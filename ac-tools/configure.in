@@ -115,8 +115,24 @@ esac
 AC_SUBST(F90_MODULE_NAMES)
 AC_LANG_POP
 
-dnl check for system getopt
 AC_LANG_PUSH(C)
+AC_CHECK_HEADERS(unistd.h sys/pstat.h sys/sysmp.h sys/sysinfo.h sys/table.h sys/param.h sys/sysctl.h sys/sytemcfg.h machine/hal_sysinfo.h)
+AC_CHECK_FUNCS(pstat_getstatic sysmp getsysinfo sysctl table)
+# special check for _system_configuration because AIX <4.3.2 do not
+# contain the `physmem' member.
+AC_MSG_CHECKING([for external symbol _system_configuration])
+AC_TRY_COMPILE([#include <sys/systemcfg.h>],
+               [double x = _system_configuration.physmem;],
+  [AC_MSG_RESULT([yes])
+  AC_DEFINE(HAVE__SYSTEM_CONFIGURATION, 1,
+            [Define if you have the _system_configuration variable.])],
+  [AC_MSG_RESULT([no])])
+
+
+dnl undef HAVE__SYSTEM_CONFIGURATION
+
+
+dnl check for system getopt
 adl_FUNC_GETOPT_LONG
 
 dnl check for strong optimization options
