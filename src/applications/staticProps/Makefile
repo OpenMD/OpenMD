@@ -6,7 +6,7 @@ Source    = \
         GofR.cpp  \
         GofXyz.cpp \
         RadialDistrFunc.cpp \
-	staticPropsCmd.c \
+	StaticPropsCmd.c \
 	StaticProps.cpp \
 
 RmiSource =

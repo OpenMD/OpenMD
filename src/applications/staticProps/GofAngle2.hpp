@@ -41,13 +41,13 @@
 #ifndef APPLICATIONS_STATICPROPS_GOFANGLE2_HPP
 #define APPLICATIONS_STATICPROPS_GOFANGLE2_HPP
 
-#include "application/staticProps/RadialDistrFunc.hpp"
+#include "applications/staticProps/RadialDistrFunc.hpp"
 namespace oopse {
 
-class GofRAngle2 : public RadialDistrFunc {
+class GofAngle2 : public RadialDistrFunc {
     
     public:
-        GofRAngle2(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2);
+        GofAngle2(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2);
    
         void setNAngleBins(int nbins) {
             assert(nbins >0);

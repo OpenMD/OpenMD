@@ -42,52 +42,64 @@
 #include <algorithm>
 
 #include "RadialDistrFunc.hpp"
-
+#include "io/DumpReader.hpp"
+#include "primitives/Molecule.hpp"
 namespace oopse {
 
 RadialDistrFunc::        RadialDistrFunc(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2)
         : info_(info), currentSnapshot_(NULL), dumpFilename_(filename), step_(1), 
-          selectionScript1_(sele1), selectionScript2_(sele2), evaluator1_(info), evaluator2_(info){
+          selectionScript1_(sele1), selectionScript2_(sele2), evaluator1_(info), evaluator2_(info), seleMan1_(info), seleMan2_(info){
           
     evaluator1_.loadScriptString(sele1);
     evaluator2_.loadScriptString(sele2);
 
-    if (!evaluator1_->isDynamic()) {
-            seleMan1_.setSelectionSet(evaluator1_->evaluate());
+    if (!evaluator1_.isDynamic()) {
+            seleMan1_.setSelectionSet(evaluator1_.evaluate());
     }
-    if (!evaluator2_->isDynamic()) {
-            seleMan2_.setSelectionSet(evaluator2_->evaluate());
+    if (!evaluator2_.isDynamic()) {
+            seleMan2_.setSelectionSet(evaluator2_.evaluate());
     }
 
 }
 
 void RadialDistrFunc::process() {
-
+    Molecule* mol;
+    RigidBody* rb;
+    SimInfo::MoleculeIterator mi;
+    Molecule::RigidBodyIterator rbIter;
     preProcess();
     
     DumpReader reader(info_, dumpFilename_);    
-    int nFrames = reader->getNFrames();
+    int nFrames = reader.getNFrames();
     nProcessed_ = nFrames / step_ + 1;
     for (int i = 0; i < nFrames; i += step_) {
-        reader->readFrame(i);
+        reader.readFrame(i);
         currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
 
-        if (evaluator1_->isDynamic()) {
-            seleMan1_.setSelectionSet(evaluator1_->evaluate());
+        if (evaluator1_.isDynamic()) {
+            seleMan1_.setSelectionSet(evaluator1_.evaluate());
         }
-        if (evaluator2_->isDynamic()) {
-            seleMan2_.setSelectionSet(evaluator2_->evaluate());
+        if (evaluator2_.isDynamic()) {
+            seleMan2_.setSelectionSet(evaluator2_.evaluate());
         }
 
+        for (mol = info_->beginMolecule(mi); mol != NULL; mol = info_->nextMolecule(mi)) {
+
+            //change the positions of atoms which belong to the rigidbodies
+            for (rb = mol->beginRigidBody(rbIter); rb != NULL; rb = mol->nextRigidBody(rbIter)) {
+                rb->updateAtoms();
+            }
+        }
+        
         initalizeHistogram();
 
         StuntDouble* sd1;
         int j;
-        for (sd1 = seleMan1_->beginSelected(j); sd1 != NULL; sd1 = seleMan1_->nextSelected(j)) {
+        for (sd1 = seleMan1_.beginSelected(j); sd1 != NULL; sd1 = seleMan1_.nextSelected(j)) {
 
             StuntDouble* sd2;
             int k;
-            for (sd2 = seleMan2_->beginSelected(k); sd2 != NULL; sd2 = seleMan2_->nextSelected(k)) {
+            for (sd2 = seleMan2_.beginSelected(k); sd2 != NULL; sd2 = seleMan2_.nextSelected(k)) {
                 collectHistogram(sd1, sd2);
             }            
         }

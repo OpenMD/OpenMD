@@ -38,10 +38,10 @@
  * University of Notre Dame has been advised of the possibility of
  * such damages.
  */
-#ifndef APPLICATIONS_STATICPROPS_GOFANGLE_HPP
-#define APPLICATIONS_STATICPROPS_GOFANGLE_HPP
+#ifndef APPLICATIONS_STATICPROPS_GOFRANGLE_HPP
+#define APPLICATIONS_STATICPROPS_GOFRANGLE_HPP
 
-#include "application/staticProps/RadialDistrFunc.hpp"
+#include "applications/staticProps/RadialDistrFunc.hpp"
 namespace oopse {
 
 class GofRAngle : public RadialDistrFunc {
@@ -61,6 +61,15 @@ class GofRAngle : public RadialDistrFunc {
 
         int getNRBins() {
             return nRBins_; 
+        }
+
+        void setLength(double len) {
+            len_ = len;
+            deltaR_ = len_ /nRBins_;                
+        }
+
+        double getLength() {
+            return len_;
         }
         
         void setNAngleBins(int nbins) {
@@ -98,22 +107,27 @@ class GofRAngle : public RadialDistrFunc {
 };
 
 
-class GofRTheta : GofRAngle {
+class GofRTheta : public GofRAngle {
     public:
-        GofRTheta(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2, double len);
-
+        GofRTheta(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2) 
+            : GofRAngle (info, filename, sele1, sele2) {
+                setOutputName(getPrefix(filename) + ".gt");
+        }
+        
     private:
 
         virtual double evaluateAngle(StuntDouble* sd1, StuntDouble* sd2);        
 };
 
 
-class GofROmega : GofRAngle {
+class GofROmega : public GofRAngle {
     public:
-        GofROmega(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2, double len);
-
+        GofROmega(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2) 
+            : GofRAngle (info, filename, sele1, sele2) {
+                setOutputName(getPrefix(filename) + ".go");
+        }
+    
     private:
-
         virtual double evaluateAngle(StuntDouble* sd1, StuntDouble* sd2);        
 };
 

@@ -43,12 +43,17 @@
 #include <fstream>
 #include <string>
 
-#include "applications/staticProps/StaticPropsCmd.h"
 #include "brains/Register.hpp"
 #include "brains/SimCreator.hpp"
 #include "brains/SimInfo.hpp"
 #include "io/DumpReader.hpp"
 #include "utils/simError.h"
+
+#include "applications/staticProps/StaticPropsCmd.h"
+#include "applications/staticProps/GofR.hpp"
+#include "applications/staticProps/GofRAngle.hpp"
+#include "applications/staticProps/GofAngle2.hpp"
+#include "applications/staticProps/GofXyz.hpp"
 
 using namespace oopse;
 
@@ -71,33 +76,107 @@ int main(int argc, char* argv[]){
     std::string mdFileName = dumpFileName.substr(0, dumpFileName.rfind(".")) + ".md";
 
     
-    //parse md file and set up the system
-    SimCreator creator;
-    SimInfo* info = creator.createSim(mdFileName, false);
-
-
     std::string sele1;
     std::string sele2;
 
     if (args_info.sele1_given) {
         sele1 = args_info.sele1_arg;
     }else {
-
+        char*  sele1Env= getenv("OOPSE_SELE1");
+        if (sele1Env) {
+            sele1 = sele1Env;
+        }else {
+            sprintf( painCave.errMsg,
+               "neither --sele1 option nor $OOPSE_SELE1 is set");
+            painCave.severity = OOPSE_ERROR;
+            painCave.isFatal = 1;
+            simError();
+        }
     }
-    if (args_info.sele1_given) {
-        sele1 = args_info.sele1_arg;
+    
+    if (args_info.sele2_given) {
+        sele2 = args_info.sele2_arg;
     }else {
+        char* sele2Env = getenv("OOPSE_SELE2");
+        if (sele2Env) {
+            sele2 = sele2Env;            
+        } else {
+            sprintf( painCave.errMsg,
+               "neither --sele2 option nor $OOPSE_SELE2 is set");
+            painCave.severity = OOPSE_ERROR;
+            painCave.isFatal = 1;
+            simError();        
+        }
+    }
 
+    //parse md file and set up the system
+    SimCreator creator;
+    SimInfo* info = creator.createSim(mdFileName);
+
+    double maxLen;
+    if (args_info.length_given) {
+        maxLen = args_info.length_arg;
+    } else {
+        Mat3x3d hmat = info->getSnapshotManager()->getCurrentSnapshot()->getHmat();
+        maxLen = std::min(std::min(hmat(0, 0), hmat(1, 1)), hmat(2, 2)) /2 ;
     }
     
-    GofR rdf(info, dumpFileName, sele1, sele2, args_info.length_arg);
 
-    if (args_info.nbins_given) {
-        rdf.setNBins(args_info.nbins_arg);
+    RadialDistrFunc* rdf;
+    if (args_info.gofr_given){
+        GofR* r = new GofR(info, dumpFileName, sele1, sele2);
+        
+        r->setNRBins(args_info.nrbins_arg);            
+        r->setLength(maxLen);
+        
+        rdf = r;
+    } else if (args_info.r_theta_given) {
+        GofRTheta* rTheta = new GofRTheta(info, dumpFileName, sele1, sele2);
+          
+        rTheta->setNRBins(args_info.nrbins_arg);            
+        rTheta->setLength(maxLen);       
+        rTheta->setNAngleBins(args_info.nanglebins_arg);
+
+        
+        rdf = rTheta;
+    }
+    else if (args_info.r_omega_given) {
+        GofROmega* rOmega = new GofROmega(info, dumpFileName, sele1, sele2);
+
+       
+        rOmega->setNRBins(args_info.nrbins_arg);            
+        rOmega->setLength(maxLen);
+        rOmega->setNAngleBins(args_info.nanglebins_arg);
+
+        rdf = rOmega;    
+    } else if (args_info.theta_omega_given) {
+        GofAngle2* rAngle2 = new GofAngle2(info, dumpFileName, sele1, sele2);
+        rAngle2->setNAngleBins(args_info.nanglebins_arg);
+
+        rdf = rAngle2;  
+    } else if (args_info.xyz_given) {
+
+        GofXyz* xyz = new GofXyz(info, dumpFileName, sele1, sele2);
+          
+        xyz->setNRBins(args_info.nrbins_arg);            
+        xyz->setLength(maxLen);
+
+        
+        rdf = xyz;
+    }
+    
+
+    if (args_info.output_given) {
+        rdf->setOutputName(args_info.output_arg);
     }
 
-    rdf.process();
-    
+    if (args_info.step_given) {
+        rdf->setStep(args_info.step_arg);
+    }
+
+    rdf->process();
+
+    delete rdf;    
     delete info;
 
     return 0;   

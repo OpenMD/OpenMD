@@ -41,38 +41,39 @@
 
 #include <algorithm>
 #include <fstream>
-#include "applications/staticProps/GofRAngle2.hpp"
+#include "applications/staticProps/GofAngle2.hpp"
 #include "utils/simError.h"
 
 namespace oopse {
 
-GofRAngle2::GofRAngle2(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2)
+GofAngle2::GofAngle2(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2)
     : RadialDistrFunc(info, filename, sele1, sele2){
+    setOutputName(getPrefix(filename) + ".gto");
 
 }
 
 
-void GofRAngle2::preProcess() {
+void GofAngle2::preProcess() {
 
     for (int i = 0; i < avgGofr_.size(); ++i) {
         std::fill(avgGofr_[i].begin(), avgGofr_[i].end(), 0);
     }
 }
 
-void GofRAngle2::initalizeHistogram() {
+void GofAngle2::initalizeHistogram() {
     npairs_ = 0;
     for (int i = 0; i < histogram_.size(); ++i)
         std::fill(histogram_[i].begin(), histogram_[i].end(), 0);
 }
 
 
-void GofRAngle2::processHistogram() {
+void GofAngle2::processHistogram() {
 
     //std::for_each(avgGofr_.begin(), avgGofr_.end(), std::plus<std::vector<int>>)
 
 }
 
-void GofRAngle2::collectHistogram(StuntDouble* sd1, StuntDouble* sd2) {
+void GofAngle2::collectHistogram(StuntDouble* sd1, StuntDouble* sd2) {
 
     if (sd1 == sd2) {
         return;
@@ -101,7 +102,7 @@ void GofRAngle2::collectHistogram(StuntDouble* sd1, StuntDouble* sd2) {
     ++npairs_;
 }
 
-void GofRAngle::writeRdf() {
+void GofAngle2::writeRdf() {
     std::ofstream rdfStream(outputFilename_.c_str());
     if (rdfStream.is_open()) {
         rdfStream << "#radial distribution function\n";

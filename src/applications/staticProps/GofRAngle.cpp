@@ -70,7 +70,7 @@ void GofRAngle::processHistogram() {
 
     double volume = info_->getSnapshotManager()->getCurrentSnapshot()->getVolume();
     double pairDensity = npairs_ /volume;
-    double pairConstant = ( 4.0 * PI * pairDensity ) / 3.0;
+    double pairConstant = ( 4.0 * NumericConstant::PI * pairDensity ) / 3.0;
 
     for(int i = 0 ; i < histogram_.size(); ++i){
 
@@ -103,7 +103,7 @@ void GofRAngle::collectHistogram(StuntDouble* sd1, StuntDouble* sd2) {
     
     double cosAngle = evaluateAngle(sd1, sd2);
     double halfBin = (nAngleBins_ - 1) * 0.5;
-    int whichThetaBin = halfBin * (cosAngle + 1.0)
+    int whichThetaBin = halfBin * (cosAngle + 1.0);
     ++histogram_[whichRBin][whichThetaBin];
     
     ++npairs_;
@@ -139,14 +139,17 @@ double GofRTheta::evaluateAngle(StuntDouble* sd1, StuntDouble* sd2) {
     Vector3d r12 = pos1 - pos2;
     currentSnapshot_->wrapVector(r12);
     r12.normalize();
-    Vector3d dipole = sd1->getElectroFrame().getColumn(2)£»
+    Vector3d dipole = sd1->getElectroFrame().getColumn(2);
     dipole.normalize();    
-    return dot();
+    return dot(r12, dipole);
 }
 
 double GofROmega::evaluateAngle(StuntDouble* sd1, StuntDouble* sd2) {
     Vector3d v1 = sd1->getElectroFrame().getColumn(2);
     Vector3d v2 = sd1->getElectroFrame().getColumn(2);    
+    v1.normalize();
+    v2.normalize();
+    return dot(v1, v2);
 }
 
 

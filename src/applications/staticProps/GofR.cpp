@@ -46,13 +46,15 @@
 
 namespace oopse {
 
-GofR::GofR(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2, double len)
+GofR::GofR(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2)
     : RadialDistrFunc(info, filename, sele1, sele2){
 
     deltaR_ = len_ /nRBins_;
     
     histogram_.resize(nRBins_);
     avgGofr_.resize(nRBins_);
+
+    setOutputName(getPrefix(filename) + ".gr");
 }
 
 
@@ -70,7 +72,7 @@ void GofR::processHistogram() {
 
     double volume = info_->getSnapshotManager()->getCurrentSnapshot()->getVolume();
     double pairDensity = npairs_ /volume;
-    double pairConstant = ( 4.0 * PI * pairDensity ) / 3.0;
+    double pairConstant = ( 4.0 * NumericConstant::PI * pairDensity ) / 3.0;
 
     for(int i = 0 ; i < histogram_.size(); ++i){
 

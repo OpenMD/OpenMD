@@ -41,7 +41,7 @@
 #ifndef APPLICATIONS_STATICPROPS_GOFXYZ_HPP
 #define APPLICATIONS_STATICPROPS_GOFXYZ_HPP
 
-#include "application/staticProps/RadialDistrFunc.hpp"
+#include "applications/staticProps/RadialDistrFunc.hpp"
 namespace oopse {
 
 class GofXyz : public RadialDistrFunc {
@@ -63,10 +63,23 @@ class GofXyz : public RadialDistrFunc {
             }            
         }
 
+        int getNRBins() {
+            return nRBins_;
+        }
+        
+        void setLength(double len) {
+            len_ = len;
+            deltaR_ = len_ /nRBins_;                
+        }
+
+        double getLength() {
+            return len_;
+        }
         
     private:
 
         virtual void preProcess();
+        void initalizeHistogram();
         virtual void collectHistogram(StuntDouble* sd1, StuntDouble* sd2);
         void processHistogram();
         virtual void writeRdf();

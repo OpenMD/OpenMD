@@ -46,6 +46,7 @@
 
 #include "selection/SelectionEvaluator.hpp"
 #include "selection/SelectionManager.hpp"
+#include "utils/NumericConstant.hpp"
 namespace oopse {
 
 /**

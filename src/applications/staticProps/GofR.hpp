@@ -41,7 +41,7 @@
 #ifndef APPLICATIONS_STATICPROPS_GOFR_HPP
 #define APPLICATIONS_STATICPROPS_GOFR_HPP
 
-#include "application/staticProps/RadialDistrFunc.hpp"
+#include "applications/staticProps/RadialDistrFunc.hpp"
 namespace oopse {
 
 class GofR : public RadialDistrFunc {
@@ -60,6 +60,15 @@ class GofR : public RadialDistrFunc {
 
         int getNRBins() {
             return nRBins_; 
+        }
+
+        void setLength(double len) {
+            len_ = len;
+            deltaR_ = len_ /nRBins_;                
+        }
+
+        double getLength() {
+            return len_;
         }
         
     private:

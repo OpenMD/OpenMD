@@ -48,29 +48,34 @@ namespace oopse {
 
 GofXyz::GofXyz(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2)
     : RadialDistrFunc(info, filename, sele1, sele2){
+    setOutputName(getPrefix(filename) + ".gxyz");
 
 }
 
 
 void GofXyz::preProcess() {
-
+    /*
     for (int i = 0; i < avgGofr_.size(); ++i) {
         std::fill(avgGofr_[i].begin(), avgGofr_[i].end(), 0);
     }
+    */
 }
 
 void GofXyz::initalizeHistogram() {
+    /*
     npairs_ = 0;
     for (int i = 0; i < histogram_.size(); ++i)
         std::fill(histogram_[i].begin(), histogram_[i].end(), 0);
+    */
 }
 
 
 void GofXyz::processHistogram() {
 
+    /*
     double volume = info_->getSnapshotManager()->getCurrentSnapshot()->getVolume();
     double pairDensity = npairs_ /volume;
-    double pairConstant = ( 4.0 * PI * pairDensity ) / 3.0;
+    double pairConstant = ( 4.0 * NumericConstant::PI * pairDensity ) / 3.0;
 
     for(int i = 0 ; i < histogram_.size(); ++i){
 
@@ -83,11 +88,12 @@ void GofXyz::processHistogram() {
             avgGofr_[i][j] += histogram_[i][j] / nIdeal;    
         }
     }
-
+    */
 }
 
 void GofXyz::collectHistogram(StuntDouble* sd1, StuntDouble* sd2) {
 
+    /*
     if (sd1 == sd2) {
         return;
     }
@@ -107,6 +113,7 @@ void GofXyz::collectHistogram(StuntDouble* sd1, StuntDouble* sd2) {
     ++histogram_[whichRBin][whichThetaBin];
     
     ++npairs_;
+    */
 }
 
 void GofXyz::writeRdf() {
@@ -123,8 +130,9 @@ void GofXyz::writeRdf() {
                 double y = deltaR_ * (j+ 0.5);
 
                 for(int k = 0;k < histogram_[i].size(); ++k) {
-                double z = deltaR_ * (k + 0.5); 
-                rdfStream << x << "\t" << y << "\t" <<  z << "\t" << histogram_[i][j][k]/nProcessed_ << "\n";
+                    double z = deltaR_ * (k + 0.5); 
+                    rdfStream << x << "\t" << y << "\t" <<  z << "\t" << histogram_[i][j][k]/nProcessed_ << "\n";
+                }
             }
         }
         
