@@ -43,8 +43,9 @@ namespace EAM_NS{
   } atomStruct;
 
   int parseAtom( char *lineBuffer, int lineNum, atomStruct &info, string eamPotFile );
-  int parseEAM( atomStruct &info, string eamPotFile, double **eam_rvals,
-		double **eam_rhovals, double **eam_Frhovals);
+  int parseEAM( atomStruct &info, string ffPath, string eamPotFile, 
+                double **eam_rvals, double **eam_rhovals, 
+                double **eam_Frhovals);
 #ifdef IS_MPI
   
   MPI_Datatype mpiAtomStructType;
@@ -357,7 +358,7 @@ void EAM_FF::readParams( void ){
 	
 	// the parser returns 0 if the line was blank
 	if( parseAtom( readLine, lineNum, info, eamPotFile ) ){
-	  parseEAM(info,eamPotFile, &eam_rvals,
+	  parseEAM(info, ffPath, eamPotFile, &eam_rvals,
 		   &eam_rhovals, &eam_Frhovals);
 	  info.ident = identNum;
 	  headAtomType->add( info, eam_rvals,
@@ -664,7 +665,7 @@ int EAM_NS::parseAtom( char *lineBuffer, int lineNum,   atomStruct &info, string
   else return 0;
 }
 
-int EAM_NS::parseEAM(atomStruct &info, string eamPotFile, 
+int EAM_NS::parseEAM(atomStruct &info, string ffPath, string eamPotFile, 
 		     double **eam_rvals, 
 		     double **eam_rhovals,
 		     double **eam_Frhovals){

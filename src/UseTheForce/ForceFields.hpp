@@ -132,7 +132,7 @@ protected:
 class DUFF : public ForceFields{
 
 public:
-  DUFF() : ForceFields() {};
+  DUFF();
   virtual ~DUFF();
 
   void readParams();
@@ -156,7 +156,7 @@ private:
 class LJFF : public ForceFields{
 
 public:
-  LJFF() : ForceFields() {};
+  LJFF();
   virtual ~LJFF();
   
 
@@ -183,11 +183,12 @@ private:
 class EAM_FF : public ForceFields{
 
 public:
-  EAM_FF() : ForceFields();
-  EAM_FF(string the_variant) : ForceFields(the_variant);
+
+  EAM_FF();
+  EAM_FF(string theVariant);
+
   virtual ~EAM_FF();
   
-
   void readParams();
   void cleanMe( void );
 
@@ -213,7 +214,7 @@ private:
 class WATER : public ForceFields{
 
 public:
-  WATER() : ForceFields() {};
+  WATER();
   virtual ~WATER();
 
   void readParams();
