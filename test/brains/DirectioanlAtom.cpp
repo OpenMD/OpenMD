@@ -27,17 +27,14 @@
 
 namespace oopse {
 
-DirectionalAtom::DirectionalAtom() : objType_(otDAtom), storage_(&Snapshot::atomData){
+DirectionalAtom::DirectionalAtom(DirectionalAtom* dAtomType) 
+                         : Atom(dAtomType), objType_(otDAtom), storage_(&Snapshot::atomData){
 
 }
 
 Mat3x3d DirectionalAtom::getI() {
-    return inertiaTensor_;
+    return static_cast<DirectionalAtomType*>(getAtomType())->getI();
 }    
-
-void DirectionalAtom::setI(Mat3x3d& I) {
-    inertiaTensor_ = I;
-}
 
 void DirectionalAtom::setPrevA(const RotMat3x3d& a) {
     (snapshotMan_->getPrevSnapshot())->storage_->aMat[localIndex_] = a;
@@ -55,11 +52,12 @@ void DirectionalAtom::setA(const RotMat3x3d& a, int snapshotNo) {
     (snapshotMan_->getSnapshot(snapshotNo))->storage_->unitVector[localIndex_] = a.inverse() * sU_.getColum(2);    
 }    
 
-
+void DirectionalAtom::rotateBy(const RotMat3x3d& m) {
+    setA(m *getA());
+}
 
 void  DirectionalAtom::setUnitFrameFromEuler(double phi, double theta, double psi) {
     sU_.setupRotMat(phi,theta,psi);
-
 }
 
 std::vector<double> DirectionalAtom::getGrad() {

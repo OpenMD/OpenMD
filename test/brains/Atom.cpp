@@ -33,10 +33,6 @@ Mat3x3d Atom::getI() {
     return Mat3x3d::identity();
 }    
 
-void Atom::setI(Mat3x3d& I) {
-    //warning message
-}    
-
 std::vector<double> Atom::getGrad() {
     vector<double> grad(3);
     Vector3d force= getFrc();

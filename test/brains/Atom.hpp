@@ -34,33 +34,61 @@
 #define PRIMITIVES_ATOM_HPP
 
 #include "primitives/StuntDouble.hpp"
+#include "types/AtomType.hpp"
 
 namespace oopse{
     class Atom : public StuntDouble {
         public:
-            Atom();
-       /**
-         * Returns the inertia tensor of this stuntdouble
-         * @return the inertia tensor of this stuntdouble
-         * @see #setI
-         */ 
-        virtual Mat3x3d getI();
+            Atom(AtomType* at);
+            /**
+             * Returns the inertia tensor of this stuntdouble
+             * @return the inertia tensor of this stuntdouble
+             */ 
+            virtual Mat3x3d getI();
 
-       /**
-         * Sets the inertia tensor of this stuntdouble
-         * @param trq new inertia tensor
-         * @see #getI
-         */      
-        virtual void setI(Mat3x3d& I);
+            /**
+             * Returns the gradient of this stuntdouble
+             * @return the inertia tensor of this stuntdouble
+             */ 
+            virtual std::vector<double> getGrad();
 
-       /**
-         * Returns the gradient of this stuntdouble
-         * @return the inertia tensor of this stuntdouble
-         * @see #setI
-         */ 
-       virtual std::vector<double> getGrad();
+            virtual void accept(BaseVisitor* v);
 
-       virtual void accept(BaseVisitor* v);
+            /** 
+             * Returns the AtomType of this Atom.
+             * @return the atom type of this atom
+             */
+            AtomType* getAtomType() {
+                return atomType_;
+            }
+            
+            //forward  functions of AtomType class
+            bool    isCharge()  {
+                return atomType_->isCharge(); 
+            }
+            
+            bool    isDirectional() {
+                return atomType_->isDirectional(); 
+            }
+
+            bool    isDipole()  { 
+                return atomType_->isDipole(); 
+            }
+            
+            bool    isGayBerne()  {
+                return atomType_->isGayBerne(); 
+            }
+            
+            bool    isSticky()  { 
+                return atomType_->isSticky(); 
+            }
+
+            bool    isShape()  { 
+                return atomType_->isShape(); 
+            }            
+
+        private:
+            AtomType* atomType_;
        
     };
 

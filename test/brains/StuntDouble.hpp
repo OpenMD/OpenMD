@@ -726,16 +726,8 @@ namespace oopse{
        /**
          * Returns the inertia tensor of this stuntdouble
          * @return the inertia tensor of this stuntdouble
-         * @see #setI
          */ 
         virtual Mat3x3d getI() = 0;
-
-       /**
-         * Sets the inertia tensor of this stuntdouble
-         * @param trq new inertia tensor
-         * @see #getI
-         */      
-        virtual void setI(Mat3x3d& I) = 0;
 
        /**
          * Returns the gradient of this stuntdouble
@@ -786,16 +778,18 @@ namespace oopse{
         void setType(const std::string& name);
 
         /**
-         * Converts a lab fixed vector to a body fixed vector
-         * @v lab fixed vector. On return, it will store body fixed vector
+         * Converts a lab fixed vector to a body fixed vector.
+         * @return body fixed vector
+         * @param v lab fixed vector
          */
-        void lab2Body(Vector3d& v);
+        Vector3d lab2Body(const Vector3d& v);
 
         /**
-         * Converts a body fixed vector to a lab fixed vector
-         * @v body fixed vector. On return, it will store lab fixed vector
+         * Converts a body fixed vector to a lab fixed vector.
+         * @return corresponding lab fixed vector
+         * @param v body fixed vector
          */
-        void body2Lab(Vector3d& v);
+        Vector3d body2Lab(const Vector3d& v);
         /**
          * <p>
          * The purpose of the Visitor Pattern is to encapsulate an operation that you want to perform on

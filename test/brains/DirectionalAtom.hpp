@@ -38,20 +38,13 @@
 namespace oopse{
     class DirectionalAtom : public Atom {
         public:
-            DirectionalAtom();
+            DirectionalAtom(DirectionalAtom* dAtomType);
             /**
              * Returns the inertia tensor of this stuntdouble
              * @return the inertia tensor of this stuntdouble
-             * @see #setI
              */ 
             virtual Mat3x3d getI();
 
-            /**
-             * Sets the inertia tensor of this stuntdouble
-             * @param trq new inertia tensor
-             * @see #getI
-             */      
-            virtual void setI(Mat3x3d& I);
 
            /**
              * Sets  the previous rotation matrix of this stuntdouble
@@ -73,6 +66,12 @@ namespace oopse{
              */         
             virtual void setA(const RotMat3x3d& a, int snapshotNo);
 
+            /** 
+             * Left multiple rotation matrix by another rotation matrix 
+             * @param m a rotation matrix
+             */
+            void rotateBy(const RotMat3x3d& m);
+            
             /** Sets the internal unit frame of this stuntdouble by three euler angles */
             void setUnitFrameFromEuler(double phi, double theta, double psi);
 
