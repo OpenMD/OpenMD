@@ -363,7 +363,7 @@ template<typename T> void Integrator<T>::moveA(void){
     integrableObjects[i]->getVel(vel);
     integrableObjects[i]->getPos(pos);
     integrableObjects[i]->getFrc(frc);
-    std::cerr << "f = " << frc[0] << "\t" << frc[1] << "\t" << frc[2] << "\n";
+    //    std::cerr << "f = " << frc[0] << "\t" << frc[1] << "\t" << frc[2] << "\n";
     
     mass = integrableObjects[i]->getMass();
 
@@ -384,7 +384,7 @@ template<typename T> void Integrator<T>::moveA(void){
 
       integrableObjects[i]->getTrq(Tb);
 
-      std::cerr << "t = " << Tb[0] << "\t" << Tb[1] << "\t" << Tb[2] << "\n";
+      //      std::cerr << "t = " << Tb[0] << "\t" << Tb[1] << "\t" << Tb[2] << "\n";
       integrableObjects[i]->lab2Body(Tb);
 
       // get the angular momentum, and propagate a half step
