@@ -1,282 +1,242 @@
-#include "visitors/ZconsVisitor.hpp"
+ /*
+ * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
+ *
+ * The University of Notre Dame grants you ("Licensee") a
+ * non-exclusive, royalty free, license to use, modify and
+ * redistribute this software in source and binary code form, provided
+ * that the following conditions are met:
+ *
+ * 1. Acknowledgement of the program authors must be made in any
+ *    publication of scientific results based in part on use of the
+ *    program.  An acceptable form of acknowledgement is citation of
+ *    the article in which the program was described (Matthew
+ *    A. Meineke, Charles F. Vardeman II, Teng Lin, Christopher
+ *    J. Fennell and J. Daniel Gezelter, "OOPSE: An Object-Oriented
+ *    Parallel Simulation Engine for Molecular Dynamics,"
+ *    J. Comput. Chem. 26, pp. 252-271 (2005))
+ *
+ * 2. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ *
+ * 3. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the
+ *    distribution.
+ *
+ * This software is provided "AS IS," without a warranty of any
+ * kind. All express or implied conditions, representations and
+ * warranties, including any implied warranty of merchantability,
+ * fitness for a particular purpose or non-infringement, are hereby
+ * excluded.  The University of Notre Dame and its licensors shall not
+ * be liable for any damages suffered by licensee as a result of
+ * using, modifying or distributing the software or its
+ * derivatives. In no event will the University of Notre Dame or its
+ * licensors be liable for any lost revenue, profit or data, or for
+ * direct, indirect, special, consequential, incidental or punitive
+ * damages, however caused and regardless of the theory of liability,
+ * arising out of the use of or inability to use software, even if the
+ * University of Notre Dame has been advised of the possibility of
+ * such damages.
+ */
+ 
 #include <cmath>
-
+#include "visitors/ZconsVisitor.hpp"
+#include "primitives/Molecule.hpp"
+#include "utils/StringUtils.hpp"
 namespace oopse {
 
-ZConsVisitor::ZConsVisitor(SimInfo* info) : BaseVisitor(), zconsReader(NULL){
-  GenericData* data;
-  DoubleGenericData* tolerance;  
-  ZConsParaData* zConsParaData;
-  StringGenericData* filename; 
-  DoubleGenericData* sampleTime;
-  vector<ZConsParaItem>* parameters;
+ZConsVisitor::ZConsVisitor(SimInfo* info) : BaseVisitor(), info_(info), zconsReader_(NULL){
 
-  this->info = info;
-  visitorName = "ZConsVisitor";
+    visitorName = "ZConsVisitor";
+    currSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
+    Globals* simParam = info_->getSimParams();
+
+    if (simParam->haveZconstraintTime()){
+        zconsTime_ = simParam->getZconsTime();
+    }
+    else{
+        sprintf(painCave.errMsg,
+        "ZConstraint error: If you use a ZConstraint,\n"
+        "\tyou must set zconsTime.\n");
+        painCave.isFatal = 1;
+        simError();
+    }
+
+    if (simParam->haveZconsTol()){
+        zconsTol_ = simParam->getZconsTol();
+    }
+    else{
+        zconsTol_ = 0.01;
+        sprintf(painCave.errMsg,
+            "ZConstraint Warning: Tolerance for z-constraint method is not specified.\n"
+            "\tOOPSE will use a default value of %f.\n"
+            "\tTo set the tolerance, use the zconsTol variable.\n",
+            zconsTol_);
+        painCave.isFatal = 0;
+        simError();      
+    }    
+         
+    int nZconstraints = simParam->getNzConstraints();
+    ZconStamp** stamp = simParam->getZconStamp();
+    for (int i = 0; i < nZconstraints; i++){
+        int zmolIndex = stamp[i]->getMolIndex();
+        zmolStates_.insert(std::make_pair(zmolIndex, zsMoving));
+    }
+
+
+    //fill zatomToZmol_ array
+    /** @todo only works for single version now*/
+    std::map<int, ZConsState>::iterator j;
+    for (j = zmolStates_.begin(); j != zmolStates_.end(); ++j) {
+        Molecule* mol = info_->getMoleculeByGlobalIndex(j->first);
+        assert(mol != NULL);
+        Molecule::AtomIterator ai;
+        Atom* at;
+        for (at = mol->beginAtom(ai); at != NULL; at = mol->nextAtom(ai)) {
+            zatomToZmol_.insert(std::make_pair(at->getGlobalIndex(), mol->getGlobalIndex()));
+        }
+    }
+
+    zconsFilename_ = getPrefix(info_->getFinalConfigFileName()) + ".fz"; 
+    
+    zconsReader_ = new ZConsReader(info);
+
+    if (zconsReader_->hasNextFrame())
+        zconsReader_->readNextFrame();
   
-  //retrieve tolerance for z-constraint molecuels
-  data = info->getProperty(ZCONSTOL_ID);
-
-  if (!data){
-    cerr << "Can not get zconstraint tolerance from SimInfo" << endl;
-    haveZcons = false;  
-    return;
-  }
-  else{
-    tolerance = dynamic_cast<DoubleGenericData*>(data);
-
-    if (!tolerance){
-      cerr << "Can not get zconstraint tolerance  from SimInfo" << endl;
-      haveZcons = false;    
-      return;
-    }
-    else{
-      zconsTol = tolerance->getData();
-    }
-  }
-
-  //retrieve sample time of z-contraint 
-  data = info->getProperty(ZCONSTIME_ID);
-
-  if (!data){
-    cerr << "Can not get zcons time  from SimInfo" << endl;
-    haveZcons = false;    
-    return;
-  }
-  else{
-    sampleTime = dynamic_cast<DoubleGenericData*>(data);
-
-    if (!sampleTime){
-      cerr << "Can not get zcons time  from SimInfo" << endl;
-      haveZcons = false;    
-      return;
-    }
-    else{
-     zconsTime = sampleTime->getData();
-    }
-  }
-
-  //retrieve index of z-constraint molecules
-  data = info->getProperty(ZCONSPARADATA_ID);
-  if (!data){
-    cerr << "Can not get index of z-constraint molecules from SimInfo" << endl;
-    haveZcons = false;
-    return;
-  }
-  else{
-    zConsParaData = dynamic_cast<ZConsParaData*>(data);
-
-    if (!zConsParaData){
-      cerr << "Can not get index of z-constraint molecules from SimInfo" << endl;
-      haveZcons = false;
-      return;
-    }
-    else{
-      vector<ZConsParaItem>::iterator i;
-      Molecule* mol;
-
-      parameters = zConsParaData->getData();
-      for(i = parameters->begin(); i != parameters->end(); ++i){
-
-        mol = findZconsMol(i->zconsIndex);
-        if(mol != NULL)
-          zconsMol.push_back(mol);
-
-      }
-
-      if(zconsMol.size() < 1){
-        cerr << "number of zconstraint molecules is less than one" << endl;
-        haveZcons = false;
-        return;
-      }
-      
-    }//end if (!zConsParaData)
-
-  }//end  if (!data  
-  
-  //retrieve output filename of z force
-  data = info->getProperty(ZCONSFILENAME_ID);
-  if (!data){
-    cerr << "Can not get filename of z-constraint output from SimInfo" << endl;
-    haveZcons = false;
-    return;
-  }
-  else{
-    filename = dynamic_cast<StringGenericData*>(data);
-
-    if (!filename){
-      cerr << "Can not get filename of z-constraint output from SimInfo" << endl;
-      haveZcons = false;
-      return;
-    }
-    else{
-      zconsFilename = filename->getData();
-    }
-  }
-
-  zconsReader = new ZConsReader(info);
-
-  if (zconsReader->hasNextFrame())
-  zconsReader->readNextFrame();
-  
-  haveZcons = true;
 }
 
 ZConsVisitor::~ZConsVisitor(){
-  if(!zconsReader) 
-    delete zconsReader;
+  if(!zconsReader_) 
+    delete zconsReader_;
   
 }
 
 void ZConsVisitor::visit(Atom* atom){
-  string prefix;
-  if(isZconstraint(atom->getIndex(), prefix))
-    internalVisit(atom, prefix);
+    std::string prefix;
+    if(isZconstraint(atom->getGlobalIndex(), prefix))
+        internalVisit(atom, prefix);
 }
 
 void ZConsVisitor::visit(DirectionalAtom* datom){
-  string prefix;
-  
-  if(isZconstraint(datom->getIndex(), prefix))
-    internalVisit(datom, prefix);
+    std::string prefix;
+
+    if(isZconstraint(datom->getGlobalIndex(), prefix))
+        internalVisit(datom, prefix);
 }
 
 void ZConsVisitor::visit(RigidBody* rb){
-  string prefix;
-  vector<Atom*> atoms;
-  
-  atoms = rb->getAtoms();
-    
-  if(isZconstraint(atoms[0]->getIndex(), prefix))
-    internalVisit(rb, prefix);
-}
+    std::string prefix;
+    std::vector<Atom*> atoms;
 
-Molecule* ZConsVisitor::findZconsMol(int index){
-  Molecule* mols;
-  mols = info->molecules;
-  for(int i =0; i < info->n_mol; i++)
-    if(index == mols[i].getMyIndex())
-      return &mols[i];
+    atoms = rb->getAtoms();
 
-  return NULL;
+    if(isZconstraint(atoms[0]->getGlobalIndex(), prefix))
+        internalVisit(rb, prefix);
 }
 
 void ZConsVisitor::update(){
-  Molecule* mol;
-  double com[3];
-  ZConsState state;
-  Atom** atoms;
-  int natoms;
+    Molecule* mol;
+    Vector3d com;
+    ZConsState state;
+    std::map<int, ZConsState>::iterator i;
+    for ( i = zmolStates_.begin(); i != zmolStates_.end(); ++i) {
+        i->second = zsMoving;
+    }
+     
+    readZconsFile(currSnapshot_->getTime());
 
-  getZconsPos(info->currentTime);
-  
-  for(size_t i = 0; i < zconsMol.size(); i++){
-    zconsMol[i]->getCOM(com);
+    const std::vector<ZconsData>& fixedZmolData = zconsReader_->getFixedZMolData();
+    std::vector<ZconsData>::const_iterator j;
+    for (j = fixedZmolData.begin(); j != fixedZmolData.end(); ++j) {
+        std::map<int, ZConsState>::iterator k = zmolStates_.find(j->zmolIndex);
+        assert(k != zmolStates_.end());
+        k->second = zsFixed;
+    }
+    
+}
 
-    if(fabs(com[2] - zconsPos[i]) < zconsTol)
-      state = zsFixed;
+void ZConsVisitor::readZconsFile(double time) {
+    double tempTime;
+    while(zconsReader_->hasNextFrame()){
+        tempTime = zconsReader_->getCurTime();
+        if(tempTime >= time) {
+            return;
+        }
+        
+        zconsReader_->readNextFrame();
+    } 
+}
+
+void ZConsVisitor::internalVisit(StuntDouble* sd, const std::string& prefix){
+    GenericData* data;
+    AtomData* atomData;
+    AtomInfo* atomInfo;
+    std::vector<AtomInfo*>::iterator iter;
+
+    //if there is not atom data, just skip it
+    data = sd->getPropertyByName("ATOMDATA");
+    if(data != NULL){
+        atomData = dynamic_cast<AtomData*>(data);  
+        if(atomData == NULL)
+            return;
+        }
     else
-      state = zsMoving;
+        return;
 
-    //update the state of zconstraint atom
-    natoms = zconsMol[i]->getNAtoms();
-    atoms = zconsMol[i]->getMyAtoms();    
-    for(int j =0; j < natoms; j++)
-      zconsState[atoms[j]->getIndex()] = state;
-  }
-  
-}
-
-void ZConsVisitor::getZconsPos(double time){
-
-  vector<double> tempPos;
-  vector<double> prevPos;
-  double tempTime;
-
-  while(true){
-    tempTime = zconsReader->getCurTime();
-
-    zconsPos = zconsReader->getZConsPos();
-    
-    if(tempTime >= time)
-      return;
-    
-    zconsReader->readNextFrame();
-
-  } 
-
-}
-
-void ZConsVisitor::internalVisit(StuntDouble* sd, const string& prefix){
-  GenericData* data;
-  AtomData* atomData;
-  AtomInfo* atomInfo;
-  vector<AtomInfo*>::iterator iter;
-
-  
-  //if there is not atom data, just skip it
-  data = sd->getProperty("ATOMDATA");
-  if(data != NULL){
-    atomData = dynamic_cast<AtomData*>(data);  
-    if(atomData == NULL)
-      return;
-  }
-  else
-    return;
-
-  for(atomInfo  = atomData->beginAtomInfo(iter); atomInfo; atomInfo = atomData->nextAtomInfo(iter))
-    (atomInfo->AtomType).insert(0, prefix);
+    for(atomInfo  = atomData->beginAtomInfo(iter); atomInfo; atomInfo = atomData->nextAtomInfo(iter))
+        (atomInfo->AtomType).insert(0, prefix);
 }
 
 
-bool ZConsVisitor::isZconstraint(int index, string& prefix){
-  map<int, ZConsState>::iterator i;
-  string prefixString[] = {"ZF", "ZM"};
-  
-  i = zconsState.find(index);
-  if(i !=zconsState.end()){
-    prefix = prefixString[(*i).second];
-    return true;
-  }
-  else{
-    prefix = "";
-    return false;
-  }
+bool ZConsVisitor::isZconstraint(int atomIndex, std::string& prefix){
+    std::string prefixString[] = {"ZF", "ZM"};
+    std::map<int, int>::iterator i = zatomToZmol_.find(atomIndex);
+    if (i ==  zatomToZmol_.end() ){
+        prefix = "";
+        return false;
+    } else {
+
+        std::map<int, ZConsState>::iterator j = zmolStates_.find(i->second);
+        assert(j !=zmolStates_.end());
+        prefix = prefixString[j->second];
+        return true;
+    }
 }
 
-const string ZConsVisitor::toString(){
-  char buffer[65535];
-  string result;
-  
-  sprintf(buffer ,"------------------------------------------------------------------\n");
-  result += buffer;
+const std::string ZConsVisitor::toString(){
+    char buffer[65535];
+    std::string result;
 
-  sprintf(buffer ,"Visitor name: %s\n", visitorName.c_str());
-  result += buffer;
-  
-  sprintf(buffer , "number of zconstraint molecule: %d\n", zconsMol.size());
-  result += buffer;
-
-  sprintf(buffer , "zconstraint tolerance = %lf\n", zconsTol);
-  result += buffer;
-
-  sprintf(buffer , "zconstraint sample time = %lf\n", zconsTime);
-  result += buffer;
-
-  sprintf(buffer , "zconstraint output filename = %s\n", zconsFilename.c_str());
-  result += buffer;
-  
-  for(size_t i = 0; i < zconsMol.size(); ++i){
-    sprintf(buffer ,"zconstraint molecule[%d] = %d\n", i, zconsMol[i]->getMyIndex());
+    sprintf(buffer ,"------------------------------------------------------------------\n");
     result += buffer;
 
-  }
+    sprintf(buffer ,"Visitor name: %s\n", visitorName.c_str());
+    result += buffer;
 
+    sprintf(buffer , "number of zconstraint molecule: %d\n", zmolStates_.size());
+    result += buffer;
+
+    sprintf(buffer , "zconstraint tolerance = %lf\n", zconsTol_);
+    result += buffer;
+
+    sprintf(buffer , "zconstraint sample time = %lf\n", zconsTime_);
+    result += buffer;
+
+    sprintf(buffer , "zconstraint output filename = %s\n", zconsFilename_.c_str());
+    result += buffer;
+
+    std::map<int, ZConsState>::iterator i;
+    int j = 0;
+    for ( i = zmolStates_.begin(); i != zmolStates_.end(); ++i) {
+        sprintf(buffer ,"zconstraint molecule[%d] = %d\n", j++, i->first);
+        result += buffer;
+    }
   
-  sprintf(buffer ,"------------------------------------------------------------------\n");
-  result += buffer;
+    sprintf(buffer ,"------------------------------------------------------------------\n");
+    result += buffer;
 
-  return result;
+    return result;
 }
 
 

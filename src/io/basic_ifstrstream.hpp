@@ -1,28 +1,44 @@
-/*
- * Copyright (C) 2000-2004  Object Oriented Parallel Simulation Engine (OOPSE) project
- * 
- * Contact: oopse@oopse.org
- * 
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public License
- * as published by the Free Software Foundation; either version 2.1
- * of the License, or (at your option) any later version.
- * All we ask is that proper credit is given for our work, which includes
- * - but is not limited to - adding the above copyright notice to the beginning
- * of your source code files, and to any copyright notice that you may distribute
- * with programs based on this work.
- * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Lesser General Public License for more details.
- * 
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ /*
+ * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
+ * The University of Notre Dame grants you ("Licensee") a
+ * non-exclusive, royalty free, license to use, modify and
+ * redistribute this software in source and binary code form, provided
+ * that the following conditions are met:
+ *
+ * 1. Acknowledgement of the program authors must be made in any
+ *    publication of scientific results based in part on use of the
+ *    program.  An acceptable form of acknowledgement is citation of
+ *    the article in which the program was described (Matthew
+ *    A. Meineke, Charles F. Vardeman II, Teng Lin, Christopher
+ *    J. Fennell and J. Daniel Gezelter, "OOPSE: An Object-Oriented
+ *    Parallel Simulation Engine for Molecular Dynamics,"
+ *    J. Comput. Chem. 26, pp. 252-271 (2005))
+ *
+ * 2. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ *
+ * 3. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the
+ *    distribution.
+ *
+ * This software is provided "AS IS," without a warranty of any
+ * kind. All express or implied conditions, representations and
+ * warranties, including any implied warranty of merchantability,
+ * fitness for a particular purpose or non-infringement, are hereby
+ * excluded.  The University of Notre Dame and its licensors shall not
+ * be liable for any damages suffered by licensee as a result of
+ * using, modifying or distributing the software or its
+ * derivatives. In no event will the University of Notre Dame or its
+ * licensors be liable for any lost revenue, profit or data, or for
+ * direct, indirect, special, consequential, incidental or punitive
+ * damages, however caused and regardless of the theory of liability,
+ * arising out of the use of or inability to use software, even if the
+ * University of Notre Dame has been advised of the possibility of
+ * such damages.
  */
-
+ 
 /**
  * @file basic_ifstrstream.hpp
  * @author Teng Lin
@@ -43,10 +59,10 @@
 #endif
 
 namespace oopse {
-using namespace std;
+
 /**
  * @class basic_ifstrstream basic_ifstrstream.hpp "io/basic_ifstrstream.hpp"
- * @brief class provides a stream interface to read data from files.
+ * @brief basic_ifstrstream class provides a stream interface to read data from files.
  * <p>In single mode, it falls back to ifstream. Don't need to read the whole file into memory.
  * In parallel mode, the master node will read the whole file and brocast it to other slave nodes.
  * After brocasting, every node will fall back to stringstream.</p>
@@ -63,7 +79,7 @@ using namespace std;
  * @endcode
  */
 template <class _CharT, class _Traits,  class _Alloc>
-class basic_ifstrstream : public basic_istream<_CharT, _Traits> {
+class basic_ifstrstream : public std::basic_istream<_CharT, _Traits> {
     public:
         //traits
         typedef _CharT                     char_type;
@@ -72,32 +88,32 @@ class basic_ifstrstream : public basic_istream<_CharT, _Traits> {
         typedef typename _Traits::off_type off_type;
         typedef _Traits                    traits_type;
 
-        typedef basic_ios<_CharT, _Traits>                _Basic_ios;
-        typedef basic_istream<_CharT, _Traits>            _Base;
+        typedef std::basic_ios<_CharT, _Traits>                _Basic_ios;
+        typedef std::basic_istream<_CharT, _Traits>            _Base;
 
 #ifdef IS_MPI
-         typedef basic_stringbuf<_CharT, _Traits, _Alloc>  _Buf;        
+         typedef std::basic_stringbuf<_CharT, _Traits, _Alloc>  _Buf;        
 #else
-        typedef basic_filebuf<_CharT, _Traits>            _Buf;
+        typedef std::basic_filebuf<_CharT, _Traits>            _Buf;
 #endif
 
-        static  const int FileNoExists = -1;
+        static  const int FileNotExists = -1;
         static const int FileIOError = -2;
         
     public:
         
         /**  Constructs an object of class ifstream.  */
         basic_ifstrstream()
-            : basic_ios<_CharT, _Traits>(),  basic_istream<_CharT, _Traits>(0),
+            : std::basic_ios<_CharT, _Traits>(),  std::basic_istream<_CharT, _Traits>(0),
               internalBuf_(NULL), isRead(false)  {
 
 #ifdef IS_MPI         
             //in parallel mode, fall back to istringstream
-            basic_stringbuf<_CharT, _Traits, _Alloc>* stringBuffer = new  basic_stringbuf<_CharT, _Traits, _Alloc>();
+            std::basic_stringbuf<_CharT, _Traits, _Alloc>* stringBuffer = new  std::basic_stringbuf<_CharT, _Traits, _Alloc>();
             internalBuf_ =  stringBuffer;
 #else
             //in single version, fall back to ifstream
-            basic_filebuf<_CharT, _Traits>* fileBuffer = new  basic_filebuf<_CharT, _Traits>();
+            std::basic_filebuf<_CharT, _Traits>* fileBuffer = new  std::basic_filebuf<_CharT, _Traits>();
             internalBuf_ =  fileBuffer;
 #endif            
 
@@ -111,11 +127,11 @@ class basic_ifstrstream : public basic_istream<_CharT, _Traits> {
          * @mode Flags describing the requested i/o mode for the file, default value is ios_base::in      
          * @checkFilename Flags indicating checking the file name in parallel
          */
-        explicit basic_ifstrstream(const char* filename, ios_base::openmode mode = ios_base::in, bool checkFilename = false)
-            : basic_ios<_CharT, _Traits>(),  basic_istream<_CharT, _Traits>(0),
+        explicit basic_ifstrstream(const char* filename, std::ios_base::openmode mode = std::ios_base::in, bool checkFilename = false)
+            : std::basic_ios<_CharT, _Traits>(),  std::basic_istream<_CharT, _Traits>(0),
               internalBuf_(NULL), isRead(false) {
 
-           isRead =  internalOpen(filename,  mode | ios_base::in, checkFilename);
+           isRead =  internalOpen(filename,  mode | std::ios_base::in, checkFilename);
          }
 
         /**
@@ -135,7 +151,7 @@ class basic_ifstrstream : public basic_istream<_CharT, _Traits> {
          * @mode Flags describing the requested i/o mode for the file
          * @checkFilename Flags indicating checking the file name in parallel
          */
-        void open(const char* filename, ios_base::openmode mode = ios_base::in, bool checkFilename = false){
+        void open(const char* filename, std::ios_base::openmode mode = std::ios_base::in, bool checkFilename = false){
 
             if (!isRead ) {
                 isRead = internalOpen(filename, mode, checkFilename);
@@ -164,7 +180,7 @@ class basic_ifstrstream : public basic_istream<_CharT, _Traits> {
 #ifndef IS_MPI            
             //single version fall back to ifstream
             if (!this->rdbuf()->close())
-                this->setstate(ios_base::failbit);
+                this->setstate(std::ios_base::failbit);
 #endif             
 
             isRead = false;
@@ -189,7 +205,7 @@ class basic_ifstrstream : public basic_istream<_CharT, _Traits> {
          * @mode Flags describing the requested i/o mode for the file
          * @todo use try - catch syntax to make the program more readable
          */
-        bool internalOpen(const char* filename, ios_base::openmode mode, bool checkFilename){
+        bool internalOpen(const char* filename, std::ios_base::openmode mode, bool checkFilename){
 
 #ifdef IS_MPI         
             int commStatus;
@@ -221,14 +237,14 @@ class basic_ifstrstream : public basic_istream<_CharT, _Traits> {
                         return false;   
                 }
                 
-                ifstream fin(filename, mode);
-                basic_stringbuf<_CharT, _Traits, _Alloc>* sbuf;
+                std::ifstream fin(filename, mode);
+                std::basic_stringbuf<_CharT, _Traits, _Alloc>* sbuf;
 
                 if (fin.is_open()) {
                     
-                    fin.seekg(0, ios::end); 
+                    fin.seekg(0, std::ios::end); 
                     fileSize = fin.tellg(); 
-                    fin.seekg(0, ios::beg);
+                    fin.seekg(0, std::ios::beg);
                     
                     // '\0' need one more char
                     fbuf = new char[fileSize+1];
@@ -250,7 +266,7 @@ class basic_ifstrstream : public basic_istream<_CharT, _Traits> {
                         return false;
                     }
                     
-                    // make a c-style string and brocasting it
+                    // make a c-style  std::string and brocasting it
                     fbuf[fileSize] = '\0';
                     commStatus = MPI_Bcast(fbuf, fileSize + 1, MPI_CHAR, masterNode, MPI_COMM_WORLD); 
 
@@ -258,7 +274,7 @@ class basic_ifstrstream : public basic_istream<_CharT, _Traits> {
                     delete internalBuf_;
 
                     //initilaize istream
-                    internalBuf_  = new basic_stringbuf<_CharT, _Traits, _Alloc>(fbuf, mode);
+                    internalBuf_  = new std::basic_stringbuf<_CharT, _Traits, _Alloc>(fbuf, mode);
                     assert(internalBuf_);
                     this->init(internalBuf_);
 
@@ -266,12 +282,13 @@ class basic_ifstrstream : public basic_istream<_CharT, _Traits> {
                     fin.close();                    
                     delete fbuf;
                 }else{
-                    fileSize = FileNoExists;
+                    fileSize = FileNotExists;
                     commStatus = MPI_Bcast(&fileSize, 1, MPI_LONG, masterNode, MPI_COMM_WORLD);   
                     return false;
                 }
                
-             } else{
+             } else{ //slave nodes
+
                     //check file name
                     if (checkFilename) {
                         commStatus = MPI_Bcast(&filenameLen, 1, MPI_INT, masterNode, MPI_COMM_WORLD);     
@@ -305,13 +322,13 @@ class basic_ifstrstream : public basic_istream<_CharT, _Traits> {
                         delete internalBuf_;
 
                         //initilaize istream                        
-                        internalBuf_  = new basic_stringbuf<_CharT, _Traits, _Alloc>(fbuf, mode);
+                        internalBuf_  = new std::basic_stringbuf<_CharT, _Traits, _Alloc>(fbuf, mode);
                         assert(internalBuf_);
                         this->init(internalBuf_);
 
                         delete fbuf;
 
-                    } else if (fileSize == FileNoExists ) {
+                    } else if (fileSize == FileNotExists ) {
                         return false;
 
                     } else if (fileSize == FileIOError ) {
@@ -321,25 +338,27 @@ class basic_ifstrstream : public basic_istream<_CharT, _Traits> {
 
 #else
             //in single version, fall back to ifstream
-            basic_filebuf<_CharT, _Traits>* fileBuffer = new  basic_filebuf<_CharT, _Traits>();
-
-            this->init(fileBuffer);
-            if (!fileBuffer->open(filename, mode))
-                this->setstate(ios_base::failbit);
+            std::basic_filebuf<_CharT, _Traits>* fileBuffer = new  std::basic_filebuf<_CharT, _Traits>();
 
             //it is safe to delete null pointer
-            delete internalBuf_;
- 
-           internalBuf_ =  fileBuffer;
+            delete internalBuf_; 
+            internalBuf_ =  fileBuffer;
+
+            this->init(internalBuf_);
+            if (!fileBuffer->open(filename, mode)) {
+                this->setstate(std::ios_base::failbit);
+                return false;
+            }    
+
 #endif
 
             return true;
         }
         
-        basic_streambuf<_CharT, _Traits>*  internalBuf_; /** internal stream buffer */        
+        std::basic_streambuf<_CharT, _Traits>*  internalBuf_; /** internal stream buffer */        
         bool isRead;                                                                    /** file opened flag */
 };
 
-typedef basic_ifstrstream<char, char_traits<char>, allocator<char> > ifstrstream;
+typedef basic_ifstrstream<char, std::char_traits<char>, std::allocator<char> > ifstrstream;
 }//namespace oopse
 #endif //IO_IFSTRSTREAM_HPP

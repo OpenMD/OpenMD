@@ -15,7 +15,7 @@
 #ifndef _TYPE_INFO_H_
 #define _TYPE_INFO_H_
 #include <typeinfo>
-using namespace std;
+
 
 class TypeInfo
 {

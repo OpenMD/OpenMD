@@ -1,176 +1,97 @@
+ /*
+ * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
+ *
+ * The University of Notre Dame grants you ("Licensee") a
+ * non-exclusive, royalty free, license to use, modify and
+ * redistribute this software in source and binary code form, provided
+ * that the following conditions are met:
+ *
+ * 1. Acknowledgement of the program authors must be made in any
+ *    publication of scientific results based in part on use of the
+ *    program.  An acceptable form of acknowledgement is citation of
+ *    the article in which the program was described (Matthew
+ *    A. Meineke, Charles F. Vardeman II, Teng Lin, Christopher
+ *    J. Fennell and J. Daniel Gezelter, "OOPSE: An Object-Oriented
+ *    Parallel Simulation Engine for Molecular Dynamics,"
+ *    J. Comput. Chem. 26, pp. 252-271 (2005))
+ *
+ * 2. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ *
+ * 3. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the
+ *    distribution.
+ *
+ * This software is provided "AS IS," without a warranty of any
+ * kind. All express or implied conditions, representations and
+ * warranties, including any implied warranty of merchantability,
+ * fitness for a particular purpose or non-infringement, are hereby
+ * excluded.  The University of Notre Dame and its licensors shall not
+ * be liable for any damages suffered by licensee as a result of
+ * using, modifying or distributing the software or its
+ * derivatives. In no event will the University of Notre Dame or its
+ * licensors be liable for any lost revenue, profit or data, or for
+ * direct, indirect, special, consequential, incidental or punitive
+ * damages, however caused and regardless of the theory of liability,
+ * arising out of the use of or inability to use software, even if the
+ * University of Notre Dame has been advised of the possibility of
+ * such damages.
+ */
+ 
+#include "primitives/GhostBend.hpp"
+#include "primitives/DirectionalAtom.hpp"
+namespace oopse {
 
-#include <math.h>
-#include <iostream>
-#include <stdlib.h>
-
-#include "utils/simError.h"
-#include "primitives/SRI.hpp"
-#include "primitives/Atom.hpp"
-
-
-
-GhostBend::GhostBend( Atom &a, Atom &b ){
-  
-  c_p_a = &a;
-  
-  if( !b.isDirectional() ){
+/**@todo still a lot left to improve*/
+void GhostBend::calcForce() {
+    DirectionalAtom* ghostAtom = static_cast<DirectionalAtom*>(atom2_);
     
-    // if atom b is not directional, then bad things will happen
-    
-    sprintf( painCave.errMsg,
-	     " Ghost Bend error: Atom # %d of type \"%s\" is not "
-	     "directional.\n",
-	     b.getIndex(),
-	     b.getType() );
-    painCave.isFatal = 1;
-    simError();
-  }    
+    Vector3d pos1 = atom1_->getPos();
+    Vector3d pos2 = ghostAtom->getPos();
 
-  atomB = ( DirectionalAtom* ) &b;
-  
-  c_potential_E = 0.0;
+    Vector3d r12 = pos1 - pos2;
+    double d12 = r12.length();
+
+    double d12inv = 1.0 / d12;
+
+    Vector3d r32 = ghostAtom->getElectroFrame().getColumn(2);
+    double d32 = r32.length();
+
+    double d32inv = 1.0 / d32;
+
+    double cosTheta = dot(r12, r32) / (d12 * d32);
+
+    //check roundoff     
+    if (cosTheta > 1.0) {
+        cosTheta = 1.0;
+    } else if (cosTheta < -1.0) {
+        cosTheta = -1.0;
+    }
+
+    double theta = acos(cosTheta);
+
+    double firstDerivative;
+
+    bendType_->calcForce(theta, firstDerivative, potential_);
+
+    double sinTheta = sqrt(1.0 - cosTheta * cosTheta);
+
+    if (fabs(sinTheta) < 1.0E-12) {
+        sinTheta = 1.0E-12;
+    }
+
+    double commonFactor1 = -firstDerivative / sinTheta * d12inv;
+    double commonFactor2 = -firstDerivative / sinTheta * d32inv;
+
+    Vector3d force1 = commonFactor1*(r12*(d12inv*cosTheta) - r32*d32inv);
+    Vector3d force3 = commonFactor2*(r32*(d32inv*cosTheta) - r12*d12inv);
+    atom1_->addFrc(force1);
+    ghostAtom->addFrc(-force1);
+    /**@todo test correctness */
+    ghostAtom->addTrq(cross(r32, force3) );
 
 }
 
+} //end namespace oopse
 
-void GhostBend::calc_forces(){
-  
-  double dx,dy,dz,gx,gy,gz,dx2,dy2,dz2,gx2,gy2,gz2;
-  double rij2, rkj2, riji2, rkji2, dot, denom, cosang, angl;
-  
-  double sina2, sinai;
-
-  double comf2, comf3, comf4;
-  double dcsidx, dcsidy, dcsidz, dcskdx, dcskdy, dcskdz;
-  // double dcsjdx, dcsjdy, dcsjdz;
-  double dadxi, dadyi, dadzi;
-  double dadxk, dadyk, dadzk;//, dadxj, dadyj, dadzj;
-  double daxi, dayi, dazi, daxk, dayk, dazk, daxj, dayj, dazj;
-  double u[3];
-  
-  double aR[3], bR[3];
-  double aF[3], bF[3], bTrq[3];
-
-  c_p_a->getPos( aR );
-  atomB->getPos( bR );
-  
-
-  dx = aR[0] - bR[0];
-  dy = aR[1] - bR[1];
-  dz = aR[2] - bR[2];
-
-  atomB->getU(u);
-
-  gx = u[0];
-  gy = u[1];
-  gz = u[2];
-  
-  dx2 = dx * dx;
-  dy2 = dy * dy;
-  dz2 = dz * dz;
-
-  gx2 = gx * gx;
-  gy2 = gy * gy;
-  gz2 = gz * gz;
-  
-  rij2 = dx2 + dy2 + dz2;
-  rkj2 = gx2 + gy2 + gz2;
-  
-  riji2 = 1.0 / rij2;
-  rkji2 = 1.0 / rkj2;
-
-  dot = dx * gx + dy * gy + dz * gz;
-  denom = sqrt((riji2 * rkji2));
-  cosang = dot * denom;
-
-  if(cosang > 1.0)cosang = 1.0;
-  if(cosang < -1.0) cosang = -1.0;
-
-  angl = acos(cosang);
-  angl = angl * 180.0 / M_PI;
-
-  sina2 = 1.0 - cosang*cosang;
-  if(fabs(sina2) < 1.0E-12 ) sina2 = 1.0E-12;
-  sinai = 1.0 / sqrt(sina2);
-
-  comf2 = cosang * riji2;
-  comf3 = cosang * rkji2;
-  comf4 = bend_force(angl);
-
-  dcsidx = gx*denom - comf2*dx;
-  dcsidy = gy*denom - comf2*dy;
-  dcsidz = gz*denom - comf2*dz;
-  
-  dcskdx = dx*denom - comf3*gx;
-  dcskdy = dy*denom - comf3*gy;
-  dcskdz = dz*denom - comf3*gz;
-  
-//   dcsjdx = -dcsidx - dcskdx;
-//   dcsjdy = -dcsidy - dcskdy;
-//   dcsjdz = -dcsidz - dcskdz;
-
-  dadxi = -sinai*dcsidx;
-  dadyi = -sinai*dcsidy;
-  dadzi = -sinai*dcsidz;
-
-  dadxk = -sinai*dcskdx;
-  dadyk = -sinai*dcskdy;
-  dadzk = -sinai*dcskdz;
-
-//   dadxj = -dadxi - dadxk;
-//   dadyj = -dadyi - dadyk;
-//   dadzj = -dadzi - dadzk;
-
-  daxi = comf4*dadxi;
-  dayi = comf4*dadyi;
-  dazi = comf4*dadzi;
-
-  daxk = comf4*dadxk;
-  dayk = comf4*dadyk;
-  dazk = comf4*dadzk;
-  
-  daxj = -daxi - daxk;
-  dayj = -dayi - dayk;
-  dazj = -dazi - dazk;
-
-  aF[0] = daxi;
-  aF[1] = dayi;
-  aF[2] = dazi;
-
-  bF[0] = daxj + daxk;
-  bF[1] = dayj + dayk;
-  bF[2] = dazj + dazk;
-
-  bTrq[0] = gy*dazk - gz*dayk;
-  bTrq[1] = gz*daxk - gx*dazk;
-  bTrq[2] = gx*dayk - gy*daxk;
-  
-  
-  c_p_a->addFrc( aF );
-  atomB->addFrc( bF );
-  atomB->addTrq( bTrq );
-  
-  return;
-}
-
-void GhostBend::setConstants( double the_c1, double the_c2, double the_c3, 
-				  double the_Th0 ){
-  c1 = the_c1;
-  c2 = the_c2;
-  c3 = the_c3;
-  theta0 = the_Th0;
-}
-
-
-double GhostBend::bend_force( double theta ){
-
-  double dt, dt2;
-  double force;
-
-  dt = ( theta - theta0 ) * M_PI / 180.0;
-  dt2 = dt * dt;
-
-  c_potential_E = ( c1 * dt2 ) + ( c2 * dt ) + c3;
-  force = -( ( 2.0 * c1 * dt ) + c2 );
-  return force;
-}

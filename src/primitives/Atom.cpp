@@ -1,185 +1,68 @@
-#include <iostream>
-
-using namespace std;
-
-#include "utils/simError.h"
+ /*
+ * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
+ *
+ * The University of Notre Dame grants you ("Licensee") a
+ * non-exclusive, royalty free, license to use, modify and
+ * redistribute this software in source and binary code form, provided
+ * that the following conditions are met:
+ *
+ * 1. Acknowledgement of the program authors must be made in any
+ *    publication of scientific results based in part on use of the
+ *    program.  An acceptable form of acknowledgement is citation of
+ *    the article in which the program was described (Matthew
+ *    A. Meineke, Charles F. Vardeman II, Teng Lin, Christopher
+ *    J. Fennell and J. Daniel Gezelter, "OOPSE: An Object-Oriented
+ *    Parallel Simulation Engine for Molecular Dynamics,"
+ *    J. Comput. Chem. 26, pp. 252-271 (2005))
+ *
+ * 2. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ *
+ * 3. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the
+ *    distribution.
+ *
+ * This software is provided "AS IS," without a warranty of any
+ * kind. All express or implied conditions, representations and
+ * warranties, including any implied warranty of merchantability,
+ * fitness for a particular purpose or non-infringement, are hereby
+ * excluded.  The University of Notre Dame and its licensors shall not
+ * be liable for any damages suffered by licensee as a result of
+ * using, modifying or distributing the software or its
+ * derivatives. In no event will the University of Notre Dame or its
+ * licensors be liable for any lost revenue, profit or data, or for
+ * direct, indirect, special, consequential, incidental or punitive
+ * damages, however caused and regardless of the theory of liability,
+ * arising out of the use of or inability to use software, even if the
+ * University of Notre Dame has been advised of the possibility of
+ * such damages.
+ */
+ 
 #include "primitives/Atom.hpp"
+namespace oopse {
 
-Atom::Atom(int theIndex, SimState* theConfig) {
-
-  objType = OT_ATOM;
-  myConfig = theConfig;
-  hasCoords = false;
-
-  has_dipole = 0;
-  has_charge = 0;
-  
-  index = theIndex;
-  offset = 0;
-  offsetX = offset;
-  offsetY = offset+1;
-  offsetZ = offset+2;
-  
-  Axx = 0;
-  Axy = Axx+1;
-  Axz = Axx+2;
-  
-  Ayx = Axx+3;
-  Ayy = Axx+4;
-  Ayz = Axx+5;
-  
-  Azx = Axx+6;
-  Azy = Axx+7;
-  Azz = Axx+8;
+Atom::Atom(AtomType* at) : StuntDouble(otAtom, &Snapshot::atomData) ,atomType_(at) {
+ mass_ = at->getMass();
 }
 
-void Atom::setIndex(int theIndex) {
-  index = theIndex; 
-}
+Mat3x3d Atom::getI() {
+    return Mat3x3d::identity();
+}    
 
-void Atom::setCoords(void){
+std::vector<double> Atom::getGrad() {
+     std::vector<double> grad(3);
+    Vector3d force= getFrc();
 
-  if( myConfig->isAllocated() ){
-
-    myConfig->getAtomPointers( index,
-		     &pos, 
-		     &vel, 
-		     &frc, 
-		     &trq, 
-		     &Amat,
-		     &mu,  
-		     &ul);
-  }
-  else{
-    sprintf( painCave.errMsg,
-	     "Attempted to set Atom %d  coordinates with an unallocated "
-	     "SimState object.\n", index );
-    painCave.isFatal = 1;
-    simError();
-  }
-  
-  hasCoords = true;
-  
-}
-
-void Atom::getPos( double theP[3] ){
-  
-  if( hasCoords ){
-    theP[0] = pos[offsetX];
-    theP[1] = pos[offsetY];
-    theP[2] = pos[offsetZ];
-  }
-  else{
-
-    sprintf( painCave.errMsg,
-	     "Attempt to get Pos for atom %d before coords set.\n",
-	     index );
-    painCave.isFatal = 1;
-    simError();
-  }
-}
-
-void Atom::setPos( double theP[3] ){
-
-  if( hasCoords ){
-    pos[offsetX] = theP[0];
-    pos[offsetY] = theP[1];
-    pos[offsetZ] = theP[2];
-  }
-  else{
-
-    sprintf( painCave.errMsg,
-	     "Attempt to set Pos for atom %d before coords set.\n",
-	     index );
-    painCave.isFatal = 1;
-    simError();
-  }
-}
-
-void Atom::getVel( double theV[3] ){
-  
-  if( hasCoords ){
-    theV[0] = vel[offsetX];
-    theV[1] = vel[offsetY];
-    theV[2] = vel[offsetZ];
-  }
-  else{
+    grad[0] = -force[0];
+    grad[1] = -force[1];
+    grad[2] = -force[2];
     
-    sprintf( painCave.errMsg,
-	     "Attempt to get vel for atom %d before coords set.\n",
-	     index );
-    painCave.isFatal = 1;
-    simError();
-  }
+    return grad;
+}    
+
+void Atom::accept(BaseVisitor* v) {
+    v->visit(this);
+}    
 
 }
-
-void Atom::setVel( double theV[3] ){
-  
-  if( hasCoords ){
-    vel[offsetX] = theV[0];
-    vel[offsetY] = theV[1];
-    vel[offsetZ] = theV[2];
-  }
-  else{
-    
-    sprintf( painCave.errMsg,
-	     "Attempt to set vel for atom %d before coords set.\n",
-	     index );
-    painCave.isFatal = 1;
-    simError();
-  }
-}
-
-void Atom::getFrc( double theF[3] ){
-  
-  if( hasCoords ){
-    theF[0] = frc[offsetX];
-    theF[1] = frc[offsetY];
-    theF[2] = frc[offsetZ];
-  }
-  else{
-    
-    sprintf( painCave.errMsg,
-	     "Attempt to get frc for atom %d before coords set.\n",
-	     index );
-    painCave.isFatal = 1;
-    simError();
-  }
-}
-
-void Atom::addFrc( double theF[3] ){
-  
-  if( hasCoords ){
-    frc[offsetX] += theF[0];
-    frc[offsetY] += theF[1];
-    frc[offsetZ] += theF[2];
-  }
-  else{
-    
-    sprintf( painCave.errMsg,
-	     "Attempt to add frc for atom %d before coords set.\n",
-	     index );
-    painCave.isFatal = 1;
-    simError();
-  }
-}
-
-
-void Atom::zeroForces( void ){
-  
-  if( hasCoords ){
-    frc[offsetX] = 0.0; 
-    frc[offsetY] = 0.0; 
-    frc[offsetZ] = 0.0;
-  }
-  else{
-    
-    sprintf( painCave.errMsg,
-	     "Attempt to zero frc for atom %d before coords set.\n",
-	     index );
-    painCave.isFatal = 1;
-    simError();
-  }
-}
-

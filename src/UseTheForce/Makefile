@@ -1,13 +1,10 @@
 Source    = \
 	doForces.F90 \
-	DUFF.cpp \
-	EAM_FF.cpp \
-	ForceFields.cpp \
-	LJFF.cpp \
-	mpiForceField.c \
-	WATER.cpp \
+        ForceField.cpp \
+        ForceFieldFactory.cpp \
+        DUFF.cpp \
+	EAM.cpp \
 	notifyCutoffs.F90 \
-	Shapes_FF.cpp \
 
 RmiSource =
 

@@ -1,3 +1,44 @@
+!!
+!! Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
+!!
+!! The University of Notre Dame grants you ("Licensee") a
+!! non-exclusive, royalty free, license to use, modify and
+!! redistribute this software in source and binary code form, provided
+!! that the following conditions are met:
+!!
+!! 1. Acknowledgement of the program authors must be made in any
+!!    publication of scientific results based in part on use of the
+!!    program.  An acceptable form of acknowledgement is citation of
+!!    the article in which the program was described (Matthew
+!!    A. Meineke, Charles F. Vardeman II, Teng Lin, Christopher
+!!    J. Fennell and J. Daniel Gezelter, "OOPSE: An Object-Oriented
+!!    Parallel Simulation Engine for Molecular Dynamics,"
+!!    J. Comput. Chem. 26, pp. 252-271 (2005))
+!!
+!! 2. Redistributions of source code must retain the above copyright
+!!    notice, this list of conditions and the following disclaimer.
+!!
+!! 3. Redistributions in binary form must reproduce the above copyright
+!!    notice, this list of conditions and the following disclaimer in the
+!!    documentation and/or other materials provided with the
+!!    distribution.
+!!
+!! This software is provided "AS IS," without a warranty of any
+!! kind. All express or implied conditions, representations and
+!! warranties, including any implied warranty of merchantability,
+!! fitness for a particular purpose or non-infringement, are hereby
+!! excluded.  The University of Notre Dame and its licensors shall not
+!! be liable for any damages suffered by licensee as a result of
+!! using, modifying or distributing the software or its
+!! derivatives. In no event will the University of Notre Dame or its
+!! licensors be liable for any lost revenue, profit or data, or for
+!! direct, indirect, special, consequential, incidental or punitive
+!! damages, however caused and regardless of the theory of liability,
+!! arising out of the use of or inability to use software, even if the
+!! University of Notre Dame has been advised of the possibility of
+!! such damages.
+!!
+
 module reaction_field
   use force_globals
   use definitions
@@ -97,11 +138,11 @@ contains
     
   end subroutine createMomentMap  
 
-  subroutine accumulate_rf(atom1, atom2, rij, u_l, taper)
+  subroutine accumulate_rf(atom1, atom2, rij, eFrame, taper)
 
     integer, intent(in) :: atom1, atom2
     real (kind = dp), intent(in) :: rij
-    real (kind = dp), dimension(3,nLocal) :: u_l    
+    real (kind = dp), dimension(9,nLocal) :: eFrame
 
     integer :: me1, me2
     real (kind = dp), intent(in) :: taper
@@ -128,24 +169,24 @@ contains
        
 #ifdef IS_MPI
     me1 = atid_Row(atom1)
-    ul1(1) = u_l_Row(1,atom1)
-    ul1(2) = u_l_Row(2,atom1)
-    ul1(3) = u_l_Row(3,atom1)
+    ul1(1) = eFrame_Row(3,atom1)
+    ul1(2) = eFrame_Row(6,atom1)
+    ul1(3) = eFrame_Row(9,atom1)
     
     me2 = atid_Col(atom2)
-    ul2(1) = u_l_Col(1,atom2)
-    ul2(2) = u_l_Col(2,atom2)
-    ul2(3) = u_l_Col(3,atom2)
+    ul2(1) = eFrame_Col(3,atom2)
+    ul2(2) = eFrame_Col(6,atom2)
+    ul2(3) = eFrame_Col(9,atom2)
 #else
     me1 = atid(atom1)
-    ul1(1) = u_l(1,atom1)
-    ul1(2) = u_l(2,atom1)
-    ul1(3) = u_l(3,atom1)
+    ul1(1) = eFrame(3,atom1)
+    ul1(2) = eFrame(6,atom1)
+    ul1(3) = eFrame(9,atom1)
     
     me2 = atid(atom2)
-    ul2(1) = u_l(1,atom2)
-    ul2(2) = u_l(2,atom2)
-    ul2(3) = u_l(3,atom2)
+    ul2(1) = eFrame(3,atom2)
+    ul2(2) = eFrame(6,atom2)
+    ul2(3) = eFrame(9,atom2)
 #endif
     
     mu1 = MomentMap(me1)%dipole_moment
@@ -173,27 +214,27 @@ contains
     return  
   end subroutine accumulate_rf
 
-  subroutine accumulate_self_rf(atom1, mu1, u_l)
+  subroutine accumulate_self_rf(atom1, mu1, eFrame)
     
     integer, intent(in) :: atom1
     real(kind=dp), intent(in) :: mu1
-    real(kind=dp), dimension(3,nLocal) :: u_l
+    real(kind=dp), dimension(9,nLocal) :: eFrame
     
     !! should work for both MPI and non-MPI version since this is not pairwise.
-    rf(1,atom1) = rf(1,atom1) + u_l(1,atom1)*mu1
-    rf(2,atom1) = rf(2,atom1) + u_l(2,atom1)*mu1
-    rf(3,atom1) = rf(3,atom1) + u_l(3,atom1)*mu1
+    rf(1,atom1) = rf(1,atom1) + eFrame(3,atom1)*mu1
+    rf(2,atom1) = rf(2,atom1) + eFrame(6,atom1)*mu1
+    rf(3,atom1) = rf(3,atom1) + eFrame(9,atom1)*mu1
         
     return
   end subroutine accumulate_self_rf
   
-  subroutine reaction_field_final(a1, mu1, u_l, rfpot, t, do_pot)
+  subroutine reaction_field_final(a1, mu1, eFrame, rfpot, t, do_pot)
             
     integer, intent(in) :: a1
     real (kind=dp), intent(in) :: mu1
     real (kind=dp), intent(inout) :: rfpot
     logical, intent(in) :: do_pot
-    real (kind = dp), dimension(3,nLocal) :: u_l    
+    real (kind = dp), dimension(9,nLocal) :: eFrame
     real (kind = dp), dimension(3,nLocal) :: t
 
     integer :: localError
@@ -217,26 +258,26 @@ contains
     
     ! The torque contribution is dipole cross reaction_field   
 
-    t(1,a1) = t(1,a1) + pre*mu1*(u_l(2,a1)*rf(3,a1) - u_l(3,a1)*rf(2,a1))
-    t(2,a1) = t(2,a1) + pre*mu1*(u_l(3,a1)*rf(1,a1) - u_l(1,a1)*rf(3,a1))
-    t(3,a1) = t(3,a1) + pre*mu1*(u_l(1,a1)*rf(2,a1) - u_l(2,a1)*rf(1,a1))
+    t(1,a1) = t(1,a1) + pre*mu1*(eFrame(6,a1)*rf(3,a1) - eFrame(9,a1)*rf(2,a1))
+    t(2,a1) = t(2,a1) + pre*mu1*(eFrame(9,a1)*rf(1,a1) - eFrame(3,a1)*rf(3,a1))
+    t(3,a1) = t(3,a1) + pre*mu1*(eFrame(3,a1)*rf(2,a1) - eFrame(6,a1)*rf(1,a1))
     
     ! the potential contribution is -1/2 dipole dot reaction_field
     
     if (do_pot) then
        rfpot = rfpot - 0.5d0 * pre * mu1 * &
-            (rf(1,a1)*u_l(1,a1) + rf(2,a1)*u_l(2,a1) + rf(3,a1)*u_l(3,a1))
+            (rf(1,a1)*eFrame(3,a1) + rf(2,a1)*eFrame(6,a1) + rf(3,a1)*eFrame(9,a1))
     endif
  
     return
   end subroutine reaction_field_final
   
-  subroutine rf_correct_forces(atom1, atom2, d, rij, u_l, taper, f, fpair)
+  subroutine rf_correct_forces(atom1, atom2, d, rij, eFrame, taper, f, fpair)
     
     integer, intent(in) :: atom1, atom2
     real(kind=dp), dimension(3), intent(in) :: d
     real(kind=dp), intent(in) :: rij, taper
-    real( kind = dp ), dimension(3,nLocal) :: u_l
+    real( kind = dp ), dimension(9,nLocal) :: eFrame
     real( kind = dp ), dimension(3,nLocal) :: f
     real( kind = dp ), dimension(3), intent(inout) :: fpair
     
@@ -274,24 +315,24 @@ contains
        
 #ifdef IS_MPI
        me1 = atid_Row(atom1)
-       ul1(1) = u_l_Row(1,atom1)
-       ul1(2) = u_l_Row(2,atom1)
-       ul1(3) = u_l_Row(3,atom1)
+       ul1(1) = eFrame_Row(3,atom1)
+       ul1(2) = eFrame_Row(6,atom1)
+       ul1(3) = eFrame_Row(9,atom1)
        
        me2 = atid_Col(atom2)
-       ul2(1) = u_l_Col(1,atom2)
-       ul2(2) = u_l_Col(2,atom2)
-       ul2(3) = u_l_Col(3,atom2)
+       ul2(1) = eFrame_Col(3,atom2)
+       ul2(2) = eFrame_Col(6,atom2)
+       ul2(3) = eFrame_Col(9,atom2)
 #else
        me1 = atid(atom1)
-       ul1(1) = u_l(1,atom1)
-       ul1(2) = u_l(2,atom1)
-       ul1(3) = u_l(3,atom1)
+       ul1(1) = eFrame(3,atom1)
+       ul1(2) = eFrame(6,atom1)
+       ul1(3) = eFrame(9,atom1)
        
        me2 = atid(atom2)
-       ul2(1) = u_l(1,atom2)
-       ul2(2) = u_l(2,atom2)
-       ul2(3) = u_l(3,atom2)
+       ul2(1) = eFrame(3,atom2)
+       ul2(2) = eFrame(6,atom2)
+       ul2(3) = eFrame(9,atom2)
 #endif
        
        mu1 = MomentMap(me1)%dipole_moment

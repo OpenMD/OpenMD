@@ -1,639 +1,914 @@
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
+ /*
+ * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
+ *
+ * The University of Notre Dame grants you ("Licensee") a
+ * non-exclusive, royalty free, license to use, modify and
+ * redistribute this software in source and binary code form, provided
+ * that the following conditions are met:
+ *
+ * 1. Acknowledgement of the program authors must be made in any
+ *    publication of scientific results based in part on use of the
+ *    program.  An acceptable form of acknowledgement is citation of
+ *    the article in which the program was described (Matthew
+ *    A. Meineke, Charles F. Vardeman II, Teng Lin, Christopher
+ *    J. Fennell and J. Daniel Gezelter, "OOPSE: An Object-Oriented
+ *    Parallel Simulation Engine for Molecular Dynamics,"
+ *    J. Comput. Chem. 26, pp. 252-271 (2005))
+ *
+ * 2. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ *
+ * 3. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the
+ *    distribution.
+ *
+ * This software is provided "AS IS," without a warranty of any
+ * kind. All express or implied conditions, representations and
+ * warranties, including any implied warranty of merchantability,
+ * fitness for a particular purpose or non-infringement, are hereby
+ * excluded.  The University of Notre Dame and its licensors shall not
+ * be liable for any damages suffered by licensee as a result of
+ * using, modifying or distributing the software or its
+ * derivatives. In no event will the University of Notre Dame or its
+ * licensors be liable for any lost revenue, profit or data, or for
+ * direct, indirect, special, consequential, incidental or punitive
+ * damages, however caused and regardless of the theory of liability,
+ * arising out of the use of or inability to use software, even if the
+ * University of Notre Dame has been advised of the possibility of
+ * such damages.
+ */
+ 
+/**
+ * @file SimInfo.cpp
+ * @author    tlin
+ * @date  11/02/2004
+ * @version 1.0
+ */
 
-#include <iostream>
-using namespace std;
+#include <algorithm>
+#include <set>
 
 #include "brains/SimInfo.hpp"
-#define __C
-#include "brains/fSimulation.h"
-#include "utils/simError.h"
-#include "UseTheForce/DarkSide/simulation_interface.h"
+#include "math/Vector3.hpp"
+#include "primitives/Molecule.hpp"
+#include "UseTheForce/doForces_interface.h"
 #include "UseTheForce/notifyCutoffs_interface.h"
-
-//#include "UseTheForce/fortranWrappers.hpp"
-
-#include "math/MatVec3.h"
+#include "utils/MemoryUtils.hpp"
+#include "utils/simError.h"
 
 #ifdef IS_MPI
-#include "brains/mpiSimulation.hpp"
+#include "UseTheForce/mpiComponentPlan.h"
+#include "UseTheForce/DarkSide/simParallel_interface.h"
+#endif 
+
+namespace oopse {
+
+SimInfo::SimInfo(std::vector<std::pair<MoleculeStamp*, int> >& molStampPairs, 
+                                ForceField* ff, Globals* simParams) : 
+                                forceField_(ff), simParams_(simParams), 
+                                ndf_(0), ndfRaw_(0), ndfTrans_(0), nZconstraint_(0),
+                                nGlobalMols_(0), nGlobalAtoms_(0), nGlobalCutoffGroups_(0), 
+                                nGlobalIntegrableObjects_(0), nGlobalRigidBodies_(0),
+                                nAtoms_(0), nBonds_(0),  nBends_(0), nTorsions_(0), nRigidBodies_(0),
+                                nIntegrableObjects_(0),  nCutoffGroups_(0), nConstraints_(0),
+                                sman_(NULL), fortranInitialized_(false) {
+
+            
+    std::vector<std::pair<MoleculeStamp*, int> >::iterator i;
+    MoleculeStamp* molStamp;
+    int nMolWithSameStamp;
+    int nCutoffAtoms = 0; // number of atoms belong to cutoff groups
+    int nGroups = 0;          //total cutoff groups defined in meta-data file
+    CutoffGroupStamp* cgStamp;    
+    RigidBodyStamp* rbStamp;
+    int nRigidAtoms = 0;
+    
+    for (i = molStampPairs.begin(); i !=molStampPairs.end(); ++i) {
+        molStamp = i->first;
+        nMolWithSameStamp = i->second;
+        
+        addMoleculeStamp(molStamp, nMolWithSameStamp);
+
+        //calculate atoms in molecules
+        nGlobalAtoms_ += molStamp->getNAtoms() *nMolWithSameStamp;   
+
+
+        //calculate atoms in cutoff groups
+        int nAtomsInGroups = 0;
+        int nCutoffGroupsInStamp = molStamp->getNCutoffGroups();
+        
+        for (int j=0; j < nCutoffGroupsInStamp; j++) {
+            cgStamp = molStamp->getCutoffGroup(j);
+            nAtomsInGroups += cgStamp->getNMembers();
+        }
+
+        nGroups += nCutoffGroupsInStamp * nMolWithSameStamp;
+        nCutoffAtoms += nAtomsInGroups * nMolWithSameStamp;            
+
+        //calculate atoms in rigid bodies
+        int nAtomsInRigidBodies = 0;
+        int nRigidBodiesInStamp = molStamp->getNCutoffGroups();
+        
+        for (int j=0; j < nRigidBodiesInStamp; j++) {
+            rbStamp = molStamp->getRigidBody(j);
+            nAtomsInRigidBodies += rbStamp->getNMembers();
+        }
+
+        nGlobalRigidBodies_ += nRigidBodiesInStamp * nMolWithSameStamp;
+        nRigidAtoms += nAtomsInRigidBodies * nMolWithSameStamp;            
+        
+    }
+
+    //every free atom (atom does not belong to cutoff groups) is a cutoff group
+    //therefore the total number of cutoff groups in the system is equal to 
+    //the total number of atoms minus number of atoms belong to cutoff group defined in meta-data
+    //file plus the number of cutoff groups defined in meta-data file
+    nGlobalCutoffGroups_ = nGlobalAtoms_ - nCutoffAtoms + nGroups;
+
+    //every free atom (atom does not belong to rigid bodies) is an integrable object
+    //therefore the total number of  integrable objects in the system is equal to 
+    //the total number of atoms minus number of atoms belong to  rigid body defined in meta-data
+    //file plus the number of  rigid bodies defined in meta-data file
+    nGlobalIntegrableObjects_ = nGlobalAtoms_ - nRigidAtoms + nGlobalRigidBodies_;
+
+    nGlobalMols_ = molStampIds_.size();
+
+#ifdef IS_MPI    
+    molToProcMap_.resize(nGlobalMols_);
+#endif
+    
+}
+
+SimInfo::~SimInfo() {
+    //MemoryUtils::deleteVectorOfPointer(molecules_);
+
+    MemoryUtils::deleteVectorOfPointer(moleculeStamps_);
+    
+    delete sman_;
+    delete simParams_;
+    delete forceField_;
+
+}
+
+int SimInfo::getNGlobalConstraints() {
+    int nGlobalConstraints;
+#ifdef IS_MPI
+    MPI_Allreduce(&nConstraints_, &nGlobalConstraints, 1, MPI_INT, MPI_SUM,
+                  MPI_COMM_WORLD);    
+#else
+    nGlobalConstraints =  nConstraints_;
+#endif
+    return nGlobalConstraints;
+}
+
+bool SimInfo::addMolecule(Molecule* mol) {
+    MoleculeIterator i;
+
+    i = molecules_.find(mol->getGlobalIndex());
+    if (i == molecules_.end() ) {
+
+        molecules_.insert(std::make_pair(mol->getGlobalIndex(), mol));
+        
+        nAtoms_ += mol->getNAtoms();
+        nBonds_ += mol->getNBonds();
+        nBends_ += mol->getNBends();
+        nTorsions_ += mol->getNTorsions();
+        nRigidBodies_ += mol->getNRigidBodies();
+        nIntegrableObjects_ += mol->getNIntegrableObjects();
+        nCutoffGroups_ += mol->getNCutoffGroups();
+        nConstraints_ += mol->getNConstraintPairs();
+
+        addExcludePairs(mol);
+        
+        return true;
+    } else {
+        return false;
+    }
+}
+
+bool SimInfo::removeMolecule(Molecule* mol) {
+    MoleculeIterator i;
+    i = molecules_.find(mol->getGlobalIndex());
+
+    if (i != molecules_.end() ) {
+
+        assert(mol == i->second);
+        
+        nAtoms_ -= mol->getNAtoms();
+        nBonds_ -= mol->getNBonds();
+        nBends_ -= mol->getNBends();
+        nTorsions_ -= mol->getNTorsions();
+        nRigidBodies_ -= mol->getNRigidBodies();
+        nIntegrableObjects_ -= mol->getNIntegrableObjects();
+        nCutoffGroups_ -= mol->getNCutoffGroups();
+        nConstraints_ -= mol->getNConstraintPairs();
+
+        removeExcludePairs(mol);
+        molecules_.erase(mol->getGlobalIndex());
+
+        delete mol;
+        
+        return true;
+    } else {
+        return false;
+    }
+
+
+}    
+
+        
+Molecule* SimInfo::beginMolecule(MoleculeIterator& i) {
+    i = molecules_.begin();
+    return i == molecules_.end() ? NULL : i->second;
+}    
+
+Molecule* SimInfo::nextMolecule(MoleculeIterator& i) {
+    ++i;
+    return i == molecules_.end() ? NULL : i->second;    
+}
+
+
+void SimInfo::calcNdf() {
+    int ndf_local;
+    MoleculeIterator i;
+    std::vector<StuntDouble*>::iterator j;
+    Molecule* mol;
+    StuntDouble* integrableObject;
+
+    ndf_local = 0;
+    
+    for (mol = beginMolecule(i); mol != NULL; mol = nextMolecule(i)) {
+        for (integrableObject = mol->beginIntegrableObject(j); integrableObject != NULL; 
+               integrableObject = mol->nextIntegrableObject(j)) {
+
+            ndf_local += 3;
+
+            if (integrableObject->isDirectional()) {
+                if (integrableObject->isLinear()) {
+                    ndf_local += 2;
+                } else {
+                    ndf_local += 3;
+                }
+            }
+            
+        }//end for (integrableObject)
+    }// end for (mol)
+    
+    // n_constraints is local, so subtract them on each processor
+    ndf_local -= nConstraints_;
+
+#ifdef IS_MPI
+    MPI_Allreduce(&ndf_local,&ndf_,1,MPI_INT,MPI_SUM, MPI_COMM_WORLD);
+#else
+    ndf_ = ndf_local;
 #endif
 
-inline double roundMe( double x ){
-  return ( x >= 0 ) ? floor( x + 0.5 ) : ceil( x - 0.5 );
-}
-	  
-inline double min( double a, double b ){
-  return (a < b ) ? a : b;
-}
-
-SimInfo* currentInfo;
-
-SimInfo::SimInfo(){
-
-  n_constraints = 0;
-  nZconstraints = 0;
-  n_oriented = 0;
-  n_dipoles = 0;
-  ndf = 0;
-  ndfRaw = 0;
-  nZconstraints = 0;
-  the_integrator = NULL;
-  setTemp = 0;
-  thermalTime = 0.0;
-  currentTime = 0.0;
-  rCut = 0.0;
-  rSw = 0.0;
-
-  haveRcut = 0;
-  haveRsw = 0;
-  boxIsInit = 0;
-  
-  resetTime = 1e99;
-
-  orthoRhombic = 0;
-  orthoTolerance = 1E-6;
-  useInitXSstate = true;
-
-  usePBC = 0;
-  useDirectionalAtoms = 0;
-  useLennardJones = 0; 
-  useElectrostatics = 0;
-  useCharges = 0;
-  useDipoles = 0;
-  useSticky = 0;
-  useGayBerne = 0;
-  useEAM = 0;
-  useShapes = 0;
-  useFLARB = 0;
-
-  useSolidThermInt = 0;
-  useLiquidThermInt = 0;
-
-  haveCutoffGroups = false;
-
-  excludes = Exclude::Instance();
-
-  myConfiguration = new SimState();
-
-  has_minimizer = false;
-  the_minimizer =NULL;
-
-  ngroup = 0;
+    // nZconstraints_ is global, as are the 3 COM translations for the 
+    // entire system:
+    ndf_ = ndf_ - 3 - nZconstraint_;
 
 }
 
+void SimInfo::calcNdfRaw() {
+    int ndfRaw_local;
 
-SimInfo::~SimInfo(){
+    MoleculeIterator i;
+    std::vector<StuntDouble*>::iterator j;
+    Molecule* mol;
+    StuntDouble* integrableObject;
 
-  delete myConfiguration;
+    // Raw degrees of freedom that we have to set
+    ndfRaw_local = 0;
+    
+    for (mol = beginMolecule(i); mol != NULL; mol = nextMolecule(i)) {
+        for (integrableObject = mol->beginIntegrableObject(j); integrableObject != NULL;
+               integrableObject = mol->nextIntegrableObject(j)) {
 
-  map<string, GenericData*>::iterator i;
-  
-  for(i = properties.begin(); i != properties.end(); i++)
-    delete (*i).second;
+            ndfRaw_local += 3;
 
-}
-
-void SimInfo::setBox(double newBox[3]) {
-  
-  int i, j;
-  double tempMat[3][3];
-
-  for(i=0; i<3; i++) 
-    for (j=0; j<3; j++) tempMat[i][j] = 0.0;;
-
-  tempMat[0][0] = newBox[0];
-  tempMat[1][1] = newBox[1];
-  tempMat[2][2] = newBox[2];
-
-  setBoxM( tempMat );
-
-}
-
-void SimInfo::setBoxM( double theBox[3][3] ){
-  
-  int i, j;
-  double FortranHmat[9]; // to preserve compatibility with Fortran the
-                         // ordering in the array is as follows:
-                         // [ 0 3 6 ]
-                         // [ 1 4 7 ]
-                         // [ 2 5 8 ]
-  double FortranHmatInv[9]; // the inverted Hmat (for Fortran);
-
-  if( !boxIsInit ) boxIsInit = 1;
-
-  for(i=0; i < 3; i++) 
-    for (j=0; j < 3; j++) Hmat[i][j] = theBox[i][j];
-  
-  calcBoxL();
-  calcHmatInv();
-
-  for(i=0; i < 3; i++) {
-    for (j=0; j < 3; j++) {
-      FortranHmat[3*j + i] = Hmat[i][j];
-      FortranHmatInv[3*j + i] = HmatInv[i][j];
+            if (integrableObject->isDirectional()) {
+                if (integrableObject->isLinear()) {
+                    ndfRaw_local += 2;
+                } else {
+                    ndfRaw_local += 3;
+                }
+            }
+            
+        }
     }
-  }
+    
+#ifdef IS_MPI
+    MPI_Allreduce(&ndfRaw_local,&ndfRaw_,1,MPI_INT,MPI_SUM, MPI_COMM_WORLD);
+#else
+    ndfRaw_ = ndfRaw_local;
+#endif
+}
 
-  setFortranBox(FortranHmat, FortranHmatInv, &orthoRhombic);
+void SimInfo::calcNdfTrans() {
+    int ndfTrans_local;
+
+    ndfTrans_local = 3 * nIntegrableObjects_ - nConstraints_;
+
+
+#ifdef IS_MPI
+    MPI_Allreduce(&ndfTrans_local,&ndfTrans_,1,MPI_INT,MPI_SUM, MPI_COMM_WORLD);
+#else
+    ndfTrans_ = ndfTrans_local;
+#endif
+
+    ndfTrans_ = ndfTrans_ - 3 - nZconstraint_;
  
 }
- 
 
-void SimInfo::getBoxM (double theBox[3][3]) {
-
-  int i, j;
-  for(i=0; i<3; i++) 
-    for (j=0; j<3; j++) theBox[i][j] = Hmat[i][j];
-}
-
-
-void SimInfo::scaleBox(double scale) {
-  double theBox[3][3];
-  int i, j;
-
-  // cerr << "Scaling box by " << scale << "\n";
-
-  for(i=0; i<3; i++) 
-    for (j=0; j<3; j++) theBox[i][j] = Hmat[i][j]*scale;
-
-  setBoxM(theBox);
-
-}
-
-void SimInfo::calcHmatInv( void ) {
-  
-  int oldOrtho;
-  int i,j;
-  double smallDiag;
-  double tol;
-  double sanity[3][3];
-
-  invertMat3( Hmat, HmatInv );
-
-  // check to see if Hmat is orthorhombic
-  
-  oldOrtho = orthoRhombic;
-
-  smallDiag = fabs(Hmat[0][0]);
-  if(smallDiag > fabs(Hmat[1][1])) smallDiag = fabs(Hmat[1][1]);
-  if(smallDiag > fabs(Hmat[2][2])) smallDiag = fabs(Hmat[2][2]);
-  tol = smallDiag * orthoTolerance;
-
-  orthoRhombic = 1;
-  
-  for (i = 0; i < 3; i++ ) {
-    for (j = 0 ; j < 3; j++) {
-      if (i != j) {
-        if (orthoRhombic) {
-          if ( fabs(Hmat[i][j]) >= tol) orthoRhombic = 0;
-        }        
-      }
+void SimInfo::addExcludePairs(Molecule* mol) {
+    std::vector<Bond*>::iterator bondIter;
+    std::vector<Bend*>::iterator bendIter;
+    std::vector<Torsion*>::iterator torsionIter;
+    Bond* bond;
+    Bend* bend;
+    Torsion* torsion;
+    int a;
+    int b;
+    int c;
+    int d;
+    
+    for (bond= mol->beginBond(bondIter); bond != NULL; bond = mol->nextBond(bondIter)) {
+        a = bond->getAtomA()->getGlobalIndex();
+        b = bond->getAtomB()->getGlobalIndex();        
+        exclude_.addPair(a, b);
     }
-  }
 
-  if( oldOrtho != orthoRhombic ){
-    
-    if( orthoRhombic ) {
-      sprintf( painCave.errMsg,
-	       "OOPSE is switching from the default Non-Orthorhombic\n"
-               "\tto the faster Orthorhombic periodic boundary computations.\n"
-	       "\tThis is usually a good thing, but if you wan't the\n"
-               "\tNon-Orthorhombic computations, make the orthoBoxTolerance\n"
-               "\tvariable ( currently set to %G ) smaller.\n",
-	       orthoTolerance);
-      painCave.severity = OOPSE_INFO;
-      simError();
+    for (bend= mol->beginBend(bendIter); bend != NULL; bend = mol->nextBend(bendIter)) {
+        a = bend->getAtomA()->getGlobalIndex();
+        b = bend->getAtomB()->getGlobalIndex();        
+        c = bend->getAtomC()->getGlobalIndex();
+
+        exclude_.addPair(a, b);
+        exclude_.addPair(a, c);
+        exclude_.addPair(b, c);        
     }
-    else {
-      sprintf( painCave.errMsg,
-	       "OOPSE is switching from the faster Orthorhombic to the more\n"
-               "\tflexible Non-Orthorhombic periodic boundary computations.\n"
-	       "\tThis is usually because the box has deformed under\n"
-               "\tNPTf integration. If you wan't to live on the edge with\n"
-               "\tthe Orthorhombic computations, make the orthoBoxTolerance\n"
-               "\tvariable ( currently set to %G ) larger.\n",
-	       orthoTolerance);
-      painCave.severity = OOPSE_WARNING;
-      simError();
+
+    for (torsion= mol->beginTorsion(torsionIter); torsion != NULL; torsion = mol->nextTorsion(torsionIter)) {
+        a = torsion->getAtomA()->getGlobalIndex();
+        b = torsion->getAtomB()->getGlobalIndex();        
+        c = torsion->getAtomC()->getGlobalIndex();        
+        d = torsion->getAtomD()->getGlobalIndex();        
+
+        exclude_.addPair(a, b);
+        exclude_.addPair(a, c);
+        exclude_.addPair(a, d);
+        exclude_.addPair(b, c);
+        exclude_.addPair(b, d);
+        exclude_.addPair(c, d);        
     }
-  }
-}
 
-void SimInfo::calcBoxL( void ){
-
-  double dx, dy, dz, dsq;
-
-  // boxVol = Determinant of Hmat
-
-  boxVol = matDet3( Hmat );
-
-  // boxLx
-  
-  dx = Hmat[0][0]; dy = Hmat[1][0]; dz = Hmat[2][0];
-  dsq = dx*dx + dy*dy + dz*dz;
-  boxL[0] = sqrt( dsq );
-  //maxCutoff = 0.5 * boxL[0];
-
-  // boxLy
-  
-  dx = Hmat[0][1]; dy = Hmat[1][1]; dz = Hmat[2][1];
-  dsq = dx*dx + dy*dy + dz*dz;
-  boxL[1] = sqrt( dsq );
-  //if( (0.5 * boxL[1]) < maxCutoff ) maxCutoff = 0.5 * boxL[1];
-
-
-  // boxLz
-  
-  dx = Hmat[0][2]; dy = Hmat[1][2]; dz = Hmat[2][2];
-  dsq = dx*dx + dy*dy + dz*dz;
-  boxL[2] = sqrt( dsq );
-  //if( (0.5 * boxL[2]) < maxCutoff ) maxCutoff = 0.5 * boxL[2];
-
-  //calculate the max cutoff
-  maxCutoff =  calcMaxCutOff(); 
-  
-  checkCutOffs();
-
-}
-
-
-double SimInfo::calcMaxCutOff(){
-
-  double ri[3], rj[3], rk[3];
-  double rij[3], rjk[3], rki[3];
-  double minDist;
-
-  ri[0] = Hmat[0][0];
-  ri[1] = Hmat[1][0];
-  ri[2] = Hmat[2][0];
-
-  rj[0] = Hmat[0][1];
-  rj[1] = Hmat[1][1];
-  rj[2] = Hmat[2][1];
-
-  rk[0] = Hmat[0][2];
-  rk[1] = Hmat[1][2];
-  rk[2] = Hmat[2][2];
-    
-  crossProduct3(ri, rj, rij);
-  distXY = dotProduct3(rk,rij) / norm3(rij);
-
-  crossProduct3(rj,rk, rjk);
-  distYZ = dotProduct3(ri,rjk) / norm3(rjk);
-
-  crossProduct3(rk,ri, rki);
-  distZX = dotProduct3(rj,rki) / norm3(rki);
-
-  minDist = min(min(distXY, distYZ), distZX);
-  return minDist/2;
-  
-}
-
-void SimInfo::wrapVector( double thePos[3] ){
-
-  int i;
-  double scaled[3];
-
-  if( !orthoRhombic ){
-    // calc the scaled coordinates.
-  
-
-    matVecMul3(HmatInv, thePos, scaled);
-    
-    for(i=0; i<3; i++)
-      scaled[i] -= roundMe(scaled[i]);
-    
-    // calc the wrapped real coordinates from the wrapped scaled coordinates
-    
-    matVecMul3(Hmat, scaled, thePos);
-
-  }
-  else{
-    // calc the scaled coordinates.
-    
-    for(i=0; i<3; i++)
-      scaled[i] = thePos[i]*HmatInv[i][i];
-    
-    // wrap the scaled coordinates
-    
-    for(i=0; i<3; i++)
-      scaled[i] -= roundMe(scaled[i]);
-    
-    // calc the wrapped real coordinates from the wrapped scaled coordinates
-    
-    for(i=0; i<3; i++)
-      thePos[i] = scaled[i]*Hmat[i][i];
-  }
     
 }
 
-
-int SimInfo::getNDF(){
-  int ndf_local;
-
-  ndf_local = 0;
-  
-  for(int i = 0; i < integrableObjects.size(); i++){
-    ndf_local += 3;
-    if (integrableObjects[i]->isDirectional()) {
-      if (integrableObjects[i]->isLinear())
-        ndf_local += 2;
-      else
-        ndf_local += 3;
+void SimInfo::removeExcludePairs(Molecule* mol) {
+    std::vector<Bond*>::iterator bondIter;
+    std::vector<Bend*>::iterator bendIter;
+    std::vector<Torsion*>::iterator torsionIter;
+    Bond* bond;
+    Bend* bend;
+    Torsion* torsion;
+    int a;
+    int b;
+    int c;
+    int d;
+    
+    for (bond= mol->beginBond(bondIter); bond != NULL; bond = mol->nextBond(bondIter)) {
+        a = bond->getAtomA()->getGlobalIndex();
+        b = bond->getAtomB()->getGlobalIndex();        
+        exclude_.removePair(a, b);
     }
-  }
 
-  // n_constraints is local, so subtract them on each processor:
+    for (bend= mol->beginBend(bendIter); bend != NULL; bend = mol->nextBend(bendIter)) {
+        a = bend->getAtomA()->getGlobalIndex();
+        b = bend->getAtomB()->getGlobalIndex();        
+        c = bend->getAtomC()->getGlobalIndex();
 
-  ndf_local -= n_constraints;
+        exclude_.removePair(a, b);
+        exclude_.removePair(a, c);
+        exclude_.removePair(b, c);        
+    }
+
+    for (torsion= mol->beginTorsion(torsionIter); torsion != NULL; torsion = mol->nextTorsion(torsionIter)) {
+        a = torsion->getAtomA()->getGlobalIndex();
+        b = torsion->getAtomB()->getGlobalIndex();        
+        c = torsion->getAtomC()->getGlobalIndex();        
+        d = torsion->getAtomD()->getGlobalIndex();        
+
+        exclude_.removePair(a, b);
+        exclude_.removePair(a, c);
+        exclude_.removePair(a, d);
+        exclude_.removePair(b, c);
+        exclude_.removePair(b, d);
+        exclude_.removePair(c, d);        
+    }
+
+}
+
+
+void SimInfo::addMoleculeStamp(MoleculeStamp* molStamp, int nmol) {
+    int curStampId;
+
+    //index from 0
+    curStampId = moleculeStamps_.size();
+
+    moleculeStamps_.push_back(molStamp);
+    molStampIds_.insert(molStampIds_.end(), nmol, curStampId);
+}
+
+void SimInfo::update() {
+
+    setupSimType();
 
 #ifdef IS_MPI
-  MPI_Allreduce(&ndf_local,&ndf,1,MPI_INT,MPI_SUM, MPI_COMM_WORLD);
-#else
-  ndf = ndf_local;
+    setupFortranParallel();
 #endif
 
-  // nZconstraints is global, as are the 3 COM translations for the 
-  // entire system:
+    setupFortranSim();
 
-  ndf = ndf - 3 - nZconstraints;
-
-  return ndf;
-}
-
-int SimInfo::getNDFraw() {
-  int ndfRaw_local;
-
-  // Raw degrees of freedom that we have to set
-  ndfRaw_local = 0;
-
-  for(int i = 0; i < integrableObjects.size(); i++){
-    ndfRaw_local += 3;
-    if (integrableObjects[i]->isDirectional()) {
-       if (integrableObjects[i]->isLinear())
-        ndfRaw_local += 2;
-      else
-        ndfRaw_local += 3;
+    //setup fortran force field
+    /** @deprecate */    
+    int isError = 0;
+    initFortranFF( &fInfo_.SIM_uses_RF , &isError );
+    if(isError){
+        sprintf( painCave.errMsg,
+         "ForceField error: There was an error initializing the forceField in fortran.\n" );
+        painCave.isFatal = 1;
+        simError();
     }
-  }
+  
     
-#ifdef IS_MPI
-  MPI_Allreduce(&ndfRaw_local,&ndfRaw,1,MPI_INT,MPI_SUM, MPI_COMM_WORLD);
-#else
-  ndfRaw = ndfRaw_local;
+    setupCutoff();
+
+    calcNdf();
+    calcNdfRaw();
+    calcNdfTrans();
+
+    fortranInitialized_ = true;
+}
+
+std::set<AtomType*> SimInfo::getUniqueAtomTypes() {
+    SimInfo::MoleculeIterator mi;
+    Molecule* mol;
+    Molecule::AtomIterator ai;
+    Atom* atom;
+    std::set<AtomType*> atomTypes;
+
+    for(mol = beginMolecule(mi); mol != NULL; mol = nextMolecule(mi)) {
+
+        for(atom = mol->beginAtom(ai); atom != NULL; atom = mol->nextAtom(ai)) {
+            atomTypes.insert(atom->getAtomType());
+        }
+        
+    }
+
+    return atomTypes;        
+}
+
+void SimInfo::setupSimType() {
+    std::set<AtomType*>::iterator i;
+    std::set<AtomType*> atomTypes;
+    atomTypes = getUniqueAtomTypes();
+    
+    int useLennardJones = 0;
+    int useElectrostatic = 0;
+    int useEAM = 0;
+    int useCharge = 0;
+    int useDirectional = 0;
+    int useDipole = 0;
+    int useGayBerne = 0;
+    int useSticky = 0;
+    int useShape = 0; 
+    int useFLARB = 0; //it is not in AtomType yet
+    int useDirectionalAtom = 0;    
+    int useElectrostatics = 0;
+    //usePBC and useRF are from simParams
+    int usePBC = simParams_->getPBC();
+    int useRF = simParams_->getUseRF();
+
+    //loop over all of the atom types
+    for (i = atomTypes.begin(); i != atomTypes.end(); ++i) {
+        useLennardJones |= (*i)->isLennardJones();
+        useElectrostatic |= (*i)->isElectrostatic();
+        useEAM |= (*i)->isEAM();
+        useCharge |= (*i)->isCharge();
+        useDirectional |= (*i)->isDirectional();
+        useDipole |= (*i)->isDipole();
+        useGayBerne |= (*i)->isGayBerne();
+        useSticky |= (*i)->isSticky();
+        useShape |= (*i)->isShape(); 
+    }
+
+    if (useSticky || useDipole || useGayBerne || useShape) {
+        useDirectionalAtom = 1;
+    }
+
+    if (useCharge || useDipole) {
+        useElectrostatics = 1;
+    }
+
+#ifdef IS_MPI    
+    int temp;
+
+    temp = usePBC;
+    MPI_Allreduce(&temp, &usePBC, 1, MPI_INT, MPI_LOR, MPI_COMM_WORLD);    
+
+    temp = useDirectionalAtom;
+    MPI_Allreduce(&temp, &useDirectionalAtom, 1, MPI_INT, MPI_LOR, MPI_COMM_WORLD);    
+
+    temp = useLennardJones;
+    MPI_Allreduce(&temp, &useLennardJones, 1, MPI_INT, MPI_LOR, MPI_COMM_WORLD);    
+
+    temp = useElectrostatics;
+    MPI_Allreduce(&temp, &useElectrostatics, 1, MPI_INT, MPI_LOR, MPI_COMM_WORLD);    
+
+    temp = useCharge;
+    MPI_Allreduce(&temp, &useCharge, 1, MPI_INT, MPI_LOR, MPI_COMM_WORLD);    
+
+    temp = useDipole;
+    MPI_Allreduce(&temp, &useDipole, 1, MPI_INT, MPI_LOR, MPI_COMM_WORLD);    
+
+    temp = useSticky;
+    MPI_Allreduce(&temp, &useSticky, 1, MPI_INT, MPI_LOR, MPI_COMM_WORLD);    
+
+    temp = useGayBerne;
+    MPI_Allreduce(&temp, &useGayBerne, 1, MPI_INT, MPI_LOR, MPI_COMM_WORLD);    
+
+    temp = useEAM;
+    MPI_Allreduce(&temp, &useEAM, 1, MPI_INT, MPI_LOR, MPI_COMM_WORLD);    
+
+    temp = useShape;
+    MPI_Allreduce(&temp, &useShape, 1, MPI_INT, MPI_LOR, MPI_COMM_WORLD);   
+
+    temp = useFLARB;
+    MPI_Allreduce(&temp, &useFLARB, 1, MPI_INT, MPI_LOR, MPI_COMM_WORLD);    
+
+    temp = useRF;
+    MPI_Allreduce(&temp, &useRF, 1, MPI_INT, MPI_LOR, MPI_COMM_WORLD);    
+    
 #endif
 
-  return ndfRaw;
+    fInfo_.SIM_uses_PBC = usePBC;    
+    fInfo_.SIM_uses_DirectionalAtoms = useDirectionalAtom;
+    fInfo_.SIM_uses_LennardJones = useLennardJones;
+    fInfo_.SIM_uses_Electrostatics = useElectrostatics;    
+    fInfo_.SIM_uses_Charges = useCharge;
+    fInfo_.SIM_uses_Dipoles = useDipole;
+    fInfo_.SIM_uses_Sticky = useSticky;
+    fInfo_.SIM_uses_GayBerne = useGayBerne;
+    fInfo_.SIM_uses_EAM = useEAM;
+    fInfo_.SIM_uses_Shapes = useShape;
+    fInfo_.SIM_uses_FLARB = useFLARB;
+    fInfo_.SIM_uses_RF = useRF;
+
+    if( fInfo_.SIM_uses_Dipoles && fInfo_.SIM_uses_RF) {
+
+        if (simParams_->haveDielectric()) {
+            fInfo_.dielect = simParams_->getDielectric();
+        } else {
+            sprintf(painCave.errMsg,
+                    "SimSetup Error: No Dielectric constant was set.\n"
+                    "\tYou are trying to use Reaction Field without"
+                    "\tsetting a dielectric constant!\n");
+            painCave.isFatal = 1;
+            simError();
+        }
+        
+    } else {
+        fInfo_.dielect = 0.0;
+    }
+
 }
 
-int SimInfo::getNDFtranslational() {
-  int ndfTrans_local;
-
-  ndfTrans_local = 3 * integrableObjects.size() - n_constraints;
-
-
-#ifdef IS_MPI
-  MPI_Allreduce(&ndfTrans_local,&ndfTrans,1,MPI_INT,MPI_SUM, MPI_COMM_WORLD);
-#else
-  ndfTrans = ndfTrans_local;
-#endif
-
-  ndfTrans = ndfTrans - 3 - nZconstraints;
-
-  return ndfTrans;
-}
-
-int SimInfo::getTotIntegrableObjects() {
-  int nObjs_local;
-  int nObjs;
-
-  nObjs_local =  integrableObjects.size();
-
-
-#ifdef IS_MPI
-  MPI_Allreduce(&nObjs_local,&nObjs,1,MPI_INT,MPI_SUM, MPI_COMM_WORLD);
-#else
-  nObjs = nObjs_local;
-#endif
-
-
-  return nObjs;
-}
-
-void SimInfo::refreshSim(){
-
-  simtype fInfo;
-  int isError;
-  int n_global;
-  int* excl;
-
-  fInfo.dielect = 0.0;
-
-  if( useDipoles ){
-    if( useReactionField )fInfo.dielect = dielectric;
-  }
-
-  fInfo.SIM_uses_PBC = usePBC;
-
-  if (useSticky || useDipoles || useGayBerne || useShapes) {
-    useDirectionalAtoms = 1;
-    fInfo.SIM_uses_DirectionalAtoms = useDirectionalAtoms;
-  }
-
-  fInfo.SIM_uses_LennardJones = useLennardJones;
-
-  if (useCharges || useDipoles) {
-    useElectrostatics = 1;
-    fInfo.SIM_uses_Electrostatics = useElectrostatics;
-  }
-
-  fInfo.SIM_uses_Charges = useCharges;
-  fInfo.SIM_uses_Dipoles = useDipoles;
-  fInfo.SIM_uses_Sticky = useSticky;
-  fInfo.SIM_uses_GayBerne = useGayBerne;
-  fInfo.SIM_uses_EAM = useEAM;
-  fInfo.SIM_uses_Shapes = useShapes;
-  fInfo.SIM_uses_FLARB = useFLARB;
-  fInfo.SIM_uses_RF = useReactionField;
-
-  n_exclude = excludes->getSize();
-  excl = excludes->getFortranArray();
-  
-#ifdef IS_MPI
-  n_global = mpiSim->getNAtomsGlobal();
-#else
-  n_global = n_atoms;
-#endif
-  
-  isError = 0;
-  
-  getFortranGroupArrays(this, FglobalGroupMembership, mfact);
-  //it may not be a good idea to pass the address of first element in vector
-  //since c++ standard does not require vector to be stored continuously in meomory
-  //Most of the compilers will organize the memory of vector continuously
-  setFortranSim( &fInfo, &n_global, &n_atoms, identArray, &n_exclude, excl, 
-                  &nGlobalExcludes, globalExcludes, molMembershipArray, 
-                  &mfact[0], &ngroup, &FglobalGroupMembership[0], &isError); 
-
-  if( isError ){
+void SimInfo::setupFortranSim() {
+    int isError;
+    int nExclude;
+    std::vector<int> fortranGlobalGroupMembership;
     
-    sprintf( painCave.errMsg,
-             "There was an error setting the simulation information in fortran.\n" );
-    painCave.isFatal = 1;
-    painCave.severity = OOPSE_ERROR;
-    simError();
-  }
-  
-#ifdef IS_MPI
-  sprintf( checkPointMsg,
-	   "succesfully sent the simulation information to fortran.\n");
-  MPIcheckPoint();
-#endif // is_mpi
-  
-  this->ndf = this->getNDF();
-  this->ndfRaw = this->getNDFraw();
-  this->ndfTrans = this->getNDFtranslational();
-}
+    nExclude = exclude_.getSize();
+    isError = 0;
 
-void SimInfo::setDefaultRcut( double theRcut ){
-  
-  haveRcut = 1;
-  rCut = theRcut;
-  rList = rCut + 1.0; 
-  
-  notifyFortranCutoffs( &rCut, &rSw, &rList );
-}
+    //globalGroupMembership_ is filled by SimCreator    
+    for (int i = 0; i < nGlobalAtoms_; i++) {
+        fortranGlobalGroupMembership.push_back(globalGroupMembership_[i] + 1);
+    }
 
-void SimInfo::setDefaultRcut( double theRcut, double theRsw ){
+    //calculate mass ratio of cutoff group
+    std::vector<double> mfact;
+    SimInfo::MoleculeIterator mi;
+    Molecule* mol;
+    Molecule::CutoffGroupIterator ci;
+    CutoffGroup* cg;
+    Molecule::AtomIterator ai;
+    Atom* atom;
+    double totalMass;
 
-  rSw = theRsw;
-  setDefaultRcut( theRcut );
-}
-
-
-void SimInfo::checkCutOffs( void ){
-  
-  if( boxIsInit ){
+    //to avoid memory reallocation, reserve enough space for mfact
+    mfact.reserve(getNCutoffGroups());
     
-    //we need to check cutOffs against the box
+    for(mol = beginMolecule(mi); mol != NULL; mol = nextMolecule(mi)) {        
+        for (cg = mol->beginCutoffGroup(ci); cg != NULL; cg = mol->nextCutoffGroup(ci)) {
+
+            totalMass = cg->getMass();
+            for(atom = cg->beginAtom(ai); atom != NULL; atom = cg->nextAtom(ai)) {
+                        mfact.push_back(atom->getMass()/totalMass);
+            }
+
+        }       
+    }
+
+    //fill ident array of local atoms (it is actually ident of AtomType, it is so confusing !!!)
+    std::vector<int> identArray;
+
+    //to avoid memory reallocation, reserve enough space identArray
+    identArray.reserve(getNAtoms());
     
-    if( rCut > maxCutoff ){
-      sprintf( painCave.errMsg,
-	       "cutoffRadius is too large for the current periodic box.\n"
-               "\tCurrent Value of cutoffRadius = %G at time %G\n "
-               "\tThis is larger than half of at least one of the\n"
-               "\tperiodic box vectors.  Right now, the Box matrix is:\n"
-	       "\n"
-	       "\t[ %G %G %G ]\n"
-	       "\t[ %G %G %G ]\n"
-	       "\t[ %G %G %G ]\n",
-	       rCut, currentTime,
-	       Hmat[0][0], Hmat[0][1], Hmat[0][2],
-	       Hmat[1][0], Hmat[1][1], Hmat[1][2],
-	       Hmat[2][0], Hmat[2][1], Hmat[2][2]);
-      painCave.severity = OOPSE_ERROR;
-      painCave.isFatal = 1;
-      simError();
+    for(mol = beginMolecule(mi); mol != NULL; mol = nextMolecule(mi)) {        
+        for(atom = mol->beginAtom(ai); atom != NULL; atom = mol->nextAtom(ai)) {
+            identArray.push_back(atom->getIdent());
+        }
     }    
-  } else {
-    // initialize this stuff before using it, OK?
-    sprintf( painCave.errMsg,
-             "Trying to check cutoffs without a box.\n"
-             "\tOOPSE should have better programmers than that.\n" );
-    painCave.severity = OOPSE_ERROR;
-    painCave.isFatal = 1;
-    simError();      
-  }
-  
-}
 
-void SimInfo::addProperty(GenericData* prop){
-
-  map<string, GenericData*>::iterator result;
-  result = properties.find(prop->getID());
-  
-  //we can't simply use  properties[prop->getID()] = prop,
-  //it will cause memory leak if we already contain a propery which has the same name of prop
-  
-  if(result != properties.end()){
-    
-    delete (*result).second;
-    (*result).second = prop;
-      
-  }
-  else{
-
-    properties[prop->getID()] = prop;
-
-  }
-    
-}
-
-GenericData* SimInfo::getProperty(const string& propName){
- 
-  map<string, GenericData*>::iterator result;
-  
-  //string lowerCaseName = ();
-  
-  result = properties.find(propName);
-  
-  if(result != properties.end()) 
-    return (*result).second;  
-  else   
-    return NULL;  
-}
-
-
-void SimInfo::getFortranGroupArrays(SimInfo* info, 
-                                    vector<int>& FglobalGroupMembership,
-                                    vector<double>& mfact){
-  
-  Molecule* myMols;
-  Atom** myAtoms;
-  int numAtom;
-  double mtot;
-  int numMol;
-  int numCutoffGroups;
-  CutoffGroup* myCutoffGroup;
-  vector<CutoffGroup*>::iterator iterCutoff;
-  Atom* cutoffAtom;
-  vector<Atom*>::iterator iterAtom;
-  int atomIndex;
-  double totalMass;
-  
-  mfact.clear();
-  FglobalGroupMembership.clear();
-  
-
-  // Fix the silly fortran indexing problem
-#ifdef IS_MPI
-  numAtom = mpiSim->getNAtomsGlobal();
-#else
-  numAtom = n_atoms;
-#endif
-  for (int i = 0; i < numAtom; i++) 
-    FglobalGroupMembership.push_back(globalGroupMembership[i] + 1);
-  
-
-  myMols = info->molecules;
-  numMol = info->n_mol;
-  for(int i  = 0; i < numMol; i++){
-    numCutoffGroups = myMols[i].getNCutoffGroups();
-    for(myCutoffGroup =myMols[i].beginCutoffGroup(iterCutoff); 
-        myCutoffGroup != NULL; 
-        myCutoffGroup =myMols[i].nextCutoffGroup(iterCutoff)){
-
-      totalMass = myCutoffGroup->getMass();
-      
-      for(cutoffAtom = myCutoffGroup->beginAtom(iterAtom); 
-          cutoffAtom != NULL; 
-          cutoffAtom = myCutoffGroup->nextAtom(iterAtom)){
-        mfact.push_back(cutoffAtom->getMass()/totalMass);
-      }  
+    //fill molMembershipArray
+    //molMembershipArray is filled by SimCreator    
+    std::vector<int> molMembershipArray(nGlobalAtoms_);
+    for (int i = 0; i < nGlobalAtoms_; i++) {
+        molMembershipArray[i] = globalMolMembership_[i] + 1;
     }
-  }
+    
+    //setup fortran simulation
+    //gloalExcludes and molMembershipArray should go away (They are never used)
+    //why the hell fortran need to know molecule?
+    //OOPSE = Object-Obfuscated Parallel Simulation Engine
+    int nGlobalExcludes = 0;
+    int* globalExcludes = NULL; 
+    int* excludeList = exclude_.getExcludeList();
+    setFortranSim( &fInfo_, &nGlobalAtoms_, &nAtoms_, &identArray[0], &nExclude, excludeList , 
+                  &nGlobalExcludes, globalExcludes, &molMembershipArray[0], 
+                  &mfact[0], &nCutoffGroups_, &fortranGlobalGroupMembership[0], &isError); 
+
+    if( isError ){
+
+        sprintf( painCave.errMsg,
+                 "There was an error setting the simulation information in fortran.\n" );
+        painCave.isFatal = 1;
+        painCave.severity = OOPSE_ERROR;
+        simError();
+    }
+
+#ifdef IS_MPI
+    sprintf( checkPointMsg,
+       "succesfully sent the simulation information to fortran.\n");
+    MPIcheckPoint();
+#endif // is_mpi
+}
+
+
+#ifdef IS_MPI
+void SimInfo::setupFortranParallel() {
+    
+    //SimInfo is responsible for creating localToGlobalAtomIndex and localToGlobalGroupIndex
+    std::vector<int> localToGlobalAtomIndex(getNAtoms(), 0);
+    std::vector<int> localToGlobalCutoffGroupIndex;
+    SimInfo::MoleculeIterator mi;
+    Molecule::AtomIterator ai;
+    Molecule::CutoffGroupIterator ci;
+    Molecule* mol;
+    Atom* atom;
+    CutoffGroup* cg;
+    mpiSimData parallelData;
+    int isError;
+
+    for (mol = beginMolecule(mi); mol != NULL; mol  = nextMolecule(mi)) {
+
+        //local index(index in DataStorge) of atom is important
+        for (atom = mol->beginAtom(ai); atom != NULL; atom = mol->nextAtom(ai)) {
+            localToGlobalAtomIndex[atom->getLocalIndex()] = atom->getGlobalIndex() + 1;
+        }
+
+        //local index of cutoff group is trivial, it only depends on the order of travesing
+        for (cg = mol->beginCutoffGroup(ci); cg != NULL; cg = mol->nextCutoffGroup(ci)) {
+            localToGlobalCutoffGroupIndex.push_back(cg->getGlobalIndex() + 1);
+        }        
+        
+    }
+
+    //fill up mpiSimData struct
+    parallelData.nMolGlobal = getNGlobalMolecules();
+    parallelData.nMolLocal = getNMolecules();
+    parallelData.nAtomsGlobal = getNGlobalAtoms();
+    parallelData.nAtomsLocal = getNAtoms();
+    parallelData.nGroupsGlobal = getNGlobalCutoffGroups();
+    parallelData.nGroupsLocal = getNCutoffGroups();
+    parallelData.myNode = worldRank;
+    MPI_Comm_size(MPI_COMM_WORLD, &(parallelData.nProcessors));
+
+    //pass mpiSimData struct and index arrays to fortran
+    setFsimParallel(&parallelData, &(parallelData.nAtomsLocal),
+                    &localToGlobalAtomIndex[0],  &(parallelData.nGroupsLocal),
+                    &localToGlobalCutoffGroupIndex[0], &isError);
+
+    if (isError) {
+        sprintf(painCave.errMsg,
+                "mpiRefresh errror: fortran didn't like something we gave it.\n");
+        painCave.isFatal = 1;
+        simError();
+    }
+
+    sprintf(checkPointMsg, " mpiRefresh successful.\n");
+    MPIcheckPoint();
+
 
 }
+
+#endif
+
+double SimInfo::calcMaxCutoffRadius() {
+
+
+    std::set<AtomType*> atomTypes;
+    std::set<AtomType*>::iterator i;
+    std::vector<double> cutoffRadius;
+
+    //get the unique atom types
+    atomTypes = getUniqueAtomTypes();
+
+    //query the max cutoff radius among these atom types
+    for (i = atomTypes.begin(); i != atomTypes.end(); ++i) {
+        cutoffRadius.push_back(forceField_->getRcutFromAtomType(*i));
+    }
+
+    double maxCutoffRadius = *(std::max_element(cutoffRadius.begin(), cutoffRadius.end()));
+#ifdef IS_MPI
+    //pick the max cutoff radius among the processors
+#endif
+
+    return maxCutoffRadius;
+}
+
+void SimInfo::setupCutoff() {
+    double rcut_;  //cutoff radius
+    double rsw_; //switching radius
+    
+    if (fInfo_.SIM_uses_Charges | fInfo_.SIM_uses_Dipoles | fInfo_.SIM_uses_RF) {
+        
+        if (!simParams_->haveRcut()){
+            sprintf(painCave.errMsg,
+                "SimCreator Warning: No value was set for the cutoffRadius.\n"
+                "\tOOPSE will use a default value of 15.0 angstroms"
+                "\tfor the cutoffRadius.\n");
+            painCave.isFatal = 0;
+            simError();
+            rcut_ = 15.0;
+        } else{
+            rcut_ = simParams_->getRcut();
+        }
+
+        if (!simParams_->haveRsw()){
+            sprintf(painCave.errMsg,
+                "SimCreator Warning: No value was set for switchingRadius.\n"
+                "\tOOPSE will use a default value of\n"
+                "\t0.95 * cutoffRadius for the switchingRadius\n");
+            painCave.isFatal = 0;
+            simError();
+            rsw_ = 0.95 * rcut_;
+        } else{
+            rsw_ = simParams_->getRsw();
+        }
+
+    } else {
+        // if charge, dipole or reaction field is not used and the cutofff radius is not specified in
+        //meta-data file, the maximum cutoff radius calculated from forcefiled will be used
+        
+        if (simParams_->haveRcut()) {
+            rcut_ = simParams_->getRcut();
+        } else {
+            //set cutoff radius to the maximum cutoff radius based on atom types in the whole system
+            rcut_ = calcMaxCutoffRadius();
+        }
+
+        if (simParams_->haveRsw()) {
+            rsw_  = simParams_->getRsw();
+        } else {
+            rsw_ = rcut_;
+        }
+    
+    }
+        
+    double rnblist = rcut_ + 1; // skin of neighbor list
+
+    //Pass these cutoff radius etc. to fortran. This function should be called once and only once
+    notifyFortranCutoffs(&rcut_, &rsw_, &rnblist);
+}
+
+void SimInfo::addProperty(GenericData* genData) {
+    properties_.addProperty(genData);  
+}
+
+void SimInfo::removeProperty(const std::string& propName) {
+    properties_.removeProperty(propName);  
+}
+
+void SimInfo::clearProperties() {
+    properties_.clearProperties(); 
+}
+
+std::vector<std::string> SimInfo::getPropertyNames() {
+    return properties_.getPropertyNames();  
+}
+      
+std::vector<GenericData*> SimInfo::getProperties() { 
+    return properties_.getProperties(); 
+}
+
+GenericData* SimInfo::getPropertyByName(const std::string& propName) {
+    return properties_.getPropertyByName(propName); 
+}
+
+void SimInfo::setSnapshotManager(SnapshotManager* sman) {
+    sman_ = sman;
+
+    Molecule* mol;
+    RigidBody* rb;
+    Atom* atom;
+    SimInfo::MoleculeIterator mi;
+    Molecule::RigidBodyIterator rbIter;
+    Molecule::AtomIterator atomIter;;
+ 
+    for (mol = beginMolecule(mi); mol != NULL; mol = nextMolecule(mi)) {
+        
+        for (atom = mol->beginAtom(atomIter); atom != NULL; atom = mol->nextAtom(atomIter)) {
+            atom->setSnapshotManager(sman_);
+        }
+        
+        for (rb = mol->beginRigidBody(rbIter); rb != NULL; rb = mol->nextRigidBody(rbIter)) {
+            rb->setSnapshotManager(sman_);
+        }
+    }    
+    
+}
+
+Vector3d SimInfo::getComVel(){ 
+    SimInfo::MoleculeIterator i;
+    Molecule* mol;
+
+    Vector3d comVel(0.0);
+    double totalMass = 0.0;
+    
+ 
+    for (mol = beginMolecule(i); mol != NULL; mol = nextMolecule(i)) {
+        double mass = mol->getMass();
+        totalMass += mass;
+        comVel += mass * mol->getComVel();
+    }  
+
+#ifdef IS_MPI
+    double tmpMass = totalMass;
+    Vector3d tmpComVel(comVel);    
+    MPI_Allreduce(&tmpMass,&totalMass,1,MPI_DOUBLE,MPI_SUM, MPI_COMM_WORLD);
+    MPI_Allreduce(tmpComVel.getArrayPointer(), comVel.getArrayPointer(),3,MPI_DOUBLE,MPI_SUM, MPI_COMM_WORLD);
+#endif
+
+    comVel /= totalMass;
+
+    return comVel;
+}
+
+Vector3d SimInfo::getCom(){ 
+    SimInfo::MoleculeIterator i;
+    Molecule* mol;
+
+    Vector3d com(0.0);
+    double totalMass = 0.0;
+     
+    for (mol = beginMolecule(i); mol != NULL; mol = nextMolecule(i)) {
+        double mass = mol->getMass();
+        totalMass += mass;
+        com += mass * mol->getCom();
+    }  
+
+#ifdef IS_MPI
+    double tmpMass = totalMass;
+    Vector3d tmpCom(com);    
+    MPI_Allreduce(&tmpMass,&totalMass,1,MPI_DOUBLE,MPI_SUM, MPI_COMM_WORLD);
+    MPI_Allreduce(tmpCom.getArrayPointer(), com.getArrayPointer(),3,MPI_DOUBLE,MPI_SUM, MPI_COMM_WORLD);
+#endif
+
+    com /= totalMass;
+
+    return com;
+
+}        
+
+std::ostream& operator <<(std::ostream& o, SimInfo& info) {
+
+    return o;
+}
+
+}//end namespace oopse
+

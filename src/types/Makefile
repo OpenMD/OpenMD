@@ -10,7 +10,9 @@ Source    = \
 	TorsionStamp.cpp \
 	ZconStamp.cpp \
 	AtomType.cpp \
+	DirectionalAtomType.cpp \
 	ShapeAtomType.cpp \
+	CharmmTorsionType.cpp
 
 RmiSource =
 

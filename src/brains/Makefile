@@ -1,12 +1,15 @@
 Source    = \
 	Exclude.cpp \
-	ForceFields.cpp \
-	mpiSimulation.cpp \
 	SimInfo.cpp \
-	SimSetup.cpp \
-	SimState.cpp \
-	SkipList.cpp \
-	Thermo.cpp \
+        DataStorage.cpp \
+        SimSnapshotManager.cpp \
+        Snapshot.cpp \
+        Stats.cpp \
+        Thermo.cpp \
+        ForceManager.cpp \
+        MoleculeCreator.cpp \
+        SimCreator.cpp \
+	Register.cpp
 
 RmiSource =
 

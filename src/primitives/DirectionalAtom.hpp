@@ -1,95 +1,106 @@
-#ifndef _DIRECTIONALATOM_H_
-#define _DIRECTIONALATOM_H_
-
-#include <string.h>
-#include <stdlib.h>
-#include <iostream>
-
-#include "primitives/StuntDouble.hpp"
-#include "primitives/Atom.hpp"
-
-class DirectionalAtom : public Atom {
-  
-public:
-  DirectionalAtom(int theIndex, SimState* theConfig) : Atom(theIndex, 
-							    theConfig)
-  { 
-    objType = OT_DATOM;
-
-    for (int i=0; i < 3; i++) 
-      for (int j=0; j < 3; j++)
-        sU[i][j] = 0.0;
-
-    is_linear = false;
-    linear_axis =  -1;
-    momIntTol = 1e-6;
-  }
-  virtual ~DirectionalAtom() {}
-
-  virtual void setCoords(void);
-
-  void printAmatIndex( void );
-  
-  void setUnitFrameFromEuler(double phi, double theta, double psi);
-  void setEuler( double phi, double theta, double psi );
-
-  void zeroForces();
-
-  void getA( double the_A[3][3] ); // get the full rotation matrix
-  void setA( double the_A[3][3] );
-  void rotateBy( double by_A[3][3] );  // rotate your frame using this matrix
-
-  void getU( double the_u[3] ); // get the unit vetor
-  void updateU( void );
-
-  void getQ( double the_q[4] ); // get the quanternions
-  void setQ( double the_q[4] );
+ /*
+ * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
+ *
+ * The University of Notre Dame grants you ("Licensee") a
+ * non-exclusive, royalty free, license to use, modify and
+ * redistribute this software in source and binary code form, provided
+ * that the following conditions are met:
+ *
+ * 1. Acknowledgement of the program authors must be made in any
+ *    publication of scientific results based in part on use of the
+ *    program.  An acceptable form of acknowledgement is citation of
+ *    the article in which the program was described (Matthew
+ *    A. Meineke, Charles F. Vardeman II, Teng Lin, Christopher
+ *    J. Fennell and J. Daniel Gezelter, "OOPSE: An Object-Oriented
+ *    Parallel Simulation Engine for Molecular Dynamics,"
+ *    J. Comput. Chem. 26, pp. 252-271 (2005))
+ *
+ * 2. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ *
+ * 3. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the
+ *    distribution.
+ *
+ * This software is provided "AS IS," without a warranty of any
+ * kind. All express or implied conditions, representations and
+ * warranties, including any implied warranty of merchantability,
+ * fitness for a particular purpose or non-infringement, are hereby
+ * excluded.  The University of Notre Dame and its licensors shall not
+ * be liable for any damages suffered by licensee as a result of
+ * using, modifying or distributing the software or its
+ * derivatives. In no event will the University of Notre Dame or its
+ * licensors be liable for any lost revenue, profit or data, or for
+ * direct, indirect, special, consequential, incidental or punitive
+ * damages, however caused and regardless of the theory of liability,
+ * arising out of the use of or inability to use software, even if the
+ * University of Notre Dame has been advised of the possibility of
+ * such damages.
+ */
  
-  void getJ( double theJ[3] );
-  void setJ( double theJ[3] );
+/**
+ * @file DirectionalAtom.hpp
+ * @author    tlin
+ * @date  10/23/2004
+ * @version 1.0
+ */ 
 
-  void getTrq( double theT[3] );
-  void addTrq( double theT[3] );
+#ifndef PRIMITIVES_DIRECTIONALATOM_HPP
+#define PRIMITIVES_DIRECTIONALATOM_HPP
 
-  void setI( double the_I[3][3] );
-  void getI( double the_I[3][3] );
+#include "primitives/Atom.hpp"
+#include "types/DirectionalAtomType.hpp"
+namespace oopse{
+    class DirectionalAtom : public Atom {
+        public:
+            DirectionalAtom(DirectionalAtomType* dAtomType);
+            /**
+             * Returns the inertia tensor of this stuntdouble
+             * @return the inertia tensor of this stuntdouble
+             */ 
+            virtual Mat3x3d getI();            
 
-  bool isLinear() {return is_linear;}
-  int linearAxis() {return linear_axis;}
-  
-  void lab2Body( double r[3] );
-  void body2Lab( double r[3] );
+           /**
+             * Sets  the previous rotation matrix of this stuntdouble
+             * @param a  new rotation matrix 
+             */         
+           virtual void setPrevA(const RotMat3x3d& a);
+           
+           /**
+             * Sets  the current rotation matrix of this stuntdouble
+             * @param a  new rotation matrix 
+             */         
+            virtual void setA(const RotMat3x3d& a);
 
-  double getZangle( );
-  void setZangle( double zAng );
-  void addZangle( double zAng );
+           /**
+             * Sets  the rotation matrix of this stuntdouble in specified snapshot
+             * @param a rotation matrix to be set 
+             * @param snapshotNo 
+             * @see #getA
+             */         
+            virtual void setA(const RotMat3x3d& a, int snapshotNo);
 
-  // Four functions added for derivatives with respect to Euler Angles:
-  // (Needed for minimization routines):
+            /** 
+             * Left multiple rotation matrix by another rotation matrix 
+             * @param m a rotation matrix
+             */
+            void rotateBy(const RotMat3x3d& m);
+            
 
-  void getGrad(double gradient[6] );
-  void getEulerAngles( double myEuler[3] );
+            /**
+             * Returns the gradient of this stuntdouble
+             * @return the gradient of this stuntdouble
+             */ 
+            virtual std::vector<double> getGrad();
 
-  double max(double x, double y);
-  double min(double x, double y);
+            virtual void accept(BaseVisitor* v);
+                
+        protected:
+            Mat3x3d inertiaTensor_;                             /**< inertial tensor */    
+            RotMat3x3d electroBodyFrame_;               /**< body fixed standard eletrostatic frame */
+    };
 
-  virtual void accept(BaseVisitor* v) {v->visit(this);}
-  
-private:
-  int dIndex;
+}//namepace oopse
 
-  double sU[3][3];       // the standard unit vectors    ( body fixed )
-  
-  double jx, jy, jz;    // the angular momentum vector ( body fixed )
-  
-  double Ixx, Ixy, Ixz; // the inertial tensor matrix  ( body fixed )
-  double Iyx, Iyy, Iyz;
-  double Izx, Izy, Izz;
-
-  bool is_linear;
-  int linear_axis;
-  double momIntTol;
-
-};
-
-#endif
+#endif //PRIMITIVES_DIRECTIONALATOM_HPP

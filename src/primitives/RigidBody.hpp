@@ -1,128 +1,209 @@
-#ifndef __RIGIDBODY_HPP__
-#define __RIGIDBODY_HPP__
+ /*
+ * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
+ *
+ * The University of Notre Dame grants you ("Licensee") a
+ * non-exclusive, royalty free, license to use, modify and
+ * redistribute this software in source and binary code form, provided
+ * that the following conditions are met:
+ *
+ * 1. Acknowledgement of the program authors must be made in any
+ *    publication of scientific results based in part on use of the
+ *    program.  An acceptable form of acknowledgement is citation of
+ *    the article in which the program was described (Matthew
+ *    A. Meineke, Charles F. Vardeman II, Teng Lin, Christopher
+ *    J. Fennell and J. Daniel Gezelter, "OOPSE: An Object-Oriented
+ *    Parallel Simulation Engine for Molecular Dynamics,"
+ *    J. Comput. Chem. 26, pp. 252-271 (2005))
+ *
+ * 2. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ *
+ * 3. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the
+ *    distribution.
+ *
+ * This software is provided "AS IS," without a warranty of any
+ * kind. All express or implied conditions, representations and
+ * warranties, including any implied warranty of merchantability,
+ * fitness for a particular purpose or non-infringement, are hereby
+ * excluded.  The University of Notre Dame and its licensors shall not
+ * be liable for any damages suffered by licensee as a result of
+ * using, modifying or distributing the software or its
+ * derivatives. In no event will the University of Notre Dame or its
+ * licensors be liable for any lost revenue, profit or data, or for
+ * direct, indirect, special, consequential, incidental or punitive
+ * damages, however caused and regardless of the theory of liability,
+ * arising out of the use of or inability to use software, even if the
+ * University of Notre Dame has been advised of the possibility of
+ * such damages.
+ */
+ 
+/**
+ * @file RigidBody.hpp
+ * @author    tlin
+ * @date  10/23/2004
+ * @version 1.0
+ */ 
+
+#ifndef PRIMITIVES_RIGIDBODY_HPP
+#define PRIMITIVES_RIGIDBODY_HPP
 
 #include <vector>
-//#include "primitives/Atom.hpp"
-//#include "types/AtomStamp.hpp"
-#include "types/RigidBodyStamp.hpp"
+
 #include "primitives/StuntDouble.hpp"
-using namespace std;
-
-class Atom;
-class AtomStamp;
-
-typedef struct {
-  double vec[3];
-  double& operator[](int index) {return vec[index];}  
-} vec3;
-
-typedef struct {
-  double mat[3][3];
-  double* operator[](int index) {return mat[index];}  
-} mat3x3;
-
+#include "primitives/DirectionalAtom.hpp"
+#include "types/AtomStamp.hpp"
+namespace oopse{
 class RigidBody : public StuntDouble {
+    public:
+        RigidBody();
 
-public:
-  
-  RigidBody();
-  //RigidBody(const RigidBody& rb);
-  
-  virtual ~RigidBody();
- 
-  void addAtom(Atom* at, AtomStamp* ats);
+        virtual std::string getType() { return name_;}
+        
+        /** Sets the name of this stuntdouble*/
+        virtual void setType(const std::string& name) { name_ = name;}
+    
 
-  void getPos( double theP[3] );
-  void setPos( double theP[3] );
+       /**
+         * Sets  the previous rotation matrix of this stuntdouble
+         * @param a  new rotation matrix 
+         */         
+       virtual void setPrevA(const RotMat3x3d& a);
+       
+       /**
+         * Sets  the current rotation matrix of this stuntdouble
+         * @param a  new rotation matrix 
+         * @note setA will not change the position and rotation matrix of Directional atoms belong to
+         * this rigidbody. If you want to do that, use #updateAtoms
+         */         
+        virtual void setA(const RotMat3x3d& a);
+       /**
+         * Sets  the rotation matrix of this stuntdouble in specified snapshot
+         * @param a rotation matrix to be set 
+         * @param snapshotNo 
+         * @see #getA
+         */         
+        virtual void setA(const RotMat3x3d& a, int snapshotNo);
 
-  void getVel( double theV[3] );
-  void setVel( double theV[3] );
-
-  void getFrc( double theF[3] );
-  void addFrc( double theF[3] );
-  void zeroForces();
-  
-  bool isLinear() {return is_linear;}
-  int linearAxis() {return linear_axis;}
-
-  double getMass( void ) { return mass; }
-
-  void printAmatIndex( void );
-  void setEuler( double phi, double theta, double psi );
-  void getQ( double the_q[4] ); // get the quanternions
-  void setQ( double the_q[4] );
-
-  void getA( double the_A[3][3] ); // get the full rotation matrix
-  void setA( double the_A[3][3] );
-
-  void getJ( double theJ[3] );
-  void setJ( double theJ[3] );
-
-  virtual void setType(char* type) {strcpy(rbName, type);}
-  virtual char* getType() { return rbName;}
-
-  void getTrq( double theT[3] );
-  void addTrq( double theT[3] );
-
-  void getI( double the_I[3][3] );
-  void lab2Body( double r[3] );
-  void body2Lab( double r[3] );
-
-  double getZangle( );
-  void setZangle( double zAng );
-  void addZangle( double zAng );
-
-  void calcRefCoords( void );
-  void doEulerToRotMat(vec3 &euler, mat3x3 &myA );
-  void calcForcesAndTorques( void );
-  void updateAtoms( void );
-
-  //void yourAtomsHaveMoved( void );
-
-  // Four functions added for derivatives with respect to Euler Angles:
-  // (Needed for minimization routines):
-
-  void getGrad(double gradient[6] );
-  void getEulerAngles( double myEuler[3] ); 
- 
-  double max(double x, double y);
-  double min(double x, double y);
+        /**
+         * Returns the inertia tensor of this stuntdouble
+         * @return the inertia tensor of this stuntdouble
+         */ 
+        virtual Mat3x3d getI();
 
 
-  // utility routines
+        /** Sets the internal unit frame of this stuntdouble by three euler angles */
+        void setElectroFrameFromEuler(double phi, double theta, double psi);
+        
+        /**
+         * Returns the gradient of this stuntdouble
+         * @return the inertia tensor of this stuntdouble
+         * @see #setI
+         */ 
+        virtual std::vector<double> getGrad();
 
-  void findCOM( void );
+        virtual void accept(BaseVisitor* v);
 
-  virtual void accept(BaseVisitor* v);
+        void addAtom(Atom* at, AtomStamp* ats);
 
-  vector<Atom*> getAtoms() { return myAtoms;}
-  int getNumAtoms() {return myAtoms.size();}
+        /** calculate the reference coordinates */
+        void calcRefCoords();
 
-  void getAtomPos(double theP[3], int index);
-  void getAtomVel(double theV[3], int index);
-  void getAtomRefCoor(double pos[3], int index);
-protected:
+        /** Convert Atomic forces and torques to total forces and torques */
+        void calcForcesAndTorques();
 
-  double mass;     // the total mass
-  double pos[3];   // the position array (center of mass)
-  double vel[3];   // the velocity array (center of mass)
-  double frc[3];   // the force array    (center of mass)
-  double trq[3];   // the torque vector  ( space fixed )
-  double ji[3];    // the angular momentum vector (body fixed)
-  double A[3][3];  // the rotation matrix 
-  double I[3][3];  // the inertial tensor (body fixed)
-  double sU[3][3]; // the standard unit vectors (body fixed)
-  double zAngle;   // the rotation about the z-axis (body fixed)
+        /** update the positions of atoms belong to this rigidbody */
+        void updateAtoms();
 
-  bool is_linear;
-  int linear_axis;
-  double momIntTol;
+        Atom* beginAtom(std::vector<Atom*>::iterator& i);
 
-  vector<Atom*> myAtoms;  // the vector of atoms
-  vector<vec3> refCoords;
-  vector<mat3x3> refOrients;
+        Atom* nextAtom(std::vector<Atom*>::iterator& i);
 
-  char rbName[100]; //it will eventually be converted into string
+        std::vector<Atom*>::iterator getBeginAtomIter() {
+            return atoms_.begin();
+        }
+        
+        std::vector<Atom*>::iterator getEndAtomIter() {
+            return atoms_.end();
+        }
+
+        /** 
+         * Returns the atoms of this rigid body
+         * @return the atoms of this rigid body in a vector
+         * @deprecate
+         */           
+        std::vector<Atom*> getAtoms() {
+            return atoms_;
+        }
+
+        /** 
+         * Returns the number of atoms in this rigid body
+         * @return the number of atoms in this rigid body
+         */
+        int getNumAtoms() {
+            return atoms_.size();
+        }
+
+        /**
+         * Return the position of atom which belongs to this rigid body.
+         * @return true if index is valid otherwise return false
+         * @param pos the position of atom which will be set on return if index is valid
+         * @param index the index of the atom in rigid body's private data member atoms_
+         */
+        bool getAtomPos(Vector3d& pos, unsigned int index);
+
+        /**
+         * Return the position of atom which belongs to this rigid body.
+         * @return true if atom belongs to this rigid body,otherwise return false
+         * @param pos position of atom which will be set on return if atom belongs to this rigid body
+         * @param atom the pointer to an atom
+         */            
+        bool getAtomPos(Vector3d& pos, Atom* atom);
+
+        /**
+         * Return the velocity of atom which belongs to this rigid body.
+         * @return true if index is valid otherwise return false
+         * @param vel the velocity of atom which will be set on return if index is valid
+         * @param index the index of the atom in rigid body's private data member atoms_
+         */
+        bool getAtomVel(Vector3d& vel, unsigned int index);
+
+        /**
+         * Return the velocity of atom which belongs to this rigid body.
+         * @return true if atom belongs to this rigid body,otherwise return false
+         * @param vel velocity of atom which will be set on return if atom belongs to this rigid body
+         * @param atom the pointer to an atom
+         */ 
+        bool getAtomVel(Vector3d& vel, Atom*);
+
+        /**
+         * Return the reference coordinate of atom which belongs to this rigid body.
+         * @return true if index is valid otherwise return false
+         * @param coor the reference coordinate of atom which will be set on return if index is valid
+         * @param index the index of the atom in rigid body's private data member atoms_
+         */
+        bool getAtomRefCoor(Vector3d& coor, unsigned int index);
+
+        /**
+         * Return the velocity of atom which belongs to this rigid body.
+         * @return true if atom belongs to this rigid body,otherwise return false
+         * @param coor velocity of atom which will be set on return if atom belongs to this rigid body
+         * @param atom the pointer to an atom
+         */ 
+        bool getAtomRefCoor(Vector3d& coor, Atom* atom);
+
+    private:
+        std::string name_;        
+        Mat3x3d inertiaTensor_;     
+        RotMat3x3d sU_;               /**< body fixed standard unit vector */
+        
+        std::vector<Atom*> atoms_;
+        std::vector<Vector3d> refCoords_;
+        std::vector<RotMat3x3d> refOrients_;
 };
 
-#endif
+}//namepace oopse
+
+#endif //PRIMITIVES_RIGIDBODY_HPP
+

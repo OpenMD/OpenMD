@@ -1,140 +1,197 @@
-/*
- * Copyright (C) 2000-2004  Object Oriented Parallel Simulation Engine (OOPSE) project
- * 
- * Contact: oopse@oopse.org
- * 
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public License
- * as published by the Free Software Foundation; either version 2.1
- * of the License, or (at your option) any later version.
- * All we ask is that proper credit is given for our work, which includes
- * - but is not limited to - adding the above copyright notice to the beginning
- * of your source code files, and to any copyright notice that you may distribute
- * with programs based on this work.
- * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Lesser General Public License for more details.
- * 
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ /*
+ * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
+ * The University of Notre Dame grants you ("Licensee") a
+ * non-exclusive, royalty free, license to use, modify and
+ * redistribute this software in source and binary code form, provided
+ * that the following conditions are met:
+ *
+ * 1. Acknowledgement of the program authors must be made in any
+ *    publication of scientific results based in part on use of the
+ *    program.  An acceptable form of acknowledgement is citation of
+ *    the article in which the program was described (Matthew
+ *    A. Meineke, Charles F. Vardeman II, Teng Lin, Christopher
+ *    J. Fennell and J. Daniel Gezelter, "OOPSE: An Object-Oriented
+ *    Parallel Simulation Engine for Molecular Dynamics,"
+ *    J. Comput. Chem. 26, pp. 252-271 (2005))
+ *
+ * 2. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ *
+ * 3. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the
+ *    distribution.
+ *
+ * This software is provided "AS IS," without a warranty of any
+ * kind. All express or implied conditions, representations and
+ * warranties, including any implied warranty of merchantability,
+ * fitness for a particular purpose or non-infringement, are hereby
+ * excluded.  The University of Notre Dame and its licensors shall not
+ * be liable for any damages suffered by licensee as a result of
+ * using, modifying or distributing the software or its
+ * derivatives. In no event will the University of Notre Dame or its
+ * licensors be liable for any lost revenue, profit or data, or for
+ * direct, indirect, special, consequential, incidental or punitive
+ * damages, however caused and regardless of the theory of liability,
+ * arising out of the use of or inability to use software, even if the
+ * University of Notre Dame has been advised of the possibility of
+ * such damages.
+ */
+ 
+/**
+ * @file StringTokenizer.hpp
+ * @author tlin
+ * @date 09/20/2004
+ * @time 11:30am
+ * @version 1.0
  */
 
- /**
-  * @file StringTokenizer.hpp
-  * @author tlin
-  * @date 09/20/2004
-  * @time 11:30am
-  * @version 1.0
-  */
- 
 #ifndef UTIL_STRINGTOKENIZER_HPP
 #define UTIL_STRINGTOKENIZER_HPP
 
-#include <vector>
+#include <string>
 
-#include "util/NoSuchElementException.hpp"
+namespace oopse {
 
-namespace oopse{
+/**
+ * @class StringTokenizer.hpp "util/StringTokenizer.hpp"
+ * @brief The string tokenizer class allows an application to break a string into tokens
+ * The set of delimiters (the characters that separate tokens) may be specified either 
+ * at creation time or on a per-token basis. 
+ * An instance of StringTokenizer behaves in one of two ways, depending on whether it was 
+ * created with the returnTokens flag having the value true or false.
+ */
+class StringTokenizer {
+    public:
 
-    /**
-     * @class StringTokenizer.hpp "util/StringTokenizer.hpp"
-     *
-     * @brief The string tokenizer class allows an application to break a string into tokens
-     *
-     * The set of delimiters (the characters that separate tokens) may be specified either 
-     * at creation time or on a per-token basis. 
-     * An instance of StringTokenizer behaves in one of two ways, depending on whether it was 
-     * created with the returnTokens flag having the value true or false.
-     */
-    class StringTokenizer{
-    
-        public:
-            
-            /**
-             * Constructs a string tokenizer for the specified string. The characters in the delim argument
-             * are the delimiters for separating tokens. characters are skipped and only serve as 
-             * separators between tokens.
-             * @param str a string to be parsed.
-             * @param delim the delimiters, default value is "\t\n\r".
-             */
-            StringTokenizer(const std::string& str, const std::string& delim = "\t\n\r");
+        /**
+         * Constructs a string tokenizer for the specified string. The characters in the delim argument
+         * are the delimiters for separating tokens. characters are skipped and only serve as 
+         * separators between tokens.
+         * @param str a string to be parsed.
+         * @param delim the delimiters, default value is " ;\t\n\r".
+         * @note this is still a little bit java like implementation. Pure c++ one should use TokenIterator.
+         * Boost's tokenizer class is one of them 
+         */
+        StringTokenizer(const std::string & str,
+                        const std::string & delim = " ;\t\n\r");
 
-            /**
-             * Constructs a string tokenizer for the specified string. The characters in the delim argument
-             * are the delimiters for separating tokens. 
-             * If the returnTokens flag is true, then the delimiter characters are also returned as tokens. 
-             * Each delimiter is returned as a string of length one. If the flag is false, the delimiter 
-             * characters are skipped and only serve as separators between tokens.
-             * @param str a string to be parsed. 
-             * @param delim the delimiters. 
-             * @param returnTokens flag indicating whether to return the delimiters as tokens.
-             */
-            StringTokenizer(const std::string& str, const std::string& delim, bool returnTokens);
+        /**
+         * Constructs a string tokenizer for an iterator range [first, last). The characters in the delim argument
+         * are the delimiters for separating tokens. characters are skipped and only serve as 
+         * separators between tokens.
+         * @param first begin iterator
+         * @param last end iterator
+         * @param delim the delimiters, default value is " ;\t\n\r".
+         * @note this is still a little bit java like implementation. Pure c++ one should use TokenIterator.
+         * Boost's tokenizer class is one of them 
+         */
+        StringTokenizer(std::string::const_iterator& first, std::string::const_iterator& last,
+                        const std::string & delim = " ;\t\n\r");
 
-            /**
-             * Calculates the number of times that this tokenizer's nextToken method can be called 
-             * before it generates an exception.
-             *
-             * @return the number of tokens remaining in the string using the current delimiter set.
-             */
-            int countTokens();
+        /**
+         * Constructs a string tokenizer for the specified string. The characters in the delim argument
+         * are the delimiters for separating tokens. 
+         * If the returnTokens flag is true, then the delimiter characters are also returned as tokens. 
+         * Each delimiter is returned as a string of length one. If the flag is false, the delimiter 
+         * characters are skipped and only serve as separators between tokens.
+         * @param str a string to be parsed. 
+         * @param delim the delimiters. 
+         * @param returnTokens flag indicating whether to return the delimiters as tokens.
+         */
+        StringTokenizer(const std::string&str, const std::string&delim,
+                        bool returnTokens);
 
-            /**
-             * Tests if there are more tokens available from this tokenizer's string.
-             *
-             * @return true if there are more tokens available from this tokenizer's string, false otherwise
-             */
-            bool hasMoreTokens();
+        /**
+         * Calculates the number of times that this tokenizer's nextToken method can be called 
+         * before it generates an exception.
+         * @return the number of tokens remaining in the string using the current delimiter set.
+         */
+        int countTokens();
 
-            /**
-             * Returns the next token from this string tokenizer.
-             *
-             * @return the next token from this string tokenizer.
-             *
-             * @exception NoSuchElementException if there are no more tokens in this tokenizer's string
-             */
-            std::string nextToken();
+        /**
+         * Tests if there are more tokens available from this tokenizer's string.
+         * @return true if there are more tokens available from this tokenizer's string, false otherwise
+         */
+        bool hasMoreTokens();
 
-            /**
-             * Returns the next token in this string tokenizer's string. The new delimiter set remains the
-             * default after this call.
-             *
-             * @param newDelim the new delimiters.
-             *
-             * @return the next token, after switching to the new delimiter set.
-             *
-             * @exception NoSuchElementException if there are no more tokens in this tokenizer's string.
-             *
-             */
-            std::string nextToken(const std::string& newDelim); 
+        /**
+         * Returns the next token from this string tokenizer.
+         * @return the next token from this string tokenizer.
+         * @exception NoSuchElementException if there are no more tokens in this tokenizer's string
+         */
+        std::string nextToken();
 
-            /**
-             * Returns the current delimiter set of this string tokenizer
-             *
-             * @return the current delimiter set
-             */
-            std::string getDelimiter();
+        //actually, nextToken Can be template function
+        //template <typename ReturnType>
+        //ReturnType nextToken();
+        
+        /**
+         * Returns the next token from this string tokenizer as a bool.
+         * @return the next token from this string tokenizer  as a bool.
+         */
+        bool nextTokenAsBool();
 
-        private:
-            
-            /**
-             * Test if character is in current delimiter set.
-             *
-             * @param c character to be tested
-             *
-             * @return true if character is in current delimiter set, flase otherwise.
-             */
-            bool isDelimiter(char c);
-            
-            std::string delim_;  /**< current delimiter set of this string tokenizer */
+        /**
+         * Returns the next token from this string tokenizer as an integer.
+         * @return the next token from this string tokenizer  as an integer.
+         */
+        int nextTokenAsInt();
 
-            bool returnTokens_; /**< flag indicating whether to return the delimiters as tokens */
-    };
+        /**
+         * Returns the next token from this string tokenizer as a float.
+         * @return the next token from this string tokenizer as a float.
+         */
+        float nextTokenAsFloat();
 
+        /**
+         * Returns the next token from this string tokenizer as a double.
+         * @return the next token from this string tokenizer as a double.
+         */
+        double nextTokenAsDouble();
 
-} //namespace oopse
-#endif //UTIL_STRINGTOKENIZER_HPP
+        /**
+         * Returns the next token without advancing the position of the StringTokenizer.
+         * @return the next token
+         */
+        std::string  peekNextToken();
+
+        /**
+         * Returns the current delimiter set of this string tokenizer
+         * @return the current delimiter set
+         */
+        const std::string& getDelimiters() {
+            return delim_;
+        }
+
+        /** 
+         * Returns the original string before tokenizing.
+         * @return the original string before tokenizing 
+         */
+        const std::string& getOriginal() {
+            return tokenString_;
+        }
+
+    private:
+
+        /**
+         * Test if character is in current delimiter set.
+         * @param c character to be tested
+         * @return true if character is in current delimiter set, flase otherwise.
+         */
+        bool isDelimiter(const char c);
+
+        std::string tokenString_;
+
+        std::string delim_;         /**< current delimiter set of this string tokenizer */
+
+        bool returnTokens_; /**< flag indicating whether to return the delimiters as tokens */
+
+        std::string::const_iterator currentPos_;
+        std::string::const_iterator end_;
+};
+
+}                               //namespace oopse
+
+#endif                          //UTIL_STRINGTOKENIZER_HPP

@@ -1,693 +1,553 @@
-#define _LARGEFILE_SOURCE64
-#define _FILE_OFFSET_BITS 64
-
-#include <string.h>
-#include <iostream>
-#include <fstream>
-#include <algorithm>
-#include <utility>
+ /*
+ * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
+ *
+ * The University of Notre Dame grants you ("Licensee") a
+ * non-exclusive, royalty free, license to use, modify and
+ * redistribute this software in source and binary code form, provided
+ * that the following conditions are met:
+ *
+ * 1. Acknowledgement of the program authors must be made in any
+ *    publication of scientific results based in part on use of the
+ *    program.  An acceptable form of acknowledgement is citation of
+ *    the article in which the program was described (Matthew
+ *    A. Meineke, Charles F. Vardeman II, Teng Lin, Christopher
+ *    J. Fennell and J. Daniel Gezelter, "OOPSE: An Object-Oriented
+ *    Parallel Simulation Engine for Molecular Dynamics,"
+ *    J. Comput. Chem. 26, pp. 252-271 (2005))
+ *
+ * 2. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ *
+ * 3. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the
+ *    distribution.
+ *
+ * This software is provided "AS IS," without a warranty of any
+ * kind. All express or implied conditions, representations and
+ * warranties, including any implied warranty of merchantability,
+ * fitness for a particular purpose or non-infringement, are hereby
+ * excluded.  The University of Notre Dame and its licensors shall not
+ * be liable for any damages suffered by licensee as a result of
+ * using, modifying or distributing the software or its
+ * derivatives. In no event will the University of Notre Dame or its
+ * licensors be liable for any lost revenue, profit or data, or for
+ * direct, indirect, special, consequential, incidental or punitive
+ * damages, however caused and regardless of the theory of liability,
+ * arising out of the use of or inability to use software, even if the
+ * University of Notre Dame has been advised of the possibility of
+ * such damages.
+ */
+ 
+#include "io/DumpWriter.hpp"
+#include "primitives/Molecule.hpp"
+#include "utils/simError.h"
 
 #ifdef IS_MPI
 #include <mpi.h>
-#include "brains/mpiSimulation.hpp"
-
-namespace dWrite{
-  void DieDieDie( void );
-}
-
-using namespace dWrite;
 #endif //is_mpi
 
-#include "io/ReadWrite.hpp"
-#include "utils/simError.h"
+namespace oopse {
 
-DumpWriter::DumpWriter( SimInfo* the_entry_plug ){
-
-  entry_plug = the_entry_plug;
-
+DumpWriter::DumpWriter(SimInfo* info, const std::string& filename) 
+                   : info_(info), filename_(filename){
 #ifdef IS_MPI
-  if(worldRank == 0 ){
+
+    if (worldRank == 0) {
 #endif // is_mpi
 
-    dumpFile.open(entry_plug->sampleName.c_str(), ios::out | ios::trunc );
+        dumpFile_.open(filename_.c_str(), std::ios::out | std::ios::trunc);
 
-    if( !dumpFile ){
+        if (!dumpFile_) {
+            sprintf(painCave.errMsg, "Could not open \"%s\" for dump output.\n",
+                    filename_.c_str());
+            painCave.isFatal = 1;
+            simError();
+        }
 
-      sprintf( painCave.errMsg,
-	       "Could not open \"%s\" for dump output.\n",
-	       entry_plug->sampleName.c_str());
-      painCave.isFatal = 1;
-      simError();
+#ifdef IS_MPI
+
     }
 
-#ifdef IS_MPI
-  }
+    sprintf(checkPointMsg, "Sucessfully opened output file for dumping.\n");
+    MPIcheckPoint();
 
-  //sort the local atoms by global index
-  sortByGlobalIndex();
-  
-  sprintf( checkPointMsg,
-	   "Sucessfully opened output file for dumping.\n");
-  MPIcheckPoint();
-#endif // is_mpi
-}
-
-DumpWriter::~DumpWriter( ){
-
-#ifdef IS_MPI
-  if(worldRank == 0 ){
 #endif // is_mpi
 
-    dumpFile.close();
-
-#ifdef IS_MPI
-  }
-#endif // is_mpi
 }
+
+DumpWriter::~DumpWriter() {
 
 #ifdef IS_MPI
 
-/**
- * A hook function to load balancing
- */
-
-void DumpWriter::update(){
-  sortByGlobalIndex();		
-}
-  
-/**
- * Auxiliary sorting function
- */
- 
-bool indexSortingCriterion(const pair<int, int>& p1, const pair<int, int>& p2){
-  return p1.second < p2.second;
-}
-
-/**
- * Sorting the local index by global index
- */
- 
-void DumpWriter::sortByGlobalIndex(){
-  Molecule* mols = entry_plug->molecules;  
-  indexArray.clear();
-  
-  for(int i = 0; i < entry_plug->n_mol;i++) 
-    indexArray.push_back(make_pair(i, mols[i].getGlobalIndex()));
-  
-  sort(indexArray.begin(), indexArray.end(), indexSortingCriterion);	
-}
-
-#endif
-
-void DumpWriter::writeDump(double currentTime){
-
-  ofstream finalOut;
-  vector<ofstream*> fileStreams;
-
-#ifdef IS_MPI
-  if(worldRank == 0 ){
-#endif    
-    finalOut.open( entry_plug->finalName.c_str(), ios::out | ios::trunc );
-    if( !finalOut ){
-      sprintf( painCave.errMsg,
-	       "Could not open \"%s\" for final dump output.\n",
-	       entry_plug->finalName.c_str() );
-      painCave.isFatal = 1;
-      simError();
-    }
-#ifdef IS_MPI
-  }
+    if (worldRank == 0) {
 #endif // is_mpi
 
-  fileStreams.push_back(&finalOut); 
-  fileStreams.push_back(&dumpFile);
-
-  writeFrame(fileStreams, currentTime);
+        dumpFile_.close();
 
 #ifdef IS_MPI
-  finalOut.close();
-#endif
-  	
-}
 
-void DumpWriter::writeFinal(double currentTime){
-
-  ofstream finalOut;
-  vector<ofstream*> fileStreams;
-
-#ifdef IS_MPI
-  if(worldRank == 0 ){
-#endif // is_mpi
-
-    finalOut.open( entry_plug->finalName.c_str(), ios::out | ios::trunc );
-
-    if( !finalOut ){
-      sprintf( painCave.errMsg,
-	       "Could not open \"%s\" for final dump output.\n",
-	       entry_plug->finalName.c_str() );
-      painCave.isFatal = 1;
-      simError();
     }
 
-#ifdef IS_MPI
-  }
 #endif // is_mpi
-  
-  fileStreams.push_back(&finalOut);  
-  writeFrame(fileStreams, currentTime);
 
-#ifdef IS_MPI
-  finalOut.close();
-#endif
-  
 }
 
-void DumpWriter::writeFrame( vector<ofstream*>& outFile, double currentTime ){
+void DumpWriter::writeCommentLine(std::ostream& os, Snapshot* s) {
 
-  const int BUFFERSIZE = 2000;
-  const int MINIBUFFERSIZE = 100;
-
-  char tempBuffer[BUFFERSIZE];  
-  char writeLine[BUFFERSIZE];
-
-  int i;
-  unsigned int k;
-
-#ifdef IS_MPI
-  
-  /*********************************************************************
-   * Documentation?  You want DOCUMENTATION?
-   * 
-   * Why all the potatoes below?  
-   *
-   * To make a long story short, the original version of DumpWriter
-   * worked in the most inefficient way possible.  Node 0 would 
-   * poke each of the node for an individual atom's formatted data 
-   * as node 0 worked its way down the global index. This was particularly 
-   * inefficient since the method blocked all processors at every atom 
-   * (and did it twice!).
-   *
-   * An intermediate version of DumpWriter could be described from Node
-   * zero's perspective as follows:
-   * 
-   *  1) Have 100 of your friends stand in a circle.
-   *  2) When you say go, have all of them start tossing potatoes at
-   *     you (one at a time).
-   *  3) Catch the potatoes.
-   *
-   * It was an improvement, but MPI has buffers and caches that could 
-   * best be described in this analogy as "potato nets", so there's no 
-   * need to block the processors atom-by-atom.
-   * 
-   * This new and improved DumpWriter works in an even more efficient 
-   * way:
-   * 
-   *  1) Have 100 of your friend stand in a circle.
-   *  2) When you say go, have them start tossing 5-pound bags of 
-   *     potatoes at you.
-   *  3) Once you've caught a friend's bag of potatoes,
-   *     toss them a spud to let them know they can toss another bag.
-   *
-   * How's THAT for documentation?
-   *
-   *********************************************************************/
-
-  int *potatoes;
-  int myPotato;
-
-  int nProc;
-  int j, which_node, done, which_atom, local_index, currentIndex;
-  double atomData[13];
-  int isDirectional;
-  char* atomTypeString;
-  char MPIatomTypeString[MINIBUFFERSIZE];
-  int nObjects;
-  int msgLen; // the length of message actually recieved at master nodes
-#endif //is_mpi
-
-  double q[4], ji[3];
-  DirectionalAtom* dAtom;
-  double pos[3], vel[3];
-  int nTotObjects;
-  StuntDouble* sd;
-  char* molName;
-  vector<StuntDouble*> integrableObjects;
-  vector<StuntDouble*>::iterator iter;
-  nTotObjects = entry_plug->getTotIntegrableObjects();
-#ifndef IS_MPI
-  
-  for(k = 0; k < outFile.size(); k++){
-    *outFile[k] << nTotObjects << "\n";
-
-    *outFile[k] << currentTime << ";\t"
-               << entry_plug->Hmat[0][0] << "\t"
-	             << entry_plug->Hmat[1][0] << "\t"
-	             << entry_plug->Hmat[2][0] << ";\t"
-               
-               << entry_plug->Hmat[0][1] << "\t"
-	             << entry_plug->Hmat[1][1] << "\t"
-	             << entry_plug->Hmat[2][1] << ";\t"
-
-	             << entry_plug->Hmat[0][2] << "\t"
-	             << entry_plug->Hmat[1][2] << "\t"
-	             << entry_plug->Hmat[2][2] << ";";
+    double currentTime;
+    Mat3x3d hmat;
+    double chi;
+    double integralOfChiDt;
+    Mat3x3d eta;
+    
+    currentTime = s->getTime();
+    hmat = s->getHmat();
+    chi = s->getChi();
+    integralOfChiDt = s->getIntegralOfChiDt();
+    eta = s->getEta();
+    
+    os << currentTime << ";\t" 
+         << hmat(0, 0) << "\t" << hmat(1, 0) << "\t" << hmat(2, 0) << ";\t" 
+         << hmat(0, 1) << "\t" << hmat(1, 1) << "\t" << hmat(2, 1) << ";\t"
+         << hmat(0, 2) << "\t" << hmat(1, 2) << "\t" << hmat(2, 2) << ";\t";
 
     //write out additional parameters, such as chi and eta
-    *outFile[k] << entry_plug->the_integrator->getAdditionalParameters() << endl;
-  }
+
+    os << chi << "\t" << integralOfChiDt << "\t;";
+
+    os << eta(0, 0) << "\t" << eta(1, 0) << "\t" << eta(2, 0) << ";\t" 
+         << eta(0, 1) << "\t" << eta(1, 1) << "\t" << eta(2, 1) << ";\t"
+         << eta(0, 2) << "\t" << eta(1, 2) << "\t" << eta(2, 2) << ";";
+        
+    os << std::endl;
+}
+
+void DumpWriter::writeFrame(std::ostream& os) {
+    const int BUFFERSIZE = 2000;
+    const int MINIBUFFERSIZE = 100;
+
+    char tempBuffer[BUFFERSIZE];
+    char writeLine[BUFFERSIZE];
+
+    Quat4d q;
+    Vector3d ji;
+    Vector3d pos;
+    Vector3d vel;
+
+    Molecule* mol;
+    StuntDouble* integrableObject;
+    SimInfo::MoleculeIterator mi;
+    Molecule::IntegrableObjectIterator ii;
   
-  for( i=0; i< entry_plug->n_mol; i++ ){
+    int nTotObjects;    
+    nTotObjects = info_->getNGlobalIntegrableObjects();
 
-    integrableObjects = entry_plug->molecules[i].getIntegrableObjects();
-    molName = (entry_plug->compStamps[entry_plug->molecules[i].getStampID()])->getID();
-    
-    for( iter = integrableObjects.begin();iter !=  integrableObjects.end(); ++iter){
-      sd = *iter;
-      sd->getPos(pos);
-      sd->getVel(vel);
+#ifndef IS_MPI
 
-      sprintf( tempBuffer,
-  	     "%s\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t",
-  	     sd->getType(),
-  	     pos[0],
-  	     pos[1],
-  	     pos[2],
-  	     vel[0],
-  	     vel[1],
-  	     vel[2]);
-      strcpy( writeLine, tempBuffer );
 
-      if( sd->isDirectional() ){
+    os << nTotObjects << "\n";
+        
+    writeCommentLine(os, info_->getSnapshotManager()->getCurrentSnapshot());
 
-        sd->getQ( q );
-        sd->getJ( ji );
+    for (mol = info_->beginMolecule(mi); mol != NULL; mol = info_->nextMolecule(mi)) {
 
-        sprintf( tempBuffer,
-  	       "%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\n",
-  	       q[0],
-  	       q[1],
-  	       q[2],
-  	       q[3],
-                 ji[0],
-                 ji[1],
-                 ji[2]);
-        strcat( writeLine, tempBuffer );
-      }
-      else
-        strcat( writeLine, "0.0\t0.0\t0.0\t0.0\t0.0\t0.0\t0.0\n" );
-    
-      for(k = 0; k < outFile.size(); k++)
-        *outFile[k] << writeLine;      
+        for (integrableObject = mol->beginIntegrableObject(ii); integrableObject != NULL; 
+            integrableObject = mol->nextIntegrableObject(ii)) { 
+                
+
+            pos = integrableObject->getPos();
+            vel = integrableObject->getVel();
+
+            sprintf(tempBuffer, "%s\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t",
+                    integrableObject->getType().c_str(), 
+                    pos[0], pos[1], pos[2],
+                    vel[0], vel[1], vel[2]);
+
+            strcpy(writeLine, tempBuffer);
+
+            if (integrableObject->isDirectional()) {
+                q = integrableObject->getQ();
+                ji = integrableObject->getJ();
+
+                sprintf(tempBuffer, "%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\n", 
+                        q[0], q[1], q[2], q[3],
+                        ji[0], ji[1], ji[2]);
+                strcat(writeLine, tempBuffer);
+            } else {
+                strcat(writeLine, "0.0\t0.0\t0.0\t0.0\t0.0\t0.0\t0.0\n");
+            }
+
+            os << writeLine;
+
+        }
     }
-    
-  }
 
 #else // is_mpi
+    /*********************************************************************
+     * Documentation?  You want DOCUMENTATION?
+     * 
+     * Why all the potatoes below?  
+     *
+     * To make a long story short, the original version of DumpWriter
+     * worked in the most inefficient way possible.  Node 0 would 
+     * poke each of the node for an individual atom's formatted data 
+     * as node 0 worked its way down the global index. This was particularly 
+     * inefficient since the method blocked all processors at every atom 
+     * (and did it twice!).
+     *
+     * An intermediate version of DumpWriter could be described from Node
+     * zero's perspective as follows:
+     * 
+     *  1) Have 100 of your friends stand in a circle.
+     *  2) When you say go, have all of them start tossing potatoes at
+     *     you (one at a time).
+     *  3) Catch the potatoes.
+     *
+     * It was an improvement, but MPI has buffers and caches that could 
+     * best be described in this analogy as "potato nets", so there's no 
+     * need to block the processors atom-by-atom.
+     * 
+     * This new and improved DumpWriter works in an even more efficient 
+     * way:
+     * 
+     *  1) Have 100 of your friend stand in a circle.
+     *  2) When you say go, have them start tossing 5-pound bags of 
+     *     potatoes at you.
+     *  3) Once you've caught a friend's bag of potatoes,
+     *     toss them a spud to let them know they can toss another bag.
+     *
+     * How's THAT for documentation?
+     *
+     *********************************************************************/
+    const int masterNode = 0;
 
-  /* code to find maximum tag value */
-  
-  int *tagub, flag, MAXTAG;
-  MPI_Attr_get(MPI_COMM_WORLD, MPI_TAG_UB, &tagub, &flag);
-  if (flag) {
-    MAXTAG = *tagub;
-  } else {
-    MAXTAG = 32767;
-  }  
-
-  int haveError;
-
-  MPI_Status istatus;
-  int nCurObj;
-  int *MolToProcMap = mpiSim->getMolToProcMap();
-
-  // write out header and node 0's coordinates
-
-  if( worldRank == 0 ){
-
-    // Node 0 needs a list of the magic potatoes for each processor;
-
-    nProc = mpiSim->getNProcessors();
-    potatoes = new int[nProc];
-
-    //write out the comment lines
-    for (i = 0; i < nProc; i++) 
-      potatoes[i] = 0;
+    int * potatoes;
+    int myPotato;
+    int nProc;
+    int which_node;
+    double atomData[13];
+    int isDirectional;
+    const char * atomTypeString;
+    char MPIatomTypeString[MINIBUFFERSIZE];
+    int msgLen; // the length of message actually recieved at master nodes
+    int haveError;
+    MPI_Status istatus;
+    int nCurObj;
     
-    for(k = 0; k < outFile.size(); k++){
-      *outFile[k] << nTotObjects << "\n";
-      
-      *outFile[k] << currentTime << ";\t"
-		  << entry_plug->Hmat[0][0] << "\t"
-		  << entry_plug->Hmat[1][0] << "\t"
-		  << entry_plug->Hmat[2][0] << ";\t"
-	
-		  << entry_plug->Hmat[0][1] << "\t"
-		  << entry_plug->Hmat[1][1] << "\t"
-		  << entry_plug->Hmat[2][1] << ";\t"
-	
-		  << entry_plug->Hmat[0][2] << "\t"
-		  << entry_plug->Hmat[1][2] << "\t"
-		  << entry_plug->Hmat[2][2] << ";";
-      
-      *outFile[k] << entry_plug->the_integrator->getAdditionalParameters() 
-		  << endl;
+    // code to find maximum tag value
+    int * tagub;
+    int flag;
+    int MAXTAG;
+    MPI_Attr_get(MPI_COMM_WORLD, MPI_TAG_UB, &tagub, &flag);
+
+    if (flag) {
+        MAXTAG = *tagub;
+    } else {
+        MAXTAG = 32767;
     }
-    
-    currentIndex = 0;
-    
-    for (i = 0 ; i < mpiSim->getNMolGlobal(); i++ ) {
-      
-      // Get the Node number which has this atom;
-      
-      which_node = MolToProcMap[i];
-      
-      if (which_node != 0) {
-        
-        if (potatoes[which_node] + 1 >= MAXTAG) {
-          // The potato was going to exceed the maximum value, 
-          // so wrap this processor potato back to 0:         
 
-          potatoes[which_node] = 0;          
-          MPI_Send(&potatoes[which_node], 1, MPI_INT, which_node, 0, 
-		   MPI_COMM_WORLD);
-          
+    if (worldRank == masterNode) { //master node (node 0) is responsible for writing the dump file
+
+        // Node 0 needs a list of the magic potatoes for each processor;
+
+        MPI_Comm_size(MPI_COMM_WORLD, &nProc);
+        potatoes = new int[nProc];
+
+        //write out the comment lines
+        for(int i = 0; i < nProc; i++) {
+            potatoes[i] = 0;
         }
 
-        myPotato = potatoes[which_node];        
 
-        //recieve the number of integrableObject in current molecule
-        MPI_Recv(&nCurObj, 1, MPI_INT, which_node,
-		 myPotato, MPI_COMM_WORLD, &istatus);
-        myPotato++;
-        
-        for(int l = 0; l < nCurObj; l++){
+        os << nTotObjects << "\n";
+        writeCommentLine(os, info_->getSnapshotManager()->getCurrentSnapshot());
 
-          if (potatoes[which_node] + 2 >= MAXTAG) {
-            // The potato was going to exceed the maximum value, 
-            // so wrap this processor potato back to 0:         
+        for(int i = 0; i < info_->getNGlobalMolecules(); i++) {
 
-            potatoes[which_node] = 0;          
-            MPI_Send(&potatoes[which_node], 1, MPI_INT, which_node, 0, MPI_COMM_WORLD);
-            
-          }
+            // Get the Node number which has this atom;
 
-          MPI_Recv(MPIatomTypeString, MINIBUFFERSIZE, MPI_CHAR, which_node,
-          myPotato, MPI_COMM_WORLD, &istatus);
+            which_node = info_->getMolToProc(i);
 
-          atomTypeString = MPIatomTypeString;
+            if (which_node != masterNode) { //current molecule is in slave node
+                if (potatoes[which_node] + 1 >= MAXTAG) {
+                    // The potato was going to exceed the maximum value, 
+                    // so wrap this processor potato back to 0:         
 
-          myPotato++;
+                    potatoes[which_node] = 0;
+                    MPI_Send(&potatoes[which_node], 1, MPI_INT, which_node, 0,
+                             MPI_COMM_WORLD);
+                }
 
-          MPI_Recv(atomData, 13, MPI_DOUBLE, which_node, myPotato, MPI_COMM_WORLD, &istatus);
-          myPotato++;
+                myPotato = potatoes[which_node];
 
-          MPI_Get_count(&istatus, MPI_DOUBLE, &msgLen);
+                //recieve the number of integrableObject in current molecule
+                MPI_Recv(&nCurObj, 1, MPI_INT, which_node, myPotato,
+                         MPI_COMM_WORLD, &istatus);
+                myPotato++;
 
-          if(msgLen  == 13) 
-            isDirectional = 1;
-          else
-            isDirectional = 0;
-          
-          // If we've survived to here, format the line:
-            
-          if (!isDirectional) {
-    	
-            sprintf( writeLine,
-    		 "%s\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t",
-    		 atomTypeString,
-    		 atomData[0],
-    		 atomData[1],
-    		 atomData[2],
-    		 atomData[3],
-    		 atomData[4],
-    		 atomData[5]);
-    	
-           strcat( writeLine, "0.0\t0.0\t0.0\t0.0\t0.0\t0.0\t0.0\n" );
-    	
-          } 
-          else {
-    	
-          	sprintf( writeLine,
-          		 "%s\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\n",
-          		 atomTypeString,
-          		 atomData[0],
-          		 atomData[1],
-          		 atomData[2],
-          		 atomData[3],
-          		 atomData[4],
-          		 atomData[5],
-          		 atomData[6],
-          		 atomData[7],
-          		 atomData[8],
-          		 atomData[9],
-          		 atomData[10],
-          		 atomData[11],
-          		 atomData[12]);
-            
-          }
-          
-          for(k = 0; k < outFile.size(); k++)
-            *outFile[k] << writeLine;            
+                for(int l = 0; l < nCurObj; l++) {
+                    if (potatoes[which_node] + 2 >= MAXTAG) {
+                        // The potato was going to exceed the maximum value, 
+                        // so wrap this processor potato back to 0:         
 
-        }// end for(int l =0)
-        potatoes[which_node] = myPotato;
-	
-      }
-      else {
-	
-       	haveError = 0;
-        
-  	    local_index = indexArray[currentIndex].first;        
-	    
-	    integrableObjects = (entry_plug->molecules[local_index]).getIntegrableObjects(); 
+                        potatoes[which_node] = 0;
+                        MPI_Send(&potatoes[which_node], 1, MPI_INT, which_node,
+                                 0, MPI_COMM_WORLD);
+                    }
 
-        for(iter= integrableObjects.begin(); iter != integrableObjects.end(); ++iter){    
-  	        sd = *iter;
-    	    atomTypeString = sd->getType();
-    	    
-    	    sd->getPos(pos);
-    	    sd->getVel(vel);          
-    	  
-            atomData[0] = pos[0];
-            atomData[1] = pos[1];
-            atomData[2] = pos[2];
+                    MPI_Recv(MPIatomTypeString, MINIBUFFERSIZE, MPI_CHAR,
+                             which_node, myPotato, MPI_COMM_WORLD,
+                             &istatus);
 
-            atomData[3] = vel[0];
-            atomData[4] = vel[1];
-            atomData[5] = vel[2];
-              
-            isDirectional = 0;
+                    atomTypeString = MPIatomTypeString;
 
-            if( sd->isDirectional() ){
+                    myPotato++;
 
-              isDirectional = 1;
+                    MPI_Recv(atomData, 13, MPI_DOUBLE, which_node, myPotato,
+                             MPI_COMM_WORLD, &istatus);
+                    myPotato++;
+
+                    MPI_Get_count(&istatus, MPI_DOUBLE, &msgLen);
+
+                    if (msgLen == 13)
+                        isDirectional = 1;
+                    else
+                        isDirectional = 0;
+
+                    // If we've survived to here, format the line:
+
+                    if (!isDirectional) {
+                        sprintf(writeLine, "%s\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t",
+                                atomTypeString, atomData[0],
+                                atomData[1], atomData[2],
+                                atomData[3], atomData[4],
+                                atomData[5]);
+
+                        strcat(writeLine,
+                               "0.0\t0.0\t0.0\t0.0\t0.0\t0.0\t0.0\n");
+                    } else {
+                        sprintf(writeLine,
+                                "%s\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\n",
+                                atomTypeString,
+                                atomData[0],
+                                atomData[1],
+                                atomData[2],
+                                atomData[3],
+                                atomData[4],
+                                atomData[5],
+                                atomData[6],
+                                atomData[7],
+                                atomData[8],
+                                atomData[9],
+                                atomData[10],
+                                atomData[11],
+                                atomData[12]);
+                    }
+
+                    os << writeLine;
+
+                } // end for(int l =0)
+
+                potatoes[which_node] = myPotato;
+            } else { //master node has current molecule
+
+                mol = info_->getMoleculeByGlobalIndex(i);
+
+                if (mol == NULL) {
+                    sprintf(painCave.errMsg, "Molecule not found on node %d!", worldRank);
+                    painCave.isFatal = 1;
+                    simError();
+                }
                 
-              sd->getQ( q );
-              sd->getJ( ji );
+                for (integrableObject = mol->beginIntegrableObject(ii); integrableObject != NULL; 
+                    integrableObject = mol->nextIntegrableObject(ii)) {
+                        
+                    atomTypeString = integrableObject->getType().c_str();
 
-              for (int j = 0; j < 6 ; j++)
-                atomData[j] = atomData[j];            
-              
-              atomData[6] = q[0];
-              atomData[7] = q[1];
-              atomData[8] = q[2];
-              atomData[9] = q[3];
-              
-              atomData[10] = ji[0];
-              atomData[11] = ji[1];
-              atomData[12] = ji[2];
+                    pos = integrableObject->getPos();
+                    vel = integrableObject->getVel();
+
+                    atomData[0] = pos[0];
+                    atomData[1] = pos[1];
+                    atomData[2] = pos[2];
+
+                    atomData[3] = vel[0];
+                    atomData[4] = vel[1];
+                    atomData[5] = vel[2];
+
+                    isDirectional = 0;
+
+                    if (integrableObject->isDirectional()) {
+                        isDirectional = 1;
+
+                        q = integrableObject->getQ();
+                        ji = integrableObject->getJ();
+
+                        for(int j = 0; j < 6; j++) {
+                            atomData[j] = atomData[j];
+                        }
+
+                        atomData[6] = q[0];
+                        atomData[7] = q[1];
+                        atomData[8] = q[2];
+                        atomData[9] = q[3];
+
+                        atomData[10] = ji[0];
+                        atomData[11] = ji[1];
+                        atomData[12] = ji[2];
+                    }
+
+                    // If we've survived to here, format the line:
+
+                    if (!isDirectional) {
+                        sprintf(writeLine, "%s\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t",
+                                atomTypeString, atomData[0],
+                                atomData[1], atomData[2],
+                                atomData[3], atomData[4],
+                                atomData[5]);
+
+                        strcat(writeLine,
+                               "0.0\t0.0\t0.0\t0.0\t0.0\t0.0\t0.0\n");
+                    } else {
+                        sprintf(writeLine,
+                                "%s\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\n",
+                                atomTypeString,
+                                atomData[0],
+                                atomData[1],
+                                atomData[2],
+                                atomData[3],
+                                atomData[4],
+                                atomData[5],
+                                atomData[6],
+                                atomData[7],
+                                atomData[8],
+                                atomData[9],
+                                atomData[10],
+                                atomData[11],
+                                atomData[12]);
+                    }
+
+
+                    os << writeLine;
+
+                } //end for(iter = integrableObject.begin())
+            }
+        } //end for(i = 0; i < mpiSim->getNmol())
+
+        os.flush();
+        std::cout << "master" << std::endl;
+        sprintf(checkPointMsg, "Sucessfully took a dump.\n");
+
+        MPIcheckPoint();
+
+        delete [] potatoes;
+    } else {
+
+        // worldRank != 0, so I'm a remote node.  
+
+        // Set my magic potato to 0:
+
+        myPotato = 0;
+
+        for(int i = 0; i < info_->getNGlobalMolecules(); i++) {
+
+            // Am I the node which has this integrableObject?
+            int whichNode = info_->getMolToProc(i);
+            if (whichNode == worldRank) {
+                if (myPotato + 1 >= MAXTAG) {
+
+                    // The potato was going to exceed the maximum value, 
+                    // so wrap this processor potato back to 0 (and block until
+                    // node 0 says we can go:
+
+                    MPI_Recv(&myPotato, 1, MPI_INT, 0, 0, MPI_COMM_WORLD,
+                             &istatus);
+                }
+
+                mol = info_->getMoleculeByGlobalIndex(i);
+
+                
+                nCurObj = mol->getNIntegrableObjects();
+
+                MPI_Send(&nCurObj, 1, MPI_INT, 0, myPotato, MPI_COMM_WORLD);
+                myPotato++;
+
+                for (integrableObject = mol->beginIntegrableObject(ii); integrableObject != NULL; 
+                    integrableObject = mol->nextIntegrableObject(ii)) {
+
+                    if (myPotato + 2 >= MAXTAG) {
+
+                        // The potato was going to exceed the maximum value, 
+                        // so wrap this processor potato back to 0 (and block until
+                        // node 0 says we can go:
+
+                        MPI_Recv(&myPotato, 1, MPI_INT, 0, 0, MPI_COMM_WORLD,
+                                 &istatus);
+                    }
+
+                    atomTypeString = integrableObject->getType().c_str();
+
+                    pos = integrableObject->getPos();
+                    vel = integrableObject->getVel();
+
+                    atomData[0] = pos[0];
+                    atomData[1] = pos[1];
+                    atomData[2] = pos[2];
+
+                    atomData[3] = vel[0];
+                    atomData[4] = vel[1];
+                    atomData[5] = vel[2];
+
+                    isDirectional = 0;
+
+                    if (integrableObject->isDirectional()) {
+                        isDirectional = 1;
+
+                        q = integrableObject->getQ();
+                        ji = integrableObject->getJ();
+
+                        atomData[6] = q[0];
+                        atomData[7] = q[1];
+                        atomData[8] = q[2];
+                        atomData[9] = q[3];
+
+                        atomData[10] = ji[0];
+                        atomData[11] = ji[1];
+                        atomData[12] = ji[2];
+                    }
+
+                    strncpy(MPIatomTypeString, atomTypeString, MINIBUFFERSIZE);
+
+                    // null terminate the  std::string before sending (just in case):
+                    MPIatomTypeString[MINIBUFFERSIZE - 1] = '\0';
+
+                    MPI_Send(MPIatomTypeString, MINIBUFFERSIZE, MPI_CHAR, 0,
+                             myPotato, MPI_COMM_WORLD);
+
+                    myPotato++;
+
+                    if (isDirectional) {
+                        MPI_Send(atomData, 13, MPI_DOUBLE, 0, myPotato,
+                                 MPI_COMM_WORLD);
+                    } else {
+                        MPI_Send(atomData, 6, MPI_DOUBLE, 0, myPotato,
+                                 MPI_COMM_WORLD);
+                    }
+
+                    myPotato++;
+                }
+                    
             }
             
-            // If we've survived to here, format the line:
-            
-            if (!isDirectional) {
-      	
-              sprintf( writeLine,
-      		 "%s\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t",
-      		 atomTypeString,
-      		 atomData[0],
-      		 atomData[1],
-      		 atomData[2],
-      		 atomData[3],
-      		 atomData[4],
-      		 atomData[5]);
-      	
-             strcat( writeLine, "0.0\t0.0\t0.0\t0.0\t0.0\t0.0\t0.0\n" );
-      	
-            } 
-            else {
-      	
-            	sprintf( writeLine,
-            		 "%s\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\n",
-            		 atomTypeString,
-            		 atomData[0],
-            		 atomData[1],
-            		 atomData[2],
-            		 atomData[3],
-            		 atomData[4],
-            		 atomData[5],
-            		 atomData[6],
-            		 atomData[7],
-            		 atomData[8],
-            		 atomData[9],
-            		 atomData[10],
-            		 atomData[11],
-            		 atomData[12]);
-              
-            }
-            
-            for(k = 0; k < outFile.size(); k++)
-              *outFile[k] << writeLine;
-            
-            
-        }//end for(iter = integrableObject.begin())
-        
-      currentIndex++;
-      }
-
-    }//end for(i = 0; i < mpiSim->getNmol())
-    
-    for(k = 0; k < outFile.size(); k++)
-      outFile[k]->flush();
-    
-    sprintf( checkPointMsg,
-             "Sucessfully took a dump.\n");
-    
-    MPIcheckPoint();        
-    
-    delete[] potatoes;
-    
-  } else {
-
-    // worldRank != 0, so I'm a remote node.  
-
-    // Set my magic potato to 0:
-
-    myPotato = 0;
-    currentIndex = 0;
-    
-    for (i = 0 ; i < mpiSim->getNMolGlobal(); i++ ) {
-      
-      // Am I the node which has this integrableObject?
-      
-      if (MolToProcMap[i] == worldRank) {
-
-
-        if (myPotato + 1 >= MAXTAG) {
-	  
-          // The potato was going to exceed the maximum value, 
-          // so wrap this processor potato back to 0 (and block until
-          // node 0 says we can go:
-	  
-          MPI_Recv(&myPotato, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, &istatus);
-          
         }
+        std::cout << "slave" << std::endl;
+        sprintf(checkPointMsg, "Sucessfully took a dump.\n");
+        MPIcheckPoint();
+    }
 
-          local_index = indexArray[currentIndex].first;        
-          integrableObjects = entry_plug->molecules[local_index].getIntegrableObjects();
-          
-          nCurObj = integrableObjects.size();
-                      
-          MPI_Send(&nCurObj, 1, MPI_INT, 0,
-		   myPotato, MPI_COMM_WORLD);
-          myPotato++;
-
-          for( iter = integrableObjects.begin(); iter  != integrableObjects.end(); iter++){
-
-            if (myPotato + 2 >= MAXTAG) {
-    	  
-              // The potato was going to exceed the maximum value, 
-              // so wrap this processor potato back to 0 (and block until
-              // node 0 says we can go:
-    	  
-              MPI_Recv(&myPotato, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, &istatus);
-              
-            }
-            
-            sd = *iter;
-            
-            atomTypeString = sd->getType();
-
-            sd->getPos(pos);
-            sd->getVel(vel);
-
-            atomData[0] = pos[0];
-            atomData[1] = pos[1];
-            atomData[2] = pos[2];
-
-            atomData[3] = vel[0];
-            atomData[4] = vel[1];
-            atomData[5] = vel[2];
-              
-            isDirectional = 0;
-
-            if( sd->isDirectional() ){
-
-                isDirectional = 1;
-                
-                sd->getQ( q );
-                sd->getJ( ji );
-                
-                
-                atomData[6] = q[0];
-                atomData[7] = q[1];
-                atomData[8] = q[2];
-                atomData[9] = q[3];
-      
-                atomData[10] = ji[0];
-                atomData[11] = ji[1];
-                atomData[12] = ji[2];
-              }
-
-             
-            strncpy(MPIatomTypeString, atomTypeString, MINIBUFFERSIZE);
-
-            // null terminate the string before sending (just in case):
-            MPIatomTypeString[MINIBUFFERSIZE-1] = '\0';
-
-            MPI_Send(MPIatomTypeString, MINIBUFFERSIZE, MPI_CHAR, 0,
-    		             myPotato, MPI_COMM_WORLD);
-            
-            myPotato++;
-            
-            if (isDirectional) {
-
-              MPI_Send(atomData, 13, MPI_DOUBLE, 0,
-                       myPotato, MPI_COMM_WORLD);
-              
-            } else {
-
-              MPI_Send(atomData, 6, MPI_DOUBLE, 0,
-                       myPotato, MPI_COMM_WORLD);
-            }
-
-            myPotato++;  
-
-          }
-
-          currentIndex++;    
-          
-        }
-      
-      }
-
-    sprintf( checkPointMsg,
-             "Successfully took a dump.\n");
-    MPIcheckPoint();                
-    
-  }
-  
 #endif // is_mpi
+
 }
 
-#ifdef IS_MPI
-
-// a couple of functions to let us escape the write loop
-
-void dWrite::DieDieDie( void ){
-
-  MPI_Finalize();
-  exit (0);
-}
-
-#endif //is_mpi
+}//end namespace oopse

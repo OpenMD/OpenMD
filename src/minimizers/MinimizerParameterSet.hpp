@@ -1,94 +1,143 @@
-#ifndef _MININIZERPARAMETERSET_H_
-#define _MININIZERPARAMETERSET_H_
-
-const double DEFAULTTOLERANCE = 1.0e-8;
+ /*
+ * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
+ *
+ * The University of Notre Dame grants you ("Licensee") a
+ * non-exclusive, royalty free, license to use, modify and
+ * redistribute this software in source and binary code form, provided
+ * that the following conditions are met:
+ *
+ * 1. Acknowledgement of the program authors must be made in any
+ *    publication of scientific results based in part on use of the
+ *    program.  An acceptable form of acknowledgement is citation of
+ *    the article in which the program was described (Matthew
+ *    A. Meineke, Charles F. Vardeman II, Teng Lin, Christopher
+ *    J. Fennell and J. Daniel Gezelter, "OOPSE: An Object-Oriented
+ *    Parallel Simulation Engine for Molecular Dynamics,"
+ *    J. Comput. Chem. 26, pp. 252-271 (2005))
+ *
+ * 2. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ *
+ * 3. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the
+ *    distribution.
+ *
+ * This software is provided "AS IS," without a warranty of any
+ * kind. All express or implied conditions, representations and
+ * warranties, including any implied warranty of merchantability,
+ * fitness for a particular purpose or non-infringement, are hereby
+ * excluded.  The University of Notre Dame and its licensors shall not
+ * be liable for any damages suffered by licensee as a result of
+ * using, modifying or distributing the software or its
+ * derivatives. In no event will the University of Notre Dame or its
+ * licensors be liable for any lost revenue, profit or data, or for
+ * direct, indirect, special, consequential, incidental or punitive
+ * damages, however caused and regardless of the theory of liability,
+ * arising out of the use of or inability to use software, even if the
+ * University of Notre Dame has been advised of the possibility of
+ * such damages.
+ */
+ 
+#ifndef MINIMIZERS_MININIZERPARAMETERSET_HPP
+#define MINIMIZERS_MININIZERPARAMETERSET_HPP
+#include "brains/SimInfo.hpp"
+namespace oopse {
 
 // base class of minimizer's parameter set
-class MinimizerParameterSet{
-  public:
 
-    MinimizerParameterSet() {setDefaultParameter();}
-    MinimizerParameterSet(MinimizerParameterSet& param) {*this = param;}
-    
-    void operator= (MinimizerParameterSet& param) {
+class MinimizerParameterSet {
+    public:
 
-      maxIteration = param.maxIteration;
-      stepSize = param.stepSize;
-      stepTol = param.stepTol;
-      fTol = param.fTol;
-      gTol = param.gTol;
+        MinimizerParameterSet(SimInfo* info);
 
-      writeFrq = param.writeFrq;
+        void setDefaultParameter();
 
-      lsMaxIteration = param.lsMaxIteration;
-      lsTol = param.lsTol;
+        void setStepTol(double tol) {
+            stepTol = tol;
+        }
 
-}
-    
-    virtual void setDefaultParameter(){
-      maxIteration = 200;
-      stepSize = 0.01;
-      stepTol = DEFAULTTOLERANCE;
-      fTol = DEFAULTTOLERANCE;
-      gTol = DEFAULTTOLERANCE;
+        double getStepTol() {
+            return stepTol;
+        }
 
-      writeFrq = maxIteration;
-      
-      lsMaxIteration = 50;
-      lsTol = DEFAULTTOLERANCE;
-    } 
-      
-    void setStepTol(double tol) { stepTol = tol;}
-    double getStepTol() { return stepTol;}
+        void setStepSize(double size) {
+            stepSize = size;
+        }
 
-    void setStepSize(double size) {  stepSize = size;}
-    double getStepSize() { return stepSize;}
+        double getStepSize() {
+            return stepSize;
+        }
 
-    void setMaxIteration(int iter) { maxIteration = iter;}
-    int getMaxIteration() {return maxIteration;}
+        void setMaxIteration(int iter) {
+            maxIteration = iter;
+        }
 
-    void setFTol(double tol) {fTol = tol;} 
-    double getFTol() {return fTol;}
+        int getMaxIteration() {
+            return maxIteration;
+        }
 
-    void setGTol(double tol) {gTol = tol;}
-    double getGTol() {return gTol;}
+        void setFTol(double tol) {
+            fTol = tol;
+        }
 
-    void setLineSearchTol(double tol) {lsTol = tol;}
-    double getLineSearchTol() {return lsTol;}
+        double getFTol() {
+            return fTol;
+        }
 
-    void setLineSearchMaxIteration(int iter) {lsMaxIteration = iter;}
-    int getLineSearchMaxIteration() {return lsMaxIteration;}
+        void setGTol(double tol) {
+            gTol = tol;
+        }
 
-    void setWriteFrq(int frq) {writeFrq = frq;}
-    int getWriteFrq() {return writeFrq;}
+        double getGTol() {
+            return gTol;
+        }
 
-  protected:    
+        void setLineSearchTol(double tol) {
+            lsTol = tol;
+        }
 
-    int maxIteration;
-    double stepTol;
-    double fTol;
-    double gTol;
-    double stepSize;
+        double getLineSearchTol() {
+            return lsTol;
+        }
 
-    int lsMaxIteration;
-    double lsTol;
+        void setLineSearchMaxIteration(int iter) {
+            lsMaxIteration = iter;
+        }
 
-    int writeFrq;
-    //int resetFrq;
-/*
-    // Absolute tolerance
-    vector<double> absTol;
+        int getLineSearchMaxIteration() {
+            return lsMaxIteration;
+        }
 
-    // Relative tolerance
-    vector<double> relTol;
+        void setWriteFrq(int frq) {
+            writeFrq = frq;
+        }
 
-    // Total specified tolerance at convergence 
-    vector<double> totTol;
+        int getWriteFrq() {
+            return writeFrq;
+        }
 
-    // Tolerance achieved at convergence.
-    vector<double> achTol;
-*/
+    protected:
+
+        int maxIteration;
+
+        double stepTol;
+
+        double fTol;
+
+        double gTol;
+
+        double stepSize;
+
+        int lsMaxIteration;
+
+        double lsTol;
+
+        int writeFrq;
+
+        const double  defaultTolerance;
+
 };
 
-
+}
 #endif

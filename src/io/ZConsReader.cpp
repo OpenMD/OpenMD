@@ -1,183 +1,108 @@
+ /*
+ * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
+ *
+ * The University of Notre Dame grants you ("Licensee") a
+ * non-exclusive, royalty free, license to use, modify and
+ * redistribute this software in source and binary code form, provided
+ * that the following conditions are met:
+ *
+ * 1. Acknowledgement of the program authors must be made in any
+ *    publication of scientific results based in part on use of the
+ *    program.  An acceptable form of acknowledgement is citation of
+ *    the article in which the program was described (Matthew
+ *    A. Meineke, Charles F. Vardeman II, Teng Lin, Christopher
+ *    J. Fennell and J. Daniel Gezelter, "OOPSE: An Object-Oriented
+ *    Parallel Simulation Engine for Molecular Dynamics,"
+ *    J. Comput. Chem. 26, pp. 252-271 (2005))
+ *
+ * 2. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ *
+ * 3. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the
+ *    distribution.
+ *
+ * This software is provided "AS IS," without a warranty of any
+ * kind. All express or implied conditions, representations and
+ * warranties, including any implied warranty of merchantability,
+ * fitness for a particular purpose or non-infringement, are hereby
+ * excluded.  The University of Notre Dame and its licensors shall not
+ * be liable for any damages suffered by licensee as a result of
+ * using, modifying or distributing the software or its
+ * derivatives. In no event will the University of Notre Dame or its
+ * licensors be liable for any lost revenue, profit or data, or for
+ * direct, indirect, special, consequential, incidental or punitive
+ * damages, however caused and regardless of the theory of liability,
+ * arising out of the use of or inability to use software, even if the
+ * University of Notre Dame has been advised of the possibility of
+ * such damages.
+ */
+ 
 #include "io/ZConsReader.hpp"
 #include "utils/simError.h"
+#include "utils/StringUtils.hpp"
+namespace oopse {
 
-ZConsReader::ZConsReader(SimInfo* info)
-                   :istream(NULL){
+ZConsReader::ZConsReader(SimInfo* info) : info_(info){
 
-  GenericData* data;
-  StringGenericData* filename; 
-  this->info = info;
+    std::string zconsFileName_ = getPrefix(info_->getFinalConfigFileName()) + ".fz";
+    istream_.open(zconsFileName_.c_str());
 
- //retrieve output filename of z force
-  data = info->getProperty(ZCONSFILENAME_ID);
-  if(!data) {
-
-      
-    sprintf( painCave.errMsg,
-               "ZConsReader error: If you use an ZConstraint\n"
-               " , you must set output filename of z-force.\n");
-    painCave.isFatal = 1;
-    simError();  
-
-  }
-  else{
-
-    filename = dynamic_cast<StringGenericData*>(data);
-    
-    if(!filename){
-
-      sprintf( painCave.errMsg,
-                 "ZConsReader error: Can not get property from SimInfo\n");
-      painCave.isFatal = 1;
-      simError();  
-        
+    if (!istream_){
+        std::cerr << "open " << zconsFileName_ << "error" << std::endl;
+        exit(1);
     }
-    else{
-      zconsFileName = filename->getData();
-    }
-    
-  }
 
-  istream = new ifstream(zconsFileName.c_str());
-
-  if (!istream){
-    cerr << "open " << filename << "error" << endl;
-    exit(1);
-  }
-  
-  readHeader();  
-}
-
-ZConsReader::ZConsReader(const string& filename){
-  istream = new ifstream(zconsFileName.c_str());
-
-  if (!istream){
-    cerr << "open " << filename << "error" << endl;
-    exit(1);
-  }
-  
-  readHeader();  
+    Globals* simParam = info_->getSimParams();
+    int nZconstraints = simParam->getNzConstraints();
+    ZconStamp** stamp = simParam->getZconStamp();
+    for (int i = 0; i < nZconstraints; i++){
+        allZmols_.push_back(stamp[i]->getMolIndex());
+    } 
 }
 
 ZConsReader::~ZConsReader(){
-  istream->close();
-}
-
-int ZConsReader::getNumZMol(){
-  return nZMol;
-}
-
-vector<int> ZConsReader::getZConsIndex(){
-  return index;
-}
-
-vector<double> ZConsReader::getZConsPos(){
-  return zconsPos;
-}
-
-//double ZConsReader::getKRatio(){
-//  return kRatio;
-//}
-    
-double ZConsReader::getCurTime(){
-  return curTime;
-}
-
-vector<double> ZConsReader::getCurZPos(){
-  return curZPos;
-}
-
-vector<double> ZConsReader::getCurFZ(){
-  return curFZ;
-}
-
-void ZConsReader::readHeader(){
-  const int MAXBUFFERSIZE = 2000;
-  char line[MAXBUFFERSIZE];
-  int zmolIndex;
-  float zmolPos;
-  int sscanfCount;
-  
-  istream->getline(line, MAXBUFFERSIZE);
-
-  cout << line << endl;
-  //skip the comment lines
-  while(line[0] == '#')
-      istream->getline(line, MAXBUFFERSIZE);
-
-  sscanfCount = sscanf(line, "%d", &nZMol);
-
-  if (sscanfCount != 1){
-    cerr << "ZConsReader Error : reading file error" << endl;
-    exit(1);
-  }
-  
-  for(int i = 0 ; i < nZMol; i++){
-
-    istream->getline(line, MAXBUFFERSIZE);
-      
-    sscanfCount = sscanf(line, "%d\t%f", &zmolIndex, &zmolPos);
-    if (sscanfCount != 2){
-      cerr << "ZConsReader Error : reading file error" << endl;
-      exit(1);    
-    }
-    
-    index.push_back(zmolIndex);
-    zconsPos.push_back(zmolPos);
-  }
-
-  curZPos.resize(nZMol);
-  curFZ.resize(nZMol);
+  istream_.close();
 }
 
 void ZConsReader::readNextFrame(){
-  const int MAXBUFFERSIZE = 2000;
-  char line[MAXBUFFERSIZE];  
-  int tempNZMol;
-  int sscanfCount;
-  int tempIndex;
-  float tempCurTime;
-  float tempFZ;
-  float tempCurZPos;
-  float tempZconsPos;
-  
-  istream->getline(line, MAXBUFFERSIZE);
-  sscanfCount = sscanf(line, "%f", &tempCurTime);
-  if (sscanfCount != 1){
-    cerr << "ZConsReader Error : reading file error" << endl;
-    exit(1);
-  }
-  curTime = tempCurTime;
-  
-  istream->getline(line, MAXBUFFERSIZE);
-  sscanfCount = sscanf(line, "%d", &tempNZMol);
-  if (sscanfCount != 1){
-    cerr << "ZConsReader Error : reading file error" << endl;
-    exit(1);
-  }
-  
-  if (tempNZMol != nZMol){
-    cerr << "ZConsReader Error: reading file error" << endl;
-    exit(1);
-  }
+    char line[MAXBUFFERSIZE];  
+    int nFixedZmol;
+    int sscanfCount;
 
-  for(int i = 0; i < nZMol; i++){
-    istream->getline(line, MAXBUFFERSIZE);
-    sscanfCount = sscanf(line, "%d\t%f\t%f\t%f", &tempIndex, &tempFZ, &tempCurZPos,&tempZconsPos);
-    if (sscanfCount != 4){
-      cerr << "ZConsReader Error : reading file error" << endl;
-      exit(1);
+    fixedZmolData_.clear();
+
+    while(istream_.getline(line, MAXBUFFERSIZE) && line[0] == '/' && line[1] == '/');
+    sscanfCount = sscanf(line, "%lf", &curTime_);
+    if (sscanfCount != 1){
+        std::cerr << "ZConsReader Error : reading file error" << std::endl;
+        exit(1);
     }
 
-    index[i] = tempIndex;
-    curFZ[i] = tempFZ;
-    curZPos[i]= tempCurZPos;
-    zconsPos[i] = tempZconsPos;
-  }
+    istream_.getline(line, MAXBUFFERSIZE);
+    sscanfCount = sscanf(line, "%d", &nFixedZmol);
+    if (sscanfCount != 1){
+        std::cerr << "ZConsReader Error : reading file error" << std::endl;
+        exit(1);
+    }
+
+    ZconsData data;
+    for(int i = 0; i < nFixedZmol; i++){
+        istream_.getline(line, MAXBUFFERSIZE);
+        sscanfCount = sscanf(line, "%d\t%lf\t%lf\t%lf", &data.zmolIndex, &data.zforce, &data.zpos,&data.zconsPos);
+        if (sscanfCount != 4){
+          std::cerr << "ZConsReader Error : reading file error" << std::endl;
+          exit(1);
+        }
+
+        fixedZmolData_.push_back(data);
+    }
 
 }
 
 bool ZConsReader::hasNextFrame(){
-  return istream->peek() != EOF ? true : false;
+  return istream_.peek() != EOF ? true : false;
 }
 
+}

@@ -1,3 +1,44 @@
+ /*
+ * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
+ *
+ * The University of Notre Dame grants you ("Licensee") a
+ * non-exclusive, royalty free, license to use, modify and
+ * redistribute this software in source and binary code form, provided
+ * that the following conditions are met:
+ *
+ * 1. Acknowledgement of the program authors must be made in any
+ *    publication of scientific results based in part on use of the
+ *    program.  An acceptable form of acknowledgement is citation of
+ *    the article in which the program was described (Matthew
+ *    A. Meineke, Charles F. Vardeman II, Teng Lin, Christopher
+ *    J. Fennell and J. Daniel Gezelter, "OOPSE: An Object-Oriented
+ *    Parallel Simulation Engine for Molecular Dynamics,"
+ *    J. Comput. Chem. 26, pp. 252-271 (2005))
+ *
+ * 2. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ *
+ * 3. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the
+ *    distribution.
+ *
+ * This software is provided "AS IS," without a warranty of any
+ * kind. All express or implied conditions, representations and
+ * warranties, including any implied warranty of merchantability,
+ * fitness for a particular purpose or non-infringement, are hereby
+ * excluded.  The University of Notre Dame and its licensors shall not
+ * be liable for any damages suffered by licensee as a result of
+ * using, modifying or distributing the software or its
+ * derivatives. In no event will the University of Notre Dame or its
+ * licensors be liable for any lost revenue, profit or data, or for
+ * direct, indirect, special, consequential, incidental or punitive
+ * damages, however caused and regardless of the theory of liability,
+ * arising out of the use of or inability to use software, even if the
+ * University of Notre Dame has been advised of the possibility of
+ * such damages.
+ */
+ 
 #include <iostream>
 
 #include <cstdlib>
@@ -5,69 +46,53 @@
 
 #include "utils/simError.h"
 #include "applications/simpleBuilder/MoLocator.hpp"
-#include "math/MatVec3.h"
-
-MoLocator::MoLocator( MoleculeStamp* theStamp, ForceFields* theFF){
+#include "types/AtomType.hpp"
+namespace oopse {
+MoLocator::MoLocator( MoleculeStamp* theStamp, ForceField* theFF){
 
   myStamp = theStamp;
   myFF = theFF;
   nIntegrableObjects = myStamp->getNIntegrable();
-  calcRefCoords();
+  calcRef();
 }
 
 void MoLocator::placeMol( const Vector3d& offset, const Vector3d& ort, Molecule* mol){
-  double newCoor[3];
-  double curRefCoor[3];
-  double zeroVector[3];
-  vector<StuntDouble*> myIntegrableObjects;
-  double rotMat[3][3];
+    Vector3d newCoor;
+    Vector3d curRefCoor;  
+    RotMat3x3d rotMat = latVec2RotMat(ort);
   
-  zeroVector[0] = 0.0;
-  zeroVector[1] = 0.0;
-  zeroVector[2] = 0.0;
-  
-  latVec2RotMat(ort, rotMat);
-  
-  myIntegrableObjects = mol->getIntegrableObjects();
-
-  if(myIntegrableObjects.size() != nIntegrableObjects){
-      sprintf( painCave.errMsg,
-	       "MoLocator error.\n"
-	       "  The number of integrable objects of MoleculeStamp is not the same as  that of Molecule\n");
-	  painCave.isFatal = 1;
-      simError();
-
-  }
-    
-  for(int i=0; i<nIntegrableObjects; i++) {
-
-    //calculate the reference coordinate for integrable objects after rotation
-    curRefCoor[0] = refCoords[i][0];
-    curRefCoor[1] = refCoords[i][1];
-    curRefCoor[2] = refCoords[i][2];
-    
-    matVecMul3(rotMat, curRefCoor, newCoor);    
-
-    newCoor[0] +=  offset[0];
-    newCoor[1] +=  offset[1];
-    newCoor[2] +=  offset[2];
-
-    myIntegrableObjects[i]->setPos( newCoor);
-    myIntegrableObjects[i]->setVel(zeroVector);
-
-    if(myIntegrableObjects[i]->isDirectional()){
-      myIntegrableObjects[i]->setA(rotMat);
-      myIntegrableObjects[i]->setJ(zeroVector);  
+    if(mol->getNIntegrableObjects() != nIntegrableObjects){
+        sprintf( painCave.errMsg,
+            "MoLocator error.\n"
+            "  The number of integrable objects of MoleculeStamp is not the same as  that of Molecule\n");
+        painCave.isFatal = 1;
+        simError();
     }
-  }
 
+    Molecule::IntegrableObjectIterator ii;
+    StuntDouble* integrableObject;
+    int i;
+    for (integrableObject = mol->beginIntegrableObject(ii), i = 0; integrableObject != NULL; 
+        integrableObject = mol->nextIntegrableObject(ii), ++i) { 
+
+        newCoor = rotMat * refCoords[i];
+        newCoor += offset;
+
+        integrableObject->setPos( newCoor);
+        integrableObject->setVel(V3Zero);
+
+        if(integrableObject->isDirectional()){
+          integrableObject->setA(rotMat * integrableObject->getA());
+          integrableObject->setJ(V3Zero);  
+        }        
+    }
 }
  
-void MoLocator::calcRefCoords( void ){
+void MoLocator::calcRef( void ){
   AtomStamp* currAtomStamp;
   int nAtoms; 
   int nRigidBodies;
-  vector<double> mass;
+   std::vector<double> mass;
   Vector3d coor;
   Vector3d refMolCom;  
   int nAtomsInRb;
@@ -99,7 +124,7 @@ void MoLocator::calcRefCoords( void ){
       continue;
     //get mass and the reference coordinate 
     else{
-      currAtomMass = myFF->getAtomTypeMass(currAtomStamp->getType());
+    
       mass.push_back(currAtomMass);
       coor.x() = currAtomStamp->getPosX();
       coor.y() = currAtomStamp->getPosY();
@@ -117,7 +142,7 @@ void MoLocator::calcRefCoords( void ){
 
     for(int j = 0; j < nAtomsInRb; j++){
 
-      currAtomMass = myFF->getAtomTypeMass(currAtomStamp->getType());
+      currAtomMass = getAtomMass(currAtomStamp->getType(), myFF);
       totMassInRb +=  currAtomMass;
       
       coor.x() += currAtomStamp->getPosX() * currAtomMass;
@@ -151,24 +176,38 @@ void MoLocator::calcRefCoords( void ){
 }
 
 
-void latVec2RotMat(const Vector3d& lv, double rotMat[3][3]){
 
-  double theta, phi, psi;
-  
-  theta =acos(lv.z());
-  phi = atan2(lv.y(), lv.x());
-  psi = 0;
+double getAtomMass(const std::string& at, ForceField* myFF) {
+    double mass;
+    AtomType* atomType= myFF->getAtomType(at);
+    if (atomType != NULL) {
+        mass =     atomType->getMass();
+    } else {
+        mass = 0.0;
+        std::cerr << "Can not find AtomType: " << at << std::endl;
+    }
+    return mass;
+}
 
-  rotMat[0][0] = (cos(phi) * cos(psi)) - (sin(phi) * cos(theta) * sin(psi));
-  rotMat[0][1] = (sin(phi) * cos(psi)) + (cos(phi) * cos(theta) * sin(psi));
-  rotMat[0][2] = sin(theta) * sin(psi);
-  
-  rotMat[1][0] = -(cos(phi) * sin(psi)) - (sin(phi) * cos(theta) * cos(psi));
-  rotMat[1][1] = -(sin(phi) * sin(psi)) + (cos(phi) * cos(theta) * cos(psi));
-  rotMat[1][2] = sin(theta) * cos(psi);
-  
-  rotMat[2][0] = sin(phi) * sin(theta);
-  rotMat[2][1] = -cos(phi) * sin(theta);
-  rotMat[2][2] = cos(theta);
+double getMolMass(MoleculeStamp *molStamp, ForceField *myFF) {
+    int nAtoms;
+    double totMass = 0;
+    nAtoms = molStamp->getNAtoms();
+
+    for(size_t i = 0; i < nAtoms; i++) {
+        AtomStamp *currAtomStamp = molStamp->getAtom(i);
+        totMass += getAtomMass(currAtomStamp->getType(), myFF);         
+    }
+    return totMass;
+}
+RotMat3x3d latVec2RotMat(const Vector3d& lv){
+
+    double theta =acos(lv[2]);
+    double phi = atan2(lv[1], lv[0]);
+    double psi = 0;
+
+    return RotMat3x3d(phi, theta, psi);
+
+}
 }
 

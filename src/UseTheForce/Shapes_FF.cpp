@@ -1,12 +1,44 @@
-/*
- *  Shapes_FF.cpp
- *  oopse
+ /*
+ * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
- *  Created by Chris Fennell on 10/20/04.
- *  Copyright 2004 __MyCompanyName__. All rights reserved.
+ * The University of Notre Dame grants you ("Licensee") a
+ * non-exclusive, royalty free, license to use, modify and
+ * redistribute this software in source and binary code form, provided
+ * that the following conditions are met:
  *
+ * 1. Acknowledgement of the program authors must be made in any
+ *    publication of scientific results based in part on use of the
+ *    program.  An acceptable form of acknowledgement is citation of
+ *    the article in which the program was described (Matthew
+ *    A. Meineke, Charles F. Vardeman II, Teng Lin, Christopher
+ *    J. Fennell and J. Daniel Gezelter, "OOPSE: An Object-Oriented
+ *    Parallel Simulation Engine for Molecular Dynamics,"
+ *    J. Comput. Chem. 26, pp. 252-271 (2005))
+ *
+ * 2. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ *
+ * 3. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the
+ *    distribution.
+ *
+ * This software is provided "AS IS," without a warranty of any
+ * kind. All express or implied conditions, representations and
+ * warranties, including any implied warranty of merchantability,
+ * fitness for a particular purpose or non-infringement, are hereby
+ * excluded.  The University of Notre Dame and its licensors shall not
+ * be liable for any damages suffered by licensee as a result of
+ * using, modifying or distributing the software or its
+ * derivatives. In no event will the University of Notre Dame or its
+ * licensors be liable for any lost revenue, profit or data, or for
+ * direct, indirect, special, consequential, incidental or punitive
+ * damages, however caused and regardless of the theory of liability,
+ * arising out of the use of or inability to use software, even if the
+ * University of Notre Dame has been advised of the possibility of
+ * such damages.
  */
-
+ 
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -33,7 +65,7 @@
 #include "UseTheForce/mpiForceField.h"
 #endif // is_mpi
 
-using namespace std;
+
 using namespace oopse;
 
 Shapes_FF::~Shapes_FF(){
@@ -72,9 +104,9 @@ void Shapes_FF::readParams( void ){
 
   char readLine[1024];
 
-  string fileName;
-  string shapeFileName;
-  string tempString;
+   std::string fileName;
+   std::string shapeFileName;
+   std::string tempString;
 
   char *nameToken;
   char *delim = " ,;\t\n";
@@ -84,27 +116,27 @@ void Shapes_FF::readParams( void ){
   int nStrength = 0;
   int myATID;
   int isError;
-  string nameString;
+   std::string nameString;
   AtomType* at;
   DirectionalAtomType* dat;
   ShapeAtomType* st;
 
-  map<string, AtomType*>::iterator iter;
+   std::map<string, AtomType*>::iterator iter;
 
   // vectors for shape transfer to fortran
-  vector<RealSphericalHarmonic*> tempSHVector;
-  vector<int> contactL;
-  vector<int> contactM;
-  vector<int> contactFunc;
-  vector<double> contactCoeff;
-  vector<int> rangeL;
-  vector<int> rangeM;
-  vector<int> rangeFunc;
-  vector<double> rangeCoeff;
-  vector<int> strengthL;
-  vector<int> strengthM;
-  vector<int> strengthFunc;
-  vector<double> strengthCoeff;
+   std::vector<RealSphericalHarmonic*> tempSHVector;
+   std::vector<int> contactL;
+   std::vector<int> contactM;
+   std::vector<int> contactFunc;
+   std::vector<double> contactCoeff;
+   std::vector<int> rangeL;
+   std::vector<int> rangeM;
+   std::vector<int> rangeFunc;
+   std::vector<double> rangeCoeff;
+   std::vector<int> strengthL;
+   std::vector<int> strengthM;
+   std::vector<int> strengthFunc;
+   std::vector<double> strengthCoeff;
    
   // generate the force file name   
   fileName = "Shapes.frc";
@@ -179,7 +211,7 @@ void Shapes_FF::readParams( void ){
 	  atomTypeMap.insert(make_pair(nameString, st));
 	  
 	} else {
-	  // atomType map already contained this string (i.e. it was
+	  // atomType map already contained this  std::string (i.e. it was
 	  // declared in a previous block, and we just need to add
 	  // the shape-specific information for this AtomType:
 
@@ -304,7 +336,7 @@ void Shapes_FF::cleanMe( void ){
 void Shapes_FF::initializeAtoms( int nAtoms, Atom** the_atoms ){
   
   int i,j,k;
-  map<string, AtomType*>::iterator iter;
+   std::map<string, AtomType*>::iterator iter;
 
   // initialize the atoms
   DirectionalAtom* dAtom;
@@ -315,19 +347,19 @@ void Shapes_FF::initializeAtoms( int nAtoms, Atom** the_atoms ){
   double ji[3];
   double inertialMat[3][3];
   Mat3x3d momInt;
-  string myTypeString;
+   std::string myTypeString;
 
   bigContact = 0.0;
 
   for( i=0; i<nAtoms; i++ ){
     
-    myTypeString = the_atoms[i]->getType();
+    myTypeString = the_atoms[i]->getType().c_str();
     iter = atomTypeMap.find(myTypeString);
 
     if (iter == atomTypeMap.end()) {
       sprintf( painCave.errMsg, 
 	       "AtomType error, %s not found in force file.\n",
-	       the_atoms[i]->getType() );
+	       the_atoms[i]->getType().c_str() );
       painCave.isFatal = 1;
       simError();
     } else {
@@ -417,9 +449,9 @@ void Shapes_FF::parseShapeFile(string shapeFileName, ShapeAtomType* st){
   int nTokens;
   Mat3x3d momInert;
   RealSphericalHarmonic* rsh;
-  vector<RealSphericalHarmonic*> functionVector;
+   std::vector<RealSphericalHarmonic*> functionVector;
   ifstrstream shapeFile;
-  string tempString;
+   std::string tempString;
 
   shapeFile.open( shapeFileName.c_str() );
   

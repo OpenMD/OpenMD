@@ -1,0 +1,228 @@
+ /*
+ * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
+ *
+ * The University of Notre Dame grants you ("Licensee") a
+ * non-exclusive, royalty free, license to use, modify and
+ * redistribute this software in source and binary code form, provided
+ * that the following conditions are met:
+ *
+ * 1. Acknowledgement of the program authors must be made in any
+ *    publication of scientific results based in part on use of the
+ *    program.  An acceptable form of acknowledgement is citation of
+ *    the article in which the program was described (Matthew
+ *    A. Meineke, Charles F. Vardeman II, Teng Lin, Christopher
+ *    J. Fennell and J. Daniel Gezelter, "OOPSE: An Object-Oriented
+ *    Parallel Simulation Engine for Molecular Dynamics,"
+ *    J. Comput. Chem. 26, pp. 252-271 (2005))
+ *
+ * 2. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ *
+ * 3. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the
+ *    distribution.
+ *
+ * This software is provided "AS IS," without a warranty of any
+ * kind. All express or implied conditions, representations and
+ * warranties, including any implied warranty of merchantability,
+ * fitness for a particular purpose or non-infringement, are hereby
+ * excluded.  The University of Notre Dame and its licensors shall not
+ * be liable for any damages suffered by licensee as a result of
+ * using, modifying or distributing the software or its
+ * derivatives. In no event will the University of Notre Dame or its
+ * licensors be liable for any lost revenue, profit or data, or for
+ * direct, indirect, special, consequential, incidental or punitive
+ * damages, however caused and regardless of the theory of liability,
+ * arising out of the use of or inability to use software, even if the
+ * University of Notre Dame has been advised of the possibility of
+ * such damages.
+ */
+ 
+#include <iostream>
+#include <iterator>
+#include <sstream>
+#include "utils/StringTokenizer.hpp"
+
+namespace oopse {
+
+
+StringTokenizer::StringTokenizer(const std::string & str, const std::string & delim) 
+                        : tokenString_(str), delim_(delim), returnTokens_(false),
+                          currentPos_(tokenString_.begin()), end_(tokenString_.end()){
+
+}
+
+StringTokenizer::StringTokenizer(std::string::const_iterator& first, std::string::const_iterator& last,
+                                                               const std::string & delim)  
+                        : tokenString_(first, last) , delim_(delim), returnTokens_(false),
+                           currentPos_(tokenString_.begin()), end_(tokenString_.end()) {
+
+}
+
+StringTokenizer::StringTokenizer(const std::string&str, const std::string&delim,
+                                                                bool returnTokens)
+                        : tokenString_(str), delim_(delim), returnTokens_(returnTokens),
+                          currentPos_(tokenString_.begin()), end_(tokenString_.end()) {
+
+}
+
+bool StringTokenizer::isDelimiter(const char c) {
+    return delim_.find(c) == std::string::npos ? false : true;
+}
+
+int StringTokenizer::countTokens() {
+    
+    std::string::const_iterator tmpIter = currentPos_;    
+    int numToken = 0;
+
+    while (true) {
+
+        //skip delimiter first
+        while( tmpIter != end_ && isDelimiter(*tmpIter)) {
+            ++tmpIter;
+
+            if (returnTokens_) {
+                //if delimiter is consider as token
+                ++numToken;
+            }
+        }
+        
+        if (tmpIter == end_) {
+            break;
+        }
+        
+        //encount a token here
+        while ( tmpIter != end_ && !isDelimiter(*tmpIter) ) {
+            ++tmpIter;
+        }
+
+        ++numToken;
+
+    }
+
+    return numToken;
+}
+
+bool StringTokenizer::hasMoreTokens() {
+    
+    if (currentPos_ == end_) {
+        return false;
+    } else if (returnTokens_) {
+        return true;
+    } else {
+        std::string::const_iterator i = currentPos_;
+
+        //walk through the remaining string to check whether it contains non-delimeter or not
+        while(i != end_ && isDelimiter(*i)) {
+            ++i;
+        }
+
+         return i != end_ ? true : false;
+    }
+}
+
+std::string StringTokenizer::nextToken() {
+    std::string result;
+    
+    if(currentPos_ != end_) {
+        std::insert_iterator<std::string> insertIter(result, result.begin());
+
+        while( currentPos_ != end_ && isDelimiter(*currentPos_)) {
+
+            if (returnTokens_) {
+                *insertIter++ = *currentPos_++;
+                return result;
+            }
+            
+            ++currentPos_;
+        }
+
+        while (currentPos_ != end_ && !isDelimiter(*currentPos_)) {
+            *insertIter++ = *currentPos_++;
+        }
+        
+    }
+    
+    return result;
+}
+
+bool StringTokenizer::nextTokenAsBool() {
+    std::string token = nextToken();
+    std::istringstream iss(token);
+    bool result;
+    
+    if (iss >> result) {
+        return result;
+    } else {
+        std::cerr << "unable to convert " << token << " to a bool" << std::endl;
+        return false;
+    }
+}
+
+int StringTokenizer::nextTokenAsInt() {
+    std::string token = nextToken();
+    std::istringstream iss(token);
+    int result;
+    
+    if (iss >> result) {
+        return result;
+    } else {
+        std::cerr << "unable to convert " << token << " to an integer" << std::endl;
+        return 0;
+    }
+}
+
+float StringTokenizer::nextTokenAsFloat() {
+    std::string token = nextToken();
+    std::istringstream iss(token);
+    float result;
+    
+    if (iss >> result) {
+        return result;
+    } else {
+        std::cerr << "unable to convert " << token << " to a float" << std::endl;
+        return 0.0;
+    }
+}
+
+double StringTokenizer::nextTokenAsDouble() {
+    std::string token = nextToken();
+    std::istringstream iss(token);
+    double result;
+    
+    if (iss >> result) {
+        return result;
+    } else {
+        std::cerr << "unable to convert " << token << " to a double" << std::endl;
+        return 0.0;
+    }
+}
+
+std::string  StringTokenizer::peekNextToken() {
+    std::string result;
+    std::string::const_iterator tmpIter = currentPos_;
+    
+    if(tmpIter != end_) {
+        std::insert_iterator<std::string> insertIter(result, result.begin());
+
+        while(tmpIter != end_ && isDelimiter(*tmpIter)) {
+
+            if (returnTokens_) {
+                *insertIter++ = *tmpIter++;
+                return result;
+            }
+            
+            ++tmpIter;
+        }
+
+        while (tmpIter != end_ && !isDelimiter(*tmpIter)) {
+            *insertIter++ = *tmpIter++;
+        }
+    }
+    
+    return result;    
+}
+
+}//end namespace oopse
+

@@ -1,178 +1,133 @@
-#include "primitives/SRI.hpp"
-#include "primitives/Atom.hpp"
-#include <math.h>
-#include <iostream>
-#include <stdlib.h>
+ /*
+ * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
+ *
+ * The University of Notre Dame grants you ("Licensee") a
+ * non-exclusive, royalty free, license to use, modify and
+ * redistribute this software in source and binary code form, provided
+ * that the following conditions are met:
+ *
+ * 1. Acknowledgement of the program authors must be made in any
+ *    publication of scientific results based in part on use of the
+ *    program.  An acceptable form of acknowledgement is citation of
+ *    the article in which the program was described (Matthew
+ *    A. Meineke, Charles F. Vardeman II, Teng Lin, Christopher
+ *    J. Fennell and J. Daniel Gezelter, "OOPSE: An Object-Oriented
+ *    Parallel Simulation Engine for Molecular Dynamics,"
+ *    J. Comput. Chem. 26, pp. 252-271 (2005))
+ *
+ * 2. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ *
+ * 3. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the
+ *    distribution.
+ *
+ * This software is provided "AS IS," without a warranty of any
+ * kind. All express or implied conditions, representations and
+ * warranties, including any implied warranty of merchantability,
+ * fitness for a particular purpose or non-infringement, are hereby
+ * excluded.  The University of Notre Dame and its licensors shall not
+ * be liable for any damages suffered by licensee as a result of
+ * using, modifying or distributing the software or its
+ * derivatives. In no event will the University of Notre Dame or its
+ * licensors be liable for any lost revenue, profit or data, or for
+ * direct, indirect, special, consequential, incidental or punitive
+ * damages, however caused and regardless of the theory of liability,
+ * arising out of the use of or inability to use software, even if the
+ * University of Notre Dame has been advised of the possibility of
+ * such damages.
+ */
+ 
+#include "primitives/Torsion.hpp"
 
-void Torsion::set_atoms( Atom &a, Atom &b, Atom &c, Atom &d){
-  c_p_a = &a;
-  c_p_b = &b;
-  c_p_c = &c;
-  c_p_d = &d;
+namespace oopse {
+
+Torsion::Torsion(Atom *atom1, Atom *atom2, Atom *atom3, Atom *atom4,
+                 TorsionType *tt) :
+    atom1_(atom1), atom2_(atom2), atom3_(atom3), atom4_(atom4), torsionType_(tt) { }
+
+void Torsion::calcForce() {
+    Vector3d pos1 = atom1_->getPos();
+    Vector3d pos2 = atom2_->getPos();
+    Vector3d pos3 = atom3_->getPos();
+    Vector3d pos4 = atom4_->getPos();
+
+    Vector3d r21 = pos1 - pos2;
+    Vector3d r32 = pos2 - pos3;
+    Vector3d r43 = pos3 - pos4;
+
+    //  Calculate the cross products and distances
+    Vector3d A = cross(r21, r32);
+    double rA = A.length();
+    Vector3d B = cross(r32, r43);
+    double rB = B.length();
+    Vector3d C = cross(r32, A);
+    double rC = C.length();
+
+    A.normalize();
+    B.normalize();
+    C.normalize();
+    
+    //  Calculate the sin and cos
+    double cos_phi = dot(A, B) ;
+    double sin_phi = dot(C, B);
+
+    double dVdPhi;
+    torsionType_->calcForce(cos_phi, sin_phi, potential_, dVdPhi);
+
+    Vector3d f1;
+    Vector3d f2;
+    Vector3d f3;
+
+    //  Next, we want to calculate the forces.  In order
+    //  to do that, we first need to figure out whether the
+    //  sin or cos form will be more stable.  For this,
+    //  just look at the value of phi
+    //if (fabs(sin_phi) > 0.1) {
+        //  use the sin version to avoid 1/cos terms
+
+        Vector3d dcosdA = (cos_phi * A - B) /rA;
+        Vector3d dcosdB = (cos_phi * B - A) /rB;
+
+        double dVdcosPhi = -dVdPhi / sin_phi;
+
+        f1 = dVdcosPhi * cross(r32, dcosdA);
+        f2 = dVdcosPhi * ( cross(r43, dcosdB) - cross(r21, dcosdA));
+        f3 = dVdcosPhi * cross(dcosdB, r32);
+
+    /** @todo fix below block, must be something wrong with the sign somewhere */
+    //} else {
+        //  This angle is closer to 0 or 180 than it is to
+        //  90, so use the cos version to avoid 1/sin terms
+
+        //double dVdsinPhi = dVdPhi /cos_phi;
+        //Vector3d dsindB = (sin_phi * B - C) /rB;
+        //Vector3d dsindC = (sin_phi * C - B) /rC;
+
+        //f1.x() = dVdsinPhi*((r32.y()*r32.y() + r32.z()*r32.z())*dsindC.x() - r32.x()*r32.y()*dsindC.y() - r32.x()*r32.z()*dsindC.z());
+
+        //f1.y() = dVdsinPhi*((r32.z()*r32.z() + r32.x()*r32.x())*dsindC.y() - r32.y()*r32.z()*dsindC.z() - r32.y()*r32.x()*dsindC.x());
+
+        //f1.z() = dVdsinPhi*((r32.x()*r32.x() + r32.y()*r32.y())*dsindC.z() - r32.z()*r32.x()*dsindC.x() - r32.z()*r32.y()*dsindC.y());
+
+        //f2.x() = dVdsinPhi*(-(r32.y()*r21.y() + r32.z()*r21.z())*dsindC.x() + (2.0*r32.x()*r21.y() - r21.x()*r32.y())*dsindC.y()
+        //+ (2.0*r32.x()*r21.z() - r21.x()*r32.z())*dsindC.z() + dsindB.z()*r43.y() - dsindB.y()*r43.z());
+
+        //f2.y() = dVdsinPhi*(-(r32.z()*r21.z() + r32.x()*r21.x())*dsindC.y() + (2.0*r32.y()*r21.z() - r21.y()*r32.z())*dsindC.z()
+        //+ (2.0*r32.y()*r21.x() - r21.y()*r32.x())*dsindC.x() + dsindB.x()*r43.z() - dsindB.z()*r43.x());
+
+        //f2.z() = dVdsinPhi*(-(r32.x()*r21.x() + r32.y()*r21.y())*dsindC.z() + (2.0*r32.z()*r21.x() - r21.z()*r32.x())*dsindC.x()
+        //+(2.0*r32.z()*r21.y() - r21.z()*r32.y())*dsindC.y() + dsindB.y()*r43.x() - dsindB.x()*r43.y());
+
+        //f3 = dVdsinPhi * cross(r32, dsindB);
+
+    //}
+
+    atom1_->addFrc(f1);
+    atom2_->addFrc(f2 - f1);
+    atom3_->addFrc(f3 - f2);
+    atom4_->addFrc(-f3);
 }
 
-
-void Torsion::calc_forces(){
-  
-  /**********************************************************************
-   * 
-   * initialize vectors
-   *
-   ***********************************************************************/
-  
-  vect r_ab; /* the vector whose origin is a and end is b */
-  vect r_cb; /* the vector whose origin is c and end is b */
-  vect r_cd; /* the vector whose origin is c and end is b */
-  vect r_cr1; /* the cross product of r_ab and r_cb */
-  vect r_cr2; /* the cross product of r_cb and r_cd */
-
-  double r_cr1_x2; /* the components of r_cr1 squared */
-  double r_cr1_y2;
-  double r_cr1_z2;
-  
-  double r_cr2_x2; /* the components of r_cr2 squared */
-  double r_cr2_y2;
-  double r_cr2_z2;
-
-  double r_cr1_sqr; /* the length of r_cr1 squared */
-  double r_cr2_sqr; /* the length of r_cr2 squared */
-  
-  double r_cr1_r_cr2; /* the length of r_cr1 * length of r_cr2 */
-  
-  double aR[3], bR[3], cR[3], dR[3];
-  double aF[3], bF[3], cF[3], dF[3];
-
-  c_p_a->getPos( aR );
-  c_p_b->getPos( bR );
-  c_p_c->getPos( cR );
-  c_p_d->getPos( dR );
-
-  r_ab.x = bR[0] - aR[0];
-  r_ab.y = bR[1] - aR[1];
-  r_ab.z = bR[2] - aR[2];
-  r_ab.length  = sqrt((r_ab.x * r_ab.x + r_ab.y * r_ab.y + r_ab.z * r_ab.z));
-
-  r_cb.x = bR[0] - cR[0];
-  r_cb.y = bR[1] - cR[1];
-  r_cb.z = bR[2] - cR[2];
-  r_cb.length = sqrt((r_cb.x * r_cb.x + r_cb.y * r_cb.y + r_cb.z * r_cb.z));
-
-  r_cd.x = dR[0] - cR[0];
-  r_cd.y = dR[1] - cR[1];
-  r_cd.z = dR[2] - cR[2];
-  r_cd.length = sqrt((r_cd.x * r_cd.x + r_cd.y * r_cd.y + r_cd.z * r_cd.z));
-
-  r_cr1.x = r_ab.y * r_cb.z - r_cb.y * r_ab.z;
-  r_cr1.y = r_ab.z * r_cb.x - r_cb.z * r_ab.x;
-  r_cr1.z = r_ab.x * r_cb.y - r_cb.x * r_ab.y;
-  r_cr1_x2 = r_cr1.x * r_cr1.x;
-  r_cr1_y2 = r_cr1.y * r_cr1.y;
-  r_cr1_z2 = r_cr1.z * r_cr1.z;
-  r_cr1_sqr = r_cr1_x2 + r_cr1_y2 + r_cr1_z2;
-  r_cr1.length = sqrt(r_cr1_sqr);
-
-  r_cr2.x = r_cb.y * r_cd.z - r_cd.y * r_cb.z;
-  r_cr2.y = r_cb.z * r_cd.x - r_cd.z * r_cb.x;
-  r_cr2.z = r_cb.x * r_cd.y - r_cd.x * r_cb.y;
-  r_cr2_x2 = r_cr2.x * r_cr2.x;
-  r_cr2_y2 = r_cr2.y * r_cr2.y;
-  r_cr2_z2 = r_cr2.z * r_cr2.z;
-  r_cr2_sqr = r_cr2_x2 + r_cr2_y2 + r_cr2_z2;
-  r_cr2.length = sqrt(r_cr2_sqr);
-
-  r_cr1_r_cr2 = r_cr1.length * r_cr2.length;
-
-  /**********************************************************************
-   *
-   * dot product and angle calculations 
-   *
-   ***********************************************************************/
-  
-  double cr1_dot_cr2; /* the dot product of the cr1 and cr2 vectors */
-  double cos_phi; /* the cosine of the torsion angle */
-
-  cr1_dot_cr2 = r_cr1.x * r_cr2.x + r_cr1.y * r_cr2.y + r_cr1.z * r_cr2.z;
-  
-  cos_phi = cr1_dot_cr2 / r_cr1_r_cr2;
-  
-   /* adjust for the granularity of the numbers for angles near 0 or pi */
-
-  if(cos_phi > 1.0) cos_phi = 1.0;
-  if(cos_phi < -1.0) cos_phi = -1.0;
-
-
-  /********************************************************************
-   *
-   * This next section calculates derivatives needed for the force
-   * calculation
-   *
-   ********************************************************************/
-
-
-  /* the derivatives of cos phi with respect to the x, y,
-     and z components of vectors cr1 and cr2. */
-  double d_cos_dx_cr1;
-  double d_cos_dy_cr1;
-  double d_cos_dz_cr1;
-  double d_cos_dx_cr2;
-  double d_cos_dy_cr2;
-  double d_cos_dz_cr2;
-
-  d_cos_dx_cr1 = r_cr2.x / r_cr1_r_cr2 - (cos_phi * r_cr1.x) / r_cr1_sqr;
-  d_cos_dy_cr1 = r_cr2.y / r_cr1_r_cr2 - (cos_phi * r_cr1.y) / r_cr1_sqr;
-  d_cos_dz_cr1 = r_cr2.z / r_cr1_r_cr2 - (cos_phi * r_cr1.z) / r_cr1_sqr;
-
-  d_cos_dx_cr2 = r_cr1.x / r_cr1_r_cr2 - (cos_phi * r_cr2.x) / r_cr2_sqr;
-  d_cos_dy_cr2 = r_cr1.y / r_cr1_r_cr2 - (cos_phi * r_cr2.y) / r_cr2_sqr;
-  d_cos_dz_cr2 = r_cr1.z / r_cr1_r_cr2 - (cos_phi * r_cr2.z) / r_cr2_sqr;
-
-  /***********************************************************************
-   *
-   * Calculate the actual forces and place them in the atoms. 
-   *
-   ***********************************************************************/
-
-  double force; /*the force scaling factor */
-
-  force = torsion_force(cos_phi);
-
-  aF[0] = force * (d_cos_dy_cr1 * r_cb.z - d_cos_dz_cr1 * r_cb.y);
-  aF[1] = force * (d_cos_dz_cr1 * r_cb.x - d_cos_dx_cr1 * r_cb.z);
-  aF[2] = force * (d_cos_dx_cr1 * r_cb.y - d_cos_dy_cr1 * r_cb.x);
-
-  bF[0] = force * (  d_cos_dy_cr1 * (r_ab.z - r_cb.z)
-		   - d_cos_dy_cr2 *  r_cd.z	  
-		   + d_cos_dz_cr1 * (r_cb.y - r_ab.y)
-		   + d_cos_dz_cr2 *  r_cd.y);
-  bF[1] = force * (  d_cos_dx_cr1 * (r_cb.z - r_ab.z)
-		   + d_cos_dx_cr2 *  r_cd.z	  
-		   + d_cos_dz_cr1 * (r_ab.x - r_cb.x)
-		   - d_cos_dz_cr2 *  r_cd.x);
-  bF[2] = force * (  d_cos_dx_cr1 * (r_ab.y - r_cb.y)
-		   - d_cos_dx_cr2 *  r_cd.y	  
-		   + d_cos_dy_cr1 * (r_cb.x - r_ab.x)
-		   + d_cos_dy_cr2 *  r_cd.x);
-
-  cF[0] = force * (- d_cos_dy_cr1 *  r_ab.z
-		   - d_cos_dy_cr2 * (r_cb.z - r_cd.z)
-		   + d_cos_dz_cr1 *  r_ab.y
-		   - d_cos_dz_cr2 * (r_cd.y - r_cb.y));
-  cF[1] = force * (  d_cos_dx_cr1 *  r_ab.z
-		   - d_cos_dx_cr2 * (r_cd.z - r_cb.z)
-		   - d_cos_dz_cr1 *  r_ab.x
-		   - d_cos_dz_cr2 * (r_cb.x - r_cd.x));
-  cF[2] = force * (- d_cos_dx_cr1 *  r_ab.y
-		   - d_cos_dx_cr2 * (r_cb.y - r_cd.y)
-		   + d_cos_dy_cr1 *  r_ab.x
-		   - d_cos_dy_cr2 * (r_cd.x - r_cb.x));
-
-  dF[0] = force * (d_cos_dy_cr2 * r_cb.z - d_cos_dz_cr2 * r_cb.y);
-  dF[1] = force * (d_cos_dz_cr2 * r_cb.x - d_cos_dx_cr2 * r_cb.z);
-  dF[2] = force * (d_cos_dx_cr2 * r_cb.y - d_cos_dy_cr2 * r_cb.x);
-
-
-  c_p_a->addFrc(aF);
-  c_p_b->addFrc(bF);
-  c_p_c->addFrc(cF);
-  c_p_d->addFrc(dF);
 }

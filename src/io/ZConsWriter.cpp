@@ -1,40 +1,75 @@
+ /*
+ * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
+ *
+ * The University of Notre Dame grants you ("Licensee") a
+ * non-exclusive, royalty free, license to use, modify and
+ * redistribute this software in source and binary code form, provided
+ * that the following conditions are met:
+ *
+ * 1. Acknowledgement of the program authors must be made in any
+ *    publication of scientific results based in part on use of the
+ *    program.  An acceptable form of acknowledgement is citation of
+ *    the article in which the program was described (Matthew
+ *    A. Meineke, Charles F. Vardeman II, Teng Lin, Christopher
+ *    J. Fennell and J. Daniel Gezelter, "OOPSE: An Object-Oriented
+ *    Parallel Simulation Engine for Molecular Dynamics,"
+ *    J. Comput. Chem. 26, pp. 252-271 (2005))
+ *
+ * 2. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ *
+ * 3. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the
+ *    distribution.
+ *
+ * This software is provided "AS IS," without a warranty of any
+ * kind. All express or implied conditions, representations and
+ * warranties, including any implied warranty of merchantability,
+ * fitness for a particular purpose or non-infringement, are hereby
+ * excluded.  The University of Notre Dame and its licensors shall not
+ * be liable for any damages suffered by licensee as a result of
+ * using, modifying or distributing the software or its
+ * derivatives. In no event will the University of Notre Dame or its
+ * licensors be liable for any lost revenue, profit or data, or for
+ * direct, indirect, special, consequential, incidental or punitive
+ * damages, however caused and regardless of the theory of liability,
+ * arising out of the use of or inability to use software, even if the
+ * University of Notre Dame has been advised of the possibility of
+ * such damages.
+ */
+ 
 #include <algorithm>
 #include <iostream>
 #include <vector>
-//#include <pair>
+
+
 #include "io/ZConsWriter.hpp"
 #include "utils/simError.h"
 
-using namespace std;
 
-ZConsWriter::ZConsWriter(const char* filename, vector<ZConsParaItem>* thePara)
-{
+namespace oopse {
+ZConsWriter::ZConsWriter(SimInfo* info, const std::string& filename) : info_(info) {
   //use master - slave mode, only master node writes to disk
 #ifdef IS_MPI
-  if(worldRank == 0){
+    if(worldRank == 0){
 #endif
 
-   output.open(filename);
-   
-   if(!output){
-     sprintf( painCave.errMsg,
-              "Could not open %s for z constrain output \n",
-         filename);
-     painCave.isFatal = 1;
-     simError();
-   }
-   output << "#number of z constrain molecules" << endl;
-   output << "#global Index of molecule\tzPos" << endl;
-   output << "#every frame will contain below data" <<endl;
-   output << "#time(fs)" << endl;
-   output << "#number of fixed z-constrain molecules" << endl;
-   output << "#global Index of molecule\tzconstrain force\tcurrentZPos" << endl;
+    output_.open(filename.c_str());
 
-   parameters = thePara;
-   writeZPos();
+    if(!output_){
+         sprintf( painCave.errMsg,
+                  "Could not open %s for z constrain output_ \n", filename.c_str());
+         painCave.isFatal = 1;
+         simError();
+    }
+
+    output_ << "//time(fs)" << std::endl;
+    output_ << "//number of fixed z-constrain molecules" << std::endl;
+    output_ << "//global Index of molecule\tzconstrain force\tcurrentZPos" << std::endl;
 
 #ifdef IS_MPI
-  }
+    }
 #endif  
 
 }
@@ -45,139 +80,90 @@ ZConsWriter::~ZConsWriter()
 #ifdef IS_MPI
   if(worldRank == 0 ){
 #endif  
-  output.close();  
+  output_.close();  
 #ifdef IS_MPI  
   }
 #endif
 }
 
-/**
- *
- */
-void ZConsWriter::writeFZ(double time, int num, int* index, double* fz, double* curZPos, double* zpos){
-
+void ZConsWriter::writeFZ(const std::list<ZconstraintMol>& fixedZmols){
 #ifndef IS_MPI
-  output << time << endl;
-  output << num << endl;
-  
-  for(int i = 0; i < num; i++)
-    output << index[i] <<"\t" << fz[i] << "\t" << curZPos[i] << "\t" << zpos[i] <<endl;
+    output_ << info_->getSnapshotManager()->getCurrentSnapshot()->getTime() << std::endl;
+    output_ << fixedZmols.size() << std::endl;
 
+    std::list<ZconstraintMol>::const_iterator i;
+    for ( i = fixedZmols.begin(); i != fixedZmols.end(); ++i) {
+        output_ << i->mol->getGlobalIndex() <<"\t" << i->fz << "\t" << i->zpos << "\t" << i->param.zTargetPos <<std::endl;
+    }
 #else
-  int totalNum;
-  MPI_Allreduce(&num, &totalNum, 1, MPI_INT,MPI_SUM, MPI_COMM_WORLD); 
-  
-  if(worldRank == 0){
-    output << time << endl;
-    output << totalNum << endl;
-  }
-  
-  int whichNode;
-  enum CommType { RequesPosAndForce, EndOfRequest} status;
-  double pos;
-  double force;
-  double zconsPos;
-  int localIndex;
-  MPI_Status ierr;
-  int tag = 0;
-  
-  if(worldRank == 0){
+    int nproc;
+    MPI_Comm_size(MPI_COMM_WORLD, &nproc);
+    const int masterNode = 0;
+    int myNode = worldRank;
+    std::vector<int> tmpNFixedZmols(nproc, 0);
+    std::vector<int> nFixedZmolsInProc(nproc, 0);
+    tmpNFixedZmols[myNode] = fixedZmols.size();
     
-    int globalIndexOfCurMol;
-    int *MolToProcMap;
-    MolToProcMap = mpiSim->getMolToProcMap();
+    //do MPI_ALLREDUCE to exchange the total number of atoms, rigidbodies and cutoff groups
+    MPI_Allreduce(&tmpNFixedZmols[0], &nFixedZmolsInProc[0], nproc, MPI_INT,
+                  MPI_SUM, MPI_COMM_WORLD);
+
+    MPI_Status ierr;
+    int zmolIndex;
+    double data[3];
     
-    for(int i = 0; i < (int)(parameters->size()); i++){
-      
-      globalIndexOfCurMol = (*parameters)[i].zconsIndex;
-      whichNode = MolToProcMap[globalIndexOfCurMol];
-      
-      if(whichNode == 0){
-        
-       for(int j = 0; j < num; j++)
-        if(index[j] == globalIndexOfCurMol){
-          localIndex = j;
-          break;
+    if (masterNode == 0) {
+
+        std::vector<ZconsData> zconsData;
+        ZconsData tmpData;       
+        for(int i =0 ; i < nproc; ++i) {
+            if (i == masterNode) {
+                std::list<ZconstraintMol>::const_iterator j;
+                for ( j = fixedZmols.begin(); j != fixedZmols.end(); ++j) {
+                    tmpData.zmolIndex = j->mol->getGlobalIndex() ;
+                    tmpData.zforce= j->fz;
+                    tmpData.zpos = j->zpos;
+                    tmpData.zconsPos = j->param.zTargetPos;
+                    zconsData.push_back(tmpData);
+                }                
+
+            } else {
+                for(int k =0 ; k < nFixedZmolsInProc[i]; ++k) {
+                    MPI_Recv(&zmolIndex, 1, MPI_INT, i, 0, MPI_COMM_WORLD,&ierr);
+                    MPI_Recv(data, 3, MPI_DOUBLE, i, 0, MPI_COMM_WORLD,&ierr);
+                    tmpData.zmolIndex = zmolIndex;
+                    tmpData.zforce= data[0];
+                    tmpData.zpos = data[1];
+                    tmpData.zconsPos = data[2];
+                    zconsData.push_back(tmpData);                                        
+                }
+            }
+            
         }
 
-      force = fz[localIndex];
-      pos = curZPos[localIndex];
-      
-      }
-      else{
-        status = RequesPosAndForce;
-        MPI_Send(&status, 1, MPI_INT, whichNode, tag, MPI_COMM_WORLD);
-        MPI_Send(&globalIndexOfCurMol, 1, MPI_INT, whichNode, tag, MPI_COMM_WORLD);
-        MPI_Recv(&force, 1, MPI_DOUBLE, whichNode, tag, MPI_COMM_WORLD, &ierr);
-        MPI_Recv(&pos, 1, MPI_DOUBLE, whichNode, tag, MPI_COMM_WORLD, &ierr);
-        MPI_Recv(&zconsPos, 1, MPI_DOUBLE, whichNode, tag, MPI_COMM_WORLD, &ierr);
-      }
 
-     output << globalIndexOfCurMol << "\t" << force << "\t" << pos << "\t"<<  zconsPos << endl;
-              
-    } //End of Request Loop
-    
-    //Send ending request message to slave nodes    
-    status = EndOfRequest;
-    for(int i =1; i < mpiSim->getNProcessors(); i++)
-      MPI_Send(&status, 1, MPI_INT, i, tag, MPI_COMM_WORLD);
-     
-  }
-  else{
-  
-    int whichMol;
-    bool done = false;
+        output_ << info_->getSnapshotManager()->getCurrentSnapshot()->getTime() << std::endl;
+        output_ << zconsData.size() << std::endl;
 
-    while (!done){  
-      
-      MPI_Recv(&status, 1, MPI_INT, 0, tag, MPI_COMM_WORLD, &ierr);
-    
-      switch (status){
-          
-         case RequesPosAndForce : 
-          
-           MPI_Recv(&whichMol, 1, MPI_INT, 0, tag, MPI_COMM_WORLD,&ierr);
-    
-           for(int i = 0; i < num; i++)
-           if(index[i] == whichMol){
-             localIndex = i;
-             break;
-           }
-    
-           MPI_Send(&fz[localIndex], 1, MPI_DOUBLE, 0, tag, MPI_COMM_WORLD);    
-           MPI_Send(&curZPos[localIndex], 1, MPI_DOUBLE, 0, tag, MPI_COMM_WORLD);    
-           MPI_Send(&zpos[localIndex], 1, MPI_DOUBLE, 0, tag, MPI_COMM_WORLD);     
-           break;
-       
-        case EndOfRequest :
-         
-         done = true;
-         break;
-      }
-      
+        std::vector<ZconsData>::iterator l;
+        for (l = zconsData.begin(); l != zconsData.end(); ++l) {
+            output_ << l->zmolIndex << "\t" << l->zforce << "\t" << l->zpos << "\t" <<  l->zconsPos << std::endl;
+        }
+        
+    } else {
+
+        std::list<ZconstraintMol>::const_iterator j;
+        for (j = fixedZmols.begin(); j != fixedZmols.end(); ++j) {
+            zmolIndex = j->mol->getGlobalIndex();            
+            data[0] = j->fz;
+            data[1] = j->zpos;
+            data[2] = j->param.zTargetPos;
+            MPI_Send(&zmolIndex, 1, MPI_INT, masterNode, 0, MPI_COMM_WORLD);
+            MPI_Send(data, 3, MPI_DOUBLE, masterNode, 0, MPI_COMM_WORLD);
+            
+        }
     }
-          
-  }
-
 #endif
-
 }
 
-/*
- *
- */
-void ZConsWriter::writeZPos(){
-
-#ifdef IS_MPI
-  if(worldRank == 0){
-#endif
-    
-    output << parameters->size() << endl;     
-    
-    for(int i =0 ; i < (int)(parameters->size()); i++)
-      output << (*parameters)[i].zconsIndex << "\t" <<  (*parameters)[i].zPos << endl;
-
-#ifdef IS_MPI
-  }
-#endif
 }

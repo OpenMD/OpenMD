@@ -1,101 +1,132 @@
-#include <iostream>
-#include <stdlib.h>
+ /*
+ * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
+ *
+ * The University of Notre Dame grants you ("Licensee") a
+ * non-exclusive, royalty free, license to use, modify and
+ * redistribute this software in source and binary code form, provided
+ * that the following conditions are met:
+ *
+ * 1. Acknowledgement of the program authors must be made in any
+ *    publication of scientific results based in part on use of the
+ *    program.  An acceptable form of acknowledgement is citation of
+ *    the article in which the program was described (Matthew
+ *    A. Meineke, Charles F. Vardeman II, Teng Lin, Christopher
+ *    J. Fennell and J. Daniel Gezelter, "OOPSE: An Object-Oriented
+ *    Parallel Simulation Engine for Molecular Dynamics,"
+ *    J. Comput. Chem. 26, pp. 252-271 (2005))
+ *
+ * 2. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ *
+ * 3. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the
+ *    distribution.
+ *
+ * This software is provided "AS IS," without a warranty of any
+ * kind. All express or implied conditions, representations and
+ * warranties, including any implied warranty of merchantability,
+ * fitness for a particular purpose or non-infringement, are hereby
+ * excluded.  The University of Notre Dame and its licensors shall not
+ * be liable for any damages suffered by licensee as a result of
+ * using, modifying or distributing the software or its
+ * derivatives. In no event will the University of Notre Dame or its
+ * licensors be liable for any lost revenue, profit or data, or for
+ * direct, indirect, special, consequential, incidental or punitive
+ * damages, however caused and regardless of the theory of liability,
+ * arising out of the use of or inability to use software, even if the
+ * University of Notre Dame has been advised of the possibility of
+ * such damages.
+ */
+ 
+#include <functional>
+#include <iterator>
+#include <utility>
 
 #include "brains/Exclude.hpp"
 
-Exclude* Exclude::_instance = 0;
+namespace oopse {
 
-Exclude* Exclude::Instance() {
-  if (_instance == 0) {
-    _instance = new Exclude;
-  }
-  return _instance;
+int *Exclude::getExcludeList() {
+
+    if (modified_) {
+        excludeList_.clear();
+
+        for (std::set<std::pair<int,int> >::iterator i = excludeSet_.begin();i != excludeSet_.end(); ++i) {
+            excludeList_.push_back(i->first + 1);
+            excludeList_.push_back(i->second + 1);            
+        }
+        modified_ = false;
+    } 
+
+    return excludeList_.size() > 0 ? &(excludeList_[0]) : NULL;    
 }
-
-Exclude::Exclude(){   
-  exPairs = NULL;
-  newFortranArrayNeeded = 1;
-}
-
-Exclude::~Exclude() {
-  if (exPairs != NULL) {
-    delete[] exPairs;
-  }
-  delete _instance;
-}
-  
-int* Exclude::getFortranArray(){
-  
-  set<pair<int, int> >::iterator  i;
-  int j;
-
-  if (newFortranArrayNeeded != 0) {
-    delete[] exPairs;
-    exPairs = new int[2*getSize()];  
-    j = 0;
-    for(i = excludeSet.begin(); i != excludeSet.end(); ++i) {   
-      exPairs[j] = (*i).first;
-      j++;
-      exPairs[j] = (*i).second;
-      j++;
-    }
-    newFortranArrayNeeded = 0;
-  }
- 
-  return exPairs;  
-}
-
 
 void Exclude::addPair(int i, int j) {
-  
-  if (!hasPair(i, j)) {
- 
-    if (i != j) {
-      
-      if (i < j) 
-        excludeSet.insert(make_pair(i, j));
-      else 
-        excludeSet.insert(make_pair(j, i));
+
+    if (i == j) {
+        return;
+    } else if (i > j) {
+        std::swap(i, j);
     }
 
-    newFortranArrayNeeded = 1;
-  }
+    std::set<std::pair<int, int> >::iterator iter = excludeSet_.find(std::make_pair(i, j));
 
+    if (iter == excludeSet_.end()) {
+        excludeSet_.insert(std::make_pair(i, j));
+        modified_ = true;
+    }
 }
 
+void Exclude::removePair(int i, int j) {
 
-void Exclude::printMe( void ){
+    if (i == j) {
+        return;
+    } else if (i > j) {
+        std::swap(i, j);
+    }
 
-  set<pair<int, int> >::iterator  i;
-  int index;
-  
-  index = 0;
-  for(i = excludeSet.begin(); i != excludeSet.end(); ++i) {   
 
-    std::cerr << "exclude[" << index << "] i, j: " << (*i).first << " - " << (*i).second << "\n";
-    index++;
-  
-  }  
+    std::set<std::pair<int, int> >::iterator iter = excludeSet_.find(std::make_pair(i, j));
+
+    if (iter != excludeSet_.end()) {
+        excludeSet_.erase(iter);
+        modified_ = true;
+    }
 }
 
-int Exclude::hasPair(int i, int j) {
+bool Exclude::hasPair(int i, int j) {
 
-  set<pair<int, int> >::iterator  position;
+    if (i == j) {
+        return false;
+    } else if (i > j) {
+        std::swap(i, j);
+    }
 
-  if (i != j) {   
-    if (i < j) 
-      position = excludeSet.find(make_pair(i, j));
-    else 
-      position = excludeSet.find(make_pair(j, i));
-
-    if (position != excludeSet.end()) 
-      return 1;
-    else
-      return 0;
-  } else 
-    return 0;
+    std::set<std::pair<int, int> >::iterator  iter = excludeSet_.find(std::make_pair(i, j));
+    return iter == excludeSet_.end() ? false : true; 
 }
 
 int Exclude::getSize() {
-  return excludeSet.size();
+    return excludeSet_.size();
 }
+
+std::ostream& operator <<(std::ostream& o, Exclude& e) {
+    std::set<std::pair<int, int> >::iterator i;
+
+    int index;
+
+    index = 0;
+
+    for(i = e.excludeSet_.begin(); i != e.excludeSet_.end(); ++i) {
+        o << "exclude[" << index << "] i, j: " << (*i).first << " - "
+            << (*i).second << "\n";
+        index++;
+    }
+
+    return o;
+}
+
+}
+
+  

@@ -1,3 +1,44 @@
+!!
+!! Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
+!!
+!! The University of Notre Dame grants you ("Licensee") a
+!! non-exclusive, royalty free, license to use, modify and
+!! redistribute this software in source and binary code form, provided
+!! that the following conditions are met:
+!!
+!! 1. Acknowledgement of the program authors must be made in any
+!!    publication of scientific results based in part on use of the
+!!    program.  An acceptable form of acknowledgement is citation of
+!!    the article in which the program was described (Matthew
+!!    A. Meineke, Charles F. Vardeman II, Teng Lin, Christopher
+!!    J. Fennell and J. Daniel Gezelter, "OOPSE: An Object-Oriented
+!!    Parallel Simulation Engine for Molecular Dynamics,"
+!!    J. Comput. Chem. 26, pp. 252-271 (2005))
+!!
+!! 2. Redistributions of source code must retain the above copyright
+!!    notice, this list of conditions and the following disclaimer.
+!!
+!! 3. Redistributions in binary form must reproduce the above copyright
+!!    notice, this list of conditions and the following disclaimer in the
+!!    documentation and/or other materials provided with the
+!!    distribution.
+!!
+!! This software is provided "AS IS," without a warranty of any
+!! kind. All express or implied conditions, representations and
+!! warranties, including any implied warranty of merchantability,
+!! fitness for a particular purpose or non-infringement, are hereby
+!! excluded.  The University of Notre Dame and its licensors shall not
+!! be liable for any damages suffered by licensee as a result of
+!! using, modifying or distributing the software or its
+!! derivatives. In no event will the University of Notre Dame or its
+!! licensors be liable for any lost revenue, profit or data, or for
+!! direct, indirect, special, consequential, incidental or punitive
+!! damages, however caused and regardless of the theory of liability,
+!! arising out of the use of or inability to use software, even if the
+!! University of Notre Dame has been advised of the possibility of
+!! such damages.
+!!
+
 !! This Module Calculates forces due to SSD potential and VDW interactions
 !! [Chandra and Ichiye, J. Chem. Phys. 111, 2701 (1999)].
 
@@ -9,70 +50,101 @@
 !! @author Matthew Meineke
 !! @author Christopher Fennel
 !! @author J. Daniel Gezelter
-!! @version $Id: sticky.F90,v 1.2 2004-10-20 21:52:20 gezelter Exp $, $Date: 2004-10-20 21:52:20 $, $Name: not supported by cvs2svn $, $Revision: 1.2 $
+!! @version $Id: sticky.F90,v 1.3 2005-01-12 22:40:45 gezelter Exp $, $Date: 2005-01-12 22:40:45 $, $Name: not supported by cvs2svn $, $Revision: 1.3 $
 
-module sticky_pair
+module sticky
 
   use force_globals
   use definitions
+  use atype_module
+  use vector_class
   use simulation
+  use status
 #ifdef IS_MPI
   use mpiSimulation
 #endif
-
   implicit none
 
   PRIVATE
 
-  logical, save :: sticky_initialized = .false.
-  real( kind = dp ), save :: SSD_w0 = 0.0_dp
-  real( kind = dp ), save :: SSD_v0 = 0.0_dp
-  real( kind = dp ), save :: SSD_v0p = 0.0_dp
-  real( kind = dp ), save :: SSD_rl = 0.0_dp
-  real( kind = dp ), save :: SSD_ru = 0.0_dp
-  real( kind = dp ), save :: SSD_rlp = 0.0_dp
-  real( kind = dp ), save :: SSD_rup = 0.0_dp
-  real( kind = dp ), save :: SSD_rbig = 0.0_dp
-
-  public :: check_sticky_FF
-  public :: set_sticky_params
+  public :: newStickyType
   public :: do_sticky_pair
+
+
+  type :: StickyList
+     integer :: c_ident
+     real( kind = dp ) :: w0 = 0.0_dp
+     real( kind = dp ) :: v0 = 0.0_dp
+     real( kind = dp ) :: v0p = 0.0_dp
+     real( kind = dp ) :: rl = 0.0_dp
+     real( kind = dp ) :: ru = 0.0_dp
+     real( kind = dp ) :: rlp = 0.0_dp
+     real( kind = dp ) :: rup = 0.0_dp
+     real( kind = dp ) :: rbig = 0.0_dp
+  end type StickyList
+  
+  type(StickyList), dimension(:),allocatable :: StickyMap
 
 contains
 
-  subroutine check_sticky_FF(status)
-    integer :: status 
-    status = -1
-    if (sticky_initialized) status = 0
-    return
-  end subroutine check_sticky_FF
+  subroutine newStickyType(c_ident, w0, v0, v0p, rl, ru, rlp, rup, isError)
 
-  subroutine set_sticky_params(sticky_w0, sticky_v0, sticky_v0p, &
-       sticky_rl, sticky_ru, sticky_rlp, sticky_rup)
+    integer, intent(in) :: c_ident
+    integer, intent(inout) :: isError
+    real( kind = dp ), intent(in) :: w0, v0, v0p
+    real( kind = dp ), intent(in) :: rl, ru
+    real( kind = dp ), intent(in) :: rlp, rup
+    integer :: nATypes, myATID
 
-    real( kind = dp ), intent(in) :: sticky_w0, sticky_v0, sticky_v0p
-    real( kind = dp ), intent(in) :: sticky_rl, sticky_ru
-    real( kind = dp ), intent(in) :: sticky_rlp, sticky_rup
     
+    isError = 0
+    myATID = getFirstMatchingElement(atypes, "c_ident", c_ident)
+    
+    !! Be simple-minded and assume that we need a StickyMap that
+    !! is the same size as the total number of atom types
+
+    if (.not.allocated(StickyMap)) then
+
+       nAtypes = getSize(atypes)
+
+       if (nAtypes == 0) then
+          isError = -1
+          return
+       end if
+
+       if (.not. allocated(StickyMap)) then
+          allocate(StickyMap(nAtypes))
+       endif
+
+    end if
+
+    if (myATID .gt. size(StickyMap)) then
+       isError = -1
+       return
+    endif
+
+    ! set the values for StickyMap for this atom type:
+
+    StickyMap(myATID)%c_ident = c_ident
+
     ! we could pass all 5 parameters if we felt like it...
     
-    SSD_w0 = sticky_w0
-    SSD_v0 = sticky_v0
-    SSD_v0p = sticky_v0p
-    SSD_rl = sticky_rl
-    SSD_ru = sticky_ru
-    SSD_rlp = sticky_rlp
-    SSD_rup = sticky_rup
+    StickyMap(myATID)%w0 = w0
+    StickyMap(myATID)%v0 = v0
+    StickyMap(myATID)%v0p = v0p
+    StickyMap(myATID)%rl = rl
+    StickyMap(myATID)%ru = ru
+    StickyMap(myATID)%rlp = rlp
+    StickyMap(myATID)%rup = rup
 
-    if (SSD_ru .gt. SSD_rup) then
-       SSD_rbig = SSD_ru
+    if (StickyMap(myATID)%ru .gt. StickyMap(myATID)%rup) then
+       StickyMap(myATID)%rbig = StickyMap(myATID)%ru
     else
-       SSD_rbig = SSD_rup
+       StickyMap(myATID)%rbig = StickyMap(myATID)%rup
     endif
    
-    sticky_initialized = .true.
     return
-  end subroutine set_sticky_params
+  end subroutine newStickyType
 
   subroutine do_sticky_pair(atom1, atom2, d, rij, r2, sw, vpair, fpair, &
        pot, A, f, t, do_pot)
@@ -113,14 +185,47 @@ contains
     real (kind=dp) :: radcomxi, radcomyi, radcomzi
     real (kind=dp) :: radcomxj, radcomyj, radcomzj
     integer :: id1, id2
+    integer :: me1, me2
+   real (kind=dp) :: w0, v0, v0p, rl, ru, rlp, rup, rbig
 
-    if (.not.sticky_initialized) then
-       write(*,*) 'Sticky forces not initialized!'
+if (.not.allocated(StickyMap)) then
+       call handleError("sticky", "no StickyMap was present before first call of do_sticky_pair!")
        return
+    end if
+    
+#ifdef IS_MPI
+    me1 = atid_Row(atom1)
+    me2 = atid_Col(atom2)
+#else
+    me1 = atid(atom1)
+    me2 = atid(atom2)
+#endif
+
+    if (me1.eq.me2) then
+       w0  = StickyMap(me1)%w0 
+       v0  = StickyMap(me1)%v0 
+       v0p = StickyMap(me1)%v0p
+       rl  = StickyMap(me1)%rl 
+       ru  = StickyMap(me1)%ru 
+       rlp = StickyMap(me1)%rlp
+       rup = StickyMap(me1)%rup
+       rbig = StickyMap(me1)%rbig
+    else
+       ! This is silly, but if you want 2 sticky types in your 
+       ! simulation, we'll let you do it with the Lorentz-
+       ! Berthelot mixing rules.
+       ! (Warning: you'll be SLLLLLLLLLLLLLLLOOOOOOOOOOWWWWWWWWWWW)
+       rl   = 0.5_dp * ( StickyMap(me1)%rl + StickyMap(me2)%rl )
+       ru   = 0.5_dp * ( StickyMap(me1)%ru + StickyMap(me2)%ru )
+       rlp  = 0.5_dp * ( StickyMap(me1)%rlp + StickyMap(me2)%rlp )
+       rup  = 0.5_dp * ( StickyMap(me1)%rup + StickyMap(me2)%rup )
+       rbig = max(ru, rup)
+       w0  = sqrt( StickyMap(me1)%w0   * StickyMap(me2)%w0  )
+       v0  = sqrt( StickyMap(me1)%v0   * StickyMap(me2)%v0  )
+       v0p = sqrt( StickyMap(me1)%v0p  * StickyMap(me2)%v0p )
     endif
 
-
-    if ( rij .LE. SSD_rbig ) then
+    if ( rij .LE. rbig ) then
 
        r3 = r2*rij
        r5 = r3*r2
@@ -165,7 +270,7 @@ contains
        yj2 = yj*yj
        zj2 = zj*zj
 
-       call calc_sw_fnc(rij, s, sp, dsdr, dspdr)
+       call calc_sw_fnc(rij, rl, ru, rlp, rup, s, sp, dsdr, dspdr)
 
        wi = 2.0d0*(xi2-yi2)*zi / r3
        wj = 2.0d0*(xj2-yj2)*zj / r3
@@ -177,17 +282,17 @@ contains
        zjf = zj/rij - 0.6d0
        zjs = zj/rij + 0.8d0
 
-       wip = zif*zif*zis*zis - SSD_w0
-       wjp = zjf*zjf*zjs*zjs - SSD_w0
+       wip = zif*zif*zis*zis - w0
+       wjp = zjf*zjf*zjs*zjs - w0
        wp = wip + wjp
 
-       vpair = vpair + 0.5d0*(SSD_v0*s*w + SSD_v0p*sp*wp)
+       vpair = vpair + 0.5d0*(v0*s*w + v0p*sp*wp)
        if (do_pot) then
 #ifdef IS_MPI 
-          pot_row(atom1) = pot_row(atom1) + 0.25d0*(SSD_v0*s*w + SSD_v0p*sp*wp)*sw
-          pot_col(atom2) = pot_col(atom2) + 0.25d0*(SSD_v0*s*w + SSD_v0p*sp*wp)*sw
+          pot_row(atom1) = pot_row(atom1) + 0.25d0*(v0*s*w + v0p*sp*wp)*sw
+          pot_col(atom2) = pot_col(atom2) + 0.25d0*(v0*s*w + v0p*sp*wp)*sw
 #else
-          pot = pot + 0.5d0*(SSD_v0*s*w + SSD_v0p*sp*wp)*sw
+          pot = pot + 0.5d0*(v0*s*w + v0p*sp*wp)*sw
 #endif  
        endif
 
@@ -229,13 +334,13 @@ contains
        ! do the torques first since they are easy:
        ! remember that these are still in the body fixed axes
 
-       txi = 0.5d0*(SSD_v0*s*dwidux + SSD_v0p*sp*dwipdux)*sw
-       tyi = 0.5d0*(SSD_v0*s*dwiduy + SSD_v0p*sp*dwipduy)*sw
-       tzi = 0.5d0*(SSD_v0*s*dwiduz + SSD_v0p*sp*dwipduz)*sw
+       txi = 0.5d0*(v0*s*dwidux + v0p*sp*dwipdux)*sw
+       tyi = 0.5d0*(v0*s*dwiduy + v0p*sp*dwipduy)*sw
+       tzi = 0.5d0*(v0*s*dwiduz + v0p*sp*dwipduz)*sw
 
-       txj = 0.5d0*(SSD_v0*s*dwjdux + SSD_v0p*sp*dwjpdux)*sw
-       tyj = 0.5d0*(SSD_v0*s*dwjduy + SSD_v0p*sp*dwjpduy)*sw
-       tzj = 0.5d0*(SSD_v0*s*dwjduz + SSD_v0p*sp*dwjpduz)*sw
+       txj = 0.5d0*(v0*s*dwjdux + v0p*sp*dwjpdux)*sw
+       tyj = 0.5d0*(v0*s*dwjduy + v0p*sp*dwjpduy)*sw
+       tzj = 0.5d0*(v0*s*dwjduz + v0p*sp*dwjpduz)*sw
 
        ! go back to lab frame using transpose of rotation matrix:
 
@@ -266,13 +371,13 @@ contains
 
        ! first rotate the i terms back into the lab frame:
 
-       radcomxi = (SSD_v0*s*dwidx+SSD_v0p*sp*dwipdx)*sw
-       radcomyi = (SSD_v0*s*dwidy+SSD_v0p*sp*dwipdy)*sw
-       radcomzi = (SSD_v0*s*dwidz+SSD_v0p*sp*dwipdz)*sw
+       radcomxi = (v0*s*dwidx+v0p*sp*dwipdx)*sw
+       radcomyi = (v0*s*dwidy+v0p*sp*dwipdy)*sw
+       radcomzi = (v0*s*dwidz+v0p*sp*dwipdz)*sw
 
-       radcomxj = (SSD_v0*s*dwjdx+SSD_v0p*sp*dwjpdx)*sw
-       radcomyj = (SSD_v0*s*dwjdy+SSD_v0p*sp*dwjpdy)*sw
-       radcomzj = (SSD_v0*s*dwjdz+SSD_v0p*sp*dwjpdz)*sw
+       radcomxj = (v0*s*dwjdx+v0p*sp*dwjpdx)*sw
+       radcomyj = (v0*s*dwjdy+v0p*sp*dwjpdy)*sw
+       radcomzj = (v0*s*dwjdz+v0p*sp*dwjpdz)*sw
 
 #ifdef IS_MPI    
        fxii = a_Row(1,atom1)*(radcomxi) + &
@@ -326,9 +431,9 @@ contains
 
        ! now assemble these with the radial-only terms:
 
-       fxradial = 0.5d0*(SSD_v0*dsdr*drdx*w + SSD_v0p*dspdr*drdx*wp + fxii + fxji)
-       fyradial = 0.5d0*(SSD_v0*dsdr*drdy*w + SSD_v0p*dspdr*drdy*wp + fyii + fyji)
-       fzradial = 0.5d0*(SSD_v0*dsdr*drdz*w + SSD_v0p*dspdr*drdz*wp + fzii + fzji)
+       fxradial = 0.5d0*(v0*dsdr*drdx*w + v0p*dspdr*drdx*wp + fxii + fxji)
+       fyradial = 0.5d0*(v0*dsdr*drdy*w + v0p*dspdr*drdy*wp + fyii + fyji)
+       fzradial = 0.5d0*(v0*dsdr*drdz*w + v0p*dspdr*drdz*wp + fzii + fzji)
 
 #ifdef IS_MPI
        f_Row(1,atom1) = f_Row(1,atom1) + fxradial
@@ -367,50 +472,50 @@ contains
   end subroutine do_sticky_pair
 
   !! calculates the switching functions and their derivatives for a given
-  subroutine calc_sw_fnc(r, s, sp, dsdr, dspdr)
+  subroutine calc_sw_fnc(r, rl, ru, rlp, rup, s, sp, dsdr, dspdr)
     
-    real (kind=dp), intent(in) :: r
+    real (kind=dp), intent(in) :: r, rl, ru, rlp, rup
     real (kind=dp), intent(inout) :: s, sp, dsdr, dspdr
     
     ! distances must be in angstroms
     
-    if (r.lt.SSD_rl) then
+    if (r.lt.rl) then
        s = 1.0d0
        dsdr = 0.0d0
-    elseif (r.gt.SSD_ru) then
+    elseif (r.gt.ru) then
        s = 0.0d0
        dsdr = 0.0d0
     else
-       s = ((SSD_ru + 2.0d0*r - 3.0d0*SSD_rl) * (SSD_ru-r)**2) / &
-            ((SSD_ru - SSD_rl)**3)
-       dsdr = 6.0d0*(r-SSD_ru)*(r-SSD_rl)/((SSD_ru - SSD_rl)**3)
+       s = ((ru + 2.0d0*r - 3.0d0*rl) * (ru-r)**2) / &
+            ((ru - rl)**3)
+       dsdr = 6.0d0*(r-ru)*(r-rl)/((ru - rl)**3)
     endif
 
-    if (r.lt.SSD_rlp) then
+    if (r.lt.rlp) then
        sp = 1.0d0       
        dspdr = 0.0d0
-    elseif (r.gt.SSD_rup) then
+    elseif (r.gt.rup) then
        sp = 0.0d0
        dspdr = 0.0d0
     else
-       sp = ((SSD_rup + 2.0d0*r - 3.0d0*SSD_rlp) * (SSD_rup-r)**2) / &
-            ((SSD_rup - SSD_rlp)**3)
-       dspdr = 6.0d0*(r-SSD_rup)*(r-SSD_rlp)/((SSD_rup - SSD_rlp)**3)       
+       sp = ((rup + 2.0d0*r - 3.0d0*rlp) * (rup-r)**2) / &
+            ((rup - rlp)**3)
+       dspdr = 6.0d0*(r-rup)*(r-rlp)/((rup - rlp)**3)       
     endif
     
     return
   end subroutine calc_sw_fnc
-end module sticky_pair
+end module sticky
 
-  subroutine makeStickyType(sticky_w0, sticky_v0, sticky_v0p, &
-       sticky_rl, sticky_ru, sticky_rlp, sticky_rup)
+  subroutine newStickyType(c_ident, w0, v0, v0p, rl, ru, rlp, rup, isError)
+
     use definitions, ONLY : dp   
-    use sticky_pair, ONLY : set_sticky_params
-    real( kind = dp ), intent(inout) :: sticky_w0, sticky_v0, sticky_v0p
-    real( kind = dp ), intent(inout) :: sticky_rl, sticky_ru
-    real( kind = dp ), intent(inout) :: sticky_rlp, sticky_rup
+    use sticky, ONLY : module_newStickyType => newStickyType
+
+    integer, intent(inout) :: c_ident, isError
+    real( kind = dp ), intent(inout) :: w0, v0, v0p, rl, ru, rlp, rup
     
-    call set_sticky_params(sticky_w0, sticky_v0, sticky_v0p, &
-       sticky_rl, sticky_ru, sticky_rlp, sticky_rup)
-       
-  end subroutine makeStickyType
+    call module_newStickyType(c_ident, w0, v0, v0p, rl, ru, rlp, rup, &
+         isError)
+    
+  end subroutine newStickyType

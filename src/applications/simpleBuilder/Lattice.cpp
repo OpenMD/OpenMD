@@ -1,43 +1,83 @@
+ /*
+ * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
+ *
+ * The University of Notre Dame grants you ("Licensee") a
+ * non-exclusive, royalty free, license to use, modify and
+ * redistribute this software in source and binary code form, provided
+ * that the following conditions are met:
+ *
+ * 1. Acknowledgement of the program authors must be made in any
+ *    publication of scientific results based in part on use of the
+ *    program.  An acceptable form of acknowledgement is citation of
+ *    the article in which the program was described (Matthew
+ *    A. Meineke, Charles F. Vardeman II, Teng Lin, Christopher
+ *    J. Fennell and J. Daniel Gezelter, "OOPSE: An Object-Oriented
+ *    Parallel Simulation Engine for Molecular Dynamics,"
+ *    J. Comput. Chem. 26, pp. 252-271 (2005))
+ *
+ * 2. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ *
+ * 3. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the
+ *    distribution.
+ *
+ * This software is provided "AS IS," without a warranty of any
+ * kind. All express or implied conditions, representations and
+ * warranties, including any implied warranty of merchantability,
+ * fitness for a particular purpose or non-infringement, are hereby
+ * excluded.  The University of Notre Dame and its licensors shall not
+ * be liable for any damages suffered by licensee as a result of
+ * using, modifying or distributing the software or its
+ * derivatives. In no event will the University of Notre Dame or its
+ * licensors be liable for any lost revenue, profit or data, or for
+ * direct, indirect, special, consequential, incidental or punitive
+ * damages, however caused and regardless of the theory of liability,
+ * arising out of the use of or inability to use software, even if the
+ * University of Notre Dame has been advised of the possibility of
+ * such damages.
+ */
+ 
 #include "applications/simpleBuilder/Lattice.hpp"
 #include "applications/simpleBuilder/LatticeFactory.hpp"
 #include "applications/simpleBuilder/LatticeCreator.hpp"
 
+namespace oopse {
+
 static LatticeCreator<FCCLattice> *FCCLatticeCreator = new LatticeCreator<FCCLattice>(FCCLatticeType);
-//static LatticeCreator<FCCLattice> *BCCLatticeCreator = new LatticeCreator<FCCLattice>(BCCLatticeType);
-//static LatticeCreator<FCCLattice> *HCPLatticeCreator = new LatticeCreator<FCCLattice>(HCPCLatticeType);
-//static LatticeCreator<FCCLattice> *OrthorhombicLattice = new LatticeCreator<FCCLattice>(OrthorhombicLatticeType);
 
 CubicLattice::CubicLattice(){
   latticeParam = 1.0;
   
-  cellLen.x = latticeParam;
-  cellLen.y = latticeParam;
-  cellLen.z = latticeParam;
+  cellLen[0] = latticeParam;
+  cellLen[1] = latticeParam;
+  cellLen[2] = latticeParam;
   
 }
 
-vector<double> CubicLattice::getLatticeConstant(){
-  vector<double> lc;
+ std::vector<double> CubicLattice::getLatticeConstant(){
+   std::vector<double> lc;
   
-  lc.push_back(cellLen.x);
+  lc.push_back(cellLen.x());
   return lc;
 }
 
-void CubicLattice::setLatticeConstant(const vector<double>& lc){
+void CubicLattice::setLatticeConstant(const  std::vector<double>& lc){
   
   if(lc.size() < 1){
-    cerr << "CubicLattice::setLatticeConstant Error: the size of lattice constant vector  is 0" << endl;
+    std::cerr << "CubicLattice::setLatticeConstant Error: the size of lattice constant vector  is 0" << std::endl;
     exit(1);
   }
   else if (lc.size() > 1){
-    cerr << "CubicLattice::setLatticeConstant Warning: the size of lattice constant vector  is " << lc.size() << endl;
+    std::cerr << "CubicLattice::setLatticeConstant Warning: the size of lattice constant vector  is " << lc.size() << std::endl;
   }
   
   latticeParam = lc[0];
   
-  cellLen.x = latticeParam;
-  cellLen.y = latticeParam;
-  cellLen.z = latticeParam;
+  cellLen[0] = latticeParam;
+  cellLen[1] = latticeParam;
+  cellLen[2] = latticeParam;
   
   update();
 }
@@ -59,40 +99,41 @@ void FCCLattice::update(){
   oneOverRoot3 = 1.0 / sqrt(3.0);
 
   // Molecule 1
-  cellSitesPos[0].x = 0.0; 
-  cellSitesPos[0].y = 0.0;
-  cellSitesPos[0].z = 0.0;
+  cellSitesPos[0][0] = 0.0; 
+  cellSitesPos[0][1] = 0.0;
+  cellSitesPos[0][2] = 0.0;
   
-   cellSitesOrt[0].x = oneOverRoot3;
-   cellSitesOrt[0].y = oneOverRoot3;
-   cellSitesOrt[0].z = oneOverRoot3;
+   cellSitesOrt[0][0] = oneOverRoot3;
+   cellSitesOrt[0][1] = oneOverRoot3;
+   cellSitesOrt[0][2] = oneOverRoot3;
 
   // Molecule 2  
-  cellSitesPos[1].x   = 0.0;
-  cellSitesPos[1].y   = cellLenOver2;
-  cellSitesPos[1].z   = cellLenOver2;
+  cellSitesPos[1][0]   = 0.0;
+  cellSitesPos[1][1]   = cellLenOver2;
+  cellSitesPos[1][2]   = cellLenOver2;
 
-  cellSitesOrt[1].x = -oneOverRoot3;
-  cellSitesOrt[1].y = oneOverRoot3;
-  cellSitesOrt[1].z = -oneOverRoot3;
+  cellSitesOrt[1][0] = -oneOverRoot3;
+  cellSitesOrt[1][1] = oneOverRoot3;
+  cellSitesOrt[1][2] = -oneOverRoot3;
    
   // Molecule 3
-  cellSitesPos[2].x   = cellLenOver2;
-  cellSitesPos[2].y   = cellLenOver2;
-  cellSitesPos[2].z   = 0.0;
+  cellSitesPos[2][0]   = cellLenOver2;
+  cellSitesPos[2][1]   = cellLenOver2;
+  cellSitesPos[2][2]   = 0.0;
 
-  cellSitesOrt[2].x = oneOverRoot3;
-  cellSitesOrt[2].y = -oneOverRoot3;
-  cellSitesOrt[2].z = -oneOverRoot3;
+  cellSitesOrt[2][0] = oneOverRoot3;
+  cellSitesOrt[2][1] = -oneOverRoot3;
+  cellSitesOrt[2][2] = -oneOverRoot3;
 
   // Molecule 4
 
-  cellSitesPos[3].x   = cellLenOver2;
-  cellSitesPos[3].y   = 0.0;
-  cellSitesPos[3].z   = cellLenOver2;
+  cellSitesPos[3][0]   = cellLenOver2;
+  cellSitesPos[3][1]   = 0.0;
+  cellSitesPos[3][2]   = cellLenOver2;
 
-  cellSitesOrt[3].x = -oneOverRoot3;
-  cellSitesOrt[3].y = oneOverRoot3;
-  cellSitesOrt[3].z = oneOverRoot3;
+  cellSitesOrt[3][0] = -oneOverRoot3;
+  cellSitesOrt[3][1] = oneOverRoot3;
+  cellSitesOrt[3][2] = oneOverRoot3;
 }
 
+}

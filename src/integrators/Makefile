@@ -1,10 +1,15 @@
 Source    = \
 	Integrator.cpp \
-	NPT.cpp \
-	NPTf.cpp \
-	NPTi.cpp \
-	NPTxyz.cpp \
+        IntegratorFactory.cpp \
+	Velocitizer.cpp \
+	VelocityVerletIntegrator.cpp \
+	DLM.cpp \
+        NVE.cpp \
 	NVT.cpp \
+        NPT.cpp \
+	NPTi.cpp \
+	NPTf.cpp \
+	NPTxyz.cpp \
 
 RmiSource =
 

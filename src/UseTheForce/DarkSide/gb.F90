@@ -1,3 +1,45 @@
+!!
+!! Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
+!!
+!! The University of Notre Dame grants you ("Licensee") a
+!! non-exclusive, royalty free, license to use, modify and
+!! redistribute this software in source and binary code form, provided
+!! that the following conditions are met:
+!!
+!! 1. Acknowledgement of the program authors must be made in any
+!!    publication of scientific results based in part on use of the
+!!    program.  An acceptable form of acknowledgement is citation of
+!!    the article in which the program was described (Matthew
+!!    A. Meineke, Charles F. Vardeman II, Teng Lin, Christopher
+!!    J. Fennell and J. Daniel Gezelter, "OOPSE: An Object-Oriented
+!!    Parallel Simulation Engine for Molecular Dynamics,"
+!!    J. Comput. Chem. 26, pp. 252-271 (2005))
+!!
+!! 2. Redistributions of source code must retain the above copyright
+!!    notice, this list of conditions and the following disclaimer.
+!!
+!! 3. Redistributions in binary form must reproduce the above copyright
+!!    notice, this list of conditions and the following disclaimer in the
+!!    documentation and/or other materials provided with the
+!!    distribution.
+!!
+!! This software is provided "AS IS," without a warranty of any
+!! kind. All express or implied conditions, representations and
+!! warranties, including any implied warranty of merchantability,
+!! fitness for a particular purpose or non-infringement, are hereby
+!! excluded.  The University of Notre Dame and its licensors shall not
+!! be liable for any damages suffered by licensee as a result of
+!! using, modifying or distributing the software or its
+!! derivatives. In no event will the University of Notre Dame or its
+!! licensors be liable for any lost revenue, profit or data, or for
+!! direct, indirect, special, consequential, incidental or punitive
+!! damages, however caused and regardless of the theory of liability,
+!! arising out of the use of or inability to use software, even if the
+!! University of Notre Dame has been advised of the possibility of
+!! such damages.
+!!
+
+
 module gb_pair
   use force_globals
   use definitions
@@ -48,7 +90,7 @@ contains
 
 
   subroutine do_gb_pair(atom1, atom2, d, r, r2, sw, vpair, fpair, &
-       pot, u_l, f, t, do_pot)
+       pot, A, f, t, do_pot)
     
     integer, intent(in) :: atom1, atom2
     integer :: id1, id2
@@ -56,7 +98,7 @@ contains
     real (kind=dp), dimension(3), intent(in) :: d
     real (kind=dp), dimension(3), intent(inout) :: fpair
     real (kind=dp) :: pot, sw, vpair
-    real (kind=dp), dimension(3,nLocal) :: u_l
+    real (kind=dp), dimension(9,nLocal) :: A
     real (kind=dp), dimension(3,nLocal) :: f
     real (kind=dp), dimension(3,nLocal) :: t
     logical, intent(in) :: do_pot
@@ -100,21 +142,21 @@ contains
     r4 = r2*r2
 
 #ifdef IS_MPI
-    ul1(1) = u_l_Row(1,atom1)
-    ul1(2) = u_l_Row(2,atom1)
-    ul1(3) = u_l_Row(3,atom1)
+    ul1(1) = A_Row(3,atom1)
+    ul1(2) = A_Row(6,atom1)
+    ul1(3) = A_Row(9,atom1)
 
-    ul2(1) = u_l_Col(1,atom2)
-    ul2(2) = u_l_Col(2,atom2)
-    ul2(3) = u_l_Col(3,atom2)
+    ul2(1) = A_Col(3,atom2)
+    ul2(2) = A_Col(6,atom2)
+    ul2(3) = A_Col(9,atom2)
 #else
-    ul1(1) = u_l(1,atom1)
-    ul1(2) = u_l(2,atom1)
-    ul1(3) = u_l(3,atom1)
+    ul1(1) = A(3,atom1)
+    ul1(2) = A(6,atom1)
+    ul1(3) = A(9,atom1)
 
-    ul2(1) = u_l(1,atom2)
-    ul2(2) = u_l(2,atom2)
-    ul2(3) = u_l(3,atom2)
+    ul2(1) = A(3,atom2)
+    ul2(2) = A(6,atom2)
+    ul2(3) = A(9,atom2)
 #endif
     
     dru1dx = ul1(1)

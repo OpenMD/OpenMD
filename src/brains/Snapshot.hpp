@@ -1,28 +1,44 @@
-/*
- * Copyright (C) 2000-2004  Object Oriented Parallel Simulation Engine (OOPSE) project
- * 
- * Contact: oopse@oopse.org
- * 
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public License
- * as published by the Free Software Foundation; either version 2.1
- * of the License, or (at your option) any later version.
- * All we ask is that proper credit is given for our work, which includes
- * - but is not limited to - adding the above copyright notice to the beginning
- * of your source code files, and to any copyright notice that you may distribute
- * with programs based on this work.
- * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Lesser General Public License for more details.
- * 
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ /*
+ * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
+ * The University of Notre Dame grants you ("Licensee") a
+ * non-exclusive, royalty free, license to use, modify and
+ * redistribute this software in source and binary code form, provided
+ * that the following conditions are met:
+ *
+ * 1. Acknowledgement of the program authors must be made in any
+ *    publication of scientific results based in part on use of the
+ *    program.  An acceptable form of acknowledgement is citation of
+ *    the article in which the program was described (Matthew
+ *    A. Meineke, Charles F. Vardeman II, Teng Lin, Christopher
+ *    J. Fennell and J. Daniel Gezelter, "OOPSE: An Object-Oriented
+ *    Parallel Simulation Engine for Molecular Dynamics,"
+ *    J. Comput. Chem. 26, pp. 252-271 (2005))
+ *
+ * 2. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ *
+ * 3. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the
+ *    distribution.
+ *
+ * This software is provided "AS IS," without a warranty of any
+ * kind. All express or implied conditions, representations and
+ * warranties, including any implied warranty of merchantability,
+ * fitness for a particular purpose or non-infringement, are hereby
+ * excluded.  The University of Notre Dame and its licensors shall not
+ * be liable for any damages suffered by licensee as a result of
+ * using, modifying or distributing the software or its
+ * derivatives. In no event will the University of Notre Dame or its
+ * licensors be liable for any lost revenue, profit or data, or for
+ * direct, indirect, special, consequential, incidental or punitive
+ * damages, however caused and regardless of the theory of liability,
+ * arising out of the use of or inability to use software, even if the
+ * University of Notre Dame has been advised of the possibility of
+ * such damages.
  */
- 
+  
  /**
   * @file Snapshot.hpp
   * @author tlin
@@ -37,32 +53,26 @@
 #include <vector>
 
 #include "brains/DataStorage.hpp"
-
-using namespace std;
+#include "brains/Stats.hpp"
+#include "UseTheForce/DarkSide/simulation_interface.h"
 
 namespace oopse{
 
-    class StuntDouble;
-    
     /**
      * @class Snapshot Snapshot.hpp "brains/Snapshot.hpp"
      * @brief Snapshot class is a repository class for storing dynamic data during 
      *  Simulation
      * Every snapshot class will contain one DataStorage  for atoms and one DataStorage
      *  for rigid bodies.
-     * @see SimData
      */
     class Snapshot {
         public:
             
-            Snapshot(int nAtoms, int nRigidbodies) {
-                atomData.resize(nAtoms);
-                rigidbodyData.resize(nRigidbodies);
+            Snapshot(int nAtoms, int nRigidbodies) : atomData(nAtoms), rigidbodyData(nRigidbodies),
+                currentTime_(0), orthoRhombic_(0), chi_(0.0), integralOfChiDt_(0.0), eta_(0.0) {
+
             }
 
-            Snapshot(const Snapshot& s);
-
-            Snapshot& operator =(const Snapshot& s);
             
             /** Returns the id of this Snapshot */
             int getID() {
@@ -73,11 +83,6 @@ namespace oopse{
             void setID(int id) {
                 id_ = id;
             }
-
-            //template<typename T>
-            //static typename T::ElemPointerType getArrayPointer(vector<T>& v) {
-            //    return v[0]->getArrayPointer();
-            //}
 
             int getSize() {
                 return atomData.getSize() + rigidbodyData.getSize();
@@ -99,34 +104,74 @@ namespace oopse{
             }
 
             /** Sets the H-Matrix */
-            void setHamt(const Mat3x3d& m) {
-                hmat_ = m;
-                invHmat_ = hmat_.inverse();
+            void setHmat(const Mat3x3d& m);
+            
+            double getVolume() {
+                return hmat_.determinant();
             }
 
             /** Returns the inverse H-Matrix */
             Mat3x3d getInvHmat() {
-                return invHmat_
+                return invHmat_;
             }
 
-            double getTimeStamp() {
-                return timeStamp_;
+            /** Wrapping the vector according to periodic boundary condition*/
+            void wrapVector(Vector3d& v);
+
+            
+            double getTime() {
+                return currentTime_;
             }
 
-            void setTimeStamp(double timeStamp) {
-                timeStamp_ =timeStamp;
+            void increaseTime(double dt) {
+                setTime(getTime() + dt);
             }
 
+            void setTime(double time) {
+                currentTime_ =time;
+                //time at statData is redundant
+                statData[Stats::TIME] = currentTime_;
+            }
 
+            double getChi() {
+                return chi_;
+            }
+
+            void setChi(double chi) {
+                chi_ = chi;
+            }
+
+            double getIntegralOfChiDt() {
+                return integralOfChiDt_;
+            }
+
+            void setIntegralOfChiDt(double integralOfChiDt) {
+                integralOfChiDt_ = integralOfChiDt;
+            }
+            
+            Mat3x3d getEta() {
+                return eta_;
+            }
+
+            void setEta(const Mat3x3d& eta) {
+                eta_ = eta;
+            }
+            
             DataStorage atomData;
             DataStorage rigidbodyData;
-            
-            friend class StuntDouble;
+            Stats statData;
             
         private:
-            double timeStamp_;
+            double currentTime_;
+
             Mat3x3d hmat_;
             Mat3x3d invHmat_;
+            int orthoRhombic_;
+
+            double chi_;
+            double integralOfChiDt_;
+            Mat3x3d eta_;
+            
             int id_; /**< identification number of the snapshot */
     };
 

@@ -1,6 +1,8 @@
 Source    = \
+        MinimizerParameterSet.cpp \
+        Minimizer.cpp \
+	MinimizerFactory.cpp \
 	CGFamilyMinimizer.cpp \
-	OOPSEMinimizer.cpp \
 	PRCG.cpp \
 	SDMinimizer.cpp \
 

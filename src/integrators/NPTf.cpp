@@ -1,19 +1,53 @@
-#include <math.h>
-
-#include "math/MatVec3.h"
-#include "primitives/Atom.hpp"
-#include "primitives/SRI.hpp"
-#include "primitives/AbstractClasses.hpp"
+ /*
+ * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
+ *
+ * The University of Notre Dame grants you ("Licensee") a
+ * non-exclusive, royalty free, license to use, modify and
+ * redistribute this software in source and binary code form, provided
+ * that the following conditions are met:
+ *
+ * 1. Acknowledgement of the program authors must be made in any
+ *    publication of scientific results based in part on use of the
+ *    program.  An acceptable form of acknowledgement is citation of
+ *    the article in which the program was described (Matthew
+ *    A. Meineke, Charles F. Vardeman II, Teng Lin, Christopher
+ *    J. Fennell and J. Daniel Gezelter, "OOPSE: An Object-Oriented
+ *    Parallel Simulation Engine for Molecular Dynamics,"
+ *    J. Comput. Chem. 26, pp. 252-271 (2005))
+ *
+ * 2. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ *
+ * 3. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the
+ *    distribution.
+ *
+ * This software is provided "AS IS," without a warranty of any
+ * kind. All express or implied conditions, representations and
+ * warranties, including any implied warranty of merchantability,
+ * fitness for a particular purpose or non-infringement, are hereby
+ * excluded.  The University of Notre Dame and its licensors shall not
+ * be liable for any damages suffered by licensee as a result of
+ * using, modifying or distributing the software or its
+ * derivatives. In no event will the University of Notre Dame or its
+ * licensors be liable for any lost revenue, profit or data, or for
+ * direct, indirect, special, consequential, incidental or punitive
+ * damages, however caused and regardless of the theory of liability,
+ * arising out of the use of or inability to use software, even if the
+ * University of Notre Dame has been advised of the possibility of
+ * such damages.
+ */
+ 
 #include "brains/SimInfo.hpp"
-#include "UseTheForce/ForceFields.hpp"
 #include "brains/Thermo.hpp"
-#include "io/ReadWrite.hpp"
-#include "integrators/Integrator.hpp"
+#include "integrators/IntegratorCreator.hpp"
+#include "integrators/NPTf.hpp"
+#include "primitives/Molecule.hpp"
+#include "utils/OOPSEConstant.hpp"
 #include "utils/simError.h"
 
-#ifdef IS_MPI
-#include "brains/mpiSimulation.hpp"
-#endif
+namespace oopse {
 
 // Basic non-isotropic thermostating and barostating via the Melchionna
 // modification of the Hoover algorithm:
@@ -25,144 +59,91 @@
 //
 //    Hoover, W. G., 1986, Phys. Rev. A, 34, 2499.
 
-template<typename T> NPTf<T>::NPTf ( SimInfo *theInfo, ForceFields* the_ff):
-  T( theInfo, the_ff )
-{
-  GenericData* data;
-  DoubleVectorGenericData * etaValue;
-  int i,j;
-
-  for(i = 0; i < 3; i++){
-    for (j = 0; j < 3; j++){
-
-      eta[i][j] = 0.0;
-      oldEta[i][j] = 0.0;
-    }
-  }
-
-
-  if( theInfo->useInitXSstate ){
-    // retrieve eta array from simInfo if it exists
-    data = info->getProperty(ETAVALUE_ID);
-    if(data){
-      etaValue = dynamic_cast<DoubleVectorGenericData*>(data);
-      
-      if(etaValue){
-	
-	for(i = 0; i < 3; i++){
-	  for (j = 0; j < 3; j++){
-	    eta[i][j] = (*etaValue)[3*i+j];
-	    oldEta[i][j] = eta[i][j];
-	  }
-	}
-      }
-    }
-  }
-
-}
-
-template<typename T> NPTf<T>::~NPTf() {
-
-  // empty for now
-}
-
-template<typename T> void NPTf<T>::resetIntegrator() {
+void NPTf::evolveEtaA() {
 
   int i, j;
 
-  for(i = 0; i < 3; i++)
-    for (j = 0; j < 3; j++)
-      eta[i][j] = 0.0;
-
-  T::resetIntegrator();
-}
-
-template<typename T> void NPTf<T>::evolveEtaA() {
-
-  int i, j;
-
-  for(i = 0; i < 3; i ++){
-    for(j = 0; j < 3; j++){
-      if( i == j)
-        eta[i][j] += dt2 *  instaVol *
-	  (press[i][j] - targetPressure/p_convert) / (NkBT*tb2);
-      else
-        eta[i][j] += dt2 * instaVol * press[i][j] / (NkBT*tb2);
+    for(i = 0; i < 3; i ++){
+        for(j = 0; j < 3; j++){
+            if( i == j) {
+                eta(i, j) += dt2 *  instaVol * (press(i, j) - targetPressure/OOPSEConstant::pressureConvert) / (NkBT*tb2);
+            } else {
+                eta(i, j) += dt2 * instaVol * press(i, j) / (NkBT*tb2);
+            }
+        }
     }
-  }
   
-  for(i = 0; i < 3; i++)
-    for (j = 0; j < 3; j++)
-      oldEta[i][j] = eta[i][j];
-}
-
-template<typename T> void NPTf<T>::evolveEtaB() {
-
-  int i,j;
-
-  for(i = 0; i < 3; i++)
-    for (j = 0; j < 3; j++)
-      prevEta[i][j] = eta[i][j];
-
-  for(i = 0; i < 3; i ++){
-    for(j = 0; j < 3; j++){
-      if( i == j) {
-	eta[i][j] = oldEta[i][j] + dt2 *  instaVol *
-	  (press[i][j] - targetPressure/p_convert) / (NkBT*tb2);
-      } else {
-	eta[i][j] = oldEta[i][j] + dt2 * instaVol * press[i][j] / (NkBT*tb2);
-      }
+    for(i = 0; i < 3; i++) {
+        for (j = 0; j < 3; j++) {
+        oldEta(i, j) = eta(i, j);
+        }
     }
-  }
+  
 }
 
-template<typename T> void NPTf<T>::calcVelScale(void){
-  int i,j;
+void NPTf::evolveEtaB() {
 
-  for (i = 0; i < 3; i++ ) {
-    for (j = 0; j < 3; j++ ) {
-      vScale[i][j] = eta[i][j];
+    int i;
+    int j;
+
+    for(i = 0; i < 3; i++) {
+        for (j = 0; j < 3; j++) {
+            prevEta(i, j) = eta(i, j);
+        }
+    }
+
+    for(i = 0; i < 3; i ++){
+        for(j = 0; j < 3; j++){
+            if( i == j) {
+                eta(i, j) = oldEta(i, j) + dt2 *  instaVol *
+                (press(i, j) - targetPressure/OOPSEConstant::pressureConvert) / (NkBT*tb2);
+            } else {
+                eta(i, j) = oldEta(i, j) + dt2 * instaVol * press(i, j) / (NkBT*tb2);
+            }
+        }
+    }
+
+  
+}
+
+void NPTf::calcVelScale(){
+
+  for (int i = 0; i < 3; i++ ) {
+    for (int j = 0; j < 3; j++ ) {
+      vScale(i, j) = eta(i, j);
 
       if (i == j) {
-        vScale[i][j] += chi;
+        vScale(i, j) += chi;
       }
     }
   }
 }
 
-template<typename T> void NPTf<T>::getVelScaleA(double sc[3], double vel[3]) {
- 
-  matVecMul3( vScale, vel, sc );
+void NPTf::getVelScaleA(Vector3d& sc, const Vector3d& vel){
+    sc = vScale * vel;
 }
 
-template<typename T> void NPTf<T>::getVelScaleB(double sc[3], int index ){
+void NPTf::getVelScaleB(Vector3d& sc, int index ) {
+  sc = vScale * oldVel[index];
+}
+
+void NPTf::getPosScale(const Vector3d& pos, const Vector3d& COM, int index, Vector3d& sc) {
+
+    /**@todo */
+    Vector3d rj = (oldPos[index] + pos)/2.0 -COM;
+    sc = eta * rj;
+}
+
+void NPTf::scaleSimBox(){
+
+  int i;
   int j;
-  double myVel[3];
-
-  for (j = 0; j < 3; j++)
-    myVel[j] = oldVel[3*index + j];
-  
-  matVecMul3( vScale, myVel, sc );
-}
-
-template<typename T> void NPTf<T>::getPosScale(double pos[3], double COM[3],
-					       int index, double sc[3]){
-  int j;
-  double rj[3];
-
-  for(j=0; j<3; j++)
-    rj[j] = ( oldPos[index*3+j] + pos[j]) / 2.0 - COM[j];
-
-  matVecMul3( eta, rj, sc );
-}
-
-template<typename T> void NPTf<T>::scaleSimBox( void ){
-
-  int i,j,k;
-  double scaleMat[3][3];
+  int k;
+  Mat3x3d scaleMat;
   double eta2ij;
   double bigScale, smallScale, offDiagMax;
-  double hm[3][3], hmnew[3][3];
+  Mat3x3d hm;
+  Mat3x3d hmnew;
 
 
 
@@ -183,23 +164,23 @@ template<typename T> void NPTf<T>::scaleSimBox( void ){
 
       eta2ij = 0.0;
       for(k=0; k<3; k++){
-        eta2ij += eta[i][k] * eta[k][j];
+        eta2ij += eta(i, k) * eta(k, j);
       }
 
-      scaleMat[i][j] = 0.0;
+      scaleMat(i, j) = 0.0;
       // identity matrix (see above):
-      if (i == j) scaleMat[i][j] = 1.0;
+      if (i == j) scaleMat(i, j) = 1.0;
       // Taylor expansion for the exponential truncated at second order:
-      scaleMat[i][j] += dt*eta[i][j]  + 0.5*dt*dt*eta2ij;
+      scaleMat(i, j) += dt*eta(i, j)  + 0.5*dt*dt*eta2ij;
       
 
       if (i != j)
-        if (fabs(scaleMat[i][j]) > offDiagMax)
-          offDiagMax = fabs(scaleMat[i][j]);
+        if (fabs(scaleMat(i, j)) > offDiagMax)
+          offDiagMax = fabs(scaleMat(i, j));
     }
 
-    if (scaleMat[i][i] > bigScale) bigScale = scaleMat[i][i];
-    if (scaleMat[i][i] < smallScale) smallScale = scaleMat[i][i];
+    if (scaleMat(i, i) > bigScale) bigScale = scaleMat(i, i);
+    if (scaleMat(i, i) < smallScale) smallScale = scaleMat(i, i);
   }
 
   if ((bigScale > 1.01) || (smallScale < 0.99)) {
@@ -212,12 +193,12 @@ template<typename T> void NPTf<T>::scaleSimBox( void ){
              "      eta = [%lf\t%lf\t%lf]\n"
              "            [%lf\t%lf\t%lf]\n"
              "            [%lf\t%lf\t%lf]\n",
-             scaleMat[0][0],scaleMat[0][1],scaleMat[0][2],
-             scaleMat[1][0],scaleMat[1][1],scaleMat[1][2],
-             scaleMat[2][0],scaleMat[2][1],scaleMat[2][2],
-             eta[0][0],eta[0][1],eta[0][2],
-             eta[1][0],eta[1][1],eta[1][2],
-             eta[2][0],eta[2][1],eta[2][2]);
+             scaleMat(0, 0),scaleMat(0, 1),scaleMat(0, 2),
+             scaleMat(1, 0),scaleMat(1, 1),scaleMat(1, 2),
+             scaleMat(2, 0),scaleMat(2, 1),scaleMat(2, 2),
+             eta(0, 0),eta(0, 1),eta(0, 2),
+             eta(1, 0),eta(1, 1),eta(1, 2),
+             eta(2, 0),eta(2, 1),eta(2, 2));
     painCave.isFatal = 1;
     simError();
   } else if (offDiagMax > 0.01) {
@@ -230,82 +211,94 @@ template<typename T> void NPTf<T>::scaleSimBox( void ){
              "      eta = [%lf\t%lf\t%lf]\n"
              "            [%lf\t%lf\t%lf]\n"
              "            [%lf\t%lf\t%lf]\n",
-             scaleMat[0][0],scaleMat[0][1],scaleMat[0][2],
-             scaleMat[1][0],scaleMat[1][1],scaleMat[1][2],
-             scaleMat[2][0],scaleMat[2][1],scaleMat[2][2],
-             eta[0][0],eta[0][1],eta[0][2],
-             eta[1][0],eta[1][1],eta[1][2],
-             eta[2][0],eta[2][1],eta[2][2]);
+             scaleMat(0, 0),scaleMat(0, 1),scaleMat(0, 2),
+             scaleMat(1, 0),scaleMat(1, 1),scaleMat(1, 2),
+             scaleMat(2, 0),scaleMat(2, 1),scaleMat(2, 2),
+             eta(0, 0),eta(0, 1),eta(0, 2),
+             eta(1, 0),eta(1, 1),eta(1, 2),
+             eta(2, 0),eta(2, 1),eta(2, 2));
     painCave.isFatal = 1;
     simError();
   } else {
-    info->getBoxM(hm);
-    matMul3(hm, scaleMat, hmnew);
-    info->setBoxM(hmnew);
+
+        Mat3x3d hmat = currentSnapshot_->getHmat();
+        hmat = hmat *scaleMat;
+        currentSnapshot_->setHmat(hmat);
+        
   }
 }
 
-template<typename T> bool NPTf<T>::etaConverged() {
-  int i;
-  double diffEta, sumEta;
+bool NPTf::etaConverged() {
+    int i;
+    double diffEta, sumEta;
 
-  sumEta = 0;
-  for(i = 0; i < 3; i++)
-    sumEta += pow(prevEta[i][i] - eta[i][i], 2);
+    sumEta = 0;
+    for(i = 0; i < 3; i++) {
+        sumEta += pow(prevEta(i, i) - eta(i, i), 2);
+    }
+    
+    diffEta = sqrt( sumEta / 3.0 );
 
-  diffEta = sqrt( sumEta / 3.0 );
-
-  return ( diffEta <= etaTolerance );
+    return ( diffEta <= etaTolerance );
 }
 
-template<typename T> double NPTf<T>::getConservedQuantity(void){
+double NPTf::calcConservedQuantity(){
 
-  double conservedQuantity;
-  double totalEnergy;
-  double thermostat_kinetic;
-  double thermostat_potential;
-  double barostat_kinetic;
-  double barostat_potential;
-  double trEta;
-  double a[3][3], b[3][3];
+    chi= currentSnapshot_->getChi();
+    integralOfChidt = currentSnapshot_->getIntegralOfChiDt();
+    loadEta();
+    
+    // We need NkBT a lot, so just set it here: This is the RAW number
+    // of integrableObjects, so no subtraction or addition of constraints or
+    // orientational degrees of freedom:
+    NkBT = info_->getNGlobalIntegrableObjects()*OOPSEConstant::kB *targetTemp;
 
-  totalEnergy = tStats->getTotalE();
+    // fkBT is used because the thermostat operates on more degrees of freedom
+    // than the barostat (when there are particles with orientational degrees
+    // of freedom).  
+    fkBT = info_->getNdf()*OOPSEConstant::kB *targetTemp;    
+    
+    double conservedQuantity;
+    double totalEnergy;
+    double thermostat_kinetic;
+    double thermostat_potential;
+    double barostat_kinetic;
+    double barostat_potential;
+    double trEta;
 
-  thermostat_kinetic = fkBT * tt2 * chi * chi /
-    (2.0 * eConvert);
+    totalEnergy = thermo.getTotalE();
 
-  thermostat_potential = fkBT* integralOfChidt / eConvert;
+    thermostat_kinetic = fkBT * tt2 * chi * chi /(2.0 * OOPSEConstant::energyConvert);
 
-  transposeMat3(eta, a);
-  matMul3(a, eta, b);
-  trEta = matTrace3(b);
+    thermostat_potential = fkBT* integralOfChidt / OOPSEConstant::energyConvert;
 
-  barostat_kinetic = NkBT * tb2 * trEta /
-    (2.0 * eConvert);
+    SquareMatrix<double, 3> tmp = eta.transpose() * eta;
+    trEta = tmp.trace();
+    
+    barostat_kinetic = NkBT * tb2 * trEta /(2.0 * OOPSEConstant::energyConvert);
 
-  barostat_potential = (targetPressure * tStats->getVolume() / p_convert) /
-    eConvert;
+    barostat_potential = (targetPressure * thermo.getVolume() / OOPSEConstant::pressureConvert) /OOPSEConstant::energyConvert;
 
-  conservedQuantity = totalEnergy + thermostat_kinetic + thermostat_potential +
-    barostat_kinetic + barostat_potential;
+    conservedQuantity = totalEnergy + thermostat_kinetic + thermostat_potential +
+        barostat_kinetic + barostat_potential;
 
-  return conservedQuantity;
+    return conservedQuantity;
 
 }
 
-template<typename T> string NPTf<T>::getAdditionalParameters(void){
-  string parameters;
-  const int BUFFERSIZE = 2000; // size of the read buffer
-  char buffer[BUFFERSIZE];
+void NPTf::loadEta() {
+    eta= currentSnapshot_->getEta();
 
-  sprintf(buffer,"\t%G\t%G;", chi, integralOfChidt);
-  parameters += buffer;
+    //if (!eta.isDiagonal()) {
+    //    sprintf( painCave.errMsg,
+    //             "NPTf error: the diagonal elements of eta matrix are not the same or etaMat is not a diagonal matrix");
+    //    painCave.isFatal = 1;
+    //    simError();
+    //}
+}
 
-  for(int i = 0; i < 3; i++){
-    sprintf(buffer,"\t%G\t%G\t%G;", eta[i][0], eta[i][1], eta[i][2]);
-    parameters += buffer;
-  }
-
-  return parameters;
+void NPTf::saveEta() {
+    currentSnapshot_->setEta(eta);
+}
 
 }

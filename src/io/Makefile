@@ -1,12 +1,20 @@
 Source    = \
-	BASSlex.l \
+        AtomTypesSectionParser.cpp \
+	DirectionalAtomTypesSectionParser.cpp \
+	SectionParser.cpp \
+	EAMAtomTypesSectionParser.cpp \
+	SectionParserManager.cpp \
+	ElectrostaticAtomTypesSectionParser.cpp \
+	StickyAtomTypesSectionParser.cpp \
+	TorsionTypesSectionParser.cpp \
+	LennardJonesAtomTypesSectionParser.cpp\
+        BondTypesSectionParser.cpp \
+        BendTypesSectionParser.cpp \
+        BASSlex.l \
 	BASSyacc.y \
 	BASS_interface.cpp \
 	BASS_parse.c \
-	DumpReader.cpp \
-	DumpWriter.cpp \
 	Globals.cpp \
-	InitializeFromFile.cpp \
 	interface.c \
 	LinkedAssign.cpp \
 	LinkedCommand.cpp \
@@ -15,9 +23,11 @@ Source    = \
 	parse_tree.c \
 	RestraintReader.cpp \
 	RestraintWriter.cpp \
-	StatWriter.cpp \
-	ZConsReader.cpp \
-	ZConsWriter.cpp \
+        DumpReader.cpp \
+	DumpWriter.cpp \
+        StatWriter.cpp \
+        ZConsReader.cpp \
+	ZConsWriter.cpp
 
 RmiSource =
 

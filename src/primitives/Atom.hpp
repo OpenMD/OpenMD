@@ -1,95 +1,127 @@
-#ifndef _ATOM_H_
-#define _ATOM_H_
+ /*
+ * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
+ *
+ * The University of Notre Dame grants you ("Licensee") a
+ * non-exclusive, royalty free, license to use, modify and
+ * redistribute this software in source and binary code form, provided
+ * that the following conditions are met:
+ *
+ * 1. Acknowledgement of the program authors must be made in any
+ *    publication of scientific results based in part on use of the
+ *    program.  An acceptable form of acknowledgement is citation of
+ *    the article in which the program was described (Matthew
+ *    A. Meineke, Charles F. Vardeman II, Teng Lin, Christopher
+ *    J. Fennell and J. Daniel Gezelter, "OOPSE: An Object-Oriented
+ *    Parallel Simulation Engine for Molecular Dynamics,"
+ *    J. Comput. Chem. 26, pp. 252-271 (2005))
+ *
+ * 2. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ *
+ * 3. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the
+ *    distribution.
+ *
+ * This software is provided "AS IS," without a warranty of any
+ * kind. All express or implied conditions, representations and
+ * warranties, including any implied warranty of merchantability,
+ * fitness for a particular purpose or non-infringement, are hereby
+ * excluded.  The University of Notre Dame and its licensors shall not
+ * be liable for any damages suffered by licensee as a result of
+ * using, modifying or distributing the software or its
+ * derivatives. In no event will the University of Notre Dame or its
+ * licensors be liable for any lost revenue, profit or data, or for
+ * direct, indirect, special, consequential, incidental or punitive
+ * damages, however caused and regardless of the theory of liability,
+ * arising out of the use of or inability to use software, even if the
+ * University of Notre Dame has been advised of the possibility of
+ * such damages.
+ */
+ 
+/**
+ * @file Atom.hpp
+ * @author    tlin
+ * @date  10/22/2004
+ * @version 1.0
+ */ 
 
-#include <string.h>
-#include <stdlib.h>
-#include <iostream>
+#ifndef PRIMITIVES_ATOM_HPP
+#define PRIMITIVES_ATOM_HPP
 
-#include "brains/SimState.hpp"
 #include "primitives/StuntDouble.hpp"
-#include "visitors/BaseVisitor.hpp"
+#include "types/AtomType.hpp"
 
-class Atom : public StuntDouble {
-public:
+namespace oopse{
+    class Atom : public StuntDouble {
+        public:
+            Atom(AtomType* at);
 
-  Atom(int theIndex, SimState* theConfig );
-  virtual ~Atom() {} 
+            virtual std::string getType() {return atomType_->getName();}
+        
+            /**
+             * Returns the inertia tensor of this stuntdouble
+             * @return the inertia tensor of this stuntdouble
+             */ 
+            virtual Mat3x3d getI();
 
-  virtual void setCoords(void);
+            /**
+             * Returns the gradient of this stuntdouble
+             * @return the inertia tensor of this stuntdouble
+             */ 
+            virtual std::vector<double> getGrad();
 
-  void getPos( double theP[3] );
-  void setPos( double theP[3] );
+            virtual void accept(BaseVisitor* v);
 
-  void getVel( double theV[3] );
-  void setVel( double theV[3] );
+            /** 
+             * Returns the AtomType of this Atom.
+             * @return the atom type of this atom
+             */
+            AtomType* getAtomType() {
+                return atomType_;
+            }
+            
+            //forward  functions of AtomType class
+            bool    isCharge()  {
+                return atomType_->isCharge(); 
+            }
+            
+            bool    isDirectional() {
+                return atomType_->isDirectional(); 
+            }
 
-  void getFrc( double theF[3] );
-  void addFrc( double theF[3] );
+            bool    isDipole()  { 
+                return atomType_->isDipole(); 
+            }
 
-  virtual void zeroForces();
+            bool    isQudrapole()  { 
+                return atomType_->isQuadrupole(); 
+            }
+            
+            bool    isMultipole()  { 
+                return atomType_->isMultipole(); 
+            }
+            
+            bool    isGayBerne()  {
+                return atomType_->isGayBerne(); 
+            }
+            
+            bool    isSticky()  { 
+                return atomType_->isSticky(); 
+            }
 
-  double getMass() {return c_mass;}
-  void setMass(double mass) {c_mass = mass;}
-  
-  int getIndex() const {return index;}
-  void setIndex(int theIndex);
+            bool    isShape()  { 
+                return atomType_->isShape(); 
+            }            
 
-  char *getType() {return c_name;}
-  void setType(char * name) {strcpy(c_name,name);}
-  
-  int getIdent( void ) { return ident; }
-  void setIdent( int info ) { ident = info; }
+            int getIdent() {
+                return atomType_->getIdent();
+            }
+            
+        protected:
+            AtomType* atomType_;
+    };
 
-#ifdef IS_MPI
-  int getGlobalIndex( void ) { return myGlobalIndex; }
-  void setGlobalIndex( int info ) { myGlobalIndex = info; }
-#endif // is_mpi
+}//namepace oopse
 
-  void setHasDipole( int value ) { has_dipole = value; }
-  int hasDipole( void ) { return has_dipole; }
-
-  void setHasCharge(int value) {has_charge = value;}
-  int hasCharge(void) {return has_charge;}
-
-
-  virtual void accept(BaseVisitor* v) {v->visit(this);}
-  
-protected:
-  
-  SimState* myConfig;
-
-  double* pos; // the position array
-  double* vel; // the velocity array
-  double* frc; // the forc array
-  double* trq; // the torque vector  ( space fixed )
-  double* Amat; // the rotation matrix
-  double* mu;   // the array of dipole moments
-  double* ul;   // the lab frame unit directional vector
-
-  double zAngle; // the rotation about the z-axis ( body-fixed )
-
-  double c_mass; /* the mass of the atom in amu */
-
-  int index; /* set the atom's index */
-  int offset; // the atom's offset in the storage array
-  int offsetX, offsetY, offsetZ;
-
-  int Axx, Axy, Axz; // the rotational matrix indices
-  int Ayx, Ayy, Ayz;
-  int Azx, Azy, Azz;
-
-  char c_name[100]; /* it's name */
-  int ident;  // it's unique numeric identity.
-  
-  int has_dipole; // dipole boolean
-  int has_charge; // charge boolean
-
-  bool hasCoords;
-
-#ifdef IS_MPI
-  int myGlobalIndex;
-#endif
-  
-};
-
-#endif
+#endif //PRIMITIVES_ATOM_HPP

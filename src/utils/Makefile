@@ -5,10 +5,12 @@ Source    = \
 	oopseMPI.F90 \
 	simError.c \
 	status.F90 \
-	StreamTokenizer.cpp \
 	StringUtils.cpp \
-	Utility.cpp \
 	vector_class.F90 \
+        StringTokenizer.cpp \
+	Utility.cpp \
+	Trim.cpp
+
 
 RmiSource =
 

@@ -1,10 +1,52 @@
+!!
+!! Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
+!!
+!! The University of Notre Dame grants you ("Licensee") a
+!! non-exclusive, royalty free, license to use, modify and
+!! redistribute this software in source and binary code form, provided
+!! that the following conditions are met:
+!!
+!! 1. Acknowledgement of the program authors must be made in any
+!!    publication of scientific results based in part on use of the
+!!    program.  An acceptable form of acknowledgement is citation of
+!!    the article in which the program was described (Matthew
+!!    A. Meineke, Charles F. Vardeman II, Teng Lin, Christopher
+!!    J. Fennell and J. Daniel Gezelter, "OOPSE: An Object-Oriented
+!!    Parallel Simulation Engine for Molecular Dynamics,"
+!!    J. Comput. Chem. 26, pp. 252-271 (2005))
+!!
+!! 2. Redistributions of source code must retain the above copyright
+!!    notice, this list of conditions and the following disclaimer.
+!!
+!! 3. Redistributions in binary form must reproduce the above copyright
+!!    notice, this list of conditions and the following disclaimer in the
+!!    documentation and/or other materials provided with the
+!!    distribution.
+!!
+!! This software is provided "AS IS," without a warranty of any
+!! kind. All express or implied conditions, representations and
+!! warranties, including any implied warranty of merchantability,
+!! fitness for a particular purpose or non-infringement, are hereby
+!! excluded.  The University of Notre Dame and its licensors shall not
+!! be liable for any damages suffered by licensee as a result of
+!! using, modifying or distributing the software or its
+!! derivatives. In no event will the University of Notre Dame or its
+!! licensors be liable for any lost revenue, profit or data, or for
+!! direct, indirect, special, consequential, incidental or punitive
+!! damages, however caused and regardless of the theory of liability,
+!! arising out of the use of or inability to use software, even if the
+!! University of Notre Dame has been advised of the possibility of
+!! such damages.
+!!
+
 !! doForces.F90
 !! module doForces
 !! Calculates Long Range forces.
 
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: doForces.F90,v 1.8 2004-11-11 21:46:29 chrisfen Exp $, $Date: 2004-11-11 21:46:29 $, $Name: not supported by cvs2svn $, $Revision: 1.8 $
+!! @version $Id: doForces.F90,v 1.9 2005-01-12 22:40:37 gezelter Exp $, $Date: 2005-01-12 22:40:37 $, $Name: not supported by cvs2svn $, $Revision: 1.9 $
+
 
 module doForces
   use force_globals
@@ -14,7 +56,7 @@ module doForces
   use switcheroo
   use neighborLists  
   use lj
-  use sticky_pair
+  use sticky
   use dipole_dipole
   use charge_charge
   use reaction_field
@@ -349,14 +391,15 @@ contains
        endif
     endif 
 
-    if (FF_uses_sticky) then
-       call check_sticky_FF(my_status)
-       if (my_status /= 0) then
-          thisStat = -1
-          haveSaneForceField = .false.
-          return
-       end if
-    endif
+    !sticky module does not contain check_sticky_FF anymore
+    !if (FF_uses_sticky) then
+    !   call check_sticky_FF(my_status)
+    !   if (my_status /= 0) then
+    !      thisStat = -1
+    !      haveSaneForceField = .false.
+    !      return
+    !   end if
+    !endif
 
     if (FF_uses_EAM) then
          call init_EAM_FF(my_status) 
@@ -396,7 +439,7 @@ contains
 
   !! Does force loop over i,j pairs. Calls do_pair to calculates forces.
   !------------------------------------------------------------->
-  subroutine do_force_loop(q, q_group, A, u_l, f, t, tau, pot, &
+  subroutine do_force_loop(q, q_group, A, eFrame, f, t, tau, pot, &
        do_pot_c, do_stress_c, error)
     !! Position array provided by C, dimensioned by getNlocal
     real ( kind = dp ), dimension(3, nLocal) :: q
@@ -405,7 +448,7 @@ contains
     !! Rotation Matrix for each long range particle in simulation.
     real( kind = dp), dimension(9, nLocal) :: A    
     !! Unit vectors for dipoles (lab frame)
-    real( kind = dp ), dimension(3,nLocal) :: u_l
+    real( kind = dp ), dimension(9,nLocal) :: eFrame
     !! Force array provided by C, dimensioned by getNlocal
     real ( kind = dp ), dimension(3,nLocal) :: f
     !! Torsion array provided by C, dimensioned by getNlocal
@@ -480,8 +523,8 @@ contains
     call gather(q_group, q_group_Col, plan_group_col_3d)
         
     if (FF_UsesDirectionalAtoms() .and. SIM_uses_DirectionalAtoms) then
-       call gather(u_l, u_l_Row, plan_atom_row_3d)
-       call gather(u_l, u_l_Col, plan_atom_col_3d)
+       call gather(eFrame, eFrame_Row, plan_atom_row_rotation)
+       call gather(eFrame, eFrame_Col, plan_atom_col_rotation)
        
        call gather(A, A_Row, plan_atom_row_rotation)
        call gather(A, A_Col, plan_atom_col_rotation)
@@ -627,21 +670,21 @@ contains
 #ifdef IS_MPI                      
                          call do_prepair(atom1, atom2, ratmsq, d_atm, sw, &
                               rgrpsq, d_grp, do_pot, do_stress, &
-                              u_l, A, f, t, pot_local)
+                              eFrame, A, f, t, pot_local)
 #else
                          call do_prepair(atom1, atom2, ratmsq, d_atm, sw, &
                               rgrpsq, d_grp, do_pot, do_stress, &
-                              u_l, A, f, t, pot)
+                              eFrame, A, f, t, pot)
 #endif                                               
                       else
 #ifdef IS_MPI                      
                          call do_pair(atom1, atom2, ratmsq, d_atm, sw, &
                               do_pot, &
-                              u_l, A, f, t, pot_local, vpair, fpair)
+                              eFrame, A, f, t, pot_local, vpair, fpair)
 #else
                          call do_pair(atom1, atom2, ratmsq, d_atm, sw, &
                               do_pot,  &
-                              u_l, A, f, t, pot, vpair, fpair)
+                              eFrame, A, f, t, pot, vpair, fpair)
 #endif
 
                          vij = vij + vpair
@@ -794,10 +837,10 @@ contains
                 
                 !! The reaction field needs to include a self contribution 
                 !! to the field:
-                call accumulate_self_rf(i, mu_i, u_l)
+                call accumulate_self_rf(i, mu_i, eFrame)
                 !! Get the reaction field contribution to the 
                 !! potential and torques:
-                call reaction_field_final(i, mu_i, u_l, rfpot, t, do_pot)
+                call reaction_field_final(i, mu_i, eFrame, rfpot, t, do_pot)
 #ifdef IS_MPI
                 pot_local = pot_local + rfpot
 #else
@@ -837,12 +880,12 @@ contains
   end subroutine do_force_loop
   
   subroutine do_pair(i, j, rijsq, d, sw, do_pot, &
-       u_l, A, f, t, pot, vpair, fpair)
+       eFrame, A, f, t, pot, vpair, fpair)
 
     real( kind = dp ) :: pot, vpair, sw
     real( kind = dp ), dimension(3) :: fpair
     real( kind = dp ), dimension(nLocal)   :: mfact
-    real( kind = dp ), dimension(3,nLocal) :: u_l
+    real( kind = dp ), dimension(9,nLocal) :: eFrame
     real( kind = dp ), dimension(9,nLocal) :: A
     real( kind = dp ), dimension(3,nLocal) :: f
     real( kind = dp ), dimension(3,nLocal) :: t
@@ -890,10 +933,10 @@ contains
        
        if ( PropertyMap(me_i)%is_Dipole .and. PropertyMap(me_j)%is_Dipole) then
           call do_dipole_pair(i, j, d, r, rijsq, sw, vpair, fpair, &
-               pot, u_l, f, t, do_pot)
+               pot, eFrame, f, t, do_pot)
           if (FF_uses_RF .and. SIM_uses_RF) then
-             call accumulate_rf(i, j, r, u_l, sw)
-             call rf_correct_forces(i, j, d, r, u_l, sw, f, fpair)
+             call accumulate_rf(i, j, r, eFrame, sw)
+             call rf_correct_forces(i, j, d, r, eFrame, sw, f, fpair)
           endif
        endif
 
@@ -914,7 +957,7 @@ contains
        if ( PropertyMap(me_i)%is_GayBerne .and. &
             PropertyMap(me_j)%is_GayBerne) then
           call do_gb_pair(i, j, d, r, rijsq, sw, vpair, fpair, &
-               pot, u_l, f, t, do_pot)
+               pot, A, f, t, do_pot)
        endif
        
     endif
@@ -943,10 +986,10 @@ contains
   end subroutine do_pair
 
   subroutine do_prepair(i, j, rijsq, d, sw, rcijsq, dc, &
-       do_pot, do_stress, u_l, A, f, t, pot)
+       do_pot, do_stress, eFrame, A, f, t, pot)
 
    real( kind = dp ) :: pot, sw
-   real( kind = dp ), dimension(3,nLocal) :: u_l
+   real( kind = dp ), dimension(9,nLocal) :: eFrame
    real (kind=dp), dimension(9,nLocal) :: A
    real (kind=dp), dimension(3,nLocal) :: f
    real (kind=dp), dimension(3,nLocal) :: t
@@ -1061,8 +1104,8 @@ contains
    q_group_Row = 0.0_dp
    q_group_Col = 0.0_dp   
    
-   u_l_Row = 0.0_dp
-   u_l_Col = 0.0_dp
+   eFrame_Row = 0.0_dp
+   eFrame_Col = 0.0_dp
    
    A_Row = 0.0_dp
    A_Col = 0.0_dp
@@ -1237,7 +1280,7 @@ end module doForces
 
  end subroutine initFortranFF
 
-  subroutine doForceloop(q, q_group, A, u_l, f, t, tau, pot, &
+  subroutine doForceloop(q, q_group, A, eFrame, f, t, tau, pot, &
        do_pot_c, do_stress_c, error)
        
        use definitions, ONLY: dp
@@ -1250,7 +1293,7 @@ end module doForces
     !! Rotation Matrix for each long range particle in simulation.
     real( kind = dp), dimension(9, nLocal) :: A    
     !! Unit vectors for dipoles (lab frame)
-    real( kind = dp ), dimension(3,nLocal) :: u_l
+    real( kind = dp ), dimension(9,nLocal) :: eFrame
     !! Force array provided by C, dimensioned by getNlocal
     real ( kind = dp ), dimension(3,nLocal) :: f
     !! Torsion array provided by C, dimensioned by getNlocal
@@ -1262,7 +1305,7 @@ end module doForces
     logical ( kind = 2) :: do_pot_c, do_stress_c
     integer :: error
     
-    call do_force_loop(q, q_group, A, u_l, f, t, tau, pot, &
+    call do_force_loop(q, q_group, A, eFrame, f, t, tau, pot, &
        do_pot_c, do_stress_c, error)
        
  end subroutine doForceloop

@@ -1,5 +1,46 @@
-#ifndef _OTHERVISITOR_H_
-#define _OTHERVISITOR_H_
+ /*
+ * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
+ *
+ * The University of Notre Dame grants you ("Licensee") a
+ * non-exclusive, royalty free, license to use, modify and
+ * redistribute this software in source and binary code form, provided
+ * that the following conditions are met:
+ *
+ * 1. Acknowledgement of the program authors must be made in any
+ *    publication of scientific results based in part on use of the
+ *    program.  An acceptable form of acknowledgement is citation of
+ *    the article in which the program was described (Matthew
+ *    A. Meineke, Charles F. Vardeman II, Teng Lin, Christopher
+ *    J. Fennell and J. Daniel Gezelter, "OOPSE: An Object-Oriented
+ *    Parallel Simulation Engine for Molecular Dynamics,"
+ *    J. Comput. Chem. 26, pp. 252-271 (2005))
+ *
+ * 2. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ *
+ * 3. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the
+ *    distribution.
+ *
+ * This software is provided "AS IS," without a warranty of any
+ * kind. All express or implied conditions, representations and
+ * warranties, including any implied warranty of merchantability,
+ * fitness for a particular purpose or non-infringement, are hereby
+ * excluded.  The University of Notre Dame and its licensors shall not
+ * be liable for any damages suffered by licensee as a result of
+ * using, modifying or distributing the software or its
+ * derivatives. In no event will the University of Notre Dame or its
+ * licensors be liable for any lost revenue, profit or data, or for
+ * direct, indirect, special, consequential, incidental or punitive
+ * damages, however caused and regardless of the theory of liability,
+ * arising out of the use of or inability to use software, even if the
+ * University of Notre Dame has been advised of the possibility of
+ * such damages.
+ */
+ 
+#ifndef VISITORS_OTHERVISITOR_HPP
+#define VISITORS_OTHERVISITOR_HPP
 #include <set>
 #include <string>
 #include <vector>
@@ -8,9 +49,10 @@
 #include "primitives/StuntDouble.hpp"
 #include "visitors/AtomData.hpp"
 
-using namespace std;
 
 namespace oopse {
+
+class SimInfo;
 
 //IgnoreVisitor will turn on the ignoring flag of the stuntdouble
 class IgnoreVisitor : public BaseVisitor{
@@ -21,14 +63,14 @@ class IgnoreVisitor : public BaseVisitor{
     virtual void visit(DirectionalAtom* datom);
     virtual void visit(RigidBody* rb);
     
-    virtual const string toString();
+    virtual const std::string toString();
 
-    void addIgnoreType(const string& type) {itList.insert(type);}
+    void addIgnoreType(const std::string& type) {itList.insert(type);}
     
   protected:
-    bool isIgnoreType(const string& name);
+    bool isIgnoreType(const std::string& name);
     void internalVisit(StuntDouble* sd);
-    set<string> itList; //ignore type list;
+    std::set<std::string> itList; //ignore type list;
 };
 
 
@@ -42,7 +84,7 @@ class WrappingVisitor : public BaseVisitor{
     virtual void visit(DirectionalAtom* datom);
     virtual void visit(RigidBody* rb);
 
-    virtual const string toString();
+    virtual const std::string toString();
 
   protected:
     void internalVisit(StuntDouble* sd);
@@ -50,35 +92,22 @@ class WrappingVisitor : public BaseVisitor{
 };
 
 
-class IntVec3 {
-  public:
-    IntVec3(){}
-    IntVec3(int i, int j, int k){
-      vec[0] = i;
-      vec[1] = j;
-      vec[2] = k;
-    }
-    
-    int vec[3];
-    int& operator[](int index) {return vec[index];}  
-};
-
 class ReplicateVisitor : public BaseVisitor{
   public:
-    ReplicateVisitor(SimInfo* info, IntVec3 opt);
+    ReplicateVisitor(SimInfo* info, Vector3i opt);
     virtual void visit(Atom* atom);
     virtual void visit(DirectionalAtom* datom);
     virtual void visit(RigidBody* rb);
 
-    virtual const string toString();
+    virtual const std::string toString();
   protected:
     void internalVisit(StuntDouble* sd);
-    void replicate(vector<AtomInfo*>& infoList,  AtomData* data, double boxM[3][3]);
+    void replicate(std::vector<AtomInfo*>& infoList,  AtomData* data, const Mat3x3d& box);
     
   private:
-    vector<IntVec3> dir;
+    std::vector<Vector3i> dir;
     SimInfo* info;
-    IntVec3 replicateOpt;
+    Vector3i replicateOpt;
 };
 
 class XYZVisitor : public BaseVisitor{
@@ -89,9 +118,9 @@ class XYZVisitor : public BaseVisitor{
     virtual void visit(DirectionalAtom* datom);
     virtual void visit(RigidBody* rb);
 
-    virtual const string toString();
+    virtual const std::string toString();
     
-    void writeFrame(ostream& outStream);    
+    void writeFrame(std::ostream& outStream);    
     void clear() {frame.clear();}
     
   protected:
@@ -100,7 +129,7 @@ class XYZVisitor : public BaseVisitor{
 
   private:  
     SimInfo* info;
-    vector<string> frame;
+    std::vector<std::string> frame;
     bool printDipole;
 };
 
@@ -113,7 +142,7 @@ class PrepareVisitor : public BaseVisitor{
     virtual void visit(DirectionalAtom* datom) {internalVisit((Atom*)datom);}
     virtual void visit(RigidBody* rb) {internalVisit(rb);}
 
-    virtual const string toString();
+    virtual const std::string toString();
 
   protected:
     void internalVisit(Atom* atom);
@@ -127,12 +156,12 @@ class WaterTypeVisitor : public BaseVisitor{
     virtual void visit(DirectionalAtom* datom) {}
     virtual void visit(RigidBody* rb);
 
-    virtual const string toString();
+    virtual const std::string toString();
     
   private:
-    void replaceType(string& atomType);
+    void replaceType(std::string& atomType);
       
-    set<string> waterTypeList;
+    std::set<std::string> waterTypeList;
 };
 
 
