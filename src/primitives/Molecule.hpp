@@ -111,8 +111,8 @@ class Molecule {
          * Sets the global index of this molecule.
          * @param new global index to be set
          */
-        int setGlobalIndex(int index) {
-            return globalIndex_;
+        void setGlobalIndex(int index) {
+            globalIndex_ = index;
         }
 
         
