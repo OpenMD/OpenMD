@@ -3,7 +3,7 @@
 
 #include <cppunit/extensions/HelperMacros.h>
 
-//using namespace oopse;
+
 
 class IfstrstreamTestCase : public CPPUNIT_NS::TestFixture {
 

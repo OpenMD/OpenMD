@@ -1,0 +1,140 @@
+! This is the forcefield file for the Dipolar Unified-atom Force Field (DUFF).
+!
+! The sections are divided into AtomTypes, BondTypes, BendTypes,
+! and TorsionTypes.
+!
+! Many parameters (but not all) are derived from the TRAPPE force field
+! of Siepmann's group.
+
+#AtomTypes
+!Atom		isDipole	isSSD	mass		LJ epsilon ( kcal/mol)		LJ sigma (Angstroms)	Dipole Moment (Debye)	w0	v0 (kcal/mol)	v0p (kcal/mol)	rl (Angstroms)	ru (Angstroms)	rlp (Angstroms)	rup (Angstroms)
+
+CH4		0		0	16.05		0.279				3.73
+CH3		0		0	15.04		0.185				3.75
+CH2		0		0	14.03		0.0866				3.95
+CH		0		0	13.02		0.0189				4.68
+SSD		1		1	18.0153		0.152				3.035			2.42	0.07715	3.9	3.9	2.4	3.8	2.75	3.35
+HEAD		1		0	196		0.185				5.75			20.6
+TB1		0		0	14.03		0.0866				4.0
+TE1		0		0	15.04		0.185				4.0
+TB2		0		0	21.05		0.25				6.0
+TE2		0		0	22.56		0.5				6.0
+TB3		0		0	28.06		0.5				8.0
+TE3		0		0	30.08		0.75				8.0
+
+#BondTypes
+!Atom1	Atom2	type		distance	k0 (kcal/mol)
+
+HEAD	CH3	fixed		2.75		260
+HEAD	CH2	fixed		2.75		260
+HEAD	CH	fixed		2.75		260
+HEAD    TB1	fixed		2.76		260
+HEAD	TB2	fixed		3.20		260
+HEAD	TB3	fixed		3.63		260
+CH3	CH3	fixed		1.526		260
+CH3	CH2	fixed		1.526		260
+CH3	CH	fixed		1.526		260
+CH2	CH2	fixed		1.526		260
+CH2	CH	fixed		1.526		260
+CH	CH	fixed		1.526		260
+TB1	TB1	fixed		1.526		260
+TB2	TB2	fixed		2.34		260
+TB3	TB3	fixed		3.12		260
+TB1	TE1	fixed		1.526		260
+TB2	TE2	fixed		2.34		260
+TB3	TE3	fixed		3.12		260
+
+
+
+#BendTypes
+!Atom1	Atom2	Atom3	type		k1	k2	k3	theta_0 
+!
+! Units require ( k1 -> kcal/mol/degrees^2; theta_0 ->degrees )
+! consistent with the functional form:
+!
+!      V_bend = k1 * ( th - th0 )^2 + k2 * ( th - th0 ) + k3
+
+
+GHOST	HEAD	CH2	quadratic	0.00176972	0.0	0.0	129.783
+HEAD	CH2	HEAD	quadratic	58.84	0.0	0.0	114.0
+HEAD	CH2	GHOST	quadratic	58.84	0.0	0.0	90.0
+HEAD	TB1	GHOST	quadratic	58.84	0.0	0.0	90.0
+HEAD	TB2	GHOST	quadratic	58.84	0.0	0.0	90.0
+HEAD	TB3	GHOST	quadratic	58.84	0.0	0.0	90.0
+HEAD	CH2	CH3	quadratic	58.84	0.0	0.0	114.0
+HEAD	CH2	CH2	quadratic	58.84	0.0	0.0	114.0
+HEAD	TB1	TB1	quadratic	58.84	0.0	0.0	114.0
+HEAD	TB2	TB2	quadratic	58.84	0.0	0.0	114.0
+HEAD	TB3	TB3	quadratic	58.84	0.0	0.0	114.0
+HEAD	CH2	CH	quadratic	58.84	0.0	0.0	114.0
+HEAD	CH	CH3	quadratic	58.84	0.0	0.0	112.0
+HEAD	CH	CH2	quadratic	58.84	0.0	0.0	112.0
+HEAD	CH	CH	quadratic	58.84	0.0	0.0	112.0
+CH3	CH2	CH3	quadratic	58.84	0.0	0.0	114.0
+CH3	CH2	CH2	quadratic	58.84	0.0	0.0	114.0
+CH3	CH2	CH	quadratic	58.84	0.0	0.0	114.0
+CH3	CH	CH3	quadratic	58.84	0.0	0.0	112.0
+CH3	CH	CH2	quadratic	58.84	0.0	0.0	112.0
+CH3	CH	CH	quadratic	58.84	0.0	0.0	112.0
+CH2	CH2	CH2	quadratic	58.84	0.0	0.0	114.0
+CH2	CH2	CH	quadratic	58.84	0.0	0.0	114.0
+CH2	CH	CH2	quadratic	58.84	0.0	0.0	112.0
+CH2	CH	CH	quadratic	58.84	0.0	0.0	112.0
+CH	CH2	CH	quadratic	58.84	0.0	0.0	114.0
+CH	CH	CH	quadratic	58.84	0.0	0.0	112.0
+TB1	TB1	TB1	quadratic	58.84	0.0	0.0	114.0
+TB2	TB2	TB2	quadratic	58.84	0.0	0.0	114.0
+TB3	TB3	TB3	quadratic	58.84	0.0	0.0	114.0
+TE1	TB1	TB1	quadratic	58.84	0.0	0.0	114.0
+TE2	TB2	TB2	quadratic	58.84	0.0	0.0	114.0
+TE3	TB3	TB3	quadratic	58.84	0.0	0.0	114.0
+
+#TorsionTypes
+!Atom1	Atom2	Atom3	Atom4	type		k1		k2		k3		k4  ( all are kcal/mol )
+!V_torsion = k1(cos phi)^3 + k2(cos phi)^2 + k3(cos phi) + k4
+
+HEAD	CH2	CH2	HEAD	cubic		5.9602		-0.2568		-3.802		2.1586
+HEAD	CH2	CH	HEAD	cubic		3.3254		-0.4215		-1.686		1.1661
+HEAD	CH	CH	HEAD	cubic		3.3254		-0.4215		-1.686		1.1661
+HEAD	CH2	CH2	CH3	cubic		5.9602		-0.2568		-3.802		2.1586
+HEAD	CH2	CH	CH3	cubic		3.3254		-0.4215		-1.686		1.1661
+HEAD	CH	CH2	CH3	cubic		3.3254		-0.4215		-1.686		1.1661
+HEAD	CH	CH	CH3	cubic		3.3254		-0.4215		-1.686		1.1661
+HEAD	CH2	CH2	CH2	cubic		5.9602		-0.2568		-3.802		2.1586
+HEAD	CH2	CH	CH2	cubic		3.3254		-0.4215		-1.686		1.1661
+HEAD	CH	CH2	CH2	cubic		3.3254		-0.4215		-1.686		1.1661
+HEAD	CH	CH	CH2	cubic		3.3254		-0.4215		-1.686		1.1661
+HEAD	CH2	CH2	CH	cubic		5.9602		-0.2568		-3.802		2.1586
+HEAD	CH2	CH	CH	cubic		3.3254		-0.4215		-1.686		1.1661
+HEAD	CH	CH2	CH	cubic		3.3254		-0.4215		-1.686		1.1661
+HEAD	CH	CH	CH	cubic		3.3254		-0.4215		-1.686		1.1661
+HEAD	TB1	TB1	TB1	cubic		5.9602		-0.2568		-3.802		2.1586
+HEAD	TB2	TB2	TB2	cubic		5.9602		-0.2568		-3.802		2.1586
+HEAD	TB3	TB3	TB3	cubic		5.9602		-0.2568		-3.802		2.1586
+CH3	CH2	CH2	CH3	cubic		5.9602		-0.2568		-3.802		2.1586
+CH3	CH2	CH	CH3	cubic		3.3254		-0.4215		-1.686		1.1661
+CH3	CH	CH	CH3	cubic		3.3254		-0.4215		-1.686		1.1661
+CH3	CH2	CH2	CH2	cubic		5.9602		-0.2568		-3.802		2.1586
+CH3	CH2	CH	CH2	cubic		3.3254		-0.4215		-1.686		1.1661
+CH3	CH	CH2	CH2	cubic		3.3254		-0.4215		-1.686		1.1661
+CH3	CH	CH	CH2	cubic		3.3254		-0.4215		-1.686		1.1661
+CH3	CH2	CH2	CH	cubic		5.9602		-0.2568		-3.802		2.1586
+CH3	CH2	CH	CH	cubic		3.3254		-0.4215		-1.686		1.1661
+CH3	CH	CH2	CH	cubic		3.3254		-0.4215		-1.686		1.1661
+CH3	CH	CH	CH	cubic		3.3254		-0.4215		-1.686		1.1661
+CH2	CH2	CH2	CH2	cubic		5.9602		-0.2568		-3.802		2.1586
+CH2	CH2	CH	CH2	cubic		3.3254		-0.4215		-1.686		1.1661
+CH2	CH	CH	CH2	cubic		3.3254		-0.4215		-1.686		1.1661
+CH2	CH2	CH2	CH	cubic		5.9602		-0.2568		-3.802		2.1586
+CH2	CH2	CH	CH	cubic		3.3254		-0.4215		-1.686		1.1661
+CH2	CH	CH2	CH	cubic		3.3254		-0.4215		-1.686		1.1661
+CH2	CH	CH	CH	cubic		3.3254		-0.4215		-1.686		1.1661
+CH	CH2	CH2	CH	cubic		5.9602		-0.2568		-3.802		2.1586
+CH	CH2	CH	CH	cubic		3.3254		-0.4215		-1.686		1.1661
+CH	CH	CH	CH	cubic		3.3254		-0.4215		-1.686		1.1661
+TB1	TB1	TB1	TB1	cubic		5.9602		-0.2568		-3.802		2.1586
+TB2	TB2	TB2	TB2	cubic		5.9602		-0.2568		-3.802		2.1586
+TB3	TB3	TB3	TB3	cubic		5.9602		-0.2568		-3.802		2.1586
+TE1	TB1	TB1	TB1	cubic		5.9602		-0.2568		-3.802		2.1586
+TE2	TB2	TB2	TB2	cubic		5.9602		-0.2568		-3.802		2.1586
+TE3	TB3	TB3	TB3	cubic		5.9602		-0.2568		-3.802		2.1586
