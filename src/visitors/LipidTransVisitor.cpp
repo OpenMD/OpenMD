@@ -125,7 +125,8 @@ void LipidTransVisitor::internalVisit(StuntDouble *sd) {
     for( atomInfo = atomData->beginAtomInfo(i); atomInfo; atomInfo = atomData->nextAtomInfo(i) ) {
 
         Vector3d tmp= atomInfo->pos - origin_;
-        atomInfo->pos = rotMat_ * tmp - origin_;;
+        currSnapshot->wrapVector(tmp);
+        atomInfo->pos = rotMat_ * tmp;;
         atomInfo->dipole = rotMat_ * atomInfo->dipole;
     }
 }
