@@ -1,4 +1,4 @@
-Source    = \
+MySource    = \
 	definitions.F90 \
 	fError.c \
 	PropertyMap.cpp \
@@ -11,8 +11,12 @@ Source    = \
 	Utility.cpp \
 	Trim.cpp
 
-ifneq "$(words $(LIBOBJS))" "0"
-   Source  = $(Source) getopt.c getopt1.c
+LibObjs = @LIBOBJS@
+
+ifneq "$(words $(LibObjs))" "0"
+   Source  = $(MySource) getopt.c getopt1.c
+else
+   Source = $(MySource)
 endif
 
 RmiSource =

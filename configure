@@ -8027,7 +8027,7 @@ esac
 
           ac_config_headers="$ac_config_headers src/config.h"
 
-          ac_config_files="$ac_config_files make/Makefile"
+                    ac_config_files="$ac_config_files make/Makefile src/utils/Makefile"
 
 
 cat >confcache <<\_ACEOF
@@ -8559,6 +8559,7 @@ do
   case "$ac_config_target" in
   # Handling of arguments.
   "make/Makefile" ) CONFIG_FILES="$CONFIG_FILES make/Makefile" ;;
+  "src/utils/Makefile" ) CONFIG_FILES="$CONFIG_FILES src/utils/Makefile" ;;
   "src/utils/getopt.h" ) CONFIG_LINKS="$CONFIG_LINKS src/utils/getopt.h:src/utils/gnugetopt.h" ;;
   "src/config.h" ) CONFIG_HEADERS="$CONFIG_HEADERS src/config.h" ;;
   *) { { echo "$as_me:$LINENO: error: invalid argument: $ac_config_target" >&5

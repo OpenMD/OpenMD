@@ -10,3 +10,6 @@
 
 /* Define to 1 if you find the <mpif.h> header file. */
 #undef HAVE_MPIF_H
+
+#undef HAVE_GETOPT_H
+#undef HAVE_GETOPT_LONG
