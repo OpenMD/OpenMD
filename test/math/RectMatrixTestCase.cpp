@@ -279,7 +279,7 @@ void RectMatrixTestCase::testRowColOperations() {
     CPPUNIT_ASSERT(m == e);
     
     //test getCol
-    col = e.getColum(1);
+    col = e.getColumn(1);
     CPPUNIT_ASSERT_DOUBLES_EQUAL(col[0], 4.0, oopse::epsilon);    
     CPPUNIT_ASSERT_DOUBLES_EQUAL(col[1], 0.0, oopse::epsilon);
     CPPUNIT_ASSERT_DOUBLES_EQUAL(col[2], 6.0, oopse::epsilon);
@@ -287,15 +287,15 @@ void RectMatrixTestCase::testRowColOperations() {
     col[0] = 2.0;    
     col[1] = 0.0;    
     col[2] = 0.0;    
-    m.setColum(0, col);
+    m.setColumn(0, col);
     col[0] = 4.0;    
     col[1] = 0.0;    
     col[2] = 6.0;    
-    m.setColum(1, col);
+    m.setColumn(1, col);
     col[0] = 1.0;    
     col[1] = 3.0;    
     col[2] = 5.0;    
-    m.setColum(2, col);
+    m.setColumn(2, col);
     CPPUNIT_ASSERT(m == e);
 
     //test swapRow
@@ -321,7 +321,7 @@ void RectMatrixTestCase::testRowColOperations() {
     s(2, 1) = 0.0;
     s(2, 2) = 5.0;
 
-    s.swapColum(0, 1);
+    s.swapColumn(0, 1);
     CPPUNIT_ASSERT(s == e);
 
     double* p = s.getArrayPointer();
