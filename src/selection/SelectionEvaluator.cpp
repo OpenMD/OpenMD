@@ -386,6 +386,7 @@ void SelectionEvaluator::clearDefinitionsAndLoadPredefined() {
 BitSet SelectionEvaluator::evaluate() {
     BitSet bs(nStuntDouble);
     if (isLoaded_) {
+        pc = 0;
         instructionDispatchLoop(bs);
     }
 
