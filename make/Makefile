@@ -100,9 +100,6 @@ DocsDir          = $(DEV_ROOT)/docs
 CurrentDir       = $(CURDIR)
 
 ifdef Source
-#Package          = $(subst $(SourceDir)/,,$(CurrentDir))
-#Package          = $(notdir $(CurrentDir))
-
 #get the relative path of current package to source directory
 # /home/maul/gezelter/src/code/src/UseTheForce/Darkside --> UseTheForce/Darkside
 #Package          = $(shell echo $(CurrentDir) | sed -e 's/^.*\/src\/\(.*\)/\1/g')
@@ -289,7 +286,6 @@ Space                  = $(Empty) $(Empty)
 default : build
 
 %.loop :
-	$(Print) $(SourceFiles)
 	@$(MAKE) $(MakeOptions) -C $(subst .loop,,$@) _$(MAKECMDGOALS)all
 
 # Create target directory
@@ -297,39 +293,39 @@ $(PackageTargetDir) :
 	$(MakeDir) $@
 
 # .c -> .o
-$(PackageTargetDir)/%.o : $(PackageSourceDir)/%.c
+$(PackageTargetDir)/%.o : %.c
 	$(Print) $@
 	$(Print) $(CCompiler) $(COptions) -c $(IncludePath) $< -o $@
 	@$(CCompiler) $(COptions) -c $(IncludePath) $< -o $@
 
-%.o : $(PackageSourceDir)/%.c
+%.o : %.c
 	$(MAKE) $(MakeOptions) $(PackageTargetDir)/$@
 
 # .cpp -> .o
-$(PackageTargetDir)/%.o : $(PackageSourceDir)/%.cpp
+$(PackageTargetDir)/%.o : %.cpp
 	$(Print) $@
 	$(Print) $(CppCompiler) $(CppOptions) -c $(IncludePath) $< -o $@
 	$(CppCompiler) $(CppOptions) -c $(IncludePath) $< -o $@
 
-%.o : $(PackageSourceDir)/%.cpp
+%.o : %.cpp
 	$(MAKE) $(MakeOptions) $(PackageTargetDir)/$@
 
 # .f -> .o
-$(PackageTargetDir)/%.o : $(PackageSourceDir)/%.f
+$(PackageTargetDir)/%.o : %.f
 	$(Print) $@
 	$(Print) $(FortranCompiler) $(FortranOptions) -c $< -o $@
 	@$(FortranCompiler) $(FortranOptions) -c $< -o $@
 
-%.o : $(PackageSourceDir)/%.f
+%.o : %.f
 	$(MAKE) $(MakeOptions) $(PackageTargetDir)/$@
 
 # .F90 -> .o
-$(PackageTargetDir)/%.o : $(PackageSourceDir)/%.F90
+$(PackageTargetDir)/%.o : %.F90
 	$(Print) $@
 	$(Print) $(F90Compiler) $(F90Options) -c $< -o $@
 	@$(F90Compiler) $(F90Options) -c $< -o $@
 
-%.o : $(PackageSourceDir)/%.F90
+%.o : %.F90
 	$(MAKE) $(MakeOptions) $(PackageTargetDir)/$@
 
 # .java -> .class
@@ -351,7 +347,7 @@ $(PackageSourceDir)/%.h : $(PackageTargetDir)/%.class
 	$(MAKE) $(MakeOptions) $(PackageSourceDir)/$@
 
 #.y -> .h
-$(PackageSourceDir)/%.h : $(PackageSourceDir)/%.y
+%.h : %.y
 	$(Print) $@
 	$(Print) @$(Yacc) -d $?
 	@$(Yacc) -d  $?
@@ -359,7 +355,7 @@ $(PackageSourceDir)/%.h : $(PackageSourceDir)/%.y
 	@$(Delete) y.tab.c
 
 #.y -> .c
-$(PackageSourceDir)/%.c : $(PackageSourceDir)/%.y
+%.c : %.y
 	$(Print) $@
 	$(Print) $(Yacc) -d $?
 	@$(Yacc) -d  $?
@@ -367,7 +363,7 @@ $(PackageSourceDir)/%.c : $(PackageSourceDir)/%.y
 	@$(Delete) y.tab.h
 
 # .l -> .c
-$(PackageSourceDir)/%.c : $(PackageSourceDir)/%.l
+%.c : %.l
 	$(Print) $@
 	$(Print) $(Lex) -o$@ $?
 	@$(Lex) -o$@ $?

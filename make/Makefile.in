@@ -56,24 +56,25 @@ Packages = \
         constraints \
         profiling \
         restraints \
-        applications \
+        applications 
 
 #packages contain libraries
 PackageLibs = \
-	utils \
-	math \
-	types \
-	primitives \
-	visitors \
-	UseTheForce/DarkSide \
-	UseTheForce \
-	brains \
-	io \
-	integrators \
-	minimizers \
-	constraints \
-	profiling \
-	restraints \
+	      utils \
+	      math \
+	      types \
+	      primitives \
+	      visitors \
+        UseTheForce/DarkSide \
+	      UseTheForce \
+        brains \
+	      io \
+	      integrators \
+	      minimizers \
+	      constraints \
+	      profiling \
+	      restraints 
+
 #---------------------------------------------------------------------------
 #
 #  Directories
@@ -91,7 +92,12 @@ DocsDir           = $(DEV_ROOT)/docs
 CurrentDir        = $(CURDIR)
 
 ifdef Source
-Package                  = $(subst $(SourceDir)/,,$(CurrentDir))
+#get the relative path of current package to source directory
+# /home/maul/gezelter/src/code/src/UseTheForce/Darkside --> UseTheForce/Darkside
+#Package          = $(shell echo $(CurrentDir) | sed -e 's/^.*\/src\/\(.*\)/\1/g')
+#use shell script to get the absolute path and then rip it off from $(CurrentDir)
+Package          = $(subst $(shell cd $(SourceDir); pwd)/,,$(CurrentDir))
+
 PackageList              = $(Package)
 PackageSourceDir         = $(SourceDir)/$(Package)
 PackageTargetDir         = $(TargetDir)
@@ -101,9 +107,9 @@ else
 PackageList              = $(Packages) $(JavaPackages)
 endif
 
-PackageListLoop  = $(patsubst %,$(SourceDir)/%/.loop,$(PackageList))
+PackageListLoop          = $(patsubst %,$(SourceDir)/%/.loop,$(PackageList))
 
-JRE              = $(JAVA_HOME)/jre/lib/rt.jar
+JRE                      = $(JAVA_HOME)/jre/lib/rt.jar
 
 ifdef IS_UNIX
 X = :
@@ -131,14 +137,14 @@ OtherSourceFiles       = $(filter-out $(JavaFiles) $(CppFiles) $(CFiles) \
 	                              $(YaccFiles) $(CorbaFiles), \
 	                              $(Source))
 ManifestFile           = $(PackageSourceDir)/Manifest
-SourceFiles            = $(JavaFiles:%.java=  $(PackageSourceDir)/%.java)\
-                         $(CppFiles:%.cpp=    $(PackageSourceDir)/%.cpp)\
-                         $(CFiles:%.c=        $(PackageSourceDir)/%.c)\
-                         $(FortranFiles:%.f=  $(PackageSourceDir)/%.f)\
-                         $(F90Files:%.F90=    $(PackageSourceDir)/%.F90)\
-                         $(LexFiles:%.l=      $(PackageSourceDir)/%.l)\
-                         $(YaccFiles:%.y=     $(PackageSourceDir)/%.y)\
 
+SourceFiles            = $(JavaFiles)\
+                         $(CppFiles)\
+                         $(CFiles)\
+                         $(FortranFiles)\
+                         $(F90Files)\
+                         $(LexFiles)\
+                         $(YaccFiles)
 
 # Target
 JavaClassFiles         = $(JavaFiles:%.java=  $(PackageTargetDir)/%.class)
@@ -148,24 +154,24 @@ RmiSkeletonFiles       = $(RmiSource:%.java=  $(PackageTargetDir)/%_Skel.class)
 JniClassFiles          = $(JniSource:%.java=  $(PackageTargetDir)/%.class)
 JniHeaders             = $(JniSource:%.java=  $(PackageSourceDir)/%.h)
 ObjectFiles            = $(CFiles:%.c=        $(PackageTargetDir)/%.o)\
-		         $(CppFiles:%.cpp=    $(PackageTargetDir)/%.o)\
-		         $(FortranFiles:%.f=  $(PackageTargetDir)/%.o)\
-		         $(F90Files:%.F90=    $(PackageTargetDir)/%.o)\
-		         $(LexFiles:%.l=      $(PackageTargetDir)/%.o)\
-		         $(YaccFiles:%.y=     $(PackageTargetDir)/%.o)
+                         $(CppFiles:%.cpp=    $(PackageTargetDir)/%.o)\
+		                     $(FortranFiles:%.f=  $(PackageTargetDir)/%.o)\
+		                     $(F90Files:%.F90=    $(PackageTargetDir)/%.o)\
+		                     $(LexFiles:%.l=      $(PackageTargetDir)/%.o)\
+		                     $(YaccFiles:%.y=     $(PackageTargetDir)/%.o)
 ParallelObjectFiles    = $(CFiles:%.c=        $(PackageParallelTargetDir)/%.o)\
-		         $(CppFiles:%.cpp=    $(PackageParallelTargetDir)/%.o)\
-		         $(FortranFiles:%.f=  $(PackageParallelTargetDir)/%.o)\
-		         $(F90Files:%.F90=    $(PackageParallelTargetDir)/%.o)\
-		         $(LexFiles:%.l=      $(PackageParallelTargetDir)/%.o)\
-		         $(YaccFiles:%.y=     $(PackageParallelTargetDir)/%.o)
+		                     $(CppFiles:%.cpp=    $(PackageParallelTargetDir)/%.o)\
+		                     $(FortranFiles:%.f=  $(PackageParallelTargetDir)/%.o)\
+		                     $(F90Files:%.F90=    $(PackageParallelTargetDir)/%.o)\
+		                     $(LexFiles:%.l=      $(PackageParallelTargetDir)/%.o)\
+		                     $(YaccFiles:%.y=     $(PackageParallelTargetDir)/%.o)
 
 DerivedSource          = $(YaccFiles:%.y=    %.h) \
-	                 $(YaccFiles:%.y=    %.c) \
-	                 $(LexFiles:%.l=     %.c)
+	                       $(YaccFiles:%.y=    %.c) \
+	                       $(LexFiles:%.l=     %.c)
 
 DerivedCFiles          = $(YaccFiles:%.y=    %.c) \
-	                 $(LexFiles:%.l=     %.c)
+	                       $(LexFiles:%.l=     %.c)
 
 OtherTargetFiles       = $(OtherSourceFiles:%=$(PackageTargetDir)/%)
 
@@ -181,11 +187,11 @@ endif
 ifneq  "$(words $(ObjectFiles) $(ParallelObjectFiles))" "0"
   DependencyFile    = $(PackageSourceDir)/Makedepend
   ifneq "$(Main)" ""
-    Executable        = $(BinDir)/$(Main)
+    Executable             = $(BinDir)/$(Main)
     ParallelExecutable     = $(BinDir)/$(Main)_MPI
   else
-    SharedLibrary     = $(LibDir)/lib$(subst /,,$(Package)).so 
-    StaticLibrary     = $(LibDir)/lib$(subst /,,$(Package)).a
+    SharedLibrary          = $(LibDir)/lib$(subst /,,$(Package)).so 
+    StaticLibrary          = $(LibDir)/lib$(subst /,,$(Package)).a
     ParallelSharedLibrary  = $(LibDir)/lib$(subst /,,$(Package))_MPI.so 
     ParallelStaticLibrary  = $(LibDir)/lib$(subst /,,$(Package))_MPI.a
   endif
@@ -284,39 +290,39 @@ $(PackageTargetDir) :
 	$(MakeDir) $@
 
 # .c -> .o
-$(PackageTargetDir)/%.o : $(PackageSourceDir)/%.c
+$(PackageTargetDir)/%.o : %.c
 	$(Print) $@
 	$(Print) $(CCompiler) $(COptions) -c $(IncludePath) $< -o $@
 	@$(CCompiler) $(COptions) -c $(IncludePath) $< -o $@
 
-%.o : $(PackageSourceDir)/%.c
+%.o : %.c
 	$(MAKE) $(MakeOptions) $(PackageTargetDir)/$@
 
 # .cpp -> .o
-$(PackageTargetDir)/%.o : $(PackageSourceDir)/%.cpp
+$(PackageTargetDir)/%.o : %.cpp
 	$(Print) $@
 	$(Print) $(CppCompiler) $(CppOptions) -c $(IncludePath) $< -o $@
 	$(CppCompiler) $(CppOptions) -c $(IncludePath) $< -o $@
 
-%.o : $(PackageSourceDir)/%.cpp
+%.o : %.cpp
 	$(MAKE) $(MakeOptions) $(PackageTargetDir)/$@
 
 # .f -> .o
-$(PackageTargetDir)/%.o : $(PackageSourceDir)/%.f
+$(PackageTargetDir)/%.o : %.f
 	$(Print) $@
 	$(Print) $(FortranCompiler) $(FortranOptions) -c $< -o $@
 	@$(FortranCompiler) $(FortranOptions) -c $< -o $@
 
-%.o : $(PackageSourceDir)/%.f
+%.o : %.f
 	$(MAKE) $(MakeOptions) $(PackageTargetDir)/$@
 
 # .F90 -> .o
-$(PackageTargetDir)/%.o : $(PackageSourceDir)/%.F90
+$(PackageTargetDir)/%.o : %.F90
 	$(Print) $@
 	$(Print) $(F90Compiler) $(F90Options) -c $< -o $@
 	@$(F90Compiler) $(F90Options) -c $< -o $@
 
-%.o : $(PackageSourceDir)/%.F90
+%.o : %.F90
 	$(MAKE) $(MakeOptions) $(PackageTargetDir)/$@
 
 # .java -> .class
@@ -338,7 +344,7 @@ $(PackageSourceDir)/%.h : $(PackageTargetDir)/%.class
 	$(MAKE) $(MakeOptions) $(PackageSourceDir)/$@
 
 #.y -> .h
-$(PackageSourceDir)/%.h : $(PackageSourceDir)/%.y
+%.h : %.y
 	$(Print) $@
 	$(Print) @$(Yacc) -d $?
 	@$(Yacc) -d  $?
@@ -346,7 +352,7 @@ $(PackageSourceDir)/%.h : $(PackageSourceDir)/%.y
 	@$(Delete) y.tab.c
 
 #.y -> .c
-$(PackageSourceDir)/%.c : $(PackageSourceDir)/%.y
+%.c : %.y
 	$(Print) $@
 	$(Print) $(Yacc) -d $?
 	@$(Yacc) -d  $?
@@ -354,7 +360,7 @@ $(PackageSourceDir)/%.c : $(PackageSourceDir)/%.y
 	@$(Delete) y.tab.h
 
 # .l -> .c
-$(PackageSourceDir)/%.c : $(PackageSourceDir)/%.l
+%.c : %.l
 	$(Print) $@
 	$(Print) $(Lex) -o$@ $?
 	@$(Lex) -o$@ $?
