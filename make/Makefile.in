@@ -437,9 +437,9 @@ ifeq "$(UseMPI)" "yes"
         fi
 
 	$(MAKE) $(MakeOptions) $(PackageParallelTargetDir)/$@
-        if test -n "`ls *.$(ModSuffix)`"; then\
-          $(Move) "`ls *.$(ModSuffix)`" $(PackageTargetDir);\
-        fi
+	if test -n "`ls *.$(ModSuffix)`"; then\
+	  $(Move) "`ls *.$(ModSuffix)`" $(PackageTargetDir);\
+	fi
 
 else
 %.o : %.F90
