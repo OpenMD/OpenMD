@@ -38,7 +38,7 @@
 #include <sstream>
 
 #ifdef IS_MPI
-#include <mpi.hpp>
+#include <mpi.h>
 #endif
 
 namespace oopse {
@@ -118,7 +118,7 @@ class basic_ifstrstream : public basic_istream<_CharT, _Traits> {
          }
 
         /**
-         *
+         * virtual destructor will close the file(in single mode) and clear the stream buffer
          */
         ~basic_ifstrstream(){
             close();
