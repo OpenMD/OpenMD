@@ -568,10 +568,10 @@ $(CombinedParallelStaticLib) : $(LibDir)/.stamp_MPI
 
 # Executable
 $(Executable) : $(CombinedStaticLib) $(ObjectFiles)
-	$(Linker) $(ObjectFiles) $(LinkOptions) $(LibDirs) $(CombinedStaticLib) $(Libraries) -o $@
+	$(Linker) $(ObjectFiles) $(CombinedStaticLib) $(LinkOptions) $(LibDirs) $(Libraries) -o $@
 
 $(ParallelExecutable) : $(CombinedParallelStaticLib) $(ParallelObjectFiles)
-	$(Linker) $(ParallelObjectFiles) $(ParallelLinkOptions) $(LibDirs) $(CombinedParallelStaticLib) $(Libraries) -o $@
+	$(Linker) $(ParallelObjectFiles) $(CombinedParallelStaticLib) $(ParallelLinkOptions) $(LibDirs) $(Libraries) -o $@
 
 # Anything else is just copied from source to target
 $(PackageTargetDir)/% : $(PackageSourceDir)/%
