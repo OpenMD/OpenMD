@@ -48,11 +48,21 @@
 #define setFsimParallel F90_FUNC(setfsimparallel, SETFSIMPARALLEL)
 
 extern "C" {
+
+#ifdef IS_MPI
   void setFsimParallel( mpiSimData* the_mpiPlug,
                         int* nLocal, 
                         int* globalAtomIndex,
                         int* nGroupsLocal,
                         int* globalGroupIndex,
                         int* isError );
+#else
+
+  /* Define a dummy routine to match the fortran dummy */
+
+  void setFsimParallel( int* isError );
+
+#endif
+
 }
 #endif

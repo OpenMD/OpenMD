@@ -1,6 +1,7 @@
 #ifdef IS_MPI
 subroutine setFsimParallel(thisComponentPlan, nAtomTags, atomTags, &
      nGroupTags, groupTags, status)
+
   use mpiSimulation
   
   !! Passed Arguments
@@ -14,10 +15,22 @@ subroutine setFsimParallel(thisComponentPlan, nAtomTags, atomTags, &
   !! Global reference tag for local particles
   integer, dimension(nAtomTags), intent(inout) :: atomTags
   integer, dimension(nGroupTags), intent(inout) :: groupTags
-  
+
   call setupSimParallel(thisComponentPlan, nAtomTags, atomTags, &
-       nGroupTags, groupTags, status)
-  
+       nGroupTags, groupTags, status)  
   
 end subroutine setFsimParallel 
-#endif 
+
+#else
+
+!! Dummy routine so that we don't have an empty compilation unit:
+
+subroutine setFsimParallel(status)
+
+  integer, intent(out) :: status
+  status = 0
+  return
+
+end subroutine setFsimParallel
+
+#endif
