@@ -101,7 +101,8 @@ public:
 	double randExc( const double& n );      // real number in [0,n)
 	double randDblExc();                    // real number in (0,1)
 	double randDblExc( const double& n );   // real number in (0,n)
-	uint32 randInt();                       // integer in [0,2^32-1]
+	uint32 randInt();                       // integer in [0,2^32-1] (modified for striding)
+        uint32 rawRandInt();                    // original randInt
 	uint32 randInt( const uint32& n );      // integer in [0,n] for n < 2^32
 	double operator()() { return rand(); }  // same as rand()
 	
@@ -184,29 +185,42 @@ inline double MTRand::randNorm( const double& mean, const double& variance )
 	return mean + r * cos(phi);
 }
 
-inline MTRand::uint32 MTRand::randInt()
+/**
+ * This function is modified from the original to allow for random
+ * streams on parallel jobs.  It now takes numbers from by striding
+ * through the random stream and picking up only one of the random
+ * numbers per nstrides_.  The number it picks is the stride_'th
+ * number in the stride sequence.  
+ */
+inline MTRand::uint32 MTRand::randInt() {
+ 
+  uint32 ranNums[nstrides_];
+  
+  for (int i = 0; i < nstrides_; ++i) {
+    ranNums[i] = rawRandInt();
+  }
+  
+  return ranNums[stride_];
+}
+
+/** 
+ * This is the original randInt function which implements the mersenne
+ * twister.
+ */
+inline MTRand::uint32 MTRand::rawRandInt()
 {
 	// Pull a 32-bit integer from the generator state
 	// Every other access function simply transforms the numbers extracted here
-
-        uint32 ranNums[nstrides_];
-
-        for (int i = 0; i < nstrides_; ++i) {
-            if( left == 0 ) {
-                reload();
-            }
-            
-            --left;
-
-            register uint32 s1;
-            s1 = *pNext++;
-            s1 ^= (s1 >> 11);
-            s1 ^= (s1 <<  7) & 0x9d2c5680UL;
-            s1 ^= (s1 << 15) & 0xefc60000UL;
-            ranNums[i] = s1 ^ (s1 >> 18);
-        }
-
-        return ranNums[stride_];
+	
+	if( left == 0 ) reload();
+	--left;
+		
+	register uint32 s1;
+	s1 = *pNext++;
+	s1 ^= (s1 >> 11);
+	s1 ^= (s1 <<  7) & 0x9d2c5680UL;
+	s1 ^= (s1 << 15) & 0xefc60000UL;
+	return ( s1 ^ (s1 >> 18) );
 }
 
 inline MTRand::uint32 MTRand::randInt( const uint32& n )
@@ -275,25 +289,42 @@ inline void MTRand::seed( uint32 *const bigSeed, const uint32 seedLength )
 
 inline void MTRand::seed()
 {
-	// Seed the generator with an array from /dev/urandom if available
-	// Otherwise use a hash of time() and clock() values
-	
-	// First try getting an array from /dev/urandom
-	FILE* urandom = fopen( "/dev/urandom", "rb" );
-	if( urandom )
-	{
-		uint32 bigSeed[N];
-		register uint32 *s = bigSeed;
-		register int i = N;
-		register bool success = true;
-		while( success && i-- )
-			success = fread( s++, sizeof(uint32), 1, urandom );
-		fclose(urandom);
-		if( success ) { seed( bigSeed, N );  return; }
-	}
-	
-	// Was not successful, so use time() and clock() instead
-	seed( hash( time(NULL), clock() ) );
+  vector<uint32> seeds;
+
+  seeds = generateSeeds();
+
+  if (seeds.size() == 1) {
+    seed( seeds[0] );
+  } else {
+    seed( &seeds[0], seeds.size() );
+  }
+}
+
+
+inline vector<uint32> MTRand::generateSeeds() {
+  // Seed the generator with an array from /dev/urandom if available
+  // Otherwise use a hash of time() and clock() values
+
+  vector<uint32> bigSeed; 
+
+  // First try getting an array from /dev/urandom
+  FILE* urandom = fopen( "/dev/urandom", "rb" );
+  if( urandom )
+    {
+      bigSeed.resize(N);
+      register uint32 *s = &bigSeed[0];
+      register int i = N;
+      register bool success = true;
+      while( success && i-- )
+        success = fread( s++, sizeof(uint32), 1, urandom );
+      fclose(urandom);
+      if( success ) { return bigSeed; }
+    }
+  
+  // Was not successful, so use time() and clock() instead
+
+  bigSeed.push_back(hash( time(NULL), clock()));
+  return bigSeed;
 }
 
 
