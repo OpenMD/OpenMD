@@ -9,7 +9,8 @@ Source = UtilTest.cpp \
          GenericFactoryTestCase.cpp \
 	 NextCombinationTestCase.cpp \
 	 StringTokenizerTestCase.cpp \
-	 StringTokenizer.cpp
+	 StringTokenizer.cpp \
+	 Utility.cpp
 
 DEV_ROOT               = ../..
 UseMPI                 = no 
