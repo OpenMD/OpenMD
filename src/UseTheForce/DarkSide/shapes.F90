@@ -62,9 +62,6 @@ module shapes
   type(ShapeList), save :: ShapeMap
 
   integer :: lmax
-  real (kind=dp), allocatable, dimension(:,:) :: plm_i, dlm_i, plm_j, dlm_j
-  real (kind=dp), allocatable, dimension(:) :: tm_i, dtm_i, um_i, dum_i
-  real (kind=dp), allocatable, dimension(:) :: tm_j, dtm_j, um_j, dum_j
 
 contains  
 
@@ -438,10 +435,10 @@ contains
     real (kind=dp) :: fxji, fyji, fzji, fxjj, fyjj, fzjj
     real (kind=dp) :: fxradial, fyradial, fzradial
 
-    real (kind=dp) :: plm_i(LMAX,MMAX), dlm_i(LMAX,MMAX)
-    real (kind=dp) :: plm_j(LMAX,MMAX), dlm_j(LMAX,MMAX)
-    real (kind=dp) :: tm_i(MMAX), dtm_i(MMAX), um_i(MMAX), dum_i(MMAX)
-    real (kind=dp) :: tm_j(MMAX), dtm_j(MMAX), um_j(MMAX), dum_j(MMAX)
+    real (kind=dp) :: plm_i(0:LMAX,0:MMAX), dlm_i(0:LMAX,0:MMAX)
+    real (kind=dp) :: plm_j(0:LMAX,0:MMAX), dlm_j(0:LMAX,0:MMAX)
+    real (kind=dp) :: tm_i(0:MMAX), dtm_i(0:MMAX), um_i(0:MMAX), dum_i(0:MMAX)
+    real (kind=dp) :: tm_j(0:MMAX), dtm_j(0:MMAX), um_j(0:MMAX), dum_j(0:MMAX)
 
     if (.not.haveShapeMap) then
        call handleError("calc_shape", "NO SHAPEMAP!!!!")
@@ -550,8 +547,8 @@ contains
        dspiduy = xi * yi * zi / proji3
        dspiduz = xi * (1.0d0 / proji - yi2 / proji3) + (xi * yi2 / proji3)
 
-       call Associated_Legendre(cti, ShapeMap%Shapes(st1)%bigL, &
-            ShapeMap%Shapes(st1)%bigM, LMAX, &
+       call Associated_Legendre(cti, ShapeMap%Shapes(st1)%bigM, &
+            ShapeMap%Shapes(st1)%bigL, LMAX, &
             plm_i, dlm_i)
 
        call Orthogonal_Polynomial(cpi, ShapeMap%Shapes(st1)%bigM, MMAX, &
@@ -588,7 +585,6 @@ contains
           function_type = ShapeMap%Shapes(st1)%ContactFunctionType(lm)
 
           if ((function_type .eq. SH_COS).or.(m.eq.0)) then
-           !  write(*,*) tm_i(m), ' is tm_i'
              Phunc = coeff * tm_i(m)
              dPhuncdX = coeff * dtm_i(m) * dcpidx
              dPhuncdY = coeff * dtm_i(m) * dcpidy
@@ -606,21 +602,21 @@ contains
              dPhuncdUz = coeff*(spi * dum_i(m-1)*dcpiduz + dspiduz *um_i(m-1))
           endif
 
-          sigma_i = sigma_i + plm_i(l,m)*Phunc
-          write(*,*) plm_i(l,m), l, m
-          dsigmaidx = dsigmaidx + plm_i(l,m)*dPhuncdX + &
-               Phunc * dlm_i(l,m) * dctidx
-          dsigmaidy = dsigmaidy + plm_i(l,m)*dPhuncdY + &
-               Phunc * dlm_i(l,m) * dctidy
-          dsigmaidz = dsigmaidz + plm_i(l,m)*dPhuncdZ + &
-               Phunc * dlm_i(l,m) * dctidz
+          sigma_i = sigma_i + plm_i(m,l)*Phunc
+
+          dsigmaidx = dsigmaidx + plm_i(m,l)*dPhuncdX + &
+               Phunc * dlm_i(m,l) * dctidx
+          dsigmaidy = dsigmaidy + plm_i(m,l)*dPhuncdY + &
+               Phunc * dlm_i(m,l) * dctidy
+          dsigmaidz = dsigmaidz + plm_i(m,l)*dPhuncdZ + &
+               Phunc * dlm_i(m,l) * dctidz
           
-          dsigmaidux = dsigmaidux + plm_i(l,m)* dPhuncdUx + &
-               Phunc * dlm_i(l,m) * dctidux
-          dsigmaiduy = dsigmaiduy + plm_i(l,m)* dPhuncdUy + &
-               Phunc * dlm_i(l,m) * dctiduy
-          dsigmaiduz = dsigmaiduz + plm_i(l,m)* dPhuncdUz + &
-               Phunc * dlm_i(l,m) * dctiduz
+          dsigmaidux = dsigmaidux + plm_i(m,l)* dPhuncdUx + &
+               Phunc * dlm_i(m,l) * dctidux
+          dsigmaiduy = dsigmaiduy + plm_i(m,l)* dPhuncdUy + &
+               Phunc * dlm_i(m,l) * dctiduy
+          dsigmaiduz = dsigmaiduz + plm_i(m,l)* dPhuncdUz + &
+               Phunc * dlm_i(m,l) * dctiduz
 
        end do
 
@@ -648,21 +644,21 @@ contains
              dPhuncdUz = coeff*(spi * dum_i(m-1)*dcpiduz + dspiduz *um_i(m-1))
           endif
 
-          s_i = s_i + plm_i(l,m)*Phunc
+          s_i = s_i + plm_i(m,l)*Phunc
           
-          dsidx = dsidx + plm_i(l,m)*dPhuncdX + &
-               Phunc * dlm_i(l,m) * dctidx
-          dsidy = dsidy + plm_i(l,m)*dPhuncdY + &
-               Phunc * dlm_i(l,m) * dctidy
-          dsidz = dsidz + plm_i(l,m)*dPhuncdZ + &
-               Phunc * dlm_i(l,m) * dctidz
+          dsidx = dsidx + plm_i(m,l)*dPhuncdX + &
+               Phunc * dlm_i(m,l) * dctidx
+          dsidy = dsidy + plm_i(m,l)*dPhuncdY + &
+               Phunc * dlm_i(m,l) * dctidy
+          dsidz = dsidz + plm_i(m,l)*dPhuncdZ + &
+               Phunc * dlm_i(m,l) * dctidz
           
-          dsidux = dsidux + plm_i(l,m)* dPhuncdUx + &
-               Phunc * dlm_i(l,m) * dctidux
-          dsiduy = dsiduy + plm_i(l,m)* dPhuncdUy + &
-               Phunc * dlm_i(l,m) * dctiduy
-          dsiduz = dsiduz + plm_i(l,m)* dPhuncdUz + &
-               Phunc * dlm_i(l,m) * dctiduz      
+          dsidux = dsidux + plm_i(m,l)* dPhuncdUx + &
+               Phunc * dlm_i(m,l) * dctidux
+          dsiduy = dsiduy + plm_i(m,l)* dPhuncdUy + &
+               Phunc * dlm_i(m,l) * dctiduy
+          dsiduz = dsiduz + plm_i(m,l)* dPhuncdUz + &
+               Phunc * dlm_i(m,l) * dctiduz      
 
        end do
               
@@ -689,22 +685,22 @@ contains
              dPhuncdUy = coeff*(spi * dum_i(m-1)*dcpiduy + dspiduy *um_i(m-1))
              dPhuncdUz = coeff*(spi * dum_i(m-1)*dcpiduz + dspiduz *um_i(m-1))
           endif
-          !write(*,*) eps_i, plm_i(l,m), Phunc
-          eps_i = eps_i + plm_i(l,m)*Phunc
+
+          eps_i = eps_i + plm_i(m,l)*Phunc
           
-          depsidx = depsidx + plm_i(l,m)*dPhuncdX + &
-               Phunc * dlm_i(l,m) * dctidx
-          depsidy = depsidy + plm_i(l,m)*dPhuncdY + &
-               Phunc * dlm_i(l,m) * dctidy
-          depsidz = depsidz + plm_i(l,m)*dPhuncdZ + &
-               Phunc * dlm_i(l,m) * dctidz
+          depsidx = depsidx + plm_i(m,l)*dPhuncdX + &
+               Phunc * dlm_i(m,l) * dctidx
+          depsidy = depsidy + plm_i(m,l)*dPhuncdY + &
+               Phunc * dlm_i(m,l) * dctidy
+          depsidz = depsidz + plm_i(m,l)*dPhuncdZ + &
+               Phunc * dlm_i(m,l) * dctidz
           
-          depsidux = depsidux + plm_i(l,m)* dPhuncdUx + &
-               Phunc * dlm_i(l,m) * dctidux
-          depsiduy = depsiduy + plm_i(l,m)* dPhuncdUy + &
-               Phunc * dlm_i(l,m) * dctiduy
-          depsiduz = depsiduz + plm_i(l,m)* dPhuncdUz + &
-               Phunc * dlm_i(l,m) * dctiduz      
+          depsidux = depsidux + plm_i(m,l)* dPhuncdUx + &
+               Phunc * dlm_i(m,l) * dctidux
+          depsiduy = depsiduy + plm_i(m,l)* dPhuncdUy + &
+               Phunc * dlm_i(m,l) * dctiduy
+          depsiduz = depsiduz + plm_i(m,l)* dPhuncdUz + &
+               Phunc * dlm_i(m,l) * dctiduz      
 
        end do
 
@@ -785,8 +781,8 @@ contains
        dspjduy = xj * yj * zj / projj3
        dspjduz = xj * (1.0d0 / projj - yi2 / projj3) + (xj * yj2 / projj3)
        
-       call Associated_Legendre(ctj, ShapeMap%Shapes(st2)%bigL, &
-            ShapeMap%Shapes(st2)%bigM, LMAX, &
+       call Associated_Legendre(ctj, ShapeMap%Shapes(st2)%bigM, &
+            ShapeMap%Shapes(st2)%bigL, LMAX, &
             plm_j, dlm_j)
        
        call Orthogonal_Polynomial(cpj, ShapeMap%Shapes(st2)%bigM, MMAX, &
@@ -840,21 +836,21 @@ contains
              dPhuncdUz = coeff*(spj * dum_j(m-1)*dcpjduz + dspjduz *um_j(m-1))
           endif
  
-          sigma_j = sigma_j + plm_j(l,m)*Phunc
+          sigma_j = sigma_j + plm_j(m,l)*Phunc
           
-          dsigmajdx = dsigmajdx + plm_j(l,m)*dPhuncdX + &
-               Phunc * dlm_j(l,m) * dctjdx
-          dsigmajdy = dsigmajdy + plm_j(l,m)*dPhuncdY + &
-               Phunc * dlm_j(l,m) * dctjdy
-          dsigmajdz = dsigmajdz + plm_j(l,m)*dPhuncdZ + &
-               Phunc * dlm_j(l,m) * dctjdz
+          dsigmajdx = dsigmajdx + plm_j(m,l)*dPhuncdX + &
+               Phunc * dlm_j(m,l) * dctjdx
+          dsigmajdy = dsigmajdy + plm_j(m,l)*dPhuncdY + &
+               Phunc * dlm_j(m,l) * dctjdy
+          dsigmajdz = dsigmajdz + plm_j(m,l)*dPhuncdZ + &
+               Phunc * dlm_j(m,l) * dctjdz
           
-          dsigmajdux = dsigmajdux + plm_j(l,m)* dPhuncdUx + &
-               Phunc * dlm_j(l,m) * dctjdux
-          dsigmajduy = dsigmajduy + plm_j(l,m)* dPhuncdUy + &
-               Phunc * dlm_j(l,m) * dctjduy
-          dsigmajduz = dsigmajduz + plm_j(l,m)* dPhuncdUz + &
-               Phunc * dlm_j(l,m) * dctjduz
+          dsigmajdux = dsigmajdux + plm_j(m,l)* dPhuncdUx + &
+               Phunc * dlm_j(m,l) * dctjdux
+          dsigmajduy = dsigmajduy + plm_j(m,l)* dPhuncdUy + &
+               Phunc * dlm_j(m,l) * dctjduy
+          dsigmajduz = dsigmajduz + plm_j(m,l)* dPhuncdUz + &
+               Phunc * dlm_j(m,l) * dctjduz
 
        end do
 
@@ -882,21 +878,21 @@ contains
              dPhuncdUz = coeff*(spj * dum_j(m-1)*dcpjduz + dspjduz *um_j(m-1))
           endif
 
-          s_j = s_j + plm_j(l,m)*Phunc
+          s_j = s_j + plm_j(m,l)*Phunc
           
-          dsjdx = dsjdx + plm_j(l,m)*dPhuncdX + &
-               Phunc * dlm_j(l,m) * dctjdx
-          dsjdy = dsjdy + plm_j(l,m)*dPhuncdY + &
-               Phunc * dlm_j(l,m) * dctjdy
-          dsjdz = dsjdz + plm_j(l,m)*dPhuncdZ + &
-               Phunc * dlm_j(l,m) * dctjdz
+          dsjdx = dsjdx + plm_j(m,l)*dPhuncdX + &
+               Phunc * dlm_j(m,l) * dctjdx
+          dsjdy = dsjdy + plm_j(m,l)*dPhuncdY + &
+               Phunc * dlm_j(m,l) * dctjdy
+          dsjdz = dsjdz + plm_j(m,l)*dPhuncdZ + &
+               Phunc * dlm_j(m,l) * dctjdz
           
-          dsjdux = dsjdux + plm_j(l,m)* dPhuncdUx + &
-               Phunc * dlm_j(l,m) * dctjdux
-          dsjduy = dsjduy + plm_j(l,m)* dPhuncdUy + &
-               Phunc * dlm_j(l,m) * dctjduy
-          dsjduz = dsjduz + plm_j(l,m)* dPhuncdUz + &
-               Phunc * dlm_j(l,m) * dctjduz
+          dsjdux = dsjdux + plm_j(m,l)* dPhuncdUx + &
+               Phunc * dlm_j(m,l) * dctjdux
+          dsjduy = dsjduy + plm_j(m,l)* dPhuncdUy + &
+               Phunc * dlm_j(m,l) * dctjduy
+          dsjduz = dsjduz + plm_j(m,l)* dPhuncdUz + &
+               Phunc * dlm_j(m,l) * dctjduz
 
        end do
 
@@ -924,21 +920,21 @@ contains
              dPhuncdUz = coeff*(spj * dum_j(m-1)*dcpjduz + dspjduz *um_j(m-1))
           endif
 
-          eps_j = eps_j + plm_j(l,m)*Phunc
+          eps_j = eps_j + plm_j(m,l)*Phunc
           
-          depsjdx = depsjdx + plm_j(l,m)*dPhuncdX + &
-               Phunc * dlm_j(l,m) * dctjdx
-          depsjdy = depsjdy + plm_j(l,m)*dPhuncdY + &
-               Phunc * dlm_j(l,m) * dctjdy
-          depsjdz = depsjdz + plm_j(l,m)*dPhuncdZ + &
-               Phunc * dlm_j(l,m) * dctjdz
+          depsjdx = depsjdx + plm_j(m,l)*dPhuncdX + &
+               Phunc * dlm_j(m,l) * dctjdx
+          depsjdy = depsjdy + plm_j(m,l)*dPhuncdY + &
+               Phunc * dlm_j(m,l) * dctjdy
+          depsjdz = depsjdz + plm_j(m,l)*dPhuncdZ + &
+               Phunc * dlm_j(m,l) * dctjdz
           
-          depsjdux = depsjdux + plm_j(l,m)* dPhuncdUx + &
-               Phunc * dlm_j(l,m) * dctjdux
-          depsjduy = depsjduy + plm_j(l,m)* dPhuncdUy + &
-               Phunc * dlm_j(l,m) * dctjduy
-          depsjduz = depsjduz + plm_j(l,m)* dPhuncdUz + &
-               Phunc * dlm_j(l,m) * dctjduz
+          depsjdux = depsjdux + plm_j(m,l)* dPhuncdUx + &
+               Phunc * dlm_j(m,l) * dctjdux
+          depsjduy = depsjduy + plm_j(m,l)* dPhuncdUy + &
+               Phunc * dlm_j(m,l) * dctjduy
+          depsjduz = depsjduz + plm_j(m,l)* dPhuncdUz + &
+               Phunc * dlm_j(m,l) * dctjduz
 
        end do
 
@@ -977,7 +973,7 @@ contains
     dsduxj = 0.5*dsjdux
     dsduyj = 0.5*dsjduy
     dsduzj = 0.5*dsjduz
-    !write(*,*) eps_i, eps_j
+
     eps = sqrt(eps_i * eps_j)
 
     depsdxi = eps_j * depsidx / (2.0d0 * eps)
@@ -1311,6 +1307,8 @@ contains
        DY0 = DY1
        DY1 = DYN
     end DO
+
+
     RETURN
     
   end subroutine Orthogonal_Polynomial

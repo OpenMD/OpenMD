@@ -69,8 +69,8 @@ class StuntDouble {
   virtual void   setEuler(double phi, double theta, double psi);
   virtual void   getEulerAngles(double eulers[3]);
 
-  virtual bool isLinear() {return false;}
-  virtual int linearAxis() {return -1;}
+  virtual bool isLinear();
+  virtual int linearAxis() {return zeroAxis;}
 
   virtual double   getZangle();
   virtual void   setZangle(double zAngle);
@@ -91,6 +91,7 @@ class StuntDouble {
   }
   
   int objType;
+  int zeroAxis;
 
   map<string, GenericData*> properties;
 };
