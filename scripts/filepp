@@ -21,8 +21,8 @@
 #  Filename     :  $RCSfile: filepp,v $
 #  Author       :  $Author: tim $
 #  Maintainer   :  Darren Miller: darren@cabaret.demon.co.uk
-#  File version :  $Revision: 1.3 $
-#  Last changed :  $Date: 2004-10-06 22:19:33 $
+#  File version :  $Revision: 1.4 $
+#  Last changed :  $Date: 2004-10-11 14:51:57 $
 #  Description  :  Main program
 #  Licence      :  GNU copyleft
 #
@@ -32,16 +32,15 @@ package Filepp;
 
 use strict "vars";
 use strict "subs";
-#use Graph;
 # Used to all filepp to work with any char, not just ascii,
 # feel free to remove this if it causes you problems
-use bytes;
+#use bytes;
 
 # version number of program
 my $VERSION = '1.7.1';
 
 # list of paths to search for modules, normal Perl list + module dir
-push(@INC, "/home/maul/gezelter/tim/code/OOPSE-2.0/scripts/filepp-1.7.1/modules/f90dpend/");
+#push(@INC, "/home/maul/gezelter/tim/code/OOPSE-2.0/scripts/filepp-1.7.1/modules/f90dpend/");
 
 # index of keywords supported and functions to deal with them
 my %Keywords = (
