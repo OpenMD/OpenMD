@@ -11,7 +11,8 @@ MySource    = \
 	vector_class.F90 \
         StringTokenizer.cpp \
 	Utility.cpp \
-	Trim.cpp
+	Trim.cpp \
+	BitSet.cpp
 
 LibObjs = @LIBOBJS@
 
