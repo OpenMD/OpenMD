@@ -139,33 +139,46 @@ void CorrelationFunction::doCorrelate() {
 
 void CorrelationFunction::correlateBlocks(int block1, int block2) {
 
-    assert(bsMan_->isBlockActive(block1) && bsMan_->isBlockActive(block2));
+  int jstart, jend;
+  
+  assert(bsMan_->isBlockActive(block1) && bsMan_->isBlockActive(block2));
 
-    SnapshotBlock snapshotBlock1 = bsMan_->getSnapshotBlock(block1);
-    SnapshotBlock snapshotBlock2 = bsMan_->getSnapshotBlock(block2);
+  SnapshotBlock snapshotBlock1 = bsMan_->getSnapshotBlock(block1);
+  SnapshotBlock snapshotBlock2 = bsMan_->getSnapshotBlock(block2);
+
+  jend = snapshotBlock2.second;
+  
+  for (int i = snapshotBlock1.first; i < snapshotBlock1.second; ++i) {
     
-    for (int i  = snapshotBlock1.first; i < snapshotBlock1.second; ++i) {
-
-        //evaluate selection if it is dynamic
-        if (evaluator1_.isDynamic()) {
-            seleMan1_.setSelectionSet(evaluator1_.evaluate());
-            validateSelection(seleMan1_);
-        }
-
-        //update the position or velocity of the atoms belong to rigid bodies
-        updateFrame(i);
-        for(int j  = snapshotBlock1.first; j < snapshotBlock1.second; ++j) {
-            //evaluate selection
-            if (!evaluator2_.isDynamic()) {
-                seleMan2_.setSelectionSet(evaluator2_.evaluate());
-                validateSelection(seleMan2_);
-            }   
-            //update the position or velocity of the atoms belong to rigid bodies
-            updateFrame(j);
-
-            correlateFrames(i, j);
-        }
+    //evaluate selection if it is dynamic
+    if (evaluator1_.isDynamic()) {
+      seleMan1_.setSelectionSet(evaluator1_.evaluate());
+      validateSelection(seleMan1_);
     }
+    
+    //update the position or velocity of the atoms belong to rigid bodies
+    updateFrame(i);
+    
+    // if the two blocks are the same, we don't want to correlate
+    // backwards in time, so start j at the same frame as i
+
+    if (block1 == block2) 
+      jstart = i;
+    else
+      jstart = snapshotBlock2.first;
+    
+    for(int j  = jstart; j < jend; ++j) {
+      //evaluate selection
+      if (!evaluator2_.isDynamic()) {
+        seleMan2_.setSelectionSet(evaluator2_.evaluate());
+        validateSelection(seleMan2_);
+      }   
+      //update the position or velocity of the atoms belong to rigid bodies
+      updateFrame(j);
+      
+      correlateFrames(i, j);
+    }
+  }
 }
 
 
@@ -179,6 +192,9 @@ void CorrelationFunction::correlateFrames(int frame1, int frame2) {
 
     double time1 = snapshot1->getTime();
     double time2 = snapshot2->getTime();
+
+    if (time2 < time1) { printf("BARF ON NON POSITIVE DT!\n"); stop;}
+
     int timeBin = int ((time2 - time1) /deltaTime_ + 0.5);
     count_[timeBin] += count;    
     
@@ -186,20 +202,39 @@ void CorrelationFunction::correlateFrames(int frame1, int frame2) {
     int j;
     StuntDouble* sd1;
     StuntDouble* sd2;
-    for (sd1 = seleMan1_.beginSelected(i), sd2 = seleMan2_.beginSelected(j); sd1 != NULL && sd2 != NULL;
-        sd1 = seleMan1_.nextSelected(i), sd2 = seleMan2_.nextSelected(j)) {
 
-        double corrVal = calcCorrVal(sd1, frame1, sd2, frame2);
+    switch (correlationFunctionType()) {
+
+    case frame:
+      double corrVal = calcCorrVal(frame1, frame2);
+      histogram_[timeBin] += corrVal;
+      count_[timeBin] += 1;
+      break;
+      
+    case particle:
+      for (sd1 = seleMan1_.beginSelected(i), sd1 != NULL;
+           sd1 = seleMan1_.nextSelected(i)) {
+        double corrVal = calcCorrVal(frame1, frame2, sd);
         histogram_[timeBin] += corrVal;    
+        count_[timeBin] += 1;
+      }
+      break;
+
+    case cross:
+      for (sd1 = seleMan1_.beginSelected(i); sd1 != NULL; sd1 = seleMan1_.nextSelected(i)) {
+        
+        for (sd2 = seleMan2_.beginSelected(j); sd2 != NULL; sd2 = seleMan2_.nextSelected(j)) {
+          double corrVal = calcCorrVal(frame1, frame2, sd1, sd2);
+          histogram_[timeBin] += corrVal;    
+          count_[timeBin] += 1;
+        }            
+      }
+      break;
+
+    default:
+      return NULL;
+
     }
-
-    //for (sd1 = seleMan1_.beginSelected(i); sd1 != NULL; sd1 = seleMan1_.nextSelected(i)) {
-    //
-    //    for (sd2 = seleMan2_.beginSelected(j); sd2 != NULL; sd2 = seleMan2_.nextSelected(j)) {
-    //        double corrVal = calcCorrVal(sd1, frame1, sd2, frame2);
-    //    }            
-    //}
-
 }
 
 
