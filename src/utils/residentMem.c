@@ -5,7 +5,6 @@
 #define to_string( s ) # s
 #define STR_DEFINE(t, s) t = to_string(s)
 
-
 double residentMem () {
 
   FILE* procresults;
@@ -16,14 +15,17 @@ double residentMem () {
   char* psPath;
 
   STR_DEFINE(psPath, PSCOMMAND );
-
-  strncpy(pscommand, psPath, strlen(psPath));
+ 
+  // null terminated string is one longer....
+  strncpy(pscommand, psPath, strlen(psPath)+1);
 
 #if PSTYPE == BSD
   strcat(pscommand, " ax -o rss");
 #else
   strcat(pscommand, " -ef -o rss");
 #endif
+
+  printf("doing %s\n", pscommand);
 
   procresults = popen(pscommand, "r");
 
