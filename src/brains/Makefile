@@ -5,7 +5,6 @@ Source    = \
 	SimInfo.cpp \
 	SimSetup.cpp \
 	SimState.cpp \
-	simulation_module.F90 \
 	SkipList.cpp \
 	Thermo.cpp \
 
