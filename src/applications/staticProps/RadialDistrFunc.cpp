@@ -68,7 +68,7 @@ void RadialDistrFunc::process() {
     
     DumpReader reader(info_, dumpFilename_);    
     int nFrames = reader->getNFrames();
-
+    nProcessed_ = nFrames / step_ + 1;
     for (int i = 0; i < nFrames; i += step_) {
         reader->readFrame(i);
         currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
@@ -99,7 +99,7 @@ void RadialDistrFunc::process() {
 
     postProcess();
 
-    
+    writeRdf();
 }
 
 }

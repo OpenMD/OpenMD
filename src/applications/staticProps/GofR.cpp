@@ -42,6 +42,7 @@
 #include <algorithm>
 #include <fstream>
 #include "applications/staticProps/GofR.hpp"
+#include "utils/simError.h"
 
 namespace oopse {
 
@@ -91,8 +92,9 @@ void GofR::collectHistogram(StuntDouble* sd1, StuntDouble* sd2) {
     Vector3d pos1 = sd1->getPos();
     Vector3d pos2 = sd2->getPos();
     Vector3d r12 = pos1 - pos2;
-    
-    double distance = (pos1 - pos2).length();
+    currentSnapshot_->wrapVector(r12);
+
+    double distance = r12.length();
 
     int whichBin = distance / delta_;
     histogram_[whichBin] ++;
@@ -104,13 +106,20 @@ void GofR::writeRdf() {
     std::ofstream rdfStream(outputFilename_.c_str());
     if (rdfStream.is_open()) {
         rdfStream << "#radial distribution function\n";
-        rdfStream << "#selection1: " << selectionScript1_;
-        rdfStream << "#selection2: " << selectionScript2_;
+        rdfStream << "#selection1: (" << selectionScript1_ << ")\t";
+        rdfStream << "selection2: (" << selectionScript2_ << ")\n";
+        rdfStream << "#r\tcorrValue\n";
+        for (int i = 0; i < avgGofr_.size(); ++i) {
+            double r = delta_ * (i + 0.5);
+            rdfStream << r << "\t" << avgGofr_[i]/nProcessed_ << "\n";
+        }
         
     } else {
 
 
     }
+
+    rdfStream.close();
 }
 
 }

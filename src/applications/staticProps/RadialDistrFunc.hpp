@@ -41,6 +41,7 @@
 #ifndef APPLICATIONS_STATICPROPS_RADIALDISTRFUNC_HPP
 #define APPLICATIONS_STATICPROPS_RADIALDISTRFUNC_HPP
 
+#include <string>
 #include <vector>
 
 #include "selection/SelectionEvaluator.hpp"
@@ -95,7 +96,7 @@ class RadialDistrFunc {
         int step_;
         std::string selectionScript1_;
         std::string selectionScript2_;
-        
+        int nProcessed_;
     private:
 
         virtual void initalizeHistogram() {}
