@@ -55,6 +55,15 @@ namespace oopse {
                         data_[i][j] = 0.0;
              }
 
+            /** Constructs and initializes every element of this matrix to a scalar */ 
+            SquareMatrix(Real s) : RectMatrix<Real, Dim, Dim>(s){
+            }
+
+            /** Constructs and initializes from an array */ 
+            SquareMatrix(Real* array) : RectMatrix<Real, Dim, Dim>(array){
+            }
+
+
             /** copy constructor */
             SquareMatrix(const RectMatrix<Real, Dim, Dim>& m) : RectMatrix<Real, Dim, Dim>(m) {
             }

@@ -63,6 +63,12 @@ namespace oopse {
                         data_[i][j] = s;
             }
 
+            RectMatrix(Real* array) {
+                for (unsigned int i = 0; i < Row; i++)
+                    for (unsigned int j = 0; j < Col; j++)
+                        data_[i][j] = array[i * Row + j];
+            }
+
             /** copy constructor */
             RectMatrix(const RectMatrix<Real, Row, Col>& m) {
                 *this = m;
@@ -103,6 +109,19 @@ namespace oopse {
                 
                 return data_[i][j];  
             }
+
+            /** 
+             * Copy the internal data to an array
+             * @param array the pointer of destination array
+             */
+            void getArray(Real* array) {
+                for (unsigned int i = 0; i < Row; i++) {
+                    for (unsigned int j = 0; j < Col; j++) {
+                        array[i * Row + j] = data_[i][j];
+                    }
+                }
+            }
+
 
             /** Returns the pointer of internal array */
             Real* getArrayPointer() {

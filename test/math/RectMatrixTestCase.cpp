@@ -166,6 +166,15 @@ void RectMatrixTestCase::testConstructor(){
     tmp4 = tmp4;
     CPPUNIT_ASSERT(tmp4 == m2);
     
+    double tmp5[4];
+    tmp5[0] = 1.0;
+    tmp5[1] = 1.0;
+    tmp5[2] = 3.0;
+    tmp5[3] = 1.0; 
+
+    RMat2x2 tmp6(tmp5);
+    CPPUNIT_ASSERT(tmp6 == m1);
+   
     
 }
 
@@ -335,4 +344,14 @@ void RectMatrixTestCase::testOtherMemberFunctions(){
     CPPUNIT_ASSERT((a.transpose()).transpose() == a);
     
     CPPUNIT_ASSERT(a.transpose() == b);
+
+    //test getArray
+
+    double tmp[4];
+    m4.getArray(tmp);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(tmp[0], -1.0, oopse::epsilon);    
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(tmp[1], -1.0, oopse::epsilon);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(tmp[2], -3.0, oopse::epsilon);    
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(tmp[3], -1.0, oopse::epsilon);    
+    
 }

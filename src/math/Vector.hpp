@@ -142,6 +142,13 @@ namespace oopse {
                 return data_[i];
             }
 
+            /** Copy the internal data to an array*/
+            void getArray(Real* array) {
+                for (unsigned int i = 0; i < Dim; i ++) {
+                    array[i] = data_[i];
+                }                
+            }
+
             /** Returns the pointer of internal array */
             Real* getArrayPointer() {
                 return data_;

@@ -59,6 +59,9 @@ namespace oopse {
       data_[1] = y;
       data_[2] = z;
     }
+
+    /** Constructs and initializes from an array*/
+    inline Vector3(double* array) : Vector<Real, 3>(array) {}
     
     inline Vector3(const Vector<Real, 3>& v) : Vector<Real, 3>(v) {}
     

@@ -227,8 +227,14 @@ void VectorTestCase::testOtherMemberFunctions(){
     //test isNormalized();
     CPPUNIT_ASSERT(a1.isNormalized());
     CPPUNIT_ASSERT(!one.isNormalized());
-    
 
+    //test getArray
+    double tempV[4];
+    v3.getArray(tempV);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(tempV[0], v3[0], oopse::epsilon);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(tempV[1], v3[1], oopse::epsilon);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(tempV[2], v3[2], oopse::epsilon);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(tempV[3], v3[3], oopse::epsilon);
 }
 void VectorTestCase::testOtherTemplateFunctions(){        
     //test dot

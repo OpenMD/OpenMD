@@ -49,6 +49,15 @@ namespace oopse {
             SquareMatrix3() : SquareMatrix<Real, 3>() {
             }
 
+            /** Constructs and initializes every element of this matrix to a scalar */ 
+            SquareMatrix3(Real s) : SquareMatrix<Real,3>(s){
+            }
+
+            /** Constructs and initializes from an array */ 
+            SquareMatrix3(Real* array) : SquareMatrix<Real,3>(array){
+            }
+
+
             /** copy  constructor */
             SquareMatrix3(const SquareMatrix<Real, 3>& m)  : SquareMatrix<Real, 3>(m) {
             }

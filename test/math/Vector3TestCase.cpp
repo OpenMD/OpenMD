@@ -36,6 +36,11 @@ void Vector3TestCase::tearDown(){
 }
 
 void Vector3TestCase::testConstructors(){
+    double b[] = {2.9, 3.2, 1.2};
+    Vector3d v(b);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(v.x(), 2.9, oopse::epsilon);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(v.y(), 3.2, oopse::epsilon);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(v.z(), 1.2, oopse::epsilon);    
 }
 
 void Vector3TestCase::testArithmetic(){

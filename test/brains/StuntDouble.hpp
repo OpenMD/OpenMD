@@ -286,7 +286,7 @@ namespace oopse{
          * @see #getA
          */         
         void setA(const RotMat3x3d& a, int snapshotNo) {
-            (snapshotMan_->getSnapshot(snapshotNo))->storage_->a[LocalIndex_] = a;
+            (snapshotMan_->getSnapshot(snapshotNo))->storage_->aMat[LocalIndex_] = a;
         }       
 
        /**

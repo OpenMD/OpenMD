@@ -1,3 +1,28 @@
+2004-10-25 12:03  tim
+
+	* ChangeLog, src/utils/GenericFactory.hpp,
+	test/utils/GenericFactoryTestCase.cpp,
+	test/utils/GenericFactoryTestCase.hpp, test/utils/Makefile: adding
+	GenericFactory Test Case. GenericFactory now can bed used to creat
+	ForcefieldFactory and IntegratorFactory etc.
+
+2004-10-24 23:08  tim
+
+	* src/: brains/SimModel.hpp, brains/SimSnapshotManager.cpp,
+	brains/SimSnapshotManager.hpp, brains/Snapshot.hpp,
+	brains/SnapshotManager.hpp, utils/GenericFactory.hpp: more classes
+	get reconstructed
+
+2004-10-24 02:55  tim
+
+	* src/utils/GenericFactory.hpp: GenericFactory pass unit test
+
+2004-10-23 18:09  tim
+
+	* test/brains/: Atom.hpp, DirectionalAtom.hpp, RigidBody.hpp,
+	StuntDouble.cpp, StuntDouble.hpp, Atom.cpp, DirectioanlAtom.cpp,
+	RigidBody.cpp: Refactoring in progress
+
 2004-10-22 18:09  tim
 
 	* ChangeLog, src/brains/Snapshot.hpp,
@@ -1068,7 +1093,7 @@
 	forceFields/Al.VC.funcfl, forceFields/Au.VC.funcfl,
 	forceFields/Au.u3.funcfl, forceFields/LJFF.frc,
 	forceFields/Ni.VC.funcfl, forceFields/Pd.u3.funcfl,
-	forceFields/Pt.VC.funcfl: Import of OOPSE v. 2.0
+	forceFields/Pt.VC.funcfl: Initial revision
 
 2004-09-23 23:16  gezelter
 
@@ -1243,5 +1268,5 @@
 	forceFields/Al.VC.funcfl, forceFields/Au.VC.funcfl,
 	forceFields/Au.u3.funcfl, forceFields/LJFF.frc,
 	forceFields/Ni.VC.funcfl, forceFields/Pd.u3.funcfl,
-	forceFields/Pt.VC.funcfl: Initial revision
+	forceFields/Pt.VC.funcfl: Import of OOPSE v. 2.0
 
