@@ -81,10 +81,10 @@ int findBegin(istream &theStream, char* startText ){
     
     the_token = strtok( readLine, " ,;\t" );
     if ( the_token != NULL)
-      if (!strcmp("begin", the_token)) {
+      if (!strcasecmp("begin", the_token)) {
 	the_token = strtok( NULL, " ,;\t" );
 	if ( the_token != NULL){
-	  foundText = !strcmp( startText, the_token );
+	  foundText = !strcasecmp( startText, the_token );
 	}
       }
     
@@ -130,7 +130,11 @@ int isEndLine(char *line) {
   
   foo = strtok(working_line, " ,;\t");
 
- if (!strcasecmp(foo, "end")) return 1;
+  if (foo != NULL) {
+
+    if (!strcasecmp(foo, "end")) return 1;
+
+  }
  
  return 0;
 }

@@ -23,6 +23,7 @@ module shapes
   logical, save :: haveShapeMap = .false.
 
   public :: do_shape_pair
+  public :: newShapeType
 
 
   type, private :: Shape
@@ -1354,3 +1355,42 @@ contains
   end subroutine Orthogonal_Polynomial
   
 end module shapes
+
+subroutine makeShape(nContactFuncs, ContactFuncLValue, &
+     ContactFuncMValue, ContactFunctionType, ContactFuncCoefficient, &
+     nRangeFuncs, RangeFuncLValue, RangeFuncMValue, RangeFunctionType, &
+     RangeFuncCoefficient, nStrengthFuncs, StrengthFuncLValue, &
+     StrengthFuncMValue, StrengthFunctionType, StrengthFuncCoefficient, &
+     myAtid, status)
+
+  use definitions
+  use shapes, only: newShapeType
+  
+  integer :: nContactFuncs 
+  integer :: nRangeFuncs 
+  integer :: nStrengthFuncs 
+  integer :: status
+  integer :: myAtid
+  
+  integer, dimension(nContactFuncs) :: ContactFuncLValue           
+  integer, dimension(nContactFuncs) :: ContactFuncMValue           
+  integer, dimension(nContactFuncs) :: ContactFunctionType         
+  real(kind=dp), dimension(nContactFuncs) :: ContactFuncCoefficient
+  integer, dimension(nRangeFuncs) :: RangeFuncLValue             
+  integer, dimension(nRangeFuncs) :: RangeFuncMValue             
+  integer, dimension(nRangeFuncs) :: RangeFunctionType           
+  real(kind=dp), dimension(nRangeFuncs) :: RangeFuncCoefficient  
+  integer, dimension(nStrengthFuncs) :: StrengthFuncLValue          
+  integer, dimension(nStrengthFuncs) :: StrengthFuncMValue          
+  integer, dimension(nStrengthFuncs) :: StrengthFunctionType        
+  real(kind=dp), dimension(nStrengthFuncs) :: StrengthFuncCoefficient
+  
+  call newShapeType(nContactFuncs, ContactFuncLValue, &
+       ContactFuncMValue, ContactFunctionType, ContactFuncCoefficient, &
+       nRangeFuncs, RangeFuncLValue, RangeFuncMValue, RangeFunctionType, &
+       RangeFuncCoefficient, nStrengthFuncs, StrengthFuncLValue, &
+       StrengthFuncMValue, StrengthFunctionType, StrengthFuncCoefficient, &
+       myAtid, status)
+
+  return
+end subroutine makeShape
