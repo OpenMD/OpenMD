@@ -47,15 +47,16 @@
 namespace oopse {
 
 GofR::GofR(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2, double len)
-    : RadialDistrFunc(info, filename, sele1, sele2, len){
+    : RadialDistrFunc(info, filename, sele1, sele2){
 
-    histogram_.resize(nbins_);
-    avgGofr_.resize(nbins_);
+    deltaR_ = len_ /nRBins_;
+    
+    histogram_.resize(nRBins_);
+    avgGofr_.resize(nRBins_);
 }
 
 
 void GofR::preProcess() {
-    avgGofr_.resize(nbins_);
     std::fill(avgGofr_.begin(), avgGofr_.end(), 0.0);    
 }
 
@@ -97,8 +98,8 @@ void GofR::collectHistogram(StuntDouble* sd1, StuntDouble* sd2) {
     double distance = r12.length();
 
     int whichBin = distance / deltaR_;
-    histogram_[whichBin] ++;
-    npairs_++;
+    ++histogram_[whichBin];
+    ++npairs_;
 }
 
 

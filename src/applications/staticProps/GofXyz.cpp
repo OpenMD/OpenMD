@@ -41,32 +41,32 @@
 
 #include <algorithm>
 #include <fstream>
-#include "applications/staticProps/GofRAngle.hpp"
+#include "applications/staticProps/GofXyz.hpp"
 #include "utils/simError.h"
 
 namespace oopse {
 
-GofRAngle::GofRAngle(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2)
+GofXyz::GofXyz(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2)
     : RadialDistrFunc(info, filename, sele1, sele2){
 
 }
 
 
-void GofRAngle::preProcess() {
+void GofXyz::preProcess() {
 
     for (int i = 0; i < avgGofr_.size(); ++i) {
         std::fill(avgGofr_[i].begin(), avgGofr_[i].end(), 0);
     }
 }
 
-void GofRAngle::initalizeHistogram() {
+void GofXyz::initalizeHistogram() {
     npairs_ = 0;
     for (int i = 0; i < histogram_.size(); ++i)
         std::fill(histogram_[i].begin(), histogram_[i].end(), 0);
 }
 
 
-void GofRAngle::processHistogram() {
+void GofXyz::processHistogram() {
 
     double volume = info_->getSnapshotManager()->getCurrentSnapshot()->getVolume();
     double pairDensity = npairs_ /volume;
@@ -86,7 +86,7 @@ void GofRAngle::processHistogram() {
 
 }
 
-void GofRAngle::collectHistogram(StuntDouble* sd1, StuntDouble* sd2) {
+void GofXyz::collectHistogram(StuntDouble* sd1, StuntDouble* sd2) {
 
     if (sd1 == sd2) {
         return;
@@ -109,19 +109,22 @@ void GofRAngle::collectHistogram(StuntDouble* sd1, StuntDouble* sd2) {
     ++npairs_;
 }
 
-void GofRAngle::writeRdf() {
+void GofXyz::writeRdf() {
     std::ofstream rdfStream(outputFilename_.c_str());
     if (rdfStream.is_open()) {
         rdfStream << "#radial distribution function\n";
         rdfStream << "#selection1: (" << selectionScript1_ << ")\t";
         rdfStream << "selection2: (" << selectionScript2_ << ")\n";
         rdfStream << "#r\tcorrValue\n";
-        for (int i = 0; i < avgGofr_.size(); ++i) {
-            double r = deltaR_ * (i + 0.5);
+        for (int i = 0; i < histogram_.size(); ++i) {
+            double x = deltaR_ * (i + 0.5);
 
-            for(int j = 0; j < avgGofr_[i].size(); ++j) {
-                double cosAngle = -1.0 + (i + 0.5)*deltaCosAngle_;
-                rdfStream << r << "\t" << cosAngle << "\t" << avgGofr_[i][j]/nProcessed_ << "\n";
+            for(int j = 0; j < histogram_[i].size(); ++j) {
+                double y = deltaR_ * (j+ 0.5);
+
+                for(int k = 0;k < histogram_[i].size(); ++k) {
+                double z = deltaR_ * (k + 0.5); 
+                rdfStream << x << "\t" << y << "\t" <<  z << "\t" << histogram_[i][j][k]/nProcessed_ << "\n";
             }
         }
         
@@ -133,23 +136,7 @@ void GofRAngle::writeRdf() {
     rdfStream.close();
 }
 
-double GofRTheta::evaluateAngle(StuntDouble* sd1, StuntDouble* sd2) {
-    Vector3d pos1 = sd1->getPos();
-    Vector3d pos2 = sd2->getPos();
-    Vector3d r12 = pos1 - pos2;
-    currentSnapshot_->wrapVector(r12);
-    r12.normalize();
-    Vector3d dipole = sd1->getElectroFrame().getColumn(2)£»
-    dipole.normalize();    
-    return dot();
 }
 
-double GofROmega::evaluateAngle(StuntDouble* sd1, StuntDouble* sd2) {
-    Vector3d v1 = sd1->getElectroFrame().getColumn(2);
-    Vector3d v2 = sd1->getElectroFrame().getColumn(2);    
-}
-
-
-}
 
 

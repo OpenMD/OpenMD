@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -38,68 +38,49 @@
  * University of Notre Dame has been advised of the possibility of
  * such damages.
  */
- 
-#include <iostream>
-#include <fstream>
-#include <string>
+#ifndef APPLICATIONS_STATICPROPS_GOFXYZ_HPP
+#define APPLICATIONS_STATICPROPS_GOFXYZ_HPP
 
-#include "applications/staticProps/GofRCmd.h"
-#include "brains/Register.hpp"
-#include "brains/SimCreator.hpp"
-#include "brains/SimInfo.hpp"
-#include "io/DumpReader.hpp"
-#include "utils/simError.h"
+#include "application/staticProps/RadialDistrFunc.hpp"
+namespace oopse {
 
-using namespace oopse;
-
-int main(int argc, char* argv[]){
-  
-    //register force fields
-    registerForceFields();
-
-    gengetopt_args_info args_info;
-
-    //parse the command line option
-    if (cmdline_parser (argc, argv, &args_info) != 0) {
-        exit(1) ;
-    }
-
-
-    //get the dumpfile name and meta-data file name
-    std::string dumpFileName = args_info.input_arg;
-
-    std::string mdFileName = dumpFileName.substr(0, dumpFileName.rfind(".")) + ".md";
-
+class GofXyz : public RadialDistrFunc {
     
-    //parse md file and set up the system
-    SimCreator creator;
-    SimInfo* info = creator.createSim(mdFileName, false);
+    public:
+        GofXyz(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2);
+
+        void setNRBins(int nbins) {
+            assert(nbins > 0);
+            nRBins_ = nbins;
+            deltaR_ = len_ / nRBins_;
+            
+            histogram_.resize(nRBins_);
+            for (int i = 0 ; i < nRBins_; ++i) {
+                histogram_[i].resize(nRBins_);
+                for(int j = 0; j < nRBins_; ++j) {
+                    histogram_[i][j].resize(nRBins_);
+                }
+            }            
+        }
+
+        
+    private:
+
+        virtual void preProcess();
+        virtual void collectHistogram(StuntDouble* sd1, StuntDouble* sd2);
+        void processHistogram();
+        virtual void writeRdf();
+
+        double len_;
+        int nRBins_;
+        double deltaR_;
+        
+        std::vector<std::vector<std::vector<int> > > histogram_;
+
+        int npairs_;
+};
 
 
-    std::string sele1;
-    std::string sele2;
-
-    if (args_info.sele1_given) {
-        sele1 = args_info.sele1_arg;
-    }else {
-
-    }
-    if (args_info.sele1_given) {
-        sele1 = args_info.sele1_arg;
-    }else {
-
-    }
-    
-    GofR rdf(info, dumpFileName, sele1, sele2, args_info.length_arg);
-
-    if (args_info.nbins_given) {
-        rdf.setNBins(args_info.nbins_arg);
-    }
-
-    rdf.process();
-    
-    delete info;
-
-    return 0;   
 }
+#endif
 

@@ -47,8 +47,34 @@ namespace oopse {
 class GofRAngle : public RadialDistrFunc {
     
     public:
-        GofRAngle(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2, double len);
+        GofRAngle(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2);
 
+        void setNRBins(int nbins) {
+            assert(nbins > 0);
+            nRBins_ = nbins;
+            deltaR_ = len_ / nRBins_;
+            for (int i = 0 ; i < nRBins_; ++i) {
+                histogram_[i].resize(nAngleBins_);
+                avgGofr_[i].resize(nAngleBins_);
+            }            
+        }
+
+        int getNRBins() {
+            return nRBins_; 
+        }
+        
+        void setNAngleBins(int nbins) {
+            assert(nbins >0);
+            nAngleBins_ = nbins;
+            deltaCosAngle_ = 2.0 / nAngleBins_;
+            for (int i = 0 ; i < nRBins_; ++i) {
+                histogram_[i].resize(nAngleBins_);
+                avgGofr_[i].resize(nAngleBins_);
+            }
+        }
+        
+        int getNAngleBins() {return nAngleBins_;}
+        
     private:
 
         virtual void preProcess();
@@ -56,9 +82,15 @@ class GofRAngle : public RadialDistrFunc {
         virtual void collectHistogram(StuntDouble* sd1, StuntDouble* sd2);
         virtual void processHistogram();
 
-        virtual double evaluateAngel(StuntDouble* sd1, StuntDouble* sd2) = 0;
+        virtual double evaluateAngle(StuntDouble* sd1, StuntDouble* sd2) = 0;
 
         virtual void writeRdf();
+
+        double deltaCosAngle_;
+        int nAngleBins_;
+        double len_;
+        int nRBins_;
+        double deltaR_;
         
         std::vector<std::vector<int> > histogram_;
         std::vector<std::vector<double> > avgGofr_;
@@ -72,7 +104,7 @@ class GofRTheta : GofRAngle {
 
     private:
 
-        virtual double evaluateAngel(StuntDouble* sd1, StuntDouble* sd2) = 0;        
+        virtual double evaluateAngle(StuntDouble* sd1, StuntDouble* sd2);        
 };
 
 
@@ -82,7 +114,7 @@ class GofROmega : GofRAngle {
 
     private:
 
-        virtual double evaluateAngel(StuntDouble* sd1, StuntDouble* sd2) = 0;        
+        virtual double evaluateAngle(StuntDouble* sd1, StuntDouble* sd2);        
 };
 
 }

@@ -45,8 +45,8 @@
 
 namespace oopse {
 
-RadialDistrFunc::        RadialDistrFunc(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2, double len)
-        : info_(info), currentSnapshot_(NULL), dumpFilename_(filename), len_(len), nbins_(50), step_(1), 
+RadialDistrFunc::        RadialDistrFunc(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2)
+        : info_(info), currentSnapshot_(NULL), dumpFilename_(filename), step_(1), 
           selectionScript1_(sele1), selectionScript2_(sele2), evaluator1_(info), evaluator2_(info){
           
     evaluator1_.loadScriptString(sele1);
@@ -59,7 +59,6 @@ RadialDistrFunc::        RadialDistrFunc(SimInfo* info, const std::string& filen
             seleMan2_.setSelectionSet(evaluator2_->evaluate());
     }
 
-    deltaR_ = len_ /nbins_;
 }
 
 void RadialDistrFunc::process() {

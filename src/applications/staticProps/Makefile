@@ -1,14 +1,17 @@
 Package = applications/staticProps
 
 Source    = \
-RadialDistrFunc.cpp \   
-GofR.cpp \	    
-GofRCmd.c \
-GofRMain.cpp \
+        GofAngle2.cpp \
+        GofRAngle.cpp \
+        GofR.cpp  \
+        GofXyz.cpp \
+        RadialDistrFunc.cpp \
+	staticPropsCmd.c \
+	StaticProps.cpp \
 
 RmiSource =
 
-Main      = GofRMain 
+Main      = StaticProps
 
 DEV_ROOT=../../..
 include $(DEV_ROOT)/make/Makefile

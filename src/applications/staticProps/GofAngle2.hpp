@@ -38,71 +38,45 @@
  * University of Notre Dame has been advised of the possibility of
  * such damages.
  */
-#ifndef APPLICATIONS_STATICPROPS_RADIALDISTRFUNC_HPP
-#define APPLICATIONS_STATICPROPS_RADIALDISTRFUNC_HPP
+#ifndef APPLICATIONS_STATICPROPS_GOFANGLE2_HPP
+#define APPLICATIONS_STATICPROPS_GOFANGLE2_HPP
 
-#include <string>
-#include <vector>
-
-#include "selection/SelectionEvaluator.hpp"
-#include "selection/SelectionManager.hpp"
+#include "application/staticProps/RadialDistrFunc.hpp"
 namespace oopse {
 
-/**
- * @class RadialDistrFunc
- * @brief Radial Distribution Function
- */
-class RadialDistrFunc {
+class GofRAngle2 : public RadialDistrFunc {
+    
     public:
-        RadialDistrFunc(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2);
-
-        virtual ~RadialDistrFunc() {}
-        
-        void process();        
-
-        void setOutputName(const std::string& filename) {
-            outputFilename_ = filename;
-        }
-
-        const std::string& getOutputFileName() const {
-            return outputFilename_;
-        }
-
-        void setStep(int step) {
-            assert(step > 0);
-            step_ =step;    
+        GofRAngle2(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2);
+   
+        void setNAngleBins(int nbins) {
+            assert(nbins >0);
+            nAngleBins_ = nbins;
+            deltaCosAngle_ = 2.0 / nAngleBins_;
+            for (int i = 0 ; i < nAngleBins_; ++i) {
+                histogram_[i].resize(nAngleBins_);
+                avgGofr_[i].resize(nAngleBins_);
+            }
         }
         
-    protected:
-
-        virtual void preProcess() {}
-        virtual void postProcess() {}
-
-        SimInfo* info_;
-        Snapshot* currentSnapshot_;
-
-        std::string dumpFilename_;
-        std::string outputFilename_;
-        int step_;
-        std::string selectionScript1_;
-        std::string selectionScript2_;
-        int nProcessed_;
+        int getNAngleBins() {return nAngleBins_;}
+        
     private:
 
-        virtual void initalizeHistogram() {}
-        virtual void collectHistogram(StuntDouble* sd1, StuntDouble* sd2) =0;
-        virtual void processHistogram() = 0;
+        virtual void preProcess();
+        virtual void initalizeHistogram();
+        virtual void collectHistogram(StuntDouble* sd1, StuntDouble* sd2);
+        virtual void processHistogram();
 
-        virtual void writeRdf() = 0;
+        virtual void writeRdf();
 
+        double deltaCosAngle_;
+        int nAngleBins_;
         
-        SelectionEvaluator evaluator1_;
-        SelectionEvaluator evaluator2_;
-        SelectionManager seleMan1_;
-        SelectionManager seleMan2_;
-        
+        std::vector<std::vector<int> > histogram_;
+        std::vector<std::vector<int> > avgGofr_;
+        int npairs_;
 };
-
 
 }
 #endif

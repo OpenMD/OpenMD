@@ -1,4 +1,4 @@
-/*
+ /*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -38,71 +38,68 @@
  * University of Notre Dame has been advised of the possibility of
  * such damages.
  */
-#ifndef APPLICATIONS_STATICPROPS_RADIALDISTRFUNC_HPP
-#define APPLICATIONS_STATICPROPS_RADIALDISTRFUNC_HPP
-
+ 
+#include <iostream>
+#include <fstream>
 #include <string>
-#include <vector>
 
-#include "selection/SelectionEvaluator.hpp"
-#include "selection/SelectionManager.hpp"
-namespace oopse {
+#include "applications/staticProps/StaticPropsCmd.h"
+#include "brains/Register.hpp"
+#include "brains/SimCreator.hpp"
+#include "brains/SimInfo.hpp"
+#include "io/DumpReader.hpp"
+#include "utils/simError.h"
 
-/**
- * @class RadialDistrFunc
- * @brief Radial Distribution Function
- */
-class RadialDistrFunc {
-    public:
-        RadialDistrFunc(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2);
+using namespace oopse;
 
-        virtual ~RadialDistrFunc() {}
-        
-        void process();        
+int main(int argc, char* argv[]){
+  
+    //register force fields
+    registerForceFields();
 
-        void setOutputName(const std::string& filename) {
-            outputFilename_ = filename;
-        }
+    gengetopt_args_info args_info;
 
-        const std::string& getOutputFileName() const {
-            return outputFilename_;
-        }
-
-        void setStep(int step) {
-            assert(step > 0);
-            step_ =step;    
-        }
-        
-    protected:
-
-        virtual void preProcess() {}
-        virtual void postProcess() {}
-
-        SimInfo* info_;
-        Snapshot* currentSnapshot_;
-
-        std::string dumpFilename_;
-        std::string outputFilename_;
-        int step_;
-        std::string selectionScript1_;
-        std::string selectionScript2_;
-        int nProcessed_;
-    private:
-
-        virtual void initalizeHistogram() {}
-        virtual void collectHistogram(StuntDouble* sd1, StuntDouble* sd2) =0;
-        virtual void processHistogram() = 0;
-
-        virtual void writeRdf() = 0;
-
-        
-        SelectionEvaluator evaluator1_;
-        SelectionEvaluator evaluator2_;
-        SelectionManager seleMan1_;
-        SelectionManager seleMan2_;
-        
-};
+    //parse the command line option
+    if (cmdline_parser (argc, argv, &args_info) != 0) {
+        exit(1) ;
+    }
 
 
+    //get the dumpfile name and meta-data file name
+    std::string dumpFileName = args_info.input_arg;
+
+    std::string mdFileName = dumpFileName.substr(0, dumpFileName.rfind(".")) + ".md";
+
+    
+    //parse md file and set up the system
+    SimCreator creator;
+    SimInfo* info = creator.createSim(mdFileName, false);
+
+
+    std::string sele1;
+    std::string sele2;
+
+    if (args_info.sele1_given) {
+        sele1 = args_info.sele1_arg;
+    }else {
+
+    }
+    if (args_info.sele1_given) {
+        sele1 = args_info.sele1_arg;
+    }else {
+
+    }
+    
+    GofR rdf(info, dumpFileName, sele1, sele2, args_info.length_arg);
+
+    if (args_info.nbins_given) {
+        rdf.setNBins(args_info.nbins_arg);
+    }
+
+    rdf.process();
+    
+    delete info;
+
+    return 0;   
 }
-#endif
+

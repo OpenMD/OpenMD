@@ -41,71 +41,63 @@
 
 #include <algorithm>
 #include <fstream>
-#include "applications/staticProps/GofRAngle.hpp"
+#include "applications/staticProps/GofRAngle2.hpp"
 #include "utils/simError.h"
 
 namespace oopse {
 
-GofRAngle::GofRAngle(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2)
+GofRAngle2::GofRAngle2(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2)
     : RadialDistrFunc(info, filename, sele1, sele2){
 
 }
 
 
-void GofRAngle::preProcess() {
+void GofRAngle2::preProcess() {
 
     for (int i = 0; i < avgGofr_.size(); ++i) {
         std::fill(avgGofr_[i].begin(), avgGofr_[i].end(), 0);
     }
 }
 
-void GofRAngle::initalizeHistogram() {
+void GofRAngle2::initalizeHistogram() {
     npairs_ = 0;
     for (int i = 0; i < histogram_.size(); ++i)
         std::fill(histogram_[i].begin(), histogram_[i].end(), 0);
 }
 
 
-void GofRAngle::processHistogram() {
+void GofRAngle2::processHistogram() {
 
-    double volume = info_->getSnapshotManager()->getCurrentSnapshot()->getVolume();
-    double pairDensity = npairs_ /volume;
-    double pairConstant = ( 4.0 * PI * pairDensity ) / 3.0;
-
-    for(int i = 0 ; i < histogram_.size(); ++i){
-
-        double rLower = i * deltaR_;
-        double rUpper = rLower + deltaR_;
-        double volSlice = ( rUpper * rUpper * rUpper ) - ( rLower * rLower * rLower );
-        double nIdeal = volSlice * pairConstant;
-
-        for (int j = 0; j < histogram_[i].size(); ++j){
-            avgGofr_[i][j] += histogram_[i][j] / nIdeal;    
-        }
-    }
+    //std::for_each(avgGofr_.begin(), avgGofr_.end(), std::plus<std::vector<int>>)
 
 }
 
-void GofRAngle::collectHistogram(StuntDouble* sd1, StuntDouble* sd2) {
+void GofRAngle2::collectHistogram(StuntDouble* sd1, StuntDouble* sd2) {
 
     if (sd1 == sd2) {
         return;
     }
-    
+
     Vector3d pos1 = sd1->getPos();
     Vector3d pos2 = sd2->getPos();
     Vector3d r12 = pos1 - pos2;
     currentSnapshot_->wrapVector(r12);
-
-    double distance = r12.length();
-    int whichRBin = distance / deltaR_;
-
+    Vector3d dipole1 = sd1->getElectroFrame().getColumn(2);
+    Vector3d dipole2 = sd2->getElectroFrame().getColumn(2);
     
-    double cosAngle = evaluateAngle(sd1, sd2);
-    double halfBin = (nAngleBins_ - 1) * 0.5;
-    int whichThetaBin = halfBin * (cosAngle + 1.0)
-    ++histogram_[whichRBin][whichThetaBin];
+    r12.normalize();
+    dipole1.normalize();    
+    dipole2.normalize();    
     
+
+    double cosAngle1 = dot(r12, dipole1);
+    double cosAngle2 = dot(dipole1, dipole2);
+
+   double halfBin = (nAngleBins_ - 1) * 0.5;
+    int angleBin1 = halfBin * (cosAngle1 + 1.0);
+    int angleBin2 = halfBin * (cosAngle1 + 1.0);
+
+    ++histogram_[angleBin1][angleBin1];    
     ++npairs_;
 }
 
@@ -117,11 +109,11 @@ void GofRAngle::writeRdf() {
         rdfStream << "selection2: (" << selectionScript2_ << ")\n";
         rdfStream << "#r\tcorrValue\n";
         for (int i = 0; i < avgGofr_.size(); ++i) {
-            double r = deltaR_ * (i + 0.5);
+            double cosAngle1 = -1.0 + (i + 0.5)*deltaCosAngle_;
 
             for(int j = 0; j < avgGofr_[i].size(); ++j) {
-                double cosAngle = -1.0 + (i + 0.5)*deltaCosAngle_;
-                rdfStream << r << "\t" << cosAngle << "\t" << avgGofr_[i][j]/nProcessed_ << "\n";
+                double cosAngle2 = -1.0 + (i + 0.5)*deltaCosAngle_;
+                rdfStream << cosAngle1 << "\t" << cosAngle2 << "\t" << avgGofr_[i][j]/nProcessed_ << "\n";
             }
         }
         
@@ -133,23 +125,4 @@ void GofRAngle::writeRdf() {
     rdfStream.close();
 }
 
-double GofRTheta::evaluateAngle(StuntDouble* sd1, StuntDouble* sd2) {
-    Vector3d pos1 = sd1->getPos();
-    Vector3d pos2 = sd2->getPos();
-    Vector3d r12 = pos1 - pos2;
-    currentSnapshot_->wrapVector(r12);
-    r12.normalize();
-    Vector3d dipole = sd1->getElectroFrame().getColumn(2)£»
-    dipole.normalize();    
-    return dot();
 }
-
-double GofROmega::evaluateAngle(StuntDouble* sd1, StuntDouble* sd2) {
-    Vector3d v1 = sd1->getElectroFrame().getColumn(2);
-    Vector3d v2 = sd1->getElectroFrame().getColumn(2);    
-}
-
-
-}
-
-

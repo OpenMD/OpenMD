@@ -47,8 +47,21 @@ namespace oopse {
 class GofR : public RadialDistrFunc {
     
     public:
-        GofR(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2. double len);
+        GofR(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2);
 
+
+        void setNRBins(int nbins) {
+            assert(nbins > 0);
+            nRBins_ = nbins;
+            deltaR_ = len_ / nRBins_;
+            histogram_.resize(nRBins_);
+            avgGofr_.resize(nRBins_);
+        }
+
+        int getNRBins() {
+            return nRBins_; 
+        }
+        
     private:
 
         virtual void preProcess();
@@ -57,6 +70,10 @@ class GofR : public RadialDistrFunc {
         virtual void processHistogram();
 
         virtual void writeRdf();
+
+        double len_;
+        int nRBins_;
+        double deltaR_;
         
         std::vector<int> histogram_;
         std::vector<double> avgGofr_;
