@@ -50,7 +50,7 @@
 #include "UseTheForce/DarkSide/atype_interface.h"
 #include "UseTheForce/DarkSide/lj_interface.h"
 #include "UseTheForce/DarkSide/eam_interface.h"
-#include "UseTheForce/DarkSide/charge_interface.h"
+#include "UseTheForce/DarkSide/electrostatic_interface.h"
 namespace oopse {
   AtomType::AtomType(){
     
@@ -147,6 +147,17 @@ void AtomType::complete() {
         }
     }
 
+    if (isElectrostatic()) {
+      newElectrostaticType(&atp, &isError);
+      if (isError != 0) {
+        sprintf( painCave.errMsg,
+                 "Fortran rejected newElectrostaticType\n");
+        painCave.severity = OOPSE_ERROR;
+        painCave.isFatal = 1;
+        simError();          
+      }
+    }
+      
     if (isCharge()) {
         data = getPropertyByName("Charge");
         if (data != NULL) {
@@ -154,11 +165,11 @@ void AtomType::complete() {
 
             if (doubleData != NULL) {
                 double charge = doubleData->getData();
-                newChargeType(&atp.ident, &charge, &isError);
-
+                setCharge(&atp.ident, &charge, &isError);
+                
                 if (isError != 0) {
                     sprintf( painCave.errMsg,
-                           "Fortran rejected newChargeType\n");
+                           "Fortran rejected setCharge\n");
                     painCave.severity = OOPSE_ERROR;
                     painCave.isFatal = 1;
                     simError();          

@@ -40,7 +40,7 @@
  */
  
 #include "types/DirectionalAtomType.hpp"
-#include "UseTheForce/DarkSide/dipole_interface.h"
+#include "UseTheForce/DarkSide/electrostatic_interface.h"
 #include "UseTheForce/DarkSide/sticky_interface.h"
 #include "utils/simError.h"
 namespace oopse {
@@ -55,73 +55,79 @@ void DirectionalAtomType::complete() {
 
     //setup dipole atom  type in fortran side
     if (isDipole()) {
-        data = getPropertyByName("Dipole");
-        if (data != NULL) {
-            DoubleGenericData* doubleData= dynamic_cast<DoubleGenericData*>(data);
-
-            if (doubleData != NULL) {
-                double dipole = doubleData->getData();
-                
-                newDipoleType(&atp.ident, &dipole, &isError);
-                if (isError != 0) {
-                    sprintf( painCave.errMsg,
-                           "Fortran rejected newDipoleType\n");
-                    painCave.severity = OOPSE_ERROR;
-                    painCave.isFatal = 1;
-                    simError();          
-                }
-                
-            } else {
-                    sprintf( painCave.errMsg,
-                           "Can not cast GenericData to DoubleGenericData\n");
-                    painCave.severity = OOPSE_ERROR;
-                    painCave.isFatal = 1;
-                    simError();          
-            }
-        } else {
-            sprintf( painCave.errMsg, "Can not find Dipole Parameters\n");
+      data = getPropertyByName("Dipole");
+      if (data != NULL) {
+        DoubleGenericData* doubleData= dynamic_cast<DoubleGenericData*>(data);
+        
+        if (doubleData != NULL) {
+          double dipole = doubleData->getData();
+          
+          setDipoleMoment(&atp.ident, &dipole, &isError);
+          if (isError != 0) {
+            sprintf( painCave.errMsg,
+                     "Fortran rejected setDipoleMoment\n");
             painCave.severity = OOPSE_ERROR;
             painCave.isFatal = 1;
             simError();          
+          }
+          
+        } else {
+          sprintf( painCave.errMsg,
+                   "Can not cast GenericData to DoubleGenericData\n");
+          painCave.severity = OOPSE_ERROR;
+          painCave.isFatal = 1;
+          simError();          
         }
+      } else {
+        sprintf( painCave.errMsg, "Can not find Dipole Parameters\n");
+        painCave.severity = OOPSE_ERROR;
+        painCave.isFatal = 1;
+        simError();          
+      }
     }
-
+    
     //setup quadrupole atom type in fortran side
     if (isQuadrupole()) {
-        data = getPropertyByName("Quadrupole");
-        if (data != NULL) {
-            Vector3dGenericData* vector3dData= dynamic_cast<Vector3dGenericData*>(data);
-
-            if (vector3dData != NULL) {
-                Vector3d diagElem= vector3dData->getData();
-                Mat3x3d Q;
-                Q(0, 0) = diagElem[0];
-                Q(1, 1) = diagElem[1];
-                Q(2, 2) = diagElem[2];
-
-                //newQuadrupoleType(&atp.ident, Q->getArrayPointer, &isError);
-                if (isError != 0) {
-                    sprintf( painCave.errMsg,
-                           "Fortran rejected newQuadrupoleType\n");
-                    painCave.severity = OOPSE_ERROR;
-                    painCave.isFatal = 1;
-                    simError();          
-                }
-                
-            } else {
-                    sprintf( painCave.errMsg,
-                           "Can not cast GenericData to Vector3dGenericData\n");
-                    painCave.severity = OOPSE_ERROR;
-                    painCave.isFatal = 1;
-                    simError();          
-            }
-        } else {
-            sprintf( painCave.errMsg, "Can not find Quadrupole Parameters\n");
+      data = getPropertyByName("Quadrupole");
+      if (data != NULL) {
+        Vector3dGenericData* vector3dData= dynamic_cast<Vector3dGenericData*>(data);
+     
+        // BROKEN:  cartesian quadrupoles have the following properties
+        //     They are symmetric and traceless:
+        //     Qxy = Qyx          Qxx + Qyy + Qzz = 0 
+        //     Qxz = Qzx
+        //     Qyz = Qzy
+        
+        if (vector3dData != NULL) {
+          Vector3d diagElem= vector3dData->getData();
+          Mat3x3d Q;
+          Q(0, 0) = diagElem[0];
+          Q(1, 1) = diagElem[1];
+          Q(2, 2) = diagElem[2];
+          
+          setCartesianQuadrupole(&atp.ident, Q.getArrayPointer(), &isError);
+          if (isError != 0) {
+            sprintf( painCave.errMsg,
+                     "Fortran rejected setCartesianQuadrupole\n");
             painCave.severity = OOPSE_ERROR;
             painCave.isFatal = 1;
             simError();          
+          }
+          
+        } else {
+          sprintf( painCave.errMsg,
+                   "Can not cast GenericData to Vector3dGenericData\n");
+          painCave.severity = OOPSE_ERROR;
+          painCave.isFatal = 1;
+          simError();          
         }
-
+      } else {
+        sprintf( painCave.errMsg, "Can not find Quadrupole Parameters\n");
+        painCave.severity = OOPSE_ERROR;
+        painCave.isFatal = 1;
+        simError();          
+      }
+      
     }
     
     //setup sticky atom type in fortran side
