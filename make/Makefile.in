@@ -322,22 +322,26 @@ Space                  = $(Empty) $(Empty)
 #---------------------------------------------------------------------------
 
 ifneq "$(words $(SampleFiles))" "0"
-MySample                 = $(subst $(shell cd $(DEV_ROOT)/samples; pwd)/,,$(CurrentDir))
-MyInstallDir             = $(SampleSimDir)/$(MySample)
-InstallFiles             = $(SampleFiles)
-InstallCommand           = $(InstallData)
+  MySample                 = $(subst $(shell cd $(DEV_ROOT)/samples; pwd)/,,$(CurrentDir))
+  MyInstallDir             = $(SampleSimDir)/$(MySample)
+  InstallFiles             = $(SampleFiles)
+  InstallCommand           = $(InstallData)
 endif
 
 ifneq "$(words $(Main))" "0"
-MyInstallDir             = $(InstallBinDir)
-InstallFiles             = $(Executable) $(ParallelExecutable)
-InstallCommand           = $(InstallProgram)
+  MyInstallDir             = $(InstallBinDir)
+  ifeq "$(UseMPI)" "yes"
+    InstallFiles             = $(Executable) $(ParallelExecutable)
+  else
+    InstallFiles             = $(Executable)
+  endif 
+  InstallCommand           = $(InstallProgram)
 endif
 
 ifneq "$(words $(ForcefieldFiles))" "0"
-MyInstallDir             = $(ForceParamDir)
-InstallFiles             = $(ForcefieldFiles)
-InstallCommand           = $(InstallData)
+  MyInstallDir             = $(ForceParamDir)
+  InstallFiles             = $(ForcefieldFiles)
+  InstallCommand           = $(InstallData)
 endif
 
 ifneq "$(words $(InstallFiles))" "0"
