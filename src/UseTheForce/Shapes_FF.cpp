@@ -1,9 +1,20 @@
+/*
+ *  Shapes_FF.cpp
+ *  oopse
+ *
+ *  Created by Chris Fennell on 10/20/04.
+ *  Copyright 2004 __MyCompanyName__. All rights reserved.
+ *
+ */
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-
+#include <map>
 #include <iostream>
+
 using namespace std;
+using namespace oopse;
 
 #ifdef IS_MPI
 #include <mpi.h>
@@ -12,8 +23,11 @@ using namespace std;
 #include "UseTheForce/ForceFields.hpp"
 #include "primitives/SRI.hpp"
 #include "utils/simError.h"
+#include "io/basic_ifstrstream.hpp"
+#include "math/RealSphericalHarmonic.hpp"
+#include "math/SquareMatrix3.hpp"
 
-#include "UseTheForce/fortranWrappers.hpp"
+#include "UseTheForce/DarkSide/atype_interface.h"
 #include "UseTheForce/DarkSide/shapes_interface.h"
 
 #ifdef IS_MPI
@@ -25,83 +39,9 @@ Shapes_FF::Shapes_FF() {
 }
 
 Shapes_FF::Shapes_FF(char* the_variant){
+  ffPath_env = "FORCE_PARAM_PATH";
 
-  char fileName[200];
-  char* ffPath_env = "FORCE_PARAM_PATH";
-  char* ffPath;
-  char temp[200];
-
-  // do the funtion wrapping
-  wrapMeFF( this );
-
-#ifdef IS_MPI    
-  if( worldRank == 0 ){
-#endif
-    
-    // generate the force file name   
-
-    strcpy( fileName, "Shapes" );
-
-    if (strlen(the_variant) > 0) {
-      has_variant = 1;
-      strcpy( variant, the_variant);
-      strcat( fileName, ".");
-      strcat( fileName, variant );
-
-      sprintf( painCave.errMsg,
-               "Using %s variant of Shapes force field.\n",
-               variant );
-      painCave.severity = OOPSE_INFO;
-      painCave.isFatal = 0;
-      simError();
-    }
-    strcat( fileName, ".frc");
-    
-    // attempt to open the file in the current directory first.
-    
-    frcFile = fopen( fileName, "r" );
-    
-    if( frcFile == NULL ){
-      
-      // next see if the force path enviorment variable is set
-      
-      ffPath = getenv( ffPath_env );
-      if( ffPath == NULL ) {
-	STR_DEFINE(ffPath, FRC_PATH );
-      }
-      
-      
-      strcpy( temp, ffPath );
-      strcat( temp, "/" );
-      strcat( temp, fileName );
-      strcpy( fileName, temp );
-      
-      frcFile = fopen( fileName, "r" );
-      
-      if( frcFile == NULL ){
-        
-	sprintf( painCave.errMsg,
-		 "Error opening the force field parameter file:\n"
-                 "\t%s\n"
-		 "\tHave you tried setting the FORCE_PARAM_PATH environment "
-		 "variable?\n",
-		 fileName );
-        painCave.severity = OOPSE_ERROR;
-	painCave.isFatal = 1;
-	simError();
-      }
-    }
-    
-    
-#ifdef IS_MPI
-  }
-  
-  sprintf( checkPointMsg, "Shapes_FF file opened sucessfully." );
-  MPIcheckPoint();
-  
-#endif // is_mpi
 }
-
 
 Shapes_FF::~Shapes_FF(){
 
@@ -133,760 +73,505 @@ void Shapes_FF::initForceField(){
 }
 
 
-void Shapes_FF::readParams( void ){
+void Shapes_FF::readForceFile( void ){
 
-  char shapePotFile[1000];
+  char readLine[1024];
+  char fileName[200];
+  char temp[200];
+  char* ffPath;
+  char *shapeFileName;
+  char *nameToken;
+  char *delim = " ,;\t\n";
+  int nTokens, i;
+  int nContact = 0;
+  int nRange = 0;
+  int nStrength = 0;
+  int myATID;
+  string nameString;
+  ShapeType* st;
+  map<string, AtomType*> atomTypeMap;
+  map<string, AtomType*>::iterator iter;
+
+  // vectors for shape transfer to fortran
+  vector<RealSphericalHarmonic> tempSHVector;
+  vector<int> contactL;
+  vector<int> contactM;
+  vector<int> contactFunc;
+  vector<double> contactCoeff;
+  vector<int> rangeL;
+  vector<int> rangeM;
+  vector<int> rangeFunc;
+  vector<double> rangeCoeff;
+  vector<int> strengthL;
+  vector<int> strengthM;
+  vector<int> strengthFunc;
+  vector<double> strengthCoeff;
+
+  // build a basic file reader
+  ifstrsteam frcReader;
+   
+  // generate the force file name   
+  strcpy( fileName, "Shapes.frc" );
   
-#ifdef IS_MPI
-  if( worldRank == 0 ){
-#endif
+  // attempt to open the file in the current directory first.
+  frcReader.open( fileName );
+  
+  if( frcReader == NULL ){
     
-    // read in the atom types.
-
-    fastForward( "AtomTypes", "eam atom readParams" );
-
-    // we are now at the AtomTypes section.
+    // next see if the force path enviorment variable is set
     
-    eof_test = fgets( readLine, sizeof(readLine), frcFile );
-    lineNum++;
+    ffPath = getenv( ffPath_env );
+    if( ffPath == NULL ) {
+      STR_DEFINE(ffPath, FRC_PATH );
+    }
+        
+    strcpy( temp, ffPath );
+    strcat( temp, "/" );
+    strcat( temp, fileName );
+    strcpy( fileName, temp );
     
+    frcReader.open( fileName );
     
-    // read a line, and start parseing out the atom types 
-
-    if( eof_test == NULL ){
-      sprintf( painCave.errMsg, 
-	       "Error in reading Atoms from force file at line %d.\n",
-	       lineNum );
+    if( frcFile == NULL ){
+      
+      sprintf( painCave.errMsg,
+	       "Error opening the force field parameter file:\n"
+	       "\t%s\n"
+	       "\tHave you tried setting the FORCE_PARAM_PATH environment "
+	       "variable?\n",
+	       fileName );
+      painCave.severity = OOPSE_ERROR;
       painCave.isFatal = 1;
       simError();
     }
-    
-    identNum = 1;
-    // stop reading at end of file, or at next section
+  }
+  
+  // read in the shape types.
+  
+  findBegin( "ShapeTypes" );
+  
+  while( !frcReader.eof() ){
+    frcReader.getline( readLine, sizeof(readLine) );
 
-    while( readLine[0] != '#' && eof_test != NULL ){
-
-      // toss comment lines
-      if( readLine[0] != '!' ){
+    // toss comment lines
+    if( readLine[0] != '!' && readLine[0] != '#' ){
+      
+      if (isEndLine(readLine)) break;
+      
+      nTokens = count_tokens(readLine, " ,;\t");
+      if (nTokens != 0) {
+	if (nTokens < 2) {
+	  sprintf( painCave.errMsg,
+		   "Not enough data on a ShapeTypes line in file: %s\n"
+		   fileName );
+	  painCave.severity = OOPSE_ERROR;
+	  painCave.isFatal = 1;
+	  simError();
+	}
 	
-	// the parser returns 0 if the line was blank
-	if( parseAtom( readLine, lineNum, info, eamPotFile ) ){
-	  parseEAM(info,eamPotFile, &eam_rvals,
-		   &eam_rhovals, &eam_Frhovals);
-	  info.ident = identNum;
-	  headAtomType->add( info, eam_rvals,
-			     eam_rhovals,eam_Frhovals );
-	  identNum++;
+	nameToken = strtok( readLine, delim );
+	shapeFileName = strtok( NULL, delim );
+
+	// strings are not char arrays!
+	nameString = nameToken;
+
+	// does this AtomType name already exist in the map?
+	iter = atomTypeMap.find(nameString);	
+	if (iter == atomTypeMap.end()) {
+	  // no, it doesn't, so we may proceed:
+	  
+	  st = new ShapeType();
+
+	  st->setName(nameString);
+	  myATID = atomTypeMap.size();
+	  st->setIdent(myATID);
+	  parseShapeFile(shapeFileName, st);
+	  st->complete();
+	  atomTypeMap.insert(make_pair(nameString, st));
+	  
+	} else {
+	  // atomType map already contained this string (i.e. it was
+	  // declared in a previous block, and we just need to add
+	  // the shape-specific information for this AtomType:
+
+	  st = (ShapeType*)(iter->second);
+	  parseShapeFile(shapeFileName, st);
 	}
       }
-      eof_test = fgets( readLine, sizeof(readLine), frcFile );
-      lineNum++;
     }
-    
-    
+  }
 
 #ifdef IS_MPI
-  
-    
-    // send out the linked list to all the other processes
 
-    sprintf( checkPointMsg,
-	     "Shapes_FF atom structures read successfully." );
-    MPIcheckPoint();
+  // looks like all the processors have their ShapeType vectors ready...
+  sprintf( checkPointMsg,
+	   "Shapes_FF shape objects read successfully." );
+  MPIcheckPoint();
 
-    currentAtomType = headAtomType->next; //skip the first element who is a place holder.
-    while( currentAtomType != NULL ){
-      currentAtomType->duplicate( info );
-
- 
-
-      sendFrcStruct( &info, mpiAtomStructType );
-
-      // We have to now broadcast the Arrays
-      MPI_Bcast(currentAtomType->eam_rvals,
-		currentAtomType->eam_nr,
-		MPI_DOUBLE,0,MPI_COMM_WORLD);
-      MPI_Bcast(currentAtomType->eam_rhovals,
-		currentAtomType->eam_nr,
-		MPI_DOUBLE,0,MPI_COMM_WORLD);
-      MPI_Bcast(currentAtomType->eam_Frhovals,
-		currentAtomType->eam_nrho,
-		MPI_DOUBLE,0,MPI_COMM_WORLD);
-
-      sprintf( checkPointMsg,
-	       "successfully sent EAM force type: \"%s\"\n",
-	       info.name );
-      MPIcheckPoint();
-
-      currentAtomType = currentAtomType->next;
-    }
-    info.last = 1;
-    sendFrcStruct( &info, mpiAtomStructType );
-    
-  }
-
-  else{
-    
-    // listen for node 0 to send out the force params
-    
-    MPIcheckPoint();
-
-    headAtomType = new LinkedAtomType;
-    receiveFrcStruct( &info, mpiAtomStructType );
-
-    while( !info.last ){
-      
-      // allocate the arrays
-
-      eam_rvals    = new double[info.eam_nr];
-      eam_rhovals  = new double[info.eam_nr];
-      eam_Frhovals = new double[info.eam_nrho];
-
-      // We have to now broadcast the Arrays
-      MPI_Bcast(eam_rvals,
-		info.eam_nr,
-		MPI_DOUBLE,0,MPI_COMM_WORLD);
-      MPI_Bcast(eam_rhovals,
-		info.eam_nr,
-		MPI_DOUBLE,0,MPI_COMM_WORLD);
-      MPI_Bcast(eam_Frhovals,
-		info.eam_nrho,
-		MPI_DOUBLE,0,MPI_COMM_WORLD);
-      
-
-      headAtomType->add( info, eam_rvals, eam_rhovals, eam_Frhovals );
-      
-      MPIcheckPoint();
-
-      receiveFrcStruct( &info, mpiAtomStructType );
-
-
-    }
-  }
 #endif // is_mpi
 
-  // call new A_types in fortran
-  
-  int isError;
+  // pack up and send the necessary info to fortran
+  for (iter = atomTypeMap.begin(); iter != atomTypeMap.end(); ++iter){
 
-  // dummy variables
-  int isLJ = 0;
-  int isDipole = 0;
-  int isSSD = 0;
-  int isGB = 0;
-  int isEAM = 1;
-  int isCharge = 0;
-  double dipole = 0.0;
-  double charge = 0.0;
-  double eamSigma = 0.0;
-  double eamEpslon = 0.0;
-  
-  currentAtomType = headAtomType->next;
-  while( currentAtomType != NULL ){
-    
-    if( currentAtomType->name[0] != '\0' ){
-      isError = 0;
-      makeAtype( &(currentAtomType->ident),
-		 &isLJ,
-		 &isSSD,
-		 &isDipole,
-		 &isGB,
-		 &isEAM,
-                 &isCharge,
-		 &eamEpslon,
-		 &eamSigma,
-                 &charge,
-		 &dipole,
-		 &isError );
-      if( isError ){
-	sprintf( painCave.errMsg,
-		 "Error initializing the \"%s\" atom type in fortran\n",
-		 currentAtomType->name );
-	painCave.isFatal = 1;
-	simError();
+    at = (AtomType*)(iter.second);
+
+    if (at->isDirectional()) {
+
+      dat = (DirectionalAtomType*)at;
+
+      if (dat->isShape()) {
+
+	st = (ShapeAtomType*)at;
+	
+	contactL.clear();
+	contactM.clear();
+	contactFunc.clear();
+	contactCoeff.clear();
+	
+	tempSHVector = st->getContactFuncs();
+	
+	nContact = tempSHVector.size();
+	for (i=0; i<nContact; i++){
+	  contactL.push_back(tempSHVector[i].getL());
+	  contactM.push_back(tempSHVector[i].getM());
+	  contactFunc.push_back(tempSHVector[i].getFunctionType());
+	  contactCoeff.push_back(tempSHVector[i].getCoefficient());
+	}
+	
+	rangeL.clear();
+	rangeM.clear();
+	rangeFunc.clear();
+	rangeCoeff.clear();
+	
+	tempSHVector = st->getRangeFuncs();
+	
+	nRange = tempSHVector.size();
+	for (i=0; i<nRange; i++){
+	  rangeL.push_back(tempSHVector[i].getL());
+	  rangeM.push_back(tempSHVector[i].getM());
+	  rangeFunc.push_back(tempSHVector[i].getFunctionType());
+	  rangeCoeff.push_back(tempSHVector[i].getCoefficient());
+	}
+	
+	strengthL.clear();
+	strengthM.clear();
+	strengthFunc.clear();
+	strengthCoeff.clear();
+	
+	tempSHVector = st->getStrengthFuncs();
+	
+	nStrength = tempSHVector.size();
+	for (i=0; i<nStrength; i++){
+	  strengthL.push_back(tempSHVector[i].getL());
+	  strengthM.push_back(tempSHVector[i].getM());
+	  strengthFunc.push_back(tempSHVector[i].getFunctionType());
+	  strengthCoeff.push_back(tempSHVector[i].getCoefficient());
+	}
+	
+	isError = 0;
+	myATID = at->getIdent();
+	makeShape( &nContact, &contactL, &contactM, &contactFunc, 
+		   &contactCoeff,
+		   &nRange, &rangeL, &rangeM, &rangeFunc, &rangeCoeff,
+		   &nStrength, &strengthL, &strengthM,
+		   &strengthFunc, &strengthCoeff,
+		   &myATID, 
+		   &isError);
+	if( isError ){
+	  sprintf( painCave.errMsg,
+		   "Error initializing the \"%s\" shape in fortran\n",
+		   marker->first );
+	  painCave.isFatal = 1;
+	  simError();
+	}
       }
     }
-    currentAtomType = currentAtomType->next;
   }
-      
-  entry_plug->useLennardJones = 0;
-  entry_plug->useEAM = 1;
-  // Walk down again and send out EAM type
-  currentAtomType = headAtomType->next;
-  while( currentAtomType != NULL ){
-    
-    if( currentAtomType->name[0] != '\0' ){
-      isError = 0;
-
-      newEAMtype( &(currentAtomType->lattice_constant),
-		  &(currentAtomType->eam_nrho),
-		  &(currentAtomType->eam_drho),
-		  &(currentAtomType->eam_nr),
-		  &(currentAtomType->eam_dr),
-		  &(currentAtomType->eam_rcut),
-		  currentAtomType->eam_rvals,
-		  currentAtomType->eam_rhovals,
-		  currentAtomType->eam_Frhovals,
-		  &(currentAtomType->eam_ident),
-		  &isError);
-
-      if( isError ){
-	sprintf( painCave.errMsg,
-		 "Error initializing the \"%s\" atom type in fortran EAM\n",
-		 currentAtomType->name );
-	painCave.isFatal = 1;
-	simError();
-      }
-    }
-    currentAtomType = currentAtomType->next;
-  }
-
-
-
+  
 #ifdef IS_MPI
   sprintf( checkPointMsg,
 	   "Shapes_FF atom structures successfully sent to fortran\n" );
   MPIcheckPoint();
 #endif // is_mpi
 
-
-
 }
 
+void SHAPES_FF::initializeAtoms( int nAtoms, Atom** the_atoms ){
+  
+  int i,j,k;
 
-void Shapes_FF::initializeAtoms( int nAtoms, Atom** the_atoms ){
-  
-  int i;
-  
   // initialize the atoms
-  
+  DirectionalAtom* dAtom;
+  AtomType* at;
+  DirectionalAtomType* dat;
+  double mySigma;
+  double ji[3];
+  double inertialMat[3][3];
+  Mat3x3d momInt;
+  string myTypeString;
+
   for( i=0; i<nAtoms; i++ ){
     
-    currentAtomType = headAtomType->find( the_atoms[i]->getType() );
-    if( currentAtomType == NULL ){
+    myTypeString = the_atoms[i]->getType();
+    iter = atomTypeMap.find(myTypeString);
+
+    if (iter == atomTypeMap.end()) {
       sprintf( painCave.errMsg, 
 	       "AtomType error, %s not found in force file.\n",
 	       the_atoms[i]->getType() );
       painCave.isFatal = 1;
       simError();
-    }
-    
-    the_atoms[i]->setMass( currentAtomType->mass );
-    the_atoms[i]->setIdent( currentAtomType->ident );
+    } else {
 
-    if (eamRcut < currentAtomType->eam_rcut) eamRcut = currentAtomType->eam_rcut;
-    
+      at = (AtomType*)(iter->second);
+
+      the_atoms[i]->setMass( at->getMass() );
+      the_atoms[i]->setIdent( at->getIdent() );
+
+      if( at->isLennardJones() ) {
+	mySigma = at->properties->getPropertyByName("sigma");
+	if( bigSigma < mySigma ) bigSigma = mySigma;
+      }
+
+      the_atoms[i]->setHasCharge(at->isCharge());
+
+      if( at->isDirectional() ){
+
+	dat = (DirectionalAtomType*)at;
+	dAtom = (DirectionalAtom *) the_atoms[i];
+
+	momInt = dat->getI();
+
+	// zero out the moments of inertia matrix
+	for( j=0; j<3; j++ )
+	  for( k=0; k<3; k++ )
+	    inertialMat[j][k] = momInt(j,k);
+	dAtom->setI( inertialMat );       	
+
+	ji[0] = 0.0;
+	ji[1] = 0.0;
+	ji[2] = 0.0;
+	dAtom->setJ( ji );
+
+	if (dat->isDipole()) {
+	  dAtom->setHasDipole( dat->isDipole() );
+	  entry_plug->n_dipoles++;
+	}	  	
+      }
+    }
   }
 }
 
 void Shapes_FF::initializeBonds( int nBonds, Bond** BondArray,
-			     bond_pair* the_bonds ){
+				 bond_pair* the_bonds ){
   
-    if( nBonds ){
-      sprintf( painCave.errMsg,
-	       "LJ_FF does not support bonds.\n" );
-      painCave.isFatal = 1;
-      simError();
-    }
+  if( nBonds ){
+    sprintf( painCave.errMsg,
+	     "Shapes_FF does not support bonds.\n" );
+    painCave.isFatal = 1;
+    simError();
+  }
 }
 
 void Shapes_FF::initializeBends( int nBends, Bend** bendArray,
-			     bend_set* the_bends ){
-
-    if( nBends ){
-      sprintf( painCave.errMsg,
-	       "LJ_FF does not support bends.\n" );
-      painCave.isFatal = 1;
-      simError();
-    }
+				 bend_set* the_bends ){
+  
+  if( nBends ){
+    sprintf( painCave.errMsg,
+	     "Shapes_FF does not support bends.\n" );
+    painCave.isFatal = 1;
+    simError();
+  }
 }
 
 void Shapes_FF::initializeTorsions( int nTorsions, Torsion** torsionArray,
-				torsion_set* the_torsions ){
-
-    if( nTorsions ){
-      sprintf( painCave.errMsg,
-	       "LJ_FF does not support torsions.\n" );
-      painCave.isFatal = 1;
-      simError();
-    }
-}
-
-void Shapes_FF::fastForward( char* stopText, char* searchOwner ){
-
-  int foundText = 0;
-  char* the_token;
-
-  rewind( frcFile );
-  lineNum = 0;
-
-  eof_test = fgets( readLine, sizeof(readLine), frcFile );
-  lineNum++;
-  if( eof_test == NULL ){
-    sprintf( painCave.errMsg, "Error fast forwarding force file for %s: "
-	     " file is empty.\n",
-	     searchOwner );
+				    torsion_set* the_torsions ){
+  
+  if( nTorsions ){
+    sprintf( painCave.errMsg,
+	     "Shapes_FF does not support torsions.\n" );
     painCave.isFatal = 1;
     simError();
   }
-  
-  
-  while( !foundText ){
-    while( eof_test != NULL && readLine[0] != '#' ){
-      eof_test = fgets( readLine, sizeof(readLine), frcFile );
-      lineNum++;
-    }
-    if( eof_test == NULL ){
-      sprintf( painCave.errMsg,
-	       "Error fast forwarding force file for %s at "
-	       "line %d: file ended unexpectedly.\n",
-	       searchOwner,
-	       lineNum );
-      painCave.isFatal = 1;
-      simError();
-    }
-    
-    the_token = strtok( readLine, " ,;\t#\n" );
-    foundText = !strcmp( stopText, the_token );
-    
-    if( !foundText ){
-      eof_test = fgets( readLine, sizeof(readLine), frcFile );
-      lineNum++;
-      
-      if( eof_test == NULL ){
-	sprintf( painCave.errMsg, 
-		 "Error fast forwarding force file for %s at "
-		 "line %d: file ended unexpectedly.\n",
-		 searchOwner,
-		 lineNum );
-	painCave.isFatal = 1;
-	simError();
-      } 
-    }
-  }  
 }
 
+int Shapes_FF::parseShapeFile(char *shapeFile, ShapeAtomType* st){
+  const int MAXLEN = 1024;
+  char inLine[MAXLEN];   
+  char *token;
+  char *delim = " ,;\t\n";
+  Mat3x3d momInert;
+  RealSphericalHarmonic tempHarmonic;
+  vector<RealSphericalHarmonic> functionVector;
 
-
-int EAM_NS::parseAtom( char *lineBuffer, int lineNum,   atomStruct &info, char *eamPotFile ){
-
-  char* the_token;
+  ifstrstream shapeFile;
   
-  the_token = strtok( lineBuffer, " \n\t,;" );
-  if( the_token != NULL ){
-    
-    strcpy( info.name, the_token );
+  // first grab the values in the ShapeInfo section
+  findBegin(shapeFile, "ShapeInfo");
+  
+  shapeFile.getline(inLine, MAXLEN);
+  while( !shapeFile.eof() ) {
+    // toss comment lines
+    if( inLine[0] != '!' && inLine[0] != '#' ){
+      // end marks section completion
+      if (isEndLine(inLine)) break;
+      
+      nTokens = count_tokens(inLine, delim);
+      if (nTokens != 0) {
+	if (nTokens < 5) {
+	  sprintf( painCave.errMsg,
+		   "Not enough data on a ShapeInfo line in file: %s\n"
+		   fileName );
+	  painCave.severity = OOPSE_ERROR;
+	  painCave.isFatal = 1;
+	  simError();
+
+	  token = strtok(inLine, delim);
+	  token = strtok(NULL, delim);
+	  st->setMass(atof(token));
+	  token = strtok(NULL, delim);
+	  momInert(0,0) = atof(token);
+	  token = strtok(NULL, delim);
+	  momInert(1,1) = atof(token);
+	  token = strtok(NULL, delim);
+	  momInert(2,2) = atof(token);
+	  st->setI(momInert);
+	}
+      }
+    }
+  }
+
+  // now grab the contact functions
+  findBegin(shapeFile, "ContactFunctions");
+  functionVector.clear();
+  
+  shapeFile.getline(inLine, MAXLEN);
+  while( !shapeFile.eof() ) {
+    // toss comment lines
+    if( inLine[0] != '!' && inLine[0] != '#' ){
+      // end marks section completion
+      if (isEndLine(inLine)) break;
+      
+      nTokens = count_tokens(inLine, delim);
+      if (nTokens != 0) {
+	if (nTokens < 4) {
+	  sprintf( painCave.errMsg,
+		   "Not enough data on a ContactFunctions line in file: %s\n"
+		   fileName );
+	  painCave.severity = OOPSE_ERROR;
+	  painCave.isFatal = 1;
+	  simError();
 	  
-    if( ( the_token = strtok( NULL, " \n\t,;" ) ) == NULL ){
-      sprintf( painCave.errMsg, 
-	       "Error parseing AtomTypes: line %d\n", lineNum );
-      painCave.isFatal = 1;
-      simError();
+	  // read in a spherical harmonic function
+	  token = strtok(inLine, delim);
+	  tempHarmonic.setL(atoi(token));
+	  token = strtok(NULL, delim);
+	  tempHarmonic.setM(atoi(token));
+	  token = strtok(NULL, delim);
+	  if (!strcasecmp("sin",token))
+	    tempHarmonic.makeSinFunction();
+	  else
+	    tempHarmonic.makeCosFunction();		
+	  token = strtok(NULL, delim);
+	  tempHarmonic.setCoefficient(atof(token));
+	  
+	  functionVector.push_back(tempHarmonic);
+	}
+      }
     }
-    
-    info.mass = atof( the_token );
-    
-    if( ( the_token = strtok( NULL, " \n\t,;" ) ) == NULL ){
-      sprintf( painCave.errMsg, 
-	       "Error parseing AtomTypes: line %d\n", lineNum );
-      painCave.isFatal = 1;
-      simError();
-    }
-	
-    strcpy( eamPotFile, the_token );
-    return 1;
   }
-  else return 0;
-}
 
-int EAM_NS::parseEAM(atomStruct &info, char *eamPotFile, 
-		     double **eam_rvals, 
-		     double **eam_rhovals,
-		     double **eam_Frhovals){
-  double* myEam_rvals;
-  double* myEam_rhovals;
-  double* myEam_Frhovals;
+  // pass contact functions to ShapeType
+  st->setContactFuncs(functionVector);
 
-  char* ffPath_env = "FORCE_PARAM_PATH";
-  char* ffPath;
-  char* the_token;
-  char* eam_eof_test;
-  FILE *eamFile;
-  const int BUFFERSIZE = 3000;
-
-  char temp[200];
-  int linenumber;
-  int nReadLines;
-  char eam_read_buffer[BUFFERSIZE];
-
-
-  int i,j;
-
-  linenumber = 0;
-
-  // Open eam file
-  eamFile = fopen( eamPotFile, "r" );
+  // now grab the range functions
+  findBegin(shapeFile, "RangeFunctions");
+  functionVector.clear();
   
-  
-  if( eamFile == NULL ){
-    
-      // next see if the force path enviorment variable is set
-    
-    ffPath = getenv( ffPath_env );
-    if( ffPath == NULL ) {
-      STR_DEFINE(ffPath, FRC_PATH );
-    }
-    
-    
-    strcpy( temp, ffPath );
-    strcat( temp, "/" );
-    strcat( temp, eamPotFile );
-    strcpy( eamPotFile, temp );
-    
-    eamFile = fopen( eamPotFile, "r" );
-
-    
-    
-    if( eamFile == NULL ){
+  shapeFile.getline(inLine, MAXLEN);
+  while( !shapeFile.eof() ) {
+    // toss comment lines
+    if( inLine[0] != '!' && inLine[0] != '#' ){
+      // end marks section completion
+      if (isEndLine(inLine)) break;
       
-      sprintf( painCave.errMsg,
-	       "Error opening the EAM force parameter file: %s\n"
-	       "Have you tried setting the FORCE_PARAM_PATH environment "
-	       "variable?\n",
-	       eamPotFile );
-      painCave.isFatal = 1;
-      simError();
+      nTokens = count_tokens(inLine, delim);
+      if (nTokens != 0) {
+	if (nTokens < 4) {
+	  sprintf( painCave.errMsg,
+		   "Not enough data on a RangeFunctions line in file: %s\n"
+		   fileName );
+	  painCave.severity = OOPSE_ERROR;
+	  painCave.isFatal = 1;
+	  simError();
+	  
+	  // read in a spherical harmonic function
+	  token = strtok(inLine, delim);
+	  tempHarmonic.setL(atoi(token));
+	  token = strtok(NULL, delim);
+	  tempHarmonic.setM(atoi(token));
+	  token = strtok(NULL, delim);
+	  if (!strcasecmp("sin",token))
+	    tempHarmonic.makeSinFunction();
+	  else
+	    tempHarmonic.makeCosFunction();		
+	  token = strtok(NULL, delim);
+	  tempHarmonic.setCoefficient(atof(token));
+	  
+	  functionVector.push_back(tempHarmonic);
+	}
+      }
     }
   }
 
-  // First line is a comment line, read and toss it....
-  eam_eof_test = fgets(eam_read_buffer, sizeof(eam_read_buffer),eamFile);
-  linenumber++;
-  if(eam_eof_test == NULL){
-    sprintf( painCave.errMsg,
-	     "error in reading commment in %s\n", eamPotFile);
-    painCave.isFatal = 1;
-    simError();
+  // pass range functions to ShapeType
+  st->setRangeFuncs(functionVector);
+
+  // finally grab the strength functions
+  findBegin(shapeFile, "StrengthFunctions");
+  functionVector.clear();
+  
+  shapeFile.getline(inLine, MAXLEN);
+  while( !shapeFile.eof() ) {
+    // toss comment lines
+    if( inLine[0] != '!' && inLine[0] != '#' ){
+      // end marks section completion
+      if (isEndLine(inLine)) break;
+      
+      nTokens = count_tokens(inLine, delim);
+      if (nTokens != 0) {
+	if (nTokens < 4) {
+	  sprintf( painCave.errMsg,
+		   "Not enough data on a StrengthFunctions line in file: %s\n"
+		   fileName );
+	  painCave.severity = OOPSE_ERROR;
+	  painCave.isFatal = 1;
+	  simError();
+	  
+	  // read in a spherical harmonic function
+	  token = strtok(inLine, delim);
+	  tempHarmonic.setL(atoi(token));
+	  token = strtok(NULL, delim);
+	  tempHarmonic.setM(atoi(token));
+	  token = strtok(NULL, delim);
+	  if (!strcasecmp("sin",token))
+	    tempHarmonic.makeSinFunction();
+	  else
+	    tempHarmonic.makeCosFunction();		
+	  token = strtok(NULL, delim);
+	  tempHarmonic.setCoefficient(atof(token));
+	  
+	  functionVector.push_back(tempHarmonic);
+	}
+      }
+    }
   }
 
+  // pass strength functions to ShapeType
+  st->setStrengthFuncs(functionVector);
 
-
-  // The Second line contains atomic number, atomic mass and a lattice constant
-  eam_eof_test = fgets(eam_read_buffer, sizeof(eam_read_buffer),eamFile);
-  linenumber++;
-  if(eam_eof_test == NULL){
-    sprintf( painCave.errMsg,
-	     "error in reading Identifier line in %s\n", eamPotFile);
-    painCave.isFatal = 1;
-    simError();
-  }
-
-
-
-    
-  if ( (the_token = strtok( eam_read_buffer, " \n\t,;")) == NULL){
-    sprintf( painCave.errMsg, 
-	     "Error parsing EAM ident  line in %s\n", eamPotFile );
-    painCave.isFatal = 1;
-    simError();
-  }
-  
-  info.eam_ident = atoi( the_token );
- 
-  if( ( the_token = strtok( NULL, " \n\t,;" ) ) == NULL ){
-    sprintf( painCave.errMsg, 
-	     "Error parsing EAM mass in %s\n", eamPotFile );
-    painCave.isFatal = 1;
-    simError();
-  }
-  info.mass = atof( the_token);
- 
-  if( ( the_token = strtok( NULL, " \n\t,;" ) ) == NULL ){
-    sprintf( painCave.errMsg, 
-	     "Error parsing EAM Lattice Constant %s\n", eamPotFile );
-    painCave.isFatal = 1;
-    simError();
-  }
-  info.lattice_constant = atof( the_token);
- 
-  // Next line is nrho, drho, nr, dr and rcut
-  eam_eof_test = fgets(eam_read_buffer, sizeof(eam_read_buffer),eamFile);
-  if(eam_eof_test == NULL){
-    sprintf( painCave.errMsg,
-	     "error in reading number of points line in %s\n", eamPotFile);
-    painCave.isFatal = 1;
-    simError();
-  }
-
-  if ( (the_token = strtok( eam_read_buffer, " \n\t,;")) == NULL){
-    sprintf( painCave.errMsg, 
-	     "Error parseing EAM nrho: line in %s\n", eamPotFile );
-    painCave.isFatal = 1;
-    simError();
-  }
-  
-  info.eam_nrho = atoi( the_token );
-  
-  if( ( the_token = strtok( NULL, " \n\t,;" ) ) == NULL ){
-    sprintf( painCave.errMsg, 
-	     "Error parsing EAM drho in %s\n", eamPotFile );
-    painCave.isFatal = 1;
-    simError();
-  }
-  info.eam_drho = atof( the_token);
-
-  if( ( the_token = strtok( NULL, " \n\t,;" ) ) == NULL ){
-    sprintf( painCave.errMsg, 
-	     "Error parsing EAM # r in %s\n", eamPotFile );
-    painCave.isFatal = 1;
-    simError();
-  }
-  info.eam_nr = atoi( the_token);
-  
-  if( ( the_token = strtok( NULL, " \n\t,;" ) ) == NULL ){
-    sprintf( painCave.errMsg, 
-	     "Error parsing EAM dr in %s\n", eamPotFile );
-    painCave.isFatal = 1;
-    simError();
-  }
-  info.eam_dr = atof( the_token);
-
-  if( ( the_token = strtok( NULL, " \n\t,;" ) ) == NULL ){
-    sprintf( painCave.errMsg, 
-	     "Error parsing EAM rcut in %s\n", eamPotFile );
-    painCave.isFatal = 1;
-    simError();
-  }
-  info.eam_rcut = atof( the_token);
-
-
-
-
-
-  // Ok now we have to allocate point arrays and read in number of points
-  // Index the arrays for fortran, starting at 1
-  myEam_Frhovals = new double[info.eam_nrho];
-  myEam_rvals    = new double[info.eam_nr];
-  myEam_rhovals  = new double[info.eam_nr];
-
-  // Parse F of rho vals.
-
-  // Assume for now that we have a complete number of lines
-  nReadLines = int(info.eam_nrho/5);
-  
-
-
-  for (i=0;i<nReadLines;i++){
-    j = i*5;
-
-    // Read next line
-    eam_eof_test = fgets(eam_read_buffer, sizeof(eam_read_buffer),eamFile);
-    linenumber++;
-    if(eam_eof_test == NULL){
-      sprintf( painCave.errMsg,
-	       "error in reading EAM file %s at line %d\n",
-	       eamPotFile,linenumber);
-      painCave.isFatal = 1;
-      simError();
-    }
-    
-    // Parse 5 values on each line into array
-    // Value 1
-    if ( (the_token = strtok( eam_read_buffer, " \n\t,;")) == NULL){
-      sprintf( painCave.errMsg, 
-	       "Error parsing EAM nrho: line in %s\n", eamPotFile );
-      painCave.isFatal = 1;
-      simError();
-    }
-
-    myEam_Frhovals[j+0] = atof( the_token );
-    
-    // Value 2
-    if ( (the_token = strtok( NULL, " \n\t,;")) == NULL){
-      sprintf( painCave.errMsg, 
-	       "Error parsing EAM nrho: line in %s\n", eamPotFile );
-      painCave.isFatal = 1;
-      simError();
-    }
-
-    myEam_Frhovals[j+1] = atof( the_token );
-    
-    // Value 3
-    if ( (the_token = strtok( NULL, " \n\t,;")) == NULL){
-      sprintf( painCave.errMsg, 
-	       "Error parsing EAM nrho: line in %s\n", eamPotFile );
-      painCave.isFatal = 1;
-      simError();
-    }
-
-    myEam_Frhovals[j+2] = atof( the_token );
-    
-    // Value 4
-    if ( (the_token = strtok( NULL, " \n\t,;")) == NULL){
-      sprintf( painCave.errMsg, 
-	       "Error parsing EAM nrho: line in %s\n", eamPotFile );
-      painCave.isFatal = 1;
-      simError();
-    }
-
-    myEam_Frhovals[j+3] = atof( the_token );
-
-    // Value 5
-    if ( (the_token = strtok( NULL, " \n\t,;")) == NULL){
-      sprintf( painCave.errMsg, 
-	       "Error parsing EAM nrho: line in %s\n", eamPotFile );
-      painCave.isFatal = 1;
-      simError();
-    }
-
-    myEam_Frhovals[j+4] = atof( the_token );
-    
-  }
-  // Parse Z of r vals
-  
-  // Assume for now that we have a complete number of lines
-  nReadLines = int(info.eam_nr/5);
-
-  for (i=0;i<nReadLines;i++){
-    j = i*5;
-
-    // Read next line
-    eam_eof_test = fgets(eam_read_buffer, sizeof(eam_read_buffer),eamFile);
-    linenumber++;
-    if(eam_eof_test == NULL){
-      sprintf( painCave.errMsg,
-	       "error in reading EAM file %s at line %d\n",
-	       eamPotFile,linenumber);
-      painCave.isFatal = 1;
-      simError();
-    }
-    
-    // Parse 5 values on each line into array
-    // Value 1
-    if ( (the_token = strtok( eam_read_buffer, " \n\t,;")) == NULL){
-      sprintf( painCave.errMsg, 
-	       "Error parsing EAM nrho: line in %s\n", eamPotFile );
-      painCave.isFatal = 1;
-      simError();
-    }
-    
-    myEam_rvals[j+0] = atof( the_token );
-
-    // Value 2
-    if ( (the_token = strtok( NULL, " \n\t,;")) == NULL){
-      sprintf( painCave.errMsg, 
-	       "Error parsing EAM nrho: line in %s\n", eamPotFile );
-      painCave.isFatal = 1;
-      simError();
-    }
-  
-    myEam_rvals[j+1] = atof( the_token );
-
-    // Value 3
-    if ( (the_token = strtok( NULL, " \n\t,;")) == NULL){
-      sprintf( painCave.errMsg, 
-	       "Error parsing EAM nrho: line in %s\n", eamPotFile );
-      painCave.isFatal = 1;
-      simError();
-    }
-  
-    myEam_rvals[j+2] = atof( the_token );
-
-    // Value 4
-    if ( (the_token = strtok( NULL, " \n\t,;")) == NULL){
-      sprintf( painCave.errMsg, 
-	       "Error parsing EAM nrho: line in %s\n", eamPotFile );
-      painCave.isFatal = 1;
-      simError();
-    }
-  
-    myEam_rvals[j+3] = atof( the_token );
-
-    // Value 5
-    if ( (the_token = strtok( NULL, " \n\t,;")) == NULL){
-      sprintf( painCave.errMsg, 
-	       "Error parsing EAM nrho: line in %s\n", eamPotFile );
-      painCave.isFatal = 1;
-      simError();
-    }
-  
-    myEam_rvals[j+4] = atof( the_token );
-
-  }
-  // Parse rho of r vals
-
-  // Assume for now that we have a complete number of lines
-
-  for (i=0;i<nReadLines;i++){
-    j = i*5;
-
-    // Read next line
-    eam_eof_test = fgets(eam_read_buffer, sizeof(eam_read_buffer),eamFile);
-    linenumber++;
-    if(eam_eof_test == NULL){
-      sprintf( painCave.errMsg,
-	       "error in reading EAM file %s at line %d\n",
-	       eamPotFile,linenumber);
-      painCave.isFatal = 1;
-      simError();
-    }
-  
-    // Parse 5 values on each line into array
-    // Value 1
-    if ( (the_token = strtok( eam_read_buffer, " \n\t,;")) == NULL){
-      sprintf( painCave.errMsg, 
-	       "Error parsing EAM nrho: line in %s\n", eamPotFile );
-      painCave.isFatal = 1;
-      simError();
-    }
-  
-    myEam_rhovals[j+0] = atof( the_token );
-
-    // Value 2
-    if ( (the_token = strtok( NULL, " \n\t,;")) == NULL){
-      sprintf( painCave.errMsg, 
-	       "Error parsing EAM nrho: line in %s\n", eamPotFile );
-      painCave.isFatal = 1;
-      simError();
-    }
-  
-    myEam_rhovals[j+1] = atof( the_token );
-
-    // Value 3
-    if ( (the_token = strtok( NULL, " \n\t,;")) == NULL){
-      sprintf( painCave.errMsg, 
-	       "Error parsing EAM nrho: line in %s\n", eamPotFile );
-      painCave.isFatal = 1;
-      simError();
-    }
-  
-    myEam_rhovals[j+2] = atof( the_token );
-
-    // Value 4
-    if ( (the_token = strtok( NULL, " \n\t,;")) == NULL){
-      sprintf( painCave.errMsg, 
-	       "Error parsing EAM nrho: line in %s\n", eamPotFile );
-      painCave.isFatal = 1;
-      simError();
-    }
-  
-    myEam_rhovals[j+3] = atof( the_token );
-
-    // Value 5
-    if ( (the_token = strtok( NULL, " \n\t,;")) == NULL){
-      sprintf( painCave.errMsg, 
-	       "Error parsing EAM nrho: line in %s\n", eamPotFile );
-      painCave.isFatal = 1;
-      simError();
-    }
-  
-    myEam_rhovals[j+4] = atof( the_token );
- 
-  }
-  *eam_rvals = myEam_rvals;
-  *eam_rhovals = myEam_rhovals;
-  *eam_Frhovals = myEam_Frhovals;
-
-  fclose(eamFile);
+  // we're done reading from this file
+  shapeFile.close();
   return 0;
 }
+

@@ -216,8 +216,7 @@ public:
   Shapes_FF(char* the_variant);
   virtual ~Shapes_FF();
   
-
-  void readParams();
+  void readForceFile();
   void cleanMe( void );
 
   void initializeAtoms( int nAtoms, Atom** atomArray );
@@ -232,11 +231,11 @@ public:
 
   void calcRcut( void );
   double getAtomTypeMass(char* atomType);
-private:
 
-  void fastForward( char* stopText, char* searchOwner );
-  
+private:
+  char* ffPath_env;
   double shapesRcut;
+
 };
 
 
