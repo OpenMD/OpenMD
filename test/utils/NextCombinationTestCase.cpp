@@ -42,7 +42,7 @@ void NextCombinationTestCase::testNextCombination() {
     sv.push_back("C");
     sv.push_back("N");
 
-    while (replaceWildCard(sic, sv, resultString)) {   
+    while (replaceWithWildCard(sic, sv, resultString)) {   
       resultStrings.push_back(resultString);  
     }
 

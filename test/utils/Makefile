@@ -5,8 +5,11 @@ TestMain = $(Main)
 Source = UtilTest.cpp \
 	 GenericDataTestCase.cpp \
 	 PropertyMapTestCase.cpp \
+	 PropertyMap.cpp \
          GenericFactoryTestCase.cpp \
-	 NextCombinationTestCase.cpp
+	 NextCombinationTestCase.cpp \
+	 StringTokenizerTestCase.cpp \
+	 StringTokenizer.cpp
 
 DEV_ROOT               = ../..
 UseMPI                 = no 
@@ -53,7 +56,6 @@ Libraries = \
 	-lsprng \
 	-lmpich \
 	-lfmpich \
-	-lOOPSE \
 
 
 #LinkOptions = \
