@@ -53,6 +53,7 @@ extern "C"{
   void newLJtype( int* ident,
                   double* sigma,
                   double* epsilon,
+                  int* soft_pot,
                   int* status);
 
   void useGeometricMixing( );

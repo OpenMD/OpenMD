@@ -43,7 +43,7 @@
 !! Calculates Long Range forces Lennard-Jones interactions.
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: LJ.F90,v 1.7 2005-01-14 20:31:16 gezelter Exp $, $Date: 2005-01-14 20:31:16 $, $Name: not supported by cvs2svn $, $Revision: 1.7 $
+!! @version $Id: LJ.F90,v 1.8 2005-02-25 21:22:00 tim Exp $, $Date: 2005-02-25 21:22:00 $, $Name: not supported by cvs2svn $, $Revision: 1.8 $
 
 
 module lj
@@ -67,6 +67,7 @@ module lj
      integer :: atid
      real(kind=dp) :: sigma
      real(kind=dp) :: epsilon
+     logical :: soft_pot
   end type LjType
   
   type(LjType), dimension(:), allocatable :: ParameterMap
@@ -80,6 +81,7 @@ module lj
      real(kind=dp)  :: tp6
      real(kind=dp)  :: tp12
      real(kind=dp)  :: delta 
+     logical :: soft_pot     
   end type MixParameters
   
   type(MixParameters), dimension(:,:), allocatable :: MixingMap
@@ -100,10 +102,11 @@ module lj
   
 contains
 
-  subroutine newLJtype(c_ident, sigma, epsilon, status)
+  subroutine newLJtype(c_ident, sigma, epsilon, soft_pot, status)
     integer,intent(in) :: c_ident
     real(kind=dp),intent(in) :: sigma
     real(kind=dp),intent(in) :: epsilon
+    integer, intent(in) :: soft_pot
     integer,intent(out) :: status
     integer :: nATypes, myATID
     integer, pointer :: MatchList(:) => null()
@@ -139,7 +142,11 @@ contains
     ParameterMap(myATID)%atid = myATID
     ParameterMap(myATID)%epsilon = epsilon
     ParameterMap(myATID)%sigma = sigma
-    
+    if (soft_pot == 1) then
+      ParameterMap(myATID)%soft_pot = .true.
+    else
+      ParameterMap(myATID)%soft_pot = .false.
+    endif
   end subroutine newLJtype
 
   function getSigma(atid) result (s)
@@ -236,6 +243,7 @@ contains
        MixingMap(i,i)%epsilon = Epsilon_i          
        MixingMap(i,i)%delta   = -4.0_DP * MixingMap(i,i)%epsilon * &
             (MixingMap(i,i)%tp12 - MixingMap(i,i)%tp6)
+       MixingMap(i,i)%soft_pot = ParameterMap(i)%soft_pot
        
        do j = i + 1, nATIDs
           
@@ -260,6 +268,9 @@ contains
           
           MixingMap(i,j)%delta = -4.0_DP * MixingMap(i,j)%epsilon * &
                (MixingMap(i,j)%tp12 - MixingMap(i,j)%tp6)
+
+          MixingMap(i,j)%soft_pot = ParameterMap(i)%soft_pot .or. ParameterMap(j)%soft_pot
+
           
           MixingMap(j,i)%sigma   = MixingMap(i,j)%sigma
           MixingMap(j,i)%sigma6  = MixingMap(i,j)%sigma6
@@ -267,6 +278,7 @@ contains
           MixingMap(j,i)%tp12    = MixingMap(i,j)%tp12
           MixingMap(j,i)%epsilon = MixingMap(i,j)%epsilon
           MixingMap(j,i)%delta   = MixingMap(i,j)%delta
+          MixingMap(j,i)%soft_pot   = MixingMap(i,j)%soft_pot
           
        end do
     end do
@@ -296,6 +308,7 @@ contains
     real( kind = dp ) :: t6
     real( kind = dp ) :: t12
     real( kind = dp ) :: delta
+    logical :: soft_pot
     integer :: id1, id2, localError
 
     if (.not.haveMixingMap) then
@@ -312,25 +325,39 @@ contains
     sigma6   = MixingMap(atid_Row(atom1),atid_Col(atom2))%sigma6
     epsilon  = MixingMap(atid_Row(atom1),atid_Col(atom2))%epsilon
     delta    = MixingMap(atid_Row(atom1),atid_Col(atom2))%delta
+    soft_pot =  MixingMap(atid_Row(atom1),atid_Col(atom2))%soft_pot
 #else
     sigma6   = MixingMap(atid(atom1),atid(atom2))%sigma6
     epsilon  = MixingMap(atid(atom1),atid(atom2))%epsilon
     delta    = MixingMap(atid(atom1),atid(atom2))%delta
+    soft_pot    = MixingMap(atid(atom1),atid(atom2))%soft_pot
 #endif
 
     r6 = r2 * r2 * r2
     
     t6  = sigma6/ r6
     t12 = t6 * t6     
-   
-    pot_temp = 4.0E0_DP * epsilon * (t12 - t6) 
-    if (LJ_do_shift) then
-       pot_temp = pot_temp + delta
-    endif
 
-    vpair = vpair + pot_temp
-       
-    dudr = sw * 24.0E0_DP * epsilon * (t6 - 2.0E0_DP*t12) / rij
+    if (soft_pot) then
+      pot_temp = 4.0E0_DP * epsilon * t12 
+      if (LJ_do_shift) then
+         pot_temp = pot_temp + delta
+      endif
+  
+      vpair = vpair + pot_temp
+         
+      dudr = sw * 24.0E0_DP * epsilon * (-2.0E0_DP)*t12 / rij
+
+    else
+      pot_temp = 4.0E0_DP * epsilon * (t12 - t6) 
+      if (LJ_do_shift) then
+         pot_temp = pot_temp + delta
+      endif
+  
+      vpair = vpair + pot_temp
+         
+      dudr = sw * 24.0E0_DP * epsilon * (t6 - 2.0E0_DP*t12) / rij
+    endif
        
     drdx = d(1) / rij
     drdy = d(2) / rij

@@ -122,7 +122,7 @@ void AtomType::complete() {
             if (ljData != NULL) {
                 LJParam ljParam = ljData->getData();
                 
-                newLJtype(&atp.ident, &ljParam.sigma, &ljParam.epsilon, &isError);
+                newLJtype(&atp.ident, &ljParam.sigma, &ljParam.epsilon, &ljParam.soft_pot, &isError);
 
                 if (isError != 0) {
                     sprintf( painCave.errMsg,

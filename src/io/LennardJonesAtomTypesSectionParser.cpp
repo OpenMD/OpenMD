@@ -53,8 +53,8 @@ void LennardJonesAtomTypesSectionParser::parseLine(ForceField& ff,const std::str
     StringTokenizer tokenizer(line);
     int nTokens = tokenizer.countTokens();    
 
-    //in AtomTypeSection, a line at least contains 2 tokens
-    //atomTypeName and mass
+    //in LennardJonesAtomTypesSectionParser, a line at least contains 3 tokens
+    //atomTypeName, epsilon and sigma
     if (nTokens < 3)  {
         sprintf(painCave.errMsg, "LennardJonesAtomTypesSectionParser Error: Not enough tokens at line %d\n",
                 lineNo);
@@ -69,6 +69,15 @@ void LennardJonesAtomTypesSectionParser::parseLine(ForceField& ff,const std::str
             LJParam ljParam;                        
             ljParam.epsilon = tokenizer.nextTokenAsDouble();
             ljParam.sigma = tokenizer.nextTokenAsDouble();
+            ljParam.soft_pot = 0;
+
+            if (tokenizer.hasMoreTokens()) {
+                std::string pot_type = tokenizer.nextToken();
+                if (pot_type == "soft") {
+                    ljParam.soft_pot = 1;
+                }
+            }
+            
             atomType->addProperty(new LJParamGenericData("LennardJones", ljParam));
             atomType->setLennardJones();
         }else {

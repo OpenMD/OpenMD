@@ -214,6 +214,7 @@ namespace oopse {
     struct LJParam {
         double epsilon;
         double sigma;
+        int soft_pot;
     };
     typedef SimpleTypeData<LJParam> LJParamGenericData;
 
