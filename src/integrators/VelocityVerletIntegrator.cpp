@@ -173,8 +173,6 @@ void VelocityVerletIntegrator::postStep() {
 
 void VelocityVerletIntegrator::finalize() {
 
-    dumpWriter->writeDump();
-
     delete dumpWriter;
     delete statWriter;
 
