@@ -42,6 +42,7 @@
 #include <math.h>
 #include "primitives/RigidBody.hpp"
 #include "utils/simError.h"
+#include "utils/NumericConstant.hpp"
 namespace oopse {
 
 RigidBody::RigidBody() : StuntDouble(otRigidBody, &Snapshot::rigidbodyData), inertiaTensor_(0.0){
@@ -510,9 +511,9 @@ void RigidBody::addAtom(Atom* at, AtomStamp* ats) {
       simError();
     }    
     
-    euler[0] = ats->getEulerPhi();
-    euler[1] = ats->getEulerTheta();
-    euler[2] = ats->getEulerPsi();
+    euler[0] = ats->getEulerPhi() * NumericConstant::PI /180.0;
+    euler[1] = ats->getEulerTheta() * NumericConstant::PI /180.0;
+    euler[2] = ats->getEulerPsi() * NumericConstant::PI /180.0;
 
     RotMat3x3d Atmp(euler);
     refOrients_.push_back(Atmp);

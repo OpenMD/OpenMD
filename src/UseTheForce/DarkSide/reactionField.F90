@@ -123,16 +123,16 @@ contains
        allocate(MomentMap(nAtypes))
     endif
 
-    do i = 1, nAtypes
-
-       call getElementProperty(atypes, i, "is_DP", thisProperty)
-
-       if (thisProperty) then
-          call getElementProperty(atypes, i, "dipole_moment", thisDP)
-          MomentMap(i)%dipole_moment = thisDP
-       endif
-       
-    end do
+    !!do i = 1, nAtypes
+    !!    
+    !!   call getElementProperty(atypes, i, "is_Dipole", thisProperty)
+    !!
+    !!   if (thisProperty) then
+    !!      call getElementProperty(atypes, i, "dipole_moment", thisDP)
+    !!      MomentMap(i)%dipole_moment = thisDP
+    !!   endif
+    !!   
+    !!end do
     
     haveMomentMap = .true.
     
