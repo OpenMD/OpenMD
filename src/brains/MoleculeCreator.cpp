@@ -253,8 +253,11 @@ RigidBody* MoleculeCreator::createRigidBody(MoleculeStamp *molStamp, Molecule* m
     //The third part is the index of the rigidbody defined in meta-data file
     //For example, Butane_RB_0 is a valid rigid body name of butane molecule
     /**@todo replace itoa by lexi_cast */
-    rb->setType(mol->getType() + "_RB_" + toString(mol->getNRigidBodies()));
-    
+    char buffer [33];   
+    sprintf(buffer, "%d", mol->getNRigidBodies());
+    //rb->setType(mol->getType() + "_RB_" + toString<int>(mol->getNRigidBodies()));
+    rb->setType(mol->getType() + "_RB_" + buffer);
+
     return rb;
 }    
 

@@ -61,7 +61,7 @@
 #include "UseTheForce/ForceField.hpp"
 #include "utils/PropertyMap.hpp"
 #include "utils/LocalIndexManager.hpp"
-
+#include "selection/SelectionManager.hpp"
 //another nonsense macro declaration
 #define __C
 #include "brains/fSimulation.h"
@@ -408,7 +408,12 @@ class SimInfo {
          */
 
         void removeExcludePairs(Molecule* mol);
-                
+
+
+        SelectionManager* getSelectionManager() {
+            return selectMan_;
+        }
+        
         friend std::ostream& operator <<(std::ostream& o, SimInfo& info);
         
     private:
@@ -509,7 +514,8 @@ class SimInfo {
         double rsw_;        /**< radius of switching function*/
 
         bool fortranInitialized_; /**< flag indicate whether fortran side is initialized */
-        
+
+        SelectionManager* selectMan_;
 #ifdef IS_MPI
     //in Parallel version, we need MolToProc
     public:
@@ -542,6 +548,7 @@ class SimInfo {
          * once.
          */        
         std::vector<int> molToProcMap_; 
+
 #endif
 
 };
