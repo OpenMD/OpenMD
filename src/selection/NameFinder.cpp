@@ -42,6 +42,7 @@
 #include "utils/wildcards.hpp"
 #include "utils/StringTokenizer.hpp"
 #include "primitives/Molecule.hpp"
+#include "utils/StringUtils.hpp"
 namespace oopse {
 
 TreeNode::~TreeNode(){
@@ -151,8 +152,18 @@ BitSet NameFinder::match(const std::string& name){
             break;
         case 2:
             //could be molecule.*(include atoms and rigidbodies) or rigidbody.*(atoms belong to rigidbody)
-            matchRigidAtoms("*", names[0], names[1], bs);
-            matchStuntDouble(names[0], names[1], bs);
+
+            if (!isInteger(names[1])){
+                matchRigidAtoms("*", names[0], names[1], bs);
+                matchStuntDouble(names[0], names[1], bs);
+            } else {
+                int internalIndex = lexi_cast<int>(names[1]);
+                if (internalIndex < 0) {
+                    std::cerr << names[0] << ". " << names[1] << " is an invalid name" << std::endl;           
+                } else {
+                    matchInternalIndex(names[0], internalIndex, bs);
+                }
+            }
             
             break;
         case 3:
@@ -221,5 +232,41 @@ std::vector<TreeNode*> NameFinder::getMatchedChildren(TreeNode* node, const std:
 bool NameFinder::isMatched(const std::string& str, const std::string& wildcard) {
     return Wildcard::wildcardfit (wildcard.c_str(), str.c_str());
 }
+
+
+void NameFinder::matchInternalIndex(const std::string& name, int internalIndex, BitSet& bs){
+
+    std::map<std::string, TreeNode*>::iterator foundIter;
+    SimInfo::MoleculeIterator mi;
+    Molecule* mol;
+
+    for (mol = info_->beginMolecule(mi); mol != NULL; mol = info_->nextMolecule(mi)) {
+           
+        if (isMatched(mol->getMoleculeName(), name) ) {
+            int natoms = mol->getNAtoms();
+            int nrigidbodies = mol->getNRigidBodies();
+            if (internalIndex >= natoms + nrigidbodies) {
+                continue;
+            } else if (internalIndex < natoms) {
+                bs.setBitOn(mol->getAtomAt(internalIndex)->getGlobalIndex());
+                continue;
+            } else if ( internalIndex < natoms + nrigidbodies) {
+                bs.setBitOn(mol->getRigidBodyAt(internalIndex - natoms)->getGlobalIndex());
+            }
+        }
+        
+    }    
+    
+}
+
+ bool NameFinder::isInteger(const std::string str) {
+    for(int i =0; i < str.size(); ++i){
+        if (!std::isdigit(str[i])) {
+            return false;
+        }
+    }
+
+    return true;
+ }
 
 }

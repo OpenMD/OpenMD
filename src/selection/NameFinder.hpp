@@ -67,9 +67,13 @@ class NameFinder{
         void matchStuntDouble(const std::string& molName, const std::string& sdName, BitSet& bs);
         void matchRigidAtoms(const std::string& molName, const std::string& rbName, const std::string& rbAtomName, BitSet& bs);
 
+        void matchInternalIndex(const std::string& name, int internalIndex, BitSet& bs);
+
         TreeNode* createNode(TreeNode* parent, const std::string& name);
         std::vector<TreeNode*> getMatchedChildren(TreeNode* node, const std::string& name);
         bool isMatched(const std::string& str, const std::string& wildcard);
+
+        bool isInteger(const std::string str);
 
         SimInfo* info_;
         int nStuntDouble_;

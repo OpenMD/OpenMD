@@ -344,9 +344,8 @@ bool SelectionCompiler::lookingAtDecimal(bool allowNegative) {
         return false;
     }
 
-    // to support 1.ca, let's check the character after the dot
-    // to determine if it is an alpha
-    if (ch == '.' && (ichT + 1 < cchScript) && std::isalpha(script[ichT + 1])) {
+    // to support DMPC.1, let's check the character before the dot
+    if (ch == '.' && (ichT > 0) && std::isalpha(script[ichT - 1])) {
         return false;
     }
 
@@ -690,9 +689,18 @@ bool SelectionCompiler:: clauseName(std::string& name) {
 
     int tok = tokPeek();
 
-    if (tok == Token::asterisk || tok == Token::identifier) {
-        name += boost::any_cast<std::string>(tokenNext().value);
-        
+    if (tok == Token::asterisk || tok == Token::identifier || tok == Token::integer) {
+
+        Token token = tokenNext();
+        if (token.value.type() == typeid(std::string)) {
+            name += boost::any_cast<std::string>(token.value);
+        } else if (token.value.type() == typeid(int)){
+            int intVal = boost::any_cast<int>(token.value);
+            char buffer[255];
+	    sprintf(buffer,"%d", intVal);
+            name += buffer; /** @todo */
+            //name += toString<int>(intVal);
+        }
         while(true){
             tok = tokPeek();
             switch (tok) {
