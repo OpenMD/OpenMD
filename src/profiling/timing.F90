@@ -1,5 +1,5 @@
 subroutine getTimes(forceTime,commTime)
-      use do_Forces
+      use doForces
       use definitions, ONLY: dp
 #ifdef IS_MPI
       use mpiSimulation
