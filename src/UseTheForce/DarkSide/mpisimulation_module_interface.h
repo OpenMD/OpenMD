@@ -6,17 +6,27 @@
  *  Copyright 2004 __MyCompanyName__. All rights reserved.
  *
  */
+
+#ifndef MPISIMULATION_MODULE_INTERFACE_H
+#define MPISIMULATION_MODULE_INTERFACE_H
+
 #define __C
 #include "config.h"
 
 extern "C" {
+  void F90_FUNC(setfortranmpi, SETFORTRANMPI)( mpiSimData* the_mpiPlug,
+                                               int* nLocal, 
+                                               int* globalAtomIndex,
+                                               int* nGroupsLocal,
+                                               int* globalGroupIndex,
+                                               int* isError );
   
-  typedef void (setFortranMPI)( mpiSimData* the_mpiPlug,
-                                int* nLocal, 
-                                int* globalAtomIndex,
-                                int* nGroupsLocal,
-                                int* globalGroupIndex,
-                                int* isError ){
+  void setFortranMPI( mpiSimData* the_mpiPlug,
+                      int* nLocal, 
+                      int* globalAtomIndex,
+                      int* nGroupsLocal,
+                      int* globalGroupIndex,
+                      int* isError ){
     F90_FUNC(setfortranmpi, SETFORTRANMPI)(the_mpiPlug,
                                            nLocal,
                                            globalAtomIndex,
@@ -26,3 +36,4 @@ extern "C" {
     
   }
 }
+#endif

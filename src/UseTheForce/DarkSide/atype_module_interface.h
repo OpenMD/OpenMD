@@ -6,9 +6,25 @@
  *  Copyright 2004 __MyCompanyName__. All rights reserved.
  *
  */
+#ifndef ATYPE_MODULE_INTERFACE.h
+#define ATYPE_MODULE_INTERFACE.h
+
 #define __C
 #include "config.h"
 extern "C"{
+  void F90_FUNC(makeatype, MAKEATYPE)(int* unique_ident, 
+                                      int* isLJ, 
+                                      int* isSticky,
+                                      int* isDipole, 
+                                      int* isGB, 
+                                      int* isEAM,
+                                      int* isCharge,
+                                      double* lj_epslon, 
+                                      double* lj_sigma, 
+                                      double* charge,
+                                      double* dipole_moment, 
+                                      int* status );
+  
   void makeAtype(int* unique_ident, 
                  int* isLJ, 
                  int* isSticky,
@@ -36,3 +52,4 @@ extern "C"{
                                      status );
   }
 }
+#endif

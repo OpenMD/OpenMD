@@ -7,11 +7,27 @@
  *
  */
 
+#ifndef SIMULATION_MODULE_INTERFACE_H
+#define SIMULATION_MODULE_INTERFACE_H
 
 #define __C
 #include "config.h"
 extern "C"{
-  typedef void (setFortranSim)( simtype* the_Info,
+  void F90_FUNC(setfortransim, SETFORTRANSIM)( simtype* the_Info,
+                       int* nGlobal, 
+                       int* nLocal, 
+                       int* identArray,
+                       int* nLocalExcludes,
+                       int* excludesLocalArray,
+                       int* nGlobalExcludes,
+                       int* excludesGlobalArray,
+                       int* molMembershipArray,
+                       double* mfact,
+                       int* ngroup,
+                       int* globalGroupMembership,
+                                               int* isError );
+    
+ void setFortranSim ( simtype* the_Info,
                                 int* nGlobal, 
                                 int* nLocal, 
                                 int* identArray,
@@ -37,13 +53,19 @@ extern "C"{
                                             globalGroupMembership,
                                             isError);
   }
-  typedef void (setFortranBox) ( double *Hmat,
-                                 double *HmatI,
-                                 int* orthoRhombic ){
-    F90_FUNC(setfortranbox,SETFORTRANBOX)( Hmat,
-                                           HmatI,
-                                           orthoRhombic)
-    
-  }
   
+ void F90_FUNC(setfortranbox,SETFORTRANBOX) ( double *Hmat,
+                                              double *HmatI,
+                                              int* orthoRhombic );
+ 
+ void setFortranBox ( double *Hmat,
+                      double *HmatI,
+                      int* orthoRhombic ){
+   F90_FUNC(setfortranbox,SETFORTRANBOX)( Hmat,
+                                          HmatI,
+                                          orthoRhombic)
+   
+ }
+ 
 }
+#endif
