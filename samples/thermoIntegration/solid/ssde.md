@@ -2,11 +2,11 @@
 
 nComponents = 1;
 component{
-  type = "TIP3P";
-  nMol = 1000;
+  type = "SSD_E";
+  nMol = 1024;
 }
 
-initialConfig = "./tp3.in";
+initialConfig = "./ssde.in";
 
 ensemble = NVT;
 forceField = "WATER";
@@ -21,12 +21,19 @@ targetTemp = 200;
 targetPressure = 1.0;
 
 tauThermostat = 1e3;
-tauBarostat = 5e3;
+tauBarostat = 1e4;
 
 dt = 2.0;
 runTime = 1e3;
 useInitialTime = "false";
 useInitialExtendedSystemState = "false";
+
+useSolidThermInt = "true";
+thermodynamicIntegrationLambda = 1.0;
+thermodynamicIntegrationK = 1.0;
+thermIntDistSpringConst = 4.3;
+thermIntThetaSpringConst = 13.9;
+thermIntOmegaSpringConst = 17.8;
 
 //tempSet = "true";
 //thermalTime = 10;

@@ -48,9 +48,9 @@
 !! Corresponds to the force field defined in ssd_FF.cpp 
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @author Christopher Fennel
+!! @author Christopher Fennell
 !! @author J. Daniel Gezelter
-!! @version $Id: sticky.F90,v 1.4 2005-01-14 20:31:16 gezelter Exp $, $Date: 2005-01-14 20:31:16 $, $Name: not supported by cvs2svn $, $Revision: 1.4 $
+!! @version $Id: sticky.F90,v 1.5 2005-03-12 19:05:16 chrisfen Exp $, $Date: 2005-03-12 19:05:16 $, $Name: not supported by cvs2svn $, $Revision: 1.5 $
 
 module sticky
 

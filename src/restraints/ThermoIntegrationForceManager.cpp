@@ -92,10 +92,6 @@ namespace oopse {
     // build the scaling factor used to modulate the forces and torques
     factor_ = pow(tIntLambda_, tIntK_);
 
-    sprintf(painCave.errMsg,"%f is the factor\n",factor_);
-    painCave.isFatal = 0;
-    simError();  
-
   }
   
   ThermoIntegrationForceManager::~ThermoIntegrationForceManager(){
