@@ -83,7 +83,7 @@ int main(int argc,char* argv[]){
       "  | Any published work resulting from the use of this code must cite the |\n" <<
       "  | following paper:       M. A. Meineke, C. F. Vardeman II, T. Lin,     |\n" <<
       "  |                        C. J. Fennell, and J. D. Gezelter,            |\n" <<
-      "  |                        J. Comp. Chem. XX, XXXX (2004).               |\n" << 
+      "  |                        J. Comput. Chem. 26, pp. 252-271 (2005).      |\n" << 
       "  +----------------------------------------------------------------------+\n" <<
       "\n";
     
