@@ -219,6 +219,32 @@ void DumpReader::scanFile(void) {
 }
 
 void DumpReader::readFrame(int whichFrame) {
+    int storageLayout = info_->getSnapshotManager()->getStorageLayout();
+
+    if (storageLayout & DataStorage::dslPosition) {
+        needPos_ = true;
+    } else {
+        needPos_ = false;
+    }
+
+    if (storageLayout & DataStorage::dslVelocity) {
+        needVel_ = true;
+    } else {
+        needVel_ = false;
+    }
+
+    if (storageLayout & DataStorage::dslAmat || storageLayout & DataStorage::dslElectroFrame) {
+        needQuaternion_ = true;
+    } else {
+        needQuaternion_ = false;
+    }
+
+    if (storageLayout & DataStorage::dslAngularMomentum) {
+        needAngMom_ = true;
+    } else {
+        needAngMom_ = false;    
+    }
+
     readSet(whichFrame);
 }
 
@@ -504,13 +530,17 @@ void DumpReader::parseDumpLine(char *line, StuntDouble *integrableObject) {
     pos[0] = tokenizer.nextTokenAsDouble();
     pos[1] = tokenizer.nextTokenAsDouble();
     pos[2] = tokenizer.nextTokenAsDouble();
-    integrableObject->setPos(pos);
+    if (needPos_) {
+        integrableObject->setPos(pos);
+    }
     
     vel[0] = tokenizer.nextTokenAsDouble();
     vel[1] = tokenizer.nextTokenAsDouble();
     vel[2] = tokenizer.nextTokenAsDouble();
-    integrableObject->setVel(vel);
-
+    if (needVel_) {
+        integrableObject->setVel(vel);
+    }
+    
     if (integrableObject->isDirectional()) {
         
         q[0] = tokenizer.nextTokenAsDouble();
@@ -529,13 +559,16 @@ void DumpReader::parseDumpLine(char *line, StuntDouble *integrableObject) {
         } 
 
         q.normalize();
-               
-        integrableObject->setQ(q);
-        
+        if (needQuaternion_) {           
+            integrableObject->setQ(q);
+        }
+
         ji[0] = tokenizer.nextTokenAsDouble();
         ji[1] = tokenizer.nextTokenAsDouble();
         ji[2] = tokenizer.nextTokenAsDouble();
-        integrableObject->setJ(ji);
+        if (needAngMom_) {
+            integrableObject->setJ(ji);
+        }
     }
 
 }
@@ -577,7 +610,7 @@ void DumpReader::parseCommentLine(char* line, Snapshot* s) {
     hmat(2, 2) = tokenizer.nextTokenAsDouble();
     s->setHmat(hmat);
     
-    //read chi and integrablOfChidt, they should apprear in pair
+    //read chi and integralOfChidt, they should apprear in pair
     if (tokenizer.countTokens() >= 2) {
         chi = tokenizer.nextTokenAsDouble();
         integralOfChiDt = tokenizer.nextTokenAsDouble();            

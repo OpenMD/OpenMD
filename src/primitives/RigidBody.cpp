@@ -281,6 +281,92 @@ void  RigidBody::updateAtoms() {
 }
 
 
+void  RigidBody::updateAtoms(int frame) {
+    unsigned int i;
+    Vector3d ref;
+    Vector3d apos;
+    DirectionalAtom* dAtom;
+    Vector3d pos = getPos(frame);
+    RotMat3x3d a = getA(frame);
+    
+    for (i = 0; i < atoms_.size(); i++) {
+     
+        ref = body2Lab(refCoords_[i]);
+
+        apos = pos + ref;
+
+        atoms_[i]->setPos(apos, frame);
+
+        if (atoms_[i]->isDirectional()) {
+          
+          dAtom = (DirectionalAtom *) atoms_[i];
+          dAtom->setA(a * refOrients_[i], frame);
+        }
+
+    }
+  
+}
+
+void RigidBody::updateAtomVel() {
+    Mat3x3d skewMat;;
+
+    Vector3d ji = getJ();
+    Mat3x3d I =  getI();
+
+    skewMat(0, 0) =0;
+    skewMat(0, 1) = ji[2] /I(2, 2);
+    skewMat(0, 2) = -ji[1] /I(1, 1);
+
+    skewMat(1, 0) = -ji[2] /I(2, 2);
+    skewMat(1, 1) = 0;
+    skewMat(1, 2) = ji[0]/I(0, 0);
+
+    skewMat(2, 0) =ji[1] /I(1, 1);
+    skewMat(2, 1) = -ji[0]/I(0, 0);
+    skewMat(2, 2) = 0;
+
+    Mat3x3d mat = (getA() * skewMat).transpose();
+    Vector3d rbVel = getVel();
+
+
+    Vector3d velRot;        
+    for (int i =0 ; i < refCoords_.size(); ++i) {
+        atoms_[i]->setVel(rbVel + mat * refCoords_[i]);
+    }
+
+}
+
+void RigidBody::updateAtomVel(int frame) {
+    Mat3x3d skewMat;;
+
+    Vector3d ji = getJ(frame);
+    Mat3x3d I =  getI();
+
+    skewMat(0, 0) =0;
+    skewMat(0, 1) = ji[2] /I(2, 2);
+    skewMat(0, 2) = -ji[1] /I(1, 1);
+
+    skewMat(1, 0) = -ji[2] /I(2, 2);
+    skewMat(1, 1) = 0;
+    skewMat(1, 2) = ji[0]/I(0, 0);
+
+    skewMat(2, 0) =ji[1] /I(1, 1);
+    skewMat(2, 1) = -ji[0]/I(0, 0);
+    skewMat(2, 2) = 0;
+
+    Mat3x3d mat = (getA(frame) * skewMat).transpose();
+    Vector3d rbVel = getVel(frame);
+
+
+    Vector3d velRot;        
+    for (int i =0 ; i < refCoords_.size(); ++i) {
+        atoms_[i]->setVel(rbVel + mat * refCoords_[i], frame);
+    }
+
+}
+
+        
+
 bool RigidBody::getAtomPos(Vector3d& pos, unsigned int index) {
     if (index < atoms_.size()) {
 

@@ -67,6 +67,7 @@ void RadialDistrFunc::process() {
     RigidBody* rb;
     SimInfo::MoleculeIterator mi;
     Molecule::RigidBodyIterator rbIter;
+    
     preProcess();
     
     DumpReader reader(info_, dumpFilename_);    

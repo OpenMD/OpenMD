@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -38,78 +38,77 @@
  * University of Notre Dame has been advised of the possibility of
  * such damages.
  */
- 
- /**
-  * @file DumpReader.hpp
-  * @author tlin
-  * @date 11/15/2004
-  * @time 09:25am
-  * @version 2.0
-  */
+#ifndef BRAINS_BLOCKSNAPSHOTMANAGER_HPP
+#define BRAINS_BLOCKSNAPSHOTMANAGER_HPP
 
-#ifndef IO_DUMPREADER_HPP
-#define IO_DUMPREADER_HPP
-
-#include <cstdio>
-#include <string>
-#include "brains/SimInfo.hpp"
-#include "primitives/StuntDouble.hpp"
+#include "brains/SnapshotManager.hpp"
 namespace oopse {
 
+class SimInfo;
+class DumpReader;
+
+typedef std::pair<int, int> SnapshotBlock;
+
 /**
- * @class DumpReader DumpReader.hpp "io/DumpReader.hpp"
- * @todo get rid of more junk code from DumpReader
+ * @class BlockSnapshotManager
+ * @todo document
  */
-class DumpReader {
+class BlockSnapshotMananger : public SnapshotManager{
+
     public:
-
-        DumpReader(SimInfo* info, const std::string & filename);
-        //DumpReader(SimInfo * info, istream & is);
-
-        ~DumpReader();
-
-        /** Returns the number of frames in the dump file*/
-        int getNFrames();
-
+        BlockSnapshotMananger(SimInfo* info, const std::string& filename, int storageLayout, int blockCapacity = 2);
+        ~BlockSnapshotMananger();
         
-        void readFrame(int whichFrame);
+        virtual Snapshot* getSnapshot(int id);
 
+        /** Returns number of snapshot blocks in this BlockSnapshotManager*/
+        int getNBlocks() {
+            return blocks_.size();
+        }
+
+        SnapshotBlock getSnapshotBlock(int block) {
+            return blocks_.at(block);
+        }
+        
+        int getNActiveBlocks();
+        
+        bool isBlockActive(int block);
+        
+        bool loadBlock(int block);
+        
+        bool unloadBlock(int block);
+
+        std::vector<int> getActiveBlocks();
+
+        int getBlockCapacity() {
+            return blockCapacity_;                
+        }
+
+        int getNFrames() {
+            return reader_->getNFrames();
+        }
+        
     private:
 
-        void scanFile();
-
-        void readSet(int whichFrame);
-
-        void parseDumpLine(char *line, StuntDouble* integrableObject);
-
-        void parseCommentLine(char* line, Snapshot* s);
-
-
-#ifdef IS_MPI
-
-        void anonymousNodeDie(void);
-        void nodeZeroError(void);
-
-#endif                
-        // the maximum length of a typical MPI package is 15k
-        const static int maxBufferSize = 8192;
+        Snapshot* loadFrame(int frame);
         
         SimInfo* info_;
+        int storageLayout_;
+        int blockCapacity_;
 
-        std::string filename_;
-        bool isScanned_;
-
+        std::vector<Snapshot*> snapshots_;
+        std::vector<SnapshotBlock> blocks_;        
+        std::vector<int> activeBlocks_;
+        
+        int nAtoms_;
+        int nRigidBodies_;
+    
+        DumpReader* reader_;
         int nframes_;
+        int nSnapshotPerBlock_;
 
-        FILE* inFile_;
-        std::vector<fpos_t*> framePos_;
-
-        bool needPos_;
-        bool needVel_;
-        bool needQuaternion_;
-        bool needAngMom_;
 };
 
-}      //end namespace oopse
+}
 
-#endif //IO_DUMPREADER_HPP
+#endif

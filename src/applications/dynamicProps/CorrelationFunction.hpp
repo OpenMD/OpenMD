@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -38,78 +38,86 @@
  * University of Notre Dame has been advised of the possibility of
  * such damages.
  */
- 
- /**
-  * @file DumpReader.hpp
-  * @author tlin
-  * @date 11/15/2004
-  * @time 09:25am
-  * @version 2.0
-  */
+#ifndef APPLICATIONS_DYNAMICPROPS_CORRELATIONFUNCTION_HPP
+#define APPLICATIONS_DYNAMICPROPS_CORRELATIONFUNCTION_HPP
 
-#ifndef IO_DUMPREADER_HPP
-#define IO_DUMPREADER_HPP
-
-#include <cstdio>
-#include <string>
-#include "brains/SimInfo.hpp"
-#include "primitives/StuntDouble.hpp"
 namespace oopse {
 
 /**
- * @class DumpReader DumpReader.hpp "io/DumpReader.hpp"
- * @todo get rid of more junk code from DumpReader
+ * @class CorrelationFunction CorrelationFunction.hpp "applications/dynamicProps/CorrelationFunction"
+ * @brief Base class for Correlation function
  */
-class DumpReader {
+ 
+class CorrelationFunction {
     public:
-
-        DumpReader(SimInfo* info, const std::string & filename);
-        //DumpReader(SimInfo * info, istream & is);
-
-        ~DumpReader();
-
-        /** Returns the number of frames in the dump file*/
-        int getNFrames();
-
+        CorrelationFunction(SimInfo* info, const std::string& filename, 
+            const std::string& sele1, const std::string& sele2, int storageLayout);
         
-        void readFrame(int whichFrame);
+        void doCorrelate();
 
+
+        void setOutputName(const std::string& filename) {
+            outputFilename_ = filename;
+        }
+
+        const std::string& getOutputFileName() const {
+            return outputFilename_;
+        }
+
+
+        const std::string& getCorrFuncType() const {
+            return corrFuncType_;
+        }
+
+        void setCorrFuncType(const std::string& type) {
+            corrFuncType_ = type;
+        }
+
+        void setExtraInfo(const std::string& extra) {
+            extra_ = extra;
+        }
+            
+    protected:
+        
+        virtual void preCorrelate();        
+        virtual void postCorrelate();
+
+        double deltaTime_;
+        int nTimeBins_;
+        std::vector<double> histogram_;
+        std::vector<int> count_;
+        
     private:
 
-        void scanFile();
-
-        void readSet(int whichFrame);
-
-        void parseDumpLine(char *line, StuntDouble* integrableObject);
-
-        void parseCommentLine(char* line, Snapshot* s);
-
-
-#ifdef IS_MPI
-
-        void anonymousNodeDie(void);
-        void nodeZeroError(void);
-
-#endif                
-        // the maximum length of a typical MPI package is 15k
-        const static int maxBufferSize = 8192;
+        void correlateBlocks(SnapshotBlock* block1, SnapshotBlock* block2);
+        void correlateFrames(int frame1, int frame2);
+        void updateFrame(int frame);
         
+        virtual void writeCorrelate();
+
+        virtual double calcCorrVal(StuntDouble* sd1, int frame1, StuntDouble* sd2, int frame2) = 0;
+
+        virtual void validateSelection(const SelectionManager& seleMan) {}
+
         SimInfo* info_;
+        int storageLayout_;
+        std::string dumpFilename_;
+        std::string selectionScript1_;
+        std::string selectionScript2_;
+        
+        SelectionEvaluator evaluator1_;
+        SelectionEvaluator evaluator2_;
+        SelectionManager seleMan1_;
+        SelectionManager seleMan2_;        
 
-        std::string filename_;
-        bool isScanned_;
+        BlockSnapshotManager* bsMan_;        
 
-        int nframes_;
 
-        FILE* inFile_;
-        std::vector<fpos_t*> framePos_;
+        std::string outputFilename_;
 
-        bool needPos_;
-        bool needVel_;
-        bool needQuaternion_;
-        bool needAngMom_;
+        std::string corrFuncType_;
+        std::string extra_;
 };
 
-}      //end namespace oopse
-
-#endif //IO_DUMPREADER_HPP
+}
+#endif

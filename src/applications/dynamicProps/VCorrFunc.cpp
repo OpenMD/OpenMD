@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -38,78 +38,33 @@
  * University of Notre Dame has been advised of the possibility of
  * such damages.
  */
- 
- /**
-  * @file DumpReader.hpp
-  * @author tlin
-  * @date 11/15/2004
-  * @time 09:25am
-  * @version 2.0
-  */
 
-#ifndef IO_DUMPREADER_HPP
-#define IO_DUMPREADER_HPP
+#include "applications/dynamicProps/VCorrFunc.hpp"
 
-#include <cstdio>
-#include <string>
-#include "brains/SimInfo.hpp"
-#include "primitives/StuntDouble.hpp"
 namespace oopse {
+VCorrFunc::VCorrFunc(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2)
+    : CorrelationFunction(info, filename, sele1, sele2, DataStorage::dslVelocity){
 
-/**
- * @class DumpReader DumpReader.hpp "io/DumpReader.hpp"
- * @todo get rid of more junk code from DumpReader
- */
-class DumpReader {
-    public:
+    setCorrFuncType("Velocity Correlation Function");
+    setOutputName(getPrefix(dumpFilename_) + ".vcf");
 
-        DumpReader(SimInfo* info, const std::string & filename);
-        //DumpReader(SimInfo * info, istream & is);
+}
 
-        ~DumpReader();
+double VCorrFunc::calcCorrVal(StuntDouble* sd1, int frame1, StuntDouble* sd2, int frame2) {
+    Vector3d v1 =sd1->getVel(frame1);
+    Vector3d v2 = sd2->getVel(frame2);
 
-        /** Returns the number of frames in the dump file*/
-        int getNFrames();
+    return dot(v1, v2);
+}
 
-        
-        void readFrame(int whichFrame);
+void VCorrFunc::postCorrelate(){
+    CorrelationFunction::postCorrelate();
+    calcDiffConst();
+}
 
-    private:
+void VCorrFunc::calcDiffConst() {
 
-        void scanFile();
+}
 
-        void readSet(int whichFrame);
+}
 
-        void parseDumpLine(char *line, StuntDouble* integrableObject);
-
-        void parseCommentLine(char* line, Snapshot* s);
-
-
-#ifdef IS_MPI
-
-        void anonymousNodeDie(void);
-        void nodeZeroError(void);
-
-#endif                
-        // the maximum length of a typical MPI package is 15k
-        const static int maxBufferSize = 8192;
-        
-        SimInfo* info_;
-
-        std::string filename_;
-        bool isScanned_;
-
-        int nframes_;
-
-        FILE* inFile_;
-        std::vector<fpos_t*> framePos_;
-
-        bool needPos_;
-        bool needVel_;
-        bool needQuaternion_;
-        bool needAngMom_;
-};
-
-}      //end namespace oopse
-
-#endif //IO_DUMPREADER_HPP

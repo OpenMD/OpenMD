@@ -69,7 +69,7 @@ namespace oopse{
                 delete previousSnapshot_;
             }
             
-            virtual bool advance() = 0;
+            virtual bool advance() {}
 
             virtual Snapshot* getSnapshot(int id) = 0;
 
@@ -88,31 +88,21 @@ namespace oopse{
             Snapshot* getCurrentSnapshot() {
                 return currentSnapshot_;
             }
-            
-            virtual int getCapacity() = 0;
 
-            virtual void setCapacity(int capacity) = 0;
-
-            //bool getNotifyStatus();
-            
-            //void setNotifyStatus(bool status);
-
-            //void attach(SnapshotObserver*);
-
-            //void detach(SnapshotObserver*);
-
-            //void notify();
+            int getStorageLayout() {
+                return storageLayout_;
+            }
 
         protected:
 
-            SnapshotManager() : currentSnapshot_(NULL), previousSnapshot_(NULL) {
+            SnapshotManager(int storageLayout) : storageLayout_(storageLayout), currentSnapshot_(NULL), previousSnapshot_(NULL) {
             }
             
             Snapshot* currentSnapshot_;
             Snapshot* previousSnapshot_;
             
         private:
-            //vector<SnapshotObserver*> observers_;
+            int storageLayout_;
 
     };
 

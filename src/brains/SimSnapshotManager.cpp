@@ -44,13 +44,15 @@
 #include "utils/simError.h"
 namespace oopse {
 
-SimSnapshotManager::SimSnapshotManager(SimInfo* info) : info_(info){
+SimSnapshotManager::SimSnapshotManager(SimInfo* info, int storageLayout = 255) 
+    : SnapshotManager(storageLayout), info_(info){
+
     int nAtoms = info_->getNAtoms();
     int nRigidBodies = info_->getNRigidBodies();
     
     //allocate memory for snapshots
-    previousSnapshot_ = new Snapshot(nAtoms, nRigidBodies);
-    currentSnapshot_ = new Snapshot(nAtoms, nRigidBodies);
+    previousSnapshot_ = new Snapshot(nAtoms, nRigidBodies, storageLayout);
+    currentSnapshot_ = new Snapshot(nAtoms, nRigidBodies, storageLayout);
 }
 
 SimSnapshotManager::~SimSnapshotManager(){
