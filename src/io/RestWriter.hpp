@@ -38,66 +38,41 @@
  * University of Notre Dame has been advised of the possibility of
  * such damages.
  */
+ 
+#ifndef IO_RESTWRITER_HPP
+#define IO_RESTWRITER_HPP
 
-#ifndef _RESTRAINTS_H_
-#define _RESTRAINTS_H_
+#define _LARGEFILE_SOURCE64
+# ifndef _FILE_OFFSET_BITS
+#   define _FILE_OFFSET_BITS 64
+# endif
 
-#include <stdlib.h>
-#include <vector>
-#include "primitives/Atom.hpp"
+#include <iostream>
+#include <fstream>
+#include <string>
+
 #include "brains/SimInfo.hpp"
-#include "io/RestReader.hpp"
-#include "math/SquareMatrix3.hpp"
-#include "math/Vector3.hpp"
+
+#ifdef IS_MPI
+#include <mpi.h>
+#endif
 
 namespace oopse {
-  
-  class Restraints{
+
+  class RestWriter{
     
-  public:
-    Restraints(SimInfo * info, double lambdaVal, double lambdaExp);
-    ~Restraints();
+public:
+    RestWriter( SimInfo* info );
+    ~RestWriter();
     
-    void Calc_rVal(Vector3d &position, double refPosition[3]);
-    void Calc_body_thetaVal(RotMat3x3d &matrix, double refUnit[3]);
-    void Calc_body_omegaVal(double zAngle);
-    double Calc_Restraint_Forces();
-    double getVharm() { return harmPotent; }
+    void writeZangle();
     
-  private:
-    SimInfo * info_;
-    RestReader* restRead_;
+private:
+      
+    SimInfo* info_;
+    std::string outName;
     
-    char moleculeName[15];
-    
-    int i, j;
-    
-    double scaleLam;
-    double delRx, delRy, delRz;
-    double theta, omega;
-    double vProj0[3];
-    double vProjDist;
-    double uTx, uTy, uTz, vTx, vTy, vTz;
-    double ub0x, ub0y, ub0z, vb0x, vb0y, vb0z;
-    double kTheta, kOmega, kDist;
-    double restraintFrc[3];
-    double restraintTrq[3];
-    double normalize;
-    double dVdrx, dVdry, dVdrz;
-    double dVdux, dVduy, dVduz;
-    double dVdvx, dVdvy, dVdvz;
-    double harmPotent;
-    double lambdaValue;
-    double lambdaK;
-    
-    char *token;
-    char fileName[200];
-    char angleName[200];
-    char inLine[1000];
-    char inValue[200];
-    char springName[200];
   };
 
-} // end namespace oopse
-
+}
 #endif

@@ -38,66 +38,55 @@
  * University of Notre Dame has been advised of the possibility of
  * such damages.
  */
+#ifndef IO_RESTREADER_HPP
+#define IO_RESTREADER_HPP
 
-#ifndef _RESTRAINTS_H_
-#define _RESTRAINTS_H_
-
+#define _LARGEFILE_SOURCE64
+#ifndef _FILE_OFFSET_BITS
+#define _FILE_OFFSET_BITS 64
+#endif
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <stdio.h>
 #include <stdlib.h>
-#include <vector>
-#include "primitives/Atom.hpp"
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+
 #include "brains/SimInfo.hpp"
-#include "io/RestReader.hpp"
-#include "math/SquareMatrix3.hpp"
-#include "math/Vector3.hpp"
+#include "primitives/StuntDouble.hpp"
 
 namespace oopse {
-  
-  class Restraints{
+    
+
+  /**
+   * @class RestReader RestReader.hpp "io/RestReader.hpp"
+   * @for extra file reading when using thermodynamic integration
+   */
+  class RestReader {
     
   public:
-    Restraints(SimInfo * info, double lambdaVal, double lambdaExp);
-    ~Restraints();
+    RestReader( SimInfo* theInfo );
+    ~RestReader();
     
-    void Calc_rVal(Vector3d &position, double refPosition[3]);
-    void Calc_body_thetaVal(RotMat3x3d &matrix, double refUnit[3]);
-    void Calc_body_omegaVal(double zAngle);
-    double Calc_Restraint_Forces();
-    double getVharm() { return harmPotent; }
+    void readIdealCrystal();
+    void readZangle();
+    void zeroZangle();
     
   private:
-    SimInfo * info_;
-    RestReader* restRead_;
+    char* parseIdealLine(char* readLine, StuntDouble* sd);
+    char *idealName;
+    FILE *inAngFile;
+    FILE *inIdealFile;
+    std::string inAngFileName;
+    std::string inIdealFileName;
+    bool isScanned;
     
-    char moleculeName[15];
-    
-    int i, j;
-    
-    double scaleLam;
-    double delRx, delRy, delRz;
-    double theta, omega;
-    double vProj0[3];
-    double vProjDist;
-    double uTx, uTy, uTz, vTx, vTy, vTz;
-    double ub0x, ub0y, ub0z, vb0x, vb0y, vb0z;
-    double kTheta, kOmega, kDist;
-    double restraintFrc[3];
-    double restraintTrq[3];
-    double normalize;
-    double dVdrx, dVdry, dVdrz;
-    double dVdux, dVduy, dVduz;
-    double dVdvx, dVdvy, dVdvz;
-    double harmPotent;
-    double lambdaValue;
-    double lambdaK;
-    
-    char *token;
-    char fileName[200];
-    char angleName[200];
-    char inLine[1000];
-    char inValue[200];
-    char springName[200];
+    double angleTransfer;
+    std::vector<fpos_t*> framePos;
+    SimInfo *info_;
   };
 
-} // end namespace oopse
-
+} //end namespace oopse
 #endif

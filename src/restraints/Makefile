@@ -2,6 +2,7 @@ Package = restraints
 
 Source    = \
 	Restraints.cpp \
+	ThermoIntegrationForceManager.cpp
 
 RmiSource =
 

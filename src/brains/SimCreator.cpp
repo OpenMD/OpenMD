@@ -62,27 +62,28 @@
 #endif
 
 namespace oopse {
-
-  void SimCreator::parseFile(const std::string mdFileName,  MakeStamps* stamps, Globals* simParams){
-
+  
+  void SimCreator::parseFile(const std::string mdFileName,  MakeStamps* stamps, 
+                             Globals* simParams){
+    
 #ifdef IS_MPI
-
+    
     if (worldRank == 0) {
 #endif // is_mpi
-
+      
       simParams->initalize();
       set_interface_stamps(stamps, simParams);
-
+      
 #ifdef IS_MPI
-
+      
       mpiEventInit();
-
+      
 #endif
-
+      
       yacc_BASS(mdFileName.c_str());
-
+      
 #ifdef IS_MPI
-
+      
       throwMPIEvent(NULL);
     } else {
       set_interface_stamps(stamps, simParams);
@@ -90,20 +91,20 @@ namespace oopse {
       MPIcheckPoint();
       mpiEventLoop();
     }
-
+    
 #endif
-
+    
   }
-
+  
   SimInfo*  SimCreator::createSim(const std::string & mdFileName, bool loadInitCoords) {
     
     MakeStamps * stamps = new MakeStamps();
-
+    
     Globals * simParams = new Globals();
-
+    
     //parse meta-data file
     parseFile(mdFileName, stamps, simParams);
-
+    
     //create the force field
     ForceField * ff = ForceFieldFactory::getInstance()->createForceField(
                                                                          simParams->getForceField());
@@ -114,20 +115,20 @@ namespace oopse {
       painCave.isFatal = 1;
       simError();
     }
-
+    
     if (simParams->haveForceFieldFileName()) {
       ff->setForceFieldFileName(simParams->getForceFieldFileName());
     }
     
     std::string forcefieldFileName;
     forcefieldFileName = ff->getForceFieldFileName();
-
+    
     if (simParams->haveForceFieldVariant()) {
       //If the force field has variant, the variant force field name will be
       //Base.variant.frc. For exampel EAM.u6.frc
-        
+      
       std::string variant = simParams->getForceFieldVariant();
-
+      
       std::string::size_type pos = forcefieldFileName.rfind(".frc");
       variant = "." + variant;
       if (pos != std::string::npos) {
@@ -143,22 +144,22 @@ namespace oopse {
     //extract the molecule stamps
     std::vector < std::pair<MoleculeStamp *, int> > moleculeStampPairs;
     compList(stamps, simParams, moleculeStampPairs);
-
+    
     //create SimInfo
     SimInfo * info = new SimInfo(moleculeStampPairs, ff, simParams);
-
+    
     //gather parameters (SimCreator only retrieves part of the parameters)
     gatherParameters(info, mdFileName);
-
+    
     //divide the molecules and determine the global index of molecules
 #ifdef IS_MPI
     divideMolecules(info);
 #endif 
-
+    
     //create the molecules
     createMolecules(info);
-
-
+    
+    
     //allocate memory for DataStorage(circular reference, need to break it)
     info->setSnapshotManager(new SimSnapshotManager(info));
     
@@ -166,7 +167,7 @@ namespace oopse {
     //global index will never change again). Local indices of atoms and rigidbodies are already set by 
     //MoleculeCreator class which actually delegates the responsibility to LocalIndexManager. 
     setGlobalIndex(info);
-
+    
     //Alought addExculdePairs is called inside SimInfo's addMolecule method, at that point
     //atoms don't have the global index yet  (their global index are all initialized to -1).
     //Therefore we have to call addExcludePairs explicitly here. A way to work around is that
@@ -177,7 +178,7 @@ namespace oopse {
       info->addExcludePairs(mol);
     }
     
-
+    
     //load initial coordinates, some extra information are pushed into SimInfo's property map ( such as
     //eta, chi for NPT integrator)
     if (loadInitCoords)
@@ -185,14 +186,14 @@ namespace oopse {
     
     return info;
   }
-
+  
   void SimCreator::gatherParameters(SimInfo *info, const std::string& mdfile) {
-
+    
     //figure out the ouput file names
     std::string prefix;
-
+    
 #ifdef IS_MPI
-
+    
     if (worldRank == 0) {
 #endif // is_mpi
       Globals * simParams = info->getSimParams();
@@ -201,19 +202,20 @@ namespace oopse {
       } else {
         prefix = getPrefix(mdfile);
       }
-
+      
       info->setFinalConfigFileName(prefix + ".eor");
       info->setDumpFileName(prefix + ".dump");
       info->setStatFileName(prefix + ".stat");
-
+      info->setRestFileName(prefix + ".zang");
+      
 #ifdef IS_MPI
-
+      
     }
-
+    
 #endif
-
+    
   }
-
+  
 #ifdef IS_MPI
   void SimCreator::divideMolecules(SimInfo *info) {
     double numerator;
@@ -237,7 +239,7 @@ namespace oopse {
     std::vector<int> molToProcMap(nGlobalMols, -1); // default to an error condition:
     
     MPI_Comm_size(MPI_COMM_WORLD, &nProcessors);
-
+    
     if (nProcessors > nGlobalMols) {
       sprintf(painCave.errMsg,
               "nProcessors (%d) > nMol (%d)\n"
@@ -246,11 +248,11 @@ namespace oopse {
               "\tusable division of atoms for force decomposition.\n"
               "\tEither try a smaller number of processors, or run the\n"
               "\tsingle-processor version of OOPSE.\n", nProcessors, nGlobalMols);
-
+      
       painCave.isFatal = 1;
       simError();
     }
-
+    
     int seedValue;
     Globals * simParams = info->getSimParams();
     SeqRandNumGen* myRandom; //divide labor does not need Parallel random number generator
@@ -260,86 +262,86 @@ namespace oopse {
     }else {
       myRandom = new SeqRandNumGen();
     }   
-
-
+    
+    
     a = 3.0 * nGlobalMols / info->getNGlobalAtoms();
-
+    
     //initialize atomsPerProc
     atomsPerProc.insert(atomsPerProc.end(), nProcessors, 0);
-
+    
     if (worldRank == 0) {
       numerator = info->getNGlobalAtoms();
       denominator = nProcessors;
       precast = numerator / denominator;
       nTarget = (int)(precast + 0.5);
-
+      
       for(i = 0; i < nGlobalMols; i++) {
         done = 0;
         loops = 0;
-
+        
         while (!done) {
           loops++;
-
+          
           // Pick a processor at random
-
+          
           which_proc = (int) (myRandom->rand() * nProcessors);
-
+          
           //get the molecule stamp first
           int stampId = info->getMoleculeStampId(i);
           MoleculeStamp * moleculeStamp = info->getMoleculeStamp(stampId);
-
+          
           // How many atoms does this processor have so far?
           old_atoms = atomsPerProc[which_proc];
           add_atoms = moleculeStamp->getNAtoms();
           new_atoms = old_atoms + add_atoms;
-
+          
           // If we've been through this loop too many times, we need
           // to just give up and assign the molecule to this processor
           // and be done with it. 
-
+          
           if (loops > 100) {
             sprintf(painCave.errMsg,
                     "I've tried 100 times to assign molecule %d to a "
                     " processor, but can't find a good spot.\n"
                     "I'm assigning it at random to processor %d.\n",
                     i, which_proc);
-
+            
             painCave.isFatal = 0;
             simError();
-
+            
             molToProcMap[i] = which_proc;
             atomsPerProc[which_proc] += add_atoms;
-
+            
             done = 1;
             continue;
           }
-
+          
           // If we can add this molecule to this processor without sending
           // it above nTarget, then go ahead and do it:
-
+          
           if (new_atoms <= nTarget) {
             molToProcMap[i] = which_proc;
             atomsPerProc[which_proc] += add_atoms;
-
+            
             done = 1;
             continue;
           }
-
+          
           // The only situation left is when new_atoms > nTarget.  We
           // want to accept this with some probability that dies off the
           // farther we are from nTarget
-
+          
           // roughly:  x = new_atoms - nTarget
           //           Pacc(x) = exp(- a * x)
           // where a = penalty / (average atoms per molecule)
-
+          
           x = (double)(new_atoms - nTarget);
           y = myRandom->rand();
-
+          
           if (y < exp(- a * x)) {
             molToProcMap[i] = which_proc;
             atomsPerProc[which_proc] += add_atoms;
-
+            
             done = 1;
             continue;
           } else {
@@ -347,53 +349,53 @@ namespace oopse {
           }
         }
       }
-
+      
       delete myRandom;
-        
+      
       // Spray out this nonsense to all other processors:
-
+      
       MPI_Bcast(&molToProcMap[0], nGlobalMols, MPI_INT, 0, MPI_COMM_WORLD);
     } else {
-
+      
       // Listen to your marching orders from processor 0:
-
+      
       MPI_Bcast(&molToProcMap[0], nGlobalMols, MPI_INT, 0, MPI_COMM_WORLD);
     }
-
+    
     info->setMolToProcMap(molToProcMap);
     sprintf(checkPointMsg,
             "Successfully divided the molecules among the processors.\n");
     MPIcheckPoint();
   }
-
+  
 #endif
-
+  
   void SimCreator::createMolecules(SimInfo *info) {
     MoleculeCreator molCreator;
     int stampId;
-
+    
     for(int i = 0; i < info->getNGlobalMolecules(); i++) {
-
+      
 #ifdef IS_MPI
-
+      
       if (info->getMolToProc(i) == worldRank) {
 #endif
-
+        
         stampId = info->getMoleculeStampId(i);
         Molecule * mol = molCreator.createMolecule(info->getForceField(), info->getMoleculeStamp(stampId),
                                                    stampId, i, info->getLocalIndexManager());
-
+        
         info->addMolecule(mol);
-
+        
 #ifdef IS_MPI
-
+        
       }
-
+      
 #endif
-
+      
     } //end for(int i=0)   
   }
-
+  
   void SimCreator::compList(MakeStamps *stamps, Globals* simParams,
                             std::vector < std::pair<MoleculeStamp *, int> > &moleculeStampPairs) {
     int i;
@@ -402,37 +404,37 @@ namespace oopse {
     MoleculeStamp * currentStamp;
     Component** the_components = simParams->getComponents();
     int n_components = simParams->getNComponents();
-
+    
     if (!simParams->haveNMol()) {
       // we don't have the total number of molecules, so we assume it is
       // given in each component
-
+      
       for(i = 0; i < n_components; i++) {
         if (!the_components[i]->haveNMol()) {
           // we have a problem
           sprintf(painCave.errMsg,
                   "SimCreator Error. No global NMol or component NMol given.\n"
                   "\tCannot calculate the number of atoms.\n");
-
+          
           painCave.isFatal = 1;
           simError();
         }
-      
+        
         id = the_components[i]->getType();
-
+        
         extractedStamp = stamps->extractMolStamp(id);
         if (extractedStamp == NULL) {
           sprintf(painCave.errMsg,
                   "SimCreator error: Component \"%s\" was not found in the "
                   "list of declared molecules\n", id);
-
+          
           painCave.isFatal = 1;
           simError();
         }
-
+        
         currentStamp = extractedStamp->getStamp();
-
-
+        
+        
         moleculeStampPairs.push_back(
                                      std::make_pair(currentStamp, the_components[i]->getNMol()));
       } //end for (i = 0; i < n_components; i++)
@@ -442,20 +444,20 @@ namespace oopse {
               " nMols and then give molfractions in the components\n"
               "\tis not currently supported."
               " Please give nMol in the components.\n");
-
+      
       painCave.isFatal = 1;
       simError();
     }
-
+    
 #ifdef IS_MPI
-
+    
     strcpy(checkPointMsg, "Component stamps successfully extracted\n");
     MPIcheckPoint();
-
+    
 #endif // is_mpi
-
+    
   }
-
+  
   void SimCreator::setGlobalIndex(SimInfo *info) {
     SimInfo::MoleculeIterator mi;
     Molecule::AtomIterator ai;
@@ -471,30 +473,30 @@ namespace oopse {
     int nGlobalAtoms = info->getNGlobalAtoms();
     
 #ifndef IS_MPI
-
+    
     beginAtomIndex = 0;
     beginRigidBodyIndex = 0;
     beginCutoffGroupIndex = 0;
-
+    
 #else
-
+    
     int nproc;
     int myNode;
-
+    
     myNode = worldRank;
     MPI_Comm_size(MPI_COMM_WORLD, &nproc);
-
+    
     std::vector < int > tmpAtomsInProc(nproc, 0);
     std::vector < int > tmpRigidBodiesInProc(nproc, 0);
     std::vector < int > tmpCutoffGroupsInProc(nproc, 0);
     std::vector < int > NumAtomsInProc(nproc, 0);
     std::vector < int > NumRigidBodiesInProc(nproc, 0);
     std::vector < int > NumCutoffGroupsInProc(nproc, 0);
-
+    
     tmpAtomsInProc[myNode] = info->getNAtoms();
     tmpRigidBodiesInProc[myNode] = info->getNRigidBodies();
     tmpCutoffGroupsInProc[myNode] = info->getNCutoffGroups();
-
+    
     //do MPI_ALLREDUCE to exchange the total number of atoms, rigidbodies and cutoff groups
     MPI_Allreduce(&tmpAtomsInProc[0], &NumAtomsInProc[0], nproc, MPI_INT,
                   MPI_SUM, MPI_COMM_WORLD);
@@ -502,54 +504,54 @@ namespace oopse {
                   MPI_INT, MPI_SUM, MPI_COMM_WORLD);
     MPI_Allreduce(&tmpCutoffGroupsInProc[0], &NumCutoffGroupsInProc[0], nproc,
                   MPI_INT, MPI_SUM, MPI_COMM_WORLD);
-
+    
     beginAtomIndex = 0;
     beginRigidBodyIndex = 0;
     beginCutoffGroupIndex = 0;
-
+    
     for(int i = 0; i < myNode; i++) {
       beginAtomIndex += NumAtomsInProc[i];
       beginRigidBodyIndex += NumRigidBodiesInProc[i];
       beginCutoffGroupIndex += NumCutoffGroupsInProc[i];
     }
-
+    
 #endif
-
+    
     //rigidbody's index begins right after atom's
     beginRigidBodyIndex += info->getNGlobalAtoms();
-
+    
     for(mol = info->beginMolecule(mi); mol != NULL;
         mol = info->nextMolecule(mi)) {
-
+      
       //local index(index in DataStorge) of atom is important
       for(atom = mol->beginAtom(ai); atom != NULL; atom = mol->nextAtom(ai)) {
         atom->setGlobalIndex(beginAtomIndex++);
       }
-
+      
       for(rb = mol->beginRigidBody(ri); rb != NULL;
           rb = mol->nextRigidBody(ri)) {
         rb->setGlobalIndex(beginRigidBodyIndex++);
       }
-
+      
       //local index of cutoff group is trivial, it only depends on the order of travesing
       for(cg = mol->beginCutoffGroup(ci); cg != NULL;
           cg = mol->nextCutoffGroup(ci)) {
         cg->setGlobalIndex(beginCutoffGroupIndex++);
       }
     }
-
+    
     //fill globalGroupMembership
     std::vector<int> globalGroupMembership(info->getNGlobalAtoms(), 0);
     for(mol = info->beginMolecule(mi); mol != NULL; mol = info->nextMolecule(mi)) {        
       for (cg = mol->beginCutoffGroup(ci); cg != NULL; cg = mol->nextCutoffGroup(ci)) {
-
+        
         for(atom = cg->beginAtom(ai); atom != NULL; atom = cg->nextAtom(ai)) {
           globalGroupMembership[atom->getGlobalIndex()] = cg->getGlobalIndex();
         }
-
+        
       }       
     }
-
+    
 #ifdef IS_MPI    
     // Since the globalGroupMembership has been zero filled and we've only
     // poked values into the atoms we know, we can do an Allreduce
@@ -563,20 +565,20 @@ namespace oopse {
 #else
     info->setGlobalGroupMembership(globalGroupMembership);
 #endif
-
+    
     //fill molMembership
     std::vector<int> globalMolMembership(info->getNGlobalAtoms(), 0);
     
     for(mol = info->beginMolecule(mi); mol != NULL; mol = info->nextMolecule(mi)) {
-
+      
       for(atom = mol->beginAtom(ai); atom != NULL; atom = mol->nextAtom(ai)) {
         globalMolMembership[atom->getGlobalIndex()] = mol->getGlobalIndex();
       }
     }
-
+    
 #ifdef IS_MPI
     std::vector<int> tmpMolMembership(nGlobalAtoms, 0);
-
+    
     MPI_Allreduce(&globalMolMembership[0], &tmpMolMembership[0], nGlobalAtoms,
                   MPI_INT, MPI_SUM, MPI_COMM_WORLD);
     
@@ -584,9 +586,9 @@ namespace oopse {
 #else
     info->setGlobalMolMembership(globalMolMembership);
 #endif
-
+    
   }
-
+  
   void SimCreator::loadCoordinates(SimInfo* info) {
     Globals* simParams;
     simParams = info->getSimParams();
@@ -597,24 +599,25 @@ namespace oopse {
       painCave.isFatal = 1;;
       simError();
     }
-        
+    
     DumpReader reader(info, simParams->getInitialConfig());
     int nframes = reader.getNFrames();
-
+    
     if (nframes > 0) {
       reader.readFrame(nframes - 1);
     } else {
       //invalid initial coordinate file
-      sprintf(painCave.errMsg, "Initial configuration file %s should at least contain one frame\n",
+      sprintf(painCave.errMsg, 
+              "Initial configuration file %s should at least contain one frame\n",
               simParams->getInitialConfig());
       painCave.isFatal = 1;
       simError();
     }
-
+    
     //copy the current snapshot to previous snapshot
     info->getSnapshotManager()->advance();
   }
-
+  
 } //end namespace oopse
 
 

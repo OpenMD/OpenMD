@@ -51,7 +51,7 @@
 
 /*
  * The following section lists all of the defined tokens for the
- * gloabal assignment statements. All are prefixed with a G_ to avoid
+ * global assignment statements. All are prefixed with a G_ to avoid
  * stepping on any previously defined enumerations. 
  *
  * NOTE: tokens start at 1, 0 is a resrved token number
@@ -113,6 +113,10 @@
 #define G_THERM_INT_K       51
 #define G_FORCEFIELD_VARIANT 52
 #define G_FORCEFIELD_FILENAME 53
+#define G_THERM_INT_DIST_SPRING  54
+#define G_THERM_INT_THETA_SPRING 55
+#define G_THERM_INT_OMEGA_SPRING 56
+
 Globals::Globals(){
   initalize();
 }
@@ -196,8 +200,11 @@ void Globals::initalize(){
   addHash( "thermodynamicIntegrationLambda",       G_THERM_INT_LAMBDA);
   addHash( "thermodynamicIntegrationK",            G_THERM_INT_K);
   addHash( "forceFieldVariant",                    G_FORCEFIELD_VARIANT);
-  addHash( "forceFieldFileName",                    G_FORCEFIELD_FILENAME);
-  
+  addHash( "forceFieldFileName",                   G_FORCEFIELD_FILENAME);
+  addHash( "thermIntDistSpringConst",              G_THERM_INT_DIST_SPRING);
+  addHash( "thermIntThetaSpringConst",             G_THERM_INT_THETA_SPRING);
+  addHash( "thermIntOmegaSpringConst",             G_THERM_INT_OMEGA_SPRING);
+
   strcpy( mixingRule,"standard");  //default mixing rules to standard.
   usePBC = 1; //default  periodic boundry conditions to on
   useRF  = 0;
@@ -255,7 +262,9 @@ void Globals::initalize(){
   have_thermodynamic_integration_k = 0;
   have_forcefield_variant = 0;
   have_forcefield_filename = 0; 
-
+  have_dist_spring_constant =  0;
+  have_theta_spring_constant = 0;
+  have_omega_spring_constant = 0;
 }
 
 int Globals::newComponent( event* the_event ){
@@ -1724,7 +1733,8 @@ int Globals::globalAssign( event* the_event ){
         return 0;
         break;
       }
-      break;      
+      break;   
+   
     case G_FORCEFIELD_VARIANT:
       if( the_type == STRING ){
 	strcpy( forcefield_variant, the_event->evt.asmt.rhs.sval );
@@ -1749,6 +1759,93 @@ int Globals::globalAssign( event* the_event ){
 	strdup( "Error in parsing meta-data file!\n\tforceFieldFileName was not a string assignment.\n" );
       return 0;
       break;      
+
+    case G_THERM_INT_DIST_SPRING:
+      switch( the_type ){
+	
+      case STRING:
+        the_event->err_msg = 
+          strdup( "Error in parsing meta-data file!\n\tthermIntDistSpringConst is not a double or int.\n" );
+        return 1;
+        break;
+        
+      case DOUBLE:
+        therm_int_dist_spring = the_event->evt.asmt.rhs.dval;
+        have_dist_spring_constant = 1;
+        return 1;
+        break;
+        
+      case INT:
+        therm_int_dist_spring = (double)the_event->evt.asmt.rhs.dval;
+        have_dist_spring_constant = 1;
+        return 1;
+        break;
+        
+      default:
+        the_event->err_msg = 
+          strdup( "Error in parsing meta-data file!\n\tthermIntDistSpringConst unrecognized.\n" );
+        return 0;
+        break;
+      }
+      break;   
+
+    case G_THERM_INT_THETA_SPRING:
+      switch( the_type ){
+	
+      case STRING:
+        the_event->err_msg = 
+          strdup( "Error in parsing meta-data file!\n\tthermIntThetaSpringConst is not a double or int.\n" );
+        return 1;
+        break;
+        
+      case DOUBLE:
+        therm_int_theta_spring = the_event->evt.asmt.rhs.dval;
+        have_theta_spring_constant = 1;
+        return 1;
+        break;
+        
+      case INT:
+        therm_int_theta_spring = (double)the_event->evt.asmt.rhs.dval;
+        have_theta_spring_constant = 1;
+        return 1;
+        break;
+        
+      default:
+        the_event->err_msg = 
+          strdup( "Error in parsing meta-data file!\n\tthermIntThetaSpringConst unrecognized.\n" );
+        return 0;
+        break;
+      }
+      break;
+
+       case G_THERM_INT_OMEGA_SPRING:
+      switch( the_type ){
+	
+      case STRING:
+        the_event->err_msg = 
+          strdup( "Error in parsing meta-data file!\n\tthermIntOmegaSpringConst is not a double or int.\n" );
+        return 1;
+        break;
+        
+      case DOUBLE:
+        therm_int_omega_spring = the_event->evt.asmt.rhs.dval;
+        have_omega_spring_constant = 1;
+        return 1;
+        break;
+        
+      case INT:
+        therm_int_omega_spring = (double)the_event->evt.asmt.rhs.dval;
+        have_omega_spring_constant = 1;
+        return 1;
+        break;
+        
+      default:
+        the_event->err_msg = 
+          strdup( "Error in parsing meta-data file!\n\tthermIntOmegaSpringConst unrecognized.\n" );
+        return 0;
+        break;
+      }
+      break;   
       // add more token cases here.      
     }
   }

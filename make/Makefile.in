@@ -50,6 +50,7 @@ PackageLibs = \
 	constraints \
 	minimizers \
 	selection \
+	restraints \
 
 #packages containing applications
 Applications = \

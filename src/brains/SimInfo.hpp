@@ -324,6 +324,14 @@ class SimInfo {
         void setStatFileName(const std::string& fileName) {
             statFileName_ = fileName;
         }
+        
+        std::string getRestFileName() {
+          return restFileName_;
+        }
+        
+        void setRestFileName(const std::string& fileName) {
+          restFileName_ = fileName;
+        }
 
         /** 
          * Sets GlobalGroupMembership
@@ -494,7 +502,8 @@ class SimInfo {
         std::string finalConfigFileName_;
         std::string dumpFileName_;
         std::string statFileName_;
-
+        std::string restFileName_;
+        
         double rcut_;       /**< cutoff radius*/
         double rsw_;        /**< radius of switching function*/
 

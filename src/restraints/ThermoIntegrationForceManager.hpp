@@ -38,66 +38,36 @@
  * University of Notre Dame has been advised of the possibility of
  * such damages.
  */
-
-#ifndef _RESTRAINTS_H_
-#define _RESTRAINTS_H_
-
-#include <stdlib.h>
+ 
+#ifndef RESTRAINTS_THERMOINTEGRATIONFORCEMANAGER_HPP
+#define RESTRAINTS_THERMOINTEGRATIONFORCEMANAGER_HPP
+#include <list>
+#include <string>
 #include <vector>
-#include "primitives/Atom.hpp"
-#include "brains/SimInfo.hpp"
-#include "io/RestReader.hpp"
-#include "math/SquareMatrix3.hpp"
-#include "math/Vector3.hpp"
+#include "brains/ForceManager.hpp"
+#include "restraints/Restraints.hpp"
 
 namespace oopse {
   
-  class Restraints{
+  class ThermoIntegrationForceManager : public ForceManager {
     
   public:
-    Restraints(SimInfo * info, double lambdaVal, double lambdaExp);
-    ~Restraints();
+    ThermoIntegrationForceManager(SimInfo* info);
+    ~ThermoIntegrationForceManager();
     
-    void Calc_rVal(Vector3d &position, double refPosition[3]);
-    void Calc_body_thetaVal(RotMat3x3d &matrix, double refUnit[3]);
-    void Calc_body_omegaVal(double zAngle);
-    double Calc_Restraint_Forces();
-    double getVharm() { return harmPotent; }
+    virtual void calcForces(bool needPotential, bool needStress);
     
   private:
-    SimInfo * info_;
-    RestReader* restRead_;
-    
-    char moleculeName[15];
-    
-    int i, j;
-    
-    double scaleLam;
-    double delRx, delRy, delRz;
-    double theta, omega;
-    double vProj0[3];
-    double vProjDist;
-    double uTx, uTy, uTz, vTx, vTy, vTz;
-    double ub0x, ub0y, ub0z, vb0x, vb0y, vb0z;
-    double kTheta, kOmega, kDist;
-    double restraintFrc[3];
-    double restraintTrq[3];
-    double normalize;
-    double dVdrx, dVdry, dVdrz;
-    double dVdux, dVduy, dVduz;
-    double dVdvx, dVdvy, dVdvz;
-    double harmPotent;
-    double lambdaValue;
-    double lambdaK;
-    
-    char *token;
-    char fileName[200];
-    char angleName[200];
-    char inLine[1000];
-    char inValue[200];
-    char springName[200];
+    Globals* simParam;
+    Restraints* restraint_;
+    Snapshot* currSnapshot_;
+
+    double tIntLambda_;
+    double tIntK_;
+    double factor_;
+    double lrPot_;
+    double vHarm_;
   };
-
-} // end namespace oopse
-
-#endif
+  
+}
+#endif 

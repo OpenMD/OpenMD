@@ -52,154 +52,189 @@
 #include "utils/StringUtils.hpp"
 
 namespace oopse {
-VelocityVerletIntegrator::VelocityVerletIntegrator(SimInfo *info) : Integrator(info), rotAlgo(NULL) { 
+  VelocityVerletIntegrator::VelocityVerletIntegrator(SimInfo *info) : Integrator(info), rotAlgo(NULL) { 
     dt2 = 0.5 * dt;
     rotAlgo = new DLM();
     rattle = new Rattle(info);
-}
-
-VelocityVerletIntegrator::~VelocityVerletIntegrator() { 
+  }
+  
+  VelocityVerletIntegrator::~VelocityVerletIntegrator() { 
     delete rotAlgo;
     delete rattle;
-}
-
-void VelocityVerletIntegrator::initialize(){
-
+  }
+  
+  void VelocityVerletIntegrator::initialize(){
+    
     forceMan_->init();
-
+    
     // remove center of mass drift velocity (in case we passed in a configuration
     // that was drifting
     velocitizer_->removeComDrift();
-
+    
     // initialize the forces before the first step
     calcForce(true, true);
-
+    
     //execute constraint algorithm to make sure at the very beginning the system is constrained  
     if (info_->getNGlobalConstraints() > 0) {
-        rattle->constraintA();
-        calcForce(true, true);
-        rattle->constraintB();        
-        info_->getSnapshotManager()->advance();//copy the current snapshot to previous snapshot
+      rattle->constraintA();
+      calcForce(true, true);
+      rattle->constraintB();        
+      info_->getSnapshotManager()->advance();//copy the current snapshot to previous snapshot
     }
-
+    
     if (needVelocityScaling) {
-        velocitizer_->velocitize(targetScalingTemp);
+      velocitizer_->velocitize(targetScalingTemp);
     }
     
     dumpWriter = createDumpWriter();
-
+    
     statWriter = createStatWriter();
-
+    
+    if (simParams->getUseSolidThermInt()) {
+      restWriter = createRestWriter();
+      restWriter->writeZangle();
+    }
+    
     dumpWriter->writeDumpAndEor();
+    
     
     //save statistics, before writeStat,  we must save statistics
     thermo.saveStat();
     saveConservedQuantity();
     statWriter->writeStat(currentSnapshot_->statData);
-
+    
     currSample = sampleTime + currentSnapshot_->getTime();
     currStatus =  statusTime + currentSnapshot_->getTime();;
     currThermal = thermalTime +  + currentSnapshot_->getTime();
     needPotential = false;
     needStress = false;       
-   
-}
-        
-void VelocityVerletIntegrator::doIntegrate() {
-
-
-    initialize();
-
-    while (currentSnapshot_->getTime() < runTime) {
-        
-        preStep();
-
-        integrateStep();
-        
-        postStep();
-
-    }
-
-    finalize();
     
+}
+
+void VelocityVerletIntegrator::doIntegrate() {
+  
+  
+  initialize();
+  
+  while (currentSnapshot_->getTime() < runTime) {
+    
+    preStep();
+    
+    integrateStep();
+    
+    postStep();
+    
+  }
+  
+  finalize();
+  
 }
 
 
 void VelocityVerletIntegrator::preStep() {
-        double difference = currentSnapshot_->getTime() + dt - currStatus;
-
-        if (difference > 0 || fabs(difference) < oopse::epsilon) {
-            needPotential = true;
-            needStress = true;   
-        }
-
+  double difference = currentSnapshot_->getTime() + dt - currStatus;
+  
+  if (difference > 0 || fabs(difference) < oopse::epsilon) {
+    needPotential = true;
+    needStress = true;   
+  }
+  
 }
 
 void VelocityVerletIntegrator::postStep() {
-
-        //save snapshot
-        info_->getSnapshotManager()->advance();
-
-        //increase time
-        currentSnapshot_->increaseTime(dt);        
-        
-        if (needVelocityScaling) {
-            if (currentSnapshot_->getTime() >= currThermal) {
-                velocitizer_->velocitize(targetScalingTemp);
-                currThermal += thermalTime;
-            }
-        }
-
-        if (currentSnapshot_->getTime() >= currSample) {
-            dumpWriter->writeDumpAndEor();
-            currSample += sampleTime;
-        }
-
-        if (currentSnapshot_->getTime() >= currStatus) {
-            //save statistics, before writeStat,  we must save statistics
-            thermo.saveStat();
-            saveConservedQuantity();
-            statWriter->writeStat(currentSnapshot_->statData);
-
-            needPotential = false;
-            needStress = false;
-            currStatus += statusTime;
-        }
-
-        
+  
+  //save snapshot
+  info_->getSnapshotManager()->advance();
+  
+  //increase time
+  currentSnapshot_->increaseTime(dt);        
+  
+  if (needVelocityScaling) {
+    if (currentSnapshot_->getTime() >= currThermal) {
+      velocitizer_->velocitize(targetScalingTemp);
+      currThermal += thermalTime;
+    }
+  }
+  
+  if (currentSnapshot_->getTime() >= currSample) {
+    dumpWriter->writeDumpAndEor();
+    
+    if (simParams->getUseSolidThermInt())
+      restWriter->writeZangle();
+    
+    currSample += sampleTime;
+  }
+  
+  if (currentSnapshot_->getTime() >= currStatus) {
+    //save statistics, before writeStat,  we must save statistics
+    thermo.saveStat();
+    saveConservedQuantity();
+    statWriter->writeStat(currentSnapshot_->statData);
+    
+    needPotential = false;
+    needStress = false;
+    currStatus += statusTime;
+  }
+  
+  
 }
 
 
 void VelocityVerletIntegrator::finalize() {
-     dumpWriter->writeEor();
-
-    delete dumpWriter;
-    delete statWriter;
-
-    dumpWriter = NULL;
-    statWriter = NULL;
-    
+  dumpWriter->writeEor();
+  
+  if (simParams->getUseSolidThermInt()) {
+    restWriter->writeZangle();
+    delete restWriter;
+    restWriter = NULL;
+  }
+  
+  delete dumpWriter;
+  delete statWriter;
+  
+  dumpWriter = NULL;
+  statWriter = NULL;
+  
 }
 
 void VelocityVerletIntegrator::integrateStep() { 
-
-    moveA();
-    calcForce(needPotential, needStress);
-    moveB();
+  
+  moveA();
+  calcForce(needPotential, needStress);
+  moveB();
 }
 
 
 void VelocityVerletIntegrator::calcForce(bool needPotential,
                                          bool needStress) { 
-    forceMan_->calcForces(needPotential, needStress);
+  forceMan_->calcForces(needPotential, needStress);
 }
 
 DumpWriter* VelocityVerletIntegrator::createDumpWriter() {
-    return new DumpWriter(info_);
+  return new DumpWriter(info_);
 }
 
 StatWriter* VelocityVerletIntegrator::createStatWriter() {
-    return new StatWriter(info_->getStatFileName());
+  // if solidThermInt is true, add extra information to the statfile
+  if (simParams->getUseSolidThermInt()){
+    StatsBitSet mask; 
+    mask.set(Stats::TIME);
+    mask.set(Stats::TOTAL_ENERGY);
+    mask.set(Stats::POTENTIAL_ENERGY);
+    mask.set(Stats::KINETIC_ENERGY);
+    mask.set(Stats::TEMPERATURE);
+    mask.set(Stats::PRESSURE);
+    mask.set(Stats::CONSERVED_QUANTITY);
+    mask.set(Stats::VRAW);
+    mask.set(Stats::VHARM);
+    return new StatWriter(info_->getStatFileName(), mask);
+  }
+  
+  return new StatWriter(info_->getStatFileName());
+}
+
+RestWriter* VelocityVerletIntegrator::createRestWriter(){
+  return new RestWriter(info_);
 }
 
 

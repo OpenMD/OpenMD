@@ -51,8 +51,10 @@
 #define INTEGRATORS_INTEGRATOR_HPP
 
 #include "brains/ForceManager.hpp"
+#include "restraints/ThermoIntegrationForceManager.hpp"
 #include "io/DumpWriter.hpp"
 #include "io/StatWriter.hpp"
+#include "io/RestWriter.hpp"
 #include "integrators/Velocitizer.hpp"
 
 namespace oopse {
@@ -104,6 +106,7 @@ class Integrator {
         }
         
         SimInfo* info_;
+        Globals* simParams;
         ForceManager* forceMan_;
         bool needPotential;
         bool needStress;
@@ -112,8 +115,9 @@ class Integrator {
         bool needVelocityScaling;
         double targetScalingTemp;
     
-        DumpWriter*dumpWriter;
+        DumpWriter* dumpWriter;
         StatWriter* statWriter;
+        RestWriter* restWriter;
         Thermo thermo;
 
         double runTime;

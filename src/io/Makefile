@@ -1,7 +1,7 @@
 Package = io
 
 Source    = \
-        AtomTypesSectionParser.cpp \
+  AtomTypesSectionParser.cpp \
 	DirectionalAtomTypesSectionParser.cpp \
 	SectionParser.cpp \
 	EAMAtomTypesSectionParser.cpp \
@@ -11,9 +11,9 @@ Source    = \
 	StickyAtomTypesSectionParser.cpp \
 	TorsionTypesSectionParser.cpp \
 	LennardJonesAtomTypesSectionParser.cpp\
-        BondTypesSectionParser.cpp \
-        BendTypesSectionParser.cpp \
-        BASSlex.l \
+  BondTypesSectionParser.cpp \
+  BendTypesSectionParser.cpp \
+  BASSlex.l \
 	BASSyacc.y \
 	BASS_interface.cpp \
 	BASS_parse.c \
@@ -24,11 +24,13 @@ Source    = \
 	make_nodes.c \
 	mpiBASS.c \
 	parse_tree.c \
-        DumpReader.cpp \
+	DumpReader.cpp \
 	DumpWriter.cpp \
-        StatWriter.cpp \
-        ZConsReader.cpp \
-	ZConsWriter.cpp
+	StatWriter.cpp \
+	ZConsReader.cpp \
+	ZConsWriter.cpp \
+	RestReader.cpp \
+	RestWriter.cpp
 
 RmiSource =
 

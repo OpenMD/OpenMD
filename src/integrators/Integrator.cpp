@@ -48,7 +48,7 @@ Integrator::Integrator(SimInfo* info)
       needVelocityScaling(false), dumpWriter(NULL), statWriter(NULL), thermo(info), 
       currentSnapshot_(info->getSnapshotManager()->getCurrentSnapshot()) {
 
-    Globals* simParams = info->getSimParams();
+    simParams = info->getSimParams();
 
     if (simParams->haveDt()) {
         dt = simParams->getDt();
@@ -90,9 +90,16 @@ Integrator::Integrator(SimInfo* info)
         currentSnapshot_->setTime(0.0);
     }
     
-    //create a default a ForceManager
-    //if the subclass want to using different ForceManager, use setForceManager
+    //create a default ForceManager
+    //if the subclass wants to use a different ForceManager, use setForceManager
     forceMan_ = new ForceManager(info);
+    
+    //set the force manager for thermodynamic integration if specified
+    if (simParams->getUseSolidThermInt() || simParams->getUseLiquidThermInt()){
+      ThermoIntegrationForceManager* thermoForce_ 
+      = new ThermoIntegrationForceManager(info);
+      setForceManager(thermoForce_);
+    }
     
     // check for the temperature set flag (velocity scaling)      
     if (simParams->haveTempSet()) {
@@ -122,6 +129,7 @@ Integrator::~Integrator(){
     
     delete dumpWriter;
     delete statWriter;
+    delete restWriter;
 }
 
 

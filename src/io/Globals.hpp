@@ -126,10 +126,13 @@ public:
   int    getMinLSMaxIter(void)      { return minimizer_ls_maxiteration; }
   int    getUseSolidThermInt(void)  { return useSolidThermInt; }
   int    getUseLiquidThermInt(void) { return useLiquidThermInt; }
-  double getThermIntLambda(void)    { return thermodynamic_integration_lambda; }
+  double getThermIntLambda(void)   { return thermodynamic_integration_lambda; }
   double getThermIntK(void)         { return thermodynamic_integration_k; }
   char*  getForceFieldVariant( void ) { return forcefield_variant; }
   char* getForceFieldFileName() { return forcefield_filename;}
+  double getDistSpringConst(void)   { return therm_int_dist_spring; }
+  double getThetaSpringConst(void)  { return therm_int_theta_spring; }
+  double getOmegaSpringConst(void)  { return therm_int_omega_spring; }
   short int haveDt( void )            { return have_dt; }
   short int haveRunTime( void )       { return have_run_time; }
   short int haveEnsemble( void )      { return have_ensemble; }
@@ -171,9 +174,12 @@ public:
   short int haveMinLSTol(void)        { return have_minimizer_ls_tol; }
   short int haveMinLSMaxIter(void)    { return have_minimizer_ls_maxiteration;}
   short int haveThermIntLambda(void)  { return have_thermodynamic_integration_lambda; }
-  short int haveThermIntK(void)       { return have_thermodynamic_integration_k; }
+  short int haveThermIntK(void)    { return have_thermodynamic_integration_k; }
   short int haveForceFieldVariant(void) { return have_forcefield_variant; }
-short int haveForceFieldFileName(void) { return have_forcefield_filename; }
+  short int haveForceFieldFileName(void) { return have_forcefield_filename; }
+  short int haveDistSpringConst(void) { return have_dist_spring_constant; }
+  short int haveThetaSpringConst(void) { return have_theta_spring_constant; }
+  short int haveOmegaSpringConst(void) { return have_omega_spring_constant; }
   /* other accessors */
   Component** getComponents( void )   { return components; }
   ZconStamp** getZconStamp( void )    { return zConstraints; }
@@ -247,6 +253,9 @@ private:
   double thermodynamic_integration_k;
   char forcefield_variant[100];
   char forcefield_filename[100];
+  double therm_int_dist_spring;
+  double therm_int_theta_spring;
+  double therm_int_omega_spring;
   //required arguments
   short int have_force_field, have_n_components, have_target_temp;
   short int have_target_pressure, have_ensemble, have_dt, have_run_time;
@@ -270,6 +279,9 @@ private:
   short int have_thermodynamic_integration_k;
   short int have_forcefield_variant;
   short int have_forcefield_filename;  
+  short int have_dist_spring_constant;
+  short int have_theta_spring_constant;
+  short int have_omega_spring_constant;
 };
 
 #endif

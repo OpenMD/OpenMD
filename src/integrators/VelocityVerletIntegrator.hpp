@@ -109,6 +109,8 @@ class VelocityVerletIntegrator : public Integrator {
         virtual DumpWriter* createDumpWriter();
 
         virtual StatWriter* createStatWriter();
+        
+        virtual RestWriter* createRestWriter();
 
 };
 
