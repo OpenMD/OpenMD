@@ -21,8 +21,8 @@
 #  Filename     :  $RCSfile: filepp,v $
 #  Author       :  $Author: tim $
 #  Maintainer   :  Darren Miller: darren@cabaret.demon.co.uk
-#  File version :  $Revision: 1.4 $
-#  Last changed :  $Date: 2004-10-11 14:51:57 $
+#  File version :  $Revision: 1.5 $
+#  Last changed :  $Date: 2004-10-11 21:10:28 $
 #  Description  :  Main program
 #  Licence      :  GNU copyleft
 #
@@ -280,8 +280,6 @@ options:
  all other arguments are assumed to be input files
 ";
 
-# graph for dependency files
-my $dependencyGraph;
 
 # visited table
 my %visitedTable = ();
@@ -303,6 +301,16 @@ my $modSuffix = "mod";
 
 # case of basename of fortran 90 module
 my $modBasenameCase = "lower";
+
+#flag for generating dependency, by default, it is off
+my $dependency = 0;
+
+#skip system header file
+my $skipSysInclude = 0;
+
+#saved command line define macro
+my @savedDefine;
+
 ##############################################################################
 # SetDebug - controls debugging level
 ##############################################################################
@@ -1937,6 +1945,11 @@ sub Include
     }
     # else assume filename given without "" or <>, naughty but allowed
     
+    #if skipSysInclude option is turned on, skip current file
+    if ($skipSysInclude && $sysinclude) {
+        return;
+    }
+    
     # check for file in current directory
     if($sysinclude == 0) {
 	# get name of directory base file is in
@@ -2220,7 +2233,10 @@ sub GetNextLine
 sub Write
 {
     my $string = shift;
-    #print(OUTPUT $string);
+    
+    if(!$dependency){
+        print(OUTPUT $string);
+    }
 }
 
 
@@ -2468,7 +2484,7 @@ sub Use{
     $f90module =~ s/\s+$//;
     $f90module = uc($f90module);
     
-    print " " . $objDir . GetModBasename($f90module) . "." . $modSuffix . "\\\n";
+    print " " . $objDir . GetModBasename($f90module) . "." . $modSuffix . " \\\n";
 }
 
 ##############################################################################
@@ -2493,6 +2509,17 @@ sub IsVisited {
 		$visitedTable{$fullfile} = 1;
 		return 0;
 	}
+}
+
+##############################################################################
+# Clean Visited Table
+##############################################################################
+sub cleanVisited {
+    my $visitedFile;
+    foreach $visitedFile (keys %visitedTable) {
+        delete $visitedTable{$visitedFile};
+    }
+
 }
 
 sub AddModule {
@@ -2551,6 +2578,18 @@ sub GetModBasename {
 	return $modname;
 }
 
+sub RestoreCommandLineDefine {
+    my $macro;
+    
+    foreach $macro(@savedDefine) {
+        Define($macro);
+    }
+}
+
+sub SaveCommandLineDefine {
+    my $macro = shift;
+    push @savedDefine, $macro;
+}
 ##############################################################################
 # Main routine
 ##############################################################################
@@ -2595,6 +2634,10 @@ while($ARGV[$i]) {
 	}
 	# add macro and defn to hash table
 	Define($macro." ".$defn);
+        
+        #save define macro from command line
+        #it will be restored when next source file is processed
+        SaveCommandLineDefine($macro." ".$defn);
     }
 
     # Debugging turned on: -d
@@ -2725,28 +2768,39 @@ while($ARGV[$i]) {
     }
 
     # Module paths: -Minclude or -M include
-    elsif(substr($ARGV[$i], 0, 2) eq "-M") {
-	# -M include format
-	if(length($ARGV[$i]) == 2) {
-	    if($i+1 >= $argc) {
-		Error("Argument to `-M' is missing");
-	    }
-	    AddModulePath($ARGV[++$i]);
-	}
-	# -Minclude format
-	else {
-	    AddModulePath(substr($ARGV[$i], 2));
-	}
-    }
+    #elsif(substr($ARGV[$i], 0, 2) eq "-M") {
+    #	# -M include format
+    #	if(length($ARGV[$i]) == 2) {
+    #	    if($i+1 >= $argc) {
+    #		Error("Argument to `-M' is missing");
+    #	    }
+    #	    AddModulePath($ARGV[++$i]);
+    #	}
+    #	# -Minclude format
+    #	else {
+    #	    AddModulePath(substr($ARGV[$i], 2));
+    #	}
+    #}
 
     # use module
-    elsif($ARGV[$i] eq "-m") {
-	if($i+1 >= $argc) {
-	    Error("Argument to `-m' is missing");
-	}
-	UseModule($ARGV[++$i]);
+    #elsif($ARGV[$i] eq "-m") {
+    #	if($i+1 >= $argc) {
+    #	    Error("Argument to `-m' is missing");
+    #	}
+    #	UseModule($ARGV[++$i]);
+    #}
+
+    # make dependency
+    elsif($ARGV[$i] eq "-M") {
+        $dependency = 1;
     }
-    
+
+    # make dependency (skip system header files)
+    elsif($ARGV[$i] eq "-MM") {
+        $dependency = 1;
+        $skipSysInclude = 1;
+    }
+
     #case of basename of fortran module
     elsif($ARGV[$i] eq "-mc") {
 	my $tempVar = lc($ARGV[++$i]);
@@ -2890,9 +2944,19 @@ foreach $base_file (@Inputfiles) {
     }
     
     #clean visitedTable
-    %visitedTable = ();
+    cleanVisited();
+    
+    #clear all define
+    UndefAll();
+    
+    #restore command line define
+    RestoreCommandLineDefine();
+    
+    #print dependency rule
     print "\n";
-    print $objDir . GetObjFile($base_file) . " : ";
+    print $objDir . GetObjFile($base_file) . " : " . $base_file . " \\";
+    print "\n";
+
     Parse($base_file);
     # close output file if in overwrite mode
     if($overwrite) { CloseOutputFile(); }    
