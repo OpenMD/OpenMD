@@ -627,24 +627,25 @@ clean : $(PackageListLoop)
 	$(Print) Done clean.	
 
 _cleanall :
-	$(Delete) $(ObjectFiles) $(ParallelObjectFiles)
+	$(Delete) \
+		$(ObjectFiles) \
+		$(ParallelObjectFiles) \
+		$(JarFile) \
+		$(SharedLibrary) \
+		$(StaticLibrary) \
+		$(ParallelSharedLibrary) \
+		$(ParallelStaticLibrary) \
+		$(CombinedStaticLib) \
+		$(CombinedParallelStaticLib)
 
 # make distclean
 distclean : $(PackageListLoop)
 	$(Print) Done clean.	
 
-_distcleanall :
-	$(Delete) $(ObjectFiles) \
-	          $(ParallelObjectFiles) \
-		        $(JarFile) \
-	          $(SharedLibrary) \
-	          $(StaticLibrary) \
-	          $(ParallelSharedLibrary) \
-	          $(ParallelStaticLibrary) \
-	          $(Executable) \
+_distcleanall : _cleanall
+	$(Delete) $(Executable) \
 	          $(ParallelExecutable) \
 	          $(DependencyFile) 
-
 
 # make depend
 depend : $(PackageListLoop)
