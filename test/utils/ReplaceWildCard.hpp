@@ -32,13 +32,17 @@
 
 #ifndef UTILS_REPLACEWILDCARD_HPP
 #define UTILS_REPLACEWILDCARD_HPP
- 
+
+#include <iostream>
 #include <vector>
 
 namespace oopse{
 
 //use -1 to represent the wild card, it is easy and cheap to operate one integer (or index) instead of string
 const int WildCard = -1;
+
+std::vector<std::vector<int> > ReplaceWildCard(int beginIndex, int endIndex, int nWildCard);
+std::vector<std::vector<int> > adjoint( const std::vector<int>& firstPart, const std::vector<std::vector<int> >& secondPart);
 
 /**
  * Driver function for replacing
@@ -61,13 +65,13 @@ std::vector<std::vector<int> > ReplaceAll(int num) {
     
     for (int i = 0; i <= num; i++) {
         v = ReplaceWildCard(0, num -1, i);
-        results.insert(v.begin(), v.end(), results.end());
+        results.insert(results.end(), v.begin(), v.end());
     }
     return results;
 }
 
 /** Replace a sequence with n wildcards, returns all of the possible replacement*/
-std::vector<vector<int> > ReplaceWildCard(int beginIndex, int endIndex, int nWildCard) {
+std::vector<std::vector<int> > ReplaceWildCard(int beginIndex, int endIndex, int nWildCard) {
     std::vector<std::vector<int> > results;
 
     int len = endIndex + 1 - beginIndex;
@@ -77,7 +81,7 @@ std::vector<vector<int> > ReplaceWildCard(int beginIndex, int endIndex, int nWil
         //if the number of the wild card is zero, just return the whole sequence
         std::vector<int> singleResult;
 
-        for(int i = beginIdex; i <= endIndex; i++)
+        for(int i = beginIndex; i <= endIndex; i++)
             singleResult.push_back(i);
 
         results.push_back(singleResult);
@@ -98,23 +102,25 @@ std::vector<vector<int> > ReplaceWildCard(int beginIndex, int endIndex, int nWil
         //we need to recursive calling ReplaceWildCard
         std::vector<int> firstPart;
         std::vector<std::vector<int> > secondPart;
+        std::vector<std::vector<int> > sequences;
 
         for (int i = 0; i <=nRecursive; i ++) {
             firstPart.push_back( beginIndex + i);
             secondPart = ReplaceWildCard(beginIndex + i + 1, endIndex, nWildCard - 1); 
-            results.push_back(adjoint(firstPart, secondPart));
+            sequences = adjoint(firstPart, secondPart);
+            results.insert(results.end(), sequences.begin(), sequences.end());			    
         }
 
         return results;
     }
 }
 
-std::vector<std::vector<int> > adjoint( int firstPart, const std::vector<std::vector<int> >& secondPart){
+std::vector<std::vector<int> > adjoint( const std::vector<int>& firstPart, const std::vector<std::vector<int> >& secondPart){
     std::vector<std::vector<int> > results(secondPart.size());
 
     for (int i = 0; i < secondPart.size(); i++) {
-        results[i].insert(firstPart.being(), firstPart.end(), results[i].end());
-        results[i].insert(secondPart[i].begin(), secondPart[i].end(), results[i].begin());
+        results[i].insert(results[i].end(), firstPart.begin(), firstPart.end());
+        results[i].insert(results[i].end(), secondPart[i].begin(), secondPart[i].end());
     }
 
     return results;

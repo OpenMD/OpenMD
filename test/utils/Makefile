@@ -5,7 +5,8 @@ TestMain = $(Main)
 Source = UtilTest.cpp \
 	 GenericDataTestCase.cpp \
 	 PropertyMapTestCase.cpp \
-         GenericFactoryTestCase.cpp
+         GenericFactoryTestCase.cpp \
+	 ReplaceWildCardTestCase.cpp
 
 DEV_ROOT               = ../..
 UseMPI                 = no 
