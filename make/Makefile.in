@@ -279,8 +279,6 @@ Yacc                   = @YACC@
 Lex                    = @LEX@
 Ranlib                 = @RANLIB@
 Doxygen                = @DOXYGEN@
-Ps                     = @PS@
-PsType                 = @PSTYPE@
 
 MakeOptions            = -k
 MakeDependOptions      = 
@@ -290,7 +288,7 @@ JavaArchiverOptions    =
 JniOptions             =
 RmiOptions             = -d $(TargetDir) -classpath $(ClassPath) \
 			 -sourcepath $(SourceDir)
-COptions               = $(FrcDeclare) @CFLAGS@ -DPS=$(Ps) -DPSTYPE=$(PsType)
+COptions               = $(FrcDeclare) @CFLAGS@
 CParallelOptions       = $(FrcDeclare) $(ParallelDeclare) @CFLAGS@
 CppOptions             = $(FrcDeclare) @CXXFLAGS@ @OOPSE_TEMPLATE_FLAGS@
 CppParallelOptions     = $(FrcDeclare) $(ParallelDeclare) @CXXFLAGS@ @OOPSE_TEMPLATE_FLAGS@

@@ -157,22 +157,29 @@ if test "$AR" = "NONE"; then
 fi
 
 AC_PATH_PROG(PS, ps)
-AC_CACHE_CHECK([for POSIX ps], ac_cv_prog_ps_posix, [
-	USER=${USER:-${LOGNAME:-`logname`}}
-	if $PS -U $USER -opid,args >/dev/null 2>&1; then
-		ac_cv_prog_ps_posix=yes
+AC_CACHE_CHECK([for POSIX or BSD ps syntax], ac_cv_prog_ps_syntax, [
+	if $PS -ef -o rss > /dev/null 2>&1; then
+		ac_cv_prog_ps_ef=yes
 	else
-		ac_cv_prog_ps_posix=no
+		ac_cv_prog_ps_ef=no
+	fi
+	if $PS ax -o rss > /dev/null 2>&1; then
+		ac_cv_prog_ps_ax=yes
+	else
+		ac_cv_prog_ps_ax=no
+	fi
+	if test "$ac_cv_prog_ps_ef" = yes; then
+		ac_cv_prog_ps_syntax=POSIX
+        else
+		if test "$ac_cv_prog_ps_ax" = yes; then
+			ac_cv_prog_ps_syntax=BSD
+		else
+			AC_MSG_ERROR(Could not determine ps syntax)
+		fi
 	fi
 ])
-if test "$ac_cv_prog_ps_posix" = yes; then
-	PSTYPE=BSD
-else
-	PSTYPE=POSIX
-fi
-
-AC_SUBST(PS)
-AC_SUBST(PSTYPE)
+AC_DEFINE_UNQUOTED(PS, $PS, [Path to ps program])
+AC_DEFINE_UNQUOTED(PSTYPE, $ac_cv_prog_ps_syntax, [ps syntax type])
 
 
 AC_ARG_WITH(mpi,
