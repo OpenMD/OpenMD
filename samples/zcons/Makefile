@@ -8,7 +8,7 @@ SampleFiles =  \
               zconsFixed.in \
 	      zconsFixed.md \
 	      zconsMoving.in \
-	      zconsMoving.in \
+	      zconsMoving.md \
 	      water.md
 
 DEV_ROOT=../..

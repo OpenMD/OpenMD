@@ -10,6 +10,6 @@ SampleFiles =  \
         water.md
 
 
-DEV_ROOT=../..
+DEV_ROOT=../../..
 include $(DEV_ROOT)/make/Makefile
 
