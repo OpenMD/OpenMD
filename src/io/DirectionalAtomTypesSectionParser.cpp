@@ -42,7 +42,7 @@
 #include "io/DirectionalAtomTypesSectionParser.hpp"
 #include "UseTheForce/ForceField.hpp"
 #include "types/DirectionalAtomType.hpp"
-
+#include "utils/simError.h"
 namespace oopse {
 
 DirectionalAtomTypesSectionParser::DirectionalAtomTypesSectionParser() {
@@ -56,7 +56,11 @@ void DirectionalAtomTypesSectionParser::parseLine(ForceField& ff,const std::stri
     //in AtomTypeSection, a line at least contains 2 tokens
     //atomTypeName and mass
     if (nTokens < 4)  {
-        std::cerr << "DirectionalAtomTypesSectionParser:: Not enought Tokens" << std::endl;                       
+        sprintf(painCave.errMsg, "DirectionalAtomTypesSectionParser Error: Not enough tokens at line %d\n",
+                lineNo);
+        painCave.isFatal = 1;
+        simError();
+                   
     } else {
 
         std::string atomTypeName = tokenizer.nextToken();    
@@ -71,7 +75,9 @@ void DirectionalAtomTypesSectionParser::parseLine(ForceField& ff,const std::stri
         } else {
             dAtomType = dynamic_cast<DirectionalAtomType*>(atomType);
             if (dAtomType == NULL) {
-                std::cerr << "DirectionalAtomTypesSectionParser:: Can not cast to DirectionalAtomType" << std::endl;                       
+                sprintf(painCave.errMsg,"DirectionalAtomTypesSectionParser:: Can not cast to DirectionalAtomType");
+                painCave.isFatal = 1;
+                simError();
             }
         }
 

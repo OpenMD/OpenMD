@@ -53,6 +53,7 @@ TorsionTypesSectionParser::TorsionTypesSectionParser() {
     setSectionName("TorsionTypes");
 
 
+    stringToEnumMap_["GhostTorsion"] == ttGhostTorsion;
     stringToEnumMap_["Cubic"] = ttCubic;
     stringToEnumMap_["Quartic"] = ttQuartic;
     stringToEnumMap_["Polynomial"] = ttPolynomial;
@@ -80,6 +81,20 @@ void TorsionTypesSectionParser::parseLine(ForceField& ff,const std::string& line
     nTokens -= 5;
 
     switch(tt) {
+
+        case TorsionTypesSectionParser::ttGhostTorsion:
+            if (nTokens < 4) {
+
+            } else {
+
+                double k3 = tokenizer.nextTokenAsDouble();
+                double k2 = tokenizer.nextTokenAsDouble();
+                double k1 = tokenizer.nextTokenAsDouble();
+                double k0 = tokenizer.nextTokenAsDouble();
+                
+                torsionType = new CubicTorsionType(k3, k2, k1, k0);
+            }
+            break;
             
         case TorsionTypesSectionParser::ttCubic :
             if (nTokens < 4) {

@@ -42,6 +42,7 @@
 #include "io/LennardJonesAtomTypesSectionParser.hpp"
 #include "types/AtomType.hpp"
 #include "UseTheForce/ForceField.hpp"
+#include "utils/simError.h"
 namespace oopse {
 
 LennardJonesAtomTypesSectionParser::LennardJonesAtomTypesSectionParser() {
@@ -55,7 +56,10 @@ void LennardJonesAtomTypesSectionParser::parseLine(ForceField& ff,const std::str
     //in AtomTypeSection, a line at least contains 2 tokens
     //atomTypeName and mass
     if (nTokens < 3)  {
-                      
+        sprintf(painCave.errMsg, "LennardJonesAtomTypesSectionParser Error: Not enough tokens at line %d\n",
+                lineNo);
+        painCave.isFatal = 1;
+        simError();                    
     } else {
 
         std::string atomTypeName = tokenizer.nextToken();    

@@ -97,7 +97,6 @@ namespace oopse{
             virtual void accept(BaseVisitor* v);
                 
         protected:
-            Mat3x3d inertiaTensor_;                             /**< inertial tensor */    
             RotMat3x3d electroBodyFrame_;               /**< body fixed standard eletrostatic frame */
     };
 

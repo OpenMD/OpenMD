@@ -39,45 +39,60 @@
  * such damages.
  */
  
-#ifndef IO_TORSIONTYPESSECTIONPARSER_HPP
-#define IO_TORSIONTYPESSECTIONPARSER_HPP
-#include <map>
-#include "io/SectionParser.hpp"
+#include "primitives/GhostTorsion.hpp"
+
 namespace oopse {
 
-    /**
-     * @class TorsionTypesSectionParser TorsionTypesSectionParser.hpp "io/TorsionTypesSectionParser.hpp"
-     */
-    class TorsionTypesSectionParser : public SectionParser {
-        public:
+GhostTorsion::GhostTorsion(Atom *atom1, Atom *atom2,  DirectionalAtom* ghostAtom,
+                 TorsionType *tt) : Torsion(atom1, atom2, ghostAtom, ghostAtom, tt) {}
 
-            
-            TorsionTypesSectionParser();
-        private:
+void GhostTorsion::calcForce() {
+    DirectionalAtom* ghostAtom = static_cast<DirectionalAtom*>(atom2_);    
 
+    Vector3d pos1 = atom1_->getPos();
+    Vector3d pos2 = atom2_->getPos();
+    Vector3d pos3 = ghostAtom->getPos();
 
-            enum TorsionTypeEnum{
-                ttGhostTorsion,
-                ttCubic,
-                ttQuartic,
-                ttPolynomial,
-                ttCharmm,
-                ttUnknown
-            };
+    Vector3d r21 = pos1 - pos2;
+    Vector3d r32 = pos2 - pos3;
+    Vector3d r43 = ghostAtom->getElectroFrame().getColumn(2);
 
-            TorsionTypeEnum getTorsionTypeEnum(const std::string& str);     
-            
-            void parseLine(ForceField& ff, const std::string& line, int lineNo);
-            
+    //  Calculate the cross products and distances
+    Vector3d A = cross(r21, r32);
+    double rA = A.length();
+    Vector3d B = cross(r32, r43);
+    double rB = B.length();
+    Vector3d C = cross(r32, A);
+    double rC = C.length();
 
-            std::map<std::string, TorsionTypeEnum> stringToEnumMap_;
-    };
+    A.normalize();
+    B.normalize();
+    C.normalize();
+    
+    //  Calculate the sin and cos
+    double cos_phi = dot(A, B) ;
+    double sin_phi = dot(C, B);
 
+    double dVdPhi;
+    torsionType_->calcForce(cos_phi, sin_phi, potential_, dVdPhi);
 
-} //namespace oopse
+    Vector3d dcosdA = (cos_phi * A - B) /rA;
+    Vector3d dcosdB = (cos_phi * B - A) /rB;
 
-#endif //IO_TORSIONTYPESSECTIONPARSER_HPP
+    double dVdcosPhi = -dVdPhi / sin_phi;
 
+    Vector3d f1 = dVdcosPhi * cross(r32, dcosdA);
+    Vector3d f2 = dVdcosPhi * ( cross(r43, dcosdB) - cross(r21, dcosdA));
+    Vector3d f3 = dVdcosPhi * cross(dcosdB, r32);
 
+    atom1_->addFrc(f1);
+    atom2_->addFrc(f2 - f1);
 
+    ghostAtom->addFrc(-f2);
+
+    f3.negate();
+    ghostAtom->addTrq(cross(r43, f3));    
+}
+
+}
 

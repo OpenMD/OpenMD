@@ -112,7 +112,7 @@
 #define G_THERM_INT_LAMBDA  50
 #define G_THERM_INT_K       51
 #define G_FORCEFIELD_VARIANT 52
-
+#define G_FORCEFIELD_FILENAME 53
 Globals::Globals(){
   initalize();
 }
@@ -196,7 +196,8 @@ void Globals::initalize(){
   addHash( "thermodynamicIntegrationLambda",       G_THERM_INT_LAMBDA);
   addHash( "thermodynamicIntegrationK",            G_THERM_INT_K);
   addHash( "forceFieldVariant",                    G_FORCEFIELD_VARIANT);
-
+  addHash( "forceFieldFileName",                    G_FORCEFIELD_FILENAME);
+  
   strcpy( mixingRule,"standard");  //default mixing rules to standard.
   usePBC = 1; //default  periodic boundry conditions to on
   useRF  = 0;
@@ -253,6 +254,7 @@ void Globals::initalize(){
   have_thermodynamic_integration_lambda = 0;
   have_thermodynamic_integration_k = 0;
   have_forcefield_variant = 0;
+  have_forcefield_filename = 0; 
 
 }
 
@@ -1732,6 +1734,19 @@ int Globals::globalAssign( event* the_event ){
       
       the_event->err_msg = 
 	strdup( "Error in parsing meta-data file!\n\tforceFieldVariant was not a string assignment.\n" );
+      return 0;
+      break;      
+      // add more token cases here.      
+
+    case G_FORCEFIELD_FILENAME:
+      if( the_type == STRING ){
+	strcpy( forcefield_filename, the_event->evt.asmt.rhs.sval );
+	have_forcefield_filename = 1;
+	return 1;
+      }
+      
+      the_event->err_msg = 
+	strdup( "Error in parsing meta-data file!\n\tforceFieldFileName was not a string assignment.\n" );
       return 0;
       break;      
       // add more token cases here.      

@@ -43,7 +43,7 @@
 #include "types/AtomType.hpp"
 #include "types/DirectionalAtomType.hpp"
 #include "UseTheForce/ForceField.hpp"
-
+#include "utils/simError.h"
 namespace oopse {
 
 StickyAtomTypesSectionParser::StickyAtomTypesSectionParser() {
@@ -57,7 +57,10 @@ void StickyAtomTypesSectionParser::parseLine(ForceField& ff,const std::string& l
     //in AtomTypeSection, a line at least contains 8 tokens
     //atomTypeName and 7 different sticky parameters
     if (nTokens < 8)  {
-                      
+        sprintf(painCave.errMsg, "StickyAtomTypesSectionParser Error: Not enough tokens at line %d\n",
+                lineNo);
+        painCave.isFatal = 1;
+        simError();                      
     } else {
 
         std::string atomTypeName = tokenizer.nextToken();    
@@ -79,10 +82,18 @@ void StickyAtomTypesSectionParser::parseLine(ForceField& ff,const std::string& l
                 dAtomType->addProperty(new StickyParamGenericData("Sticky", sticky));
                 dAtomType->setSticky();
             } else {
+                sprintf(painCave.errMsg, "StickyAtomTypesSectionParser Error: Not enough tokens at line %d\n",
+                        lineNo);
+                painCave.isFatal = 1;
+                simError();            
                 std::cerr << "StickyAtomTypesSectionParser Warning:" << std::endl;
             }
         } else {
-            std::cerr << "StickyAtomTypesSectionParser Error: Can not find matched AtomType " << atomTypeName << std::endl;
+            sprintf(painCave.errMsg, "StickyAtomTypesSectionParser Error: Can not find matched AtomType %s\n",
+                    atomTypeName.c_str());
+            painCave.isFatal = 1;
+            simError();    
+        
         }
                        
     }    

@@ -42,6 +42,7 @@
 #include "io/AtomTypesSectionParser.hpp"
 #include "types/AtomType.hpp"
 #include "UseTheForce/ForceField.hpp"
+#include "utils/simError.h"
 namespace oopse {
 
 AtomTypesSectionParser::AtomTypesSectionParser() {
@@ -55,7 +56,11 @@ void AtomTypesSectionParser::parseLine(ForceField& ff,const std::string& line, i
     //in AtomTypeSection, a line at least contains 2 tokens
     //atomTypeName and mass
     if (nTokens < 2)  {
-                      
+        sprintf(painCave.errMsg, "AtomTypesSectionParser Error: Not enough tokens at line %d\n",
+                lineNo);
+        painCave.isFatal = 1;
+        simError();
+            
     } else {
 
         std::string atomTypeName = tokenizer.nextToken();    

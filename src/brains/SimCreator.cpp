@@ -116,6 +116,10 @@ SimInfo*  SimCreator::createSim(const std::string & mdFileName, bool loadInitCoo
         simError();
     }
 
+    if (simParams->haveForceFieldFileName()) {
+        ff->setForceFieldFileName(simParams->getForceFieldFileName());
+    }
+    
     std::string forcefieldFileName;
     forcefieldFileName = ff->getForceFieldFileName();
 

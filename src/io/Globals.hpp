@@ -129,7 +129,7 @@ public:
   double getThermIntLambda(void)    { return thermodynamic_integration_lambda; }
   double getThermIntK(void)         { return thermodynamic_integration_k; }
   char*  getForceFieldVariant( void ) { return forcefield_variant; }
-
+  char* getForceFieldFileName() { return forcefield_filename;}
   short int haveDt( void )            { return have_dt; }
   short int haveRunTime( void )       { return have_run_time; }
   short int haveEnsemble( void )      { return have_ensemble; }
@@ -173,7 +173,7 @@ public:
   short int haveThermIntLambda(void)  { return have_thermodynamic_integration_lambda; }
   short int haveThermIntK(void)       { return have_thermodynamic_integration_k; }
   short int haveForceFieldVariant(void) { return have_forcefield_variant; }
-
+short int haveForceFieldFileName(void) { return have_forcefield_filename; }
   /* other accessors */
   Component** getComponents( void )   { return components; }
   ZconStamp** getZconStamp( void )    { return zConstraints; }
@@ -246,7 +246,7 @@ private:
   double thermodynamic_integration_lambda;
   double thermodynamic_integration_k;
   char forcefield_variant[100];
-
+  char forcefield_filename[100];
   //required arguments
   short int have_force_field, have_n_components, have_target_temp;
   short int have_target_pressure, have_ensemble, have_dt, have_run_time;
@@ -269,6 +269,7 @@ private:
   short int have_thermodynamic_integration_lambda;
   short int have_thermodynamic_integration_k;
   short int have_forcefield_variant;
+  short int have_forcefield_filename;  
 };
 
 #endif

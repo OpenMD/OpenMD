@@ -47,6 +47,7 @@
 #include "types/PolynomialBendType.hpp"
 #include "UseTheForce/ForceField.hpp"
 #include "utils/NumericConstant.hpp"
+#include "utils/simError.h"
 namespace oopse {
 
 BendTypesSectionParser::BendTypesSectionParser() {
@@ -67,7 +68,10 @@ void BendTypesSectionParser::parseLine(ForceField& ff,const std::string& line, i
     int nTokens = tokenizer.countTokens();
 
     if (nTokens < 5) {
-
+        sprintf(painCave.errMsg, "BendTypesSectionParser Error: Not enough tokens at line %d\n",
+                lineNo);
+        painCave.isFatal = 1;
+        simError();
         return;
     }
     
@@ -84,7 +88,10 @@ void BendTypesSectionParser::parseLine(ForceField& ff,const std::string& line, i
         case btHarmonic :
             
             if (nTokens < 1) {
-
+                sprintf(painCave.errMsg, "BendTypesSectionParser Error: Not enough tokens at line %d\n",
+                        lineNo);
+                painCave.isFatal = 1;
+                simError();
             } else {
 
                 double ktheta = tokenizer.nextTokenAsDouble();
@@ -93,7 +100,10 @@ void BendTypesSectionParser::parseLine(ForceField& ff,const std::string& line, i
             break;
         case btGhostBend :
             if (nTokens < 1) {
-
+                sprintf(painCave.errMsg, "BendTypesSectionParser Error: Not enough tokens at line %d\n",
+                        lineNo);
+                painCave.isFatal = 1;
+                simError();
             } else {
                 double ktheta = tokenizer.nextTokenAsDouble();
                 bendType = new HarmonicBendType(theta0, ktheta);                
@@ -102,7 +112,10 @@ void BendTypesSectionParser::parseLine(ForceField& ff,const std::string& line, i
 
         case btUreyBradley :
             if (nTokens < 3) {
-
+                sprintf(painCave.errMsg, "BendTypesSectionParser Error: Not enough tokens at line %d\n",
+                        lineNo);
+                painCave.isFatal = 1;
+                simError();
             } else {
                 double ktheta = tokenizer.nextTokenAsDouble();
                 double s0 =  tokenizer.nextTokenAsDouble();
@@ -113,7 +126,10 @@ void BendTypesSectionParser::parseLine(ForceField& ff,const std::string& line, i
             
         case btCubic :
             if (nTokens < 4) {
-
+                sprintf(painCave.errMsg, "BendTypesSectionParser Error: Not enough tokens at line %d\n",
+                        lineNo);
+                painCave.isFatal = 1;
+                simError();
             } else {
 
                 double k3 = tokenizer.nextTokenAsDouble();
@@ -127,7 +143,10 @@ void BendTypesSectionParser::parseLine(ForceField& ff,const std::string& line, i
             
         case btQuartic :
             if (nTokens < 5) {
-
+                sprintf(painCave.errMsg, "BendTypesSectionParser Error: Not enough tokens at line %d\n",
+                        lineNo);
+                painCave.isFatal = 1;
+                simError();
             } else {
 
                 theta0 = tokenizer.nextTokenAsDouble();
@@ -143,7 +162,10 @@ void BendTypesSectionParser::parseLine(ForceField& ff,const std::string& line, i
 
         case btPolynomial :
             if (nTokens < 2 || nTokens % 2 != 0) {
-
+                sprintf(painCave.errMsg, "BendTypesSectionParser Error: Not enough tokens at line %d\n",
+                        lineNo);
+                painCave.isFatal = 1;
+                simError();
             } else {
                 int nPairs = nTokens / 2;
                 int power;
@@ -161,6 +183,10 @@ void BendTypesSectionParser::parseLine(ForceField& ff,const std::string& line, i
 
         case btUnknown :
         default:
+            sprintf(painCave.errMsg, "BendTypesSectionParser Error: Unknown Bond Type at line %d\n",
+                    lineNo);
+            painCave.isFatal = 1;
+            simError();
             break;
             
     }

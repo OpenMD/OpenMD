@@ -81,7 +81,7 @@ int main(int argc, char* argv[]){
   
   mdFileName = dumpFileName;
   mdFileName = mdFileName.substr(0, mdFileName.rfind(".")) + ".md";
-  
+
   if (args_info.output_given){
     xyzFileName = args_info.output_arg;
   } else {
@@ -91,7 +91,7 @@ int main(int argc, char* argv[]){
   
   //parse md file and set up the system
   SimCreator creator;
-  SimInfo* info = creator.createSim(mdFileName);
+  SimInfo* info = creator.createSim(mdFileName, false);
   
   
   

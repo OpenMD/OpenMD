@@ -9,6 +9,7 @@ Source    = \
 	Bend.cpp \
 	GhostBend.cpp \
 	Torsion.cpp \
+	GhostTorsion.cpp \
         UreyBradleyBend.cpp
 
 

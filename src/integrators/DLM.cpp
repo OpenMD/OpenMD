@@ -109,14 +109,15 @@ void DLM::rotateStep(int axes1, int axes2, double angle, Vector3d& ji, RotMat3x3
 
     // use a small angle aproximation for sin and cosine
 
-    angleSqr = angle * angle;
-    angleSqrOver4 = angleSqr / 4.0;
-    top = 1.0 - angleSqrOver4;
-    bottom = 1.0 + angleSqrOver4;
+    //angleSqr = angle * angle;
+    //angleSqrOver4 = angleSqr / 4.0;
+    //top = 1.0 - angleSqrOver4;
+    //bottom = 1.0 + angleSqrOver4;
 
-    cosAngle = top / bottom;
-    sinAngle = angle / bottom;
-
+    //cosAngle = top / bottom;
+    //sinAngle = angle / bottom;
+    cosAngle = cos(angle);
+    sinAngle = sin(angle);
     rot(axes1, axes1) = cosAngle;
     rot(axes2, axes2) = cosAngle;
 

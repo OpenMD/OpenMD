@@ -676,20 +676,34 @@ int MakeStamps::torsionAssign( event* the_event ){
 
 int MakeStamps::torsionMembers( event* the_event ){
 
-  if( the_event->evt.mbrs.nMembers == 4 ){
+
+  switch( the_event->evt.mbrs.nMembers ) {
+  case 4:
     
     current_torsion->members( the_event->evt.mbrs.memberList[0],
                               the_event->evt.mbrs.memberList[1],
                               the_event->evt.mbrs.memberList[2],
                               the_event->evt.mbrs.memberList[3]);
     return 1;
-    
-  } else {
-    the_event->err_msg = strdup( "MakeStamp error. Wrong number of members "
-                                 " in torsion");
-    return 0;
+    break;
+  case 3:
 
+    
+    current_torsion->members( the_event->evt.mbrs.memberList[0],
+                              the_event->evt.mbrs.memberList[1],
+                              the_event->evt.mbrs.memberList[2],
+                              -1);
+    
+    return 1;
+    break;
+  default: 	
+    the_event->err_msg = strdup( "MakeStamp error. Wrong number of members "
+                                 "in torsion.");
+    return 0;
+    break;
   }
+  return 0;
+  
 }
 
 int MakeStamps::torsionConstraint( event* the_event ){

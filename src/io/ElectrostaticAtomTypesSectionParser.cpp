@@ -42,6 +42,7 @@
 #include "io/ElectrostaticAtomTypesSectionParser.hpp"
 #include "UseTheForce/ForceField.hpp"
 #include "utils/NumericConstant.hpp"
+#include "utils/simError.h"
 namespace oopse {
 
 ElectrostaticAtomTypesSectionParser::ElectrostaticAtomTypesSectionParser() {
@@ -67,7 +68,10 @@ void ElectrostaticAtomTypesSectionParser::parseLine(ForceField& ff,const std::st
     // name 2 charge |u| Qxx Qyy Qzz [theta phi psi]
     
     if (nTokens < 2)  {
-        std::cerr << "ElectrostaticAtomTypesSectionParser Error: Not enought Tokens at line " << lineNo << std::endl;                  
+        sprintf(painCave.errMsg, "ElectrostaticAtomTypesSectionParser Error: Not enough tokens at line %d\n",
+                lineNo);
+        painCave.isFatal = 1;
+        simError();
     } else {
 
         std::string atomTypeName = tokenizer.nextToken();    
@@ -87,7 +91,9 @@ void ElectrostaticAtomTypesSectionParser::parseLine(ForceField& ff,const std::st
 
                     dAtomType = dynamic_cast<DirectionalAtomType*>(atomType);            
                     if (dAtomType == NULL) {
-                        std::cerr << "ElectrostaticAtomTypesSectionParser Warning:" << std::endl;
+                        sprintf(painCave.errMsg, "ElectrostaticAtomTypesSectionParser Error: Can not Cast Atom to DirectionalAtom at line \n");
+                        painCave.isFatal = 1;
+                        simError();
                     }
 
                     parseCharge(tokenizer, dAtomType);
@@ -99,7 +105,9 @@ void ElectrostaticAtomTypesSectionParser::parseLine(ForceField& ff,const std::st
 
                     dAtomType = dynamic_cast<DirectionalAtomType*>(atomType);            
                     if (dAtomType == NULL) {
-                        std::cerr << "ElectrostaticAtomTypesSectionParser Warning:" << std::endl;
+                        sprintf(painCave.errMsg, "ElectrostaticAtomTypesSectionParser Error: Can not Cast Atom to DirectionalAtom at line \n");
+                        painCave.isFatal = 1;
+                        simError();
                     }
 
                     parseCharge(tokenizer, dAtomType);
@@ -114,8 +122,11 @@ void ElectrostaticAtomTypesSectionParser::parseLine(ForceField& ff,const std::st
             }
             
         } else {
-            std::cerr << "ElectrostaticAtomTypesSectionParser Error: Can not find matched AtomType " << atomTypeName
-                          << "at line " << lineNo << std::endl;
+
+            sprintf(painCave.errMsg, "ElectrostaticAtomTypesSectionParser Error: Can not find matched AtomType at line %d\n",
+                    lineNo);
+            painCave.isFatal = 1;
+            simError();
         }
                        
     }    

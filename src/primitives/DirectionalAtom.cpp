@@ -40,7 +40,7 @@
  */
  
 #include "primitives/DirectionalAtom.hpp"
-
+#include "utils/simError.h"
 namespace oopse {
 
 DirectionalAtom::DirectionalAtom(DirectionalAtomType* dAtomType) 
@@ -49,6 +49,27 @@ DirectionalAtom::DirectionalAtom(DirectionalAtomType* dAtomType)
     if (dAtomType->isMultipole()) {
         electroBodyFrame_ = dAtomType->getElectroBodyFrame();
     }
+
+    //check if one of the diagonal inertia tensor of this directional atom  is zero
+    int nLinearAxis = 0;
+    Mat3x3d inertiaTensor = getI();
+    for (int i = 0; i < 3; i++) {    
+        if (fabs(inertiaTensor(i, i)) < oopse::epsilon) {
+            linear_ = true;
+            linearAxis_ = i;
+            ++ nLinearAxis;
+        }
+    }
+
+    if (nLinearAxis > 1) {
+        sprintf( painCave.errMsg,
+            "Directional Atom error.\n"
+            "\tOOPSE found more than one axis in this directional atom with a vanishing \n"
+            "\tmoment of inertia.");
+        painCave.isFatal = 1;
+        simError();
+    }
+      
 }
 
 Mat3x3d DirectionalAtom::getI() {

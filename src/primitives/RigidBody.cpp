@@ -174,6 +174,16 @@ void  RigidBody::calcRefCoords() {
         Itmp(2, 2) += mtmp * r2;
     }
 
+    //project the inertial moment of directional atoms into this rigid body
+    for (std::size_t i = 0; i < atoms_.size(); i++) {
+        if (atoms_[i]->isDirectional()) {
+            RectMatrix<double, 3, 3> Iproject = refOrients_[i].transpose() * atoms_[i]->getI();
+            Itmp(0, 0) += Iproject(0, 0);
+            Itmp(1, 1) += Iproject(1, 1);
+            Itmp(2, 2) += Iproject(2, 2);
+        }
+    }
+
     //diagonalize 
     Vector3d evals;
     Mat3x3d::diagonalize(Itmp, evals, sU_);

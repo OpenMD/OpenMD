@@ -52,6 +52,7 @@
 
 #include "brains/MoleculeCreator.hpp"
 #include "primitives/GhostBend.hpp"
+#include "primitives/GhostTorsion.hpp"
 #include "types/DirectionalAtomType.hpp"
 #include "types/FixedBondType.hpp"
 #include "utils/simError.h"
@@ -376,34 +377,60 @@ Bend* MoleculeCreator::createBend(ForceField* ff, Molecule* mol, BendStamp* stam
 }    
 
 Torsion* MoleculeCreator::createTorsion(ForceField* ff, Molecule* mol, TorsionStamp* stamp) {
-    TorsionType* torsionType;
-    Atom* atomA;
-    Atom* atomB;
-    Atom* atomC;
-    Atom* atomD;
 
-    atomA = mol->getAtomAt(stamp->getA());
-    atomB = mol->getAtomAt(stamp->getB());
-    atomC = mol->getAtomAt(stamp->getC());
-    atomD = mol->getAtomAt(stamp->getD());
+    Atom* atomA = mol->getAtomAt(stamp->getA());
+    Atom* atomB = mol->getAtomAt(stamp->getB());
+    Atom* atomC = mol->getAtomAt(stamp->getC());
+    Torsion* torsion;
 
-    assert(atomA && atomB && atomC && atomD);
-    
-    torsionType = ff->getTorsionType(atomA->getType(), atomB->getType(), 
-                                                       atomC->getType(), atomD->getType());
+    if (stamp->getD() != -1) {
+        Atom* atomD = mol->getAtomAt(stamp->getD());
 
-    if (torsionType == NULL) {
-        sprintf(painCave.errMsg, "Can not find Matching Torsion Type for[%s, %s, %s, %s]",
-                   atomA->getType().c_str(),
-                   atomB->getType().c_str(),
-                   atomC->getType().c_str(),
-                   atomD->getType().c_str());
+        assert(atomA && atomB && atomC && atomD);
+        
+        TorsionType* torsionType = ff->getTorsionType(atomA->getType(), atomB->getType(), 
+                                                           atomC->getType(), atomD->getType());
 
-        painCave.isFatal = 1;
-        simError();
+        if (torsionType == NULL) {
+            sprintf(painCave.errMsg, "Can not find Matching Torsion Type for[%s, %s, %s, %s]",
+                       atomA->getType().c_str(),
+                       atomB->getType().c_str(),
+                       atomC->getType().c_str(),
+                       atomD->getType().c_str());
+
+            painCave.isFatal = 1;
+            simError();
+        }
+        
+        torsion = new Torsion(atomA, atomB, atomC, atomD, torsionType);       
     }
-    
-    return new Torsion(atomA, atomB, atomC, atomD, torsionType);       
+    else {
+
+        DirectionalAtom* dAtom = dynamic_cast<DirectionalAtom*>(atomC);
+        if (dAtom == NULL) {
+            sprintf(painCave.errMsg, "Can not cast Atom to DirectionalAtom");
+            painCave.isFatal = 1;
+            simError();
+        }        
+
+        TorsionType* torsionType = ff->getTorsionType(atomA->getType(), atomB->getType(), 
+                                                           atomC->getType(), "GHOST");
+
+        if (torsionType == NULL) {
+            sprintf(painCave.errMsg, "Can not find Matching Torsion Type for[%s, %s, %s, %s]",
+                       atomA->getType().c_str(),
+                       atomB->getType().c_str(),
+                       atomC->getType().c_str(),
+                       "GHOST");
+
+            painCave.isFatal = 1;
+            simError();
+        }
+        
+        torsion = new GhostTorsion(atomA, atomB, dAtom, torsionType);               
+    }
+
+    return torsion;
 }    
 
 CutoffGroup* MoleculeCreator::createCutoffGroup(Molecule* mol, CutoffGroupStamp* stamp) {

@@ -39,45 +39,33 @@
  * such damages.
  */
  
-#ifndef IO_TORSIONTYPESSECTIONPARSER_HPP
-#define IO_TORSIONTYPESSECTIONPARSER_HPP
-#include <map>
-#include "io/SectionParser.hpp"
+/**
+ * @file GhostBend.hpp
+ * @author    tlin
+ * @date  11/01/2004
+ * @version 1.0
+ */ 
+
+
+#ifndef PRIMITIVES_GHOSTTORSION_HPP
+#define PRIMITIVES_GHOSTTORSION_HPP
+
+#include "primitives/Torsion.hpp"
+#include "primitives/DirectionalAtom.hpp"
+
 namespace oopse {
 
-    /**
-     * @class TorsionTypesSectionParser TorsionTypesSectionParser.hpp "io/TorsionTypesSectionParser.hpp"
-     */
-    class TorsionTypesSectionParser : public SectionParser {
-        public:
+class GhostTorsion : public Torsion {
+    public:
 
-            
-            TorsionTypesSectionParser();
-        private:
+        GhostTorsion(Atom *atom1, Atom *atom2,  DirectionalAtom* ghostAtom,
+                        TorsionType* tt);
 
+        virtual void calcForce();
+        
+};
 
-            enum TorsionTypeEnum{
-                ttGhostTorsion,
-                ttCubic,
-                ttQuartic,
-                ttPolynomial,
-                ttCharmm,
-                ttUnknown
-            };
+} //end namespace oopse
 
-            TorsionTypeEnum getTorsionTypeEnum(const std::string& str);     
-            
-            void parseLine(ForceField& ff, const std::string& line, int lineNo);
-            
-
-            std::map<std::string, TorsionTypeEnum> stringToEnumMap_;
-    };
-
-
-} //namespace oopse
-
-#endif //IO_TORSIONTYPESSECTIONPARSER_HPP
-
-
-
+#endif //PRIMITIVES_GHOSTBEND_HPP
 

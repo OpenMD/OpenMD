@@ -46,6 +46,7 @@
 #include "types/QuarticBondType.hpp"
 #include "types/PolynomialBondType.hpp"
 #include "UseTheForce/ForceField.hpp"
+#include "utils/simError.h"
 namespace oopse {
 
 BondTypesSectionParser::BondTypesSectionParser() {
@@ -64,8 +65,10 @@ void BondTypesSectionParser::parseLine(ForceField& ff,const std::string& line, i
     int nTokens = tokenizer.countTokens();
 
     if (nTokens < 4) {
-
-        return;
+        sprintf(painCave.errMsg, "BondTypesSectionParser Error: Not enough tokens at line %d\n",
+                lineNo);
+        painCave.isFatal = 1;
+        simError();
     }
     
     std::string at1 = tokenizer.nextToken();
@@ -82,7 +85,10 @@ void BondTypesSectionParser::parseLine(ForceField& ff,const std::string& line, i
             
         case btHarmonic :
             if (nTokens < 1) {
-
+                sprintf(painCave.errMsg, "BondTypesSectionParser Error: Not enough tokens at line %d\n",
+                        lineNo);
+                painCave.isFatal = 1;
+                simError();
             } else {
 
                 double kb = tokenizer.nextTokenAsDouble();
@@ -93,7 +99,10 @@ void BondTypesSectionParser::parseLine(ForceField& ff,const std::string& line, i
 
         case btCubic :
             if (nTokens < 4) {
-
+                sprintf(painCave.errMsg, "BondTypesSectionParser Error: Not enough tokens at line %d\n",
+                        lineNo);
+                painCave.isFatal = 1;
+                simError();
             } else {
 
                 double k3 = tokenizer.nextTokenAsDouble();
@@ -107,6 +116,11 @@ void BondTypesSectionParser::parseLine(ForceField& ff,const std::string& line, i
             
         case btQuartic :
             if (nTokens < 5) {
+
+                sprintf(painCave.errMsg, "BondTypesSectionParser Error: Not enough tokens at line %d\n",
+                        lineNo);
+                painCave.isFatal = 1;
+                simError();
 
             } else {
 
@@ -123,6 +137,10 @@ void BondTypesSectionParser::parseLine(ForceField& ff,const std::string& line, i
 
         case btPolynomial :
             if (nTokens < 2 || nTokens % 2 != 0) {
+                sprintf(painCave.errMsg, "BondTypesSectionParser Error: Not enough tokens at line %d\n",
+                        lineNo);
+                painCave.isFatal = 1;
+                simError();
 
             } else {
                 int nPairs = nTokens / 2;
@@ -141,6 +159,11 @@ void BondTypesSectionParser::parseLine(ForceField& ff,const std::string& line, i
 
         case btUnknown :
         default:
+                sprintf(painCave.errMsg, "BondTypesSectionParser Error: Unknown Bond Type at line %d\n",
+                        lineNo);
+                painCave.isFatal = 1;
+                simError();
+
             break;
             
     }

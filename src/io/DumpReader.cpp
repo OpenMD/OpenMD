@@ -80,7 +80,7 @@ DumpReader::DumpReader(SimInfo* info, const std::string& filename)
         inFile_ = fopen(filename_.c_str(), "r");
 
         if (inFile_ == NULL) {
-            sprintf(painCave.errMsg, "Cannot open file: %s\n", filename_.c_str());
+            sprintf(painCave.errMsg, "DumpReader: Cannot open file: %s\n", filename_.c_str());
             painCave.isFatal = 1;
             simError();
         }
@@ -254,7 +254,7 @@ void DumpReader::readSet(int whichFrame) {
                     "does not match the meta-data file's nIntegrable, %d.\n",
                 filename_.c_str(),
                 nTotObjs,
-                info_->getNIntegrableObjects());
+                info_->getNGlobalIntegrableObjects());
 
         painCave.isFatal = 1;
         simError();

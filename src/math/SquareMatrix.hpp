@@ -175,6 +175,17 @@ namespace oopse {
                 return true;
             }         
 
+            /** Return the transpose of this matrix */
+            SquareMatrix<Real,  Dim> transpose() const{
+                SquareMatrix<Real,  Dim> result;
+                
+                for (unsigned int i = 0; i < Dim; i++)
+                    for (unsigned int j = 0; j < Dim; j++)              
+                        result(j, i) = data_[i][j];
+
+                return result;
+            }
+            
             /** @todo need implementation */
             void diagonalize() {
                 //jacobi(m, eigenValues, ortMat);

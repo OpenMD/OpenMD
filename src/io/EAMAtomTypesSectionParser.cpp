@@ -62,14 +62,19 @@ void EAMAtomTypesSectionParser::parseLine(ForceField& ff,const std::string& line
             atomType->setEAM();                            
             parseEAMParamFile(ff, atomType, potentialParamFile, atomType->getIdent());                                                    
         } else {
-
+            sprintf(painCave.errMsg, "EAMAtomTypesSectionParser Error: Can not find AtomType [%s]\n",
+                atomTypeName.c_str());
+            painCave.isFatal = 1;
+            simError();  
         }
         
     } else {
-      
+        sprintf(painCave.errMsg, "EAMAtomTypesSectionParser Error: Not enough tokens at line %d\n",
+                lineNo);
+        painCave.isFatal = 1;
+        simError();    
     }
             
-
 }
 
 void EAMAtomTypesSectionParser::parseEAMParamFile(ForceField& ff, AtomType* atomType, 
@@ -98,10 +103,10 @@ void EAMAtomTypesSectionParser::parseEAMParamFile(ForceField& ff, AtomType* atom
             latticeConstant = tokenizer1.nextTokenAsDouble();
             lattice = tokenizer1.nextToken();
         }else {
-            std::cerr << "Not enought tokens" << std::endl;
+            sprintf(painCave.errMsg, "EAMAtomTypesSectionParser Error: Not enough tokens\n");
+            painCave.isFatal = 1;
+            simError();  
         }
-    } else {
-
     }
     
     // The third line is nrho, drho, nr, dr and rcut
@@ -118,12 +123,14 @@ void EAMAtomTypesSectionParser::parseEAMParamFile(ForceField& ff, AtomType* atom
             eamParam.dr = tokenizer2.nextTokenAsDouble();
             eamParam.rcut = tokenizer2.nextTokenAsDouble();
         }else {
-            std::cerr << "Not enought tokens" << std::endl;
+
+            sprintf(painCave.errMsg, "EAMAtomTypesSectionParser Error: Not enough tokens\n");
+            painCave.isFatal = 1;
+            simError();            
+
         }
-    } else {
-
-    }
-
+    } 
+    
     parseEAMArray(*ppfStream, eamParam.Frhovals, eamParam.nrho);    
     parseEAMArray(*ppfStream, eamParam.rvals, eamParam.nr);
     parseEAMArray(*ppfStream, eamParam.rhovals, eamParam.nr);
@@ -154,13 +161,17 @@ void EAMAtomTypesSectionParser::parseEAMArray(std::istream& input,
                 array.push_back(tokenizer.nextTokenAsDouble());
             }
         } else {
-
+            sprintf(painCave.errMsg, "EAMAtomTypesSectionParser Error: Not enough tokens\n");
+            painCave.isFatal = 1;
+            simError();  
         }
         ++lineCount;
     }
 
     if (lineCount < nlinesToRead) {
-        
+        sprintf(painCave.errMsg, "EAMAtomTypesSectionParser Error: Not enough lines to read\n");
+        painCave.isFatal = 1;
+        simError();          
     }
     
 }
