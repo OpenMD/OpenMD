@@ -10,4 +10,4 @@ RmiSource =
 
 Main      =
 
-include $(DEV_ROOT)/Makefile
+include ../../make/Makefile

@@ -11,4 +11,4 @@ RmiSource =
 
 Main      = simpleBuilder
 
-include $(DEV_ROOT)/Makefile
+include ../../../make/Makefile
