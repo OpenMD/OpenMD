@@ -35,6 +35,7 @@
 
 #include <cassert>
 #include <cmath>
+#include <iostream>
 
 namespace oopse {
 
@@ -42,7 +43,7 @@ namespace oopse {
      * @class Vector Vector.hpp "math/Vector.hpp"
      * @brief Fix length vector class
      */
-    template<typename Real, int Dim>
+    template<typename Real, unsigned int Dim>
     class Vector{
         public:
 
@@ -209,25 +210,25 @@ namespace oopse {
             }
 
             /** @see #add */
-            inline Vector<Real, Dim> operator +=( const Vector<Real, Dim>& v1 ) {
+            inline Vector<Real, Dim>& operator +=( const Vector<Real, Dim>& v1 ) {
                 add(v1);
                 return *this;
             }
 
             /** @see #sub */
-            inline Vector<Real, Dim> operator -=( const Vector<Real, Dim>& v1 ) {
+            inline Vector<Real, Dim>& operator -=( const Vector<Real, Dim>& v1 ) {
                 sub(v1);
                 return *this;
             }
 
             /** @see #mul */
-            inline Vector<Real, Dim> operator *=( double s) {
+            inline Vector<Real, Dim>& operator *=( double s) {
                 mul(s);
                 return *this;
             }
 
             /** @see #div */
-            inline Vector<Real, Dim> operator /=( double s ) {
+            inline Vector<Real, Dim>& operator /=( double s ) {
                 div(s);
                 return *this;
             }
@@ -262,7 +263,7 @@ namespace oopse {
     };
 
     /** unary minus*/
-    template<typename Real, int Dim>    
+    template<typename Real, unsigned int Dim>    
     inline Vector<Real, Dim> operator -(const Vector<Real, Dim>& v1){
         Vector tmp(v1);
         return tmp.negate();
@@ -274,7 +275,7 @@ namespace oopse {
      * @param v1 the first vector
      * @param v2 the second vector
      */   
-    template<typename Real, int Dim>    
+    template<typename Real, unsigned int Dim>    
     inline Vector<Real, Dim> operator +(const Vector<Real, Dim>& v1, const Vector<Real, Dim>& v2) {
         Vector<Real, Dim> result;
         
@@ -288,7 +289,7 @@ namespace oopse {
      * @param v1 the first vector
      * @param v2 the second vector
      */  
-    template<typename Real, int Dim>    
+    template<typename Real, unsigned int Dim>    
     Vector<Real, Dim> operator -(const Vector<Real, Dim>& v1, const Vector<Real, Dim>& v2) {
         Vector<Real, Dim> result;
         result.sub(v1, v2);
@@ -301,7 +302,7 @@ namespace oopse {
      * @param v1 the source vector
      * @param s the scalar value
      */ 
-    template<typename Real, int Dim>                 
+    template<typename Real, unsigned int Dim>                 
     Vector<Real, Dim> operator * ( const Vector<Real, Dim>& v1, double s) {       
         Vector<Real, Dim> result;
         result.mul(s, v1);
@@ -314,7 +315,7 @@ namespace oopse {
      * @param s the scalar value
      * @param v1 the source vector
      */  
-    template<typename Real, int Dim>
+    template<typename Real, unsigned int Dim>
     Vector<Real, Dim> operator * ( double s, const Vector<Real, Dim>& v1 ) {
         Vector<Real, Dim> result;
         result.mul(s, v1);
@@ -327,7 +328,7 @@ namespace oopse {
      * @param v1 the source vector
      * @param s the scalar value
      */
-    template<typename Real, int Dim>    
+    template<typename Real, unsigned int Dim>    
     Vector<Real, Dim> operator / ( const Vector<Real, Dim>& v1, double s) {       
         Vector<Real, Dim> result;
         result.div( v1,s);
@@ -340,7 +341,7 @@ namespace oopse {
      * @param s the scalar value
      * @param v1 the source vector
      */
-    template<typename Real, int Dim>        
+    template<typename Real, unsigned int Dim>        
     inline Vector<Real, Dim> operator /( double s, const Vector<Real, Dim>& v1 ) {
         Vector<Real, Dim> result;
         result.div( v1,s);
@@ -348,7 +349,7 @@ namespace oopse {
     }
 
     /** fuzzy comparson */
-    template<typename Real, int Dim>        
+    template<typename Real, unsigned int Dim>        
     inline bool epsilonEqual( const Vector<Real, Dim>& v1, const Vector<Real, Dim>& v2 ) {
 
     }
@@ -360,7 +361,7 @@ namespace oopse {
      * @param v2 second vector
      * @return the dot product of v1 and v2
      */
-    template<typename Real, int Dim>    
+    template<typename Real, unsigned int Dim>    
     inline Real dot( const Vector<Real, Dim>& v1, const Vector<Real, Dim>& v2 ) {
 		Real tmp;
 		tmp = 0;
@@ -377,7 +378,7 @@ namespace oopse {
      * @param v2 second vector
      * @return the distance between v1 and v2
      */	
-    template<typename Real, int Dim>    
+    template<typename Real, unsigned int Dim>    
     inline Real distance( const Vector<Real, Dim>& v1, const Vector<Real, Dim>& v2 ) {
         Vector<Real, Dim> tempVector = v1 - v2;
         return tempVector.length();
@@ -389,7 +390,7 @@ namespace oopse {
      * @param v2 second vector
      * @return the squared distance between v1 and v2
      */
-    template<typename Real, int Dim>
+    template<typename Real, unsigned int Dim>
     inline Real distanceSquare( const Vector<Real, Dim>& v1, const Vector<Real, Dim>& v2 ) {
         Vector<Real, Dim> tempVector = v1 - v2;
         return tempVector.lengthSquare();
@@ -398,7 +399,7 @@ namespace oopse {
     /**
      * Write to an output stream
      */
-    template<typename Real, int Dim>
+    template<typename Real, unsigned int Dim>
     std::ostream &operator<< ( std::ostream& o, const Vector<Real, Dim>& v1 ) {
         
         return o;        
