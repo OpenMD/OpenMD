@@ -319,20 +319,26 @@ contains
     real( kind = dp ), dimension(3,nLocal) :: f
     real( kind = dp ), dimension(3,nLocal) :: t
     
-    real (kind = dp), dimension(3) :: ul_i
-    real (kind = dp), dimension(3) :: ul_j
+    real (kind = dp), dimension(3) :: ux_i, uy_i, uz_i
+    real (kind = dp), dimension(3) :: ux_j, uy_j, uz_j
+    real (kind = dp), dimension(3) :: dudux_i, duduy_i, duduz_i
+    real (kind = dp), dimension(3) :: dudux_j, duduy_j, duduz_j
 
     logical :: i_is_Charge, i_is_Dipole, i_is_SplitDipole, i_is_Quadrupole
     logical :: j_is_Charge, j_is_Dipole, j_is_SplitDipole, j_is_Quadrupole
     integer :: me1, me2, id1, id2
     real (kind=dp) :: q_i, q_j, mu_i, mu_j, d_i, d_j
+    real (kind=dp) :: qxx_i, qyy_i, qzz_i
+    real (kind=dp) :: qxx_j, qyy_j, qzz_j
+    real (kind=dp) :: cx_i, cy_i, cz_i
+    real (kind=dp) :: cx_j, cy_j, cz_j
+    real (kind=dp) :: cx2, cy2, cz2
     real (kind=dp) :: ct_i, ct_j, ct_ij, a1
     real (kind=dp) :: riji, ri, ri2, ri3, ri4
     real (kind=dp) :: pref, vterm, epot, dudr    
     real (kind=dp) :: xhat, yhat, zhat
     real (kind=dp) :: dudx, dudy, dudz
     real (kind=dp) :: drdxj, drdyj, drdzj
-    real (kind=dp) :: duduix, duduiy, duduiz, dudujx, dudujy, dudujz
     real (kind=dp) :: scale, sc2, bigR
 
     if (.not.allocated(ElectrostaticMap)) then
@@ -379,21 +385,52 @@ contains
     if (i_is_Dipole) then
        mu_i = ElectrostaticMap(me1)%dipole_moment
 #ifdef IS_MPI
-       ul_i(1) = eFrame_Row(3,atom1)
-       ul_i(2) = eFrame_Row(6,atom1)
-       ul_i(3) = eFrame_Row(9,atom1)
+       uz_i(1) = eFrame_Row(3,atom1)
+       uz_i(2) = eFrame_Row(6,atom1)
+       uz_i(3) = eFrame_Row(9,atom1)
 #else
-       ul_i(1) = eFrame(3,atom1)
-       ul_i(2) = eFrame(6,atom1)
-       ul_i(3) = eFrame(9,atom1)
+       uz_i(1) = eFrame(3,atom1)
+       uz_i(2) = eFrame(6,atom1)
+       uz_i(3) = eFrame(9,atom1)
 #endif
-       ct_i = ul_i(1)*drdxj + ul_i(2)*drdyj + ul_i(3)*drdzj
+       ct_i = uz_i(1)*xhat + uz_i(2)*yhat + uz_i(3)*zhat
 
        if (i_is_SplitDipole) then
           d_i = ElectrostaticMap(me1)%split_dipole_distance
        endif
        
     endif
+
+    if (i_is_Quadrupole) then
+       qxx_i = ElectrostaticMap(me1)%quadrupole_moments(1)
+       qyy_i = ElectrostaticMap(me1)%quadrupole_moments(2)
+       qzz_i = ElectrostaticMap(me1)%quadrupole_moments(3)
+#ifdef IS_MPI
+       ux_i(1) = eFrame_Row(1,atom1)
+       ux_i(2) = eFrame_Row(4,atom1)
+       ux_i(3) = eFrame_Row(7,atom1)
+       uy_i(1) = eFrame_Row(2,atom1)
+       uy_i(2) = eFrame_Row(5,atom1)
+       uy_i(3) = eFrame_Row(8,atom1)
+       uz_i(1) = eFrame_Row(3,atom1)
+       uz_i(2) = eFrame_Row(6,atom1)
+       uz_i(3) = eFrame_Row(9,atom1)
+#else
+       ux_i(1) = eFrame(1,atom1)
+       ux_i(2) = eFrame(4,atom1)
+       ux_i(3) = eFrame(7,atom1)
+       uy_i(1) = eFrame(2,atom1)
+       uy_i(2) = eFrame(5,atom1)
+       uy_i(3) = eFrame(8,atom1)
+       uz_i(1) = eFrame(3,atom1)
+       uz_i(2) = eFrame(6,atom1)
+       uz_i(3) = eFrame(9,atom1)
+#endif
+       cx_i = ux_i(1)*xhat + ux_i(2)*yhat + ux_i(3)*zhat
+       cy_i = uy_i(1)*xhat + uy_i(2)*yhat + uy_i(3)*zhat
+       cz_i = uz_i(1)*xhat + uz_i(2)*yhat + uz_i(3)*zhat
+    endif
+
 
     if (j_is_Charge) then
        q_j = ElectrostaticMap(me2)%charge      
@@ -402,19 +439,49 @@ contains
     if (j_is_Dipole) then
        mu_j = ElectrostaticMap(me2)%dipole_moment
 #ifdef IS_MPI
-       ul_j(1) = eFrame_Col(3,atom2)
-       ul_j(2) = eFrame_Col(6,atom2)
-       ul_j(3) = eFrame_Col(9,atom2)
+       uz_j(1) = eFrame_Col(3,atom2)
+       uz_j(2) = eFrame_Col(6,atom2)
+       uz_j(3) = eFrame_Col(9,atom2)
 #else
-       ul_j(1) = eFrame(3,atom2)
-       ul_j(2) = eFrame(6,atom2)
-       ul_j(3) = eFrame(9,atom2)
+       uz_j(1) = eFrame(3,atom2)
+       uz_j(2) = eFrame(6,atom2)
+       uz_j(3) = eFrame(9,atom2)
 #endif
-       ct_j = ul_j(1)*drdxj + ul_j(2)*drdyj + ul_j(3)*drdzj
+       ct_j = uz_j(1)*drdxj + uz_j(2)*drdyj + uz_j(3)*drdzj
 
        if (j_is_SplitDipole) then
           d_j = ElectrostaticMap(me2)%split_dipole_distance
        endif
+    endif
+
+    if (j_is_Quadrupole) then
+       qxx_j = ElectrostaticMap(me2)%quadrupole_moments(1)
+       qyy_j = ElectrostaticMap(me2)%quadrupole_moments(2)
+       qzz_j = ElectrostaticMap(me2)%quadrupole_moments(3)
+#ifdef IS_MPI
+       ux_j(1) = eFrame_Col(1,atom2)
+       ux_j(2) = eFrame_Col(4,atom2)
+       ux_j(3) = eFrame_Col(7,atom2)
+       uy_j(1) = eFrame_Col(2,atom2)
+       uy_j(2) = eFrame_Col(5,atom2)
+       uy_j(3) = eFrame_Col(8,atom2)
+       uz_j(1) = eFrame_Col(3,atom2)
+       uz_j(2) = eFrame_Col(6,atom2)
+       uz_j(3) = eFrame_Col(9,atom2)
+#else
+       ux_j(1) = eFrame(1,atom2)
+       ux_j(2) = eFrame(4,atom2)
+       ux_j(3) = eFrame(7,atom2)
+       uy_j(1) = eFrame(2,atom2)
+       uy_j(2) = eFrame(5,atom2)
+       uy_j(3) = eFrame(8,atom2)
+       uz_j(1) = eFrame(3,atom2)
+       uz_j(2) = eFrame(6,atom2)
+       uz_j(3) = eFrame(9,atom2)
+#endif
+       cx_j = ux_j(1)*xhat + ux_j(2)*yhat + ux_j(3)*zhat
+       cy_j = uy_j(1)*xhat + uy_j(2)*yhat + uy_j(3)*zhat
+       cz_j = uz_j(1)*xhat + uz_j(2)*yhat + uz_j(3)*zhat
     endif
 
     epot = 0.0_dp
@@ -422,13 +489,13 @@ contains
     dudy = 0.0_dp
     dudz = 0.0_dp
 
-    duduix = 0.0_dp
-    duduiy = 0.0_dp
-    duduiz = 0.0_dp
+    dudux_i = 0.0_dp
+    duduy_i = 0.0_dp
+    duduz_i = 0.0_dp
 
-    dudujx = 0.0_dp
-    dudujy = 0.0_dp
-    dudujz = 0.0_dp
+    dudux_j = 0.0_dp
+    duduy_j = 0.0_dp
+    duduz_j = 0.0_dp
 
     if (i_is_Charge) then
 
@@ -470,14 +537,55 @@ contains
           !! r_j - r_i and the charge-dipole potential takes the origin
           !! as the point dipole, which is atom j in this case.
 
-          dudx = dudx + pref * sw * ri3 * ( ul_j(1) + 3.0d0*ct_j*xhat*sc2)
-          dudy = dudy + pref * sw * ri3 * ( ul_j(2) + 3.0d0*ct_j*yhat*sc2)
-          dudz = dudz + pref * sw * ri3 * ( ul_j(3) + 3.0d0*ct_j*zhat*sc2)
+          dudx = dudx + pref * sw * ri3 * ( uz_j(1) + 3.0d0*ct_j*xhat*sc2)
+          dudy = dudy + pref * sw * ri3 * ( uz_j(2) + 3.0d0*ct_j*yhat*sc2)
+          dudz = dudz + pref * sw * ri3 * ( uz_j(3) + 3.0d0*ct_j*zhat*sc2)
 
-          dudujx = dudujx - pref * sw * ri2 * xhat * scale
-          dudujy = dudujy - pref * sw * ri2 * yhat * scale
-          dudujz = dudujz - pref * sw * ri2 * zhat * scale
+          duduz_j(1) = duduz_j(1) - pref * sw * ri2 * xhat * scale
+          duduz_j(2) = duduz_j(2) - pref * sw * ri2 * yhat * scale
+          duduz_j(3) = duduz_j(3) - pref * sw * ri2 * zhat * scale
           
+       endif
+
+       if (j_is_Quadrupole) then
+          ri2 = riji * riji
+          ri3 = ri2 * riji
+          ri4 = ri2 * ri4
+          cx2 = cx_j * cx_j
+          cy2 = cy_j * cy_j
+          cz2 = cz_j * cz_j
+
+          pref = pre14 * q_i / 6.0_dp
+          vterm = pref * ri3 * (qxx_j * (3.0_dp*cx2 - 1.0_dp) + &
+               qyy_j * (3.0_dp*cy2 - 1.0_dp) + &
+               qzz_j * (3.0_dp*cz2 - 1.0_dp))
+          vpair = vpair + vterm
+          epot = epot + sw * vterm
+
+          dudx = dudx - 5.0_dp*sw*vterm*riji*xhat - pref * sw * ri4 * ( &
+               qxx_j*(6.0_dp*cx_j*ux_j(1) - 2.0_dp*xhat) + &
+               qyy_j*(6.0_dp*cy_j*uy_j(1) - 2.0_dp*xhat) + &
+               qzz_j*(6.0_dp*cz_j*uz_j(1) - 2.0_dp*xhat) ) 
+          dudy = dudy - 5.0_dp*sw*vterm*riji*yhat - pref * sw * ri4 * ( &
+               qxx_j*(6.0_dp*cx_j*ux_j(2) - 2.0_dp*yhat) + &
+               qyy_j*(6.0_dp*cy_j*uy_j(2) - 2.0_dp*yhat) + &
+               qzz_j*(6.0_dp*cz_j*uz_j(2) - 2.0_dp*yhat) )
+          dudz = dudz - 5.0_dp*sw*vterm*riji*zhat - pref * sw * ri4 * ( &
+               qxx_j*(6.0_dp*cx_j*ux_j(3) - 2.0_dp*zhat) + &
+               qyy_j*(6.0_dp*cy_j*uy_j(3) - 2.0_dp*zhat) + &
+               qzz_j*(6.0_dp*cz_j*uz_j(3) - 2.0_dp*zhat) ) 
+          
+          dudux_j(1) = dudux_j(1) + pref * sw * ri3 * (qxx_j*6.0_dp*cx_j*xhat)
+          dudux_j(2) = dudux_j(2) + pref * sw * ri3 * (qxx_j*6.0_dp*cx_j*yhat)
+          dudux_j(3) = dudux_j(3) + pref * sw * ri3 * (qxx_j*6.0_dp*cx_j*zhat)
+
+          duduy_j(1) = duduy_j(1) + pref * sw * ri3 * (qyy_j*6.0_dp*cy_j*xhat)
+          duduy_j(2) = duduy_j(2) + pref * sw * ri3 * (qyy_j*6.0_dp*cy_j*yhat)
+          duduy_j(3) = duduy_j(3) + pref * sw * ri3 * (qyy_j*6.0_dp*cy_j*zhat)
+
+          duduz_j(1) = duduz_j(1) + pref * sw * ri3 * (qzz_j*6.0_dp*cz_j*xhat)
+          duduz_j(2) = duduz_j(2) + pref * sw * ri3 * (qzz_j*6.0_dp*cz_j*yhat)
+          duduz_j(3) = duduz_j(3) + pref * sw * ri3 * (qzz_j*6.0_dp*cz_j*zhat)
        endif
 
     endif
@@ -504,13 +612,13 @@ contains
           vpair = vpair + vterm
           epot = epot + sw * vterm
 
-          dudx = dudx + pref * sw * ri3 * ( ul_i(1) - 3.0d0 * ct_i * xhat*sc2)
-          dudy = dudy + pref * sw * ri3 * ( ul_i(2) - 3.0d0 * ct_i * yhat*sc2)
-          dudz = dudz + pref * sw * ri3 * ( ul_i(3) - 3.0d0 * ct_i * zhat*sc2)
+          dudx = dudx + pref * sw * ri3 * ( uz_i(1) - 3.0d0 * ct_i * xhat*sc2)
+          dudy = dudy + pref * sw * ri3 * ( uz_i(2) - 3.0d0 * ct_i * yhat*sc2)
+          dudz = dudz + pref * sw * ri3 * ( uz_i(3) - 3.0d0 * ct_i * zhat*sc2)
 
-          duduix = duduix + pref * sw * ri2 * xhat * scale
-          duduiy = duduiy + pref * sw * ri2 * yhat * scale
-          duduiz = duduiz + pref * sw * ri2 * zhat * scale
+          duduz_i(1) = duduz_i(1) + pref * sw * ri2 * xhat * scale
+          duduz_i(2) = duduz_i(2) + pref * sw * ri2 * yhat * scale
+          duduz_i(3) = duduz_i(3) + pref * sw * ri2 * zhat * scale
        endif
 
        if (j_is_Dipole) then
@@ -534,7 +642,7 @@ contains
              endif
           endif
 
-          ct_ij = ul_i(1)*ul_j(1) + ul_i(2)*ul_j(2) + ul_i(3)*ul_j(3)
+          ct_ij = uz_i(1)*uz_j(1) + uz_i(2)*uz_j(2) + uz_i(3)*uz_j(3)
 
           ri2 = ri * ri
           ri3 = ri2 * ri
@@ -548,20 +656,65 @@ contains
           
           a1 = 5.0d0 * ct_i * ct_j * sc2 - ct_ij
 
-          dudx=dudx+pref*sw*3.0d0*ri4*scale*(a1*xhat-ct_i*ul_j(1)-ct_j*ul_i(1))
-          dudy=dudy+pref*sw*3.0d0*ri4*scale*(a1*yhat-ct_i*ul_j(2)-ct_j*ul_i(2))
-          dudz=dudz+pref*sw*3.0d0*ri4*scale*(a1*zhat-ct_i*ul_j(3)-ct_j*ul_i(3))
+          dudx=dudx+pref*sw*3.0d0*ri4*scale*(a1*xhat-ct_i*uz_j(1)-ct_j*uz_i(1))
+          dudy=dudy+pref*sw*3.0d0*ri4*scale*(a1*yhat-ct_i*uz_j(2)-ct_j*uz_i(2))
+          dudz=dudz+pref*sw*3.0d0*ri4*scale*(a1*zhat-ct_i*uz_j(3)-ct_j*uz_i(3))
 
-          duduix = duduix + pref*sw*ri3*(ul_j(1) - 3.0d0*ct_j*xhat*sc2)
-          duduiy = duduiy + pref*sw*ri3*(ul_j(2) - 3.0d0*ct_j*yhat*sc2)
-          duduiz = duduiz + pref*sw*ri3*(ul_j(3) - 3.0d0*ct_j*zhat*sc2)
+          duduz_i(1) = duduz_i(1) + pref*sw*ri3*(uz_j(1) - 3.0d0*ct_j*xhat*sc2)
+          duduz_i(2) = duduz_i(2) + pref*sw*ri3*(uz_j(2) - 3.0d0*ct_j*yhat*sc2)
+          duduz_i(3) = duduz_i(3) + pref*sw*ri3*(uz_j(3) - 3.0d0*ct_j*zhat*sc2)
 
-          dudujx = dudujx + pref*sw*ri3*(ul_i(1) - 3.0d0*ct_i*xhat*sc2)
-          dudujy = dudujy + pref*sw*ri3*(ul_i(2) - 3.0d0*ct_i*yhat*sc2)
-          dudujz = dudujz + pref*sw*ri3*(ul_i(3) - 3.0d0*ct_i*zhat*sc2)
+          duduz_j(1) = duduz_j(1) + pref*sw*ri3*(uz_i(1) - 3.0d0*ct_i*xhat*sc2)
+          duduz_j(2) = duduz_j(2) + pref*sw*ri3*(uz_i(2) - 3.0d0*ct_i*yhat*sc2)
+          duduz_j(3) = duduz_j(3) + pref*sw*ri3*(uz_i(3) - 3.0d0*ct_i*zhat*sc2)
        endif
 
     endif
+
+    if (i_is_Quadrupole) then
+       if (j_is_Charge) then
+          
+          ri2 = riji * riji
+          ri3 = ri2 * riji
+          ri4 = ri2 * ri4
+          cx2 = cx_i * cx_i
+          cy2 = cy_i * cy_i
+          cz2 = cz_i * cz_i
+          
+          pref = pre14 * q_i / 6.0_dp
+          vterm = pref * ri3 * (qxx_i * (3.0_dp*cx2 - 1.0_dp) + &
+               qyy_i * (3.0_dp*cy2 - 1.0_dp) + &
+               qzz_i * (3.0_dp*cz2 - 1.0_dp))
+          vpair = vpair + vterm
+          epot = epot + sw * vterm
+          
+          dudx = dudx - 5.0_dp*sw*vterm*riji*xhat - pref * sw * ri4 * ( &
+               qxx_i*(6.0_dp*cx_i*ux_i(1) - 2.0_dp*xhat) + &
+               qyy_i*(6.0_dp*cy_i*uy_i(1) - 2.0_dp*xhat) + &
+               qzz_i*(6.0_dp*cz_i*uz_i(1) - 2.0_dp*xhat) ) 
+          dudy = dudy - 5.0_dp*sw*vterm*riji*yhat - pref * sw * ri4 * ( &
+               qxx_i*(6.0_dp*cx_i*ux_i(2) - 2.0_dp*yhat) + &
+               qyy_i*(6.0_dp*cy_i*uy_i(2) - 2.0_dp*yhat) + &
+               qzz_i*(6.0_dp*cz_i*uz_i(2) - 2.0_dp*yhat) )
+          dudz = dudz - 5.0_dp*sw*vterm*riji*zhat - pref * sw * ri4 * ( &
+               qxx_i*(6.0_dp*cx_i*ux_i(3) - 2.0_dp*zhat) + &
+               qyy_i*(6.0_dp*cy_i*uy_i(3) - 2.0_dp*zhat) + &
+               qzz_i*(6.0_dp*cz_i*uz_i(3) - 2.0_dp*zhat) ) 
+          
+          dudux_i(1) = dudux_i(1) + pref * sw * ri3 * (qxx_i*6.0_dp*cx_i*xhat)
+          dudux_i(2) = dudux_i(2) + pref * sw * ri3 * (qxx_i*6.0_dp*cx_i*yhat)
+          dudux_i(3) = dudux_i(3) + pref * sw * ri3 * (qxx_i*6.0_dp*cx_i*zhat)
+          
+          duduy_i(1) = duduy_i(1) + pref * sw * ri3 * (qyy_i*6.0_dp*cy_i*xhat)
+          duduy_i(2) = duduy_i(2) + pref * sw * ri3 * (qyy_i*6.0_dp*cy_i*yhat)
+          duduy_i(3) = duduy_i(3) + pref * sw * ri3 * (qyy_i*6.0_dp*cy_i*zhat)
+          
+          duduz_i(1) = duduz_i(1) + pref * sw * ri3 * (qzz_i*6.0_dp*cz_i*xhat)
+          duduz_i(2) = duduz_i(2) + pref * sw * ri3 * (qzz_i*6.0_dp*cz_i*yhat)
+          duduz_i(3) = duduz_i(3) + pref * sw * ri3 * (qzz_i*6.0_dp*cz_i*zhat)
+       endif
+    endif
+       
     
     if (do_pot) then
 #ifdef IS_MPI 
@@ -582,15 +735,33 @@ contains
     f_Col(3,atom2) = f_Col(3,atom2) - dudz
     
     if (i_is_Dipole .or. i_is_Quadrupole) then
-       t_Row(1,atom1) = t_Row(1,atom1) - ul_i(2)*duduiz + ul_i(3)*duduiy
-       t_Row(2,atom1) = t_Row(2,atom1) - ul_i(3)*duduix + ul_i(1)*duduiz
-       t_Row(3,atom1) = t_Row(3,atom1) - ul_i(1)*duduiy + ul_i(2)*duduix
+       t_Row(1,atom1)=t_Row(1,atom1) - uz_i(2)*duduz_i(3) + uz_i(3)*duduz_i(2)
+       t_Row(2,atom1)=t_Row(2,atom1) - uz_i(3)*duduz_i(1) + uz_i(1)*duduz_i(3)
+       t_Row(3,atom1)=t_Row(3,atom1) - uz_i(1)*duduz_i(2) + uz_i(2)*duduz_i(1)
+    endif
+    if (i_is_Quadrupole) then
+       t_Row(1,atom1)=t_Row(1,atom1) - ux_i(2)*dudux_i(3) + ux_i(3)*dudux_i(2)
+       t_Row(2,atom1)=t_Row(2,atom1) - ux_i(3)*dudux_i(1) + ux_i(1)*dudux_i(3)
+       t_Row(3,atom1)=t_Row(3,atom1) - ux_i(1)*dudux_i(2) + ux_i(2)*dudux_i(1)
+
+       t_Row(1,atom1)=t_Row(1,atom1) - uy_i(2)*duduy_i(3) + uy_i(3)*duduy_i(2)
+       t_Row(2,atom1)=t_Row(2,atom1) - uy_i(3)*duduy_i(1) + uy_i(1)*duduy_i(3)
+       t_Row(3,atom1)=t_Row(3,atom1) - uy_i(1)*duduy_i(2) + uy_i(2)*duduy_i(1)
     endif
 
     if (j_is_Dipole .or. j_is_Quadrupole) then
-       t_Col(1,atom2) = t_Col(1,atom2) - ul_j(2)*dudujz + ul_j(3)*dudujy
-       t_Col(2,atom2) = t_Col(2,atom2) - ul_j(3)*dudujx + ul_j(1)*dudujz
-       t_Col(3,atom2) = t_Col(3,atom2) - ul_j(1)*dudujy + ul_j(2)*dudujx
+       t_Col(1,atom2)=t_Col(1,atom2) - uz_j(2)*duduz_j(3) + uz_j(3)*duduz_j(2)
+       t_Col(2,atom2)=t_Col(2,atom2) - uz_j(3)*duduz_j(1) + uz_j(1)*duduz_j(3)
+       t_Col(3,atom2)=t_Col(3,atom2) - uz_j(1)*duduz_j(2) + uz_j(2)*duduz_j(1)
+    endif
+    if (j_is_Quadrupole) then
+       t_Col(1,atom2)=t_Col(1,atom2) - ux_j(2)*dudux_j(3) + ux_j(3)*dudux_j(2)
+       t_Col(2,atom2)=t_Col(2,atom2) - ux_j(3)*dudux_j(1) + ux_j(1)*dudux_j(3)
+       t_Col(3,atom2)=t_Col(3,atom2) - ux_j(1)*dudux_j(2) + ux_j(2)*dudux_j(1)
+
+       t_Col(1,atom2)=t_Col(1,atom2) - uy_j(2)*duduy_j(3) + uy_j(3)*duduy_j(2)
+       t_Col(2,atom2)=t_Col(2,atom2) - uy_j(3)*duduy_j(1) + uy_j(1)*duduy_j(3)
+       t_Col(3,atom2)=t_Col(3,atom2) - uy_j(1)*duduy_j(2) + uy_j(2)*duduy_j(1)
     endif
 
 #else
@@ -603,16 +774,35 @@ contains
     f(3,atom2) = f(3,atom2) - dudz
     
     if (i_is_Dipole .or. i_is_Quadrupole) then
-       t(1,atom1) = t(1,atom1) - ul_i(2)*duduiz + ul_i(3)*duduiy
-       t(2,atom1) = t(2,atom1) - ul_i(3)*duduix + ul_i(1)*duduiz
-       t(3,atom1) = t(3,atom1) - ul_i(1)*duduiy + ul_i(2)*duduix
+       t(1,atom1)=t(1,atom1) - uz_i(2)*duduz_i(3) + uz_i(3)*duduz_i(2)
+       t(2,atom1)=t(2,atom1) - uz_i(3)*duduz_i(1) + uz_i(1)*duduz_i(3)
+       t(3,atom1)=t(3,atom1) - uz_i(1)*duduz_i(2) + uz_i(2)*duduz_i(1)
     endif
-       
+    if (i_is_Quadrupole) then
+       t(1,atom1)=t(1,atom1) - ux_i(2)*dudux_i(3) + ux_i(3)*dudux_i(2)
+       t(2,atom1)=t(2,atom1) - ux_i(3)*dudux_i(1) + ux_i(1)*dudux_i(3)
+       t(3,atom1)=t(3,atom1) - ux_i(1)*dudux_i(2) + ux_i(2)*dudux_i(1)
+
+       t(1,atom1)=t(1,atom1) - uy_i(2)*duduy_i(3) + uy_i(3)*duduy_i(2)
+       t(2,atom1)=t(2,atom1) - uy_i(3)*duduy_i(1) + uy_i(1)*duduy_i(3)
+       t(3,atom1)=t(3,atom1) - uy_i(1)*duduy_i(2) + uy_i(2)*duduy_i(1)
+    endif
+
     if (j_is_Dipole .or. j_is_Quadrupole) then
-       t(1,atom2) = t(1,atom2) - ul_j(2)*dudujz + ul_j(3)*dudujy
-       t(2,atom2) = t(2,atom2) - ul_j(3)*dudujx + ul_j(1)*dudujz
-       t(3,atom2) = t(3,atom2) - ul_j(1)*dudujy + ul_j(2)*dudujx
+       t(1,atom2)=t(1,atom2) - uz_j(2)*duduz_j(3) + uz_j(3)*duduz_j(2)
+       t(2,atom2)=t(2,atom2) - uz_j(3)*duduz_j(1) + uz_j(1)*duduz_j(3)
+       t(3,atom2)=t(3,atom2) - uz_j(1)*duduz_j(2) + uz_j(2)*duduz_j(1)
     endif
+    if (j_is_Quadrupole) then
+       t(1,atom2)=t(1,atom2) - ux_j(2)*dudux_j(3) + ux_j(3)*dudux_j(2)
+       t(2,atom2)=t(2,atom2) - ux_j(3)*dudux_j(1) + ux_j(1)*dudux_j(3)
+       t(3,atom2)=t(3,atom2) - ux_j(1)*dudux_j(2) + ux_j(2)*dudux_j(1)
+
+       t(1,atom2)=t(1,atom2) - uy_j(2)*duduy_j(3) + uy_j(3)*duduy_j(2)
+       t(2,atom2)=t(2,atom2) - uy_j(3)*duduy_j(1) + uy_j(1)*duduy_j(3)
+       t(3,atom2)=t(3,atom2) - uy_j(1)*duduy_j(2) + uy_j(2)*duduy_j(1)
+    endif
+
 #endif
     
 #ifdef IS_MPI
