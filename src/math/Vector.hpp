@@ -39,6 +39,23 @@
 
 namespace oopse {
 
+    const double epsilon = 0.000001;
+
+    template<typename T>
+    inline bool equal(T e1, T e2) {
+        return e1 == e2;
+    }
+
+    template<>
+    inline bool equal(float e1, float e2) {
+        return fabs(e1 - e2) < epsilon;
+    }
+
+    template<>
+    inline bool equal(double e1, double e2) {
+        return fabs(e1 - e2) < epsilon;
+    }
+    
     /**
      * @class Vector Vector.hpp "math/Vector.hpp"
      * @brief Fix length vector class
@@ -115,6 +132,31 @@ namespace oopse {
                 return data_[i];
             }
 
+            /**
+             * Tests if this vetor is equal to other vector
+             * @return true if equal, otherwise return false
+             * @param v vector to be compared
+             */
+             inline bool operator ==(const Vector<Real, Dim>& v) {
+
+                for (unsigned int i = 0; i < Dim; i ++) {
+                    if (!equal(data_[i], v[i])) {
+                        return false;
+                    }
+                }
+                
+                return true;
+            }
+
+            /**
+             * Tests if this vetor is not equal to other vector
+             * @return true if equal, otherwise return false
+             * @param v vector to be compared
+             */
+            inline bool operator !=(const Vector<Real, Dim>& v) {
+                return !(*this == v);
+            }
+             
             /** Negates the value of this vector in place. */           
             inline void negate() {
                 data_[0] = -data_[0];

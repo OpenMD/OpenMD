@@ -83,9 +83,7 @@ namespace oopse {
              SquareMatrix<Real, Dim> result;
 
              return result;
-        }
-
-        
+        }        
 
         /** Returns the determinant of this matrix. */
         double determinant() const {
@@ -113,13 +111,13 @@ namespace oopse {
             return true;
         }
 
-        /** Tests if this matrix is orthogona. */            
+        /** Tests if this matrix is orthogonal. */            
         bool isOrthogonal() {
             SquareMatrix<Real, Dim> tmp;
 
             tmp = *this * transpose();
 
-            return tmp.isUnitMatrix();
+            return tmp.isDiagonal();
         }
 
         /** Tests if this matrix is diagonal. */
@@ -144,7 +142,189 @@ namespace oopse {
             return true;
         }         
 
+        void diagonalize() {
+            jacobi(m, eigenValues, ortMat);
+        }
+
+        /**
+         * Finds the eigenvalues and eigenvectors of a symmetric matrix
+         * @param eigenvals a reference to a vector3 where the
+         * eigenvalues will be stored. The eigenvalues are ordered so
+         * that eigenvals[0] <= eigenvals[1] <= eigenvals[2].
+         * @return an orthogonal matrix whose ith column is an
+         * eigenvector for the eigenvalue eigenvals[i]
+         */
+        SquareMatrix<Real, Dim>  findEigenvectors(Vector<Real, Dim>& eigenValues) {
+            SquareMatrix<Real, Dim> ortMat;
+            
+            if ( !isSymmetric()){
+                throw();
+            }
+            
+            SquareMatrix<Real, Dim> m(*this);
+            jacobi(m, eigenValues, ortMat);
+
+            return ortMat;
+        }
+        /**
+         * Jacobi iteration routines for computing eigenvalues/eigenvectors of 
+         * real symmetric matrix
+         *
+         * @return true if success, otherwise return false
+         * @param a source matrix
+         * @param w output eigenvalues 
+         * @param v output eigenvectors 
+         */
+        void jacobi(const SquareMatrix<Real, Dim>& a, 
+                              Vector<Real, Dim>& w, 
+                              SquareMatrix<Real, Dim>& v);
     };//end SquareMatrix
+
+
+#define ROT(a,i,j,k,l) g=a(i, j);h=a(k, l);a(i, j)=g-s*(h+g*tau);a(k, l)=h+s*(g-h*tau)
+#define MAX_ROTATIONS 60
+
+template<Real, int Dim>
+void SquareMatrix<Real, int Dim>::jacobi(SquareMatrix<Real, Dim>& a,
+                                                                       Vector<Real, Dim>& w, 
+                                                                       SquareMatrix<Real, Dim>& v) {
+    const int N = Dim;                                                                       
+    int i, j, k, iq, ip;
+    double tresh, theta, tau, t, sm, s, h, g, c;
+    double tmp;
+    Vector<Real, Dim> b, z;
+
+    // initialize
+    for (ip=0; ip<N; ip++) 
+    {
+	for (iq=0; iq<N; iq++) v(ip, iq) = 0.0;
+	v(ip, ip) = 1.0;
+    }
+    for (ip=0; ip<N; ip++) 
+    {
+	b(ip) = w(ip) = a(ip, ip);
+	z(ip) = 0.0;
+    }
+
+    // begin rotation sequence
+    for (i=0; i<MAX_ROTATIONS; i++) 
+    {
+	sm = 0.0;
+	for (ip=0; ip<2; ip++) 
+	{
+	    for (iq=ip+1; iq<N; iq++) sm += fabs(a(ip, iq));
+	}
+	if (sm == 0.0) break;
+
+	if (i < 4) tresh = 0.2*sm/(9);
+	else tresh = 0.0;
+
+	for (ip=0; ip<2; ip++) 
+	{
+	    for (iq=ip+1; iq<N; iq++) 
+	    {
+		g = 100.0*fabs(a(ip, iq));
+		if (i > 4 && (fabs(w(ip))+g) == fabs(w(ip))
+		    && (fabs(w(iq))+g) == fabs(w(iq)))
+		{
+		    a(ip, iq) = 0.0;
+		}
+		else if (fabs(a(ip, iq)) > tresh) 
+		{
+		    h = w(iq) - w(ip);
+		    if ( (fabs(h)+g) == fabs(h)) t = (a(ip, iq)) / h;
+		    else 
+		    {
+			theta = 0.5*h / (a(ip, iq));
+			t = 1.0 / (fabs(theta)+sqrt(1.0+theta*theta));
+			if (theta < 0.0) t = -t;
+		    }
+		    c = 1.0 / sqrt(1+t*t);
+		    s = t*c;
+		    tau = s/(1.0+c);
+		    h = t*a(ip, iq);
+		    z(ip) -= h;
+		    z(iq) += h;
+		    w(ip) -= h;
+		    w(iq) += h;
+		    a(ip, iq)=0.0;
+		    for (j=0;j<ip-1;j++) 
+		    {
+			ROT(a,j,ip,j,iq);
+		    }
+		    for (j=ip+1;j<iq-1;j++) 
+		    {
+			ROT(a,ip,j,j,iq);
+		    }
+		    for (j=iq+1; j<N; j++) 
+		    {
+			ROT(a,ip,j,iq,j);
+		    }
+		    for (j=0; j<N; j++) 
+		    {
+			ROT(v,j,ip,j,iq);
+		    }
+		}
+	    }
+	}
+
+	for (ip=0; ip<N; ip++) 
+	{
+	    b(ip) += z(ip);
+	    w(ip) = b(ip);
+	    z(ip) = 0.0;
+	}
+    }
+
+    if ( i >= MAX_ROTATIONS )
+	return false;
+
+    // sort eigenfunctions
+    for (j=0; j<N; j++) 
+    {
+	k = j;
+	tmp = w(k);
+	for (i=j; i<N; i++)
+	{
+	    if (w(i) >= tmp) 
+	    {
+		k = i;
+		tmp = w(k);
+	    }
+	}
+	if (k != j) 
+	{
+	    w(k) = w(j);
+	    w(j) = tmp;
+	    for (i=0; i<N; i++) 
+	    {
+		tmp = v(i, j);
+		v(i, j) = v(i, k);
+		v(i, k) = tmp;
+	    }
+	}
+    }
+
+    //    insure eigenvector consistency (i.e., Jacobi can compute
+    //    vectors that are negative of one another (.707,.707,0) and
+    //    (-.707,-.707,0). This can reek havoc in
+    //    hyperstreamline/other stuff. We will select the most
+    //    positive eigenvector.
+    int numPos;
+    for (j=0; j<N; j++)
+    {
+	for (numPos=0, i=0; i<N; i++) if ( v(i, j) >= 0.0 ) numPos++;
+	if ( numPos < 2 ) for(i=0; i<N; i++) v(i, j) *= -1.0;
+    }
+
+    return true;
+}
+
+#undef ROT
+#undef MAX_ROTATIONS
+
+}
+
 
 }
 #endif //MATH_SQUAREMATRIX_HPP 

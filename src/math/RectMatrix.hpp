@@ -38,22 +38,6 @@
 #include "Vector.hpp"
 
 namespace oopse {
-    const double epsilon = 0.000001;
-
-    template<typename T>
-    inline bool equal(T e1, T e2) {
-        return e1 == e2;
-    }
-
-    template<>
-    inline bool equal(float e1, float e2) {
-        return fabs(e1 - e2) < epsilon;
-    }
-
-    template<>
-    inline bool equal(double e1, double e2) {
-        return fabs(e1 - e2) < epsilon;
-    }
 
     /**
      * @class RectMatrix RectMatrix.hpp "math/RectMatrix.hpp"
@@ -428,7 +412,7 @@ namespace oopse {
             for (unsigned int i = 0; i < Row; i++)
                 for (unsigned int j = 0; j < Col; j++)
                     for (unsigned int k = 0; k < SameDim; k++)
-                        result(i, j)  = m1(i, k) * m2(k, j);                
+                        result(i, j)  += m1(i, k) * m2(k, j);                
 
         return result;
     }

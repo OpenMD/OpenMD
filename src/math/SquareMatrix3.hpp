@@ -53,6 +53,50 @@ namespace oopse {
                     return *this;
                  SquareMatrix<Real, 3>::operator=(m);
             }
+
+            /**
+             * Sets this matrix to a rotation matrix by three euler angles
+             * @ param euler
+             */
+            void setupRotMat(const Vector3d& euler);
+
+            /**
+             * Sets this matrix to a rotation matrix by three euler angles
+             * @param phi
+             * @param theta
+             * @psi theta
+             */
+            void setupRotMat(double phi, double theta, double psi);
+
+
+            /**
+             * Sets this matrix to a rotation matrix by quaternion
+             * @param quat
+            */
+            void setupRotMat(const Vector4d& quat);
+
+            /**
+             * Sets this matrix to a rotation matrix by quaternion
+             * @param q0
+             * @param q1
+             * @param q2
+             * @parma q3
+            */
+            void setupRotMat(double q0, double q1, double q2, double q4);
+
+            /**
+             * Returns the quaternion from this rotation matrix
+             * @return the quaternion from this rotation matrix
+             * @exception invalid rotation matrix
+            */            
+            Quaternion rotMatToQuat();
+
+            /**
+             * Returns the euler angles from this rotation matrix
+             * @return the quaternion from this rotation matrix
+             * @exception invalid rotation matrix
+            */            
+            Vector3d rotMatToEuler();
             
             /**
              * Sets the value of this matrix to  the inversion of itself. 
@@ -60,12 +104,8 @@ namespace oopse {
              * implementation of inverse in SquareMatrix class
              */
             void  inverse();
-            
-            /**
-             * Sets the value of this matrix to  the inversion of other matrix.
-             * @ param m the source matrix
-             */        
-            void inverse(const SquareMatrix<Real, Dim>& m);
+
+            void diagonalize();
 
     }
 
