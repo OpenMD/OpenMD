@@ -55,7 +55,96 @@ void RectMatrixTestCase::setUp(){
     b(2, 0) = 0.0;
     b(2, 1) = 0.0;
 
-    
+    c(0, 0) = 1.0;
+    c(0, 1) = 0.0;
+    c(1, 0) = 0.0;
+    c(1, 1) = 1.0;       
+
+    d(0, 0) = 1.0;
+    d(0, 1) = 0.0;
+    d(0, 2) = 0.0;
+    d(1, 0) = 0.0;
+    d(1, 1) = 0.0;
+    d(1, 2) = 1.0;    
+    d(2, 0) = 0.0;
+    d(2, 1) = 1.0;
+    d(2, 2) = 0.0;  
+
+    e(0, 0) = 2.0;
+    e(0, 1) = 4.0;
+    e(0, 2) = 1.0;
+    e(1, 0) = 0.0;
+    e(1, 1) = 0.0;
+    e(1, 2) = 3.0;    
+    e(2, 0) = 0.0;
+    e(2, 1) = 6.0;
+    e(2, 2) = 5.0;  
+
+    f(0, 0) = 2.0;
+    f(0, 1) = 4.0;
+    f(0, 2) = 1.0;
+    f(1, 0) = 0.0;
+    f(1, 1) = 6.0;
+    f(1, 2) = 5.0;    
+    f(2, 0) = 0.0;
+    f(2, 1) = 0.0;
+    f(2, 2) = 3.0;  
+
+    f(0, 0) = 2.0;
+    f(0, 1) = 4.0;
+    f(0, 2) = 1.0;
+    f(1, 0) = 0.0;
+    f(1, 1) = 6.0;
+    f(1, 2) = 5.0;    
+    f(2, 0) = 0.0;
+    f(2, 1) = 0.0;
+    f(2, 2) = 3.0;  
+
+    g(0, 0) = 1.0;
+    g(0, 1) = 0.0;
+    g(0, 2) = 0.0;
+    g(1, 0) = -2.0;
+    g(1, 1) = 1.0;
+    g(1, 2) = 0.0;    
+    g(2, 0) = 0.0;
+    g(2, 1) = 0.0;
+    g(2, 2) = 1.0;  
+
+    h(0, 0) = 2.0;
+    h(0, 1) = 4.0;
+    h(0, 2) = -2.0;
+    h(0, 3) = 2.0;
+    h(1, 0) = 4.0;
+    h(1, 1) = 9.0;
+    h(1, 2) = -3.0;
+    h(1, 3) = 8.0;
+    h(2, 0) = -2.0;
+    h(2, 1) = -3.0;
+    h(2, 2) = 7.0;
+    h(2, 3) = 10.0;
+
+    i(0, 0) = 2.0;
+    i(0, 1) = 4.0;
+    i(0, 2) = -2.0;
+    i(0, 3) = 2.0;
+    i(1, 0) = 0.0;
+    i(1, 1) = 1.0;
+    i(1, 2) = 1.0;
+    i(1, 3) = 4.0;
+    i(2, 0) = -2.0;
+    i(2, 1) = -3.0;
+    i(2, 2) = 7.0;
+    i(2, 3) = 10.0;    
+
+
+    v1(0) = 2.0;
+    v1(1) = 4.0;
+    v1(2) = -2.0;
+
+    v2(0) = 2.0;
+    v2(1) = 0.0;
+    v2(2) = -2.0;
+
 }
 
 void RectMatrixTestCase::testConstructor(){
@@ -82,6 +171,8 @@ void RectMatrixTestCase::testConstructor(){
 
 void RectMatrixTestCase::testEqual() {
     CPPUNIT_ASSERT(m2 == m3);
+    CPPUNIT_ASSERT(m2 != m3);
+    
 }
 
 void RectMatrixTestCase::testNegate() {
@@ -129,7 +220,15 @@ void RectMatrixTestCase::testMul() {
     CPPUNIT_ASSERT(m1 * 1.0 == m1);
     CPPUNIT_ASSERT(m1 * 0.0 == zero);
     CPPUNIT_ASSERT(2.0 *m1 == m1 + m1);
-    
+
+    //test matrix multiplication
+    CPPUNIT_ASSERT(a * b == c);
+    CPPUNIT_ASSERT(d  * e == f);
+    CPPUNIT_ASSERT(g  * h == i);
+
+    //test matrix vector multiplication
+    CPPUNIT_ASSERT(g  * v1 == v2);
+
 }
 
 void RectMatrixTestCase::testDiv() {
@@ -141,7 +240,7 @@ void RectMatrixTestCase::testDiv() {
 }
 
 void RectMatrixTestCase::testAccessEntries(){
-    CPPUNIT_ASSERT(m1(1, 0) == 3.0);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(m1(1, 0), 3.0, oopse::epsilon);
 }
 
 void RectMatrixTestCase::testTranspose(){
