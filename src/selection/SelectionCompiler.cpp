@@ -118,14 +118,16 @@ bool SelectionCompiler::internalCompile(){
             //    continue;
             //}
             if (lookingAtDecimal((tokCommand & Token::negnums) != 0)) {
-                float value = lexi_cast<float>(script.substr(ichToken, ichToken + cchToken));          
-                ltoken.push_back(Token(Token::decimal, value));/**@todo*/
+                float value = lexi_cast<float>(script.substr(ichToken, cchToken));        
+                std::cout << "encount an decimal: " << value << std::endl;
+                ltoken.push_back(Token(Token::decimal, boost::any(value)));
                 continue;
             }
             if (lookingAtInteger((tokCommand & Token::negnums) != 0)) {
-                std::string intString = script.substr(ichToken, ichToken + cchToken);
-                int val = lexi_cast<int>(intString);
-                ltoken.push_back(Token(Token::integer, val, intString));/**@todo*/
+
+                int val = lexi_cast<int>(script.substr(ichToken, cchToken));
+                std::cout << "encount an integer: " << val << std::endl;
+                ltoken.push_back(Token(Token::integer,   boost::any(val)));
                 continue;
             }
         }
@@ -242,6 +244,9 @@ bool SelectionCompiler::internalCompile(){
       previousCharBackslash = ch == '\\' ? !previousCharBackslash : false;
     }
     cchToken = ichT - ichToken;
+
+
+    std::cout << "lookingAtString: encount " << script.substr(ichToken, cchToken) << std::endl; 
     return true;
   }
 
@@ -425,7 +430,10 @@ bool SelectionCompiler::lookingAtLookupToken() {
             }
         break;
     }
+
     cchToken = ichT - ichToken;
+
+    std::cout << "lookingAtLookupToken: encount " << script.substr(ichToken, cchToken) << std::endl; 
     return true;
 }
 
@@ -562,7 +570,9 @@ bool SelectionCompiler::clausePrimitive() {
         case Token::asterisk:
         case Token::identifier:
             return clauseChemObjName();
-      
+
+        case Token::integer :
+            return clauseIndex();
         default:
             if ((tok & Token::atomproperty) == Token::atomproperty) {
                 return clauseComparator();
@@ -608,8 +618,10 @@ bool SelectionCompiler::clauseComparator() {
         return false;
     }
 
+    boost::any floatVal;
+    floatVal = val;
     return addTokenToPostfix(Token(tokenComparator.tok,
-                       tokenAtomProperty.tok, boost::any(val)));
+                       tokenAtomProperty.tok, floatVal));
 }
 
 bool SelectionCompiler::clauseWithin() {
@@ -622,8 +634,6 @@ bool SelectionCompiler::clauseWithin() {
     Token tokenDistance = tokenNext();       // distance
     switch(tokenDistance.tok) {
         case Token::integer:
-            distance = float(tokenDistance.intValue);
-            break;
         case Token::decimal:
             distance = tokenDistance.value;
             break;
@@ -709,5 +719,34 @@ bool SelectionCompiler:: clauseName(std::string& name) {
 
 }
 
+bool SelectionCompiler::clauseIndex(){
+    Token token = tokenNext();
+    if (token.tok == Token::integer) {
+        int index = boost::any_cast<int>(token.value);
+        int tok = tokPeek();
+        std::cout << "Token::to is " << Token::to << ", tok = " << tok << std::endl;
+        if (tok == Token::to) {
+            tokenNext();
+            tok = tokPeek();
+            if (tok != Token::integer) {
+                return numberExpected();
+            }
+            
+            boost::any intVal = tokenNext().value;
+            int first = index;
+            if (intVal.type() != typeid(int)){
+                return false;
+            }
+            int second = boost::any_cast<int>(intVal);
+
+            return addTokenToPostfix(Token(Token::index, boost::any(std::make_pair(first, second))));
+            
+        }else {
+            return addTokenToPostfix(Token(Token::index, boost::any(index)));
+        }
+    } else {
+        return numberExpected();
+    }
+}
 
 }

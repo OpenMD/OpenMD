@@ -50,8 +50,10 @@
 #include "selection/Token.hpp"
 #include "selection/SelectionCompiler.hpp"
 #include "selection/NameFinder.hpp"
+#include "selection/DistanceFinder.hpp"
 #include "utils/BitSet.hpp"
 #include "primitives/StuntDouble.hpp"
+#include "utils/StringUtils.hpp"
 namespace oopse {
 
 
@@ -142,7 +144,7 @@ class SelectionEvaluator{
         BitSet comparatorInstruction(const Token& instruction); 
         void compareProperty(StuntDouble* sd, BitSet& bs, int property, int comparator, float comparisonValue);
         BitSet nameInstruction(const std::string& name);
-
+        BitSet indexInstruction(const boost::any& value);
         BitSet expression(const std::vector<Token>& tokens, int pc);
 
         BitSet lookupValue(const std::string& variable);
@@ -167,6 +169,15 @@ class SelectionEvaluator{
             evalError("unrecognized identifier:" + identifier);
         }    
 
+        void invalidIndexRange(std::pair<int, int> range) {
+            evalError("invalid index range: [" + toString(range.first) + ", " + toString(range.second) + ")");
+        }
+
+        void invalidIndex(int index) {
+            evalError("invalid index : " + toString(index) );
+        }
+
+        
         bool containDynamicToken(const std::vector<Token>& tokens);
         
         SelectionCompiler compiler;
@@ -190,7 +201,8 @@ class SelectionEvaluator{
         int statementLength;
 
         SimInfo* info;
-        NameFinder finder;
+        NameFinder nameFinder;
+        DistanceFinder distanceFinder;
         int nStuntDouble;   //natoms + nrigidbodies
         std::map<std::string, boost::any > variables;
 

@@ -49,8 +49,8 @@
 namespace oopse {
 
 
-SelectionEvaluator::SelectionEvaluator(SimInfo* si) : info(si), finder(info), isLoaded_(false){
-
+SelectionEvaluator::SelectionEvaluator(SimInfo* si) : info(si), nameFinder(info), distanceFinder(info), isLoaded_(false){
+    nStuntDouble = info->getNGlobalAtoms() + info->getNRigidBodies();
 }            
 
 bool SelectionEvaluator::loadScript(const std::string& filename, const std::string& script) {
@@ -181,6 +181,8 @@ void SelectionEvaluator::instructionDispatchLoop(BitSet& bs){
       case Token::name:
         stack.push(nameInstruction(boost::any_cast<std::string>(instruction.value)));
         break;
+      case Token::index:
+        stack.push(indexInstruction(instruction.value));
         break;
       case Token::identifier:
         stack.push(lookupValue(boost::any_cast<std::string>(instruction.value)));
@@ -211,6 +213,7 @@ BitSet SelectionEvaluator::comparatorInstruction(const Token& instruction) {
     float comparisonValue = boost::any_cast<float>(instruction.value);
     float propertyValue;
     BitSet bs(nStuntDouble);
+    bs.clearAll();
     
     SimInfo::MoleculeIterator mi;
     Molecule* mol;
@@ -277,14 +280,19 @@ void SelectionEvaluator::compareProperty(StuntDouble* sd, BitSet& bs, int proper
 }
 
 void SelectionEvaluator::withinInstruction(const Token& instruction, BitSet& bs){
-
+    
     boost::any withinSpec = instruction.value;
+    float distance;
     if (withinSpec.type() == typeid(float)){
-        //
-        return;
+        distance = boost::any_cast<float>(withinSpec);
+    } else if (withinSpec.type() == typeid(int)) {
+        distance = boost::any_cast<int>(withinSpec);    
+    } else {
+        evalError("casting error in withinInstruction");
+        bs.clearAll();
     }
     
-    evalError("Unrecognized within parameter");
+    bs = distanceFinder.find(bs, distance);            
 }
 
 void SelectionEvaluator::define() {
@@ -334,24 +342,27 @@ void SelectionEvaluator::select(BitSet& bs){
 
 BitSet SelectionEvaluator::lookupValue(const std::string& variable){
 
+    BitSet bs(nStuntDouble);
     std::map<std::string, boost::any>::iterator i = variables.find(variable);
-
+    
     if (i != variables.end()) {
         if (i->second.type() == typeid(BitSet)) {
             return boost::any_cast<BitSet>(i->second);
         } else if (i->second.type() ==  typeid(std::vector<Token>)){
-            BitSet bs = expression(boost::any_cast<std::vector<Token> >(i->second), 2);
+            bs = expression(boost::any_cast<std::vector<Token> >(i->second), 2);
             i->second =  bs; /**@todo fixme */
             return bs;
         }
     } else {
         unrecognizedIdentifier(variable);
     }
+
+    return bs;
 }
 
 BitSet SelectionEvaluator::nameInstruction(const std::string& name){
     
-    return finder.match(name);
+    return nameFinder.match(name);
 
 }    
 
@@ -380,7 +391,30 @@ BitSet SelectionEvaluator::evaluate() {
 
     return bs;
 }
-        
+
+BitSet SelectionEvaluator::indexInstruction(const boost::any& value) {
+    BitSet bs(nStuntDouble);
+
+    if (value.type() == typeid(int)) {
+        int index = boost::any_cast<int>(value);
+        if (index < 0 || index >= bs.size()) {
+            invalidIndex(index);
+        } else {
+            bs.setBitOn(index);
+        }
+    } else if (value.type() == typeid(std::pair<int, int>)) {
+        std::pair<int, int> indexRange= boost::any_cast<std::pair<int, int> >(value);
+        assert(indexRange.first <= indexRange.second);
+        if (indexRange.first < 0 || indexRange.second >= bs.size()) {
+            invalidIndexRange(indexRange);
+        }else {
+            bs.setRangeOn(indexRange.first, indexRange.second);
+        }
+    }
+
+    return bs;
+}
+
 //BitSet SelectionEvaluator::evaluate(int frameNo) {
 //
 //}

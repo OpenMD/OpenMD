@@ -141,7 +141,7 @@ class SelectionCompiler{
         bool clauseComparator();
         bool clauseChemObjName();        
         bool clauseName(std::string& name);
-
+        bool clauseIndex();
         Token tokenNext();
         boost::any valuePeek();
         int tokPeek();

@@ -78,6 +78,8 @@ TokenMap::TokenMap() {
     tokenMap_.insert(std::make_pair("mass", Token(Token::mass, std::string("mass"))));
     tokenMap_.insert(std::make_pair("dipole", Token(Token::dipole, std::string("dipole"))));
     tokenMap_.insert(std::make_pair("charge", Token(Token::charge, std::string("charge"))));
+    tokenMap_.insert(std::make_pair("to", Token(Token::to, std::string("to"))));
+    
     //tokenMap_.insert(std::make_pair("name", Token(Token::name, std::string("name"))));
     //tokenMap_.insert(std::make_pair("index", Token(Token::index, std::string("index"))));
     //tokenMap_.insert(std::make_pair("molname", Token(Token::molname, std::string("molname"))));

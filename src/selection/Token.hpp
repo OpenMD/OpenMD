@@ -119,7 +119,7 @@ class Token {
         const static int comparator        = (1 << 13) | expression;
         const static int predefinedset     = (1 << 14) | expression;
         const  static int embeddedExpression= (1 << 15); // embedded expression
-        
+        const static int index = (1 << 16) | expression;
         // rasmol commands
         const static int define       = command | expressionCommand |1;
         const static int select       = command |expressionCommand |2 ;
@@ -140,7 +140,7 @@ class Token {
         const static int all          = expression | 9 ; 
         const static int none      = expression | 10;
         const static int name            =  expression |11;
-
+        const static int to                = expression | 12;
         // miguel 2005 01 01
         // these are used to demark the beginning and end of expressions
         // they do not exist in the source code, but are emitted by the
