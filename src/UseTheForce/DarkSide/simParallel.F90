@@ -1,4 +1,3 @@
-
 !!
 !! Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
 !!
@@ -48,7 +47,7 @@
 !!
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: simParallel.F90,v 1.2 2005-01-12 22:40:45 gezelter Exp $, $Date: 2005-01-12 22:40:45 $, $Name: not supported by cvs2svn $, $Revision: 1.2 $
+!! @version $Id: simParallel.F90,v 1.3 2005-01-14 20:31:16 gezelter Exp $, $Date: 2005-01-14 20:31:16 $, $Name: not supported by cvs2svn $, $Revision: 1.3 $
 
 module mpiSimulation  
   use definitions
@@ -890,30 +889,4 @@ contains
 
 #endif // is_mpi
 end module mpiSimulation
-
-#ifdef IS_MPI
-  subroutine setFsimParallel(thisComponentPlan, nAtomTags, atomTags, &
-       nGroupTags, groupTags, status)
-       use mpiSimulation
-       
-    !! Passed Arguments
-    !! mpiComponentPlan struct from C
-    type (mpiComponentPlan), intent(inout) :: thisComponentPlan
-    !! Number of tags passed
-    integer, intent(in) :: nAtomTags, nGroupTags
-    !! Result status, 0 = normal, -1 = error
-    integer, intent(out) :: status
-    integer :: localStatus
-    !! Global reference tag for local particles
-    integer, dimension(nAtomTags), intent(inout) :: atomTags
-    integer, dimension(nGroupTags), intent(inout) :: groupTags
- 
-    call setupSimParallel(thisComponentPlan, nAtomTags, atomTags, &
-       nGroupTags, groupTags, status)
-
- 
- end subroutine 
- 
-#endif 
-
 

@@ -43,7 +43,7 @@
 !! Calculates Long Range forces Lennard-Jones interactions.
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: LJ.F90,v 1.6 2005-01-12 22:40:44 gezelter Exp $, $Date: 2005-01-12 22:40:44 $, $Name: not supported by cvs2svn $, $Revision: 1.6 $
+!! @version $Id: LJ.F90,v 1.7 2005-01-14 20:31:16 gezelter Exp $, $Date: 2005-01-14 20:31:16 $, $Name: not supported by cvs2svn $, $Revision: 1.7 $
 
 
 module lj
@@ -391,22 +391,3 @@ contains
   !! Calculates the mixing for sigma or epslon
     
 end module lj
-
-subroutine newLJtype(c_ident, sigma, epsilon, status)
-  use lj, ONLY : module_newLJtype => newLJtype
-  integer, parameter :: DP = selected_real_kind(15)
-  integer,intent(inout) :: c_ident
-  real(kind=dp),intent(inout) :: sigma
-  real(kind=dp),intent(inout) :: epsilon
-  integer,intent(inout) :: status
-  
-  call module_newLJtype(c_ident, sigma, epsilon, status)
-  
-end subroutine newLJtype
-
-subroutine useGeometricMixing()
-  use lj, ONLY: module_useGeometricMixing => useGeometricMixing
-  
-  call module_useGeometricMixing()
-  return
-end subroutine useGeometricMixing

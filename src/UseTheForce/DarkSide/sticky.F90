@@ -50,7 +50,7 @@
 !! @author Matthew Meineke
 !! @author Christopher Fennel
 !! @author J. Daniel Gezelter
-!! @version $Id: sticky.F90,v 1.3 2005-01-12 22:40:45 gezelter Exp $, $Date: 2005-01-12 22:40:45 $, $Name: not supported by cvs2svn $, $Revision: 1.3 $
+!! @version $Id: sticky.F90,v 1.4 2005-01-14 20:31:16 gezelter Exp $, $Date: 2005-01-14 20:31:16 $, $Name: not supported by cvs2svn $, $Revision: 1.4 $
 
 module sticky
 
@@ -506,16 +506,3 @@ if (.not.allocated(StickyMap)) then
     return
   end subroutine calc_sw_fnc
 end module sticky
-
-  subroutine newStickyType(c_ident, w0, v0, v0p, rl, ru, rlp, rup, isError)
-
-    use definitions, ONLY : dp   
-    use sticky, ONLY : module_newStickyType => newStickyType
-
-    integer, intent(inout) :: c_ident, isError
-    real( kind = dp ), intent(inout) :: w0, v0, v0p, rl, ru, rlp, rup
-    
-    call module_newStickyType(c_ident, w0, v0, v0p, rl, ru, rlp, rup, &
-         isError)
-    
-  end subroutine newStickyType
