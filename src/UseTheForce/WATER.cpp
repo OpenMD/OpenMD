@@ -660,6 +660,18 @@ void WATER::initializeAtoms( int nAtoms, Atom** the_atoms ){
       painCave.isFatal = 1;
       simError();
     }
+
+    if( currentAtomType->isDirectional ){
+      currentDirectionalType = 
+	headDirectionalType->find( the_atoms[i]->getType() );
+      if( currentDirectionalType == NULL ){
+	sprintf( painCave.errMsg, 
+		 "DirectionalType error, %s not found in force file.\n",
+		 the_atoms[i]->getType() );
+	painCave.isFatal = 1;
+	simError();
+      }
+
     the_atoms[i]->setMass( currentAtomType->mass );
     the_atoms[i]->setIdent( currentAtomType->ident );
 
@@ -674,16 +686,7 @@ void WATER::initializeAtoms( int nAtoms, Atom** the_atoms ){
 
     the_atoms[i]->setHasCharge(currentAtomType->isCharge);
 
-    if( currentAtomType->isDirectional ){
-      currentDirectionalType = 
-	headDirectionalType->find( the_atoms[i]->getType() );
-      if( currentDirectionalType == NULL ){
-	sprintf( painCave.errMsg, 
-		 "DirectionalType error, %s not found in force file.\n",
-		 the_atoms[i]->getType() );
-	painCave.isFatal = 1;
-	simError();
-      }
+
 
       // zero out the moments of inertia matrix
       for( j=0; j<3; j++ )
