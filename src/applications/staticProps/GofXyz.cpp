@@ -160,7 +160,7 @@ void GofXyz::writeRdf() {
  
             for(int j = 0; j < histogram_[i].size(); ++j) {
  
-                for(int k = 0;k < histogram_[i].size(); ++k) {
+                for(int k = 0;k < histogram_[i][j].size(); ++k) {
                     rdfStream.write(reinterpret_cast<char *>(&histogram_[i][j][k] ), sizeof(histogram_[i][j][k] ));
                 }
             }
