@@ -478,14 +478,14 @@ distclean : $(PackageListLoop)
 _distcleanall :
 	$(Delete) $(ObjectFiles) \
 	          $(ParallelObjectFiles) \
-		  $(JarFile) \
+		        $(JarFile) \
 	          $(SharedLibrary) \
 	          $(StaticLibrary) \
 	          $(ParallelSharedLibrary) \
 	          $(ParallelStaticLibrary) \
 	          $(Executable) \
 	          $(ParallelExecutable) \
-	          $(DependencyFile)
+	          $(DependencyFile) 
 
 
 # make depend
@@ -498,8 +498,8 @@ $(DependencyFile) : $(DerivedSource)
 	$(Print) $@ 
 	@cd $(PackageSourceDir)
 
-	touch Make.ctemp
-	touch Make.ctemp
+	@touch Make.ctemp
+	@touch Make.ctemp
 
 ifneq "$(words $(CppFiles))" "0"
 	$(CppCompiler) $(IncludePath) -MM $(CppFiles)  > Make.cpptemp
@@ -515,8 +515,8 @@ ifneq "$(words $(CFiles))" "0"
 endif
 
 ifneq "$(words $(F90Files))" "0"
-	$(DEV_ROOT)/scripts/filepp  -I $(DEV_ROOT)/src -od '$$(DEV_ROOT)/obj/' -D__F90  *.F90 > Make.ftemp
-	$(DEV_ROOT)/scripts/filepp  -I $(DEV_ROOT)/src -od '$$(DEV_ROOT)/MPIobj/' -DIS_MPI -D__F90  *.F90 >> Make.ftemp
+	$(DEV_ROOT)/scripts/filepp  -I $(DEV_ROOT)/src -od '$$(DEV_ROOT)/obj/' -D__F90   $(F90Files) > Make.ftemp
+	$(DEV_ROOT)/scripts/filepp  -I $(DEV_ROOT)/src -od '$$(DEV_ROOT)/MPIobj/' -DIS_MPI -D__F90   $(F90Files) >> Make.ftemp
 	cat Make.ftemp >> $(DependencyFile)
 endif
 	$(Delete) Make.cpptemp Make.ctemp Make.ftemp
@@ -547,6 +547,10 @@ $(Executable).pure :
 	$(LibList) $(ObjectFiles) -o $@
 
 pure : $(Executable).pure
+
+#make cvslog
+cvslog:
+	$(DEV_ROOT)/scripts/cvs2cl.pl
 
 # Execute
 _runexe :

@@ -73,15 +73,15 @@ PackageLibs = \
 
 IncludeDirs = \
 	/usr/local/include \
-	/usr/local/mpich/include
+	
 
 LibraryDirs = \
 	/usr/local/lib \
-	/usr/local/mpich/lib 
+	 
 
 Libraries = \
 	-lsprng \
-	-lmpich 
+	 
 
 LinkOptions = \
 	 -L/usr/local/intel/compiler81/lib -L/usr/lib -lifport -lifcore -limf -lm -lcxa -lirc -lunwind -lirc_s
@@ -241,7 +241,7 @@ MakeDepend             = makedepend
 Install                = /usr/bin/install -c
 InstallProgram         = ${INSTALL}
 InstallData            = ${INSTALL} -m 644
-MakeDir                = /home/maul/gezelter/gezelter/OOPSE-2.0/ac-tools/shtool mkdir -p -f
+MakeDir                = /home/maul/gezelter/tim/code/OOPSE-2.0/ac-tools/shtool mkdir -p -f
 Delete                 = rm -fr
 StaticArchiver         = ar
 DynamicArchiver        = icc
@@ -485,7 +485,7 @@ _distcleanall :
 	          $(ParallelStaticLibrary) \
 	          $(Executable) \
 	          $(ParallelExecutable) \
-	          $(DependencyFile)
+	          $(DependencyFile) 
 
 
 # make depend
@@ -515,8 +515,8 @@ ifneq "$(words $(CFiles))" "0"
 endif
 
 ifneq "$(words $(F90Files))" "0"
-	$(DEV_ROOT)/scripts/filepp  -I $(DEV_ROOT)/src -od '$$(DEV_ROOT)/obj/' -D__F90  *.F90 > Make.ftemp
-	$(DEV_ROOT)/scripts/filepp  -I $(DEV_ROOT)/src -od '$$(DEV_ROOT)/MPIobj/' -DIS_MPI -D__F90  *.F90 >> Make.ftemp
+	$(DEV_ROOT)/scripts/filepp  -I $(DEV_ROOT)/src -od '$$(DEV_ROOT)/obj/' -D__F90   $(F90Files) > Make.ftemp
+	$(DEV_ROOT)/scripts/filepp  -I $(DEV_ROOT)/src -od '$$(DEV_ROOT)/MPIobj/' -DIS_MPI -D__F90   $(F90Files) >> Make.ftemp
 	cat Make.ftemp >> $(DependencyFile)
 endif
 	$(Delete) Make.cpptemp Make.ctemp Make.ftemp
@@ -547,6 +547,9 @@ $(Executable).pure :
 	$(LibList) $(ObjectFiles) -o $@
 
 pure : $(Executable).pure
+
+cvslog:
+	$(DEV_ROOT)/scripts/cvs2cl.pl
 
 # Execute
 _runexe :
