@@ -54,10 +54,19 @@ module electrostatic_module
 
   PRIVATE
 
+  !! these prefactors convert the multipole interactions into kcal / mol
+  !! all were computed assuming distances are measured in angstroms
+  !! Charge-Charge, assuming charges are measured in electrons
   real(kind=dp), parameter :: pre11 = 332.0637778_dp
-  real(kind=dp), parameter :: pre12 = 69.13291783_dp
-  real(kind=dp), parameter :: pre22 = 14.39289874_dp
-  real(kind=dp), parameter :: pre14 = 0.0_dp
+  !! Charge-Dipole, assuming charges are measured in electrons, and
+  !! dipoles are measured in debyes
+  real(kind=dp), parameter :: pre12 = 69.13373_dp
+  !! Dipole-Dipole, assuming dipoles are measured in debyes
+  real(kind=dp), parameter :: pre22 = 14.39325_dp
+  !! Charge-Quadrupole, assuming charges are measured in electrons, and
+  !! quadrupoles are measured in 10^-26 esu cm^2
+  !! This unit is also known affectionately as an esu centi-barn.
+  real(kind=dp), parameter :: pre14 = 69.13373_dp
 
   public :: newElectrostaticType
   public :: setCharge
