@@ -41,13 +41,10 @@ PackageLibs = \
 	math \
 	types \
 	primitives \
-	visitors \
 	UseTheForce/DarkSide \
 	UseTheForce \
 	brains \
 	io \
-	integrators \
-	minimizers \
 	constraints \
 	profiling \
 	restraints \

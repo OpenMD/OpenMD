@@ -1,12 +1,116 @@
-2004-11-02 11:59  tim
+2004-11-04 14:48  tim
 
-	* src/brains/SimModel.cpp: file SimModel.cpp was initially added on
+	* src/brains/: SimInfo.cpp, SimInfo.hpp, SimModel.cpp,
+	SimModel.hpp, Snapshot.hpp, Stats.cpp, Stats.hpp: adding Stats
+	class
+
+2004-11-04 14:48  tim
+
+	* src/brains/Stats.cpp: file Stats.cpp was initially added on
 	branch new_design.
+
+2004-11-04 14:48  tim
+
+	* src/brains/Stats.hpp: file Stats.hpp was initially added on
+	branch new_design.
+
+2004-11-04 11:22  gezelter
+
+	* src/primitives/: DirectionalAtom.cpp, DirectionalAtom.hpp,
+	RigidBody.hpp, StuntDouble.cpp, StuntDouble.hpp: isLinear and
+	linearAxis are virtual in StuntDouble, but are implemented by
+	DirectionalAtom and RigidBody In StuntDouble, they should return
+	false and "-1" but there should be logic to figure them out in the
+	other two classes
+
+2004-11-04 11:20  gezelter
+
+	* src/: brains/ForceFields.cpp, integrators/Integrator.cpp: Don't
+	remember what I did
+
+2004-11-04 11:20  gezelter
+
+	* src/UseTheForce/DarkSide/shapes.F90: Breaky Breaky
+
+2004-11-04 11:20  gezelter
+
+	* src/UseTheForce/: DUFF.cpp, WATER.cpp, doForces.F90: fixed useXXX
+	in the entry_plug so that it only is set if the atoms really are in
+	the simulation
+
+2004-11-04 11:20  gezelter
+
+	* samples/water/ssd/ssd.md: testing force fields
+
+2004-11-04 11:19  gezelter
+
+	* samples/shape/linear.in: testing shapes
+
+2004-11-03 14:56  tim
+
+	* src/brains/SimCreator.cpp: file SimCreator.cpp was initially
+	added on branch new_design.
+
+2004-11-03 14:56  tim
+
+	* src/brains/: SimCreator.cpp, SimCreator.hpp: Adding SimCreator
+	class(similar as SimSetup)
+
+2004-11-03 14:56  tim
+
+	* src/brains/SimCreator.hpp: file SimCreator.hpp was initially
+	added on branch new_design.
+
+2004-11-03 13:00  tim
+
+	* src/: UseTheForce/DUFF.cpp, UseTheForce/EAM_FF.cpp,
+	UseTheForce/ForceFields.cpp, UseTheForce/LJFF.cpp,
+	UseTheForce/Shapes_FF.cpp, UseTheForce/WATER.cpp,
+	brains/DataStorage.hpp, primitives/Atom.hpp,
+	primitives/DirectionalAtom.hpp, restraints/Restraints.hpp,
+	visitors/BaseVisitor.hpp, visitors/ZconsVisitor.cpp: ForceFiled get
+	compiled. Still a long way to go ......
+
+2004-11-03 11:08  tim
+
+	* ChangeLog, src/brains/SimInfo.cpp, src/brains/SimInfo.hpp,
+	src/constraints/ZConstraint.cpp, src/integrators/NPT.cpp,
+	src/integrators/NPTf.cpp, src/integrators/NPTi.cpp,
+	src/integrators/NPTxyz.cpp, src/integrators/NVT.cpp,
+	src/io/ZConsReader.cpp, src/primitives/Bend.cpp,
+	src/primitives/Bond.cpp, src/primitives/GhostBend.cpp,
+	src/primitives/Molecule.cpp, src/primitives/Molecule.hpp,
+	src/primitives/SRI.hpp, src/primitives/StuntDouble.cpp,
+	src/primitives/StuntDouble.hpp, src/primitives/Torsion.cpp,
+	src/utils/GenericData.hpp, src/visitors/AtomVisitor.cpp,
+	src/visitors/OtherVisitor.cpp, src/visitors/RigidBodyVisitor.cpp,
+	src/visitors/ZconsVisitor.cpp, test/utils/Makefile: mess up ......
+
+2004-11-02 17:41  tim
+
+	* src/utils/LocalndexManager.hpp: file LocalndexManager.hpp was
+	initially added on branch new_design.
+
+2004-11-02 17:41  tim
+
+	* src/brains/Migrator.hpp: file Migrator.hpp was initially added on
+	branch new_design.
+
+2004-11-02 17:41  tim
+
+	* src/: brains/Migrator.hpp, brains/SimModel.cpp,
+	utils/LocalndexManager.hpp: Adding LocalIndexManager and Migrator.
+	Need unit test
 
 2004-11-02 11:59  tim
 
 	* src/brains/: SimModel.cpp, SimModel.hpp, SimSnapshotManager.cpp,
 	SimSnapshotManager.hpp: SimModel in progress
+
+2004-11-02 11:59  tim
+
+	* src/brains/SimModel.cpp: file SimModel.cpp was initially added on
+	branch new_design.
 
 2004-11-02 10:28  chrisfen
 
@@ -16,13 +120,13 @@
 
 2004-11-02 10:27  tim
 
-	* src/utils/MemoryUtils.hpp: adding MemoryUtils which provide some
-	functions for dealing with memory issue
+	* src/utils/MemoryUtils.hpp: file MemoryUtils.hpp was initially
+	added on branch new_design.
 
 2004-11-02 10:27  tim
 
-	* src/utils/MemoryUtils.hpp: file MemoryUtils.hpp was initially
-	added on branch new_design.
+	* src/utils/MemoryUtils.hpp: adding MemoryUtils which provide some
+	functions for dealing with memory issue
 
 2004-11-02 10:23  tim
 
