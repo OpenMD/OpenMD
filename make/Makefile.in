@@ -41,6 +41,7 @@ PackageLibs = \
 	math \
 	types \
 	primitives \
+	visitors \
 	UseTheForce/DarkSide \
 	UseTheForce \
 	brains \
@@ -48,6 +49,7 @@ PackageLibs = \
 	constraints \
 	profiling \
 	restraints \
+	minimizers \
 
 #packages containing applications
 Applications = \
