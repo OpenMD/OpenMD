@@ -85,7 +85,7 @@ begin BondTypes
 //V_Fixed = 0
 
 //Atom1	Atom2	Harmonic	b0	Kb (kcal/mol)
-//V_Harmonic = Kb(b- bo)^2
+//V_Harmonic = 0.5*Kb(b- bo)^2
 //Harmonic Examples
 HEAD	CH3	Harmonic		2.75		260
 HEAD	CH2	Harmonic		2.75		260
@@ -124,48 +124,49 @@ begin BendTypes
 
 //Harmonic
 //Atom1	Atom2	Atom3	Harmonic	Theta0	Ktheta
-//V_Harmonic = Ktheta(Theta - Theta0)^2
+//V_Harmonic = 0.5*Ktheta(Theta - Theta0)^2
 //Ktheta: kcal/mole/rad**2
 //Theta0: degrees
 //Harmonic examples
-HEAD	CH2	HEAD	Harmonic	114.0	58.84
-HEAD	CH2	CH3	Harmonic	114.0	58.84
-HEAD	CH2	CH2	Harmonic	114.0	58.84
-HEAD	TB1	TB1	Harmonic	114.0	58.84
-HEAD	TB2	TB2	Harmonic	114.0	58.84
-HEAD	TB3	TB3	Harmonic	114.0	58.84
-HEAD	CH2	CH	Harmonic	114.0	58.84
-HEAD	CH	CH3	Harmonic	112.0	58.84
-HEAD	CH	CH2	Harmonic	112.0	58.84
-HEAD	CH	CH	Harmonic	112.0	58.84
-CH3	CH2	CH3	Harmonic	114.0	58.84
-CH3	CH2	CH2	Harmonic	114.0	58.84
-CH3	CH2	CH	Harmonic	114.0	58.84
-CH3	CH	CH3	Harmonic	112.0	58.84
-CH3	CH	CH2	Harmonic	112.0	58.84
-CH3	CH	CH	Harmonic	112.0	58.84
-CH2	CH2	CH2	Harmonic	114.0	58.84
-CH2	CH2	CH	Harmonic	114.0	58.84
-CH2	CH	CH2	Harmonic	112.0	58.84
-CH2	CH	CH	Harmonic	112.0	58.84
-CH	CH2	CH	Harmonic	114.0	58.84
-CH	CH	CH	Harmonic	112.0	58.84
-TB1	TB1	TB1	Harmonic	114.0	58.84
-TB2	TB2	TB2	Harmonic	114.0	58.84
-TB3	TB3	TB3	Harmonic	114.0	58.84
-TE1	TB1	TB1	Harmonic	114.0	58.84
-TE2	TB2	TB2	Harmonic	114.0	58.84
-TE3	TB3	TB3	Harmonic	114.0	58.84
+//
+HEAD	CH2	HEAD	Harmonic	114.0	117.68
+HEAD	CH2	CH3	Harmonic	114.0	117.68
+HEAD	CH2	CH2	Harmonic	114.0	117.68
+HEAD	TB1	TB1	Harmonic	114.0	117.68
+HEAD	TB2	TB2	Harmonic	114.0	117.68
+HEAD	TB3	TB3	Harmonic	114.0	117.68
+HEAD	CH2	CH	Harmonic	114.0	117.68
+HEAD	CH	CH3	Harmonic	112.0	117.68
+HEAD	CH	CH2	Harmonic	112.0	117.68
+HEAD	CH	CH	Harmonic	112.0	117.68
+CH3	CH2	CH3	Harmonic	114.0	117.68
+CH3	CH2	CH2	Harmonic	114.0	117.68
+CH3	CH2	CH	Harmonic	114.0	117.68
+CH3	CH	CH3	Harmonic	112.0	117.68
+CH3	CH	CH2	Harmonic	112.0	117.68
+CH3	CH	CH	Harmonic	112.0	117.68
+CH2	CH2	CH2	Harmonic	114.0	117.68
+CH2	CH2	CH	Harmonic	114.0	117.68
+CH2	CH	CH2	Harmonic	112.0	117.68
+CH2	CH	CH	Harmonic	112.0	117.68
+CH	CH2	CH	Harmonic	114.0	117.68
+CH	CH	CH	Harmonic	112.0	117.68
+TB1	TB1	TB1	Harmonic	114.0	117.68
+TB2	TB2	TB2	Harmonic	114.0	117.68
+TB3	TB3	TB3	Harmonic	114.0	117.68
+TE1	TB1	TB1	Harmonic	114.0	117.68
+TE2	TB2	TB2	Harmonic	114.0	117.68
+TE3	TB3	TB3	Harmonic	114.0	117.68
 
 //GhostBend
 //Atom1	Atom2	GHOST	GhostBend	Theta0	Ktheta
 //Atom2 must be directional atom
 //Ghost examples
-CH2	HEAD	GHOST	GhostBend	129.783	0.001769723
-CH2	HEAD	GHOST	GhostBend	90.0	58.84	
-TB1	HEAD	GHOST	GhostBend	90.0	58.84	
-TB2	HEAD	GHOST	GhostBend	90.0	58.84
-TB3	HEAD	GHOST	GhostBend	90.0	58.84
+CH2	HEAD	GHOST	GhostBend	129.783	0.00354
+CH2	HEAD	GHOST	GhostBend	90.0	117.68	
+TB1	HEAD	GHOST	GhostBend	90.0	117.68	
+TB2	HEAD	GHOST	GhostBend	90.0	117.68
+TB3	HEAD	GHOST	GhostBend	90.0 	117.68	
 
 //UreyBradley
 //Atom1	Atom2	Atom3	UreyBradley		Theta0	Ktheta	S0	Kub
