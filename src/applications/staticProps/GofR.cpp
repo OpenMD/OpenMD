@@ -120,7 +120,9 @@ void GofR::writeRdf() {
         
     } else {
 
-
+        sprintf(painCave.errMsg, "GofR: unable to open %s\n", outputFilename_.c_str());
+        painCave.isFatal = 1;
+        simError();  
     }
 
     rdfStream.close();

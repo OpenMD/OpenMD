@@ -119,19 +119,23 @@ void GofAngle2::writeRdf() {
         rdfStream << "#radial distribution function\n";
         rdfStream << "#selection1: (" << selectionScript1_ << ")\t";
         rdfStream << "selection2: (" << selectionScript2_ << ")\n";
-        rdfStream << "#r\tcorrValue\n";
+        rdfStream << "#nAngleBins =" << nAngleBins_ << "deltaCosAngle = " << deltaCosAngle_ << "\n";
         for (int i = 0; i < avgGofr_.size(); ++i) {
             double cosAngle1 = -1.0 + (i + 0.5)*deltaCosAngle_;
 
             for(int j = 0; j < avgGofr_[i].size(); ++j) {
                 double cosAngle2 = -1.0 + (j + 0.5)*deltaCosAngle_;
-                rdfStream << cosAngle1 << "\t" << cosAngle2 << "\t" << avgGofr_[i][j]/nProcessed_ << "\n";
+                rdfStream <<avgGofr_[i][j]/nProcessed_ << "\t";
             }
+
+            rdfStream << "\n";
         }
         
     } else {
 
-
+        sprintf(painCave.errMsg, "GofAngle2: unable to open %s\n", outputFilename_.c_str());
+        painCave.isFatal = 1;
+        simError();  
     }
 
     rdfStream.close();

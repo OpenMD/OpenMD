@@ -147,7 +147,9 @@ void GofXyz::writeRdf() {
         
     } else {
 
-
+        sprintf(painCave.errMsg, "GofXyz: unable to open %s\n", outputFilename_.c_str());
+        painCave.isFatal = 1;
+        simError();  
     }
 
     rdfStream.close();
