@@ -34,9 +34,11 @@
 #ifndef MATH_RECTMATRIX_HPP
 #define MATH_RECTMATRIX_HPP
 
+#include <cmath>
 #include "Vector.hpp"
 
 namespace oopse {
+    const double epsilon = 0.000001;
 
     template<typename T>
     inline bool equal(T e1, T e2) {
@@ -45,12 +47,12 @@ namespace oopse {
 
     template<>
     inline bool equal(float e1, float e2) {
-        return e1 == e2;
+        return fabs(e1 - e2) < epsilon;
     }
 
     template<>
     inline bool equal(double e1, double e2) {
-        return e1 == e2;
+        return fabs(e1 - e2) < epsilon;
     }
 
     /**
