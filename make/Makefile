@@ -72,19 +72,26 @@ PackageLibs = \
 	restraints \
 
 IncludeDirs = \
-	/usr/include \
-	/usr/local/include 
+	/usr/local/include \
+	
 
 LibraryDirs = \
-        /usr/lib \
-	/usr/local/mpich/lib \
 	/usr/local/lib \
-	/usr/local/intel/compiler81/lib \
+	 
 
 Libraries = \
-        mpich \
-	sprng \
-	ifcore \
+	-lsprng \
+	 
+
+LinkOptions = \
+	 -L/usr/local/intel/compiler81/lib -L/usr/lib -lifport -lifcore -limf -lm -lcxa -lirc -lunwind -lirc_s
+
+OopseHome       = /usr/local/oopse
+ForceParamDir   = /usr/local/oopse/share/forceFields/
+SampleSimDir    = /usr/local/oopse/share/samples/
+FrcDeclare      = -DFRC_PATH="$(ForceParamDir)"
+ParallelDeclare = -DIS_MPI
+
 
 #---------------------------------------------------------------------------
 #
@@ -214,7 +221,7 @@ JavaPackageNames = $(subst /,.,$(JavaPackages))
 IncludePath      = -I$(SourceDir) $(IncludeDirs:%=-I%)
 LibDirs          = -L$(LibDir)    $(LibraryDirs:%=-L%)
 LocalLibs        = $(subst /,,$(patsubst %, oopse_%, $(PackageLibs))) 
-LibList          = $(LocalLibs:%=-l%) $(Libraries:%=-l%)
+LibList          = $(LocalLibs:%=-l%) $(Libraries)
 
 
 #---------------------------------------------------------------------------
@@ -232,7 +239,7 @@ MakeDepend             = makedepend
 Install                = /usr/bin/install -c
 InstallProgram         = ${INSTALL}
 InstallData            = ${INSTALL} -m 644
-MakeDir                = /home/maul/gezelter/tim/code/OOPSE-2.0/ac-tools/shtool mkdir -p -f
+MakeDir                = /home/maul/gezelter/gezelter/OOPSE-2.0/ac-tools/shtool mkdir -p -f
 Delete                 = rm -fr
 StaticArchiver         = ar
 DynamicArchiver        = icc
@@ -260,8 +267,13 @@ JavaArchiverOptions    =
 JniOptions             =
 RmiOptions             = -d $(TargetDir) -classpath $(ClassPath) \
 			 -sourcepath $(SourceDir)
+COptions               = $(FrcDeclare)
+CParallelOptions       = $(FrcDeclare) $(ParallelDeclare)
+CppOptions             = $(FrcDeclare)
+CppParallelOptions     = $(FrcDeclare) $(ParallelDeclare)
 FortranOptions         =
-F90Options             =  -I$(SourceDir) -module $(TargetDir) 
+F90Options             =  -fpp1  -O -I$(SourceDir) -module $(TargetDir) 
+F90ParallelOptions     =  -fpp1  -O -I$(SourceDir) -module $(TargetDir)   $(ParallelDeclare)
 JavaCompilerOptions    = -d $(TargetDir) -classpath $(ClassPath) \
 			 -sourcepath $(SourceDir) -deprecation
 JavaRunOptions         = -classpath $(ClassPath) 

@@ -72,19 +72,26 @@ PackageLibs = \
 	restraints \
 
 IncludeDirs = \
-	/usr/include \
-	/usr/local/include 
+	@SPRNG_INC_DIR@ \
+	@MPI_INC_DIR@
 
 LibraryDirs = \
-        /usr/lib \
-	/usr/local/mpich/lib \
-	/usr/local/lib \
-	/usr/local/intel/compiler81/lib \
+	@SPRNG_LIB_DIR@ \
+	@MPI_LIB_DIR@ 
 
 Libraries = \
-        mpich \
-	sprng \
-	ifcore \
+	@SPRNG_LIB@ \
+	@MPI_LIB@ 
+
+LinkOptions = \
+	@F90LIBS@
+
+OopseHome       = @OOPSE_HOME@
+ForceParamDir   = @OOPSE_HOME@/share/forceFields/
+SampleSimDir    = @OOPSE_HOME@/share/samples/
+FrcDeclare      = -DFRC_PATH="$(ForceParamDir)"
+ParallelDeclare = -DIS_MPI
+
 
 #---------------------------------------------------------------------------
 #
@@ -214,7 +221,7 @@ JavaPackageNames = $(subst /,.,$(JavaPackages))
 IncludePath      = -I$(SourceDir) $(IncludeDirs:%=-I%)
 LibDirs          = -L$(LibDir)    $(LibraryDirs:%=-L%)
 LocalLibs        = $(subst /,,$(patsubst %, oopse_%, $(PackageLibs))) 
-LibList          = $(LocalLibs:%=-l%) $(Libraries:%=-l%)
+LibList          = $(LocalLibs:%=-l%) $(Libraries)
 
 
 #---------------------------------------------------------------------------
@@ -260,8 +267,13 @@ JavaArchiverOptions    =
 JniOptions             =
 RmiOptions             = -d $(TargetDir) -classpath $(ClassPath) \
 			 -sourcepath $(SourceDir)
+COptions               = $(FrcDeclare)
+CParallelOptions       = $(FrcDeclare) $(ParallelDeclare)
+CppOptions             = $(FrcDeclare)
+CppParallelOptions     = $(FrcDeclare) $(ParallelDeclare)
 FortranOptions         =
-F90Options             =  -I$(SourceDir) -module $(TargetDir) 
+F90Options             =  @PREPFLAG@ @F90FLAGS@ @MODDIRFLAG@$(SourceDir) -module $(TargetDir) 
+F90ParallelOptions     =  @PREPFLAG@ @F90FLAGS@ @MODDIRFLAG@$(SourceDir) -module $(TargetDir)  @PREPDEFFLAG@$(ParallelDeclare)
 JavaCompilerOptions    = -d $(TargetDir) -classpath $(ClassPath) \
 			 -sourcepath $(SourceDir) -deprecation
 JavaRunOptions         = -classpath $(ClassPath) 
