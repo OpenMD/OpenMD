@@ -384,15 +384,8 @@ bool SelectionCompiler::lookingAtLookupToken() {
         case '(':
         case ')':
         case ',':
-        case '*':
-        case '-':
         case '[':
         case ']':
-        case '+':
-        case ':':
-        case '@':
-        case '.':
-        case '%':
         break;
         case '&':
         case '|':
@@ -417,9 +410,10 @@ bool SelectionCompiler::lookingAtLookupToken() {
             if ((ch < 'a' || ch > 'z') && (ch < 'A' && ch > 'Z') && ch != '_') {
                 return false;
             }
+        case '*':
         case '?': // include question marks in identifier for atom expressions
-            while (ichT < cchScript && !std::isspace(ch = script[ichT]) && (std::isalpha(ch) ||std::isdigit(ch) ||
-                ch == '_' || ch == '?') ) {
+            while (ichT < cchScript && !std::isspace(ch = script[ichT]) && 
+                    (std::isalpha(ch) ||std::isdigit(ch) || ch == '_' || ch == '.' || ch == '*' || ch == '?' || ch == '+' || ch == '-' || ch == '[' || ch == ']') ){
 
                 ++ichT;
             }
@@ -651,75 +645,41 @@ bool SelectionCompiler::clauseWithin() {
 }
 
 bool SelectionCompiler::clauseChemObjName() {
-    std::string chemObjName;
-    int tok = tokPeek();
-    if (!clauseName(chemObjName)){
-        return false;
-    }
+    Token token = tokenNext();
+    if (token.tok == Token::identifier && token.value.type() == typeid(std::string)) {
 
-
-    tok = tokPeek();
-    //allow two dot at most
-    if (tok == Token::dot) {
-        tokenNext();
-        chemObjName += ".";
-        if (!clauseName(chemObjName)) {
-            return false;
+        std::string name = boost::any_cast<std::string>(token.value);
+        if (isNameValid(name)) {
+            return addTokenToPostfix(Token(Token::name, name));
+        } else {
+            return compileError("invalid name: " + name);
         }
-        tok = tokPeek();
-        if (tok == Token::dot) {
-            tokenNext();
-            chemObjName += ".";
+    } 
 
-            if (!clauseName(chemObjName)) {
-                return false;
-            }
-        }        
-    }
-
-    return addTokenToPostfix(Token(Token::name, chemObjName));
+    return false;
+        
 }
 
-bool SelectionCompiler:: clauseName(std::string& name) {
+bool SelectionCompiler::isNameValid(const std::string& name) {
+	  int nbracket = 0;
+    int ndot = 0;
+    for (int i =0 ; i < name.size(); ++i) {
+        switch(name[i]) {
 
-    int tok = tokPeek();
-
-    if (tok == Token::asterisk || tok == Token::identifier || tok == Token::integer) {
-
-        Token token = tokenNext();
-        if (token.value.type() == typeid(std::string)) {
-            name += boost::any_cast<std::string>(token.value);
-        } else if (token.value.type() == typeid(int)){
-            int intVal = boost::any_cast<int>(token.value);
-            char buffer[255];
-	    sprintf(buffer,"%d", intVal);
-            name += buffer; /** @todo */
-            //name += toString<int>(intVal);
+          case '[' :
+              ++nbracket;
+              break;
+          case ']' :
+              --nbracket;
+              break;
+          case '.' :
+              ++ndot;
+              break;       
         }
-        while(true){
-            tok = tokPeek();
-            switch (tok) {
-                case Token::asterisk :
-                    name += "*";
-                    tokenNext();
-                    break;
-                case Token::identifier :
-                    name += boost::any_cast<std::string>(tokenNext().value);
-                    break;
-                case Token::integer :
-                    name += toString(boost::any_cast<int>(tokenNext().value));
-                    break;
-                case Token::dot :
-                    return true;
-                default :
-                    return true;
-            }
-        }
-        
-    }else {
-        return false;
     }
 
+    //only allow 3 dots at most
+    return (ndot <=3 && nbracket == 0) ? true : false;
 }
 
 bool SelectionCompiler::clauseIndex(){

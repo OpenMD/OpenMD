@@ -130,7 +130,7 @@ class Token {
         // atom expression operators
         const static int leftparen    = expression |  0;
         const static int rightparen   = expression |  1;
-        const static int hyphen       = expression |  2;
+        const static int to                = expression | 2;
         const static int opAnd        = expression |  3;
         const static int opOr         = expression |  4;
         const static int opNot        = expression |  5;
@@ -139,8 +139,7 @@ class Token {
         const static int dot          = expression | 8;
         const static int all          = expression | 9 ; 
         const static int none      = expression | 10;
-        const static int name            =  expression |11;
-        const static int to                = expression | 12;
+	const static int name      = expression | 11;
         // miguel 2005 01 01
         // these are used to demark the beginning and end of expressions
         // they do not exist in the source code, but are emitted by the

@@ -106,7 +106,6 @@ class SelectionCompiler{
                 strError += filename;
             }
 
-            strError += " line#" + lineCurrent;
             return strError;
         }
 
@@ -140,14 +139,13 @@ class SelectionCompiler{
         bool clauseWithin();
         bool clauseComparator();
         bool clauseChemObjName();        
-        bool clauseName(std::string& name);
         bool clauseIndex();
         Token tokenNext();
         boost::any valuePeek();
         int tokPeek();
 
         bool addTokenToPostfix(const Token& token);
-
+        bool isNameValid(const std::string& name);
 
         bool compileError(const std::string& errorMessage) {
             std::cerr << "SelectionCompiler Error: " << errorMessage << std::endl;

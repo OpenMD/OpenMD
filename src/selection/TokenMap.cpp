@@ -53,7 +53,6 @@ TokenMap::TokenMap() {
     //expressions
     tokenMap_.insert(TokenMapType::value_type("(", Token(Token::leftparen, std::string("("))));
     tokenMap_.insert(TokenMapType::value_type(")", Token(Token::rightparen, std::string(")"))));
-    tokenMap_.insert(TokenMapType::value_type("-", Token(Token::hyphen, std::string("-"))));
 
     tokenMap_.insert(TokenMapType::value_type("and", Token(Token::opAnd, std::string("and"))));
     tokenMap_.insert(TokenMapType::value_type("&", Token(Token::opAnd, std::string("and"))));
@@ -79,7 +78,6 @@ TokenMap::TokenMap() {
     tokenMap_.insert(TokenMapType::value_type("charge", Token(Token::charge, std::string("charge"))));
     tokenMap_.insert(TokenMapType::value_type("to", Token(Token::to, std::string("to"))));
     
-    tokenMap_.insert(TokenMapType::value_type("*", Token(Token::asterisk, std::string("*"))));
     tokenMap_.insert(TokenMapType::value_type("all", Token(Token::all, std::string("all"))));
     tokenMap_.insert(TokenMapType::value_type("none", Token(Token::none, std::string("none"))));
 }

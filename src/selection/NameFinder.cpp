@@ -141,13 +141,8 @@ BitSet NameFinder::match(const std::string& name){
     switch(size) {
         case 1 :
             //could be molecule name, atom name and rigidbody name
-            if (names[0] == "*"){
-                //if all molecules are selected, we don't need to do the matching, just set all of the bits
-                bs.setAll();
-            } else{
-                matchMolecule(names[0], bs);
-                matchStuntDouble("*", names[0], bs);
-            } 
+            matchMolecule(names[0], bs);
+            matchStuntDouble("*", names[0], bs);
             
             break;
         case 2:
