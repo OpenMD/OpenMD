@@ -86,13 +86,16 @@ bool next_combination(std::vector<int> sequence, int totNum, int beginIndex = 0)
                 for(int i = 0; i < currentSize; i++)
                     sequence[i] = beginIndex + i;
                 sequence.push_back(beginIndex + currentSize);
-            }            
+                
+		return true; 
+	    }            
         } else {
             ++sequence[j];
 
             for(int k = j + 1; k < currentSize; k++)
                 sequence[k] = sequence[k-1] + 1; 
 
+            return true;
         }
         
         
