@@ -42,7 +42,6 @@
 #include <cmath>
 
 
-#include "integrators/Integrator.cpp"
 #include "io/StatWriter.hpp"
 #include "minimizers/Minimizer.hpp"
 #include "primitives/Molecule.hpp"

@@ -44,7 +44,6 @@
 
 #include <iostream>
 
-#include "integrators/Integrator.hpp"
 #include "io/DumpWriter.hpp"
 #include "io/StatWriter.hpp"
 #include "minimizers/MinimizerParameterSet.hpp"
