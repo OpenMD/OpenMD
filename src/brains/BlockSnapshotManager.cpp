@@ -72,7 +72,7 @@ BlockSnapshotManager::BlockSnapshotManager(SimInfo* info, const std::string& fil
     }  
     
     for (int i = 0; i < nblocks; ++i) {
-        blocks_.push_back(SnapshotBlock(i, (i+1)*nSnapshotPerBlock_));    
+        blocks_.push_back(SnapshotBlock(i*nSnapshotPerBlock_, (i+1)*nSnapshotPerBlock_));    
     }
     //the last block may not have nSnapshotPerBlock frames, we need to consider this special situation
     blocks_.back().second = nframes_;
