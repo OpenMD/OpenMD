@@ -54,7 +54,7 @@ namespace oopse {
 
 /**
  * @class ParallelRandNumGen a parallel random number generator
- * @note use MTRand if you want a non-parallel random number generator in MPI enviroment
+ * @note use SeqRandNumGen if you want a non-parallel random number generator.
  */
 class ParallelRandNumGen : public RandNumGen{
     public:
@@ -74,7 +74,7 @@ class ParallelRandNumGen : public RandNumGen{
          ParallelRandNumGen& operator =(const ParallelRandNumGen&);
 
         static int nCreatedRNG_; /**< number of created random number of generator*/
-
+        int myRank_; /**@todo Fixed Me */
 };
 
 }

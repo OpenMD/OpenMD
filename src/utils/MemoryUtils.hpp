@@ -48,15 +48,15 @@
 
 #ifndef UTILS_MEMORYUTILS_HPP
 #define UTILS_MEMORYUTILS_HPP
-#include <vector>
+
 
 namespace oopse {
     class MemoryUtils{
         public:
 
-            template<typename ElemType>
-            static void deleteVectorOfPointer(std::vector<ElemType*>& container){
-                for (typename std::vector<ElemType*>::iterator i = container.begin(); i != container.end(); i++) {
+            template<typename ContainterType>
+            static void deletePointers(ContainterType& container) {
+                for (typename ContainterType::iterator i = container.begin(); i != container.end(); i++) {
                     delete *i;
                 }
                 

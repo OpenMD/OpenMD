@@ -144,9 +144,13 @@ SimInfo::SimInfo(std::vector<std::pair<MoleculeStamp*, int> >& molStampPairs,
 }
 
 SimInfo::~SimInfo() {
-    //MemoryUtils::deleteVectorOfPointer(molecules_);
-
-    MemoryUtils::deleteVectorOfPointer(moleculeStamps_);
+    std::map<int, Molecule*>::iterator i;
+    for (i = molecules_.begin(); i != molecules_.end(); ++i) {
+        delete i->second;
+    }
+    molecules_.clear();
+    
+    MemoryUtils::deletePointers(moleculeStamps_);
     
     delete sman_;
     delete simParams_;

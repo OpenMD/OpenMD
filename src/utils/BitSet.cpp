@@ -150,7 +150,7 @@ void BitSet::resize(int nbits) {
     int oldSize = size();
     bitset_.resize(nbits);
     if (nbits > oldSize) {
-        std::fill(bitset_.begin()+oldSize, bitset_.begin()+nbits+1, false);
+        std::fill(bitset_.begin()+oldSize, bitset_.end(), false);
     }
 }
 

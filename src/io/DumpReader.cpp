@@ -113,7 +113,7 @@ DumpReader::~DumpReader() {
             simError();
         }
 
-        MemoryUtils::deleteVectorOfPointer(framePos_);
+        MemoryUtils::deletePointers(framePos_);
 
 #ifdef IS_MPI
 

@@ -61,14 +61,14 @@ Molecule::Molecule(int stampId, int globalIndex, const std::string& molName)
 
 Molecule::~Molecule() {
 
-    MemoryUtils::deleteVectorOfPointer(atoms_);
-    MemoryUtils::deleteVectorOfPointer(bonds_);
-    MemoryUtils::deleteVectorOfPointer(bends_);
-    MemoryUtils::deleteVectorOfPointer(torsions_);
-    MemoryUtils::deleteVectorOfPointer(rigidBodies_);
-    MemoryUtils::deleteVectorOfPointer(cutoffGroups_);
-    MemoryUtils::deleteVectorOfPointer(constraintPairs_);
-    MemoryUtils::deleteVectorOfPointer(constraintElems_);
+    MemoryUtils::deletePointers(atoms_);
+    MemoryUtils::deletePointers(bonds_);
+    MemoryUtils::deletePointers(bends_);
+    MemoryUtils::deletePointers(torsions_);
+    MemoryUtils::deletePointers(rigidBodies_);
+    MemoryUtils::deletePointers(cutoffGroups_);
+    MemoryUtils::deletePointers(constraintPairs_);
+    MemoryUtils::deletePointers(constraintElems_);
     //integrableObjects_ don't own the objects
     integrableObjects_.clear();
     

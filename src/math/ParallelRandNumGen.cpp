@@ -64,12 +64,12 @@ ParallelRandNumGen::ParallelRandNumGen( const uint32& oneSeed) {
 
     int nProcessors;
     MPI_Comm_size(MPI_COMM_WORLD, &nProcessors);
-
+    MPI_Comm_rank( MPI_COMM_WORLD, &myRank_);
     //In order to generate independent random number stream, the actual seed used by random 
     //number generator is the seed passed to the constructor plus the number of random number
     //generators which are already created.     
     int newSeed = oneSeed + nCreatedRNG_;
-    mtRand_ = new MTRand(newSeed, nProcessors, worldRank);
+    mtRand_ = new MTRand(newSeed, nProcessors, myRank_);
 
     ++nCreatedRNG_;
 }
@@ -80,7 +80,8 @@ ParallelRandNumGen::ParallelRandNumGen() {
     const int masterNode = 0;
     int nProcessors;
     MPI_Comm_size(MPI_COMM_WORLD, &nProcessors);
-    mtRand_ = new MTRand(nProcessors, worldRank);
+    MPI_Comm_rank( MPI_COMM_WORLD, &myRank_);
+    mtRand_ = new MTRand(nProcessors, myRank_);
 
     seed();       /** @todo calling virtual function in constructor is not a good design */
 }
