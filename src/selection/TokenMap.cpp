@@ -46,48 +46,48 @@ namespace oopse {
 TokenMap* TokenMap::instance_ = NULL;
 
 TokenMap::TokenMap() {
-    tokenMap_.insert(std::make_pair("define", Token(Token::define, std::string("define"))));
-    tokenMap_.insert(std::make_pair("select", Token(Token::select, std::string("select")))); 
-    //tokenMap_.insert(std::make_pair("selected", Token(Token::selected, std::string("selected")))); 
+    tokenMap_.insert(TokenMapType::value_type("define", Token(Token::define, std::string("define"))));
+    tokenMap_.insert(TokenMapType::value_type("select", Token(Token::select, std::string("select")))); 
+    //tokenMap_.insert(TokenMapType::value_type("selected", Token(Token::selected, std::string("selected")))); 
     
     //expressions
-    tokenMap_.insert(std::make_pair("(", Token(Token::leftparen, std::string("("))));
-    tokenMap_.insert(std::make_pair(")", Token(Token::rightparen, std::string(")"))));
-    tokenMap_.insert(std::make_pair("-", Token(Token::hyphen, std::string("-"))));
+    tokenMap_.insert(TokenMapType::value_type("(", Token(Token::leftparen, std::string("("))));
+    tokenMap_.insert(TokenMapType::value_type(")", Token(Token::rightparen, std::string(")"))));
+    tokenMap_.insert(TokenMapType::value_type("-", Token(Token::hyphen, std::string("-"))));
 
-    tokenMap_.insert(std::make_pair("and", Token(Token::opAnd, std::string("and"))));
-    tokenMap_.insert(std::make_pair("&", Token(Token::opAnd, std::string("and"))));
-    tokenMap_.insert(std::make_pair("&&", Token(Token::opAnd, std::string("and"))));
+    tokenMap_.insert(TokenMapType::value_type("and", Token(Token::opAnd, std::string("and"))));
+    tokenMap_.insert(TokenMapType::value_type("&", Token(Token::opAnd, std::string("and"))));
+    tokenMap_.insert(TokenMapType::value_type("&&", Token(Token::opAnd, std::string("and"))));
 
-    tokenMap_.insert(std::make_pair("or", Token(Token::opOr, std::string("or"))));
-    tokenMap_.insert(std::make_pair(",", Token(Token::opOr, std::string("or"))));
-    tokenMap_.insert(std::make_pair("|", Token(Token::opOr, std::string("or"))));
-    tokenMap_.insert(std::make_pair("||", Token(Token::opOr, std::string("or"))));
+    tokenMap_.insert(TokenMapType::value_type("or", Token(Token::opOr, std::string("or"))));
+    tokenMap_.insert(TokenMapType::value_type(",", Token(Token::opOr, std::string("or"))));
+    tokenMap_.insert(TokenMapType::value_type("|", Token(Token::opOr, std::string("or"))));
+    tokenMap_.insert(TokenMapType::value_type("||", Token(Token::opOr, std::string("or"))));
 
-    tokenMap_.insert(std::make_pair("not", Token(Token::opNot, std::string("not"))));
-    tokenMap_.insert(std::make_pair("!", Token(Token::opNot, std::string("not"))));
+    tokenMap_.insert(TokenMapType::value_type("not", Token(Token::opNot, std::string("not"))));
+    tokenMap_.insert(TokenMapType::value_type("!", Token(Token::opNot, std::string("not"))));
     
-    tokenMap_.insert(std::make_pair("<", Token(Token::opLT, std::string("<"))));
-    tokenMap_.insert(std::make_pair("<=", Token(Token::opLE, std::string("<="))));
-    tokenMap_.insert(std::make_pair(">=", Token(Token::opGE, std::string(">="))));
-    tokenMap_.insert(std::make_pair(">", Token(Token::opGT, std::string(">="))));
-    tokenMap_.insert(std::make_pair("==", Token(Token::opEQ, std::string("=="))));
-    tokenMap_.insert(std::make_pair("!=", Token(Token::opNE, std::string("!="))));
-    tokenMap_.insert(std::make_pair("within", Token(Token::within, std::string("within"))));
-    tokenMap_.insert(std::make_pair(".", Token(Token::dot, std::string("."))));
-    tokenMap_.insert(std::make_pair("mass", Token(Token::mass, std::string("mass"))));
-    tokenMap_.insert(std::make_pair("dipole", Token(Token::dipole, std::string("dipole"))));
-    tokenMap_.insert(std::make_pair("charge", Token(Token::charge, std::string("charge"))));
-    tokenMap_.insert(std::make_pair("to", Token(Token::to, std::string("to"))));
+    tokenMap_.insert(TokenMapType::value_type("<", Token(Token::opLT, std::string("<"))));
+    tokenMap_.insert(TokenMapType::value_type("<=", Token(Token::opLE, std::string("<="))));
+    tokenMap_.insert(TokenMapType::value_type(">=", Token(Token::opGE, std::string(">="))));
+    tokenMap_.insert(TokenMapType::value_type(">", Token(Token::opGT, std::string(">="))));
+    tokenMap_.insert(TokenMapType::value_type("==", Token(Token::opEQ, std::string("=="))));
+    tokenMap_.insert(TokenMapType::value_type("!=", Token(Token::opNE, std::string("!="))));
+    tokenMap_.insert(TokenMapType::value_type("within", Token(Token::within, std::string("within"))));
+    tokenMap_.insert(TokenMapType::value_type(".", Token(Token::dot, std::string("."))));
+    tokenMap_.insert(TokenMapType::value_type("mass", Token(Token::mass, std::string("mass"))));
+    tokenMap_.insert(TokenMapType::value_type("dipole", Token(Token::dipole, std::string("dipole"))));
+    tokenMap_.insert(TokenMapType::value_type("charge", Token(Token::charge, std::string("charge"))));
+    tokenMap_.insert(TokenMapType::value_type("to", Token(Token::to, std::string("to"))));
     
-    //tokenMap_.insert(std::make_pair("name", Token(Token::name, std::string("name"))));
-    //tokenMap_.insert(std::make_pair("index", Token(Token::index, std::string("index"))));
-    //tokenMap_.insert(std::make_pair("molname", Token(Token::molname, std::string("molname"))));
-    //tokenMap_.insert(std::make_pair("molindex", Token(Token::molindex, std::string("molindex"))));
+    //tokenMap_.insert(TokenMapType::value_type("name", Token(Token::name, std::string("name"))));
+    //tokenMap_.insert(TokenMapType::value_type("index", Token(Token::index, std::string("index"))));
+    //tokenMap_.insert(TokenMapType::value_type("molname", Token(Token::molname, std::string("molname"))));
+    //tokenMap_.insert(TokenMapType::value_type("molindex", Token(Token::molindex, std::string("molindex"))));
 
-    tokenMap_.insert(std::make_pair("*", Token(Token::asterisk, std::string("*"))));
-    tokenMap_.insert(std::make_pair("all", Token(Token::all, std::string("all"))));
-    tokenMap_.insert(std::make_pair("none", Token(Token::none, std::string("none"))));
+    tokenMap_.insert(TokenMapType::value_type("*", Token(Token::asterisk, std::string("*"))));
+    tokenMap_.insert(TokenMapType::value_type("all", Token(Token::all, std::string("all"))));
+    tokenMap_.insert(TokenMapType::value_type("none", Token(Token::none, std::string("none"))));
 }
 
 Token* TokenMap::getToken(const std::string& ident) {

@@ -49,6 +49,7 @@ namespace oopse {
 
 class TokenMap{
     public:
+        typedef std::map<std::string, Token> TokenMapType;
         static TokenMap* getInstance(){
             if (instance_ == NULL) {
                 instance_ = new TokenMap();
@@ -65,7 +66,7 @@ class TokenMap{
         
         static TokenMap* instance_;
 
-        std::map<std::string, Token> tokenMap_;        
+        TokenMapType tokenMap_;        
         
 };
 
