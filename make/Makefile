@@ -212,12 +212,12 @@ $(PackageTargetDir)/%.o : $(PackageTargetDir) $(PackageSourceDir)/%.c
 %.o : $(PackageSourceDir)/%.c
 	$(MAKE) $(MakeOptions) $(PackageTargetDir)/$@
 
-# .cc -> .o
-$(PackageTargetDir)/%.o : $(PackageSourceDir)/%.cc
+# .cpp -> .o
+$(PackageTargetDir)/%.o : $(PackageSourceDir)/%.cpp
 	$(Print) $@
 	$(CppCompiler) $(CppOptions) -c $(IncludePath) $< -o $@
 
-%.o : $(PackageSourceDir)/%.cc
+%.o : $(PackageSourceDir)/%.cpp
 	$(MAKE) $(MakeOptions) $(PackageTargetDir)/$@
 
 # .f -> .o
