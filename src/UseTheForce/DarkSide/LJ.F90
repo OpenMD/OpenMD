@@ -43,7 +43,7 @@
 !! Calculates Long Range forces Lennard-Jones interactions.
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: LJ.F90,v 1.8 2005-02-25 21:22:00 tim Exp $, $Date: 2005-02-25 21:22:00 $, $Name: not supported by cvs2svn $, $Revision: 1.8 $
+!! @version $Id: LJ.F90,v 1.9 2005-03-08 21:06:12 gezelter Exp $, $Date: 2005-03-08 21:06:12 $, $Name: not supported by cvs2svn $, $Revision: 1.9 $
 
 
 module lj
@@ -124,11 +124,11 @@ contains
           status = -1
           return
        end if
-       
+        
        if (.not. allocated(ParameterMap)) then
           allocate(ParameterMap(nAtypes))
        endif
-       
+      
     end if
 
     if (myATID .gt. size(ParameterMap)) then
@@ -208,8 +208,15 @@ contains
     real ( kind = dp ) :: Sigma_i, Sigma_j
     real ( kind = dp ) :: Epsilon_i, Epsilon_j
     real ( kind = dp ) :: rcut6
+    logical :: i_is_LJ, j_is_LJ
 
     status = 0
+
+    if (.not. allocated(ParameterMap)) then
+       call handleError("LJ", "no ParameterMap was present before call of createMixingMap!")
+       status = -1
+       return
+    endif
     
     nATIDs = size(ParameterMap)
     
@@ -218,69 +225,73 @@ contains
        return
     end if
 
+    if (.not. allocated(MixingMap)) then
+       allocate(MixingMap(nATIDs, nATIDs))
+    endif
+
     if (.not.have_rcut) then
        status = -1
        return
     endif
-    
-    if (.not. allocated(MixingMap)) then
-       allocate(MixingMap(nATIDs, nATIDs))
-    endif
-    
+        
     rcut6 = LJ_rcut**6
     
     ! This loops through all atypes, even those that don't support LJ forces.
     do i = 1, nATIDs
-       
-       Epsilon_i = ParameterMap(i)%epsilon
-       Sigma_i = ParameterMap(i)%sigma
-       
-       ! do self mixing rule
-       MixingMap(i,i)%sigma   = Sigma_i          
-       MixingMap(i,i)%sigma6  = Sigma_i ** 6          
-       MixingMap(i,i)%tp6     = (MixingMap(i,i)%sigma6)/rcut6          
-       MixingMap(i,i)%tp12    = (MixingMap(i,i)%tp6) ** 2
-       MixingMap(i,i)%epsilon = Epsilon_i          
-       MixingMap(i,i)%delta   = -4.0_DP * MixingMap(i,i)%epsilon * &
-            (MixingMap(i,i)%tp12 - MixingMap(i,i)%tp6)
-       MixingMap(i,i)%soft_pot = ParameterMap(i)%soft_pot
-       
-       do j = i + 1, nATIDs
+       call getElementProperty(atypes, i, "is_LennardJones", i_is_LJ)
+       if (i_is_LJ) then
+          Epsilon_i = ParameterMap(i)%epsilon
+          Sigma_i = ParameterMap(i)%sigma
           
-          Epsilon_j = ParameterMap(j)%epsilon
-          Sigma_j = ParameterMap(j)%sigma
+          ! do self mixing rule
+          MixingMap(i,i)%sigma   = Sigma_i          
+          MixingMap(i,i)%sigma6  = Sigma_i ** 6          
+          MixingMap(i,i)%tp6     = (MixingMap(i,i)%sigma6)/rcut6          
+          MixingMap(i,i)%tp12    = (MixingMap(i,i)%tp6) ** 2
+          MixingMap(i,i)%epsilon = Epsilon_i          
+          MixingMap(i,i)%delta   = -4.0_DP * MixingMap(i,i)%epsilon * &
+               (MixingMap(i,i)%tp12 - MixingMap(i,i)%tp6)
+          MixingMap(i,i)%soft_pot = ParameterMap(i)%soft_pot
           
-          ! only the distance parameter uses different mixing policies
-          if (useGeometricDistanceMixing) then
-             ! only for OPLS as far as we can tell
-             MixingMap(i,j)%sigma = dsqrt(Sigma_i * Sigma_j)
-          else
-             ! everyone else
-             MixingMap(i,j)%sigma = 0.5_dp * (Sigma_i + Sigma_j)
-          endif
+          do j = i + 1, nATIDs
+             call getElementProperty(atypes, j, "is_LennardJones", j_is_LJ)
           
-          ! energy parameter is always geometric mean:
-          MixingMap(i,j)%epsilon = dsqrt(Epsilon_i * Epsilon_j)
-                    
-          MixingMap(i,j)%sigma6 = (MixingMap(i,j)%sigma)**6
-          MixingMap(i,j)%tp6    = MixingMap(i,j)%sigma6/rcut6
-          MixingMap(i,j)%tp12    = (MixingMap(i,j)%tp6) ** 2
-          
-          MixingMap(i,j)%delta = -4.0_DP * MixingMap(i,j)%epsilon * &
-               (MixingMap(i,j)%tp12 - MixingMap(i,j)%tp6)
-
-          MixingMap(i,j)%soft_pot = ParameterMap(i)%soft_pot .or. ParameterMap(j)%soft_pot
-
-          
-          MixingMap(j,i)%sigma   = MixingMap(i,j)%sigma
-          MixingMap(j,i)%sigma6  = MixingMap(i,j)%sigma6
-          MixingMap(j,i)%tp6     = MixingMap(i,j)%tp6
-          MixingMap(j,i)%tp12    = MixingMap(i,j)%tp12
-          MixingMap(j,i)%epsilon = MixingMap(i,j)%epsilon
-          MixingMap(j,i)%delta   = MixingMap(i,j)%delta
-          MixingMap(j,i)%soft_pot   = MixingMap(i,j)%soft_pot
-          
-       end do
+             if (j_is_LJ) then
+                Epsilon_j = ParameterMap(j)%epsilon
+                Sigma_j = ParameterMap(j)%sigma
+                
+                ! only the distance parameter uses different mixing policies
+                if (useGeometricDistanceMixing) then
+                   ! only for OPLS as far as we can tell
+                   MixingMap(i,j)%sigma = dsqrt(Sigma_i * Sigma_j)
+                else
+                   ! everyone else
+                   MixingMap(i,j)%sigma = 0.5_dp * (Sigma_i + Sigma_j)
+                endif
+                
+                ! energy parameter is always geometric mean:
+                MixingMap(i,j)%epsilon = dsqrt(Epsilon_i * Epsilon_j)
+                
+                MixingMap(i,j)%sigma6 = (MixingMap(i,j)%sigma)**6
+                MixingMap(i,j)%tp6    = MixingMap(i,j)%sigma6/rcut6
+                MixingMap(i,j)%tp12    = (MixingMap(i,j)%tp6) ** 2
+                
+                MixingMap(i,j)%delta = -4.0_DP * MixingMap(i,j)%epsilon * &
+                     (MixingMap(i,j)%tp12 - MixingMap(i,j)%tp6)
+                
+                MixingMap(i,j)%soft_pot = ParameterMap(i)%soft_pot .or. ParameterMap(j)%soft_pot
+                
+                
+                MixingMap(j,i)%sigma   = MixingMap(i,j)%sigma
+                MixingMap(j,i)%sigma6  = MixingMap(i,j)%sigma6
+                MixingMap(j,i)%tp6     = MixingMap(i,j)%tp6
+                MixingMap(j,i)%tp12    = MixingMap(i,j)%tp12
+                MixingMap(j,i)%epsilon = MixingMap(i,j)%epsilon
+                MixingMap(j,i)%delta   = MixingMap(i,j)%delta
+                MixingMap(j,i)%soft_pot   = MixingMap(i,j)%soft_pot
+             endif
+          end do
+       endif
     end do
     
     haveMixingMap = .true.

@@ -54,13 +54,13 @@ module atype_module
 contains
   
   subroutine new_atype(ident, is_Directional, is_LennardJones, &
-       is_Electrostatic, is_Charge, is_Dipole, is_Sticky, is_GayBerne, &
-       is_EAM, is_Shape, is_FLARB, status)
+       is_Electrostatic, is_Charge, is_Dipole, is_Quadrupole, &
+       is_Sticky, is_GayBerne, is_EAM, is_Shape, is_FLARB, status)
     
     integer,intent(in) :: ident
     logical,intent(in) :: is_Directional, is_LennardJones, is_Electrostatic
-    logical,intent(in) :: is_Charge, is_Dipole, is_Sticky, is_GayBerne, is_EAM
-    logical,intent(in) :: is_Shape, is_FLARB
+    logical,intent(in) :: is_Charge, is_Dipole, is_Quadrupole
+    logical,intent(in) :: is_Sticky, is_GayBerne, is_EAM, is_Shape, is_FLARB
     integer,intent(out) :: status
 
     integer :: me
@@ -68,9 +68,9 @@ contains
     status = 0
     
     if (.not. associated(atypes)) then
-       !! There are 16 properties to worry about for now.  
+       !! There are 17 properties to worry about for now.  
        !! Fix this if needed for more atomic properties
-       atypes => initialize(17)
+       atypes => initialize(18)
        if (.not.associated(atypes)) then
           status = -1
           return
@@ -86,6 +86,7 @@ contains
     call setElementProperty(atypes, me, "is_Electrostatic", is_Electrostatic)
     call setElementProperty(atypes, me, "is_Charge", is_Charge)
     call setElementProperty(atypes, me, "is_Dipole", is_Dipole)
+    call setElementProperty(atypes, me, "is_Quadrupole", is_Quadrupole)
     call setElementProperty(atypes, me, "is_Sticky", is_Sticky)
     call setElementProperty(atypes, me, "is_GayBerne", is_GayBerne)
     call setElementProperty(atypes, me, "is_EAM", is_EAM)

@@ -10,10 +10,8 @@ Source    = \
 	switcheroo.F90 \
 	simulation.F90 \
         simulation_interface.F90 \
-	charge.F90 \
-        charge_interface.F90 \
-	dipole.F90 \
-        dipole_interface.F90 \
+	electrostatic.F90 \
+	electrostatic_interface.F90 \
 	eam.F90 \
         eam_interface.F90 \
 	gb.F90 \
