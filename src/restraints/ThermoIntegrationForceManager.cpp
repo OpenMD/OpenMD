@@ -90,6 +90,8 @@ namespace oopse {
     
     // build the scaling factor used to modulate the forces and torques
     factor_ = pow(tIntLambda_, tIntK_);
+
+    printf("%f is the factor\n",factor_);
     
   }
   
@@ -106,11 +108,11 @@ namespace oopse {
     Vector3d frc;
     Vector3d trq;
     
-    curSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
-    
     // perform the standard calcForces first
     ForceManager::calcForces(needPotential, needStress);
     
+    curSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
+
     // now scale forces and torques of all the integrableObjects
       
     for (mol = info_->beginMolecule(mi); mol != NULL; 
@@ -130,19 +132,19 @@ namespace oopse {
       }
       
       // set vraw to be the unmodulated potential
-      lrPot_ = curSnapshot->statData[Stats::POTENTIAL_ENERGY];
+      lrPot_ = curSnapshot->statData[Stats::LONG_RANGE_POTENTIAL];
       curSnapshot->statData[Stats::VRAW] = lrPot_;
       
       // modulate the potential and update the snapshot
       lrPot_ *= factor_;
-      curSnapshot->statData[Stats::POTENTIAL_ENERGY] = lrPot_;
+      curSnapshot->statData[Stats::LONG_RANGE_POTENTIAL] = lrPot_;
     }
     
     // do crystal restraint forces for thermodynamic integration
     if (simParam->getUseSolidThermInt()) {
       
       lrPot_ += restraint_->Calc_Restraint_Forces();
-      curSnapshot->statData[Stats::POTENTIAL_ENERGY] = lrPot_;
+      curSnapshot->statData[Stats::LONG_RANGE_POTENTIAL] = lrPot_;
       
       vHarm_ = restraint_->getVharm();
       curSnapshot->statData[Stats::VHARM] = vHarm_;
