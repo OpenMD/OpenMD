@@ -1,3 +1,52 @@
+2004-10-22 18:09  tim
+
+	* ChangeLog, src/brains/Snapshot.hpp,
+	src/brains/SnapshotManager.hpp, src/math/SquareMatrix.hpp,
+	test/brains/SnapshotTestCase.cpp, test/brains/SnapshotTestCase.hpp,
+	test/brains/StuntDouble.hpp: more work in Snapshot
+
+2004-10-22 17:59  chrisfen
+
+	* src/: UseTheForce/LJFF.cpp,
+	UseTheForce/DarkSide/atype_interface.h, types/AtomType.cpp: Dear
+	god!  It runs and conserves energy!
+
+2004-10-22 17:54  chrisfen
+
+	* src/types/: AtomType.cpp, AtomType.hpp: strDUP not strCOPY
+
+2004-10-22 17:53  chrisfen
+
+	* src/: UseTheForce/DUFF.cpp, UseTheForce/EAM_FF.cpp,
+	UseTheForce/LJFF.cpp, UseTheForce/Shapes_FF.cpp,
+	UseTheForce/WATER.cpp, UseTheForce/doForces.F90,
+	brains/SimInfo.cpp, brains/SimInfo.hpp: fixey fixey the breakey
+	breakey
+
+2004-10-22 17:53  chrisfen
+
+	* make/Makefile.in: compiler flags
+
+2004-10-22 16:20  gezelter
+
+	* src/: UseTheForce/DUFF.cpp, UseTheForce/EAM_FF.cpp,
+	UseTheForce/LJFF.cpp, UseTheForce/doForces.F90,
+	brains/fSimulation.h, types/AtomType.hpp,
+	types/DirectionalAtomType.hpp: fixey fixey
+
+2004-10-22 15:22  gezelter
+
+	* src/UseTheForce/DarkSide/: LJ.F90, atype.F90, atype_interface.h,
+	charge.F90, charge_interface.h, dipole.F90, dipole_interface.h,
+	lj_interface.h, shapes.F90, simulation.F90: Added un-busticated
+	fortran files and c/Fortran interfaces
+
+2004-10-22 15:21  gezelter
+
+	* src/types/: AtomType.cpp, AtomType.hpp, AtomTypeProperties.h,
+	DirectionalAtomType.hpp, Makefile: More on AtomType and
+	DirectionalAtomType
+
 2004-10-22 09:47  gezelter
 
 	* src/types/AtomType.hpp: Adding AtomType

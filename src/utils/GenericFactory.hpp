@@ -31,6 +31,7 @@
  */
 #ifndef UTIL_GENERICFACTORY_HPP
 #define UTIL_GENERICFACTORY_HPP
+#include <cassert>
 #include <map>
 #include <string>
 #include <vector>
@@ -47,6 +48,7 @@ namespace oopse {
  * @param Creator  the callable entity that creates objects. This type must support operator(),
  * taking no parameters and returning a pointer to Object. Default type is function pointer.
  *
+ * Usage:
  * @code
  * //Shape class
  * class Shape {
@@ -67,7 +69,9 @@ namespace oopse {
  * }
  *
  * //register createLine
- * ShapeFactory::getInstance()->registerCreator("Line", createLine);
+ * //note: must put ShapeFactory::getInstance()->registerCreator("Line", createLine) on the right
+ * //hand side, otherwise the compiler will consider it as a function declaration
+ * const bool registeredLine = ShapeFactory::getInstance()->registerCreator("Line", createLine);
  *
  * //Circle class
  * class Circle : public Shape{
@@ -80,11 +84,44 @@ namespace oopse {
  * }
  *
  * //register createCircle
- * ShapeFactory::getInstance()->registerCreator("Circle", createCircle); 
+ * const bool registeredCircle = ShapeFactory::getInstance()->registerCreator("Circle", createCircle); 
  *
  * //create object by ident
  * Line* line = ShapeFactory::getInstance()->createObject("Line");
  * Circle* circle = ShapeFactory::getInstance()->createObject("Circle"); 
+ * @endcode
+ *
+ * Or the user can use predefined macro DECLARE_CREATOR and REGISTER_CREATOR
+ * @code
+ * //Shape class
+ * class Shape {
+ * ...
+ * };
+ * 
+ * //instantiating a new object factory
+ * typedef GenericFactory<Shape> ShapeFactory;
+ *
+ * //Line class
+ * class Line : public Shape{
+ * ...
+ * };
+ *
+ * //declare function using macro 
+ * DECLARE_CREATOR(Shape, Line)
+ * 
+ * //register using macro
+ * REGISTER_CREATOR(ShapeFactory, "Line", Line);
+ 
+ * //Circle class
+ * class Circle : public Shape{
+ * ...
+ * };
+ *
+ * //declare function using macro 
+ * DECLARE_CREATOR(Shape, Circle)
+ * 
+ * //register using macro
+ * REGISTER_CREATOR(ShapeFactory, "Circle", Circle);
  * @endcode
  */
 template<class Object, typename IdentType = std::string, typename Creator = Object* (*)()>
@@ -135,6 +172,7 @@ class GenericFactory {
         Object* createObject(const IdentType& id) {
             typename CreatorMapType::iterator i = creatorMap_.find(id);
             if (i != creatorMap_.end()) {
+                //invoke functor to create object
                 return (i->second)();
             } else {
                 return NULL;
@@ -181,10 +219,15 @@ std::ostream& operator <<(std::ostream& o, GenericFactory<O, I, C>& factory) {
 template<class Object, typename IdentType,typename Creator>
 GenericFactory<Object,IdentType,Creator>* GenericFactory<Object,IdentType,Creator>::instance_ ; 
 
+
 #define DECLARE_CREATOR(abstractObject, concreteObject) \
-    abstractObject* create##concreteObject(){\
+    inline abstractObject* create##concreteObject(){\
         return new concreteObject;\
     }
+
+#define REGISTER_CREATOR(factory, ident, concreteObject) \
+        const bool registered##concreteObject = factory::getInstance()->registerCreator(ident, create##concreteObject); 
+
 
 }//namespace oopse
 #endif //UTIL_GENERICFACTORY_HPP
