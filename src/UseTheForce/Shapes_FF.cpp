@@ -14,7 +14,7 @@ using namespace std;
 #include "utils/simError.h"
 
 #include "UseTheForce/fortranWrappers.hpp"
-#include "UseTheForce/DarkSide/shapes_module.h"
+#include "UseTheForce/DarkSide/shapes_interface.h"
 
 #ifdef IS_MPI
 #include "UseTheForce/mpiForceField.h"
