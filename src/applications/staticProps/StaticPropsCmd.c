@@ -40,9 +40,9 @@ cmdline_parser_print_help (void)
   printf("  -i, --input=filename          input dump file\n");
   printf("  -o, --output=filename         output file name\n");
   printf("  -n, --step=INT                process every n frame  (default=`1')\n");
-  printf("  -r, --nrbins=INT              number of bins for distance  (default=`50')\n");
+  printf("  -r, --nrbins=INT              number of bins for distance  (default=`100')\n");
   printf("  -a, --nanglebins=INT          number of bins for cos(angle)  (default=`50')\n");
-  printf("  -l, --length=DOUBLE           maximum length (Defaults to 1/2 smallest length of first frame)\n");
+  printf("  -l, --length=DOUBLE           maximum length (Defaults to 1/2 smallest \n                                  length of first frame)\n");
   printf("      --sele1=selection script  select first stuntdouble set\n");
   printf("      --sele2=selection script  select second stuntdouble set\n");
   printf("\n");
@@ -96,7 +96,7 @@ cmdline_parser (int argc, char * const *argv, struct gengetopt_args_info *args_i
   args_info->input_arg = NULL; \
   args_info->output_arg = NULL; \
   args_info->step_arg = 1 ;\
-  args_info->nrbins_arg = 50 ;\
+  args_info->nrbins_arg = 100 ;\
   args_info->nanglebins_arg = 50 ;\
   args_info->sele1_arg = NULL; \
   args_info->sele2_arg = NULL; \
@@ -205,7 +205,7 @@ cmdline_parser (int argc, char * const *argv, struct gengetopt_args_info *args_i
           args_info->nanglebins_arg = strtol (optarg,&stop_char,0);
           break;
 
-        case 'l':	/* maximum length (Defaults to cutoff radius).  */
+        case 'l':	/* maximum length (Defaults to 1/2 smallest length of first frame).  */
           if (args_info->length_given)
             {
               fprintf (stderr, "%s: `--length' (`-l') option given more than once\n", CMDLINE_PARSER_PACKAGE);

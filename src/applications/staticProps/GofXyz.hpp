@@ -47,31 +47,12 @@ namespace oopse {
 class GofXyz : public RadialDistrFunc {
     
     public:
-        GofXyz(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2);
-
-        void setNRBins(int nbins) {
-            assert(nbins > 0);
-            nRBins_ = nbins;
-            deltaR_ = len_ / nRBins_;
-            
-            histogram_.resize(nRBins_);
-            for (int i = 0 ; i < nRBins_; ++i) {
-                histogram_[i].resize(nRBins_);
-                for(int j = 0; j < nRBins_; ++j) {
-                    histogram_[i][j].resize(nRBins_);
-                }
-            }            
-        }
+        GofXyz(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2, double len, int nrbins);
 
         int getNRBins() {
             return nRBins_;
         }
         
-        void setLength(double len) {
-            len_ = len;
-            deltaR_ = len_ /nRBins_;                
-        }
-
         double getLength() {
             return len_;
         }

@@ -119,57 +119,24 @@ int main(int argc, char* argv[]){
     } else {
         Mat3x3d hmat = info->getSnapshotManager()->getCurrentSnapshot()->getHmat();
         maxLen = std::min(std::min(hmat(0, 0), hmat(1, 1)), hmat(2, 2)) /2.0;        
-    }
-    
+    }    
 
     RadialDistrFunc* rdf;
     if (args_info.gofr_given){
-        GofR* r = new GofR(info, dumpFileName, sele1, sele2);
-        
-        r->setNRBins(args_info.nrbins_arg);            
-        r->setLength(maxLen);
-        
-        rdf = r;
+        rdf= new GofR(info, dumpFileName, sele1, sele2, maxLen, args_info.nrbins_arg);        
     } else if (args_info.r_theta_given) {
-        GofRTheta* rTheta = new GofRTheta(info, dumpFileName, sele1, sele2);
-          
-        rTheta->setNRBins(args_info.nrbins_arg);            
-        rTheta->setLength(maxLen);       
-        rTheta->setNAngleBins(args_info.nanglebins_arg);
-
-        
-        rdf = rTheta;
-    }
-    else if (args_info.r_omega_given) {
-        GofROmega* rOmega = new GofROmega(info, dumpFileName, sele1, sele2);
-
-       
-        rOmega->setNRBins(args_info.nrbins_arg);            
-        rOmega->setLength(maxLen);
-        rOmega->setNAngleBins(args_info.nanglebins_arg);
-
-        rdf = rOmega;    
+        rdf  = new GofRTheta(info, dumpFileName, sele1, sele2, maxLen, args_info.nrbins_arg, args_info.nanglebins_arg);
+    } else if (args_info.r_omega_given) {
+        rdf  = new GofROmega(info, dumpFileName, sele1, sele2, maxLen, args_info.nrbins_arg, args_info.nanglebins_arg);
     } else if (args_info.theta_omega_given) {
-        GofAngle2* rAngle2 = new GofAngle2(info, dumpFileName, sele1, sele2);
-        rAngle2->setNAngleBins(args_info.nanglebins_arg);
-
-        rdf = rAngle2;  
+        rdf  = new GofAngle2(info, dumpFileName, sele1, sele2, args_info.nanglebins_arg);
     } else if (args_info.xyz_given) {
-
-        GofXyz* xyz = new GofXyz(info, dumpFileName, sele1, sele2);
-          
-        xyz->setNRBins(args_info.nrbins_arg);            
-        xyz->setLength(maxLen);
-
-        
-        rdf = xyz;
+        rdf= new GofXyz(info, dumpFileName, sele1, sele2, maxLen, args_info.nrbins_arg);        
     }
     
-
     if (args_info.output_given) {
         rdf->setOutputName(args_info.output_arg);
     }
-
     if (args_info.step_given) {
         rdf->setStep(args_info.step_arg);
     }

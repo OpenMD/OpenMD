@@ -47,18 +47,8 @@ namespace oopse {
 class GofAngle2 : public RadialDistrFunc {
     
     public:
-        GofAngle2(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2);
+        GofAngle2(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2, int nangleBins);
    
-        void setNAngleBins(int nbins) {
-            assert(nbins >0);
-            nAngleBins_ = nbins;
-            deltaCosAngle_ = 2.0 / nAngleBins_;
-            for (int i = 0 ; i < nAngleBins_; ++i) {
-                histogram_[i].resize(nAngleBins_);
-                avgGofr_[i].resize(nAngleBins_);
-            }
-        }
-        
         int getNAngleBins() {return nAngleBins_;}
         
     private:

@@ -27,9 +27,9 @@ struct gengetopt_args_info
   char * input_arg;	/* input dump file.  */
   char * output_arg;	/* output file name.  */
   int step_arg;	/* process every n frame (default='1').  */
-  int nrbins_arg;	/* number of bins for distance (default='50').  */
+  int nrbins_arg;	/* number of bins for distance (default='100').  */
   int nanglebins_arg;	/* number of bins for cos(angle) (default='50').  */
-  double length_arg;	/* maximum length (Defaults to cutoff radius).  */
+  double length_arg;	/* maximum length (Defaults to 1/2 smallest length of first frame).  */
   char * sele1_arg;	/* select first stuntdouble set.  */
   char * sele2_arg;	/* select second stuntdouble set.  */
 

@@ -46,10 +46,19 @@
 
 namespace oopse {
 
-GofXyz::GofXyz(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2)
-    : RadialDistrFunc(info, filename, sele1, sele2){
+GofXyz::GofXyz(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2, double len, int nrbins)
+    : RadialDistrFunc(info, filename, sele1, sele2), len_(len), nRBins_(nrbins) {
     setOutputName(getPrefix(filename) + ".gxyz");
 
+    deltaR_ = len_ / nRBins_;
+    
+    histogram_.resize(nRBins_);
+    for (int i = 0 ; i < nRBins_; ++i) {
+        histogram_[i].resize(nRBins_);
+        for(int j = 0; j < nRBins_; ++j) {
+            histogram_[i][j].resize(nRBins_);
+        }
+    }   
 }
 
 

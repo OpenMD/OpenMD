@@ -46,9 +46,19 @@
 
 namespace oopse {
 
-GofRAngle::GofRAngle(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2)
-    : RadialDistrFunc(info, filename, sele1, sele2){
+GofRAngle::GofRAngle(SimInfo* info, const std::string& filename, const std::string& sele1, 
+    const std::string& sele2, double len, int nrbins, int nangleBins)
+    : RadialDistrFunc(info, filename, sele1, sele2), len_(len), nRBins_(nrbins), nAngleBins_(nangleBins){
 
+    deltaR_ = len_ /nRBins_;             
+    deltaCosAngle_ = 2.0 / nAngleBins_;    
+
+    histogram_.resize(nRBins_);
+    avgGofr_.resize(nRBins_);
+    for (int i = 0 ; i < nRBins_; ++i) {
+        histogram_[i].resize(nAngleBins_);
+        avgGofr_[i].resize(nAngleBins_);
+    }
 }
 
 

@@ -46,9 +46,20 @@
 
 namespace oopse {
 
-GofAngle2::GofAngle2(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2)
-    : RadialDistrFunc(info, filename, sele1, sele2){
-    setOutputName(getPrefix(filename) + ".gfotw");
+GofAngle2::GofAngle2(SimInfo* info, const std::string& filename, const std::string& sele1, 
+    const std::string& sele2, int nangleBins)
+    : RadialDistrFunc(info, filename, sele1, sele2), nAngleBins_(nangleBins) {
+
+    setOutputName(getPrefix(filename) + ".gto");
+
+    deltaCosAngle_ = 2.0 / nAngleBins_;
+
+    histogram_.resize(nAngleBins_);
+    avgGofr_.resize(nAngleBins_);
+    for (int i = 0 ; i < nAngleBins_; ++i) {
+        histogram_[i].resize(nAngleBins_);
+        avgGofr_[i].resize(nAngleBins_);
+    }    
 
 }
 

@@ -40,6 +40,7 @@
  */
 #include <algorithm>
 #include "brains/BlockSnapshotManager.hpp"
+#include "utils/residentMem.h"
 #include "utils/physmem.h"
 #include "utils/Algorithm.hpp"
 #include "brains/SimInfo.hpp"
@@ -54,13 +55,16 @@ BlockSnapshotManager::BlockSnapshotManager(SimInfo* info, const std::string& fil
     nAtoms_ = info->getNGlobalAtoms();
     nRigidBodies_ = info->getNGlobalRigidBodies();
 
+    double physMem = physmem_total();
     double avalPhysMem = physmem_available();
-    
+    double rssMem = residentMem();
+
+    std::cout << "physmem = " << physMem << "\t availablePhysMem = " << avalPhysMem << "\trssMem =  "<< rssMem<<std::endl;
     int bytesPerStuntDouble = DataStorage::getBytesPerStuntDouble(storageLayout);
 
     int bytesPerFrame = (nRigidBodies_ + nAtoms_) * bytesPerStuntDouble;
 
-    int frameCapacity = int (avalPhysMem / bytesPerFrame);
+    int frameCapacity = int (rssMem / bytesPerFrame);
     
     nSnapshotPerBlock_ = frameCapacity /blockCapacity_ ;
 

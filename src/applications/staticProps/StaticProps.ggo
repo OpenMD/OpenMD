@@ -9,7 +9,7 @@ version "1.00"
 option	"input"		i	"input dump file"					string	typestr="filename" 	yes
 option	"output"	o	"output file name"					string	typestr="filename"	no
 option	"step"		n	"process every n frame"					int	default="1"		no
-option	"nrbins"    	r       "number of bins for distance"				int	default="50"		no
+option	"nrbins"    	r       "number of bins for distance"				int	default="100"		no
 option	"nanglebins"	a	"number of bins for cos(angle)"				int	default="50"		no 
 option	"length"	l	"maximum length (Defaults to 1/2 smallest length of first frame)"	double	no   
 option	"sele1"		-	"select first stuntdouble set"	string	typestr="selection script"	no

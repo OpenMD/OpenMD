@@ -46,8 +46,8 @@
 
 namespace oopse {
 
-GofR::GofR(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2)
-    : RadialDistrFunc(info, filename, sele1, sele2){
+GofR::GofR(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2, double len, int nrbins)
+    : RadialDistrFunc(info, filename, sele1, sele2), len_(len), nRBins_(nrbins){
 
     deltaR_ = len_ /nRBins_;
     

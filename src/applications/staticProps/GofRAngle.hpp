@@ -47,41 +47,16 @@ namespace oopse {
 class GofRAngle : public RadialDistrFunc {
     
     public:
-        GofRAngle(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2);
-
-        void setNRBins(int nbins) {
-            assert(nbins > 0);
-            nRBins_ = nbins;
-            deltaR_ = len_ / nRBins_;
-            for (int i = 0 ; i < nRBins_; ++i) {
-                histogram_[i].resize(nAngleBins_);
-                avgGofr_[i].resize(nAngleBins_);
-            }            
-        }
+        GofRAngle(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2, double len, int nrbins, int nangleBins);
 
         int getNRBins() {
             return nRBins_; 
         }
 
-        void setLength(double len) {
-            len_ = len;
-            deltaR_ = len_ /nRBins_;                
-        }
-
         double getLength() {
             return len_;
         }
-        
-        void setNAngleBins(int nbins) {
-            assert(nbins >0);
-            nAngleBins_ = nbins;
-            deltaCosAngle_ = 2.0 / nAngleBins_;
-            for (int i = 0 ; i < nRBins_; ++i) {
-                histogram_[i].resize(nAngleBins_);
-                avgGofr_[i].resize(nAngleBins_);
-            }
-        }
-        
+
         int getNAngleBins() {return nAngleBins_;}
         
     private:
@@ -109,8 +84,8 @@ class GofRAngle : public RadialDistrFunc {
 
 class GofRTheta : public GofRAngle {
     public:
-        GofRTheta(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2) 
-            : GofRAngle (info, filename, sele1, sele2) {
+        GofRTheta(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2, double len, int nrbins, int nangleBins)
+            : GofRAngle (info, filename, sele1, sele2, len, nrbins, nangleBins) {
                 setOutputName(getPrefix(filename) + ".gofrt");
         }
         
@@ -122,9 +97,9 @@ class GofRTheta : public GofRAngle {
 
 class GofROmega : public GofRAngle {
     public:
-        GofROmega(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2) 
-            : GofRAngle (info, filename, sele1, sele2) {
-                setOutputName(getPrefix(filename) + ".gofrw");
+        GofROmega(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2, double len, int nrbins, int nangleBins)
+            : GofRAngle (info, filename, sele1, sele2, len, nrbins, nangleBins) {
+                setOutputName(getPrefix(filename) + ".gofro");
         }
     
     private:
