@@ -57,6 +57,7 @@ module electrostatic_module
   real(kind=dp), parameter :: pre11 = 332.0637778_dp
   real(kind=dp), parameter :: pre12 = 69.13291783_dp
   real(kind=dp), parameter :: pre22 = 14.39289874_dp
+  real(kind=dp), parameter :: pre14 = 0.0_dp
 
   public :: newElectrostaticType
   public :: setCharge
@@ -317,12 +318,13 @@ contains
     integer :: me1, me2, id1, id2
     real (kind=dp) :: q_i, q_j, mu_i, mu_j, d_i, d_j
     real (kind=dp) :: ct_i, ct_j, ct_ij, a1
-    real (kind=dp) :: riji, ri2, ri3, ri4
+    real (kind=dp) :: riji, ri, ri2, ri3, ri4
     real (kind=dp) :: pref, vterm, epot, dudr    
+    real (kind=dp) :: xhat, yhat, zhat
     real (kind=dp) :: dudx, dudy, dudz
     real (kind=dp) :: drdxj, drdyj, drdzj
     real (kind=dp) :: duduix, duduiy, duduiz, dudujx, dudujy, dudujz
-
+    real (kind=dp) :: scale, sc2, bigR
 
     if (.not.allocated(ElectrostaticMap)) then
        call handleError("electrostatic", "no ElectrostaticMap was present before first call of do_electrostatic_pair!")
@@ -341,12 +343,13 @@ contains
 
     riji = 1.0d0 / rij
 
-    !! these are also useful as the unit vector of \vec{r} 
-    !! \hat{r} = \vec{r} / r =   {(x_j-x_i) / r, (y_j-y_i)/r, (z_j-z_i)/r}
+    xhat = d(1) * riji
+    yhat = d(2) * riji
+    zhat = d(3) * riji
 
-    drdxj = d(1) * riji
-    drdyj = d(2) * riji
-    drdzj = d(3) * riji
+    drdxj = xhat
+    drdyj = yhat
+    drdzj = zhat
 
     !! logicals
 
@@ -436,71 +439,117 @@ contains
 
        if (j_is_Dipole) then
 
-          ri2 = riji * riji
-          ri3 = ri2 * riji
+          if (j_is_SplitDipole) then
+             BigR = sqrt(r2 + 0.25_dp * d_j * d_j)
+             ri = 1.0_dp / BigR
+             scale = rij * ri
+          else
+             ri = riji
+             scale = 1.0_dp
+          endif
 
+          ri2 = ri * ri
+          ri3 = ri2 * ri
+          sc2 = scale * scale
+             
           pref = pre12 * q_i * mu_j
-          vterm = pref * ct_j * riji * riji
+          vterm = pref * ct_j * ri2 * scale
           vpair = vpair + vterm
           epot = epot + sw * vterm
 
-          dudx = dudx + pref * sw * ri3 * ( ul_j(1) + 3.0d0 * ct_j * drdxj)
-          dudy = dudy + pref * sw * ri3 * ( ul_j(2) + 3.0d0 * ct_j * drdyj)
-          dudz = dudz + pref * sw * ri3 * ( ul_j(3) + 3.0d0 * ct_j * drdzj)
+          !! this has a + sign in the () because the rij vector is
+          !! r_j - r_i and the charge-dipole potential takes the origin
+          !! as the point dipole, which is atom j in this case.
 
-          dudujx = dudujx - pref * sw * ri2 * drdxj
-          dudujy = dudujy - pref * sw * ri2 * drdyj
-          dudujz = dudujz - pref * sw * ri2 * drdzj
+          dudx = dudx + pref * sw * ri3 * ( ul_j(1) + 3.0d0*ct_j*xhat*sc2)
+          dudy = dudy + pref * sw * ri3 * ( ul_j(2) + 3.0d0*ct_j*yhat*sc2)
+          dudz = dudz + pref * sw * ri3 * ( ul_j(3) + 3.0d0*ct_j*zhat*sc2)
+
+          dudujx = dudujx - pref * sw * ri2 * xhat * scale
+          dudujy = dudujy - pref * sw * ri2 * yhat * scale
+          dudujz = dudujz - pref * sw * ri2 * zhat * scale
           
        endif
+
     endif
   
     if (i_is_Dipole) then 
        
        if (j_is_Charge) then
 
-          ri2 = riji * riji
-          ri3 = ri2 * riji
+          if (i_is_SplitDipole) then
+             BigR = sqrt(r2 + 0.25_dp * d_i * d_i)
+             ri = 1.0_dp / BigR
+             scale = rij * ri
+          else
+             ri = riji
+             scale = 1.0_dp
+          endif
 
+          ri2 = ri * ri
+          ri3 = ri2 * ri
+          sc2 = scale * scale
+             
           pref = pre12 * q_j * mu_i
-          vterm = pref * ct_i * riji * riji
+          vterm = pref * ct_i * ri2 * scale
           vpair = vpair + vterm
           epot = epot + sw * vterm
 
-          dudx = dudx + pref * sw * ri3 * ( ul_i(1) - 3.0d0 * ct_i * drdxj)
-          dudy = dudy + pref * sw * ri3 * ( ul_i(2) - 3.0d0 * ct_i * drdyj)
-          dudz = dudz + pref * sw * ri3 * ( ul_i(3) - 3.0d0 * ct_i * drdzj)
+          dudx = dudx + pref * sw * ri3 * ( ul_i(1) - 3.0d0 * ct_i * xhat*sc2)
+          dudy = dudy + pref * sw * ri3 * ( ul_i(2) - 3.0d0 * ct_i * yhat*sc2)
+          dudz = dudz + pref * sw * ri3 * ( ul_i(3) - 3.0d0 * ct_i * zhat*sc2)
 
-          duduix = duduix + pref * sw * ri2 * drdxj
-          duduiy = duduiy + pref * sw * ri2 * drdyj
-          duduiz = duduiz + pref * sw * ri2 * drdzj
+          duduix = duduix + pref * sw * ri2 * xhat * scale
+          duduiy = duduiy + pref * sw * ri2 * yhat * scale
+          duduiz = duduiz + pref * sw * ri2 * zhat * scale
        endif
 
        if (j_is_Dipole) then
 
+          if (i_is_SplitDipole) then
+             if (j_is_SplitDipole) then
+                BigR = sqrt(r2 + 0.25_dp * d_i * d_i + 0.25_dp * d_j * d_j)
+             else
+                BigR = sqrt(r2 + 0.25_dp * d_i * d_i)
+             endif
+             ri = 1.0_dp / BigR
+             scale = rij * ri                
+          else
+             if (j_is_SplitDipole) then
+                BigR = sqrt(r2 + 0.25_dp * d_j * d_j)
+                ri = 1.0_dp / BigR
+                scale = rij * ri                             
+             else                
+                ri = riji
+                scale = 1.0_dp
+             endif
+          endif
+
           ct_ij = ul_i(1)*ul_j(1) + ul_i(2)*ul_j(2) + ul_i(3)*ul_j(3)
-          ri2 = riji * riji
-          ri3 = ri2 * riji
+
+          ri2 = ri * ri
+          ri3 = ri2 * ri
           ri4 = ri2 * ri2
+          sc2 = scale * scale
 
           pref = pre22 * mu_i * mu_j
-          vterm = pref * ri3 * (ct_ij - 3.0d0 * ct_i * ct_j)
+          vterm = pref * ri3 * (ct_ij - 3.0d0 * ct_i * ct_j * sc2)
           vpair = vpair + vterm
           epot = epot + sw * vterm
           
-          a1 = 5.0d0 * ct_i * ct_j - ct_ij
+          a1 = 5.0d0 * ct_i * ct_j * sc2 - ct_ij
 
-          dudx = dudx + pref*sw*3.0d0*ri4*(a1*drdxj-ct_i*ul_j(1)-ct_j*ul_i(1))
-          dudy = dudy + pref*sw*3.0d0*ri4*(a1*drdyj-ct_i*ul_j(2)-ct_j*ul_i(2))
-          dudz = dudz + pref*sw*3.0d0*ri4*(a1*drdzj-ct_i*ul_j(3)-ct_j*ul_i(3))
+          dudx=dudx+pref*sw*3.0d0*ri4*scale*(a1*xhat-ct_i*ul_j(1)-ct_j*ul_i(1))
+          dudy=dudy+pref*sw*3.0d0*ri4*scale*(a1*yhat-ct_i*ul_j(2)-ct_j*ul_i(2))
+          dudz=dudz+pref*sw*3.0d0*ri4*scale*(a1*zhat-ct_i*ul_j(3)-ct_j*ul_i(3))
 
-          duduix = duduix + pref*sw*ri3*(ul_j(1) - 3.0d0*ct_j*drdxj)
-          duduiy = duduiy + pref*sw*ri3*(ul_j(2) - 3.0d0*ct_j*drdyj)
-          duduiz = duduiz + pref*sw*ri3*(ul_j(3) - 3.0d0*ct_j*drdzj)
+          duduix = duduix + pref*sw*ri3*(ul_j(1) - 3.0d0*ct_j*xhat*sc2)
+          duduiy = duduiy + pref*sw*ri3*(ul_j(2) - 3.0d0*ct_j*yhat*sc2)
+          duduiz = duduiz + pref*sw*ri3*(ul_j(3) - 3.0d0*ct_j*zhat*sc2)
 
-          dudujx = dudujx + pref*sw*ri3*(ul_i(1) - 3.0d0*ct_i*drdxj)
-          dudujy = dudujy + pref*sw*ri3*(ul_i(2) - 3.0d0*ct_i*drdyj)
-          dudujz = dudujz + pref*sw*ri3*(ul_i(3) - 3.0d0*ct_i*drdzj)
+          dudujx = dudujx + pref*sw*ri3*(ul_i(1) - 3.0d0*ct_i*xhat*sc2)
+          dudujy = dudujy + pref*sw*ri3*(ul_i(2) - 3.0d0*ct_i*yhat*sc2)
+          dudujz = dudujz + pref*sw*ri3*(ul_i(3) - 3.0d0*ct_i*zhat*sc2)
        endif
 
     endif
@@ -577,4 +626,3 @@ contains
   end subroutine doElectrostaticPair
   
 end module electrostatic_module
-
