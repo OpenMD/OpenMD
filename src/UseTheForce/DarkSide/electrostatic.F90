@@ -555,7 +555,8 @@ contains
           cy2 = cy_j * cy_j
           cz2 = cz_j * cz_j
 
-          pref = pre14 * q_i / 6.0_dp
+
+          pref =  pre14 * q_i / 6.0_dp
           vterm = pref * ri3 * (qxx_j * (3.0_dp*cx2 - 1.0_dp) + &
                qyy_j * (3.0_dp*cy2 - 1.0_dp) + &
                qzz_j * (3.0_dp*cz2 - 1.0_dp))
