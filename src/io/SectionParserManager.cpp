@@ -39,8 +39,10 @@
  * such damages.
  */
 #include <algorithm> 
+#include <stack>
 #include "io/SectionParserManager.hpp"
 #include "utils/Trim.hpp"
+#include "utils/simError.h"
 
 namespace oopse {
 
@@ -63,12 +65,13 @@ void SectionParserManager::parse(std::istream& input, ForceField& ff) {
     const int bufferSize = 65535;
     char buffer[bufferSize];
     int lineNo = 0;
+    std::stack<std::string> sectionNameStack;
     //scan through the input stream and find section names        
     while(input.getline(buffer, bufferSize)) {
         ++lineNo;
         
         std::string line = trimLeftCopy(buffer);
-        //a line begins with "//" is comment
+        //a line begins with "//" is a comment line
         if ( line.empty() || (line.size() >= 2 && line[0] == '/' && line[1] == '/')) {
             continue;
         } else {        
@@ -78,26 +81,51 @@ void SectionParserManager::parse(std::istream& input, ForceField& ff) {
             } else {
                 std::string keyword = tokenizer.nextToken();
 
-                if (keyword != "begin") {
+                if (keyword == "begin") {
+                    std::string section = tokenizer.nextToken();
+                    sectionNameStack.push(section);
+
+                    i = std::find_if(sectionParsers_.begin(), sectionParsers_.end(), SameSectionParserFunctor(section));
+                    if (i == sectionParsers_.end()){
+                        sprintf(painCave.errMsg, "SectionParserManager Error: Can not find corresponding section parser for %s\n",
+                                section.c_str());
+                        painCave.isFatal = 1;
+                        simError();                        
+                    } else {
+                        if (i->isActive) {
+                            sprintf(painCave.errMsg, "SectionParserManager Error:find multiple %s section\n",
+                                    section.c_str());
+                            painCave.isFatal = 1;
+                            simError();                        
+                        } else {                         
+                            i->isActive = true;
+                            i->lineNo = lineNo;
+                            i->offset = input.tellg();
+                        }
+                    }
+                } else if (keyword == "end") {
+                    std::string section = tokenizer.nextToken();
+                    if (sectionNameStack.top() == section) {
+                        sectionNameStack.pop();
+                    } else {
+                        sprintf(painCave.errMsg, "SectionParserManager Error: begin %s and end %s does not match at line %d\n",
+                                sectionNameStack.top().c_str(), section.c_str(), lineNo);
+                        painCave.isFatal = 1;
+                        simError();
+                    }
+                    
+                } else {
                     continue;
                 }
-
-                std::string section = tokenizer.nextToken();
-
-                i = std::find_if(sectionParsers_.begin(), sectionParsers_.end(), SameSectionParserFunctor(section));
-                if (i == sectionParsers_.end()){
-                    //can not find corresponding section parser
-                    std::cerr << "Can not find corresponding section parser for section: " << section << std::endl;
-                } else {
-                    i->isActive = true;
-                    i->lineNo = lineNo;
-                    i->offset = input.tellg();
-                }
-                
             }
         }
-
         
+    }
+
+    if (!sectionNameStack.empty()) {
+        sprintf(painCave.errMsg, "SectionParserManager Error: stack is not empty\n");
+        painCave.isFatal = 1;
+        simError();
     }
 
     //invoke parser

@@ -356,7 +356,6 @@ void DefaultAtomVisitor::visit(Atom *atom) {
 
     pos = atom->getPos();
     atomInfo->atomTypeName = atom->getType();
-    printf("setting a type to %s\n", atom->getType().c_str());
     atomInfo->pos[0] = pos[0];
     atomInfo->pos[1] = pos[1];
     atomInfo->pos[2] = pos[2];

@@ -73,7 +73,7 @@ SimInfo::SimInfo(std::vector<std::pair<MoleculeStamp*, int> >& molStampPairs,
                                 nGlobalIntegrableObjects_(0), nGlobalRigidBodies_(0),
                                 nAtoms_(0), nBonds_(0),  nBends_(0), nTorsions_(0), nRigidBodies_(0),
                                 nIntegrableObjects_(0),  nCutoffGroups_(0), nConstraints_(0),
-                                sman_(NULL), fortranInitialized_(false), selectMan_(NULL) {
+                                sman_(NULL), fortranInitialized_(false) {
 
             
     std::vector<std::pair<MoleculeStamp*, int> >::iterator i;
@@ -139,8 +139,6 @@ SimInfo::SimInfo(std::vector<std::pair<MoleculeStamp*, int> >& molStampPairs,
     molToProcMap_.resize(nGlobalMols_);
 #endif
 
-    selectMan_ = new SelectionManager(this);
-    selectMan_->selectAll();
 }
 
 SimInfo::~SimInfo() {
@@ -155,7 +153,6 @@ SimInfo::~SimInfo() {
     delete sman_;
     delete simParams_;
     delete forceField_;
-    delete selectMan_;
 }
 
 int SimInfo::getNGlobalConstraints() {

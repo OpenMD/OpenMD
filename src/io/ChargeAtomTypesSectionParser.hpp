@@ -40,31 +40,28 @@
  */
  
 
-#ifndef IO_ELECTROSTATICATOMTYPESSECTIONPARSER_HPP
-#define IO_ELECTROSTATICATOMTYPESSECTIONPARSER_HPP
+#ifndef IO_CHARGEATOMTYPESSECTIONPARSER_HPP
+#define IO_CHARGEATOMTYPESSECTIONPARSER_HPP
 
 #include "io/SectionParser.hpp"
 #include "types/DirectionalAtomType.hpp"
 namespace oopse {
 
     /**
-     * @class ElectrostaticAtomTypesSectionParser ElectrostaticAtomTypesSectionParser.hpp "io/ElectrostaticAtomTypesSectionParser.hpp"
+     * @class ChargeAtomTypesSectionParser ChargeAtomTypesSectionParser.hpp "io/ChargeAtomTypesSectionParser.hpp"
      */
-    class ElectrostaticAtomTypesSectionParser : public SectionParser {
+    class ChargeAtomTypesSectionParser : public SectionParser {
         public:
-            ElectrostaticAtomTypesSectionParser();
+            ChargeAtomTypesSectionParser();
             
         private:
             virtual void parseLine(ForceField& ff, const std::string& line, int lineNo);
 
-            void parseCharge(StringTokenizer& tokenizer, AtomType* atomType);
-            void parseDipole(StringTokenizer& tokenizer, DirectionalAtomType* dAtomType);
-            void parseQuadruple(StringTokenizer& tokenizer, DirectionalAtomType* dAtomType);
-            void parseElectroBodyFrame(StringTokenizer& tokenizer, DirectionalAtomType* dAtomType);
     };
 
 
 } //namespace oopse
 
 #endif //IO_DIRECTIONALATOMTYPESECTIONPARSER_HPP
+
 

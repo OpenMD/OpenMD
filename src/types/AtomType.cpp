@@ -65,6 +65,7 @@ namespace oopse {
     atp.is_LennardJones = 0;
     atp.is_Charge = 0;
     atp.is_Dipole = 0;
+    atp.is_SplitDipole = 0;
     atp.is_Quadrupole = 0;
     atp.is_Sticky = 0;
     atp.is_GayBerne = 0;

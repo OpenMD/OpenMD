@@ -49,7 +49,9 @@
 namespace oopse {
 
 
-SelectionEvaluator::SelectionEvaluator(SimInfo* si) : info(si), nameFinder(info), distanceFinder(info), isLoaded_(false){
+SelectionEvaluator::SelectionEvaluator(SimInfo* si) 
+    : info(si), nameFinder(info), distanceFinder(info), indexFinder(info), isLoaded_(false){
+    
     nStuntDouble = info->getNGlobalAtoms() + info->getNRigidBodies();
 }            
 
@@ -401,7 +403,7 @@ BitSet SelectionEvaluator::indexInstruction(const boost::any& value) {
         if (index < 0 || index >= bs.size()) {
             invalidIndex(index);
         } else {
-            bs.setBitOn(index);
+            indexFinder.find(index);
         }
     } else if (value.type() == typeid(std::pair<int, int>)) {
         std::pair<int, int> indexRange= boost::any_cast<std::pair<int, int> >(value);
@@ -409,15 +411,11 @@ BitSet SelectionEvaluator::indexInstruction(const boost::any& value) {
         if (indexRange.first < 0 || indexRange.second >= bs.size()) {
             invalidIndexRange(indexRange);
         }else {
-            bs.setRangeOn(indexRange.first, indexRange.second);
+            indexFinder.find(indexRange.first, indexRange.second);
         }
     }
 
     return bs;
 }
-
-//BitSet SelectionEvaluator::evaluate(int frameNo) {
-//
-//}
 
 }

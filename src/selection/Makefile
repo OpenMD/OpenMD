@@ -7,6 +7,7 @@ Source    = \
 	SelectionEvaluator.cpp \
 	NameFinder.cpp \
 	DistanceFinder.cpp \
+	IndexFinder.cpp \
 	SelectionManager.cpp \
 	
 

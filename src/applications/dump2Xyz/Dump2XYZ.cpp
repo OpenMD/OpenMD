@@ -101,49 +101,11 @@ int main(int argc, char* argv[]){
   
   //creat visitor list
   CompositeVisitor* compositeVisitor = new CompositeVisitor();
-  
-  //creat ignore visitor
-  if(args_info.ignore_given ||args_info.water_flag){
     
-    IgnoreVisitor* ignoreVisitor = new IgnoreVisitor(info);
-    
-    for(int i = 0; i < args_info.ignore_given; i++)
-      ignoreVisitor->addIgnoreType(args_info.ignore_arg[i]);
-    
-    //ignore water 
-    if(args_info.water_flag){
-      ignoreVisitor->addIgnoreType("SSD");
-      ignoreVisitor->addIgnoreType("SSD1");
-      ignoreVisitor->addIgnoreType("SSD_E");
-      ignoreVisitor->addIgnoreType("SSD_RF");
-      ignoreVisitor->addIgnoreType("TIP3P_RB_0");
-      ignoreVisitor->addIgnoreType("TIP4P_RB_0");
-      ignoreVisitor->addIgnoreType("TIP5P_RB_0");
-      ignoreVisitor->addIgnoreType("SPCE_RB_0");      
-      ignoreVisitor->addIgnoreType("DPD_RB_0");
-    }
-    
-    compositeVisitor->addVisitor(ignoreVisitor, 1000);
-  }
-  
   //creat RigidBody Visitor
   if(args_info.rigidbody_flag){
     RBCOMVisitor* rbCOMVisitor = new RBCOMVisitor(info);
     compositeVisitor->addVisitor(rbCOMVisitor, 900);
-  }
-  
-  //create selection visitor
-  //if (args_info.selection_given){
-  //  SelectionVisitor* selectionVisitor = new SelectionVisitor(info, args_info.selection_arg);
-  //  compositeVisitor->addVisitor(selectionVisitor, 850);
-  //}
-
-  SelectionEvaluator* evaluator = NULL;
-  if (args_info.selection_given) {
-    evaluator = new SelectionEvaluator(info);
-    assert(evaluator);
-    evaluator->loadScriptString( args_info.selection_arg);
-          
   }
   
   //creat SSD atom visitor
@@ -199,7 +161,12 @@ int main(int argc, char* argv[]){
   }
     
   //creat xyzVisitor
-  XYZVisitor* xyzVisitor = new XYZVisitor(info);
+  XYZVisitor* xyzVisitor;
+  if (args_info.selection_given) {
+    xyzVisitor = new XYZVisitor(info, args_info.selection_arg);
+  } else {
+    xyzVisitor = new XYZVisitor(info);
+  }
   compositeVisitor->addVisitor(xyzVisitor, 200);
   
   std::cout << compositeVisitor->toString();
@@ -222,11 +189,7 @@ int main(int argc, char* argv[]){
   Molecule* mol;
   StuntDouble* integrableObject;
   RigidBody* rb;
-
-  if (evaluator && !evaluator->isDynamic()) {
-    info->getSelectionManager()->setSelectionSet(evaluator->evaluate());
-  }
-  
+       
   for (int i = 0; i < nframes; i += args_info.frame_arg){
     dumpReader->readFrame(i);
     
@@ -250,11 +213,7 @@ int main(int argc, char* argv[]){
     //update visitor
     compositeVisitor->update();
 
-    //if dynamic, we need to re-evaluate the selection
-    if (evaluator && evaluator->isDynamic()) {
-      info->getSelectionManager()->setSelectionSet(evaluator->evaluate());
-    }
-    
+
     //visit stuntdouble
     for (mol = info->beginMolecule(miter); mol != NULL; mol = info->nextMolecule(miter)) {
       for (integrableObject = mol->beginIntegrableObject(iiter); integrableObject != NULL;

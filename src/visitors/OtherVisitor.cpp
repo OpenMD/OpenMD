@@ -46,85 +46,6 @@
 #include "brains/SimInfo.hpp"
 namespace oopse {
 
-//----------------------------------------------------------------------------//
-void IgnoreVisitor::visit(Atom *atom) {
-    if (isIgnoreType(atom->getType()))
-        internalVisit(atom);
-}
-
-void IgnoreVisitor::visit(DirectionalAtom *datom) {
-    if (isIgnoreType(datom->getType()))
-        internalVisit(datom);
-}
-
-void IgnoreVisitor::visit(RigidBody *rb) {
-    std::vector<Atom *>           myAtoms;
-    std::vector<Atom *>::iterator atomIter;
-    AtomInfo *                    atomInfo;
-
-    if (isIgnoreType(rb->getType())) {
-        internalVisit(rb);
-
-        myAtoms = rb->getAtoms();
-
-        for( atomIter = myAtoms.begin(); atomIter != myAtoms.end(); ++atomIter )
-            internalVisit(*atomIter);
-    }
-}
-
-bool IgnoreVisitor::isIgnoreType(const std::string&name) {
-return itList.find(name) != itList.end() ? true : false;
-}
-
-void IgnoreVisitor::internalVisit(StuntDouble *sd) {
-    info->getSelectionManager()->clearSelection(sd);
-    //GenericData *data;
-    //data = sd->getPropertyByName("IGNORE");
-    //
-    ////if this stuntdoulbe is already marked as ignore just skip it
-    //if (data == NULL) {
-    //    data = new GenericData;
-    //    data->setID("IGNORE");
-    //    sd->addProperty(data);
-    //}
-}
-
-const std::string IgnoreVisitor::toString() {
-    char                            buffer[65535];
-    std::string                     result;
-    std::set<std::string>::iterator i;
-
-    sprintf(buffer,
-            "------------------------------------------------------------------\n");
-    result += buffer;
-
-    sprintf(buffer, "Visitor name: %s\n", visitorName.c_str());
-    result += buffer;
-
-    sprintf(buffer, "Visitor Description: ignore  stuntdoubles\n");
-    result += buffer;
-
-    //print the ignore type list
-    sprintf(buffer, "Ignore type list contains below types:\n");
-    result += buffer;
-
-    for( i = itList.begin(); i != itList.end(); ++i ) {
-        sprintf(buffer, "%s\t", i->c_str());
-        result += buffer;
-    }
-
-    sprintf(buffer, "\n");
-    result += buffer;
-
-    sprintf(buffer,
-            "------------------------------------------------------------------\n");
-    result += buffer;
-
-    return result;
-}
-
-//----------------------------------------------------------------------------//
-
 void WrappingVisitor::visit(Atom *atom) {
 internalVisit(atom);
 }
@@ -296,13 +217,32 @@ const std::string ReplicateVisitor::toString() {
 
 //----------------------------------------------------------------------------//
 
-XYZVisitor::XYZVisitor(SimInfo *info, bool printDipole) :
-    BaseVisitor() {
+XYZVisitor::XYZVisitor(SimInfo *info) :
+    BaseVisitor(), seleMan(info), evaluator(info){
     this->info = info;
     visitorName = "XYZVisitor";
-    this->printDipole = printDipole;
+
+    evaluator.loadScriptString("select all");
+
+    if (!evaluator.isDynamic()) {
+        seleMan.setSelectionSet(evaluator.evaluate());
+    }
+
 }
 
+XYZVisitor::XYZVisitor(SimInfo *info, const std::string& script) :
+    BaseVisitor(), seleMan(info), evaluator(info) {
+    this->info = info;
+    visitorName = "XYZVisitor";
+
+    evaluator.loadScriptString(script);
+
+    if (!evaluator.isDynamic()) {
+        seleMan.setSelectionSet(evaluator.evaluate());
+    }
+          
+}
+    
 void XYZVisitor::visit(Atom *atom) {
     if (isSelected(atom))
         internalVisit(atom);
@@ -316,6 +256,13 @@ void XYZVisitor::visit(DirectionalAtom *datom) {
 void XYZVisitor::visit(RigidBody *rb) {
     if (isSelected(rb))
         internalVisit(rb);
+}
+
+void XYZVisitor::update() {
+    //if dynamic, we need to re-evaluate the selection
+    if (evaluator.isDynamic()) {
+       seleMan.setSelectionSet(evaluator.evaluate());
+    }
 }
 
 void XYZVisitor::internalVisit(StuntDouble *sd) {
@@ -338,9 +285,6 @@ void XYZVisitor::internalVisit(StuntDouble *sd) {
 
     for( atomInfo = atomData->beginAtomInfo(i); atomInfo;
         atomInfo = atomData->nextAtomInfo(i) ) {
-      printf("SD type is %s\n", sd->getType().c_str());
-      printf("XYZVisitor thinks %s\n", atomInfo->atomTypeName.c_str());
-      if (printDipole) {
         sprintf(buffer,
                 "%s%15.8f%15.8f%15.8f%15.8f%15.8f%15.8f",
                 atomInfo->atomTypeName.c_str(),
@@ -350,18 +294,12 @@ void XYZVisitor::internalVisit(StuntDouble *sd) {
                 atomInfo->dipole[0],
                 atomInfo->dipole[1],
                 atomInfo->dipole[2]); 
-      } else {
-        sprintf(buffer,                     "%s%15.8f%15.8f%15.8f",
-                atomInfo->atomTypeName.c_str(), atomInfo->pos[0],
-                atomInfo->pos[1],           atomInfo->pos[2]);
-      }
-        
         frame.push_back(buffer);
     }
 }
 
 bool XYZVisitor::isSelected(StuntDouble *sd) {
-    return info->getSelectionManager()->isSelected(sd);
+    return seleMan.isSelected(sd);
 }
 
 void XYZVisitor::writeFrame(std::ostream &outStream) {

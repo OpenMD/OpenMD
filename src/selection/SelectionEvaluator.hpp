@@ -52,28 +52,11 @@
 #include "selection/SelectionCompiler.hpp"
 #include "selection/NameFinder.hpp"
 #include "selection/DistanceFinder.hpp"
+#include "selection/IndexFinder.hpp"
 #include "utils/BitSet.hpp"
 #include "primitives/StuntDouble.hpp"
 #include "utils/StringUtils.hpp"
 namespace oopse {
-
-
-//class Context {
-//    public:
-//        
-//        void clear() {
-//            linenumbers.clear();
-//            lineIndices.clear();
-//            aatoken.clear();
-//        }
-//        
-//        std::string filename;
-//        std::string script;
-//        std::vector<int> linenumbers;
-//        std::vector<int> lineIndices;
-//        std::vector<std::vector<Token> > aatoken;
-//        int pc;
-//};
 
 
 /**
@@ -91,8 +74,6 @@ class SelectionEvaluator{
         
         BitSet evaluate();
         
-        //BitSet evaluate(Snapshot* snapshot);
-
         /**
          * Tests if the result from evaluation of script is dynamic.
          */         
@@ -204,6 +185,7 @@ class SelectionEvaluator{
         SimInfo* info;
         NameFinder nameFinder;
         DistanceFinder distanceFinder;
+        IndexFinder indexFinder;
         int nStuntDouble;   //natoms + nrigidbodies
 
         typedef std::map<std::string, boost::any > VariablesType;

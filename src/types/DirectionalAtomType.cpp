@@ -168,9 +168,6 @@ namespace oopse {
         if (stickyData != NULL) {
           StickyParam stickyParam = stickyData->getData();
 
-          /**@todo change fortran interface */
-          //makeStickyType(&atp.ident, &stickyParam.w0, &stickyParam.v0, &stickyParam.v0p, &stickyParam.rl,
-          //    &stickyParam.ru, &stickyParam.rlp, &stickyParam.rup);
           newStickyType(&atp.ident,&stickyParam.w0, &stickyParam.v0, &stickyParam.v0p, &stickyParam.rl,
                         &stickyParam.ru, &stickyParam.rlp, &stickyParam.rup, &isError);
           if (isError != 0) {

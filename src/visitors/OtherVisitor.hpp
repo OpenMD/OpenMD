@@ -48,31 +48,12 @@
 #include "visitors/BaseVisitor.hpp"
 #include "primitives/StuntDouble.hpp"
 #include "visitors/AtomData.hpp"
-
+#include "selection/SelectionManager.hpp"
+#include "selection/SelectionEvaluator.hpp"
 
 namespace oopse {
 
 class SimInfo;
-
-//IgnoreVisitor will turn on the ignoring flag of the stuntdouble
-class IgnoreVisitor : public BaseVisitor{
-  public:
-    IgnoreVisitor(SimInfo* info) : BaseVisitor() {this->info = info; visitorName = "IgnoreVisitor";}
-
-    virtual void visit(Atom* atom);
-    virtual void visit(DirectionalAtom* datom);
-    virtual void visit(RigidBody* rb);
-    
-    virtual const std::string toString();
-
-    void addIgnoreType(const std::string& type) {itList.insert(type);}
-    
-  protected:
-    bool isIgnoreType(const std::string& name);
-    void internalVisit(StuntDouble* sd);
-    std::set<std::string> itList; //ignore type list;
-    SimInfo* info;
-};
 
 
 class WrappingVisitor : public BaseVisitor{
@@ -113,11 +94,16 @@ class ReplicateVisitor : public BaseVisitor{
 
 class XYZVisitor : public BaseVisitor{
   public:
-    XYZVisitor(SimInfo* info, bool printDipole = true);
+    
+    XYZVisitor(SimInfo* info);
+    
+    XYZVisitor(SimInfo* info, const std::string& script);
     
     virtual void visit(Atom* atom);
     virtual void visit(DirectionalAtom* datom);
     virtual void visit(RigidBody* rb);
+
+    virtual void update();
 
     virtual const std::string toString();
     
@@ -130,8 +116,10 @@ class XYZVisitor : public BaseVisitor{
 
   private:  
     SimInfo* info;
+    SelectionManager seleMan;
+    SelectionEvaluator evaluator; 
     std::vector<std::string> frame;
-    bool printDipole;
+
 };
 
 

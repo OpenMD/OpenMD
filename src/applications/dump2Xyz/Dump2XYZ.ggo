@@ -9,13 +9,11 @@ version "0.99"
 option	"input"		i	"input dump file"					string	typestr="filename" 	yes
 option	"output"	o	"output file name"					string	typestr="filename"	no
 option	"frame"		n	"print every n frame"					int	default="1"		no
-option	"dipole"	d	"print the dipole moments"				flag				off
 option	"water"		w	"skip the the waters"					flag				off
 option	"periodicBox"	m	"map to the periodic box"				flag				off
 option  "zconstraint"	z	"replace the atom types of zconstraint molecules"	flag				off
 option	"rigidbody"	r	"add a pseudo COM atom to rigidbody"			flag				off
 option	"watertype"	t	"replace the atom type of water model"			flag				on
-option	"ignore"	g	"ignore the atom types"					string	typestr="atomtype"	no	multiple
 option	"selection"	s	"general selection syntax(now only support select atoms within a specified range)"	string	typestr="selection script"	no 
 option  "originsele"      -     "select origin"                                       string  typestr="selection script"     no 
 option	"refsele"	-	"select reference"					string  typestr="selection script"     no

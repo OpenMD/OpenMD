@@ -400,10 +400,6 @@ class SimInfo {
         void removeExcludePairs(Molecule* mol);
 
 
-        SelectionManager* getSelectionManager() {
-            return selectMan_;
-        }
-
         /** Returns the unique atom types of local processor in an array */
         std::set<AtomType*> getUniqueAtomTypes();
         
@@ -504,7 +500,6 @@ class SimInfo {
 
         bool fortranInitialized_; /**< flag indicate whether fortran side is initialized */
 
-        SelectionManager* selectMan_;
 #ifdef IS_MPI
     //in Parallel version, we need MolToProc
     public:

@@ -6,7 +6,8 @@ Source    = \
 	SectionParser.cpp \
 	EAMAtomTypesSectionParser.cpp \
 	SectionParserManager.cpp \
-	ElectrostaticAtomTypesSectionParser.cpp \
+	ChargeAtomTypesSectionParser.cpp \
+	MultipoleAtomTypesSectionParser.cpp \
 	StickyAtomTypesSectionParser.cpp \
 	TorsionTypesSectionParser.cpp \
 	LennardJonesAtomTypesSectionParser.cpp\
