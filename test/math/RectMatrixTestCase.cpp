@@ -178,6 +178,7 @@ void RectMatrixTestCase::testEqual() {
 void RectMatrixTestCase::testNegate() {
 
     CPPUNIT_ASSERT(m1 == -m4);
+    CPPUNIT_ASSERT(m1 == m4);
 }
 
 void RectMatrixTestCase::testAdd() {
