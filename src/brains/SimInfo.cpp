@@ -367,7 +367,32 @@ void SimInfo::addExcludePairs(Molecule* mol) {
         exclude_.addPair(c, d);        
     }
 
-    
+    Molecule::RigidBodyIterator rbIter;
+    RigidBody* rb;
+    for (rb = mol->beginRigidBody(rbIter); rb != NULL; rb = mol->nextRigidBody(rbIter)) {
+        std::vector<Atom*> atoms = rb->getAtoms();
+        for (int i = 0; i < atoms.size() -1 ; ++i) {
+            for (int j = i + 1; j < atoms.size(); ++j) {
+                a = atoms[i]->getGlobalIndex();
+                b = atoms[j]->getGlobalIndex();
+                exclude_.addPair(a, b);
+            }
+        }
+    }        
+
+    Molecule::CutoffGroupIterator cgIter;
+    CutoffGroup* cg;
+    for (cg = mol->beginCutoffGroup(cgIter); cg != NULL; cg = mol->nextCutoffGroup(cgIter)) {
+        std::vector<Atom*> atoms = cg->getAtoms();
+        for (int i = 0; i < atoms.size() -1 ; ++i) {
+            for (int j = i + 1; j < atoms.size(); ++j) {
+                a = atoms[i]->getGlobalIndex();
+                b = atoms[j]->getGlobalIndex();
+                exclude_.addPair(a, b);
+            }
+        }
+    }  
+
 }
 
 void SimInfo::removeExcludePairs(Molecule* mol) {
@@ -411,6 +436,32 @@ void SimInfo::removeExcludePairs(Molecule* mol) {
         exclude_.removePair(b, d);
         exclude_.removePair(c, d);        
     }
+
+    Molecule::RigidBodyIterator rbIter;
+    RigidBody* rb;
+    for (rb = mol->beginRigidBody(rbIter); rb != NULL; rb = mol->nextRigidBody(rbIter)) {
+        std::vector<Atom*> atoms = rb->getAtoms();
+        for (int i = 0; i < atoms.size() -1 ; ++i) {
+            for (int j = i + 1; j < atoms.size(); ++j) {
+                a = atoms[i]->getGlobalIndex();
+                b = atoms[j]->getGlobalIndex();
+                exclude_.removePair(a, b);
+            }
+        }
+    }        
+
+    Molecule::CutoffGroupIterator cgIter;
+    CutoffGroup* cg;
+    for (cg = mol->beginCutoffGroup(cgIter); cg != NULL; cg = mol->nextCutoffGroup(cgIter)) {
+        std::vector<Atom*> atoms = cg->getAtoms();
+        for (int i = 0; i < atoms.size() -1 ; ++i) {
+            for (int j = i + 1; j < atoms.size(); ++j) {
+                a = atoms[i]->getGlobalIndex();
+                b = atoms[j]->getGlobalIndex();
+                exclude_.removePair(a, b);
+            }
+        }
+    }  
 
 }
 

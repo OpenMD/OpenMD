@@ -69,6 +69,7 @@ class CutoffGroup {
             return i != cutoffAtomList.end() ? *i : NULL;
         }
 
+        std::vector<Atom*> getAtoms() { return cutoffAtomList; }
         double getMass() {
             std::vector<Atom *>::iterator i;
             Atom * atom;
