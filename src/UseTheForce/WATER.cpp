@@ -578,6 +578,8 @@ void WATER::readParams( void ){
 
   while( currentAtomType != NULL ){    
 
+    currentDirectionalType = headDirectionalType->find(currentAtomType->name);
+  
     if( currentAtomType->isLJ ){
       isError = 0;
       newLJtype( &(currentAtomType->ident), &(currentAtomType->sigma), 
