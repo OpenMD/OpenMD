@@ -99,6 +99,20 @@ dnl Fortran 90 module suffix
 AC_CHECK_MODSUFFIX
 dnl Fortran 90 module path specifier
 AC_CHECK_MODDIRFLAG
+AC_F90_MODULE_NAMES
+pat=`echo $ac_cv_f90_module_names | sed 's/.*\(%.*%\).*/\1/'`
+F90_MODULE_NAMES=empty
+case $pat in
+       %MODULE%)
+          F90_MODULE_NAMES=UPPER ;;
+       %Module%)
+          F90_MODULE_NAMES=Mixed ;;
+       %module%)
+          F90_MODULE_NAMES=lower ;;
+       *)
+          F90_MODULE_NAMES=unknown ;;
+esac
+AC_SUBST(F90_MODULE_NAMES)
 AC_LANG_POP
 
 dnl check for system getopt
@@ -231,6 +245,7 @@ AC_SUBST(F90FLAGS)
 AC_SUBST(LDFLAGS)
 AC_SUBST(PREPFLAG)
 AC_SUBST(PREPDEFFLAG)
+AC_SUBST(F90_MODULE_NAMES)
 AC_CONFIG_HEADER([src/config.h])
 AC_CONFIG_FILES([make/Makefile])
 

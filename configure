@@ -312,7 +312,7 @@ ac_includes_default="\
 # include <unistd.h>
 #endif"
 
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS PROGNAME debug build build_cpu build_vendor build_os host host_cpu host_vendor host_os CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT CXX CXXFLAGS ac_ct_CXX OOPSE_TEMPLATE_FLAGS EXTRA_CC_FLAG F90 F90FLAGS ac_ct_F90 PREPFLAG PREPDEFFLAG F90LIBS F90_FUNC F90_FUNC_ MOD F90_WORK_FILES_ARG MODDIRFLAG F90MODINCSPEC CPP EGREP LIBOBJS INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA LN_S SET_MAKE RANLIB ac_ct_RANLIB YACC LEX LEXLIB LEX_OUTPUT_ROOT AR MPI_LIB_DIR MPI_INC_DIR MPI_F90_INC MPI_LIB MPI_F90_LIB USE_MPI SPRNG_LIB_DIR SPRNG_INC_DIR SPRNG_LIB USE_SPRNG MKL_LIBDIR MKL_LIB MKL_INC HAVE_MKL BATEXT MKINSTALLDIRS OOPSE OOPSE_HOME SUBDIRS FFLAGS LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS PROGNAME debug build build_cpu build_vendor build_os host host_cpu host_vendor host_os CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT CXX CXXFLAGS ac_ct_CXX OOPSE_TEMPLATE_FLAGS EXTRA_CC_FLAG F90 F90FLAGS ac_ct_F90 PREPFLAG PREPDEFFLAG F90LIBS F90_FUNC F90_FUNC_ MOD F90_WORK_FILES_ARG MODDIRFLAG F90MODINCSPEC F90_MODULE_NAMES CPP EGREP LIBOBJS INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA LN_S SET_MAKE RANLIB ac_ct_RANLIB YACC LEX LEXLIB LEX_OUTPUT_ROOT AR MPI_LIB_DIR MPI_INC_DIR MPI_F90_INC MPI_LIB MPI_F90_LIB USE_MPI SPRNG_LIB_DIR SPRNG_INC_DIR SPRNG_LIB USE_SPRNG MKL_LIBDIR MKL_LIB MKL_INC HAVE_MKL BATEXT MKINSTALLDIRS OOPSE OOPSE_HOME SUBDIRS FFLAGS LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -1813,6 +1813,14 @@ ac_configure="$SHELL $ac_aux_dir/configure" # This should be Cygnus configure.
 # $SHELLVAR to the Fortran 95 mangled name.  If the SHELLVAR
 # argument is not supplied, it defaults to NAME.
 # AC_F95_FUNC
+
+# AC_F90_MODULE_NAMES
+# -------------------
+#
+# Figure out how the Fortran 90 compiler constructs module file names
+#
+ # AC_F90_MODULE_NAMES
+
 
 
 
@@ -3527,7 +3535,7 @@ _ACEOF
 ac_save_F90FLAGS=$F90FLAGS
 F90FLAGS="$F90FLAGS $ac_verb"
 
-(eval echo $as_me:3530: \"$ac_link\") >&5
+(eval echo $as_me:3538: \"$ac_link\") >&5
 ac_f90_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
 echo "$ac_f90_v_output" >&5
 F90FLAGS=$ac_save_F90FLAGS
@@ -3604,7 +3612,7 @@ _ACEOF
 ac_save_F90FLAGS=$F90FLAGS
 F90FLAGS="$F90FLAGS $ac_cv_prog_f90_v"
 
-(eval echo $as_me:3607: \"$ac_link\") >&5
+(eval echo $as_me:3615: \"$ac_link\") >&5
 ac_f90_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
 echo "$ac_f90_v_output" >&5
 F90FLAGS=$ac_save_F90FLAGS
@@ -4201,6 +4209,233 @@ echo "${ECHO_T}unknown" >&6
    if test $madedir = 1 ; then rmdir conf ; fi
 fi
 
+
+echo "$as_me:$LINENO: checking for Fortran 90 module file names" >&5
+echo $ECHO_N "checking for Fortran 90 module file names... $ECHO_C" >&6
+if test "${ac_cv_f90_module_names+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  ac_ext=f90
+ac_compile='$F90 -c $F90FLAGS conftest.$ac_ext >&5'
+ac_link='$F90 -o conftest$ac_exeext $F90FLAGS $LD90FLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_f90_compiler_gnu
+
+# carry out the test in a new directory, so that we don't miss anything
+mkdir conftest
+cd conftest
+cat >conftest.$ac_ext <<_ACEOF
+MODULE Bar
+END MODULE Bar
+_ACEOF
+rm -f conftest.$ac_objext
+if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
+  (eval $ac_compile) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_f90_werror_flag"
+			 || test ! -s conftest.err'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest.$ac_objext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  ac_cv_f90_module_names=
+ac_file_list=*
+for ac_file in $ac_file_list; do
+   case $ac_file in
+      # don't care for original source and object files
+      conftest.$ac_ext | conftest.$ac_objext | conftest.err )
+          :
+          ;;
+      # look for new files derived from the file name
+      *conftest*)
+          ac_pat=`echo $ac_file | sed s/conftest/%FILE%/`
+	    ac_exists=false
+  for ac_i in $ac_cv_f90_module_names; do
+    if test x"$ac_pat" = x"$ac_i"; then
+      ac_exists=true
+      break
+    fi
+  done
+
+  if test x"$ac_exists" = xtrue; then
+  :
+else
+  ac_cv_f90_module_names="$ac_cv_f90_module_names $ac_pat"
+fi
+
+          ;;
+      # look for new files derived from the module name,
+      # with different case translation schemes
+      *Bar*)
+          ac_pat=`echo $ac_file | sed s/Bar/%Module%/`
+	    ac_exists=false
+  for ac_i in $ac_cv_f90_module_names; do
+    if test x"$ac_pat" = x"$ac_i"; then
+      ac_exists=true
+      break
+    fi
+  done
+
+  if test x"$ac_exists" = xtrue; then
+  :
+else
+  ac_cv_f90_module_names="$ac_cv_f90_module_names $ac_pat"
+fi
+
+          ;;
+      *bar*)
+          ac_pat=`echo $ac_file | sed s/bar/%module%/`
+	    ac_exists=false
+  for ac_i in $ac_cv_f90_module_names; do
+    if test x"$ac_pat" = x"$ac_i"; then
+      ac_exists=true
+      break
+    fi
+  done
+
+  if test x"$ac_exists" = xtrue; then
+  :
+else
+  ac_cv_f90_module_names="$ac_cv_f90_module_names $ac_pat"
+fi
+
+          ;;
+      *BAR*)
+          ac_pat=`echo $ac_file | sed s/BAR/%MODULE%/`
+	    ac_exists=false
+  for ac_i in $ac_cv_f90_module_names; do
+    if test x"$ac_pat" = x"$ac_i"; then
+      ac_exists=true
+      break
+    fi
+  done
+
+  if test x"$ac_exists" = xtrue; then
+  :
+else
+  ac_cv_f90_module_names="$ac_cv_f90_module_names $ac_pat"
+fi
+
+          ;;
+       # Other files - we have no idea how they are generated
+       *)
+          { echo "$as_me:$LINENO: WARNING: Bogus file found: $ac_file" >&5
+echo "$as_me: WARNING: Bogus file found: $ac_file" >&2;}
+          ;;
+   esac
+done
+if test "x$ac_cv_f90_module_names" = "x"; then
+  { echo "$as_me:$LINENO: WARNING: Couldn't determine module file names" >&5
+echo "$as_me: WARNING: Couldn't determine module file names" >&2;}
+fi
+
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+ac_cv_f90_module_names=
+{ echo "$as_me:$LINENO: WARNING: Couldn't determine module file names" >&5
+echo "$as_me: WARNING: Couldn't determine module file names" >&2;}
+fi
+rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
+cd ..
+# cleanup
+rm -rf conftest
+ac_ext=f90
+ac_compile='$F90 -c $F90FLAGS conftest.$ac_ext >&5'
+ac_link='$F90 -o conftest$ac_exeext $F90FLAGS $LD90FLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_f90_compiler_gnu
+
+fi
+echo "$as_me:$LINENO: result: $ac_cv_f90_module_names" >&5
+echo "${ECHO_T}$ac_cv_f90_module_names" >&6 # AC_CACHE_CHECK
+
+# We now generate a shell script that will help us to figure out the correct
+# module file names, using the value of ac_cv_f90_module_names
+
+echo "Generating shell script modnam"
+
+cat > scripts/modnam << EOF
+#! /bin/sh
+# This script is auto-generated by configure
+#
+usage="\\
+Usage: \$0 [FILES]
+
+[FILES] are Fortran 90 source files.
+The output is a list of module file names that the Fortran 90 compiler
+generates when compiling [FILES]."
+
+list=
+empty=
+
+if test \$# -eq 0; then
+   echo "\$usage"; exit 0
+fi
+
+while test \$# != 0; do
+
+  file=\$1
+  shift
+
+# strip suffix
+  base=\`echo \$file | sed 's/[.][^.]*$//'\`
+
+  test ! -f \$file && continue
+
+# Look for module definitions and transform them to upper / lower case
+  mods=\`cat \$file | sed '/^ *[mM][oO][dD][uU][lL][eE]/!d;s/^ *[mM][oO][dD][uU][lL][eE] *\([A-Za-z_][A-Za-z0-9_]*\).*\$/\1/'\`
+  upper=\`echo \$mods | tr a-z A-Z\`
+  lower=\`echo \$mods | tr A-Z a-z\`
+
+# Here, the patterns for generating module file names were inserted by configure
+  for trans in $ac_cv_f90_module_names; do
+
+    pat=\`echo \$trans | sed 's/.*\(%.*%\).*/\1/'\`
+    var=empty
+    case \$pat in
+       %MODULE%)
+          var=upper ;;
+       %Module%)
+          var=mods ;;
+       %module%)
+          var=lower ;;
+       %FILE%)
+          test -n "\$mods" && var=base ;;
+    esac
+    new=\`eval '(for i in \$'\$var '; do echo \$trans | sed s/\$pat/\$i/; done)'\`
+    list="\$list \$new"
+  done
+done
+
+echo \$list
+# end of configure-generated script
+EOF
+chmod 755 scripts/modnam
+
+pat=`echo $ac_cv_f90_module_names | sed 's/.*\(%.*%\).*/\1/'`
+F90_MODULE_NAMES=empty
+case $pat in
+       %MODULE%)
+          F90_MODULE_NAMES=UPPER ;;
+       %Module%)
+          F90_MODULE_NAMES=Mixed ;;
+       %module%)
+          F90_MODULE_NAMES=lower ;;
+       *)
+          F90_MODULE_NAMES=unknown ;;
+esac
 
 ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
@@ -7572,6 +7807,7 @@ esac
 
 
 
+
           ac_config_headers="$ac_config_headers src/config.h"
 
           ac_config_files="$ac_config_files make/Makefile"
@@ -8227,6 +8463,7 @@ s,@MOD@,$MOD,;t t
 s,@F90_WORK_FILES_ARG@,$F90_WORK_FILES_ARG,;t t
 s,@MODDIRFLAG@,$MODDIRFLAG,;t t
 s,@F90MODINCSPEC@,$F90MODINCSPEC,;t t
+s,@F90_MODULE_NAMES@,$F90_MODULE_NAMES,;t t
 s,@CPP@,$CPP,;t t
 s,@EGREP@,$EGREP,;t t
 s,@LIBOBJS@,$LIBOBJS,;t t
