@@ -50,7 +50,7 @@ NVT::NVT(SimInfo* info) : VelocityVerletIntegrator(info), chiTolerance_ (1e-6), 
 
     Globals* simParams = info_->getSimParams();
 
-    if (simParams->getUseInitXSstate()) {
+    if (!simParams->getUseInitXSstate()) {
         Snapshot* currSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
         currSnapshot->setChi(0.0);
         currSnapshot->setIntegralOfChiDt(0.0);
