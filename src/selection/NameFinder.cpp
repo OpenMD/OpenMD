@@ -38,80 +38,73 @@
  * University of Notre Dame has been advised of the possibility of
  * such damages.
  */
-
-#ifndef SELECTION_SELECTIONMANAGER_HPP
-#define SELECTION_SELECTIONMANAGER_HPP
-
-#include "utils/BitSet.hpp"
-
+#include "selection/NameFinder.hpp"
 namespace oopse {
 
-/**
- * @class SelectionManager SelectionManager.hpp "selection/SelectionManager.hpp"
- * @brief
- */
-class SelectionManager {
-    public:
-        SelectionManager(int size) {bsSelection_.resize(size); clearSelection;}
+NameFinder::NameFinder(SimInfo* info) {
+    loadNames();
+}
 
-        void addSelection(StuntDouble* sd) {
-            bsSelection_.setBitOn(sd->getGlobalIndex());
+
+
+void NameFinder::loadNames() {
+
+    root_ = new NameNode;
+    root_.type = rootNode;
+
+    NameNode* newNode;            
+    SimInfo::MoleculeIterator mi;
+    Molecule* mol;
+    Molecule::AtomIterator ai;
+    Atom* atom;
+    Molecule::RigidBodyIterator rbIter;
+    RigidBody* rb;
+    for (mol = info_->beginMolecule(mi); mol != NULL; mol = info_->nextMolecule(mi)) {
+        newNode = new NameNode;
+        newNode.type = molNode;
+        newNode.name = mol->getMoleculeName();
+        
+        for(atom = mol->beginAtom(ai); atom != NULL; atom = mol->nextAtom(ai)) {
+            atomNames_.insert(atom->getType());
         }
         
-        void addSelectionSet(const BitSet& bs) {
-            bsSelection_ |= bs;
-        }
+        //change the positions of atoms which belong to the rigidbodies
+        for (rb = mol->beginRigidBody(rbIter); rb != NULL; rb = mol->nextRigidBody(rbIter)) {
+            rbNames_.insert(rb->getType());
+        }        
+    }    
+}
 
-        void setSelection(StuntDouble* sd) {
-            bsSelection_.clearAll();
-            bsSelection_.setBitOn(sd->getGlobalIndex());
-        }
-        
-        void setSelectionSet(const BitSet& bs) {
-            bsSelection_ = bs;           
-        }
+bool NameFinder::match(const std::string& name, BitSet& bs){
 
-        void toggleSelection(StuntDouble* sd) {
-            bsSelection_.flip(sd->getGlobalIndex());
-        }
+    bool error = true;
+    StringTokenizer tokenizer(name, ".");
 
-        void toggleSelection() {
-            bsSelection_.flip();
-        }
-        
-        void selectAll() {
-            bsSelection_.setAll();                
-        }
+    std::vector<std::string> names;
+    while(tokenizer.hasMoreTokens()) {
+        names.push_back(tokenizer.nextToken());
+    }
 
-        void clearSelection() {
-           bsSelection_.clearAll();
-        }
+    int size = names.size();
+    switch(size) {
+        case 1 :
+            //could be molecule name, atom name, rigidbody name
+            isMolName();
+            isAtomName();
+            isRigidBodyName();
+            break;
+        case 2:
+            //could be molecule.*(include atoms and rigidbodies) or rigidbody.*
+            break;
+        case 3:
+            //must be molecule.rigidbody.*
+            
+            break;
+        default:            
+            break;           
+    }
 
-        void clearSelection(StuntDouble* sd) {
-            bsSelection_.setBitOff(sd->getGlobalIndex());
-        }
-
-        bool isSelected(StuntDouble* sd) {
-            return bsSelection_[sd->getGlobalIndex()];
-        }
-
-        bool isEmpty() {
-            return bsSelection_.none();
-        }
-
-        int getSelectionCount() {
-            bsSelection_.countBits();
-        }
-
-        BitSet getSelectionSet() {
-            return bsSelection_;
-        }
-        
-    private:
-        
-        BitSet bsSelection_;
-        SimInfo* info_;
-};
+    return matched;
+}
 
 }
-#endif

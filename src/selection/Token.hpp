@@ -122,7 +122,7 @@ class Token {
         const static int select       = command |expressionCommand |2 ;
 
         //predefine
-        const static int selected    = predefinedset |0;
+        //const static int selected    = predefinedset |0;
 
         // atom expression operators
         const static int leftparen    = expression |  0;
@@ -134,13 +134,10 @@ class Token {
         const static int within       = expression |  6;
         const static int asterisk     = expression |  7;
         const static int dot          = expression | 8;
-        const static int name            =  expression |9;
-        const static int index            =  expression | 10;
-        const static int molname            =  expression | 11;
-        const static int molindex      =  expression | 12;
-        const static int all          = expression | 13 ; 
-        const static int none      = expression | 14;
-        
+        const static int all          = expression | 9 ; 
+        const static int none      = expression | 10;
+        const static int name            =  expression |11;
+
         // miguel 2005 01 01
         // these are used to demark the beginning and end of expressions
         // they do not exist in the source code, but are emitted by the

@@ -48,13 +48,25 @@ TokenMap* TokenMap::instance_ = NULL;
 TokenMap::TokenMap() {
     tokenMap_.insert(std::make_pair("define", Token(Token::define, std::string("define"))));
     tokenMap_.insert(std::make_pair("select", Token(Token::select, std::string("select")))); 
+    //tokenMap_.insert(std::make_pair("selected", Token(Token::selected, std::string("selected")))); 
+    
     //expressions
     tokenMap_.insert(std::make_pair("(", Token(Token::leftparen, std::string("("))));
     tokenMap_.insert(std::make_pair(")", Token(Token::rightparen, std::string(")"))));
     tokenMap_.insert(std::make_pair("-", Token(Token::hyphen, std::string("-"))));
+
     tokenMap_.insert(std::make_pair("and", Token(Token::opAnd, std::string("and"))));
+    tokenMap_.insert(std::make_pair("&", Token(Token::opAnd, std::string("and"))));
+    tokenMap_.insert(std::make_pair("&&", Token(Token::opAnd, std::string("and"))));
+
     tokenMap_.insert(std::make_pair("or", Token(Token::opOr, std::string("or"))));
+    tokenMap_.insert(std::make_pair(",", Token(Token::opOr, std::string("or"))));
+    tokenMap_.insert(std::make_pair("|", Token(Token::opOr, std::string("or"))));
+    tokenMap_.insert(std::make_pair("||", Token(Token::opOr, std::string("or"))));
+
     tokenMap_.insert(std::make_pair("not", Token(Token::opNot, std::string("not"))));
+    tokenMap_.insert(std::make_pair("!", Token(Token::opNot, std::string("not"))));
+    
     tokenMap_.insert(std::make_pair("<", Token(Token::opLT, std::string("<"))));
     tokenMap_.insert(std::make_pair("<=", Token(Token::opLE, std::string("<="))));
     tokenMap_.insert(std::make_pair(">=", Token(Token::opGE, std::string(">="))));
@@ -66,10 +78,10 @@ TokenMap::TokenMap() {
     tokenMap_.insert(std::make_pair("mass", Token(Token::mass, std::string("mass"))));
     tokenMap_.insert(std::make_pair("dipole", Token(Token::dipole, std::string("dipole"))));
     tokenMap_.insert(std::make_pair("charge", Token(Token::charge, std::string("charge"))));
-    tokenMap_.insert(std::make_pair("name", Token(Token::name, std::string("name"))));
-    tokenMap_.insert(std::make_pair("index", Token(Token::index, std::string("index"))));
-    tokenMap_.insert(std::make_pair("molname", Token(Token::molname, std::string("molname"))));
-    tokenMap_.insert(std::make_pair("molindex", Token(Token::molindex, std::string("molindex"))));
+    //tokenMap_.insert(std::make_pair("name", Token(Token::name, std::string("name"))));
+    //tokenMap_.insert(std::make_pair("index", Token(Token::index, std::string("index"))));
+    //tokenMap_.insert(std::make_pair("molname", Token(Token::molname, std::string("molname"))));
+    //tokenMap_.insert(std::make_pair("molindex", Token(Token::molindex, std::string("molindex"))));
 
     tokenMap_.insert(std::make_pair("*", Token(Token::asterisk, std::string("*"))));
     tokenMap_.insert(std::make_pair("all", Token(Token::all, std::string("all"))));

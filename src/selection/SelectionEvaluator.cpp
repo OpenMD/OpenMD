@@ -39,9 +39,18 @@
  * such damages.
  */
 
+#include <stack>
 #include "selection/SelectionEvaluator.hpp"
+#include "primitives/Atom.hpp"
+#include "primitives/DirectionalAtom.hpp"
+#include "primitives/RigidBody.hpp"
+#include "primitives/Molecule.hpp"
+
 namespace oopse {
 
+
+SelectionEvaluator::SelectionEvaluator(SimInfo* si, const std::string& script) : info(si), finder(info){
+}            
 
 bool SelectionEvaluator::loadScript(const std::string& filename, const std::string& script) {
     this->filename = filename;
@@ -77,8 +86,8 @@ bool SelectionEvaluator::loadScriptFile(const std::string& filename) {
     return loadScriptFileInternal(filename);
 }
 
-bool SelectionEvaluator::loadScriptFileInternal(const  string & filename) {
-
+bool SelectionEvaluator::loadScriptFileInternal(const  std::string & filename) {
+    return true; /**@todo */
 }
 
 void SelectionEvaluator::instructionDispatchLoop(){
@@ -101,12 +110,10 @@ void SelectionEvaluator::instructionDispatchLoop(){
     }
 }
 
-  BitSet SelectionEvaluator::expression(std::vector<Token>& code, int pcStart) {
-    int numberOfAtoms = viewer.getAtomCount();
+  BitSet SelectionEvaluator::expression(const std::vector<Token>& code, int pcStart) {
     BitSet bs;
-    BitSet[] stack = new BitSet[10];
-    int sp = 0;
-
+    std::stack<BitSet> stack;
+    
     for (int pc = pcStart; ; ++pc) {
       Token instruction = code[pc];
 
@@ -116,46 +123,40 @@ void SelectionEvaluator::instructionDispatchLoop(){
       case Token::expressionEnd:
         break;
       case Token::all:
-        bs = stack[sp++] = new BitSet(numberOfAtoms);
-        for (int i = numberOfAtoms; --i >= 0; )
-          bs.set(i);
+        bs = BitSet(nStuntDouble);
+        bs.setAll();
+        stack.push(bs);            
         break;
       case Token::none:
-        stack[sp++] = new BitSet();
+        bs = BitSet(nStuntDouble);
+        stack.push(bs);            
         break;
       case Token::opOr:
-        bs = stack[--sp];
-        stack[sp-1].or(bs);
+        bs = stack.top();
+        stack.pop();
+        stack.top() |= bs;
         break;
       case Token::opAnd:
-        bs = stack[--sp];
-        stack[sp-1].and(bs);
+        bs = stack.top();
+        stack.pop();
+        stack.top() &= bs;
         break;
       case Token::opNot:
-        bs = stack[sp - 1];
-        notSet(bs);
+        stack.top().flip();
         break;
       case Token::within:
-        bs = stack[sp - 1];
-        stack[sp - 1] = new BitSet();
-        withinInstruction(instruction, bs, stack[sp - 1]);
+
+        withinInstruction(instruction, stack.top());
         break;
-      case Token::selected:
-        stack[sp++] = copyBitSet(viewer.getSelectionSet());
-        break;
+      //case Token::selected:
+      //  stack.push(getSelectionSet());
+      //  break;
       case Token::name:
-
+        stack.push(nameInstruction(boost::any_cast<std::string>(instruction.value)));
         break;
-      case  Token::index:
-        
-        break;
-      case Token::molname:  
-
-        break;
-      case Token::molindex:
         break;
       case Token::identifier:
-        stack[sp++] = lookupIdentifierValue((std::string)instruction.value);
+        stack.push(lookupValue(boost::any_cast<std::string>(instruction.value)));
         break;
       case Token::opLT:
       case Token::opLE:
@@ -163,100 +164,110 @@ void SelectionEvaluator::instructionDispatchLoop(){
       case Token::opGT:
       case Token::opEQ:
       case Token::opNE:
-        bs = stack[sp++] = new BitSet();
-        comparatorInstruction(instruction, bs);
+        stack.push(comparatorInstruction(instruction));
         break;
       default:
         unrecognizedExpression();
       }
     }
-    if (sp != 1)
+    if (stack.size() != 1)
       evalError("atom expression compiler error - stack over/underflow");
-    return stack[0];
+          
+    return stack.top();
   }
 
 
 
-  void SelectionEvaluator::comparatorInstruction(Token instruction, BitSet bs) {
+BitSet SelectionEvaluator::comparatorInstruction(const Token& instruction) {
     int comparator = instruction.tok;
     int property = instruction.intValue;
-    float propertyValue = 0; // just for temperature
-    int comparisonValue = ((Integer)instruction.value).intValue();
-    int numberOfAtoms = viewer.getAtomCount();
-    Frame frame = viewer.getFrame();
-    for (int i = 0; i < numberOfAtoms; ++i) {
-      Atom atom = frame.getAtomAt(i);
-      switch (property) {
-      case Token::mass:
-        //propertyValue = atom.getAtomNumber();
-        break;
-      case Token::charge:
+    float comparisonValue = boost::any_cast<float>(instruction.value);
+    float propertyValue;
+    BitSet bs(nStuntDouble);
+    
+    SimInfo::MoleculeIterator mi;
+    Molecule* mol;
+    Molecule::AtomIterator ai;
+    Atom* atom;
+    Molecule::RigidBodyIterator rbIter;
+    RigidBody* rb;
+    
+    for (mol = info->beginMolecule(mi); mol != NULL; mol = info->nextMolecule(mi)) {
 
-        break;
-      case Token::dipole:
-
-        break; 
-      default:
-        unrecognizedAtomProperty(property);
-      }
-      bool match = false;
-      switch (comparator) {
-      case Token::opLT:
-        match = propertyValue < comparisonValue;
-        break;
-      case Token::opLE:
-        match = propertyValue <= comparisonValue;
-        break;
-      case Token::opGE:
-        match = propertyValue >= comparisonValue;
-        break;
-      case Token::opGT:
-        match = propertyValue > comparisonValue;
-        break;
-      case Token::opEQ:
-        match = propertyValue == comparisonValue;
-        break;
-      case Token::opNE:
-        match = propertyValue != comparisonValue;
-        break;
-      }
-      if (match)
-        bs.set(i);
+        for(atom = mol->beginAtom(ai); atom != NULL; atom = mol->nextAtom(ai)) {
+            compareProperty(atom, bs, property, comparator, comparisonValue);
+        }
+        
+        //change the positions of atoms which belong to the rigidbodies
+        for (rb = mol->beginRigidBody(rbIter); rb != NULL; rb = mol->nextRigidBody(rbIter)) {
+            compareProperty(rb, bs, property, comparator, comparisonValue);
+        }        
     }
-  }
 
-void SelectionEvaluator::withinInstruction(const Token& instruction, BitSet& bs, BitSet& bsResult)
+    return bs;
+}
+
+void SelectionEvaluator::compareProperty(StuntDouble* sd, BitSet& bs, int property, int comparator, float comparisonValue) {
+        double propertyValue;
+        switch (property) {
+        case Token::mass:
+            propertyValue = sd->getMass();
+            break;
+        case Token::charge:
+            return;
+            //break;
+        case Token::dipole:
+            return;
+            //break; 
+        default:
+            unrecognizedAtomProperty(property);
+        }
+        
+        bool match = false;
+        switch (comparator) {
+            case Token::opLT:
+                match = propertyValue < comparisonValue;
+                break;
+            case Token::opLE:
+                match = propertyValue <= comparisonValue;
+                break;
+            case Token::opGE:
+                match = propertyValue >= comparisonValue;
+                break;
+            case Token::opGT:
+                match = propertyValue > comparisonValue;
+                break;
+            case Token::opEQ:
+                match = propertyValue == comparisonValue;
+                break;
+            case Token::opNE:
+                match = propertyValue != comparisonValue;
+                break;
+        }
+        if (match)
+            bs.setBitOn(sd->getGlobalIndex());
+
+}
+
+void SelectionEvaluator::withinInstruction(const Token& instruction, BitSet& bs){
 
     boost::any withinSpec = instruction.value;
     if (withinSpec.type() == typeid(float)){
-        withinDistance(boost::any_cast<float>(withinSpec), bs, bsResult);
+        //
         return;
     }
     
-    evalError("Unrecognized within parameter:" + withinSpec);
+    evalError("Unrecognized within parameter");
 }
 
-  void SelectionEvaluator::withinDistance(float distance, const BitSet& bs, const BitSet& bsResult) {
-    Frame frame = viewer.getFrame();
-    for (int i = frame.getAtomCount(); --i >= 0; ) {
-      if (bs.get(i)) {
-        Atom atom = frame.getAtomAt(i);
-        AtomIterator iterWithin =
-          frame.getWithinIterator(atom, distance);
-        while (iterWithin.hasNext())
-          bsResult.set(iterWithin.next().getAtomIndex());
-      }
-    }
-  }
-
-  void SelectionEvaluator::define() {
+void SelectionEvaluator::define() {
     assert(statement.size() >= 3);
 
     std::string variable = boost::any_cast<std::string>(statement[1].value);
-    
+
     variables.insert(std::make_pair(variable, expression(statement, 2)));
-  }
 }
+
 
 /** @todo */
 void SelectionEvaluator::predefine(const std::string& script) {
@@ -272,7 +283,7 @@ void SelectionEvaluator::predefine(const std::string& script) {
         if (statement.size() > 2) {
             int tok = statement[1].tok;
             if (tok == Token::identifier || (tok & Token::predefinedset) == Token::predefinedset) {
-                std::string variable = (std::string)statement[1].value;
+                std::string variable = boost::any_cast<std::string>(statement[1].value);
                 variables.insert(std::make_pair(variable, statement));
 
             } else {
@@ -291,7 +302,7 @@ void SelectionEvaluator::predefine(const std::string& script) {
 }
 
 void SelectionEvaluator::select(){
-    viewer.setSelectionSet(expression(statement, 1));
+    //viewer.setSelectionSet(expression(statement, 1));
 }
 
 BitSet SelectionEvaluator::lookupValue(const std::string& variable){
@@ -302,12 +313,22 @@ BitSet SelectionEvaluator::lookupValue(const std::string& variable){
         if (i->second.type() == typeid(BitSet)) {
             return boost::any_cast<BitSet>(i->second);
         } else if (i->second.type() ==  typeid(std::vector<Token>)){
-            BitSet bs = expression(boost::any_cast(i->second), 2);
+            BitSet bs = expression(boost::any_cast<std::vector<Token> >(i->second), 2);
             i->second =  bs; /**@todo fixme */
             return bs;
         }
+    } else {
+        unrecognizedIdentifier(variable);
     }
-
 }
+
+BitSet SelectionEvaluator::nameInstruction(const std::string& name){
+    BitSet bs(nStuntDouble);
+    
+    bool hasError = finder.match(name, bs);
+    
+    return bs;    
+}    
+
 
 }

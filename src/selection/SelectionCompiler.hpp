@@ -66,7 +66,7 @@ namespace oopse {
 
     clausePrimitive  ::= clauseComparator |
                          clauseWithin |
-                         clauseChemObject |
+                         clauseName |
                          none | all |
                          ( clauseOr )
 
@@ -75,24 +75,9 @@ namespace oopse {
     clauseWithin     ::= WITHIN ( clauseDistance , expression )
 
     clauseDistance   ::= integer | decimal
-    
-    clauseChemObject::= {clauseMolecule} | {clauseStuntDouble}
+        
+    clauseName::= *|string{.string{.string}}
 
-    clauseMolecule ::= {clauseMolName} | {clauseMolIndex}
-
-    clauseMolName ::= molname clauseName
-    
-    clauseName::= *|string
-
-    clauseMolIndex ::= molindex clauseIndex
-    
-    clauseIndex ::= integer {- integer }
-    
-    clauseStuntDouble ::= {clauseStuntDoubleName} | {clauseStuntDoubleIndex}
-
-    clauseStuntDoubleName ::= name clauseName
-
-    clauseStuntDoubleIndex ::= index clauseIndex
 
  * </pre>
  */
@@ -154,8 +139,8 @@ class SelectionCompiler{
         bool clausePrimitive();
         bool clauseWithin();
         bool clauseComparator();
-        bool clauseName(int tok);
-        bool clauseIndex(int tok);
+        bool clauseChemObjName();        
+        bool clauseName(std::string& name);
 
         Token tokenNext();
         boost::any valuePeek();

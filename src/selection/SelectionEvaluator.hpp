@@ -49,9 +49,11 @@
 #include "brains/SimInfo.hpp"
 #include "selection/Token.hpp"
 #include "selection/SelectionCompiler.hpp"
+#include "selection/NameFinder.hpp"
 #include "utils/BitSet.hpp"
-
+#include "primitives/StuntDouble.hpp"
 namespace oopse {
+
 
 class Context {
     public:
@@ -69,6 +71,7 @@ class Context {
         std::vector<std::vector<Token> > aatoken;
         int pc;
 };
+
 
 /**
  * @class SelectionEvaluator SelectionEvaluator.hpp "selection/SelectionEvaluator"
@@ -126,21 +129,37 @@ class SelectionEvaluator{
          
         void define();
         void select();
-        void predefine();
+        void predefine(const std::string& script);
 
         void instructionDispatchLoop();
 
-        void withinInstruction(const Token& instruction, BitSet& , BitSet&);
+        void withinInstruction(const Token& instruction, BitSet& bs);
+        
+        BitSet comparatorInstruction(const Token& instruction); 
+        void compareProperty(StuntDouble* sd, BitSet& bs, int property, int comparator, float comparisonValue);
+        BitSet nameInstruction(const std::string& name);
 
-        BitSet expression(std::vector<Token>& tokens, int pc);
+        BitSet expression(const std::vector<Token>& tokens, int pc);
 
-
+        BitSet lookupValue(const std::string& variable);
+        
         void evalError(const std::string& message);
 
         void unrecognizedCommand(const Token& token) {
-            evalError("unrecognized command:" + token.value);
+            evalError("unrecognized command:" + boost::any_cast<std::string>(token.value));
         }        
-        
+
+        void unrecognizedExpression() {
+            evalError("unrecognized expression");
+        }
+
+        void unrecognizedAtomProperty(int property){
+            evalError("unrecognized atom property");
+        }
+
+        void unrecognizedIdentifier(const std::string& identifier) {
+            evalError("unrecognized identifier:" + identifier);
+        }    
         SelectionCompiler compiler;
 
         const static int scriptLevelMax = 10;
@@ -162,8 +181,9 @@ class SelectionEvaluator{
         int statementLength;
 
         SimInfo* info;
-
-        std::map<std::string, std::vector<Token> > variables;
+        NameFinder finder;
+        int nStuntDouble;   //natoms + nrigidbodies
+        std::map<std::string, boost::any > variables;
 };
 
 }

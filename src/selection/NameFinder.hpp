@@ -38,79 +38,39 @@
  * University of Notre Dame has been advised of the possibility of
  * such damages.
  */
-
-#ifndef SELECTION_SELECTIONMANAGER_HPP
-#define SELECTION_SELECTIONMANAGER_HPP
+#ifndef SELECTION_NAMEFINDER_HPP
+#define SELECTION_NAMEFINDER_HPP
+#include <set>
+#include <string>
 
 #include "utils/BitSet.hpp"
-
 namespace oopse {
 
-/**
- * @class SelectionManager SelectionManager.hpp "selection/SelectionManager.hpp"
- * @brief
- */
-class SelectionManager {
+enum NameNodeType {
+    rootNode,
+    molNode,
+    atomNode,
+    rbNode,
+    rbAtomNode,
+};
+
+struct NameNode{
+    std::string name;
+    BitSet bs;
+    std::vector<NameNode*> children;
+    NameNodeType type;
+};
+
+class NameFinder{
     public:
-        SelectionManager(int size) {bsSelection_.resize(size); clearSelection;}
+        NameFinder(SimInfo* info);
+        bool match(const std::string& name, BitSet& bs);
 
-        void addSelection(StuntDouble* sd) {
-            bsSelection_.setBitOn(sd->getGlobalIndex());
-        }
-        
-        void addSelectionSet(const BitSet& bs) {
-            bsSelection_ |= bs;
-        }
-
-        void setSelection(StuntDouble* sd) {
-            bsSelection_.clearAll();
-            bsSelection_.setBitOn(sd->getGlobalIndex());
-        }
-        
-        void setSelectionSet(const BitSet& bs) {
-            bsSelection_ = bs;           
-        }
-
-        void toggleSelection(StuntDouble* sd) {
-            bsSelection_.flip(sd->getGlobalIndex());
-        }
-
-        void toggleSelection() {
-            bsSelection_.flip();
-        }
-        
-        void selectAll() {
-            bsSelection_.setAll();                
-        }
-
-        void clearSelection() {
-           bsSelection_.clearAll();
-        }
-
-        void clearSelection(StuntDouble* sd) {
-            bsSelection_.setBitOff(sd->getGlobalIndex());
-        }
-
-        bool isSelected(StuntDouble* sd) {
-            return bsSelection_[sd->getGlobalIndex()];
-        }
-
-        bool isEmpty() {
-            return bsSelection_.none();
-        }
-
-        int getSelectionCount() {
-            bsSelection_.countBits();
-        }
-
-        BitSet getSelectionSet() {
-            return bsSelection_;
-        }
-        
     private:
-        
-        BitSet bsSelection_;
+        void loadNames();
         SimInfo* info_;
+
+        NameNode* root_;
 };
 
 }

@@ -560,15 +560,11 @@ bool SelectionCompiler::clausePrimitive() {
     switch (tok) {
         case Token::within:
             return clauseWithin();
-        case Token::name :
-            return clauseName(Token::name);
-        case Token::index :
-            return clauseIndex(Token::index);
-        case Token::molname :
-            return clauseName(Token::molname);
-        case Token::molindex :
-            return clauseIndex(Token::molindex);
-            
+
+        case Token::asterisk:
+        case Token::identifier:
+            return clauseChemObjName();
+      
         default:
             if ((tok & Token::atomproperty) == Token::atomproperty) {
                 return clauseComparator();
@@ -647,17 +643,63 @@ bool SelectionCompiler::clauseWithin() {
     return addTokenToPostfix(Token(Token::within, distance));
 }
 
+bool SelectionCompiler::clauseChemObjName() {
+    std::string chemObjName;
+    int tok = tokPeek();
+    if (!clauseName(chemObjName)){
+        return false;
+    }
 
-bool SelectionCompiler:: clauseName(int tok) {
-    Token tokenName = tokenNext();
-    std::string name = boost::any_cast<std::string>(tokenName.value);
-    return addTokenToPostfix(Token(tok, name)); /**@todo */
+
+    tok = tokPeek();
+    //allow two dot at most
+    if (tok == Token::dot) {
+        if (!clauseName(chemObjName)) {
+            return false;
+        }
+        tok = tokPeek();
+        if (tok == Token::dot) {
+            if (!clauseName(chemObjName)) {
+                return false;
+            }
+        }        
+    }
+
+    return addTokenToPostfix(Token(Token::name, chemObjName));
+}
+
+bool SelectionCompiler:: clauseName(std::string& name) {
+
+    int tok = tokPeek();
+
+    if (tok == Token::asterisk || tok == Token::identifier) {
+        name += boost::any_cast<std::string>(tokenNext().value);
+        
+        while(true){
+            tok = tokPeek();
+            switch (tok) {
+                case Token::asterisk :
+                    name += "*";
+                    tokenNext();
+                    break;
+                case Token::identifier :
+                    name += boost::any_cast<std::string>(tokenNext().value);
+                    break;
+                case Token::integer :
+                    name += toString(boost::any_cast<int>(tokenNext().value));
+                    break;
+                case Token::dot :
+                    return true;
+                default :
+                    return true;
+            }
+        }
+        
+    }else {
+        return false;
+    }
 
 }
 
-bool SelectionCompiler:: clauseIndex(int tok) {
-    //return addTokenToPostfix(Token(tok, )); /**@todo*/
-    return true;
-}
 
 }
