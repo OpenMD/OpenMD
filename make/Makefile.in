@@ -272,7 +272,7 @@ List                   = cat
 Yacc                   = @YACC@
 Lex                    = @LEX@
 Ranlib                 = @RANLIB@
-
+Doxygen                = @DOXYGEN@
 
 MakeOptions            = -k
 MakeDependOptions      = 
@@ -486,6 +486,11 @@ $(PackageTargetDir)/%_Skel.class : $(PackageTargetDir)/%.class
 %_Skel.class : %.class
 	$(MAKE) $(MakeOptions) $(PackageTargetDir)/$@
 
+document :
+	$(Print) Generate Documentation for OOPSE-2.0
+	@cd $(DEV_ROOT)/src	
+	$(Doxygen) $(DEV_ROOT)/make/Doxyfile
+
 #GUN make funtions to merge the libraries
 find_objs = $(shell $(StaticArchiver) -t $(1))
 extract_objs = $(shell $(StaticArchiver) -x $(1) $(call find_objs, $(1)))
@@ -587,27 +592,27 @@ $(DependencyFile) : $(DerivedSource)
 
 ifneq "$(words $(CppFiles))" "0"
 	$(CppCompiler) $(CppOptions) $(IncludePath) -MM $(CppFiles) > Make.cpptemp
-	cat Make.cpptemp | sed 's/^[a-zA-Z0-9]/$$\(TargetDir\)\/&/g' >> $(DependencyFile)
+	@cat Make.cpptemp | sed 's/^[a-zA-Z0-9]/$$\(TargetDir\)\/&/g' >> $(DependencyFile)
 	$(Delete) Make.cpptemp
 	$(CppCompiler) $(CppParallelOptions) $(IncludePath) -MM $(CppFiles) > Make.cpptemp
-	cat Make.cpptemp | sed 's/^[a-zA-Z0-9]/$$\(ParallelTargetDir\)\/&/g' >> $(DependencyFile)
-	$(Delete) Make.cpptemp
+	@cat Make.cpptemp | sed 's/^[a-zA-Z0-9]/$$\(ParallelTargetDir\)\/&/g' >> $(DependencyFile)
+	@$(Delete) Make.cpptemp
 endif
 
 ifneq "$(words $(CFiles))" "0" 
 	$(CCompiler) $(COptions) $(IncludePath) -MM $(CFiles) $(DerivedCFiles) > Make.ctemp
-	cat Make.ctemp | sed 's/^[a-zA-Z0-9]/$$\(TargetDir\)\/&/g' >> $(DependencyFile)
+	@cat Make.ctemp | sed 's/^[a-zA-Z0-9]/$$\(TargetDir\)\/&/g' >> $(DependencyFile)
 	$(Delete) Make.ctemp
 	$(CCompiler) $(CParallelOptions) $(IncludePath) -MM $(CFiles) $(DerivedCFiles) > Make.ctemp
-	cat Make.ctemp | sed 's/^[a-zA-Z0-9]/$$\(ParallelTargetDir\)\/&/g' >> $(DependencyFile)
-	$(Delete) Make.ctemp
+	@cat Make.ctemp | sed 's/^[a-zA-Z0-9]/$$\(ParallelTargetDir\)\/&/g' >> $(DependencyFile)
+	@$(Delete) Make.ctemp
 endif
 
 ifneq "$(words $(F90Files))" "0"
-	$(DEV_ROOT)/scripts/filepp  -I $(DEV_ROOT)/src -od '$$(TargetDir)/' $(F90Declare)  $(F90Files) > Make.ftemp
-	$(DEV_ROOT)/scripts/filepp  -I $(DEV_ROOT)/src -od '$$(ParallelTargetDir)/' $(ParallelDeclare) $(F90Declare)  $(F90Files) >> Make.ftemp
-	cat Make.ftemp >> $(DependencyFile)
-	$(Delete) Make.ftemp
+	$(DEV_ROOT)/scripts/filepp  -I $(DEV_ROOT)/src -od '$$(TargetDir)/' $(F90Declare) -mc $(ModuleCase) -ms $(ModSuffix) $(F90Files) > Make.ftemp
+	$(DEV_ROOT)/scripts/filepp  -I $(DEV_ROOT)/src -od '$$(ParallelTargetDir)/' $(ParallelDeclare) $(F90Declare) -mc $(ModuleCase) -ms $(ModSuffix)  $(F90Files) >> Make.ftemp
+	@cat Make.ftemp >> $(DependencyFile)
+	@$(Delete) Make.ftemp
 endif
 
 # make lib
