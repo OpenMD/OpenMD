@@ -42,7 +42,7 @@ class RectMatrixTestCase : public CPPUNIT_NS::TestFixture {
         void testMul();
         void testDiv();
         void testAccessEntries();
-        void testRowColOperations()
+        void testRowColOperations();
         void testOtherMemberFunctions();
 
     private:
