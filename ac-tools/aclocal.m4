@@ -652,7 +652,7 @@ if test "$ac_test_CXXFLAGS" != "set"; then
 		echo "*******************************************************"
         fi;;
    *darwin*)
-	if test "$CXX" = xlc++; then
+	if test "$CXX" = xlc++ -o "$CXX" = xlC ; then
         	CXXFLAGS="-qthreaded -O -qtune=auto -qarch=auto -qunroll=auto -qaltivec"
         fi;;
   esac

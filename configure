@@ -312,7 +312,7 @@ ac_includes_default="\
 # include <unistd.h>
 #endif"
 
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS PROGNAME debug build build_cpu build_vendor build_os host host_cpu host_vendor host_os CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT CXX CXXFLAGS ac_ct_CXX OOPSE_TEMPLATE_FLAGS EXTRA_CC_FLAG F90 F90FLAGS ac_ct_F90 PREPFLAG PREPDEFFLAG F90LIBS F90_FUNC F90_FUNC_ MOD F90_WORK_FILES_ARG MODDIRFLAG F90MODINCSPEC F90_MODULE_NAMES CPP EGREP LIBOBJS INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA LN_S SET_MAKE RANLIB ac_ct_RANLIB YACC LEX LEXLIB LEX_OUTPUT_ROOT AR MPI_LIB_DIR MPI_INC_DIR MPI_F90_INC MPI_LIB MPI_F90_LIB USE_MPI SPRNG_LIB_DIR SPRNG_INC_DIR SPRNG_LIB USE_SPRNG MKL_LIBDIR MKL_LIB MKL_INC HAVE_MKL DOXYGEN DOT DOC enable_dot enable_html_docs enable_latex_docs BATEXT MKINSTALLDIRS OOPSE OOPSE_HOME SUBDIRS FFLAGS LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS PROGNAME debug build build_cpu build_vendor build_os host host_cpu host_vendor host_os CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT CXX CXXFLAGS ac_ct_CXX OOPSE_TEMPLATE_FLAGS EXTRA_CC_FLAG F90 F90FLAGS ac_ct_F90 PREPFLAG PREPDEFFLAG F90LIBS F90_FUNC F90_FUNC_ MOD F90_WORK_FILES_ARG MODDIRFLAG F90MODINCSPEC F90_MODULE_NAMES CPP EGREP LIBOBJS INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA LN_S SET_MAKE RANLIB ac_ct_RANLIB YACC LEX LEXLIB LEX_OUTPUT_ROOT AR PS_PATH BSD_PS POSIX_PS MPI_LIB_DIR MPI_INC_DIR MPI_F90_INC MPI_LIB MPI_F90_LIB USE_MPI SPRNG_LIB_DIR SPRNG_INC_DIR SPRNG_LIB USE_SPRNG MKL_LIBDIR MKL_LIB MKL_INC HAVE_MKL DOXYGEN DOT DOC enable_dot enable_html_docs enable_latex_docs BATEXT MKINSTALLDIRS OOPSE OOPSE_HOME SUBDIRS FFLAGS LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -5266,9 +5266,6 @@ echo "${ECHO_T}no" >&6
 fi
 rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
 
-
-
-
   # clean out junk possibly left behind by a previous configuration
   rm -f src/getopt.h
   # Check for getopt_long support
@@ -6155,7 +6152,7 @@ if test "$ac_test_CXXFLAGS" != "set"; then
 		echo "*******************************************************"
         fi;;
    *darwin*)
-	if test "$CXX" = xlc++; then
+	if test "$CXX" = xlc++ -o "$CXX" = xlC ; then
         	CXXFLAGS="-qthreaded -O -qtune=auto -qarch=auto -qunroll=auto -qaltivec"
         fi;;
   esac
@@ -7257,6 +7254,70 @@ fi
 rm -f confcache
   exit 1
 fi
+
+# Extract the first word of "ps", so it can be a program name with args.
+set dummy ps; ac_word=$2
+echo "$as_me:$LINENO: checking for $ac_word" >&5
+echo $ECHO_N "checking for $ac_word... $ECHO_C" >&6
+if test "${ac_cv_path_PS_PATH+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  case $PS_PATH in
+  [\\/]* | ?:[\\/]*)
+  ac_cv_path_PS_PATH="$PS_PATH" # Let the user override the test with a path.
+  ;;
+  *)
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+  for ac_exec_ext in '' $ac_executable_extensions; do
+  if $as_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
+    ac_cv_path_PS_PATH="$as_dir/$ac_word$ac_exec_ext"
+    echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+done
+
+  ;;
+esac
+fi
+PS_PATH=$ac_cv_path_PS_PATH
+
+if test -n "$PS_PATH"; then
+  echo "$as_me:$LINENO: result: $PS_PATH" >&5
+echo "${ECHO_T}$PS_PATH" >&6
+else
+  echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6
+fi
+
+echo "$as_me:$LINENO: checking for POSIX ps" >&5
+echo $ECHO_N "checking for POSIX ps... $ECHO_C" >&6
+if test "${ac_cv_prog_ps_posix+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+
+	USER=${USER:-${LOGNAME:-`logname`}}
+	if $PS_PATH -U $USER -opid,args >/dev/null 2>&1; then
+		ac_cv_prog_ps_posix=yes
+	else
+		ac_cv_prog_ps_posix=no
+	fi
+
+fi
+echo "$as_me:$LINENO: result: $ac_cv_prog_ps_posix" >&5
+echo "${ECHO_T}$ac_cv_prog_ps_posix" >&6
+if test "$ac_cv_prog_ps_posix" = yes; then
+	BSD_PS=yes
+else
+	POSIX_PS=yes
+fi
+
+
+
 
 
 
@@ -9021,6 +9082,9 @@ s,@LEX@,$LEX,;t t
 s,@LEXLIB@,$LEXLIB,;t t
 s,@LEX_OUTPUT_ROOT@,$LEX_OUTPUT_ROOT,;t t
 s,@AR@,$AR,;t t
+s,@PS_PATH@,$PS_PATH,;t t
+s,@BSD_PS@,$BSD_PS,;t t
+s,@POSIX_PS@,$POSIX_PS,;t t
 s,@MPI_LIB_DIR@,$MPI_LIB_DIR,;t t
 s,@MPI_INC_DIR@,$MPI_INC_DIR,;t t
 s,@MPI_F90_INC@,$MPI_F90_INC,;t t

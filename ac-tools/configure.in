@@ -128,10 +128,6 @@ AC_TRY_COMPILE([#include <sys/systemcfg.h>],
             [Define if you have the _system_configuration variable.])],
   [AC_MSG_RESULT([no])])
 
-
-dnl undef HAVE__SYSTEM_CONFIGURATION
-
-
 dnl check for system getopt
 adl_FUNC_GETOPT_LONG
 
@@ -159,6 +155,24 @@ if test "$AR" = "NONE"; then
   AC_CACHE_SAVE
   exit 1
 fi
+
+AC_PATH_PROG(PS_PATH, ps)
+AC_CACHE_CHECK([for POSIX ps], ac_cv_prog_ps_posix, [
+	USER=${USER:-${LOGNAME:-`logname`}}
+	if $PS_PATH -U $USER -opid,args >/dev/null 2>&1; then
+		ac_cv_prog_ps_posix=yes
+	else
+		ac_cv_prog_ps_posix=no
+	fi
+])
+if test "$ac_cv_prog_ps_posix" = yes; then
+	BSD_PS=yes
+else
+	POSIX_PS=yes
+fi
+AC_SUBST(PS_PATH)
+AC_SUBST(BSD_PS)
+AC_SUBST(POSIX_PS)
 
 
 AC_ARG_WITH(mpi,
