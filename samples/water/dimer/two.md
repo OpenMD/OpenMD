@@ -27,7 +27,7 @@ tauBarostat = 1e4;
 dt = 1.0;
 runTime = 1e5;
 
-sampleTime = 3e4;
-statusTime = 1;
+sampleTime = 1e2;
+statusTime = 10;
 useInitialTime = "false";
 useInitialExtendedSystemState = "false";
