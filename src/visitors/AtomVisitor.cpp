@@ -381,7 +381,7 @@ void DefaultAtomVisitor::visit(DirectionalAtom *datom) {
         return;
 
     pos = datom->getPos();
-    u = datom->getElectroFrame().getColumn(3);
+    u = datom->getElectroFrame().getColumn(2);
 
     atomData = new AtomData;
     atomData->setID("ATOMDATA");

@@ -47,7 +47,7 @@ GhostTorsion::GhostTorsion(Atom *atom1, Atom *atom2,  DirectionalAtom* ghostAtom
                  TorsionType *tt) : Torsion(atom1, atom2, ghostAtom, ghostAtom, tt) {}
 
 void GhostTorsion::calcForce() {
-    DirectionalAtom* ghostAtom = static_cast<DirectionalAtom*>(atom2_);    
+    DirectionalAtom* ghostAtom = static_cast<DirectionalAtom*>(atom3_);    
 
     Vector3d pos1 = atom1_->getPos();
     Vector3d pos2 = atom2_->getPos();
