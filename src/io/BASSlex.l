@@ -413,7 +413,8 @@ int escape_stack_ptr = 0; //keeps track of the escape stack
 <<EOF>> 			{
 				  buffer_stack_ptr--;
 				  if( buffer_stack_ptr < 0 ){
-				    
+                                    //reinitialize buffer_stack_ptr
+				    buffer_stack_ptr = 0; 
 				    yyterminate();
 				  }
 				  
