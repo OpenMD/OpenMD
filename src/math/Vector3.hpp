@@ -48,7 +48,9 @@ namespace oopse {
   template<typename Real>
   class Vector3 : public Vector<Real, 3>{
   public:
-
+    typedef Real ElemType;
+    typedef Real* ElemPoinerType;
+    
     Vector3() : Vector<Real, 3>(){}
     
     /** Constructs and initializes a Vector3 from x, y, z coordinates */

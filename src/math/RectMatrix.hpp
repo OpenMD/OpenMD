@@ -46,308 +46,315 @@ namespace oopse {
     template<typename Real, unsigned int Row, unsigned int Col> 
     class RectMatrix {
         public:
-
-        /** default constructor */
-        RectMatrix() {
-            for (unsigned int i = 0; i < Row; i++)
-                for (unsigned int j = 0; j < Col; j++)
-                    data_[i][j] = 0.0;
-         }
-
-        /** Constructs and initializes every element of this matrix to a scalar */ 
-        RectMatrix(Real s) {
-            for (unsigned int i = 0; i < Row; i++)
-                for (unsigned int j = 0; j < Col; j++)
-                    data_[i][j] = s;
-        }
-
-        /** copy constructor */
-        RectMatrix(const RectMatrix<Real, Row, Col>& m) {
-            *this = m;
-        }
-        
-        /** destructor*/
-        ~RectMatrix() {}
-
-        /** copy assignment operator */
-        RectMatrix<Real, Row, Col>& operator =(const RectMatrix<Real, Row, Col>& m) {
-            if (this == &m)
-                return *this;
+            typedef Real ElemType;
+            typedef Real* ElemPoinerType;
             
-            for (unsigned int i = 0; i < Row; i++)
-                for (unsigned int j = 0; j < Col; j++)
-                    data_[i][j] = m.data_[i][j];
-            return *this;
-        }
-        
-        /**
-         * Return the reference of a single element of this matrix.
-         * @return the reference of a single element of this matrix 
-         * @param i row index
-         * @param j colum index
-         */
-        double& operator()(unsigned int i, unsigned int j) {
-            //assert( i < Row && j < Col);
-            return data_[i][j];
-        }
+            /** default constructor */
+            RectMatrix() {
+                for (unsigned int i = 0; i < Row; i++)
+                    for (unsigned int j = 0; j < Col; j++)
+                        data_[i][j] = 0.0;
+             }
 
-        /**
-         * Return the value of a single element of this matrix.
-         * @return the value of a single element of this matrix 
-         * @param i row index
-         * @param j colum index
-         */        
-        double operator()(unsigned int i, unsigned int j) const  {
+            /** Constructs and initializes every element of this matrix to a scalar */ 
+            RectMatrix(Real s) {
+                for (unsigned int i = 0; i < Row; i++)
+                    for (unsigned int j = 0; j < Col; j++)
+                        data_[i][j] = s;
+            }
+
+            /** copy constructor */
+            RectMatrix(const RectMatrix<Real, Row, Col>& m) {
+                *this = m;
+            }
             
-            return data_[i][j];  
-        }
+            /** destructor*/
+            ~RectMatrix() {}
 
-        /**
-         * Returns a row of  this matrix as a vector.
-         * @return a row of  this matrix as a vector 
-         * @param row the row index
-         */                
-        Vector<Real, Row> getRow(unsigned int row) {
-            Vector<Real, Row> v;
-
-            for (unsigned int i = 0; i < Row; i++)
-                v[i] = data_[row][i];
-
-            return v;
-        }
-
-        /**
-         * Sets a row of  this matrix
-         * @param row the row index
-         * @param v the vector to be set
-         */                
-         void setRow(unsigned int row, const Vector<Real, Row>& v) {
-
-            for (unsigned int i = 0; i < Row; i++)
-                data_[row][i] = v[i];
-         }
-
-        /**
-         * Returns a column of  this matrix as a vector.
-         * @return a column of  this matrix as a vector 
-         * @param col the column index
-         */                
-        Vector<Real, Col> getColum(unsigned int col) {
-            Vector<Real, Col> v;
-
-            for (unsigned int j = 0; j < Col; j++)
-                v[j] = data_[j][col];
-
-            return v;
-        }
-
-        /**
-         * Sets a column of  this matrix
-         * @param col the column index
-         * @param v the vector to be set
-         */                
-         void setColum(unsigned int col, const Vector<Real, Col>& v){
-
-            for (unsigned int j = 0; j < Col; j++)
-                data_[j][col] = v[j];
-         }         
-
-        /**
-         * swap two rows of this matrix
-         * @param i the first row
-         * @param j the second row
-         */
-        void swapRow(unsigned int i, unsigned int j){
-                assert(i < Row && j < Row);
-
-                for (unsigned int k = 0; k < Col; k++)
-                    std::swap(data_[i][k], data_[j][k]);
-        }
-
-       /**
-         * swap two colums of this matrix
-         * @param i the first colum
-         * @param j the second colum
-         */
-        void swapColum(unsigned int i, unsigned int j){
-                assert(i < Col && j < Col);
+            /** copy assignment operator */
+            RectMatrix<Real, Row, Col>& operator =(const RectMatrix<Real, Row, Col>& m) {
+                if (this == &m)
+                    return *this;
                 
-                for (unsigned int k = 0; k < Row; k++)
-                    std::swap(data_[k][i], data_[k][j]);
-        }
-
-        /**
-         * Tests if this matrix is identical to matrix m
-         * @return true if this matrix is equal to the matrix m, return false otherwise
-         * @m matrix to be compared
-         *
-         * @todo replace operator == by template function equal
-         */
-        bool operator ==(const RectMatrix<Real, Row, Col>& m) {
-            for (unsigned int i = 0; i < Row; i++)
-                for (unsigned int j = 0; j < Col; j++)
-                    if (!equal(data_[i][j], m.data_[i][j]))
-                        return false;
-
-            return true;
-        }
-
-        /**
-         * Tests if this matrix is not equal to matrix m
-         * @return true if this matrix is not equal to the matrix m, return false otherwise
-         * @m matrix to be compared
-         */
-        bool operator !=(const RectMatrix<Real, Row, Col>& m) {
-            return !(*this == m);
-        }
-
-        /** Negates the value of this matrix in place. */           
-        inline void negate() {
-            for (unsigned int i = 0; i < Row; i++)
-                for (unsigned int j = 0; j < Col; j++)
-                    data_[i][j] = -data_[i][j];
-        }
-        
-        /**
-        * Sets the value of this matrix to the negation of matrix m.
-        * @param m the source matrix
-        */
-        inline void negate(const RectMatrix<Real, Row, Col>& m) {
-            for (unsigned int i = 0; i < Row; i++)
-                for (unsigned int j = 0; j < Col; j++)
-                    data_[i][j] = -m.data_[i][j];        
-        }
-        
-        /**
-        * Sets the value of this matrix to the sum of itself and m (*this += m).
-        * @param m the other matrix
-        */
-        inline void add( const RectMatrix<Real, Row, Col>& m ) {
-            for (unsigned int i = 0; i < Row; i++)
-                for (unsigned int j = 0; j < Col; j++)        
-                data_[i][j] += m.data_[i][j];
-        }
-        
-        /**
-        * Sets the value of this matrix to the sum of m1 and m2 (*this = m1 + m2).
-        * @param m1 the first matrix
-        * @param m2 the second matrix
-        */
-        inline void add( const RectMatrix<Real, Row, Col>& m1, const RectMatrix<Real, Row, Col>& m2 ) {
-            for (unsigned int i = 0; i < Row; i++)
-                for (unsigned int j = 0; j < Col; j++)        
-                data_[i][j] = m1.data_[i][j] + m2.data_[i][j];
-        }
-        
-        /**
-        * Sets the value of this matrix to the difference  of itself and m (*this -= m).
-        * @param m the other matrix
-        */
-        inline void sub( const RectMatrix<Real, Row, Col>& m ) {
-            for (unsigned int i = 0; i < Row; i++)
-                for (unsigned int j = 0; j < Col; j++)        
-                    data_[i][j] -= m.data_[i][j];
-        }
-        
-        /**
-        * Sets the value of this matrix to the difference of matrix m1 and m2 (*this = m1 - m2).
-        * @param m1 the first matrix
-        * @param m2 the second matrix
-        */
-        inline void sub( const RectMatrix<Real, Row, Col>& m1, const RectMatrix<Real, Row, Col>& m2){
-            for (unsigned int i = 0; i < Row; i++)
-                for (unsigned int j = 0; j < Col; j++)        
-                    data_[i][j] = m1.data_[i][j] - m2.data_[i][j];
-        }
-
-        /**
-        * Sets the value of this matrix to the scalar multiplication of itself (*this *= s).
-        * @param s the scalar value
-        */
-        inline void mul( double s ) {
-            for (unsigned int i = 0; i < Row; i++)
-                for (unsigned int j = 0; j < Col; j++)  
-                    data_[i][j] *= s;
-        }
-
-        /**
-        * Sets the value of this matrix to the scalar multiplication of matrix m  (*this = s * m).
-        * @param s the scalar value
-        * @param m the matrix
-        */
-        inline void mul( double s, const RectMatrix<Real, Row, Col>& m ) {
-            for (unsigned int i = 0; i < Row; i++)
-                for (unsigned int j = 0; j < Col; j++)  
-                    data_[i][j] = s * m.data_[i][j];
-        }
-
-        /**
-        * Sets the value of this matrix to the scalar division of itself  (*this /= s ).
-        * @param s the scalar value
-        */             
-        inline void div( double s) {
-            for (unsigned int i = 0; i < Row; i++)
-                for (unsigned int j = 0; j < Col; j++)  
-                    data_[i][j] /= s;
-        }
-
-        /**
-        * Sets the value of this matrix to the scalar division of matrix m  (*this = m /s).
-        * @param s the scalar value
-        * @param m the matrix
-        */
-        inline void div( double s, const RectMatrix<Real, Row, Col>& m ) {
-            for (unsigned int i = 0; i < Row; i++)
-                for (unsigned int j = 0; j < Col; j++)  
-                    data_[i][j] = m.data_[i][j] / s;
-        }
-
-        /**
-         *  Multiples a scalar into every element of this matrix.
-         * @param s the scalar value
-         */
-        RectMatrix<Real, Row, Col>& operator *=(const double s) {
-            this->mul(s);
-            return *this;
-        }
-
-        /**
-         *  Divides every element of this matrix by a scalar.
-         * @param s the scalar value
-         */
-        RectMatrix<Real, Row, Col>& operator /=(const double s) {
-            this->div(s);
-            return *this;
-        }
-
-        /**
-         * Sets the value of this matrix to the sum of the other matrix and itself (*this += m).
-         * @param m the other matrix
-         */
-        RectMatrix<Real, Row, Col>& operator += (const RectMatrix<Real, Row, Col>& m) {
-            add(m);
-            return *this;
-         }
-
-        /**
-         * Sets the value of this matrix to the differerence of itself and the other matrix (*this -= m) 
-         * @param m the other matrix
-         */
-        RectMatrix<Real, Row, Col>& operator -= (const RectMatrix<Real, Row, Col>& m){
-            sub(m);
-            return *this;
-        }
-
-        /** Return the transpose of this matrix */
-        RectMatrix<Real,  Col, Row> transpose(){
-            RectMatrix<Real,  Col, Row> result;
+                for (unsigned int i = 0; i < Row; i++)
+                    for (unsigned int j = 0; j < Col; j++)
+                        data_[i][j] = m.data_[i][j];
+                return *this;
+            }
             
-            for (unsigned int i = 0; i < Row; i++)
-                for (unsigned int j = 0; j < Col; j++)              
-                    result(j, i) = data_[i][j];
+            /**
+             * Return the reference of a single element of this matrix.
+             * @return the reference of a single element of this matrix 
+             * @param i row index
+             * @param j colum index
+             */
+            Real& operator()(unsigned int i, unsigned int j) {
+                //assert( i < Row && j < Col);
+                return data_[i][j];
+            }
 
-            return result;
-        }
+            /**
+             * Return the value of a single element of this matrix.
+             * @return the value of a single element of this matrix 
+             * @param i row index
+             * @param j colum index
+             */        
+            Real operator()(unsigned int i, unsigned int j) const  {
+                
+                return data_[i][j];  
+            }
+
+            /** Returns the pointer of internal array */
+            Real* getArrayPointer() {
+                return &data_[0][0];
+            }
+
+            /**
+             * Returns a row of  this matrix as a vector.
+             * @return a row of  this matrix as a vector 
+             * @param row the row index
+             */                
+            Vector<Real, Row> getRow(unsigned int row) {
+                Vector<Real, Row> v;
+
+                for (unsigned int i = 0; i < Row; i++)
+                    v[i] = data_[row][i];
+
+                return v;
+            }
+
+            /**
+             * Sets a row of  this matrix
+             * @param row the row index
+             * @param v the vector to be set
+             */                
+             void setRow(unsigned int row, const Vector<Real, Row>& v) {
+
+                for (unsigned int i = 0; i < Row; i++)
+                    data_[row][i] = v[i];
+             }
+
+            /**
+             * Returns a column of  this matrix as a vector.
+             * @return a column of  this matrix as a vector 
+             * @param col the column index
+             */                
+            Vector<Real, Col> getColum(unsigned int col) {
+                Vector<Real, Col> v;
+
+                for (unsigned int j = 0; j < Col; j++)
+                    v[j] = data_[j][col];
+
+                return v;
+            }
+
+            /**
+             * Sets a column of  this matrix
+             * @param col the column index
+             * @param v the vector to be set
+             */                
+             void setColum(unsigned int col, const Vector<Real, Col>& v){
+
+                for (unsigned int j = 0; j < Col; j++)
+                    data_[j][col] = v[j];
+             }         
+
+            /**
+             * swap two rows of this matrix
+             * @param i the first row
+             * @param j the second row
+             */
+            void swapRow(unsigned int i, unsigned int j){
+                    assert(i < Row && j < Row);
+
+                    for (unsigned int k = 0; k < Col; k++)
+                        std::swap(data_[i][k], data_[j][k]);
+            }
+
+           /**
+             * swap two colums of this matrix
+             * @param i the first colum
+             * @param j the second colum
+             */
+            void swapColum(unsigned int i, unsigned int j){
+                    assert(i < Col && j < Col);
+                    
+                    for (unsigned int k = 0; k < Row; k++)
+                        std::swap(data_[k][i], data_[k][j]);
+            }
+
+            /**
+             * Tests if this matrix is identical to matrix m
+             * @return true if this matrix is equal to the matrix m, return false otherwise
+             * @m matrix to be compared
+             *
+             * @todo replace operator == by template function equal
+             */
+            bool operator ==(const RectMatrix<Real, Row, Col>& m) {
+                for (unsigned int i = 0; i < Row; i++)
+                    for (unsigned int j = 0; j < Col; j++)
+                        if (!equal(data_[i][j], m.data_[i][j]))
+                            return false;
+
+                return true;
+            }
+
+            /**
+             * Tests if this matrix is not equal to matrix m
+             * @return true if this matrix is not equal to the matrix m, return false otherwise
+             * @m matrix to be compared
+             */
+            bool operator !=(const RectMatrix<Real, Row, Col>& m) {
+                return !(*this == m);
+            }
+
+            /** Negates the value of this matrix in place. */           
+            inline void negate() {
+                for (unsigned int i = 0; i < Row; i++)
+                    for (unsigned int j = 0; j < Col; j++)
+                        data_[i][j] = -data_[i][j];
+            }
+            
+            /**
+            * Sets the value of this matrix to the negation of matrix m.
+            * @param m the source matrix
+            */
+            inline void negate(const RectMatrix<Real, Row, Col>& m) {
+                for (unsigned int i = 0; i < Row; i++)
+                    for (unsigned int j = 0; j < Col; j++)
+                        data_[i][j] = -m.data_[i][j];        
+            }
+            
+            /**
+            * Sets the value of this matrix to the sum of itself and m (*this += m).
+            * @param m the other matrix
+            */
+            inline void add( const RectMatrix<Real, Row, Col>& m ) {
+                for (unsigned int i = 0; i < Row; i++)
+                    for (unsigned int j = 0; j < Col; j++)        
+                    data_[i][j] += m.data_[i][j];
+            }
+            
+            /**
+            * Sets the value of this matrix to the sum of m1 and m2 (*this = m1 + m2).
+            * @param m1 the first matrix
+            * @param m2 the second matrix
+            */
+            inline void add( const RectMatrix<Real, Row, Col>& m1, const RectMatrix<Real, Row, Col>& m2 ) {
+                for (unsigned int i = 0; i < Row; i++)
+                    for (unsigned int j = 0; j < Col; j++)        
+                    data_[i][j] = m1.data_[i][j] + m2.data_[i][j];
+            }
+            
+            /**
+            * Sets the value of this matrix to the difference  of itself and m (*this -= m).
+            * @param m the other matrix
+            */
+            inline void sub( const RectMatrix<Real, Row, Col>& m ) {
+                for (unsigned int i = 0; i < Row; i++)
+                    for (unsigned int j = 0; j < Col; j++)        
+                        data_[i][j] -= m.data_[i][j];
+            }
+            
+            /**
+            * Sets the value of this matrix to the difference of matrix m1 and m2 (*this = m1 - m2).
+            * @param m1 the first matrix
+            * @param m2 the second matrix
+            */
+            inline void sub( const RectMatrix<Real, Row, Col>& m1, const RectMatrix<Real, Row, Col>& m2){
+                for (unsigned int i = 0; i < Row; i++)
+                    for (unsigned int j = 0; j < Col; j++)        
+                        data_[i][j] = m1.data_[i][j] - m2.data_[i][j];
+            }
+
+            /**
+            * Sets the value of this matrix to the scalar multiplication of itself (*this *= s).
+            * @param s the scalar value
+            */
+            inline void mul( Real s ) {
+                for (unsigned int i = 0; i < Row; i++)
+                    for (unsigned int j = 0; j < Col; j++)  
+                        data_[i][j] *= s;
+            }
+
+            /**
+            * Sets the value of this matrix to the scalar multiplication of matrix m  (*this = s * m).
+            * @param s the scalar value
+            * @param m the matrix
+            */
+            inline void mul( Real s, const RectMatrix<Real, Row, Col>& m ) {
+                for (unsigned int i = 0; i < Row; i++)
+                    for (unsigned int j = 0; j < Col; j++)  
+                        data_[i][j] = s * m.data_[i][j];
+            }
+
+            /**
+            * Sets the value of this matrix to the scalar division of itself  (*this /= s ).
+            * @param s the scalar value
+            */             
+            inline void div( Real s) {
+                for (unsigned int i = 0; i < Row; i++)
+                    for (unsigned int j = 0; j < Col; j++)  
+                        data_[i][j] /= s;
+            }
+
+            /**
+            * Sets the value of this matrix to the scalar division of matrix m  (*this = m /s).
+            * @param s the scalar value
+            * @param m the matrix
+            */
+            inline void div( Real s, const RectMatrix<Real, Row, Col>& m ) {
+                for (unsigned int i = 0; i < Row; i++)
+                    for (unsigned int j = 0; j < Col; j++)  
+                        data_[i][j] = m.data_[i][j] / s;
+            }
+
+            /**
+             *  Multiples a scalar into every element of this matrix.
+             * @param s the scalar value
+             */
+            RectMatrix<Real, Row, Col>& operator *=(const Real s) {
+                this->mul(s);
+                return *this;
+            }
+
+            /**
+             *  Divides every element of this matrix by a scalar.
+             * @param s the scalar value
+             */
+            RectMatrix<Real, Row, Col>& operator /=(const Real s) {
+                this->div(s);
+                return *this;
+            }
+
+            /**
+             * Sets the value of this matrix to the sum of the other matrix and itself (*this += m).
+             * @param m the other matrix
+             */
+            RectMatrix<Real, Row, Col>& operator += (const RectMatrix<Real, Row, Col>& m) {
+                add(m);
+                return *this;
+             }
+
+            /**
+             * Sets the value of this matrix to the differerence of itself and the other matrix (*this -= m) 
+             * @param m the other matrix
+             */
+            RectMatrix<Real, Row, Col>& operator -= (const RectMatrix<Real, Row, Col>& m){
+                sub(m);
+                return *this;
+            }
+
+            /** Return the transpose of this matrix */
+            RectMatrix<Real,  Col, Row> transpose(){
+                RectMatrix<Real,  Col, Row> result;
+                
+                for (unsigned int i = 0; i < Row; i++)
+                    for (unsigned int j = 0; j < Col; j++)              
+                        result(j, i) = data_[i][j];
+
+                return result;
+            }
         
         protected:
             Real data_[Row][Col];

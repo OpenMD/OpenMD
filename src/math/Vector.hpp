@@ -65,6 +65,9 @@ namespace oopse {
     class Vector{
         public:
 
+            typedef Real ElemType;
+            typedef Real* ElemPoinerType;
+
             /** default constructor */
             inline Vector(){
                 for (unsigned int i = 0; i < Dim; i++)
@@ -139,6 +142,11 @@ namespace oopse {
                 return data_[i];
             }
 
+            /** Returns the pointer of internal array */
+            Real* getArrayPointer() {
+                return data_;
+            }
+            
             /**
              * Tests if this vetor is equal to other vector
              * @return true if equal, otherwise return false

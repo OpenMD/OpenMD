@@ -1,3 +1,51 @@
+2004-10-21 15:15  gezelter
+
+	* src/: UseTheForce/DUFF.cpp, UseTheForce/EAM_FF.cpp,
+	UseTheForce/ForceFields.cpp, UseTheForce/ForceFields.hpp,
+	UseTheForce/LJFF.cpp, UseTheForce/Shapes_FF.cpp,
+	UseTheForce/WATER.cpp, UseTheForce/doForces.F90,
+	UseTheForce/doForces_interface.h, UseTheForce/fForceField.h,
+	UseTheForce/DarkSide/LJ.F90, UseTheForce/DarkSide/lj_interface.h,
+	brains/SimSetup.cpp, types/AtomTypeProperties.h: Breaky Breaky.  
+	Fixey Fixey.
+
+2004-10-21 11:32  tim
+
+	* src/utils/GenericData.cpp, src/utils/Makefile,
+	test/utils/Makefile, test/utils/UtilTest: remove some junk files
+
+2004-10-21 11:24  tim
+
+	* test/utils/GenericData.hpp: remove backup of	GenericData.hpp
+
+2004-10-21 11:22  tim
+
+	* ChangeLog, src/brains/SimSetup.cpp,
+	src/constraints/ZConstraint.cpp, src/constraints/ZconsData.hpp,
+	src/integrators/NPT.cpp, src/integrators/NPTf.cpp,
+	src/integrators/NPTi.cpp, src/integrators/NPTxyz.cpp,
+	src/integrators/NVT.cpp, src/io/DumpReader.cpp,
+	src/io/InitializeFromFile.cpp, src/io/ZConsReader.cpp,
+	src/io/ZConsWriter.hpp, src/primitives/StuntDouble.hpp,
+	src/utils/GenericData.cpp, src/utils/GenericData.hpp,
+	src/visitors/AtomData.hpp, src/visitors/AtomVisitor.cpp,
+	src/visitors/AtomVisitor.hpp, src/visitors/CompositeVisitor.cpp,
+	src/visitors/CompositeVisitor.hpp, src/visitors/OtherVisitor.cpp,
+	src/visitors/OtherVisitor.hpp, src/visitors/RigidBodyVisitor.cpp,
+	src/visitors/RigidBodyVisitor.hpp, src/visitors/ZconsVisitor.cpp,
+	src/visitors/ZconsVisitor.hpp: replace old GebericData with  new
+	GenericData
+
+2004-10-21 10:25  chuckv
+
+	* src/UseTheForce/DarkSide/: LJ.F90, eam.F90: Added newLJtype to lj
+	module.
+
+2004-10-21 10:24  chuckv
+
+	* src/UseTheForce/DarkSide/lj_interface.h: Added interface for
+	fortran lj module.
+
 2004-10-20 17:54  tim
 
 	* ChangeLog, src/utils/PropertyMap.cpp, src/utils/PropertyMap.hpp,

@@ -32,6 +32,9 @@
   */
 #ifndef BRAINS_SNAPSHOTMANAGER_HPP
 #define BRAINS_SNAPSHOTMANAGER_HPP
+
+#include "brains/Snapshot.hpp"
+
 namespace oopse{
 
     /**
@@ -47,9 +50,9 @@ namespace oopse{
 
             bool move(int );
 
-            getActiveFrame();
+            Snapshot* getActiveSnapshot();
 
-            setActiveFrame();
+            void setActiveSnapshot();
             
             int getCapacity();
 

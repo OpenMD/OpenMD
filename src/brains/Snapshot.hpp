@@ -32,6 +32,14 @@
   */
 #ifndef BRAINS_SNAPSHOT_HPP
 #define BRAINS_SNAPSHOT_HPP
+
+#include <vector>
+
+#include "math/Vector3.hpp"
+#include "math/SquareMatrix3.hpp"
+
+using namespace std;
+
 namespace oopse{
 
     /**
@@ -42,11 +50,61 @@ namespace oopse{
      */
     class Snapshot {
         public:
+
+            Snapshot(int i) {
+
+            }
+
+            Snapshot(const Snapshot& s);
+
+            Snapshot& operator =(const Snapshot& s);
             
-            PropertyMap properties_;
+            /** Returns the id of this Snapshot */
+            int getID() {
+                return id_;
+            }
+
+            /** Sets the id of this Snapshot */
+            void setID(int id) {
+                id_ = id;
+            }
+
+            /** */
+            Snapshot* clone() {
+                return new Snapshot(*this);
+            }
+
+
+            //template<typename T>
+            //static typename T::ElemPointerType getArrayPointer(vector<T>& v) {
+            //    return v[0]->getArrayPointer();
+            //}
+
+            static double* getArrayPointer(vector<Vector3d>& v) {
+                return v[0].getArrayPointer();
+            }
+            
+            static double* getArrayPointer(vector<RotMat3x3d>& v) {
+                return v[0].getArrayPointer();
+            }
+            
+            static double* getArrayPointer(vector<double>& v) {
+                assert(v.size() > 0);
+                return &(v[0]);
+            }
+            
+            vector<Vector3d> pos;
+            vector<Vector3d> vel;
+            vector<Vector3d> frc;
+            vector<Vector3d> trq;
+            vector<RotMat3x3d> Amat;
+            vector<Vector3d> mu;
+            vector<Vector3d> ul;
+            vector<double> zAngle;
             
         private:
-            
+
+            int id_; /**< identification number of the snapshot */
     };
 
 }

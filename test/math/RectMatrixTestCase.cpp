@@ -314,7 +314,20 @@ void RectMatrixTestCase::testRowColOperations() {
 
     s.swapColum(0, 1);
     CPPUNIT_ASSERT(s == e);
-    
+
+    double* p = s.getArrayPointer();
+
+    p[0] = 2.0;
+    p[1] = 4.0;
+    p[2] = 1.0;
+    p[3] = 0.0;
+    p[4] = 6.0;
+    p[5] = 5.0;    
+    p[6] = 0.0;
+    p[7] = 0.0;
+    p[8] = 3.0;  
+
+    CPPUNIT_ASSERT(s == f);    
 }    
 
 void RectMatrixTestCase::testOtherMemberFunctions(){

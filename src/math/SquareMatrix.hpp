@@ -45,128 +45,130 @@ namespace oopse {
     template<typename Real, int Dim>
     class SquareMatrix : public RectMatrix<Real, Dim, Dim> {
         public:
+            typedef Real ElemType;
+            typedef Real* ElemPoinerType;
 
-        /** default constructor */
-        SquareMatrix() {
-            for (unsigned int i = 0; i < Dim; i++)
-                for (unsigned int j = 0; j < Dim; j++)
-                    data_[i][j] = 0.0;
-         }
+            /** default constructor */
+            SquareMatrix() {
+                for (unsigned int i = 0; i < Dim; i++)
+                    for (unsigned int j = 0; j < Dim; j++)
+                        data_[i][j] = 0.0;
+             }
 
-        /** copy constructor */
-        SquareMatrix(const RectMatrix<Real, Dim, Dim>& m)  : RectMatrix<Real, Dim, Dim>(m) {
-        }
-        
-        /** copy assignment operator */
-        SquareMatrix<Real, Dim>& operator =(const RectMatrix<Real, Dim, Dim>& m) {
-            RectMatrix<Real, Dim, Dim>::operator=(m);
-            return *this;
-        }
-                               
-        /** Retunrs  an identity matrix*/
-
-       static SquareMatrix<Real, Dim> identity() {
-            SquareMatrix<Real, Dim> m;
+            /** copy constructor */
+            SquareMatrix(const RectMatrix<Real, Dim, Dim>& m) : RectMatrix<Real, Dim, Dim>(m) {
+            }
             
-            for (unsigned int i = 0; i < Dim; i++) 
-                for (unsigned int j = 0; j < Dim; j++) 
-                    if (i == j)
-                        m(i, j) = 1.0;
-                    else
-                        m(i, j) = 0.0;
+            /** copy assignment operator */
+            SquareMatrix<Real, Dim>& operator =(const RectMatrix<Real, Dim, Dim>& m) {
+                RectMatrix<Real, Dim, Dim>::operator=(m);
+                return *this;
+            }
+                                   
+            /** Retunrs  an identity matrix*/
 
-            return m;
-        }
+           static SquareMatrix<Real, Dim> identity() {
+                SquareMatrix<Real, Dim> m;
+                
+                for (unsigned int i = 0; i < Dim; i++) 
+                    for (unsigned int j = 0; j < Dim; j++) 
+                        if (i == j)
+                            m(i, j) = 1.0;
+                        else
+                            m(i, j) = 0.0;
 
-        /** 
-         * Retunrs  the inversion of this matrix. 
-         * @todo need implementation
-         */
-         SquareMatrix<Real, Dim>  inverse() {
-             SquareMatrix<Real, Dim> result;
+                return m;
+            }
 
-             return result;
-        }        
+            /** 
+             * Retunrs  the inversion of this matrix. 
+             * @todo need implementation
+             */
+             SquareMatrix<Real, Dim>  inverse() {
+                 SquareMatrix<Real, Dim> result;
 
-        /**
-         * Returns the determinant of this matrix.
-         * @todo need implementation
-         */
-        Real determinant() const {
-            Real det;
-            return det;
-        }
+                 return result;
+            }        
 
-        /** Returns the trace of this matrix. */
-        Real trace() const {
-           Real tmp = 0;
-           
-            for (unsigned int i = 0; i < Dim ; i++)
-                tmp += data_[i][i];
+            /**
+             * Returns the determinant of this matrix.
+             * @todo need implementation
+             */
+            Real determinant() const {
+                Real det;
+                return det;
+            }
 
-            return tmp;
-        }
+            /** Returns the trace of this matrix. */
+            Real trace() const {
+               Real tmp = 0;
+               
+                for (unsigned int i = 0; i < Dim ; i++)
+                    tmp += data_[i][i];
 
-        /** Tests if this matrix is symmetrix. */            
-        bool isSymmetric() const {
-            for (unsigned int i = 0; i < Dim - 1; i++)
-                for (unsigned int j = i; j < Dim; j++)
-                    if (fabs(data_[i][j] - data_[j][i]) > oopse::epsilon) 
-                        return false;
-                    
-            return true;
-        }
+                return tmp;
+            }
 
-        /** Tests if this matrix is orthogonal. */            
-        bool isOrthogonal() {
-            SquareMatrix<Real, Dim> tmp;
+            /** Tests if this matrix is symmetrix. */            
+            bool isSymmetric() const {
+                for (unsigned int i = 0; i < Dim - 1; i++)
+                    for (unsigned int j = i; j < Dim; j++)
+                        if (fabs(data_[i][j] - data_[j][i]) > oopse::epsilon) 
+                            return false;
+                        
+                return true;
+            }
 
-            tmp = *this * transpose();
+            /** Tests if this matrix is orthogonal. */            
+            bool isOrthogonal() {
+                SquareMatrix<Real, Dim> tmp;
 
-            return tmp.isDiagonal();
-        }
+                tmp = *this * transpose();
 
-        /** Tests if this matrix is diagonal. */
-        bool isDiagonal() const {
-            for (unsigned int i = 0; i < Dim ; i++)
-                for (unsigned int j = 0; j < Dim; j++)
-                    if (i !=j && fabs(data_[i][j]) > oopse::epsilon) 
-                        return false;
-                    
-            return true;
-        }
+                return tmp.isDiagonal();
+            }
 
-        /** Tests if this matrix is the unit matrix. */
-        bool isUnitMatrix() const {
-            if (!isDiagonal())
-                return false;
-            
-            for (unsigned int i = 0; i < Dim ; i++)
-                if (fabs(data_[i][i] - 1) > oopse::epsilon)
+            /** Tests if this matrix is diagonal. */
+            bool isDiagonal() const {
+                for (unsigned int i = 0; i < Dim ; i++)
+                    for (unsigned int j = 0; j < Dim; j++)
+                        if (i !=j && fabs(data_[i][j]) > oopse::epsilon) 
+                            return false;
+                        
+                return true;
+            }
+
+            /** Tests if this matrix is the unit matrix. */
+            bool isUnitMatrix() const {
+                if (!isDiagonal())
                     return false;
                 
-            return true;
-        }         
+                for (unsigned int i = 0; i < Dim ; i++)
+                    if (fabs(data_[i][i] - 1) > oopse::epsilon)
+                        return false;
+                    
+                return true;
+            }         
 
-        /** @todo need implementation */
-        void diagonalize() {
-            //jacobi(m, eigenValues, ortMat);
-        }
+            /** @todo need implementation */
+            void diagonalize() {
+                //jacobi(m, eigenValues, ortMat);
+            }
 
-        /**
-         * Jacobi iteration routines for computing eigenvalues/eigenvectors of 
-         * real symmetric matrix
-         *
-         * @return true if success, otherwise return false
-         * @param a symmetric matrix whose eigenvectors are to be computed. On return, the matrix is
-         *     overwritten
-         * @param w will contain the eigenvalues of the matrix On return of this function
-         * @param v the columns of this matrix will contain the eigenvectors. The eigenvectors are 
-         *    normalized and mutually orthogonal. 
-         */
-       
-        static int jacobi(SquareMatrix<Real, Dim>& a, Vector<Real, Dim>& d, 
-                              SquareMatrix<Real, Dim>& v);
+            /**
+             * Jacobi iteration routines for computing eigenvalues/eigenvectors of 
+             * real symmetric matrix
+             *
+             * @return true if success, otherwise return false
+             * @param a symmetric matrix whose eigenvectors are to be computed. On return, the matrix is
+             *     overwritten
+             * @param w will contain the eigenvalues of the matrix On return of this function
+             * @param v the columns of this matrix will contain the eigenvectors. The eigenvectors are 
+             *    normalized and mutually orthogonal. 
+             */
+           
+            static int jacobi(SquareMatrix<Real, Dim>& a, Vector<Real, Dim>& d, 
+                                  SquareMatrix<Real, Dim>& v);
     };//end SquareMatrix
 
 

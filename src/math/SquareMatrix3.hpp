@@ -41,6 +41,9 @@ namespace oopse {
     template<typename Real>
     class SquareMatrix3 : public SquareMatrix<Real, 3> {
         public:
+
+            typedef Real ElemType;
+            typedef Real* ElemPoinerType;
             
             /** default constructor */
             SquareMatrix3() : SquareMatrix<Real, 3>() {

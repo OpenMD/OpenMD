@@ -194,6 +194,15 @@ void VectorTestCase::testAccessEntries(){
     //test () operator
     CPPUNIT_ASSERT_DOUBLES_EQUAL(v3(0) , 4.0, oopse::epsilon);
 
+    Vec4 a1;
+    double *pa1 = a1.getArrayPointer();
+    
+    pa1[0] = 4.0;
+    pa1[1] = 1.0;
+    pa1[2] = 3.0;
+    pa1[3] = 2.0;        
+
+    CPPUNIT_ASSERT(a1 == v3);    
 }
 
 void VectorTestCase::testOtherMemberFunctions(){
