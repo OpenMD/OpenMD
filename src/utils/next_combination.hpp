@@ -44,14 +44,14 @@ namespace oopse {
  * <p> Preconditions: </p>
  * 
  */
-template<class BidirectionalIterator, template<typename ELEM, typename = std::allocator<ELEM> > class IteratorContainer>
-bool next_combination(IteratorContainer<BidirectionalIterator>& iterContainer, BidirectionalIterator first, BidirectionalIterator last) {
+template<class RandomAccessIterator, template<typename ELEM, typename = std::allocator<ELEM> > class IteratorContainer>
+bool next_combination(IteratorContainer<RandomAccessIterator>& iterContainer, RandomAccessIterator first, RandomAccessIterator last) {
     if (first == last) {
         return false;
     }
     
-    BidirectionalIterator endIter = --last;
-    typename IteratorContainer<BidirectionalIterator>::iterator i = iterContainer.end();
+    RandomAccessIterator endIter = --last;
+    typename IteratorContainer<RandomAccessIterator>::iterator i = iterContainer.end();
     
     if (iterContainer.empty()) {
         //if sequence is empty, we insert the first iterator
@@ -71,14 +71,14 @@ bool next_combination(IteratorContainer<BidirectionalIterator>& iterContainer, B
         //If j is less than zero, it means it already reaches the last combination of current size.
         //For instance, sequence may contain 6, 7, 8, 9 at this time, we need to increase the size
         // of combination to 5
-        typename IteratorContainer<BidirectionalIterator>::iterator j = i;
+        typename IteratorContainer<RandomAccessIterator>::iterator j = i;
         j--;
         while( j >= iterContainer.begin() && *i == *j + 1){
             i--;
             j--;
         };
 
-        BidirectionalIterator biDirIter;
+        RandomAccessIterator raIter;
         if (j - iterContainer.begin() < 0) { //reaches the last combination of current size
             //half open range
             if (last  - first + 1  == iterContainer.size()) {
@@ -88,20 +88,20 @@ bool next_combination(IteratorContainer<BidirectionalIterator>& iterContainer, B
 
                 //push the first currentSize+1 element into sequence 
                 
-                for(i = iterContainer.begin(), biDirIter= first; i  != iterContainer.end(); ++i, ++biDirIter) {
-                    *i = biDirIter;
+                for(i = iterContainer.begin(), raIter= first; i  != iterContainer.end(); ++i, ++raIter) {
+                    *i = raIter;
                 }    
-                iterContainer.insert(iterContainer.end(), biDirIter);
+                iterContainer.insert(iterContainer.end(), raIter);
                 
                 return true; 
             }
             
         } else {
             ++(*j);
-            biDirIter = *j;
+            raIter = *j;
             for(; i != iterContainer.end(); ++i) {
-                ++biDirIter;
-                *i = biDirIter;
+                ++raIter;
+                *i = raIter;
             }
             return true;
         }
