@@ -136,15 +136,13 @@ void TimeCorrFunc::doCorrelate() {
 
     for (int i = 0; i < nblocks; ++i) {
         bsMan_->loadBlock(i);
+
         for (int j = i; j < nblocks; ++j) {
             bsMan_->loadBlock(j);
             correlateBlocks(i, j);
-
-            if (i != j) {
-                //if i equals to j, the block is still used, should not unload it
-                bsMan_->unloadBlock(j);
-            }
+            bsMan_->unloadBlock(j);
         }
+        
         bsMan_->unloadBlock(i);
     }
     

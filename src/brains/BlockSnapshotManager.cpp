@@ -48,7 +48,8 @@
 namespace oopse {
 BlockSnapshotManager::BlockSnapshotManager(SimInfo* info, const std::string& filename, 
     int storageLayout, int blockCapacity) 
-    : SnapshotManager(storageLayout), info_(info), blockCapacity_(blockCapacity), activeBlocks_(blockCapacity_, -1) {
+    : SnapshotManager(storageLayout), info_(info), blockCapacity_(blockCapacity), 
+      activeBlocks_(blockCapacity_, -1), activeRefCount_(blockCapacity_, 0) {
 
     nAtoms_ = info->getNGlobalAtoms();
     nRigidBodies_ = info->getNGlobalRigidBodies();
@@ -106,49 +107,83 @@ int BlockSnapshotManager::getNActiveBlocks() {
 #endif
 }
 
-bool BlockSnapshotManager::isBlockActive(int block) {
-    return std::find(activeBlocks_.begin(), activeBlocks_.end(), block) != activeBlocks_.end() ? true : false;
-}
+
 
 bool BlockSnapshotManager::loadBlock(int block) {
+    std::vector<int>::iterator i = findActiveBlock(block);
     bool loadSuccess;
-    if (isBlockActive(block)) {
+    if (i != activeBlocks_.end()) {
+        //if block is already in memory, just increast the reference count
+        ++activeRefCount_[i - activeBlocks_.begin()];
         loadSuccess = true;
     } else if (getNActiveBlocks() < blockCapacity_){
-
-        for (int i = blocks_[block].first; i < blocks_[block].second; ++i) {
-            snapshots_[i] = loadFrame(i);
-        }
-        
-        std::vector<int>::iterator j;
-        j = std::find(activeBlocks_.begin(), activeBlocks_.end(), -1);
-        assert(j != activeBlocks_.end());
-        *j = block;    
+        //if number of active blocks is less than the block capacity, just load it
+        internalLoad(block);
         loadSuccess = true;
-    }else {
+    } else if (hasZeroRefBlock() > 0) {
+        //if already reach the block capacity, need to unload a block with 0 reference
+        int zeroRefBlock = getFirstZeroRefBlock();
+        assert(zeroRefBlock != -1);
+        internalUnload(zeroRefBlock);
+        internalLoad(block);
+    } else {
+        //reach the capacity and all blocks in memory are not zero reference
         loadSuccess = false;
     }
-
+    
     return loadSuccess;
 }
 
 bool BlockSnapshotManager::unloadBlock(int block) {
     bool unloadSuccess;
-    if (!isBlockActive(block)){
-        unloadSuccess = false;
-    } else {
-        for (int i = blocks_[block].first; i < blocks_[block].second; ++i) {
-            delete snapshots_[i];
-            snapshots_[i] = NULL;
+    std::vector<int>::iterator i = findActiveBlock(block);
+    
+    if (i != activeBlocks_.end()){
+        --activeRefCount_[i - activeBlocks_.begin()];
+        if (activeRefCount_[i - activeBlocks_.begin()] < 0) {
+            //in case, unloadBlock called multiple times
+            activeRefCount_[i - activeBlocks_.begin()]  = 0;
         }
-        std::vector<int>::iterator j;
-        j = std::find(activeBlocks_.begin(), activeBlocks_.end(), block);
-        assert(j != activeBlocks_.end());
-        *j = -1;
+        
         unloadSuccess = true;
+    } else {
+        unloadSuccess = false;
     }
 
     return unloadSuccess;
+}
+
+void BlockSnapshotManager::internalLoad(int block) {
+        
+    for (int i = blocks_[block].first; i < blocks_[block].second; ++i) {
+        snapshots_[i] = loadFrame(i);
+    }
+    
+    std::vector<int>::iterator j;
+    j = std::find(activeBlocks_.begin(), activeBlocks_.end(), -1);
+    assert(j != activeBlocks_.end());
+    *j = block;    
+    ++activeRefCount_[j - activeBlocks_.begin()];
+}
+
+void BlockSnapshotManager::internalUnload(int block) {
+    for (int i = blocks_[block].first; i < blocks_[block].second; ++i) {
+        delete snapshots_[i];
+        snapshots_[i] = NULL;
+    }
+    std::vector<int>::iterator j;
+    j = std::find(activeBlocks_.begin(), activeBlocks_.end(), block);
+    assert(j != activeBlocks_.end());
+    *j = -1;
+}
+
+bool BlockSnapshotManager::hasZeroRefBlock(){
+    return std::find(activeRefCount_.begin(), activeRefCount_.end(), 0);
+}
+
+int BlockSnapshotManager::getFirstZeroRefBlock(){
+     std::vector<int>::iterator i = std::find(activeRefCount_.begin(), activeRefCount_.end(), 0);
+     return i != activeRefCount_.end() ? activeBlocks_[i - activeRefCount_.begin()] : -1;
 }
 
 std::vector<int> BlockSnapshotManager::getActiveBlocks() {

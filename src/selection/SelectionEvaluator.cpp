@@ -300,7 +300,7 @@ void SelectionEvaluator::define() {
 
     std::string variable = boost::any_cast<std::string>(statement[1].value);
 
-    variables.insert(std::make_pair(variable, expression(statement, 2)));
+    variables.insert(VariablesType::value_type(variable, expression(statement, 2)));
 }
 
 

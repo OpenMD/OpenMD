@@ -73,8 +73,11 @@ class BlockSnapshotManager : public SnapshotManager{
         
         int getNActiveBlocks();
         
-        bool isBlockActive(int block);
-        
+
+        bool isBlockActive(int block) {
+            return  findActiveBlock(block) != activeBlocks_.end() ? true : false;
+        }        
+
         bool loadBlock(int block);
         
         bool unloadBlock(int block);
@@ -89,6 +92,16 @@ class BlockSnapshotManager : public SnapshotManager{
         
     private:
 
+        std::vector<int>::iterator findActiveBlock(int block) {
+            return std::find(activeBlocks_.begin(), activeBlocks_.end(), block);
+        }
+
+        bool hasZeroRefBlock();
+
+        int getFirstZeroRefBlock();
+
+        void internalLoad(int block);
+        void internalUnload(int block);
         Snapshot* loadFrame(int frame);
         
         SimInfo* info_;
@@ -97,6 +110,7 @@ class BlockSnapshotManager : public SnapshotManager{
         std::vector<Snapshot*> snapshots_;
         std::vector<SnapshotBlock> blocks_;        
         std::vector<int> activeBlocks_;
+        std::vector<int> activeRefCount_;
         
         int nAtoms_;
         int nRigidBodies_;

@@ -85,7 +85,8 @@ void RadialDistrFunc::process() {
     
     DumpReader reader(info_, dumpFilename_);    
     int nFrames = reader.getNFrames();
-    nProcessed_ = nFrames / step_ + 1;
+    nProcessed_ = nFrames / step_;
+
     for (int i = 0; i < nFrames; i += step_) {
         reader.readFrame(i);
         currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
@@ -131,7 +132,7 @@ void RadialDistrFunc::process() {
 
 int RadialDistrFunc::getNRealPairs() {
     if (evaluator1_.isDynamic() || evaluator2_.isDynamic()) {
-        //if one of the selection is static,  need to recompute it    
+        //if one of the selection is dynamic,  need to recompute it    
 
         int nSelected1 = seleMan1_.getSelectionCount();
         int nSelected2 = seleMan2_.getSelectionCount();
