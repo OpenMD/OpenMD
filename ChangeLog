@@ -1,3 +1,164 @@
+2004-11-02 11:59  tim
+
+	* src/brains/SimModel.cpp: file SimModel.cpp was initially added on
+	branch new_design.
+
+2004-11-02 11:59  tim
+
+	* src/brains/: SimModel.cpp, SimModel.hpp, SimSnapshotManager.cpp,
+	SimSnapshotManager.hpp: SimModel in progress
+
+2004-11-02 10:28  chrisfen
+
+	* src/: UseTheForce/DarkSide/shapes.F90,
+	primitives/StuntDouble.cpp, primitives/StuntDouble.hpp: Shapes
+	looks like it's working
+
+2004-11-02 10:27  tim
+
+	* src/utils/MemoryUtils.hpp: adding MemoryUtils which provide some
+	functions for dealing with memory issue
+
+2004-11-02 10:27  tim
+
+	* src/utils/MemoryUtils.hpp: file MemoryUtils.hpp was initially
+	added on branch new_design.
+
+2004-11-02 10:23  tim
+
+	* src/: brains/SimModel.hpp, brains/Snapshot.hpp,
+	brains/SnapshotManager.hpp, primitives/Molecule.hpp: adding
+	SimModel(something similar as SimInfo)
+
+2004-11-01 17:52  tim
+
+	* src/: applications/simpleBuilder/MoLocator.hpp,
+	applications/simpleBuilder/simpleBuilder.cpp,
+	brains/DataStorage.hpp, brains/ForceFields.cpp,
+	brains/Snapshot.hpp, brains/SnapshotManager.hpp, brains/Thermo.cpp,
+	constraints/ZConstraint.cpp, integrators/Integrator.cpp,
+	integrators/NPT.cpp, integrators/NVT.cpp, io/DumpWriter.cpp,
+	math/SquareMatrix3.hpp, math/Vector3.hpp,
+	minimizers/OOPSEMinimizer.cpp, primitives/Bend.hpp,
+	primitives/Bond.hpp, primitives/CutoffGroup.hpp,
+	primitives/Molecule.cpp, primitives/Molecule.hpp,
+	primitives/RigidBody.hpp, primitives/Torsion.hpp,
+	restraints/Restraints.cpp, types/TorsionType.hpp,
+	utils/PropertyMap.hpp, utils/StringTokenizer.hpp,
+	visitors/AtomVisitor.cpp, visitors/BaseVisitor.hpp,
+	visitors/RigidBodyVisitor.cpp: Molecule, Atom, DirectionalAtom,
+	RigidBody and StuntDouble classes get compiled
+
+2004-11-01 16:40  tim
+
+	* src/primitives/Torsion.hpp: file Torsion.hpp was initially added
+	on branch new_design.
+
+2004-11-01 16:40  tim
+
+	* src/primitives/Bend.hpp: file Bend.hpp was initially added on
+	branch new_design.
+
+2004-11-01 16:40  tim
+
+	* src/primitives/Bond.hpp: file Bond.hpp was initially added on
+	branch new_design.
+
+2004-11-01 16:40  tim
+
+	* src/primitives/: Bend.hpp, Bond.hpp, Torsion.hpp: add initial
+	version of Bond, Bend and Torsion.
+
+2004-11-01 16:37  tim
+
+	* src/types/BendType.hpp: file BendType.hpp was initially added on
+	branch new_design.
+
+2004-11-01 16:37  tim
+
+	* src/types/: BendType.hpp, BondType.hpp, TorsionType.hpp: adding
+	BondType, BendType, TorsionType
+
+2004-11-01 16:37  tim
+
+	* src/types/TorsionType.hpp: file TorsionType.hpp was initially
+	added on branch new_design.
+
+2004-11-01 16:37  tim
+
+	* src/types/BondType.hpp: file BondType.hpp was initially added on
+	branch new_design.
+
+2004-11-01 15:15  tim
+
+	* src/primitives/: Atom.cpp, Atom.hpp, Bend.cpp, Bond.cpp,
+	CutoffGroup.hpp, DirectionalAtom.cpp, DirectionalAtom.hpp,
+	GhostBend.cpp, Makefile, Molecule.cpp, Molecule.hpp, RigidBody.cpp,
+	RigidBody.hpp, StuntDouble.cpp, StuntDouble.hpp, Torsion.cpp:
+	break, break and break.....
+
+2004-11-01 14:57  tim
+
+	* test/brains/: Atom.cpp, DirectioanlAtom.cpp, DirectionalAtom.cpp,
+	DirectionalAtom.hpp, RigidBody.cpp, RigidBody.hpp, StuntDouble.cpp,
+	StuntDouble.hpp: these core classes get compiled
+
+2004-10-29 17:37  tim
+
+	* test/brains/: Molecule.cpp, Molecule.hpp: more work on Molecule
+	class
+
+2004-10-29 17:28  chrisfen
+
+	* src/: UseTheForce/DarkSide/atype.F90,
+	UseTheForce/DarkSide/shapes.F90, math/RealSphericalHarmonic.cpp,
+	types/ShapeAtomType.cpp: still debugging
+
+2004-10-29 17:28  chrisfen
+
+	* src/UseTheForce/: ForceFields.hpp, Shapes_FF.cpp, doForces.F90:
+	shapes rcut calculator added
+
+2004-10-29 17:27  chrisfen
+
+	* samples/shape/linear.md: shorter run
+
+2004-10-29 15:54  tim
+
+	* test/brains/: Molecule.cpp, Molecule.hpp: rewrite Molecule class.
+
+2004-10-29 11:22  tim
+
+	* test/utils/: GenerateCombination.hpp, ReplaceWildCard.hpp,
+	ReplaceWildCardTestCase.cpp, ReplaceWildCardTestCase.hpp: Remove
+	some deprecated files
+
+2004-10-29 11:20  tim
+
+	* test/brains/: Atom.cpp, Atom.hpp, DirectioanlAtom.cpp,
+	DirectionalAtom.hpp, RigidBody.cpp, RigidBody.hpp, StuntDouble.hpp:
+	More painful reconstruction is coming !!!
+
+2004-10-28 17:34  tim
+
+	* src/brains/DataStorage.hpp, src/utils/next_combination.hpp,
+	test/brains/DirectioanlAtom.cpp, test/brains/DirectionalAtom.hpp,
+	test/brains/RigidBody.cpp, test/brains/RigidBody.hpp,
+	test/brains/StuntDouble.hpp: More work on StuntDouble, Atom,
+	DirectionalAtom and RigidBody
+
+2004-10-28 17:26  tim
+
+	* ChangeLog, src/applications/simpleBuilder/BaseLattice.hpp,
+	src/applications/simpleBuilder/MoLocator.cpp,
+	src/applications/simpleBuilder/Vector3d.hpp,
+	src/utils/GenericFactory.hpp, src/utils/next_combination.hpp:
+	remove old Vector3d.hpp from application/simpleBuilder
+
+2004-10-28 16:42  tim
+
+	* src/utils/next_combination.hpp: Minor change in next_combination
+
 2004-10-28 16:28  tim
 
 	* src/utils/next_combination.hpp,
