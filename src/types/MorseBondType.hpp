@@ -52,7 +52,7 @@ namespace oopse {
    *
    * The functional form is given by: \f$V(r) = D_e (1 - e^{-\beta (r
    * - r_0)})^2\f$ where \f$D_e\f$ is the bond dissociation energy (in
-   * kcal / mol), \f$\beta$\f is an inverse distance parameter related
+   * kcal / mol), \f$\beta\f$ is an inverse distance parameter related
    * to the force constant. \f$\beta = \sqrt{\frac{k}{2 D_e}}\f$, and
    * \f$r_0\f$ is the equilibrium bond length.
    */
