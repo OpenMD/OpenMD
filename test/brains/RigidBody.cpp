@@ -31,6 +31,22 @@ RigidBody::RigidBody() : objType_(otRigidBody), storage_(&Snapshot::rigidbodyDat
 
 }
 
+void RigidBody::setPrevA(const RotMat3x3d& a) {
+    (snapshotMan_->getPrevSnapshot())->storage_->aMat[localIndex_] = a;
+    (snapshotMan_->getPrevSnapshot())->storage_->unitVector[localIndex_] = a.inverse() * sU_.getColum(2);
+}
+
+      
+void RigidBody::setA(const RotMat3x3d& a) {
+    (snapshotMan_->getCurrentSnapshot())->storage_->aMat[localIndex_] = a;
+    (snapshotMan_->getCurrentSnapshot())->storage_->unitVector[localIndex_] = a.inverse() * sU_.getColum(2);
+}    
+    
+void RigidBody::setA(const RotMat3x3d& a, int snapshotNo) {
+    (snapshotMan_->getSnapshot(snapshotNo))->storage_->aMat[localIndex_] = a;
+    (snapshotMan_->getSnapshot(snapshotNo))->storage_->unitVector[localIndex_] = a.inverse() * sU_.getColum(2);    
+}   
+
 Mat3x3d RigidBody::getI() {
     return inertiaTensor_;
 }    

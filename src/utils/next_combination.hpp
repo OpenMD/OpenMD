@@ -163,7 +163,7 @@ bool next_combination(IteratorContainer<RandomAccessIterator>& iterContainer, Ra
  * //H X N
  * //X C N
  * //H C N
- @endcode
+ * @endcode
  */
 bool replaceWildCard(std::vector<std::vector<std::string>::iterator>& cont,
                                              std::vector<std::string>& sequence, std::vector<std::string>& result,

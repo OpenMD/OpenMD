@@ -118,7 +118,7 @@ using namespace oopse;
             std::vector<Vector3d> position;               /** position array */
             std::vector<Vector3d> velocity;               /** velocity array */
             std::vector<RotMat3x3d> aMat;            /** rotation matrix array */
-            std::vector<Vector3d> angularMomentum;/** velocity array */
+            std::vector<Vector3d> angularMomentum;/** angular momentum array (body-fixed) */
             std::vector<Vector3d> unitVector;                /** the lab frame unit std::vector array*/
             std::vector<double> zAngle;              /** z -angle array */        
             std::vector<Vector3d> force;               /** force array */

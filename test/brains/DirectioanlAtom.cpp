@@ -37,7 +37,30 @@ Mat3x3d DirectionalAtom::getI() {
 
 void DirectionalAtom::setI(Mat3x3d& I) {
     inertiaTensor_ = I;
+}
+
+void DirectionalAtom::setPrevA(const RotMat3x3d& a) {
+    (snapshotMan_->getPrevSnapshot())->storage_->aMat[localIndex_] = a;
+    (snapshotMan_->getPrevSnapshot())->storage_->unitVector[localIndex_] = a.inverse() * sU_.getColum(2);
+}
+
+      
+void DirectionalAtom::setA(const RotMat3x3d& a) {
+    (snapshotMan_->getCurrentSnapshot())->storage_->aMat[localIndex_] = a;
+    (snapshotMan_->getCurrentSnapshot())->storage_->unitVector[localIndex_] = a.inverse() * sU_.getColum(2);
 }    
+    
+void DirectionalAtom::setA(const RotMat3x3d& a, int snapshotNo) {
+    (snapshotMan_->getSnapshot(snapshotNo))->storage_->aMat[localIndex_] = a;
+    (snapshotMan_->getSnapshot(snapshotNo))->storage_->unitVector[localIndex_] = a.inverse() * sU_.getColum(2);    
+}    
+
+
+
+void  DirectionalAtom::setUnitFrameFromEuler(double phi, double theta, double psi) {
+    sU_.setupRotMat(phi,theta,psi);
+
+}
 
 std::vector<double> DirectionalAtom::getGrad() {
     vector<double> grad(6, 0.0);

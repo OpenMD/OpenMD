@@ -53,17 +53,40 @@ namespace oopse{
              */      
             virtual void setI(Mat3x3d& I);
 
+           /**
+             * Sets  the previous rotation matrix of this stuntdouble
+             * @param a  new rotation matrix 
+             */         
+           virtual void setPrevA(const RotMat3x3d& a);
+           
+           /**
+             * Sets  the current rotation matrix of this stuntdouble
+             * @param a  new rotation matrix 
+             */         
+            virtual void setA(const RotMat3x3d& a);
+
+           /**
+             * Sets  the rotation matrix of this stuntdouble in specified snapshot
+             * @param a rotation matrix to be set 
+             * @param snapshotNo 
+             * @see #getA
+             */         
+            virtual void setA(const RotMat3x3d& a, int snapshotNo);
+
+            /** Sets the internal unit frame of this stuntdouble by three euler angles */
+            void setUnitFrameFromEuler(double phi, double theta, double psi);
+
             /**
              * Returns the gradient of this stuntdouble
-             * @return the inertia tensor of this stuntdouble
-             * @see #setI
+             * @return the gradient of this stuntdouble
              */ 
             virtual std::vector<double> getGrad();
 
             virtual void accept(BaseVisitor* v);
 
         protected:
-            Mat3x3d inertiaTensor_;       
+            Mat3x3d inertiaTensor_;   /**< inertial tensor */    
+            RotMat3x3d sU_;               /**< body fixed standard unit vector */
     };
 
 }//namepace oopse
