@@ -1,0 +1,58 @@
+begin ShapeInfo
+#name		mass	I_xx	I_yy	I_zz
+samples/ethylBenzene_RB_0	106.165	410.762	338.759	111.218
+end ShapeInfo
+
+begin ContactFunctions
+#l	m	sin or cos	coeff (Ang)
+0	0	cos		6.0085
+1	0	cos		0.394919
+2	0	cos		2.82267
+2	1	cos		-0.100458
+2	2	cos		-0.527139
+3	1	cos		0.355331
+3	2	cos		0.170143
+4	0	cos		-0.156938
+6	0	cos		0.516559
+7	0	cos		0.0635204
+end ContactFunctions
+
+begin RangeFunctions
+#l	m	sin or cos	coeff (Ang)
+0	0	cos		3.88764
+1	1	cos		0.319314
+2	0	cos		-0.404484
+2	1	cos		0.0644329
+2	1	sin		0.0511127
+2	2	cos		0.247505
+3	0	cos		-0.0949118
+3	1	cos		-0.129815
+3	2	cos		-0.0405526
+4	0	cos		-0.153572
+4	1	sin		-0.0442154
+5	0	cos		0.409055
+6	0	cos		0.0911014
+6	1	cos		0.0447591
+end RangeFunctions
+
+begin StrengthFunctions
+#l	m	sin or cos	coeff (kcal/mol)
+0	0	cos		1.44163
+1	0	cos		-0.30813
+1	1	cos		0.0664078
+2	0	cos		-1.29737
+2	1	cos		0.159284
+2	2	cos		0.527609
+3	0	cos		0.51455
+3	1	cos		-0.269971
+3	2	cos		-0.135995
+4	0	cos		0.676102
+4	1	cos		-0.040923
+4	2	cos		-0.0701629
+5	0	cos		-0.235968
+5	1	cos		0.132981
+6	0	cos		-0.742867
+6	2	cos		0.0150739
+7	0	cos		-0.0297167
+7	1	cos		-0.107851
+end StrengthFunctions

@@ -1,0 +1,4 @@
+begin ShapeTypes
+# shapeName    shapeFile
+linear         linear.shape
+end ShapeTypes

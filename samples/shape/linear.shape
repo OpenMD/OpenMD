@@ -1,0 +1,27 @@
+begin ShapeInfo
+#name		mass	I_xx	I_yy	I_zz
+linear		48.0428	86.477	86.477	0
+end ShapeInfo
+
+begin ContactFunctions
+#l	m	sin or cos	coeff (Ang)
+0	0	cos		4.32851
+2	0	cos		2.64072
+6	0	cos		-0.146442
+end ContactFunctions
+
+begin RangeFunctions
+#l	m	sin or cos	coeff (Ang)
+0	0	cos		3.56035
+2	0	cos		0.28064
+4	0	cos		0.104529
+6	0	cos		0.285028
+end RangeFunctions
+
+begin StrengthFunctions
+#l	m	sin or cos	coeff (kcal/mol)
+0	0	cos		0.705782
+2	0	cos		-0.793274
+4	0	cos		0.3388
+6	0	cos		-0.045476
+end StrengthFunctions
