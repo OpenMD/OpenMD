@@ -24,13 +24,14 @@
  */
 
 /**
- * @file Molecule.hpp
+ * @file Molecule.cpp
  * @author    tlin
- * @date  10/25/2004
+ * @date  10/28/2004
  * @version 1.0
  */ 
 
 #include "primitives/Molecule.hpp"
+#include <algorithm>
 
 namespace oopse {
 
@@ -47,6 +48,70 @@ Molecule::~Molecule() {
     
 }
 
+void Molecule::addAtom(Atom* atom) {
+    if (atoms_.find(atom) == atoms_.end()) {
+        atoms_.push_back(atom);
+    }
+}
+
+void Molecule::addBond(Bond* bond) {
+    if (bonds_.find(bond) == bonds_.end()) {
+        bonds_.push_back(bond);
+    }
+}
+
+void Molecule::addBend(Bend* bend) {
+    if (bends_.find(bend) == bends_.end()) {
+        bends_.push_back(bend);
+    }
+}
+
+void Molecule::addTorsion(Torsion* torsion) {
+    if (torsions_.find(torsion) == torsions_.end()) {
+        torsions_.push_back(torsion);
+    }
+}
+
+void Molecule::addRigidBody(RigidBody *rb) {
+    if (rigidBodies_.find(bond) == bonds_.end()) {
+        rigidBodies_.push_back(rb);
+    }
+}
+
+void Molecule::addCutoffGroup(CutoffGroup* cp) {
+    if (cutoffGroups_.find(bond) == bonds_.end()) {
+        cutoffGroups_.push_back(cp);
+    }
+
+}
+
+void Molecule::complete() {
+    
+    std::set<Atom*> allAtoms;
+    allAtoms.insert(atoms_.begin(), atoms_.end());
+
+    std::set<Atom*> rigidAtoms;
+    RigidBody* rb;
+    std::vector<RigidBody*> rbIter;
+
+    
+    for (rb = beginRigidBody(rbIter); rb != NULL; rb = nextRigidBody(rbIter)) {
+        rigidAtoms.insert(rb->beginAtomIter(), rb->endAtomIter());
+    }
+
+    //find all free atoms (which do not belong to rigid bodies)  
+    //performs the "difference" operation from set theory,  the output range contains a copy of every
+    //element that is contained in [allAtoms.begin(), allAtoms.end()) and not contained in 
+    //[rigidAtoms.begin(), rigidAtoms.end()).
+    std::set_difference(allAtoms.begin(), allAtoms.end(), rigidAtoms.begin(), rigidAtoms.end(),
+                            std::back_inserter(integrableObjects_));
+
+    if (integrableObjects_.size() != allAtoms.size() - rigidAtoms.size()) {
+        //Some atoms in rigidAtoms are not in allAtoms, something must be wrong
+    }
+
+    integrableObjects_.insert(integrableObjects_.end(), rigidBodies_.begin(), rigidBodies_.end());
+}
 
 Atom* Molecule::beginAtom(std::vector<Atom*>::iterator& i) {
     i = atoms_.begin();
@@ -146,6 +211,97 @@ void Molecule::calcForces() {
         torsion->calcForce();
     }
     
+}
+
+double Molecule::getPotential() {
+    //RigidBody* rb;
+    Bond* bond;
+    Bend* bend;
+    Torsion* torsion;
+    //std::vector<RigidBody*> rbIter;
+    std::vector<Bond*> bondIter;;
+    std::vector<Bend*> bendIter;
+    std::vector<Torsion*> torsionIter;
+
+    double potential = 0;
+    
+    //for (rb = beginRigidBody(rbIter); rb != NULL; rb = nextRigidBody(rbIter)) {
+    //    rb->updateAtoms();
+    //}
+
+    for (bond = beginBond(bondIter); bond != NULL; bond = nextBond(bondIter)) {
+        potential += bond->getPotential();
+    }
+
+    for (bend = beginBend(bendIter); bend != NULL; bend = nextBend(bendIter)) {
+        potential += bend->getPotential();
+    }
+
+    for (torsion = beginTorsion(torsionIter); torsion != NULL; torsion = nextTorsion(torsionIter)) {
+        potential += torsion->getPotential();
+    }
+    
+    return potential;
+}
+
+Vector3d Molecule::getCom() {
+    StuntDouble* sd;
+    std::vector<StuntDouble*>::iterator i;
+    Vector3d com;
+    double totalMass = 0;
+    double mass;
+    
+    for (sd = beginIntegrableObject(i); sd != NULL; sd = nextIntegrableObject(i)){
+        mass = sd->getMass();
+        totalMass += mass;
+        com += sd->getPos() * mass;    
+    }
+
+    com /= totalMass;
+
+    return com;
+}
+
+void Molecule::moveCom(const Vetor3d& delta) {
+    StuntDouble* sd;
+    std::vector<StuntDouble*>::iterator i;
+    
+    for (sd = beginIntegrableObject(i); sd != NULL; sd = nextIntegrableObject(i)){
+        s->setPos(sd->getPos() + delta);
+    }
+
+}
+
+Vector3d Molecule::getComVel() {
+    StuntDouble* sd;
+    std::vector<StuntDouble*>::iterator i;
+    Vector3d velCom;
+    double totalMass = 0;
+    double mass;
+    
+    for (sd = beginIntegrableObject(i); sd != NULL; sd = nextIntegrableObject(i)){
+        mass = sd->getMass();
+        totalMass += mass;
+        velCom += sd->getVel() * mass;    
+    }
+
+    velCom /= totalMass;
+
+    return velCom;
+}
+
+std::ostream& operator <<(std::ostream& o, const Molecule& mol) {
+    o << std::endl;
+    o << "Molecule " << mol.getGlobalIndex() << "has: " << std::endl;
+    o << mol.getNAtoms() << " atoms" << std::endl;
+    o << mol.getNBonds() << " bonds" << std::endl;
+    o << mol.getNBends() << " bends" << std::endl;
+    o << mol.getNTorsions() << " torsions" << std::endl;
+    o << mol.getNRigidBodies() << " rigid bodies" << std::endl;
+    o << mol.getNIntegrableObjects() << "integrable objects" << std::endl;
+    o << mol.getNCutoffGroups() << "cutoff groups" << std::endl;
+
+    return o;
 }
 
 }//end namespace oopse

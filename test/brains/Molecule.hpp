@@ -33,7 +33,7 @@
 #ifndef PRIMITIVES_MOLECULE_HPP
 #define PRIMITIVES_MOLECULE_HPP
 #include <vector>
-
+#include <iostream>
 #include "math/Vector3.hpp"
 
 namespace oopse{
@@ -71,6 +71,27 @@ class Molecule {
         int getLocalIndex() {
             return localIndex_;
         }
+
+        /** add an atom into this molecule */
+        void addAtom(Atom* atom);
+
+        /** add a bond into this molecule */
+        void addBond(Bond* bond);
+
+        /** add a bend into this molecule */
+        void addBend(Bend* bend);
+
+        /** add a torsion into this molecule*/
+        void addTorsion(Torsion* torsion);
+
+        /** add a rigidbody into this molecule */
+        void addRigidBody(RigidBody *rb);
+
+        /** add a cutoff group into this molecule */
+        void addCutoffGroup(CutoffGroup* cp)         
+
+        /** */
+        void complete();
 
         /** Returns the total number of atoms in this molecule */
         unsigned int getNAtoms() {
@@ -196,7 +217,7 @@ class Molecule {
         /** Returns the total mass of this molecule */
         double getTotalMass();
 
-        friend ostream& operator <<(ostream& o, const Molecule& mol);
+        friend std::ostream& operator <<(std::ostream& o, const Molecule& mol);
         
     private:
         int localIndex_;
