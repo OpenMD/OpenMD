@@ -557,7 +557,7 @@ void WATER::readParams( void ){
       }
 
       if (currentAtomType->isDirectional) {
-	if (currentDirectionalType->isSticky) {
+	if (currentDirectionalType->isDipole) {
 	  ((DirectionalAtomType*)at)->setDipole();
 	  entry_plug->useDipoles = 1;
 	}
