@@ -20,7 +20,6 @@ Source    = \
 	Globals.cpp \
 	interface.c \
 	LinkedAssign.cpp \
-	LinkedCommand.cpp \
 	make_nodes.c \
 	mpiBASS.c \
 	parse_tree.c \
