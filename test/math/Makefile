@@ -4,7 +4,12 @@ TestMain = $(Main)
 
 Source = MainTest.cpp \
          RectMatrixTestCase.cpp \
-         SquareMatrixTestCase.cpp
+         SquareMatrixTestCase.cpp \
+       	 SquareMatrix3TestCase.cpp \
+       	 VectorTestCase.cpp \
+       	 Vector3TestCase.cpp \
+	 Quaternion.cpp
+
 
 DEV_ROOT               = ../..
 UseMPI                 = no 

@@ -1,17 +1,13 @@
-#ifndef TEST_VECTORTESTCASE_HPP
-#define TEST_VECTORTESTCASE_HPP
+#ifndef TEST_VECTOR3TESTCASE_HPP
+#define TEST_VECTOR3TESTCASE_HPP
 
 #include <cppunit/extensions/HelperMacros.h>
-#include "math/Vector.hpp"
+#include "math/Vector3.hpp"
  
 using namespace oopse;
 
-
-typedef Vector<double, 3> Vec3; 
-typedef Vector<double, 4> Vec4;
-
-class VectorTestCase : public CPPUNIT_NS::TestFixture {
-    CPPUNIT_TEST_SUITE( VectorTestCase );
+class Vector3TestCase : public CPPUNIT_NS::TestFixture {
+    CPPUNIT_TEST_SUITE( Vector3TestCase );
     CPPUNIT_TEST(testConstructors);
     CPPUNIT_TEST(testArithmetic);
     CPPUNIT_TEST(testAccessEntries);
@@ -21,13 +17,11 @@ class VectorTestCase : public CPPUNIT_NS::TestFixture {
     public:
         virtual void setUp();
         virtual void tearDown();
-
         void testConstructors();
         void testArithmetic();
         void testOperators();
         void testAccessEntries();
-        void testOtherTemplateFunctions();
-        
+        void testOtherTemplateFunctions();        
 };
 
-#endif //TEST_VECTORTESTCASE_HPP
+#endif //TEST_VECTO3RTESTCASE_HPP
