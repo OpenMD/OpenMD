@@ -268,7 +268,7 @@ void RectMatrixTestCase::testRowColOperations() {
     CPPUNIT_ASSERT(m == e);
     
     //test getCol
-    col = e.getCol(1);
+    col = e.getColum(1);
     CPPUNIT_ASSERT(col[0] == 4.0 && col[1] == 0.0 && col[2] == 6.0);    
 
     //test setCol

@@ -285,7 +285,7 @@ namespace oopse {
              * @return the length of this vector
              */
              inline double length() {
-                return sqrt(lengthSquared());  
+                return sqrt(lengthSquare());  
             }
             
             /**
@@ -312,9 +312,8 @@ namespace oopse {
              * Tests if this vector is normalized
              * @return true if this vector is normalized, otherwise return false
              */
-            inline bool isNormalized() const
-            {
-                return lengthSquare() == 1.0;
+            inline bool isNormalized() {
+                return equal(lengthSquare(), 1.0);
             }           
             
         protected:
