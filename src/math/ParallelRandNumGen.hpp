@@ -69,6 +69,9 @@ class ParallelRandNumGen : public RandNumGen{
 	virtual void seed();
 
     private:
+        
+         ParallelRandNumGen(const ParallelRandNumGen&);
+         ParallelRandNumGen& operator =(const ParallelRandNumGen&);
 
         static int nCreatedRNG_; /**< number of created random number of generator*/
 

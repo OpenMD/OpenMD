@@ -57,7 +57,7 @@
 #include "UseTheForce/ForceFieldFactory.hpp"
 #include "utils/simError.h"
 #include "utils/StringUtils.hpp"
-
+#include "math/SeqRandNumGen.hpp"
 #ifdef IS_MPI
 #include "io/mpiBASS.h"
 #include "math/ParallelRandNumGen.hpp"
@@ -258,9 +258,9 @@ void SimCreator::divideMolecules(SimInfo *info) {
     SeqRandNumGen* myRandom; //divide labor does not need Parallel random number generator
     if (simParams->haveSeed()) {
         seedValue = simParams->getSeed();
-        myRandom = new MTRand(seedValue);
+        myRandom = new SeqRandNumGen(seedValue);
     }else {
-        myRandom = new MTRand();
+        myRandom = new SeqRandNumGen();
     }   
 
 

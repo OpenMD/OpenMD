@@ -65,7 +65,9 @@ class SeqRandNumGen : public RandNumGen{
 	virtual void seed();
 
     private:
-
+         SeqRandNumGen(const SeqRandNumGen&);
+         SeqRandNumGen& operator =(const SeqRandNumGen&);
+         
         static int nCreatedRNG_; /**< number of created random number of generator*/
 
 };

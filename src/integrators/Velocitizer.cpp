@@ -52,7 +52,7 @@
 
 namespace oopse {
 
-Velocitizer::Velocitizer(SimInfo* info) {
+Velocitizer::Velocitizer(SimInfo* info) : info_(info) {
 
     int seedValue;
     Globals * simParams = info->getSimParams();
