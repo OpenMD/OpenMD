@@ -84,9 +84,6 @@ Libraries = \
 	-lmpich \
 	-lfmpich
 
-LinkOptions = \
-	 -L/usr/local/intel/compiler81/lib -L/usr/lib -lifport -lifcore -limf -lm -lcxa -lirc -lunwind -lirc_s
-
 OopseHome       = /usr/local/oopse
 ForceParamDir   = /usr/local/oopse/share/forceFields/
 SampleSimDir    = /usr/local/oopse/share/samples/
@@ -109,6 +106,15 @@ MakeDir           = $(DEV_ROOT)/make
 BinDir            = $(DEV_ROOT)/bin
 DocsDir           = $(DEV_ROOT)/docs
 CurrentDir        = $(CURDIR)
+RPath = $(shell cd $(DEV_ROOT); pwd)/lib:$(OopseHome)/lib
+ParallelRPath = $(shell cd $(DEV_ROOT); pwd)/MPIlib:$(OopseHome)/MPIlib
+LinkOptions = \
+	 -L/usr/local/intel/compiler81/lib -L/usr/lib -lifport -lifcore -limf -lm -lcxa -lirc -lunwind -lirc_s \
+	-Wl,-R$(RPath)
+
+ParallelLinkOptions = \
+	 -L/usr/local/intel/compiler81/lib -L/usr/lib -lifport -lifcore -limf -lm -lcxa -lirc -lunwind -lirc_s \
+	-Wl,-R$(ParallelRPath)
 
 ifdef Source
 #get the relative path of current package to source directory
@@ -480,12 +486,25 @@ $(PackageTargetDir)/%_Skel.class : $(PackageTargetDir)/%.class
 %_Skel.class : %.class
 	$(MAKE) $(MakeOptions) $(PackageTargetDir)/$@
 
+$(OopseStaticLibrary) : .stamp
+	touch .stamp
+
+$(OopseStaticLibrary) : $(ObjectFiles)
+	$(StaticArchiver)  $(StaticArchiverOptions) $(OopseStaticLibrary) $(ObjectFiles)
+
+.MPIstamp : $(OopseParallelStaticLibrary)
+	touch .MPIstamp
+
+$(OopseParallelStaticLibrary) : $(ParallelObjectFiles)
+	$(StaticArchiver)  $(StaticArchiverOptions) $(OopseParallelStaticLibrary) $(ParallelObjectFiles)
+
+
 # Executable
 $(Executable) : $(ObjectFiles)
-	$(Linker) $(ObjectFiles) $(LinkOptions) $(LibDirs) $(LibList) $(LibList) $(LibList) -o $@
+	$(Linker) $(ObjectFiles) $(LinkOptions) $(LibDirs) $(LibList) -o $@
 
 $(ParallelExecutable) : $(ParallelObjectFiles)
-	$(Linker) $(ParallelObjectFiles) $(LinkOptions) $(ParallelLibDirs) $(ParallelLibList) $(ParallelLibList) $(ParallelLibList) -o $@
+	$(Linker) $(ParallelObjectFiles)  $(ParallelLinkOptions) $(ParallelLibDirs) $(LibList) -o $@
 
 # Anything else is just copied from source to target
 $(PackageTargetDir)/% : $(PackageSourceDir)/%
@@ -508,7 +527,9 @@ _buildall : \
 	$(RmiStubFiles) \
 	$(RmiSkeletonFiles) \
 	$(OtherTargetFiles) \
+	$(SharedLibrary) \
 	$(StaticLibrary) \
+	$(ParallelSharedLibrary) \
 	$(ParallelStaticLibrary) \
 	$(JarFile) \
 	$(Executable) \
@@ -522,6 +543,7 @@ _buildall : \
 	$(RmiStubFiles) \
 	$(RmiSkeletonFiles) \
 	$(OtherTargetFiles) \
+	$(SharedLibrary) \
 	$(StaticLibrary) \
 	$(JarFile) \
 	$(Executable) 

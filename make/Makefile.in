@@ -84,9 +84,6 @@ Libraries = \
 	@MPI_LIB@ \
 	@MPI_F90_LIB@
 
-LinkOptions = \
-	@F90LIBS@
-
 OopseHome       = @OOPSE_HOME@
 ForceParamDir   = @OOPSE_HOME@/share/forceFields/
 SampleSimDir    = @OOPSE_HOME@/share/samples/
@@ -109,6 +106,15 @@ MakeDir           = $(DEV_ROOT)/make
 BinDir            = $(DEV_ROOT)/bin
 DocsDir           = $(DEV_ROOT)/docs
 CurrentDir        = $(CURDIR)
+RPath = $(shell cd $(DEV_ROOT); pwd)/lib:$(OopseHome)/lib
+ParallelRPath = $(shell cd $(DEV_ROOT); pwd)/MPIlib:$(OopseHome)/MPIlib
+LinkOptions = \
+	@F90LIBS@ \
+	-Wl,-R$(RPath)
+
+ParallelLinkOptions = \
+	@F90LIBS@ \
+	-Wl,-R$(ParallelRPath)
 
 ifdef Source
 #get the relative path of current package to source directory
@@ -482,10 +488,10 @@ $(PackageTargetDir)/%_Skel.class : $(PackageTargetDir)/%.class
 
 # Executable
 $(Executable) : $(ObjectFiles)
-	$(Linker) $(ObjectFiles) $(LinkOptions) $(LibDirs) $(LibList) $(LibList) $(LibList) -o $@
+	$(Linker) $(ObjectFiles) $(LinkOptions) $(LibDirs) $(LibList) -o $@
 
 $(ParallelExecutable) : $(ParallelObjectFiles)
-	$(Linker) $(ParallelObjectFiles) $(LinkOptions) $(ParallelLibDirs) $(ParallelLibList) $(ParallelLibList) $(ParallelLibList) -o $@
+	$(Linker) $(ParallelObjectFiles)  $(ParallelLinkOptions) $(ParallelLibDirs) $(LibList) -o $@
 
 # Anything else is just copied from source to target
 $(PackageTargetDir)/% : $(PackageSourceDir)/%
@@ -508,7 +514,9 @@ _buildall : \
 	$(RmiStubFiles) \
 	$(RmiSkeletonFiles) \
 	$(OtherTargetFiles) \
+	$(SharedLibrary) \
 	$(StaticLibrary) \
+	$(ParallelSharedLibrary) \
 	$(ParallelStaticLibrary) \
 	$(JarFile) \
 	$(Executable) \
@@ -522,6 +530,7 @@ _buildall : \
 	$(RmiStubFiles) \
 	$(RmiSkeletonFiles) \
 	$(OtherTargetFiles) \
+	$(SharedLibrary) \
 	$(StaticLibrary) \
 	$(JarFile) \
 	$(Executable) 
