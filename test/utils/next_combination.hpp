@@ -44,14 +44,14 @@ namespace oopse {
  * <p> Preconditions: </p>
  * 
  */
-template<class BidirectionalIterator, template<typename ELEM, typename = std::allocator<ELEM> > class IteratorContainer = std::vector>
-bool next_permutation(IteratorContainer<BidirectionalIterator>& iterContainer, BidirectionalIterator first, BidirectionalIterator last) {
+template<class BidirectionalIterator, template<typename ELEM, typename = std::allocator<ELEM> > class IteratorContainer>
+bool next_combination(IteratorContainer<BidirectionalIterator>& iterContainer, BidirectionalIterator first, BidirectionalIterator last) {
     if (first == last) {
         return false;
     }
     
     BidirectionalIterator endIter = --last;
-    typename IteratorContainer::iterator i = iterContainer.end();
+    typename IteratorContainer<BidirectionalIterator>::iterator i = iterContainer.end();
     
     if (iterContainer.empty()) {
         //if sequence is empty, we insert the first iterator
@@ -71,7 +71,7 @@ bool next_permutation(IteratorContainer<BidirectionalIterator>& iterContainer, B
         //If j is less than zero, it means it already reaches the last combination of current size.
         //For instance, sequence may contain 6, 7, 8, 9 at this time, we need to increase the size
         // of combination to 5
-        typename IteratorContainer::iterator j = i;
+        typename IteratorContainer<BidirectionalIterator>::iterator j = i;
         j--;
         while( j >= first && *i == *j + 1){
             i--;
@@ -96,13 +96,14 @@ bool next_permutation(IteratorContainer<BidirectionalIterator>& iterContainer, B
 	    }            
         } else {
             ++(*j);
-            for(bidirIter = *j; i != iterContainer.size(); ++i, ++biDirIter) {
+            for(biDirIter = *j; i != iterContainer.end(); ++i, ++biDirIter) {
                 *i = biDirIter;
             }
             return true;
         }
     }
-}
+} //end next_combination
 
+} //end namespace oopse
 #endif //UTILS_NEXT_COMBINATION_HPP
 

@@ -2,7 +2,7 @@
 #define TEST_NEXTCOMBINATIONTESTCASE_HPP
 
 #include <cppunit/extensions/HelperMacros.h>
-
+#include "utils/next_combination.hpp"
 using namespace oopse;
 
 class NextCombinationTestCase : public CPPUNIT_NS::TestFixture {

@@ -6,7 +6,8 @@ Source = UtilTest.cpp \
 	 GenericDataTestCase.cpp \
 	 PropertyMapTestCase.cpp \
          GenericFactoryTestCase.cpp \
-	 ReplaceWildCardTestCase.cpp
+	 ReplaceWildCardTestCase.cpp \
+	 NextCombinationTestCase.cpp
 
 DEV_ROOT               = ../..
 UseMPI                 = no 
