@@ -72,6 +72,7 @@ namespace oopse {
                 if (this == &m)
                     return *this;
                  SquareMatrix<Real, 3>::operator=(m);
+                 return *this;
             }
 
             /**
@@ -126,7 +127,7 @@ namespace oopse {
              * @param w the first element 
              * @param x the second element
              * @param y the third element
-             * @parma z the fourth element
+             * @param z the fourth element
             */
             void setupRotMat(Real w, Real x, Real y, Real z) {
                 Quaternion<Real> q(w, x, y, z);
@@ -237,17 +238,163 @@ namespace oopse {
                 return myEuler;
             }
             
+            /** Returns the determinant of this matrix. */
+            Real determinant() const {
+                Real x,y,z;
+
+                x = data_[0][0] * (data_[1][1] * data_[2][2] - data_[1][2] * data_[2][1]);
+                y = data_[0][1] * (data_[1][2] * data_[2][0] - data_[1][0] * data_[2][2]);
+                z = data_[0][2] * (data_[1][0] * data_[2][1] - data_[1][1] * data_[2][0]);
+
+                return(x + y + z);
+            }            
+            
             /**
              * Sets the value of this matrix to  the inversion of itself. 
              * @note since simple algorithm can be applied to inverse the 3 by 3 matrix, we hide the 
              * implementation of inverse in SquareMatrix class
              */
-            void  inverse() {
+            SquareMatrix3<Real>  inverse() {
+                SquareMatrix3<Real> m;
+                double det = determinant();
+                if (fabs(det) <= oopse::epsilon) {
+                //"The method was called on a matrix with |determinant| <= 1e-6.",
+                //"This is a runtime or a programming error in your application.");
+                }
 
+                m(0, 0) = data_[1][1]*data_[2][2] - data_[1][2]*data_[2][1];
+                m(1, 0) = data_[1][2]*data_[2][0] - data_[1][0]*data_[2][2];
+                m(2, 0) = data_[1][0]*data_[2][1] - data_[1][1]*data_[2][0];
+                m(0, 1) = data_[2][1]*data_[0][2] - data_[2][2]*data_[0][1];
+                m(1, 1) = data_[2][2]*data_[0][0] - data_[2][0]*data_[0][2];
+                m(2, 1) = data_[2][0]*data_[0][1] - data_[2][1]*data_[0][0];
+                m(0, 2) = data_[0][1]*data_[1][2] - data_[0][2]*data_[1][1];
+                m(1, 2) = data_[0][2]*data_[1][0] - data_[0][0]*data_[1][2];
+                m(2, 2) = data_[0][0]*data_[1][1] - data_[0][1]*data_[1][0];
+
+                m /= det;
+                return m;
             }
 
-            void diagonalize() {
+            void diagonalize(SquareMatrix3<Real>& a, Vector3<Real>& w, SquareMatrix3<Real>& v) {
+                int i,j,k,maxI;
+                Real tmp, maxVal;
+                Vector3<Real> v_maxI, v_k, v_j;
 
+                // diagonalize using Jacobi
+                jacobi(a, w, v);
+
+                // if all the eigenvalues are the same, return identity matrix
+                if (w[0] == w[1] && w[0] == w[2] ){
+                      v = SquareMatrix3<Real>::identity();
+                      return
+                }
+
+                // transpose temporarily, it makes it easier to sort the eigenvectors
+                v = v.tanspose(); 
+                
+                // if two eigenvalues are the same, re-orthogonalize to optimally line
+                // up the eigenvectors with the x, y, and z axes
+                for (i = 0; i < 3; i++) {
+                    if (w((i+1)%3) == w((i+2)%3)) {// two eigenvalues are the same
+                    // find maximum element of the independant eigenvector
+                    maxVal = fabs(v(i, 0));
+                    maxI = 0;
+                    for (j = 1; j < 3; j++) {
+                        if (maxVal < (tmp = fabs(v(i, j)))){
+                            maxVal = tmp;
+                            maxI = j;
+                        }
+                    }
+                    
+                    // swap the eigenvector into its proper position
+                    if (maxI != i) {
+                        tmp = w(maxI);
+                        w(maxI) = w(i);
+                        w(i) = tmp;
+
+                        v.swapRow(i, maxI);
+                    }
+                    // maximum element of eigenvector should be positive
+                    if (v(maxI, maxI) < 0) {
+                        v(maxI, 0) = -v(maxI, 0);
+                        v(maxI, 1) = -v(maxI, 1);
+                        v(maxI, 2) = -v(maxI, 2);
+                    }
+
+                    // re-orthogonalize the other two eigenvectors
+                    j = (maxI+1)%3;
+                    k = (maxI+2)%3;
+
+                    v(j, 0) = 0.0; 
+                    v(j, 1) = 0.0; 
+                    v(j, 2) = 0.0;
+                    v(j, j) = 1.0;
+
+                    /** @todo */
+                    v_maxI = v.getRow(maxI);
+                    v_j = v.getRow(j);
+                    v_k = cross(v_maxI, v_j);
+                    v_k.normailze();
+                    v_j = cross(v_k, v_maxI);
+                    v.setRow(j, v_j);
+                    v.setRow(k, v_k);
+
+
+                    // transpose vectors back to columns
+                    v = v.transpose();
+                    return;
+                    }
+                }
+
+                // the three eigenvalues are different, just sort the eigenvectors
+                // to align them with the x, y, and z axes
+
+                // find the vector with the largest x element, make that vector
+                // the first vector
+                maxVal = fabs(v(0, 0));
+                maxI = 0;
+                for (i = 1; i < 3; i++) {
+                    if (maxVal < (tmp = fabs(v(i, 0)))) {
+                        maxVal = tmp;
+                        maxI = i;
+                    }
+                }
+
+                // swap eigenvalue and eigenvector
+                if (maxI != 0) {
+                    tmp = w(maxI);
+                    w(maxI) = w(0);
+                    w(0) = tmp;
+                    v.swapRow(maxI, 0);
+                }
+                // do the same for the y element
+                if (fabs(v(1, 1)) < fabs(v(2, 1))) {
+                    tmp = w(2);
+                    w(2) = w(1);
+                    w(1) = tmp;
+                    v.swapRow(2, 1);
+                }
+
+                // ensure that the sign of the eigenvectors is correct
+                for (i = 0; i < 2; i++) {
+                    if (v(i, i) < 0) {
+                        v(i, 0) = -v(i, 0);
+                        v(i, 1) = -v(i, 1);
+                        v(i, 2) = -v(i, 2);
+                    }
+                }
+
+                // set sign of final eigenvector to ensure that determinant is positive
+                if (determinant(v) < 0) {
+                    v(2, 0) = -v(2, 0);
+                    v(2, 1) = -v(2, 1);
+                    v(2, 2) = -v(2, 2);
+                }
+
+                // transpose the eigenvectors back again
+                v = v.transpose();
+                return ;
             }
     };
 

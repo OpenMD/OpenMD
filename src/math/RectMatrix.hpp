@@ -153,6 +153,30 @@ namespace oopse {
          }         
 
         /**
+         * swap two rows of this matrix
+         * @param i the first row
+         * @param j the second row
+         */
+        void swapRow(unsigned int i, unsigned int j){
+                assert(i < Row && j < Row);
+
+                for (unsigned int k = 0; k < Col; k++)
+                    std::swap(data_[i][k], data_[j][k]);
+        }
+
+       /**
+         * swap two colums of this matrix
+         * @param i the first colum
+         * @param j the second colum
+         */
+        void swapColum(unsigned int i, unsigned int j){
+                assert(i < Col && j < Col);
+                
+                for (unsigned int k = 0; k < Row; k++)
+                    std::swap(data_[k][i], data_[k][j]);
+        }
+
+        /**
          * Tests if this matrix is identical to matrix m
          * @return true if this matrix is equal to the matrix m, return false otherwise
          * @m matrix to be compared

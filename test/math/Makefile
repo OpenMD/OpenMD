@@ -2,20 +2,28 @@ Main = MathTest
 
 TestMain = $(Main)
 
+
 Source = MainTest.cpp \
          RectMatrixTestCase.cpp \
          SquareMatrixTestCase.cpp \
        	 SquareMatrix3TestCase.cpp \
        	 VectorTestCase.cpp \
        	 Vector3TestCase.cpp \
-	 Quaternion.cpp
+	 QuaternionTestCase.cpp
 
+#Source = MainTest.cpp \
+         RectMatrixTestCase.cpp \
+         SquareMatrixTestCase.cpp \
+       	 SquareMatrix3TestCase.cpp \
+       	 VectorTestCase.cpp \
+       	 Vector3TestCase.cpp \
+	 QuaternionTestCase.cpp
 
 DEV_ROOT               = ../..
 UseMPI                 = no 
 ParallelDeclare        = -DIS_MPI
-CppCompiler            = icpc
-Linker                 = icpc
+CppCompiler            = icpc -g
+Linker                 = icpc -g
 Delete                 = /bin/rm -rf
 MakeDepend             = makedepend
 

@@ -85,6 +85,12 @@ namespace oopse {
                 
                 return *this;
             }
+
+            template<typename T>
+            inline Vector(const T& s){
+                for (unsigned int i = 0; i < Dim; i++)
+                    data_[i] = s;
+            }
             
             /** Constructs and initializes a Vector from an array */            
             inline Vector( double* v) {
@@ -159,9 +165,8 @@ namespace oopse {
              
             /** Negates the value of this vector in place. */           
             inline void negate() {
-                data_[0] = -data_[0];
-                data_[1] = -data_[1];
-                data_[2] = -data_[2];
+                for (unsigned int i = 0; i < Dim; i++)
+                    data_[i] = -data_[i];
             }
 
             /**
@@ -224,10 +229,10 @@ namespace oopse {
             /**
             * Sets the value of this vector to the scalar multiplication of vector v1  
             * (*this = s * v1).
+            * @param v1 the vector            
             * @param s the scalar value
-            * @param v1 the vector
             */
-            inline void mul( double s, const Vector<Real, Dim>& v1 ) {
+            inline void mul( const Vector<Real, Dim>& v1, double s) {
                 for (unsigned int i = 0; i < Dim; i++)
                     data_[i] = s * v1.data_[i];
             }
@@ -309,15 +314,16 @@ namespace oopse {
             }           
             
         protected:
-            double data_[3];
+            double data_[Dim];
         
     };
 
     /** unary minus*/
     template<typename Real, unsigned int Dim>    
     inline Vector<Real, Dim> operator -(const Vector<Real, Dim>& v1){
-        Vector tmp(v1);
-        return tmp.negate();
+        Vector<Real, Dim> tmp(v1);
+        tmp.negate();
+        return tmp;
     }
 
     /**
@@ -356,7 +362,7 @@ namespace oopse {
     template<typename Real, unsigned int Dim>                 
     Vector<Real, Dim> operator * ( const Vector<Real, Dim>& v1, double s) {       
         Vector<Real, Dim> result;
-        result.mul(s, v1);
+        result.mul(v1,s);
         return result;           
     }
     
@@ -369,7 +375,7 @@ namespace oopse {
     template<typename Real, unsigned int Dim>
     Vector<Real, Dim> operator * ( double s, const Vector<Real, Dim>& v1 ) {
         Vector<Real, Dim> result;
-        result.mul(s, v1);
+        result.mul(v1, s);
         return result;           
     }
 
@@ -386,19 +392,6 @@ namespace oopse {
         return result;           
     }
     
-    /**
-     * Returns the  value of division of a vector by a scalar. 
-     * @return  the vaule of scalar division of this vector
-     * @param s the scalar value
-     * @param v1 the source vector
-     */
-    template<typename Real, unsigned int Dim>        
-    inline Vector<Real, Dim> operator /( double s, const Vector<Real, Dim>& v1 ) {
-        Vector<Real, Dim> result;
-        result.div( v1,s);
-        return result;           
-    }
-
     /** fuzzy comparson */
     template<typename Real, unsigned int Dim>        
     inline bool epsilonEqual( const Vector<Real, Dim>& v1, const Vector<Real, Dim>& v2 ) {

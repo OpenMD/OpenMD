@@ -5,21 +5,200 @@ CPPUNIT_TEST_SUITE_REGISTRATION( VectorTestCase );
 
 
 void VectorTestCase::setUp(){
-}
+    zero[0] = 0.0;
+    zero[1] = 0.0;
+    zero[2] = 0.0;
+    zero[3] = 0.0;
 
-void VectorTestCase::tearDown(){
+    one[0] = 1.0;
+    one[1] = 1.0;
+    one[2] = 1.0;
+    one[3] = 1.0;
+
+    two[0] = 2.0;
+    two[1] = 2.0;
+    two[2] = 2.0;
+    two[3] = 2.0;
+
+
+    v1[0] = 3.0;
+    v1[1] = 0.0;
+    v1[2] = 2.0;
+    v1[3] = 1.0;        
+
+    v2[0] = -3.0;
+    v2[1] = 0.0;
+    v2[2] = -2.0;
+    v2[3] = -1.0;        
+
+    v3[0] = 4.0;
+    v3[1] = 1.0;
+    v3[2] = 3.0;
+    v3[3] = 2.0;        
+
+    s1 = 1.0;
+    s2 = 2.0;
+    
 }
 
 void VectorTestCase::testConstructors(){
+    Vec4 a0;
+    Vec4 a1(1);
+    Vec4 a2(2);
+    
+    CPPUNIT_ASSERT( a0 == zero);
+    CPPUNIT_ASSERT( a1 == one);
+    CPPUNIT_ASSERT( a2 == two);
+
+    CPPUNIT_ASSERT( a1 != two);
+
+    //test copy constructor
+    Vec4 b1(v1);
+    CPPUNIT_ASSERT( b1 == v1);
+
+    //test operator =
+    b1 = v2;
+    CPPUNIT_ASSERT( b1 == v2);
+
+    //test constructor from an array    
+    double tempArray[] = {1.0, 2.0, 5.0, 8.0};
+    Vec4 tempV;
+    tempV[0] = 1.0;
+    tempV[1] = 2.0;
+    tempV[2] = 5.0;
+    tempV[3] = 8.0;
+    
+    Vec4 b2(tempV);
+    CPPUNIT_ASSERT( b2 == tempArray);
+    
 }
 
 void VectorTestCase::testArithmetic(){
+    //test negate
+    Vec4 a0 = v2;
+    a0.negate();
+    CPPUNIT_ASSERT (a0 == v1);
+    
+    Vec4 a1;
+    a1.negate(v2);
+    CPPUNIT_ASSERT(a1 == v1);
+
+    //test add
+    Vec4 a2;
+    a2 = v1;
+    a2.add(v2);    
+    CPPUNIT_ASSERT( a2 == zero);
+
+    Vec4 a3;
+    a3.add(v2, v3);       
+    CPPUNIT_ASSERT( a3 == one);
+    
+
+    //test sub
+    Vec4 a4;
+    a4 = two;
+    a4.sub(one);
+    CPPUNIT_ASSERT( a4 == one);    
+
+    Vec4 a5;
+    a5.sub(two, one);
+    CPPUNIT_ASSERT( a5 == one);      
+    
+    //test mul
+    Vec4 a6;
+    a6 = one;
+    a6.mul(2.0);
+    CPPUNIT_ASSERT( a6 == two);      
+
+    Vec4 a7;
+    a7.mul(one, 2.0);
+    CPPUNIT_ASSERT( a7 == two);      
+    Vec4 a8;
+    a7.mul(zero, 2.0);
+    CPPUNIT_ASSERT( a7 == zero);      
+
+    //test div
+    Vec4 a9;
+    a9 = two;
+    a9.div(2.0);
+    CPPUNIT_ASSERT( a9 == one);      
+
+    Vec4 a10;
+    a10.div(two, 2.0);
+    CPPUNIT_ASSERT( a10 == one);      
+    Vec4 a11;
+    a11.mul(zero, 2.0);
+    CPPUNIT_ASSERT( a11 == zero);      
+    
+     
 }
 
 void VectorTestCase::testOperators(){
+    //test unary minus
+    Vec4 a0 = v2;
+    a0 = - a0;
+    CPPUNIT_ASSERT (a0 == v1);
+   
+
+    //test add
+    Vec4 a1;
+    a1 = v1;
+    a1 += v2;
+    CPPUNIT_ASSERT( a1 == zero);
+
+    Vec4 a2;
+    a2 = v2 + v3;
+    CPPUNIT_ASSERT( a2 == one);
+
+    //test sub
+    Vec4 a3;
+    a3 = two;
+    a3 -= one;
+    CPPUNIT_ASSERT( a3 == one);    
+
+    Vec4 a4;
+    a4 = two - one;
+    CPPUNIT_ASSERT( a4 == one);
+
+    Vec4 a5;
+    a5.sub(two, one);
+    CPPUNIT_ASSERT( a5 == one);      
+    
+    //test mul
+    Vec4 a6;
+    a6 = one;
+    a6.mul(2.0);
+    CPPUNIT_ASSERT( a6 == two);      
+
+    Vec4 a7;
+    a7.mul(one, 2.0);
+    CPPUNIT_ASSERT( a7 == two);      
+    Vec4 a8;
+    a7.mul(zero, 2.0);
+    CPPUNIT_ASSERT( a7 == zero);      
+
+    //test div
+    Vec4 a9;
+    a9 = two;
+    a9.div(2.0);
+    CPPUNIT_ASSERT( a9 == one);      
+
+    Vec4 a10;
+    a10.div(two, 2.0);
+    CPPUNIT_ASSERT( a10 == one);      
+    Vec4 a11;
+    a11.mul(zero, 2.0);
+    CPPUNIT_ASSERT( a11 == zero);  
+
 }
 
 void VectorTestCase::testAccessEntries(){
+    CPPUNIT_ASSERT(zero[0] == 0.0);
+    CPPUNIT_ASSERT(one[0] == 1.0);
+    CPPUNIT_ASSERT(v3[0] == 4.0); 
+
+    CPPUNIT_ASSERT(v3(0) != 1.0); 
+
 }
 
 void VectorTestCase::testOtherTemplateFunctions(){        

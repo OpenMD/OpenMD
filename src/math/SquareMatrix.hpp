@@ -78,14 +78,20 @@ namespace oopse {
             return m;
         }
 
-        /** Retunrs  the inversion of this matrix. */
+        /** 
+         * Retunrs  the inversion of this matrix. 
+         * @todo
+         */
          SquareMatrix<Real, Dim>  inverse() {
              SquareMatrix<Real, Dim> result;
 
              return result;
         }        
 
-        /** Returns the determinant of this matrix. */
+        /**
+         * Returns the determinant of this matrix.
+         * @todo
+         */
         double determinant() const {
             double det;
             return det;
@@ -142,8 +148,9 @@ namespace oopse {
             return true;
         }         
 
+        /** @todo need implement */
         void diagonalize() {
-            jacobi(m, eigenValues, ortMat);
+            //jacobi(m, eigenValues, ortMat);
         }
 
         /**
@@ -256,6 +263,7 @@ bool SquareMatrix<Real, Dim>::jacobi(const SquareMatrix<Real, Dim>& a, Vector<Re
 
                     for (j=iq+1; j<N; j++) 
                         ROT(a,ip,j,iq,j);
+                    
                     for (j=0; j<N; j++) 
                         ROT(v,j,ip,j,iq);
                 }

@@ -1,48 +1,885 @@
+2004-10-16 20:19  tim
+
+	* src/math/: Quaternion.hpp, RectMatrix.hpp, SquareMatrix.hpp,
+	SquareMatrix3.hpp, Vector.hpp, Vector3.hpp: math library in
+	progress
+
+2004-10-15 20:31  tim
+
+	* src/math/Quaternion.hpp: add quaternion class
+
+2004-10-15 16:11  tim
+
+	* test/io/: DUFF.frc, IfstrstreamTestCase.cpp,
+	IfstrstreamTestCase.hpp: adding test file
+
+2004-10-15 16:10  tim
+
+	* src/io/basic_ifstrstream.hpp: fix a bunch of bugs
+
+2004-10-15 15:42  tim
+
+	* src/io/basic_ifstrstream.hpp: change const_cast to statc_const
+
+2004-10-15 15:35  tim
+
+	* src/io/basic_ifstrstream.hpp: fix a bug in basic_ifstrstream.hpp
+
+2004-10-15 15:34  tim
+
+	* test/io/: IfstrstreamTestCase.cpp, Makefile: forget to use
+	namespace oopse
+
+2004-10-15 14:38  chuckv
+
+	* configure, ac-tools/aclocal.m4: Changed optimization flags for
+	XLF and XLC.
+
+2004-10-15 13:28  tim
+
+	* test/io/: IfstrstreamTestCase.cpp, IfstrstreamTestCase.hpp:
+	adding ifstrstream test case
+
+2004-10-15 13:20  tim
+
+	* src/io/basic_ifstrstream.hpp: fix include
+
+2004-10-15 13:18  tim
+
+	* src/math/SquareMatrix.hpp: fix incompatible declaration in jacobi
+
+2004-10-15 13:17  tim
+
+	* test/math/: Makefile, RectMatrixTestCase.cpp: adding Makefile
+
+2004-10-15 13:16  tim
+
+	* test/io/: Makefile, ifstrstreamTestCase.cpp,
+	ifstrstreamTestCase.hpp: adding test case for ifstrstream
+
+2004-10-15 10:37  tim
+
+	* test/io/: IOTest.cpp, ifstrstreamTestCase.cpp,
+	ifstrstreamTestCase.hpp: add ifstrstreamTestCase
+
+2004-10-15 10:20  tim
+
+	* src/io/basic_ifstrstream.hpp: add checkFilename Option
+
+2004-10-15 10:19  tim
+
+	* test/math/: RectMatrixTestCase.cpp, RectMatrixTestCase.hpp,
+	SquareMatrixTestCase.cpp, SquareMatrixTestCase.hpp: add
+	SquareMatrixTestCase class
+
+2004-10-15 02:52  tim
+
+	* src/io/basic_ifstrstream.hpp: adding basic_ifstrstream
+
+2004-10-14 18:28  tim
+
+	* src/math/: RectMatrix.hpp, SquareMatrix.hpp, SquareMatrix3.hpp,
+	Vector.hpp: math library in progress
+
+2004-10-14 18:27  tim
+
+	* src/io/FileReader.hpp: FileReader in progress
+
+2004-10-13 18:53  tim
+
+	* src/math/: RectMatrix.hpp, SquareMatrix.hpp: Matrix in progress,
+	test in isOrthogonal of SquareMatrix is failed by some reasons
+
+2004-10-13 17:28  tim
+
+	* src/utils/: PropertyMap.cpp, PropertyMap.hpp: adding PropertyMap
+	class
+
+2004-10-13 17:27  tim
+
+	* test/math/: MainTest.cpp, RectMatrixTestCase.cpp,
+	RectMatrixTestCase.hpp: adding testing unit
+
+2004-10-13 17:24  tim
+
+	* src/math/: RectMatrix.hpp, Vector.hpp: adding RectMatrix
+
+2004-10-13 01:51  tim
+
+	* src/math/: SquareMatrix.hpp, SquareMatrix3.hpp, Vector.hpp,
+	Vector3.hpp: refactory vector and matrix classes
+
+2004-10-13 01:50  tim
+
+	* src/math/Vector3d.hpp: Remove some Makefile.in
+
+2004-10-12 18:57  tim
+
+	* src/math/: Matrix3x3d.hpp, Vector3d.hpp: add Vector3d.hpp and 
+	Matrix3x3d.hpp
+
+2004-10-12 14:08  tim
+
+	* doc/: cppstyle.html, style.css: adding c++ coding style
+
+2004-10-11 17:15  tim
+
+	* src/: constraints/AbstractClasses.hpp,
+	integrators/AbstractClasses.hpp, primitives/AbstractClasses.hpp:
+	change #include "mpi.h" to #include <mpi.h> in AbstractClasses.hpp
+
+2004-10-11 16:54  tim
+
+	* scripts/filepp: fix a bug in filepp
+
+2004-10-11 16:13  tim
+
+	* make/Makefile.in: using filepp to generate dependencies instead
+	of compilers
+
+2004-10-11 16:10  tim
+
+	* scripts/filepp: filepp can be used to generate dependencies for
+	c/c++ now
+
+2004-10-11 13:40  tim
+
+	* make/Makefile.in: remove -module from F90Options
+
+2004-10-11 13:01  tim
+
+	* make/Makefile.in: adding rules to move fortran 90 module to
+	target directory
+
+2004-10-11 10:43  gezelter
+
+	* make/Makefile.in: fixed makefile.in
+
+2004-10-11 09:51  tim
+
+	* scripts/filepp: remove "use bytes" which causes problem in sgi
+	machine
+
+2004-10-11 09:26  tim
+
+	* forceFields/Makefile: add Makefile
+
+2004-10-11 09:23  tim
+
+	* samples/: water/dimer/Makefile, water/spce/Makefile,
+	water/ssd/Makefile, water/ssde/Makefile, water/tip3p_ice/Makefile,
+	water/tip4p/Makefile, zcons/Makefile: fix Makefile under water
+	directory
+
+2004-10-11 09:23  tim
+
+	* samples/argon/Makefile: remove argon.dump and argon.eor from
+	Makefile
+
+2004-10-09 01:01  tim
+
+	* samples/: alkane/Makefile.in, argon/Makefile.in,
+	lipid/Makefile.in, metals/Makefile.in, minimizer/Makefile.in:
+	Remove some Makefile.in
+
+2004-10-08 18:15  tim
+
+	* make/Makefile.in: [no log message]
+
+2004-10-08 17:51  tim
+
+	* make/Makefile.in: fix make install
+
+2004-10-08 17:10  tim
+
+	* make/Makefile.in: adding make install
+
+2004-10-08 17:04  tim
+
+	* samples/: alkane/Makefile, argon/Makefile, lipid/Makefile,
+	metals/Makefile, minimizer/Makefile, water/Makefile.in,
+	water/dimer/Makefile, water/dimer/Makefile.in, water/spce/Makefile,
+	water/spce/Makefile.in, water/ssd/Makefile, water/ssd/Makefile.in,
+	water/ssde/Makefile, water/ssde/Makefile.in,
+	water/tip3p_ice/Makefile, water/tip3p_ice/Makefile.in,
+	water/tip4p/Makefile, water/tip4p/Makefile.in, zcons/Makefile,
+	zcons/Makefile.in: add Makefile to sample directory
+
+2004-10-06 18:03  gezelter
+
+	* src/utils/: getopt.c, getopt1.c, gnugetopt.h: moved the getopt
+	stuff
+
+2004-10-06 18:03  gezelter
+
+	* configure, ac-tools/aclocal.m4, ac-tools/configure.in,
+	make/Doxyfile, src/applications/getopt.c,
+	src/applications/getopt1.c, src/applications/gnugetopt.h: more
+	build fixes
+
+2004-10-06 17:20  tim
+
+	* make/: Doxyfile, Makefile.in: adding doxygen configuration file
+
+2004-10-06 17:19  tim
+
+	* scripts/filepp: filepp can handle different fortran module case
+	and suffix
+
+2004-10-06 16:27  gezelter
+
+	* src/restraints/Restraints.cpp: Chris doesn't know about the
+	OOPSE-2.0 directory structure yet
+
+2004-10-06 16:27  gezelter
+
+	* ChangeLog: Yeah yeah, we'lll get around to it later
+
 2004-10-06 16:22  gezelter
 
-	* configure, ac-tools/configure.in, ac-tools/fortran90.m4: cleaning
-	up build process
+	* configure, ac-tools/configure.in, ac-tools/fortran90.m4,
+	make/Makefile.in: cleaning up build process
+
+2004-10-06 15:01  chrisfen
+
+	* src/restraints/Restraints.cpp: made the file reading in
+	restraints more intelligent - no longer gives uninformative seg
+	faults
+
+2004-10-06 14:55  gezelter
+
+	* src/applications/simpleBuilder/Make.ftemp.old: cleaning up
 
 2004-10-06 14:51  gezelter
 
-	* LICENSE, MPIobj/dummy: Cleaning up a bit
+	* LICENSE, MPIobj/dummy, make/Makefile, obj/dummy,
+	scripts/cleanSrc, src/brains/Makedepend: Cleaning up a bit
+
+2004-10-06 13:53  tim
+
+	* make/: Makefile, Makefile.in: fix make statistics
+
+2004-10-06 13:18  tim
+
+	* make/: Makefile, Makefile.in: adding GNU make functions to
+	combine all of the static libraries to a big library
+
+2004-10-05 17:57  tim
+
+	* make/: Makefile, Makefile.in:  adding shared library flag
+
+2004-10-05 14:37  tim
+
+	* src/: Makefile, UseTheForce/Makefile,
+	UseTheForce/mpiSimulation_module.F90,
+	UseTheForce/DarkSide/Makefile,
+	UseTheForce/DarkSide/mpiSimulation_module.F90, math/Makefile: move
+	mpiSimulation_module to DarkSide
+
+2004-10-05 14:35  tim
+
+	* make/: Makefile, Makefile.in: building MPI version;using static
+	library instead of shared library
+
+2004-10-05 09:14  tim
+
+	* make/: Makefile, Makefile.in: pass __FORTRAN90 instead of __F90
+	to filepp
+
+2004-10-04 15:56  tim
+
+	* make/: Makefile, Makefile.in: add make cvslog
+
+2004-10-04 11:24  gezelter
+
+	* make/: Makefile, Makefile.in: more work on the parallel build
+
+2004-10-04 11:06  gezelter
+
+	* make/: Makefile, Makefile.in: changes to backport declare flags
+
+2004-10-04 10:27  gezelter
+
+	* src/UseTheForce/: ForceFields.hpp, Shapes_FF.cpp,
+	DarkSide/Makefile, DarkSide/calc_shapes.F90: Started work merging
+	shapes
+
+2004-10-01 23:40  tim
+
+	* scripts/: filepp, sfmakedepend: remove sfmakedepend from cvs tree
+
+2004-10-01 23:22  tim
+
+	* make/: Makefile, Makefile.in: add oopse_ as library prefix
+
+2004-10-01 16:59  tim
+
+	* make/: Makefile, Makefile.in: fix a space trimming bug in filepp
 
 2004-10-01 16:22  gezelter
 
-	* Makefile, ac-tools/aclocal.m4: A few minor build changes
+	* Makefile, ac-tools/aclocal.m4, make/Makefile, make/Makefile.in: A
+	few minor build changes
+
+2004-10-01 16:11  tim
+
+	* scripts/filepp: adding fortran90 make dependency tool
+
+2004-09-30 10:41  tim
+
+	* make/: Makefile, Makefile.in: make clean is smart enough to only
+	remove object files belong to current package.	turn off silent
+	mode
+
+2004-09-29 16:55  tim
+
+	* src/: Makefile, UseTheForce/Makefile,
+	UseTheForce/DarkSide/Makefile, applications/dump2Xyz/Makefile,
+	applications/oopse/Makefile, applications/simpleBuilder/Makefile,
+	brains/Makedepend, brains/Makefile, constraints/Makefile,
+	integrators/Makefile, io/Makefile, math/Makefile,
+	minimizers/Makefile, primitives/Makefile, profiling/Makefile,
+	restraints/Makefile, types/Makefile, utils/Makefile,
+	visitors/Makefile: define DEV_ROOT as relative path
+
+2004-09-29 16:54  tim
+
+	* make/: Makefile, Makefile.in: get the relative path by shell
+	script
+
+2004-09-29 16:32  tim
+
+	* make/Makefile: eliminate DEV_ROOT by relative path
+
+2004-09-29 13:37  tim
+
+	* make/Makefile.in: add PackageLibs;  fix dependency rule
 
 2004-09-29 12:57  gezelter
 
 	* configure, ac-tools/configure.in: updates
 
+2004-09-29 12:56  gezelter
+
+	* make/: Make.conf.in, Makefile.in, _files/style.css: Working on
+	make stuff
+
 2004-09-29 12:46  tim
 
 	* Makefile: If makefile does not exist, print error message
 
+2004-09-29 12:12  tim
+
+	* make/: Make.conf.in, Makefile: fix dependencies rule
+
 2004-09-29 10:58  gezelter
 
-	* Makefile: still working on build process
+	* Makefile, make/Makefile: still working on build process
+
+2004-09-29 10:00  tim
+
+	* make/Makefile: add print statment to rules
+
+2004-09-29 09:59  tim
+
+	* src/: UseTheForce/Makefile, UseTheForce/DarkSide/Makefile,
+	applications/dump2Xyz/Makefile, applications/oopse/Makefile,
+	applications/simpleBuilder/Makefile, brains/Makefile,
+	constraints/Makefile, integrators/Makefile, io/Makefile,
+	math/Makefile, minimizers/Makefile, primitives/Makefile,
+	profiling/Makefile, restraints/Makefile, types/Makefile,
+	utils/Makefile, visitors/Makefile: change Makefile to relative path
+
+2004-09-28 21:55  tim
+
+	* src/utils/: StringUtils.c, StringUtils.h: remove StringUtils.c
+	which cause headache in bulding libutils
+
+2004-09-28 18:24  tim
+
+	* src/applications/: BaseLattice.cpp, BaseLattice.hpp,
+	Dump2XYZ.cpp, Dump2XYZ.ggo, Dump2XYZCmd.c, Dump2XYZCmd.h,
+	Lattice.cpp, Lattice.hpp, LatticeCreator.cpp, LatticeCreator.hpp,
+	LatticeFactory.cpp, LatticeFactory.hpp, MoLocator.cpp,
+	MoLocator.hpp, Vector3d.hpp, cmdline.c, cmdline.h, nanoBuilder.cpp,
+	nanoBuilder.hpp, oopse.cpp, simpleBuilder.cpp, simpleBuilder.ggo,
+	simpleBuilderCmd.c, simpleBuilderCmd.h, dump2Xyz/Dump2XYZ.cpp,
+	dump2Xyz/Dump2XYZ.ggo, dump2Xyz/Dump2XYZCmd.c,
+	dump2Xyz/Dump2XYZCmd.h, dump2Xyz/Makefile, oopse/Makefile,
+	oopse/oopse.cpp, simpleBuilder/BaseLattice.cpp,
+	simpleBuilder/BaseLattice.hpp, simpleBuilder/Lattice.cpp,
+	simpleBuilder/Lattice.hpp, simpleBuilder/LatticeCreator.cpp,
+	simpleBuilder/LatticeCreator.hpp, simpleBuilder/LatticeFactory.cpp,
+	simpleBuilder/LatticeFactory.hpp, simpleBuilder/Make.ftemp.old,
+	simpleBuilder/Makefile, simpleBuilder/MoLocator.cpp,
+	simpleBuilder/MoLocator.hpp, simpleBuilder/Vector3d.hpp,
+	simpleBuilder/simpleBuilder.cpp, simpleBuilder/simpleBuilder.ggo,
+	simpleBuilder/simpleBuilderCmd.c, simpleBuilder/simpleBuilderCmd.h:
+	change directory structure of application. Every executable file is
+	replaced in seperate directory
+
+2004-09-28 17:15  gezelter
+
+	* lib/dummy: Keep that lib around, please.
 
 2004-09-28 17:14  gezelter
 
-	* Makefile, configure, ac-tools/configure.in: starting a configure
-	version
+	* Makefile, configure, ac-tools/configure.in, make/Make.conf.in:
+	starting a configure version
+
+2004-09-28 16:08  tim
+
+	* src/: UseTheForce/Makefile, UseTheForce/notifyCutoffs.F90,
+	UseTheForce/DarkSide/Makefile,
+	UseTheForce/DarkSide/notifyCutoffs.F90,
+	UseTheForce/DarkSide/simulation_module.F90, brains/Makedepend,
+	brains/Makefile, brains/simulation_module.F90: move fortran files
+	around to solve dependency problem
 
 2004-09-28 15:43  tim
 
-	* Makefile: [no log message]
+	* Makefile, src/UseTheForce/ForceFields.hpp,
+	src/UseTheForce/Makefile, src/applications/BaseLattice.hpp,
+	src/applications/Makedepend, src/applications/Makefile,
+	src/brains/Makedepend, src/brains/simulation_module.F90,
+	src/integrators/AllIntegrator.hpp, src/math/Euler3.cpp,
+	src/math/Makefile, src/minimizers/OOPSEMinimizer.cpp,
+	src/utils/Makefile: [no log message]
+
+2004-09-28 15:41  tim
+
+	* make/Makefile, scripts/sfmakedepend: fix fortran dependency
+	problem
+
+2004-09-28 11:13  tim
+
+	* make/Makefile, src/io/BASSlex.l, src/io/BASSyacc.y,
+	src/io/Makefile: add yacc and lex rules
+
+2004-09-27 15:24  tim
+
+	* make/Makefile: adding include path to F90Options
+
+2004-09-27 15:13  tim
+
+	* make/Makefile: change suffix from .cc to .cpp
+
+2004-09-24 11:27  tim
+
+	* src/: UseTheForce/DUFF.cpp, UseTheForce/EAM_FF.cpp,
+	UseTheForce/ForceFields.cpp, UseTheForce/ForceFields.hpp,
+	UseTheForce/LJFF.cpp, UseTheForce/WATER.cpp,
+	UseTheForce/do_Forces.F90, UseTheForce/fortranWrapDefines.hpp,
+	UseTheForce/fortranWrappers.cpp, UseTheForce/fortranWrappers.hpp,
+	UseTheForce/mpiForceField.c, UseTheForce/mpiSimulation_module.F90,
+	UseTheForce/DarkSide/calc_LJ_FF.F90,
+	UseTheForce/DarkSide/notifyCutoffs.F90,
+	UseTheForce/DarkSide/switch_module.F90,
+	applications/BaseLattice.cpp, applications/Dump2XYZ.cpp,
+	applications/Dump2XYZCmd.c, applications/Lattice.cpp,
+	applications/Lattice.hpp, applications/LatticeCreator.cpp,
+	applications/LatticeCreator.hpp, applications/LatticeFactory.cpp,
+	applications/MoLocator.cpp, applications/MoLocator.hpp,
+	applications/cmdline.c, applications/nanoBuilder.cpp,
+	applications/oopse.cpp, applications/simpleBuilder.cpp,
+	applications/simpleBuilderCmd.c, brains/Exclude.cpp,
+	brains/ForceFields.cpp, brains/SimInfo.cpp, brains/SimInfo.hpp,
+	brains/SimSetup.cpp, brains/SimSetup.hpp, brains/SimState.cpp,
+	brains/SkipList.cpp, brains/Thermo.cpp, brains/Thermo.hpp,
+	brains/mpiSimulation.cpp, brains/mpiSimulation.hpp,
+	constraints/AbstractClasses.hpp, constraints/ZConstraint.cpp,
+	integrators/AbstractClasses.hpp, integrators/Integrator.cpp,
+	integrators/Integrator.hpp, integrators/NPT.cpp,
+	integrators/NPTf.cpp, integrators/NPTi.cpp, integrators/NPTxyz.cpp,
+	integrators/NVT.cpp, io/BASS_interface.cpp, io/BASS_parse.c,
+	io/DumpReader.cpp, io/DumpWriter.cpp, io/Globals.cpp,
+	io/Globals.hpp, io/InitializeFromFile.cpp, io/LinkedAssign.cpp,
+	io/LinkedCommand.cpp, io/ReadWrite.hpp, io/StatWriter.cpp,
+	io/ZConsReader.cpp, io/ZConsReader.hpp, io/ZConsWriter.cpp,
+	io/ZConsWriter.hpp, io/interface.c, io/make_nodes.c,
+	io/make_nodes.h, io/mpiBASS.c, io/mpiBASS.h, io/parse_interface.h,
+	io/parse_tree.c, io/parse_tree.h, math/Euler3.cpp, math/MatVec3.c,
+	math/MatVec3.h, math/randomSPRNG.cpp,
+	minimizers/CGFamilyMinimizer.cpp, minimizers/OOPSEMinimizer.cpp,
+	minimizers/OOPSEMinimizer.hpp, minimizers/PRCG.cpp,
+	minimizers/SDMinimizer.cpp, primitives/AbstractClasses.hpp,
+	primitives/Atom.cpp, primitives/Atom.hpp, primitives/Bend.cpp,
+	primitives/BendExtensions.cpp, primitives/Bond.cpp,
+	primitives/BondExtensions.cpp, primitives/CutoffGroup.hpp,
+	primitives/DirectionalAtom.cpp, primitives/DirectionalAtom.hpp,
+	primitives/GhostBend.cpp, primitives/Molecule.cpp,
+	primitives/Molecule.hpp, primitives/RigidBody.cpp,
+	primitives/RigidBody.hpp, primitives/SRI.hpp,
+	primitives/StuntDouble.cpp, primitives/StuntDouble.hpp,
+	primitives/Torsion.cpp, primitives/TorsionExtensions.cpp,
+	profiling/mdProfile.cpp, restraints/Restraints.cpp,
+	restraints/Restraints.hpp, types/AtomStamp.cpp,
+	types/AtomStamp.hpp, types/BendStamp.cpp, types/BendStamp.hpp,
+	types/BondStamp.cpp, types/BondStamp.hpp, types/Component.cpp,
+	types/CutoffGroupStamp.cpp, types/CutoffGroupStamp.hpp,
+	types/MakeStamps.cpp, types/MakeStamps.hpp,
+	types/MoleculeStamp.cpp, types/MoleculeStamp.hpp,
+	types/RigidBodyStamp.cpp, types/RigidBodyStamp.hpp,
+	types/TorsionStamp.cpp, types/TorsionStamp.hpp,
+	types/ZconStamp.cpp, types/ZconStamp.hpp, utils/GenericData.cpp,
+	utils/StreamTokenizer.cpp, utils/StringUtils.c,
+	utils/StringUtils.cpp, utils/Utility.cpp, utils/fError.c,
+	utils/simError.c, visitors/AtomVisitor.cpp,
+	visitors/AtomVisitor.hpp, visitors/CompositeVisitor.cpp,
+	visitors/CompositeVisitor.hpp, visitors/OtherVisitor.cpp,
+	visitors/OtherVisitor.hpp, visitors/RigidBodyVisitor.cpp,
+	visitors/RigidBodyVisitor.hpp, visitors/ZconsVisitor.cpp,
+	visitors/ZconsVisitor.hpp: change the #include in source files
 
 2004-09-23 23:16  gezelter
 
 	* AUTHORS, ChangeLog, LICENSE, Makefile, README, configure,
+	src/Makefile, src/config.h.in, src/constraints/AbstractClasses.hpp,
+	src/constraints/Makefile, src/constraints/ZConstraint.cpp,
+	src/UseTheForce/DUFF.cpp, src/UseTheForce/EAM_FF.cpp,
+	src/UseTheForce/ForceFields.cpp, src/UseTheForce/ForceFields.hpp,
+	src/UseTheForce/LJFF.cpp, src/UseTheForce/Makefile,
+	src/UseTheForce/WATER.cpp, src/UseTheForce/do_Forces.F90,
+	src/UseTheForce/fForceField.h,
+	src/UseTheForce/fSwitchingFunction.h,
+	src/UseTheForce/fortranWrapDefines.hpp,
+	src/UseTheForce/fortranWrappers.cpp,
+	src/UseTheForce/fortranWrappers.hpp,
+	src/UseTheForce/mpiComponentPlan.h,
+	src/UseTheForce/mpiForceField.c, src/UseTheForce/mpiForceField.h,
+	src/UseTheForce/mpiSimulation_module.F90,
+	src/UseTheForce/wrappers.F90, src/UseTheForce/DarkSide/Makefile,
+	src/UseTheForce/DarkSide/atype_module.F90,
+	src/UseTheForce/DarkSide/calc_LJ_FF.F90,
+	src/UseTheForce/DarkSide/calc_charge_charge.F90,
+	src/UseTheForce/DarkSide/calc_dipole_dipole.F90,
+	src/UseTheForce/DarkSide/calc_eam.F90,
+	src/UseTheForce/DarkSide/calc_gb.F90,
+	src/UseTheForce/DarkSide/calc_reaction_field.F90,
+	src/UseTheForce/DarkSide/calc_sticky_pair.F90,
+	src/UseTheForce/DarkSide/force_globals.F90,
+	src/UseTheForce/DarkSide/neighborLists.F90,
+	src/UseTheForce/DarkSide/notifyCutoffs.F90,
+	src/UseTheForce/DarkSide/switch_module.F90,
+	src/io/BASS_interface.h, src/io/BASS_parse.c, src/io/BASS_parse.h,
+	src/io/BASSlex.l, src/io/BASSyacc.y, src/io/DumpReader.cpp,
+	src/io/DumpWriter.cpp, src/io/Globals.cpp,
+	src/io/InitializeFromFile.cpp, src/io/LinkedAssign.hpp,
+	src/io/LinkedCommand.cpp, src/io/LinkedCommand.hpp,
+	src/io/Makefile, src/io/ReadWrite.hpp, src/io/StatWriter.cpp,
+	src/io/ZConsReader.hpp, src/io/ZConsWriter.cpp,
+	src/io/ZConsWriter.hpp, src/io/interface.c, src/io/make_nodes.c,
+	src/io/make_nodes.h, src/io/mpiBASS.c, src/io/mpiBASS.h,
+	src/io/node_list.h, src/io/parse_interface.h, src/io/parse_me.h,
+	src/io/parse_tree.c, src/io/parse_tree.h, src/types/AtomStamp.cpp,
+	src/types/AtomStamp.hpp, src/types/BendStamp.cpp,
+	src/types/BendStamp.hpp, src/types/BondStamp.cpp,
+	src/types/BondStamp.hpp, src/types/Component.cpp,
+	src/types/Component.hpp, src/types/CutoffGroupStamp.cpp,
+	src/types/CutoffGroupStamp.hpp, src/types/MakeStamps.cpp,
+	src/types/MakeStamps.hpp, src/types/Makefile,
+	src/types/MoleculeStamp.cpp, src/types/MoleculeStamp.hpp,
+	src/types/RigidBodyStamp.cpp, src/types/RigidBodyStamp.hpp,
+	src/types/TorsionStamp.cpp, src/types/TorsionStamp.hpp,
+	src/types/ZconStamp.cpp, src/types/ZconStamp.hpp,
+	src/applications/simpleBuilderCmd.h, src/brains/Exclude.cpp,
+	src/brains/Exclude.hpp, src/brains/ForceFields.cpp,
+	src/brains/Makedepend, src/brains/Makefile, src/brains/SimInfo.cpp,
+	src/brains/SimInfo.hpp, src/brains/SimSetup.cpp,
+	src/brains/SimSetup.hpp, src/brains/SimState.cpp,
+	src/brains/SimState.hpp, src/brains/SkipList.cpp,
+	src/brains/SkipList.hpp, src/brains/Thermo.cpp,
+	src/brains/Thermo.hpp, src/brains/fSimulation.h,
+	src/brains/mpiSimulation.cpp, src/brains/mpiSimulation.hpp,
+	src/brains/simulation_module.F90, src/io/BASS_interface.cpp,
+	src/io/Globals.hpp, src/io/LinkedAssign.cpp,
+	src/io/ZConsReader.cpp, src/math/Euler3.cpp, src/math/Euler3.hpp,
+	src/math/Makefile, src/math/MatVec3.c, src/math/MatVec3.h,
+	src/math/mt19937ar.c, src/math/randomSPRNG.cpp,
+	src/math/randomSPRNG.hpp, src/minimizers/CGFamilyMinimizer.cpp,
+	src/minimizers/Makefile, src/minimizers/MinimizerParameterSet.hpp,
+	src/minimizers/OOPSEMinimizer.cpp,
+	src/minimizers/OOPSEMinimizer.hpp, src/minimizers/PRCG.cpp,
+	src/minimizers/SDMinimizer.cpp, src/primitives/AbstractClasses.hpp,
+	src/primitives/Atom.cpp, src/primitives/Atom.hpp,
+	src/primitives/Bend.cpp, src/primitives/BendExtensions.cpp,
+	src/primitives/Bond.cpp, src/primitives/BondExtensions.cpp,
+	src/primitives/CutoffGroup.hpp, src/primitives/DirectionalAtom.cpp,
+	src/primitives/DirectionalAtom.hpp, src/primitives/GhostBend.cpp,
+	src/primitives/Makefile, src/primitives/Molecule.cpp,
+	src/primitives/Molecule.hpp, src/primitives/RigidBody.cpp,
+	src/primitives/RigidBody.hpp, src/primitives/SRI.hpp,
+	src/primitives/StuntDouble.cpp, src/primitives/StuntDouble.hpp,
+	src/primitives/Torsion.cpp, src/primitives/TorsionExtensions.cpp,
+	src/restraints/Makefile, src/restraints/Restraints.cpp,
+	src/restraints/Restraints.hpp, src/utils/GenericData.cpp,
+	src/utils/GenericData.hpp, src/utils/Makefile,
+	src/utils/StreamTokenizer.cpp, src/utils/StreamTokenizer.hpp,
+	src/utils/StringUtils.c, src/utils/StringUtils.cpp,
+	src/utils/StringUtils.h, src/utils/StringUtils.hpp,
+	src/utils/TypeInfo.hpp, src/utils/Utility.cpp,
+	src/utils/Utility.hpp, src/utils/definitions_module.F90,
+	src/utils/fError.c, src/utils/oopseMPI_module.F90,
+	src/utils/simError.c, src/utils/simError.h,
+	src/utils/status_module.F90, src/utils/vector_class.F90,
+	src/visitors/AtomVisitor.cpp, src/visitors/AtomVisitor.hpp,
+	src/visitors/BaseVisitor.hpp, src/visitors/CompositeVisitor.cpp,
+	src/visitors/CompositeVisitor.hpp, src/visitors/Makefile,
+	src/visitors/OtherVisitor.cpp, src/visitors/OtherVisitor.hpp,
+	src/visitors/RigidBodyVisitor.cpp,
+	src/visitors/RigidBodyVisitor.hpp, src/visitors/ZconsVisitor.cpp,
+	src/visitors/ZconsVisitor.hpp, make/Makefile,
+	make/_files/style.css, samples/Makefile.in,
+	samples/metals/Au-Core-Ag-Shell_Nanoparticle.in,
+	samples/metals/Au-Core-Ag-Shell_Nanoparticle.md,
+	samples/metals/Au_bulk_FBD.md, samples/metals/Au_bulk_voter.md,
+	samples/metals/Au_nanoparticle.md, samples/metals/Makefile.in,
+	samples/zcons/Makefile.in, samples/zcons/water.md,
+	samples/zcons/zconsFixed.in, samples/zcons/zconsFixed.md,
+	samples/zcons/zconsMoving.in, samples/zcons/zconsMoving.md,
+	src/applications/BaseLattice.cpp, src/applications/BaseLattice.hpp,
+	src/applications/Dump2XYZ.cpp, src/applications/Dump2XYZ.ggo,
+	src/applications/Dump2XYZCmd.c, src/applications/Dump2XYZCmd.h,
+	src/applications/Lattice.cpp, src/applications/Lattice.hpp,
+	src/applications/LatticeCreator.cpp,
+	src/applications/LatticeCreator.hpp,
+	src/applications/LatticeFactory.cpp,
+	src/applications/LatticeFactory.hpp, src/applications/Makedepend,
+	src/applications/Makefile, src/applications/MoLocator.cpp,
+	src/applications/MoLocator.hpp, src/applications/Vector3d.hpp,
+	src/applications/cmdline.c, src/applications/cmdline.h,
+	src/applications/getopt.c, src/applications/getopt1.c,
+	src/applications/gnugetopt.h, src/applications/nanoBuilder.cpp,
+	src/applications/nanoBuilder.hpp, src/applications/oopse.cpp,
+	src/applications/quickLate.c, src/applications/simpleBuilder.cpp,
+	src/applications/simpleBuilder.ggo,
+	src/applications/simpleBuilderCmd.c,
+	src/integrators/AbstractClasses.hpp,
+	src/integrators/AllIntegrator.hpp, src/integrators/Integrator.cpp,
+	src/integrators/Integrator.hpp, src/integrators/Makefile,
+	src/integrators/NPT.cpp, src/integrators/NPTf.cpp,
+	src/integrators/NPTi.cpp, src/integrators/NPTxyz.cpp,
+	src/integrators/NVT.cpp, src/profiling/Makefile,
+	src/profiling/mdProfile.cpp, src/profiling/mdProfile.hpp,
+	src/profiling/timing.F90, samples/metals/Au_bulk.in,
+	samples/metals/Au_nanoparticle.in, samples/metals/metals.md,
+	samples/water/Makefile.in, samples/water/dimer/Makefile.in,
+	samples/water/dimer/two.in, samples/water/dimer/two.md,
+	samples/water/dimer/water.md, samples/water/spce/Makefile.in,
+	samples/water/spce/spce.in, samples/water/spce/spce.md,
+	samples/water/spce/water.md, samples/water/ssde/Makefile.in,
+	samples/water/ssde/ssde.in, samples/water/ssde/ssde.md,
+	samples/water/ssde/water.md, samples/water/tip3p_ice/Makefile.in,
+	samples/water/tip3p_ice/tp3.in, samples/water/tip3p_ice/tp3.md,
+	samples/water/tip3p_ice/water.md, samples/water/ssd/Makefile.in,
+	samples/water/ssd/ssd.in, samples/water/ssd/ssd.md,
+	samples/water/ssd/water.md, samples/water/tip4p/tp4.in,
+	samples/water/tip4p/tp4.md, samples/water/tip4p/water.md,
+	samples/alkane/Makefile.in, samples/alkane/alkanes.md,
+	samples/alkane/butane.in, samples/alkane/butane.md,
+	samples/argon/500.in, samples/argon/500.md,
+	samples/argon/Makefile.in, samples/argon/ar864.in,
+	samples/argon/ar864.md, samples/argon/argonNVT.in,
+	samples/argon/argonNVT.md, samples/argon/lj.md,
+	samples/lipid/5x5.in, samples/lipid/5x5.md,
+	samples/lipid/Makefile.in, samples/lipid/lipid.md,
+	samples/lipid/water.md, samples/minimizer/Makefile.in,
+	samples/minimizer/WATER.frc, samples/minimizer/ssdEM.in,
+	samples/minimizer/ssdEM.md, samples/minimizer/tip4p_two.in,
+	samples/minimizer/tip4p_two.md, samples/minimizer/water.md,
+	samples/water/tip4p/Makefile.in, forceFields/Ag.VC.funcfl,
+	forceFields/Ag.u3.funcfl, forceFields/Ag.u6.funcfl,
+	forceFields/Au.u6.funcfl, forceFields/Cu.VC.funcfl,
+	forceFields/Cu.u3.funcfl, forceFields/Cu.u6.funcfl,
+	forceFields/DUFF.frc, forceFields/DipoleTest.frc,
+	forceFields/EAM.VC.frc, forceFields/EAM.frc,
+	forceFields/EAM.u3.frc, forceFields/EAM.u6.frc,
+	forceFields/Makefile.in, forceFields/Ni.u3.funcfl,
+	forceFields/Ni.u6.funcfl, forceFields/Pd.VC.funcfl,
+	forceFields/Pd.u6.funcfl, forceFields/Pt.u3.funcfl,
+	forceFields/Pt.u6.funcfl, forceFields/WATER.frc, scripts/cleanSrc,
+	scripts/cvs2cl.pl, scripts/makers, scripts/sfmakedepend,
 	ac-tools/Make.conf.in, ac-tools/aclocal.m4, ac-tools/config.guess,
 	ac-tools/config.sub, ac-tools/configure.in, ac-tools/fortran90.m4,
-	ac-tools/install-sh, ac-tools/shtool: Import of OOPSE v. 2.0
+	ac-tools/install-sh, ac-tools/shtool, doc/OOPSE.pdf,
+	forceFields/Al.VC.funcfl, forceFields/Au.VC.funcfl,
+	forceFields/Au.u3.funcfl, forceFields/LJFF.frc,
+	forceFields/Ni.VC.funcfl, forceFields/Pd.u3.funcfl,
+	forceFields/Pt.VC.funcfl: Import of OOPSE v. 2.0
 
 2004-09-23 23:16  gezelter
 
 	* AUTHORS, ChangeLog, LICENSE, Makefile, README, configure,
+	src/Makefile, src/config.h.in, src/constraints/AbstractClasses.hpp,
+	src/constraints/Makefile, src/constraints/ZConstraint.cpp,
+	src/UseTheForce/DUFF.cpp, src/UseTheForce/EAM_FF.cpp,
+	src/UseTheForce/ForceFields.cpp, src/UseTheForce/ForceFields.hpp,
+	src/UseTheForce/LJFF.cpp, src/UseTheForce/Makefile,
+	src/UseTheForce/WATER.cpp, src/UseTheForce/do_Forces.F90,
+	src/UseTheForce/fForceField.h,
+	src/UseTheForce/fSwitchingFunction.h,
+	src/UseTheForce/fortranWrapDefines.hpp,
+	src/UseTheForce/fortranWrappers.cpp,
+	src/UseTheForce/fortranWrappers.hpp,
+	src/UseTheForce/mpiComponentPlan.h,
+	src/UseTheForce/mpiForceField.c, src/UseTheForce/mpiForceField.h,
+	src/UseTheForce/mpiSimulation_module.F90,
+	src/UseTheForce/wrappers.F90, src/UseTheForce/DarkSide/Makefile,
+	src/UseTheForce/DarkSide/atype_module.F90,
+	src/UseTheForce/DarkSide/calc_LJ_FF.F90,
+	src/UseTheForce/DarkSide/calc_charge_charge.F90,
+	src/UseTheForce/DarkSide/calc_dipole_dipole.F90,
+	src/UseTheForce/DarkSide/calc_eam.F90,
+	src/UseTheForce/DarkSide/calc_gb.F90,
+	src/UseTheForce/DarkSide/calc_reaction_field.F90,
+	src/UseTheForce/DarkSide/calc_sticky_pair.F90,
+	src/UseTheForce/DarkSide/force_globals.F90,
+	src/UseTheForce/DarkSide/neighborLists.F90,
+	src/UseTheForce/DarkSide/notifyCutoffs.F90,
+	src/UseTheForce/DarkSide/switch_module.F90,
+	src/io/BASS_interface.h, src/io/BASS_parse.c, src/io/BASS_parse.h,
+	src/io/BASSlex.l, src/io/BASSyacc.y, src/io/DumpReader.cpp,
+	src/io/DumpWriter.cpp, src/io/Globals.cpp,
+	src/io/InitializeFromFile.cpp, src/io/LinkedAssign.hpp,
+	src/io/LinkedCommand.cpp, src/io/LinkedCommand.hpp,
+	src/io/Makefile, src/io/ReadWrite.hpp, src/io/StatWriter.cpp,
+	src/io/ZConsReader.hpp, src/io/ZConsWriter.cpp,
+	src/io/ZConsWriter.hpp, src/io/interface.c, src/io/make_nodes.c,
+	src/io/make_nodes.h, src/io/mpiBASS.c, src/io/mpiBASS.h,
+	src/io/node_list.h, src/io/parse_interface.h, src/io/parse_me.h,
+	src/io/parse_tree.c, src/io/parse_tree.h, src/types/AtomStamp.cpp,
+	src/types/AtomStamp.hpp, src/types/BendStamp.cpp,
+	src/types/BendStamp.hpp, src/types/BondStamp.cpp,
+	src/types/BondStamp.hpp, src/types/Component.cpp,
+	src/types/Component.hpp, src/types/CutoffGroupStamp.cpp,
+	src/types/CutoffGroupStamp.hpp, src/types/MakeStamps.cpp,
+	src/types/MakeStamps.hpp, src/types/Makefile,
+	src/types/MoleculeStamp.cpp, src/types/MoleculeStamp.hpp,
+	src/types/RigidBodyStamp.cpp, src/types/RigidBodyStamp.hpp,
+	src/types/TorsionStamp.cpp, src/types/TorsionStamp.hpp,
+	src/types/ZconStamp.cpp, src/types/ZconStamp.hpp,
+	src/applications/simpleBuilderCmd.h, src/brains/Exclude.cpp,
+	src/brains/Exclude.hpp, src/brains/ForceFields.cpp,
+	src/brains/Makedepend, src/brains/Makefile, src/brains/SimInfo.cpp,
+	src/brains/SimInfo.hpp, src/brains/SimSetup.cpp,
+	src/brains/SimSetup.hpp, src/brains/SimState.cpp,
+	src/brains/SimState.hpp, src/brains/SkipList.cpp,
+	src/brains/SkipList.hpp, src/brains/Thermo.cpp,
+	src/brains/Thermo.hpp, src/brains/fSimulation.h,
+	src/brains/mpiSimulation.cpp, src/brains/mpiSimulation.hpp,
+	src/brains/simulation_module.F90, src/io/BASS_interface.cpp,
+	src/io/Globals.hpp, src/io/LinkedAssign.cpp,
+	src/io/ZConsReader.cpp, src/math/Euler3.cpp, src/math/Euler3.hpp,
+	src/math/Makefile, src/math/MatVec3.c, src/math/MatVec3.h,
+	src/math/mt19937ar.c, src/math/randomSPRNG.cpp,
+	src/math/randomSPRNG.hpp, src/minimizers/CGFamilyMinimizer.cpp,
+	src/minimizers/Makefile, src/minimizers/MinimizerParameterSet.hpp,
+	src/minimizers/OOPSEMinimizer.cpp,
+	src/minimizers/OOPSEMinimizer.hpp, src/minimizers/PRCG.cpp,
+	src/minimizers/SDMinimizer.cpp, src/primitives/AbstractClasses.hpp,
+	src/primitives/Atom.cpp, src/primitives/Atom.hpp,
+	src/primitives/Bend.cpp, src/primitives/BendExtensions.cpp,
+	src/primitives/Bond.cpp, src/primitives/BondExtensions.cpp,
+	src/primitives/CutoffGroup.hpp, src/primitives/DirectionalAtom.cpp,
+	src/primitives/DirectionalAtom.hpp, src/primitives/GhostBend.cpp,
+	src/primitives/Makefile, src/primitives/Molecule.cpp,
+	src/primitives/Molecule.hpp, src/primitives/RigidBody.cpp,
+	src/primitives/RigidBody.hpp, src/primitives/SRI.hpp,
+	src/primitives/StuntDouble.cpp, src/primitives/StuntDouble.hpp,
+	src/primitives/Torsion.cpp, src/primitives/TorsionExtensions.cpp,
+	src/restraints/Makefile, src/restraints/Restraints.cpp,
+	src/restraints/Restraints.hpp, src/utils/GenericData.cpp,
+	src/utils/GenericData.hpp, src/utils/Makefile,
+	src/utils/StreamTokenizer.cpp, src/utils/StreamTokenizer.hpp,
+	src/utils/StringUtils.c, src/utils/StringUtils.cpp,
+	src/utils/StringUtils.h, src/utils/StringUtils.hpp,
+	src/utils/TypeInfo.hpp, src/utils/Utility.cpp,
+	src/utils/Utility.hpp, src/utils/definitions_module.F90,
+	src/utils/fError.c, src/utils/oopseMPI_module.F90,
+	src/utils/simError.c, src/utils/simError.h,
+	src/utils/status_module.F90, src/utils/vector_class.F90,
+	src/visitors/AtomVisitor.cpp, src/visitors/AtomVisitor.hpp,
+	src/visitors/BaseVisitor.hpp, src/visitors/CompositeVisitor.cpp,
+	src/visitors/CompositeVisitor.hpp, src/visitors/Makefile,
+	src/visitors/OtherVisitor.cpp, src/visitors/OtherVisitor.hpp,
+	src/visitors/RigidBodyVisitor.cpp,
+	src/visitors/RigidBodyVisitor.hpp, src/visitors/ZconsVisitor.cpp,
+	src/visitors/ZconsVisitor.hpp, make/Makefile,
+	make/_files/style.css, samples/Makefile.in,
+	samples/metals/Au-Core-Ag-Shell_Nanoparticle.in,
+	samples/metals/Au-Core-Ag-Shell_Nanoparticle.md,
+	samples/metals/Au_bulk_FBD.md, samples/metals/Au_bulk_voter.md,
+	samples/metals/Au_nanoparticle.md, samples/metals/Makefile.in,
+	samples/zcons/Makefile.in, samples/zcons/water.md,
+	samples/zcons/zconsFixed.in, samples/zcons/zconsFixed.md,
+	samples/zcons/zconsMoving.in, samples/zcons/zconsMoving.md,
+	src/applications/BaseLattice.cpp, src/applications/BaseLattice.hpp,
+	src/applications/Dump2XYZ.cpp, src/applications/Dump2XYZ.ggo,
+	src/applications/Dump2XYZCmd.c, src/applications/Dump2XYZCmd.h,
+	src/applications/Lattice.cpp, src/applications/Lattice.hpp,
+	src/applications/LatticeCreator.cpp,
+	src/applications/LatticeCreator.hpp,
+	src/applications/LatticeFactory.cpp,
+	src/applications/LatticeFactory.hpp, src/applications/Makedepend,
+	src/applications/Makefile, src/applications/MoLocator.cpp,
+	src/applications/MoLocator.hpp, src/applications/Vector3d.hpp,
+	src/applications/cmdline.c, src/applications/cmdline.h,
+	src/applications/getopt.c, src/applications/getopt1.c,
+	src/applications/gnugetopt.h, src/applications/nanoBuilder.cpp,
+	src/applications/nanoBuilder.hpp, src/applications/oopse.cpp,
+	src/applications/quickLate.c, src/applications/simpleBuilder.cpp,
+	src/applications/simpleBuilder.ggo,
+	src/applications/simpleBuilderCmd.c,
+	src/integrators/AbstractClasses.hpp,
+	src/integrators/AllIntegrator.hpp, src/integrators/Integrator.cpp,
+	src/integrators/Integrator.hpp, src/integrators/Makefile,
+	src/integrators/NPT.cpp, src/integrators/NPTf.cpp,
+	src/integrators/NPTi.cpp, src/integrators/NPTxyz.cpp,
+	src/integrators/NVT.cpp, src/profiling/Makefile,
+	src/profiling/mdProfile.cpp, src/profiling/mdProfile.hpp,
+	src/profiling/timing.F90, samples/metals/Au_bulk.in,
+	samples/metals/Au_nanoparticle.in, samples/metals/metals.md,
+	samples/water/Makefile.in, samples/water/dimer/Makefile.in,
+	samples/water/dimer/two.in, samples/water/dimer/two.md,
+	samples/water/dimer/water.md, samples/water/spce/Makefile.in,
+	samples/water/spce/spce.in, samples/water/spce/spce.md,
+	samples/water/spce/water.md, samples/water/ssde/Makefile.in,
+	samples/water/ssde/ssde.in, samples/water/ssde/ssde.md,
+	samples/water/ssde/water.md, samples/water/tip3p_ice/Makefile.in,
+	samples/water/tip3p_ice/tp3.in, samples/water/tip3p_ice/tp3.md,
+	samples/water/tip3p_ice/water.md, samples/water/ssd/Makefile.in,
+	samples/water/ssd/ssd.in, samples/water/ssd/ssd.md,
+	samples/water/ssd/water.md, samples/water/tip4p/tp4.in,
+	samples/water/tip4p/tp4.md, samples/water/tip4p/water.md,
+	samples/alkane/Makefile.in, samples/alkane/alkanes.md,
+	samples/alkane/butane.in, samples/alkane/butane.md,
+	samples/argon/500.in, samples/argon/500.md,
+	samples/argon/Makefile.in, samples/argon/ar864.in,
+	samples/argon/ar864.md, samples/argon/argonNVT.in,
+	samples/argon/argonNVT.md, samples/argon/lj.md,
+	samples/lipid/5x5.in, samples/lipid/5x5.md,
+	samples/lipid/Makefile.in, samples/lipid/lipid.md,
+	samples/lipid/water.md, samples/minimizer/Makefile.in,
+	samples/minimizer/WATER.frc, samples/minimizer/ssdEM.in,
+	samples/minimizer/ssdEM.md, samples/minimizer/tip4p_two.in,
+	samples/minimizer/tip4p_two.md, samples/minimizer/water.md,
+	samples/water/tip4p/Makefile.in, forceFields/Ag.VC.funcfl,
+	forceFields/Ag.u3.funcfl, forceFields/Ag.u6.funcfl,
+	forceFields/Au.u6.funcfl, forceFields/Cu.VC.funcfl,
+	forceFields/Cu.u3.funcfl, forceFields/Cu.u6.funcfl,
+	forceFields/DUFF.frc, forceFields/DipoleTest.frc,
+	forceFields/EAM.VC.frc, forceFields/EAM.frc,
+	forceFields/EAM.u3.frc, forceFields/EAM.u6.frc,
+	forceFields/Makefile.in, forceFields/Ni.u3.funcfl,
+	forceFields/Ni.u6.funcfl, forceFields/Pd.VC.funcfl,
+	forceFields/Pd.u6.funcfl, forceFields/Pt.u3.funcfl,
+	forceFields/Pt.u6.funcfl, forceFields/WATER.frc, scripts/cleanSrc,
+	scripts/cvs2cl.pl, scripts/makers, scripts/sfmakedepend,
 	ac-tools/Make.conf.in, ac-tools/aclocal.m4, ac-tools/config.guess,
 	ac-tools/config.sub, ac-tools/configure.in, ac-tools/fortran90.m4,
-	ac-tools/install-sh, ac-tools/shtool: Initial revision
+	ac-tools/install-sh, ac-tools/shtool, doc/OOPSE.pdf,
+	forceFields/Al.VC.funcfl, forceFields/Au.VC.funcfl,
+	forceFields/Au.u3.funcfl, forceFields/LJFF.frc,
+	forceFields/Ni.VC.funcfl, forceFields/Pd.u3.funcfl,
+	forceFields/Pt.VC.funcfl: Initial revision
 

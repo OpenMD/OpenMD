@@ -6,8 +6,6 @@
  
 using namespace oopse;
 
-
-typedef Vector<double, 3> Vec3; 
 typedef Vector<double, 4> Vec4;
 
 class VectorTestCase : public CPPUNIT_NS::TestFixture {
@@ -20,14 +18,25 @@ class VectorTestCase : public CPPUNIT_NS::TestFixture {
 
     public:
         virtual void setUp();
-        virtual void tearDown();
 
         void testConstructors();
         void testArithmetic();
         void testOperators();
         void testAccessEntries();
         void testOtherTemplateFunctions();
+
+    private:
+        Vec4 zero;
+        Vec4 one;
+        Vec4 two;
+        Vec4 v1;
+        Vec4 v2;
+        Vec4 v3;
+
+        double s1;
+        double s2;
         
+   
 };
 
 #endif //TEST_VECTORTESTCASE_HPP
