@@ -77,7 +77,7 @@ BlockSnapshotManager::BlockSnapshotManager(SimInfo* info, const std::string& fil
     //the last block may not have nSnapshotPerBlock frames, we need to consider this special situation
     blocks_.back().second = nframes_;
 
-    snapshots_.insert(snapshots_.begin(), nframes_, NULL);   
+    snapshots_.insert(snapshots_.begin(), nframes_,(Snapshot*)(NULL));   
     
 }
 
