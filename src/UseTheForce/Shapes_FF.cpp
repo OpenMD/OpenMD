@@ -11,10 +11,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <map>
+#include <cmath>
 #include <iostream>
-
-using namespace std;
-using namespace oopse;
 
 #ifdef IS_MPI
 #include <mpi.h>
@@ -23,10 +21,11 @@ using namespace oopse;
 #include "UseTheForce/ForceFields.hpp"
 #include "primitives/SRI.hpp"
 #include "utils/simError.h"
+#include "utils/StringUtils.hpp"
 #include "io/basic_ifstrstream.hpp"
 #include "math/RealSphericalHarmonic.hpp"
 #include "math/SquareMatrix3.hpp"
-
+#include "types/ShapeAtomType.hpp"
 #include "UseTheForce/DarkSide/atype_interface.h"
 #include "UseTheForce/DarkSide/shapes_interface.h"
 
@@ -34,14 +33,8 @@ using namespace oopse;
 #include "UseTheForce/mpiForceField.h"
 #endif // is_mpi
 
-Shapes_FF::Shapes_FF() {
-  Shapes_FF("");
-}
-
-Shapes_FF::Shapes_FF(char* the_variant){
-  ffPath_env = "FORCE_PARAM_PATH";
-
-}
+using namespace std;
+using namespace oopse;
 
 Shapes_FF::~Shapes_FF(){
 
@@ -49,7 +42,7 @@ Shapes_FF::~Shapes_FF(){
   if( worldRank == 0 ){
 #endif // is_mpi
     
-    fclose( frcFile );
+    forceFile.close();
     
 #ifdef IS_MPI
   }
@@ -73,13 +66,14 @@ void Shapes_FF::initForceField(){
 }
 
 
-void Shapes_FF::readForceFile( void ){
+void Shapes_FF::readParams( void ){
 
   char readLine[1024];
-  char fileName[200];
-  char temp[200];
-  char* ffPath;
-  char *shapeFileName;
+
+  string fileName;
+  string shapeFileName;
+  string tempString;
+
   char *nameToken;
   char *delim = " ,;\t\n";
   int nTokens, i;
@@ -87,13 +81,16 @@ void Shapes_FF::readForceFile( void ){
   int nRange = 0;
   int nStrength = 0;
   int myATID;
+  int isError;
   string nameString;
-  ShapeType* st;
-  map<string, AtomType*> atomTypeMap;
+  AtomType* at;
+  DirectionalAtomType* dat;
+  ShapeAtomType* st;
+
   map<string, AtomType*>::iterator iter;
 
   // vectors for shape transfer to fortran
-  vector<RealSphericalHarmonic> tempSHVector;
+  vector<RealSphericalHarmonic*> tempSHVector;
   vector<int> contactL;
   vector<int> contactM;
   vector<int> contactFunc;
@@ -106,40 +103,30 @@ void Shapes_FF::readForceFile( void ){
   vector<int> strengthM;
   vector<int> strengthFunc;
   vector<double> strengthCoeff;
-
-  // build a basic file reader
-  ifstrsteam frcReader;
    
   // generate the force file name   
-  strcpy( fileName, "Shapes.frc" );
+  fileName = "Shapes.frc";
   
   // attempt to open the file in the current directory first.
-  frcReader.open( fileName );
+  forceFile.open( fileName.c_str() );
   
-  if( frcReader == NULL ){
+  if( forceFile == NULL ){
     
-    // next see if the force path enviorment variable is set
+    tempString = ffPath;
+    tempString += "/";
+    tempString += fileName;
+    fileName = tempString;
     
-    ffPath = getenv( ffPath_env );
-    if( ffPath == NULL ) {
-      STR_DEFINE(ffPath, FRC_PATH );
-    }
-        
-    strcpy( temp, ffPath );
-    strcat( temp, "/" );
-    strcat( temp, fileName );
-    strcpy( fileName, temp );
+    forceFile.open( fileName.c_str() );
     
-    frcReader.open( fileName );
-    
-    if( frcFile == NULL ){
+    if( forceFile == NULL ){
       
       sprintf( painCave.errMsg,
 	       "Error opening the force field parameter file:\n"
 	       "\t%s\n"
 	       "\tHave you tried setting the FORCE_PARAM_PATH environment "
 	       "variable?\n",
-	       fileName );
+	       fileName.c_str() );
       painCave.severity = OOPSE_ERROR;
       painCave.isFatal = 1;
       simError();
@@ -148,22 +135,22 @@ void Shapes_FF::readForceFile( void ){
   
   // read in the shape types.
   
-  findBegin( "ShapeTypes" );
+  findBegin( forceFile, "ShapeTypes" );
   
-  while( !frcReader.eof() ){
-    frcReader.getline( readLine, sizeof(readLine) );
+  while( !forceFile.eof() ){
+    forceFile.getline( readLine, sizeof(readLine) );
 
     // toss comment lines
     if( readLine[0] != '!' && readLine[0] != '#' ){
       
       if (isEndLine(readLine)) break;
       
-      nTokens = count_tokens(readLine, " ,;\t");
+      nTokens = countTokens(readLine, " ,;\t");
       if (nTokens != 0) {
 	if (nTokens < 2) {
 	  sprintf( painCave.errMsg,
-		   "Not enough data on a ShapeTypes line in file: %s\n"
-		   fileName );
+		   "Not enough data on a ShapeTypes line in file: %s\n",
+		   fileName.c_str() );
 	  painCave.severity = OOPSE_ERROR;
 	  painCave.isFatal = 1;
 	  simError();
@@ -180,7 +167,7 @@ void Shapes_FF::readForceFile( void ){
 	if (iter == atomTypeMap.end()) {
 	  // no, it doesn't, so we may proceed:
 	  
-	  st = new ShapeType();
+	  st = new ShapeAtomType();
 
 	  st->setName(nameString);
 	  myATID = atomTypeMap.size();
@@ -194,7 +181,7 @@ void Shapes_FF::readForceFile( void ){
 	  // declared in a previous block, and we just need to add
 	  // the shape-specific information for this AtomType:
 
-	  st = (ShapeType*)(iter->second);
+	  st = (ShapeAtomType*)(iter->second);
 	  parseShapeFile(shapeFileName, st);
 	}
       }
@@ -213,7 +200,7 @@ void Shapes_FF::readForceFile( void ){
   // pack up and send the necessary info to fortran
   for (iter = atomTypeMap.begin(); iter != atomTypeMap.end(); ++iter){
 
-    at = (AtomType*)(iter.second);
+    at = (AtomType*)(iter->second);
 
     if (at->isDirectional()) {
 
@@ -232,10 +219,10 @@ void Shapes_FF::readForceFile( void ){
 	
 	nContact = tempSHVector.size();
 	for (i=0; i<nContact; i++){
-	  contactL.push_back(tempSHVector[i].getL());
-	  contactM.push_back(tempSHVector[i].getM());
-	  contactFunc.push_back(tempSHVector[i].getFunctionType());
-	  contactCoeff.push_back(tempSHVector[i].getCoefficient());
+	  contactL.push_back(tempSHVector[i]->getL());
+	  contactM.push_back(tempSHVector[i]->getM());
+	  contactFunc.push_back(tempSHVector[i]->getFunctionType());
+	  contactCoeff.push_back(tempSHVector[i]->getCoefficient());
 	}
 	
 	rangeL.clear();
@@ -247,10 +234,10 @@ void Shapes_FF::readForceFile( void ){
 	
 	nRange = tempSHVector.size();
 	for (i=0; i<nRange; i++){
-	  rangeL.push_back(tempSHVector[i].getL());
-	  rangeM.push_back(tempSHVector[i].getM());
-	  rangeFunc.push_back(tempSHVector[i].getFunctionType());
-	  rangeCoeff.push_back(tempSHVector[i].getCoefficient());
+	  rangeL.push_back(tempSHVector[i]->getL());
+	  rangeM.push_back(tempSHVector[i]->getM());
+	  rangeFunc.push_back(tempSHVector[i]->getFunctionType());
+	  rangeCoeff.push_back(tempSHVector[i]->getCoefficient());
 	}
 	
 	strengthL.clear();
@@ -262,25 +249,26 @@ void Shapes_FF::readForceFile( void ){
 	
 	nStrength = tempSHVector.size();
 	for (i=0; i<nStrength; i++){
-	  strengthL.push_back(tempSHVector[i].getL());
-	  strengthM.push_back(tempSHVector[i].getM());
-	  strengthFunc.push_back(tempSHVector[i].getFunctionType());
-	  strengthCoeff.push_back(tempSHVector[i].getCoefficient());
+	  strengthL.push_back(tempSHVector[i]->getL());
+	  strengthM.push_back(tempSHVector[i]->getM());
+	  strengthFunc.push_back(tempSHVector[i]->getFunctionType());
+	  strengthCoeff.push_back(tempSHVector[i]->getCoefficient());
 	}
 	
 	isError = 0;
 	myATID = at->getIdent();
-	makeShape( &nContact, &contactL, &contactM, &contactFunc, 
-		   &contactCoeff,
-		   &nRange, &rangeL, &rangeM, &rangeFunc, &rangeCoeff,
-		   &nStrength, &strengthL, &strengthM,
-		   &strengthFunc, &strengthCoeff,
+	makeShape( &nContact, &contactL[0], &contactM[0], &contactFunc[0], 
+		   &contactCoeff[0],
+		   &nRange, &rangeL[0], &rangeM[0], &rangeFunc[0], 
+                   &rangeCoeff[0],
+		   &nStrength, &strengthL[0], &strengthM[0],
+		   &strengthFunc[0], &strengthCoeff[0],
 		   &myATID, 
 		   &isError);
 	if( isError ){
 	  sprintf( painCave.errMsg,
 		   "Error initializing the \"%s\" shape in fortran\n",
-		   marker->first );
+		   (iter->first).c_str() );
 	  painCave.isFatal = 1;
 	  simError();
 	}
@@ -296,15 +284,21 @@ void Shapes_FF::readForceFile( void ){
 
 }
 
-void SHAPES_FF::initializeAtoms( int nAtoms, Atom** the_atoms ){
+void Shapes_FF::cleanMe( void ){
+
+}
+
+void Shapes_FF::initializeAtoms( int nAtoms, Atom** the_atoms ){
   
   int i,j,k;
+  map<string, AtomType*>::iterator iter;
 
   // initialize the atoms
   DirectionalAtom* dAtom;
   AtomType* at;
   DirectionalAtomType* dat;
-  double mySigma;
+  ShapeAtomType* sat;
+  double sigma;
   double ji[3];
   double inertialMat[3][3];
   Mat3x3d momInt;
@@ -327,10 +321,13 @@ void SHAPES_FF::initializeAtoms( int nAtoms, Atom** the_atoms ){
 
       the_atoms[i]->setMass( at->getMass() );
       the_atoms[i]->setIdent( at->getIdent() );
+      
+      if ( at->isShape() ) {
+        
+        sat = (ShapeAtomType*)at;
+        sigma = findLargestContactDistance(sat);
+        if (sigma > bigSigma) bigSigma = sigma;
 
-      if( at->isLennardJones() ) {
-	mySigma = at->properties->getPropertyByName("sigma");
-	if( bigSigma < mySigma ) bigSigma = mySigma;
       }
 
       the_atoms[i]->setHasCharge(at->isCharge());
@@ -395,19 +392,47 @@ void Shapes_FF::initializeTorsions( int nTorsions, Torsion** torsionArray,
   }
 }
 
-int Shapes_FF::parseShapeFile(char *shapeFile, ShapeAtomType* st){
+void Shapes_FF::parseShapeFile(string shapeFileName, ShapeAtomType* st){
   const int MAXLEN = 1024;
   char inLine[MAXLEN];   
   char *token;
   char *delim = " ,;\t\n";
+  int nTokens;
   Mat3x3d momInert;
-  RealSphericalHarmonic tempHarmonic;
-  vector<RealSphericalHarmonic> functionVector;
-
+  RealSphericalHarmonic* rsh;
+  vector<RealSphericalHarmonic*> functionVector;
   ifstrstream shapeFile;
+  string tempString;
+
+  shapeFile.open( shapeFileName.c_str() );
+  
+  if( shapeFile == NULL ){
+    
+    tempString = ffPath;
+    tempString += "/";
+    tempString += shapeFileName;
+    shapeFileName = tempString;
+        
+    shapeFile.open( shapeFileName.c_str() );
+    
+    if( shapeFile == NULL ){
+      
+      sprintf( painCave.errMsg,
+	       "Error opening the shape file:\n"
+	       "\t%s\n"
+	       "\tHave you tried setting the FORCE_PARAM_PATH environment "
+	       "variable?\n",
+	       shapeFileName.c_str() );
+      painCave.severity = OOPSE_ERROR;
+      painCave.isFatal = 1;
+      simError();
+    }
+  }
+  
+  // read in the shape types. 
   
   // first grab the values in the ShapeInfo section
-  findBegin(shapeFile, "ShapeInfo");
+  findBegin( shapeFile, "ShapeInfo");
   
   shapeFile.getline(inLine, MAXLEN);
   while( !shapeFile.eof() ) {
@@ -416,12 +441,12 @@ int Shapes_FF::parseShapeFile(char *shapeFile, ShapeAtomType* st){
       // end marks section completion
       if (isEndLine(inLine)) break;
       
-      nTokens = count_tokens(inLine, delim);
+      nTokens = countTokens(inLine, delim);
       if (nTokens != 0) {
 	if (nTokens < 5) {
 	  sprintf( painCave.errMsg,
-		   "Not enough data on a ShapeInfo line in file: %s\n"
-		   fileName );
+		   "Not enough data on a ShapeInfo line in file: %s\n",
+		   shapeFileName.c_str() );
 	  painCave.severity = OOPSE_ERROR;
 	  painCave.isFatal = 1;
 	  simError();
@@ -452,30 +477,31 @@ int Shapes_FF::parseShapeFile(char *shapeFile, ShapeAtomType* st){
       // end marks section completion
       if (isEndLine(inLine)) break;
       
-      nTokens = count_tokens(inLine, delim);
+      nTokens = countTokens(inLine, delim);
       if (nTokens != 0) {
 	if (nTokens < 4) {
 	  sprintf( painCave.errMsg,
-		   "Not enough data on a ContactFunctions line in file: %s\n"
-		   fileName );
+		   "Not enough data on a ContactFunctions line in file: %s\n",
+		   shapeFileName.c_str() );
 	  painCave.severity = OOPSE_ERROR;
 	  painCave.isFatal = 1;
 	  simError();
 	  
 	  // read in a spherical harmonic function
 	  token = strtok(inLine, delim);
-	  tempHarmonic.setL(atoi(token));
+          rsh = new RealSphericalHarmonic();
+	  rsh->setL(atoi(token));
 	  token = strtok(NULL, delim);
-	  tempHarmonic.setM(atoi(token));
+	  rsh->setM(atoi(token));
 	  token = strtok(NULL, delim);
 	  if (!strcasecmp("sin",token))
-	    tempHarmonic.makeSinFunction();
+	    rsh->makeSinFunction();
 	  else
-	    tempHarmonic.makeCosFunction();		
+	    rsh->makeCosFunction();		
 	  token = strtok(NULL, delim);
-	  tempHarmonic.setCoefficient(atof(token));
+	  rsh->setCoefficient(atof(token));
 	  
-	  functionVector.push_back(tempHarmonic);
+	  functionVector.push_back(rsh);
 	}
       }
     }
@@ -495,30 +521,32 @@ int Shapes_FF::parseShapeFile(char *shapeFile, ShapeAtomType* st){
       // end marks section completion
       if (isEndLine(inLine)) break;
       
-      nTokens = count_tokens(inLine, delim);
+      nTokens = countTokens(inLine, delim);
       if (nTokens != 0) {
 	if (nTokens < 4) {
 	  sprintf( painCave.errMsg,
-		   "Not enough data on a RangeFunctions line in file: %s\n"
-		   fileName );
+		   "Not enough data on a RangeFunctions line in file: %s\n",
+		   shapeFileName.c_str() );
 	  painCave.severity = OOPSE_ERROR;
 	  painCave.isFatal = 1;
 	  simError();
 	  
 	  // read in a spherical harmonic function
 	  token = strtok(inLine, delim);
-	  tempHarmonic.setL(atoi(token));
+
+          rsh = new RealSphericalHarmonic();
+	  rsh->setL(atoi(token));
 	  token = strtok(NULL, delim);
-	  tempHarmonic.setM(atoi(token));
+	  rsh->setM(atoi(token));
 	  token = strtok(NULL, delim);
 	  if (!strcasecmp("sin",token))
-	    tempHarmonic.makeSinFunction();
+	    rsh->makeSinFunction();
 	  else
-	    tempHarmonic.makeCosFunction();		
+	    rsh->makeCosFunction();		
 	  token = strtok(NULL, delim);
-	  tempHarmonic.setCoefficient(atof(token));
+	  rsh->setCoefficient(atof(token));
 	  
-	  functionVector.push_back(tempHarmonic);
+	  functionVector.push_back(rsh);
 	}
       }
     }
@@ -538,30 +566,31 @@ int Shapes_FF::parseShapeFile(char *shapeFile, ShapeAtomType* st){
       // end marks section completion
       if (isEndLine(inLine)) break;
       
-      nTokens = count_tokens(inLine, delim);
+      nTokens = countTokens(inLine, delim);
       if (nTokens != 0) {
 	if (nTokens < 4) {
 	  sprintf( painCave.errMsg,
-		   "Not enough data on a StrengthFunctions line in file: %s\n"
-		   fileName );
+		   "Not enough data on a StrengthFunctions line in file: %s\n",
+		   shapeFileName.c_str() );
 	  painCave.severity = OOPSE_ERROR;
 	  painCave.isFatal = 1;
 	  simError();
 	  
 	  // read in a spherical harmonic function
 	  token = strtok(inLine, delim);
-	  tempHarmonic.setL(atoi(token));
+          rsh = new RealSphericalHarmonic();
+	  rsh->setL(atoi(token));
 	  token = strtok(NULL, delim);
-	  tempHarmonic.setM(atoi(token));
+	  rsh->setM(atoi(token));
 	  token = strtok(NULL, delim);
 	  if (!strcasecmp("sin",token))
-	    tempHarmonic.makeSinFunction();
+	    rsh->makeSinFunction();
 	  else
-	    tempHarmonic.makeCosFunction();		
+	    rsh->makeCosFunction();		
 	  token = strtok(NULL, delim);
-	  tempHarmonic.setCoefficient(atof(token));
+	  rsh->setCoefficient(atof(token));
 	  
-	  functionVector.push_back(tempHarmonic);
+	  functionVector.push_back(rsh);
 	}
       }
     }
@@ -572,6 +601,35 @@ int Shapes_FF::parseShapeFile(char *shapeFile, ShapeAtomType* st){
 
   // we're done reading from this file
   shapeFile.close();
-  return 0;
 }
 
+double Shapes_FF::findLargestContactDistance(ShapeAtomType* st) {
+  int i, j,  nSteps;
+  double theta, thetaStep, thetaMin, costheta;
+  double phi, phiStep;
+  double sigma, bigSigma;
+
+  nSteps = 16;
+
+  thetaStep = M_PI / nSteps;
+  thetaMin = thetaStep / 2.0;
+  phiStep = thetaStep * 2.0;
+  bigSigma = 0.0;
+  
+  for (i = 0; i < nSteps; i++) {
+    
+    theta = thetaMin + i * thetaStep;
+    costheta = cos(theta);
+
+    for (j = 0; j < nSteps; j++) {
+
+      phi = j*phiStep;
+
+      sigma = st->getContactValueAt(costheta, phi);
+      
+      if (sigma > bigSigma) bigSigma = sigma;
+    }
+  }
+
+  return bigSigma;  
+}

@@ -1065,18 +1065,3 @@ int EAM_NS::parseEAM(atomStruct &info, char *eamPotFile,
   fclose(eamFile);
   return 0;
 }
-
-double EAM_FF::getAtomTypeMass (char* atomType) {
-
-  currentAtomType = headAtomType->find( atomType );
-  if( currentAtomType == NULL ){
-    sprintf( painCave.errMsg,
-            "AtomType error, %s not found in force file.\n",
-             atomType );
-    painCave.isFatal = 1;
-    simError();
-  }
-
-  return currentAtomType->mass;
-}
-

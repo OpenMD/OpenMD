@@ -1089,16 +1089,3 @@ int WATER_NS::parseDirectional( char *lineBuffer, int lineNum, directionalStruct
   }
   else return 0;
 }
-double WATER::getAtomTypeMass (char* atomType) {
-
-  currentAtomType = headAtomType->find( atomType );
-  if( currentAtomType == NULL ){
-    sprintf( painCave.errMsg,
-            "AtomType error, %s not found in force file.\n",
-             atomType );
-    painCave.isFatal = 1;
-    simError();
-  }
-
-  return currentAtomType->mass;
-}

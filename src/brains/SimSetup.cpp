@@ -26,10 +26,11 @@
 #define NPTxyz_ENS     4
 
 
-#define FF_DUFF  0
-#define FF_LJ    1
-#define FF_EAM   2
-#define FF_H2O   3
+#define FF_DUFF   0
+#define FF_LJ     1
+#define FF_EAM    2
+#define FF_H2O    3
+#define FF_SHAPES 4
 
 using namespace std;
 using namespace oopse;
@@ -715,11 +716,14 @@ void SimSetup::gatherInfo(void){
   else if (!strcasecmp(force_field, "WATER")){
     ffCase = FF_H2O;
   }
+  else if (!strcasecmp(force_field, "SHAPES")){
+    ffCase = FF_SHAPES;
+  }
   else{
     sprintf(painCave.errMsg, "SimSetup Error. Unrecognized force field -> %s\n",
             force_field);
-         painCave.isFatal = 1;
-         simError();
+    painCave.isFatal = 1;
+    simError();
   }
   if (globals->haveForceFieldVariant()) {
     strcpy(forcefield_variant, globals->getForceFieldVariant());
@@ -1257,6 +1261,10 @@ void SimSetup::createFF(void){
 
     case FF_H2O:
       the_ff = new WATER();
+      break;
+
+    case FF_SHAPES:
+      the_ff = new Shapes_FF();
       break;
 
     default:

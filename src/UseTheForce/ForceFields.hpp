@@ -4,18 +4,24 @@
 #define MK_STR(s) # s
 #define STR_DEFINE(t, s) t = MK_STR(s)
 
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <string>
+#include <map>
 
 #include "primitives/Atom.hpp"
 #include "brains/SimInfo.hpp"
 #include "primitives/StuntDouble.hpp"
+#include "types/ShapeAtomType.hpp"
+#include "io/basic_ifstrstream.hpp"
 
 #ifdef IS_MPI
 #include "UseTheForce/mpiForceField.h"
 #endif
+
+using namespace std;
+using namespace oopse;
 
 class bond_pair{
 public:
@@ -55,8 +61,27 @@ public:
 class ForceFields{
 
 public:
-  ForceFields(){ frcFile = NULL; entry_plug = NULL; has_variant=0;}
-  ForceFields(char * theVariant ){ frcFile = NULL; entry_plug = NULL; has_variant=1; strcpy(variant, theVariant); }
+  ForceFields(){ 
+    frcFile = NULL; 
+    entry_plug = NULL; 
+    has_variant=0;
+    ffPath_env = "FORCE_PARAM_PATH";
+    ffPath = getenv( ffPath_env );
+    if( ffPath == NULL ) {
+      STR_DEFINE(ffPath, FRC_PATH );
+    }   
+  }
+  ForceFields(char * theVariant){ 
+    frcFile = NULL; 
+    entry_plug = NULL; 
+    has_variant=1; 
+    strcpy(variant, theVariant); 
+    ffPath_env = "FORCE_PARAM_PATH";
+    ffPath = getenv( ffPath_env );
+    if( ffPath == NULL ) {
+      STR_DEFINE(ffPath, FRC_PATH );
+    }   
+  }
   virtual ~ForceFields(){}
   
   void setSimInfo( SimInfo* the_entry_plug ) { entry_plug = the_entry_plug; }
@@ -81,14 +106,10 @@ public:
   virtual void setRcut( double LJrcut );
   virtual void doForces( int calcPot, int calcStress );
 
-  virtual double getAtomTypeMass(char* atomType) = 0;
-
- 
 protected:
   
   void initFortran( int useReactionField );
   
-
   FILE *frcFile;
   SimInfo* entry_plug;
   
@@ -98,6 +119,11 @@ protected:
   char variant[100];
   short int has_variant;
   double bigSigma;
+
+  ifstrstream forceFile;
+  map<string, AtomType*> atomTypeMap;
+  char* ffPath_env;
+  char* ffPath;
 
 };
 
@@ -120,7 +146,6 @@ public:
 			   torsion_set* the_torsions );
 
   void initForceField();
-  double getAtomTypeMass(char* atomType);
 
 private:
   
@@ -146,7 +171,7 @@ public:
 			   torsion_set* the_torsions );
 
   void initForceField( );
-  double getAtomTypeMass(char* atomType);
+
 
 private:
 
@@ -176,7 +201,7 @@ public:
   void initForceField();
 
   void calcRcut( void );
-  double getAtomTypeMass(char* atomType);
+
 private:
 
   void fastForward( char* stopText, char* searchOwner );
@@ -200,7 +225,7 @@ public:
   void initializeTorsions( int nTorsions, Torsion** torsionArray,
 			   torsion_set* the_torsions );
   void initForceField();
-  double getAtomTypeMass(char* atomType);
+
 
 private:
   
@@ -212,11 +237,11 @@ private:
 class Shapes_FF : public ForceFields{
 
 public:
-  Shapes_FF();
-  Shapes_FF(char* the_variant);
+  Shapes_FF() : ForceFields() {};
+  Shapes_FF(char* the_variant) : ForceFields(the_variant) {};
   virtual ~Shapes_FF();
   
-  void readForceFile();
+  void readParams();
   void cleanMe( void );
 
   void initializeAtoms( int nAtoms, Atom** atomArray );
@@ -229,11 +254,13 @@ public:
 
   void initForceField();
 
+  void parseShapeFile(string shapeFileName, ShapeAtomType* st);
+
   void calcRcut( void );
-  double getAtomTypeMass(char* atomType);
 
 private:
-  char* ffPath_env;
+
+  double findLargestContactDistance(ShapeAtomType* st);
   double shapesRcut;
 
 };

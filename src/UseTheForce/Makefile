@@ -7,6 +7,7 @@ Source    = \
 	mpiForceField.c \
 	WATER.cpp \
 	notifyCutoffs.F90 \
+	Shapes_FF.cpp \
 
 RmiSource =
 

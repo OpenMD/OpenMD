@@ -397,20 +397,6 @@ void LJFF::readParams( void ){
 
 }
 
-double LJFF::getAtomTypeMass (char* atomType) {
-
-  currentAtomType = headAtomType->find( atomType );
-  if( currentAtomType == NULL ){
-    sprintf( painCave.errMsg,
-            "AtomType error, %s not found in force file.\n",
-             atomType );
-    painCave.isFatal = 1;
-    simError();
-  }
-
-  return currentAtomType->mass;
-}
-
 void LJFF::initializeAtoms( int nAtoms, Atom** the_atoms ){
   
   int i;
