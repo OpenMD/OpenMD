@@ -21,8 +21,8 @@
 #  Filename     :  $RCSfile: filepp,v $
 #  Author       :  $Author: tim $
 #  Maintainer   :  Darren Miller: darren@cabaret.demon.co.uk
-#  File version :  $Revision: 1.5 $
-#  Last changed :  $Date: 2004-10-11 21:10:28 $
+#  File version :  $Revision: 1.6 $
+#  Last changed :  $Date: 2004-10-11 21:54:35 $
 #  Description  :  Main program
 #  Licence      :  GNU copyleft
 #
@@ -2542,7 +2542,7 @@ sub printModule {
 	my $objname;
 	print "\n";
 	foreach $modname (keys %parsedModList) {
-		$objname = GetObjFile($parsedModList{$modname});
+		$objname = GetObjFile($modname);
 		print $objDir . $modname  . " : " . $objDir . $objname . "\n";
 	}
 }
@@ -2556,6 +2556,7 @@ sub GetObjFile {
 	my $filename;
 	my $dir;
 	my $suffix;
+        
 	($filename, $dir, $suffix) = fileparse($fullname, '\.[^.]*');	
 	return $filename . $objExt;
 }
@@ -2944,7 +2945,7 @@ foreach $base_file (@Inputfiles) {
     }
     
     #clean visitedTable
-    cleanVisited();
+    %visitedTable = ();
     
     #clear all define
     UndefAll();
