@@ -62,6 +62,9 @@ namespace oopse{
 
             virtual void accept(BaseVisitor* v);
 
+            void addAtom(Atom* atom);
+
+            /** calculate the reference coordinates */
             void calcRefCoords();
 
             /** Convert Atomic forces and torques to total forces and torques */
@@ -74,7 +77,7 @@ namespace oopse{
              * Returns the atoms of this rigid body
              * @return the atoms of this rigid body in a vector
              */           
-            vector<Atom*> getAtoms() { return atomLists_;}
+            vector<Atom*> getAtoms() { return atoms_;}
 
             /** 
              * Returns the number of atoms in this rigid body
@@ -95,7 +98,7 @@ namespace oopse{
         private:
             
             Mat3x3d inertiaTensor_;       
-            vector<Atom*> atomLists_;
+            vector<Atom*> atoms_;
             vector<Vector3d> refCoords;
     };
 

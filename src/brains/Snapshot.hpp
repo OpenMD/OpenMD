@@ -43,16 +43,7 @@ using namespace std;
 
 namespace oopse{
 
-    enum DataStorageLayout {
-        dslPosition = 1,
-        dslVelocity = 2,
-        dslAMat = 4, 
-        dslAngularMomentum = 8,
-        dslUnitVector = 16,
-        dslZAngle = 32,
-        dslForce = 64, 
-        dslTorque = 128
-    };
+
     //forward declaration
     class Snapshot;
     class SnapshotManager;
@@ -60,22 +51,41 @@ namespace oopse{
     
     /**
      * @class DataStorage
-     * @brief
      * @warning do not try to insert element into (or ease element from) private member data 
      * of DataStorage directly.
      */
     class DataStorage {
         public:
-            DataStorage() {};
-            DataStorage(size_t size);
 
-            int size();
-            void resize(size_t size);
-            void reserve(size_t size);
+            enum{
+                slPosition = 1,
+                slVelocity = 2,
+                slAmat = 4, 
+                slAngularMomentum = 8,
+                slUnitVector = 16,
+                slZAngle = 32,
+                slForce = 64, 
+                slTorque = 128
+            };
             
-            friend class Snapshot;
+            DataStorage(int size);
+
+            /** return the size of this DataStorage */
+            int size();
+            void resize(int size);
+            void reserve(int size);
+
+            void move(int source, int num, int target);
+            int getStorageLayout();
+            void setStorageLayout(int layout);
+
+            double *getArrayPointer(int );
+
             friend class StuntDouble;
+
         private:
+            int size_;
+            int storageLayout_;
             vector<Vector3d> position;               /** position array */
             vector<Vector3d> velocity;               /** velocity array */
             vector<RotMat3x3d> aMat;            /** rotation matrix array */
@@ -84,7 +94,6 @@ namespace oopse{
             vector<double> zAngle;              /** z -angle array */        
             vector<Vector3d> force;               /** force array */
             vector<Vector3d> torque;               /** torque array */
-
     };
 
     /**
@@ -122,39 +131,54 @@ namespace oopse{
             //    return v[0]->getArrayPointer();
             //}
 
-            static double* getArrayPointer(vector<Vector3d>& v) {
-                assert(v.size() > 0);
-                return v[0].getArrayPointer();
-            }
-            
-            static double* getArrayPointer(vector<RotMat3x3d>& v) {
-                assert(v.size() > 0);
-                return v[0].getArrayPointer();
-            }
-            
-            static double* getArrayPointer(vector<double>& v) {
-                assert(v.size() > 0);
-                return &(v[0]);
-            }
-
             int getSize() {
                 return atomData.size() + rigidbodyData.size();
             }
-            
-            int getSizeOfAtoms() {
+
+            /** Returns the number of atoms */
+            int getNumberOfAtoms() {
                 return atomData.size();
             }
-            
-            int getSizeOfRigidBodies() {
+
+            /** Returns the number of rigid bodies */
+            int getNumberOfRigidBodies() {
                 return rigidbodyData.size();
             }
-            
+
+            /** Returns the H-Matrix */
+            Mat3x3d getHmat() {
+                return hmat_;
+            }
+
+            /** Sets the H-Matrix */
+            void setHamt(const Mat3x3d& m) {
+                hmat_ = m;
+                invHmat_ = hmat_.inverse();
+            }
+
+            /** Returns the inverse H-Matrix */
+            Mat3x3d getInvHmat() {
+                return invHmat_
+            }
+
+            double getTimeStamp() {
+                return timeStamp_;
+            }
+
+            void setTimeStamp(double timeStamp) {
+                timeStamp_ =timeStamp;
+            }
+
+
             DataStorage atomData;
             DataStorage rigidbodyData;
-
+            
             friend class StuntDouble;
+            
         private:
-
+            double timeStamp_;
+            Mat3x3d hmat_;
+            Mat3x3d invHmat_;
             int id_; /**< identification number of the snapshot */
     };
 
