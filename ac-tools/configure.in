@@ -156,23 +156,23 @@ if test "$AR" = "NONE"; then
   exit 1
 fi
 
-AC_PATH_PROG(PS_PATH, ps)
+AC_PATH_PROG(PS, ps)
 AC_CACHE_CHECK([for POSIX ps], ac_cv_prog_ps_posix, [
 	USER=${USER:-${LOGNAME:-`logname`}}
-	if $PS_PATH -U $USER -opid,args >/dev/null 2>&1; then
+	if $PS -U $USER -opid,args >/dev/null 2>&1; then
 		ac_cv_prog_ps_posix=yes
 	else
 		ac_cv_prog_ps_posix=no
 	fi
 ])
 if test "$ac_cv_prog_ps_posix" = yes; then
-	BSD_PS=yes
+	PSTYPE=BSD
 else
-	POSIX_PS=yes
+	PSTYPE=POSIX
 fi
-AC_SUBST(PS_PATH)
-AC_SUBST(BSD_PS)
-AC_SUBST(POSIX_PS)
+
+AC_SUBST(PS)
+AC_SUBST(PSTYPE)
 
 
 AC_ARG_WITH(mpi,
