@@ -6,7 +6,7 @@ Source    = \
         ForceField.cpp \
         ForceFieldFactory.cpp \
         DUFF.cpp \
-	EAM.cpp \
+	EAM_FF.cpp \
 	notifyCutoffs.F90 \
 	notifyCutoffs_interface.F90
 

@@ -39,7 +39,7 @@
  * such damages.
  */
  
-#include "UseTheForce/EAM.hpp"
+#include "UseTheForce/EAM_FF.hpp"
 #include "UseTheForce/DarkSide/lj_interface.h"
 #include "UseTheForce/DarkSide/charge_interface.h"
 #include "UseTheForce/DarkSide/dipole_interface.h"
@@ -58,7 +58,7 @@
 #include "utils/simError.h"
 namespace oopse {
     
-EAM::EAM(){
+EAM_FF::EAM_FF(){
 
     //set default force field filename
     setForceFieldFileName("EAM.frc");
@@ -85,7 +85,7 @@ EAM::EAM(){
     
 }
 
-void EAM::parse(const std::string& filename) {
+void EAM_FF::parse(const std::string& filename) {
     ifstrstream* ffStream;
     ffStream = openForceFieldFile(filename);
 
@@ -105,7 +105,7 @@ void EAM::parse(const std::string& filename) {
 }
 
 
-double EAM::getRcutFromAtomType(AtomType* at){
+double EAM_FF::getRcutFromAtomType(AtomType* at){
     double rcut = 0.0;    
     if (at->isEAM()) {
         GenericData* data = at->getPropertyByName("EAM");

@@ -40,14 +40,14 @@
  */
  
  /**
-  * @file EAM.hpp
+  * @file EAM_FF.hpp
   * @author tlin
   * @date 11/15/2004
   * @time 13:43am
   * @version 1.0
   */
-#ifndef USETHEFORCE_EAM_HPP
-#define USETHEFORCE_EAM_HPP
+#ifndef USETHEFORCE_EAM_FF_HPP
+#define USETHEFORCE_EAM_FF_HPP
 
 #include "UseTheForce/ForceField.hpp"
 #include "io/SectionParserManager.hpp"
@@ -55,12 +55,12 @@
 namespace oopse {
 
 /**
- * @class EAM EAM.hpp "UseTheForce/EAM.hpp"
- * @brief Dipole United Atom Force Field Parser
+ * @class EAM_FF EAM_FF.hpp "UseTheForce/EAM_FF.hpp"
+ * @brief Embedded Atom Method Force Field Parser
  */
-class EAM : public ForceField {
+class EAM_FF : public ForceField {
     public:
-        EAM();
+        EAM_FF();
         virtual void parse(const std::string& filename);
 
          virtual double getRcutFromAtomType(AtomType* at);
@@ -71,5 +71,5 @@ class EAM : public ForceField {
 };
 
 } //end namespace oopse
-#endif //USETHEFORCE_EAM_HPP
+#endif //USETHEFORCE_EAM_FF_HPP
 
