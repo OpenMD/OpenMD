@@ -1,10 +1,10 @@
 Source    = \
-	definitions_module.F90 \
+	definitions.F90 \
 	fError.c \
 	GenericData.cpp \
-	oopseMPI_module.F90 \
+	oopseMPI.F90 \
 	simError.c \
-	status_module.F90 \
+	status.F90 \
 	StreamTokenizer.cpp \
 	StringUtils.cpp \
 	Utility.cpp \
