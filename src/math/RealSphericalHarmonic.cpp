@@ -14,7 +14,7 @@ double RealSphericalHarmonic::getValueAt(double costheta, double phi) {
   
   // associated Legendre polynomial
   p = LegendreP(L,M,costheta);
-  
+ 
   if (functionType == RSH_SIN) {
     phase = sin((double)M * phi);
   } else {

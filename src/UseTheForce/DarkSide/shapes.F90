@@ -73,14 +73,14 @@ contains
        nRangeFuncs, RangeFuncLValue, RangeFuncMValue, RangeFunctionType, &
        RangeFuncCoefficient, nStrengthFuncs, StrengthFuncLValue, &
        StrengthFuncMValue, StrengthFunctionType, StrengthFuncCoefficient, &
-       myAtid, status)
+       myATID, status)
 
     integer :: nContactFuncs 
     integer :: nRangeFuncs 
     integer :: nStrengthFuncs 
     integer :: shape_ident
     integer :: status
-    integer :: myAtid
+    integer :: myATID
     integer :: bigL
     integer :: bigM
     integer :: j, me, nShapeTypes, nLJTypes, ntypes, current, alloc_stat
@@ -115,7 +115,7 @@ contains
        
        ntypes = getSize(atypes)
        
-       allocate(ShapeMap%atidToShape(ntypes))
+       allocate(ShapeMap%atidToShape(0:ntypes))
     end if
     
     ShapeMap%currentShape = ShapeMap%currentShape + 1
@@ -128,7 +128,8 @@ contains
        return
     endif
 
-    call getElementProperty(atypes, myAtid, "c_ident", me)
+    call getElementProperty(atypes, myATID, 'c_ident', me)
+
     ShapeMap%atidToShape(me)                         = current
     ShapeMap%Shapes(current)%atid                    = me
     ShapeMap%Shapes(current)%nContactFuncs           = nContactFuncs
@@ -188,6 +189,7 @@ contains
     integer, intent(out) :: stat
     integer :: alloc_stat
  
+    stat = 0
     if (associated(myShape%contactFuncLValue)) then
        deallocate(myShape%contactFuncLValue)
     endif
@@ -253,7 +255,7 @@ contains
        stat = -1
        return
     endif
-    
+
     if (associated(myShape%strengthFuncLValue)) then
        deallocate(myShape%strengthFuncLValue)
     endif
@@ -287,6 +289,8 @@ contains
        return
     endif
 
+    return
+
   end subroutine allocateShape
     
   subroutine complete_Shape_FF(status)
@@ -310,7 +314,8 @@ contains
        return
     end if
 
-    do i = 1, nAtypes
+    ! atypes comes from c side
+    do i = 0, nAtypes
        
        call getElementProperty(atypes, i, "is_LennardJones", thisProperty)
        
@@ -339,6 +344,9 @@ contains
   subroutine do_shape_pair(atom1, atom2, d, rij, r2, sw, vpair, fpair, &
        pot, A, f, t, do_pot)
     
+    INTEGER, PARAMETER:: LMAX         = 64
+    INTEGER, PARAMETER:: MMAX         = 64
+
     integer, intent(in) :: atom1, atom2
     real (kind=dp), intent(inout) :: rij, r2
     real (kind=dp), dimension(3), intent(in) :: d
@@ -430,6 +438,11 @@ contains
     real (kind=dp) :: fxji, fyji, fzji, fxjj, fyjj, fzjj
     real (kind=dp) :: fxradial, fyradial, fzradial
 
+    real (kind=dp) :: plm_i(LMAX,MMAX), dlm_i(LMAX,MMAX)
+    real (kind=dp) :: plm_j(LMAX,MMAX), dlm_j(LMAX,MMAX)
+    real (kind=dp) :: tm_i(MMAX), dtm_i(MMAX), um_i(MMAX), dum_i(MMAX)
+    real (kind=dp) :: tm_j(MMAX), dtm_j(MMAX), um_j(MMAX), dum_j(MMAX)
+
     if (.not.haveShapeMap) then
        call handleError("calc_shape", "NO SHAPEMAP!!!!")
        return       
@@ -437,7 +450,7 @@ contains
     
     !! We assume that the rotation matrices have already been calculated
     !! and placed in the A array.
-        
+
     r3 = r2*rij
     r5 = r3*r2
     
@@ -459,11 +472,11 @@ contains
 #endif
 
     ! use the atid to find the shape type (st) for each atom:
-
     st1 = ShapeMap%atidToShape(atid1)
     st2 = ShapeMap%atidToShape(atid2)
-    
+
     if (ShapeMap%Shapes(st1)%isLJ) then
+
        sigma_i = ShapeMap%Shapes(st1)%sigma
        s_i = ShapeMap%Shapes(st1)%sigma
        eps_i = ShapeMap%Shapes(st1)%epsilon
@@ -504,7 +517,7 @@ contains
        zi = a(7,atom1)*d(1) + a(8,atom1)*d(2) + a(9,atom1)*d(3)
        
 #endif
-       
+
        xi2 = xi*xi
        yi2 = yi*yi
        zi2 = zi*zi
@@ -513,6 +526,7 @@ contains
        proji3 = proji*proji*proji
        
        cti = zi / rij
+
        dctidx = - zi * xi / r3
        dctidy = - zi * yi / r3
        dctidz = 1.0d0 / rij - zi2 / r3
@@ -537,11 +551,12 @@ contains
        dspiduz = xi * (1.0d0 / proji - yi2 / proji3) + (xi * yi2 / proji3)
 
        call Associated_Legendre(cti, ShapeMap%Shapes(st1)%bigL, &
-            ShapeMap%Shapes(st1)%bigM, lmax, plm_i, dlm_i)
+            ShapeMap%Shapes(st1)%bigM, LMAX, &
+            plm_i, dlm_i)
 
-       call Orthogonal_Polynomial(cpi, ShapeMap%Shapes(st1)%bigM, &
+       call Orthogonal_Polynomial(cpi, ShapeMap%Shapes(st1)%bigM, MMAX, &
             CHEBYSHEV_TN, tm_i, dtm_i)
-       call Orthogonal_Polynomial(cpi, ShapeMap%Shapes(st1)%bigM, &
+       call Orthogonal_Polynomial(cpi, ShapeMap%Shapes(st1)%bigM, MMAX, &
             CHEBYSHEV_UN, um_i, dum_i)
        
        sigma_i = 0.0d0
@@ -573,6 +588,7 @@ contains
           function_type = ShapeMap%Shapes(st1)%ContactFunctionType(lm)
 
           if ((function_type .eq. SH_COS).or.(m.eq.0)) then
+           !  write(*,*) tm_i(m), ' is tm_i'
              Phunc = coeff * tm_i(m)
              dPhuncdX = coeff * dtm_i(m) * dcpidx
              dPhuncdY = coeff * dtm_i(m) * dcpidy
@@ -591,7 +607,7 @@ contains
           endif
 
           sigma_i = sigma_i + plm_i(l,m)*Phunc
-          
+          write(*,*) plm_i(l,m), l, m
           dsigmaidx = dsigmaidx + plm_i(l,m)*dPhuncdX + &
                Phunc * dlm_i(l,m) * dctidx
           dsigmaidy = dsigmaidy + plm_i(l,m)*dPhuncdY + &
@@ -673,7 +689,7 @@ contains
              dPhuncdUy = coeff*(spi * dum_i(m-1)*dcpiduy + dspiduy *um_i(m-1))
              dPhuncdUz = coeff*(spi * dum_i(m-1)*dcpiduz + dspiduz *um_i(m-1))
           endif
-
+          !write(*,*) eps_i, plm_i(l,m), Phunc
           eps_i = eps_i + plm_i(l,m)*Phunc
           
           depsidx = depsidx + plm_i(l,m)*dPhuncdX + &
@@ -770,11 +786,12 @@ contains
        dspjduz = xj * (1.0d0 / projj - yi2 / projj3) + (xj * yj2 / projj3)
        
        call Associated_Legendre(ctj, ShapeMap%Shapes(st2)%bigL, &
-            ShapeMap%Shapes(st2)%bigM, lmax, plm_j, dlm_j)
+            ShapeMap%Shapes(st2)%bigM, LMAX, &
+            plm_j, dlm_j)
        
-       call Orthogonal_Polynomial(cpj, ShapeMap%Shapes(st2)%bigM, &
+       call Orthogonal_Polynomial(cpj, ShapeMap%Shapes(st2)%bigM, MMAX, &
             CHEBYSHEV_TN, tm_j, dtm_j)
-       call Orthogonal_Polynomial(cpj, ShapeMap%Shapes(st2)%bigM, &
+       call Orthogonal_Polynomial(cpj, ShapeMap%Shapes(st2)%bigM, MMAX, &
             CHEBYSHEV_UN, um_j, dum_j)
        
        sigma_j = 0.0d0
@@ -960,7 +977,7 @@ contains
     dsduxj = 0.5*dsjdux
     dsduyj = 0.5*dsjduy
     dsduzj = 0.5*dsjduz
-
+    !write(*,*) eps_i, eps_j
     eps = sqrt(eps_i * eps_j)
 
     depsdxi = eps_j * depsidx / (2.0d0 * eps)
@@ -1138,8 +1155,8 @@ contains
     
   end subroutine do_shape_pair
     
-  SUBROUTINE Associated_Legendre(x, l, m, lmax, plm, dlm) 
-    
+  SUBROUTINE Associated_Legendre(x, l, m, lmax, plm, dlm)        
+
     ! Purpose: Compute the associated Legendre functions 
     !          Plm(x) and their derivatives Plm'(x)
     ! Input :  x  --- Argument of Plm(x)
@@ -1156,17 +1173,17 @@ contains
     ! The original Fortran77 codes can be found here:
     ! http://iris-lee3.ece.uiuc.edu/~jjin/routines/routines.html
     
-    real (kind=8), intent(in) :: x
+    real (kind=dp), intent(in) :: x
     integer, intent(in) :: l, m, lmax 
-    real (kind=8), dimension(0:lmax,0:m), intent(out) :: PLM, DLM
+    real (kind=dp), dimension(0:lmax,0:m), intent(out) :: PLM, DLM
     integer :: i, j, ls
-    real (kind=8) :: xq, xs
+    real (kind=dp) :: xq, xs
 
     ! zero out both arrays:
     DO I = 0, m
        DO J = 0, l
-          PLM(J,I) = 0.0D0
-          DLM(J,I) = 0.0D0
+          PLM(J,I) = 0.0_dp
+          DLM(J,I) = 0.0_dp
        end DO
     end DO
 
@@ -1199,35 +1216,34 @@ contains
     DO I = 1, l
        PLM(I, I) = -LS*(2.0D0*I-1.0D0)*XQ*PLM(I-1, I-1)
     enddo
-    
+
     DO I = 0, l
        PLM(I, I+1)=(2.0D0*I+1.0D0)*X*PLM(I, I)
     enddo
-    
+
     DO I = 0, l
        DO J = I+2, m
           PLM(I, J)=((2.0D0*J-1.0D0)*X*PLM(I,J-1) - &
                (I+J-1.0D0)*PLM(I,J-2))/(J-I)
        end DO
     end DO
-  
+
     DLM(0, 0)=0.0D0
-    
     DO J = 1, m
        DLM(0, J)=LS*J*(PLM(0,J-1)-X*PLM(0,J))/XS
     end DO
-    
+
     DO I = 1, l
        DO J = I, m
           DLM(I,J) = LS*I*X*PLM(I, J)/XS + (J+I)*(J-I+1.0D0)/XQ*PLM(I-1, J)
        end DO
     end DO
-    
+
     RETURN
   END SUBROUTINE Associated_Legendre
 
 
-  subroutine Orthogonal_Polynomial(x, m, function_type, pl, dpl)
+  subroutine Orthogonal_Polynomial(x, m, mmax, function_type, pl, dpl)
   
     ! Purpose: Compute orthogonal polynomials: Tn(x) or Un(x),
     !          or Ln(x) or Hn(x), and their derivatives
@@ -1249,9 +1265,9 @@ contains
     ! http://iris-lee3.ece.uiuc.edu/~jjin/routines/routines.html
   
     real(kind=8), intent(in) :: x
-    integer, intent(in):: m
+    integer, intent(in):: m, mmax
     integer, intent(in):: function_type
-    real(kind=8), dimension(0:m), intent(inout) :: pl, dpl
+    real(kind=8), dimension(0:mmax), intent(inout) :: pl, dpl
   
     real(kind=8) :: a, b, c, y0, y1, dy0, dy1, yn, dyn
     integer :: k
@@ -1306,7 +1322,7 @@ subroutine makeShape(nContactFuncs, ContactFuncLValue, &
      nRangeFuncs, RangeFuncLValue, RangeFuncMValue, RangeFunctionType, &
      RangeFuncCoefficient, nStrengthFuncs, StrengthFuncLValue, &
      StrengthFuncMValue, StrengthFunctionType, StrengthFuncCoefficient, &
-     myAtid, status)
+     myATID, status)
 
   use definitions
   use shapes, only: newShapeType
@@ -1315,7 +1331,7 @@ subroutine makeShape(nContactFuncs, ContactFuncLValue, &
   integer :: nRangeFuncs 
   integer :: nStrengthFuncs 
   integer :: status
-  integer :: myAtid
+  integer :: myATID
   
   integer, dimension(nContactFuncs) :: ContactFuncLValue           
   integer, dimension(nContactFuncs) :: ContactFuncMValue           
@@ -1335,7 +1351,7 @@ subroutine makeShape(nContactFuncs, ContactFuncLValue, &
        nRangeFuncs, RangeFuncLValue, RangeFuncMValue, RangeFunctionType, &
        RangeFuncCoefficient, nStrengthFuncs, StrengthFuncLValue, &
        StrengthFuncMValue, StrengthFunctionType, StrengthFuncCoefficient, &
-       myAtid, status)
+       myATID, status)
 
   return
 end subroutine makeShape

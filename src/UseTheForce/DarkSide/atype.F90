@@ -37,6 +37,7 @@ contains
     endif
     
     me = addElement(atypes)
+
     call setElementProperty(atypes, me, "c_ident", ident)
     
     call setElementProperty(atypes, me, "is_Directional", is_Directional)
@@ -70,7 +71,7 @@ subroutine makeatype(atp, status)
   logical :: is_Directional, is_LennardJones, is_Electrostatic
   logical :: is_Charge, is_Dipole, is_Sticky, is_GayBerne, is_EAM
   logical :: is_Shape, is_FLARB
-  
+
   ident = atp%ident
   is_Directional = (atp%is_Directional .ne. 0)
   is_LennardJones = (atp%is_LennardJones .ne. 0)

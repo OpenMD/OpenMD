@@ -23,9 +23,9 @@ double ShapeAtomType::getContactValueAt(double costheta, double phi) {
   contactVal = 0.0;
   
   for(contactIter = contactFuncs.begin();  contactIter != contactFuncs.end(); 
-      ++contactIter)     
+      ++contactIter) 
     contactVal += (*contactIter)->getValueAt(costheta, phi);
-  
+
   return contactVal;
 }
 
