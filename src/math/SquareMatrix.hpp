@@ -80,7 +80,7 @@ namespace oopse {
 
         /** 
          * Retunrs  the inversion of this matrix. 
-         * @todo
+         * @todo need implementation
          */
          SquareMatrix<Real, Dim>  inverse() {
              SquareMatrix<Real, Dim> result;
@@ -90,7 +90,7 @@ namespace oopse {
 
         /**
          * Returns the determinant of this matrix.
-         * @todo
+         * @todo need implementation
          */
         double determinant() const {
             double det;
@@ -148,7 +148,7 @@ namespace oopse {
             return true;
         }         
 
-        /** @todo need implement */
+        /** @todo need implementation */
         void diagonalize() {
             //jacobi(m, eigenValues, ortMat);
         }
@@ -165,7 +165,7 @@ namespace oopse {
             SquareMatrix<Real, Dim> ortMat;
             
             if ( !isSymmetric()){
-                throw();
+                //throw();
             }
             
             SquareMatrix<Real, Dim> m(*this);

@@ -70,25 +70,28 @@ void Vector3TestCase::testOperators(){
     //test /=
     tmp = two;
     tmp *= 2.0;
-    CPPUNIT_ASSERT(tmp == one);    
-    //test /
-    CPPUNIT_ASSERT( two /2 == one);
-    CPPUNIT_ASSERT( two /4 == one * 0.5);
+    CPPUNIT_ASSERT(tmp == one * 4.0);    
     
+    //test /
+    CPPUNIT_ASSERT( two /2.0 == one);
+    CPPUNIT_ASSERT( two /4.0 == one * 0.5);
+
 }
 
 void Vector3TestCase::testAccessEntries(){
 
-    CPPUNIT_ASSERT(v1.z() == 3.0);
-    CPPUNIT_ASSERT(v2.x() == 4.0);
-    CPPUNIT_ASSERT(v3.y() == 10.0);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(v1.z(), 3.0, oopse::epsilon);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(v2.x(), 4.0, oopse::epsilon);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(v3.y(), 10.0, oopse::epsilon);
 
     Vector3d tmp;
     tmp.x() = 78.01;
     tmp.y() = 21.0;
     tmp.z() =133.12;
-    CPPUNIT_ASSERT(tmp[0] == 78.01 && tmp[1] == 21.0 && tmp[2] == 133.12);
-    
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(tmp.x(), 78.01, oopse::epsilon);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(tmp.y(), 21.0, oopse::epsilon);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(tmp.z(), 133.12, oopse::epsilon);
+
 }
 
 void Vector3TestCase::testOtherTemplateFunctions(){      

@@ -55,6 +55,7 @@ namespace oopse {
     inline bool equal(double e1, double e2) {
         return fabs(e1 - e2) < epsilon;
     }
+
     
     /**
      * @class Vector Vector.hpp "math/Vector.hpp"
@@ -93,7 +94,7 @@ namespace oopse {
             }
             
             /** Constructs and initializes a Vector from an array */            
-            inline Vector( double* v) {
+            inline Vector( Real* v) {
                 for (unsigned int i = 0; i < Dim; i++)
                     data_[i] = v[i];
             }
@@ -103,7 +104,7 @@ namespace oopse {
              * @return reference of ith element
              * @param i index
              */
-            inline double& operator[](unsigned int  i) {
+            inline Real& operator[](unsigned int  i) {
                 assert( i < Dim);
                 return data_[i];
             }
@@ -113,7 +114,7 @@ namespace oopse {
              * @return reference of ith element
              * @param i index
              */
-            inline double& operator()(unsigned int  i) {
+            inline Real& operator()(unsigned int  i) {
                 assert( i < Dim);
                 return data_[i];
             }
@@ -123,7 +124,7 @@ namespace oopse {
              * @return reference of ith element
              * @param i index
              */
-            inline  const double& operator[](unsigned int i) const {
+            inline  const Real& operator[](unsigned int i) const {
                 assert( i < Dim);
                 return data_[i];
             }
@@ -133,7 +134,7 @@ namespace oopse {
              * @return reference of ith element
              * @param i index
              */
-            inline  const double& operator()(unsigned int i) const {
+            inline  const Real& operator()(unsigned int i) const {
                 assert( i < Dim);
                 return data_[i];
             }
@@ -184,9 +185,9 @@ namespace oopse {
             * @param v1 the other vector
             */
             inline void add( const Vector<Real, Dim>& v1 ) {
-            for (unsigned int i = 0; i < Dim; i++)
-                data_[i] += v1.data_[i];
-                }
+                for (unsigned int i = 0; i < Dim; i++)
+                    data_[i] += v1.data_[i];
+            }
 
             /**
             * Sets the value of this vector to the sum of v1 and v2 (*this = v1 + v2).
@@ -221,7 +222,7 @@ namespace oopse {
             * Sets the value of this vector to the scalar multiplication of itself (*this *= s).
             * @param s the scalar value
             */
-            inline void mul( double s ) {
+            inline void mul( Real s ) {
                 for (unsigned int i = 0; i < Dim; i++)
                    data_[i] *= s;
             }
@@ -232,7 +233,7 @@ namespace oopse {
             * @param v1 the vector            
             * @param s the scalar value
             */
-            inline void mul( const Vector<Real, Dim>& v1, double s) {
+            inline void mul( const Vector<Real, Dim>& v1, Real s) {
                 for (unsigned int i = 0; i < Dim; i++)
                     data_[i] = s * v1.data_[i];
             }
@@ -241,7 +242,7 @@ namespace oopse {
             * Sets the value of this vector to the scalar division of itself  (*this /= s ).
             * @param s the scalar value
             */             
-            inline void div( double s) {
+            inline void div( Real s) {
                 for (unsigned int i = 0; i < Dim; i++)            
                     data_[i] /= s;
             }
@@ -251,7 +252,7 @@ namespace oopse {
             * @param v1 the source vector
             * @param s the scalar value
             */                         
-            inline void div( const Vector<Real, Dim>& v1, double s ) {
+            inline void div( const Vector<Real, Dim>& v1, Real s ) {
                 for (unsigned int i = 0; i < Dim; i++)
                     data_[i] = v1.data_[i] / s;
             }
@@ -269,13 +270,13 @@ namespace oopse {
             }
 
             /** @see #mul */
-            inline Vector<Real, Dim>& operator *=( double s) {
+            inline Vector<Real, Dim>& operator *=( Real s) {
                 mul(s);
                 return *this;
             }
 
             /** @see #div */
-            inline Vector<Real, Dim>& operator /=( double s ) {
+            inline Vector<Real, Dim>& operator /=( Real s ) {
                 div(s);
                 return *this;
             }
@@ -284,7 +285,7 @@ namespace oopse {
              * Returns the length of this vector.
              * @return the length of this vector
              */
-             inline double length() {
+             inline Real length() {
                 return sqrt(lengthSquare());  
             }
             
@@ -292,13 +293,13 @@ namespace oopse {
              * Returns the squared length of this vector.
              * @return the squared length of this vector
              */
-             inline double lengthSquare() {
+             inline Real lengthSquare() {
                 return dot(*this, *this);
             }
             
             /** Normalizes this vector in place */
             inline void normalize() {
-                double len;
+                Real len;
 
                 len = length();
                 
@@ -317,7 +318,7 @@ namespace oopse {
             }           
             
         protected:
-            double data_[Dim];
+            Real data_[Dim];
         
     };
 
@@ -363,7 +364,7 @@ namespace oopse {
      * @param s the scalar value
      */ 
     template<typename Real, unsigned int Dim>                 
-    Vector<Real, Dim> operator * ( const Vector<Real, Dim>& v1, double s) {       
+    Vector<Real, Dim> operator * ( const Vector<Real, Dim>& v1, Real s) {       
         Vector<Real, Dim> result;
         result.mul(v1,s);
         return result;           
@@ -376,7 +377,7 @@ namespace oopse {
      * @param v1 the source vector
      */  
     template<typename Real, unsigned int Dim>
-    Vector<Real, Dim> operator * ( double s, const Vector<Real, Dim>& v1 ) {
+    Vector<Real, Dim> operator * ( Real s, const Vector<Real, Dim>& v1 ) {
         Vector<Real, Dim> result;
         result.mul(v1, s);
         return result;           
@@ -389,7 +390,7 @@ namespace oopse {
      * @param s the scalar value
      */
     template<typename Real, unsigned int Dim>    
-    Vector<Real, Dim> operator / ( const Vector<Real, Dim>& v1, double s) {       
+    Vector<Real, Dim> operator / ( const Vector<Real, Dim>& v1, Real s) {       
         Vector<Real, Dim> result;
         result.div( v1,s);
         return result;           
@@ -407,7 +408,7 @@ namespace oopse {
         tmp = 0;
 
         for (unsigned int i = 0; i < Dim; i++)
-            tmp += v1[i] + v2[i];
+            tmp += v1[i] * v2[i];
 
         return tmp;
     }
@@ -442,7 +443,17 @@ namespace oopse {
     template<typename Real, unsigned int Dim>
     std::ostream &operator<< ( std::ostream& o, const Vector<Real, Dim>& v) {
 
-        o << "[" << v[0] << ", " << v[1] << ", " << v[2] << "]" << endl;
+        o << "[ ";
+        
+        for (unsigned int i = 0 ; i< Dim; i++) {
+            o << v[i];
+
+            if (i  != Dim -1) {
+                o<< ", ";
+            }
+        }
+
+        o << " ]";
         return o;        
     }
     

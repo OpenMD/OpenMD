@@ -479,9 +479,9 @@ namespace oopse {
     template<typename Real,  unsigned int Row, unsigned int Col>
     std::ostream &operator<< ( std::ostream& o, const RectMatrix<Real, Row, Col>& m) {
         for (unsigned int i = 0; i < Row ; i++) {
-            o << "(" 
+            o << "(";
             for (unsigned int j = 0; j < Col ; j++) {
-                o << m(i, j) << "\t"
+                o << m(i, j) << "\t";
             }
             o << ")" << std::endl;
         }

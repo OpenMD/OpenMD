@@ -187,25 +187,25 @@ void VectorTestCase::testOperators(){
 
 void VectorTestCase::testAccessEntries(){
     //test [] operator
-    CPPUNIT_ASSERT(zero[0] == 0.0);
-    CPPUNIT_ASSERT(one[0] == 1.0);
-    CPPUNIT_ASSERT(v3[0] == 4.0); 
 
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(zero[0], 0.0, oopse::epsilon);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(one[0] , 1.0, oopse::epsilon);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(v3[0] , 4.0, oopse::epsilon);
     //test () operator
-    CPPUNIT_ASSERT(v3(0) != 1.0); 
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(v3(0) , 4.0, oopse::epsilon);
 
 }
 
 void VectorTestCase::testOtherMemberFunctions(){
     //test length()
-    CPPUNIT_ASSERT(zero.length() == 0.0);
-    CPPUNIT_ASSERT(one.length() == 2.0);
-    CPPUNIT_ASSERT(v2.length() == sqrt(14.0));
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(zero.length(), 0.0, oopse::epsilon);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(one.length(), 2.0, oopse::epsilon);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(v2.length(), sqrt(14.0), oopse::epsilon);
     
     //test lengthSquare()
-    CPPUNIT_ASSERT(zero.lengthSquare() == 0.0);
-    CPPUNIT_ASSERT(one.lengthSquare() == 4.0);
-    CPPUNIT_ASSERT(v2.length() == 14.0);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(zero.lengthSquare(), 0.0, oopse::epsilon);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(one.lengthSquare(), 4.0, oopse::epsilon);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(v2.lengthSquare(), 14.0, oopse::epsilon);
 
     //test normalize()
     Vec4 a1 = one;
@@ -223,15 +223,15 @@ void VectorTestCase::testOtherMemberFunctions(){
 }
 void VectorTestCase::testOtherTemplateFunctions(){        
     //test dot
-    CPPUNIT_ASSERT(dot(one, two) == 8.0);
-    CPPUNIT_ASSERT(dot(v1, v3) == 20.0);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(dot(one, two), 8.0, oopse::epsilon);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(dot(v1, v3), 20.0, oopse::epsilon);
 
     //test distance
-    CPPUNIT_ASSERT(distance(one, two) == 2.0);    
-    CPPUNIT_ASSERT(distance(v1, v2) == sqrt(56.0));
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(distance(one, two), 2.0, oopse::epsilon);    
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(distance(v1, v2), sqrt(56.0), oopse::epsilon);
     
     //test distanceSquare
-    CPPUNIT_ASSERT(distanceSquare(one, two) == 4.0);    
-    CPPUNIT_ASSERT(distanceSquare(v1, v2) == 56);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(distanceSquare(one, two), 4.0, oopse::epsilon);    
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(distanceSquare(v1, v2), 56, oopse::epsilon);
 
 }

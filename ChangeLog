@@ -1,3 +1,70 @@
+2004-10-18 23:34  tim
+
+	* src/math/Vector.hpp, test/math/RectMatrixTestCase.cpp: more bugs
+	are fixed in Vector class
+
+2004-10-18 23:28  tim
+
+	* test/math/: RectMatrixTestCase.cpp, RectMatrixTestCase.hpp: fix
+	some bugs in RectMatrixTestCase
+
+2004-10-18 23:21  tim
+
+	* src/math/Vector.hpp, test/math/RectMatrixTestCase.cpp,
+	test/math/RectMatrixTestCase.hpp, test/math/Vector3TestCase.cpp,
+	test/math/Vector3TestCase.hpp, test/math/VectorTestCase.cpp,
+	test/math/VectorTestCase.hpp: implement more test cases
+
+2004-10-18 18:13  tim
+
+	* ChangeLog, make/Doxyfile, src/math/Matrix3x3d.hpp,
+	src/math/RectMatrix.hpp, src/math/SquareMatrix.hpp,
+	src/math/SquareMatrix3.hpp, src/math/Vector.hpp,
+	src/utils/StringTokenizer.hpp, test/math/Makefile,
+	test/math/VectorTestCase.cpp, test/math/VectorTestCase.hpp: more
+	tests on math library
+
+2004-10-18 16:03  tim
+
+	* test/math/: Makefile, QuaternionTestCase.cpp,
+	QuaternionTestCase.hpp, RectMatrixTestCase.cpp,
+	SquareMatrix3TestCase.cpp, Vector3TestCase.cpp,
+	Vector3TestCase.hpp, VectorTestCase.cpp, VectorTestCase.hpp: adding
+	more testing units
+
+2004-10-18 12:07  tim
+
+	* src/: brains/SimSetup.hpp, io/FileReader.hpp, math/Euler3.cpp,
+	math/Euler3.hpp, math/Quaternion.hpp, math/SquareMatrix3.hpp,
+	math/Vector3.hpp, types/ShapeType.cpp, types/ShapeType.hpp,
+	utils/GenericFactory.hpp: fix some bugs in Quaternion class
+
+2004-10-18 11:30  gezelter
+
+	* src/math/: RealSphericalHarmonic.cpp, RealSphericalHarmonic.hpp:
+	Your basic run of the mill real-valued versions of Y_l^m(\theta,
+	\phi)
+
+2004-10-18 11:29  gezelter
+
+	* src/: math/Makefile, math/Matrix3x3d.hpp, math/Vector3.hpp,
+	types/Makefile, types/ShapeType.cpp, types/ShapeType.hpp,
+	utils/StringUtils.cpp, utils/StringUtils.hpp: Working on getting
+	Shapes into OOPSE
+
+2004-10-18 10:21  gezelter
+
+	* src/types/: ShapeType.cpp, ShapeType.hpp: Added ShapeType
+
+2004-10-18 00:23  tim
+
+	* test/math/VectorTestCase.hpp: adding	vector test case
+
+2004-10-18 00:23  tim
+
+	* src/utils/GenericFactory.hpp: adding generic factory and vector
+	test case
+
 2004-10-16 20:19  tim
 
 	* src/math/: Quaternion.hpp, RectMatrix.hpp, SquareMatrix.hpp,
@@ -361,8 +428,7 @@
 
 2004-09-29 12:56  gezelter
 
-	* make/: Make.conf.in, Makefile.in, _files/style.css: Working on
-	make stuff
+	* make/: Make.conf.in, Makefile.in: Working on make stuff
 
 2004-09-29 12:46  tim
 
@@ -628,8 +694,7 @@
 	src/visitors/OtherVisitor.cpp, src/visitors/OtherVisitor.hpp,
 	src/visitors/RigidBodyVisitor.cpp,
 	src/visitors/RigidBodyVisitor.hpp, src/visitors/ZconsVisitor.cpp,
-	src/visitors/ZconsVisitor.hpp, make/Makefile,
-	make/_files/style.css, samples/Makefile.in,
+	src/visitors/ZconsVisitor.hpp, make/Makefile, samples/Makefile.in,
 	samples/metals/Au-Core-Ag-Shell_Nanoparticle.in,
 	samples/metals/Au-Core-Ag-Shell_Nanoparticle.md,
 	samples/metals/Au_bulk_FBD.md, samples/metals/Au_bulk_voter.md,
@@ -804,8 +869,7 @@
 	src/visitors/OtherVisitor.cpp, src/visitors/OtherVisitor.hpp,
 	src/visitors/RigidBodyVisitor.cpp,
 	src/visitors/RigidBodyVisitor.hpp, src/visitors/ZconsVisitor.cpp,
-	src/visitors/ZconsVisitor.hpp, make/Makefile,
-	make/_files/style.css, samples/Makefile.in,
+	src/visitors/ZconsVisitor.hpp, make/Makefile, samples/Makefile.in,
 	samples/metals/Au-Core-Ag-Shell_Nanoparticle.in,
 	samples/metals/Au-Core-Ag-Shell_Nanoparticle.md,
 	samples/metals/Au_bulk_FBD.md, samples/metals/Au_bulk_voter.md,

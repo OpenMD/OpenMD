@@ -6,25 +6,32 @@
  
 using namespace oopse;
 
+typedef Vector<double, 4> Vec4;
 class QuaternionTestCase : public CPPUNIT_NS::TestFixture {
     CPPUNIT_TEST_SUITE( QuaternionTestCase );
     CPPUNIT_TEST(testConstructors);
     CPPUNIT_TEST(testArithmetic);
     CPPUNIT_TEST(testAccessEntries);
-    CPPUNIT_TEST(testOtherTemplateFunctions);
+    CPPUNIT_TEST(testOtherMemberFunctions);
     CPPUNIT_TEST_SUITE_END();
 
     public:
         virtual void setUp();
-        virtual void tearDown();
 
         void testConstructors();
         void testArithmetic();
         void testOperators();
         void testAccessEntries();
-        void testOtherTemplateFunctions();
+        void testOtherMemberFunctions();
+        
+    private:
+        Quat4d q1;
+        Quat4d q2;
+        Quat4d q3;
+        Quat4d q4;
         
 };
+
 
 #endif //TEST_QUATERNIONTESTCASE_HPP
 

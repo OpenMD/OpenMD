@@ -237,6 +237,7 @@ void RectMatrixTestCase::testDiv() {
 
     CPPUNIT_ASSERT(m1 / 2.0 * 2.0 == m1);
 
+
 }
 
 void RectMatrixTestCase::testAccessEntries(){
@@ -250,8 +251,9 @@ void RectMatrixTestCase::testRowColOperations() {
     
     //test getRow
     row = e.getRow(0);
-    CPPUNIT_ASSERT(row[0] == 2.0 && row[1] == 4.0 && row[2] == 1.0);
-
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(row[0], 2.0, oopse::epsilon);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(row[1], 4.0, oopse::epsilon);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(row[2], 1.0, oopse::epsilon);
     //test setRow
     row[0] = 2.0;    
     row[1] = 4.0;    
@@ -269,8 +271,9 @@ void RectMatrixTestCase::testRowColOperations() {
     
     //test getCol
     col = e.getColum(1);
-    CPPUNIT_ASSERT(col[0] == 4.0 && col[1] == 0.0 && col[2] == 6.0);    
-
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(col[0], 4.0, oopse::epsilon);    
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(col[1], 0.0, oopse::epsilon);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(col[2], 6.0, oopse::epsilon);
     //test setCol
     col[0] = 2.0;    
     col[1] = 0.0;    
