@@ -27,8 +27,9 @@ dt = 2.0;
 runTime = 1e3;
 useInitialTime = "false";
 useInitialExtendedSystemState = "false";
+//useLiquidThermInt = "true";
 useSolidThermInt = "true";
-thermodynamicIntegrationLambda = 0.95;
+thermodynamicIntegrationLambda = 1.0;
 thermodynamicIntegrationK = 1.0;
 
 //tempSet = "true";

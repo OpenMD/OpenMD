@@ -106,6 +106,7 @@ namespace oopse {
     }
     
     // build a RestReader and read in important information
+    
     restRead_ = new RestReader(info_);
     restRead_->readIdealCrystal();
     restRead_->readZangle();

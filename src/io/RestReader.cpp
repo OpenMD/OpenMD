@@ -68,7 +68,7 @@
 namespace oopse {
   
   RestReader::RestReader( SimInfo* info ) : info_(info){
-        
+    
     idealName = "idealCrystal.in";
     
     isScanned = false;
@@ -92,6 +92,7 @@ namespace oopse {
             "File \"idealCrystal.in\" opened successfully for reading." );
     MPIcheckPoint();
 #endif
+
     return;  
   }
   
@@ -225,7 +226,7 @@ namespace oopse {
 
     nTotObjs = info_->getNGlobalIntegrableObjects();
     haveError = 0;
-    
+
     if (worldRank == masterNode) {
       eof_test = fgets(read_buffer, sizeof(read_buffer), inIdealFile);
       if( eof_test == NULL ){
@@ -258,7 +259,7 @@ namespace oopse {
         painCave.isFatal = 1;
         simError();
       }
-      
+
       for (i=0 ; i < info_->getNGlobalMolecules(); i++) {
         int which_node = info_->getMolToProc(i);
         
@@ -290,8 +291,9 @@ namespace oopse {
               painCave.isFatal = 1;
               simError();
             }
-            
-            parseIdealLine(read_buffer, integrableObjects[j]);
+	
+            parseIdealLine(read_buffer, integrableObject);
+	
           }
         } else {
           //molecule belongs to slave nodes
@@ -374,7 +376,7 @@ namespace oopse {
     int nTokens;
     
     nTokens = tokenizer.countTokens();
-    
+
     if (nTokens < 14) {
       sprintf(painCave.errMsg,
               "RestReader Error: Not enough Tokens.\n");
@@ -383,7 +385,7 @@ namespace oopse {
     }
     
     std::string name = tokenizer.nextToken();
-    
+
     if (name != sd->getType()) {
       
       sprintf(painCave.errMsg,
@@ -398,13 +400,13 @@ namespace oopse {
     pos[0] = tokenizer.nextTokenAsDouble();
     pos[1] = tokenizer.nextTokenAsDouble();
     pos[2] = tokenizer.nextTokenAsDouble();
-    
+
     // store the positions in the stuntdouble as generic data doubles
     DoubleGenericData* refPosX = new DoubleGenericData();
     refPosX->setID("refPosX");
     refPosX->setData(pos[0]);
     sd->addProperty(refPosX);
-    
+
     DoubleGenericData* refPosY = new DoubleGenericData();
     refPosY->setID("refPosY");
     refPosY->setData(pos[1]);
@@ -414,7 +416,7 @@ namespace oopse {
     refPosZ->setID("refPosZ");
     refPosZ->setData(pos[2]);
     sd->addProperty(refPosZ);
-    
+
     // we don't need the velocities
     uselessToken = tokenizer.nextTokenAsDouble();
     uselessToken = tokenizer.nextTokenAsDouble();
