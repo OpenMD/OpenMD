@@ -42,6 +42,10 @@
 #ifndef SELECTION_TOKEN_HPP
 #define SELECTION_TOKEN_HPP
 
+#include <map>
+#include <string>
+#include <utility>
+#include "utils/any.hpp"
 
 namespace oopse {
 
@@ -55,30 +59,35 @@ class Token {
 
     public:
 
-        static std::map<std::string, Token> tokenMap;
-        
-        int tok;
-        Object value;
-        int intValue = Integer.MAX_VALUE;
 
-        Token(int tok, int intValue, Object value) {
-            this.tok = tok;
-            this.intValue = intValue;
-            this.value = value;
+        int tok;
+        boost::any value;
+        int intValue;
+
+        Token() { tok = unknown;}
+
+        Token(const Token& token) {
+            *this = token;
+        }
+        
+        Token(int tok, int intValue, const boost::any& value) {
+            this->tok = tok;
+            this->intValue = intValue;
+            this->value = value;
         }
 
         Token(int tok, int intValue) {
-        this.tok = tok;
-        this.intValue = intValue;
+        this->tok = tok;
+        this->intValue = intValue;
         }
 
         Token(int tok) {
-            this.tok = tok;
+            this->tok = tok;
         }
 
-        Token(int tok, Object value) {
-            this.tok = tok;
-            this.value = value;
+        Token(int tok,  const boost::any& value) {
+            this->tok = tok;
+            this->value = value;
         }
         
         const static int nada              =  0;
@@ -97,16 +106,23 @@ class Token {
         const static int expressionCommand = (1 <<  9); // expression command
         const static int expression        = (1 << 10); /// expression term
 
-        // every property is also valid in an expression context
-        const static int atomproperty      = (1 << 11) | expression;
-        // every predefined is also valid in an expression context
-        const static int comparator        = (1 << 12) | expression;
-        const static int predefinedset     = (1 << 13) | expression;
+        // generally, the minus sign is used to denote atom ranges
+        // this property is used for the few commands which allow negative integers
+        const static int negnums      = (1 << 11);
 
+        // every property is also valid in an expression context
+        const static int atomproperty      = (1 << 12) | expression | negnums;
+        // every predefined is also valid in an expression context
+        const static int comparator        = (1 << 13) | expression;
+        const static int predefinedset     = (1 << 14) | expression;
+        const  static int embeddedExpression= (1 << 15); // embedded expression
+        
         // rasmol commands
         const static int define       = command | expressionCommand |1;
         const static int select       = command |expressionCommand |2 ;
-        const static int all          = expression | 11 ; 
+
+        //predefine
+        const static int selected    = predefinedset |0;
 
         // atom expression operators
         const static int leftparen    = expression |  0;
@@ -118,7 +134,13 @@ class Token {
         const static int within       = expression |  6;
         const static int asterisk     = expression |  7;
         const static int dot          = expression | 8;
-
+        const static int name            =  expression |9;
+        const static int index            =  expression | 10;
+        const static int molname            =  expression | 11;
+        const static int molindex      =  expression | 12;
+        const static int all          = expression | 13 ; 
+        const static int none      = expression | 14;
+        
         // miguel 2005 01 01
         // these are used to demark the beginning and end of expressions
         // they do not exist in the source code, but are emitted by the
@@ -126,14 +148,10 @@ class Token {
         const static int expressionBegin = expression | 100;
         const static int expressionEnd   = expression | 101;
 
-        const static int atomno       = atomproperty | 0;
-        const static int elemno       = atomproperty | 1;
-        const static int resno        = atomproperty | 2;
-        const static int radius       = atomproperty | 3 ; 
-        const static int _bondedcount = atomproperty | 6;
-        const static int _groupID     = atomproperty | 7;
-        const static int _atomID      = atomproperty | 8;
-
+        const static int mass         = atomproperty | 0;
+        const static int charge       = atomproperty | 1;
+        const static int dipole       = atomproperty | 2;
+        
         const static int opGT         = comparator |  0;
         const static int opGE         = comparator |  1;
         const static int opLE         = comparator |  2;
@@ -141,52 +159,11 @@ class Token {
         const static int opEQ         = comparator |  4;
         const static int opNE         = comparator |  5;
  
-        const static int x            =  expression |2;
-        const static int y            =  expression | 3;
-        const static int z            =  expression | 4;
-        const static int none      =  expression | 5;
-  
-        const static Token tokenExpressionBegin(expressionBegin, "expressionBegin");
-        const static Token tokenExpressionEnd(expressionEnd, "expressionEnd");
-
-          };
+        static Token tokenExpressionBegin;
+        static Token tokenExpressionEnd;
 
 };
 
-
-class TokenMap {
-       const static Object[] arrayPairs  = {
-        // commands 
-        "define",            new Token(define, "define"), 
-        "select",            new Token(select, "select"), 
-        // atom expressions
-        "(",            new Token(leftparen, "("),
-        ")",            new Token(rightparen, ")"),
-        "-",            new Token(hyphen, "-"),
-        "and",          tokenAnd,
-        "or",           new Token(opOr, "or"),
-        "not",          new Token(opNot, "not"),
-        "<",            new Token(opLT, "<"),
-        "<=",           new Token(opLE, "<="),
-        ">=",           new Token(opGE, ">="),
-        ">",            new Token(opGT, ">="),
-        "==",           new Token(opEQ, "=="),
-        "!=",           new Token(opNE, "!="),
-        "within",       new Token(within, "within"),
-        ".",            new Token(dot, "."),
-        "atomno",       new Token(atomno, "atomno"),
-        "elemno",       tokenElemno,
-        "_bondedcount", new Token(_bondedcount, "_bondedcount"),
-        "_groupID",     new Token(_groupID, "_groupID"),
-        "_atomID",      new Token(_atomID, "_atomID"), 
-        "x",            new Token(x, "x"),
-        "y",            new Token(y, "y"),
-        "z",            new Token(z, "z"),
-        "*",            new Token(asterisk, "*"),
-        "all",          tokenAll,
-        "none",         new Token(none, "none"),
-
-};
 
 }
 

@@ -61,15 +61,15 @@ bool SelectionEvaluator::loadScript(const std::string& filename, const std::stri
 
 void SelectionEvaluator::clearState() {
     for (int i = scriptLevelMax; --i >= 0; )
-        stack[i] = null;
+        stack[i].clear();
     scriptLevel = 0;
     error = false;
-    errorMessage = null;
+    errorMessage = "";
 }
 
 bool SelectionEvaluator::loadScriptString(const std::string& script) {
     clearState();
-    return loadScript(null, script);
+    return loadScript("", script);
 }
 
 bool SelectionEvaluator::loadScriptFile(const std::string& filename) {
@@ -80,15 +80,15 @@ bool SelectionEvaluator::loadScriptFile(const std::string& filename) {
 
 void SelectionEvaluator::instructionDispatchLoop(){
 
-    while ( pc < aatoken.length) {
+    while ( pc < aatoken.size()) {
         statement = aatoken[pc++];
-        statementLength = statement.length;
+        statementLength = statement.size();
         Token token = statement[0];
         switch (token.tok) {
-            case Token.define:
+            case Token::define:
                 define();
             break;
-            case Token.select:
+            case Token::select:
                 select();
             break;
             default:
@@ -98,20 +98,22 @@ void SelectionEvaluator::instructionDispatchLoop(){
     }
 }
 
-  void SelectionEvaluator::predefine(String script) {
+  void SelectionEvaluator::predefine(const std::string& script) {
     if (compiler.compile("#predefine", script)) {
-      Token [][] aatoken = compiler.getAatokenCompiled();
-      if (aatoken.length != 1) {
+      std::vector<std::vector<Token> > aatoken = compiler.getAatokenCompiled();
+      if (aatoken.size() != 1) {
         viewer.scriptStatus("predefinition does not have exactly 1 command:"
                             + script);
         return;
       }
-      Token[] statement = aatoken[0];
-      if (statement.length > 2) {
+
+      std::vector<Token> statement = aatoken[0];
+
+      if (statement.size() > 2) {
         int tok = statement[1].tok;
-        if (tok == Token.identifier ||
-            (tok & Token.predefinedset) == Token.predefinedset) {
-          String variable = (String)statement[1].value;
+        if (tok == Token::identifier ||
+            (tok & Token::predefinedset) == Token::predefinedset) {
+          std::string variable = (std::string)statement[1].value;
           variables.put(variable, statement);
         } else {
           viewer.scriptStatus("invalid variable name:" + script);
@@ -127,7 +129,7 @@ void SelectionEvaluator::instructionDispatchLoop(){
 
 
 
-  BitSet SelectionEvaluator::expression(Token[] code, int pcStart) throws ScriptException {
+  BitSet SelectionEvaluator::expression(std::vector<Token>& code, int pcStart) {
     int numberOfAtoms = viewer.getAtomCount();
     BitSet bs;
     BitSet[] stack = new BitSet[10];
@@ -138,53 +140,58 @@ void SelectionEvaluator::instructionDispatchLoop(){
       if (logMessages)
         viewer.scriptStatus("instruction=" + instruction);
       switch (instruction.tok) {
-      case Token.expressionBegin:
+      case Token::expressionBegin:
         break;
-      case Token.expressionEnd:
+      case Token::expressionEnd:
         break expression_loop;
-      case Token.all:
+      case Token::all:
         bs = stack[sp++] = new BitSet(numberOfAtoms);
         for (int i = numberOfAtoms; --i >= 0; )
           bs.set(i);
         break;
-      case Token.none:
+      case Token::none:
         stack[sp++] = new BitSet();
         break;
-      case Token.opOr:
+      case Token::opOr:
         bs = stack[--sp];
         stack[sp-1].or(bs);
         break;
-      case Token.opAnd:
+      case Token::opAnd:
         bs = stack[--sp];
         stack[sp-1].and(bs);
         break;
-      case Token.opNot:
+      case Token::opNot:
         bs = stack[sp - 1];
         notSet(bs);
         break;
-      case Token.within:
+      case Token::within:
         bs = stack[sp - 1];
         stack[sp - 1] = new BitSet();
         withinInstruction(instruction, bs, stack[sp - 1]);
         break;
-      case Token.selected:
+      case Token::selected:
         stack[sp++] = copyBitSet(viewer.getSelectionSet());
         break;
-      case Token.y:
-      case Token.amino:
-      case Token.backbone:
-      case Token.solvent:
-      case Token.identifier:
-      case Token.sidechain:
-      case Token.surface:
-        stack[sp++] = lookupIdentifierValue((String)instruction.value);
+      case Token::name:
+
         break;
-      case Token.opLT:
-      case Token.opLE:
-      case Token.opGE:
-      case Token.opGT:
-      case Token.opEQ:
-      case Token.opNE:
+      case  Token::index:
+        
+        break;
+      case Token::molname:  
+
+        break;
+      case Token::molindex:
+        break;
+      case Token::identifier:
+        stack[sp++] = lookupIdentifierValue((std::string)instruction.value);
+        break;
+      case Token::opLT:
+      case Token::opLE:
+      case Token::opGE:
+      case Token::opGT:
+      case Token::opEQ:
+      case Token::opNE:
         bs = stack[sp++] = new BitSet();
         comparatorInstruction(instruction, bs);
         break;
@@ -209,58 +216,36 @@ void SelectionEvaluator::instructionDispatchLoop(){
     for (int i = 0; i < numberOfAtoms; ++i) {
       Atom atom = frame.getAtomAt(i);
       switch (property) {
-      case Token.atomno:
-        propertyValue = atom.getAtomNumber();
+      case Token::mass:
+        //propertyValue = atom.getAtomNumber();
         break;
-      case Token.elemno:
-        propertyValue = atom.getElementNumber();
+      case Token::charge:
+
         break;
-      case Token.temperature:
-        propertyValue = atom.getBfactor100();
-        if (propertyValue < 0)
-          continue;
-        propertyValue /= 100;
+      case Token::dipole:
+
         break; 
-      case Token._atomID:
-        propertyValue = atom.getSpecialAtomID();
-        if (propertyValue < 0)
-          continue;
-        break;
-      case Token._structure:
-        propertyValue = getProteinStructureType(atom);
-        if (propertyValue == -1)
-          continue;
-        break;
-      case Token.radius:
-        propertyValue = atom.getRasMolRadius();
-        break;
-      case Token._bondedcount:
-        propertyValue = atom.getCovalentBondCount();
-        break;
-      case Token.model:
-        propertyValue = atom.getModelTagNumber();
-        break;
       default:
         unrecognizedAtomProperty(property);
       }
-      boolean match = false;
+      bool match = false;
       switch (comparator) {
-      case Token.opLT:
+      case Token::opLT:
         match = propertyValue < comparisonValue;
         break;
-      case Token.opLE:
+      case Token::opLE:
         match = propertyValue <= comparisonValue;
         break;
-      case Token.opGE:
+      case Token::opGE:
         match = propertyValue >= comparisonValue;
         break;
-      case Token.opGT:
+      case Token::opGT:
         match = propertyValue > comparisonValue;
         break;
-      case Token.opEQ:
+      case Token::opEQ:
         match = propertyValue == comparisonValue;
         break;
-      case Token.opNE:
+      case Token::opNE:
         match = propertyValue != comparisonValue;
         break;
       }
@@ -269,9 +254,9 @@ void SelectionEvaluator::instructionDispatchLoop(){
     }
   }
 
-void SelectionEvaluator::withinInstruction(Token instruction, BitSet bs, BitSet bsResult)
+void SelectionEvaluator::withinInstruction(const Token& instruction, BitSet& bs, BitSet& bsResult)
 
-    Object withinSpec = instruction.value;
+    boost::any withinSpec = instruction.value;
     if (withinSpec instanceof Float) {
         withinDistance(((Float)withinSpec).floatValue(), bs, bsResult);
         return;
@@ -292,29 +277,19 @@ void SelectionEvaluator::withinInstruction(Token instruction, BitSet bs, BitSet 
     }
   }
 
-  void SelectionEvaluator::define() throws ScriptException {
-    String variable = (String)statement[1].value;
-    variables.put(variable, (expression(statement, 2)));
+  void SelectionEvaluator::define() {
+    std::string variable = (std::string)statement[1].value;
+    variables.insert(std::make_pair(variable, expression(statement, 2)));
   }
 }
 
   void SelectionEvaluator::predefine(Token[] statement) {
-    String variable = (String)statement[1].value;
+    std::string variable = (std::string)statement[1].value;
     variables.put(variable, statement);
   }
 
   void SelectionEvaluator::select(){
-    // NOTE this is called by restrict()
-    if (statementLength == 1) {
-      viewer.selectAll();
-      if (!viewer.getRasmolHydrogenSetting())
-        viewer.excludeSelectionSet(getHydrogenSet());
-      if (!viewer.getRasmolHeteroSetting())
-        viewer.excludeSelectionSet(getHeteroSet());
-    } else {
       viewer.setSelectionSet(expression(statement, 1));
-    }
-    viewer.scriptStatus("" + viewer.getSelectionCount() + " atoms selected");
   }
   
   }

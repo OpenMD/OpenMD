@@ -54,13 +54,21 @@
 namespace oopse {
 
 class Context {
-    std::string filename;
-    std::tring script;
-    std::vector<int> linenumbers;
-    std::vector<int> lineIndices;
-    std::vector<std::vector<Token> > aatoken;
-    int pc;
-}
+    public:
+        
+        void clear() {
+            linenumbers.clear();
+            lineIndices.clear();
+            aatoken.clear();
+        }
+        
+        std::string filename;
+        std::string script;
+        std::vector<int> linenumbers;
+        std::vector<int> lineIndices;
+        std::vector<std::vector<Token> > aatoken;
+        int pc;
+};
 
 /**
  * @class SelectionEvaluator SelectionEvaluator.hpp "selection/SelectionEvaluator"
@@ -98,8 +106,8 @@ class SelectionEvaluator{
         std::string getLine() {
             int ichBegin = lineIndices[pc];
             int ichEnd;
-            if ((ichEnd = script.find('\r', ichBegin)) == std::string:npos &&
-                (ichEnd = script.find('\n', ichBegin)) == std::string:npos) {
+            if ((ichEnd = script.find('\r', ichBegin)) == std::string::npos &&
+                (ichEnd = script.find('\n', ichBegin)) == std::string::npos) {
                 ichEnd = script.size();
             }            
             return script.substr(ichBegin, ichEnd);
@@ -110,10 +118,9 @@ class SelectionEvaluator{
         void clearState();
         
         bool loadScript(const std::string& filename, const std::string& script); 
-
         bool loadScriptString(const std::string& script);
-
         bool loadScriptFileInternal(const std::string& filename);
+        bool loadScriptFile(const std::string& filename);
 
         void clearDefinitionsAndLoadPredefined();
          
@@ -123,7 +130,7 @@ class SelectionEvaluator{
 
         void instructionDispatchLoop();
 
-        withinInstruction(Token instruction, BitSet , BitSet);
+        void withinInstruction(const Token& instruction, BitSet& , BitSet&);
 
         BitSet expression(std::vector<Token>& tokens, int pc);
 
@@ -141,18 +148,15 @@ class SelectionEvaluator{
         std::vector<std::vector<Token> > aatoken;
         int pc; // program counter
 
-        boolean error;
+        bool error;
         std::string errorMessage;
 
         std::vector<Token> statement;
         int statementLength;
 
-        SimInfo* info_;
+        SimInfo* info;
 
-        std::map<std::string, std::vector<Token> > variables_;
-        std::string script_;
-
-        Hashtable variables = new Hashtable();        
+        std::map<std::string, std::vector<Token> > variables;
 };
 
 }

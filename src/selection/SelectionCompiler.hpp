@@ -41,8 +41,12 @@
 
 #ifndef SELECTION_SELECTIONCOMPILER_HPP
 #define SELECTION_SELECTIONCOMPILER_HPP
+#include <iostream>
 #include <string>
 #include <vector>
+
+#include "selection/Token.hpp"
+#include "selection/TokenMap.hpp"
 namespace oopse {
 
 
@@ -124,7 +128,7 @@ class SelectionCompiler{
         
     private:
 
-        bool internalcompile();
+        bool internalCompile();
 
 
         bool lookingAtLeadingWhitespace();
@@ -132,9 +136,17 @@ class SelectionCompiler{
         bool lookingAtEndOfLine();
         bool lookingAtEndOfStatement();
         bool lookingAtString();
+        bool lookingAtDecimal(bool allowNegative);
+        bool lookingAtInteger(bool allowNegative);
+        bool lookingAtLookupToken();
+        bool lookingAtSpecialString();
 
+        std::string getUnescapedStringLiteral();
+        int getHexitValue(char ch);        
 
-        bool compileCommand(const std::vector<vector>&);
+        bool compileCommand(const std::vector<Token>& ltoken);
+        bool compileExpression();        
+        bool compileExpression(int itoken);        
         
         bool clauseOr();
         bool clauseAnd();
@@ -142,19 +154,20 @@ class SelectionCompiler{
         bool clausePrimitive();
         bool clauseWithin();
         bool clauseComparator();
-        bool clauseChemObject();
-        bool clauseMolecule();
-        bool clauseMolName();
-        bool clauseMolIndex();
-        bool clauseName();
-        bool clauseIndex();
-        bool clauseStuntDoubleName();
-        bool clauseStuntDoubleIndex();
+        bool clauseName(int tok);
+        bool clauseIndex(int tok);
+
+        Token tokenNext();
+        boost::any valuePeek();
+        int tokPeek();
+
+        bool addTokenToPostfix(const Token& token);
+
 
         bool compileError(const std::string& errorMessage) {
-            std::cerr << "SelectionCompiler Error: " << errorMessage <<  << std::endl;
+            std::cerr << "SelectionCompiler Error: " << errorMessage << std::endl;
             error = true;
-            this.errorMessage = errorMessage;
+            this->errorMessage = errorMessage;
             return false;
         }
         
@@ -191,7 +204,16 @@ class SelectionCompiler{
         }
 
         bool unrecognizedExpressionToken() {
-            return compileError("unrecognized expression token:" + valuePeek());
+            boost::any tmp = valuePeek();
+            std::string tokenStr;
+
+            try {
+                tokenStr = boost::any_cast<std::string>(tmp);                
+            } catch(const boost::bad_any_cast &) {
+                return compileError("any_cast error");
+            }
+            
+            return compileError("unrecognized expression token:" + tokenStr);
         }
 
         bool comparisonOperatorExpected() {
@@ -202,6 +224,9 @@ class SelectionCompiler{
             return compileError("integer expected");
         }        
         
+        bool numberOrKeywordExpected() {
+            return compileError("number or keyword expected");
+        }        
         
         std::string filename;
         std::string script;

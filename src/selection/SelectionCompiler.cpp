@@ -40,6 +40,7 @@
  */
 
 #include "selection/SelectionCompiler.hpp"
+#include "utils/StringUtils.hpp"
 namespace oopse {
 
 bool SelectionCompiler::compile(const std::string& filename, const std::string& script) {
@@ -50,13 +51,13 @@ bool SelectionCompiler::compile(const std::string& filename, const std::string& 
     lineIndices.clear();
     aatokenCompiled.clear();
         
-    if (internalcompile()) {
+    if (internalCompile()) {
         return true;
     }
     
     int icharEnd;
-    if ((icharEnd = script.find('\r', ichCurrentCommand)) == std::string:npos &&
-        (icharEnd = script.find('\n', ichCurrentCommand)) == std::string:npos) {
+    if ((icharEnd = script.find('\r', ichCurrentCommand)) == std::string::npos &&
+        (icharEnd = script.find('\n', ichCurrentCommand)) == std::string::npos) {
         icharEnd = script.size();
     }
     errorLine = script.substr(ichCurrentCommand, icharEnd);
@@ -71,30 +72,29 @@ bool SelectionCompiler::internalCompile(){
 
     error = false;
 
-    std::vector<Token> lltoken;
+    //std::vector<Token> lltoken;
+    aatokenCompiled.clear();
     std::vector<Token> ltoken;
 
-    //Token tokenCommand = null;
-    int tokCommand = Token.nada;
+    Token tokenCommand;
+    int tokCommand = Token::nada;
 
     for ( ; true; ichToken += cchToken) {
         if (lookingAtLeadingWhitespace())
             continue;
         if (lookingAtComment())
             continue;
-        boolean endOfLine = lookingAtEndOfLine();
+        bool endOfLine = lookingAtEndOfLine();
         if (endOfLine || lookingAtEndOfStatement()) {
-            if (tokCommand != Token.nada) {
+            if (tokCommand != Token::nada) {
                 if (! compileCommand(ltoken)) {
                     return false;
                 }
-            lltoken.push_back(atokenCommand);
-            /** @todo*/
-            int iCommand = lltoken.size();
-            lineNumbers[iCommand] = lineCurrent;
-            lineIndices[iCommand] = (short) ichCurrentCommand;
-            ltoken.clear();
-            tokCommand = Token.nada;
+                aatokenCompiled.push_back(atokenCommand);
+                lineNumbers.push_back(lineCurrent);
+                lineIndices.push_back(ichCurrentCommand);
+                ltoken.clear();
+                tokCommand = Token::nada;
             }
             
             if (ichToken < cchScript) {
@@ -105,70 +105,70 @@ bool SelectionCompiler::internalCompile(){
             break;
         }
 
-        if (tokCommand != Token.nada) {
+        if (tokCommand != Token::nada) {
             if (lookingAtString()) {
                 std::string str = getUnescapedStringLiteral();
-                ltoken.push_back(Token(Token.string, str));
+                ltoken.push_back(Token(Token::string, str));
                 continue;
             }
-            if ((tokCommand & Token.specialstring) != 0 &&
-                lookingAtSpecialString()) {
-                std::string str = script.substr(ichToken, ichToken + cchToken);
-                ltoken.push_back(Token(Token.string, str));
+            //if ((tokCommand & Token::specialstring) != 0 &&
+            //    lookingAtSpecialString()) {
+            //    std::string str = script.substr(ichToken, ichToken + cchToken);
+            //    ltoken.push_back(Token(Token::string, str));
+            //    continue;
+            //}
+            if (lookingAtDecimal((tokCommand & Token::negnums) != 0)) {
+                float value = lexi_cast<float>(script.substr(ichToken, ichToken + cchToken));          
+                ltoken.push_back(Token(Token::decimal, value));/**@todo*/
                 continue;
             }
-            if (lookingAtDecimal((tokCommand & Token.negnums) != 0)) {
-                float value = lexi_cast<float>((script.substr(ichToken, ichToken + cchToken));          
-                ltoken.push_back(Token(Token.decimal, new Float(value)));/**@todo*/
-                continue;
-            }
-            if (lookingAtInteger((tokCommand & Token.negnums) != 0)) {
+            if (lookingAtInteger((tokCommand & Token::negnums) != 0)) {
                 std::string intString = script.substr(ichToken, ichToken + cchToken);
                 int val = lexi_cast<int>(intString);
-                ltoken.push_back(new Token(Token.integer, val, intString));/**@todo*/
+                ltoken.push_back(Token(Token::integer, val, intString));/**@todo*/
                 continue;
             }
         }
       
         if (lookingAtLookupToken()) {
-            std::string ident = script.subst(ichToken, ichToken + cchToken);
+            std::string ident = script.substr(ichToken, ichToken + cchToken);
 
-            /**@todo */
-            Token token = (Token) Token.map.get(ident);
-            if (token == NULL) {
-
+            Token token;            
+            Token* pToken = TokenMap::getInstance()->getToken(ident);
+            if (pToken != NULL) {
+                token = *pToken;
+            } else {
+                token = Token(Token::identifier, ident);
             }
-            Token token(Token.identifier, ident);
-
             
             int tok = token.tok;
             
             switch (tokCommand) {
-                case Token.nada:
+                case Token::nada:
                     ichCurrentCommand = ichToken;
                     //tokenCommand = token;
                     tokCommand = tok;
-                    if ((tokCommand & Token.command) == 0)
+                    if ((tokCommand & Token::command) == 0)
                     return commandExpected();
                     break;
 
-                case Token.define:
+                case Token::define:
                     if (ltoken.size() == 1) {
                         // we are looking at the variable name
-                        if (tok != Token.identifier &&
-                        (tok & Token.predefinedset) != Token.predefinedset)
+                        if (tok != Token::identifier &&
+                        (tok & Token::predefinedset) != Token::predefinedset)
                         return invalidExpressionToken(ident);
                     } else {
                     // we are looking at the expression
-                    if (tok != Token.identifier && tok != Token.set &&
-                        (tok & (Token.expression | Token.predefinedset)) == 0)
+                    if (tok != Token::identifier && 
+                        (tok & (Token::expression | Token::predefinedset)) == 0)
                         return invalidExpressionToken(ident);
                     }
                     
                     break;
 
-                case Token.select:
-                    if (tok != Token.identifier && (tok & Token.expression) == 0)
+                case Token::select:
+                    if (tok != Token::identifier && (tok & Token::expression) == 0)
                         return invalidExpressionToken(ident);
                 break;
             }
@@ -183,7 +183,6 @@ bool SelectionCompiler::internalCompile(){
         return unrecognizedToken();
     }
 
-    aatokenCompiled.push_back(lltoken);
     return true;
   }
 
@@ -236,9 +235,9 @@ bool SelectionCompiler::internalCompile(){
     int ichT = ichToken + 1;
     //    while (ichT < cchScript && script.charAt(ichT++) != chFirst)
     char ch;
-    boolean previousCharBackslash = false;
+    bool previousCharBackslash = false;
     while (ichT < cchScript) {
-      ch = script.[ichT++];
+      ch = script[ichT++];
       if (ch == '"' && !previousCharBackslash)
         break;
       previousCharBackslash = ch == '\\' ? !previousCharBackslash : false;
@@ -249,7 +248,9 @@ bool SelectionCompiler::internalCompile(){
 
   
 std::string SelectionCompiler::getUnescapedStringLiteral() {
-    StringBuffer sb = new StringBuffer(cchToken - 2);
+    /** @todo */
+    std::string sb(cchToken - 2, ' ');
+    
     int ichMax = ichToken + cchToken - 1;
     int ich = ichToken + 1;
 
@@ -292,13 +293,13 @@ std::string SelectionCompiler::getUnescapedStringLiteral() {
                     }
             }
         }
-        sb.append(ch);
+        sb.append(1, ch);
     }
 
-    return "" + sb;
+    return sb;
 }
 
-static int SelectionCompiler::getHexitValue(char ch) {
+int SelectionCompiler::getHexitValue(char ch) {
     if (ch >= '0' && ch <= '9')
         return ch - '0';
     else if (ch >= 'a' && ch <= 'f')
@@ -319,7 +320,7 @@ bool SelectionCompiler::lookingAtSpecialString() {
     return cchToken > 0;
 }
 
-bool SelectionCompiler::lookingAtDecimal(boolean allowNegative) {
+bool SelectionCompiler::lookingAtDecimal(bool allowNegative) {
     if (ichToken == cchScript) {
         return false;
     }
@@ -328,7 +329,7 @@ bool SelectionCompiler::lookingAtDecimal(boolean allowNegative) {
     if (script[ichT] == '-') {
         ++ichT;
     }
-    boolean digitSeen = false;
+    bool digitSeen = false;
     char ch = 'X';
     while (ichT < cchScript && std::isdigit(ch = script[ichT])) {
         ++ichT;
@@ -354,7 +355,7 @@ bool SelectionCompiler::lookingAtDecimal(boolean allowNegative) {
     return digitSeen;
 }
 
-bool SelectionCompiler::lookingAtInteger(boolean allowNegative) {
+bool SelectionCompiler::lookingAtInteger(bool allowNegative) {
     if (ichToken == cchScript) {
         return false;
     }
@@ -430,16 +431,15 @@ bool SelectionCompiler::lookingAtLookupToken() {
     return true;
 }
 
-bool SelectionCompiler::compileCommand(Vector ltoken) {
-    /** todo */
-    Token tokenCommand = (Token)ltoken.firstElement();
+bool SelectionCompiler::compileCommand(const std::vector<Token>& ltoken) {
+    const Token& tokenCommand = ltoken[0];
     int tokCommand = tokenCommand.tok;
-        
-    atokenCommand = new Token[ltoken.size()];
-    ltoken.copyInto(atokenCommand);
-    if ((tokCommand & Token.expressionCommand) != 0 && !compileExpression()) {
+
+    atokenCommand = ltoken;
+    if ((tokCommand & Token::expressionCommand) != 0 && !compileExpression()) {
         return false;
     }
+    
     return true;
 }
 
@@ -447,40 +447,43 @@ bool SelectionCompiler::compileExpression() {
     /** todo */
     int i = 1;
     int tokCommand = atokenCommand[0].tok;
-    if (tokCommand == Token.define)
-      i = 2;
-    else if ((tokCommand & Token.embeddedExpression) != 0) {
-      // look for the open parenthesis
-      while (i < atokenCommand.length &&
-             atokenCommand[i].tok != Token.leftparen)
+    if (tokCommand == Token::define) {
+        i = 2;
+    } else if ((tokCommand & Token::embeddedExpression) != 0) {
+        // look for the open parenthesis
+        while (i < atokenCommand.size() &&
+         atokenCommand[i].tok != Token::leftparen)
         ++i;
     }
-    if (i >= atokenCommand.length)
-      return true;
+
+    if (i >= atokenCommand.size()) {
+        return true;
+    }
     return compileExpression(i);
   }
 
                   
-bool SelectionCompiler::addTokenToPostfix(Token token) {
+bool SelectionCompiler::addTokenToPostfix(const Token& token) {
     ltokenPostfix.push_back(token);
     return true;
 }
 
 bool SelectionCompiler::compileExpression(int itoken) {
-    ltokenPostfix = new Vector();
-    for (int i = 0; i < itoken; ++i)
+    ltokenPostfix.clear();
+    for (int i = 0; i < itoken; ++i) {
         addTokenToPostfix(atokenCommand[i]);
-
+    }
+    
     atokenInfix = atokenCommand;
     itokenInfix = itoken;
 
-    addTokenToPostfix(Token.tokenExpressionBegin);
+    addTokenToPostfix(Token::tokenExpressionBegin);
     if (!clauseOr()) {
         return false;
     }
     
-    addTokenToPostfix(Token.tokenExpressionEnd);
-    if (itokenInfix != atokenInfix.length) {
+    addTokenToPostfix(Token::tokenExpressionEnd);
+    if (itokenInfix != atokenInfix.size()) {
         return endOfExpressionExpected();
     }
 
@@ -489,21 +492,22 @@ bool SelectionCompiler::compileExpression(int itoken) {
 }
 
 Token SelectionCompiler::tokenNext() {
-if (itokenInfix == atokenInfix.length)
-return null;
-return atokenInfix[itokenInfix++];
+    if (itokenInfix == atokenInfix.size()) {
+        return Token();
+    }
+    return atokenInfix[itokenInfix++];
 }
 
-Object SelectionCompiler::valuePeek() {
-    if (itokenInfix == atokenInfix.length) {
-        return null;
+boost::any SelectionCompiler::valuePeek() {
+    if (itokenInfix == atokenInfix.size()) {
+        return boost::any();
     } else {
         return atokenInfix[itokenInfix].value;
     }
 }
 
 int SelectionCompiler::tokPeek() {
-    if (itokenInfix == atokenInfix.length) {
+    if (itokenInfix == atokenInfix.size()) {
         return 0;
     }else {
         return atokenInfix[itokenInfix].tok;
@@ -515,7 +519,7 @@ bool SelectionCompiler::clauseOr() {
         return false;
     }
     
-    while (tokPeek() == Token.opOr) {
+    while (tokPeek() == Token::opOr) {
         Token tokenOr = tokenNext();
         if (!clauseAnd()) {
             return false;
@@ -530,7 +534,7 @@ bool SelectionCompiler::clauseAnd() {
         return false;
     }
 
-    while (tokPeek() == Token.opAnd) {
+    while (tokPeek() == Token::opAnd) {
         Token tokenAnd = tokenNext();
         if (!clauseNot()) {
             return false;
@@ -541,7 +545,7 @@ bool SelectionCompiler::clauseAnd() {
 }
 
 bool SelectionCompiler::clauseNot() {
-    if (tokPeek() == Token.opNot) {
+    if (tokPeek() == Token::opNot) {
         Token tokenNot = tokenNext();
         if (!clauseNot()) {
             return false;
@@ -554,36 +558,34 @@ bool SelectionCompiler::clauseNot() {
 bool SelectionCompiler::clausePrimitive() {
     int tok = tokPeek();
     switch (tok) {
-        case Token.within:
+        case Token::within:
             return clauseWithin();
-        case Token.hyphen: // selecting a negative residue spec
-        case Token.integer:
-        case Token.seqcode:
-        case Token.asterisk:
-        case Token.leftsquare:
-        case Token.identifier:
-        case Token.x:
-        case Token.y:
-        case Token.z:
-        case Token.colon:
-            return clauseResidueSpec();
+        case Token::name :
+            return clauseName(Token::name);
+        case Token::index :
+            return clauseIndex(Token::index);
+        case Token::molname :
+            return clauseName(Token::molname);
+        case Token::molindex :
+            return clauseIndex(Token::molindex);
+            
         default:
-            if ((tok & Token.atomproperty) == Token.atomproperty) {
+            if ((tok & Token::atomproperty) == Token::atomproperty) {
                 return clauseComparator();
             }
-            if ((tok & Token.predefinedset) != Token.predefinedset) {
+            if ((tok & Token::predefinedset) != Token::predefinedset) {
                 break;
             }
             // fall into the code and below and just add the token
-        case Token.all:
-        case Token.none:
+        case Token::all:
+        case Token::none:
             return addTokenToPostfix(tokenNext());
-        case Token.leftparen:
+        case Token::leftparen:
             tokenNext();
             if (!clauseOr()) {
                 return false;
             }
-            if (tokenNext().tok != Token.rightparen) {
+            if (tokenNext().tok != Token::rightparen) {
                 return rightParenthesisExpected();
             }
             return true;
@@ -594,12 +596,12 @@ bool SelectionCompiler::clausePrimitive() {
 bool SelectionCompiler::clauseComparator() {
     Token tokenAtomProperty = tokenNext();
     Token tokenComparator = tokenNext();
-    if ((tokenComparator.tok & Token.comparator) == 0) {
+    if ((tokenComparator.tok & Token::comparator) == 0) {
         return comparisonOperatorExpected();
     }
 
     Token tokenValue = tokenNext();
-    if (tokenValue.tok != Token.integer) {
+    if (tokenValue.tok != Token::integer) {
         return integerExpected();
     }
     int val = tokenValue.intValue;
@@ -607,31 +609,30 @@ bool SelectionCompiler::clauseComparator() {
     // int intValue is the tok of the property you are comparing
     // the value against which you are comparing is stored as an Integer
     // in the object value
-    return addTokenToPostfix(new Token(tokenComparator.tok,
-                       tokenAtomProperty.tok,
-                       new Integer(val)));
+    return addTokenToPostfix(Token(tokenComparator.tok,
+                       tokenAtomProperty.tok, boost::any(val)));
 }
 
 bool SelectionCompiler::clauseWithin() {
     tokenNext();                             // WITHIN
-    if (tokenNext().tok != Token.leftparen) {  // (
+    if (tokenNext().tok != Token::leftparen) {  // (
         return leftParenthesisExpected();
     }
     
-    Object distance;
+    boost::any distance;
     Token tokenDistance = tokenNext();       // distance
     switch(tokenDistance.tok) {
-        case Token.integer:
-            distance = new Float((tokenDistance.intValue * 4) / 1000f);
+        case Token::integer:
+            distance = float(tokenDistance.intValue);
             break;
-        case Token.decimal:
+        case Token::decimal:
             distance = tokenDistance.value;
             break;
         default:
             return numberOrKeywordExpected();
     }
 
-    if (tokenNext().tok != Token.opOr) {       // ,
+    if (tokenNext().tok != Token::opOr) {       // ,
         return commaExpected();
     }
     
@@ -639,35 +640,24 @@ bool SelectionCompiler::clauseWithin() {
         return false;
     }
     
-    if (tokenNext().tok != Token.rightparen) { // )T
+    if (tokenNext().tok != Token::rightparen) { // )T
         return rightParenthesisExpected();
     }
     
-    return addTokenToPostfix(new Token(Token.within, distance));
+    return addTokenToPostfix(Token(Token::within, distance));
 }
 
-bool SelectionCompiler:: clauseChemObject() {
+
+bool SelectionCompiler:: clauseName(int tok) {
+    Token tokenName = tokenNext();
+    std::string name = boost::any_cast<std::string>(tokenName.value);
+    return addTokenToPostfix(Token(tok, name)); /**@todo */
+
 }
 
-bool SelectionCompiler:: clauseMolecule() {
-}
-
-bool SelectionCompiler:: clauseMolName() {
-}
-
-bool SelectionCompiler:: clauseMolIndex() {
-}
-
-bool SelectionCompiler:: clauseName() {
-}
-
-bool SelectionCompiler:: clauseIndex() {
-}
-
-bool SelectionCompiler:: clauseStuntDoubleName() {
-}
-
-bool SelectionCompiler:: clauseStuntDoubleIndex() {
+bool SelectionCompiler:: clauseIndex(int tok) {
+    //return addTokenToPostfix(Token(tok, )); /**@todo*/
+    return true;
 }
 
 }
