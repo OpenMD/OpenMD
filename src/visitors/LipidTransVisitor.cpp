@@ -125,9 +125,7 @@ void LipidTransVisitor::internalVisit(StuntDouble *sd) {
     for( atomInfo = atomData->beginAtomInfo(i); atomInfo; atomInfo = atomData->nextAtomInfo(i) ) {
 
         Vector3d tmp= atomInfo->pos - origin_;
-        //we don't need to do the wrapping anymore, since LipidTransVisitor will be execute after 
-        //WrappingVistor and ReplicateVisitor
-        atomInfo->pos = rotMat_ * tmp;
+        atomInfo->pos = rotMat_ * tmp - origin_;;
         atomInfo->dipole = rotMat_ * atomInfo->dipole;
     }
 }
