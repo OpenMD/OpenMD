@@ -49,6 +49,7 @@ PackageLibs = \
 	integrators\
 	constraints \
 	minimizers \
+	selection \
 
 #packages containing applications
 Applications = \
