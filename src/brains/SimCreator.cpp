@@ -178,9 +178,6 @@ namespace oopse {
       info->addExcludePairs(mol);
     }
     
-    
-    //load initial coordinates, some extra information are pushed into SimInfo's property map ( such as
-    //eta, chi for NPT integrator)
     if (loadInitCoords)
       loadCoordinates(info);    
     

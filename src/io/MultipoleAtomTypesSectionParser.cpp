@@ -158,7 +158,7 @@ void MultipoleAtomTypesSectionParser::parseSplitDipole(StringTokenizer& tokenize
 void MultipoleAtomTypesSectionParser::parseQuadruple(StringTokenizer& tokenizer,
     DirectionalAtomType* dAtomType, int lineNo) {
     int nTokens = tokenizer.countTokens();   
-    if (nTokens < 3) {
+    if (nTokens >= 3) {
         Vector3d Q;
         Q[0] = tokenizer.nextTokenAsDouble();
         Q[1] = tokenizer.nextTokenAsDouble();
