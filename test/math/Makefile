@@ -10,15 +10,9 @@ Source = MainTest.cpp \
        	 VectorTestCase.cpp \
        	 Vector3TestCase.cpp \
 	 QuaternionTestCase.cpp \
-	 PolynomialTestCase.cpp
+	 PolynomialTestCase.cpp \
+         ParallelRandNumGenTestCase.cpp
 
-#Source = MainTest.cpp \
-         RectMatrixTestCase.cpp \
-         SquareMatrixTestCase.cpp \
-       	 SquareMatrix3TestCase.cpp \
-       	 VectorTestCase.cpp \
-       	 Vector3TestCase.cpp \
-	 QuaternionTestCase.cpp
 
 DEV_ROOT               = ../..
 UseMPI                 = no 
