@@ -484,7 +484,7 @@ void EAM_FF::readParams( void ){
     currentAtomType = currentAtomType->next;
   }
       
-  entry_plug->useLJ = 0;
+  entry_plug->useLennardJones = 0;
   entry_plug->useEAM = 1;
   // Walk down again and send out EAM type
   currentAtomType = headAtomType->next;

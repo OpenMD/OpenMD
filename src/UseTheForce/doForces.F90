@@ -4,7 +4,7 @@
 
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: doForces.F90,v 1.3 2004-10-22 21:20:53 gezelter Exp $, $Date: 2004-10-22 21:20:53 $, $Name: not supported by cvs2svn $, $Revision: 1.3 $
+!! @version $Id: doForces.F90,v 1.4 2004-10-22 22:53:57 chrisfen Exp $, $Date: 2004-10-22 22:53:57 $, $Name: not supported by cvs2svn $, $Revision: 1.4 $
 
 module doForces
   use force_globals
@@ -19,6 +19,7 @@ module doForces
   use charge_charge
   use reaction_field
   use gb_pair
+  use shapes
   use vector_class
   use eam
   use status

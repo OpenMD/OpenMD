@@ -88,13 +88,17 @@ public:
 
   
   int usePBC; // whether we use periodic boundry conditions.
-  int useLJ; 
-  int useSticky;
+  int useDirectionalAtoms;
+  int useLennardJones; 
+  int useElectrostatics;
   int useCharges;
   int useDipoles;
-  int useReactionField;
-  int useGB;
+  int useSticky;
+  int useGayBerne;
   int useEAM;
+  int useShapes;
+  int useFLARB;
+  int useReactionField;
   bool haveCutoffGroups;
   bool useInitXSstate;
   double orthoTolerance;

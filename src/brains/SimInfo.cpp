@@ -57,13 +57,17 @@ SimInfo::SimInfo(){
   useInitXSstate = true;
 
   usePBC = 0;
-  useLJ = 0; 
-  useSticky = 0;
+  useDirectionalAtoms = 0;
+  useLennardJones = 0; 
+  useElectrostatics = 0;
   useCharges = 0;
   useDipoles = 0;
-  useReactionField = 0;
-  useGB = 0;
+  useSticky = 0;
+  useGayBerne = 0;
   useEAM = 0;
+  useShapes = 0;
+  useFLARB = 0;
+
   useSolidThermInt = 0;
   useLiquidThermInt = 0;
 
@@ -433,17 +437,27 @@ void SimInfo::refreshSim(){
   }
 
   fInfo.SIM_uses_PBC = usePBC;
-  //fInfo.SIM_uses_LJ = 0;
-  fInfo.SIM_uses_LJ = useLJ;
-  fInfo.SIM_uses_sticky = useSticky;
-  //fInfo.SIM_uses_sticky = 0;
-  fInfo.SIM_uses_charges = useCharges;
-  fInfo.SIM_uses_dipoles = useDipoles;
-  //fInfo.SIM_uses_dipoles = 0;
-  fInfo.SIM_uses_RF = useReactionField;
-  //fInfo.SIM_uses_RF = 0;
-  fInfo.SIM_uses_GB = useGB;
+
+  if (useSticky || useDipoles || useGayBerne || useShapes) {
+    useDirectionalAtoms = 1;
+    fInfo.SIM_uses_DirectionalAtoms = useDirectionalAtoms;
+  }
+
+  fInfo.SIM_uses_LennardJones = useLennardJones;
+
+  if (useCharges || useDipoles) {
+    useElectrostatics = 1;
+    fInfo.SIM_uses_Electrostatics = useElectrostatics;
+  }
+
+  fInfo.SIM_uses_Charges = useCharges;
+  fInfo.SIM_uses_Dipoles = useDipoles;
+  fInfo.SIM_uses_Sticky = useSticky;
+  fInfo.SIM_uses_GayBerne = useGayBerne;
   fInfo.SIM_uses_EAM = useEAM;
+  fInfo.SIM_uses_Shapes = useShapes;
+  fInfo.SIM_uses_FLARB = useFLARB;
+  fInfo.SIM_uses_RF = useReactionField;
 
   n_exclude = excludes->getSize();
   excl = excludes->getFortranArray();

@@ -1109,7 +1109,7 @@ void DUFF::readParams( void ){
 
 #endif // is_mpi
 
-  entry_plug->useLJ = 1;
+  entry_plug->useLennardJones = 1;
 }
 
 

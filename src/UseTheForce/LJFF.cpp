@@ -356,6 +356,7 @@ void LJFF::readParams( void ){
 
       AtomType* at = new AtomType();
       at->setIdent(currentAtomType->ident);
+      printf ("currentName = %s\n", currentAtomType->name);
       at->setName(currentAtomType->name);     
       at->setLennardJones();
       at->complete();
@@ -383,7 +384,7 @@ void LJFF::readParams( void ){
     currentAtomType = currentAtomType->next;
   }
   
-  entry_plug->useLJ = 1;
+  entry_plug->useLennardJones = 1;
 
 #ifdef IS_MPI
   sprintf( checkPointMsg,

@@ -12,9 +12,10 @@ using namespace std;
 #include "UseTheForce/ForceFields.hpp"
 #include "primitives/SRI.hpp"
 #include "utils/simError.h"
-
-
-#include "UseTheForce/DarkSide/atype_interface.h"
+#include "types/DirectionalAtomType.hpp"
+#include "UseTheForce/DarkSide/lj_interface.h"
+#include "UseTheForce/DarkSide/charge_interface.h"
+#include "UseTheForce/DarkSide/dipole_interface.h"
 #include "UseTheForce/DarkSide/sticky_interface.h"
 
 #ifdef IS_MPI
@@ -399,12 +400,14 @@ void WATER::initForceField(){
 
 void WATER::readParams( void ){
 
-  int identNum;
+  int identNum, isError;
   int tempDirect0, tempDirect1;
 
   atomStruct atomInfo;
   directionalStruct directionalInfo;
   fpos_t *atomPos;
+
+  AtomType* at;
 
   atomInfo.last = 1;         // initialize last to have the last set. 
   directionalInfo.last = 1;  // if things go well, last will be set to 0
@@ -544,98 +547,109 @@ void WATER::readParams( void ){
 
 #endif // is_mpi
   
-  // call new A_types in fortran
-  
-  int isError;
-
   // dummy variables
-  int isGB = 0;
-  int isEAM = 0;
-  int notDipole = 0;
-  int notSSD = 0;
-  double noDipMoment = 0.0;
-
 
   currentAtomType = headAtomType->next;
   currentDirectionalType = headDirectionalType->next;
 
   while( currentAtomType != NULL ){
- 
-    if( currentAtomType->isLJ ) entry_plug->useLJ = 1;
-    if( currentAtomType->isCharge ) entry_plug->useCharges = 1;
-    if( currentAtomType->isDirectional ){
-      // only directional atoms can have dipoles or be sticky
-      if ( currentDirectionalType->isDipole ) entry_plug->useDipoles = 1;
-      if ( currentDirectionalType->isSticky ) {
-	entry_plug->useSticky = 1;
-	makeStickyType( &(currentDirectionalType->w0), 
-			   &(currentDirectionalType->v0), 
-			   &(currentDirectionalType->v0p), 
-			   &(currentDirectionalType->rl), 
-			   &(currentDirectionalType->ru), 
-			   &(currentDirectionalType->rlp), 
-			   &(currentDirectionalType->rup));
-      }
-      if( currentAtomType->name[0] != '\0' ){
-	isError = 0;
-	makeAtype( &(currentAtomType->ident),
-		   &(currentAtomType->isLJ),
-		   &(currentDirectionalType->isSticky),
-		   &(currentDirectionalType->isDipole),
-		   &isGB,
-		   &isEAM,
-		   &(currentAtomType->isCharge),
-		   &(currentAtomType->epslon),
-		   &(currentAtomType->sigma),
-		   &(currentAtomType->charge),
-		   &(currentDirectionalType->dipole),
-		   &isError );
-	if( isError ){
-	  sprintf( painCave.errMsg,
-		   "Error initializing the \"%s\" atom type in fortran\n",
-		   currentAtomType->name );
-	  painCave.isFatal = 1;
-	  simError();
-	}
-      }
-      currentDirectionalType->next;
-    }
+    if( currentAtomType->name[0] != '\0' ){
+      if (currentAtomType->isDirectional) 
+	DirectionalAtomType* at = new DirectionalAtomType();
+      else 
+	AtomType* at = new AtomType();
 
-    else {
-      // use all dummy variables if this is not a directional atom
-      if( currentAtomType->name[0] != '\0' ){
-	isError = 0;
-	makeAtype( &(currentAtomType->ident),
-		   &(currentAtomType->isLJ),
-		   &notSSD,
-		   &notDipole,
-		   &isGB,
-		   &isEAM,
-		   &(currentAtomType->isCharge),
-		   &(currentAtomType->epslon),
-		   &(currentAtomType->sigma),
-		   &(currentAtomType->charge),
-		   &noDipMoment,
-		   &isError );
-	if( isError ){
-	  sprintf( painCave.errMsg,
-		   "Error initializing the \"%s\" atom type in fortran\n",
-		   currentAtomType->name );
-	  painCave.isFatal = 1;
-	  simError();
+      if (currentAtomType->isLJ) {
+	at->setLennardJones();
+      }
+
+      if (currentAtomType->isCharge) {
+	at->setCharge();
+      }
+
+      if (currentAtomType->isDirectional) {
+	if (currentDirectionalType->isSticky) {
+	  ((DirectionalAtomType*)at)->setDipole();
+	  entry_plug->useDipoles = 1;
+	}
+      
+	if (currentDirectionalType->isSticky) {
+	  ((DirectionalAtomType*)at)->setSticky();
+	  entry_plug->useSticky = 1;
 	}
       }
+      
+      at->setIdent(currentAtomType->ident);
+      at->setName(currentAtomType->name);     
+      at->complete();
     }
     currentAtomType = currentAtomType->next;
   }
 
+  currentAtomType = headAtomType->next;
+  currentDirectionalType = headDirectionalType->next;
+
+  while( currentAtomType != NULL ){    
+
+    if( currentAtomType->isLJ ){
+      isError = 0;
+      newLJtype( &(currentAtomType->ident), &(currentAtomType->sigma), 
+                 &(currentAtomType->epslon), &isError);
+      if( isError ){
+        sprintf( painCave.errMsg,
+                 "Error initializing the \"%s\" LJ type in fortran\n",
+                 currentAtomType->name );
+        painCave.isFatal = 1;
+        simError();
+      }
+    }
+
+    if (currentAtomType->isCharge) {
+      newChargeType(&(currentAtomType->ident), &(currentAtomType->charge),
+		    &isError);
+      if( isError ){
+	sprintf( painCave.errMsg,
+		 "Error initializing the \"%s\" charge type in fortran\n",
+		 currentAtomType->name );
+	painCave.isFatal = 1;
+	simError();
+      }
+    }
+
+    if (currentAtomType->isDirectional){
+      if (currentDirectionalType->isDipole) {
+	newDipoleType(&(currentAtomType->ident), 
+		      &(currentDirectionalType->dipole),
+		      &isError);
+	if( isError ){
+	  sprintf( painCave.errMsg,
+		   "Error initializing the \"%s\" dipole type in fortran\n",
+		   currentDirectionalType->name );
+	  painCave.isFatal = 1;
+	  simError();
+	}
+      }
+      
+      if(currentDirectionalType->isSticky) {        
+	makeStickyType( &(currentDirectionalType->w0), 
+			&(currentDirectionalType->v0), 
+			&(currentDirectionalType->v0p), 
+			&(currentDirectionalType->rl), 
+			&(currentDirectionalType->ru), 
+			&(currentDirectionalType->rlp), 
+			&(currentDirectionalType->rup));
+      }
+    }
+    currentAtomType = currentAtomType->next;
+  }
+  
 #ifdef IS_MPI
   sprintf( checkPointMsg,
 	   "WATER atom and directional structures successfully"
 	   "sent to fortran\n" );
   MPIcheckPoint();
 #endif // is_mpi
-
+  
 }
 
 
