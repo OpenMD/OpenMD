@@ -48,7 +48,15 @@
 
 namespace oopse {
 int BitSet::countBits() {
+#ifdef __RWSTD    
+    //For the compiler(Sun, MSVC6.0) binding with RougeWave STL Library, we need to use old-style
+    // std::count which is error-prone.
+    int count = 0;
+    std::count(bitset_.begin(), bitset_.end(), true, count);
+    return count;
+#else
     return std::count(bitset_.begin(), bitset_.end(), true);
+#endif
 }
 
 void BitSet::flip(int fromIndex, int toIndex) {

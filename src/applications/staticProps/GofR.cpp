@@ -70,8 +70,9 @@ void GofR::initalizeHistogram() {
 
 void GofR::processHistogram() {
 
+    int nRealPairs = getNRealPairs();
     double volume = info_->getSnapshotManager()->getCurrentSnapshot()->getVolume();
-    double pairDensity = npairs_ /volume;
+    double pairDensity = nRealPairs /volume;
     double pairConstant = ( 4.0 * NumericConstant::PI * pairDensity ) / 3.0;
 
     for(int i = 0 ; i < histogram_.size(); ++i){

@@ -77,7 +77,7 @@ BlockSnapshotManager::BlockSnapshotManager(SimInfo* info, const std::string& fil
     //the last block may not have nSnapshotPerBlock frames, we need to consider this special situation
     blocks_.back().second = nframes_;
 
-    snapshots_.insert(snapshots_.begin(), nframes_,(Snapshot*)(NULL));   
+    snapshots_.insert(snapshots_.begin(), nframes_, static_cast<Snapshot*>(NULL));   
     
 }
 
@@ -97,7 +97,13 @@ BlockSnapshotManager::~BlockSnapshotManager() {
 }
 
 int BlockSnapshotManager::getNActiveBlocks() {
+#ifdef __RWSTD   
+    int count = 0;
+    std::count_if(activeBlocks_.begin(), activeBlocks_.end(), std::bind2nd(std::not_equal_to<int>(), -1), count);
+    return count;
+#else
     return std::count_if(activeBlocks_.begin(), activeBlocks_.end(), std::bind2nd(std::not_equal_to<int>(), -1));
+#endif
 }
 
 bool BlockSnapshotManager::isBlockActive(int block) {

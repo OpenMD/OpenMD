@@ -79,6 +79,8 @@ class RadialDistrFunc {
         virtual void preProcess() {}
         virtual void postProcess() {}
 
+        int getNRealPairs() { return nRealPairs_; }
+        
         SimInfo* info_;
         Snapshot* currentSnapshot_;
 
@@ -88,6 +90,7 @@ class RadialDistrFunc {
         std::string selectionScript1_;
         std::string selectionScript2_;
         int nProcessed_;
+        
     private:
 
         virtual void initalizeHistogram() {}
@@ -101,7 +104,7 @@ class RadialDistrFunc {
         SelectionEvaluator evaluator2_;
         SelectionManager seleMan1_;
         SelectionManager seleMan2_;
-        
+        int nRealPairs_;
 };
 
 
