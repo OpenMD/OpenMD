@@ -32,7 +32,7 @@ struct gengetopt_args_info
   int zconstraint_flag;	/* replace the atom types of zconstraint molecules (default=off).  */
   int rigidbody_flag;	/* add a pseudo COM atom to rigidbody (default=off).  */
   int watertype_flag;	/* replace the atom type of water model (default=on).  */
-  char * selection_arg;	/* general selection syntax(now only support select atoms within a specified range).  */
+  char * selection_arg;	/* general selection syntax.  */
   char * originsele_arg;	/* select origin.  */
   char * refsele_arg;	/* select reference.  */
   int repeatX_arg;	/* The number of images to repeat in the x direction (default='0').  */

@@ -119,14 +119,12 @@ bool SelectionCompiler::internalCompile(){
             //}
             if (lookingAtDecimal((tokCommand & Token::negnums) != 0)) {
                 float value = lexi_cast<float>(script.substr(ichToken, cchToken));        
-                std::cout << "encount an decimal: " << value << std::endl;
                 ltoken.push_back(Token(Token::decimal, boost::any(value)));
                 continue;
             }
             if (lookingAtInteger((tokCommand & Token::negnums) != 0)) {
 
                 int val = lexi_cast<int>(script.substr(ichToken, cchToken));
-                std::cout << "encount an integer: " << val << std::endl;
                 ltoken.push_back(Token(Token::integer,   boost::any(val)));
                 continue;
             }
@@ -245,8 +243,6 @@ bool SelectionCompiler::internalCompile(){
     }
     cchToken = ichT - ichToken;
 
-
-    std::cout << "lookingAtString: encount " << script.substr(ichToken, cchToken) << std::endl; 
     return true;
   }
 
@@ -432,7 +428,6 @@ bool SelectionCompiler::lookingAtLookupToken() {
 
     cchToken = ichT - ichToken;
 
-    std::cout << "lookingAtLookupToken: encount " << script.substr(ichToken, cchToken) << std::endl; 
     return true;
 }
 

@@ -403,7 +403,7 @@ BitSet SelectionEvaluator::indexInstruction(const boost::any& value) {
         if (index < 0 || index >= bs.size()) {
             invalidIndex(index);
         } else {
-            indexFinder.find(index);
+            bs = indexFinder.find(index);
         }
     } else if (value.type() == typeid(std::pair<int, int>)) {
         std::pair<int, int> indexRange= boost::any_cast<std::pair<int, int> >(value);
@@ -411,7 +411,7 @@ BitSet SelectionEvaluator::indexInstruction(const boost::any& value) {
         if (indexRange.first < 0 || indexRange.second >= bs.size()) {
             invalidIndexRange(indexRange);
         }else {
-            indexFinder.find(indexRange.first, indexRange.second);
+            bs = indexFinder.find(indexRange.first, indexRange.second);
         }
     }
 

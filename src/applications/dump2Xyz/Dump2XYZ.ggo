@@ -14,7 +14,7 @@ option	"periodicBox"	m	"map to the periodic box"				flag				off
 option  "zconstraint"	z	"replace the atom types of zconstraint molecules"	flag				off
 option	"rigidbody"	r	"add a pseudo COM atom to rigidbody"			flag				off
 option	"watertype"	t	"replace the atom type of water model"			flag				on
-option	"selection"	s	"general selection syntax(now only support select atoms within a specified range)"	string	typestr="selection script"	no 
+option	"selection"	s	"general selection syntax"	string	typestr="selection script"	no 
 option  "originsele"      -     "select origin"                                       string  typestr="selection script"     no 
 option	"refsele"	-	"select reference"					string  typestr="selection script"     no
 option	"repeatX"	-	"The number of images to repeat in the x direction"	int	default="0"		no

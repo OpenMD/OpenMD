@@ -45,7 +45,7 @@ cmdline_parser_print_help (void)
   printf("  -z, --zconstraint                  replace the atom types of zconstraint \n                                       molecules  (default=off)\n");
   printf("  -r, --rigidbody                    add a pseudo COM atom to rigidbody  \n                                       (default=off)\n");
   printf("  -t, --watertype                    replace the atom type of water model  \n                                       (default=on)\n");
-  printf("  -s, --selection=selection script   general selection syntax(now only support \n                                       select atoms within a specified range)\n");
+  printf("  -s, --selection=selection script   general selection syntax\n");
   printf("      --originsele=selection script  select origin\n");
   printf("      --refsele=selection script     select reference\n");
   printf("      --repeatX=INT                  The number of images to repeat in the x \n                                       direction  (default=`0')\n");
@@ -244,7 +244,7 @@ cmdline_parser (int argc, char * const *argv, struct gengetopt_args_info *args_i
           args_info->watertype_flag = !(args_info->watertype_flag);
           break;
 
-        case 's':	/* general selection syntax(now only support select atoms within a specified range).  */
+        case 's':	/* general selection syntax.  */
           if (args_info->selection_given)
             {
               fprintf (stderr, "%s: `--selection' (`-s') option given more than once\n", CMDLINE_PARSER_PACKAGE);
