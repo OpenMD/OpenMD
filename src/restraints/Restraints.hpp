@@ -22,12 +22,14 @@ class Restraints{
   Restraints(double lambdaVal, double lambdaExp);
   ~Restraints();
 
-  void Calc_rVal(double position[3], int currentMol);
-  void Calc_body_thetaVal(double matrix[3][3], int currentMol);
+  void Calc_rVal(double position[3], double refPosition[3]);
+  void Calc_body_thetaVal(double matrix[3][3], double refUnit[3]);
   void Calc_body_omegaVal(double matrix[3][3], double zAngle);
   double Calc_Restraint_Forces(vector<StuntDouble*> vecParticles);
-  void Store_Init_Info(vector<StuntDouble*> vecParticles);
-  void Write_zAngle_File(vector<StuntDouble*> vecParticles);
+  //  void Store_Init_Info(vector<StuntDouble*> vecParticles);
+  void Write_zAngle_File(vector<StuntDouble*> vecParticles, 
+			 int currTime,
+			 int nIntObj);
   double getVharm();
 
  private:
@@ -52,27 +54,6 @@ class Restraints{
   double harmPotent;
   double lambdaValue;
   double lambdaK;
-
-  vector<double> cofmPosX;
-  vector<double> cofmPosY;
-  vector<double> cofmPosZ;
-  vector<double> ubX0;
-  vector<double> uX0;
-  vector<double> ubY0;
-  vector<double> uY0;
-  vector<double> ubZ0;
-  vector<double> uZ0;
-  vector<double> vbX0;
-  vector<double> vX0;
-  vector<double> vbY0;
-  vector<double> vY0;
-  vector<double> vbZ0;
-  vector<double> vZ0;
-
-  //  SimInfo *info; // all the info we'll ever need
-//   Atom **atoms; /* array of atom pointers */
-//   DirectionalAtom* dAtom;
-//  SimInfo *againInfo; // all the info we'll ever need
 
   char *token;
   char fileName[200];

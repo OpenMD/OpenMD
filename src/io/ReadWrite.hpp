@@ -67,6 +67,32 @@ private:
 
 };
 
+class RestraintWriter{
+
+public:
+  RestraintWriter( SimInfo* the_entry_plug );
+  ~RestraintWriter();
+
+  void writeZangle( double currentTime );
+  void writeZangle(double currentTime, const char *in_name);
+  void writeFrame( vector<ofstream*>& outFile, double finalTime );
+
+#ifdef IS_MPI
+  void update();
+#endif
+
+private:
+
+#ifdef IS_MPI
+  void sortByGlobalIndex();
+  vector<pair<int, int> > indexArray;
+#endif
+
+  SimInfo* entry_plug;
+  ofstream zAngFile;
+
+};
+
 class InitializeFromFile{
 
 public:
@@ -112,6 +138,35 @@ private:
   SimInfo *simnfo;
 };
 
+class RestraintReader{
 
+public:
+  RestraintReader( SimInfo* the_simnfo  );
+  ~RestraintReader();
+
+  void readIdealCrystal();
+  void readZangle( const char *in_name );
+  void zeroZangle();
+
+#ifdef IS_MPI
+  void anonymousNodeDie( void );
+  void nodeZeroError( void );
+#endif
+
+private:
+  char* parseIdealLine(char* readLine, StuntDouble* sd);
+  char *idealName;
+  FILE *inFile;
+  FILE *inAngFile;
+  FILE *inIdealFile;
+  string inFileName;
+  string inAngFileName;
+  string inIdealFileName;
+  bool isScanned;
+
+  double angleTransfer;
+  vector<fpos_t*> framePos;
+  SimInfo *simnfo;
+};
 
 #endif

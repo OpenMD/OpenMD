@@ -249,20 +249,3 @@ void ForceFields::initFortran(int useReactionField ){
 }
 
 
-void ForceFields::initRestraints(){
-  int i;
-  // store the initial info.
-  // set the omega values to zero
-  for (i=0; i<entry_plug->integrableObjects.size(); i++)
-    entry_plug->integrableObjects[i]->setZangle( 0.0 );
-
-  entry_plug->restraint->Store_Init_Info(entry_plug->integrableObjects);
-
-}
-
-void ForceFields::dumpzAngle(){
-
-  // store the initial info.
-  entry_plug->restraint->Write_zAngle_File(entry_plug->integrableObjects);
-
-}

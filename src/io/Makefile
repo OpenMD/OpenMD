@@ -13,6 +13,8 @@ Source    = \
 	make_nodes.c \
 	mpiBASS.c \
 	parse_tree.c \
+	RestraintReader.cpp \
+	RestraintWriter.cpp \
 	StatWriter.cpp \
 	ZConsReader.cpp \
 	ZConsWriter.cpp \

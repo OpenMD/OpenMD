@@ -114,8 +114,6 @@ public:
   virtual void initializeTorsions( int nTorsions, Torsion** torsionArray,
 				   torsion_set* the_torsions ) = 0;
   virtual void initForceField() = 0;
-  virtual void initRestraints();
-  virtual void dumpzAngle();
 
   virtual void calcRcut( void );
   virtual void setRcut( double LJrcut );

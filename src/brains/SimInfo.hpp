@@ -131,6 +131,7 @@ public:
   string finalName;  // the name of the eor file to be written
   string sampleName; // the name of the dump file to be written
   string statusName; // the name of the stat file to be written
+  string zAngleName; // the name of the ang file to be written
 
   int seed;                    //seed for random number generator
 

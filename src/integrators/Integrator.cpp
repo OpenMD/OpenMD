@@ -171,10 +171,24 @@ template<typename T> void Integrator<T>::integrate(void){
   double currReset;
 
   int calcPot, calcStress;
+  int i;
+  int localIndex;
+
+#ifdef IS_MPI
+  int which_node;
+#endif // is_mpi
+  
+  vector<StuntDouble*> particles;
+  string inAngle;
 
   tStats = new Thermo(info);
   statOut = new StatWriter(info);
   dumpOut = new DumpWriter(info);
+
+  if (info->useSolidThermInt && !info->useLiquidThermInt) {
+    restOut = new RestraintWriter(info);
+    initRestraints = new RestraintReader(info);
+  }
 
   atoms = info->atoms;
 
@@ -189,11 +203,13 @@ template<typename T> void Integrator<T>::integrate(void){
 
   // initialize the retraints if necessary
   if (info->useSolidThermInt && !info->useLiquidThermInt) {
-    myFF->initRestraints();
+    initRestraints->zeroZangle();
+    inAngle = info->zAngleName + "_in";
+    initRestraints->readZangle(inAngle.c_str());
+    initRestraints->readIdealCrystal();
   }
 
   // initialize the forces before the first step
-
   calcForce(1, 1);
 
   //execute constraint algorithm to make sure at the very beginning the system is constrained  
@@ -217,7 +233,7 @@ template<typename T> void Integrator<T>::integrate(void){
 
   dumpOut->writeDump(info->getTime());
   statOut->writeStat(info->getTime());
-
+  restOut->writeZangle(info->getTime());
 
 #ifdef IS_MPI
   strcpy(checkPointMsg, "The integrator is ready to go.");
@@ -254,6 +270,9 @@ template<typename T> void Integrator<T>::integrate(void){
 
     if (info->getTime() >= currSample){
       dumpOut->writeDump(info->getTime());
+      // write a zAng file to coincide with each dump or eor file
+      if (info->useSolidThermInt && !info->useLiquidThermInt)
+	restOut->writeZangle(info->getTime());
       currSample += sampleTime;
     }
 
@@ -283,10 +302,11 @@ template<typename T> void Integrator<T>::integrate(void){
 
   dumpOut->writeFinal(info->getTime());
 
-  // dump out a file containing the omega values for the final configuration
-  if (info->useSolidThermInt && !info->useLiquidThermInt)
-    myFF->dumpzAngle();
-  
+  // write the file containing the omega values of the final configuration
+  if (info->useSolidThermInt && !info->useLiquidThermInt){
+    restOut->writeZangle(info->getTime());
+    restOut->writeZangle(info->getTime(), inAngle.c_str());
+  }
 
   delete dumpOut;
   delete statOut;

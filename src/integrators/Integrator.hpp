@@ -84,6 +84,8 @@ protected:
   Thermo *tStats;
   StatWriter*  statOut;
   DumpWriter*  dumpOut;
+  RestraintWriter* restOut;
+  RestraintReader* initRestraints;
 
 };
 

@@ -299,8 +299,8 @@ void DumpWriter::writeFrame( vector<ofstream*>& outFile, double currentTime ){
       for(k = 0; k < outFile.size(); k++)
         *outFile[k] << writeLine;      
     }
-
-}
+    
+  }
 
 #else // is_mpi
 
@@ -333,27 +333,28 @@ void DumpWriter::writeFrame( vector<ofstream*>& outFile, double currentTime ){
     for (i = 0; i < nProc; i++) 
       potatoes[i] = 0;
     
-      for(k = 0; k < outFile.size(); k++){
-        *outFile[k] << nTotObjects << "\n";
-
-        *outFile[k] << currentTime << ";\t"
-	                 << entry_plug->Hmat[0][0] << "\t"
-	                 << entry_plug->Hmat[1][0] << "\t"
-	                 << entry_plug->Hmat[2][0] << ";\t"
-
-	                 << entry_plug->Hmat[0][1] << "\t"
-	                 << entry_plug->Hmat[1][1] << "\t"
-	                 << entry_plug->Hmat[2][1] << ";\t"
-
-	                 << entry_plug->Hmat[0][2] << "\t"
-	                 << entry_plug->Hmat[1][2] << "\t"
-	                 << entry_plug->Hmat[2][2] << ";";
-  
-        *outFile[k] << entry_plug->the_integrator->getAdditionalParameters() << endl;
+    for(k = 0; k < outFile.size(); k++){
+      *outFile[k] << nTotObjects << "\n";
+      
+      *outFile[k] << currentTime << ";\t"
+		  << entry_plug->Hmat[0][0] << "\t"
+		  << entry_plug->Hmat[1][0] << "\t"
+		  << entry_plug->Hmat[2][0] << ";\t"
+	
+		  << entry_plug->Hmat[0][1] << "\t"
+		  << entry_plug->Hmat[1][1] << "\t"
+		  << entry_plug->Hmat[2][1] << ";\t"
+	
+		  << entry_plug->Hmat[0][2] << "\t"
+		  << entry_plug->Hmat[1][2] << "\t"
+		  << entry_plug->Hmat[2][2] << ";";
+      
+      *outFile[k] << entry_plug->the_integrator->getAdditionalParameters() 
+		  << endl;
     }
-
+    
     currentIndex = 0;
-
+    
     for (i = 0 ; i < mpiSim->getNMolGlobal(); i++ ) {
       
       // Get the Node number which has this atom;
@@ -367,7 +368,8 @@ void DumpWriter::writeFrame( vector<ofstream*>& outFile, double currentTime ){
           // so wrap this processor potato back to 0:         
 
           potatoes[which_node] = 0;          
-          MPI_Send(&potatoes[which_node], 1, MPI_INT, which_node, 0, MPI_COMM_WORLD);
+          MPI_Send(&potatoes[which_node], 1, MPI_INT, which_node, 0, 
+		   MPI_COMM_WORLD);
           
         }
 
@@ -449,15 +451,15 @@ void DumpWriter::writeFrame( vector<ofstream*>& outFile, double currentTime ){
 
         }// end for(int l =0)
         potatoes[which_node] = myPotato;
-
+	
       }
       else {
-        
+	
        	haveError = 0;
         
   	    local_index = indexArray[currentIndex].first;        
-
-        integrableObjects = (entry_plug->molecules[local_index]).getIntegrableObjects(); 
+	    
+	    integrableObjects = (entry_plug->molecules[local_index]).getIntegrableObjects(); 
 
         for(iter= integrableObjects.begin(); iter != integrableObjects.end(); ++iter){    
   	        sd = *iter;
@@ -587,7 +589,7 @@ void DumpWriter::writeFrame( vector<ofstream*>& outFile, double currentTime ){
           nCurObj = integrableObjects.size();
                       
           MPI_Send(&nCurObj, 1, MPI_INT, 0,
-  		             myPotato, MPI_COMM_WORLD);
+		   myPotato, MPI_COMM_WORLD);
           myPotato++;
 
           for( iter = integrableObjects.begin(); iter  != integrableObjects.end(); iter++){
@@ -670,12 +672,10 @@ void DumpWriter::writeFrame( vector<ofstream*>& outFile, double currentTime ){
       }
 
     sprintf( checkPointMsg,
-             "Sucessfully took a dump.\n");
+             "Successfully took a dump.\n");
     MPIcheckPoint();                
     
-    }
-
-
+  }
   
 #endif // is_mpi
 }

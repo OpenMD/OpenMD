@@ -1195,6 +1195,9 @@ void SimSetup::makeOutNames(void){
       info[k].finalName = prefix + ".eor";	
       info[k].sampleName = prefix + ".dump";
       info[k].statusName = prefix + ".stat";
+      
+      if (info[k].useSolidThermInt && !info[k].useLiquidThermInt)
+	info[k].zAngleName = prefix + ".ang";
 
 #ifdef IS_MPI
 
