@@ -160,8 +160,10 @@ void Molecule::complete() {
     //    painCave.isFatal = 1;
     //    simError();        
     //}
-
-    integrableObjects_.insert(integrableObjects_.end(), rigidBodies_.begin(), rigidBodies_.end());
+    for (rb = beginRigidBody(rbIter); rb != NULL; rb = nextRigidBody(rbIter)) {
+      integrableObjects_.push_back(rb);
+    } 
+    //integrableObjects_.insert(integrableObjects_.end(), rigidBodies_.begin(), rigidBodies_.end());
 }
 
 double Molecule::getMass() {
