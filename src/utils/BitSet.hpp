@@ -105,13 +105,15 @@ class BitSet {
         void setRangeOff(int fromIndex, int toIndex) {  setBits(fromIndex, toIndex, false);  }        
 
         /** Sets all of the bits in this BitSet to false. */
-        void clear() {  setRangeOff(0, size());  }         
+        void clearAll() {  setRangeOff(0, size());  }         
+
+        void setAll() {  setRangeOn(0, size());  }        
         
         /** Returns the number of bits of space actually in use by this BitSet to represent bit values. */
         int size() const {  return bitset_.size();  }
 
         /** Changes the size of BitSet*/
-        void resize(int nbits) {  bitset_.resize(nbits);  }
+        void resize(int nbits);
         
         BitSet& operator&= (const BitSet &bs) {  andOperator (bs); return *this; }
         BitSet& operator|= (const BitSet &bs) { orOperator (bs); return *this; }

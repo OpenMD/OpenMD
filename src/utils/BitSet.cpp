@@ -125,6 +125,14 @@ void BitSet::setBits(int fromIndex, int toIndex, bool value) {
     std::fill(first, last, value);
 }
 
+void BitSet::resize(int nbits) {
+    int oldSize = size();
+    bitset_.resize(nbits);
+    if (nbits > oldSize) {
+        std::fill(bitset_.begin()+oldSize, bitset_.begin()+nbits+1, false);
+    }
+}
+
 BitSet operator| (const BitSet& bs1, const BitSet& bs2) {
     assert(bs1.size() == bs2.size());
 
