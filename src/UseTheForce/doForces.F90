@@ -4,7 +4,7 @@
 
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: doForces.F90,v 1.7 2004-11-04 16:20:28 gezelter Exp $, $Date: 2004-11-04 16:20:28 $, $Name: not supported by cvs2svn $, $Revision: 1.7 $
+!! @version $Id: doForces.F90,v 1.8 2004-11-11 21:46:29 chrisfen Exp $, $Date: 2004-11-11 21:46:29 $, $Name: not supported by cvs2svn $, $Revision: 1.8 $
 
 module doForces
   use force_globals
@@ -866,7 +866,7 @@ contains
     me_j = atid(j)
 #endif
 
-    write(*,*) i, j, me_i, me_j
+!    write(*,*) i, j, me_i, me_j
     
     if (FF_uses_LennardJones .and. SIM_uses_LennardJones) then
        
@@ -929,7 +929,7 @@ contains
     endif
 
 
-    write(*,*) PropertyMap(me_i)%is_Shape,PropertyMap(me_j)%is_Shape
+!    write(*,*) PropertyMap(me_i)%is_Shape,PropertyMap(me_j)%is_Shape
 
     if (FF_uses_Shapes .and. SIM_uses_Shapes) then
        if ( PropertyMap(me_i)%is_Shape .and. &
