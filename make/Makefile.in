@@ -86,10 +86,10 @@ Libraries = \
 	@MPI_F90_LIB@
 
 OopseHome       = @OOPSE_HOME@
-ForceParamDir   = @OOPSE_HOME@/share/forceFields
-SampleSimDir    = @OOPSE_HOME@/share/samples
-InstallBinDir   = @OOPSE_HOME@/bin
-DocDir          = @OOPSE_HOME@/doc
+ForceParamDir   = $(OopseHome)/share/forceFields
+SampleSimDir    = $(OopseHome)/share/samples
+InstallBinDir   = $(OopseHome)/bin
+DocDir          = $(OopseHome)/doc
 FrcDeclare      = -DFRC_PATH="$(ForceParamDir)"
 F90Declare      = -D__FORTRAN90
 ParallelDeclare = -DIS_MPI
@@ -253,7 +253,7 @@ CCompiler              = @CC@
 CppCompiler            = @CXX@
 Linker                 = @CXX@
 MakeDepend             = makedepend
-Install                = @INSTALL@
+INSTALL                = @INSTALL@
 InstallProgram         = @INSTALL_PROGRAM@
 InstallData            = @INSTALL_DATA@
 MkDir                = @MKINSTALLDIRS@
