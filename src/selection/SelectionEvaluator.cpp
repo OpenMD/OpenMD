@@ -319,7 +319,7 @@ void SelectionEvaluator::predefine(const std::string& script) {
             int tok = statement[1].tok;
             if (tok == Token::identifier || (tok & Token::predefinedset) == Token::predefinedset) {
                 std::string variable = boost::any_cast<std::string>(statement[1].value);
-                variables.insert(std::make_pair(variable, statement));
+                variables.insert(VariablesType::value_type(variable, statement));
 
             } else {
                 evalError("invalid variable name:" + script);

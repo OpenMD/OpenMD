@@ -205,7 +205,9 @@ class SelectionEvaluator{
         NameFinder nameFinder;
         DistanceFinder distanceFinder;
         int nStuntDouble;   //natoms + nrigidbodies
-        std::map<std::string, boost::any > variables;
+
+        typedef std::map<std::string, boost::any > VariablesType;
+        VariablesType variables;
 
         bool isDynamic_;
         bool isLoaded_;
