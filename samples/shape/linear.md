@@ -4,6 +4,7 @@ molecule{
   atom[0]{
      type="linear";
      position( 0.0, 0.0, 0.0 );
+     orientation( 0.0, 0.0, 1.0);
   }
 }
 
