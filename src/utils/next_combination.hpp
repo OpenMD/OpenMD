@@ -39,10 +39,30 @@
 namespace oopse {
 
 /**
- * STL next_permuationtation like combination sequence generator 
- * 
- * <p> Preconditions: </p>
- * 
+ * @fn bool next_combination(IteratorContainer<RandomAccessIterator>& iterContainer, RandomAccessIterator first, RandomAccessIterator last) 
+ * @brief STL next_permuationtation like combination sequence generator.
+ * Given the first and last iterator of a sequence, next_combination iteratively generates all possible combination.
+ * @param iterContainer iterator container
+ * @param first the first iterator
+ * @param last the last iterator
+ * @note first and last must be random access iterators and iterContainer must be the container which
+ * element is iterator. And all of the iteratos in iterContainer must be within the range [first, last)
+ *
+ * @code
+ * std::vector<int> iv;
+ * iv.push_back(1);
+ * iv.push_back(8);
+ * std::vector<std::vector<int>::iterator> ic;
+ * while(next_combination(ic, iv.begin(), iv.end())) {
+ *     for (i =  ic.begin(); i < ic.end(); ++i) {
+ *         std::cout << **i << "\t";
+ *     }
+ *     std::cout << std::endl;
+ * }
+ * //output
+ * //1
+ * //8
+ * //1  8
  */
 template<class RandomAccessIterator, template<typename ELEM, typename = std::allocator<ELEM> > class IteratorContainer>
 bool next_combination(IteratorContainer<RandomAccessIterator>& iterContainer, RandomAccessIterator first, RandomAccessIterator last) {
@@ -107,6 +127,24 @@ bool next_combination(IteratorContainer<RandomAccessIterator>& iterContainer, Ra
         }
     }
 } //end next_combination
+
+bool replaceWildCard(std::vector<std::vector<std::string>::iterator>& cont,
+                                             std::vector<std::string> sequence, std::vector<std::string> result
+                                             std::string& wildCard = "X") {
+    if (cont.size() > sequnce.size()) {
+        std::cerr << "the size of iterator container is greater than the size of sequence"
+    }
+
+    bool hasMoreCombination = next_combination(cont, sequence.begin(), sequence.end());
+    if (hasMoreCombination) {
+        result.resize(sequence.size());
+        result.insert(result.end(), sequence.size(), wildCard);
+        for ( i = cont.begin(); i != cont.end(); i++){
+            result[*i - sequence.begin()] = **i;
+    }
+
+     return hasMoreCombination;
+}
 
 } //end namespace oopse
 #endif //UTILS_NEXT_COMBINATION_HPP
