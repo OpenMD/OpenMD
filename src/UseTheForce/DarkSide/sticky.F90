@@ -9,7 +9,7 @@
 !! @author Matthew Meineke
 !! @author Christopher Fennel
 !! @author J. Daniel Gezelter
-!! @version $Id: calc_sticky_pair.F90,v 1.2 2004-10-19 20:44:31 chuckv Exp $, $Date: 2004-10-19 20:44:31 $, $Name: not supported by cvs2svn $, $Revision: 1.2 $
+!! @version $Id: sticky.F90,v 1.1 2004-10-20 04:02:48 gezelter Exp $, $Date: 2004-10-20 04:02:48 $, $Name: not supported by cvs2svn $, $Revision: 1.1 $
 
 module sticky_pair
 

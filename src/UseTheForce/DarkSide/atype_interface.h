@@ -6,8 +6,8 @@
  *  Copyright 2004 __MyCompanyName__. All rights reserved.
  *
  */
-#ifndef ATYPE_MODULE_INTERFACE.h
-#define ATYPE_MODULE_INTERFACE.h
+#ifndef USETHEFORCE_DARKSIDE_ATYPE_INTERFACE_H
+#define USETHEFORCE_DARKSIDE_ATYPE_INTERFACE_H
 
 #define __C
 #include "config.h"

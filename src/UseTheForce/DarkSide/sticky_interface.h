@@ -6,11 +6,12 @@
  *  Copyright 2004 __MyCompanyName__. All rights reserved.
  *
  */
-#ifndef STICKY_PAIR_MODULE_INTERFACE_H
-#define STICKY_PAIR_MODULE_INTERFACE_H
+#ifndef USETHEFORCE_DARKSIDE_STICKY_INTERFACE_H
+#define USETHEFORCE_DARKSIDE_STICKY_INTERFACE_H
 
 #define __C
 #include "config.h"
+
 extern "C"{
   
   void F90_FUNC_(set_sticky_params, SET_STICKY_PARAMS)( double* sticky_w0, 

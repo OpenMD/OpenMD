@@ -1,18 +1,18 @@
 Source    = \
-	mpiSimulation_module.F90 \
+	mpiSimulation.F90 \
 	neighborLists.F90 \
-	atype_module.F90 \
+	atype.F90 \
 	force_globals.F90 \
-	switch_module.F90 \
-	simulation_module.F90 \
-	calc_charge_charge.F90 \
-	calc_dipole_dipole.F90 \
-	calc_eam.F90 \
-	calc_gb.F90 \
-	calc_LJ_FF.F90 \
-	calc_reaction_field.F90 \
-	calc_sticky_pair.F90 \
-	calc_shapes.F90
+	switcheroo.F90 \
+	simulation.F90 \
+	charge.F90 \
+	dipole.F90 \
+	eam.F90 \
+	gb.F90 \
+	LJ.F90 \
+	reactionField.F90 \
+	sticky.F90 \
+	shapes.F90 \
 
 RmiSource =
 

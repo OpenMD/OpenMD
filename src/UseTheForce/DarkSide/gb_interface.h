@@ -6,8 +6,8 @@
  *  Copyright 2004 __MyCompanyName__. All rights reserved.
  *
  */
-#ifndef GB_MODULE_INTERFACE_H
-#define GB_MODULE_INTERFACE_H
+#ifndef USETHEFORCE_DARKSIDE_GB_INTERFACE_H
+#define USETHEFORCE_DARKSIDE_GB_INTERFACE_H
 
 #define __C
 #include "config.h"

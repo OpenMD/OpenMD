@@ -2,7 +2,7 @@
 !! Corresponds to the force field defined in lj_FF.cpp 
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: calc_LJ_FF.F90,v 1.2 2004-09-24 16:27:57 tim Exp $, $Date: 2004-09-24 16:27:57 $, $Name: not supported by cvs2svn $, $Revision: 1.2 $
+!! @version $Id: LJ.F90,v 1.1 2004-10-20 04:02:48 gezelter Exp $, $Date: 2004-10-20 04:02:48 $, $Name: not supported by cvs2svn $, $Revision: 1.1 $
 
 module lj
   use definitions
