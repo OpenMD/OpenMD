@@ -25,9 +25,9 @@ identifier		("_"|{letter})({letter}|{digit}|"-"|"_")*
 #include <stdio.h>
 #include <string.h>
 
-#include "BASSyacc.h"
-#include "BASS_parse.h"
-#include "simError.h"
+#include "io/BASSyacc.h"
+#include "io/BASS_parse.h"
+#include "utils/simError.h"
 #ifdef IS_MPI
 #define __is_lex__
 #include "mpiBASS.h"

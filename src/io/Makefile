@@ -1,4 +1,6 @@
 Source    = \
+	BASSlex.l \
+	BASSyacc.y \
 	BASS_interface.cpp \
 	BASS_parse.c \
 	DumpReader.cpp \

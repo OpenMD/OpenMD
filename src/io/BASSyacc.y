@@ -47,10 +47,10 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "node_list.h"
-#include "make_nodes.h"
-#include "parse_tree.h"
-#include "simError.h"
+#include "io/node_list.h"
+#include "io/make_nodes.h"
+#include "io/parse_tree.h"
+#include "utils/simError.h"
 #ifdef IS_MPI
 #define __is_lex__
 #include "mpiBASS.h"

@@ -50,7 +50,7 @@ ifdef Source
 Package          = $(subst $(SourceDir)/,,$(CurrentDir))
 PackageList      = $(Package)
 PackageSourceDir = $(SourceDir)/$(Package)
-PackageTargetDir = $(TargetDir)/$(Package)
+PackageTargetDir = $(TargetDir)
 JavaMainClass    = $(subst /,.,$(Package)).$(Main)
 else
 PackageList      = $(Packages) $(JavaPackages)
@@ -79,16 +79,21 @@ CFiles                 = $(filter %.c,     $(Source))
 FortranFiles           = $(filter %.f,     $(Source))
 F90Files               = $(filter %.F90,   $(Source))
 CorbaFiles             = $(filter %.idl,   $(Source))
+LexFiles               = $(filter %.l,     $(Source))
+YaccFiles              = $(filter %.y,     $(Source))
 OtherSourceFiles       = $(filter-out $(JavaFiles) $(CppFiles) $(CFiles) \
-		                      $(FortranFiles) $(F90Files) \
-	                              $(CorbaFiles), \
+		                      $(FortranFiles) $(F90Files) $(LexFiles) \
+	                              $(YaccFiles) $(CorbaFiles), \
 	                              $(Source))
 ManifestFile           = $(PackageSourceDir)/Manifest
 SourceFiles            = $(JavaFiles:%.java=  $(PackageSourceDir)/%.java)\
                          $(CppFiles:%.cpp=    $(PackageSourceDir)/%.cpp)\
                          $(CFiles:%.c=        $(PackageSourceDir)/%.c)\
                          $(FortranFiles:%.f=  $(PackageSourceDir)/%.f)\
-                         $(F90Files:%.F90=    $(PackageSourceDir)/%.F90)
+                         $(F90Files:%.F90=    $(PackageSourceDir)/%.F90)\
+                         $(LexFiles:%.l=      $(PackageSourceDir)/%.l)\
+                         $(YaccFiles:%.y=     $(PackageSourceDir)/%.y)\
+
 
 # Target
 JavaClassFiles         = $(JavaFiles:%.java=  $(PackageTargetDir)/%.class)
@@ -100,7 +105,17 @@ JniHeaders             = $(JniSource:%.java=  $(PackageSourceDir)/%.h)
 ObjectFiles            = $(CFiles:%.c=        $(PackageTargetDir)/%.o)\
 		         $(CppFiles:%.cpp=    $(PackageTargetDir)/%.o)\
 		         $(FortranFiles:%.f=  $(PackageTargetDir)/%.o)\
-		         $(F90Files:%.F90=    $(PackageTargetDir)/%.o)
+		         $(F90Files:%.F90=    $(PackageTargetDir)/%.o)\
+		         $(LexFiles:%.l=      $(PackageTargetDir)/%.o)\
+		         $(YaccFiles:%.y=     $(PackageTargetDir)/%.o)
+
+DerivedSource          = $(YaccFiles:%.y=    %.h) \
+	                 $(YaccFiles:%.y=    %.c) \
+	                 $(LexFiles:%.l=     %.c)
+
+DerivedCFiles          = $(YaccFiles:%.y=    %.c) \
+	                 $(LexFiles:%.l=     %.c)
+
 OtherTargetFiles       = $(OtherSourceFiles:%=$(PackageTargetDir)/%)
 
 ThirdPartyJarsTmp = $(patsubst %,$(LibDir)/%,$(JavaLibraries))
@@ -135,17 +150,18 @@ LibList          = $(LocalLibs:%=-l%) $(Libraries:%=-l%)
 #
 #---------------------------------------------------------------------------
 Print                  = @echo
+Move                   = mv
 Copy                   = cp
-CCompiler              = gcc
-CppCompiler            = gcc
-Linker                 = gcc
+CCompiler              = icc
+CppCompiler            = icpc
+Linker                 = icpc
 MakeDepend             = makedepend
 MakeDir                = mkdir -p
 Delete                 = rm -fr
 StaticArchiver         = ar
-DynamicArchiver        = gcc
-FortranCompiler        = f77
-F90Compiler            = f90
+DynamicArchiver        = icc
+FortranCompiler        = ifort
+F90Compiler            = ifort
 JavaCompiler           = $(JAVA_HOME)/bin/javac
 JavaArchiver           = $(JAVA_HOME)/bin/jar
 JarSigner              = $(JAVA_HOME)/bin/jarsigner
@@ -156,6 +172,9 @@ JavaExecute            = $(JAVA_HOME)/bin/java
 Purify                 = purify
 WordCount              = wc
 List                   = cat
+Yacc                   = bison -y
+Lex                    = flex
+
 
 MakeOptions            = -k -s
 MakeDependOptions      = 
@@ -166,7 +185,7 @@ JniOptions             =
 RmiOptions             = -d $(TargetDir) -classpath $(ClassPath) \
 			 -sourcepath $(SourceDir)
 FortranOptions         =
-F90Options             =  -I$(SourceDir) 
+F90Options             =  -I$(SourceDir) -module $(TargetDir) 
 JavaCompilerOptions    = -d $(TargetDir) -classpath $(ClassPath) \
 			 -sourcepath $(SourceDir) -deprecation
 JavaRunOptions         = -classpath $(ClassPath) 
@@ -205,7 +224,7 @@ $(PackageTargetDir) :
 	$(MakeDir) $@
 
 # .c -> .o
-$(PackageTargetDir)/%.o : $(PackageTargetDir) $(PackageSourceDir)/%.c
+$(PackageTargetDir)/%.o : $(PackageSourceDir)/%.c
 	$(Print) $@
 	@$(CCompiler) $(COptions) -c $(IncludePath) $< -o $@
 
@@ -251,6 +270,28 @@ $(PackageSourceDir)/%.h : $(PackageTargetDir)/%.class
 
 %.h : %.class
 	$(MAKE) $(MakeOptions) $(PackageSourceDir)/$@
+
+#.y -> .h
+$(PackageSourceDir)/%.h : $(PackageSourceDir)/%.y
+	$(Print) $@
+	$(Print) @$(Yacc) -d $?
+	@$(Yacc) -d  $?
+	@$(Move) y.tab.h $*.h
+	@$(Delete) y.tab.c
+
+#.y -> .c
+$(PackageSourceDir)/%.c : $(PackageSourceDir)/%.y
+	$(Print) $@
+	$(Print) @$(Yacc) -d $?
+	@$(Yacc) -d  $?
+	@$(Move) y.tab.c $*.c
+	@$(Delete) y.tab.h
+
+# .l -> .c
+$(PackageSourceDir)/%.c : $(PackageSourceDir)/%.l
+	$(Print) $@
+	$(Print) @$(Lex) -o$@ $?
+	@$(Lex) -o$@ $?
 
 # .o -> .a
 $(LibDir)/%.a : $(ObjectFiles)
@@ -349,11 +390,18 @@ depend : $(PackageListLoop)
 
 _dependall : $(DependencyFile)
 
-$(DependencyFile) :
-	$(Print) $@
-	@cd $(PackageSourceDir); \
-	$(MakeDepend) $(MakeDependOptions) -f- -p$(PackageTargetDir)/ \
-	$(IncludePath) $(Source) > $(DependencyFile)
+$(DependencyFile) : $(DerivedSource)
+	$(Print) $@ 
+	$(Print) $(DerivedSource)
+	@cd $(PackageSourceDir)
+	$(CppCompiler) $(IncludePath) -MM $(CppFiles)  > Make.temp
+	$(CCompiler)   $(IncludePath) -MM $(CFiles) $(DerivedCFiles)   >> Make.temp
+	cat Make.temp | sed 's/^[a-zA-Z0-9]/$$\(DEV_ROOT\)\/obj\/&/g' >> $(DependencyFile)
+	cat Make.temp | sed 's/^[a-zA-Z0-9]/$$\(DEV_ROOT\)\/MPIobj\/&/g' >> $(DependencyFile)
+	#$(DEV_ROOT)/scripts/sfmakedepend -I $(DEV_ROOT)/src -d $(DEV_ROOT)/obj -f ./Make.ftemp -h *.F90
+	#$(DEV_ROOT)/scripts/sfmakedepend -I $(DEV_ROOT)/src -d $(DEV_ROOT)/MPIobj -f ./Make.ftemp -h *.F90
+	#cat Make.ftemp >> $(DependencyFile)
+	$(Delete) Make.temp Make.ftemp
 
 # make lib
 lib    : $(PackageListLoop)
