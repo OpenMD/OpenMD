@@ -1,3 +1,56 @@
+2004-10-20 16:52  gezelter
+
+	* src/UseTheForce/: DUFF.cpp, WATER.cpp, DarkSide/sticky.F90,
+	DarkSide/sticky_interface.h: fixed a fortran name problem
+
+2004-10-20 16:38  tim
+
+	* test/utils/: GenericData.hpp, GenericDataTestCase.cpp,
+	GenericDataTestCase.hpp, Makefile, PropertyMapTestCase.hpp,
+	UtilTest, UtilTest.cpp: adding generic data test case
+
+2004-10-20 16:16  chuckv
+
+	* configure, ac-tools/aclocal.m4,
+	src/UseTheForce/DarkSide/Makefile,
+	src/UseTheForce/DarkSide/mpiSimulation.F90,
+	src/UseTheForce/DarkSide/mpiSimulation_interface.h,
+	src/UseTheForce/DarkSide/simParallel.F90,
+	src/UseTheForce/DarkSide/simParallel_interface.h,
+	src/brains/mpiSimulation.cpp, src/brains/mpiSimulation.hpp:
+	Fortran/C++ interface de-obfuscation project appears to be
+	complete!  Woo hoo!
+
+2004-10-20 15:47  chuckv
+
+	* src/UseTheForce/: fortranWrapDefines.hpp, fortranWrappers.cpp,
+	fortranWrappers.hpp: Fortran/C++ interface de-obfuscation project
+	continues
+
+2004-10-20 15:46  chuckv
+
+	* src/: UseTheForce/DUFF.cpp, UseTheForce/EAM_FF.cpp,
+	UseTheForce/ForceFields.cpp, UseTheForce/ForceFields.hpp,
+	UseTheForce/LJFF.cpp, UseTheForce/Makefile, UseTheForce/WATER.cpp,
+	UseTheForce/doForces_interface.h,
+	UseTheForce/notifyCutoffs_interface.h, UseTheForce/wrappers.F90,
+	UseTheForce/DarkSide/atype_interface.h,
+	UseTheForce/DarkSide/eam_interface.h,
+	UseTheForce/DarkSide/gb_interface.h,
+	UseTheForce/DarkSide/mpiSimulation_interface.h,
+	UseTheForce/DarkSide/shapes_interface.h,
+	UseTheForce/DarkSide/simulation_interface.h,
+	UseTheForce/DarkSide/sticky_interface.h, brains/ForceFields.cpp,
+	brains/SimInfo.cpp, brains/SimInfo.hpp: Fortran/C++ interface
+	de-obfuscation project (It is a very long story)
+
+2004-10-20 13:07  tim
+
+	* ChangeLog, src/math/SquareMatrix.hpp, src/math/SquareMatrix3.hpp,
+	test/math/SquareMatrix3TestCase.cpp,
+	test/math/SquareMatrixTestCase.cpp,
+	test/math/SquareMatrixTestCase.hpp: Math library pass the unit test
+
 2004-10-20 00:52  tim
 
 	* src/brains/: Snapshot.hpp, SnapshotManager.hpp: Snapshot and

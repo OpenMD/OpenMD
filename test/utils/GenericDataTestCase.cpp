@@ -111,5 +111,5 @@ void GenericDataTestCase::testSTLContainerTypeData(){
 
     fv2.push_back(251.21);
     fv2.push_back(42.90);
-    
+
 }

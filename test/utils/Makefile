@@ -3,8 +3,9 @@ Main = UtilTest
 TestMain = $(Main)
 
 Source = UtilTest.cpp \
-         GenericFactoryTestCase.cpp \
-	 GenericDataTestCase.cpp
+	 GenericDataTestCase.cpp \
+	 PropertyMap.cpp \
+	 PropertyMapTestCase.cpp
 
 DEV_ROOT               = ../..
 UseMPI                 = no 
@@ -40,7 +41,7 @@ IncludePath      = -I$(SourceDir) $(IncludeDirs:%=-I%)
 LibraryDirs = \
 	/usr/local/lib \
 	/usr/local/mpich/lib \
-        /home/maul/gezelter/tim/cppunit/lib 
+        /home/maul/gezelter/tim/cppunit/lib \
 
 LibDirs          = -L$(LibDir)    $(LibraryDirs:%=-L%)
 
@@ -49,7 +50,7 @@ Libraries = \
         -ldl \
 	-lsprng \
 	-lmpich \
-	-lfmpich 
+	-lfmpich \
 
 
 #LinkOptions = \
