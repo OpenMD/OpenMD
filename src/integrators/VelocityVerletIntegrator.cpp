@@ -49,6 +49,7 @@
 
 #include "integrators/VelocityVerletIntegrator.hpp"
 #include "integrators/DLM.hpp"
+#include "utils/StringUtils.hpp"
 
 namespace oopse {
 VelocityVerletIntegrator::VelocityVerletIntegrator(SimInfo *info) : Integrator(info), rotAlgo(NULL) { 
@@ -86,10 +87,12 @@ void VelocityVerletIntegrator::initialize(){
     }
     
     dumpWriter = createDumpWriter();
+    eorWriter = createEorWriter();
     statWriter = createStatWriter();
 
     dumpWriter->writeDump();
-
+    eorWriter->writeDump();
+    
     //save statistics, before writeStat,  we must save statistics
     thermo.saveStat();
     saveConservedQuantity();
@@ -150,6 +153,7 @@ void VelocityVerletIntegrator::postStep() {
 
         if (currentSnapshot_->getTime() >= currSample) {
             dumpWriter->writeDump();
+            eorWriter->writeDump();
             currSample += sampleTime;
         }
 
@@ -171,11 +175,14 @@ void VelocityVerletIntegrator::postStep() {
 void VelocityVerletIntegrator::finalize() {
 
     dumpWriter->writeDump();
+    eorWriter->writeDump();
 
     delete dumpWriter;
+    delete eorWriter;
     delete statWriter;
 
     dumpWriter = NULL;
+    eorWriter = NULL;
     statWriter = NULL;
     
 }
@@ -195,6 +202,10 @@ void VelocityVerletIntegrator::calcForce(bool needPotential,
 
 DumpWriter* VelocityVerletIntegrator::createDumpWriter() {
     return new DumpWriter(info_, info_->getDumpFileName());
+}
+
+DumpWriter* VelocityVerletIntegrator::createEorWriter() {
+    return new DumpWriter(info_, getPrefix(info_->getDumpFileName()) + ".eor");
 }
 
 StatWriter* VelocityVerletIntegrator::createStatWriter() {
