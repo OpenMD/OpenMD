@@ -559,12 +559,10 @@ void WATER::readParams( void ){
       if (currentAtomType->isDirectional) {
 	if (currentDirectionalType->isDipole) {
 	  ((DirectionalAtomType*)at)->setDipole();
-	  entry_plug->useDipoles = 1;
 	}
       
 	if (currentDirectionalType->isSticky) {
 	  ((DirectionalAtomType*)at)->setSticky();
-	  entry_plug->useSticky = 1;
 	}
       }
       
@@ -662,6 +660,13 @@ void WATER::initializeAtoms( int nAtoms, Atom** the_atoms ){
     }
     the_atoms[i]->setMass( currentAtomType->mass );
     the_atoms[i]->setIdent( currentAtomType->ident );
+
+    if (currentAtomType->isLJ) entry_plug->useLennardJones = 1;
+    if (currentAtomType->isCharge) entry_plug->useCharges = 1;
+    if (currentAtomType->isDirectional) {
+      if (currentDirectionalType->isDipole) entry_plug->useDipoles = 1;      
+      if (currentDirectionalType->isSticky) entry_plug->useSticky = 1;
+    }
 
     if( bigSigma < currentAtomType->sigma ) bigSigma = currentAtomType->sigma;
 

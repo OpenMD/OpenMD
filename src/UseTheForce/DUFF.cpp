@@ -773,12 +773,10 @@ void DUFF::readParams( void ){
       
       if (currentAtomType->isSSD) {
         ((DirectionalAtomType*)at)->setSticky();
-        entry_plug->useSticky = 1;
       }
       
       if (currentAtomType->isDipole) {
         ((DirectionalAtomType*)at)->setDipole();
-        entry_plug->useDipoles = 1;               
       }
       
       at->setIdent(currentAtomType->ident);
@@ -1085,8 +1083,6 @@ void DUFF::readParams( void ){
   MPIcheckPoint();
 
 #endif // is_mpi
-
-  entry_plug->useLennardJones = 1;
 }
 
 
@@ -1145,6 +1141,12 @@ void DUFF::initializeAtoms( int nAtoms, Atom** the_atoms ){
     
     the_atoms[i]->setMass( currentAtomType->mass );
     the_atoms[i]->setIdent( currentAtomType->ident );
+
+    if (currentAtomType->isSSD) entry_plug->useSticky = 1;      
+    if (currentAtomType->isDipole) entry_plug->useDipoles = 1; 
+    // Fix this later.  We'll set it a bunch of times.
+    entry_plug->useLennardJones = 1;
+
 
     if( bigSigma < currentAtomType->sigma ) bigSigma = currentAtomType->sigma;
 
