@@ -43,29 +43,44 @@ using namespace std;
 
 namespace oopse{
 
+    enum DataStorageLayout {
+        dslPosition = 1,
+        dslVelocity = 2,
+        dslAMat = 4, 
+        dslAngularMomentum = 8,
+        dslUnitVector = 16,
+        dslZAngle = 32,
+        dslForce = 64, 
+        dslTorque = 128
+    };
     //forward declaration
     class Snapshot;
     class SnapshotManager;
-
+    class StuntDouble;
+    
     /**
-     * @struct DataStorage
+     * @class DataStorage
      * @brief
+     * @warning do not try to insert element into (or ease element from) private member data 
+     * of DataStorage directly.
      */
     class DataStorage {
         public:
             DataStorage() {};
             DataStorage(size_t size);
+
+            int size();
             void resize(size_t size);
             void reserve(size_t size);
             
-        //friend Snapshot;
-        //friend SnapshotManager;
-        //private:
+            friend class Snapshot;
+            friend class StuntDouble;
+        private:
             vector<Vector3d> position;               /** position array */
             vector<Vector3d> velocity;               /** velocity array */
-            vector<RotMat3x3d> Amat;            /** rotation matrix array */
+            vector<RotMat3x3d> aMat;            /** rotation matrix array */
             vector<Vector3d> angularMomentum;/** velocity array */
-            vector<Vector3d> ul;                /** the lab frame unit vector array*/
+            vector<Vector3d> unitVector;                /** the lab frame unit vector array*/
             vector<double> zAngle;              /** z -angle array */        
             vector<Vector3d> force;               /** force array */
             vector<Vector3d> torque;               /** torque array */
@@ -83,9 +98,9 @@ namespace oopse{
     class Snapshot {
         public:
             
-            Snapshot() {}
-            Snapshot(int i) {
-
+            Snapshot(int nAtoms, int nRigidbodies) {
+                atomData.resize(nAtoms);
+                rigidbodyData.resize(nRigidbodies);
             }
 
             Snapshot(const Snapshot& s);
@@ -121,23 +136,28 @@ namespace oopse{
                 assert(v.size() > 0);
                 return &(v[0]);
             }
+
+            int getSize() {
+                return atomData.size() + rigidbodyData.size();
+            }
             
-            /** */
-            void resize(size_t size);
-
-
-            /** */
-            void reserve(size_t size);
-
+            int getSizeOfAtoms() {
+                return atomData.size();
+            }
+            
+            int getSizeOfRigidBodies() {
+                return rigidbodyData.size();
+            }
+            
             DataStorage atomData;
             DataStorage rigidbodyData;
 
-            friend class SnapshotManager;
+            friend class StuntDouble;
         private:
 
             int id_; /**< identification number of the snapshot */
     };
 
-    typedef DataStorage* (Snapshot::*DataStoragePointer); 
+    typedef DataStorage (Snapshot::*DataStoragePointer); 
 }
 #endif //BRAINS_SNAPSHOT_HPP

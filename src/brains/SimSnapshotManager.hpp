@@ -24,7 +24,7 @@
  */
  
  /**
-  * @file SnapshotManager.hpp
+  * @file SimSnapshotManager.hpp
   * @author tlin
   * @date 10/20/2004
   * @time 23:56am
@@ -33,66 +33,29 @@
 #ifndef BRAINS_SNAPSHOTMANAGER_HPP
 #define BRAINS_SNAPSHOTMANAGER_HPP
 
-#include "brains/Snapshot.hpp"
+#include "brains/SnapshotManager.hpp"
 
 namespace oopse{
 
     /**
-     * @class SnapshotManager SnapshotManager.hpp "brains/SnapshotManager.hpp"
-     * @brief SnapshotManager class is an abstract class which maintains 
-     * a series of snapshots.
-     * 
-     * @see SimSnapshotManager
-     * @see PropSnapshotManager
+     * @class SimSnapshotManager SimSnapshotManager.hpp "brains/SimSnapshotManager.hpp"
+     * @brief SimSnapshotManager class is the concrete snapshot manager for actual simulation
+     * SimSnapshotManager only maintains two snapshots. 
+     * @see PropSimSnapshotManager
      */
-    class SnapshotManager {
+    class SimSnapshotManager : public SnapshotManager {
         public:
-            SnapshotManager() : currentSnapshot_(NULL), previousSnapshot_(NULL) {
-            }
-            virtual ~SnapshotManager();
-            virtual bool advance() = 0;
+            SimSnapshotManager(SimModel* model);
+            virtual bool advance();
 
-            virtual Snapshot* getSnapshot(int id) = 0;
-
-            /**
-             * Returns the pointer of previous snapshot
-             * @return the pointer of previous snapshot
-             */
-            Snapshot* getPrevSnapshot() {
-                return previousSnapshot_;
-            }
-
-            /**
-             * Returns the pointer of current snapshot
-             * @return the pointer of current snapshot
-             */            
-            Snapshot* getCurrentSnapshot() {
-                return currentSnapshot_;
-            }
+            virtual Snapshot* getSnapshot(int id);
             
             int getCapacity();
 
             virtual void setCapacity(int capacity);
-
-            bool getNotifyStatus();
-            
-            void setNotifyStatus(bool status);
-
-            void attach(SnapshotObserver*);
-
-            void detach(SnapshotObserver*);
-
-            void notify();
-
-        protected:
-            Snapshot* currentSnapshot_;
-            Snapshot* previousSnapshot_;
             
         private:
-            vector<SnapshotObserver*> observers_;
-
     };
 
 }
 #endif //BRAINS_SNAPSHOTMANAGER_HPP
-

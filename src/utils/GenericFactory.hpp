@@ -130,7 +130,7 @@ class GenericFactory {
          * corresponding creator for the type identifier and returns its result. 
          * @return a pointer of the concrete object, return NULL if no creator is registed for 
          * creating this concrete object
-         * @id the identification of the concrete object
+         * @param id the identification of the concrete object
          */
         Object* createObject(const IdentType& id) {
             typename CreatorMapType::iterator i = creatorMap_.find(id);
