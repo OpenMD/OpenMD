@@ -57,6 +57,8 @@ double residentMem () {
   totRSS *= getpagesize() / 1024;
 #endif
 
+  //return in byte
+  totRSS *= 1024;
   return(totRSS);
 
 }
