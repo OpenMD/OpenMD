@@ -418,6 +418,8 @@ class SimInfo {
         std::set<AtomType*> getUniqueAtomTypes();
         
         friend std::ostream& operator <<(std::ostream& o, SimInfo& info);
+
+        void getCutoff(double& rcut, double& rsw);
         
     private:
 

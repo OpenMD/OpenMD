@@ -62,7 +62,10 @@ Integrator::Integrator(SimInfo* info)
     if (simParams->haveRunTime()) {
         runTime = simParams->getRunTime();
     } else {
-
+            sprintf(painCave.errMsg,
+                    "Integrator Error: runTime is not set\n");
+            painCave.isFatal = 1;
+            simError();
     }
     // set the status, sample, and thermal kick times
     if (simParams->haveSampleTime()){

@@ -86,12 +86,27 @@ CorrelationFunction::CorrelationFunction(SimInfo* info, const std::string& filen
         validateSelection(seleMan2_);
     }    
 
+    /**@todo Fixed Me */
+    Globals* simParams = info_->getSimParams();
+    if (simParams->haveSampleTime()){
+        deltaTime_ = simParams->getSampleTime();
+    } else {
+            sprintf(painCave.errMsg,
+                "CorrelationFunction::writeCorrelate Error: can not figure out deltaTime\n");
+            painCave.isFatal = 1;
+            simError();  
+    }
+
     int nframes =  bsMan_->getNFrames();
-    nTimeBins_ = nframes;  /**@todo Fixed Me */
+    nTimeBins_ = nframes;
     histogram_.resize(nTimeBins_);
     count_.resize(nTimeBins_);
     time_.resize(nTimeBins_);
-    //deltaTime_ = info_->;
+
+    for (int i = 0; i < nTimeBins_; ++i) {
+        time_[i] = i * deltaTime_;
+    }
+    
 }
 
 

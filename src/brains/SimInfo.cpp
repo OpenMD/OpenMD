@@ -754,9 +754,7 @@ double SimInfo::calcMaxCutoffRadius() {
     return maxCutoffRadius;
 }
 
-void SimInfo::setupCutoff() {
-    double rcut_;  //cutoff radius
-    double rsw_; //switching radius
+void SimInfo::getCutoff(double& rcut, double& rsw) {
     
     if (fInfo_.SIM_uses_Charges | fInfo_.SIM_uses_Dipoles | fInfo_.SIM_uses_RF) {
         
@@ -802,7 +800,10 @@ void SimInfo::setupCutoff() {
         }
     
     }
-        
+}
+
+void SimInfo::setupCutoff() {
+    getCutoff(rcut_, rsw_);    
     double rnblist = rcut_ + 1; // skin of neighbor list
 
     //Pass these cutoff radius etc. to fortran. This function should be called once and only once

@@ -111,14 +111,16 @@ int main(int argc, char* argv[]){
 
     //parse md file and set up the system
     SimCreator creator;
-    SimInfo* info = creator.createSim(mdFileName);
+    SimInfo* info = creator.createSim(mdFileName, false);
 
     double maxLen;
     if (args_info.length_given) {
         maxLen = args_info.length_arg;
     } else {
-        Mat3x3d hmat = info->getSnapshotManager()->getCurrentSnapshot()->getHmat();
-        maxLen = std::min(std::min(hmat(0, 0), hmat(1, 1)), hmat(2, 2)) /2 ;
+        double rcut;
+        double rsw;
+        info->getCutoff(rcut, rsw);
+        maxLen = rcut + rsw;        
     }
     
 
