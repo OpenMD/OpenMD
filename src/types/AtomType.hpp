@@ -49,7 +49,7 @@ namespace oopse {
 
     PropertyMap properties;
                 
-  private:
+  protected:
     
     AtomTypeProperties atp;
     double mass;

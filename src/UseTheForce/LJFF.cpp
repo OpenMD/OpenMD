@@ -12,9 +12,9 @@ using namespace std;
 #include "UseTheForce/ForceFields.hpp"
 #include "primitives/SRI.hpp"
 #include "utils/simError.h"
-#include "UseTheForce/DarkSide/atype_interface.h"
+#include "types/AtomType.hpp"
+#include "UseTheForce/DarkSide/lj_interface.h"
 
-//#include "UseTheForce/fortranWrappers.hpp"
 
 #ifdef IS_MPI
 #include "UseTheForce/mpiForceField.h"
@@ -252,7 +252,7 @@ void LJFF::readParams( void ){
                  // if things go well, last will be set to 0
 
   int identNum;
-  
+  int isError;
 
   bigSigma = 0.0;
 #ifdef IS_MPI
@@ -348,49 +348,41 @@ void LJFF::readParams( void ){
     }
   }
 #endif // is_mpi
-
-  // call new A_types in fortran
-  
-  int isError;
-
-  // dummy variables
-  int isLJ = 1;
-  int isDipole = 0;
-  int isSSD = 0;
-  int isGB = 0;
-  int isEAM = 0;
-  int isCharge = 0;
-  double charge = 0.0;
-  double dipole = 0.0;
   
   currentAtomType = headAtomType;
   while( currentAtomType != NULL ){
     
     if( currentAtomType->name[0] != '\0' ){
-      isError = 0;
-      makeAtype( &(currentAtomType->ident),
-		 &isLJ,
-		 &isSSD,
-		 &isDipole,
-		 &isGB,
-		 &isEAM,
-                 &isCharge,
-		 &(currentAtomType->epslon),
-		 &(currentAtomType->sigma),
-                 &charge,
-		 &dipole,
-		 &isError );
-      if( isError ){
-	sprintf( painCave.errMsg,
-		 "Error initializing the \"%s\" atom type in fortran\n",
-		 currentAtomType->name );
-	painCave.isFatal = 1;
-	simError();
-      }
+
+      AtomType* at = new AtomType();
+      at->setIdent(currentAtomType->ident);
+      at->setName(currentAtomType->name);     
+      at->setLennardJones();
+      at->complete();
+      
     }
     currentAtomType = currentAtomType->next;
   }
-      
+
+  currentAtomType = headAtomType;
+  while( currentAtomType != NULL ){
+    
+    if( currentAtomType->name[0] != '\0' ){
+      isError = 0;
+      newLJtype( &(currentAtomType->ident), &(currentAtomType->sigma), 
+                 &(currentAtomType->epslon), &isError);
+      if( isError ){
+        sprintf( painCave.errMsg,
+                 "Error initializing the \"%s\" LJ type in fortran\n",
+                 currentAtomType->name );
+        painCave.isFatal = 1;
+        simError();
+      }
+    }
+    
+    currentAtomType = currentAtomType->next;
+  }
+  
   entry_plug->useLJ = 1;
 
 #ifdef IS_MPI

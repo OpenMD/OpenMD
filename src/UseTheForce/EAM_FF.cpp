@@ -12,9 +12,9 @@ using namespace std;
 #include "UseTheForce/ForceFields.hpp"
 #include "primitives/SRI.hpp"
 #include "utils/simError.h"
-
+#include "types/AtomType.hpp"
 #include "UseTheForce/DarkSide/eam_interface.h"
-#include "UseTheForce/DarkSide/atype_interface.h"
+
 //#include "UseTheForce/fortranWrappers.hpp"
 
 #ifdef IS_MPI
@@ -328,6 +328,7 @@ void EAM_FF::readParams( void ){
   double *eam_rhovals;  // rho of r values
   double *eam_Frhovals; // F of rho values
   char eamPotFile[1000];
+
   
 
   bigSigma = 0.0;
@@ -466,42 +467,20 @@ void EAM_FF::readParams( void ){
   int isError;
 
   // dummy variables
-  int isLJ = 0;
-  int isDipole = 0;
-  int isSSD = 0;
-  int isGB = 0;
-  int isEAM = 1;
-  int isCharge = 0;
-  double dipole = 0.0;
-  double charge = 0.0;
-  double eamSigma = 0.0;
-  double eamEpslon = 0.0;
   
   currentAtomType = headAtomType->next;
   while( currentAtomType != NULL ){
     
     if( currentAtomType->name[0] != '\0' ){
-      isError = 0;
-      makeAtype( &(currentAtomType->ident),
-		 &isLJ,
-		 &isSSD,
-		 &isDipole,
-		 &isGB,
-		 &isEAM,
-                 &isCharge,
-		 &eamEpslon,
-		 &eamSigma,
-                 &charge,
-		 &dipole,
-		 &isError );
-      if( isError ){
-	sprintf( painCave.errMsg,
-		 "Error initializing the \"%s\" atom type in fortran\n",
-		 currentAtomType->name );
-	painCave.isFatal = 1;
-	simError();
-      }
-    }
+
+      AtomType* at = new AtomType();
+      at->setIdent(currentAtomType->ident);
+      at->setName(currentAtomType->name);
+      at->setEAM();
+      at->complete();
+
+    }    
+    
     currentAtomType = currentAtomType->next;
   }
       

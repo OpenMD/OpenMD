@@ -24,21 +24,24 @@ namespace oopse {
      */
     void    complete();
         
-    Matrix3x3d getI() {return I;}
-    void       setI(Matrix3x3d theI) {I = theI;}
+    Mat3x3d getI() {return I;}
+    void    setI(Mat3x3d theI) {I = theI;}
 
-    void       setDipole() { atp.is_Dipole = 1; atp.is_Electrostatic = 1;}
-    bool       isDipole()  { return atp.is_Dipole; }
+    void    setDipole() { atp.is_Dipole = 1; atp.is_Electrostatic = 1; }
+    bool    isDipole()  { return atp.is_Dipole; }
 
-    void       setGayBerne() { atp.is_GayBerne = 1; }
-    bool       isGayBerne()  { return atp.is_GayBerne; }
+    void    setGayBerne() { atp.is_GayBerne = 1; }
+    bool    isGayBerne()  { return atp.is_GayBerne; }
 
-    void       setShape() { atp.is_Shape = 1;}
-    bool       isShape()  { return atp.is_Shape; }
+    void    setSticky() { atp.is_Sticky = 1; }
+    bool    isSticky()  { return atp.is_Sticky; }
+
+    void    setShape() { atp.is_Shape = 1;}
+    bool    isShape()  { return atp.is_Shape; }
                 
   private:
     
-    Matrix3x3d I;
+    Mat3x3d I;
     
   };
 }

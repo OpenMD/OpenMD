@@ -8,11 +8,10 @@ using namespace std;
 #include "UseTheForce/ForceFields.hpp"
 #include "primitives/SRI.hpp"
 #include "utils/simError.h"
+#include "types/DirectionalAtomType.hpp"
+#include "UseTheForce/DarkSide/lj_interface.h"
+#include "UseTheForce/DarkSide/dipole_interface.h"
 #include "UseTheForce/DarkSide/sticky_interface.h"
-#include "UseTheForce/DarkSide/atype_interface.h"
-
-//#include "UseTheForce/fortranWrappers.hpp"
-
 
 #ifdef IS_MPI
 #include "UseTheForce/mpiForceField.h"
@@ -674,12 +673,14 @@ double DUFF::getAtomTypeMass (char* atomType) {
 
 void DUFF::readParams( void ){
 
-  int identNum;
+  int identNum, isError;
   
   atomStruct atomInfo;
   bondStruct bondInfo;
   bendStruct bendInfo;
   torsionStruct torsionInfo;
+
+  AtomType* at;
   
   bigSigma = 0.0;
 
@@ -780,54 +781,71 @@ void DUFF::readParams( void ){
   }
 
 #endif // is_mpi
-
-
-
-  // call new A_types in fortran
-  
-  int isError;
-  
+ 
   // dummy variables
-  
-  int isGB = 0;
-  int isLJ = 1;
-  int isEAM =0;
-  int isCharge = 0;
-  double charge=0.0;
-    
+      
   currentAtomType = headAtomType->next;;
-  while( currentAtomType != NULL ){
-    
-    if(currentAtomType->isDipole) entry_plug->useDipoles = 1;
-    if(currentAtomType->isSSD) {
-      entry_plug->useSticky = 1;
-      makeStickyType( &(currentAtomType->w0), &(currentAtomType->v0), 
-                      &(currentAtomType->v0p), 
-                      &(currentAtomType->rl), &(currentAtomType->ru), 
-                      &(currentAtomType->rlp), &(currentAtomType->rup));
+  while( currentAtomType != NULL ){    
+
+    if( currentAtomType->name[0] != '\0' ){
+      
+      if (currentAtomType->isSSD || currentAtomType->isDipole) 
+        DirectionalAtomType* at = new DirectionalAtomType();
+      else 
+        AtomType* at = new AtomType();
+      
+      if (currentAtomType->isSSD) {
+        ((DirectionalAtomType*)at)->setSticky();
+        entry_plug->useSticky = 1;
+      }
+      
+      if (currentAtomType->isDipole) {
+        ((DirectionalAtomType*)at)->setDipole();
+        entry_plug->useDipoles = 1;               
+      }
+      
+      at->setIdent(currentAtomType->ident);
+      at->setName(currentAtomType->name);     
+      at->setLennardJones();
+      at->complete();
     }
+    currentAtomType = currentAtomType->next;
+  }
+  
+  currentAtomType = headAtomType->next;;
+  while( currentAtomType != NULL ){    
 
     if( currentAtomType->name[0] != '\0' ){
       isError = 0;
-      makeAtype( &(currentAtomType->ident),
-		 &isLJ,
-		 &(currentAtomType->isSSD),
-		 &(currentAtomType->isDipole),
-		 &isGB,
-		 &isEAM,
-		 &isCharge,
-		 &(currentAtomType->epslon),
-		 &(currentAtomType->sigma),
-		 &charge,
-		 &(currentAtomType->dipole),
-		 &isError );
+      newLJtype( &(currentAtomType->ident), &(currentAtomType->sigma), 
+                 &(currentAtomType->epslon), &isError);
       if( isError ){
-	sprintf( painCave.errMsg,
-		 "Error initializing the \"%s\" atom type in fortran\n",
-		 currentAtomType->name );
-	painCave.isFatal = 1;
-	simError();
+        sprintf( painCave.errMsg,
+                 "Error initializing the \"%s\" LJ type in fortran\n",
+                 currentAtomType->name );
+        painCave.isFatal = 1;
+        simError();
       }
+           
+      if (currentAtomType->isDipole) {
+        newDipoleType(&(currentAtomType->ident), &(currentAtomType->dipole),
+                      &isError);
+        if( isError ){
+          sprintf( painCave.errMsg,
+                   "Error initializing the \"%s\" dipole type in fortran\n",
+                   currentAtomType->name );
+          painCave.isFatal = 1;
+          simError();
+        }
+      }
+      
+      if(currentAtomType->isSSD) {        
+        makeStickyType( &(currentAtomType->w0), &(currentAtomType->v0), 
+                        &(currentAtomType->v0p), 
+                        &(currentAtomType->rl), &(currentAtomType->ru), 
+                        &(currentAtomType->rlp), &(currentAtomType->rup));
+      }
+      
     }
     currentAtomType = currentAtomType->next;
   }

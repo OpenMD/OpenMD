@@ -4,7 +4,7 @@
 
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: doForces.F90,v 1.2 2004-10-21 20:15:22 gezelter Exp $, $Date: 2004-10-21 20:15:22 $, $Name: not supported by cvs2svn $, $Revision: 1.2 $
+!! @version $Id: doForces.F90,v 1.3 2004-10-22 21:20:53 gezelter Exp $, $Date: 2004-10-22 21:20:53 $, $Name: not supported by cvs2svn $, $Revision: 1.3 $
 
 module doForces
   use force_globals
@@ -40,23 +40,32 @@ module doForces
   logical, save :: haveSIMvariables = .false.
   logical, save :: havePropertyMap = .false.
   logical, save :: haveSaneForceField = .false.
-  logical, save :: FF_uses_LJ
-  logical, save :: FF_uses_sticky
+  
+  logical, save :: FF_uses_DirectionalAtoms
+  logical, save :: FF_uses_LennardJones
+  logical, save :: FF_uses_Electrostatic
   logical, save :: FF_uses_charges
   logical, save :: FF_uses_dipoles
-  logical, save :: FF_uses_RF
-  logical, save :: FF_uses_GB
+  logical, save :: FF_uses_sticky
+  logical, save :: FF_uses_GayBerne
   logical, save :: FF_uses_EAM
-  logical, save :: SIM_uses_LJ
-  logical, save :: SIM_uses_sticky
-  logical, save :: SIM_uses_charges
-  logical, save :: SIM_uses_dipoles
-  logical, save :: SIM_uses_RF
-  logical, save :: SIM_uses_GB
+  logical, save :: FF_uses_Shapes
+  logical, save :: FF_uses_FLARB
+  logical, save :: FF_uses_RF
+
+  logical, save :: SIM_uses_DirectionalAtoms
+  logical, save :: SIM_uses_LennardJones
+  logical, save :: SIM_uses_Electrostatics
+  logical, save :: SIM_uses_Charges
+  logical, save :: SIM_uses_Dipoles
+  logical, save :: SIM_uses_Sticky
+  logical, save :: SIM_uses_GayBerne
   logical, save :: SIM_uses_EAM
+  logical, save :: SIM_uses_Shapes
+  logical, save :: SIM_uses_FLARB
+  logical, save :: SIM_uses_RF
   logical, save :: SIM_requires_postpair_calc
   logical, save :: SIM_requires_prepair_calc
-  logical, save :: SIM_uses_directional_atoms
   logical, save :: SIM_uses_PBC
   logical, save :: SIM_uses_molecular_cutoffs
 
@@ -74,14 +83,16 @@ module doForces
 #endif
 
   type :: Properties
-     logical :: is_lj     = .false.
-     logical :: is_sticky = .false.
-     logical :: is_dp     = .false.
-     logical :: is_gb     = .false.
-     logical :: is_eam    = .false.
-     logical :: is_charge = .false.
-     real(kind=DP) :: charge = 0.0_DP
-     real(kind=DP) :: dipole_moment = 0.0_DP
+     logical :: is_Directional   = .false.
+     logical :: is_LennardJones  = .false.
+     logical :: is_Electrostatic = .false.
+     logical :: is_Charge        = .false.
+     logical :: is_Dipole        = .false.
+     logical :: is_Sticky        = .false.
+     logical :: is_GayBerne      = .false.
+     logical :: is_EAM           = .false.
+     logical :: is_Shape         = .false.
+     logical :: is_FLARB         = .false.
   end type Properties
 
   type(Properties), dimension(:),allocatable :: PropertyMap
@@ -120,31 +131,35 @@ contains
     endif
 
     do i = 1, nAtypes
-       call getElementProperty(atypes, i, "is_LJ", thisProperty)
-       PropertyMap(i)%is_LJ = thisProperty
+       call getElementProperty(atypes, i, "is_Directional", thisProperty)
+       PropertyMap(i)%is_Directional = thisProperty
+
+       call getElementProperty(atypes, i, "is_LennardJones", thisProperty)
+       PropertyMap(i)%is_LennardJones = thisProperty
+       
+       call getElementProperty(atypes, i, "is_Electrostatic", thisProperty)
+       PropertyMap(i)%is_Electrostatic = thisProperty
 
        call getElementProperty(atypes, i, "is_Charge", thisProperty)
        PropertyMap(i)%is_Charge = thisProperty
        
-       if (thisProperty) then
-          call getElementProperty(atypes, i, "charge", thisDPproperty)
-          PropertyMap(i)%charge = thisDPproperty
-       endif
-
-       call getElementProperty(atypes, i, "is_DP", thisProperty)
-       PropertyMap(i)%is_DP = thisProperty
-
-       if (thisProperty) then
-          call getElementProperty(atypes, i, "dipole_moment", thisDPproperty)
-          PropertyMap(i)%dipole_moment = thisDPproperty
-       endif
+       call getElementProperty(atypes, i, "is_Dipole", thisProperty)
+       PropertyMap(i)%is_Dipole = thisProperty
 
        call getElementProperty(atypes, i, "is_Sticky", thisProperty)
        PropertyMap(i)%is_Sticky = thisProperty
-       call getElementProperty(atypes, i, "is_GB", thisProperty)
-       PropertyMap(i)%is_GB = thisProperty
+
+       call getElementProperty(atypes, i, "is_GayBerne", thisProperty)
+       PropertyMap(i)%is_GayBerne = thisProperty
+
        call getElementProperty(atypes, i, "is_EAM", thisProperty)
        PropertyMap(i)%is_EAM = thisProperty
+
+       call getElementProperty(atypes, i, "is_Shape", thisProperty)
+       PropertyMap(i)%is_Shape = thisProperty
+
+       call getElementProperty(atypes, i, "is_FLARB", thisProperty)
+       PropertyMap(i)%is_FLARB = thisProperty
     end do
 
     havePropertyMap = .true.
@@ -152,18 +167,20 @@ contains
   end subroutine createPropertyMap
 
   subroutine setSimVariables()
-    SIM_uses_LJ = SimUsesLJ()
-    SIM_uses_sticky = SimUsesSticky()
-    SIM_uses_charges = SimUsesCharges()
-    SIM_uses_dipoles = SimUsesDipoles()
-    SIM_uses_RF = SimUsesRF()
-    SIM_uses_GB = SimUsesGB()
+    SIM_uses_DirectionalAtoms = SimUsesDirectionalAtoms()
+    SIM_uses_LennardJones = SimUsesLennardJones()
+    SIM_uses_Electrostatics = SimUsesElectrostatics()
+    SIM_uses_Charges = SimUsesCharges()
+    SIM_uses_Dipoles = SimUsesDipoles()
+    SIM_uses_Sticky = SimUsesSticky()
+    SIM_uses_GayBerne = SimUsesGayBerne()
     SIM_uses_EAM = SimUsesEAM()
+    SIM_uses_Shapes = SimUsesShapes()
+    SIM_uses_FLARB = SimUsesFLARB()
+    SIM_uses_RF = SimUsesRF()
     SIM_requires_postpair_calc = SimRequiresPostpairCalc()
     SIM_requires_prepair_calc = SimRequiresPrepairCalc()
-    SIM_uses_directional_atoms = SimUsesDirectionalAtoms()
     SIM_uses_PBC = SimUsesPBC()
-    !SIM_uses_molecular_cutoffs = SimUsesMolecularCutoffs()
 
     haveSIMvariables = .true.
 
@@ -244,32 +261,74 @@ contains
     !! this will scan through the known atypes and figure out what
     !! interactions are used by the force field.     
   
-    FF_uses_LJ = .false.
-    FF_uses_sticky = .false.
-    FF_uses_charges = .false.
-    FF_uses_dipoles = .false.
-    FF_uses_GB = .false.
+    FF_uses_DirectionalAtoms = .false.
+    FF_uses_LennardJones = .false.
+    FF_uses_Electrostatic = .false.
+    FF_uses_Charges = .false.    
+    FF_uses_Dipoles = .false.
+    FF_uses_Sticky = .false.
+    FF_uses_GayBerne = .false.
     FF_uses_EAM = .false.
+    FF_uses_Shapes = .false.
+    FF_uses_FLARB = .false.
     
-    call getMatchingElementList(atypes, "is_LJ", .true., nMatches, MatchList)
-    if (nMatches .gt. 0) FF_uses_LJ = .true.
+    call getMatchingElementList(atypes, "is_Directional", .true., &
+         nMatches, MatchList)
+    if (nMatches .gt. 0) FF_uses_DirectionalAtoms = .true.
+
+    call getMatchingElementList(atypes, "is_LennardJones", .true., &
+         nMatches, MatchList)
+    if (nMatches .gt. 0) FF_uses_LennardJones = .true.
     
-    call getMatchingElementList(atypes, "is_Charge", .true., nMatches, MatchList)
-    if (nMatches .gt. 0) FF_uses_charges = .true.   
+    call getMatchingElementList(atypes, "is_Electrostatic", .true., &
+         nMatches, MatchList)
+    if (nMatches .gt. 0) then
+       FF_uses_Electrostatic = .true.
+    endif
+
+    call getMatchingElementList(atypes, "is_Charge", .true., &
+         nMatches, MatchList)
+    if (nMatches .gt. 0) then
+       FF_uses_charges = .true.   
+       FF_uses_electrostatic = .true.
+    endif
     
-    call getMatchingElementList(atypes, "is_DP", .true., nMatches, MatchList)
-    if (nMatches .gt. 0) FF_uses_dipoles = .true.
+    call getMatchingElementList(atypes, "is_Dipole", .true., &
+         nMatches, MatchList)
+    if (nMatches .gt. 0) then 
+       FF_uses_dipoles = .true.
+       FF_uses_electrostatic = .true.
+       FF_uses_DirectionalAtoms = .true.
+    endif
     
     call getMatchingElementList(atypes, "is_Sticky", .true., nMatches, &
          MatchList) 
-    if (nMatches .gt. 0) FF_uses_Sticky = .true.
+    if (nMatches .gt. 0) then
+       FF_uses_Sticky = .true.
+       FF_uses_DirectionalAtoms = .true.
+    endif
     
-    call getMatchingElementList(atypes, "is_GB", .true., nMatches, MatchList)
-    if (nMatches .gt. 0) FF_uses_GB = .true.
+    call getMatchingElementList(atypes, "is_GayBerne", .true., &
+         nMatches, MatchList)
+    if (nMatches .gt. 0) then
+       FF_uses_GayBerne = .true.
+       FF_uses_DirectionalAtoms = .true.
+    endif
     
     call getMatchingElementList(atypes, "is_EAM", .true., nMatches, MatchList)
     if (nMatches .gt. 0) FF_uses_EAM = .true.
     
+    call getMatchingElementList(atypes, "is_Shape", .true., &
+         nMatches, MatchList)
+    if (nMatches .gt. 0) then
+       FF_uses_Shapes = .true.
+       FF_uses_DirectionalAtoms = .true.
+    endif
+
+    call getMatchingElementList(atypes, "is_FLARB", .true., &
+         nMatches, MatchList)
+    if (nMatches .gt. 0) FF_uses_FLARB = .true.
+
     !! Assume sanity (for the sake of argument)
     haveSaneForceField = .true.
     
@@ -308,7 +367,7 @@ contains
        end if
     endif
 
-    if (FF_uses_GB) then
+    if (FF_uses_GayBerne) then
        call check_gb_pair_FF(my_status)
        if (my_status .ne. 0) then
           thisStat = -1
@@ -317,9 +376,9 @@ contains
        endif
     endif
 
-    if (FF_uses_GB .and. FF_uses_LJ) then
+    if (FF_uses_GayBerne .and. FF_uses_LennardJones) then
     endif
-
+    
     if (.not. haveNeighborList) then
        !! Create neighbor lists
        call expandNeighborList(nLocal, my_status)
@@ -419,7 +478,7 @@ contains
     call gather(q_group, q_group_Row, plan_group_row_3d)
     call gather(q_group, q_group_Col, plan_group_col_3d)
         
-    if (FF_UsesDirectionalAtoms() .and. SIM_uses_directional_atoms) then
+    if (FF_UsesDirectionalAtoms() .and. SIM_uses_DirectionalAtoms) then
        call gather(u_l, u_l_Row, plan_atom_row_3d)
        call gather(u_l, u_l_Col, plan_atom_col_3d)
        
@@ -673,7 +732,7 @@ contains
        f(1:3,i) = f(1:3,i) + f_temp(1:3,i)
     end do
     
-    if (FF_UsesDirectionalAtoms() .and. SIM_uses_directional_atoms) then
+    if (FF_UsesDirectionalAtoms() .and. SIM_uses_DirectionalAtoms) then
        t_temp = 0.0_dp
        call scatter(t_Row,t_temp,plan_atom_row_3d)
        do i = 1,nlocal
@@ -728,9 +787,9 @@ contains
              me_i = atid(i)
 #endif
              
-             if (PropertyMap(me_i)%is_DP) then
+             if (PropertyMap(me_i)%is_Dipole) then
                 
-                mu_i = PropertyMap(me_i)%dipole_moment
+                mu_i = getDipoleMoment(me_i)
                 
                 !! The reaction field needs to include a self contribution 
                 !! to the field:
@@ -806,9 +865,10 @@ contains
     me_j = atid(j)
 #endif
     
-    if (FF_uses_LJ .and. SIM_uses_LJ) then
+    if (FF_uses_LennardJones .and. SIM_uses_LennardJones) then
        
-       if ( PropertyMap(me_i)%is_LJ .and. PropertyMap(me_j)%is_LJ ) then
+       if ( PropertyMap(me_i)%is_LennardJones .and. &
+            PropertyMap(me_j)%is_LennardJones ) then
           call do_lj_pair(i, j, d, r, rijsq, sw, vpair, fpair, pot, f, do_pot)
        endif
        
@@ -817,20 +877,21 @@ contains
     if (FF_uses_charges .and. SIM_uses_charges) then
        
        if (PropertyMap(me_i)%is_Charge .and. PropertyMap(me_j)%is_Charge) then
-          call do_charge_pair(i, j, d, r, rijsq, sw, vpair, fpair, pot, f, do_pot)
+          call do_charge_pair(i, j, d, r, rijsq, sw, vpair, fpair, &
+               pot, f, do_pot)
        endif
        
     endif
     
     if (FF_uses_dipoles .and. SIM_uses_dipoles) then
        
-       if ( PropertyMap(me_i)%is_DP .and. PropertyMap(me_j)%is_DP) then
-          call do_dipole_pair(i, j, d, r, rijsq, sw, vpair, fpair, pot, u_l, f, t, &
-               do_pot)
+       if ( PropertyMap(me_i)%is_Dipole .and. PropertyMap(me_j)%is_Dipole) then
+          call do_dipole_pair(i, j, d, r, rijsq, sw, vpair, fpair, &
+               pot, u_l, f, t, do_pot)
           if (FF_uses_RF .and. SIM_uses_RF) then
              call accumulate_rf(i, j, r, u_l, sw)
              call rf_correct_forces(i, j, d, r, u_l, sw, f, fpair)
-          endif          
+          endif
        endif
 
     endif
@@ -838,27 +899,38 @@ contains
     if (FF_uses_Sticky .and. SIM_uses_sticky) then
 
        if ( PropertyMap(me_i)%is_Sticky .and. PropertyMap(me_j)%is_Sticky) then
-          call do_sticky_pair(i, j, d, r, rijsq, sw, vpair, fpair, pot, A, f, t, &
-               do_pot)
+          call do_sticky_pair(i, j, d, r, rijsq, sw, vpair, fpair, &
+               pot, A, f, t, do_pot)
        endif
-
+       
     endif
 
 
-    if (FF_uses_GB .and. SIM_uses_GB) then
+    if (FF_uses_GayBerne .and. SIM_uses_GayBerne) then
        
-       if ( PropertyMap(me_i)%is_GB .and. PropertyMap(me_j)%is_GB) then
-          call do_gb_pair(i, j, d, r, rijsq, sw, vpair, fpair, pot, u_l, f, t, &
-               do_pot)
+       if ( PropertyMap(me_i)%is_GayBerne .and. &
+            PropertyMap(me_j)%is_GayBerne) then
+          call do_gb_pair(i, j, d, r, rijsq, sw, vpair, fpair, &
+               pot, u_l, f, t, do_pot)
        endif
-
-    endif
        
+    endif
+    
     if (FF_uses_EAM .and. SIM_uses_EAM) then
        
        if ( PropertyMap(me_i)%is_EAM .and. PropertyMap(me_j)%is_EAM) then
           call do_eam_pair(i, j, d, r, rijsq, sw, vpair, fpair, pot, f, &
                do_pot)
+       endif
+       
+    endif
+
+    if (FF_uses_Shapes .and. SIM_uses_Shapes) then
+       
+       if ( PropertyMap(me_i)%is_Shape .and. &
+            PropertyMap(me_j)%is_Shape ) then
+          call do_shape_pair(i, j, d, r, rijsq, sw, vpair, fpair, &
+               pot, u_l, f, t, do_pot)
        endif
        
     endif
@@ -1101,8 +1173,8 @@ contains
  
  function FF_UsesDirectionalAtoms() result(doesit)
    logical :: doesit
-   doesit = FF_uses_dipoles .or. FF_uses_sticky .or. &
-        FF_uses_GB .or. FF_uses_RF
+   doesit = FF_uses_DirectionalAtoms .or. FF_uses_Dipoles .or. &
+        FF_uses_Sticky .or. FF_uses_GayBerne .or. FF_uses_Shapes
  end function FF_UsesDirectionalAtoms
  
  function FF_RequiresPrepairCalc() result(doesit)

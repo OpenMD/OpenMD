@@ -9,13 +9,17 @@
 typedef  struct{
   double dielect;
   int SIM_uses_PBC;
-  int SIM_uses_LJ;
-  int SIM_uses_sticky;
-  int SIM_uses_charges;
-  int SIM_uses_dipoles;
-  int SIM_uses_RF;
-  int SIM_uses_GB;
+  int SIM_uses_DirectionalAtoms;
+  int SIM_uses_LennardJones;
+  int SIM_uses_Electrostatics;
+  int SIM_uses_Charges;
+  int SIM_uses_Dipoles;
+  int SIM_uses_Sticky;
+  int SIM_uses_GayBerne;
   int SIM_uses_EAM;
+  int SIM_uses_Shapes;
+  int SIM_uses_FLARB;
+  int SIM_uses_RF;
 } simtype;
 #endif //__FSIMULATION
 #endif //__C
@@ -29,12 +33,16 @@ type, public :: simtype
    real ( kind = dp ) :: dielect = 0.0_dp
    !! Periodic Boundry Conditions
    logical :: SIM_uses_PBC
-   logical :: SIM_uses_LJ
-   logical :: SIM_uses_sticky
-   logical :: SIM_uses_charges
-   logical :: SIM_uses_dipoles
-   logical :: SIM_uses_RF
-   logical :: SIM_uses_GB
+   logical :: SIM_uses_DirectionalAtoms
+   logical :: SIM_uses_LennardJones
+   logical :: SIM_uses_Electrostatics
+   logical :: SIM_uses_Charges
+   logical :: SIM_uses_Dipoles
+   logical :: SIM_uses_Sticky
+   logical :: SIM_uses_GayBerne
    logical :: SIM_uses_EAM
+   logical :: SIM_uses_Shapes
+   logical :: SIM_uses_FLARB
+   logical :: SIM_uses_RF
 end type simtype
 #endif
