@@ -33,7 +33,7 @@ RigidBody::RigidBody() : StuntDouble(otRigidBody, &Snapshot::rigidbodyData){
 
 void RigidBody::setPrevA(const RotMat3x3d& a) {
     ((snapshotMan_->getPrevSnapshot())->*storage_).aMat[localIndex_] = a;
-    ((snapshotMan_->getPrevSnapshot())->*storage_).unitVector[localIndex_] = a.inverse() * sU_.getColum(2);
+    ((snapshotMan_->getPrevSnapshot())->*storage_).unitVector[localIndex_] = a.inverse() * sU_.getColumn(2);
 
     std::vector<Atom*>::iterator i;
     for (i = atoms_.begin(); i != atoms_.end(); ++i) {
@@ -47,7 +47,7 @@ void RigidBody::setPrevA(const RotMat3x3d& a) {
       
 void RigidBody::setA(const RotMat3x3d& a) {
     ((snapshotMan_->getCurrentSnapshot())->*storage_).aMat[localIndex_] = a;
-    ((snapshotMan_->getCurrentSnapshot())->*storage_).unitVector[localIndex_] = a.inverse() * sU_.getColum(2);
+    ((snapshotMan_->getCurrentSnapshot())->*storage_).unitVector[localIndex_] = a.inverse() * sU_.getColumn(2);
 
     std::vector<Atom*>::iterator i;
     for (i = atoms_.begin(); i != atoms_.end(); ++i) {
@@ -59,7 +59,7 @@ void RigidBody::setA(const RotMat3x3d& a) {
     
 void RigidBody::setA(const RotMat3x3d& a, int snapshotNo) {
     ((snapshotMan_->getSnapshot(snapshotNo))->*storage_).aMat[localIndex_] = a;
-    ((snapshotMan_->getSnapshot(snapshotNo))->*storage_).unitVector[localIndex_] = a.inverse() * sU_.getColum(2);    
+    ((snapshotMan_->getSnapshot(snapshotNo))->*storage_).unitVector[localIndex_] = a.inverse() * sU_.getColumn(2);    
 
     std::vector<Atom*>::iterator i;
     for (i = atoms_.begin(); i != atoms_.end(); ++i) {
