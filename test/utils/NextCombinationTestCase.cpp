@@ -4,6 +4,8 @@
 
 // Registers the fixture into the 'registry'
 CPPUNIT_TEST_SUITE_REGISTRATION( NextCombinationTestCase);
+
+
 void NextCombinationTestCase::testNextCombination() {
     std::vector<int> iv;
     std::vector<std::vector<int>::iterator> ic;
@@ -30,5 +32,22 @@ void NextCombinationTestCase::testNextCombination() {
     CPPUNIT_ASSERT(results[4][0] == 0 && results[4][1] == 4 && results[4].size() == 2);
     CPPUNIT_ASSERT(results[5][0] == 1 && results[5][1] == 4  && results[5].size() == 2);
     CPPUNIT_ASSERT(results[6][0] == 0  && results[6][1] == 1 && results[6][2] == 4 && results[6].size() == 3);
-    
+
+    std::vector<std::string> sv;
+    std::vector<std::vector<std::string>::iterator> sic;
+    std::vector<std::vector<std::string>::iterator>::iterator j; 
+    std::vector<std::vector<std::string> > resultStrings;
+    std::vector<std::string> resultString;
+    sv.push_back("H");
+    sv.push_back("C");
+    sv.push_back("N");
+
+    while (replaceWildCard(sic, sv, resultString)) {   
+        for(std::vector<std::string>::iterator k = resultString.begin(); k != resultString.end(); ++k) {
+            std::cout << *k << "\t";
+        }
+        std::cout << std::endl;
+      resultStrings.push_back(resultString);  
+    }
 }
+

@@ -1,3 +1,97 @@
+2004-10-28 14:06  tim
+
+	* ChangeLog, src/applications/simpleBuilder/MoLocator.hpp,
+	src/applications/simpleBuilder/simpleBuilder.cpp,
+	src/utils/next_combination.hpp, test/utils/Makefile,
+	test/utils/NextCombinationTestCase.cpp,
+	test/utils/ReplaceWildCardTestCase.cpp,
+	test/utils/next_combination.hpp: STL next_permutation like
+	next_combination is working
+
+2004-10-28 12:22  chrisfen
+
+	* src/UseTheForce/WATER.cpp: fix of setDipoles
+
+2004-10-28 12:20  gezelter
+
+	* src/UseTheForce/Shapes_FF.cpp: forgot to advance lines in the
+	shapeFile
+
+2004-10-28 12:20  gezelter
+
+	* samples/shape/linear.md: forgot the orientation line
+
+2004-10-28 11:56  gezelter
+
+	* src/: UseTheForce/DUFF.cpp, UseTheForce/EAM_FF.cpp,
+	UseTheForce/ForceFields.hpp, UseTheForce/LJFF.cpp,
+	UseTheForce/WATER.cpp, types/AtomType.cpp: fixed duplicate
+	declaration foo
+
+2004-10-28 11:55  gezelter
+
+	* samples/lipid/5x5.md: uncommented .in line
+
+2004-10-28 10:42  tim
+
+	* test/utils/: Makefile, NextCombinationTestCase.cpp,
+	NextCombinationTestCase.hpp, next_combination.hpp: next_combination
+	in progress
+
+2004-10-28 10:15  tim
+
+	* test/utils/: NextCombinationTestCase.cpp,
+	NextCombinationTestCase.hpp: adding next_combination test case
+
+2004-10-28 10:02  tim
+
+	* test/utils/next_combination.hpp: STL Compatible combination
+	sequence generator
+
+2004-10-28 01:23  tim
+
+	* test/utils/: GenerateCombination.hpp,
+	ReplaceWildCardTestCase.cpp: bug fixed in GenerateCombination.hpp
+
+2004-10-28 01:16  tim
+
+	* test/utils/GenerateCombination.hpp: a STL next_permutaion like
+	next_combination function.
+
+2004-10-27 22:27  tim
+
+	* test/utils/ReplaceWildCard.hpp: no message
+
+2004-10-27 22:14  tim
+
+	* test/utils/: ReplaceWildCard.hpp, ReplaceWildCardTestCase.cpp:
+	ReplaceWildCard(recursive version) is working, need refactoring. An
+	iterative version is on the way
+
+2004-10-27 21:28  tim
+
+	* test/utils/: Makefile, ReplaceWildCard.hpp,
+	ReplaceWildCardTestCase.cpp: ReplaceWildCard in progress
+
+2004-10-27 21:08  tim
+
+	* test/utils/: ReplaceWildCardTestCase.cpp,
+	ReplaceWildCardTestCase.hpp: Adding Test Case for ReplaceWildCard
+
+2004-10-27 18:17  tim
+
+	* test/utils/ReplaceWildCard.hpp: adding ReplaceWildCard.hpp, need
+	test
+
+2004-10-27 01:25  tim
+
+	* src/utils/TupleMatcher.hpp: Adding Generic TupleMatcher, wild
+	char matching is on the way
+
+2004-10-27 01:07  tim
+
+	* src/utils/Tuple.hpp: Adding Generic Tuple3 and Tuple4
+
 2004-10-26 22:00  gezelter
 
 	* src/UseTheForce/: EAM_FF.cpp, ForceFields.hpp: bug fix
@@ -37,6 +131,13 @@
 	UseTheForce/WATER.cpp, UseTheForce/doForces.F90,
 	UseTheForce/DarkSide/shapes_interface.h, brains/SimSetup.cpp:
 	forcefield refactoring for shapes
+
+2004-10-26 17:24  gezelter
+
+	* samples/shape/: 5CB.shape, 8CB.shape, C60.shape, C70.shape,
+	Shapes.frc, cholesterol.shape, ethylBenzene.shape, linear.in,
+	linear.md, linear.shape, toluene.shape: adding sample shape
+	directory
 
 2004-10-26 17:19  tim
 
