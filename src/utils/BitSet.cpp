@@ -42,7 +42,7 @@
 #include "utils/BitSet.hpp"
 #include <algorithm>
 #include <cassert>
-
+#include <string>
 namespace oopse {
 int BitSet::countBits() {
     return std::count(bitset_.begin(), bitset_.end(), true);
@@ -76,7 +76,7 @@ bool BitSet::none() {
     return i == bitset_.end() ? true : false;
 }
     
-int BitSet::nextOffBit(int fromIndex) {
+int BitSet::nextOffBit(int fromIndex) const {
     ++fromIndex;
     while (fromIndex < size()) {
         if (!bitset_[fromIndex]) {
@@ -88,7 +88,7 @@ int BitSet::nextOffBit(int fromIndex) {
     return -1;
 }
 
-int BitSet::nextOnBit(int fromIndex) {
+int BitSet::nextOnBit(int fromIndex) const {
     ++fromIndex;
     while (fromIndex < size()) {
         if (bitset_[fromIndex]) {
@@ -168,6 +168,11 @@ std::istream& operator>> ( std::istream& is, const BitSet& bs) {
 }
 
 std::ostream& operator<< ( std::ostream& os, const BitSet& bs) {
+    for (int i = 0; i < bs.bitset_.size(); ++i) {
+        std::string val = bs[i] ? "true" : "false";
+        os << "BitSet[" << i <<"] = " << val << std::endl; 
+    }
+    
     return os;
 }
 

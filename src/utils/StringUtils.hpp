@@ -122,8 +122,8 @@ namespace oopse {
     template<typename T>
     T lexi_cast(const std::string& str) {
         T result;
-        std::istringstream iss;        
-        if (iss >> result) {
+        std::istringstream iss(str);        
+        if (!(iss >> result)) {
             std::cerr << "lexi_cast Error" << std::endl;
         }
         return result;

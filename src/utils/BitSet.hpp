@@ -42,6 +42,7 @@
 #ifndef UTILS_BITSET_HPP
 #define UTILS_BITSET_HPP
 
+#include <iostream>
 #include <functional>
 #include <vector>
 namespace oopse {
@@ -82,10 +83,10 @@ class BitSet {
         bool none();
         
         /** Returns the index of the first bit that is set to false that occurs on or after the specified starting index.*/
-        int nextOffBit(int fromIndex); 
+        int nextOffBit(int fromIndex) const; 
          
         /** Returns the index of the first bit that is set to true that occurs on or after the specified starting index. */
-        int nextOnBit(int fromIndex); 
+        int nextOnBit(int fromIndex) const; 
         
         /** Performs a logical AND of this target bit set with the argument bit set. */
         void andOperator (const BitSet& bs);
@@ -118,8 +119,7 @@ class BitSet {
         BitSet& operator&= (const BitSet &bs) {  andOperator (bs); return *this; }
         BitSet& operator|= (const BitSet &bs) { orOperator (bs); return *this; }
         BitSet& operator^= (const BitSet &bs) { xorOperator (bs); return *this; }
-        bool operator[] (int bitIndex) {  return bitset_[bitIndex];  }
-
+        bool operator[] (int bitIndex)  const {  return bitset_[bitIndex];  }
         friend BitSet operator| (const BitSet& bs1, const BitSet& bs2);
         friend BitSet operator& (const BitSet& bs1, const BitSet& bs2);
         friend BitSet operator^ (const BitSet& bs1, const BitSet& bs2);
