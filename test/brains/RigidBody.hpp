@@ -36,7 +36,7 @@
 #include <vector>
 
 #include "primitives/StuntDouble.hpp"
-
+#include "primitives/DirectionalAtom.hpp"
 namespace oopse{
     class RigidBody : public StuntDouble {
         public:

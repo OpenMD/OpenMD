@@ -27,13 +27,13 @@
 
 namespace oopse {
 
-RigidBody::RigidBody() : objType_(otRigidBody), storage_(&Snapshot::rigidbodyData){
+RigidBody::RigidBody() : StuntDouble(otRigidBody, &Snapshot::rigidbodyData){
 
 }
 
 void RigidBody::setPrevA(const RotMat3x3d& a) {
-    (snapshotMan_->getPrevSnapshot())->storage_->aMat[localIndex_] = a;
-    (snapshotMan_->getPrevSnapshot())->storage_->unitVector[localIndex_] = a.inverse() * sU_.getColum(2);
+    ((snapshotMan_->getPrevSnapshot())->*storage_).aMat[localIndex_] = a;
+    ((snapshotMan_->getPrevSnapshot())->*storage_).unitVector[localIndex_] = a.inverse() * sU_.getColum(2);
 
     std::vector<Atom*>::iterator i;
     for (i = atoms_.begin(); i != atoms_.end(); ++i) {
@@ -46,8 +46,8 @@ void RigidBody::setPrevA(const RotMat3x3d& a) {
 
       
 void RigidBody::setA(const RotMat3x3d& a) {
-    (snapshotMan_->getCurrentSnapshot())->storage_->aMat[localIndex_] = a;
-    (snapshotMan_->getCurrentSnapshot())->storage_->unitVector[localIndex_] = a.inverse() * sU_.getColum(2);
+    ((snapshotMan_->getCurrentSnapshot())->*storage_).aMat[localIndex_] = a;
+    ((snapshotMan_->getCurrentSnapshot())->*storage_).unitVector[localIndex_] = a.inverse() * sU_.getColum(2);
 
     std::vector<Atom*>::iterator i;
     for (i = atoms_.begin(); i != atoms_.end(); ++i) {
@@ -58,8 +58,8 @@ void RigidBody::setA(const RotMat3x3d& a) {
 }    
     
 void RigidBody::setA(const RotMat3x3d& a, int snapshotNo) {
-    (snapshotMan_->getSnapshot(snapshotNo))->storage_->aMat[localIndex_] = a;
-    (snapshotMan_->getSnapshot(snapshotNo))->storage_->unitVector[localIndex_] = a.inverse() * sU_.getColum(2);    
+    ((snapshotMan_->getSnapshot(snapshotNo))->*storage_).aMat[localIndex_] = a;
+    ((snapshotMan_->getSnapshot(snapshotNo))->*storage_).unitVector[localIndex_] = a.inverse() * sU_.getColum(2);    
 
     std::vector<Atom*>::iterator i;
     for (i = atoms_.begin(); i != atoms_.end(); ++i) {
@@ -76,10 +76,6 @@ void  DirectionalAtom::setUnitFrameFromEuler(double phi, double theta, double ps
 
 Mat3x3d RigidBody::getI() {
     return inertiaTensor_;
-}    
-
-void RigidBody::setI(Mat3x3d& I) {
-    inertiaTensor_ = I;
 }    
 
 std::vector<double> RigidBody::getGrad() {
@@ -326,11 +322,11 @@ void  RigidBody::updateAtoms() {
 
 
 bool RigidBody::getAtomPos(Vector3d& pos, unsigned int index) {
-    if (index < atoms_.size() {
+    if (index < atoms_.size()) {
 
         Vector3d ref = body2Lab(refCoords_[index]);
         pos = getPos() + ref;
-        return true
+        return true;
     } else {
         std::cerr << index << " is an invalid index, current rigid body contains " 
                       << atoms_.size() << "atoms" << std::endl;
@@ -349,15 +345,15 @@ bool RigidBody::getAtomPos(Vector3d& pos, Atom* atom) {
     } else {
         std::cerr << "Atom " << atom->getGlobalIndex() 
                       <<" does not belong to Rigid body "<< getGlobalIndex() << std::endl; 
+        return false;
     }
 }
 bool RigidBody::getAtomVel(Vector3d& vel, unsigned int index) {
 
     //velRot = $(A\cdot skew(I^{-1}j))^{T}refCoor$
 
-    if (index < atoms_.size() {
+    if (index < atoms_.size()) {
 
-        Vector3d ref;
         Vector3d velRot;
         Mat3x3d skewMat;;
         Vector3d ref = refCoords_[index];
@@ -379,10 +375,11 @@ bool RigidBody::getAtomVel(Vector3d& vel, unsigned int index) {
         velRot = (getA() * skewMat).transpose() * ref;
 
         vel =getVel() + velRot;
+        return true;
         
     } else {
-        std::cerr << "Atom " << atom->getGlobalIndex() 
-                      <<" does not belong to Rigid body "<< getGlobalIndex() << std::endl; 
+        std::cerr << index << " is an invalid index, current rigid body contains " 
+                      << atoms_.size() << "atoms" << std::endl;
         return false;
     }
 }
@@ -401,10 +398,10 @@ bool RigidBody::getAtomVel(Vector3d& vel, Atom* atom) {
 }
 
 bool RigidBody::getAtomRefCoor(Vector3d& coor, unsigned int index) {
-    if (index < atoms_.size() {
+    if (index < atoms_.size()) {
 
         coor = refCoords_[index];
-        return true
+        return true;
     } else {
         std::cerr << index << " is an invalid index, current rigid body contains " 
                       << atoms_.size() << "atoms" << std::endl;

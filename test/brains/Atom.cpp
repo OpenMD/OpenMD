@@ -23,9 +23,10 @@
  *
  */
 
+#include "primitives/Atom.hpp"
 namespace oopse {
 
-Atom::Atom() : objType_(otAtom), storage_(&Snapshot::atomData){
+Atom::Atom(AtomType* at) : StuntDouble(otAtom, &Snapshot::atomData) ,atomType_(at) {
 
 }
 

@@ -27,9 +27,9 @@
 
 namespace oopse {
 
-DirectionalAtom::DirectionalAtom(DirectionalAtom* dAtomType) 
-                         : Atom(dAtomType), objType_(otDAtom), storage_(&Snapshot::atomData){
-
+DirectionalAtom::DirectionalAtom(DirectionalAtomType* dAtomType) 
+                         : Atom(dAtomType){
+    objType_= otDAtom;
 }
 
 Mat3x3d DirectionalAtom::getI() {
@@ -37,19 +37,19 @@ Mat3x3d DirectionalAtom::getI() {
 }    
 
 void DirectionalAtom::setPrevA(const RotMat3x3d& a) {
-    (snapshotMan_->getPrevSnapshot())->storage_->aMat[localIndex_] = a;
-    (snapshotMan_->getPrevSnapshot())->storage_->unitVector[localIndex_] = a.inverse() * sU_.getColum(2);
+    ((snapshotMan_->getPrevSnapshot())->*storage_).aMat[localIndex_] = a;
+    ((snapshotMan_->getPrevSnapshot())->*storage_).unitVector[localIndex_] = a.inverse() * sU_.getColum(2);
 }
 
       
 void DirectionalAtom::setA(const RotMat3x3d& a) {
-    (snapshotMan_->getCurrentSnapshot())->storage_->aMat[localIndex_] = a;
-    (snapshotMan_->getCurrentSnapshot())->storage_->unitVector[localIndex_] = a.inverse() * sU_.getColum(2);
+    ((snapshotMan_->getCurrentSnapshot())->*storage_).aMat[localIndex_] = a;
+    ((snapshotMan_->getCurrentSnapshot())->*storage_).unitVector[localIndex_] = a.inverse() * sU_.getColum(2);
 }    
     
 void DirectionalAtom::setA(const RotMat3x3d& a, int snapshotNo) {
-    (snapshotMan_->getSnapshot(snapshotNo))->storage_->aMat[localIndex_] = a;
-    (snapshotMan_->getSnapshot(snapshotNo))->storage_->unitVector[localIndex_] = a.inverse() * sU_.getColum(2);    
+    ((snapshotMan_->getSnapshot(snapshotNo))->*storage_).aMat[localIndex_] = a;
+    ((snapshotMan_->getSnapshot(snapshotNo))->*storage_).unitVector[localIndex_] = a.inverse() * sU_.getColum(2);    
 }    
 
 void DirectionalAtom::rotateBy(const RotMat3x3d& m) {

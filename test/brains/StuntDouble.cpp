@@ -34,7 +34,8 @@
 
 namespace oopse {
 
-StuntDouble::StuntDouble() : 
+StuntDouble::StuntDouble(ObjectType objType, DataStoragePointer storage) : 
+    objType_(objType), storage_(storage),    
     linear_(false), linearAxis_(-1), globalIndex_(-1), localIndex_(-1), snapshotMan_(NULL){
 }
 
@@ -42,28 +43,31 @@ StuntDouble::~StuntDouble() {
 
 }
 
+void StuntDouble::zeroForces() {
+    setFrc(V3Zero);
+}
 void StuntDouble::addProperty(GenericData* genData) {
-    properties.addProperty(genData);  
+    properties_.addProperty(genData);  
 }
 
 void StuntDouble::removeProperty(std::string& propName) {
-    properties.removeProperty();  
+    properties_.removeProperty(propName);  
 }
 
 void StuntDouble::clearProperties() {
-    properties.clearProperties(); 
+    properties_.clearProperties(); 
 }
 
 std::vector<std::string> StuntDouble::getPropertyNames() {
-    return properties.getPropertyNames();  
+    return properties_.getPropertyNames();  
 }
       
 std::vector<GenericData*> StuntDouble::getProperties() { 
-    return properties.getProperties(); 
+    return properties_.getProperties(); 
 }
 
-GenericData* StuntDouble::getPropertyByName(std:string& propName) {
-    return properties.getPropertyByName(propName); 
+GenericData* StuntDouble::getPropertyByName(std::string& propName) {
+    return properties_.getPropertyByName(propName); 
 }
 
 

@@ -34,11 +34,11 @@
 #define PRIMITIVES_DIRECTIONALATOM_HPP
 
 #include "primitives/Atom.hpp"
-
+#include "types/DirectionalAtomType.hpp"
 namespace oopse{
     class DirectionalAtom : public Atom {
         public:
-            DirectionalAtom(DirectionalAtom* dAtomType);
+            DirectionalAtom(DirectionalAtomType* dAtomType);
             /**
              * Returns the inertia tensor of this stuntdouble
              * @return the inertia tensor of this stuntdouble
