@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -71,15 +71,12 @@ class DirectionalAtomType : public AtomType {
             electroBodyFrame_ =electroBodyFrame;
         }
 
-        void    setDipole() { atp.is_Dipole = 1; }
-
+        void setDipole() { atp.is_Dipole = 1; }
+        void setSplitDipole() { atp.is_SplitDipole = 1; atp.is_Dipole=1;}
         void setQuadrupole() { atp.is_Quadrupole = 1; }
-
-        void    setGayBerne() { atp.is_GayBerne = 1; }
-
-        void    setSticky() { atp.is_Sticky = 1; }
-
-        void    setShape() { atp.is_Shape = 1;}
+        void setGayBerne() { atp.is_GayBerne = 1; }
+        void setSticky() { atp.is_Sticky = 1; }
+        void setShape() { atp.is_Shape = 1;}
 
         virtual void complete();
 

@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -45,7 +45,7 @@
 #include "utils/simError.h"
 namespace oopse {
 
-void DirectionalAtomType::complete() {
+  void DirectionalAtomType::complete() {
 
     //
     AtomType::complete();
@@ -85,30 +85,59 @@ void DirectionalAtomType::complete() {
         simError();          
       }
     }
+
+    if (isSplitDipole()) {
+      data = getPropertyByName("SplitDipoleDistance");
+      if (data != NULL) {
+        DoubleGenericData* doubleData= dynamic_cast<DoubleGenericData*>(data);
+        
+        if (doubleData != NULL) {
+          double splitDipoleDistance = doubleData->getData();
+          
+          setSplitDipoleDistance(&atp.ident, &splitDipoleDistance, &isError);
+          if (isError != 0) {
+            sprintf( painCave.errMsg,
+                     "Fortran rejected setSplitDipoleDistance\n");
+            painCave.severity = OOPSE_ERROR;
+            painCave.isFatal = 1;
+            simError();          
+          }
+          
+        } else {
+          sprintf( painCave.errMsg,
+                   "Can not cast GenericData to DoubleGenericData\n");
+          painCave.severity = OOPSE_ERROR;
+          painCave.isFatal = 1;
+          simError();          
+        }
+      } else {
+        sprintf( painCave.errMsg, "Can not find SplitDipole distance parameter\n");
+        painCave.severity = OOPSE_ERROR;
+        painCave.isFatal = 1;
+        simError();          
+      }
+    }
     
     //setup quadrupole atom type in fortran side
     if (isQuadrupole()) {
-      data = getPropertyByName("Quadrupole");
+      data = getPropertyByName("QuadrupoleMoments");
       if (data != NULL) {
         Vector3dGenericData* vector3dData= dynamic_cast<Vector3dGenericData*>(data);
      
-        // BROKEN:  cartesian quadrupoles have the following properties
-        //     They are symmetric and traceless:
-        //     Qxy = Qyx          Qxx + Qyy + Qzz = 0 
-        //     Qxz = Qzx
-        //     Qyz = Qzy
+        // Quadrupoles in OOPSE are set as the diagonal elements
+        // of the diagonalized traceless quadrupole moment tensor.
+        // The column vectors of the unitary matrix that diagonalizes 
+        // the quadrupole moment tensor become the eFrame (or the
+        // electrostatic version of the body-fixed frame.
         
         if (vector3dData != NULL) {
           Vector3d diagElem= vector3dData->getData();
-          Mat3x3d Q;
-          Q(0, 0) = diagElem[0];
-          Q(1, 1) = diagElem[1];
-          Q(2, 2) = diagElem[2];
           
-          setCartesianQuadrupole(&atp.ident, Q.getArrayPointer(), &isError);
+          setQuadrupoleMoments(&atp.ident, diagElem.getArrayPointer(), 
+                               &isError);
           if (isError != 0) {
             sprintf( painCave.errMsg,
-                     "Fortran rejected setCartesianQuadrupole\n");
+                     "Fortran rejected setQuadrupoleMoments\n");
             painCave.severity = OOPSE_ERROR;
             painCave.isFatal = 1;
             simError();          
@@ -122,7 +151,7 @@ void DirectionalAtomType::complete() {
           simError();          
         }
       } else {
-        sprintf( painCave.errMsg, "Can not find Quadrupole Parameters\n");
+        sprintf( painCave.errMsg, "Can not find QuadrupoleMoments\n");
         painCave.severity = OOPSE_ERROR;
         painCave.isFatal = 1;
         simError();          
@@ -132,44 +161,44 @@ void DirectionalAtomType::complete() {
     
     //setup sticky atom type in fortran side
     if (isSticky()) {
-        data = getPropertyByName("Sticky");
-        if (data != NULL) {
-            StickyParamGenericData* stickyData = dynamic_cast<StickyParamGenericData*>(data);
+      data = getPropertyByName("Sticky");
+      if (data != NULL) {
+        StickyParamGenericData* stickyData = dynamic_cast<StickyParamGenericData*>(data);
 
-            if (stickyData != NULL) {
-                StickyParam stickyParam = stickyData->getData();
+        if (stickyData != NULL) {
+          StickyParam stickyParam = stickyData->getData();
 
-                /**@todo change fortran interface */
-                //makeStickyType(&atp.ident, &stickyParam.w0, &stickyParam.v0, &stickyParam.v0p, &stickyParam.rl,
-                //    &stickyParam.ru, &stickyParam.rlp, &stickyParam.rup);
-                newStickyType(&atp.ident,&stickyParam.w0, &stickyParam.v0, &stickyParam.v0p, &stickyParam.rl,
-                    &stickyParam.ru, &stickyParam.rlp, &stickyParam.rup, &isError);
-                if (isError != 0) {
-                    sprintf( painCave.errMsg,
-                           "Fortran rejected newLJtype\n");
-                    painCave.severity = OOPSE_ERROR;
-                    painCave.isFatal = 1;
-                    simError();          
-                }
-                
-            } else {
-                    sprintf( painCave.errMsg,
-                           "Can not cast GenericData to StickyParam\n");
-                    painCave.severity = OOPSE_ERROR;
-                    painCave.isFatal = 1;
-                    simError();          
-            }            
-        } else {
-            sprintf( painCave.errMsg, "Can not find Parameters for Sticky\n");
+          /**@todo change fortran interface */
+          //makeStickyType(&atp.ident, &stickyParam.w0, &stickyParam.v0, &stickyParam.v0p, &stickyParam.rl,
+          //    &stickyParam.ru, &stickyParam.rlp, &stickyParam.rup);
+          newStickyType(&atp.ident,&stickyParam.w0, &stickyParam.v0, &stickyParam.v0p, &stickyParam.rl,
+                        &stickyParam.ru, &stickyParam.rlp, &stickyParam.rup, &isError);
+          if (isError != 0) {
+            sprintf( painCave.errMsg,
+                     "Fortran rejected newLJtype\n");
             painCave.severity = OOPSE_ERROR;
             painCave.isFatal = 1;
             simError();          
-        }
+          }
+                
+        } else {
+          sprintf( painCave.errMsg,
+                   "Can not cast GenericData to StickyParam\n");
+          painCave.severity = OOPSE_ERROR;
+          painCave.isFatal = 1;
+          simError();          
+        }            
+      } else {
+        sprintf( painCave.errMsg, "Can not find Parameters for Sticky\n");
+        painCave.severity = OOPSE_ERROR;
+        painCave.isFatal = 1;
+        simError();          
+      }
     }
 
     //setup GayBerne type in fortran side
 
-}
+  }
 
 
 } //end namespace oopse

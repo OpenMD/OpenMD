@@ -13,6 +13,7 @@ typedef  struct{
   int is_LennardJones;
   int is_Charge;
   int is_Dipole;
+  int is_SplitDipole;
   int is_Quadrupole;
   int is_Sticky;
   int is_GayBerne;
@@ -32,6 +33,7 @@ type :: AtomTypeProperties
    integer :: is_LennardJones
    integer :: is_Charge
    integer :: is_Dipole
+   integer :: is_SplitDipole
    integer :: is_Quadrupole
    integer :: is_Sticky
    integer :: is_GayBerne
