@@ -1,10 +1,14 @@
 #ifndef TYPES_ATOMTYPE_HPP
 #define TYPES_ATOMTYPE_HPP
 
+#include <string>
+
 #include "utils/PropertyMap.hpp"
 #define __C
 #include "types/AtomTypeProperties.h"
 #include "UseTheForce/DarkSide/atype_interface.h"
+
+using namespace std;
 
 namespace oopse {
   /**
@@ -19,7 +23,7 @@ namespace oopse {
   public:
     
     AtomType();
-    ~AtomType();
+    virtual ~AtomType(){ };
     /**
      * Finishes off the AtomType by communicating the logical portions of the
      * structure to the Fortran atype module
@@ -32,8 +36,8 @@ namespace oopse {
     void    setIdent(int id) {atp.ident = id;}
     int     getIdent() {return atp.ident;}
 
-    void    setName(char* n) {name = strdup(n);}
-    char*   getName() {return name;}
+    void    setName(string n) {name = n;}
+    string  getName() {return name;}
     
     void    setLennardJones() { atp.is_LennardJones = 1; }
     bool    isLennardJones()  { return atp.is_LennardJones; }
@@ -47,13 +51,19 @@ namespace oopse {
     void    setCharge() { atp.is_Charge = 1; atp.is_Electrostatic = 1;}
     bool    isCharge()  { return atp.is_Charge; }
 
+    bool    isDirectional() { return atp.is_Directional; }
+    bool    isDipole()  { return atp.is_Dipole; }
+    bool    isGayBerne()  { return atp.is_GayBerne; }
+    bool    isSticky()  { return atp.is_Sticky; }
+    bool    isShape()  { return atp.is_Shape; }
+
     PropertyMap properties;
                 
   protected:
     
     AtomTypeProperties atp;
     double mass;
-    char* name;
+    string name;
     
   };
 }

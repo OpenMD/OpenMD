@@ -13,8 +13,7 @@ namespace oopse {
     
     // initialize to an error:
     atp.ident = -1;
-    // make the type empty:
-    name = NULL;
+
     // and massless:
     mass = 0.0;
     
@@ -30,15 +29,11 @@ namespace oopse {
     atp.is_FLARB = 0;  
   }
     
-  AtomType::~AtomType() {
-    if ( name != NULL ) free(name);
-  }
-
   void AtomType::complete() {
     
     int status;
 
-    if (name == NULL) {
+    if (name.empty()) {
       sprintf( painCave.errMsg,
                "Attempting to complete an AtomType without giving "
                "it a name!\n");
@@ -50,7 +45,7 @@ namespace oopse {
     if (atp.ident == -1) {
       sprintf( painCave.errMsg,
                "Attempting to complete AtomType %s without setting the"
-               " ident!/n", name);
+               " ident!/n", name.c_str());
       painCave.severity = OOPSE_ERROR;
       painCave.isFatal = 1;
       simError();          
@@ -62,7 +57,7 @@ namespace oopse {
     
     if (status != 0) {
       sprintf( painCave.errMsg,
-               "Fortran rejected AtomType %s!\n", name);
+               "Fortran rejected AtomType %s!\n", name.c_str());
       painCave.severity = OOPSE_ERROR;
       painCave.isFatal = 1;
       simError();          

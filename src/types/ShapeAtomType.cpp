@@ -1,21 +1,27 @@
-#include "types/ShapeType.hpp"
+#include "types/ShapeAtomType.hpp"
 
 using namespace oopse;
 
-ShapeType::ShapeType(void) {
-  mass = 0.0;
+ShapeAtomType::~ShapeAtomType() {
+  vector<RealSphericalHarmonic*>::iterator iter;
+  for (iter = contactFuncs.begin(); iter != contactFuncs.end(); ++iter) 
+    delete (*iter);
+  for (iter = rangeFuncs.begin(); iter != rangeFuncs.end(); ++iter) 
+    delete (*iter);
+  for (iter = strengthFuncs.begin(); iter != strengthFuncs.end(); ++iter) 
+    delete (*iter);
+  contactFuncs.clear();
+  rangeFuncs.clear();
+  strengthFuncs.clear();
 }
 
-ShapeType::~ShapeType(void) {
-}
-
-double ShapeType::getContactValueAt(double costheta, double phi) {
-
+double ShapeAtomType::getContactValueAt(double costheta, double phi) {
+  
   vector<RealSphericalHarmonic*>::iterator contactIter;
   double contactVal;
-
+  
   contactVal = 0.0;
-
+  
   for(contactIter = contactFuncs.begin();  contactIter != contactFuncs.end(); 
       ++contactIter)     
     contactVal += (*contactIter)->getValueAt(costheta, phi);
@@ -23,7 +29,7 @@ double ShapeType::getContactValueAt(double costheta, double phi) {
   return contactVal;
 }
 
-double ShapeType::getRangeValueAt(double costheta, double phi) {
+double ShapeAtomType::getRangeValueAt(double costheta, double phi) {
   
   vector<RealSphericalHarmonic*>::iterator rangeIter;
   double rangeVal;
@@ -37,17 +43,17 @@ double ShapeType::getRangeValueAt(double costheta, double phi) {
   return rangeVal;
 }
 
-double ShapeType::getStrengthValueAt(double costheta, double phi) {
-
+double ShapeAtomType::getStrengthValueAt(double costheta, double phi) {
+  
   vector<RealSphericalHarmonic*>::iterator strengthIter;
   double strengthVal;
-
+  
   strengthVal = 0.0;
-
+  
   for(strengthIter = strengthFuncs.begin();  
       strengthIter != strengthFuncs.end(); 
       ++strengthIter)     
     strengthVal += (*strengthIter)->getValueAt(costheta, phi);
-
+  
   return strengthVal;
 }

@@ -1,37 +1,28 @@
 /**
- * @file ShapeType.hpp
+ * @file ShapeAtomType.hpp
  * @author Dan Gezelter
  * @date 10/18/2004
  * @version 1.0
  */
 
-#ifndef TYPES_SHAPETYPE_HPP
-#define TYPES_SHAPETYPE_HPP
+#ifndef TYPES_SHAPEATOMTYPE_HPP
+#define TYPES_SHAPEATOMTYPE_HPP
 
-#include <fstream>
 #include <vector>
 #include "math/RealSphericalHarmonic.hpp"
 #include "math/SquareMatrix3.hpp"
+#include "types/DirectionalAtomType.hpp"
 
 namespace oopse {
   using namespace std;
   
-  class ShapeType {
+  class ShapeAtomType : public DirectionalAtomType {
     
   public: 
     
-    ShapeType(void);
-    ~ShapeType(void);  
-    
-    char *getName(void) {return shapeName;}
-    void setName(char * name) {shapeName = strdup(name);}
-    
-    double getMass(void) {return mass;}
-    void setMass(double m) {mass = m;}
-    
-    Mat3x3d getI(void) {return I;}
-    void setI(Mat3x3d theI) {I = theI;}
-    
+    ShapeAtomType() : DirectionalAtomType() { atp.is_Shape = 1; }
+    ~ShapeAtomType();
+        
     vector<RealSphericalHarmonic*> getContactFuncs(void) {return contactFuncs;}
     vector<RealSphericalHarmonic*> getRangeFuncs(void) {return rangeFuncs;}
     vector<RealSphericalHarmonic*> getStrengthFuncs(void) {return strengthFuncs;}
@@ -69,9 +60,6 @@ namespace oopse {
     
   private:
     
-    char *shapeName;             // The name of the shape
-    double mass;                 // The mass
-    Mat3x3d I;                // The moment of inertia tensor
     vector<RealSphericalHarmonic*> contactFuncs;  // The contact functions
     vector<RealSphericalHarmonic*> rangeFuncs;    // The range functions
     vector<RealSphericalHarmonic*> strengthFuncs; // The strength functions
