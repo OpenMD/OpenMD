@@ -114,6 +114,31 @@ class SelectionManager {
 
         StuntDouble* beginUnselected(int& i);
         StuntDouble* nextUnSelected(int& i);
+
+        SelectionManager& operator&= (const SelectionManager &sman) {
+            bsSelection_ &= sman.bsSelection_;
+            return *this; 
+        }
+        
+        SelectionManager& operator|= (const SelectionManager &sman) {
+            bsSelection_ |= sman.bsSelection_;
+            return *this; 
+        }
+        
+        SelectionManager& operator^= (const SelectionManager &sman) {
+            bsSelection_ ^= sman.bsSelection_;
+            return *this; 
+        }
+
+        SelectionManager& operator-= (const SelectionManager &sman) {
+            bsSelection_ -= sman.bsSelection_;
+            return *this; 
+        }
+        
+        friend SelectionManager operator| (const SelectionManager& sman1, const SelectionManager& sman2);
+        friend SelectionManager operator& (const SelectionManager& sman1, const SelectionManager& sman2);
+        friend SelectionManager operator^ (const SelectionManager& sman1, const SelectionManager& sman2);
+        friend SelectionManager operator-(const SelectionManager& sman1, const SelectionManager& sman2);
         
     private:
         SimInfo* info_;

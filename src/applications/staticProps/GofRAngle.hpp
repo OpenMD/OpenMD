@@ -111,7 +111,7 @@ class GofRTheta : public GofRAngle {
     public:
         GofRTheta(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2) 
             : GofRAngle (info, filename, sele1, sele2) {
-                setOutputName(getPrefix(filename) + ".gt");
+                setOutputName(getPrefix(filename) + ".gofrt");
         }
         
     private:
@@ -124,7 +124,7 @@ class GofROmega : public GofRAngle {
     public:
         GofROmega(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2) 
             : GofRAngle (info, filename, sele1, sele2) {
-                setOutputName(getPrefix(filename) + ".go");
+                setOutputName(getPrefix(filename) + ".gofrw");
         }
     
     private:

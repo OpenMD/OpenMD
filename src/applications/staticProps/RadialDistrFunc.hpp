@@ -79,7 +79,7 @@ class RadialDistrFunc {
         virtual void preProcess() {}
         virtual void postProcess() {}
 
-        int getNRealPairs();
+        int getNPairs() { return nPairs_;}
         
         SimInfo* info_;
         Snapshot* currentSnapshot_;
@@ -96,6 +96,8 @@ class RadialDistrFunc {
         virtual void initalizeHistogram() {}
         virtual void collectHistogram(StuntDouble* sd1, StuntDouble* sd2) =0;
         virtual void processHistogram() = 0;
+        void processNonOverlapping(SelectionManager& sman1, SelectionManager& sman2);
+        void processOverlapping(SelectionManager& sman);
 
         virtual void writeRdf() = 0;
 
@@ -104,7 +106,10 @@ class RadialDistrFunc {
         SelectionEvaluator evaluator2_;
         SelectionManager seleMan1_;
         SelectionManager seleMan2_;
-        int nRealPairs_;
+        SelectionManager sele1_minus_common_;
+        SelectionManager sele2_minus_common_;
+        SelectionManager common_;        
+        int nPairs_;
 };
 
 

@@ -75,6 +75,9 @@ TimeCorrFunc::TimeCorrFunc(SimInfo* info, const std::string& filename,
             storageLayout_ |= DataStorage::dslAngularMomentum;        
         }
     }
+    if(nRigidBodies > 0 && storageLayout_ & DataStorage::dslVelocity) {
+        storageLayout_ |= DataStorage::dslAngularMomentum;
+    }
         
     bsMan_ = new BlockSnapshotManager(info, dumpFilename_, storageLayout_);
     info_->setSnapshotManager(bsMan_);

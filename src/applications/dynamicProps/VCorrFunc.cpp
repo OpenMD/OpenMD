@@ -46,7 +46,7 @@ VCorrFunc::VCorrFunc(SimInfo* info, const std::string& filename, const std::stri
     : ParticleTimeCorrFunc(info, filename, sele1, sele2, DataStorage::dslVelocity){
 
     setCorrFuncType("Velocity Correlation Function");
-    setOutputName(getPrefix(dumpFilename_) + ".vcf");
+    setOutputName(getPrefix(dumpFilename_) + ".vcorr");
 
 }
 

@@ -122,10 +122,18 @@ class BitSet {
         BitSet& operator&= (const BitSet &bs) {  andOperator (bs); return *this; }
         BitSet& operator|= (const BitSet &bs) { orOperator (bs); return *this; }
         BitSet& operator^= (const BitSet &bs) { xorOperator (bs); return *this; }
+        BitSet& operator-= (const BitSet &bs) { 
+            BitSet tmp = *this ^ bs;
+            *this &= tmp;
+            return *this;
+        }
+        
         bool operator[] (int bitIndex)  const {  return bitset_[bitIndex];  }
         friend BitSet operator| (const BitSet& bs1, const BitSet& bs2);
         friend BitSet operator& (const BitSet& bs1, const BitSet& bs2);
         friend BitSet operator^ (const BitSet& bs1, const BitSet& bs2);
+        friend BitSet operator- (const BitSet& bs1, const BitSet& bs2);
+        
         friend bool operator== (const BitSet & bs1, const BitSet &bs2);
 
         friend std::istream& operator>> ( std::istream&, const BitSet& bs);

@@ -88,6 +88,11 @@ bool BitSet::none() {
 }
     
 int BitSet::nextOffBit(int fromIndex) const {
+    if (fromIndex <= -1) {
+        //in case -1 or other negative number is passed to this function
+        return -1;
+    }
+    
     ++fromIndex;
     while (fromIndex < size()) {
         if (!bitset_[fromIndex]) {
@@ -100,6 +105,11 @@ int BitSet::nextOffBit(int fromIndex) const {
 }
 
 int BitSet::nextOnBit(int fromIndex) const {
+    if (fromIndex <= -1) {
+        //in case -1 or other negative number is passed to this function
+        return -1;
+    }
+
     ++fromIndex;
     while (fromIndex < size()) {
         if (bitset_[fromIndex]) {
@@ -165,6 +175,14 @@ BitSet operator^ (const BitSet& bs1, const BitSet& bs2) {
 
     BitSet result(bs1);
     result ^= bs2;
+    return result;
+}
+
+BitSet operator- (const BitSet& bs1, const BitSet& bs2) {
+    assert(bs1.size() == bs2.size());
+
+    BitSet result(bs1);
+    result -= bs2;
     return result;
 }
 

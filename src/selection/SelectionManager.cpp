@@ -82,13 +82,38 @@ StuntDouble* SelectionManager::nextSelected(int& i) {
     return i == -1 ? NULL : stuntdoubles_[i];
 }
 
-StuntDouble* SelectionManager::beginUnselected(int& i) {
+StuntDouble* SelectionManager::beginUnselected(int& i){
     i = bsSelection_.firstOffBit();
     return i == -1 ? NULL : stuntdoubles_[i];
 }
 StuntDouble* SelectionManager::nextUnSelected(int& i) {
     i = bsSelection_.nextOffBit(i);
     return i == -1 ? NULL : stuntdoubles_[i];
+}
+
+
+SelectionManager operator| (const SelectionManager& sman1, const SelectionManager& sman2) {
+    SelectionManager result(sman1);
+    result |= sman2;
+    return result;
+}
+SelectionManager operator& (const SelectionManager& sman1, const SelectionManager& sman2) {
+    SelectionManager result(sman1);
+    result &= sman2;
+    return result;
+
+}
+SelectionManager operator^ (const SelectionManager& sman1, const SelectionManager& sman2) {
+    SelectionManager result(sman1);
+    result ^= sman2;
+    return result;
+
+}
+SelectionManager operator-(const SelectionManager& sman1, const SelectionManager& sman2){
+    SelectionManager result(sman1);
+    result -= sman2;
+    return result;
+
 }
 
 }

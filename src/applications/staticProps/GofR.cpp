@@ -54,7 +54,7 @@ GofR::GofR(SimInfo* info, const std::string& filename, const std::string& sele1,
     histogram_.resize(nRBins_);
     avgGofr_.resize(nRBins_);
 
-    setOutputName(getPrefix(filename) + ".gr");
+    setOutputName(getPrefix(filename) + ".gofr");
 }
 
 
@@ -63,16 +63,15 @@ void GofR::preProcess() {
 }
 
 void GofR::initalizeHistogram() {
-    npairs_ = 0;
     std::fill(histogram_.begin(), histogram_.end(), 0);
 }
 
 
 void GofR::processHistogram() {
 
-    int nRealPairs = getNRealPairs();
+    int nPairs = getNPairs();
     double volume = info_->getSnapshotManager()->getCurrentSnapshot()->getVolume();
-    double pairDensity = nRealPairs /volume;
+    double pairDensity = nPairs /volume * 2.0;
     double pairConstant = ( 4.0 * NumericConstant::PI * pairDensity ) / 3.0;
 
     for(int i = 0 ; i < histogram_.size(); ++i){
@@ -102,8 +101,7 @@ void GofR::collectHistogram(StuntDouble* sd1, StuntDouble* sd2) {
 
     if (distance < len_) {
         int whichBin = distance / deltaR_;
-        ++histogram_[whichBin];
-        ++npairs_;
+        histogram_[whichBin] += 2;
     }
 }
 

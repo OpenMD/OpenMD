@@ -48,7 +48,8 @@ namespace oopse {
 
 RadialDistrFunc::        RadialDistrFunc(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2)
         : info_(info), currentSnapshot_(NULL), dumpFilename_(filename), step_(1), 
-          selectionScript1_(sele1), selectionScript2_(sele2), evaluator1_(info), evaluator2_(info), seleMan1_(info), seleMan2_(info){
+          selectionScript1_(sele1), selectionScript2_(sele2), evaluator1_(info), evaluator2_(info), 
+          seleMan1_(info), seleMan2_(info), common_(info), sele1_minus_common_(info), sele2_minus_common_(info){
           
     evaluator1_.loadScriptString(sele1);
     evaluator2_.loadScriptString(sele2);
@@ -62,15 +63,15 @@ RadialDistrFunc::        RadialDistrFunc(SimInfo* info, const std::string& filen
 
     if (!evaluator1_.isDynamic() && !evaluator2_.isDynamic()) {
         //if all selections are static,  we can precompute the number of real pairs    
+        common_ = seleMan1_ & seleMan2_;
+        sele1_minus_common_ = seleMan1_ - common_;
+        sele2_minus_common_ = seleMan2_ - common_;      
 
         int nSelected1 = seleMan1_.getSelectionCount();
         int nSelected2 = seleMan2_.getSelectionCount();
-
-        BitSet bs = seleMan1_.getSelectionSet();
-        bs &= seleMan2_.getSelectionSet();
-        int nIntersect = bs.countBits();
-
-        nRealPairs_ = nSelected1 * nSelected2 - (nIntersect +1) * nIntersect/2;
+        int nIntersect = common_.getSelectionCount();
+        
+        nPairs_ = nSelected1 * nSelected2 - (nIntersect +1) * nIntersect/2;            
     }
     
 }
@@ -108,19 +109,40 @@ void RadialDistrFunc::process() {
         
         initalizeHistogram();
 
-        StuntDouble* sd1;
-        int j;
-        for (sd1 = seleMan1_.beginSelected(j); sd1 != NULL; sd1 = seleMan1_.nextSelected(j)) {
 
-            StuntDouble* sd2;
-            int k;
-            for (sd2 = seleMan2_.beginSelected(k); sd2 != NULL; sd2 = seleMan2_.nextSelected(k)) {
-                if (sd1 != sd2) {
-                    collectHistogram(sd1, sd2);
-                }
-            }            
+        
+        //selections may overlap.
+        //
+        // |s1 -c | c |
+        //            | c |s2 - c|
+        //
+        // s1 : number of selected stuntdoubles in selection1
+        // s2 : number of selected stuntdoubles in selection2
+        // c   : number of intersect stuntdouble between selection1 and selection2
+        //when loop over the pairs, we can divide the looping into 3 stages
+        //stage 1 :     [s1-c]      [s2]
+        //stage 2 :     [c]            [s2 - c]
+        //stage 3 :     [c]            [c]
+        //stage 1 and stage 2 are completly non-overlapping
+        //stage 3 are completely overlapping
+
+        if (evaluator1_.isDynamic() || evaluator2_.isDynamic()) {
+
+            common_ = seleMan1_ & seleMan2_;
+            sele1_minus_common_ = seleMan1_ - common_;
+            sele2_minus_common_ = seleMan2_ - common_;            
+            int nSelected1 = seleMan1_.getSelectionCount();
+            int nSelected2 = seleMan2_.getSelectionCount();
+            int nIntersect = common_.getSelectionCount();
+            
+            nPairs_ = nSelected1 * nSelected2 - (nIntersect +1) * nIntersect/2;                      
         }
 
+        processNonOverlapping(sele1_minus_common_, seleMan2_);
+        processNonOverlapping(common_, sele2_minus_common_);        
+        processOverlapping(common_);
+        
+        
         processHistogram();
         
     }
@@ -130,21 +152,37 @@ void RadialDistrFunc::process() {
     writeRdf();
 }
 
-int RadialDistrFunc::getNRealPairs() {
-    if (evaluator1_.isDynamic() || evaluator2_.isDynamic()) {
-        //if one of the selection is dynamic,  need to recompute it    
+void RadialDistrFunc::processNonOverlapping( SelectionManager& sman1, SelectionManager& sman2) {
+    StuntDouble* sd1;
+    StuntDouble* sd2;
+    int i;    
+    int j;
+    
+    for (sd1 = sman1.beginSelected(i); sd1 != NULL; sd1 = sman1.nextSelected(i)) {
 
-        int nSelected1 = seleMan1_.getSelectionCount();
-        int nSelected2 = seleMan2_.getSelectionCount();
-
-        BitSet bs = seleMan1_.getSelectionSet();
-        bs &= seleMan2_.getSelectionSet();
-        int nIntersect = bs.countBits();
-
-        nRealPairs_ = nSelected1 * nSelected2 - (nIntersect +1) * nIntersect/2;
+        for (sd2 = sman2.beginSelected(j); sd2 != NULL; sd2 = sman2.nextSelected(j)) {
+            collectHistogram(sd1, sd2);
+        }            
     }
 
-    return nRealPairs_;
+}
+
+void RadialDistrFunc::processOverlapping( SelectionManager& sman) {
+    StuntDouble* sd1;
+    StuntDouble* sd2;
+    int i;    
+    int j;
+
+    //basically, it is the same as below loop
+    //for (int i = 0;  i < n; ++i )
+    //  for (int j = i + 1; j < n; ++j) {}
+    
+    for (sd1 = sman.beginSelected(i); sd1 != NULL; sd1 = sman.nextSelected(i)) {                    
+        for (j  = i, sd2 = sman.nextSelected(j); sd2 != NULL; sd2 = sman.nextSelected(j)) {
+            collectHistogram(sd1, sd2);
+        }            
+    }
+
 }
 
 }

@@ -46,7 +46,7 @@ RCorrFunc::RCorrFunc(SimInfo* info, const std::string& filename, const std::stri
     : ParticleTimeCorrFunc(info, filename, sele1, sele2, DataStorage::dslPosition){
 
     setCorrFuncType("RCorrFunc");
-    setOutputName(getPrefix(dumpFilename_) + ".rcf");
+    setOutputName(getPrefix(dumpFilename_) + ".rcorr");
 
 }
 

@@ -47,7 +47,7 @@ DipoleCorrFunc::DipoleCorrFunc(SimInfo* info, const std::string& filename, const
     : ParticleTimeCorrFunc(info, filename, sele1, sele2, DataStorage::dslElectroFrame){
 
     setCorrFuncType("Dipole Correlation Function");
-    setOutputName(getPrefix(dumpFilename_) + ".dcf");
+    setOutputName(getPrefix(dumpFilename_) + ".dcorr");
 
 }
 

@@ -86,7 +86,6 @@ class GofR : public RadialDistrFunc {
         
         std::vector<int> histogram_;
         std::vector<double> avgGofr_;
-        int npairs_;
 };
 
 }
