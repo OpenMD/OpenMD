@@ -33,6 +33,7 @@
 #ifndef IO_IFSTRSTREAM_HPP
 #define IO_IFSTRSTREAM_HPP
 
+#include <cassert>
 #include <cstring>
 #include <fstream>
 #include <sstream>
@@ -209,11 +210,11 @@ class basic_ifstrstream : public basic_istream<_CharT, _Traits> {
 
                     //check the filename is the same
                     filenameLen = strlen(filename);
-                    commStatus = MPI_Bcast(filenameLen, 1, MPI_INT, masterNode, MPI_COMM_WORLD);     
-                    commStatus = MPI_Bcast(filename, filenameLen, MPI_CHAR, masterNode, MPI_COMM_WORLD);     
+                    commStatus = MPI_Bcast(&filenameLen, 1, MPI_INT, masterNode, MPI_COMM_WORLD);     
+                    commStatus = MPI_Bcast((void*)filename, filenameLen, MPI_CHAR, masterNode, MPI_COMM_WORLD);     
 
                     diffFilename = 0;
-                    commStatus = MPI_Allreduce(diffFilename, error, 1,  MPI_INT,  MPI_COMM_WORLD);             
+                    commStatus = MPI_Allreduce(&diffFilename, &error, 1,  MPI_INT, MPI_SUM,  MPI_COMM_WORLD);             
 
                     //if file names are different just return false
                     if (error > 0)
@@ -225,9 +226,10 @@ class basic_ifstrstream : public basic_istream<_CharT, _Traits> {
 
                 if (fin.is_open()) {
                     
-                    fin.in.seekg(0, ios::end); 
+                    fin.seekg(0, ios::end); 
                     fileSize = fin.tellg(); 
-
+                    fin.seekg(0, ios::beg);
+                    
                     // '\0' need one more char
                     fbuf = new char[fileSize+1];
                     
@@ -272,7 +274,7 @@ class basic_ifstrstream : public basic_istream<_CharT, _Traits> {
              } else{
                     //check file name
                     if (checkFilename) {
-                        commStatus = MPI_Bcast(filenameLen, 1, MPI_INT, masterNode, MPI_COMM_WORLD);     
+                        commStatus = MPI_Bcast(&filenameLen, 1, MPI_INT, masterNode, MPI_COMM_WORLD);     
 
                         char * masterFilename = new char[filenameLen];
                         commStatus = MPI_Bcast(masterFilename, filenameLen, MPI_CHAR, masterNode, MPI_COMM_WORLD);     
@@ -284,7 +286,7 @@ class basic_ifstrstream : public basic_istream<_CharT, _Traits> {
 
                         delete masterFilename;
                         
-                        commStatus = MPI_Allreduce(diffFilename, error, 1,  MPI_INT,  MPI_COMM_WORLD);    
+                        commStatus = MPI_Allreduce(&diffFilename, &error, 1,  MPI_INT,  MPI_SUM, MPI_COMM_WORLD);    
 
                         if (error > 0)
                             return false;                        
