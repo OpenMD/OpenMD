@@ -124,6 +124,7 @@
 #       Kate Hedstrom
 #       kate@ahab.rutgers.edu
 #
+use File::Spec;
 
 package source_file;
 
@@ -229,13 +230,15 @@ sub print_includes {
     foreach $file (keys %{$self->{'includes'}}) {
         next if $printed{$file};
         $ref = $inc_files{$file};
-        my $len = length($ref->{'filepath'}) + length($objdir) + 2;
+        $rel_path = File::Spec->abs2rel( $ref->{'filepath'} ) ;
+        my $len = length($rel_path) + length($objdir) + 2;
         if (($len_sum + $len > 80) &&
                (length($target) + length($objdir) + 2 < $len_sum)) {
             print "\n" . $objdir . "/" . "$target:";
             $len_sum = length($target) + length($objdir) + 2;
         }
-        print " " . $objdir . "/" . $ref->{'filepath'};
+        #print " " . $objdir . "/" . $ref->{'filepath'};
+        print " " . $rel_path;
         $printed{$file} = 1;
         $len_sum += $len;
         $len_sum = $ref->print_includes($target, $len_sum, $objdir);

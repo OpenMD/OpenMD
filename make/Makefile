@@ -394,13 +394,20 @@ $(DependencyFile) : $(DerivedSource)
 	$(Print) $@ 
 	$(Print) $(DerivedSource)
 	@cd $(PackageSourceDir)
+	touch Make.temp
+ifdef $(CppFiles)
 	$(CppCompiler) $(IncludePath) -MM $(CppFiles)  > Make.temp
+endif
+ifdef $(CFiles) 
 	$(CCompiler)   $(IncludePath) -MM $(CFiles) $(DerivedCFiles)   >> Make.temp
+endif
 	cat Make.temp | sed 's/^[a-zA-Z0-9]/$$\(DEV_ROOT\)\/obj\/&/g' >> $(DependencyFile)
 	cat Make.temp | sed 's/^[a-zA-Z0-9]/$$\(DEV_ROOT\)\/MPIobj\/&/g' >> $(DependencyFile)
-	#$(DEV_ROOT)/scripts/sfmakedepend -I $(DEV_ROOT)/src -d $(DEV_ROOT)/obj -f ./Make.ftemp -h *.F90
-	#$(DEV_ROOT)/scripts/sfmakedepend -I $(DEV_ROOT)/src -d $(DEV_ROOT)/MPIobj -f ./Make.ftemp -h *.F90
-	#cat Make.ftemp >> $(DependencyFile)
+	echo $(F90Files)
+#ifdef $(F90Files) 
+	$(DEV_ROOT)/scripts/sfmakedepend  -I $(DEV_ROOT)/src -d '$$(DEV_ROOT)/obj' -f ./Make.ftemp -h *.F90
+	cat Make.ftemp >> $(DependencyFile)
+#endif
 	$(Delete) Make.temp Make.ftemp
 
 # make lib
