@@ -44,7 +44,6 @@
 
 #include "primitives/Atom.hpp"
 #include "brains/SimInfo.hpp"
-#include "math/randomSPRNG.hpp"
 
 namespace oopse {
 
