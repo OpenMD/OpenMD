@@ -765,9 +765,9 @@ void SimInfo::getCutoff(double& rcut, double& rsw) {
                 "\tfor the cutoffRadius.\n");
             painCave.isFatal = 0;
             simError();
-            rcut_ = 15.0;
+            rcut = 15.0;
         } else{
-            rcut_ = simParams_->getRcut();
+            rcut = simParams_->getRcut();
         }
 
         if (!simParams_->haveRsw()){
@@ -777,9 +777,9 @@ void SimInfo::getCutoff(double& rcut, double& rsw) {
                 "\t0.95 * cutoffRadius for the switchingRadius\n");
             painCave.isFatal = 0;
             simError();
-            rsw_ = 0.95 * rcut_;
+            rsw = 0.95 * rcut;
         } else{
-            rsw_ = simParams_->getRsw();
+            rsw = simParams_->getRsw();
         }
 
     } else {
@@ -787,16 +787,16 @@ void SimInfo::getCutoff(double& rcut, double& rsw) {
         //meta-data file, the maximum cutoff radius calculated from forcefiled will be used
         
         if (simParams_->haveRcut()) {
-            rcut_ = simParams_->getRcut();
+            rcut = simParams_->getRcut();
         } else {
             //set cutoff radius to the maximum cutoff radius based on atom types in the whole system
-            rcut_ = calcMaxCutoffRadius();
+            rcut = calcMaxCutoffRadius();
         }
 
         if (simParams_->haveRsw()) {
-            rsw_  = simParams_->getRsw();
+            rsw  = simParams_->getRsw();
         } else {
-            rsw_ = rcut_;
+            rsw = rcut;
         }
     
     }

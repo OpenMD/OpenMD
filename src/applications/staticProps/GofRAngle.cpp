@@ -100,13 +100,14 @@ void GofRAngle::collectHistogram(StuntDouble* sd1, StuntDouble* sd2) {
     double distance = r12.length();
     int whichRBin = distance / deltaR_;
 
-    
-    double cosAngle = evaluateAngle(sd1, sd2);
-    double halfBin = (nAngleBins_ - 1) * 0.5;
-    int whichThetaBin = halfBin * (cosAngle + 1.0);
-    ++histogram_[whichRBin][whichThetaBin];
-    
-    ++npairs_;
+    if (distance <= len_) {
+        double cosAngle = evaluateAngle(sd1, sd2);
+        double halfBin = (nAngleBins_ - 1) * 0.5;
+        int whichThetaBin = halfBin * (cosAngle + 1.0);
+        ++histogram_[whichRBin][whichThetaBin];
+        
+        ++npairs_;
+    }
 }
 
 void GofRAngle::writeRdf() {

@@ -99,9 +99,11 @@ void GofR::collectHistogram(StuntDouble* sd1, StuntDouble* sd2) {
 
     double distance = r12.length();
 
-    int whichBin = distance / deltaR_;
-    ++histogram_[whichBin];
-    ++npairs_;
+    if (distance < len_) {
+        int whichBin = distance / deltaR_;
+        ++histogram_[whichBin];
+        ++npairs_;
+    }
 }
 
 
