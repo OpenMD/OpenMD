@@ -43,8 +43,7 @@
 #include "math/SquareMatrix3.hpp"
 #include "primitives/Molecule.hpp"
 #include "primitives/StuntDouble.hpp"
-#include "math/randomSPRNG.hpp"
-
+#include "math/MersenneTwister.hpp"
 namespace oopse {
 
 void Velocitizer::velocitize(double temperature) {
@@ -65,7 +64,15 @@ void Velocitizer::velocitize(double temperature) {
     Molecule::IntegrableObjectIterator j;
     Molecule * mol;
     StuntDouble * integrableObject;
-    gaussianSPRNG gaussStream(info_->getSeed());
+
+    
+#ifndef IS_MPI
+    MTRand randNumGen(info_->getSeed());
+#else
+    int nProcessors;
+    MPI_Comm_size(MPI_COMM_WORLD, &nProcessors);
+    MTRand randNumGen(info_->getSeed(), nProcessors, worldRank);
+#endif
 
     kebar = kb * temperature * info_->getNdfRaw() / (2.0 * info_->getNdf());
 
@@ -84,7 +91,7 @@ void Velocitizer::velocitize(double temperature) {
             // centered on vbar
 
             for( int k = 0; k < 3; k++ ) {
-                aVel[k] = vbar * gaussStream.getGaussian();
+                aVel[k] = vbar * randNumGen.randNorm(0.0, 1.0);
             }
 
             integrableObject->setVel(aVel);
@@ -99,13 +106,13 @@ void Velocitizer::velocitize(double temperature) {
 
                     aJ[l] = 0.0;
                     vbar = sqrt(2.0 * kebar * I(m, m));
-                    aJ[m] = vbar * gaussStream.getGaussian();
+                    aJ[m] = vbar * randNumGen.randNorm(0.0, 1.0);
                     vbar = sqrt(2.0 * kebar * I(n, n));
-                    aJ[n] = vbar * gaussStream.getGaussian();
+                    aJ[n] = vbar * randNumGen.randNorm(0.0, 1.0);
                 } else {
                     for( int k = 0; k < 3; k++ ) {
                         vbar = sqrt(2.0 * kebar * I(k, k));
-                        aJ[k] = vbar * gaussStream.getGaussian();
+                        aJ[k] = vbar * randNumGen.randNorm(0.0, 1.0);
                     }
                 } // else isLinear
 

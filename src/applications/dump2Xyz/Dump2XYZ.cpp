@@ -194,7 +194,7 @@ int main(int argc, char* argv[]){
   if (args_info.refsele_given&& args_info.originsele_given) {
     compositeVisitor->addVisitor(new LipidTransVisitor(info, args_info.originsele_arg, args_info.refsele_arg), 250); 
   } else if (args_info.refsele_given || args_info.originsele_given) {
-    std::cerr << "Both of --refsele and --originselc should appear by pair" << std::endl;
+    std::cerr << "Both of --refsele and --originsele should appear by pair" << std::endl;
     exit(1);
   }
     

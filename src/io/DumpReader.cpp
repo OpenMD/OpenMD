@@ -511,7 +511,7 @@ void DumpReader::parseDumpLine(char *line, StuntDouble *integrableObject) {
 
     if (nTokens < 14) {
             sprintf(painCave.errMsg,
-                    "DumpReader Error: Not enough Tokens.\n");
+                    "DumpReader Error: Not enough Tokens.\n%s\n", line);
             painCave.isFatal = 1;
             simError();
     }

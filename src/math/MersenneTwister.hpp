@@ -86,9 +86,9 @@ private:
 
 //Methods
 public:
-	MTRand( const uint32& oneSeed, nstrides = 1, stride = 0);  // initialize with a simple uint32
-	MTRand( uint32 *const bigSeed, uint32 const seedLength = N, nstrides = 1, stride = 0);  // or an array
-	MTRand(nstrides = 1, stride = 0);  // auto-initialize with /dev/urandom or time() and clock()
+	MTRand( const uint32& oneSeed, int nstrides = 1, int stride = 0);  // initialize with a simple uint32
+	MTRand( uint32 *const bigSeed, uint32 const seedLength = N, int nstrides = 1, int stride = 0);  // or an array
+	MTRand(int nstrides = 1, int stride = 0);  // auto-initialize with /dev/urandom or time() and clock()
 	
 	// Do NOT use for CRYPTOGRAPHY without securely hashing several returned
 	// values together, otherwise the generator state can be learned after
@@ -189,9 +189,9 @@ inline MTRand::uint32 MTRand::randInt()
 	// Pull a 32-bit integer from the generator state
 	// Every other access function simply transforms the numbers extracted here
 
-        uint32 ranNums[nstrides];
+        uint32 ranNums[nstrides_];
 
-        for (int i = 0; i < nstrides; ++i) {
+        for (int i = 0; i < nstrides_; ++i) {
             if( left == 0 ) {
                 reload();
             }
@@ -203,10 +203,10 @@ inline MTRand::uint32 MTRand::randInt()
             s1 ^= (s1 >> 11);
             s1 ^= (s1 <<  7) & 0x9d2c5680UL;
             s1 ^= (s1 << 15) & 0xefc60000UL;
-            ranNums[i] = s1 ^ (s1 >> 18) );
+            ranNums[i] = s1 ^ (s1 >> 18);
         }
 
-        return ranNums[stride];
+        return ranNums[stride_];
 }
 
 inline MTRand::uint32 MTRand::randInt( const uint32& n )

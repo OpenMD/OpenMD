@@ -287,7 +287,6 @@ void SimCreator::divideMolecules(SimInfo *info) {
     int which_proc;
     int nProcessors;
     std::vector<int> atomsPerProc;
-    randomSPRNG myRandom(info->getSeed());
     int nGlobalMols = info->getNGlobalMolecules();
     std::vector<int> molToProcMap(nGlobalMols, -1); // default to an error condition:
     
@@ -305,6 +304,9 @@ void SimCreator::divideMolecules(SimInfo *info) {
         painCave.isFatal = 1;
         simError();
     }
+
+    MTRand myRandom(info->getSeed(), nProcessors, worldRank);
+
 
     a = 3.0 * nGlobalMols / info->getNGlobalAtoms();
 
@@ -326,7 +328,7 @@ void SimCreator::divideMolecules(SimInfo *info) {
 
                 // Pick a processor at random
 
-                which_proc = (int) (myRandom.getRandom() * nProcessors);
+                which_proc = (int) (myRandom.rand() * nProcessors);
 
                 //get the molecule stamp first
                 int stampId = info->getMoleculeStampId(i);
