@@ -11,6 +11,9 @@ Source    = \
 	Utility.cpp \
 	Trim.cpp
 
+ifneq "$(words $(LIBOBJS))" "0"
+   Source  = $(Source) getopt.c getopt1.c
+endif
 
 RmiSource =
 
