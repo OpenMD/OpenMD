@@ -178,15 +178,13 @@ The most general form of the select command is:	<b>select <i>expression</i>
 
 <p><a name="index" id="index"><b> Index expression </b></a></p>
 
-<p>Index expression is used to select stuntdobules by their global indices. </p>
-
 <ul>
 
 <table width="894" border=1 cellpadding=5 bgcolor="#FFFFFF"><tr bgcolor="#FFFFCC">
 
   <td width="113">select 20 </td>
 
-    <td width="520">select stuntdoubles which global index is 20 </td>
+    <td width="520">select all of the stuntdoubles of molecule 20</td>
 
 </tr>
 
@@ -194,7 +192,7 @@ The most general form of the select command is:	<b>select <i>expression</i>
 
     <td>select 20 to 30      </td>
 
-    <td>select stuntdoubles which global indices are between 20 (inclusive) and 30 (exclusive) </td>
+    <td>select all of the stuntdoubles of molecules  which global indices are between 20 (inclusive) and 30 (exclusive) </td>
 
   </tr>
 
@@ -233,14 +231,6 @@ The most general form of the select command is:	<b>select <i>expression</i>
       <td><div align="left">none</div></td>
 
       <td><div align="left">select none of the stuntdoubles </div></td>
-
-    </tr>
-
-    <tr bgcolor="#FFCCFF">
-
-      <td><div align="left">rigidbody</div></td>
-
-      <td><div align="left">select all rigid-bodies</div></td>
 
     </tr>
 
@@ -406,7 +396,7 @@ The most general form of the select command is:	<b>select <i>expression</i>
       <td><blockquote>
         <p>--gxyz</p>
       </blockquote></td>
-      <td>Calculate the three dimension distribution of the particle B in the body frame of particle A. Therefore, --originsele and --refsele must be given to define the A's internal coordinate set. </td>
+      <td>Calculate the three dimension distribution of the particle B in the body frame of particle A. Therefore, --originsele and --refsele must be given to define A's internal coordinate set. </td>
     </tr>
   </table>
 </ul>

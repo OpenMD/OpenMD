@@ -86,9 +86,6 @@ bool SelectionEvaluator::loadScript(const std::string& filename, const std::stri
 }
 
 void SelectionEvaluator::clearState() {
-    //for (int i = scriptLevelMax; --i >= 0; )
-    //    stack[i].clear();
-    //scriptLevel = 0;
     error = false;
     errorMessage = "";
 }
@@ -230,7 +227,6 @@ BitSet SelectionEvaluator::comparatorInstruction(const Token& instruction) {
             compareProperty(atom, bs, property, comparator, comparisonValue);
         }
         
-        //change the positions of atoms which belong to the rigidbodies
         for (rb = mol->beginRigidBody(rbIter); rb != NULL; rb = mol->nextRigidBody(rbIter)) {
             compareProperty(rb, bs, property, comparator, comparisonValue);
         }        

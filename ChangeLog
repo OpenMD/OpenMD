@@ -1,3 +1,2600 @@
+2005-03-10 10:10  chrisfen
+
+	* make/Makefile.in, samples/water/tip3p_ice/tp3.md,
+	src/brains/SimCreator.cpp, src/brains/SimInfo.hpp,
+	src/integrators/Integrator.cpp, src/integrators/Integrator.hpp,
+	src/integrators/VelocityVerletIntegrator.cpp,
+	src/integrators/VelocityVerletIntegrator.hpp,
+	src/io/DumpReader.cpp, src/io/Globals.cpp, src/io/Globals.hpp,
+	src/io/Makefile, src/io/ReadWrite.hpp, src/io/RestReader.cpp,
+	src/io/RestReader.hpp, src/io/RestWriter.cpp,
+	src/io/RestWriter.hpp, src/io/RestraintReader.cpp,
+	src/io/RestraintWriter.cpp, src/restraints/Makefile,
+	src/restraints/Restraints.cpp, src/restraints/Restraints.hpp,
+	src/restraints/ThermoIntegrationForceManager.cpp,
+	src/restraints/ThermoIntegrationForceManager.hpp: First commit of
+	the new restraints code
+
+2005-03-09 13:48  tim
+
+	* src/selection/: IndexFinder.cpp, IndexFinder.hpp: adding
+	IndexFinder
+
+2005-03-09 13:46  tim
+
+	* src/: applications/dump2Xyz/Dump2XYZ.ggo,
+	applications/dump2Xyz/Dump2XYZCmd.c,
+	applications/dump2Xyz/Dump2XYZCmd.h,
+	selection/SelectionCompiler.cpp, selection/SelectionEvaluator.cpp:
+	fix compilation issue
+
+2005-03-09 12:58  tim
+
+	* forceFields/DUFF2.frc, scripts/filepp,
+	src/UseTheForce/EAM_FF.cpp,
+	src/io/MultipoleAtomTypesSectionParser.cpp,
+	src/io/SectionParser.cpp, test/math/testRandNumGen.cpp: fix a bug
+	in SectionParser (lineNo is not updated)
+
+2005-03-09 12:30  tim
+
+	* src/: UseTheForce/DUFF.cpp, applications/dump2Xyz/Dump2XYZ.cpp,
+	applications/dump2Xyz/Dump2XYZ.ggo,
+	applications/dump2Xyz/Dump2XYZCmd.c,
+	applications/dump2Xyz/Dump2XYZCmd.h, brains/SimInfo.cpp,
+	brains/SimInfo.hpp, io/ChargeAtomTypesSectionParser.cpp,
+	io/ChargeAtomTypesSectionParser.hpp,
+	io/ElectrostaticAtomTypesSectionParser.cpp,
+	io/ElectrostaticAtomTypesSectionParser.hpp, io/Makefile,
+	io/MultipoleAtomTypesSectionParser.cpp,
+	io/MultipoleAtomTypesSectionParser.hpp,
+	io/SectionParserManager.cpp, selection/Makefile,
+	selection/SelectionEvaluator.cpp, selection/SelectionEvaluator.hpp,
+	types/AtomType.cpp, types/DirectionalAtomType.cpp,
+	visitors/AtomVisitor.cpp, visitors/OtherVisitor.cpp,
+	visitors/OtherVisitor.hpp: adding IndexFinder which is used to
+	select the molecules; Seperate ElectrostaticAtomTypesSectionParser
+	into ChargeAtomTypesSectionParser and
+	MultipoleAtomTypesSectionParser;remove print dipole option from
+	Dump2XYZ;
+
+2005-03-09 12:28  tim
+
+	* forceFields/DUFF2.frc: change the format of DUFF2
+
+2005-03-09 10:44  gezelter
+
+	* src/UseTheForce/DarkSide/: electrostatic.F90,
+	electrostatic_interface.F90, electrostatic_interface.h: new
+	electrostatic module
+
+2005-03-09 09:26  gezelter
+
+	* src/types/: AtomType.cpp, AtomType.hpp, AtomTypeProperties.h,
+	DirectionalAtomType.cpp, DirectionalAtomType.hpp: added splitDipole
+	and fixed quadrupole stuff
+
+2005-03-09 09:25  gezelter
+
+	* src/UseTheForce/: DUFF.cpp, EAM_FF.cpp: removed #include lines
+	for outdated charge and dipole interfaces
+
+2005-03-08 16:08  gezelter
+
+	* samples/water/dimer/: cl.in, cl.md, cl2.in, cl2.md, mix.in,
+	mix.md, mix2.in, mix2.md, ssd.in, ssd.md: addded a few fun
+	charge-dipole test cases
+
+2005-03-08 16:07  gezelter
+
+	* src/visitors/: AtomData.hpp, AtomVisitor.cpp, OtherVisitor.cpp,
+	OtherVisitor.hpp, RigidBodyVisitor.cpp, ZconsVisitor.cpp: fixing a
+	strange icc8 bug (we think).
+
+2005-03-08 16:07  gezelter
+
+	* src/utils/: StringUtils.cpp, StringUtils.hpp: OOPSE_itoa!
+
+2005-03-08 16:07  gezelter
+
+	* src/types/: AtomType.cpp, DirectionalAtomType.cpp: Electrostatic
+	Unification Project
+
+2005-03-08 16:07  gezelter
+
+	* src/io/Globals.cpp: Dunno
+
+2005-03-08 16:06  gezelter
+
+	* src/brains/: MoleculeCreator.cpp, SimCreator.cpp: Using
+	OOPSE_itoa and checking a NULL left over from the LinkedList days
+
+2005-03-08 16:06  gezelter
+
+	* src/UseTheForce/DarkSide/: LJ.F90, Makefile, atype.F90,
+	atype_interface.F90, atype_interface.h, charge.F90,
+	charge_interface.F90, charge_interface.h, dipole.F90,
+	dipole_interface.F90, dipole_interface.h: electrostatic unification
+	project fixed an uninitialized variable in Lennard Jones mixing map
+
+2005-03-08 16:05  gezelter
+
+	* src/UseTheForce/doForces.F90: electrostatic unification project
+
+2005-03-08 16:05  gezelter
+
+	* samples/water/dimer/: two.md, water.md: making some cool test
+	cases
+
+2005-03-08 16:05  gezelter
+
+	* forceFields/DUFF2.frc: Added a charge for Chlorine
+
+2005-03-07 17:39  tim
+
+	* src/: brains/SimInfo.cpp, io/DumpReader.cpp,
+	math/ParallelRandNumGen.cpp, math/ParallelRandNumGen.hpp,
+	primitives/Molecule.cpp, utils/BitSet.cpp, utils/MemoryUtils.hpp:
+	Fixing a bug in BitSet.cpp
+
+2005-03-04 10:28  gezelter
+
+	* src/config.h.in: Cleaning up config.h.in by adding comments
+
+2005-03-04 10:28  gezelter
+
+	* configure, ac-tools/configure.in, make/Makefile.in,
+	src/brains/SimCreator.cpp: SPRNG eradication project
+
+2005-03-03 09:40  tim
+
+	* src/io/DumpWriter.cpp: avoid using const char*(hope can fixed the
+	missing atom type problem)
+
+2005-03-02 11:29  tim
+
+	* src/math/RandNumGen.hpp: adding base class of Random Number
+	generator
+
+2005-03-02 11:28  tim
+
+	* src/: brains/SimCreator.cpp, integrators/Velocitizer.cpp,
+	math/ParallelRandNumGen.hpp, math/SeqRandNumGen.hpp: info_ in
+	Velocitizer is not initialized which causes a seg fault
+
+2005-03-02 10:36  tim
+
+	* src/: brains/SimCreator.cpp, integrators/Velocitizer.cpp,
+	integrators/Velocitizer.hpp, math/Makefile,
+	math/MersenneTwister.hpp, math/ParallelRandNumGen.cpp,
+	math/ParallelRandNumGen.hpp, math/SeqRandNumGen.cpp,
+	math/SeqRandNumGen.hpp: remove default parameter from
+	MersenneTwister.hpp which causes all kinds of trouble.	Refactory
+	random number generator
+
+2005-03-02 02:32  tim
+
+	* test/math/testRandNumGen.cpp: Adding unit test for random number
+	generator
+
+2005-03-01 18:17  tim
+
+	* src/brains/Thermo.hpp: fixed a file inclusion problem
+
+2005-03-01 18:17  tim
+
+	* test/math/: Makefile, OOPSERandNumGenTestCase.cpp,
+	OOPSERandNumGenTestCase.hpp, ParallelandNumGenTestCase.cpp,
+	ParallelandNumGenTestCase.hpp, RandNumGenTestCase.cpp,
+	RandNumGenTestCase.hpp: fixed compilation problem
+
+2005-03-01 18:02  tim
+
+	* src/: brains/SimCreator.cpp, integrators/Velocitizer.cpp,
+	integrators/Velocitizer.hpp, math/Makefile,
+	math/OOPSERandNumGen.hpp, math/ParallelRandNumGen.cpp,
+	math/ParallelRandNumGen.hpp, math/mt19937ar.c,
+	math/randomSPRNG.cpp, math/randomSPRNG.hpp: replace SPRNG by MTRand
+
+2005-03-01 18:00  tim
+
+	* test/math/: Makefile, ParallelandNumGenTestCase.cpp,
+	ParallelandNumGenTestCase.hpp: Change the name of test case
+
+2005-03-01 16:00  tim
+
+	* test/math/: Makefile, OOPSERandNumGenTestCase.cpp,
+	OOPSERandNumGenTestCase.hpp: adding testcase for random number
+	generator
+
+2005-03-01 15:10  tim
+
+	* src/: UseTheForce/ForceFieldCreator.hpp, brains/SimCreator.hpp,
+	integrators/IntegratorCreator.hpp, math/MersenneTwister.hpp,
+	math/Polynomial.hpp, math/Quaternion.hpp, math/RectMatrix.hpp,
+	math/SquareMatrix.hpp, math/SquareMatrix3.hpp, math/Vector.hpp,
+	math/Vector3.hpp, minimizers/MinimizerCreator.hpp,
+	utils/BitSet.cpp, utils/BitSet.hpp, utils/GenericData.hpp,
+	utils/TypeContainer.hpp, visitors/AtomVisitor.cpp,
+	visitors/RigidBodyVisitor.cpp: fix compilation problem for g++ 3.4
+
+2005-03-01 14:11  tim
+
+	* src/: brains/SimCreator.cpp, brains/SimInfo.hpp,
+	integrators/Velocitizer.cpp, integrators/Velocitizer.hpp,
+	math/MersenneTwister.hpp, math/OOPSERandNumGen.hpp: adding
+	OOPSERandNumGen
+
+2005-03-01 10:44  gezelter
+
+	* make/Makefile.in: Fixed the damned build problem with the
+	libraries not being removed in make clean and make distclean (at
+	least we think it is fixed).
+
+2005-03-01 10:26  gezelter
+
+	* src/math/MersenneTwister.hpp: Making small modifications to allow
+	for use on MPI machines
+
+2005-03-01 09:45  tim
+
+	* src/: applications/dump2Xyz/Dump2XYZ.cpp, brains/SimCreator.cpp,
+	integrators/Velocitizer.cpp, io/DumpReader.cpp,
+	math/MersenneTwister.hpp: adding MersenneTwister random number
+	generator
+
+2005-02-28 22:55  tim
+
+	* src/math/MersenneTwister.hpp: Adding a modified version of
+	MersenneTwister.hpp
+
+2005-02-28 12:24  tim
+
+	* doc/: SelectionExpression.html, classoopse_1_1StuntDouble.png,
+	definition.jpg: selection expression
+
+2005-02-25 16:22  tim
+
+	* src/: UseTheForce/DarkSide/LJ.F90,
+	UseTheForce/DarkSide/lj_interface.F90,
+	UseTheForce/DarkSide/lj_interface.h,
+	io/LennardJonesAtomTypesSectionParser.cpp, types/AtomType.cpp,
+	types/AtomType.hpp: adding soft potential to LJ Module
+
+2005-02-25 11:38  tim
+
+	* doc/SelectionExpression.html: adding documentation for selection
+	expression
+
+2005-02-24 15:55  tim
+
+	* src/: applications/simpleBuilder/simpleBuilder.cpp,
+	integrators/VelocityVerletIntegrator.cpp, io/DumpWriter.cpp,
+	io/DumpWriter.hpp, io/basic_teebuf.hpp, minimizers/Minimizer.cpp:
+	adding basic_teebuf which can operate on multiple stream
+	simutaneously.
+
+2005-02-22 13:56  tim
+
+	* src/: UseTheForce/DarkSide/reactionField.F90,
+	primitives/RigidBody.cpp: reactionfield get fixed
+
+2005-02-21 11:57  tim
+
+	* src/: applications/staticProps/GofRAngle.cpp,
+	visitors/LipidTransVisitor.cpp, visitors/LipidTransVisitor.hpp: Fix
+	a bug in GofRAngle
+
+2005-02-21 10:28  tim
+
+	* src/primitives/Molecule.cpp: Fix for compilation on the Sun
+
+2005-02-21 10:22  tim
+
+	* src/utils/next_combination.hpp: fix for compilation on the Sun
+
+2005-02-21 10:21  tim
+
+	* src/utils/GenericData.hpp: fix problem in sun
+
+2005-02-18 18:07  tim
+
+	* src/: applications/dump2Xyz/Dump2XYZ.cpp,
+	applications/dump2Xyz/Dump2XYZ.ggo,
+	applications/dump2Xyz/Dump2XYZCmd.c,
+	applications/dump2Xyz/Dump2XYZCmd.h,
+	applications/dynamicProps/RCorrFunc.cpp,
+	applications/staticProps/GofXyz.cpp,
+	applications/staticProps/GofXyz.hpp,
+	applications/staticProps/StaticProps.cpp,
+	applications/staticProps/StaticProps.ggo,
+	applications/staticProps/StaticPropsCmd.c,
+	applications/staticProps/StaticPropsCmd.h,
+	io/ElectrostaticAtomTypesSectionParser.cpp,
+	visitors/LipidTransVisitor.cpp, visitors/LipidTransVisitor.hpp,
+	visitors/Makefile: adding LipidTransVisitor, GofXyz is working now
+
+2005-02-18 10:58  gezelter
+
+	* src/brains/Register.cpp: Corrected filename collision for EAM on
+	Mac OS X
+
+2005-02-18 10:58  gezelter
+
+	* src/applications/oopse/oopse.cpp: Updated copyright information
+
+2005-02-18 10:58  gezelter
+
+	* src/UseTheForce/: EAM.cpp, EAM.hpp, EAM_FF.cpp, EAM_FF.hpp,
+	Makefile: corrected filename collision for EAM on operating systems
+	which are not case sensitive (aka Mac OS X)
+
+2005-02-17 15:15  tim
+
+	* src/applications/staticProps/GofXyz.cpp: more bug get fixed
+
+2005-02-17 14:50  tim
+
+	* src/applications/staticProps/: GofXyz.cpp, GofXyz.hpp: fix a bug
+	in GofXyz
+
+2005-02-17 14:09  tim
+
+	* src/applications/staticProps/RadialDistrFunc.hpp: make
+	processHistogram non-abstrct function
+
+2005-02-17 13:41  tim
+
+	* src/applications/staticProps/GofXyz.cpp: [no log message]
+
+2005-02-17 13:30  tim
+
+	* src/applications/staticProps/: GofR.cpp, GofRAngle.cpp,
+	GofXyz.cpp, GofXyz.hpp, RadialDistrFunc.cpp, RadialDistrFunc.hpp:
+	finish GofXyz
+
+2005-02-17 11:21  tim
+
+	* src/applications/staticProps/: GofAngle2.cpp, GofR.cpp,
+	GofRAngle.cpp, GofXyz.cpp: change the output format of 2D radial
+	distribution function
+
+2005-02-17 10:23  tim
+
+	* src/utils/BitSet.hpp: forget the const correctness for BitSet
+
+2005-02-17 10:18  tim
+
+	* src/: brains/BlockSnapshotManager.cpp,
+	selection/DistanceFinder.cpp: The change of interface of BitSet
+	cause a bug in SelectionEvaluation
+
+2005-02-16 16:13  tim
+
+	* src/utils/residentMem.c: return residentMem in byte
+
+2005-02-16 16:00  tim
+
+	* src/applications/staticProps/: GofAngle2.cpp, GofRAngle.cpp: fix
+	a bug in writing out the value of cosang
+
+2005-02-16 15:43  tim
+
+	* src/brains/BlockSnapshotManager.cpp: using PhysMem - RSSMem to
+	estimate avaliable memory
+
+2005-02-16 15:30  tim
+
+	* src/: applications/staticProps/GofAngle2.cpp,
+	applications/staticProps/GofAngle2.hpp,
+	applications/staticProps/GofR.cpp,
+	applications/staticProps/GofR.hpp,
+	applications/staticProps/GofRAngle.cpp,
+	applications/staticProps/GofRAngle.hpp,
+	applications/staticProps/GofXyz.cpp,
+	applications/staticProps/GofXyz.hpp,
+	applications/staticProps/StaticProps.cpp,
+	applications/staticProps/StaticProps.ggo,
+	applications/staticProps/StaticPropsCmd.c,
+	applications/staticProps/StaticPropsCmd.h,
+	brains/BlockSnapshotManager.cpp: change the default bin number
+
+2005-02-16 14:36  tim
+
+	* src/: applications/dynamicProps/DipoleCorrFunc.cpp,
+	applications/dynamicProps/RCorrFunc.cpp,
+	applications/dynamicProps/TimeCorrFunc.cpp,
+	applications/dynamicProps/VCorrFunc.cpp,
+	applications/staticProps/GofAngle2.cpp,
+	applications/staticProps/GofR.cpp,
+	applications/staticProps/GofR.hpp,
+	applications/staticProps/GofRAngle.cpp,
+	applications/staticProps/GofRAngle.hpp,
+	applications/staticProps/RadialDistrFunc.cpp,
+	applications/staticProps/RadialDistrFunc.hpp,
+	selection/SelectionManager.cpp, selection/SelectionManager.hpp,
+	utils/BitSet.cpp, utils/BitSet.hpp: change the suffix of output
+	files;fix the problem of counting in staticProps
+
+2005-02-15 14:39  tim
+
+	* src/brains/BlockSnapshotManager.cpp: fix a bug in
+	BlockSnapshotManager
+
+2005-02-15 14:36  tim
+
+	* src/: applications/dynamicProps/TimeCorrFunc.cpp,
+	applications/staticProps/RadialDistrFunc.cpp,
+	brains/BlockSnapshotManager.cpp, brains/BlockSnapshotManager.hpp,
+	selection/SelectionEvaluator.cpp: BlockSnapshotManager is using
+	reference counting now
+
+2005-02-15 12:49  tim
+
+	* src/selection/: SelectionEvaluator.cpp, SelectionEvaluator.hpp:
+	replace std::make_pair by VariablesType::value_type to make Sun
+	Compiler happy
+
+2005-02-15 12:35  tim
+
+	* src/selection/: TokenMap.cpp, TokenMap.hpp: adding typedef to
+	TokenMap, using TokenMapType::value_type instead of std::make_pair
+	to make Sun compiler happy
+
+2005-02-15 12:24  tim
+
+	* src/applications/staticProps/: GofRAngle.cpp,
+	RadialDistrFunc.cpp, RadialDistrFunc.hpp: bug fix in StaticProps
+
+2005-02-15 12:11  tim
+
+	* src/: applications/staticProps/GofR.cpp,
+	applications/staticProps/RadialDistrFunc.cpp,
+	applications/staticProps/RadialDistrFunc.hpp,
+	brains/BlockSnapshotManager.cpp, utils/BitSet.cpp: (1) adding
+	#ifdef __RWSTD to make sun compiler happy (2) fix pair density
+	calculation problem when two selections intersect with each other
+
+2005-02-15 10:24  gezelter
+
+	* src/brains/BlockSnapshotManager.cpp: cast of NULL to satisfy
+	xlc++
+
+2005-02-15 10:17  gezelter
+
+	* configure, ac-tools/configure.in, src/config.h.in,
+	src/utils/residentMem.c: [no log message]
+
+2005-02-15 01:17  gezelter
+
+	* src/utils/residentMem.c: bug fix for null termination
+
+2005-02-15 01:11  gezelter
+
+	* configure, ac-tools/configure.in, src/utils/residentMem.c:
+	bugfixing residentMem
+
+2005-02-15 00:59  gezelter
+
+	* configure, ac-tools/configure.in, src/config.h.in,
+	src/utils/residentMem.c: bugfixes for residentMem on LINUX
+
+2005-02-15 00:08  gezelter
+
+	* src/utils/Makefile.in: added residentMem
+
+2005-02-15 00:05  gezelter
+
+	* configure, ac-tools/configure.in, make/Makefile.in,
+	src/config.h.in, src/utils/physmem.h, src/utils/residentMem.c,
+	src/utils/residentMem.h: modifications to estimate memory in use by
+	other processes autoconf fixes ps syntax checking config.h file
+	cleaning
+
+2005-02-14 18:26  gezelter
+
+	* configure, ac-tools/configure.in, make/Makefile.in: ps niceness
+
+2005-02-14 18:16  gezelter
+
+	* configure, ac-tools/aclocal.m4, ac-tools/configure.in: ps
+	strangeness
+
+2005-02-14 14:42  tim
+
+	* src/brains/BlockSnapshotManager.cpp: fix a bug in
+	BlockSnapshotManager.hpp
+
+2005-02-14 13:51  tim
+
+	* src/applications/staticProps/: StaticProps.cpp, StaticProps.ggo,
+	StaticPropsCmd.c: default length for staticProps is 1/2 smallest
+	length of first frame
+
+2005-02-14 13:12  tim
+
+	* src/integrators/VelocityVerletIntegrator.cpp: fix a bug in
+	VelocityVerletIntegrator : last frame is written twice
+
+2005-02-14 12:57  tim
+
+	* src/: applications/dynamicProps/TimeCorrFunc.cpp,
+	brains/SimInfo.cpp, primitives/RigidBody.cpp,
+	primitives/StuntDouble.hpp: begin bug fix
+
+2005-02-14 12:35  tim
+
+	* src/applications/dynamicProps/: CorrelationFunction.cpp,
+	CorrelationFunction.hpp, CrossTimeCorrFunc.cpp,
+	CrossTimeCorrFunc.hpp, DipoleCorrFunc.cpp, DipoleCorrFunc.hpp,
+	DynamicProps.cpp, FrameTimeCorrFunc.hpp, Makefile,
+	ParticleTimeCorrFunc.cpp, ParticleTimeCorrFunc.hpp, RCorrFunc.cpp,
+	RCorrFunc.hpp, TimeCorrFunc.cpp, TimeCorrFunc.hpp, VCorrFunc.cpp,
+	VCorrFunc.hpp: refactory CorrelationFunction
+
+2005-02-14 10:18  gezelter
+
+	* src/applications/dynamicProps/CorrelationFunction.cpp: bug fix
+	and start of switch for type of correlation function
+
+2005-02-13 16:18  tim
+
+	* src/brains/: DataStorage.cpp, SimInfo.cpp: fix a bug in
+	calculating  bytes per stuntdouble
+
+2005-02-13 16:03  tim
+
+	* src/applications/dynamicProps/CorrelationFunction.cpp: more fix
+
+2005-02-13 15:57  tim
+
+	* src/applications/dynamicProps/CorrelationFunction.cpp: fixed a
+	bug in CorrelationFunction
+
+2005-02-13 15:36  tim
+
+	* src/: applications/staticProps/GofR.cpp,
+	applications/staticProps/GofRAngle.cpp, brains/SimInfo.cpp: fixed a
+	bug in SimInfo::getCutoff()
+
+2005-02-13 15:08  tim
+
+	* make/Makefile.in: adding staticProps and dynamicProps into
+	Makefile.in
+
+2005-02-13 15:05  tim
+
+	* src/: applications/dynamicProps/CorrelationFunction.cpp,
+	applications/dynamicProps/CorrelationFunction.hpp,
+	applications/staticProps/StaticProps.cpp,
+	applications/staticProps/StaticProps.ggo,
+	applications/staticProps/StaticPropsCmd.c,
+	applications/staticProps/StaticPropsCmd.h, brains/SimInfo.cpp,
+	brains/SimInfo.hpp, integrators/Integrator.cpp: maximum length
+	defaults to the cutoff radius
+
+2005-02-13 14:14  tim
+
+	* src/utils/Algorithm.hpp: adding Algorithm.hpp
+
+2005-02-13 14:10  tim
+
+	* src/: applications/dump2Xyz/Dump2XYZ.cpp,
+	applications/dynamicProps/CorrelationFunction.cpp,
+	applications/dynamicProps/CorrelationFunction.hpp,
+	applications/dynamicProps/DynamicProps.cpp,
+	brains/BlockSnapshotManager.cpp, brains/BlockSnapshotManager.hpp,
+	integrators/Integrator.cpp, integrators/Integrator.hpp,
+	integrators/VelocityVerletIntegrator.cpp,
+	integrators/VelocityVerletIntegrator.hpp, io/DumpWriter.cpp,
+	io/LennardJonesAtomTypesSectionParser.cpp, minimizers/PRCG.cpp,
+	utils/BitSet.cpp, utils/BitSet.hpp, utils/physmem.h,
+	visitors/OtherVisitor.cpp: dynamicProps get built
+
+2005-02-13 10:56  tim
+
+	* src/: applications/dynamicProps/CorrelationFunction.cpp,
+	brains/BlockSnapshotManager.cpp, brains/BlockSnapshotManager.hpp,
+	brains/DataStorage.cpp, brains/DataStorage.hpp: dynamicProps in
+	progress
+
+2005-02-13 03:04  tim
+
+	* src/: applications/dynamicProps/CorrelationFunction.hpp,
+	brains/BlockSnapshotManager.cpp, brains/BlockSnapshotManager.hpp,
+	brains/Makefile, brains/SimInfo.hpp, brains/SimSnapshotManager.cpp,
+	brains/SimSnapshotManager.hpp, brains/SnapshotManager.hpp: more
+	work in dynamicProps
+
+2005-02-13 02:25  tim
+
+	* src/applications/dynamicProps/DynamicProps.cpp: adding
+	dynamicProps
+
+2005-02-13 02:14  tim
+
+	* src/applications/dynamicProps/: DynamicPropsCmd.c,
+	DynamicPropsCmd.h: adding command line option to DynamicProps
+
+2005-02-13 02:13  tim
+
+	* src/applications/dynamicProps/: DynamicProps.ggo, Makefile:
+	adding command line option for DynamicProps
+
+2005-02-13 01:57  tim
+
+	* src/: applications/dynamicProps/CorrelationFunction.cpp,
+	applications/dynamicProps/CorrelationFunction.hpp,
+	applications/dynamicProps/DipoleCorrFunc.cpp,
+	applications/dynamicProps/DipoleCorrFunc.hpp,
+	applications/dynamicProps/RCorrFunc.cpp,
+	applications/dynamicProps/RCorrFunc.hpp,
+	applications/dynamicProps/VCorrFunc.cpp,
+	applications/dynamicProps/VCorrFunc.hpp,
+	applications/staticProps/RadialDistrFunc.cpp,
+	brains/BlockSnapshotManager.cpp, brains/BlockSnapshotManager.hpp,
+	brains/SimSnapshotManager.cpp, brains/SimSnapshotManager.hpp,
+	brains/SnapshotManager.hpp, io/DumpReader.cpp, io/DumpReader.hpp,
+	primitives/RigidBody.cpp, primitives/RigidBody.hpp: adding
+	dynamicProps
+
+2005-02-12 15:09  tim
+
+	* src/selection/SelectionManager.cpp: adding SelectionManager.cpp
+
+2005-02-11 17:41  tim
+
+	* src/brains/: SimInfo.cpp, SimInfo.hpp, Snapshot.hpp: adding one
+	more constructor to Snapshot to create customized DataStorage
+
+2005-02-11 17:39  tim
+
+	* src/selection/: DistanceFinder.hpp, Makefile,
+	SelectionManager.hpp: adding beginSelected, nextSelected method to
+	SelectionManager
+
+2005-02-11 17:36  tim
+
+	* src/config.h.in, configure: adding support for physmem
+
+2005-02-11 17:35  tim
+
+	* ac-tools/configure.in: adding supprot for physmem
+
+2005-02-11 17:35  tim
+
+	* src/utils/: BitSet.hpp, Makefile.in, physmem.c, physmem.h: adding
+	physmem
+
+2005-02-10 17:37  tim
+
+	* src/applications/staticProps/: GofAngle2.cpp, GofAngle2.hpp,
+	GofR.cpp, GofR.hpp, GofRAngle.cpp, GofRAngle.hpp, GofXyz.cpp,
+	GofXyz.hpp, Makefile, RadialDistrFunc.cpp, RadialDistrFunc.hpp,
+	StaticProps.cpp, StaticProps.ggo, StaticPropsCmd.c,
+	StaticPropsCmd.h: more work in StaticProps
+
+2005-02-10 13:14  tim
+
+	* src/applications/staticProps/: GofAngle2.cpp, GofAngle2.hpp,
+	GofR.cpp, GofR.ggo, GofR.hpp, GofRAngle.cpp, GofRAngle.hpp,
+	GofRCmd.c, GofRCmd.h, GofRMain.cpp, GofXyz.cpp, GofXyz.hpp,
+	Makefile, RadialDistrFunc.cpp, RadialDistrFunc.hpp,
+	StaticProps.cpp, StaticProps.ggo, StaticPropsCmd.c,
+	StaticPropsCmd.h: change the filenames
+
+2005-02-10 09:15  tim
+
+	* src/applications/staticProps/: GofR.cpp, GofRAngle.cpp,
+	GofRAngle.hpp, GofRMain.cpp, RadialDistrFunc.cpp,
+	RadialDistrFunc.hpp: adding GofRAngle
+
+2005-02-09 13:21  tim
+
+	* src/applications/staticProps/: GofrCmd.c, GofrCmd.h: remove some
+	useless files
+
+2005-02-09 13:12  tim
+
+	* src/applications/staticProps/: GofR.cpp, Makefile,
+	RadialDistrFunc.cpp, RadialDistrFunc.hpp: staticProps in progress
+
+2005-02-09 12:08  tim
+
+	* src/applications/staticProps/: GofR.cpp, GofR.ggo, GofR.hpp,
+	GofRCmd.c, GofRCmd.h, GofRMain.cpp, GofrCmd.c, GofrCmd.h,
+	RadialDistrFunc.cpp, RadialDistrFunc.hpp: adding GofR
+
+2005-02-07 17:39  tim
+
+	* src/primitives/Molecule.hpp: add getRigidBodyAt  function into
+	Molecule class
+
+2005-02-07 17:38  tim
+
+	* src/applications/dump2Xyz/Dump2XYZCmd.c: update help info
+
+2005-02-07 17:36  tim
+
+	* src/selection/: NameFinder.cpp, NameFinder.hpp,
+	SelectionCompiler.cpp: support select internal index selection, for
+	example, select DMPC.3
+
+2005-02-07 16:11  tim
+
+	* src/applications/dump2Xyz/: Dump2XYZCmd.c, Dump2XYZCmd.h: update
+	help info for Dump2XYZ
+
+2005-02-07 15:39  chrisfen
+
+	* src/selection/: SelectionEvaluator.cpp, SelectionEvaluator.hpp:
+	selection librarys added
+
+2005-02-07 15:31  tim
+
+	* src/selection/Makefile, make/Makefile.in: adding Makefile
+
+2005-02-07 15:20  chrisfen
+
+	* src/utils/wildcards.hpp: issue commented out in wildcards
+
+2005-02-07 15:06  tim
+
+	* src/selection/SelectionEvaluator.cpp: forget to reset the pc
+	which cause reevaluate return NULL
+
+2005-02-07 14:14  tim
+
+	* src/brains/: SimCreator.cpp, SimSnapshotManager.cpp,
+	SimSnapshotManager.hpp: fix a bug in determing the global index for
+	rigidbodies
+
+2005-02-07 14:13  tim
+
+	* src/utils/: BitSet.cpp, BitSet.hpp, StringUtils.hpp: minor change
+	in Bitset
+
+2005-02-07 14:13  tim
+
+	* src/selection/: DistanceFinder.cpp, DistanceFinder.hpp,
+	SelectionCompiler.cpp, SelectionCompiler.hpp,
+	SelectionEvaluator.cpp, SelectionEvaluator.hpp, Token.hpp,
+	TokenMap.cpp: selection library is working
+
+2005-02-04 17:46  tim
+
+	* src/applications/dump2Xyz/Dump2XYZ.cpp: remove SelectionVisitor
+
+2005-02-04 17:45  tim
+
+	* src/visitors/: OtherVisitor.cpp, OtherVisitor.hpp: IgnoreVisitor
+	and XYZVisitor now use selection library
+
+2005-02-04 17:44  tim
+
+	* src/brains/: MoleculeCreator.cpp, SimInfo.cpp, SimInfo.hpp:
+	adding SelectionManager into SimInfo
+
+2005-02-04 17:43  tim
+
+	* src/applications/dump2Xyz/: Dump2XYZ.cpp, Dump2XYZ.ggo,
+	Dump2XYZCmd.c, Dump2XYZCmd.h: dump2Xyz now take advantage of
+	selection library
+
+2005-02-04 17:42  tim
+
+	* src/utils/: BitSet.hpp, Makefile.in, wildcards.cpp: minor change
+	in BitSet
+
+2005-02-04 17:41  tim
+
+	* src/primitives/: Molecule.hpp, RigidBody.hpp: adding missing
+	implementation
+
+2005-02-04 17:39  tim
+
+	* src/selection/: NameFinder.cpp, NameFinder.hpp,
+	SelectionCompiler.cpp, SelectionCompiler.hpp,
+	SelectionEvaluator.cpp, SelectionEvaluator.hpp,
+	SelectionManager.hpp, Token.hpp: half of the selection utility is
+	working need to debug within keyword and atomproperty keyword
+
+2005-02-04 00:42  tim
+
+	* src/selection/: NameFinder.cpp, NameFinder.hpp: selection library
+	get built
+
+2005-02-04 00:42  tim
+
+	* src/utils/: BitSet.cpp, BitSet.hpp: fix BitSet
+
+2005-02-04 00:26  tim
+
+	* src/brains/: ForceFields.cpp, Migrator.hpp, SimCreator.cpp:
+	remove some useless files
+
+2005-02-03 23:57  tim
+
+	* src/: primitives/RigidBody.hpp, selection/NameFinder.cpp,
+	selection/NameFinder.hpp, utils/wildcards.cpp, utils/wildcards.hpp:
+	adding wildcard class; NameFinder is finished
+
+2005-02-03 18:14  tim
+
+	* src/selection/: NameFinder.cpp, NameFinder.hpp,
+	SelectionCompiler.cpp, SelectionCompiler.hpp,
+	SelectionEvaluator.cpp, SelectionEvaluator.hpp,
+	SelectionManager.hpp, Token.hpp, TokenMap.cpp: more work in
+	selection library
+
+2005-02-03 09:04  tim
+
+	* src/selection/: SelectionEvaluator.cpp, SelectionEvaluator.hpp:
+	selection in progress
+
+2005-02-02 18:13  tim
+
+	* src/selection/: SelectionCompiler.cpp, SelectionCompiler.hpp,
+	SelectionEvaluator.cpp, SelectionEvaluator.hpp, Token.cpp,
+	Token.hpp, TokenMap.cpp, TokenMap.hpp: selection library in
+	progress, except SelectionEvaluator, other files are compiled
+
+2005-02-02 18:12  tim
+
+	* src/utils/: Makefile.in, any.hpp: adding boost::any
+
+2005-02-02 07:51  tim
+
+	* src/selection/SelectionCompiler.cpp: add SelectionCompiler.cpp
+
+2005-02-01 17:49  tim
+
+	* src/: utils/BitSet.cpp, utils/BitSet.hpp, utils/StringUtils.hpp,
+	selection/SelectionCompiler.hpp, selection/SelectionEvaluator.cpp,
+	selection/SelectionEvaluator.hpp, selection/SelectionManager.hpp,
+	selection/Token.hpp: Selection in progress
+
+2005-02-01 01:55  tim
+
+	* src/: selection/SelectionCompiler.hpp,
+	selection/SelectionEvaluator.cpp, selection/SelectionEvaluator.hpp,
+	selection/SelectionManager.hpp, selection/Token.hpp,
+	utils/BitSet.cpp, utils/BitSet.hpp: adding selection library
+
+2005-01-26 10:26  tim
+
+	* src/integrators/: Integrator.cpp, Integrator.hpp,
+	VelocityVerletIntegrator.cpp, VelocityVerletIntegrator.hpp: forget
+	to add eorWriter
+
+2005-01-26 10:15  tim
+
+	* src/: primitives/GhostTorsion.cpp, visitors/AtomVisitor.cpp:
+	(1)Cast wrong atom to DirectionalAtom in GhostTorsion (2)get the
+	wrong column of electroframe
+
+2005-01-25 16:59  tim
+
+	* src/: brains/SimInfo.cpp, io/DumpReader.cpp: fix a bug in
+	SimInfo, use number of cutoff stamp as counter to loop over
+	rigidbody stamp
+
+2005-01-25 12:45  tim
+
+	* src/: applications/dump2Xyz/Dump2XYZ.cpp,
+	brains/MoleculeCreator.cpp, brains/SimCreator.cpp,
+	integrators/DLM.cpp, io/AtomTypesSectionParser.cpp,
+	io/BendTypesSectionParser.cpp, io/BondTypesSectionParser.cpp,
+	io/DirectionalAtomTypesSectionParser.cpp, io/DumpReader.cpp,
+	io/EAMAtomTypesSectionParser.cpp,
+	io/ElectrostaticAtomTypesSectionParser.cpp, io/Globals.cpp,
+	io/Globals.hpp, io/LennardJonesAtomTypesSectionParser.cpp,
+	io/StickyAtomTypesSectionParser.cpp,
+	io/TorsionTypesSectionParser.cpp, io/TorsionTypesSectionParser.hpp,
+	math/SquareMatrix.hpp, primitives/DirectionalAtom.cpp,
+	primitives/DirectionalAtom.hpp, primitives/GhostTorsion.cpp,
+	primitives/GhostTorsion.hpp, primitives/Makefile,
+	primitives/RigidBody.cpp, types/MakeStamps.cpp: (1) complete
+	section parser's error message (2) add GhostTorsion (3) accumulate
+	inertial tensor from the directional atoms before calculate
+	rigidbody's inertial tensor
+
+2005-01-17 17:17  tim
+
+	* forceFields/DUFF2.frc: forget to set dipole for lipid head group
+
+2005-01-17 11:58  tim
+
+	* src/integrators/NVT.cpp: fix a bug in loading initial extended
+	system parameters
+
+2005-01-17 11:05  tim
+
+	* src/integrators/NVT.cpp: forget to set maxIterNum_ in NVT
+
+2005-01-14 17:02  tim
+
+	* src/UseTheForce/WATER.cpp: remove WATER.cpp
+
+2005-01-14 16:37  tim
+
+	* forceFields/Makefile: sync Makefile
+
+2005-01-14 16:13  gezelter
+
+	* make/Makefile.in, src/Makefile, src/UseTheForce/Makefile,
+	src/UseTheForce/DarkSide/Makefile, src/applications/Makefile,
+	src/applications/dump2Xyz/Makefile,
+	src/applications/oopse/Makefile,
+	src/applications/simpleBuilder/Makefile, src/brains/Makefile,
+	src/constraints/Makefile, src/integrators/Makefile,
+	src/io/Makefile, src/math/Makefile, src/minimizers/Makefile,
+	src/primitives/Makefile, src/profiling/Makefile,
+	src/restraints/Makefile, src/types/Makefile, src/utils/Makefile.in,
+	src/visitors/Makefile: moved Package variable into subdirectory
+	makefiles to speed up the building process
+
+2005-01-14 15:48  gezelter
+
+	* src/applications/oopse/oopse.cpp: Fixed publication details in
+	banner
+
+2005-01-14 15:48  gezelter
+
+	* src/UseTheForce/DarkSide/: simParallel_interface.F90,
+	simParallel_interface.h: added dummy subroutine to avoid empty
+	unit, synchronized this dummy routine between C and fortran
+
+2005-01-14 15:31  gezelter
+
+	* src/UseTheForce/: Makefile, doForces.F90, doForces_interface.F90,
+	notifyCutoffs.F90, notifyCutoffs_interface.F90, DarkSide/LJ.F90,
+	DarkSide/Makefile, DarkSide/atype.F90,
+	DarkSide/atype_interface.F90, DarkSide/charge.F90,
+	DarkSide/charge_interface.F90, DarkSide/dipole.F90,
+	DarkSide/dipole_interface.F90, DarkSide/eam.F90,
+	DarkSide/eam_interface.F90, DarkSide/gb.F90,
+	DarkSide/gb_interface.F90, DarkSide/lj_interface.F90,
+	DarkSide/shapes.F90, DarkSide/shapes_interface.F90,
+	DarkSide/simParallel.F90, DarkSide/simParallel_interface.F90,
+	DarkSide/simulation.F90, DarkSide/simulation_interface.F90,
+	DarkSide/sticky.F90, DarkSide/sticky_interface.F90: separating
+	modules and C/Fortran interface subroutines
+
+2005-01-14 15:15  gezelter
+
+	* configure, ac-tools/aclocal.m4: more fixes for gnugetopt
+
+2005-01-14 15:09  gezelter
+
+	* configure, ac-tools/configure.in, src/config.h.in,
+	src/utils/Makefile, src/utils/Makefile.in: fixing for gnugetopt
+
+2005-01-14 11:49  tim
+
+	* src/: io/EAMAtomTypesSectionParser.cpp,
+	utils/StringTokenizer.cpp, utils/StringTokenizer.hpp,
+	utils/StringUtils.hpp: using c library to do conversion instead of
+	using iostream due to a bug in libstdc++(GCC 3.2)
+
+2005-01-13 21:40  tim
+
+	* src/brains/SimSetup.cpp: no message
+
+2005-01-13 20:56  tim
+
+	* src/primitives/Molecule.hpp: fix a bug in global index
+
+2005-01-13 20:04  tim
+
+	* src/minimizers/: Minimizer.cpp, Minimizer.hpp: remove include
+	Integrator.hpp in Minimizer
+
+2005-01-13 17:14  gezelter
+
+	* src/utils/Makefile: compile getopt and getopt1 if we need to
+
+2005-01-13 16:56  gezelter
+
+	* make/Makefile.in: template flags
+
+2005-01-13 16:48  gezelter
+
+	* src/applications/oopse/Makefile: formatting
+
+2005-01-13 16:48  gezelter
+
+	* make/Makefile.in: fixed a MakeDir / MkDir problem added BinDir
+	target
+
+2005-01-13 14:40  tim
+
+	* src/: UseTheForce/fSwitchingFunction.h,
+	UseTheForce/mpiComponentPlan.h, brains/fSimulation.h, io/Makefile,
+	math/Makefile, math/RectMatrix.hpp, math/Vector.hpp,
+	primitives/RigidBody.cpp, types/AtomTypeProperties.h,
+	types/CharmmTorsionType.cpp, utils/simError.h: port to SGI platform
+
+2005-01-13 13:26  tim
+
+	* make/Makefile.in: change the order of linking (object file comes
+	first and then follow by user built library)
+
+2005-01-12 18:24  tim
+
+	* src/io/DumpWriter.cpp: remove useless debug info
+
+2005-01-12 18:21  tim
+
+	* src/applications/dump2Xyz/Dump2XYZ.cpp: minor fix
+
+2005-01-12 18:17  tim
+
+	* make/: Makefile.in, Makefile.in: missing tab
+
+2005-01-12 18:15  tim
+
+	* src/visitors/: AtomVisitor.cpp, AtomVisitor.hpp: LinearVisitor
+	get fixed
+
+2005-01-12 17:40  gezelter
+
+	* make/Makefile.in, src/UseTheForce/DUFF.cpp,
+	src/UseTheForce/DUFF.hpp, src/UseTheForce/EAM.cpp,
+	src/UseTheForce/EAM.hpp, src/UseTheForce/EAM_FF.cpp,
+	src/UseTheForce/ForceField.cpp, src/UseTheForce/ForceField.hpp,
+	src/UseTheForce/ForceFieldCreator.hpp,
+	src/UseTheForce/ForceFieldFactory.cpp,
+	src/UseTheForce/ForceFieldFactory.hpp, src/UseTheForce/LJFF.cpp,
+	src/UseTheForce/Makefile, src/UseTheForce/Shapes_FF.cpp,
+	src/UseTheForce/doForces.F90, src/UseTheForce/doForces_interface.h,
+	src/UseTheForce/fSwitchingFunction.h,
+	src/UseTheForce/mpiComponentPlan.h,
+	src/UseTheForce/mpiForceField.c, src/UseTheForce/mpiForceField.h,
+	src/UseTheForce/notifyCutoffs.F90,
+	src/UseTheForce/notifyCutoffs_interface.h,
+	src/UseTheForce/DarkSide/LJ.F90,
+	src/UseTheForce/DarkSide/atype.F90,
+	src/UseTheForce/DarkSide/atype_interface.h,
+	src/UseTheForce/DarkSide/charge.F90,
+	src/UseTheForce/DarkSide/charge_interface.h,
+	src/UseTheForce/DarkSide/dipole.F90,
+	src/UseTheForce/DarkSide/dipole_interface.h,
+	src/UseTheForce/DarkSide/eam.F90,
+	src/UseTheForce/DarkSide/eam_interface.h,
+	src/UseTheForce/DarkSide/force_globals.F90,
+	src/UseTheForce/DarkSide/gb.F90,
+	src/UseTheForce/DarkSide/gb_interface.h,
+	src/UseTheForce/DarkSide/lj_interface.h,
+	src/UseTheForce/DarkSide/neighborLists.F90,
+	src/UseTheForce/DarkSide/reactionField.F90,
+	src/UseTheForce/DarkSide/shapes.F90,
+	src/UseTheForce/DarkSide/shapes_interface.h,
+	src/UseTheForce/DarkSide/simParallel.F90,
+	src/UseTheForce/DarkSide/simParallel_interface.h,
+	src/UseTheForce/DarkSide/simulation.F90,
+	src/UseTheForce/DarkSide/simulation_interface.h,
+	src/UseTheForce/DarkSide/sticky.F90,
+	src/UseTheForce/DarkSide/sticky_interface.h,
+	src/UseTheForce/DarkSide/switcheroo.F90,
+	src/applications/Makedepend, src/applications/quickLate.c,
+	src/applications/dump2Xyz/Dump2XYZ.cpp,
+	src/applications/oopse/oopse.cpp,
+	src/applications/simpleBuilder/BaseLattice.cpp,
+	src/applications/simpleBuilder/BaseLattice.hpp,
+	src/applications/simpleBuilder/Lattice.cpp,
+	src/applications/simpleBuilder/Lattice.hpp,
+	src/applications/simpleBuilder/LatticeCreator.cpp,
+	src/applications/simpleBuilder/LatticeCreator.hpp,
+	src/applications/simpleBuilder/LatticeFactory.cpp,
+	src/applications/simpleBuilder/LatticeFactory.hpp,
+	src/applications/simpleBuilder/MoLocator.cpp,
+	src/applications/simpleBuilder/MoLocator.hpp,
+	src/applications/simpleBuilder/simpleBuilder.cpp,
+	src/brains/DataStorage.cpp, src/brains/DataStorage.hpp,
+	src/brains/Exclude.cpp, src/brains/Exclude.hpp,
+	src/brains/ForceManager.cpp, src/brains/ForceManager.hpp,
+	src/brains/Makefile, src/brains/Migrator.hpp,
+	src/brains/MoleculeCreator.cpp, src/brains/MoleculeCreator.hpp,
+	src/brains/Register.cpp, src/brains/Register.hpp,
+	src/brains/SimCreator.cpp, src/brains/SimCreator.hpp,
+	src/brains/SimInfo.cpp, src/brains/SimInfo.hpp,
+	src/brains/SimModel.hpp, src/brains/SimSetup.hpp,
+	src/brains/SimSnapshotManager.cpp,
+	src/brains/SimSnapshotManager.hpp, src/brains/SimState.cpp,
+	src/brains/SimState.hpp, src/brains/SkipList.cpp,
+	src/brains/SkipList.hpp, src/brains/Snapshot.cpp,
+	src/brains/Snapshot.hpp, src/brains/SnapshotManager.hpp,
+	src/brains/Stats.cpp, src/brains/Stats.hpp, src/brains/Thermo.cpp,
+	src/brains/Thermo.hpp, src/brains/fSimulation.h,
+	src/brains/mpiSimulation.cpp, src/brains/mpiSimulation.hpp,
+	src/constraints/AbstractClasses.hpp,
+	src/constraints/ConstraintElem.hpp,
+	src/constraints/ConstraintPair.hpp, src/constraints/Makefile,
+	src/constraints/Rattle.cpp, src/constraints/Rattle.hpp,
+	src/constraints/ZConstraint.cpp, src/constraints/ZconsData.hpp,
+	src/constraints/ZconsStruct.hpp,
+	src/constraints/ZconstraintForceManager.cpp,
+	src/constraints/ZconstraintForceManager.hpp,
+	src/integrators/AbstractClasses.hpp,
+	src/integrators/AllIntegrator.hpp, src/integrators/DLM.cpp,
+	src/integrators/DLM.hpp, src/integrators/Integrator.cpp,
+	src/integrators/Integrator.hpp,
+	src/integrators/IntegratorCreator.hpp,
+	src/integrators/IntegratorFactory.cpp,
+	src/integrators/IntegratorFactory.hpp, src/integrators/Makefile,
+	src/integrators/NPT.cpp, src/integrators/NPT.hpp,
+	src/integrators/NPTf.cpp, src/integrators/NPTf.hpp,
+	src/integrators/NPTi.cpp, src/integrators/NPTi.hpp,
+	src/integrators/NPTxyz.cpp, src/integrators/NPTxyz.hpp,
+	src/integrators/NVE.cpp, src/integrators/NVE.hpp,
+	src/integrators/NVT.cpp, src/integrators/NVT.hpp,
+	src/integrators/RotationAlgorithm.hpp,
+	src/integrators/Velocitizer.cpp, src/integrators/Velocitizer.hpp,
+	src/integrators/VelocityVerletIntegrator.cpp,
+	src/integrators/VelocityVerletIntegrator.hpp,
+	src/io/AtomTypesSectionParser.cpp,
+	src/io/AtomTypesSectionParser.hpp, src/io/BASS_interface.cpp,
+	src/io/BASS_interface.h, src/io/BASS_parse.c, src/io/BASS_parse.h,
+	src/io/BendTypesSectionParser.cpp,
+	src/io/BendTypesSectionParser.hpp,
+	src/io/BondTypesSectionParser.cpp,
+	src/io/BondTypesSectionParser.hpp,
+	src/io/DirectionalAtomTypesSectionParser.cpp,
+	src/io/DirectionalAtomTypesSectionParser.hpp,
+	src/io/DumpReader.cpp, src/io/DumpReader.hpp,
+	src/io/DumpWriter.cpp, src/io/DumpWriter.hpp,
+	src/io/EAMAtomTypesSectionParser.cpp,
+	src/io/EAMAtomTypesSectionParser.hpp,
+	src/io/ElectrostaticAtomTypesSectionParser.cpp,
+	src/io/ElectrostaticAtomTypesSectionParser.hpp, src/io/Globals.cpp,
+	src/io/Globals.hpp, src/io/InitializeFromFile.cpp,
+	src/io/LennardJonesAtomTypesSectionParser.cpp,
+	src/io/LennardJonesAtomTypesSectionParser.hpp,
+	src/io/LinkedAssign.cpp, src/io/LinkedAssign.hpp,
+	src/io/LinkedCommand.cpp, src/io/LinkedCommand.hpp,
+	src/io/Makefile, src/io/SectionParser.cpp,
+	src/io/SectionParser.hpp, src/io/SectionParserManager.cpp,
+	src/io/SectionParserManager.hpp, src/io/StatWriter.cpp,
+	src/io/StatWriter.hpp, src/io/StickyAtomTypesSectionParser.cpp,
+	src/io/StickyAtomTypesSectionParser.hpp,
+	src/io/TorsionTypesSectionParser.cpp,
+	src/io/TorsionTypesSectionParser.hpp, src/io/ZConsReader.cpp,
+	src/io/ZConsReader.hpp, src/io/ZConsWriter.cpp,
+	src/io/ZConsWriter.hpp, src/io/basic_ifstrstream.hpp,
+	src/io/interface.c, src/io/make_nodes.c, src/io/make_nodes.h,
+	src/io/mpiBASS.c, src/io/mpiBASS.h, src/io/node_list.h,
+	src/io/parse_interface.h, src/io/parse_me.h, src/io/parse_tree.c,
+	src/io/parse_tree.h, src/math/ChebyshevPolynomials.cpp,
+	src/math/ChebyshevPolynomials.hpp, src/math/MatVec3.c,
+	src/math/MatVec3.h, src/math/Polynomial.hpp,
+	src/math/Quaternion.hpp, src/math/RealSphericalHarmonic.cpp,
+	src/math/RealSphericalHarmonic.hpp, src/math/RectMatrix.hpp,
+	src/math/SquareMatrix.hpp, src/math/SquareMatrix3.hpp,
+	src/math/Vector.hpp, src/math/Vector3.hpp,
+	src/math/randomSPRNG.cpp, src/math/randomSPRNG.hpp,
+	src/minimizers/CGFamilyMinimizer.cpp,
+	src/minimizers/CGFamilyMinimizer.hpp, src/minimizers/Makefile,
+	src/minimizers/Minimizer.cpp, src/minimizers/Minimizer.hpp,
+	src/minimizers/MinimizerCreator.hpp,
+	src/minimizers/MinimizerFactory.cpp,
+	src/minimizers/MinimizerFactory.hpp,
+	src/minimizers/MinimizerParameterSet.cpp,
+	src/minimizers/MinimizerParameterSet.hpp,
+	src/minimizers/OOPSEMinimizer.cpp,
+	src/minimizers/OOPSEMinimizer.hpp, src/minimizers/PRCG.cpp,
+	src/minimizers/PRCG.hpp, src/minimizers/SDMinimizer.cpp,
+	src/minimizers/SDMinimizer.hpp, src/primitives/AbstractClasses.hpp,
+	src/primitives/Atom.cpp, src/primitives/Atom.hpp,
+	src/primitives/Bend.cpp, src/primitives/Bend.hpp,
+	src/primitives/BendExtensions.cpp, src/primitives/Bond.cpp,
+	src/primitives/Bond.hpp, src/primitives/BondExtensions.cpp,
+	src/primitives/CutoffGroup.hpp, src/primitives/DirectionalAtom.cpp,
+	src/primitives/DirectionalAtom.hpp, src/primitives/GhostBend.cpp,
+	src/primitives/GhostBend.hpp, src/primitives/Makefile,
+	src/primitives/Molecule.cpp, src/primitives/Molecule.hpp,
+	src/primitives/RigidBody.cpp, src/primitives/RigidBody.hpp,
+	src/primitives/SRI.hpp, src/primitives/StuntDouble.cpp,
+	src/primitives/StuntDouble.hpp, src/primitives/Torsion.cpp,
+	src/primitives/Torsion.hpp, src/primitives/TorsionExtensions.cpp,
+	src/primitives/UreyBradleyBend.cpp,
+	src/primitives/UreyBradleyBend.hpp, src/profiling/mdProfile.cpp,
+	src/profiling/mdProfile.hpp, src/types/AtomStamp.cpp,
+	src/types/AtomStamp.hpp, src/types/AtomType.cpp,
+	src/types/AtomType.hpp, src/types/AtomTypeProperties.h,
+	src/types/BendStamp.cpp, src/types/BendStamp.hpp,
+	src/types/BendType.hpp, src/types/BondStamp.cpp,
+	src/types/BondStamp.hpp, src/types/BondType.hpp,
+	src/types/CharmmTorsionType.cpp, src/types/CharmmTorsionType.hpp,
+	src/types/Component.cpp, src/types/Component.hpp,
+	src/types/CubicBendType.hpp, src/types/CubicBondType.hpp,
+	src/types/CubicTorsionType.hpp, src/types/CutoffGroupStamp.cpp,
+	src/types/CutoffGroupStamp.hpp, src/types/DirectionalAtomType.cpp,
+	src/types/DirectionalAtomType.hpp, src/types/FixedBondType.hpp,
+	src/types/HarmonicBendType.hpp, src/types/HarmonicBondType.hpp,
+	src/types/MakeStamps.cpp, src/types/MakeStamps.hpp,
+	src/types/Makefile, src/types/MoleculeStamp.cpp,
+	src/types/MoleculeStamp.hpp, src/types/MorseBondType.hpp,
+	src/types/OplsTorsionType.hpp, src/types/PolynomialBendType.hpp,
+	src/types/PolynomialBondType.hpp,
+	src/types/PolynomialTorsionType.hpp, src/types/QuarticBendType.hpp,
+	src/types/QuarticBondType.hpp, src/types/QuarticTorsionType.hpp,
+	src/types/RigidBodyStamp.cpp, src/types/RigidBodyStamp.hpp,
+	src/types/ShapeAtomType.cpp, src/types/ShapeAtomType.hpp,
+	src/types/TorsionStamp.cpp, src/types/TorsionStamp.hpp,
+	src/types/TorsionType.hpp, src/types/UreyBradleyBendType.hpp,
+	src/types/ZconStamp.cpp, src/types/ZconStamp.hpp,
+	src/utils/GenericData.hpp, src/utils/GenericFactory.hpp,
+	src/utils/LocalIndexManager.hpp, src/utils/Makefile,
+	src/utils/MemoryUtils.hpp, src/utils/NumericConstant.hpp,
+	src/utils/OOPSEConstant.hpp, src/utils/PropertyMap.cpp,
+	src/utils/PropertyMap.hpp, src/utils/StreamTokenizer.cpp,
+	src/utils/StreamTokenizer.hpp, src/utils/StringTokenizer.cpp,
+	src/utils/StringTokenizer.hpp, src/utils/StringUtils.cpp,
+	src/utils/StringUtils.hpp, src/utils/Trim.cpp, src/utils/Trim.hpp,
+	src/utils/Tuple.hpp, src/utils/TupleMatcher.hpp,
+	src/utils/TypeContainer.hpp, src/utils/TypeInfo.hpp,
+	src/utils/Utility.cpp, src/utils/Utility.hpp,
+	src/utils/definitions.F90, src/utils/fError.c,
+	src/utils/next_combination.hpp, src/utils/oopseMPI.F90,
+	src/utils/simError.c, src/utils/simError.h, src/utils/status.F90,
+	src/utils/vector_class.F90, src/visitors/AtomData.hpp,
+	src/visitors/AtomVisitor.cpp, src/visitors/AtomVisitor.hpp,
+	src/visitors/BaseVisitor.hpp, src/visitors/CompositeVisitor.cpp,
+	src/visitors/CompositeVisitor.hpp, src/visitors/OtherVisitor.cpp,
+	src/visitors/OtherVisitor.hpp, src/visitors/RigidBodyVisitor.cpp,
+	src/visitors/RigidBodyVisitor.hpp, src/visitors/ZconsVisitor.cpp,
+	src/visitors/ZconsVisitor.hpp: merging new_design branch into
+	OOPSE-2.0
+
+2005-01-12 13:13  tim
+
+	* src/: io/SectionParserManager.cpp, primitives/RigidBody.cpp,
+	utils/TypeContainer.hpp: forget to include <algorithm>
+
+2005-01-12 12:25  tim
+
+	* forceFields/: DUFF.frc, DipoleTest.frc, LJFF.frc, newEAM.VC.frc,
+	newEAM.frc, newEAM.u3.frc, newEAM.u6.frc: remove some useless force
+	fields
+
+2005-01-12 12:14  tim
+
+	* src/: UseTheForce/DUFF.cpp, UseTheForce/DUFF.hpp,
+	UseTheForce/EAM.cpp, UseTheForce/EAM.hpp,
+	UseTheForce/ForceField.cpp, UseTheForce/ForceField.hpp,
+	UseTheForce/ForceFieldCreator.hpp,
+	UseTheForce/ForceFieldFactory.cpp,
+	UseTheForce/ForceFieldFactory.hpp, UseTheForce/Shapes_FF.cpp,
+	UseTheForce/doForces.F90, UseTheForce/doForces_interface.h,
+	UseTheForce/fSwitchingFunction.h, UseTheForce/mpiComponentPlan.h,
+	UseTheForce/notifyCutoffs.F90,
+	UseTheForce/notifyCutoffs_interface.h, UseTheForce/DarkSide/LJ.F90,
+	UseTheForce/DarkSide/atype.F90,
+	UseTheForce/DarkSide/atype_interface.h,
+	UseTheForce/DarkSide/charge.F90,
+	UseTheForce/DarkSide/charge_interface.h,
+	UseTheForce/DarkSide/dipole.F90,
+	UseTheForce/DarkSide/dipole_interface.h,
+	UseTheForce/DarkSide/eam.F90, UseTheForce/DarkSide/eam_interface.h,
+	UseTheForce/DarkSide/force_globals.F90,
+	UseTheForce/DarkSide/gb.F90, UseTheForce/DarkSide/gb_interface.h,
+	UseTheForce/DarkSide/lj_interface.h,
+	UseTheForce/DarkSide/neighborLists.F90,
+	UseTheForce/DarkSide/reactionField.F90,
+	UseTheForce/DarkSide/shapes.F90,
+	UseTheForce/DarkSide/shapes_interface.h,
+	UseTheForce/DarkSide/simParallel.F90,
+	UseTheForce/DarkSide/simParallel_interface.h,
+	UseTheForce/DarkSide/simulation.F90,
+	UseTheForce/DarkSide/simulation_interface.h,
+	UseTheForce/DarkSide/sticky.F90,
+	UseTheForce/DarkSide/sticky_interface.h,
+	UseTheForce/DarkSide/switcheroo.F90,
+	applications/dump2Xyz/Dump2XYZ.cpp, applications/oopse/oopse.cpp,
+	applications/simpleBuilder/BaseLattice.cpp,
+	applications/simpleBuilder/BaseLattice.hpp,
+	applications/simpleBuilder/Lattice.cpp,
+	applications/simpleBuilder/Lattice.hpp,
+	applications/simpleBuilder/LatticeCreator.cpp,
+	applications/simpleBuilder/LatticeCreator.hpp,
+	applications/simpleBuilder/LatticeFactory.cpp,
+	applications/simpleBuilder/LatticeFactory.hpp,
+	applications/simpleBuilder/MoLocator.cpp,
+	applications/simpleBuilder/MoLocator.hpp,
+	applications/simpleBuilder/simpleBuilder.cpp,
+	brains/DataStorage.cpp, brains/DataStorage.hpp, brains/Exclude.cpp,
+	brains/Exclude.hpp, brains/ForceManager.cpp,
+	brains/ForceManager.hpp, brains/Makefile, brains/Migrator.hpp,
+	brains/MoleculeCreator.cpp, brains/MoleculeCreator.hpp,
+	brains/Register.cpp, brains/Register.hpp, brains/SimCreator.cpp,
+	brains/SimCreator.hpp, brains/SimInfo.cpp, brains/SimInfo.hpp,
+	brains/SimSnapshotManager.cpp, brains/SimSnapshotManager.hpp,
+	brains/SkipList.cpp, brains/SkipList.hpp, brains/SnapShot.cpp,
+	brains/Snapshot.cpp, brains/Snapshot.hpp,
+	brains/SnapshotManager.hpp, brains/Stats.cpp, brains/Stats.hpp,
+	brains/Thermo.cpp, brains/Thermo.hpp, brains/fSimulation.h,
+	constraints/ConstraintElem.hpp, constraints/ConstraintPair.hpp,
+	constraints/Rattle.cpp, constraints/Rattle.hpp,
+	constraints/ZconsStruct.hpp,
+	constraints/ZconstraintForceManager.cpp,
+	constraints/ZconstraintForceManager.hpp, integrators/DLM.cpp,
+	integrators/DLM.hpp, integrators/Integrator.cpp,
+	integrators/Integrator.hpp, integrators/IntegratorCreator.hpp,
+	integrators/IntegratorFactory.cpp,
+	integrators/IntegratorFactory.hpp, integrators/NPT.cpp,
+	integrators/NPT.hpp, integrators/NPTf.cpp, integrators/NPTf.hpp,
+	integrators/NPTi.cpp, integrators/NPTi.hpp, integrators/NPTxyz.cpp,
+	integrators/NPTxyz.hpp, integrators/NVE.cpp, integrators/NVE.hpp,
+	integrators/NVT.cpp, integrators/NVT.hpp,
+	integrators/RotationAlgorithm.hpp, integrators/Velocitizer.cpp,
+	integrators/Velocitizer.hpp,
+	integrators/VelocityVerletIntegrator.cpp,
+	integrators/VelocityVerletIntegrator.hpp,
+	io/AtomTypesSectionParser.cpp, io/AtomTypesSectionParser.hpp,
+	io/BASS_interface.cpp, io/BASS_interface.h, io/BASS_parse.c,
+	io/BASS_parse.h, io/BendTypesSectionParser.cpp,
+	io/BendTypesSectionParser.hpp, io/BondTypesSectionParser.cpp,
+	io/BondTypesSectionParser.hpp,
+	io/DirectionalAtomTypesSectionParser.cpp,
+	io/DirectionalAtomTypesSectionParser.hpp, io/DumpReader.cpp,
+	io/DumpReader.hpp, io/DumpWriter.cpp, io/DumpWriter.hpp,
+	io/EAMAtomTypesSectionParser.cpp, io/EAMAtomTypesSectionParser.hpp,
+	io/ElectrostaticAtomTypesSectionParser.cpp,
+	io/ElectrostaticAtomTypesSectionParser.hpp, io/Globals.cpp,
+	io/Globals.hpp, io/LennardJonesAtomTypesSectionParser.cpp,
+	io/LennardJonesAtomTypesSectionParser.hpp, io/LinkedAssign.cpp,
+	io/LinkedAssign.hpp, io/LinkedCommand.cpp, io/LinkedCommand.hpp,
+	io/SectionParser.cpp, io/SectionParser.hpp,
+	io/SectionParserManager.cpp, io/SectionParserManager.hpp,
+	io/StatWriter.cpp, io/StatWriter.hpp,
+	io/StickyAtomTypesSectionParser.cpp,
+	io/StickyAtomTypesSectionParser.hpp,
+	io/TorsionTypesSectionParser.cpp, io/TorsionTypesSectionParser.hpp,
+	io/ZConsReader.cpp, io/ZConsReader.hpp, io/ZConsWriter.cpp,
+	io/ZConsWriter.hpp, io/basic_ifstrstream.hpp, io/interface.c,
+	io/make_nodes.c, io/make_nodes.h, io/mpiBASS.c, io/mpiBASS.h,
+	io/node_list.h, io/parse_interface.h, io/parse_me.h,
+	io/parse_tree.c, io/parse_tree.h, math/ChebyshevPolynomials.cpp,
+	math/ChebyshevPolynomials.hpp, math/MatVec3.c, math/MatVec3.h,
+	math/Polynomial.hpp, math/Quaternion.hpp,
+	math/RealSphericalHarmonic.cpp, math/RealSphericalHarmonic.hpp,
+	math/RectMatrix.hpp, math/SquareMatrix.hpp, math/SquareMatrix3.hpp,
+	math/Vector.hpp, math/Vector3.hpp, math/randomSPRNG.cpp,
+	math/randomSPRNG.hpp, minimizers/CGFamilyMinimizer.cpp,
+	minimizers/CGFamilyMinimizer.hpp, minimizers/Minimizer.cpp,
+	minimizers/Minimizer.hpp, minimizers/MinimizerCreator.hpp,
+	minimizers/MinimizerFactory.cpp, minimizers/MinimizerFactory.hpp,
+	minimizers/MinimizerParameterSet.cpp,
+	minimizers/MinimizerParameterSet.hpp, minimizers/PRCG.cpp,
+	minimizers/PRCG.hpp, minimizers/SDMinimizer.cpp,
+	minimizers/SDMinimizer.hpp, primitives/Atom.cpp,
+	primitives/Atom.hpp, primitives/Bend.cpp, primitives/Bend.hpp,
+	primitives/Bond.hpp, primitives/CutoffGroup.hpp,
+	primitives/DirectionalAtom.cpp, primitives/DirectionalAtom.hpp,
+	primitives/GhostBend.cpp, primitives/GhostBend.hpp,
+	primitives/Molecule.cpp, primitives/Molecule.hpp,
+	primitives/RigidBody.cpp, primitives/RigidBody.hpp,
+	primitives/StuntDouble.cpp, primitives/StuntDouble.hpp,
+	primitives/Torsion.cpp, primitives/Torsion.hpp,
+	primitives/UreyBradleyBend.cpp, primitives/UreyBradleyBend.hpp,
+	profiling/mdProfile.cpp, profiling/mdProfile.hpp,
+	restraints/Restraints.cpp, restraints/Restraints.hpp,
+	types/AtomStamp.cpp, types/AtomStamp.hpp, types/AtomType.cpp,
+	types/AtomType.hpp, types/AtomTypeProperties.h,
+	types/BendStamp.cpp, types/BendStamp.hpp, types/BendType.hpp,
+	types/BondStamp.cpp, types/BondStamp.hpp, types/BondType.hpp,
+	types/CharmmTorsionType.cpp, types/CharmmTorsionType.hpp,
+	types/Component.cpp, types/Component.hpp, types/CubicBendType.hpp,
+	types/CubicBondType.hpp, types/CubicTorsionType.hpp,
+	types/CutoffGroupStamp.cpp, types/CutoffGroupStamp.hpp,
+	types/DirectionalAtomType.cpp, types/DirectionalAtomType.hpp,
+	types/FixedBondType.hpp, types/HarmonicBendType.hpp,
+	types/HarmonicBondType.hpp, types/MakeStamps.cpp,
+	types/MakeStamps.hpp, types/MoleculeStamp.cpp,
+	types/MoleculeStamp.hpp, types/MorseBondType.hpp,
+	types/OplsTorsionType.hpp, types/PolynomialBendType.hpp,
+	types/PolynomialBondType.hpp, types/PolynomialTorsionType.hpp,
+	types/QuarticBendType.hpp, types/QuarticBondType.hpp,
+	types/QuarticTorsionType.hpp, types/RigidBodyStamp.cpp,
+	types/RigidBodyStamp.hpp, types/ShapeAtomType.cpp,
+	types/ShapeAtomType.hpp, types/TorsionStamp.cpp,
+	types/TorsionStamp.hpp, types/TorsionType.hpp,
+	types/UreyBradleyBendType.hpp, types/ZconStamp.cpp,
+	types/ZconStamp.hpp, utils/GenericData.hpp,
+	utils/GenericFactory.hpp, utils/LocalIndexManager.hpp,
+	utils/MemoryUtils.hpp, utils/NumericConstant.hpp,
+	utils/OOPSEConstant.hpp, utils/PropertyMap.cpp,
+	utils/PropertyMap.hpp, utils/StringTokenizer.cpp,
+	utils/StringTokenizer.hpp, utils/StringUtils.cpp,
+	utils/StringUtils.hpp, utils/Trim.cpp, utils/Trim.hpp,
+	utils/Tuple.hpp, utils/TupleMatcher.hpp, utils/TypeContainer.hpp,
+	utils/Utility.cpp, utils/Utility.hpp, utils/definitions.F90,
+	utils/fError.c, utils/next_combination.hpp, utils/oopseMPI.F90,
+	utils/simError.c, utils/simError.h, utils/status.F90,
+	utils/vector_class.F90, visitors/AtomData.hpp,
+	visitors/AtomVisitor.cpp, visitors/AtomVisitor.hpp,
+	visitors/BaseVisitor.hpp, visitors/CompositeVisitor.cpp,
+	visitors/CompositeVisitor.hpp, visitors/OtherVisitor.cpp,
+	visitors/OtherVisitor.hpp, visitors/RigidBodyVisitor.cpp,
+	visitors/RigidBodyVisitor.hpp, visitors/ZconsVisitor.cpp,
+	visitors/ZconsVisitor.hpp: change license
+
+2005-01-12 12:14  tim
+
+	* src/brains/Snapshot.cpp: file Snapshot.cpp was initially added on
+	branch new_design.
+
+2005-01-11 16:03  tim
+
+	* src/: constraints/ZconstraintForceManager.cpp,
+	constraints/ZconstraintForceManager.hpp,
+	minimizers/MinimizerParameterSet.cpp,
+	minimizers/MinimizerParameterSet.hpp: change const static double
+	data member to const double
+
+2005-01-11 15:50  tim
+
+	* src/io/basic_ifstrstream.hpp: forget namespace qualifier std::
+
+2005-01-11 15:39  tim
+
+	* src/: UseTheForce/DarkSide/atype.F90, types/AtomTypeProperties.h:
+	change data type from logical to integer in AtomTypeProperties.h
+
+2005-01-11 11:36  tim
+
+	* forceFields/: EAM.VC.frc, EAM.frc, EAM.u3.frc, EAM.u6.frc: adding
+	new format of EAM force field
+
+2005-01-11 11:24  tim
+
+	* src/UseTheForce/DUFF.cpp: change default name of DUFF force field
+	to DUFF2.frc
+
+2005-01-11 11:23  tim
+
+	* forceFields/: DUFF2.frc, newDUFF.frc: rename newDUFF.frc to
+	DUFF2.frc
+
+2005-01-11 11:09  tim
+
+	* make/Makefile.in: adding constraints and minimizers into
+	Makefile.in
+
+2005-01-11 11:03  tim
+
+	* src/io/: ChargeAtomTypesSectionParser.cpp,
+	ChargeAtomTypesSectionParser.hpp, DipoleAtomTypesSectionParser.cpp,
+	DipoleAtomTypesSectionParser.hpp, Makefile: remove some useless
+	files
+
+2005-01-11 10:59  tim
+
+	* src/io/ZConsWriter.cpp: [no log message]
+
+2005-01-11 10:53  tim
+
+	* src/UseTheForce/EAM.cpp: minor fix
+
+2005-01-11 10:52  tim
+
+	* src/constraints/Rattle.cpp: file Rattle.cpp was initially added
+	on branch new_design.
+
+2005-01-11 10:52  tim
+
+	* src/constraints/: Rattle.cpp, Rattle.hpp: adding Rattle Algorithm
+
+2005-01-11 10:52  tim
+
+	* src/constraints/Rattle.hpp: file Rattle.hpp was initially added
+	on branch new_design.
+
+2005-01-11 10:47  tim
+
+	* make/Makefile.in: forget a '$' sign
+
+2005-01-11 10:46  tim
+
+	* make/Makefile.in: missing tab in rules
+
+2005-01-10 17:04  tim
+
+	* src/: UseTheForce/ForceFieldCreator.cpp,
+	UseTheForce/ForceFieldCreator.hpp,
+	UseTheForce/ForceFieldFactory.cpp,
+	UseTheForce/ForceFieldFactory.hpp, UseTheForce/Makefile,
+	applications/dump2Xyz/Dump2XYZ.cpp, applications/oopse/oopse.cpp,
+	applications/simpleBuilder/simpleBuilder.cpp, brains/Makefile,
+	brains/Register.cpp, brains/Register.hpp,
+	integrators/IntegratorCreator.cpp,
+	integrators/IntegratorCreator.hpp,
+	integrators/IntegratorFactory.cpp,
+	integrators/IntegratorFactory.hpp, integrators/Makefile,
+	integrators/NPTi.cpp, integrators/NVE.cpp, integrators/NVT.cpp,
+	minimizers/Makefile, minimizers/MinimizerCreator.cpp,
+	minimizers/MinimizerCreator.hpp, minimizers/MinimizerFactory.cpp,
+	minimizers/MinimizerFactory.hpp: create a register module to
+	register force fields, integrators and minimizers
+
+2005-01-10 17:04  tim
+
+	* src/brains/Register.cpp: file Register.cpp was initially added on
+	branch new_design.
+
+2005-01-10 17:04  tim
+
+	* src/brains/Register.hpp: file Register.hpp was initially added on
+	branch new_design.
+
+2005-01-10 15:52  tim
+
+	* src/: UseTheForce/ForceFieldFactory.cpp,
+	applications/oopse/oopse.cpp, brains/ForceManager.hpp,
+	constraints/ZconstraintForceManager.cpp,
+	constraints/ZconstraintForceManager.hpp,
+	integrators/IntegratorFactory.cpp,
+	integrators/VelocityVerletIntegrator.cpp, io/ZConsReader.cpp,
+	io/ZConsWriter.cpp, minimizers/MinimizerFactory.cpp,
+	visitors/ZconsVisitor.cpp, visitors/ZconsVisitor.hpp: zconstraint
+	method is working now
+
+2005-01-10 13:05  tim
+
+	* src/: constraints/ConstraintElem.hpp,
+	constraints/ConstraintPair.hpp, constraints/ZconsStruct.hpp,
+	constraints/ZconstraintForceManager.cpp,
+	constraints/ZconstraintForceManager.hpp, io/ZConsReader.cpp,
+	io/ZConsReader.hpp, io/ZConsWriter.cpp, io/ZConsWriter.hpp,
+	visitors/ZconsVisitor.cpp, visitors/ZconsVisitor.hpp: more work in
+	zconstraint
+
+2005-01-10 13:05  tim
+
+	* src/constraints/ZconsStruct.hpp: file ZconsStruct.hpp was
+	initially added on branch new_design.
+
+2005-01-07 16:50  tim
+
+	* src/: applications/simpleBuilder/BaseLattice.hpp,
+	applications/simpleBuilder/Lattice.hpp,
+	applications/simpleBuilder/LatticeCreator.hpp,
+	applications/simpleBuilder/LatticeFactory.hpp,
+	applications/simpleBuilder/MoLocator.hpp, brains/ForceManager.hpp,
+	constraints/ConstraintElem.hpp, constraints/Makefile,
+	constraints/ZConstraint.cpp, constraints/ZconsData.hpp,
+	constraints/ZconstraintForceManager.cpp,
+	constraints/ZconstraintForceManager.hpp,
+	integrators/VelocityVerletIntegrator.cpp, primitives/Molecule.hpp,
+	utils/NumericConstant.hpp: ZConstraintForceManager in progress
+
+2005-01-07 16:50  tim
+
+	* src/constraints/ConstraintElem.hpp: file ConstraintElem.hpp was
+	initially added on branch new_design.
+
+2005-01-07 16:50  tim
+
+	* src/constraints/ZconstraintForceManager.cpp: file
+	ZconstraintForceManager.cpp was initially added on branch
+	new_design.
+
+2005-01-07 16:50  tim
+
+	* src/constraints/ZconstraintForceManager.hpp: file
+	ZconstraintForceManager.hpp was initially added on branch
+	new_design.
+
+2005-01-06 17:31  tim
+
+	* src/: brains/MoleculeCreator.cpp, brains/MoleculeCreator.hpp,
+	brains/SimCreator.cpp, brains/SimInfo.cpp, brains/SimInfo.hpp,
+	constraints/ConstraintPair.hpp, integrators/Integrator.cpp,
+	integrators/NPTi.cpp, integrators/VelocityVerletIntegrator.cpp,
+	io/Globals.cpp, primitives/Molecule.cpp, primitives/Molecule.hpp:
+	constraint is almost working
+
+2005-01-05 19:36  tim
+
+	* src/applications/simpleBuilder/MoLocator.cpp: simpleBuilder is
+	working
+
+2005-01-05 19:16  tim
+
+	* src/: applications/dump2Xyz/Dump2XYZ.cpp,
+	applications/oopse/oopse.cpp,
+	applications/simpleBuilder/BaseLattice.cpp,
+	applications/simpleBuilder/Lattice.cpp,
+	applications/simpleBuilder/LatticeFactory.cpp,
+	applications/simpleBuilder/LatticeFactory.hpp,
+	applications/simpleBuilder/MoLocator.cpp,
+	applications/simpleBuilder/MoLocator.hpp,
+	applications/simpleBuilder/simpleBuilder.cpp,
+	brains/SimCreator.cpp, brains/SimCreator.hpp, brains/SimInfo.hpp,
+	minimizers/Minimizer.cpp, primitives/RigidBody.cpp: simpleBuilder
+	in progress
+
+2005-01-05 12:35  tim
+
+	* src/minimizers/MinimizerFactory.hpp: file MinimizerFactory.hpp
+	was initially added on branch new_design.
+
+2005-01-05 12:35  tim
+
+	* src/minimizers/: CGFamilyMinimizer.cpp, CGFamilyMinimizer.hpp,
+	Makefile, Minimizer.cpp, Minimizer.hpp, MinimizerCreator.cpp,
+	MinimizerCreator.hpp, MinimizerFactory.cpp, MinimizerFactory.hpp,
+	OOPSEMinimizer.cpp, OOPSEMinimizer.hpp, SDMinimizer.cpp,
+	SDMinimizer.hpp: minimizer in progress
+
+2005-01-05 12:35  tim
+
+	* src/minimizers/Minimizer.cpp: file Minimizer.cpp was initially
+	added on branch new_design.
+
+2005-01-05 12:35  tim
+
+	* src/minimizers/MinimizerCreator.hpp: file MinimizerCreator.hpp
+	was initially added on branch new_design.
+
+2005-01-05 12:35  tim
+
+	* src/minimizers/MinimizerFactory.cpp: file MinimizerFactory.cpp
+	was initially added on branch new_design.
+
+2005-01-05 12:35  tim
+
+	* src/minimizers/Minimizer.hpp: file Minimizer.hpp was initially
+	added on branch new_design.
+
+2005-01-05 12:35  tim
+
+	* src/minimizers/MinimizerCreator.cpp: file MinimizerCreator.cpp
+	was initially added on branch new_design.
+
+2005-01-04 17:18  tim
+
+	* src/constraints/ConstraintPair.hpp: file ConstraintPair.hpp was
+	initially added on branch new_design.
+
+2005-01-04 17:18  tim
+
+	* src/: brains/ForceManager.cpp, brains/MoleculeCreator.cpp,
+	brains/MoleculeCreator.hpp, brains/SimInfo.cpp, brains/Stats.hpp,
+	brains/Thermo.cpp, constraints/ConstraintPair.hpp,
+	constraints/Makefile, integrators/NPT.cpp, integrators/NVE.cpp,
+	integrators/NVT.cpp, integrators/VelocityVerletIntegrator.cpp,
+	integrators/VelocityVerletIntegrator.hpp, io/DumpReader.cpp,
+	primitives/Molecule.cpp, primitives/Molecule.hpp: constraints in
+	progress
+
+2005-01-04 17:18  tim
+
+	* src/minimizers/: CGFamilyMinimizer.cpp, CGFamilyMinimizer.hpp,
+	Makefile, MinimizerParameterSet.cpp, MinimizerParameterSet.hpp,
+	OOPSEMinimizer.cpp, OOPSEMinimizer.hpp, PRCG.cpp, PRCG.hpp,
+	SDMinimizer.cpp, SDMinimizer.hpp: minimizers in progress
+
+2005-01-04 17:18  tim
+
+	* src/minimizers/CGFamilyMinimizer.hpp: file CGFamilyMinimizer.hpp
+	was initially added on branch new_design.
+
+2005-01-04 17:18  tim
+
+	* src/minimizers/MinimizerParameterSet.cpp: file
+	MinimizerParameterSet.cpp was initially added on branch new_design.
+
+2005-01-04 17:18  tim
+
+	* src/minimizers/SDMinimizer.hpp: file SDMinimizer.hpp was
+	initially added on branch new_design.
+
+2005-01-04 17:18  tim
+
+	* src/minimizers/PRCG.hpp: file PRCG.hpp was initially added on
+	branch new_design.
+
+2004-12-20 15:50  chuckv
+
+	* make/Makefile.in: Fixed Makefile test bug under OSX and possibly
+	other BSD's, replaced test -f *.mod with ls function since BSD test
+	apparently doesn't support wildcards.
+
+2004-12-20 15:36  tim
+
+	* make/Makefile.in: fix a test command incompatiable problem
+
+2004-12-20 14:49  tim
+
+	* src/integrators/NPTi.cpp: NPT is working now
+
+2004-12-16 14:20  tim
+
+	* src/brains/SimInfo.cpp: Fix a bug in SimInfo which gives the
+	invalid stamp id
+
+2004-12-16 14:00  tim
+
+	* forceFields/: newEAM.VC.frc, newEAM.frc, newEAM.u3.frc,
+	newEAM.u6.frc: adding new EAM force field files
+
+2004-12-16 13:55  tim
+
+	* src/io/EAMAtomTypesSectionParser.cpp: parsing order three arrays
+	in  EAM parameter file is incorrect
+
+2004-12-16 12:27  tim
+
+	* src/: UseTheForce/EAM.cpp, UseTheForce/EAM.hpp,
+	brains/SimCreator.cpp, io/EAMAtomTypesSectionParser.cpp,
+	utils/StringTokenizer.cpp: add getMaxRcutFromAtomType into EAM
+
+2004-12-15 17:34  tim
+
+	* src/: applications/simpleBuilder/BaseLattice.cpp,
+	applications/simpleBuilder/BaseLattice.hpp,
+	applications/simpleBuilder/Lattice.cpp,
+	applications/simpleBuilder/Lattice.hpp,
+	applications/simpleBuilder/LatticeCreator.cpp,
+	applications/simpleBuilder/LatticeCreator.hpp,
+	applications/simpleBuilder/LatticeFactory.cpp,
+	applications/simpleBuilder/LatticeFactory.hpp,
+	applications/simpleBuilder/simpleBuilder.cpp,
+	io/basic_ifstrstream.hpp: fix a bug in basic_ifstrstream
+
+2004-12-15 16:07  tim
+
+	* src/: UseTheForce/DUFF.cpp, UseTheForce/DUFF.hpp,
+	UseTheForce/EAM.cpp, UseTheForce/EAM.hpp, UseTheForce/Makefile,
+	applications/dump2Xyz/Dump2XYZ.cpp, applications/oopse/oopse.cpp:
+	add EAM Force Field
+
+2004-12-15 14:40  tim
+
+	* src/applications/oopse/oopse.cpp: add more force fields
+
+2004-12-15 11:44  tim
+
+	* src/brains/SimInfo.cpp: fix bugs in getCom and getComVel (forget
+	to call All_reduce in MPI version)
+
+2004-12-15 11:13  tim
+
+	* src/: brains/SimCreator.cpp, brains/SimInfo.cpp,
+	io/DumpReader.cpp: MPI in NVE is working
+
+2004-12-14 16:57  tim
+
+	* src/io/: DumpReader.cpp, DumpReader.hpp: fix a bug in DumpReader.
+	Master nodes does not brocast the total number of frames
+
+2004-12-14 14:08  tim
+
+	* src/: brains/SimCreator.cpp, brains/SimSnapshotManager.hpp,
+	integrators/NVE.hpp, io/DumpReader.cpp, io/DumpWriter.cpp,
+	minimizers/CGFamilyMinimizer.cpp,
+	minimizers/MinimizerParameterSet.hpp,
+	minimizers/OOPSEMinimizer.cpp, minimizers/OOPSEMinimizer.hpp,
+	minimizers/SDMinimizer.cpp: more fix in MPI version
+
+2004-12-13 17:30  tim
+
+	* src/: UseTheForce/DarkSide/simParallel.F90,
+	applications/oopse/oopse.cpp, brains/SimCreator.cpp,
+	brains/SimInfo.cpp, brains/Snapshot.hpp, brains/Thermo.cpp,
+	integrators/DLM.cpp, integrators/Integrator.cpp,
+	integrators/NPT.cpp, integrators/NPTf.cpp, integrators/NPTi.cpp,
+	integrators/NPTxyz.cpp, integrators/NVT.cpp, io/DumpReader.cpp,
+	io/DumpWriter.cpp, io/EAMAtomTypesSectionParser.cpp,
+	io/ElectrostaticAtomTypesSectionParser.cpp, io/SectionParser.hpp,
+	io/ZConsWriter.cpp, io/ZConsWriter.hpp, io/basic_ifstrstream.hpp,
+	math/SquareMatrix3.hpp, primitives/Bend.hpp, primitives/Bond.hpp,
+	primitives/RigidBody.cpp, primitives/StuntDouble.cpp,
+	primitives/StuntDouble.hpp, types/CutoffGroupStamp.cpp,
+	utils/LocalIndexManager.hpp, utils/PropertyMap.cpp,
+	utils/PropertyMap.hpp, visitors/CompositeVisitor.cpp: MPI version
+	is built
+
+2004-12-10 13:41  tim
+
+	* src/UseTheForce/WATER.cpp: fix another bug in WATER.cpp
+
+2004-12-10 11:14  tim
+
+	* src/: brains/ForceManager.cpp, primitives/StuntDouble.cpp,
+	primitives/StuntDouble.hpp: forget to zero out the torque. Sticky
+	and Dipole is working now
+
+2004-12-09 18:15  tim
+
+	* src/: UseTheForce/DarkSide/dipole.F90,
+	UseTheForce/DarkSide/reactionField.F90, primitives/StuntDouble.hpp:
+	fix an index problem in eFrame matrix
+
+2004-12-09 18:09  tim
+
+	* src/UseTheForce/WATER.cpp: fix a bug in WATER.cpp when
+	initializing the new Charge AtomType
+
+2004-12-09 16:15  tim
+
+	* src/: UseTheForce/doForces.F90, UseTheForce/DarkSide/sticky.F90,
+	types/DirectionalAtomType.cpp: sticky module get compiled
+
+2004-12-09 15:43  gezelter
+
+	* src/UseTheForce/DarkSide/: dipole.F90, force_globals.F90, gb.F90,
+	reactionField.F90: u_l -> eFrame  for electrostatics u_l -> A for
+	GB
+
+2004-12-09 15:42  gezelter
+
+	* src/UseTheForce/doForces.F90: u_l -> eFrame
+
+2004-12-09 15:27  gezelter
+
+	* src/UseTheForce/DarkSide/: sticky.F90, sticky_interface.h: sticky
+	module now has the option for multiple sticky types
+
+2004-12-09 15:27  gezelter
+
+	* src/UseTheForce/doForces.F90: sticky
+
+2004-12-09 11:22  tim
+
+	* src/integrators/: NPT.cpp, NVT.cpp: fix an interface
+	inconsistency in lab2Bidy
+
+2004-12-09 10:45  tim
+
+	* src/: math/SquareMatrix3.hpp, primitives/RigidBody.cpp: Fix a bug
+	in calculating torque in rigid body
+
+2004-12-08 15:37  tim
+
+	* src/: UseTheForce/mpiForceField.c, UseTheForce/mpiForceField.h,
+	brains/SnapShot.cpp, brains/Snapshot.hpp,
+	integrators/Integrator.cpp,
+	io/ElectrostaticAtomTypesSectionParser.cpp, utils/MemoryUtils.hpp:
+	fix a parsing bug in ElectroStaticAtomTypesSectionParser
+
+2004-12-08 12:03  tim
+
+	* src/integrators/: NVT.cpp, VelocityVerletIntegrator.cpp: Butane
+	in  NVT is working
+
+2004-12-07 18:08  tim
+
+	* src/: UseTheForce/Makefile, brains/SimInfo.hpp,
+	integrators/NPT.cpp, integrators/NPTf.cpp, integrators/NPTi.cpp,
+	integrators/NPTxyz.cpp, integrators/NVT.cpp, integrators/NVT.hpp,
+	io/DumpWriter.cpp: NPT in progress
+
+2004-12-07 09:43  tim
+
+	* test/utils/: Makefile, NextCombinationTestCase.hpp: [no log
+	message]
+
+2004-12-07 00:12  tim
+
+	* src/integrators/: Integrator.cpp, NPT.cpp, NPTi.cpp: fix a bug in
+	UseInitXSstate
+
+2004-12-07 00:00  tim
+
+	* src/: io/DumpReader.cpp, utils/StringTokenizer.hpp: no message
+
+2004-12-06 23:47  tim
+
+	* src/types/DirectionalAtomType.cpp: [no log message]
+
+2004-12-06 21:18  tim
+
+	* forceFields/newDUFF.frc: merge WATER force field into DUFF
+
+2004-12-06 20:33  tim
+
+	* forceFields/newDUFF.frc: change the force constant of bonds
+
+2004-12-06 18:29  tim
+
+	* src/: UseTheForce/DarkSide/charge.F90,
+	UseTheForce/DarkSide/charge_interface.h,
+	UseTheForce/DarkSide/dipole.F90,
+	UseTheForce/DarkSide/dipole_interface.h, primitives/Torsion.cpp:
+	fix atom type ident in Charge and Dipole Module
+
+2004-12-06 17:56  tim
+
+	* src/primitives/Torsion.cpp: butane is working now
+
+2004-12-06 15:15  tim
+
+	* src/: brains/MoleculeCreator.cpp, primitives/Bend.cpp,
+	primitives/Bond.hpp, primitives/Torsion.cpp: short range
+	interaction for butane is correct.Still something wrong with long
+	range one
+
+2004-12-05 23:49  tim
+
+	* src/: brains/Exclude.cpp, brains/Exclude.hpp,
+	brains/SimCreator.cpp, brains/SimInfo.cpp, brains/SimInfo.hpp,
+	io/BendTypesSectionParser.cpp, math/Polynomial.hpp,
+	primitives/Atom.hpp, utils/NumericConstant.hpp,
+	utils/TypeContainer.hpp: fix a bug in Exclude List
+
+2004-12-05 17:21  tim
+
+	* forceFields/newDUFF.frc: minor fix in DUFF
+
+2004-12-05 17:02  tim
+
+	* src/: brains/SimInfo.cpp, brains/Thermo.cpp, math/Vector.hpp,
+	utils/StringTokenizer.cpp, utils/Utility.cpp, utils/Utility.hpp:
+	fix a bug in filling MolMembership
+
+2004-12-05 12:12  tim
+
+	* forceFields/newDUFF.frc: minor fix in force field file
+
+2004-12-05 12:09  tim
+
+	* src/: applications/oopse/oopse.cpp, integrators/Integrator.cpp,
+	integrators/NPTxyz.cpp, integrators/NVT.cpp: add Integrator.cpp
+
+2004-12-04 15:09  tim
+
+	* src/: UseTheForce/DarkSide/LJ.F90, math/Polynomial.hpp,
+	math/Vector3.hpp: NVE is working now, get the same result as
+	OOPSE-1.0
+
+2004-12-04 14:29  tim
+
+	* src/primitives/: Bend.cpp, Torsion.cpp: rewind to old copy
+
+2004-12-04 14:24  gezelter
+
+	* src/primitives/: Bend.cpp, Torsion.cpp: What?
+
+2004-12-04 14:24  gezelter
+
+	* src/UseTheForce/DarkSide/LJ.F90: atid / c_ident confusion
+
+2004-12-04 00:24  tim
+
+	* src/: UseTheForce/ForceField.cpp, brains/Thermo.cpp,
+	integrators/Integrator.hpp,
+	integrators/VelocityVerletIntegrator.cpp, primitives/Torsion.cpp,
+	utils/TypeContainer.hpp: NVE conserved energy, however, potential
+	is not the same as OOPSE-1.0 Step 1 argon in NVE, NVT, NPTi, NPTf
+	and NPTxyz to test integrator Step 2 SSD in NVE to test DLM,
+	dipole, sticky Step 3 Butane in NVE to test Bond Bend Torsion Step
+	4 EAM Step 5 Shape Step 6 Constraint & Restraint
+
+2004-12-03 19:01  tim
+
+	* src/: UseTheForce/DarkSide/LJ.F90,
+	applications/dump2Xyz/Dump2XYZ.cpp, brains/DataStorage.cpp,
+	integrators/VelocityVerletIntegrator.cpp,
+	integrators/VelocityVerletIntegrator.hpp, io/StatWriter.cpp,
+	io/StatWriter.hpp, primitives/Atom.cpp: Dump2Xyz is also working,
+	energy of NVE is not conserved
+
+2004-12-03 17:36  tim
+
+	* src/: brains/DataStorage.hpp, brains/Snapshot.hpp,
+	primitives/Molecule.cpp, primitives/StuntDouble.hpp: NVE is running
+
+2004-12-03 16:30  tim
+
+	* src/: applications/oopse/oopse.cpp, brains/SimInfo.cpp,
+	brains/SimInfo.hpp, brains/Thermo.hpp, integrators/Makefile,
+	integrators/NVE.cpp, primitives/Molecule.cpp,
+	primitives/Molecule.hpp, primitives/StuntDouble.hpp,
+	primitives/Torsion.hpp: more missing function get implemented
+
+2004-12-03 15:30  tim
+
+	* src/brains/: MoleculeCreator.cpp, SimCreator.cpp, SimCreator.hpp,
+	SimInfo.cpp, SimInfo.hpp: Change interface of SimInfo
+
+2004-12-03 12:59  tim
+
+	* src/: applications/oopse/oopse.cpp, brains/SimCreator.cpp,
+	brains/SimCreator.hpp, brains/SimInfo.cpp, brains/SimInfo.hpp,
+	integrators/NPT.cpp, integrators/NPTi.cpp, integrators/NVT.cpp,
+	io/BASS_interface.cpp, io/DirectionalAtomTypesSectionParser.cpp,
+	io/SectionParserManager.cpp, utils/LocalIndexManager.hpp,
+	utils/TypeContainer.hpp: begin to fix bugs
+
+2004-12-02 19:26  tim
+
+	* src/: UseTheForce/DUFF.cpp, UseTheForce/DUFF.hpp,
+	UseTheForce/ForceFieldCreator.cpp,
+	UseTheForce/ForceFieldFactory.cpp, applications/oopse/oopse.cpp,
+	integrators/IntegratorCreator.cpp,
+	integrators/IntegratorFactory.cpp, io/SectionParserManager.cpp,
+	io/SectionParserManager.hpp, utils/Makefile,
+	utils/StringTokenizer.cpp, utils/Trim.cpp, utils/Trim.hpp: Fixed a
+	bug in countTokens in StringTokenizer
+
+2004-12-02 19:26  tim
+
+	* src/utils/Trim.cpp: file Trim.cpp was initially added on branch
+	new_design.
+
+2004-12-02 19:06  tim
+
+	* forceFields/newDUFF.frc: minor fix
+
+2004-12-02 18:15  tim
+
+	* forceFields/newDUFF.frc: new ForceField format
+
+2004-12-02 17:15  tim
+
+	* src/UseTheForce/ForceFieldCreator.cpp: file ForceFieldCreator.cpp
+	was initially added on branch new_design.
+
+2004-12-02 17:15  tim
+
+	* src/integrators/IntegratorCreator.cpp: file IntegratorCreator.cpp
+	was initially added on branch new_design.
+
+2004-12-02 17:15  tim
+
+	* src/integrators/IntegratorCreator.hpp: file IntegratorCreator.hpp
+	was initially added on branch new_design.
+
+2004-12-02 17:15  tim
+
+	* src/: UseTheForce/DUFF.cpp, UseTheForce/DUFF.hpp,
+	UseTheForce/ForceFieldCreator.cpp,
+	UseTheForce/ForceFieldCreator.hpp,
+	UseTheForce/ForceFieldFactory.cpp,
+	UseTheForce/ForceFieldFactory.hpp, UseTheForce/Makefile,
+	applications/oopse/oopse.cpp, integrators/IntegratorCreator.cpp,
+	integrators/IntegratorCreator.hpp,
+	integrators/IntegratorFactory.cpp,
+	integrators/IntegratorFactory.hpp, integrators/Makefile,
+	integrators/NPTf.cpp, integrators/NPTf.hpp, integrators/NPTi.cpp,
+	integrators/NPTi.hpp, integrators/NPTxyz.cpp,
+	integrators/NPTxyz.hpp, integrators/NVE.cpp, integrators/NVE.hpp,
+	integrators/NVT.cpp, integrators/NVT.hpp,
+	types/CharmmTorsionType.cpp, types/CharmmTorsionType.hpp,
+	types/Makefile: refine factory pattern to make it initialized
+	correctly
+
+2004-12-02 17:15  tim
+
+	* src/UseTheForce/ForceFieldCreator.hpp: file ForceFieldCreator.hpp
+	was initially added on branch new_design.
+
+2004-12-02 11:53  tim
+
+	* src/: applications/dump2Xyz/Dump2XYZ.cpp, brains/Stats.cpp,
+	types/DirectionalAtomType.cpp, types/Makefile: oopse get built
+
+2004-12-02 11:04  tim
+
+	* src/: applications/simpleBuilder/LatticeCreator.cpp,
+	applications/simpleBuilder/LatticeCreator.hpp,
+	applications/simpleBuilder/LatticeFactory.cpp,
+	applications/simpleBuilder/LatticeFactory.hpp,
+	applications/simpleBuilder/simpleBuilder.cpp, brains/Exclude.cpp,
+	brains/MoleculeCreator.cpp, brains/SimCreator.cpp,
+	brains/SimInfo.cpp, brains/SimInfo.hpp,
+	brains/SimSnapshotManager.cpp, brains/SimSnapshotManager.hpp,
+	brains/SnapshotManager.hpp, brains/Stats.cpp,
+	constraints/ZconsData.hpp, io/DumpWriter.cpp, io/LinkedAssign.hpp,
+	io/ZConsReader.cpp, io/ZConsReader.hpp, io/ZConsWriter.hpp,
+	io/basic_ifstrstream.hpp, primitives/Bend.hpp,
+	primitives/GhostBend.cpp, primitives/GhostBend.hpp,
+	types/MoleculeStamp.cpp, types/MoleculeStamp.hpp,
+	types/OplsTorsionType.hpp, types/ShapeAtomType.hpp,
+	utils/PropertyMap.hpp, utils/TypeContainer.hpp,
+	visitors/AtomVisitor.cpp, visitors/CompositeVisitor.cpp,
+	visitors/CompositeVisitor.hpp, visitors/OtherVisitor.cpp,
+	visitors/OtherVisitor.hpp, visitors/RigidBodyVisitor.cpp,
+	visitors/RigidBodyVisitor.hpp, visitors/ZconsVisitor.cpp: still
+	have two linking problem
+
+2004-12-02 00:17  tim
+
+	* src/: applications/dump2Xyz/Dump2XYZ.cpp,
+	applications/simpleBuilder/Lattice.cpp,
+	applications/simpleBuilder/simpleBuilder.cpp,
+	constraints/ZConstraint.cpp, io/DumpWriter.cpp, io/ZConsReader.cpp,
+	io/ZConsWriter.cpp, minimizers/CGFamilyMinimizer.cpp,
+	minimizers/OOPSEMinimizer.cpp, minimizers/SDMinimizer.cpp,
+	restraints/Restraints.cpp, visitors/AtomVisitor.cpp,
+	visitors/OtherVisitor.cpp, visitors/RigidBodyVisitor.cpp,
+	visitors/ZconsVisitor.cpp: change endl to std::endl
+
+2004-12-02 00:14  tim
+
+	* src/: UseTheForce/Shapes_FF.cpp,
+	applications/dump2Xyz/Dump2XYZ.cpp,
+	applications/simpleBuilder/BaseLattice.hpp,
+	applications/simpleBuilder/Lattice.hpp,
+	applications/simpleBuilder/LatticeCreator.hpp,
+	applications/simpleBuilder/LatticeFactory.cpp,
+	applications/simpleBuilder/LatticeFactory.hpp,
+	applications/simpleBuilder/simpleBuilder.cpp, io/DumpWriter.cpp,
+	io/LinkedAssign.hpp, io/basic_ifstrstream.hpp,
+	minimizers/OOPSEMinimizer.hpp, utils/GenericData.hpp,
+	utils/GenericFactory.hpp, visitors/CompositeVisitor.cpp,
+	visitors/CompositeVisitor.hpp, visitors/RigidBodyVisitor.cpp,
+	visitors/RigidBodyVisitor.hpp: minor fix
+
+2004-12-02 00:09  tim
+
+	* src/utils/: Makefile, StreamTokenizer.cpp, StreamTokenizer.hpp:
+	remove StreamTokenizer
+
+2004-12-02 00:06  tim
+
+	* src/: UseTheForce/Shapes_FF.cpp,
+	applications/dump2Xyz/Dump2XYZ.cpp, applications/oopse/oopse.cpp,
+	applications/simpleBuilder/simpleBuilder.cpp, brains/Thermo.cpp,
+	io/ZConsWriter.cpp, math/randomSPRNG.cpp,
+	restraints/Restraints.cpp, utils/StreamTokenizer.cpp: remove using
+	namespace std in .cpp file
+
+2004-12-02 00:04  tim
+
+	* src/: UseTheForce/Shapes_FF.cpp,
+	applications/dump2Xyz/Dump2XYZ.cpp,
+	applications/simpleBuilder/BaseLattice.hpp,
+	applications/simpleBuilder/Lattice.cpp,
+	applications/simpleBuilder/Lattice.hpp,
+	applications/simpleBuilder/LatticeFactory.cpp,
+	applications/simpleBuilder/LatticeFactory.hpp,
+	applications/simpleBuilder/MoLocator.cpp,
+	applications/simpleBuilder/MoLocator.hpp, brains/SkipList.cpp,
+	brains/SkipList.hpp, constraints/ZconsData.hpp, io/ZConsReader.cpp,
+	io/ZConsWriter.cpp, io/ZConsWriter.hpp,
+	minimizers/MinimizerParameterSet.hpp,
+	minimizers/OOPSEMinimizer.cpp, minimizers/OOPSEMinimizer.hpp,
+	minimizers/PRCG.cpp, primitives/Atom.cpp, primitives/RigidBody.cpp,
+	restraints/Restraints.cpp, restraints/Restraints.hpp,
+	types/MoleculeStamp.cpp, types/MoleculeStamp.hpp,
+	types/ShapeAtomType.cpp, types/ShapeAtomType.hpp,
+	utils/GenericData.hpp, visitors/CompositeVisitor.cpp,
+	visitors/CompositeVisitor.hpp, visitors/RigidBodyVisitor.cpp,
+	visitors/RigidBodyVisitor.hpp, visitors/ZconsVisitor.cpp: adding
+	qulified name prefix std
+
+2004-12-01 23:55  tim
+
+	* src/: UseTheForce/Shapes_FF.cpp,
+	applications/dump2Xyz/Dump2XYZ.cpp,
+	applications/simpleBuilder/BaseLattice.hpp,
+	applications/simpleBuilder/Lattice.hpp,
+	applications/simpleBuilder/LatticeCreator.hpp,
+	applications/simpleBuilder/LatticeFactory.cpp,
+	applications/simpleBuilder/LatticeFactory.hpp,
+	applications/simpleBuilder/simpleBuilder.cpp, io/DumpWriter.cpp,
+	io/LinkedAssign.hpp, io/basic_ifstrstream.hpp,
+	minimizers/OOPSEMinimizer.hpp, utils/GenericData.hpp,
+	utils/GenericFactory.hpp, visitors/CompositeVisitor.cpp,
+	visitors/CompositeVisitor.hpp, visitors/RigidBodyVisitor.cpp,
+	visitors/RigidBodyVisitor.hpp: replace string by std::string
+
+2004-12-01 22:12  tim
+
+	* make/Makefile.in, src/UseTheForce/ForceFieldFactory.hpp,
+	src/applications/simpleBuilder/BaseLattice.hpp,
+	src/applications/simpleBuilder/Lattice.hpp,
+	src/applications/simpleBuilder/LatticeCreator.hpp,
+	src/applications/simpleBuilder/LatticeFactory.hpp,
+	src/applications/simpleBuilder/MoLocator.hpp,
+	src/brains/SimInfo.cpp, src/brains/SkipList.hpp,
+	src/brains/Snapshot.hpp, src/constraints/ZconsData.hpp,
+	src/integrators/IntegratorFactory.hpp, src/io/Globals.hpp,
+	src/io/ZConsWriter.hpp, src/io/basic_ifstrstream.hpp,
+	src/minimizers/OOPSEMinimizer.hpp, src/primitives/StuntDouble.hpp,
+	src/types/MoleculeStamp.hpp, src/types/ShapeAtomType.hpp,
+	src/utils/Makefile, src/utils/StringUtils.cpp,
+	src/utils/StringUtils.hpp, src/utils/TypeInfo.hpp,
+	src/utils/Utility.cpp, src/visitors/CompositeVisitor.hpp,
+	src/visitors/RigidBodyVisitor.hpp, test/brains/DirectionalAtom.cpp,
+	test/brains/RigidBody.cpp: replace misuse of using namespace std in
+	header files
+
+2004-12-01 21:23  tim
+
+	* src/: primitives/Atom.hpp, primitives/RigidBody.hpp,
+	primitives/StuntDouble.hpp, utils/TypeContainer.hpp,
+	utils/Utility.cpp, utils/Utility.hpp, utils/next_combination.hpp:
+	begin to fix linking problem
+
+2004-12-01 21:08  tim
+
+	* src/: applications/oopse/oopse.cpp, brains/Stats.cpp,
+	brains/Thermo.cpp, brains/Thermo.hpp, integrators/Makefile,
+	integrators/NPT.cpp, integrators/NPT.hpp, integrators/NPTf.cpp,
+	integrators/NPTf.hpp, integrators/NPTi.cpp, integrators/NPTi.hpp,
+	integrators/NPTxyz.cpp, integrators/VelocityVerletIntegrator.hpp,
+	math/SquareMatrix3.hpp, primitives/Atom.hpp,
+	primitives/RigidBody.hpp, primitives/StuntDouble.hpp,
+	utils/OOPSEConstant.hpp, utils/StringUtils.cpp: oopse get compiled,
+	still has some linking problem
+
+2004-12-01 19:26  tim
+
+	* src/: integrators/NVT.cpp, integrators/NVT.hpp,
+	utils/OOPSEConstant.hpp: NVT get built
+
+2004-12-01 19:09  tim
+
+	* src/integrators/RotationAlgorithm.hpp: file RotationAlgorithm.hpp
+	was initially added on branch new_design.
+
+2004-12-01 19:09  tim
+
+	* src/: brains/SimSnapshotManager.cpp, brains/Snapshot.hpp,
+	brains/Stats.cpp, brains/Stats.hpp, brains/Thermo.cpp,
+	brains/Thermo.hpp, integrators/DLM.cpp, integrators/DLM.hpp,
+	integrators/Integrator.hpp, integrators/Makefile,
+	integrators/NVE.cpp, integrators/NVE.hpp,
+	integrators/RotationAlgorithm.hpp,
+	integrators/VelocityVerletIntegrator.cpp,
+	integrators/VelocityVerletIntegrator.hpp, io/DumpWriter.hpp: NVE
+	get built
+
+2004-12-01 19:09  tim
+
+	* src/integrators/DLM.hpp: file DLM.hpp was initially added on
+	branch new_design.
+
+2004-12-01 19:09  tim
+
+	* src/integrators/DLM.cpp: file DLM.cpp was initially added on
+	branch new_design.
+
+2004-12-01 17:45  tim
+
+	* src/: UseTheForce/DarkSide/atype.F90, integrators/Integrator.hpp,
+	integrators/IntegratorFactory.cpp,
+	integrators/IntegratorFactory.hpp, integrators/Makefile,
+	integrators/Velocitizer.cpp, integrators/Velocitizer.hpp,
+	integrators/VelocityVerletIntegrator.cpp,
+	integrators/VelocityVerletIntegrator.hpp, io/DumpWrite.hpp,
+	io/DumpWriter.cpp, io/DumpWriter.hpp, io/StatWriter.cpp,
+	io/StatWriter.hpp: rename DumpWrite to DumpWriter
+
+2004-12-01 17:45  tim
+
+	* src/io/DumpWriter.hpp: file DumpWriter.hpp was initially added on
+	branch new_design.
+
+2004-12-01 15:05  tim
+
+	* src/: io/Makefile, io/ZConsReader.cpp, io/ZConsReader.hpp,
+	io/ZConsWriter.hpp, math/Vector3.hpp, utils/Makefile,
+	utils/Utility.cpp, utils/Utility.hpp, visitors/AtomData.hpp,
+	visitors/BaseVisitor.hpp, visitors/OtherVisitor.cpp,
+	visitors/OtherVisitor.hpp, visitors/ZconsVisitor.cpp,
+	visitors/ZconsVisitor.hpp: visitors get built
+
+2004-12-01 14:32  chrisfen
+
+	* samples/water/tip3p_ice/tp3.md: fixed a sample
+
+2004-12-01 14:10  tim
+
+	* src/math/RectMatrix.hpp, src/primitives/DirectionalAtom.cpp,
+	src/primitives/DirectionalAtom.hpp, src/primitives/GhostBend.cpp,
+	src/types/AtomType.hpp, src/utils/Utility.hpp,
+	src/visitors/AtomData.hpp, src/visitors/AtomVisitor.cpp,
+	src/visitors/AtomVisitor.hpp, test/math/RectMatrixTestCase.cpp:
+	spell check
+
+2004-12-01 13:42  tim
+
+	* src/: UseTheForce/DarkSide/atype.F90,
+	io/ElectrostaticAtomTypesSectionParser.cpp,
+	io/ElectrostaticAtomTypesSectionParser.hpp, primitives/Atom.hpp,
+	primitives/DirectionalAtom.cpp, primitives/RigidBody.cpp,
+	primitives/StuntDouble.hpp, types/AtomType.cpp: except integrator
+	and constraint, other directories get built
+
+2004-12-01 12:38  tim
+
+	* src/: brains/DataStorage.cpp, brains/DataStorage.hpp,
+	brains/ForceManager.cpp, brains/MoleculeCreator.cpp,
+	io/ElectrostaticAtomTypesSectionParser.cpp,
+	io/ElectrostaticAtomTypesSectionParser.hpp,
+	primitives/DirectionalAtom.cpp, primitives/DirectionalAtom.hpp,
+	primitives/GhostBend.cpp, primitives/RigidBody.cpp,
+	primitives/RigidBody.hpp, primitives/StuntDouble.hpp,
+	types/AtomType.cpp, types/AtomType.hpp, types/AtomTypeProperties.h,
+	types/DirectionalAtomType.cpp, types/DirectionalAtomType.hpp:
+	refactory AtomType
+
+2004-11-30 22:11  tim
+
+	* src/: math/Vector.hpp, primitives/RigidBody.cpp: minor change
+
+2004-11-30 21:30  tim
+
+	* src/utils/: NumericConstant.cpp, NumericConstant.hpp: Change
+	NumericConstant
+
+2004-11-30 21:24  tim
+
+	* src/: UseTheForce/ForceField.cpp, io/SectionParser.cpp,
+	primitives/RigidBody.cpp: minor fix
+
+2004-11-30 18:14  tim
+
+	* src/: brains/Stats.hpp, io/DumpReader.cpp, io/DumpReader.hpp,
+	io/DumpWrite.hpp, io/DumpWriter.cpp, io/Makefile,
+	io/StatWriter.cpp, io/StatWriter.hpp, utils/StringTokenizer.hpp: io
+	get built, next is integrator
+
+2004-11-30 17:43  tim
+
+	* src/: UseTheForce/DUFF.cpp, UseTheForce/DUFF.hpp,
+	UseTheForce/ForceField.hpp, brains/SimCreator.cpp,
+	brains/SimCreator.hpp, brains/SimInfo.cpp, brains/SimInfo.hpp,
+	io/BASS_interface.cpp, primitives/StuntDouble.hpp,
+	utils/StringUtils.hpp: brains get built
+
+2004-11-30 15:50  tim
+
+	* src/: brains/ForceManager.cpp, brains/Makefile,
+	brains/MoleculeCreator.cpp, brains/MoleculeCreator.hpp,
+	primitives/RigidBody.cpp, primitives/RigidBody.hpp,
+	utils/StringUtils.hpp: brains get built, io is next
+
+2004-11-30 14:58  tim
+
+	* src/utils/OOPSEConstant.hpp: file OOPSEConstant.hpp was initially
+	added on branch new_design.
+
+2004-11-30 14:58  tim
+
+	* src/: brains/Exclude.cpp, brains/Exclude.hpp,
+	brains/ForceManager.cpp, brains/ForceManager.hpp,
+	brains/MoleculeCreator.cpp, brains/SimCreator.hpp,
+	brains/SimInfo.cpp, brains/SimInfo.hpp,
+	brains/SimSnapshotManager.cpp, brains/SimSnapshotManager.hpp,
+	brains/SnapShot.cpp, brains/Stats.cpp, brains/Stats.hpp,
+	brains/Thermo.cpp, brains/Thermo.hpp, io/Makefile,
+	math/SquareMatrix3.hpp, utils/OOPSEConstant.hpp: fix Thermo
+
+2004-11-30 12:54  tim
+
+	* src/: primitives/Bend.hpp, primitives/Bond.hpp,
+	primitives/StuntDouble.hpp, primitives/Torsion.hpp,
+	utils/LocalIndexManager.hpp: more get fixed
+
+2004-11-30 00:03  tim
+
+	* src/utils/: LocalIndexManager.hpp, LocalndexManager.hpp: rename
+	LocalndexManager.hpp to LocalIndexManager.hpp
+
+2004-11-30 00:03  tim
+
+	* src/utils/LocalIndexManager.hpp: file LocalIndexManager.hpp was
+	initially added on branch new_design.
+
+2004-11-29 23:43  tim
+
+	* src/: io/BendTypesSectionParser.cpp,
+	io/BendTypesSectionParser.hpp, io/BondTypesSectionParser.cpp,
+	io/BondTypesSectionParser.hpp, io/SectionParserManager.cpp,
+	io/SectionParserManager.hpp, io/TorsionTypesSectionParser.cpp,
+	types/PolynomialBendType.hpp, types/PolynomialBondType.hpp,
+	types/PolynomialTorsionType.hpp: Section Parsers get compiled
+
+2004-11-29 23:14  tim
+
+	* src/: io/BendTypesSectionParser.cpp,
+	io/BendTypesSectionParser.hpp, io/BondTypesSectionParser.cpp,
+	io/BondTypesSectionParser.hpp, io/TorsionTypesSectionParser.cpp,
+	types/PolynomialBendType.hpp, types/PolynomialBondType.hpp: minor
+	fixed
+
+2004-11-29 22:49  tim
+
+	* src/: io/TorsionTypesSectionParser.cpp,
+	io/TorsionTypesSectionParser.hpp, types/CharmmTorsionType.hpp,
+	types/CubicTorsionType.hpp, types/PolynomialBendType.hpp,
+	types/PolynomialBondType.hpp, types/PolynomialTorsionType.hpp,
+	types/QuarticTorsionType.hpp: minor fixed
+
+2004-11-29 22:32  tim
+
+	* src/: io/TorsionTypesSectionParser.cpp,
+	types/PolynomialBendType.hpp, types/PolynomialBondType.hpp,
+	types/PolynomialTorsionType.hpp: #inlcude statement can not be
+	embedded
+
+2004-11-29 16:42  tim
+
+	* test/math/: Makefile, PolynomialTestCase.cpp,
+	PolynomialTestCase.hpp: add PolynomialTestCase
+
+2004-11-29 16:42  tim
+
+	* src/math/Polynomial.hpp: Polynomial passes unit test
+
+2004-11-29 15:03  tim
+
+	* src/types/: QuarticTorsion.hpp, QuarticTorsionType.hpp: rename
+	QuarticTorsion.hpp to QuarticTorsionType.hpp
+
+2004-11-29 15:03  tim
+
+	* src/types/QuarticTorsionType.hpp: file QuarticTorsionType.hpp was
+	initially added on branch new_design.
+
+2004-11-29 14:56  tim
+
+	* src/types/CubicTorsionType.hpp: file CubicTorsionType.hpp was
+	initially added on branch new_design.
+
+2004-11-29 14:56  tim
+
+	* src/types/: CubicTorsionType.hpp, QuarticTorsion.hpp: add
+	CubicTorsionType and QuarticTorsionType
+
+2004-11-29 14:56  tim
+
+	* src/types/QuarticTorsion.hpp: file QuarticTorsion.hpp was
+	initially added on branch new_design.
+
+2004-11-29 13:00  tim
+
+	* src/: brains/DataStorage.hpp, brains/Snapshot.hpp,
+	types/CubicBendType.hpp, types/CubicBondType.hpp,
+	types/QuarticBendType.hpp, types/QuarticBondType.hpp: more file get
+	fixed
+
+2004-11-29 12:59  tim
+
+	* src/utils/Trim.hpp: file Trim.hpp was initially added on branch
+	new_design.
+
+2004-11-29 12:59  tim
+
+	* src/utils/: StringUtils.cpp, StringUtils.hpp, Trim.hpp: add Trim
+	Algorithm for std::string
+
+2004-11-29 10:52  tim
+
+	* src/UseTheForce/: EAM.cpp, EAM.hpp, LJFF.cpp, LJFF.hpp: remove
+	some useless files
+
+2004-11-29 10:50  tim
+
+	* src/io/: BondTypesSectionParser.cpp,
+	ChargeAtomTypesSectionParser.cpp, DipoleAtomTypesSectionParser.cpp,
+	ElectrostaticAtomTypesSectionParser.cpp,
+	HarmonicBondTypesSectionParser.cpp,
+	HarmonicBondTypesSectionParser.hpp,
+	LennardJonesAtomTypesSectionParser.cpp, Makefile,
+	SectionParserManager.cpp, StickyAtomTypesSectionParser.cpp,
+	StickyAtomTypesSectionParser.hpp: more files get fixed
+
+2004-11-29 10:27  tim
+
+	* src/io/: AtomTypesSectionParser.cpp, BendTypesSectionParser.cpp,
+	DirectionalAtomTypesSectionParser.cpp,
+	EAMAtomTypesSectionParser.cpp, EAMAtomTypesSectionParser.hpp,
+	Makefile, SectionParser.cpp, SectionParser.hpp,
+	SectionParserManager.cpp, SectionParserManager.hpp: part of io get
+	built
+
+2004-11-29 09:49  tim
+
+	* src/types/UreyBradleyBendType.hpp: types get built
+
+2004-11-29 09:40  tim
+
+	* src/types/: AtomType.cpp, AtomType.hpp, DirectionalAtomType.cpp:
+	types  get built
+
+2004-11-25 21:13  tim
+
+	* src/: UseTheForce/ForceField.hpp,
+	io/DirectionalAtomTypesSectionParser.cpp, math/Polynomial.hpp,
+	types/CubicBendType.hpp, types/PolynomialBendType.hpp: rename some
+	files
+
+2004-11-25 15:18  tim
+
+	* src/: io/AtomTypesSectionParser.cpp,
+	io/BondTypesSectionParser.cpp,
+	io/DirectionalAtomTypesSectionParser.cpp,
+	types/QuadraticBendType.hpp, types/QuadraticBondType.hpp,
+	types/QuarticBendType.hpp, types/QuarticBondType.hpp: rename some
+	files
+
+2004-11-25 15:18  tim
+
+	* src/types/QuarticBendType.hpp: file QuarticBendType.hpp was
+	initially added on branch new_design.
+
+2004-11-25 15:18  tim
+
+	* src/types/QuarticBondType.hpp: file QuarticBondType.hpp was
+	initially added on branch new_design.
+
+2004-11-24 17:12  tim
+
+	* src/: io/AtomTypesSectionParser.cpp,
+	io/AtomTypesSectionParser.hpp, io/BendTypesSectionParser.cpp,
+	io/BendTypesSectionParser.hpp, io/BondTypesSectionParser.cpp,
+	io/BondTypesSectionParser.hpp, io/ChargeAtomTypesSectionParser.cpp,
+	io/ChargeAtomTypesSectionParser.hpp,
+	io/DipoleAtomTypesSectionParser.cpp,
+	io/DipoleAtomTypesSectionParser.hpp,
+	io/DirectionalAtomTypesSectionParser.hpp, io/DumpReader.cpp,
+	io/DumpReader.hpp, io/EAMAtomTypesSectionParser.cpp,
+	io/EAMAtomTypesSectionParser.hpp,
+	io/ElectrostaticAtomTypesSectionParser.cpp,
+	io/ElectrostaticAtomTypesSectionParser.hpp,
+	io/HarmonicBondTypesSectionParser.hpp,
+	io/LennardJonesAtomTypesSectionParser.cpp,
+	io/LennardJonesAtomTypesSectionParser.hpp, io/Makefile,
+	io/SectionParser.hpp, io/SectionParserManager.hpp,
+	io/StickyAtomTypesSectionParser.cpp,
+	io/StickyAtomTypesSectionParser.hpp,
+	io/TorsionTypesSectionParser.cpp, io/TorsionTypesSectionParser.hpp,
+	utils/LocalndexManager.hpp, utils/TypeContainer.hpp: more get built
+
+2004-11-24 16:33  tim
+
+	* src/UseTheForce/: DUFF.cpp, DUFF.hpp, EAM.cpp, ForceField.cpp,
+	ForceField.hpp, ForceFieldFactory.cpp, ForceFieldFactory.hpp,
+	LJFF.cpp, Makefile: UseTheForce get built
+
+2004-11-24 15:55  tim
+
+	* src/: math/RectMatrix.hpp, primitives/Bend.cpp,
+	primitives/Bend.hpp, primitives/Bond.hpp, primitives/GhostBend.cpp,
+	primitives/Makefile, primitives/Molecule.cpp,
+	primitives/Molecule.hpp, primitives/RigidBody.cpp,
+	primitives/StuntDouble.hpp, primitives/Torsion.cpp,
+	primitives/Torsion.hpp, primitives/UreyBradleyBend.cpp,
+	primitives/UreyBradleyBend.hpp: types and primitives get built
+
+2004-11-24 14:49  tim
+
+	* test/utils/: Makefile, NextCombinationTestCase.cpp,
+	StringTokenizerTestCase.cpp, StringTokenizerTestCase.hpp: Addint
+	StringTokenizerTestCase
+
+2004-11-24 14:49  tim
+
+	* src/utils/: GenericData.hpp, StringTokenizer.cpp,
+	StringTokenizer.hpp: StringTokenizer passes unit test
+
+2004-11-24 13:20  tim
+
+	* ChangeLog, make/Makefile.in, src/UseTheForce/Makefile,
+	src/io/Makefile, src/primitives/Makefile, src/utils/Makefile:
+	change Makefile
+
+2004-11-24 13:06  chrisfen
+
+	* src/io/RestraintReader.cpp: improved restraints - mpi should work
+	fine
+
+2004-11-24 13:06  chrisfen
+
+	* src/integrators/Integrator.cpp: improved restraints
+
+2004-11-24 13:05  chrisfen
+
+	* samples/water/tip3p_ice/tp3.md: oops...
+
 2004-11-24 12:42  tim
 
 	* src/: applications/oopse/oopse.cpp, brains/DataStorage.cpp,
@@ -41,6 +2638,12 @@
 
 2004-11-23 12:53  tim
 
+	* src/io/ElectrostaticAtomTypesSectionParser.cpp: file
+	ElectrostaticAtomTypesSectionParser.cpp was initially added on
+	branch new_design.
+
+2004-11-23 12:53  tim
+
 	* src/: UseTheForce/DUFF.cpp, UseTheForce/DUFF.hpp,
 	UseTheForce/ForceField.cpp, UseTheForce/ForceField.hpp,
 	applications/simpleBuilder/simpleBuilder.cpp,
@@ -58,11 +2661,11 @@
 	ElectrostaticAtomTypesSectionParser.hpp was initially added on
 	branch new_design.
 
-2004-11-23 12:53  tim
+2004-11-23 01:03  tim
 
-	* src/io/ElectrostaticAtomTypesSectionParser.cpp: file
-	ElectrostaticAtomTypesSectionParser.cpp was initially added on
-	branch new_design.
+	* src/io/EAMAtomTypesSectionParser.cpp: file
+	EAMAtomTypesSectionParser.cpp was initially added on branch
+	new_design.
 
 2004-11-23 01:03  tim
 
@@ -73,25 +2676,19 @@
 
 2004-11-23 01:03  tim
 
-	* src/types/DirectionalAtomType.cpp: file DirectionalAtomType.cpp
-	was initially added on branch new_design.
-
-2004-11-23 01:03  tim
-
 	* src/io/EAMAtomTypesSectionParser.hpp: file
 	EAMAtomTypesSectionParser.hpp was initially added on branch
 	new_design.
 
 2004-11-23 01:03  tim
 
-	* src/io/EAMAtomTypesSectionParser.cpp: file
-	EAMAtomTypesSectionParser.cpp was initially added on branch
-	new_design.
+	* src/types/DirectionalAtomType.cpp: file DirectionalAtomType.cpp
+	was initially added on branch new_design.
 
 2004-11-22 23:35  tim
 
-	* src/io/TorsionTypesSectionParser.hpp: file
-	TorsionTypesSectionParser.hpp was initially added on branch
+	* src/io/TorsionTypesSectionParser.cpp: file
+	TorsionTypesSectionParser.cpp was initially added on branch
 	new_design.
 
 2004-11-22 23:35  tim
@@ -102,20 +2699,26 @@
 
 2004-11-22 23:35  tim
 
-	* src/io/BondTypesSectionParser.hpp: file
-	BondTypesSectionParser.hpp was initially added on branch
-	new_design.
-
-2004-11-22 23:35  tim
-
 	* src/io/BondTypesSectionParser.cpp: file
 	BondTypesSectionParser.cpp was initially added on branch
 	new_design.
 
 2004-11-22 23:35  tim
 
-	* src/io/TorsionTypesSectionParser.cpp: file
-	TorsionTypesSectionParser.cpp was initially added on branch
+	* src/io/BondTypesSectionParser.hpp: file
+	BondTypesSectionParser.hpp was initially added on branch
+	new_design.
+
+2004-11-22 23:35  tim
+
+	* src/io/TorsionTypesSectionParser.hpp: file
+	TorsionTypesSectionParser.hpp was initially added on branch
+	new_design.
+
+2004-11-22 23:35  tim
+
+	* src/io/BendTypesSectionParser.cpp: file
+	BendTypesSectionParser.cpp was initially added on branch
 	new_design.
 
 2004-11-22 23:35  tim
@@ -126,12 +2729,6 @@
 	BondTypesSectionParser, BendTypesSectionParser and
 	TorsionTypeSectionParser
 
-2004-11-22 23:35  tim
-
-	* src/io/BendTypesSectionParser.cpp: file
-	BendTypesSectionParser.cpp was initially added on branch
-	new_design.
-
 2004-11-22 18:04  tim
 
 	* src/UseTheForce/: DUFF.cpp, EAM.cpp, EAM.hpp: minor change in
@@ -139,25 +2736,19 @@
 
 2004-11-22 18:02  tim
 
-	* src/io/: DirectionalAtomTypesParser.hpp,
-	DirectionalAtomTypesSectionParser.hpp: adding section parsers
-
-2004-11-22 18:02  tim
-
 	* src/io/DirectionalAtomTypesSectionParser.hpp: file
 	DirectionalAtomTypesSectionParser.hpp was initially added on branch
 	new_design.
 
+2004-11-22 18:02  tim
+
+	* src/io/: DirectionalAtomTypesParser.hpp,
+	DirectionalAtomTypesSectionParser.hpp: adding section parsers
+
 2004-11-22 15:55  tim
 
-	* src/io/DipoleAtomTypesSectionParser.hpp: file
-	DipoleAtomTypesSectionParser.hpp was initially added on branch
-	new_design.
-
-2004-11-22 15:55  tim
-
-	* src/io/AtomTypesSectionParser.hpp: file
-	AtomTypesSectionParser.hpp was initially added on branch
+	* src/io/DirectionalAtomTypesParser.hpp: file
+	DirectionalAtomTypesParser.hpp was initially added on branch
 	new_design.
 
 2004-11-22 15:55  tim
@@ -168,20 +2759,8 @@
 
 2004-11-22 15:55  tim
 
-	* src/io/StickyAtomTypesSectionParser.cpp: file
-	StickyAtomTypesSectionParser.cpp was initially added on branch
-	new_design.
-
-2004-11-22 15:55  tim
-
-	* src/io/LennardJonesAtomTypesSectionParser.hpp: file
-	LennardJonesAtomTypesSectionParser.hpp was initially added on
-	branch new_design.
-
-2004-11-22 15:55  tim
-
-	* src/io/HarmonicBondTypesSectionParser.cpp: file
-	HarmonicBondTypesSectionParser.cpp was initially added on branch
+	* src/io/ChargeAtomTypesSectionParser.hpp: file
+	ChargeAtomTypesSectionParser.hpp was initially added on branch
 	new_design.
 
 2004-11-22 15:55  tim
@@ -192,49 +2771,15 @@
 
 2004-11-22 15:55  tim
 
-	* src/io/SectionParserManager.cpp: file SectionParserManager.cpp
-	was initially added on branch new_design.
-
-2004-11-22 15:55  tim
-
-	* src/io/AtomTypesSectionParser.cpp: file
-	AtomTypesSectionParser.cpp was initially added on branch
-	new_design.
-
-2004-11-22 15:55  tim
-
-	* src/io/ChargeAtomTypesSectionParser.cpp: file
-	ChargeAtomTypesSectionParser.cpp was initially added on branch
-	new_design.
-
-2004-11-22 15:55  tim
-
-	* src/io/DipoleAtomTypesSectionParser.cpp: file
-	DipoleAtomTypesSectionParser.cpp was initially added on branch
-	new_design.
-
-2004-11-22 15:55  tim
-
 	* src/io/LennardJonesAtomTypesSectionParser.cpp: file
 	LennardJonesAtomTypesSectionParser.cpp was initially added on
 	branch new_design.
 
 2004-11-22 15:55  tim
 
-	* src/io/ChargeAtomTypesSectionParser.hpp: file
-	ChargeAtomTypesSectionParser.hpp was initially added on branch
+	* src/io/DipoleAtomTypesSectionParser.cpp: file
+	DipoleAtomTypesSectionParser.cpp was initially added on branch
 	new_design.
-
-2004-11-22 15:55  tim
-
-	* src/io/StickyAtomTypesSectionParser.hpp: file
-	StickyAtomTypesSectionParser.hpp was initially added on branch
-	new_design.
-
-2004-11-22 15:55  tim
-
-	* src/io/SectionParser.hpp: file SectionParser.hpp was initially
-	added on branch new_design.
 
 2004-11-22 15:55  tim
 
@@ -260,9 +2805,14 @@
 
 2004-11-22 15:55  tim
 
-	* src/io/DirectionalAtomTypesParser.hpp: file
-	DirectionalAtomTypesParser.hpp was initially added on branch
+	* src/io/DipoleAtomTypesSectionParser.hpp: file
+	DipoleAtomTypesSectionParser.hpp was initially added on branch
 	new_design.
+
+2004-11-22 15:55  tim
+
+	* src/io/SectionParser.cpp: file SectionParser.cpp was initially
+	added on branch new_design.
 
 2004-11-22 15:55  tim
 
@@ -271,19 +2821,66 @@
 
 2004-11-22 15:55  tim
 
-	* src/io/SectionParser.cpp: file SectionParser.cpp was initially
+	* src/io/AtomTypesSectionParser.cpp: file
+	AtomTypesSectionParser.cpp was initially added on branch
+	new_design.
+
+2004-11-22 15:55  tim
+
+	* src/io/LennardJonesAtomTypesSectionParser.hpp: file
+	LennardJonesAtomTypesSectionParser.hpp was initially added on
+	branch new_design.
+
+2004-11-22 15:55  tim
+
+	* src/io/HarmonicBondTypesSectionParser.cpp: file
+	HarmonicBondTypesSectionParser.cpp was initially added on branch
+	new_design.
+
+2004-11-22 15:55  tim
+
+	* src/io/AtomTypesSectionParser.hpp: file
+	AtomTypesSectionParser.hpp was initially added on branch
+	new_design.
+
+2004-11-22 15:55  tim
+
+	* src/io/StickyAtomTypesSectionParser.cpp: file
+	StickyAtomTypesSectionParser.cpp was initially added on branch
+	new_design.
+
+2004-11-22 15:55  tim
+
+	* src/io/SectionParser.hpp: file SectionParser.hpp was initially
 	added on branch new_design.
 
-2004-11-19 17:12  tim
+2004-11-22 15:55  tim
 
-	* src/types/FixedBondType.hpp: file FixedBondType.hpp was initially
-	added on branch new_design.
+	* src/io/ChargeAtomTypesSectionParser.cpp: file
+	ChargeAtomTypesSectionParser.cpp was initially added on branch
+	new_design.
+
+2004-11-22 15:55  tim
+
+	* src/io/SectionParserManager.cpp: file SectionParserManager.cpp
+	was initially added on branch new_design.
+
+2004-11-22 15:55  tim
+
+	* src/io/StickyAtomTypesSectionParser.hpp: file
+	StickyAtomTypesSectionParser.hpp was initially added on branch
+	new_design.
 
 2004-11-19 17:12  tim
 
 	* src/: brains/SimState.cpp, brains/SimState.hpp,
 	io/InitializeFromFile.cpp, types/FixBondType.hpp,
 	types/FixedBondType.hpp: remove more useless files
+
+2004-11-19 17:12  tim
+
+	* src/types/FixedBondType.hpp: file FixedBondType.hpp was initially
+	added on branch new_design.
 
 2004-11-19 16:47  tim
 
@@ -293,24 +2890,7 @@
 
 2004-11-19 16:38  tim
 
-	* src/: UseTheForce/DUFF.cpp, UseTheForce/DUFF.hpp,
-	UseTheForce/EAM.cpp, integrators/NPT.hpp, integrators/NPTf.hpp,
-	integrators/NPTi.hpp, integrators/NPTxyz.hpp, integrators/NVT.cpp,
-	integrators/NVT.hpp: refactory integrator
-
-2004-11-19 16:38  tim
-
 	* src/integrators/NPTi.hpp: file NPTi.hpp was initially added on
-	branch new_design.
-
-2004-11-19 16:38  tim
-
-	* src/integrators/NPTf.hpp: file NPTf.hpp was initially added on
-	branch new_design.
-
-2004-11-19 16:38  tim
-
-	* src/integrators/NPT.hpp: file NPT.hpp was initially added on
 	branch new_design.
 
 2004-11-19 16:38  tim
@@ -320,17 +2900,29 @@
 
 2004-11-19 16:38  tim
 
+	* src/integrators/NPT.hpp: file NPT.hpp was initially added on
+	branch new_design.
+
+2004-11-19 16:38  tim
+
 	* src/integrators/NVT.hpp: file NVT.hpp was initially added on
 	branch new_design.
+
+2004-11-19 16:38  tim
+
+	* src/integrators/NPTf.hpp: file NPTf.hpp was initially added on
+	branch new_design.
+
+2004-11-19 16:38  tim
+
+	* src/: UseTheForce/DUFF.cpp, UseTheForce/DUFF.hpp,
+	UseTheForce/EAM.cpp, integrators/NPT.hpp, integrators/NPTf.hpp,
+	integrators/NPTi.hpp, integrators/NPTxyz.hpp, integrators/NVT.cpp,
+	integrators/NVT.hpp: refactory integrator
 
 2004-11-19 15:37  tim
 
 	* forceFields/newDUFF.frc: new DUFF forcefield
-
-2004-11-19 15:23  tim
-
-	* src/UseTheForce/EAM.hpp: file EAM.hpp was initially added on
-	branch new_design.
 
 2004-11-19 15:23  tim
 
@@ -343,6 +2935,11 @@
 	* src/UseTheForce/EAM.cpp: file EAM.cpp was initially added on
 	branch new_design.
 
+2004-11-19 15:23  tim
+
+	* src/UseTheForce/EAM.hpp: file EAM.hpp was initially added on
+	branch new_design.
+
 2004-11-19 13:02  tim
 
 	* src/UseTheForce/: DUFF.cpp, DUFF.hpp: DUFF is almost done except
@@ -350,12 +2947,12 @@
 
 2004-11-19 12:56  tim
 
-	* src/integrators/IntegratorFactory.hpp: file IntegratorFactory.hpp
+	* src/integrators/IntegratorFactory.cpp: file IntegratorFactory.cpp
 	was initially added on branch new_design.
 
 2004-11-19 12:56  tim
 
-	* src/integrators/IntegratorFactory.cpp: file IntegratorFactory.cpp
+	* src/integrators/IntegratorFactory.hpp: file IntegratorFactory.hpp
 	was initially added on branch new_design.
 
 2004-11-19 12:56  tim
@@ -380,11 +2977,6 @@
 
 2004-11-18 18:26  tim
 
-	* src/integrators/Velocitizer.cpp: file Velocitizer.cpp was
-	initially added on branch new_design.
-
-2004-11-18 18:26  tim
-
 	* src/: UseTheForce/DUFF.hpp, integrators/NVE.cpp,
 	integrators/Velocitizer.cpp, integrators/Velocitizer.hpp,
 	integrators/VelocityVerletIntegrator.cpp,
@@ -394,6 +2986,11 @@
 	types/HarmonicBondType.hpp, types/QuadraticBendType.hpp,
 	types/QuadraticBondType.hpp, types/UreyBradleyBendType.hpp: adding
 	DUFF parser
+
+2004-11-18 18:26  tim
+
+	* src/integrators/Velocitizer.cpp: file Velocitizer.cpp was
+	initially added on branch new_design.
 
 2004-11-18 16:42  tim
 
@@ -406,12 +3003,12 @@
 
 2004-11-18 00:42  tim
 
-	* src/utils/NumericConstant.cpp: file NumericConstant.cpp was
+	* src/utils/NumericConstant.hpp: file NumericConstant.hpp was
 	initially added on branch new_design.
 
 2004-11-18 00:42  tim
 
-	* src/utils/NumericConstant.hpp: file NumericConstant.hpp was
+	* src/utils/NumericConstant.cpp: file NumericConstant.cpp was
 	initially added on branch new_design.
 
 2004-11-18 00:42  tim
@@ -454,17 +3051,7 @@
 
 2004-11-17 16:47  tim
 
-	* src/types/UreyBradleyBendType.hpp: file UreyBradleyBendType.hpp
-	was initially added on branch new_design.
-
-2004-11-17 16:47  tim
-
 	* src/types/CubicBendType.hpp: file CubicBendType.hpp was initially
-	added on branch new_design.
-
-2004-11-17 16:47  tim
-
-	* src/primitives/GhostBend.hpp: file GhostBend.hpp was initially
 	added on branch new_design.
 
 2004-11-17 16:47  tim
@@ -474,12 +3061,12 @@
 
 2004-11-17 16:47  tim
 
-	* src/primitives/UreyBradleyBend.cpp: file UreyBradleyBend.cpp was
+	* src/primitives/UreyBradleyBend.hpp: file UreyBradleyBend.hpp was
 	initially added on branch new_design.
 
 2004-11-17 16:47  tim
 
-	* src/primitives/UreyBradleyBend.hpp: file UreyBradleyBend.hpp was
+	* src/primitives/UreyBradleyBend.cpp: file UreyBradleyBend.cpp was
 	initially added on branch new_design.
 
 2004-11-17 16:47  tim
@@ -499,10 +3086,25 @@
 	types/QuadraticBondType.hpp, types/UreyBradleyBendType.hpp:
 	UreyBradleyBend and GhostBend
 
+2004-11-17 16:47  tim
+
+	* src/primitives/GhostBend.hpp: file GhostBend.hpp was initially
+	added on branch new_design.
+
+2004-11-17 16:47  tim
+
+	* src/types/UreyBradleyBendType.hpp: file UreyBradleyBendType.hpp
+	was initially added on branch new_design.
+
 2004-11-17 13:58  tim
 
 	* src/math/ChebyshevPolynomials.cpp: file ChebyshevPolynomials.cpp
 	was initially added on branch new_design.
+
+2004-11-17 13:58  tim
+
+	* src/types/OplsTorsionType.hpp: file OplsTorsionType.hpp was
+	initially added on branch new_design.
 
 2004-11-17 13:58  tim
 
@@ -518,11 +3120,6 @@
 	types/PolynomialTorsionType.hpp, types/TorsionType.hpp: more types
 	stuff and Chebyshev Polynomial
 
-2004-11-17 13:58  tim
-
-	* src/types/OplsTorsionType.hpp: file OplsTorsionType.hpp was
-	initially added on branch new_design.
-
 2004-11-17 01:37  tim
 
 	* src/types/PolynomialTorsionType.hpp: file
@@ -530,7 +3127,22 @@
 
 2004-11-17 01:37  tim
 
+	* src/types/PolynomialBendType.hpp: file PolynomialBendType.hpp was
+	initially added on branch new_design.
+
+2004-11-17 01:37  tim
+
+	* src/types/CharmmTorsionType.hpp: file CharmmTorsionType.hpp was
+	initially added on branch new_design.
+
+2004-11-17 01:37  tim
+
 	* src/types/CharmmTorsionType.cpp: file CharmmTorsionType.cpp was
+	initially added on branch new_design.
+
+2004-11-17 01:37  tim
+
+	* src/types/HarmonicBendType.hpp: file HarmonicBendType.hpp was
 	initially added on branch new_design.
 
 2004-11-17 01:37  tim
@@ -547,21 +3159,6 @@
 	CharmmTorsionType. Need to refine the design and add document for
 	them
 
-2004-11-17 01:37  tim
-
-	* src/types/CharmmTorsionType.hpp: file CharmmTorsionType.hpp was
-	initially added on branch new_design.
-
-2004-11-17 01:37  tim
-
-	* src/types/HarmonicBendType.hpp: file HarmonicBendType.hpp was
-	initially added on branch new_design.
-
-2004-11-17 01:37  tim
-
-	* src/types/PolynomialBendType.hpp: file PolynomialBendType.hpp was
-	initially added on branch new_design.
-
 2004-11-16 20:11  tim
 
 	* src/types/: BendType.hpp, PolynomialBondType.hpp,
@@ -574,22 +3171,22 @@
 
 2004-11-16 18:20  tim
 
-	* src/math/Polynomial.hpp: file Polynomial.hpp was initially added
-	on branch new_design.
+	* src/math/Polynomial.hpp: Adding Polynomial class
 
 2004-11-16 18:20  tim
 
-	* src/math/Polynomial.hpp: Adding Polynomial class
-
-2004-11-16 17:04  gezelter
-
-	* src/types/MorseBondType.hpp: file MorseBondType.hpp was initially
-	added on branch new_design.
+	* src/math/Polynomial.hpp: file Polynomial.hpp was initially added
+	on branch new_design.
 
 2004-11-16 17:04  gezelter
 
 	* src/types/HarmonicBondType.hpp: file HarmonicBondType.hpp was
 	initially added on branch new_design.
+
+2004-11-16 17:04  gezelter
+
+	* src/types/MorseBondType.hpp: file MorseBondType.hpp was initially
+	added on branch new_design.
 
 2004-11-16 17:04  gezelter
 
@@ -605,15 +3202,25 @@
 
 2004-11-15 21:07  tim
 
-	* src/UseTheForce/DUFF.hpp: file DUFF.hpp was initially added on
-	branch new_design.
-
-2004-11-15 21:07  tim
-
 	* src/: UseTheForce/DUFF.cpp, UseTheForce/DUFF.hpp,
 	UseTheForce/LJFF.cpp, UseTheForce/LJFF.hpp,
 	utils/StringTokenizer.cpp: adding DUFF class; adding checking
 	statement to nextTokenAsInt and nextTokenAsFloat in StringTokenizer
+
+2004-11-15 21:07  tim
+
+	* src/UseTheForce/DUFF.hpp: file DUFF.hpp was initially added on
+	branch new_design.
+
+2004-11-15 18:00  tim
+
+	* src/UseTheForce/ForceFieldFactory.cpp: file ForceFieldFactory.cpp
+	was initially added on branch new_design.
+
+2004-11-15 18:00  tim
+
+	* src/UseTheForce/LJFF.hpp: file LJFF.hpp was initially added on
+	branch new_design.
 
 2004-11-15 18:00  tim
 
@@ -625,23 +3232,8 @@
 
 2004-11-15 18:00  tim
 
-	* src/UseTheForce/ForceFieldFactory.cpp: file ForceFieldFactory.cpp
-	was initially added on branch new_design.
-
-2004-11-15 18:00  tim
-
 	* src/UseTheForce/ForceFieldFactory.hpp: file ForceFieldFactory.hpp
 	was initially added on branch new_design.
-
-2004-11-15 18:00  tim
-
-	* src/UseTheForce/LJFF.hpp: file LJFF.hpp was initially added on
-	branch new_design.
-
-2004-11-15 13:02  tim
-
-	* src/integrators/Velocitizer.hpp: file Velocitizer.hpp was
-	initially added on branch new_design.
 
 2004-11-15 13:02  tim
 
@@ -652,6 +3244,11 @@
 
 	* src/io/DumpReader.hpp: file DumpReader.hpp was initially added on
 	branch new_design.
+
+2004-11-15 13:02  tim
+
+	* src/integrators/Velocitizer.hpp: file Velocitizer.hpp was
+	initially added on branch new_design.
 
 2004-11-15 13:02  tim
 
@@ -778,17 +3375,6 @@
 
 2004-11-09 18:11  tim
 
-	* src/brains/ForceManager.cpp: file ForceManager.cpp was initially
-	added on branch new_design.
-
-2004-11-09 18:11  tim
-
-	* src/integrators/VelocityVerletIntegrator.cpp: file
-	VelocityVerletIntegrator.cpp was initially added on branch
-	new_design.
-
-2004-11-09 18:11  tim
-
 	* src/: UseTheForce/mpiComponentPlan.h, brains/ForceManager.cpp,
 	brains/ForceManager.hpp, brains/SimInfo.cpp, brains/SimInfo.hpp,
 	brains/Stats.hpp, brains/Thermo.cpp, brains/mpiSimulation.cpp,
@@ -803,8 +3389,19 @@
 
 2004-11-09 18:11  tim
 
+	* src/integrators/VelocityVerletIntegrator.cpp: file
+	VelocityVerletIntegrator.cpp was initially added on branch
+	new_design.
+
+2004-11-09 18:11  tim
+
 	* src/integrators/NVE.cpp: file NVE.cpp was initially added on
 	branch new_design.
+
+2004-11-09 18:11  tim
+
+	* src/brains/ForceManager.cpp: file ForceManager.cpp was initially
+	added on branch new_design.
 
 2004-11-08 20:08  tim
 
@@ -814,15 +3411,15 @@
 
 2004-11-08 20:08  tim
 
-	* src/integrators/NVE.hpp: file NVE.hpp was initially added on
-	branch new_design.
-
-2004-11-08 20:08  tim
-
 	* src/: brains/Exclude.hpp, brains/Stats.hpp,
 	integrators/Integrator.hpp, integrators/NVE.hpp,
 	integrators/VelocityVerletIntegrator.hpp, io/StatWriter.cpp,
 	utils/TypeContainer.hpp: More to break
+
+2004-11-08 20:08  tim
+
+	* src/integrators/NVE.hpp: file NVE.hpp was initially added on
+	branch new_design.
 
 2004-11-06 00:21  tim
 
@@ -838,11 +3435,6 @@
 
 2004-11-05 18:38  tim
 
-	* src/brains/MoleculeCreator.cpp: file MoleculeCreator.cpp was
-	initially added on branch new_design.
-
-2004-11-05 18:38  tim
-
 	* src/brains/MoleculeCreator.hpp: file MoleculeCreator.hpp was
 	initially added on branch new_design.
 
@@ -853,6 +3445,11 @@
 	brains/SimCreator.cpp, brains/SimCreator.hpp, brains/SimInfo.cpp,
 	brains/SimInfo.hpp, primitives/Molecule.hpp,
 	utils/LocalndexManager.hpp: Fix Exclude class etc.
+
+2004-11-05 18:38  tim
+
+	* src/brains/MoleculeCreator.cpp: file MoleculeCreator.cpp was
+	initially added on branch new_design.
 
 2004-11-05 16:45  chrisfen
 
@@ -891,6 +3488,12 @@
 
 2004-11-04 14:48  tim
 
+	* src/brains/: SimInfo.cpp, SimInfo.hpp, SimModel.cpp,
+	SimModel.hpp, Snapshot.hpp, Stats.cpp, Stats.hpp: adding Stats
+	class
+
+2004-11-04 14:48  tim
+
 	* src/brains/Stats.cpp: file Stats.cpp was initially added on
 	branch new_design.
 
@@ -898,12 +3501,6 @@
 
 	* src/brains/Stats.hpp: file Stats.hpp was initially added on
 	branch new_design.
-
-2004-11-04 14:48  tim
-
-	* src/brains/: SimInfo.cpp, SimInfo.hpp, SimModel.cpp,
-	SimModel.hpp, Snapshot.hpp, Stats.cpp, Stats.hpp: adding Stats
-	class
 
 2004-11-04 11:22  gezelter
 
@@ -979,9 +3576,8 @@
 
 2004-11-02 17:41  tim
 
-	* src/: brains/Migrator.hpp, brains/SimModel.cpp,
-	utils/LocalndexManager.hpp: Adding LocalIndexManager and Migrator.
-	Need unit test
+	* src/brains/Migrator.hpp: file Migrator.hpp was initially added on
+	branch new_design.
 
 2004-11-02 17:41  tim
 
@@ -990,18 +3586,19 @@
 
 2004-11-02 17:41  tim
 
-	* src/brains/Migrator.hpp: file Migrator.hpp was initially added on
-	branch new_design.
-
-2004-11-02 11:59  tim
-
-	* src/brains/SimModel.cpp: file SimModel.cpp was initially added on
-	branch new_design.
+	* src/: brains/Migrator.hpp, brains/SimModel.cpp,
+	utils/LocalndexManager.hpp: Adding LocalIndexManager and Migrator.
+	Need unit test
 
 2004-11-02 11:59  tim
 
 	* src/brains/: SimModel.cpp, SimModel.hpp, SimSnapshotManager.cpp,
 	SimSnapshotManager.hpp: SimModel in progress
+
+2004-11-02 11:59  tim
+
+	* src/brains/SimModel.cpp: file SimModel.cpp was initially added on
+	branch new_design.
 
 2004-11-02 10:28  chrisfen
 
@@ -1011,13 +3608,13 @@
 
 2004-11-02 10:27  tim
 
-	* src/utils/MemoryUtils.hpp: adding MemoryUtils which provide some
-	functions for dealing with memory issue
+	* src/utils/MemoryUtils.hpp: file MemoryUtils.hpp was initially
+	added on branch new_design.
 
 2004-11-02 10:27  tim
 
-	* src/utils/MemoryUtils.hpp: file MemoryUtils.hpp was initially
-	added on branch new_design.
+	* src/utils/MemoryUtils.hpp: adding MemoryUtils which provide some
+	functions for dealing with memory issue
 
 2004-11-02 10:23  tim
 
@@ -1046,13 +3643,13 @@
 
 2004-11-01 16:40  tim
 
-	* src/primitives/Torsion.hpp: file Torsion.hpp was initially added
-	on branch new_design.
+	* src/primitives/Bend.hpp: file Bend.hpp was initially added on
+	branch new_design.
 
 2004-11-01 16:40  tim
 
-	* src/primitives/Bend.hpp: file Bend.hpp was initially added on
-	branch new_design.
+	* src/primitives/: Bend.hpp, Bond.hpp, Torsion.hpp: add initial
+	version of Bond, Bend and Torsion.
 
 2004-11-01 16:40  tim
 
@@ -1061,8 +3658,8 @@
 
 2004-11-01 16:40  tim
 
-	* src/primitives/: Bend.hpp, Bond.hpp, Torsion.hpp: add initial
-	version of Bond, Bend and Torsion.
+	* src/primitives/Torsion.hpp: file Torsion.hpp was initially added
+	on branch new_design.
 
 2004-11-01 16:37  tim
 
@@ -1071,8 +3668,8 @@
 
 2004-11-01 16:37  tim
 
-	* src/types/: BendType.hpp, BondType.hpp, TorsionType.hpp: adding
-	BondType, BendType, TorsionType
+	* src/types/BondType.hpp: file BondType.hpp was initially added on
+	branch new_design.
 
 2004-11-01 16:37  tim
 
@@ -1081,8 +3678,8 @@
 
 2004-11-01 16:37  tim
 
-	* src/types/BondType.hpp: file BondType.hpp was initially added on
-	branch new_design.
+	* src/types/: BendType.hpp, BondType.hpp, TorsionType.hpp: adding
+	BondType, BendType, TorsionType
 
 2004-11-01 15:15  tim
 
@@ -1915,16 +4512,10 @@
 	water/tip4p/Makefile, zcons/Makefile: fix Makefile under water
 	directory
 
-2004-10-11 09:23  tim
-
-	* samples/argon/Makefile: remove argon.dump and argon.eor from
-	Makefile
-
 2004-10-09 01:01  tim
 
-	* samples/: alkane/Makefile.in, argon/Makefile.in,
-	lipid/Makefile.in, metals/Makefile.in, minimizer/Makefile.in:
-	Remove some Makefile.in
+	* samples/: alkane/Makefile.in, lipid/Makefile.in,
+	metals/Makefile.in, minimizer/Makefile.in: Remove some Makefile.in
 
 2004-10-08 18:15  tim
 
@@ -1940,9 +4531,9 @@
 
 2004-10-08 17:04  tim
 
-	* samples/: alkane/Makefile, argon/Makefile, lipid/Makefile,
-	metals/Makefile, minimizer/Makefile, water/Makefile.in,
-	water/dimer/Makefile, water/dimer/Makefile.in, water/spce/Makefile,
+	* samples/: alkane/Makefile, lipid/Makefile, metals/Makefile,
+	minimizer/Makefile, water/Makefile.in, water/dimer/Makefile,
+	water/dimer/Makefile.in, water/spce/Makefile,
 	water/spce/Makefile.in, water/ssd/Makefile, water/ssd/Makefile.in,
 	water/ssde/Makefile, water/ssde/Makefile.in,
 	water/tip3p_ice/Makefile, water/tip3p_ice/Makefile.in,
@@ -2105,7 +4696,8 @@
 
 2004-09-29 12:56  gezelter
 
-	* make/: Make.conf.in, Makefile.in: Working on make stuff
+	* make/: Make.conf.in, Makefile.in, _files/style.css: Working on
+	make stuff
 
 2004-09-29 12:46  tim
 
@@ -2371,7 +4963,8 @@
 	src/visitors/OtherVisitor.cpp, src/visitors/OtherVisitor.hpp,
 	src/visitors/RigidBodyVisitor.cpp,
 	src/visitors/RigidBodyVisitor.hpp, src/visitors/ZconsVisitor.cpp,
-	src/visitors/ZconsVisitor.hpp, make/Makefile, samples/Makefile.in,
+	src/visitors/ZconsVisitor.hpp, make/Makefile,
+	make/_files/style.css, samples/Makefile.in,
 	samples/metals/Au-Core-Ag-Shell_Nanoparticle.in,
 	samples/metals/Au-Core-Ag-Shell_Nanoparticle.md,
 	samples/metals/Au_bulk_FBD.md, samples/metals/Au_bulk_voter.md,
@@ -2419,10 +5012,6 @@
 	samples/water/tip4p/tp4.md, samples/water/tip4p/water.md,
 	samples/alkane/Makefile.in, samples/alkane/alkanes.md,
 	samples/alkane/butane.in, samples/alkane/butane.md,
-	samples/argon/500.in, samples/argon/500.md,
-	samples/argon/Makefile.in, samples/argon/ar864.in,
-	samples/argon/ar864.md, samples/argon/argonNVT.in,
-	samples/argon/argonNVT.md, samples/argon/lj.md,
 	samples/lipid/5x5.in, samples/lipid/5x5.md,
 	samples/lipid/Makefile.in, samples/lipid/lipid.md,
 	samples/lipid/water.md, samples/minimizer/Makefile.in,
@@ -2546,7 +5135,8 @@
 	src/visitors/OtherVisitor.cpp, src/visitors/OtherVisitor.hpp,
 	src/visitors/RigidBodyVisitor.cpp,
 	src/visitors/RigidBodyVisitor.hpp, src/visitors/ZconsVisitor.cpp,
-	src/visitors/ZconsVisitor.hpp, make/Makefile, samples/Makefile.in,
+	src/visitors/ZconsVisitor.hpp, make/Makefile,
+	make/_files/style.css, samples/Makefile.in,
 	samples/metals/Au-Core-Ag-Shell_Nanoparticle.in,
 	samples/metals/Au-Core-Ag-Shell_Nanoparticle.md,
 	samples/metals/Au_bulk_FBD.md, samples/metals/Au_bulk_voter.md,
@@ -2594,10 +5184,6 @@
 	samples/water/tip4p/tp4.md, samples/water/tip4p/water.md,
 	samples/alkane/Makefile.in, samples/alkane/alkanes.md,
 	samples/alkane/butane.in, samples/alkane/butane.md,
-	samples/argon/500.in, samples/argon/500.md,
-	samples/argon/Makefile.in, samples/argon/ar864.in,
-	samples/argon/ar864.md, samples/argon/argonNVT.in,
-	samples/argon/argonNVT.md, samples/argon/lj.md,
 	samples/lipid/5x5.in, samples/lipid/5x5.md,
 	samples/lipid/Makefile.in, samples/lipid/lipid.md,
 	samples/lipid/water.md, samples/minimizer/Makefile.in,

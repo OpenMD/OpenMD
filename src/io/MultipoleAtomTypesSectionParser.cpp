@@ -63,11 +63,11 @@ void MultipoleAtomTypesSectionParser::parseLine(ForceField& ff,const std::string
     // Dipoles are given in units of Debye  
     // Quadrupoles are given in units of 
     // examples:
-    // name d theta phi psi dipole_moment
-    // name s theta phi psi dipole_moment splitdipole_distance
-    // name q theta phi psi Qxx Qyy Qzz
-    // name dq theta phi psi dipole_moment Qxx Qyy Qzz
-    //  name sq theta phi psi dipole_moment splitdipole_distance Qxx Qyy Qzz
+    // name d phi theta psi dipole_moment
+    // name s phi theta psi dipole_moment splitdipole_distance
+    // name q phi theta psi Qxx Qyy Qzz
+    // name dq phi theta psi dipole_moment Qxx Qyy Qzz
+    // name sq phi theta psi dipole_moment splitdipole_distance Qxx Qyy Qzz
         
     if (nTokens < 5)  {
         sprintf(painCave.errMsg, "MultipoleAtomTypesSectionParser Error: Not enough tokens at line %d\n",

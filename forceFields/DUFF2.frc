@@ -110,11 +110,11 @@ end ChargeAtomTypes
 begin MultipoleAtomTypes
 //only support up tp quadrupole.
 //possible format:
-// name d theta phi psi dipole_moment
-// name s theta phi psi dipole_moment splitdipole_distance
-// name q theta phi psi Qxx Qyy Qzz
-// name dq theta phi psi dipole_moment Qxx Qyy Qzz
-// name sq theta phi psi dipole_moment splitdipole_distance Qxx Qyy Qzz
+// name d phi theta psi dipole_moment
+// name s phi theta psi dipole_moment splitdipole_distance
+// name q phi theta psi Qxx Qyy Qzz
+// name dq phi theta psi dipole_moment Qxx Qyy Qzz
+// name sq phi theta psi dipole_moment splitdipole_distance Qxx Qyy Qzz
 // euler angles are given in units of degree
 // dipoles are given in units of Debye
 // split dipole distances are given in units of Angstrom
