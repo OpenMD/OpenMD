@@ -333,19 +333,26 @@ int DataStorage::getBytesPerStuntDouble(int layout) {
     int bytes = 0;
     if (layout & dslPosition) {
         bytes += sizeof(Vector3d);
-    } else if (layout & dslVelocity) {
+    }
+    if (layout & dslVelocity) {
         bytes += sizeof(Vector3d);
-    } else if (layout & dslAmat) {
+    }
+    if (layout & dslAmat) {
         bytes += sizeof(Mat3x3d);    
-    } else if (layout & dslAngularMomentum) {
+    }
+    if (layout & dslAngularMomentum) {
         bytes += sizeof(Vector3d);
-    } else if (layout & dslElectroFrame) {
+    }
+    if (layout & dslElectroFrame) {
         bytes += sizeof(Mat3x3d);
-    } else if (layout & dslZAngle) {
+    }
+    if (layout & dslZAngle) {
         bytes += sizeof(Vector3d);
-    } else if (layout & dslForce) {
+    }
+    if (layout & dslForce) {
         bytes += sizeof(Vector3d);
-    } else if (layout & dslTorque) {
+    }
+    if (layout & dslTorque) {
         bytes += sizeof(Vector3d);
     }
     return bytes;
