@@ -13,7 +13,8 @@ MySource    = \
 	Utility.cpp \
 	Trim.cpp \
 	BitSet.cpp\
-	wildcards.cpp
+	wildcards.cpp\
+	physmem.c
 
 LibObjs = @LIBOBJS@
 

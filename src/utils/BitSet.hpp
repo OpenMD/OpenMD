@@ -81,10 +81,14 @@ class BitSet {
 
         /** Returns true if no bits are set to true */
         bool none();
+
+        int firstOffBit() { return !bitset_[0] ? 0 : nextOffBit(0); }
         
         /** Returns the index of the first bit that is set to false that occurs on or after the specified starting index.*/
         int nextOffBit(int fromIndex) const; 
-         
+
+        int firstOnBit() { return bitset_[0] ? 0 : nextOnBit(0); }
+        
         /** Returns the index of the first bit that is set to true that occurs on or after the specified starting index. */
         int nextOnBit(int fromIndex) const; 
         
