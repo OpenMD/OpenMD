@@ -44,6 +44,26 @@ class SSDAtomVisitor : public BaseAtomVisitor{
     vector<string> ssdAtomType;   
 };
 
+class LinearAtomVisitor : public BaseAtomVisitor{
+  public:
+    LinearAtomVisitor(SimInfo* info) : BaseAtomVisitor(info) {
+      visitorName = "LinearAtomVisitor";
+      linearAtomType.push_back("linear");
+    }
+
+    virtual void visit(Atom* atom) {}
+    virtual void visit(DirectionalAtom* datom);       
+    virtual void visit(RigidBody* rb) {}
+    
+    virtual const string toString();
+  private:
+    inline bool isLinearAtom(const string& atomType);
+    vector<string> linearAtomType;   
+};
+
+
+
+
 class DefaultAtomVisitor : public BaseAtomVisitor{
   public:
     DefaultAtomVisitor(SimInfo* info) : BaseAtomVisitor(info) { visitorName = "DefaultAtomVisitor";}

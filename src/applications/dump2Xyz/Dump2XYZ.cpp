@@ -31,6 +31,7 @@ int main(int argc, char* argv[]){
   
   CompositeVisitor* compositeVisitor;
   SSDAtomVisitor* ssdVisitor;
+  LinearAtomVisitor* linearVisitor;
   DefaultAtomVisitor* defaultAtomVisitor;
   LipidHeadVisitor* lipidVisitor;
   RBCOMVisitor* rbCOMVisitor;
@@ -114,6 +115,8 @@ int main(int argc, char* argv[]){
   //creat SSD atom visitor
   ssdVisitor = new SSDAtomVisitor(info);
   compositeVisitor->addVisitor(ssdVisitor, 800);
+  linearVisitor = new LinearAtomVisitor(info);
+  compositeVisitor->addVisitor(linearVisitor, 750);
 
   //creat default atom visitor
   defaultAtomVisitor = new DefaultAtomVisitor(info);
