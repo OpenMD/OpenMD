@@ -33,6 +33,8 @@
 #  $<      - Current dependency
 #
 #---------------------------------------------------------------------------
+
+include $(DEV_ROOT)/make/Make.conf.in
 #---------------------------------------------------------------------------
 #
 #  Directories
@@ -125,12 +127,15 @@ ifneq "$(words $(JavaFiles))" "0"
   JavaPackageName   = $(subst /,.,$(Package))
   JarFile           = $(LibDir)/$(subst /,,$(Package)).jar
 endif
+
+#if Main is defined, do not build library. It may not be true sometimes
 ifneq  "$(words $(ObjectFiles))" "0"
   DependencyFile    = $(PackageSourceDir)/Makedepend
-  SharedLibrary     = $(LibDir)/lib$(subst /,,$(Package)).so 
-  StaticLibrary     = $(LibDir)/lib$(subst /,,$(Package)).a
   ifneq "$(Main)" ""
     Executable        = $(BinDir)/$(Main)
+  else
+    SharedLibrary     = $(LibDir)/lib$(subst /,,$(Package)).so 
+    StaticLibrary     = $(LibDir)/lib$(subst /,,$(Package)).a
   endif
 endif
 #
@@ -226,6 +231,7 @@ $(PackageTargetDir) :
 # .c -> .o
 $(PackageTargetDir)/%.o : $(PackageSourceDir)/%.c
 	$(Print) $@
+	$(Print) $(CCompiler) $(COptions) -c $(IncludePath) $< -o $@
 	@$(CCompiler) $(COptions) -c $(IncludePath) $< -o $@
 
 %.o : $(PackageSourceDir)/%.c
@@ -234,6 +240,7 @@ $(PackageTargetDir)/%.o : $(PackageSourceDir)/%.c
 # .cpp -> .o
 $(PackageTargetDir)/%.o : $(PackageSourceDir)/%.cpp
 	$(Print) $@
+	$(Print) $(CppCompiler) $(CppOptions) -c $(IncludePath) $< -o $@
 	$(CppCompiler) $(CppOptions) -c $(IncludePath) $< -o $@
 
 %.o : $(PackageSourceDir)/%.cpp
@@ -242,6 +249,7 @@ $(PackageTargetDir)/%.o : $(PackageSourceDir)/%.cpp
 # .f -> .o
 $(PackageTargetDir)/%.o : $(PackageSourceDir)/%.f
 	$(Print) $@
+	$(Print) $(FortranCompiler) $(FortranOptions) -c $< -o $@
 	@$(FortranCompiler) $(FortranOptions) -c $< -o $@
 
 %.o : $(PackageSourceDir)/%.f
@@ -250,6 +258,7 @@ $(PackageTargetDir)/%.o : $(PackageSourceDir)/%.f
 # .F90 -> .o
 $(PackageTargetDir)/%.o : $(PackageSourceDir)/%.F90
 	$(Print) $@
+	$(Print) $(F90Compiler) $(F90Options) -c $< -o $@
 	@$(F90Compiler) $(F90Options) -c $< -o $@
 
 %.o : $(PackageSourceDir)/%.F90
@@ -258,6 +267,7 @@ $(PackageTargetDir)/%.o : $(PackageSourceDir)/%.F90
 # .java -> .class
 $(PackageTargetDir)/%.class : $(PackageSourceDir)/%.java
 	$(Print) $@
+	$(Print) $(JavaCompiler) $(JavaCompilerOptions) $< 
 	@$(JavaCompiler) $(JavaCompilerOptions) $< 
 
 %.class : $(PackageSourceDir)/%.java
@@ -266,6 +276,7 @@ $(PackageTargetDir)/%.class : $(PackageSourceDir)/%.java
 # .class -> .h
 $(PackageSourceDir)/%.h : $(PackageTargetDir)/%.class
 	$(Print) $@
+	$(Print) $(JniCompiler) $(JniOptions) $(JavaPackageName).$*
 	$(JniCompiler) $(JniOptions) $(JavaPackageName).$*
 
 %.h : %.class
@@ -282,7 +293,7 @@ $(PackageSourceDir)/%.h : $(PackageSourceDir)/%.y
 #.y -> .c
 $(PackageSourceDir)/%.c : $(PackageSourceDir)/%.y
 	$(Print) $@
-	$(Print) @$(Yacc) -d $?
+	$(Print) $(Yacc) -d $?
 	@$(Yacc) -d  $?
 	@$(Move) y.tab.c $*.c
 	@$(Delete) y.tab.h
@@ -290,12 +301,13 @@ $(PackageSourceDir)/%.c : $(PackageSourceDir)/%.y
 # .l -> .c
 $(PackageSourceDir)/%.c : $(PackageSourceDir)/%.l
 	$(Print) $@
-	$(Print) @$(Lex) -o$@ $?
+	$(Print) $(Lex) -o$@ $?
 	@$(Lex) -o$@ $?
 
 # .o -> .a
 $(LibDir)/%.a : $(ObjectFiles)
 	$(Print) $@
+	$(Print) $(StaticArchiver) $(StaticArchiverOptions) $@ $(ObjectFiles)
 	@$(StaticArchiver) $(StaticArchiverOptions) $@ $(ObjectFiles)
 
 %.a : $(ObjectFiles)
@@ -304,6 +316,7 @@ $(LibDir)/%.a : $(ObjectFiles)
 # .o -> .so
 $(LibDir)/%.so : $(ObjectFiles)
 	$(Print) $@	
+	$(Print) $(DynamicArchiver) $(ObjectFiles) $(DynamicArchiverOptions) -o $@
 	$(DynamicArchiver) $(ObjectFiles) $(DynamicArchiverOptions) -o $@
 
 %.so : $(ObjectFiles)
@@ -312,6 +325,7 @@ $(LibDir)/%.so : $(ObjectFiles)
 # .class -> .jar
 $(LibDir)/%.jar : $(JavaClassFiles) $(OtherTargetFiles)
 	$(Print) $@
+	$(Print) $(JavaArchiver) -cf $@ $(JavaClassFilesRel) $(OtherTargetFiles)
 	@cd $(TargetDir); $(JavaArchiver) -cf $@ \
 	$(JavaClassFilesRel) $(OtherTargetFiles)
 
@@ -392,7 +406,6 @@ _dependall : $(DependencyFile)
 
 $(DependencyFile) : $(DerivedSource)
 	$(Print) $@ 
-	$(Print) $(DerivedSource)
 	@cd $(PackageSourceDir)
 	touch Make.temp
 ifdef $(CppFiles)
@@ -403,7 +416,6 @@ ifdef $(CFiles)
 endif
 	cat Make.temp | sed 's/^[a-zA-Z0-9]/$$\(DEV_ROOT\)\/obj\/&/g' >> $(DependencyFile)
 	cat Make.temp | sed 's/^[a-zA-Z0-9]/$$\(DEV_ROOT\)\/MPIobj\/&/g' >> $(DependencyFile)
-	echo $(F90Files)
 #ifdef $(F90Files) 
 	$(DEV_ROOT)/scripts/sfmakedepend  -I $(DEV_ROOT)/src -d '$$(DEV_ROOT)/obj' -f ./Make.ftemp -h *.F90
 	cat Make.ftemp >> $(DependencyFile)
