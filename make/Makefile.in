@@ -254,7 +254,7 @@ MakeDepend             = makedepend
 INSTALL                = @INSTALL@
 InstallProgram         = @INSTALL_PROGRAM@
 InstallData            = @INSTALL_DATA@
-MkDir                = @MKINSTALLDIRS@
+MkDir                  = @MKINSTALLDIRS@
 Delete                 = rm -fr
 StaticArchiver         = @AR@
 DynamicArchiver        = @CC@
@@ -364,7 +364,10 @@ default : build
 
 # Create target directory
 $(PackageTargetDir) :
-	$(MakeDir) $@
+	$(MkDir) $@
+
+$(BinDir) :
+	$(MkDir) $@
 
 # .c -> .o
 $(PackageTargetDir)/%.o : %.c
@@ -447,7 +450,6 @@ else
 	if test -n "`ls *.$(ModSuffix)`"; then\
           $(Move) "`ls *.$(ModSuffix)`" $(PackageTargetDir);\
         fi
-
 endif
 
 
@@ -567,10 +569,10 @@ $(CombinedParallelStaticLib) : $(LibDir)/.stamp_MPI
 	$(Ranlib) $(CombinedParallelStaticLib)
 
 # Executable
-$(Executable) : $(CombinedStaticLib) $(ObjectFiles)
+$(Executable) : $(CombinedStaticLib) $(ObjectFiles) $(BinDir)
 	$(Linker) $(ObjectFiles) $(CombinedStaticLib) $(LinkOptions) $(LibDirs) $(Libraries) -o $@
 
-$(ParallelExecutable) : $(CombinedParallelStaticLib) $(ParallelObjectFiles)
+$(ParallelExecutable) : $(CombinedParallelStaticLib) $(ParallelObjectFiles) $(BinDir)
 	$(Linker) $(ParallelObjectFiles) $(CombinedParallelStaticLib) $(ParallelLinkOptions) $(LibDirs) $(Libraries) -o $@
 
 # Anything else is just copied from source to target
