@@ -198,7 +198,7 @@ inline double MTRand::randNorm( const double& mean, const double& variance )
  */
 inline MTRand::uint32 MTRand::randInt() {
  
-  uint32 ranNums[nstrides_];
+  std::vector<uint32> ranNums(nstrides_);
   
   for (int i = 0; i < nstrides_; ++i) {
     ranNums[i] = rawRandInt();

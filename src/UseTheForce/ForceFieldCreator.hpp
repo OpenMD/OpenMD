@@ -55,7 +55,8 @@ class ForceField;
 class ForceFieldCreator {
     public:
         ForceFieldCreator(const std::string& ident) : ident_(ident) {}
-
+        virtual ~ForceFieldCreator() {}
+        
         const std::string& getIdent() const { return ident_; }
 
         virtual ForceField* create() const = 0;

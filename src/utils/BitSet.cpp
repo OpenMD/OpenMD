@@ -191,10 +191,10 @@ bool operator== (const BitSet & bs1, const BitSet &bs2) {
     return std::equal(bs1.bitset_.begin(), bs1.bitset_.end(), bs2.bitset_.begin());
 }
 
-std::istream& operator>> ( std::istream& is, const BitSet& bs) {
-
-    return is;
-}
+//std::istream& operator>> ( std::istream& is, const BitSet& bs) {
+//
+//    return is;
+//}
 
 std::ostream& operator<< ( std::ostream& os, const BitSet& bs) {
     for (int i = 0; i < bs.bitset_.size(); ++i) {

@@ -69,10 +69,10 @@ namespace oopse{
 
             /** Constructs and initializes a Quaternion from w, x, y, z values */     
             Quaternion(Real w, Real x, Real y, Real z) {
-                data_[0] = w;
-                data_[1] = x;
-                data_[2] = y;
-                data_[3] = z;                
+                this->data_[0] = w;
+                this->data_[1] = x;
+                this->data_[2] = y;
+                this->data_[3] = z;                
             }
             
             /** Constructs and initializes a Quaternion from a  Vector<Real,4> */     
@@ -95,7 +95,7 @@ namespace oopse{
              * @return the value of the first element of this quaternion
              */
             Real w() const {
-                return data_[0];
+                return this->data_[0];
             }
 
             /**
@@ -103,7 +103,7 @@ namespace oopse{
              * @return the reference of the first element of this quaternion
              */
             Real& w() {
-                return data_[0];    
+                return this->data_[0];    
             }
 
             /**
@@ -111,7 +111,7 @@ namespace oopse{
              * @return the value of the first element of this quaternion
              */
             Real x() const {
-                return data_[1];
+                return this->data_[1];
             }
 
             /**
@@ -119,7 +119,7 @@ namespace oopse{
              * @return the reference of the second element of this quaternion
              */
             Real& x() {
-                return data_[1];    
+                return this->data_[1];    
             }
 
             /**
@@ -127,7 +127,7 @@ namespace oopse{
              * @return the value of the third element of this quaternion
              */
             Real y() const {
-                return data_[2];
+                return this->data_[2];
             }
 
             /**
@@ -135,7 +135,7 @@ namespace oopse{
              * @return the reference of the third element of this quaternion
              */           
             Real& y() {
-                return data_[2];    
+                return this->data_[2];    
             }
 
             /**
@@ -143,14 +143,14 @@ namespace oopse{
              * @return the value of the fourth element of this quaternion
              */
             Real z() const {
-                return data_[3];
+                return this->data_[3];
             }
             /**
              * Returns the reference of the fourth element of this quaternion.
              * @return the reference of the fourth element of this quaternion
              */
             Real& z() {
-                return data_[3];    
+                return this->data_[3];    
             }
 
             /**
@@ -161,7 +161,7 @@ namespace oopse{
              inline bool operator ==(const Quaternion<Real>& q) {
 
                 for (unsigned int i = 0; i < 4; i ++) {
-                    if (!equal(data_[i], q[i])) {
+                    if (!equal(this->data_[i], q[i])) {
                         return false;
                     }
                 }
@@ -194,17 +194,17 @@ namespace oopse{
             void mul(const Quaternion<Real>& q) {
                 Quaternion<Real> tmp(*this);
 
-                data_[0] = (tmp[0]*q[0]) -(tmp[1]*q[1]) - (tmp[2]*q[2]) - (tmp[3]*q[3]);
-                data_[1] = (tmp[0]*q[1]) + (tmp[1]*q[0]) + (tmp[2]*q[3]) - (tmp[3]*q[2]);
-                data_[2] = (tmp[0]*q[2]) + (tmp[2]*q[0]) + (tmp[3]*q[1]) - (tmp[1]*q[3]);
-                data_[3] = (tmp[0]*q[3]) + (tmp[3]*q[0]) + (tmp[1]*q[2]) - (tmp[2]*q[1]);                
+                this->data_[0] = (tmp[0]*q[0]) -(tmp[1]*q[1]) - (tmp[2]*q[2]) - (tmp[3]*q[3]);
+                this->data_[1] = (tmp[0]*q[1]) + (tmp[1]*q[0]) + (tmp[2]*q[3]) - (tmp[3]*q[2]);
+                this->data_[2] = (tmp[0]*q[2]) + (tmp[2]*q[0]) + (tmp[3]*q[1]) - (tmp[1]*q[3]);
+                this->data_[3] = (tmp[0]*q[3]) + (tmp[3]*q[0]) + (tmp[1]*q[2]) - (tmp[2]*q[1]);                
             }
 
             void mul(const Real& s) {
-                data_[0] *= s;
-                data_[1] *= s;
-                data_[2] *= s;
-                data_[3] *= s;
+                this->data_[0] *= s;
+                this->data_[1] *= s;
+                this->data_[2] *= s;
+                this->data_[3] *= s;
             }
 
             /** Set the value of this quaternion to the division of itself by another quaternion */
@@ -213,10 +213,10 @@ namespace oopse{
             }
 
             void div(const Real& s) {
-                data_[0] /= s;
-                data_[1] /= s;
-                data_[2] /= s;
-                data_[3] /= s;
+                this->data_[0] /= s;
+                this->data_[1] /= s;
+                this->data_[2] /= s;
+                this->data_[3] /= s;
             }
             
             Quaternion<Real>& operator *=(const Quaternion<Real>& q) {
@@ -258,8 +258,8 @@ namespace oopse{
                 Real y2;
                 Real z2;
 
-                if (!isNormalized())
-                    normalize();
+                if (!this->isNormalized())
+                    this->normalize();
                 
                 w2 = w() * w();
                 x2 = x() * x();

@@ -66,14 +66,13 @@ namespace oopse {
   public:
     typedef Real ElemType;
     typedef Real* ElemPoinerType;
-    
     Vector3() : Vector<Real, 3>(){}
     
     /** Constructs and initializes a Vector3 from x, y, z coordinates */
     inline Vector3( Real x, Real y, Real z) {
-      data_[0] = x;
-      data_[1] = y;
-      data_[2] = z;
+      this->data_[0] = x;
+      this->data_[1] = y;
+      this->data_[2] = z;
     }
 
     /** Constructs and initializes from an array*/
@@ -91,37 +90,37 @@ namespace oopse {
      * Retunrs reference of the first element of Vector3.
      * @return reference of the first element of Vector3
      */
-    inline Real& x() {  return data_[0];}
+    inline Real& x() {  return this->data_[0];}
     
     /**
      * Retunrs the first element of Vector3.
      * @return  the first element of Vector3
      */
-    inline Real x() const {  return data_[0];}
+    inline Real x() const {  return this->data_[0];}
     
     /**
      * Retunrs reference of the second element of Vector3.
      * @return reference of the second element of Vector3
      */
-    inline Real& y() {  return data_[1];}
+    inline Real& y() {  return this->data_[1];}
     
     /**
      * Retunrs  the second element of Vector3.
      * @return c the second element of Vector3
      */
-    inline Real y() const {  return data_[1];}
+    inline Real y() const {  return this->data_[1];}
     
     /**
      * Retunrs reference of the third element of Vector3.
      * @return reference of the third element of Vector3
      */
-    inline Real& z() {  return data_[2];}
+    inline Real& z() {  return this->data_[2];}
     
     /**
      * Retunrs  the third element of Vector3.
      * @return f the third element of Vector3
      */
-    inline Real z() const {  return data_[2];}
+    inline Real z() const {  return this->data_[2];}
     
   };
   

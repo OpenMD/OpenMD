@@ -87,7 +87,7 @@ namespace oopse {
             /** default constructor */
             inline Vector(){
                 for (unsigned int i = 0; i < Dim; i++)
-                    data_[i] = 0;
+                    this->data_[i] = 0;
             }
 
             /** Constructs and initializes a Vector from a vector */
@@ -101,7 +101,7 @@ namespace oopse {
                     return *this;
                 
             	for (unsigned int i = 0; i < Dim; i++)            
-                    data_[i] = v[i];
+                    this->data_[i] = v[i];
                 
                 return *this;
             }
@@ -109,13 +109,13 @@ namespace oopse {
             template<typename T>
             inline Vector(const T& s){
                 for (unsigned int i = 0; i < Dim; i++)
-                    data_[i] = s;
+                    this->data_[i] = s;
             }
             
             /** Constructs and initializes a Vector from an array */            
             inline Vector( Real* v) {
                 for (unsigned int i = 0; i < Dim; i++)
-                    data_[i] = v[i];
+                    this->data_[i] = v[i];
             }
 
             /** 
@@ -125,7 +125,7 @@ namespace oopse {
              */
             inline Real& operator[](unsigned int  i) {
                 assert( i < Dim);
-                return data_[i];
+                return this->data_[i];
             }
 
             /** 
@@ -135,7 +135,7 @@ namespace oopse {
              */
             inline Real& operator()(unsigned int  i) {
                 assert( i < Dim);
-                return data_[i];
+                return this->data_[i];
             }
 
             /** 
@@ -145,7 +145,7 @@ namespace oopse {
              */
             inline  const Real& operator[](unsigned int i) const {
                 assert( i < Dim);
-                return data_[i];
+                return this->data_[i];
             }
 
             /** 
@@ -155,19 +155,19 @@ namespace oopse {
              */
             inline  const Real& operator()(unsigned int i) const {
                 assert( i < Dim);
-                return data_[i];
+                return this->data_[i];
             }
 
             /** Copy the internal data to an array*/
             void getArray(Real* array) {
                 for (unsigned int i = 0; i < Dim; i ++) {
-                    array[i] = data_[i];
+                    array[i] = this->data_[i];
                 }                
             }
 
             /** Returns the pointer of internal array */
             Real* getArrayPointer() {
-                return data_;
+                return this->data_;
             }
             
             /**
@@ -178,7 +178,7 @@ namespace oopse {
              inline bool operator ==(const Vector<Real, Dim>& v) {
 
                 for (unsigned int i = 0; i < Dim; i ++) {
-                    if (!equal(data_[i], v[i])) {
+                    if (!equal(this->data_[i], v[i])) {
                         return false;
                     }
                 }
@@ -198,7 +198,7 @@ namespace oopse {
             /** Negates the value of this vector in place. */           
             inline void negate() {
                 for (unsigned int i = 0; i < Dim; i++)
-                    data_[i] = -data_[i];
+                    this->data_[i] = -this->data_[i];
             }
 
             /**
@@ -207,7 +207,7 @@ namespace oopse {
             */
             inline void negate(const Vector<Real, Dim>& v1) {
                 for (unsigned int i = 0; i < Dim; i++)
-                    data_[i] = -v1.data_[i];
+                    this->data_[i] = -v1.data_[i];
 
             }
             
@@ -217,7 +217,7 @@ namespace oopse {
             */
             inline void add( const Vector<Real, Dim>& v1 ) {
                 for (unsigned int i = 0; i < Dim; i++)
-                    data_[i] += v1.data_[i];
+                    this->data_[i] += v1.data_[i];
             }
 
             /**
@@ -227,7 +227,7 @@ namespace oopse {
             */
             inline void add( const Vector<Real, Dim>& v1, const Vector<Real, Dim>& v2 ) {
                 for (unsigned int i = 0; i < Dim; i++)
-                    data_[i] = v1.data_[i] + v2.data_[i];
+                    this->data_[i] = v1.data_[i] + v2.data_[i];
             }
 
             /**
@@ -236,7 +236,7 @@ namespace oopse {
             */
             inline void sub( const Vector<Real, Dim>& v1 ) {
                 for (unsigned int i = 0; i < Dim; i++)
-                    data_[i] -= v1.data_[i];
+                    this->data_[i] -= v1.data_[i];
             }
 
             /**
@@ -246,7 +246,7 @@ namespace oopse {
             */
             inline void sub( const Vector<Real, Dim>& v1, const Vector  &v2 ){
             	for (unsigned int i = 0; i < Dim; i++)
-                    data_[i] = v1.data_[i] - v2.data_[i];
+                    this->data_[i] = v1.data_[i] - v2.data_[i];
             }
 
             /**
@@ -255,7 +255,7 @@ namespace oopse {
             */
             inline void mul( Real s ) {
                 for (unsigned int i = 0; i < Dim; i++)
-                   data_[i] *= s;
+                   this->data_[i] *= s;
             }
 
             /**
@@ -266,7 +266,7 @@ namespace oopse {
             */
             inline void mul( const Vector<Real, Dim>& v1, Real s) {
                 for (unsigned int i = 0; i < Dim; i++)
-                    data_[i] = s * v1.data_[i];
+                    this->data_[i] = s * v1.data_[i];
             }
 
             /**
@@ -275,7 +275,7 @@ namespace oopse {
             */             
             inline void div( Real s) {
                 for (unsigned int i = 0; i < Dim; i++)            
-                    data_[i] /= s;
+                    this->data_[i] /= s;
             }
 
             /**
@@ -285,7 +285,7 @@ namespace oopse {
             */                         
             inline void div( const Vector<Real, Dim>& v1, Real s ) {
                 for (unsigned int i = 0; i < Dim; i++)
-                    data_[i] = v1.data_[i] / s;
+                    this->data_[i] = v1.data_[i] / s;
             }
 
             /** @see #add */

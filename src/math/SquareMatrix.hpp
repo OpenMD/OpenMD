@@ -68,7 +68,7 @@ namespace oopse {
             SquareMatrix() {
                 for (unsigned int i = 0; i < Dim; i++)
                     for (unsigned int j = 0; j < Dim; j++)
-                        data_[i][j] = 0.0;
+                        this->data_[i][j] = 0.0;
              }
 
             /** Constructs and initializes every element of this matrix to a scalar */ 
@@ -129,7 +129,7 @@ namespace oopse {
                Real tmp = 0;
                
                 for (unsigned int i = 0; i < Dim ; i++)
-                    tmp += data_[i][i];
+                    tmp += this->data_[i][i];
 
                 return tmp;
             }
@@ -138,7 +138,7 @@ namespace oopse {
             bool isSymmetric() const {
                 for (unsigned int i = 0; i < Dim - 1; i++)
                     for (unsigned int j = i; j < Dim; j++)
-                        if (fabs(data_[i][j] - data_[j][i]) > oopse::epsilon) 
+                        if (fabs(this->data_[i][j] - this->data_[j][i]) > oopse::epsilon) 
                             return false;
                         
                 return true;
@@ -157,7 +157,7 @@ namespace oopse {
             bool isDiagonal() const {
                 for (unsigned int i = 0; i < Dim ; i++)
                     for (unsigned int j = 0; j < Dim; j++)
-                        if (i !=j && fabs(data_[i][j]) > oopse::epsilon) 
+                        if (i !=j && fabs(this->data_[i][j]) > oopse::epsilon) 
                             return false;
                         
                 return true;
@@ -169,7 +169,7 @@ namespace oopse {
                     return false;
                 
                 for (unsigned int i = 0; i < Dim ; i++)
-                    if (fabs(data_[i][i] - 1) > oopse::epsilon)
+                    if (fabs(this->data_[i][i] - 1) > oopse::epsilon)
                         return false;
                     
                 return true;
@@ -181,7 +181,7 @@ namespace oopse {
                 
                 for (unsigned int i = 0; i < Dim; i++)
                     for (unsigned int j = 0; j < Dim; j++)              
-                        result(j, i) = data_[i][j];
+                        result(j, i) = this->data_[i][j];
 
                 return result;
             }

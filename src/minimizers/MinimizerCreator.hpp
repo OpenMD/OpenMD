@@ -55,7 +55,8 @@ class SimInfo;
 class MinimizerCreator {
     public:
         MinimizerCreator(const std::string& ident) : ident_(ident) {}
-
+        virtual ~MinimizerCreator() {}
+        
         const std::string& getIdent() const { return ident_; }
 
         virtual Minimizer* create(SimInfo* info) const = 0;

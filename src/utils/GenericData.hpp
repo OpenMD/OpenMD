@@ -182,12 +182,12 @@ namespace oopse{
     * @template ElemDataType
     */
     template <typename ElemDataType > 
-    class VectorTypeData : public GenericData, public std::vector<ElemDataType>{
+    class VectorTypeData : public GenericData {
         public:
             typedef VectorTypeData<ElemDataType> SelfType;
 
             VectorTypeData(const std::string& id) 
-                : GenericData(id), std::vector() {}
+                : GenericData(id){}
             
             VectorTypeData(const SelfType& s) : SelfType(s){}
 
@@ -195,9 +195,12 @@ namespace oopse{
                 if (this == &s)
                     return *this;
 
-                VectorTypeData::operator=(s);
+                this->data_ = s.data_;
                 return *this;
             }
+            
+        private:
+            std::vector<ElemDataType> data_;
     };
 
     /**

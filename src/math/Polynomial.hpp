@@ -126,7 +126,7 @@ class Polynomial {
          */
         
         void setCoefficient(int exponent, const ElemType& coefficient) {
-            polyPairMap_.insert(PolynomialPairMap::value_type(exponent, coefficient));
+            polyPairMap_.insert(typename PolynomialPairMap::value_type(exponent, coefficient));
         }
 
         /**

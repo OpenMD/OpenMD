@@ -43,9 +43,6 @@
 
 #include "primitives/RigidBody.hpp"
 
-#include "math/MatVec3.h"
-
-
 
 namespace oopse {
 

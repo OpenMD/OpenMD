@@ -68,8 +68,9 @@ namespace oopse {
             typedef std::vector<std::string> KeyType;
             typedef typename KeyType::iterator KeyTypeIterator;
             typedef std::pair<int, ElemPtr> ValueType;
-            typedef std::map<KeyType, ValueType> MapType;
+            typedef typename std::map<KeyType, ValueType> MapType;
             typedef typename std::map<KeyType, ValueType>::iterator MapTypeIterator;
+            typedef typename MapType::value_type value_type;
 
             TypeContainer() : index_(0) {}
             
@@ -84,7 +85,7 @@ namespace oopse {
             bool add(KeyType& keys, ElemPtr elem) {
                 assert(keys.size() == SIZE);
                 assert(elem);
-                return data_.insert(MapType::value_type(keys, std::make_pair(index_++,elem))).second;
+                return data_.insert(value_type(keys, std::make_pair(index_++,elem))).second;
             }
 
             /** Exact Match */

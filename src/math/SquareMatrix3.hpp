@@ -134,17 +134,17 @@ namespace oopse {
                 ctheta = cos(theta);
                 cpsi = cos(psi);
 
-                data_[0][0] = cpsi * cphi - ctheta * sphi * spsi;
-                data_[0][1] = cpsi * sphi + ctheta * cphi * spsi;
-                data_[0][2] = spsi * stheta;
+                this->data_[0][0] = cpsi * cphi - ctheta * sphi * spsi;
+                this->data_[0][1] = cpsi * sphi + ctheta * cphi * spsi;
+                this->data_[0][2] = spsi * stheta;
                 
-                data_[1][0] = -spsi * ctheta - ctheta * sphi * cpsi;
-                data_[1][1] = -spsi * stheta + ctheta * cphi * cpsi;
-                data_[1][2] = cpsi * stheta;
+                this->data_[1][0] = -spsi * ctheta - ctheta * sphi * cpsi;
+                this->data_[1][1] = -spsi * stheta + ctheta * cphi * cpsi;
+                this->data_[1][2] = cpsi * stheta;
 
-                data_[2][0] = stheta * sphi;
-                data_[2][1] = -stheta * cphi;
-                data_[2][2] = ctheta;
+                this->data_[2][0] = stheta * sphi;
+                this->data_[2][1] = -stheta * cphi;
+                this->data_[2][2] = ctheta;
             }
 
 
@@ -177,40 +177,40 @@ namespace oopse {
                 Quaternion<Real> q;
                 Real t, s;
                 Real ad1, ad2, ad3;    
-                t = data_[0][0] + data_[1][1] + data_[2][2] + 1.0;
+                t = this->data_[0][0] + this->data_[1][1] + this->data_[2][2] + 1.0;
 
                 if( t > 0.0 ){
 
                     s = 0.5 / sqrt( t );
                     q[0] = 0.25 / s;
-                    q[1] = (data_[1][2] - data_[2][1]) * s;
-                    q[2] = (data_[2][0] - data_[0][2]) * s;
-                    q[3] = (data_[0][1] - data_[1][0]) * s;
+                    q[1] = (this->data_[1][2] - this->data_[2][1]) * s;
+                    q[2] = (this->data_[2][0] - this->data_[0][2]) * s;
+                    q[3] = (this->data_[0][1] - this->data_[1][0]) * s;
                 } else {
 
-                    ad1 = fabs( data_[0][0] );
-                    ad2 = fabs( data_[1][1] );
-                    ad3 = fabs( data_[2][2] );
+                    ad1 = fabs( this->data_[0][0] );
+                    ad2 = fabs( this->data_[1][1] );
+                    ad3 = fabs( this->data_[2][2] );
 
                     if( ad1 >= ad2 && ad1 >= ad3 ){
 
-                        s = 2.0 * sqrt( 1.0 + data_[0][0] - data_[1][1] - data_[2][2] );
-                        q[0] = (data_[1][2] + data_[2][1]) / s;
+                        s = 2.0 * sqrt( 1.0 + this->data_[0][0] - this->data_[1][1] - this->data_[2][2] );
+                        q[0] = (this->data_[1][2] + this->data_[2][1]) / s;
                         q[1] = 0.5 / s;
-                        q[2] = (data_[0][1] + data_[1][0]) / s;
-                        q[3] = (data_[0][2] + data_[2][0]) / s;
+                        q[2] = (this->data_[0][1] + this->data_[1][0]) / s;
+                        q[3] = (this->data_[0][2] + this->data_[2][0]) / s;
                     } else if ( ad2 >= ad1 && ad2 >= ad3 ) {
-                        s = sqrt( 1.0 + data_[1][1] - data_[0][0] - data_[2][2] ) * 2.0;
-                        q[0] = (data_[0][2] + data_[2][0]) / s;
-                        q[1] = (data_[0][1] + data_[1][0]) / s;
+                        s = sqrt( 1.0 + this->data_[1][1] - this->data_[0][0] - this->data_[2][2] ) * 2.0;
+                        q[0] = (this->data_[0][2] + this->data_[2][0]) / s;
+                        q[1] = (this->data_[0][1] + this->data_[1][0]) / s;
                         q[2] = 0.5 / s;
-                        q[3] = (data_[1][2] + data_[2][1]) / s;
+                        q[3] = (this->data_[1][2] + this->data_[2][1]) / s;
                     } else {
 
-                        s = sqrt( 1.0 + data_[2][2] - data_[0][0] - data_[1][1] ) * 2.0;
-                        q[0] = (data_[0][1] + data_[1][0]) / s;
-                        q[1] = (data_[0][2] + data_[2][0]) / s;
-                        q[2] = (data_[1][2] + data_[2][1]) / s;
+                        s = sqrt( 1.0 + this->data_[2][2] - this->data_[0][0] - this->data_[1][1] ) * 2.0;
+                        q[0] = (this->data_[0][1] + this->data_[1][0]) / s;
+                        q[1] = (this->data_[0][2] + this->data_[2][0]) / s;
+                        q[2] = (this->data_[1][2] + this->data_[2][1]) / s;
                         q[3] = 0.5 / s;
                     }
                 }             
@@ -239,8 +239,8 @@ namespace oopse {
                 
                 // set the tolerance for Euler angles and rotation elements
 
-                theta = acos(std::min(1.0, std::max(-1.0,data_[2][2])));
-                ctheta = data_[2][2]; 
+                theta = acos(std::min(1.0, std::max(-1.0,this->data_[2][2])));
+                ctheta = this->data_[2][2]; 
                 stheta = sqrt(1.0 - ctheta * ctheta);
 
                 // when sin(theta) is close to 0, we need to consider singularity
@@ -253,12 +253,12 @@ namespace oopse {
 
                 if (fabs(stheta) <= oopse::epsilon){
                     psi = 0.0;
-                    phi = atan2(-data_[1][0], data_[0][0]);  
+                    phi = atan2(-this->data_[1][0], this->data_[0][0]);  
                 }
                 // we only have one unique solution
                 else{    
-                    phi = atan2(data_[2][0], -data_[2][1]);
-                    psi = atan2(data_[0][2], data_[1][2]);
+                    phi = atan2(this->data_[2][0], -this->data_[2][1]);
+                    psi = atan2(this->data_[0][2], this->data_[1][2]);
                 }
 
                 //wrap phi and psi, make sure they are in the range from 0 to 2*Pi
@@ -279,16 +279,16 @@ namespace oopse {
             Real determinant() const {
                 Real x,y,z;
 
-                x = data_[0][0] * (data_[1][1] * data_[2][2] - data_[1][2] * data_[2][1]);
-                y = data_[0][1] * (data_[1][2] * data_[2][0] - data_[1][0] * data_[2][2]);
-                z = data_[0][2] * (data_[1][0] * data_[2][1] - data_[1][1] * data_[2][0]);
+                x = this->data_[0][0] * (this->data_[1][1] * this->data_[2][2] - this->data_[1][2] * this->data_[2][1]);
+                y = this->data_[0][1] * (this->data_[1][2] * this->data_[2][0] - this->data_[1][0] * this->data_[2][2]);
+                z = this->data_[0][2] * (this->data_[1][0] * this->data_[2][1] - this->data_[1][1] * this->data_[2][0]);
 
                 return(x + y + z);
             }            
 
             /** Returns the trace of this matrix. */
             Real trace() const {
-                return data_[0][0] + data_[1][1] + data_[2][2];
+                return this->data_[0][0] + this->data_[1][1] + this->data_[2][2];
             }
             
             /**
@@ -304,15 +304,15 @@ namespace oopse {
                 //"This is a runtime or a programming error in your application.");
                 }
 
-                m(0, 0) = data_[1][1]*data_[2][2] - data_[1][2]*data_[2][1];
-                m(1, 0) = data_[1][2]*data_[2][0] - data_[1][0]*data_[2][2];
-                m(2, 0) = data_[1][0]*data_[2][1] - data_[1][1]*data_[2][0];
-                m(0, 1) = data_[2][1]*data_[0][2] - data_[2][2]*data_[0][1];
-                m(1, 1) = data_[2][2]*data_[0][0] - data_[2][0]*data_[0][2];
-                m(2, 1) = data_[2][0]*data_[0][1] - data_[2][1]*data_[0][0];
-                m(0, 2) = data_[0][1]*data_[1][2] - data_[0][2]*data_[1][1];
-                m(1, 2) = data_[0][2]*data_[1][0] - data_[0][0]*data_[1][2];
-                m(2, 2) = data_[0][0]*data_[1][1] - data_[0][1]*data_[1][0];
+                m(0, 0) = this->data_[1][1]*this->data_[2][2] - this->data_[1][2]*this->data_[2][1];
+                m(1, 0) = this->data_[1][2]*this->data_[2][0] - this->data_[1][0]*this->data_[2][2];
+                m(2, 0) = this->data_[1][0]*this->data_[2][1] - this->data_[1][1]*this->data_[2][0];
+                m(0, 1) = this->data_[2][1]*this->data_[0][2] - this->data_[2][2]*this->data_[0][1];
+                m(1, 1) = this->data_[2][2]*this->data_[0][0] - this->data_[2][0]*this->data_[0][2];
+                m(2, 1) = this->data_[2][0]*this->data_[0][1] - this->data_[2][1]*this->data_[0][0];
+                m(0, 2) = this->data_[0][1]*this->data_[1][2] - this->data_[0][2]*this->data_[1][1];
+                m(1, 2) = this->data_[0][2]*this->data_[1][0] - this->data_[0][0]*this->data_[1][2];
+                m(2, 2) = this->data_[0][0]*this->data_[1][1] - this->data_[0][1]*this->data_[1][0];
 
                 m /= det;
                 return m;

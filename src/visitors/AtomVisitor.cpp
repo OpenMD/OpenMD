@@ -42,7 +42,6 @@
 #include <cstring>
 #include "visitors/AtomVisitor.hpp"
 #include "primitives/DirectionalAtom.hpp"
-#include "math/MatVec3.h"
 #include "primitives/RigidBody.hpp"
 
 namespace oopse {

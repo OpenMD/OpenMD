@@ -136,7 +136,7 @@ class BitSet {
         
         friend bool operator== (const BitSet & bs1, const BitSet &bs2);
 
-        friend std::istream& operator>> ( std::istream&, const BitSet& bs);
+        //friend std::istream& operator>> ( std::istream&, const BitSet& bs);
         friend std::ostream& operator<< ( std::ostream&, const BitSet& bs) ;
 
     private:

@@ -71,6 +71,8 @@ namespace oopse {
 class SimCreator {
     public:
 
+        virtual ~SimCreator() {}
+
         /**
          * Setup Simulation
          * @return a pointer to SimInfo

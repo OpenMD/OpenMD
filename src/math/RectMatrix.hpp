@@ -68,20 +68,20 @@ namespace oopse {
             RectMatrix() {
                 for (unsigned int i = 0; i < Row; i++)
                     for (unsigned int j = 0; j < Col; j++)
-                        data_[i][j] = 0.0;
+                        this->data_[i][j] = 0.0;
              }
 
             /** Constructs and initializes every element of this matrix to a scalar */ 
             RectMatrix(Real s) {
                 for (unsigned int i = 0; i < Row; i++)
                     for (unsigned int j = 0; j < Col; j++)
-                        data_[i][j] = s;
+                        this->data_[i][j] = s;
             }
 
             RectMatrix(Real* array) {
                 for (unsigned int i = 0; i < Row; i++)
                     for (unsigned int j = 0; j < Col; j++)
-                        data_[i][j] = array[i * Row + j];
+                        this->data_[i][j] = array[i * Row + j];
             }
 
             /** copy constructor */
@@ -99,7 +99,7 @@ namespace oopse {
                 
                 for (unsigned int i = 0; i < Row; i++)
                     for (unsigned int j = 0; j < Col; j++)
-                        data_[i][j] = m.data_[i][j];
+                        this->data_[i][j] = m.data_[i][j];
                 return *this;
             }
             
@@ -111,7 +111,7 @@ namespace oopse {
              */
             Real& operator()(unsigned int i, unsigned int j) {
                 //assert( i < Row && j < Col);
-                return data_[i][j];
+                return this->data_[i][j];
             }
 
             /**
@@ -122,7 +122,7 @@ namespace oopse {
              */        
             Real operator()(unsigned int i, unsigned int j) const  {
                 
-                return data_[i][j];  
+                return this->data_[i][j];  
             }
 
             /** 
@@ -132,7 +132,7 @@ namespace oopse {
             void getArray(Real* array) {
                 for (unsigned int i = 0; i < Row; i++) {
                     for (unsigned int j = 0; j < Col; j++) {
-                        array[i * Row + j] = data_[i][j];
+                        array[i * Row + j] = this->data_[i][j];
                     }
                 }
             }
@@ -140,7 +140,7 @@ namespace oopse {
 
             /** Returns the pointer of internal array */
             Real* getArrayPointer() {
-                return &data_[0][0];
+                return &this->data_[0][0];
             }
 
             /**
@@ -152,7 +152,7 @@ namespace oopse {
                 Vector<Real, Row> v;
 
                 for (unsigned int i = 0; i < Row; i++)
-                    v[i] = data_[row][i];
+                    v[i] = this->data_[row][i];
 
                 return v;
             }
@@ -165,7 +165,7 @@ namespace oopse {
              void setRow(unsigned int row, const Vector<Real, Row>& v) {
 
                 for (unsigned int i = 0; i < Row; i++)
-                    data_[row][i] = v[i];
+                    this->data_[row][i] = v[i];
              }
 
             /**
@@ -177,7 +177,7 @@ namespace oopse {
                 Vector<Real, Col> v;
 
                 for (unsigned int j = 0; j < Col; j++)
-                    v[j] = data_[j][col];
+                    v[j] = this->data_[j][col];
 
                 return v;
             }
@@ -190,7 +190,7 @@ namespace oopse {
              void setColumn(unsigned int col, const Vector<Real, Col>& v){
 
                 for (unsigned int j = 0; j < Col; j++)
-                    data_[j][col] = v[j];
+                    this->data_[j][col] = v[j];
              }         
 
             /**
@@ -202,7 +202,7 @@ namespace oopse {
                     assert(i < Row && j < Row);
 
                     for (unsigned int k = 0; k < Col; k++)
-                        std::swap(data_[i][k], data_[j][k]);
+                        std::swap(this->data_[i][k], this->data_[j][k]);
             }
 
            /**
@@ -214,7 +214,7 @@ namespace oopse {
                     assert(i < Col && j < Col);
                     
                     for (unsigned int k = 0; k < Row; k++)
-                        std::swap(data_[k][i], data_[k][j]);
+                        std::swap(this->data_[k][i], this->data_[k][j]);
             }
 
             /**
@@ -227,7 +227,7 @@ namespace oopse {
             bool operator ==(const RectMatrix<Real, Row, Col>& m) {
                 for (unsigned int i = 0; i < Row; i++)
                     for (unsigned int j = 0; j < Col; j++)
-                        if (!equal(data_[i][j], m.data_[i][j]))
+                        if (!equal(this->data_[i][j], m.data_[i][j]))
                             return false;
 
                 return true;
@@ -246,7 +246,7 @@ namespace oopse {
             inline void negate() {
                 for (unsigned int i = 0; i < Row; i++)
                     for (unsigned int j = 0; j < Col; j++)
-                        data_[i][j] = -data_[i][j];
+                        this->data_[i][j] = -this->data_[i][j];
             }
             
             /**
@@ -256,7 +256,7 @@ namespace oopse {
             inline void negate(const RectMatrix<Real, Row, Col>& m) {
                 for (unsigned int i = 0; i < Row; i++)
                     for (unsigned int j = 0; j < Col; j++)
-                        data_[i][j] = -m.data_[i][j];        
+                        this->data_[i][j] = -m.data_[i][j];        
             }
             
             /**
@@ -266,7 +266,7 @@ namespace oopse {
             inline void add( const RectMatrix<Real, Row, Col>& m ) {
                 for (unsigned int i = 0; i < Row; i++)
                     for (unsigned int j = 0; j < Col; j++)        
-                    data_[i][j] += m.data_[i][j];
+                    this->data_[i][j] += m.data_[i][j];
             }
             
             /**
@@ -277,7 +277,7 @@ namespace oopse {
             inline void add( const RectMatrix<Real, Row, Col>& m1, const RectMatrix<Real, Row, Col>& m2 ) {
                 for (unsigned int i = 0; i < Row; i++)
                     for (unsigned int j = 0; j < Col; j++)        
-                    data_[i][j] = m1.data_[i][j] + m2.data_[i][j];
+                    this->data_[i][j] = m1.data_[i][j] + m2.data_[i][j];
             }
             
             /**
@@ -287,7 +287,7 @@ namespace oopse {
             inline void sub( const RectMatrix<Real, Row, Col>& m ) {
                 for (unsigned int i = 0; i < Row; i++)
                     for (unsigned int j = 0; j < Col; j++)        
-                        data_[i][j] -= m.data_[i][j];
+                        this->data_[i][j] -= m.data_[i][j];
             }
             
             /**
@@ -298,7 +298,7 @@ namespace oopse {
             inline void sub( const RectMatrix<Real, Row, Col>& m1, const RectMatrix<Real, Row, Col>& m2){
                 for (unsigned int i = 0; i < Row; i++)
                     for (unsigned int j = 0; j < Col; j++)        
-                        data_[i][j] = m1.data_[i][j] - m2.data_[i][j];
+                        this->data_[i][j] = m1.data_[i][j] - m2.data_[i][j];
             }
 
             /**
@@ -308,7 +308,7 @@ namespace oopse {
             inline void mul( Real s ) {
                 for (unsigned int i = 0; i < Row; i++)
                     for (unsigned int j = 0; j < Col; j++)  
-                        data_[i][j] *= s;
+                        this->data_[i][j] *= s;
             }
 
             /**
@@ -319,7 +319,7 @@ namespace oopse {
             inline void mul( Real s, const RectMatrix<Real, Row, Col>& m ) {
                 for (unsigned int i = 0; i < Row; i++)
                     for (unsigned int j = 0; j < Col; j++)  
-                        data_[i][j] = s * m.data_[i][j];
+                        this->data_[i][j] = s * m.data_[i][j];
             }
 
             /**
@@ -329,7 +329,7 @@ namespace oopse {
             inline void div( Real s) {
                 for (unsigned int i = 0; i < Row; i++)
                     for (unsigned int j = 0; j < Col; j++)  
-                        data_[i][j] /= s;
+                        this->data_[i][j] /= s;
             }
 
             /**
@@ -340,7 +340,7 @@ namespace oopse {
             inline void div( Real s, const RectMatrix<Real, Row, Col>& m ) {
                 for (unsigned int i = 0; i < Row; i++)
                     for (unsigned int j = 0; j < Col; j++)  
-                        data_[i][j] = m.data_[i][j] / s;
+                        this->data_[i][j] = m.data_[i][j] / s;
             }
 
             /**
@@ -385,7 +385,7 @@ namespace oopse {
                 
                 for (unsigned int i = 0; i < Row; i++)
                     for (unsigned int j = 0; j < Col; j++)              
-                        result(j, i) = data_[i][j];
+                        result(j, i) = this->data_[i][j];
 
                 return result;
             }
