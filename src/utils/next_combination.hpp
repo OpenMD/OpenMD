@@ -133,11 +133,11 @@ bool next_combination(IteratorContainer<RandomAccessIterator>& iterContainer, Ra
 /**
  * @brief iteratively replace the sequence with wild cards
  * @return true if more combination sequence is avaliable, otherwise return true
- * @param cont iterator container, if expect whole series of combination, just pass an empty iterator 
- * container. The user should not modify the iterator container
+ * @param cont iterator container, if expect the whole series of combinations,  pass an empty iterator 
+ * container. The user should not modify this iterator container
  * @param sequence the whole sequence used to generate combination
  * @param result a possible combination sequence which is set on return
- * @wildCard the wild card string. Its value is "X" by default
+ * @param wildCard the wild card string. Its value is "X" by default
  * @note since next_combination never returns an empty sequence, replaceWildCard will not generate 
  * one special combination, which is n identical wild cards (n is equal to the size of the passing sequence)
  * 

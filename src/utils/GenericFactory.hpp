@@ -199,7 +199,7 @@ class GenericFactory {
         CreatorMapType creatorMap_;
 };
 
-/** write out all of the type identifier to a output stream */
+/** write out all of the type identifiers to an output stream */
 template<typename O, typename I, typename C>
 std::ostream& operator <<(std::ostream& o, GenericFactory<O, I, C>& factory) {
     std::vector<I> idents;

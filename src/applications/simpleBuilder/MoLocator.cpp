@@ -101,18 +101,18 @@ void MoLocator::calcRefCoords( void ){
     else{
       currAtomMass = myFF->getAtomTypeMass(currAtomStamp->getType());
       mass.push_back(currAtomMass);
-      coor.x = currAtomStamp->getPosX();
-      coor.y = currAtomStamp->getPosY();
-      coor.z = currAtomStamp->getPosZ();
+      coor.x() = currAtomStamp->getPosX();
+      coor.y() = currAtomStamp->getPosY();
+      coor.z() = currAtomStamp->getPosZ();
       refCoords.push_back(coor);
 
     }
   }
 
   for(int i = 0; i < nRigidBodies; i++){
-    coor.x = 0;
-    coor.y = 0;
-    coor.z = 0;
+    coor.x() = 0;
+    coor.y() = 0;
+    coor.z() = 0;
     totMassInRb = 0;
 
     for(int j = 0; j < nAtomsInRb; j++){
@@ -120,9 +120,9 @@ void MoLocator::calcRefCoords( void ){
       currAtomMass = myFF->getAtomTypeMass(currAtomStamp->getType());
       totMassInRb +=  currAtomMass;
       
-      coor.x += currAtomStamp->getPosX() * currAtomMass;
-      coor.y += currAtomStamp->getPosY() * currAtomMass;
-      coor.z += currAtomStamp->getPosZ() * currAtomMass;
+      coor.x() += currAtomStamp->getPosX() * currAtomMass;
+      coor.y() += currAtomStamp->getPosY() * currAtomMass;
+      coor.z() += currAtomStamp->getPosZ() * currAtomMass;
     }
 
     mass.push_back(totMassInRb);
@@ -133,9 +133,9 @@ void MoLocator::calcRefCoords( void ){
 
   //calculate the reference center of mass
   molMass = 0;
-  refMolCom.x = 0;
-  refMolCom.y = 0;
-  refMolCom.z = 0;
+  refMolCom.x() = 0;
+  refMolCom.y() = 0;
+  refMolCom.z() = 0;
   
   for(int i = 0; i < nIntegrableObjects; i++){
     refMolCom += refCoords[i] * mass[i];
@@ -155,8 +155,8 @@ void latVec2RotMat(const Vector3d& lv, double rotMat[3][3]){
 
   double theta, phi, psi;
   
-  theta =acos(lv.z);
-  phi = atan2(lv.y, lv.x);
+  theta =acos(lv.z());
+  phi = atan2(lv.y(), lv.x());
   psi = 0;
 
   rotMat[0][0] = (cos(phi) * cos(psi)) - (sin(phi) * cos(theta) * sin(psi));
