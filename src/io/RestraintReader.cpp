@@ -493,14 +493,12 @@ void RestraintReader::readZangle( const char *in_name ){
 
   int i;
   unsigned int j;
+  int isPresent;
 
 #ifdef IS_MPI
   int done, which_node, which_atom; // loop counter
-
-  int *potatoes;
-  int myPotato;
-
   int nProc;
+  MPI_Status istatus;
 #endif //is_mpi
 
   const int BUFFERSIZE = 2000; // size of the read buffer
@@ -517,25 +515,41 @@ void RestraintReader::readZangle( const char *in_name ){
 #ifdef IS_MPI
   if (worldRank == 0) {
 #endif
+    isPresent = 1;
+    inAngFile = fopen(in_name, "r");
+    if(!inAngFile){
+      sprintf(painCave.errMsg,
+	      "Restraints Warning: %s file is not present\n"
+	      "\tAll omega values will be initialized to zero. If the\n"
+	      "\tsimulation is starting from the idealCrystal.in reference\n"
+	      "\tconfiguration, this is the desired action. If this is not\n"
+	      "\tthe case, the energy calculations will be incorrect.\n",
+	      in_name);
+      painCave.severity = OOPSE_WARNING;
+      painCave.isFatal = 0;
+      simError();   
+      isPresent = 0;
+    }
 
-  inAngFile = fopen(in_name, "r");
-  if(!inAngFile){
-    sprintf(painCave.errMsg,
-	    "Restraints Warning: %s file is not present\n"
-	    "\tAll omega values will be initialized to zero. If the\n"
-	    "\tsimulation is starting from the idealCrystal.in reference\n"
-	    "\tconfiguration, this is the desired action. If this is not\n"
-	    "\tthe case, the energy calculations will be incorrect.\n",
-	    in_name);
-    painCave.severity = OOPSE_WARNING;
-    painCave.isFatal = 0;
-    simError();   
-    return;
-  }
+#ifdef IS_MPI
+    // let the other nodes know the status of the file search
+    MPI_Bcast(&isPresent, 1, MPI_INT, 0, MPI_COMM_WORLD);
+#endif // is_mpi
 
-  inAngFileName = in_name;
+    if (!isPresent)
+      return;
+    
+    inAngFileName = in_name;
 #ifdef IS_MPI
   }
+
+  // listen to node 0 to see if we should exit this function
+  if (worldRank != 0) {
+    MPI_Bcast(&isPresent, 1, MPI_INT, 0, MPI_COMM_WORLD);
+    if (!isPresent)
+      return;
+  }
+  
   strcpy( checkPointMsg, "zAngle file opened successfully for reading." );
   MPIcheckPoint();
 #endif
@@ -586,7 +600,6 @@ void RestraintReader::readZangle( const char *in_name ){
   int myStatus; // 1 = wakeup & success; 0 = error; -1 = AllDone
   int haveError, index;
 
-  MPI_Status istatus;
   int *MolToProcMap = mpiSim->getMolToProcMap();
   int localIndex;
   int nCurObj;
@@ -650,10 +663,10 @@ void RestraintReader::readZangle( const char *in_name ){
 	  index++;
 	}	
 	
-	// restraints is limited to a single zAngle per molecule
-	vecParticles = (simnfo->molecules[localIndex]).getIntegrableObjects();
-	for(j=0; j < vecParticles.size(); j++)
-	  vecParticles[j]->setZangle(tempZangs[i]);
+// 	// restraints is limited to a single zAngle per molecule
+// 	vecParticles = (simnfo->molecules[localIndex]).getIntegrableObjects();
+// 	for(j=0; j < vecParticles.size(); j++)
+// 	  vecParticles[j]->setZangle(tempZangs[i]);
 	
       } else {
 	// I am MASTER OF THE UNIVERSE, but I don't own this molecule
@@ -700,6 +713,7 @@ void RestraintReader :: zeroZangle(){
 
   int i;
   unsigned int j;
+  int nTotObjs; // the number of atoms
 
   vector<StuntDouble*> vecParticles;
 
@@ -718,34 +732,71 @@ void RestraintReader :: zeroZangle(){
   painCave.isEventLoop = 1;
 
   int myStatus; // 1 = wakeup & success; 0 = error; -1 = AllDone
-  int haveError;
+  int haveError, index;
+  int which_node;
 
   MPI_Status istatus;
   int *MolToProcMap = mpiSim->getMolToProcMap();
   int localIndex;
-  int which_node;
+  int nCurObj;
+  double angleTranfer;
 
+  nTotObjs = simnfo->getTotIntegrableObjects();
   haveError = 0;
 
   for (i=0 ; i < mpiSim->getNMolGlobal(); i++) {
+    // Get the Node number which has this atom
     which_node = MolToProcMap[i];
     
-    if(which_node == worldRank){
-      //molecule with global index i belongs to this processor
-      
-      localIndex = mpiSim->getGlobalToLocalMol(i);
-      
-      if(localIndex == -1) {
-	sprintf(painCave.errMsg, "Molecule not found on node %d\n", worldRank);
-	haveError = 1;
-	simError();
+    // let's let node 0 pass out constant values to all the processors
+    if (worldRank == 0) {
+      if (which_node == 0) {
+	localIndex = mpiSim->getGlobalToLocalMol(i);
+	
+	if(localIndex == -1) {
+	  strcpy(painCave.errMsg, "Molecule not found on node 0!");
+	  haveError = 1;
+	  simError();
+	}
+	
+	vecParticles = (simnfo->molecules[localIndex]).getIntegrableObjects();	
+	for(j = 0; j < vecParticles.size(); j++){	  
+	  vecParticles[j]->setZangle( 0.0 );
+	}	
+	
+      } else {
+	// I am MASTER OF THE UNIVERSE, but I don't own this molecule
+	
+	MPI_Recv(&nCurObj, 1, MPI_INT, which_node,
+		 TAKE_THIS_TAG_INT, MPI_COMM_WORLD, &istatus);
+	
+	for(j=0; j < nCurObj; j++){	 	 
+	  angleTransfer = 0.0;
+	  MPI_Send(&angleTransfer, 1, MPI_DOUBLE, which_node, 
+		   TAKE_THIS_TAG_DOUBLE, MPI_COMM_WORLD);      	  
+	  index++;
+	}
       }
+    } else {
+      // I am SLAVE TO THE MASTER
       
-      vecParticles = (simnfo->molecules[localIndex]).getIntegrableObjects();
-      
-      // set zAngle to 0.0 for all integrable objects
-      for(j = 0; j < vecParticles.size(); j++){
-	vecParticles[j]->setZangle( 0.0 );
+      if (which_node == worldRank) {
+	
+	// BUT I OWN THIS MOLECULE!!!
+	
+	localIndex = mpiSim->getGlobalToLocalMol(i);
+	vecParticles = (simnfo->molecules[localIndex]).getIntegrableObjects();	
+	nCurObj = vecParticles.size();
+	
+	MPI_Send(&nCurObj, 1, MPI_INT, 0,
+		 TAKE_THIS_TAG_INT, MPI_COMM_WORLD);
+	
+	for(j = 0; j < vecParticles.size(); j++){
+	  
+	  MPI_Recv(&angleTransfer, 1, MPI_DOUBLE, 0,
+		   TAKE_THIS_TAG_DOUBLE, MPI_COMM_WORLD, &istatus);
+	  vecParticles[j]->setZangle(angleTransfer);
+	}	
       }
     }
   }
