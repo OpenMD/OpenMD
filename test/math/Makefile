@@ -23,8 +23,8 @@ Source = MainTest.cpp \
 DEV_ROOT               = ../..
 UseMPI                 = no 
 ParallelDeclare        = -DIS_MPI
-CppCompiler            = icpc -g
-Linker                 = icpc -g
+CppCompiler            = g++ -g
+Linker                 = g++ -g
 Delete                 = /bin/rm -rf
 MakeDepend             = makedepend
 
@@ -44,7 +44,7 @@ PackageParallelTargetDir = $(DEV_ROOT)/MPIobj
 MakeOptions            = -k
 
 IncludeDirs = \
-        /home/maul/gezelter/tim/cppunit/include \
+        /home/maul/gezelter/tim/include \
 	/usr/local/include \
 	/usr/local/mpich/include \
         $(OOPSESrcDir)
@@ -54,7 +54,7 @@ IncludePath      = -I$(SourceDir) $(IncludeDirs:%=-I%)
 LibraryDirs = \
 	/usr/local/lib \
 	/usr/local/mpich/lib \
-        /home/maul/gezelter/tim/cppunit/lib 
+        /home/maul/gezelter/tim/lib 
 
 LibDirs          = -L$(LibDir)    $(LibraryDirs:%=-L%)
 
