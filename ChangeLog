@@ -1,3 +1,12 @@
+2004-10-25 17:46  tim
+
+	* ChangeLog, src/math/RectMatrix.hpp, src/math/SquareMatrix.hpp,
+	src/math/SquareMatrix3.hpp, src/math/Vector.hpp,
+	src/math/Vector3.hpp, test/brains/StuntDouble.hpp,
+	test/math/RectMatrixTestCase.cpp, test/math/Vector3TestCase.cpp,
+	test/math/VectorTestCase.cpp: add getArray function to	RectMatrix
+	and Vector classes
+
 2004-10-25 12:03  tim
 
 	* ChangeLog, src/utils/GenericFactory.hpp,
@@ -1093,7 +1102,7 @@
 	forceFields/Al.VC.funcfl, forceFields/Au.VC.funcfl,
 	forceFields/Au.u3.funcfl, forceFields/LJFF.frc,
 	forceFields/Ni.VC.funcfl, forceFields/Pd.u3.funcfl,
-	forceFields/Pt.VC.funcfl: Initial revision
+	forceFields/Pt.VC.funcfl: Import of OOPSE v. 2.0
 
 2004-09-23 23:16  gezelter
 
@@ -1268,5 +1277,5 @@
 	forceFields/Al.VC.funcfl, forceFields/Au.VC.funcfl,
 	forceFields/Au.u3.funcfl, forceFields/LJFF.frc,
 	forceFields/Ni.VC.funcfl, forceFields/Pd.u3.funcfl,
-	forceFields/Pt.VC.funcfl: Import of OOPSE v. 2.0
+	forceFields/Pt.VC.funcfl: Initial revision
 

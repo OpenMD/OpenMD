@@ -36,66 +36,14 @@
 
 #include <vector>
 
-#include "math/Vector3.hpp"
-#include "math/SquareMatrix3.hpp"
+#include "brains/DataStorage.hpp"
 
 using namespace std;
 
 namespace oopse{
 
-
-    //forward declaration
-    class Snapshot;
-    class SnapshotManager;
     class StuntDouble;
     
-    /**
-     * @class DataStorage
-     * @warning do not try to insert element into (or ease element from) private member data 
-     * of DataStorage directly.
-     */
-    class DataStorage {
-        public:
-
-            enum{
-                slPosition = 1,
-                slVelocity = 2,
-                slAmat = 4, 
-                slAngularMomentum = 8,
-                slUnitVector = 16,
-                slZAngle = 32,
-                slForce = 64, 
-                slTorque = 128
-            };
-            
-            DataStorage(int size);
-
-            /** return the size of this DataStorage */
-            int size();
-            void resize(int size);
-            void reserve(int size);
-
-            void move(int source, int num, int target);
-            int getStorageLayout();
-            void setStorageLayout(int layout);
-
-            double *getArrayPointer(int );
-
-            friend class StuntDouble;
-
-        private:
-            int size_;
-            int storageLayout_;
-            vector<Vector3d> position;               /** position array */
-            vector<Vector3d> velocity;               /** velocity array */
-            vector<RotMat3x3d> aMat;            /** rotation matrix array */
-            vector<Vector3d> angularMomentum;/** velocity array */
-            vector<Vector3d> unitVector;                /** the lab frame unit vector array*/
-            vector<double> zAngle;              /** z -angle array */        
-            vector<Vector3d> force;               /** force array */
-            vector<Vector3d> torque;               /** torque array */
-    };
-
     /**
      * @class Snapshot Snapshot.hpp "brains/Snapshot.hpp"
      * @brief Snapshot class is a repository class for storing dynamic data during 
@@ -132,17 +80,17 @@ namespace oopse{
             //}
 
             int getSize() {
-                return atomData.size() + rigidbodyData.size();
+                return atomData.getSize() + rigidbodyData.getSize();
             }
 
             /** Returns the number of atoms */
             int getNumberOfAtoms() {
-                return atomData.size();
+                return atomData.getSize();
             }
 
             /** Returns the number of rigid bodies */
             int getNumberOfRigidBodies() {
-                return rigidbodyData.size();
+                return rigidbodyData.getSize();
             }
 
             /** Returns the H-Matrix */
