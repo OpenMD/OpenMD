@@ -114,6 +114,7 @@ H_SPC		0	0.42
 EP_TIP4P	0	-1.040
 EP_TIP5P	0	-0.241
 HEAD		0	20.6
+Cl              0       -1.0
 end ElectrostaticAtomTypes
 
 begin StickyAtomTypes
