@@ -33,8 +33,13 @@
 #ifndef IO_IFSTRSTREAM_HPP
 #define IO_IFSTRSTREAM_HPP
 
+#include <cstring>
 #include <fstream>
 #include <sstream>
+
+#ifdef IS_MPI
+#include <mpi.hpp>
+#endif
 
 namespace oopse {
 using namespace std;
@@ -50,7 +55,7 @@ using namespace std;
  *       char buffer[MAXLEN];
  *       ifstrstream in;
  *       in.open("Shapes.frc");
- *       if (in.is_open) {
+ *       if (in.is_open()) {
  *           in.getline(buffer, MAXLEN);
  *       }
  *       in.close();
@@ -102,13 +107,14 @@ class basic_ifstrstream : public basic_istream<_CharT, _Traits> {
         /**
          * Explicit constructor
          * @filename String containing the name of the file to be opened
-         * @mode Flags describing the requested i/o mode for the file, default value is ios_base::in         
+         * @mode Flags describing the requested i/o mode for the file, default value is ios_base::in      
+         * @checkFilename Flags indicating checking the file name in parallel
          */
-        explicit basic_ifstrstream(const char* filename, ios_base::openmode mode = ios_base::in)
+        explicit basic_ifstrstream(const char* filename, ios_base::openmode mode = ios_base::in, bool checkFilename = false)
             : basic_ios<_CharT, _Traits>(),  basic_istream<_CharT, _Traits>(0),
               internalBuf_(NULL), isRead(false) {
 
-           isRead =  internalOpen(filename,  mode | ios_base::in);
+           isRead =  internalOpen(filename,  mode | ios_base::in, checkFilename);
          }
 
         /**
@@ -126,11 +132,12 @@ class basic_ifstrstream : public basic_istream<_CharT, _Traits> {
          * brocasting, every nodes fall back to stringstream (parallel mode).
          * @filename String containing the name of the file to be opened
          * @mode Flags describing the requested i/o mode for the file
+         * @checkFilename Flags indicating checking the file name in parallel
          */
-        void open(const char* filename, ios_base::openmode mode = ios_base::in){
+        void open(const char* filename, ios_base::openmode mode = ios_base::in, bool checkFilename = false){
 
             if (!isRead ) {
-                isRead = internalOpen();
+                isRead = internalOpen(filename, mode, checkFilename);
             }
         }
 
@@ -181,7 +188,7 @@ class basic_ifstrstream : public basic_istream<_CharT, _Traits> {
          * @mode Flags describing the requested i/o mode for the file
          * @todo use try - catch syntax to make the program more readable
          */
-        bool internalOpen(const char* filename, ios_base::openmode mode){
+        bool internalOpen(const char* filename, ios_base::openmode mode, bool checkFilename){
 
 #ifdef IS_MPI         
             int commStatus;
@@ -190,22 +197,30 @@ class basic_ifstrstream : public basic_istream<_CharT, _Traits> {
             int filenameLen;
             int diffFilename;
             int error;
+            int myRank;
+            int masterNode;
 
-            if (worldRank == masterNode) {
+            commStatus = MPI_Comm_rank(MPI_COMM_WORLD, &myRank);
+            masterNode = 0;
+            
+            if (myRank == masterNode) {
 
-                //check the filename is the same
-                filenameLen = strlen(filename);
-                commStatus = MPI_Bcast(filenameLen, 1, MPI_INT, masterNode, MPI_COMM_WORLD);     
-                commStatus = MPI_Bcast(filename, filenameLen, MPI_CHAR, masterNode, MPI_COMM_WORLD);     
+                if (checkFilename) {
 
-                diffFilename = 0;
-                commStatus = MPI_Allreduce(sameFilename, error, 1,  MPI_INT,  MPI_COMM_WORLD);             
+                    //check the filename is the same
+                    filenameLen = strlen(filename);
+                    commStatus = MPI_Bcast(filenameLen, 1, MPI_INT, masterNode, MPI_COMM_WORLD);     
+                    commStatus = MPI_Bcast(filename, filenameLen, MPI_CHAR, masterNode, MPI_COMM_WORLD);     
 
-                //if file names are different just return false
-                if (error > 0)
+                    diffFilename = 0;
+                    commStatus = MPI_Allreduce(diffFilename, error, 1,  MPI_INT,  MPI_COMM_WORLD);             
+
+                    //if file names are different just return false
+                    if (error > 0)
                         return false;   
+                }
                 
-                ifstream fin(filename, mod);
+                ifstream fin(filename, mode);
                 basic_stringbuf<_CharT, _Traits, _Alloc>* sbuf;
 
                 if (fin.is_open()) {
@@ -256,23 +271,24 @@ class basic_ifstrstream : public basic_istream<_CharT, _Traits> {
                
              } else{
                     //check file name
-                    commStatus = MPI_Bcast(filenameLen, 1, MPI_INT, masterNode, MPI_COMM_WORLD);     
+                    if (checkFilename) {
+                        commStatus = MPI_Bcast(filenameLen, 1, MPI_INT, masterNode, MPI_COMM_WORLD);     
 
-                    char * masterFilename = new char[filenameLen];
-                    commStatus = MPI_Bcast(masterFilename, filenameLen, MPI_CHAR, masterNode, MPI_COMM_WORLD);     
-    
-                    if( strcmp(masterFilename, filename) == 0)
-                        diffFilename = 0;
-                    else
-                        diffFilename = 1;
+                        char * masterFilename = new char[filenameLen];
+                        commStatus = MPI_Bcast(masterFilename, filenameLen, MPI_CHAR, masterNode, MPI_COMM_WORLD);     
+        
+                        if( strcmp(masterFilename, filename) == 0)
+                            diffFilename = 0;
+                        else
+                            diffFilename = 1;
 
-                    delete masterFilename;
-                    
-                    commStatus = MPI_Allreduce(sameFilename, error, 1,  MPI_INT,  MPI_COMM_WORLD);    
+                        delete masterFilename;
+                        
+                        commStatus = MPI_Allreduce(diffFilename, error, 1,  MPI_INT,  MPI_COMM_WORLD);    
 
-                    if (error > 0)
-                        return false;                        
-
+                        if (error > 0)
+                            return false;                        
+                    }
                     //get file size
                     commStatus = MPI_Bcast(&fileSize, 1, MPI_LONG, masterNode, MPI_COMM_WORLD);   
 
