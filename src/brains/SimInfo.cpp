@@ -9,8 +9,10 @@ using namespace std;
 #define __C
 #include "brains/fSimulation.h"
 #include "utils/simError.h"
+#include "UseTheForce/DarkSide/simulation_interface.h"
+#include "UseTheForce/notifyCutoffs_interface.h"
 
-#include "UseTheForce/fortranWrappers.hpp"
+//#include "UseTheForce/fortranWrappers.hpp"
 
 #include "math/MatVec3.h"
 
@@ -76,7 +78,6 @@ SimInfo::SimInfo(){
 
   ngroup = 0;
 
-  wrapMeSimInfo( this );
 }
 
 
@@ -132,7 +133,7 @@ void SimInfo::setBoxM( double theBox[3][3] ){
     }
   }
 
-  setFortranBoxSize(FortranHmat, FortranHmatInv, &orthoRhombic);
+  setFortranBox(FortranHmat, FortranHmatInv, &orthoRhombic);
  
 }
  
@@ -459,7 +460,7 @@ void SimInfo::refreshSim(){
   //it may not be a good idea to pass the address of first element in vector
   //since c++ standard does not require vector to be stored continuously in meomory
   //Most of the compilers will organize the memory of vector continuously
-  setFsimulation( &fInfo, &n_global, &n_atoms, identArray, &n_exclude, excl, 
+  setFortranSim( &fInfo, &n_global, &n_atoms, identArray, &n_exclude, excl, 
                   &nGlobalExcludes, globalExcludes, molMembershipArray, 
                   &mfact[0], &ngroup, &FglobalGroupMembership[0], &isError); 
 
@@ -489,7 +490,7 @@ void SimInfo::setDefaultRcut( double theRcut ){
   rCut = theRcut;
   rList = rCut + 1.0; 
   
-  notifyFortranCutOffs( &rCut, &rSw, &rList );
+  notifyFortranCutoffs( &rCut, &rSw, &rList );
 }
 
 void SimInfo::setDefaultRcut( double theRcut, double theRsw ){

@@ -13,7 +13,9 @@ using namespace std;
 #include "primitives/SRI.hpp"
 #include "utils/simError.h"
 
-#include "UseTheForce/fortranWrappers.hpp"
+#include "UseTheForce/DarkSide/eam_interface.h"
+#include "UseTheForce/DarkSide/atype_interface.h"
+//#include "UseTheForce/fortranWrappers.hpp"
 
 #ifdef IS_MPI
 #include "UseTheForce/mpiForceField.h"
@@ -171,9 +173,6 @@ EAM_FF::EAM_FF(char* the_variant){
 
   // Set eamRcut to 0.0
   eamRcut = 0.0;
-
-  // do the funtion wrapping
-  wrapMeFF( this );
 
 #ifdef IS_MPI
   int i;

@@ -3,12 +3,10 @@ Source    = \
 	DUFF.cpp \
 	EAM_FF.cpp \
 	ForceFields.cpp \
-	fortranWrappers.cpp \
 	LJFF.cpp \
 	mpiForceField.c \
 	WATER.cpp \
 	notifyCutoffs.F90 \
-	wrappers.F90 \
 
 RmiSource =
 

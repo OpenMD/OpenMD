@@ -8,8 +8,11 @@ using namespace std;
 #include "UseTheForce/ForceFields.hpp"
 #include "primitives/SRI.hpp"
 #include "utils/simError.h"
+#include "UseTheForce/DarkSide/sticky_interface.h"
+#include "UseTheForce/DarkSide/atype_interface.h"
 
-#include "UseTheForce/fortranWrappers.hpp"
+//#include "UseTheForce/fortranWrappers.hpp"
+
 
 #ifdef IS_MPI
 #include "UseTheForce/mpiForceField.h"
@@ -465,9 +468,6 @@ DUFF::DUFF(){
   currentBendType    = NULL;
   headTorsionType    = NULL; 
   currentTorsionType = NULL;
-
-  // do the funtion wrapping
-  wrapMeFF( this );
 
 
 #ifdef IS_MPI

@@ -6,16 +6,19 @@
  *  Copyright 2004 __MyCompanyName__. All rights reserved.
  *
  */
+#ifndef USETHEFORCE_NOTIFYCUTOFFS_INTERFACE_H
+#define USETHEFORCE_NOTIFYCUTOFFS_INTERFACE_H
 
 #define __C
 #include "config.h"
+
+#define notifyFortranCutoffs F90_FUNC(notifyfortrancutoffs, NOTIFYFORTRANCUTOFFS)
+
 extern "C"{
-  typedef void (notifyFortranCutOff) ( double *rCut,
-                                       double *rSw,
-                                       double *rList ){
-    F90_FUNC(notifyfortrancutoff,NOTIFYFORTRANCUTOFF)( rCut,
-                                                       rSw,
-                                                       rList)
-  }
+  
+ void notifyFortranCutoffs( double *rCut,
+                           double *rSw,
+                           double *rList );
   
 }
+#endif

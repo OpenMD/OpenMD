@@ -11,57 +11,27 @@
 
 #define __C
 #include "config.h"
+
+#define initFortranFF F90_FUNC(initfortranff, INITFORTRANFF)
+#define doForceLoop F90_FUNC(doforceloop, DOFORCELOOP)
+
 extern "C"{
   
-  void F90_FUNC(initFortranff,INITFORTRANFF)( int* LJ_mix_policy, 
-                                              int* useReactionField,
-                                              int *isError );        
-  void (initFortranFF)( int* LJ_mix_policy, 
-                        int* useReactionField,
-                        int *isError ){           
-    F90_FUNC(initFortranff,INITFORTRANFF)( LJ_mix_policy, 
-                                           useReactionField,
-                                           isError 
-                                           );
-  }
-  
-  void F90_FUNC(doforceloop,DOFORCELOOP)( double* positionArray,
-                                          double* rcArray,
-                                          double* RotationMatrixArray,
-                                          double* unitVectorArray_l,
-                                          double* forceArray,
-                                          double *torqueArray,
-                                          double* StressTensor, 
-                                          double* potentialEnergy, 
-                                          short int* doPotentialCalc, 
-                                          short int* doStressCalc,
-                                          int* isError );
-  
-  void (doForceLoop)( double* positionArray,
-                      double* rcArray,
-                      double* RotationMatrixArray,
-                      double* unitVectorArray_l,
-                      double* forceArray,
-                      double *torqueArray,
-                      double* StressTensor, 
-                      double* potentialEnergy, 
-                      short int* doPotentialCalc, 
-                      short int* doStressCalc,
-                      int* isError ){
-    F90_FUNC(doforceloop,DOFORCELOOP)( positionArray,
-                                       rcArray,
-                                       RotationMatrixArray,
-                                       unitVectorArray_l,
-                                       forceArray,
-                                       torqueArray,
-                                       StressTensor, 
-                                       potentialEnergy, 
-                                       doPotentialCalc, 
-                                       doStressCalc,
-                                       isError );
-  }
-  
-  
-}
+  void initFortranFF( int* LJ_mix_policy, 
+                      int* useReactionField,
+                      int *isError );        
 
+  
+  void doForceLoop( double* positionArray,
+                    double* rcArray,
+                    double* RotationMatrixArray,
+                    double* unitVectorArray_l,
+                    double* forceArray,
+                    double *torqueArray,
+                    double* StressTensor, 
+                    double* potentialEnergy, 
+                    short int* doPotentialCalc, 
+                    short int* doStressCalc,
+                    int* isError );
+}
 #endif

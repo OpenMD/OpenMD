@@ -17,7 +17,7 @@ using namespace std;
 #include "utils/simError.h"
 #include "UseTheForce/ForceFields.hpp"
 #include "primitives/Atom.hpp"
-#include "UseTheForce/fortranWrappers.hpp"
+#include "UseTheForce/doForces_interface.h"
 
 
 void ForceFields::calcRcut( void ){
@@ -168,7 +168,7 @@ void ForceFields::doForces( int calcPot, int calcStress ){
   startProfile(pro8);
 #endif
 
-  fortranForceLoop( pos,
+  doForceLoop( pos,
   		    rc,
 		    A,
 		    u_l,

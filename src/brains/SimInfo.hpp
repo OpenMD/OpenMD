@@ -17,7 +17,6 @@
 
 #define __C
 #include "brains/fSimulation.h"
-#include "UseTheForce/fortranWrapDefines.hpp"
 #include "utils/GenericData.hpp"
 
 
@@ -152,13 +151,6 @@ public:
 
   // sets the internal function pointer to fortran.
 
-  void setInternal( setFortranSim_TD fSetup,
-		    setFortranBox_TD fBox,
-		    notifyFortranCutOff_TD fCut){
-    setFsimulation = fSetup;
-    setFortranBoxSize = fBox;
-    notifyFortranCutOffs = fCut;
-  }
 
   int getNDF();
   int getNDFraw();
@@ -213,12 +205,6 @@ private:
   void calcBoxL();
   double calcMaxCutOff();
 
-  // private function to initialize the fortran side of the simulation
-  setFortranSim_TD setFsimulation;
-
-  setFortranBox_TD setFortranBoxSize;
-  
-  notifyFortranCutOff_TD notifyFortranCutOffs;
   
   //Addtional Properties of SimInfo
   map<string, GenericData*> properties;

@@ -18,7 +18,7 @@
 #endif
 
 #include "UseTheForce/fForceField.h"
-#include "UseTheForce/fortranWrapDefines.hpp"
+//#include "UseTheForce/fortranWrapDefines.hpp"
 
 class bond_pair{
 public:
@@ -86,14 +86,11 @@ public:
 
   virtual double getAtomTypeMass(char* atomType) = 0;
 
-  void setFortranForceLoop( doForceLoop_TD fsub ){
-    fortranForceLoop = fsub;
-  }
-
+ 
 protected:
   
   void initFortran( int ljMixPolicy, int useReactionField );
-  doForceLoop_TD fortranForceLoop;
+  
 
   FILE *frcFile;
   SimInfo* entry_plug;

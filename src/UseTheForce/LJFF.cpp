@@ -12,8 +12,9 @@ using namespace std;
 #include "UseTheForce/ForceFields.hpp"
 #include "primitives/SRI.hpp"
 #include "utils/simError.h"
+#include "UseTheForce/DarkSide/atype_interface.h"
 
-#include "UseTheForce/fortranWrappers.hpp"
+//#include "UseTheForce/fortranWrappers.hpp"
 
 #ifdef IS_MPI
 #include "UseTheForce/mpiForceField.h"
@@ -128,7 +129,7 @@ LJFF::LJFF(){
   currentAtomType = NULL;
 
   // do the funtion wrapping
-  wrapMeFF( this );
+ // wrapMeFF( this );
 
 #ifdef IS_MPI
   int i;

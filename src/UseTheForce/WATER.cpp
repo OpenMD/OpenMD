@@ -13,7 +13,9 @@ using namespace std;
 #include "primitives/SRI.hpp"
 #include "utils/simError.h"
 
-#include "UseTheForce/fortranWrappers.hpp"
+
+#include "UseTheForce/DarkSide/atype_interface.h"
+#include "UseTheForce/DarkSide/sticky_interface.h"
 
 #ifdef IS_MPI
 #include "UseTheForce/mpiForceField.h"
@@ -252,9 +254,6 @@ WATER::WATER(){
   currentAtomType = NULL;
   headDirectionalType = NULL;
   currentDirectionalType = NULL;
-
-  // do the funtion wrapping
-  wrapMeFF( this );
 
 #ifdef IS_MPI
   int i;

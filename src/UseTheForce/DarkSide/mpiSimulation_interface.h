@@ -20,20 +20,5 @@ extern "C" {
                                                int* nGroupsLocal,
                                                int* globalGroupIndex,
                                                int* isError );
-  
-  void setFortranMPI( mpiSimData* the_mpiPlug,
-                      int* nLocal, 
-                      int* globalAtomIndex,
-                      int* nGroupsLocal,
-                      int* globalGroupIndex,
-                      int* isError ){
-    F90_FUNC(setfortranmpi, SETFORTRANMPI)(the_mpiPlug,
-                                           nLocal,
-                                           globalAtomIndex,
-                                           nGroupsLocal,
-                                           globalGroupIndex);
-    
-    
-  }
 }
 #endif
