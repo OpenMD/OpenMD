@@ -6,7 +6,7 @@
 
 TOP=..
 
-SAMPLES=argon water alkane lipid minimizer metals zcons
+SAMPLES=argon water alkane lipid minimizer metals zcons thermoIntegration
 
 subdirs :
 	@set -e; for i in $(SAMPLES); do (cd $$i; $(MAKE)) || exit 1; done
