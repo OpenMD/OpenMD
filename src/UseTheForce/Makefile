@@ -7,7 +7,6 @@ Source    = \
 	LJFF.cpp \
 	mpiForceField.c \
 	WATER.cpp \
-	Shapes_FF.cpp \
 	notifyCutoffs.F90 \
 	wrappers.F90 \
 
