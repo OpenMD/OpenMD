@@ -75,18 +75,13 @@ bool BaseAtomVisitor::isVisited(Atom *atom) {
 }
 
 bool SSDAtomVisitor::isSSDAtom(const std::string&atomType) {
-    std::vector<std::string>::iterator strIter;
-
-    for( strIter = ssdAtomType.begin(); strIter != ssdAtomType.end();
-        ++strIter )
-  if (*strIter == atomType)
-      return true;
-
-    return false;
+    std::set<std::string>::iterator strIter;
+    strIter = ssdAtomType.find(atomType);
+    return strIter != ssdAtomType.end() ? true : false;
 }
 
 void SSDAtomVisitor::visit(DirectionalAtom *datom) {
-    std::vector<AtomInfo *>atoms;
+    std::vector<AtomInfo*>atoms;
 
     //we need to convert SSD into 4 differnet atoms
     //one oxygen atom, two hydrogen atoms and one pseudo atom which is the center of the mass
@@ -220,123 +215,115 @@ const std::string SSDAtomVisitor::toString() {
     return result;
 }
 
-bool LinearAtomVisitor::isLinearAtom(const string& atomType){
-  vector<string>::iterator strIter;
-  
-  for(strIter = linearAtomType.begin(); strIter != linearAtomType.end(); 
-      ++strIter)
-    if(*strIter == atomType)
-      return true;
-  
-  return false;  
+bool LinearAtomVisitor::isLinearAtom(const std::string& atomType){
+    std::set<std::string>::iterator strIter;
+    strIter = linearAtomType.find(atomType);
+
+    return strIter != linearAtomType.end() ? true : false;
 }
 
 void LinearAtomVisitor::visit(DirectionalAtom* datom){
+    std::vector<AtomInfo*> atoms;
+    //we need to convert linear into 4 different atoms
+    Vector3d c1(0.0, 0.0, -1.8);
+    Vector3d c2(0.0, 0.0, -0.6);
+    Vector3d c3(0.0, 0.0,  0.6);
+    Vector3d c4(0.0, 0.0,  1.8);
+    RotMat3x3d rotMatrix;
+    RotMat3x3d rotTrans;
+    AtomInfo* atomInfo;
+    Vector3d pos;
+    Vector3d newVec;
+    Quat4d q;
+    AtomData* atomData;
+    GenericData* data;
+    bool haveAtomData;
 
-  vector<AtomInfo*> atoms;
+    //if atom is not SSD atom, just skip it
+    if(!isLinearAtom(datom->getType()))
+        return;
 
-  //we need to convert linear into 4 different atoms
-  double c1[3] = {0.0, 0.0, -1.8};
-  double c2[3] = {0.0, 0.0, -0.6};
-  double c3[3] = {0.0, 0.0,  0.6};
-  double c4[3] = {0.0, 0.0,  1.8};
-  double rotMatrix[3][3];
-  double rotTrans[3][3];
-  AtomInfo* atomInfo;
-  double pos[3];
-  double newVec[3];
-  double q[4];
-  AtomData* atomData;
-  GenericData* data;
-  bool haveAtomData;
-  
-  //if atom is not SSD atom, just skip it
-  if(!isLinearAtom(datom->getType()))
-    return;
-  
-  data = datom->getProperty("ATOMDATA");
-  if(data != NULL){
-
-    atomData = dynamic_cast<AtomData*>(data);  
-    if(atomData == NULL){
-      cerr << "can not get Atom Data from " << datom->getType() << endl;
-      atomData = new AtomData; 
-      haveAtomData = false;      
+    data = datom->getPropertyByName("ATOMDATA");
+    if(data != NULL){
+        atomData = dynamic_cast<AtomData*>(data);  
+        if(atomData == NULL){
+            std::cerr << "can not get Atom Data from " << datom->getType() << std::endl;
+            atomData = new AtomData; 
+            haveAtomData = false;      
+        } else {
+            haveAtomData = true;
+        }
+    } else {
+        atomData = new AtomData;
+        haveAtomData = false;
     }
-    else
-      haveAtomData = true;
-  }
-  else{
-    atomData = new AtomData;
-    haveAtomData = false;
-  }
    
   
-  datom->getPos(pos);
-  datom->getQ(q);
-  datom->getA(rotMatrix);
+    pos = datom->getPos();
+    q = datom->getQ();
+    rotMatrix = datom->getA();
 
-  // We need A^T to convert from body-fixed to space-fixed:
-  transposeMat3(rotMatrix, rotTrans);
-  
-  matVecMul3(rotTrans, c1, newVec);
-  atomInfo = new AtomInfo;
-  atomInfo->AtomType = "C";
-  atomInfo->pos[0] = pos[0] + newVec[0];
-  atomInfo->pos[1] = pos[1] + newVec[1];
-  atomInfo->pos[2] = pos[2] + newVec[2];
-  atomInfo->dipole[0] = 0.0;
-  atomInfo->dipole[1] = 0.0;
-  atomInfo->dipole[2] = 0.0;
-  atomData->addAtomInfo(atomInfo);
+    // We need A^T to convert from body-fixed to space-fixed:  
+    rotTrans = rotMatrix.transpose();
 
-  matVecMul3(rotTrans, c2, newVec);
-  atomInfo = new AtomInfo;
-  atomInfo->AtomType = "C";
-  atomInfo->pos[0] = pos[0] + newVec[0];
-  atomInfo->pos[1] = pos[1] + newVec[1];
-  atomInfo->pos[2] = pos[2] + newVec[2];
-  atomInfo->dipole[0] = 0.0;
-  atomInfo->dipole[1] = 0.0;
-  atomInfo->dipole[2] = 0.0;
-  atomData->addAtomInfo(atomInfo);
+    newVec = rotTrans * c1;
+    atomInfo = new AtomInfo;
+    atomInfo->AtomType = "C";
+    atomInfo->pos[0] = pos[0] + newVec[0];
+    atomInfo->pos[1] = pos[1] + newVec[1];
+    atomInfo->pos[2] = pos[2] + newVec[2];
+    atomInfo->dipole[0] = 0.0;
+    atomInfo->dipole[1] = 0.0;
+    atomInfo->dipole[2] = 0.0;
+    atomData->addAtomInfo(atomInfo);
 
-  matVecMul3(rotTrans, c3, newVec);
-  atomInfo = new AtomInfo;
-  atomInfo->AtomType = "C";
-  atomInfo->pos[0] = pos[0] + newVec[0];
-  atomInfo->pos[1] = pos[1] + newVec[1];
-  atomInfo->pos[2] = pos[2] + newVec[2];
-  atomInfo->dipole[0] = 0.0;
-  atomInfo->dipole[1] = 0.0;
-  atomInfo->dipole[2] = 0.0;
-  atomData->addAtomInfo(atomInfo);
+    newVec = rotTrans * c2;
+    atomInfo = new AtomInfo;
+    atomInfo->AtomType = "C";
+    atomInfo->pos[0] = pos[0] + newVec[0];
+    atomInfo->pos[1] = pos[1] + newVec[1];
+    atomInfo->pos[2] = pos[2] + newVec[2];
+    atomInfo->dipole[0] = 0.0;
+    atomInfo->dipole[1] = 0.0;
+    atomInfo->dipole[2] = 0.0;
+    atomData->addAtomInfo(atomInfo);
 
-  matVecMul3(rotTrans, c4, newVec);
-  atomInfo = new AtomInfo;
-  atomInfo->AtomType = "C";
-  atomInfo->pos[0] = pos[0] + newVec[0];
-  atomInfo->pos[1] = pos[1] + newVec[1];
-  atomInfo->pos[2] = pos[2] + newVec[2];
-  atomInfo->dipole[0] = 0.0;
-  atomInfo->dipole[1] = 0.0;
-  atomInfo->dipole[2] = 0.0;
-  atomData->addAtomInfo(atomInfo);
+    newVec = rotTrans * c3;
+    atomInfo = new AtomInfo;
+    atomInfo->AtomType = "C";
+    atomInfo->pos[0] = pos[0] + newVec[0];
+    atomInfo->pos[1] = pos[1] + newVec[1];
+    atomInfo->pos[2] = pos[2] + newVec[2];
+    atomInfo->dipole[0] = 0.0;
+    atomInfo->dipole[1] = 0.0;
+    atomInfo->dipole[2] = 0.0;
+    atomData->addAtomInfo(atomInfo);
 
-  //add atom data into atom's property
+    newVec = rotTrans * c4;
+    atomInfo = new AtomInfo;
+    atomInfo->AtomType = "C";
+    atomInfo->pos[0] = pos[0] + newVec[0];
+    atomInfo->pos[1] = pos[1] + newVec[1];
+    atomInfo->pos[2] = pos[2] + newVec[2];
+    atomInfo->dipole[0] = 0.0;
+    atomInfo->dipole[1] = 0.0;
+    atomInfo->dipole[2] = 0.0;
+    atomData->addAtomInfo(atomInfo);
 
-  if(!haveAtomData){
-    atomData->setID("ATOMDATA");
-    datom->addProperty(atomData);
-  }
+    //add atom data into atom's property
 
-  setVisited(datom);
+    if(!haveAtomData){
+        atomData->setID("ATOMDATA");
+        datom->addProperty(atomData);
+    }
+
+    setVisited(datom);
 
 }
 
-const string LinearAtomVisitor::toString(){
+const std::string LinearAtomVisitor::toString(){
   char buffer[65535];
-  string result;
+  std::string result;
   
   sprintf(buffer ,"------------------------------------------------------------------\n");
   result += buffer;

@@ -42,7 +42,7 @@
 #ifndef VISITORS_BASEATOMVISITOR_HPP
 #define VISITORS_BASEATOMVISITOR_HPP
 
-#include <vector>
+#include <set>
 
 #include "visitors/BaseVisitor.hpp"
 #include "visitors/AtomData.hpp"
@@ -74,10 +74,10 @@ class SSDAtomVisitor : public BaseAtomVisitor{
         public:
             SSDAtomVisitor(SimInfo* info) : BaseAtomVisitor(info) {
                 visitorName = "SSDAtomVisitor";
-                ssdAtomType.push_back("SSD");
-                ssdAtomType.push_back("SSD_E");
-                ssdAtomType.push_back("SSD_RF");
-                ssdAtomType.push_back("SSD1");
+                ssdAtomType.insert("SSD");
+                ssdAtomType.insert("SSD_E");
+                ssdAtomType.insert("SSD_RF");
+                ssdAtomType.insert("SSD1");
             }
 
             virtual void visit(Atom* atom) {}
@@ -87,24 +87,24 @@ class SSDAtomVisitor : public BaseAtomVisitor{
             virtual const std::string toString();
         private:
             inline bool isSSDAtom(const std::string& atomType);
-            std::vector<std::string> ssdAtomType;   
+            std::set<std::string> ssdAtomType;   
 };
 
 class LinearAtomVisitor : public BaseAtomVisitor{
-  public:
-    LinearAtomVisitor(SimInfo* info) : BaseAtomVisitor(info) {
-      visitorName = "LinearAtomVisitor";
-      linearAtomType.push_back("linear");
-    }
+    public:
+        LinearAtomVisitor(SimInfo* info) : BaseAtomVisitor(info) {
+            visitorName = "LinearAtomVisitor";
+            linearAtomType.insert("linear");
+        }
 
-    virtual void visit(Atom* atom) {}
-    virtual void visit(DirectionalAtom* datom);       
-    virtual void visit(RigidBody* rb) {}
-    
-    virtual const string toString();
-  private:
-    inline bool isLinearAtom(const string& atomType);
-    vector<string> linearAtomType;   
+        virtual void visit(Atom* atom) {}
+        virtual void visit(DirectionalAtom* datom);       
+        virtual void visit(RigidBody* rb) {}
+
+        virtual const std::string toString();
+    private:
+        inline bool isLinearAtom(const std::string& atomType);
+        std::set<std::string> linearAtomType;   
 };
 
 
