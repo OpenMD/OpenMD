@@ -767,9 +767,9 @@ void DUFF::readParams( void ){
     if( currentAtomType->name[0] != '\0' ){
       
       if (currentAtomType->isSSD || currentAtomType->isDipole) 
-        DirectionalAtomType* at = new DirectionalAtomType();
+        at = new DirectionalAtomType();
       else 
-        AtomType* at = new AtomType();
+        at = new AtomType();
       
       if (currentAtomType->isSSD) {
         ((DirectionalAtomType*)at)->setSticky();

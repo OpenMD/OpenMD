@@ -118,7 +118,7 @@ using namespace LJ_NS;
 //****************************************************************
 
 
-LJFF::LJFF(){
+LJFF::LJFF() : ForceFields() {
 
   string fileName;
   string tempString;
@@ -158,8 +158,8 @@ LJFF::LJFF(){
   if( worldRank == 0 ){
 #endif
     
-    // generate the force file name
-    
+    // generate the force file name   
+
     fileName = "LJFF.frc";
     // fprintf( stderr,"Trying to open %s\n", fileName );
     

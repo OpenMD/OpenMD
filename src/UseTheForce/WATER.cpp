@@ -12,6 +12,7 @@ using namespace std;
 #include "UseTheForce/ForceFields.hpp"
 #include "primitives/SRI.hpp"
 #include "utils/simError.h"
+#include "types/AtomType.hpp"
 #include "types/DirectionalAtomType.hpp"
 #include "UseTheForce/DarkSide/lj_interface.h"
 #include "UseTheForce/DarkSide/charge_interface.h"
@@ -395,7 +396,6 @@ void WATER::readParams( void ){
   atomStruct atomInfo;
   directionalStruct directionalInfo;
   fpos_t *atomPos;
-
   AtomType* at;
 
   atomInfo.last = 1;         // initialize last to have the last set. 
@@ -544,10 +544,10 @@ void WATER::readParams( void ){
   while( currentAtomType != NULL ){
     if( currentAtomType->name[0] != '\0' ){
       if (currentAtomType->isDirectional) 
-	DirectionalAtomType* at = new DirectionalAtomType();
+	at = new DirectionalAtomType();         
       else 
-	AtomType* at = new AtomType();
-
+	at = new AtomType();
+      
       if (currentAtomType->isLJ) {
 	at->setLennardJones();
       }

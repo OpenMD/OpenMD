@@ -18,10 +18,11 @@ namespace oopse {
     mass = 0.0;
     
     // atom type is a Tabula Rasa:
+    atp.is_Directional = 0;
     atp.is_LennardJones = 0;
     atp.is_Electrostatic = 0;
     atp.is_Charge = 0;
-    atp.is_Directional = 0;
+    atp.is_Dipole = 0;
     atp.is_Sticky = 0;
     atp.is_GayBerne = 0;
     atp.is_EAM = 0;

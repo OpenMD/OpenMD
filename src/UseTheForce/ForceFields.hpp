@@ -62,20 +62,37 @@ class ForceFields{
 
 public:
   ForceFields(){ 
+
+    char* force_param_path;
     frcFile = NULL; 
     entry_plug = NULL; 
     has_variant=0;
-    ffPath = getenv("FORCE_PARAM_PATH");
+
+    force_param_path = getenv("FORCE_PARAM_PATH");
+    if (force_param_path != NULL) {
+      ffPath = force_param_path;
+    } else {
+      ffPath = "";
+    }
+
     if( ffPath.empty() ) {
       STR_DEFINE(ffPath, FRC_PATH );
     }   
   }
-  ForceFields(string theVariant){ 
+  ForceFields(const string &theVariant){ 
+    char* force_param_path;
     frcFile = NULL; 
     entry_plug = NULL; 
     has_variant=1; 
     variant = theVariant;
-    ffPath = getenv("FORCE_PARAM_PATH");
+
+    force_param_path = getenv("FORCE_PARAM_PATH");
+    if (force_param_path != NULL) {
+      ffPath = force_param_path;
+    } else {
+      ffPath = "";
+    }
+
     if( ffPath.empty() ) {
       STR_DEFINE(ffPath, FRC_PATH );
     }   
@@ -185,7 +202,7 @@ class EAM_FF : public ForceFields{
 public:
 
   EAM_FF();
-  EAM_FF(string theVariant);
+  EAM_FF(const string &theVariant);
 
   virtual ~EAM_FF();
   
@@ -240,7 +257,7 @@ class Shapes_FF : public ForceFields{
 
 public:
   Shapes_FF() : ForceFields() {};
-  Shapes_FF(char* the_variant) : ForceFields(the_variant) {};
+  Shapes_FF(const string &the_variant) : ForceFields(the_variant) {};
   virtual ~Shapes_FF();
   
   void readParams();

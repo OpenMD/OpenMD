@@ -158,11 +158,11 @@ using namespace EAM_NS;
 // begins the actual forcefield stuff.	
 //****************************************************************
 
-EAM_FF::EAM_FF() {
+EAM_FF::EAM_FF(){
   EAM_FF("");
 }
 
-EAM_FF::EAM_FF(string the_variant){
+EAM_FF::EAM_FF(const string &the_variant) : ForceFields(the_variant) {
 
   string fileName;
   string tempString;
