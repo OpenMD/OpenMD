@@ -43,11 +43,17 @@ void NextCombinationTestCase::testNextCombination() {
     sv.push_back("N");
 
     while (replaceWildCard(sic, sv, resultString)) {   
-        for(std::vector<std::string>::iterator k = resultString.begin(); k != resultString.end(); ++k) {
-            std::cout << *k << "\t";
-        }
-        std::cout << std::endl;
       resultStrings.push_back(resultString);  
     }
+
+    CPPUNIT_ASSERT(resultStrings.size() == 7);
+    CPPUNIT_ASSERT(resultStrings[0][0] == "H"  && resultStrings[0][1] == "X" && resultStrings[0][2] == "X" && resultStrings[0].size() == 3);
+    CPPUNIT_ASSERT(resultStrings[1][0] == "X"  && resultStrings[1][1] == "C" && resultStrings[1][2] == "X" && resultStrings[1].size() == 3);
+    CPPUNIT_ASSERT(resultStrings[2][0] == "X"  && resultStrings[2][1] == "X" && resultStrings[2][2] == "N" && resultStrings[2].size() == 3);
+    CPPUNIT_ASSERT(resultStrings[3][0] == "H"  && resultStrings[3][1] == "C" && resultStrings[3][2] == "X" && resultStrings[3].size() == 3);
+    CPPUNIT_ASSERT(resultStrings[4][0] == "H"  && resultStrings[4][1] == "X" && resultStrings[4][2] == "N" && resultStrings[4].size() == 3);
+    CPPUNIT_ASSERT(resultStrings[5][0] == "X"  && resultStrings[5][1] == "C" && resultStrings[5][2] == "N" && resultStrings[5].size() == 3);
+    CPPUNIT_ASSERT(resultStrings[6][0] == "H"  && resultStrings[6][1] == "C" && resultStrings[6][2] == "N" && resultStrings[6].size() == 3);
+    
 }
 

@@ -8,10 +8,7 @@ CPPUNIT_TEST_SUITE_REGISTRATION( ReplaceWildCardTestCase );
 void ReplaceWildCardTestCase::testReplaceWildCard(){
     std::vector<std::vector<int> > sequences;
 
-    sequences = ReplaceAll(3);
-    std::cout << std::endl;
-    std::cout << "size of sequence: " << sequences.size() << std::endl;
-   
+    sequences = ReplaceAll(3);   
     CPPUNIT_ASSERT(sequences.size() == 8);
     
     CPPUNIT_ASSERT(sequences[0][0] == 0  && sequences[0][1] == 1  && sequences[0][2] == 2);

@@ -39,11 +39,9 @@
 namespace oopse {
 
 /**
- * @fn bool next_combination(IteratorContainer<RandomAccessIterator>& iterContainer,
- *                                           RandomAccessIterator first, RandomAccessIterator last)
  * @brief STL next_permuationtation like combination sequence generator.
  * Given the first and last iterator of a sequence, next_combination iteratively generates all 
- * possible combination.
+ * possible combinations.
  * @return if more combination is availiable, otherwise return false
  * @param iterContainer iterator container
  * @param first the first iterator
@@ -66,6 +64,7 @@ namespace oopse {
  * //1
  * //8
  * //1  8
+ * @endcode
  */
 template<class RandomAccessIterator, template<typename ELEM, typename = std::allocator<ELEM> > class IteratorContainer>
 bool next_combination(IteratorContainer<RandomAccessIterator>& iterContainer, RandomAccessIterator first, RandomAccessIterator last) {
@@ -132,9 +131,6 @@ bool next_combination(IteratorContainer<RandomAccessIterator>& iterContainer, Ra
 } //end next_combination
 
 /**
- * @fn bool replaceWildCard(std::vector<std::vector<std::string>::iterator>& cont,
- *                                        std::vector<std::string>& sequence, std::vector<std::string>& result,
- *                                        const std::string& wildCard)
  * @brief iteratively replace the sequence with wild cards
  * @return true if more combination sequence is avaliable, otherwise return true
  * @param cont iterator container, if expect whole series of combination, just pass an empty iterator 
