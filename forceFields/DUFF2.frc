@@ -92,30 +92,42 @@ Br	  0.511111921764	3.54
 Kr	  0.32590340268		3.83	              
 end LennardJonesAtomTypes
 
-begin ElectrostaticAtomTypes
+begin ChargeAtomTypes
+// Name charge
+O_TIP3P  -0.834
+O_SPCE   -0.8476
+O_SPC    -0.82
+H_TIP3P   0.417
+H_TIP4P   0.520
+H_TIP5P   0.241
+H_SPCE    0.4238
+H_SPC     0.42
+EP_TIP4P -1.040
+EP_TIP5P -0.241
+Cl	 -1.0
+end ChargeAtomTypes
+
+begin MultipoleAtomTypes
 //only support up tp quadrupole.
-//Below are possible format
-//name 0 charge
-//name 1 charge dipole [phi, theta, psi]
-//name 2 charge dipole Qxx Qyy Qzz [phi, theta, psi]
-//note: [phi, theta, psi] is optional, by default, they are [0, 0, 0]
-SSD_E   	1	0.0	2.42
-SSD_RF  	1	0.0	2.48
-SSD     	1	0.0	2.35
-SSD1		1	0.0	2.35
-O_TIP3P 	0	-0.834
-O_SPCE  	0	-0.8476
-O_SPC   	0	-0.82
-H_TIP3P		0	0.417
-H_TIP4P		0	0.520
-H_TIP5P		0	0.241
-H_SPCE		0	0.4238
-H_SPC		0	0.42
-EP_TIP4P	0	-1.040
-EP_TIP5P	0	-0.241
-HEAD		0	20.6
-Cl              0       -1.0
-end ElectrostaticAtomTypes
+//possible format:
+// name d theta phi psi dipole_moment
+// name s theta phi psi dipole_moment splitdipole_distance
+// name q theta phi psi Qxx Qyy Qzz
+// name dq theta phi psi dipole_moment Qxx Qyy Qzz
+// name sq theta phi psi dipole_moment splitdipole_distance Qxx Qyy Qzz
+// euler angles are given in units of degree
+// dipoles are given in units of Debye
+// split dipole distances are given in units of Angstrom
+// quadrupoles are given in units of
+//
+SSD_E   d       0.0     0.0     0.0     2.42
+SSD_RF  d       0.0     0.0     0.0     2.48
+SSD     d       0.0     0.0     0.0     2.35
+SSD1    d       0.0     0.0     0.0     2.35
+CE      d       0.0     0.0     0.0     1.693
+CK      d       0.0     0.0     0.0     2.478
+HDP     s       0.0     0.0     0.0     20.6    4.63
+end MultipoleAtomTypes
 
 begin StickyAtomTypes
 //name w0	v0 (kcal/mol)   v0p	rl (Ang)  ru	rlp	rup
