@@ -75,8 +75,28 @@ int main(int argc, char* argv[]){
     SimCreator creator;
     SimInfo* info = creator.createSim(mdFileName, false);
 
-    GofR rdf(info, dumpFileName, sele1, sele2, len);
 
+    std::string sele1;
+    std::string sele2;
+
+    if (args_info.sele1_given) {
+        sele1 = args_info.sele1_arg;
+    }else {
+
+    }
+    if (args_info.sele1_given) {
+        sele1 = args_info.sele1_arg;
+    }else {
+
+    }
+    
+    GofR rdf(info, dumpFileName, sele1, sele2, args_info.length_arg);
+
+    if (args_info.nbins_given) {
+        rdf.setNBins(args_info.nbins_arg);
+    }
+
+    rdf.process();
     
     delete info;
 

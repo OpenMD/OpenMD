@@ -59,7 +59,7 @@ RadialDistrFunc::        RadialDistrFunc(SimInfo* info, const std::string& filen
             seleMan2_.setSelectionSet(evaluator2_->evaluate());
     }
 
-    delta_ = len_ /nbins_;
+    deltaR_ = len_ /nbins_;
 }
 
 void RadialDistrFunc::process() {
