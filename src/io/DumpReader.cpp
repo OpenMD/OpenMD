@@ -108,7 +108,7 @@ DumpReader::~DumpReader() {
         error = fclose(inFile_);
 
         if (error) {
-            sprintf(painCave.errMsg, "Error closing %s\n", filename_.c_str());
+            sprintf(painCave.errMsg, "DumpReader Error: Error closing %s\n", filename_.c_str());
             painCave.isFatal = 1;            
             simError();
         }
@@ -155,7 +155,7 @@ void DumpReader::scanFile(void) {
 
         if (feof(inFile_)) {
             sprintf(painCave.errMsg,
-                    "File \"%s\" ended unexpectedly at line %d\n",
+                    "DumpReader Error: File \"%s\" ended unexpectedly at line %d\n",
                     filename_.c_str(),
                     lineNum);
             painCave.isFatal = 1;
@@ -172,7 +172,7 @@ void DumpReader::scanFile(void) {
 
             if (feof(inFile_)) {
                 sprintf(painCave.errMsg,
-                        "File \"%s\" ended unexpectedly at line %d\n",
+                        "DumpReader Error: File \"%s\" ended unexpectedly at line %d\n",
                         filename_.c_str(),
                         lineNum);
                 painCave.isFatal = 1;
@@ -185,7 +185,7 @@ void DumpReader::scanFile(void) {
 
                 if (feof(inFile_)) {
                     sprintf(painCave.errMsg,
-                            "File \"%s\" ended unexpectedly at line %d,"
+                            "DumpReader Error: File \"%s\" ended unexpectedly at line %d,"
                                 " with atom %d\n", filename_.c_str(),
                             lineNum,
                             j);
@@ -265,7 +265,7 @@ void DumpReader::readSet(int whichFrame) {
     eof_test = fgets(read_buffer, sizeof(read_buffer), inFile_);
 
     if (eof_test == NULL) {
-        sprintf(painCave.errMsg, "error in reading commment in %s\n",
+        sprintf(painCave.errMsg, "DumpReader Error: error in reading commment in %s\n",
                 filename_.c_str());
         painCave.isFatal = 1;
         simError();
@@ -284,7 +284,7 @@ void DumpReader::readSet(int whichFrame) {
 
             if (eof_test == NULL) {
                 sprintf(painCave.errMsg,
-                        "error in reading file %s\n"
+                        "DumpReader Error: error in reading file %s\n"
                             "natoms  = %d; index = %d\n"
                             "error reading the line from the file.\n",
                         filename_.c_str(),
@@ -324,7 +324,7 @@ void DumpReader::readSet(int whichFrame) {
         eof_test = fgets(read_buffer, sizeof(read_buffer), inFile_);
 
         if (eof_test == NULL) {
-            sprintf(painCave.errMsg, "Error reading 1st line of %s \n ",
+            sprintf(painCave.errMsg, "DumpReader Error: Error reading 1st line of %s \n ",
                     filename_.c_str());
             painCave.isFatal = 1;
             simError();
@@ -353,7 +353,7 @@ void DumpReader::readSet(int whichFrame) {
         eof_test = fgets(read_buffer, sizeof(read_buffer), inFile_);
 
         if (eof_test == NULL) {
-            sprintf(painCave.errMsg, "error in reading commment in %s\n",
+            sprintf(painCave.errMsg, "DumpReader Error: error in reading commment in %s\n",
                     filename_.c_str());
             painCave.isFatal = 1;
             simError();
@@ -376,7 +376,7 @@ void DumpReader::readSet(int whichFrame) {
                 mol = info_->getMoleculeByGlobalIndex(i);
 
                 if (mol == NULL) {
-                    sprintf(painCave.errMsg, "Molecule not found on node %d!", worldRank);
+                    sprintf(painCave.errMsg, "DumpReader Error: Molecule not found on node %d!", worldRank);
                         painCave.isFatal = 1;
                     simError();
                 }
@@ -388,7 +388,7 @@ void DumpReader::readSet(int whichFrame) {
 
                     if (eof_test == NULL) {
                         sprintf(painCave.errMsg,
-                                "error in reading file %s\n"
+                                "DumpReader Error: error in reading file %s\n"
                                     "natoms  = %d; index = %d\n"
                                     "error reading the line from the file.\n",
                                 filename_.c_str(),
@@ -412,7 +412,7 @@ void DumpReader::readSet(int whichFrame) {
 
                     if (eof_test == NULL) {
                         sprintf(painCave.errMsg,
-                                "error in reading file %s\n"
+                                "DumpReader Error: error in reading file %s\n"
                                     "natoms  = %d; index = %d\n"
                                     "error reading the line from the file.\n",
                                 filename_.c_str(),
@@ -443,7 +443,7 @@ void DumpReader::readSet(int whichFrame) {
                 
                 mol = info_->getMoleculeByGlobalIndex(i);
                 if (mol == NULL) {
-                    sprintf(painCave.errMsg, "Molecule not found on node %d!", worldRank);
+                    sprintf(painCave.errMsg, "DumpReader Error: Molecule not found on node %d!", worldRank);
                     painCave.isFatal = 1;
                     simError();
                 }
@@ -485,7 +485,7 @@ void DumpReader::parseDumpLine(char *line, StuntDouble *integrableObject) {
 
     if (nTokens < 14) {
             sprintf(painCave.errMsg,
-                    "Not enough Tokens.\n");
+                    "DumpReader Error: Not enough Tokens.\n");
             painCave.isFatal = 1;
             simError();
     }
@@ -493,7 +493,12 @@ void DumpReader::parseDumpLine(char *line, StuntDouble *integrableObject) {
     std::string name = tokenizer.nextToken();
 
     if (name != integrableObject->getType()) {
-        
+
+            sprintf(painCave.errMsg,
+                    "DumpReader Error: Atom type [%s] in %s does not match Atom Type [%s] in .md file.\n",
+                    name.c_str(), filename_.c_str(), integrableObject->getType().c_str());
+            painCave.isFatal = 1;
+            simError();        
     }
 
     pos[0] = tokenizer.nextTokenAsDouble();
@@ -517,7 +522,7 @@ void DumpReader::parseDumpLine(char *line, StuntDouble *integrableObject) {
         if (qlen < oopse::epsilon) { //check quaternion is not equal to 0
             
             sprintf(painCave.errMsg,
-                    "initial quaternion error (q0^2 + q1^2 + q2^2 + q3^2 ~ 0).\n");
+                    "DumpReader Error: initial quaternion error (q0^2 + q1^2 + q2^2 + q3^2 ~ 0).\n");
             painCave.isFatal = 1;
             simError();
             
@@ -551,7 +556,7 @@ void DumpReader::parseCommentLine(char* line, Snapshot* s) {
     //comment line should at least contain 10 tokens: current time(1 token) and  h-matrix(9 tokens)
     if (nTokens < 10) {
             sprintf(painCave.errMsg,
-                    "Not enough tokens in comment line: %s", line);
+                    "DumpReader Error: Not enough tokens in comment line: %s", line);
             painCave.isFatal = 1;
             simError();   
     }

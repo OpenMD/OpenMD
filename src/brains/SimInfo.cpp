@@ -108,7 +108,7 @@ SimInfo::SimInfo(std::vector<std::pair<MoleculeStamp*, int> >& molStampPairs,
 
         //calculate atoms in rigid bodies
         int nAtomsInRigidBodies = 0;
-        int nRigidBodiesInStamp = molStamp->getNCutoffGroups();
+        int nRigidBodiesInStamp = molStamp->getNRigidBodies();
         
         for (int j=0; j < nRigidBodiesInStamp; j++) {
             rbStamp = molStamp->getRigidBody(j);
