@@ -1,3 +1,5 @@
+// Thermodynamic integration is not multiprocessor friendly right now
+
 #include <iostream>
 #include <stdlib.h>
 #include <cstdio>
@@ -9,9 +11,9 @@
 
 using namespace std;
 
-#include "restraints/Restraints.hpp"
-#include "brains/SimInfo.hpp"
-#include "utils/simError.h"
+#include "Restraints.hpp"
+#include "SimInfo.hpp"
+#include "simError.h"
 
 #define PI 3.14159265359
 #define TWO_PI 6.28318530718
@@ -19,7 +21,7 @@ using namespace std;
 Restraints::Restraints(double lambdaVal, double lambdaExp){
   lambdaValue = lambdaVal;
   lambdaK = lambdaExp;
-
+  vector<double> resConsts;
   const char *jolt = " \t\n;,";
 
 #ifdef IS_MPI
@@ -32,10 +34,10 @@ Restraints::Restraints(double lambdaVal, double lambdaExp){
     
     if (!springs) { 
       sprintf(painCave.errMsg,
-	      "In Restraints: Unable to open HarmSpringConsts.txt for reading.\n"
-	      "\tDefault spring constants will be loaded. If you want to specify\n"
-	      "\tspring constants, include a three line HarmSpringConsts.txt file\n"
-	      "\tin the current directory.\n");
+	      "Unable to open HarmSpringConsts.txt for reading, so the\n"
+	      "\tdefault spring constants will be loaded. If you want\n"
+	      "\tto specify spring constants, include a three line\n"
+	      "\tHarmSpringConsts.txt file in the execution directory.\n");
       painCave.severity = OOPSE_WARNING;
       painCave.isFatal = 0;
       simError();   
@@ -47,22 +49,49 @@ Restraints::Restraints(double lambdaVal, double lambdaExp){
     } else  {
       
       springs.getline(inLine,999,'\n');
+      // the file is blank!
+      if (springs.eof()){
+      sprintf(painCave.errMsg,
+	      "HarmSpringConsts.txt file is not valid.\n"
+	      "\tThe file should contain four rows, the last three containing\n"
+	      "\ta label and the spring constant value. They should be listed\n"
+	      "\tin the following order: kDist (positional restrant), kTheta\n"
+	      "\t(rot. restraint: deflection of z-axis), and kOmega (rot.\n"
+	      "\trestraint: rotation about the z-axis).\n");
+      painCave.severity = OOPSE_ERROR;
+      painCave.isFatal = 1;
+      simError();   
+      }
+      // read in spring constants and check to make sure it is a valid file
       springs.getline(inLine,999,'\n');
-      token = strtok(inLine,jolt);
-      token = strtok(NULL,jolt);
-      strcpy(inValue,token);
-      kDist = (atof(inValue));
-      springs.getline(inLine,999,'\n');
-      token = strtok(inLine,jolt);
-      token = strtok(NULL,jolt);
-      strcpy(inValue,token);
-      kTheta = (atof(inValue));
-      springs.getline(inLine,999,'\n');
-      token = strtok(inLine,jolt);
-      token = strtok(NULL,jolt);
-      strcpy(inValue,token);
-      kOmega = (atof(inValue));
-      springs.close();
+      while (!springs.eof()){
+	if (NULL != inLine){
+	  token = strtok(inLine,jolt);
+	  token = strtok(NULL,jolt);
+	  if (NULL != token){
+	    strcpy(inValue,token);
+	    resConsts.push_back(atof(inValue));
+	  }
+ 	}
+	springs.getline(inLine,999,'\n');
+      }
+      if (resConsts.size() == 3){
+	kDist = resConsts[0];
+	kTheta = resConsts[1];
+	kOmega = resConsts[2];
+      }
+      else {
+	sprintf(painCave.errMsg,
+		"HarmSpringConsts.txt file is not valid.\n"
+		"\tThe file should contain four rows, the last three containing\n"
+		"\ta label and the spring constant value. They should be listed\n"
+		"\tin the following order: kDist (positional restrant), kTheta\n"
+		"\t(rot. restraint: deflection of z-axis), and kOmega (rot.\n"
+		"\trestraint: rotation about the z-axis).\n");
+	painCave.severity = OOPSE_ERROR;
+	painCave.isFatal = 1;
+	simError();  
+      }
     }
 #ifdef IS_MPI
   }
@@ -180,9 +209,6 @@ double Restraints::Calc_Restraint_Forces(vector<StuntDouble*> vecParticles){
       omegaPass = vecParticles[i]->getZangle();
       Calc_body_omegaVal( A, omegaPass );
 
-      if (omega > PI || omega < -PI)
-	cout << "oops... " << omega << "\n";
-
       // first we calculate the derivatives
       dVdrx = -kDist*delRx;
       dVdry = -kDist*delRy;
@@ -266,16 +292,13 @@ double Restraints::Calc_Restraint_Forces(vector<StuntDouble*> vecParticles){
 }
 
 void Restraints::Store_Init_Info(vector<StuntDouble*> vecParticles){
+  int idealSize;
   double pos[3];
   double A[3][3];
   double RfromQ[3][3];
   double quat0, quat1, quat2, quat3;
   double dot;
-//   char *token;
-//   char fileName[200];
-//   char angleName[200];
-//   char inLine[1000];
-//   char inValue[200];
+  vector<double> tempZangs;
   const char *delimit = " \t\n;,";
 
   //open the idealCrystal.in file and zAngle.ang file
@@ -285,23 +308,26 @@ void Restraints::Store_Init_Info(vector<StuntDouble*> vecParticles){
   ifstream crystalIn(fileName);
   ifstream angleIn(angleName);
 
+  // check to see if these files are present in the execution directory
   if (!crystalIn) { 
     sprintf(painCave.errMsg,
 	    "Restraints Error: Unable to open idealCrystal.in for reading.\n"
-	    "\tMake sure a reference crystal file is in the current directory.\n");
+	    "\tMake sure a ref. crystal file is in the working directory.\n");
+    painCave.severity = OOPSE_ERROR;
     painCave.isFatal = 1;
     simError();   
-    
-    return;
   }
 
+  // it's not fatal to lack a zAngle.ang file, it just means you're starting
+  // from the ideal crystal state
   if (!angleIn) { 
     sprintf(painCave.errMsg,
 	    "Restraints Warning: The lack of a zAngle.ang file is mildly\n"
 	    "\tunsettling... This means the simulation is starting from the\n"
 	    "\tidealCrystal.in reference configuration, so the omega values\n"
-	    "\twill all be set to zero. If this is not the case, you should\n"
-	    "\tquestion your results.\n");
+	    "\twill all be set to zero. If this is not the case, the energy\n"
+	    "\tcalculations will be wrong.\n");
+    painCave.severity = OOPSE_WARNING;
     painCave.isFatal = 0;
     simError();   
   }
@@ -309,6 +335,21 @@ void Restraints::Store_Init_Info(vector<StuntDouble*> vecParticles){
   // A rather specific reader for OOPSE .eor files...
   // Let's read in the perfect crystal file
   crystalIn.getline(inLine,999,'\n');
+  // check to see if the crystal file is the same length as starting config.
+  token = strtok(inLine,delimit);
+  strcpy(inValue,token);
+  idealSize = atoi(inValue);
+  if (idealSize != vecParticles.size()) {
+    sprintf(painCave.errMsg,
+	    "Restraints Error: Reference crystal file is not valid.\n"
+	    "\tMake sure the idealCrystal.in file is the same size as the\n"
+	    "\tstarting configuration. Using an incompatable crystal will\n"
+	    "\tlead to energy calculation failures.\n");
+    painCave.severity = OOPSE_ERROR;
+    painCave.isFatal = 1;
+    simError();  
+  }
+  // else, the file is okay... let's continue
   crystalIn.getline(inLine,999,'\n');
   
   for (i=0; i<vecParticles.size(); i++) {
@@ -362,17 +403,35 @@ void Restraints::Store_Init_Info(vector<StuntDouble*> vecParticles){
     vY0.push_back(RfromQ[1][1]/normalize);
     vZ0.push_back(RfromQ[1][2]/normalize);
   }
+  crystalIn.close();
 
-  // now we can read in the zAngle.ang file
+  // now we read in the zAngle.ang file
   if (angleIn){
     angleIn.getline(inLine,999,'\n');
-    for (i=0; i<vecParticles.size(); i++) {
-      angleIn.getline(inLine,999,'\n');
+    angleIn.getline(inLine,999,'\n');
+    while (!angleIn.eof()) {
       token = strtok(inLine,delimit);
       strcpy(inValue,token);
-      vecParticles[i]->setZangle(atof(inValue));
+      tempZangs.push_back(atof(inValue));
+      angleIn.getline(inLine,999,'\n');
+    }
+
+    // test to make sure the zAngle.ang file is the proper length
+    if (tempZangs.size() == vecParticles.size())
+      for (i=0; i<vecParticles.size(); i++)
+	vecParticles[i]->setZangle(tempZangs[i]);
+    else {
+      sprintf(painCave.errMsg,
+	      "Restraints Error: the supplied zAngle file is not valid.\n"
+	      "\tMake sure the zAngle.ang file matches with the initial\n"
+	      "\tconfiguration (i.e. they're the same length). Using the wrong\n"
+	      "\tzAngle file will lead to errors in the energy calculations.\n");
+      painCave.severity = OOPSE_ERROR;
+      painCave.isFatal = 1;
+      simError();  
     }
   }
+  angleIn.close();
 
   return;
 }
