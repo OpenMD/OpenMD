@@ -1,3 +1,5 @@
+Package = visitors
+
 Source    = \
 	AtomVisitor.cpp \
 	CompositeVisitor.cpp \

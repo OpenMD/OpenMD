@@ -1,3 +1,5 @@
+Package = restraints
+
 Source    = \
 	Restraints.cpp \
 

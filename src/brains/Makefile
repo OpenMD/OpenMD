@@ -1,3 +1,5 @@
+Package = brains
+
 Source    = \
 	Exclude.cpp \
 	SimInfo.cpp \

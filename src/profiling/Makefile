@@ -1,3 +1,5 @@
+Package = profiling
+
 Source    = \
 	mdProfile.cpp \
 	timing.F90 \

@@ -1,3 +1,5 @@
+Package = applications
+
 Source    = \
 	BaseLattice.cpp \
 	cmdline.c \

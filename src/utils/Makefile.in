@@ -1,3 +1,5 @@
+Package = utils
+
 MySource    = \
 	definitions.F90 \
 	fError.c \

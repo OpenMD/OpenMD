@@ -1,3 +1,5 @@
+Package = integrators
+
 Source    = \
 	Integrator.cpp \
         IntegratorFactory.cpp \

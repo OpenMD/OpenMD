@@ -1,3 +1,5 @@
+Package = applications/simpleBuilder
+
 Source    = \
 	BaseLattice.cpp \
 	Lattice.cpp \

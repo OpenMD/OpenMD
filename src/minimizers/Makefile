@@ -1,3 +1,5 @@
+Package = minimizers
+
 Source    = \
         MinimizerParameterSet.cpp \
         Minimizer.cpp \

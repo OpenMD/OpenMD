@@ -1,3 +1,5 @@
+Package = types
+
 Source    = \
 	AtomStamp.cpp \
 	BendStamp.cpp \

@@ -1,3 +1,5 @@
+Package = applications/dump2Xyz
+
 Source    = \
 	Dump2XYZCmd.c \
 	Dump2XYZ.cpp \

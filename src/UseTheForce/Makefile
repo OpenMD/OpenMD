@@ -1,3 +1,5 @@
+Package = UseTheForce
+
 Source    = \
 	doForces.F90 \
 	doForces_interface.F90 \

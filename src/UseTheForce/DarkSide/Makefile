@@ -1,3 +1,5 @@
+Package = UseTheForce/DarkSide
+
 Source    = \
 	simParallel.F90 \
         simParallel_interface.F90 \

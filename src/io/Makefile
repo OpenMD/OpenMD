@@ -1,3 +1,5 @@
+Package = io
+
 Source    = \
         AtomTypesSectionParser.cpp \
 	DirectionalAtomTypesSectionParser.cpp \

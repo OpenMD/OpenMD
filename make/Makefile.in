@@ -123,7 +123,9 @@ ifdef Source
 # /home/maul/gezelter/src/code/src/UseTheForce/Darkside --> UseTheForce/Darkside
 #Package          = $(shell echo $(CurrentDir) | sed -e 's/^.*\/src\/\(.*\)/\1/g')
 #use shell script to get the absolute path and then rip it off from $(CurrentDir)
-Package          = $(subst $(shell cd $(SourceDir); pwd)/,,$(CurrentDir))
+#Package          = $(subst $(shell cd $(SourceDir); pwd)/,,$(CurrentDir))
+# REMINDER: We are now using the Package line in each subdir makefile.
+# This avoids the strange path problem and the subshell
 
 PackageList              = $(Package)
 PackageSourceDir         = $(SourceDir)/$(Package)

@@ -1,3 +1,5 @@
+Package = applications/oopse
+
 Source    = \
 	oopse.cpp \
 

@@ -1,3 +1,5 @@
+Package = primitives
+
 Source    = \
 	StuntDouble.cpp \
 	Atom.cpp \

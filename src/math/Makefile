@@ -1,3 +1,5 @@
+Package = math
+
 Source    = \
 	randomSPRNG.cpp \
 

@@ -1,3 +1,5 @@
+Package = constraints
+
 Source    = \
         Rattle.cpp \
         ZconstraintForceManager.cpp	
