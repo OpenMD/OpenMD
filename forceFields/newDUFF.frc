@@ -1,46 +1,82 @@
-// This is the forcefield file for the Dipolar Unified-atom Force Field (DUFF).
-
+// This is the forcefield file for the Dipolar Unified-atom Force Field (DUFF)
 //
-
-// The sections are divided into AtomTypes, BondTypes, BendTypes,
-
-// and TorsionTypes.
-
+// The sections are divided into AtomTypes
 //
-
-// Many parameters (but not all) are derived from the TRAPPE force field
-
+//any parameters (but not all) are derived from the TRAPPE force field
 // of Siepmann's group.
-
-
-
-begin AtomTypes
-
-//AtomTypeName	isDirectional	isLJ	isCharge	mass (amu)	epsilon (kcal/mol)	sigma (Ang)	q (e)
-CH4		0	1	0	16.05		0.279				3.73
-CH3		0	1	0	15.04		0.185				3.75
-
-CH2		0	1	0	14.03		0.0866				3.95
-
-CH		0	1	0	13.02		0.0189				4.68
-
-SSD		1	1	0	18.0153		0.152				3.035			
-HEAD		1	1	0	196		0.185				5.75			
-TB1		0	1	0	14.03		0.0866				4.0
-
-TE1		0	1	0	15.04		0.185				4.0
-
-TB2		0	1	0	21.05		0.25				6.0
-
-TE2		0	1	0	22.56		0.5				6.0
-
-TB3		0	1	0	28.06		0.5				8.0
-
-TE3		0	1	0	30.08		0.75				8.0
-
-
-
+begin AtomTypes    
+//Name		mass	 (amu)
+CH4		16.05		
+CH3		15.04		
+CH2		14.03		
+CH		13.02		
+SSD		18.0153		
+HEAD		196		
+TB1		14.03		
+TE1		15.04		
+TB2		21.05		
+TE2		22.56		
+TB3		28.06		
+TE3		30.08	
+H		1.00794		
+He		4.002602	
+C		12.0107		
+N		14.00674	
+O		15.9994		
+F		18.9984032	
+Ne		20.1797		
+S		32.066		
+Cl		35.4527		
+Ar		39.948		
+Br		79.904		
+Kr		83.80		
 end AtomTypes
+
+begin DirectionalAtomTypes
+//Name		I_xx	I_yy	I_zz	(All moments in (amu*Ang^2)
+SSD		1.7696	0.6145	1.1550  
+SSD1		1.7696	0.6145	1.1550  
+SSD_E		1.7696	0.6145	1.1550  
+SSD_RF		1.7696	0.6145	1.1550  
+HEAD		1125	1125	250
+end DirectionalAtomTypes                    
+                   	
+begin LennardJonesAtomTypes
+//Name	epsilon			sigma	
+CH4	  0.279			3.73    		              
+CH3	  0.185			3.75    		              
+CH2	  0.0866		3.95    			              
+CH	  0.0189		4.68    			             
+SSD	  0.152			3.035					
+HEAD	  0.185			.75					
+TB1	  0.0866		4.0     		         
+TE1	  0.185			4.0     		             
+TB2	  0.25			6.0     		             
+TE2	  0.5			6.0     		             
+TB3	  0.5			8.0     		              
+TE3	  0.75			8.0     
+H	  0.017090056482	2.81
+He	  0.020269601874	2.28
+C	  0.101745452544	3.35
+N	  0.074123151951	3.31
+O	  0.122412497592	2.95
+F	  0.104924997936	2.83
+Ne	  0.09339914589		2.72
+S	  0.36366050421		3.52
+Cl	  0.344781953445	3.35
+Ar	  0.238068461226	3.41
+Br	  0.511111921764	3.54
+Kr	  0.32590340268		3.83	              
+end LennardJonesAtomTypes
+
+begin ChargeAtomTypes
+end ChargeAtomTypes
+
+begin DipoleAtomTypes
+end DipoleAtomTypes
+
+begin StickyAtomTypes
+end StickyAtomTypes
 
 
 begin DirectionalAtomType
@@ -51,358 +87,180 @@ end DirectionalAtomType
 
 begin BondTypes
 
+//Atom1	Atom2	Fixed
+//V_Fixed = 0
+
+//Atom1	Atom2	Harmonic	b0	Kb (kcal/mol)
+//V_Harmonic = Kb(b- bo)^2
+//Harmonic Examples
+HEAD	CH3	Harmonic		2.75		260
+HEAD	CH2	Harmonic		2.75		260
+HEAD	CH	Harmonic		2.75		260
+HEAD    TB1	Harmonic		2.76		260
+HEAD	TB2	Harmonic		3.20		260
+HEAD	TB3	Harmonic		3.63		260
+CH3	CH3	Harmonic		1.526		260
+CH3	CH2	Harmonic		1.526		260
+CH3	CH	Harmonic		1.526		260
+CH2	CH2	Harmonic		1.526		260
+CH2	CH	Harmonic		1.526		260
+CH	CH	Harmonic		1.526		260
+TB1	TB1	Harmonic		1.526		260
+TB2	TB2	Harmonic		2.34		260
+TB3	TB3	Harmonic		3.12		260
+TB1	TE1	Harmonic		1.526		260
+TB2	TE2	Harmonic		2.34		260
+TB3	TE3	Harmonic		3.12		260
+
+//Atom1	Atom2	Cubic		b0	K3	K2	K1	K0
+//V_Cubic = K3(b - b0)^3 + K2(b - b0)^2 + K1(b - b0) + K0
 
 
-//Atom1	Atom2	FixedBondType
-
-//V_FixedBondType = 0
-
+//Atom1	Atom2	Quartic	b0	K4	K3	K2	K1	K0
+//V_Quartic = K4(b - b0)^4 + K3(b - b0)^3 + K2(b - b0)^2 + K1(b - b0) + K0
 
 
-//Atom1	Atom2	HarmonicBondType	b0	Kb (kcal/mol)
-
-//V_HarmonicBondType = Kb(b- bo)^2
-
-//HarmonicBondType Examples
-
-HEAD	CH3	HarmonicBondType		2.75		260
-
-HEAD	CH2	HarmonicBondType		2.75		260
-
-HEAD	CH	HarmonicBondType		2.75		260
-
-HEAD    TB1	HarmonicBondType		2.76		260
-
-HEAD	TB2	HarmonicBondType		3.20		260
-
-HEAD	TB3	HarmonicBondType		3.63		260
-
-CH3	CH3	HarmonicBondType		1.526		260
-
-CH3	CH2	HarmonicBondType		1.526		260
-
-CH3	CH	HarmonicBondType		1.526		260
-
-CH2	CH2	HarmonicBondType		1.526		260
-
-CH2	CH	HarmonicBondType		1.526		260
-
-CH	CH	HarmonicBondType		1.526		260
-
-TB1	TB1	HarmonicBondType		1.526		260
-
-TB2	TB2	HarmonicBondType		2.34		260
-
-TB3	TB3	HarmonicBondType		3.12		260
-
-TB1	TE1	HarmonicBondType		1.526		260
-
-TB2	TE2	HarmonicBondType		2.34		260
-
-TB3	TE3	HarmonicBondType		3.12		260
+//Atom1	Atom2	Polynomial	b0	i	Ki	[j	Kj]
+//V_Quartic = Ki(b - b0)^i + Kj(b - b0)^j + ...
 
 
-
-//Atom1	Atom2	CubicBondType		b0	K3	K2	K1	K0
-
-//V_CubicBondType = K3(b - b0)^3 + K2(b - b0)^2 + K1(b - b0) + K0
-
-
-
-
-
-//Atom1	Atom2	QuadraticBondType	b0	K4	K3	K2	K1	K0
-
-//V_QuadraticBondType = K4(b - b0)^4 + K3(b - b0)^3 + K2(b - b0)^2 + K1(b - b0) + K0
-
-
-
-
-
-//Atom1	Atom2	PolynomialBondType	b0	i	Ki	[j	Kj]
-
-//V_QuadraticBondType = Ki(b - b0)^i + Kj(b - b0)^j + ...
-
-
-
-
-
-end BondTypes
-
-
+end s
 
 begin BendTypes
 
-
-
-//HarmonicBendType
-
-//Atom1	Atom2	Atom3	HarmonicBendType	Ktheta	Theta0
-
-//V_HarmonicBendType = Ktheta(Theta - Theta0)^2
-
+//Harmonic
+//Atom1	Atom2	Atom3	Harmonic	Ktheta	Theta0
+//V_Harmonic = Ktheta(Theta - Theta0)^2
 //Ktheta: kcal/mole/rad**2
-
 //Theta0: degrees
-
-//HarmonicBendType examples
-
-HEAD	CH2	HEAD	HarmonicBendType	58.84	114.0
-
-HEAD	CH2	CH3	HarmonicBendType	58.84	114.0
-
-HEAD	CH2	CH2	HarmonicBendType	58.84	114.0
-
-HEAD	TB1	TB1	HarmonicBendType	58.84	114.0
-
-HEAD	TB2	TB2	HarmonicBendType	58.84	114.0
-
-HEAD	TB3	TB3	HarmonicBendType	58.84	114.0
-
-HEAD	CH2	CH	HarmonicBendType	58.84	114.0
-
-HEAD	CH	CH3	HarmonicBendType	58.84	112.0
-
-HEAD	CH	CH2	HarmonicBendType	58.84	112.0
-
-HEAD	CH	CH	HarmonicBendType	58.84	112.0
-
-CH3	CH2	CH3	HarmonicBendType	58.84	114.0
-
-CH3	CH2	CH2	HarmonicBendType	58.84	114.0
-
-CH3	CH2	CH	HarmonicBendType	58.84	114.0
-
-CH3	CH	CH3	HarmonicBendType	58.84	112.0
-
-CH3	CH	CH2	HarmonicBendType	58.84	112.0
-
-CH3	CH	CH	HarmonicBendType	58.84	112.0
-
-CH2	CH2	CH2	HarmonicBendType	58.84	114.0
-
-CH2	CH2	CH	HarmonicBendType	58.84	114.0
-
-CH2	CH	CH2	HarmonicBendType	58.84	112.0
-
-CH2	CH	CH	HarmonicBendType	58.84	112.0
-
-CH	CH2	CH	HarmonicBendType	58.84	114.0
-
-CH	CH	CH	HarmonicBendType	58.84	112.0
-
-TB1	TB1	TB1	HarmonicBendType	58.84	114.0
-
-TB2	TB2	TB2	HarmonicBendType	58.84	114.0
-
-TB3	TB3	TB3	HarmonicBendType	58.84	114.0
-
-TE1	TB1	TB1	HarmonicBendType	58.84	114.0
-
-TE2	TB2	TB2	HarmonicBendType	58.84	114.0
-
-TE3	TB3	TB3	HarmonicBendType	58.84	114.0
-
-
+//Harmonic examples
+HEAD	CH2	HEAD	Harmonic	58.84	114.0
+HEAD	CH2	CH3	Harmonic	58.84	114.0
+HEAD	CH2	CH2	Harmonic	58.84	114.0
+HEAD	TB1	TB1	Harmonic	58.84	114.0
+HEAD	TB2	TB2	Harmonic	58.84	114.0
+HEAD	TB3	TB3	Harmonic	58.84	114.0
+HEAD	CH2	CH	Harmonic	58.84	114.0
+HEAD	CH	CH3	Harmonic	58.84	112.0
+HEAD	CH	CH2	Harmonic	58.84	112.0
+HEAD	CH	CH	Harmonic	58.84	112.0
+CH3	CH2	CH3	Harmonic	58.84	114.0
+CH3	CH2	CH2	Harmonic	58.84	114.0
+CH3	CH2	CH	Harmonic	58.84	114.0
+CH3	CH	CH3	Harmonic	58.84	112.0
+CH3	CH	CH2	Harmonic	58.84	112.0
+CH3	CH	CH	Harmonic	58.84	112.0
+CH2	CH2	CH2	Harmonic	58.84	114.0
+CH2	CH2	CH	Harmonic	58.84	114.0
+CH2	CH	CH2	Harmonic	58.84	112.0
+CH2	CH	CH	Harmonic	58.84	112.0
+CH	CH2	CH	Harmonic	58.84	114.0
+CH	CH	CH	Harmonic	58.84	112.0
+TB1	TB1	TB1	Harmonic	58.84	114.0
+TB2	TB2	TB2	Harmonic	58.84	114.0
+TB3	TB3	TB3	Harmonic	58.84	114.0
+TE1	TB1	TB1	Harmonic	58.84	114.0
+TE2	TB2	TB2	Harmonic	58.84	114.0
+TE3	TB3	TB3	Harmonic	58.84	114.0
 
 //GhostBend
-
-//Atom1	Atom2	GHOST	GhostBendType	Ktheta	Theta0	
-
+//Atom1	Atom2	GHOST	GhostBend	Ktheta	Theta0	
 //Atom2 must be directional atom
+//Ghost examples
+CH2	HEAD	GHOST	GhostBend	0.00176972	129.783
+CH2	HEAD	GHOST	GhostBend	58.84	90.0
+TB1	HEAD	GHOST	GhostBend	58.84	90.0
+TB2	HEAD	GHOST	GhostBend	58.84	90.0
+TB3	HEAD	GHOST	GhostBend	58.84	90.0
 
-//GhostBendType examples
-
-CH2	HEAD	GHOST	GhostBendType	0.00176972	129.783
-
-CH2	HEAD	GHOST	GhostBendType	58.84	90.0
-
-TB1	HEAD	GHOST	GhostBendType	58.84	90.0
-
-TB2	HEAD	GHOST	GhostBendType	58.84	90.0
-
-TB3	HEAD	GHOST	GhostBendType	58.84	90.0
-
-
-
-//UreyBradleyBend
-
-//Atom1	Atom2	Atom3	UreyBradleyBend		Ktheta	Theta0	Kub	S0
-
+//UreyBradley
+//Atom1	Atom2	Atom3	UreyBradley		Ktheta	Theta0	Kub	S0
 //V_UreyBradleyBend = Ktheta(Theta - Theta0)^2 +  Kub(S - S0)^2
-
 //Ktheta: kcal/mole/rad**2
-
 //Theta0: degrees
-
 //Kub: kcal/mole/A**2
-
 //S0: A
 
+//Cubic
+//Atom1	Atom2	Atom3	Cubic	Theta0	K3	K2	K1	K0
+//V_Cubic = K3(Theta - Theta0)^3 + K2(Theta - Theta0)^2 + K1(Theta - Theta0) + K0
 
+//Quartic
+//Atom1	Atom2	Atom3	Quartic	Theta0	K4	K3	K2	K1	K0
+//V_Quartic = K4(Theta - Theta0)^4 + K3(Theta - Theta0)^3 + K2(Theta - Theta0)^2 + K1(Theta - Theta0) + K0
 
-//CubicBendType
-
-//Atom1	Atom2	Atom3	CubicBendType	Theta0	K3	K2	K1	K0
-
-//V_CubicBendType = K3(Theta - Theta0)^3 + K2(Theta - Theta0)^2 + K1(Theta - Theta0) + K0
-
-
-
-//QuadraticBendType
-
-//Atom1	Atom2	Atom3	QuadraticBendType	Theta0	K4	K3	K2	K1	K0
-
-//V_QuadraticBendType = K4(Theta - Theta0)^4 + K3(Theta - Theta0)^3 + K2(Theta - Theta0)^2 + K1(Theta - Theta0) + K0
-
-
-
-//PolynomialBendType
-
-//Atom1	Atom2	Atom3	PolynomialBendType	Theta0	i	Ki 	[j	Kj]
-
-//V_PolynomialBendType = Ki(Theta - Theta0)^i +  Kj(Theta - Theta0)^j + ...
-
-
+//Polynomial
+//Atom1	Atom2	Atom3	Polynomial	Theta0	i	Ki 	[j	Kj]
+//V_Polynomial = Ki(Theta - Theta0)^i +  Kj(Theta - Theta0)^j + ...
 
 end BendTypes
 
-
-
 begin TorsionTypes
 
+//Cubic
+//Atom1	Atom2	Atom3	Atom4	Cubic		k3		k2		k1		k0  ( all are kcal/mol )
+//V_Cubic = k3(cos phi)^3 + k2(cos phi)^2 + k1(cos phi) + k0
+//Cubic Examples
+HEAD	CH2	CH2	HEAD	Cubic		5.9602		-0.2568		-3.802		2.1586
+HEAD	CH2	CH	HEAD	Cubic		3.3254		-0.4215		-1.686		1.1661
+HEAD	CH	CH	HEAD	Cubic		3.3254		-0.4215		-1.686		1.1661
+HEAD	CH2	CH2	CH3	Cubic		5.9602		-0.2568		-3.802		2.1586
+HEAD	CH2	CH	CH3	Cubic		3.3254		-0.4215		-1.686		1.1661
+HEAD	CH	CH2	CH3	Cubic		3.3254		-0.4215		-1.686		1.1661
+HEAD	CH	CH	CH3	Cubic		3.3254		-0.4215		-1.686		1.1661
+HEAD	CH2	CH2	CH2	Cubic		5.9602		-0.2568		-3.802		2.1586
+HEAD	CH2	CH	CH2	Cubic		3.3254		-0.4215		-1.686		1.1661
+HEAD	CH	CH2	CH2	Cubic		3.3254		-0.4215		-1.686		1.1661
+HEAD	CH	CH	CH2	Cubic		3.3254		-0.4215		-1.686		1.1661
+HEAD	CH2	CH2	CH	Cubic		5.9602		-0.2568		-3.802		2.1586
+HEAD	CH2	CH	CH	Cubic		3.3254		-0.4215		-1.686		1.1661
+HEAD	CH	CH2	CH	Cubic		3.3254		-0.4215		-1.686		1.1661
+HEAD	CH	CH	CH	Cubic		3.3254		-0.4215		-1.686		1.1661
+HEAD	TB1	TB1	TB1	Cubic		5.9602		-0.2568		-3.802		2.1586
+HEAD	TB2	TB2	TB2	Cubic		5.9602		-0.2568		-3.802		2.1586
+HEAD	TB3	TB3	TB3	Cubic		5.9602		-0.2568		-3.802		2.1586
+CH3	CH2	CH2	CH3	Cubic		5.9602		-0.2568		-3.802		2.1586
+CH3	CH2	CH	CH3	Cubic		3.3254		-0.4215		-1.686		1.1661
+CH3	CH	CH	CH3	Cubic		3.3254		-0.4215		-1.686		1.1661
+CH3	CH2	CH2	CH2	Cubic		5.9602		-0.2568		-3.802		2.1586
+CH3	CH2	CH	CH2	Cubic		3.3254		-0.4215		-1.686		1.1661
+CH3	CH	CH2	CH2	Cubic		3.3254		-0.4215		-1.686		1.1661
+CH3	CH	CH	CH2	Cubic		3.3254		-0.4215		-1.686		1.1661
+CH3	CH2	CH2	CH	Cubic		5.9602		-0.2568		-3.802		2.1586
+CH3	CH2	CH	CH	Cubic		3.3254		-0.4215		-1.686		1.1661
+CH3	CH	CH2	CH	Cubic		3.3254		-0.4215		-1.686		1.1661
+CH3	CH	CH	CH	Cubic		3.3254		-0.4215		-1.686		1.1661
+CH2	CH2	CH2	CH2	Cubic		5.9602		-0.2568		-3.802		2.1586
+CH2	CH2	CH	CH2	Cubic		3.3254		-0.4215		-1.686		1.1661
+CH2	CH	CH	CH2	Cubic		3.3254		-0.4215		-1.686		1.1661
+CH2	CH2	CH2	CH	Cubic		5.9602		-0.2568		-3.802		2.1586
+CH2	CH2	CH	CH	Cubic		3.3254		-0.4215		-1.686		1.1661
+CH2	CH	CH2	CH	Cubic		3.3254		-0.4215		-1.686		1.1661
+CH2	CH	CH	CH	Cubic		3.3254		-0.4215		-1.686		1.1661
+CH	CH2	CH2	CH	Cubic		5.9602		-0.2568		-3.802		2.1586
+CH	CH2	CH	CH	Cubic		3.3254		-0.4215		-1.686		1.1661
+CH	CH	CH	CH	Cubic		3.3254		-0.4215		-1.686		1.1661
+TB1	TB1	TB1	TB1	Cubic		5.9602		-0.2568		-3.802		2.1586
+TB2	TB2	TB2	TB2	Cubic		5.9602		-0.2568		-3.802		2.1586
+TB3	TB3	TB3	TB3	Cubic		5.9602		-0.2568		-3.802		2.1586
+TE1	TB1	TB1	TB1	Cubic		5.9602		-0.2568		-3.802		2.1586
+TE2	TB2	TB2	TB2	Cubic		5.9602		-0.2568		-3.802		2.1586
+TE3	TB3	TB3	TB3	Cubic		5.9602		-0.2568		-3.802		2.1586
 
-
-//CubicTorsionType
-
-//Atom1	Atom2	Atom3	Atom4	CubicTorsionType		k3		k2		k1		k0  ( all are kcal/mol )
-
-//V_CubicTorsionType = k3(cos phi)^3 + k2(cos phi)^2 + k1(cos phi) + k0
-
-//CubicTorsionType Examples
-
-HEAD	CH2	CH2	HEAD	CubicTorsionType		5.9602		-0.2568		-3.802		2.1586
-
-HEAD	CH2	CH	HEAD	CubicTorsionType		3.3254		-0.4215		-1.686		1.1661
-
-HEAD	CH	CH	HEAD	CubicTorsionType		3.3254		-0.4215		-1.686		1.1661
-
-HEAD	CH2	CH2	CH3	CubicTorsionType		5.9602		-0.2568		-3.802		2.1586
-
-HEAD	CH2	CH	CH3	CubicTorsionType		3.3254		-0.4215		-1.686		1.1661
-
-HEAD	CH	CH2	CH3	CubicTorsionType		3.3254		-0.4215		-1.686		1.1661
-
-HEAD	CH	CH	CH3	CubicTorsionType		3.3254		-0.4215		-1.686		1.1661
-
-HEAD	CH2	CH2	CH2	CubicTorsionType		5.9602		-0.2568		-3.802		2.1586
-
-HEAD	CH2	CH	CH2	CubicTorsionType		3.3254		-0.4215		-1.686		1.1661
-
-HEAD	CH	CH2	CH2	CubicTorsionType		3.3254		-0.4215		-1.686		1.1661
-
-HEAD	CH	CH	CH2	CubicTorsionType		3.3254		-0.4215		-1.686		1.1661
-
-HEAD	CH2	CH2	CH	CubicTorsionType		5.9602		-0.2568		-3.802		2.1586
-
-HEAD	CH2	CH	CH	CubicTorsionType		3.3254		-0.4215		-1.686		1.1661
-
-HEAD	CH	CH2	CH	CubicTorsionType		3.3254		-0.4215		-1.686		1.1661
-
-HEAD	CH	CH	CH	CubicTorsionType		3.3254		-0.4215		-1.686		1.1661
-
-HEAD	TB1	TB1	TB1	CubicTorsionType		5.9602		-0.2568		-3.802		2.1586
-
-HEAD	TB2	TB2	TB2	CubicTorsionType		5.9602		-0.2568		-3.802		2.1586
-
-HEAD	TB3	TB3	TB3	CubicTorsionType		5.9602		-0.2568		-3.802		2.1586
-
-CH3	CH2	CH2	CH3	CubicTorsionType		5.9602		-0.2568		-3.802		2.1586
-
-CH3	CH2	CH	CH3	CubicTorsionType		3.3254		-0.4215		-1.686		1.1661
-
-CH3	CH	CH	CH3	CubicTorsionType		3.3254		-0.4215		-1.686		1.1661
-
-CH3	CH2	CH2	CH2	CubicTorsionType		5.9602		-0.2568		-3.802		2.1586
-
-CH3	CH2	CH	CH2	CubicTorsionType		3.3254		-0.4215		-1.686		1.1661
-
-CH3	CH	CH2	CH2	CubicTorsionType		3.3254		-0.4215		-1.686		1.1661
-
-CH3	CH	CH	CH2	CubicTorsionType		3.3254		-0.4215		-1.686		1.1661
-
-CH3	CH2	CH2	CH	CubicTorsionType		5.9602		-0.2568		-3.802		2.1586
-
-CH3	CH2	CH	CH	CubicTorsionType		3.3254		-0.4215		-1.686		1.1661
-
-CH3	CH	CH2	CH	CubicTorsionType		3.3254		-0.4215		-1.686		1.1661
-
-CH3	CH	CH	CH	CubicTorsionType		3.3254		-0.4215		-1.686		1.1661
-
-CH2	CH2	CH2	CH2	CubicTorsionType		5.9602		-0.2568		-3.802		2.1586
-
-CH2	CH2	CH	CH2	CubicTorsionType		3.3254		-0.4215		-1.686		1.1661
-
-CH2	CH	CH	CH2	CubicTorsionType		3.3254		-0.4215		-1.686		1.1661
-
-CH2	CH2	CH2	CH	CubicTorsionType		5.9602		-0.2568		-3.802		2.1586
-
-CH2	CH2	CH	CH	CubicTorsionType		3.3254		-0.4215		-1.686		1.1661
-
-CH2	CH	CH2	CH	CubicTorsionType		3.3254		-0.4215		-1.686		1.1661
-
-CH2	CH	CH	CH	CubicTorsionType		3.3254		-0.4215		-1.686		1.1661
-
-CH	CH2	CH2	CH	CubicTorsionType		5.9602		-0.2568		-3.802		2.1586
-
-CH	CH2	CH	CH	CubicTorsionType		3.3254		-0.4215		-1.686		1.1661
-
-CH	CH	CH	CH	CubicTorsionType		3.3254		-0.4215		-1.686		1.1661
-
-TB1	TB1	TB1	TB1	CubicTorsionType		5.9602		-0.2568		-3.802		2.1586
-
-TB2	TB2	TB2	TB2	CubicTorsionType		5.9602		-0.2568		-3.802		2.1586
-
-TB3	TB3	TB3	TB3	CubicTorsionType		5.9602		-0.2568		-3.802		2.1586
-
-TE1	TB1	TB1	TB1	CubicTorsionType		5.9602		-0.2568		-3.802		2.1586
-
-TE2	TB2	TB2	TB2	CubicTorsionType		5.9602		-0.2568		-3.802		2.1586
-
-TE3	TB3	TB3	TB3	CubicTorsionType		5.9602		-0.2568		-3.802		2.1586
-
-
-
-//CharmmTorsionType
-
-//Atom1	Atom2	Atom3	Atom4	CharmmTorsionType		Kchi		n		delta		[Kchi		n		delta]
-
-//V_CharmmTorsionType =  Kchi(1 + cos(n(chi) - delta))
-
+//Charmm
+//Atom1	Atom2	Atom3	Atom4	Charmm		Kchi		n		delta		[Kchi		n		delta]
+//V_Charmm =  Kchi(1 + cos(n(chi) - delta))
 //Kchi: kcal/mole
-
 //n: multiplicity
-
 //delta: degrees
+//in some cases, a Charmm may have two or three terms. If n is equal to 0, it falls back to harmonic form
 
-//in some cases, a CharmmTorsionType may have two or three terms. If n is equal to 0, it falls back to harmonic form
+//Quartic
+//Atom1	Atom2	Atom3	Atom4	Quartic		k4		k3		k2		k1		k0  ( all are kcal/mol )
+//V_Quartic = k4(cos phi)^4 + k3(cos phi)^3 + k2(cos phi)^2 + k1(cos phi) + k0
 
-
-
-//QuadraticTorsionType
-
-//Atom1	Atom2	Atom3	Atom4	QuadraticTorsionType		k4		k3		k2		k1		k0  ( all are kcal/mol )
-
-//V_QuadraticTorsionType = k4(cos phi)^4 + k3(cos phi)^3 + k2(cos phi)^2 + k1(cos phi) + k0
-
-
-
-//PolynomialTorsionType
-
-//Atom1	Atom2	Atom3	Atom4	PolynomialTorsionType	i	Ki	[j	Kj] 
-
-//VPolynomialTorsionType = Ki (cos phi)^i + ... + Kj (cos phi)^j
-
-
+//Polynomial
+//Atom1	Atom2	Atom3	Atom4	Polynomial	i	Ki	[j	Kj] 
+//VPolynomial = Ki (cos phi)^i + ... + Kj (cos phi)^j
 
 end TorsionTypes
