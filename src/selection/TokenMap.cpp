@@ -76,15 +76,9 @@ TokenMap::TokenMap() {
     tokenMap_.insert(TokenMapType::value_type("within", Token(Token::within, std::string("within"))));
     tokenMap_.insert(TokenMapType::value_type(".", Token(Token::dot, std::string("."))));
     tokenMap_.insert(TokenMapType::value_type("mass", Token(Token::mass, std::string("mass"))));
-    tokenMap_.insert(TokenMapType::value_type("dipole", Token(Token::dipole, std::string("dipole"))));
     tokenMap_.insert(TokenMapType::value_type("charge", Token(Token::charge, std::string("charge"))));
     tokenMap_.insert(TokenMapType::value_type("to", Token(Token::to, std::string("to"))));
     
-    //tokenMap_.insert(TokenMapType::value_type("name", Token(Token::name, std::string("name"))));
-    //tokenMap_.insert(TokenMapType::value_type("index", Token(Token::index, std::string("index"))));
-    //tokenMap_.insert(TokenMapType::value_type("molname", Token(Token::molname, std::string("molname"))));
-    //tokenMap_.insert(TokenMapType::value_type("molindex", Token(Token::molindex, std::string("molindex"))));
-
     tokenMap_.insert(TokenMapType::value_type("*", Token(Token::asterisk, std::string("*"))));
     tokenMap_.insert(TokenMapType::value_type("all", Token(Token::all, std::string("all"))));
     tokenMap_.insert(TokenMapType::value_type("none", Token(Token::none, std::string("none"))));

@@ -697,9 +697,6 @@ void SimInfo::setupFortranSim() {
     }
     
     //setup fortran simulation
-    //gloalExcludes and molMembershipArray should go away (They are never used)
-    //why the hell fortran need to know molecule?
-    //OOPSE = Object-Obfuscated Parallel Simulation Engine
     int nGlobalExcludes = 0;
     int* globalExcludes = NULL; 
     int* excludeList = exclude_.getExcludeList();
@@ -887,11 +884,10 @@ GenericData* SimInfo::getPropertyByName(const std::string& propName) {
 }
 
 void SimInfo::setSnapshotManager(SnapshotManager* sman) {
-    //if (sman_ == sman_) {
-    //    return;
-    //}
-    
-    //delete sman_;
+    if (sman_ == sman) {
+        return;
+    }    
+    delete sman_;
     sman_ = sman;
 
     Molecule* mol;

@@ -150,7 +150,6 @@ class Token {
 
         const static int mass         = atomproperty | 0;
         const static int charge       = atomproperty | 1;
-        const static int dipole       = atomproperty | 2;
         
         const static int opGT         = comparator |  0;
         const static int opGE         = comparator |  1;

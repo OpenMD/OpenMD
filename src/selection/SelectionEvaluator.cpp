@@ -236,17 +236,24 @@ BitSet SelectionEvaluator::comparatorInstruction(const Token& instruction) {
 }
 
 void SelectionEvaluator::compareProperty(StuntDouble* sd, BitSet& bs, int property, int comparator, float comparisonValue) {
-        double propertyValue;
+        double propertyValue = 0.0;
         switch (property) {
         case Token::mass:
             propertyValue = sd->getMass();
             break;
         case Token::charge:
-            return;
-            //break;
-        case Token::dipole:
-            return;
-            //break; 
+            if (sd->isAtom()){
+                Atom* atom = static_cast<Atom*>(sd);
+                propertyValue = getCharge(atom);
+            } else if (sd->isRigidBody()) {
+                RigidBody* rb = static_cast<RigidBody*>(sd);
+                RigidBody::AtomIterator ai;
+                Atom* atom;
+                for (atom = rb->beginAtom(ai); atom != NULL; atom = rb->nextAtom(ai)) {
+                    propertyValue+=  getCharge(atom);
+                }
+            }
+            break;
         default:
             unrecognizedAtomProperty(property);
         }
@@ -412,6 +419,31 @@ BitSet SelectionEvaluator::indexInstruction(const boost::any& value) {
     }
 
     return bs;
+}
+
+
+double SelectionEvaluator::getCharge(Atom* atom) {
+    double charge =0.0;
+    AtomType* atomType = atom->getAtomType();
+    if (atomType->isCharge()) {
+        GenericData* data = atomType->getPropertyByName("Charge");
+        if (data != NULL) {
+            DoubleGenericData* doubleData= dynamic_cast<DoubleGenericData*>(data);
+
+            if (doubleData != NULL) {
+                charge = doubleData->getData();
+
+            } else {
+                    sprintf( painCave.errMsg,
+                           "Can not cast GenericData to DoubleGenericData\n");
+                    painCave.severity = OOPSE_ERROR;
+                    painCave.isFatal = 1;
+                    simError();          
+            }
+        } 
+    }
+
+    return charge;
 }
 
 }
