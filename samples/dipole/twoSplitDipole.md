@@ -19,7 +19,7 @@ switchingRadius = 7.8;
 
 density = 0.0334;
 
-targetTemp = 0.001;
+targetTemp = 10.0;
 targetPressure = 1.0;
 
 tauThermostat = 1e4;

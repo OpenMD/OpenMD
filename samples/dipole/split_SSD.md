@@ -25,10 +25,10 @@ switchingRadius = 7.8;
 
 density = 0.0334;
 
-targetTemp = 0.001;
+targetTemp = 100.0;
 targetPressure = 1.0;
 
-tauThermostat = 1e4;
+tauThermostat = 1e3;
 tauBarostat = 1e4;
 
 dt = 1.0;
