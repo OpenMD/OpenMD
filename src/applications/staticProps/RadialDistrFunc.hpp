@@ -97,7 +97,7 @@ class RadialDistrFunc {
 
         virtual void initalizeHistogram() {}
         virtual void collectHistogram(StuntDouble* sd1, StuntDouble* sd2) =0;
-        virtual void processHistogram() = 0;
+        virtual void processHistogram() {}
         void processNonOverlapping(SelectionManager& sman1, SelectionManager& sman2);
         void processOverlapping(SelectionManager& sman);
 
