@@ -290,8 +290,8 @@ CParallelOptions       = $(FrcDeclare) $(ParallelDeclare)
 CppOptions             = $(FrcDeclare)
 CppParallelOptions     = $(FrcDeclare) $(ParallelDeclare)
 FortranOptions         =
-F90Options             =  @PREPFLAG@ @F90FLAGS@ @MODDIRFLAG@$(SourceDir) -module $(TargetDir) 
-F90ParallelOptions     =  @PREPFLAG@ @F90FLAGS@ @MODDIRFLAG@$(SourceDir) -module $(ParallelTargetDir)  @PREPDEFFLAG@$(ParallelDeclare)
+F90Options             =  @PREPFLAG@ @F90FLAGS@ @MODDIRFLAG@$(SourceDir) @MODDIRFLAG@$(TargetDir) 
+F90ParallelOptions     =  @PREPFLAG@ @F90FLAGS@ @MODDIRFLAG@$(SourceDir) @MODDIRFLAG@$(ParallelTargetDir)  @PREPDEFFLAG@$(ParallelDeclare)
 JavaCompilerOptions    = -d $(TargetDir) -classpath $(ClassPath) \
 			 -sourcepath $(SourceDir) -deprecation
 JavaRunOptions         = -classpath $(ClassPath) 
@@ -655,25 +655,39 @@ ifneq "$(words $(CppFiles))" "0"
 	$(CppCompiler) $(CppOptions) $(IncludePath) -MM $(CppFiles) > Make.cpptemp
 	@cat Make.cpptemp | sed 's/^[a-zA-Z0-9]/$$\(TargetDir\)\/&/g' >> $(DependencyFile)
 	$(Delete) Make.cpptemp
+
+  ifeq "$(UseMPI)" "yes"
 	$(CppCompiler) $(CppParallelOptions) $(IncludePath) -MM $(CppFiles) > Make.cpptemp
 	@cat Make.cpptemp | sed 's/^[a-zA-Z0-9]/$$\(ParallelTargetDir\)\/&/g' >> $(DependencyFile)
 	@$(Delete) Make.cpptemp
+  endif
+
 endif
 
 ifneq "$(words $(CFiles))" "0" 
 	$(CCompiler) $(COptions) $(IncludePath) -MM $(CFiles) $(DerivedCFiles) > Make.ctemp
 	@cat Make.ctemp | sed 's/^[a-zA-Z0-9]/$$\(TargetDir\)\/&/g' >> $(DependencyFile)
 	$(Delete) Make.ctemp
+
+  ifeq "$(UseMPI)" "yes"
 	$(CCompiler) $(CParallelOptions) $(IncludePath) -MM $(CFiles) $(DerivedCFiles) > Make.ctemp
 	@cat Make.ctemp | sed 's/^[a-zA-Z0-9]/$$\(ParallelTargetDir\)\/&/g' >> $(DependencyFile)
 	@$(Delete) Make.ctemp
+  endif
+
 endif
 
 ifneq "$(words $(F90Files))" "0"
 	$(DEV_ROOT)/scripts/filepp  -I $(DEV_ROOT)/src -od '$$(TargetDir)/' $(F90Declare) -mc $(ModuleCase) -ms $(ModSuffix) $(F90Files) > Make.ftemp
+	@cat Make.ftemp >> $(DependencyFile)
+	@$(Delete) Make.ftemp
+
+  ifeq "$(UseMPI)" "yes"
 	$(DEV_ROOT)/scripts/filepp  -I $(DEV_ROOT)/src -od '$$(ParallelTargetDir)/' $(ParallelDeclare) $(F90Declare) -mc $(ModuleCase) -ms $(ModSuffix)  $(F90Files) >> Make.ftemp
 	@cat Make.ftemp >> $(DependencyFile)
 	@$(Delete) Make.ftemp
+  endif
+
 endif
 
 # make lib
