@@ -53,6 +53,12 @@ SimSnapshotManager::SimSnapshotManager(SimInfo* info) : info_(info){
     currentSnapshot_ = new Snapshot(nAtoms, nRigidBodies);
 }
 
+SimSnapshotManager::~SimSnapshotManager(){
+    delete previousSnapshot_;
+    delete currentSnapshot_;
+    previousSnapshot_ = NULL;
+    currentSnapshot_ = NULL;
+}
 bool SimSnapshotManager::advance() {
 
     *previousSnapshot_ = *currentSnapshot_;

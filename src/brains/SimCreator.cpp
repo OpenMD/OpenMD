@@ -551,9 +551,10 @@ void SimCreator::setGlobalIndex(SimInfo *info) {
         beginCutoffGroupIndex += NumCutoffGroupsInProc[i];
     }
 
+#endif
+
     //rigidbody's index begins right after atom's
     beginRigidBodyIndex += info->getNGlobalAtoms();
-#endif
 
     for(mol = info->beginMolecule(mi); mol != NULL;
         mol = info->nextMolecule(mi)) {
