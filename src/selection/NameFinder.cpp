@@ -40,6 +40,8 @@
  */
 #include "selection/NameFinder.hpp"
 #include "utils/wildcards.hpp"
+#include "utils/StringTokenizer.hpp"
+#include "primitives/Molecule.hpp"
 namespace oopse {
 
 TreeNode::~TreeNode(){
@@ -52,7 +54,7 @@ TreeNode::~TreeNode(){
 
 
 NameFinder::NameFinder(SimInfo* info) : info_(info), root_(NULL){
-    nStuntDouble_ = info_->getNGlobalAtoms() + info_->getNGlobalRigidBodies()
+    nStuntDouble_ = info_->getNGlobalAtoms() + info_->getNGlobalRigidBodies();
     loadNames();
 }
 
@@ -72,7 +74,7 @@ void NameFinder::loadNames() {
     RigidBody* rb;
 
     root_ = new TreeNode;
-    root_->bs.resize(nStuntDobule_);
+    root_->bs.resize(nStuntDouble_);
     root_->bs.setAll(); //
     
     for (mol = info_->beginMolecule(mi); mol != NULL; mol = info_->nextMolecule(mi)) {
@@ -85,7 +87,7 @@ void NameFinder::loadNames() {
             currentMolNode->name = molName;
             currentMolNode->bs.resize(nStuntDouble_);
         }else {
-            currentMolNode = i->second;
+            currentMolNode = foundIter->second;
         }
         
         for(atom = mol->beginAtom(ai); atom != NULL; atom = mol->nextAtom(ai)) {
@@ -137,15 +139,11 @@ void NameFinder::loadNames() {
         
     }    
 
-    std::map<std::string, TreeNode*>::iterator i;
-    for( i = root_->children.begin(); i != ; ++i){
-        i->bs = 
-    }
 }
 
 bool NameFinder::match(const std::string& name, BitSet& bs){
 
-    bool error = true;
+    bool hasError = false;
     StringTokenizer tokenizer(name, ".");
 
     std::vector<std::string> names;
@@ -161,33 +159,34 @@ bool NameFinder::match(const std::string& name, BitSet& bs){
                 //if all molecules are selected, we don't need to do the matching, just set all of the bits
                 bs.setAll();
             } else{
-                matchMolecule(name[0]);
-                matchStuntDouble("*", names[0]);
+                matchMolecule(names[0], bs);
+                matchStuntDouble("*", names[0], bs);
             } 
             
             break;
         case 2:
             //could be molecule.*(include atoms and rigidbodies) or rigidbody.*(atoms belong to rigidbody)
             matchRigidAtoms("*", names[0], names[1], bs);
-            matchStuntDouble(names[0], names[1]);
+            matchStuntDouble(names[0], names[1], bs);
             
             break;
         case 3:
             //must be molecule.rigidbody.*
-            matchRigidAtoms(names[0], names[1], names[2], bs)
+            matchRigidAtoms(names[0], names[1], names[2], bs);
             break;
-        default:            
+        default:      
+            hasError = true;	    
             break;           
     }
 
-    return matched;
+    return hasError; 
 }
 
 void NameFinder::matchMolecule(const std::string& molName, BitSet& bs) {
     std::vector<TreeNode*> molNodes = getMatchedChildren(root_, molName);            
     std::vector<TreeNode*>::iterator i;
     for( i = molNodes.begin(); i != molNodes.end(); ++i ) {
-        bs |= i->bs;
+        bs |= (*i)->bs;
     }    
 }
 
@@ -198,7 +197,7 @@ void NameFinder::matchStuntDouble(const std::string& molName, const std::string&
         std::vector<TreeNode*> sdNodes = getMatchedChildren(*i, sdName);   
         std::vector<TreeNode*>::iterator j;
         for (j = sdNodes.begin(); j != sdNodes.end(); ++j) {
-            bs |= j->bs;
+            bs |= (*j)->bs;
         }
     }
 
@@ -214,7 +213,7 @@ void NameFinder::matchRigidAtoms(const std::string& molName, const std::string& 
             std::vector<TreeNode*> rbAtomNodes = getMatchedChildren(*j, rbAtomName);
             std::vector<TreeNode*>::iterator k;
             for(k = rbAtomNodes.begin(); k != rbAtomNodes.end(); ++k){
-                bs |= k->bs;
+                bs |= (*k)->bs;
             }
         }
     }

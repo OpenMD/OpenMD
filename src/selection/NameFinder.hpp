@@ -43,7 +43,7 @@
 #include <set>
 #include <string>
 #include <map>
-
+#include "brains/SimInfo.hpp"
 #include "utils/BitSet.hpp"
 namespace oopse {
 
