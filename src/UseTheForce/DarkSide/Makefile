@@ -10,7 +10,8 @@ Source    = \
 	calc_gb.F90 \
 	calc_LJ_FF.F90 \
 	calc_reaction_field.F90 \
-	calc_sticky_pair.F90 
+	calc_sticky_pair.F90 \
+	calc_shapes.F90
 
 RmiSource =
 

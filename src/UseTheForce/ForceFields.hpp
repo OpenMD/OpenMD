@@ -215,5 +215,36 @@ private:
 
 };
 
+class Shapes_FF : public ForceFields{
+
+public:
+  Shapes_FF();
+  Shapes_FF(char* the_variant);
+  virtual ~Shapes_FF();
+  
+
+  void readParams();
+  void cleanMe( void );
+
+  void initializeAtoms( int nAtoms, Atom** atomArray );
+  void initializeBonds( int nBonds, Bond** bondArray,
+			bond_pair* the_bonds );
+  void initializeBends( int nBends, Bend** bendArray,
+			bend_set* the_bends );
+  void initializeTorsions( int nTorsions, Torsion** torsionArray,
+			   torsion_set* the_torsions );
+
+  void initForceField( int ljMixRule );
+
+  void calcRcut( void );
+  double getAtomTypeMass(char* atomType);
+private:
+
+  void fastForward( char* stopText, char* searchOwner );
+  
+  double shapesRcut;
+};
+
+
 #endif
 
