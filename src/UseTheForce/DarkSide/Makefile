@@ -1,4 +1,5 @@
 Source    = \
+	mpiSimulation_module.F90 \
 	neighborLists.F90 \
 	atype_module.F90 \
 	force_globals.F90 \

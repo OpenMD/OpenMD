@@ -4,4 +4,5 @@ RmiSource =
 
 Main      = 
 
-include $(DEV_ROOT)/Makefile
+DEV_ROOT=.. 
+include $(DEV_ROOT)/make/Makefile

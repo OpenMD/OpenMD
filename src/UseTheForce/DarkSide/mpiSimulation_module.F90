@@ -7,7 +7,7 @@
 !!
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: mpiSimulation_module.F90,v 1.2 2004-09-24 16:27:57 tim Exp $, $Date: 2004-09-24 16:27:57 $, $Name: not supported by cvs2svn $, $Revision: 1.2 $
+!! @version $Id: mpiSimulation_module.F90,v 1.1 2004-10-05 19:37:38 tim Exp $, $Date: 2004-10-05 19:37:38 $, $Name: not supported by cvs2svn $, $Revision: 1.1 $
 
 module mpiSimulation  
   use definitions

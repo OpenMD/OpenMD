@@ -6,7 +6,6 @@ Source    = \
 	fortranWrappers.cpp \
 	LJFF.cpp \
 	mpiForceField.c \
-	mpiSimulation_module.F90 \
 	WATER.cpp \
 	notifyCutoffs.F90 \
 	wrappers.F90 \
