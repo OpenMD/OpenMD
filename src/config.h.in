@@ -30,5 +30,5 @@
 #undef HAVE__SYSTEM_CONFIGURATION
 #undef HAVE_TABLE 
 
-#undef PS
+#undef PSCOMMAND
 #undef PSTYPE

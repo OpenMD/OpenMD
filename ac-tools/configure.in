@@ -158,27 +158,27 @@ fi
 
 AC_PATH_PROG(PS, ps)
 AC_CACHE_CHECK([for POSIX or BSD ps syntax], ac_cv_prog_ps_syntax, [
-	if $PS -ef -o rss > /dev/null 2>&1; then
-		ac_cv_prog_ps_ef=yes
-	else
-		ac_cv_prog_ps_ef=no
-	fi
 	if $PS ax -o rss > /dev/null 2>&1; then
 		ac_cv_prog_ps_ax=yes
 	else
 		ac_cv_prog_ps_ax=no
 	fi
-	if test "$ac_cv_prog_ps_ef" = yes; then
-		ac_cv_prog_ps_syntax=POSIX
+	if $PS -ef -o rss > /dev/null 2>&1; then
+		ac_cv_prog_ps_ef=yes
+	else
+		ac_cv_prog_ps_ef=no
+	fi
+	if test "$ac_cv_prog_ps_ax" = yes; then
+		ac_cv_prog_ps_syntax=BSD
         else
-		if test "$ac_cv_prog_ps_ax" = yes; then
-			ac_cv_prog_ps_syntax=BSD
+		if test "$ac_cv_prog_ps_es" = yes; then
+			ac_cv_prog_ps_syntax=POSIX
 		else
 			AC_MSG_ERROR(Could not determine ps syntax)
 		fi
 	fi
 ])
-AC_DEFINE_UNQUOTED(PS, $PS, [Path to ps program])
+AC_DEFINE_UNQUOTED(PSCOMMAND, "$PS", [Path to ps program])
 AC_DEFINE_UNQUOTED(PSTYPE, $ac_cv_prog_ps_syntax, [ps syntax type])
 
 

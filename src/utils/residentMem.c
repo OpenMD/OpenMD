@@ -8,9 +8,9 @@ double residentMem () {
   char buf[150];
   char* foo;
   long int myRSS, totRSS;
-  char* pscommand;
+  char pscommand[150];
 
-  pscommand = strdup("PS");
+  strncpy(pscommand, PSCOMMAND, strlen(PSCOMMAND));
 
 #if PSTYPE == BSD
   strcat(pscommand, " ax -o rss");
