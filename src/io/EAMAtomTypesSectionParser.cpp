@@ -144,7 +144,6 @@ void EAMAtomTypesSectionParser::parseEAMArray(std::istream& input,
     const int bufferSize = 65535;
     char buffer[bufferSize];
     std::string line;
-    int readLines = num/dataPerLine;
     int lineCount = 0;
 
     while(lineCount < nlinesToRead && input.getline(buffer, bufferSize) ){

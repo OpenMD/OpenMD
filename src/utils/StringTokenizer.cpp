@@ -159,44 +159,25 @@ bool StringTokenizer::nextTokenAsBool() {
         return false;
     }
 }
-
+ 
+//Since libstdc++(GCC 3.2) has an i/ostream::operator>>/<<(streambuf*) bug (Bug 9318)
+//Instead of using iostream facility, we use C library
 int StringTokenizer::nextTokenAsInt() {
     std::string token = nextToken();
-    std::istringstream iss(token);
-    int result;
-    
-    if (iss >> result) {
-        return result;
-    } else {
-        std::cerr << "unable to convert " << token << " to an integer" << std::endl;
-        return 0;
-    }
+   
+    return atoi(token.c_str());
 }
 
 float StringTokenizer::nextTokenAsFloat() {
     std::string token = nextToken();
-    std::istringstream iss(token);
-    float result;
-    
-    if (iss >> result) {
-        return result;
-    } else {
-        std::cerr << "unable to convert " << token << " to a float" << std::endl;
-        return 0.0;
-    }
+    convertFortranNumber(token);
+    return (float) (atof(token.c_str()));
 }
 
 double StringTokenizer::nextTokenAsDouble() {
     std::string token = nextToken();
-    std::istringstream iss(token);
-    double result;
-    
-    if (iss >> result) {
-        return result;
-    } else {
-        std::cerr << "unable to convert " << token << " to a double" << std::endl;
-        return 0.0;
-    }
+    convertFortranNumber(token);
+    return atof(token.c_str());
 }
 
 std::string  StringTokenizer::peekNextToken() {
@@ -222,6 +203,15 @@ std::string  StringTokenizer::peekNextToken() {
     }
     
     return result;    
+}
+
+void StringTokenizer::convertFortranNumber(std::string& fortranNumber) {
+    std::string::iterator i;
+    for(i = fortranNumber.begin(); i != fortranNumber.end(); ++i) {
+        if (*i == 'd' || *i == 'D') {
+            *i = 'E';
+        }
+    }
 }
 
 }//end namespace oopse

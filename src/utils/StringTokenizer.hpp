@@ -182,6 +182,10 @@ class StringTokenizer {
          */
         bool isDelimiter(const char c);
 
+        /** convert a fortran number to a c/c++ number */
+        void convertFortranNumber(std::string& fortranNumber);
+         
+
         std::string tokenString_;
 
         std::string delim_;         /**< current delimiter set of this string tokenizer */

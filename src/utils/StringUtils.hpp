@@ -112,9 +112,7 @@ namespace oopse {
    */
     template<typename T>
     std::string toString(const T& v) {
-        std::ostringstream oss;
-        T result;
-        
+        std::ostringstream oss;        
         oss << v;
         return oss.str();
     }
