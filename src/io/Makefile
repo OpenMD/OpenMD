@@ -21,8 +21,6 @@ Source    = \
 	make_nodes.c \
 	mpiBASS.c \
 	parse_tree.c \
-	RestraintReader.cpp \
-	RestraintWriter.cpp \
         DumpReader.cpp \
 	DumpWriter.cpp \
         StatWriter.cpp \

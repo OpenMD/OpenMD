@@ -52,7 +52,7 @@
 #include <cassert>
 #include <cmath>
 #include <iostream>
-
+#include <math.h>
 namespace oopse {
 
     static const double epsilon = 0.000001;

@@ -38,7 +38,7 @@
  * University of Notre Dame has been advised of the possibility of
  * such damages.
  */
- 
+#include <cmath> 
 #include "types/CharmmTorsionType.hpp"
 #include "utils/NumericConstant.hpp"
 namespace oopse {
@@ -46,7 +46,7 @@ namespace oopse {
 void CharmmTorsionType::calcForce(double cosPhi, double sinPhi, double& V, double& dVdPhi) {
     V = 0;
     dVdPhi = 0; 
-    double phi = -atan2(sinPhi, cosPhi);
+    double phi = -std::atan2(sinPhi, cosPhi);
     
     std::vector<CharmmTorsionParameter>::iterator i;
     for (i = parameter_.begin(); i != parameter_.end(); ++i) {
@@ -69,8 +69,8 @@ void CharmmTorsionType::calcForce(double cosPhi, double sinPhi, double& V, doubl
 
         } else {
             //use normal cos form if periodicity is greater than 0
-            V += kchi * (1 + cos(n * phi + delta));
-            dVdPhi += -n * kchi * sin(n * phi + delta);
+            V += kchi * (1 + std::cos(n * phi + delta));
+            dVdPhi += -n * kchi * std::sin(n * phi + delta);
         }
     } 
 }

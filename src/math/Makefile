@@ -1,7 +1,5 @@
 Source    = \
-	MatVec3.c \
 	randomSPRNG.cpp \
-	RealSphericalHarmonic.cpp \
 
 RmiSource =
 

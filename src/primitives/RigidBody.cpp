@@ -39,6 +39,7 @@
  * such damages.
  */
 #include <algorithm>
+#include <math.h>
 #include "primitives/RigidBody.hpp"
 #include "utils/simError.h"
 namespace oopse {
