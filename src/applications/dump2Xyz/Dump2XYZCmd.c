@@ -53,7 +53,8 @@ cmdline_parser_print_help (void)
          "                                    select not DMPC -- select all atoms and all rigidbodies do not belong to DMPC molecule\n"	
 	 "                                    select C* and 4 to 7 -- select stuntdoubles which match C* and which index is between [4, 7)\n"  
          "                                    select 5 -- select stuntdobule whose global index is 5\n"                                       
-         "                                    select within (5.0, HDP or PO4) -- select stuntdoubles which is within 5 A to HDP or PO4\n" 
+         "                                    select within (5.0, HDP or PO4) -- select stuntdoubles which is within 5 A to HDP or PO4\n"
+         "                                    select DMPC.3 -- select stuntdouble which internal index is 3\n"
          "                                    select DMPC.DMPC_RB_*.* --select atoms belong to rigid body inside DMPC molecule \n");
   printf("      --repeatX=INT                 The number of images to repeat in the x \n                                      direction  (default=`0')\n");
   printf("      --repeatY=INT                 The number of images to repeat in the y \n                                      direction  (default=`0')\n");
