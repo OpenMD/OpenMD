@@ -11,14 +11,14 @@ Source = MainTest.cpp \
        	 Vector3TestCase.cpp \
 	 QuaternionTestCase.cpp \
 	 PolynomialTestCase.cpp \
-         ParallelRandNumGenTestCase.cpp
-
+         RandNumGenTestCase.cpp \
+	 ParallelandNumGen.cpp 
 
 DEV_ROOT               = ../..
 UseMPI                 = no 
 ParallelDeclare        = -DIS_MPI
-CppCompiler            = g++ -g
-Linker                 = g++ -g
+CppCompiler            = icpc7 -g
+Linker                 = icpc7 -g
 Delete                 = /bin/rm -rf
 MakeDepend             = makedepend
 

@@ -2,12 +2,12 @@
 #define TEST_OOPSERANDNUMGENTESTCASE_HPP
 
 #include <cppunit/extensions/HelperMacros.h>
-#include "math/ParallelandNumGenTestCase.hpp"
+#include "math/ParallelRandNumGen.hpp"
  
 
 
-class ParallelandNumGenTestCase : public CPPUNIT_NS::TestFixture {
-    CPPUNIT_TEST_SUITE( ParallelandNumGenTestCase );
+class RandNumGenTestCase : public CPPUNIT_NS::TestFixture {
+    CPPUNIT_TEST_SUITE( RandNumGenTestCase );
     CPPUNIT_TEST(testUniform);
     CPPUNIT_TEST(testGaussian);
     CPPUNIT_TEST(testMPIRNG);    
