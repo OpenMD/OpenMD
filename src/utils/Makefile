@@ -6,7 +6,6 @@ Source    = \
 	simError.c \
 	status_module.F90 \
 	StreamTokenizer.cpp \
-	StringUtils.c \
 	StringUtils.cpp \
 	Utility.cpp \
 	vector_class.F90 \

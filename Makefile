@@ -1,24 +1,26 @@
-DEV_ROOT=/home/maul/gezelter/gezelter/OOPSE-1.0
+DEV_ROOT=/home/maul/gezelter/tim/code/OOPSE-2.0
 IS_UNIX=1
 
 Packages = \
-	applications \
-	brains \
-	constraints \
-	integrators \
-	io \
+	utils \
 	math \
-	minimizers \
+	types \
 	primitives \
+	visitors \
+	UseTheForce/DarkSide \
+	UseTheForce \
+	brains \
+	io \
+	integrators \
+	minimizers \
+	constraints \
 	profiling \
 	restraints \
-	types \
-	UseTheForce \
-	utils \
-	visitors \
+	applications \
 
 IncludeDirs = \
-	/usr/include 
+	/usr/include \
+	/usr/local/include \
 	
 LibraryDirs = \
         /usr/lib 

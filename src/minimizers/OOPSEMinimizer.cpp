@@ -1,6 +1,6 @@
 #include <math.h>
 #include "minimizers/OOPSEMinimizer.hpp"
-#include "Integrator.cpp"
+#include "integrators/Integrator.cpp"
 
 OOPSEMinimizer::OOPSEMinimizer( SimInfo *theInfo, ForceFields* the_ff ,
                                               MinimizerParameterSet * param) :

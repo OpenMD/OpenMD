@@ -17,7 +17,7 @@
 #include "UseTheForce/mpiForceField.h"
 #endif
 
-#include ""UseTheForce/fForceField.h""
+#include "UseTheForce/fForceField.h"
 #include "UseTheForce/fortranWrapDefines.hpp"
 
 class bond_pair{

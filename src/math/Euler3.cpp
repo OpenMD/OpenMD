@@ -1,5 +1,5 @@
 #include "math/Euler3.hpp"
-#include "Mat3x3d.hpp"
+#include "math/Mat3x3d.hpp"
 #include "Quaternion.hpp"
 #include "Vector3d.hpp"
 

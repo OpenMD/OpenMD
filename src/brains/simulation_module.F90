@@ -15,8 +15,8 @@ module simulation
   PRIVATE
 
 #define __FORTRAN90
-#include "fSimulation.h"
-#include "fSwitchingFunction.h"
+#include "brains/fSimulation.h"
+#include "UseTheForce/fSwitchingFunction.h"
 
   type (simtype), public, save :: thisSim
 

@@ -9,7 +9,6 @@ Source    = \
 	LatticeCreator.cpp \
 	LatticeFactory.cpp \
 	MoLocator.cpp \
-	nanoBuilder.cpp \
 	oopse.cpp \
 	quickLate.c \
 	simpleBuilderCmd.c \
