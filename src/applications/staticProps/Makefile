@@ -8,6 +8,8 @@ Source    = \
         RadialDistrFunc.cpp \
 	StaticPropsCmd.c \
 	StaticProps.cpp \
+	
+BuiltParallelExe = 0
 
 RmiSource =
 

@@ -3,6 +3,7 @@ Package = applications/oopse
 Source    = \
 	oopse.cpp \
 
+BuiltParallelExe = 1
 RmiSource =
 
 Main      = oopse

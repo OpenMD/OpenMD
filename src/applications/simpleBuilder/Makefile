@@ -8,6 +8,8 @@ Source    = \
 	MoLocator.cpp \
 	simpleBuilderCmd.c \
 	simpleBuilder.cpp \
+	
+BuiltParallelExe = 0
 
 RmiSource =
 

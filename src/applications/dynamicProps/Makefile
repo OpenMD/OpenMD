@@ -9,6 +9,8 @@ Source    = \
             VCorrFunc.cpp \
             DynamicProps.cpp \
             DynamicPropsCmd.c \
+	    
+BuiltParallelExe = 0
 
 RmiSource =
 

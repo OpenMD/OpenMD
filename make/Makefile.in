@@ -218,7 +218,9 @@ ifneq  "$(words $(ObjectFiles) $(ParallelObjectFiles))" "0"
   DependencyFile    = $(PackageSourceDir)/Makedepend
   ifneq "$(words $(Main))" "0"
     Executable             = $(BinDir)/$(Main)
-    ParallelExecutable     = $(BinDir)/$(Main)_MPI
+    ifeq "$(BuiltParallelExe)" "1"
+      ParallelExecutable     = $(BinDir)/$(Main)_MPI
+    endif
   else
     SharedLibrary          = $(LibDir)/lib$(subst /,,$(patsubst %,oopse_%,$(Package)))_UP.so
     StaticLibrary          = $(LibDir)/lib$(subst /,,$(patsubst %,oopse_%,$(Package)))_UP.a
