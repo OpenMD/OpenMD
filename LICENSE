@@ -1,4 +1,4 @@
-Copyright (c) 2003 The University of Notre Dame. All Rights Reserved.
+Copyright (c) 2004 The University of Notre Dame. All Rights Reserved.
 
 The University of Notre Dame grants you ("Licensee") a non-exclusive,
 royalty free, license to use, modify and redistribute this software in
@@ -9,9 +9,9 @@ are met:
    publication of scientific results based in part on use of the
    program.  An acceptable form of acknowledgement is citation of
    the article in which the program was described (Matthew
-   A. Meineke, Charles F. Vardeman II, Christopher J. Fennel and
-   J. Daniel Gezelter, "An Open-Source Object-Oriented Parallel
-   Simulation Engine (OOPSE)," J. Comput. Chem. XX, XXXX-YYYY (2004)).
+   A. Meineke, Charles F. Vardeman II, Teng Lin, Christopher J. Fennel
+   and J. Daniel Gezelter, "OOPSE: The Object-Oriented Parallel
+   Simulation Engine," J. Comput. Chem. XX, XXXX-YYYY (2004)).
 
 2. Redistributions of source code must retain the above copyright
    notice, this list of conditions and the following disclaimer.
@@ -34,11 +34,3 @@ DAMAGES, HOWEVER CAUSED AND REGARDLESS OF THE THEORY OF LIABILITY,
 ARISING OUT OF THE USE OF OR INABILITY TO USE SOFTWARE, EVEN IF THE
 UNIVERSITY OF NOTRE DAME HAS BEEN ADVISED OF THE POSSIBILITY OF
 SUCH DAMAGES.
-
-This software is not designed or intended for use in on-line
-control of aircraft, air traffic, aircraft navigation or aircraft
-communications; or in the design, construction, operation or
-maintenance of any nuclear facility. Licensee represents and
-warrants that it will not use or redistribute the Software for such
-purposes.  
-
