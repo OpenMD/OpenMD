@@ -11,7 +11,7 @@ option	"output"	o	"output file name"					string	typestr="filename"	no
 option	"step"		n	"process every n frame"					int	default="1"		no
 option	"nrbins"    	r       "number of bins for distance"				int	default="50"		no
 option	"nanglebins"	a	"number of bins for cos(angle)"				int	default="50"		no 
-option	"length"	l	"maximum length (Defaults to cutoff radius)"	double	no   
+option	"length"	l	"maximum length (Defaults to 1/2 smallest length of first frame)"	double	no   
 option	"sele1"		-	"select first stuntdouble set"	string	typestr="selection script"	no
 option  "sele2"         -       "select second stuntdouble set" string  typestr="selection script"      no
 defgroup "staticProps" groupdesc=" an option of this group is required" yes

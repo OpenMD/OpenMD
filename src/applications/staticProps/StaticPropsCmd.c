@@ -42,7 +42,7 @@ cmdline_parser_print_help (void)
   printf("  -n, --step=INT                process every n frame  (default=`1')\n");
   printf("  -r, --nrbins=INT              number of bins for distance  (default=`50')\n");
   printf("  -a, --nanglebins=INT          number of bins for cos(angle)  (default=`50')\n");
-  printf("  -l, --length=DOUBLE           maximum length (Defaults to cutoff radius)\n");
+  printf("  -l, --length=DOUBLE           maximum length (Defaults to 1/2 smallest length of first frame)\n");
   printf("      --sele1=selection script  select first stuntdouble set\n");
   printf("      --sele2=selection script  select second stuntdouble set\n");
   printf("\n");
