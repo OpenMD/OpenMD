@@ -55,10 +55,12 @@ RadialDistrFunc::        RadialDistrFunc(SimInfo* info, const std::string& filen
     evaluator2_.loadScriptString(sele2);
 
     if (!evaluator1_.isDynamic()) {
-            seleMan1_.setSelectionSet(evaluator1_.evaluate());
+        seleMan1_.setSelectionSet(evaluator1_.evaluate());
+        validateSelection1(seleMan1_);
     }
     if (!evaluator2_.isDynamic()) {
-            seleMan2_.setSelectionSet(evaluator2_.evaluate());
+        seleMan2_.setSelectionSet(evaluator2_.evaluate());
+        validateSelection2(seleMan2_);
     }
 
     if (!evaluator1_.isDynamic() && !evaluator2_.isDynamic()) {
@@ -94,9 +96,11 @@ void RadialDistrFunc::process() {
 
         if (evaluator1_.isDynamic()) {
             seleMan1_.setSelectionSet(evaluator1_.evaluate());
+            validateSelection1(seleMan1_);
         }
         if (evaluator2_.isDynamic()) {
             seleMan2_.setSelectionSet(evaluator2_.evaluate());
+            validateSelection2(seleMan2_);
         }
 
         for (mol = info_->beginMolecule(mi); mol != NULL; mol = info_->nextMolecule(mi)) {

@@ -62,16 +62,26 @@ class GofXyz : public RadialDistrFunc {
         virtual void preProcess();
         void initalizeHistogram();
         virtual void collectHistogram(StuntDouble* sd1, StuntDouble* sd2);
-        void processHistogram();
         virtual void writeRdf();
 
+        Vector3d getMolCom(StuntDouble* sd);
+        
+        //virtual void validateSelection1(SelectionManager& sman);
+        
         double len_;
         int nRBins_;
         double deltaR_;
         
         std::vector<std::vector<std::vector<int> > > histogram_;
 
-        int npairs_;
+        struct CoorSet {
+            Vector3d xaxis;
+            Vector3d yaxis;
+            Vector3d zaxis;
+        };
+
+        std::map<int, CoorSet> coorSets_;
+        std::vector<Molecule*> atom2Mol_;
 };
 
 

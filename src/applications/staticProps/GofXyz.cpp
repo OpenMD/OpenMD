@@ -43,7 +43,7 @@
 #include <fstream>
 #include "applications/staticProps/GofXyz.hpp"
 #include "utils/simError.h"
-
+#include "primitives/Molecule.hpp"
 namespace oopse {
 
 GofXyz::GofXyz(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2, double len, int nrbins)
@@ -59,89 +59,108 @@ GofXyz::GofXyz(SimInfo* info, const std::string& filename, const std::string& se
             histogram_[i][j].resize(nRBins_);
         }
     }   
+
+    //create atom2Mol mapping (should be other class' responsibility)
+    atom2Mol_.insert(atom2Mol_.begin(), info_->getNGlobalAtoms() + info_->getNGlobalRigidBodies(), static_cast<Molecule*>(NULL));
+    
+    SimInfo::MoleculeIterator mi;
+    Molecule* mol;
+    Molecule::AtomIterator ai;
+    Atom* atom;
+    Molecule::RigidBodyIterator rbIter;
+    RigidBody* rb;
+    
+    for (mol = info_->beginMolecule(mi); mol != NULL; mol = info_->nextMolecule(mi)) {
+        
+        for(atom = mol->beginAtom(ai); atom != NULL; atom = mol->nextAtom(ai)) {
+            atom2Mol_[atom->getGlobalIndex()] = mol;
+        }
+
+        for (rb = mol->beginRigidBody(rbIter); rb != NULL; rb = mol->nextRigidBody(rbIter)) {
+            atom2Mol_[rb->getGlobalIndex()] = mol;
+        }
+        
+    }       
 }
 
 
 void GofXyz::preProcess() {
-    /*
-    for (int i = 0; i < avgGofr_.size(); ++i) {
-        std::fill(avgGofr_[i].begin(), avgGofr_[i].end(), 0);
-    }
-    */
+    for (int i = 0 ; i < nRBins_; ++i) {
+        histogram_[i].resize(nRBins_);
+        for(int j = 0; j < nRBins_; ++j) {
+            std::fill(histogram_[i][j].begin(), histogram_[i][j].end(), 0);
+        }
+    }   
 }
+
 
 void GofXyz::initalizeHistogram() {
-    /*
-    npairs_ = 0;
-    for (int i = 0; i < histogram_.size(); ++i)
-        std::fill(histogram_[i].begin(), histogram_[i].end(), 0);
-    */
-}
+    //calculate the center of mass of the molecule of selected stuntdouble in selection1
 
+    //determine the new coordinate set of selection1
+    //v1 = Rs1 -Rcom, 
+    //z = Rs1.dipole
+    //x = v1 X z
+    //y = z X x 
+    coorSets_.clear();
 
-void GofXyz::processHistogram() {
-
-    /*
-    double volume = info_->getSnapshotManager()->getCurrentSnapshot()->getVolume();
-    double pairDensity = npairs_ /volume;
-    double pairConstant = ( 4.0 * NumericConstant::PI * pairDensity ) / 3.0;
-
-    for(int i = 0 ; i < histogram_.size(); ++i){
-
-        double rLower = i * deltaR_;
-        double rUpper = rLower + deltaR_;
-        double volSlice = ( rUpper * rUpper * rUpper ) - ( rLower * rLower * rLower );
-        double nIdeal = volSlice * pairConstant;
-
-        for (int j = 0; j < histogram_[i].size(); ++j){
-            avgGofr_[i][j] += histogram_[i][j] / nIdeal;    
-        }
+    int i;
+    StuntDouble* sd;
+    for (sd = seleMan1_.beginSelected(i); sd != NULL; sd = seleMan1_.nextSelected(i)) {
+        Vector3d rcom = getMolCom(sd);
+        Vector3d rs1 = sd->getPos();
+        Vector3d v1 =  rcom - rs1;
+        CoorSet currCoorSet;
+        currCoorSet.zaxis = sd->getElectroFrame().getColumn(2);
+        v1.normalize();
+        currCoorSet.zaxis.normalize();
+        currCoorSet.xaxis = cross(v1, currCoorSet.zaxis);
+        currCoorSet.yaxis = cross(currCoorSet.zaxis, currCoorSet.xaxis);
+        coorSets_.insert(std::map<int, CoorSet>::value_type(sd->getGlobalIndex(), currCoorSet));
     }
-    */
+
 }
 
 void GofXyz::collectHistogram(StuntDouble* sd1, StuntDouble* sd2) {
 
-    /*
-    if (sd1 == sd2) {
-        return;
-    }
-    
     Vector3d pos1 = sd1->getPos();
     Vector3d pos2 = sd2->getPos();
-    Vector3d r12 = pos1 - pos2;
+    Vector3d r12 = pos2 - pos1;
     currentSnapshot_->wrapVector(r12);
 
-    double distance = r12.length();
-    int whichRBin = distance / deltaR_;
+    std::map<int, CoorSet>::iterator i = coorSets_.find(sd1->getGlobalIndex());
+    assert(i != coorSets_.end());
+    
+    double x = dot(r12, i->second.xaxis);
+    double y = dot(r12, i->second.yaxis);
+    double z = dot(r12, i->second.zaxis);
 
+    int xbin = x / deltaR_;
+    int ybin = y / deltaR_;
+    int zbin = z / deltaR_;
+
+    if (xbin < nRBins_ && ybin < nRBins_ && zbin < nRBins_) {
+        ++histogram_[x][y][z];
+    }
     
-    double cosAngle = evaluateAngle(sd1, sd2);
-    double halfBin = (nAngleBins_ - 1) * 0.5;
-    int whichThetaBin = halfBin * (cosAngle + 1.0)
-    ++histogram_[whichRBin][whichThetaBin];
-    
-    ++npairs_;
-    */
 }
 
 void GofXyz::writeRdf() {
     std::ofstream rdfStream(outputFilename_.c_str());
     if (rdfStream.is_open()) {
-        rdfStream << "#radial distribution function\n";
+        rdfStream << "#g(x, y, z)\n";
         rdfStream << "#selection1: (" << selectionScript1_ << ")\t";
         rdfStream << "selection2: (" << selectionScript2_ << ")\n";
-        rdfStream << "#r\tcorrValue\n";
+        rdfStream << "#nRBins = " << nRBins_ << "\t maxLen = " << len_ << "deltaR = " << deltaR_ <<"\n";
         for (int i = 0; i < histogram_.size(); ++i) {
-            double x = deltaR_ * (i + 0.5);
-
+ 
             for(int j = 0; j < histogram_[i].size(); ++j) {
-                double y = deltaR_ * (j+ 0.5);
-
+ 
                 for(int k = 0;k < histogram_[i].size(); ++k) {
-                    double z = deltaR_ * (k + 0.5); 
-                    rdfStream << x << "\t" << y << "\t" <<  z << "\t" << histogram_[i][j][k]/nProcessed_ << "\n";
+ 
+                    rdfStream << histogram_[i][j][k]/nProcessed_ << "\t";
                 }
+                rdfStream << "\n";                
             }
         }
         
@@ -155,7 +174,10 @@ void GofXyz::writeRdf() {
     rdfStream.close();
 }
 
+Vector3d GofXyz::getMolCom(StuntDouble* sd){
+    Molecule* mol = atom2Mol_[sd->getGlobalIndex()];
+    assert(mol);
+    return mol->getCom();
 }
 
-
-
+}

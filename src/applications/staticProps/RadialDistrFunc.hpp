@@ -90,6 +90,8 @@ class RadialDistrFunc {
         std::string selectionScript1_;
         std::string selectionScript2_;
         int nProcessed_;
+        SelectionManager seleMan1_;
+        SelectionManager seleMan2_;
         
     private:
 
@@ -99,13 +101,14 @@ class RadialDistrFunc {
         void processNonOverlapping(SelectionManager& sman1, SelectionManager& sman2);
         void processOverlapping(SelectionManager& sman);
 
+        virtual void validateSelection1(SelectionManager& sman) {}
+        virtual void validateSelection2(SelectionManager& sman) {}
         virtual void writeRdf() = 0;
 
         
         SelectionEvaluator evaluator1_;
         SelectionEvaluator evaluator2_;
-        SelectionManager seleMan1_;
-        SelectionManager seleMan2_;
+
         SelectionManager sele1_minus_common_;
         SelectionManager sele2_minus_common_;
         SelectionManager common_;        

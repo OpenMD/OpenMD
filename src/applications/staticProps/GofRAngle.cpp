@@ -105,7 +105,7 @@ void GofRAngle::collectHistogram(StuntDouble* sd1, StuntDouble* sd2) {
     
     Vector3d pos1 = sd1->getPos();
     Vector3d pos2 = sd2->getPos();
-    Vector3d r12 = pos1 - pos2;
+    Vector3d r12 = pos2 - pos1;
     currentSnapshot_->wrapVector(r12);
 
     double distance = r12.length();
@@ -152,7 +152,7 @@ void GofRAngle::writeRdf() {
 double GofRTheta::evaluateAngle(StuntDouble* sd1, StuntDouble* sd2) {
     Vector3d pos1 = sd1->getPos();
     Vector3d pos2 = sd2->getPos();
-    Vector3d r12 = pos1 - pos2;
+    Vector3d r12 = pos2 - pos1;
     currentSnapshot_->wrapVector(r12);
     r12.normalize();
     Vector3d dipole = sd1->getElectroFrame().getColumn(2);
