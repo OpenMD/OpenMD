@@ -1,8 +1,18 @@
-2004-11-04 14:48  tim
+2004-11-04 21:56  tim
 
-	* src/brains/: SimInfo.cpp, SimInfo.hpp, SimModel.cpp,
-	SimModel.hpp, Snapshot.hpp, Stats.cpp, Stats.hpp: adding Stats
-	class
+	* src/: brains/SimCreator.cpp, brains/SimCreator.hpp,
+	primitives/Molecule.hpp: Pain......
+
+2004-11-04 15:55  tim
+
+	* ChangeLog, make/Makefile.in, src/brains/SimCreator.cpp,
+	src/brains/SimCreator.hpp, src/brains/SimInfo.hpp,
+	src/brains/Stats.hpp: time to break SimSetup
+
+2004-11-04 15:51  gezelter
+
+	* src/UseTheForce/: ForceField.cpp, ForceField.hpp: added new
+	classes in progress
 
 2004-11-04 14:48  tim
 
@@ -13,6 +23,12 @@
 
 	* src/brains/Stats.hpp: file Stats.hpp was initially added on
 	branch new_design.
+
+2004-11-04 14:48  tim
+
+	* src/brains/: SimInfo.cpp, SimInfo.hpp, SimModel.cpp,
+	SimModel.hpp, Snapshot.hpp, Stats.cpp, Stats.hpp: adding Stats
+	class
 
 2004-11-04 11:22  gezelter
 
@@ -48,17 +64,17 @@
 
 2004-11-03 14:56  tim
 
-	* src/brains/SimCreator.cpp: file SimCreator.cpp was initially
-	added on branch new_design.
-
-2004-11-03 14:56  tim
-
 	* src/brains/: SimCreator.cpp, SimCreator.hpp: Adding SimCreator
 	class(similar as SimSetup)
 
 2004-11-03 14:56  tim
 
 	* src/brains/SimCreator.hpp: file SimCreator.hpp was initially
+	added on branch new_design.
+
+2004-11-03 14:56  tim
+
+	* src/brains/SimCreator.cpp: file SimCreator.cpp was initially
 	added on branch new_design.
 
 2004-11-03 13:00  tim
@@ -88,6 +104,12 @@
 
 2004-11-02 17:41  tim
 
+	* src/: brains/Migrator.hpp, brains/SimModel.cpp,
+	utils/LocalndexManager.hpp: Adding LocalIndexManager and Migrator.
+	Need unit test
+
+2004-11-02 17:41  tim
+
 	* src/utils/LocalndexManager.hpp: file LocalndexManager.hpp was
 	initially added on branch new_design.
 
@@ -96,21 +118,15 @@
 	* src/brains/Migrator.hpp: file Migrator.hpp was initially added on
 	branch new_design.
 
-2004-11-02 17:41  tim
+2004-11-02 11:59  tim
 
-	* src/: brains/Migrator.hpp, brains/SimModel.cpp,
-	utils/LocalndexManager.hpp: Adding LocalIndexManager and Migrator.
-	Need unit test
+	* src/brains/SimModel.cpp: file SimModel.cpp was initially added on
+	branch new_design.
 
 2004-11-02 11:59  tim
 
 	* src/brains/: SimModel.cpp, SimModel.hpp, SimSnapshotManager.cpp,
 	SimSnapshotManager.hpp: SimModel in progress
-
-2004-11-02 11:59  tim
-
-	* src/brains/SimModel.cpp: file SimModel.cpp was initially added on
-	branch new_design.
 
 2004-11-02 10:28  chrisfen
 
@@ -120,13 +136,13 @@
 
 2004-11-02 10:27  tim
 
-	* src/utils/MemoryUtils.hpp: file MemoryUtils.hpp was initially
-	added on branch new_design.
+	* src/utils/MemoryUtils.hpp: adding MemoryUtils which provide some
+	functions for dealing with memory issue
 
 2004-11-02 10:27  tim
 
-	* src/utils/MemoryUtils.hpp: adding MemoryUtils which provide some
-	functions for dealing with memory issue
+	* src/utils/MemoryUtils.hpp: file MemoryUtils.hpp was initially
+	added on branch new_design.
 
 2004-11-02 10:23  tim
 
@@ -1214,7 +1230,8 @@
 
 2004-09-29 12:56  gezelter
 
-	* make/: Make.conf.in, Makefile.in: Working on make stuff
+	* make/: Make.conf.in, Makefile.in, _files/style.css: Working on
+	make stuff
 
 2004-09-29 12:46  tim
 
@@ -1480,7 +1497,8 @@
 	src/visitors/OtherVisitor.cpp, src/visitors/OtherVisitor.hpp,
 	src/visitors/RigidBodyVisitor.cpp,
 	src/visitors/RigidBodyVisitor.hpp, src/visitors/ZconsVisitor.cpp,
-	src/visitors/ZconsVisitor.hpp, make/Makefile, samples/Makefile.in,
+	src/visitors/ZconsVisitor.hpp, make/Makefile,
+	make/_files/style.css, samples/Makefile.in,
 	samples/metals/Au-Core-Ag-Shell_Nanoparticle.in,
 	samples/metals/Au-Core-Ag-Shell_Nanoparticle.md,
 	samples/metals/Au_bulk_FBD.md, samples/metals/Au_bulk_voter.md,
@@ -1655,7 +1673,8 @@
 	src/visitors/OtherVisitor.cpp, src/visitors/OtherVisitor.hpp,
 	src/visitors/RigidBodyVisitor.cpp,
 	src/visitors/RigidBodyVisitor.hpp, src/visitors/ZconsVisitor.cpp,
-	src/visitors/ZconsVisitor.hpp, make/Makefile, samples/Makefile.in,
+	src/visitors/ZconsVisitor.hpp, make/Makefile,
+	make/_files/style.css, samples/Makefile.in,
 	samples/metals/Au-Core-Ag-Shell_Nanoparticle.in,
 	samples/metals/Au-Core-Ag-Shell_Nanoparticle.md,
 	samples/metals/Au_bulk_FBD.md, samples/metals/Au_bulk_voter.md,
