@@ -82,14 +82,14 @@ namespace oopse {
  * //1  8
  * @endcode
  */
-template<class RandomAccessIterator, template<typename ELEM, typename = std::allocator<ELEM> > class IteratorContainer>
-bool next_combination(IteratorContainer<RandomAccessIterator>& iterContainer, RandomAccessIterator first, RandomAccessIterator last) {
+template<class RandomAccessIterator>
+bool next_combination(std::vector<RandomAccessIterator>& iterContainer, RandomAccessIterator first, RandomAccessIterator last) {
     if (first == last) {
         return false;
     }
     
     RandomAccessIterator endIter = --last;
-    typename IteratorContainer<RandomAccessIterator>::iterator i = iterContainer.end();
+    typename std::vector<RandomAccessIterator>::iterator i = iterContainer.end();
     
     if (iterContainer.empty()) {
         //if sequence is empty, we insert the first iterator
@@ -109,7 +109,7 @@ bool next_combination(IteratorContainer<RandomAccessIterator>& iterContainer, Ra
         //If j is less than zero, it means it already reaches the last combination of current size.
         //For instance, sequence may contain 6, 7, 8, 9 at this time, we need to increase the size
         // of combination to 5
-        typename IteratorContainer<RandomAccessIterator>::iterator j = i;
+        typename std::vector<RandomAccessIterator>::iterator j = i;
         j--;
         while( j >= iterContainer.begin() && *i == *j + 1){
             i--;
