@@ -1,7 +1,7 @@
 !! Calculates Long Range forces Lennard-Jones interactions.
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: LJ.F90,v 1.4 2004-10-22 20:22:47 gezelter Exp $, $Date: 2004-10-22 20:22:47 $, $Name: not supported by cvs2svn $, $Revision: 1.4 $
+!! @version $Id: LJ.F90,v 1.5 2004-11-18 15:57:16 chrisfen Exp $, $Date: 2004-11-18 15:57:16 $, $Name: not supported by cvs2svn $, $Revision: 1.5 $
 
 module lj
   use atype_module
@@ -225,6 +225,8 @@ contains
        end do
     end do
     
+    haveMixingMap = .true.
+
   end subroutine createMixingMap
         
   subroutine do_lj_pair(atom1, atom2, d, rij, r2, sw, vpair, fpair, &
