@@ -175,8 +175,7 @@ namespace oopse {
          * @param w output eigenvalues 
          * @param v output eigenvectors 
          */
-        void jacobi(const SquareMatrix<Real, Dim>& a, 
-                              Vector<Real, Dim>& w, 
+        bool jacobi(const SquareMatrix<Real, Dim>& a, Vector<Real, Dim>& w, 
                               SquareMatrix<Real, Dim>& v);
     };//end SquareMatrix
 
@@ -184,10 +183,9 @@ namespace oopse {
 #define ROT(a,i,j,k,l) g=a(i, j);h=a(k, l);a(i, j)=g-s*(h+g*tau);a(k, l)=h+s*(g-h*tau)
 #define MAX_ROTATIONS 60
 
-template<Real, int Dim>
-void SquareMatrix<Real, int Dim>::jacobi(SquareMatrix<Real, Dim>& a,
-                                                                       Vector<Real, Dim>& w, 
-                                                                       SquareMatrix<Real, Dim>& v) {
+template<typename Real, int Dim>
+bool SquareMatrix<Real, Dim>::jacobi(const SquareMatrix<Real, Dim>& a, Vector<Real, Dim>& w, 
+                              SquareMatrix<Real, Dim>& v) {
     const int N = Dim;                                                                       
     int i, j, k, iq, ip;
     double tresh, theta, tau, t, sm, s, h, g, c;
@@ -325,6 +323,4 @@ void SquareMatrix<Real, int Dim>::jacobi(SquareMatrix<Real, Dim>& a,
 
 }
 
-
-}
 #endif //MATH_SQUAREMATRIX_HPP 
