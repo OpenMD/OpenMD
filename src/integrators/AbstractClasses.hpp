@@ -5,7 +5,7 @@
 #include "primitives/Atom.hpp"
 #ifdef IS_MPI
 
-#include "mpi.h"
+#include <mpi.h>
 #endif
 
 using namespace std;
