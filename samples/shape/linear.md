@@ -21,7 +21,7 @@ targetTemp = 119.8;
 
 ensemble = "NVE";
 dt = 1.0;
-runTime = 1e2;
+runTime = 1e1;
 
 sampleTime = 1;
 statusTime = 1;
