@@ -8,6 +8,7 @@ using namespace oopse;
 
 class SnapshotTestCase : public CPPUNIT_NS::TestFixture {
     CPPUNIT_TEST_SUITE( SnapshotTestCase );
+    CPPUNIT_TEST(testMemoryLayout);
     CPPUNIT_TEST(testConstructors);
 
     CPPUNIT_TEST_SUITE_END();
@@ -15,6 +16,7 @@ class SnapshotTestCase : public CPPUNIT_NS::TestFixture {
     public:
         virtual void setUp();
         virtual void tearDown();
+        void testMemoryLayout();
         void testConstructors();
 
     private:

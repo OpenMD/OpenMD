@@ -39,26 +39,44 @@ namespace oopse{
 
     /**
      * @class SnapshotManager SnapshotManager.hpp "brains/SnapshotManager.hpp"
-     * @brief 
+     * @brief SnapshotManager class is an abstract class which maintains 
+     * a series of snapshots.
+     * 
+     * @see SimSnapshotManager
+     * @see PropSnapshotManager
      */
     class SnapshotManager {
         public:
 
-            bool forward();
+            virtual bool advance() = 0;
 
-            bool backward();
+            Snapshot* getSnapshot(int id);
+            
+            Snapshot* getPrevSnapshot();
 
-            bool move(int );
+            void setCurrentSnapshot();
+            
+            Snapshot* getCurrentSnapshot();
 
-            Snapshot* getActiveSnapshot();
-
-            void setActiveSnapshot();
+            void setCurrentSnapshot();
             
             int getCapacity();
 
             void setCapacity();
+
+            void getNotifyStatus();
+            
+            void setNotifyStatus();
+
+            void attach(SnapshotObserver*);
+
+            void detach(SnapshotObserver*);
+
+            void notify();
+            
         private:
             vector<Snapshot*> snapshots_;
+            vector<SnapshotObserver*> observers_;
     };
 
 }

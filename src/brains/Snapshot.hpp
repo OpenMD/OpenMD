@@ -30,6 +30,7 @@
   * @time 23:56am
   * @version 1.0
   */
+  
 #ifndef BRAINS_SNAPSHOT_HPP
 #define BRAINS_SNAPSHOT_HPP
 
@@ -42,15 +43,47 @@ using namespace std;
 
 namespace oopse{
 
+    //forward declaration
+    class Snapshot;
+    class SnapshotManager;
+
+    /**
+     * @struct DataStorage
+     * @brief
+     */
+    class DataStorage {
+        public:
+            DataStorage() {};
+            DataStorage(size_t size);
+            void resize(size_t size);
+            void reserve(size_t size);
+            
+        //friend Snapshot;
+        //friend SnapshotManager;
+        //private:
+            vector<Vector3d> position;               /** position array */
+            vector<Vector3d> velocity;               /** velocity array */
+            vector<RotMat3x3d> Amat;            /** rotation matrix array */
+            vector<Vector3d> angularMomentum;/** velocity array */
+            vector<Vector3d> ul;                /** the lab frame unit vector array*/
+            vector<double> zAngle;              /** z -angle array */        
+            vector<Vector3d> force;               /** force array */
+            vector<Vector3d> torque;               /** torque array */
+
+    };
+
     /**
      * @class Snapshot Snapshot.hpp "brains/Snapshot.hpp"
      * @brief Snapshot class is a repository class for storing dynamic data during 
      *  Simulation
+     * Every snapshot class will contain one DataStorage  for atoms and one DataStorage
+     *  for rigid bodies.
      * @see SimData
      */
     class Snapshot {
         public:
-
+            
+            Snapshot() {}
             Snapshot(int i) {
 
             }
@@ -69,22 +102,18 @@ namespace oopse{
                 id_ = id;
             }
 
-            /** */
-            Snapshot* clone() {
-                return new Snapshot(*this);
-            }
-
-
             //template<typename T>
             //static typename T::ElemPointerType getArrayPointer(vector<T>& v) {
             //    return v[0]->getArrayPointer();
             //}
 
             static double* getArrayPointer(vector<Vector3d>& v) {
+                assert(v.size() > 0);
                 return v[0].getArrayPointer();
             }
             
             static double* getArrayPointer(vector<RotMat3x3d>& v) {
+                assert(v.size() > 0);
                 return v[0].getArrayPointer();
             }
             
@@ -93,19 +122,22 @@ namespace oopse{
                 return &(v[0]);
             }
             
-            vector<Vector3d> pos;
-            vector<Vector3d> vel;
-            vector<Vector3d> frc;
-            vector<Vector3d> trq;
-            vector<RotMat3x3d> Amat;
-            vector<Vector3d> mu;
-            vector<Vector3d> ul;
-            vector<double> zAngle;
-            
+            /** */
+            void resize(size_t size);
+
+
+            /** */
+            void reserve(size_t size);
+
+            DataStorage atomData;
+            DataStorage rigidbodyData;
+
+            friend class SnapshotManager;
         private:
 
             int id_; /**< identification number of the snapshot */
     };
 
+    typedef DataStorage* (Snapshot::*DataStoragePointer); 
 }
 #endif //BRAINS_SNAPSHOT_HPP

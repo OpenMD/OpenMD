@@ -1,3 +1,23 @@
+2004-10-22 09:47  gezelter
+
+	* src/types/AtomType.hpp: Adding AtomType
+
+2004-10-21 16:31  tim
+
+	* ChangeLog, src/brains/Snapshot.hpp,
+	src/brains/SnapshotManager.hpp, src/math/RectMatrix.hpp,
+	src/math/SquareMatrix.hpp, src/math/SquareMatrix3.hpp,
+	src/math/Vector.hpp, src/math/Vector3.hpp,
+	test/math/RectMatrixTestCase.cpp, test/math/VectorTestCase.cpp:
+	Snapshot and SnapshotManager in progress
+
+2004-10-21 16:30  tim
+
+	* test/brains/: BrainsTest.cpp, Makefile,
+	SnapshotManagerTestCase.cpp, SnapshotManagerTestCase.hpp,
+	SnapshotTestCase.cpp, SnapshotTestCase.hpp: adding test case for
+	Snapshot and snapshotManager.
+
 2004-10-21 15:15  gezelter
 
 	* src/: UseTheForce/DUFF.cpp, UseTheForce/EAM_FF.cpp,
