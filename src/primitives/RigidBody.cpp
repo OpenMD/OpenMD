@@ -291,7 +291,7 @@ void  RigidBody::updateAtoms(int frame) {
     
     for (i = 0; i < atoms_.size(); i++) {
      
-        ref = body2Lab(refCoords_[i]);
+        ref = body2Lab(refCoords_[i], frame);
 
         apos = pos + ref;
 

@@ -816,6 +816,10 @@ namespace oopse{
             return getA() * v;
         }
 
+        Vector3d lab2Body(const Vector3d& v, int frame) {
+            return getA(frame) * v;
+        }
+
         /**
          * Converts a body fixed vector to a lab fixed vector.
          * @return corresponding lab fixed vector
@@ -823,6 +827,10 @@ namespace oopse{
          */
         Vector3d body2Lab(const Vector3d& v){
             return getA().transpose() * v;
+        }
+
+        Vector3d body2Lab(const Vector3d& v, int frame){
+            return getA(frame).transpose() * v;
         }
         /**
          * <p>

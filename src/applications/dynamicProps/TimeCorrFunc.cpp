@@ -79,6 +79,9 @@ TimeCorrFunc::TimeCorrFunc(SimInfo* info, const std::string& filename,
     bsMan_ = new BlockSnapshotManager(info, dumpFilename_, storageLayout_);
     info_->setSnapshotManager(bsMan_);
 
+    evaluator1_.loadScriptString(selectionScript1_);
+    evaluator2_.loadScriptString(selectionScript2_);
+    
     //if selection is static, we only need to evaluate it once
     if (!evaluator1_.isDynamic()) {
         seleMan1_.setSelectionSet(evaluator1_.evaluate());
@@ -102,7 +105,7 @@ TimeCorrFunc::TimeCorrFunc(SimInfo* info, const std::string& filename,
     
 
     
-    /**@todo Fixed Me */
+    /**@todo Fix Me */
     Globals* simParams = info_->getSimParams();
     if (simParams->haveSampleTime()){
         deltaTime_ = simParams->getSampleTime();
@@ -152,46 +155,35 @@ void TimeCorrFunc::doCorrelate() {
 
 void TimeCorrFunc::correlateBlocks(int block1, int block2) {
 
-  int jstart, jend;
-  
-  assert(bsMan_->isBlockActive(block1) && bsMan_->isBlockActive(block2));
+    int jstart, jend;
 
-  SnapshotBlock snapshotBlock1 = bsMan_->getSnapshotBlock(block1);
-  SnapshotBlock snapshotBlock2 = bsMan_->getSnapshotBlock(block2);
+    assert(bsMan_->isBlockActive(block1) && bsMan_->isBlockActive(block2));
 
-  jend = snapshotBlock2.second;
-  
-  for (int i = snapshotBlock1.first; i < snapshotBlock1.second; ++i) {
-    
-    //evaluate selection if it is dynamic
-    if (evaluator1_.isDynamic()) {
-      seleMan1_.setSelectionSet(evaluator1_.evaluate());
-      validateSelection(seleMan1_);
+    SnapshotBlock snapshotBlock1 = bsMan_->getSnapshotBlock(block1);
+    SnapshotBlock snapshotBlock2 = bsMan_->getSnapshotBlock(block2);
+
+    jend = snapshotBlock2.second;
+
+    for (int i = snapshotBlock1.first; i < snapshotBlock1.second; ++i) {
+
+        //update the position or velocity of the atoms belong to rigid bodies
+        updateFrame(i);
+
+        // if the two blocks are the same, we don't want to correlate
+        // backwards in time, so start j at the same frame as i
+        if (block1 == block2) {
+        jstart = i;
+        } else {
+            jstart = snapshotBlock2.first;
+        }
+        
+        for(int j  = jstart; j < jend; ++j) {
+            //update the position or velocity of the atoms belong to rigid bodies
+            updateFrame(j);
+
+            correlateFrames(i, j);
+        }
     }
-    
-    //update the position or velocity of the atoms belong to rigid bodies
-    updateFrame(i);
-    
-    // if the two blocks are the same, we don't want to correlate
-    // backwards in time, so start j at the same frame as i
-
-    if (block1 == block2) 
-      jstart = i;
-    else
-      jstart = snapshotBlock2.first;
-    
-    for(int j  = jstart; j < jend; ++j) {
-      //evaluate selection
-      if (!evaluator2_.isDynamic()) {
-        seleMan2_.setSelectionSet(evaluator2_.evaluate());
-        validateSelection(seleMan2_);
-      }   
-      //update the position or velocity of the atoms belong to rigid bodies
-      updateFrame(j);
-      
-      correlateFrames(i, j);
-    }
-  }
 }
 
 void TimeCorrFunc::updateFrame(int frame){

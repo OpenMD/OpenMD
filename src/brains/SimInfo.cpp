@@ -835,11 +835,11 @@ GenericData* SimInfo::getPropertyByName(const std::string& propName) {
 }
 
 void SimInfo::setSnapshotManager(SnapshotManager* sman) {
-    if (sman_ == sman_) {
-        return;
-    }
+    //if (sman_ == sman_) {
+    //    return;
+    //}
     
-    delete sman_;
+    //delete sman_;
     sman_ = sman;
 
     Molecule* mol;
