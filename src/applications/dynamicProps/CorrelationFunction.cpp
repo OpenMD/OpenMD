@@ -62,7 +62,7 @@ CorrelationFunction::CorrelationFunction(SimInfo* info, const std::string& filen
             hasDirectionalAtom = true;
         }
         if ((*i)->isMultipole()){
-            hasDirectionalAtom = true;
+            hasMultipole = true;
         }
     }
     
