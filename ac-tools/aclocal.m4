@@ -985,6 +985,11 @@ if test x = x"$MPI_LIB"; then
         AC_CHECK_LIB(mpi, MPI_Init, [MPI_LIB="-lmpi -llam"], [],
                      "-llam")
 fi
+$as_unset ac_cv_lib_mpich_MPI_Init
+if test x = x"$MPI_LIB"; then
+        AC_CHECK_LIB(mpich, MPI_Init, [MPI_LIB="-lmpich -lpmpich"], [],
+                     "-lpmpich")
+fi
 
 $as_unset ac_cv_lib_mpi_MPI_Init
 if test x = x"$MPI_LIB"; then

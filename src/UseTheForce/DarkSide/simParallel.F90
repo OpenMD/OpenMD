@@ -7,7 +7,7 @@
 !!
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: mpiSimulation.F90,v 1.1 2004-10-20 04:02:48 gezelter Exp $, $Date: 2004-10-20 04:02:48 $, $Name: not supported by cvs2svn $, $Revision: 1.1 $
+!! @version $Id: simParallel.F90,v 1.1 2004-10-20 21:16:01 chuckv Exp $, $Date: 2004-10-20 21:16:01 $, $Name: not supported by cvs2svn $, $Revision: 1.1 $
 
 module mpiSimulation  
   use definitions
@@ -854,7 +854,7 @@ contains
 end module mpiSimulation
 
 #ifdef IS_MPI
-  subroutine setFortranMPI(thisComponentPlan, nAtomTags, atomTags, &
+  subroutine setFsimParallel(thisComponentPlan, nAtomTags, atomTags, &
        nGroupTags, groupTags, status)
        use mpiSimulation
        

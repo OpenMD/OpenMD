@@ -6,7 +6,7 @@
 #define __C
 #include "UseTheForce/mpiComponentPlan.h"
 
-#include "UseTheForce/fortranWrapDefines.hpp"
+#include "UseTheForce/DarkSide/simParallel_interface.h"
 
 class mpiSimulation{
 public:
@@ -35,13 +35,6 @@ public:
   int getGlobalToLocalAtom(int globalIndex) {return globalToLocalAtom[globalIndex];}
   int getGlobalToLocalGroup(int globalIndex) {return globalToLocalGroup[globalIndex];}
 
-  // sets the internal function pointer to fortran.
-
-  void setInternal( setFortranMPI_TD fSetup){
-    setFsimParallel = fSetup;
-  }
-
-
   // call at the begining and after load balancing
   
   void mpiRefresh( void );
@@ -62,13 +55,9 @@ protected:
   vector<int> globalToLocalAtom;
   vector<int> globalToLocalGroup;
 
-  // private function to initialize the fortran side of the simulation
-  setFortranMPI_TD setFsimParallel;
-
   // int *myIdents; // is needed by Cpp only. It tells the molecule which stamp it is.
 
 };
-
 
 /**
    The following pointer is the global declaration of the mpiSim

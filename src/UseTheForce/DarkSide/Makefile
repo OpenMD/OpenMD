@@ -1,5 +1,5 @@
 Source    = \
-	mpiSimulation.F90 \
+	simParallel.F90 \
 	neighborLists.F90 \
 	atype.F90 \
 	force_globals.F90 \

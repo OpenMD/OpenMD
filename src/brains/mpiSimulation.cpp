@@ -7,7 +7,7 @@
 
 #include "brains/mpiSimulation.hpp"
 #include "utils/simError.h"
-#include "UseTheForce/fortranWrappers.hpp"
+#include "UseTheForce/DarkSide/simParallel_interface.h"
 #include "math/randomSPRNG.hpp"
 
 mpiSimulation* mpiSim;
@@ -26,7 +26,6 @@ mpiSimulation::mpiSimulation(SimInfo* the_entryPlug)
   GroupToProcMap = new int[entryPlug->ngroup];
 
   mpiSim = this;
-  wrapMeSimParallel( this );
 }
 
 
