@@ -77,3 +77,29 @@ contains
   end subroutine new_atype
 
 end module atype_module
+  ! provide interface for c calls....
+subroutine makeatype(c_ident, is_LJ, is_Sticky, is_DP, is_GB, &
+       is_EAM, is_Charge, lj_epsilon, lj_sigma, charge, dipole_moment, &
+       status)
+    use definitions, only: dp   
+    use atype_module, ONLY: new_atype
+    
+    real( kind = dp ), intent(in) :: lj_epsilon
+    real( kind = dp ), intent(in) :: lj_sigma
+    real( kind = dp ), intent(in) :: dipole_moment
+    real( kind = dp ), intent(in) :: charge
+
+    integer, intent(in)  :: c_ident
+    integer, intent(out) :: status
+    integer, intent(in)  :: is_Sticky
+    integer, intent(in)  :: is_DP
+    integer, intent(in)  :: is_GB
+    integer, intent(in)  :: is_EAM
+    integer, intent(in)  :: is_LJ
+    integer, intent(in)  :: is_Charge
+
+    call module_new_atype(c_ident, is_LJ, is_Sticky, is_DP, is_GB, &
+       is_EAM, is_Charge, lj_epsilon, lj_sigma, charge, dipole_moment, &
+       status)
+       
+end subroutine

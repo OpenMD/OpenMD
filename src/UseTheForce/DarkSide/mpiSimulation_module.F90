@@ -7,7 +7,7 @@
 !!
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: mpiSimulation_module.F90,v 1.1 2004-10-05 19:37:38 tim Exp $, $Date: 2004-10-05 19:37:38 $, $Name: not supported by cvs2svn $, $Revision: 1.1 $
+!! @version $Id: mpiSimulation_module.F90,v 1.2 2004-10-19 20:44:31 chuckv Exp $, $Date: 2004-10-19 20:44:31 $, $Name: not supported by cvs2svn $, $Revision: 1.2 $
 
 module mpiSimulation  
   use definitions
@@ -852,5 +852,30 @@ contains
 
 #endif // is_mpi
 end module mpiSimulation
+
+#ifdef IS_MPI
+  subroutine setFortranMPI(thisComponentPlan, nAtomTags, atomTags, &
+       nGroupTags, groupTags, status)
+       use mpiSimulation
+       
+    !! Passed Arguments
+    !! mpiComponentPlan struct from C
+    type (mpiComponentPlan), intent(inout) :: thisComponentPlan
+    !! Number of tags passed
+    integer, intent(in) :: nAtomTags, nGroupTags
+    !! Result status, 0 = normal, -1 = error
+    integer, intent(out) :: status
+    integer :: localStatus
+    !! Global reference tag for local particles
+    integer, dimension(nAtomTags), intent(inout) :: atomTags
+    integer, dimension(nGroupTags), intent(inout) :: groupTags
+ 
+    call setupSimParallel(thisComponentPlan, nAtomTags, atomTags, &
+       nGroupTags, groupTags, status)
+
+ 
+ end subroutine 
+ 
+#endif 
 
 

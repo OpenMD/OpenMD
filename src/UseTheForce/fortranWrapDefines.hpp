@@ -83,8 +83,8 @@ extern "C" {
 				     int* orthoRhombic );
 
   typedef void (*notifyFortranCutOff_TD) ( double *rCut,
-                                           double *rSw,
-					   double *rList );
+                                         double *rSw,
+					                     double *rList );
 }
 
 

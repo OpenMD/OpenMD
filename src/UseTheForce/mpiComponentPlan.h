@@ -2,6 +2,7 @@
 #ifndef __MPICOMPONENTPLAN_H__
 #define __MPICOMPONENTPLAN_H__
 
+
 /** This header provides dual access for mpiComponentPlan 
     structure in fortran and in c, C++. 
 */
