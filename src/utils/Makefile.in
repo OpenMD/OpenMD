@@ -12,7 +12,8 @@ MySource    = \
         StringTokenizer.cpp \
 	Utility.cpp \
 	Trim.cpp \
-	BitSet.cpp
+	BitSet.cpp\
+	wildcards.cpp
 
 LibObjs = @LIBOBJS@
 

@@ -55,7 +55,7 @@ class BitSet {
         /** */
         BitSet() {}
         /** */
-        BitSet(int nbits) {  bitset_.resize(nbits);  }
+        BitSet(int nbits) : bitset_(nbits) {clearAll(); }
 
         /** Returns the number of bits set to true in this BitSet.  */
         int countBits();

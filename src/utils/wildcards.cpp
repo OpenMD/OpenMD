@@ -8,7 +8,7 @@
 // Thanks to the E.S.O. - ACS project that has done this C++ interface
 // to the wildcards pttern matching algorithm
 
-#include "wildcards.hh"
+#include "wildcards.hpp"
 
 int
 Wildcard::wildcardfit(const char *wildcard, const char *test)
