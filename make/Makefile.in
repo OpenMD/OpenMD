@@ -421,17 +421,35 @@ endif
 # .F90 -> .o
 $(PackageTargetDir)/%.o : %.F90
 	$(F90Compiler) $(F90Options) $(IncludePath) -c $< -o $@
+	if test -f *.$(ModSuffix); then \
+	  $(Move) *.$(ModSuffix) $(PackageTargetDir);\
+	fi
 
 $(PackageParallelTargetDir)/%.o : %.F90
 	$(F90Compiler) $(F90ParallelOptions) $(IncludePath) -c $< -o $@
+	if test -f *.$(ModSuffix); then \
+	  $(Move) *.$(ModSuffix) $(PackageParallelTargetDir);\
+	fi
 
 ifeq "$(UseMPI)" "yes"
 %.o : %.F90
 	$(MAKE) $(MakeOptions) $(PackageTargetDir)/$@
+	if test -f *.$(ModSuffix); then \
+	  $(Move) *.$(ModSuffix) $(PackageTargetDir);\
+	fi
+
 	$(MAKE) $(MakeOptions) $(PackageParallelTargetDir)/$@
+	if test -f *.$(ModSuffix); then \
+	  $(Move) *.$(ModSuffix) $(PackageParallelTargetDir);\
+	fi
+
 else
 %.o : %.F90
 	$(MAKE) $(MakeOptions) $(PackageTargetDir)/$@
+	if test -f *.$(ModSuffix); then \
+	  $(Move) *.$(ModSuffix) $(PackageTargetDir);\
+	fi
+
 endif
 
 
