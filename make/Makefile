@@ -245,7 +245,7 @@ Yacc                   = bison -y
 Lex                    = flex
 
 
-MakeOptions            = -k -s
+MakeOptions            = -k
 MakeDependOptions      = 
 StaticArchiverOptions  = rc
 DynamicArchiverOptions = -shared
@@ -294,17 +294,13 @@ $(PackageTargetDir) :
 
 # .c -> .o
 $(PackageTargetDir)/%.o : %.c
-	$(Print) $@
-	$(Print) $(CCompiler) $(COptions) -c $(IncludePath) $< -o $@
-	@$(CCompiler) $(COptions) -c $(IncludePath) $< -o $@
+	$(CCompiler) $(COptions) -c $(IncludePath) $< -o $@
 
 %.o : %.c
 	$(MAKE) $(MakeOptions) $(PackageTargetDir)/$@
 
 # .cpp -> .o
 $(PackageTargetDir)/%.o : %.cpp
-	$(Print) $@
-	$(Print) $(CppCompiler) $(CppOptions) -c $(IncludePath) $< -o $@
 	$(CppCompiler) $(CppOptions) -c $(IncludePath) $< -o $@
 
 %.o : %.cpp
@@ -321,9 +317,7 @@ $(PackageTargetDir)/%.o : %.f
 
 # .F90 -> .o
 $(PackageTargetDir)/%.o : %.F90
-	$(Print) $@
-	$(Print) $(F90Compiler) $(F90Options) -c $< -o $@
-	@$(F90Compiler) $(F90Options) -c $< -o $@
+	$(F90Compiler) $(F90Options) -c $< -o $@
 
 %.o : %.F90
 	$(MAKE) $(MakeOptions) $(PackageTargetDir)/$@
@@ -455,11 +449,22 @@ clean : $(PackageListLoop)
 	$(Print) Done clean.	
 
 _cleanall :
-	$(Delete) $(PackageTargetDir)/* \
+	$(Delete) $(ObjectFiles) $(ParallelObjectFiles)
+
+# make distclean
+distclean : $(PackageListLoop)
+	$(Print) Done clean.	
+
+_distcleanall :
+	$(Delete) $(ObjectFiles) \
+	          $(ParallelObjectFiles) \
 		  $(JarFile) \
 	          $(SharedLibrary) \
 	          $(StaticLibrary) \
+	          $(ParallelSharedLibrary) \
+	          $(ParallelStaticLibrary) \
 	          $(Executable) \
+	          $(ParallelExecutable) \
 	          $(DependencyFile)
 
 

@@ -33,47 +33,58 @@
 #  $<      - Current dependency
 #
 #---------------------------------------------------------------------------
-
-#---------------------------------------------------------------------------
-#
-#  Packages
-#
-#---------------------------------------------------------------------------
-
+IS_UNIX=1
 #packages to be made
 Packages = \
-        utils \
-        math \
-        types \
-        primitives \
-        visitors \
-        UseTheForce/DarkSide \
-        UseTheForce \
-        brains \
-        io \
-        integrators \
-        minimizers \
-        constraints \
-        profiling \
-        restraints \
-        applications 
+	utils \
+	math \
+	types \
+	primitives \
+	visitors \
+	UseTheForce/DarkSide \
+	UseTheForce \
+	brains \
+	io \
+	integrators \
+	minimizers \
+	constraints \
+	profiling \
+	restraints \
+	applications/oopse \
+	applications/dump2Xyz \
+	applications/simpleBuilder \
 
 #packages contain libraries
 PackageLibs = \
-	      utils \
-	      math \
-	      types \
-	      primitives \
-	      visitors \
-        UseTheForce/DarkSide \
-	      UseTheForce \
-        brains \
-	      io \
-	      integrators \
-	      minimizers \
-	      constraints \
-	      profiling \
-	      restraints 
+	utils \
+	math \
+	types \
+	primitives \
+	visitors \
+	UseTheForce/DarkSide \
+	UseTheForce \
+	brains \
+	io \
+	integrators \
+	minimizers \
+	constraints \
+	profiling \
+	restraints \
+
+IncludeDirs = \
+	/usr/include \
+	/usr/local/include 
+
+LibraryDirs = \
+        /usr/lib \
+	/usr/local/mpich/lib \
+	/usr/local/lib \
+	/usr/local/intel/compiler80/lib \
+
+Libraries = \
+        mpich \
+	sprng \
+	ifcore \
 
 #---------------------------------------------------------------------------
 #
@@ -81,7 +92,6 @@ PackageLibs = \
 #
 #---------------------------------------------------------------------------
 
-srcdir = @srcdir@
 SourceDir         = $(DEV_ROOT)/src
 TargetDir         = $(DEV_ROOT)/obj
 ParallelTargetDir = $(DEV_ROOT)/MPIobj
@@ -242,7 +252,7 @@ Yacc                   = @YACC@
 Lex                    = @LEX@
 
 
-MakeOptions            = -k -s
+MakeOptions            = -k
 MakeDependOptions      = 
 StaticArchiverOptions  = rc
 DynamicArchiverOptions = -shared
@@ -292,16 +302,13 @@ $(PackageTargetDir) :
 # .c -> .o
 $(PackageTargetDir)/%.o : %.c
 	$(Print) $@
-	$(Print) $(CCompiler) $(COptions) -c $(IncludePath) $< -o $@
-	@$(CCompiler) $(COptions) -c $(IncludePath) $< -o $@
+	$(CCompiler) $(COptions) -c $(IncludePath) $< -o $@
 
 %.o : %.c
 	$(MAKE) $(MakeOptions) $(PackageTargetDir)/$@
 
 # .cpp -> .o
 $(PackageTargetDir)/%.o : %.cpp
-	$(Print) $@
-	$(Print) $(CppCompiler) $(CppOptions) -c $(IncludePath) $< -o $@
 	$(CppCompiler) $(CppOptions) -c $(IncludePath) $< -o $@
 
 %.o : %.cpp
@@ -309,35 +316,27 @@ $(PackageTargetDir)/%.o : %.cpp
 
 # .f -> .o
 $(PackageTargetDir)/%.o : %.f
-	$(Print) $@
-	$(Print) $(FortranCompiler) $(FortranOptions) -c $< -o $@
-	@$(FortranCompiler) $(FortranOptions) -c $< -o $@
+	$(FortranCompiler) $(FortranOptions) -c $< -o $@
 
 %.o : %.f
 	$(MAKE) $(MakeOptions) $(PackageTargetDir)/$@
 
 # .F90 -> .o
 $(PackageTargetDir)/%.o : %.F90
-	$(Print) $@
-	$(Print) $(F90Compiler) $(F90Options) -c $< -o $@
-	@$(F90Compiler) $(F90Options) -c $< -o $@
+	$(F90Compiler) $(F90Options) -c $< -o $@
 
 %.o : %.F90
 	$(MAKE) $(MakeOptions) $(PackageTargetDir)/$@
 
 # .java -> .class
 $(PackageTargetDir)/%.class : $(PackageSourceDir)/%.java
-	$(Print) $@
-	$(Print) $(JavaCompiler) $(JavaCompilerOptions) $< 
-	@$(JavaCompiler) $(JavaCompilerOptions) $< 
+	$(JavaCompiler) $(JavaCompilerOptions) $< 
 
 %.class : $(PackageSourceDir)/%.java
 	@$(MAKE) $(MakeOptions) $(PackageTargetDir)/$@
 
 # .class -> .h
 $(PackageSourceDir)/%.h : $(PackageTargetDir)/%.class
-	$(Print) $@
-	$(Print) $(JniCompiler) $(JniOptions) $(JavaPackageName).$*
 	$(JniCompiler) $(JniOptions) $(JavaPackageName).$*
 
 %.h : %.class
@@ -345,17 +344,13 @@ $(PackageSourceDir)/%.h : $(PackageTargetDir)/%.class
 
 #.y -> .h
 %.h : %.y
-	$(Print) $@
-	$(Print) @$(Yacc) -d $?
-	@$(Yacc) -d  $?
+	$(Yacc) -d  $?
 	@$(Move) y.tab.h $*.h
 	@$(Delete) y.tab.c
 
 #.y -> .c
 %.c : %.y
-	$(Print) $@
-	$(Print) $(Yacc) -d $?
-	@$(Yacc) -d  $?
+	$(Yacc) -d  $?
 	@$(Move) y.tab.c $*.c
 	@$(Delete) y.tab.h
 
@@ -367,33 +362,25 @@ $(PackageSourceDir)/%.h : $(PackageTargetDir)/%.class
 
 # .o -> .a
 $(LibDir)/%.a : $(ObjectFiles)
-	$(Print) $@
-	$(Print) $(StaticArchiver) $(StaticArchiverOptions) $@ $(ObjectFiles)
-	@$(StaticArchiver) $(StaticArchiverOptions) $@ $(ObjectFiles)
+	$(StaticArchiver) $(StaticArchiverOptions) $@ $(ObjectFiles)
 
 %.a : $(ObjectFiles)
 	$(MAKE) $(MakeOptions) $(LibDir)/$@
 
 $(LibDir)/%_MPI.a : $(ParallelObjectFiles)
-	$(Print) $@
-	$(Print) $(StaticArchiver) $(StaticArchiverOptions) $@ $(ParallelObjectFiles)
-	@$(StaticArchiver) $(StaticArchiverOptions) $@ $(ParallelObjectFiles)
+	$(StaticArchiver) $(StaticArchiverOptions) $@ $(ParallelObjectFiles)
 
 %_MPI.a : $(ParallelObjectFiles)
 	$(MAKE) $(MakeOptions) $(LibDir)/$@
 
 # .o -> .so
 $(LibDir)/%.so : $(ObjectFiles)
-	$(Print) $@	
-	$(Print) $(DynamicArchiver) $(ObjectFiles) $(DynamicArchiverOptions) -o $@
 	$(DynamicArchiver) $(ObjectFiles) $(DynamicArchiverOptions) -o $@
 
 %.so : $(ObjectFiles)
 	$(MAKE) $(MakeOptions) $(LibDir)/$@
 
 $(LibDir)/%_MPI.so : $(ParallelObjectFiles)
-	$(Print) $@	
-	$(Print) $(DynamicArchiver) $(ParallelObjectFiles) $(DynamicArchiverOptions) -o $@
 	$(DynamicArchiver) $(ParallelObjectFiles) $(DynamicArchiverOptions) -o $@
 
 %_MPI.so : $(ParallelObjectFiles)
@@ -402,7 +389,6 @@ $(LibDir)/%_MPI.so : $(ParallelObjectFiles)
 # .class -> .jar
 $(LibDir)/%.jar : $(JavaClassFiles) $(OtherTargetFiles)
 	$(Print) $@
-	$(Print) $(JavaArchiver) -cf $@ $(JavaClassFilesRel) $(OtherTargetFiles)
 	@cd $(TargetDir); $(JavaArchiver) -cf $@ \
 	$(JavaClassFilesRel) $(OtherTargetFiles)
 
@@ -434,13 +420,9 @@ $(PackageTargetDir)/%_Skel.class : $(PackageTargetDir)/%.class
 
 # Executable
 $(Executable) : $(ObjectFiles)
-	$(Print) $@
-	$(Print) $(Linker) $(LinkOptions) $(LibDirs) $(LibList) $(ObjectFiles) -o $@
 	$(Linker) $(LinkOptions) $(LibDirs) $(LibList) $(ObjectFiles) -o $@
 
 $(ParallelExecutable) : $(ParallelObjectFiles)
-	$(Print) $@
-	$(Print) $(Linker) $(LinkOptions) $(LibDirs) $(LibList) $(ParallelObjectFiles) -o $@
 	$(Linker) $(LinkOptions) $(LibDirs) $(LibList) $(ParallelObjectFiles) -o $@
 
 # Anything else is just copied from source to target
@@ -466,18 +448,29 @@ _buildall : \
 	$(StaticLibrary) \
 	$(JarFile) \
 	$(Executable)
-
+	
 
 # make clean
 clean : $(PackageListLoop)
 	$(Print) Done clean.	
 
 _cleanall :
-	$(Delete) $(PackageTargetDir)/* \
+	$(Delete) $(ObjectFiles) $(ParallelObjectFiles)
+
+# make distclean
+distclean : $(PackageListLoop)
+	$(Print) Done clean.	
+
+_distcleanall :
+	$(Delete) $(ObjectFiles) \
+	          $(ParallelObjectFiles) \
 		  $(JarFile) \
 	          $(SharedLibrary) \
 	          $(StaticLibrary) \
+	          $(ParallelSharedLibrary) \
+	          $(ParallelStaticLibrary) \
 	          $(Executable) \
+	          $(ParallelExecutable) \
 	          $(DependencyFile)
 
 
@@ -495,16 +488,12 @@ $(DependencyFile) : $(DerivedSource)
 	touch Make.ctemp
 
 ifneq "$(words $(CppFiles))" "0"
-	$(Print) Make dependencies for $(CppFiles)
-	$(Print) $(CppCompiler) $(IncludePath) -MM $(CppFiles)  > Make.cpptemp
 	$(CppCompiler) $(IncludePath) -MM $(CppFiles)  > Make.cpptemp
 	cat Make.cpptemp | sed 's/^[a-zA-Z0-9]/$$\(DEV_ROOT\)\/obj\/&/g' >> $(DependencyFile)
 	cat Make.cpptemp | sed 's/^[a-zA-Z0-9]/$$\(DEV_ROOT\)\/MPIobj\/&/g' >> $(DependencyFile)
 endif
 
 ifneq "$(words $(CFiles))" "0" 
-	$(Print) Make dependencies for $(CFiles)
-	$(Print) $(CCompiler)   $(IncludePath) -MM $(CFiles) $(DerivedCFiles)   > Make.ctemp
 	$(CCompiler)   $(IncludePath) -MM $(CFiles) $(DerivedCFiles)   > Make.ctemp
 	cat Make.ctemp | sed 's/^[a-zA-Z0-9]/$$\(DEV_ROOT\)\/obj\/&/g' >> $(DependencyFile)
 	cat Make.ctemp | sed 's/^[a-zA-Z0-9]/$$\(DEV_ROOT\)\/MPIobj\/&/g' >> $(DependencyFile)
@@ -512,7 +501,6 @@ ifneq "$(words $(CFiles))" "0"
 endif
 
 ifneq "$(words $(F90Files))" "0"
-	$(Print) Make dependencies for $(F90Files)
 	$(DEV_ROOT)/scripts/sfmakedepend  -I $(DEV_ROOT)/src -d '$$(DEV_ROOT)/obj' -f ./Make.ftemp -h *.F90
 	cat Make.ftemp >> $(DependencyFile)
 endif
