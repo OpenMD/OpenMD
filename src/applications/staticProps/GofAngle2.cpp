@@ -124,7 +124,7 @@ void GofAngle2::writeRdf() {
             double cosAngle1 = -1.0 + (i + 0.5)*deltaCosAngle_;
 
             for(int j = 0; j < avgGofr_[i].size(); ++j) {
-                double cosAngle2 = -1.0 + (i + 0.5)*deltaCosAngle_;
+                double cosAngle2 = -1.0 + (j + 0.5)*deltaCosAngle_;
                 rdfStream << cosAngle1 << "\t" << cosAngle2 << "\t" << avgGofr_[i][j]/nProcessed_ << "\n";
             }
         }
