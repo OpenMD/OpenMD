@@ -243,8 +243,79 @@ void RectMatrixTestCase::testAccessEntries(){
     CPPUNIT_ASSERT_DOUBLES_EQUAL(m1(1, 0), 3.0, oopse::epsilon);
 }
 
-void RectMatrixTestCase::testTranspose(){
+void RectMatrixTestCase::testRowColOperations() {
+    Vec3 row;
+    Vec3 col;
+    RMat3x3 m;
+    
+    //test getRow
+    row = e.getRow(0);
+    CPPUNIT_ASSERT(row[0] == 2.0 && row[1] == 4.0 && row[2] == 1.0)
 
+    //test setRow
+    row[0] = 2.0;    
+    row[1] = 4.0;    
+    row[2] = 1.0;    
+    m.setRow(0, row);
+    row[0] = 0.0;    
+    row[1] = 0.0;    
+    row[2] = 3.0;    
+    m.setRow(1, row);
+    row[0] = 0.0;    
+    row[1] = 6.0;    
+    row[2] = 5.0;    
+    m.setRow(2, row);
+    CPPUNIT_ASSERT(m == e);
+    
+    //test getCol
+    col = e.getCol(1);
+    CPPUNIT_ASSERT(col[0] == 4.0 && col[1] == 0.0 && col[2] == 6.0)    
+
+    //test setCol
+    col[0] = 2.0;    
+    col[1] = 0.0;    
+    col[2] = 0.0;    
+    m.setCol(0, col);
+    col[0] = 4.0;    
+    col[1] = 0.0;    
+    col[2] = 6.0;    
+    m.setCol(1, col);
+    col[0] = 1.0;    
+    col[1] = 3.0;    
+    col[2] = 5.0;    
+    m.setCol(2, col);
+    CPPUNIT_ASSERT(m == e);
+
+    //test swapRow
+    RMat2x3 r;
+    r(0, 0) = 0.0;
+    r(0, 1) = 1.0;
+    r(0, 2) = 0.0;
+    r(1, 0) = 1.0;
+    r(1, 1) = 0.0;
+    r(1, 2) = 0.0;
+    r.swapRow(0, 1);
+    CPPUNIT_ASSERT(r == a);
+
+    //test swapCol
+    RMat3x3 s;
+    s(0, 0) = 4.0;
+    s(0, 1) = 2.0;
+    s(0, 2) = 1.0;
+    s(1, 0) = 0.0;    
+    s(1, 1) = 0.0;
+    s(1, 2) = 3.0;    
+    s(2, 0) = 6.0;
+    s(2, 1) = 0.0;
+    s(2, 2) = 5.0;
+
+    s.swapCol(0, 1);
+    CPPUNIT_ASSERT(s == e);
+    
+}    
+
+void RectMatrixTestCase::testOtherMemberFunctions(){
+    //test transpose
     CPPUNIT_ASSERT((a.transpose()).transpose() == a);
     
     CPPUNIT_ASSERT(a.transpose() == b);

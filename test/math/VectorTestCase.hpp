@@ -13,6 +13,7 @@ class VectorTestCase : public CPPUNIT_NS::TestFixture {
     CPPUNIT_TEST(testConstructors);
     CPPUNIT_TEST(testArithmetic);
     CPPUNIT_TEST(testAccessEntries);
+    CPPUNIT_TEST(testOtherMemberFunctions);
     CPPUNIT_TEST(testOtherTemplateFunctions);
     CPPUNIT_TEST_SUITE_END();
 
@@ -23,6 +24,7 @@ class VectorTestCase : public CPPUNIT_NS::TestFixture {
         void testArithmetic();
         void testOperators();
         void testAccessEntries();
+        void testOtherMemberFunctions();
         void testOtherTemplateFunctions();
 
     private:

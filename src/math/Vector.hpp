@@ -301,6 +301,10 @@ namespace oopse {
                 double len;
 
                 len = length();
+                
+                //if (len < oopse:epsilon)
+                //  throw();
+                
                 *this /= len;
             }
 
@@ -391,13 +395,6 @@ namespace oopse {
         result.div( v1,s);
         return result;           
     }
-    
-    /** fuzzy comparson */
-    template<typename Real, unsigned int Dim>        
-    inline bool epsilonEqual( const Vector<Real, Dim>& v1, const Vector<Real, Dim>& v2 ) {
-
-    }
-
     
     /**
      * Returns the dot product of two Vectors

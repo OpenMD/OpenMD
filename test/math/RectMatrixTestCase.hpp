@@ -26,7 +26,8 @@ class RectMatrixTestCase : public CPPUNIT_NS::TestFixture {
     CPPUNIT_TEST(testMul);
     CPPUNIT_TEST(testDiv);
     CPPUNIT_TEST(testAccessEntries);
-    CPPUNIT_TEST(testTranspose);
+    CPPUNIT_TEST(testRowColOperations);
+    CPPUNIT_TEST(testOtherMemberFunctions);
     CPPUNIT_TEST_SUITE_END();
 
     public:
@@ -41,7 +42,8 @@ class RectMatrixTestCase : public CPPUNIT_NS::TestFixture {
         void testMul();
         void testDiv();
         void testAccessEntries();
-        void testTranspose();
+        void testRowColOperations()
+        void testOtherMemberFunctions();
 
     private:
         RMat2x2 m1;

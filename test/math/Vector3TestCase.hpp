@@ -22,6 +22,13 @@ class Vector3TestCase : public CPPUNIT_NS::TestFixture {
         void testOperators();
         void testAccessEntries();
         void testOtherTemplateFunctions();        
+    private:
+        Vector3d zero;
+        Vector3d one;
+        Vector3d two;
+        Vector3d v1;
+        Vector3d v2;
+        Vector3d v3;
 };
 
 #endif //TEST_VECTO3RTESTCASE_HPP

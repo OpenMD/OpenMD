@@ -167,40 +167,71 @@ void VectorTestCase::testOperators(){
     //test mul
     Vec4 a6;
     a6 = one;
-    a6.mul(2.0);
+    a6 *= 2.0;
     CPPUNIT_ASSERT( a6 == two);      
 
     Vec4 a7;
-    a7.mul(one, 2.0);
+    a7 =  one * 2.0;
     CPPUNIT_ASSERT( a7 == two);      
-    Vec4 a8;
-    a7.mul(zero, 2.0);
-    CPPUNIT_ASSERT( a7 == zero);      
+    a7 =  2.0 * one;
+    CPPUNIT_ASSERT( a7 == two);      
 
     //test div
-    Vec4 a9;
-    a9 = two;
-    a9.div(2.0);
-    CPPUNIT_ASSERT( a9 == one);      
-
-    Vec4 a10;
-    a10.div(two, 2.0);
-    CPPUNIT_ASSERT( a10 == one);      
-    Vec4 a11;
-    a11.mul(zero, 2.0);
-    CPPUNIT_ASSERT( a11 == zero);  
-
+    Vec4 a8;
+    a8 = two;
+    a8 /= 2.0;
+    CPPUNIT_ASSERT( a8 == one);      
+    a8 = two /2.0;
+    CPPUNIT_ASSERT( a8 == one);      
 }
 
 void VectorTestCase::testAccessEntries(){
+    //test [] operator
     CPPUNIT_ASSERT(zero[0] == 0.0);
     CPPUNIT_ASSERT(one[0] == 1.0);
     CPPUNIT_ASSERT(v3[0] == 4.0); 
 
+    //test () operator
     CPPUNIT_ASSERT(v3(0) != 1.0); 
 
 }
 
+void VectorTestCase::testOtherMemberFunctions(){
+    //test length()
+    CPPUNIT_ASSERT(zero.length() == 0.0);
+    CPPUNIT_ASSERT(one.length() == 2.0);
+    CPPUNIT_ASSERT(v2.length() == sqrt(14.0));
+    
+    //test lengthSquare()
+    CPPUNIT_ASSERT(zero.lengthSquare() == 0.0);
+    CPPUNIT_ASSERT(one.lengthSquare() == 4.0);
+    CPPUNIT_ASSERT(v2.length() == 14.0);
+
+    //test normalize()
+    Vec4 a1 = one;
+    Vec4 a2 = two;
+
+    a1.normalize();
+    a2.normalize();
+    CPPUNIT_ASSERT(a1 == a2);
+
+    //test isNormalized();
+    CPPUNIT_ASSERT(a1.isNormalized());
+    CPPUNIT_ASSERT(!one.isNormalized());
+    
+
+}
 void VectorTestCase::testOtherTemplateFunctions(){        
+    //test dot
+    CPPUNIT_ASSERT(dot(one, two) == 8.0);
+    CPPUNIT_ASSERT(dot(v1, v3) == 20.0);
+
+    //test distance
+    CPPUNIT_ASSERT(distance(one, two) == 2.0);    
+    CPPUNIT_ASSERT(distance(v1, v2) == sqrt(56.0));
+    
+    //test distanceSquare
+    CPPUNIT_ASSERT(distanceSquare(one, two) == 4.0);    
+    CPPUNIT_ASSERT(distanceSquare(v1, v2) == 56);
 
 }
