@@ -42,7 +42,7 @@ namespace oopse{
 const int WildCard = -1;
 
 std::vector<std::vector<int> > ReplaceWildCard(int beginIndex, int endIndex, int nWildCard);
-std::vector<std::vector<int> > adjoint( const std::vector<int>& firstPart, const std::vector<std::vector<int> >& secondPart);
+std::vector<std::vector<int> > join( const std::vector<int>& firstPart, const std::vector<std::vector<int> >& secondPart);
 
 /**
  * Driver function for replacing
@@ -95,32 +95,34 @@ std::vector<std::vector<int> > ReplaceWildCard(int beginIndex, int endIndex, int
         exit(1);
     } else if (len == nWildCard) {
         //if the lengths are the same, we only have one choice
-        //replace all of the index with WildCard
+        //replace all of the indices with WildCard
         std::vector<int> singleResult(nWildCard, WildCard);
         results.push_back(singleResult);
         return results;
     } else {
-        //we need to recursive calling ReplaceWildCard
+        //we need to recursively calling ReplaceWildCard
         std::vector<int> firstPart;
         std::vector<std::vector<int> > secondPart;
         std::vector<std::vector<int> > sequences;
 
         for (int i = 0; i <=nRecursive; i ++) {
-          firstPart.clear();
-      	  for(int j = 0; j < i; ++j) {
-	      firstPart.push_back(beginIndex + j);
-	    }	    
-    	    firstPart.push_back(WildCard);
+            
+            firstPart.clear();
+            for(int j = 0; j < i; ++j) {
+                firstPart.push_back(beginIndex + j);
+            }       
+            firstPart.push_back(WildCard);
+            
             secondPart = ReplaceWildCard(beginIndex + i + 1, endIndex, nWildCard - 1); 
-            sequences = adjoint(firstPart, secondPart);
-            results.insert(results.end(), sequences.begin(), sequences.end());			    
+            sequences = join(firstPart, secondPart);
+            results.insert(results.end(), sequences.begin(), sequences.end());              
         }
 
         return results;
     }
 }
 
-std::vector<std::vector<int> > adjoint( const std::vector<int>& firstPart, const std::vector<std::vector<int> >& secondPart){
+std::vector<std::vector<int> > join( const std::vector<int>& firstPart, const std::vector<std::vector<int> >& secondPart){
     std::vector<std::vector<int> > results(secondPart.size());
 
     for (int i = 0; i < secondPart.size(); i++) {
