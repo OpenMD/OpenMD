@@ -54,7 +54,7 @@
 #include "minimizers/PRCG.hpp"
 #include "minimizers/SDMinimizer.hpp"
 #include "UseTheForce/DUFF.hpp"
-#include "UseTheForce/EAM.hpp"
+#include "UseTheForce/EAM_FF.hpp"
 #include "UseTheForce/ForceFieldFactory.hpp"
 #include "UseTheForce/ForceFieldCreator.hpp"
 
@@ -68,7 +68,7 @@ void registerForceFields() {
     ForceFieldFactory::getInstance()->registerForceField(new ForceFieldBuilder<DUFF>("WATER"));
     ForceFieldFactory::getInstance()->registerForceField(new ForceFieldBuilder<DUFF>("LJ"));
     //in theory, EAM can also be merged
-    ForceFieldFactory::getInstance()->registerForceField(new ForceFieldBuilder<EAM>("EAM"));
+    ForceFieldFactory::getInstance()->registerForceField(new ForceFieldBuilder<EAM_FF>("EAM"));
 }
 
 void registerIntegrators() {
