@@ -24,7 +24,7 @@
  */
 
 /**
- * @file GenerateCombination.hpp
+ * @file next_combination.hpp
  * @author    tlin
  * @date  10/27/2004
  * @version 1.0
@@ -80,15 +80,15 @@ bool next_combination(IteratorContainer<RandomAccessIterator>& iterContainer, Ra
         iterContainer.insert(iterContainer.end(), first);
         return true;
     } else if (*(--i) != endIter){
-        //if the last iterator in iterContainer does not reaches the end, just increment it 
+        //if the last iterator in iterContainer does not reaches the end, just increase its iterator by 1 
         ++(*i);
         return true;
     } else {// the last iterator in iterContainer does not reaches the end
 
         //starts at the end of the sequence and works its way towards the front, looking for two 
         //consecutive members of the sequence where the difference between them is greater 
-        //than one. For example , if the sequence contains 1, 5, 8, 9 (total number is 10, begin
-        //index is 0, therefore 9 is the end index, and the current size is 4). At the end of while
+        //than one. For example , if the sequence contains 1, 5, 8, 9 (total number is 10, first is 0
+        //and the last is 10 (due to STL's half open range)). At the end of while
         //loop, j will point to 5, and i will point to 8, next combination should be 1, 6, 7, 8.
         //If j is less than zero, it means it already reaches the last combination of current size.
         //For instance, sequence may contain 6, 7, 8, 9 at this time, we need to increase the size
@@ -184,7 +184,7 @@ bool replaceWildCard(std::vector<std::vector<std::string>::iterator>& cont,
 
      return hasMoreCombination;
     
-}
+}//end replaceWildCard
 
 } //end namespace oopse
 #endif //UTILS_NEXT_COMBINATION_HPP
