@@ -120,7 +120,7 @@ void LipidHeadVisitor::visit(RigidBody* rb){
 
   atomInfo = new AtomInfo;
 
-  atomInfo->AtomType = "X";
+  atomInfo->atomTypeName = "X";
 
   atomInfo->pos[0] = pos[0];
 
@@ -248,7 +248,7 @@ void RBCOMVisitor::visit(RigidBody* rb){
 
   atomInfo = new AtomInfo;
 
-  atomInfo->AtomType = "X";
+  atomInfo->atomTypeName = "X";
 
   atomInfo->pos[0] = pos[0];
 

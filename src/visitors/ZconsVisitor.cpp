@@ -185,7 +185,7 @@ void ZConsVisitor::internalVisit(StuntDouble* sd, const std::string& prefix){
         return;
 
     for(atomInfo  = atomData->beginAtomInfo(iter); atomInfo; atomInfo = atomData->nextAtomInfo(iter))
-        (atomInfo->AtomType).insert(0, prefix);
+        (atomInfo->atomTypeName).insert(0, prefix);
 }
 
 

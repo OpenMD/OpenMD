@@ -150,18 +150,18 @@ class PrepareVisitor : public BaseVisitor{
     void internalVisit(RigidBody* rb);
 };
 
-class WaterTypeVisitor : public BaseVisitor{
+  class WaterTypeVisitor : public BaseVisitor{
   public:
     WaterTypeVisitor() ;
     virtual void visit(Atom* atom) {}
     virtual void visit(DirectionalAtom* datom) {}
     virtual void visit(RigidBody* rb);
-
+    
     virtual const std::string toString();
     
   private:
-    void replaceType(std::string& atomType);
-      
+    std::string trimmedName(const std::string& atomType);
+    
     std::set<std::string> waterTypeList;
 };
 

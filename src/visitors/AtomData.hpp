@@ -50,7 +50,7 @@
 namespace oopse {
 
 struct AtomInfo {
-    std::string AtomType;
+    std::string atomTypeName;
     Vector3d pos;
     Vector3d dipole;  
 };

@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -338,20 +338,24 @@ void XYZVisitor::internalVisit(StuntDouble *sd) {
 
     for( atomInfo = atomData->beginAtomInfo(i); atomInfo;
         atomInfo = atomData->nextAtomInfo(i) ) {
-        if (printDipole)
-            sprintf(buffer,
-                    "%s%15.8f%15.8f%15.8f%15.8f%15.8f%15.8f",
-                    atomInfo->AtomType.c_str(),
-                    atomInfo->pos[0],
-                    atomInfo->pos[1],
-                    atomInfo->pos[2],
-                    atomInfo->dipole[0],
-                    atomInfo->dipole[1],
-                    atomInfo->dipole[2]); else
-            sprintf(buffer,                     "%s%15.8f%15.8f%15.8f",
-                    atomInfo->AtomType.c_str(), atomInfo->pos[0],
-                    atomInfo->pos[1],           atomInfo->pos[2]);
-
+      printf("SD type is %s\n", sd->getType().c_str());
+      printf("XYZVisitor thinks %s\n", atomInfo->atomTypeName.c_str());
+      if (printDipole) {
+        sprintf(buffer,
+                "%s%15.8f%15.8f%15.8f%15.8f%15.8f%15.8f",
+                atomInfo->atomTypeName.c_str(),
+                atomInfo->pos[0],
+                atomInfo->pos[1],
+                atomInfo->pos[2],
+                atomInfo->dipole[0],
+                atomInfo->dipole[1],
+                atomInfo->dipole[2]); 
+      } else {
+        sprintf(buffer,                     "%s%15.8f%15.8f%15.8f",
+                atomInfo->atomTypeName.c_str(), atomInfo->pos[0],
+                atomInfo->pos[1],           atomInfo->pos[2]);
+      }
+        
         frame.push_back(buffer);
     }
 }
@@ -521,16 +525,16 @@ void WaterTypeVisitor::visit(RigidBody *rb) {
                 continue;
 
             for( atomInfo = atomData->beginAtomInfo(i); atomInfo;
-                atomInfo = atomData->nextAtomInfo(i) ) {
-            replaceType(atomInfo->AtomType);
+                 atomInfo = atomData->nextAtomInfo(i) ) {
+              atomInfo->atomTypeName = trimmedName(atomInfo->atomTypeName);
             } //end for(atomInfo)
         }     //end for(atomIter)
     }         //end if (waterTypeList.find(rbName) != waterTypeList.end())
 }
 
-void WaterTypeVisitor::replaceType(std::string&atomType) {
-atomType = atomType.substr(0, atomType.find('_'));
-}
+  std::string WaterTypeVisitor::trimmedName(const std::string&atomTypeName) {
+    return atomTypeName.substr(0, atomTypeName.find('_'));
+  }
 
 const std::string WaterTypeVisitor::toString() {
     char buffer[65535];

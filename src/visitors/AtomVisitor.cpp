@@ -132,7 +132,7 @@ void SSDAtomVisitor::visit(DirectionalAtom *datom) {
     newVec = rotTrans * u;
 
     atomInfo = new AtomInfo;
-    atomInfo->AtomType = "X";
+    atomInfo->atomTypeName = "X";
     atomInfo->pos[0] = pos[0];
     atomInfo->pos[1] = pos[1];
     atomInfo->pos[2] = pos[2];
@@ -147,7 +147,7 @@ void SSDAtomVisitor::visit(DirectionalAtom *datom) {
     newVec = rotTrans * ox;
 
     atomInfo = new AtomInfo;
-    atomInfo->AtomType = "O";
+    atomInfo->atomTypeName = "O";
     atomInfo->pos[0] = pos[0] + newVec[0];
     atomInfo->pos[1] = pos[1] + newVec[1];
     atomInfo->pos[2] = pos[2] + newVec[2];
@@ -160,7 +160,7 @@ void SSDAtomVisitor::visit(DirectionalAtom *datom) {
     //matVecMul3(rotTrans, h1, newVec);
     newVec = rotTrans * h1;
     atomInfo = new AtomInfo;
-    atomInfo->AtomType = "H";
+    atomInfo->atomTypeName = "H";
     atomInfo->pos[0] = pos[0] + newVec[0];
     atomInfo->pos[1] = pos[1] + newVec[1];
     atomInfo->pos[2] = pos[2] + newVec[2];
@@ -173,7 +173,7 @@ void SSDAtomVisitor::visit(DirectionalAtom *datom) {
     //matVecMul3(rotTrans, h2, newVec);
     newVec = rotTrans * h2;
     atomInfo = new AtomInfo;
-    atomInfo->AtomType = "H";
+    atomInfo->atomTypeName = "H";
     atomInfo->pos[0] = pos[0] + newVec[0];
     atomInfo->pos[1] = pos[1] + newVec[1];
     atomInfo->pos[2] = pos[2] + newVec[2];
@@ -267,7 +267,7 @@ void LinearAtomVisitor::visit(DirectionalAtom* datom){
 
     newVec = rotTrans * c1;
     atomInfo = new AtomInfo;
-    atomInfo->AtomType = "C";
+    atomInfo->atomTypeName = "C";
     atomInfo->pos[0] = pos[0] + newVec[0];
     atomInfo->pos[1] = pos[1] + newVec[1];
     atomInfo->pos[2] = pos[2] + newVec[2];
@@ -278,7 +278,7 @@ void LinearAtomVisitor::visit(DirectionalAtom* datom){
 
     newVec = rotTrans * c2;
     atomInfo = new AtomInfo;
-    atomInfo->AtomType = "C";
+    atomInfo->atomTypeName = "C";
     atomInfo->pos[0] = pos[0] + newVec[0];
     atomInfo->pos[1] = pos[1] + newVec[1];
     atomInfo->pos[2] = pos[2] + newVec[2];
@@ -289,7 +289,7 @@ void LinearAtomVisitor::visit(DirectionalAtom* datom){
 
     newVec = rotTrans * c3;
     atomInfo = new AtomInfo;
-    atomInfo->AtomType = "C";
+    atomInfo->atomTypeName = "C";
     atomInfo->pos[0] = pos[0] + newVec[0];
     atomInfo->pos[1] = pos[1] + newVec[1];
     atomInfo->pos[2] = pos[2] + newVec[2];
@@ -300,7 +300,7 @@ void LinearAtomVisitor::visit(DirectionalAtom* datom){
 
     newVec = rotTrans * c4;
     atomInfo = new AtomInfo;
-    atomInfo->AtomType = "C";
+    atomInfo->atomTypeName = "C";
     atomInfo->pos[0] = pos[0] + newVec[0];
     atomInfo->pos[1] = pos[1] + newVec[1];
     atomInfo->pos[2] = pos[2] + newVec[2];
@@ -355,7 +355,8 @@ void DefaultAtomVisitor::visit(Atom *atom) {
     atomData->setID("ATOMDATA");
 
     pos = atom->getPos();
-    atomInfo->AtomType = atom->getType();
+    atomInfo->atomTypeName = atom->getType();
+    printf("setting a type to %s\n", atom->getType().c_str());
     atomInfo->pos[0] = pos[0];
     atomInfo->pos[1] = pos[1];
     atomInfo->pos[2] = pos[2];
@@ -386,7 +387,7 @@ void DefaultAtomVisitor::visit(DirectionalAtom *datom) {
     atomData->setID("ATOMDATA");
     atomInfo = new AtomInfo;
 
-    atomInfo->AtomType = datom->getType();
+    atomInfo->atomTypeName = datom->getType();
     atomInfo->pos[0] = pos[0];
     atomInfo->pos[1] = pos[1];
     atomInfo->pos[2] = pos[2];
