@@ -11,6 +11,9 @@ CH3		15.04
 CH2		14.03		
 CH		13.02		
 SSD		18.0153		
+SSD1            18.0153 
+SSD_E           18.0153
+SSD_RF          18.0153
 HEAD		196		
 TB1		14.03		
 TE1		15.04		
@@ -76,12 +79,6 @@ begin StickyAtomTypes
 end StickyAtomTypes
 
 
-begin DirectionalAtomType
-//AtomTypeName	isDipole	isSticky	I_xx (amu*Ang^2)	I_yy	I_zz	dipole (Debye)	w0	v0 (kcal/mol)   v0p	rl (Ang)  ru	rlp	rup
-SSD		1		1		1.7696			0.6145	1.1550	2.35	    	0.07715	3.7284		3.7284	2.75	  3.35	2.75	4.0
-HEAD		1		0		1125			1125	250	20.6
-end DirectionalAtomType
-
 begin BondTypes
 
 //Atom1	Atom2	Fixed
@@ -121,7 +118,7 @@ TB3	TE3	Harmonic		3.12		260
 //V_Quartic = Ki(b - b0)^i + Kj(b - b0)^j + ...
 
 
-end s
+end BondTypes
 
 begin BendTypes
 
@@ -261,3 +258,5 @@ TE3	TB3	TB3	TB3	Cubic		5.9602		-0.2568		-3.802		2.1586
 //VPolynomial = Ki (cos phi)^i + ... + Kj (cos phi)^j
 
 end TorsionTypes
+
+
