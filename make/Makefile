@@ -73,15 +73,16 @@ PackageLibs = \
 
 IncludeDirs = \
 	/usr/local/include \
-	
+	/usr/local/mpich/include
 
 LibraryDirs = \
 	/usr/local/lib \
-	 
+	/usr/local/mpich/lib 
 
 Libraries = \
 	-lsprng \
-	 
+	-lmpich \
+	-lfmpich
 
 LinkOptions = \
 	 -L/usr/local/intel/compiler81/lib -L/usr/lib -lifport -lifcore -limf -lm -lcxa -lirc -lunwind -lirc_s
@@ -91,7 +92,7 @@ ForceParamDir   = /usr/local/oopse/share/forceFields/
 SampleSimDir    = /usr/local/oopse/share/samples/
 FrcDeclare      = -DFRC_PATH="$(ForceParamDir)"
 ParallelDeclare = -DIS_MPI
-
+UseMPI          = yes
 
 #---------------------------------------------------------------------------
 #
@@ -103,6 +104,7 @@ SourceDir         = $(DEV_ROOT)/src
 TargetDir         = $(DEV_ROOT)/obj
 ParallelTargetDir = $(DEV_ROOT)/MPIobj
 LibDir            = $(DEV_ROOT)/lib
+ParallelLibDir    = $(DEV_ROOT)/MPIlib
 MakeDir           = $(DEV_ROOT)/make
 BinDir            = $(DEV_ROOT)/bin
 DocsDir           = $(DEV_ROOT)/docs
@@ -172,23 +174,23 @@ JniClassFiles          = $(JniSource:%.java=  $(PackageTargetDir)/%.class)
 JniHeaders             = $(JniSource:%.java=  $(PackageSourceDir)/%.h)
 ObjectFiles            = $(CFiles:%.c=        $(PackageTargetDir)/%.o)\
                          $(CppFiles:%.cpp=    $(PackageTargetDir)/%.o)\
-		                     $(FortranFiles:%.f=  $(PackageTargetDir)/%.o)\
-		                     $(F90Files:%.F90=    $(PackageTargetDir)/%.o)\
-		                     $(LexFiles:%.l=      $(PackageTargetDir)/%.o)\
-		                     $(YaccFiles:%.y=     $(PackageTargetDir)/%.o)
+		         $(FortranFiles:%.f=  $(PackageTargetDir)/%.o)\
+		         $(F90Files:%.F90=    $(PackageTargetDir)/%.o)\
+		         $(LexFiles:%.l=      $(PackageTargetDir)/%.o)\
+		         $(YaccFiles:%.y=     $(PackageTargetDir)/%.o)
 ParallelObjectFiles    = $(CFiles:%.c=        $(PackageParallelTargetDir)/%.o)\
-		                     $(CppFiles:%.cpp=    $(PackageParallelTargetDir)/%.o)\
-		                     $(FortranFiles:%.f=  $(PackageParallelTargetDir)/%.o)\
-		                     $(F90Files:%.F90=    $(PackageParallelTargetDir)/%.o)\
-		                     $(LexFiles:%.l=      $(PackageParallelTargetDir)/%.o)\
-		                     $(YaccFiles:%.y=     $(PackageParallelTargetDir)/%.o)
+		         $(CppFiles:%.cpp=    $(PackageParallelTargetDir)/%.o)\
+		         $(FortranFiles:%.f=  $(PackageParallelTargetDir)/%.o)\
+		         $(F90Files:%.F90=    $(PackageParallelTargetDir)/%.o)\
+		         $(LexFiles:%.l=      $(PackageParallelTargetDir)/%.o)\
+		         $(YaccFiles:%.y=     $(PackageParallelTargetDir)/%.o)
 
 DerivedSource          = $(YaccFiles:%.y=    %.h) \
-	                       $(YaccFiles:%.y=    %.c) \
-	                       $(LexFiles:%.l=     %.c)
+	                 $(YaccFiles:%.y=    %.c) \
+	                 $(LexFiles:%.l=     %.c)
 
 DerivedCFiles          = $(YaccFiles:%.y=    %.c) \
-	                       $(LexFiles:%.l=     %.c)
+	                 $(LexFiles:%.l=     %.c)
 
 OtherTargetFiles       = $(OtherSourceFiles:%=$(PackageTargetDir)/%)
 
@@ -209,8 +211,8 @@ ifneq  "$(words $(ObjectFiles) $(ParallelObjectFiles))" "0"
   else
     SharedLibrary          = $(LibDir)/lib$(subst /,,$(patsubst %,oopse_%,$(Package))).so
     StaticLibrary          = $(LibDir)/lib$(subst /,,$(patsubst %,oopse_%,$(Package))).a
-    ParallelSharedLibrary  = $(LibDir)/lib$(subst /,,$(patsubst %,oopse_%,$(Package)))_MPI.so
-    ParallelStaticLibrary  = $(LibDir)/lib$(subst /,,$(patsubst %,oopse_%,$(Package)))_MPI.a
+    ParallelSharedLibrary  = $(ParallelLibDir)/lib$(subst /,,$(patsubst %,oopse_%,$(Package))).so
+    ParallelStaticLibrary  = $(ParallelLibDir)/lib$(subst /,,$(patsubst %,oopse_%,$(Package))).a
   endif
 endif
 #
@@ -220,10 +222,11 @@ ClassPath        = $(JRE)$(X)$(TargetDir)$(X)$(ThirdPartyJars)
 JavaPackageNames = $(subst /,.,$(JavaPackages))
 IncludePath      = -I$(SourceDir) $(IncludeDirs:%=-I%)
 LibDirs          = -L$(LibDir)    $(LibraryDirs:%=-L%)
+ParallelLibDirs  = -L$(ParallelLibDir)  $(LibraryDirs:%=-L%)
 LocalLibs        = $(subst /,,$(patsubst %, oopse_%, $(PackageLibs))) 
-ParallelLocalLibs= $(subst /,,$(patsubst %, oopse_%_MPI, $(PackageLibs))) 
+ParallelLocalLibs= $(subst /,,$(patsubst %, oopse_%, $(PackageLibs))) 
 LibList          = $(LocalLibs:%=-l%) $(Libraries)
-ParallelLibList  = $(LocalLibs:%=-l%) $(Libraries)
+ParallelLibList  = $(ParallelLocalLibs:%=-l%) $(Libraries)
 
 
 #---------------------------------------------------------------------------
@@ -275,7 +278,7 @@ CppOptions             = $(FrcDeclare)
 CppParallelOptions     = $(FrcDeclare) $(ParallelDeclare)
 FortranOptions         =
 F90Options             =  -fpp1  -O -I$(SourceDir) -module $(TargetDir) 
-F90ParallelOptions     =  -fpp1  -O -I$(SourceDir) -module $(TargetDir)   $(ParallelDeclare)
+F90ParallelOptions     =  -fpp1  -O -I$(SourceDir) -module $(ParallelTargetDir)   $(ParallelDeclare)
 JavaCompilerOptions    = -d $(TargetDir) -classpath $(ClassPath) \
 			 -sourcepath $(SourceDir) -deprecation
 JavaRunOptions         = -classpath $(ClassPath) 
@@ -318,29 +321,67 @@ $(PackageTargetDir)/%.o : %.c
 	$(Print) $@
 	$(CCompiler) $(COptions) -c $(IncludePath) $< -o $@
 
+$(PackageParallelTargetDir)/%.o : %.c
+	$(Print) $@
+	$(CCompiler) $(CParallelOptions) -c $(IncludePath) $< -o $@
+
+ifeq "$(UseMPI)" "yes"
 %.o : %.c
 	$(MAKE) $(MakeOptions) $(PackageTargetDir)/$@
+	$(MAKE) $(MakeOptions) $(PackageParallelTargetDir)/$@
+else
+%.o : %.c
+	$(MAKE) $(MakeOptions) $(PackageTargetDir)/$@
+endif
 
 # .cpp -> .o
 $(PackageTargetDir)/%.o : %.cpp
 	$(CppCompiler) $(CppOptions) -c $(IncludePath) $< -o $@
 
+$(PackageParallelTargetDir)/%.o : %.cpp
+	$(CppCompiler) $(CppParallelOptions) -c $(IncludePath) $< -o $@
+
+ifeq "$(UseMPI)" "yes"
 %.o : %.cpp
 	$(MAKE) $(MakeOptions) $(PackageTargetDir)/$@
+	$(MAKE) $(MakeOptions) $(PackageParallelTargetDir)/$@
+else
+%.o : %.cpp
+	$(MAKE) $(MakeOptions) $(PackageTargetDir)/$@
+endif
 
 # .f -> .o
 $(PackageTargetDir)/%.o : %.f
 	$(FortranCompiler) $(FortranOptions) -c $< -o $@
 
+$(PackageParallelTargetDir)/%.o : %.f
+	$(FortranCompiler) $(FortranParallelOptions) -c $< -o $@
+
+ifeq "$(UseMPI)" "yes"
 %.o : %.f
 	$(MAKE) $(MakeOptions) $(PackageTargetDir)/$@
+	$(MAKE) $(MakeOptions) $(PackageParallelTargetDir)/$@
+else
+%.o : %.f
+	$(MAKE) $(MakeOptions) $(PackageTargetDir)/$@
+endif
 
 # .F90 -> .o
 $(PackageTargetDir)/%.o : %.F90
-	$(F90Compiler) $(F90Options) -c $< -o $@
+	$(F90Compiler) $(F90Options) $(IncludePath) -c $< -o $@
 
+$(PackageParallelTargetDir)/%.o : %.F90
+	$(F90Compiler) $(F90ParallelOptions) $(IncludePath) -c $< -o $@
+
+ifeq "$(UseMPI)" "yes"
 %.o : %.F90
 	$(MAKE) $(MakeOptions) $(PackageTargetDir)/$@
+	$(MAKE) $(MakeOptions) $(PackageParallelTargetDir)/$@
+else
+%.o : %.F90
+	$(MAKE) $(MakeOptions) $(PackageTargetDir)/$@
+endif
+
 
 # .java -> .class
 $(PackageTargetDir)/%.class : $(PackageSourceDir)/%.java
@@ -375,30 +416,37 @@ $(PackageSourceDir)/%.h : $(PackageTargetDir)/%.class
 	@$(Lex) -o$@ $?
 
 # .o -> .a
+
 $(LibDir)/%.a : $(ObjectFiles)
 	$(StaticArchiver) $(StaticArchiverOptions) $@ $(ObjectFiles)
 
-%.a : $(ObjectFiles)
-	$(MAKE) $(MakeOptions) $(LibDir)/$@
-
-$(LibDir)/%_MPI.a : $(ParallelObjectFiles)
+$(ParallelLibDir)/%.a: $(ParallelObjectFiles)
 	$(StaticArchiver) $(StaticArchiverOptions) $@ $(ParallelObjectFiles)
 
-%_MPI.a : $(ParallelObjectFiles)
+ifeq "$(UseMPI)" "yes"
+%.a : $(ObjectFiles) $(ParallelObjectFiles)
 	$(MAKE) $(MakeOptions) $(LibDir)/$@
+	$(MAKE) $(MakeOptions) $(ParallelLibDir)/$@
+else
+%.a : $(ObjectFiles)
+	$(MAKE) $(MakeOptions) $(LibDir)/$@
+endif
 
 # .o -> .so
 $(LibDir)/%.so : $(ObjectFiles)
 	$(DynamicArchiver) $(ObjectFiles) $(DynamicArchiverOptions) -o $@
 
-%.so : $(ObjectFiles)
-	$(MAKE) $(MakeOptions) $(LibDir)/$@
-
-$(LibDir)/%_MPI.so : $(ParallelObjectFiles)
+$(ParallelLibDir)/%.so : $(ParallelObjectFiles)
 	$(DynamicArchiver) $(ParallelObjectFiles) $(DynamicArchiverOptions) -o $@
 
-%_MPI.so : $(ParallelObjectFiles)
+ifeq "$(UseMPI)" "yes"
+%.so : $(ObjectFiles) $(ParallelObjectFiles)
 	$(MAKE) $(MakeOptions) $(LibDir)/$@
+	$(MAKE) $(MakeOptions) $(ParallelLibDir)/$@
+else
+%.so : $(ObjectFiles)
+	$(MAKE) $(MakeOptions) $(LibDir)/$@
+endif
 
 # .class -> .jar
 $(LibDir)/%.jar : $(JavaClassFiles) $(OtherTargetFiles)
@@ -434,10 +482,10 @@ $(PackageTargetDir)/%_Skel.class : $(PackageTargetDir)/%.class
 
 # Executable
 $(Executable) : $(ObjectFiles)
-	$(Linker) $(LinkOptions) $(LibDirs) $(LibList) $(ObjectFiles) -o $@
+	$(Linker) $(ObjectFiles) $(LinkOptions) $(LibDirs) $(LibList) $(LibList) $(LibList) -o $@
 
 $(ParallelExecutable) : $(ParallelObjectFiles)
-	$(Linker) $(LinkOptions) $(LibDirs) $(ParallelLibList) $(ParallelObjectFiles) -o $@
+	$(Linker) $(ParallelObjectFiles) $(LinkOptions) $(ParallelLibDirs) $(ParallelLibList) $(ParallelLibList) $(ParallelLibList) -o $@
 
 # Anything else is just copied from source to target
 $(PackageTargetDir)/% : $(PackageSourceDir)/%
@@ -450,6 +498,22 @@ build : $(PackageListLoop)
 
 _all : _buildall
 
+ifeq "$(UseMPI)" "yes"
+_buildall : \
+	$(DependencyFile) \
+	$(PackageTargetDir) \
+	$(ObjectFiles) \
+	$(ParallelObjectFiles) \
+	$(JavaClassFiles) \
+	$(RmiStubFiles) \
+	$(RmiSkeletonFiles) \
+	$(OtherTargetFiles) \
+	$(StaticLibrary) \
+	$(ParallelStaticLibrary) \
+	$(JarFile) \
+	$(Executable) \
+	$(ParallelExecutable) 
+else
 _buildall : \
 	$(DependencyFile) \
 	$(PackageTargetDir) \
@@ -458,11 +522,11 @@ _buildall : \
 	$(RmiStubFiles) \
 	$(RmiSkeletonFiles) \
 	$(OtherTargetFiles) \
-	$(SharedLibrary) \
 	$(StaticLibrary) \
 	$(JarFile) \
-	$(Executable)
-	
+	$(Executable) 
+endif
+
 
 # make clean
 clean : $(PackageListLoop)
@@ -476,16 +540,16 @@ distclean : $(PackageListLoop)
 	$(Print) Done clean.	
 
 _distcleanall :
-	@$(Delete) $(ObjectFiles) \
-	           $(ParallelObjectFiles) \
-		   $(JarFile) \
-	           $(SharedLibrary) \
-	           $(StaticLibrary) \
-	           $(ParallelSharedLibrary) \
-	           $(ParallelStaticLibrary) \
-	           $(Executable) \
-	           $(ParallelExecutable) \
-	           $(DependencyFile) 
+	$(Delete) $(ObjectFiles) \
+	          $(ParallelObjectFiles) \
+		        $(JarFile) \
+	          $(SharedLibrary) \
+	          $(StaticLibrary) \
+	          $(ParallelSharedLibrary) \
+	          $(ParallelStaticLibrary) \
+	          $(Executable) \
+	          $(ParallelExecutable) \
+	          $(DependencyFile) 
 
 
 # make depend
@@ -498,8 +562,8 @@ $(DependencyFile) : $(DerivedSource)
 	$(Print) $@ 
 	@cd $(PackageSourceDir)
 
-	touch Make.ctemp
-	touch Make.ctemp
+	@touch Make.ctemp
+	@touch Make.ctemp
 
 ifneq "$(words $(CppFiles))" "0"
 	$(CppCompiler) $(IncludePath) -MM $(CppFiles)  > Make.cpptemp
@@ -515,8 +579,8 @@ ifneq "$(words $(CFiles))" "0"
 endif
 
 ifneq "$(words $(F90Files))" "0"
-	$(DEV_ROOT)/scripts/filepp  -I $(DEV_ROOT)/src -od '$$(DEV_ROOT)/obj/' -D__FORTRAN90   $(F90Files) > Make.ftemp
-	$(DEV_ROOT)/scripts/filepp  -I $(DEV_ROOT)/src -od '$$(DEV_ROOT)/MPIobj/' -DIS_MPI -D__FORTRAN90   $(F90Files) >> Make.ftemp
+	$(DEV_ROOT)/scripts/filepp  -I $(DEV_ROOT)/src -od '$$(DEV_ROOT)/obj/' -D__FORTRAN90  $(F90Files) > Make.ftemp
+	$(DEV_ROOT)/scripts/filepp  -I $(DEV_ROOT)/src -od '$$(DEV_ROOT)/MPIobj/' -DIS_MPI -D__FORTRAN90  $(F90Files) >> Make.ftemp
 	cat Make.ftemp >> $(DependencyFile)
 endif
 	$(Delete) Make.cpptemp Make.ctemp Make.ftemp
@@ -548,6 +612,7 @@ $(Executable).pure :
 
 pure : $(Executable).pure
 
+#make cvslog
 cvslog:
 	$(DEV_ROOT)/scripts/cvs2cl.pl
 
