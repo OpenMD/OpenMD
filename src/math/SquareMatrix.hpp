@@ -193,114 +193,106 @@ bool SquareMatrix<Real, Dim>::jacobi(const SquareMatrix<Real, Dim>& a, Vector<Re
     Vector<Real, Dim> b, z;
 
     // initialize
-    for (ip=0; ip<N; ip++) 
-    {
-	for (iq=0; iq<N; iq++) v(ip, iq) = 0.0;
-	v(ip, ip) = 1.0;
+    for (ip=0; ip<N; ip++) {
+        for (iq=0; iq<N; iq++)
+            v(ip, iq) = 0.0;
+        v(ip, ip) = 1.0;
     }
-    for (ip=0; ip<N; ip++) 
-    {
-	b(ip) = w(ip) = a(ip, ip);
-	z(ip) = 0.0;
+    
+    for (ip=0; ip<N; ip++) {
+        b(ip) = w(ip) = a(ip, ip);
+        z(ip) = 0.0;
     }
 
     // begin rotation sequence
-    for (i=0; i<MAX_ROTATIONS; i++) 
-    {
-	sm = 0.0;
-	for (ip=0; ip<2; ip++) 
-	{
-	    for (iq=ip+1; iq<N; iq++) sm += fabs(a(ip, iq));
-	}
-	if (sm == 0.0) break;
+    for (i=0; i<MAX_ROTATIONS; i++) {
+        sm = 0.0;
+        for (ip=0; ip<2; ip++) {
+            for (iq=ip+1; iq<N; iq++)
+                sm += fabs(a(ip, iq));
+        }
+        
+        if (sm == 0.0)
+            break;
 
-	if (i < 4) tresh = 0.2*sm/(9);
-	else tresh = 0.0;
+        if (i < 4)
+            tresh = 0.2*sm/(9);
+        else
+            tresh = 0.0;
 
-	for (ip=0; ip<2; ip++) 
-	{
-	    for (iq=ip+1; iq<N; iq++) 
-	    {
-		g = 100.0*fabs(a(ip, iq));
-		if (i > 4 && (fabs(w(ip))+g) == fabs(w(ip))
-		    && (fabs(w(iq))+g) == fabs(w(iq)))
-		{
-		    a(ip, iq) = 0.0;
-		}
-		else if (fabs(a(ip, iq)) > tresh) 
-		{
-		    h = w(iq) - w(ip);
-		    if ( (fabs(h)+g) == fabs(h)) t = (a(ip, iq)) / h;
-		    else 
-		    {
-			theta = 0.5*h / (a(ip, iq));
-			t = 1.0 / (fabs(theta)+sqrt(1.0+theta*theta));
-			if (theta < 0.0) t = -t;
-		    }
-		    c = 1.0 / sqrt(1+t*t);
-		    s = t*c;
-		    tau = s/(1.0+c);
-		    h = t*a(ip, iq);
-		    z(ip) -= h;
-		    z(iq) += h;
-		    w(ip) -= h;
-		    w(iq) += h;
-		    a(ip, iq)=0.0;
-		    for (j=0;j<ip-1;j++) 
-		    {
-			ROT(a,j,ip,j,iq);
-		    }
-		    for (j=ip+1;j<iq-1;j++) 
-		    {
-			ROT(a,ip,j,j,iq);
-		    }
-		    for (j=iq+1; j<N; j++) 
-		    {
-			ROT(a,ip,j,iq,j);
-		    }
-		    for (j=0; j<N; j++) 
-		    {
-			ROT(v,j,ip,j,iq);
-		    }
-		}
-	    }
-	}
+        for (ip=0; ip<2; ip++) {
+            for (iq=ip+1; iq<N; iq++) {
+                g = 100.0*fabs(a(ip, iq));
+                if (i > 4 && (fabs(w(ip))+g) == fabs(w(ip))
+                    && (fabs(w(iq))+g) == fabs(w(iq))) {
+                    a(ip, iq) = 0.0;
+                } else if (fabs(a(ip, iq)) > tresh) {
+                    h = w(iq) - w(ip);
+                    if ( (fabs(h)+g) == fabs(h)) {
+                        t = (a(ip, iq)) / h;
+                    } else {
+                        theta = 0.5*h / (a(ip, iq));
+                        t = 1.0 / (fabs(theta)+sqrt(1.0+theta*theta));
 
-	for (ip=0; ip<N; ip++) 
-	{
-	    b(ip) += z(ip);
-	    w(ip) = b(ip);
-	    z(ip) = 0.0;
-	}
-    }
+                        if (theta < 0.0)
+                            t = -t;
+                    }
+
+                    c = 1.0 / sqrt(1+t*t);
+                    s = t*c;
+                    tau = s/(1.0+c);
+                    h = t*a(ip, iq);
+                    z(ip) -= h;
+                    z(iq) += h;
+                    w(ip) -= h;
+                    w(iq) += h;
+                    a(ip, iq)=0.0;
+                    
+                    for (j=0;j<ip-1;j++) 
+                        ROT(a,j,ip,j,iq);
+
+                    for (j=ip+1;j<iq-1;j++) 
+                        ROT(a,ip,j,j,iq);
+
+                    for (j=iq+1; j<N; j++) 
+                        ROT(a,ip,j,iq,j);
+                    for (j=0; j<N; j++) 
+                        ROT(v,j,ip,j,iq);
+                }
+            }
+        }//for (ip=0; ip<2; ip++) 
+
+        for (ip=0; ip<N; ip++) {
+            b(ip) += z(ip);
+            w(ip) = b(ip);
+            z(ip) = 0.0;
+        }
+        
+    } // end for (i=0; i<MAX_ROTATIONS; i++) 
 
     if ( i >= MAX_ROTATIONS )
-	return false;
+        return false;
 
     // sort eigenfunctions
-    for (j=0; j<N; j++) 
-    {
-	k = j;
-	tmp = w(k);
-	for (i=j; i<N; i++)
-	{
-	    if (w(i) >= tmp) 
-	    {
-		k = i;
-		tmp = w(k);
-	    }
-	}
-	if (k != j) 
-	{
-	    w(k) = w(j);
-	    w(j) = tmp;
-	    for (i=0; i<N; i++) 
-	    {
-		tmp = v(i, j);
-		v(i, j) = v(i, k);
-		v(i, k) = tmp;
-	    }
-	}
+    for (j=0; j<N; j++) {
+        k = j;
+        tmp = w(k);
+        for (i=j; i<N; i++) {
+            if (w(i) >= tmp) {
+            k = i;
+            tmp = w(k);
+            }
+        }
+    
+        if (k != j) {
+            w(k) = w(j);
+            w(j) = tmp;
+            for (i=0; i<N; i++)  {
+                tmp = v(i, j);
+                v(i, j) = v(i, k);
+                v(i, k) = tmp;
+            }
+        }
     }
 
     //    insure eigenvector consistency (i.e., Jacobi can compute
@@ -309,10 +301,9 @@ bool SquareMatrix<Real, Dim>::jacobi(const SquareMatrix<Real, Dim>& a, Vector<Re
     //    hyperstreamline/other stuff. We will select the most
     //    positive eigenvector.
     int numPos;
-    for (j=0; j<N; j++)
-    {
-	for (numPos=0, i=0; i<N; i++) if ( v(i, j) >= 0.0 ) numPos++;
-	if ( numPos < 2 ) for(i=0; i<N; i++) v(i, j) *= -1.0;
+    for (j=0; j<N; j++) {
+        for (numPos=0, i=0; i<N; i++) if ( v(i, j) >= 0.0 ) numPos++;
+        if ( numPos < 2 ) for(i=0; i<N; i++) v(i, j) *= -1.0;
     }
 
     return true;

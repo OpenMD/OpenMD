@@ -88,8 +88,8 @@ namespace oopse {
             
             /** Constructs and initializes a Vector from an array */            
             inline Vector( double* v) {
-		for (unsigned int i = 0; i < Dim; i++)
-		    data_[i] = v[i];
+                for (unsigned int i = 0; i < Dim; i++)
+                    data_[i] = v[i];
             }
 
             /** 
@@ -179,8 +179,8 @@ namespace oopse {
             * @param v1 the other vector
             */
             inline void add( const Vector<Real, Dim>& v1 ) {
-            	for (unsigned int i = 0; i < Dim; i++)
-		    data_[i] += v1.data_[i];
+            for (unsigned int i = 0; i < Dim; i++)
+                data_[i] += v1.data_[i];
                 }
 
             /**
@@ -189,8 +189,8 @@ namespace oopse {
             * @param v2 the second vector
             */
             inline void add( const Vector<Real, Dim>& v1, const Vector<Real, Dim>& v2 ) {
-            	for (unsigned int i = 0; i < Dim; i++)
-		    data_[i] = v1.data_[i] + v2.data_[i];
+                for (unsigned int i = 0; i < Dim; i++)
+                    data_[i] = v1.data_[i] + v2.data_[i];
             }
 
             /**
@@ -217,7 +217,7 @@ namespace oopse {
             * @param s the scalar value
             */
             inline void mul( double s ) {
-            	for (unsigned int i = 0; i < Dim; i++)
+                for (unsigned int i = 0; i < Dim; i++)
                    data_[i] *= s;
             }
 
@@ -228,7 +228,7 @@ namespace oopse {
             * @param v1 the vector
             */
             inline void mul( double s, const Vector<Real, Dim>& v1 ) {
-            	for (unsigned int i = 0; i < Dim; i++)
+                for (unsigned int i = 0; i < Dim; i++)
                     data_[i] = s * v1.data_[i];
             }
 
@@ -237,7 +237,7 @@ namespace oopse {
             * @param s the scalar value
             */             
             inline void div( double s) {
-            	for (unsigned int i = 0; i < Dim; i++)            
+                for (unsigned int i = 0; i < Dim; i++)            
                     data_[i] /= s;
             }
 
@@ -247,7 +247,7 @@ namespace oopse {
             * @param s the scalar value
             */                         
             inline void div( const Vector<Real, Dim>& v1, double s ) {
-            	for (unsigned int i = 0; i < Dim; i++)
+                for (unsigned int i = 0; i < Dim; i++)
                     data_[i] = v1.data_[i] / s;
             }
 
@@ -287,7 +287,7 @@ namespace oopse {
              * Returns the squared length of this vector.
              * @return the squared length of this vector
              */
-             inline double lengthSquared() {
+             inline double lengthSquare() {
                 return dot(*this, *this);
             }
             
@@ -298,6 +298,15 @@ namespace oopse {
                 len = length();
                 *this /= len;
             }
+
+            /**
+             * Tests if this vector is normalized
+             * @return true if this vector is normalized, otherwise return false
+             */
+            inline bool isNormalized() const
+            {
+                return lengthSquare() == 1.0;
+            }           
             
         protected:
             double data_[3];
@@ -405,13 +414,13 @@ namespace oopse {
      */
     template<typename Real, unsigned int Dim>    
     inline Real dot( const Vector<Real, Dim>& v1, const Vector<Real, Dim>& v2 ) {
-		Real tmp;
-		tmp = 0;
+        Real tmp;
+        tmp = 0;
 
-		for (unsigned int i = 0; i < Dim; i++)
-			tmp += v1[i] + v2[i];
-		
-		return tmp;
+        for (unsigned int i = 0; i < Dim; i++)
+            tmp += v1[i] + v2[i];
+
+        return tmp;
     }
 
     /**
@@ -442,8 +451,9 @@ namespace oopse {
      * Write to an output stream
      */
     template<typename Real, unsigned int Dim>
-    std::ostream &operator<< ( std::ostream& o, const Vector<Real, Dim>& v1 ) {
-        
+    std::ostream &operator<< ( std::ostream& o, const Vector<Real, Dim>& v) {
+
+        o << "[" << v[0] << ", " << v[1] << ", " << v[2] << "]" << endl;
         return o;        
     }
     

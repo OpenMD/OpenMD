@@ -49,7 +49,7 @@ namespace oopse {
     class Vector3 : public Vector<Real, 3>{
         public:
 
-	    Vector3() : Vector<Real, 3>(){}
+        Vector3() : Vector<Real, 3>(){}
 
             /** Constructs and initializes a Vector3 from x, y, z coordinates */            
             inline Vector3( double x, double y, double z) {
@@ -70,37 +70,37 @@ namespace oopse {
              * Retunrs reference of the first element of Vector3.
              * @return reference of the first element of Vector3
              */
-            inline double& x() {  return data_[0];}
+            inline Real& x() {  return data_[0];}
 
             /**
              * Retunrs the first element of Vector3.
              * @return  the first element of Vector3
              */
-            inline double x() const {  return data_[0];}
+            inline Real x() const {  return data_[0];}
 
             /**
              * Retunrs reference of the second element of Vector3.
              * @return reference of the second element of Vector3
              */
-            inline double& y() {  return data_[1];}
+            inline Real& y() {  return data_[1];}
 
             /**
              * Retunrs  the second element of Vector3.
              * @return c the second element of Vector3
              */
-            inline double y() const {  return data_[1];}
+            inline Real y() const {  return data_[1];}
 
             /**
              * Retunrs reference of the third element of Vector3.
              * @return reference of the third element of Vector3
              */
-            inline double& z() {  return data_[2];}
+            inline Real& z() {  return data_[2];}
 
             /**
              * Retunrs  the third element of Vector3.
              * @return f the third element of Vector3
              */
-            inline double z() const {  return data_[2];}
+            inline Real z() const {  return data_[2];}
 
     };
 
@@ -114,13 +114,16 @@ namespace oopse {
     template<typename Real>
     Vector3<Real> cross( const Vector3<Real>& v1, const Vector3<Real>& v2 ) {
         Vector3<Real> result;
-		
-		result.x() = v1.y() * v2.z() - v1.z() * v2.y();
-		result.y() = v1.z() * v2.x() - v1.x() * v2.z();
-		result.z() = v1.x() * v2.y() - v1.y() * v2.x();
 
-		return result;
+        result.x() = v1.y() * v2.z() - v1.z() * v2.y();
+        result.y() = v1.z() * v2.x() - v1.x() * v2.z();
+        result.z() = v1.x() * v2.y() - v1.y() * v2.x();
+
+        return result;
     }
+
+
+    template Vector3<double> Vector3d;    
         
 }
 
