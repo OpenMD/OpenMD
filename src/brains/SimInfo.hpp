@@ -413,14 +413,13 @@ class SimInfo {
         SelectionManager* getSelectionManager() {
             return selectMan_;
         }
+
+        /** Returns the unique atom types of local processor in an array */
+        std::set<AtomType*> getUniqueAtomTypes();
         
         friend std::ostream& operator <<(std::ostream& o, SimInfo& info);
         
     private:
-
-        
-        /** Returns the unique atom types of local processor in an array */
-        std::set<AtomType*> getUniqueAtomTypes();
 
         /** fill up the simtype struct*/
         void setupSimType();

@@ -69,7 +69,7 @@ namespace oopse{
                 delete previousSnapshot_;
             }
             
-            virtual bool advance() {}
+            virtual bool advance() { return true; }
 
             virtual Snapshot* getSnapshot(int id) = 0;
 

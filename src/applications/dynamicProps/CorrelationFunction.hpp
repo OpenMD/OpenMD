@@ -41,6 +41,16 @@
 #ifndef APPLICATIONS_DYNAMICPROPS_CORRELATIONFUNCTION_HPP
 #define APPLICATIONS_DYNAMICPROPS_CORRELATIONFUNCTION_HPP
 
+#include <string>
+#include <vector>
+
+#include "brains/SimInfo.hpp"
+#include "brains/BlockSnapshotManager.hpp"
+
+#include "primitives/StuntDouble.hpp"
+#include "selection/SelectionEvaluator.hpp"
+#include "selection/SelectionManager.hpp"
+
 namespace oopse {
 
 /**

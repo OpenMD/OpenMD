@@ -64,7 +64,7 @@ class SimInfo;
      */
     class SimSnapshotManager : public SnapshotManager {
         public:
-            SimSnapshotManager(SimInfo* info, int storageLayout);
+            SimSnapshotManager(SimInfo* info, int storageLayout = 255);
             ~SimSnapshotManager();
             virtual bool advance();
 

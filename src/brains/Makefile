@@ -11,7 +11,8 @@ Source    = \
         ForceManager.cpp \
         MoleculeCreator.cpp \
         SimCreator.cpp \
-	Register.cpp
+	Register.cpp \
+	BlockSnapshotManager.cpp
 
 RmiSource =
 

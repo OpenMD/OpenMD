@@ -84,9 +84,7 @@ class BlockSnapshotMananger : public SnapshotManager{
             return blockCapacity_;                
         }
 
-        int getNFrames() {
-            return reader_->getNFrames();
-        }
+        int getNFrames();
         
     private:
 

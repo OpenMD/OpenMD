@@ -44,7 +44,7 @@
 #include "utils/simError.h"
 namespace oopse {
 
-SimSnapshotManager::SimSnapshotManager(SimInfo* info, int storageLayout = 255) 
+SimSnapshotManager::SimSnapshotManager(SimInfo* info, int storageLayout) 
     : SnapshotManager(storageLayout), info_(info){
 
     int nAtoms = info_->getNAtoms();

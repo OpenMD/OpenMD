@@ -40,7 +40,7 @@
  */
 #include <algorithm>
 #include "brains/BlockSnapshotManager.hpp"
-#include "utlis/physmem.h"
+#include "utils/physmem.h"
 #include "brains/SimInfo.hpp"
 #include "io/DumpReader.hpp"
 
@@ -147,6 +147,10 @@ Snapshot* BlockSnapshotManager::loadFrame(int frame){
     setCurrentSnapshot(snapshot);   /** @todo fixed me */
     reader_->readFrame(frame);
     return snapshot;
+}
+
+int BlockSnapshotManager::getNFrames() {
+    return reader_->getNFrames();
 }
 
 }
