@@ -9,7 +9,8 @@ Source = MainTest.cpp \
        	 SquareMatrix3TestCase.cpp \
        	 VectorTestCase.cpp \
        	 Vector3TestCase.cpp \
-	 QuaternionTestCase.cpp
+	 QuaternionTestCase.cpp \
+	 PolynomialTestCase.cpp
 
 #Source = MainTest.cpp \
          RectMatrixTestCase.cpp \
