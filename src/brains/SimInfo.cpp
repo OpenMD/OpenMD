@@ -56,6 +56,7 @@
 #include "UseTheForce/notifyCutoffs_interface.h"
 #include "utils/MemoryUtils.hpp"
 #include "utils/simError.h"
+#include "selection/SelectionManager.hpp"
 
 #ifdef IS_MPI
 #include "UseTheForce/mpiComponentPlan.h"
@@ -138,7 +139,7 @@ SimInfo::SimInfo(std::vector<std::pair<MoleculeStamp*, int> >& molStampPairs,
     molToProcMap_.resize(nGlobalMols_);
 #endif
 
-    selectMan_ = new SelectionManager(nGlobalAtoms_ + nGlobalRigidBodies_);
+    selectMan_ = new SelectionManager(this);
     selectMan_->selectAll();
 }
 

@@ -61,7 +61,7 @@
 #include "UseTheForce/ForceField.hpp"
 #include "utils/PropertyMap.hpp"
 #include "utils/LocalIndexManager.hpp"
-#include "selection/SelectionManager.hpp"
+
 //another nonsense macro declaration
 #define __C
 #include "brains/fSimulation.h"
@@ -71,7 +71,7 @@ namespace oopse{
 //forward decalration 
 class SnapshotManager;
 class Molecule;
-
+class SelectionManager;
 /**
  * @class SimInfo SimInfo.hpp "brains/SimInfo.hpp" 
  * @brief As one of the heavy weight class of OOPSE, SimInfo

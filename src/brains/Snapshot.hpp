@@ -73,6 +73,11 @@ namespace oopse{
 
             }
 
+            Snapshot(int nAtoms, int nRigidbodies, int storageLayout) 
+                : atomData(nAtoms, storageLayout), rigidbodyData(nRigidbodies, storageLayout),
+                currentTime_(0), orthoRhombic_(0), chi_(0.0), integralOfChiDt_(0.0), eta_(0.0) {
+
+            }
             
             /** Returns the id of this Snapshot */
             int getID() {
