@@ -1,0 +1,144 @@
+BODY {
+	FONT-SIZE: 10pt; FONT-FAMILY: Arial, Helvetica, sans-serif
+}
+P {
+	FONT-SIZE: 10pt; FONT-FAMILY: Arial, Helvetica, sans-serif
+}
+A {
+	FONT-SIZE: 10pt; FONT-FAMILY: Arial, Helvetica, sans-serif
+}
+TD {
+	FONT-SIZE: 10pt; FONT-FAMILY: Arial, Helvetica, sans-serif
+}
+OL {
+	FONT-SIZE: 10pt; FONT-FAMILY: Arial, Helvetica, sans-serif
+}
+UL {
+	FONT-SIZE: 10pt; FONT-FAMILY: Arial, Helvetica, sans-serif
+}
+H1 {
+	FONT-WEIGHT: bold; FONT-SIZE: 12pt; FONT-FAMILY: Arial, Helvetica, sans-serif
+}
+H2 {
+	FONT-WEIGHT: bold; FONT-SIZE: 10pt; FONT-FAMILY: Arial, Helvetica, sans-serif
+}
+H3 {
+	FONT-WEIGHT: bold; FONT-SIZE: 10pt; FONT-FAMILY: Arial, Helvetica, sans-serif
+}
+H4 {
+	FONT-WEIGHT: bold; FONT-SIZE: 10pt; FONT-FAMILY: Arial, Helvetica, sans-serif
+}
+TT {
+	FONT-SIZE: 1em; FONT-FAMILY: fixed
+}
+CODE {
+	FONT-SIZE: 1em; FONT-FAMILY: fixed
+}
+PRE {
+	FONT-SIZE: 1em; FONT-FAMILY: fixed
+}
+CODE {
+	FONT-SIZE: 0.75em; COLOR: #000099
+}
+PRE {
+	FONT-SIZE: 0.75em; COLOR: #000099
+}
+PRE {
+	MARGIN-LEFT: 20pt
+}
+.comment {
+	COLOR: #990000
+}
+.normal {
+	COLOR: #000099
+}
+.menu {
+	BACKGROUND: #004477
+}
+A.menuentry {
+	FONT-WEIGHT: bold; FONT-SIZE: 14pt; FONT-STYLE: italic; TEXT-ALIGN: right; TEXT-DECORATION: none
+}
+A.selected {
+	FONT-WEIGHT: bold; FONT-SIZE: 14pt; FONT-STYLE: italic; TEXT-ALIGN: right; TEXT-DECORATION: none
+}
+A.menuentry:link {
+	COLOR: #cccccc
+}
+A:active:unknown {
+	COLOR: white
+}
+A:hover:unknown {
+	COLOR: white
+}
+A.menuentry:visited {
+	COLOR: #cccccc
+}
+A.selected {
+	COLOR: white
+}
+.title {
+	FONT-WEIGHT: bold; FONT-SIZE: 24pt; BACKGROUND: #004477; COLOR: #cccccc; FONT-FAMILY: Arial, Helvetica, sans-serif; TEXT-ALIGN: right
+}
+.smalltitle {
+	FONT-WEIGHT: bold; FONT-SIZE: 24pt; BACKGROUND: #004477; COLOR: #cccccc; FONT-FAMILY: Arial, Helvetica, sans-serif; TEXT-ALIGN: right
+}
+.smalltitle {
+	FONT-SIZE: 18pt; FONT-STYLE: italic
+}
+.footnote {
+	FONT-SIZE: 8pt; FONT-FAMILY: Arial, Helvetica, sans-serif
+}
+.address {
+	FONT-WEIGHT: bold; FONT-SIZE: 12pt; FONT-FAMILY: Arial, Helvetica, sans-serif
+}
+.access {
+	FONT-SIZE: 8pt; BACKGROUND: #990000
+}
+.noaccess {
+	FONT-SIZE: 8pt; BACKGROUND: #990000
+}
+.legend {
+	FONT-SIZE: 8pt; BACKGROUND: #990000
+}
+.noaccess {
+	BACKGROUND: #ccbbbb
+}
+.legend {
+	BACKGROUND: #ccaaaa
+}
+.trendentry {
+	FONT-SIZE: 1em
+}
+.navigator {
+	FONT-WEIGHT: bold; BACKGROUND: #ccbbbb; FONT-FAMILY: Arial, Helvetica, sans-serif
+}
+.recom {
+	FONT-WEIGHT: bold; BACKGROUND: #bbccee
+}
+.practice {
+	FONT-WEIGHT: bold; BACKGROUND: #bbccee
+}
+.rationale {
+	FONT-SIZE: 0.75em
+}
+.cvtitle {
+	FONT-WEIGHT: bold; FONT-SIZE: 24pt; BACKGROUND: #004477; COLOR: #cccccc; FONT-FAMILY: Arial, Helvetica, sans-serif; TEXT-ALIGN: center
+}
+.cvsmalltitle {
+	FONT-WEIGHT: bold; FONT-SIZE: 24pt; BACKGROUND: #004477; COLOR: #cccccc; FONT-FAMILY: Arial, Helvetica, sans-serif; TEXT-ALIGN: center
+}
+.cvsmalltitle {
+	FONT-WEIGHT: normal; FONT-SIZE: 18pt; TEXT-ALIGN: left
+}
+.cvprompt {
+	FONT-WEIGHT: bold
+}
+.warning {
+	BACKGROUND: yellow; COLOR: red
+}
+.copyright {
+	FONT-SIZE: 7pt; FONT-FAMILY: Arial, Helvetica, sans-serif
+}
+.small {
+	FONT-SIZE: 8pt; FONT-FAMILY: Arial, Helvetica, sans-serif
+}
