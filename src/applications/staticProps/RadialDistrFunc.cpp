@@ -63,8 +63,8 @@ RadialDistrFunc::        RadialDistrFunc(SimInfo* info, const std::string& filen
     if (!evaluator1_.isDynamic() && !evaluator2_.isDynamic()) {
         //if all selections are static,  we can precompute the number of real pairs    
 
-        int nSelected1 = seleMan1_->getSelectionCount();
-        int nSelected2 = seleMan2_->getSelectionCount();
+        int nSelected1 = seleMan1_.getSelectionCount();
+        int nSelected2 = seleMan2_.getSelectionCount();
 
         BitSet bs = seleMan1_.getSelectionSet();
         bs &= seleMan2_.getSelectionSet();
@@ -133,8 +133,8 @@ int RadialDistrFunc::getNRealPairs() {
     if (evaluator1_.isDynamic() || evaluator2_.isDynamic()) {
         //if one of the selection is static,  need to recompute it    
 
-        int nSelected1 = seleMan1_->getSelectionCount();
-        int nSelected2 = seleMan2_->getSelectionCount();
+        int nSelected1 = seleMan1_.getSelectionCount();
+        int nSelected2 = seleMan2_.getSelectionCount();
 
         BitSet bs = seleMan1_.getSelectionSet();
         bs &= seleMan2_.getSelectionSet();
@@ -143,7 +143,7 @@ int RadialDistrFunc::getNRealPairs() {
         nRealPairs_ = nSelected1 * nSelected2 - (nIntersect +1) * nIntersect/2;
     }
 
-    return nRealPairs_
+    return nRealPairs_;
 }
 
 }

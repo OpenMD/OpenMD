@@ -79,7 +79,7 @@ class RadialDistrFunc {
         virtual void preProcess() {}
         virtual void postProcess() {}
 
-        int getNRealPairs() { return nRealPairs_; }
+        int getNRealPairs();
         
         SimInfo* info_;
         Snapshot* currentSnapshot_;
