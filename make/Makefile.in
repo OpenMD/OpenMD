@@ -88,6 +88,8 @@ Libraries = \
 OopseHome       = @OOPSE_HOME@
 ForceParamDir   = @OOPSE_HOME@/share/forceFields/
 SampleSimDir    = @OOPSE_HOME@/share/samples/
+BinDir          = @OOPSE_HOME@/bin
+DocDir          = @OOPSE_HOME@/doc
 FrcDeclare      = -DFRC_PATH="$(ForceParamDir)"
 F90Declare      = -D__FORTRAN90
 ParallelDeclare = -DIS_MPI
@@ -223,6 +225,7 @@ ifneq  "$(words $(ObjectFiles) $(ParallelObjectFiles))" "0"
     ParallelStaticLibrary  = $(LibDir)/lib$(subst /,,$(patsubst %,oopse_%,$(Package)))_MPI.a
   endif
 endif
+
 #
 # Misc
 #
@@ -253,7 +256,7 @@ MakeDepend             = makedepend
 Install                = @INSTALL@
 InstallProgram         = @INSTALL_PROGRAM@
 InstallData            = @INSTALL_DATA@
-MakeDir                = @MKINSTALLDIRS@
+MkDir                = @MKINSTALLDIRS@
 Delete                 = rm -fr
 StaticArchiver         = @AR@
 DynamicArchiver        = @CC@
@@ -310,6 +313,41 @@ WordCountOptions       = --lines
 
 Empty                  =
 Space                  = $(Empty) $(Empty)
+
+
+#---------------------------------------------------------------------------
+#
+#  Install
+#
+#---------------------------------------------------------------------------
+
+ifneq "$(words $(SampleFiles))" "0"
+MySample                 = $(subst $(shell cd $(DEV_ROOT)/samples; pwd)/,,$(CurrentDir))
+MyInstallDir             = $(SampleSimDir)/$(MySample)
+InstallFiles             = $(SampleFiles)
+InstallCommand           = $(InstallData)
+endif
+
+ifneq "$(words $(Main))" "0"
+MyInstallDir             = $(BinDir)/
+InstallFiles             = $(Executable) $(ParallelExecutable)
+InstallCommand           = $(InstallProgram)
+endif
+
+ifneq "$(words $(ForcefiledFiles))" "0"
+MyInstallDir             = $(ForceParamDir)
+InstallFiles             = $(ForcefiledFiles)/
+InstallCommand           = $(InstallData)
+endif
+
+ifneq "$(words $(InstallFiles))" "0"
+  InstallList            =
+else
+  InstallList            = $(patsubst %,$(DEV_ROOT)/%,$(Samples)) $(patsubst %, $(DEV_ROOT)/%,$(Forcefield)) $(patsubst %, $(SourceDir)/%,$(Applications)) 
+endif
+
+InstallListLoop          = $(patsubst %,$(SourceDir)/%/.install,$(PackageList))  $(patsubst %,%/.install,$(InstallList)) 
+
 
 
 #---------------------------------------------------------------------------
@@ -526,6 +564,7 @@ build : $(PackageListLoop)
 
 _all : _buildall
 
+_buildall : 
 ifeq "$(UseMPI)" "yes"
 _buildall : \
 	$(DependencyFile) \
@@ -626,6 +665,26 @@ jar : $(JarFile)
 jarsign : $(JarFile)
 	$(JarSigner) -keystore GeoSoftKeystore $(JarFile) myself
 
+#make install
+%.install :
+	@$(MAKE) $(MakeOptions) -C $(subst .install,,$@) _installall 	
+
+install : $(InstallListLoop)
+	$(Print) Done Install
+
+_installall : _buildall _installdata
+
+$(MyInstallDir) : 
+	$(MkDir) $@
+
+_installdata :  $(MyInstallDir)
+	$(Print) $(InstallFiles) 
+ifneq "$(words $(InstallFiles))" "0"
+	$(InstallData) $(InstallFiles) $(MyInstallDir)
+endif	    
+
+_installprogram:
+	
 # make statistics
 _statisticsall :
 	@$(Print) $(patsubst %,$(CurrentDir)/%,$(SourceFiles)) >> $(DEV_ROOT)/files.tmp
