@@ -1,170 +1,441 @@
 <html>
+
 <head>
+
 <title>Select Commands in OOPSE</title>
+
 </head>
 
+
+
 <body bgcolor=white>
+
 <basefont size=3>
 
+
+
 <div align=center>
-<font size="+2"><b>Select Commands in </b></font><b><font size="+2">OOPSE</font></b><br>
+
+  <p><font size="+2"><b>Select Commands in </b></font><b><font size="+2">OOPSE</font></b></p>
+  <h2 align="left"><a name="introduction" id="introduction"> Introduction </a></h2>
+  <p align="left">&nbsp;</p>
+  <p align="center"><img src="classoopse_1_1StuntDouble.png" width="292" height="136"></p>
+  <p align="left"><b><a name="stuntdouble" id="stuntdouble"></a> Stuntdouble </b> stands in for some object that can be manipulated by the Integrators or Minimizers. </p>
+  <p align="left"><b><a name="atom" id="atom"></a> Atom </b>is a fundamental unit in OOPSE</p>
+  <p align="left"><b><a name="datom" id="datom"></a> DirectionalAtom </b>is a special atom</p>
+  <p align="left"><b><a name="rigidbody" id="rigidbody"></a> Rigid-body </b>is a collection of atoms or directional atoms. </p>
+  <p align="left"> Every molecule, atom and directional atom in OOPSE have their own name which are given by .md file. In contrast, the name of rigid-body, which is [MoleculeName]_RB_[index] (the content inside the brackets will be replaced), is generated automatically. For example, the name of the first rigi-body of DMPC molecule is DMPC_RB_0. <br>
+  </p>
 </div>
+
 <a name="syntax" id="syntax">
+
 <h2>
+
 Syntax of the select command
+
 </h2>
+
 </a>
 
+
+
 The most general form of the select command is:	<b>select <i>expression</i>
+
 </b>
+
 <p>The expression represents an arbitrary set of stuntdoubles (atoms or rigid-bodies) in OOPSE. Expressions are composed of either name expressions, index expression, predefined sets, user define expression, comparison operators, within expressions, or logical combinations of the above expression types.  Expression can be combined with parentheses and the Boolean operators</p>
+
 <p><b><a name="logic"></a> Logical expression. </b> </p>
+
 <p>The logical operators allow complex queries to be constructed out of simpler ones using the standard boolean connectives <b>and, or, not</b>. Parentheses can be used to alter the precedence of the operators.
+
 <ul>
+
   <table width="441" border=1 cellpadding=5 bgcolor="#FFFFFF">
+
     <tr bgcolor="#FFCCFF">
+
       <td width="174"><div align="left">logical operator </div></td>
+
       <td width="241"><div align="left">equivalent operator</div></td>
+
     </tr>
+
     <tr bgcolor="#FFCCFF">
+
       <td><div align="left">and</div></td>
+
       <td><div align="left">&quot;&amp;&quot;, &quot;&amp;&amp;&quot; </div></td>
+
     </tr>
+
     <tr bgcolor="#FFCCFF">
+
       <td><div align="left">or</div></td>
-      <td><div align="left">&quot;|&quot;,&quot;||&quot;, &quot;,&quot; </div></td>
+
+      <td><div align="left">&quot;|&quot;, &quot;||&quot;, &quot;,&quot; </div></td>
+
     </tr>
+
     <tr bgcolor="#FFCCFF">
+
       <td><div align="left">not</div></td>
+
       <td><div align="left">&quot;!&quot;</div></td>
+
     </tr>
+
   </table>
+
   <p>&nbsp;</p>
-</ul>
-<p><a name="name"><b> Name expression.
-</b></a> </p>
-<ul>
-<table width="886" border="1" bordercolor="#6B7683" bgcolor="#FFFFCC">
-  <tr>
-    <td colspan="2"><div align="center">expression</div></td>
-    <td width="434"><div align="center">description</div></td>
-  </tr>
-  <tr>
-    <td width="183" rowspan="3">expression without &quot;.&quot; </td>
-    <td width="247"><div align="left">select DMPC</div></td>
-    <td>select all stuntdoubles belong to DMPC molecule </td>
-  </tr>
-  <tr>
-    <td><div align="left">select C*</div></td>
-    <td>select all carbon atoms </td>
-  </tr>
-  <tr>
-    <td><div align="left">select DMPC_RB_*</div></td>
-    <td>select all rigid-bodies (only select rigid-bodies, not include the atoms belong to them)</td>
-  </tr>
-  <tr>
-    <td rowspan="3">expression has one &quot;.&quot; </td>
-    <td>select TIP3P.O_TIP3P</td>
-    <td>select stuntdoubles belong to molecule </td>
-  </tr>
-  <tr>
-    <td>select DMPC_RB_0.PO4</td>
-    <td>select atoms belong to rigid-bodies</td>
-  </tr>
-  <tr>
-    <td>select DMPC.20</td>
-    <td>select stuntdoubles by their internal indices inside the molecules </td>
-  </tr>
-  <tr>
-    <td>expression has two &quot;.&quot;</td>
-    <td>select DMPC.DMPC_RB_?.*</td>
-    <td>select all atoms belong to rigid-bodies within DMPC molecule</td>
-  </tr>
-</table>
-<p>&nbsp;</p>
-</ul>
-<p><a name="index" id="index"><b> Index expression </b></a></p>
-<p>Index expression is used to select stuntdobules by their global indices. </p>
-<ul>
-<table width="894" border=1 cellpadding=5 bgcolor="#FFFFFF"><tr bgcolor="#FFFFCC">
-  <td width="113">select 20 </td>
-    <td width="520">select stuntdoubles which global index is 20 </td>
-</tr>
-  <tr bgcolor="#FFFFCC">
-    <td>select 20 to 30      </td>
-    <td>select stuntdoubles which global indices are between 20 (inclusive) and 30 (exclusive) </td>
-  </tr>
-</table>
+
 </ul>
 
+<p><a name="name"><b> Name expression.
+
+</b></a> </p>
+
+<ul>
+
+<table width="886" border="1" bordercolor="#6B7683" bgcolor="#FFFFCC">
+
+  <tr>
+
+    <td colspan="2"><div align="center">expression</div></td>
+
+    <td width="434"><div align="center">description</div></td>
+
+  </tr>
+
+  <tr>
+
+    <td width="183" rowspan="3">expression without &quot;.&quot; </td>
+
+    <td width="247"><div align="left">select DMPC</div></td>
+
+    <td>select all stuntdoubles belong to DMPC molecule </td>
+
+  </tr>
+
+  <tr>
+
+    <td><div align="left">select C*</div></td>
+
+    <td>select all carbon atoms </td>
+
+  </tr>
+
+  <tr>
+
+    <td><div align="left">select DMPC_RB_*</div></td>
+
+    <td>select all rigid-bodies (only select rigid-bodies, not include the atoms belong to them)</td>
+
+  </tr>
+
+  <tr>
+
+    <td rowspan="3">expression has one &quot;.&quot; </td>
+
+    <td>select TIP3P.O_TIP3P</td>
+
+    <td>select stuntdoubles belong to molecule </td>
+
+  </tr>
+
+  <tr>
+
+    <td>select DMPC_RB_0.PO4</td>
+
+    <td>select atoms belong to rigid-bodies</td>
+
+  </tr>
+
+  <tr>
+
+    <td>select DMPC.20</td>
+
+    <td>select stuntdoubles by their internal indices inside the molecules </td>
+
+  </tr>
+
+  <tr>
+
+    <td>expression has two &quot;.&quot;</td>
+
+    <td>select DMPC.DMPC_RB_?.*</td>
+
+    <td>select all atoms belong to rigid-bodies within DMPC molecule</td>
+
+  </tr>
+
+</table>
+
+<p>&nbsp;</p>
+
+</ul>
+
+<p><a name="index" id="index"><b> Index expression </b></a></p>
+
+<p>Index expression is used to select stuntdobules by their global indices. </p>
+
+<ul>
+
+<table width="894" border=1 cellpadding=5 bgcolor="#FFFFFF"><tr bgcolor="#FFFFCC">
+
+  <td width="113">select 20 </td>
+
+    <td width="520">select stuntdoubles which global index is 20 </td>
+
+</tr>
+
+  <tr bgcolor="#FFFFCC">
+
+    <td>select 20 to 30      </td>
+
+    <td>select stuntdoubles which global indices are between 20 (inclusive) and 30 (exclusive) </td>
+
+  </tr>
+
+</table>
+
+</ul>
+
+
+
 <p>&nbsp; </p>
+
 <p><a name="predefine" id="predefine"><b> Predefine set </b></a></p>
+
 <ul>
+
   <table width="449" border=1 cellpadding=5 bgcolor="#FFFFFF">
+
     <tr bgcolor="#FFCCFF">
+
       <td width="91"><div align="left">keyword</div></td>
+
       <td width="332"><div align="left">description</div></td>
+
     </tr>
+
     <tr bgcolor="#FFCCFF">
+
       <td><div align="left">all</div></td>
+
       <td><div align="left">select all stuntdoubles</div></td>
+
     </tr>
+
     <tr bgcolor="#FFCCFF">
+
       <td><div align="left">none</div></td>
+
       <td><div align="left">select none of the stuntdoubles </div></td>
+
     </tr>
+
     <tr bgcolor="#FFCCFF">
+
       <td><div align="left">rigidbody</div></td>
+
       <td><div align="left">select all rigid-bodies</div></td>
+
     </tr>
+
   </table>
+
 </ul>
+
 <p>&nbsp;</p>
+
 <p><a name="user" id="user"><b> User define expression.</b></a></p>
+
 <p> User can define arbitrary terms to represent groups of stuntdoubles, and then use the terms you have defined in select commands. The general form for the define command is: <strong>define <em>term expression</em></strong></p>
+
 <p> Once defined, user can use such terms in boolean expressions </p>
+
 <ul>
+
   <table width="659" border=1 cellpadding=5 bgcolor="#FFFFFF">
+
     <tr bgcolor="#FFFFCC">
+
       <td><p>define SSDWATER SSD or SSD1 or SSDRF</p>
+
       <p>select SSDWATER  </p>      <div align="left"></div></td>
+
     </tr>
+
   </table>
+
 </ul>
+
 <p><a name="comparison" id="comparison"> <b>Comparison expression.</b></a></p>
+
 <p>Stuntdoubles can be distinguished using comparision operators on their properties. The general form for the comparison command is: a property name, followed by a comparision operator and then a number.</p>
+
 <ul>
+
   <table width="668" border=1 cellpadding=5 bgcolor="#FFFFFF">
+
     <tr bgcolor="#FFCCFF">
+
       <td width="305"><div align="left">property</div></td>
+
       <td width="331"><div align="left">mass, dipole, charge </div></td>
+
     </tr>
+
     <tr bgcolor="#FFCCFF">
+
       <td><div align="left">comparision operator</div></td>
+
       <td><div align="left">&quot;&gt;&quot;, &quot;&lt;&quot;, &quot;=&quot;, &quot;&gt;=&quot;, &quot;&lt;=&quot;, &quot;!=&quot; </div></td>
+
     </tr>
+
   </table>
+
 </ul>
+
 <ul>
+
   <table width="672" border=1 cellpadding=5 bgcolor="#FFFFFF">
+
     <tr bgcolor="#FFFFCC">
+
       <td width="302">select mass &gt; 16.0 and charge &lt; -2 </td>
+
       <td width="338">select stuntdoubles which mass is great than 16.0 and charge is less than -2 </td>
+
+    </tr>
+
+  </table>
+
+</ul>
+
+<p>&nbsp;</p>
+
+<p><b> <a name="within"></a>	Within expression.</b>
+
+<p> Within selection selects all stuntdoubles within the specified distance (in ?) from a selection, including the selection itself. The general form for within selection is: <b>select within(<i>distance, expression</i>) </b>
+
+<ul>
+
+  <table width="681" border=1 cellpadding=5 bgcolor="#FFFFFF">
+
+    <tr bgcolor="#FFFFCC">
+
+      <td width="306">select within(2.5, PO4 or NC4) </td>
+
+      <td width="343"><blockquote>select stunntdoules which are within 2.5 ? from either PO4 or NC4 </blockquote></td>
+
     </tr>
   </table>
+
 </ul>
-<p>&nbsp;</p>
-<p><b> <a name="within"></a>	Within expression.</b>
-<p> Within selection selects all stuntdoubles within the specified distance (in ?) from a selection, including the selection itself. The general form for within selection is: <b>select within(<i>distance, expression</i>) </b>
+
+<p>
+
+<h2><a name="syntax" id="syntax"> Tools using selection command </a></h2>
+<p><b><a name="within"></a> Dump2XYZ</b>
+<p>Dump2XYZ can transform an OOPSE dump file into a xyz file which could be opened by other molecular viewers, such as Jmol and VMD. 
 <ul>
   <table width="890" border=1 cellpadding=5 bgcolor="#FFFFFF">
-    <tr bgcolor="#FFFFCC">
-      <td width="431">select within(2.5, PO4 or NC4) </td>
-      <td width="427"><blockquote>select stunntdoules which are within 2.5 ? from either PO4 or NC4 </blockquote></td>
+    <tr bgcolor="#6699FF">
+      <td width="191"><blockquote>
+          <p>--selection</p>
+      </blockquote></td>
+      <td width="667">Specifying --selection=&quot;selection command&quot; with Dump2XYZ, user can select an arbitrary set of stuntdoubles to be converted. </td>
+    </tr>
+    <tr bgcolor="#CCFF99">
+      <td><blockquote>
+          <p>--originsele</p>
+      </blockquote></td>
+      <td rowspan="2">In order to rotate the system, --originsele and --refselec must be given to define the new coordinate set. A stuntdouble with a dipole, which direction is always (0, 0, 1) in body frame, is specified by --originsele. The new x-z plane is defined by the direction of dipole and the stuntdouble specified by --refsele. </td>
+    </tr>
+    <tr bgcolor="#CCFF99">
+      <td><blockquote>
+          <p>--refsele</p>
+      </blockquote></td>
     </tr>
   </table>
 </ul>
 <p>
-<p><p>    
+<p><b><a name="within"></a> StaticProps</b>
+<p> 
+<p align="center"><img src="definition.jpg" width="720" height="540">
+<p align="left">There are five seperate radial distribution functions availiable in OOPSE. Since every radial distrbution function invlove the calculation between a pair, --sele1 and --sele2 must be given.
+<ul>
+  <table width="890" border=1 cellpadding=5 bgcolor="#FFFFFF">
+    <tr bgcolor="#CCFFCC">
+      <td width="191"><blockquote>
+        <p>option</p>
+      </blockquote></td>
+      <td width="667"><blockquote>
+          <div align="center">description</div>
+      </blockquote></td>
+    </tr>
+    <tr bgcolor="#CCFFCC">
+      <td><blockquote>
+        <p>--gofr</p>
+      </blockquote></td>
+      <td>normal pair distribution function.</td>
+    </tr>
+    <tr bgcolor="#CCFFCC">
+      <td><blockquote>
+        <p>--r_theta</p>
+      </blockquote></td>
+      <td>Calculate angle dependent pair distribution function. The angle is defined by r and A's dipole moment. </td>
+    </tr>
+    <tr bgcolor="#CCFFCC">
+      <td><blockquote>
+        <p>--r_omega</p>
+      </blockquote></td>
+      <td>Calculate angle dependent pair distribution function. The angle is defined by A's dipole moment and B's dipole moment . </td>
+    </tr>
+    <tr bgcolor="#CCFFCC">
+      <td><blockquote>
+        <p>--theta_omega</p>
+      </blockquote></td>
+      <td>Calculate the two dimension distribution of two angles.</td>
+    </tr>
+    <tr bgcolor="#CCFFCC">
+      <td><blockquote>
+        <p>--gxyz</p>
+      </blockquote></td>
+      <td>Calculate the three dimension distribution of the particle B in the body frame of particle A. Therefore, --originsele and --refsele must be given to define the A's internal coordinate set. </td>
+    </tr>
+  </table>
+</ul>
+<p>&nbsp; </p>
+<p><b><a name="within"></a> DynamicProps </b>
+<ul>
+  <table width="890" border=1 cellpadding=5 bgcolor="#FFFFFF">
+    <tr bgcolor="#CCFFCC">
+      <td width="191">        <p align="center">option</p></td>
+      <td width="667"><blockquote>
+          <div align="center">description</div>
+      </blockquote></td>
+    </tr>
+    <tr bgcolor="#CCFFCC">
+      <td>        <p align="center">--rcorr</p></td>
+      <td>mean square displacement </td>
+    </tr>
+    <tr bgcolor="#CCFFCC">
+      <td>        <p align="center">--vcorr</p></td>
+      <td>velocity correlation function</td>
+    </tr>
+    <tr bgcolor="#CCFFCC">
+      <td>        <p align="center">--dcorr</p></td>
+      <td>dipole correlation function </td>
+    </tr>
+  </table>
+</ul>
+<p>
 </body>
+
 </html>
+
