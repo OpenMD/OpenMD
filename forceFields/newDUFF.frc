@@ -14,6 +14,18 @@ SSD		18.0153
 SSD1            18.0153 
 SSD_E           18.0153
 SSD_RF          18.0153
+O_TIP3P		15.9994			
+O_TIP4P		15.9994
+O_TIP5P		15.9994	
+O_SPCE		15.9994
+O_SPC		15.9994	
+H_TIP3P		1.0079
+H_TIP4P		1.0079
+H_TIP5P		1.0079
+H_SPCE		1.0079
+H_SPC		1.0079
+EP_TIP4P	0.0
+EP_TIP5P	0.0
 HEAD		196		
 TB1		14.03		
 TE1		15.04		
@@ -46,11 +58,19 @@ end DirectionalAtomTypes
                    	
 begin LennardJonesAtomTypes
 //Name	epsilon			sigma	
-CH4	  0.279			3.73    		              
-CH3	  0.185			3.75    		              
-CH2	  0.0866		3.95    			              
-CH	  0.0189		4.68    			             
-SSD	  0.152			3.035					
+SSD	  0.152			3.051					
+SSD1      0.152                 3.016 
+SSD_E	  0.152	                3.035
+SSD_RF    0.152                 3.019 
+O_TIP3P   0.1521                3.15061 
+O_TIP4P   0.1550                3.15365 
+O_TIP5P   0.16                  3.12   
+O_SPCE    0.15532               3.16549
+O_SPC     0.15532               3.16549
+CH4       0.279                 3.73
+CH3       0.185                 3.75
+CH2       0.0866                3.95
+CH        0.0189                4.68
 HEAD	  0.185			.75					
 TB1	  0.0866		4.0     		         
 TE1	  0.185			4.0     		             
@@ -73,9 +93,34 @@ Kr	  0.32590340268		3.83
 end LennardJonesAtomTypes
 
 begin ElectrostaticAtomTypes
+//only support up tp quadrupole.
+//Below are possible format
+//name 0 charge
+//name 1 charge dipole [phi, theta, psi]
+//name 2 charge dipole Qxx Qyy Qzz [phi, theta, psi]
+//note: [phi, theta, psi] is optional, by default, they are [0, 0, 0]
+SSD_E   	1	0.0	2.42
+SSD_RF  	1	0.0	2.48
+SSD     	1	0.0	2.35
+SSD1		1	0.0	2.35
+O_TIP3P 	0	-0.834
+O_SPCE  	0	-0.8476
+O_SPC   	0	-0.82
+H_TIP3P		0	0.417
+H_TIP4P		0	0.520
+H_TIP5P		0	0.241
+H_SPCE		0	0.4238
+H_SPC		0	0.42
+EP_TIP4P	0	-1.040
+EP_TIP5P	0	-0.241
 end ElectrostaticAtomTypes
 
 begin StickyAtomTypes
+//name w0	v0 (kcal/mol)   v0p	rl (Ang)  ru	rlp	rup
+SSD_E	0.07715	3.90		3.90	2.40	  3.80	2.75	3.35
+SSD_RF	0.07715	3.90		3.90	2.40	  3.80	2.75	3.35
+SSD	0.07715	3.7284		3.7284	2.75	  3.35	2.75	4.0
+SSD1	0.07715	3.6613		3.6613	2.75	  3.35	2.75	4.0
 end StickyAtomTypes
 
 
