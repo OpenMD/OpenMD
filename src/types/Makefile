@@ -9,6 +9,7 @@ Source    = \
 	RigidBodyStamp.cpp \
 	TorsionStamp.cpp \
 	ZconStamp.cpp \
+	AtomType.cpp \
 	ShapeType.cpp \
 
 RmiSource =

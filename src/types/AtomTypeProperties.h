@@ -9,6 +9,7 @@
  */
 typedef  struct{
   int ident;
+  int is_Directional;
   int is_LennardJones;
   int is_Electrostatic;
   int is_Charge;
@@ -24,10 +25,10 @@ typedef  struct{
 
 #ifdef  __FORTRAN90
 
-type, public :: AtomTypeProperties
-   PRIVATE
+type :: AtomTypeProperties
    SEQUENCE
    integer :: ident
+   logical :: is_Directional
    logical :: is_LennardJones
    logical :: is_Electrostatic
    logical :: is_Charge
