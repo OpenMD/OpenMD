@@ -42,6 +42,7 @@
 #define SELECTION_DISTANCEFINDER_HPP
 #include "brains/SimInfo.hpp"
 #include "utils/BitSet.hpp"
+#include "primitives/StuntDouble.hpp"
 namespace oopse {
 
 class DistanceFinder {

@@ -46,13 +46,14 @@
 #include "primitives/StuntDouble.hpp"
 namespace oopse {
 
+class SimInfo;
 /**
  * @class SelectionManager SelectionManager.hpp "selection/SelectionManager.hpp"
  * @brief
  */
 class SelectionManager {
     public:
-        SelectionManager(int size) {bsSelection_.resize(size);}
+        SelectionManager(SimInfo* info);
 
         void addSelection(StuntDouble* sd) {
             bsSelection_.setBitOn(sd->getGlobalIndex());
@@ -106,10 +107,18 @@ class SelectionManager {
         BitSet getSelectionSet() {
             return bsSelection_;
         }
+
+
+        StuntDouble* beginSelected(int& i);
+        StuntDouble* nextSelected(int& i);
+
+        StuntDouble* beginUnselected(int& i);
+        StuntDouble* nextUnSelected(int& i);
         
     private:
-        
+        SimInfo* info_;
         BitSet bsSelection_;
+        std::vector<StuntDouble*> stuntdoubles_;
 };
 
 }

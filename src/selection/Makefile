@@ -7,6 +7,8 @@ Source    = \
 	SelectionEvaluator.cpp \
 	NameFinder.cpp \
 	DistanceFinder.cpp \
+	SelectionManager.cpp \
+	
 
 RmiSource =
 
