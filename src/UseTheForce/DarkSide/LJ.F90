@@ -2,10 +2,9 @@
 !! Corresponds to the force field defined in lj_FF.cpp 
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: LJ.F90,v 1.1 2004-10-20 04:02:48 gezelter Exp $, $Date: 2004-10-20 04:02:48 $, $Name: not supported by cvs2svn $, $Revision: 1.1 $
+!! @version $Id: LJ.F90,v 1.2 2004-10-21 15:25:30 chuckv Exp $, $Date: 2004-10-21 15:25:30 $, $Name: not supported by cvs2svn $, $Revision: 1.2 $
 
 module lj
-  use definitions
   use atype_module
   use switcheroo
   use vector_class
@@ -17,6 +16,8 @@ module lj
 
   implicit none
   PRIVATE
+  
+  integer, parameter :: DP = selected_real_kind(15)
 
 #define __FORTRAN90
 #include "UseTheForce/fForceField.h"
@@ -35,6 +36,25 @@ module lj
   public :: init_LJ_FF
   public :: setCutoffLJ
   public :: do_lj_pair
+  public :: newLJtype
+  
+  !! structure for lj type parameters
+  type, private :: ljType
+    integer :: lj_ident
+    real(kind=dp) :: lj_sigma
+    real(kind=dp) :: lj_epsilon
+  end type ljType
+  
+  !! List of lj type parameters
+  type, private :: ljTypeList
+    integer  :: n_lj_types = 0
+    integer  :: currentAddition = 0
+    type(ljType), pointer :: ljParams(:) => null()
+  end type ljTypeList
+  
+  !! The list of lj Parameters
+  type (ljTypeList), save :: ljParameterList
+  
   
   type :: lj_mixed_params
      !! Lennard-Jones epsilon
@@ -51,8 +71,46 @@ module lj
   
   type (lj_mixed_params), dimension(:,:), pointer :: ljMixed
   
+  
+  
 contains
 
+  subroutine newLJtype(ident,lj_sigma,lj_epsilon,status)
+    integer,intent(in) :: ident
+    real(kind=dp),intent(in) :: lj_sigma
+    real(kind=dp),intent(in) :: lj_epsilon
+    integer,intent(out) :: status
+    
+    integer,pointer                        :: Matchlist(:) => null()
+    integer :: current
+    integer :: nAtypes
+    status = 0
+    
+        !! Assume that atypes has already been set and get the total number of types in atypes
+  
+   
+
+    ! check to see if this is the first time into 
+    if (.not.associated(ljParameterList%ljParams)) then
+       call getMatchingElementList(atypes, "is_lj", .true., nAtypes, MatchList)
+       ljParameterList%n_lj_types = nAtypes
+       if (nAtypes == 0) then
+         status = -1
+         return
+       end if
+       allocate(ljParameterList%ljParams(nAtypes))
+    end if
+
+    ljParameterList%currentAddition = ljParameterList%currentAddition + 1
+    current = ljParameterList%currentAddition
+    
+    ! set the values for ljParameterList
+    ljParameterList%ljParams(current)%lj_ident = ident
+    ljParameterList%ljParams(current)%lj_epsilon = lj_epsilon
+    ljParameterList%ljParams(current)%lj_sigma = lj_sigma
+    
+  end subroutine newLJtype
+  
   subroutine init_LJ_FF(mix_Policy, status)
     integer, intent(in) :: mix_Policy
     integer, intent(out) :: status
@@ -125,7 +183,8 @@ contains
     logical :: I_isLJ, J_isLJ
     status = 0
     
-    nAtypes = getSize(atypes)
+    ! we only allocate this array to the number of lj_atypes
+    nAtypes = size(ljParameterList%ljParams)
     if (nAtypes == 0) then
        status = -1
        return
@@ -140,12 +199,9 @@ contains
 ! This loops through all atypes, even those that don't support LJ forces.
     do i = 1, nAtypes
 
-       call getElementProperty(atypes, i, "is_LJ", I_isLJ)
-
-       if (I_isLJ) then
-
-          call getElementProperty(atypes, i, "lj_epsilon", myEpsilon_i)
-          call getElementProperty(atypes, i, "lj_sigma",   mySigma_i)
+          myEpsilon_i = ljParameterList%ljParams(i)%lj_epsilon
+          mySigma_i = ljParameterList%ljParams(i)%lj_sigma
+          
           ! do self mixing rule
           ljMixed(i,i)%sigma   = mySigma_i
           
@@ -163,13 +219,10 @@ contains
           
           do j = i + 1, nAtypes
 
-             call getElementProperty(atypes, j, "is_LJ", J_isLJ)
-             
-             if (J_isLJ) then                
-             
-                call getElementProperty(atypes,j,"lj_epsilon",myEpsilon_j)
-                call getElementProperty(atypes,j,"lj_sigma",  mySigma_j)
-                
+                myEpsilon_j = ljParameterList%ljParams(j)%lj_epsilon
+                mySigma_j = ljParameterList%ljParams(j)%lj_sigma
+
+                          
                 ljMixed(i,j)%sigma  =  &
                      calcLJMix("sigma",mySigma_i, &
                      mySigma_j)
@@ -197,9 +250,8 @@ contains
                 ljMixed(j,i)%tp12    = ljMixed(i,j)%tp12
                 ljMixed(j,i)%epsilon = ljMixed(i,j)%epsilon
                 ljMixed(j,i)%delta   = ljMixed(i,j)%delta
-             endif                
+          
           end do
-       endif
     end do
     
   end subroutine createMixingList
@@ -337,3 +389,16 @@ contains
   end function calcLJMix
   
 end module lj
+
+ subroutine newLJtype(ident,lj_sigma,lj_epsilon,status)
+    use lj, ONLY : module_newLJtype => newLJtype
+    integer, parameter :: DP = selected_real_kind(15)
+    integer,intent(inout) :: ident
+    real(kind=dp),intent(inout) :: lj_sigma
+    real(kind=dp),intent(inout) :: lj_epsilon
+    integer,intent(inout) :: status
+
+    call module_newLJtype(ident,lj_sigma,lj_epsilon,status)
+
+ end subroutine newLJtype
+

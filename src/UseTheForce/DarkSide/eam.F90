@@ -1,5 +1,4 @@
 module eam
-  use definitions, ONLY : DP,default_error
   use simulation
   use force_globals
   use status
@@ -11,6 +10,7 @@ module eam
   implicit none
   PRIVATE
 
+  INTEGER, PARAMETER :: DP = selected_real_kind(15)
 
   logical, save :: EAM_FF_initialized = .false.
   integer, save :: EAM_Mixing_Policy
