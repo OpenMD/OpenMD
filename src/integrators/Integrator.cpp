@@ -233,7 +233,8 @@ template<typename T> void Integrator<T>::integrate(void){
 
   dumpOut->writeDump(info->getTime());
   statOut->writeStat(info->getTime());
-  restOut->writeZangle(info->getTime());
+  if (info->useSolidThermInt && !info->useLiquidThermInt)
+    restOut->writeZangle(info->getTime());
 
 #ifdef IS_MPI
   strcpy(checkPointMsg, "The integrator is ready to go.");
