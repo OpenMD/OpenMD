@@ -13,13 +13,13 @@ template<typename T> ZConstraint<T>::ZConstraint(SimInfo* theInfo,
   //get properties from SimInfo
   GenericData* data;
   ZConsParaData* zConsParaData;
-  DoubleData* sampleTime;
-  DoubleData* tolerance;
-  DoubleData* gap;
-  DoubleData* fixtime;
-  StringData* policy;
-  StringData* filename; 
-  IntData* smdFlag;
+  DoubleGenericData* sampleTime;
+  DoubleGenericData* tolerance;
+  DoubleGenericData* gap;
+  DoubleGenericData* fixtime;
+  StringGenericData* policy;
+  StringGenericData* filename; 
+  IntGenericData* smdFlag;
   double COM[3];
 
   //by default, the direction of constraint is z
@@ -47,11 +47,11 @@ template<typename T> ZConstraint<T>::ZConstraint(SimInfo* theInfo,
     forcePolicy = (ForceSubtractionPolicy *) new PolicyByMass(this);
   }
   else{
-    policy = dynamic_cast<StringData*>(data);
+    policy = dynamic_cast<StringGenericData*>(data);
 
     if (!policy){
       sprintf(painCave.errMsg,
-              "ZConstraint Error: Convertion from GenericData to StringData failure, "
+              "ZConstraint Error: Convertion from GenericData to StringGenericData failure, "
               "PolicyByMass is used\n");
       painCave.isFatal = 0;
       simError();      
@@ -86,7 +86,7 @@ template<typename T> ZConstraint<T>::ZConstraint(SimInfo* theInfo,
     simError();
   }
   else{
-    sampleTime = dynamic_cast<DoubleData*>(data);
+    sampleTime = dynamic_cast<DoubleGenericData*>(data);
 
     if (!sampleTime){
       sprintf(painCave.errMsg,
@@ -109,7 +109,7 @@ template<typename T> ZConstraint<T>::ZConstraint(SimInfo* theInfo,
     simError();
   }
   else{
-    filename = dynamic_cast<StringData*>(data);
+    filename = dynamic_cast<StringGenericData*>(data);
 
     if (!filename){
       sprintf(painCave.errMsg,
@@ -131,7 +131,7 @@ template<typename T> ZConstraint<T>::ZConstraint(SimInfo* theInfo,
     simError();
   }
   else{
-    tolerance = dynamic_cast<DoubleData*>(data);
+    tolerance = dynamic_cast<DoubleGenericData*>(data);
 
     if (!tolerance){
       sprintf(painCave.errMsg,
@@ -148,7 +148,7 @@ template<typename T> ZConstraint<T>::ZConstraint(SimInfo* theInfo,
   data = info->getProperty(ZCONSGAP_ID);
 
   if (data){
-    gap = dynamic_cast<DoubleData*>(data);
+    gap = dynamic_cast<DoubleGenericData*>(data);
 
     if (!gap){
       sprintf(painCave.errMsg,
@@ -167,7 +167,7 @@ template<typename T> ZConstraint<T>::ZConstraint(SimInfo* theInfo,
   data = info->getProperty(ZCONSFIXTIME_ID);
 
   if (data){
-    fixtime = dynamic_cast<DoubleData*>(data);
+    fixtime = dynamic_cast<DoubleGenericData*>(data);
     if (!fixtime){
       sprintf(painCave.errMsg,
               "ZConstraint error: Can not get zconsFixTime from SimInfo\n");
@@ -190,7 +190,7 @@ template<typename T> ZConstraint<T>::ZConstraint(SimInfo* theInfo,
   data = info->getProperty(ZCONSUSINGSMD_ID);
 
   if (data){
-    smdFlag = dynamic_cast<IntData*>(data);
+    smdFlag = dynamic_cast<IntGenericData*>(data);
 
     if (!smdFlag){
       sprintf(painCave.errMsg,

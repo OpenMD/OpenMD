@@ -2,6 +2,8 @@
 #include "primitives/RigidBody.hpp"
 #include "math/MatVec3.h"
 
+namespace oopse {
+
 void LipidHeadVisitor::visit(RigidBody* rb){
   double pos[3];
   double u[3] = {0, 0, 1};
@@ -137,3 +139,5 @@ const string RBCOMVisitor::toString(){
 
 }
 
+
+}//namespace oopse

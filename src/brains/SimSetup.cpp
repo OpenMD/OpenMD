@@ -1791,7 +1791,7 @@ void SimSetup::setupZConstraint(SimInfo& theInfo){
 
   if (globals->haveZconstraintTime()){
     //add sample time of z-constraint  into SimInfo's property list                    
-    DoubleData* zconsTimeProp = new DoubleData();
+    DoubleGenericData* zconsTimeProp = new DoubleGenericData();
     zconsTimeProp->setID(ZCONSTIME_ID);
     zconsTimeProp->setData(globals->getZconsTime());
     theInfo.addProperty(zconsTimeProp);
@@ -1806,7 +1806,7 @@ void SimSetup::setupZConstraint(SimInfo& theInfo){
 
   //push zconsTol into siminfo, if user does not specify
   //value for zconsTol, a default value will be used
-  DoubleData* zconsTol = new DoubleData();
+  DoubleGenericData* zconsTol = new DoubleGenericData();
   zconsTol->setID(ZCONSTOL_ID);
   if (globals->haveZconsTol()){
     zconsTol->setData(globals->getZconsTol());
@@ -1826,7 +1826,7 @@ void SimSetup::setupZConstraint(SimInfo& theInfo){
   theInfo.addProperty(zconsTol);
 
   //set Force Subtraction Policy
-  StringData* zconsForcePolicy = new StringData();
+  StringGenericData* zconsForcePolicy = new StringGenericData();
   zconsForcePolicy->setID(ZCONSFORCEPOLICY_ID);
 
   if (globals->haveZconsForcePolicy()){
@@ -1845,7 +1845,7 @@ void SimSetup::setupZConstraint(SimInfo& theInfo){
   theInfo.addProperty(zconsForcePolicy);
 
   //set zcons gap
-  DoubleData* zconsGap = new DoubleData();
+  DoubleGenericData* zconsGap = new DoubleGenericData();
   zconsGap->setID(ZCONSGAP_ID);
 
   if (globals->haveZConsGap()){
@@ -1854,7 +1854,7 @@ void SimSetup::setupZConstraint(SimInfo& theInfo){
   }
 
   //set zcons fixtime
-  DoubleData* zconsFixtime = new DoubleData();
+  DoubleGenericData* zconsFixtime = new DoubleGenericData();
   zconsFixtime->setID(ZCONSFIXTIME_ID);
 
   if (globals->haveZConsFixTime()){
@@ -1863,7 +1863,7 @@ void SimSetup::setupZConstraint(SimInfo& theInfo){
   }
 
   //set zconsUsingSMD
-  IntData* zconsUsingSMD = new IntData();
+  IntGenericData* zconsUsingSMD = new IntGenericData();
   zconsUsingSMD->setID(ZCONSUSINGSMD_ID);
 
   if (globals->haveZConsUsingSMD()){
@@ -1879,7 +1879,7 @@ void SimSetup::setupZConstraint(SimInfo& theInfo){
 
   zconsOutput = zconsOutput.substr(0, zconsOutput.rfind(".")) + ".fz";
 
-  StringData* zconsFilename = new StringData();
+  StringGenericData* zconsFilename = new StringGenericData();
   zconsFilename->setID(ZCONSFILENAME_ID);
   zconsFilename->setData(zconsOutput);
 

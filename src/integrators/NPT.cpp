@@ -29,8 +29,8 @@ template<typename T> NPT<T>::NPT ( SimInfo *theInfo, ForceFields* the_ff):
   T( theInfo, the_ff )
 {
   GenericData* data;
-  DoubleData * chiValue;
-  DoubleData * integralOfChidtValue;
+  DoubleGenericData * chiValue;
+  DoubleGenericData * integralOfChidtValue;
 
   chiValue = NULL;
   integralOfChidtValue = NULL;
@@ -48,12 +48,12 @@ template<typename T> NPT<T>::NPT ( SimInfo *theInfo, ForceFields* the_ff):
   // retrieve chi and integralOfChidt from simInfo
   data = info->getProperty(CHIVALUE_ID);
   if(data){
-    chiValue = dynamic_cast<DoubleData*>(data);
+    chiValue = dynamic_cast<DoubleGenericData*>(data);
   }
 
   data = info->getProperty(INTEGRALOFCHIDT_ID);
   if(data){
-    integralOfChidtValue = dynamic_cast<DoubleData*>(data);
+    integralOfChidtValue = dynamic_cast<DoubleGenericData*>(data);
   }
 
   // chi and integralOfChidt should appear by pair

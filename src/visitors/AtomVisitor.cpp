@@ -4,6 +4,8 @@
 #include "math/MatVec3.h"
 #include "primitives/RigidBody.hpp"
 
+namespace oopse {
+
 void BaseAtomVisitor::visit(RigidBody* rb){
   //vector<Atom*> myAtoms;
   //vector<Atom*>::iterator atomIter;
@@ -253,3 +255,5 @@ const string DefaultAtomVisitor::toString(){
 
   return result;
 }    
+
+}//namespace oopse

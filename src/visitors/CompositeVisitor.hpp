@@ -4,8 +4,10 @@
 #include <list>
 #include "visitors/BaseVisitor.hpp"
 #include "primitives/StuntDouble.hpp"
-using namespace std;
 
+using namespace std;
+namespace oopse {
+    
 typedef list<pair<BaseVisitor*, int> >::iterator VisitorIterator;
 
 class CompositeVisitor: public BaseVisitor{
@@ -27,4 +29,5 @@ class CompositeVisitor: public BaseVisitor{
     list<pair<BaseVisitor*, int> > visitorList;
 };
 
+}
 #endif //_COMPOSITEVISITOR_H_

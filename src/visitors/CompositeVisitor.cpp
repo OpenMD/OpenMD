@@ -2,6 +2,9 @@
 #include "visitors/CompositeVisitor.hpp"
 #include "primitives/RigidBody.hpp"
 #include "primitives/DirectionalAtom.hpp"
+
+namespace oopse {
+
 CompositeVisitor::~CompositeVisitor(){
   VisitorIterator i;
   BaseVisitor* curVisitor;
@@ -114,3 +117,5 @@ void CompositeVisitor::update(){
   for(curVisitor = beginVisitor(i); curVisitor; curVisitor = nextVisitor(i))
     curVisitor->update();
  }
+
+}//namespace oopse

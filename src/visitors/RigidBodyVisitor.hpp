@@ -4,10 +4,12 @@
 #include <set>
 #include <string>
 #include "visitors/BaseVisitor.hpp"
-#include "utils/GenericData.hpp"
+#include "visitors/AtomData.hpp"
 
 using namespace std;
 
+namespace oopse {
+    
 class BaseRigidBodyVisitor: public BaseVisitor{
   public:
 
@@ -46,4 +48,6 @@ class RBCOMVisitor : public BaseRigidBodyVisitor{
 
     virtual const string toString();
 };
+
+}//namespace oopse
 #endif

@@ -1,3 +1,11 @@
+2004-10-20 17:54  tim
+
+	* ChangeLog, src/utils/PropertyMap.cpp, src/utils/PropertyMap.hpp,
+	test/utils/GenericDataTestCase.cpp, test/utils/Makefile,
+	test/utils/PropertyMapTestCase.cpp,
+	test/utils/PropertyMapTestCase.hpp, test/utils/UtilTest:
+	GenericData and PropertyMap  pass unit test.
+
 2004-10-20 16:52  gezelter
 
 	* src/UseTheForce/: DUFF.cpp, WATER.cpp, DarkSide/sticky.F90,

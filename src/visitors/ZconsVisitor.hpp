@@ -3,9 +3,11 @@
 
 #include "visitors/BaseVisitor.hpp"
 #include "io/ZConsReader.hpp"
-
+#include "visitors/AtomData.hpp"
+#include "constraints/ZconsData.hpp"
 enum ZConsState{zsFixed, zsMoving};
-
+namespace oopse {
+    
 class ZConsVisitor : public BaseVisitor{
   public:
 
@@ -39,5 +41,8 @@ class ZConsVisitor : public BaseVisitor{
     ZConsReader* zconsReader;
     SimInfo* info;
 };
+
+}//namespace oopse
 #endif // _ZCONS_VISITOR_H_
+
 

@@ -9,7 +9,7 @@
 #include <iostream>
 #include <fstream>
 
-#include "utils/GenericData.hpp"
+#include "constraints/ZconsData.hpp"
 
 #ifdef IS_MPI
 #include <mpi.h>
@@ -17,6 +17,7 @@
 #endif
 
 using namespace std;
+using namespace oopse;
 
 class ZConsWriter {
 

@@ -698,12 +698,12 @@ char* DumpReader::parseCommentLine(char* readLine, SimInfo* entry_plug){
       
       //push chi and integralOfChidt into SimInfo::properties which can be
       //retrieved by integrator later
-      DoubleData* chiValue = new DoubleData();
+      DoubleGenericData* chiValue = new DoubleGenericData();
       chiValue->setID(CHIVALUE_ID);
       chiValue->setData(chi);
       entry_plug->addProperty(chiValue);
       
-      DoubleData* integralOfChidtValue = new DoubleData();
+      DoubleGenericData* integralOfChidtValue = new DoubleGenericData();
       integralOfChidtValue->setID(INTEGRALOFCHIDT_ID);
       integralOfChidtValue->setData(integralOfChidt);
       entry_plug->addProperty(integralOfChidtValue);
@@ -733,9 +733,8 @@ char* DumpReader::parseCommentLine(char* readLine, SimInfo* entry_plug){
     //push eta into SimInfo::properties which can be
     //retrieved by integrator later
     //entry_plug->setBoxM( theBoxMat3 );
-    DoubleArrayData* etaValue = new DoubleArrayData();
-    etaValue->setID(ETAVALUE_ID);
-    etaValue->setData(eta, 9);
+    DoubleVectorGenericData* etaValue = new DoubleVectorGenericData(ETAVALUE_ID);
+    etaValue->insert(etaValue->end(), eta, eta+9);
     entry_plug->addProperty(etaValue);
   }
 

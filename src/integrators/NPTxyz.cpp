@@ -28,8 +28,7 @@ template<typename T> NPTxyz<T>::NPTxyz ( SimInfo *theInfo, ForceFields* the_ff):
   T( theInfo, the_ff )
 {
   GenericData* data;
-  DoubleArrayData * etaValue;
-  vector<double> etaArray;
+  DoubleVectorGenericData * etaValue;
   int i,j;
 
   for(i = 0; i < 3; i++){
@@ -46,14 +45,13 @@ template<typename T> NPTxyz<T>::NPTxyz ( SimInfo *theInfo, ForceFields* the_ff):
     // retrieve eta array from simInfo if it exists
     data = info->getProperty(ETAVALUE_ID);
     if(data){
-      etaValue = dynamic_cast<DoubleArrayData*>(data);
+      etaValue = dynamic_cast<DoubleVectorGenericData*>(data);
       
       if(etaValue){
-	etaArray = etaValue->getData();
 	
 	for(i = 0; i < 3; i++){
 	  for (j = 0; j < 3; j++){
-	    eta[i][j] = etaArray[3*i+j];
+	    eta[i][j] = (*etaValue)[3*i+j];
 	    oldEta[i][j] = eta[i][j];
 	  }
 	}

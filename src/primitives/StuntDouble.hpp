@@ -9,6 +9,8 @@
 #define OT_RIGIDBODY 2
 
 using namespace std;
+using namespace oopse;
+
 class BaseVisitor;
 
 class StuntDouble {

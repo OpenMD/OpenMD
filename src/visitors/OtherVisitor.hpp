@@ -6,7 +6,11 @@
 
 #include "visitors/BaseVisitor.hpp"
 #include "primitives/StuntDouble.hpp"
+#include "visitors/AtomData.hpp"
+
 using namespace std;
+
+namespace oopse {
 
 //IgnoreVisitor will turn on the ignoring flag of the stuntdouble
 class IgnoreVisitor : public BaseVisitor{
@@ -130,4 +134,7 @@ class WaterTypeVisitor : public BaseVisitor{
       
     set<string> waterTypeList;
 };
+
+
+}//namespace oopse
 #endif //_OTHERVISITOR_H_

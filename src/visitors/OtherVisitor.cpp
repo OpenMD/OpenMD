@@ -3,6 +3,9 @@
 #include "primitives/RigidBody.hpp"
 #include "primitives/Molecule.hpp"
 #include "brains/SimInfo.hpp"
+
+namespace oopse {
+
 //----------------------------------------------------------------------------//
 void IgnoreVisitor::visit(Atom* atom){
   if(isIgnoreType(atom->getType()))
@@ -490,3 +493,5 @@ const string WaterTypeVisitor:: toString(){
   return result;
 }
 
+
+}//namespace oopse

@@ -5,7 +5,7 @@ ZConsReader::ZConsReader(SimInfo* info)
                    :istream(NULL){
 
   GenericData* data;
-  StringData* filename; 
+  StringGenericData* filename; 
   this->info = info;
 
  //retrieve output filename of z force
@@ -22,7 +22,7 @@ ZConsReader::ZConsReader(SimInfo* info)
   }
   else{
 
-    filename = dynamic_cast<StringData*>(data);
+    filename = dynamic_cast<StringGenericData*>(data);
     
     if(!filename){
 

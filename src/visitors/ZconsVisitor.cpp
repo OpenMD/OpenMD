@@ -1,12 +1,14 @@
 #include "visitors/ZconsVisitor.hpp"
 #include <cmath>
 
+namespace oopse {
+
 ZConsVisitor::ZConsVisitor(SimInfo* info) : BaseVisitor(), zconsReader(NULL){
   GenericData* data;
-  DoubleData* tolerance;  
+  DoubleGenericData* tolerance;  
   ZConsParaData* zConsParaData;
-  StringData* filename; 
-  DoubleData* sampleTime;
+  StringGenericData* filename; 
+  DoubleGenericData* sampleTime;
   vector<ZConsParaItem>* parameters;
 
   this->info = info;
@@ -21,7 +23,7 @@ ZConsVisitor::ZConsVisitor(SimInfo* info) : BaseVisitor(), zconsReader(NULL){
     return;
   }
   else{
-    tolerance = dynamic_cast<DoubleData*>(data);
+    tolerance = dynamic_cast<DoubleGenericData*>(data);
 
     if (!tolerance){
       cerr << "Can not get zconstraint tolerance  from SimInfo" << endl;
@@ -42,7 +44,7 @@ ZConsVisitor::ZConsVisitor(SimInfo* info) : BaseVisitor(), zconsReader(NULL){
     return;
   }
   else{
-    sampleTime = dynamic_cast<DoubleData*>(data);
+    sampleTime = dynamic_cast<DoubleGenericData*>(data);
 
     if (!sampleTime){
       cerr << "Can not get zcons time  from SimInfo" << endl;
@@ -100,7 +102,7 @@ ZConsVisitor::ZConsVisitor(SimInfo* info) : BaseVisitor(), zconsReader(NULL){
     return;
   }
   else{
-    filename = dynamic_cast<StringData*>(data);
+    filename = dynamic_cast<StringGenericData*>(data);
 
     if (!filename){
       cerr << "Can not get filename of z-constraint output from SimInfo" << endl;
@@ -276,3 +278,6 @@ const string ZConsVisitor::toString(){
 
   return result;
 }
+
+
+}//namespace oopse

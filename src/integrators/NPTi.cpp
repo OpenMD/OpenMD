@@ -27,7 +27,7 @@ template<typename T> NPTi<T>::NPTi ( SimInfo *theInfo, ForceFields* the_ff):
   T( theInfo, the_ff )
 {
   GenericData* data;
-  DoubleArrayData * etaValue;
+  DoubleVectorGenericData * etaValue;
   vector<double> etaArray;
 
   eta = 0.0;
@@ -37,11 +37,10 @@ template<typename T> NPTi<T>::NPTi ( SimInfo *theInfo, ForceFields* the_ff):
     // retrieve eta from simInfo if
     data = info->getProperty(ETAVALUE_ID);
     if(data){
-      etaValue = dynamic_cast<DoubleArrayData*>(data);
+      etaValue = dynamic_cast<DoubleVectorGenericData*>(data);
       
       if(etaValue){
-	etaArray = etaValue->getData();
-	eta = etaArray[0];
+	eta = (*etaValue)[0];
 	oldEta = eta;
       }
     }

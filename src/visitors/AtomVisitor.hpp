@@ -1,10 +1,15 @@
 #ifndef _BASEATOMVISITOR_H_
 #define _BASEATOMVISITOR_H_
 
-#include "visitors/BaseVisitor.hpp"
+
 #include <vector>
+#include "visitors/BaseVisitor.hpp"
+#include "visitors/AtomData.hpp"
+
 using namespace std;
 
+namespace oopse {
+    
 class BaseAtomVisitor : public BaseVisitor{
   public:
     virtual void visit(Atom* atom) {}
@@ -50,4 +55,6 @@ class DefaultAtomVisitor : public BaseAtomVisitor{
     virtual const string toString();
     
 };
+
+}//namespace oopse
 #endif
