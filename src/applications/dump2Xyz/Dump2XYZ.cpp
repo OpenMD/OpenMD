@@ -56,6 +56,8 @@
 #include "visitors/ZconsVisitor.hpp"
 #include "selection/SelectionEvaluator.hpp"
 #include "selection/SelectionManager.hpp"
+#include "visitors/LipidTransVisitor.hpp"
+
 using namespace oopse;
 
 int main(int argc, char* argv[]){
@@ -179,14 +181,23 @@ int main(int argc, char* argv[]){
     WrappingVisitor* wrappingVisitor = new WrappingVisitor(info);
     compositeVisitor->addVisitor(wrappingVisitor, 400);
   }
-  
+
   //creat replicate visitor
   if(args_info.repeatX_given > 0 || args_info.repeatY_given > 0 ||args_info.repeatY_given > 0){
     Vector3i replicateOpt(args_info.repeatX_arg, args_info.repeatY_arg, args_info.repeatZ_arg);
     ReplicateVisitor* replicateVisitor = new ReplicateVisitor(info, replicateOpt);
     compositeVisitor->addVisitor(replicateVisitor, 300);
   }
-  
+
+
+  //create rotation visitor
+  if (args_info.refsele_given&& args_info.originsele_given) {
+    compositeVisitor->addVisitor(new LipidTransVisitor(info, args_info.originsele_arg, args_info.refsele_arg), 250); 
+  } else if (args_info.refsele_given || args_info.originsele_given) {
+    std::cerr << "Both of --refsele and --originselc should appear by pair" << std::endl;
+    exit(1);
+  }
+    
   //creat xyzVisitor
   XYZVisitor* xyzVisitor = new XYZVisitor(info);
   compositeVisitor->addVisitor(xyzVisitor, 200);

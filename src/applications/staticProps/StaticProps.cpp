@@ -130,8 +130,16 @@ int main(int argc, char* argv[]){
         rdf  = new GofROmega(info, dumpFileName, sele1, sele2, maxLen, args_info.nrbins_arg, args_info.nanglebins_arg);
     } else if (args_info.theta_omega_given) {
         rdf  = new GofAngle2(info, dumpFileName, sele1, sele2, args_info.nanglebins_arg);
-    } else if (args_info.xyz_given) {
-        rdf= new GofXyz(info, dumpFileName, sele1, sele2, maxLen, args_info.nrbins_arg);        
+    } else if (args_info.gxyz_given) {
+        if (args_info.refsele_given) {
+            rdf= new GofXyz(info, dumpFileName, sele1, sele2,args_info.refsele_arg, maxLen, args_info.nrbins_arg);        
+        } else {
+            sprintf( painCave.errMsg,
+               "--refsele must set when --gxyz is used");
+            painCave.severity = OOPSE_ERROR;
+            painCave.isFatal = 1;
+            simError();  
+        }
     }
     
     if (args_info.output_given) {

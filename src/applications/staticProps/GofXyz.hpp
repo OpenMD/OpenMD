@@ -47,7 +47,8 @@ namespace oopse {
 class GofXyz : public RadialDistrFunc {
     
     public:
-        GofXyz(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2, double len, int nrbins);
+        GofXyz(SimInfo* info, const std::string& filename, const std::string& sele1, 
+            const std::string& sele2, const std::string& sele3,double len, int nrbins);
 
         int getNRBins() {
             return nRBins_;
@@ -63,8 +64,6 @@ class GofXyz : public RadialDistrFunc {
         void initalizeHistogram();
         virtual void collectHistogram(StuntDouble* sd1, StuntDouble* sd2);
         virtual void writeRdf();
-
-        Vector3d getMolCom(StuntDouble* sd);
         
         //virtual void validateSelection1(SelectionManager& sman);
         
@@ -72,17 +71,14 @@ class GofXyz : public RadialDistrFunc {
         double halfLen_;
         int nRBins_;
         double deltaR_;
+
+        SelectionEvaluator evaluator3_;
+        SelectionManager seleMan3_;
         
         std::vector<std::vector<std::vector<int> > > histogram_;
 
-        struct CoorSet {
-            Vector3d xaxis;
-            Vector3d yaxis;
-            Vector3d zaxis;
-        };
+        std::map<int, RotMat3x3d> rotMats_;
 
-        std::map<int, CoorSet> coorSets_;
-        std::vector<Molecule*> atom2Mol_;
 };
 
 

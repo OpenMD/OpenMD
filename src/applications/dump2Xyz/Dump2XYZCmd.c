@@ -35,30 +35,32 @@ cmdline_parser_print_help (void)
   printf("\n"
   "Usage: %s [OPTIONS]...\n", CMDLINE_PARSER_PACKAGE);
   printf("\n");
-  printf("  -h, --help                        Print help and exit\n");
-  printf("  -V, --version                     Print version and exit\n");
-  printf("  -i, --input=filename              input dump file\n");
-  printf("  -o, --output=filename             output file name\n");
-  printf("  -n, --frame=INT                   print every n frame  (default=`1')\n");
-  printf("  -d, --dipole                      print the dipole moments  (default=off)\n");
-  printf("  -w, --water                       skip the the waters  (default=off)\n");
-  printf("  -m, --periodicBox                 map to the periodic box  (default=off)\n");
-  printf("  -z, --zconstraint                 replace the atom types of zconstraint \n                                      molecules  (default=off)\n");
-  printf("  -r, --rigidbody                   add a pseudo COM atom to rigidbody  \n                                      (default=off)\n");
-  printf("  -t, --watertype                   replace the atom type of water model  \n                                      (default=on)\n");
-  printf("  -g, --ignore=atomtype             ignore the atom types\n");
-  printf("  -s, --selection=selection script  selection syntax:\n"                                      
-	 "                                    select DMPC -- select DMPC molecule\n"                     
-         "                                    select DMPC.* -- select all atoms and all rigidbodies belong to DMPC molecule(same as above)\n"           
-         "                                    select not DMPC -- select all atoms and all rigidbodies do not belong to DMPC molecule\n"	
-	 "                                    select C* and 4 to 7 -- select stuntdoubles which match C* and which index is between [4, 7)\n"  
-         "                                    select 5 -- select stuntdobule whose global index is 5\n"                                       
+  printf("  -h, --help                         Print help and exit\n");
+  printf("  -V, --version                      Print version and exit\n");
+  printf("  -i, --input=filename               input dump file\n");
+  printf("  -o, --output=filename              output file name\n");
+  printf("  -n, --frame=INT                    print every n frame  (default=`1')\n");
+  printf("  -d, --dipole                       print the dipole moments  (default=off)\n");
+  printf("  -w, --water                        skip the the waters  (default=off)\n");
+  printf("  -m, --periodicBox                  map to the periodic box  (default=off)\n");
+  printf("  -z, --zconstraint                  replace the atom types of zconstraint \n                                       molecules  (default=off)\n");
+  printf("  -r, --rigidbody                    add a pseudo COM atom to rigidbody  \n                                       (default=off)\n");
+  printf("  -t, --watertype                    replace the atom type of water model  \n                                       (default=on)\n");
+  printf("  -g, --ignore=atomtype              ignore the atom types\n");
+  printf("  -s, --selection=selection script  selection syntax:\n"
+         "                                    select DMPC -- select DMPC molecule\n"
+         "                                    select DMPC.* -- select all atoms and all rigidbodies belong to DMPC molecule(same as above)\n"
+         "                                    select not DMPC -- select all atoms and all rigidbodies do not belong to DMPC molecule\n"
+         "                                    select C* and 4 to 7 -- select stuntdoubles which match C* and which index is between [4, 7)\n"
+         "                                    select 5 -- select stuntdobule whose global index is 5\n"
          "                                    select within (5.0, HDP or PO4) -- select stuntdoubles which is within 5 A to HDP or PO4\n"
          "                                    select DMPC.3 -- select stuntdouble which internal index is 3\n"
          "                                    select DMPC.DMPC_RB_*.* --select atoms belong to rigid body inside DMPC molecule \n");
-  printf("      --repeatX=INT                 The number of images to repeat in the x \n                                      direction  (default=`0')\n");
-  printf("      --repeatY=INT                 The number of images to repeat in the y \n                                      direction  (default=`0')\n");
-  printf("      --repeatZ=INT                 The number of images to repeat in the z \n                                      direction  (default=`0')\n");
+  printf("      --originsele=selection script  select origin\n");
+  printf("      --refsele=selection script     select reference\n");
+  printf("      --repeatX=INT                  The number of images to repeat in the x \n                                       direction  (default=`0')\n");
+  printf("      --repeatY=INT                  The number of images to repeat in the y \n                                       direction  (default=`0')\n");
+  printf("      --repeatZ=INT                  The number of images to repeat in the z \n                                       direction  (default=`0')\n");
 }
 
 
@@ -103,6 +105,8 @@ cmdline_parser (int argc, char * const *argv, struct gengetopt_args_info *args_i
   args_info->watertype_given = 0 ;
   args_info->ignore_given = 0 ;
   args_info->selection_given = 0 ;
+  args_info->originsele_given = 0 ;
+  args_info->refsele_given = 0 ;
   args_info->repeatX_given = 0 ;
   args_info->repeatY_given = 0 ;
   args_info->repeatZ_given = 0 ;
@@ -118,6 +122,8 @@ cmdline_parser (int argc, char * const *argv, struct gengetopt_args_info *args_i
   args_info->watertype_flag = 1;\
   args_info->ignore_arg = NULL; \
   args_info->selection_arg = NULL; \
+  args_info->originsele_arg = NULL; \
+  args_info->refsele_arg = NULL; \
   args_info->repeatX_arg = 0 ;\
   args_info->repeatY_arg = 0 ;\
   args_info->repeatZ_arg = 0 ;\
@@ -149,6 +155,8 @@ cmdline_parser (int argc, char * const *argv, struct gengetopt_args_info *args_i
         { "watertype",	0, NULL, 't' },
         { "ignore",	1, NULL, 'g' },
         { "selection",	1, NULL, 's' },
+        { "originsele",	1, NULL, 0 },
+        { "refsele",	1, NULL, 0 },
         { "repeatX",	1, NULL, 0 },
         { "repeatY",	1, NULL, 0 },
         { "repeatZ",	1, NULL, 0 },
@@ -279,12 +287,7 @@ cmdline_parser (int argc, char * const *argv, struct gengetopt_args_info *args_i
           ignore_new->ignore_arg = gengetopt_strdup (optarg);
           break;
 
-        case 's':	/* general selection syntax:\n
-select DMPC -- select DMPC molecule\n \
-select DMPC.* -- select all atoms and all rigidbodies belong to DMPC molecule\n \
-select 5 -- select stuntdobule whose global index is 5\n \
-select within (5.0, HDP or PO4) -- select stuntdoubles which is within 5 A to HDP or PO4\n \
-select DMPC.DMPC_RB_*.* --select atoms belong to rigid body inside DMPC molecule .  */
+        case 's':	/* general selection syntax(now only support select atoms within a specified range).  */
           if (args_info->selection_given)
             {
               fprintf (stderr, "%s: `--selection' (`-s') option given more than once\n", CMDLINE_PARSER_PACKAGE);
@@ -297,8 +300,36 @@ select DMPC.DMPC_RB_*.* --select atoms belong to rigid body inside DMPC molecule
 
 
         case 0:	/* Long option with no short option */
+          /* select origin.  */
+          if (strcmp (long_options[option_index].name, "originsele") == 0)
+          {
+            if (args_info->originsele_given)
+              {
+                fprintf (stderr, "%s: `--originsele' option given more than once\n", CMDLINE_PARSER_PACKAGE);
+                clear_args ();
+                exit (EXIT_FAILURE);
+              }
+            args_info->originsele_given = 1;
+            args_info->originsele_arg = gengetopt_strdup (optarg);
+            break;
+          }
+          
+          /* select reference.  */
+          else if (strcmp (long_options[option_index].name, "refsele") == 0)
+          {
+            if (args_info->refsele_given)
+              {
+                fprintf (stderr, "%s: `--refsele' option given more than once\n", CMDLINE_PARSER_PACKAGE);
+                clear_args ();
+                exit (EXIT_FAILURE);
+              }
+            args_info->refsele_given = 1;
+            args_info->refsele_arg = gengetopt_strdup (optarg);
+            break;
+          }
+          
           /* The number of images to repeat in the x direction.  */
-          if (strcmp (long_options[option_index].name, "repeatX") == 0)
+          else if (strcmp (long_options[option_index].name, "repeatX") == 0)
           {
             if (args_info->repeatX_given)
               {

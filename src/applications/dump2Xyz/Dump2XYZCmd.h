@@ -34,12 +34,9 @@ struct gengetopt_args_info
   int rigidbody_flag;	/* add a pseudo COM atom to rigidbody (default=off).  */
   int watertype_flag;	/* replace the atom type of water model (default=on).  */
   char ** ignore_arg;	/* ignore the atom types.  */
-  char * selection_arg;	/* general selection syntax:\n
-select DMPC -- select DMPC molecule\n \
-select DMPC.* -- select all atoms and all rigidbodies belong to DMPC molecule\n \
-select 5 -- select stuntdobule whose global index is 5\n \
-select within (5.0, HDP or PO4) -- select stuntdoubles which is within 5 A to HDP or PO4\n \
-select DMPC.DMPC_RB_*.* --select atoms belong to rigid body inside DMPC molecule .  */
+  char * selection_arg;	/* general selection syntax(now only support select atoms within a specified range).  */
+  char * originsele_arg;	/* select origin.  */
+  char * refsele_arg;	/* select reference.  */
   int repeatX_arg;	/* The number of images to repeat in the x direction (default='0').  */
   int repeatY_arg;	/* The number of images to repeat in the y direction (default='0').  */
   int repeatZ_arg;	/* The number of images to repeat in the z direction (default='0').  */
@@ -57,6 +54,8 @@ select DMPC.DMPC_RB_*.* --select atoms belong to rigid body inside DMPC molecule
   int watertype_given ;	/* Whether watertype was given.  */
   int ignore_given ;	/* Whether ignore was given.  */
   int selection_given ;	/* Whether selection was given.  */
+  int originsele_given ;	/* Whether originsele was given.  */
+  int refsele_given ;	/* Whether refsele was given.  */
   int repeatX_given ;	/* Whether repeatX was given.  */
   int repeatY_given ;	/* Whether repeatY was given.  */
   int repeatZ_given ;	/* Whether repeatZ was given.  */

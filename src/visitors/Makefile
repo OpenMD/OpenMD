@@ -6,6 +6,7 @@ Source    = \
 	OtherVisitor.cpp \
 	RigidBodyVisitor.cpp \
 	ZconsVisitor.cpp \
+	LipidTransVisitor.cpp
 
 RmiSource =
 

@@ -46,9 +46,14 @@
 #include "primitives/Molecule.hpp"
 namespace oopse {
 
-GofXyz::GofXyz(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2, double len, int nrbins)
-    : RadialDistrFunc(info, filename, sele1, sele2), len_(len), halfLen_(len/2), nRBins_(nrbins) {
+GofXyz::GofXyz(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2, const std::string& sele3, double len, int nrbins)
+    : RadialDistrFunc(info, filename, sele1, sele2), evaluator3_(info), seleMan3_(info), len_(len), halfLen_(len/2), nRBins_(nrbins) {
     setOutputName(getPrefix(filename) + ".gxyz");
+
+    evaluator3_.loadScriptString(sele3);
+    if (!evaluator3_.isDynamic()) {
+        seleMan3_.setSelectionSet(evaluator3_.evaluate());
+    }    
 
     deltaR_ =  len_ / nRBins_;
     
@@ -59,28 +64,7 @@ GofXyz::GofXyz(SimInfo* info, const std::string& filename, const std::string& se
             histogram_[i][j].resize(nRBins_);
         }
     }   
-
-    //create atom2Mol mapping (should be other class' responsibility)
-    atom2Mol_.insert(atom2Mol_.begin(), info_->getNGlobalAtoms() + info_->getNGlobalRigidBodies(), static_cast<Molecule*>(NULL));
-    
-    SimInfo::MoleculeIterator mi;
-    Molecule* mol;
-    Molecule::AtomIterator ai;
-    Atom* atom;
-    Molecule::RigidBodyIterator rbIter;
-    RigidBody* rb;
-    
-    for (mol = info_->beginMolecule(mi); mol != NULL; mol = info_->nextMolecule(mi)) {
-        
-        for(atom = mol->beginAtom(ai); atom != NULL; atom = mol->nextAtom(ai)) {
-            atom2Mol_[atom->getGlobalIndex()] = mol;
-        }
-
-        for (rb = mol->beginRigidBody(rbIter); rb != NULL; rb = mol->nextRigidBody(rbIter)) {
-            atom2Mol_[rb->getGlobalIndex()] = mol;
-        }
-        
-    }       
+   
 }
 
 
@@ -97,26 +81,46 @@ void GofXyz::preProcess() {
 void GofXyz::initalizeHistogram() {
     //calculate the center of mass of the molecule of selected stuntdouble in selection1
 
-    //determine the new coordinate set of selection1
-    //v1 = Rs1 -Rcom, 
-    //z = Rs1.dipole
+    if (!evaluator3_.isDynamic()) {
+        seleMan3_.setSelectionSet(evaluator3_.evaluate());
+    }    
+
+    assert(seleMan1_.getSelectionCount() == seleMan3_.getSelectionCount());
+    
+    //dipole direction of selection3 and position of selection3 will be used to determine the y-z plane
+    //v1 = s3 -s1, 
+    //z = origin.dipole
     //x = v1 X z
     //y = z X x 
-    coorSets_.clear();
+    rotMats_.clear();
 
     int i;
-    StuntDouble* sd;
-    for (sd = seleMan1_.beginSelected(i); sd != NULL; sd = seleMan1_.nextSelected(i)) {
-        Vector3d rcom = getMolCom(sd);
-        Vector3d rs1 = sd->getPos();
-        Vector3d v1 =  rcom - rs1;
-        CoorSet currCoorSet;
-        currCoorSet.zaxis = sd->getElectroFrame().getColumn(2);
-        v1.normalize();
-        currCoorSet.zaxis.normalize();
-        currCoorSet.xaxis = cross(v1, currCoorSet.zaxis);
-        currCoorSet.yaxis = cross(currCoorSet.zaxis, currCoorSet.xaxis);
-        coorSets_.insert(std::map<int, CoorSet>::value_type(sd->getGlobalIndex(), currCoorSet));
+    int j;
+    StuntDouble* sd1;
+    StuntDouble* sd3;
+    
+    for (sd1 = seleMan1_.beginSelected(i), sd3 = seleMan3_.beginSelected(j); 
+        sd1 != NULL, sd3 != NULL;
+        sd1 = seleMan1_.nextSelected(i), sd3 = seleMan3_.nextSelected(j)) {
+
+        Vector3d r3 =sd3->getPos();
+        Vector3d r1 = sd1->getPos();
+        Vector3d v1 =  r3 - r1;
+        info_->getSnapshotManager()->getCurrentSnapshot()->wrapVector(v1);
+        Vector3d zaxis = sd1->getElectroFrame().getColumn(2);
+        Vector3d xaxis = cross(v1, zaxis);
+        Vector3d yaxis = cross(zaxis, xaxis);
+
+        xaxis.normalize();
+        yaxis.normalize();
+        zaxis.normalize();
+
+        RotMat3x3d rotMat;
+        rotMat.setRow(0, xaxis);
+        rotMat.setRow(1, yaxis);
+        rotMat.setRow(2, zaxis);
+        
+        rotMats_.insert(std::map<int, RotMat3x3d>::value_type(sd1->getGlobalIndex(), rotMat));
     }
 
 }
@@ -128,17 +132,14 @@ void GofXyz::collectHistogram(StuntDouble* sd1, StuntDouble* sd2) {
     Vector3d r12 = pos2 - pos1;
     currentSnapshot_->wrapVector(r12);
 
-    std::map<int, CoorSet>::iterator i = coorSets_.find(sd1->getGlobalIndex());
-    assert(i != coorSets_.end());
+    std::map<int, RotMat3x3d>::iterator i = rotMats_.find(sd1->getGlobalIndex());
+    assert(i != rotMats_.end());
     
-    double x = dot(r12, i->second.xaxis);
-    double y = dot(r12, i->second.yaxis);
-    double z = dot(r12, i->second.zaxis);
-
+    Vector3d newR12 = i->second * r12;
     // x, y and z's possible values range -halfLen_ to halfLen_
-    int xbin = (x+ halfLen_) / deltaR_;
-    int ybin = (y + halfLen_) / deltaR_;
-    int zbin = (z + halfLen_) / deltaR_;
+    int xbin = (newR12.x()+ halfLen_) / deltaR_;
+    int ybin = (newR12.y() + halfLen_) / deltaR_;
+    int zbin = (newR12.z() + halfLen_) / deltaR_;
 
     if (xbin < nRBins_ && xbin >=0 &&
         ybin < nRBins_ && ybin >= 0 &&
@@ -173,12 +174,6 @@ void GofXyz::writeRdf() {
     }
 
     rdfStream.close();
-}
-
-Vector3d GofXyz::getMolCom(StuntDouble* sd){
-    Molecule* mol = atom2Mol_[sd->getGlobalIndex()];
-    assert(mol);
-    return mol->getCom();
 }
 
 }

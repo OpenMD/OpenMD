@@ -35,23 +35,24 @@ cmdline_parser_print_help (void)
   printf("\n"
   "Usage: %s [OPTIONS]...\n", CMDLINE_PARSER_PACKAGE);
   printf("\n");
-  printf("  -h, --help                    Print help and exit\n");
-  printf("  -V, --version                 Print version and exit\n");
-  printf("  -i, --input=filename          input dump file\n");
-  printf("  -o, --output=filename         output file name\n");
-  printf("  -n, --step=INT                process every n frame  (default=`1')\n");
-  printf("  -r, --nrbins=INT              number of bins for distance  (default=`100')\n");
-  printf("  -a, --nanglebins=INT          number of bins for cos(angle)  (default=`50')\n");
-  printf("  -l, --length=DOUBLE           maximum length (Defaults to 1/2 smallest \n                                  length of first frame)\n");
-  printf("      --sele1=selection script  select first stuntdouble set\n");
-  printf("      --sele2=selection script  select second stuntdouble set\n");
+  printf("  -h, --help                      Print help and exit\n");
+  printf("  -V, --version                   Print version and exit\n");
+  printf("  -i, --input=filename            input dump file\n");
+  printf("  -o, --output=filename           output file name\n");
+  printf("  -n, --step=INT                  process every n frame  (default=`1')\n");
+  printf("  -r, --nrbins=INT                number of bins for distance  (default=`100')\n");
+  printf("  -a, --nanglebins=INT            number of bins for cos(angle)  (default=\n                                    `50')\n");
+  printf("  -l, --length=DOUBLE             maximum length (Defaults to 1/2 smallest \n                                    length of first frame)\n");
+  printf("      --sele1=selection script    select first stuntdouble set\n");
+  printf("      --sele2=selection script    select second stuntdouble set\n");
+  printf("      --refsele=selection script  select reference (use and only use with \n                                    --gxyz)\n");
   printf("\n");
   printf(" Group: staticProps  an option of this group is required\n");
-  printf("      --gofr                    g(r)\n");
-  printf("      --r_theta                 g(r, cos(theta))\n");
-  printf("      --r_omega                 g(r, cos(omega))\n");
-  printf("      --theta_omega             g(cos(theta), cos(omega))\n");
-  printf("      --xyz                     g(x, y, z)\n");
+  printf("      --gofr                      g(r)\n");
+  printf("      --r_theta                   g(r, cos(theta))\n");
+  printf("      --r_omega                   g(r, cos(omega))\n");
+  printf("      --theta_omega               g(cos(theta), cos(omega))\n");
+  printf("      --gxyz                      g(x, y, z)\n");
 }
 
 
@@ -87,11 +88,12 @@ cmdline_parser (int argc, char * const *argv, struct gengetopt_args_info *args_i
   args_info->length_given = 0 ;
   args_info->sele1_given = 0 ;
   args_info->sele2_given = 0 ;
+  args_info->refsele_given = 0 ;
   args_info->gofr_given = 0 ;
   args_info->r_theta_given = 0 ;
   args_info->r_omega_given = 0 ;
   args_info->theta_omega_given = 0 ;
-  args_info->xyz_given = 0 ;
+  args_info->gxyz_given = 0 ;
 #define clear_args() { \
   args_info->input_arg = NULL; \
   args_info->output_arg = NULL; \
@@ -100,6 +102,7 @@ cmdline_parser (int argc, char * const *argv, struct gengetopt_args_info *args_i
   args_info->nanglebins_arg = 50 ;\
   args_info->sele1_arg = NULL; \
   args_info->sele2_arg = NULL; \
+  args_info->refsele_arg = NULL; \
 }
 
   clear_args();
@@ -125,11 +128,12 @@ cmdline_parser (int argc, char * const *argv, struct gengetopt_args_info *args_i
         { "length",	1, NULL, 'l' },
         { "sele1",	1, NULL, 0 },
         { "sele2",	1, NULL, 0 },
+        { "refsele",	1, NULL, 0 },
         { "gofr",	0, NULL, 0 },
         { "r_theta",	0, NULL, 0 },
         { "r_omega",	0, NULL, 0 },
         { "theta_omega",	0, NULL, 0 },
-        { "xyz",	0, NULL, 0 },
+        { "gxyz",	0, NULL, 0 },
         { NULL,	0, NULL, 0 }
       };
 
@@ -246,6 +250,20 @@ cmdline_parser (int argc, char * const *argv, struct gengetopt_args_info *args_i
             break;
           }
           
+          /* select reference (use and only use with --gxyz).  */
+          else if (strcmp (long_options[option_index].name, "refsele") == 0)
+          {
+            if (args_info->refsele_given)
+              {
+                fprintf (stderr, "%s: `--refsele' option given more than once\n", CMDLINE_PARSER_PACKAGE);
+                clear_args ();
+                exit (EXIT_FAILURE);
+              }
+            args_info->refsele_given = 1;
+            args_info->refsele_arg = gengetopt_strdup (optarg);
+            break;
+          }
+          
           /* g(r).  */
           else if (strcmp (long_options[option_index].name, "gofr") == 0)
           {
@@ -303,15 +321,15 @@ cmdline_parser (int argc, char * const *argv, struct gengetopt_args_info *args_i
           }
           
           /* g(x, y, z).  */
-          else if (strcmp (long_options[option_index].name, "xyz") == 0)
+          else if (strcmp (long_options[option_index].name, "gxyz") == 0)
           {
-            if (args_info->xyz_given)
+            if (args_info->gxyz_given)
               {
-                fprintf (stderr, "%s: `--xyz' option given more than once\n", CMDLINE_PARSER_PACKAGE);
+                fprintf (stderr, "%s: `--gxyz' option given more than once\n", CMDLINE_PARSER_PACKAGE);
                 clear_args ();
                 exit (EXIT_FAILURE);
               }
-            args_info->xyz_given = 1; staticProps_group_counter += 1;
+            args_info->gxyz_given = 1; staticProps_group_counter += 1;
           
             break;
           }

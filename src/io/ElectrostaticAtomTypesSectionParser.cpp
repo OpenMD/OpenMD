@@ -180,9 +180,9 @@ void ElectrostaticAtomTypesSectionParser::parseElectroBodyFrame(StringTokenizer&
     double psi;
 
     if (tokenizer.countTokens() >=3 ) {
-        phi = tokenizer.nextTokenAsDouble()/180.0;
-        theta = tokenizer.nextTokenAsDouble()/180.0;
-        psi = tokenizer.nextTokenAsDouble()/180.0;
+        phi = tokenizer.nextTokenAsDouble() * NumericConstant::PI /180.0;
+        theta = tokenizer.nextTokenAsDouble() * NumericConstant::PI /180.0;
+        psi = tokenizer.nextTokenAsDouble() * NumericConstant::PI /180.0;
     } else {
         phi = 0.0;
         theta = 0.0;
