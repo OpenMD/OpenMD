@@ -833,7 +833,7 @@ void Minimizer::minimize() {
     int writeFrq;
     int nextWriteIter;
     Snapshot* curSnapshot =info->getSnapshotManager()->getCurrentSnapshot();
-    DumpWriter dumpWriter(info, info->getDumpFileName());     
+    DumpWriter dumpWriter(info);     
     StatsBitSet mask;
     mask.set(Stats::TIME);
     mask.set(Stats::POTENTIAL_ENERGY);

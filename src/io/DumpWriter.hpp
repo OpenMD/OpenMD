@@ -70,20 +70,22 @@ namespace oopse {
 class DumpWriter{
 
     public:
+        DumpWriter(SimInfo* info);
         DumpWriter(SimInfo* info, const std::string& filename);
         ~DumpWriter();
-        
-        void writeDump() {
-            writeFrame(dumpFile_);
-        }
 
+        void writeDumpAndEor();
+        void writeDump();
+        void writeEor();
+        
     private:  
+        
         void writeFrame(std::ostream& os);
         void writeCommentLine(std::ostream& os, Snapshot* s);
         SimInfo* info_;
         std::string filename_;
         std::ofstream dumpFile_;
-
+        std::string eorFilename_;
 };
 
 }

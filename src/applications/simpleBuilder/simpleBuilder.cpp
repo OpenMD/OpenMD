@@ -246,7 +246,7 @@ int main(int argc, char *argv []) {
 
     //create dumpwriter and write out the coordinates
     oldInfo->setFinalConfigFileName(outInitFileName);
-    writer = new DumpWriter(oldInfo, oldInfo->getDumpFileName());
+    writer = new DumpWriter(oldInfo);
 
     if (writer == NULL) {
         std::cerr << "error in creating DumpWriter" << std::endl;

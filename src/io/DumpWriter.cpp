@@ -42,12 +42,40 @@
 #include "io/DumpWriter.hpp"
 #include "primitives/Molecule.hpp"
 #include "utils/simError.h"
-
+#include "io/basic_teebuf.hpp"
 #ifdef IS_MPI
 #include <mpi.h>
 #endif //is_mpi
 
 namespace oopse {
+
+DumpWriter::DumpWriter(SimInfo* info) 
+                   : info_(info), filename_(info->getDumpFileName()), eorFilename_(info->getFinalConfigFileName()){
+#ifdef IS_MPI
+
+    if (worldRank == 0) {
+#endif // is_mpi
+
+        dumpFile_.open(filename_.c_str(), std::ios::out | std::ios::trunc);
+
+        if (!dumpFile_) {
+            sprintf(painCave.errMsg, "Could not open \"%s\" for dump output.\n",
+                    filename_.c_str());
+            painCave.isFatal = 1;
+            simError();
+        }
+
+#ifdef IS_MPI
+
+    }
+
+    sprintf(checkPointMsg, "Sucessfully opened output file for dumping.\n");
+    MPIcheckPoint();
+
+#endif // is_mpi
+
+}
+
 
 DumpWriter::DumpWriter(SimInfo* info, const std::string& filename) 
                    : info_(info), filename_(filename){
@@ -56,6 +84,7 @@ DumpWriter::DumpWriter(SimInfo* info, const std::string& filename)
     if (worldRank == 0) {
 #endif // is_mpi
 
+        eorFilename_ = filename_.substr(0, filename_.rfind(".")) + ".eor";
         dumpFile_.open(filename_.c_str(), std::ios::out | std::ios::trunc);
 
         if (!dumpFile_) {
@@ -120,7 +149,7 @@ void DumpWriter::writeCommentLine(std::ostream& os, Snapshot* s) {
          << eta(0, 1) << "\t" << eta(1, 1) << "\t" << eta(2, 1) << ";\t"
          << eta(0, 2) << "\t" << eta(1, 2) << "\t" << eta(2, 2) << ";";
         
-    os << std::endl;
+    os << "\n";
 }
 
 void DumpWriter::writeFrame(std::ostream& os) {
@@ -548,5 +577,65 @@ void DumpWriter::writeFrame(std::ostream& os) {
 #endif // is_mpi
 
 }
+
+void DumpWriter::writeDump() {
+    writeFrame(dumpFile_);
+
+}
+
+void DumpWriter::writeEor() {
+    std::ofstream eorStream;
+    
+#ifdef IS_MPI
+    if (worldRank == 0) {
+#endif // is_mpi
+
+        eorStream.open(eorFilename_.c_str());
+        if (!eorStream.is_open()) {
+            sprintf(painCave.errMsg, "DumpWriter : Could not open \"%s\" for writing.\n",
+                    eorFilename_.c_str());
+            painCave.isFatal = 1;
+            simError();
+        }
+
+#ifdef IS_MPI
+    }
+#endif // is_mpi    
+
+    writeFrame(eorStream);
+}
+
+
+void DumpWriter::writeDumpAndEor() {
+    std::ofstream eorStream;
+    std::vector<std::streambuf*> buffers;
+#ifdef IS_MPI
+    if (worldRank == 0) {
+#endif // is_mpi
+
+        buffers.push_back(dumpFile_.rdbuf());
+
+        eorStream.open(eorFilename_.c_str());
+        if (!eorStream.is_open()) {
+            sprintf(painCave.errMsg, "DumpWriter : Could not open \"%s\" for writing.\n",
+                    eorFilename_.c_str());
+            painCave.isFatal = 1;
+            simError();
+        }
+
+        buffers.push_back(eorStream.rdbuf());
+        
+#ifdef IS_MPI
+    }
+#endif // is_mpi    
+
+    TeeBuf tbuf(buffers.begin(), buffers.end());
+    std::ostream os(&tbuf);
+
+    writeFrame(os);
+    
+}
+
+
 
 }//end namespace oopse

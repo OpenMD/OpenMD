@@ -90,7 +90,7 @@ void VelocityVerletIntegrator::initialize(){
 
     statWriter = createStatWriter();
 
-    dumpWriter->writeDump();
+    dumpWriter->writeDumpAndEor();
     
     //save statistics, before writeStat,  we must save statistics
     thermo.saveStat();
@@ -151,8 +151,7 @@ void VelocityVerletIntegrator::postStep() {
         }
 
         if (currentSnapshot_->getTime() >= currSample) {
-            dumpWriter->writeDump();
-            //eorWriter->writeDump();
+            dumpWriter->writeDumpAndEor();
             currSample += sampleTime;
         }
 
@@ -172,6 +171,7 @@ void VelocityVerletIntegrator::postStep() {
 
 
 void VelocityVerletIntegrator::finalize() {
+     dumpWriter->writeEor();
 
     delete dumpWriter;
     delete statWriter;
@@ -195,7 +195,7 @@ void VelocityVerletIntegrator::calcForce(bool needPotential,
 }
 
 DumpWriter* VelocityVerletIntegrator::createDumpWriter() {
-    return new DumpWriter(info_, info_->getDumpFileName());
+    return new DumpWriter(info_);
 }
 
 StatWriter* VelocityVerletIntegrator::createStatWriter() {
