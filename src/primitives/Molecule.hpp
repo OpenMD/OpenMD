@@ -292,6 +292,10 @@ class Molecule {
         /** Returns the velocity of center of mass of this molecule */
         Vector3d getComVel();
 
+        std::string getMoleculeName() { 
+            return moleculeName_;
+        }
+        
         friend std::ostream& operator <<(std::ostream& o, Molecule& mol);
         
     private:

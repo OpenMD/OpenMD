@@ -119,9 +119,15 @@ class RigidBody : public StuntDouble {
         /** update the positions of atoms belong to this rigidbody */
         void updateAtoms();
 
-        Atom* beginAtom(std::vector<Atom*>::iterator& i);
+        Atom* beginAtom(std::vector<Atom*>::iterator& i) {
+            i = atoms_.begin();
+            return i != atoms_.end() ? *i : NULL;
+        }
 
-        Atom* nextAtom(std::vector<Atom*>::iterator& i);
+        Atom* nextAtom(std::vector<Atom*>::iterator& i) {
+            ++i;
+            return i != atoms_.end() ? *i : NULL;
+        }
 
         std::vector<Atom*>::iterator getBeginAtomIter() {
             return atoms_.begin();
