@@ -107,7 +107,7 @@ class VelocityVerletIntegrator : public Integrator {
         virtual double calcConservedQuantity() = 0;
 
         virtual DumpWriter* createDumpWriter();
-        virtual DumpWriter* createEorWriter();
+
         virtual StatWriter* createStatWriter();
 
 };

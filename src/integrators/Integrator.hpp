@@ -113,7 +113,6 @@ class Integrator {
         double targetScalingTemp;
     
         DumpWriter*dumpWriter;
-        DumpWriter* eorWriter;
         StatWriter* statWriter;
         Thermo thermo;
 
@@ -131,8 +130,6 @@ class Integrator {
         virtual double calcConservedQuantity() = 0;
         
         virtual DumpWriter* createDumpWriter() = 0;
-        
-        virtual DumpWriter* createEorWriter() = 0;
 
         virtual StatWriter* createStatWriter() = 0;
 };

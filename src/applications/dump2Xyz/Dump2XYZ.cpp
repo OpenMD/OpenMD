@@ -55,6 +55,7 @@
 #include "visitors/OtherVisitor.hpp"
 #include "visitors/ZconsVisitor.hpp"
 #include "selection/SelectionEvaluator.hpp"
+#include "selection/SelectionManager.hpp"
 using namespace oopse;
 
 int main(int argc, char* argv[]){

@@ -49,7 +49,7 @@
 #include "utils/simError.h"
 
 #include "applications/dynamicProps/DynamicPropsCmd.h"
-#include "applications/dynamicProps/DCorrFunc.hpp"
+#include "applications/dynamicProps/DipoleCorrFunc.hpp"
 #include "applications/dynamicProps/RCorrFunc.hpp"
 #include "applications/dynamicProps/VCorrFunc.hpp"
 

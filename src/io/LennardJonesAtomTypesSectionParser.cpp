@@ -71,6 +71,10 @@ void LennardJonesAtomTypesSectionParser::parseLine(ForceField& ff,const std::str
             ljParam.sigma = tokenizer.nextTokenAsDouble();
             atomType->addProperty(new LJParamGenericData("LennardJones", ljParam));
             atomType->setLennardJones();
+        }else {
+            sprintf(painCave.errMsg, "LennardJonesAtomTypesSectionParser Error: Atom Type [%s] is not created yet\n", atomTypeName.c_str());
+            painCave.isFatal = 1;
+            simError();    
         }
                        
     }    

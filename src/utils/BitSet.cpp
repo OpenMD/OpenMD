@@ -39,10 +39,13 @@
  * such damages.
  */
 
-#include "utils/BitSet.hpp"
 #include <algorithm>
 #include <cassert>
 #include <string>
+
+#include "utils/BitSet.hpp"
+#include "utils/Algorithm.hpp"
+
 namespace oopse {
 int BitSet::countBits() {
     return std::count(bitset_.begin(), bitset_.end(), true);

@@ -96,10 +96,17 @@ class CorrelationFunction {
         int nTimeBins_;
         std::vector<double> histogram_;
         std::vector<int> count_;
+        std::vector<int> time_;
+        
+        SimInfo* info_;
+        int storageLayout_;
+        std::string dumpFilename_;        
+        SelectionManager seleMan1_;
+        SelectionManager seleMan2_;          
         
     private:
 
-        void correlateBlocks(SnapshotBlock* block1, SnapshotBlock* block2);
+        void correlateBlocks(int block1, int block2);
         void correlateFrames(int frame1, int frame2);
         void updateFrame(int frame);
         
@@ -109,19 +116,14 @@ class CorrelationFunction {
 
         virtual void validateSelection(const SelectionManager& seleMan) {}
 
-        SimInfo* info_;
-        int storageLayout_;
-        std::string dumpFilename_;
+
         std::string selectionScript1_;
         std::string selectionScript2_;
         
         SelectionEvaluator evaluator1_;
         SelectionEvaluator evaluator2_;
-        SelectionManager seleMan1_;
-        SelectionManager seleMan2_;        
 
         BlockSnapshotManager* bsMan_;        
-
 
         std::string outputFilename_;
 

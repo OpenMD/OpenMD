@@ -45,7 +45,7 @@
 namespace oopse {
 Integrator::Integrator(SimInfo* info) 
     : info_(info), forceMan_(NULL) , needPotential(false), needStress(false), velocitizer_(NULL),
-      needVelocityScaling(false), dumpWriter(NULL), eorWriter(NULL), statWriter(NULL), thermo(info), 
+      needVelocityScaling(false), dumpWriter(NULL), statWriter(NULL), thermo(info), 
       currentSnapshot_(info->getSnapshotManager()->getCurrentSnapshot()) {
 
     Globals* simParams = info->getSimParams();
@@ -118,7 +118,6 @@ Integrator::~Integrator(){
     delete velocitizer_;
     
     delete dumpWriter;
-    delete eorWriter;
     delete statWriter;
 }
 

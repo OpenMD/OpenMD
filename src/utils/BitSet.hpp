@@ -43,7 +43,6 @@
 #define UTILS_BITSET_HPP
 
 #include <iostream>
-#include <functional>
 #include <vector>
 namespace oopse {
 
@@ -143,10 +142,6 @@ class BitSet {
         std::vector<char> bitset_;
 };
 
-template<typename T>
-struct logical_xor :public std::binary_function<T, T, bool> {
-    double operator()(T x, T y) { return x ^ y; }
-};
 
 }
 #endif

@@ -41,7 +41,7 @@
 
 #include "applications/dynamicProps/CorrelationFunction.hpp"
 #include "utils/simError.h"
-
+#include "primitives/Molecule.hpp"
 namespace oopse {
 
 CorrelationFunction::CorrelationFunction(SimInfo* info, const std::string& filename, 
@@ -73,8 +73,8 @@ CorrelationFunction::CorrelationFunction(SimInfo* info, const std::string& filen
         storageLayout_ |= DataStorage::dslElectroFrame;
     }
         
-    bsMan_ = new BlockSnapshotMananger(info, dumpFilename_, storageLayout_);
-    info->setSnapshotManager(bsMan_);
+    bsMan_ = new BlockSnapshotManager(info, dumpFilename_, storageLayout_);
+    info_->setSnapshotManager(bsMan_);
 
     //if selection is static, we only need to evaluate it once
     if (!evaluator1_.isDynamic()) {
@@ -90,7 +90,7 @@ CorrelationFunction::CorrelationFunction(SimInfo* info, const std::string& filen
     nTimeBins_ = nframes;  /**@todo Fixed Me */
     histogram_.resize(nTimeBins_);
     count_.resize(nTimeBins_);
-
+    time_.resize(nTimeBins_);
     //deltaTime_ = info_->;
 }
 
@@ -168,8 +168,9 @@ void CorrelationFunction::correlateFrames(int frame1, int frame2) {
     int j;
     StuntDouble* sd1;
     StuntDouble* sd2;
-    for (sd1 = seleMan1_.beginSelected(i), (sd2 = seleMan2_.beginSelected(j); sd1 != NULL && sd2 != NULL;
-        sd1 = seleMan1_.nextSelected(i) sd2 = seleMan2_.nextSelected(j)) {
+    for (sd1 = seleMan1_.beginSelected(i), sd2 = seleMan2_.beginSelected(j); sd1 != NULL && sd2 != NULL;
+        sd1 = seleMan1_.nextSelected(i), sd2 = seleMan2_.nextSelected(j)) {
+
         double corrVal = calcCorrVal(sd1, frame1, sd2, frame2);
         histogram_[timeBin] += corrVal;    
     }
@@ -223,7 +224,7 @@ void CorrelationFunction::preCorrelate() {
 void CorrelationFunction::postCorrelate() {
     for (int i =0 ; i < nTimeBins_; ++i) {
         if (count_[i] > 0) {
-            histogram_[i] / = count_[i];
+            histogram_[i] /= count_[i];
         }
     }
 }
@@ -235,7 +236,7 @@ void CorrelationFunction::writeCorrelate() {
     if (ofs.is_open()) {
 
         ofs << "#" << getCorrFuncType() << "\n";
-        ofs << "#selection script1: \"" << selectionScript1_ <<"\"\tselection script2: \"" selectionScript2_ << "\"\n";
+        ofs << "#selection script1: \"" << selectionScript1_ <<"\"\tselection script2: \"" << selectionScript2_ << "\"\n";
         ofs << "#extra information: " << extra_ << "\n";
         ofs << "#time\tcorrVal\n";
 

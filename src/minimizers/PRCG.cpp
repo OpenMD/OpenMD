@@ -40,6 +40,8 @@
  */
  
 #include "minimizers/PRCG.hpp"
+namespace oopse {
+	
 void PRCGMinimizer::init(){
 
   calcG();
@@ -97,5 +99,7 @@ void PRCGMinimizer::prepareStep(){
 
   for(i = 0; i < direction.size(); i++)  
     direction[i] = -curG[i] + beta * direction[i];
+
+}
 
 }

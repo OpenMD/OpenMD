@@ -183,6 +183,7 @@ void DumpWriter::writeFrame(std::ostream& os) {
         }
     }
 
+    os.flush();
 #else // is_mpi
     /*********************************************************************
      * Documentation?  You want DOCUMENTATION?

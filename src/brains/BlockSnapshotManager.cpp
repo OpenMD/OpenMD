@@ -41,11 +41,12 @@
 #include <algorithm>
 #include "brains/BlockSnapshotManager.hpp"
 #include "utils/physmem.h"
+#include "utils/Algorithm.hpp"
 #include "brains/SimInfo.hpp"
 #include "io/DumpReader.hpp"
 
 namespace oopse {
-BlockSnapshotMananger::BlockSnapshotMananger(SimInfo* info, const std::string& filename, 
+BlockSnapshotManager::BlockSnapshotManager(SimInfo* info, const std::string& filename, 
     int storageLayout, int blockCapacity) 
     : SnapshotManager(storageLayout), info_(info), blockCapacity_(blockCapacity), activeBlocks_(blockCapacity_, -1) {
 
@@ -71,26 +72,32 @@ BlockSnapshotMananger::BlockSnapshotMananger(SimInfo* info, const std::string& f
     }  
     
     for (int i = 0; i < nblocks; ++i) {
-        blocks_.push_back(SnapshotBlock(i, (i+1)*nSnapshotPerBlock_);    
+        blocks_.push_back(SnapshotBlock(i, (i+1)*nSnapshotPerBlock_));    
     }
     //the last block may not have nSnapshotPerBlock frames, we need to consider this special situation
-    blocks_.back.second = nframes_;
+    blocks_.back().second = nframes_;
 
     snapshots_.insert(snapshots_.begin(), nframes_, NULL);   
     
 }
 
 
-BlockSnapshotMananger::~BlockSnapshotMananger() {
+BlockSnapshotManager::~BlockSnapshotManager() {
     currentSnapshot_ = NULL;
     previousSnapshot_ = NULL;
     
     delete reader_;
-    std::for_each(activeBlocks_.begin(), activeBlocks_.end(), unloadBlock);
+
+    std::vector<int>::iterator i;
+    for (i = activeBlocks_.begin(); i != activeBlocks_.end(); ++i) {
+        if (*i != -1) {
+            unloadBlock(*i);
+        }
+    }
 }
 
 int BlockSnapshotManager::getNActiveBlocks() {
-    return std::count_if(activeBlocks_.begin(), activeBlocks_.end(), std::not);
+    return std::count_if(activeBlocks_.begin(), activeBlocks_.end(), std::bind2nd(std::not_equal_to<int>(), -1));
 }
 
 bool BlockSnapshotManager::isBlockActive(int block) {
@@ -132,19 +139,28 @@ bool BlockSnapshotManager::unloadBlock(int block) {
         j = std::find(activeBlocks_.begin(), activeBlocks_.end(), block);
         assert(j != activeBlocks_.end());
         *j = -1;
+        unloadSuccess = true;
     }
+
+    return unloadSuccess;
 }
 
 std::vector<int> BlockSnapshotManager::getActiveBlocks() {
     std::vector<int> result;
-    std::copy_if(activeBlocks_.begin(), activeBlocks_.end());
+    oopse::copy_if(activeBlocks_.begin(), activeBlocks_.end(), std::back_inserter(result), 
+        std::bind2nd(std::not_equal_to<int>(), -1));
+    return result;    
 }
 
 Snapshot* BlockSnapshotManager::loadFrame(int frame){
     Snapshot* snapshot = new Snapshot(nAtoms_, nRigidBodies_, getStorageLayout());
     snapshot->setID(frame);
-    setCurrentSnapshot(snapshot);   /** @todo fixed me */
+    
+    /** @todo fixed me */
+    Snapshot* oldSnapshot = currentSnapshot_;
+    currentSnapshot_ = snapshot;   
     reader_->readFrame(frame);
+    currentSnapshot_ = oldSnapshot;
     return snapshot;
 }
 

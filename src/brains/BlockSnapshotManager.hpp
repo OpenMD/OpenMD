@@ -54,11 +54,11 @@ typedef std::pair<int, int> SnapshotBlock;
  * @class BlockSnapshotManager
  * @todo document
  */
-class BlockSnapshotMananger : public SnapshotManager{
+class BlockSnapshotManager : public SnapshotManager{
 
     public:
-        BlockSnapshotMananger(SimInfo* info, const std::string& filename, int storageLayout, int blockCapacity = 2);
-        ~BlockSnapshotMananger();
+        BlockSnapshotManager(SimInfo* info, const std::string& filename, int storageLayout, int blockCapacity = 2);
+        ~BlockSnapshotManager();
         
         virtual Snapshot* getSnapshot(int id) { return snapshots_[id]; }
 
