@@ -122,7 +122,7 @@ namespace oopse {
     return result;
   }
     
-  typedef template Vector3<double> Vector3d;    
+  typedef Vector3<double> Vector3d;    
   
 }
 

@@ -29,8 +29,8 @@
  * @date 10/11/2004
  * @version 1.0
  */
-#ifndef MATH_SQUAREMATRIX_HPP
-#define  MATH_SQUAREMATRIX_HPP
+#ifndef MATH_SQUAREMATRIX3_HPP
+#define  MATH_SQUAREMATRIX3_HPP
 
 #include "Quaternion.hpp"
 #include "SquareMatrix.hpp"
@@ -242,14 +242,17 @@ namespace oopse {
              * @note since simple algorithm can be applied to inverse the 3 by 3 matrix, we hide the 
              * implementation of inverse in SquareMatrix class
              */
-            void  inverse();
+            void  inverse() {
 
-            void diagonalize();
+            }
 
+            void diagonalize() {
+
+            }
     };
 
-    typedef template SquareMatrix3<double> Mat3x3d
-    typedef template SquareMatrix3<double> RotMat3x3d;
+    typedef SquareMatrix3<double> Mat3x3d;
+    typedef SquareMatrix3<double> RotMat3x3d;
 
 } //namespace oopse
 #endif // MATH_SQUAREMATRIX_HPP

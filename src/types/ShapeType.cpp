@@ -4,8 +4,6 @@ using namespace oopse;
 
 ShapeType::ShapeType(void) {
   mass = 0.0;
-  I = new Matrix3x3d();
-  
 }
 
 ShapeType::~ShapeType(void) {

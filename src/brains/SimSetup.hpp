@@ -10,6 +10,7 @@
 #include "integrators/AllIntegrator.hpp"
 
 using namespace std;
+using namespace oopse;
 // this routine is defined in BASS_interface.cpp
 extern void set_interface_stamps( MakeStamps* ms, Globals* g );
 

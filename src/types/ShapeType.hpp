@@ -11,7 +11,7 @@
 #include <fstream>
 #include <vector>
 #include "math/RealSphericalHarmonic.hpp"
-#include "math/Matrix3x3d.hpp"
+#include "math/SquareMatrix3.hpp"
 
 namespace oopse {
   using namespace std;
@@ -29,8 +29,8 @@ namespace oopse {
     double getMass(void) {return mass;}
     void setMass(double m) {mass = m;}
     
-    Matrix3x3d* getI(void) {return I;}
-    void setI(Matrix3x3d* theI) {I = theI;}
+    Mat3x3d getI(void) {return I;}
+    void setI(Mat3x3d theI) {I = theI;}
     
     vector<RealSphericalHarmonic*> getContactFuncs(void) {return contactFuncs;}
     vector<RealSphericalHarmonic*> getRangeFuncs(void) {return rangeFuncs;}
@@ -71,7 +71,7 @@ namespace oopse {
     
     char *shapeName;             // The name of the shape
     double mass;                 // The mass
-    Matrix3x3d* I;                // The moment of inertia tensor
+    Mat3x3d I;                // The moment of inertia tensor
     vector<RealSphericalHarmonic*> contactFuncs;  // The contact functions
     vector<RealSphericalHarmonic*> rangeFuncs;    // The range functions
     vector<RealSphericalHarmonic*> strengthFuncs; // The strength functions

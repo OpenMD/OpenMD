@@ -205,8 +205,8 @@ namespace oopse{
              * Returns the corresponding rotation matrix (3x3)
              * @return a 3x3 rotation matrix
              */
-            SquareMatrix<Real, 3, 3> toRotationMatrix3() {
-                SquareMatrix<Real, 3, 3> rotMat3;
+            SquareMatrix<Real, 3> toRotationMatrix3() {
+                SquareMatrix<Real, 3> rotMat3;
 
                 Real w2;
                 Real x2;
@@ -268,7 +268,7 @@ namespace oopse{
      * @note for a quaternion q, 1/q = q.inverse()
      */
     template<typename Real>
-    Quaternion<Real> operator /(const Quaternion<Real>& s, const Quaternion<Real>& q) {
+    Quaternion<Real> operator /(const Real& s, const Quaternion<Real>& q) {
 
         Quaternion<Real> x = q.inv();
         return x * s;

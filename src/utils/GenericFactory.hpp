@@ -33,32 +33,76 @@
 #define UTIL_GENERICFACTORY_HPP
 #include <map>
 #include <string>
-
-template<class Product, typename Creator, typename ProductIdentType = std::string>
+namespace oopse {
+template<class Product, typename ProductIdentType = std::string, typename Creator = Product* (*)() >
 class GenericFactory{
     public:
         
-        typedef map<ProductIdentType,  Creator*> CreatorMapType;
-        ~GenericFactory();
+        typedef std::map<ProductIdentType,  Creator*> CreatorMapType;
+        typedef GenericFactory<Product, ProductIdentType, Creator> SelfType;
+        static SelfType* getInstance() {
+            if (instance_ == NULL) {
+                instance_ = new GenericFactory<Product, ProductIdentType, Creator>();
+            }
 
-        static GenericFactory* getInstance();
-
-        bool register(CreatorType*  creator);
-
-        bool unregister();
+            return instance_;
+        }
         
-        bool hasCreator( const ProductIdentType& id );
+        //bool register( const ProductIdentType& id, Creator creator) {
 
-        const std::string toString();
+            //insert method in std::map will return a pair<iterator, bool>. the second
+            //element of this pair indicates whether the result of the operation
+            //return creatorMap_.insert(CreatorMapType::value_type(id, creator)).second;
+        //}
 
-        Product* createProduct( const ProductIdentType& id );
+        bool unregister(const ProductIdentType& id) {
+            
+            return creatorMap_->erase(id) == 1; 
+
+        }
+        
+        bool hasCreator( const ProductIdentType& id ) {
+            CreatorMapType::iterator i;
+
+            i = creatorMap_.find(id);
+
+            if (i != creatorMap_.end()) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        //const std::string toString() {
+
+        
+        //}
+
+        Product* createProduct( const ProductIdentType& id ) {
+            CreatorMapType::iterator i;
+
+            i = creatorMap_.find(id);
+
+            if (i != creatorMap_.end()) {
+                //call the function to create the product
+                return (i->second)();
+            } else {
+                return NULL;
+            }
+        }
         
     private:
         GenericFactory(){}
-        static GenericFactory* instance_;
-        map<string,  Creator*> creatorMap_;
+        static SelfType* instance_;
+        CreatorMapType creatorMap_;
 };
 
-typedef GenericFactory<ForceFieldParser, > ForceFiledParserFactory;
-#endif 
+
+#define REGISTER_CREATOR(factory, product, id) \
+    product * create##product() {\
+        return new product(); \
+    }
+
+}//namespace oopse
+#endif //UTIL_GENERICFACTORY_HPP
 
