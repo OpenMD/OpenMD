@@ -34,27 +34,8 @@
 #
 #---------------------------------------------------------------------------
 IS_UNIX=1
-#packages to be made
-Packages = \
-	utils \
-	math \
-	types \
-	primitives \
-	visitors \
-	UseTheForce/DarkSide \
-	UseTheForce \
-	brains \
-	io \
-	integrators \
-	minimizers \
-	constraints \
-	profiling \
-	restraints \
-	applications/oopse \
-	applications/dump2Xyz \
-	applications/simpleBuilder \
 
-#packages contain libraries
+#packages containing libraries
 PackageLibs = \
 	utils \
 	math \
@@ -70,6 +51,12 @@ PackageLibs = \
 	constraints \
 	profiling \
 	restraints \
+
+#packages containing applications
+Applications = \
+	applications/oopse \
+	applications/dump2Xyz \
+	applications/simpleBuilder
 
 IncludeDirs = \
 	@SPRNG_INC_DIR@ \
@@ -90,6 +77,12 @@ SampleSimDir    = @OOPSE_HOME@/share/samples/
 FrcDeclare      = -DFRC_PATH="$(ForceParamDir)"
 ParallelDeclare = -DIS_MPI
 UseMPI          = @USE_MPI@
+LinkOptions = \
+	@F90LIBS@ 
+
+ParallelLinkOptions = \
+	@F90LIBS@ 
+
 
 #---------------------------------------------------------------------------
 #
@@ -106,15 +99,8 @@ MakeDir           = $(DEV_ROOT)/make
 BinDir            = $(DEV_ROOT)/bin
 DocsDir           = $(DEV_ROOT)/docs
 CurrentDir        = $(CURDIR)
-RPath = $(shell cd $(DEV_ROOT); pwd)/lib:$(OopseHome)/lib
-ParallelRPath = $(shell cd $(DEV_ROOT); pwd)/MPIlib:$(OopseHome)/MPIlib
-LinkOptions = \
-	@F90LIBS@ \
-	-Wl,-R$(RPath)
-
-ParallelLinkOptions = \
-	@F90LIBS@ \
-	-Wl,-R$(ParallelRPath)
+CombinedStaticLib = $(LibDir)/libOOPSE.a
+CombinedParallelStaticLib = $(LibDir)/libOOPSE_MPI.a
 
 ifdef Source
 #get the relative path of current package to source directory
@@ -129,7 +115,7 @@ PackageTargetDir         = $(TargetDir)
 PackageParallelTargetDir = $(ParallelTargetDir)
 JavaMainClass            = $(subst /,.,$(Package)).$(Main)
 else
-PackageList              = $(Packages) $(JavaPackages)
+PackageList              = $(PackageLibs) $(JavaPackages) $(Applications)
 endif
 
 PackageListLoop          = $(patsubst %,$(SourceDir)/%/.loop,$(PackageList))
@@ -215,10 +201,10 @@ ifneq  "$(words $(ObjectFiles) $(ParallelObjectFiles))" "0"
     Executable             = $(BinDir)/$(Main)
     ParallelExecutable     = $(BinDir)/$(Main)_MPI
   else
-    SharedLibrary          = $(LibDir)/lib$(subst /,,$(patsubst %,oopse_%,$(Package))).so
-    StaticLibrary          = $(LibDir)/lib$(subst /,,$(patsubst %,oopse_%,$(Package))).a
-    ParallelSharedLibrary  = $(ParallelLibDir)/lib$(subst /,,$(patsubst %,oopse_%,$(Package))).so
-    ParallelStaticLibrary  = $(ParallelLibDir)/lib$(subst /,,$(patsubst %,oopse_%,$(Package))).a
+    SharedLibrary          = $(LibDir)/lib$(subst /,,$(patsubst %,oopse_%,$(Package)))_UP.so
+    StaticLibrary          = $(LibDir)/lib$(subst /,,$(patsubst %,oopse_%,$(Package)))_UP.a
+    ParallelSharedLibrary  = $(LibDir)/lib$(subst /,,$(patsubst %,oopse_%,$(Package)))_MPI.so
+    ParallelStaticLibrary  = $(LibDir)/lib$(subst /,,$(patsubst %,oopse_%,$(Package)))_MPI.a
   endif
 endif
 #
@@ -228,11 +214,12 @@ ClassPath        = $(JRE)$(X)$(TargetDir)$(X)$(ThirdPartyJars)
 JavaPackageNames = $(subst /,.,$(JavaPackages))
 IncludePath      = -I$(SourceDir) $(IncludeDirs:%=-I%)
 LibDirs          = -L$(LibDir)    $(LibraryDirs:%=-L%)
-ParallelLibDirs  = -L$(ParallelLibDir)  $(LibraryDirs:%=-L%)
-LocalLibs        = $(subst /,,$(patsubst %, oopse_%, $(PackageLibs))) 
-ParallelLocalLibs= $(subst /,,$(patsubst %, oopse_%, $(PackageLibs))) 
+LocalLibs        = $(subst /,,$(patsubst %, oopse_%_UP, $(PackageLibs)))
+ParallelLocalLibs= $(subst /,,$(patsubst %, oopse_%_MPI, $(PackageLibs))) 
 LibList          = $(LocalLibs:%=-l%) $(Libraries)
+LibNames         = $(LocalLibs:%=$(LibDir)/lib%.a)
 ParallelLibList  = $(ParallelLocalLibs:%=-l%) $(Libraries)
+ParallelLibNames = $(ParallelLocalLibs:%=$(LibDir)/lib%.a)
 
 
 #---------------------------------------------------------------------------
@@ -268,6 +255,7 @@ WordCount              = wc
 List                   = cat
 Yacc                   = @YACC@
 Lex                    = @LEX@
+Ranlib                 = @RANLIB@
 
 
 MakeOptions            = -k
@@ -423,36 +411,32 @@ $(PackageSourceDir)/%.h : $(PackageTargetDir)/%.class
 
 # .o -> .a
 
-$(LibDir)/%.a : $(ObjectFiles)
+$(LibDir)/%_UP.a : $(ObjectFiles)
 	$(StaticArchiver) $(StaticArchiverOptions) $@ $(ObjectFiles)
+	touch $(LibDir)/.stamp_UP
 
-$(ParallelLibDir)/%.a: $(ParallelObjectFiles)
+$(LibDir)/%_MPI.a: $(ParallelObjectFiles)
 	$(StaticArchiver) $(StaticArchiverOptions) $@ $(ParallelObjectFiles)
+	touch $(LibDir)/.stamp_MPI
 
-ifeq "$(UseMPI)" "yes"
-%.a : $(ObjectFiles) $(ParallelObjectFiles)
+%_UP.a : $(ObjectFiles)
 	$(MAKE) $(MakeOptions) $(LibDir)/$@
-	$(MAKE) $(MakeOptions) $(ParallelLibDir)/$@
-else
-%.a : $(ObjectFiles)
+
+%_MPI.a : $(ParallelObjectFiles)
 	$(MAKE) $(MakeOptions) $(LibDir)/$@
-endif
 
 # .o -> .so
-$(LibDir)/%.so : $(ObjectFiles)
+$(LibDir)/%_UP.so : $(ObjectFiles)
 	$(DynamicArchiver) $(ObjectFiles) $(DynamicArchiverOptions) -o $@
 
-$(ParallelLibDir)/%.so : $(ParallelObjectFiles)
+$(LibDir)/%_MPI.so : $(ParallelObjectFiles)
 	$(DynamicArchiver) $(ParallelObjectFiles) $(DynamicArchiverOptions) -o $@
 
-ifeq "$(UseMPI)" "yes"
-%.so : $(ObjectFiles) $(ParallelObjectFiles)
+%_UP.so : $(ObjectFiles)
 	$(MAKE) $(MakeOptions) $(LibDir)/$@
-	$(MAKE) $(MakeOptions) $(ParallelLibDir)/$@
-else
-%.so : $(ObjectFiles)
+
+%_MPI.so : $(ParallelObjectFiles)
 	$(MAKE) $(MakeOptions) $(LibDir)/$@
-endif
 
 # .class -> .jar
 $(LibDir)/%.jar : $(JavaClassFiles) $(OtherTargetFiles)
@@ -486,12 +470,27 @@ $(PackageTargetDir)/%_Skel.class : $(PackageTargetDir)/%.class
 %_Skel.class : %.class
 	$(MAKE) $(MakeOptions) $(PackageTargetDir)/$@
 
-# Executable
-$(Executable) : $(ObjectFiles)
-	$(Linker) $(ObjectFiles) $(LinkOptions) $(LibDirs) $(LibList) -o $@
+#GUN make funtions to merge the libraries
+find_objs = $(shell $(StaticArchiver) -t $(1))
+extract_objs = $(shell $(StaticArchiver) -x $(1) $(call find_objs, $(1)))
+create_archive = $(shell  $(StaticArchiver) $(StaticArchiverOptions) $(2) $(call find_objs, $(1)))
+remove_objs = $(shell $(Delete) $(call find_objs, $(1)))
+do_create = $(call extract_objs,$(1))$(call create_archive,$(1),$(2))$(call remove_objs,$(1))  
 
-$(ParallelExecutable) : $(ParallelObjectFiles)
-	$(Linker) $(ParallelObjectFiles)  $(ParallelLinkOptions) $(ParallelLibDirs) $(LibList) -o $@
+$(CombinedStaticLib) : $(LibDir)/.stamp_UP 
+	$(foreach thisLib,$(LibNames),$(call do_create,$(thisLib),$@))
+	$(Ranlib) $(CombinedStaticLib)
+
+$(CombinedParallelStaticLib) : $(LibDir)/.stamp_MPI
+	$(foreach thisLib,$(ParallelLibNames), $(call do_create, $(thisLib), $@))
+	$(Ranlib) $(CombinedParallelStaticLib)
+
+# Executable
+$(Executable) : $(CombinedStaticLib) $(ObjectFiles)
+	$(Linker) $(ObjectFiles) $(LinkOptions) $(LibDirs) $(CombinedStaticLib) $(Libraries) -o $@
+
+$(ParallelExecutable) : $(CombinedParallelStaticLib) $(ParallelObjectFiles)
+	$(Linker) $(ParallelObjectFiles) $(ParallelLinkOptions) $(LibDirs) $(CombinedParallelStaticLib) $(Libraries) -o $@
 
 # Anything else is just copied from source to target
 $(PackageTargetDir)/% : $(PackageSourceDir)/%
@@ -514,9 +513,7 @@ _buildall : \
 	$(RmiStubFiles) \
 	$(RmiSkeletonFiles) \
 	$(OtherTargetFiles) \
-	$(SharedLibrary) \
 	$(StaticLibrary) \
-	$(ParallelSharedLibrary) \
 	$(ParallelStaticLibrary) \
 	$(JarFile) \
 	$(Executable) \
@@ -530,7 +527,6 @@ _buildall : \
 	$(RmiStubFiles) \
 	$(RmiSkeletonFiles) \
 	$(OtherTargetFiles) \
-	$(SharedLibrary) \
 	$(StaticLibrary) \
 	$(JarFile) \
 	$(Executable) 
