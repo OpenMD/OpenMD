@@ -54,7 +54,6 @@
 #include "visitors/RigidBodyVisitor.hpp"
 #include "visitors/OtherVisitor.hpp"
 #include "visitors/ZconsVisitor.hpp"
-#include "visitors/SelectionVisitor.hpp"
 #include "selection/SelectionEvaluator.hpp"
 using namespace oopse;
 
