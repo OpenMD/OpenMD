@@ -130,15 +130,16 @@ namespace oopse {
           integrableObject->setTrq(trq);
         }
       }
-      
-      // set vraw to be the unmodulated potential
-      lrPot_ = curSnapshot->statData[Stats::LONG_RANGE_POTENTIAL];
-      curSnapshot->statData[Stats::VRAW] = lrPot_;
-      
-      // modulate the potential and update the snapshot
-      lrPot_ *= factor_;
-      curSnapshot->statData[Stats::LONG_RANGE_POTENTIAL] = lrPot_;
     }
+  
+    // set vraw to be the unmodulated potential
+    lrPot_ = curSnapshot->statData[Stats::LONG_RANGE_POTENTIAL];
+    curSnapshot->statData[Stats::VRAW] = lrPot_;
+    
+    // modulate the potential and update the snapshot
+    lrPot_ *= factor_;
+    curSnapshot->statData[Stats::LONG_RANGE_POTENTIAL] = lrPot_;
+    
     
     // do crystal restraint forces for thermodynamic integration
     if (simParam->getUseSolidThermInt()) {
