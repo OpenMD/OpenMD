@@ -88,9 +88,9 @@ private:
 
 //Methods
 public:
-	MTRand( const uint32& oneSeed, int nstrides = 1, int stride = 0);  // initialize with a simple uint32
-	MTRand( uint32 *const bigSeed, uint32 const seedLength = N, int nstrides = 1, int stride = 0);  // or an array
-	MTRand(int nstrides = 1, int stride = 0);  // auto-initialize with /dev/urandom or time() and clock()
+	MTRand( const uint32& oneSeed, int nstrides, int stride);  // initialize with a simple uint32
+	MTRand( uint32 *const bigSeed, uint32 const seedLength, int nstrides, int stride);  // or an array
+	MTRand(int nstrides, int stride);  // auto-initialize with /dev/urandom or time() and clock()
 	
 	// Do NOT use for CRYPTOGRAPHY without securely hashing several returned
 	// values together, otherwise the generator state can be learned after

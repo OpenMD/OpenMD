@@ -44,6 +44,12 @@
 #include "primitives/Molecule.hpp"
 #include "primitives/StuntDouble.hpp"
 
+#ifndef IS_MPI
+#include "math/SeqRandNumGen.hpp"
+#else
+#include "math/ParallelRandNumGen.hpp"
+#endif
+
 namespace oopse {
 
 Velocitizer::Velocitizer(SimInfo* info) {
@@ -54,9 +60,9 @@ Velocitizer::Velocitizer(SimInfo* info) {
 #ifndef IS_MPI
     if (simParams->haveSeed()) {
         seedValue = simParams->getSeed();
-        randNumGen_ = new MTRand(seedValue);
+        randNumGen_ = new SeqRandNumGen(seedValue);
     }else {
-        randNumGen_ = new MTRand();
+        randNumGen_ = new SeqRandNumGen();
     }    
 #else
     if (simParams->haveSeed()) {

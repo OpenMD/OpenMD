@@ -2,6 +2,7 @@ Package = math
 
 Source    = \
 	ParallelRandNumGen.cpp \
+        SeqRandNumGen.cpp
 
 RmiSource =
 

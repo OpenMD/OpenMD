@@ -38,42 +38,40 @@
  * University of Notre Dame has been advised of the possibility of
  * such damages.
  */
- 
- /**
-  * @file Velocitizer.hpp
-  * @author tlin
-  * @date 11/14/2004
-  * @time 13:25am
-  * @version 1.0
-  */
 
-#ifndef INTEGRATORS_VELOCITIZER_HPP
-#define INTEGRATORS_VELOCITIZER_HPP
-#include "brains/SimInfo.hpp"
+#ifndef MATH_SEQRANDNUMGEN_HPP
+#define MATH_SEQRANDNUMGEN_HPP
+
+#include <vector>
+
+#include "utils/simError.h"
 #include "math/RandNumGen.hpp"
 
 namespace oopse {
 
 /**
- * @class Velocitizer Velocitizer.hpp "integratos/Velocitizer.hpp"
- * @todo document
+ * @class SeqRandNumGen a sequential random number generator
  */
-class Velocitizer {
+class SeqRandNumGen : public RandNumGen{
     public:
-        Velocitizer(SimInfo* info);
-        virtual ~Velocitizer();
+        typedef unsigned long uint32; 
         
-        void velocitize(double temperature);
+        SeqRandNumGen( const uint32& oneSeed);
 
-        void removeComDrift();
-        
+        SeqRandNumGen();
+	
+	virtual void seed( const uint32 oneSeed );
+	
+	virtual void seed();
+
     private:
-        
-        SimInfo* info_;
 
-        RandNumGen* randNumGen_;
+        static int nCreatedRNG_; /**< number of created random number of generator*/
 
 };
 
 }
-#endif //INTEGRATORS_VELOCITIZER_HPP
+
+
+#endif 
+

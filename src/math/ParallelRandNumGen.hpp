@@ -43,9 +43,9 @@
 #define MATH_PARALLELRANDNUMGEN_HPP
 
 #include <vector>
-#include "MersenneTwister.hpp"
-#include "utils/simError.h"
 
+#include "utils/simError.h"
+#include "math/RandNumGen.hpp"
 #ifdef IS_MPI
 
 namespace oopse {
@@ -56,75 +56,19 @@ namespace oopse {
  * @class ParallelRandNumGen a parallel random number generator
  * @note use MTRand if you want a non-parallel random number generator in MPI enviroment
  */
-class ParallelRandNumGen{
+class ParallelRandNumGen : public RandNumGen{
     public:
         typedef unsigned long uint32; 
         
         ParallelRandNumGen( const uint32& oneSeed);
+
         ParallelRandNumGen();
-
-        ~ParallelRandNumGen() {
-            delete mtRand_;
-        }
-        
-        /** Returns a real number in [0,1] */
-	double rand() {
-	    return mtRand_->rand();
-        }
-
-        /** Returns a real number in [0, n] */
-	double rand( const double& n ) {
-            return mtRand_->rand(n);
-        }
-
-        /** Returns a real number in [0, 1) */
-	double randExc() {
-            return mtRand_->randExc();
-        }
-
-        /** Returns a real number in [0, n) */        
-	double randExc( const double& n ) {
-            return mtRand_->randExc(n);
-        }
-
-        /** Returns a real number in (0, 1) */                
-	double randDblExc() {
-            return mtRand_->randDblExc();
-        }
-
-        /** Returns a real number in (0, n) */                        
-	double randDblExc( const double& n ) {
-            return mtRand_->randDblExc(n);
-        }
-
-        /** Returns aninteger in [0,2^32-1]  */            
-	uint32 randInt() {
-           return mtRand_->randInt();
-        }
-
-        /** Returns aninteger in [0, n]  for n < 2^32 */     
-	uint32 randInt( const uint32& n ) {
-           return mtRand_->randInt(n);
-        }
 	
-	/** Returns a 53-bitreal number in [0,1) (capacity of IEEE double precision) */
-	double rand53() {
-            return mtRand_->rand53();
-	}
+	virtual void seed( const uint32 oneSeed );
 	
-	/** Access to nonuniform random number distributions */
-	double randNorm( const double& mean, const double& variance) {
-            return mtRand_->randNorm(mean, variance);
-	}
-	
-	// Re-seeding functions with same behavior as initializers
-	void seed( const uint32 oneSeed );
-	
-	void seed();
+	virtual void seed();
 
     private:
-
-        MTRand* mtRand_;
 
         static int nCreatedRNG_; /**< number of created random number of generator*/
 
