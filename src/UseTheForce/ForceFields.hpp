@@ -65,20 +65,18 @@ public:
     frcFile = NULL; 
     entry_plug = NULL; 
     has_variant=0;
-    ffPath_env = "FORCE_PARAM_PATH";
-    ffPath = getenv( ffPath_env );
-    if( ffPath == NULL ) {
+    ffPath = getenv("FORCE_PARAM_PATH");
+    if( ffPath.empty() ) {
       STR_DEFINE(ffPath, FRC_PATH );
     }   
   }
-  ForceFields(char * theVariant){ 
+  ForceFields(string theVariant){ 
     frcFile = NULL; 
     entry_plug = NULL; 
     has_variant=1; 
-    strcpy(variant, theVariant); 
-    ffPath_env = "FORCE_PARAM_PATH";
-    ffPath = getenv( ffPath_env );
-    if( ffPath == NULL ) {
+    variant = theVariant;
+    ffPath = getenv("FORCE_PARAM_PATH");
+    if( ffPath.empty() ) {
       STR_DEFINE(ffPath, FRC_PATH );
     }   
   }
@@ -116,14 +114,17 @@ protected:
   int lineNum;
   char readLine[500];
   char* eof_test;
-  char variant[100];
   short int has_variant;
   double bigSigma;
 
+  string ffPath;
   ifstrstream forceFile;
+  bool hasVariant;
+  string variant;
   map<string, AtomType*> atomTypeMap;
-  char* ffPath_env;
-  char* ffPath;
+  // map<pair<string,string>, BondType*> bondTypeMap;
+  // map<tuple3<string,string,string>, BendType*> bendTypeMap;
+  // map<tuple4<string,string,string,string>, TorsionType*> torsionTypeMap;
 
 };
 
@@ -183,7 +184,7 @@ class EAM_FF : public ForceFields{
 
 public:
   EAM_FF();
-  EAM_FF(char* the_variant);
+  EAM_FF(string the_variant);
   virtual ~EAM_FF();
   
 

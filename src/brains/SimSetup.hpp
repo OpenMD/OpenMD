@@ -79,7 +79,7 @@ private:
   int globalMolCounter;
 
   char force_field[100];
-  char forcefield_variant[100];
+  string forcefield_variant;
   char ensemble[100];
   Component** the_components;
 

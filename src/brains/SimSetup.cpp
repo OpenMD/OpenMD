@@ -726,7 +726,7 @@ void SimSetup::gatherInfo(void){
     simError();
   }
   if (globals->haveForceFieldVariant()) {
-    strcpy(forcefield_variant, globals->getForceFieldVariant());
+    forcefield_variant = globals->getForceFieldVariant();
     has_forcefield_variant = 1;
   }
   

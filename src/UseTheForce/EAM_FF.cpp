@@ -161,12 +161,10 @@ EAM_FF::EAM_FF() {
   EAM_FF("");
 }
 
-EAM_FF::EAM_FF(char* the_variant){
+EAM_FF::EAM_FF(string the_variant){
 
-  char fileName[200];
-  char* ffPath_env = "FORCE_PARAM_PATH";
-  char* ffPath;
-  char temp[200];
+  string fileName;
+  string tempString;
 
   headAtomType = NULL;
   currentAtomType = NULL;
@@ -205,45 +203,34 @@ EAM_FF::EAM_FF(char* the_variant){
     
     // generate the force file name   
 
-    strcpy( fileName, "EAM" );
+    fileName = "EAM";
 
-    if (strlen(the_variant) > 0) {
+    if (!the_variant.empty()) {
       has_variant = 1;
-      strcpy( variant, the_variant);
-      strcat( fileName, ".");
-      strcat( fileName, variant );
-
+      fileName += "." + the_variant + ".frc";
+      
       sprintf( painCave.errMsg,
                "Using %s variant of EAM force field.\n",
-               variant );
+               the_variant.c_str() );
       painCave.severity = OOPSE_INFO;
       painCave.isFatal = 0;
       simError();
-    }
-    strcat( fileName, ".frc");
+    }   
 
     //fprintf( stderr,"Trying to open %s\n", fileName );
     
     // attempt to open the file in the current directory first.
     
-    frcFile = fopen( fileName, "r" );
+    frcFile = fopen( fileName.c_str(), "r" );
     
     if( frcFile == NULL ){
       
       // next see if the force path enviorment variable is set
       
-      ffPath = getenv( ffPath_env );
-      if( ffPath == NULL ) {
-	STR_DEFINE(ffPath, FRC_PATH );
-      }
-      
-      
-      strcpy( temp, ffPath );
-      strcat( temp, "/" );
-      strcat( temp, fileName );
-      strcpy( fileName, temp );
-      
-      frcFile = fopen( fileName, "r" );
+      tempString = ffPath + "/" + fileName;
+      fileName = tempString;
+            
+      frcFile = fopen( fileName.c_str(), "r" );
       
       if( frcFile == NULL ){
         
@@ -252,7 +239,7 @@ EAM_FF::EAM_FF(char* the_variant){
                  "\t%s\n"
 		 "\tHave you tried setting the FORCE_PARAM_PATH environment "
 		 "variable?\n",
-		 fileName );
+		 fileName.c_str() );
         painCave.severity = OOPSE_ERROR;
 	painCave.isFatal = 1;
 	simError();
