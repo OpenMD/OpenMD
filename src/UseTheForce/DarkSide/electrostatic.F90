@@ -550,7 +550,7 @@ contains
        if (j_is_Quadrupole) then
           ri2 = riji * riji
           ri3 = ri2 * riji
-          ri4 = ri2 * ri4
+          ri4 = ri2 * ri2
           cx2 = cx_j * cx_j
           cy2 = cy_j * cy_j
           cz2 = cz_j * cz_j
@@ -676,12 +676,12 @@ contains
           
           ri2 = riji * riji
           ri3 = ri2 * riji
-          ri4 = ri2 * ri4
+          ri4 = ri2 * ri2
           cx2 = cx_i * cx_i
           cy2 = cy_i * cy_i
           cz2 = cz_i * cz_i
           
-          pref = pre14 * q_i / 6.0_dp
+          pref = pre14 * q_j / 6.0_dp
           vterm = pref * ri3 * (qxx_i * (3.0_dp*cx2 - 1.0_dp) + &
                qyy_i * (3.0_dp*cy2 - 1.0_dp) + &
                qzz_i * (3.0_dp*cz2 - 1.0_dp))
