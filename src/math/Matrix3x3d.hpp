@@ -32,7 +32,7 @@
 #ifndef MATH_MATRIX3X3D_HPP 
 #define MATH_MATRIX3X3D_HPP 
 
-#include "Vector3d.hpp"
+#include "math/Vector3.hpp"
 
 namespace oopse {
 
