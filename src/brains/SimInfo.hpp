@@ -256,16 +256,6 @@ class SimInfo {
         /** Returns the center of the mass of the whole system.*/
         Vector3d getCom();
 
-        /** Returns the seed (used for random number generator) */
-        int getSeed() {
-            return seed_;
-        }
-
-        /** Sets the seed*/
-        void setSeed(int seed) {
-            seed_ = seed;
-        }
-
         /** main driver function to interact with fortran during the initialization and molecule migration */
         void update();
 
@@ -495,8 +485,6 @@ class SimInfo {
         Exclude exclude_;      
         PropertyMap properties_;                  /**< Generic Property */
         SnapshotManager* sman_;               /**< SnapshotManager */
-
-        int seed_; /**< seed for random number generator */
 
         /** 
          * The reason to have a local index manager is that when molecule is migrating to other processors, 

@@ -50,6 +50,7 @@
 #ifndef INTEGRATORS_VELOCITIZER_HPP
 #define INTEGRATORS_VELOCITIZER_HPP
 #include "brains/SimInfo.hpp"
+#include "math/OOPSERandNumGen.hpp"
 
 namespace oopse {
 
@@ -59,8 +60,9 @@ namespace oopse {
  */
 class Velocitizer {
     public:
-        Velocitizer(SimInfo* info) : info_(info) {}
-
+        Velocitizer(SimInfo* info);
+        virtual ~Velocitizer();
+        
         void velocitize(double temperature);
 
         void removeComDrift();
@@ -68,6 +70,7 @@ class Velocitizer {
     private:
         
         SimInfo* info_;
+        OOPSERandNumGen* randNumGen_;
 
 };
 

@@ -66,6 +66,8 @@
 #include <stdio.h>
 #include <time.h>
 #include <math.h>
+#include <vector>
+namespace oopse {
 
 class MTRand {
 // Data
@@ -116,7 +118,9 @@ public:
 	void seed( const uint32 oneSeed );
 	void seed( uint32 *const bigSeed, const uint32 seedLength = N );
 	void seed();
-	
+
+        std::vector<uint32>generateSeeds();	
+        
 	// Saving and loading generator state
 	void save( uint32* saveArray ) const;  // to array of size SAVE
 	void load( uint32 *const loadArray );  // from such array
@@ -289,7 +293,7 @@ inline void MTRand::seed( uint32 *const bigSeed, const uint32 seedLength )
 
 inline void MTRand::seed()
 {
-  vector<uint32> seeds;
+  std::vector<uint32> seeds;
 
   seeds = generateSeeds();
 
@@ -301,11 +305,11 @@ inline void MTRand::seed()
 }
 
 
-inline vector<uint32> MTRand::generateSeeds() {
+inline std::vector<MTRand::uint32> MTRand::generateSeeds() {
   // Seed the generator with an array from /dev/urandom if available
   // Otherwise use a hash of time() and clock() values
 
-  vector<uint32> bigSeed; 
+  std::vector<uint32> bigSeed; 
 
   // First try getting an array from /dev/urandom
   FILE* urandom = fopen( "/dev/urandom", "rb" );
@@ -428,6 +432,7 @@ inline std::istream& operator>>( std::istream& is, MTRand& mtrand )
 	return is;
 }
 
+}
 #endif  // MERSENNETWISTER_H
 
 // Change log:
