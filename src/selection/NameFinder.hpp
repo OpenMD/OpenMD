@@ -42,36 +42,39 @@
 #define SELECTION_NAMEFINDER_HPP
 #include <set>
 #include <string>
+#include <map>
 
 #include "utils/BitSet.hpp"
 namespace oopse {
 
-enum NameNodeType {
-    rootNode,
-    molNode,
-    atomNode,
-    rbNode,
-    rbAtomNode,
-};
-
-struct NameNode{
-    std::string name;
-    BitSet bs;
-    std::vector<NameNode*> children;
-    NameNodeType type;
+class TreeNode{
+    public:
+        ~TreeNode();
+        std::string name;
+        BitSet bs;
+        std::map<std::string, TreeNode*> children;
 };
 
 class NameFinder{
     public:
         NameFinder(SimInfo* info);
+        ~NameFinder();
         bool match(const std::string& name, BitSet& bs);
 
     private:
         void loadNames();
-        SimInfo* info_;
+        void matchMolecule(const std::string& molName, BitSet& bs);
+        void matchStuntDouble(const std::string& molName, const std::string& sdName, BitSet& bs);
+        void matchRigidAtoms(const std::string& molName, const std::string& rbName, const std::string& rbAtomName, BitSet& bs);
 
-        NameNode* root_;
+        std::vector<TreeNode*> getMatchedChildren(TreeNode* node, const std::string& name);
+        bool isMatched(const std::string& str, const std::string& wildcard);
+
+        SimInfo* info_;
+        int nStuntDouble_;
+        TreeNode* root_;
 };
+
 
 }
 #endif

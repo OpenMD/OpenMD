@@ -57,6 +57,9 @@
 namespace oopse{
 class RigidBody : public StuntDouble {
     public:
+
+        typedef std::vector<Atom*>::iterator AtomIterator;        
+
         RigidBody();
 
         virtual std::string getType() { return name_;}

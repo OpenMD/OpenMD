@@ -39,40 +39,108 @@
  * such damages.
  */
 #include "selection/NameFinder.hpp"
+#include "utils/wildcards.hpp"
 namespace oopse {
 
-NameFinder::NameFinder(SimInfo* info) {
+TreeNode::~TreeNode(){
+    std::map<std::string, TreeNode*>::iterator i;
+    for ( i = children.begin(); i != children.end(); ++i) {
+        i->second->~TreeNode();
+    }
+    children.clear();
+}
+
+
+NameFinder::NameFinder(SimInfo* info) : info_(info), root_(NULL){
+    nStuntDouble_ = info_->getNGlobalAtoms() + info_->getNGlobalRigidBodies()
     loadNames();
 }
 
 
+NameFinder::~NameFinder(){
+    delete root_;
+}
 
 void NameFinder::loadNames() {
 
-    root_ = new NameNode;
-    root_.type = rootNode;
-
-    NameNode* newNode;            
+    std::map<std::string, TreeNode*>::iterator foundIter;
     SimInfo::MoleculeIterator mi;
     Molecule* mol;
     Molecule::AtomIterator ai;
     Atom* atom;
     Molecule::RigidBodyIterator rbIter;
     RigidBody* rb;
+
+    root_ = new TreeNode;
+    root_->bs.resize(nStuntDobule_);
+    root_->bs.setAll(); //
+    
     for (mol = info_->beginMolecule(mi); mol != NULL; mol = info_->nextMolecule(mi)) {
-        newNode = new NameNode;
-        newNode.type = molNode;
-        newNode.name = mol->getMoleculeName();
-        
-        for(atom = mol->beginAtom(ai); atom != NULL; atom = mol->nextAtom(ai)) {
-            atomNames_.insert(atom->getType());
+        TreeNode* currentMolNode;            
+        std::string molName = mol->getMoleculeName();
+
+        foundIter = root_->children.find(molName);
+        if ( foundIter  == root_->children.end()) {
+            currentMolNode = new TreeNode;
+            currentMolNode->name = molName;
+            currentMolNode->bs.resize(nStuntDouble_);
+        }else {
+            currentMolNode = i->second;
         }
         
-        //change the positions of atoms which belong to the rigidbodies
+        for(atom = mol->beginAtom(ai); atom != NULL; atom = mol->nextAtom(ai)) {
+            std::string atomName = atom->getType();
+            TreeNode* currentAtomNode;
+            foundIter = currentMolNode->children.find(molName);
+            if (foundIter == currentMolNode->children.end()) {
+                currentAtomNode = new TreeNode;
+                currentAtomNode->name = atomName;
+                currentAtomNode->bs.resize(nStuntDouble_);
+            } else {
+                currentAtomNode = foundIter->second;
+            }
+            currentMolNode->bs.setBitOn(atom->getGlobalIndex());
+            currentAtomNode->bs.setBitOn(atom->getGlobalIndex());
+        }
+
         for (rb = mol->beginRigidBody(rbIter); rb != NULL; rb = mol->nextRigidBody(rbIter)) {
-            rbNames_.insert(rb->getType());
-        }        
+            std::string rbName = atom->getType();
+            TreeNode* currentRbNode;
+            foundIter = currentMolNode->children.find(molName);
+            if (foundIter == currentMolNode->children.end()) {
+                currentRbNode = new TreeNode;
+                currentRbNode->name = rbName;
+                currentRbNode->bs.resize(nStuntDouble_);
+            } else {
+                currentRbNode = foundIter->second;
+            }
+            
+            currentMolNode->bs.setBitOn(rb->getGlobalIndex());
+            currentRbNode->bs.setBitOn(rb->getGlobalIndex());
+
+            //create nodes for atoms belong to this rigidbody
+            for(atom = rb->beginAtom(ai); rb != NULL; atom = rb->nextAtom(ai)) {
+                std::string rbAtomName = atom->getType();
+                TreeNode* currentRbAtomNode;
+                foundIter = currentRbNode->children.find(molName);
+                if (foundIter == currentRbNode->children.end()) {
+                    currentRbAtomNode = new TreeNode;
+                    currentRbAtomNode->name = rbAtomName;
+                    currentRbAtomNode->bs.resize(nStuntDouble_);
+                } else {
+                    currentRbAtomNode = foundIter->second;
+                }
+                currentRbAtomNode->bs.setBitOn(atom->getGlobalIndex());
+            }
+
+        }
+        
     }    
+
+    std::map<std::string, TreeNode*>::iterator i;
+    for( i = root_->children.begin(); i != ; ++i){
+        i->bs = 
+    }
 }
 
 bool NameFinder::match(const std::string& name, BitSet& bs){
@@ -88,23 +156,86 @@ bool NameFinder::match(const std::string& name, BitSet& bs){
     int size = names.size();
     switch(size) {
         case 1 :
-            //could be molecule name, atom name, rigidbody name
-            isMolName();
-            isAtomName();
-            isRigidBodyName();
+            //could be molecule name, atom name and rigidbody name
+            if (names[0] == "*"){
+                //if all molecules are selected, we don't need to do the matching, just set all of the bits
+                bs.setAll();
+            } else{
+                matchMolecule(name[0]);
+                matchStuntDouble("*", names[0]);
+            } 
+            
             break;
         case 2:
-            //could be molecule.*(include atoms and rigidbodies) or rigidbody.*
+            //could be molecule.*(include atoms and rigidbodies) or rigidbody.*(atoms belong to rigidbody)
+            matchRigidAtoms("*", names[0], names[1], bs);
+            matchStuntDouble(names[0], names[1]);
+            
             break;
         case 3:
             //must be molecule.rigidbody.*
-            
+            matchRigidAtoms(names[0], names[1], names[2], bs)
             break;
         default:            
             break;           
     }
 
     return matched;
+}
+
+void NameFinder::matchMolecule(const std::string& molName, BitSet& bs) {
+    std::vector<TreeNode*> molNodes = getMatchedChildren(root_, molName);            
+    std::vector<TreeNode*>::iterator i;
+    for( i = molNodes.begin(); i != molNodes.end(); ++i ) {
+        bs |= i->bs;
+    }    
+}
+
+void NameFinder::matchStuntDouble(const std::string& molName, const std::string& sdName, BitSet& bs){
+    std::vector<TreeNode*> molNodes = getMatchedChildren(root_, molName);            
+    std::vector<TreeNode*>::iterator i;
+    for( i = molNodes.begin(); i != molNodes.end(); ++i ) {
+        std::vector<TreeNode*> sdNodes = getMatchedChildren(*i, sdName);   
+        std::vector<TreeNode*>::iterator j;
+        for (j = sdNodes.begin(); j != sdNodes.end(); ++j) {
+            bs |= j->bs;
+        }
+    }
+
+}
+
+void NameFinder::matchRigidAtoms(const std::string& molName, const std::string& rbName, const std::string& rbAtomName, BitSet& bs){
+    std::vector<TreeNode*> molNodes = getMatchedChildren(root_, molName);            
+    std::vector<TreeNode*>::iterator i;
+    for( i = molNodes.begin(); i != molNodes.end(); ++i ) {
+        std::vector<TreeNode*> rbNodes = getMatchedChildren(*i, rbName);   
+        std::vector<TreeNode*>::iterator j;
+        for (j = rbNodes.begin(); j != rbNodes.end(); ++j) {
+            std::vector<TreeNode*> rbAtomNodes = getMatchedChildren(*j, rbAtomName);
+            std::vector<TreeNode*>::iterator k;
+            for(k = rbAtomNodes.begin(); k != rbAtomNodes.end(); ++k){
+                bs |= k->bs;
+            }
+        }
+    }
+
+}
+
+
+std::vector<TreeNode*> NameFinder::getMatchedChildren(TreeNode* node, const std::string& name) {
+    std::vector<TreeNode*> matchedNodes;
+    std::map<std::string, TreeNode*>::iterator i;
+    for (i = node->children.begin(); i != node->children.end(); ++i) {
+        if (isMatched( i->first, name)) {
+            matchedNodes.push_back(i->second);
+        }
+    }
+
+    return matchedNodes;
+}
+
+bool NameFinder::isMatched(const std::string& str, const std::string& wildcard) {
+    return Wildcard::wildcardfit (wildcard.c_str(), str.c_str());
 }
 
 }
