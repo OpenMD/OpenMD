@@ -14,6 +14,7 @@ using namespace std;
 #include "restraints/Restraints.hpp"
 #include "brains/SimInfo.hpp"
 #include "utils/simError.h"
+#include "io/basic_ifstrstream.hpp"
 
 #define PI 3.14159265359
 #define TWO_PI 6.28318530718
@@ -305,8 +306,8 @@ void Restraints::Store_Init_Info(vector<StuntDouble*> vecParticles){
   strcpy(fileName, "idealCrystal.in");
   strcpy(angleName, "zAngle.ang");
   
-  ifstream crystalIn(fileName);
-  ifstream angleIn(angleName);
+  ifstrstream crystalIn(fileName);
+  ifstrstream angleIn(angleName);
 
   // check to see if these files are present in the execution directory
   if (!crystalIn) { 
