@@ -39,23 +39,31 @@
  * such damages.
  */
 
-#ifndef MATH_OOPSERANDNUMGEN_HPP
-#define MATH_OOPSERANDNUMGEN_HPP
+#ifndef MATH_PARALLELRANDNUMGEN_HPP
+#define MATH_PARALLELRANDNUMGEN_HPP
 
 #include <vector>
 #include "MersenneTwister.hpp"
 #include "utils/simError.h"
 
+#ifdef IS_MPI
+
 namespace oopse {
 
-class OOPSERandNumGen{
+
+
+/**
+ * @class ParallelRandNumGen a parallel random number generator
+ * @note use MTRand if you want a non-parallel random number generator in MPI enviroment
+ */
+class ParallelRandNumGen{
     public:
         typedef unsigned long uint32; 
         
-        OOPSERandNumGen( const uint32& oneSeed);
-        OOPSERandNumGen();
+        ParallelRandNumGen( const uint32& oneSeed);
+        ParallelRandNumGen();
 
-        ~OOPSERandNumGen() {
+        ~ParallelRandNumGen() {
             delete mtRand_;
         }
         
@@ -117,82 +125,12 @@ class OOPSERandNumGen{
     private:
 
         MTRand* mtRand_;
+
+        static int nCreatedRNG_; /**< number of created random number of generator*/
+
 };
 
-
-inline OOPSERandNumGen::OOPSERandNumGen( const uint32& oneSeed) {
-#ifndef IS_MPI
-    mtRand_ = new MTRand(oneSeed);
-#else
-    int nProcessors;
-    MPI_Comm_size(MPI_COMM_WORLD, &nProcessors);
-    mtRand_ = new MTRand(oneSeed, nProcessors, worldRank);
+}
 #endif
 
-}
-
-inline OOPSERandNumGen::OOPSERandNumGen() {
-#ifndef IS_MPI
-    mtRand_ = new MTRand();
-#else
-    std::vector<uint32> bigSeed;
-    const int masterNode = 0;
-    int nProcessors;
-    MPI_Comm_size(MPI_COMM_WORLD, &nProcessors);
-    mtRand_ = new MTRand(nProcessors, worldRank);
-
-    seed();        
-#endif
-
-}
-
-	// Re-seeding functions with same behavior as initializers
-inline void OOPSERandNumGen::seed( const uint32 oneSeed ) {
-#ifndef IS_MPI
-    mtRand_->seed(oneSeed);
-#else
-    const int masterNode = 0;
-    int seed = oneSeed;
-    MPI_Bcast(&seed, 1, MPI_UNSIGNED_LONG, masterNode, MPI_COMM_WORLD); 
-
-    if (seed != oneSeed) {
-        sprintf(painCave.errMsg,
-                "Using different seed to initialize OOPSERandNumGen.\n");
-        painCave.isFatal = 1;;
-        simError();
-    }
-    
-#endif
-}
-        
-inline void OOPSERandNumGen::seed() {
-#ifndef IS_MPI
-    mtRand_->seed();
-#else
-
-    std::vector<uint32> bigSeed;
-    int size;
-    const int masterNode = 0;
-    if (worldRank == masterNode) {
-        bigSeed = mtRand_->generateSeeds();
-        size = bigSeed.size();
-        MPI_Bcast(&size, 1, MPI_INT, masterNode, MPI_COMM_WORLD);        
-        MPI_Bcast(&bigSeed[0], size, MPI_UNSIGNED_LONG, masterNode, MPI_COMM_WORLD); 
-
-    }else {
-        MPI_Bcast(&size, 1, MPI_INT, masterNode, MPI_COMM_WORLD);        
-        bigSeed.resize(size);
-        MPI_Bcast(&bigSeed[0], size, MPI_UNSIGNED_LONG, masterNode, MPI_COMM_WORLD); 
-    }
-    
-    if (bigSeed.size() == 1) {
-        mtRand_->seed(bigSeed[0]);
-    } else {
-        mtRand_->seed(&bigSeed[0], bigSeed.size());
-    }
-
-#endif
-}    
-
-}
 #endif 

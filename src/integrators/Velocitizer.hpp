@@ -50,7 +50,7 @@
 #ifndef INTEGRATORS_VELOCITIZER_HPP
 #define INTEGRATORS_VELOCITIZER_HPP
 #include "brains/SimInfo.hpp"
-#include "math/OOPSERandNumGen.hpp"
+#include "math/ParallelRandNumGen.hpp"
 
 namespace oopse {
 
@@ -70,8 +70,13 @@ class Velocitizer {
     private:
         
         SimInfo* info_;
-        OOPSERandNumGen* randNumGen_;
 
+        /**@todo random number generator should have same interface*/
+#ifndef IS_MPI        
+        MTRand* randNumGen_;
+#else
+        ParallelRandNumGen* randNumGen_;
+#endif
 };
 
 }

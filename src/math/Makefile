@@ -1,7 +1,7 @@
 Package = math
 
 Source    = \
-	randomSPRNG.cpp \
+	ParallelRandNumGen.cpp \
 
 RmiSource =
 

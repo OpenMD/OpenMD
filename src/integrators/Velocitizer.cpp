@@ -51,13 +51,21 @@ Velocitizer::Velocitizer(SimInfo* info) {
     int seedValue;
     Globals * simParams = info->getSimParams();
 
+#ifndef IS_MPI
     if (simParams->haveSeed()) {
         seedValue = simParams->getSeed();
-        randNumGen_ = new OOPSERandNumGen(seedValue);
+        randNumGen_ = new MTRand(seedValue);
     }else {
-        randNumGen_ = new OOPSERandNumGen();
+        randNumGen_ = new MTRand();
     }    
-
+#else
+    if (simParams->haveSeed()) {
+        seedValue = simParams->getSeed();
+        randNumGen_ = new ParallelRandNumGen(seedValue);
+    }else {
+        randNumGen_ = new ParallelRandNumGen();
+    }    
+#endif 
 }
 
 Velocitizer::~Velocitizer() {

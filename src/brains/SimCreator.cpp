@@ -57,10 +57,9 @@
 #include "UseTheForce/ForceFieldFactory.hpp"
 #include "utils/simError.h"
 #include "utils/StringUtils.hpp"
-#include "math/OOPSERandNumGen.hpp"
+#include "math/MersenneTwister.hpp"
 #ifdef IS_MPI
 #include "io/mpiBASS.h"
-
 #endif
 
 namespace oopse {
@@ -255,12 +254,12 @@ void SimCreator::divideMolecules(SimInfo *info) {
 
     int seedValue;
     Globals * simParams = info->getSimParams();
-    OOPSERandNumGen* myRandom;
+    MTRand* myRandom; //divide labor does not need Parallel random number generator
     if (simParams->haveSeed()) {
         seedValue = simParams->getSeed();
-        myRandom = new OOPSERandNumGen(seedValue);
+        myRandom = new MTRand(seedValue);
     }else {
-        myRandom = new OOPSERandNumGen();
+        myRandom = new MTRand();
     }   
 
 

@@ -38,46 +38,86 @@
  * University of Notre Dame has been advised of the possibility of
  * such damages.
  */
- 
-#ifndef MATH_RANDOMSPRNG_HPP
-#define MATH_RANDOMSPRNG_HPP
 
-/* Define the random number generator used by SPRNG
-   to be type 3 = Combined Multiple Recursive Generator.
-*/
-#define GTYPE 3
+#include "math/ParallelRandNumGen.hpp"
 #ifdef IS_MPI
-#define USE_MPI
-#endif
+#include <mpi.h>
 
-class randomSPRNG{
-public:
-  randomSPRNG(int myseed);
-  virtual ~randomSPRNG();
-
-  double getRandom();
-
-protected:
-  int *thisStream;
-  int myStreamNumber;
-  int nSPRNGStreams;
-  static int nStreamsInitialized;
-
-};
-
-
-class gaussianSPRNG : protected randomSPRNG{
-
-public:
-  gaussianSPRNG(int iseed):randomSPRNG(iseed){}
-  ~gaussianSPRNG(){}
-
-  double getGaussian();
-
-protected:
-
-};
+namespace oopse {
 
 
 
-#endif
+int ParallelRandNumGen::nCreatedRNG_ = 0;
+
+ParallelRandNumGen::ParallelRandNumGen( const uint32& oneSeed) {
+
+    int nProcessors;
+    MPI_Comm_size(MPI_COMM_WORLD, &nProcessors);
+    int newSeed = oneSeed +nCreatedRNG_;
+    mtRand_ = new MTRand(newSeed, nProcessors, worldRank);
+
+    ++nCreatedRNG_;
+}
+
+ParallelRandNumGen::ParallelRandNumGen() {
+
+    std::vector<uint32> bigSeed;
+    const int masterNode = 0;
+    int nProcessors;
+    MPI_Comm_size(MPI_COMM_WORLD, &nProcessors);
+    mtRand_ = new MTRand(nProcessors, worldRank);
+
+    seed();        
+    ++nCreatedRNG_;
+}
+
+
+void ParallelRandNumGen::seed( const uint32 oneSeed ) {
+
+    const int masterNode = 0;
+    int seed = oneSeed;
+    MPI_Bcast(&seed, 1, MPI_UNSIGNED_LONG, masterNode, MPI_COMM_WORLD); 
+
+    if (seed != oneSeed) {
+        sprintf(painCave.errMsg,
+                "Using different seed to initialize ParallelRandNumGen.\n");
+        painCave.isFatal = 1;;
+        simError();
+    }
+
+    int newSeed = oneSeed +nCreatedRNG_;
+    mtRand_->seed(newSeed);
+
+    ++nCreatedRNG_;
+}
+        
+void ParallelRandNumGen::seed() {
+
+    std::vector<uint32> bigSeed;
+    int size;
+    const int masterNode = 0;
+    if (worldRank == masterNode) {
+        bigSeed = mtRand_->generateSeeds();
+        size = bigSeed.size();
+        MPI_Bcast(&size, 1, MPI_INT, masterNode, MPI_COMM_WORLD);        
+        MPI_Bcast(&bigSeed[0], size, MPI_UNSIGNED_LONG, masterNode, MPI_COMM_WORLD); 
+
+    }else {
+        MPI_Bcast(&size, 1, MPI_INT, masterNode, MPI_COMM_WORLD);        
+        bigSeed.resize(size);
+        MPI_Bcast(&bigSeed[0], size, MPI_UNSIGNED_LONG, masterNode, MPI_COMM_WORLD); 
+    }
+    
+    if (bigSeed.size() == 1) {
+        mtRand_->seed(bigSeed[0]);
+    } else {
+        mtRand_->seed(&bigSeed[0], bigSeed.size());
+    }
+
+    ++nCreatedRNG_;
+}    
+
+
+}
+
+#endif 
