@@ -1065,3 +1065,26 @@ AC_DEFUN([adl_FUNC_GETOPT_LONG],
       AC_LIBOBJ(getopt)
       AC_LIBOBJ(getopt1)
       AC_CONFIG_LINKS([utils/getopt.h:utils/gnugetopt.h])])])])
+
+
+AC_DEFUN([ACX_CONFIG_HOME], [
+ myDir=${0%/*}
+ if [ "$myDir" = "$0" ]; then
+    # Ran from local directory
+     myDir=$PWD
+ fi
+ # Resolve symlinks.
+ myProgram="$0"
+ while [ -L "$myProgram" ]; do
+    ls=`/bin/ls -ld "$myProgram"`
+    link=`/usr/bin/expr "$ls" : '.*-> \(.*\)$'`
+    if /usr/bin/expr "$link" : '.*/.*' > /dev/null; then
+       myProgram="$link"
+    else
+       myProgram="`AS_DIRNAME([$myProgram])`/$link"
+    fi
+ done
+ myDir=`AS_DIRNAME([$myProgram])`
+fi
+CONFIG_HOME=$myDir
+])

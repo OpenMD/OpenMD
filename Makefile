@@ -1,3 +1,5 @@
+DEV_ROOT=.
+
 -include make/Makefile
 
 make/Makefile : make/Makefile.in configure

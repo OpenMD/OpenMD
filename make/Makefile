@@ -73,13 +73,13 @@ PackageLibs = \
 
 IncludeDirs = \
 	/usr/include \
-	/usr/local/include \
-	
+	/usr/local/include 
+
 LibraryDirs = \
         /usr/lib \
 	/usr/local/mpich/lib \
 	/usr/local/lib \
-	/usr/local/intel/compiler80/lib \
+	/usr/local/intel/compiler81/lib \
 
 Libraries = \
         mpich \
@@ -91,32 +91,35 @@ Libraries = \
 #  Directories
 #
 #---------------------------------------------------------------------------
-SourceDir        = $(DEV_ROOT)/src
-TargetDir        = $(DEV_ROOT)/obj
-LibDir           = $(DEV_ROOT)/lib
-MakeDir          = $(DEV_ROOT)/make
-BinDir           = $(DEV_ROOT)/bin
-DocsDir          = $(DEV_ROOT)/docs
-CurrentDir       = $(CURDIR)
+
+SourceDir         = $(DEV_ROOT)/src
+TargetDir         = $(DEV_ROOT)/obj
+ParallelTargetDir = $(DEV_ROOT)/MPIobj
+LibDir            = $(DEV_ROOT)/lib
+MakeDir           = $(DEV_ROOT)/make
+BinDir            = $(DEV_ROOT)/bin
+DocsDir           = $(DEV_ROOT)/docs
+CurrentDir        = $(CURDIR)
 
 ifdef Source
 #get the relative path of current package to source directory
 # /home/maul/gezelter/src/code/src/UseTheForce/Darkside --> UseTheForce/Darkside
 #Package          = $(shell echo $(CurrentDir) | sed -e 's/^.*\/src\/\(.*\)/\1/g')
+#use shell script to get the absolute path and then rip it off from $(CurrentDir)
 Package          = $(subst $(shell cd $(SourceDir); pwd)/,,$(CurrentDir))
 
-PackageList      = $(Package)
-PackageSourceDir = $(SourceDir)/$(Package)
-PackageTargetDir = $(TargetDir)
-JavaMainClass    = $(subst /,.,$(Package)).$(Main)
+PackageList              = $(Package)
+PackageSourceDir         = $(SourceDir)/$(Package)
+PackageTargetDir         = $(TargetDir)
+PackageParallelTargetDir = $(ParallelTargetDir)
+JavaMainClass            = $(subst /,.,$(Package)).$(Main)
 else
-PackageList      = $(Packages) $(JavaPackages)
+PackageList              = $(Packages) $(JavaPackages)
 endif
 
-PackageListLoop  = $(patsubst %,$(SourceDir)/%/.loop,$(PackageList))
-#PackageListLoop  = $(PackageList)
+PackageListLoop          = $(patsubst %,$(SourceDir)/%/.loop,$(PackageList))
 
-JRE              = $(JAVA_HOME)/jre/lib/rt.jar
+JRE                      = $(JAVA_HOME)/jre/lib/rt.jar
 
 ifdef IS_UNIX
 X = :
@@ -153,14 +156,6 @@ SourceFiles            = $(JavaFiles)\
                          $(LexFiles)\
                          $(YaccFiles)
 
-#SourceFiles            = $(JavaFiles:%.java=  $(PackageSourceDir)/%.java)\
-                         $(CppFiles:%.cpp=    $(PackageSourceDir)/%.cpp)\
-                         $(CFiles:%.c=        $(PackageSourceDir)/%.c)\
-                         $(FortranFiles:%.f=  $(PackageSourceDir)/%.f)\
-                         $(F90Files:%.F90=    $(PackageSourceDir)/%.F90)\
-                         $(LexFiles:%.l=      $(PackageSourceDir)/%.l)\
-                         $(YaccFiles:%.y=     $(PackageSourceDir)/%.y)\
-
 # Target
 JavaClassFiles         = $(JavaFiles:%.java=  $(PackageTargetDir)/%.class)
 JavaClassFilesRel      = $(JavaFiles:%.java=  $(Package)/%.class)
@@ -169,18 +164,24 @@ RmiSkeletonFiles       = $(RmiSource:%.java=  $(PackageTargetDir)/%_Skel.class)
 JniClassFiles          = $(JniSource:%.java=  $(PackageTargetDir)/%.class)
 JniHeaders             = $(JniSource:%.java=  $(PackageSourceDir)/%.h)
 ObjectFiles            = $(CFiles:%.c=        $(PackageTargetDir)/%.o)\
-		         $(CppFiles:%.cpp=    $(PackageTargetDir)/%.o)\
-		         $(FortranFiles:%.f=  $(PackageTargetDir)/%.o)\
-		         $(F90Files:%.F90=    $(PackageTargetDir)/%.o)\
-		         $(LexFiles:%.l=      $(PackageTargetDir)/%.o)\
-		         $(YaccFiles:%.y=     $(PackageTargetDir)/%.o)
+                         $(CppFiles:%.cpp=    $(PackageTargetDir)/%.o)\
+		                     $(FortranFiles:%.f=  $(PackageTargetDir)/%.o)\
+		                     $(F90Files:%.F90=    $(PackageTargetDir)/%.o)\
+		                     $(LexFiles:%.l=      $(PackageTargetDir)/%.o)\
+		                     $(YaccFiles:%.y=     $(PackageTargetDir)/%.o)
+ParallelObjectFiles    = $(CFiles:%.c=        $(PackageParallelTargetDir)/%.o)\
+		                     $(CppFiles:%.cpp=    $(PackageParallelTargetDir)/%.o)\
+		                     $(FortranFiles:%.f=  $(PackageParallelTargetDir)/%.o)\
+		                     $(F90Files:%.F90=    $(PackageParallelTargetDir)/%.o)\
+		                     $(LexFiles:%.l=      $(PackageParallelTargetDir)/%.o)\
+		                     $(YaccFiles:%.y=     $(PackageParallelTargetDir)/%.o)
 
 DerivedSource          = $(YaccFiles:%.y=    %.h) \
-	                 $(YaccFiles:%.y=    %.c) \
-	                 $(LexFiles:%.l=     %.c)
+	                       $(YaccFiles:%.y=    %.c) \
+	                       $(LexFiles:%.l=     %.c)
 
 DerivedCFiles          = $(YaccFiles:%.y=    %.c) \
-	                 $(LexFiles:%.l=     %.c)
+	                       $(LexFiles:%.l=     %.c)
 
 OtherTargetFiles       = $(OtherSourceFiles:%=$(PackageTargetDir)/%)
 
@@ -193,13 +194,16 @@ ifneq "$(words $(JavaFiles))" "0"
 endif
 
 #if Main is defined, do not build library. It may not be true sometimes
-ifneq  "$(words $(ObjectFiles))" "0"
+ifneq  "$(words $(ObjectFiles) $(ParallelObjectFiles))" "0"
   DependencyFile    = $(PackageSourceDir)/Makedepend
   ifneq "$(Main)" ""
-    Executable        = $(BinDir)/$(Main)
+    Executable             = $(BinDir)/$(Main)
+    ParallelExecutable     = $(BinDir)/$(Main)_MPI
   else
-    SharedLibrary     = $(LibDir)/lib$(subst /,,$(Package)).so 
-    StaticLibrary     = $(LibDir)/lib$(subst /,,$(Package)).a
+    SharedLibrary          = $(LibDir)/lib$(subst /,,$(Package)).so 
+    StaticLibrary          = $(LibDir)/lib$(subst /,,$(Package)).a
+    ParallelSharedLibrary  = $(LibDir)/lib$(subst /,,$(Package))_MPI.so 
+    ParallelStaticLibrary  = $(LibDir)/lib$(subst /,,$(Package))_MPI.a
   endif
 endif
 #
@@ -225,11 +229,14 @@ CCompiler              = icc
 CppCompiler            = icpc
 Linker                 = icpc
 MakeDepend             = makedepend
-MakeDir                = mkdir -p
+Install                = /usr/bin/install -c
+InstallProgram         = ${INSTALL}
+InstallData            = ${INSTALL} -m 644
+MakeDir                = /home/maul/gezelter/gezelter/OOPSE-2.0/ac-tools/shtool mkdir -p -f
 Delete                 = rm -fr
 StaticArchiver         = ar
 DynamicArchiver        = icc
-FortranCompiler        = ifort
+FortranCompiler        = @FC@
 F90Compiler            = ifort
 JavaCompiler           = $(JAVA_HOME)/bin/javac
 JavaArchiver           = $(JAVA_HOME)/bin/jar
@@ -294,6 +301,7 @@ $(PackageTargetDir) :
 
 # .c -> .o
 $(PackageTargetDir)/%.o : %.c
+	$(Print) $@
 	$(CCompiler) $(COptions) -c $(IncludePath) $< -o $@
 
 %.o : %.c
@@ -308,9 +316,7 @@ $(PackageTargetDir)/%.o : %.cpp
 
 # .f -> .o
 $(PackageTargetDir)/%.o : %.f
-	$(Print) $@
-	$(Print) $(FortranCompiler) $(FortranOptions) -c $< -o $@
-	@$(FortranCompiler) $(FortranOptions) -c $< -o $@
+	$(FortranCompiler) $(FortranOptions) -c $< -o $@
 
 %.o : %.f
 	$(MAKE) $(MakeOptions) $(PackageTargetDir)/$@
@@ -324,17 +330,13 @@ $(PackageTargetDir)/%.o : %.F90
 
 # .java -> .class
 $(PackageTargetDir)/%.class : $(PackageSourceDir)/%.java
-	$(Print) $@
-	$(Print) $(JavaCompiler) $(JavaCompilerOptions) $< 
-	@$(JavaCompiler) $(JavaCompilerOptions) $< 
+	$(JavaCompiler) $(JavaCompilerOptions) $< 
 
 %.class : $(PackageSourceDir)/%.java
 	@$(MAKE) $(MakeOptions) $(PackageTargetDir)/$@
 
 # .class -> .h
 $(PackageSourceDir)/%.h : $(PackageTargetDir)/%.class
-	$(Print) $@
-	$(Print) $(JniCompiler) $(JniOptions) $(JavaPackageName).$*
 	$(JniCompiler) $(JniOptions) $(JavaPackageName).$*
 
 %.h : %.class
@@ -342,17 +344,13 @@ $(PackageSourceDir)/%.h : $(PackageTargetDir)/%.class
 
 #.y -> .h
 %.h : %.y
-	$(Print) $@
-	$(Print) @$(Yacc) -d $?
-	@$(Yacc) -d  $?
+	$(Yacc) -d  $?
 	@$(Move) y.tab.h $*.h
 	@$(Delete) y.tab.c
 
 #.y -> .c
 %.c : %.y
-	$(Print) $@
-	$(Print) $(Yacc) -d $?
-	@$(Yacc) -d  $?
+	$(Yacc) -d  $?
 	@$(Move) y.tab.c $*.c
 	@$(Delete) y.tab.h
 
@@ -364,26 +362,33 @@ $(PackageSourceDir)/%.h : $(PackageTargetDir)/%.class
 
 # .o -> .a
 $(LibDir)/%.a : $(ObjectFiles)
-	$(Print) $@
-	$(Print) $(StaticArchiver) $(StaticArchiverOptions) $@ $(ObjectFiles)
-	@$(StaticArchiver) $(StaticArchiverOptions) $@ $(ObjectFiles)
+	$(StaticArchiver) $(StaticArchiverOptions) $@ $(ObjectFiles)
 
 %.a : $(ObjectFiles)
 	$(MAKE) $(MakeOptions) $(LibDir)/$@
 
+$(LibDir)/%_MPI.a : $(ParallelObjectFiles)
+	$(StaticArchiver) $(StaticArchiverOptions) $@ $(ParallelObjectFiles)
+
+%_MPI.a : $(ParallelObjectFiles)
+	$(MAKE) $(MakeOptions) $(LibDir)/$@
+
 # .o -> .so
 $(LibDir)/%.so : $(ObjectFiles)
-	$(Print) $@	
-	$(Print) $(DynamicArchiver) $(ObjectFiles) $(DynamicArchiverOptions) -o $@
 	$(DynamicArchiver) $(ObjectFiles) $(DynamicArchiverOptions) -o $@
 
 %.so : $(ObjectFiles)
 	$(MAKE) $(MakeOptions) $(LibDir)/$@
 
+$(LibDir)/%_MPI.so : $(ParallelObjectFiles)
+	$(DynamicArchiver) $(ParallelObjectFiles) $(DynamicArchiverOptions) -o $@
+
+%_MPI.so : $(ParallelObjectFiles)
+	$(MAKE) $(MakeOptions) $(LibDir)/$@
+
 # .class -> .jar
 $(LibDir)/%.jar : $(JavaClassFiles) $(OtherTargetFiles)
 	$(Print) $@
-	$(Print) $(JavaArchiver) -cf $@ $(JavaClassFilesRel) $(OtherTargetFiles)
 	@cd $(TargetDir); $(JavaArchiver) -cf $@ \
 	$(JavaClassFilesRel) $(OtherTargetFiles)
 
@@ -415,9 +420,10 @@ $(PackageTargetDir)/%_Skel.class : $(PackageTargetDir)/%.class
 
 # Executable
 $(Executable) : $(ObjectFiles)
-	$(Print) $@
-	$(Print) $(Linker) $(LinkOptions) $(LibDirs) $(LibList) $(ObjectFiles) -o $@
 	$(Linker) $(LinkOptions) $(LibDirs) $(LibList) $(ObjectFiles) -o $@
+
+$(ParallelExecutable) : $(ParallelObjectFiles)
+	$(Linker) $(LinkOptions) $(LibDirs) $(LibList) $(ParallelObjectFiles) -o $@
 
 # Anything else is just copied from source to target
 $(PackageTargetDir)/% : $(PackageSourceDir)/%
@@ -442,7 +448,7 @@ _buildall : \
 	$(StaticLibrary) \
 	$(JarFile) \
 	$(Executable)
-
+	
 
 # make clean
 clean : $(PackageListLoop)
@@ -482,16 +488,12 @@ $(DependencyFile) : $(DerivedSource)
 	touch Make.ctemp
 
 ifneq "$(words $(CppFiles))" "0"
-	$(Print) Make dependencies for $(CppFiles)
-	$(Print) $(CppCompiler) $(IncludePath) -MM $(CppFiles)  > Make.cpptemp
 	$(CppCompiler) $(IncludePath) -MM $(CppFiles)  > Make.cpptemp
 	cat Make.cpptemp | sed 's/^[a-zA-Z0-9]/$$\(DEV_ROOT\)\/obj\/&/g' >> $(DependencyFile)
 	cat Make.cpptemp | sed 's/^[a-zA-Z0-9]/$$\(DEV_ROOT\)\/MPIobj\/&/g' >> $(DependencyFile)
 endif
 
 ifneq "$(words $(CFiles))" "0" 
-	$(Print) Make dependencies for $(CFiles)
-	$(Print) $(CCompiler)   $(IncludePath) -MM $(CFiles) $(DerivedCFiles)   > Make.ctemp
 	$(CCompiler)   $(IncludePath) -MM $(CFiles) $(DerivedCFiles)   > Make.ctemp
 	cat Make.ctemp | sed 's/^[a-zA-Z0-9]/$$\(DEV_ROOT\)\/obj\/&/g' >> $(DependencyFile)
 	cat Make.ctemp | sed 's/^[a-zA-Z0-9]/$$\(DEV_ROOT\)\/MPIobj\/&/g' >> $(DependencyFile)
@@ -499,7 +501,6 @@ ifneq "$(words $(CFiles))" "0"
 endif
 
 ifneq "$(words $(F90Files))" "0"
-	$(Print) Make dependencies for $(F90Files)
 	$(DEV_ROOT)/scripts/sfmakedepend  -I $(DEV_ROOT)/src -d '$$(DEV_ROOT)/obj' -f ./Make.ftemp -h *.F90
 	cat Make.ftemp >> $(DependencyFile)
 endif

@@ -79,7 +79,7 @@ LibraryDirs = \
         /usr/lib \
 	/usr/local/mpich/lib \
 	/usr/local/lib \
-	/usr/local/intel/compiler80/lib \
+	/usr/local/intel/compiler81/lib \
 
 Libraries = \
         mpich \
