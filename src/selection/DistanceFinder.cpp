@@ -77,7 +77,7 @@ BitSet DistanceFinder::find(const BitSet& bs, double distance) {
     BitSet bsResult(nStuntDoubles_);
     assert(bsResult.size() == bs.size());
     
-    for (int i = bs.nextOnBit(-1); i != -1; i = bs.nextOnBit(i)) {
+    for (int i = bs.firstOnBit(); i != -1; i = bs.nextOnBit(i)) {
         center = stuntdoubles_[i];
         centerPos = center->getPos();
         for (int j = 0; j < stuntdoubles_.size(); ++j) {
