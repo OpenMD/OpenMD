@@ -146,21 +146,19 @@ void GofXyz::collectHistogram(StuntDouble* sd1, StuntDouble* sd2) {
 }
 
 void GofXyz::writeRdf() {
-    std::ofstream rdfStream(outputFilename_.c_str());
+    std::ofstream rdfStream(outputFilename_.c_str(), std::ios::binary);
     if (rdfStream.is_open()) {
-        rdfStream << "#g(x, y, z)\n";
-        rdfStream << "#selection1: (" << selectionScript1_ << ")\t";
-        rdfStream << "selection2: (" << selectionScript2_ << ")\n";
-        rdfStream << "#nRBins = " << nRBins_ << "\t maxLen = " << len_ << "deltaR = " << deltaR_ <<"\n";
+        //rdfStream << "#g(x, y, z)\n";
+        //rdfStream << "#selection1: (" << selectionScript1_ << ")\t";
+        //rdfStream << "selection2: (" << selectionScript2_ << ")\n";
+        //rdfStream << "#nRBins = " << nRBins_ << "\t maxLen = " << len_ << "deltaR = " << deltaR_ <<"\n";
         for (int i = 0; i < histogram_.size(); ++i) {
  
             for(int j = 0; j < histogram_[i].size(); ++j) {
  
                 for(int k = 0;k < histogram_[i].size(); ++k) {
- 
-                    rdfStream << histogram_[i][j][k]/nProcessed_ << "\t";
+                    rdfStream.write(reinterpret_cast<char *>(&histogram_[i][j][k] ), sizeof(histogram_[i][j][k] ));
                 }
-                rdfStream << "\n";                
             }
         }
         
