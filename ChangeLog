@@ -1,3 +1,66 @@
+2004-10-26 22:00  gezelter
+
+	* src/UseTheForce/: EAM_FF.cpp, ForceFields.hpp: bug fix
+
+2004-10-26 21:20  gezelter
+
+	* src/UseTheForce/ForceFields.hpp: subclass foo
+
+2004-10-26 21:16  gezelter
+
+	* src/UseTheForce/: EAM_FF.cpp, LJFF.cpp, WATER.cpp: more char* ->
+	string conversion
+
+2004-10-26 19:01  gezelter
+
+	* src/: UseTheForce/DUFF.cpp, UseTheForce/EAM_FF.cpp,
+	UseTheForce/ForceFields.hpp, brains/SimSetup.cpp,
+	brains/SimSetup.hpp: char* -> string
+
+2004-10-26 17:25  gezelter
+
+	* src/types/: AtomType.cpp, AtomType.hpp, DirectionalAtomType.hpp,
+	Makefile, ShapeAtomType.cpp, ShapeAtomType.hpp, ShapeType.cpp,
+	ShapeType.hpp: Making ShapeType into a ShapeAtomType, fixing some
+	isXXX
+
+2004-10-26 17:25  gezelter
+
+	* src/math/: RealSphericalHarmonic.cpp, RealSphericalHarmonic.hpp:
+	define name collision
+
+2004-10-26 17:24  gezelter
+
+	* src/: UseTheForce/DUFF.cpp, UseTheForce/EAM_FF.cpp,
+	UseTheForce/ForceFields.hpp, UseTheForce/LJFF.cpp,
+	UseTheForce/Makefile, UseTheForce/Shapes_FF.cpp,
+	UseTheForce/WATER.cpp, UseTheForce/doForces.F90,
+	UseTheForce/DarkSide/shapes_interface.h, brains/SimSetup.cpp:
+	forcefield refactoring for shapes
+
+2004-10-26 17:19  tim
+
+	* ChangeLog, src/brains/DataStorage.cpp,
+	src/brains/DataStorage.hpp, src/brains/Snapshot.hpp,
+	test/brains/DataStorageTestCase.cpp,
+	test/brains/DataStorageTestCase.hpp, test/brains/Makefile:
+	DataStorage passes unit test
+
+2004-10-26 13:03  chrisfen
+
+	* src/UseTheForce/DarkSide/: shapes.F90, shapes_interface.h:
+	Changes to help advance shapes
+
+2004-10-26 13:02  chrisfen
+
+	* src/UseTheForce/: ForceFields.hpp, Shapes_FF.cpp: Changes to
+	Shapes force field reader
+
+2004-10-26 12:28  tim
+
+	* src/brains/Snapshot.hpp, test/brains/RigidBody.hpp: Snaphot and
+	SnapshotTestCase in progress
+
 2004-10-25 17:46  tim
 
 	* ChangeLog, src/math/RectMatrix.hpp, src/math/SquareMatrix.hpp,

@@ -13,7 +13,7 @@
 #include "applications/simpleBuilder/simpleBuilderCmd.h"
 #include "utils/StringUtils.hpp"
 #include "applications/simpleBuilder/LatticeFactory.hpp"
-#include "applications/simpleBuilder/Vector3d.hpp"
+#include "math/Vector3.hpp"
 #include "applications/simpleBuilder/MoLocator.hpp"
 #include "applications/simpleBuilder/Lattice.hpp"
 

@@ -59,7 +59,7 @@ bool next_combination(IteratorContainer<BidirectionalIterator>& iterContainer, B
         return true;
     } else if (*(--i) != endIter){
         //if the last iterator in iterContainer does not reaches the end, just increment it 
-        *i++;
+        ++(*i);
         return true;
     } else {// the last iterator in iterContainer does not reaches the end
 
@@ -73,30 +73,34 @@ bool next_combination(IteratorContainer<BidirectionalIterator>& iterContainer, B
         // of combination to 5
         typename IteratorContainer<BidirectionalIterator>::iterator j = i;
         j--;
-        while( j >= first && *i == *j + 1){
+        while( j >= iterContainer.begin() && *i == *j + 1){
             i--;
             j--;
         };
 
         BidirectionalIterator biDirIter;
-        if (j < first) { //reaches the last combination of current size
-
-            if (last  - first == iterContainer.size()) {
+        if (j - iterContainer.begin() < 0) { //reaches the last combination of current size
+            //half open range
+            if (last  - first + 1  == iterContainer.size()) {
                 //if the current size equals to total number, done
                 return false;
             } else {
 
                 //push the first currentSize+1 element into sequence 
-                for(i = iterContainer.begin(), biDirIter= first; i  != iterContainer.end(); ++i, ++biDirIter) {
-                    *i = j;
-                }    
-                iterContainer.insert(iterContainer.end(), ++biDirIter);
                 
-		return true; 
-	    }            
+                for(i = iterContainer.begin(), biDirIter= first; i  != iterContainer.end(); ++i, ++biDirIter) {
+                    *i = biDirIter;
+                }    
+                iterContainer.insert(iterContainer.end(), biDirIter);
+                
+                return true; 
+            }
+            
         } else {
             ++(*j);
-            for(biDirIter = *j; i != iterContainer.end(); ++i, ++biDirIter) {
+            biDirIter = *j;
+            for(; i != iterContainer.end(); ++i) {
+                ++biDirIter;
                 *i = biDirIter;
             }
             return true;

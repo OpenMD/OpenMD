@@ -6,7 +6,7 @@
 #include "primitives/DirectionalAtom.hpp"
 #include "types/MoleculeStamp.hpp"
 #include "primitives/Molecule.hpp"
-#include "Vector3d.hpp"
+#include "math/Vector3.hpp"
 #include "UseTheForce/ForceFields.hpp"
 using namespace std;
 

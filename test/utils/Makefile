@@ -12,8 +12,8 @@ Source = UtilTest.cpp \
 DEV_ROOT               = ../..
 UseMPI                 = no 
 ParallelDeclare        = -DIS_MPI
-CppCompiler            = icpc
-Linker                 = icpc
+CppCompiler            = icpc -g
+Linker                 = icpc -g
 Delete                 = /bin/rm -rf
 MakeDepend             = makedepend
 
