@@ -432,20 +432,20 @@ $(PackageParallelTargetDir)/%.o : %.F90
 ifeq "$(UseMPI)" "yes"
 %.o : %.F90
 	$(MAKE) $(MakeOptions) $(PackageTargetDir)/$@
-        if test -n "`ls *.$(ModSuffix)`"; then\
-          $(Move) -f "`ls *.$(ModSuffix)`" $(PackageTargetDir);\
+	if test -n "`ls *.$(ModSuffix)`"; then\
+          $(Move) "`ls *.$(ModSuffix)`" $(PackageTargetDir);\
         fi
 
 	$(MAKE) $(MakeOptions) $(PackageParallelTargetDir)/$@
         if test -n "`ls *.$(ModSuffix)`"; then\
-          $(Move) -f "`ls *.$(ModSuffix)`" $(PackageTargetDir);\
+          $(Move) "`ls *.$(ModSuffix)`" $(PackageTargetDir);\
         fi
 
 else
 %.o : %.F90
 	$(MAKE) $(MakeOptions) $(PackageTargetDir)/$@
-        if test -n "`ls *.$(ModSuffix)`"; then\
-          $(Move) -f "`ls *.$(ModSuffix)`" $(PackageTargetDir);\
+	if test -n "`ls *.$(ModSuffix)`"; then\
+          $(Move) "`ls *.$(ModSuffix)`" $(PackageTargetDir);\
         fi
 
 endif
