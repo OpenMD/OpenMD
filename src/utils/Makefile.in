@@ -14,6 +14,7 @@ MySource    = \
 	Trim.cpp \
 	BitSet.cpp\
 	wildcards.cpp\
+	residentMem.c\
 	physmem.c
 
 LibObjs = @LIBOBJS@
