@@ -49,16 +49,21 @@ module simulation
   public :: setBox
   public :: getDielect
   public :: SimUsesPBC
-  public :: SimUsesLJ
+
+  public :: SimUsesDirectionalAtoms
+  public :: SimUsesLennardJones
+  public :: SimUsesElectrostatics
   public :: SimUsesCharges
   public :: SimUsesDipoles
   public :: SimUsesSticky
-  public :: SimUsesRF
-  public :: SimUsesGB
+  public :: SimUsesGayBerne
   public :: SimUsesEAM
+  public :: SimUsesShapes
+  public :: SimUsesFLARB
+  public :: SimUsesRF
   public :: SimRequiresPrepairCalc
   public :: SimRequiresPostpairCalc
-  public :: SimUsesDirectionalAtoms
+
   
 contains
   
@@ -440,46 +445,61 @@ contains
     doesit = thisSim%SIM_uses_PBC
   end function SimUsesPBC
 
-  function SimUsesLJ() result(doesit)
+  function SimUsesDirectionalAtoms() result(doesit)
     logical :: doesit
-    doesit = thisSim%SIM_uses_LJ
-  end function SimUsesLJ
+    doesit = thisSim%SIM_uses_dipoles .or. thisSim%SIM_uses_sticky .or. &
+         thisSim%SIM_uses_GayBerne .or. thisSim%SIM_uses_Shapes
+  end function SimUsesDirectionalAtoms
 
-  function SimUsesSticky() result(doesit)
+  function SimUsesLennardJones() result(doesit)
     logical :: doesit
-    doesit = thisSim%SIM_uses_sticky
-  end function SimUsesSticky
+    doesit = thisSim%SIM_uses_LennardJones
+  end function SimUsesLennardJones
+
+  function SimUsesElectrostatics() result(doesit)
+    logical :: doesit
+    doesit = thisSim%SIM_uses_Electrostatics
+  end function SimUsesElectrostatics
 
   function SimUsesCharges() result(doesit)
     logical :: doesit
-    doesit = thisSim%SIM_uses_charges
+    doesit = thisSim%SIM_uses_Charges
   end function SimUsesCharges
 
   function SimUsesDipoles() result(doesit)
     logical :: doesit
-    doesit = thisSim%SIM_uses_dipoles
+    doesit = thisSim%SIM_uses_Dipoles
   end function SimUsesDipoles
 
-  function SimUsesRF() result(doesit)
+  function SimUsesSticky() result(doesit)
     logical :: doesit
-    doesit = thisSim%SIM_uses_RF
-  end function SimUsesRF
+    doesit = thisSim%SIM_uses_Sticky
+  end function SimUsesSticky
 
-  function SimUsesGB() result(doesit)
+  function SimUsesGayBerne() result(doesit)
     logical :: doesit
-    doesit = thisSim%SIM_uses_GB
-  end function SimUsesGB
-
+    doesit = thisSim%SIM_uses_GayBerne
+  end function SimUsesGayBerne
+  
   function SimUsesEAM() result(doesit)
     logical :: doesit
     doesit = thisSim%SIM_uses_EAM
   end function SimUsesEAM
 
-  function SimUsesDirectionalAtoms() result(doesit)
+  function SimUsesShapes() result(doesit)
     logical :: doesit
-    doesit = thisSim%SIM_uses_dipoles .or. thisSim%SIM_uses_sticky .or. &
-         thisSim%SIM_uses_GB .or. thisSim%SIM_uses_RF
-  end function SimUsesDirectionalAtoms
+    doesit = thisSim%SIM_uses_Shapes
+  end function SimUsesShapes
+
+  function SimUsesFLARB() result(doesit)
+    logical :: doesit
+    doesit = thisSim%SIM_uses_FLARB
+  end function SimUsesFLARB
+
+  function SimUsesRF() result(doesit)
+    logical :: doesit
+    doesit = thisSim%SIM_uses_RF
+  end function SimUsesRF
 
   function SimRequiresPrepairCalc() result(doesit)
     logical :: doesit

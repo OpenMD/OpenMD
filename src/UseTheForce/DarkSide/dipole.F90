@@ -14,11 +14,13 @@ module dipole_dipole
   PRIVATE
 
   real(kind=dp), parameter :: pre = 14.38362_dp
-  logical, save :: haveMomentMap = .false.
 
-  public::do_dipole_pair
+  public :: newDipoleType
+  public :: do_dipole_pair
+  public :: getDipoleMoment
 
   type :: MomentList
+     integer :: ident
      real(kind=DP) :: dipole_moment = 0.0_DP
   end type MomentList
 
@@ -26,41 +28,57 @@ module dipole_dipole
 
 contains
 
-  subroutine createMomentMap(status)
+  subroutine newDipoleType(ident, dipole_moment, status)
+    integer,intent(in) :: ident
+    real(kind=dp),intent(in) :: dipole_moment
+    integer,intent(out) :: status
     integer :: nAtypes
-    integer :: status
-    integer :: i
-    real (kind=DP) :: thisDP
-    logical :: thisProperty
 
     status = 0
-
-    nAtypes = getSize(atypes)
     
-    if (nAtypes == 0) then
+    !! Be simple-minded and assume that we need a MomentMap that
+    !! is the same size as the total number of atom types
+
+    if (.not.allocated(MomentMap)) then
+       
+       nAtypes = getSize(atypes)
+    
+       if (nAtypes == 0) then
+          status = -1
+          return
+       end if
+       
+       if (.not. allocated(MomentMap)) then
+          allocate(MomentMap(nAtypes))
+       endif
+       
+    end if
+
+    if (ident .gt. size(MomentMap)) then
        status = -1
+       return
+    endif
+    
+    ! set the values for MomentMap for this atom type:
+
+    MomentMap(ident)%ident = ident
+    MomentMap(ident)%dipole_moment = dipole_moment
+    
+  end subroutine newDipoleType
+
+  function getDipoleMoment(atid) result (dm)
+    integer, intent(in) :: atid
+    integer :: localError
+    real(kind=dp) :: dm
+    
+    if (.not.allocated(MomentMap)) then
+       call handleError("dipole-dipole", "no MomentMap was present before first call of getDipoleMoment!")
        return
     end if
     
-    if (.not. allocated(MomentMap)) then
-       allocate(MomentMap(nAtypes))
-    endif
+    dm = MomentMap(atid)%dipole_moment
+  end function getDipoleMoment
 
-    do i = 1, nAtypes
-
-       call getElementProperty(atypes, i, "is_DP", thisProperty)
-
-       if (thisProperty) then
-          call getElementProperty(atypes, i, "dipole_moment", thisDP)
-          MomentMap(i)%dipole_moment = thisDP
-       endif
-       
-    end do
-    
-    haveMomentMap = .true.
-    
-  end subroutine createMomentMap 
-  
   subroutine do_dipole_pair(atom1, atom2, d, rij, r2, sw, vpair, fpair, &
        pot, u_l, f, t, do_pot)
     
@@ -83,14 +101,12 @@ contains
     real (kind = dp), dimension(3) :: ul1
     real (kind = dp), dimension(3) :: ul2
 
-    if (.not.haveMomentMap) then
-       localError = 0
-       call createMomentMap(localError)
-       if ( localError .ne. 0 ) then
-          call handleError("dipole-dipole", "MomentMap creation failed!")
-          return
-       end if
-    endif
+
+    if (.not.allocated(MomentMap)) then
+       call handleError("dipole-dipole", "no MomentMap was present before first call of do_dipole_pair!")
+       return
+    end if
+
 
 #ifdef IS_MPI
     me1 = atid_Row(atom1)
@@ -216,3 +232,16 @@ contains
   end subroutine do_dipole_pair
   
 end module dipole_dipole
+
+subroutine newDipoleType(ident, dipole_moment, status)
+
+  use dipole_dipole, ONLY : module_newDipoleType => newDipoleType
+
+  integer, parameter :: DP = selected_real_kind(15)
+  integer,intent(inout) :: ident
+  real(kind=dp),intent(inout) :: dipole_moment
+  integer,intent(inout) :: status
+  
+  call module_newDipoleType(ident, dipole_moment, status)
+  
+end subroutine newDipoleType

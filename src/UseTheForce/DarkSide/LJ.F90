@@ -1,7 +1,7 @@
 !! Calculates Long Range forces Lennard-Jones interactions.
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: LJ.F90,v 1.3 2004-10-21 20:15:25 gezelter Exp $, $Date: 2004-10-21 20:15:25 $, $Name: not supported by cvs2svn $, $Revision: 1.3 $
+!! @version $Id: LJ.F90,v 1.4 2004-10-22 20:22:47 gezelter Exp $, $Date: 2004-10-22 20:22:47 $, $Name: not supported by cvs2svn $, $Revision: 1.4 $
 
 module lj
   use atype_module
@@ -51,6 +51,8 @@ module lj
   public :: useGeometricMixing
   public :: do_lj_pair
   public :: newLJtype  
+  public :: getSigma
+  public :: getEpsilon
   
 contains
 
@@ -93,7 +95,34 @@ contains
     ParameterMap(ident)%sigma = sigma
     
   end subroutine newLJtype
+
+  function getSigma(atid) result (s)
+    integer, intent(in) :: atid
+    integer :: localError
+    real(kind=dp) :: s
     
+    if (.not.allocated(ParameterMap)) then
+       call handleError("LJ", "no ParameterMap was present before first call of getSigma!")
+       return
+    end if
+    
+    s = ParameterMap(atid)%sigma
+  end function getSigma
+
+  function getEpsilon(atid) result (e)
+    integer, intent(in) :: atid
+    integer :: localError
+    real(kind=dp) :: e
+    
+    if (.not.allocated(ParameterMap)) then
+       call handleError("dipole-dipole", "no ParameterMap was present before first call of getEpsilon!")
+       return
+    end if
+    
+    e = ParameterMap(atid)%epsilon
+  end function getEpsilon
+
+
   subroutine setCutoffLJ(rcut, do_shift, status)
     logical, intent(in):: do_shift
     integer :: status, myStatus

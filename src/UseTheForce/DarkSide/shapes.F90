@@ -6,6 +6,7 @@ module shapes
   use vector_class
   use simulation
   use status
+  use lj
 #ifdef IS_MPI
   use mpiSimulation
 #endif
@@ -104,7 +105,7 @@ contains
        call getMatchingElementList(atypes, "is_Shape", .true., &
             nShapeTypes, MatchList)
        
-       call getMatchingElementList(atypes, "is_LJ", .true., &
+       call getMatchingElementList(atypes, "is_LennardJones", .true., &
             nLJTypes, MatchList)
        
        ShapeMap%n_shapes = nShapeTypes + nLJTypes
@@ -291,7 +292,7 @@ contains
     integer :: status
     integer :: i, j, l, m, lm, function_type
     real(kind=dp) :: bigSigma, myBigSigma, thisSigma, coeff, Phunc, spi
-    real(kind=dp) :: costheta, cpi, theta, Pi, phi, thisDP
+    real(kind=dp) :: costheta, cpi, theta, Pi, phi, thisDP, sigma
     integer :: alloc_stat, iTheta, iPhi, nSteps, nAtypes, thisIP, current
     logical :: thisProperty
 
@@ -363,7 +364,7 @@ contains
 
     do i = 1, nAtypes
        
-       call getElementProperty(atypes, i, "is_LJ", thisProperty)
+       call getElementProperty(atypes, i, "is_LennardJones", thisProperty)
        
        if (thisProperty) then
           
@@ -376,12 +377,10 @@ contains
 
           ShapeMap%Shapes(current)%isLJ = .true.
 
-          call getElementProperty(atypes, i, "lj_epsilon", thisDP)
-          ShapeMap%Shapes(current)%epsilon = thisDP
-
-          call getElementProperty(atypes, i, "lj_sigma",   thisDP)
-          ShapeMap%Shapes(current)%sigma = thisDP          
-          if (thisDP .gt. bigSigma) bigSigma = thisDP
+          ShapeMap%Shapes(current)%epsilon = getEpsilon(thisIP)
+          sigma = getSigma(thisIP)
+          ShapeMap%Shapes(current)%sigma = sigma
+          if (sigma .gt. bigSigma) bigSigma = thisDP
           
        endif
        

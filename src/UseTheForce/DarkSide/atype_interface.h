@@ -13,21 +13,11 @@
 #define __C
 
 #include "config.h"
+#include "types/AtomTypeProperties.h"
 
 #define makeAtype F90_FUNC(makeatype, MAKEATYPE)
 
 extern "C" {
-  void makeAtype(int* unique_ident, 
-                 int* isLJ, 
-                 int* isSticky,
-                 int* isDipole, 
-                 int* isGB, 
-                 int* isEAM,
-                 int* isCharge,
-                 double* lj_epslon, 
-                 double* lj_sigma, 
-                 double* charge,
-                 double* dipole_moment, 
-                 int* status );
+  void makeAtype(AtomTypeProperties atp, int* status );
 }  
 #endif

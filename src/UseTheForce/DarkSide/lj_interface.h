@@ -23,7 +23,7 @@
 extern "C"{
   void newLJtype( int* ident,
                   double* sigma,
-                  double* epsilon
+                  double* epsilon,
                   int* status);
 
   void useGeometricMixing( );
