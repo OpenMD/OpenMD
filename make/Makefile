@@ -413,11 +413,11 @@ $(PackageSourceDir)/%.h : $(PackageTargetDir)/%.class
 
 $(LibDir)/%_UP.a : $(ObjectFiles)
 	$(StaticArchiver) $(StaticArchiverOptions) $@ $(ObjectFiles)
-	touch $(LibDir)/.stamp_UP
+	@touch $(LibDir)/.stamp_UP
 
 $(LibDir)/%_MPI.a: $(ParallelObjectFiles)
 	$(StaticArchiver) $(StaticArchiverOptions) $@ $(ParallelObjectFiles)
-	touch $(LibDir)/.stamp_MPI
+	@touch $(LibDir)/.stamp_MPI
 
 %_UP.a : $(ObjectFiles)
 	$(MAKE) $(MakeOptions) $(LibDir)/$@
@@ -477,11 +477,13 @@ create_archive = $(shell  $(StaticArchiver) $(StaticArchiverOptions) $(2) $(call
 remove_objs = $(shell $(Delete) $(call find_objs, $(1)))
 do_create = $(call extract_objs,$(1))$(call create_archive,$(1),$(2))$(call remove_objs,$(1))  
 
-$(CombinedStaticLib) : $(LibDir)/.stamp_UP 
+$(CombinedStaticLib) : $(LibDir)/.stamp_UP
+	$(Print) create $@     	
 	$(foreach thisLib,$(LibNames),$(call do_create,$(thisLib),$@))
 	$(Ranlib) $(CombinedStaticLib)
 
 $(CombinedParallelStaticLib) : $(LibDir)/.stamp_MPI
+	$(Print) create $@
 	$(foreach thisLib,$(ParallelLibNames), $(call do_create, $(thisLib), $@))
 	$(Ranlib) $(CombinedParallelStaticLib)
 
@@ -603,7 +605,7 @@ jarsign : $(JarFile)
 
 # make statistics
 _statisticsall :
-	@$(Print) $(SourceFiles) >> $(DEV_ROOT)/files.tmp
+	@$(Print) $(patsubst %,$(CurrentDir)/%,$(SourceFiles)) >> $(DEV_ROOT)/files.tmp
 
 statistics : $(PackageListLoop)
 	@$(List) $(DEV_ROOT)/files.tmp | xargs $(WordCount) $(WordCountOptions)
