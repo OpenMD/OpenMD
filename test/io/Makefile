@@ -7,6 +7,7 @@ Source = IOTest.cpp \
 
 DEV_ROOT               = ../..
 UseMPI                 = yes
+
 ParallelDeclare        = -DIS_MPI
 CppCompiler            = icpc
 Linker                 = icpc

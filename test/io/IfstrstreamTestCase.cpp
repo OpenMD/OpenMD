@@ -1,6 +1,7 @@
 #include "io/basic_ifstrstream.hpp"
 #include "IfstrstreamTestCase.hpp"
 // Registers the fixture into the 'registry'
+using namespace oopse;
 CPPUNIT_TEST_SUITE_REGISTRATION( IfstrstreamTestCase );
 
 #ifndef IS_MPI
@@ -39,7 +40,7 @@ void IfstrstreamTestCase::tearDown() {
 }
 
 void IfstrstreamTestCase::testMasterConstructor() {
-        CPPUNIT_ASSERT(1 == 0);
+    ifstrstream in;
 }    
 
 void IfstrstreamTestCase::testMasterOpen() {
