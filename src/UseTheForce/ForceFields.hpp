@@ -17,9 +17,6 @@
 #include "UseTheForce/mpiForceField.h"
 #endif
 
-#include "UseTheForce/fForceField.h"
-//#include "UseTheForce/fortranWrapDefines.hpp"
-
 class bond_pair{
 public:
   bond_pair(){}
@@ -76,7 +73,7 @@ public:
 				bend_set* the_bends ) = 0;
   virtual void initializeTorsions( int nTorsions, Torsion** torsionArray,
 				   torsion_set* the_torsions ) = 0;
-  virtual void initForceField( int ljMixRule ) = 0;
+  virtual void initForceField() = 0;
   virtual void initRestraints();
   virtual void dumpzAngle();
 
@@ -89,7 +86,7 @@ public:
  
 protected:
   
-  void initFortran( int ljMixPolicy, int useReactionField );
+  void initFortran( int useReactionField );
   
 
   FILE *frcFile;
@@ -122,7 +119,7 @@ public:
   void initializeTorsions( int nTorsions, Torsion** torsionArray,
 			   torsion_set* the_torsions );
 
-  void initForceField( int ljMixRule );
+  void initForceField();
   double getAtomTypeMass(char* atomType);
 
 private:
@@ -148,7 +145,7 @@ public:
   void initializeTorsions( int nTorsions, Torsion** torsionArray,
 			   torsion_set* the_torsions );
 
-  void initForceField( int ljMixRule );
+  void initForceField( );
   double getAtomTypeMass(char* atomType);
 
 private:
@@ -176,7 +173,7 @@ public:
   void initializeTorsions( int nTorsions, Torsion** torsionArray,
 			   torsion_set* the_torsions );
 
-  void initForceField( int ljMixRule );
+  void initForceField();
 
   void calcRcut( void );
   double getAtomTypeMass(char* atomType);
@@ -202,7 +199,7 @@ public:
 			bend_set* the_bends );
   void initializeTorsions( int nTorsions, Torsion** torsionArray,
 			   torsion_set* the_torsions );
-  void initForceField( int ljMixRule );
+  void initForceField();
   double getAtomTypeMass(char* atomType);
 
 private:
@@ -231,7 +228,7 @@ public:
   void initializeTorsions( int nTorsions, Torsion** torsionArray,
 			   torsion_set* the_torsions );
 
-  void initForceField( int ljMixRule );
+  void initForceField();
 
   void calcRcut( void );
   double getAtomTypeMass(char* atomType);

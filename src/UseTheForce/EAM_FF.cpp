@@ -297,8 +297,8 @@ void EAM_FF::calcRcut( void ){
 }
 
 
-void EAM_FF::initForceField( int ljMixRule ){
-  initFortran( ljMixRule, 0 );
+void EAM_FF::initForceField( ){
+  initFortran(0);
 }
 
 void EAM_FF::cleanMe( void ){

@@ -230,12 +230,12 @@ void ForceFields::doForces( int calcPot, int calcStress ){
 }
 
 
-void ForceFields::initFortran(int ljMixPolicy, int useReactionField ){
+void ForceFields::initFortran(int useReactionField ){
   
   int isError;
   
   isError = 0;
-  initFortranFF( &ljMixPolicy, &useReactionField, &isError );
+  initFortranFF( &useReactionField, &isError );
   
   if(isError){
     sprintf( painCave.errMsg,
@@ -243,7 +243,7 @@ void ForceFields::initFortran(int ljMixPolicy, int useReactionField ){
     painCave.isFatal = 1;
     simError();
   }
-
+  
   
 #ifdef IS_MPI
   sprintf( checkPointMsg, "ForceField successfully initialized the fortran component list.\n" );

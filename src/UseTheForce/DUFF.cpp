@@ -653,9 +653,9 @@ void DUFF::cleanMe( void ){
 }
 
 
-void DUFF::initForceField( int ljMixRule ){
+void DUFF::initForceField(){
   
-  initFortran( ljMixRule, entry_plug->useReactionField );
+  initFortran( entry_plug->useReactionField );
 }
 
 double DUFF::getAtomTypeMass (char* atomType) {

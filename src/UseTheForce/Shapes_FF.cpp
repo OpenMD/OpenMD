@@ -128,8 +128,8 @@ void Shapes_FF::calcRcut( void ){
 }
 
 
-void Shapes_FF::initForceField(int ljMixRule){
-  initFortran(ljMixRule, 0);
+void Shapes_FF::initForceField(){
+  initFortran(0);
 }
 
 

@@ -17,8 +17,7 @@
 
 extern "C"{
   
-  void initFortranFF( int* LJ_mix_policy, 
-                      int* useReactionField,
+  void initFortranFF( int* useReactionField,
                       int *isError );        
 
   

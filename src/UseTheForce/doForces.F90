@@ -4,7 +4,7 @@
 
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: doForces.F90,v 1.1 2004-10-20 04:19:55 gezelter Exp $, $Date: 2004-10-20 04:19:55 $, $Name: not supported by cvs2svn $, $Revision: 1.1 $
+!! @version $Id: doForces.F90,v 1.2 2004-10-21 20:15:22 gezelter Exp $, $Date: 2004-10-21 20:15:22 $, $Name: not supported by cvs2svn $, $Revision: 1.2 $
 
 module doForces
   use force_globals
@@ -30,7 +30,6 @@ module doForces
   PRIVATE
 
 #define __FORTRAN90
-#include "UseTheForce/fForceField.h"
 #include "UseTheForce/fSwitchingFunction.h"
 
   INTEGER, PARAMETER:: PREPAIR_LOOP = 1
@@ -38,7 +37,6 @@ module doForces
 
   logical, save :: haveRlist = .false.
   logical, save :: haveNeighborList = .false.
-  logical, save :: havePolicies = .false.
   logical, save :: haveSIMvariables = .false.
   logical, save :: havePropertyMap = .false.
   logical, save :: haveSaneForceField = .false.
@@ -202,14 +200,6 @@ contains
        return
     endif
 
-    if (SIM_uses_LJ .and. FF_uses_LJ) then
-       if (.not. havePolicies) then
-          write(default_error, *) 'LJ mixing Policies have not been set in doForces!'
-          error = -1
-          return
-       endif
-    endif
-
     if (.not. haveNeighborList) then
        write(default_error, *) 'neighbor list has not been initialized in doForces!'
        error = -1
@@ -233,9 +223,8 @@ contains
   end subroutine doReadyCheck
     
 
-  subroutine init_FF(LJMIXPOLICY, use_RF_c, thisStat)
+  subroutine init_FF(use_RF_c, thisStat)
 
-    integer, intent(in) :: LJMIXPOLICY
     logical, intent(in) :: use_RF_c
 
     integer, intent(out) :: thisStat   
@@ -264,10 +253,10 @@ contains
     
     call getMatchingElementList(atypes, "is_LJ", .true., nMatches, MatchList)
     if (nMatches .gt. 0) FF_uses_LJ = .true.
-
+    
     call getMatchingElementList(atypes, "is_Charge", .true., nMatches, MatchList)
     if (nMatches .gt. 0) FF_uses_charges = .true.   
-
+    
     call getMatchingElementList(atypes, "is_DP", .true., nMatches, MatchList)
     if (nMatches .gt. 0) FF_uses_dipoles = .true.
     
@@ -283,7 +272,7 @@ contains
     
     !! Assume sanity (for the sake of argument)
     haveSaneForceField = .true.
-
+    
     !! check to make sure the FF_uses_RF setting makes sense
     
     if (FF_uses_dipoles) then
@@ -300,27 +289,6 @@ contains
        endif
     endif 
 
-    if (FF_uses_LJ) then
-       
-       select case (LJMIXPOLICY)
-       case (LB_MIXING_RULE)
-          call init_lj_FF(LB_MIXING_RULE, my_status)             
-       case (EXPLICIT_MIXING_RULE)
-          call init_lj_FF(EXPLICIT_MIXING_RULE, my_status)
-       case default
-          write(default_error,*) 'unknown LJ Mixing Policy!'
-          thisStat = -1
-          haveSaneForceField = .false.
-          return             
-       end select
-       if (my_status /= 0) then
-          thisStat = -1
-          haveSaneForceField = .false.
-          return
-       end if
-       havePolicies = .true.
-    endif
-
     if (FF_uses_sticky) then
        call check_sticky_FF(my_status)
        if (my_status /= 0) then
@@ -329,7 +297,6 @@ contains
           return
        end if
     endif
-
 
     if (FF_uses_EAM) then
          call init_EAM_FF(my_status) 
@@ -352,6 +319,7 @@ contains
 
     if (FF_uses_GB .and. FF_uses_LJ) then
     endif
+
     if (.not. haveNeighborList) then
        !! Create neighbor lists
        call expandNeighborList(nLocal, my_status)
@@ -361,9 +329,7 @@ contains
           return
        endif
        haveNeighborList = .true.
-    endif
-
-    
+    endif    
     
   end subroutine init_FF
   
@@ -1185,13 +1151,12 @@ end module doForces
 
 !! Interfaces for C programs to module....
 
- subroutine initFortranFF(LJMIXPOLICY, use_RF_c, thisStat)
+ subroutine initFortranFF(use_RF_c, thisStat)
     use doForces, ONLY: init_FF
-    integer, intent(in) :: LJMIXPOLICY
     logical, intent(in) :: use_RF_c
 
     integer, intent(out) :: thisStat   
-    call init_FF(LJMIXPOLICY, use_RF_c, thisStat)
+    call init_FF(use_RF_c, thisStat)
 
  end subroutine initFortranFF
 

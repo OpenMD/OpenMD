@@ -1,14 +1,14 @@
 !! Calculates Long Range forces Lennard-Jones interactions.
-!! Corresponds to the force field defined in lj_FF.cpp 
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: LJ.F90,v 1.2 2004-10-21 15:25:30 chuckv Exp $, $Date: 2004-10-21 15:25:30 $, $Name: not supported by cvs2svn $, $Revision: 1.2 $
+!! @version $Id: LJ.F90,v 1.3 2004-10-21 20:15:25 gezelter Exp $, $Date: 2004-10-21 20:15:25 $, $Name: not supported by cvs2svn $, $Revision: 1.3 $
 
 module lj
   use atype_module
   use switcheroo
   use vector_class
   use simulation
+  use status
 #ifdef IS_MPI
   use mpiSimulation
 #endif
@@ -18,131 +18,82 @@ module lj
   PRIVATE
   
   integer, parameter :: DP = selected_real_kind(15)
-
-#define __FORTRAN90
-#include "UseTheForce/fForceField.h"
-
-  integer, save :: LJ_Mixing_Policy
+  
+  type, private :: LjType
+     integer :: ident
+     real(kind=dp) :: sigma
+     real(kind=dp) :: epsilon
+  end type LjType
+  
+  type(LjType), dimension(:), allocatable :: ParameterMap
+  
+  logical, save :: haveMixingMap = .false.
+  
+  type :: MixParameters
+     real(kind=DP) :: sigma
+     real(kind=DP) :: epsilon
+     real(kind=dp)  :: sigma6
+     real(kind=dp)  :: tp6
+     real(kind=dp)  :: tp12
+     real(kind=dp)  :: delta 
+  end type MixParameters
+  
+  type(MixParameters), dimension(:,:), allocatable :: MixingMap
+  
   real(kind=DP), save :: LJ_rcut
-  logical, save :: havePolicy = .false.
-  logical, save :: haveCut = .false.
+  logical, save :: have_rcut = .false.
   logical, save :: LJ_do_shift = .false.
-  
-  !! Logical has lj force field module been initialized?
-  
-  logical, save :: LJ_FF_initialized = .false.
-  
+  logical, save :: useGeometricDistanceMixing = .false.
+   
   !! Public methods and data
-  public :: init_LJ_FF
+  
   public :: setCutoffLJ
+  public :: useGeometricMixing
   public :: do_lj_pair
-  public :: newLJtype
-  
-  !! structure for lj type parameters
-  type, private :: ljType
-    integer :: lj_ident
-    real(kind=dp) :: lj_sigma
-    real(kind=dp) :: lj_epsilon
-  end type ljType
-  
-  !! List of lj type parameters
-  type, private :: ljTypeList
-    integer  :: n_lj_types = 0
-    integer  :: currentAddition = 0
-    type(ljType), pointer :: ljParams(:) => null()
-  end type ljTypeList
-  
-  !! The list of lj Parameters
-  type (ljTypeList), save :: ljParameterList
-  
-  
-  type :: lj_mixed_params
-     !! Lennard-Jones epsilon
-     real ( kind = dp )  :: epsilon = 0.0_dp
-     !! Lennard-Jones Sigma
-     real ( kind = dp )  :: sigma = 0.0_dp
-     !! Lennard-Jones Sigma to sixth
-     real ( kind = dp )  :: sigma6 = 0.0_dp
-     !! 
-     real ( kind = dp )  :: tp6
-     real ( kind = dp )  :: tp12
-     real ( kind = dp )  :: delta  = 0.0_dp
-  end type lj_mixed_params
-  
-  type (lj_mixed_params), dimension(:,:), pointer :: ljMixed
-  
-  
+  public :: newLJtype  
   
 contains
 
-  subroutine newLJtype(ident,lj_sigma,lj_epsilon,status)
+  subroutine newLJtype(ident, sigma, epsilon, status)
     integer,intent(in) :: ident
-    real(kind=dp),intent(in) :: lj_sigma
-    real(kind=dp),intent(in) :: lj_epsilon
+    real(kind=dp),intent(in) :: sigma
+    real(kind=dp),intent(in) :: epsilon
     integer,intent(out) :: status
-    
-    integer,pointer                        :: Matchlist(:) => null()
-    integer :: current
     integer :: nAtypes
+
     status = 0
     
-        !! Assume that atypes has already been set and get the total number of types in atypes
-  
-   
+    !! Be simple-minded and assume that we need a ParameterMap that
+    !! is the same size as the total number of atom types
 
-    ! check to see if this is the first time into 
-    if (.not.associated(ljParameterList%ljParams)) then
-       call getMatchingElementList(atypes, "is_lj", .true., nAtypes, MatchList)
-       ljParameterList%n_lj_types = nAtypes
+    if (.not.allocated(ParameterMap)) then
+       
+       nAtypes = getSize(atypes)
+    
        if (nAtypes == 0) then
-         status = -1
-         return
-       end if
-       allocate(ljParameterList%ljParams(nAtypes))
-    end if
-
-    ljParameterList%currentAddition = ljParameterList%currentAddition + 1
-    current = ljParameterList%currentAddition
-    
-    ! set the values for ljParameterList
-    ljParameterList%ljParams(current)%lj_ident = ident
-    ljParameterList%ljParams(current)%lj_epsilon = lj_epsilon
-    ljParameterList%ljParams(current)%lj_sigma = lj_sigma
-    
-  end subroutine newLJtype
-  
-  subroutine init_LJ_FF(mix_Policy, status)
-    integer, intent(in) :: mix_Policy
-    integer, intent(out) :: status
-    integer :: myStatus
-    
-    if (mix_Policy == LB_MIXING_RULE) then
-       LJ_Mixing_Policy = LB_MIXING_RULE
-    else
-       if (mix_Policy == EXPLICIT_MIXING_RULE) then
-          LJ_Mixing_Policy = EXPLICIT_MIXING_RULE
-       else
-          write(*,*) 'Unknown Mixing Policy!'
-          status = -1
-          return
-       endif
-    endif
-
-    havePolicy = .true.
-
-    if (haveCut) then
-       status = 0
-       call createMixingList(myStatus)
-       if (myStatus /= 0) then
           status = -1
           return
        end if
        
-       LJ_FF_initialized = .true.
+       if (.not. allocated(ParameterMap)) then
+          allocate(ParameterMap(nAtypes))
+       endif
+       
     end if
-  
-  end subroutine init_LJ_FF
-  
+
+    if (ident .gt. size(ParameterMap)) then
+       status = -1
+       return
+    endif
+    
+    ! set the values for ParameterMap for this atom type:
+
+    ParameterMap(ident)%ident = ident
+    ParameterMap(ident)%epsilon = epsilon
+    ParameterMap(ident)%sigma = sigma
+    
+  end subroutine newLJtype
+    
   subroutine setCutoffLJ(rcut, do_shift, status)
     logical, intent(in):: do_shift
     integer :: status, myStatus
@@ -156,106 +107,97 @@ contains
     LJ_rcut = rcut
     LJ_do_shift = do_shift
     call set_switch(LJ_SWITCH, rcut, rcut)
-    haveCut = .true.
-
-    if (havePolicy) then
-       status = 0
-       call createMixingList(myStatus)
-       if (myStatus /= 0) then
-          status = -1
-          return
-       end if
-       
-       LJ_FF_initialized = .true.
-    end if    
+    have_rcut = .true.
     
     return
   end subroutine setCutoffLJ
+
+  subroutine useGeometricMixing() 
+    useGeometricDistanceMixing = .true.
+    haveMixingMap = .false.
+    return
+  end subroutine useGeometricMixing
   
-  subroutine createMixingList(status)
+  subroutine createMixingMap(status)
     integer :: nAtypes
     integer :: status
     integer :: i
     integer :: j
-    real ( kind = dp ) :: mySigma_i,mySigma_j
-    real ( kind = dp ) :: myEpsilon_i,myEpsilon_j
+    real ( kind = dp ) :: Sigma_i, Sigma_j
+    real ( kind = dp ) :: Epsilon_i, Epsilon_j
     real ( kind = dp ) :: rcut6
-    logical :: I_isLJ, J_isLJ
+
     status = 0
     
-    ! we only allocate this array to the number of lj_atypes
-    nAtypes = size(ljParameterList%ljParams)
+    nAtypes = size(ParameterMap)
+    
     if (nAtypes == 0) then
        status = -1
        return
     end if
-        
-    if (.not. associated(ljMixed)) then
-       allocate(ljMixed(nAtypes, nAtypes))
+
+    if (.not.have_rcut) then
+       status = -1
+       return
     endif
-
+    
+    if (.not. allocated(MixingMap)) then
+       allocate(MixingMap(nAtypes, nAtypes))
+    endif
+    
     rcut6 = LJ_rcut**6
-
-! This loops through all atypes, even those that don't support LJ forces.
+    
+    ! This loops through all atypes, even those that don't support LJ forces.
     do i = 1, nAtypes
-
-          myEpsilon_i = ljParameterList%ljParams(i)%lj_epsilon
-          mySigma_i = ljParameterList%ljParams(i)%lj_sigma
+       
+       Epsilon_i = ParameterMap(i)%epsilon
+       Sigma_i = ParameterMap(i)%sigma
+       
+       ! do self mixing rule
+       MixingMap(i,i)%sigma   = Sigma_i          
+       MixingMap(i,i)%sigma6  = Sigma_i ** 6          
+       MixingMap(i,i)%tp6     = (MixingMap(i,i)%sigma6)/rcut6          
+       MixingMap(i,i)%tp12    = (MixingMap(i,i)%tp6) ** 2
+       MixingMap(i,i)%epsilon = Epsilon_i          
+       MixingMap(i,i)%delta   = -4.0_DP * MixingMap(i,i)%epsilon * &
+            (MixingMap(i,i)%tp12 - MixingMap(i,i)%tp6)
+       
+       do j = i + 1, nAtypes
           
-          ! do self mixing rule
-          ljMixed(i,i)%sigma   = mySigma_i
+          Epsilon_j = ParameterMap(j)%epsilon
+          Sigma_j = ParameterMap(j)%sigma
           
-          ljMixed(i,i)%sigma6  = (ljMixed(i,i)%sigma) ** 6
+          ! only the distance parameter uses different mixing policies
+          if (useGeometricDistanceMixing) then
+             ! only for OPLS as far as we can tell
+             MixingMap(i,j)%sigma = dsqrt(Sigma_i * Sigma_j)
+          else
+             ! everyone else
+             MixingMap(i,j)%sigma = 0.5_dp * (Sigma_i + Sigma_j)
+          endif
           
-          ljMixed(i,i)%tp6     = (ljMixed(i,i)%sigma6)/rcut6
+          ! energy parameter is always geometric mean:
+          MixingMap(i,j)%epsilon = dsqrt(Epsilon_i * Epsilon_j)
+                    
+          MixingMap(i,j)%sigma6 = (MixingMap(i,j)%sigma)**6
+          MixingMap(i,j)%tp6    = MixingMap(i,j)%sigma6/rcut6
+          MixingMap(i,j)%tp12    = (MixingMap(i,j)%tp6) ** 2
           
-          ljMixed(i,i)%tp12    = (ljMixed(i,i)%tp6) ** 2
+          MixingMap(i,j)%delta = -4.0_DP * MixingMap(i,j)%epsilon * &
+               (MixingMap(i,j)%tp12 - MixingMap(i,j)%tp6)
           
+          MixingMap(j,i)%sigma   = MixingMap(i,j)%sigma
+          MixingMap(j,i)%sigma6  = MixingMap(i,j)%sigma6
+          MixingMap(j,i)%tp6     = MixingMap(i,j)%tp6
+          MixingMap(j,i)%tp12    = MixingMap(i,j)%tp12
+          MixingMap(j,i)%epsilon = MixingMap(i,j)%epsilon
+          MixingMap(j,i)%delta   = MixingMap(i,j)%delta
           
-          ljMixed(i,i)%epsilon = myEpsilon_i
-          
-          ljMixed(i,i)%delta = -4.0_DP * ljMixed(i,i)%epsilon * &
-            (ljMixed(i,i)%tp12 - ljMixed(i,i)%tp6)
-          
-          do j = i + 1, nAtypes
-
-                myEpsilon_j = ljParameterList%ljParams(j)%lj_epsilon
-                mySigma_j = ljParameterList%ljParams(j)%lj_sigma
-
-                          
-                ljMixed(i,j)%sigma  =  &
-                     calcLJMix("sigma",mySigma_i, &
-                     mySigma_j)
-                
-                ljMixed(i,j)%sigma6 = &
-                     (ljMixed(i,j)%sigma)**6
-                
-                
-                ljMixed(i,j)%tp6     = ljMixed(i,j)%sigma6/rcut6
-                
-                ljMixed(i,j)%tp12    = (ljMixed(i,j)%tp6) ** 2
-                
-                
-                ljMixed(i,j)%epsilon = &
-                     calcLJMix("epsilon",myEpsilon_i, &
-                     myEpsilon_j)
-                
-                ljMixed(i,j)%delta = -4.0_DP * ljMixed(i,j)%epsilon * &
-                     (ljMixed(i,j)%tp12 - ljMixed(i,j)%tp6)
-                
-                
-                ljMixed(j,i)%sigma   = ljMixed(i,j)%sigma
-                ljMixed(j,i)%sigma6  = ljMixed(i,j)%sigma6
-                ljMixed(j,i)%tp6     = ljMixed(i,j)%tp6
-                ljMixed(j,i)%tp12    = ljMixed(i,j)%tp12
-                ljMixed(j,i)%epsilon = ljMixed(i,j)%epsilon
-                ljMixed(j,i)%delta   = ljMixed(i,j)%delta
-          
-          end do
+       end do
     end do
     
-  end subroutine createMixingList
-  
+  end subroutine createMixingMap
+        
   subroutine do_lj_pair(atom1, atom2, d, rij, r2, sw, vpair, fpair, &
        pot, f, do_pot)
 
@@ -277,17 +219,26 @@ contains
     real( kind = dp ) :: t6
     real( kind = dp ) :: t12
     real( kind = dp ) :: delta
-    integer :: id1, id2
+    integer :: id1, id2, localError
+
+    if (.not.haveMixingMap) then
+       localError = 0
+       call createMixingMap(localError)
+       if ( localError .ne. 0 ) then
+          call handleError("LJ", "MixingMap creation failed!")
+          return
+       end if
+    endif
 
     ! Look up the correct parameters in the mixing matrix
 #ifdef IS_MPI
-    sigma6   = ljMixed(atid_Row(atom1),atid_Col(atom2))%sigma6
-    epsilon  = ljMixed(atid_Row(atom1),atid_Col(atom2))%epsilon
-    delta    = ljMixed(atid_Row(atom1),atid_Col(atom2))%delta
+    sigma6   = MixingMap(atid_Row(atom1),atid_Col(atom2))%sigma6
+    epsilon  = MixingMap(atid_Row(atom1),atid_Col(atom2))%epsilon
+    delta    = MixingMap(atid_Row(atom1),atid_Col(atom2))%delta
 #else
-    sigma6   = ljMixed(atid(atom1),atid(atom2))%sigma6
-    epsilon  = ljMixed(atid(atom1),atid(atom2))%epsilon
-    delta    = ljMixed(atid(atom1),atid(atom2))%delta
+    sigma6   = MixingMap(atid(atom1),atid(atom2))%sigma6
+    epsilon  = MixingMap(atid(atom1),atid(atom2))%epsilon
+    delta    = MixingMap(atid(atom1),atid(atom2))%delta
 #endif
 
     r6 = r2 * r2 * r2
@@ -361,44 +312,24 @@ contains
   
   
   !! Calculates the mixing for sigma or epslon
-  
-  function calcLJMix(thisParam,param1,param2,status) result(myMixParam)
-    character(len=*) :: thisParam
-    real(kind = dp)  :: param1
-    real(kind = dp)  :: param2
-    real(kind = dp ) :: myMixParam
-
-    integer, optional :: status   
-
-    myMixParam = 0.0_dp
     
-    if (present(status)) status = 0
-    select case (LJ_Mixing_Policy)
-    case (1)
-       select case (thisParam)
-       case ("sigma")
-          myMixParam = 0.5_dp * (param1 + param2)
-       case ("epsilon")
-          myMixParam = sqrt(param1 * param2)
-       case default
-          status = -1
-       end select
-    case default
-       status = -1
-    end select
-  end function calcLJMix
-  
 end module lj
 
- subroutine newLJtype(ident,lj_sigma,lj_epsilon,status)
-    use lj, ONLY : module_newLJtype => newLJtype
-    integer, parameter :: DP = selected_real_kind(15)
-    integer,intent(inout) :: ident
-    real(kind=dp),intent(inout) :: lj_sigma
-    real(kind=dp),intent(inout) :: lj_epsilon
-    integer,intent(inout) :: status
+subroutine newLJtype(ident, sigma, epsilon, status)
+  use lj, ONLY : module_newLJtype => newLJtype
+  integer, parameter :: DP = selected_real_kind(15)
+  integer,intent(inout) :: ident
+  real(kind=dp),intent(inout) :: sigma
+  real(kind=dp),intent(inout) :: epsilon
+  integer,intent(inout) :: status
+  
+  call module_newLJtype(ident, sigma, epsilon, status)
+  
+end subroutine newLJtype
 
-    call module_newLJtype(ident,lj_sigma,lj_epsilon,status)
-
- end subroutine newLJtype
-
+subroutine useGeometricMixing()
+  use lj, ONLY: module_useGeometricMixing => useGeometricMixing
+  
+  call module_useGeometricMixing()
+  return
+end subroutine useGeometricMixing

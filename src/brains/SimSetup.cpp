@@ -909,9 +909,6 @@ void SimSetup::gatherInfo(void){
   }
   
   for (i = 0; i < nInfo; i++) {
-    // get the mixing rule
-    
-    strcpy(info[i].mixingRule, globals->getMixingRule());
     info[i].usePBC = globals->getPBC();
   }
   
@@ -1765,22 +1762,10 @@ void SimSetup::makeIntegrator(void){
 void SimSetup::initFortran(void){
   info[0].refreshSim();
 
-  if (!strcmp(info[0].mixingRule, "standard")){
-    the_ff->initForceField(LB_MIXING_RULE);
-  }
-  else if (!strcmp(info[0].mixingRule, "explicit")){
-    the_ff->initForceField(EXPLICIT_MIXING_RULE);
-  }
-  else{
-    sprintf(painCave.errMsg, "SimSetup Error: unknown mixing rule -> \"%s\"\n",
-            info[0].mixingRule);
-    painCave.isFatal = 1;
-    simError();
-  }
-
+  the_ff->initForceField();
 
 #ifdef IS_MPI
-  strcpy(checkPointMsg, "Successfully intialized the mixingRule for Fortran.");
+  strcpy(checkPointMsg, "Successfully intialized the fortran portion of the force field.");
   MPIcheckPoint();
 #endif // is_mpi
 }

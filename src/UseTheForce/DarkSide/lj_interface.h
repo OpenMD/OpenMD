@@ -18,12 +18,15 @@
 #include "config.h"
 
 #define newLJtype F90_FUNC(newljtype, NEWLJTYPE)
+#define useGeometricMixing F90_FUNC(usegeometricmixing, USEGEOMETRICMIXING)
 
 extern "C"{
-  void newEAMtype( int* ident,
-                   double* lj_sigma,
-                   double* lj_epsilon
-                   int* status);
+  void newLJtype( int* ident,
+                  double* sigma,
+                  double* epsilon
+                  int* status);
+
+  void useGeometricMixing( );
 }  
 #endif
 

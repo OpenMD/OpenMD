@@ -391,9 +391,9 @@ void WATER::cleanMe( void ){
 }
 
 
-void WATER::initForceField( int ljMixRule ){
+void WATER::initForceField(){
   
-  initFortran( ljMixRule, entry_plug->useReactionField );
+  initFortran(entry_plug->useReactionField );
 }
 
 

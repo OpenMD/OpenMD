@@ -225,9 +225,9 @@ LJFF::~LJFF(){
 #endif // is_mpi
 }
 
-void LJFF::initForceField( int ljMixRule ){
+void LJFF::initForceField(){
   
-  initFortran( ljMixRule, 0 );
+  initFortran(0);
 }
 
 void LJFF::cleanMe( void ){
