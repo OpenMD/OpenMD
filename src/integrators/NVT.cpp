@@ -46,7 +46,7 @@
 
 namespace oopse {
 
-NVT::NVT(SimInfo* info) : VelocityVerletIntegrator(info), chiTolerance_ (1e-6) {
+NVT::NVT(SimInfo* info) : VelocityVerletIntegrator(info), chiTolerance_ (1e-6), maxIterNum_(4) {
 
     Globals* simParams = info_->getSimParams();
 
