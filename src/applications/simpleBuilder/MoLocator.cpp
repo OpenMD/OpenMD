@@ -4,7 +4,7 @@
 #include <cmath>
 
 #include "utils/simError.h"
-#include "applications/MoLocator.hpp"
+#include "applications/simpleBuilder/MoLocator.hpp"
 #include "math/MatVec3.h"
 
 MoLocator::MoLocator( MoleculeStamp* theStamp, ForceFields* theFF){

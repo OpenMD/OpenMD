@@ -3,7 +3,7 @@
 #include <string>
 
 #include "brains/SimSetup.hpp"
-#include "applications/Dump2XYZCmd.h"
+#include "applications/dump2Xyz/Dump2XYZCmd.h"
 #include "visitors/AtomVisitor.hpp"
 #include "visitors/CompositeVisitor.hpp"
 #include "visitors/RigidBodyVisitor.hpp"

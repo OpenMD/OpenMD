@@ -10,12 +10,12 @@
 #include "io/Globals.hpp"
 #include "brains/SimInfo.hpp"
 #include "brains/SimSetup.hpp"
-#include "applications/simpleBuilderCmd.h"
+#include "applications/simpleBuilder/simpleBuilderCmd.h"
 #include "utils/StringUtils.hpp"
-#include "applications/LatticeFactory.hpp"
-#include "applications/Vector3d.hpp"
-#include "applications/MoLocator.hpp"
-#include "applications/Lattice.hpp"
+#include "applications/simpleBuilder/LatticeFactory.hpp"
+#include "applications/simpleBuilder/Vector3d.hpp"
+#include "applications/simpleBuilder/MoLocator.hpp"
+#include "applications/simpleBuilder/Lattice.hpp"
 
 using namespace std;
 

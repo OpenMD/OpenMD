@@ -1,4 +1,4 @@
-#include "applications/BaseLattice.hpp"
+#include "applications/simpleBuilder/BaseLattice.hpp"
 void BaseLattice::getLatticePointsPos(vector<Vector3d>& latticePos, int nx, int ny, int nz){
 
   latticePos.resize(nCellSites);

@@ -2,7 +2,7 @@
 #define _BASELATTICE_H_
 
 #include <vector>
-#include "applications/Vector3d.hpp"
+#include "applications/simpleBuilder/Vector3d.hpp"
 
 using namespace std;
 

@@ -21,7 +21,7 @@
 
 #include "getopt.h"
 
-#include "applications/Dump2XYZCmd.h"
+#include "applications/dump2Xyz/Dump2XYZCmd.h"
 
 void
 cmdline_parser_print_version (void)

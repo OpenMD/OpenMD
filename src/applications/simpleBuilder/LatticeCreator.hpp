@@ -1,7 +1,7 @@
 #ifndef _LATTICECREATOR_H_
 #define _LATTICECREATOR_H_
 #include <string>
-#include "applications/BaseLattice.hpp"
+#include "applications/simpleBuilder/BaseLattice.hpp"
 
 using namespace std;
 
