@@ -41,7 +41,7 @@
 
 #ifndef SELECTION_SELECTIONCOMPILER_HPP
 #define SELECTION_SELECTIONCOMPILER_HPP
-
+#include <string>
 #include <vector>
 namespace oopse {
 
@@ -49,6 +49,7 @@ namespace oopse {
 /**
  * @class SelectionCompiler SelectionCompiler.hpp "selection/SelectionCompiler.hpp"
  * @brief compile a selection script to tokens
+ * @todo document
  * <pre>
 
     expression       :: = clauseOr
@@ -61,7 +62,7 @@ namespace oopse {
 
     clausePrimitive  ::= clauseComparator |
                          clauseWithin |
-                         clauseResidueSpec |
+                         clauseChemObject |
                          none | all |
                          ( clauseOr )
 
@@ -70,58 +71,165 @@ namespace oopse {
     clauseWithin     ::= WITHIN ( clauseDistance , expression )
 
     clauseDistance   ::= integer | decimal
-
     
+    clauseChemObject::= {clauseMolecule} | {clauseStuntDouble}
 
+    clauseMolecule ::= {clauseMolName} | {clauseMolIndex}
 
-    clauseResidueSpec::= { clauseResNameSpec }
-                         { clauseResNumSpec }
-                         { chainSpec }
-                         { clauseAtomSpec }
-                         { modelSpec }
+    clauseMolName ::= molname clauseName
+    
+    clauseName::= *|string
 
-    clauseResNameSpec::= * | [ resNamePattern ] | resNamePattern
+    clauseMolIndex ::= molindex clauseIndex
+    
+    clauseIndex ::= integer {- integer }
+    
+    clauseStuntDouble ::= {clauseStuntDoubleName} | {clauseStuntDoubleIndex}
 
-    // question marks are part of identifiers
-    // they get split up and dealt with as wildcards at runtime
-    // and the integers which are residue number chains get bundled
-    // in with the identifier and also split out at runtime
-    // iff a variable of that name does not exist
+    clauseStuntDoubleName ::= name clauseName
 
-    resNamePattern   ::= up to 3 alphanumeric chars with * and ?
+    clauseStuntDoubleIndex ::= index clauseIndex
 
-    clauseResNumSpec ::= * | clauseSequenceRange
-
-    clauseSequenceRange ::= clauseSequenceCode { - clauseSequenceCode }
-
-    clauseSequenceCode ::= seqcode | {-} integer
-
-    clauseChainSpec  ::= {:} * | identifier | integer
-
-    clauseAtomSpec   ::= . * | . identifier {*} // note that this * is *not* a wildcard
-
-    clauseModelSpec  ::= {:|/} * | integer
- 
  * </pre>
  */
 class SelectionCompiler{
     public:
-        bool compile();
+        bool compile(const std::string& filename, const std::string& script );
+        
 
-        std::vector<Token> getCompiledTokens();
+        std::vector<int> getLineNumbers() {
+            return lineNumbers;
+        }
+
+        std::vector<int> getLineIndices() {
+            return lineIndices;
+        }
+
+        std::vector<std::vector<Token> > getAatokenCompiled() {
+            return aatokenCompiled;
+        }
+
+        std::string getErrorMessage() {
+            std::string strError = errorMessage;
+            strError += " : " + errorLine + "\n";
+
+            if (!filename.empty()) {
+                strError += filename;
+            }
+
+            strError += " line#" + lineCurrent;
+            return strError;
+        }
+
+        
     private:
 
+        bool internalcompile();
+
+
+        bool lookingAtLeadingWhitespace();
+        bool lookingAtComment();
+        bool lookingAtEndOfLine();
+        bool lookingAtEndOfStatement();
+        bool lookingAtString();
+
+
+        bool compileCommand(const std::vector<vector>&);
+        
         bool clauseOr();
         bool clauseAnd();
         bool clauseNot();
         bool clausePrimitive();
         bool clauseWithin();
         bool clauseComparator();
-        
-        internalCompile();
+        bool clauseChemObject();
+        bool clauseMolecule();
+        bool clauseMolName();
+        bool clauseMolIndex();
+        bool clauseName();
+        bool clauseIndex();
+        bool clauseStuntDoubleName();
+        bool clauseStuntDoubleIndex();
 
-        std::vector<Token> compiledTokens_;
+        bool compileError(const std::string& errorMessage) {
+            std::cerr << "SelectionCompiler Error: " << errorMessage <<  << std::endl;
+            error = true;
+            this.errorMessage = errorMessage;
+            return false;
+        }
+        
+        bool commandExpected() {
+            return compileError("command expected");
+        }
+
+        bool invalidExpressionToken(const std::string& ident) {
+            return compileError("invalid expression token:" + ident);
+        }
+
+        bool unrecognizedToken() {
+            return compileError("unrecognized token");
+        }
+
+        bool badArgumentCount() {
+            return compileError("bad argument count");
+        }
+
+        bool endOfExpressionExpected() {
+            return compileError("end of expression expected");
+        }
+
+        bool leftParenthesisExpected() {
+            return compileError("left parenthesis expected");
+        }
+
+        bool rightParenthesisExpected() {
+            return compileError("right parenthesis expected");
+        }
+
+        bool commaExpected() {
+            return compileError("comma expected");
+        }
+
+        bool unrecognizedExpressionToken() {
+            return compileError("unrecognized expression token:" + valuePeek());
+        }
+
+        bool comparisonOperatorExpected() {
+            return compileError("comparison operator expected");
+        }
+
+        bool integerExpected() {
+            return compileError("integer expected");
+        }        
+        
+        
+        std::string filename;
+        std::string script;
+
+        std::vector<int> lineNumbers;
+        std::vector<int> lineIndices;
+        std::vector<std::vector<Token> >aatokenCompiled;
+
+        bool error;
+        std::string errorMessage;
+        std::string errorLine;
+
+        int cchScript;
+        short lineCurrent;
+
+        int ichToken;
+        int cchToken;
+        std::vector<Token> atokenCommand;
+
+        int ichCurrentCommand;
+
+        std::vector<Token> ltokenPostfix;
+        std::vector<Token> atokenInfix;
+        int itokenInfix;
+
+        //std::vector<Token> compiledTokens_;
 };
 
 }
 #endif
+

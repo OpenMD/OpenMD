@@ -42,6 +42,8 @@
 #ifndef SELECTION_SELECTIONMANAGER_HPP
 #define SELECTION_SELECTIONMANAGER_HPP
 
+#include "utils/BitSet.hpp"
+
 namespace oopse {
 
 /**
@@ -49,7 +51,16 @@ namespace oopse {
  * @brief
  */
 class SelectionManager {
+    public:
+        SelectionManager();
 
+
+        bool isSelected(StuntDouble* sd);
+        
+    private:
+        
+        BitSet bsSelection;
+        BitSet bsNull;
 };
 
 }

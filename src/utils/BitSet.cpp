@@ -41,9 +41,11 @@
 
 #include "utils/BitSet.hpp"
 #include <algorithm>
+#include <cassert>
+
 namespace oopse {
 int BitSet::countBits() {
-    std::count(bitset_.begin(), bitset_.end(), true);
+    return std::count(bitset_.begin(), bitset_.end(), true);
 }
 
 void BitSet::flip(int fromIndex, int toIndex) {
@@ -69,34 +71,47 @@ BitSet BitSet::get(int fromIndex, int toIndex) {
     return result;
 }
 
-bool BitSet::isEmpty() {
+bool BitSet::none() {
     std::vector<char>::iterator i = std::find(bitset_.begin(), bitset_.end(), true);
     return i == bitset_.end() ? true : false;
 }
     
 int BitSet::nextOffBit(int fromIndex) {
+    ++fromIndex;
+    while (fromIndex < size()) {
+        if (!bitset_[fromIndex]) {
+            return fromIndex;
+        }
+        ++fromIndex;
+    }
 
+    return -1;
 }
 
-int BitSet::nextOnBit(int fromIndex); 
+int BitSet::nextOnBit(int fromIndex) {
+    ++fromIndex;
+    while (fromIndex < size()) {
+        if (bitset_[fromIndex]) {
+            return fromIndex;
+        }
+        ++fromIndex;
+    }
 
-void BitSet::and(const BitSet& bs) {
+    return -1;
+}
+
+void BitSet::andOperator (const BitSet& bs) {
     assert(size() == bs.size());
 
     std::transform(bs.bitset_.begin(), bs.bitset_.end(), bitset_.begin(), bitset_.begin(), std::logical_and<bool>());
 }
 
-void BitSet::andNot(const BitSet& bs) {
-    assert(size() == bs.size());
-    std::transform(bs.bitset_.begin(), bs.bitset_.end(), bitset_.begin(), bitset_.begin(), oopse::logical_andNot<bool>());        
-}
-
-void BitSet::or(const BitSet& bs){
+void BitSet::orOperator (const BitSet& bs) {
     assert(size() == bs.size());
     std::transform(bs.bitset_.begin(), bs.bitset_.end(), bitset_.begin(), bitset_.begin(), std::logical_or<bool>());    
 }
 
-void BitSet::xor(const BitSet& bs);       {
+void BitSet::xorOperator (const BitSet& bs) {
     assert(size() == bs.size());
     std::transform(bs.bitset_.begin(), bs.bitset_.end(), bitset_.begin(), bitset_.begin(), oopse::logical_xor<bool>());        
 }
@@ -110,7 +125,7 @@ void BitSet::setBits(int fromIndex, int toIndex, bool value) {
     std::fill(first, last, value);
 }
 
-BitSet operator| (BitSet& bs1, BitSet& bs2) {
+BitSet operator| (const BitSet& bs1, const BitSet& bs2) {
     assert(bs1.size() == bs2.size());
 
     BitSet result(bs1);
@@ -118,7 +133,7 @@ BitSet operator| (BitSet& bs1, BitSet& bs2) {
     return result;
 }
 
-BitSet operator& (BitSet& bs1, BitSet& bs2) {
+BitSet operator& (const BitSet& bs1, const BitSet& bs2) {
     assert(bs1.size() == bs2.size());
 
     BitSet result(bs1);
@@ -126,7 +141,7 @@ BitSet operator& (BitSet& bs1, BitSet& bs2) {
     return result;
 }
 
-BitSet operator^ (BitSet& bs1, BitSet& bs2) {
+BitSet operator^ (const BitSet& bs1, const BitSet& bs2) {
     assert(bs1.size() == bs2.size());
 
     BitSet result(bs1);
@@ -139,12 +154,13 @@ bool operator== (const BitSet & bs1, const BitSet &bs2) {
     return std::equal(bs1.bitset_.begin(), bs1.bitset_.end(), bs2.bitset_.begin());
 }
 
-std::istream& operator>> ( std::istream& is, BitSet& bs) {
+std::istream& operator>> ( std::istream& is, const BitSet& bs) {
 
+    return is;
 }
 
 std::ostream& operator<< ( std::ostream& os, const BitSet& bs) {
-
+    return os;
 }
 
 }

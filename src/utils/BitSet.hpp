@@ -42,12 +42,13 @@
 #ifndef UTILS_BITSET_HPP
 #define UTILS_BITSET_HPP
 
+#include <functional>
 #include <vector>
 namespace oopse {
 
 /**
  * @class BitSet BitSet.hpp "BitSet.hpp"
- * @brief BitSet is a wrapper class of std::vector<char>
+ * @brief BitSet is a wrapper class of std::vector<char> to act as a growable std::bitset 
  */
 class BitSet {
     public:
@@ -74,9 +75,12 @@ class BitSet {
         /** Returns a new BitSet composed of bits from this BitSet from fromIndex(inclusive) to toIndex(exclusive). */
         BitSet get(int fromIndex, int toIndex); 
         
-        /** Returns true if this BitSet contains no bits that are set to true. */
-        bool isEmpty(); 
-                
+        /** Returns true if any bits are set to true */
+        bool any() {return !none(); }
+
+        /** Returns true if no bits are set to true */
+        bool none();
+        
         /** Returns the index of the first bit that is set to false that occurs on or after the specified starting index.*/
         int nextOffBit(int fromIndex); 
          
@@ -84,16 +88,13 @@ class BitSet {
         int nextOnBit(int fromIndex); 
         
         /** Performs a logical AND of this target bit set with the argument bit set. */
-        void and(const BitSet& bs);
-
-        /** Clears all of the bits in this BitSet whose corresponding bit is set in the specified BitSet. */
-        void andNot(const BitSet& bs); 
-        
+        void andOperator (const BitSet& bs);
+       
         /** Performs a logical OR of this bit set with the bit set argument. */
-        void or(const BitSet& bs); 
+        void orOperator (const BitSet& bs); 
         
         /** Performs a logical XOR of this bit set with the bit set argument. */
-        void xor(const BitSet& bs);        
+        void xorOperator (const BitSet& bs);        
                
         void setBitOn(int bitIndex) {  setBit(bitIndex, true);  }
 
@@ -107,22 +108,22 @@ class BitSet {
         void clear() {  setRangeOff(0, size());  }         
         
         /** Returns the number of bits of space actually in use by this BitSet to represent bit values. */
-        int size() {  return bitset_.size();  }
+        int size() const {  return bitset_.size();  }
 
         /** Changes the size of BitSet*/
-        bool resize(int nbits) {  bitset_.resize();  }
+        void resize(int nbits) {  bitset_.resize(nbits);  }
         
-        BitSet& operator&= (const BitSet &bs) {  and(bs); return *this; }
-        BitSet& operator|= (const BitSet &bs) { or(bs); return *this; }
-        BitSet& operator^= (const BitSet &bs) { xor(bs); return *this; }
+        BitSet& operator&= (const BitSet &bs) {  andOperator (bs); return *this; }
+        BitSet& operator|= (const BitSet &bs) { orOperator (bs); return *this; }
+        BitSet& operator^= (const BitSet &bs) { xorOperator (bs); return *this; }
         bool operator[] (int bitIndex) {  return bitset_[bitIndex];  }
 
-        friend BitSet operator| (BitSet& bs1, BitSet& bs2);
-        friend BitSet operator& (BitSet& bs1, BitSet& bs2);
-        friend BitSet operator^ (BitSet& bs1, BitSet& bs2);
+        friend BitSet operator| (const BitSet& bs1, const BitSet& bs2);
+        friend BitSet operator& (const BitSet& bs1, const BitSet& bs2);
+        friend BitSet operator^ (const BitSet& bs1, const BitSet& bs2);
         friend bool operator== (const BitSet & bs1, const BitSet &bs2);
 
-        friend std::istream& operator>> ( std::istream&, BitSet& bs);
+        friend std::istream& operator>> ( std::istream&, const BitSet& bs);
         friend std::ostream& operator<< ( std::ostream&, const BitSet& bs) ;
 
     private:
@@ -131,9 +132,14 @@ class BitSet {
         void setBit(int bitIndex, bool value) { bitset_[bitIndex] = value; }
         
         /** Sets the bits from the specified fromIndex(inclusive) to the specified toIndex(exclusive) to the specified value. */
-        void setBits(int fromIndex, int toIndex, bool value) {}
+        void setBits(int fromIndex, int toIndex, bool value);
         
         std::vector<char> bitset_;
+};
+
+template<typename T>
+struct logical_xor :public std::binary_function<T, T, bool> {
+    double operator()(T x, T y) { return x ^ y; }
 };
 
 }

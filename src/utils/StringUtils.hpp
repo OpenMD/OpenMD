@@ -113,8 +113,20 @@ namespace oopse {
     template<typename T>
     std::string toString(const T& v) {
         std::ostringstream oss;        
-        oss << v;
+        if (!oss << v) {
+            std::cerr << "toString Error" << std::endl;
+        }
         return oss.str();
+    }
+
+    template<typename T>
+    T lexi_cast(const std::string& str) {
+        T result;
+        std::istringstream iss;        
+        if (iss >> result) {
+            std::cerr << "lexi_cast Error" << std::endl;
+        }
+        return result;
     }
 
     /**@todo need implementation */
