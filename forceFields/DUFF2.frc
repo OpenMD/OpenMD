@@ -108,22 +108,41 @@ Cl	 -1.0
 end ChargeAtomTypes
 
 begin MultipoleAtomTypes
-//only support up tp quadrupole.
-//possible format:
-// name d phi theta psi dipole_moment
-// name s phi theta psi dipole_moment splitdipole_distance
-// name q phi theta psi Qxx Qyy Qzz
-// name dq phi theta psi dipole_moment Qxx Qyy Qzz
-// name sq phi theta psi dipole_moment splitdipole_distance Qxx Qyy Qzz
-// euler angles are given in units of degree
-// dipoles are given in units of Debye
-// split dipole distances are given in units of Angstrom
-// quadrupoles are given in units of
+// OOPSE currently only supports charge-charge, charge-dipole, 
+// dipole-dipole, and charge-quadrupole interactions.
+// Dipoles may be either traditional point-dipoles or split-dipoles.
+// possible formats for a multipolar atom type are:
 //
-SSD_E   d       0.0     0.0     0.0     2.42
-SSD_RF  d       0.0     0.0     0.0     2.48
-SSD     d       0.0     0.0     0.0     2.35
-SSD1    d       0.0     0.0     0.0     2.35
+// Point-dipoles:
+// name d phi theta psi dipole_moment
+//
+// Split-dipoles:
+// name s phi theta psi dipole_moment splitdipole_distance
+//
+// Point-Quadrupoles:
+// name q phi theta psi Qxx Qyy Qzz
+//
+// Atoms with both dipole and quadrupole moments:
+// name dq phi theta psi dipole_moment Qxx Qyy Qzz
+//
+// Atoms with both split dipoles and quadrupole moments:
+// name sq phi theta psi dipole_moment splitdipole_distance Qxx Qyy Qzz
+//
+// Euler angles are given in zxz convention in units of degrees.
+//
+// Charges are given in units of electrons.
+//
+// Dipoles are given in units of Debyes.
+//
+// Split dipole distances are given in units of Angstroms.
+//  
+// Quadrupole moments are given in units of 10^-26 esu cm^2 (also known as an
+//                                                           esu centi-barn)
+//
+SSD_E   dq       0.0     0.0     0.0     2.42  -1.682  1.762  -0.08
+SSD_RF  dq       0.0     0.0     0.0     2.48  -1.682  1.762  -0.08
+SSD     dq       0.0     0.0     0.0     2.35  -1.682  1.762  -0.08
+SSD1    dq       0.0     0.0     0.0     2.35  -1.682  1.762  -0.08
 //HDP     s       0.0     0.0     0.0     20.6    4.63
 end MultipoleAtomTypes
 
