@@ -33,6 +33,58 @@
 #  $<      - Current dependency
 #
 #---------------------------------------------------------------------------
+IS_UNIX=1
+#packages to be made
+Packages = \
+	utils \
+	math \
+	types \
+	primitives \
+	visitors \
+	UseTheForce/DarkSide \
+	UseTheForce \
+	brains \
+	io \
+	integrators \
+	minimizers \
+	constraints \
+	profiling \
+	restraints \
+	applications/oopse \
+	applications/dump2Xyz \
+	applications/simpleBuilder \
+
+#packages contain libraries
+PackageLibs = \
+	utils \
+	math \
+	types \
+	primitives \
+	visitors \
+	UseTheForce/DarkSide \
+	UseTheForce \
+	brains \
+	io \
+	integrators \
+	minimizers \
+	constraints \
+	profiling \
+	restraints \
+
+IncludeDirs = \
+	/usr/include \
+	/usr/local/include \
+	
+LibraryDirs = \
+        /usr/lib \
+	/usr/local/mpich/lib \
+	/usr/local/lib \
+	/usr/local/intel/compiler80/lib \
+
+Libraries = \
+        mpich \
+	sprng \
+	ifcore \
 
 #---------------------------------------------------------------------------
 #
@@ -144,7 +196,7 @@ ClassPath        = $(JRE)$(X)$(TargetDir)$(X)$(ThirdPartyJars)
 JavaPackageNames = $(subst /,.,$(JavaPackages))
 IncludePath      = -I$(SourceDir) $(IncludeDirs:%=-I%)
 LibDirs          = -L$(LibDir)    $(LibraryDirs:%=-L%)
-LocalLibs        = $(subst /,,$(Packages))
+LocalLibs        = $(subst /,,$(PackageLibs))
 LibList          = $(LocalLibs:%=-l%) $(Libraries:%=-l%)
 
 
@@ -357,6 +409,7 @@ $(PackageTargetDir)/%_Skel.class : $(PackageTargetDir)/%.class
 # Executable
 $(Executable) : $(ObjectFiles)
 	$(Print) $@
+	$(Print) $(Linker) $(LinkOptions) $(LibDirs) $(LibList) $(ObjectFiles) -o $@
 	$(Linker) $(LinkOptions) $(LibDirs) $(LibList) $(ObjectFiles) -o $@
 
 # Anything else is just copied from source to target
@@ -406,20 +459,33 @@ _dependall : $(DependencyFile)
 $(DependencyFile) : $(DerivedSource)
 	$(Print) $@ 
 	@cd $(PackageSourceDir)
-	touch Make.temp
-ifdef $(CppFiles)
-	$(CppCompiler) $(IncludePath) -MM $(CppFiles)  > Make.temp
+
+	touch Make.ctemp
+	touch Make.ctemp
+
+ifneq "$(words $(CppFiles))" "0"
+	$(Print) Make dependencies for $(CppFiles)
+	$(Print) $(CppCompiler) $(IncludePath) -MM $(CppFiles)  > Make.cpptemp
+	$(CppCompiler) $(IncludePath) -MM $(CppFiles)  > Make.cpptemp
+	cat Make.cpptemp | sed 's/^[a-zA-Z0-9]/$$\(DEV_ROOT\)\/obj\/&/g' >> $(DependencyFile)
+	cat Make.cpptemp | sed 's/^[a-zA-Z0-9]/$$\(DEV_ROOT\)\/MPIobj\/&/g' >> $(DependencyFile)
 endif
-ifdef $(CFiles) 
-	$(CCompiler)   $(IncludePath) -MM $(CFiles) $(DerivedCFiles)   >> Make.temp
+
+ifneq "$(words $(CFiles))" "0" 
+	$(Print) Make dependencies for $(CFiles)
+	$(Print) $(CCompiler)   $(IncludePath) -MM $(CFiles) $(DerivedCFiles)   > Make.ctemp
+	$(CCompiler)   $(IncludePath) -MM $(CFiles) $(DerivedCFiles)   > Make.ctemp
+	cat Make.ctemp | sed 's/^[a-zA-Z0-9]/$$\(DEV_ROOT\)\/obj\/&/g' >> $(DependencyFile)
+	cat Make.ctemp | sed 's/^[a-zA-Z0-9]/$$\(DEV_ROOT\)\/MPIobj\/&/g' >> $(DependencyFile)
+
 endif
-	cat Make.temp | sed 's/^[a-zA-Z0-9]/$$\(DEV_ROOT\)\/obj\/&/g' >> $(DependencyFile)
-	cat Make.temp | sed 's/^[a-zA-Z0-9]/$$\(DEV_ROOT\)\/MPIobj\/&/g' >> $(DependencyFile)
-ifdef $(F90Files) 
+
+ifneq "$(words $(F90Files))" "0"
+	$(Print) Make dependencies for $(F90Files)
 	$(DEV_ROOT)/scripts/sfmakedepend  -I $(DEV_ROOT)/src -d '$$(DEV_ROOT)/obj' -f ./Make.ftemp -h *.F90
 	cat Make.ftemp >> $(DependencyFile)
 endif
-	$(Delete) Make.temp Make.ftemp
+	$(Delete) Make.cpptemp Make.ctemp Make.ftemp
 
 # make lib
 lib    : $(PackageListLoop)

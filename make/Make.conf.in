@@ -1,9 +1,9 @@
 #ROOT of development tree
-DEV_ROOT=@DEV_ROOT@
+#DEV_ROOT=@DEV_ROOT@
 
 # Are we a unix machine?
-IS_UNIX=@IS_UNIX@
-
+#IS_UNIX=@IS_UNIX@
+IS_UNIX=1
 # Extension of object files
 O=@OBJEXT@
 
@@ -94,3 +94,19 @@ LDFLAGS=@LDFLAGS@
 # Compile-time flags:
 DECLARE=-DFRC_PATH="$(FORCE_PARAM_DIR)"
 MPI_DECLARE=-DIS_MPI
+
+
+IncludeDirs = \
+	/usr/include \
+	/usr/local/include \
+	
+LibraryDirs = \
+        /usr/lib \
+	/usr/local/mpich/lib \
+	/usr/local/lib \
+	/usr/local/intel/compiler80/lib \
+
+Libraries = \
+        mpich \
+	sprng \
+	ifcore \
