@@ -10,8 +10,8 @@
 
 #include <string.h>
 
-#define SH_SIN  0
-#define SH_COS  1
+#define RSH_SIN  0
+#define RSH_COS  1
 
 namespace oopse {
   class RealSphericalHarmonic {
@@ -32,11 +32,11 @@ namespace oopse {
     void setFunctionType(short int theType) {functionType = theType;}
     short int getFunctionType() { return functionType; }
 
-    void makeSinFunction() {functionType = SH_SIN;}
-    void makeCosFunction() {functionType = SH_COS;}
+    void makeSinFunction() {functionType = RSH_SIN;}
+    void makeCosFunction() {functionType = RSH_COS;}
 
-    bool isSinFunction() { return functionType == SH_SIN ? true : false;}
-    bool isCosFunction() { return functionType == SH_COS ? true : false;}
+    bool isSinFunction() { return functionType == RSH_SIN ? true : false;}
+    bool isCosFunction() { return functionType == RSH_COS ? true : false;}
     
     double getValueAt(double costheta, double phi);
     
