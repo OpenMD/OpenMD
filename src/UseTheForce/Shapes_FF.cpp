@@ -53,9 +53,11 @@ Shapes_FF::~Shapes_FF(){
 void Shapes_FF::calcRcut( void ){
   
 #ifdef IS_MPI
-  double tempShapesRcut = shapesRcut;
+  double tempShapesRcut = bigContact;
   MPI_Allreduce( &tempShapesRcut, &shapesRcut, 1, MPI_DOUBLE, MPI_MAX,
 		 MPI_COMM_WORLD);
+#else
+  shapesRcut = bigContact;
 #endif  //is_mpi
   entry_plug->setDefaultRcut(shapesRcut);
 }
@@ -170,7 +172,7 @@ void Shapes_FF::readParams( void ){
 	  st = new ShapeAtomType();
 
 	  st->setName(nameString);
-	  myATID = atomTypeMap.size();
+	  myATID = atomTypeMap.size() + 1;
 	  st->setIdent(myATID);
 	  parseShapeFile(shapeFileName, st);
 	  st->complete();
@@ -257,6 +259,7 @@ void Shapes_FF::readParams( void ){
 	
 	isError = 0;
 	myATID = at->getIdent();
+
 	makeShape( &nContact, &contactL[0], &contactM[0], &contactFunc[0], 
 		   &contactCoeff[0],
 		   &nRange, &rangeL[0], &rangeM[0], &rangeFunc[0], 
@@ -265,6 +268,7 @@ void Shapes_FF::readParams( void ){
 		   &strengthFunc[0], &strengthCoeff[0],
 		   &myATID, 
 		   &isError);
+
 	if( isError ){
 	  sprintf( painCave.errMsg,
 		   "Error initializing the \"%s\" shape in fortran\n",
@@ -274,6 +278,15 @@ void Shapes_FF::readParams( void ){
 	}
       }
     }
+  }
+  
+  isError = 0;
+  completeShapeFF(&isError);
+  if( isError ){
+    sprintf( painCave.errMsg,
+	     "Error completing Shape FF in fortran\n");
+    painCave.isFatal = 1;
+    simError();
   }
   
 #ifdef IS_MPI
@@ -298,11 +311,13 @@ void Shapes_FF::initializeAtoms( int nAtoms, Atom** the_atoms ){
   AtomType* at;
   DirectionalAtomType* dat;
   ShapeAtomType* sat;
-  double sigma;
+  double longCutoff;
   double ji[3];
   double inertialMat[3][3];
   Mat3x3d momInt;
   string myTypeString;
+
+  bigContact = 0.0;
 
   for( i=0; i<nAtoms; i++ ){
     
@@ -325,9 +340,11 @@ void Shapes_FF::initializeAtoms( int nAtoms, Atom** the_atoms ){
       if ( at->isShape() ) {
         
         sat = (ShapeAtomType*)at;
-        sigma = findLargestContactDistance(sat);
-        if (sigma > bigSigma) bigSigma = sigma;
-
+        longCutoff = findCutoffDistance(sat);
+        if (longCutoff > bigContact) bigContact = longCutoff;  
+	cout << bigContact << " is the cutoff value\n";
+	
+	entry_plug->useShapes = 1;
       }
 
       the_atoms[i]->setHasCharge(at->isCharge());
@@ -450,7 +467,7 @@ void Shapes_FF::parseShapeFile(string shapeFileName, ShapeAtomType* st){
 	  painCave.severity = OOPSE_ERROR;
 	  painCave.isFatal = 1;
 	  simError();
-
+	} else {
 	  token = strtok(inLine, delim);
 	  token = strtok(NULL, delim);
 	  st->setMass(atof(token));
@@ -477,7 +494,6 @@ void Shapes_FF::parseShapeFile(string shapeFileName, ShapeAtomType* st){
     if( inLine[0] != '!' && inLine[0] != '#' ){
       // end marks section completion
       if (isEndLine(inLine)) break;
-      
       nTokens = countTokens(inLine, delim);
       if (nTokens != 0) {
 	if (nTokens < 4) {
@@ -487,7 +503,7 @@ void Shapes_FF::parseShapeFile(string shapeFileName, ShapeAtomType* st){
 	  painCave.severity = OOPSE_ERROR;
 	  painCave.isFatal = 1;
 	  simError();
-	  
+	} else {
 	  // read in a spherical harmonic function
 	  token = strtok(inLine, delim);
           rsh = new RealSphericalHarmonic();
@@ -510,6 +526,7 @@ void Shapes_FF::parseShapeFile(string shapeFileName, ShapeAtomType* st){
   }
 
   // pass contact functions to ShapeType
+
   st->setContactFuncs(functionVector);
 
   // now grab the range functions
@@ -532,6 +549,7 @@ void Shapes_FF::parseShapeFile(string shapeFileName, ShapeAtomType* st){
 	  painCave.severity = OOPSE_ERROR;
 	  painCave.isFatal = 1;
 	  simError();
+	} else {
 	  
 	  // read in a spherical harmonic function
 	  token = strtok(inLine, delim);
@@ -578,6 +596,7 @@ void Shapes_FF::parseShapeFile(string shapeFileName, ShapeAtomType* st){
 	  painCave.severity = OOPSE_ERROR;
 	  painCave.isFatal = 1;
 	  simError();
+	} else {
 	  
 	  // read in a spherical harmonic function
 	  token = strtok(inLine, delim);
@@ -611,14 +630,14 @@ double Shapes_FF::findLargestContactDistance(ShapeAtomType* st) {
   int i, j,  nSteps;
   double theta, thetaStep, thetaMin, costheta;
   double phi, phiStep;
-  double sigma, bigSigma;
-
+  double sigma, bs;
+  
   nSteps = 16;
 
   thetaStep = M_PI / nSteps;
   thetaMin = thetaStep / 2.0;
   phiStep = thetaStep * 2.0;
-  bigSigma = 0.0;
+  bs = 0.0;
   
   for (i = 0; i < nSteps; i++) {
     
@@ -631,9 +650,46 @@ double Shapes_FF::findLargestContactDistance(ShapeAtomType* st) {
 
       sigma = st->getContactValueAt(costheta, phi);
       
-      if (sigma > bigSigma) bigSigma = sigma;
+      if (sigma > bs) bs = sigma;
     }
   }
 
-  return bigSigma;  
+  return bs;  
+}
+
+
+double Shapes_FF::findCutoffDistance(ShapeAtomType* st) {
+  int i, j,  nSteps;
+  double theta, thetaStep, thetaMin, costheta;
+  double phi, phiStep;
+  double sigma, range;
+  double bigCut, tempCut;
+
+  nSteps = 16;
+
+  thetaStep = M_PI / nSteps;
+  thetaMin = thetaStep / 2.0;
+  phiStep = thetaStep * 2.0;
+  bigCut = 0.0;
+  
+  for (i = 0; i < nSteps; i++) {
+    
+    theta = thetaMin + i * thetaStep;
+    costheta = cos(theta);
+
+    for (j = 0; j < nSteps; j++) {
+
+      phi = j*phiStep;
+
+      sigma = st->getContactValueAt(costheta, phi);
+      range = st->getRangeValueAt(costheta, phi);
+
+       // cutoff for a shape is taken to be (2.5*rangeVal + contactVal)
+      tempCut = 2.5*range + sigma;
+
+      if (tempCut > bigCut) bigCut = tempCut; 
+    }
+  }
+ 
+  return bigCut;  
 }

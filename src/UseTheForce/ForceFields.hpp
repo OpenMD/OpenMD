@@ -273,14 +273,16 @@ public:
 
   void initForceField();
 
-  void parseShapeFile(string shapeFileName, ShapeAtomType* st);
-
   void calcRcut( void );
+
+  void parseShapeFile(string shapeFileName, ShapeAtomType* st);
 
 private:
 
   double findLargestContactDistance(ShapeAtomType* st);
+  double findCutoffDistance(ShapeAtomType* st);
   double shapesRcut;
+  double bigContact;
 
 };
 

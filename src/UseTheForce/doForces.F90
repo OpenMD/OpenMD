@@ -4,7 +4,7 @@
 
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: doForces.F90,v 1.5 2004-10-26 22:24:44 gezelter Exp $, $Date: 2004-10-26 22:24:44 $, $Name: not supported by cvs2svn $, $Revision: 1.5 $
+!! @version $Id: doForces.F90,v 1.6 2004-10-29 22:28:12 chrisfen Exp $, $Date: 2004-10-29 22:28:12 $, $Name: not supported by cvs2svn $, $Revision: 1.6 $
 
 module doForces
   use force_globals
@@ -927,7 +927,6 @@ contains
     endif
 
     if (FF_uses_Shapes .and. SIM_uses_Shapes) then
-       
        if ( PropertyMap(me_i)%is_Shape .and. &
             PropertyMap(me_j)%is_Shape ) then
           call do_shape_pair(i, j, d, r, rijsq, sw, vpair, fpair, &
