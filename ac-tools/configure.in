@@ -171,16 +171,25 @@ AC_CACHE_CHECK([for POSIX or BSD ps syntax], ac_cv_prog_ps_syntax, [
 	if test "$ac_cv_prog_ps_ax" = yes; then
 		ac_cv_prog_ps_syntax=BSD
         else
-		if test "$ac_cv_prog_ps_es" = yes; then
+		if test "$ac_cv_prog_ps_ef" = yes; then
 			ac_cv_prog_ps_syntax=POSIX
 		else
 			AC_MSG_ERROR(Could not determine ps syntax)
 		fi
 	fi
 ])
-AC_DEFINE_UNQUOTED(PSCOMMAND, $PS, [Path to ps program])
-AC_DEFINE_UNQUOTED(PSTYPE, $ac_cv_prog_ps_syntax, [ps syntax type])
 
+AC_DEFINE_UNQUOTED(PSCOMMAND, $PS, [Path to ps program])
+
+if test "$ac_cv_prog_ps_syntax" = BSD; then
+  AC_DEFINE(PSTYPE_IS_BSD, 1)
+else
+   if test "$ac_cv_prog_ps_syntax" = POSIX; then
+       AC_DEFINE(PSTYPE_IS_POSIX, 1)
+   else
+       AC_MSG_ERROR(Unknown ps syntax type!)
+   fi
+fi
 
 AC_ARG_WITH(mpi,
     	[AC_HELP_STRING([--with-mpi=<prefix>],

@@ -1,10 +1,17 @@
 #include <config.h> 
 #include <string.h> 
 #include <stdio.h>
+#include <stdlib.h>
+#ifdef __sgi
+#include <unistd.h>
+#endif
 
 #define to_string( s ) # s
 #define STR_DEFINE(t, s) t = to_string(s)
 
+/* 
+ * returns an estimate of the resident memory size in kB 
+ */
 double residentMem () {
 
   FILE* procresults;
@@ -19,10 +26,14 @@ double residentMem () {
   // null terminated string is one longer....
   strncpy(pscommand, psPath, strlen(psPath)+1);
 
-#if PSTYPE == BSD
+#ifdef PSTYPE_IS_BSD
   strcat(pscommand, " ax -o rss");
 #else
+#ifdef PSTYPE_IS_POSIX
   strcat(pscommand, " -ef -o rss");
+#else 
+  printf("Unknown ps syntax!\n");
+#endif
 #endif
 
   printf("doing %s\n", pscommand);
@@ -39,6 +50,12 @@ double residentMem () {
     totRSS += myRSS;
   } 
   pclose(procresults);
+
+#ifdef __sgi
+  // Damn IRIX machines uses pages for RSS and pagesize is variable 
+  // depending on version of the OS.
+  totRSS *= getpagesize() / 1024;
+#endif
 
   return(totRSS);
 

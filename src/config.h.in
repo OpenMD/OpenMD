@@ -31,4 +31,5 @@
 #undef HAVE_TABLE 
 
 #undef PSCOMMAND
-#undef PSTYPE
+#undef PSTYPE_IS_POSIX
+#undef PSTYPE_IS_BSD
