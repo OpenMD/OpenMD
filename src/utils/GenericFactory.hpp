@@ -24,83 +24,166 @@
  */
 
 /**
- * @file Vector3.hpp
+ * @file GenericFactory.hpp
  * @author Teng Lin
- * @date 09/14/2004
+ * @date 10/24/2004
  * @version 1.0
  */
 #ifndef UTIL_GENERICFACTORY_HPP
 #define UTIL_GENERICFACTORY_HPP
 #include <map>
 #include <string>
-namespace oopse {
-template<class Product, typename ProductIdentType = std::string, typename Creator = Product* (*)() >
-class GenericFactory{
-    public:
-        
-        typedef std::map<ProductIdentType,  Creator*> CreatorMapType;
-        typedef GenericFactory<Product, ProductIdentType, Creator> SelfType;
-        static SelfType* getInstance() {
-            if (instance_ == NULL) {
-                instance_ = new GenericFactory<Product, ProductIdentType, Creator>();
-            }
+#include <vector>
 
+namespace oopse {
+
+/**
+ * @class GenericFactory GenericFactory.hpp "utils/GenericFactory.hpp"
+ * @brief GenericFactory is a template based Object Factory 
+ * Factory pattern is used to define an interface for creating an object.
+ * 
+ * @param Object the base class of the hierarchy for which you provide the object factory.
+ * @param IdentType the object that identifies the type of the concrete object. Default type is string
+ * @param Creator  the callable entity that creates objects. This type must support operator(),
+ * taking no parameters and returning a pointer to Object. Default type is function pointer.
+ *
+ * @code
+ * //Shape class
+ * class Shape {
+ * ...
+ * };
+ * 
+ * //instantiating a new object factory
+ * typedef GenericFactory<Shape> ShapeFactory;
+ *
+ * //Line class
+ * class Line : public Shape{
+ * ...
+ * };
+ *
+ * //declare function to create Line
+ * Shape* createLine() {
+ *   return new Line;
+ * }
+ *
+ * //register createLine
+ * ShapeFactory::getInstance()->registerCreator("Line", createLine);
+ *
+ * //Circle class
+ * class Circle : public Shape{
+ * ...
+ * };
+ *
+ * //declare function to create Circle
+ * Shape* createCircle() { 
+ *   return new Circle;
+ * }
+ *
+ * //register createCircle
+ * ShapeFactory::getInstance()->registerCreator("Circle", createCircle); 
+ *
+ * //create object by ident
+ * Line* line = ShapeFactory::getInstance()->createObject("Line");
+ * Circle* circle = ShapeFactory::getInstance()->createObject("Circle"); 
+ * @endcode
+ */
+template<class Object, typename IdentType = std::string, typename Creator = Object* (*)()>
+class GenericFactory {
+    public:
+        typedef GenericFactory<Object, IdentType, Creator> FactoryType;
+        typedef std::map<IdentType, Creator> CreatorMapType;
+        
+        /**
+         * Returns an instance of object factory
+         * @return an instance of object factory
+         */        
+        static FactoryType* getInstance(){
+            if (instance_ == NULL)
+                instance_ = new FactoryType;
             return instance_;
         }
-        
-        //bool register( const ProductIdentType& id, Creator creator) {
 
-            //insert method in std::map will return a pair<iterator, bool>. the second
-            //element of this pair indicates whether the result of the operation
-            //return creatorMap_.insert(CreatorMapType::value_type(id, creator)).second;
-        //}
-
-        bool unregister(const ProductIdentType& id) {
-            
-            return creatorMap_->erase(id) == 1; 
-
-        }
-        
-        bool hasCreator( const ProductIdentType& id ) {
-            CreatorMapType::iterator i;
-
-            i = creatorMap_.find(id);
-
-            if (i != creatorMap_.end()) {
-                return true;
-            } else {
-                return false;
-            }
+        /**
+         * Registers a creator with a type identifier
+         * @return true if registration is succeed, otherwise return false
+         * @id the identification of the concrete object
+         * @creator the object responsible to create the concrete object 
+         */
+        bool registerCreator(const IdentType& id, Creator creator) {
+            return creatorMap_.insert(
+                CreatorMapType::value_type(id, creator)).second;
         }
 
-        //const std::string toString() {
+        /**
+         * Unregisters the creator for the given type identifier. If the type identifier 
+         * was previously registered, the function returns true.
+         * @return truethe type identifier was previously registered and the creator is removed,
+         * otherwise return false
+         * @id the identification of the concrete object
+         */
+        bool unregisterCreator(const IdentType& id) {
+            return creatorMap_.erase(id) == 1;
+        }
 
-        
-        //}
-
-        Product* createProduct( const ProductIdentType& id ) {
-            CreatorMapType::iterator i;
-
-            i = creatorMap_.find(id);
-
+        /**
+         * Looks up the type identifier in the internal map. If it is found, it invokes the
+         * corresponding creator for the type identifier and returns its result. 
+         * @return a pointer of the concrete object, return NULL if no creator is registed for 
+         * creating this concrete object
+         * @id the identification of the concrete object
+         */
+        Object* createObject(const IdentType& id) {
+            typename CreatorMapType::iterator i = creatorMap_.find(id);
             if (i != creatorMap_.end()) {
-                //call the function to create the product
                 return (i->second)();
             } else {
                 return NULL;
             }
         }
-        
-    private:
-        GenericFactory(){}
-        static SelfType* instance_;
+
+        /** 
+         *  Returns all of the registed  type identifiers
+         * @return all of the registed  type identifiers
+         */
+        std::vector<IdentType> getIdents() {
+            std::vector<IdentType> idents;
+            typename CreatorMapType::iterator i;
+
+            for (i = creatorMap_.begin(); i != creatorMap_.end(); ++i) {
+                idents.push_back(i->first);
+            }
+            
+            return idents;
+        }
+
+    public:
+        static FactoryType* instance_;
         CreatorMapType creatorMap_;
 };
 
+/** write out all of the type identifier to a output stream */
+template<typename O, typename I, typename C>
+std::ostream& operator <<(std::ostream& o, GenericFactory<O, I, C>& factory) {
+    std::vector<I> idents;
+    std::vector<I>::iterator i;
 
-#define REGISTER_CREATOR(factory, product, id) \
-    product * create##product() {\
-        return new product(); \
+    idents = factory.getIdents();
+
+    o << "Avaliable type identifiers in this factory: " << std::endl;
+    for (i = idents.begin(); i != idents.end(); ++i) {
+        o << *i << std::endl;
+    }
+
+    return o;
+}
+
+//static template class member
+template<class Object, typename IdentType,typename Creator>
+GenericFactory<Object,IdentType,Creator>* GenericFactory<Object,IdentType,Creator>::instance_ ; 
+
+#define DECLARE_CREATOR(abstractObject, concreteObject) \
+    abstractObject* create##concreteObject(){\
+        return new concreteObject;\
     }
 
 }//namespace oopse
