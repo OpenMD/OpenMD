@@ -18,6 +18,6 @@
 #define makeAtype F90_FUNC(makeatype, MAKEATYPE)
 
 extern "C" {
-  void makeAtype(AtomTypeProperties atp, int* status );
+  void makeAtype(AtomTypeProperties* atp, int* status );
 }  
 #endif

@@ -58,7 +58,7 @@ namespace oopse {
  
     status = 0;
 
-    makeAtype(atp, &status);   
+    makeAtype(&atp, &status);   
     
     if (status != 0) {
       sprintf( painCave.errMsg,

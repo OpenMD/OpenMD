@@ -358,8 +358,11 @@ void LJFF::readParams( void ){
       at->setIdent(currentAtomType->ident);
       printf ("currentName = %s\n", currentAtomType->name);
       at->setName(currentAtomType->name);     
+      printf("Did setName\n");
       at->setLennardJones();
+      printf("Did setLennardJones\n");
       at->complete();
+      printf("Did complete\n");
       
     }
     currentAtomType = currentAtomType->next;
