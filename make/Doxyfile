@@ -5,7 +5,7 @@
 #---------------------------------------------------------------------------
 PROJECT_NAME           = OOPSE
 PROJECT_NUMBER         = 2.0
-OUTPUT_DIRECTORY       = /export/home/gezelter/tim/code/OOPSE-2.0/doc/
+OUTPUT_DIRECTORY       = doc/
 CREATE_SUBDIRS         = NO
 OUTPUT_LANGUAGE        = English
 USE_WINDOWS_ENCODING   = NO
@@ -25,7 +25,7 @@ ABBREVIATE_BRIEF       = "The $name class" \
 ALWAYS_DETAILED_SEC    = NO
 INLINE_INHERITED_MEMB  = NO
 FULL_PATH_NAMES        = YES
-STRIP_FROM_PATH        = /export/home/gezelter/tim/code/OOPSE-2.0/
+STRIP_FROM_PATH        = src/
 STRIP_FROM_INC_PATH    = 
 SHORT_NAMES            = NO
 JAVADOC_AUTOBRIEF      = NO
@@ -78,7 +78,7 @@ WARN_LOGFILE           =
 #---------------------------------------------------------------------------
 # configuration options related to the input files
 #---------------------------------------------------------------------------
-INPUT                  = /export/home/gezelter/tim/code/OOPSE-2.0/src/
+INPUT                  = src/
 FILE_PATTERNS          = *.c \
                          *.cc \
                          *.cxx \

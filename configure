@@ -312,7 +312,7 @@ ac_includes_default="\
 # include <unistd.h>
 #endif"
 
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS PROGNAME debug build build_cpu build_vendor build_os host host_cpu host_vendor host_os CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT CXX CXXFLAGS ac_ct_CXX OOPSE_TEMPLATE_FLAGS EXTRA_CC_FLAG F90 F90FLAGS ac_ct_F90 PREPFLAG PREPDEFFLAG F90LIBS F90_FUNC F90_FUNC_ MOD F90_WORK_FILES_ARG MODDIRFLAG F90MODINCSPEC F90_MODULE_NAMES CPP EGREP LIBOBJS INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA LN_S SET_MAKE RANLIB ac_ct_RANLIB YACC LEX LEXLIB LEX_OUTPUT_ROOT AR MPI_LIB_DIR MPI_INC_DIR MPI_F90_INC MPI_LIB MPI_F90_LIB USE_MPI SPRNG_LIB_DIR SPRNG_INC_DIR SPRNG_LIB USE_SPRNG MKL_LIBDIR MKL_LIB MKL_INC HAVE_MKL BATEXT MKINSTALLDIRS OOPSE OOPSE_HOME SUBDIRS FFLAGS LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS PROGNAME debug build build_cpu build_vendor build_os host host_cpu host_vendor host_os CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT CXX CXXFLAGS ac_ct_CXX OOPSE_TEMPLATE_FLAGS EXTRA_CC_FLAG F90 F90FLAGS ac_ct_F90 PREPFLAG PREPDEFFLAG F90LIBS F90_FUNC F90_FUNC_ MOD F90_WORK_FILES_ARG MODDIRFLAG F90MODINCSPEC F90_MODULE_NAMES CPP EGREP LIBOBJS INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA LN_S SET_MAKE RANLIB ac_ct_RANLIB YACC LEX LEXLIB LEX_OUTPUT_ROOT AR MPI_LIB_DIR MPI_INC_DIR MPI_F90_INC MPI_LIB MPI_F90_LIB USE_MPI SPRNG_LIB_DIR SPRNG_INC_DIR SPRNG_LIB USE_SPRNG MKL_LIBDIR MKL_LIB MKL_INC HAVE_MKL DOXYGEN DOT DOC enable_dot enable_html_docs enable_latex_docs BATEXT MKINSTALLDIRS OOPSE OOPSE_HOME SUBDIRS FFLAGS LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -866,6 +866,10 @@ Optional Features:
   --disable-FEATURE       do not include FEATURE (same as --enable-FEATURE=no)
   --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
   --enable-debug          Compile OOPSE in debug mode
+  --enable-doxygen        enable documentation generation with doxygen (auto)
+  --enable-dot            use 'dot' to generate graphs in doxygen (auto)
+  --enable-html-docs      enable HTML generation with doxygen (yes)
+  --enable-latex-docs     enable LaTeX documentation generation with doxygen (no)
   --enable-oopse-home=DIR      define oopse home dir PREFIX/oopse
 
 Optional Packages:
@@ -1820,6 +1824,9 @@ ac_configure="$SHELL $ac_aux_dir/configure" # This should be Cygnus configure.
 # Figure out how the Fortran 90 compiler constructs module file names
 #
  # AC_F90_MODULE_NAMES
+
+
+
 
 
 
@@ -3535,7 +3542,7 @@ _ACEOF
 ac_save_F90FLAGS=$F90FLAGS
 F90FLAGS="$F90FLAGS $ac_verb"
 
-(eval echo $as_me:3538: \"$ac_link\") >&5
+(eval echo $as_me:3545: \"$ac_link\") >&5
 ac_f90_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
 echo "$ac_f90_v_output" >&5
 F90FLAGS=$ac_save_F90FLAGS
@@ -3612,7 +3619,7 @@ _ACEOF
 ac_save_F90FLAGS=$F90FLAGS
 F90FLAGS="$F90FLAGS $ac_cv_prog_f90_v"
 
-(eval echo $as_me:3615: \"$ac_link\") >&5
+(eval echo $as_me:3622: \"$ac_link\") >&5
 ac_f90_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
 echo "$ac_f90_v_output" >&5
 F90FLAGS=$ac_save_F90FLAGS
@@ -4939,7 +4946,7 @@ done
 
 
   # clean out junk possibly left behind by a previous configuration
-  rm -f utils/getopt.h
+  rm -f src/utils/getopt.h
   # Check for getopt_long support
 
 for ac_header in getopt.h
@@ -5279,7 +5286,7 @@ esac
   *) LIBOBJS="$LIBOBJS getopt1.$ac_objext" ;;
 esac
 
-                ac_config_links="$ac_config_links utils/getopt.h:utils/gnugetopt.h"
+                ac_config_links="$ac_config_links src/utils/getopt.h:src/utils/gnugetopt.h"
 
 fi
 
@@ -7749,6 +7756,145 @@ fi;
 
 
 
+# Check whether --enable-doxygen or --disable-doxygen was given.
+if test "${enable_doxygen+set}" = set; then
+  enableval="$enable_doxygen"
+
+fi;
+# Check whether --enable-dot or --disable-dot was given.
+if test "${enable_dot+set}" = set; then
+  enableval="$enable_dot"
+
+fi;
+# Check whether --enable-html-docs or --disable-html-docs was given.
+if test "${enable_html_docs+set}" = set; then
+  enableval="$enable_html_docs"
+
+else
+   enable_html_docs=yes
+fi;
+# Check whether --enable-latex-docs or --disable-latex-docs was given.
+if test "${enable_latex_docs+set}" = set; then
+  enableval="$enable_latex_docs"
+
+else
+   enable_latex_docs=no
+fi;
+if test "x$enable_doxygen" = xno; then
+        enable_doc=no
+else
+        # Extract the first word of "doxygen", so it can be a program name with args.
+set dummy doxygen; ac_word=$2
+echo "$as_me:$LINENO: checking for $ac_word" >&5
+echo $ECHO_N "checking for $ac_word... $ECHO_C" >&6
+if test "${ac_cv_path_DOXYGEN+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  case $DOXYGEN in
+  [\\/]* | ?:[\\/]*)
+  ac_cv_path_DOXYGEN="$DOXYGEN" # Let the user override the test with a path.
+  ;;
+  *)
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+  for ac_exec_ext in '' $ac_executable_extensions; do
+  if $as_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
+    ac_cv_path_DOXYGEN="$as_dir/$ac_word$ac_exec_ext"
+    echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+done
+
+  ;;
+esac
+fi
+DOXYGEN=$ac_cv_path_DOXYGEN
+
+if test -n "$DOXYGEN"; then
+  echo "$as_me:$LINENO: result: $DOXYGEN" >&5
+echo "${ECHO_T}$DOXYGEN" >&6
+else
+  echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6
+fi
+
+        if test "x$DOXYGEN" = x; then
+                if test "x$enable_doxygen" = xyes; then
+                        { { echo "$as_me:$LINENO: error: could not find doxygen" >&5
+echo "$as_me: error: could not find doxygen" >&2;}
+   { (exit 1); exit 1; }; }
+                fi
+                enable_doc=no
+        else
+                enable_doc=yes
+                # Extract the first word of "dot", so it can be a program name with args.
+set dummy dot; ac_word=$2
+echo "$as_me:$LINENO: checking for $ac_word" >&5
+echo $ECHO_N "checking for $ac_word... $ECHO_C" >&6
+if test "${ac_cv_path_DOT+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  case $DOT in
+  [\\/]* | ?:[\\/]*)
+  ac_cv_path_DOT="$DOT" # Let the user override the test with a path.
+  ;;
+  *)
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+  for ac_exec_ext in '' $ac_executable_extensions; do
+  if $as_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
+    ac_cv_path_DOT="$as_dir/$ac_word$ac_exec_ext"
+    echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+done
+
+  ;;
+esac
+fi
+DOT=$ac_cv_path_DOT
+
+if test -n "$DOT"; then
+  echo "$as_me:$LINENO: result: $DOT" >&5
+echo "${ECHO_T}$DOT" >&6
+else
+  echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6
+fi
+
+        fi
+fi
+
+if test "x$enable_doc" = xyes; then
+  DOC=1
+else
+  DOC=0
+fi
+
+
+if test x$DOT = x; then
+        if test "x$enable_dot" = xyes; then
+                { { echo "$as_me:$LINENO: error: could not find dot" >&5
+echo "$as_me: error: could not find dot" >&2;}
+   { (exit 1); exit 1; }; }
+        fi
+        enable_dot=no
+else
+        enable_dot=yes
+fi
+
+
+
+
+
 
 
 OBJEXT=".$OBJEXT"
@@ -8342,7 +8488,7 @@ do
   case "$ac_config_target" in
   # Handling of arguments.
   "make/Makefile" ) CONFIG_FILES="$CONFIG_FILES make/Makefile" ;;
-  "utils/getopt.h" ) CONFIG_LINKS="$CONFIG_LINKS utils/getopt.h:utils/gnugetopt.h" ;;
+  "src/utils/getopt.h" ) CONFIG_LINKS="$CONFIG_LINKS src/utils/getopt.h:src/utils/gnugetopt.h" ;;
   "src/config.h" ) CONFIG_HEADERS="$CONFIG_HEADERS src/config.h" ;;
   *) { { echo "$as_me:$LINENO: error: invalid argument: $ac_config_target" >&5
 echo "$as_me: error: invalid argument: $ac_config_target" >&2;}
@@ -8493,6 +8639,12 @@ s,@MKL_LIBDIR@,$MKL_LIBDIR,;t t
 s,@MKL_LIB@,$MKL_LIB,;t t
 s,@MKL_INC@,$MKL_INC,;t t
 s,@HAVE_MKL@,$HAVE_MKL,;t t
+s,@DOXYGEN@,$DOXYGEN,;t t
+s,@DOT@,$DOT,;t t
+s,@DOC@,$DOC,;t t
+s,@enable_dot@,$enable_dot,;t t
+s,@enable_html_docs@,$enable_html_docs,;t t
+s,@enable_latex_docs@,$enable_latex_docs,;t t
 s,@BATEXT@,$BATEXT,;t t
 s,@MKINSTALLDIRS@,$MKINSTALLDIRS,;t t
 s,@OOPSE@,$OOPSE,;t t

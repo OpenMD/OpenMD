@@ -1055,7 +1055,7 @@ AC_SUBST(SPRNG_LIB)
 AC_DEFUN([adl_FUNC_GETOPT_LONG],
  [AC_PREREQ(2.49)dnl
   # clean out junk possibly left behind by a previous configuration
-  rm -f utils/getopt.h
+  rm -f src/utils/getopt.h
   # Check for getopt_long support
   AC_CHECK_HEADERS([getopt.h])
   AC_CHECK_FUNCS([getopt_long],,
@@ -1064,7 +1064,7 @@ AC_DEFUN([adl_FUNC_GETOPT_LONG],
      [# use the GNU replacement
       AC_LIBOBJ(getopt)
       AC_LIBOBJ(getopt1)
-      AC_CONFIG_LINKS([utils/getopt.h:utils/gnugetopt.h])])])])
+      AC_CONFIG_LINKS([src/utils/getopt.h:src/utils/gnugetopt.h])])])])
 
 
 AC_DEFUN([ACX_CONFIG_HOME], [
@@ -1088,3 +1088,45 @@ AC_DEFUN([ACX_CONFIG_HOME], [
 fi
 CONFIG_HOME=$myDir
 ])
+
+AC_DEFUN(BB_ENABLE_DOXYGEN,
+[
+AC_ARG_ENABLE(doxygen, [  --enable-doxygen        enable documentation generation with doxygen (auto)])
+AC_ARG_ENABLE(dot, [  --enable-dot            use 'dot' to generate graphs in doxygen (auto)])              
+AC_ARG_ENABLE(html-docs, [  --enable-html-docs      enable HTML generation with doxygen (yes)], [], [ enable_html_docs=yes])              
+AC_ARG_ENABLE(latex-docs, [  --enable-latex-docs     enable LaTeX documentation generation with doxygen (no)], [], [ enable_latex_docs=no])              
+if test "x$enable_doxygen" = xno; then
+        enable_doc=no
+else 
+        AC_PATH_PROG(DOXYGEN, doxygen, , $PATH)
+        if test "x$DOXYGEN" = x; then
+                if test "x$enable_doxygen" = xyes; then
+                        AC_MSG_ERROR([could not find doxygen])
+                fi
+                enable_doc=no
+        else
+                enable_doc=yes
+                AC_PATH_PROG(DOT, dot, , $PATH)
+        fi
+fi
+
+if test "x$enable_doc" = xyes; then
+  DOC=1
+else
+  DOC=0
+fi
+AC_SUBST(DOC)
+
+if test x$DOT = x; then
+        if test "x$enable_dot" = xyes; then
+                AC_MSG_ERROR([could not find dot])
+        fi
+        enable_dot=no
+else
+        enable_dot=yes
+fi
+AC_SUBST(enable_dot)
+AC_SUBST(enable_html_docs)
+AC_SUBST(enable_latex_docs)
+])
+
