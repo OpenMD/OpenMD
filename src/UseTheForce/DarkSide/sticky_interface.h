@@ -12,16 +12,17 @@
 #define __C
 #include "config.h"
 
+#define makeStickyType F90_FUNC(makestickytype, MAKESTICKYTYPE)
+
 extern "C" {
   
-  void F90_FUNC_(set_sticky_params, SET_STICKY_PARAMS)( double* sticky_w0, 
-                                                        double* sticky_v0,
-                                                        double* sticky_v0p,
-                                                        double* sticky_rl,
-                                                        double* sticky_ru,
-                                                        double* sticky_rlp,
-                                                        double* sticky_rup );
-  
+  void makeStickyType( double* sticky_w0, 
+                       double* sticky_v0,
+                       double* sticky_v0p,
+                       double* sticky_rl,
+                       double* sticky_ru,
+                       double* sticky_rlp,
+                       double* sticky_rup );
 }
 
 #endif

@@ -801,10 +801,10 @@ void DUFF::readParams( void ){
     if(currentAtomType->isDipole) entry_plug->useDipoles = 1;
     if(currentAtomType->isSSD) {
       entry_plug->useSticky = 1;
-      set_sticky_params( &(currentAtomType->w0), &(currentAtomType->v0), 
-                         &(currentAtomType->v0p), 
-                         &(currentAtomType->rl), &(currentAtomType->ru), 
-                         &(currentAtomType->rlp), &(currentAtomType->rup));
+      makeStickyType( &(currentAtomType->w0), &(currentAtomType->v0), 
+                      &(currentAtomType->v0p), 
+                      &(currentAtomType->rl), &(currentAtomType->ru), 
+                      &(currentAtomType->rlp), &(currentAtomType->rup));
     }
 
     if( currentAtomType->name[0] != '\0' ){

@@ -9,7 +9,7 @@
 !! @author Matthew Meineke
 !! @author Christopher Fennel
 !! @author J. Daniel Gezelter
-!! @version $Id: sticky.F90,v 1.1 2004-10-20 04:02:48 gezelter Exp $, $Date: 2004-10-20 04:02:48 $, $Name: not supported by cvs2svn $, $Revision: 1.1 $
+!! @version $Id: sticky.F90,v 1.2 2004-10-20 21:52:20 gezelter Exp $, $Date: 2004-10-20 21:52:20 $, $Name: not supported by cvs2svn $, $Revision: 1.2 $
 
 module sticky_pair
 
@@ -402,15 +402,15 @@ contains
   end subroutine calc_sw_fnc
 end module sticky_pair
 
-  subroutine set_sticky_params(sticky_w0, sticky_v0, sticky_v0p, &
+  subroutine makeStickyType(sticky_w0, sticky_v0, sticky_v0p, &
        sticky_rl, sticky_ru, sticky_rlp, sticky_rup)
     use definitions, ONLY : dp   
-    use sticky_pair, ONLY : module_set_sticky_params => set_sticky_params
+    use sticky_pair, ONLY : set_sticky_params
     real( kind = dp ), intent(inout) :: sticky_w0, sticky_v0, sticky_v0p
     real( kind = dp ), intent(inout) :: sticky_rl, sticky_ru
     real( kind = dp ), intent(inout) :: sticky_rlp, sticky_rup
     
-    call module_set_sticky_params(sticky_w0, sticky_v0, sticky_v0p, &
+    call set_sticky_params(sticky_w0, sticky_v0, sticky_v0p, &
        sticky_rl, sticky_ru, sticky_rlp, sticky_rup)
        
-  end subroutine set_sticky_params
+  end subroutine makeStickyType

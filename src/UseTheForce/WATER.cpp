@@ -568,7 +568,7 @@ void WATER::readParams( void ){
       if ( currentDirectionalType->isDipole ) entry_plug->useDipoles = 1;
       if ( currentDirectionalType->isSticky ) {
 	entry_plug->useSticky = 1;
-	set_sticky_params( &(currentDirectionalType->w0), 
+	makeStickyType( &(currentDirectionalType->w0), 
 			   &(currentDirectionalType->v0), 
 			   &(currentDirectionalType->v0p), 
 			   &(currentDirectionalType->rl), 
