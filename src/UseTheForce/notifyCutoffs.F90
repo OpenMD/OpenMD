@@ -1,7 +1,7 @@
 module notifyCutoffs
   
   use definitions
-  use do_Forces, only:      setRlistDF
+  use doForces, only:       setRlistDF
   use reaction_field, only: setCutoffsRF
   use lj, only:             setCutoffLJ
   use eam, only:            setCutoffEAM

@@ -1,12 +1,12 @@
-!! do_Forces.F90
-!! module do_Forces
+!! doForces.F90
+!! module doForces
 !! Calculates Long Range forces.
 
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: do_Forces.F90,v 1.3 2004-10-19 20:44:36 chuckv Exp $, $Date: 2004-10-19 20:44:36 $, $Name: not supported by cvs2svn $, $Revision: 1.3 $
+!! @version $Id: doForces.F90,v 1.1 2004-10-20 04:19:55 gezelter Exp $, $Date: 2004-10-20 04:19:55 $, $Name: not supported by cvs2svn $, $Revision: 1.1 $
 
-module do_Forces
+module doForces
   use force_globals
   use simulation
   use definitions
@@ -24,7 +24,7 @@ module do_Forces
   use status
 #ifdef IS_MPI
   use mpiSimulation
-#endif
+#endif
 
   implicit none
   PRIVATE
@@ -186,7 +186,7 @@ contains
        call createPropertyMap(myStatus)
 
        if (myStatus .ne. 0) then
-          write(default_error, *) 'createPropertyMap failed in do_Forces!'
+          write(default_error, *) 'createPropertyMap failed in doForces!'
           error = -1
           return
        endif
@@ -197,27 +197,27 @@ contains
     endif
 
     if (.not. haveRlist) then
-       write(default_error, *) 'rList has not been set in do_Forces!'
+       write(default_error, *) 'rList has not been set in doForces!'
        error = -1
        return
     endif
 
     if (SIM_uses_LJ .and. FF_uses_LJ) then
        if (.not. havePolicies) then
-          write(default_error, *) 'LJ mixing Policies have not been set in do_Forces!'
+          write(default_error, *) 'LJ mixing Policies have not been set in doForces!'
           error = -1
           return
        endif
     endif
 
     if (.not. haveNeighborList) then
-       write(default_error, *) 'neighbor list has not been initialized in do_Forces!'
+       write(default_error, *) 'neighbor list has not been initialized in doForces!'
        error = -1
        return
     end if
 
     if (.not. haveSaneForceField) then
-       write(default_error, *) 'Force Field is not sane in do_Forces!'
+       write(default_error, *) 'Force Field is not sane in doForces!'
        error = -1
        return
     end if
@@ -1181,12 +1181,12 @@ contains
    
  end subroutine add_stress_tensor
  
-end module do_Forces
+end module doForces
 
 !! Interfaces for C programs to module....
 
  subroutine initFortranFF(LJMIXPOLICY, use_RF_c, thisStat)
-    use do_Forces, ONLY: init_FF
+    use doForces, ONLY: init_FF
     integer, intent(in) :: LJMIXPOLICY
     logical, intent(in) :: use_RF_c
 
@@ -1200,7 +1200,7 @@ end module do_Forces
        
        use definitions, ONLY: dp
        use simulation
-       use do_Forces, ONLY: do_force_loop
+       use doForces, ONLY: do_force_loop
     !! Position array provided by C, dimensioned by getNlocal
     real ( kind = dp ), dimension(3, nLocal) :: q
     !! molecular center-of-mass position array

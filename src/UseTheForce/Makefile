@@ -1,5 +1,5 @@
 Source    = \
-	do_Forces.F90 \
+	doForces.F90 \
 	DUFF.cpp \
 	EAM_FF.cpp \
 	ForceFields.cpp \

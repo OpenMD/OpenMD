@@ -2,7 +2,7 @@
 subroutine wrapForceField(infoWrapper)
 
   use atype_module, ONLY: new_atype
-  use do_Forces, ONLY: init_FF, do_force_loop
+  use doForces, ONLY: init_FF, do_force_loop
   use sticky_pair, ONLY: set_sticky_params
   use gb_pair, ONLY: set_gb_pair_params
   use eam, ONLY: newEAMtype

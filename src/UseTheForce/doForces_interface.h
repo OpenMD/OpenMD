@@ -1,13 +1,13 @@
 /*
- *  do_Forces.h
+ *  doForces_interface.h
  *  oopse
  *
  *  Created by Charles Vardeman II on 10/19/04.
  *  Copyright 2004 __MyCompanyName__. All rights reserved.
  *
  */
-#ifndef DO_FORCES_H
-#define DO_FORCES_H
+#ifndef USETHEFORCE_DOFORCES_INTERFACE_H
+#define USETHEFORCE_DOFORCES_INTERFACE_H
 
 #define __C
 #include "config.h"
