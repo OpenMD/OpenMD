@@ -39,12 +39,12 @@
  * such damages.
  */
 
-#include "applications/dynamicProps/CorrelationFunction.hpp"
+#include "applications/dynamicProps/TimeCorrFunc.hpp"
 #include "utils/simError.h"
 #include "primitives/Molecule.hpp"
 namespace oopse {
 
-CorrelationFunction::CorrelationFunction(SimInfo* info, const std::string& filename, 
+TimeCorrFunc::TimeCorrFunc(SimInfo* info, const std::string& filename, 
     const std::string& sele1, const std::string& sele2, int storageLayout)
     : info_(info), storageLayout_(storageLayout), dumpFilename_(filename), selectionScript1_(sele1),
       selectionScript2_(sele2), evaluator1_(info), evaluator2_(info), seleMan1_(info), seleMan2_(info){
@@ -83,19 +83,32 @@ CorrelationFunction::CorrelationFunction(SimInfo* info, const std::string& filen
     if (!evaluator1_.isDynamic()) {
         seleMan1_.setSelectionSet(evaluator1_.evaluate());
         validateSelection(seleMan1_);
+    } else {
+            sprintf(painCave.errMsg,
+                "TimeCorrFunc Error: dynamic selection is not supported\n");
+            painCave.isFatal = 1;
+            simError();  
     }
+    
     if (!evaluator2_.isDynamic()) {
         seleMan2_.setSelectionSet(evaluator2_.evaluate());
         validateSelection(seleMan2_);
-    }    
+    } else {
+            sprintf(painCave.errMsg,
+                "TimeCorrFunc Error: dynamic selection is not supported\n");
+            painCave.isFatal = 1;
+            simError();  
+    }
+    
 
+    
     /**@todo Fixed Me */
     Globals* simParams = info_->getSimParams();
     if (simParams->haveSampleTime()){
         deltaTime_ = simParams->getSampleTime();
     } else {
             sprintf(painCave.errMsg,
-                "CorrelationFunction::writeCorrelate Error: can not figure out deltaTime\n");
+                "TimeCorrFunc::writeCorrelate Error: can not figure out deltaTime\n");
             painCave.isFatal = 1;
             simError();  
     }
@@ -113,7 +126,7 @@ CorrelationFunction::CorrelationFunction(SimInfo* info, const std::string& filen
 }
 
 
-void CorrelationFunction::doCorrelate() {
+void TimeCorrFunc::doCorrelate() {
     preCorrelate();
 
     int nblocks = bsMan_->getNBlocks();
@@ -137,7 +150,7 @@ void CorrelationFunction::doCorrelate() {
     writeCorrelate();
 }
 
-void CorrelationFunction::correlateBlocks(int block1, int block2) {
+void TimeCorrFunc::correlateBlocks(int block1, int block2) {
 
   int jstart, jend;
   
@@ -181,64 +194,7 @@ void CorrelationFunction::correlateBlocks(int block1, int block2) {
   }
 }
 
-
-void CorrelationFunction::correlateFrames(int frame1, int frame2) {
-    int count = seleMan1_.getSelectionCount();
-    assert(  count == seleMan2_.getSelectionCount());
-
-    Snapshot* snapshot1 = bsMan_->getSnapshot(frame1);
-    Snapshot* snapshot2 = bsMan_->getSnapshot(frame2);
-    assert(snapshot1 && snapshot2);
-
-    double time1 = snapshot1->getTime();
-    double time2 = snapshot2->getTime();
-
-    if (time2 < time1) { printf("BARF ON NON POSITIVE DT!\n"); stop;}
-
-    int timeBin = int ((time2 - time1) /deltaTime_ + 0.5);
-    count_[timeBin] += count;    
-    
-    int i;
-    int j;
-    StuntDouble* sd1;
-    StuntDouble* sd2;
-
-    switch (correlationFunctionType()) {
-
-    case frame:
-      double corrVal = calcCorrVal(frame1, frame2);
-      histogram_[timeBin] += corrVal;
-      count_[timeBin] += 1;
-      break;
-      
-    case particle:
-      for (sd1 = seleMan1_.beginSelected(i), sd1 != NULL;
-           sd1 = seleMan1_.nextSelected(i)) {
-        double corrVal = calcCorrVal(frame1, frame2, sd);
-        histogram_[timeBin] += corrVal;    
-        count_[timeBin] += 1;
-      }
-      break;
-
-    case cross:
-      for (sd1 = seleMan1_.beginSelected(i); sd1 != NULL; sd1 = seleMan1_.nextSelected(i)) {
-        
-        for (sd2 = seleMan2_.beginSelected(j); sd2 != NULL; sd2 = seleMan2_.nextSelected(j)) {
-          double corrVal = calcCorrVal(frame1, frame2, sd1, sd2);
-          histogram_[timeBin] += corrVal;    
-          count_[timeBin] += 1;
-        }            
-      }
-      break;
-
-    default:
-      return NULL;
-
-    }
-}
-
-
-void CorrelationFunction::updateFrame(int frame){
+void TimeCorrFunc::updateFrame(int frame){
     Molecule* mol;
     RigidBody* rb;
     SimInfo::MoleculeIterator mi;
@@ -269,12 +225,12 @@ void CorrelationFunction::updateFrame(int frame){
 }
 
 
-void CorrelationFunction::preCorrelate() {
+void TimeCorrFunc::preCorrelate() {
     std::fill(histogram_.begin(), histogram_.end(), 0.0);
     std::fill(count_.begin(), count_.end(), 0);
 }
 
-void CorrelationFunction::postCorrelate() {
+void TimeCorrFunc::postCorrelate() {
     for (int i =0 ; i < nTimeBins_; ++i) {
         if (count_[i] > 0) {
             histogram_[i] /= count_[i];
@@ -283,7 +239,7 @@ void CorrelationFunction::postCorrelate() {
 }
 
 
-void CorrelationFunction::writeCorrelate() {
+void TimeCorrFunc::writeCorrelate() {
     std::ofstream ofs(outputFilename_.c_str());
 
     if (ofs.is_open()) {
@@ -299,7 +255,7 @@ void CorrelationFunction::writeCorrelate() {
             
     } else {
             sprintf(painCave.errMsg,
-                "CorrelationFunction::writeCorrelate Error: fail to open %s\n", outputFilename_.c_str());
+                "TimeCorrFunc::writeCorrelate Error: fail to open %s\n", outputFilename_.c_str());
             painCave.isFatal = 1;
             simError();        
     }

@@ -38,41 +38,42 @@
  * University of Notre Dame has been advised of the possibility of
  * such damages.
  */
-
-#include "applications/dynamicProps/DipoleCorrFunc.hpp"
-#include "utils/simError.h"
+ 
+#include "applications/dynamicProps/CrossTimeCorrFunc.hpp"
 
 namespace oopse {
-DipoleCorrFunc::DipoleCorrFunc(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2)
-    : ParticleTimeCorrFunc(info, filename, sele1, sele2, DataStorage::dslElectroFrame){
 
-    setCorrFuncType("Dipole Correlation Function");
-    setOutputName(getPrefix(dumpFilename_) + ".dcf");
-
-}
-
-double DipoleCorrFunc::calcCorrVal(int frame1, int frame2, StuntDouble* sd1,  StuntDouble* sd2) {
-    Vector3d v1 =sd1->getVel(frame1);
-    Vector3d v2 = sd2->getVel(frame2);
-
-    return dot(v1, v2);
-}
-
-
-void DipoleCorrFunc::validateSelection(const SelectionManager& seleMan) {
-    StuntDouble* sd;
-    int i;    
-    for (sd = seleMan1_.beginSelected(i); sd != NULL; sd = seleMan1_.nextSelected(i)) {
-        if (!sd->isDirectionalAtom()) {
-            sprintf(painCave.errMsg,
-                "DipoleCorrFunc::validateSelection Error: selected atoms do not have dipole moment\n");
-            painCave.isFatal = 1;
-            simError();        
-        }
-    }
+CrossTimeCorrFunc::CrossTimeCorrFunc(SimInfo * info, const  std::string & filename,
+    const std :: string & sele1, const std :: string & sele2, int storageLayout) 
+    : TimeCorrFunc(info, filename, sele1, sele2, storageLayout) {
     
+    nSelected1_ = seleMan1_.getSelectionCount();  
+    nSelected2_ = seleMan2_.getSelectionCount();  
+    nSelectedPairs_ = nSelected1_ * nSelected2_;
+}
+
+void CrossTimeCorrFunc::correlateFrames(int frame1, int frame2) {
+    Snapshot* snapshot1 = bsMan_->getSnapshot(frame1);
+    Snapshot* snapshot2 = bsMan_->getSnapshot(frame2);
+    assert(snapshot1 && snapshot2);
+
+    double time1 = snapshot1->getTime();
+    double time2 = snapshot2->getTime();
+
+    int timeBin = int ((time2 - time1) /deltaTime_ + 0.5);
+    count_[timeBin] += nSelectedPairs_ ;    
+
+    int i;
+    int j;
+    StuntDouble* sd1;
+    StuntDouble* sd2;
+    for (sd1 = seleMan1_.beginSelected(i); sd1 != NULL; sd1 = seleMan1_.nextSelected(i)) {
+
+        for (sd2 = seleMan2_.beginSelected(j); sd2 != NULL; sd2 = seleMan2_.nextSelected(j)) {
+            double corrVal = calcCorrVal(frame1, frame2, sd1, sd2);
+            histogram_[timeBin] += corrVal;    
+        }            
+    }
 }
 
 }
-
-

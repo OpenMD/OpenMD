@@ -41,19 +41,16 @@
 #ifndef APPLICATIONS_DYNAMICPROPS_RCORRFUNC_HPP
 #define APPLICATIONS_DYNAMICPROPS_RCORRFUNC_HPP
 
-#include "applications/dynamicProps/CorrelationFunction.hpp"
+#include "applications/dynamicProps/ParticleTimeCorrFunc.hpp"
 namespace oopse {
 
-class RCorrFunc : public CorrelationFunction {
+class RCorrFunc : public ParticleTimeCorrFunc {
     public:
         RCorrFunc(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2);   
-
-    protected:
-        virtual void postCorrelate();
         
     private:
-         virtual double calcCorrVal(StuntDouble* sd1, int frame1, StuntDouble* sd2, int frame2);
-          void calcDiffConst();
+         virtual double calcCorrVal(int frame1, int frame2, StuntDouble* sd1, StuntDouble* sd2);
+
 };
 
 }

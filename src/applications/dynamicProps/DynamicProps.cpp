@@ -108,7 +108,7 @@ int main(int argc, char* argv[]){
     SimInfo* info = creator.createSim(mdFileName, false);
 
 
-    CorrelationFunction* corrFunc;
+    TimeCorrFunc* corrFunc;
     if (args_info.dcorr_given){
         corrFunc = new DipoleCorrFunc(info, dumpFileName, sele1, sele2);
     } else if (args_info.rcorr_given) {

@@ -38,41 +38,27 @@
  * University of Notre Dame has been advised of the possibility of
  * such damages.
  */
+#ifndef APPLICATIONS_DYNAMICPROPS_PARTICLETIMECORRFUNC_HPP
+#define APPLICATIONS_DYNAMICPROPS_PARTICLETIMECORRFUNC_HPP
 
-#include "applications/dynamicProps/DipoleCorrFunc.hpp"
-#include "utils/simError.h"
+#include "applications/dynamicProps/TimeCorrFunc.hpp"
 
 namespace oopse {
-DipoleCorrFunc::DipoleCorrFunc(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2)
-    : ParticleTimeCorrFunc(info, filename, sele1, sele2, DataStorage::dslElectroFrame){
 
-    setCorrFuncType("Dipole Correlation Function");
-    setOutputName(getPrefix(dumpFilename_) + ".dcf");
+class ParticleTimeCorrFunc : public TimeCorrFunc {
+    public:
+        ParticleTimeCorrFunc(SimInfo* info, const std::string& filename, 
+            const std::string& sele1, const std::string& sele2, int storageLayout);
+        
+    private:
+        
+        virtual void correlateFrames(int frame1, int frame2);
 
-}
-
-double DipoleCorrFunc::calcCorrVal(int frame1, int frame2, StuntDouble* sd1,  StuntDouble* sd2) {
-    Vector3d v1 =sd1->getVel(frame1);
-    Vector3d v2 = sd2->getVel(frame2);
-
-    return dot(v1, v2);
-}
-
-
-void DipoleCorrFunc::validateSelection(const SelectionManager& seleMan) {
-    StuntDouble* sd;
-    int i;    
-    for (sd = seleMan1_.beginSelected(i); sd != NULL; sd = seleMan1_.nextSelected(i)) {
-        if (!sd->isDirectionalAtom()) {
-            sprintf(painCave.errMsg,
-                "DipoleCorrFunc::validateSelection Error: selected atoms do not have dipole moment\n");
-            painCave.isFatal = 1;
-            simError();        
-        }
-    }
-    
-}
+        virtual double calcCorrVal(int frame1, int frame2, StuntDouble* sd1,  StuntDouble* sd2) = 0;
+        
+        int nSelected_;
+};
 
 }
-
+#endif
 

@@ -38,8 +38,8 @@
  * University of Notre Dame has been advised of the possibility of
  * such damages.
  */
-#ifndef APPLICATIONS_DYNAMICPROPS_CORRELATIONFUNCTION_HPP
-#define APPLICATIONS_DYNAMICPROPS_CORRELATIONFUNCTION_HPP
+#ifndef APPLICATIONS_DYNAMICPROPS_TIMECORRFUNC_HPP
+#define APPLICATIONS_DYNAMICPROPS_TIMECORRFUNC_HPP
 
 #include <string>
 #include <vector>
@@ -54,13 +54,13 @@
 namespace oopse {
 
 /**
- * @class CorrelationFunction CorrelationFunction.hpp "applications/dynamicProps/CorrelationFunction"
+ * @class TimeCorrFunc TimeCorrFunc.hpp "applications/dynamicProps/TimeCorrFunc"
  * @brief Base class for Correlation function
  */
  
-class CorrelationFunction {
+class TimeCorrFunc {
     public:
-        CorrelationFunction(SimInfo* info, const std::string& filename, 
+        TimeCorrFunc(SimInfo* info, const std::string& filename, 
             const std::string& sele1, const std::string& sele2, int storageLayout);
         
         void doCorrelate();
@@ -91,6 +91,7 @@ class CorrelationFunction {
         
         virtual void preCorrelate();        
         virtual void postCorrelate();
+        virtual void updateFrame(int frame);
 
         double deltaTime_;
         int nTimeBins_;
@@ -103,16 +104,15 @@ class CorrelationFunction {
         std::string dumpFilename_;        
         SelectionManager seleMan1_;
         SelectionManager seleMan2_;          
+
+        BlockSnapshotManager* bsMan_;       
         
     private:
 
         void correlateBlocks(int block1, int block2);
-        void correlateFrames(int frame1, int frame2);
-        void updateFrame(int frame);
+        virtual void correlateFrames(int frame1, int frame2) = 0;       
         
         virtual void writeCorrelate();
-
-        virtual double calcCorrVal(StuntDouble* sd1, int frame1, StuntDouble* sd2, int frame2) = 0;
 
         virtual void validateSelection(const SelectionManager& seleMan) {}
 
@@ -122,8 +122,7 @@ class CorrelationFunction {
         
         SelectionEvaluator evaluator1_;
         SelectionEvaluator evaluator2_;
-
-        BlockSnapshotManager* bsMan_;        
+ 
 
         std::string outputFilename_;
 

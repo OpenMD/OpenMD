@@ -41,15 +41,15 @@
 #ifndef APPLICATIONS_DYNAMICPROPS_DIPOLECORRFUNC_HPP
 #define APPLICATIONS_DYNAMICPROPS_DIPOLECORRFUNC_HPP
 
-#include "applications/dynamicProps/CorrelationFunction.hpp"
+#include "applications/dynamicProps/ParticleTimeCorrFunc.hpp"
 namespace oopse {
 
-class DipoleCorrFunc : public CorrelationFunction {
+class DipoleCorrFunc : public ParticleTimeCorrFunc {
     public:
         DipoleCorrFunc(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2);   
 
    private:
-         virtual double calcCorrVal(StuntDouble* sd1, int frame1, StuntDouble* sd2, int frame2);
+         virtual double calcCorrVal(int frame1, int frame2, StuntDouble* sd1,  StuntDouble* sd2);
 
         virtual void validateSelection(const SelectionManager& seleMan);
 

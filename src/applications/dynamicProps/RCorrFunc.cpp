@@ -43,27 +43,18 @@
 
 namespace oopse {
 RCorrFunc::RCorrFunc(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2)
-    : CorrelationFunction(info, filename, sele1, sele2, DataStorage::dslPosition){
+    : ParticleTimeCorrFunc(info, filename, sele1, sele2, DataStorage::dslPosition){
 
     setCorrFuncType("RCorrFunc");
     setOutputName(getPrefix(dumpFilename_) + ".rcf");
 
 }
 
-double RCorrFunc::calcCorrVal(StuntDouble* sd1, int frame1, StuntDouble* sd2, int frame2) {
+double RCorrFunc::calcCorrVal(int frame1, int frame2, StuntDouble* sd1, StuntDouble* sd2) {
     Vector3d r1 =sd1->getPos(frame1);
     Vector3d r2 = sd2->getPos(frame2);
 
     return (r1-r2).lengthSquare();
-}
-
-void RCorrFunc::postCorrelate(){
-    CorrelationFunction::postCorrelate();
-    calcDiffConst();
-}
-
-void RCorrFunc::calcDiffConst() {
-
 }
 
 }

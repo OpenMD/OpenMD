@@ -1,7 +1,9 @@
 Package = applications/dynamicProps
 
 Source    = \
-            CorrelationFunction.cpp \
+            TimeCorrFunc.cpp \
+	    CrossTimeCorrFunc.cpp \
+	    ParticleTimeCorrFunc.cpp \
             DipoleCorrFunc.cpp \
             RCorrFunc.cpp \
             VCorrFunc.cpp \
