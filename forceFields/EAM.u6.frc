@@ -3,12 +3,20 @@
 ! There is only a section for AtomTypes which defines mass and the name
 ! of the file which contains the rho(r), phi(r) and F[rho] functions.
 
-#AtomTypes
-!Atom	mass	Potential param filename
+begin AtomTypes
+Au	196.97
+Ag	107.87
+Cu	63.550
+Ni	58.710
+Pd	106.40
+Pt	195.09
+end AtomTypes
 
-Au	196.97		Au.u6.funcfl
-Ag	107.87		Ag.u6.funcfl
-Cu	63.550		Cu.u6.funcfl
-Ni	58.710		Ni.u6.funcfl
-Pd	106.40		Pd.u6.funcfl
-Pt      195.09		Pt.u6.funcfl
+begin EAMAtomTypes
+Au	Au.u6.funcfl
+Ag	Ag.u6.funcfl
+Cu	Cu.u6.funcfl
+Ni	Ni.u6.funcfl
+Pd	Pd.u6.funcfl
+Pt	Pt.u6.funcfl
+end EAMAtomTypes
