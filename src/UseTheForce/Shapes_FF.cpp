@@ -336,7 +336,7 @@ void Shapes_FF::initializeAtoms( int nAtoms, Atom** the_atoms ){
 
 	dat = (DirectionalAtomType*)at;
 	dAtom = (DirectionalAtom *) the_atoms[i];
-
+        
 	momInt = dat->getI();
 
 	// zero out the moments of inertia matrix
@@ -464,6 +464,7 @@ void Shapes_FF::parseShapeFile(string shapeFileName, ShapeAtomType* st){
 	}
       }
     }
+    shapeFile.getline(inLine, MAXLEN); 
   }
 
   // now grab the contact functions
@@ -505,6 +506,7 @@ void Shapes_FF::parseShapeFile(string shapeFileName, ShapeAtomType* st){
 	}
       }
     }
+    shapeFile.getline(inLine, MAXLEN);
   }
 
   // pass contact functions to ShapeType
@@ -550,6 +552,7 @@ void Shapes_FF::parseShapeFile(string shapeFileName, ShapeAtomType* st){
 	}
       }
     }
+    shapeFile.getline(inLine, MAXLEN);
   }
 
   // pass range functions to ShapeType
@@ -594,6 +597,7 @@ void Shapes_FF::parseShapeFile(string shapeFileName, ShapeAtomType* st){
 	}
       }
     }
+    shapeFile.getline(inLine, MAXLEN);
   }
 
   // pass strength functions to ShapeType
