@@ -69,11 +69,8 @@ Br	  0.511111921764	3.54
 Kr	  0.32590340268		3.83	              
 end LennardJonesAtomTypes
 
-begin ChargeAtomTypes
-end ChargeAtomTypes
-
-begin DipoleAtomTypes
-end DipoleAtomTypes
+begin ElectrostaticAtomTypes
+end ElectrostaticAtomTypes
 
 begin StickyAtomTypes
 end StickyAtomTypes
