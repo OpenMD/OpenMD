@@ -56,6 +56,8 @@ Applications = \
 	applications/oopse \
 	applications/dump2Xyz \
         applications/simpleBuilder\
+	applications/staticProps \
+	applications/dynamicProps \
 
 Samples = \
 	samples/argon \
