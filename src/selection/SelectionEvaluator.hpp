@@ -125,7 +125,7 @@ class SelectionEvaluator{
         void clearDefinitionsAndLoadPredefined();
          
         void define();
- 
+        void select();
         void predefine();
 
         void instructionDispatchLoop();
@@ -134,6 +134,13 @@ class SelectionEvaluator{
 
         BitSet expression(std::vector<Token>& tokens, int pc);
 
+
+        void evalError(const std::string& message);
+
+        void unrecognizedCommand(const Token& token) {
+            evalError("unrecognized command:" + token.value);
+        }        
+        
         SelectionCompiler compiler;
 
         const static int scriptLevelMax = 10;

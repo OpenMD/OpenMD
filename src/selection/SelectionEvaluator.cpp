@@ -77,6 +77,9 @@ bool SelectionEvaluator::loadScriptFile(const std::string& filename) {
     return loadScriptFileInternal(filename);
 }
 
+bool SelectionEvaluator::loadScriptFileInternal(const  string & filename) {
+
+}
 
 void SelectionEvaluator::instructionDispatchLoop(){
 
@@ -98,37 +101,6 @@ void SelectionEvaluator::instructionDispatchLoop(){
     }
 }
 
-  void SelectionEvaluator::predefine(const std::string& script) {
-    if (compiler.compile("#predefine", script)) {
-      std::vector<std::vector<Token> > aatoken = compiler.getAatokenCompiled();
-      if (aatoken.size() != 1) {
-        viewer.scriptStatus("predefinition does not have exactly 1 command:"
-                            + script);
-        return;
-      }
-
-      std::vector<Token> statement = aatoken[0];
-
-      if (statement.size() > 2) {
-        int tok = statement[1].tok;
-        if (tok == Token::identifier ||
-            (tok & Token::predefinedset) == Token::predefinedset) {
-          std::string variable = (std::string)statement[1].value;
-          variables.put(variable, statement);
-        } else {
-          viewer.scriptStatus("invalid variable name:" + script);
-        }
-      } else {
-        viewer.scriptStatus("bad predefinition length:" + script);
-      }
-    } else {
-      viewer.scriptStatus("predefined set compile error:" + script +
-                          "\ncompile error:" + compiler.getErrorMessage());
-    }
-  }
-
-
-
   BitSet SelectionEvaluator::expression(std::vector<Token>& code, int pcStart) {
     int numberOfAtoms = viewer.getAtomCount();
     BitSet bs;
@@ -137,13 +109,12 @@ void SelectionEvaluator::instructionDispatchLoop(){
 
     for (int pc = pcStart; ; ++pc) {
       Token instruction = code[pc];
-      if (logMessages)
-        viewer.scriptStatus("instruction=" + instruction);
+
       switch (instruction.tok) {
       case Token::expressionBegin:
         break;
       case Token::expressionEnd:
-        break expression_loop;
+        break;
       case Token::all:
         bs = stack[sp++] = new BitSet(numberOfAtoms);
         for (int i = numberOfAtoms; --i >= 0; )
@@ -257,14 +228,15 @@ void SelectionEvaluator::instructionDispatchLoop(){
 void SelectionEvaluator::withinInstruction(const Token& instruction, BitSet& bs, BitSet& bsResult)
 
     boost::any withinSpec = instruction.value;
-    if (withinSpec instanceof Float) {
-        withinDistance(((Float)withinSpec).floatValue(), bs, bsResult);
+    if (withinSpec.type() == typeid(float)){
+        withinDistance(boost::any_cast<float>(withinSpec), bs, bsResult);
         return;
     }
+    
     evalError("Unrecognized within parameter:" + withinSpec);
 }
 
-  void SelectionEvaluator::withinDistance(float distance, BitSet bs, BitSet bsResult) {
+  void SelectionEvaluator::withinDistance(float distance, const BitSet& bs, const BitSet& bsResult) {
     Frame frame = viewer.getFrame();
     for (int i = frame.getAtomCount(); --i >= 0; ) {
       if (bs.get(i)) {
@@ -278,18 +250,64 @@ void SelectionEvaluator::withinInstruction(const Token& instruction, BitSet& bs,
   }
 
   void SelectionEvaluator::define() {
-    std::string variable = (std::string)statement[1].value;
+    assert(statement.size() >= 3);
+
+    std::string variable = boost::any_cast<std::string>(statement[1].value);
+    
     variables.insert(std::make_pair(variable, expression(statement, 2)));
   }
 }
 
-  void SelectionEvaluator::predefine(Token[] statement) {
-    std::string variable = (std::string)statement[1].value;
-    variables.put(variable, statement);
-  }
+/** @todo */
+void SelectionEvaluator::predefine(const std::string& script) {
 
-  void SelectionEvaluator::select(){
-      viewer.setSelectionSet(expression(statement, 1));
-  }
-  
-  }
+    if (compiler.compile("#predefine", script)) {
+        std::vector<std::vector<Token> > aatoken = compiler.getAatokenCompiled();
+        if (aatoken.size() != 1) {
+            evalError("predefinition does not have exactly 1 command:"
+                + script);
+            return;
+        }
+        std::vector<Token> statement = aatoken[0];
+        if (statement.size() > 2) {
+            int tok = statement[1].tok;
+            if (tok == Token::identifier || (tok & Token::predefinedset) == Token::predefinedset) {
+                std::string variable = (std::string)statement[1].value;
+                variables.insert(std::make_pair(variable, statement));
+
+            } else {
+                evalError("invalid variable name:" + script);
+            }
+        }else {
+            evalError("bad predefinition length:" + script);
+        }
+
+        
+    } else {
+        evalError("predefined set compile error:" + script +
+          "\ncompile error:" + compiler.getErrorMessage());
+    }
+
+}
+
+void SelectionEvaluator::select(){
+    viewer.setSelectionSet(expression(statement, 1));
+}
+
+BitSet SelectionEvaluator::lookupValue(const std::string& variable){
+
+    std::map<std::string, boost::any>::iterator i = variables.find(variable);
+
+    if (i != variables.end()) {
+        if (i->second.type() == typeid(BitSet)) {
+            return boost::any_cast<BitSet>(i->second);
+        } else if (i->second.type() ==  typeid(std::vector<Token>)){
+            BitSet bs = expression(boost::any_cast(i->second), 2);
+            i->second =  bs; /**@todo fixme */
+            return bs;
+        }
+    }
+
+}
+
+}
