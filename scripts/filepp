@@ -1,20 +1,4 @@
 #!/usr/bin/perl -w
-
-package FileEntry;
-
-sub new {
-    my $type = shift;
-    my $filename = shift;
-    my $path = shift;
-    my $self = {};
-    $self->{'source_file'} = $filename;
-    $self->{'filepath'} = $path;
-    $self->{'includes'} = {};
-    $self->{'uses'} = {};
-    $self->{'modules'} = {};
-    bless $self;
-}
-
 ########################################################################
 #
 # filepp is free software; you can redistribute it and/or modify
@@ -37,8 +21,8 @@ sub new {
 #  Filename     :  $RCSfile: filepp,v $
 #  Author       :  $Author: tim $
 #  Maintainer   :  Darren Miller: darren@cabaret.demon.co.uk
-#  File version :  $Revision: 1.1 $
-#  Last changed :  $Date: 2004-10-01 21:11:29 $
+#  File version :  $Revision: 1.2 $
+#  Last changed :  $Date: 2004-10-02 04:40:48 $
 #  Description  :  Main program
 #  Licence      :  GNU copyleft
 #
@@ -2453,6 +2437,7 @@ sub Module{
     my $file;
     if ($modulename !~ /^procedure/){
 	
+	$modulename =~ s/\s+$//;
 	$parsedModList{uc($modulename) . ".mod"} =  Filepp::GetDefine('__FILE__');
 	
         #$modulefile = Filepp::GetDefine('__BASE_FILE__');
@@ -2474,6 +2459,7 @@ sub Use{
     my $line = shift;
     $line =~ /^(\w+).*/;
     my $f90module = $1;
+    $f90module =~ s/\s+$//;
     $f90module = uc($f90module);
     
     print " " . $objDir . $f90module . '.mod \\', "\n";
@@ -2491,23 +2477,8 @@ Filepp::AddKeyword("use", "Filepp::Use");
 Filepp::AddKeyword("include", "Filepp::Include");
 
 ##############################################################################
-# add RecordFileInfo info Filepp. Every time a file is opened, an entry
-# of this file is created  
+# test whether a file is visited or not
 ##############################################################################
-
-sub RecordFileInfo{
-    my $file = Filepp::GetDefine('__FILE__');
-#    dependenyGraph->add_vertex(new );
-    
-    #if it is not base file, we need to add an edge 
-    if ($include_level > 0) {
-    
-    }
-
-}
-
-Filepp::AddOpenInputFunc("Filepp::RecordFileInfo");
-
 sub IsVisited {
 	my $fullfile = shift;
 	
