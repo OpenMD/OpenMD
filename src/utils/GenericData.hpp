@@ -181,23 +181,21 @@ namespace oopse{
     * @template ContainerType
     * @template ElemDataType
     */
-    template <template<typename ELEM, typename = std::allocator<ELEM> > class ContainerType,
-                     typename ElemDataType > 
-    class STLContainerTypeData : public GenericData, public ContainerType<ElemDataType>{
+    template <typename ElemDataType > 
+    class VectorTypeData : public GenericData, public std::vector<ElemDataType>{
         public:
-            typedef STLContainerTypeData<ContainerType, ElemDataType> SelfType;
-            typedef ContainerType<ElemDataType> STLContainerType;
+            typedef VectorTypeData<ElemDataType> SelfType;
 
-            STLContainerTypeData(const std::string& id) 
-                : GenericData(id),  ContainerType<ElemDataType> () {}
+            VectorTypeData(const std::string& id) 
+                : GenericData(id), std::vector() {}
             
-            STLContainerTypeData(const SelfType& s) : SelfType(s){}
+            VectorTypeData(const SelfType& s) : SelfType(s){}
 
             SelfType& operator =(const SelfType& s){
                 if (this == &s)
                     return *this;
 
-                STLContainerType::operator=(s);
+                VectorTypeData::operator=(s);
                 return *this;
             }
     };
@@ -206,19 +204,19 @@ namespace oopse{
      * @typedef IntVectorGenericData
      * A generic data type contains a  std::vector<int> variable.
      */  
-    typedef STLContainerTypeData<std::vector, int> IntVectorGenericData;
+    typedef VectorTypeData<int> IntVectorGenericData;
 
     /**
      * @typedef IntVectorGenericData
      * A generic data type contains a  std::vector<float> variable.
      */  
-    typedef STLContainerTypeData<std::vector, float> FloatVectorGenericData;
+    typedef VectorTypeData<float> FloatVectorGenericData;
 
     /**
      * @typedef IntVectorGenericData
      * A generic data type contains a  std::vector<double> variable.
      */  
-    typedef STLContainerTypeData<std::vector, double> DoubleVectorGenericData;
+    typedef VectorTypeData<double> DoubleVectorGenericData;
 
     /** 
      * @typedef StringVectorGenericData
@@ -248,17 +246,8 @@ namespace oopse{
      *  }
      * @endcode
      */  
-    typedef STLContainerTypeData<std::vector, std::string> StringVectorGenericData;
-
-    /**
-     * @typedef IntVectorGenericData
-     * A generic data type contains a   std::list<vector<string> >  variable.
-     */  
-    typedef STLContainerTypeData<std::list, std::vector<int> > IntVectorListGenericData;
+    typedef VectorTypeData<std::string> StringVectorGenericData;
   
-#define CHIVALUE_ID "CHIVALUE"
-#define INTEGRALOFCHIDT_ID "INTEGRALOFCHIDT"
-#define ETAVALUE_ID "ETAVALUE"
 
 } // namespace oopse
 #endif //UTIL _GENERICDATA_HPP
