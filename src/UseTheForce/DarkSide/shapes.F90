@@ -25,6 +25,7 @@ module shapes
 
   public :: do_shape_pair
   public :: newShapeType
+  public :: complete_Shape_FF
 
 
   type, private :: Shape
@@ -288,15 +289,12 @@ contains
 
   end subroutine allocateShape
     
-  subroutine init_Shape_FF(status)
+  subroutine complete_Shape_FF(status)
     integer :: status
     integer :: i, j, l, m, lm, function_type
-    real(kind=dp) :: bigSigma, myBigSigma, thisSigma, coeff, Phunc, spi
-    real(kind=dp) :: costheta, cpi, theta, Pi, phi, thisDP, sigma
+    real(kind=dp) :: thisDP, sigma
     integer :: alloc_stat, iTheta, iPhi, nSteps, nAtypes, thisIP, current
     logical :: thisProperty
-
-    Pi = 4.0d0 * datan(1.0d0)
 
     status = 0
     if (ShapeMap%currentShape == 0) then
@@ -304,57 +302,7 @@ contains
        status = -1
        return
     end if
-
-    bigSigma = 0.0d0
-    do i = 1, ShapeMap%currentShape
-
-       ! Scan over theta and phi to
-       ! find the largest contact in any direction....
-
-       myBigSigma = 0.0d0
-
-       do iTheta = 0, nSteps
-          theta = (Pi/2.0d0)*(dble(iTheta)/dble(nSteps))
-          costheta = cos(theta)
-
-          call Associated_Legendre(costheta, ShapeMap%Shapes(i)%bigL, &
-               ShapeMap%Shapes(i)%bigM, lmax, plm_i, dlm_i)
-                   
-          do iPhi = 0, nSteps
-             phi = -Pi  + 2.0d0 * Pi * (dble(iPhi)/dble(nSteps))
-             cpi = cos(phi)
-             spi = sin(phi)
-             
-             call Orthogonal_Polynomial(cpi, ShapeMap%Shapes(i)%bigM, &
-                  CHEBYSHEV_TN, tm_i, dtm_i)
-             call Orthogonal_Polynomial(cpi, ShapeMap%Shapes(i)%bigM, &
-                  CHEBYSHEV_UN, um_i, dum_i)
-
-             thisSigma = 0.0d0
-
-             do lm = 1, ShapeMap%Shapes(i)%nContactFuncs                
-
-                l = ShapeMap%Shapes(i)%ContactFuncLValue(lm)
-                m = ShapeMap%Shapes(i)%ContactFuncMValue(lm)
-                coeff = ShapeMap%Shapes(i)%ContactFuncCoefficient(lm)
-                function_type = ShapeMap%Shapes(i)%ContactFunctionType(lm)
-
-                if ((function_type .eq. SH_COS).or.(m.eq.0)) then
-                   Phunc = coeff * tm_i(m)
-                else
-                   Phunc = coeff * spi * um_i(m-1)
-                endif
-                
-                thisSigma = thisSigma + plm_i(l,m)*Phunc
-             enddo
-
-             if (thisSigma.gt.myBigSigma) myBigSigma = thisSigma
-          enddo
-       enddo
-
-       if (myBigSigma.gt.bigSigma) bigSigma = myBigSigma
-    enddo
-
+    
     nAtypes = getSize(atypes)
 
     if (nAtypes == 0) then
@@ -378,9 +326,7 @@ contains
           ShapeMap%Shapes(current)%isLJ = .true.
 
           ShapeMap%Shapes(current)%epsilon = getEpsilon(thisIP)
-          sigma = getSigma(thisIP)
-          ShapeMap%Shapes(current)%sigma = sigma
-          if (sigma .gt. bigSigma) bigSigma = thisDP
+          ShapeMap%Shapes(current)%sigma = getSigma(thisIP)
           
        endif
        
@@ -388,7 +334,7 @@ contains
 
     haveShapeMap = .true.
     
-  end subroutine init_Shape_FF
+  end subroutine complete_Shape_FF
     
   subroutine do_shape_pair(atom1, atom2, d, rij, r2, sw, vpair, fpair, &
        pot, A, f, t, do_pot)
@@ -1393,3 +1339,20 @@ subroutine makeShape(nContactFuncs, ContactFuncLValue, &
 
   return
 end subroutine makeShape
+
+subroutine completeShapeFF(status)
+
+  use shapes, only: complete_Shape_FF
+
+  integer, intent(out)  :: status
+  integer :: myStatus
+
+  myStatus = 0
+
+  call complete_Shape_FF(myStatus)
+
+  status = myStatus
+
+  return
+end subroutine completeShapeFF
+

@@ -13,6 +13,7 @@
 #include "config.h"
 
 #define makeShape F90_FUNC(makeshape, MAKESHAPE)
+#define completeShapeFF F90_FUNC(completeshapeff, COMPLETESHAPEFF)
 
 #define SH_COS 0
 #define SH_SIN 1
@@ -36,6 +37,8 @@ extern "C" {
                  double* StrengthFuncCoefficient,
                  int* myAtid, 
                  int* status);
+
+  void completeShapeFF( int* status);
 }
     
 #endif
