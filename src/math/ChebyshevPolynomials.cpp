@@ -48,7 +48,7 @@ ChebyshevPolynomials::ChebyshevPolynomials(int maxPower) : maxPower_(maxPower){
     GeneratePolynomials(maxPower_);
 }
 
-ChebyshevPolynomials::GeneratePolynomials(int maxPower) {
+void ChebyshevPolynomials::GeneratePolynomials(int maxPower) {
 
     GenerateFirstTwoTerms();
 
@@ -66,7 +66,7 @@ ChebyshevPolynomials::GeneratePolynomials(int maxPower) {
 }
 
 
-ChebyshevT::GenerateFirstTwoTerms() {
+void ChebyshevT::GenerateFirstTwoTerms() {
     DoublePolynomial t0;
     t0.setCoefficient(0, 1.0);
     polyList_.push_back(t0);
@@ -76,7 +76,7 @@ ChebyshevT::GenerateFirstTwoTerms() {
     polyList_.push_back(t1);    
 }
 
-ChebyshevU::GenerateFirstTwoTerms() {
+void ChebyshevU::GenerateFirstTwoTerms() {
     DoublePolynomial u0;
     u0.setCoefficient(0, 1.0);
     polyList_.push_back(u0);

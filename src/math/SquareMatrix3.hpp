@@ -51,7 +51,7 @@
 #include "Quaternion.hpp"
 #include "SquareMatrix.hpp"
 #include "Vector3.hpp"
-
+#include "utils/NumericConstant.hpp"
 namespace oopse {
 
     template<typename Real>
@@ -179,7 +179,7 @@ namespace oopse {
                 Real ad1, ad2, ad3;    
                 t = this->data_[0][0] + this->data_[1][1] + this->data_[2][2] + 1.0;
 
-                if( t > 0.0 ){
+                if( t > NumericConstant::epsilon ){
 
                     s = 0.5 / sqrt( t );
                     q[0] = 0.25 / s;
@@ -194,24 +194,24 @@ namespace oopse {
 
                     if( ad1 >= ad2 && ad1 >= ad3 ){
 
-                        s = 2.0 * sqrt( 1.0 + this->data_[0][0] - this->data_[1][1] - this->data_[2][2] );
-                        q[0] = (this->data_[1][2] + this->data_[2][1]) / s;
-                        q[1] = 0.5 / s;
-                        q[2] = (this->data_[0][1] + this->data_[1][0]) / s;
-                        q[3] = (this->data_[0][2] + this->data_[2][0]) / s;
+                        s = 0.5 / sqrt( 1.0 + this->data_[0][0] - this->data_[1][1] - this->data_[2][2] );
+                        q[0] = (this->data_[1][2] - this->data_[2][1]) * s;
+                        q[1] = 0.25 / s;
+                        q[2] = (this->data_[0][1] + this->data_[1][0]) * s;
+                        q[3] = (this->data_[0][2] + this->data_[2][0]) * s;
                     } else if ( ad2 >= ad1 && ad2 >= ad3 ) {
-                        s = sqrt( 1.0 + this->data_[1][1] - this->data_[0][0] - this->data_[2][2] ) * 2.0;
-                        q[0] = (this->data_[0][2] + this->data_[2][0]) / s;
-                        q[1] = (this->data_[0][1] + this->data_[1][0]) / s;
-                        q[2] = 0.5 / s;
-                        q[3] = (this->data_[1][2] + this->data_[2][1]) / s;
+                        s = 0.5 / sqrt( 1.0 + this->data_[1][1] - this->data_[0][0] - this->data_[2][2] );
+                        q[0] = (this->data_[2][0] - this->data_[0][2] ) * s;
+                        q[1] = (this->data_[0][1] + this->data_[1][0]) * s;
+                        q[2] = 0.25 / s;
+                        q[3] = (this->data_[1][2] + this->data_[2][1]) * s;
                     } else {
 
-                        s = sqrt( 1.0 + this->data_[2][2] - this->data_[0][0] - this->data_[1][1] ) * 2.0;
-                        q[0] = (this->data_[0][1] + this->data_[1][0]) / s;
-                        q[1] = (this->data_[0][2] + this->data_[2][0]) / s;
-                        q[2] = (this->data_[1][2] + this->data_[2][1]) / s;
-                        q[3] = 0.5 / s;
+                        s = 0.5 / sqrt( 1.0 + this->data_[2][2] - this->data_[0][0] - this->data_[1][1] );
+                        q[0] = (this->data_[0][1] - this->data_[1][0]) * s;
+                        q[1] = (this->data_[0][2] + this->data_[2][0]) * s;
+                        q[2] = (this->data_[1][2] + this->data_[2][1]) * s;
+                        q[3] = 0.25 / s;
                     }
                 }             
 
