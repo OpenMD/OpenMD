@@ -45,7 +45,7 @@
 
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: doForces.F90,v 1.10 2005-01-14 20:31:12 gezelter Exp $, $Date: 2005-01-14 20:31:12 $, $Name: not supported by cvs2svn $, $Revision: 1.10 $
+!! @version $Id: doForces.F90,v 1.11 2005-03-08 21:05:46 gezelter Exp $, $Date: 2005-03-08 21:05:46 $, $Name: not supported by cvs2svn $, $Revision: 1.11 $
 
 
 module doForces
@@ -57,8 +57,7 @@ module doForces
   use neighborLists  
   use lj
   use sticky
-  use dipole_dipole
-  use charge_charge
+  use electrostatic_module
   use reaction_field
   use gb_pair
   use shapes
@@ -86,9 +85,10 @@ module doForces
   
   logical, save :: FF_uses_DirectionalAtoms
   logical, save :: FF_uses_LennardJones
-  logical, save :: FF_uses_Electrostatic
-  logical, save :: FF_uses_charges
-  logical, save :: FF_uses_dipoles
+  logical, save :: FF_uses_Electrostatics
+  logical, save :: FF_uses_Charges
+  logical, save :: FF_uses_Dipoles
+  logical, save :: FF_uses_Quadrupoles
   logical, save :: FF_uses_sticky
   logical, save :: FF_uses_GayBerne
   logical, save :: FF_uses_EAM
@@ -101,6 +101,7 @@ module doForces
   logical, save :: SIM_uses_Electrostatics
   logical, save :: SIM_uses_Charges
   logical, save :: SIM_uses_Dipoles
+  logical, save :: SIM_uses_Quadrupoles
   logical, save :: SIM_uses_Sticky
   logical, save :: SIM_uses_GayBerne
   logical, save :: SIM_uses_EAM
@@ -131,6 +132,7 @@ module doForces
      logical :: is_Electrostatic = .false.
      logical :: is_Charge        = .false.
      logical :: is_Dipole        = .false.
+     logical :: is_Quadrupole    = .false.
      logical :: is_Sticky        = .false.
      logical :: is_GayBerne      = .false.
      logical :: is_EAM           = .false.
@@ -188,6 +190,9 @@ contains
        
        call getElementProperty(atypes, i, "is_Dipole", thisProperty)
        PropertyMap(i)%is_Dipole = thisProperty
+
+       call getElementProperty(atypes, i, "is_Quadrupole", thisProperty)
+       PropertyMap(i)%is_Quadrupole = thisProperty
 
        call getElementProperty(atypes, i, "is_Sticky", thisProperty)
        PropertyMap(i)%is_Sticky = thisProperty
@@ -306,7 +311,7 @@ contains
   
     FF_uses_DirectionalAtoms = .false.
     FF_uses_LennardJones = .false.
-    FF_uses_Electrostatic = .false.
+    FF_uses_Electrostatics = .false.
     FF_uses_Charges = .false.    
     FF_uses_Dipoles = .false.
     FF_uses_Sticky = .false.
@@ -326,21 +331,29 @@ contains
     call getMatchingElementList(atypes, "is_Electrostatic", .true., &
          nMatches, MatchList)
     if (nMatches .gt. 0) then
-       FF_uses_Electrostatic = .true.
+       FF_uses_Electrostatics = .true.
     endif
 
     call getMatchingElementList(atypes, "is_Charge", .true., &
          nMatches, MatchList)
     if (nMatches .gt. 0) then
-       FF_uses_charges = .true.   
-       FF_uses_electrostatic = .true.
+       FF_uses_Charges = .true.   
+       FF_uses_Electrostatics = .true.
     endif
     
     call getMatchingElementList(atypes, "is_Dipole", .true., &
          nMatches, MatchList)
     if (nMatches .gt. 0) then 
-       FF_uses_dipoles = .true.
-       FF_uses_electrostatic = .true.
+       FF_uses_Dipoles = .true.
+       FF_uses_Electrostatics = .true.
+       FF_uses_DirectionalAtoms = .true.
+    endif
+
+    call getMatchingElementList(atypes, "is_Quadrupole", .true., &
+         nMatches, MatchList)
+    if (nMatches .gt. 0) then 
+       FF_uses_Quadrupoles = .true.
+       FF_uses_Electrostatics = .true.
        FF_uses_DirectionalAtoms = .true.
     endif
     
@@ -920,27 +933,25 @@ contains
        
     endif
     
-    if (FF_uses_charges .and. SIM_uses_charges) then
+    if (FF_uses_Electrostatics .and. SIM_uses_Electrostatics) then
        
-       if (PropertyMap(me_i)%is_Charge .and. PropertyMap(me_j)%is_Charge) then
-          call do_charge_pair(i, j, d, r, rijsq, sw, vpair, fpair, &
-               pot, f, do_pot)
+       if (PropertyMap(me_i)%is_Electrostatic .and. &
+            PropertyMap(me_j)%is_Electrostatic) then
+          call doElectrostaticPair(i, j, d, r, rijsq, sw, vpair, fpair, &
+               pot, eFrame, f, t, do_pot)
        endif
        
-    endif
-    
-    if (FF_uses_dipoles .and. SIM_uses_dipoles) then
-       
-       if ( PropertyMap(me_i)%is_Dipole .and. PropertyMap(me_j)%is_Dipole) then
-          call do_dipole_pair(i, j, d, r, rijsq, sw, vpair, fpair, &
-               pot, eFrame, f, t, do_pot)
-          if (FF_uses_RF .and. SIM_uses_RF) then
-             call accumulate_rf(i, j, r, eFrame, sw)
-             call rf_correct_forces(i, j, d, r, eFrame, sw, f, fpair)
+       if (FF_uses_dipoles .and. SIM_uses_dipoles) then       
+          if ( PropertyMap(me_i)%is_Dipole .and. &
+               PropertyMap(me_j)%is_Dipole) then
+             if (FF_uses_RF .and. SIM_uses_RF) then
+                call accumulate_rf(i, j, r, eFrame, sw)
+                call rf_correct_forces(i, j, d, r, eFrame, sw, f, fpair)
+             endif
           endif
        endif
-
     endif
+
 
     if (FF_uses_Sticky .and. SIM_uses_sticky) then
 
@@ -1222,7 +1233,8 @@ contains
  function FF_UsesDirectionalAtoms() result(doesit)
    logical :: doesit
    doesit = FF_uses_DirectionalAtoms .or. FF_uses_Dipoles .or. &
-        FF_uses_Sticky .or. FF_uses_GayBerne .or. FF_uses_Shapes
+        FF_uses_Quadrupoles .or. FF_uses_Sticky .or. &
+        FF_uses_GayBerne .or. FF_uses_Shapes
  end function FF_UsesDirectionalAtoms
  
  function FF_RequiresPrepairCalc() result(doesit)
