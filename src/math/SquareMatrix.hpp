@@ -92,14 +92,14 @@ namespace oopse {
          * Returns the determinant of this matrix.
          * @todo need implementation
          */
-        double determinant() const {
-            double det;
+        Real determinant() const {
+            Real det;
             return det;
         }
 
         /** Returns the trace of this matrix. */
-        double trace() const {
-           double tmp = 0;
+        Real trace() const {
+           Real tmp = 0;
            
             for (unsigned int i = 0; i < Dim ; i++)
                 tmp += data_[i][i];
@@ -182,7 +182,7 @@ namespace oopse {
          * @param w output eigenvalues 
          * @param v output eigenvectors 
          */
-        bool jacobi(const SquareMatrix<Real, Dim>& a, Vector<Real, Dim>& w, 
+        bool jacobi(SquareMatrix<Real, Dim>& a, Vector<Real, Dim>& w, 
                               SquareMatrix<Real, Dim>& v);
     };//end SquareMatrix
 
@@ -191,12 +191,12 @@ namespace oopse {
 #define MAX_ROTATIONS 60
 
 template<typename Real, int Dim>
-bool SquareMatrix<Real, Dim>::jacobi(const SquareMatrix<Real, Dim>& a, Vector<Real, Dim>& w, 
+bool SquareMatrix<Real, Dim>::jacobi(SquareMatrix<Real, Dim>& a, Vector<Real, Dim>& w, 
                               SquareMatrix<Real, Dim>& v) {
     const int N = Dim;                                                                       
     int i, j, k, iq, ip;
-    double tresh, theta, tau, t, sm, s, h, g, c;
-    double tmp;
+    Real tresh, theta, tau, t, sm, s, h, g, c;
+    Real tmp;
     Vector<Real, Dim> b, z;
 
     // initialize

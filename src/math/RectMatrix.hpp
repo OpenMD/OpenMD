@@ -481,7 +481,9 @@ namespace oopse {
         for (unsigned int i = 0; i < Row ; i++) {
             o << "(";
             for (unsigned int j = 0; j < Col ; j++) {
-                o << m(i, j) << "\t";
+                o << m(i, j);
+                if (j != Col -1)
+                    o << "\t";
             }
             o << ")" << std::endl;
         }

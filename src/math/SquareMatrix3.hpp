@@ -59,12 +59,12 @@ namespace oopse {
             }
 
             SquareMatrix3(const Quaternion<Real>& q) {
-                *this = q.toRotationMatrix3();
+                setupRotMat(q);
+
             }
 
             SquareMatrix3(Real w, Real x, Real y, Real z) {
-                Quaternion<Real> q(w, x, y, z);
-                *this = q.toRotationMatrix3();
+                setupRotMat(w, x, y, z);
             }
             
             /** copy assignment operator */
@@ -119,7 +119,7 @@ namespace oopse {
              * @param quat
             */
             void setupRotMat(const Quaternion<Real>& quat) {
-                *this = quat.toRotationMatrix3();
+                setupRotMat(quat.w(), quat.x(), quat.y(), quat.z());
             }
 
             /**
@@ -196,13 +196,13 @@ namespace oopse {
              * z-axis (again). 
             */            
             Vector3<Real> toEulerAngles() {
-                Vector<Real> myEuler;
+                Vector3<Real> myEuler;
                 Real phi,theta,psi,eps;
                 Real ctheta,stheta;
                 
                 // set the tolerance for Euler angles and rotation elements
 
-                theta = acos(min(1.0,max(-1.0,data_[2][2])));
+                theta = acos(std::min(1.0, std::max(-1.0,data_[2][2])));
                 ctheta = data_[2][2]; 
                 stheta = sqrt(1.0 - ctheta * ctheta);
 
@@ -285,13 +285,13 @@ namespace oopse {
                 jacobi(a, w, v);
 
                 // if all the eigenvalues are the same, return identity matrix
-                if (w[0] == w[1] && w[0] == w[2] ){
+                if (w[0] == w[1] && w[0] == w[2] ) {
                       v = SquareMatrix3<Real>::identity();
-                      return
+                      return;
                 }
 
                 // transpose temporarily, it makes it easier to sort the eigenvectors
-                v = v.tanspose(); 
+                v = v.transpose(); 
                 
                 // if two eigenvalues are the same, re-orthogonalize to optimally line
                 // up the eigenvectors with the x, y, and z axes
@@ -335,7 +335,7 @@ namespace oopse {
                     v_maxI = v.getRow(maxI);
                     v_j = v.getRow(j);
                     v_k = cross(v_maxI, v_j);
-                    v_k.normailze();
+                    v_k.normalize();
                     v_j = cross(v_k, v_maxI);
                     v.setRow(j, v_j);
                     v.setRow(k, v_k);
@@ -386,7 +386,7 @@ namespace oopse {
                 }
 
                 // set sign of final eigenvector to ensure that determinant is positive
-                if (determinant(v) < 0) {
+                if (v.determinant() < 0) {
                     v(2, 0) = -v(2, 0);
                     v(2, 1) = -v(2, 1);
                     v(2, 2) = -v(2, 2);
