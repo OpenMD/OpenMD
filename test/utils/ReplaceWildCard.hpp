@@ -38,7 +38,7 @@
 
 namespace oopse{
 
-//use -1 to represent the wild card, it is easy and cheap to operate one integer (or index) instead of string
+//use -1 to represent the wild card, it is easy and cheap to handle integer
 const int WildCard = -1;
 
 std::vector<std::vector<int> > ReplaceWildCard(int beginIndex, int endIndex, int nWildCard);
@@ -55,6 +55,7 @@ std::vector<std::vector<int> > adjoint( const std::vector<int>& firstPart, const
  * //0, -1, 2
  * //0, 1, -1
  * //-1, -1, 2
+ * //-1, 1, -1 
  * //0, -1, -1
  * //-1, -1, -1
  * @endcode
@@ -105,7 +106,11 @@ std::vector<std::vector<int> > ReplaceWildCard(int beginIndex, int endIndex, int
         std::vector<std::vector<int> > sequences;
 
         for (int i = 0; i <=nRecursive; i ++) {
-            firstPart.push_back( beginIndex + i);
+          firstPart.clear();
+      	  for(int j = 0; j < i; ++j) {
+	      firstPart.push_back(beginIndex + j);
+	    }	    
+    	    firstPart.push_back(WildCard);
             secondPart = ReplaceWildCard(beginIndex + i + 1, endIndex, nWildCard - 1); 
             sequences = adjoint(firstPart, secondPart);
             results.insert(results.end(), sequences.begin(), sequences.end());			    
