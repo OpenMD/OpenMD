@@ -232,7 +232,7 @@ MakeDepend             = makedepend
 Install                = /usr/bin/install -c
 InstallProgram         = ${INSTALL}
 InstallData            = ${INSTALL} -m 644
-MakeDir                = /home/maul/gezelter/gezelter/OOPSE-2.0/ac-tools/shtool mkdir -p -f
+MakeDir                = /home/maul/gezelter/tim/code/OOPSE-2.0/ac-tools/shtool mkdir -p -f
 Delete                 = rm -fr
 StaticArchiver         = ar
 DynamicArchiver        = icc
@@ -501,11 +501,16 @@ ifneq "$(words $(CFiles))" "0"
 endif
 
 ifneq "$(words $(F90Files))" "0"
-	$(DEV_ROOT)/scripts/sfmakedepend  -I $(DEV_ROOT)/src -d '$$(DEV_ROOT)/obj' -f ./Make.ftemp -h *.F90
+	#$(DEV_ROOT)/scripts/sfmakedepend  -I $(DEV_ROOT)/src -d '$$(DEV_ROOT)/obj' -f ./Make.ftemp -h *.F90
+	#$(DEV_ROOT)/scripts/sfmakedepend  -I $(DEV_ROOT)/src -d '$$(DEV_ROOT)/MPIobj' -f ./Make.fmpitemp -h *.F90
+	#cat Make.ftemp >> $(DependencyFile)
+	#cat Make.fmpitemp >> $(DependencyFile)
+	$(DEV_ROOT)/scripts/filepp  -I $(DEV_ROOT)/src -od '$$(DEV_ROOT)/obj/' -D__F90  *.F90 > Make.ftemp
+	$(DEV_ROOT)/scripts/filepp  -I $(DEV_ROOT)/src -od '$$(DEV_ROOT)/MPIobj/' -DIS_MPI -D__F90  *.F90 >> Make.ftemp
 	cat Make.ftemp >> $(DependencyFile)
+
 endif
 	$(Delete) Make.cpptemp Make.ctemp Make.ftemp
-
 # make lib
 lib    : $(PackageListLoop)
 	$(Print) Libraries built.
