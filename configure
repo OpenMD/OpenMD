@@ -273,7 +273,7 @@ PACKAGE_VERSION='2.0'
 PACKAGE_STRING='OOPSE 2.0'
 PACKAGE_BUGREPORT='gezelter@nd.edu'
 
-ac_unique_file="src/applications/oopse.cpp"
+ac_unique_file="src/applications/oopse/oopse.cpp"
 ac_default_prefix="/usr/local"
 # Factoring default headers for most tests.
 ac_includes_default="\
@@ -1947,6 +1947,8 @@ host_os=`echo $ac_cv_host | sed 's/^\([^-]*\)-\([^-]*\)-\(.*\)$/\3/'`
 
 
 
+
+
 ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
@@ -3525,7 +3527,7 @@ _ACEOF
 ac_save_F90FLAGS=$F90FLAGS
 F90FLAGS="$F90FLAGS $ac_verb"
 
-(eval echo $as_me:3528: \"$ac_link\") >&5
+(eval echo $as_me:3530: \"$ac_link\") >&5
 ac_f90_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
 echo "$ac_f90_v_output" >&5
 F90FLAGS=$ac_save_F90FLAGS
@@ -3602,7 +3604,7 @@ _ACEOF
 ac_save_F90FLAGS=$F90FLAGS
 F90FLAGS="$F90FLAGS $ac_cv_prog_f90_v"
 
-(eval echo $as_me:3605: \"$ac_link\") >&5
+(eval echo $as_me:3607: \"$ac_link\") >&5
 ac_f90_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
 echo "$ac_f90_v_output" >&5
 F90FLAGS=$ac_save_F90FLAGS
@@ -7572,7 +7574,7 @@ esac
 
           ac_config_headers="$ac_config_headers src/config.h"
 
-          ac_config_files="$ac_config_files make/Make.conf"
+          ac_config_files="$ac_config_files make/Makefile"
 
 
 cat >confcache <<\_ACEOF
@@ -8103,7 +8105,7 @@ for ac_config_target in $ac_config_targets
 do
   case "$ac_config_target" in
   # Handling of arguments.
-  "make/Make.conf" ) CONFIG_FILES="$CONFIG_FILES make/Make.conf" ;;
+  "make/Makefile" ) CONFIG_FILES="$CONFIG_FILES make/Makefile" ;;
   "utils/getopt.h" ) CONFIG_LINKS="$CONFIG_LINKS utils/getopt.h:utils/gnugetopt.h" ;;
   "src/config.h" ) CONFIG_HEADERS="$CONFIG_HEADERS src/config.h" ;;
   *) { { echo "$as_me:$LINENO: error: invalid argument: $ac_config_target" >&5

@@ -6,7 +6,7 @@ AC_CONFIG_AUX_DIR(ac-tools)
 builtin(include, ac-tools/fortran90.m4)
 builtin(include, ac-tools/aclocal.m4)
 
-AC_CONFIG_SRCDIR([src/applications/oopse.cpp])
+AC_CONFIG_SRCDIR([src/applications/oopse/oopse.cpp])
 
 AC_PREFIX_DEFAULT("/usr/local")
 
@@ -27,6 +27,8 @@ AC_SUBST(debug)
 
 # who am i
 AC_CANONICAL_HOST
+
+
 
 dnl Checks for C compiler
 AC_PROG_CC([icc xlc gcc cc])
@@ -230,6 +232,6 @@ AC_SUBST(LDFLAGS)
 AC_SUBST(PREPFLAG)
 AC_SUBST(PREPDEFFLAG)
 AC_CONFIG_HEADER([src/config.h])
-AC_CONFIG_FILES([make/Make.conf])
+AC_CONFIG_FILES([make/Makefile])
 
 AC_OUTPUT
