@@ -12,8 +12,7 @@ class SquareMatrixTestCase : public CPPUNIT_NS::TestFixture {
     CPPUNIT_TEST_SUITE( SquareMatrixTestCase );
     CPPUNIT_TEST(testConstructor);
     CPPUNIT_TEST(testIdentity);
-    CPPUNIT_TEST(testInverse);
-    CPPUNIT_TEST(testDeterminant);
+    CPPUNIT_TEST(testJacobi);
     CPPUNIT_TEST(testTrace);
     CPPUNIT_TEST(testIsSymmertric);
     CPPUNIT_TEST(testIsOrthogonal);
@@ -26,8 +25,7 @@ class SquareMatrixTestCase : public CPPUNIT_NS::TestFixture {
 
         void testConstructor();
         void testIdentity();
-        void testInverse();
-        void testDeterminant();
+        void testJacobi();
         void testTrace();
         void testIsSymmertric();
         void testIsOrthogonal();

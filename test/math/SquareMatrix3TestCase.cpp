@@ -140,28 +140,33 @@ void SquareMatrix3TestCase::testTransformation(){
 
     //test diagonalize
 
-    RotMat3x3d m4;
+    RotMat3x3d m4;    
     RotMat3x3d a;
     Vector3d w;
-    RotMat3x3d v;
-    m4(0,0) = 1.0;
-    m4(0,1) = 5.0;
-    m4(0,2) = 3.0;
-    m4(1,0) = 3.0;
-    m4(1,1) = 1.0;
-    m4(1,2) = 2.0;
-    m4(2,0) = 0.0;
-    m4(2,1) = -21.0;
-    m4(2,2) = -81.0; 
-    m4.diagonalize(a, w, v);
+    RotMat3x3d m5L;
+    RotMat3x3d m5R;
+    m4(0, 0) = 3.0;
+    m4(0, 1) = 4.0;
+    m4(0, 2) = 5.0;
+    m4(1, 0) = 4.0;
+    m4(1, 1) = 5.0;
+    m4(1, 2) = 6.0;    
+    m4(2, 0) = 5.0;
+    m4(2, 1) = 6.0;
+    m4(2, 2) = 7.0; 
+    a = m4;
+    
+    RotMat3x3d::diagonalize(a, w, m5L);
 
-    std::cout << std::endl;
-    std::cout << a << std::endl;    
+    m5R(0, 0) = 0.789067 ;
+    m5R(0, 1) = -0.408248;
+    m5R(0, 2) = 0.459028;
+    m5R(1, 0) = 0.090750;
+    m5R(1, 1) = 0.816497;
+    m5R(1, 2) = 0.570173;    
+    m5R(2, 0) = -0.607567;
+    m5R(2, 1) = -0.408248 ;
+    m5R(2, 2) = 0.681319; 
 
-    std::cout << std::endl;
-    std::cout << w << std::endl;    
-
-    std::cout << std::endl;
-    std::cout << v << std::endl;    
-
+    CPPUNIT_ASSERT(m5L == m5R);
 }

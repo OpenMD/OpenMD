@@ -55,11 +55,31 @@ void SquareMatrixTestCase::testIdentity() {
     CPPUNIT_ASSERT(SMat3x3::identity() == identMat);
 }
 
-void SquareMatrixTestCase::testInverse() {
 
-}
+void SquareMatrixTestCase::testJacobi() {
+    SMat3x3 a;
+    Vector<double, 3> w1L;
+    Vector<double, 3> w1R;    
+    SMat3x3 v;
+    a(0, 0) = 3.0;
+    a(0, 1) = 4.0;
+    a(0, 2) = 5.0;
+    a(1, 0) = 4.0;
+    a(1, 1) = 5.0;
+    a(1, 2) = 6.0;    
+    a(2, 0) = 5.0;
+    a(2, 1) = 6.0;
+    a(2, 2) = 7.0;   
 
-void SquareMatrixTestCase::testDeterminant() {
+    w1R[0] = 15.3899;
+    w1R[1] = 0.0;
+    w1R[2] = -0.389867;
+    
+    SMat3x3::jacobi(a, w1L, v);
+
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(w1L[0], w1R[0], 0.0001);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(w1L[1], w1R[1], oopse::epsilon);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(w1L[2], w1R[2], oopse::epsilon);
 
 }
 

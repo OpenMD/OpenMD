@@ -29,7 +29,7 @@
  * @date 10/11/2004
  * @version 1.0
  */
-#ifndef MATH_SQUAREMATRIX3_HPP
+ #ifndef MATH_SQUAREMATRIX3_HPP
 #define  MATH_SQUAREMATRIX3_HPP
 
 #include "Quaternion.hpp"
@@ -275,131 +275,158 @@ namespace oopse {
                 m /= det;
                 return m;
             }
-
-            void diagonalize(SquareMatrix3<Real>& a, Vector3<Real>& w, SquareMatrix3<Real>& v) {
-                int i,j,k,maxI;
-                Real tmp, maxVal;
-                Vector3<Real> v_maxI, v_k, v_j;
-
-                // diagonalize using Jacobi
-                jacobi(a, w, v);
-
-                // if all the eigenvalues are the same, return identity matrix
-                if (w[0] == w[1] && w[0] == w[2] ) {
-                      v = SquareMatrix3<Real>::identity();
-                      return;
-                }
-
-                // transpose temporarily, it makes it easier to sort the eigenvectors
-                v = v.transpose(); 
-                
-                // if two eigenvalues are the same, re-orthogonalize to optimally line
-                // up the eigenvectors with the x, y, and z axes
-                for (i = 0; i < 3; i++) {
-                    if (w((i+1)%3) == w((i+2)%3)) {// two eigenvalues are the same
-                    // find maximum element of the independant eigenvector
-                    maxVal = fabs(v(i, 0));
-                    maxI = 0;
-                    for (j = 1; j < 3; j++) {
-                        if (maxVal < (tmp = fabs(v(i, j)))){
-                            maxVal = tmp;
-                            maxI = j;
-                        }
-                    }
-                    
-                    // swap the eigenvector into its proper position
-                    if (maxI != i) {
-                        tmp = w(maxI);
-                        w(maxI) = w(i);
-                        w(i) = tmp;
-
-                        v.swapRow(i, maxI);
-                    }
-                    // maximum element of eigenvector should be positive
-                    if (v(maxI, maxI) < 0) {
-                        v(maxI, 0) = -v(maxI, 0);
-                        v(maxI, 1) = -v(maxI, 1);
-                        v(maxI, 2) = -v(maxI, 2);
-                    }
-
-                    // re-orthogonalize the other two eigenvectors
-                    j = (maxI+1)%3;
-                    k = (maxI+2)%3;
-
-                    v(j, 0) = 0.0; 
-                    v(j, 1) = 0.0; 
-                    v(j, 2) = 0.0;
-                    v(j, j) = 1.0;
-
-                    /** @todo */
-                    v_maxI = v.getRow(maxI);
-                    v_j = v.getRow(j);
-                    v_k = cross(v_maxI, v_j);
-                    v_k.normalize();
-                    v_j = cross(v_k, v_maxI);
-                    v.setRow(j, v_j);
-                    v.setRow(k, v_k);
-
-
-                    // transpose vectors back to columns
-                    v = v.transpose();
-                    return;
-                    }
-                }
-
-                // the three eigenvalues are different, just sort the eigenvectors
-                // to align them with the x, y, and z axes
-
-                // find the vector with the largest x element, make that vector
-                // the first vector
-                maxVal = fabs(v(0, 0));
-                maxI = 0;
-                for (i = 1; i < 3; i++) {
-                    if (maxVal < (tmp = fabs(v(i, 0)))) {
-                        maxVal = tmp;
-                        maxI = i;
-                    }
-                }
-
-                // swap eigenvalue and eigenvector
-                if (maxI != 0) {
-                    tmp = w(maxI);
-                    w(maxI) = w(0);
-                    w(0) = tmp;
-                    v.swapRow(maxI, 0);
-                }
-                // do the same for the y element
-                if (fabs(v(1, 1)) < fabs(v(2, 1))) {
-                    tmp = w(2);
-                    w(2) = w(1);
-                    w(1) = tmp;
-                    v.swapRow(2, 1);
-                }
-
-                // ensure that the sign of the eigenvectors is correct
-                for (i = 0; i < 2; i++) {
-                    if (v(i, i) < 0) {
-                        v(i, 0) = -v(i, 0);
-                        v(i, 1) = -v(i, 1);
-                        v(i, 2) = -v(i, 2);
-                    }
-                }
-
-                // set sign of final eigenvector to ensure that determinant is positive
-                if (v.determinant() < 0) {
-                    v(2, 0) = -v(2, 0);
-                    v(2, 1) = -v(2, 1);
-                    v(2, 2) = -v(2, 2);
-                }
-
-                // transpose the eigenvectors back again
-                v = v.transpose();
-                return ;
-            }
+            /**
+             * Extract the eigenvalues and eigenvectors from a 3x3 matrix.
+             * The eigenvectors (the columns of V) will be normalized. 
+             * The eigenvectors are aligned optimally with the x, y, and z
+             * axes respectively.
+             * @param a symmetric matrix whose eigenvectors are to be computed. On return, the matrix is
+             *     overwritten             
+             * @param w will contain the eigenvalues of the matrix On return of this function
+             * @param v the columns of this matrix will contain the eigenvectors. The eigenvectors are 
+             *    normalized and mutually orthogonal.              
+             * @warning a will be overwritten
+             */
+            static void diagonalize(SquareMatrix3<Real>& a, Vector3<Real>& w, SquareMatrix3<Real>& v); 
     };
+/*=========================================================================
 
+  Program:   Visualization Toolkit
+  Module:    $RCSfile: SquareMatrix3.hpp,v $
+
+  Copyright (c) Ken Martin, Will Schroeder, Bill Lorensen
+  All rights reserved.
+  See Copyright.txt or http://www.kitware.com/Copyright.htm for details.
+
+     This software is distributed WITHOUT ANY WARRANTY; without even
+     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+     PURPOSE.  See the above copyright notice for more information.
+
+=========================================================================*/
+    template<typename Real>
+    void SquareMatrix3<Real>::diagonalize(SquareMatrix3<Real>& a, Vector3<Real>& w, 
+                                                                           SquareMatrix3<Real>& v) {
+        int i,j,k,maxI;
+        Real tmp, maxVal;
+        Vector3<Real> v_maxI, v_k, v_j;
+
+        // diagonalize using Jacobi
+        jacobi(a, w, v);
+        // if all the eigenvalues are the same, return identity matrix
+        if (w[0] == w[1] && w[0] == w[2] ) {
+              v = SquareMatrix3<Real>::identity();
+              return;
+        }
+
+        // transpose temporarily, it makes it easier to sort the eigenvectors
+        v = v.transpose(); 
+        
+        // if two eigenvalues are the same, re-orthogonalize to optimally line
+        // up the eigenvectors with the x, y, and z axes
+        for (i = 0; i < 3; i++) {
+            if (w((i+1)%3) == w((i+2)%3)) {// two eigenvalues are the same
+            // find maximum element of the independant eigenvector
+            maxVal = fabs(v(i, 0));
+            maxI = 0;
+            for (j = 1; j < 3; j++) {
+                if (maxVal < (tmp = fabs(v(i, j)))){
+                    maxVal = tmp;
+                    maxI = j;
+                }
+            }
+            
+            // swap the eigenvector into its proper position
+            if (maxI != i) {
+                tmp = w(maxI);
+                w(maxI) = w(i);
+                w(i) = tmp;
+
+                v.swapRow(i, maxI);
+            }
+            // maximum element of eigenvector should be positive
+            if (v(maxI, maxI) < 0) {
+                v(maxI, 0) = -v(maxI, 0);
+                v(maxI, 1) = -v(maxI, 1);
+                v(maxI, 2) = -v(maxI, 2);
+            }
+
+            // re-orthogonalize the other two eigenvectors
+            j = (maxI+1)%3;
+            k = (maxI+2)%3;
+
+            v(j, 0) = 0.0; 
+            v(j, 1) = 0.0; 
+            v(j, 2) = 0.0;
+            v(j, j) = 1.0;
+
+            /** @todo */
+            v_maxI = v.getRow(maxI);
+            v_j = v.getRow(j);
+            v_k = cross(v_maxI, v_j);
+            v_k.normalize();
+            v_j = cross(v_k, v_maxI);
+            v.setRow(j, v_j);
+            v.setRow(k, v_k);
+
+
+            // transpose vectors back to columns
+            v = v.transpose();
+            return;
+            }
+        }
+
+        // the three eigenvalues are different, just sort the eigenvectors
+        // to align them with the x, y, and z axes
+
+        // find the vector with the largest x element, make that vector
+        // the first vector
+        maxVal = fabs(v(0, 0));
+        maxI = 0;
+        for (i = 1; i < 3; i++) {
+            if (maxVal < (tmp = fabs(v(i, 0)))) {
+                maxVal = tmp;
+                maxI = i;
+            }
+        }
+
+        // swap eigenvalue and eigenvector
+        if (maxI != 0) {
+            tmp = w(maxI);
+            w(maxI) = w(0);
+            w(0) = tmp;
+            v.swapRow(maxI, 0);
+        }
+        // do the same for the y element
+        if (fabs(v(1, 1)) < fabs(v(2, 1))) {
+            tmp = w(2);
+            w(2) = w(1);
+            w(1) = tmp;
+            v.swapRow(2, 1);
+        }
+
+        // ensure that the sign of the eigenvectors is correct
+        for (i = 0; i < 2; i++) {
+            if (v(i, i) < 0) {
+                v(i, 0) = -v(i, 0);
+                v(i, 1) = -v(i, 1);
+                v(i, 2) = -v(i, 2);
+            }
+        }
+
+        // set sign of final eigenvector to ensure that determinant is positive
+        if (v.determinant() < 0) {
+            v(2, 0) = -v(2, 0);
+            v(2, 1) = -v(2, 1);
+            v(2, 2) = -v(2, 2);
+        }
+
+        // transpose the eigenvectors back again
+        v = v.transpose();
+        return ;
+    }
     typedef SquareMatrix3<double> Mat3x3d;
     typedef SquareMatrix3<double> RotMat3x3d;
 
 } //namespace oopse
 #endif // MATH_SQUAREMATRIX_HPP
+

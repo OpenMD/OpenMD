@@ -1,3 +1,123 @@
+2004-10-20 00:52  tim
+
+	* src/brains/: Snapshot.hpp, SnapshotManager.hpp: Snapshot and
+	SnapshotManager in design phase
+
+2004-10-19 23:54  gezelter
+
+	* src/: brains/SimSetup.cpp, utils/StringUtils.cpp: namespace
+	problem prevented linking
+
+2004-10-19 23:54  gezelter
+
+	* src/UseTheForce/Shapes_FF.cpp: fixed include
+
+2004-10-19 23:26  gezelter
+
+	* src/utils/: Makefile, definitions.F90, definitions_module.F90,
+	oopseMPI.F90, oopseMPI_module.F90, status.F90, status_module.F90:
+	more fortran name mangling
+
+2004-10-19 23:23  gezelter
+
+	* src/profiling/timing.F90: yet more fortran renaming
+
+2004-10-19 23:19  gezelter
+
+	* src/UseTheForce/: Makefile, doForces.F90, doForces_interface.h,
+	do_Forces.F90, do_Forces.h, notifyCutoffs.F90,
+	notifyCutoffs_interface.h, notifycutoffs_module_interface.h,
+	wrappers.F90: Fortran name cleanup continues
+
+2004-10-19 23:12  gezelter
+
+	* src/UseTheForce/DarkSide/: atype.F90, simulation.F90: fixing some
+	broken fortran stuff
+
+2004-10-19 23:02  gezelter
+
+	* src/UseTheForce/DarkSide/: LJ.F90, Makefile, atype.F90,
+	atype_interface.h, atype_module.F90, atype_module_interface.h,
+	calc_LJ_FF.F90, calc_charge_charge.F90, calc_dipole_dipole.F90,
+	calc_eam.F90, calc_gb.F90, calc_reaction_field.F90,
+	calc_shapes.F90, calc_sticky_pair.F90, charge.F90, dipole.F90,
+	eam.F90, eam_interface.h, eam_module_inteface.h, gb.F90,
+	gb_interface.h, gb_module_interface.h, mpiSimulation.F90,
+	mpiSimulation_interface.h, mpiSimulation_module.F90,
+	mpisimulation_module_interface.h, reactionField.F90, shapes.F90,
+	shapes_interface.h, shapes_module.h, simulation.F90,
+	simulation_interface.h, simulation_module.F90,
+	simulation_module_interface.h, sticky.F90, sticky_interface.h,
+	sticky_pair_module_interface.h, switch_module.F90, switcheroo.F90:
+	name sanity on the fortran side
+
+2004-10-19 19:18  tim
+
+	* test/math/SquareMatrix3TestCase.hpp: [no log message]
+
+2004-10-19 18:01  tim
+
+	* src/math/RectMatrix.hpp, src/math/SquareMatrix.hpp,
+	src/math/SquareMatrix3.hpp, test/math/SquareMatrix3TestCase.cpp:
+	except diagonalize(), all of functions in math library pass the
+	test
+
+2004-10-19 17:43  chuckv
+
+	* src/UseTheForce/do_Forces.h: Added correct prototypes for
+	C-fortran interface functions.
+
+2004-10-19 17:37  chuckv
+
+	* src/UseTheForce/DarkSide/: atype_module_interface.h,
+	eam_module_inteface.h, gb_module_interface.h,
+	mpisimulation_module_interface.h, simulation_module_interface.h,
+	sticky_pair_module_interface.h: Added correct prototypes for
+	C-fortran interface functions.
+
+2004-10-19 16:28  tim
+
+	* ChangeLog, src/math/Quaternion.hpp, src/math/RectMatrix.hpp,
+	src/math/SquareMatrix.hpp, src/math/Vector.hpp,
+	test/math/QuaternionTestCase.cpp, test/math/QuaternionTestCase.hpp,
+	test/math/RectMatrixTestCase.cpp,
+	test/math/SquareMatrix3TestCase.cpp, test/math/Vector3TestCase.cpp,
+	test/math/Vector3TestCase.hpp, test/math/VectorTestCase.cpp: more
+	bugs get fixed at math library
+
+2004-10-19 15:43  chuckv
+
+	* src/UseTheForce/: DarkSide/atype_module_interface.h,
+	DarkSide/eam_module_inteface.h, DarkSide/gb_module_interface.h,
+	DarkSide/mpisimulation_module_interface.h,
+	DarkSide/simulation_module_interface.h,
+	DarkSide/sticky_pair_module_interface.h, DarkSide/calc_eam.F90,
+	DarkSide/atype_module.F90, DarkSide/calc_gb.F90,
+	DarkSide/calc_sticky_pair.F90, DarkSide/mpiSimulation_module.F90,
+	DarkSide/simulation_module.F90, do_Forces.F90,
+	fortranWrapDefines.hpp, mpiComponentPlan.h, notifyCutoffs.F90,
+	notifycutoffs_module_interface.h: Added new files for fortran
+	interface.
+
+2004-10-19 15:43  gezelter
+
+	* src/UseTheForce/Makefile: regressing
+
+2004-10-19 15:40  gezelter
+
+	* src/: UseTheForce/DarkSide/calc_shapes.F90,
+	UseTheForce/DarkSide/shapes_module.h, utils/StringUtils.cpp:
+	working on shapes for portability
+
+2004-10-19 15:40  gezelter
+
+	* src/UseTheForce/: Makefile, Shapes_FF.cpp: working on shapes
+
+2004-10-19 13:21  chrisfen
+
+	* src/utils/: StringUtils.cpp, StringUtils.hpp: changed around
+	findBegin
+
 2004-10-18 23:34  tim
 
 	* src/math/Vector.hpp, test/math/RectMatrixTestCase.cpp: more bugs

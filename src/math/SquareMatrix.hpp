@@ -29,7 +29,7 @@
  * @date 10/11/2004
  * @version 1.0
  */
-#ifndef MATH_SQUAREMATRIX_HPP 
+ #ifndef MATH_SQUAREMATRIX_HPP 
 #define MATH_SQUAREMATRIX_HPP 
 
 #include "math/RectMatrix.hpp"
@@ -154,172 +154,238 @@ namespace oopse {
         }
 
         /**
-         * Finds the eigenvalues and eigenvectors of a symmetric matrix
-         * @param eigenvals a reference to a vector3 where the
-         * eigenvalues will be stored. The eigenvalues are ordered so
-         * that eigenvals[0] <= eigenvals[1] <= eigenvals[2].
-         * @return an orthogonal matrix whose ith column is an
-         * eigenvector for the eigenvalue eigenvals[i]
-         */
-        SquareMatrix<Real, Dim>  findEigenvectors(Vector<Real, Dim>& eigenValues) {
-            SquareMatrix<Real, Dim> ortMat;
-            
-            if ( !isSymmetric()){
-                //throw();
-            }
-            
-            SquareMatrix<Real, Dim> m(*this);
-            jacobi(m, eigenValues, ortMat);
-
-            return ortMat;
-        }
-        /**
          * Jacobi iteration routines for computing eigenvalues/eigenvectors of 
          * real symmetric matrix
          *
          * @return true if success, otherwise return false
-         * @param a source matrix
-         * @param w output eigenvalues 
-         * @param v output eigenvectors 
+         * @param a symmetric matrix whose eigenvectors are to be computed. On return, the matrix is
+         *     overwritten
+         * @param w will contain the eigenvalues of the matrix On return of this function
+         * @param v the columns of this matrix will contain the eigenvectors. The eigenvectors are 
+         *    normalized and mutually orthogonal. 
          */
-        bool jacobi(SquareMatrix<Real, Dim>& a, Vector<Real, Dim>& w, 
+       
+        static int jacobi(SquareMatrix<Real, Dim>& a, Vector<Real, Dim>& d, 
                               SquareMatrix<Real, Dim>& v);
     };//end SquareMatrix
 
 
-#define ROT(a,i,j,k,l) g=a(i, j);h=a(k, l);a(i, j)=g-s*(h+g*tau);a(k, l)=h+s*(g-h*tau)
-#define MAX_ROTATIONS 60
+/*=========================================================================
 
-template<typename Real, int Dim>
-bool SquareMatrix<Real, Dim>::jacobi(SquareMatrix<Real, Dim>& a, Vector<Real, Dim>& w, 
-                              SquareMatrix<Real, Dim>& v) {
-    const int N = Dim;                                                                       
-    int i, j, k, iq, ip;
-    Real tresh, theta, tau, t, sm, s, h, g, c;
-    Real tmp;
-    Vector<Real, Dim> b, z;
+  Program:   Visualization Toolkit
+  Module:    $RCSfile: SquareMatrix.hpp,v $
 
-    // initialize
-    for (ip=0; ip<N; ip++) {
-        for (iq=0; iq<N; iq++)
-            v(ip, iq) = 0.0;
+  Copyright (c) Ken Martin, Will Schroeder, Bill Lorensen
+  All rights reserved.
+  See Copyright.txt or http://www.kitware.com/Copyright.htm for details.
+
+     This software is distributed WITHOUT ANY WARRANTY; without even
+     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+     PURPOSE.  See the above copyright notice for more information.
+
+=========================================================================*/
+
+#define VTK_ROTATE(a,i,j,k,l) g=a(i, j);h=a(k, l);a(i, j)=g-s*(h+g*tau);\
+        a(k, l)=h+s*(g-h*tau)
+
+#define VTK_MAX_ROTATIONS 20
+
+    // Jacobi iteration for the solution of eigenvectors/eigenvalues of a nxn
+    // real symmetric matrix. Square nxn matrix a; size of matrix in n;
+    // output eigenvalues in w; and output eigenvectors in v. Resulting
+    // eigenvalues/vectors are sorted in decreasing order; eigenvectors are
+    // normalized.
+    template<typename Real, int Dim>
+    int SquareMatrix<Real, Dim>::jacobi(SquareMatrix<Real, Dim>& a, Vector<Real, Dim>& w, 
+                                  SquareMatrix<Real, Dim>& v) {
+      const int n = Dim;  
+      int i, j, k, iq, ip, numPos;
+      Real tresh, theta, tau, t, sm, s, h, g, c, tmp;
+      Real bspace[4], zspace[4];
+      Real *b = bspace;
+      Real *z = zspace;
+
+      // only allocate memory if the matrix is large
+      if (n > 4)
+        {
+        b = new Real[n];
+        z = new Real[n]; 
+        }
+
+      // initialize
+      for (ip=0; ip<n; ip++) 
+        {
+        for (iq=0; iq<n; iq++)
+          {
+          v(ip, iq) = 0.0;
+          }
         v(ip, ip) = 1.0;
-    }
-    
-    for (ip=0; ip<N; ip++) {
-        b(ip) = w(ip) = a(ip, ip);
-        z(ip) = 0.0;
-    }
+        }
+      for (ip=0; ip<n; ip++) 
+        {
+        b[ip] = w[ip] = a(ip, ip);
+        z[ip] = 0.0;
+        }
 
-    // begin rotation sequence
-    for (i=0; i<MAX_ROTATIONS; i++) {
+      // begin rotation sequence
+      for (i=0; i<VTK_MAX_ROTATIONS; i++) 
+        {
         sm = 0.0;
-        for (ip=0; ip<2; ip++) {
-            for (iq=ip+1; iq<N; iq++)
-                sm += fabs(a(ip, iq));
-        }
-        
+        for (ip=0; ip<n-1; ip++) 
+          {
+          for (iq=ip+1; iq<n; iq++)
+            {
+            sm += fabs(a(ip, iq));
+            }
+          }
         if (sm == 0.0)
-            break;
+          {
+          break;
+          }
 
-        if (i < 4)
-            tresh = 0.2*sm/(9);
+        if (i < 3)                                // first 3 sweeps
+          {
+          tresh = 0.2*sm/(n*n);
+          }
         else
-            tresh = 0.0;
+          {
+          tresh = 0.0;
+          }
 
-        for (ip=0; ip<2; ip++) {
-            for (iq=ip+1; iq<N; iq++) {
-                g = 100.0*fabs(a(ip, iq));
-                if (i > 4 && (fabs(w(ip))+g) == fabs(w(ip))
-                    && (fabs(w(iq))+g) == fabs(w(iq))) {
-                    a(ip, iq) = 0.0;
-                } else if (fabs(a(ip, iq)) > tresh) {
-                    h = w(iq) - w(ip);
-                    if ( (fabs(h)+g) == fabs(h)) {
-                        t = (a(ip, iq)) / h;
-                    } else {
-                        theta = 0.5*h / (a(ip, iq));
-                        t = 1.0 / (fabs(theta)+sqrt(1.0+theta*theta));
+        for (ip=0; ip<n-1; ip++) 
+          {
+          for (iq=ip+1; iq<n; iq++) 
+            {
+            g = 100.0*fabs(a(ip, iq));
 
-                        if (theta < 0.0)
-                            t = -t;
-                    }
-
-                    c = 1.0 / sqrt(1+t*t);
-                    s = t*c;
-                    tau = s/(1.0+c);
-                    h = t*a(ip, iq);
-                    z(ip) -= h;
-                    z(iq) += h;
-                    w(ip) -= h;
-                    w(iq) += h;
-                    a(ip, iq)=0.0;
-                    
-                    for (j=0;j<ip-1;j++) 
-                        ROT(a,j,ip,j,iq);
-
-                    for (j=ip+1;j<iq-1;j++) 
-                        ROT(a,ip,j,j,iq);
-
-                    for (j=iq+1; j<N; j++) 
-                        ROT(a,ip,j,iq,j);
-                    
-                    for (j=0; j<N; j++) 
-                        ROT(v,j,ip,j,iq);
+            // after 4 sweeps
+            if (i > 3 && (fabs(w[ip])+g) == fabs(w[ip])
+            && (fabs(w[iq])+g) == fabs(w[iq]))
+              {
+              a(ip, iq) = 0.0;
+              }
+            else if (fabs(a(ip, iq)) > tresh) 
+              {
+              h = w[iq] - w[ip];
+              if ( (fabs(h)+g) == fabs(h))
+                {
+                t = (a(ip, iq)) / h;
                 }
+              else 
+                {
+                theta = 0.5*h / (a(ip, iq));
+                t = 1.0 / (fabs(theta)+sqrt(1.0+theta*theta));
+                if (theta < 0.0)
+                  {
+                  t = -t;
+                  }
+                }
+              c = 1.0 / sqrt(1+t*t);
+              s = t*c;
+              tau = s/(1.0+c);
+              h = t*a(ip, iq);
+              z[ip] -= h;
+              z[iq] += h;
+              w[ip] -= h;
+              w[iq] += h;
+              a(ip, iq)=0.0;
+
+              // ip already shifted left by 1 unit
+              for (j = 0;j <= ip-1;j++) 
+                {
+                VTK_ROTATE(a,j,ip,j,iq);
+                }
+              // ip and iq already shifted left by 1 unit
+              for (j = ip+1;j <= iq-1;j++) 
+                {
+                VTK_ROTATE(a,ip,j,j,iq);
+                }
+              // iq already shifted left by 1 unit
+              for (j=iq+1; j<n; j++) 
+                {
+                VTK_ROTATE(a,ip,j,iq,j);
+                }
+              for (j=0; j<n; j++) 
+                {
+                VTK_ROTATE(v,j,ip,j,iq);
+                }
+              }
             }
-        }//for (ip=0; ip<2; ip++) 
+          }
 
-        for (ip=0; ip<N; ip++) {
-            b(ip) += z(ip);
-            w(ip) = b(ip);
-            z(ip) = 0.0;
+        for (ip=0; ip<n; ip++) 
+          {
+          b[ip] += z[ip];
+          w[ip] = b[ip];
+          z[ip] = 0.0;
+          }
         }
-        
-    } // end for (i=0; i<MAX_ROTATIONS; i++) 
 
-    if ( i >= MAX_ROTATIONS )
-        return false;
+      //// this is NEVER called
+      if ( i >= VTK_MAX_ROTATIONS )
+        {
+           std::cout << "vtkMath::Jacobi: Error extracting eigenfunctions" << std::endl;
+           return 0;
+        }
 
-    // sort eigenfunctions
-    for (j=0; j<N; j++) {
+      // sort eigenfunctions                 these changes do not affect accuracy 
+      for (j=0; j<n-1; j++)                  // boundary incorrect
+        {
         k = j;
-        tmp = w(k);
-        for (i=j; i<N; i++) {
-            if (w(i) >= tmp) {
+        tmp = w[k];
+        for (i=j+1; i<n; i++)                // boundary incorrect, shifted already
+          {
+          if (w[i] >= tmp)                   // why exchage if same?
+            {
             k = i;
-            tmp = w(k);
+            tmp = w[k];
             }
-        }
-    
-        if (k != j) {
-            w(k) = w(j);
-            w(j) = tmp;
-            for (i=0; i<N; i++)  {
-                tmp = v(i, j);
-                v(i, j) = v(i, k);
-                v(i, k) = tmp;
+          }
+        if (k != j) 
+          {
+          w[k] = w[j];
+          w[j] = tmp;
+          for (i=0; i<n; i++) 
+            {
+            tmp = v(i, j);
+            v(i, j) = v(i, k);
+            v(i, k) = tmp;
             }
+          }
         }
+      // insure eigenvector consistency (i.e., Jacobi can compute vectors that
+      // are negative of one another (.707,.707,0) and (-.707,-.707,0). This can
+      // reek havoc in hyperstreamline/other stuff. We will select the most
+      // positive eigenvector.
+      int ceil_half_n = (n >> 1) + (n & 1);
+      for (j=0; j<n; j++)
+        {
+        for (numPos=0, i=0; i<n; i++)
+          {
+          if ( v(i, j) >= 0.0 )
+            {
+            numPos++;
+            }
+          }
+    //    if ( numPos < ceil(double(n)/double(2.0)) )
+        if ( numPos < ceil_half_n)
+          {
+          for(i=0; i<n; i++)
+            {
+            v(i, j) *= -1.0;
+            }
+          }
+        }
+
+      if (n > 4)
+        {
+        delete [] b;
+        delete [] z;
+        }
+      return 1;
     }
 
-    //    insure eigenvector consistency (i.e., Jacobi can compute
-    //    vectors that are negative of one another (.707,.707,0) and
-    //    (-.707,-.707,0). This can reek havoc in
-    //    hyperstreamline/other stuff. We will select the most
-    //    positive eigenvector.
-    int numPos;
-    for (j=0; j<N; j++) {
-        for (numPos=0, i=0; i<N; i++) if ( v(i, j) >= 0.0 ) numPos++;
-        if ( numPos < 2 ) for(i=0; i<N; i++) v(i, j) *= -1.0;
-    }
-
-    return true;
-}
-
-#undef ROT
-#undef MAX_ROTATIONS
 
 }
-
 #endif //MATH_SQUAREMATRIX_HPP 
+
