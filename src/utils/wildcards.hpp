@@ -11,9 +11,9 @@
 // Thanks to the E.S.O. - ACS project that has done this C++ interface
 // to the wildcards pttern matching algorithm
 
-#ifndef __cplusplus
-#error This is a C++ include file and cannot be used from plain C
-#endif
+//#ifndef __cplusplus
+//#error This is a C++ include file and cannot be used from plain C
+//#endif
 
 // Implementation of the UN*X wildcards
 // Supported wild-characters: '*', '?'; sets: [a-z], '!' negation
