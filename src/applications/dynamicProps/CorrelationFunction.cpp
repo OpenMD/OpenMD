@@ -95,7 +95,7 @@ CorrelationFunction::CorrelationFunction(SimInfo* info, const std::string& filen
 }
 
 
-CorrelationFunction::doCorrelate() {
+void CorrelationFunction::doCorrelate() {
     preCorrelate();
 
     int nblocks = bsMan_->getNBlocks();

@@ -53,8 +53,7 @@
 #include <math/Vector3.hpp>
 #include <math/SquareMatrix3.hpp>
 
-using namespace oopse;
-
+namespace oopse {
     /**
      * @class DataStorage
      * @warning do not try to insert element into (or ease element from) private member data 
@@ -117,6 +116,8 @@ using namespace oopse;
             std::vector<Vector3d> force;               /** force array */
             std::vector<Vector3d> torque;               /** torque array */
 
+            static int getBytesPerStuntDouble(int layout);
+
         private:
 
             double* internalGetArrayPointer(std::vector<Vector3d>& v);
@@ -135,5 +136,5 @@ using namespace oopse;
 
     };
 
-
+}
 #endif //BRAINS_DATASTORAGE_HPP

@@ -40,6 +40,7 @@
  */
 #ifndef BRAINS_BLOCKSNAPSHOTMANAGER_HPP
 #define BRAINS_BLOCKSNAPSHOTMANAGER_HPP
+#include <vector>
 
 #include "brains/SnapshotManager.hpp"
 namespace oopse {
@@ -59,7 +60,7 @@ class BlockSnapshotMananger : public SnapshotManager{
         BlockSnapshotMananger(SimInfo* info, const std::string& filename, int storageLayout, int blockCapacity = 2);
         ~BlockSnapshotMananger();
         
-        virtual Snapshot* getSnapshot(int id);
+        virtual Snapshot* getSnapshot(int id) { return snapshots_[id]; }
 
         /** Returns number of snapshot blocks in this BlockSnapshotManager*/
         int getNBlocks() {
@@ -91,7 +92,6 @@ class BlockSnapshotMananger : public SnapshotManager{
         Snapshot* loadFrame(int frame);
         
         SimInfo* info_;
-        int storageLayout_;
         int blockCapacity_;
 
         std::vector<Snapshot*> snapshots_;

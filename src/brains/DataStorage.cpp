@@ -49,6 +49,7 @@
 
 #include "brains/DataStorage.hpp"
 
+namespace oopse {
 
 DataStorage::DataStorage() : size_(0), storageLayout_(0){
 
@@ -326,4 +327,28 @@ void DataStorage::internalCopy(std::vector<T>& v, int source,  int num, int targ
     std::advance(result, target );
 
     std::copy(first, last, result);
+}
+
+int DataStorage::getBytesPerStuntDouble(int layout) {
+    int bytes = 0;
+    if (layout & dslPosition) {
+        bytes += sizeof(Vector3d);
+    } else if (layout & dslVelocity) {
+        bytes += sizeof(Vector3d);
+    } else if (layout & dslAmat) {
+        bytes += sizeof(Mat3x3d);    
+    } else if (layout & dslAngularMomentum) {
+        bytes += sizeof(Vector3d);
+    } else if (layout & dslElectroFrame) {
+        bytes += sizeof(Mat3x3d);
+    } else if (layout & dslZAngle) {
+        bytes += sizeof(Vector3d);
+    } else if (layout & dslForce) {
+        bytes += sizeof(Vector3d);
+    } else if (layout & dslTorque) {
+        bytes += sizeof(Vector3d);
+    }
+    return bytes;
+}
+
 }

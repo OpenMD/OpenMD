@@ -45,10 +45,9 @@
 #include "io/DumpReader.hpp"
 
 namespace oopse {
-BlockSnapshotManager::BlockSnapshotManager(SimInfo* info, const std::string& filename, 
+BlockSnapshotMananger::BlockSnapshotMananger(SimInfo* info, const std::string& filename, 
     int storageLayout, int blockCapacity) 
-    : SnapshotManager(storageLayout), info_(info), 
-      blockCapacity_(blockCapacity), activeBlocks(blockCapacity_, -1) {
+    : SnapshotManager(storageLayout), info_(info), blockCapacity_(blockCapacity), activeBlocks_(blockCapacity_, -1) {
 
     nAtoms_ = info->getNGlobalAtoms();
     nRigidBodies_ = info->getNGlobalRigidBodies();
@@ -57,17 +56,17 @@ BlockSnapshotManager::BlockSnapshotManager(SimInfo* info, const std::string& fil
     
     int bytesPerStuntDouble = DataStorage::getBytesPerStuntDouble(storageLayout);
 
-    int bytesPerFrame = nStuntDoubles * bytesPerStuntDouble;
+    int bytesPerFrame = (nRigidBodies_ + nAtoms_) * bytesPerStuntDouble;
 
     int frameCapacity = int (avalPhysMem / bytesPerFrame);
     
     nSnapshotPerBlock_ = frameCapacity /blockCapacity_ ;
 
     reader_ = new DumpReader(info, filename);
-    nframes_ = reader->getNFrames();
+    nframes_ = reader_->getNFrames();
 
-    int nblocks = nframes / nSnapshotPerBlock_;
-    if (nframes % nSnapshotPerBlock != 0) {
+    int nblocks = nframes_ / nSnapshotPerBlock_;
+    if (nframes_ % nSnapshotPerBlock_ != 0) {
         ++nblocks;
     }  
     
@@ -75,9 +74,9 @@ BlockSnapshotManager::BlockSnapshotManager(SimInfo* info, const std::string& fil
         blocks_.push_back(SnapshotBlock(i, (i+1)*nSnapshotPerBlock_);    
     }
     //the last block may not have nSnapshotPerBlock frames, we need to consider this special situation
-    blocks.back.second = nframes;
+    blocks_.back.second = nframes_;
 
-    snapshots_.insert(snapshot_.begin(), nframes, NULL);   
+    snapshots_.insert(snapshots_.begin(), nframes_, NULL);   
     
 }
 
