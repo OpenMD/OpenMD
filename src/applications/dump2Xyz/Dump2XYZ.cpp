@@ -54,6 +54,8 @@
 #include "visitors/RigidBodyVisitor.hpp"
 #include "visitors/OtherVisitor.hpp"
 #include "visitors/ZconsVisitor.hpp"
+#include "visitors/SelectionVisitor.hpp"
+#include "selection/SelectionEvaluator.hpp"
 using namespace oopse;
 
 int main(int argc, char* argv[]){
@@ -101,7 +103,7 @@ int main(int argc, char* argv[]){
   //creat ignore visitor
   if(args_info.ignore_given ||args_info.water_flag){
     
-    IgnoreVisitor* ignoreVisitor = new IgnoreVisitor();
+    IgnoreVisitor* ignoreVisitor = new IgnoreVisitor(info);
     
     for(int i = 0; i < args_info.ignore_given; i++)
       ignoreVisitor->addIgnoreType(args_info.ignore_arg[i]);
@@ -128,7 +130,19 @@ int main(int argc, char* argv[]){
     compositeVisitor->addVisitor(rbCOMVisitor, 900);
   }
   
-  //compositeVisitor->addVisitor(lipidVisitor, 900);
+  //create selection visitor
+  //if (args_info.selection_given){
+  //  SelectionVisitor* selectionVisitor = new SelectionVisitor(info, args_info.selection_arg);
+  //  compositeVisitor->addVisitor(selectionVisitor, 850);
+  //}
+
+  SelectionEvaluator* evaluator = NULL;
+  if (args_info.selection_given) {
+    evaluator = new SelectionEvaluator(info);
+    assert(evaluator);
+    evaluator->loadScriptString( args_info.selection_arg);
+          
+  }
   
   //creat SSD atom visitor
   SSDAtomVisitor* ssdVisitor = new SSDAtomVisitor(info);
@@ -197,6 +211,10 @@ int main(int argc, char* argv[]){
   Molecule* mol;
   StuntDouble* integrableObject;
   RigidBody* rb;
+
+  if (evaluator && !evaluator->isDynamic()) {
+    info->getSelectionManager()->setSelectionSet(evaluator->evaluate());
+  }
   
   for (int i = 0; i < nframes; i += args_info.frame_arg){
     dumpReader->readFrame(i);
@@ -220,6 +238,11 @@ int main(int argc, char* argv[]){
     
     //update visitor
     compositeVisitor->update();
+
+    //if dynamic, we need to re-evaluate the selection
+    if (evaluator && evaluator->isDynamic()) {
+      info->getSelectionManager()->setSelectionSet(evaluator->evaluate());
+    }
     
     //visit stuntdouble
     for (mol = info->beginMolecule(miter); mol != NULL; mol = info->nextMolecule(miter)) {
