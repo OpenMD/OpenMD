@@ -186,6 +186,11 @@ class Molecule {
             return atoms_[i];
         }
 
+        RigidBody* getRigidBodyAt(unsigned int i) {
+            assert(i < rigidBodies_.size());
+            return rigidBodies_[i];
+        }
+        
         Atom* beginAtom(std::vector<Atom*>::iterator& i) {
             i = atoms_.begin();
             return (i == atoms_.end()) ? NULL : *i;
