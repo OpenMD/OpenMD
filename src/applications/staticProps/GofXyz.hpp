@@ -69,6 +69,7 @@ class GofXyz : public RadialDistrFunc {
         //virtual void validateSelection1(SelectionManager& sman);
         
         double len_;
+        double halfLen_;
         int nRBins_;
         double deltaR_;
         

@@ -47,10 +47,10 @@
 namespace oopse {
 
 GofXyz::GofXyz(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2, double len, int nrbins)
-    : RadialDistrFunc(info, filename, sele1, sele2), len_(len), nRBins_(nrbins) {
+    : RadialDistrFunc(info, filename, sele1, sele2), len_(len), halfLen_(len/2), nRBins_(nrbins) {
     setOutputName(getPrefix(filename) + ".gxyz");
 
-    deltaR_ = len_ / nRBins_;
+    deltaR_ =  len_ / nRBins_;
     
     histogram_.resize(nRBins_);
     for (int i = 0 ; i < nRBins_; ++i) {
@@ -135,9 +135,10 @@ void GofXyz::collectHistogram(StuntDouble* sd1, StuntDouble* sd2) {
     double y = dot(r12, i->second.yaxis);
     double z = dot(r12, i->second.zaxis);
 
-    int xbin = x / deltaR_;
-    int ybin = y / deltaR_;
-    int zbin = z / deltaR_;
+    // x, y and z's possible values range -halfLen_ to halfLen_
+    int xbin = (x+ halfLen_) / deltaR_;
+    int ybin = (y + halfLen_) / deltaR_;
+    int zbin = (z + halfLen_) / deltaR_;
 
     if (xbin < nRBins_ && ybin < nRBins_ && zbin < nRBins_) {
         ++histogram_[x][y][z];
