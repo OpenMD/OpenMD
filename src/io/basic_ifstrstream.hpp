@@ -175,7 +175,7 @@ class basic_ifstrstream : public basic_istream<_CharT, _Traits> {
          * parallel mode) associated with the stream.
          */
         _Buf* rdbuf() const{
-            return const_cast<_Buf*>(internalBuf_); 
+            return static_cast<_Buf*>(internalBuf_); 
         }
 
     private:
