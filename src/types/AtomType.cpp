@@ -31,7 +31,7 @@ namespace oopse {
   }
     
   AtomType::~AtomType() {
-    if ( name != NULL ) delete name;
+    if ( name != NULL ) free(name);
   }
 
   void AtomType::complete() {

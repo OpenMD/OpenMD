@@ -32,7 +32,7 @@ namespace oopse {
     void    setIdent(int id) {atp.ident = id;}
     int     getIdent() {return atp.ident;}
 
-    void    setName(char* n) {strcpy(name, n);}
+    void    setName(char* n) {name = strdup(n);}
     char*   getName() {return name;}
     
     void    setLennardJones() { atp.is_LennardJones = 1; }
