@@ -71,6 +71,9 @@ CorrelationFunction::CorrelationFunction(SimInfo* info, const std::string& filen
     }
     if (hasMultipole) {
         storageLayout_ |= DataStorage::dslElectroFrame;
+        if (nRigidBodies > 0) { 
+            storageLayout_ |= DataStorage::dslAngularMomentum;        
+        }
     }
         
     bsMan_ = new BlockSnapshotManager(info, dumpFilename_, storageLayout_);
