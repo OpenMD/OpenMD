@@ -56,15 +56,15 @@ BlockSnapshotManager::BlockSnapshotManager(SimInfo* info, const std::string& fil
     nRigidBodies_ = info->getNGlobalRigidBodies();
 
     double physMem = physmem_total();
-    double avalPhysMem = physmem_available();
     double rssMem = residentMem();
-
-    std::cout << "physmem = " << physMem << "\t availablePhysMem = " << avalPhysMem << "\trssMem =  "<< rssMem<<std::endl;
+    double avaliablePhysMem = physMem - rssMem;
+    
+    std::cout << "physmem = " << int(physMem) << "\trssMem =  "<< rssMem << "\t availablePhysMem = " << avaliablePhysMem <<std::endl;
     int bytesPerStuntDouble = DataStorage::getBytesPerStuntDouble(storageLayout);
 
     int bytesPerFrame = (nRigidBodies_ + nAtoms_) * bytesPerStuntDouble;
 
-    int frameCapacity = int (rssMem / bytesPerFrame);
+    int frameCapacity = int (avaliablePhysMem / bytesPerFrame);
     
     nSnapshotPerBlock_ = frameCapacity /blockCapacity_ ;
 
