@@ -77,7 +77,7 @@ namespace oopse {
       if( !finalOut ){
         sprintf( painCave.errMsg,
                  "Could not open \"%s\" for zAngle output.\n",
-                 outName );
+                 outName.c_str() );
         painCave.isFatal = 1;
         simError();
       }
@@ -124,7 +124,7 @@ namespace oopse {
     MPI_Status ierr;
     int intObIndex;
     double zAngle;
-    
+   
     if (masterNode == 0) {
       std::map<int, double> zAngData;
       for(int i = 0 ; i < nproc; ++i) {
@@ -138,7 +138,7 @@ namespace oopse {
               
               intObIndex = integrableObject->getGlobalIndex() ;
               zAngle = integrableObject->getZangle();
-              zAngData.insert(pair<int, double>(intObIndex, zAngle));
+              zAngData.insert(std::pair<int, double>(intObIndex, zAngle));
             }      
           }
           
@@ -146,7 +146,7 @@ namespace oopse {
           for(int k = 0; k < nIntObjectsInProc[i]; ++k) {
             MPI_Recv(&intObIndex, 1, MPI_INT, i, 0, MPI_COMM_WORLD,&ierr);
             MPI_Recv(&zAngle, 1, MPI_DOUBLE, i, 0, MPI_COMM_WORLD,&ierr);
-            zAngData.insert(pair<int, double>(intObIndex, zAngle));
+            zAngData.insert(std::pair<int, double>(intObIndex, zAngle));
           }
         }
         

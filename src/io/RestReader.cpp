@@ -60,7 +60,6 @@
 
 #ifdef IS_MPI
 #include <mpi.h>
-#include "brains/mpiSimulation.hpp"
 #define TAKE_THIS_TAG_CHAR 0
 #define TAKE_THIS_TAG_INT 1
 #define TAKE_THIS_TAG_DOUBLE 2
@@ -220,11 +219,11 @@ namespace oopse {
     int myStatus; // 1 = wakeup & success; 0 = error; -1 = AllDone
     
     MPI_Status istatus;
-    int localIndex;
     int nCurObj;
     int nitems;
-    
-    nTotObjs = info_->getTotIntegrableObjects();
+    int haveError;
+
+    nTotObjs = info_->getNGlobalIntegrableObjects();
     haveError = 0;
     
     if (worldRank == masterNode) {
@@ -266,11 +265,11 @@ namespace oopse {
         if(which_node == masterNode){
           //molecules belong to master node
           
-          localIndex = info_->getMoleculeByGlobalIndex(i);
+          mol = info_->getMoleculeByGlobalIndex(i);
           
-          if(localIndex == NULL) {
-            strcpy(painCave.errMsg, 
-                   "RestReader Error: Molecule not found on node %d!",
+          if(mol == NULL) {
+	    sprintf(painCave.errMsg, 
+                   "RestReader Error: Molecule not found on node %d!\n",
                    worldRank);
             painCave.isFatal = 1;
             simError();
@@ -313,9 +312,7 @@ namespace oopse {
               simError();
             }
             
-            if(haveError) nodeZeroError();
-            
-            MPI_Send(read_buffer, BUFFERSIZE, MPI_CHAR, which_node,
+	    MPI_Send(read_buffer, BUFFERSIZE, MPI_CHAR, which_node,
                      TAKE_THIS_TAG_CHAR, MPI_COMM_WORLD);
           }
         }
@@ -328,9 +325,9 @@ namespace oopse {
         if(which_node == worldRank){
           //molecule with global index i belongs to this processor
           
-          localIndex = info_->getMoleculeByGlobalIndex(i);
+          mol = info_->getMoleculeByGlobalIndex(i);
           
-          if(localIndex == NULL) {
+          if(mol == NULL) {
             sprintf(painCave.errMsg, 
                     "RestReader Error: molecule not found on node %d\n", 
                     worldRank);
@@ -338,7 +335,7 @@ namespace oopse {
             simError();
           }
           
-          nCurObj = localIndex->getNIntegrableObjects();
+          nCurObj = mol->getNIntegrableObjects();
           
           MPI_Send(&nCurObj, 1, MPI_INT, masterNode,
                    TAKE_THIS_TAG_INT, MPI_COMM_WORLD);
@@ -594,18 +591,19 @@ namespace oopse {
     
     // first thing first, suspend fatalities.
     painCave.isEventLoop = 1;
-    
+
+    int masterNode = 0;
     int myStatus; // 1 = wakeup & success; 0 = error; -1 = AllDone
-    int haveError, index;
-    
-    int *MolToProcMap = mpiSim->getMolToProcMap();
-    int localIndex;
+    int haveError;
+    int index;    
+
     int nCurObj;
     double angleTranfer;
     
-    nTotObjs = info_->getTotIntegrableObjects();
+    nTotObjs = info_->getNGlobalIntegrableObjects();
     haveError = 0;
-    if (worldRank == 0) {
+
+    if (worldRank == masterNode) {
       
       eof_test = fgets(read_buffer, sizeof(read_buffer), inAngFile);
       if( eof_test == NULL ){
@@ -636,69 +634,82 @@ namespace oopse {
         simError();
       }
       
-    }
-    // At this point, node 0 has a tempZangs vector completed, and 
-    // everyone else has nada
-    index = 0;
-    
-    for (i=0 ; i < mpiSim->getNMolGlobal(); i++) {
-      // Get the Node number which has this atom
-      which_node = MolToProcMap[i];
+      // At this point, node 0 has a tempZangs vector completed, and 
+      // everyone else has nada
+      index = 0;
       
-      if (worldRank == 0) {
-        if (which_node == 0) {
-          localIndex = mpiSim->getGlobalToLocalMol(i);
-          
-          if(localIndex == -1) {
-            strcpy(painCave.errMsg, "Molecule not found on node 0!");
-            haveError = 1;
+      for (i=0 ; i < info_->getNGlobalMolecules(); i++) {
+	// Get the Node number which has this atom
+	which_node = info_->getMolToProc(i);
+	
+	if (worldRank == masterNode) {
+	  mol = info_->getMoleculeByGlobalIndex(i);
+	  
+	  if(mol == NULL) {
+	    strcpy(painCave.errMsg, "Molecule not found on node 0!");
+	    haveError = 1;
+	    simError();
+	  }
+	  
+	  for (integrableObject = mol->beginIntegrableObject(ii); 
+	       integrableObject != NULL; 
+	       integrableObject = mol->nextIntegrableObject(ii)){
+	    
+	    integrableObject->setZangle(tempZangs[index]);
+	    index++;
+	  }	
+	  
+	} else {
+	  // I am MASTER OF THE UNIVERSE, but I don't own this molecule
+	  
+	  MPI_Recv(&nCurObj, 1, MPI_INT, which_node,
+		   TAKE_THIS_TAG_INT, MPI_COMM_WORLD, &istatus);
+	  
+	  for(j=0; j < nCurObj; j++){	 	 
+	    angleTransfer = tempZangs[index];
+	    MPI_Send(&angleTransfer, 1, MPI_DOUBLE, which_node, 
+		     TAKE_THIS_TAG_DOUBLE, MPI_COMM_WORLD);      	  
+	    index++;
+	  }
+	  
+	}
+      }
+    } else {
+      // I am SLAVE TO THE MASTER
+      for (i=0 ; i < info_->getNGlobalMolecules(); i++) {
+        int which_node = info_->getMolToProc(i);
+
+	if (which_node == worldRank) {
+	  
+	  // BUT I OWN THIS MOLECULE!!!
+	  
+	  mol = info_->getMoleculeByGlobalIndex(i);
+
+          if(mol == NULL) {
+            sprintf(painCave.errMsg, 
+                    "RestReader Error: molecule not found on node %d\n", 
+                    worldRank);
+            painCave.isFatal = 1;
             simError();
           }
-          
-          vecParticles = (info_->molecules[localIndex]).getIntegrableObjects();	
-          for(j = 0; j < vecParticles.size(); j++){	  
-            vecParticles[j]->setZangle(tempZangs[index]);
-            index++;
-          }	
-          
-        } else {
-          // I am MASTER OF THE UNIVERSE, but I don't own this molecule
-          
-          MPI_Recv(&nCurObj, 1, MPI_INT, which_node,
-                   TAKE_THIS_TAG_INT, MPI_COMM_WORLD, &istatus);
-          
-          for(j=0; j < nCurObj; j++){	 	 
-            angleTransfer = tempZangs[index];
-            MPI_Send(&angleTransfer, 1, MPI_DOUBLE, which_node, 
-                     TAKE_THIS_TAG_DOUBLE, MPI_COMM_WORLD);      	  
-            index++;
-          }
-          
-        }
-        
-      } else {
-        // I am SLAVE TO THE MASTER
-        
-        if (which_node == worldRank) {
-          
-          // BUT I OWN THIS MOLECULE!!!
-          
-          localIndex = mpiSim->getGlobalToLocalMol(i);
-          vecParticles = (info_->molecules[localIndex]).getIntegrableObjects();	
-          nCurObj = vecParticles.size();
-          
-          MPI_Send(&nCurObj, 1, MPI_INT, 0,
-                   TAKE_THIS_TAG_INT, MPI_COMM_WORLD);
-          
-          for(j = 0; j < vecParticles.size(); j++){
-            
-            MPI_Recv(&angleTransfer, 1, MPI_DOUBLE, 0,
-                     TAKE_THIS_TAG_DOUBLE, MPI_COMM_WORLD, &istatus);
-            vecParticles[j]->setZangle(angleTransfer);
-          }	
-        }
+
+          nCurObj = mol->getNIntegrableObjects();
+	
+	  MPI_Send(&nCurObj, 1, MPI_INT, 0,
+		   TAKE_THIS_TAG_INT, MPI_COMM_WORLD);
+	  
+          for (integrableObject = mol->beginIntegrableObject(ii); 
+               integrableObject != NULL; 
+               integrableObject = mol->nextIntegrableObject(ii)){
+	    
+	    MPI_Recv(&angleTransfer, 1, MPI_DOUBLE, 0,
+		     TAKE_THIS_TAG_DOUBLE, MPI_COMM_WORLD, &istatus);
+
+	    integrableObject->setZangle(angleTransfer);
+	  }	
+	}
       }
-    }
+    } 
 #endif
   }
   
@@ -732,68 +743,83 @@ namespace oopse {
     // first thing first, suspend fatalities.
     painCave.isEventLoop = 1;
     
+    int masterNode = 0;
     int myStatus; // 1 = wakeup & success; 0 = error; -1 = AllDone
-    int haveError, index;
+    int haveError;
     int which_node;
     
     MPI_Status istatus;
-    int *MolToProcMap = mpiSim->getMolToProcMap();
-    int localIndex;
+    
     int nCurObj;
     double angleTranfer;
     
-    nTotObjs = info_->getTotIntegrableObjects();
+    nTotObjs = info_->getNGlobalIntegrableObjects();
     haveError = 0;
-    
-    for (i=0 ; i < mpiSim->getNMolGlobal(); i++) {
-      // Get the Node number which has this atom
-      which_node = MolToProcMap[i];
-      
-      // let's let node 0 pass out constant values to all the processors
-      if (worldRank == 0) {
-        if (which_node == 0) {
-          localIndex = mpiSim->getGlobalToLocalMol(i);
-          
-          if(localIndex == -1) {
-            strcpy(painCave.errMsg, "Molecule not found on node 0!");
-            haveError = 1;
-            simError();
-          }
-          
-          vecParticles = (info_->molecules[localIndex]).getIntegrableObjects();	
-          for(j = 0; j < vecParticles.size(); j++){	  
-            vecParticles[j]->setZangle( 0.0 );
-          }	
-          
-        } else {
-          // I am MASTER OF THE UNIVERSE, but I don't own this molecule
-          
-          MPI_Recv(&nCurObj, 1, MPI_INT, which_node,
-                   TAKE_THIS_TAG_INT, MPI_COMM_WORLD, &istatus);
-          
-          for(j=0; j < nCurObj; j++){	 	 
-            angleTransfer = 0.0;
-            MPI_Send(&angleTransfer, 1, MPI_DOUBLE, which_node, 
-                     TAKE_THIS_TAG_DOUBLE, MPI_COMM_WORLD);      	  
-            index++;
-          }
-        }
-      } else {
-        // I am SLAVE TO THE MASTER
-        
-        if (which_node == worldRank) {
-          
-          // BUT I OWN THIS MOLECULE!!!
-          
-          localIndex = mpiSim->getGlobalToLocalMol(i);
-          vecParticles = (info_->molecules[localIndex]).getIntegrableObjects();	
-          nCurObj = vecParticles.size();
-          
-          MPI_Send(&nCurObj, 1, MPI_INT, 0,
-                   TAKE_THIS_TAG_INT, MPI_COMM_WORLD);
-          
-          for(j = 0; j < vecParticles.size(); j++){
-            
+    if (worldRank == masterNode) {
+
+      for (i=0 ; i < info_->getNGlobalMolecules(); i++) {
+	// Get the Node number which has this atom
+	which_node = info_->getMolToProc(i);
+	
+	// let's let node 0 pass out constant values to all the processors
+	if (worldRank == masterNode) {
+	  mol = info_->getMoleculeByGlobalIndex(i);
+	  
+	  if(mol == NULL) {
+	    strcpy(painCave.errMsg, "Molecule not found on node 0!");
+	    haveError = 1;
+	    simError();
+	  }
+	  
+	  for (integrableObject = mol->beginIntegrableObject(ii); 
+	       integrableObject != NULL; 
+	       integrableObject = mol->nextIntegrableObject(ii)){
+	    
+	    integrableObject->setZangle( 0.0 );
+	    
+	  }
+	  
+	} else {
+	  // I am MASTER OF THE UNIVERSE, but I don't own this molecule
+	  
+	  MPI_Recv(&nCurObj, 1, MPI_INT, which_node,
+		   TAKE_THIS_TAG_INT, MPI_COMM_WORLD, &istatus);
+	  
+	  for(j=0; j < nCurObj; j++){	 	 
+	    angleTransfer = 0.0;
+	    MPI_Send(&angleTransfer, 1, MPI_DOUBLE, which_node, 
+		     TAKE_THIS_TAG_DOUBLE, MPI_COMM_WORLD);      	  
+	    
+	  }
+	}
+      }
+    } else {
+      // I am SLAVE TO THE MASTER
+      for (i=0 ; i < info_->getNGlobalMolecules(); i++) {
+	int which_node = info_->getMolToProc(i);
+	
+	if (which_node == worldRank) {
+	  
+	  // BUT I OWN THIS MOLECULE!!!
+	  mol = info_->getMoleculeByGlobalIndex(i);
+	  
+	  if(mol == NULL) {
+	    sprintf(painCave.errMsg, 
+		    "RestReader Error: molecule not found on node %d\n", 
+		    worldRank);
+	    painCave.isFatal = 1;
+	    simError();
+	  }
+	  
+	  nCurObj = mol->getNIntegrableObjects();
+	  
+	  MPI_Send(&nCurObj, 1, MPI_INT, 0,
+		   TAKE_THIS_TAG_INT, MPI_COMM_WORLD);
+	  
+	  for (integrableObject = mol->beginIntegrableObject(ii); 
+               integrableObject != NULL; 
+               integrableObject = mol->nextIntegrableObject(ii)){
+	    
             MPI_Recv(&angleTransfer, 1, MPI_DOUBLE, 0,
                      TAKE_THIS_TAG_DOUBLE, MPI_COMM_WORLD, &istatus);
             vecParticles[j]->setZangle(angleTransfer);

@@ -42,6 +42,7 @@
 #include <cmath>
 #include "restraints/ThermoIntegrationForceManager.hpp"
 #include "integrators/Integrator.hpp"
+#include "math/SquareMatrix3.hpp"
 #include "primitives/Molecule.hpp"
 #include "utils/simError.h"
 #include "utils/OOPSEConstant.hpp"
@@ -91,8 +92,6 @@ namespace oopse {
     // build the scaling factor used to modulate the forces and torques
     factor_ = pow(tIntLambda_, tIntK_);
 
-    printf("%f is the factor\n",factor_);
-    
   }
   
   ThermoIntegrationForceManager::~ThermoIntegrationForceManager(){
@@ -107,6 +106,7 @@ namespace oopse {
     StuntDouble* integrableObject;
     Vector3d frc;
     Vector3d trq;
+    Mat3x3d tempTau;
     
     // perform the standard calcForces first
     ForceManager::calcForces(needPotential, needStress);
@@ -140,7 +140,11 @@ namespace oopse {
     lrPot_ *= factor_;
     curSnapshot->statData[Stats::LONG_RANGE_POTENTIAL] = lrPot_;
     
-    
+    // scale the pressure tensor
+    tempTau = curSnapshot->statData.getTau();
+    tempTau *= factor_;
+    curSnapshot->statData.setTau(tempTau);
+
     // do crystal restraint forces for thermodynamic integration
     if (simParam->getUseSolidThermInt()) {
       
