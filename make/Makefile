@@ -34,7 +34,6 @@
 #
 #---------------------------------------------------------------------------
 
-include $(DEV_ROOT)/make/Make.conf.in
 #---------------------------------------------------------------------------
 #
 #  Directories
@@ -416,10 +415,10 @@ ifdef $(CFiles)
 endif
 	cat Make.temp | sed 's/^[a-zA-Z0-9]/$$\(DEV_ROOT\)\/obj\/&/g' >> $(DependencyFile)
 	cat Make.temp | sed 's/^[a-zA-Z0-9]/$$\(DEV_ROOT\)\/MPIobj\/&/g' >> $(DependencyFile)
-#ifdef $(F90Files) 
+ifdef $(F90Files) 
 	$(DEV_ROOT)/scripts/sfmakedepend  -I $(DEV_ROOT)/src -d '$$(DEV_ROOT)/obj' -f ./Make.ftemp -h *.F90
 	cat Make.ftemp >> $(DependencyFile)
-#endif
+endif
 	$(Delete) Make.temp Make.ftemp
 
 # make lib

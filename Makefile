@@ -1,31 +1,9 @@
-DEV_ROOT=/home/maul/gezelter/gezelter/OOPSE-2.0
-IS_UNIX=1
+make/Makefile : make/Makefile.in configure
+	@echo
+	@echo 'Please run (or re-run) configure'
+	@echo
+	@exit 1
 
-Packages = \
-	utils \
-	math \
-	types \
-	primitives \
-	visitors \
-	UseTheForce/DarkSide \
-	UseTheForce \
-	brains \
-	io \
-	integrators \
-	minimizers \
-	constraints \
-	profiling \
-	restraints \
-	applications \
+-include make/Makefile
 
-IncludeDirs = \
-	/usr/include \
-	/usr/local/include \
-	
-LibraryDirs = \
-        /usr/lib 
-
-Libraries = \
-        mpich 
-
-include $(DEV_ROOT)/make/Makefile
+all: make/Makefile
