@@ -200,10 +200,10 @@ ifneq  "$(words $(ObjectFiles) $(ParallelObjectFiles))" "0"
     Executable             = $(BinDir)/$(Main)
     ParallelExecutable     = $(BinDir)/$(Main)_MPI
   else
-    SharedLibrary          = $(LibDir)/lib$(subst /,,$(Package)).so 
-    StaticLibrary          = $(LibDir)/lib$(subst /,,$(Package)).a
-    ParallelSharedLibrary  = $(LibDir)/lib$(subst /,,$(Package))_MPI.so 
-    ParallelStaticLibrary  = $(LibDir)/lib$(subst /,,$(Package))_MPI.a
+    SharedLibrary          = $(LibDir)/lib$(subst /,,$(patsubst %,oopse_%,$(Package))).so
+    StaticLibrary          = $(LibDir)/lib$(subst /,,$(patsubst %,oopse_%,$(Package))).a
+    ParallelSharedLibrary  = $(LibDir)/lib$(subst /,,$(patsubst %,oopse_%,$(Package)))_MPI.so
+    ParallelStaticLibrary  = $(LibDir)/lib$(subst /,,$(patsubst %,oopse_%,$(Package)))_MPI.a
   endif
 endif
 #
@@ -213,7 +213,7 @@ ClassPath        = $(JRE)$(X)$(TargetDir)$(X)$(ThirdPartyJars)
 JavaPackageNames = $(subst /,.,$(JavaPackages))
 IncludePath      = -I$(SourceDir) $(IncludeDirs:%=-I%)
 LibDirs          = -L$(LibDir)    $(LibraryDirs:%=-L%)
-LocalLibs        = $(subst /,,$(PackageLibs))
+LocalLibs        = $(subst /,,$(patsubst %, oopse_%, $(PackageLibs))) 
 LibList          = $(LocalLibs:%=-l%) $(Libraries:%=-l%)
 
 
@@ -501,16 +501,12 @@ ifneq "$(words $(CFiles))" "0"
 endif
 
 ifneq "$(words $(F90Files))" "0"
-	#$(DEV_ROOT)/scripts/sfmakedepend  -I $(DEV_ROOT)/src -d '$$(DEV_ROOT)/obj' -f ./Make.ftemp -h *.F90
-	#$(DEV_ROOT)/scripts/sfmakedepend  -I $(DEV_ROOT)/src -d '$$(DEV_ROOT)/MPIobj' -f ./Make.fmpitemp -h *.F90
-	#cat Make.ftemp >> $(DependencyFile)
-	#cat Make.fmpitemp >> $(DependencyFile)
 	$(DEV_ROOT)/scripts/filepp  -I $(DEV_ROOT)/src -od '$$(DEV_ROOT)/obj/' -D__F90  *.F90 > Make.ftemp
 	$(DEV_ROOT)/scripts/filepp  -I $(DEV_ROOT)/src -od '$$(DEV_ROOT)/MPIobj/' -DIS_MPI -D__F90  *.F90 >> Make.ftemp
 	cat Make.ftemp >> $(DependencyFile)
-
 endif
 	$(Delete) Make.cpptemp Make.ctemp Make.ftemp
+
 # make lib
 lib    : $(PackageListLoop)
 	$(Print) Libraries built.
