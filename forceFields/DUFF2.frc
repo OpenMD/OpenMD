@@ -61,7 +61,7 @@ begin LennardJonesAtomTypes
 SSD	  0.152			3.051					
 SSD1      0.152                 3.016 
 SSD_E	  0.152	                3.035
-SSD_RF    0.152                 3.019 
+SSD_RF    0.151                 3.019 
 O_TIP3P   0.1521                3.15061 
 O_TIP4P   0.1550                3.15365 
 O_TIP5P   0.16                  3.12   

@@ -5,7 +5,7 @@
 !Atom		isDirectional	isLJ	isCharge	mass (amu)	epsilon (kcal/mol)	sigma (Ang)	q (e)
 
 SSD_E		1		1	0		18.0153		0.152			3.035		0.0
-SSD_RF		1		1	0		18.0153		0.152			3.019		0.0
+SSD_RF		1		1	0		18.0153		0.151			3.019		0.0
 SSD		1		1	0		18.0153		0.152			3.051		0.0
 SSD1		1		1	0		18.0153		0.152			3.016		0.0
 O_TIP3P		0		1	1		15.9994		0.1521			3.15061		-0.834	
