@@ -73,15 +73,15 @@ PackageLibs = \
 
 IncludeDirs = \
 	/usr/local/include \
-	
+	/usr/local/mpich/include
 
 LibraryDirs = \
 	/usr/local/lib \
-	 
+	/usr/local/mpich/lib 
 
 Libraries = \
 	-lsprng \
-	 
+	-lmpich 
 
 LinkOptions = \
 	 -L/usr/local/intel/compiler81/lib -L/usr/lib -lifport -lifcore -limf -lm -lcxa -lirc -lunwind -lirc_s
@@ -221,7 +221,9 @@ JavaPackageNames = $(subst /,.,$(JavaPackages))
 IncludePath      = -I$(SourceDir) $(IncludeDirs:%=-I%)
 LibDirs          = -L$(LibDir)    $(LibraryDirs:%=-L%)
 LocalLibs        = $(subst /,,$(patsubst %, oopse_%, $(PackageLibs))) 
+ParallelLocalLibs= $(subst /,,$(patsubst %, oopse_%_MPI, $(PackageLibs))) 
 LibList          = $(LocalLibs:%=-l%) $(Libraries)
+ParallelLibList  = $(LocalLibs:%=-l%) $(Libraries)
 
 
 #---------------------------------------------------------------------------
@@ -435,7 +437,7 @@ $(Executable) : $(ObjectFiles)
 	$(Linker) $(LinkOptions) $(LibDirs) $(LibList) $(ObjectFiles) -o $@
 
 $(ParallelExecutable) : $(ParallelObjectFiles)
-	$(Linker) $(LinkOptions) $(LibDirs) $(LibList) $(ParallelObjectFiles) -o $@
+	$(Linker) $(LinkOptions) $(LibDirs) $(ParallelLibList) $(ParallelObjectFiles) -o $@
 
 # Anything else is just copied from source to target
 $(PackageTargetDir)/% : $(PackageSourceDir)/%
