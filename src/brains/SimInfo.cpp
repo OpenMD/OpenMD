@@ -380,19 +380,6 @@ void SimInfo::addExcludePairs(Molecule* mol) {
         }
     }        
 
-    Molecule::CutoffGroupIterator cgIter;
-    CutoffGroup* cg;
-    for (cg = mol->beginCutoffGroup(cgIter); cg != NULL; cg = mol->nextCutoffGroup(cgIter)) {
-        std::vector<Atom*> atoms = cg->getAtoms();
-        for (int i = 0; i < atoms.size() -1 ; ++i) {
-            for (int j = i + 1; j < atoms.size(); ++j) {
-                a = atoms[i]->getGlobalIndex();
-                b = atoms[j]->getGlobalIndex();
-                exclude_.addPair(a, b);
-            }
-        }
-    }  
-
 }
 
 void SimInfo::removeExcludePairs(Molecule* mol) {
@@ -449,19 +436,6 @@ void SimInfo::removeExcludePairs(Molecule* mol) {
             }
         }
     }        
-
-    Molecule::CutoffGroupIterator cgIter;
-    CutoffGroup* cg;
-    for (cg = mol->beginCutoffGroup(cgIter); cg != NULL; cg = mol->nextCutoffGroup(cgIter)) {
-        std::vector<Atom*> atoms = cg->getAtoms();
-        for (int i = 0; i < atoms.size() -1 ; ++i) {
-            for (int j = i + 1; j < atoms.size(); ++j) {
-                a = atoms[i]->getGlobalIndex();
-                b = atoms[j]->getGlobalIndex();
-                exclude_.removePair(a, b);
-            }
-        }
-    }  
 
 }
 
