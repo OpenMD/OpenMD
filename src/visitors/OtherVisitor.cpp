@@ -77,15 +77,16 @@ return itList.find(name) != itList.end() ? true : false;
 }
 
 void IgnoreVisitor::internalVisit(StuntDouble *sd) {
-    GenericData *data;
-    data = sd->getPropertyByName("IGNORE");
-
-    //if this stuntdoulbe is already marked as ignore just skip it
-    if (data == NULL) {
-        data = new GenericData;
-        data->setID("IGNORE");
-        sd->addProperty(data);
-    }
+    info->getSelectionManager()->clearSelection(sd);
+    //GenericData *data;
+    //data = sd->getPropertyByName("IGNORE");
+    //
+    ////if this stuntdoulbe is already marked as ignore just skip it
+    //if (data == NULL) {
+    //    data = new GenericData;
+    //    data->setID("IGNORE");
+    //    sd->addProperty(data);
+    //}
 }
 
 const std::string IgnoreVisitor::toString() {
@@ -303,17 +304,17 @@ XYZVisitor::XYZVisitor(SimInfo *info, bool printDipole) :
 }
 
 void XYZVisitor::visit(Atom *atom) {
-    if (!isIgnore(atom))
+    if (isSelected(atom))
         internalVisit(atom);
 }
 
 void XYZVisitor::visit(DirectionalAtom *datom) {
-    if (!isIgnore(datom))
+    if (isSelected(datom))
         internalVisit(datom);
 }
 
 void XYZVisitor::visit(RigidBody *rb) {
-    if (!isIgnore(rb))
+    if (isSelected(rb))
         internalVisit(rb);
 }
 
@@ -355,11 +356,8 @@ void XYZVisitor::internalVisit(StuntDouble *sd) {
     }
 }
 
-bool XYZVisitor::isIgnore(StuntDouble *sd) {
-    GenericData *data;
-
-    data = sd->getPropertyByName("IGNORE");
-    return data == NULL ? false : true;
+bool XYZVisitor::isSelected(StuntDouble *sd) {
+    return info->getSelectionManager()->isSelected(sd);
 }
 
 void XYZVisitor::writeFrame(std::ostream &outStream) {
@@ -465,25 +463,25 @@ void PrepareVisitor::internalVisit(RigidBody *rb) {
 }
 
 const std::string PrepareVisitor::toString() {
-    char buffer[65535];
-    std::string result;
-
-    sprintf(buffer,
-            "------------------------------------------------------------------\n");
-    result += buffer;
-
-    sprintf(buffer, "Visitor name: %s", visitorName.c_str());
-    result += buffer;
-
-    sprintf(buffer,
-            "Visitor Description: prepare for operation of other vistors\n");
-    result += buffer;
-
-    sprintf(buffer,
-            "------------------------------------------------------------------\n");
-    result += buffer;
-
-    return result;
+     char buffer[65535];
+     std::string result;
+ 
+     sprintf(buffer,
+             "------------------------------------------------------------------\n");
+     result += buffer;
+ 
+     sprintf(buffer, "Visitor name: %s", visitorName.c_str());
+     result += buffer;
+ 
+     sprintf(buffer,
+             "Visitor Description: prepare for operation of other vistors\n");
+     result += buffer;
+ 
+     sprintf(buffer,
+             "------------------------------------------------------------------\n");
+     result += buffer;
+ 
+     return result;
 }
 
 //----------------------------------------------------------------------------//

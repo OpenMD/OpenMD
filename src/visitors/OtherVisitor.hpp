@@ -57,7 +57,7 @@ class SimInfo;
 //IgnoreVisitor will turn on the ignoring flag of the stuntdouble
 class IgnoreVisitor : public BaseVisitor{
   public:
-    IgnoreVisitor() : BaseVisitor() {visitorName = "IgnoreVisitor";}
+    IgnoreVisitor(SimInfo* info) : BaseVisitor() {this->info = info; visitorName = "IgnoreVisitor";}
 
     virtual void visit(Atom* atom);
     virtual void visit(DirectionalAtom* datom);
@@ -71,6 +71,7 @@ class IgnoreVisitor : public BaseVisitor{
     bool isIgnoreType(const std::string& name);
     void internalVisit(StuntDouble* sd);
     std::set<std::string> itList; //ignore type list;
+    SimInfo* info;
 };
 
 
@@ -125,7 +126,7 @@ class XYZVisitor : public BaseVisitor{
     
   protected:
     void internalVisit(StuntDouble* sd);
-    bool isIgnore(StuntDouble* sd);
+    bool isSelected(StuntDouble* sd);
 
   private:  
     SimInfo* info;
