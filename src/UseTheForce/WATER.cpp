@@ -246,10 +246,8 @@ using namespace WATER_NS;
 
 WATER::WATER(){
 
-  char fileName[200];
-  char* ffPath_env = "FORCE_PARAM_PATH";
-  char* ffPath;
-  char temp[200];
+  string fileName;
+  string tempString;
 
   headAtomType = NULL;
   currentAtomType = NULL;
@@ -309,31 +307,22 @@ WATER::WATER(){
   if( worldRank == 0 ){
 #endif
     
-    // generate the force file name
-    
-    strcpy( fileName, "WATER.frc" ); 
+    // generate the force file name   
+
+    fileName = "WATER.frc";
+
     //    fprintf( stderr,"Trying to open %s\n", fileName );
     
     // attempt to open the file in the current directory first.
     
-    frcFile = fopen( fileName, "r" );
+    frcFile = fopen( fileName.c_str(), "r" );
     
     if( frcFile == NULL ){
       
-      // next see if the force path enviorment variable is set
+      tempString = ffPath + "/" + fileName;
+      fileName = tempString;
       
-      ffPath = getenv( ffPath_env );
-      if( ffPath == NULL ) {
-	STR_DEFINE(ffPath, FRC_PATH );
-      }
-      
-      
-      strcpy( temp, ffPath );
-      strcat( temp, "/" );
-      strcat( temp, fileName );
-      strcpy( fileName, temp );
-      
-      frcFile = fopen( fileName, "r" );
+      frcFile = fopen( fileName.c_str(), "r" );
       
       if( frcFile == NULL ){
 	
@@ -342,7 +331,7 @@ WATER::WATER(){
                  "\t%s\n"
 		 "\tHave you tried setting the FORCE_PARAM_PATH environment "
 		 "variable?\n",
-		 fileName );
+		 fileName.c_str() );
         painCave.severity = OOPSE_ERROR;
 	painCave.isFatal = 1;
 	simError();

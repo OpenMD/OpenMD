@@ -42,8 +42,8 @@ namespace EAM_NS{
                    //  1  -> in MPI: tells nodes to stop listening
   } atomStruct;
 
-  int parseAtom( char *lineBuffer, int lineNum, atomStruct &info, char *eamPotFile );
-  int parseEAM( atomStruct &info, char *eamPotFile, double **eam_rvals,
+  int parseAtom( char *lineBuffer, int lineNum, atomStruct &info, string eamPotFile );
+  int parseEAM( atomStruct &info, string eamPotFile, double **eam_rvals,
 		double **eam_rhovals, double **eam_Frhovals);
 #ifdef IS_MPI
   
@@ -207,7 +207,7 @@ EAM_FF::EAM_FF(string the_variant){
 
     if (!the_variant.empty()) {
       has_variant = 1;
-      fileName += "." + the_variant + ".frc";
+      fileName += "." + the_variant;
       
       sprintf( painCave.errMsg,
                "Using %s variant of EAM force field.\n",
@@ -216,6 +216,8 @@ EAM_FF::EAM_FF(string the_variant){
       painCave.isFatal = 0;
       simError();
     }   
+
+    fileName += ".frc";
 
     //fprintf( stderr,"Trying to open %s\n", fileName );
     
@@ -314,7 +316,7 @@ void EAM_FF::readParams( void ){
   double *eam_rvals;    // Z of r values
   double *eam_rhovals;  // rho of r values
   double *eam_Frhovals; // F of rho values
-  char eamPotFile[1000];
+  string eamPotFile;
 
   
 
@@ -630,7 +632,7 @@ void EAM_FF::fastForward( char* stopText, char* searchOwner ){
 
 
 
-int EAM_NS::parseAtom( char *lineBuffer, int lineNum,   atomStruct &info, char *eamPotFile ){
+int EAM_NS::parseAtom( char *lineBuffer, int lineNum,   atomStruct &info, string eamPotFile ){
 
   char* the_token;
   
@@ -654,14 +656,15 @@ int EAM_NS::parseAtom( char *lineBuffer, int lineNum,   atomStruct &info, char *
       painCave.isFatal = 1;
       simError();
     }
-	
-    strcpy( eamPotFile, the_token );
+    
+    eamPotFile = the_token;
+
     return 1;
   }
   else return 0;
 }
 
-int EAM_NS::parseEAM(atomStruct &info, char *eamPotFile, 
+int EAM_NS::parseEAM(atomStruct &info, string eamPotFile, 
 		     double **eam_rvals, 
 		     double **eam_rhovals,
 		     double **eam_Frhovals){
@@ -669,45 +672,31 @@ int EAM_NS::parseEAM(atomStruct &info, char *eamPotFile,
   double* myEam_rhovals;
   double* myEam_Frhovals;
 
-  char* ffPath_env = "FORCE_PARAM_PATH";
-  char* ffPath;
   char* the_token;
   char* eam_eof_test;
   FILE *eamFile;
   const int BUFFERSIZE = 3000;
 
-  char temp[200];
+  string tempString;
   int linenumber;
   int nReadLines;
   char eam_read_buffer[BUFFERSIZE];
-
 
   int i,j;
 
   linenumber = 0;
 
   // Open eam file
-  eamFile = fopen( eamPotFile, "r" );
-  
+  eamFile = fopen( eamPotFile.c_str(), "r" );
   
   if( eamFile == NULL ){
     
       // next see if the force path enviorment variable is set
     
-    ffPath = getenv( ffPath_env );
-    if( ffPath == NULL ) {
-      STR_DEFINE(ffPath, FRC_PATH );
-    }
+    tempString = ffPath + "/" + eamPotFile;
+    eamPotFile = tempString;
     
-    
-    strcpy( temp, ffPath );
-    strcat( temp, "/" );
-    strcat( temp, eamPotFile );
-    strcpy( eamPotFile, temp );
-    
-    eamFile = fopen( eamPotFile, "r" );
-
-    
+    eamFile = fopen( eamPotFile.c_str(), "r" );
     
     if( eamFile == NULL ){
       
@@ -715,7 +704,7 @@ int EAM_NS::parseEAM(atomStruct &info, char *eamPotFile,
 	       "Error opening the EAM force parameter file: %s\n"
 	       "Have you tried setting the FORCE_PARAM_PATH environment "
 	       "variable?\n",
-	       eamPotFile );
+	       eamPotFile.c_str() );
       painCave.isFatal = 1;
       simError();
     }
@@ -726,7 +715,7 @@ int EAM_NS::parseEAM(atomStruct &info, char *eamPotFile,
   linenumber++;
   if(eam_eof_test == NULL){
     sprintf( painCave.errMsg,
-	     "error in reading commment in %s\n", eamPotFile);
+	     "error in reading commment in %s\n", eamPotFile.c_str());
     painCave.isFatal = 1;
     simError();
   }
@@ -738,7 +727,7 @@ int EAM_NS::parseEAM(atomStruct &info, char *eamPotFile,
   linenumber++;
   if(eam_eof_test == NULL){
     sprintf( painCave.errMsg,
-	     "error in reading Identifier line in %s\n", eamPotFile);
+	     "error in reading Identifier line in %s\n", eamPotFile.c_str());
     painCave.isFatal = 1;
     simError();
   }
@@ -748,7 +737,7 @@ int EAM_NS::parseEAM(atomStruct &info, char *eamPotFile,
     
   if ( (the_token = strtok( eam_read_buffer, " \n\t,;")) == NULL){
     sprintf( painCave.errMsg, 
-	     "Error parsing EAM ident  line in %s\n", eamPotFile );
+	     "Error parsing EAM ident  line in %s\n", eamPotFile.c_str() );
     painCave.isFatal = 1;
     simError();
   }
@@ -757,7 +746,7 @@ int EAM_NS::parseEAM(atomStruct &info, char *eamPotFile,
  
   if( ( the_token = strtok( NULL, " \n\t,;" ) ) == NULL ){
     sprintf( painCave.errMsg, 
-	     "Error parsing EAM mass in %s\n", eamPotFile );
+	     "Error parsing EAM mass in %s\n", eamPotFile.c_str() );
     painCave.isFatal = 1;
     simError();
   }
@@ -765,7 +754,7 @@ int EAM_NS::parseEAM(atomStruct &info, char *eamPotFile,
  
   if( ( the_token = strtok( NULL, " \n\t,;" ) ) == NULL ){
     sprintf( painCave.errMsg, 
-	     "Error parsing EAM Lattice Constant %s\n", eamPotFile );
+	     "Error parsing EAM Lattice Constant %s\n", eamPotFile.c_str() );
     painCave.isFatal = 1;
     simError();
   }
@@ -775,14 +764,15 @@ int EAM_NS::parseEAM(atomStruct &info, char *eamPotFile,
   eam_eof_test = fgets(eam_read_buffer, sizeof(eam_read_buffer),eamFile);
   if(eam_eof_test == NULL){
     sprintf( painCave.errMsg,
-	     "error in reading number of points line in %s\n", eamPotFile);
+	     "error in reading number of points line in %s\n", 
+             eamPotFile.c_str());
     painCave.isFatal = 1;
     simError();
   }
 
   if ( (the_token = strtok( eam_read_buffer, " \n\t,;")) == NULL){
     sprintf( painCave.errMsg, 
-	     "Error parseing EAM nrho: line in %s\n", eamPotFile );
+	     "Error parseing EAM nrho: line in %s\n", eamPotFile.c_str() );
     painCave.isFatal = 1;
     simError();
   }
@@ -791,7 +781,7 @@ int EAM_NS::parseEAM(atomStruct &info, char *eamPotFile,
   
   if( ( the_token = strtok( NULL, " \n\t,;" ) ) == NULL ){
     sprintf( painCave.errMsg, 
-	     "Error parsing EAM drho in %s\n", eamPotFile );
+	     "Error parsing EAM drho in %s\n", eamPotFile.c_str() );
     painCave.isFatal = 1;
     simError();
   }
@@ -799,7 +789,7 @@ int EAM_NS::parseEAM(atomStruct &info, char *eamPotFile,
 
   if( ( the_token = strtok( NULL, " \n\t,;" ) ) == NULL ){
     sprintf( painCave.errMsg, 
-	     "Error parsing EAM # r in %s\n", eamPotFile );
+	     "Error parsing EAM # r in %s\n", eamPotFile.c_str() );
     painCave.isFatal = 1;
     simError();
   }
@@ -807,7 +797,7 @@ int EAM_NS::parseEAM(atomStruct &info, char *eamPotFile,
   
   if( ( the_token = strtok( NULL, " \n\t,;" ) ) == NULL ){
     sprintf( painCave.errMsg, 
-	     "Error parsing EAM dr in %s\n", eamPotFile );
+	     "Error parsing EAM dr in %s\n", eamPotFile.c_str() );
     painCave.isFatal = 1;
     simError();
   }
@@ -815,7 +805,7 @@ int EAM_NS::parseEAM(atomStruct &info, char *eamPotFile,
 
   if( ( the_token = strtok( NULL, " \n\t,;" ) ) == NULL ){
     sprintf( painCave.errMsg, 
-	     "Error parsing EAM rcut in %s\n", eamPotFile );
+	     "Error parsing EAM rcut in %s\n", eamPotFile.c_str() );
     painCave.isFatal = 1;
     simError();
   }
@@ -847,7 +837,7 @@ int EAM_NS::parseEAM(atomStruct &info, char *eamPotFile,
     if(eam_eof_test == NULL){
       sprintf( painCave.errMsg,
 	       "error in reading EAM file %s at line %d\n",
-	       eamPotFile,linenumber);
+	       eamPotFile.c_str(), linenumber);
       painCave.isFatal = 1;
       simError();
     }
@@ -856,7 +846,7 @@ int EAM_NS::parseEAM(atomStruct &info, char *eamPotFile,
     // Value 1
     if ( (the_token = strtok( eam_read_buffer, " \n\t,;")) == NULL){
       sprintf( painCave.errMsg, 
-	       "Error parsing EAM nrho: line in %s\n", eamPotFile );
+	       "Error parsing EAM nrho: line in %s\n", eamPotFile.c_str() );
       painCave.isFatal = 1;
       simError();
     }
@@ -866,7 +856,7 @@ int EAM_NS::parseEAM(atomStruct &info, char *eamPotFile,
     // Value 2
     if ( (the_token = strtok( NULL, " \n\t,;")) == NULL){
       sprintf( painCave.errMsg, 
-	       "Error parsing EAM nrho: line in %s\n", eamPotFile );
+	       "Error parsing EAM nrho: line in %s\n", eamPotFile.c_str() );
       painCave.isFatal = 1;
       simError();
     }
@@ -876,7 +866,7 @@ int EAM_NS::parseEAM(atomStruct &info, char *eamPotFile,
     // Value 3
     if ( (the_token = strtok( NULL, " \n\t,;")) == NULL){
       sprintf( painCave.errMsg, 
-	       "Error parsing EAM nrho: line in %s\n", eamPotFile );
+	       "Error parsing EAM nrho: line in %s\n", eamPotFile.c_str() );
       painCave.isFatal = 1;
       simError();
     }
@@ -886,7 +876,7 @@ int EAM_NS::parseEAM(atomStruct &info, char *eamPotFile,
     // Value 4
     if ( (the_token = strtok( NULL, " \n\t,;")) == NULL){
       sprintf( painCave.errMsg, 
-	       "Error parsing EAM nrho: line in %s\n", eamPotFile );
+	       "Error parsing EAM nrho: line in %s\n", eamPotFile.c_str() );
       painCave.isFatal = 1;
       simError();
     }
@@ -896,7 +886,7 @@ int EAM_NS::parseEAM(atomStruct &info, char *eamPotFile,
     // Value 5
     if ( (the_token = strtok( NULL, " \n\t,;")) == NULL){
       sprintf( painCave.errMsg, 
-	       "Error parsing EAM nrho: line in %s\n", eamPotFile );
+	       "Error parsing EAM nrho: line in %s\n", eamPotFile.c_str() );
       painCave.isFatal = 1;
       simError();
     }
@@ -918,7 +908,7 @@ int EAM_NS::parseEAM(atomStruct &info, char *eamPotFile,
     if(eam_eof_test == NULL){
       sprintf( painCave.errMsg,
 	       "error in reading EAM file %s at line %d\n",
-	       eamPotFile,linenumber);
+	       eamPotFile.c_str(), linenumber);
       painCave.isFatal = 1;
       simError();
     }
@@ -927,7 +917,7 @@ int EAM_NS::parseEAM(atomStruct &info, char *eamPotFile,
     // Value 1
     if ( (the_token = strtok( eam_read_buffer, " \n\t,;")) == NULL){
       sprintf( painCave.errMsg, 
-	       "Error parsing EAM nrho: line in %s\n", eamPotFile );
+	       "Error parsing EAM nrho: line in %s\n", eamPotFile.c_str() );
       painCave.isFatal = 1;
       simError();
     }
@@ -937,7 +927,7 @@ int EAM_NS::parseEAM(atomStruct &info, char *eamPotFile,
     // Value 2
     if ( (the_token = strtok( NULL, " \n\t,;")) == NULL){
       sprintf( painCave.errMsg, 
-	       "Error parsing EAM nrho: line in %s\n", eamPotFile );
+	       "Error parsing EAM nrho: line in %s\n", eamPotFile.c_str() );
       painCave.isFatal = 1;
       simError();
     }
@@ -947,7 +937,7 @@ int EAM_NS::parseEAM(atomStruct &info, char *eamPotFile,
     // Value 3
     if ( (the_token = strtok( NULL, " \n\t,;")) == NULL){
       sprintf( painCave.errMsg, 
-	       "Error parsing EAM nrho: line in %s\n", eamPotFile );
+	       "Error parsing EAM nrho: line in %s\n", eamPotFile.c_str() );
       painCave.isFatal = 1;
       simError();
     }
@@ -957,7 +947,7 @@ int EAM_NS::parseEAM(atomStruct &info, char *eamPotFile,
     // Value 4
     if ( (the_token = strtok( NULL, " \n\t,;")) == NULL){
       sprintf( painCave.errMsg, 
-	       "Error parsing EAM nrho: line in %s\n", eamPotFile );
+	       "Error parsing EAM nrho: line in %s\n", eamPotFile.c_str() );
       painCave.isFatal = 1;
       simError();
     }
@@ -967,7 +957,7 @@ int EAM_NS::parseEAM(atomStruct &info, char *eamPotFile,
     // Value 5
     if ( (the_token = strtok( NULL, " \n\t,;")) == NULL){
       sprintf( painCave.errMsg, 
-	       "Error parsing EAM nrho: line in %s\n", eamPotFile );
+	       "Error parsing EAM nrho: line in %s\n", eamPotFile.c_str() );
       painCave.isFatal = 1;
       simError();
     }
@@ -988,7 +978,7 @@ int EAM_NS::parseEAM(atomStruct &info, char *eamPotFile,
     if(eam_eof_test == NULL){
       sprintf( painCave.errMsg,
 	       "error in reading EAM file %s at line %d\n",
-	       eamPotFile,linenumber);
+	       eamPotFile.c_str(), linenumber);
       painCave.isFatal = 1;
       simError();
     }
@@ -997,7 +987,7 @@ int EAM_NS::parseEAM(atomStruct &info, char *eamPotFile,
     // Value 1
     if ( (the_token = strtok( eam_read_buffer, " \n\t,;")) == NULL){
       sprintf( painCave.errMsg, 
-	       "Error parsing EAM nrho: line in %s\n", eamPotFile );
+	       "Error parsing EAM nrho: line in %s\n", eamPotFile.c_str() );
       painCave.isFatal = 1;
       simError();
     }
@@ -1007,7 +997,7 @@ int EAM_NS::parseEAM(atomStruct &info, char *eamPotFile,
     // Value 2
     if ( (the_token = strtok( NULL, " \n\t,;")) == NULL){
       sprintf( painCave.errMsg, 
-	       "Error parsing EAM nrho: line in %s\n", eamPotFile );
+	       "Error parsing EAM nrho: line in %s\n", eamPotFile.c_str() );
       painCave.isFatal = 1;
       simError();
     }
@@ -1017,7 +1007,7 @@ int EAM_NS::parseEAM(atomStruct &info, char *eamPotFile,
     // Value 3
     if ( (the_token = strtok( NULL, " \n\t,;")) == NULL){
       sprintf( painCave.errMsg, 
-	       "Error parsing EAM nrho: line in %s\n", eamPotFile );
+	       "Error parsing EAM nrho: line in %s\n", eamPotFile.c_str() );
       painCave.isFatal = 1;
       simError();
     }
@@ -1027,7 +1017,7 @@ int EAM_NS::parseEAM(atomStruct &info, char *eamPotFile,
     // Value 4
     if ( (the_token = strtok( NULL, " \n\t,;")) == NULL){
       sprintf( painCave.errMsg, 
-	       "Error parsing EAM nrho: line in %s\n", eamPotFile );
+	       "Error parsing EAM nrho: line in %s\n", eamPotFile.c_str() );
       painCave.isFatal = 1;
       simError();
     }
@@ -1037,7 +1027,7 @@ int EAM_NS::parseEAM(atomStruct &info, char *eamPotFile,
     // Value 5
     if ( (the_token = strtok( NULL, " \n\t,;")) == NULL){
       sprintf( painCave.errMsg, 
-	       "Error parsing EAM nrho: line in %s\n", eamPotFile );
+	       "Error parsing EAM nrho: line in %s\n", eamPotFile.c_str() );
       painCave.isFatal = 1;
       simError();
     }
