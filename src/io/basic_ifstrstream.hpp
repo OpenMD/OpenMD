@@ -338,6 +338,6 @@ class basic_ifstrstream : public basic_istream<_CharT, _Traits> {
         bool isRead;                                                                    /** file opened flag */
 };
 
-typedef basic_istringstream<char, char_traits<char>, allocator<char> > ifstringstream;
+typedef basic_ifstrstream<char, char_traits<char>, allocator<char> > ifstrstream;
 }//namespace oopse
 #endif //IO_IFSTRSTREAM_HPP
