@@ -285,10 +285,10 @@ JavaArchiverOptions    =
 JniOptions             =
 RmiOptions             = -d $(TargetDir) -classpath $(ClassPath) \
 			 -sourcepath $(SourceDir)
-COptions               = $(FrcDeclare)
-CParallelOptions       = $(FrcDeclare) $(ParallelDeclare)
-CppOptions             = $(FrcDeclare)
-CppParallelOptions     = $(FrcDeclare) $(ParallelDeclare)
+COptions               = $(FrcDeclare) @CFLAGS@
+CParallelOptions       = $(FrcDeclare) $(ParallelDeclare) @CFLAGS@
+CppOptions             = $(FrcDeclare) @CXXFLAGS@
+CppParallelOptions     = $(FrcDeclare) $(ParallelDeclare) @CXXFLAGS@
 FortranOptions         =
 F90Options             =  @PREPFLAG@ @F90FLAGS@ @MODDIRFLAG@$(SourceDir) @MODDIRFLAG@$(TargetDir) 
 F90ParallelOptions     =  @PREPFLAG@ @F90FLAGS@ @MODDIRFLAG@$(SourceDir) @MODDIRFLAG@$(ParallelTargetDir)  @PREPDEFFLAG@$(ParallelDeclare)
