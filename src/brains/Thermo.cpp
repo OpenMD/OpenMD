@@ -6,15 +6,15 @@ using namespace std;
 #include <mpi.h>
 #endif //is_mpi
 
-#include "Thermo.hpp"
-#include "SRI.hpp"
-#include "Integrator.hpp"
-#include "simError.h"
-#include "MatVec3.h"
+#include "brains/Thermo.hpp"
+#include "primitives/SRI.hpp"
+#include "integrators/Integrator.hpp"
+#include "utils/simError.h"
+#include "math/MatVec3.h"
 
 #ifdef IS_MPI
 #define __C
-#include "mpiSimulation.hpp"
+#include "brains/mpiSimulation.hpp"
 #endif // is_mpi
 
 inline double roundMe( double x ){

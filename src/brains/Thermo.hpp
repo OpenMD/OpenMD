@@ -1,10 +1,10 @@
 #ifndef __THERMO_H__
 #define __THERMO_H__
 
-#include "Atom.hpp"
-#include "SRI.hpp"
-#include "SimInfo.hpp"
-#include "randomSPRNG.hpp"
+#include "primitives/Atom.hpp"
+#include "primitives/SRI.hpp"
+#include "brains/SimInfo.hpp"
+#include "math/randomSPRNG.hpp"
 
 class Thermo{
 

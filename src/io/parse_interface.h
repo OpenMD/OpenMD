@@ -1,7 +1,7 @@
 #ifndef __INTERFACE_H__
 #define __INTERFACE_H__
 
-#include "node_list.h"
+#include "io/node_list.h"
 
 /*
  * the following is used to clarify the namespace of a given statement

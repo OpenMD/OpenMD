@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "TorsionStamp.hpp"
+#include "types/TorsionStamp.hpp"
 
 TorsionStamp::TorsionStamp(){
   

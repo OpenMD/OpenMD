@@ -2,13 +2,13 @@
 #define __MOLECULESTAMP_H__
 #include <vector>
 #include <utility>
-#include "AtomStamp.hpp"
-#include "BondStamp.hpp"
-#include "BendStamp.hpp"
-#include "TorsionStamp.hpp"
-#include "RigidBodyStamp.hpp"
-#include "CutoffGroupStamp.hpp"
-#include "LinkedAssign.hpp"
+#include "types/AtomStamp.hpp"
+#include "types/BondStamp.hpp"
+#include "types/BendStamp.hpp"
+#include "types/TorsionStamp.hpp"
+#include "types/RigidBodyStamp.hpp"
+#include "types/CutoffGroupStamp.hpp"
+#include "io/LinkedAssign.hpp"
 
 using namespace std;
 class MoleculeStamp{

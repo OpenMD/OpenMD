@@ -1,16 +1,16 @@
 #include <math.h>
-#include "Atom.hpp"
-#include "SRI.hpp"
-#include "AbstractClasses.hpp"
-#include "SimInfo.hpp"
-#include "ForceFields.hpp"
-#include "Thermo.hpp"
-#include "ReadWrite.hpp"
-#include "Integrator.hpp"
-#include "simError.h"
+#include "primitives/Atom.hpp"
+#include "primitives/SRI.hpp"
+#include "primitives/AbstractClasses.hpp"
+#include "brains/SimInfo.hpp"
+#include "UseTheForce/ForceFields.hpp"
+#include "brains/Thermo.hpp"
+#include "io/ReadWrite.hpp"
+#include "integrators/Integrator.hpp"
+#include "utils/simError.h"
 
 #ifdef IS_MPI
-#include "mpiSimulation.hpp"
+#include "brains/mpiSimulation.hpp"
 #endif
 
 // Basic isotropic thermostating and barostating via the Melchionna

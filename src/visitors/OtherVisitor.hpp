@@ -4,8 +4,8 @@
 #include <string>
 #include <vector>
 
-#include "BaseVisitor.hpp"
-#include "StuntDouble.hpp"
+#include "visitors/BaseVisitor.hpp"
+#include "primitives/StuntDouble.hpp"
 using namespace std;
 
 //IgnoreVisitor will turn on the ignoring flag of the stuntdouble

@@ -2,13 +2,13 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "MakeStamps.hpp"
-#include "MoleculeStamp.hpp"
-#include "RigidBodyStamp.hpp"
-#include "CutoffGroupStamp.hpp"
-#include "simError.h"
+#include "types/MakeStamps.hpp"
+#include "types/MoleculeStamp.hpp"
+#include "types/RigidBodyStamp.hpp"
+#include "types/CutoffGroupStamp.hpp"
+#include "utils/simError.h"
 #ifdef IS_MPI
-#include "mpiBASS.h"
+#include "io/mpiBASS.h"
 #endif // is_mpi
 
 LinkedMolStamp::~LinkedMolStamp(){ 

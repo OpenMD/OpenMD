@@ -2,9 +2,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "node_list.h"
-#include "make_nodes.h"
-#include "simError.h"
+#include "io/node_list.h"
+#include "io/make_nodes.h"
+#include "utils/simError.h"
 
 /*
   walks to to the top of a stmt_list. Needed when assigning the

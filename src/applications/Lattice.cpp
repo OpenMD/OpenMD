@@ -1,6 +1,6 @@
-#include "Lattice.hpp"
-#include "LatticeFactory.hpp"
-#include "LatticeCreator.hpp"
+#include "applications/Lattice.hpp"
+#include "applications/LatticeFactory.hpp"
+#include "applications/LatticeCreator.hpp"
 
 static LatticeCreator<FCCLattice> *FCCLatticeCreator = new LatticeCreator<FCCLattice>(FCCLatticeType);
 //static LatticeCreator<FCCLattice> *BCCLatticeCreator = new LatticeCreator<FCCLattice>(BCCLatticeType);

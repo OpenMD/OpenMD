@@ -1,8 +1,8 @@
 #ifndef __RIGIDBODYSTAMP_H__
 #define __RIGIDBODYSTAMP_H__
 
-#include "LinkedAssign.hpp"
-#include "AtomStamp.hpp"
+#include "io/LinkedAssign.hpp"
+#include "types/AtomStamp.hpp"
 
 
 class RigidBodyStamp{

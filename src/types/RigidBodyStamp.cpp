@@ -3,7 +3,7 @@
 #include <string.h>
 #include <iostream>
 
-#include "RigidBodyStamp.hpp"
+#include "types/RigidBodyStamp.hpp"
 
 char RigidBodyStamp::errMsg[500];
 

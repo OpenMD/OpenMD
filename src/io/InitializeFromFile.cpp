@@ -9,13 +9,13 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#include "ReadWrite.hpp"
-#include "simError.h"
-#include "GenericData.hpp"
+#include "io/ReadWrite.hpp"
+#include "utils/simError.h"
+#include "utils/GenericData.hpp"
 
 #ifdef IS_MPI
 #include <mpi.h>
-#include "mpiSimulation.hpp"
+#include "brains/mpiSimulation.hpp"
 #define TAKE_THIS_TAG_CHAR 3134
 #define TAKE_THIS_TAG_INT 3135
 

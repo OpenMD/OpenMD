@@ -20,7 +20,7 @@
 
 #include "getopt.h"
 
-#include "simpleBuilderCmd.h"
+#include "applications/simpleBuilderCmd.h"
 
 void
 cmdline_parser_print_version (void)

@@ -2,8 +2,8 @@
 #include <iostream>
 #include <vector>
 //#include <pair>
-#include "ZConsWriter.hpp"
-#include "simError.h"
+#include "io/ZConsWriter.hpp"
+#include "utils/simError.h"
 
 using namespace std;
 

@@ -9,17 +9,17 @@
 #endif
 
 #ifdef PROFILE
-#include "mdProfile.hpp"
+#include "profiling/mdProfile.hpp"
 #endif // PROFILE
 
-#include "simError.h"
-#include "SimSetup.hpp"
-#include "SimInfo.hpp"
-#include "Atom.hpp"
-#include "Integrator.hpp"
-#include "Thermo.hpp"
-#include "ReadWrite.hpp"
-#include "OOPSEMinimizer.hpp"
+#include "utils/simError.h"
+#include "brains/SimSetup.hpp"
+#include "brains/SimInfo.hpp"
+#include "primitives/Atom.hpp"
+#include "integrators/Integrator.hpp"
+#include "brains/Thermo.hpp"
+#include "io/ReadWrite.hpp"
+#include "minimizers/OOPSEMinimizer.hpp"
 
 char* program_name;
 using namespace std;

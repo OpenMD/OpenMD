@@ -4,17 +4,17 @@
 #include <math.h>
 #include <string>
 #include <sprng.h> 
-#include "SimSetup.hpp"
-#include "ReadWrite.hpp"
-#include "parse_me.h"
-#include "Integrator.hpp"
-#include "simError.h"
-#include "RigidBody.hpp"
-#include "OOPSEMinimizer.hpp"
+#include "brains/SimSetup.hpp"
+#include "io/ReadWrite.hpp"
+#include "io/parse_me.h"
+#include "integrators/Integrator.hpp"
+#include "utils/simError.h"
+#include "primitives/RigidBody.hpp"
+#include "minimizers/OOPSEMinimizer.hpp"
 
 #ifdef IS_MPI
-#include "mpiBASS.h"
-#include "mpiSimulation.hpp"
+#include "io/mpiBASS.h"
+#include "brains/mpiSimulation.hpp"
 #endif
 
 // some defines for ensemble and Forcefield  cases

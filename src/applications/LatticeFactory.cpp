@@ -1,6 +1,6 @@
-#include "LatticeFactory.hpp"
-#include "BaseLattice.hpp"
-#include "LatticeCreator.hpp"
+#include "applications/LatticeFactory.hpp"
+#include "applications/BaseLattice.hpp"
+#include "applications/LatticeCreator.hpp"
 
 LatticeFactory* LatticeFactory::instance = NULL;
 LatticeFactory::~LatticeFactory(){

@@ -1,7 +1,7 @@
 #ifndef __BONDSTAMP_H__
 #define __BONDSTAMP_H__
 
-#include "LinkedAssign.hpp"
+#include "io/LinkedAssign.hpp"
 
 class BondStamp{
 

@@ -9,7 +9,7 @@
 int nChecks;
 #endif // IS_MPI
 
-#include "simError.h"
+#include "utils/simError.h"
 
 errorStruct painCave;
 

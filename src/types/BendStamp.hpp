@@ -1,7 +1,7 @@
 #ifndef __BENDSTAMP_H__
 #define __BENDSTAMP_H__
 
-#include "LinkedAssign.hpp"
+#include "io/LinkedAssign.hpp"
 
 class BendStamp{
 

@@ -4,14 +4,14 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "BASS_interface.h"
-#include "MoleculeStamp.hpp"
-#include "AtomStamp.hpp"
-#include "BondStamp.hpp"
-#include "BendStamp.hpp"
-#include "TorsionStamp.hpp"
-#include "RigidBodyStamp.hpp"
-#include "CutoffGroupStamp.hpp"
+#include "io/BASS_interface.h"
+#include "types/MoleculeStamp.hpp"
+#include "types/AtomStamp.hpp"
+#include "types/BondStamp.hpp"
+#include "types/BendStamp.hpp"
+#include "types/TorsionStamp.hpp"
+#include "types/RigidBodyStamp.hpp"
+#include "types/CutoffGroupStamp.hpp"
 
 class LinkedMolStamp{
 

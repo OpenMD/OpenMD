@@ -1,8 +1,8 @@
 #ifndef _ZCONS_VISITOR_H_
 #define _ZCONS_VISITOR_H_
 
-#include "BaseVisitor.hpp"
-#include "ZConsReader.hpp"
+#include "visitors/BaseVisitor.hpp"
+#include "io/ZConsReader.hpp"
 
 enum ZConsState{zsFixed, zsMoving};
 

@@ -2,8 +2,8 @@
 #define _COMPOSITEVISITOR_H_
 
 #include <list>
-#include "BaseVisitor.hpp"
-#include "StuntDouble.hpp"
+#include "visitors/BaseVisitor.hpp"
+#include "primitives/StuntDouble.hpp"
 using namespace std;
 
 typedef list<pair<BaseVisitor*, int> >::iterator VisitorIterator;

@@ -1,9 +1,9 @@
 #include <math.h>
 
-#include "Atom.hpp"
-#include "DirectionalAtom.hpp"
-#include "simError.h"
-#include "MatVec3.h"
+#include "primitives/Atom.hpp"
+#include "primitives/DirectionalAtom.hpp"
+#include "utils/simError.h"
+#include "math/MatVec3.h"
 
 void DirectionalAtom::zeroForces() {
   if( hasCoords ){

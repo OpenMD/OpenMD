@@ -1,6 +1,6 @@
 #ifndef _LATTICE_H_
 #define _LATTICE_H_
-#include "BaseLattice.hpp"
+#include "applications/BaseLattice.hpp"
 #include <string>
 #include <vector>
 using namespace std;

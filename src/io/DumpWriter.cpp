@@ -9,7 +9,7 @@
 
 #ifdef IS_MPI
 #include <mpi.h>
-#include "mpiSimulation.hpp"
+#include "brains/mpiSimulation.hpp"
 
 namespace dWrite{
   void DieDieDie( void );
@@ -18,8 +18,8 @@ namespace dWrite{
 using namespace dWrite;
 #endif //is_mpi
 
-#include "ReadWrite.hpp"
-#include "simError.h"
+#include "io/ReadWrite.hpp"
+#include "utils/simError.h"
 
 DumpWriter::DumpWriter( SimInfo* the_entry_plug ){
 

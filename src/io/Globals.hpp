@@ -6,11 +6,11 @@
 #include <stdlib.h>
 #include <vector>
 
-#include "BASS_interface.h"
-#include "Component.hpp"
-#include "LinkedCommand.hpp"
-#include "MakeStamps.hpp"
-#include "ZconStamp.hpp"
+#include "io/BASS_interface.h"
+#include "types/Component.hpp"
+#include "io/LinkedCommand.hpp"
+#include "types/MakeStamps.hpp"
+#include "types/ZconStamp.hpp"
 
 using namespace std;
 

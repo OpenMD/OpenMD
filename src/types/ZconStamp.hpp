@@ -1,7 +1,7 @@
 #ifndef __ZCONSTAMP_H__
 #define __ZCONSTAMP_H__
 
-#include "LinkedAssign.hpp"
+#include "io/LinkedAssign.hpp"
 
 class ZconStamp{
 

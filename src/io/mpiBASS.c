@@ -4,8 +4,8 @@
 #include <string.h>
 
 #define __mpiBASSEVENT
-#include "mpiBASS.h"
-#include "simError.h"
+#include "io/mpiBASS.h"
+#include "utils/simError.h"
 
 
 void mpiCatchEvent(void);

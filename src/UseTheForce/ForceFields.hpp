@@ -9,16 +9,16 @@
 #include <stdlib.h>
 #include <math.h>
 
-#include "Atom.hpp"
-#include "SimInfo.hpp"
-#include "StuntDouble.hpp"
+#include "primitives/Atom.hpp"
+#include "brains/SimInfo.hpp"
+#include "primitives/StuntDouble.hpp"
 
 #ifdef IS_MPI
-#include "mpiForceField.h"
+#include "UseTheForce/mpiForceField.h"
 #endif
 
-#include "fForceField.h"
-#include "fortranWrapDefines.hpp"
+#include ""UseTheForce/fForceField.h""
+#include "UseTheForce/fortranWrapDefines.hpp"
 
 class bond_pair{
 public:

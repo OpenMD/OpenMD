@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "BendStamp.hpp"
+#include "types/BendStamp.hpp"
 
 BendStamp::BendStamp(){
   

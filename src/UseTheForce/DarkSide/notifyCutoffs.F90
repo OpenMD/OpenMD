@@ -14,7 +14,7 @@ module notifyCutoffs
   character(len = statusMsgSize) :: errMsg
 
 #define __FORTRAN90
-#include "fSwitchingFunction.h"
+#include "UseTheForce/fSwitchingFunction.h"
 
   public::cutoffNotify
   

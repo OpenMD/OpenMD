@@ -1,7 +1,7 @@
 #include <math.h>
 
-#include "SRI.hpp"
-#include "simError.h"
+#include "primitives/SRI.hpp"
+#include "utils/simError.h"
 
 QuadraticBend::QuadraticBend( Atom &a, Atom &b, Atom &c ){
 

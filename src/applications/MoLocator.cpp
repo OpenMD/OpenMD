@@ -3,9 +3,9 @@
 #include <cstdlib>
 #include <cmath>
 
-#include "simError.h"
-#include "MoLocator.hpp"
-#include "MatVec3.h"
+#include "utils/simError.h"
+#include "applications/MoLocator.hpp"
+#include "math/MatVec3.h"
 
 MoLocator::MoLocator( MoleculeStamp* theStamp, ForceFields* theFF){
 

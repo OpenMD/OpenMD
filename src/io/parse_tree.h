@@ -1,8 +1,8 @@
 #ifndef __PARSE_TREE_H__
 #define __PARSE_TREE_H__
 
-#include "node_list.h"
-#include "parse_interface.h"
+#include "io/node_list.h"
+#include "io/parse_interface.h"
 
 /* 
    This is the function that takes the statement node tree and gives

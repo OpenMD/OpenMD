@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <stdlib.h>
-#include "MatVec3.h"
+#include "math/MatVec3.h"
 
 /* 
  * Contains various utilities for dealing with 3x3 matrices and 

@@ -4,11 +4,11 @@
 #include <set>
 #include <vector>
 
-#include "Atom.hpp"
-#include "SRI.hpp"
-#include "MoleculeStamp.hpp"
-#include "RigidBody.hpp"
-#include "CutoffGroup.hpp"
+#include "primitives/Atom.hpp"
+#include "primitives/SRI.hpp"
+#include "types/MoleculeStamp.hpp"
+#include "primitives/RigidBody.hpp"
+#include "primitives/CutoffGroup.hpp"
 
 using namespace std;
 

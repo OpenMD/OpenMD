@@ -6,7 +6,7 @@ module switcheroo
   PRIVATE
 
 #define __FORTRAN90
-#include "fSwitchingFunction.h"
+#include "UseTheForce/fSwitchingFunction.h"
 
   real ( kind = dp ), dimension(NSWITCHTYPES) :: rin
   real ( kind = dp ), dimension(NSWITCHTYPES) :: rout

@@ -4,7 +4,7 @@
 
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: do_Forces.F90,v 1.1.1.1 2004-09-24 04:16:36 gezelter Exp $, $Date: 2004-09-24 04:16:36 $, $Name: not supported by cvs2svn $, $Revision: 1.1.1.1 $
+!! @version $Id: do_Forces.F90,v 1.2 2004-09-24 16:27:57 tim Exp $, $Date: 2004-09-24 16:27:57 $, $Name: not supported by cvs2svn $, $Revision: 1.2 $
 
 module do_Forces
   use force_globals
@@ -30,8 +30,8 @@ module do_Forces
   PRIVATE
 
 #define __FORTRAN90
-#include "fForceField.h"
-#include "fSwitchingFunction.h"
+#include "UseTheForce/fForceField.h"
+#include "UseTheForce/fSwitchingFunction.h"
 
   INTEGER, PARAMETER:: PREPAIR_LOOP = 1
   INTEGER, PARAMETER:: PAIR_LOOP    = 2

@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "BondStamp.hpp"
+#include "types/BondStamp.hpp"
 
 BondStamp::BondStamp(){
   

@@ -1,12 +1,12 @@
 #include <iostream>
 #include <math.h>
 
-#include "randomSPRNG.hpp"
-#include "simError.h"
+#include "math/randomSPRNG.hpp"
+#include "utils/simError.h"
 #include <sprng.h>
 
 #ifdef IS_MPI
-#include "mpiSimulation.hpp"
+#include "brains/mpiSimulation.hpp"
 #endif
 
 using namespace std;

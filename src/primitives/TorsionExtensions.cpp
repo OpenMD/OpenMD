@@ -1,4 +1,4 @@
-#include "SRI.hpp"
+#include "primitives/SRI.hpp"
 
 CubicTorsion::CubicTorsion( Atom &a, Atom &b, Atom &c, Atom &d ){
 

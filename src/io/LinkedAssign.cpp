@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "LinkedAssign.hpp"
+#include "io/LinkedAssign.hpp"
 
 LinkedAssign::LinkedAssign( char* the_text, int the_ival ){
   

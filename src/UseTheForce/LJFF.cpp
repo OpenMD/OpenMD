@@ -9,14 +9,14 @@ using namespace std;
 #include <mpi.h>
 #endif //is_mpi
 
-#include "ForceFields.hpp"
-#include "SRI.hpp"
-#include "simError.h"
+#include "UseTheForce/ForceFields.hpp"
+#include "primitives/SRI.hpp"
+#include "utils/simError.h"
 
-#include "fortranWrappers.hpp"
+#include "UseTheForce/fortranWrappers.hpp"
 
 #ifdef IS_MPI
-#include "mpiForceField.h"
+#include "UseTheForce/mpiForceField.h"
 #endif // is_mpi
 
 

@@ -2,7 +2,7 @@
 #define _ABSTRACT_CLASSES_H_
 
 #include <string>
-#include "Atom.hpp"
+#include "primitives/Atom.hpp"
 #ifdef IS_MPI
 
 #include "mpi.h"

@@ -2,7 +2,7 @@
 #define __FORTRAN_WRAP_DEFINES_H__
 
 #define __C
-#include "fSimulation.h"
+#include "brains/fSimulation.h"
 
 // here we declare the function pointer typedefs for fortran functions
 
@@ -90,7 +90,7 @@ extern "C" {
 
 #ifdef IS_MPI
 
-#include "mpiComponentPlan.h"
+#include "UseTheForce/mpiComponentPlan.h"
 
 
 

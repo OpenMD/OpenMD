@@ -1,8 +1,8 @@
 #include <cstring>
-#include "AtomVisitor.hpp"
-#include "DirectionalAtom.hpp"
-#include "MatVec3.h"
-#include "RigidBody.hpp"
+#include "visitors/AtomVisitor.hpp"
+#include "primitives/DirectionalAtom.hpp"
+#include "math/MatVec3.h"
+#include "primitives/RigidBody.hpp"
 
 void BaseAtomVisitor::visit(RigidBody* rb){
   //vector<Atom*> myAtoms;

@@ -2,7 +2,7 @@
 #define __STUNTDOUBLE_HPP__
 
 #include <map>
-#include "GenericData.hpp"
+#include "utils/GenericData.hpp"
 
 #define OT_ATOM 0
 #define OT_DATOM 1

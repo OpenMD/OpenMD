@@ -10,11 +10,11 @@
 #include <iostream>
 #include <vector>
 
-#include "Atom.hpp"
-#include "SimState.hpp"
+#include "primitives/Atom.hpp"
+#include "brains/SimState.hpp"
 
-//#include "SimInfo.hpp"
-//#include "ReadWrite.hpp"
+//#include "brains/SimInfo.hpp"
+//#include "io/ReadWrite.hpp"
 
 class Restraints{
 

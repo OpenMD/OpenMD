@@ -1,6 +1,6 @@
 
 
-#include "SRI.hpp"
+#include "primitives/SRI.hpp"
 
 
 ConstrainedBond::ConstrainedBond( Atom &a, Atom &b, double constraint ){

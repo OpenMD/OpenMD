@@ -12,12 +12,12 @@
 #include <string.h>
 
 
-#include "ReadWrite.hpp"
-#include "simError.h"
+#include "io/ReadWrite.hpp"
+#include "utils/simError.h"
 
 #ifdef IS_MPI
 #include <mpi.h>
-#include "mpiSimulation.hpp"
+#include "brains/mpiSimulation.hpp"
 #define TAKE_THIS_TAG_CHAR 0
 #define TAKE_THIS_TAG_INT 1
 #endif // is_mpi

@@ -4,7 +4,7 @@
 // Available at www.BruceEckel.com.
 //{-g++295} 
 
-#include "StreamTokenizer.hpp"
+#include "utils/StreamTokenizer.hpp"
 using namespace std;
 
 string StreamTokenizer::next() {

@@ -1,8 +1,8 @@
-#include "StuntDouble.hpp"
-#include "Atom.hpp"
-#include "DirectionalAtom.hpp"
-#include "RigidBody.hpp"
-#include "simError.h"
+#include "primitives/StuntDouble.hpp"
+#include "primitives/Atom.hpp"
+#include "primitives/DirectionalAtom.hpp"
+#include "primitives/RigidBody.hpp"
+#include "utils/simError.h"
 
 /*   
         "Don't move, or you're dead! Stand up! Captain, we've got them!"

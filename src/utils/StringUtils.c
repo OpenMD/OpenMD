@@ -3,8 +3,8 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
-#include "simError.h"
-#include "StringUtils.h"
+#include "utils/simError.h"
+#include "utils/StringUtils.h"
 
 int fastForwardToBeginBlock(FILE* theFile, char* blockName ){
   int foundText = 0;

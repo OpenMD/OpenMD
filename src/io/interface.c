@@ -2,11 +2,11 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "parse_interface.h"
-#include "BASS_interface.h"
-#include "simError.h"
+#include "io/parse_interface.h"
+#include "io/BASS_interface.h"
+#include "utils/simError.h"
 #ifdef IS_MPI
-#include "mpiBASS.h"
+#include "io/mpiBASS.h"
 #endif
 
 void interface_error( event* the_event );

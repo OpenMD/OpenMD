@@ -3,8 +3,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "simError.h"
-#include "SimState.hpp"
+#include "utils/simError.h"
+#include "brains/SimState.hpp"
 
 
 SimState::SimState(){

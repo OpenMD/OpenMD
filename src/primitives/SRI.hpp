@@ -3,9 +3,9 @@
 
 #include <iostream>
 
-#include "Atom.hpp"
-#include "DirectionalAtom.hpp"
-#include "AbstractClasses.hpp"
+#include "primitives/Atom.hpp"
+#include "primitives/DirectionalAtom.hpp"
+#include "primitives/AbstractClasses.hpp"
 
 // a little home-made vector structure
 

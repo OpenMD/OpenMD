@@ -5,17 +5,17 @@
 #include <iostream>
 using namespace std;
 
-#include "SimInfo.hpp"
+#include "brains/SimInfo.hpp"
 #define __C
-#include "fSimulation.h"
-#include "simError.h"
+#include "brains/fSimulation.h"
+#include "utils/simError.h"
 
-#include "fortranWrappers.hpp"
+#include "UseTheForce/fortranWrappers.hpp"
 
-#include "MatVec3.h"
+#include "math/MatVec3.h"
 
 #ifdef IS_MPI
-#include "mpiSimulation.hpp"
+#include "brains/mpiSimulation.hpp"
 #endif
 
 inline double roundMe( double x ){

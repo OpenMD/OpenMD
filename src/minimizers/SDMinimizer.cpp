@@ -1,5 +1,5 @@
-#include "OOPSEMinimizer.hpp"
-#include "Utility.hpp"
+#include "minimizers/OOPSEMinimizer.hpp"
+#include "utils/Utility.hpp"
 
 SDMinimizer::SDMinimizer(SimInfo *theInfo, ForceFields* the_ff ,
                                                                MinimizerParameterSet * param)

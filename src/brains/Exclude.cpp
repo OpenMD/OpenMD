@@ -1,7 +1,7 @@
 #include <iostream>
 #include <stdlib.h>
 
-#include "Exclude.hpp"
+#include "brains/Exclude.hpp"
 
 Exclude* Exclude::_instance = 0;
 

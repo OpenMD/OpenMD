@@ -1,7 +1,7 @@
 #ifndef __ATOMSTAMP_H__
 #define __ATOMSTAMP_H__
 
-#include "LinkedAssign.hpp"
+#include "io/LinkedAssign.hpp"
 
 class AtomStamp{
   

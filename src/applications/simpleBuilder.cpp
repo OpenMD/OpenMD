@@ -7,15 +7,15 @@
 #include <map>
 #include <fstream>
 
-#include "Globals.hpp"
-#include "SimInfo.hpp"
-#include "SimSetup.hpp"
-#include "simpleBuilderCmd.h"
-#include "StringUtils.hpp"
-#include "LatticeFactory.hpp"
-#include "Vector3d.hpp"
-#include "MoLocator.hpp"
-#include "Lattice.hpp"
+#include "io/Globals.hpp"
+#include "brains/SimInfo.hpp"
+#include "brains/SimSetup.hpp"
+#include "applications/simpleBuilderCmd.h"
+#include "utils/StringUtils.hpp"
+#include "applications/LatticeFactory.hpp"
+#include "applications/Vector3d.hpp"
+#include "applications/MoLocator.hpp"
+#include "applications/Lattice.hpp"
 
 using namespace std;
 

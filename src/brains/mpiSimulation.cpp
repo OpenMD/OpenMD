@@ -5,10 +5,10 @@
 #include <math.h>
 #include <mpi.h>
 
-#include "mpiSimulation.hpp"
-#include "simError.h"
-#include "fortranWrappers.hpp"
-#include "randomSPRNG.hpp"
+#include "brains/mpiSimulation.hpp"
+#include "utils/simError.h"
+#include "UseTheForce/fortranWrappers.hpp"
+#include "math/randomSPRNG.hpp"
 
 mpiSimulation* mpiSim;
 

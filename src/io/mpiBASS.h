@@ -9,7 +9,7 @@
 #include <mpi.h>
 
 #ifndef __is_lex__
-#include "BASS_interface.h"
+#include "io/BASS_interface.h"
 #endif
 
 #ifdef __cplusplus

@@ -2,7 +2,7 @@
 !! Corresponds to the force field defined in lj_FF.cpp 
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: calc_LJ_FF.F90,v 1.1.1.1 2004-09-24 04:16:36 gezelter Exp $, $Date: 2004-09-24 04:16:36 $, $Name: not supported by cvs2svn $, $Revision: 1.1.1.1 $
+!! @version $Id: calc_LJ_FF.F90,v 1.2 2004-09-24 16:27:57 tim Exp $, $Date: 2004-09-24 16:27:57 $, $Name: not supported by cvs2svn $, $Revision: 1.2 $
 
 module lj
   use definitions
@@ -19,7 +19,7 @@ module lj
   PRIVATE
 
 #define __FORTRAN90
-#include "fForceField.h"
+#include "UseTheForce/fForceField.h"
 
   integer, save :: LJ_Mixing_Policy
   real(kind=DP), save :: LJ_rcut
@@ -91,7 +91,7 @@ contains
     real(kind=dp) :: rcut
 
 #define __FORTRAN90
-#include "fSwitchingFunction.h"
+#include "UseTheForce/fSwitchingFunction.h"
 
     status = 0
 

@@ -5,14 +5,14 @@
 #include <cmath>
 
 
-#include "simError.h"
-#include "SimInfo.hpp"
-#include "ReadWrite.hpp"
+#include "utils/simError.h"
+#include "brains/SimInfo.hpp"
+#include "io/ReadWrite.hpp"
 
 #include "latticeBuilder.hpp"
-#include "MoLocator.hpp"
+#include "applications/MoLocator.hpp"
 #include "sysBuild.hpp"
-#include "nanoBuilder.hpp"
+#include "applications/nanoBuilder.hpp"
 
 nanoBuilder::nanoBuilder(int &hasError){
   int Errors;

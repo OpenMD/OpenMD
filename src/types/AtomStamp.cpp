@@ -3,7 +3,7 @@
 #include <string.h>
 #include <iostream>
 
-#include "AtomStamp.hpp"
+#include "types/AtomStamp.hpp"
 
 AtomStamp::AtomStamp(){
   

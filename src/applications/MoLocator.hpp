@@ -2,12 +2,12 @@
 #define __MOLOCATOR_H__
 
 #include <vector>
-#include "Atom.hpp"
-#include "DirectionalAtom.hpp"
-#include "MoleculeStamp.hpp"
-#include "Molecule.hpp"
+#include "primitives/Atom.hpp"
+#include "primitives/DirectionalAtom.hpp"
+#include "types/MoleculeStamp.hpp"
+#include "primitives/Molecule.hpp"
 #include "Vector3d.hpp"
-#include "ForceFields.hpp"
+#include "UseTheForce/ForceFields.hpp"
 using namespace std;
 
 //convert lattice vector to rotation matrix

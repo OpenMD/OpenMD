@@ -9,9 +9,9 @@
 
 using namespace std;
 
-#include "Restraints.hpp"
-#include "SimInfo.hpp"
-#include "simError.h"
+#include "restraints/Restraints.hpp"
+#include "brains/SimInfo.hpp"
+#include "utils/simError.h"
 
 #define PI 3.14159265359
 #define TWO_PI 6.28318530718

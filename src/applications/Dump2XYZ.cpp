@@ -2,13 +2,13 @@
 #include <fstream>
 #include <string>
 
-#include "SimSetup.hpp"
-#include "Dump2XYZCmd.h"
-#include "AtomVisitor.hpp"
-#include "CompositeVisitor.hpp"
-#include "RigidBodyVisitor.hpp"
-#include "OtherVisitor.hpp"
-#include "ZconsVisitor.hpp"
+#include "brains/SimSetup.hpp"
+#include "applications/Dump2XYZCmd.h"
+#include "visitors/AtomVisitor.hpp"
+#include "visitors/CompositeVisitor.hpp"
+#include "visitors/RigidBodyVisitor.hpp"
+#include "visitors/OtherVisitor.hpp"
+#include "visitors/ZconsVisitor.hpp"
 
 using namespace std;
 

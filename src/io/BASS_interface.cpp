@@ -3,12 +3,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "Globals.hpp"
-#include "BASS_interface.h"
-#include "simError.h"
+#include "io/Globals.hpp"
+#include "io/BASS_interface.h"
+#include "utils/simError.h"
 
 #ifdef IS_MPI
-#include "mpiBASS.h"
+#include "io/mpiBASS.h"
 #endif
 
 

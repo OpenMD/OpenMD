@@ -1,12 +1,12 @@
 #ifndef __FORTRANWRAPPERS_H__
 #define __FORTRANWRAPPERS_H__
 
-#include "fortranWrapDefines.hpp"
-#include "ForceFields.hpp"
-#include "SimInfo.hpp"
+#include "UseTheForce/fortranWrapDefines.hpp"
+#include "UseTheForce/ForceFields.hpp"
+#include "brains/SimInfo.hpp"
 
 #ifdef IS_MPI
-#include "mpiSimulation.hpp"
+#include "brains/mpiSimulation.hpp"
 #endif // is_mpi
 
 

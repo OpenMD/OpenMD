@@ -5,8 +5,8 @@
 #include <stdlib.h>
 #include <iostream>
 
-#include "StuntDouble.hpp"
-#include "Atom.hpp"
+#include "primitives/StuntDouble.hpp"
+#include "primitives/Atom.hpp"
 
 class DirectionalAtom : public Atom {
   

@@ -1,8 +1,8 @@
 #define __C
 
 #include "config.h"
-#include "fSimulation.h"
-#include "fortranWrappers.hpp"
+#include "brains/fSimulation.h"
+#include "UseTheForce/fortranWrappers.hpp"
 
 // declare the actual instances of the function pointers
 

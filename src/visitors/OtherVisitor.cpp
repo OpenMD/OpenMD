@@ -1,8 +1,8 @@
-#include "OtherVisitor.hpp"
-#include "DirectionalAtom.hpp"
-#include "RigidBody.hpp"
-#include "Molecule.hpp"
-#include "SimInfo.hpp"
+#include "visitors/OtherVisitor.hpp"
+#include "primitives/DirectionalAtom.hpp"
+#include "primitives/RigidBody.hpp"
+#include "primitives/Molecule.hpp"
+#include "brains/SimInfo.hpp"
 //----------------------------------------------------------------------------//
 void IgnoreVisitor::visit(Atom* atom){
   if(isIgnoreType(atom->getType()))

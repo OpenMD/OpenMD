@@ -5,9 +5,9 @@
 #include <stdlib.h>
 #include <iostream>
 
-#include "SimState.hpp"
-#include "StuntDouble.hpp"
-#include "BaseVisitor.hpp"
+#include "brains/SimState.hpp"
+#include "primitives/StuntDouble.hpp"
+#include "visitors/BaseVisitor.hpp"
 
 class Atom : public StuntDouble {
 public:

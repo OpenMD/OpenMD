@@ -3,8 +3,8 @@
 
 #include <iostream>
 
-#include "Integrator.hpp"
-#include "MinimizerParameterSet.hpp"
+#include "integrators/Integrator.hpp"
+#include "minimizers/MinimizerParameterSet.hpp"
 
 
 using namespace std;

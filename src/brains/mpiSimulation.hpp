@@ -1,12 +1,12 @@
 #ifndef __MPISIMULATION__
 #define __MPISIMULATION__
 
-#include "SimInfo.hpp"
-#include "MakeStamps.hpp"
+#include "brains/SimInfo.hpp"
+#include "types/MakeStamps.hpp"
 #define __C
-#include "mpiComponentPlan.h"
+#include "UseTheForce/mpiComponentPlan.h"
 
-#include "fortranWrapDefines.hpp"
+#include "UseTheForce/fortranWrapDefines.hpp"
 
 class mpiSimulation{
 public:

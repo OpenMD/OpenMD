@@ -3,11 +3,11 @@
 #include <string.h>
 
 #include "BASSyacc.h"
-#include "BASS_parse.h"
-#include "simError.h"
+#include "io/BASS_parse.h"
+#include "utils/simError.h"
 #ifdef IS_MPI
 #define __is_lex__
-#include "mpiBASS.h"
+#include "io/mpiBASS.h"
 #endif
 
 #define HASH_SIZE 211 // the size of the hash table

@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "Component.hpp"
+#include "types/Component.hpp"
 
 Component::Component(){
   

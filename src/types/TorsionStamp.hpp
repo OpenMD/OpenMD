@@ -1,7 +1,7 @@
 #ifndef __TORSIONSTAMP_H__
 #define __TORSIONSTAMP_H__
 
-#include "LinkedAssign.hpp"
+#include "io/LinkedAssign.hpp"
 
 class TorsionStamp{
 

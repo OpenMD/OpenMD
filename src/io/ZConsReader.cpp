@@ -1,5 +1,5 @@
-#include "ZConsReader.hpp"
-#include "simError.h"
+#include "io/ZConsReader.hpp"
+#include "utils/simError.h"
 
 ZConsReader::ZConsReader(SimInfo* info)
                    :istream(NULL){

@@ -1,5 +1,5 @@
-#include "OOPSEMinimizer.hpp"
-#include "Utility.hpp"
+#include "minimizers/OOPSEMinimizer.hpp"
+#include "utils/Utility.hpp"
 void PRCGMinimizer::init(){
 
   calcG();

@@ -1,8 +1,8 @@
 #include <stdlib.h>
 
 
-#include "Molecule.hpp"
-#include "simError.h"
+#include "primitives/Molecule.hpp"
+#include "utils/simError.h"
 
 
 

@@ -15,10 +15,10 @@
 #include <sys/stat.h>
 
 
-#include "Atom.hpp"
-#include "SimInfo.hpp"
-#include "Thermo.hpp"
-#include "StuntDouble.hpp"
+#include "primitives/Atom.hpp"
+#include "brains/SimInfo.hpp"
+#include "brains/Thermo.hpp"
+#include "primitives/StuntDouble.hpp"
 
 using namespace std;
 

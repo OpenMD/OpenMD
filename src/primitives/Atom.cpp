@@ -2,8 +2,8 @@
 
 using namespace std;
 
-#include "simError.h"
-#include "Atom.hpp"
+#include "utils/simError.h"
+#include "primitives/Atom.hpp"
 
 Atom::Atom(int theIndex, SimState* theConfig) {
 

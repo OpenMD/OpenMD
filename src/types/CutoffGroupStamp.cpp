@@ -3,7 +3,7 @@
 #include <string.h>
 #include <iostream>
 
-#include "CutoffGroupStamp.hpp"
+#include "types/CutoffGroupStamp.hpp"
 
 char CutoffGroupStamp::errMsg[500];
 

@@ -5,7 +5,7 @@
 #include <string.h>
 #include <mpi.h>
 
-#include "mpiForceField.h"
+#include "UseTheForce/mpiForceField.h"
 
 
 

@@ -5,8 +5,8 @@
 #include <iostream>
 #include <fstream>
 
-#include "ReadWrite.hpp"
-#include "simError.h"
+#include "io/ReadWrite.hpp"
+#include "utils/simError.h"
 
 
 StatWriter::StatWriter( SimInfo* the_entry_plug ){

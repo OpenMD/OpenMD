@@ -9,11 +9,11 @@
 #include <iostream>
 #include <fstream>
 
-#include "GenericData.hpp"
+#include "utils/GenericData.hpp"
 
 #ifdef IS_MPI
 #include <mpi.h>
-#include "mpiSimulation.hpp"
+#include "brains/mpiSimulation.hpp"
 #endif
 
 using namespace std;

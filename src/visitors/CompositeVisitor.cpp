@@ -1,7 +1,7 @@
 #include <cstring>
-#include "CompositeVisitor.hpp"
-#include "RigidBody.hpp"
-#include "DirectionalAtom.hpp"
+#include "visitors/CompositeVisitor.hpp"
+#include "primitives/RigidBody.hpp"
+#include "primitives/DirectionalAtom.hpp"
 CompositeVisitor::~CompositeVisitor(){
   VisitorIterator i;
   BaseVisitor* curVisitor;

@@ -1,5 +1,5 @@
-#include "SRI.hpp"
-#include "Atom.hpp"
+#include "primitives/SRI.hpp"
+#include "primitives/Atom.hpp"
 #include <math.h>
 #include <iostream>
 #include <stdlib.h>

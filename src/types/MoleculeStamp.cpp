@@ -3,7 +3,7 @@
 #include <string.h>
 #include <iostream>
 
-#include "MoleculeStamp.hpp"
+#include "types/MoleculeStamp.hpp"
 
 char MoleculeStamp::errMsg[500];
 

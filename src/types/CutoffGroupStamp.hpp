@@ -1,8 +1,8 @@
 #ifndef __CUTOFFGROUPSTAMP_H__
 #define __CUTOFFGROUPSTAMP_H__
 
-#include "LinkedAssign.hpp"
-#include "AtomStamp.hpp"
+#include "io/LinkedAssign.hpp"
+#include "types/AtomStamp.hpp"
 
 
 class CutoffGroupStamp{

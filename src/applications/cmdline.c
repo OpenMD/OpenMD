@@ -20,7 +20,7 @@
 
 #include "getopt.h"
 
-#include "cmdline.h"
+#include "applications/cmdline.h"
 
 void
 cmdline_parser_print_version (void)

@@ -7,12 +7,12 @@
 #ifdef IS_MPI
 #include <mpi.h>
 
-#include "mpiSimulation.hpp"
+#include "brains/mpiSimulation.hpp"
 #endif //is_mpi
 
 #include "config.h"
-#include "simError.h"
-#include "mdProfile.hpp"
+#include "utils/simError.h"
+#include "profiling/mdProfile.hpp"
 
 namespace mdProfileSpace {
 

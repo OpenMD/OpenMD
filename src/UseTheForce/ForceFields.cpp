@@ -11,13 +11,13 @@ using namespace std;
 
 
 #ifdef PROFILE
-#include "mdProfile.hpp"
+#include "profiling/mdProfile.hpp"
 #endif
 
-#include "simError.h"
-#include "ForceFields.hpp"
-#include "Atom.hpp"
-#include "fortranWrappers.hpp"
+#include "utils/simError.h"
+#include "UseTheForce/ForceFields.hpp"
+#include "primitives/Atom.hpp"
+#include "UseTheForce/fortranWrappers.hpp"
 
 
 void ForceFields::calcRcut( void ){

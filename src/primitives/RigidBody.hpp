@@ -2,10 +2,10 @@
 #define __RIGIDBODY_HPP__
 
 #include <vector>
-//#include "Atom.hpp"
-//#include "AtomStamp.hpp"
-#include "RigidBodyStamp.hpp"
-#include "StuntDouble.hpp"
+//#include "primitives/Atom.hpp"
+//#include "types/AtomStamp.hpp"
+#include "types/RigidBodyStamp.hpp"
+#include "primitives/StuntDouble.hpp"
 using namespace std;
 
 class Atom;

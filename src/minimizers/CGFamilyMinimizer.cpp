@@ -1,7 +1,7 @@
 #include <math.h>
 
-#include "OOPSEMinimizer.hpp"
-#include "Utility.hpp"
+#include "minimizers/OOPSEMinimizer.hpp"
+#include "utils/Utility.hpp"
 
 CGFamilyMinmizer::CGFamilyMinmizer(SimInfo *theInfo, ForceFields* the_ff ,
                                                                MinimizerParameterSet * param)

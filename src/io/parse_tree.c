@@ -1,12 +1,12 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "parse_tree.h"
-#include "simError.h"
+#include "io/parse_tree.h"
+#include "utils/simError.h"
 
 #ifdef IS_MPI
 #define __is_lex__
-#include "mpiBASS.h"
+#include "io/mpiBASS.h"
 #endif
 
 void walk_down( struct node_tag* the_node, struct namespc the_namespc );

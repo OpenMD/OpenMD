@@ -7,7 +7,7 @@
 !!
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: mpiSimulation_module.F90,v 1.1.1.1 2004-09-24 04:16:36 gezelter Exp $, $Date: 2004-09-24 04:16:36 $, $Name: not supported by cvs2svn $, $Revision: 1.1.1.1 $
+!! @version $Id: mpiSimulation_module.F90,v 1.2 2004-09-24 16:27:57 tim Exp $, $Date: 2004-09-24 16:27:57 $, $Name: not supported by cvs2svn $, $Revision: 1.2 $
 
 module mpiSimulation  
   use definitions
@@ -70,7 +70,7 @@ module mpiSimulation
 !! Include mpiComponentPlan type. mpiComponentPlan is a 
 !! dual header file for both c and fortran.
 #define __FORTRAN90
-#include "mpiComponentPlan.h"
+#include "UseTheForce/mpiComponentPlan.h"
 
 
 !! Tags used during force loop for parallel simulation

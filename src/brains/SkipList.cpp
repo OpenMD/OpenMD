@@ -1,7 +1,7 @@
 #include <iostream>
 #include <stdlib.h>
 
-#include "SkipList.hpp"
+#include "brains/SkipList.hpp"
 
 SkipList* SkipList::_instance = 0;
 

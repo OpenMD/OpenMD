@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "LinkedCommand.hpp"
+#include "io/LinkedCommand.hpp"
 
 int LinkedCommand::match( char* the_text ){
   

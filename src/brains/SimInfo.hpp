@@ -5,24 +5,24 @@
 #include <string>
 #include <vector>
 
-#include "Atom.hpp"
-#include "RigidBody.hpp"
-#include "Molecule.hpp"
-#include "Exclude.hpp"
-#include "SkipList.hpp"
-#include "AbstractClasses.hpp"
-#include "MakeStamps.hpp"
-#include "SimState.hpp"
-#include "Restraints.hpp"
+#include "primitives/Atom.hpp"
+#include "primitives/RigidBody.hpp"
+#include "primitives/Molecule.hpp"
+#include "brains/Exclude.hpp"
+#include "brains/SkipList.hpp"
+#include "primitives/AbstractClasses.hpp"
+#include "types/MakeStamps.hpp"
+#include "brains/SimState.hpp"
+#include "restraints/Restraints.hpp"
 
 #define __C
-#include "fSimulation.h"
-#include "fortranWrapDefines.hpp"
-#include "GenericData.hpp"
+#include "brains/fSimulation.h"
+#include "UseTheForce/fortranWrapDefines.hpp"
+#include "utils/GenericData.hpp"
 
 
 //#include "Minimizer.hpp"
-//#include "OOPSEMinimizer.hpp"
+//#include "minimizers/OOPSEMinimizer.hpp"
 
 
 double roundMe( double x );

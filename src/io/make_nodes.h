@@ -1,7 +1,7 @@
 #ifndef __MAKE_NODES_H__
 #define __MAKE_NODES_H__
 
-#include "node_list.h"
+#include "io/node_list.h"
 
 /* walks to the top node of the current list */
 

@@ -1,7 +1,7 @@
 #ifndef _BASEATOMVISITOR_H_
 #define _BASEATOMVISITOR_H_
 
-#include "BaseVisitor.hpp"
+#include "visitors/BaseVisitor.hpp"
 #include <vector>
 using namespace std;
 

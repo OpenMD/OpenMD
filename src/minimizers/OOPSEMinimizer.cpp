@@ -1,5 +1,5 @@
 #include <math.h>
-#include "OOPSEMinimizer.hpp"
+#include "minimizers/OOPSEMinimizer.hpp"
 #include "Integrator.cpp"
 
 OOPSEMinimizer::OOPSEMinimizer( SimInfo *theInfo, ForceFields* the_ff ,

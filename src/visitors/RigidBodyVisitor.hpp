@@ -3,8 +3,8 @@
 #include <iostream>
 #include <set>
 #include <string>
-#include "BaseVisitor.hpp"
-#include "GenericData.hpp"
+#include "visitors/BaseVisitor.hpp"
+#include "utils/GenericData.hpp"
 
 using namespace std;
 

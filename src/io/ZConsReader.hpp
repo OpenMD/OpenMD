@@ -5,8 +5,8 @@
 #include <string>
 #include <vector>
 
-#include "Integrator.hpp"
-#include "SimInfo.hpp"
+#include "integrators/Integrator.hpp"
+#include "brains/SimInfo.hpp"
 
 using namespace std;
 

@@ -1,8 +1,8 @@
 #include <math.h>
-#include "RigidBody.hpp"
-#include "DirectionalAtom.hpp"
-#include "simError.h"
-#include "MatVec3.h"
+#include "primitives/RigidBody.hpp"
+#include "primitives/DirectionalAtom.hpp"
+#include "utils/simError.h"
+#include "math/MatVec3.h"
 
 RigidBody::RigidBody() : StuntDouble() {
   objType = OT_RIGIDBODY;

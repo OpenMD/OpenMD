@@ -1,6 +1,6 @@
 #ifndef _CUTOFFGROUP_H_
 #define _CUTOFFGROUP_H_
-#include "Atom.hpp"
+#include "primitives/Atom.hpp"
 
 class CutoffGroup{
 public:

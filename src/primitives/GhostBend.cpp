@@ -3,9 +3,9 @@
 #include <iostream>
 #include <stdlib.h>
 
-#include "simError.h"
-#include "SRI.hpp"
-#include "Atom.hpp"
+#include "utils/simError.h"
+#include "primitives/SRI.hpp"
+#include "primitives/Atom.hpp"
 
 
 

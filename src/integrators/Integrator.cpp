@@ -2,16 +2,16 @@
 #include <stdlib.h>
 #include <math.h>
 #ifdef IS_MPI
-#include "mpiSimulation.hpp"
+#include "brains/mpiSimulation.hpp"
 #include <unistd.h>
 #endif //is_mpi
 
 #ifdef PROFILE
-#include "mdProfile.hpp"
+#include "profiling/mdProfile.hpp"
 #endif // profile
 
-#include "Integrator.hpp"
-#include "simError.h"
+#include "integrators/Integrator.hpp"
+#include "utils/simError.h"
 
 
 template<typename T> Integrator<T>::Integrator(SimInfo* theInfo,

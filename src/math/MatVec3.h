@@ -2,7 +2,7 @@
 #define __MATVEC3_H__
 
 #include <math.h>
-#include "simError.h"
+#include "utils/simError.h"
 #ifdef __cplusplus
 extern "C" {
 #endif

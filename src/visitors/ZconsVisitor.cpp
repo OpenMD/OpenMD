@@ -1,4 +1,4 @@
-#include "ZconsVisitor.hpp"
+#include "visitors/ZconsVisitor.hpp"
 #include <cmath>
 
 ZConsVisitor::ZConsVisitor(SimInfo* info) : BaseVisitor(), zconsReader(NULL){

@@ -3,7 +3,7 @@
 #include <string.h>
 #include "config.h"
 
-#include "simError.h" 
+#include "utils/simError.h" 
 
 void F90_FUNC_(c_simerror, C_SIMERROR) (errorStruct* pc);
 

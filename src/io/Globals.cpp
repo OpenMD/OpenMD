@@ -2,10 +2,10 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "Globals.hpp"
-#include "simError.h"
+#include "io/Globals.hpp"
+#include "utils/simError.h"
 #ifdef IS_MPI
-#include "mpiBASS.h"
+#include "io/mpiBASS.h"
 #endif // is_mpi
 
 /*

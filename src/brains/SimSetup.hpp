@@ -1,13 +1,13 @@
 #ifndef __SIMSETUP_H__
 #define __SIMSETUP_H__
 #include <string>
-#include "StringUtils.hpp"
-#include "MakeStamps.hpp"
-#include "Globals.hpp"
-#include "ForceFields.hpp"
-#include "SimInfo.hpp"
-#include "ReadWrite.hpp"
-#include "AllIntegrator.hpp"
+#include "utils/StringUtils.hpp"
+#include "types/MakeStamps.hpp"
+#include "io/Globals.hpp"
+#include "UseTheForce/ForceFields.hpp"
+#include "brains/SimInfo.hpp"
+#include "io/ReadWrite.hpp"
+#include "integrators/AllIntegrator.hpp"
 
 using namespace std;
 // this routine is defined in BASS_interface.cpp

@@ -1,5 +1,5 @@
-#include "Integrator.hpp"
-#include "simError.h"
+#include "integrators/Integrator.hpp"
+#include "utils/simError.h"
 #include <math.h>
 
 const double INFINITE_TIME = 10e30;

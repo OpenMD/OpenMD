@@ -1,6 +1,6 @@
-#include "RigidBodyVisitor.hpp"
-#include "RigidBody.hpp"
-#include "MatVec3.h"
+#include "visitors/RigidBodyVisitor.hpp"
+#include "primitives/RigidBody.hpp"
+#include "math/MatVec3.h"
 
 void LipidHeadVisitor::visit(RigidBody* rb){
   double pos[3];

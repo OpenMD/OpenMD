@@ -3,17 +3,17 @@
 
 #include <string>
 #include <vector>
-#include "Atom.hpp"
-#include "StuntDouble.hpp"
-#include "Molecule.hpp"
-#include "SRI.hpp"
-#include "AbstractClasses.hpp"
-#include "SimInfo.hpp"
-#include "ForceFields.hpp"
-#include "Thermo.hpp"
-#include "ReadWrite.hpp"
-#include "ZConsWriter.hpp"
-#include "Restraints.hpp"
+#include "primitives/Atom.hpp"
+#include "primitives/StuntDouble.hpp"
+#include "primitives/Molecule.hpp"
+#include "primitives/SRI.hpp"
+#include "primitives/AbstractClasses.hpp"
+#include "brains/SimInfo.hpp"
+#include "UseTheForce/ForceFields.hpp"
+#include "brains/Thermo.hpp"
+#include "io/ReadWrite.hpp"
+#include "io/ZConsWriter.hpp"
+#include "restraints/Restraints.hpp"
 
 using namespace std;
 const double kB = 8.31451e-7;// boltzmann constant amu*Ang^2*fs^-2/K

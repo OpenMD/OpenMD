@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "ZconStamp.hpp"
+#include "types/ZconStamp.hpp"
 
 
 ZconStamp::ZconStamp(int theIndex){
