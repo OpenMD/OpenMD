@@ -15,13 +15,11 @@ ForcefieldFiles = \
  Cu.u3.funcfl \
  Cu.u6.funcfl \
  Cu.VC.funcfl \
- DipoleTest.frc \
- DUFF.frc \
+ DUFF2.frc \
  EAM.frc \
  EAM.u3.frc \
  EAM.u6.frc \
  EAM.VC.frc \
- LJFF.frc \
  Ni.u3.funcfl \
  Ni.VC.funcfl \
  Pd.u3.funcfl \
@@ -30,7 +28,6 @@ ForcefieldFiles = \
  Pt.u3.funcfl \
  Pt.u6.funcfl \
  Pt.VC.funcfl \
- WATER.frc
 
 DEV_ROOT=..
 include $(DEV_ROOT)/make/Makefile
