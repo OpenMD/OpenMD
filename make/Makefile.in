@@ -652,38 +652,38 @@ $(DependencyFile) : $(DerivedSource)
 	@cd $(PackageSourceDir)
 
 ifneq "$(words $(CppFiles))" "0"
-	$(CppCompiler) $(CppOptions) $(IncludePath) -MM $(CppFiles) > Make.cpptemp
-	@cat Make.cpptemp | sed 's/^[a-zA-Z0-9]/$$\(TargetDir\)\/&/g' >> $(DependencyFile)
+	$(DEV_ROOT)/scripts/filepp  -I $(DEV_ROOT)/src -od '$$(TargetDir)/' -MM $(CppFiles)>> Make.cpptemp
+	@cat Make.cpptemp  >> $(DependencyFile)
 	$(Delete) Make.cpptemp
 
   ifeq "$(UseMPI)" "yes"
-	$(CppCompiler) $(CppParallelOptions) $(IncludePath) -MM $(CppFiles) > Make.cpptemp
-	@cat Make.cpptemp | sed 's/^[a-zA-Z0-9]/$$\(ParallelTargetDir\)\/&/g' >> $(DependencyFile)
+	$(DEV_ROOT)/scripts/filepp  -I $(DEV_ROOT)/src -od '$$(ParallelTargetDir)/' $(ParallelDeclare) -MM $(CppFiles)>> Make.cpptemp
+	@cat Make.cpptemp  >> $(DependencyFile)
 	@$(Delete) Make.cpptemp
   endif
 
 endif
 
 ifneq "$(words $(CFiles))" "0" 
-	$(CCompiler) $(COptions) $(IncludePath) -MM $(CFiles) $(DerivedCFiles) > Make.ctemp
-	@cat Make.ctemp | sed 's/^[a-zA-Z0-9]/$$\(TargetDir\)\/&/g' >> $(DependencyFile)
+	$(DEV_ROOT)/scripts/filepp  -I $(DEV_ROOT)/src -od '$$(TargetDir)/'  -MM $(CFiles) $(DerivedCFiles)  >> Make.ctemp
+	@cat Make.ctemp  >> $(DependencyFile)
 	$(Delete) Make.ctemp
 
   ifeq "$(UseMPI)" "yes"
-	$(CCompiler) $(CParallelOptions) $(IncludePath) -MM $(CFiles) $(DerivedCFiles) > Make.ctemp
-	@cat Make.ctemp | sed 's/^[a-zA-Z0-9]/$$\(ParallelTargetDir\)\/&/g' >> $(DependencyFile)
+	$(DEV_ROOT)/scripts/filepp  -I $(DEV_ROOT)/src -od '$$(ParallelTargetDir)/' $(ParallelDeclare) -MM $(CFiles) $(DerivedCFiles)  >> Make.ctemp
+	@cat Make.ctemp  >> $(DependencyFile)
 	@$(Delete) Make.ctemp
   endif
 
 endif
 
 ifneq "$(words $(F90Files))" "0"
-	$(DEV_ROOT)/scripts/filepp  -I $(DEV_ROOT)/src -od '$$(TargetDir)/' $(F90Declare) -mc $(ModuleCase) -ms $(ModSuffix) $(F90Files) > Make.ftemp
+	$(DEV_ROOT)/scripts/filepp  -I $(DEV_ROOT)/src -od '$$(TargetDir)/' $(F90Declare) -MM -mc $(ModuleCase) -ms $(ModSuffix) $(F90Files) > Make.ftemp
 	@cat Make.ftemp >> $(DependencyFile)
 	@$(Delete) Make.ftemp
 
   ifeq "$(UseMPI)" "yes"
-	$(DEV_ROOT)/scripts/filepp  -I $(DEV_ROOT)/src -od '$$(ParallelTargetDir)/' $(ParallelDeclare) $(F90Declare) -mc $(ModuleCase) -ms $(ModSuffix)  $(F90Files) >> Make.ftemp
+	$(DEV_ROOT)/scripts/filepp  -I $(DEV_ROOT)/src -od '$$(ParallelTargetDir)/' $(ParallelDeclare) $(F90Declare) -MM -mc $(ModuleCase) -ms $(ModSuffix)  $(F90Files) >> Make.ftemp
 	@cat Make.ftemp >> $(DependencyFile)
 	@$(Delete) Make.ftemp
   endif
