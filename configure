@@ -4946,7 +4946,7 @@ done
 
 
   # clean out junk possibly left behind by a previous configuration
-  rm -f src/utils/getopt.h
+  rm -f src/getopt.h
   # Check for getopt_long support
 
 for ac_header in getopt.h
@@ -5286,7 +5286,7 @@ esac
   *) LIBOBJS="$LIBOBJS getopt1.$ac_objext" ;;
 esac
 
-                ac_config_links="$ac_config_links src/utils/getopt.h:src/utils/gnugetopt.h"
+                ac_config_links="$ac_config_links src/getopt.h:src/utils/gnugetopt.h"
 
 fi
 
@@ -8560,7 +8560,7 @@ do
   # Handling of arguments.
   "make/Makefile" ) CONFIG_FILES="$CONFIG_FILES make/Makefile" ;;
   "src/utils/Makefile" ) CONFIG_FILES="$CONFIG_FILES src/utils/Makefile" ;;
-  "src/utils/getopt.h" ) CONFIG_LINKS="$CONFIG_LINKS src/utils/getopt.h:src/utils/gnugetopt.h" ;;
+  "src/getopt.h" ) CONFIG_LINKS="$CONFIG_LINKS src/getopt.h:src/utils/gnugetopt.h" ;;
   "src/config.h" ) CONFIG_HEADERS="$CONFIG_HEADERS src/config.h" ;;
   *) { { echo "$as_me:$LINENO: error: invalid argument: $ac_config_target" >&5
 echo "$as_me: error: invalid argument: $ac_config_target" >&2;}

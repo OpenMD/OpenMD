@@ -1060,7 +1060,7 @@ AC_SUBST(SPRNG_LIB)
 AC_DEFUN([adl_FUNC_GETOPT_LONG],
  [AC_PREREQ(2.49)dnl
   # clean out junk possibly left behind by a previous configuration
-  rm -f src/utils/getopt.h
+  rm -f src/getopt.h
   # Check for getopt_long support
   AC_CHECK_HEADERS([getopt.h])
   AC_CHECK_FUNCS([getopt_long],,
@@ -1069,7 +1069,7 @@ AC_DEFUN([adl_FUNC_GETOPT_LONG],
      [# use the GNU replacement
       AC_LIBOBJ(getopt)
       AC_LIBOBJ(getopt1)
-      AC_CONFIG_LINKS([src/utils/getopt.h:src/utils/gnugetopt.h])])])])
+      AC_CONFIG_LINKS([src/getopt.h:src/utils/gnugetopt.h])])])])
 
 
 AC_DEFUN([ACX_CONFIG_HOME], [
