@@ -5,4 +5,6 @@ RmiSource =
 
 Main      = oopse
 
-include ../../../make/Makefile
+DEV_ROOT=../../..
+include $(DEV_ROOT)/make/Makefile
+

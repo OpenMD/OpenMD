@@ -6,4 +6,6 @@ RmiSource =
 
 Main      = Dump2XYZ
 
-include ../../../make/Makefile
+DEV_ROOT=../../..
+include $(DEV_ROOT)/make/Makefile
+
