@@ -534,7 +534,7 @@ if test "$ac_test_CFLAGS" != "set"; then
         fi;;
    *darwin*)
 	if test "$CC" = xlc -o "$CC" = cc; then
-        	CFLAGS="-qthreaded -O5 -qtune=auto -qarch=auto -qunroll=auto -qaltivec"
+        	CFLAGS="-qthreaded -O -qtune=auto -qarch=auto -qunroll=auto -qaltivec"
         fi;;
   esac
 
@@ -653,7 +653,7 @@ if test "$ac_test_CXXFLAGS" != "set"; then
         fi;;
    *darwin*)
 	if test "$CXX" = xlc++; then
-        	CXXFLAGS="-qthreaded -O5 -qtune=auto -qarch=auto -qunroll=auto -qaltivec"
+        	CXXFLAGS="-qthreaded -O -qtune=auto -qarch=auto -qunroll=auto -qaltivec"
         fi;;
   esac
 
@@ -768,7 +768,7 @@ if test x"$F90FLAGS" = x ; then
         fi;;
    *darwin*)
 	if test "$F90" = f90 -o "$F90" = xlf90 -o "$F90" = xlf95; then
-        	F90FLAGS="-qthreaded -O5 -qtune=auto -qarch=auto -qunroll=auto"
+        	F90FLAGS="-qthreaded -O -qtune=auto -qarch=auto -qunroll=auto"
         fi;;
   esac
 
