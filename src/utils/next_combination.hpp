@@ -39,14 +39,17 @@
 namespace oopse {
 
 /**
- * @fn bool next_combination(IteratorContainer<RandomAccessIterator>& iterContainer, RandomAccessIterator first, RandomAccessIterator last) 
+ * @fn bool next_combination(IteratorContainer<RandomAccessIterator>& iterContainer,
+ *                                           RandomAccessIterator first, RandomAccessIterator last)
  * @brief STL next_permuationtation like combination sequence generator.
- * Given the first and last iterator of a sequence, next_combination iteratively generates all possible combination.
+ * Given the first and last iterator of a sequence, next_combination iteratively generates all 
+ * possible combination.
+ * @return if more combination is availiable, otherwise return false
  * @param iterContainer iterator container
  * @param first the first iterator
  * @param last the last iterator
- * @note first and last must be random access iterators and iterContainer must be the container which
- * element is iterator. And all of the iteratos in iterContainer must be within the range [first, last)
+ * @note first and last must be random access iterators and iterContainer must be the container of  
+ * random access iterators . And all of the iteratos in iterContainer must be within the range [first, last)
  *
  * @code
  * std::vector<int> iv;
@@ -128,6 +131,44 @@ bool next_combination(IteratorContainer<RandomAccessIterator>& iterContainer, Ra
     }
 } //end next_combination
 
+/**
+ * @fn bool replaceWildCard(std::vector<std::vector<std::string>::iterator>& cont,
+ *                                        std::vector<std::string>& sequence, std::vector<std::string>& result,
+ *                                        const std::string& wildCard)
+ * @brief iteratively replace the sequence with wild cards
+ * @return true if more combination sequence is avaliable, otherwise return true
+ * @param cont iterator container, if expect whole series of combination, just pass an empty iterator 
+ * container. The user should not modify the iterator container
+ * @param sequence the whole sequence used to generate combination
+ * @param result a possible combination sequence which is set on return
+ * @wildCard the wild card string. Its value is "X" by default
+ * @note since next_combination never returns an empty sequence, replaceWildCard will not generate 
+ * one special combination, which is n identical wild cards (n is equal to the size of the passing sequence)
+ * 
+ * @code
+ * std::vector<std::string> sv;
+ * std::vector<std::vector<std::string>::iterator> sic;
+ * std::vector<std::string> resultString;
+ * sv.push_back("H");
+ * sv.push_back("C");
+ * sv.push_back("N");
+
+ * while (replaceWildCard(sic, sv, resultString)) {   
+ *     for(std::vector<std::string>::iterator i = resultString.begin(); i != resultString.end(); ++i) {
+ *         std::cout << *i << "\t";
+ *     }
+ *     std::cout << std::endl;
+ * }
+ * //output
+ * //H X X
+ * //X C X
+ * //X X N
+ * //H C X
+ * //H X N
+ * //X C N
+ * //H C N
+ @endcode
+ */
 bool replaceWildCard(std::vector<std::vector<std::string>::iterator>& cont,
                                              std::vector<std::string>& sequence, std::vector<std::string>& result,
                                              const std::string& wildCard = "X") {
