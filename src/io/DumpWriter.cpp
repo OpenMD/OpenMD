@@ -436,9 +436,8 @@ void DumpWriter::writeFrame(std::ostream& os) {
         } //end for(i = 0; i < mpiSim->getNmol())
 
         os.flush();
-        std::cout << "master" << std::endl;
+        
         sprintf(checkPointMsg, "Sucessfully took a dump.\n");
-
         MPIcheckPoint();
 
         delete [] potatoes;
@@ -541,7 +540,6 @@ void DumpWriter::writeFrame(std::ostream& os) {
             }
             
         }
-        std::cout << "slave" << std::endl;
         sprintf(checkPointMsg, "Sucessfully took a dump.\n");
         MPIcheckPoint();
     }
