@@ -216,7 +216,7 @@ endif
 #if Main is defined, do not build library. It may not be true sometimes
 ifneq  "$(words $(ObjectFiles) $(ParallelObjectFiles))" "0"
   DependencyFile    = $(PackageSourceDir)/Makedepend
-  ifneq "$(Main)" ""
+  ifneq "$(words $(Main))" "0"
     Executable             = $(BinDir)/$(Main)
     ParallelExecutable     = $(BinDir)/$(Main)_MPI
   else
@@ -256,6 +256,7 @@ Linker                 = @CXX@
 MakeDepend             = makedepend
 INSTALL                = @INSTALL@
 InstallProgram         = @INSTALL_PROGRAM@
+InstallScript          = @INSTALL_SCRIPT@
 InstallData            = @INSTALL_DATA@
 MkDir                  = @MKINSTALLDIRS@
 Delete                 = rm -fr
@@ -720,7 +721,7 @@ $(MyInstallDir) :
 _installdata :  $(MyInstallDir)
 	$(Print) $(InstallFiles) 
 ifneq "$(words $(InstallFiles))" "0"
-	$(InstallData) $(InstallFiles) $(MyInstallDir)
+	$(InstallCommand) $(InstallFiles) $(MyInstallDir)
 endif	    
 
 # make statistics
