@@ -8,8 +8,8 @@ component{
 
 initialConfig = "./ssd.in";
 
-ensemble = NPTi;
-forceField = "DUFF";
+ensemble = NVE;
+forceField = "WATER";
 useReactionField = "false";
 dielectric = 80.0;
 cutoffRadius = 9.0;
@@ -26,5 +26,5 @@ tauBarostat = 1e4;
 dt = 2.0;
 runTime = 1e3;
 
-sampleTime = 200;
+sampleTime = 100;
 statusTime = 2;
