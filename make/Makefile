@@ -100,7 +100,14 @@ DocsDir          = $(DEV_ROOT)/docs
 CurrentDir       = $(CURDIR)
 
 ifdef Source
-Package          = $(subst $(SourceDir)/,,$(CurrentDir))
+#Package          = $(subst $(SourceDir)/,,$(CurrentDir))
+#Package          = $(notdir $(CurrentDir))
+
+#get the relative path of current package to source directory
+# /home/maul/gezelter/src/code/src/UseTheForce/Darkside --> UseTheForce/Darkside
+#Package          = $(shell echo $(CurrentDir) | sed -e 's/^.*\/src\/\(.*\)/\1/g')
+Package          = $(subst $(shell cd $(SourceDir); pwd)/,,$(CurrentDir))
+
 PackageList      = $(Package)
 PackageSourceDir = $(SourceDir)/$(Package)
 PackageTargetDir = $(TargetDir)
@@ -110,6 +117,7 @@ PackageList      = $(Packages) $(JavaPackages)
 endif
 
 PackageListLoop  = $(patsubst %,$(SourceDir)/%/.loop,$(PackageList))
+#PackageListLoop  = $(PackageList)
 
 JRE              = $(JAVA_HOME)/jre/lib/rt.jar
 
@@ -139,14 +147,22 @@ OtherSourceFiles       = $(filter-out $(JavaFiles) $(CppFiles) $(CFiles) \
 	                              $(YaccFiles) $(CorbaFiles), \
 	                              $(Source))
 ManifestFile           = $(PackageSourceDir)/Manifest
-SourceFiles            = $(JavaFiles:%.java=  $(PackageSourceDir)/%.java)\
+
+SourceFiles            = $(JavaFiles)\
+                         $(CppFiles)\
+                         $(CFiles)\
+                         $(FortranFiles)\
+                         $(F90Files)\
+                         $(LexFiles)\
+                         $(YaccFiles)
+
+#SourceFiles            = $(JavaFiles:%.java=  $(PackageSourceDir)/%.java)\
                          $(CppFiles:%.cpp=    $(PackageSourceDir)/%.cpp)\
                          $(CFiles:%.c=        $(PackageSourceDir)/%.c)\
                          $(FortranFiles:%.f=  $(PackageSourceDir)/%.f)\
                          $(F90Files:%.F90=    $(PackageSourceDir)/%.F90)\
                          $(LexFiles:%.l=      $(PackageSourceDir)/%.l)\
                          $(YaccFiles:%.y=     $(PackageSourceDir)/%.y)\
-
 
 # Target
 JavaClassFiles         = $(JavaFiles:%.java=  $(PackageTargetDir)/%.class)
@@ -273,6 +289,7 @@ Space                  = $(Empty) $(Empty)
 default : build
 
 %.loop :
+	$(Print) $(SourceFiles)
 	@$(MAKE) $(MakeOptions) -C $(subst .loop,,$@) _$(MAKECMDGOALS)all
 
 # Create target directory
