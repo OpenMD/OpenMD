@@ -210,27 +210,26 @@ if test "$USE_MPI" = "yes"; then
 fi
 AC_SUBST(USE_MPI)
 
-AC_ARG_WITH(sprng,
-    	[AC_HELP_STRING([--with-sprng=<prefix>],
-		[compile with SPRNG installed in <prefix> [default=/usr/local]])],
-	with_sprng=$withval,
-	with_sprng="/usr/local")
+dnl AC_ARG_WITH(sprng,
+dnl    	[AC_HELP_STRING([--with-sprng=<prefix>],
+dnl		[compile with SPRNG installed in <prefix> [default=/usr/local]])],
+dnl	with_sprng=$withval,
+dnl	with_sprng="/usr/local")
+dnl
+dnl case "x$with_sprng" in
+dnl        xyes | "x")  USE_SPRNG=yes;;
+dnl        xno) USE_SPRNG=no ;;
+dnl        *) SPRNG="$with_sprng"; USE_SPRNG=yes ;;
+dnl esac
+dnl if test "$USE_SPRNG" = "yes" -a -z "$with_sprng"; then
+dnl        SPRNG="/usr/local"
+dnl fi
+dnl if test "$USE_SPRNG" = "yes"; then
+dnl         ACX_SPRNG
+dnl fi
+dnl AC_SUBST(USE_SPRNG)
 
-case "x$with_sprng" in
-        xyes | "x")  USE_SPRNG=yes;;
-        xno) USE_SPRNG=no ;;
-        *) SPRNG="$with_sprng"; USE_SPRNG=yes ;;
-esac
-if test "$USE_SPRNG" = "yes" -a -z "$with_sprng"; then
-        SPRNG="/usr/local"
-fi
-if test "$USE_SPRNG" = "yes"; then
-        ACX_SPRNG
-fi
-AC_SUBST(USE_SPRNG)
-
-
-CHECK_MKL
+dnl CHECK_MKL
 
 BB_ENABLE_DOXYGEN
 

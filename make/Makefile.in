@@ -74,15 +74,12 @@ Samples = \
 	samples/zcons \
 
 IncludeDirs = \
-	@SPRNG_INC_DIR@ \
 	@MPI_INC_DIR@
 
 LibraryDirs = \
-	@SPRNG_LIB_DIR@ \
 	@MPI_LIB_DIR@ 
 
 Libraries = \
-	@SPRNG_LIB@ \
 	@MPI_LIB@ \
 	@MPI_F90_LIB@
 

@@ -47,8 +47,6 @@
  * @version 1.0
  */
 
-#include <sprng.h>
-
 #include "brains/MoleculeCreator.hpp"
 #include "brains/SimCreator.hpp"
 #include "brains/SimSnapshotManager.hpp"
