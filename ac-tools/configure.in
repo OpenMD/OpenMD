@@ -1,12 +1,12 @@
 dnl **** Process this file with autoconf to produce a configure script.
 
-AC_INIT(OOPSE, 1.0, gezelter@nd.edu, oopse)
+AC_INIT(OOPSE, 2.0, gezelter@nd.edu, oopse)
 AC_CONFIG_AUX_DIR(ac-tools)
 
 builtin(include, ac-tools/fortran90.m4)
 builtin(include, ac-tools/aclocal.m4)
 
-AC_CONFIG_SRCDIR([src/oopse.cpp])
+AC_CONFIG_SRCDIR([src/applications/oopse.cpp])
 
 AC_PREFIX_DEFAULT("/usr/local")
 
@@ -195,9 +195,6 @@ esac
 
 MKINSTALLDIRS=`pwd`/ac-tools/"shtool mkdir -p -f"
 
-dnl **** Final list of subdirs
-SUBDIRS="libBASS libmdtools src forceFields samples utils utils/sysbuilder third-party "
-
 dnl **** Define CFLAGS etc empty to prevent configure from setting them
 CFLAGS=${CFLAGS-""}
 CXXFLAGS=${CXXFLAGS-""}
@@ -232,18 +229,7 @@ AC_SUBST(F90FLAGS)
 AC_SUBST(LDFLAGS)
 AC_SUBST(PREPFLAG)
 AC_SUBST(PREPDEFFLAG)
-AC_CONFIG_HEADER([libBASS/config.h libmdtools/config.h])
-AC_CONFIG_FILES([Makefile
-	libBASS/Makefile libmdtools/Makefile src/Makefile utils/Makefile
-	utils/sysbuilder/Makefile  forceFields/Makefile samples/Makefile
-        third-party/Makefile
-	samples/alkane/Makefile samples/argon/Makefile
-	samples/lipid/Makefile samples/minimizer/Makefile
-	samples/metals/Makefile samples/water/Makefile
-        samples/water/dimer/Makefile samples/water/spce/Makefile
-        samples/water/ssd/Makefile samples/water/ssde/Makefile
-        samples/water/tip4p/Makefile samples/water/tip3p_ice/Makefile
-	samples/zcons/Makefile
-])
+AC_CONFIG_HEADER([src/config.h])
+AC_CONFIG_FILES([make/Make.conf])
 
 AC_OUTPUT

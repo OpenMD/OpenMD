@@ -1,4 +1,4 @@
-DEV_ROOT=/home/maul/gezelter/tim/code/OOPSE-2.0
+DEV_ROOT=/home/maul/gezelter/gezelter/OOPSE-2.0
 IS_UNIX=1
 
 Packages = \
