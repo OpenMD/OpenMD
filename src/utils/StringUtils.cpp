@@ -1,8 +1,8 @@
 #include "utils/StringUtils.hpp"
 
 using namespace std;
-using namespace oopse;
 
+namespace oopse {
 string UpperCase(const string& S) {
   string uc = S;
   unsigned int n = uc.size();
@@ -137,4 +137,5 @@ int isEndLine(char *line) {
   }
  
  return 0;
+}
 }

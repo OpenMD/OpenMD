@@ -32,6 +32,7 @@
 #define FF_H2O   3
 
 using namespace std;
+using namespace oopse;
 
 /**
  * Check whether dividend is divisble by divisor or not
