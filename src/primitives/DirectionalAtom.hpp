@@ -20,6 +20,9 @@ public:
       for (int j=0; j < 3; j++)
         sU[i][j] = 0.0;
 
+    is_linear = false;
+    linear_axis =  -1;
+    momIntTol = 1e-6;
   }
   virtual ~DirectionalAtom() {}
 
@@ -50,6 +53,9 @@ public:
 
   void setI( double the_I[3][3] );
   void getI( double the_I[3][3] );
+
+  bool isLinear() {return is_linear;}
+  int linearAxis() {return linear_axis;}
   
   void lab2Body( double r[3] );
   void body2Lab( double r[3] );
@@ -79,6 +85,10 @@ private:
   double Ixx, Ixy, Ixz; // the inertial tensor matrix  ( body fixed )
   double Iyx, Iyy, Iyz;
   double Izx, Izy, Izz;
+
+  bool is_linear;
+  int linear_axis;
+  double momIntTol;
 
 };
 

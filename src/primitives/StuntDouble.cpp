@@ -534,24 +534,6 @@ void StuntDouble::getEulerAngles(double eulers[3]){
   }
 }
 
-bool StuntDouble::isLinear() {
-  int i;
-  double momI[3][3];
-  bool linearTest = false;
-  double tolerance = 0.001;
-
-  getI(momI);
-  
-  for (i=0; i<3; i++){
-    if (momI[i][i]<tolerance){
-      linearTest = true;
-      zeroAxis = i;
-    }
-  }
-
-  return linearTest;
-}
-
 double StuntDouble::getZangle(){
   switch (objType) 
     {

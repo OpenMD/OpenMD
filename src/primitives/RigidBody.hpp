@@ -42,8 +42,8 @@ public:
   void addFrc( double theF[3] );
   void zeroForces();
   
-  virtual bool isLinear() {return is_linear;}
-  virtual int linearAxis() {return linear_axis;}
+  bool isLinear() {return is_linear;}
+  int linearAxis() {return linear_axis;}
 
   double getMass( void ) { return mass; }
 

@@ -69,10 +69,35 @@ void DirectionalAtom::setA( double the_A[3][3] ){
 }
 
 void DirectionalAtom::setI( double the_I[3][3] ){  
+
+  int n_linear_coords, i, j;
   
   Ixx = the_I[0][0]; Ixy = the_I[0][1]; Ixz = the_I[0][2];
   Iyx = the_I[1][0]; Iyy = the_I[1][1]; Iyz = the_I[1][2];
   Izx = the_I[2][0]; Izy = the_I[2][1]; Izz = the_I[2][2];
+  
+  n_linear_coords = 0;
+
+  for (i = 0; i<3; i++) {
+    if (fabs(the_I[i][i]) < momIntTol) {
+      is_linear = true;
+      n_linear_coords++;
+      linear_axis = i;
+    }
+  }
+  
+  if (n_linear_coords > 1) {
+    sprintf( painCave.errMsg,
+             "DirectionalAtom error.\n"
+             "\tOOPSE was told to set more than one axis in this\n"
+             "\tDirectionalAtom to a vanishing moment of inertia.\n"
+             "\tThis should not be a DirectionalAtom.  Use an Atom.\n"
+             );
+      painCave.isFatal = 1;
+      simError();
+  }
+
+
 }
 
 void DirectionalAtom::setQ( double the_q[4] ){
