@@ -377,6 +377,8 @@ contains
 
     real (kind=dp) :: xi, yi, zi, xj, yj, zj, xi2, yi2, zi2, xj2, yj2, zj2
 
+    real (kind=dp) :: sti2, stj2
+
     real (kind=dp) :: proji, proji3, projj, projj3
     real (kind=dp) :: cti, ctj, cpi, cpj, spi, spj
     real (kind=dp) :: Phunc, sigma, s, eps, rtdenom, rt
@@ -444,6 +446,13 @@ contains
        call handleError("calc_shape", "NO SHAPEMAP!!!!")
        return       
     endif
+
+    write(*,*) rij, r2, d(1), d(2), d(3)
+    write(*,*) 'before, atom1, 2 = ', atom1, atom2
+    write(*,*) 'f1 = ', f(1,atom1), f(2,atom1), f(3,atom1)
+    write(*,*) 'f2 = ', f(1,atom2), f(2,atom2), f(3,atom2)
+    write(*,*) 't1 = ', t(1,atom1), t(2,atom1), t(3,atom1)
+    write(*,*) 't2 = ', t(1,atom2), t(2,atom2), t(3,atom2)
     
     !! We assume that the rotation matrices have already been calculated
     !! and placed in the A array.
@@ -517,35 +526,54 @@ contains
 
        xi2 = xi*xi
        yi2 = yi*yi
-       zi2 = zi*zi
-       
-       proji = sqrt(xi2 + yi2)
-       proji3 = proji*proji*proji
-       
+       zi2 = zi*zi             
        cti = zi / rij
+
+       if (cti .gt. 1.0_dp) cti = 1.0_dp
+       if (cti .lt. -1.0_dp) cti = -1.0_dp
 
        dctidx = - zi * xi / r3
        dctidy = - zi * yi / r3
        dctidz = 1.0d0 / rij - zi2 / r3
-       dctidux =  yi / rij
-       dctiduy = -xi / rij
+       dctidux =  yi / rij + (zi * yi) / r3
+       dctiduy = -xi / rij - (zi * xi) / r3
        dctiduz = 0.0d0
+
+       ! this is an attempt to try to truncate the singularity when
+       ! sin(theta) is near 0.0:
+
+       sti2 = 1.0_dp - cti*cti
+       if (dabs(sti2) .lt. 1.0d-12) then
+          proji = sqrt(rij * 1.0d-12)
+          dcpidx = 1.0d0 / proji
+          dcpidy = 0.0d0
+          dcpidux = 0.0d0
+          dcpiduy = zi / proji
+          dspidx = 0.0d0
+          dspidy = 1.0d0 / proji
+          dspidux = -zi / proji
+          dspiduy = 0.0d0
+       else
+          proji = sqrt(xi2 + yi2)
+          proji3 = proji*proji*proji
+          dcpidx = 1.0d0 / proji - xi2 / proji3
+          dcpidy = - xi * yi / proji3
+          dcpidux = xi * yi * zi / proji3
+          dcpiduy = zi / proji - xi2 * zi / proji3
+          dspidx = - xi * yi / proji3
+          dspidy = 1.0d0 / proji - yi2 / proji3
+          dspidux = -zi / proji + yi2 * zi / proji3
+          dspiduy = - xi * yi * zi / proji3
+       endif
        
        cpi = xi / proji
-       dcpidx = 1.0d0 / proji - xi2 / proji3
-       dcpidy = - xi * yi / proji3
        dcpidz = 0.0d0
-       dcpidux = xi * yi * zi / proji3
-       dcpiduy = -zi * (1.0d0 / proji - xi2 / proji3) 
-       dcpiduz = -yi * (1.0d0 / proji - xi2 / proji3)  - (xi2 * yi / proji3)
+       dcpiduz = -yi / proji
        
        spi = yi / proji
-       dspidx = - xi * yi / proji3
-       dspidy = 1.0d0 / proji - yi2 / proji3
        dspidz = 0.0d0
-       dspidux = -zi * (1.0d0 / proji - yi2 / proji3) 
-       dspiduy = xi * yi * zi / proji3
-       dspiduz = xi * (1.0d0 / proji - yi2 / proji3) + (xi * yi2 / proji3)
+       dspiduz = xi / proji
+       write(*,*) 'before lmloop', cpi, dcpidx, dcpidux
 
        call Associated_Legendre(cti, ShapeMap%Shapes(st1)%bigM, &
             ShapeMap%Shapes(st1)%bigL, LMAX, &
@@ -626,6 +654,9 @@ contains
           coeff = ShapeMap%Shapes(st1)%RangeFuncCoefficient(lm)
           function_type = ShapeMap%Shapes(st1)%RangeFunctionType(lm)
           
+         write(*,*) 'in lm loop a', coeff, dtm_i(m), dcpidx
+
+
           if ((function_type .eq. SH_COS).or.(m.eq.0)) then
              Phunc = coeff * tm_i(m)
              dPhuncdX = coeff * dtm_i(m) * dcpidx
@@ -645,7 +676,9 @@ contains
           endif
 
           s_i = s_i + plm_i(m,l)*Phunc
-          
+           
+
+          write(*,*) 'in lm loop ', dsidx, plm_i(m,l), dPhuncdX, Phunc, dlm_i(m,l), dctidx
           dsidx = dsidx + plm_i(m,l)*dPhuncdX + &
                Phunc * dlm_i(m,l) * dctidx
           dsidy = dsidy + plm_i(m,l)*dPhuncdY + &
@@ -753,34 +786,53 @@ contains
        xj2 = xj*xj
        yj2 = yj*yj
        zj2 = zj*zj
-       
-       projj = sqrt(xj2 + yj2)
-       projj3 = projj*projj*projj
-       
        ctj = zj / rij
+       
+       if (ctj .gt. 1.0_dp) ctj = 1.0_dp
+       if (ctj .lt. -1.0_dp) ctj = -1.0_dp
+
        dctjdx = - zj * xj / r3
        dctjdy = - zj * yj / r3
        dctjdz = 1.0d0 / rij - zj2 / r3
-       dctjdux =  yj / rij
-       dctjduy = -xj / rij
+       dctjdux =  yj / rij + (zj * yj) / r3
+       dctjduy = -xj / rij - (zj * xj) / r3
        dctjduz = 0.0d0
        
+       ! this is an attempt to try to truncate the singularity when
+       ! sin(theta) is near 0.0:
+
+       stj2 = 1.0_dp - ctj*ctj
+       if (dabs(stj2) .lt. 1.0d-12) then
+          projj = sqrt(rij * 1.0d-12)
+          dcpjdx = 1.0d0 / projj 
+          dcpjdy = 0.0d0
+          dcpjdux = 0.0d0
+          dcpjduy = zj / projj
+          dspjdx = 0.0d0
+          dspjdy = 1.0d0 / projj
+          dspjdux = -zj / projj
+          dspjduy = 0.0d0
+       else
+          projj = sqrt(xj2 + yj2)
+          projj3 = projj*projj*projj
+          dcpjdx = 1.0d0 / projj - xj2 / projj3
+          dcpjdy = - xj * yj / projj3
+          dcpjdux = xj * yj * zj / projj3
+          dcpjduy = zj / projj - xj2 * zj / projj3
+          dspjdx = - xj * yj / projj3
+          dspjdy = 1.0d0 / projj - yj2 / projj3
+          dspjdux = -zj / projj + yj2 * zj / projj3
+          dspjduy = - xj * yj * zj / projj3
+       endif
+
        cpj = xj / projj
-       dcpjdx = 1.0d0 / projj - xj2 / projj3
-       dcpjdy = - xj * yj / projj3
        dcpjdz = 0.0d0
-       dcpjdux = xj * yj * zj / projj3
-       dcpjduy = -zj * (1.0d0 / projj - xj2 / projj3) 
-       dcpjduz = -yj * (1.0d0 / projj - xj2 / projj3)  - (xj2 * yj / projj3)
+       dcpjduz = -yj / projj
        
        spj = yj / projj
-       dspjdx = - xj * yj / projj3
-       dspjdy = 1.0d0 / projj - yj2 / projj3
        dspjdz = 0.0d0
-       dspjdux = -zj * (1.0d0 / projj - yj2 / projj3) 
-       dspjduy = xj * yj * zj / projj3
-       dspjduz = xj * (1.0d0 / projj - yi2 / projj3) + (xj * yj2 / projj3)
-       
+       dspjduz = xj / projj
+
        call Associated_Legendre(ctj, ShapeMap%Shapes(st2)%bigM, &
             ShapeMap%Shapes(st2)%bigL, LMAX, &
             plm_j, dlm_j)
@@ -976,6 +1028,8 @@ contains
 
     eps = sqrt(eps_i * eps_j)
 
+    write(*,*) 'sigma, s, eps = ', sigma, s, eps
+
     depsdxi = eps_j * depsidx / (2.0d0 * eps)
     depsdyi = eps_j * depsidy / (2.0d0 * eps)
     depsdzi = eps_j * depsidz / (2.0d0 * eps)
@@ -991,7 +1045,13 @@ contains
     depsduzj = eps_i * depsjduz / (2.0d0 * eps)
     
     rtdenom = rij-sigma+s
+
+    write(*,*) 'rtdenom = ', rtdenom, ' sw = ', sw
     rt = s / rtdenom
+
+    write(*,*) 'john' , dsdxi, rt, drdxi, dsigmadxi, rtdenom
+    write(*,*) 'bigboot', dsduzj, rt, drduzj, dsigmaduzj, rtdenom
+
 
     drtdxi = (dsdxi + rt * (drdxi - dsigmadxi + dsdxi)) / rtdenom
     drtdyi = (dsdyi + rt * (drdyi - dsigmadyi + dsdyi)) / rtdenom
@@ -1023,12 +1083,17 @@ contains
 #endif
     endif
     
+    write(*,*) 'drtdxi = ', drtdxi, drtdyi
+    write(*,*) 'depsdxi = ', depsdxi, depsdyi
+
     dvdxi = 24.0d0*eps*(2.0d0*rt11 - rt5)*drtdxi + 4.0d0*depsdxi*rt126
     dvdyi = 24.0d0*eps*(2.0d0*rt11 - rt5)*drtdyi + 4.0d0*depsdyi*rt126
     dvdzi = 24.0d0*eps*(2.0d0*rt11 - rt5)*drtdzi + 4.0d0*depsdzi*rt126
     dvduxi = 24.0d0*eps*(2.0d0*rt11 - rt5)*drtduxi + 4.0d0*depsduxi*rt126
     dvduyi = 24.0d0*eps*(2.0d0*rt11 - rt5)*drtduyi + 4.0d0*depsduyi*rt126
     dvduzi = 24.0d0*eps*(2.0d0*rt11 - rt5)*drtduzi + 4.0d0*depsduzi*rt126
+
+    write(*,*) 'drtduzj = ', drtduzj, depsduzj
 
     dvdxj = 24.0d0*eps*(2.0d0*rt11 - rt5)*drtdxj + 4.0d0*depsdxj*rt126
     dvdyj = 24.0d0*eps*(2.0d0*rt11 - rt5)*drtdyj + 4.0d0*depsdyj*rt126
@@ -1039,6 +1104,11 @@ contains
 
     ! do the torques first since they are easy:
     ! remember that these are still in the body fixed axes
+
+    write(*,*) 'dvdx = ', dvdxi, dvdyi, dvdzi
+    write(*,*) 'dvdx = ', dvdxj, dvdyj, dvdzj
+    write(*,*) 'dvdu = ', dvduxi, dvduyi, dvduzi
+    write(*,*) 'dvdu = ', dvduxj, dvduyj, dvduzj
 
     txi = dvduxi * sw
     tyi = dvduyi * sw
@@ -1149,6 +1219,12 @@ contains
        
     endif
     
+    write(*,*) 'f1 = ', f(1,atom1), f(2,atom1), f(3,atom1)
+    write(*,*) 'f2 = ', f(1,atom2), f(2,atom2), f(3,atom2)
+    write(*,*) 't1 = ', t(1,atom1), t(2,atom1), t(3,atom1)
+    write(*,*) 't2 = ', t(1,atom2), t(2,atom2), t(3,atom2)
+
+
   end subroutine do_shape_pair
     
   SUBROUTINE Associated_Legendre(x, l, m, lmax, plm, dlm)        
