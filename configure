@@ -7327,7 +7327,7 @@ echo "$as_me:$LINENO: result: $ac_cv_prog_ps_syntax" >&5
 echo "${ECHO_T}$ac_cv_prog_ps_syntax" >&6
 
 cat >>confdefs.h <<_ACEOF
-#define PSCOMMAND "$PS"
+#define PSCOMMAND $PS
 _ACEOF
 
 

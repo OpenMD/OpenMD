@@ -178,7 +178,7 @@ AC_CACHE_CHECK([for POSIX or BSD ps syntax], ac_cv_prog_ps_syntax, [
 		fi
 	fi
 ])
-AC_DEFINE_UNQUOTED(PSCOMMAND, "$PS", [Path to ps program])
+AC_DEFINE_UNQUOTED(PSCOMMAND, $PS, [Path to ps program])
 AC_DEFINE_UNQUOTED(PSTYPE, $ac_cv_prog_ps_syntax, [ps syntax type])
 
 

@@ -2,6 +2,10 @@
 #include <string.h> 
 #include <stdio.h>
 
+#define to_string( s ) # s
+#define STR_DEFINE(t, s) t = to_string(s)
+
+
 double residentMem () {
 
   FILE* procresults;
@@ -9,8 +13,11 @@ double residentMem () {
   char* foo;
   long int myRSS, totRSS;
   char pscommand[150];
+  char* psPath;
 
-  strncpy(pscommand, PSCOMMAND, strlen(PSCOMMAND));
+  STR_DEFINE(psPath, PSCOMMAND );
+
+  strncpy(pscommand, psPath, strlen(psPath));
 
 #if PSTYPE == BSD
   strcat(pscommand, " ax -o rss");
