@@ -124,9 +124,7 @@ SSD_E   d       0.0     0.0     0.0     2.42
 SSD_RF  d       0.0     0.0     0.0     2.48
 SSD     d       0.0     0.0     0.0     2.35
 SSD1    d       0.0     0.0     0.0     2.35
-CE      d       0.0     0.0     0.0     1.693
-CK      d       0.0     0.0     0.0     2.478
-HDP     s       0.0     0.0     0.0     20.6    4.63
+//HDP     s       0.0     0.0     0.0     20.6    4.63
 end MultipoleAtomTypes
 
 begin StickyAtomTypes

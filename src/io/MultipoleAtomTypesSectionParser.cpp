@@ -85,15 +85,15 @@ void MultipoleAtomTypesSectionParser::parseLine(ForceField& ff,const std::string
 
         AtomType* atomType = ff.getAtomType(atomTypeName);
         if (atomType == NULL) {
-            sprintf(painCave.errMsg, "MultipoleAtomTypesSectionParser Error: Can not find matched AtomType at line %d\n",
-                    lineNo);
+            sprintf(painCave.errMsg, "MultipoleAtomTypesSectionParser Error: Can not find matched AtomType[%s] at line %d\n",
+                    atomTypeName.c_str(), lineNo);
             painCave.isFatal = 1;
             simError();
         }
         
         DirectionalAtomType* dAtomType = dynamic_cast<DirectionalAtomType*>(atomType);            
         if (dAtomType == NULL) {
-            sprintf(painCave.errMsg, "MultipoleAtomTypesSectionParser Error: Can not Cast Atom to DirectionalAtom at line \n");
+            sprintf(painCave.errMsg, "MultipoleAtomTypesSectionParser Error: Can not Cast Atom to DirectionalAtom at line %d\n", lineNo);
             painCave.isFatal = 1;
             simError();
         }        

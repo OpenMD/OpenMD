@@ -46,7 +46,8 @@
 #include "io/DirectionalAtomTypesSectionParser.hpp"
 #include "io/AtomTypesSectionParser.hpp"
 #include "io/LennardJonesAtomTypesSectionParser.hpp"
-#include "io/ElectrostaticAtomTypesSectionParser.hpp"
+#include "io/ChargeAtomTypesSectionParser.hpp"
+#include "io/MultipoleAtomTypesSectionParser.hpp"
 #include "io/EAMAtomTypesSectionParser.hpp"
 #include "io/StickyAtomTypesSectionParser.hpp"
 #include "io/BondTypesSectionParser.hpp"
@@ -74,7 +75,8 @@ EAM_FF::EAM_FF(){
     spMan_.push_back(new DirectionalAtomTypesSectionParser());
     spMan_.push_back(new AtomTypesSectionParser());
     spMan_.push_back(new LennardJonesAtomTypesSectionParser());
-    spMan_.push_back(new ElectrostaticAtomTypesSectionParser());
+    spMan_.push_back(new ChargeAtomTypesSectionParser());
+    spMan_.push_back(new MultipoleAtomTypesSectionParser());
     spMan_.push_back(new EAMAtomTypesSectionParser());
     spMan_.push_back(new StickyAtomTypesSectionParser());
     spMan_.push_back(new BondTypesSectionParser());

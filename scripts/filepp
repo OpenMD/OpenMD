@@ -21,8 +21,8 @@
 #  Filename     :  $RCSfile: filepp,v $
 #  Author       :  $Author: tim $
 #  Maintainer   :  Darren Miller: darren@cabaret.demon.co.uk
-#  File version :  $Revision: 1.6 $
-#  Last changed :  $Date: 2004-10-11 21:54:35 $
+#  File version :  $Revision: 1.7 $
+#  Last changed :  $Date: 2005-03-09 17:58:33 $
 #  Description  :  Main program
 #  Licence      :  GNU copyleft
 #
@@ -31,7 +31,7 @@
 package Filepp;
 
 use strict "vars";
-use strict "subs";
+#use strict "subs";
 # Used to all filepp to work with any char, not just ascii,
 # feel free to remove this if it causes you problems
 #use bytes;

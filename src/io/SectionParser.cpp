@@ -48,7 +48,7 @@ void SectionParser::parse(std::istream& input, ForceField& ff, int lineNo) {
     char buffer[bufferSize];
     std::string line;
     while(input.getline(buffer, bufferSize)) {
-        /**@todo */
+        ++lineNo;
         line = trimLeftCopy(buffer);
         //a line begins with "//" is comment
         if (isEndSection(line)) {
