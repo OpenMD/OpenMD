@@ -1,0 +1,52 @@
+#####################################################
+# Makefile for Oopse Sample Simulations             #
+#####################################################
+# You should not change anything here.              #
+#####################################################
+
+# Location of the oopse home
+OOPSE_HOME=@OOPSE_HOME@
+SAMPLE_SIM_DIR=@OOPSE_HOME@/share/samples/
+
+# BSD install
+INSTALL=@INSTALL@
+INSTALL_PROGRAM=@INSTALL_PROGRAM@
+INSTALL_DATA=@INSTALL_DATA@
+MKINSTALLDIRS=@MKINSTALLDIRS@
+
+TOP=../..
+
+MYSIM=lipid
+
+FILES= \
+	5x5.md \
+	5x5.in \
+	water.md \
+	lipid.md
+
+all: dummy
+
+install : 
+	$(MKINSTALLDIRS) $(SAMPLE_SIM_DIR)$(MYSIM)
+	for i in $(FILES); do \
+	  echo "Installing $$i in $(SAMPLE_SIM_DIR)$(MYSIM)"; \
+	  $(INSTALL_DATA) $$i $(SAMPLE_SIM_DIR)$(MYSIM)/$$i; \
+	done
+
+tests : dummy
+
+clean : dummy
+	$(RM) *~
+
+distclean : dummy
+	$(RM) *~ *.dump
+
+devclean : distclean
+
+depend : dummy
+
+links: dummy
+
+tags : dummy
+
+dummy :

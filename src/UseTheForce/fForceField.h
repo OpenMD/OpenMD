@@ -1,0 +1,17 @@
+#ifdef __C
+#ifndef __FFORCEFIELD
+#define __FFORCEFIELD
+
+#define LB_MIXING_RULE 1
+#define EXPLICIT_MIXING_RULE 2
+
+
+#endif
+#endif //__C
+
+#ifdef  __FORTRAN90
+
+  INTEGER, PARAMETER:: LB_MIXING_RULE = 1
+  INTEGER, PARAMETER:: EXPLICIT_MIXING_RULE = 2
+
+#endif

@@ -1,0 +1,177 @@
+BODY, P, A, TD, OL, UL {
+	font-family: 	Arial, Helvetica, sans-serif;
+	font-size:      10pt;
+}
+
+
+H1 {
+        font-family:    Arial, Helvetica, sans-serif;
+        font-size:      12pt;
+        font-weight:    bold;
+}
+
+
+H2, H3, H4 {
+        font-family:    Arial, Helvetica, sans-serif;
+        font-size:      10pt;
+        font-weight:    bold;
+}
+
+
+TT, CODE, PRE {
+	font-family:    fixed;
+	font-size:      1.0em;
+}
+
+
+CODE, PRE {
+	color:		#000099;
+	font-size:      0.75em;
+}
+
+
+PRE {
+	margin-left:    20pt;
+}
+
+.comment {
+	color:		#990000;
+}
+
+.normal {
+	color:		#000099;
+}
+
+.menu {
+	background:	#004477; 
+}
+
+A.menuentry, A.selected {
+	text-decoration: none;
+	text-align:	 right;	
+	font-size:       14pt;
+	font-weight:     bold;
+	font-style:	 italic;	
+}
+
+A.menuentry:link {
+	color:           #cccccc;
+}
+
+A:menuentry:active {
+	color:		 white;
+}
+
+A:menuentry:hover {
+	color:		 white;
+}
+
+A.menuentry:visited {
+	color:           #cccccc;
+}
+
+A.selected {
+	color:           white;
+}
+
+
+.title, .smalltitle {
+	color:           #cccccc;
+	background:      #004477; 
+	font-family:     Arial, Helvetica, sans-serif;
+	font-size:       24pt;
+	font-weight:     bold;
+	text-align:	 right;
+}
+
+.smalltitle {
+	font-size:       18pt;
+	font-style:      italic;
+}
+
+.footnote {
+	font-family:     Arial, Helvetica, sans-serif;
+	font-size:	8pt;
+}
+
+.address {
+	font-family:    Arial, Helvetica, sans-serif;
+	font-size:      12pt;
+	font-weight:    bold;
+}
+
+
+.access, .noaccess, .legend {
+	background:     #990000;
+	font-size:	8pt;
+}
+
+.noaccess {
+	background:     #ccbbbb;
+}
+
+.legend {
+	background:     #ccaaaa;
+}
+
+.trendentry {
+	font-size:	1.0em;
+}
+
+
+.navigator {
+	font-family:    Arial, Helvetica, sans-serif;
+	font-weight:    bold;
+	background:	#ccbbbb;
+}
+
+.recom {
+	background:	#BBCCEE;
+	font-weight:    bold;
+}
+
+.practice {
+	background:	#BBCCEE;
+	font-weight:    bold;
+}
+
+
+.rationale {
+	font-size:	0.75em;
+}
+
+.cvtitle, .cvsmalltitle {
+	color:           #cccccc;
+	background:      #004477; 
+	font-family:     Arial, Helvetica, sans-serif;
+	font-size:       24pt;
+	font-weight:     bold;
+	text-align:	 center;
+}
+
+.cvsmalltitle {
+	font-size:       18pt;
+	text-align:	 left;
+	font-weight:     normal;
+}
+
+.cvprompt {
+	font-weight:     bold;
+}
+
+
+.warning {
+	color: red;
+	background: yellow;
+}
+
+.copyright {
+        font-family:    Arial, Helvetica, sans-serif;
+        font-size:      7pt;
+}
+
+.small {
+        font-family:    Arial, Helvetica, sans-serif;
+        font-size:      8pt;
+}
+

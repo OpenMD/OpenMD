@@ -1,0 +1,20 @@
+! This is the forcefield file for the Lennard-Jones Force Field (LJFF).
+! There is only a section for AtomTypes in this FF
+!
+! Data is from Table 1.1 in Allen & Tildesley's book
+
+#AtomTypes
+!Atom	mass		LJ epsilon (kcal/mol)	LJ sigma (Angstroms)
+
+H	1.00794		0.017090056482		2.81
+He	4.002602	0.020269601874		2.28
+C	12.0107		0.101745452544		3.35
+N	14.00674	0.074123151951		3.31
+O	15.9994		0.122412497592		2.95
+F	18.9984032	0.104924997936		2.83
+Ne	20.1797		0.09339914589		2.72
+S	32.066		0.36366050421		3.52
+Cl	35.4527		0.344781953445		3.35
+Ar	39.948		0.238068461226		3.41
+Br	79.904		0.511111921764		3.54
+Kr	83.80		0.32590340268		3.83

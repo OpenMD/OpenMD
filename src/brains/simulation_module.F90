@@ -1,0 +1,547 @@
+!! Fortran interface to C entry plug.
+
+module simulation
+  use definitions
+  use neighborLists
+  use force_globals
+  use vector_class
+  use atype_module
+  use switcheroo
+#ifdef IS_MPI
+  use mpiSimulation
+#endif
+
+  implicit none
+  PRIVATE
+
+#define __FORTRAN90
+#include "fSimulation.h"
+#include "fSwitchingFunction.h"
+
+  type (simtype), public, save :: thisSim
+
+  logical, save :: simulation_setup_complete = .false.
+
+  integer, public, save :: nLocal, nGlobal
+  integer, public, save :: nGroups, nGroupGlobal
+  integer, public, save :: nExcludes_Global = 0
+  integer, public, save :: nExcludes_Local = 0
+  integer, allocatable, dimension(:,:), public :: excludesLocal
+  integer, allocatable, dimension(:),   public :: excludesGlobal
+  integer, allocatable, dimension(:),   public :: molMembershipList
+  integer, allocatable, dimension(:),   public :: groupListRow
+  integer, allocatable, dimension(:),   public :: groupStartRow
+  integer, allocatable, dimension(:),   public :: groupListCol
+  integer, allocatable, dimension(:),   public :: groupStartCol
+  integer, allocatable, dimension(:),   public :: groupListLocal
+  integer, allocatable, dimension(:),   public :: groupStartLocal
+  integer, allocatable, dimension(:),   public :: nSkipsForAtom
+  integer, allocatable, dimension(:,:), public :: skipsForAtom
+  real(kind=dp), allocatable, dimension(:), public :: mfactRow
+  real(kind=dp), allocatable, dimension(:), public :: mfactCol
+  real(kind=dp), allocatable, dimension(:), public :: mfactLocal
+
+  real(kind=dp), public, dimension(3,3), save :: Hmat, HmatInv
+  logical, public, save :: boxIsOrthorhombic
+  
+  public :: SimulationSetup
+  public :: getNlocal
+  public :: setBox
+  public :: getDielect
+  public :: SimUsesPBC
+  public :: SimUsesLJ
+  public :: SimUsesCharges
+  public :: SimUsesDipoles
+  public :: SimUsesSticky
+  public :: SimUsesRF
+  public :: SimUsesGB
+  public :: SimUsesEAM
+  public :: SimRequiresPrepairCalc
+  public :: SimRequiresPostpairCalc
+  public :: SimUsesDirectionalAtoms
+  
+contains
+  
+  subroutine SimulationSetup(setThisSim, CnGlobal, CnLocal, c_idents, &
+       CnLocalExcludes, CexcludesLocal, CnGlobalExcludes, CexcludesGlobal, &
+       CmolMembership, Cmfact, CnGroups, CglobalGroupMembership, &
+       status)    
+
+    type (simtype) :: setThisSim
+    integer, intent(inout) :: CnGlobal, CnLocal
+    integer, dimension(CnLocal),intent(inout) :: c_idents
+
+    integer :: CnLocalExcludes
+    integer, dimension(2,CnLocalExcludes), intent(in) :: CexcludesLocal
+    integer :: CnGlobalExcludes
+    integer, dimension(CnGlobalExcludes), intent(in) :: CexcludesGlobal
+    integer, dimension(CnGlobal),intent(in) :: CmolMembership 
+    !!  Result status, success = 0, status = -1
+    integer, intent(out) :: status
+    integer :: i, j, me, thisStat, alloc_stat, myNode, id1, id2
+    integer :: ia
+
+    !! mass factors used for molecular cutoffs
+    real ( kind = dp ), dimension(CnLocal) :: Cmfact
+    integer, intent(in):: CnGroups
+    integer, dimension(CnGlobal), intent(in):: CglobalGroupMembership
+    integer :: maxSkipsForAtom, glPointer
+
+#ifdef IS_MPI
+    integer, allocatable, dimension(:) :: c_idents_Row
+    integer, allocatable, dimension(:) :: c_idents_Col
+    integer :: nAtomsInRow, nGroupsInRow, aid
+    integer :: nAtomsInCol, nGroupsInCol, gid
+#endif  
+
+    simulation_setup_complete = .false.
+    status = 0
+
+    ! copy C struct into fortran type
+
+    nLocal = CnLocal
+    nGlobal = CnGlobal
+    nGroups = CnGroups
+
+    thisSim = setThisSim
+
+    nExcludes_Global = CnGlobalExcludes
+    nExcludes_Local = CnLocalExcludes
+
+    call InitializeForceGlobals(nLocal, thisStat)
+    if (thisStat /= 0) then
+       write(default_error,*) "SimSetup: InitializeForceGlobals error"
+       status = -1
+       return
+    endif
+
+    call InitializeSimGlobals(thisStat)
+    if (thisStat /= 0) then
+       write(default_error,*) "SimSetup: InitializeSimGlobals error"
+       status = -1
+       return
+    endif
+
+#ifdef IS_MPI
+    ! We can only set up forces if mpiSimulation has been setup.
+    if (.not. isMPISimSet()) then
+       write(default_error,*) "MPI is not set"
+       status = -1
+       return
+    endif
+    nAtomsInRow = getNatomsInRow(plan_atom_row)
+    nAtomsInCol = getNatomsInCol(plan_atom_col)
+    nGroupsInRow = getNgroupsInRow(plan_group_row)
+    nGroupsInCol = getNgroupsInCol(plan_group_col)
+    mynode = getMyNode()
+    
+    allocate(c_idents_Row(nAtomsInRow),stat=alloc_stat)
+    if (alloc_stat /= 0 ) then
+       status = -1
+       return
+    endif
+
+    allocate(c_idents_Col(nAtomsInCol),stat=alloc_stat)
+    if (alloc_stat /= 0 ) then
+       status = -1
+       return
+    endif
+
+    call gather(c_idents, c_idents_Row, plan_atom_row)
+    call gather(c_idents, c_idents_Col, plan_atom_col)
+
+    do i = 1, nAtomsInRow
+       me = getFirstMatchingElement(atypes, "c_ident", c_idents_Row(i))
+       atid_Row(i) = me
+    enddo
+
+    do i = 1, nAtomsInCol
+       me = getFirstMatchingElement(atypes, "c_ident", c_idents_Col(i))
+       atid_Col(i) = me
+    enddo
+
+    !! free temporary ident arrays
+    if (allocated(c_idents_Col)) then
+       deallocate(c_idents_Col)
+    end if
+    if (allocated(c_idents_Row)) then
+       deallocate(c_idents_Row)
+    endif
+   
+#endif
+
+#ifdef IS_MPI
+    allocate(groupStartRow(nGroupsInRow+1),stat=alloc_stat)
+    if (alloc_stat /= 0 ) then
+       status = -1
+       return
+    endif
+    allocate(groupStartCol(nGroupsInCol+1),stat=alloc_stat)
+    if (alloc_stat /= 0 ) then
+       status = -1
+       return
+    endif
+    allocate(groupListRow(nAtomsInRow),stat=alloc_stat)
+    if (alloc_stat /= 0 ) then
+       status = -1
+       return
+    endif
+    allocate(groupListCol(nAtomsInCol),stat=alloc_stat)
+    if (alloc_stat /= 0 ) then
+       status = -1
+       return
+    endif
+    allocate(mfactRow(nAtomsInRow),stat=alloc_stat)
+    if (alloc_stat /= 0 ) then
+       status = -1
+       return
+    endif
+    allocate(mfactCol(nAtomsInCol),stat=alloc_stat)
+    if (alloc_stat /= 0 ) then
+       status = -1
+       return
+    endif
+    allocate(mfactLocal(nLocal),stat=alloc_stat)
+    if (alloc_stat /= 0 ) then
+       status = -1
+       return
+    endif
+    
+    glPointer = 1
+
+    do i = 1, nGroupsInRow 
+
+       gid = GroupRowToGlobal(i)
+       groupStartRow(i) = glPointer       
+
+       do j = 1, nAtomsInRow
+          aid = AtomRowToGlobal(j)
+          if (CglobalGroupMembership(aid) .eq. gid) then
+             groupListRow(glPointer) = j
+             glPointer = glPointer + 1
+          endif
+       enddo
+    enddo
+    groupStartRow(nGroupsInRow+1) = nAtomsInRow + 1
+
+    glPointer = 1
+
+    do i = 1, nGroupsInCol
+
+       gid = GroupColToGlobal(i)
+       groupStartCol(i) = glPointer       
+
+       do j = 1, nAtomsInCol
+          aid = AtomColToGlobal(j)
+          if (CglobalGroupMembership(aid) .eq. gid) then
+             groupListCol(glPointer) = j
+             glPointer = glPointer + 1
+          endif
+       enddo
+    enddo
+    groupStartCol(nGroupsInCol+1) = nAtomsInCol + 1
+
+    mfactLocal = Cmfact        
+
+    call gather(mfactLocal,      mfactRow,      plan_atom_row)
+    call gather(mfactLocal,      mfactCol,      plan_atom_col)
+    
+    if (allocated(mfactLocal)) then
+       deallocate(mfactLocal)
+    end if
+#else
+    allocate(groupStartRow(nGroups+1),stat=alloc_stat)
+    if (alloc_stat /= 0 ) then
+       status = -1
+       return
+    endif
+    allocate(groupStartCol(nGroups+1),stat=alloc_stat)
+    if (alloc_stat /= 0 ) then
+       status = -1
+       return
+    endif
+    allocate(groupListRow(nLocal),stat=alloc_stat)
+    if (alloc_stat /= 0 ) then
+       status = -1
+       return
+    endif
+    allocate(groupListCol(nLocal),stat=alloc_stat)
+    if (alloc_stat /= 0 ) then
+       status = -1
+       return
+    endif
+    allocate(mfactRow(nLocal),stat=alloc_stat)
+    if (alloc_stat /= 0 ) then
+       status = -1
+       return
+    endif
+    allocate(mfactCol(nLocal),stat=alloc_stat)
+    if (alloc_stat /= 0 ) then
+       status = -1
+       return
+    endif
+    allocate(mfactLocal(nLocal),stat=alloc_stat)
+    if (alloc_stat /= 0 ) then
+       status = -1
+       return
+    endif
+
+    glPointer = 1
+    do i = 1, nGroups
+       groupStartRow(i) = glPointer       
+       groupStartCol(i) = glPointer
+       do j = 1, nLocal
+          if (CglobalGroupMembership(j) .eq. i) then
+             groupListRow(glPointer) = j
+             groupListCol(glPointer) = j
+             glPointer = glPointer + 1
+          endif
+       enddo
+    enddo
+    groupStartRow(nGroups+1) = nLocal + 1
+    groupStartCol(nGroups+1) = nLocal + 1
+
+    do i = 1, nLocal
+       mfactRow(i) = Cmfact(i)
+       mfactCol(i) = Cmfact(i)
+    end do
+    
+#endif
+
+
+! We build the local atid's for both mpi and nonmpi
+    do i = 1, nLocal
+       
+       me = getFirstMatchingElement(atypes, "c_ident", c_idents(i))
+       atid(i) = me
+  
+    enddo
+
+    do i = 1, nExcludes_Local
+       excludesLocal(1,i) = CexcludesLocal(1,i)
+       excludesLocal(2,i) = CexcludesLocal(2,i)
+    enddo
+
+#ifdef IS_MPI
+    allocate(nSkipsForAtom(nAtomsInRow), stat=alloc_stat)
+#else
+    allocate(nSkipsForAtom(nLocal), stat=alloc_stat)
+#endif
+    if (alloc_stat /= 0 ) then
+       thisStat = -1
+       write(*,*) 'Could not allocate nSkipsForAtom array'
+       return
+    endif
+
+    maxSkipsForAtom = 0
+#ifdef IS_MPI
+    do j = 1, nAtomsInRow
+#else
+    do j = 1, nLocal
+#endif
+       nSkipsForAtom(j) = 0
+#ifdef IS_MPI
+       id1 = AtomRowToGlobal(j)
+#else 
+       id1 = j
+#endif
+       do i = 1, nExcludes_Local
+          if (excludesLocal(1,i) .eq. id1 ) then
+             nSkipsForAtom(j) = nSkipsForAtom(j) + 1
+
+             if (nSkipsForAtom(j) .gt. maxSkipsForAtom) then
+                maxSkipsForAtom = nSkipsForAtom(j)
+             endif
+          endif
+          if (excludesLocal(2,i) .eq. id1 ) then
+             nSkipsForAtom(j) = nSkipsForAtom(j) + 1
+
+             if (nSkipsForAtom(j) .gt. maxSkipsForAtom) then
+                maxSkipsForAtom = nSkipsForAtom(j)
+             endif
+          endif
+       end do
+    enddo
+
+#ifdef IS_MPI
+    allocate(skipsForAtom(nAtomsInRow, maxSkipsForAtom), stat=alloc_stat)
+#else
+    allocate(skipsForAtom(nLocal, maxSkipsForAtom), stat=alloc_stat)
+#endif
+    if (alloc_stat /= 0 ) then
+       write(*,*) 'Could not allocate skipsForAtom array'
+       return
+    endif
+
+#ifdef IS_MPI
+    do j = 1, nAtomsInRow
+#else
+    do j = 1, nLocal
+#endif
+       nSkipsForAtom(j) = 0
+#ifdef IS_MPI
+       id1 = AtomRowToGlobal(j)
+#else 
+       id1 = j
+#endif
+       do i = 1, nExcludes_Local
+          if (excludesLocal(1,i) .eq. id1 ) then
+             nSkipsForAtom(j) = nSkipsForAtom(j) + 1
+             ! exclude lists have global ID's so this line is 
+             ! the same in MPI and non-MPI
+             id2 = excludesLocal(2,i)
+             skipsForAtom(j, nSkipsForAtom(j)) = id2
+          endif
+          if (excludesLocal(2, i) .eq. id1 ) then
+             nSkipsForAtom(j) = nSkipsForAtom(j) + 1
+             ! exclude lists have global ID's so this line is 
+             ! the same in MPI and non-MPI
+             id2 = excludesLocal(1,i)
+             skipsForAtom(j, nSkipsForAtom(j)) = id2
+          endif
+       end do
+    enddo
+    
+    do i = 1, nExcludes_Global
+       excludesGlobal(i) = CexcludesGlobal(i)
+    enddo
+
+    do i = 1, nGlobal
+       molMemberShipList(i) = CmolMembership(i)
+    enddo
+    
+    if (status == 0) simulation_setup_complete = .true.
+    
+  end subroutine SimulationSetup
+  
+  subroutine setBox(cHmat, cHmatInv, cBoxIsOrthorhombic)
+    real(kind=dp), dimension(3,3) :: cHmat, cHmatInv
+    integer :: cBoxIsOrthorhombic
+    integer :: smallest, status, i
+    
+    Hmat = cHmat
+    HmatInv = cHmatInv
+    if (cBoxIsOrthorhombic .eq. 0 ) then
+       boxIsOrthorhombic = .false.
+    else 
+       boxIsOrthorhombic = .true.
+    endif
+    
+    return     
+  end subroutine setBox
+
+  function getDielect() result(dielect)
+    real( kind = dp ) :: dielect
+    dielect = thisSim%dielect
+  end function getDielect
+       
+  function SimUsesPBC() result(doesit)
+    logical :: doesit
+    doesit = thisSim%SIM_uses_PBC
+  end function SimUsesPBC
+
+  function SimUsesLJ() result(doesit)
+    logical :: doesit
+    doesit = thisSim%SIM_uses_LJ
+  end function SimUsesLJ
+
+  function SimUsesSticky() result(doesit)
+    logical :: doesit
+    doesit = thisSim%SIM_uses_sticky
+  end function SimUsesSticky
+
+  function SimUsesCharges() result(doesit)
+    logical :: doesit
+    doesit = thisSim%SIM_uses_charges
+  end function SimUsesCharges
+
+  function SimUsesDipoles() result(doesit)
+    logical :: doesit
+    doesit = thisSim%SIM_uses_dipoles
+  end function SimUsesDipoles
+
+  function SimUsesRF() result(doesit)
+    logical :: doesit
+    doesit = thisSim%SIM_uses_RF
+  end function SimUsesRF
+
+  function SimUsesGB() result(doesit)
+    logical :: doesit
+    doesit = thisSim%SIM_uses_GB
+  end function SimUsesGB
+
+  function SimUsesEAM() result(doesit)
+    logical :: doesit
+    doesit = thisSim%SIM_uses_EAM
+  end function SimUsesEAM
+
+  function SimUsesDirectionalAtoms() result(doesit)
+    logical :: doesit
+    doesit = thisSim%SIM_uses_dipoles .or. thisSim%SIM_uses_sticky .or. &
+         thisSim%SIM_uses_GB .or. thisSim%SIM_uses_RF
+  end function SimUsesDirectionalAtoms
+
+  function SimRequiresPrepairCalc() result(doesit)
+    logical :: doesit
+    doesit = thisSim%SIM_uses_EAM
+  end function SimRequiresPrepairCalc
+
+  function SimRequiresPostpairCalc() result(doesit)
+    logical :: doesit
+    doesit = thisSim%SIM_uses_RF
+  end function SimRequiresPostpairCalc
+  
+  subroutine InitializeSimGlobals(thisStat)
+    integer, intent(out) :: thisStat
+    integer :: alloc_stat
+    
+    thisStat = 0
+    
+    call FreeSimGlobals()    
+    
+    allocate(excludesLocal(2,nExcludes_Local), stat=alloc_stat)
+    if (alloc_stat /= 0 ) then
+       thisStat = -1
+       return
+    endif
+    
+    allocate(excludesGlobal(nExcludes_Global), stat=alloc_stat)
+    if (alloc_stat /= 0 ) then
+       thisStat = -1
+       return
+    endif
+
+    allocate(molMembershipList(nGlobal), stat=alloc_stat)
+    if (alloc_stat /= 0 ) then
+       thisStat = -1
+       return
+    endif
+    
+  end subroutine InitializeSimGlobals
+  
+  subroutine FreeSimGlobals()
+    
+    !We free in the opposite order in which we allocate in.
+
+    if (allocated(skipsForAtom)) deallocate(skipsForAtom)
+    if (allocated(nSkipsForAtom)) deallocate(nSkipsForAtom)
+    if (allocated(mfactLocal)) deallocate(mfactLocal)
+    if (allocated(mfactCol)) deallocate(mfactCol)
+    if (allocated(mfactRow)) deallocate(mfactRow)
+    if (allocated(groupListCol)) deallocate(groupListCol)     
+    if (allocated(groupListRow)) deallocate(groupListRow)    
+    if (allocated(groupStartCol)) deallocate(groupStartCol)
+    if (allocated(groupStartRow)) deallocate(groupStartRow)     
+    if (allocated(molMembershipList)) deallocate(molMembershipList)     
+    if (allocated(excludesGlobal)) deallocate(excludesGlobal)
+    if (allocated(excludesLocal)) deallocate(excludesLocal)
+    
+  end subroutine FreeSimGlobals
+  
+  pure function getNlocal() result(n)
+    integer :: n
+    n = nLocal
+  end function getNlocal
+  
+  
+end module simulation

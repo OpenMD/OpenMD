@@ -1,0 +1,249 @@
+dnl **** Process this file with autoconf to produce a configure script.
+
+AC_INIT(OOPSE, 1.0, gezelter@nd.edu, oopse)
+AC_CONFIG_AUX_DIR(ac-tools)
+
+builtin(include, ac-tools/fortran90.m4)
+builtin(include, ac-tools/aclocal.m4)
+
+AC_CONFIG_SRCDIR([src/oopse.cpp])
+
+AC_PREFIX_DEFAULT("/usr/local")
+
+# set program name
+PROGNAME="oopse"
+AC_SUBST(PROGNAME)
+
+# there are two ways to do debugging.  One with the --enable-debug flag
+# and one using the DEBUG environment variable
+
+debug=0
+AC_ARG_ENABLE(debug, AC_HELP_STRING([--enable-debug], [Compile OOPSE in debug mode]), [debug=1])
+if test "${DEBUG}"; then
+	AC_DEFINE(debug, 1, [Code compiled in debug mode])
+  msg="$msg, debug mode"
+fi
+AC_SUBST(debug)
+
+# who am i
+AC_CANONICAL_HOST
+
+dnl Checks for C compiler
+AC_PROG_CC([icc xlc gcc cc])
+
+dnl Checks for C++ compiler
+AC_PROG_CXX([icpc icc xlc++ xlC CC g++ c++])
+
+dnl If we are not running g++ then we might need some other flags
+dnl to get the templates compiled correctly
+OOPSE_TEMPLATE_FLAGS=""
+if test $ac_cv_prog_gxx = no; then
+  AC_MSG_CHECKING([checking whether ${CXX} accepts -ptused -no_prelink])
+  echo 'void f(){}' > conftest.cc
+  if test -z "`${CXX} -ptused -no_prelink -c conftest.cc 2>&1`"; then
+    AC_MSG_RESULT(yes)
+    OOPSE_TEMPLATE_FLAGS="-ptused -no_prelink"
+  else
+    AC_MSG_RESULT(no)
+  fi
+  rm -f conftest*
+  AC_MSG_CHECKING([checking whether ${CXX} accepts -instances=static])
+  echo 'void f(){}' > conftest.cc
+  if test -z "`${CXX} -instances=static -c conftest.cc 2>&1`"; then
+    AC_MSG_RESULT(yes)
+    OOPSE_TEMPLATE_FLAGS="-instances=static"
+  else
+    AC_MSG_RESULT(no)
+  fi
+  rm -f conftest*
+  AC_MSG_CHECKING([checking whether ${CXX} accepts -pto])
+  echo 'void f(){}' > conftest.cc
+  if test -z "`${CXX} -pto -c conftest.cc 2>&1`"; then
+    AC_MSG_RESULT(yes)
+    OOPSE_TEMPLATE_FLAGS="-pto"
+  else
+    AC_MSG_RESULT(no)
+  fi
+  rm -f conftest*
+  AC_MSG_CHECKING([checking whether ${CXX} accepts -LANG:std])
+  echo 'void f(){}' > conftest.cc
+  if test -z "`${CXX} -LANG:std -c conftest.cc 2>&1`"; then
+    AC_MSG_RESULT(yes)
+    
+
+    EXTRA_CC_FLAG=${EXTRA_CC_FLAG}" -LANG:std"
+  else
+    AC_MSG_RESULT(no)
+  fi
+fi
+AC_SUBST(OOPSE_TEMPLATE_FLAGS)
+AC_SUBST(EXTRA_CC_FLAG)
+
+dnl Fortran 90 compilation checks are next
+
+AC_PROG_F90([ifort ifc f90 xlf90 pgf90 epcf90 f95 xlf95 lf95 fort g95])
+dnl Check the flag for Fortran90 preprocessing
+ACX_PROG_F90_PREPFLAG
+dnl Check to see if a flag is required for preprocessing defines
+ACX_PROG_F90_PREPDEFFLAG
+AC_LANG_PUSH(Fortran 90)
+AC_LANG_PREPROC(Fortran 90)
+AC_F90_LIBRARY_LDFLAGS
+dnl How does Fortran mangle function names
+AC_F90_WRAPPERS
+AC_SUBST(F90_FUNC)
+AC_SUBST(F90_FUNC_)
+dnl Fortran 90 module suffix
+AC_CHECK_MODSUFFIX
+dnl Fortran 90 module path specifier
+AC_CHECK_MODDIRFLAG
+AC_LANG_POP
+
+dnl check for system getopt
+AC_LANG_PUSH(C)
+adl_FUNC_GETOPT_LONG
+
+dnl check for strong optimization options
+
+case $debug in
+  1) 
+     ;;
+  *) 
+   ACX_PROG_CC_MAXOPT
+   ACX_PROG_CXX_MAXOPT
+   ACX_PROG_F90_MAXOPT
+     ;;
+esac
+
+AC_PROG_INSTALL
+AC_PROG_LN_S
+AC_PROG_MAKE_SET
+AC_PROG_RANLIB
+AC_PROG_YACC
+AC_PROG_LEX
+AC_CHECK_PROG(AR, ar, ar, NONE)
+if test "$AR" = "NONE"; then
+  AC_MSG_ERROR(--> Can't find \`ar'!)
+  AC_CACHE_SAVE
+  exit 1
+fi
+
+
+AC_ARG_WITH(mpi,
+    	[AC_HELP_STRING([--with-mpi=<prefix>],
+		[compile with MPI installed in <prefix> [default=no]])],
+	with_mpi=$withval,
+	with_mpi="no")
+
+case "x$with_mpi" in
+        xyes | "x")  USE_MPI=yes;;
+        xno) USE_MPI=no ;;
+        *) MPI="$with_mpi"; USE_MPI=yes ;; 
+esac 
+if test "$USE_MPI" = "yes" -a -z "$with_mpi"; then 
+	MPI="/usr/local" 
+fi 
+if test "$USE_MPI" = "yes"; then
+        ACX_MPI
+fi
+AC_SUBST(USE_MPI)
+
+AC_ARG_WITH(sprng,
+    	[AC_HELP_STRING([--with-sprng=<prefix>],
+		[compile with SPRNG installed in <prefix> [default=/usr/local]])],
+	with_sprng=$withval,
+	with_sprng="/usr/local")
+
+case "x$with_sprng" in
+        xyes | "x")  USE_SPRNG=yes;;
+        xno) USE_SPRNG=no ;;
+        *) SPRNG="$with_sprng"; USE_SPRNG=yes ;;
+esac
+if test "$USE_SPRNG" = "yes" -a -z "$with_sprng"; then
+        SPRNG="/usr/local"
+fi
+if test "$USE_SPRNG" = "yes"; then
+        ACX_SPRNG
+fi
+AC_SUBST(USE_SPRNG)
+
+
+CHECK_MKL
+
+
+AC_EXEEXT
+AC_OBJEXT
+OBJEXT=".$OBJEXT"
+
+OOPSE=oopse
+
+dnl **** define home dir of oopse
+if test "x${prefix}" = "xNONE"
+then
+  OOPSE_HOME=${ac_default_prefix}/oopse
+else
+  OOPSE_HOME=${prefix}/oopse
+fi
+AC_ARG_ENABLE(oopse-home,
+[  --enable-oopse-home=DIR      define oopse home dir [PREFIX/oopse]],
+[OOPSE_HOME="${enableval}"])
+
+case "x$INSTALL" in
+   x/*) ;;
+   *) INSTALL=`pwd`/ac-tools/"shtool install -c" ;
+esac
+
+MKINSTALLDIRS=`pwd`/ac-tools/"shtool mkdir -p -f"
+
+dnl **** Final list of subdirs
+SUBDIRS="libBASS libmdtools src forceFields samples utils utils/sysbuilder third-party "
+
+dnl **** Define CFLAGS etc empty to prevent configure from setting them
+CFLAGS=${CFLAGS-""}
+CXXFLAGS=${CXXFLAGS-""}
+CPPFLAGS=${CPPFLAGS-""}
+FFLAGS=${FFLAGS-""}
+F90FLAGS=${F90FLAGS-""}
+LDFLAGS=${LDFLAGS-""}
+DEBUG=${DEBUG-"-g"}
+
+case $debug in
+  1) 
+     FFLAGS="$DEBUG $FFLAGS"
+     F90FLAGS="$DEBUG $F90FLAGS"
+     ;;
+  *) 
+     ;;
+esac
+
+
+AC_SUBST(EXEEXT)
+AC_SUBST(OBJEXT)
+AC_SUBST(BATEXT)
+AC_SUBST(MKINSTALLDIRS)
+AC_SUBST(OOPSE)
+AC_SUBST(OOPSE_HOME)
+AC_SUBST(SUBDIRS)
+AC_SUBST(CFLAGS)
+AC_SUBST(CXXFLAGS)
+AC_SUBST(CPPFLAGS)
+AC_SUBST(FFLAGS)
+AC_SUBST(F90FLAGS)
+AC_SUBST(LDFLAGS)
+AC_SUBST(PREPFLAG)
+AC_SUBST(PREPDEFFLAG)
+AC_CONFIG_HEADER([libBASS/config.h libmdtools/config.h])
+AC_CONFIG_FILES([Makefile
+	libBASS/Makefile libmdtools/Makefile src/Makefile utils/Makefile
+	utils/sysbuilder/Makefile  forceFields/Makefile samples/Makefile
+        third-party/Makefile
+	samples/alkane/Makefile samples/argon/Makefile
+	samples/lipid/Makefile samples/minimizer/Makefile
+	samples/metals/Makefile samples/water/Makefile
+        samples/water/dimer/Makefile samples/water/spce/Makefile
+        samples/water/ssd/Makefile samples/water/ssde/Makefile
+        samples/water/tip4p/Makefile samples/water/tip3p_ice/Makefile
+	samples/zcons/Makefile
+])
+
+AC_OUTPUT

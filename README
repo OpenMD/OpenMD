@@ -1,0 +1,62 @@
+OOPSE
+
+OOPSE is an open-source Object-Oriented Parallel Simulation Engine.
+It is primarily used to perform molecular dynamics simulations on
+"strange" atom types that are not normally handled by other simulation
+packages.  This includes atoms with orientational degrees of freedom
+(point dipoles, sticky atoms), as well as transition metals under the
+Embedded Atom Method (EAM). 
+
+Simulations are started in OOPSE using two files: 
+
+  1) a C-based meta-data (.md) file, and 
+
+  2) a modified XYZ format for initial coordinate and velocity information.
+
+Detailed descriptions of the structures of these two files are 
+available in the "doc" directory.  Sample simulations are 
+available in the "samples" directory. 
+
+What you need to compile and use OOPSE:
+
+ 1) Good C, C++ and Fortran95 compilers.  We've built and tested OOPSE
+    on the following architecture & compiler combinations:
+
+    Architecture                CC     CXX     F90    Notes
+    -------------------------   ----   -----   -----  ----------------------
+    ix86-pc-linux-gnu           icc    icpc    ifort  (Intel versions 7 & 8)
+    powerpc-apple-darwin7.4.0   xlc    xlc++   xlf    (IBM XL v. 6.0/8.1)
+    mips-sgi-irix6.5            cc     CC      f90    (MIPSpro 7.4)
+    sparc-sun-solaris2.8        cc     CC      f95    (Forte Developer 7)
+    
+    We've successfully compiled OOPSE with gcc and g++, as well as
+    pgcc and pgCC in linux environments.  However, you will need to
+    use a Fortran *95* compler for the fortran side of OOPSE, and
+    pgf90 does not implement the required portions of the f95
+    language.  Fortran77 and Fortran90 (i.e. g77 and pgf90) are *not*
+    sufficient to compile the fortran portions of OOPSE.
+
+ 2) The Scalable Parallel Random Number Generators Library (SPRNG). You
+    can obtain SPRNG here:  http://sprng.cs.fsu.edu/
+    SPRNG is a *requirement* for compiling OOPSE.
+
+ 3) MPI.  We like MPICH.  Other implementations might work, but we
+    haven't tried.  You can get MPICH here:
+    http://www-unix.mcs.anl.gov/mpi/mpich/
+    MPI is only required if you want a parallel version of OOPSE.
+
+ 4) Assorted unix utilities (lexx, yacc, make) or their GNU
+    equivalents.  The Gnu version of make is pretty much a requirement on
+    SGI machines.  
+        
+
+INSTRUCTIONS
+
+ 1) Get, build, and test the required pieces above.
+ 2) ./configure
+ 3) make
+ 4) make install
+
+That's it.  Documentation will be forthcoming after the paper is
+published.
+

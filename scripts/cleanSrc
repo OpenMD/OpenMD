@@ -1,0 +1,4 @@
+#!/bin/bash
+
+/bin/rm -rf libmdtools libBASS src utils 
+cvs update -d -P

@@ -1,0 +1,10 @@
+! This is the forcefield file for the TraPPE force field.
+! the sections are divided into AtomTypes, BondTypes, BendTypes,
+! and TorsionTypes.
+
+
+#AtomTypes
+!Atom		isDipole	mass		LJ epsilon ( kcal/mol)		LJ sigma (Angstroms)	Dipole Moment (Debye)
+
+SSD		1		18.03		0.152				3.051			2.35
+Ar		0		39.95		0.226				3.41

@@ -1,0 +1,15 @@
+! This is the forcefield file for the Embedded Atom Method Force Field (EAM_FF).
+!
+! There is only a section for AtomTypes which defines mass and the name
+! of the file which contains the rho(r), phi(r) and F[rho] functions.
+
+#AtomTypes
+!Atom	mass	Potential param filename
+
+Au	196.97		Au.VC.funcfl
+Al	26.98154	Al.VC.funcfl
+Ag	107.87		Ag.VC.funcfl
+Cu	63.550		Cu.VC.funcfl
+Ni	58.710		Ni.VC.funcfl
+Pd	106.40		Pd.VC.funcfl
+Pt	195.09		Pt.VC.funcfl

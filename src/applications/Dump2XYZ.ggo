@@ -1,0 +1,21 @@
+# Input file for gengetopt --generates cmdline.c and cmdline.h
+# for parsing command line arguments useing getopt and getoptlong.
+# gengetopt is available from:
+#  http://www.gnu.org/software/gengetopt/gengetopt.html
+package "Dump2XYZ"
+version "0.99"
+
+# Options
+option	"input"		i	"input dump file"					string	typestr="filename" 	yes
+option	"output"	o	"output file name"					string	typestr="filename"	no
+option	"frame"		n	"print every n frame"					int	default="1"		no
+option	"dipole"	d	"print the dipole moments"				flag				off
+option	"water"		w	"skip the the waters"					flag				off
+option	"periodicBox"	m	"map to the periodic box"				flag				off
+option  "zconstraint"	z	"replace the atom types of zconstraint molecules"	flag				off
+option	"rigidbody"	r	"add a pseudo COM atom to rigidbody"			flag				off
+option	"watertype"	t	"replace the atom type of water model"			flag				on
+option	"ignore"	s	"ignore the atom types"					string	typestr="atomtype"	no	multiple 
+option	"repeatX"	-	"The number of images to repeat in the x direction"	int	default="0"		no
+option	"repeatY"	-	"The number of images to repeat in the y direction"	int	default="0"		no
+option	"repeatZ"	-	"The number of images to repeat in the z direction"	int	default="0"		no
