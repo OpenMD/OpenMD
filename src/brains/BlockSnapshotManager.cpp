@@ -178,7 +178,7 @@ void BlockSnapshotManager::internalUnload(int block) {
 }
 
 bool BlockSnapshotManager::hasZeroRefBlock(){
-    return std::find(activeRefCount_.begin(), activeRefCount_.end(), 0);
+    return std::find(activeRefCount_.begin(), activeRefCount_.end(), 0) != activeRefCount_.end() ?  true : false;
 }
 
 int BlockSnapshotManager::getFirstZeroRefBlock(){
