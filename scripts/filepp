@@ -21,8 +21,8 @@
 #  Filename     :  $RCSfile: filepp,v $
 #  Author       :  $Author: tim $
 #  Maintainer   :  Darren Miller: darren@cabaret.demon.co.uk
-#  File version :  $Revision: 1.2 $
-#  Last changed :  $Date: 2004-10-02 04:40:48 $
+#  File version :  $Revision: 1.3 $
+#  Last changed :  $Date: 2004-10-06 22:19:33 $
 #  Description  :  Main program
 #  Licence      :  GNU copyleft
 #
@@ -296,8 +296,14 @@ my %parsedModList = ();
 #
 my %f90ModList = ();
 
-#
+# suffix of fortran object file
 my $objExt = '.o';
+
+# suffix of fortran 90 module
+my $modSuffix = "mod";
+
+# case of basename of fortran 90 module
+my $modBasenameCase = "lower";
 ##############################################################################
 # SetDebug - controls debugging level
 ##############################################################################
@@ -2438,7 +2444,8 @@ sub Module{
     if ($modulename !~ /^procedure/){
 	
 	$modulename =~ s/\s+$//;
-	$parsedModList{uc($modulename) . ".mod"} =  Filepp::GetDefine('__FILE__');
+	$parsedModList{GetModBasename($modulename) .  "." . $modSuffix}
+                    =  Filepp::GetDefine('__FILE__');
 	
         #$modulefile = Filepp::GetDefine('__BASE_FILE__');
         #print $modulefile;
@@ -2462,8 +2469,7 @@ sub Use{
     $f90module =~ s/\s+$//;
     $f90module = uc($f90module);
     
-    print " " . $objDir . $f90module . '.mod \\', "\n";
-    #addModule($f90module);
+    print " " . $objDir . GetModBasename($f90module) . "." . $modSuffix . "\\\n";
 }
 
 ##############################################################################
@@ -2502,7 +2508,9 @@ sub AddModule {
 
 }
 
-
+##############################################################################
+# Generate rules for fortran 90 module
+##############################################################################
 sub printModule {
 	my $modname;
 	my $objname;
@@ -2513,6 +2521,9 @@ sub printModule {
 	}
 }
 
+##############################################################################
+# Get the object file name
+##############################################################################
 sub GetObjFile {
 	use File::Basename;
 	my $fullname = shift;
@@ -2522,6 +2533,25 @@ sub GetObjFile {
 	($filename, $dir, $suffix) = fileparse($fullname, '\.[^.]*');	
 	return $filename . $objExt;
 }
+
+##############################################################################
+# Get the base name of fortran 90 module
+##############################################################################
+sub GetModBasename {
+	my $modname = shift;
+        
+	if ($modBasenameCase eq "lower") {
+            $modname = lc($modname);
+            
+        } elsif ($modBasenameCase eq "upper") {
+            $modname = uc($modname);
+        } elsif ($modBasenameCase eq "mixed") {
+            $modname = ucfirst(lc($modname));
+        }
+        
+	return $modname;
+}
+
 ##############################################################################
 # Main routine
 ##############################################################################
@@ -2717,7 +2747,22 @@ while($ARGV[$i]) {
 	}
 	UseModule($ARGV[++$i]);
     }
-
+    
+    #case of basename of fortran module
+    elsif($ARGV[$i] eq "-mc") {
+	my $tempVar = lc($ARGV[++$i]);
+        if ($modBasenameCase ne 'lower' && $modBasenameCase ne 'upper'
+                                        && $modBasenameCase ne 'mixed'){
+            Error("Valid argument for `-om' are lower, upper or mixed");
+        }
+        $modBasenameCase = $tempVar;
+    }
+    
+    #the suffix of fortran module
+    elsif($ARGV[$i] eq "-ms") {
+	$modSuffix = $ARGV[++$i];
+    }
+    
     # set macro prefix
     elsif($ARGV[$i] eq "-mp") {
 	if($i+1 >= $argc) {
@@ -2735,7 +2780,8 @@ while($ARGV[$i]) {
     # module files will be built in a separate directory from the sources.
     elsif($ARGV[$i] eq "-od") {
 	$objDir = $ARGV[++$i];
-    }    
+    }
+    
     # turn on overwrite mode
     elsif($ARGV[$i] eq "-ov") {
 	$overwrite = 1;
