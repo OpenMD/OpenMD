@@ -45,6 +45,7 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <fstream>
 
 #include "brains/SimInfo.hpp"
 #include "selection/Token.hpp"

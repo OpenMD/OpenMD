@@ -102,7 +102,7 @@ bool SelectionEvaluator::loadScriptFile(const std::string& filename) {
 }
 
 bool SelectionEvaluator::loadScriptFileInternal(const  std::string & filename) {
-    ifstream ifs(filename.c_str());
+  std::ifstream ifs(filename.c_str());
     if (!ifs.is_open()) {
         return false;
     }
