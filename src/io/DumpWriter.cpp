@@ -258,7 +258,6 @@ void DumpWriter::writeFrame(std::ostream& os) {
     int which_node;
     double atomData[13];
     int isDirectional;
-    const char * atomTypeString;
     char MPIatomTypeString[MINIBUFFERSIZE];
     int msgLen; // the length of message actually recieved at master nodes
     int haveError;
@@ -330,8 +329,6 @@ void DumpWriter::writeFrame(std::ostream& os) {
                              which_node, myPotato, MPI_COMM_WORLD,
                              &istatus);
 
-                    atomTypeString = MPIatomTypeString;
-
                     myPotato++;
 
                     MPI_Recv(atomData, 13, MPI_DOUBLE, which_node, myPotato,
@@ -349,7 +346,7 @@ void DumpWriter::writeFrame(std::ostream& os) {
 
                     if (!isDirectional) {
                         sprintf(writeLine, "%s\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t",
-                                atomTypeString, atomData[0],
+                                MPIatomTypeString, atomData[0],
                                 atomData[1], atomData[2],
                                 atomData[3], atomData[4],
                                 atomData[5]);
@@ -359,7 +356,7 @@ void DumpWriter::writeFrame(std::ostream& os) {
                     } else {
                         sprintf(writeLine,
                                 "%s\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\n",
-                                atomTypeString,
+                                MPIatomTypeString,
                                 atomData[0],
                                 atomData[1],
                                 atomData[2],
@@ -391,9 +388,7 @@ void DumpWriter::writeFrame(std::ostream& os) {
                 }
                 
                 for (integrableObject = mol->beginIntegrableObject(ii); integrableObject != NULL; 
-                    integrableObject = mol->nextIntegrableObject(ii)) {
-                        
-                    atomTypeString = integrableObject->getType().c_str();
+                    integrableObject = mol->nextIntegrableObject(ii)) {      
 
                     pos = integrableObject->getPos();
                     vel = integrableObject->getVel();
@@ -432,7 +427,7 @@ void DumpWriter::writeFrame(std::ostream& os) {
 
                     if (!isDirectional) {
                         sprintf(writeLine, "%s\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t",
-                                atomTypeString, atomData[0],
+                                integrableObject->getType().c_str(), atomData[0],
                                 atomData[1], atomData[2],
                                 atomData[3], atomData[4],
                                 atomData[5]);
@@ -442,7 +437,7 @@ void DumpWriter::writeFrame(std::ostream& os) {
                     } else {
                         sprintf(writeLine,
                                 "%s\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\n",
-                                atomTypeString,
+                                integrableObject->getType().c_str(),
                                 atomData[0],
                                 atomData[1],
                                 atomData[2],
@@ -515,8 +510,6 @@ void DumpWriter::writeFrame(std::ostream& os) {
                                  &istatus);
                     }
 
-                    atomTypeString = integrableObject->getType().c_str();
-
                     pos = integrableObject->getPos();
                     vel = integrableObject->getVel();
 
@@ -546,7 +539,7 @@ void DumpWriter::writeFrame(std::ostream& os) {
                         atomData[12] = ji[2];
                     }
 
-                    strncpy(MPIatomTypeString, atomTypeString, MINIBUFFERSIZE);
+                    strncpy(MPIatomTypeString, integrableObject->getType().c_str(), MINIBUFFERSIZE);
 
                     // null terminate the  std::string before sending (just in case):
                     MPIatomTypeString[MINIBUFFERSIZE - 1] = '\0';
