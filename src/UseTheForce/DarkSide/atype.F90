@@ -77,7 +77,9 @@ contains
   end subroutine new_atype
 
 end module atype_module
+
   ! provide interface for c calls....
+
 subroutine makeatype(c_ident, is_LJ, is_Sticky, is_DP, is_GB, &
        is_EAM, is_Charge, lj_epsilon, lj_sigma, charge, dipole_moment, &
        status)
@@ -98,7 +100,7 @@ subroutine makeatype(c_ident, is_LJ, is_Sticky, is_DP, is_GB, &
     integer, intent(in)  :: is_LJ
     integer, intent(in)  :: is_Charge
 
-    call module_new_atype(c_ident, is_LJ, is_Sticky, is_DP, is_GB, &
+    call new_atype(c_ident, is_LJ, is_Sticky, is_DP, is_GB, &
        is_EAM, is_Charge, lj_epsilon, lj_sigma, charge, dipole_moment, &
        status)
        

@@ -570,7 +570,6 @@ end module simulation
     real ( kind = dp ), dimension(CnLocal) :: Cmfact
     integer, intent(in):: CnGroups
     integer, dimension(CnGlobal), intent(inout):: CglobalGroupMembership
-    integer :: status
     
     call SimulationSetup(setThisSim, CnGlobal, CnLocal, c_idents, &
        CnLocalExcludes, CexcludesLocal, CnGlobalExcludes, CexcludesGlobal, &
