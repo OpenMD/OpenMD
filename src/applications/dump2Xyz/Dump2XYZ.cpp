@@ -134,7 +134,7 @@ int main(int argc, char* argv[]){
   SSDAtomVisitor* ssdVisitor = new SSDAtomVisitor(info);
   compositeVisitor->addVisitor(ssdVisitor, 800);
   
-  LinearVisitor* linearVisitor = new LinearAtomVisitor(info);
+  LinearAtomVisitor* linearVisitor = new LinearAtomVisitor(info);
   compositeVisitor->addVisitor(linearVisitor, 750);
   
   //creat default atom visitor
