@@ -129,7 +129,6 @@ Integrator::~Integrator(){
     
     delete dumpWriter;
     delete statWriter;
-    delete restWriter;
 }
 
 
