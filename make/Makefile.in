@@ -86,9 +86,9 @@ Libraries = \
 	@MPI_F90_LIB@
 
 OopseHome       = @OOPSE_HOME@
-ForceParamDir   = @OOPSE_HOME@/share/forceFields/
-SampleSimDir    = @OOPSE_HOME@/share/samples/
-BinDir          = @OOPSE_HOME@/bin
+ForceParamDir   = @OOPSE_HOME@/share/forceFields
+SampleSimDir    = @OOPSE_HOME@/share/samples
+InstallBinDir   = @OOPSE_HOME@/bin
 DocDir          = @OOPSE_HOME@/doc
 FrcDeclare      = -DFRC_PATH="$(ForceParamDir)"
 F90Declare      = -D__FORTRAN90
@@ -329,21 +329,21 @@ InstallCommand           = $(InstallData)
 endif
 
 ifneq "$(words $(Main))" "0"
-MyInstallDir             = $(BinDir)/
+MyInstallDir             = $(InstallBinDir)
 InstallFiles             = $(Executable) $(ParallelExecutable)
 InstallCommand           = $(InstallProgram)
 endif
 
-ifneq "$(words $(ForcefiledFiles))" "0"
+ifneq "$(words $(ForcefieldFiles))" "0"
 MyInstallDir             = $(ForceParamDir)
-InstallFiles             = $(ForcefiledFiles)/
+InstallFiles             = $(ForcefieldFiles)
 InstallCommand           = $(InstallData)
 endif
 
 ifneq "$(words $(InstallFiles))" "0"
   InstallList            =
 else
-  InstallList            = $(patsubst %,$(DEV_ROOT)/%,$(Samples)) $(patsubst %, $(DEV_ROOT)/%,$(Forcefield)) $(patsubst %, $(SourceDir)/%,$(Applications)) 
+  InstallList            = $(patsubst %,$(DEV_ROOT)/%,$(Samples)) $(DEV_ROOT)/forceFields $(patsubst %, $(SourceDir)/%,$(Applications)) 
 endif
 
 InstallListLoop          = $(patsubst %,$(SourceDir)/%/.install,$(PackageList))  $(patsubst %,%/.install,$(InstallList)) 
@@ -682,8 +682,6 @@ _installdata :  $(MyInstallDir)
 ifneq "$(words $(InstallFiles))" "0"
 	$(InstallData) $(InstallFiles) $(MyInstallDir)
 endif	    
-
-_installprogram:
 	
 # make statistics
 _statisticsall :
