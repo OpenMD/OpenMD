@@ -42,8 +42,6 @@
 
 #include "UseTheForce/DUFF.hpp"
 #include "UseTheForce/DarkSide/lj_interface.h"
-#include "UseTheForce/DarkSide/charge_interface.h"
-#include "UseTheForce/DarkSide/dipole_interface.h"
 #include "UseTheForce/DarkSide/sticky_interface.h"
 #include "UseTheForce/ForceFieldFactory.hpp"
 #include "io/DirectionalAtomTypesSectionParser.hpp"
