@@ -162,7 +162,7 @@ double GofRTheta::evaluateAngle(StuntDouble* sd1, StuntDouble* sd2) {
 
 double GofROmega::evaluateAngle(StuntDouble* sd1, StuntDouble* sd2) {
     Vector3d v1 = sd1->getElectroFrame().getColumn(2);
-    Vector3d v2 = sd1->getElectroFrame().getColumn(2);    
+    Vector3d v2 = sd2->getElectroFrame().getColumn(2);    
     v1.normalize();
     v2.normalize();
     return dot(v1, v2);

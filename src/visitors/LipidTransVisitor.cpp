@@ -40,8 +40,49 @@
  */
 
 #include "visitors/LipidTransVisitor.hpp"
+#include "utils/simError.h"
 
 namespace oopse {
+LipidTransVisitor::LipidTransVisitor(SimInfo* info, const std::string& originSeleScript, const std::string& refSeleScript) 
+    : BaseVisitor(), info_(info), originEvaluator_(info), originSeleMan_(info), refEvaluator_(info), refSeleMan_(info), refSd_(NULL) {
+
+ 
+    visitorName = "LipidTransVisitor";
+    
+    originEvaluator_.loadScriptString(originSeleScript);            
+    if (!originEvaluator_.isDynamic()) {  
+        originSeleMan_.setSelectionSet(originEvaluator_.evaluate());
+        if (originSeleMan_.getSelectionCount() == 1) {
+            int i;
+            originDatom_ = dynamic_cast<DirectionalAtom*>(originSeleMan_.beginSelected(i));
+            if (originDatom_ ==  NULL) {
+                sprintf(painCave.errMsg, "LipidTransVisitor: origin selection must select an directional atom");
+                painCave.isFatal = 1;
+                simError();                  
+            }
+        } else {
+            sprintf(painCave.errMsg, "LipidTransVisitor: origin selection must select an directional atom");
+            painCave.isFatal = 1;
+            simError();                  
+            
+        }
+    }
+
+    refEvaluator_.loadScriptString(refSeleScript);
+    if (!refEvaluator_.isDynamic()) {  
+        refSeleMan_.setSelectionSet(refEvaluator_.evaluate());
+        if (refSeleMan_.getSelectionCount() == 1) {
+            int i;
+            refSd_ = refSeleMan_.beginSelected(i);
+            
+        } else {
+            //error
+            
+        }
+    }
+    
+}
+
 void LipidTransVisitor::update() {
 
         Vector3d ref = refSd_->getPos();
