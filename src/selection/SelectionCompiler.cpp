@@ -82,8 +82,8 @@ bool SelectionCompiler::internalCompile(){
     for ( ; true; ichToken += cchToken) {
         if (lookingAtLeadingWhitespace())
             continue;
-        if (lookingAtComment())
-            continue;
+        //if (lookingAtComment())
+        //    continue;
         bool endOfLine = lookingAtEndOfLine();
         if (endOfLine || lookingAtEndOfStatement()) {
             if (tokCommand != Token::nada) {
@@ -131,8 +131,7 @@ bool SelectionCompiler::internalCompile(){
         }
       
         if (lookingAtLookupToken()) {
-            std::string ident = script.substr(ichToken, ichToken + cchToken);
-
+            std::string ident = script.substr(ichToken, cchToken);
             Token token;            
             Token* pToken = TokenMap::getInstance()->getToken(ident);
             if (pToken != NULL) {
@@ -419,10 +418,9 @@ bool SelectionCompiler::lookingAtLookupToken() {
                 return false;
             }
         case '?': // include question marks in identifier for atom expressions
-            while (ichT < cchScript && (std::isalpha(ch = script[ichT]) ||std::isdigit(ch) ||
-                ch == '_' || ch == '?') ||(ch == '^' && ichT > ichToken && std::isdigit(script[ichT - 1]))) {
-                // hack for insertion codes embedded in an atom expression :-(
-                // select c3^a
+            while (ichT < cchScript && !std::isspace(ch = script[ichT]) && (std::isalpha(ch) ||std::isdigit(ch) ||
+                ch == '_' || ch == '?') ) {
+
                 ++ichT;
             }
         break;
@@ -597,14 +595,19 @@ bool SelectionCompiler::clauseComparator() {
     }
 
     Token tokenValue = tokenNext();
-    if (tokenValue.tok != Token::integer) {
-        return integerExpected();
+    if (tokenValue.tok != Token::integer && tokenValue.tok != Token::decimal) {
+        return numberExpected();
     }
-    int val = tokenValue.intValue;
-    // note that a comparator instruction is a complicated instruction
-    // int intValue is the tok of the property you are comparing
-    // the value against which you are comparing is stored as an Integer
-    // in the object value
+    
+    float val;
+    if (tokenValue.value.type() == typeid(int)) {
+        val = boost::any_cast<int>(tokenValue.value);
+    } else if (tokenValue.value.type() == typeid(float)) {
+        val = boost::any_cast<float>(tokenValue.value);
+    } else {
+        return false;
+    }
+
     return addTokenToPostfix(Token(tokenComparator.tok,
                        tokenAtomProperty.tok, boost::any(val)));
 }
@@ -654,11 +657,16 @@ bool SelectionCompiler::clauseChemObjName() {
     tok = tokPeek();
     //allow two dot at most
     if (tok == Token::dot) {
+        tokenNext();
+        chemObjName += ".";
         if (!clauseName(chemObjName)) {
             return false;
         }
         tok = tokPeek();
         if (tok == Token::dot) {
+            tokenNext();
+            chemObjName += ".";
+
             if (!clauseName(chemObjName)) {
                 return false;
             }

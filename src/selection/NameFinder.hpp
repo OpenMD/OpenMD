@@ -59,7 +59,7 @@ class NameFinder{
     public:
         NameFinder(SimInfo* info);
         ~NameFinder();
-        bool match(const std::string& name, BitSet& bs);
+        BitSet  match(const std::string& name);
 
     private:
         void loadNames();
@@ -67,6 +67,7 @@ class NameFinder{
         void matchStuntDouble(const std::string& molName, const std::string& sdName, BitSet& bs);
         void matchRigidAtoms(const std::string& molName, const std::string& rbName, const std::string& rbAtomName, BitSet& bs);
 
+        TreeNode* createNode(TreeNode* parent, const std::string& name);
         std::vector<TreeNode*> getMatchedChildren(TreeNode* node, const std::string& name);
         bool isMatched(const std::string& str, const std::string& wildcard);
 

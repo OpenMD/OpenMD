@@ -49,15 +49,18 @@
 namespace oopse {
 
 
-SelectionEvaluator::SelectionEvaluator(SimInfo* si, const std::string& script) : info(si), finder(info){
+SelectionEvaluator::SelectionEvaluator(SimInfo* si) : info(si), finder(info), isLoaded_(false){
+
 }            
 
 bool SelectionEvaluator::loadScript(const std::string& filename, const std::string& script) {
+    clearDefinitionsAndLoadPredefined();
     this->filename = filename;
     this->script = script;
     if (! compiler.compile(filename, script)) {
         error = true;
         errorMessage = compiler.getErrorMessage();
+        std::cerr << "SelectionCompiler Error: " << errorMessage << std::endl;
         return false;
     }
 
@@ -65,13 +68,25 @@ bool SelectionEvaluator::loadScript(const std::string& filename, const std::stri
     aatoken = compiler.getAatokenCompiled();
     linenumbers = compiler.getLineNumbers();
     lineIndices = compiler.getLineIndices();
+
+    std::vector<std::vector<Token> >::const_iterator i;   
+
+    isDynamic_ = false;
+    for (i = aatoken.begin(); i != aatoken.end(); ++i) {
+        if (containDynamicToken(*i)) {
+            isDynamic_ = true;
+            break;
+        }
+    }
+
+    isLoaded_ = true;
     return true;
 }
 
 void SelectionEvaluator::clearState() {
-    for (int i = scriptLevelMax; --i >= 0; )
-        stack[i].clear();
-    scriptLevel = 0;
+    //for (int i = scriptLevelMax; --i >= 0; )
+    //    stack[i].clear();
+    //scriptLevel = 0;
     error = false;
     errorMessage = "";
 }
@@ -87,11 +102,22 @@ bool SelectionEvaluator::loadScriptFile(const std::string& filename) {
 }
 
 bool SelectionEvaluator::loadScriptFileInternal(const  std::string & filename) {
-    return true; /**@todo */
+    ifstream ifs(filename.c_str());
+    if (!ifs.is_open()) {
+        return false;
+    }
+
+    const int bufferSize = 65535;
+    char buffer[bufferSize];
+    std::string script;
+    while(ifs.getline(buffer, bufferSize)) {
+        script += buffer;
+    }
+    return loadScript(filename, script);
 }
 
-void SelectionEvaluator::instructionDispatchLoop(){
-
+void SelectionEvaluator::instructionDispatchLoop(BitSet& bs){
+    
     while ( pc < aatoken.size()) {
         statement = aatoken[pc++];
         statementLength = statement.size();
@@ -101,20 +127,21 @@ void SelectionEvaluator::instructionDispatchLoop(){
                 define();
             break;
             case Token::select:
-                select();
+                select(bs);
             break;
             default:
                 unrecognizedCommand(token);
             return;
         }
     }
+
 }
 
   BitSet SelectionEvaluator::expression(const std::vector<Token>& code, int pcStart) {
     BitSet bs;
     std::stack<BitSet> stack;
     
-    for (int pc = pcStart; ; ++pc) {
+    for (int pc = pcStart; pc < code.size(); ++pc) {
       Token instruction = code[pc];
 
       switch (instruction.tok) {
@@ -301,8 +328,8 @@ void SelectionEvaluator::predefine(const std::string& script) {
 
 }
 
-void SelectionEvaluator::select(){
-    //viewer.setSelectionSet(expression(statement, 1));
+void SelectionEvaluator::select(BitSet& bs){
+    bs = expression(statement, 1);
 }
 
 BitSet SelectionEvaluator::lookupValue(const std::string& variable){
@@ -323,12 +350,39 @@ BitSet SelectionEvaluator::lookupValue(const std::string& variable){
 }
 
 BitSet SelectionEvaluator::nameInstruction(const std::string& name){
-    BitSet bs(nStuntDouble);
     
-    bool hasError = finder.match(name, bs);
-    
-    return bs;    
+    return finder.match(name);
+
 }    
 
+bool SelectionEvaluator::containDynamicToken(const std::vector<Token>& tokens){
+    std::vector<Token>::const_iterator i;
+    for (i = tokens.begin(); i != tokens.end(); ++i) {
+        if (i->tok & Token::dynamic) {
+            return true;
+        }
+    }
+
+    return false;
+}    
+
+void SelectionEvaluator::clearDefinitionsAndLoadPredefined() {
+    variables.clear();
+    //load predefine
+    //predefine();
+}
+
+BitSet SelectionEvaluator::evaluate() {
+    BitSet bs(nStuntDouble);
+    if (isLoaded_) {
+        instructionDispatchLoop(bs);
+    }
+
+    return bs;
+}
+        
+//BitSet SelectionEvaluator::evaluate(int frameNo) {
+//
+//}
 
 }

@@ -43,7 +43,7 @@
 #define SELECTION_SELECTIONMANAGER_HPP
 
 #include "utils/BitSet.hpp"
-
+#include "primitives/StuntDouble.hpp"
 namespace oopse {
 
 /**
@@ -52,7 +52,7 @@ namespace oopse {
  */
 class SelectionManager {
     public:
-        SelectionManager(int size) {bsSelection_.resize(size); clearSelection;}
+        SelectionManager(int size) {bsSelection_.resize(size);}
 
         void addSelection(StuntDouble* sd) {
             bsSelection_.setBitOn(sd->getGlobalIndex());
@@ -100,7 +100,7 @@ class SelectionManager {
         }
 
         int getSelectionCount() {
-            bsSelection_.countBits();
+            return bsSelection_.countBits();
         }
 
         BitSet getSelectionSet() {
@@ -110,7 +110,6 @@ class SelectionManager {
     private:
         
         BitSet bsSelection_;
-        SimInfo* info_;
 };
 
 }

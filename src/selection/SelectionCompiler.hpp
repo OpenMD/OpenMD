@@ -117,7 +117,7 @@ class SelectionCompiler{
 
 
         bool lookingAtLeadingWhitespace();
-        bool lookingAtComment();
+        //bool lookingAtComment();
         bool lookingAtEndOfLine();
         bool lookingAtEndOfStatement();
         bool lookingAtString();
@@ -205,8 +205,8 @@ class SelectionCompiler{
             return compileError("comparison operator expected");
         }
 
-        bool integerExpected() {
-            return compileError("integer expected");
+        bool numberExpected() {
+            return compileError("number expected");
         }        
         
         bool numberOrKeywordExpected() {

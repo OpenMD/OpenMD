@@ -110,6 +110,9 @@ class Token {
         // this property is used for the few commands which allow negative integers
         const static int negnums      = (1 << 11);
 
+        //expression involves coordinates which will change every frame, such as withins
+        const static int dynamic        = (1 << 12);
+
         // every property is also valid in an expression context
         const static int atomproperty      = (1 << 12) | expression | negnums;
         // every predefined is also valid in an expression context
@@ -131,7 +134,7 @@ class Token {
         const static int opAnd        = expression |  3;
         const static int opOr         = expression |  4;
         const static int opNot        = expression |  5;
-        const static int within       = expression |  6;
+        const static int within       = expression | dynamic | 6;
         const static int asterisk     = expression |  7;
         const static int dot          = expression | 8;
         const static int all          = expression | 9 ; 

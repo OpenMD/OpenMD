@@ -55,22 +55,22 @@
 namespace oopse {
 
 
-class Context {
-    public:
-        
-        void clear() {
-            linenumbers.clear();
-            lineIndices.clear();
-            aatoken.clear();
-        }
-        
-        std::string filename;
-        std::string script;
-        std::vector<int> linenumbers;
-        std::vector<int> lineIndices;
-        std::vector<std::vector<Token> > aatoken;
-        int pc;
-};
+//class Context {
+//    public:
+//        
+//        void clear() {
+//            linenumbers.clear();
+//            lineIndices.clear();
+//            aatoken.clear();
+//        }
+//        
+//        std::string filename;
+//        std::string script;
+//        std::vector<int> linenumbers;
+//        std::vector<int> lineIndices;
+//        std::vector<std::vector<Token> > aatoken;
+//        int pc;
+//};
 
 
 /**
@@ -80,18 +80,22 @@ class Context {
 class SelectionEvaluator{
     public:
 
-        SelectionEvaluator(SimInfo* info, const std::string& script);
+        SelectionEvaluator(SimInfo* info);
 
 
+        bool loadScriptString(const std::string& script);
+        bool loadScriptFile(const std::string& filename);
+        
         BitSet evaluate();
         
-        BitSet evaluate(int frameNo);
+        //BitSet evaluate(Snapshot* snapshot);
 
         /**
-         * Tests if the result from evaluation of script is static.
-         * @return true if the result keeps the same even the frame change, otherwise return false
+         * Tests if the result from evaluation of script is dynamic.
          */         
-        bool isStatic();
+        bool isDynamic() {
+            return isDynamic_;
+        }
 
         bool hadRuntimeError() const{
             return error;
@@ -121,17 +125,17 @@ class SelectionEvaluator{
         void clearState();
         
         bool loadScript(const std::string& filename, const std::string& script); 
-        bool loadScriptString(const std::string& script);
+
         bool loadScriptFileInternal(const std::string& filename);
-        bool loadScriptFile(const std::string& filename);
+
 
         void clearDefinitionsAndLoadPredefined();
          
         void define();
-        void select();
+        void select(BitSet& bs);
         void predefine(const std::string& script);
 
-        void instructionDispatchLoop();
+        void instructionDispatchLoop(BitSet& bs);
 
         void withinInstruction(const Token& instruction, BitSet& bs);
         
@@ -143,7 +147,9 @@ class SelectionEvaluator{
 
         BitSet lookupValue(const std::string& variable);
         
-        void evalError(const std::string& message);
+        void evalError(const std::string& message) {
+            std::cerr << "SelectionEvaulator Error: " << message <<  std::endl; 
+        }
 
         void unrecognizedCommand(const Token& token) {
             evalError("unrecognized command:" + boost::any_cast<std::string>(token.value));
@@ -160,12 +166,15 @@ class SelectionEvaluator{
         void unrecognizedIdentifier(const std::string& identifier) {
             evalError("unrecognized identifier:" + identifier);
         }    
+
+        bool containDynamicToken(const std::vector<Token>& tokens);
+        
         SelectionCompiler compiler;
 
-        const static int scriptLevelMax = 10;
-        int scriptLevel;
+        //const static int scriptLevelMax = 10;
+        //int scriptLevel;
 
-        Context stack[scriptLevelMax];
+        //Context stack[scriptLevelMax];
 
         std::string filename;
         std::string script;
@@ -184,6 +193,10 @@ class SelectionEvaluator{
         NameFinder finder;
         int nStuntDouble;   //natoms + nrigidbodies
         std::map<std::string, boost::any > variables;
+
+        bool isDynamic_;
+        bool isLoaded_;
+        
 };
 
 }

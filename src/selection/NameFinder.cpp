@@ -78,60 +78,30 @@ void NameFinder::loadNames() {
     root_->bs.setAll(); //
     
     for (mol = info_->beginMolecule(mi); mol != NULL; mol = info_->nextMolecule(mi)) {
-        TreeNode* currentMolNode;            
+           
         std::string molName = mol->getMoleculeName();
-
-        foundIter = root_->children.find(molName);
-        if ( foundIter  == root_->children.end()) {
-            currentMolNode = new TreeNode;
-            currentMolNode->name = molName;
-            currentMolNode->bs.resize(nStuntDouble_);
-        }else {
-            currentMolNode = foundIter->second;
-        }
+         TreeNode* currentMolNode = createNode(root_, molName);
         
         for(atom = mol->beginAtom(ai); atom != NULL; atom = mol->nextAtom(ai)) {
             std::string atomName = atom->getType();
-            TreeNode* currentAtomNode;
-            foundIter = currentMolNode->children.find(molName);
-            if (foundIter == currentMolNode->children.end()) {
-                currentAtomNode = new TreeNode;
-                currentAtomNode->name = atomName;
-                currentAtomNode->bs.resize(nStuntDouble_);
-            } else {
-                currentAtomNode = foundIter->second;
-            }
+            TreeNode* currentAtomNode = createNode(currentMolNode, atomName);
+            
             currentMolNode->bs.setBitOn(atom->getGlobalIndex());
             currentAtomNode->bs.setBitOn(atom->getGlobalIndex());
         }
 
         for (rb = mol->beginRigidBody(rbIter); rb != NULL; rb = mol->nextRigidBody(rbIter)) {
-            std::string rbName = atom->getType();
-            TreeNode* currentRbNode;
-            foundIter = currentMolNode->children.find(molName);
-            if (foundIter == currentMolNode->children.end()) {
-                currentRbNode = new TreeNode;
-                currentRbNode->name = rbName;
-                currentRbNode->bs.resize(nStuntDouble_);
-            } else {
-                currentRbNode = foundIter->second;
-            }
+            std::string rbName = rb->getType();
+            TreeNode* currentRbNode = createNode(currentMolNode, rbName);
             
             currentMolNode->bs.setBitOn(rb->getGlobalIndex());
             currentRbNode->bs.setBitOn(rb->getGlobalIndex());
 
             //create nodes for atoms belong to this rigidbody
-            for(atom = rb->beginAtom(ai); rb != NULL; atom = rb->nextAtom(ai)) {
+            for(atom = rb->beginAtom(ai); atom != NULL; atom = rb->nextAtom(ai)) {
                 std::string rbAtomName = atom->getType();
-                TreeNode* currentRbAtomNode;
-                foundIter = currentRbNode->children.find(molName);
-                if (foundIter == currentRbNode->children.end()) {
-                    currentRbAtomNode = new TreeNode;
-                    currentRbAtomNode->name = rbAtomName;
-                    currentRbAtomNode->bs.resize(nStuntDouble_);
-                } else {
-                    currentRbAtomNode = foundIter->second;
-                }
+                TreeNode* currentRbAtomNode = createNode(currentRbNode, rbName);;
+
                 currentRbAtomNode->bs.setBitOn(atom->getGlobalIndex());
             }
 
@@ -141,9 +111,24 @@ void NameFinder::loadNames() {
 
 }
 
-bool NameFinder::match(const std::string& name, BitSet& bs){
+TreeNode* NameFinder::createNode(TreeNode* parent, const std::string& name) {
+    TreeNode* node;    
+    std::map<std::string, TreeNode*>::iterator foundIter;
+    foundIter = parent->children.find(name);
+    if ( foundIter  == parent->children.end()) {
+        node = new TreeNode;
+        node->name = name;
+        node->bs.resize(nStuntDouble_);
+        parent->children.insert(std::make_pair(name, node));
+    }else {
+        node = foundIter->second;
+    }
+    return node;
+}
 
-    bool hasError = false;
+BitSet NameFinder::match(const std::string& name){
+    BitSet bs(nStuntDouble_);
+  
     StringTokenizer tokenizer(name, ".");
 
     std::vector<std::string> names;
@@ -175,11 +160,11 @@ bool NameFinder::match(const std::string& name, BitSet& bs){
             matchRigidAtoms(names[0], names[1], names[2], bs);
             break;
         default:      
-            hasError = true;	    
+            std::cerr << "invalid name: " << name << std::endl;
             break;           
     }
 
-    return hasError; 
+    return bs; 
 }
 
 void NameFinder::matchMolecule(const std::string& molName, BitSet& bs) {
