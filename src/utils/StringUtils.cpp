@@ -23,7 +23,35 @@ string LowerCase(const string& S) {
   return lc;
 }
 
-int findBegin(istream theStream, char* startText ){
+char* trimSpaces(char *str) {
+  size_t len;
+  char *right, *left;
+
+  if (strlen(str) == 0) return(str);
+  
+  /* Trim whitespace from left side */
+  for (left = str; isspace(*left); left++);
+
+  /* Trim whitespace from right side */
+  if ((len = strlen(left)))
+    {
+      right = left + (len - 1);
+      
+      while (isspace(*right))
+        {
+          *right = '\0';
+          right--;
+        }
+    }
+
+  /* Only do the str copy if there were spaces to the left */
+  if (left != str)
+    strcpy(str, left);
+  
+  return (str);
+}
+
+int findBegin(istream &theStream, char* startText ){
   const int MAXLEN = 1024;
   char readLine[MAXLEN];   
   int foundText = 0;
@@ -50,14 +78,16 @@ int findBegin(istream theStream, char* startText ){
              "stream ended unexpectedly.\n", lineNum);
       return -1;
     }
-
+    
     the_token = strtok( readLine, " ,;\t" );
-
-    if (!strcasecmp("begin", the_token)) {
-      the_token = TrimSpaces(strtok( NULL, " ,;\t" ));
-      foundText = !strcasecmp( startText, the_token );
-    }
-
+    if ( the_token != NULL)
+      if (!strcmp("begin", the_token)) {
+	the_token = strtok( NULL, " ,;\t" );
+	if ( the_token != NULL){
+	  foundText = !strcmp( startText, the_token );
+	}
+      }
+    
     if (!foundText) {
       if (!theStream.eof()) {
         theStream.getline(readLine, MAXLEN);
@@ -65,7 +95,7 @@ int findBegin(istream theStream, char* startText ){
       } else {
         printf( "Error fast forwarding stream at line %d: "
                 "stream ended unexpectedly.\n", lineNum);
-        return -1;
+	return -1;
       }
     }
   }
@@ -90,34 +120,6 @@ int countTokens(char *line, char *delimiters) {
 
   free(working_line);
   return(ntokens);
-}
-
-char* TrimSpaces(char *str) {
-  size_t len;
-  char *right, *left;
-  
-  if (strlen(str) == 0) return(str);
-  
-  /* Trim whitespace from left side */
-  for (left = str; isspace(*left); left++);
-  
-  /* Trim whitespace from right side */
-  if ((len = strlen(left)))
-    {
-      right = left + (len - 1);
-      
-      while (isspace(*right))
-        {
-          *right = '\0';
-          right--;
-        }
-    }
-  
-  /* Only do the str copy if their was spaces to the left */
-  if (left != str)
-    strcpy(str, left);
-  
-  return (str);
 }
 
 int isEndLine(char *line) {

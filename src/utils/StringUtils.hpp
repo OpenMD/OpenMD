@@ -29,13 +29,22 @@ namespace oopse {
   string LowerCase(const string& S);
 
   /**
+   * Removes left and right spaces from a string
+   *
+   * @param str  String to trim
+   *
+   * @return  char* to the trimed string
+   */
+  char* trimSpaces(char *str);
+
+  /**
    * Finds the location of the string "begin <startText>" in an input stream.
    * @param theStream
    * @param startText
    *
    * @return the line number of the block within the theStream
    */
-  int findBegin(istream theStream, char* startText );
+  int findBegin(istream &theStream, char* startText );
 
   /**
    * Counts the number of tokens on line which are delimited by the characters 
@@ -44,15 +53,6 @@ namespace oopse {
    * @param delimiters
    */
   int countTokens(char *line, char *delimiters);
-
-  /**
-   * Removes left and right spaces from a string
-   *
-   * @param str  String to trim
-   *
-   * @return  char* to the trimed string
-   */
-  char* TrimSpaces(char *str);
 
   /**
    * discovers whether or not the line contains the "end" token
