@@ -22,6 +22,14 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  *
  */
+
+/**
+ * @file StuntDouble.hpp
+ * @author    tlin
+ * @date  10/22/2004
+ * @version 1.0
+ */ 
+   
  #ifndef _STUNTDOUBLE_HPP_
  #define _STUNTDOUBLE_HPP_
 
@@ -29,28 +37,37 @@
 
 #include <core/BaseVisitor.hpp>
 #include <math/Quaternion.hpp>
-#include <math/Mat3x3d.hpp>
-#include <math/Vector3d.hpp>
-#include <util/PropertyMap.hpp>
+#include <math/SquareMatrix3.hpp>
+#include <math/Vector3.hpp>
+#include <utils/PropertyMap.hpp>
 
 namespace oopse{
 
-  /**
-   * The base class for atom types. Typically, atom types are used to descibe the behavior of an atom
-   * of a element in differnet enviroment. In OOPSE, atom types are also used to represent the coarse-
-   * grainded atom
-   * @author    tlin
-   * @date  09/08/2004
-   * @version 1.0
-   */
 
-  /*
-   * Design Decision:
-   * the member data of stuntdouble will be stored outside of the class
+   
+  /**
+   * @class StuntDouble StuntDouble.hpp "Primitives/StuntDouble.hpp"
+   * @brief 
+   * StuntDouble is a very strange idea.  A StuntDouble stands in for
+   * some object that can be manipulated by the Integrators or
+   * Minimizers.  Some of the manipulable objects are Atoms, some are
+   * DirectionalAtoms, and some are RigidBodies.  StuntDouble
+   * provides an interface for the Integrators and Minimizers to use,
+   * and does some preliminary sanity checking so that the program
+   * doesn't try to do something stupid like torque an Atom
+   * @note the dynamoc data of stuntdouble will be stored outside of the class
    */
    class StuntDouble{
-    public:    
+   public:    
 
+        enum ObjectType{
+            otAtom,
+            otDAtom,
+            otRigidBody
+        };
+
+        virtual ~StuntDouble();
+        
         /**
          * Returns the global index of this stuntdouble.
          * @return  the global index of this stuntdouble 
@@ -83,40 +100,70 @@ namespace oopse{
             localIndex_ = index;
         }
 
-       /**
-         * Returns  the previous position of this stuntdouble
-         * @return the position of this stuntdouble
-         */    
-        void Vector3d getPrevPos() {
-            return (snapshotMan_->getPrevSnapshot())->storage->position[localId_];
-        }
-       
         /**
-         * Returns  the current position of this stuntdouble
-         * @return the position of this stuntdouble
-         */    
-        void Vector3d getPos() {
-            return (snapshotMan_->getCurrentSnapshot())->storage->position[localId_];
+         * Tests if this stuntdouble is an atom 
+         * @return true is this stuntdouble is an atom(or a directional atom), return false otherwise
+         */
+        bool isAtom(){
+            return objType_ == otAtom || objType_ == otDAtom;
+        }
+
+        /** 
+         * Tests if this stuntdouble is an directional atom 
+         * @return true if this stuntdouble is an directional atom, return false otherwise
+         */
+        bool isDirectionalAtom(){
+            return objType_ == otDAtom;
+        }
+
+        /**
+         * Tests if this stuntdouble is a rigid body. 
+         * @return true if this stuntdouble is a rigid body, otherwise return false
+         */
+        bool isRigidBody(){
+            return objType_ == otRigidBody;
+        }
+
+        /**
+         * Tests if this stuntdouble is a directional one. 
+         * @return true is this stuntdouble is a directional atom or a rigid body, return false otherwise
+         */
+        bool isDirectional(){
+            return isDirectionalAtom() || isRigidBody();
         }
 
        /**
-         * Returns  the position of this stuntdouble in specified snapshot 
-         *
+         * Returns the previous position of this stuntdouble
+         * @return the position of this stuntdouble
+         */    
+        void Vector3d getPrevPos() {
+            return (snapshotMan_->getPrevSnapshot())->storage_->position[LocalIndex_];
+        }
+       
+        /**
+         * Returns the current position of this stuntdouble
+         * @return the position of this stuntdouble
+         */    
+        void Vector3d getPos() {
+            return (snapshotMan_->getCurrentSnapshot())->storage_->position[LocalIndex_];
+        }
+
+       /**
+         * Returns the position of this stuntdouble in specified snapshot 
          * @return the position of this stuntdouble
          * @param snapshotNo
          */    
         Vector3d getPos(int snapshotNo) {
-            return (snapshotMan_->getSnapshot(snapShotNo))->storage->position[localId_];
+            return (snapshotMan_->getSnapshot(snapShotNo))->storage_->position[LocalIndex_];
         }
 
        /**
          * Sets  the previous position of this stuntdouble
-         *
          * @param pos  new position 
          * @see #getPos
          */         
        void setPrevPos(const Vector3d& pos) {
-            (snapshotMan_->getPrevSnapshot())->storage->position[localId_] = pos;
+            (snapshotMan_->getPrevSnapshot())->storage_->position[LocalIndex_] = pos;
        }
        
        /**
@@ -124,54 +171,51 @@ namespace oopse{
          * @param pos  new position 
          */         
         void setPos(const Vector3d& pos) {
-            (snapshotMan_->getCurrentSnapshot())->storage->position[localId_] = pos;
+            (snapshotMan_->getCurrentSnapshot())->storage_->position[LocalIndex_] = pos;
         }
 
        /**
          * Sets  the position of this stuntdouble in specified snapshot
-         *
          * @param pos position to be set 
          * @param snapshotNo 
          * @see #getPos
          */         
         void setPos(const Vector3d& pos, int snapshotNo) {
-            (snapshotMan_->getSnapshot(snapshotNo))->storage->position[localId_] = pos;
+            (snapshotMan_->getSnapshot(snapshotNo))->storage_->position[LocalIndex_] = pos;
         }
        
        /**
-         * Returns  the previous velocity of this stuntdouble
+         * Returns the previous velocity of this stuntdouble
          * @return the velocity of this stuntdouble
          */    
         Vector3d getPrevVel() {
-            return (snapshotMan_->getPrevSnapshot())->storage->velocity[localId_];
+            return (snapshotMan_->getPrevSnapshot())->storage_->velocity[LocalIndex_];
         }
        
         /**
-         * Returns  the current velocity of this stuntdouble
+         * Returns the current velocity of this stuntdouble
          * @return the velocity of this stuntdouble
          */    
         Vector3d getVel() {
-            return (snapshotMan_->getCurrentSnapshot())->storage->velocity[localId_];
+            return (snapshotMan_->getCurrentSnapshot())->storage_->velocity[LocalIndex_];
         }
 
        /**
-         * Returns  the velocity of this stuntdouble in specified snapshot 
-         *
+         * Returns the velocity of this stuntdouble in specified snapshot 
          * @return the velocity of this stuntdouble
          * @param snapshotNo
          */    
          Vector3d getVel(int snapshotNo) {
-            return (snapshotMan_->getSnapshot(snapShotNo))->storage->velocity[localId_];
+            return (snapshotMan_->getSnapshot(snapShotNo))->storage_->velocity[LocalIndex_];
         }
 
        /**
          * Sets  the previous velocity of this stuntdouble
-         *
          * @param vel  new velocity 
          * @see #getVel
          */         
        void setPrevVel(const Vector3d& vel) {
-            (snapshotMan_->getPrevSnapshot())->storage->velocity[localId_] = vel;
+            (snapshotMan_->getPrevSnapshot())->storage_->velocity[LocalIndex_] = vel;
        }
        
        /**
@@ -179,54 +223,52 @@ namespace oopse{
          * @param vel  new velocity 
          */         
         void setVel(const Vector3d& vel) {
-            (snapshotMan_->getCurrentSnapshot())->storage->velocity[localId_] = vel;
+            (snapshotMan_->getCurrentSnapshot())->storage_->velocity[LocalIndex_] = vel;
         }
 
        /**
          * Sets  the velocity of this stuntdouble in specified snapshot
-         *
          * @param vel velocity to be set 
          * @param snapshotNo 
          * @see #getVel
          */         
         void setVel(const Vector3d& vel, int snapshotNo) {
-            (snapshotMan_->getSnapshot(snapshotNo))->storage->velocity[localId_] = vel;
+            (snapshotMan_->getSnapshot(snapshotNo))->storage_->velocity[LocalIndex_] = vel;
         }
 
        /**
-         * Returns  the previous rotation matrix of this stuntdouble
+         * Returns the previous rotation matrix of this stuntdouble
          * @return the rotation matrix of this stuntdouble
          */    
         RotMat3x3d getPrevA() {
-            return (snapshotMan_->getPrevSnapshot())->storage->aMat[localId_];
+            return (snapshotMan_->getPrevSnapshot())->storage_->aMat[LocalIndex_];
         }
        
         /**
-         * Returns  the current rotation matrix of this stuntdouble
+         * Returns the current rotation matrix of this stuntdouble
          * @return the rotation matrix of this stuntdouble
          */    
         RotMat3x3d getA() {
-            return (snapshotMan_->getCurrentSnapshot())->storage->aMat[localId_];
+            return (snapshotMan_->getCurrentSnapshot())->storage_->aMat[LocalIndex_];
         }
 
        /**
-         * Returns  the rotation matrix of this stuntdouble in specified snapshot 
+         * Returns the rotation matrix of this stuntdouble in specified snapshot 
          *
          * @return the rotation matrix of this stuntdouble
          * @param snapshotNo
          */    
          RotMat3x3d getA(int snapshotNo) {
-            return (snapshotMan_->getSnapshot(snapShotNo))->storage->aMat[localId_];
+            return (snapshotMan_->getSnapshot(snapShotNo))->storage_->aMat[LocalIndex_];
         }
 
        /**
          * Sets  the previous rotation matrix of this stuntdouble
-         *
          * @param a  new rotation matrix 
          * @see #getA
          */         
        void setPrevA(const RotMat3x3d& a) {
-            (snapshotMan_->getPrevSnapshot())->storage->aMat[localId_] = a;
+            (snapshotMan_->getPrevSnapshot())->storage_->aMat[LocalIndex_] = a;
        }
        
        /**
@@ -234,54 +276,51 @@ namespace oopse{
          * @param a  new rotation matrix 
          */         
         void setA(const RotMat3x3d& a) {
-            (snapshotMan_->getCurrentSnapshot())->storage->aMat[localId_] = a;
+            (snapshotMan_->getCurrentSnapshot())->storage_->aMat[LocalIndex_] = a;
         }
 
        /**
          * Sets  the rotation matrix of this stuntdouble in specified snapshot
-         *
          * @param a rotation matrix to be set 
          * @param snapshotNo 
          * @see #getA
          */         
         void setA(const RotMat3x3d& a, int snapshotNo) {
-            (snapshotMan_->getSnapshot(snapshotNo))->storage->a[localId_] = a;
+            (snapshotMan_->getSnapshot(snapshotNo))->storage_->a[LocalIndex_] = a;
         }       
 
        /**
-         * Returns  the previous angular momentum of this stuntdouble
+         * Returns the previous angular momentum of this stuntdouble
          * @return the angular momentum of this stuntdouble
          */    
         Vector3d getPrevJ() {
-            return (snapshotMan_->getPrevSnapshot())->storage->angularMomentum[localId_];
+            return (snapshotMan_->getPrevSnapshot())->storage_->angularMomentum[LocalIndex_];
         }
        
         /**
-         * Returns  the current angular momentum of this stuntdouble
+         * Returns the current angular momentum of this stuntdouble
          * @return the angular momentum of this stuntdouble
          */    
         Vector3d getJ() {
-            return (snapshotMan_->getCurrentSnapshot())->storage->angularMomentum[localId_];
+            return (snapshotMan_->getCurrentSnapshot())->storage_->angularMomentum[LocalIndex_];
         }
 
        /**
-         * Returns  the angular momentum of this stuntdouble in specified snapshot 
-         *
+         * Returns the angular momentum of this stuntdouble in specified snapshot 
          * @return the angular momentum of this stuntdouble
          * @param snapshotNo
          */    
          Vector3d getJ(int snapshotNo) {
-            return (snapshotMan_->getSnapshot(snapShotNo))->storage->angularMomentum[localId_];
+            return (snapshotMan_->getSnapshot(snapShotNo))->storage_->angularMomentum[LocalIndex_];
         }
 
        /**
          * Sets  the previous angular momentum of this stuntdouble
-         *
          * @param angMom  new angular momentum 
          * @see #getJ
          */         
        void setPrevJ(const Vector3d& angMom) {
-            (snapshotMan_->getPrevSnapshot())->storage->angularMomentum[localId_] = angMom;
+            (snapshotMan_->getPrevSnapshot())->storage_->angularMomentum[LocalIndex_] = angMom;
        }
        
        /**
@@ -289,54 +328,51 @@ namespace oopse{
          * @param angMom  new angular momentum 
          */         
         void setJ(const Vector3d& angMom) {
-            (snapshotMan_->getCurrentSnapshot())->storage->angularMomentum[localId_] = angMom;
+            (snapshotMan_->getCurrentSnapshot())->storage_->angularMomentum[LocalIndex_] = angMom;
         }
 
        /**
          * Sets the angular momentum of this stuntdouble in specified snapshot
-         *
          * @param angMom angular momentum to be set 
          * @param snapshotNo 
          * @see #getJ
          */         
         void setJ(const Vector3d& angMom, int snapshotNo) {
-            (snapshotMan_->getSnapshot(snapshotNo))->storage->angularMomentum[localId_] = angMom;
+            (snapshotMan_->getSnapshot(snapshotNo))->storage_->angularMomentum[LocalIndex_] = angMom;
         }
          
        /**
-         * Returns  the previous quaternion of this stuntdouble
+         * Returns the previous quaternion of this stuntdouble
          * @return the quaternion of this stuntdouble
          */    
         Quat4d getPrevQ() {
-            return (snapshotMan_->getPrevSnapshot())->storage->aMat[localId_].toQuaternion();
+            return (snapshotMan_->getPrevSnapshot())->storage_->aMat[LocalIndex_].toQuaternion();
         }
        
         /**
-         * Returns  the current quaternion of this stuntdouble
+         * Returns the current quaternion of this stuntdouble
          * @return the quaternion of this stuntdouble
          */    
         Quat4d getQ() {
-            return (snapshotMan_->getCurrentSnapshot())->storage->aMat[localId_].toQuaternion();
+            return (snapshotMan_->getCurrentSnapshot())->storage_->aMat[LocalIndex_].toQuaternion();
         }
 
        /**
-         * Returns  the quaternion of this stuntdouble in specified snapshot 
-         *
+         * Returns the quaternion of this stuntdouble in specified snapshot 
          * @return the quaternion of this stuntdouble
          * @param snapshotNo
          */    
          Quat4d getQ(int snapshotNo) {
-            return (snapshotMan_->getSnapshot(snapShotNo))->storage->aMat[localId_].toQuaternion();
+            return (snapshotMan_->getSnapshot(snapShotNo))->storage_->aMat[LocalIndex_].toQuaternion();
         }
 
        /**
          * Sets  the previous quaternion of this stuntdouble
-         *
          * @param q  new quaternion 
          * @see #getQ
          */         
        void setPrevQ(const Quat4d& q) {
-            (snapshotMan_->getPrevSnapshot())->storage->aMat[localId_] = q;
+            (snapshotMan_->getPrevSnapshot())->storage_->aMat[LocalIndex_] = q;
        }
        
        /**
@@ -344,7 +380,7 @@ namespace oopse{
          * @param q  new quaternion 
          */         
         void setQ(const Quat4d& q) {
-            (snapshotMan_->getCurrentSnapshot())->storage->aMat[localId_] = q;
+            (snapshotMan_->getCurrentSnapshot())->storage_->aMat[LocalIndex_] = q;
         }
 
        /**
@@ -355,128 +391,344 @@ namespace oopse{
          * @see #getQ
          */         
         void setQ(const Quat4d& q, int snapshotNo) {
-            (snapshotMan_->getSnapshot(snapshotNo))->storage->aMat[localId_] = q;
+            (snapshotMan_->getSnapshot(snapshotNo))->storage_->aMat[LocalIndex_] = q;
+        }
+
+       /**
+         * Returns the previous euler angles of this stuntdouble
+         * @return the euler angles of this stuntdouble
+         */    
+        Vector3d getPrevEuler() {
+            return (snapshotMan_->getPrevSnapshot())->storage_->aMat[LocalIndex_].toEulerAngles();
         }
        
-       /**
-         * Returns the force of this stuntdouble
-         *
-         * @return the quaternion of this stuntdouble
-         *
-         * @see #setFrc
-         * @see #addFrc
-         */
-        virtual Vector3d getFrc() = 0;
+        /**
+         * Returns the current euler angles of this stuntdouble
+         * @return the euler angles of this stuntdouble
+         */    
+        Vector3d getEuler() {
+            return (snapshotMan_->getCurrentSnapshot())->storage_->aMat[LocalIndex_].toEulerAngles();
+        }
 
        /**
-         * Sets the force of this stuntdouble
+         * Returns the euler angles of this stuntdouble in specified snapshot 
          *
-         * @param frc new force
+         * @return the euler angles of this stuntdouble
+         * @param snapshotNo
+         */    
+         Vector3d getEuler(int snapshotNo) {
+            return (snapshotMan_->getSnapshot(snapShotNo))->storage_->aMat[LocalIndex_].toEulerAngles();
+        }
+
+       /**
+         * Sets  the previous euler angles of this stuntdouble
          *
+         * @param euler  new euler angles 
+         * @see #getEuler
+         */         
+       void setPrevEuler(const Vector3d& euler) {
+            (snapshotMan_->getPrevSnapshot())->storage_->aMat[LocalIndex_] = euler;
+       }
+       
+       /**
+         * Sets  the current euler angles of this stuntdouble
+         * @param euler  new euler angles 
+         */         
+        void setEuler(const Vector3d& euler) {
+            (snapshotMan_->getCurrentSnapshot())->storage_->aMat[LocalIndex_] = euler;
+        }
+
+       /**
+         * Sets  the euler angles  of this stuntdouble in specified snapshot
+         *
+         * @param euler euler angles to be set 
+         * @param snapshotNo 
+         * @see #getEuler
+         */         
+        void setEuler(const Vector3d& euler, int snapshotNo) {
+            (snapshotMan_->getSnapshot(snapshotNo))->storage_->aMat[LocalIndex_] = euler;
+        }
+
+       /**
+         * Returns the previous force of this stuntdouble
+         * @return the force of this stuntdouble
+         */    
+        Vector3d getPrevFrc() {
+            return (snapshotMan_->getPrevSnapshot())->storage_->force[LocalIndex_];
+        }
+       
+        /**
+         * Returns the current force of this stuntdouble
+         * @return the force of this stuntdouble
+         */    
+        Vector3d getFrc() {
+            return (snapshotMan_->getCurrentSnapshot())->storage_->force[LocalIndex_];
+        }
+
+       /**
+         * Returns the force of this stuntdouble in specified snapshot 
+         *
+         * @return the force of this stuntdouble
+         * @param snapshotNo
+         */    
+         Vector3d getFrc(int snapshotNo) {
+            return (snapshotMan_->getSnapshot(snapShotNo))->storage_->force[LocalIndex_];
+        }
+
+       /**
+         * Sets  the previous force of this stuntdouble
+         *
+         * @param frc  new force 
          * @see #getFrc
-         * @see #addFrc
-         */     
-        virtual void setFrc(Vector3d& frc) = 0;
+         */         
+       void setPrevFrc(const Vector3d& frc) {
+            (snapshotMan_->getPrevSnapshot())->storage_->force[LocalIndex_] = frc;
+       }
+       
+       /**
+         * Sets  the current force of this stuntdouble
+         * @param frc  new force 
+         */         
+        void setFrc(const Vector3d& frc) {
+            (snapshotMan_->getCurrentSnapshot())->storage_->force[LocalIndex_] = frc;
+        }
 
        /**
-         * Adds the force into this stuntdouble
+         * Sets  the force of this stuntdouble in specified snapshot
          *
-         * @param frc  force to be added
-         *
+         * @param frc force to be set 
+         * @param snapshotNo 
          * @see #getFrc
-         * @see #setFrc
-         */          
-        virtual void addFrc(Vector3d& frc) = 0;
+         */         
+        void setFrc(const Vector3d& frc, int snapshotNo) {
+            (snapshotMan_->getSnapshot(snapshotNo))->storage_->force[LocalIndex_] = frc;
+        }
 
        /**
-         * Returns the torque of this stuntdouble
+         * Adds force into the previous force of this stuntdouble
+         *
+         * @param frc  new force 
+         * @see #getFrc
+         */         
+       void setPrevFrc(const Vector3d& frc) {
+            (snapshotMan_->getPrevSnapshot())->storage_->force[LocalIndex_] += frc;
+       }
+       
+       /**
+         * Adds force into the current force of this stuntdouble
+         * @param frc  new force 
+         */         
+        void setFrc(const Vector3d& frc) {
+            (snapshotMan_->getCurrentSnapshot())->storage_->force[LocalIndex_] += frc;
+        }
+
+       /**
+         * Adds force into the force of this stuntdouble in specified snapshot
+         *
+         * @param frc force to be set 
+         * @param snapshotNo 
+         * @see #getFrc
+         */         
+        void setFrc(const Vector3d& frc, int snapshotNo) {
+            (snapshotMan_->getSnapshot(snapshotNo))->storage_->force[LocalIndex_] += frc;
+        }
+
+       /**
+         * Returns the previous torque of this stuntdouble
+         * @return the torque of this stuntdouble
+         */    
+        Vector3d getPrevTrq() {
+            return (snapshotMan_->getPrevSnapshot())->storage_->torque[LocalIndex_];
+        }
+       
+        /**
+         * Returns the current torque of this stuntdouble
+         * @return the torque of this stuntdouble
+         */    
+        Vector3d getTrq() {
+            return (snapshotMan_->getCurrentSnapshot())->storage_->torque[LocalIndex_];
+        }
+
+       /**
+         * Returns the torque of this stuntdouble in specified snapshot 
          *
          * @return the torque of this stuntdouble
-         *
-         * @see #setTrq
-         * @see #addTrq
-         */
-        virtual Vector3d getTrq() = 0;
+         * @param snapshotNo
+         */    
+         Vector3d getTrq(int snapshotNo) {
+            return (snapshotMan_->getSnapshot(snapShotNo))->storage_->torque[LocalIndex_];
+        }
 
        /**
-         * Sets the torque of this stuntdouble
+         * Sets  the previous torque of this stuntdouble
          *
-         * @param trq new torque
-         *
+         * @param trq  new torque 
          * @see #getTrq
-         * @see #addTrq
-         */      
-        virtual void setTrq(Vector3d& trq) = 0;
+         */         
+       void setPrevTrq(const Vector3d& trq) {
+            (snapshotMan_->getPrevSnapshot())->storage_->torque[LocalIndex_] = trq;
+       }
+       
+       /**
+         * Sets  the current torque of this stuntdouble
+         * @param trq  new torque 
+         */         
+        void setTrq(const Vector3d& trq) {
+            (snapshotMan_->getCurrentSnapshot())->storage_->torque[LocalIndex_] = trq;
+        }
 
        /**
-         * Adds the torque into this stuntdouble
+         * Sets  the torque of this stuntdouble in specified snapshot
          *
-         * @param trq  torque to be added
-         *
+         * @param trq torque to be set 
+         * @param snapshotNo 
          * @see #getTrq
-         * @see #setTrq
-         */
-        virtual void addTrq(Vector3d& trq) = 0;
+         */         
+        void setTrq(const Vector3d& trq, int snapshotNo) {
+            (snapshotMan_->getSnapshot(snapshotNo))->storage_->torque[LocalIndex_] = trq;
+        }
+
+       /**
+         * Adds torque into the previous torque of this stuntdouble
+         *
+         * @param trq  new torque 
+         * @see #getTrq
+         */         
+       void addPrevTrq(const Vector3d& trq) {
+            (snapshotMan_->getPrevSnapshot())->storage_->torque[LocalIndex_] += trq;
+       }
+       
+       /**
+         * Adds torque into the current torque of this stuntdouble
+         * @param trq  new torque 
+         */         
+        void addTrq(const Vector3d& trq) {
+            (snapshotMan_->getCurrentSnapshot())->storage_->torque[LocalIndex_] += trq;
+        }
+
+       /**
+         * Adds torque into the torque of this stuntdouble in specified snapshot
+         *
+         * @param trq torque to be add 
+         * @param snapshotNo 
+         * @see #getTrq
+         */         
+        void addTrq(const Vector3d& trq, int snapshotNo) {
+            (snapshotMan_->getSnapshot(snapshotNo))->storage_->torque[LocalIndex_] += trq;
+        }       
+
+
+       /**
+         * Returns the previous z-angle of this stuntdouble
+         * @return the z-angle of this stuntdouble
+         */    
+        Vector3d getPrevZangle() {
+            return (snapshotMan_->getPrevSnapshot())->storage_->zAngle[LocalIndex_];
+        }
+       
+        /**
+         * Returns the current z-angle of this stuntdouble
+         * @return the z-angle of this stuntdouble
+         */    
+        Vector3d getZangle() {
+            return (snapshotMan_->getCurrentSnapshot())->storage_->zAngle[LocalIndex_];
+        }
+
+       /**
+         * Returns the z-angle of this stuntdouble in specified snapshot
+         * @return the z-angle of this stuntdouble
+         * @param snapshotNo
+         */    
+         Vector3d getZangle(int snapshotNo) {
+            return (snapshotMan_->getSnapshot(snapShotNo))->storage_->zAngle[LocalIndex_];
+        }
+
+       /**
+         * Sets  the previous z-angle of this stuntdouble
+         * @param angle  new z-angle 
+         * @see #getZangle
+         */         
+       void setPrevZangle(const Vector3d& angle) {
+            (snapshotMan_->getPrevSnapshot())->storage_->zAngle[LocalIndex_] = angle;
+       }
+       
+       /**
+         * Sets  the current z-angle of this stuntdouble
+         * @param angle  new z-angle 
+         */         
+        void setZangle(const Vector3d& angle) {
+            (snapshotMan_->getCurrentSnapshot())->storage_->zAngle[LocalIndex_] = angle;
+        }
+
+       /**
+         * Sets  the z-angle of this stuntdouble in specified snapshot
+         * @param angle z-angle to be set 
+         * @param snapshotNo 
+         * @see #getZangle
+         */         
+        void setZangle(const Vector3d& angle, int snapshotNo) {
+            (snapshotMan_->getSnapshot(snapshotNo))->storage_->zAngle[LocalIndex_] = angle;
+        }
+
+       /**
+         * Adds z-angle into the previous z-angle of this stuntdouble
+         * @param angle  new z-angle 
+         * @see #getZangle
+         */         
+       void addPrevZangle(const Vector3d& angle) {
+            (snapshotMan_->getPrevSnapshot())->storage_->zAngle[LocalIndex_] += angle;
+       }
+       
+       /**
+         * Adds z-angle into the current z-angle of this stuntdouble
+         * @param angle  new z-angle 
+         */         
+        void addZangle(const Vector3d& angle) {
+            (snapshotMan_->getCurrentSnapshot())->storage_->zAngle[LocalIndex_] += angle;
+        }
+
+       /**
+         * Adds z-angle into the z-angle of this stuntdouble in specified snapshot
+         * @param angle z-angle to be add 
+         * @param snapshotNo 
+         * @see #getZangle
+         */         
+        void addZangle(const Vector3d& angle, int snapshotNo) {
+            (snapshotMan_->getSnapshot(snapshotNo))->storage_->zAngle[LocalIndex_] += angle;
+        }       
 
        /**
          * Returns the inertia tensor of this stuntdouble
-         *
          * @return the inertia tensor of this stuntdouble
-         *
          * @see #setI
          */ 
         virtual Mat3x3d getI() = 0;
 
        /**
          * Sets the inertia tensor of this stuntdouble
-         *
          * @param trq new inertia tensor
-         *
          * @see #getI
          */      
         virtual void setI(Mat3x3d& I) = 0;
 
        /**
          * Returns the gradient of this stuntdouble
-         *
          * @return the inertia tensor of this stuntdouble
-         *
          * @see #setI
          */ 
         virtual std::vector<double> getGrad() = 0;
 
        /**
-         * Returns the euler angles of this stuntdouble
-         * <p>
-         *   <ol>
-         *   <il>
-         *   <il>
-         *   <il>
-         *   </ol>
-         * </p>
-         * @return the euler angles of this stuntdouble
+         * Tests the  if this stuntdouble is a  linear rigidbody
          *
-         * @see #setEuler
-         */ 
-        virtual Vector3d getEuler() = 0;
-
-       /**
-         * Sets the euler angles of this stuntdouble
-         *
-         * @param e new euler angles
-         * <p>
-         *   <ol>
-         *   <il>e[0] = phi </il>
-         *   <il>e[1] = theta <il>
-         *   <il>e[2] = psi </il>
-         *   </ol>
-         * </p>
-         *
-         * @see #setEuler
-         */ 
-        virtual void setEuler(Vector3d& e) = 0;
-        
-        virtual bool isLinear() {return false;}
+         * @return true if this stuntdouble is a  linear rigidbody, otherwise return false
+         * @note atom and directional atom will always return false
+         * 
+         * @see #linearAxis
+         */         
+        bool isLinear() {
+            return linear_;
+        }
 
        /**
          * Returns the linear axis of the rigidbody, atom and directional atom will always return -1
@@ -485,30 +737,41 @@ namespace oopse{
          * 
          * @see #isLinear
          */ 
-        virtual int linearAxis() {return -1;}
+        int linearAxis() {
+            return linearAxis_;
+        }
 
-       /**
-        * Returns the zangle
-        *
-        * @return the zangle
-        *
-        * @see #setZangle
-        * @see #addZangle
-        */
-        virtual double   getZangle() = 0;
+        /** Returns the mass of this stuntdouble */
+        double getMass() {
+            return mass_;
+        }
 
-       /**
-        *
-        */
-        virtual void   setZangle(double zAngle) = 0;
+        /**
+         * Sets the mass of this stuntdoulbe
+         * @param mass the mass to be set
+         */         
+        void setMass(double mass) {
+            mass_ = mass;
+        }
 
-       /**
-        *
-        */
-        virtual void   addZangle(double zAngle) = 0;
+        /** Returns the name of this stuntdouble */
+        std::string getType();
+        
+        /** Sets the name of this stuntdouble*/
+        void setType(const std::string& name);
 
-       /**
-         * 
+        /**
+         * Converts a lab fixed vector to a body fixed vector
+         * @v lab fixed vector. On return, it will store body fixed vector
+         */
+        void lab2Body(Vector3d& v);
+
+        /**
+         * Converts a body fixed vector to a lab fixed vector
+         * @v body fixed vector. On return, it will store lab fixed vector
+         */
+        void body2Lab(Vector3d& v);
+        /**
          * <p>
          * The purpose of the Visitor Pattern is to encapsulate an operation that you want to perform on
          * the elements of a data structure. In this way, you can change the operation being performed 
@@ -520,74 +783,70 @@ namespace oopse{
          */      
         virtual void accept(BaseVisitor* v) = 0;
 
-        StorageMethod getStorageMethd(){return stMethod;}
-        void setStorageMethod(StorageMethod method) {stMethod = method;}
-
         //below functions are just forward functions
         /**
          * Adds property into property map
-         *
          * @param genData GenericData to be added into PropertyMap
-         *
-         * @see #removeProperty
-         * @see #clearProperties
          */
-        void addProperty(GenericData* genData) {  properties.addProperty(genData);  }
+        void addProperty(GenericData* genData);
 
         /**
          * Removes property from PropertyMap by name
-         *
          * @param propName the name of property to be removed
-         *
-         * @see #addProperty
-         * @see #clearProperties
          */
-        void removeProperty(std::string& propName) {  properties.removeProperty();  }
+        void removeProperty(std::string& propName);
 
         /**
          * clear all of the properties
-         *
-         * @see #addProperty
-         * @see #removeProperty
          */
-        void clearProperties() {  properties.clearProperties(); }
+        void clearProperties();
 
         /**
          * Returns all names of properties
-         *
          * @return all names of properties
          */
-        std::vector<std::string> getPropertyNames() {return properties.getPropertyNames();  }
+        std::vector<std::string> getPropertyNames();
 
         /**
          * Returns all of the properties in PropertyMap
-         *
          * @return all of the properties in PropertyMap
-         *
-         * @see #getPropertyByName
          */      
-        std::vector<GenericData*> getProperties() { return properties.getProperties(); }
+        std::vector<GenericData*> getProperties();
 
         /**
          * Returns property 
-         *
          * @param propName name of property
-         *
          * @return a pointer point to property with propName. If no property named propName
          * exists, return NULL
-         *
-         * @see #getProperties
          */      
-        GenericData* getPropertyByName(std:string& propName) {  return properties.getPropertyByName(propName); }
+        GenericData* getPropertyByName(std:string& propName);
 
-      private:
+    protected:
+        
+        StuntDouble();
+        
+        StuntDouble(const StuntDouble& sd);
+        StuntDouble& operator=(const StuntDouble& sd);
+
+        ObjectType objType_;
+
+        bool linear_;
+        int linearAxis_;        
+
+        DataStoragePointer storage_;
+        SnapshotManager* snapshotMan_;
+        
+    private:
         
         int globalIndex_;
         int localIndex_;
-        PropertyMap properties;
-        DataStoragePointer storage_;
-        SnapshotManager* snapshotMan_;
- };
+
+        std::string name_;
+
+        double mass_;
+        
+        PropertyMap properties_;
+    };
 
 }//end namespace oopse
 #endif //ifndef _STUNTDOUBLE_HPP_
