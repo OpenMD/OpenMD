@@ -76,6 +76,7 @@ module electrostatic_module
   public :: doElectrostaticPair
   public :: getCharge
   public :: getDipoleMoment
+  public :: pre22
 
   type :: Electrostatic
      integer :: c_ident

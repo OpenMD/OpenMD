@@ -45,7 +45,7 @@
 
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: doForces.F90,v 1.11 2005-03-08 21:05:46 gezelter Exp $, $Date: 2005-03-08 21:05:46 $, $Name: not supported by cvs2svn $, $Revision: 1.11 $
+!! @version $Id: doForces.F90,v 1.12 2005-03-21 20:51:06 chrisfen Exp $, $Date: 2005-03-21 20:51:06 $, $Name: not supported by cvs2svn $, $Revision: 1.12 $
 
 
 module doForces
@@ -847,7 +847,7 @@ contains
              if (PropertyMap(me_i)%is_Dipole) then
                 
                 mu_i = getDipoleMoment(me_i)
-                
+    
                 !! The reaction field needs to include a self contribution 
                 !! to the field:
                 call accumulate_self_rf(i, mu_i, eFrame)

@@ -46,6 +46,7 @@ module reaction_field
   use vector_class
   use simulation
   use status
+  use electrostatic_module
 #ifdef IS_MPI
   use mpiSimulation
 #endif
@@ -58,15 +59,9 @@ module reaction_field
   real(kind=dp), save :: dielect = 1.0_dp
   real(kind=dp), save :: rrfsq = 1.0_dp
   real(kind=dp), save :: pre
+
   logical, save :: haveCutoffs = .false.
-  logical, save :: haveMomentMap = .false.
   logical, save :: haveDielectric = .false.
-
-  type :: MomentList
-     real(kind=DP) :: dipole_moment = 0.0_DP
-  end type MomentList
-
-  type(MomentList), dimension(:),allocatable :: MomentMap
 
   PUBLIC::initialize_rf
   PUBLIC::setCutoffsRF
@@ -82,7 +77,7 @@ contains
     
     dielect = this_dielect
 
-    pre = 14.38362d0*2.0d0*(dielect-1.0d0)/((2.0d0*dielect+1.0d0)*rrfsq*rrf) 
+    pre = pre22 * 2.0d0*(dielect-1.0d0)/((2.0d0*dielect+1.0d0)*rrfsq*rrf) 
     
     haveDielectric = .true.
 
@@ -97,46 +92,11 @@ contains
     rt  = this_rt
 
     rrfsq = rrf * rrf
-    pre = 14.38362d0*2.0d0*(dielect-1.0d0)/((2.0d0*dielect+1.0d0)*rrfsq*rrf)
+    pre = pre22 * 2.0d0*(dielect-1.0d0)/((2.0d0*dielect+1.0d0)*rrfsq*rrf)
     
     haveCutoffs = .true.
 
   end subroutine setCutoffsRF
-
-  subroutine createMomentMap(status)
-    integer :: nAtypes
-    integer :: status
-    integer :: i
-    real (kind=DP) :: thisDP
-    logical :: thisProperty
-
-    status = 0
-
-    nAtypes = getSize(atypes)
-    
-    if (nAtypes == 0) then
-       status = -1
-       return
-    end if
-    
-    if (.not. allocated(MomentMap)) then
-       allocate(MomentMap(nAtypes))
-    endif
-
-    !!do i = 1, nAtypes
-    !!    
-    !!   call getElementProperty(atypes, i, "is_Dipole", thisProperty)
-    !!
-    !!   if (thisProperty) then
-    !!      call getElementProperty(atypes, i, "dipole_moment", thisDP)
-    !!      MomentMap(i)%dipole_moment = thisDP
-    !!   endif
-    !!   
-    !!end do
-    
-    haveMomentMap = .true.
-    
-  end subroutine createMomentMap  
 
   subroutine accumulate_rf(atom1, atom2, rij, eFrame, taper)
 
@@ -155,17 +115,7 @@ contains
     if ((.not.haveDielectric).or.(.not.haveCutoffs)) then
        write(default_error,*) 'Reaction field not initialized!'
        return
-    endif
-
-    if (.not.haveMomentMap) then
-       localError = 0
-       call createMomentMap(localError)
-       if ( localError .ne. 0 ) then
-          call handleError("reaction-field", "MomentMap creation failed!")
-          return
-       end if
-    endif
-    
+    endif    
        
 #ifdef IS_MPI
     me1 = atid_Row(atom1)
@@ -189,8 +139,8 @@ contains
     ul2(3) = eFrame(9,atom2)
 #endif
     
-    mu1 = MomentMap(me1)%dipole_moment
-    mu2 = MomentMap(me2)%dipole_moment
+    mu1 = getDipoleMoment(me1)
+    mu2 = getDipoleMoment(me2)
     
 #ifdef IS_MPI
     rf_Row(1,atom1) = rf_Row(1,atom1) + ul2(1)*mu2*taper
@@ -244,15 +194,6 @@ contains
        return
     endif
 
-    if (.not.haveMomentMap) then
-       localError = 0
-       call createMomentMap(localError)
-       if ( localError .ne. 0 ) then
-          call handleError("reaction-field", "MomentMap creation failed!")
-          return
-       end if
-    endif
-
     ! compute torques on dipoles:
     ! pre converts from mu in units of debye to kcal/mol
     
@@ -295,15 +236,6 @@ contains
        return
     endif
 
-    if (.not.haveMomentMap) then
-       localError = 0
-       call createMomentMap(localError)
-       if ( localError .ne. 0 ) then
-          call handleError("reaction-field", "MomentMap creation failed!")
-          return
-       end if
-    endif
-
     if (rij.le.rrf) then
        
        if (rij.lt.rt) then
@@ -335,8 +267,8 @@ contains
        ul2(3) = eFrame(9,atom2)
 #endif
        
-       mu1 = MomentMap(me1)%dipole_moment
-       mu2 = MomentMap(me2)%dipole_moment
+       mu1 = getDipoleMoment(me1)
+       mu2 = getDipoleMoment(me2)
        
        u1dotu2 = ul1(1)*ul2(1) + ul1(2)*ul2(2) + ul1(3)*ul2(3)
        
