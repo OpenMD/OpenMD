@@ -17,7 +17,6 @@ using namespace std;
 #include "utils/simError.h"
 #include "UseTheForce/ForceFields.hpp"
 #include "primitives/Atom.hpp"
-//#include "UseTheForce/fortranWrappers.hpp"
 #include "UseTheForce/doForces_interface.h"
 
 void ForceFields::calcRcut( void ){
@@ -153,8 +152,6 @@ void ForceFields::doForces( int calcPot, int calcStress ){
     // center of mass of the group is the same as position of the atom  if cutoff group does not exist
     rc = pos;
   }
-  
-
 
   isError = 0;
   entry_plug->lrPot = 0.0;
@@ -168,18 +165,17 @@ void ForceFields::doForces( int calcPot, int calcStress ){
   startProfile(pro8);
 #endif
 
-  fortranForceLoop( pos,
-  		    rc,
-		    A,
-		    u_l,
-		    frc,
-		    trq,
-		    entry_plug->tau,
-		    &(entry_plug->lrPot), 
-		    &passedCalcPot,
-		    &passedCalcStress,
-		    &isError );
-
+  doForceLoop( pos,
+               rc,
+               A,
+               u_l,
+               frc,
+               trq,
+               entry_plug->tau,
+               &(entry_plug->lrPot), 
+               &passedCalcPot,
+               &passedCalcStress,
+               &isError );
 
 #ifdef PROFILE
   endProfile(pro8);
@@ -230,12 +226,12 @@ void ForceFields::doForces( int calcPot, int calcStress ){
 }
 
 
-void ForceFields::initFortran(int ljMixPolicy, int useReactionField ){
+void ForceFields::initFortran(int useReactionField ){
   
   int isError;
   
   isError = 0;
-  initFortranFF( &ljMixPolicy, &useReactionField, &isError );
+  initFortranFF(&useReactionField, &isError );
   
   if(isError){
     sprintf( painCave.errMsg,

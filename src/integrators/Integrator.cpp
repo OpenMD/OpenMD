@@ -363,6 +363,7 @@ template<typename T> void Integrator<T>::moveA(void){
     integrableObjects[i]->getVel(vel);
     integrableObjects[i]->getPos(pos);
     integrableObjects[i]->getFrc(frc);
+    std::cerr << "f = " << frc[0] << "\t" << frc[1] << "\t" << frc[2] << "\n";
     
     mass = integrableObjects[i]->getMass();
 
@@ -376,11 +377,14 @@ template<typename T> void Integrator<T>::moveA(void){
     integrableObjects[i]->setVel(vel);
     integrableObjects[i]->setPos(pos);
 
+
     if (integrableObjects[i]->isDirectional()){
 
       // get and convert the torque to body frame
 
       integrableObjects[i]->getTrq(Tb);
+
+      std::cerr << "t = " << Tb[0] << "\t" << Tb[1] << "\t" << Tb[2] << "\n";
       integrableObjects[i]->lab2Body(Tb);
 
       // get the angular momentum, and propagate a half step
@@ -716,10 +720,11 @@ template<typename T> void Integrator<T>::rotationPropagation
   sd->getI(I);
 
   if (sd->isLinear()) {
+
     i = sd->linearAxis();
     j = (i+1)%3;
     k = (i+2)%3;
-    
+
     angle = dt2 * ji[j] / I[j][j];
     this->rotate( k, i, angle, ji, A );
 
