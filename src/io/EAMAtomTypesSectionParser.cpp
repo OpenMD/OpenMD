@@ -136,6 +136,8 @@ void EAMAtomTypesSectionParser::parseEAMParamFile(ForceField& ff, AtomType* atom
     parseEAMArray(*ppfStream, eamParam.rhovals, eamParam.nr);
     
     atomType->addProperty(new EAMParamGenericData("EAM", eamParam));
+
+    delete ppfStream;
 }
 
 void EAMAtomTypesSectionParser::parseEAMArray(std::istream& input, 

@@ -100,6 +100,8 @@ void DUFF::parse(const std::string& filename) {
     for (at = atomTypeCont_.beginType(i); at != NULL; at = atomTypeCont_.nextType(i)) {
         at->complete();
     }
+
+    delete ffStream;
     
 }
 

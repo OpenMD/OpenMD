@@ -46,6 +46,8 @@
 
 #include <stdlib.h>
 #include <vector>
+#include <string>
+#include <map>
 
 #include "io/BASS_interface.h"
 #include "types/Component.hpp"
@@ -55,6 +57,11 @@
 
 
 
+/**
+ * @class Globals Globals.hpp "io/Globals.hpp"
+ * @brief parsing and storing global parameters for simulation 
+ * @todo need refactorying
+ */
 class Globals{
   
 public:
@@ -186,11 +193,10 @@ public:
   
 private:
   
-  int hash_size;
-  int hash_shift;
-  int hash( char* text );
-  void addHash( char* text, int token );
-  LinkedCommand** command_table;
+
+  typedef std::map<std::string, int> CommandMapType;
+  CommandMapType command_table;
+
   
   char* checkMe( void );
   

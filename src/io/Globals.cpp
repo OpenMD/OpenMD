@@ -123,12 +123,6 @@ Globals::Globals(){
 
 Globals::~Globals(){
   int i;
-
-  for( i=0; i<hash_size; i++ ){
-    if( command_table[i] != NULL ) delete command_table[i];
-  }
-  delete[] command_table;
-
   if( components != NULL ){
     for( i=0; i<n_components; i++ ) delete components[i];
     delete[] components;
@@ -138,72 +132,65 @@ Globals::~Globals(){
 void Globals::initalize(){
   int i;
   
-  hash_size = 23;
-  hash_shift = 4;
-  
   components = NULL;
   
-  command_table = new LinkedCommand*[hash_size];
-  for( i=0; i<hash_size; i++ ) command_table[i] = NULL;
-  
-  addHash( "forceField",    G_FORCEFIELD );
-  addHash( "nComponents",   G_NCOMPONENTS );
-  addHash( "targetTemp",    G_TARGETTEMP );
-  addHash( "ensemble",      G_ENSEMBLE );
-  
-  addHash( "dt",            G_DT );
-  addHash( "runTime",       G_RUNTIME );
-  
-  addHash( "initialConfig", G_INITIALCONFIG );
-  addHash( "finalConfig",   G_FINALCONFIG );
-  addHash( "nMol",          G_NMOL );
-  addHash( "density",       G_DENSITY );
-  addHash( "box",           G_BOX );
-  addHash( "boxX",          G_BOXX );
-  addHash( "boxY",          G_BOXY );
-  addHash( "boxZ",          G_BOXZ );
-  addHash( "sampleTime",    G_SAMPLETIME );
-  addHash( "resetTime",     G_RESETTIME );
-  addHash( "statusTime",    G_STATUSTIME );
-  addHash( "cutoffRadius",  G_RCUT );
-  addHash( "switchingRadius",  G_RSW );
-  addHash( "dielectric",    G_DIELECTRIC );
-  addHash( "tempSet",       G_TEMPSET );
-  addHash( "thermalTime",   G_THERMALTIME );
-  addHash( "mixingRule",    G_MIXINGRULE);
-  addHash( "usePeriodicBoundaryConditions",        G_USEPBC);
-  addHash( "useReactionField",                     G_USERF );
-  addHash( "targetPressure",                       G_TARGETPRESSURE);
-  addHash( "tauThermostat",                        G_TAUTHERMOSTAT);
-  addHash( "tauBarostat",                          G_TAUBAROSTAT);
-  addHash( "zconsTime",                            G_ZCONSTIME);
-  addHash( "nZconstraints",                        G_NZCONSTRAINTS);
-  addHash( "zconsTol",                             G_ZCONSTOL);
-  addHash( "zconsForcePolicy",                     G_ZCONSFORCEPOLICY);
-  addHash( "seed",                                 G_SEED);
-  addHash( "useInitialTime",                       G_USEINITTIME);
-  addHash( "useInitialExtendedSystemState",        G_USEINIT_XS_STATE);
-  addHash( "orthoBoxTolerance",                    G_ORTHOBOXTOLERANCE);
-  addHash( "minimizer",                            G_MINIMIZER);
-  addHash( "minimizerMaxIter",                     G_MIN_MAXITER);
-  addHash( "minimizerWriteFrq",                    G_MIN_WRITEFRQ);
-  addHash( "minimizerStepSize",                    G_MIN_STEPSIZE);
-  addHash( "minimizerFTol",                        G_MIN_FTOL);
-  addHash( "minimizerGTol",                        G_MIN_GTOL);
-  addHash( "minimizerLSTol",                       G_MIN_LSTOL);
-  addHash( "minimizerLSMaxIter",                   G_MIN_LSMAXITER);
-  addHash( "zconsGap",                             G_ZCONSGAP);
-  addHash( "zconsFixtime",                         G_ZCONSFIXTIME);
-  addHash( "zconsUsingSMD",                        G_ZCONSUSINGSMD);
-  addHash( "useSolidThermInt",                     G_USE_SOLID_THERM_INT);
-  addHash( "useLiquidThermInt",                    G_USE_LIQUID_THERM_INT);
-  addHash( "thermodynamicIntegrationLambda",       G_THERM_INT_LAMBDA);
-  addHash( "thermodynamicIntegrationK",            G_THERM_INT_K);
-  addHash( "forceFieldVariant",                    G_FORCEFIELD_VARIANT);
-  addHash( "forceFieldFileName",                   G_FORCEFIELD_FILENAME);
-  addHash( "thermIntDistSpringConst",              G_THERM_INT_DIST_SPRING);
-  addHash( "thermIntThetaSpringConst",             G_THERM_INT_THETA_SPRING);
-  addHash( "thermIntOmegaSpringConst",             G_THERM_INT_OMEGA_SPRING);
+  command_table.insert(CommandMapType::value_type("forceField", G_FORCEFIELD));
+  command_table.insert(CommandMapType::value_type("nComponents", G_NCOMPONENTS));
+  command_table.insert(CommandMapType::value_type("targetTemp", G_TARGETTEMP));
+  command_table.insert(CommandMapType::value_type("ensemble", G_ENSEMBLE));
+  command_table.insert(CommandMapType::value_type("dt", G_DT));
+  command_table.insert(CommandMapType::value_type("runTime", G_RUNTIME));
+  command_table.insert(CommandMapType::value_type("initialConfig", G_INITIALCONFIG));
+  command_table.insert(CommandMapType::value_type("finalConfig", G_FINALCONFIG));
+  command_table.insert(CommandMapType::value_type("nMol", G_NMOL));
+  command_table.insert(CommandMapType::value_type("density", G_DENSITY));
+  command_table.insert(CommandMapType::value_type("box", G_BOX));
+  command_table.insert(CommandMapType::value_type("boxX", G_BOXX));
+  command_table.insert(CommandMapType::value_type("boxY", G_BOXY));
+  command_table.insert(CommandMapType::value_type("boxZ", G_BOXZ));
+  command_table.insert(CommandMapType::value_type("sampleTime", G_SAMPLETIME));
+  command_table.insert(CommandMapType::value_type("resetTime", G_RESETTIME));
+  command_table.insert(CommandMapType::value_type("statusTime", G_STATUSTIME));
+  command_table.insert(CommandMapType::value_type("cutoffRadius", G_RCUT));
+  command_table.insert(CommandMapType::value_type("switchingRadius", G_RSW));
+  command_table.insert(CommandMapType::value_type("dielectric", G_DIELECTRIC));
+  command_table.insert(CommandMapType::value_type("tempSet", G_TEMPSET));
+  command_table.insert(CommandMapType::value_type("thermalTime", G_THERMALTIME));
+  command_table.insert(CommandMapType::value_type("mixingRule", G_MIXINGRULE));
+  command_table.insert(CommandMapType::value_type("usePeriodicBoundaryConditions", G_USEPBC));
+  command_table.insert(CommandMapType::value_type("useReactionField", G_USERF));
+  command_table.insert(CommandMapType::value_type("targetPressure", G_TARGETPRESSURE));
+  command_table.insert(CommandMapType::value_type("tauThermostat", G_TAUTHERMOSTAT));
+  command_table.insert(CommandMapType::value_type("tauBarostat", G_TAUBAROSTAT));
+  command_table.insert(CommandMapType::value_type("zconsTime", G_ZCONSTIME));
+  command_table.insert(CommandMapType::value_type("nZconstraints", G_NZCONSTRAINTS));
+  command_table.insert(CommandMapType::value_type("zconsTol", G_ZCONSTOL));
+  command_table.insert(CommandMapType::value_type("zconsForcePolicy", G_ZCONSFORCEPOLICY));
+  command_table.insert(CommandMapType::value_type("seed", G_SEED));
+  command_table.insert(CommandMapType::value_type("useInitialTime", G_USEINITTIME));
+  command_table.insert(CommandMapType::value_type("useInitialExtendedSystemState", G_USEINIT_XS_STATE));
+  command_table.insert(CommandMapType::value_type("orthoBoxTolerance", G_ORTHOBOXTOLERANCE));
+  command_table.insert(CommandMapType::value_type("minimizer", G_MINIMIZER));
+  command_table.insert(CommandMapType::value_type("minimizerMaxIter", G_MIN_MAXITER));
+  command_table.insert(CommandMapType::value_type("minimizerWriteFrq", G_MIN_WRITEFRQ));
+  command_table.insert(CommandMapType::value_type("minimizerStepSize", G_MIN_STEPSIZE));
+  command_table.insert(CommandMapType::value_type("minimizerFTol", G_MIN_FTOL));
+  command_table.insert(CommandMapType::value_type("minimizerGTol", G_MIN_GTOL));
+  command_table.insert(CommandMapType::value_type("minimizerLSTol", G_MIN_LSTOL));
+  command_table.insert(CommandMapType::value_type("minimizerLSMaxIter", G_MIN_LSMAXITER));
+  command_table.insert(CommandMapType::value_type("zconsGap", G_ZCONSGAP));
+  command_table.insert(CommandMapType::value_type("zconsFixtime", G_ZCONSFIXTIME));
+  command_table.insert(CommandMapType::value_type("zconsUsingSMD", G_ZCONSUSINGSMD));
+  command_table.insert(CommandMapType::value_type("useSolidThermInt", G_USE_SOLID_THERM_INT));
+  command_table.insert(CommandMapType::value_type("useLiquidThermInt", G_USE_LIQUID_THERM_INT));
+  command_table.insert(CommandMapType::value_type("thermodynamicIntegrationLambda", G_THERM_INT_LAMBDA));
+  command_table.insert(CommandMapType::value_type("thermodynamicIntegrationK", G_THERM_INT_K));
+  command_table.insert(CommandMapType::value_type("forceFieldVariant", G_FORCEFIELD_VARIANT));
+  command_table.insert(CommandMapType::value_type("forceFieldFileName", G_FORCEFIELD_FILENAME));
+  command_table.insert(CommandMapType::value_type("thermIntDistSpringConst", G_THERM_INT_DIST_SPRING));
+  command_table.insert(CommandMapType::value_type("thermIntThetaSpringConst", G_THERM_INT_THETA_SPRING));
+  command_table.insert(CommandMapType::value_type("thermIntOmegaSpringConst", G_THERM_INT_OMEGA_SPRING));
+
 
   strcpy( mixingRule,"standard");  //default mixing rules to standard.
   usePBC = 1; //default  periodic boundry conditions to on
@@ -412,8 +399,13 @@ int Globals::globalAssign( event* the_event ){
   char err[300];
   
   token = 0;
-  key = hash( lhs );
-  if( command_table[key] != NULL ) token = command_table[key]->match( lhs );
+
+  CommandMapType::iterator iter;
+  std::string keyword(lhs);
+  iter = command_table.find(keyword);
+  if (iter != command_table.end()) {
+    token = iter->second;
+  }
   
   if( token ){
     
@@ -1937,46 +1929,3 @@ int Globals::globalEnd( event* the_event ){
   return 1;
 }
 
-int Globals::hash( char* text ){
-
-  register unsigned short int i = 0; // loop counter
-  int key = 0; // the hash key
-  
-  while( text[i] != '\0' ){
-    
-    key = ( ( key << hash_shift ) + text[i] ) % hash_size;
-    
-    i++;
-  }
-  
-  if( key < 0 ){
-
-    // if the key is less than zero, we've had an overflow error
-
-    sprintf( painCave.errMsg,
-	     "There has been an overflow error in the Globals' hash key.");
-    painCave.isFatal = 1;
-    simError();
-#ifdef IS_MPI
-    if( painCave.isEventLoop ){
-      if( worldRank == 0 ) mpiInterfaceExit();
-    }
-#endif //is_mpi
-  }
-  
-  return key;
-}
-
-void Globals::addHash( char* text, int token ){
-
-  int key;
-  LinkedCommand* the_element;
-
-  the_element = new LinkedCommand;
-  the_element->setValues( text, token );
-
-  key = hash( text );
-
-  the_element->setNext( command_table[key] );
-  command_table[key] = the_element;
-}
