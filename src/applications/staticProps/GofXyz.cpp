@@ -140,8 +140,10 @@ void GofXyz::collectHistogram(StuntDouble* sd1, StuntDouble* sd2) {
     int ybin = (y + halfLen_) / deltaR_;
     int zbin = (z + halfLen_) / deltaR_;
 
-    if (xbin < nRBins_ && ybin < nRBins_ && zbin < nRBins_) {
-        ++histogram_[x][y][z];
+    if (xbin < nRBins_ && xbin >=0 &&
+        ybin < nRBins_ && ybin >= 0 &&
+        zbin < nRBins_ && zbin >=0 ) {
+        ++histogram_[xbin][ybin][zbin];
     }
     
 }
