@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -42,149 +42,179 @@
 #include "utils/StringUtils.hpp"
 
 namespace oopse {
-std::string UpperCase(const std::string& S) {
-  std::string uc = S;
-  unsigned int n = uc.size();
-  for (unsigned int j = 0; j < n; j++) {   
-    char sj = uc[j];
-    if (sj >= 'a' && sj <= 'z') uc[j] = (char)(sj - ('a' - 'A'));
-  }
-  return uc;
-}
-
-std::string LowerCase(const std::string& S) {
-  std::string lc = S;
-  unsigned int n = lc.size();
-  for (unsigned int j = 0; j < n; j++) {
-    char sj = lc[j];
-    if (sj >= 'A' && sj <= 'Z') lc[j] = (char)(sj + ('a' - 'A'));
-  }
-  return lc;
-}
-
-char* trimSpaces(char *str) {
-  size_t len;
-  char *right, *left;
-
-  if (strlen(str) == 0) return(str);
-  
-  /* Trim whitespace from left side */
-  for (left = str; isspace(*left); left++);
-
-  /* Trim whitespace from right side */
-  if ((len = strlen(left)))
-    {
-      right = left + (len - 1);
-      
-      while (isspace(*right))
-        {
-          *right = '\0';
-          right--;
-        }
+  std::string UpperCase(const std::string& S) {
+    std::string uc = S;
+    unsigned int n = uc.size();
+    for (unsigned int j = 0; j < n; j++) {   
+      char sj = uc[j];
+      if (sj >= 'a' && sj <= 'z') uc[j] = (char)(sj - ('a' - 'A'));
     }
-
-  /* Only do the str copy if there were spaces to the left */
-  if (left != str)
-    strcpy(str, left);
-  
-  return (str);
-}
-
-int findBegin(std::istream &theStream, char* startText ){
-  const int MAXLEN = 1024;
-  char readLine[MAXLEN];   
-  int foundText = 0;
-  int lineNum;
-  char* the_token;
-  char* eof_test;
-
-  // rewind the stream
-  theStream.seekg (0, std::ios::beg);
-  lineNum = 0;
-  
-  if (!theStream.eof()) {
-    theStream.getline(readLine, MAXLEN);
-    lineNum++;
-  } else {
-    printf( "Error fast forwarding stream: stream is empty.\n");
-    return -1;
+    return uc;
   }
+
+  std::string LowerCase(const std::string& S) {
+    std::string lc = S;
+    unsigned int n = lc.size();
+    for (unsigned int j = 0; j < n; j++) {
+      char sj = lc[j];
+      if (sj >= 'A' && sj <= 'Z') lc[j] = (char)(sj + ('a' - 'A'));
+    }
+    return lc;
+  }
+
+  char* trimSpaces(char *str) {
+    size_t len;
+    char *right, *left;
+
+    if (strlen(str) == 0) return(str);
   
-  while ( !foundText ) {
-    
-    if (theStream.eof()) {
-      printf("Error fast forwarding stream at line %d: "
-             "stream ended unexpectedly.\n", lineNum);
+    /* Trim whitespace from left side */
+    for (left = str; isspace(*left); left++);
+
+    /* Trim whitespace from right side */
+    if ((len = strlen(left)))
+      {
+        right = left + (len - 1);
+      
+        while (isspace(*right))
+          {
+            *right = '\0';
+            right--;
+          }
+      }
+
+    /* Only do the str copy if there were spaces to the left */
+    if (left != str)
+      strcpy(str, left);
+  
+    return (str);
+  }
+
+  int findBegin(std::istream &theStream, char* startText ){
+    const int MAXLEN = 1024;
+    char readLine[MAXLEN];   
+    int foundText = 0;
+    int lineNum;
+    char* the_token;
+    char* eof_test;
+
+    // rewind the stream
+    theStream.seekg (0, std::ios::beg);
+    lineNum = 0;
+  
+    if (!theStream.eof()) {
+      theStream.getline(readLine, MAXLEN);
+      lineNum++;
+    } else {
+      printf( "Error fast forwarding stream: stream is empty.\n");
       return -1;
     }
+  
+    while ( !foundText ) {
     
-    the_token = strtok( readLine, " ,;\t" );
-    if ( the_token != NULL)
-      if (!strcasecmp("begin", the_token)) {
-	the_token = strtok( NULL, " ,;\t" );
-	if ( the_token != NULL){
-	  foundText = !strcasecmp( startText, the_token );
-	}
+      if (theStream.eof()) {
+        printf("Error fast forwarding stream at line %d: "
+               "stream ended unexpectedly.\n", lineNum);
+        return -1;
       }
     
-    if (!foundText) {
-      if (!theStream.eof()) {
-        theStream.getline(readLine, MAXLEN);
-        lineNum++;
-      } else {
-        printf( "Error fast forwarding stream at line %d: "
-                "stream ended unexpectedly.\n", lineNum);
-	return -1;
+      the_token = strtok( readLine, " ,;\t" );
+      if ( the_token != NULL)
+        if (!strcasecmp("begin", the_token)) {
+          the_token = strtok( NULL, " ,;\t" );
+          if ( the_token != NULL){
+            foundText = !strcasecmp( startText, the_token );
+          }
+        }
+    
+      if (!foundText) {
+        if (!theStream.eof()) {
+          theStream.getline(readLine, MAXLEN);
+          lineNum++;
+        } else {
+          printf( "Error fast forwarding stream at line %d: "
+                  "stream ended unexpectedly.\n", lineNum);
+          return -1;
+        }
       }
     }
+    return lineNum;
   }
-  return lineNum;
-}
 
-int countTokens(char *line, char *delimiters) {
-  /* PURPOSE: RETURN A COUNT OF THE NUMBER OF TOKENS ON THE LINE. */
+  int countTokens(char *line, char *delimiters) {
+    /* PURPOSE: RETURN A COUNT OF THE NUMBER OF TOKENS ON THE LINE. */
   
-  char *working_line;   /* WORKING COPY OF LINE. */
-  int ntokens;          /* NUMBER OF TOKENS FOUND IN LINE. */
-  char *strtok_ptr;     /* POINTER FOR STRTOK. */
+    char *working_line;   /* WORKING COPY OF LINE. */
+    int ntokens;          /* NUMBER OF TOKENS FOUND IN LINE. */
+    char *strtok_ptr;     /* POINTER FOR STRTOK. */
 
-  strtok_ptr= working_line= strdup(line);
+    strtok_ptr= working_line= strdup(line);
 
-  ntokens=0;
-  while (strtok(strtok_ptr,delimiters)!=NULL)
-    {
-      ntokens++;
-      strtok_ptr=NULL;
+    ntokens=0;
+    while (strtok(strtok_ptr,delimiters)!=NULL)
+      {
+        ntokens++;
+        strtok_ptr=NULL;
+      }
+
+    free(working_line);
+    return(ntokens);
+  }
+
+  int isEndLine(char *line) {
+    char *working_line;
+    char *foo;
+  
+    working_line = strdup(line);
+  
+    foo = strtok(working_line, " ,;\t");
+
+    if (foo != NULL) {
+
+      if (!strcasecmp(foo, "end")) return 1;
+
     }
-
-  free(working_line);
-  return(ntokens);
-}
-
-int isEndLine(char *line) {
-  char *working_line;
-  char *foo;
-  
-  working_line = strdup(line);
-  
-  foo = strtok(working_line, " ,;\t");
-
-  if (foo != NULL) {
-
-    if (!strcasecmp(foo, "end")) return 1;
-
-  }
  
- return 0;
-}
+    return 0;
+  }
+  
+  std::string OOPSE_itoa(int value, unsigned int base = 10) {    
+    const char digitMap[] = "0123456789abcdef";	
+    std::string buf;
+
+    if (base == 0 || base > 16) {      
+      return buf;
+    }
+
+    if (value == 0) {
+      buf = "0";
+      return buf;
+    }
+    
+    // Take care negative int:
+	
+    std::string sign;    
+    int _value = value;	
+    if (value < 0) {
+      _value = -value;
+      sign = "-";
+    }
+
+    // Translating number to string with base:
+    for (int i = 30; _value && i ; --i) {
+      buf = digitMap[ _value % base ] + buf;
+      _value /= base;
+    }
+    return sign.append(buf);
+  }
 
 
-std::string getPrefix(const std::string& str) {
-  return str.substr(0, str.rfind('.'));
-}
+  std::string getPrefix(const std::string& str) {
+    return str.substr(0, str.rfind('.'));
+  }
 
-std::string getSuffix(const std::string& str) {
+  std::string getSuffix(const std::string& str) {
     return str.substr(0, str.find('.'));
-}
+  }
 
 }

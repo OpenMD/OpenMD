@@ -55,7 +55,6 @@
 
 namespace oopse {
  
-
   /**
    * Converts a string to UPPER CASE
    * @param S
@@ -110,31 +109,35 @@ namespace oopse {
    * @param v data to be converted
    * @return a string
    */
-    template<typename T>
-    std::string toString(const T& v) {
-        std::ostringstream oss;        
-        if (!oss << v) {
-            std::cerr << "toString Error" << std::endl;
-        }
-        return oss.str();
+  template<typename T>
+  std::string toString(const T& v) {
+    std::ostringstream oss;        
+    if (!oss << v) {
+      std::cerr << "toString Error" << std::endl;
     }
-
-    template<typename T>
-    T lexi_cast(const std::string& str) {
-        T result;
-        std::istringstream iss(str);        
-        if (!(iss >> result)) {
-            std::cerr << "lexi_cast Error" << std::endl;
-        }
-        return result;
+    return oss.str();
+  }
+  
+  template<typename T>
+  T lexi_cast(const std::string& str) {
+    T result;
+    std::istringstream iss(str);        
+    if (!(iss >> result)) {
+      std::cerr << "lexi_cast Error" << std::endl;
     }
+    return result;
+  }
+  
+  std::string OOPSE_itoa(int value, unsigned int base);
+  
+  /**@todo need implementation */
+  std::string getPrefix(const std::string& str);
+  
+  /**@todo need implementation */
+  std::string getSuffix(const std::string& str);
+  
+  
 
-    /**@todo need implementation */
-    std::string getPrefix(const std::string& str);
-
-    /**@todo need implementation */
-    std::string getSuffix(const std::string& str);
-    
-}
-
+  
+}  
 #endif
