@@ -4,7 +4,6 @@ TestMain = $(Main)
 
 Source = UtilTest.cpp \
 	 GenericDataTestCase.cpp \
-	 PropertyMap.cpp \
 	 PropertyMapTestCase.cpp
 
 DEV_ROOT               = ../..
@@ -42,6 +41,7 @@ LibraryDirs = \
 	/usr/local/lib \
 	/usr/local/mpich/lib \
         /home/maul/gezelter/tim/cppunit/lib \
+	$(DEV_ROOT)/lib
 
 LibDirs          = -L$(LibDir)    $(LibraryDirs:%=-L%)
 
@@ -51,6 +51,7 @@ Libraries = \
 	-lsprng \
 	-lmpich \
 	-lfmpich \
+	-lOOPSE \
 
 
 #LinkOptions = \

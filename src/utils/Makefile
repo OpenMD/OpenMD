@@ -1,7 +1,7 @@
 Source    = \
 	definitions.F90 \
 	fError.c \
-	GenericData.cpp \
+	PropertyMap.cpp \
 	oopseMPI.F90 \
 	simError.c \
 	status.F90 \
