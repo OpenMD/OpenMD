@@ -2,10 +2,19 @@
 #define _WATER_MD_
 
 molecule{
-  name = "Cl";
+  name = "Cl-";
   nAtoms = 1;
   atom[0]{
-    type = "Cl";
+    type = "Cl-";
+    position(0.0, 0.0, 0.0);
+  }
+}
+
+molecule{
+  name = "Na+";
+  nAtoms = 1;
+  atom[0]{
+    type = "Na+";
     position(0.0, 0.0, 0.0);
   }
 }
@@ -73,7 +82,7 @@ molecule{
   }
 
   nCutoffGroups = 1;
-  cutoffGroup[0]{
+  cutoffGroup[0]{ 
     nMembers = 3;
     members(0, 1, 2);
   }
@@ -105,7 +114,7 @@ molecule{
   }
 
   nCutoffGroups = 1;
-  cutoffGroup[0]{
+  cutoffGroup[0]{ 
     nMembers = 4;
     members(0, 1, 2, 3);
   }
@@ -141,7 +150,7 @@ molecule{
   }
 
   nCutoffGroups = 1;
-  cutoffGroup[0]{
+  cutoffGroup[0]{ 
     nMembers = 5;
     members(0, 1, 2, 3, 4);
   }
@@ -169,38 +178,11 @@ molecule{
   }
 
   nCutoffGroups = 1;
-  cutoffGroup[0]{
-    nMembers = 3;
-    members(0, 1, 2);
-  }
-}
-
-molecule{
-  name = "SPC";
-  nAtoms = 3;
-  atom[0]{
-    type = "O_SPC";
-    position( 0.0, 0.0, -0.06461 );
-  }
-  atom[1]{
-    type = "H_SPC";
-    position( 0.0, 0.81649, 0.51275 );
-  }
-  atom[2]{
-    type = "H_SPC";
-    position( 0.0, -0.81649, 0.51275 );
-  }
-  nRigidBodies = 1;
-  rigidBody[0]{
+  cutoffGroup[0]{ 
     nMembers = 3;
     members(0, 1, 2);
   }
 
-  nCutoffGroups = 1;
-  cutoffGroup[0]{
-    nMembers = 3;
-    members(0, 1, 2);
-  }
 }
 
 molecule{

@@ -2,6 +2,24 @@
 #define _WATER_MD_
 
 molecule{
+  name = "Cl-";
+  nAtoms = 1;
+  atom[0]{
+    type = "Cl-";
+    position(0.0, 0.0, 0.0);
+  }
+}
+
+molecule{
+  name = "Na+";
+  nAtoms = 1;
+  atom[0]{
+    type = "Na+";
+    position(0.0, 0.0, 0.0);
+  }
+}
+
+molecule{
   name = "SSD_E";
   nAtoms = 1;
   atom[0]{
