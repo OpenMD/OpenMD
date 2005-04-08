@@ -44,7 +44,10 @@ S		32.066
 Cl		35.4527		
 Ar		39.948		
 Br		79.904		
-Kr		83.80		
+Kr		83.80	
+Cl-		35.4527
+Na+		22.9898
+Na		22.9898
 end AtomTypes
 
 begin DirectionalAtomTypes
@@ -89,7 +92,10 @@ S	  0.36366050421		3.52
 Cl	  0.344781953445	3.35
 Ar	  0.238068461226	3.41
 Br	  0.511111921764	3.54
-Kr	  0.32590340268		3.83	              
+Kr	  0.32590340268		3.83
+Cl-	  0.1180 		4.41724
+Na+	  0.002772		3.330445	              
+Na	  0.002772		3.330445	              
 end LennardJonesAtomTypes
 
 begin ChargeAtomTypes
@@ -104,7 +110,8 @@ H_SPCE    0.4238
 H_SPC     0.42
 EP_TIP4P -1.040
 EP_TIP5P -0.241
-Cl	 -1.0
+Cl-	 -1.0
+Na+	  1.0
 end ChargeAtomTypes
 
 begin MultipoleAtomTypes
