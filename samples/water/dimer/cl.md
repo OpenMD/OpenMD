@@ -2,7 +2,7 @@
 
 nComponents = 2;
 component{
-  type = "SSD";
+  type = "SSD_E";
   nMol = 1;
 }
 component{
@@ -29,9 +29,12 @@ tauThermostat = 1e4;
 tauBarostat = 1e4;
 
 dt = 1.0;
-runTime = 1e5;
+runTime = 1e3;
 
-sampleTime = 1e2;
-statusTime = 10;
+sampleTime = 10;
+statusTime = 1;
 useInitialTime = "false";
 useInitialExtendedSystemState = "false";
+
+//tempSet = "true";
+//thermalTime = 100;

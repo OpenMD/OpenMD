@@ -9,7 +9,7 @@ component{
 initialConfig = "./ssd.in";
 
 
-ensemble = NVT;
+ensemble = NVE;
 forceField = "WATER";
 useReactionField = "false";
 dielectric = 80.0;
