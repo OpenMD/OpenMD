@@ -564,15 +564,15 @@ contains
           vpair = vpair + vterm
           epot = epot + sw * vterm
 
-          dudx = dudx - 5.0_dp*sw*vterm*riji*xhat - pref * sw * ri4 * ( &
+          dudx = dudx - 5.0_dp*sw*vterm*riji*xhat + pref * sw * ri4 * ( &
                qxx_j*(6.0_dp*cx_j*ux_j(1) - 2.0_dp*xhat) + &
                qyy_j*(6.0_dp*cy_j*uy_j(1) - 2.0_dp*xhat) + &
                qzz_j*(6.0_dp*cz_j*uz_j(1) - 2.0_dp*xhat) ) 
-          dudy = dudy - 5.0_dp*sw*vterm*riji*yhat - pref * sw * ri4 * ( &
+          dudy = dudy - 5.0_dp*sw*vterm*riji*yhat + pref * sw * ri4 * ( &
                qxx_j*(6.0_dp*cx_j*ux_j(2) - 2.0_dp*yhat) + &
                qyy_j*(6.0_dp*cy_j*uy_j(2) - 2.0_dp*yhat) + &
                qzz_j*(6.0_dp*cz_j*uz_j(2) - 2.0_dp*yhat) )
-          dudz = dudz - 5.0_dp*sw*vterm*riji*zhat - pref * sw * ri4 * ( &
+          dudz = dudz - 5.0_dp*sw*vterm*riji*zhat + pref * sw * ri4 * ( &
                qxx_j*(6.0_dp*cx_j*ux_j(3) - 2.0_dp*zhat) + &
                qyy_j*(6.0_dp*cy_j*uy_j(3) - 2.0_dp*zhat) + &
                qzz_j*(6.0_dp*cz_j*uz_j(3) - 2.0_dp*zhat) ) 
@@ -690,15 +690,15 @@ contains
           vpair = vpair + vterm
           epot = epot + sw * vterm
           
-          dudx = dudx - 5.0_dp*sw*vterm*riji*xhat - pref * sw * ri4 * ( &
+          dudx = dudx - 5.0_dp*sw*vterm*riji*xhat + pref * sw * ri4 * ( &
                qxx_i*(6.0_dp*cx_i*ux_i(1) - 2.0_dp*xhat) + &
                qyy_i*(6.0_dp*cy_i*uy_i(1) - 2.0_dp*xhat) + &
                qzz_i*(6.0_dp*cz_i*uz_i(1) - 2.0_dp*xhat) ) 
-          dudy = dudy - 5.0_dp*sw*vterm*riji*yhat - pref * sw * ri4 * ( &
+          dudy = dudy - 5.0_dp*sw*vterm*riji*yhat + pref * sw * ri4 * ( &
                qxx_i*(6.0_dp*cx_i*ux_i(2) - 2.0_dp*yhat) + &
                qyy_i*(6.0_dp*cy_i*uy_i(2) - 2.0_dp*yhat) + &
                qzz_i*(6.0_dp*cz_i*uz_i(2) - 2.0_dp*yhat) )
-          dudz = dudz - 5.0_dp*sw*vterm*riji*zhat - pref * sw * ri4 * ( &
+          dudz = dudz - 5.0_dp*sw*vterm*riji*zhat + pref * sw * ri4 * ( &
                qxx_i*(6.0_dp*cx_i*ux_i(3) - 2.0_dp*zhat) + &
                qyy_i*(6.0_dp*cy_i*uy_i(3) - 2.0_dp*zhat) + &
                qzz_i*(6.0_dp*cz_i*uz_i(3) - 2.0_dp*zhat) ) 
