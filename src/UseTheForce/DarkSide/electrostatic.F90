@@ -530,7 +530,7 @@ contains
           sc2 = scale * scale
              
           pref = pre12 * q_i * mu_j
-          vterm = pref * ct_j * ri2 * scale
+          vterm = - pref * ct_j * ri2 * scale
           vpair = vpair + vterm
           epot = epot + sw * vterm
 
@@ -538,9 +538,9 @@ contains
           !! r_j - r_i and the charge-dipole potential takes the origin
           !! as the point dipole, which is atom j in this case.
 
-          dudx = dudx + pref * sw * ri3 * ( uz_j(1) + 3.0d0*ct_j*xhat*sc2)
-          dudy = dudy + pref * sw * ri3 * ( uz_j(2) + 3.0d0*ct_j*yhat*sc2)
-          dudz = dudz + pref * sw * ri3 * ( uz_j(3) + 3.0d0*ct_j*zhat*sc2)
+          dudx = dudx - pref * sw * ri3 * ( uz_j(1) - 3.0d0*ct_j*xhat*sc2)
+          dudy = dudy - pref * sw * ri3 * ( uz_j(2) - 3.0d0*ct_j*yhat*sc2)
+          dudz = dudz - pref * sw * ri3 * ( uz_j(3) - 3.0d0*ct_j*zhat*sc2)
 
           duduz_j(1) = duduz_j(1) - pref * sw * ri2 * xhat * scale
           duduz_j(2) = duduz_j(2) - pref * sw * ri2 * yhat * scale
@@ -557,7 +557,7 @@ contains
           cz2 = cz_j * cz_j
 
 
-          pref =  pre14 * q_i / 6.0_dp
+          pref =  pre14 * q_i / 1.0_dp
           vterm = pref * ri3 * (qxx_j * (3.0_dp*cx2 - 1.0_dp) + &
                qyy_j * (3.0_dp*cy2 - 1.0_dp) + &
                qzz_j * (3.0_dp*cz2 - 1.0_dp))
@@ -683,7 +683,7 @@ contains
           cy2 = cy_i * cy_i
           cz2 = cz_i * cz_i
           
-          pref = pre14 * q_j / 6.0_dp
+          pref = pre14 * q_j / 1.0_dp
           vterm = pref * ri3 * (qxx_i * (3.0_dp*cx2 - 1.0_dp) + &
                qyy_i * (3.0_dp*cy2 - 1.0_dp) + &
                qzz_i * (3.0_dp*cz2 - 1.0_dp))
