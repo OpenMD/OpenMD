@@ -70,24 +70,24 @@ class Token {
             *this = token;
         }
         
-        Token(int tok, int intValue, const boost::any& value) {
-            this->tok = tok;
-            this->intValue = intValue;
-            this->value = value;
+        Token(int MyTok, int myIntValue, const boost::any& myValue) {
+            this->tok = MyTok;
+            this->intValue = myIntValue;
+            this->value = myValue;
         }
 
-        Token(int tok, int intValue) {
-        this->tok = tok;
-        this->intValue = intValue;
+        Token(int myTok, int myIntValue) {
+        this->tok = myTok;
+        this->intValue = myIntValue;
         }
 
-        Token(int tok) {
-            this->tok = tok;
+        Token(int myTok) {
+            this->tok = myTok;
         }
 
-        Token(int tok,  const boost::any& value) {
-            this->tok = tok;
-            this->value = value;
+        Token(int myTok,  const boost::any& myValue) {
+            this->tok = myTok;
+            this->value = myValue;
         }
         
         const static int nada              =  0;
