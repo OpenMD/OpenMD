@@ -59,6 +59,7 @@ Applications = \
         applications/simpleBuilder\
 	applications/staticProps \
 	applications/dynamicProps \
+	applications/nanoRodBuilder \
 
 Samples = \
 	samples/argon \

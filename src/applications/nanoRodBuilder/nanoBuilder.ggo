@@ -1,0 +1,15 @@
+# Input file for gengetopt --generates cmdline.c and cmdline.h
+# for parsing command line arguments useing getopt and getoptlong.
+# gengetopt is available from:
+#  http://www.gnu.org/software/gengetopt/gengetopt.html
+package "nanoparticlebuilder"
+version "1.0"
+
+purpose "Build nanoparticle of specified radius or a core-shell particle in order of listing in the meta-data file."
+
+# Options
+option "output"        o  "Output file name" string no
+option "latticetype"    - "Lattice type string. Valid types are fcc,hcp,bcc and hcp-water." string default="fcc" no
+option "lconstant"     -  "Lattice constant in angstroms" double yes
+option "type"          -  "Type of particle to create. Valid arguments are core-shell, simple and random" string yes
+option "core-radius"   -  "Radius of core" double no
