@@ -229,7 +229,7 @@ int main(int argc, char* argv[]){
   
   xyzStream.close();
   
-  
+  delete prepareVisitor; 
   delete compositeVisitor;
   delete info;
    
