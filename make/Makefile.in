@@ -235,11 +235,20 @@ tr = $(eval __t := $3)                                                    \
 [0-9] := 0 1 2 3 4 5 6 7 8 9 #
 [A-F] := A B C D E F #
 
-# Upper case and lower case functions.  Each function has a single
-# argument which is the text to alter
+# Figure out whether we have $(eval) or not (GNU Make 3.80 and above)
+# if we do not then we need to use the shell version of tr, and not the
+# faster tr function above:
 
-uc = $(call tr,$([a-z]),$([A-Z]),$1)
-lc = $(call tr,$([A-Z]),$([a-z]),$1)
+__have_eval := $(false)
+__ignore := $(eval __have_eval := $(true))
+
+ifndef __have_eval
+  uc = $(shell echo $1 | tr "A-Z" "a-z")
+  lc = $(shell echo $1 | tr "A-Z" "a-z")
+else
+  uc = $(call tr,$([a-z]),$([A-Z]),$1)
+  lc = $(call tr,$([A-Z]),$([a-z]),$1)
+endif
 
 # OK, now we can actually use these functions to figure out the names
 # of the module files:
