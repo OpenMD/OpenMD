@@ -47,7 +47,6 @@ Br		79.904
 Kr		83.80	
 Cl-		35.4527
 Na+		22.9898
-Na		22.9898
 end AtomTypes
 
 begin DirectionalAtomTypes
@@ -93,9 +92,8 @@ Cl	  0.344781953445	3.35
 Ar	  0.238068461226	3.41
 Br	  0.511111921764	3.54
 Kr	  0.32590340268		3.83
-Cl-	  0.1180 		4.41724
-Na+	  0.002772		3.330445	              
-Na	  0.002772		3.330445	              
+Cl-	  0.100 		4.445
+Na+	  0.118			2.579	              
 end LennardJonesAtomTypes
 
 begin ChargeAtomTypes
