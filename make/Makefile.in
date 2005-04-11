@@ -205,6 +205,61 @@ DerivedCFiles          = $(YaccFiles:%.y=    %.c) \
 
 OtherTargetFiles       = $(OtherSourceFiles:%=$(PackageTargetDir)/%)
 
+###########################################################################
+#
+# Figure out the names of the module files based on some work done by
+# configure.  The tr function below is from John Graham-Cumming
+# (http://www.jgc.org). 
+#
+# The tr function.   Has three arguments:
+#
+# $1   The list of characters to translate from
+# $2   The list of characters to translate to
+# $3   The text to translate
+#
+# For example, $(call tr,A B C,1 2 3,CAPITAL) becomes 21PIT1L.
+
+tr = $(eval __t := $3)                                                    \
+     $(foreach c,                                                         \
+         $(join $(addsuffix :,$1),$2),                                    \
+         $(eval __t :=                                                    \
+             $(subst $(word 1,$(subst :, ,$c)),$(word 2,$(subst :, ,$c)), \
+                 $(__t))))$(__t)
+
+# Common character classes for use with the tr function.  Each of
+# these is actually a variable declaration and must be wrapped with
+# $() or ${} to be used.
+
+[A-Z] := A B C D E F G H I J K L M N O P Q R S T U V W X Y Z #
+[a-z] := a b c d e f g h i j k l m n o p q r s t u v w x y z #
+[0-9] := 0 1 2 3 4 5 6 7 8 9 #
+[A-F] := A B C D E F #
+
+# Upper case and lower case functions.  Each function has a single
+# argument which is the text to alter
+
+uc = $(call tr,$([a-z]),$([A-Z]),$1)
+lc = $(call tr,$([A-Z]),$([a-z]),$1)
+
+# OK, now we can actually use these functions to figure out the names
+# of the module files:
+
+ifneq "$(words $(Modules))" "0"
+ifeq "$(ModuleCase)" "UPPER"
+  MODULES = $(call uc,$(Modules))
+else
+  ifeq "$(ModuleCase)" "lower"
+    MODULES = $(call lc,$(Modules))
+  else
+    MODULES = $(Modules)
+  endif
+endif
+  ModuleFiles = $(MODULES:%= $(PackageTargetDir)/%.$(ModSuffix))
+  ParallelModuleFiles = $(MODULES:%= $(PackageParallelTargetDir)/%.$(ModSuffix))
+endif
+#
+###########################################################################
+
 ThirdPartyJarsTmp = $(patsubst %,$(LibDir)/%,$(JavaLibraries))
 ThirdPartyJars    = $(subst $(Space),$(X),$(ThirdPartyJarsTmp))
 
@@ -622,6 +677,11 @@ _buildall : \
 	$(Executable) 
 endif
 
+echo : $(PackageListLoop)
+	$(Print) Done echo.
+
+_echoall :
+	$(Print) $(Modules)
 
 # make clean
 clean : $(PackageListLoop)
@@ -630,7 +690,9 @@ clean : $(PackageListLoop)
 _cleanall :
 	$(Delete) \
 		$(ObjectFiles) \
+		$(ModuleFiles) \
 		$(ParallelObjectFiles) \
+		$(ParallelModuleFiles) \
 		$(JarFile) \
 		$(SharedLibrary) \
 		$(StaticLibrary) \

@@ -24,6 +24,20 @@ Source    = \
 	shapes.F90 \
         shapes_interface.F90
 
+Modules = \
+	atype_module \
+	eam \
+	electrostatic_module \
+	force_globals \
+	gb_pair \
+	lj \
+	neighborLists \
+	reaction_field \
+	shapes \
+	mpiSimulation \
+	simulation \
+	sticky \
+	switcheroo
 
 RmiSource =
 

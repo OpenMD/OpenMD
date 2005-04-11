@@ -25,6 +25,12 @@ else
    Source = $(MySource)
 endif
 
+Modules = \
+	definitions \
+	oopseMPI \
+	status \
+	Vector_class
+
 RmiSource =
 
 Main      =

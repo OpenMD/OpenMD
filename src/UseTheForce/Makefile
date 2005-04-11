@@ -10,6 +10,10 @@ Source    = \
 	notifyCutoffs.F90 \
 	notifyCutoffs_interface.F90
 
+Modules = \
+	doForces \
+	notifyCutoffs
+
 RmiSource =
 
 Main      =
