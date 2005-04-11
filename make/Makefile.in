@@ -243,7 +243,7 @@ __have_eval := $(false)
 __ignore := $(eval __have_eval := $(true))
 
 ifndef __have_eval
-  uc = $(shell echo $1 | tr "A-Z" "a-z")
+  uc = $(shell echo $1 | tr "a-z" "A-Z")
   lc = $(shell echo $1 | tr "A-Z" "a-z")
 else
   uc = $(call tr,$([a-z]),$([A-Z]),$1)
