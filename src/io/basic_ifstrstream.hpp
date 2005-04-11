@@ -104,21 +104,10 @@ class basic_ifstrstream : public std::basic_istream<_CharT, _Traits> {
         
         /**  Constructs an object of class ifstream.  */
         basic_ifstrstream()
-            : std::basic_ios<_CharT, _Traits>(),  std::basic_istream<_CharT, _Traits>(0),
-              internalBuf_(NULL), isRead(false)  {
-
-#ifdef IS_MPI         
-            //in parallel mode, fall back to istringstream
-            std::basic_stringbuf<_CharT, _Traits, _Alloc>* stringBuffer = new  std::basic_stringbuf<_CharT, _Traits, _Alloc>();
-            internalBuf_ =  stringBuffer;
-#else
-            //in single version, fall back to ifstream
-            std::basic_filebuf<_CharT, _Traits>* fileBuffer = new  std::basic_filebuf<_CharT, _Traits>();
-            internalBuf_ =  fileBuffer;
-#endif            
-
-            this->init(internalBuf_);
-            isRead = false;
+            :  std::basic_istream<_CharT, _Traits>(0),
+              internalBuf_(), isRead(false)  {
+    
+            this->init(&internalBuf_);
         }
         
         /**
@@ -128,10 +117,11 @@ class basic_ifstrstream : public std::basic_istream<_CharT, _Traits> {
          * @checkFilename Flags indicating checking the file name in parallel
          */
         explicit basic_ifstrstream(const char* filename, std::ios_base::openmode mode = std::ios_base::in, bool checkFilename = false)
-            : std::basic_ios<_CharT, _Traits>(),  std::basic_istream<_CharT, _Traits>(0),
-              internalBuf_(NULL), isRead(false) {
+            :  std::basic_istream<_CharT, _Traits>(0),
+              internalBuf_(), isRead(false) {
 
-           isRead =  internalOpen(filename,  mode | std::ios_base::in, checkFilename);
+             this->init(&internalBuf_);
+             isRead =  internalOpen(filename,  mode | std::ios_base::in, checkFilename);
          }
 
         /**
@@ -139,8 +129,6 @@ class basic_ifstrstream : public std::basic_istream<_CharT, _Traits> {
          */
         ~basic_ifstrstream(){
             close();
-            delete internalBuf_;
-            internalBuf_ = NULL;
         }
 
         /**
@@ -168,7 +156,7 @@ class basic_ifstrstream : public std::basic_istream<_CharT, _Traits> {
             return isRead; 
 #else
             //single version fall back to ifstream
-            return this->rdbuf()->is_open();
+            return internalBuf_.is_open();
 #endif
         }
 
@@ -179,7 +167,7 @@ class basic_ifstrstream : public std::basic_istream<_CharT, _Traits> {
         void close() {
 #ifndef IS_MPI            
             //single version fall back to ifstream
-            if (!this->rdbuf()->close())
+            if (!internalBuf_.close())
                 this->setstate(std::ios_base::failbit);
 #endif             
 
@@ -192,7 +180,7 @@ class basic_ifstrstream : public std::basic_istream<_CharT, _Traits> {
          * parallel mode) associated with the stream.
          */
         _Buf* rdbuf() const{
-            return static_cast<_Buf*>(internalBuf_); 
+            return static_cast<_Buf*>(&internalBuf_); 
         }
 
     private:
@@ -238,7 +226,6 @@ class basic_ifstrstream : public std::basic_istream<_CharT, _Traits> {
                 }
                 
                 std::ifstream fin(filename, mode);
-                std::basic_stringbuf<_CharT, _Traits, _Alloc>* sbuf;
 
                 if (fin.is_open()) {
                     
@@ -270,16 +257,9 @@ class basic_ifstrstream : public std::basic_istream<_CharT, _Traits> {
                     fbuf[fileSize] = '\0';
                     commStatus = MPI_Bcast(fbuf, fileSize + 1, MPI_CHAR, masterNode, MPI_COMM_WORLD); 
 
-                    //it is safe to delete null pointer
-                    delete internalBuf_;
-
-                    //initilaize istream
-                    internalBuf_  = new std::basic_stringbuf<_CharT, _Traits, _Alloc>(fbuf, mode);
-                    assert(internalBuf_);
-                    this->init(internalBuf_);
-
                     //close the file and delete the buffer
-                    fin.close();                    
+                    fin.close();      
+                    internalBuf_.str(fbuf);
                     delete fbuf;
                 }else{
                     fileSize = FileNotExists;
@@ -318,14 +298,7 @@ class basic_ifstrstream : public std::basic_istream<_CharT, _Traits> {
                         //receive file content
                         commStatus = MPI_Bcast(fbuf, fileSize + 1, MPI_CHAR, masterNode, MPI_COMM_WORLD); 
 
-                        //it is safe to delete null pointer
-                        delete internalBuf_;
-
-                        //initilaize istream                        
-                        internalBuf_  = new std::basic_stringbuf<_CharT, _Traits, _Alloc>(fbuf, mode);
-                        assert(internalBuf_);
-                        this->init(internalBuf_);
-
+                        internalBuf_.str(fbuf);
                         delete fbuf;
 
                     } else if (fileSize == FileNotExists ) {
@@ -338,24 +311,17 @@ class basic_ifstrstream : public std::basic_istream<_CharT, _Traits> {
 
 #else
             //in single version, fall back to ifstream
-            std::basic_filebuf<_CharT, _Traits>* fileBuffer = new  std::basic_filebuf<_CharT, _Traits>();
-
-            //it is safe to delete null pointer
-            delete internalBuf_; 
-            internalBuf_ =  fileBuffer;
-
-            this->init(internalBuf_);
-            if (!fileBuffer->open(filename, mode)) {
+            if (!internalBuf_.open(filename, mode)) {
                 this->setstate(std::ios_base::failbit);
                 return false;
             }    
 
 #endif
-
+            this->clear();
             return true;
         }
         
-        std::basic_streambuf<_CharT, _Traits>*  internalBuf_; /** internal stream buffer */        
+        _Buf  internalBuf_; /** internal stream buffer */        
         bool isRead;                                                                    /** file opened flag */
 };
 
