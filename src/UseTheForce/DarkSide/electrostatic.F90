@@ -339,7 +339,6 @@ contains
     real (kind=dp) :: pref, vterm, epot, dudr    
     real (kind=dp) :: xhat, yhat, zhat
     real (kind=dp) :: dudx, dudy, dudz
-    real (kind=dp) :: drdxj, drdyj, drdzj
     real (kind=dp) :: scale, sc2, bigR
 
     if (.not.allocated(ElectrostaticMap)) then
@@ -362,10 +361,6 @@ contains
     xhat = d(1) * riji
     yhat = d(2) * riji
     zhat = d(3) * riji
-
-    drdxj = xhat
-    drdyj = yhat
-    drdzj = zhat
 
     !! logicals
 
@@ -448,7 +443,7 @@ contains
        uz_j(2) = eFrame(6,atom2)
        uz_j(3) = eFrame(9,atom2)
 #endif
-       ct_j = uz_j(1)*drdxj + uz_j(2)*drdyj + uz_j(3)*drdzj
+       ct_j = uz_j(1)*xhat + uz_j(2)*yhat + uz_j(3)*zhat
 
        if (j_is_SplitDipole) then
           d_j = ElectrostaticMap(me2)%split_dipole_distance
@@ -508,9 +503,9 @@ contains
 
           dudr  = - sw * vterm * riji
 
-          dudx = dudx + dudr * drdxj
-          dudy = dudy + dudr * drdyj
-          dudz = dudz + dudr * drdzj
+          dudx = dudx + dudr * xhat
+          dudy = dudy + dudr * yhat
+          dudz = dudz + dudr * zhat
        
        endif
 
@@ -557,7 +552,7 @@ contains
           cz2 = cz_j * cz_j
 
 
-          pref =  pre14 * q_i / 1.0_dp
+          pref =  pre14 * q_i / 3.0_dp
           vterm = pref * ri3 * (qxx_j * (3.0_dp*cx2 - 1.0_dp) + &
                qyy_j * (3.0_dp*cy2 - 1.0_dp) + &
                qzz_j * (3.0_dp*cz2 - 1.0_dp))
@@ -683,7 +678,7 @@ contains
           cy2 = cy_i * cy_i
           cz2 = cz_i * cz_i
           
-          pref = pre14 * q_j / 1.0_dp
+          pref = pre14 * q_j / 3.0_dp
           vterm = pref * ri3 * (qxx_i * (3.0_dp*cx2 - 1.0_dp) + &
                qyy_i * (3.0_dp*cy2 - 1.0_dp) + &
                qzz_i * (3.0_dp*cz2 - 1.0_dp))
