@@ -60,7 +60,7 @@
 !! @author J. Daniel Gezelter
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: vector_class.F90,v 1.4 2005-04-12 17:39:06 chuckv Exp $, $Date: 2005-04-12 17:39:06 $, $Name: not supported by cvs2svn $, $Revision: 1.4 $
+!! @version $Id: vector_class.F90,v 1.5 2005-04-12 17:45:31 chuckv Exp $, $Date: 2005-04-12 17:45:31 $, $Name: not supported by cvs2svn $, $Revision: 1.5 $
 
 module Vector_class
   
@@ -884,6 +884,12 @@ contains
     type(Vector), pointer :: this 
     type(Vector), pointer :: null_this 
 
+
+    if (.not. associated(this)) then
+       null_this => null()
+       return
+    end if
+    
 !! Walk down the list and deallocate each of the vector components
      if(associated(this%elementData)) then
         deallocate(this%elementData)
