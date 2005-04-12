@@ -60,7 +60,7 @@
 !! @author J. Daniel Gezelter
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: vector_class.F90,v 1.2 2005-01-12 22:41:39 gezelter Exp $, $Date: 2005-01-12 22:41:39 $, $Name: not supported by cvs2svn $, $Revision: 1.2 $
+!! @version $Id: vector_class.F90,v 1.3 2005-04-12 00:28:29 chuckv Exp $, $Date: 2005-04-12 00:28:29 $, $Name: not supported by cvs2svn $, $Revision: 1.3 $
 
 module Vector_class
   
@@ -68,6 +68,7 @@ module Vector_class
   PRIVATE
    
   public :: initialize
+  public :: destroy
   public :: getSize
   public :: getElementAt
   public :: getPropertyListSize
@@ -77,6 +78,7 @@ module Vector_class
   public :: getElementProperty
   public :: getMatchingElementList
   public :: getFirstMatchingElement
+  
 
   integer, parameter :: logical_data_type = 1
   integer, parameter :: integer_data_type = 2
@@ -824,7 +826,7 @@ contains
   end function initialize_3i
 
   function initialize_4i(cap, nprop, capinc, propinc) result(this)
-    integer, intent(in) :: cap, nprop, capinc, propinc
+     integer, intent(in) :: cap, nprop, capinc, propinc
     integer :: error
     type(Vector), pointer :: this 
 
@@ -875,7 +877,49 @@ contains
     if(error .ne. 0) write(*,*) 'Could not allocate logicalElementProperties!'
 
   end function initialize_4i
-    
-  
+
+    !! This function destroys the vector components....
+  function destroy(this) result(null_this)
+    logical :: done
+    type(Vector), pointer :: this 
+    type(Vector), pointer :: null_this 
+
+!! Walk down the list and deallocate each of the vector components
+     if(associated(this%elementData)) then
+        deallocate(this%elementData)
+        this%elementData=>null()
+     endif
+
+
+     if(associated(this%PropertyDescriptions)) then
+        deallocate(this%PropertyDescriptions)
+        this%PropertyDescriptions=>null()
+     endif
+     
+     
+     
+     if(associated(this%PropertyDataType)) then
+        deallocate(this%PropertyDataType)
+        this%PropertyDataType=>null()
+     endif
+     
+     
+     if(associated(this%integerElementProperties)) then
+        deallocate(this%integerElementProperties)
+        this%integerElementProperties=>null()
+     endif
+     
+
+     if(associated(this%realElementProperties)) then
+        deallocate(this%realElementProperties)
+        this%realElementProperties=>null()
+     endif
+
+     if(associated(this%logicalElementProperties)) then
+        deallocate(this%logicalElementProperties)
+        this%logicalElementProperties=>null()
+     endif
+     null_this => null()
+  end function destroy
   
 end module Vector_class
