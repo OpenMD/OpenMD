@@ -1,8 +1,9 @@
 Package = lattice
 
 Source    = \
-	BaseLattice.cpp \
 	Lattice.cpp \
+	CubicLattice.cpp \
+	FCCLattice.cpp \
 	LatticeFactory.cpp
 
 RmiSource =

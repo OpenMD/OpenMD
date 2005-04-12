@@ -58,9 +58,6 @@ class Lattice{
 
     //virtual destructor of Lattice
     virtual ~Lattice() {}
-
-    //get lattice type
-    virtual const  std::string getLatticeType() = 0;
     
     int getNumSitesPerCell() {return nCellSites;}
 

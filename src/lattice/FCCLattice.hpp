@@ -50,7 +50,6 @@ namespace oopse {
 class FCCLattice : public CubicLattice{
   public:
     FCCLattice();
-    virtual const  std::string getLatticeType() {return FCCLatticeType;}    
     virtual void update();
     
 };
