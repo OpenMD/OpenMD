@@ -12,8 +12,9 @@ MySource    = \
         StringTokenizer.cpp \
 	Utility.cpp \
 	Trim.cpp \
-	BitSet.cpp\
-	wildcards.cpp\
+	BitSet.cpp \
+	MoLocator.cpp \
+	wildcards.cpp \
 	residentMem.c\
 	physmem.c
 

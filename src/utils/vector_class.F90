@@ -60,7 +60,7 @@
 !! @author J. Daniel Gezelter
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: vector_class.F90,v 1.5 2005-04-12 17:45:31 chuckv Exp $, $Date: 2005-04-12 17:45:31 $, $Name: not supported by cvs2svn $, $Revision: 1.5 $
+!! @version $Id: vector_class.F90,v 1.6 2005-04-12 21:28:07 gezelter Exp $, $Date: 2005-04-12 21:28:07 $, $Name: not supported by cvs2svn $, $Revision: 1.6 $
 
 module Vector_class
   
@@ -667,7 +667,7 @@ contains
        that => initialize(newCapacity, newPropCap, &
             this%capacityIncrement, this%PropertyIncrement)       
        call copyAllData(this, that)
-       deallocate(this)
+       this => destroy(this)
        this => that
     endif
   end subroutine ensureCapacityHelper
@@ -884,48 +884,38 @@ contains
     type(Vector), pointer :: this 
     type(Vector), pointer :: null_this 
 
-
     if (.not. associated(this)) then
        null_this => null()
        return
     end if
     
-!! Walk down the list and deallocate each of the vector components
-     if(associated(this%elementData)) then
-        deallocate(this%elementData)
-        this%elementData=>null()
-     endif
-
-
-     if(associated(this%PropertyDescriptions)) then
-        deallocate(this%PropertyDescriptions)
-        this%PropertyDescriptions=>null()
-     endif
-     
-     
-     
-     if(associated(this%PropertyDataType)) then
-        deallocate(this%PropertyDataType)
-        this%PropertyDataType=>null()
-     endif
-     
-     
-     if(associated(this%integerElementProperties)) then
-        deallocate(this%integerElementProperties)
-        this%integerElementProperties=>null()
-     endif
-     
-
-     if(associated(this%realElementProperties)) then
-        deallocate(this%realElementProperties)
-        this%realElementProperties=>null()
-     endif
-
+!! Walk down the list and deallocate each of the vector component
      if(associated(this%logicalElementProperties)) then
         deallocate(this%logicalElementProperties)
         this%logicalElementProperties=>null()
      endif
+     if(associated(this%realElementProperties)) then
+        deallocate(this%realElementProperties)
+        this%realElementProperties=>null()
+     endif
+     if(associated(this%integerElementProperties)) then
+        deallocate(this%integerElementProperties)
+        this%integerElementProperties=>null()
+     endif
+     if(associated(this%PropertyDataType)) then
+        deallocate(this%PropertyDataType)
+        this%PropertyDataType=>null()
+     endif
+     if(associated(this%PropertyDescriptions)) then
+        deallocate(this%PropertyDescriptions)
+        this%PropertyDescriptions=>null()
+     endif
+     if(associated(this%elementData)) then
+        deallocate(this%elementData)
+        this%elementData=>null()
+     endif
      deallocate(this)
+     this => null()
      null_this => null()
   end function destroy
   
