@@ -60,7 +60,7 @@
 !! @author J. Daniel Gezelter
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: vector_class.F90,v 1.3 2005-04-12 00:28:29 chuckv Exp $, $Date: 2005-04-12 00:28:29 $, $Name: not supported by cvs2svn $, $Revision: 1.3 $
+!! @version $Id: vector_class.F90,v 1.4 2005-04-12 17:39:06 chuckv Exp $, $Date: 2005-04-12 17:39:06 $, $Name: not supported by cvs2svn $, $Revision: 1.4 $
 
 module Vector_class
   
@@ -919,6 +919,7 @@ contains
         deallocate(this%logicalElementProperties)
         this%logicalElementProperties=>null()
      endif
+     deallocate(this)
      null_this => null()
   end function destroy
   
