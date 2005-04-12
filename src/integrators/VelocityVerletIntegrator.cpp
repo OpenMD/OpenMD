@@ -224,6 +224,7 @@ StatWriter* VelocityVerletIntegrator::createStatWriter() {
     mask.set(Stats::KINETIC_ENERGY);
     mask.set(Stats::TEMPERATURE);
     mask.set(Stats::PRESSURE);
+    mask.set(Stats::VOLUME);
     mask.set(Stats::CONSERVED_QUANTITY);
     mask.set(Stats::VRAW);
     mask.set(Stats::VHARM);
