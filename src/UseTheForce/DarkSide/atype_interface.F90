@@ -36,8 +36,8 @@ subroutine makeatype(atp, status)
   
 end subroutine
 
-!clears memory up
+! clears memory up
 subroutine deleteAtypes()
-use atype_module,ONLY: delete_atypes
-call delete_atypes()
+  use atype_module,ONLY: delete_atypes
+  call delete_atypes()
 end subroutine deleteatypes

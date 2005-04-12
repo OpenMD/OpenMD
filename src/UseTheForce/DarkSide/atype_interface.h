@@ -48,14 +48,10 @@
 #include "types/AtomTypeProperties.h"
 
 #define makeAtype F90_FUNC(makeatype, MAKEATYPE)
-
-extern "C" {
-  void makeAtype(AtomTypeProperties* atp, int* status );
-}  
-
 #define deleteAtypes F90_FUNC(deleteatypes, DELETEATYPES)
 
 extern "C" {
+  void makeAtype(AtomTypeProperties* atp, int* status );
   void deleteAtypes(void);
 }  
 #endif
