@@ -716,7 +716,7 @@ double Shapes_FF::findCutoffDistance(ShapeAtomType* st) {
       sigma = st->getContactValueAt(costheta, phi);
       range = st->getRangeValueAt(costheta, phi);
 
-       // cutoff for a shape is taken to be (2.5*rangeVal + contactVal)
+       // cutoff for a shape is taken to be (1.5*rangeVal + contactVal)
       tempCut = 1.5*range + sigma;
 
       if (tempCut > bigCut) bigCut = tempCut; 
