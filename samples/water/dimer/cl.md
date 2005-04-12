@@ -2,7 +2,7 @@
 
 nComponents = 2;
 component{
-  type = "SSD_E";
+  type = "TIP4P";
   nMol = 1;
 }
 component{
