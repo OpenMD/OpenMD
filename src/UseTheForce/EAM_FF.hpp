@@ -65,6 +65,7 @@ class EAM_FF : public ForceField {
 
          virtual double getRcutFromAtomType(AtomType* at);
 
+  ~EAM_FF();
     private:
         SectionParserManager spMan_;
 

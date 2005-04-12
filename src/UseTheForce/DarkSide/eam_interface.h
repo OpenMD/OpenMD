@@ -61,4 +61,10 @@ extern "C"{
                    int* eam_ident,
                    int* status );
 }  
+
+#define destroyEAMTypes F90_FUNC(destroyeamtypes,DESTROYEAMTYPES)
+extern "C"{
+  void destroyEAMTypes(void);
+}
 #endif
+

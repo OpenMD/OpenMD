@@ -132,6 +132,7 @@ module eam
   public :: calc_eam_prepair_rho
   public :: calc_eam_preforce_Frho
   public :: clean_EAM
+  public :: destroyEAMTypes
 
 contains
 
@@ -198,6 +199,22 @@ contains
   end subroutine newEAMtype
 
 
+  ! kills all eam types entered and sets simulation to uninitalized
+  subroutine destroyEAMtypes()
+    integer :: i
+    type(EAMType), pointer :: tempEAMType=>null()
+
+    do i = 1, EAMList%n_eam_types
+       tempEAMType => eamList%EAMParams(i)
+       call deallocate_EAMType(tempEAMType)
+    end do
+    if(associated( eamList%EAMParams)) deallocate( eamList%EAMParams)
+    eamList%EAMParams => null()
+    
+    eamList%n_eam_types = 0
+    eamList%currentAddition = 0
+     
+  end subroutine destroyEAMtypes
 
   subroutine init_EAM_FF(status)
     integer :: status
@@ -502,16 +519,16 @@ contains
     type (EAMtype), pointer :: thisEAMType
 
     ! free Arrays in reverse order of allocation...
-    deallocate(thisEAMType%eam_phi_r_pp)      
-    deallocate(thisEAMType%eam_rho_r_pp)   
-    deallocate(thisEAMType%eam_Z_r_pp)   
-    deallocate(thisEAMType%eam_F_rho_pp)   
-    deallocate(thisEAMType%eam_phi_r)      
-    deallocate(thisEAMType%eam_rho_r)      
-    deallocate(thisEAMType%eam_Z_r)   
-    deallocate(thisEAMType%eam_F_rho)
-    deallocate(thisEAMType%eam_rhovals)
-    deallocate(thisEAMType%eam_rvals)
+    if(associated(thisEAMType%eam_phi_r_pp)) deallocate(thisEAMType%eam_phi_r_pp)      
+    if(associated(thisEAMType%eam_rho_r_pp)) deallocate(thisEAMType%eam_rho_r_pp)   
+    if(associated(thisEAMType%eam_Z_r_pp)) deallocate(thisEAMType%eam_Z_r_pp)   
+    if(associated(thisEAMType%eam_F_rho_pp)) deallocate(thisEAMType%eam_F_rho_pp)   
+    if(associated(thisEAMType%eam_phi_r)) deallocate(thisEAMType%eam_phi_r)      
+    if(associated(thisEAMType%eam_rho_r)) deallocate(thisEAMType%eam_rho_r)      
+    if(associated(thisEAMType%eam_Z_r)) deallocate(thisEAMType%eam_Z_r)   
+    if(associated(thisEAMType%eam_F_rho)) deallocate(thisEAMType%eam_F_rho)
+    if(associated(thisEAMType%eam_rhovals)) deallocate(thisEAMType%eam_rhovals)
+    if(associated(thisEAMType%eam_rvals)) deallocate(thisEAMType%eam_rvals)
    
   end subroutine deallocate_EAMType
 

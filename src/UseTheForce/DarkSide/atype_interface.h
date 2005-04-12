@@ -52,4 +52,12 @@
 extern "C" {
   void makeAtype(AtomTypeProperties* atp, int* status );
 }  
+
+#define deleteAtypes F90_FUNC(deleteatypes, DELETEATYPES)
+
+extern "C" {
+  void deleteAtypes(void);
+}  
 #endif
+
+

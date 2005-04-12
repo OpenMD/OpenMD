@@ -21,3 +21,10 @@ subroutine newEAMtype(lattice_constant,eam_nrho,eam_drho,eam_nr,&
        eam_ident,status)
   
 end subroutine newEAMtype
+
+subroutine destroyEAMTypes()
+  use eam, ONLY: module_destroyEAMTypes =>destroyEAMTypes
+  
+  call module_destroyEAMTypes()  
+  
+end subroutine destroyEAMTypes
