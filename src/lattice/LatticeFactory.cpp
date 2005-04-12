@@ -40,80 +40,63 @@
  */
  
 #include "lattice/LatticeFactory.hpp"
-#include "lattice/BaseLattice.hpp"
 #include "lattice/LatticeCreator.hpp"
 
 namespace oopse {
 
-LatticeFactory* LatticeFactory::instance = NULL;
-LatticeFactory::~LatticeFactory(){
-   std::map<std::string, BaseLatticeCreator*>::iterator mapIter;
-	for (mapIter = creatorMap.begin(); mapIter == creatorMap.end(); ++mapIter) {
-		delete mapIter->second;
-	}  
+//initialize instance of LatticeFactory
+LatticeFactory* LatticeFactory::instance_ = NULL;
+
+LatticeFactory::~LatticeFactory() {
+    CreatorMapType::iterator i;
+    for (i = creatorMap_.begin(); i != creatorMap_.end(); ++i) {
+        delete i->second;
+    }
+    creatorMap_.clear();
 }
 
- LatticeFactory* LatticeFactory::getInstance(){
-	if (instance == NULL)
-      instance = new LatticeFactory();
-	
-  	return instance;
+bool LatticeFactory::registerLattice(LatticeCreator* creator) {
+    return creatorMap_.insert(
+        CreatorMapType::value_type(creator->getIdent(), creator)).second;
 }
 
-bool LatticeFactory::registerCreator( BaseLatticeCreator*  latCreator ){  
-   std::string latticeType = latCreator->getType();
-   std::map<std::string, BaseLatticeCreator*>::iterator mapIter;
-
-  mapIter = creatorMap.find(latticeType);
-
-  if (mapIter == creatorMap.end()) {
-    creatorMap[ latticeType ] = latCreator;
-    return true;
-  }
-  else{
-    delete mapIter->second;
-    mapIter->second = latCreator;
-    return false;
-  }
+bool LatticeFactory::unregisterLattice(const std::string& id) {
+    return creatorMap_.erase(id) == 1;
 }
 
-BaseLattice* LatticeFactory::createLattice( const std::string& latticeType ){ 
-   std::map<std::string, BaseLatticeCreator*>::iterator mapIter; 
-  
-  mapIter = creatorMap.find(latticeType);
-
-  if (mapIter != creatorMap.end()) {
-     return (mapIter->second)->createLattice();
-  }
-  else
-    return NULL;
+Lattice* LatticeFactory::createLattice(const std::string& id) {
+    CreatorMapType::iterator i = creatorMap_.find(id);
+    if (i != creatorMap_.end()) {
+        //invoke functor to create object
+        return (i->second)->create();
+    } else {
+        return NULL;
+    }
 }
 
-bool LatticeFactory::hasLatticeCreator( const std::string& latticeType ){
-   std::map<std::string, BaseLatticeCreator*>::iterator mapIter;
+std::vector<std::string> LatticeFactory::getIdents() {
+    IdentVectorType idents;
+    CreatorMapType::iterator i;
 
-  mapIter = creatorMap.find(latticeType);
-
-  if (mapIter != creatorMap.end())
-    return true;
-  else
-    return false;
+    for (i = creatorMap_.begin(); i != creatorMap_.end(); ++i) {
+        idents.push_back(i->first);
+    }
+    
+    return idents;
 }
 
-const  std::string LatticeFactory::toString(){
-   std::string result;
-   std::map<std::string, BaseLatticeCreator*>::iterator mapIter;
+std::ostream& operator <<(std::ostream& o, LatticeFactory& factory) {
+    LatticeFactory::IdentVectorType idents;
+    LatticeFactory::IdentVectorIterator i;
 
-  result = "Avaliable lattice creators in LatticeFactory are:\n";
-  
-  for(mapIter = creatorMap.begin(); mapIter != creatorMap.end(); ++mapIter){
-    result += mapIter->first + " ";
-  }
-  
-  result += "\n";
+    idents = factory.getIdents();
 
-  return result;
+    o << "Avaliable type identifiers in this factory: " << std::endl;
+    for (i = idents.begin(); i != idents.end(); ++i) {
+        o << *i << std::endl;
+    }
+
+    return o;
 }
-
 
 }

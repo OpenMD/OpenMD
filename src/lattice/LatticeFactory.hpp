@@ -39,36 +39,90 @@
  * such damages.
  */
  
+/**
+ * @file LatticeFactory.hpp
+ * @author Teng Lin
+ * @date 10/24/2004
+ * @version 1.0
+ */
 #ifndef LATTICE_LATTICEFACTORY_HPP
 #define LATTICE_LATTICEFACTORY_HPP
+#include <cassert>
 #include <map>
 #include <string>
-
+#include <vector>
+#include <iostream>
 namespace oopse {
 
-class BaseLatticeCreator;
-class BaseLattice;
+//forward declaration
+class Lattice;
+class LatticeCreator;
+/**
+ * @class LatticeFactory LatticeFactory.hpp "UseTheForce/LatticeFactory.hpp"
+ * Factory pattern and Singleton Pattern are used to define an interface for creating an Lattice.
+ */
+class LatticeFactory {
+    public:
+                
+        typedef std::map<std::string, LatticeCreator*> CreatorMapType;
+        typedef std::vector<std::string> IdentVectorType;
+        typedef std::vector<std::string>::iterator IdentVectorIterator;
 
-class LatticeFactory{
-public:
-	~LatticeFactory();
+        ~LatticeFactory();
+                    
+        /**
+         * Returns an instance of Lattice factory
+         * @return an instance of Lattice factory
+         */        
+        static LatticeFactory* getInstance() {
 
-	static LatticeFactory* getInstance();
+            if (instance_ == NULL) {
+                instance_ = new LatticeFactory();
+            }
+            return instance_;
+            
+        }
 
-	bool registerCreator( BaseLatticeCreator*  latCreator );
+        /**
+         * Registers a creator with a type identifier
+         * @return true if registration is succeed, otherwise return false
+         * @id the identification of the concrete object
+         * @creator the object responsible to create the concrete object 
+         */
+        bool registerLattice(LatticeCreator* creator);
 
+        /**
+         * Unregisters the creator for the given type identifier. If the type identifier 
+         * was previously registered, the function returns true.
+         * @return truethe type identifier was previously registered and the creator is removed,
+         * otherwise return false
+         * @id the identification of the concrete object
+         */
+        bool unregisterLattice(const std::string& id);
+        /**
+         * Looks up the type identifier in the internal map. If it is found, it invokes the
+         * corresponding creator for the type identifier and returns its result. 
+         * @return a pointer of the concrete object, return NULL if no creator is registed for 
+         * creating this concrete object
+         * @param id the identification of the concrete object
+         */
+        Lattice* createLattice(const std::string& id);
 
-    bool hasLatticeCreator( const std::string& latticeType );
-
-    const  std::string toString();
-
-    BaseLattice* createLattice( const std::string& latticeType );
-    
-private:
-	LatticeFactory(){}
-    static LatticeFactory* instance;
-     std::map<std::string,  BaseLatticeCreator*> creatorMap;
+        /** 
+         *  Returns all of the registed  type identifiers
+         * @return all of the registed  type identifiers
+         */
+        IdentVectorType getIdents();
+        
+    private:
+        LatticeFactory() {}
+        
+        static LatticeFactory* instance_;
+        CreatorMapType creatorMap_;
 };
 
-}
-#endif 
+/** write out all of the type identifiers to an output stream */
+std::ostream& operator <<(std::ostream& o, LatticeFactory& factory);
+
+}//namespace oopse
+#endif //USETHEFORCE_FORCEFIELDFACTORY_HPP

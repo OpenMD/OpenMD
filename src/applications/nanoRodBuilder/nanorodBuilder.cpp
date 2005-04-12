@@ -70,6 +70,7 @@ int main(int argc, char *argv []) {
 
     //register force fields
     registerForceFields();
+    registerLattice();
     
     gengetopt_args_info args_info;
     std::string latticeType;

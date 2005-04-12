@@ -57,6 +57,9 @@
 #include "UseTheForce/EAM_FF.hpp"
 #include "UseTheForce/ForceFieldFactory.hpp"
 #include "UseTheForce/ForceFieldCreator.hpp"
+#include "lattice/LatticeFactory.hpp"
+#include "lattice/LatticeCreator.hpp"
+#include "lattice/Lattice.hpp"
 
 namespace oopse {
 
@@ -82,6 +85,11 @@ void registerIntegrators() {
 void registerMinimizers() {
     MinimizerFactory::getInstance()->registerMinimizer(new MinimizerBuilder<SDMinimizer>("SD"));
     MinimizerFactory::getInstance()->registerMinimizer(new MinimizerBuilder<PRCGMinimizer>("CG"));
+}
+
+void registerLattice(){
+    LatticeFactory::getInstance()->registerLattice(new LatticeBuilder<CubicLattice>("CUBIC"));
+    LatticeFactory::getInstance()->registerLattice(new LatticeBuilder<FCCLattice>("FCC"));
 }
 
 void registerAll() {

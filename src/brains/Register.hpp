@@ -53,6 +53,8 @@ void registerIntegrators();
 /** Register all minimizers*/
 void registerMinimizers();
 
+/** Register all lattice */
+void registerLattice();
 
 /** register force fields, integrators and  minmizers*/
 void registerAll();

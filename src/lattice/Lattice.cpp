@@ -45,8 +45,6 @@
 
 namespace oopse {
 
-static LatticeCreator<FCCLattice> *FCCLatticeCreator = new LatticeCreator<FCCLattice>(FCCLatticeType);
-
 CubicLattice::CubicLattice(){
   latticeParam = 1.0;
   

@@ -47,12 +47,6 @@
 
 namespace oopse {
 
-const  std::string FCCLatticeType = "FCC";
-const  std::string BCCLatticeType = "BCC";
-const  std::string HCPCLatticeType = "HCP";
-const  std::string OrthorhombicLatticeType = "ORTHORHOMBIC";
-
-
 class CubicLattice : public BaseLattice{
   protected:
     CubicLattice();

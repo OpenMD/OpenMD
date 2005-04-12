@@ -3,7 +3,6 @@ Package = lattice
 Source    = \
 	BaseLattice.cpp \
 	Lattice.cpp \
-	LatticeCreator.cpp \
 	LatticeFactory.cpp
 
 RmiSource =

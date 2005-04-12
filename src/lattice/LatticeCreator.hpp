@@ -39,32 +39,43 @@
  * such damages.
  */
  
-#ifndef LATTICE_LATTICECREATOR_HPP
+#ifndef LATTICE_LATTICECREATOR_HPP 
 #define LATTICE_LATTICECREATOR_HPP
-#include <string>
-#include "lattice/BaseLattice.hpp"
 
+#include <string>
 
 namespace oopse {
 
-class BaseLatticeCreator{
-  public:
-    virtual BaseLattice* createLattice() = 0;
-    const std::string& getType() {return latticeType;}
-    
-  protected:
-    BaseLatticeCreator(const std::string& latType);
-  private:
-     std::string latticeType;
+class Lattice;
+
+/**
+ * @class Lattice
+ * @todo document
+ */
+class LatticeCreator {
+    public:
+        LatticeCreator(const std::string& ident) : ident_(ident) {}
+        virtual ~LatticeCreator() {}
+        
+        const std::string& getIdent() const { return ident_; }
+
+        virtual Lattice* create() const = 0;
+            
+    private:
+        std::string ident_;
 };
 
-template<class LatticeClass>
-class LatticeCreator : public BaseLatticeCreator
-{
-public:
-	LatticeCreator(const std::string& latticeType): BaseLatticeCreator(latticeType) {}
-	virtual BaseLattice* createLattice()  { return new LatticeClass();}
+/**
+ * @class LatticeBuilder
+ * @todo document
+ */
+template<class ConcreteLattice>
+class LatticeBuilder : public LatticeCreator {
+    public:
+        LatticeBuilder(const std::string& ident) : LatticeCreator(ident) {}
+        virtual  Lattice* create() const {return new ConcreteLattice();}
 };
 
 }
-#endif
+
+#endif //USETHEFORCE_FORCEFIELDCREATOR_HPP
