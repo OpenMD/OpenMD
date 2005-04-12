@@ -49,6 +49,7 @@
   
 #include "UseTheForce/ForceField.hpp"
 #include "utils/simError.h"
+#include "UseTheForce/DarkSide/atype_interface.h"
 namespace oopse {
 
 ForceField::ForceField() { 
@@ -61,6 +62,11 @@ ForceField::ForceField() {
     } else {
         ffPath_ = tempPath;
     }
+}
+
+
+ForceField::~ForceField() {
+    deleteAtypes();
 }
 
 AtomType* ForceField::getAtomType(const std::string &at) {

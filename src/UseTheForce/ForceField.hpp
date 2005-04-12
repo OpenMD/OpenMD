@@ -80,7 +80,7 @@ class ForceField{
         
         ForceField(); 
 
-        virtual ~ForceField(){}
+        virtual ~ForceField();
 
         std::string getForceFieldFileName() {
             return forceFieldFileName_;
