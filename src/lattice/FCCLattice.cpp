@@ -39,60 +39,63 @@
  * such damages.
  */
  
-#ifndef LATTICE_BASELATTICE_HPP
-#define LATTICE_BASELATTICE_HPP
-
-#include <vector>
-#include "math/Vector3.hpp"
+#include "lattice/FCCLattice.hpp"
 
 namespace oopse {
 
-class BaseLattice{
-  protected:
-    BaseLattice(){
-      
-      setOrigin(V3Zero);
-    }
-    
-  public:
-
-    //virtual destructor of BaseLattice
-    virtual ~BaseLattice() {}
-
-    //get lattice type
-    virtual const  std::string getLatticeType() = 0;
-    
-    int getNumSitesPerCell() {return nCellSites;}
-
-    void getLatticePointsPos(std::vector<Vector3d>& latticePos, int nx, int ny, int nz);
-
-     std::vector<Vector3d> getLatticePointsOrt() {return cellSitesOrt;}
-    
-    //get lattice constant of unit cell
-    virtual  std::vector<double> getLatticeConstant() =0;
-
-    //set lattice constant of unit cell
-    virtual void setLatticeConstant(const  std::vector<double>& lc)=0;
-
-    //get origin of unit cell
-    Vector3d getOrigin( ) {return origin;} 
-
-    //set origin of unit cell
-    void setOrigin(const Vector3d& newOrigin){
-      this->origin = newOrigin;
-    }
-
-  protected:
-    virtual void update() =0;
-    
-    int nCellSites;
-    Vector3d origin;    
-     std::vector<Vector3d> cellSitesPos;
-     std::vector<Vector3d> cellSitesOrt;
-    Vector3d cellLen;
-};
-
+FCCLattice::FCCLattice() : CubicLattice(){
+  nCellSites = 4;
+  cellSitesPos.resize(nCellSites);
+  cellSitesOrt.resize(nCellSites);
+  update();
 
 }
 
-#endif
+void FCCLattice::update(){
+
+  double cellLenOver2;
+  double oneOverRoot3;
+
+  cellLenOver2  = 0.5 * latticeParam;
+  oneOverRoot3 = 1.0 / sqrt(3.0);
+
+  // Molecule 1
+  cellSitesPos[0][0] = 0.0; 
+  cellSitesPos[0][1] = 0.0;
+  cellSitesPos[0][2] = 0.0;
+  
+   cellSitesOrt[0][0] = oneOverRoot3;
+   cellSitesOrt[0][1] = oneOverRoot3;
+   cellSitesOrt[0][2] = oneOverRoot3;
+
+  // Molecule 2  
+  cellSitesPos[1][0]   = 0.0;
+  cellSitesPos[1][1]   = cellLenOver2;
+  cellSitesPos[1][2]   = cellLenOver2;
+
+  cellSitesOrt[1][0] = -oneOverRoot3;
+  cellSitesOrt[1][1] = oneOverRoot3;
+  cellSitesOrt[1][2] = -oneOverRoot3;
+   
+  // Molecule 3
+  cellSitesPos[2][0]   = cellLenOver2;
+  cellSitesPos[2][1]   = cellLenOver2;
+  cellSitesPos[2][2]   = 0.0;
+
+  cellSitesOrt[2][0] = oneOverRoot3;
+  cellSitesOrt[2][1] = -oneOverRoot3;
+  cellSitesOrt[2][2] = -oneOverRoot3;
+
+  // Molecule 4
+
+  cellSitesPos[3][0]   = cellLenOver2;
+  cellSitesPos[3][1]   = 0.0;
+  cellSitesPos[3][2]   = cellLenOver2;
+
+  cellSitesOrt[3][0] = -oneOverRoot3;
+  cellSitesOrt[3][1] = oneOverRoot3;
+  cellSitesOrt[3][2] = oneOverRoot3;
+}
+
+}
+

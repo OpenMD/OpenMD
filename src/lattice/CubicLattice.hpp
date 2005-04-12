@@ -39,20 +39,26 @@
  * such damages.
  */
  
-#include "lattice/BaseLattice.hpp"
+#ifndef LATTICE_CUBICLATTICE_HPP
+#define LATTICE_CUBICLATTICE_HPP
+#include "lattice/Lattice.hpp"
+#include <string>
+#include <vector>
 
-namespace oopse{
-void BaseLattice::getLatticePointsPos(std::vector<Vector3d>& latticePos, int nx, int ny, int nz){
+namespace oopse {
 
-  latticePos.resize(nCellSites);
-                                                           
-  for( int i=0;i < nCellSites;i++){
+class CubicLattice : public Lattice{
+  protected:
+    CubicLattice();
+  public:
+    //get lattice constant of unit cell
+    virtual  std::vector<double> getLatticeConstant();
 
-    latticePos[i][0] = origin[0] + cellSitesPos[i][0] + cellLen[0] * (double(nx) - 0.5);
-    latticePos[i][1] = origin[1] + cellSitesPos[i][1] + cellLen[1] * (double(ny) - 0.5);
-    latticePos[i][2] = origin[2] + cellSitesPos[i][2] + cellLen[2] * (double(nz) - 0.5);    
-  }
+    //set lattice constant of unit cell
+    virtual void setLatticeConstant(const  std::vector<double>& lc);
+  protected:
+    double latticeParam;
+};
 
 }
-
-}
+#endif

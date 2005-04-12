@@ -40,98 +40,19 @@
  */
  
 #include "lattice/Lattice.hpp"
-#include "lattice/LatticeFactory.hpp"
-#include "lattice/LatticeCreator.hpp"
 
-namespace oopse {
+namespace oopse{
+void Lattice::getLatticePointsPos(std::vector<Vector3d>& latticePos, int nx, int ny, int nz){
 
-CubicLattice::CubicLattice(){
-  latticeParam = 1.0;
-  
-  cellLen[0] = latticeParam;
-  cellLen[1] = latticeParam;
-  cellLen[2] = latticeParam;
-  
-}
+  latticePos.resize(nCellSites);
+                                                           
+  for( int i=0;i < nCellSites;i++){
 
- std::vector<double> CubicLattice::getLatticeConstant(){
-   std::vector<double> lc;
-  
-  lc.push_back(cellLen.x());
-  return lc;
-}
-
-void CubicLattice::setLatticeConstant(const  std::vector<double>& lc){
-  
-  if(lc.size() < 1){
-    std::cerr << "CubicLattice::setLatticeConstant Error: the size of lattice constant vector  is 0" << std::endl;
-    exit(1);
+    latticePos[i][0] = origin[0] + cellSitesPos[i][0] + cellLen[0] * (double(nx) - 0.5);
+    latticePos[i][1] = origin[1] + cellSitesPos[i][1] + cellLen[1] * (double(ny) - 0.5);
+    latticePos[i][2] = origin[2] + cellSitesPos[i][2] + cellLen[2] * (double(nz) - 0.5);    
   }
-  else if (lc.size() > 1){
-    std::cerr << "CubicLattice::setLatticeConstant Warning: the size of lattice constant vector  is " << lc.size() << std::endl;
-  }
-  
-  latticeParam = lc[0];
-  
-  cellLen[0] = latticeParam;
-  cellLen[1] = latticeParam;
-  cellLen[2] = latticeParam;
-  
-  update();
-}
 
-FCCLattice::FCCLattice() : CubicLattice(){
-  nCellSites = 4;
-  cellSitesPos.resize(nCellSites);
-  cellSitesOrt.resize(nCellSites);
-  update();
-
-}
-
-void FCCLattice::update(){
-
-  double cellLenOver2;
-  double oneOverRoot3;
-
-  cellLenOver2  = 0.5 * latticeParam;
-  oneOverRoot3 = 1.0 / sqrt(3.0);
-
-  // Molecule 1
-  cellSitesPos[0][0] = 0.0; 
-  cellSitesPos[0][1] = 0.0;
-  cellSitesPos[0][2] = 0.0;
-  
-   cellSitesOrt[0][0] = oneOverRoot3;
-   cellSitesOrt[0][1] = oneOverRoot3;
-   cellSitesOrt[0][2] = oneOverRoot3;
-
-  // Molecule 2  
-  cellSitesPos[1][0]   = 0.0;
-  cellSitesPos[1][1]   = cellLenOver2;
-  cellSitesPos[1][2]   = cellLenOver2;
-
-  cellSitesOrt[1][0] = -oneOverRoot3;
-  cellSitesOrt[1][1] = oneOverRoot3;
-  cellSitesOrt[1][2] = -oneOverRoot3;
-   
-  // Molecule 3
-  cellSitesPos[2][0]   = cellLenOver2;
-  cellSitesPos[2][1]   = cellLenOver2;
-  cellSitesPos[2][2]   = 0.0;
-
-  cellSitesOrt[2][0] = oneOverRoot3;
-  cellSitesOrt[2][1] = -oneOverRoot3;
-  cellSitesOrt[2][2] = -oneOverRoot3;
-
-  // Molecule 4
-
-  cellSitesPos[3][0]   = cellLenOver2;
-  cellSitesPos[3][1]   = 0.0;
-  cellSitesPos[3][2]   = cellLenOver2;
-
-  cellSitesOrt[3][0] = -oneOverRoot3;
-  cellSitesOrt[3][1] = oneOverRoot3;
-  cellSitesOrt[3][2] = oneOverRoot3;
 }
 
 }

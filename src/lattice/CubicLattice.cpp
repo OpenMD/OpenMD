@@ -39,60 +39,43 @@
  * such damages.
  */
  
-#ifndef LATTICE_BASELATTICE_HPP
-#define LATTICE_BASELATTICE_HPP
-
-#include <vector>
-#include "math/Vector3.hpp"
+#include "lattice/CubicLattice.hpp"
 
 namespace oopse {
 
-class Lattice{
-  protected:
-    Lattice(){
-      
-      setOrigin(V3Zero);
-    }
-    
-  public:
-
-    //virtual destructor of Lattice
-    virtual ~Lattice() {}
-
-    //get lattice type
-    virtual const  std::string getLatticeType() = 0;
-    
-    int getNumSitesPerCell() {return nCellSites;}
-
-    void getLatticePointsPos(std::vector<Vector3d>& latticePos, int nx, int ny, int nz);
-
-     std::vector<Vector3d> getLatticePointsOrt() {return cellSitesOrt;}
-    
-    //get lattice constant of unit cell
-    virtual  std::vector<double> getLatticeConstant() =0;
-
-    //set lattice constant of unit cell
-    virtual void setLatticeConstant(const  std::vector<double>& lc)=0;
-
-    //get origin of unit cell
-    Vector3d getOrigin( ) {return origin;} 
-
-    //set origin of unit cell
-    void setOrigin(const Vector3d& newOrigin){
-      this->origin = newOrigin;
-    }
-
-  protected:
-    virtual void update() =0;
-    
-    int nCellSites;
-    Vector3d origin;    
-     std::vector<Vector3d> cellSitesPos;
-     std::vector<Vector3d> cellSitesOrt;
-    Vector3d cellLen;
-};
-
-
+CubicLattice::CubicLattice(){
+  latticeParam = 1.0;
+  
+  cellLen[0] = latticeParam;
+  cellLen[1] = latticeParam;
+  cellLen[2] = latticeParam;
+  
 }
 
-#endif
+ std::vector<double> CubicLattice::getLatticeConstant(){
+   std::vector<double> lc;
+  
+  lc.push_back(cellLen.x());
+  return lc;
+}
+
+void CubicLattice::setLatticeConstant(const  std::vector<double>& lc){
+  
+  if(lc.size() < 1){
+    std::cerr << "CubicLattice::setLatticeConstant Error: the size of lattice constant vector  is 0" << std::endl;
+    exit(1);
+  }
+  else if (lc.size() > 1){
+    std::cerr << "CubicLattice::setLatticeConstant Warning: the size of lattice constant vector  is " << lc.size() << std::endl;
+  }
+  
+  latticeParam = lc[0];
+  
+  cellLen[0] = latticeParam;
+  cellLen[1] = latticeParam;
+  cellLen[2] = latticeParam;
+  
+  update();
+}
+
+}
