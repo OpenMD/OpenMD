@@ -337,7 +337,8 @@ int main(int argc, char *argv []) {
 		
     if (writer != NULL)
 			delete writer;
-		
+    delete simpleLat;	
+
     return 0;
 }
 
