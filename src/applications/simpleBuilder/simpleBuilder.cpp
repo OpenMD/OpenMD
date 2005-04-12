@@ -49,9 +49,9 @@
 #include <fstream>
 
 #include "applications/simpleBuilder/simpleBuilderCmd.h"
-#include "applications/simpleBuilder/LatticeFactory.hpp"
-#include "applications/simpleBuilder/MoLocator.hpp"
-#include "applications/simpleBuilder/Lattice.hpp"
+#include "lattice/LatticeFactory.hpp"
+#include "utils/MoLocator.hpp"
+#include "lattice/Lattice.hpp"
 #include "brains/Register.hpp"
 #include "brains/SimInfo.hpp"
 #include "brains/SimCreator.hpp"

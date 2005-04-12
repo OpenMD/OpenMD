@@ -1,14 +1,9 @@
 Package = applications/nanoRodBuilder
 
 Source    = \
-	BaseLattice.cpp \
-	Lattice.cpp \
-	LatticeCreator.cpp \
-	LatticeFactory.cpp \
-	MoLocator.cpp \
 	nanorodBuilder.cpp \
 	nanorodBuilderCmd.c 
-#	GeometryBuilder.cpp \
+#	GeometryBuilder.cpp 
 	
 BuiltParallelExe = 0
 

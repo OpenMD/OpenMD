@@ -1,11 +1,6 @@
 Package = applications/simpleBuilder
 
 Source    = \
-	BaseLattice.cpp \
-	Lattice.cpp \
-	LatticeCreator.cpp \
-	LatticeFactory.cpp \
-	MoLocator.cpp \
 	simpleBuilderCmd.c \
 	simpleBuilder.cpp \
 	
