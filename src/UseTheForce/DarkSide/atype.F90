@@ -50,6 +50,7 @@ module atype_module
   type (Vector), pointer, public :: atypes => null()
 
   public :: new_atype
+  public :: delete_atypes
   
 contains
   
@@ -94,6 +95,10 @@ contains
     call setElementProperty(atypes, me, "is_FLARB", is_FLARB)
     
   end subroutine new_atype
+
+  subroutine delete_atypes()
+    atypes => destroy(atypes)
+  end subroutine delete_atypes
   
 end module atype_module
 
