@@ -59,7 +59,7 @@
 #include "UseTheForce/ForceFieldCreator.hpp"
 #include "lattice/LatticeFactory.hpp"
 #include "lattice/LatticeCreator.hpp"
-#include "lattice/Lattice.hpp"
+#include "lattice/FCCLattice.hpp"
 
 namespace oopse {
 
@@ -88,7 +88,6 @@ void registerMinimizers() {
 }
 
 void registerLattice(){
-    LatticeFactory::getInstance()->registerLattice(new LatticeBuilder<CubicLattice>("CUBIC"));
     LatticeFactory::getInstance()->registerLattice(new LatticeBuilder<FCCLattice>("FCC"));
 }
 

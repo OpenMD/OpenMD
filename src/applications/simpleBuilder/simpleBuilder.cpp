@@ -77,7 +77,7 @@ int main(int argc, char *argv []) {
     std::string outPrefix;
     std::string outMdFileName;
     std::string outInitFileName;
-    BaseLattice *simpleLat;
+    Lattice *simpleLat;
     int numMol;
     double latticeConstant;
     std::vector<double> lc;
@@ -104,10 +104,13 @@ int main(int argc, char *argv []) {
     //get lattice type
     latticeType = UpperCase(args_info.latticetype_arg);
 
-    if (!LatticeFactory::getInstance()->hasLatticeCreator(latticeType)) {
-        std::cerr << latticeType << " is an invalid lattice type" << std::endl;
-        std::cerr << LatticeFactory::getInstance()->toString() << std::endl;
-        exit(1);
+    simpleLat = LatticeFactory::getInstance()->createLattice(latticeType);
+    
+    if (simpleLat == NULL) {
+      sprintf(painCave.errMsg, "Lattice Factory can not create %s lattice\n",
+              latticeType.c_str());
+      painCave.isFatal = 1;
+      simError();
     }
 
     //get the number of unit cell
@@ -187,7 +190,7 @@ int main(int argc, char *argv []) {
             << std::endl;
         std::cerr << "A new .md file: " << outMdFileName
             << " is generated, use it to rerun the simpleBuilder" << std::endl;
-        exit(1);
+	exit(1);
     }
 
     //determine the output file names  
