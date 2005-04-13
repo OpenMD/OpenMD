@@ -48,6 +48,7 @@
 #undef HAVE_SYSCTL
 #undef HAVE__SYSTEM_CONFIGURATION
 #undef HAVE_TABLE 
+#undef HAVE_GCAL
 
 /* Define to the path to the ps command on this machine. */
 #undef PSCOMMAND

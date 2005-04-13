@@ -77,14 +77,17 @@ Samples = \
 	samples/zcons \
 
 IncludeDirs = \
-	@MPI_INC_DIR@
+	@CGAL_INC_DIR@ \
+	@MPI_INC_DIR@ 
 
 LibraryDirs = \
+	@CGAL_LIB_DIR@ \
 	@MPI_LIB_DIR@ 
 
 Libraries = \
+	@CGAL_LIBS@ \
 	@MPI_LIB@ \
-	@MPI_F90_LIB@
+	@MPI_F90_LIB@ 
 
 OopseHome       = @OOPSE_HOME@
 ForceParamDir   = $(OopseHome)/share/forceFields

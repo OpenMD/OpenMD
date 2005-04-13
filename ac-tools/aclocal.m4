@@ -1,3 +1,26 @@
+dnl We need a function similar to AC_CHECK_LIB to check for C++ libraries.
+dnl AC_CHECK_CXX_LIB provides a similar interface like AC_CHECK_LIB
+dnl and uses AC_TRY_LINK.
+dnl
+dnl $1 library name (without "-l")
+dnl $2 object name to check for
+dnl $3 neccessary include directive(s)
+dnl $4 command to create object $2
+dnl $5 yes-action
+dnl $6 no-action
+dnl $7 include dir for $3 (with -I)
+dnl $8 additional libraries to link with
+
+AC_DEFUN(AC_CHECK_CXX_LIB, AC_MSG_CHECKING([for $2 in -l$1])
+save_CXXFLAGS_CHECK_CXX_LIB="$CXXFLAGS"
+CXXFLAGS="$CXXFLAGS $7"
+save_LIBS_CHECK_CXX_LIB="$LIBS"
+LIBS="-l$1 $8 $LIBS"
+[AC_TRY_LINK([$3], [$4], [AC_MSG_RESULT([yes])
+$5], [AC_MSG_RESULT([no])
+$6])]
+CXXFLAGS="$save_CXXFLAGS_CHECK_CXX_LIB"
+LIBS="$save_LIBS_CHECK_CXX_LIB")dnl
 dnl
 dnl AC_CHECK_MODSUFFIX
 dnl

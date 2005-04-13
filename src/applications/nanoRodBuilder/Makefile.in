@@ -1,10 +1,18 @@
 Package = applications/nanoRodBuilder
 
-Source    = \
+MySource    = \
 	nanorodBuilder.cpp \
 	nanorodBuilderCmd.c 
-#	GeometryBuilder.cpp 
-	
+
+USE_CGAL = @USE_CGAL@
+
+ifeq "$(USE_CGAL)" "yes"
+   Source  = $(MySource) GeometryBuilder.cpp
+else
+   Source = $(MySource)
+endif
+
+
 BuiltParallelExe = 0
 
 RmiSource =
