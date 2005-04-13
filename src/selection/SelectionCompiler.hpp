@@ -147,10 +147,10 @@ class SelectionCompiler{
         bool addTokenToPostfix(const Token& token);
         bool isNameValid(const std::string& name);
 
-        bool compileError(const std::string& errorMessage) {
-            std::cerr << "SelectionCompiler Error: " << errorMessage << std::endl;
+        bool compileError(const std::string& errorMsg) {
+            std::cerr << "SelectionCompiler Error: " << errorMsg << std::endl;
             error = true;
-            this->errorMessage = errorMessage;
+            this->errorMessage = errorMsg;
             return false;
         }
         

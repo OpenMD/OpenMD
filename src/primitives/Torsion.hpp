@@ -61,7 +61,7 @@ namespace oopse {
 class Torsion {
     public:
         Torsion(Atom* atom1, Atom* atom2, Atom* atom3, Atom* atom4, TorsionType* tt);
-        ~Torsion() {}
+        virtual ~Torsion() {}
         virtual void calcForce();
         
         double getPotential() {

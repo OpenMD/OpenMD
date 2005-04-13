@@ -93,7 +93,10 @@ namespace oopse{
                 return storageLayout_;
             }
 
-        protected:
+        private:
+            int storageLayout_;
+
+	protected:
 
             SnapshotManager(int storageLayout) : storageLayout_(storageLayout), currentSnapshot_(NULL), previousSnapshot_(NULL) {
             }
@@ -101,8 +104,6 @@ namespace oopse{
             Snapshot* currentSnapshot_;
             Snapshot* previousSnapshot_;
             
-        private:
-            int storageLayout_;
 
     };
 
