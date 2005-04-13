@@ -58,7 +58,7 @@ class Bend {
         Bend(Atom* atom1, Atom* atom2, Atom* atom3, BendType* bt)
             : atom1_(atom1), atom2_(atom2), atom3_(atom3), bendType_(bt) {}
 
-
+        virtual ~Bend() {}
         virtual void calcForce();
         
         double getPotential() {

@@ -58,7 +58,7 @@ namespace oopse {
 class Bond {
     public:
         Bond(Atom* atom1, Atom* atom2, BondType* bt) : atom1_(atom1), atom2_(atom2), bondType_(bt) {}
-
+        virtual ~Bond() {}
         void calcForce() {
             double len;
             double dvdr;

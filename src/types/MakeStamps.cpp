@@ -52,126 +52,48 @@
 #include "io/mpiBASS.h"
 #endif // is_mpi
 
-LinkedMolStamp::~LinkedMolStamp(){ 
-  if( mol_stamp != NULL ) delete mol_stamp;
-  if( next != NULL ) delete next; 
-}
-
-void LinkedMolStamp::add( LinkedMolStamp* newbie ){
-  
-  if( next != NULL ) next->add( newbie );
-  else{
-    next = newbie;
-    next->setPrev( this );
-  }
-}
-
-MoleculeStamp* LinkedMolStamp::match( char* id ){
-
-  if( mol_stamp != NULL ){
-    if(!strcmp( mol_stamp->getID(), id )){
-      
-      // make sure we aren't hiding somebody else with the same name
-      if(next != NULL ){
-	if( next->match( id ) != NULL){
-	  sprintf( painCave.errMsg,
-		   "Molecule Stamp Error. Two separate of declarations of "
-		   "%s present.\n",
-		   id );
-	  painCave.isFatal = 1;
-	  simError();
-#ifdef IS_MPI
-	  if( painCave.isEventLoop ){
-	    if( worldRank == 0 ) mpiInterfaceExit();
-	  }
-#endif //is_mpi
-	}
-	else return mol_stamp;
-      }
-      else  return mol_stamp;
-    }
-  }
-  
-  if( next != NULL ) return next->match( id );
-  
-  return NULL;
-}
-
-LinkedMolStamp* LinkedMolStamp::extract( char* id ){
-
-  if( mol_stamp != NULL ){
-    if(!strcmp( mol_stamp->getID(), id )){
-      
-      // make sure we aren't hiding somebody else with the same name
-      if(next != NULL ){
-	if( next->match( id ) != NULL){
-	  sprintf( painCave.errMsg,
-		   "Molecule Stamp Error. Two separate of declarations of "
-		   "%s present.\n",
-		   id );
-	  painCave.isFatal = 1;
-	  simError();
-#ifdef IS_MPI
-	  if( painCave.isEventLoop ){
-	    if( worldRank == 0 ) mpiInterfaceExit();
-	  }
-#endif //is_mpi
-	}
-      }
-	  
-      prev->setNext( next );
-      if( next != NULL ) next->setPrev( prev );
-      return this;
-    }
-  }
-  
-  if( next != NULL ) return next->extract( id );
-  
-  return NULL;
-}
-
 MakeStamps::MakeStamps(){
-  
-  int i;
-
-  hash_size = 47;
-  hash_shift = 4;
-  
-  my_mols = new LinkedMolStamp*[hash_size];
-  for( i=0; i<hash_size; i++ ){
-    my_mols[i] = new LinkedMolStamp();
-  }
-
 }
 
 MakeStamps::~MakeStamps(){
   
-  int i;
+  std::map<std::string, MoleculeStamp*>::iterator iter;
 
-  for( i=0; i<hash_size; i++ ){
-    if( my_mols[i] != NULL ) delete my_mols[i];
+  for (iter=my_mols.begin(); iter!=my_mols.end(); ++iter) {
+    delete iter->second;
   }
-  delete[] my_mols;
+
+  my_mols.clear();
+
 }
 
-int MakeStamps::hash( char* text ){
+MoleculeStamp* MakeStamps::getMolStamp( std::string the_id ){
 
-  register unsigned short int i = 0; // loop counter
-  int key = 0; // the hash key
-
-  while( text[i] != '\0' ){
-
-    key = ( ( key << hash_shift ) + text[i] ) % hash_size;
-    
-    i++;
-  }
+  std::map<std::string, MoleculeStamp*>::iterator iter;
   
-  if( key < 0 ){
+  iter = my_mols.find(the_id);
 
-    // if the key is less than zero, we've had an overflow error
+  if (iter == my_mols.end()) {
+    return NULL;
+  } else {
+    return iter->second;
+  }
 
+}
+
+void MakeStamps::addMolStamp( MoleculeStamp* the_stamp ){
+  
+  std::map<std::string, MoleculeStamp*>::iterator iter;
+
+  std::string molStampName(the_stamp->getID());
+
+  iter = my_mols.find(molStampName);
+
+  if (iter != my_mols.end()) {
     sprintf( painCave.errMsg,
-	     "There has been an overflow error in the MakeStamps hash key.");
+	     "Molecule Stamp Error. Two separate of declarations of "
+	     "%s present.\n",
+	     the_stamp->getID());
     painCave.isFatal = 1;
     simError();
 #ifdef IS_MPI
@@ -179,34 +101,10 @@ int MakeStamps::hash( char* text ){
       if( worldRank == 0 ) mpiInterfaceExit();
     }
 #endif //is_mpi
+    
+  } else {
+    my_mols.insert(std::map<std::string, MoleculeStamp*>::value_type(molStampName, the_stamp));
   }
-  
-  return key;
-}
-
-LinkedMolStamp* MakeStamps::extractMolStamp( char* the_id ){
-  int key;
-  
-  key = hash( the_id );
-  if( my_mols[key] != NULL ){
-    return my_mols[key]->extract( the_id );
-  }
-  
-  return NULL;
-}
-
-void MakeStamps::addMolStamp( MoleculeStamp* the_stamp ){
-
-  int key;
-  LinkedMolStamp* linked_mol;
-  
-  key = hash( the_stamp->getID() );
-
-  linked_mol = new LinkedMolStamp;
-  linked_mol->setStamp( the_stamp );
-
-  my_mols[key]->add( linked_mol );
-
 }
 
 

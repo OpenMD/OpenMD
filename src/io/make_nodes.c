@@ -157,6 +157,7 @@ struct node_tag* members( char* list_str ){
     the_node->the_data.mbrs.memberList[i] = atoi( foo );
   }
 
+  free(list_str);
   return the_node;
 }
 
@@ -186,6 +187,7 @@ struct node_tag* constraint( char* list_str ){
   foo = strtok(list_str, " ,;\t");
   the_node->the_data.cnstr.constraint_val = atof( foo );
 
+  free(list_str);
   return the_node;
 }
 
@@ -221,6 +223,7 @@ struct node_tag* orientation( char* list_str ){
   foo = strtok(NULL, " ,;\t");
   the_node->the_data.ort.psi = atof( foo );
 
+  free(list_str);
   return the_node;
 }
 
@@ -256,7 +259,7 @@ struct node_tag* position( char* list_str ){
   foo = strtok(NULL, " ,;\t");
   the_node->the_data.pos.z = atof( foo );
 
-  
+  free(list_str);
   return the_node;
 }
 

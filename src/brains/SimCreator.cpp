@@ -146,8 +146,8 @@ namespace oopse {
     compList(stamps, simParams, moleculeStampPairs);
     
     //create SimInfo
-    SimInfo * info = new SimInfo(moleculeStampPairs, ff, simParams);
-    
+    SimInfo * info = new SimInfo(stamps, moleculeStampPairs, ff, simParams);
+     
     //gather parameters (SimCreator only retrieves part of the parameters)
     gatherParameters(info, mdFileName);
     
@@ -397,7 +397,6 @@ namespace oopse {
                             std::vector < std::pair<MoleculeStamp *, int> > &moleculeStampPairs) {
     int i;
     char * id;
-    LinkedMolStamp* extractedStamp = NULL;
     MoleculeStamp * currentStamp;
     Component** the_components = simParams->getComponents();
     int n_components = simParams->getNComponents();
@@ -418,9 +417,9 @@ namespace oopse {
         }
         
         id = the_components[i]->getType();
-        
-        extractedStamp = stamps->extractMolStamp(id);
-        if (extractedStamp == NULL) {
+
+        currentStamp = stamps->getMolStamp(id);
+        if (currentStamp == NULL) {
           sprintf(painCave.errMsg,
                   "SimCreator error: Component \"%s\" was not found in the "
                   "list of declared molecules\n", id);
@@ -428,9 +427,6 @@ namespace oopse {
           painCave.isFatal = 1;
           simError();
         }
-        
-        currentStamp = extractedStamp->getStamp();
-        
         
         moleculeStampPairs.push_back(
                                      std::make_pair(currentStamp, the_components[i]->getNMol()));

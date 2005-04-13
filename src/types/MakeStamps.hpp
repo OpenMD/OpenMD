@@ -44,6 +44,8 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <string>
+#include <map>
 
 #include "io/BASS_interface.h"
 #include "types/MoleculeStamp.hpp"
@@ -53,27 +55,6 @@
 #include "types/TorsionStamp.hpp"
 #include "types/RigidBodyStamp.hpp"
 #include "types/CutoffGroupStamp.hpp"
-
-class LinkedMolStamp{
-
-public:
-  LinkedMolStamp(){ mol_stamp = NULL; next = NULL; prev = NULL; }
-  ~LinkedMolStamp();
-  
-  MoleculeStamp* match( char* id );
-  LinkedMolStamp* extract( char* id );
-  void setStamp( MoleculeStamp* the_stamp ){ mol_stamp = the_stamp; }
-  MoleculeStamp* getStamp(){ return mol_stamp; }
-  void add( LinkedMolStamp* newbie );
-  void setPrev( LinkedMolStamp* thePrev ){ prev = thePrev; }
-  void setNext( LinkedMolStamp* theNext ){ next = theNext; }
-  LinkedMolStamp* getNext() { return next; }
-  
-private:
-  MoleculeStamp* mol_stamp;
-  LinkedMolStamp* next;
-  LinkedMolStamp* prev;
-};
 
 class MakeStamps{
 
@@ -119,14 +100,11 @@ public:
   int torsionConstraint( event* the_event );
   int torsionEnd( event* the_event );
 
-  LinkedMolStamp* extractMolStamp( char* the_id );
+  MoleculeStamp* getMolStamp( std::string the_id );
 
 private:
 
-  int hash_size;
-  int hash_shift;
-  int hash( char* text );
-  LinkedMolStamp** my_mols;
+  std::map<std::string, MoleculeStamp*> my_mols;
   void addMolStamp( MoleculeStamp* the_stamp );
 
   MoleculeStamp* current_mol;

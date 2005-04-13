@@ -338,7 +338,7 @@ int main(int argc, char *argv []) {
     if (writer != NULL)
 			delete writer;
     delete simpleLat;	
-
+    cmdline_parser_free(&args_info);
     return 0;
 }
 

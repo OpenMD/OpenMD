@@ -124,7 +124,7 @@ void MoLocator::calcRef( void ){
       continue;
     //get mass and the reference coordinate 
     else{
-    
+      currAtomMass = getAtomMass(currAtomStamp->getType(), myFF);   
       mass.push_back(currAtomMass);
       coor.x() = currAtomStamp->getPosX();
       coor.y() = currAtomStamp->getPosY();

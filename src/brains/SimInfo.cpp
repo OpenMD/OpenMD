@@ -65,9 +65,9 @@
 
 namespace oopse {
 
-SimInfo::SimInfo(std::vector<std::pair<MoleculeStamp*, int> >& molStampPairs, 
+SimInfo::SimInfo(MakeStamps* stamps, std::vector<std::pair<MoleculeStamp*, int> >& molStampPairs, 
                                 ForceField* ff, Globals* simParams) : 
-                                forceField_(ff), simParams_(simParams), 
+                                stamps_(stamps), forceField_(ff), simParams_(simParams), 
                                 ndf_(0), ndfRaw_(0), ndfTrans_(0), nZconstraint_(0),
                                 nGlobalMols_(0), nGlobalAtoms_(0), nGlobalCutoffGroups_(0), 
                                 nGlobalIntegrableObjects_(0), nGlobalRigidBodies_(0),
@@ -147,9 +147,8 @@ SimInfo::~SimInfo() {
         delete i->second;
     }
     molecules_.clear();
-    
-    MemoryUtils::deletePointers(moleculeStamps_);
-    
+       
+    delete stamps_;
     delete sman_;
     delete simParams_;
     delete forceField_;

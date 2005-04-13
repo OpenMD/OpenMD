@@ -94,7 +94,7 @@ class SimInfo {
          * @param simParams 
          * @note
          */
-        SimInfo(std::vector<std::pair<MoleculeStamp*, int> >& molStampPairs, ForceField* ff, Globals* simParams);
+        SimInfo(MakeStamps* stamps, std::vector<std::pair<MoleculeStamp*, int> >& molStampPairs, ForceField* ff, Globals* simParams);
         virtual ~SimInfo();
 
         /**
@@ -440,6 +440,7 @@ class SimInfo {
          */
         void addMoleculeStamp(MoleculeStamp* molStamp, int nmol);
 
+	MakeStamps* stamps_;
         ForceField* forceField_;      
         Globals* simParams_;
 

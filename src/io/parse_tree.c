@@ -501,6 +501,13 @@ void kill_tree( struct node_tag* the_node ){
 	free( the_node->the_data.asmt.identifier );
 	break;
 
+      case MEMBERS_STMT:
+
+	if (the_node->the_data.mbrs.nMembers >0 ){
+	  free(the_node->the_data.mbrs.memberList);
+	}
+	break;
+       
       default:
 	// nothing to do here, everyone else can be freed normally.
 	break;
