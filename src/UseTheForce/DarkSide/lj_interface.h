@@ -48,6 +48,7 @@
 
 #define newLJtype F90_FUNC(newljtype, NEWLJTYPE)
 #define useGeometricMixing F90_FUNC(usegeometricmixing, USEGEOMETRICMIXING)
+#define destroyLJTypes F90_FUNC(destroyljtypes, DESTROYLJTYPES)
 
 extern "C"{
   void newLJtype( int* ident,
@@ -57,6 +58,7 @@ extern "C"{
                   int* status);
 
   void useGeometricMixing( );
+	void destroyLJTypes( void );
 }  
 #endif
 

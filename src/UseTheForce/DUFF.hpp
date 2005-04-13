@@ -62,6 +62,7 @@ class DUFF : public ForceField {
     public:
         DUFF();
         virtual void parse(const std::string& filename);
+				~DUFF();
 
     private:
         SectionParserManager spMan_;

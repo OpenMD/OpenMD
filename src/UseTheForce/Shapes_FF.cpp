@@ -70,6 +70,7 @@ using namespace oopse;
 
 Shapes_FF::~Shapes_FF(){
 
+	destroyShapeTypes();
 #ifdef IS_MPI
   if( worldRank == 0 ){
 #endif // is_mpi

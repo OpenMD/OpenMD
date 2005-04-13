@@ -17,3 +17,10 @@ subroutine useGeometricMixing()
   call module_useGeometricMixing()
   return
 end subroutine useGeometricMixing
+
+subroutine destroyLJTypes()
+use lj, ONLY: module_destroyLJTypes => destroyLJTypes
+
+call module_destroyLJTypes()
+
+end subroutine destroyLJTypes

@@ -54,6 +54,7 @@
 
 #define setQuadrupoleMoments F90_FUNC(setquadrupolemoments, SETQUADRUPOLEMOMENTS)
 
+#define destroyElectrostaticTypes F90_FUNC(destroyelectrostatictypes,DESTROYELECTROSTATICTYPES)
 extern "C"{
   void newElectrostaticType( AtomTypeProperties* atp,
                              int* status);
@@ -73,6 +74,8 @@ extern "C"{
   void setQuadrupoleMoments( int* c_ident,
                              double* quadrupole_moments,
                              int* status);
+	
+	void destroyElectrostaticTypes(void);
 }  
 #endif
 

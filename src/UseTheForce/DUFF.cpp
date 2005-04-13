@@ -105,4 +105,8 @@ void DUFF::parse(const std::string& filename) {
     
 }
 
+DUFF::~DUFF(){
+	destroyLJTypes();
+	destroyStickyTypes();
+}
 } //end namespace oopse

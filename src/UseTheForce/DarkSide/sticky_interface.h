@@ -46,7 +46,7 @@
 #include "config.h"
 
 #define newStickyType F90_FUNC(newstickytype, NEWSTICKYTYPE)
-
+#define destroyStickyTypes F90_FUNC(destroystickytypes,DESTROYSTICKYTYPES)
 extern "C" {
   
   void newStickyType( int* c_ident, 
@@ -58,6 +58,7 @@ extern "C" {
                       double* sticky_rlp,
                       double* sticky_rup,
                       int* isError );
+	void destroyStickyTypes();
 }
 
 #endif

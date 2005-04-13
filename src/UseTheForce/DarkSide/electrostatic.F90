@@ -77,6 +77,7 @@ module electrostatic_module
   public :: getCharge
   public :: getDipoleMoment
   public :: pre22
+  public :: destroyElectrostaticTypes
 
   type :: Electrostatic
      integer :: c_ident
@@ -821,4 +822,11 @@ contains
     return
   end subroutine doElectrostaticPair
   
+
+  subroutine destroyElectrostaticTypes()
+    
+   if(allocated(ElectrostaticMap)) deallocate(ElectrostaticMap)
+
+  end subroutine destroyElectrostaticTypes
+
 end module electrostatic_module

@@ -10,3 +10,9 @@ subroutine newStickyType(c_ident, w0, v0, v0p, rl, ru, rlp, rup, isError)
        isError)
   
 end subroutine newStickyType
+
+subroutine destroyStickyTypes()
+  use sticky, ONLY : module_destroyStickyTypes => destroyStickyTypes
+  call module_destroyStickyTypes()
+
+end subroutine destroyStickyTypes

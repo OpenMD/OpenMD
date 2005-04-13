@@ -50,7 +50,7 @@
 !! @author Matthew Meineke
 !! @author Christopher Fennell
 !! @author J. Daniel Gezelter
-!! @version $Id: sticky.F90,v 1.5 2005-03-12 19:05:16 chrisfen Exp $, $Date: 2005-03-12 19:05:16 $, $Name: not supported by cvs2svn $, $Revision: 1.5 $
+!! @version $Id: sticky.F90,v 1.6 2005-04-13 20:36:45 chuckv Exp $, $Date: 2005-04-13 20:36:45 $, $Name: not supported by cvs2svn $, $Revision: 1.6 $
 
 module sticky
 
@@ -69,6 +69,7 @@ module sticky
 
   public :: newStickyType
   public :: do_sticky_pair
+  public :: destroyStickyTypes
 
 
   type :: StickyList
@@ -505,4 +506,8 @@ if (.not.allocated(StickyMap)) then
     
     return
   end subroutine calc_sw_fnc
+
+  subroutine destroyStickyTypes()   
+    if(allocated(StickyMap)) deallocate(StickyMap)
+  end subroutine destroyStickyTypes
 end module sticky

@@ -43,7 +43,7 @@
 !! Calculates Long Range forces Lennard-Jones interactions.
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: LJ.F90,v 1.9 2005-03-08 21:06:12 gezelter Exp $, $Date: 2005-03-08 21:06:12 $, $Name: not supported by cvs2svn $, $Revision: 1.9 $
+!! @version $Id: LJ.F90,v 1.10 2005-04-13 20:36:45 chuckv Exp $, $Date: 2005-04-13 20:36:45 $, $Name: not supported by cvs2svn $, $Revision: 1.10 $
 
 
 module lj
@@ -99,6 +99,7 @@ module lj
   public :: newLJtype  
   public :: getSigma
   public :: getEpsilon
+  public :: destroyLJTypes
   
 contains
 
@@ -425,7 +426,11 @@ contains
     
   end subroutine do_lj_pair
   
-  
-  !! Calculates the mixing for sigma or epslon
+  subroutine destroyLJTypes()
+    if(allocated(ParameterMap)) deallocate(ParameterMap)
+    if(allocated(MixingMap)) deallocate(MixingMap)
+    haveMixingMap = .false.
+  end subroutine destroyLJTypes
+
     
 end module lj
