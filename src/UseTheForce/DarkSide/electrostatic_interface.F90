@@ -79,8 +79,8 @@ subroutine setQuadrupoleMoments(ident, quadrupole_moments, status)
 end subroutine setQuadrupoleMoments
 
 subroutine destroyElectrostaticTypes()
-  use electrostatic_module, ONLY: module_destroyElectrostaticTypes =>destroyElectrostaticTypes
+  use electrostatic_module, ONLY: m_destroyElectrostaticTypes =>destroyElectrostaticTypes
 
-  call module_destroyElectrostaticTypes()
+  call m_destroyElectrostaticTypes()
 
 end subroutine destroyElectrostaticTypes
