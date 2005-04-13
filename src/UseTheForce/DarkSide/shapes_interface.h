@@ -55,7 +55,7 @@
 
 #define makeShape F90_FUNC(makeshape, MAKESHAPE)
 #define completeShapeFF F90_FUNC(completeshapeff, COMPLETESHAPEFF)
-
+#define destroyShapeTypes F90_FUNC(destroyshapetypes, DESTROYSHAPETYPES)
 
 #define SH_COS 0
 #define SH_SIN 1
@@ -81,6 +81,7 @@ extern "C" {
                  int* status);
 
   void completeShapeFF( int* status);
+	void destroyShapeTypes(void);
 }
     
 #endif

@@ -68,7 +68,7 @@ module shapes
   public :: do_shape_pair
   public :: newShapeType
   public :: complete_Shape_FF
-
+  public :: destroyShapeTypes
 
   type, private :: Shape
      integer :: atid
@@ -1428,5 +1428,93 @@ contains
     RETURN
     
   end subroutine Orthogonal_Polynomial
+  
+  subroutine deallocateShapes(this)
+    type(Shape), pointer :: this
+
+     if (associated( this%ContactFuncLValue)) then
+        deallocate(this%ContactFuncLValue)
+        this%ContactFuncLValue => null()
+     end if
+
+     if (associated( this%ContactFuncMValue)) then
+        deallocate( this%ContactFuncMValue)
+         this%ContactFuncMValue => null()
+      end if
+      if (associated( this%ContactFunctionType)) then
+         deallocate(this%ContactFunctionType)
+         this%ContactFunctionType => null()
+      end if
+
+     if (associated( this%ContactFuncCoefficient)) then 
+        deallocate(this%ContactFuncCoefficient)
+        this%ContactFuncCoefficient => null()
+     end if
+
+     if (associated( this%RangeFuncLValue)) then 
+        deallocate(this%RangeFuncLValue)
+        this%RangeFuncLValue => null()
+     end if
+     if (associated( this%RangeFuncMValue)) then 
+        deallocate( this%RangeFuncMValue) 
+         this%RangeFuncMValue => null()
+      end if
+
+     if (associated( this%RangeFunctionType)) then
+        deallocate( this%RangeFunctionType) 
+         this%RangeFunctionType => null()
+      end if
+    if (associated( this%RangeFuncCoefficient)) then
+       deallocate(this%RangeFuncCoefficient) 
+       this%RangeFuncCoefficient => null()
+    end if
+
+    if (associated( this%StrengthFuncLValue)) then
+       deallocate(this%StrengthFuncLValue)
+       this%StrengthFuncLValue => null()
+    end if
+
+    if (associated( this%StrengthFuncMValue )) then
+       deallocate(this%StrengthFuncMValue)
+       this%StrengthFuncMValue => null()
+    end if
+
+    if(associated( this%StrengthFunctionType)) then
+       deallocate(this%StrengthFunctionType) 
+       this%StrengthFunctionType => null()
+    end if
+    if (associated( this%StrengthFuncCoefficient )) then 
+       deallocate(this%StrengthFuncCoefficient)
+       this%StrengthFuncCoefficient => null()
+    end if
+  end subroutine deallocateShapes
+
+  subroutine destroyShapeTypes
+    integer :: i 
+    type(Shape), pointer :: thisShape
+
+! First walk through and kill the shape
+    do i = 1,ShapeMap%n_shapes
+       thisShape => ShapeMap%Shapes(i)
+       call deallocateShapes(thisShape)
+    end do
+    
+    ! set shape map to starting values
+    ShapeMap%n_shapes = 0
+    ShapeMap%currentShape = 0
+    
+     if (associated(ShapeMap%Shapes)) then
+       deallocate(ShapeMap%Shapes)
+       ShapeMap%Shapes => null()
+    end if
+
+    if (associated(ShapeMap%atidToShape)) then
+       deallocate(ShapeMap%atidToShape)
+       ShapeMap%atidToShape => null()
+    end if
+
+
+  end subroutine destroyShapeTypes
+
   
 end module shapes

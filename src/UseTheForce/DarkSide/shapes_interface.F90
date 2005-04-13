@@ -52,3 +52,9 @@ subroutine completeShapeFF(status)
 
   return
 end subroutine completeShapeFF
+
+subroutine destroyShapeTypes()
+ use shapes, only: module_destroyShapeTypes => destroyShapeTypes
+ call module_destroyShapeTypes()
+
+end subroutine destroyShapeTypes
