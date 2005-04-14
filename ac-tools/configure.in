@@ -149,6 +149,7 @@ AC_PROG_MAKE_SET
 AC_PROG_RANLIB
 AC_PROG_YACC
 AC_PROG_LEX
+AX_SYS_PERLSHARPBANG
 AC_CHECK_PROG(AR, ar, ar, NONE)
 if test "$AR" = "NONE"; then
   AC_MSG_ERROR(--> Can't find \`ar'!)
@@ -496,6 +497,6 @@ AC_SUBST(PREPFLAG)
 AC_SUBST(PREPDEFFLAG)
 AC_SUBST(F90_MODULE_NAMES)
 AC_CONFIG_HEADER([src/config.h])
-AC_CONFIG_FILES([make/Makefile src/utils/Makefile src/applications/nanoRodBuilder/Makefile])
+AC_CONFIG_FILES([make/Makefile src/utils/Makefile src/applications/nanoRodBuilder/Makefile scripts/filepp], [chmod 0755 scripts/*])
 
 AC_OUTPUT

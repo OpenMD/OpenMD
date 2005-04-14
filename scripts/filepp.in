@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!@PERLINTERP@ -w
 ########################################################################
 #
 # filepp is free software; you can redistribute it and/or modify
@@ -18,11 +18,11 @@
 ########################################################################
 #
 #  Project      :  File Preprocessor
-#  Filename     :  $RCSfile: filepp,v $
-#  Author       :  $Author: tim $
+#  Filename     :  $RCSfile: filepp.in,v $
+#  Author       :  $Author: gezelter $
 #  Maintainer   :  Darren Miller: darren@cabaret.demon.co.uk
-#  File version :  $Revision: 1.7 $
-#  Last changed :  $Date: 2005-03-09 17:58:33 $
+#  File version :  $Revision: 1.1 $
+#  Last changed :  $Date: 2005-04-14 21:41:56 $
 #  Description  :  Main program
 #  Licence      :  GNU copyleft
 #

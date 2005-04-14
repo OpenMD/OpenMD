@@ -820,7 +820,7 @@ pure : $(Executable).pure
 
 #make cvslog
 cvslog:
-	$(DEV_ROOT)/scripts/cvs2cl.pl
+	$(DEV_ROOT)/scripts/cvs2cl
 
 # Execute
 _runexe :

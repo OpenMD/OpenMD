@@ -312,7 +312,7 @@ ac_includes_default="\
 # include <unistd.h>
 #endif"
 
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS PROGNAME debug build build_cpu build_vendor build_os host host_cpu host_vendor host_os CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT CXX CXXFLAGS ac_ct_CXX OOPSE_TEMPLATE_FLAGS EXTRA_CC_FLAG F90 F90FLAGS ac_ct_F90 PREPFLAG PREPDEFFLAG F90LIBS F90_FUNC F90_FUNC_ MOD F90_WORK_FILES_ARG MODDIRFLAG F90MODINCSPEC F90_MODULE_NAMES CPP EGREP LIBOBJS INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA LN_S SET_MAKE RANLIB ac_ct_RANLIB YACC LEX LEXLIB LEX_OUTPUT_ROOT AR PS MPI_LIB_DIR MPI_INC_DIR MPI_F90_INC MPI_LIB MPI_F90_LIB USE_MPI CXXCPP USE_CGAL CGAL_INC_DIR CGAL_LIB_DIR CGAL_RLIB_DIR CGAL_DEFINES CGAL_CXXFLAGS CGAL_LIBS DOXYGEN DOT DOC enable_dot enable_html_docs enable_latex_docs BATEXT MKINSTALLDIRS OOPSE OOPSE_HOME SUBDIRS FFLAGS LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS PROGNAME debug build build_cpu build_vendor build_os host host_cpu host_vendor host_os CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT CXX CXXFLAGS ac_ct_CXX OOPSE_TEMPLATE_FLAGS EXTRA_CC_FLAG F90 F90FLAGS ac_ct_F90 PREPFLAG PREPDEFFLAG F90LIBS F90_FUNC F90_FUNC_ MOD F90_WORK_FILES_ARG MODDIRFLAG F90MODINCSPEC F90_MODULE_NAMES CPP EGREP LIBOBJS INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA LN_S SET_MAKE RANLIB ac_ct_RANLIB YACC LEX LEXLIB LEX_OUTPUT_ROOT PERLINTERP PERL_SHEBANG AR PS MPI_LIB_DIR MPI_INC_DIR MPI_F90_INC MPI_LIB MPI_F90_LIB USE_MPI CXXCPP USE_CGAL CGAL_INC_DIR CGAL_LIB_DIR CGAL_RLIB_DIR CGAL_DEFINES CGAL_CXXFLAGS CGAL_LIBS DOXYGEN DOT DOC enable_dot enable_html_docs enable_latex_docs BATEXT MKINSTALLDIRS OOPSE OOPSE_HOME SUBDIRS FFLAGS LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -879,6 +879,8 @@ Optional Features:
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
   --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
+  --with-perl-shebang     override what perl thinks is the way for the kernel
+                          to start it (seldom needed)
   --with-mpi=<prefix>     compile with MPI installed in <prefix> [default=no]
   --with-cgal-makefile=FILE  CGAL makefile that should be used
 
@@ -1880,7 +1882,9 @@ ac_configure="$SHELL $ac_aux_dir/configure" # This should be Cygnus configure.
 
 
 
-
+#
+#
+#
 
 
 
@@ -3546,7 +3550,7 @@ _ACEOF
 ac_save_F90FLAGS=$F90FLAGS
 F90FLAGS="$F90FLAGS $ac_verb"
 
-(eval echo $as_me:3549: \"$ac_link\") >&5
+(eval echo $as_me:3553: \"$ac_link\") >&5
 ac_f90_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
 echo "$ac_f90_v_output" >&5
 F90FLAGS=$ac_save_F90FLAGS
@@ -3623,7 +3627,7 @@ _ACEOF
 ac_save_F90FLAGS=$F90FLAGS
 F90FLAGS="$F90FLAGS $ac_cv_prog_f90_v"
 
-(eval echo $as_me:3626: \"$ac_link\") >&5
+(eval echo $as_me:3630: \"$ac_link\") >&5
 ac_f90_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
 echo "$ac_f90_v_output" >&5
 F90FLAGS=$ac_save_F90FLAGS
@@ -7162,6 +7166,125 @@ _ACEOF
 fi
 
 fi
+
+   # Extract the first word of "perl", so it can be a program name with args.
+set dummy perl; ac_word=$2
+echo "$as_me:$LINENO: checking for $ac_word" >&5
+echo $ECHO_N "checking for $ac_word... $ECHO_C" >&6
+if test "${ac_cv_path_PERLINTERP+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  case $PERLINTERP in
+  [\\/]* | ?:[\\/]*)
+  ac_cv_path_PERLINTERP="$PERLINTERP" # Let the user override the test with a path.
+  ;;
+  *)
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+  for ac_exec_ext in '' $ac_executable_extensions; do
+  if $as_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
+    ac_cv_path_PERLINTERP="$as_dir/$ac_word$ac_exec_ext"
+    echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+done
+
+  test -z "$ac_cv_path_PERLINTERP" && ac_cv_path_PERLINTERP="perl"
+  ;;
+esac
+fi
+PERLINTERP=$ac_cv_path_PERLINTERP
+
+if test -n "$PERLINTERP"; then
+  echo "$as_me:$LINENO: result: $PERLINTERP" >&5
+echo "${ECHO_T}$PERLINTERP" >&6
+else
+  echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6
+fi
+
+   ac_cv_path_perlinterp="$PERLINTERP"
+   _sHpB='#!'
+
+
+# Check whether --with-perl-shebang or --without-perl-shebang was given.
+if test "${with_perl_shebang+set}" = set; then
+  withval="$with_perl_shebang"
+  opt_perl_shebang="$withval"
+else
+  		opt_perl_shebang="not_set"
+fi;
+   echo "$as_me:$LINENO: checking whether explicit instead of detected sharpbang is to be used" >&5
+echo $ECHO_N "checking whether explicit instead of detected sharpbang is to be used... $ECHO_C" >&6
+if test "${ax_cv_opt_perl_shebang+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+   case "$opt_perl_shebang" in
+		      not_set  ) ax_cv_opt_perl_shebang=''
+		               ;;
+		         *     )
+	ax_cv_opt_perl_shebang=`echo "$opt_perl_shebang" | sed -e's|^#!\s*\(.*\)$|\1|'`
+		    esac
+
+fi
+echo "$as_me:$LINENO: result: $ax_cv_opt_perl_shebang" >&5
+echo "${ECHO_T}$ax_cv_opt_perl_shebang" >&6
+   if test "A$ax_cv_opt_perl_shebang" != "A"
+     then
+       ac_cv_sys_kernshrpbang_perl="$ax_cv_opt_perl_shebang"
+       PERL_SHEBANG="$ac_cv_sys_kernshrpbang_perl"
+              { echo "$as_me:$LINENO: OK - PERL_SHEBANG is $_sHpB$PERL_SHEBANG." >&5
+echo "$as_me: OK - PERL_SHEBANG is $_sHpB$PERL_SHEBANG." >&6;}
+
+# Automatic detection of sharpbang formula starts here
+     else
+   _somian_shbangperl=`$PERLINTERP -V:startperl`
+   negclass="[^']"; # must leave this comment:  m4 will remove the outer brackets for us, heheh
+   echo "$as_me:$LINENO: checking for kernel sharpbang invocation to start perl" >&5
+echo $ECHO_N "checking for kernel sharpbang invocation to start perl... $ECHO_C" >&6
+if test "${ac_cv_sys_kernshrpbang_perl+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  _somian_kspb_perl=`echo "$_somian_shbangperl" | sed -ne"s|.*='\($negclass*\)';$|\1|p"`
+	if test "x$_somian_kspb_perl" == x
+	  then _somian_ksbp_warn_empty='durnit'
+	  else
+	  case "A$_somian_kspb_perl" in
+	         A#!*perl* )
+           ac_cv_sys_kernshrpbang_perl=`echo "$_somian_kspb_perl" | sed -e's|#!\(.*\)$|\1|'`
+			;;
+	             A*    )  _somian_ksbp_warn_defau='trouble'
+		              ac_cv_sys_kernshrpbang_perl="$PERLINTERP"
+	  esac
+	fi
+
+fi
+echo "$as_me:$LINENO: result: $ac_cv_sys_kernshrpbang_perl" >&5
+echo "${ECHO_T}$ac_cv_sys_kernshrpbang_perl" >&6
+# The above prints Checking ... result message to user.
+   PERL_SHEBANG="$ac_cv_sys_kernshrpbang_perl"
+
+    if test A${_somian_ksbp_warn_empty+set} == Aset
+      then   { echo "$as_me:$LINENO: WARNING: In last check, doing $PERLINTERP -V:startperl yielded empty result! That should not happen." >&5
+echo "$as_me: WARNING: In last check, doing $PERLINTERP -V:startperl yielded empty result! That should not happen." >&2;}
+    fi
+# Inform user after printing result value
+    if test A${_somian_ksbp_warn_defau+set} == Aset
+      then { echo "$as_me:$LINENO: Maybe Not good -" >&5
+echo "$as_me: Maybe Not good -" >&6;}
+	   { echo "$as_me:$LINENO: WARNING: In last check perl's Config query did not work so we bunted: $_sHpB$PERLINTERP" >&5
+echo "$as_me: WARNING: In last check perl's Config query did not work so we bunted: $_sHpB$PERLINTERP" >&2;}
+      else { echo "$as_me:$LINENO: OK Good result - " >&5
+echo "$as_me: OK Good result - " >&6;}
+	   { echo "$as_me:$LINENO: In last check we got a proper-looking answer from perl's Config: $_somian_shbangperl" >&5
+echo "$as_me: In last check we got a proper-looking answer from perl's Config: $_somian_shbangperl" >&6;}
+    fi
+  fi
+
 # Extract the first word of "ar", so it can be a program name with args.
 set dummy ar; ac_word=$2
 echo "$as_me:$LINENO: checking for $ac_word" >&5
@@ -8696,7 +8819,7 @@ esac
 
           ac_config_headers="$ac_config_headers src/config.h"
 
-                              ac_config_files="$ac_config_files make/Makefile src/utils/Makefile src/applications/nanoRodBuilder/Makefile"
+                                        ac_config_files="$ac_config_files make/Makefile src/utils/Makefile src/applications/nanoRodBuilder/Makefile scripts/filepp"
 
 
 cat >confcache <<\_ACEOF
@@ -9230,6 +9353,7 @@ do
   "make/Makefile" ) CONFIG_FILES="$CONFIG_FILES make/Makefile" ;;
   "src/utils/Makefile" ) CONFIG_FILES="$CONFIG_FILES src/utils/Makefile" ;;
   "src/applications/nanoRodBuilder/Makefile" ) CONFIG_FILES="$CONFIG_FILES src/applications/nanoRodBuilder/Makefile" ;;
+  "scripts/filepp" ) CONFIG_FILES="$CONFIG_FILES scripts/filepp" ;;
   "src/getopt.h" ) CONFIG_LINKS="$CONFIG_LINKS src/getopt.h:src/utils/gnugetopt.h" ;;
   "src/config.h" ) CONFIG_HEADERS="$CONFIG_HEADERS src/config.h" ;;
   *) { { echo "$as_me:$LINENO: error: invalid argument: $ac_config_target" >&5
@@ -9366,6 +9490,8 @@ s,@YACC@,$YACC,;t t
 s,@LEX@,$LEX,;t t
 s,@LEXLIB@,$LEXLIB,;t t
 s,@LEX_OUTPUT_ROOT@,$LEX_OUTPUT_ROOT,;t t
+s,@PERLINTERP@,$PERLINTERP,;t t
+s,@PERL_SHEBANG@,$PERL_SHEBANG,;t t
 s,@AR@,$AR,;t t
 s,@PS@,$PS,;t t
 s,@MPI_LIB_DIR@,$MPI_LIB_DIR,;t t
@@ -9631,6 +9757,13 @@ s,@INSTALL@,$ac_INSTALL,;t t
     rm -f $tmp/out
   fi
 
+  # Run the commands associated with the file.
+  case $ac_file in
+    make/Makefile ) chmod 0755 scripts/* ;;
+    src/utils/Makefile ) chmod 0755 scripts/* ;;
+    src/applications/nanoRodBuilder/Makefile ) chmod 0755 scripts/* ;;
+    scripts/filepp ) chmod 0755 scripts/* ;;
+  esac
 done
 _ACEOF
 cat >>$CONFIG_STATUS <<\_ACEOF
