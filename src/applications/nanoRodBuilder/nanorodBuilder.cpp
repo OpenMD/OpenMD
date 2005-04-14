@@ -111,7 +111,16 @@ int main(int argc, char *argv []) {
     exit(1);
   
   
-  
+	// Check for lib CGAL, if we don't have it, we should exit....
+	
+#ifndef HAVE_CGAL
+		 std::cerr << "nanoRodBuilder requires libCGAL to function, please rebuild OOPSE with libCGAL."
+		 << std::endl;
+		 exit(1);
+#endif
+	
+	
+	
   //get lattice type
   latticeType = UpperCase(args_info.latticetype_arg);
   
@@ -194,7 +203,7 @@ int main(int argc, char *argv []) {
   
   
   // Create geometry for nanocrystal
-#ifdef HAVE_GCAL
+#ifdef HAVE_CGAL
   GeometryBuilder myGeometry(rodLength,rodDiameter);
 #endif
   
@@ -244,12 +253,10 @@ int main(int argc, char *argv []) {
 	
         for(int l = 0; l < numMolPerCell; l++) {
 
-#ifdef HAVE_GCAL
+#ifdef HAVE_CGAL
           if (myGeometry.isInsidePolyhedron(latticePos[l][0],latticePos[l][1],latticePos[l][2])){
             numMol++;
           }
-#else
-          numMol++;
 #endif
         }
       }
