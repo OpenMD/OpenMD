@@ -81,6 +81,6 @@ extern struct node_tag* bond_blk( int index, struct node_tag* stmt_list );
 extern struct node_tag* bend_blk( int index, struct node_tag* stmt_list );
 extern struct node_tag* torsion_blk( int index, struct node_tag* stmt_list );
 extern struct node_tag* component_blk( struct node_tag* stmt_list );
-
+extern int yyerror( char *err_msg );
 int count_tokens(char *line, char *delimiters);
 #endif
