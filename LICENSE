@@ -7,11 +7,12 @@ are met:
 
 1. Acknowledgement of the program authors must be made in any
    publication of scientific results based in part on use of the
-   program.  An acceptable form of acknowledgement is citation of
-   the article in which the program was described (Matthew
-   A. Meineke, Charles F. Vardeman II, Teng Lin, Christopher J. Fennel
-   and J. Daniel Gezelter, "OOPSE: The Object-Oriented Parallel
-   Simulation Engine," J. Comput. Chem. XX, XXXX-YYYY (2004)).
+   program.  An acceptable form of acknowledgement is citation of the
+   article in which the program was described (Matthew A. Meineke,
+   Charles F. Vardeman II, Teng Lin, Christopher J. Fennell and
+   J. Daniel Gezelter, "OOPSE: An Object-Oriented Parallel Simulation
+   Engine for Molecular Dynamics," J. Comput. Chem. 26, pp. 252-271
+   (2005))
 
 2. Redistributions of source code must retain the above copyright
    notice, this list of conditions and the following disclaimer.
@@ -20,17 +21,16 @@ are met:
    notice, this list of conditions and the following disclaimer in the
    documentation and/or other materials provided with the distribution.
 
-This software is provided "AS IS," without a warranty of any
-kind. ALL EXPRESS OR IMPLIED CONDITIONS, REPRESENTATIONS AND
-WARRANTIES, INCLUDING ANY IMPLIED WARRANTY OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE OR NON-INFRINGEMENT, ARE HEREBY
-EXCLUDED.  THE UNIVERSITY OF NOTRE DAME AND ITS LICENSORS SHALL NOT
-BE LIABLE FOR ANY DAMAGES SUFFERED BY LICENSEE AS A RESULT OF
-USING, MODIFYING OR DISTRIBUTING THE SOFTWARE OR ITS
-DERIVATIVES. IN NO EVENT WILL THE UNIVERSITY OF NOTRE DAME OR ITS
-LICENSORS BE LIABLE FOR ANY LOST REVENUE, PROFIT OR DATA, OR FOR
-DIRECT, INDIRECT, SPECIAL, CONSEQUENTIAL, INCIDENTAL OR PUNITIVE
-DAMAGES, HOWEVER CAUSED AND REGARDLESS OF THE THEORY OF LIABILITY,
-ARISING OUT OF THE USE OF OR INABILITY TO USE SOFTWARE, EVEN IF THE
-UNIVERSITY OF NOTRE DAME HAS BEEN ADVISED OF THE POSSIBILITY OF
-SUCH DAMAGES.
+This software is provided "AS IS," without a warranty of any kind. ALL
+EXPRESS OR IMPLIED CONDITIONS, REPRESENTATIONS AND WARRANTIES,
+INCLUDING ANY IMPLIED WARRANTY OF MERCHANTABILITY, FITNESS FOR A
+PARTICULAR PURPOSE OR NON-INFRINGEMENT, ARE HEREBY EXCLUDED.  THE
+UNIVERSITY OF NOTRE DAME AND ITS LICENSORS SHALL NOT BE LIABLE FOR ANY
+DAMAGES SUFFERED BY LICENSEE AS A RESULT OF USING, MODIFYING OR
+DISTRIBUTING THE SOFTWARE OR ITS DERIVATIVES. IN NO EVENT WILL THE
+UNIVERSITY OF NOTRE DAME OR ITS LICENSORS BE LIABLE FOR ANY LOST
+REVENUE, PROFIT OR DATA, OR FOR DIRECT, INDIRECT, SPECIAL,
+CONSEQUENTIAL, INCIDENTAL OR PUNITIVE DAMAGES, HOWEVER CAUSED AND
+REGARDLESS OF THE THEORY OF LIABILITY, ARISING OUT OF THE USE OF OR
+INABILITY TO USE SOFTWARE, EVEN IF THE UNIVERSITY OF NOTRE DAME HAS
+BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
