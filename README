@@ -25,7 +25,7 @@ What you need to compile and use OOPSE:
     Architecture                CC     CXX     F90    Notes
     -------------------------   ----   -----   -----  ----------------------
     ix86-pc-linux-gnu           icc    icpc    ifort  (Intel versions 7 & 8)
-    powerpc-apple-darwin7.4.0   xlc    xlc++   xlf    (IBM XL v. 6.0/8.1)
+    powerpc-apple-darwin7.8.0   xlc    xlc++   xlf    (IBM XL v. 6.0/8.1)
     mips-sgi-irix6.5            cc     CC      f90    (MIPSpro 7.4)
     sparc-sun-solaris2.8        cc     CC      f95    (Forte Developer 7)
     
@@ -34,29 +34,32 @@ What you need to compile and use OOPSE:
     use a Fortran *95* compler for the fortran side of OOPSE, and
     pgf90 does not implement the required portions of the f95
     language.  Fortran77 and Fortran90 (i.e. g77 and pgf90) are *not*
-    sufficient to compile the fortran portions of OOPSE.
+    sufficient to compile the fortran portions of OOPSE.  Tests
+    with the PATHSCALE compiler on 64-bit AMD Opteron machines
+    are ongoing.
 
- 2) The Scalable Parallel Random Number Generators Library (SPRNG). You
-    can obtain SPRNG here:  http://sprng.cs.fsu.edu/
-    SPRNG is a *requirement* for compiling OOPSE.
+ 2) GNU make.  Regular make won't work.  Really.  We've tried.
+    Don't bother with regular make.  Seriously.  You need GNU make.
+    Did we mention that you need GNU make?
 
- 3) MPI.  We like MPICH.  Other implementations might work, but we
+ 3) Perl.  Compilation dependencies in Fortran95 are somewhat
+    complicated, so the build process uses a perl script called
+    filepp to do this job.  You need perl.
+
+ 4) MPI is optional for the single processor version of OOPSE, 
+    but is required if you want OOPSE to run in parallel. 
+
+    We like MPICH-1.2.*.  Other implementations might work, but we
     haven't tried.  You can get MPICH here:
     http://www-unix.mcs.anl.gov/mpi/mpich/
-    MPI is only required if you want a parallel version of OOPSE.
 
- 4) Assorted unix utilities (lexx, yacc, make) or their GNU
-    equivalents.  The Gnu version of make is pretty much a requirement on
-    SGI machines.  
-        
+ 5) Assorted unix utilities (lexx, yacc) or their GNU equivalents. 
 
 INSTRUCTIONS
 
  1) Get, build, and test the required pieces above.
- 2) ./configure
+ 2) ./configure  (or ./configure --with-mpi=/usr/local/mpich)
  3) make
  4) make install
 
-That's it.  Documentation will be forthcoming after the paper is
-published.
-
+That's it.
