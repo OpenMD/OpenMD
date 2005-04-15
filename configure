@@ -7964,7 +7964,8 @@ if test "x$cgal_makefile" != xno; then
     cgal_makefile="$CGAL_MAKEFILE"
   fi
 
-  echo "cgal_makefile      $cgal_makefile"
+  echo "$as_me:$LINENO: checking for cgal_makefile: $cgal_makefile" >&5
+echo $ECHO_N "checking for cgal_makefile: $cgal_makefile... $ECHO_C" >&6
 
   if test -f "$cgal_makefile"; then
 
@@ -8026,15 +8027,24 @@ EOF
       GMP_RLIBDIR=""
     fi
 
-    echo "CGAL_OS_COMPILER   $CGAL_OS_COMPILER"
-    echo "CGAL_INCLDIR       $CGAL_INCLDIR"
-    echo "CGAL_INCLCONFDIR   $CGAL_INCLCONFDIR"
-    echo "CGAL_LIBDIR        $CGAL_LIBDIR"
-    echo "CGAL_CXXFLAGS      $CGAL_CXXFLAGS"
-    echo "LEDA_INCLDIR       $LEDA_INCLDIR"
-    echo "LEDA_LIBDIR        $LEDA_LIBDIR"
-    echo "GMP_INCLDIR        $GMP_INCLDIR"
-    echo "GMP_LIBDIR         $GMP_LIBDIR"
+    echo "$as_me:$LINENO: result: CGAL_OS_COMPILER=   $CGAL_OS_COMPILER" >&5
+echo "${ECHO_T}CGAL_OS_COMPILER=   $CGAL_OS_COMPILER" >&6
+    echo "$as_me:$LINENO: result: CGAL_INCLDIR=       $CGAL_INCLDIR" >&5
+echo "${ECHO_T}CGAL_INCLDIR=       $CGAL_INCLDIR" >&6
+    echo "$as_me:$LINENO: result: CGAL_INCLCONFDIR=   $CGAL_INCLCONFDIR" >&5
+echo "${ECHO_T}CGAL_INCLCONFDIR=   $CGAL_INCLCONFDIR" >&6
+    echo "$as_me:$LINENO: result: CGAL_LIBDIR=        $CGAL_LIBDIR" >&5
+echo "${ECHO_T}CGAL_LIBDIR=        $CGAL_LIBDIR" >&6
+    echo "$as_me:$LINENO: result: CGAL_CXXFLAGS=      $CGAL_CXXFLAGS" >&5
+echo "${ECHO_T}CGAL_CXXFLAGS=      $CGAL_CXXFLAGS" >&6
+    echo "$as_me:$LINENO: result: LEDA_INCLDIR=       $LEDA_INCLDIR" >&5
+echo "${ECHO_T}LEDA_INCLDIR=       $LEDA_INCLDIR" >&6
+    echo "$as_me:$LINENO: result: LEDA_LIBDIR=        $LEDA_LIBDIR" >&5
+echo "${ECHO_T}LEDA_LIBDIR=        $LEDA_LIBDIR" >&6
+    echo "$as_me:$LINENO: result: GMP_INCLDIR=        $GMP_INCLDIR" >&5
+echo "${ECHO_T}GMP_INCLDIR=        $GMP_INCLDIR" >&6
+    echo "$as_me:$LINENO: result: GMP_LIBDIR=         $GMP_LIBDIR" >&5
+echo "${ECHO_T}GMP_LIBDIR=         $GMP_LIBDIR" >&6
 
     ac_ext=cc
 ac_cpp='$CXXCPP $CPPFLAGS'
@@ -8474,13 +8484,20 @@ echo "${ECHO_T}no" >&6
 
       CGAL_CXXFLAGS="-ftemplate-depth-50"
 
-      echo "CGAL_USES_LEDA     $CGAL_USES_LEDA"
-      echo "CGAL_USES_GMP      $CGAL_USES_GMP"
-      echo "CGAL_INCLDIR       $CGAL_INCLDIR"
-      echo "CGAL_LIBDIR        $CGAL_LIBDIR"
-      echo "CGAL_DEFINES       $CGAL_DEFINES"
-      echo "CGAL_CXXFLAGS      $CGAL_CXXFLAGS"
-      echo "CGAL_LIBS          $CGAL_LIBS"
+      echo "$as_me:$LINENO: result: CGAL_USES_LEDA=     $CGAL_USES_LEDA" >&5
+echo "${ECHO_T}CGAL_USES_LEDA=     $CGAL_USES_LEDA" >&6
+      echo "$as_me:$LINENO: result: CGAL_USES_GMP =     $CGAL_USES_GMP" >&5
+echo "${ECHO_T}CGAL_USES_GMP =     $CGAL_USES_GMP" >&6
+      echo "$as_me:$LINENO: result: CGAL_INCLDIR  =     $CGAL_INCLDIR" >&5
+echo "${ECHO_T}CGAL_INCLDIR  =     $CGAL_INCLDIR" >&6
+      echo "$as_me:$LINENO: result: CGAL_LIBDIR   =     $CGAL_LIBDIR" >&5
+echo "${ECHO_T}CGAL_LIBDIR   =     $CGAL_LIBDIR" >&6
+      echo "$as_me:$LINENO: result: CGAL_DEFINES  =     $CGAL_DEFINES" >&5
+echo "${ECHO_T}CGAL_DEFINES  =     $CGAL_DEFINES" >&6
+      echo "$as_me:$LINENO: result: CGAL_CXXFLAGS =     $CGAL_CXXFLAGS" >&5
+echo "${ECHO_T}CGAL_CXXFLAGS =     $CGAL_CXXFLAGS" >&6
+      echo "$as_me:$LINENO: result: CGAL_LIBS     =     $CGAL_LIBS" >&5
+echo "${ECHO_T}CGAL_LIBS     =     $CGAL_LIBS" >&6
     fi
 
     if test "x$cgal" = xyes; then
@@ -8587,16 +8604,8 @@ echo "$as_me: WARNING: *****************************************************" >&
   fi
 else
    if test "x$cgal_makefile" != xno; then
-    { echo "$as_me:$LINENO: WARNING: *********************************************************" >&5
-echo "$as_me: WARNING: *********************************************************" >&2;}
-    { echo "$as_me:$LINENO: WARNING: *** Warning: CGAL was not found.                      ***" >&5
-echo "$as_me: WARNING: *** Warning: CGAL was not found.                      ***" >&2;}
-    { echo "$as_me:$LINENO: WARNING: *** Run \"configure\" with the appropriate options.     ***" >&5
-echo "$as_me: WARNING: *** Run \"configure\" with the appropriate options.     ***" >&2;}
-    { echo "$as_me:$LINENO: WARNING: *** CGAL support will be disabled.                    ***" >&5
-echo "$as_me: WARNING: *** CGAL support will be disabled.                    ***" >&2;}
-    { echo "$as_me:$LINENO: WARNING: *********************************************************" >&5
-echo "$as_me: WARNING: *********************************************************" >&2;}
+    echo "$as_me:$LINENO: result: No CGAL support. These are not the droids you want." >&5
+echo "${ECHO_T}No CGAL support. These are not the droids you want." >&6
   fi
   CGAL_INCLDIR=
   CGAL_LIBDIR=
