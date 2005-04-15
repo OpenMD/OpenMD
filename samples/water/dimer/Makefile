@@ -16,9 +16,6 @@ SampleFiles =  \
         mix.md \
         ssd.in \
         ssd.md \
-        two.in \
-        two.md \
-        water.md \
 
 
 DEV_ROOT=../../..
