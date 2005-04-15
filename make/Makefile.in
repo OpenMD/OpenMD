@@ -64,16 +64,22 @@ Applications = \
 
 Samples = \
 	samples/argon \
-	samples/water/dimer \
+        samples/water/dimer \
 	samples/water/spce \
 	samples/water/ssd \
 	samples/water/ssde \
+	samples/water/ssdrf \
+	samples/water/ssd-ion \
 	samples/water/tip3p_ice \
 	samples/water/tip4p \
 	samples/lipid \
 	samples/alkane \
 	samples/minimizer \
 	samples/metals \
+	samples/thermoIntegration/liquid \
+	samples/thermoIntegration/solid \
+	samples/dipole \
+        samples/shape \
 	samples/zcons \
 
 IncludeDirs = \
