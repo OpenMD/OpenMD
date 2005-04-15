@@ -75,6 +75,7 @@ int main(int argc,char* argv[]){
       "  |  / / / / / / / /_/ /\\__ \\/ __/                                       |\n" <<
       "  | / /_/ / /_/ / ____/___/ / /___     Copyright 2004-2005 by the        |\n" <<
       "  | \\____/\\____/_/    /____/_____/     University of Notre Dame.         |\n" <<
+      "  |                                                                      |\n" <<
       "  |                     version " << 
       OOPSE_VERSION_MAJOR << "." << OOPSE_VERSION_MINOR << "." << OOPSE_VERSION_TINY <<
       "  http://www.oopse.org              |\n" <<
