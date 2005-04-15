@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -64,7 +64,7 @@
 namespace oopse {
 
 
-void registerForceFields() {
+  void registerForceFields() {
     /** @todo move to a seperate initialization module */
     //DUFF, WATER and LJ are merged into one force field
     ForceFieldFactory::getInstance()->registerForceField(new ForceFieldBuilder<DUFF>("DUFF"));
@@ -72,29 +72,29 @@ void registerForceFields() {
     ForceFieldFactory::getInstance()->registerForceField(new ForceFieldBuilder<DUFF>("LJ"));
     //in theory, EAM can also be merged
     ForceFieldFactory::getInstance()->registerForceField(new ForceFieldBuilder<EAM_FF>("EAM"));
-}
+  }
 
-void registerIntegrators() {
+  void registerIntegrators() {
     IntegratorFactory::getInstance()->registerIntegrator(new IntegratorBuilder<NVE>("NVE"));
     IntegratorFactory::getInstance()->registerIntegrator(new IntegratorBuilder<NVT>("NVT"));
     IntegratorFactory::getInstance()->registerIntegrator(new IntegratorBuilder<NPTi>("NPTi"));
     IntegratorFactory::getInstance()->registerIntegrator(new IntegratorBuilder<NPTf>("NPTf"));
     IntegratorFactory::getInstance()->registerIntegrator(new IntegratorBuilder<NPTxyz>("NPTxyz"));
-}
+  }
 
-void registerMinimizers() {
+  void registerMinimizers() {
     MinimizerFactory::getInstance()->registerMinimizer(new MinimizerBuilder<SDMinimizer>("SD"));
     MinimizerFactory::getInstance()->registerMinimizer(new MinimizerBuilder<PRCGMinimizer>("CG"));
-}
+  }
 
-void registerLattice(){
+  void registerLattice(){
     LatticeFactory::getInstance()->registerLattice(new LatticeBuilder<FCCLattice>("FCC"));
-}
+  }
 
-void registerAll() {
+  void registerAll() {
     registerForceFields();
     registerIntegrators();
     registerMinimizers();
-}
+  }
 
 }

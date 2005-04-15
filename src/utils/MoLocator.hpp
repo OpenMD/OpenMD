@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -53,23 +53,23 @@
 #include "math/Vector3.hpp"
 #include "UseTheForce/ForceField.hpp"
 namespace oopse {
-//convert lattice vector to rotation matrix
-double getAtomMass(const std::string& at, ForceField* myFF);
-double getMolMass(MoleculeStamp *molStamp, ForceField *myFF);
-RotMat3x3d latVec2RotMat(const Vector3d& lv);
-class MoLocator{
-    public:
-        MoLocator( MoleculeStamp* theStamp, ForceField* theFF);
-        void placeMol( const Vector3d& offset, const Vector3d& ort, Molecule* mol);
-    private:
-        void calcRef( void );
-        MoleculeStamp* myStamp;
+  //convert lattice vector to rotation matrix
+  double getAtomMass(const std::string& at, ForceField* myFF);
+  double getMolMass(MoleculeStamp *molStamp, ForceField *myFF);
+  RotMat3x3d latVec2RotMat(const Vector3d& lv);
+  class MoLocator{
+  public:
+    MoLocator( MoleculeStamp* theStamp, ForceField* theFF);
+    void placeMol( const Vector3d& offset, const Vector3d& ort, Molecule* mol);
+  private:
+    void calcRef( void );
+    MoleculeStamp* myStamp;
 
-        ForceField* myFF;
-        std::vector<Vector3d> refCoords;
-        int nIntegrableObjects;
+    ForceField* myFF;
+    std::vector<Vector3d> refCoords;
+    int nIntegrableObjects;
 
-};
+  };
 
 }
 #endif

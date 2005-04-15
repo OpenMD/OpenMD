@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -45,25 +45,25 @@
 #include "minimizers/Minimizer.hpp"
 namespace oopse {
 
-/**
- * @class CGFamilyMinimizer 
- * Base class of conjugate gradient famlily minimzier
- */
-class CGFamilyMinimizer : public Minimizer{
-    public:
+  /**
+   * @class CGFamilyMinimizer 
+   * Base class of conjugate gradient famlily minimzier
+   */
+  class CGFamilyMinimizer : public Minimizer{
+  public:
                 
-        //check the convergence
-        virtual int checkConvg();
+    //check the convergence
+    virtual int checkConvg();
 
-    protected:
-        CGFamilyMinimizer(SimInfo* info);
+  protected:
+    CGFamilyMinimizer(SimInfo* info);
         
-        std::vector<double> direction;
-        std::vector<double> prevX;
-        std::vector<double> prevG;
-        double prevF;
-        double stepSize;
-};
+    std::vector<double> direction;
+    std::vector<double> prevX;
+    std::vector<double> prevG;
+    double prevF;
+    double stepSize;
+  };
 
 }
 

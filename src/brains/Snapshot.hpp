@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -39,13 +39,13 @@
  * such damages.
  */
   
- /**
-  * @file Snapshot.hpp
-  * @author tlin
-  * @date 10/20/2004
-  * @time 23:56am
-  * @version 1.0
-  */
+/**
+ * @file Snapshot.hpp
+ * @author tlin
+ * @date 10/20/2004
+ * @time 23:56am
+ * @version 1.0
+ */
   
 #ifndef BRAINS_SNAPSHOT_HPP
 #define BRAINS_SNAPSHOT_HPP
@@ -58,128 +58,128 @@
 
 namespace oopse{
 
-    /**
-     * @class Snapshot Snapshot.hpp "brains/Snapshot.hpp"
-     * @brief Snapshot class is a repository class for storing dynamic data during 
-     *  Simulation
-     * Every snapshot class will contain one DataStorage  for atoms and one DataStorage
-     *  for rigid bodies.
-     */
-    class Snapshot {
-        public:
+  /**
+   * @class Snapshot Snapshot.hpp "brains/Snapshot.hpp"
+   * @brief Snapshot class is a repository class for storing dynamic data during 
+   *  Simulation
+   * Every snapshot class will contain one DataStorage  for atoms and one DataStorage
+   *  for rigid bodies.
+   */
+  class Snapshot {
+  public:
             
-            Snapshot(int nAtoms, int nRigidbodies) : atomData(nAtoms), rigidbodyData(nRigidbodies),
-                currentTime_(0), orthoRhombic_(0), chi_(0.0), integralOfChiDt_(0.0), eta_(0.0) {
+    Snapshot(int nAtoms, int nRigidbodies) : atomData(nAtoms), rigidbodyData(nRigidbodies),
+					     currentTime_(0), orthoRhombic_(0), chi_(0.0), integralOfChiDt_(0.0), eta_(0.0) {
 
-            }
+    }
 
-            Snapshot(int nAtoms, int nRigidbodies, int storageLayout) 
-                : atomData(nAtoms, storageLayout), rigidbodyData(nRigidbodies, storageLayout),
-                currentTime_(0), orthoRhombic_(0), chi_(0.0), integralOfChiDt_(0.0), eta_(0.0) {
+    Snapshot(int nAtoms, int nRigidbodies, int storageLayout) 
+      : atomData(nAtoms, storageLayout), rigidbodyData(nRigidbodies, storageLayout),
+	currentTime_(0), orthoRhombic_(0), chi_(0.0), integralOfChiDt_(0.0), eta_(0.0) {
 
-            }
+      }
             
-            /** Returns the id of this Snapshot */
-            int getID() {
-                return id_;
-            }
+    /** Returns the id of this Snapshot */
+    int getID() {
+      return id_;
+    }
 
-            /** Sets the id of this Snapshot */
-            void setID(int id) {
-                id_ = id;
-            }
+    /** Sets the id of this Snapshot */
+    void setID(int id) {
+      id_ = id;
+    }
 
-            int getSize() {
-                return atomData.getSize() + rigidbodyData.getSize();
-            }
+    int getSize() {
+      return atomData.getSize() + rigidbodyData.getSize();
+    }
 
-            /** Returns the number of atoms */
-            int getNumberOfAtoms() {
-                return atomData.getSize();
-            }
+    /** Returns the number of atoms */
+    int getNumberOfAtoms() {
+      return atomData.getSize();
+    }
 
-            /** Returns the number of rigid bodies */
-            int getNumberOfRigidBodies() {
-                return rigidbodyData.getSize();
-            }
+    /** Returns the number of rigid bodies */
+    int getNumberOfRigidBodies() {
+      return rigidbodyData.getSize();
+    }
 
-            /** Returns the H-Matrix */
-            Mat3x3d getHmat() {
-                return hmat_;
-            }
+    /** Returns the H-Matrix */
+    Mat3x3d getHmat() {
+      return hmat_;
+    }
 
-            /** Sets the H-Matrix */
-            void setHmat(const Mat3x3d& m);
+    /** Sets the H-Matrix */
+    void setHmat(const Mat3x3d& m);
             
-            double getVolume() {
-                return hmat_.determinant();
-            }
+    double getVolume() {
+      return hmat_.determinant();
+    }
 
-            /** Returns the inverse H-Matrix */
-            Mat3x3d getInvHmat() {
-                return invHmat_;
-            }
+    /** Returns the inverse H-Matrix */
+    Mat3x3d getInvHmat() {
+      return invHmat_;
+    }
 
-            /** Wrapping the vector according to periodic boundary condition*/
-            void wrapVector(Vector3d& v);
+    /** Wrapping the vector according to periodic boundary condition*/
+    void wrapVector(Vector3d& v);
 
             
-            double getTime() {
-                return currentTime_;
-            }
+    double getTime() {
+      return currentTime_;
+    }
 
-            void increaseTime(double dt) {
-                setTime(getTime() + dt);
-            }
+    void increaseTime(double dt) {
+      setTime(getTime() + dt);
+    }
 
-            void setTime(double time) {
-                currentTime_ =time;
-                //time at statData is redundant
-                statData[Stats::TIME] = currentTime_;
-            }
+    void setTime(double time) {
+      currentTime_ =time;
+      //time at statData is redundant
+      statData[Stats::TIME] = currentTime_;
+    }
 
-            double getChi() {
-                return chi_;
-            }
+    double getChi() {
+      return chi_;
+    }
 
-            void setChi(double chi) {
-                chi_ = chi;
-            }
+    void setChi(double chi) {
+      chi_ = chi;
+    }
 
-            double getIntegralOfChiDt() {
-                return integralOfChiDt_;
-            }
+    double getIntegralOfChiDt() {
+      return integralOfChiDt_;
+    }
 
-            void setIntegralOfChiDt(double integralOfChiDt) {
-                integralOfChiDt_ = integralOfChiDt;
-            }
+    void setIntegralOfChiDt(double integralOfChiDt) {
+      integralOfChiDt_ = integralOfChiDt;
+    }
             
-            Mat3x3d getEta() {
-                return eta_;
-            }
+    Mat3x3d getEta() {
+      return eta_;
+    }
 
-            void setEta(const Mat3x3d& eta) {
-                eta_ = eta;
-            }
+    void setEta(const Mat3x3d& eta) {
+      eta_ = eta;
+    }
             
-            DataStorage atomData;
-            DataStorage rigidbodyData;
-            Stats statData;
+    DataStorage atomData;
+    DataStorage rigidbodyData;
+    Stats statData;
             
-        private:
-            double currentTime_;
+  private:
+    double currentTime_;
 
-            Mat3x3d hmat_;
-            Mat3x3d invHmat_;
-            int orthoRhombic_;
+    Mat3x3d hmat_;
+    Mat3x3d invHmat_;
+    int orthoRhombic_;
 
-            double chi_;
-            double integralOfChiDt_;
-            Mat3x3d eta_;
+    double chi_;
+    double integralOfChiDt_;
+    Mat3x3d eta_;
             
-            int id_; /**< identification number of the snapshot */
-    };
+    int id_; /**< identification number of the snapshot */
+  };
 
-    typedef DataStorage (Snapshot::*DataStoragePointer); 
+  typedef DataStorage (Snapshot::*DataStoragePointer); 
 }
 #endif //BRAINS_SNAPSHOT_HPP

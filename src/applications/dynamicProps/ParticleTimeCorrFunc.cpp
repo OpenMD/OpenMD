@@ -43,16 +43,16 @@
 
 namespace oopse {
 
-ParticleTimeCorrFunc::ParticleTimeCorrFunc(SimInfo * info, const std::string & filename, 
-    const std :: string & sele1, const std :: string & sele2, int storageLayout) 
+  ParticleTimeCorrFunc::ParticleTimeCorrFunc(SimInfo * info, const std::string & filename, 
+					     const std :: string & sele1, const std :: string & sele2, int storageLayout) 
     : TimeCorrFunc(info, filename, sele1, sele2, storageLayout){
 
 
-    nSelected_ =   seleMan1_.getSelectionCount();  
-    assert(  nSelected_ == seleMan2_.getSelectionCount());
-}
+      nSelected_ =   seleMan1_.getSelectionCount();  
+      assert(  nSelected_ == seleMan2_.getSelectionCount());
+    }
 
-void ParticleTimeCorrFunc::correlateFrames(int frame1, int frame2) {
+  void ParticleTimeCorrFunc::correlateFrames(int frame1, int frame2) {
     Snapshot* snapshot1 = bsMan_->getSnapshot(frame1);
     Snapshot* snapshot2 = bsMan_->getSnapshot(frame2);
     assert(snapshot1 && snapshot2);
@@ -69,14 +69,14 @@ void ParticleTimeCorrFunc::correlateFrames(int frame1, int frame2) {
     StuntDouble* sd2;
 
     for (sd1 = seleMan1_.beginSelected(i), sd2 = seleMan2_.beginSelected(j);
-        sd1 != NULL && sd2 != NULL;
-        sd1 = seleMan1_.nextSelected(i), sd2 = seleMan2_.nextSelected(j)) {
+	 sd1 != NULL && sd2 != NULL;
+	 sd1 = seleMan1_.nextSelected(i), sd2 = seleMan2_.nextSelected(j)) {
 
-        double corrVal = calcCorrVal(frame1, frame2, sd1, sd2);
-        histogram_[timeBin] += corrVal;    
+      double corrVal = calcCorrVal(frame1, frame2, sd1, sd2);
+      histogram_[timeBin] += corrVal;    
     }
     
-}
+  }
 
 }
 

@@ -19,10 +19,10 @@
  *    publication of scientific results based in part on use of the
  *    program.  An acceptable form of acknowledgement is citation of
  *    the article in which the program was described (Matthew
-																											*    A. Meineke, Charles F. Vardeman II, Teng Lin, Christopher
-																											*    J. Fennell and J. Daniel Gezelter, "OOPSE: An Object-Oriented
+ *    A. Meineke, Charles F. Vardeman II, Teng Lin, Christopher
+ *    J. Fennell and J. Daniel Gezelter, "OOPSE: An Object-Oriented
  *    Parallel Simulation Engine for Molecular Dynamics,"
-																											*    J. Comput. Chem. 26, pp. 252-271 (2005))
+ *    J. Comput. Chem. 26, pp. 252-271 (2005))
  *
  * 2. Redistributions of source code must retain the above copyright
  *    notice, this list of conditions and the following disclaimer.
@@ -95,10 +95,10 @@ Polyhedron nanoRodPolyhedron;
 // A modifier creating a triangle with the incremental builder.
 template <class HDS>
 class Build_nanorod : public CGAL::Modifier_base<HDS> {
-public:
+ public:
   Vertex_handle end1;
   Vertex_handle neight1;
-		Vertex_handle end2;
+  Vertex_handle end2;
   Vertex_handle neight2;
   
   Build_nanorod() {}
@@ -243,7 +243,7 @@ struct Normal_vector {
 
 bool GeometryBuilder::isInsidePolyhedron(double x, double y, double z) {
 	
-	Point_3 point(x,y,z);
+  Point_3 point(x,y,z);
   Plane_iterator i;
   Facet_iterator j;
   for ( i =nanoRodPolyhedron.planes_begin(), j = nanoRodPolyhedron.facets_begin(); i != nanoRodPolyhedron.planes_end() && j !=nanoRodPolyhedron.facets_end(); ++i, ++j) {
@@ -263,36 +263,36 @@ bool GeometryBuilder::isInsidePolyhedron(double x, double y, double z) {
 
 
 GeometryBuilder::GeometryBuilder(double length,double width) {
-// Create the geometry for nanorod
+  // Create the geometry for nanorod
   Build_nanorod<HalfedgeDS> nanorod;
   
   nanoRodPolyhedron.delegate( nanorod);
    
-	double y1 = nanorod.end1->point().y() - nanorod.neight1->point().y();
-	double y2 = nanorod.end2->point().y() - nanorod.neight2->point().y();
+  double y1 = nanorod.end1->point().y() - nanorod.neight1->point().y();
+  double y2 = nanorod.end2->point().y() - nanorod.neight2->point().y();
 	
-	CGAL::Aff_transformation_3<Kernel> aff_tranformation( width,
-																												0.0,
-																												0.0,
-																												0.0,
-																												0.0,
-																												length,
-																												0.0,
-																												0.0,
-																												0.0,
-																												0.0,
-																												width,
-																												0.0);	
-	std::transform( nanoRodPolyhedron.points_begin(), nanoRodPolyhedron.points_end(), nanoRodPolyhedron.points_begin(), aff_tranformation);
+  CGAL::Aff_transformation_3<Kernel> aff_tranformation( width,
+							0.0,
+							0.0,
+							0.0,
+							0.0,
+							length,
+							0.0,
+							0.0,
+							0.0,
+							0.0,
+							width,
+							0.0);	
+  std::transform( nanoRodPolyhedron.points_begin(), nanoRodPolyhedron.points_end(), nanoRodPolyhedron.points_begin(), aff_tranformation);
 	
-	Point_3 point1(nanorod.end1->point().x(), y1 + nanorod.neight1->point().y(), nanorod.end1->point().z());
-	Point_3 point2(nanorod.end2->point().x(), y2+ nanorod.neight2->point().y(), nanorod.end2->point().z());
-	nanorod.end1->point() = point1;
-	nanorod.end2->point() = point2;
+  Point_3 point1(nanorod.end1->point().x(), y1 + nanorod.neight1->point().y(), nanorod.end1->point().z());
+  Point_3 point2(nanorod.end2->point().x(), y2+ nanorod.neight2->point().y(), nanorod.end2->point().z());
+  nanorod.end1->point() = point1;
+  nanorod.end2->point() = point2;
 	
-	// Construct normal vector for each face.
-	std::transform( nanoRodPolyhedron.facets_begin(), nanoRodPolyhedron.facets_end(), nanoRodPolyhedron.planes_begin(),
-									Normal_vector());
+  // Construct normal vector for each face.
+  std::transform( nanoRodPolyhedron.facets_begin(), nanoRodPolyhedron.facets_end(), nanoRodPolyhedron.planes_begin(),
+		  Normal_vector());
  	
   
 	

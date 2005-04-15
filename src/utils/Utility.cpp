@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -44,24 +44,24 @@
 
 namespace oopse {
 
-bool replaceWithWildCard(std::vector<std::vector<std::string>::iterator>& cont,
-                                             std::vector<std::string>& sequence, std::vector<std::string>& result, const std::string& wildCard) {
+  bool replaceWithWildCard(std::vector<std::vector<std::string>::iterator>& cont,
+			   std::vector<std::string>& sequence, std::vector<std::string>& result, const std::string& wildCard) {
     if (cont.size() > sequence.size()) {
-        std::cerr << "the size of iterator container is greater than the size of sequence";
+      std::cerr << "the size of iterator container is greater than the size of sequence";
     }
 
     bool hasMoreCombination = next_combination(cont, sequence.begin(), sequence.end());
     if (hasMoreCombination) {
-        result.clear();
-        result.insert(result.begin(), sequence.size(), wildCard);
-        std::vector<std::vector<std::string>::iterator>::iterator i;
-        for ( i = cont.begin(); i != cont.end(); i++){
-            result[*i - sequence.begin()] = **i;
-        }
+      result.clear();
+      result.insert(result.begin(), sequence.size(), wildCard);
+      std::vector<std::vector<std::string>::iterator>::iterator i;
+      for ( i = cont.begin(); i != cont.end(); i++){
+	result[*i - sequence.begin()] = **i;
+      }
     }
 
-     return hasMoreCombination;
+    return hasMoreCombination;
     
-}//end replaceWildCard
+  }//end replaceWildCard
 
 }

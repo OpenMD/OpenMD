@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -48,7 +48,7 @@
 
 class RigidBodyStamp{
 
-public:
+ public:
   RigidBodyStamp();
   ~RigidBodyStamp();
 
@@ -65,7 +65,7 @@ public:
   LinkedAssign* getExtras( void ) { return unhandled; }
 
   static char errMsg[500];
-private:
+ private:
 
   int n_members;
   int which;

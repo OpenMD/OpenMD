@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -43,68 +43,68 @@
 #include "utils/simError.h"
 
 namespace oopse {
-LipidTransVisitor::LipidTransVisitor(SimInfo* info, const std::string& originSeleScript, const std::string& refSeleScript) 
+  LipidTransVisitor::LipidTransVisitor(SimInfo* info, const std::string& originSeleScript, const std::string& refSeleScript) 
     : BaseVisitor(), info_(info), originEvaluator_(info), originSeleMan_(info), refEvaluator_(info), refSeleMan_(info), refSd_(NULL) {
 
  
-    visitorName = "LipidTransVisitor";
+      visitorName = "LipidTransVisitor";
     
-    originEvaluator_.loadScriptString(originSeleScript);            
-    if (!originEvaluator_.isDynamic()) {  
+      originEvaluator_.loadScriptString(originSeleScript);            
+      if (!originEvaluator_.isDynamic()) {  
         originSeleMan_.setSelectionSet(originEvaluator_.evaluate());
         if (originSeleMan_.getSelectionCount() == 1) {
-            int i;
-            originDatom_ = dynamic_cast<DirectionalAtom*>(originSeleMan_.beginSelected(i));
-            if (originDatom_ ==  NULL) {
-                sprintf(painCave.errMsg, "LipidTransVisitor: origin selection must select an directional atom");
-                painCave.isFatal = 1;
-                simError();                  
-            }
+	  int i;
+	  originDatom_ = dynamic_cast<DirectionalAtom*>(originSeleMan_.beginSelected(i));
+	  if (originDatom_ ==  NULL) {
+	    sprintf(painCave.errMsg, "LipidTransVisitor: origin selection must select an directional atom");
+	    painCave.isFatal = 1;
+	    simError();                  
+	  }
         } else {
-            sprintf(painCave.errMsg, "LipidTransVisitor: origin selection must select an directional atom");
-            painCave.isFatal = 1;
-            simError();                  
+	  sprintf(painCave.errMsg, "LipidTransVisitor: origin selection must select an directional atom");
+	  painCave.isFatal = 1;
+	  simError();                  
             
         }
-    }
+      }
 
-    refEvaluator_.loadScriptString(refSeleScript);
-    if (!refEvaluator_.isDynamic()) {  
+      refEvaluator_.loadScriptString(refSeleScript);
+      if (!refEvaluator_.isDynamic()) {  
         refSeleMan_.setSelectionSet(refEvaluator_.evaluate());
         if (refSeleMan_.getSelectionCount() == 1) {
-            int i;
-            refSd_ = refSeleMan_.beginSelected(i);
+	  int i;
+	  refSd_ = refSeleMan_.beginSelected(i);
             
         } else {
-            //error
+	  //error
             
         }
-    }
+      }
     
-}
+    }
 
-void LipidTransVisitor::update() {
+  void LipidTransVisitor::update() {
 
-        Vector3d ref = refSd_->getPos();
-        origin_ = originDatom_->getPos();
-        Vector3d v1 =  ref - origin_;
-        info_->getSnapshotManager()->getCurrentSnapshot()->wrapVector(v1);
-        Vector3d zaxis = originDatom_->getElectroFrame().getColumn(2);
-        Vector3d xaxis = cross(v1, zaxis);
-        Vector3d yaxis = cross(zaxis, xaxis);
+    Vector3d ref = refSd_->getPos();
+    origin_ = originDatom_->getPos();
+    Vector3d v1 =  ref - origin_;
+    info_->getSnapshotManager()->getCurrentSnapshot()->wrapVector(v1);
+    Vector3d zaxis = originDatom_->getElectroFrame().getColumn(2);
+    Vector3d xaxis = cross(v1, zaxis);
+    Vector3d yaxis = cross(zaxis, xaxis);
 
-        xaxis.normalize();
-        yaxis.normalize();
-        zaxis.normalize();
+    xaxis.normalize();
+    yaxis.normalize();
+    zaxis.normalize();
         
-        rotMat_.setRow(0, xaxis);
-        rotMat_.setRow(1, yaxis);
-        rotMat_.setRow(2, zaxis);
+    rotMat_.setRow(0, xaxis);
+    rotMat_.setRow(1, yaxis);
+    rotMat_.setRow(2, zaxis);
 
 
-}
+  }
 
-void LipidTransVisitor::internalVisit(StuntDouble *sd) {
+  void LipidTransVisitor::internalVisit(StuntDouble *sd) {
     GenericData *                     data;
     AtomData *                        atomData;
     AtomInfo *                        atomInfo;
@@ -113,25 +113,25 @@ void LipidTransVisitor::internalVisit(StuntDouble *sd) {
     data = sd->getPropertyByName("ATOMDATA");
 
     if (data != NULL) {
-        atomData = dynamic_cast<AtomData *>(data);
+      atomData = dynamic_cast<AtomData *>(data);
 
-        if (atomData == NULL)
-            return;
+      if (atomData == NULL)
+	return;
     } else
-        return;
+      return;
 
     Snapshot* currSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
     
     for( atomInfo = atomData->beginAtomInfo(i); atomInfo; atomInfo = atomData->nextAtomInfo(i) ) {
 
-        Vector3d tmp= atomInfo->pos - origin_;
-        currSnapshot->wrapVector(tmp);
-        atomInfo->pos = rotMat_ * tmp;;
-        atomInfo->dipole = rotMat_ * atomInfo->dipole;
+      Vector3d tmp= atomInfo->pos - origin_;
+      currSnapshot->wrapVector(tmp);
+      atomInfo->pos = rotMat_ * tmp;;
+      atomInfo->dipole = rotMat_ * atomInfo->dipole;
     }
-}
+  }
 
-const std::string LipidTransVisitor::toString() {
+  const std::string LipidTransVisitor::toString() {
     char        buffer[65535];
     std::string result;
 
@@ -151,6 +151,6 @@ const std::string LipidTransVisitor::toString() {
     result += buffer;
 
     return result;
-}
+  }
 
 }

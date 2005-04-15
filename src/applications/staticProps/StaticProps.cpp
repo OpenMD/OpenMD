@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -59,101 +59,101 @@ using namespace oopse;
 
 int main(int argc, char* argv[]){
   
-    //register force fields
-    registerForceFields();
+  //register force fields
+  registerForceFields();
 
-    gengetopt_args_info args_info;
+  gengetopt_args_info args_info;
 
-    //parse the command line option
-    if (cmdline_parser (argc, argv, &args_info) != 0) {
-        exit(1) ;
-    }
+  //parse the command line option
+  if (cmdline_parser (argc, argv, &args_info) != 0) {
+    exit(1) ;
+  }
 
 
-    //get the dumpfile name and meta-data file name
-    std::string dumpFileName = args_info.input_arg;
+  //get the dumpfile name and meta-data file name
+  std::string dumpFileName = args_info.input_arg;
 
-    std::string mdFileName = dumpFileName.substr(0, dumpFileName.rfind(".")) + ".md";
+  std::string mdFileName = dumpFileName.substr(0, dumpFileName.rfind(".")) + ".md";
 
     
-    std::string sele1;
-    std::string sele2;
+  std::string sele1;
+  std::string sele2;
 
-    if (args_info.sele1_given) {
-        sele1 = args_info.sele1_arg;
+  if (args_info.sele1_given) {
+    sele1 = args_info.sele1_arg;
+  }else {
+    char*  sele1Env= getenv("OOPSE_SELE1");
+    if (sele1Env) {
+      sele1 = sele1Env;
     }else {
-        char*  sele1Env= getenv("OOPSE_SELE1");
-        if (sele1Env) {
-            sele1 = sele1Env;
-        }else {
-            sprintf( painCave.errMsg,
+      sprintf( painCave.errMsg,
                "neither --sele1 option nor $OOPSE_SELE1 is set");
-            painCave.severity = OOPSE_ERROR;
-            painCave.isFatal = 1;
-            simError();
-        }
+      painCave.severity = OOPSE_ERROR;
+      painCave.isFatal = 1;
+      simError();
     }
+  }
     
-    if (args_info.sele2_given) {
-        sele2 = args_info.sele2_arg;
-    }else {
-        char* sele2Env = getenv("OOPSE_SELE2");
-        if (sele2Env) {
-            sele2 = sele2Env;            
-        } else {
-            sprintf( painCave.errMsg,
-               "neither --sele2 option nor $OOPSE_SELE2 is set");
-            painCave.severity = OOPSE_ERROR;
-            painCave.isFatal = 1;
-            simError();        
-        }
-    }
-
-    //parse md file and set up the system
-    SimCreator creator;
-    SimInfo* info = creator.createSim(mdFileName);
-
-    double maxLen;
-    if (args_info.length_given) {
-        maxLen = args_info.length_arg;
+  if (args_info.sele2_given) {
+    sele2 = args_info.sele2_arg;
+  }else {
+    char* sele2Env = getenv("OOPSE_SELE2");
+    if (sele2Env) {
+      sele2 = sele2Env;            
     } else {
-        Mat3x3d hmat = info->getSnapshotManager()->getCurrentSnapshot()->getHmat();
-        maxLen = std::min(std::min(hmat(0, 0), hmat(1, 1)), hmat(2, 2)) /2.0;        
-    }    
+      sprintf( painCave.errMsg,
+               "neither --sele2 option nor $OOPSE_SELE2 is set");
+      painCave.severity = OOPSE_ERROR;
+      painCave.isFatal = 1;
+      simError();        
+    }
+  }
 
-    RadialDistrFunc* rdf;
-    if (args_info.gofr_given){
-        rdf= new GofR(info, dumpFileName, sele1, sele2, maxLen, args_info.nrbins_arg);        
-    } else if (args_info.r_theta_given) {
-        rdf  = new GofRTheta(info, dumpFileName, sele1, sele2, maxLen, args_info.nrbins_arg, args_info.nanglebins_arg);
-    } else if (args_info.r_omega_given) {
-        rdf  = new GofROmega(info, dumpFileName, sele1, sele2, maxLen, args_info.nrbins_arg, args_info.nanglebins_arg);
-    } else if (args_info.theta_omega_given) {
-        rdf  = new GofAngle2(info, dumpFileName, sele1, sele2, args_info.nanglebins_arg);
-    } else if (args_info.gxyz_given) {
-        if (args_info.refsele_given) {
-            rdf= new GofXyz(info, dumpFileName, sele1, sele2,args_info.refsele_arg, maxLen, args_info.nrbins_arg);        
-        } else {
-            sprintf( painCave.errMsg,
+  //parse md file and set up the system
+  SimCreator creator;
+  SimInfo* info = creator.createSim(mdFileName);
+
+  double maxLen;
+  if (args_info.length_given) {
+    maxLen = args_info.length_arg;
+  } else {
+    Mat3x3d hmat = info->getSnapshotManager()->getCurrentSnapshot()->getHmat();
+    maxLen = std::min(std::min(hmat(0, 0), hmat(1, 1)), hmat(2, 2)) /2.0;        
+  }    
+
+  RadialDistrFunc* rdf;
+  if (args_info.gofr_given){
+    rdf= new GofR(info, dumpFileName, sele1, sele2, maxLen, args_info.nrbins_arg);        
+  } else if (args_info.r_theta_given) {
+    rdf  = new GofRTheta(info, dumpFileName, sele1, sele2, maxLen, args_info.nrbins_arg, args_info.nanglebins_arg);
+  } else if (args_info.r_omega_given) {
+    rdf  = new GofROmega(info, dumpFileName, sele1, sele2, maxLen, args_info.nrbins_arg, args_info.nanglebins_arg);
+  } else if (args_info.theta_omega_given) {
+    rdf  = new GofAngle2(info, dumpFileName, sele1, sele2, args_info.nanglebins_arg);
+  } else if (args_info.gxyz_given) {
+    if (args_info.refsele_given) {
+      rdf= new GofXyz(info, dumpFileName, sele1, sele2,args_info.refsele_arg, maxLen, args_info.nrbins_arg);        
+    } else {
+      sprintf( painCave.errMsg,
                "--refsele must set when --gxyz is used");
-            painCave.severity = OOPSE_ERROR;
-            painCave.isFatal = 1;
-            simError();  
-        }
+      painCave.severity = OOPSE_ERROR;
+      painCave.isFatal = 1;
+      simError();  
     }
+  }
     
-    if (args_info.output_given) {
-        rdf->setOutputName(args_info.output_arg);
-    }
-    if (args_info.step_given) {
-        rdf->setStep(args_info.step_arg);
-    }
+  if (args_info.output_given) {
+    rdf->setOutputName(args_info.output_arg);
+  }
+  if (args_info.step_given) {
+    rdf->setStep(args_info.step_arg);
+  }
 
-    rdf->process();
+  rdf->process();
 
-    delete rdf;    
-    delete info;
+  delete rdf;    
+  delete info;
 
-    return 0;   
+  return 0;   
 }
 

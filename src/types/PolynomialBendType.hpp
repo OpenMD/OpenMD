@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -55,64 +55,64 @@
 
 namespace oopse {
 
-/**
- * @class PolynomialBendType PolynomialBendType.hpp "types/PolynomialBendType.hpp"
- * @todo documentation
- */
-class PolynomialBendType : public BendType{
+  /**
+   * @class PolynomialBendType PolynomialBendType.hpp "types/PolynomialBendType.hpp"
+   * @todo documentation
+   */
+  class PolynomialBendType : public BendType{
 
-    public:
-        PolynomialBendType(double theta) : BendType(theta) {}
+  public:
+    PolynomialBendType(double theta) : BendType(theta) {}
 
-        void setCoefficient(int power, double coefficient) {
-            polynomial_.setCoefficient(power, coefficient);
-        }
+    void setCoefficient(int power, double coefficient) {
+      polynomial_.setCoefficient(power, coefficient);
+    }
 
-        double getCoefficient(int power) {
-            return polynomial_.getCoefficient(power);
-        }
+    double getCoefficient(int power) {
+      return polynomial_.getCoefficient(power);
+    }
         
-        void calcForce(double theta, double & V, double & dVdr) {
-            double delta = theta - theta0_;
-            V = polynomial_.evaluate(delta);
-            dVdr = polynomial_.evaluateDerivative(delta);
+    void calcForce(double theta, double & V, double & dVdr) {
+      double delta = theta - theta0_;
+      V = polynomial_.evaluate(delta);
+      dVdr = polynomial_.evaluateDerivative(delta);
 
-        }
+    }
 
-        friend std::ostream& operator <<(std::ostream& os, PolynomialBendType& pbt);
+    friend std::ostream& operator <<(std::ostream& os, PolynomialBendType& pbt);
         
-    private:
+  private:
         
-        DoublePolynomial polynomial_;
-};
+    DoublePolynomial polynomial_;
+  };
 
-std::ostream& operator <<(std::ostream& os, PolynomialBendType& pbt) {
+  std::ostream& operator <<(std::ostream& os, PolynomialBendType& pbt) {
     DoublePolynomial::const_iterator i;
 
     i = pbt.polynomial_.begin();
     
     if (i == pbt.polynomial_.end()) {
-        os << "This PolynomialBendType contains nothing" << std::endl;
-        return os;
+      os << "This PolynomialBendType contains nothing" << std::endl;
+      return os;
     }
 
     os << "This PolynomialBendType contains below terms:" << std::endl;    
     
     while(true){
-        os << i->second << "*" << "(theta - " << pbt.getTheta() << ")" << "^" << i->first;
+      os << i->second << "*" << "(theta - " << pbt.getTheta() << ")" << "^" << i->first;
 
-        if (++i == pbt.polynomial_.end()) {
-            //if we reach the end of the polynomial pair, write out a newline and then escape the loop
-            os << std::endl;
-            break;
-        } else {
-            //otherwise, write out a "+"
-            os << " + ";
-        }
+      if (++i == pbt.polynomial_.end()) {
+	//if we reach the end of the polynomial pair, write out a newline and then escape the loop
+	os << std::endl;
+	break;
+      } else {
+	//otherwise, write out a "+"
+	os << " + ";
+      }
     }
     
     return os;
-}
+  }
 
 
 } //end namespace oopse

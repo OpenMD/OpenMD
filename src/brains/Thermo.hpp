@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -47,30 +47,30 @@
 
 namespace oopse {
 
-class Thermo{
+  class Thermo{
 
-    public:
+  public:
 
-        Thermo( SimInfo* info) : info_(info) {}
+    Thermo( SimInfo* info) : info_(info) {}
 
-        // note: all the following energies are in kcal/mol
+    // note: all the following energies are in kcal/mol
 
-        double getKinetic(); // the total kinetic energy 
-        double getPotential(); // the total potential energy
-        double getTotalE(); // gets the total energy
+    double getKinetic(); // the total kinetic energy 
+    double getPotential(); // the total potential energy
+    double getTotalE(); // gets the total energy
 
-        double getTemperature(); // gives the instant temp. in K
+    double getTemperature(); // gives the instant temp. in K
 
-        double getPressure(); // gives the instant pressure in atm;
+    double getPressure(); // gives the instant pressure in atm;
 
-        Mat3x3d getPressureTensor(); // gives the pressure  tensor in amu*fs^-2*Ang^-1
-        double getVolume();   // gives the volume in Ang^3 
+    Mat3x3d getPressureTensor(); // gives the pressure  tensor in amu*fs^-2*Ang^-1
+    double getVolume();   // gives the volume in Ang^3 
 
-        void saveStat();
+    void saveStat();
         
-    private:
-        SimInfo* info_;
-};
+  private:
+    SimInfo* info_;
+  };
 
 } //end namespace oopse
 #endif

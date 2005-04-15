@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -39,13 +39,13 @@
  * such damages.
  */
  
- /**
-  * @file DUFF.hpp
-  * @author tlin
-  * @date 11/15/2004
-  * @time 13:43am
-  * @version 1.0
-  */
+/**
+ * @file DUFF.hpp
+ * @author tlin
+ * @date 11/15/2004
+ * @time 13:43am
+ * @version 1.0
+ */
 #ifndef USETHEFORCE_DUFF_HPP
 #define USETHEFORCE_DUFF_HPP
 
@@ -54,20 +54,20 @@
 #include "UseTheForce/ForceFieldCreator.hpp"
 namespace oopse {
 
-/**
- * @class DUFF DUFF.hpp "UseTheForce/DUFF.hpp"
- * @brief Dipole United Atom Force Field Parser
- */
-class DUFF : public ForceField {
-    public:
-        DUFF();
-        virtual void parse(const std::string& filename);
-				~DUFF();
+  /**
+   * @class DUFF DUFF.hpp "UseTheForce/DUFF.hpp"
+   * @brief Dipole United Atom Force Field Parser
+   */
+  class DUFF : public ForceField {
+  public:
+    DUFF();
+    virtual void parse(const std::string& filename);
+    ~DUFF();
 
-    private:
-        SectionParserManager spMan_;
+  private:
+    SectionParserManager spMan_;
 
-};
+  };
 
 } //end namespace oopse
 #endif //USETHEFORCE_DUFF_HPP

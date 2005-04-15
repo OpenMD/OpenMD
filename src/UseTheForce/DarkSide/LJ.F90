@@ -43,7 +43,7 @@
 !! Calculates Long Range forces Lennard-Jones interactions.
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: LJ.F90,v 1.10 2005-04-13 20:36:45 chuckv Exp $, $Date: 2005-04-13 20:36:45 $, $Name: not supported by cvs2svn $, $Revision: 1.10 $
+!! @version $Id: LJ.F90,v 1.11 2005-04-15 22:03:47 gezelter Exp $, $Date: 2005-04-15 22:03:47 $, $Name: not supported by cvs2svn $, $Revision: 1.11 $
 
 
 module lj
@@ -59,9 +59,9 @@ module lj
 
   implicit none
   PRIVATE
-  
+
   integer, parameter :: DP = selected_real_kind(15)
-  
+
   type, private :: LjType
      integer :: c_ident
      integer :: atid
@@ -69,11 +69,11 @@ module lj
      real(kind=dp) :: epsilon
      logical :: soft_pot
   end type LjType
-  
+
   type(LjType), dimension(:), allocatable :: ParameterMap
-  
+
   logical, save :: haveMixingMap = .false.
-  
+
   type :: MixParameters
      real(kind=DP) :: sigma
      real(kind=DP) :: epsilon
@@ -83,16 +83,16 @@ module lj
      real(kind=dp)  :: delta 
      logical :: soft_pot     
   end type MixParameters
-  
+
   type(MixParameters), dimension(:,:), allocatable :: MixingMap
-  
+
   real(kind=DP), save :: LJ_rcut
   logical, save :: have_rcut = .false.
   logical, save :: LJ_do_shift = .false.
   logical, save :: useGeometricDistanceMixing = .false.
-   
+
   !! Public methods and data
-  
+
   public :: setCutoffLJ
   public :: useGeometricMixing
   public :: do_lj_pair
@@ -100,7 +100,7 @@ module lj
   public :: getSigma
   public :: getEpsilon
   public :: destroyLJTypes
-  
+
 contains
 
   subroutine newLJtype(c_ident, sigma, epsilon, soft_pot, status)
@@ -113,11 +113,11 @@ contains
     integer, pointer :: MatchList(:) => null()
 
     status = 0
-    
+
     myATID = getFirstMatchingElement(atypes, "c_ident", c_ident)
 
     if (.not.allocated(ParameterMap)) then
-       
+
        !call getMatchingElementList(atypes, "is_LennardJones", .true., &
        !     nLJTypes, MatchList)
        nAtypes = getSize(atypes)
@@ -125,18 +125,18 @@ contains
           status = -1
           return
        end if
-        
+
        if (.not. allocated(ParameterMap)) then
           allocate(ParameterMap(nAtypes))
        endif
-      
+
     end if
 
     if (myATID .gt. size(ParameterMap)) then
        status = -1
        return
     endif
-    
+
     ! set the values for ParameterMap for this atom type:
 
     ParameterMap(myATID)%c_ident = c_ident
@@ -144,9 +144,9 @@ contains
     ParameterMap(myATID)%epsilon = epsilon
     ParameterMap(myATID)%sigma = sigma
     if (soft_pot == 1) then
-      ParameterMap(myATID)%soft_pot = .true.
+       ParameterMap(myATID)%soft_pot = .true.
     else
-      ParameterMap(myATID)%soft_pot = .false.
+       ParameterMap(myATID)%soft_pot = .false.
     endif
   end subroutine newLJtype
 
@@ -154,12 +154,12 @@ contains
     integer, intent(in) :: atid
     integer :: localError
     real(kind=dp) :: s
-    
+
     if (.not.allocated(ParameterMap)) then
        call handleError("LJ", "no ParameterMap was present before first call of getSigma!")
        return
     end if
-    
+
     s = ParameterMap(atid)%sigma
   end function getSigma
 
@@ -167,12 +167,12 @@ contains
     integer, intent(in) :: atid
     integer :: localError
     real(kind=dp) :: e
-    
+
     if (.not.allocated(ParameterMap)) then
        call handleError("LJ", "no ParameterMap was present before first call of getEpsilon!")
        return
     end if
-    
+
     e = ParameterMap(atid)%epsilon
   end function getEpsilon
 
@@ -191,7 +191,7 @@ contains
     LJ_do_shift = do_shift
     call set_switch(LJ_SWITCH, rcut, rcut)
     have_rcut = .true.
-    
+
     return
   end subroutine setCutoffLJ
 
@@ -200,7 +200,7 @@ contains
     haveMixingMap = .false.
     return
   end subroutine useGeometricMixing
-  
+
   subroutine createMixingMap(status)
     integer :: nATIDs
     integer :: status
@@ -218,9 +218,9 @@ contains
        status = -1
        return
     endif
-    
+
     nATIDs = size(ParameterMap)
-    
+
     if (nATIDs == 0) then
        status = -1
        return
@@ -234,16 +234,16 @@ contains
        status = -1
        return
     endif
-        
+
     rcut6 = LJ_rcut**6
-    
+
     ! This loops through all atypes, even those that don't support LJ forces.
     do i = 1, nATIDs
        call getElementProperty(atypes, i, "is_LennardJones", i_is_LJ)
        if (i_is_LJ) then
           Epsilon_i = ParameterMap(i)%epsilon
           Sigma_i = ParameterMap(i)%sigma
-          
+
           ! do self mixing rule
           MixingMap(i,i)%sigma   = Sigma_i          
           MixingMap(i,i)%sigma6  = Sigma_i ** 6          
@@ -253,14 +253,14 @@ contains
           MixingMap(i,i)%delta   = -4.0_DP * MixingMap(i,i)%epsilon * &
                (MixingMap(i,i)%tp12 - MixingMap(i,i)%tp6)
           MixingMap(i,i)%soft_pot = ParameterMap(i)%soft_pot
-          
+
           do j = i + 1, nATIDs
              call getElementProperty(atypes, j, "is_LennardJones", j_is_LJ)
-          
+
              if (j_is_LJ) then
                 Epsilon_j = ParameterMap(j)%epsilon
                 Sigma_j = ParameterMap(j)%sigma
-                
+
                 ! only the distance parameter uses different mixing policies
                 if (useGeometricDistanceMixing) then
                    ! only for OPLS as far as we can tell
@@ -269,20 +269,20 @@ contains
                    ! everyone else
                    MixingMap(i,j)%sigma = 0.5_dp * (Sigma_i + Sigma_j)
                 endif
-                
+
                 ! energy parameter is always geometric mean:
                 MixingMap(i,j)%epsilon = dsqrt(Epsilon_i * Epsilon_j)
-                
+
                 MixingMap(i,j)%sigma6 = (MixingMap(i,j)%sigma)**6
                 MixingMap(i,j)%tp6    = MixingMap(i,j)%sigma6/rcut6
                 MixingMap(i,j)%tp12    = (MixingMap(i,j)%tp6) ** 2
-                
+
                 MixingMap(i,j)%delta = -4.0_DP * MixingMap(i,j)%epsilon * &
                      (MixingMap(i,j)%tp12 - MixingMap(i,j)%tp6)
-                
+
                 MixingMap(i,j)%soft_pot = ParameterMap(i)%soft_pot .or. ParameterMap(j)%soft_pot
-                
-                
+
+
                 MixingMap(j,i)%sigma   = MixingMap(i,j)%sigma
                 MixingMap(j,i)%sigma6  = MixingMap(i,j)%sigma6
                 MixingMap(j,i)%tp6     = MixingMap(i,j)%tp6
@@ -294,11 +294,11 @@ contains
           end do
        endif
     end do
-    
+
     haveMixingMap = .true.
 
   end subroutine createMixingMap
-        
+
   subroutine do_lj_pair(atom1, atom2, d, rij, r2, sw, vpair, fpair, &
        pot, f, do_pot)
 
@@ -346,66 +346,66 @@ contains
 #endif
 
     r6 = r2 * r2 * r2
-    
+
     t6  = sigma6/ r6
     t12 = t6 * t6     
 
     if (soft_pot) then
-      pot_temp = 4.0E0_DP * epsilon * t12 
-      if (LJ_do_shift) then
-         pot_temp = pot_temp + delta
-      endif
-  
-      vpair = vpair + pot_temp
-         
-      dudr = sw * 24.0E0_DP * epsilon * (-2.0E0_DP)*t12 / rij
+       pot_temp = 4.0E0_DP * epsilon * t12 
+       if (LJ_do_shift) then
+          pot_temp = pot_temp + delta
+       endif
+
+       vpair = vpair + pot_temp
+
+       dudr = sw * 24.0E0_DP * epsilon * (-2.0E0_DP)*t12 / rij
 
     else
-      pot_temp = 4.0E0_DP * epsilon * (t12 - t6) 
-      if (LJ_do_shift) then
-         pot_temp = pot_temp + delta
-      endif
-  
-      vpair = vpair + pot_temp
-         
-      dudr = sw * 24.0E0_DP * epsilon * (t6 - 2.0E0_DP*t12) / rij
+       pot_temp = 4.0E0_DP * epsilon * (t12 - t6) 
+       if (LJ_do_shift) then
+          pot_temp = pot_temp + delta
+       endif
+
+       vpair = vpair + pot_temp
+
+       dudr = sw * 24.0E0_DP * epsilon * (t6 - 2.0E0_DP*t12) / rij
     endif
-       
+
     drdx = d(1) / rij
     drdy = d(2) / rij
     drdz = d(3) / rij
-       
+
     fx = dudr * drdx
     fy = dudr * drdy
     fz = dudr * drdz
-    
-       
+
+
 #ifdef IS_MPI
     if (do_pot) then
        pot_Row(atom1) = pot_Row(atom1) + sw*pot_temp*0.5
        pot_Col(atom2) = pot_Col(atom2) + sw*pot_temp*0.5
     endif
-    
+
     f_Row(1,atom1) = f_Row(1,atom1) + fx 
     f_Row(2,atom1) = f_Row(2,atom1) + fy
     f_Row(3,atom1) = f_Row(3,atom1) + fz
-    
+
     f_Col(1,atom2) = f_Col(1,atom2) - fx 
     f_Col(2,atom2) = f_Col(2,atom2) - fy
     f_Col(3,atom2) = f_Col(3,atom2) - fz       
-    
+
 #else
     if (do_pot) pot = pot + sw*pot_temp
 
     f(1,atom1) = f(1,atom1) + fx
     f(2,atom1) = f(2,atom1) + fy
     f(3,atom1) = f(3,atom1) + fz
-    
+
     f(1,atom2) = f(1,atom2) - fx
     f(2,atom2) = f(2,atom2) - fy
     f(3,atom2) = f(3,atom2) - fz
 #endif
-        
+
 #ifdef IS_MPI
     id1 = AtomRowToGlobal(atom1)
     id2 = AtomColToGlobal(atom2)
@@ -415,7 +415,7 @@ contains
 #endif
 
     if (molMembershipList(id1) .ne. molMembershipList(id2)) then
-       
+
        fpair(1) = fpair(1) + fx
        fpair(2) = fpair(2) + fy
        fpair(3) = fpair(3) + fz
@@ -423,14 +423,14 @@ contains
     endif
 
     return    
-    
+
   end subroutine do_lj_pair
-  
+
   subroutine destroyLJTypes()
     if(allocated(ParameterMap)) deallocate(ParameterMap)
     if(allocated(MixingMap)) deallocate(MixingMap)
     haveMixingMap = .false.
   end subroutine destroyLJTypes
 
-    
+
 end module lj

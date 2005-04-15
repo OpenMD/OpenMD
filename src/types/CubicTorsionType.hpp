@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -52,49 +52,49 @@
 #include "types/TorsionType.hpp"
 
 namespace oopse {
-/**
- * @class CubicTorsionType 
- * @todo document
- */
-class CubicTorsionType : public TorsionType {
+  /**
+   * @class CubicTorsionType 
+   * @todo document
+   */
+  class CubicTorsionType : public TorsionType {
 
-    public:
+  public:
 
-        CubicTorsionType(double k3, double k2, double k1, double k0) 
-            : k3_(k3), k2_(k2),  k1_(k1), k0_(k0){
-        }
+    CubicTorsionType(double k3, double k2, double k1, double k0) 
+      : k3_(k3), k2_(k2),  k1_(k1), k0_(k0){
+      }
 
-        void setForceConstant(double k3, double k2, double k1, double k0) {
-            k3_ = k3;
-            k2_ = k2;
-            k1_ = k1;
-            k0_ = k0;
-        }
+    void setForceConstant(double k3, double k2, double k1, double k0) {
+      k3_ = k3;
+      k2_ = k2;
+      k1_ = k1;
+      k0_ = k0;
+    }
 
-        void getForceConstant(double& k3, double& k2, double& k1, double& k0) {
-            k3 = k3_;
-            k2  = k2_;
-            k1 = k1_;
-            k0 = k0_;
-        }
+    void getForceConstant(double& k3, double& k2, double& k1, double& k0) {
+      k3 = k3_;
+      k2  = k2_;
+      k1 = k1_;
+      k0 = k0_;
+    }
 
-        virtual void calcForce(double cosPhi, double sinPhi, double& V, double& dVdPhi){ 
-            double cosPhi2 = cosPhi * cosPhi;
-            double cosPhi3 = cosPhi2 * cosPhi;
+    virtual void calcForce(double cosPhi, double sinPhi, double& V, double& dVdPhi){ 
+      double cosPhi2 = cosPhi * cosPhi;
+      double cosPhi3 = cosPhi2 * cosPhi;
             
-            V =k0_ + k1_ * cosPhi + k2_*cosPhi2 + k3_*cosPhi3;
-            dVdPhi = k1_ + 2.0*k2_ * cosPhi + 3.0 * k3_*cosPhi2;     
-            dVdPhi *= -sinPhi;
-        }
+      V =k0_ + k1_ * cosPhi + k2_*cosPhi2 + k3_*cosPhi3;
+      dVdPhi = k1_ + 2.0*k2_ * cosPhi + 3.0 * k3_*cosPhi2;     
+      dVdPhi *= -sinPhi;
+    }
         
-    private:
+  private:
 
-        double k3_;
-        double k2_;
-        double k1_;
-        double k0_;
+    double k3_;
+    double k2_;
+    double k1_;
+    double k0_;
 
-};
+  };
 
 }//end namespace oopse
 #endif //TYPES_CUBICTORSIONTYPE_HPP

@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -53,10 +53,10 @@
 
 namespace oopse {
 
-class SimInfo;
+  class SimInfo;
 
 
-class WrappingVisitor : public BaseVisitor{
+  class WrappingVisitor : public BaseVisitor{
   public:
     WrappingVisitor(SimInfo* info) : BaseVisitor() {
       this->info = info;
@@ -71,10 +71,10 @@ class WrappingVisitor : public BaseVisitor{
   protected:
     void internalVisit(StuntDouble* sd);
     SimInfo* info;
-};
+  };
 
 
-class ReplicateVisitor : public BaseVisitor{
+  class ReplicateVisitor : public BaseVisitor{
   public:
     ReplicateVisitor(SimInfo* info, Vector3i opt);
     virtual void visit(Atom* atom);
@@ -90,9 +90,9 @@ class ReplicateVisitor : public BaseVisitor{
     std::vector<Vector3i> dir;
     SimInfo* info;
     Vector3i replicateOpt;
-};
+  };
 
-class XYZVisitor : public BaseVisitor{
+  class XYZVisitor : public BaseVisitor{
   public:
     
     XYZVisitor(SimInfo* info);
@@ -120,10 +120,10 @@ class XYZVisitor : public BaseVisitor{
     SelectionEvaluator evaluator; 
     std::vector<std::string> frame;
 
-};
+  };
 
 
-class PrepareVisitor : public BaseVisitor{
+  class PrepareVisitor : public BaseVisitor{
   public:
     PrepareVisitor() : BaseVisitor() {visitorName = "prepareVisitor";}
 
@@ -136,7 +136,7 @@ class PrepareVisitor : public BaseVisitor{
   protected:
     void internalVisit(Atom* atom);
     void internalVisit(RigidBody* rb);
-};
+  };
 
   class WaterTypeVisitor : public BaseVisitor{
   public:
@@ -151,7 +151,7 @@ class PrepareVisitor : public BaseVisitor{
     std::string trimmedName(const std::string& atomType);
     
     std::set<std::string> waterTypeList;
-};
+  };
 
 
 }//namespace oopse

@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -46,39 +46,39 @@
 #include "constraints/ConstraintPair.hpp"
 namespace oopse {
 
-/** 
- * @class Rattle Rattle.hpp "constraints/Rattle.hpp"
- * Velocity Verlet Constraint Algorithm
- */ 
-class Rattle {
-    public:
-        enum ConsStatus{
-            consFail = -1,  //Constraint Fail
-            consSuccess = 0,  //constrain the pair by moving two elements
-            consAlready = 1}; //current pair is already constrained, do not need to move the elements
+  /** 
+   * @class Rattle Rattle.hpp "constraints/Rattle.hpp"
+   * Velocity Verlet Constraint Algorithm
+   */ 
+  class Rattle {
+  public:
+    enum ConsStatus{
+      consFail = -1,  //Constraint Fail
+      consSuccess = 0,  //constrain the pair by moving two elements
+      consAlready = 1}; //current pair is already constrained, do not need to move the elements
   
-        Rattle(SimInfo* info);
-        void constraintA();
-        void constraintB();
+    Rattle(SimInfo* info);
+    void constraintA();
+    void constraintB();
         
-        int getMaxConsIteration() { return maxConsIteration_; }
-        void setMaxConsIteration(int iteration) { maxConsIteration_ = iteration; }
+    int getMaxConsIteration() { return maxConsIteration_; }
+    void setMaxConsIteration(int iteration) { maxConsIteration_ = iteration; }
 
-        double getConsTolerance() { return consTolerance_; } 
-        void setConsTolerance(double tolerance) { consTolerance_ = tolerance;}        
+    double getConsTolerance() { return consTolerance_; } 
+    void setConsTolerance(double tolerance) { consTolerance_ = tolerance;}        
 
-    private:
-        typedef int (Rattle::*ConstraintPairFuncPtr)(ConstraintPair*);
-        void doConstraint(ConstraintPairFuncPtr func);
-        int constraintPairA(ConstraintPair* consPair);
-        int constraintPairB(ConstraintPair* consPair);
+  private:
+    typedef int (Rattle::*ConstraintPairFuncPtr)(ConstraintPair*);
+    void doConstraint(ConstraintPairFuncPtr func);
+    int constraintPairA(ConstraintPair* consPair);
+    int constraintPairB(ConstraintPair* consPair);
 
-        SimInfo* info_;
-        int maxConsIteration_;        
-        double consTolerance_;
-        double dt_;
-        Snapshot* currentSnapshot_;     
-};
+    SimInfo* info_;
+    int maxConsIteration_;        
+    double consTolerance_;
+    double dt_;
+    Snapshot* currentSnapshot_;     
+  };
 
 }
 #endif

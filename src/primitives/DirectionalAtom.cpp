@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -43,68 +43,68 @@
 #include "utils/simError.h"
 namespace oopse {
 
-DirectionalAtom::DirectionalAtom(DirectionalAtomType* dAtomType) 
-                         : Atom(dAtomType){
-    objType_= otDAtom;
-    if (dAtomType->isMultipole()) {
+  DirectionalAtom::DirectionalAtom(DirectionalAtomType* dAtomType) 
+    : Atom(dAtomType){
+      objType_= otDAtom;
+      if (dAtomType->isMultipole()) {
         electroBodyFrame_ = dAtomType->getElectroBodyFrame();
-    }
+      }
 
-    //check if one of the diagonal inertia tensor of this directional atom  is zero
-    int nLinearAxis = 0;
-    Mat3x3d inertiaTensor = getI();
-    for (int i = 0; i < 3; i++) {    
+      //check if one of the diagonal inertia tensor of this directional atom  is zero
+      int nLinearAxis = 0;
+      Mat3x3d inertiaTensor = getI();
+      for (int i = 0; i < 3; i++) {    
         if (fabs(inertiaTensor(i, i)) < oopse::epsilon) {
-            linear_ = true;
-            linearAxis_ = i;
-            ++ nLinearAxis;
+	  linear_ = true;
+	  linearAxis_ = i;
+	  ++ nLinearAxis;
         }
-    }
+      }
 
-    if (nLinearAxis > 1) {
+      if (nLinearAxis > 1) {
         sprintf( painCave.errMsg,
-            "Directional Atom error.\n"
-            "\tOOPSE found more than one axis in this directional atom with a vanishing \n"
-            "\tmoment of inertia.");
+		 "Directional Atom error.\n"
+		 "\tOOPSE found more than one axis in this directional atom with a vanishing \n"
+		 "\tmoment of inertia.");
         painCave.isFatal = 1;
         simError();
-    }
+      }
       
-}
+    }
 
-Mat3x3d DirectionalAtom::getI() {
+  Mat3x3d DirectionalAtom::getI() {
     return static_cast<DirectionalAtomType*>(getAtomType())->getI();
-}    
+  }    
 
-void DirectionalAtom::setPrevA(const RotMat3x3d& a) {
+  void DirectionalAtom::setPrevA(const RotMat3x3d& a) {
     ((snapshotMan_->getPrevSnapshot())->*storage_).aMat[localIndex_] = a;
     if (atomType_->isMultipole()) {
-        ((snapshotMan_->getPrevSnapshot())->*storage_).electroFrame[localIndex_] = a.transpose() * electroBodyFrame_;
+      ((snapshotMan_->getPrevSnapshot())->*storage_).electroFrame[localIndex_] = a.transpose() * electroBodyFrame_;
     }
-}
+  }
 
       
-void DirectionalAtom::setA(const RotMat3x3d& a) {
+  void DirectionalAtom::setA(const RotMat3x3d& a) {
     ((snapshotMan_->getCurrentSnapshot())->*storage_).aMat[localIndex_] = a;
 
     if (atomType_->isMultipole()) {
-        ((snapshotMan_->getCurrentSnapshot())->*storage_).electroFrame[localIndex_] = a.transpose() * electroBodyFrame_;
+      ((snapshotMan_->getCurrentSnapshot())->*storage_).electroFrame[localIndex_] = a.transpose() * electroBodyFrame_;
     }
-}    
+  }    
     
-void DirectionalAtom::setA(const RotMat3x3d& a, int snapshotNo) {
+  void DirectionalAtom::setA(const RotMat3x3d& a, int snapshotNo) {
     ((snapshotMan_->getSnapshot(snapshotNo))->*storage_).aMat[localIndex_] = a;
 
     if (atomType_->isMultipole()) {
-        ((snapshotMan_->getSnapshot(snapshotNo))->*storage_).electroFrame[localIndex_] = a.transpose() * electroBodyFrame_;    
+      ((snapshotMan_->getSnapshot(snapshotNo))->*storage_).electroFrame[localIndex_] = a.transpose() * electroBodyFrame_;    
     }
-}    
+  }    
 
-void DirectionalAtom::rotateBy(const RotMat3x3d& m) {
+  void DirectionalAtom::rotateBy(const RotMat3x3d& m) {
     setA(m *getA());
-}
+  }
 
-std::vector<double> DirectionalAtom::getGrad() {
+  std::vector<double> DirectionalAtom::getGrad() {
     std::vector<double> grad(6, 0.0);
     Vector3d force;
     Vector3d torque;
@@ -144,22 +144,22 @@ std::vector<double> DirectionalAtom::getGrad() {
 
     //gradient is equal to -force
     for (int j = 0 ; j<3; j++)
-        grad[j] = -force[j];
+      grad[j] = -force[j];
 
     for (int j = 0; j < 3; j++ ) {
 
-        grad[3] += torque[j]*ephi[j];
-        grad[4] += torque[j]*etheta[j];
-        grad[5] += torque[j]*epsi[j];
+      grad[3] += torque[j]*ephi[j];
+      grad[4] += torque[j]*etheta[j];
+      grad[5] += torque[j]*epsi[j];
 
     }
     
     return grad;
-}    
+  }    
 
-void DirectionalAtom::accept(BaseVisitor* v) {
+  void DirectionalAtom::accept(BaseVisitor* v) {
     v->visit(this);
-}    
+  }    
 
 }
 

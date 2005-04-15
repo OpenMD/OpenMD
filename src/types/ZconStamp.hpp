@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -46,7 +46,7 @@
 
 class ZconStamp{
 
-public:
+ public:
   ZconStamp(int theIndex);
   ~ZconStamp();
 
@@ -68,7 +68,7 @@ public:
   short int haveKratio( void ) { return have_kRatio; }
   short int haveCantVel( void ) { return have_cantVel; }
   
-private:
+ private:
 
   short int have_zPos;
   short int have_molIndex;

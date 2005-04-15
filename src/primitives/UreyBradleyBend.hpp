@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -56,20 +56,20 @@
 
 namespace oopse {
 
-class UreyBradleyBend : public Bend {
-    public:
-        UreyBradleyBend(Atom* atom1, Atom* atom2, Atom* atom3, UreyBradleyBendType* bt);
-        virtual ~UreyBradleyBend();
-        virtual void calcForce();
+  class UreyBradleyBend : public Bend {
+  public:
+    UreyBradleyBend(Atom* atom1, Atom* atom2, Atom* atom3, UreyBradleyBendType* bt);
+    virtual ~UreyBradleyBend();
+    virtual void calcForce();
 
-    protected:
-        virtual UreyBradleyBendType* getUreyBradleyBendType() {
-            return static_cast<UreyBradleyBendType*> (bendType_);
-        }
+  protected:
+    virtual UreyBradleyBendType* getUreyBradleyBendType() {
+      return static_cast<UreyBradleyBendType*> (bendType_);
+    }
         
-    private:
-        Bond* bond_;
-};
+  private:
+    Bond* bond_;
+  };
 
 } //end namespace oopse
 

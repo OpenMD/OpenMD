@@ -3,7 +3,7 @@
    "Keep this file name-space clean" means, talk to drepper@gnu.org
    before changing it!
    Copyright (C) 1987,88,89,90,91,92,93,94,95,96,98,99,2000,2001
-   	Free Software Foundation, Inc.
+   Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -155,37 +155,37 @@ int optopt = '?';
 
 /* Describe how to deal with options that follow non-option ARGV-elements.
 
-   If the caller did not specify anything,
-   the default is REQUIRE_ORDER if the environment variable
-   POSIXLY_CORRECT is defined, PERMUTE otherwise.
+If the caller did not specify anything,
+the default is REQUIRE_ORDER if the environment variable
+POSIXLY_CORRECT is defined, PERMUTE otherwise.
 
-   REQUIRE_ORDER means don't recognize them as options;
-   stop option processing when the first non-option is seen.
-   This is what Unix does.
-   This mode of operation is selected by either setting the environment
-   variable POSIXLY_CORRECT, or using `+' as the first character
-   of the list of option characters.
+REQUIRE_ORDER means don't recognize them as options;
+stop option processing when the first non-option is seen.
+This is what Unix does.
+This mode of operation is selected by either setting the environment
+variable POSIXLY_CORRECT, or using `+' as the first character
+of the list of option characters.
 
-   PERMUTE is the default.  We permute the contents of ARGV as we scan,
-   so that eventually all the non-options are at the end.  This allows options
-   to be given in any order, even with programs that were not written to
-   expect this.
+PERMUTE is the default.  We permute the contents of ARGV as we scan,
+so that eventually all the non-options are at the end.  This allows options
+to be given in any order, even with programs that were not written to
+expect this.
 
-   RETURN_IN_ORDER is an option available to programs that were written
-   to expect options and other ARGV-elements in any order and that care about
-   the ordering of the two.  We describe each non-option ARGV-element
-   as if it were the argument of an option with character code 1.
-   Using `-' as the first character of the list of option characters
-   selects this mode of operation.
+RETURN_IN_ORDER is an option available to programs that were written
+to expect options and other ARGV-elements in any order and that care about
+the ordering of the two.  We describe each non-option ARGV-element
+as if it were the argument of an option with character code 1.
+Using `-' as the first character of the list of option characters
+selects this mode of operation.
 
-   The special argument `--' forces an end of option-scanning regardless
-   of the value of `ordering'.  In the case of RETURN_IN_ORDER, only
-   `--' can cause `getopt' to return -1 with `optind' != ARGC.  */
+The special argument `--' forces an end of option-scanning regardless
+of the value of `ordering'.  In the case of RETURN_IN_ORDER, only
+`--' can cause `getopt' to return -1 with `optind' != ARGC.  */
 
 static enum
-{
-  REQUIRE_ORDER, PERMUTE, RETURN_IN_ORDER
-} ordering;
+  {
+    REQUIRE_ORDER, PERMUTE, RETURN_IN_ORDER
+  } ordering;
 
 /* Value of POSIXLY_CORRECT environment variable.  */
 static char *posixly_correct;
@@ -268,12 +268,12 @@ static int nonoption_flags_len;
 # endif
 
 # ifdef USE_NONOPTION_FLAGS
-#  define SWAP_FLAGS(ch1, ch2) \
-  if (nonoption_flags_len > 0)						      \
-    {									      \
-      char __tmp = __getopt_nonoption_flags[ch1];			      \
-      __getopt_nonoption_flags[ch1] = __getopt_nonoption_flags[ch2];	      \
-      __getopt_nonoption_flags[ch2] = __tmp;				      \
+#  define SWAP_FLAGS(ch1, ch2)						\
+  if (nonoption_flags_len > 0)						\
+    {									\
+      char __tmp = __getopt_nonoption_flags[ch1];			\
+      __getopt_nonoption_flags[ch1] = __getopt_nonoption_flags[ch2];	\
+      __getopt_nonoption_flags[ch2] = __tmp;				\
     }
 # else
 #  define SWAP_FLAGS(ch1, ch2)
@@ -533,8 +533,8 @@ _getopt_internal (argc, argv, optstring, longopts, longind, long_only)
      from the shell indicating it is not an option.  The later information
      is only used when the used in the GNU libc.  */
 #if defined _LIBC && defined USE_NONOPTION_FLAGS
-# define NONOPTION_P (argv[optind][0] != '-' || argv[optind][1] == '\0'	      \
-		      || (optind < nonoption_flags_len			      \
+# define NONOPTION_P (argv[optind][0] != '-' || argv[optind][1] == '\0'	\
+		      || (optind < nonoption_flags_len			\
 			  && __getopt_nonoption_flags[optind] == '1'))
 #else
 # define NONOPTION_P (argv[optind][0] != '-' || argv[optind][1] == '\0')
@@ -621,16 +621,16 @@ _getopt_internal (argc, argv, optstring, longopts, longind, long_only)
 
   /* Check whether the ARGV-element is a long option.
 
-     If long_only and the ARGV-element has the form "-f", where f is
-     a valid short option, don't consider it an abbreviated form of
-     a long option that starts with f.  Otherwise there would be no
-     way to give the -f short option.
+  If long_only and the ARGV-element has the form "-f", where f is
+  a valid short option, don't consider it an abbreviated form of
+  a long option that starts with f.  Otherwise there would be no
+  way to give the -f short option.
 
-     On the other hand, if there's a long option "fubar" and
-     the ARGV-element is "-fu", do consider that an abbreviation of
-     the long option, just like "--fu", and not "-f" with arg "u".
+  On the other hand, if there's a long option "fubar" and
+  the ARGV-element is "-fu", do consider that an abbreviation of
+  the long option, just like "--fu", and not "-f" with arg "u".
 
-     This distinction seems to be the most useful approach.  */
+  This distinction seems to be the most useful approach.  */
 
   if (longopts != NULL
       && (argv[optind][1] == '-'
@@ -726,8 +726,8 @@ _getopt_internal (argc, argv, optstring, longopts, longind, long_only)
 		{
 		  if (print_errors)
 		    fprintf (stderr,
-			   _("%s: option `%s' requires an argument\n"),
-			   argv[0], argv[optind - 1]);
+			     _("%s: option `%s' requires an argument\n"),
+			     argv[0], argv[optind - 1]);
 		  nextchar += strlen (nextchar);
 		  optopt = pfound->val;
 		  return optstring[0] == ':' ? ':' : '?';
@@ -884,7 +884,7 @@ _getopt_internal (argc, argv, optstring, longopts, longind, long_only)
 		  {
 		    if (print_errors)
 		      fprintf (stderr, _("\
-%s: option `-W %s' doesn't allow an argument\n"),
+ %s: option `-W %s' doesn't allow an argument\n"),
 			       argv[0], pfound->name);
 
 		    nextchar += strlen (nextchar);
@@ -915,8 +915,8 @@ _getopt_internal (argc, argv, optstring, longopts, longind, long_only)
 	      }
 	    return pfound->val;
 	  }
-	  nextchar = NULL;
-	  return 'W';	/* Let the application handle it.   */
+	nextchar = NULL;
+	return 'W';	/* Let the application handle it.   */
       }
     if (temp[1] == ':')
       {

@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -42,16 +42,16 @@
 #include "primitives/Atom.hpp"
 namespace oopse {
 
-Atom::Atom(AtomType* at) : StuntDouble(otAtom, &Snapshot::atomData) ,atomType_(at) {
- mass_ = at->getMass();
-}
+  Atom::Atom(AtomType* at) : StuntDouble(otAtom, &Snapshot::atomData) ,atomType_(at) {
+    mass_ = at->getMass();
+  }
 
-Mat3x3d Atom::getI() {
+  Mat3x3d Atom::getI() {
     return Mat3x3d::identity();
-}    
+  }    
 
-std::vector<double> Atom::getGrad() {
-     std::vector<double> grad(3);
+  std::vector<double> Atom::getGrad() {
+    std::vector<double> grad(3);
     Vector3d force= getFrc();
 
     grad[0] = -force[0];
@@ -59,10 +59,10 @@ std::vector<double> Atom::getGrad() {
     grad[2] = -force[2];
     
     return grad;
-}    
+  }    
 
-void Atom::accept(BaseVisitor* v) {
+  void Atom::accept(BaseVisitor* v) {
     v->visit(this);
-}    
+  }    
 
 }

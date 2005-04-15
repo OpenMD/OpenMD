@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -51,78 +51,78 @@ namespace oopse {
 
 
 
-/**
- * @class RandNumGen a random number generator class
- */
-class RandNumGen{
-    public:
-        typedef unsigned long uint32; 
+  /**
+   * @class RandNumGen a random number generator class
+   */
+  class RandNumGen{
+  public:
+    typedef unsigned long uint32; 
         
-        virtual ~RandNumGen() {
-            delete mtRand_;
-        }
+    virtual ~RandNumGen() {
+      delete mtRand_;
+    }
         
-        /** Returns a real number in [0,1] */
-	double rand() {
-	    return mtRand_->rand();
-        }
+    /** Returns a real number in [0,1] */
+    double rand() {
+      return mtRand_->rand();
+    }
 
-        /** Returns a real number in [0, n] */
-	double rand( const double& n ) {
-            return mtRand_->rand(n);
-        }
+    /** Returns a real number in [0, n] */
+    double rand( const double& n ) {
+      return mtRand_->rand(n);
+    }
 
-        /** Returns a real number in [0, 1) */
-	double randExc() {
-            return mtRand_->randExc();
-        }
+    /** Returns a real number in [0, 1) */
+    double randExc() {
+      return mtRand_->randExc();
+    }
 
-        /** Returns a real number in [0, n) */        
-	double randExc( const double& n ) {
-            return mtRand_->randExc(n);
-        }
+    /** Returns a real number in [0, n) */        
+    double randExc( const double& n ) {
+      return mtRand_->randExc(n);
+    }
 
-        /** Returns a real number in (0, 1) */                
-	double randDblExc() {
-            return mtRand_->randDblExc();
-        }
+    /** Returns a real number in (0, 1) */                
+    double randDblExc() {
+      return mtRand_->randDblExc();
+    }
 
-        /** Returns a real number in (0, n) */                        
-	double randDblExc( const double& n ) {
-            return mtRand_->randDblExc(n);
-        }
+    /** Returns a real number in (0, n) */                        
+    double randDblExc( const double& n ) {
+      return mtRand_->randDblExc(n);
+    }
 
-        /** Returns aninteger in [0,2^32-1]  */            
-	uint32 randInt() {
-           return mtRand_->randInt();
-        }
+    /** Returns aninteger in [0,2^32-1]  */            
+    uint32 randInt() {
+      return mtRand_->randInt();
+    }
 
-        /** Returns aninteger in [0, n]  for n < 2^32 */     
-	uint32 randInt( const uint32& n ) {
-           return mtRand_->randInt(n);
-        }
+    /** Returns aninteger in [0, n]  for n < 2^32 */     
+    uint32 randInt( const uint32& n ) {
+      return mtRand_->randInt(n);
+    }
 	
-	/** Returns a 53-bitreal number in [0,1) (capacity of IEEE double precision) */
-	double rand53() {
-            return mtRand_->rand53();
-	}
+    /** Returns a 53-bitreal number in [0,1) (capacity of IEEE double precision) */
+    double rand53() {
+      return mtRand_->rand53();
+    }
 	
-	/** Access to nonuniform random number distributions */
-	double randNorm( const double& mean, const double& variance) {
-            return mtRand_->randNorm(mean, variance);
-	}
+    /** Access to nonuniform random number distributions */
+    double randNorm( const double& mean, const double& variance) {
+      return mtRand_->randNorm(mean, variance);
+    }
 	
-	// Re-seeding functions with same behavior as initializers
-	virtual void seed( const uint32 oneSeed ) = 0;
+    // Re-seeding functions with same behavior as initializers
+    virtual void seed( const uint32 oneSeed ) = 0;
 	
-	virtual void seed()= 0;
+    virtual void seed()= 0;
 
-    protected:
+  protected:
         
-        MTRand* mtRand_;
+    MTRand* mtRand_;
 
 
-};
+  };
 
 }
 

@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -49,32 +49,32 @@
 
 namespace oopse {
 
-class ForceField;
+  class ForceField;
 
-    /**
-     * @class SectionParser SectionParser.hpp "io/SectionParser.hpp"
-     * @todo document
-     */
-    class SectionParser {
-        public:
-            virtual ~SectionParser() {}
-            void parse(std::istream& input, ForceField& ff, int lineNo);
+  /**
+   * @class SectionParser SectionParser.hpp "io/SectionParser.hpp"
+   * @todo document
+   */
+  class SectionParser {
+  public:
+    virtual ~SectionParser() {}
+    void parse(std::istream& input, ForceField& ff, int lineNo);
 
-            const std::string& getSectionName() const {
-                return sectionName_;
-            }
+    const std::string& getSectionName() const {
+      return sectionName_;
+    }
 
-        protected:
-            void setSectionName(const std::string& sectionName) {
-                sectionName_ = sectionName;
-            }
+  protected:
+    void setSectionName(const std::string& sectionName) {
+      sectionName_ = sectionName;
+    }
             
-        private:
+  private:
 
-            bool isEndSection(const std::string& line);
-            virtual void parseLine(ForceField& ff, const std::string& line, int lineNo) = 0;
-            std::string sectionName_;
-    };
+    bool isEndSection(const std::string& line);
+    virtual void parseLine(ForceField& ff, const std::string& line, int lineNo) = 0;
+    std::string sectionName_;
+  };
 
 
 }

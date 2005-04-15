@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -50,11 +50,11 @@
 
 namespace oopse {
   RestWriter::RestWriter(SimInfo* info) : 
-  info_(info) {
+    info_(info) {
     
-    //we use master - slave mode, only master node writes to disk
-    outName = info_->getRestFileName();
-  }
+      //we use master - slave mode, only master node writes to disk
+      outName = info_->getRestFileName();
+    }
   
   RestWriter::~RestWriter() {}
   

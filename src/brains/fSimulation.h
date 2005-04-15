@@ -28,24 +28,25 @@ typedef  struct{
 
 #ifdef  __FORTRAN90
 
-type, public :: simtype
-   PRIVATE
-   SEQUENCE
-   !! Dielectric Constant for reaction field
-   real ( kind = dp ) :: dielect = 0.0_dp
-   !! Periodic Boundry Conditions
-   logical :: SIM_uses_PBC
-   logical :: SIM_uses_DirectionalAtoms
-   logical :: SIM_uses_LennardJones
-   logical :: SIM_uses_Electrostatics
-   logical :: SIM_uses_Charges
-   logical :: SIM_uses_Dipoles
-   logical :: SIM_uses_Sticky
-   logical :: SIM_uses_GayBerne
-   logical :: SIM_uses_EAM
-   logical :: SIM_uses_Shapes
-   logical :: SIM_uses_FLARB
-   logical :: SIM_uses_RF
-end type simtype
-#endif
+  type, public :: simtype
+    PRIVATE
+    SEQUENCE
+    !! Dielectric Constant for reaction field
+    real ( kind = dp ) :: dielect = 0.0_dp
+    !! Periodic Boundry Conditions
+    logical :: SIM_uses_PBC
+    logical :: SIM_uses_DirectionalAtoms
+    logical :: SIM_uses_LennardJones
+    logical :: SIM_uses_Electrostatics
+    logical :: SIM_uses_Charges
+    logical :: SIM_uses_Dipoles
+    logical :: SIM_uses_Sticky
+    logical :: SIM_uses_GayBerne
+    logical :: SIM_uses_EAM
+    logical :: SIM_uses_Shapes
+    logical :: SIM_uses_FLARB
+    logical :: SIM_uses_RF
+  end type simtype
 
+#endif
+  

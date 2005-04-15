@@ -47,7 +47,7 @@
 #include "utils/Algorithm.hpp"
 
 namespace oopse {
-int BitSet::countBits() {
+  int BitSet::countBits() {
 #ifdef __RWSTD    
     //For the compiler(Sun, MSVC6.0) binding with RougeWave STL Library, we need to use old-style
     // std::count which is error-prone.
@@ -57,9 +57,9 @@ int BitSet::countBits() {
 #else
     return std::count(bitset_.begin(), bitset_.end(), true);
 #endif
-}
+  }
 
-void BitSet::flip(int fromIndex, int toIndex) {
+  void BitSet::flip(int fromIndex, int toIndex) {
     assert(fromIndex <= toIndex);
     assert(fromIndex >=0);
     assert(toIndex <= size());
@@ -68,9 +68,9 @@ void BitSet::flip(int fromIndex, int toIndex) {
 
     std::transform(first, last, first, std::logical_not<bool>());
         
-}
+  }
 
-BitSet BitSet::get(int fromIndex, int toIndex) {
+  BitSet BitSet::get(int fromIndex, int toIndex) {
     assert(fromIndex <= toIndex);
     assert(fromIndex >=0);
     assert(toIndex <= size());
@@ -80,129 +80,129 @@ BitSet BitSet::get(int fromIndex, int toIndex) {
     BitSet result;
     std::copy(first, last, std::back_inserter(result.bitset_));
     return result;
-}
+  }
 
-bool BitSet::none() {
+  bool BitSet::none() {
     std::vector<char>::iterator i = std::find(bitset_.begin(), bitset_.end(), true);
     return i == bitset_.end() ? true : false;
-}
+  }
     
-int BitSet::nextOffBit(int fromIndex) const {
+  int BitSet::nextOffBit(int fromIndex) const {
     if (fromIndex <= -1) {
-        //in case -1 or other negative number is passed to this function
-        return -1;
+      //in case -1 or other negative number is passed to this function
+      return -1;
     }
     
     ++fromIndex;
     while (fromIndex < size()) {
-        if (!bitset_[fromIndex]) {
-            return fromIndex;
-        }
-        ++fromIndex;
+      if (!bitset_[fromIndex]) {
+	return fromIndex;
+      }
+      ++fromIndex;
     }
 
     return -1;
-}
+  }
 
-int BitSet::nextOnBit(int fromIndex) const {
+  int BitSet::nextOnBit(int fromIndex) const {
     if (fromIndex <= -1) {
-        //in case -1 or other negative number is passed to this function
-        return -1;
+      //in case -1 or other negative number is passed to this function
+      return -1;
     }
 
     ++fromIndex;
     while (fromIndex < size()) {
-        if (bitset_[fromIndex]) {
-            return fromIndex;
-        }
-        ++fromIndex;
+      if (bitset_[fromIndex]) {
+	return fromIndex;
+      }
+      ++fromIndex;
     }
 
     return -1;
-}
+  }
 
-void BitSet::andOperator (const BitSet& bs) {
+  void BitSet::andOperator (const BitSet& bs) {
     assert(size() == bs.size());
 
     std::transform(bs.bitset_.begin(), bs.bitset_.end(), bitset_.begin(), bitset_.begin(), std::logical_and<bool>());
-}
+  }
 
-void BitSet::orOperator (const BitSet& bs) {
+  void BitSet::orOperator (const BitSet& bs) {
     assert(size() == bs.size());
     std::transform(bs.bitset_.begin(), bs.bitset_.end(), bitset_.begin(), bitset_.begin(), std::logical_or<bool>());    
-}
+  }
 
-void BitSet::xorOperator (const BitSet& bs) {
+  void BitSet::xorOperator (const BitSet& bs) {
     assert(size() == bs.size());
     std::transform(bs.bitset_.begin(), bs.bitset_.end(), bitset_.begin(), bitset_.begin(), oopse::logical_xor<bool>());        
-}
+  }
    
-void BitSet::setBits(int fromIndex, int toIndex, bool value) {
+  void BitSet::setBits(int fromIndex, int toIndex, bool value) {
     assert(fromIndex <= toIndex);
     assert(fromIndex >=0);
     assert(toIndex <= size());
     std::vector<char>::iterator first = bitset_.begin() + fromIndex;
     std::vector<char>::iterator last = bitset_.begin() + toIndex;
     std::fill(first, last, value);
-}
+  }
 
-void BitSet::resize(int nbits) {
+  void BitSet::resize(int nbits) {
     int oldSize = size();
     bitset_.resize(nbits);
     if (nbits > oldSize) {
-        std::fill(bitset_.begin()+oldSize, bitset_.end(), false);
+      std::fill(bitset_.begin()+oldSize, bitset_.end(), false);
     }
-}
+  }
 
-BitSet operator| (const BitSet& bs1, const BitSet& bs2) {
+  BitSet operator| (const BitSet& bs1, const BitSet& bs2) {
     assert(bs1.size() == bs2.size());
 
     BitSet result(bs1);
     result |= bs2;
     return result;
-}
+  }
 
-BitSet operator& (const BitSet& bs1, const BitSet& bs2) {
+  BitSet operator& (const BitSet& bs1, const BitSet& bs2) {
     assert(bs1.size() == bs2.size());
 
     BitSet result(bs1);
     result &= bs2;
     return result;
-}
+  }
 
-BitSet operator^ (const BitSet& bs1, const BitSet& bs2) {
+  BitSet operator^ (const BitSet& bs1, const BitSet& bs2) {
     assert(bs1.size() == bs2.size());
 
     BitSet result(bs1);
     result ^= bs2;
     return result;
-}
+  }
 
-BitSet operator- (const BitSet& bs1, const BitSet& bs2) {
+  BitSet operator- (const BitSet& bs1, const BitSet& bs2) {
     assert(bs1.size() == bs2.size());
 
     BitSet result(bs1);
     result -= bs2;
     return result;
-}
+  }
 
-bool operator== (const BitSet & bs1, const BitSet &bs2) {
+  bool operator== (const BitSet & bs1, const BitSet &bs2) {
     assert(bs1.size() == bs2.size());
     return std::equal(bs1.bitset_.begin(), bs1.bitset_.end(), bs2.bitset_.begin());
-}
+  }
 
-//std::istream& operator>> ( std::istream& is, const BitSet& bs) {
-//
-//    return is;
-//}
+  //std::istream& operator>> ( std::istream& is, const BitSet& bs) {
+  //
+  //    return is;
+  //}
 
-std::ostream& operator<< ( std::ostream& os, const BitSet& bs) {
+  std::ostream& operator<< ( std::ostream& os, const BitSet& bs) {
     for (int i = 0; i < bs.bitset_.size(); ++i) {
-        std::string val = bs[i] ? "true" : "false";
-        os << "BitSet[" << i <<"] = " << val << std::endl; 
+      std::string val = bs[i] ? "true" : "false";
+      os << "BitSet[" << i <<"] = " << val << std::endl; 
     }
     
     return os;
-}
+  }
 
 }

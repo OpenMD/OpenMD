@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -43,8 +43,8 @@
 #include "primitives/DirectionalAtom.hpp"
 namespace oopse {
 
-/**@todo still a lot left to improve*/
-void GhostBend::calcForce() {
+  /**@todo still a lot left to improve*/
+  void GhostBend::calcForce() {
     DirectionalAtom* ghostAtom = static_cast<DirectionalAtom*>(atom2_);
     
     Vector3d pos1 = atom1_->getPos();
@@ -64,9 +64,9 @@ void GhostBend::calcForce() {
 
     //check roundoff     
     if (cosTheta > 1.0) {
-        cosTheta = 1.0;
+      cosTheta = 1.0;
     } else if (cosTheta < -1.0) {
-        cosTheta = -1.0;
+      cosTheta = -1.0;
     }
 
     double theta = acos(cosTheta);
@@ -78,7 +78,7 @@ void GhostBend::calcForce() {
     double sinTheta = sqrt(1.0 - cosTheta * cosTheta);
 
     if (fabs(sinTheta) < 1.0E-12) {
-        sinTheta = 1.0E-12;
+      sinTheta = 1.0E-12;
     }
 
     double commonFactor1 = -firstDerivative / sinTheta * d12inv;
@@ -91,7 +91,7 @@ void GhostBend::calcForce() {
     /**@todo test correctness */
     ghostAtom->addTrq(cross(r32, force3) );
 
-}
+  }
 
 } //end namespace oopse
 

@@ -270,8 +270,8 @@ namespace oopse {
           
           if(mol == NULL) {
 	    sprintf(painCave.errMsg, 
-                   "RestReader Error: Molecule not found on node %d!\n",
-                   worldRank);
+		    "RestReader Error: Molecule not found on node %d!\n",
+		    worldRank);
             painCave.isFatal = 1;
             simError();
           }

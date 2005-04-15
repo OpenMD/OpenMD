@@ -46,48 +46,48 @@
 
 namespace oopse {
 
-GofAngle2::GofAngle2(SimInfo* info, const std::string& filename, const std::string& sele1, 
-    const std::string& sele2, int nangleBins)
+  GofAngle2::GofAngle2(SimInfo* info, const std::string& filename, const std::string& sele1, 
+		       const std::string& sele2, int nangleBins)
     : RadialDistrFunc(info, filename, sele1, sele2), nAngleBins_(nangleBins) {
 
-    setOutputName(getPrefix(filename) + ".gto");
+      setOutputName(getPrefix(filename) + ".gto");
 
-    deltaCosAngle_ = 2.0 / nAngleBins_;
+      deltaCosAngle_ = 2.0 / nAngleBins_;
 
-    histogram_.resize(nAngleBins_);
-    avgGofr_.resize(nAngleBins_);
-    for (int i = 0 ; i < nAngleBins_; ++i) {
+      histogram_.resize(nAngleBins_);
+      avgGofr_.resize(nAngleBins_);
+      for (int i = 0 ; i < nAngleBins_; ++i) {
         histogram_[i].resize(nAngleBins_);
         avgGofr_[i].resize(nAngleBins_);
-    }    
+      }    
 
-}
+    }
 
 
-void GofAngle2::preProcess() {
+  void GofAngle2::preProcess() {
 
     for (int i = 0; i < avgGofr_.size(); ++i) {
-        std::fill(avgGofr_[i].begin(), avgGofr_[i].end(), 0);
+      std::fill(avgGofr_[i].begin(), avgGofr_[i].end(), 0);
     }
-}
+  }
 
-void GofAngle2::initalizeHistogram() {
+  void GofAngle2::initalizeHistogram() {
     npairs_ = 0;
     for (int i = 0; i < histogram_.size(); ++i)
-        std::fill(histogram_[i].begin(), histogram_[i].end(), 0);
-}
+      std::fill(histogram_[i].begin(), histogram_[i].end(), 0);
+  }
 
 
-void GofAngle2::processHistogram() {
+  void GofAngle2::processHistogram() {
 
     //std::for_each(avgGofr_.begin(), avgGofr_.end(), std::plus<std::vector<int>>)
 
-}
+  }
 
-void GofAngle2::collectHistogram(StuntDouble* sd1, StuntDouble* sd2) {
+  void GofAngle2::collectHistogram(StuntDouble* sd1, StuntDouble* sd2) {
 
     if (sd1 == sd2) {
-        return;
+      return;
     }
 
     Vector3d pos1 = sd1->getPos();
@@ -105,40 +105,40 @@ void GofAngle2::collectHistogram(StuntDouble* sd1, StuntDouble* sd2) {
     double cosAngle1 = dot(r12, dipole1);
     double cosAngle2 = dot(dipole1, dipole2);
 
-   double halfBin = (nAngleBins_ - 1) * 0.5;
+    double halfBin = (nAngleBins_ - 1) * 0.5;
     int angleBin1 = halfBin * (cosAngle1 + 1.0);
     int angleBin2 = halfBin * (cosAngle1 + 1.0);
 
     ++histogram_[angleBin1][angleBin1];    
     ++npairs_;
-}
+  }
 
-void GofAngle2::writeRdf() {
+  void GofAngle2::writeRdf() {
     std::ofstream rdfStream(outputFilename_.c_str());
     if (rdfStream.is_open()) {
-        rdfStream << "#radial distribution function\n";
-        rdfStream << "#selection1: (" << selectionScript1_ << ")\t";
-        rdfStream << "selection2: (" << selectionScript2_ << ")\n";
-        rdfStream << "#nAngleBins =" << nAngleBins_ << "deltaCosAngle = " << deltaCosAngle_ << "\n";
-        for (int i = 0; i < avgGofr_.size(); ++i) {
-            double cosAngle1 = -1.0 + (i + 0.5)*deltaCosAngle_;
+      rdfStream << "#radial distribution function\n";
+      rdfStream << "#selection1: (" << selectionScript1_ << ")\t";
+      rdfStream << "selection2: (" << selectionScript2_ << ")\n";
+      rdfStream << "#nAngleBins =" << nAngleBins_ << "deltaCosAngle = " << deltaCosAngle_ << "\n";
+      for (int i = 0; i < avgGofr_.size(); ++i) {
+	double cosAngle1 = -1.0 + (i + 0.5)*deltaCosAngle_;
 
-            for(int j = 0; j < avgGofr_[i].size(); ++j) {
-                double cosAngle2 = -1.0 + (j + 0.5)*deltaCosAngle_;
-                rdfStream <<avgGofr_[i][j]/nProcessed_ << "\t";
-            }
+	for(int j = 0; j < avgGofr_[i].size(); ++j) {
+	  double cosAngle2 = -1.0 + (j + 0.5)*deltaCosAngle_;
+	  rdfStream <<avgGofr_[i][j]/nProcessed_ << "\t";
+	}
 
-            rdfStream << "\n";
-        }
+	rdfStream << "\n";
+      }
         
     } else {
 
-        sprintf(painCave.errMsg, "GofAngle2: unable to open %s\n", outputFilename_.c_str());
-        painCave.isFatal = 1;
-        simError();  
+      sprintf(painCave.errMsg, "GofAngle2: unable to open %s\n", outputFilename_.c_str());
+      painCave.isFatal = 1;
+      simError();  
     }
 
     rdfStream.close();
-}
+  }
 
 }

@@ -46,109 +46,109 @@
 #include <vector>
 namespace oopse {
 
-/**
- * @class BitSet BitSet.hpp "BitSet.hpp"
- * @brief BitSet is a wrapper class of std::vector<char> to act as a growable std::bitset 
- */
-class BitSet {
-    public:
-        /** */
-        BitSet() {}
-        /** */
-        BitSet(int nbits) : bitset_(nbits) {clearAll(); }
+  /**
+   * @class BitSet BitSet.hpp "BitSet.hpp"
+   * @brief BitSet is a wrapper class of std::vector<char> to act as a growable std::bitset 
+   */
+  class BitSet {
+  public:
+    /** */
+    BitSet() {}
+    /** */
+    BitSet(int nbits) : bitset_(nbits) {clearAll(); }
 
-        /** Returns the number of bits set to true in this BitSet.  */
-        int countBits();
+    /** Returns the number of bits set to true in this BitSet.  */
+    int countBits();
 
-        /** Sets the bit at the specified index to to the complement of its current value. */
-        void flip(int bitIndex) {  bitset_[bitIndex] = !bitset_[bitIndex];  }
+    /** Sets the bit at the specified index to to the complement of its current value. */
+    void flip(int bitIndex) {  bitset_[bitIndex] = !bitset_[bitIndex];  }
  
-        /** Sets each bit from the specified fromIndex(inclusive) to the specified toIndex(exclusive) to the complement of its current value. */
-        void flip(int fromIndex, int toIndex); 
+    /** Sets each bit from the specified fromIndex(inclusive) to the specified toIndex(exclusive) to the complement of its current value. */
+    void flip(int fromIndex, int toIndex); 
 
-        /** Sets each bit to the complement of its current value. */
-        void flip() { flip(0, size()); }
+    /** Sets each bit to the complement of its current value. */
+    void flip() { flip(0, size()); }
         
-        /** Returns the value of the bit with the specified index. */
-        bool get(int bitIndex) {  return bitset_[bitIndex];  }
+    /** Returns the value of the bit with the specified index. */
+    bool get(int bitIndex) {  return bitset_[bitIndex];  }
         
-        /** Returns a new BitSet composed of bits from this BitSet from fromIndex(inclusive) to toIndex(exclusive). */
-        BitSet get(int fromIndex, int toIndex); 
+    /** Returns a new BitSet composed of bits from this BitSet from fromIndex(inclusive) to toIndex(exclusive). */
+    BitSet get(int fromIndex, int toIndex); 
         
-        /** Returns true if any bits are set to true */
-        bool any() {return !none(); }
+    /** Returns true if any bits are set to true */
+    bool any() {return !none(); }
 
-        /** Returns true if no bits are set to true */
-        bool none();
+    /** Returns true if no bits are set to true */
+    bool none();
 
-        int firstOffBit() const { return !bitset_[0] ? 0 : nextOffBit(0); }
+    int firstOffBit() const { return !bitset_[0] ? 0 : nextOffBit(0); }
         
-        /** Returns the index of the first bit that is set to false that occurs on or after the specified starting index.*/
-        int nextOffBit(int fromIndex) const; 
+    /** Returns the index of the first bit that is set to false that occurs on or after the specified starting index.*/
+    int nextOffBit(int fromIndex) const; 
 
-        int firstOnBit() const { return bitset_[0] ? 0 : nextOnBit(0); }
+    int firstOnBit() const { return bitset_[0] ? 0 : nextOnBit(0); }
         
-        /** Returns the index of the first bit that is set to true that occurs on or after the specified starting index. */
-        int nextOnBit(int fromIndex) const; 
+    /** Returns the index of the first bit that is set to true that occurs on or after the specified starting index. */
+    int nextOnBit(int fromIndex) const; 
         
-        /** Performs a logical AND of this target bit set with the argument bit set. */
-        void andOperator (const BitSet& bs);
+    /** Performs a logical AND of this target bit set with the argument bit set. */
+    void andOperator (const BitSet& bs);
        
-        /** Performs a logical OR of this bit set with the bit set argument. */
-        void orOperator (const BitSet& bs); 
+    /** Performs a logical OR of this bit set with the bit set argument. */
+    void orOperator (const BitSet& bs); 
         
-        /** Performs a logical XOR of this bit set with the bit set argument. */
-        void xorOperator (const BitSet& bs);        
+    /** Performs a logical XOR of this bit set with the bit set argument. */
+    void xorOperator (const BitSet& bs);        
                
-        void setBitOn(int bitIndex) {  setBit(bitIndex, true);  }
+    void setBitOn(int bitIndex) {  setBit(bitIndex, true);  }
 
-        void setBitOff(int bitIndex) {  setBit(bitIndex, false);  }
+    void setBitOff(int bitIndex) {  setBit(bitIndex, false);  }
 
-        void setRangeOn(int fromIndex, int toIndex) {  setBits(fromIndex, toIndex, true);  }
+    void setRangeOn(int fromIndex, int toIndex) {  setBits(fromIndex, toIndex, true);  }
 
-        void setRangeOff(int fromIndex, int toIndex) {  setBits(fromIndex, toIndex, false);  }        
+    void setRangeOff(int fromIndex, int toIndex) {  setBits(fromIndex, toIndex, false);  }        
 
-        /** Sets all of the bits in this BitSet to false. */
-        void clearAll() {  setRangeOff(0, size());  }         
+    /** Sets all of the bits in this BitSet to false. */
+    void clearAll() {  setRangeOff(0, size());  }         
 
-        void setAll() {  setRangeOn(0, size());  }        
+    void setAll() {  setRangeOn(0, size());  }        
         
-        /** Returns the number of bits of space actually in use by this BitSet to represent bit values. */
-        int size() const {  return bitset_.size();  }
+    /** Returns the number of bits of space actually in use by this BitSet to represent bit values. */
+    int size() const {  return bitset_.size();  }
 
-        /** Changes the size of BitSet*/
-        void resize(int nbits);
+    /** Changes the size of BitSet*/
+    void resize(int nbits);
         
-        BitSet& operator&= (const BitSet &bs) {  andOperator (bs); return *this; }
-        BitSet& operator|= (const BitSet &bs) { orOperator (bs); return *this; }
-        BitSet& operator^= (const BitSet &bs) { xorOperator (bs); return *this; }
-        BitSet& operator-= (const BitSet &bs) { 
-            BitSet tmp = *this ^ bs;
-            *this &= tmp;
-            return *this;
-        }
+    BitSet& operator&= (const BitSet &bs) {  andOperator (bs); return *this; }
+    BitSet& operator|= (const BitSet &bs) { orOperator (bs); return *this; }
+    BitSet& operator^= (const BitSet &bs) { xorOperator (bs); return *this; }
+    BitSet& operator-= (const BitSet &bs) { 
+      BitSet tmp = *this ^ bs;
+      *this &= tmp;
+      return *this;
+    }
         
-        bool operator[] (int bitIndex)  const {  return bitset_[bitIndex];  }
-        friend BitSet operator| (const BitSet& bs1, const BitSet& bs2);
-        friend BitSet operator& (const BitSet& bs1, const BitSet& bs2);
-        friend BitSet operator^ (const BitSet& bs1, const BitSet& bs2);
-        friend BitSet operator- (const BitSet& bs1, const BitSet& bs2);
+    bool operator[] (int bitIndex)  const {  return bitset_[bitIndex];  }
+    friend BitSet operator| (const BitSet& bs1, const BitSet& bs2);
+    friend BitSet operator& (const BitSet& bs1, const BitSet& bs2);
+    friend BitSet operator^ (const BitSet& bs1, const BitSet& bs2);
+    friend BitSet operator- (const BitSet& bs1, const BitSet& bs2);
         
-        friend bool operator== (const BitSet & bs1, const BitSet &bs2);
+    friend bool operator== (const BitSet & bs1, const BitSet &bs2);
 
-        //friend std::istream& operator>> ( std::istream&, const BitSet& bs);
-        friend std::ostream& operator<< ( std::ostream&, const BitSet& bs) ;
+    //friend std::istream& operator>> ( std::istream&, const BitSet& bs);
+    friend std::ostream& operator<< ( std::ostream&, const BitSet& bs) ;
 
-    private:
+  private:
 
-        /** Sets the bit at the specified index to the specified value. */
-        void setBit(int bitIndex, bool value) { bitset_[bitIndex] = value; }
+    /** Sets the bit at the specified index to the specified value. */
+    void setBit(int bitIndex, bool value) { bitset_[bitIndex] = value; }
         
-        /** Sets the bits from the specified fromIndex(inclusive) to the specified toIndex(exclusive) to the specified value. */
-        void setBits(int fromIndex, int toIndex, bool value);
+    /** Sets the bits from the specified fromIndex(inclusive) to the specified toIndex(exclusive) to the specified value. */
+    void setBits(int fromIndex, int toIndex, bool value);
         
-        std::vector<char> bitset_;
-};
+    std::vector<char> bitset_;
+  };
 
 
 }

@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -56,200 +56,200 @@
 #include <vector>
 namespace oopse{
 
+  /**
+   * @ class GenericData GenericData.hpp "utils/GenericData.hpp"
+   * @brief Base class for generic data which is associated with an id
+   */
+  class GenericData{
+  public:
+    GenericData() :  id_("UndefinedGenericData"){}
+
+    GenericData(const std::string& id) {  setID(id);  }
+
+    /** virtual destructor */
+    virtual ~GenericData() {}
+
+
     /**
-     * @ class GenericData GenericData.hpp "utils/GenericData.hpp"
-     * @brief Base class for generic data which is associated with an id
+     *  Returns the id of this generic data
+     *
+     * @return the id of this generic data
+     *
+     * @see #setID
      */
-    class GenericData{
-        public:
-            GenericData() :  id_("UndefinedGenericData"){}
+    const std::string getID() const { return id_;  }
 
-            GenericData(const std::string& id) {  setID(id);  }
-
-            /** virtual destructor */
-            virtual ~GenericData() {}
-
-
-            /**
-             *  Returns the id of this generic data
-             *
-             * @return the id of this generic data
-             *
-             * @see #setID
-             */
-            const std::string getID() const { return id_;  }
-
-            /**
-             *  Sets the id of this generic data
-             *
-             * @param id the id to be set
-             *
-             * @see #getID
-             */
-            void setID(const std::string& id) { id_ = id;  }
+    /**
+     *  Sets the id of this generic data
+     *
+     * @param id the id to be set
+     *
+     * @see #getID
+     */
+    void setID(const std::string& id) { id_ = id;  }
 
             
-        private:
-            GenericData(const GenericData&);
-            GenericData& operator=(GenericData&);
-            std::string id_;
+  private:
+    GenericData(const GenericData&);
+    GenericData& operator=(GenericData&);
+    std::string id_;
 
-    };
+  };
 
-    /**
-     * @class SimpleTypeData
-     * @brief SimpleTypeData class is a POD  repository class 
-     * @warning ElemDataType must be copy constructible, and copy assignable
-     */
-    template<typename ElemDataType> class SimpleTypeData : public GenericData{
+  /**
+   * @class SimpleTypeData
+   * @brief SimpleTypeData class is a POD  repository class 
+   * @warning ElemDataType must be copy constructible, and copy assignable
+   */
+  template<typename ElemDataType> class SimpleTypeData : public GenericData{
 
-        public:
-            SimpleTypeData() :  GenericData(), data_(ElemDataType()) {}
-            SimpleTypeData(const std::string& id) : GenericData(id), data_(ElemDataType()) {}
-            SimpleTypeData(const std::string&id , const ElemDataType& data) : GenericData(id), data_(data) {}
-            template<typename T>
-            SimpleTypeData(const SimpleTypeData<T>& s) {
-                data_ = s.getData();
-            }
+  public:
+    SimpleTypeData() :  GenericData(), data_(ElemDataType()) {}
+    SimpleTypeData(const std::string& id) : GenericData(id), data_(ElemDataType()) {}
+    SimpleTypeData(const std::string&id , const ElemDataType& data) : GenericData(id), data_(data) {}
+    template<typename T>
+    SimpleTypeData(const SimpleTypeData<T>& s) {
+      data_ = s.getData();
+    }
 
-            SimpleTypeData<ElemDataType>& operator =(const SimpleTypeData<ElemDataType>& s) {
-                if (this == &s)
-                    return *this;
+    SimpleTypeData<ElemDataType>& operator =(const SimpleTypeData<ElemDataType>& s) {
+      if (this == &s)
+	return *this;
                 
-                data_ = s.getData();
-                return *this;                
-            }
+      data_ = s.getData();
+      return *this;                
+    }
             
-            template<typename T>
-            SimpleTypeData<ElemDataType>& operator =(const SimpleTypeData<T>& s) {                
-                data_ = s.getData();
-                return *this;
-            }
+    template<typename T>
+    SimpleTypeData<ElemDataType>& operator =(const SimpleTypeData<T>& s) {                
+      data_ = s.getData();
+      return *this;
+    }
             
-            /** Returns POD data */     
-            const ElemDataType& getData() const {return data_;}
-            ElemDataType& getData()  {return data_;}
-            /**
-            * Sets POD data
-            * @data POD data to be set
-            */
-            void setData(const ElemDataType& data) { data_ = data;  }
+    /** Returns POD data */     
+    const ElemDataType& getData() const {return data_;}
+    ElemDataType& getData()  {return data_;}
+    /**
+     * Sets POD data
+     * @data POD data to be set
+     */
+    void setData(const ElemDataType& data) { data_ = data;  }
 
-        private:
-            ElemDataType data_;
-    };
+  private:
+    ElemDataType data_;
+  };
 
-    /** BoolGenericData is a generic data type contains a bool variable */
-    typedef SimpleTypeData<bool> BoolGenericData;
+  /** BoolGenericData is a generic data type contains a bool variable */
+  typedef SimpleTypeData<bool> BoolGenericData;
 
-    /** IntGenericData is a generic data type contains an integer variable */
-    typedef SimpleTypeData<int> IntGenericData;
+  /** IntGenericData is a generic data type contains an integer variable */
+  typedef SimpleTypeData<int> IntGenericData;
 
-    /** FloatGenericData is a generic data type contains a float variable */
-    typedef SimpleTypeData<float> FloatGenericData;
+  /** FloatGenericData is a generic data type contains a float variable */
+  typedef SimpleTypeData<float> FloatGenericData;
 
-    /** DoubleGenericData is a generic data type contains a double variable */
-    typedef SimpleTypeData<double> DoubleGenericData;
+  /** DoubleGenericData is a generic data type contains a double variable */
+  typedef SimpleTypeData<double> DoubleGenericData;
   
-    /**
-     * @typedef StringGenericData
-     * A generic data type contains a  std::string variable
-     *
-     * @code
-     *   StringGenericData* s = new StringGenericData("MyStringGenericData");
-     *   PropertyMap propMap;
-     *   GenericData* gdata;
-     *
-     *   s->setData("OOPSE");
-     *   propMap->addProperty(s);
-     *   
-     *   gdata = propMap->getPropertyByName("MyStringGenericData");
-     *   if (gdata != NULL){
-     *     s = dynamic_cast<StringGenericData*>(gdata);
-     *     if (s != NULL)
-     *       std::cout << s->getData() << std::endl;
-     *   }
-     *
-     * @endcode
-     */  
-    typedef SimpleTypeData<std::string> StringGenericData;
+  /**
+   * @typedef StringGenericData
+   * A generic data type contains a  std::string variable
+   *
+   * @code
+   *   StringGenericData* s = new StringGenericData("MyStringGenericData");
+   *   PropertyMap propMap;
+   *   GenericData* gdata;
+   *
+   *   s->setData("OOPSE");
+   *   propMap->addProperty(s);
+   *   
+   *   gdata = propMap->getPropertyByName("MyStringGenericData");
+   *   if (gdata != NULL){
+   *     s = dynamic_cast<StringGenericData*>(gdata);
+   *     if (s != NULL)
+   *       std::cout << s->getData() << std::endl;
+   *   }
+   *
+   * @endcode
+   */  
+  typedef SimpleTypeData<std::string> StringGenericData;
 
-    /**
-    * @class STLContainerTypeData 
-    * @brief STL container type generic data which is associated with an id
-    *
-    * @template ContainerType
-    * @template ElemDataType
-    */
-    template <typename ElemDataType > 
-    class VectorTypeData : public GenericData {
-        public:
-            typedef VectorTypeData<ElemDataType> SelfType;
+  /**
+   * @class STLContainerTypeData 
+   * @brief STL container type generic data which is associated with an id
+   *
+   * @template ContainerType
+   * @template ElemDataType
+   */
+  template <typename ElemDataType > 
+  class VectorTypeData : public GenericData {
+  public:
+    typedef VectorTypeData<ElemDataType> SelfType;
 
-            VectorTypeData(const std::string& id) 
-                : GenericData(id){}
+    VectorTypeData(const std::string& id) 
+      : GenericData(id){}
             
-            VectorTypeData(const SelfType& s) : SelfType(s){}
+    VectorTypeData(const SelfType& s) : SelfType(s){}
 
-            SelfType& operator =(const SelfType& s){
-                if (this == &s)
-                    return *this;
+    SelfType& operator =(const SelfType& s){
+      if (this == &s)
+	return *this;
 
-                this->data_ = s.data_;
-                return *this;
-            }
+      this->data_ = s.data_;
+      return *this;
+    }
             
-        private:
-            std::vector<ElemDataType> data_;
-    };
+  private:
+    std::vector<ElemDataType> data_;
+  };
 
-    /**
-     * @typedef IntVectorGenericData
-     * A generic data type contains a  std::vector<int> variable.
-     */  
-    typedef VectorTypeData<int> IntVectorGenericData;
+  /**
+   * @typedef IntVectorGenericData
+   * A generic data type contains a  std::vector<int> variable.
+   */  
+  typedef VectorTypeData<int> IntVectorGenericData;
 
-    /**
-     * @typedef IntVectorGenericData
-     * A generic data type contains a  std::vector<float> variable.
-     */  
-    typedef VectorTypeData<float> FloatVectorGenericData;
+  /**
+   * @typedef IntVectorGenericData
+   * A generic data type contains a  std::vector<float> variable.
+   */  
+  typedef VectorTypeData<float> FloatVectorGenericData;
 
-    /**
-     * @typedef IntVectorGenericData
-     * A generic data type contains a  std::vector<double> variable.
-     */  
-    typedef VectorTypeData<double> DoubleVectorGenericData;
+  /**
+   * @typedef IntVectorGenericData
+   * A generic data type contains a  std::vector<double> variable.
+   */  
+  typedef VectorTypeData<double> DoubleVectorGenericData;
 
-    /** 
-     * @typedef StringVectorGenericData
-     *  A generic data type contains a  std::vector<string> variable.
-     *
-     * @code
-     *  StringVectorGenericData* sv = new StringVectorGenericData("MyStringVector");
-     *  GenericData* gdata;
-     *  PropertyMap propMap;
-     *  std::vector<std::string>::iterator iter;
-     *  
-     *  sv->push_back("Hello World");
-     *  sv->push_back("OOPSE");
-     *
-     *  propMap.addProperty(sv);
-     *  
-     *  gdata = propMap.getPropertyByName("MyStringVector");
-     *
-     *  if (gdata != NULL){
-     * 
-     *    sv = dynamic_cast<StringVectorGenericData*>(gdata);
-     *
-     *    if (sv != NULL){
-     *      for (iter = sv->begin(); iter != sv->end(); ++ iter)
-     *        std::cout << *iter << std::endl;
-     *    }
-     *  }
-     * @endcode
-     */  
-    typedef VectorTypeData<std::string> StringVectorGenericData;
+  /** 
+   * @typedef StringVectorGenericData
+   *  A generic data type contains a  std::vector<string> variable.
+   *
+   * @code
+   *  StringVectorGenericData* sv = new StringVectorGenericData("MyStringVector");
+   *  GenericData* gdata;
+   *  PropertyMap propMap;
+   *  std::vector<std::string>::iterator iter;
+   *  
+   *  sv->push_back("Hello World");
+   *  sv->push_back("OOPSE");
+   *
+   *  propMap.addProperty(sv);
+   *  
+   *  gdata = propMap.getPropertyByName("MyStringVector");
+   *
+   *  if (gdata != NULL){
+   * 
+   *    sv = dynamic_cast<StringVectorGenericData*>(gdata);
+   *
+   *    if (sv != NULL){
+   *      for (iter = sv->begin(); iter != sv->end(); ++ iter)
+   *        std::cout << *iter << std::endl;
+   *    }
+   *  }
+   * @endcode
+   */  
+  typedef VectorTypeData<std::string> StringVectorGenericData;
   
 
 } // namespace oopse

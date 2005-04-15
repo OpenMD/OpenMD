@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -39,13 +39,13 @@
  * such damages.
  */
   
- /**
-  * @file Stats.hpp
-  * @author tlin
-  * @date 11/04/2004
-  * @time 23:56am
-  * @version 1.0
-  */
+/**
+ * @file Stats.hpp
+ * @author tlin
+ * @date 11/04/2004
+ * @time 23:56am
+ * @version 1.0
+ */
 
 #ifndef BRAINS_STATS_HPP
 #define BRAINS_STATS_HPP
@@ -55,73 +55,73 @@
 #include "math/SquareMatrix3.hpp"
 namespace oopse {
 
-/**
- * @class Stats Stats.hpp "brains/Stats.hpp"
- */
-class Stats{
-    public:
-        enum StatsIndex {
-            BEGININDEX = 0,  //internal use
-            TIME = BEGININDEX,            
-            TOTAL_ENERGY,
-            POTENTIAL_ENERGY,
-            KINETIC_ENERGY,
-            TEMPERATURE,
-            PRESSURE,
-            VOLUME,
-            CONSERVED_QUANTITY,             
-            TRANSLATIONAL_KINETIC,
-            ROTATIONAL_KINETIC,
-            LONG_RANGE_POTENTIAL,   
-            SHORT_RANGE_POTENTIAL,
-            VANDERWAALS_POTENTIAL,
-            ELECTROSTATIC_POTENTIAL,
-            BOND_POTENTIAL,
-            BEND_POTENTIAL,
-            DIHEDRAL_POTENTIAL,
-            IMPROPER_POTENTIAL,
-            VRAW,
-            VHARM,
-            ENDINDEX  //internal use
-        };
+  /**
+   * @class Stats Stats.hpp "brains/Stats.hpp"
+   */
+  class Stats{
+  public:
+    enum StatsIndex {
+      BEGININDEX = 0,  //internal use
+      TIME = BEGININDEX,            
+      TOTAL_ENERGY,
+      POTENTIAL_ENERGY,
+      KINETIC_ENERGY,
+      TEMPERATURE,
+      PRESSURE,
+      VOLUME,
+      CONSERVED_QUANTITY,             
+      TRANSLATIONAL_KINETIC,
+      ROTATIONAL_KINETIC,
+      LONG_RANGE_POTENTIAL,   
+      SHORT_RANGE_POTENTIAL,
+      VANDERWAALS_POTENTIAL,
+      ELECTROSTATIC_POTENTIAL,
+      BOND_POTENTIAL,
+      BEND_POTENTIAL,
+      DIHEDRAL_POTENTIAL,
+      IMPROPER_POTENTIAL,
+      VRAW,
+      VHARM,
+      ENDINDEX  //internal use
+    };
 
-        Stats();
-        const double& operator [](int index) const {
-            assert(index >=0 && index < ENDINDEX);
-            return data_[index];
-        }
+    Stats();
+    const double& operator [](int index) const {
+      assert(index >=0 && index < ENDINDEX);
+      return data_[index];
+    }
 
-        double& operator [](int index){
-            assert(index >=0 && index < ENDINDEX);            
-            return data_[index];
-        }
+    double& operator [](int index){
+      assert(index >=0 && index < ENDINDEX);            
+      return data_[index];
+    }
         
-        static std::string getTitle(int index) {
-            assert(index >=0 && index < ENDINDEX);
-            return title_[index];
-        }
+    static std::string getTitle(int index) {
+      assert(index >=0 && index < ENDINDEX);
+      return title_[index];
+    }
 
-        static std::string getUnits(int index) {
-            assert(index >=0 && index < ENDINDEX);
-            return units_[index];
-        }
+    static std::string getUnits(int index) {
+      assert(index >=0 && index < ENDINDEX);
+      return units_[index];
+    }
 
-        Mat3x3d getTau() {
-            return tau_;
-        }
+    Mat3x3d getTau() {
+      return tau_;
+    }
         
-        void setTau(const Mat3x3d& tau) {
-            tau_ = tau;
-        }
+    void setTau(const Mat3x3d& tau) {
+      tau_ = tau;
+    }
         
-    private:
-        static void init();
-        static bool isInit_;
-        double data_[ENDINDEX - BEGININDEX];
-        static std::string title_[ENDINDEX - BEGININDEX];
-        static std::string units_[ENDINDEX - BEGININDEX];
-        Mat3x3d tau_;
-};
+  private:
+    static void init();
+    static bool isInit_;
+    double data_[ENDINDEX - BEGININDEX];
+    static std::string title_[ENDINDEX - BEGININDEX];
+    static std::string units_[ENDINDEX - BEGININDEX];
+    Mat3x3d tau_;
+  };
 
 } //end namespace oopse
 #endif //BRAINS_STATS_HPP

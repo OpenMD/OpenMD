@@ -86,7 +86,7 @@ contains
             'set_switch:  one of the switches is negative!'
        return
     endif
-    
+
     rin(SwitchType) = rinner
     rout(SwitchType) = router
     rin2(SwitchType) = rinner * rinner
@@ -115,27 +115,27 @@ contains
 
     if (r2.lt.rout2(SwitchType)) then
        if (r2.lt.rin2(SwitchType)) then
-          
+
           sw = 1.0d0
           dswdr = 0.0d0
           return
-          
+
        else
-          
+
           r = dsqrt(r2)
-          
+
           ron = rin(SwitchType)
           roff = rout(SwitchType)
-          
+
           sw = (roff + 2.0d0*r - 3.0d0*ron)*(roff-r)**2/ ((roff-ron)**3)
           dswdr = 6.0d0*(r*r - r*ron - r*roff +roff*ron)/((roff-ron)**3)
-          
+
           in_switching_region = .true.
           return          
        endif
     else
        return
-    endif    
-       
+    endif
+
   end subroutine get_switch
 end module switcheroo

@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -38,7 +38,7 @@
  * University of Notre Dame has been advised of the possibility of
  * such damages.
  */
-  
+
 #include "integrators/Velocitizer.hpp"
 #include "math/SquareMatrix3.hpp"
 #include "primitives/Molecule.hpp"
@@ -51,34 +51,34 @@
 #endif
 
 namespace oopse {
-
-Velocitizer::Velocitizer(SimInfo* info) : info_(info) {
-
+  
+  Velocitizer::Velocitizer(SimInfo* info) : info_(info) {
+    
     int seedValue;
     Globals * simParams = info->getSimParams();
-
+    
 #ifndef IS_MPI
     if (simParams->haveSeed()) {
-        seedValue = simParams->getSeed();
-        randNumGen_ = new SeqRandNumGen(seedValue);
+      seedValue = simParams->getSeed();
+      randNumGen_ = new SeqRandNumGen(seedValue);
     }else {
-        randNumGen_ = new SeqRandNumGen();
+      randNumGen_ = new SeqRandNumGen();
     }    
 #else
     if (simParams->haveSeed()) {
-        seedValue = simParams->getSeed();
-        randNumGen_ = new ParallelRandNumGen(seedValue);
+      seedValue = simParams->getSeed();
+      randNumGen_ = new ParallelRandNumGen(seedValue);
     }else {
-        randNumGen_ = new ParallelRandNumGen();
+      randNumGen_ = new ParallelRandNumGen();
     }    
 #endif 
-}
-
-Velocitizer::~Velocitizer() {
+  }
+  
+  Velocitizer::~Velocitizer() {
     delete randNumGen_;
-}
-
-void Velocitizer::velocitize(double temperature) {
+  }
+  
+  void Velocitizer::velocitize(double temperature) {
     Vector3d aVel;
     Vector3d aJ;
     Mat3x3d I;
@@ -91,70 +91,70 @@ void Velocitizer::velocitize(double temperature) {
     const double kb = 8.31451e-7; // kb in amu, angstroms, fs, etc.
     double av2;
     double kebar;
-
+    
     SimInfo::MoleculeIterator i;
     Molecule::IntegrableObjectIterator j;
     Molecule * mol;
     StuntDouble * integrableObject;
-
-
-
+    
+    
+    
     kebar = kb * temperature * info_->getNdfRaw() / (2.0 * info_->getNdf());
-
+    
     for( mol = info_->beginMolecule(i); mol != NULL;
-        mol = info_->nextMolecule(i) ) {
-        for( integrableObject = mol->beginIntegrableObject(j);
-            integrableObject != NULL;
-            integrableObject = mol->nextIntegrableObject(j) ) {
-
-            // uses equipartition theory to solve for vbar in angstrom/fs
-
-            av2 = 2.0 * kebar / integrableObject->getMass();
-            vbar = sqrt(av2);
-
-            // picks random velocities from a gaussian distribution
-            // centered on vbar
-
-            for( int k = 0; k < 3; k++ ) {
-                aVel[k] = vbar * randNumGen_->randNorm(0.0, 1.0);
-            }
-
-            integrableObject->setVel(aVel);
-
-            if (integrableObject->isDirectional()) {
-                I = integrableObject->getI();
-
-                if (integrableObject->isLinear()) {
-                    l = integrableObject->linearAxis();
-                    m = (l + 1) % 3;
-                    n = (l + 2) % 3;
-
-                    aJ[l] = 0.0;
-                    vbar = sqrt(2.0 * kebar * I(m, m));
-                    aJ[m] = vbar * randNumGen_->randNorm(0.0, 1.0);
-                    vbar = sqrt(2.0 * kebar * I(n, n));
-                    aJ[n] = vbar * randNumGen_->randNorm(0.0, 1.0);
-                } else {
-                    for( int k = 0; k < 3; k++ ) {
-                        vbar = sqrt(2.0 * kebar * I(k, k));
-                        aJ[k] = vbar *randNumGen_->randNorm(0.0, 1.0);
-                    }
-                } // else isLinear
-
-                integrableObject->setJ(aJ);
-            }     //isDirectional 
-        }
+	 mol = info_->nextMolecule(i) ) {
+      for( integrableObject = mol->beginIntegrableObject(j);
+	   integrableObject != NULL;
+	   integrableObject = mol->nextIntegrableObject(j) ) {
+	
+	// uses equipartition theory to solve for vbar in angstrom/fs
+	
+	av2 = 2.0 * kebar / integrableObject->getMass();
+	vbar = sqrt(av2);
+	
+	// picks random velocities from a gaussian distribution
+	// centered on vbar
+	
+	for( int k = 0; k < 3; k++ ) {
+	  aVel[k] = vbar * randNumGen_->randNorm(0.0, 1.0);
+	}
+	
+	integrableObject->setVel(aVel);
+	
+	if (integrableObject->isDirectional()) {
+	  I = integrableObject->getI();
+	  
+	  if (integrableObject->isLinear()) {
+	    l = integrableObject->linearAxis();
+	    m = (l + 1) % 3;
+	    n = (l + 2) % 3;
+	    
+	    aJ[l] = 0.0;
+	    vbar = sqrt(2.0 * kebar * I(m, m));
+	    aJ[m] = vbar * randNumGen_->randNorm(0.0, 1.0);
+	    vbar = sqrt(2.0 * kebar * I(n, n));
+	    aJ[n] = vbar * randNumGen_->randNorm(0.0, 1.0);
+	  } else {
+	    for( int k = 0; k < 3; k++ ) {
+	      vbar = sqrt(2.0 * kebar * I(k, k));
+	      aJ[k] = vbar *randNumGen_->randNorm(0.0, 1.0);
+	    }
+	  } // else isLinear
+	  
+	  integrableObject->setJ(aJ);
+	}     //isDirectional 
+      }
     }             //end for (mol = beginMolecule(i); ...)
-
-
-
+    
+    
+    
     removeComDrift();
-
-}
-
-
-
-void Velocitizer::removeComDrift() {
+    
+  }
+  
+  
+  
+  void Velocitizer::removeComDrift() {
     // Get the Center of Mass drift velocity.
     Vector3d vdrift = info_->getComVel();
     
@@ -166,14 +166,14 @@ void Velocitizer::removeComDrift() {
     //  Corrects for the center of mass drift.
     // sums all the momentum and divides by total mass.
     for( mol = info_->beginMolecule(i); mol != NULL;
-        mol = info_->nextMolecule(i) ) {
-        for( integrableObject = mol->beginIntegrableObject(j);
-            integrableObject != NULL;
-            integrableObject = mol->nextIntegrableObject(j) ) {
-            integrableObject->setVel(integrableObject->getVel() - vdrift);
-        }
+	 mol = info_->nextMolecule(i) ) {
+      for( integrableObject = mol->beginIntegrableObject(j);
+	   integrableObject != NULL;
+	   integrableObject = mol->nextIntegrableObject(j) ) {
+	integrableObject->setVel(integrableObject->getVel() - vdrift);
+      }
     }
-
-}
-
+    
+  }
+  
 }

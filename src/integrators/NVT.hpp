@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -39,13 +39,13 @@
  * such damages.
  */
  
- /**
-  * @file NVT.hpp
-  * @author tlin
-  * @date 11/19/2004
-  * @time 13:25am
-  * @version 1.0
-  */
+/**
+ * @file NVT.hpp
+ * @author tlin
+ * @date 11/19/2004
+ * @time 13:25am
+ * @version 1.0
+ */
 
 #ifndef INTEGRATOR_NVT_HPP
 #define INTEGRATOR_NVT_HPP
@@ -54,66 +54,66 @@
 
 namespace oopse {
 
-/**
- * @class NVT NVT.hpp "integrators/NVT.hpp"
- * Basic thermostating via Hoover, Phys.Rev.A, 1985, Vol. 31 (5) 1695-1697
- * @todo document
-*/
-class NVT : public VelocityVerletIntegrator{
-    public:
-        NVT(SimInfo* info);
+  /**
+   * @class NVT NVT.hpp "integrators/NVT.hpp"
+   * Basic thermostating via Hoover, Phys.Rev.A, 1985, Vol. 31 (5) 1695-1697
+   * @todo document
+   */
+  class NVT : public VelocityVerletIntegrator{
+  public:
+    NVT(SimInfo* info);
 
-        int getMaxIterationNumber() {
-            return maxIterNum_;
-        }
+    int getMaxIterationNumber() {
+      return maxIterNum_;
+    }
         
-        void setMaxIterationNumber(int maxIter) {
-            maxIterNum_ = maxIter;
-        }
+    void setMaxIterationNumber(int maxIter) {
+      maxIterNum_ = maxIter;
+    }
 
-        double getTauThermostat() {
-            return tauThermostat_;
-        }
+    double getTauThermostat() {
+      return tauThermostat_;
+    }
 
-        void setTauThermostat(double tt) {
-            tauThermostat_ = tt;
-        }
+    void setTauThermostat(double tt) {
+      tauThermostat_ = tt;
+    }
 
-        double getTargetTemp() {
-            return targetTemp_;
-        }
+    double getTargetTemp() {
+      return targetTemp_;
+    }
 
-        void setTargetTemp(double tt) {
-            targetTemp_ = tt;
-        }
+    void setTargetTemp(double tt) {
+      targetTemp_ = tt;
+    }
 
-        double getChiTolerance() {
-            return chiTolerance_;
-        }
+    double getChiTolerance() {
+      return chiTolerance_;
+    }
 
-        void setChiTolerance(double tol) {
-            chiTolerance_ = tol;
-        }
+    void setChiTolerance(double tol) {
+      chiTolerance_ = tol;
+    }
 
         
-    protected:
-        virtual void moveA();
+  protected:
+    virtual void moveA();
 
-        virtual void moveB();
+    virtual void moveB();
 
-        virtual void doUpdate() ;
+    virtual void doUpdate() ;
         
-    private:
-        virtual double calcConservedQuantity();              
+  private:
+    virtual double calcConservedQuantity();              
 
-        int maxIterNum_;
-        double targetTemp_;
-        double tauThermostat_;
-        double chiTolerance_;
+    int maxIterNum_;
+    double targetTemp_;
+    double tauThermostat_;
+    double chiTolerance_;
 
-        std::vector<Vector3d> oldVel_;
-        std::vector<Vector3d> oldJi_;
- };
+    std::vector<Vector3d> oldVel_;
+    std::vector<Vector3d> oldJi_;
+  };
 
 
 } //end namespace oopse

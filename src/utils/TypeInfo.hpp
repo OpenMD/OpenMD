@@ -19,41 +19,41 @@
 
 class TypeInfo
 {
-public:
-    // Constructors
-    TypeInfo(); // needed for containers
-    TypeInfo(const std::type_info&); // non-explicit
+ public:
+  // Constructors
+  TypeInfo(); // needed for containers
+  TypeInfo(const std::type_info&); // non-explicit
 
-    // Access for the wrapped std::type_info
-    const std::type_info& Get() const;
-    // Compatibility functions
-    bool before(const TypeInfo& rhs) const;
-    const char* name() const;
+  // Access for the wrapped std::type_info
+  const std::type_info& Get() const;
+  // Compatibility functions
+  bool before(const TypeInfo& rhs) const;
+  const char* name() const;
 
-private:
-    const std::type_info* pInfo_;
+ private:
+  const std::type_info* pInfo_;
 };
 
 // Implementation
 
 inline TypeInfo::TypeInfo(){
-    class Nil {};
-    pInfo_ = &typeid(Nil);
+  class Nil {};
+  pInfo_ = &typeid(Nil);
 }
 
 inline TypeInfo::TypeInfo(const std::type_info& ti): pInfo_(&ti)
 { }
 
 inline bool TypeInfo::before(const TypeInfo& rhs) const{
-    return pInfo_->before(*rhs.pInfo_);
+  return pInfo_->before(*rhs.pInfo_);
 }
 
 inline const std::type_info& TypeInfo::Get() const{
-    return *pInfo_;
+  return *pInfo_;
 }
 
 inline const char* TypeInfo::name() const{
-    return pInfo_->name();
+  return pInfo_->name();
 }
 
 // Comparison operators

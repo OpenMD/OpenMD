@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -50,44 +50,44 @@
 
 namespace oopse {
 
-    /**
-     * @class Exclude Exclude.hpp "brains/Exclude.hpp"
-     * @brief Exclude class maintains the exclusion list of the simulation by the global indices of the 
-     * atoms. The exclusion list will be passed to fortran in a plain array.
-     */
-    class Exclude {
-        public:
+  /**
+   * @class Exclude Exclude.hpp "brains/Exclude.hpp"
+   * @brief Exclude class maintains the exclusion list of the simulation by the global indices of the 
+   * atoms. The exclusion list will be passed to fortran in a plain array.
+   */
+  class Exclude {
+  public:
 
-            Exclude() : modified_(false) {}
+    Exclude() : modified_(false) {}
 
 
-            /** Adds a pair into this Exclude class */
-            void addPair(int i, int j);
+    /** Adds a pair into this Exclude class */
+    void addPair(int i, int j);
 
-            /** Remove a pair from Exclude class */
-            void removePair(int i, int j);
+    /** Remove a pair from Exclude class */
+    void removePair(int i, int j);
 
-            /** Checks whether pair (i, j) is in this Exclude class */
-            bool hasPair(int i, int j);
+    /** Checks whether pair (i, j) is in this Exclude class */
+    bool hasPair(int i, int j);
 
-            /** Returns the number of exclusion pair */
-            int getSize();
+    /** Returns the number of exclusion pair */
+    int getSize();
 
-            /** Returns the size of exclusion list */
-            int getSizeOfExcludeList();
+    /** Returns the size of exclusion list */
+    int getSizeOfExcludeList();
 
-            /** Returns the exclusion pairs in a plain array*/
-            int *getExcludeList();
+    /** Returns the exclusion pairs in a plain array*/
+    int *getExcludeList();
 
-            /** write out the exclusion list to an ostream */
-            friend std::ostream& operator <<(std::ostream& o, Exclude& e);
+    /** write out the exclusion list to an ostream */
+    friend std::ostream& operator <<(std::ostream& o, Exclude& e);
 
-        private:
+  private:
 
-            std::set < std::pair<int, int> > excludeSet_;
-            std::vector <int> excludeList_;
-            bool modified_;
-    };
+    std::set < std::pair<int, int> > excludeSet_;
+    std::vector <int> excludeList_;
+    bool modified_;
+  };
 
 }      //end namespace oopse
 

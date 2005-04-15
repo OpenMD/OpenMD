@@ -33,7 +33,7 @@ cmdline_parser_print_help (void)
 {
   cmdline_parser_print_version ();
   printf("\n"
-  "Usage: %s [OPTIONS]...\n", CMDLINE_PARSER_PACKAGE);
+	 "Usage: %s [OPTIONS]...\n", CMDLINE_PARSER_PACKAGE);
   printf("\n");
   printf("  -h, --help                      Print help and exit\n");
   printf("  -V, --version                   Print version and exit\n");
@@ -94,16 +94,16 @@ cmdline_parser (int argc, char * const *argv, struct gengetopt_args_info *args_i
   args_info->r_omega_given = 0 ;
   args_info->theta_omega_given = 0 ;
   args_info->gxyz_given = 0 ;
-#define clear_args() { \
-  args_info->input_arg = NULL; \
-  args_info->output_arg = NULL; \
-  args_info->step_arg = 1 ;\
-  args_info->nrbins_arg = 100 ;\
-  args_info->nanglebins_arg = 50 ;\
-  args_info->sele1_arg = NULL; \
-  args_info->sele2_arg = NULL; \
-  args_info->refsele_arg = NULL; \
-}
+#define clear_args() {				\
+    args_info->input_arg = NULL;		\
+    args_info->output_arg = NULL;		\
+    args_info->step_arg = 1 ;			\
+    args_info->nrbins_arg = 100 ;		\
+    args_info->nanglebins_arg = 50 ;		\
+    args_info->sele1_arg = NULL;		\
+    args_info->sele2_arg = NULL;		\
+    args_info->refsele_arg = NULL;		\
+  }
 
   clear_args();
 
@@ -224,115 +224,115 @@ cmdline_parser (int argc, char * const *argv, struct gengetopt_args_info *args_i
         case 0:	/* Long option with no short option */
           /* select first stuntdouble set.  */
           if (strcmp (long_options[option_index].name, "sele1") == 0)
-          {
-            if (args_info->sele1_given)
-              {
-                fprintf (stderr, "%s: `--sele1' option given more than once\n", CMDLINE_PARSER_PACKAGE);
-                clear_args ();
-                exit (EXIT_FAILURE);
-              }
-            args_info->sele1_given = 1;
-            args_info->sele1_arg = gengetopt_strdup (optarg);
-            break;
-          }
+	    {
+	      if (args_info->sele1_given)
+		{
+		  fprintf (stderr, "%s: `--sele1' option given more than once\n", CMDLINE_PARSER_PACKAGE);
+		  clear_args ();
+		  exit (EXIT_FAILURE);
+		}
+	      args_info->sele1_given = 1;
+	      args_info->sele1_arg = gengetopt_strdup (optarg);
+	      break;
+	    }
           
           /* select second stuntdouble set.  */
           else if (strcmp (long_options[option_index].name, "sele2") == 0)
-          {
-            if (args_info->sele2_given)
-              {
-                fprintf (stderr, "%s: `--sele2' option given more than once\n", CMDLINE_PARSER_PACKAGE);
-                clear_args ();
-                exit (EXIT_FAILURE);
-              }
-            args_info->sele2_given = 1;
-            args_info->sele2_arg = gengetopt_strdup (optarg);
-            break;
-          }
+	    {
+	      if (args_info->sele2_given)
+		{
+		  fprintf (stderr, "%s: `--sele2' option given more than once\n", CMDLINE_PARSER_PACKAGE);
+		  clear_args ();
+		  exit (EXIT_FAILURE);
+		}
+	      args_info->sele2_given = 1;
+	      args_info->sele2_arg = gengetopt_strdup (optarg);
+	      break;
+	    }
           
           /* select reference (use and only use with --gxyz).  */
           else if (strcmp (long_options[option_index].name, "refsele") == 0)
-          {
-            if (args_info->refsele_given)
-              {
-                fprintf (stderr, "%s: `--refsele' option given more than once\n", CMDLINE_PARSER_PACKAGE);
-                clear_args ();
-                exit (EXIT_FAILURE);
-              }
-            args_info->refsele_given = 1;
-            args_info->refsele_arg = gengetopt_strdup (optarg);
-            break;
-          }
+	    {
+	      if (args_info->refsele_given)
+		{
+		  fprintf (stderr, "%s: `--refsele' option given more than once\n", CMDLINE_PARSER_PACKAGE);
+		  clear_args ();
+		  exit (EXIT_FAILURE);
+		}
+	      args_info->refsele_given = 1;
+	      args_info->refsele_arg = gengetopt_strdup (optarg);
+	      break;
+	    }
           
           /* g(r).  */
           else if (strcmp (long_options[option_index].name, "gofr") == 0)
-          {
-            if (args_info->gofr_given)
-              {
-                fprintf (stderr, "%s: `--gofr' option given more than once\n", CMDLINE_PARSER_PACKAGE);
-                clear_args ();
-                exit (EXIT_FAILURE);
-              }
-            args_info->gofr_given = 1; staticProps_group_counter += 1;
+	    {
+	      if (args_info->gofr_given)
+		{
+		  fprintf (stderr, "%s: `--gofr' option given more than once\n", CMDLINE_PARSER_PACKAGE);
+		  clear_args ();
+		  exit (EXIT_FAILURE);
+		}
+	      args_info->gofr_given = 1; staticProps_group_counter += 1;
           
-            break;
-          }
+	      break;
+	    }
           
           /* g(r, cos(theta)).  */
           else if (strcmp (long_options[option_index].name, "r_theta") == 0)
-          {
-            if (args_info->r_theta_given)
-              {
-                fprintf (stderr, "%s: `--r_theta' option given more than once\n", CMDLINE_PARSER_PACKAGE);
-                clear_args ();
-                exit (EXIT_FAILURE);
-              }
-            args_info->r_theta_given = 1; staticProps_group_counter += 1;
+	    {
+	      if (args_info->r_theta_given)
+		{
+		  fprintf (stderr, "%s: `--r_theta' option given more than once\n", CMDLINE_PARSER_PACKAGE);
+		  clear_args ();
+		  exit (EXIT_FAILURE);
+		}
+	      args_info->r_theta_given = 1; staticProps_group_counter += 1;
           
-            break;
-          }
+	      break;
+	    }
           
           /* g(r, cos(omega)).  */
           else if (strcmp (long_options[option_index].name, "r_omega") == 0)
-          {
-            if (args_info->r_omega_given)
-              {
-                fprintf (stderr, "%s: `--r_omega' option given more than once\n", CMDLINE_PARSER_PACKAGE);
-                clear_args ();
-                exit (EXIT_FAILURE);
-              }
-            args_info->r_omega_given = 1; staticProps_group_counter += 1;
+	    {
+	      if (args_info->r_omega_given)
+		{
+		  fprintf (stderr, "%s: `--r_omega' option given more than once\n", CMDLINE_PARSER_PACKAGE);
+		  clear_args ();
+		  exit (EXIT_FAILURE);
+		}
+	      args_info->r_omega_given = 1; staticProps_group_counter += 1;
           
-            break;
-          }
+	      break;
+	    }
           
           /* g(cos(theta), cos(omega)).  */
           else if (strcmp (long_options[option_index].name, "theta_omega") == 0)
-          {
-            if (args_info->theta_omega_given)
-              {
-                fprintf (stderr, "%s: `--theta_omega' option given more than once\n", CMDLINE_PARSER_PACKAGE);
-                clear_args ();
-                exit (EXIT_FAILURE);
-              }
-            args_info->theta_omega_given = 1; staticProps_group_counter += 1;
+	    {
+	      if (args_info->theta_omega_given)
+		{
+		  fprintf (stderr, "%s: `--theta_omega' option given more than once\n", CMDLINE_PARSER_PACKAGE);
+		  clear_args ();
+		  exit (EXIT_FAILURE);
+		}
+	      args_info->theta_omega_given = 1; staticProps_group_counter += 1;
           
-            break;
-          }
+	      break;
+	    }
           
           /* g(x, y, z).  */
           else if (strcmp (long_options[option_index].name, "gxyz") == 0)
-          {
-            if (args_info->gxyz_given)
-              {
-                fprintf (stderr, "%s: `--gxyz' option given more than once\n", CMDLINE_PARSER_PACKAGE);
-                clear_args ();
-                exit (EXIT_FAILURE);
-              }
-            args_info->gxyz_given = 1; staticProps_group_counter += 1;
+	    {
+	      if (args_info->gxyz_given)
+		{
+		  fprintf (stderr, "%s: `--gxyz' option given more than once\n", CMDLINE_PARSER_PACKAGE);
+		  clear_args ();
+		  exit (EXIT_FAILURE);
+		}
+	      args_info->gxyz_given = 1; staticProps_group_counter += 1;
           
-            break;
-          }
+	      break;
+	    }
           
 
         case '?':	/* Invalid option.  */

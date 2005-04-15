@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -52,53 +52,53 @@
 #include "primitives/Atom.hpp"
 #include "types/DirectionalAtomType.hpp"
 namespace oopse{
-    class DirectionalAtom : public Atom {
-        public:
-            DirectionalAtom(DirectionalAtomType* dAtomType);
-            /**
-             * Returns the inertia tensor of this stuntdouble
-             * @return the inertia tensor of this stuntdouble
-             */ 
-            virtual Mat3x3d getI();            
+  class DirectionalAtom : public Atom {
+  public:
+    DirectionalAtom(DirectionalAtomType* dAtomType);
+    /**
+     * Returns the inertia tensor of this stuntdouble
+     * @return the inertia tensor of this stuntdouble
+     */ 
+    virtual Mat3x3d getI();            
 
-           /**
-             * Sets  the previous rotation matrix of this stuntdouble
-             * @param a  new rotation matrix 
-             */         
-           virtual void setPrevA(const RotMat3x3d& a);
+    /**
+     * Sets  the previous rotation matrix of this stuntdouble
+     * @param a  new rotation matrix 
+     */         
+    virtual void setPrevA(const RotMat3x3d& a);
            
-           /**
-             * Sets  the current rotation matrix of this stuntdouble
-             * @param a  new rotation matrix 
-             */         
-            virtual void setA(const RotMat3x3d& a);
+    /**
+     * Sets  the current rotation matrix of this stuntdouble
+     * @param a  new rotation matrix 
+     */         
+    virtual void setA(const RotMat3x3d& a);
 
-           /**
-             * Sets  the rotation matrix of this stuntdouble in specified snapshot
-             * @param a rotation matrix to be set 
-             * @param snapshotNo 
-             * @see #getA
-             */         
-            virtual void setA(const RotMat3x3d& a, int snapshotNo);
+    /**
+     * Sets  the rotation matrix of this stuntdouble in specified snapshot
+     * @param a rotation matrix to be set 
+     * @param snapshotNo 
+     * @see #getA
+     */         
+    virtual void setA(const RotMat3x3d& a, int snapshotNo);
 
-            /** 
-             * Left multiple rotation matrix by another rotation matrix 
-             * @param m a rotation matrix
-             */
-            void rotateBy(const RotMat3x3d& m);
+    /** 
+     * Left multiple rotation matrix by another rotation matrix 
+     * @param m a rotation matrix
+     */
+    void rotateBy(const RotMat3x3d& m);
             
 
-            /**
-             * Returns the gradient of this stuntdouble
-             * @return the gradient of this stuntdouble
-             */ 
-            virtual std::vector<double> getGrad();
+    /**
+     * Returns the gradient of this stuntdouble
+     * @return the gradient of this stuntdouble
+     */ 
+    virtual std::vector<double> getGrad();
 
-            virtual void accept(BaseVisitor* v);
+    virtual void accept(BaseVisitor* v);
                 
-        protected:
-            RotMat3x3d electroBodyFrame_;               /**< body fixed standard eletrostatic frame */
-    };
+  protected:
+    RotMat3x3d electroBodyFrame_;               /**< body fixed standard eletrostatic frame */
+  };
 
 }//namepace oopse
 

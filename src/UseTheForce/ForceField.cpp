@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -39,43 +39,43 @@
  * such damages.
  */
  
- /**
-  * @file ForceField.cpp
-  * @author tlin
-  * @date 11/04/2004
-  * @time 22:51am
-  * @version 1.0
-  */
+/**
+ * @file ForceField.cpp
+ * @author tlin
+ * @date 11/04/2004
+ * @time 22:51am
+ * @version 1.0
+ */
   
 #include "UseTheForce/ForceField.hpp"
 #include "utils/simError.h"
 #include "UseTheForce/DarkSide/atype_interface.h"
 namespace oopse {
 
-ForceField::ForceField() { 
+  ForceField::ForceField() { 
     char* tempPath; 
     tempPath = getenv("FORCE_PARAM_PATH");
 
     if (tempPath == NULL) {
-        //convert a macro from compiler to a string in c++
-        STR_DEFINE(ffPath_, FRC_PATH );
+      //convert a macro from compiler to a string in c++
+      STR_DEFINE(ffPath_, FRC_PATH );
     } else {
-        ffPath_ = tempPath;
+      ffPath_ = tempPath;
     }
-}
+  }
 
 
-ForceField::~ForceField() {
+  ForceField::~ForceField() {
     deleteAtypes();
-}
+  }
 
-AtomType* ForceField::getAtomType(const std::string &at) {
+  AtomType* ForceField::getAtomType(const std::string &at) {
     std::vector<std::string> keys;
     keys.push_back(at);
     return atomTypeCont_.find(keys);
-}
+  }
 
-BondType* ForceField::getBondType(const std::string &at1, const std::string &at2) {
+  BondType* ForceField::getBondType(const std::string &at1, const std::string &at2) {
     std::vector<std::string> keys;
     keys.push_back(at1);
     keys.push_back(at2);    
@@ -83,16 +83,16 @@ BondType* ForceField::getBondType(const std::string &at1, const std::string &at2
     //try exact match first
     BondType* bondType = bondTypeCont_.find(keys);
     if (bondType) {
-        return bondType;
+      return bondType;
     } else {
-        //if no exact match found, try wild card match
-        return bondTypeCont_.find(keys, wildCardAtomTypeName_);
+      //if no exact match found, try wild card match
+      return bondTypeCont_.find(keys, wildCardAtomTypeName_);
     }
 
-}
+  }
 
-BendType* ForceField::getBendType(const std::string &at1, const std::string &at2,
-                        const std::string &at3) {
+  BendType* ForceField::getBendType(const std::string &at1, const std::string &at2,
+				    const std::string &at3) {
     std::vector<std::string> keys;
     keys.push_back(at1);
     keys.push_back(at2);    
@@ -101,15 +101,15 @@ BendType* ForceField::getBendType(const std::string &at1, const std::string &at2
     //try exact match first
     BendType* bendType = bendTypeCont_.find(keys);
     if (bendType) {
-        return bendType;
+      return bendType;
     } else {
-        //if no exact match found, try wild card match
-        return bendTypeCont_.find(keys, wildCardAtomTypeName_);
+      //if no exact match found, try wild card match
+      return bendTypeCont_.find(keys, wildCardAtomTypeName_);
     }
-}
+  }
 
-TorsionType* ForceField::getTorsionType(const std::string &at1, const std::string &at2,
-                              const std::string &at3, const std::string &at4) {
+  TorsionType* ForceField::getTorsionType(const std::string &at1, const std::string &at2,
+					  const std::string &at3, const std::string &at4) {
     std::vector<std::string> keys;
     keys.push_back(at1);
     keys.push_back(at2);    
@@ -118,110 +118,110 @@ TorsionType* ForceField::getTorsionType(const std::string &at1, const std::strin
 
     TorsionType* torsionType = torsionTypeCont_.find(keys);
     if (torsionType) {
-        return torsionType;
+      return torsionType;
     } else {
-        //if no exact match found, try wild card match
-        return torsionTypeCont_.find(keys, wildCardAtomTypeName_);
+      //if no exact match found, try wild card match
+      return torsionTypeCont_.find(keys, wildCardAtomTypeName_);
     }
     
     return torsionTypeCont_.find(keys, wildCardAtomTypeName_);
 
-}
+  }
 
-BondType* ForceField::getExactBondType(const std::string &at1, const std::string &at2){ 
+  BondType* ForceField::getExactBondType(const std::string &at1, const std::string &at2){ 
     std::vector<std::string> keys;
     keys.push_back(at1);
     keys.push_back(at2);    
     return bondTypeCont_.find(keys);
-}
+  }
 
-BendType* ForceField::getExactBendType(const std::string &at1, const std::string &at2,
-                            const std::string &at3){ 
+  BendType* ForceField::getExactBendType(const std::string &at1, const std::string &at2,
+					 const std::string &at3){ 
     std::vector<std::string> keys;
     keys.push_back(at1);
     keys.push_back(at2);    
     keys.push_back(at3);    
     return bendTypeCont_.find(keys);
-}
+  }
 
-TorsionType* ForceField::getExactTorsionType(const std::string &at1, const std::string &at2,
-                                  const std::string &at3, const std::string &at4){ 
+  TorsionType* ForceField::getExactTorsionType(const std::string &at1, const std::string &at2,
+					       const std::string &at3, const std::string &at4){ 
     std::vector<std::string> keys;
     keys.push_back(at1);
     keys.push_back(at2);    
     keys.push_back(at3);    
     keys.push_back(at4);   
     return torsionTypeCont_.find(keys);
-}
-bool ForceField::addAtomType(const std::string &at, AtomType* atomType) {
+  }
+  bool ForceField::addAtomType(const std::string &at, AtomType* atomType) {
     std::vector<std::string> keys;
     keys.push_back(at);
     return atomTypeCont_.add(keys, atomType);
-}
+  }
 
-bool ForceField::addBondType(const std::string &at1, const std::string &at2, BondType* bondType) {
+  bool ForceField::addBondType(const std::string &at1, const std::string &at2, BondType* bondType) {
     std::vector<std::string> keys;
     keys.push_back(at1);
     keys.push_back(at2);    
     return bondTypeCont_.add(keys, bondType);
 
-}
+  }
 
-bool ForceField::addBendType(const std::string &at1, const std::string &at2,
-                        const std::string &at3, BendType* bendType) {
+  bool ForceField::addBendType(const std::string &at1, const std::string &at2,
+			       const std::string &at3, BendType* bendType) {
     std::vector<std::string> keys;
     keys.push_back(at1);
     keys.push_back(at2);    
     keys.push_back(at3);    
     return bendTypeCont_.add(keys, bendType);
-}
+  }
 
-bool ForceField::addTorsionType(const std::string &at1, const std::string &at2,
-                              const std::string &at3, const std::string &at4, TorsionType* torsionType) {
+  bool ForceField::addTorsionType(const std::string &at1, const std::string &at2,
+				  const std::string &at3, const std::string &at4, TorsionType* torsionType) {
     std::vector<std::string> keys;
     keys.push_back(at1);
     keys.push_back(at2);    
     keys.push_back(at3);    
     keys.push_back(at4);    
     return torsionTypeCont_.add(keys, torsionType);
-}
+  }
 
-double ForceField::getRcutFromAtomType(AtomType* at) {
+  double ForceField::getRcutFromAtomType(AtomType* at) {
     /**@todo */
     GenericData* data;
     double rcut = 0.0;
 
     if (at->isLennardJones()) {
-        data = at->getPropertyByName("LennardJones");
-        if (data != NULL) {
-            LJParamGenericData* ljData = dynamic_cast<LJParamGenericData*>(data);
+      data = at->getPropertyByName("LennardJones");
+      if (data != NULL) {
+	LJParamGenericData* ljData = dynamic_cast<LJParamGenericData*>(data);
 
-            if (ljData != NULL) {
-                LJParam ljParam = ljData->getData();
+	if (ljData != NULL) {
+	  LJParam ljParam = ljData->getData();
 
-                //by default use 2.5*sigma as cutoff radius
-                rcut = 2.5 * ljParam.sigma;
+	  //by default use 2.5*sigma as cutoff radius
+	  rcut = 2.5 * ljParam.sigma;
                 
-            } else {
-                    sprintf( painCave.errMsg,
-                           "Can not cast GenericData to LJParam\n");
-                    painCave.severity = OOPSE_ERROR;
-                    painCave.isFatal = 1;
-                    simError();          
-            }            
-        } else {
-            sprintf( painCave.errMsg, "Can not find Parameters for LennardJones\n");
-            painCave.severity = OOPSE_ERROR;
-            painCave.isFatal = 1;
-            simError();          
-        }
+	} else {
+	  sprintf( painCave.errMsg,
+		   "Can not cast GenericData to LJParam\n");
+	  painCave.severity = OOPSE_ERROR;
+	  painCave.isFatal = 1;
+	  simError();          
+	}            
+      } else {
+	sprintf( painCave.errMsg, "Can not find Parameters for LennardJones\n");
+	painCave.severity = OOPSE_ERROR;
+	painCave.isFatal = 1;
+	simError();          
+      }
     }
 
     return rcut;    
-}
+  }
 
 
-ifstrstream* ForceField::openForceFieldFile(const std::string& filename) {
+  ifstrstream* ForceField::openForceFieldFile(const std::string& filename) {
     std::string forceFieldFilename(filename);
     ifstrstream* ffStream = new ifstrstream();
     
@@ -229,27 +229,27 @@ ifstrstream* ForceField::openForceFieldFile(const std::string& filename) {
     ffStream->open(forceFieldFilename.c_str());
     if(!ffStream->is_open()){
 
-        forceFieldFilename = ffPath_ + "/" + forceFieldFilename;
-        ffStream->open( forceFieldFilename.c_str() );
+      forceFieldFilename = ffPath_ + "/" + forceFieldFilename;
+      ffStream->open( forceFieldFilename.c_str() );
 
-        //if current directory does not contain the force field file,
-        //try to open it in the path        
-        if(!ffStream->is_open()){
+      //if current directory does not contain the force field file,
+      //try to open it in the path        
+      if(!ffStream->is_open()){
 
-            sprintf( painCave.errMsg,
-               "Error opening the force field parameter file:\n"
-               "\t%s\n"
-               "\tHave you tried setting the FORCE_PARAM_PATH environment "
-               "variable?\n",
-               forceFieldFilename.c_str() );
-            painCave.severity = OOPSE_ERROR;
-            painCave.isFatal = 1;
-            simError();
-        }
+	sprintf( painCave.errMsg,
+		 "Error opening the force field parameter file:\n"
+		 "\t%s\n"
+		 "\tHave you tried setting the FORCE_PARAM_PATH environment "
+		 "variable?\n",
+		 forceFieldFilename.c_str() );
+	painCave.severity = OOPSE_ERROR;
+	painCave.isFatal = 1;
+	simError();
+      }
     }  
 
     return ffStream;
 
-}
+  }
 
 } //end namespace oopse

@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -43,21 +43,21 @@
 #include "utils/Utility.hpp"
 
 namespace oopse {
-SDMinimizer::SDMinimizer(SimInfo* info) : Minimizer(info) {
+  SDMinimizer::SDMinimizer(SimInfo* info) : Minimizer(info) {
     direction.resize(ndim);
     stepSize = paramSet->getStepSize();
-}
+  }
 
-void SDMinimizer::init() {
+  void SDMinimizer::init() {
     calcG();
 
     for(int i = 0; i < direction.size(); i++) {
-        direction[i] = -curG[i];
+      direction[i] = -curG[i];
     }
-}
+  }
 
-int SDMinimizer::step() {
-  int lsStatus;
+  int SDMinimizer::step() {
+    int lsStatus;
 
     prevF = curF;
 
@@ -65,24 +65,24 @@ int SDMinimizer::step() {
     lsStatus = doLineSearch(direction, stepSize);
 
     if (lsStatus < 0)
-        return -1;
+      return -1;
     else
-        return 1;
-}
+      return 1;
+  }
 
-void SDMinimizer::prepareStep() {
+  void SDMinimizer::prepareStep() {
     for(int i = 0; i < direction.size(); i++) {
-        direction[i] = -curG[i];
+      direction[i] = -curG[i];
     }
-}
+  }
 
-int SDMinimizer::checkConvg() {
-  double fTol;
-  double relativeFTol; // relative tolerance
-  double deltaF;
-  double gTol;
-  double relativeGTol;
-  double gnorm;
+  int SDMinimizer::checkConvg() {
+    double fTol;
+    double relativeFTol; // relative tolerance
+    double deltaF;
+    double gTol;
+    double relativeGTol;
+    double gnorm;
 
     // test function tolerance test
     fTol = paramSet->getFTol();
@@ -90,12 +90,12 @@ int SDMinimizer::checkConvg() {
     deltaF = prevF - curF;
 
     if (fabs(deltaF) <= relativeFTol) {
-        if (bVerbose) {
-            std::cout << "function value tolerance test passed" << std::endl;
-            std::cout << "ftol = " << fTol << "\tdeltaf = " << deltaF << std::endl;
-        }
+      if (bVerbose) {
+	std::cout << "function value tolerance test passed" << std::endl;
+	std::cout << "ftol = " << fTol << "\tdeltaf = " << deltaF << std::endl;
+      }
 
-        return CONVG_FTOL;
+      return CONVG_FTOL;
     }
 
     //gradient tolerance test
@@ -108,8 +108,8 @@ int SDMinimizer::checkConvg() {
 
 #else
 
-  double localDP;
-  double globalDP;
+    double localDP;
+    double globalDP;
 
     localDP = dotProduct(curG, curG);
     MPI_Allreduce(&localDP, &globalDP, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
@@ -118,21 +118,21 @@ int SDMinimizer::checkConvg() {
 #endif
 
     if (gnorm <= relativeGTol) {
-        std::cout << "gradient tolerance test" << std::endl;
-        std::cout << "gnorm = " << gnorm << "\trelativeGTol = " << relativeGTol
-            << std::endl;
-        return CONVG_GTOL;
+      std::cout << "gradient tolerance test" << std::endl;
+      std::cout << "gnorm = " << gnorm << "\trelativeGTol = " << relativeGTol
+		<< std::endl;
+      return CONVG_GTOL;
     }
 
     //absolute gradient tolerance test
 
     if (gnorm <= gTol) {
-        std::cout << "absolute gradient tolerance test" << std::endl;
-        std::cout << "gnorm = " << gnorm << "\tgTol = " << gTol << std::endl;
-        return CONVG_ABSGTOL;
+      std::cout << "absolute gradient tolerance test" << std::endl;
+      std::cout << "gnorm = " << gnorm << "\tgTol = " << gTol << std::endl;
+      return CONVG_ABSGTOL;
     }
 
     return CONVG_UNCONVG;
-}
+  }
 
 }

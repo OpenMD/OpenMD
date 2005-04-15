@@ -44,14 +44,14 @@
 #include "applications/dynamicProps/ParticleTimeCorrFunc.hpp"
 namespace oopse {
 
-class VCorrFunc : public ParticleTimeCorrFunc {
-    public:
-        VCorrFunc(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2);   
+  class VCorrFunc : public ParticleTimeCorrFunc {
+  public:
+    VCorrFunc(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2);   
         
-   private:
-         virtual double calcCorrVal(int frame1, int frame2, StuntDouble* sd1,  StuntDouble* sd2);
+  private:
+    virtual double calcCorrVal(int frame1, int frame2, StuntDouble* sd1,  StuntDouble* sd2);
          
-};
+  };
 
 }
 #endif

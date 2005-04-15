@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -54,72 +54,72 @@
 
 namespace oopse {
 
-/**
- * @class PolynomialTorsionType PolynomialTorsionType.hpp "types/PolynomialTorsionType.hpp"
- * @todo documentation
- */
-class PolynomialTorsionType : public TorsionType{
+  /**
+   * @class PolynomialTorsionType PolynomialTorsionType.hpp "types/PolynomialTorsionType.hpp"
+   * @todo documentation
+   */
+  class PolynomialTorsionType : public TorsionType{
 
-    public:
-        PolynomialTorsionType() {}
+  public:
+    PolynomialTorsionType() {}
 
-        double getCoefficient(int power) {
-            return polynomial_.getCoefficient(power);
-        }
+    double getCoefficient(int power) {
+      return polynomial_.getCoefficient(power);
+    }
 
-        void addCoefficient(int power, double coefficient) {
-            polynomial_.addCoefficient(power, coefficient);
-        }
+    void addCoefficient(int power, double coefficient) {
+      polynomial_.addCoefficient(power, coefficient);
+    }
 
-        void setCoefficient(int power, double coefficient) {
-            polynomial_.setCoefficient(power, coefficient);
-        }
+    void setCoefficient(int power, double coefficient) {
+      polynomial_.setCoefficient(power, coefficient);
+    }
 
-        void setPolynomial(const DoublePolynomial& p) {
-            polynomial_ = p;
-        }
+    void setPolynomial(const DoublePolynomial& p) {
+      polynomial_ = p;
+    }
         
-        virtual void calcForce(double cosPhi, double sinPhi, double& V, double& dVdPhi) {
-            V = polynomial_.evaluate(cosPhi);
-            double dVdcosPhi = polynomial_.evaluateDerivative(cosPhi); 
-            dVdPhi = - dVdcosPhi * sinPhi;
-        }
+    virtual void calcForce(double cosPhi, double sinPhi, double& V, double& dVdPhi) {
+      V = polynomial_.evaluate(cosPhi);
+      double dVdcosPhi = polynomial_.evaluateDerivative(cosPhi); 
+      dVdPhi = - dVdcosPhi * sinPhi;
+    }
 
-        friend std::ostream& operator <<(std::ostream& os, PolynomialTorsionType& pbt);
+    friend std::ostream& operator <<(std::ostream& os, PolynomialTorsionType& pbt);
         
-    private:
+  private:
         
-        DoublePolynomial polynomial_;
-};
+    DoublePolynomial polynomial_;
+  };
 
-std::ostream& operator <<(std::ostream& os, PolynomialTorsionType& ptt) {
+  std::ostream& operator <<(std::ostream& os, PolynomialTorsionType& ptt) {
     DoublePolynomial::const_iterator i;
 
     i = ptt.polynomial_.begin();
     
     if (i == ptt.polynomial_.end()) {
-        os << "This Polynomial contains nothing" << std::endl;
-        return os;
+      os << "This Polynomial contains nothing" << std::endl;
+      return os;
     }
 
     os << "This Polynomial contains below terms:" << std::endl;    
     
     while(true){
-        os << i->second << "*" << "(cosPhi)" << "^" << i->first;
+      os << i->second << "*" << "(cosPhi)" << "^" << i->first;
 
-        if (++i == ptt.polynomial_.end()) {
-            //if we reach the end of the polynomial pair, write out a newline and then escape the loop
-            os << std::endl;
-            break;
-        } else {
-            //otherwise, write out a "+"
-            os << " + ";
-        }
+      if (++i == ptt.polynomial_.end()) {
+	//if we reach the end of the polynomial pair, write out a newline and then escape the loop
+	os << std::endl;
+	break;
+      } else {
+	//otherwise, write out a "+"
+	os << " + ";
+      }
     }
     
     os << std::endl;
     return os;
-}
+  }
 
 
 } //end namespace oopse

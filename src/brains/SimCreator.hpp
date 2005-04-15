@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -39,13 +39,13 @@
  * such damages.
  */
  
- /**
-  * @file SimCreatorr.hpp
-  * @author tlin
-  * @date 11/02/2004
-  * @time 12:126am
-  * @version 1.0
-  */
+/**
+ * @file SimCreatorr.hpp
+ * @author tlin
+ * @date 11/02/2004
+ * @time 12:126am
+ * @version 1.0
+ */
 
 #ifndef BRAINS_SIMCREATOR_HPP
 #define BRAINS_SIMCREATOR_HPP
@@ -63,63 +63,63 @@ extern void set_interface_stamps( MakeStamps* ms, Globals* g );
 
 namespace oopse {
 
-/**
- * @class SimCreator SimCreator.hpp "brains/SimCreator.hpp"
- * The only responsibility of SimCreator is to parse the meta-data file and create a SimInfo
- * instance based on the information returned by parser. 
- */
-class SimCreator {
-    public:
+  /**
+   * @class SimCreator SimCreator.hpp "brains/SimCreator.hpp"
+   * The only responsibility of SimCreator is to parse the meta-data file and create a SimInfo
+   * instance based on the information returned by parser. 
+   */
+  class SimCreator {
+  public:
 
-        virtual ~SimCreator() {}
+    virtual ~SimCreator() {}
 
-        /**
-         * Setup Simulation
-         * @return a pointer to SimInfo
-         * @param mdfile the meta-data file name
-         */
-        SimInfo* createSim(const std::string & mdFileName, bool loadInitCoords = true);
+    /**
+     * Setup Simulation
+     * @return a pointer to SimInfo
+     * @param mdfile the meta-data file name
+     */
+    SimInfo* createSim(const std::string & mdFileName, bool loadInitCoords = true);
         
-    private:
+  private:
         
-        /**
-         * Parses the meta-data file
-         * @param mdfile
-         * @param stamps
-         * @param simParams
-         */
-        void parseFile(const std::string mdFileName,  MakeStamps* stamps, Globals* simParams);
+    /**
+     * Parses the meta-data file
+     * @param mdfile
+     * @param stamps
+     * @param simParams
+     */
+    void parseFile(const std::string mdFileName,  MakeStamps* stamps, Globals* simParams);
 
 
-        /** create the molecules belong to current processor*/
-        virtual void createMolecules(SimInfo* info);
+    /** create the molecules belong to current processor*/
+    virtual void createMolecules(SimInfo* info);
 
-        /** 
-         * Sets the global index for atoms, rigidbodies and cutoff groups and fill up
-         * globalGroupMembership and globalMolMembership arrays which map atoms'
-         * global index to the global index of the groups (or molecules) they belong to.
-         * These array are never changed during the simulation.
-         */
-        void setGlobalIndex(SimInfo* info);
+    /** 
+     * Sets the global index for atoms, rigidbodies and cutoff groups and fill up
+     * globalGroupMembership and globalMolMembership arrays which map atoms'
+     * global index to the global index of the groups (or molecules) they belong to.
+     * These array are never changed during the simulation.
+     */
+    void setGlobalIndex(SimInfo* info);
 
-        void gatherParameters(SimInfo *info, const std::string& mdfile);             
+    void gatherParameters(SimInfo *info, const std::string& mdfile);             
 
         
-        /** Extracts the molecules stamps and adds them into SimInfo class */
-        void compList(MakeStamps* stamps,  Globals* simParams, 
-                                     std::vector<std::pair<MoleculeStamp*, int> >& moleculeStamps) ;
+    /** Extracts the molecules stamps and adds them into SimInfo class */
+    void compList(MakeStamps* stamps,  Globals* simParams, 
+		  std::vector<std::pair<MoleculeStamp*, int> >& moleculeStamps) ;
 
-        /**
-         * Divide the molecules among the processors 
-         */
+    /**
+     * Divide the molecules among the processors 
+     */
          
-        void divideMolecules(SimInfo* info);
+    void divideMolecules(SimInfo* info);
 
-        /** Load initial coordinates */
-        void loadCoordinates(SimInfo* info);     
+    /** Load initial coordinates */
+    void loadCoordinates(SimInfo* info);     
 
-        std::string mdFileName_;  //save the meta-data file name which may be used later
-};
+    std::string mdFileName_;  //save the meta-data file name which may be used later
+  };
 
 } //end namespace oopse
 #endif //BRAINS_SIMCREATOR_HPP

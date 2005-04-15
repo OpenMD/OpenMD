@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -52,30 +52,30 @@ namespace oopse {
 
 
 
-/**
- * @class ParallelRandNumGen a parallel random number generator
- * @note use SeqRandNumGen if you want a non-parallel random number generator.
- */
-class ParallelRandNumGen : public RandNumGen{
-    public:
-        typedef unsigned long uint32; 
+  /**
+   * @class ParallelRandNumGen a parallel random number generator
+   * @note use SeqRandNumGen if you want a non-parallel random number generator.
+   */
+  class ParallelRandNumGen : public RandNumGen{
+  public:
+    typedef unsigned long uint32; 
         
-        ParallelRandNumGen( const uint32& oneSeed);
+    ParallelRandNumGen( const uint32& oneSeed);
 
-        ParallelRandNumGen();
+    ParallelRandNumGen();
 	
-	virtual void seed( const uint32 oneSeed );
+    virtual void seed( const uint32 oneSeed );
 	
-	virtual void seed();
+    virtual void seed();
 
-    private:
+  private:
         
-         ParallelRandNumGen(const ParallelRandNumGen&);
-         ParallelRandNumGen& operator =(const ParallelRandNumGen&);
+    ParallelRandNumGen(const ParallelRandNumGen&);
+    ParallelRandNumGen& operator =(const ParallelRandNumGen&);
 
-        static int nCreatedRNG_; /**< number of created random number of generator*/
-        int myRank_; /**@todo Fixed Me */
-};
+    static int nCreatedRNG_; /**< number of created random number of generator*/
+    int myRank_; /**@todo Fixed Me */
+  };
 
 }
 #endif

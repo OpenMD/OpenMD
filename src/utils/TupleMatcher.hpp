@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -52,19 +52,19 @@
 #include <map>
 namespace oopse {
 
-    template<class TupleType, class ReturnType>
-    class TupleMatcher {
-        static ReturnType match(const std::map<TupleType, ReturnType>& container, const TupleType& t) {
-            typename std::map<TupleType, ReturnType>::iterator i;
+  template<class TupleType, class ReturnType>
+  class TupleMatcher {
+    static ReturnType match(const std::map<TupleType, ReturnType>& container, const TupleType& t) {
+      typename std::map<TupleType, ReturnType>::iterator i;
 
-            i = container.find(t);
-            if (i != container.end()) {
-                return i->second;
-            } else {
-                return NULL;
-            }
-        }
-    };
+      i = container.find(t);
+      if (i != container.end()) {
+	return i->second;
+      } else {
+	return NULL;
+      }
+    }
+  };
     
 }
 #endif //UTILS_TUPLEMATCHER_HPP

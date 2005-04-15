@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -46,35 +46,35 @@
 
 namespace oopse {
 
-class ForceField;
+  class ForceField;
 
-/**
- * @class ForceField
- * @todo document
- */
-class ForceFieldCreator {
-    public:
-        ForceFieldCreator(const std::string& ident) : ident_(ident) {}
-        virtual ~ForceFieldCreator() {}
+  /**
+   * @class ForceField
+   * @todo document
+   */
+  class ForceFieldCreator {
+  public:
+    ForceFieldCreator(const std::string& ident) : ident_(ident) {}
+    virtual ~ForceFieldCreator() {}
         
-        const std::string& getIdent() const { return ident_; }
+    const std::string& getIdent() const { return ident_; }
 
-        virtual ForceField* create() const = 0;
+    virtual ForceField* create() const = 0;
             
-    private:
-        std::string ident_;
-};
+  private:
+    std::string ident_;
+  };
 
-/**
- * @class ForceFieldBuilder
- * @todo document
- */
-template<class ConcreteForceField>
-class ForceFieldBuilder : public ForceFieldCreator {
-    public:
-        ForceFieldBuilder(const std::string& ident) : ForceFieldCreator(ident) {}
-        virtual  ForceField* create() const {return new ConcreteForceField();}
-};
+  /**
+   * @class ForceFieldBuilder
+   * @todo document
+   */
+  template<class ConcreteForceField>
+  class ForceFieldBuilder : public ForceFieldCreator {
+  public:
+    ForceFieldBuilder(const std::string& ident) : ForceFieldCreator(ident) {}
+    virtual  ForceField* create() const {return new ConcreteForceField();}
+  };
 
 }
 

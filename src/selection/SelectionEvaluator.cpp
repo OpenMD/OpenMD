@@ -49,21 +49,21 @@
 namespace oopse {
 
 
-SelectionEvaluator::SelectionEvaluator(SimInfo* si) 
+  SelectionEvaluator::SelectionEvaluator(SimInfo* si) 
     : info(si), nameFinder(info), distanceFinder(info), indexFinder(info), isLoaded_(false){
     
-    nStuntDouble = info->getNGlobalAtoms() + info->getNRigidBodies();
-}            
+      nStuntDouble = info->getNGlobalAtoms() + info->getNRigidBodies();
+    }            
 
-bool SelectionEvaluator::loadScript(const std::string& filename, const std::string& script) {
+  bool SelectionEvaluator::loadScript(const std::string& filename, const std::string& script) {
     clearDefinitionsAndLoadPredefined();
     this->filename = filename;
     this->script = script;
     if (! compiler.compile(filename, script)) {
-        error = true;
-        errorMessage = compiler.getErrorMessage();
-        std::cerr << "SelectionCompiler Error: " << errorMessage << std::endl;
-        return false;
+      error = true;
+      errorMessage = compiler.getErrorMessage();
+      std::cerr << "SelectionCompiler Error: " << errorMessage << std::endl;
+      return false;
     }
 
     pc = 0;
@@ -75,66 +75,66 @@ bool SelectionEvaluator::loadScript(const std::string& filename, const std::stri
 
     isDynamic_ = false;
     for (i = aatoken.begin(); i != aatoken.end(); ++i) {
-        if (containDynamicToken(*i)) {
-            isDynamic_ = true;
-            break;
-        }
+      if (containDynamicToken(*i)) {
+	isDynamic_ = true;
+	break;
+      }
     }
 
     isLoaded_ = true;
     return true;
-}
+  }
 
-void SelectionEvaluator::clearState() {
+  void SelectionEvaluator::clearState() {
     error = false;
     errorMessage = "";
-}
+  }
 
-bool SelectionEvaluator::loadScriptString(const std::string& script) {
+  bool SelectionEvaluator::loadScriptString(const std::string& script) {
     clearState();
     return loadScript("", script);
-}
+  }
 
-bool SelectionEvaluator::loadScriptFile(const std::string& filename) {
+  bool SelectionEvaluator::loadScriptFile(const std::string& filename) {
     clearState();
     return loadScriptFileInternal(filename);
-}
+  }
 
-bool SelectionEvaluator::loadScriptFileInternal(const  std::string & filename) {
-  std::ifstream ifs(filename.c_str());
+  bool SelectionEvaluator::loadScriptFileInternal(const  std::string & filename) {
+    std::ifstream ifs(filename.c_str());
     if (!ifs.is_open()) {
-        return false;
+      return false;
     }
 
     const int bufferSize = 65535;
     char buffer[bufferSize];
     std::string script;
     while(ifs.getline(buffer, bufferSize)) {
-        script += buffer;
+      script += buffer;
     }
     return loadScript(filename, script);
-}
+  }
 
-void SelectionEvaluator::instructionDispatchLoop(BitSet& bs){
+  void SelectionEvaluator::instructionDispatchLoop(BitSet& bs){
     
     while ( pc < aatoken.size()) {
-        statement = aatoken[pc++];
-        statementLength = statement.size();
-        Token token = statement[0];
-        switch (token.tok) {
-            case Token::define:
-                define();
-            break;
-            case Token::select:
-                select(bs);
-            break;
-            default:
-                unrecognizedCommand(token);
-            return;
-        }
+      statement = aatoken[pc++];
+      statementLength = statement.size();
+      Token token = statement[0];
+      switch (token.tok) {
+      case Token::define:
+	define();
+	break;
+      case Token::select:
+	select(bs);
+	break;
+      default:
+	unrecognizedCommand(token);
+	return;
+      }
     }
 
-}
+  }
 
   BitSet SelectionEvaluator::expression(const std::vector<Token>& code, int pcStart) {
     BitSet bs;
@@ -174,9 +174,9 @@ void SelectionEvaluator::instructionDispatchLoop(BitSet& bs){
 
         withinInstruction(instruction, stack.top());
         break;
-      //case Token::selected:
-      //  stack.push(getSelectionSet());
-      //  break;
+	//case Token::selected:
+	//  stack.push(getSelectionSet());
+	//  break;
       case Token::name:
         stack.push(nameInstruction(boost::any_cast<std::string>(instruction.value)));
         break;
@@ -206,7 +206,7 @@ void SelectionEvaluator::instructionDispatchLoop(BitSet& bs){
 
 
 
-BitSet SelectionEvaluator::comparatorInstruction(const Token& instruction) {
+  BitSet SelectionEvaluator::comparatorInstruction(const Token& instruction) {
     int comparator = instruction.tok;
     int property = instruction.intValue;
     float comparisonValue = boost::any_cast<float>(instruction.value);
@@ -223,227 +223,227 @@ BitSet SelectionEvaluator::comparatorInstruction(const Token& instruction) {
     
     for (mol = info->beginMolecule(mi); mol != NULL; mol = info->nextMolecule(mi)) {
 
-        for(atom = mol->beginAtom(ai); atom != NULL; atom = mol->nextAtom(ai)) {
-            compareProperty(atom, bs, property, comparator, comparisonValue);
-        }
+      for(atom = mol->beginAtom(ai); atom != NULL; atom = mol->nextAtom(ai)) {
+	compareProperty(atom, bs, property, comparator, comparisonValue);
+      }
         
-        for (rb = mol->beginRigidBody(rbIter); rb != NULL; rb = mol->nextRigidBody(rbIter)) {
-            compareProperty(rb, bs, property, comparator, comparisonValue);
-        }        
+      for (rb = mol->beginRigidBody(rbIter); rb != NULL; rb = mol->nextRigidBody(rbIter)) {
+	compareProperty(rb, bs, property, comparator, comparisonValue);
+      }        
     }
 
     return bs;
-}
+  }
 
-void SelectionEvaluator::compareProperty(StuntDouble* sd, BitSet& bs, int property, int comparator, float comparisonValue) {
-        double propertyValue = 0.0;
-        switch (property) {
-        case Token::mass:
-            propertyValue = sd->getMass();
-            break;
-        case Token::charge:
-            if (sd->isAtom()){
-                Atom* atom = static_cast<Atom*>(sd);
-                propertyValue = getCharge(atom);
-            } else if (sd->isRigidBody()) {
-                RigidBody* rb = static_cast<RigidBody*>(sd);
-                RigidBody::AtomIterator ai;
-                Atom* atom;
-                for (atom = rb->beginAtom(ai); atom != NULL; atom = rb->nextAtom(ai)) {
-                    propertyValue+=  getCharge(atom);
-                }
-            }
-            break;
-        default:
-            unrecognizedAtomProperty(property);
-        }
+  void SelectionEvaluator::compareProperty(StuntDouble* sd, BitSet& bs, int property, int comparator, float comparisonValue) {
+    double propertyValue = 0.0;
+    switch (property) {
+    case Token::mass:
+      propertyValue = sd->getMass();
+      break;
+    case Token::charge:
+      if (sd->isAtom()){
+	Atom* atom = static_cast<Atom*>(sd);
+	propertyValue = getCharge(atom);
+      } else if (sd->isRigidBody()) {
+	RigidBody* rb = static_cast<RigidBody*>(sd);
+	RigidBody::AtomIterator ai;
+	Atom* atom;
+	for (atom = rb->beginAtom(ai); atom != NULL; atom = rb->nextAtom(ai)) {
+	  propertyValue+=  getCharge(atom);
+	}
+      }
+      break;
+    default:
+      unrecognizedAtomProperty(property);
+    }
         
-        bool match = false;
-        switch (comparator) {
-            case Token::opLT:
-                match = propertyValue < comparisonValue;
-                break;
-            case Token::opLE:
-                match = propertyValue <= comparisonValue;
-                break;
-            case Token::opGE:
-                match = propertyValue >= comparisonValue;
-                break;
-            case Token::opGT:
-                match = propertyValue > comparisonValue;
-                break;
-            case Token::opEQ:
-                match = propertyValue == comparisonValue;
-                break;
-            case Token::opNE:
-                match = propertyValue != comparisonValue;
-                break;
-        }
-        if (match)
-            bs.setBitOn(sd->getGlobalIndex());
+    bool match = false;
+    switch (comparator) {
+    case Token::opLT:
+      match = propertyValue < comparisonValue;
+      break;
+    case Token::opLE:
+      match = propertyValue <= comparisonValue;
+      break;
+    case Token::opGE:
+      match = propertyValue >= comparisonValue;
+      break;
+    case Token::opGT:
+      match = propertyValue > comparisonValue;
+      break;
+    case Token::opEQ:
+      match = propertyValue == comparisonValue;
+      break;
+    case Token::opNE:
+      match = propertyValue != comparisonValue;
+      break;
+    }
+    if (match)
+      bs.setBitOn(sd->getGlobalIndex());
 
-}
+  }
 
-void SelectionEvaluator::withinInstruction(const Token& instruction, BitSet& bs){
+  void SelectionEvaluator::withinInstruction(const Token& instruction, BitSet& bs){
     
     boost::any withinSpec = instruction.value;
     float distance;
     if (withinSpec.type() == typeid(float)){
-        distance = boost::any_cast<float>(withinSpec);
+      distance = boost::any_cast<float>(withinSpec);
     } else if (withinSpec.type() == typeid(int)) {
-        distance = boost::any_cast<int>(withinSpec);    
+      distance = boost::any_cast<int>(withinSpec);    
     } else {
-        evalError("casting error in withinInstruction");
-        bs.clearAll();
+      evalError("casting error in withinInstruction");
+      bs.clearAll();
     }
     
     bs = distanceFinder.find(bs, distance);            
-}
+  }
 
-void SelectionEvaluator::define() {
+  void SelectionEvaluator::define() {
     assert(statement.size() >= 3);
 
     std::string variable = boost::any_cast<std::string>(statement[1].value);
 
     variables.insert(VariablesType::value_type(variable, expression(statement, 2)));
-}
+  }
 
 
-/** @todo */
-void SelectionEvaluator::predefine(const std::string& script) {
+  /** @todo */
+  void SelectionEvaluator::predefine(const std::string& script) {
 
     if (compiler.compile("#predefine", script)) {
-        std::vector<std::vector<Token> > aatoken = compiler.getAatokenCompiled();
-        if (aatoken.size() != 1) {
-            evalError("predefinition does not have exactly 1 command:"
-                + script);
-            return;
-        }
-        std::vector<Token> statement = aatoken[0];
-        if (statement.size() > 2) {
-            int tok = statement[1].tok;
-            if (tok == Token::identifier || (tok & Token::predefinedset) == Token::predefinedset) {
-                std::string variable = boost::any_cast<std::string>(statement[1].value);
-                variables.insert(VariablesType::value_type(variable, statement));
+      std::vector<std::vector<Token> > aatoken = compiler.getAatokenCompiled();
+      if (aatoken.size() != 1) {
+	evalError("predefinition does not have exactly 1 command:"
+		  + script);
+	return;
+      }
+      std::vector<Token> statement = aatoken[0];
+      if (statement.size() > 2) {
+	int tok = statement[1].tok;
+	if (tok == Token::identifier || (tok & Token::predefinedset) == Token::predefinedset) {
+	  std::string variable = boost::any_cast<std::string>(statement[1].value);
+	  variables.insert(VariablesType::value_type(variable, statement));
 
-            } else {
-                evalError("invalid variable name:" + script);
-            }
-        }else {
-            evalError("bad predefinition length:" + script);
-        }
+	} else {
+	  evalError("invalid variable name:" + script);
+	}
+      }else {
+	evalError("bad predefinition length:" + script);
+      }
 
         
     } else {
-        evalError("predefined set compile error:" + script +
-          "\ncompile error:" + compiler.getErrorMessage());
+      evalError("predefined set compile error:" + script +
+		"\ncompile error:" + compiler.getErrorMessage());
     }
 
-}
+  }
 
-void SelectionEvaluator::select(BitSet& bs){
+  void SelectionEvaluator::select(BitSet& bs){
     bs = expression(statement, 1);
-}
+  }
 
-BitSet SelectionEvaluator::lookupValue(const std::string& variable){
+  BitSet SelectionEvaluator::lookupValue(const std::string& variable){
 
     BitSet bs(nStuntDouble);
     std::map<std::string, boost::any>::iterator i = variables.find(variable);
     
     if (i != variables.end()) {
-        if (i->second.type() == typeid(BitSet)) {
-            return boost::any_cast<BitSet>(i->second);
-        } else if (i->second.type() ==  typeid(std::vector<Token>)){
-            bs = expression(boost::any_cast<std::vector<Token> >(i->second), 2);
-            i->second =  bs; /**@todo fixme */
-            return bs;
-        }
+      if (i->second.type() == typeid(BitSet)) {
+	return boost::any_cast<BitSet>(i->second);
+      } else if (i->second.type() ==  typeid(std::vector<Token>)){
+	bs = expression(boost::any_cast<std::vector<Token> >(i->second), 2);
+	i->second =  bs; /**@todo fixme */
+	return bs;
+      }
     } else {
-        unrecognizedIdentifier(variable);
+      unrecognizedIdentifier(variable);
     }
 
     return bs;
-}
+  }
 
-BitSet SelectionEvaluator::nameInstruction(const std::string& name){
+  BitSet SelectionEvaluator::nameInstruction(const std::string& name){
     
     return nameFinder.match(name);
 
-}    
+  }    
 
-bool SelectionEvaluator::containDynamicToken(const std::vector<Token>& tokens){
+  bool SelectionEvaluator::containDynamicToken(const std::vector<Token>& tokens){
     std::vector<Token>::const_iterator i;
     for (i = tokens.begin(); i != tokens.end(); ++i) {
-        if (i->tok & Token::dynamic) {
-            return true;
-        }
+      if (i->tok & Token::dynamic) {
+	return true;
+      }
     }
 
     return false;
-}    
+  }    
 
-void SelectionEvaluator::clearDefinitionsAndLoadPredefined() {
+  void SelectionEvaluator::clearDefinitionsAndLoadPredefined() {
     variables.clear();
     //load predefine
     //predefine();
-}
+  }
 
-BitSet SelectionEvaluator::evaluate() {
+  BitSet SelectionEvaluator::evaluate() {
     BitSet bs(nStuntDouble);
     if (isLoaded_) {
-        pc = 0;
-        instructionDispatchLoop(bs);
+      pc = 0;
+      instructionDispatchLoop(bs);
     }
 
     return bs;
-}
+  }
 
-BitSet SelectionEvaluator::indexInstruction(const boost::any& value) {
+  BitSet SelectionEvaluator::indexInstruction(const boost::any& value) {
     BitSet bs(nStuntDouble);
 
     if (value.type() == typeid(int)) {
-        int index = boost::any_cast<int>(value);
-        if (index < 0 || index >= bs.size()) {
-            invalidIndex(index);
-        } else {
-            bs = indexFinder.find(index);
-        }
+      int index = boost::any_cast<int>(value);
+      if (index < 0 || index >= bs.size()) {
+	invalidIndex(index);
+      } else {
+	bs = indexFinder.find(index);
+      }
     } else if (value.type() == typeid(std::pair<int, int>)) {
-        std::pair<int, int> indexRange= boost::any_cast<std::pair<int, int> >(value);
-        assert(indexRange.first <= indexRange.second);
-        if (indexRange.first < 0 || indexRange.second >= bs.size()) {
-            invalidIndexRange(indexRange);
-        }else {
-            bs = indexFinder.find(indexRange.first, indexRange.second);
-        }
+      std::pair<int, int> indexRange= boost::any_cast<std::pair<int, int> >(value);
+      assert(indexRange.first <= indexRange.second);
+      if (indexRange.first < 0 || indexRange.second >= bs.size()) {
+	invalidIndexRange(indexRange);
+      }else {
+	bs = indexFinder.find(indexRange.first, indexRange.second);
+      }
     }
 
     return bs;
-}
+  }
 
 
-double SelectionEvaluator::getCharge(Atom* atom) {
+  double SelectionEvaluator::getCharge(Atom* atom) {
     double charge =0.0;
     AtomType* atomType = atom->getAtomType();
     if (atomType->isCharge()) {
-        GenericData* data = atomType->getPropertyByName("Charge");
-        if (data != NULL) {
-            DoubleGenericData* doubleData= dynamic_cast<DoubleGenericData*>(data);
+      GenericData* data = atomType->getPropertyByName("Charge");
+      if (data != NULL) {
+	DoubleGenericData* doubleData= dynamic_cast<DoubleGenericData*>(data);
 
-            if (doubleData != NULL) {
-                charge = doubleData->getData();
+	if (doubleData != NULL) {
+	  charge = doubleData->getData();
 
-            } else {
-                    sprintf( painCave.errMsg,
-                           "Can not cast GenericData to DoubleGenericData\n");
-                    painCave.severity = OOPSE_ERROR;
-                    painCave.isFatal = 1;
-                    simError();          
-            }
-        } 
+	} else {
+	  sprintf( painCave.errMsg,
+		   "Can not cast GenericData to DoubleGenericData\n");
+	  painCave.severity = OOPSE_ERROR;
+	  painCave.isFatal = 1;
+	  simError();          
+	}
+      } 
     }
 
     return charge;
-}
+  }
 
 }

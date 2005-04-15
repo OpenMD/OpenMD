@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -45,41 +45,41 @@
 #include "utils/simError.h"
 namespace oopse {
 
-AtomTypesSectionParser::AtomTypesSectionParser() {
+  AtomTypesSectionParser::AtomTypesSectionParser() {
     setSectionName("AtomTypes");
-}
+  }
 
-void AtomTypesSectionParser::parseLine(ForceField& ff,const std::string& line, int lineNo){
+  void AtomTypesSectionParser::parseLine(ForceField& ff,const std::string& line, int lineNo){
     StringTokenizer tokenizer(line);
     int nTokens = tokenizer.countTokens();    
 
     //in AtomTypeSection, a line at least contains 2 tokens
     //atomTypeName and mass
     if (nTokens < 2)  {
-        sprintf(painCave.errMsg, "AtomTypesSectionParser Error: Not enough tokens at line %d\n",
-                lineNo);
-        painCave.isFatal = 1;
-        simError();
+      sprintf(painCave.errMsg, "AtomTypesSectionParser Error: Not enough tokens at line %d\n",
+	      lineNo);
+      painCave.isFatal = 1;
+      simError();
             
     } else {
 
-        std::string atomTypeName = tokenizer.nextToken();    
-        AtomType* atomType = ff.getAtomType(atomTypeName);
+      std::string atomTypeName = tokenizer.nextToken();    
+      AtomType* atomType = ff.getAtomType(atomTypeName);
 
-        if (atomType == NULL) {
-            atomType = new AtomType();
-            int ident = ff.getNAtomType() + 1;
-            atomType->setIdent(ident); 
-            atomType->setName(atomTypeName);
-            ff.addAtomType(atomTypeName, atomType);
-        }
+      if (atomType == NULL) {
+	atomType = new AtomType();
+	int ident = ff.getNAtomType() + 1;
+	atomType->setIdent(ident); 
+	atomType->setName(atomTypeName);
+	ff.addAtomType(atomTypeName, atomType);
+      }
         
-        double mass = tokenizer.nextTokenAsDouble();              
-        atomType->setMass(mass);
+      double mass = tokenizer.nextTokenAsDouble();              
+      atomType->setMass(mass);
                
     }    
 
 
-}
+  }
 
 } //end namespace oopse

@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -54,17 +54,17 @@
 #include "integrators/NPTf.hpp"
 
 namespace oopse {
-    class NPTxyz : public NPTf {
-        public:
+  class NPTxyz : public NPTf {
+  public:
 
-            NPTxyz(SimInfo * info) : NPTf(info) {}
+    NPTxyz(SimInfo * info) : NPTf(info) {}
 
-        private:
+  private:
             
-            virtual void scaleSimBox();
-            virtual double calcConservedQuantity();
-            virtual void loadEta();
-    };
+    virtual void scaleSimBox();
+    virtual double calcConservedQuantity();
+    virtual void loadEta();
+  };
 
 }      //end namespace oopse
 

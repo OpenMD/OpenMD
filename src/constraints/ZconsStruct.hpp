@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -44,28 +44,28 @@
 #include "primitives/Molecule.hpp"
 namespace oopse {
 
-struct ZconstraintParam {
+  struct ZconstraintParam {
     double zTargetPos;   /**< target zconstraint position */
     double kz;                  /**< force constant */
     double cantVel;         /**< The velocity of cantilever */
-};
+  };
 
-struct ZconstraintMol {
+  struct ZconstraintMol {
     Molecule* mol;
     ZconstraintParam param;
     double fz;
     double zpos;
     double cantPos;         /**< current position of cantilever */
     double endFixingTime;    
-};
+  };
 
 
-struct ZconsData{
+  struct ZconsData{
     int zmolIndex;
     double zforce;
     double zpos;
     double zconsPos;
-};
+  };
 
 }
 

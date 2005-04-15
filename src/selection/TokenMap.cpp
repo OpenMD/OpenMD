@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -43,9 +43,9 @@
 
 namespace oopse {
 
-TokenMap* TokenMap::instance_ = NULL;
+  TokenMap* TokenMap::instance_ = NULL;
 
-TokenMap::TokenMap() {
+  TokenMap::TokenMap() {
     tokenMap_.insert(TokenMapType::value_type("define", Token(Token::define, std::string("define"))));
     tokenMap_.insert(TokenMapType::value_type("select", Token(Token::select, std::string("select")))); 
     //tokenMap_.insert(TokenMapType::value_type("selected", Token(Token::selected, std::string("selected")))); 
@@ -80,11 +80,11 @@ TokenMap::TokenMap() {
     
     tokenMap_.insert(TokenMapType::value_type("all", Token(Token::all, std::string("all"))));
     tokenMap_.insert(TokenMapType::value_type("none", Token(Token::none, std::string("none"))));
-}
+  }
 
-Token* TokenMap::getToken(const std::string& ident) {
+  Token* TokenMap::getToken(const std::string& ident) {
     std::map<std::string, Token>::iterator i = tokenMap_.find(ident);
 
     return i != tokenMap_.end() ? &(i->second) : NULL;
-}
+  }
 }

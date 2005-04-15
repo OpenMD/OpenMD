@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -55,83 +55,83 @@
 
 namespace oopse {
 
-/**
- * @class ChebyshevPolynomials
- * A collection of Chebyshev Polynomials.
- * @todo document
- */
-class ChebyshevPolynomials {
-    public:
-        ChebyshevPolynomials(int maxPower);
+  /**
+   * @class ChebyshevPolynomials
+   * A collection of Chebyshev Polynomials.
+   * @todo document
+   */
+  class ChebyshevPolynomials {
+  public:
+    ChebyshevPolynomials(int maxPower);
 
-        /**
-         * Calculates the value of the nth Chebyshev Polynomial evaluated at the given x value.
-         * @return The value of the nth Chebyshev Polynomial evaluates at the given x value
-         * @param n
-         * @param x the value of the independent variable for the nth Chebyshev Polynomial  function
-         */
+    /**
+     * Calculates the value of the nth Chebyshev Polynomial evaluated at the given x value.
+     * @return The value of the nth Chebyshev Polynomial evaluates at the given x value
+     * @param n
+     * @param x the value of the independent variable for the nth Chebyshev Polynomial  function
+     */
         
-        double evaluate(int n, double x) {
-            assert (n <= maxPower_ && n >=0); 
-            return polyList_[n].evaluate(x);
-        }
+    double evaluate(int n, double x) {
+      assert (n <= maxPower_ && n >=0); 
+      return polyList_[n].evaluate(x);
+    }
 
-        /**
-         * Returns the first derivative of the nth Chebyshev Polynomial.
-         * @return the first derivative of the nth Chebyshev Polynomial
-         * @param n
-         * @param x the value of the independent variable for the nth Chebyshev Polynomial  function
-         */
-        double evaluateDerivative(int n, double x) {
-            assert (n <= maxPower_ && n >=0); 
-            return polyList_[n].evaluateDerivative(x);        
-        }
+    /**
+     * Returns the first derivative of the nth Chebyshev Polynomial.
+     * @return the first derivative of the nth Chebyshev Polynomial
+     * @param n
+     * @param x the value of the independent variable for the nth Chebyshev Polynomial  function
+     */
+    double evaluateDerivative(int n, double x) {
+      assert (n <= maxPower_ && n >=0); 
+      return polyList_[n].evaluateDerivative(x);        
+    }
 
-        /**
-         * Returns the nth Chebyshev Polynomial 
-         * @return the nth Chebyshev Polynomial
-         * @param n
-         */
-        const DoublePolynomial& getChebyshevPolynomial(int n) const {
-            assert (n <= maxPower_ && n >=0); 
-            return polyList_[n];
-        }
+    /**
+     * Returns the nth Chebyshev Polynomial 
+     * @return the nth Chebyshev Polynomial
+     * @param n
+     */
+    const DoublePolynomial& getChebyshevPolynomial(int n) const {
+      assert (n <= maxPower_ && n >=0); 
+      return polyList_[n];
+    }
 
-    protected:
+  protected:
 
-       std::vector<DoublePolynomial> polyList_;
+    std::vector<DoublePolynomial> polyList_;
                 
-    private:
+  private:
         
-        void GeneratePolynomials(int maxPower);
-        virtual void GenerateFirstTwoTerms() = 0;
+    void GeneratePolynomials(int maxPower);
+    virtual void GenerateFirstTwoTerms() = 0;
         
-        int maxPower_;
-};    
+    int maxPower_;
+  };    
 
-/**
- * @class ChebyshevT
- * @todo document
- */
-class ChebyshevT : public ChebyshevPolynomials {
-    public:
-        ChebyshevT(int maxPower) :ChebyshevPolynomials(maxPower) {}
+  /**
+   * @class ChebyshevT
+   * @todo document
+   */
+  class ChebyshevT : public ChebyshevPolynomials {
+  public:
+    ChebyshevT(int maxPower) :ChebyshevPolynomials(maxPower) {}
 
-    private:
-        virtual void GenerateFirstTwoTerms();
-};
+  private:
+    virtual void GenerateFirstTwoTerms();
+  };
 
-/**
- * @class ChebyshevU
- * @todo document
- */
-class ChebyshevU : public ChebyshevPolynomials {
-    public:
-        ChebyshevU(int maxPower) :ChebyshevPolynomials(maxPower) {}
+  /**
+   * @class ChebyshevU
+   * @todo document
+   */
+  class ChebyshevU : public ChebyshevPolynomials {
+  public:
+    ChebyshevU(int maxPower) :ChebyshevPolynomials(maxPower) {}
 
-    private:
-        virtual void GenerateFirstTwoTerms();
-};
+  private:
+    virtual void GenerateFirstTwoTerms();
+  };
 
 
 } //end namespace oopse

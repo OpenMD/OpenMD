@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -52,33 +52,33 @@
 #include "types/BendType.hpp"
 
 namespace oopse {
-/**
- * @class HarmonicBendType 
- *
- * @todo documentation
- */
-class HarmonicBendType : public BendType {
+  /**
+   * @class HarmonicBendType 
+   *
+   * @todo documentation
+   */
+  class HarmonicBendType : public BendType {
 
-    public:
+  public:
 
-        HarmonicBendType(double theta, double k) : BendType(theta) , k_(k){
-        }
+    HarmonicBendType(double theta, double k) : BendType(theta) , k_(k){
+    }
 
-        void setForceConstant(double k) {k_ = k; }
+    void setForceConstant(double k) {k_ = k; }
 
-        double getForceConstant() {return k_;}
+    double getForceConstant() {return k_;}
 
-        void calcForce(double theta, double& V, double& dVdr) {
-            double delta = theta - theta0_;
+    void calcForce(double theta, double& V, double& dVdr) {
+      double delta = theta - theta0_;
 
-            V = 0.5 * k_ * delta * delta;
-            dVdr = k_ * delta;
-        }
+      V = 0.5 * k_ * delta * delta;
+      dVdr = k_ * delta;
+    }
                 
-    private:
-        double k_;
+  private:
+    double k_;
 
-};
+  };
 
 }//end namespace oopse
 #endif //TYPES_HARMONICBENDTYPE_HPP

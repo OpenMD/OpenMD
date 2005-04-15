@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -44,32 +44,32 @@
 #include "utils/simError.h"
 namespace oopse {
 
-Rattle::Rattle(SimInfo* info) : info_(info), maxConsIteration_(10), consTolerance_(1.0e-6) {
+  Rattle::Rattle(SimInfo* info) : info_(info), maxConsIteration_(10), consTolerance_(1.0e-6) {
     
     if (info_->getSimParams()->haveDt()) {
-        dt_ = info_->getSimParams()->getDt();
+      dt_ = info_->getSimParams()->getDt();
     } else {
-            sprintf(painCave.errMsg,
-                    "Integrator Error: dt is not set\n");
-            painCave.isFatal = 1;
-            simError();
+      sprintf(painCave.errMsg,
+	      "Integrator Error: dt is not set\n");
+      painCave.isFatal = 1;
+      simError();
     }    
     
     currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
-}
+  }
 
-void Rattle::constraintA() {
+  void Rattle::constraintA() {
     if (info_->getNConstraints() > 0) {
-        doConstraint(&Rattle::constraintPairA);
+      doConstraint(&Rattle::constraintPairA);
     }
-}
-void Rattle::constraintB() {
+  }
+  void Rattle::constraintB() {
     if (info_->getNConstraints() > 0) {
-        doConstraint(&Rattle::constraintPairB);
+      doConstraint(&Rattle::constraintPairB);
     }
-}
+  }
 
-void Rattle::doConstraint(ConstraintPairFuncPtr func) {
+  void Rattle::doConstraint(ConstraintPairFuncPtr func) {
     Molecule* mol;
     SimInfo::MoleculeIterator mi;
     ConstraintElem* consElem;
@@ -78,64 +78,64 @@ void Rattle::doConstraint(ConstraintPairFuncPtr func) {
     Molecule::ConstraintPairIterator cpi;
     
     for (mol = info_->beginMolecule(mi); mol != NULL; mol = info_->nextMolecule(mi)) {
-        for (consElem = mol->beginConstraintElem(cei); consElem != NULL; consElem = mol->nextConstraintElem(cei)) {
-            consElem->setMoved(true);
-            consElem->setMoving(false);
-        }
+      for (consElem = mol->beginConstraintElem(cei); consElem != NULL; consElem = mol->nextConstraintElem(cei)) {
+	consElem->setMoved(true);
+	consElem->setMoving(false);
+      }
     }
     
     //main loop of constraint algorithm
     bool done = false;
     int iteration = 0;
     while(!done && iteration < maxConsIteration_){
-        done = true;
+      done = true;
 
-        //loop over every constraint pair
+      //loop over every constraint pair
 
-        for (mol = info_->beginMolecule(mi); mol != NULL; mol = info_->nextMolecule(mi)) {
-            for (consPair = mol->beginConstraintPair(cpi); consPair != NULL; consPair = mol->nextConstraintPair(cpi)) {
+      for (mol = info_->beginMolecule(mi); mol != NULL; mol = info_->nextMolecule(mi)) {
+	for (consPair = mol->beginConstraintPair(cpi); consPair != NULL; consPair = mol->nextConstraintPair(cpi)) {
 
 
-                //dispatch constraint algorithm
-                if(consPair->isMoved()) {
-                    int exeStatus = (this->*func)(consPair);
+	  //dispatch constraint algorithm
+	  if(consPair->isMoved()) {
+	    int exeStatus = (this->*func)(consPair);
 
-                    switch(exeStatus){
-                        case consFail:
-                            sprintf(painCave.errMsg,
-                            "Constraint failure in Rattle::constrainA, Constraint Fail\n");
-                            painCave.isFatal = 1;
-                            simError();                             
+	    switch(exeStatus){
+	    case consFail:
+	      sprintf(painCave.errMsg,
+		      "Constraint failure in Rattle::constrainA, Constraint Fail\n");
+	      painCave.isFatal = 1;
+	      simError();                             
                             
-                            break;
-                        case consSuccess:
-                            //constrain the pair by moving two elements
-                            done = false;
-                            consPair->getConsElem1()->setMoving(true);
-                            consPair->getConsElem2()->setMoving(true);
-                            break;
-                        case consAlready:
-                            //current pair is already constrained, do not need to move the elements
-                            break;
-                        default:          
-                            sprintf(painCave.errMsg, "ConstraintAlgorithm::doConstrain() Error: unrecognized status");
-                            painCave.isFatal = 1;
-                            simError();                           
-                            break;
-                    }      
-                }
-            }
-        }//end for(iter->first())
+	      break;
+	    case consSuccess:
+	      //constrain the pair by moving two elements
+	      done = false;
+	      consPair->getConsElem1()->setMoving(true);
+	      consPair->getConsElem2()->setMoving(true);
+	      break;
+	    case consAlready:
+	      //current pair is already constrained, do not need to move the elements
+	      break;
+	    default:          
+	      sprintf(painCave.errMsg, "ConstraintAlgorithm::doConstrain() Error: unrecognized status");
+	      painCave.isFatal = 1;
+	      simError();                           
+	      break;
+	    }      
+	  }
+	}
+      }//end for(iter->first())
 
 
-        for (mol = info_->beginMolecule(mi); mol != NULL; mol = info_->nextMolecule(mi)) {
-            for (consElem = mol->beginConstraintElem(cei); consElem != NULL; consElem = mol->nextConstraintElem(cei)) {
-                consElem->setMoved(consElem->getMoving());
-                consElem->setMoving(false);
-            }
-        }
+      for (mol = info_->beginMolecule(mi); mol != NULL; mol = info_->nextMolecule(mi)) {
+	for (consElem = mol->beginConstraintElem(cei); consElem != NULL; consElem = mol->nextConstraintElem(cei)) {
+	  consElem->setMoved(consElem->getMoving());
+	  consElem->setMoving(false);
+	}
+      }
 
-        iteration++;
+      iteration++;
     }//end while
 
     if (!done){
@@ -145,79 +145,79 @@ void Rattle::doConstraint(ConstraintPairFuncPtr func) {
       painCave.isFatal = 1;
       simError();    
     }
-}
-
-int Rattle::constraintPairA(ConstraintPair* consPair){
-  ConstraintElem* consElem1 = consPair->getConsElem1();
-  ConstraintElem* consElem2 = consPair->getConsElem2();
-
-  Vector3d posA = consElem1->getPos();
-  Vector3d posB = consElem2->getPos();
-
-  Vector3d pab = posA -posB;   
-
-  //periodic boundary condition
-
-  currentSnapshot_->wrapVector(pab);
-
-  double pabsq = pab.lengthSquare();
-
-  double rabsq = consPair->getConsDistSquare();
-  double diffsq = rabsq - pabsq;
-
-  // the original rattle code from alan tidesley
-  if (fabs(diffsq) > (consTolerance_ * rabsq * 2)){
-    
-    Vector3d oldPosA = consElem1->getPrevPos();
-    Vector3d oldPosB = consElem2->getPrevPos();      
-
-    Vector3d rab = oldPosA - oldPosB;    
-
-    currentSnapshot_->wrapVector(rab);
-
-    double rpab = dot(rab, pab);
-    double rpabsq = rpab * rpab;
-
-    if (rpabsq < (rabsq * -diffsq)){
-      return consFail;
-    }
-
-    double rma = 1.0 / consElem1->getMass();
-    double rmb = 1.0 / consElem2->getMass();
-
-    double gab = diffsq / (2.0 * (rma + rmb) * rpab);
-
-    Vector3d delta = rab * gab;
-
-    //set atom1's position
-    posA += rma * delta;    
-    consElem1->setPos(posA);
-
-    //set atom2's position
-    posB -= rmb * delta;
-    consElem2->setPos(posB);
-
-    delta /= dt_;
-    
-    //set atom1's velocity
-    Vector3d velA = consElem1->getVel();
-    velA += rma * delta;
-    consElem1->setVel(velA);
-
-    //set atom2's velocity
-    Vector3d velB = consElem2->getVel();
-    velB -= rmb * delta;
-    consElem2->setVel(velB);
-
-    return consSuccess;
   }
-  else
-    return consAlready;
+
+  int Rattle::constraintPairA(ConstraintPair* consPair){
+    ConstraintElem* consElem1 = consPair->getConsElem1();
+    ConstraintElem* consElem2 = consPair->getConsElem2();
+
+    Vector3d posA = consElem1->getPos();
+    Vector3d posB = consElem2->getPos();
+
+    Vector3d pab = posA -posB;   
+
+    //periodic boundary condition
+
+    currentSnapshot_->wrapVector(pab);
+
+    double pabsq = pab.lengthSquare();
+
+    double rabsq = consPair->getConsDistSquare();
+    double diffsq = rabsq - pabsq;
+
+    // the original rattle code from alan tidesley
+    if (fabs(diffsq) > (consTolerance_ * rabsq * 2)){
+    
+      Vector3d oldPosA = consElem1->getPrevPos();
+      Vector3d oldPosB = consElem2->getPrevPos();      
+
+      Vector3d rab = oldPosA - oldPosB;    
+
+      currentSnapshot_->wrapVector(rab);
+
+      double rpab = dot(rab, pab);
+      double rpabsq = rpab * rpab;
+
+      if (rpabsq < (rabsq * -diffsq)){
+	return consFail;
+      }
+
+      double rma = 1.0 / consElem1->getMass();
+      double rmb = 1.0 / consElem2->getMass();
+
+      double gab = diffsq / (2.0 * (rma + rmb) * rpab);
+
+      Vector3d delta = rab * gab;
+
+      //set atom1's position
+      posA += rma * delta;    
+      consElem1->setPos(posA);
+
+      //set atom2's position
+      posB -= rmb * delta;
+      consElem2->setPos(posB);
+
+      delta /= dt_;
+    
+      //set atom1's velocity
+      Vector3d velA = consElem1->getVel();
+      velA += rma * delta;
+      consElem1->setVel(velA);
+
+      //set atom2's velocity
+      Vector3d velB = consElem2->getVel();
+      velB -= rmb * delta;
+      consElem2->setVel(velB);
+
+      return consSuccess;
+    }
+    else
+      return consAlready;
   
-}
+  }
 
 
-int Rattle::constraintPairB(ConstraintPair* consPair){
+  int Rattle::constraintPairB(ConstraintPair* consPair){
     ConstraintElem* consElem1 = consPair->getConsElem1();
     ConstraintElem* consElem2 = consPair->getConsElem2();
 
@@ -255,6 +255,6 @@ int Rattle::constraintPairB(ConstraintPair* consPair){
     else
       return consAlready;
 
-}
+  }
 
 }

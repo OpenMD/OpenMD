@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -46,89 +46,89 @@
 #include "utils/simError.h"
 
 namespace oopse {
-StatWriter::StatWriter( const std::string& filename, const StatsBitSet& mask) : mask_(mask){
+  StatWriter::StatWriter( const std::string& filename, const StatsBitSet& mask) : mask_(mask){
 
 #ifdef IS_MPI
-  if(worldRank == 0 ){
+    if(worldRank == 0 ){
 #endif // is_mpi
 
-    statfile_.open(filename.c_str(), std::ios::out | std::ios::trunc );
+      statfile_.open(filename.c_str(), std::ios::out | std::ios::trunc );
     
-    if( !statfile_ ){
+      if( !statfile_ ){
       
-      sprintf( painCave.errMsg,
-           "Could not open \"%s\" for stat output.\n",
-           filename.c_str());
-      painCave.isFatal = 1;
-      simError();
-    }
+	sprintf( painCave.errMsg,
+		 "Could not open \"%s\" for stat output.\n",
+		 filename.c_str());
+	painCave.isFatal = 1;
+	simError();
+      }
 
-    writeTitle();
+      writeTitle();
     
 #ifdef IS_MPI
+    }
+
+    sprintf( checkPointMsg,
+	     "Sucessfully opened output file for stating.\n");
+    MPIcheckPoint();
+#endif // is_mpi
+
   }
 
-  sprintf( checkPointMsg,
-               "Sucessfully opened output file for stating.\n");
-  MPIcheckPoint();
-#endif // is_mpi
-
-}
-
-StatWriter::~StatWriter( ){
-
-#ifdef IS_MPI
-  if(worldRank == 0 ){
-#endif // is_mpi
-
-    statfile_.close();
-
-#ifdef IS_MPI
-  }
-#endif // is_mpi
-}
-
-void StatWriter::writeTitle() {
-
+  StatWriter::~StatWriter( ){
 
 #ifdef IS_MPI
     if(worldRank == 0 ){
 #endif // is_mpi
 
-        //write title
-        statfile_ << "#";
-        for (int i =0; i < mask_.size(); ++i) {
-            if (mask_[i]) {
-            statfile_ << "\t" << Stats::getTitle(i) << "(" << Stats::getUnits(i) << ")";
-            }
-        }
-        statfile_ << std::endl;
-
-#ifdef IS_MPI
-  }
-#endif // is_mpi    
-}
-
-void StatWriter::writeStat(const Stats& s){
-
-#ifdef IS_MPI
-    if(worldRank == 0 ){
-#endif // is_mpi
-
-        statfile_.precision(8);
-
-        for (int i =0; i < mask_.size(); ++i) {
-            if (mask_[i]) {
-                statfile_ << "\t" << s[i];
-            }
-        }
-        statfile_ << std::endl;
-
-        statfile_.flush();
+      statfile_.close();
 
 #ifdef IS_MPI
     }
 #endif // is_mpi
-}
+  }
+
+  void StatWriter::writeTitle() {
+
+
+#ifdef IS_MPI
+    if(worldRank == 0 ){
+#endif // is_mpi
+
+      //write title
+      statfile_ << "#";
+      for (int i =0; i < mask_.size(); ++i) {
+	if (mask_[i]) {
+	  statfile_ << "\t" << Stats::getTitle(i) << "(" << Stats::getUnits(i) << ")";
+	}
+      }
+      statfile_ << std::endl;
+
+#ifdef IS_MPI
+    }
+#endif // is_mpi    
+  }
+
+  void StatWriter::writeStat(const Stats& s){
+
+#ifdef IS_MPI
+    if(worldRank == 0 ){
+#endif // is_mpi
+
+      statfile_.precision(8);
+
+      for (int i =0; i < mask_.size(); ++i) {
+	if (mask_[i]) {
+	  statfile_ << "\t" << s[i];
+	}
+      }
+      statfile_ << std::endl;
+
+      statfile_.flush();
+
+#ifdef IS_MPI
+    }
+#endif // is_mpi
+  }
 
 }

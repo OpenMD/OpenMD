@@ -45,7 +45,7 @@
 
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: doForces.F90,v 1.12 2005-03-21 20:51:06 chrisfen Exp $, $Date: 2005-03-21 20:51:06 $, $Name: not supported by cvs2svn $, $Revision: 1.12 $
+!! @version $Id: doForces.F90,v 1.13 2005-04-15 22:03:37 gezelter Exp $, $Date: 2005-04-15 22:03:37 $, $Name: not supported by cvs2svn $, $Revision: 1.13 $
 
 
 module doForces
@@ -82,7 +82,7 @@ module doForces
   logical, save :: haveSIMvariables = .false.
   logical, save :: havePropertyMap = .false.
   logical, save :: haveSaneForceField = .false.
-  
+
   logical, save :: FF_uses_DirectionalAtoms
   logical, save :: FF_uses_LennardJones
   logical, save :: FF_uses_Electrostatics
@@ -145,15 +145,15 @@ module doForces
 contains
 
   subroutine setRlistDF( this_rlist )
-    
+
     real(kind=dp) :: this_rlist
 
     rlist = this_rlist
     rlistsq = rlist * rlist
-    
+
     haveRlist = .true.
 
-  end subroutine setRlistDF    
+  end subroutine setRlistDF
 
   subroutine createPropertyMap(status)
     integer :: nAtypes
@@ -170,7 +170,7 @@ contains
        status = -1
        return
     end if
-        
+
     if (.not. allocated(PropertyMap)) then
        allocate(PropertyMap(nAtypes))
     endif
@@ -181,13 +181,13 @@ contains
 
        call getElementProperty(atypes, i, "is_LennardJones", thisProperty)
        PropertyMap(i)%is_LennardJones = thisProperty
-       
+
        call getElementProperty(atypes, i, "is_Electrostatic", thisProperty)
        PropertyMap(i)%is_Electrostatic = thisProperty
 
        call getElementProperty(atypes, i, "is_Charge", thisProperty)
        PropertyMap(i)%is_Charge = thisProperty
-       
+
        call getElementProperty(atypes, i, "is_Dipole", thisProperty)
        PropertyMap(i)%is_Dipole = thisProperty
 
@@ -241,7 +241,7 @@ contains
     integer :: myStatus
 
     error = 0
-    
+
     if (.not. havePropertyMap) then 
 
        myStatus = 0
@@ -286,7 +286,7 @@ contains
 #endif
     return
   end subroutine doReadyCheck
-    
+
 
   subroutine init_FF(use_RF_c, thisStat)
 
@@ -302,13 +302,13 @@ contains
 
     !! Fortran's version of a cast:
     FF_uses_RF = use_RF_c
-    
+
     !! init_FF is called *after* all of the atom types have been 
     !! defined in atype_module using the new_atype subroutine.
     !!
     !! this will scan through the known atypes and figure out what
     !! interactions are used by the force field.     
-  
+
     FF_uses_DirectionalAtoms = .false.
     FF_uses_LennardJones = .false.
     FF_uses_Electrostatics = .false.
@@ -319,7 +319,7 @@ contains
     FF_uses_EAM = .false.
     FF_uses_Shapes = .false.
     FF_uses_FLARB = .false.
-    
+
     call getMatchingElementList(atypes, "is_Directional", .true., &
          nMatches, MatchList)
     if (nMatches .gt. 0) FF_uses_DirectionalAtoms = .true.
@@ -327,7 +327,7 @@ contains
     call getMatchingElementList(atypes, "is_LennardJones", .true., &
          nMatches, MatchList)
     if (nMatches .gt. 0) FF_uses_LennardJones = .true.
-    
+
     call getMatchingElementList(atypes, "is_Electrostatic", .true., &
          nMatches, MatchList)
     if (nMatches .gt. 0) then
@@ -340,7 +340,7 @@ contains
        FF_uses_Charges = .true.   
        FF_uses_Electrostatics = .true.
     endif
-    
+
     call getMatchingElementList(atypes, "is_Dipole", .true., &
          nMatches, MatchList)
     if (nMatches .gt. 0) then 
@@ -356,24 +356,24 @@ contains
        FF_uses_Electrostatics = .true.
        FF_uses_DirectionalAtoms = .true.
     endif
-    
+
     call getMatchingElementList(atypes, "is_Sticky", .true., nMatches, &
          MatchList) 
     if (nMatches .gt. 0) then
        FF_uses_Sticky = .true.
        FF_uses_DirectionalAtoms = .true.
     endif
-    
+
     call getMatchingElementList(atypes, "is_GayBerne", .true., &
          nMatches, MatchList)
     if (nMatches .gt. 0) then
        FF_uses_GayBerne = .true.
        FF_uses_DirectionalAtoms = .true.
     endif
-    
+
     call getMatchingElementList(atypes, "is_EAM", .true., nMatches, MatchList)
     if (nMatches .gt. 0) FF_uses_EAM = .true.
-    
+
     call getMatchingElementList(atypes, "is_Shape", .true., &
          nMatches, MatchList)
     if (nMatches .gt. 0) then
@@ -387,9 +387,9 @@ contains
 
     !! Assume sanity (for the sake of argument)
     haveSaneForceField = .true.
-    
+
     !! check to make sure the FF_uses_RF setting makes sense
-    
+
     if (FF_uses_dipoles) then
        if (FF_uses_RF) then
           dielect = getDielect()
@@ -402,7 +402,7 @@ contains
           haveSaneForceField = .false.
           return
        endif
-    endif 
+    endif
 
     !sticky module does not contain check_sticky_FF anymore
     !if (FF_uses_sticky) then
@@ -415,7 +415,7 @@ contains
     !endif
 
     if (FF_uses_EAM) then
-         call init_EAM_FF(my_status) 
+       call init_EAM_FF(my_status) 
        if (my_status /= 0) then
           write(default_error, *) "init_EAM_FF returned a bad status"
           thisStat = -1
@@ -435,7 +435,7 @@ contains
 
     if (FF_uses_GayBerne .and. FF_uses_LennardJones) then
     endif
-    
+
     if (.not. haveNeighborList) then
        !! Create neighbor lists
        call expandNeighborList(nLocal, my_status)
@@ -445,10 +445,10 @@ contains
           return
        endif
        haveNeighborList = .true.
-    endif    
-    
+    endif
+
   end subroutine init_FF
-  
+
 
   !! Does force loop over i,j pairs. Calls do_pair to calculates forces.
   !------------------------------------------------------------->
@@ -501,9 +501,9 @@ contains
     integer :: loopStart, loopEnd, loop
 
     real(kind=dp) :: listSkin = 1.0   
-    
+
     !! initialize local variables  
-    
+
 #ifdef IS_MPI
     pot_local = 0.0_dp
     nAtomsInRow   = getNatomsInRow(plan_atom_row)
@@ -513,7 +513,7 @@ contains
 #else
     natoms = nlocal
 #endif
-    
+
     call doReadyCheck(localError)
     if ( localError .ne. 0 ) then
        call handleError("do_force_loop", "Not Initialized")
@@ -521,36 +521,36 @@ contains
        return
     end if
     call zero_work_arrays()
-        
+
     do_pot = do_pot_c
     do_stress = do_stress_c
-    
+
     ! Gather all information needed by all force loops:
-    
+
 #ifdef IS_MPI    
-    
+
     call gather(q, q_Row, plan_atom_row_3d)
     call gather(q, q_Col, plan_atom_col_3d)
 
     call gather(q_group, q_group_Row, plan_group_row_3d)
     call gather(q_group, q_group_Col, plan_group_col_3d)
-        
+
     if (FF_UsesDirectionalAtoms() .and. SIM_uses_DirectionalAtoms) then
        call gather(eFrame, eFrame_Row, plan_atom_row_rotation)
        call gather(eFrame, eFrame_Col, plan_atom_col_rotation)
-       
+
        call gather(A, A_Row, plan_atom_row_rotation)
        call gather(A, A_Col, plan_atom_col_rotation)
     endif
-    
+
 #endif
-    
+
     !! Begin force loop timing:
 #ifdef PROFILE
     call cpu_time(forceTimeInitial)
     nloops = nloops + 1
 #endif
-    
+
     loopEnd = PAIR_LOOP
     if (FF_RequiresPrepairCalc() .and. SIM_requires_prepair_calc) then
        loopStart = PREPAIR_LOOP
@@ -565,13 +565,13 @@ contains
        if (loop .eq. loopStart) then
 #ifdef IS_MPI
           call checkNeighborList(nGroupsInRow, q_group_row, listSkin, &
-             update_nlist)
+               update_nlist)
 #else
           call checkNeighborList(nGroups, q_group, listSkin, &
-             update_nlist)
+               update_nlist)
 #endif
        endif
-       
+
        if (update_nlist) then
           !! save current configuration and construct neighbor list
 #ifdef IS_MPI
@@ -582,7 +582,7 @@ contains
           neighborListSize = size(list)
           nlist = 0
        endif
-       
+
        istart = 1
 #ifdef IS_MPI
        iend = nGroupsInRow
@@ -592,9 +592,9 @@ contains
        outer: do i = istart, iend
 
           if (update_nlist) point(i) = nlist + 1
-          
+
           n_in_i = groupStartRow(i+1) - groupStartRow(i)
-          
+
           if (update_nlist) then
 #ifdef IS_MPI
              jstart = 1
@@ -609,7 +609,7 @@ contains
              ! make sure group i has neighbors
              if (jstart .gt. jend) cycle outer
           endif
-          
+
           do jnab = jstart, jend
              if (update_nlist) then
                 j = jnab
@@ -628,7 +628,7 @@ contains
              if (rgrpsq < rlistsq) then
                 if (update_nlist) then
                    nlist = nlist + 1
-                   
+
                    if (nlist > neighborListSize) then
 #ifdef IS_MPI                 
                       call expandNeighborList(nGroupsInRow, listerror)
@@ -642,28 +642,28 @@ contains
                       end if
                       neighborListSize = size(list)
                    endif
-                   
+
                    list(nlist) = j
                 endif
-                
+
                 if (loop .eq. PAIR_LOOP) then
                    vij = 0.0d0
                    fij(1:3) = 0.0d0
                 endif
-                
+
                 call get_switch(rgrpsq, sw, dswdr, rgrp, group_switch, &
                      in_switching_region)
-                
+
                 n_in_j = groupStartCol(j+1) - groupStartCol(j)
-                
+
                 do ia = groupStartRow(i), groupStartRow(i+1)-1
-                   
+
                    atom1 = groupListRow(ia)
-                   
+
                    inner: do jb = groupStartCol(j), groupStartCol(j+1)-1
-                      
+
                       atom2 = groupListCol(jb)
-                      
+
                       if (skipThisPair(atom1, atom2)) cycle inner
 
                       if ((n_in_i .eq. 1).and.(n_in_j .eq. 1)) then
@@ -705,14 +705,14 @@ contains
                       endif
                    enddo inner
                 enddo
-                
+
                 if (loop .eq. PAIR_LOOP) then
                    if (in_switching_region) then
                       swderiv = vij*dswdr/rgrp
                       fij(1) = fij(1) + swderiv*d_grp(1)
                       fij(2) = fij(2) + swderiv*d_grp(2)
                       fij(3) = fij(3) + swderiv*d_grp(3)
-                      
+
                       do ia=groupStartRow(i), groupStartRow(i+1)-1
                          atom1=groupListRow(ia)
                          mf = mfactRow(atom1)
@@ -726,7 +726,7 @@ contains
                          f(3,atom1) = f(3,atom1) + swderiv*d_grp(3)*mf
 #endif
                       enddo
-                      
+
                       do jb=groupStartCol(j), groupStartCol(j+1)-1
                          atom2=groupListCol(jb)
                          mf = mfactCol(atom2)
@@ -741,13 +741,13 @@ contains
 #endif
                       enddo
                    endif
-                   
+
                    if (do_stress) call add_stress_tensor(d_grp, fij)
                 endif
              end if
           enddo
        enddo outer
-       
+
        if (update_nlist) then
 #ifdef IS_MPI
           point(nGroupsInRow + 1) = nlist + 1
@@ -761,34 +761,34 @@ contains
              update_nlist = .false.                              
           endif
        endif
-             
+
        if (loop .eq. PREPAIR_LOOP) then
           call do_preforce(nlocal, pot)
        endif
-       
+
     enddo
-    
+
     !! Do timing
 #ifdef PROFILE
     call cpu_time(forceTimeFinal)
     forceTime = forceTime + forceTimeFinal - forceTimeInitial
 #endif    
-    
+
 #ifdef IS_MPI
     !!distribute forces
-    
+
     f_temp = 0.0_dp
     call scatter(f_Row,f_temp,plan_atom_row_3d)
     do i = 1,nlocal
        f(1:3,i) = f(1:3,i) + f_temp(1:3,i)
     end do
-    
+
     f_temp = 0.0_dp
     call scatter(f_Col,f_temp,plan_atom_col_3d)
     do i = 1,nlocal
        f(1:3,i) = f(1:3,i) + f_temp(1:3,i)
     end do
-    
+
     if (FF_UsesDirectionalAtoms() .and. SIM_uses_DirectionalAtoms) then
        t_temp = 0.0_dp
        call scatter(t_Row,t_temp,plan_atom_row_3d)
@@ -797,36 +797,36 @@ contains
        end do
        t_temp = 0.0_dp
        call scatter(t_Col,t_temp,plan_atom_col_3d)
-       
+
        do i = 1,nlocal
           t(1:3,i) = t(1:3,i) + t_temp(1:3,i)
        end do
     endif
-    
+
     if (do_pot) then
        ! scatter/gather pot_row into the members of my column
        call scatter(pot_Row, pot_Temp, plan_atom_row)
-       
+
        ! scatter/gather pot_local into all other procs
        ! add resultant to get total pot
        do i = 1, nlocal
           pot_local = pot_local + pot_Temp(i)
        enddo
-       
+
        pot_Temp = 0.0_DP 
-       
+
        call scatter(pot_Col, pot_Temp, plan_atom_col)
        do i = 1, nlocal
           pot_local = pot_local + pot_Temp(i)
        enddo
-       
+
     endif
 #endif
-    
+
     if (FF_RequiresPostpairCalc() .and. SIM_requires_postpair_calc) then
-       
+
        if (FF_uses_RF .and. SIM_uses_RF) then
-          
+
 #ifdef IS_MPI
           call scatter(rf_Row,rf,plan_atom_row_3d)
           call scatter(rf_Col,rf_Temp,plan_atom_col_3d)
@@ -834,20 +834,20 @@ contains
              rf(1:3,i) = rf(1:3,i) + rf_Temp(1:3,i)
           end do
 #endif
-          
+
           do i = 1, nLocal
-             
+
              rfpot = 0.0_DP
 #ifdef IS_MPI
              me_i = atid_row(i)
 #else
              me_i = atid(i)
 #endif
-             
+
              if (PropertyMap(me_i)%is_Dipole) then
-                
+
                 mu_i = getDipoleMoment(me_i)
-    
+
                 !! The reaction field needs to include a self contribution 
                 !! to the field:
                 call accumulate_self_rf(i, mu_i, eFrame)
@@ -858,40 +858,40 @@ contains
                 pot_local = pot_local + rfpot
 #else
                 pot = pot + rfpot
-      
+
 #endif
-             endif             
+             endif
           enddo
        endif
     endif
-    
-    
+
+
 #ifdef IS_MPI
-    
+
     if (do_pot) then
        pot = pot + pot_local
        !! we assume the c code will do the allreduce to get the total potential
        !! we could do it right here if we needed to...
     endif
-    
+
     if (do_stress) then
        call mpi_allreduce(tau_Temp, tau, 9,mpi_double_precision,mpi_sum, &
             mpi_comm_world,mpi_err)
        call mpi_allreduce(virial_Temp, virial,1,mpi_double_precision,mpi_sum, &
             mpi_comm_world,mpi_err)
     endif
-    
+
 #else
-    
+
     if (do_stress) then
        tau = tau_Temp
        virial = virial_Temp
     endif
-    
+
 #endif
-       
+
   end subroutine do_force_loop
-  
+
   subroutine do_pair(i, j, rijsq, d, sw, do_pot, &
        eFrame, A, f, t, pot, vpair, fpair)
 
@@ -922,25 +922,25 @@ contains
     me_j = atid(j)
 #endif
 
-!    write(*,*) i, j, me_i, me_j
-    
+    !    write(*,*) i, j, me_i, me_j
+
     if (FF_uses_LennardJones .and. SIM_uses_LennardJones) then
-       
+
        if ( PropertyMap(me_i)%is_LennardJones .and. &
             PropertyMap(me_j)%is_LennardJones ) then
           call do_lj_pair(i, j, d, r, rijsq, sw, vpair, fpair, pot, f, do_pot)
        endif
-       
+
     endif
-    
+
     if (FF_uses_Electrostatics .and. SIM_uses_Electrostatics) then
-       
+
        if (PropertyMap(me_i)%is_Electrostatic .and. &
             PropertyMap(me_j)%is_Electrostatic) then
           call doElectrostaticPair(i, j, d, r, rijsq, sw, vpair, fpair, &
                pot, eFrame, f, t, do_pot)
        endif
-       
+
        if (FF_uses_dipoles .and. SIM_uses_dipoles) then       
           if ( PropertyMap(me_i)%is_Dipole .and. &
                PropertyMap(me_j)%is_Dipole) then
@@ -959,31 +959,31 @@ contains
           call do_sticky_pair(i, j, d, r, rijsq, sw, vpair, fpair, &
                pot, A, f, t, do_pot)
        endif
-       
+
     endif
 
 
     if (FF_uses_GayBerne .and. SIM_uses_GayBerne) then
-       
+
        if ( PropertyMap(me_i)%is_GayBerne .and. &
             PropertyMap(me_j)%is_GayBerne) then
           call do_gb_pair(i, j, d, r, rijsq, sw, vpair, fpair, &
                pot, A, f, t, do_pot)
        endif
-       
+
     endif
-    
+
     if (FF_uses_EAM .and. SIM_uses_EAM) then
-       
+
        if ( PropertyMap(me_i)%is_EAM .and. PropertyMap(me_j)%is_EAM) then
           call do_eam_pair(i, j, d, r, rijsq, sw, vpair, fpair, pot, f, &
                do_pot)
        endif
-       
+
     endif
 
 
-!    write(*,*) PropertyMap(me_i)%is_Shape,PropertyMap(me_j)%is_Shape
+    !    write(*,*) PropertyMap(me_i)%is_Shape,PropertyMap(me_j)%is_Shape
 
     if (FF_uses_Shapes .and. SIM_uses_Shapes) then
        if ( PropertyMap(me_i)%is_Shape .and. &
@@ -991,30 +991,30 @@ contains
           call do_shape_pair(i, j, d, r, rijsq, sw, vpair, fpair, &
                pot, A, f, t, do_pot)
        endif
-       
+
     endif
-    
+
   end subroutine do_pair
 
   subroutine do_prepair(i, j, rijsq, d, sw, rcijsq, dc, &
        do_pot, do_stress, eFrame, A, f, t, pot)
 
-   real( kind = dp ) :: pot, sw
-   real( kind = dp ), dimension(9,nLocal) :: eFrame
-   real (kind=dp), dimension(9,nLocal) :: A
-   real (kind=dp), dimension(3,nLocal) :: f
-   real (kind=dp), dimension(3,nLocal) :: t
-   
-   logical, intent(inout) :: do_pot, do_stress
-   integer, intent(in) :: i, j
-   real ( kind = dp ), intent(inout)    :: rijsq, rcijsq
-   real ( kind = dp )                :: r, rc
-   real ( kind = dp ), intent(inout) :: d(3), dc(3)
-   
-   logical :: is_EAM_i, is_EAM_j
-   
-   integer :: me_i, me_j
-   
+    real( kind = dp ) :: pot, sw
+    real( kind = dp ), dimension(9,nLocal) :: eFrame
+    real (kind=dp), dimension(9,nLocal) :: A
+    real (kind=dp), dimension(3,nLocal) :: f
+    real (kind=dp), dimension(3,nLocal) :: t
+
+    logical, intent(inout) :: do_pot, do_stress
+    integer, intent(in) :: i, j
+    real ( kind = dp ), intent(inout)    :: rijsq, rcijsq
+    real ( kind = dp )                :: r, rc
+    real ( kind = dp ), intent(inout) :: d(3), dc(3)
+
+    logical :: is_EAM_i, is_EAM_j
+
+    integer :: me_i, me_j
+
 
     r = sqrt(rijsq)
     if (SIM_uses_molecular_cutoffs) then
@@ -1022,261 +1022,261 @@ contains
     else
        rc = r
     endif
-   
+
 
 #ifdef IS_MPI   
-   me_i = atid_row(i)
-   me_j = atid_col(j)   
+    me_i = atid_row(i)
+    me_j = atid_col(j)   
 #else   
-   me_i = atid(i)
-   me_j = atid(j)   
+    me_i = atid(i)
+    me_j = atid(j)   
 #endif
-   
-   if (FF_uses_EAM .and. SIM_uses_EAM) then
-      
-      if (PropertyMap(me_i)%is_EAM .and. PropertyMap(me_j)%is_EAM) &
-           call calc_EAM_prepair_rho(i, j, d, r, rijsq )
-      
-   endif
-   
- end subroutine do_prepair
- 
- 
- subroutine do_preforce(nlocal,pot)
-   integer :: nlocal
-   real( kind = dp ) :: pot
-   
-   if (FF_uses_EAM .and. SIM_uses_EAM) then
-      call calc_EAM_preforce_Frho(nlocal,pot)
-   endif
-   
-   
- end subroutine do_preforce
- 
- 
- subroutine get_interatomic_vector(q_i, q_j, d, r_sq)
-   
-   real (kind = dp), dimension(3) :: q_i
-   real (kind = dp), dimension(3) :: q_j
-   real ( kind = dp ), intent(out) :: r_sq
-   real( kind = dp ) :: d(3), scaled(3)
-   integer i
-   
-   d(1:3) = q_j(1:3) - q_i(1:3)
-   
-   ! Wrap back into periodic box if necessary
-   if ( SIM_uses_PBC ) then
-      
-      if( .not.boxIsOrthorhombic ) then
-         ! calc the scaled coordinates.
-         
-         scaled = matmul(HmatInv, d)
-         
-         ! wrap the scaled coordinates
-         
-         scaled = scaled  - anint(scaled)
-         
-         
-         ! calc the wrapped real coordinates from the wrapped scaled 
-         ! coordinates
-         
-         d = matmul(Hmat,scaled)
-         
-      else
-         ! calc the scaled coordinates.
-         
-         do i = 1, 3
-            scaled(i) = d(i) * HmatInv(i,i)
-            
-            ! wrap the scaled coordinates
-            
-            scaled(i) = scaled(i) - anint(scaled(i))
-            
-            ! calc the wrapped real coordinates from the wrapped scaled 
-            ! coordinates
-            
-            d(i) = scaled(i)*Hmat(i,i)
-         enddo
-      endif
-      
-   endif
-   
-   r_sq = dot_product(d,d)
-   
- end subroutine get_interatomic_vector
- 
- subroutine zero_work_arrays()
-   
-#ifdef IS_MPI
-   
-   q_Row = 0.0_dp
-   q_Col = 0.0_dp
 
-   q_group_Row = 0.0_dp
-   q_group_Col = 0.0_dp   
-   
-   eFrame_Row = 0.0_dp
-   eFrame_Col = 0.0_dp
-   
-   A_Row = 0.0_dp
-   A_Col = 0.0_dp
-   
-   f_Row = 0.0_dp
-   f_Col = 0.0_dp
-   f_Temp = 0.0_dp
-   
-   t_Row = 0.0_dp
-   t_Col = 0.0_dp
-   t_Temp = 0.0_dp
-   
-   pot_Row = 0.0_dp
-   pot_Col = 0.0_dp
-   pot_Temp = 0.0_dp
-   
-   rf_Row = 0.0_dp
-   rf_Col = 0.0_dp
-   rf_Temp = 0.0_dp
-   
-#endif
- 
-   if (FF_uses_EAM .and. SIM_uses_EAM) then
-      call clean_EAM()
-   endif
-   
-   rf = 0.0_dp
-   tau_Temp = 0.0_dp
-   virial_Temp = 0.0_dp
- end subroutine zero_work_arrays
- 
- function skipThisPair(atom1, atom2) result(skip_it)
-   integer, intent(in) :: atom1
-   integer, intent(in), optional :: atom2
-   logical :: skip_it
-   integer :: unique_id_1, unique_id_2
-   integer :: me_i,me_j
-   integer :: i
-   
-   skip_it = .false. 
-   
-   !! there are a number of reasons to skip a pair or a particle
-   !! mostly we do this to exclude atoms who are involved in short
-   !! range interactions (bonds, bends, torsions), but we also need 
-   !! to exclude some overcounted interactions that result from
-   !! the parallel decomposition
-   
+    if (FF_uses_EAM .and. SIM_uses_EAM) then
+
+       if (PropertyMap(me_i)%is_EAM .and. PropertyMap(me_j)%is_EAM) &
+            call calc_EAM_prepair_rho(i, j, d, r, rijsq )
+
+    endif
+
+  end subroutine do_prepair
+
+
+  subroutine do_preforce(nlocal,pot)
+    integer :: nlocal
+    real( kind = dp ) :: pot
+
+    if (FF_uses_EAM .and. SIM_uses_EAM) then
+       call calc_EAM_preforce_Frho(nlocal,pot)
+    endif
+
+
+  end subroutine do_preforce
+
+
+  subroutine get_interatomic_vector(q_i, q_j, d, r_sq)
+
+    real (kind = dp), dimension(3) :: q_i
+    real (kind = dp), dimension(3) :: q_j
+    real ( kind = dp ), intent(out) :: r_sq
+    real( kind = dp ) :: d(3), scaled(3)
+    integer i
+
+    d(1:3) = q_j(1:3) - q_i(1:3)
+
+    ! Wrap back into periodic box if necessary
+    if ( SIM_uses_PBC ) then
+
+       if( .not.boxIsOrthorhombic ) then
+          ! calc the scaled coordinates.
+
+          scaled = matmul(HmatInv, d)
+
+          ! wrap the scaled coordinates
+
+          scaled = scaled  - anint(scaled)
+
+
+          ! calc the wrapped real coordinates from the wrapped scaled 
+          ! coordinates
+
+          d = matmul(Hmat,scaled)
+
+       else
+          ! calc the scaled coordinates.
+
+          do i = 1, 3
+             scaled(i) = d(i) * HmatInv(i,i)
+
+             ! wrap the scaled coordinates
+
+             scaled(i) = scaled(i) - anint(scaled(i))
+
+             ! calc the wrapped real coordinates from the wrapped scaled 
+             ! coordinates
+
+             d(i) = scaled(i)*Hmat(i,i)
+          enddo
+       endif
+
+    endif
+
+    r_sq = dot_product(d,d)
+
+  end subroutine get_interatomic_vector
+
+  subroutine zero_work_arrays()
+
 #ifdef IS_MPI
-   !! in MPI, we have to look up the unique IDs for each atom
-   unique_id_1 = AtomRowToGlobal(atom1)
+
+    q_Row = 0.0_dp
+    q_Col = 0.0_dp
+
+    q_group_Row = 0.0_dp
+    q_group_Col = 0.0_dp   
+
+    eFrame_Row = 0.0_dp
+    eFrame_Col = 0.0_dp
+
+    A_Row = 0.0_dp
+    A_Col = 0.0_dp
+
+    f_Row = 0.0_dp
+    f_Col = 0.0_dp
+    f_Temp = 0.0_dp
+
+    t_Row = 0.0_dp
+    t_Col = 0.0_dp
+    t_Temp = 0.0_dp
+
+    pot_Row = 0.0_dp
+    pot_Col = 0.0_dp
+    pot_Temp = 0.0_dp
+
+    rf_Row = 0.0_dp
+    rf_Col = 0.0_dp
+    rf_Temp = 0.0_dp
+
+#endif
+
+    if (FF_uses_EAM .and. SIM_uses_EAM) then
+       call clean_EAM()
+    endif
+
+    rf = 0.0_dp
+    tau_Temp = 0.0_dp
+    virial_Temp = 0.0_dp
+  end subroutine zero_work_arrays
+
+  function skipThisPair(atom1, atom2) result(skip_it)
+    integer, intent(in) :: atom1
+    integer, intent(in), optional :: atom2
+    logical :: skip_it
+    integer :: unique_id_1, unique_id_2
+    integer :: me_i,me_j
+    integer :: i
+
+    skip_it = .false. 
+
+    !! there are a number of reasons to skip a pair or a particle
+    !! mostly we do this to exclude atoms who are involved in short
+    !! range interactions (bonds, bends, torsions), but we also need 
+    !! to exclude some overcounted interactions that result from
+    !! the parallel decomposition
+
+#ifdef IS_MPI
+    !! in MPI, we have to look up the unique IDs for each atom
+    unique_id_1 = AtomRowToGlobal(atom1)
 #else
-   !! in the normal loop, the atom numbers are unique
-   unique_id_1 = atom1
+    !! in the normal loop, the atom numbers are unique
+    unique_id_1 = atom1
 #endif
-   
-   !! We were called with only one atom, so just check the global exclude
-   !! list for this atom
-   if (.not. present(atom2)) then
-      do i = 1, nExcludes_global
-         if (excludesGlobal(i) == unique_id_1) then
-            skip_it = .true.
-            return
-         end if
-      end do
-      return 
-   end if
-   
+
+    !! We were called with only one atom, so just check the global exclude
+    !! list for this atom
+    if (.not. present(atom2)) then
+       do i = 1, nExcludes_global
+          if (excludesGlobal(i) == unique_id_1) then
+             skip_it = .true.
+             return
+          end if
+       end do
+       return 
+    end if
+
 #ifdef IS_MPI
-   unique_id_2 = AtomColToGlobal(atom2)
+    unique_id_2 = AtomColToGlobal(atom2)
 #else
-   unique_id_2 = atom2
+    unique_id_2 = atom2
 #endif
-   
+
 #ifdef IS_MPI
-   !! this situation should only arise in MPI simulations
-   if (unique_id_1 == unique_id_2) then
-      skip_it = .true.
-      return
-   end if
-   
-   !! this prevents us from doing the pair on multiple processors
-   if (unique_id_1 < unique_id_2) then
-      if (mod(unique_id_1 + unique_id_2,2) == 0) then
-         skip_it = .true.
-         return
-      endif
-   else                
-      if (mod(unique_id_1 + unique_id_2,2) == 1) then 
-         skip_it = .true.
-         return
-      endif
-   endif
+    !! this situation should only arise in MPI simulations
+    if (unique_id_1 == unique_id_2) then
+       skip_it = .true.
+       return
+    end if
+
+    !! this prevents us from doing the pair on multiple processors
+    if (unique_id_1 < unique_id_2) then
+       if (mod(unique_id_1 + unique_id_2,2) == 0) then
+          skip_it = .true.
+          return
+       endif
+    else                
+       if (mod(unique_id_1 + unique_id_2,2) == 1) then 
+          skip_it = .true.
+          return
+       endif
+    endif
 #endif
-   
-   !! the rest of these situations can happen in all simulations:
-   do i = 1, nExcludes_global       
-      if ((excludesGlobal(i) == unique_id_1) .or. &
-           (excludesGlobal(i) == unique_id_2)) then
-         skip_it = .true.
-         return
-      endif
-   enddo
-   
-   do i = 1, nSkipsForAtom(atom1)
-      if (skipsForAtom(atom1, i) .eq. unique_id_2) then
-         skip_it = .true.
-         return
-      endif
-   end do
-   
-   return
- end function skipThisPair
- 
- function FF_UsesDirectionalAtoms() result(doesit)
-   logical :: doesit
-   doesit = FF_uses_DirectionalAtoms .or. FF_uses_Dipoles .or. &
-        FF_uses_Quadrupoles .or. FF_uses_Sticky .or. &
-        FF_uses_GayBerne .or. FF_uses_Shapes
- end function FF_UsesDirectionalAtoms
- 
- function FF_RequiresPrepairCalc() result(doesit)
-   logical :: doesit
-   doesit = FF_uses_EAM
- end function FF_RequiresPrepairCalc
- 
- function FF_RequiresPostpairCalc() result(doesit)
-   logical :: doesit
-   doesit = FF_uses_RF
- end function FF_RequiresPostpairCalc
- 
+
+    !! the rest of these situations can happen in all simulations:
+    do i = 1, nExcludes_global       
+       if ((excludesGlobal(i) == unique_id_1) .or. &
+            (excludesGlobal(i) == unique_id_2)) then
+          skip_it = .true.
+          return
+       endif
+    enddo
+
+    do i = 1, nSkipsForAtom(atom1)
+       if (skipsForAtom(atom1, i) .eq. unique_id_2) then
+          skip_it = .true.
+          return
+       endif
+    end do
+
+    return
+  end function skipThisPair
+
+  function FF_UsesDirectionalAtoms() result(doesit)
+    logical :: doesit
+    doesit = FF_uses_DirectionalAtoms .or. FF_uses_Dipoles .or. &
+         FF_uses_Quadrupoles .or. FF_uses_Sticky .or. &
+         FF_uses_GayBerne .or. FF_uses_Shapes
+  end function FF_UsesDirectionalAtoms
+
+  function FF_RequiresPrepairCalc() result(doesit)
+    logical :: doesit
+    doesit = FF_uses_EAM
+  end function FF_RequiresPrepairCalc
+
+  function FF_RequiresPostpairCalc() result(doesit)
+    logical :: doesit
+    doesit = FF_uses_RF
+  end function FF_RequiresPostpairCalc
+
 #ifdef PROFILE
- function getforcetime() result(totalforcetime)
-   real(kind=dp) :: totalforcetime
-   totalforcetime = forcetime
- end function getforcetime
+  function getforcetime() result(totalforcetime)
+    real(kind=dp) :: totalforcetime
+    totalforcetime = forcetime
+  end function getforcetime
 #endif
- 
- !! This cleans componets of force arrays belonging only to fortran
 
- subroutine add_stress_tensor(dpair, fpair)
-   
-   real( kind = dp ), dimension(3), intent(in) :: dpair, fpair
-   
-   ! because the d vector is the rj - ri vector, and
-   ! because fx, fy, fz are the force on atom i, we need a
-   ! negative sign here:  
-   
-   tau_Temp(1) = tau_Temp(1) - dpair(1) * fpair(1)
-   tau_Temp(2) = tau_Temp(2) - dpair(1) * fpair(2)
-   tau_Temp(3) = tau_Temp(3) - dpair(1) * fpair(3)
-   tau_Temp(4) = tau_Temp(4) - dpair(2) * fpair(1)
-   tau_Temp(5) = tau_Temp(5) - dpair(2) * fpair(2)
-   tau_Temp(6) = tau_Temp(6) - dpair(2) * fpair(3)
-   tau_Temp(7) = tau_Temp(7) - dpair(3) * fpair(1)
-   tau_Temp(8) = tau_Temp(8) - dpair(3) * fpair(2)
-   tau_Temp(9) = tau_Temp(9) - dpair(3) * fpair(3)
-   
-   virial_Temp = virial_Temp + &
-        (tau_Temp(1) + tau_Temp(5) + tau_Temp(9))
-   
- end subroutine add_stress_tensor
- 
+  !! This cleans componets of force arrays belonging only to fortran
+
+  subroutine add_stress_tensor(dpair, fpair)
+
+    real( kind = dp ), dimension(3), intent(in) :: dpair, fpair
+
+    ! because the d vector is the rj - ri vector, and
+    ! because fx, fy, fz are the force on atom i, we need a
+    ! negative sign here:  
+
+    tau_Temp(1) = tau_Temp(1) - dpair(1) * fpair(1)
+    tau_Temp(2) = tau_Temp(2) - dpair(1) * fpair(2)
+    tau_Temp(3) = tau_Temp(3) - dpair(1) * fpair(3)
+    tau_Temp(4) = tau_Temp(4) - dpair(2) * fpair(1)
+    tau_Temp(5) = tau_Temp(5) - dpair(2) * fpair(2)
+    tau_Temp(6) = tau_Temp(6) - dpair(2) * fpair(3)
+    tau_Temp(7) = tau_Temp(7) - dpair(3) * fpair(1)
+    tau_Temp(8) = tau_Temp(8) - dpair(3) * fpair(2)
+    tau_Temp(9) = tau_Temp(9) - dpair(3) * fpair(3)
+
+    virial_Temp = virial_Temp + &
+         (tau_Temp(1) + tau_Temp(5) + tau_Temp(9))
+
+  end subroutine add_stress_tensor
+
 end module doForces

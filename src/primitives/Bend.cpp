@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -43,8 +43,8 @@
 
 namespace oopse {
 
-/**@todo still a lot left to improve*/
-void Bend::calcForce() {
+  /**@todo still a lot left to improve*/
+  void Bend::calcForce() {
     Vector3d pos1 = atom1_->getPos();
     Vector3d pos2 = atom2_->getPos();
     Vector3d pos3 = atom3_->getPos();
@@ -63,9 +63,9 @@ void Bend::calcForce() {
 
     //check roundoff     
     if (cosTheta > 1.0) {
-        cosTheta = 1.0;
+      cosTheta = 1.0;
     } else if (cosTheta < -1.0) {
-        cosTheta = -1.0;
+      cosTheta = -1.0;
     }
 
     double theta = acos(cosTheta);
@@ -77,7 +77,7 @@ void Bend::calcForce() {
     double sinTheta = sqrt(1.0 - cosTheta * cosTheta);
 
     if (fabs(sinTheta) < 1.0E-6) {
-        sinTheta = 1.0E-6;
+      sinTheta = 1.0E-6;
     }
 
     double commonFactor1 = dVdTheta / sinTheta * d21inv;
@@ -93,6 +93,6 @@ void Bend::calcForce() {
     atom1_->addFrc(force1);
     atom2_->addFrc(force2);
     atom3_->addFrc(force3);
-}
+  }
 
 } //end namespace oopse

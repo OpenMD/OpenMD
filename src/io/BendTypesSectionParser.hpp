@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -45,31 +45,31 @@
 #include "io/SectionParser.hpp"
 namespace oopse {
 
-    /**
-     * @class BendTypesSectionParser BendTypesSectionParser.hpp "io/BendTypesSectionParser.hpp"
-     */
-    class BendTypesSectionParser : public SectionParser {
-        public:
-            BendTypesSectionParser();
+  /**
+   * @class BendTypesSectionParser BendTypesSectionParser.hpp "io/BendTypesSectionParser.hpp"
+   */
+  class BendTypesSectionParser : public SectionParser {
+  public:
+    BendTypesSectionParser();
             
-        private:
+  private:
 
-            enum BendTypeEnum{
-                btHarmonic,
-                btGhostBend,
-                btUreyBradley,
-                btCubic,
-                btQuartic,
-                btPolynomial,
-                btUnknown
-            };
-            
-            void parseLine(ForceField& ff, const std::string& line, int lineNo);
-
-            BendTypeEnum getBendTypeEnum(const std::string& str);  
-
-            std::map<std::string, BendTypeEnum> stringToEnumMap_;               
+    enum BendTypeEnum{
+      btHarmonic,
+      btGhostBend,
+      btUreyBradley,
+      btCubic,
+      btQuartic,
+      btPolynomial,
+      btUnknown
     };
+            
+    void parseLine(ForceField& ff, const std::string& line, int lineNo);
+
+    BendTypeEnum getBendTypeEnum(const std::string& str);  
+
+    std::map<std::string, BendTypeEnum> stringToEnumMap_;               
+  };
 
 
 } //namespace oopse

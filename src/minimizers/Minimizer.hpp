@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -39,7 +39,7 @@
  * such damages.
  */
  
- #ifndef MINIMIZERS_OOPSEMINIMIZER_HPP
+#ifndef MINIMIZERS_OOPSEMINIMIZER_HPP
 #define MINIMIZERS_OOPSEMINIMIZER_HPP
 
 #include <iostream>
@@ -53,168 +53,168 @@
 
 namespace oopse {
 
-/** @todo need refactorying */
-const int MIN_LSERROR = -1;
-const int MIN_MAXITER = 0;
-const int MIN_CONVERGE = 1;
+  /** @todo need refactorying */
+  const int MIN_LSERROR = -1;
+  const int MIN_MAXITER = 0;
+  const int MIN_CONVERGE = 1;
 
-const int CONVG_UNCONVG = 0;
-const int CONVG_FTOL = 1;
-const int CONVG_GTOL = 2;
-const int CONVG_ABSGTOL = 3;
-const int CONVG_STEPTOL = 4;
+  const int CONVG_UNCONVG = 0;
+  const int CONVG_FTOL = 1;
+  const int CONVG_GTOL = 2;
+  const int CONVG_ABSGTOL = 3;
+  const int CONVG_STEPTOL = 4;
 
-const int LS_SUCCEED =1;
-const int LS_ERROR  = -1;
+  const int LS_SUCCEED =1;
+  const int LS_ERROR  = -1;
 
-/** @todo move to math module */
-double dotProduct(const std::vector<double>& v1, const std::vector<double>& v2);
+  /** @todo move to math module */
+  double dotProduct(const std::vector<double>& v1, const std::vector<double>& v2);
 
-/**
- * @class Minimizer
- * base minimizer class
- */
-class Minimizer {
-    public:
+  /**
+   * @class Minimizer
+   * base minimizer class
+   */
+  class Minimizer {
+  public:
 
-        Minimizer(SimInfo *rhs);
+    Minimizer(SimInfo *rhs);
 
-        virtual ~Minimizer();
+    virtual ~Minimizer();
 
-        //
-        virtual void init() {}
+    //
+    virtual void init() {}
 
-        //driver function of minimization method
-        virtual void minimize();
+    //driver function of minimization method
+    virtual void minimize();
 
-        //
-        virtual int step() = 0;
+    //
+    virtual int step() = 0;
 
-        //
-        virtual void prepareStep() {};
+    //
+    virtual void prepareStep() {};
 
-        //line search algorithm, for the time being, we use back track algorithm
-        virtual int doLineSearch(std::vector<double>& direction, double stepSize);
+    //line search algorithm, for the time being, we use back track algorithm
+    virtual int doLineSearch(std::vector<double>& direction, double stepSize);
 
-        virtual int checkConvg() = 0;
+    virtual int checkConvg() = 0;
 
-        //save the result when minimization method is done
-        virtual void saveResult(){}
+    //save the result when minimization method is done
+    virtual void saveResult(){}
 
-        //get the status of minimization
-        int getMinStatus() {return minStatus;}
+    //get the status of minimization
+    int getMinStatus() {return minStatus;}
 
-        // get the dimension of the model
-        int getDim() {  return ndim;  }
+    // get the dimension of the model
+    int getDim() {  return ndim;  }
 
-        //get the name of minimizer method
-        std::string getMinimizerName() {  return minimizerName;  }
+    //get the name of minimizer method
+    std::string getMinimizerName() {  return minimizerName;  }
 
-        //return number of  current Iteration  
-        int getCurIter() {  return curIter;  }
+    //return number of  current Iteration  
+    int getCurIter() {  return curIter;  }
 
-        // set the verbose mode of minimizer
-        void setVerbose(bool verbose) {  bVerbose = verbose;}
+    // set the verbose mode of minimizer
+    void setVerbose(bool verbose) {  bVerbose = verbose;}
 
-        //get and set the coordinate
-        std::vector<double> getX() {  return curX;  }
-        void setX(std::vector<double>& x);
+    //get and set the coordinate
+    std::vector<double> getX() {  return curX;  }
+    void setX(std::vector<double>& x);
 
-        //get and set the value of object function
-        double getF() {  return curF;  }
-        void setF(double f)  { curF = f;  }
+    //get and set the value of object function
+    double getF() {  return curF;  }
+    void setF(double f)  { curF = f;  }
 
-        std::vector<double> getG() {  return curG;  }
-        void setG(std::vector<double>& g);
+    std::vector<double> getG() {  return curG;  }
+    void setG(std::vector<double>& g);
 
-        //get and set the gradient
-        std::vector<double> getGrad() {  return curG;  }
-        void setGrad(std::vector<double>& g) {  curG = g;  }
+    //get and set the gradient
+    std::vector<double> getGrad() {  return curG;  }
+    void setGrad(std::vector<double>& g) {  curG = g;  }
 
-        //interal function to evaluate the energy and gradient in OOPSE
-        void calcEnergyGradient(std::vector<double>& x,  std::vector<double>& grad, double&
-                                                 energy, int& status);
+    //interal function to evaluate the energy and gradient in OOPSE
+    void calcEnergyGradient(std::vector<double>& x,  std::vector<double>& grad, double&
+			    energy, int& status);
 
-        //calculate the value of object function
-        virtual void calcF();
-        virtual void calcF(std::vector<double>& x, double&f, int& status);
+    //calculate the value of object function
+    virtual void calcF();
+    virtual void calcF(std::vector<double>& x, double&f, int& status);
 
-        //calculate the gradient
-        virtual void calcG();
-        virtual void calcG(std::vector<double>& x,  std::vector<double>& g, double& f, int& status);
+    //calculate the gradient
+    virtual void calcG();
+    virtual void calcG(std::vector<double>& x,  std::vector<double>& g, double& f, int& status);
 
-        //calculate the hessian
-        //virtual void calcH(int& status);
-        //virtual void calcH(vector<double>& x,  std::vector<dobule>& g, SymMatrix& h, int& status);
+    //calculate the hessian
+    //virtual void calcH(int& status);
+    //virtual void calcH(vector<double>& x,  std::vector<dobule>& g, SymMatrix& h, int& status);
 
-        friend std::ostream& operator<<(std::ostream& os, const Minimizer& minimizer);
+    friend std::ostream& operator<<(std::ostream& os, const Minimizer& minimizer);
 
-    protected:
+  protected:
 
-        // transfrom cartesian and rotational coordinates into minimization coordinates 
-        std::vector<double> getCoor();
+    // transfrom cartesian and rotational coordinates into minimization coordinates 
+    std::vector<double> getCoor();
 
-        // transfrom minimization coordinates into cartesian and rotational coordinates  
-        void setCoor(std::vector<double>& x);
+    // transfrom minimization coordinates into cartesian and rotational coordinates  
+    void setCoor(std::vector<double>& x);
 
 
 
-        //constraint the bonds;
-        int shakeR() { return 0;}
+    //constraint the bonds;
+    int shakeR() { return 0;}
 
-        //remove the force component along the bond direction
-        int shakeF() { return 0;}
+    //remove the force component along the bond direction
+    int shakeF() { return 0;}
 
-        double calcPotential();
+    double calcPotential();
         
-        SimInfo* info;
+    SimInfo* info;
 
-        ForceManager* forceMan;
+    ForceManager* forceMan;
         
-        //parameter set of minimization method
-        MinimizerParameterSet* paramSet;
+    //parameter set of minimization method
+    MinimizerParameterSet* paramSet;
 
-        //flag of turning on shake algorithm 
-        bool usingShake;
+    //flag of turning on shake algorithm 
+    bool usingShake;
         
-        // dimension of the model
-        int ndim;
+    // dimension of the model
+    int ndim;
 
-        //name of the minimizer
-        std::string minimizerName;
+    //name of the minimizer
+    std::string minimizerName;
 
-        // current iteration number
-        int curIter;
-        //status of minimization
-        int minStatus;
+    // current iteration number
+    int curIter;
+    //status of minimization
+    int minStatus;
 
-        //flag of verbose mode
-        bool bVerbose;
+    //flag of verbose mode
+    bool bVerbose;
 
-        //status of energy and gradient evaluation
-        int egEvalStatus;
+    //status of energy and gradient evaluation
+    int egEvalStatus;
 
-        //initial coordinates
-        //vector<double> initX;
+    //initial coordinates
+    //vector<double> initX;
 
-        //current value  of the function
-        double curF;
+    //current value  of the function
+    double curF;
         
-        // current coordinates
-        std::vector<double> curX;
+    // current coordinates
+    std::vector<double> curX;
 
-        //gradient at curent coordinates
-        std::vector<double> curG;
+    //gradient at curent coordinates
+    std::vector<double> curG;
 
-        //hessian at current coordinates
-        //SymMatrix curH;
+    //hessian at current coordinates
+    //SymMatrix curH;
 
-    private:
+  private:
 
-        //calculate the dimension od the model for minimization
-        void calcDim();
+    //calculate the dimension od the model for minimization
+    void calcDim();
 
-};
+  };
 
 }
 #endif

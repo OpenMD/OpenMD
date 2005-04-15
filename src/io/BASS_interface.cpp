@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -367,7 +367,7 @@ int event_handler( event* the_event ){
 	strdup( "not a valid component event\n" );
       return 0;
     }
-   break;
+    break;
    
   default:
     the_event->err_msg = 

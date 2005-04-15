@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -60,7 +60,7 @@
 namespace oopse {
 
     
-double NPTxyz::calcConservedQuantity(){
+  double NPTxyz::calcConservedQuantity(){
 
     // We need NkBT a lot, so just set it here: This is the RAW number
     // of integrableObjects, so no subtraction or addition of constraints or
@@ -94,15 +94,15 @@ double NPTxyz::calcConservedQuantity(){
     barostat_potential = (targetPressure * thermo.getVolume() / OOPSEConstant::pressureConvert) /OOPSEConstant::energyConvert;
 
     conservedQuantity = totalEnergy + thermostat_kinetic + thermostat_potential +
-        barostat_kinetic + barostat_potential;
+      barostat_kinetic + barostat_potential;
 
 
     return conservedQuantity;
 
-}
+  }
 
     
-void NPTxyz::scaleSimBox(){
+  void NPTxyz::scaleSimBox(){
 
     int i,j,k;
     Mat3x3d scaleMat;
@@ -113,63 +113,63 @@ void NPTxyz::scaleSimBox(){
 
 
 
-  // Scale the box after all the positions have been moved:
+    // Scale the box after all the positions have been moved:
 
-  // Use a taylor expansion for eta products:  Hmat = Hmat . exp(dt * etaMat)
-  //  Hmat = Hmat . ( Ident + dt * etaMat  + dt^2 * etaMat*etaMat / 2)
+    // Use a taylor expansion for eta products:  Hmat = Hmat . exp(dt * etaMat)
+    //  Hmat = Hmat . ( Ident + dt * etaMat  + dt^2 * etaMat*etaMat / 2)
 
     bigScale = 1.0;
     smallScale = 1.0;
     offDiagMax = 0.0;
 
     for(i=0; i<3; i++){
-        for(j=0; j<3; j++){
-            scaleMat(i, j) = 0.0;
-            if(i==j) {
-                scaleMat(i, j) = 1.0;
-            }
-        }
+      for(j=0; j<3; j++){
+	scaleMat(i, j) = 0.0;
+	if(i==j) {
+	  scaleMat(i, j) = 1.0;
+	}
+      }
     }
 
     for(i=0;i<3;i++){
 
-    // calculate the scaleFactors
+      // calculate the scaleFactors
 
-        scaleFactor = exp(dt*eta(i, i));
+      scaleFactor = exp(dt*eta(i, i));
 
-        scaleMat(i, i) = scaleFactor;
+      scaleMat(i, i) = scaleFactor;
 
-        if (scaleMat(i, i) > bigScale) {
-            bigScale = scaleMat(i, i);
-        }
+      if (scaleMat(i, i) > bigScale) {
+	bigScale = scaleMat(i, i);
+      }
         
-        if (scaleMat(i, i) < smallScale) {
-            smallScale = scaleMat(i, i);
-        }
+      if (scaleMat(i, i) < smallScale) {
+	smallScale = scaleMat(i, i);
+      }
     }
 
     if ((bigScale > 1.1) || (smallScale < 0.9)) {
-        sprintf( painCave.errMsg,
-            "NPTxyz error: Attempting a Box scaling of more than 10 percent.\n"
-            " Check your tauBarostat, as it is probably too small!\n\n"
-            " scaleMat = [%lf\t%lf\t%lf]\n"
-            "            [%lf\t%lf\t%lf]\n"
-            "            [%lf\t%lf\t%lf]\n",
-        scaleMat(0, 0),scaleMat(0, 1),scaleMat(0, 2),
-        scaleMat(1, 0),scaleMat(1, 1),scaleMat(1, 2),
-        scaleMat(2, 0),scaleMat(2, 1),scaleMat(2, 2));
-        painCave.isFatal = 1;
-        simError();
+      sprintf( painCave.errMsg,
+	       "NPTxyz error: Attempting a Box scaling of more than 10 percent.\n"
+	       " Check your tauBarostat, as it is probably too small!\n\n"
+	       " scaleMat = [%lf\t%lf\t%lf]\n"
+	       "            [%lf\t%lf\t%lf]\n"
+	       "            [%lf\t%lf\t%lf]\n",
+	       scaleMat(0, 0),scaleMat(0, 1),scaleMat(0, 2),
+	       scaleMat(1, 0),scaleMat(1, 1),scaleMat(1, 2),
+	       scaleMat(2, 0),scaleMat(2, 1),scaleMat(2, 2));
+      painCave.isFatal = 1;
+      simError();
     } else {
 
-        Mat3x3d hmat = currentSnapshot_->getHmat();
-        hmat = hmat *scaleMat;
-        currentSnapshot_->setHmat(hmat);
+      Mat3x3d hmat = currentSnapshot_->getHmat();
+      hmat = hmat *scaleMat;
+      currentSnapshot_->setHmat(hmat);
     }
-}
+  }
 
-void NPTxyz::loadEta() {
+  void NPTxyz::loadEta() {
     eta= currentSnapshot_->getEta();
-}
+  }
 
 }

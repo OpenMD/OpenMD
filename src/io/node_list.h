@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -79,7 +79,7 @@ typedef struct assignment_data_tag{
   assignment_value rhs; // right hand side
 } assignment_data;
 
- /* a structure to hold the position information */
+/* a structure to hold the position information */
 
 typedef struct position_data_tag{
   double x;
@@ -87,7 +87,7 @@ typedef struct position_data_tag{
   double z;
 } position_data;
 
- /* a structure to hold the orientation information */
+/* a structure to hold the orientation information */
 
 typedef struct orientation_data_tag{
   double phi;

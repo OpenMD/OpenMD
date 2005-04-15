@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -55,168 +55,168 @@
 #include "primitives/DirectionalAtom.hpp"
 #include "types/AtomStamp.hpp"
 namespace oopse{
-class RigidBody : public StuntDouble {
-    public:
+  class RigidBody : public StuntDouble {
+  public:
 
-        typedef std::vector<Atom*>::iterator AtomIterator;        
+    typedef std::vector<Atom*>::iterator AtomIterator;        
 
-        RigidBody();
+    RigidBody();
 
-        virtual std::string getType() { return name_;}
+    virtual std::string getType() { return name_;}
         
-        /** Sets the name of this stuntdouble*/
-        virtual void setType(const std::string& name) { name_ = name;}
+    /** Sets the name of this stuntdouble*/
+    virtual void setType(const std::string& name) { name_ = name;}
     
 
-       /**
-         * Sets  the previous rotation matrix of this stuntdouble
-         * @param a  new rotation matrix 
-         */         
-       virtual void setPrevA(const RotMat3x3d& a);
+    /**
+     * Sets  the previous rotation matrix of this stuntdouble
+     * @param a  new rotation matrix 
+     */         
+    virtual void setPrevA(const RotMat3x3d& a);
        
-       /**
-         * Sets  the current rotation matrix of this stuntdouble
-         * @param a  new rotation matrix 
-         * @note setA will not change the position and rotation matrix of Directional atoms belong to
-         * this rigidbody. If you want to do that, use #updateAtoms
-         */         
-        virtual void setA(const RotMat3x3d& a);
-       /**
-         * Sets  the rotation matrix of this stuntdouble in specified snapshot
-         * @param a rotation matrix to be set 
-         * @param snapshotNo 
-         * @see #getA
-         */         
-        virtual void setA(const RotMat3x3d& a, int snapshotNo);
+    /**
+     * Sets  the current rotation matrix of this stuntdouble
+     * @param a  new rotation matrix 
+     * @note setA will not change the position and rotation matrix of Directional atoms belong to
+     * this rigidbody. If you want to do that, use #updateAtoms
+     */         
+    virtual void setA(const RotMat3x3d& a);
+    /**
+     * Sets  the rotation matrix of this stuntdouble in specified snapshot
+     * @param a rotation matrix to be set 
+     * @param snapshotNo 
+     * @see #getA
+     */         
+    virtual void setA(const RotMat3x3d& a, int snapshotNo);
 
-        /**
-         * Returns the inertia tensor of this stuntdouble
-         * @return the inertia tensor of this stuntdouble
-         */ 
-        virtual Mat3x3d getI();
+    /**
+     * Returns the inertia tensor of this stuntdouble
+     * @return the inertia tensor of this stuntdouble
+     */ 
+    virtual Mat3x3d getI();
 
 
-        /** Sets the internal unit frame of this stuntdouble by three euler angles */
-        void setElectroFrameFromEuler(double phi, double theta, double psi);
+    /** Sets the internal unit frame of this stuntdouble by three euler angles */
+    void setElectroFrameFromEuler(double phi, double theta, double psi);
         
-        /**
-         * Returns the gradient of this stuntdouble
-         * @return the inertia tensor of this stuntdouble
-         * @see #setI
-         */ 
-        virtual std::vector<double> getGrad();
+    /**
+     * Returns the gradient of this stuntdouble
+     * @return the inertia tensor of this stuntdouble
+     * @see #setI
+     */ 
+    virtual std::vector<double> getGrad();
 
-        virtual void accept(BaseVisitor* v);
+    virtual void accept(BaseVisitor* v);
 
-        void addAtom(Atom* at, AtomStamp* ats);
+    void addAtom(Atom* at, AtomStamp* ats);
 
-        /** calculate the reference coordinates */
-        void calcRefCoords();
+    /** calculate the reference coordinates */
+    void calcRefCoords();
 
-        /** Convert Atomic forces and torques to total forces and torques */
-        void calcForcesAndTorques();
+    /** Convert Atomic forces and torques to total forces and torques */
+    void calcForcesAndTorques();
 
-        /** update the positions of atoms belong to this rigidbody */
-        void updateAtoms();
+    /** update the positions of atoms belong to this rigidbody */
+    void updateAtoms();
 
-        void updateAtoms(int frame);
+    void updateAtoms(int frame);
 
-        void updateAtomVel();
+    void updateAtomVel();
 
-        void updateAtomVel(int frame);
+    void updateAtomVel(int frame);
         
-        Atom* beginAtom(std::vector<Atom*>::iterator& i) {
-            i = atoms_.begin();
-            return i != atoms_.end() ? *i : NULL;
-        }
+    Atom* beginAtom(std::vector<Atom*>::iterator& i) {
+      i = atoms_.begin();
+      return i != atoms_.end() ? *i : NULL;
+    }
 
-        Atom* nextAtom(std::vector<Atom*>::iterator& i) {
-            ++i;
-            return i != atoms_.end() ? *i : NULL;
-        }
+    Atom* nextAtom(std::vector<Atom*>::iterator& i) {
+      ++i;
+      return i != atoms_.end() ? *i : NULL;
+    }
 
-        std::vector<Atom*>::iterator getBeginAtomIter() {
-            return atoms_.begin();
-        }
+    std::vector<Atom*>::iterator getBeginAtomIter() {
+      return atoms_.begin();
+    }
         
-        std::vector<Atom*>::iterator getEndAtomIter() {
-            return atoms_.end();
-        }
+    std::vector<Atom*>::iterator getEndAtomIter() {
+      return atoms_.end();
+    }
 
-        /** 
-         * Returns the atoms of this rigid body
-         * @return the atoms of this rigid body in a vector
-         * @deprecate
-         */           
-        std::vector<Atom*> getAtoms() {
-            return atoms_;
-        }
+    /** 
+     * Returns the atoms of this rigid body
+     * @return the atoms of this rigid body in a vector
+     * @deprecate
+     */           
+    std::vector<Atom*> getAtoms() {
+      return atoms_;
+    }
 
-        /** 
-         * Returns the number of atoms in this rigid body
-         * @return the number of atoms in this rigid body
-         */
-        int getNumAtoms() {
-            return atoms_.size();
-        }
+    /** 
+     * Returns the number of atoms in this rigid body
+     * @return the number of atoms in this rigid body
+     */
+    int getNumAtoms() {
+      return atoms_.size();
+    }
 
-        /**
-         * Return the position of atom which belongs to this rigid body.
-         * @return true if index is valid otherwise return false
-         * @param pos the position of atom which will be set on return if index is valid
-         * @param index the index of the atom in rigid body's private data member atoms_
-         */
-        bool getAtomPos(Vector3d& pos, unsigned int index);
+    /**
+     * Return the position of atom which belongs to this rigid body.
+     * @return true if index is valid otherwise return false
+     * @param pos the position of atom which will be set on return if index is valid
+     * @param index the index of the atom in rigid body's private data member atoms_
+     */
+    bool getAtomPos(Vector3d& pos, unsigned int index);
 
-        /**
-         * Return the position of atom which belongs to this rigid body.
-         * @return true if atom belongs to this rigid body,otherwise return false
-         * @param pos position of atom which will be set on return if atom belongs to this rigid body
-         * @param atom the pointer to an atom
-         */            
-        bool getAtomPos(Vector3d& pos, Atom* atom);
+    /**
+     * Return the position of atom which belongs to this rigid body.
+     * @return true if atom belongs to this rigid body,otherwise return false
+     * @param pos position of atom which will be set on return if atom belongs to this rigid body
+     * @param atom the pointer to an atom
+     */            
+    bool getAtomPos(Vector3d& pos, Atom* atom);
 
-        /**
-         * Return the velocity of atom which belongs to this rigid body.
-         * @return true if index is valid otherwise return false
-         * @param vel the velocity of atom which will be set on return if index is valid
-         * @param index the index of the atom in rigid body's private data member atoms_
-         */
-        bool getAtomVel(Vector3d& vel, unsigned int index);
+    /**
+     * Return the velocity of atom which belongs to this rigid body.
+     * @return true if index is valid otherwise return false
+     * @param vel the velocity of atom which will be set on return if index is valid
+     * @param index the index of the atom in rigid body's private data member atoms_
+     */
+    bool getAtomVel(Vector3d& vel, unsigned int index);
 
-        /**
-         * Return the velocity of atom which belongs to this rigid body.
-         * @return true if atom belongs to this rigid body,otherwise return false
-         * @param vel velocity of atom which will be set on return if atom belongs to this rigid body
-         * @param atom the pointer to an atom
-         */ 
-        bool getAtomVel(Vector3d& vel, Atom*);
+    /**
+     * Return the velocity of atom which belongs to this rigid body.
+     * @return true if atom belongs to this rigid body,otherwise return false
+     * @param vel velocity of atom which will be set on return if atom belongs to this rigid body
+     * @param atom the pointer to an atom
+     */ 
+    bool getAtomVel(Vector3d& vel, Atom*);
 
-        /**
-         * Return the reference coordinate of atom which belongs to this rigid body.
-         * @return true if index is valid otherwise return false
-         * @param coor the reference coordinate of atom which will be set on return if index is valid
-         * @param index the index of the atom in rigid body's private data member atoms_
-         */
-        bool getAtomRefCoor(Vector3d& coor, unsigned int index);
+    /**
+     * Return the reference coordinate of atom which belongs to this rigid body.
+     * @return true if index is valid otherwise return false
+     * @param coor the reference coordinate of atom which will be set on return if index is valid
+     * @param index the index of the atom in rigid body's private data member atoms_
+     */
+    bool getAtomRefCoor(Vector3d& coor, unsigned int index);
 
-        /**
-         * Return the velocity of atom which belongs to this rigid body.
-         * @return true if atom belongs to this rigid body,otherwise return false
-         * @param coor velocity of atom which will be set on return if atom belongs to this rigid body
-         * @param atom the pointer to an atom
-         */ 
-        bool getAtomRefCoor(Vector3d& coor, Atom* atom);
+    /**
+     * Return the velocity of atom which belongs to this rigid body.
+     * @return true if atom belongs to this rigid body,otherwise return false
+     * @param coor velocity of atom which will be set on return if atom belongs to this rigid body
+     * @param atom the pointer to an atom
+     */ 
+    bool getAtomRefCoor(Vector3d& coor, Atom* atom);
 
-    private:
-        std::string name_;        
-        Mat3x3d inertiaTensor_;     
-        RotMat3x3d sU_;               /**< body fixed standard unit vector */
+  private:
+    std::string name_;        
+    Mat3x3d inertiaTensor_;     
+    RotMat3x3d sU_;               /**< body fixed standard unit vector */
         
-        std::vector<Atom*> atoms_;
-        std::vector<Vector3d> refCoords_;
-        std::vector<RotMat3x3d> refOrients_;
-};
+    std::vector<Atom*> atoms_;
+    std::vector<Vector3d> refCoords_;
+    std::vector<RotMat3x3d> refOrients_;
+  };
 
 }//namepace oopse
 

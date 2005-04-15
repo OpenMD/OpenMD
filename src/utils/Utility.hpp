@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -46,47 +46,47 @@
 #include "utils/next_combination.hpp"
 
 namespace oopse {
-inline double roundMe( double x ){
-  return ( x >= 0 ) ? floor( x + 0.5 ) : ceil( x - 0.5 );
-}
+  inline double roundMe( double x ){
+    return ( x >= 0 ) ? floor( x + 0.5 ) : ceil( x - 0.5 );
+  }
 
-/**
- * @brief iteratively replace the sequence with wild cards
- * @return true if more combination sequence is avaliable, otherwise return true
- * @param cont iterator container, if expect the whole series of combinations,  pass an empty iterator 
- * container. The user should not modify this iterator container
- * @param sequence the whole sequence used to generate combination
- * @param result a possible combination sequence which is set on return
- * @param wildCard the wild card string. Its value is "X" by default
- * @note since next_combination never returns an empty sequence, replaceWildCard will not generate 
- * one special combination, which is n identical wild cards (n is equal to the size of the passing sequence)
- * 
- * @code
- * std::vector<std::string> sv;
- * std::vector<std::vector<std::string>::iterator> sic;
- * std::vector<std::string> resultString;
- * sv.push_back("H");
- * sv.push_back("C");
- * sv.push_back("N");
+  /**
+   * @brief iteratively replace the sequence with wild cards
+   * @return true if more combination sequence is avaliable, otherwise return true
+   * @param cont iterator container, if expect the whole series of combinations,  pass an empty iterator 
+   * container. The user should not modify this iterator container
+   * @param sequence the whole sequence used to generate combination
+   * @param result a possible combination sequence which is set on return
+   * @param wildCard the wild card string. Its value is "X" by default
+   * @note since next_combination never returns an empty sequence, replaceWildCard will not generate 
+   * one special combination, which is n identical wild cards (n is equal to the size of the passing sequence)
+   * 
+   * @code
+   * std::vector<std::string> sv;
+   * std::vector<std::vector<std::string>::iterator> sic;
+   * std::vector<std::string> resultString;
+   * sv.push_back("H");
+   * sv.push_back("C");
+   * sv.push_back("N");
 
- * while (replaceWithWildCard(sic, sv, resultString)) {   
- *     for(std::vector<std::string>::iterator i = resultString.begin(); i != resultString.end(); ++i) {
- *         std::cout << *i << "\t";
- *     }
- *     std::cout << std::endl;
- * }
- * //output
- * //H X X
- * //X C X
- * //X X N
- * //H C X
- * //H X N
- * //X C N
- * //H C N
- * @endcode
- */
-bool replaceWithWildCard(std::vector<std::vector<std::string>::iterator>& cont,
-                                             std::vector<std::string>& sequence, std::vector<std::string>& result, const std::string& wildCard = "X");
+   * while (replaceWithWildCard(sic, sv, resultString)) {   
+   *     for(std::vector<std::string>::iterator i = resultString.begin(); i != resultString.end(); ++i) {
+   *         std::cout << *i << "\t";
+   *     }
+   *     std::cout << std::endl;
+   * }
+   * //output
+   * //H X X
+   * //X C X
+   * //X X N
+   * //H C X
+   * //H X N
+   * //X C N
+   * //H C N
+   * @endcode
+   */
+  bool replaceWithWildCard(std::vector<std::vector<std::string>::iterator>& cont,
+			   std::vector<std::string>& sequence, std::vector<std::string>& result, const std::string& wildCard = "X");
 }
 #endif
 

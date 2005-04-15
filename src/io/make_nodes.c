@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -397,7 +397,7 @@ struct node_tag* component_blk( struct node_tag* stmt_list ){
 
 
 int count_tokens(char *line, char *delimiters) {
-/* PURPOSE: RETURN A COUNT OF THE NUMBER OF TOKENS ON THE LINE. */
+  /* PURPOSE: RETURN A COUNT OF THE NUMBER OF TOKENS ON THE LINE. */
 
   char *working_line;   /* WORKING COPY OF LINE. */
   int ntokens;          /* NUMBER OF TOKENS FOUND IN LINE. */

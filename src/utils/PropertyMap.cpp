@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -45,77 +45,77 @@
 
 namespace oopse {
 
-PropertyMap::~PropertyMap(){
-  clearProperties();
-}
+  PropertyMap::~PropertyMap(){
+    clearProperties();
+  }
 
 
-void PropertyMap::addProperty(GenericData* genData){
+  void PropertyMap::addProperty(GenericData* genData){
     std::map<std::string, GenericData*>::iterator iter;
 
     iter = propMap_.find(genData->getID());
 
     if (iter == propMap_.end()){
-        propMap_.insert(std::make_pair(genData->getID(), genData));
+      propMap_.insert(std::make_pair(genData->getID(), genData));
     } else {
-        delete iter->second;
-        iter->second = genData;
+      delete iter->second;
+      iter->second = genData;
     }
-}
+  }
 
-bool PropertyMap::removeProperty(const std::string& propName){
-  std::map<std::string, GenericData*>::iterator iter;
+  bool PropertyMap::removeProperty(const std::string& propName){
+    std::map<std::string, GenericData*>::iterator iter;
 
     iter = propMap_.find(propName);
 
     if (iter != propMap_.end()){
-        delete iter->second;
-        propMap_.erase(iter);    
-        return true;
+      delete iter->second;
+      propMap_.erase(iter);    
+      return true;
     } else {
-        //logger.warn("Can not find property with name: " + propName);
-        return false;
+      //logger.warn("Can not find property with name: " + propName);
+      return false;
     }
-}
+  }
 
-void PropertyMap::clearProperties(){
+  void PropertyMap::clearProperties(){
     std::map<std::string, GenericData*>::iterator iter;
 
     for (iter = propMap_.begin(); iter != propMap_.end(); ++iter)
-        delete iter->second;
+      delete iter->second;
 
     propMap_.clear();
-}
+  }
 
-std::vector<std::string> PropertyMap::getPropertyNames(){
+  std::vector<std::string> PropertyMap::getPropertyNames(){
     std::vector<std::string> propNames;
     std::map<std::string, GenericData*>::iterator iter;
 
     for (iter = propMap_.begin(); iter != propMap_.end(); ++iter)
-        propNames.push_back(iter->first);
+      propNames.push_back(iter->first);
 
     return propNames;
-}
+  }
 
-std::vector<GenericData*> PropertyMap::getProperties(){
+  std::vector<GenericData*> PropertyMap::getProperties(){
     std::vector<GenericData*> properties;
     std::map<std::string, GenericData*>::iterator iter;
 
     for (iter = propMap_.begin(); iter != propMap_.end(); ++iter)
-        properties.push_back(iter->second);
+      properties.push_back(iter->second);
 
     return properties;
-}
+  }
 
-GenericData* PropertyMap::getPropertyByName(const std::string& propName){
+  GenericData* PropertyMap::getPropertyByName(const std::string& propName){
     std::map<std::string, GenericData*>::iterator iter;
 
     iter = propMap_.find(propName);
 
     if (iter != propMap_.end())
-        return iter->second;
+      return iter->second;
     else
-        return NULL;
-}
+      return NULL;
+  }
 
 }//end namepace oopse

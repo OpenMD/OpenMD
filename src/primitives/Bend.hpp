@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -53,43 +53,43 @@
 #include "types/BendType.hpp"
 namespace oopse {
 
-class Bend {
-    public:
-        Bend(Atom* atom1, Atom* atom2, Atom* atom3, BendType* bt)
-            : atom1_(atom1), atom2_(atom2), atom3_(atom3), bendType_(bt) {}
+  class Bend {
+  public:
+    Bend(Atom* atom1, Atom* atom2, Atom* atom3, BendType* bt)
+      : atom1_(atom1), atom2_(atom2), atom3_(atom3), bendType_(bt) {}
 
-        virtual ~Bend() {}
-        virtual void calcForce();
+    virtual ~Bend() {}
+    virtual void calcForce();
         
-        double getPotential() {
-            return potential_;
-        }
+    double getPotential() {
+      return potential_;
+    }
 
-        Atom* getAtomA() {
-            return atom1_;
-        }
+    Atom* getAtomA() {
+      return atom1_;
+    }
 
-        Atom* getAtomB() {
-            return atom2_;
-        }
+    Atom* getAtomB() {
+      return atom2_;
+    }
 
-        Atom* getAtomC() {
-            return atom3_;
-        }
+    Atom* getAtomC() {
+      return atom3_;
+    }
 
-        BendType * getBendType() {
-            return bendType_;
-        }
+    BendType * getBendType() {
+      return bendType_;
+    }
 
-    protected:
+  protected:
         
-        double potential_;
-        Atom* atom1_;
-        Atom* atom2_;
-        Atom* atom3_;
-        BendType* bendType_; /**< bend type */
+    double potential_;
+    Atom* atom1_;
+    Atom* atom2_;
+    Atom* atom3_;
+    BendType* bendType_; /**< bend type */
 
-};    
+  };    
 
 
 

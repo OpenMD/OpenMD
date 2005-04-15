@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -39,13 +39,13 @@
  * such damages.
  */
  
- /**
-  * @file ForceManager.hpp
-  * @author tlin
-  * @date 11/09/2004
-  * @time 10:36am
-  * @version 1.0
-  */
+/**
+ * @file ForceManager.hpp
+ * @author tlin
+ * @date 11/09/2004
+ * @time 10:36am
+ * @version 1.0
+ */
 
 #ifndef BRAINS_FORCEMANAGER_HPP
 #define BRAINS_FORCEMANAGER_HPP
@@ -54,39 +54,39 @@
 
 namespace oopse {
 
-/**
- * @class ForceManager ForceManager.hpp "brains/ForceManager.hpp"
- * ForceManager is responsible for calculating the short range interactions (c++) and
- * long range interactions(fortran). If fortran side is not setup before the force calculation,
- * call SimInfo's update function to settle it down. 
- * @note the reason we delay fortran side's setup is that some applications (Dump2XYZ etc.) 
- * may not need force calculation, why bother? 
- */
-class ForceManager {
+  /**
+   * @class ForceManager ForceManager.hpp "brains/ForceManager.hpp"
+   * ForceManager is responsible for calculating the short range interactions (c++) and
+   * long range interactions(fortran). If fortran side is not setup before the force calculation,
+   * call SimInfo's update function to settle it down. 
+   * @note the reason we delay fortran side's setup is that some applications (Dump2XYZ etc.) 
+   * may not need force calculation, why bother? 
+   */
+  class ForceManager {
 
-    public:
-        ForceManager(SimInfo * info) : info_(info) {}
+  public:
+    ForceManager(SimInfo * info) : info_(info) {}
         
-        virtual ~ForceManager() {}
+    virtual ~ForceManager() {}
 
-        //public virtual function should be avoided
-        /**@todo need refactory */
-        virtual void calcForces(bool needPotential, bool needStress);
+    //public virtual function should be avoided
+    /**@todo need refactory */
+    virtual void calcForces(bool needPotential, bool needStress);
 
-        virtual void init() {}
-    protected:
+    virtual void init() {}
+  protected:
 
-        virtual void preCalculation();
+    virtual void preCalculation();
         
-        virtual void calcShortRangeInteraction();
+    virtual void calcShortRangeInteraction();
 
-        virtual void calcLongRangeInteraction(bool needPotential, bool needStress);
+    virtual void calcLongRangeInteraction(bool needPotential, bool needStress);
 
-        virtual void postCalculation();
+    virtual void postCalculation();
  
-        SimInfo * info_;        
+    SimInfo * info_;        
 
-};
+  };
 
 } //end namespace oopse
 #endif //BRAINS_FORCEMANAGER_HPP

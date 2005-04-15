@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -57,7 +57,7 @@
 
 //*** Global functions, variables, and structures ************
 
-unsigned short is_initialized = 0; // tells whether to init the linked list
+    unsigned short is_initialized = 0; // tells whether to init the linked list
 
 // reserved word elements for the hash table
 struct res_element{
@@ -88,9 +88,9 @@ struct defined_element** defined_list = NULL; // the defined hash table
 //*** The Functions *******************************************
 
 
-/*
-  function to initialize the list of reserved words into memory.
-*/
+  /*
+    function to initialize the list of reserved words into memory.
+  */
 
 void initialize_res_list(){
   
@@ -125,9 +125,9 @@ void initialize_res_list(){
 
 
 /*
-   checks for reserved words.
-   If a reserved word is found, returns the token,
-   else returns 0.
+  checks for reserved words.
+  If a reserved word is found, returns the token,
+  else returns 0.
 */
 
 int res_word( char* text ){
@@ -189,7 +189,7 @@ int is_defined( char* text ){
   key = hash( text );
 
   if( defined_list != NULL ){
-        def_ptr = defined_list[key];
+    def_ptr = defined_list[key];
     
     while( def_ptr != NULL ){
       

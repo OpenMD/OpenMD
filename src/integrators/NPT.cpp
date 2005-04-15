@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -61,77 +61,77 @@
 
 namespace oopse {
 
-NPT::NPT(SimInfo* info) :
+  NPT::NPT(SimInfo* info) :
     VelocityVerletIntegrator(info), chiTolerance(1e-6), etaTolerance(1e-6), maxIterNum_(4) {
 
-    Globals* simParams = info_->getSimParams();
+      Globals* simParams = info_->getSimParams();
     
-    if (!simParams->getUseInitXSstate()) {
+      if (!simParams->getUseInitXSstate()) {
         Snapshot* currSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
         currSnapshot->setChi(0.0);
         currSnapshot->setIntegralOfChiDt(0.0);
         currSnapshot->setEta(Mat3x3d(0.0));
-    }
+      }
     
-    if (!simParams->haveTargetTemp()) {
+      if (!simParams->haveTargetTemp()) {
         sprintf(painCave.errMsg, "You can't use the NVT integrator without a targetTemp!\n");
         painCave.isFatal = 1;
         painCave.severity = OOPSE_ERROR;
         simError();
-    } else {
+      } else {
         targetTemp = simParams->getTargetTemp();
-    }
+      }
 
-    // We must set tauThermostat
-    if (!simParams->haveTauThermostat()) {
+      // We must set tauThermostat
+      if (!simParams->haveTauThermostat()) {
         sprintf(painCave.errMsg, "If you use the constant temperature\n"
-                                     "\tintegrator, you must set tauThermostat_.\n");
+		"\tintegrator, you must set tauThermostat_.\n");
 
         painCave.severity = OOPSE_ERROR;
         painCave.isFatal = 1;
         simError();
-    } else {
+      } else {
         tauThermostat = simParams->getTauThermostat();
-    }
+      }
 
-    if (!simParams->haveTargetPressure()) {
+      if (!simParams->haveTargetPressure()) {
         sprintf(painCave.errMsg, "NPT error: You can't use the NPT integrator\n"
-                                     "   without a targetPressure!\n");
+		"   without a targetPressure!\n");
 
         painCave.isFatal = 1;
         simError();
-    } else {
+      } else {
         targetPressure = simParams->getTargetPressure();
-    }
+      }
     
-    if (!simParams->haveTauBarostat()) {
+      if (!simParams->haveTauBarostat()) {
         sprintf(painCave.errMsg,
                 "If you use the NPT integrator, you must set tauBarostat.\n");
         painCave.severity = OOPSE_ERROR;
         painCave.isFatal = 1;
         simError();
-    } else {
+      } else {
         tauBarostat = simParams->getTauBarostat();
-    }
+      }
     
-    tt2 = tauThermostat * tauThermostat;
-    tb2 = tauBarostat * tauBarostat;
+      tt2 = tauThermostat * tauThermostat;
+      tb2 = tauBarostat * tauBarostat;
 
-    update();
-}
+      update();
+    }
 
-NPT::~NPT() {
-}
+  NPT::~NPT() {
+  }
 
-void NPT::doUpdate() {
+  void NPT::doUpdate() {
 
     oldPos.resize(info_->getNIntegrableObjects());
     oldVel.resize(info_->getNIntegrableObjects());
     oldJi.resize(info_->getNIntegrableObjects());
 
-}
+  }
 
-void NPT::moveA() {
+  void NPT::moveA() {
     SimInfo::MoleculeIterator i;
     Molecule::IntegrableObjectIterator  j;
     Molecule* mol;
@@ -160,40 +160,40 @@ void NPT::moveA() {
     calcVelScale();
 
     for (mol = info_->beginMolecule(i); mol != NULL; mol = info_->nextMolecule(i)) {
-        for (integrableObject = mol->beginIntegrableObject(j); integrableObject != NULL;
-               integrableObject = mol->nextIntegrableObject(j)) {
+      for (integrableObject = mol->beginIntegrableObject(j); integrableObject != NULL;
+	   integrableObject = mol->nextIntegrableObject(j)) {
                 
-            vel = integrableObject->getVel();
-            frc = integrableObject->getFrc();
+	vel = integrableObject->getVel();
+	frc = integrableObject->getFrc();
 
-            mass = integrableObject->getMass();
+	mass = integrableObject->getMass();
 
-            getVelScaleA(sc, vel);
+	getVelScaleA(sc, vel);
 
-            // velocity half step  (use chi from previous step here):
-            //vel[j] += dt2 * ((frc[j] / mass) * OOPSEConstant::energyConvert - sc[j]);
-            vel += dt2*OOPSEConstant::energyConvert/mass* frc - dt2*sc;
-            integrableObject->setVel(vel);
+	// velocity half step  (use chi from previous step here):
+	//vel[j] += dt2 * ((frc[j] / mass) * OOPSEConstant::energyConvert - sc[j]);
+	vel += dt2*OOPSEConstant::energyConvert/mass* frc - dt2*sc;
+	integrableObject->setVel(vel);
 
-            if (integrableObject->isDirectional()) {
+	if (integrableObject->isDirectional()) {
 
-                // get and convert the torque to body frame
+	  // get and convert the torque to body frame
 
-                Tb = integrableObject->lab2Body(integrableObject->getTrq());
+	  Tb = integrableObject->lab2Body(integrableObject->getTrq());
 
-                // get the angular momentum, and propagate a half step
+	  // get the angular momentum, and propagate a half step
 
-                ji = integrableObject->getJ();
+	  ji = integrableObject->getJ();
 
-                //ji[j] += dt2 * (Tb[j] * OOPSEConstant::energyConvert - ji[j]*chi);
-                ji += dt2*OOPSEConstant::energyConvert * Tb - dt2*chi* ji;
+	  //ji[j] += dt2 * (Tb[j] * OOPSEConstant::energyConvert - ji[j]*chi);
+	  ji += dt2*OOPSEConstant::energyConvert * Tb - dt2*chi* ji;
                 
-                rotAlgo->rotate(integrableObject, ji, dt);
+	  rotAlgo->rotate(integrableObject, ji, dt);
 
-                integrableObject->setJ(ji);
-            }
+	  integrableObject->setJ(ji);
+	}
             
-        }
+      }
     }
     // evolve chi and eta  half step
 
@@ -206,33 +206,33 @@ void NPT::moveA() {
     
     index = 0;
     for (mol = info_->beginMolecule(i); mol != NULL; mol = info_->nextMolecule(i)) {
-        for (integrableObject = mol->beginIntegrableObject(j); integrableObject != NULL;
-               integrableObject = mol->nextIntegrableObject(j)) {
-            oldPos[index++] = integrableObject->getPos();            
-        }
+      for (integrableObject = mol->beginIntegrableObject(j); integrableObject != NULL;
+	   integrableObject = mol->nextIntegrableObject(j)) {
+	oldPos[index++] = integrableObject->getPos();            
+      }
     }
     
     //the first estimation of r(t+dt) is equal to  r(t)
 
     for(int k = 0; k < maxIterNum_; k++) {
-        index = 0;
-        for (mol = info_->beginMolecule(i); mol != NULL; mol = info_->nextMolecule(i)) {
-            for (integrableObject = mol->beginIntegrableObject(j); integrableObject != NULL;
-                   integrableObject = mol->nextIntegrableObject(j)) {
+      index = 0;
+      for (mol = info_->beginMolecule(i); mol != NULL; mol = info_->nextMolecule(i)) {
+	for (integrableObject = mol->beginIntegrableObject(j); integrableObject != NULL;
+	     integrableObject = mol->nextIntegrableObject(j)) {
 
-                vel = integrableObject->getVel();
-                pos = integrableObject->getPos();
+	  vel = integrableObject->getVel();
+	  pos = integrableObject->getPos();
 
-                this->getPosScale(pos, COM, index, sc);
+	  this->getPosScale(pos, COM, index, sc);
 
-                pos = oldPos[index] + dt * (vel + sc);
-                integrableObject->setPos(pos);     
+	  pos = oldPos[index] + dt * (vel + sc);
+	  integrableObject->setPos(pos);     
 
-                ++index;
-           }
-        }
+	  ++index;
+	}
+      }
 
-        rattle->constraintA();
+      rattle->constraintA();
     }
 
     // Scale the box after all the positions have been moved:
@@ -243,9 +243,9 @@ void NPT::moveA() {
     currentSnapshot_->setIntegralOfChiDt(integralOfChidt);
 
     saveEta();
-}
+  }
 
-void NPT::moveB(void) {
+  void NPT::moveB(void) {
     SimInfo::MoleculeIterator i;
     Molecule::IntegrableObjectIterator  j;
     Molecule* mol;
@@ -269,64 +269,64 @@ void NPT::moveB(void) {
     //save velocity and angular momentum
     index = 0;
     for (mol = info_->beginMolecule(i); mol != NULL; mol = info_->nextMolecule(i)) {
-        for (integrableObject = mol->beginIntegrableObject(j); integrableObject != NULL;
-               integrableObject = mol->nextIntegrableObject(j)) {
+      for (integrableObject = mol->beginIntegrableObject(j); integrableObject != NULL;
+	   integrableObject = mol->nextIntegrableObject(j)) {
                 
-            oldVel[index] = integrableObject->getVel();
-            oldJi[index] = integrableObject->getJ();
-            ++index;
-        }
+	oldVel[index] = integrableObject->getVel();
+	oldJi[index] = integrableObject->getJ();
+	++index;
+      }
     }
 
     // do the iteration:
     instaVol =thermo.getVolume();
 
     for(int k = 0; k < maxIterNum_; k++) {
-        instaTemp =thermo.getTemperature();
-        instaPress =thermo.getPressure();
+      instaTemp =thermo.getTemperature();
+      instaPress =thermo.getPressure();
 
-        // evolve chi another half step using the temperature at t + dt/2
-        prevChi = chi;
-        chi = oldChi + dt2 * (instaTemp / targetTemp - 1.0) / tt2;
+      // evolve chi another half step using the temperature at t + dt/2
+      prevChi = chi;
+      chi = oldChi + dt2 * (instaTemp / targetTemp - 1.0) / tt2;
 
-        //evolve eta
-        this->evolveEtaB();
-        this->calcVelScale();
+      //evolve eta
+      this->evolveEtaB();
+      this->calcVelScale();
 
-        index = 0;
-        for (mol = info_->beginMolecule(i); mol != NULL; mol = info_->nextMolecule(i)) {
-            for (integrableObject = mol->beginIntegrableObject(j); integrableObject != NULL;
-                   integrableObject = mol->nextIntegrableObject(j)) {            
+      index = 0;
+      for (mol = info_->beginMolecule(i); mol != NULL; mol = info_->nextMolecule(i)) {
+	for (integrableObject = mol->beginIntegrableObject(j); integrableObject != NULL;
+	     integrableObject = mol->nextIntegrableObject(j)) {            
 
-                frc = integrableObject->getFrc();
-                vel = integrableObject->getVel();
+	  frc = integrableObject->getFrc();
+	  vel = integrableObject->getVel();
 
-                mass = integrableObject->getMass();
+	  mass = integrableObject->getMass();
 
-                getVelScaleB(sc, index);
+	  getVelScaleB(sc, index);
 
-                // velocity half step
-                //vel[j] = oldVel[3 * i + j] + dt2 *((frc[j] / mass) * OOPSEConstant::energyConvert - sc[j]);
-                vel = oldVel[index] + dt2*OOPSEConstant::energyConvert/mass* frc - dt2*sc;
-                integrableObject->setVel(vel);
+	  // velocity half step
+	  //vel[j] = oldVel[3 * i + j] + dt2 *((frc[j] / mass) * OOPSEConstant::energyConvert - sc[j]);
+	  vel = oldVel[index] + dt2*OOPSEConstant::energyConvert/mass* frc - dt2*sc;
+	  integrableObject->setVel(vel);
 
-                if (integrableObject->isDirectional()) {
-                    // get and convert the torque to body frame
-                    Tb = integrableObject->lab2Body(integrableObject->getTrq());
+	  if (integrableObject->isDirectional()) {
+	    // get and convert the torque to body frame
+	    Tb = integrableObject->lab2Body(integrableObject->getTrq());
 
-                    //ji[j] = oldJi[3*i + j] + dt2 * (Tb[j] * OOPSEConstant::energyConvert - oldJi[3*i+j]*chi);
-                    ji = oldJi[index] + dt2*OOPSEConstant::energyConvert*Tb - dt2*chi*oldJi[index];
-                    integrableObject->setJ(ji);
-                }
+	    //ji[j] = oldJi[3*i + j] + dt2 * (Tb[j] * OOPSEConstant::energyConvert - oldJi[3*i+j]*chi);
+	    ji = oldJi[index] + dt2*OOPSEConstant::energyConvert*Tb - dt2*chi*oldJi[index];
+	    integrableObject->setJ(ji);
+	  }
 
-                ++index;
-            }
-        }
+	  ++index;
+	}
+      }
         
-        rattle->constraintB();
+      rattle->constraintB();
 
-        if ((fabs(prevChi - chi) <= chiTolerance) && this->etaConverged())
-            break;
+      if ((fabs(prevChi - chi) <= chiTolerance) && this->etaConverged())
+	break;
     }
 
     //calculate integral of chidt
@@ -336,6 +336,6 @@ void NPT::moveB(void) {
     currentSnapshot_->setIntegralOfChiDt(integralOfChidt);    
 
     saveEta();
-}
+  }
 
 }

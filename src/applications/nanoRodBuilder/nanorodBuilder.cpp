@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -111,12 +111,12 @@ int main(int argc, char *argv []) {
     exit(1);
   
   
-	// Check for lib CGAL, if we don't have it, we should exit....
+  // Check for lib CGAL, if we don't have it, we should exit....
 	
 #ifndef HAVE_CGAL
-		 std::cerr << "nanoRodBuilder requires libCGAL to function, please rebuild OOPSE with libCGAL."
-		 << std::endl;
-		 exit(1);
+  std::cerr << "nanoRodBuilder requires libCGAL to function, please rebuild OOPSE with libCGAL."
+	    << std::endl;
+  exit(1);
 #endif
 	
 	
@@ -341,7 +341,7 @@ int main(int argc, char *argv []) {
   if (writer == NULL) {
     std::cerr << "error in creating DumpWriter" << std::endl;
     exit(1);
-    }
+  }
   
   writer->writeDump();
   std::cout << "new initial configuration file: " << outInitFileName

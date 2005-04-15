@@ -75,7 +75,7 @@ extern "C"{
                              double* quadrupole_moments,
                              int* status);
 	
-	void destroyElectrostaticTypes(void);
+  void destroyElectrostaticTypes(void);
 }  
 #endif
 

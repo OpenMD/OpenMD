@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -46,19 +46,19 @@
 
 namespace oopse {
 
-/**
- * @class PRCGMinimizer 
- * Polak-Ribiere  Conjugate Gradient Method 
- */
+  /**
+   * @class PRCGMinimizer 
+   * Polak-Ribiere  Conjugate Gradient Method 
+   */
 
-class PRCGMinimizer : public CGFamilyMinimizer{
+  class PRCGMinimizer : public CGFamilyMinimizer{
   public:
-      PRCGMinimizer(SimInfo *info)
-                                   :CGFamilyMinimizer(info) {}
+    PRCGMinimizer(SimInfo *info)
+      :CGFamilyMinimizer(info) {}
     virtual int step();
     virtual void init();
     virtual void prepareStep();
-};
+  };
 
 }
 

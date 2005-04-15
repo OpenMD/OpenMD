@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -61,8 +61,8 @@ namespace oopse {
   public:
 
     MorseBondType( double myR0, double myD, double myBeta) 
-        : BondType(myR0), De(myD), beta(myBeta) {
-    }
+      : BondType(myR0), De(myD), beta(myBeta) {
+      }
     
     void setWellDepth(double myD) { De = myD;}
 

@@ -45,81 +45,81 @@
 #include "brains/SnapshotManager.hpp"
 namespace oopse {
 
-class SimInfo;
-class DumpReader;
+  class SimInfo;
+  class DumpReader;
 
-typedef std::pair<int, int> SnapshotBlock;
+  typedef std::pair<int, int> SnapshotBlock;
 
-/**
- * @class BlockSnapshotManager
- * @todo document
- */
-class BlockSnapshotManager : public SnapshotManager{
+  /**
+   * @class BlockSnapshotManager
+   * @todo document
+   */
+  class BlockSnapshotManager : public SnapshotManager{
 
-    public:
-        BlockSnapshotManager(SimInfo* info, const std::string& filename, int storageLayout, int blockCapacity = 2);
-        ~BlockSnapshotManager();
+  public:
+    BlockSnapshotManager(SimInfo* info, const std::string& filename, int storageLayout, int blockCapacity = 2);
+    ~BlockSnapshotManager();
         
-        virtual Snapshot* getSnapshot(int id) { return snapshots_[id]; }
+    virtual Snapshot* getSnapshot(int id) { return snapshots_[id]; }
 
-        /** Returns number of snapshot blocks in this BlockSnapshotManager*/
-        int getNBlocks() {
-            return blocks_.size();
-        }
+    /** Returns number of snapshot blocks in this BlockSnapshotManager*/
+    int getNBlocks() {
+      return blocks_.size();
+    }
 
-        SnapshotBlock getSnapshotBlock(int block) {
-            return blocks_.at(block);
-        }
+    SnapshotBlock getSnapshotBlock(int block) {
+      return blocks_.at(block);
+    }
         
-        int getNActiveBlocks();
+    int getNActiveBlocks();
         
 
-        bool isBlockActive(int block) {
-            return  findActiveBlock(block) != activeBlocks_.end() ? true : false;
-        }        
+    bool isBlockActive(int block) {
+      return  findActiveBlock(block) != activeBlocks_.end() ? true : false;
+    }        
 
-        bool loadBlock(int block);
+    bool loadBlock(int block);
         
-        bool unloadBlock(int block);
+    bool unloadBlock(int block);
 
-        std::vector<int> getActiveBlocks();
+    std::vector<int> getActiveBlocks();
 
-        int getBlockCapacity() {
-            return blockCapacity_;                
-        }
+    int getBlockCapacity() {
+      return blockCapacity_;                
+    }
 
-        int getNFrames();
+    int getNFrames();
         
-    private:
+  private:
 
-        std::vector<int>::iterator findActiveBlock(int block) {
-            return std::find(activeBlocks_.begin(), activeBlocks_.end(), block);
-        }
+    std::vector<int>::iterator findActiveBlock(int block) {
+      return std::find(activeBlocks_.begin(), activeBlocks_.end(), block);
+    }
 
-        bool hasZeroRefBlock();
+    bool hasZeroRefBlock();
 
-        int getFirstZeroRefBlock();
+    int getFirstZeroRefBlock();
 
-        void internalLoad(int block);
-        void internalUnload(int block);
-        Snapshot* loadFrame(int frame);
+    void internalLoad(int block);
+    void internalUnload(int block);
+    Snapshot* loadFrame(int frame);
         
-        SimInfo* info_;
-        int blockCapacity_;
+    SimInfo* info_;
+    int blockCapacity_;
 
-        std::vector<Snapshot*> snapshots_;
-        std::vector<SnapshotBlock> blocks_;        
-        std::vector<int> activeBlocks_;
-        std::vector<int> activeRefCount_;
+    std::vector<Snapshot*> snapshots_;
+    std::vector<SnapshotBlock> blocks_;        
+    std::vector<int> activeBlocks_;
+    std::vector<int> activeRefCount_;
         
-        int nAtoms_;
-        int nRigidBodies_;
+    int nAtoms_;
+    int nRigidBodies_;
     
-        DumpReader* reader_;
-        int nframes_;
-        int nSnapshotPerBlock_;
+    DumpReader* reader_;
+    int nframes_;
+    int nSnapshotPerBlock_;
 
-};
+  };
 
 }
 

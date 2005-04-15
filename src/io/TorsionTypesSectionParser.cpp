@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -49,7 +49,7 @@
 
 namespace oopse {
 
-TorsionTypesSectionParser::TorsionTypesSectionParser() {
+  TorsionTypesSectionParser::TorsionTypesSectionParser() {
     setSectionName("TorsionTypes");
 
 
@@ -59,9 +59,9 @@ TorsionTypesSectionParser::TorsionTypesSectionParser() {
     stringToEnumMap_["Polynomial"] = ttPolynomial;
     stringToEnumMap_["Charmm"] =  ttCharmm;
 
-}
+  }
 
-void TorsionTypesSectionParser::parseLine(ForceField& ff,const std::string& line, int lineNo){
+  void TorsionTypesSectionParser::parseLine(ForceField& ff,const std::string& line, int lineNo){
     StringTokenizer tokenizer(line);
     TorsionType* torsionType = NULL;
 
@@ -69,7 +69,7 @@ void TorsionTypesSectionParser::parseLine(ForceField& ff,const std::string& line
 
     if (nTokens < 5) {
 
-        return;
+      return;
     }
     
     std::string at1 = tokenizer.nextToken();
@@ -82,107 +82,107 @@ void TorsionTypesSectionParser::parseLine(ForceField& ff,const std::string& line
 
     switch(tt) {
 
-        case TorsionTypesSectionParser::ttGhostTorsion:
-            if (nTokens < 4) {
+    case TorsionTypesSectionParser::ttGhostTorsion:
+      if (nTokens < 4) {
 
-            } else {
+      } else {
 
-                double k3 = tokenizer.nextTokenAsDouble();
-                double k2 = tokenizer.nextTokenAsDouble();
-                double k1 = tokenizer.nextTokenAsDouble();
-                double k0 = tokenizer.nextTokenAsDouble();
+	double k3 = tokenizer.nextTokenAsDouble();
+	double k2 = tokenizer.nextTokenAsDouble();
+	double k1 = tokenizer.nextTokenAsDouble();
+	double k0 = tokenizer.nextTokenAsDouble();
                 
-                torsionType = new CubicTorsionType(k3, k2, k1, k0);
-            }
-            break;
+	torsionType = new CubicTorsionType(k3, k2, k1, k0);
+      }
+      break;
             
-        case TorsionTypesSectionParser::ttCubic :
-            if (nTokens < 4) {
+    case TorsionTypesSectionParser::ttCubic :
+      if (nTokens < 4) {
 
-            } else {
+      } else {
 
-                double k3 = tokenizer.nextTokenAsDouble();
-                double k2 = tokenizer.nextTokenAsDouble();
-                double k1 = tokenizer.nextTokenAsDouble();
-                double k0 = tokenizer.nextTokenAsDouble();
+	double k3 = tokenizer.nextTokenAsDouble();
+	double k2 = tokenizer.nextTokenAsDouble();
+	double k1 = tokenizer.nextTokenAsDouble();
+	double k0 = tokenizer.nextTokenAsDouble();
                 
-                torsionType = new CubicTorsionType(k3, k2, k1, k0);
-            }
-            break;
+	torsionType = new CubicTorsionType(k3, k2, k1, k0);
+      }
+      break;
             
-        case TorsionTypesSectionParser::ttQuartic:
-            if (nTokens < 5) {
+    case TorsionTypesSectionParser::ttQuartic:
+      if (nTokens < 5) {
 
-            } else {
+      } else {
 
-                double k4 = tokenizer.nextTokenAsDouble();
-                double k3 = tokenizer.nextTokenAsDouble();
-                double k2 = tokenizer.nextTokenAsDouble();
-                double k1 = tokenizer.nextTokenAsDouble();
-                double k0 = tokenizer.nextTokenAsDouble();
+	double k4 = tokenizer.nextTokenAsDouble();
+	double k3 = tokenizer.nextTokenAsDouble();
+	double k2 = tokenizer.nextTokenAsDouble();
+	double k1 = tokenizer.nextTokenAsDouble();
+	double k0 = tokenizer.nextTokenAsDouble();
                 
-                torsionType = new QuarticTorsionType( k4, k3, k2, k1, k0);
-            }
-            break;
+	torsionType = new QuarticTorsionType( k4, k3, k2, k1, k0);
+      }
+      break;
 
         
-        case TorsionTypesSectionParser::ttPolynomial:
-            if (nTokens < 2 || nTokens % 2 != 0) {
+    case TorsionTypesSectionParser::ttPolynomial:
+      if (nTokens < 2 || nTokens % 2 != 0) {
 
-            } else {
-                int nPairs = nTokens / 2;
-                int power;
-                double coefficient;
-                PolynomialTorsionType* ptt = new PolynomialTorsionType();
+      } else {
+	int nPairs = nTokens / 2;
+	int power;
+	double coefficient;
+	PolynomialTorsionType* ptt = new PolynomialTorsionType();
                 
-                for (int i = 0; i < nPairs; ++i) {
-                    power = tokenizer.nextTokenAsInt();
-                    coefficient = tokenizer.nextTokenAsDouble();
-                    ptt->setCoefficient(power, coefficient);
-                }
-            }
+	for (int i = 0; i < nPairs; ++i) {
+	  power = tokenizer.nextTokenAsInt();
+	  coefficient = tokenizer.nextTokenAsDouble();
+	  ptt->setCoefficient(power, coefficient);
+	}
+      }
             
-            break;
+      break;
              
-        case TorsionTypesSectionParser::ttCharmm:
+    case TorsionTypesSectionParser::ttCharmm:
             
-            if (nTokens < 3 || nTokens % 3 != 0) {
+      if (nTokens < 3 || nTokens % 3 != 0) {
 
-            } else {
-                int nSets = nTokens / 3;
+      } else {
+	int nSets = nTokens / 3;
   
-                CharmmTorsionType* ctt = new CharmmTorsionType();
+	CharmmTorsionType* ctt = new CharmmTorsionType();
                 
-                for (int i = 0; i < nSets; ++i) {
-                    double kchi = tokenizer.nextTokenAsDouble();
-                    int n = tokenizer.nextTokenAsInt();
-                    double delta = tokenizer.nextTokenAsDouble();
+	for (int i = 0; i < nSets; ++i) {
+	  double kchi = tokenizer.nextTokenAsDouble();
+	  int n = tokenizer.nextTokenAsInt();
+	  double delta = tokenizer.nextTokenAsDouble();
     
-                    ctt->setCharmmTorsionParameter(kchi, n, delta);
-                }
-            }
+	  ctt->setCharmmTorsionParameter(kchi, n, delta);
+	}
+      }
 
-            break;
+      break;
             
-        case TorsionTypesSectionParser::ttUnknown :
-        default:
+    case TorsionTypesSectionParser::ttUnknown :
+    default:
 
-            break;
+      break;
             
     }
 
     if (torsionType != NULL) {
-        ff.addTorsionType(at1, at2, at3, at4, torsionType);
+      ff.addTorsionType(at1, at2, at3, at4, torsionType);
     }
 
-}
+  }
 
-TorsionTypesSectionParser::TorsionTypeEnum TorsionTypesSectionParser::getTorsionTypeEnum(const std::string& str) {
+  TorsionTypesSectionParser::TorsionTypeEnum TorsionTypesSectionParser::getTorsionTypeEnum(const std::string& str) {
     std::map<std::string, TorsionTypeEnum>::iterator i;
     i = stringToEnumMap_.find(str);
 
     return i == stringToEnumMap_.end() ? TorsionTypesSectionParser::ttUnknown : i->second;
-}
+  }
 
 } //end namespace oopse
 

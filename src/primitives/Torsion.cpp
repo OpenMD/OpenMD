@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -43,11 +43,11 @@
 
 namespace oopse {
 
-Torsion::Torsion(Atom *atom1, Atom *atom2, Atom *atom3, Atom *atom4,
-                 TorsionType *tt) :
+  Torsion::Torsion(Atom *atom1, Atom *atom2, Atom *atom3, Atom *atom4,
+		   TorsionType *tt) :
     atom1_(atom1), atom2_(atom2), atom3_(atom3), atom4_(atom4), torsionType_(tt) { }
 
-void Torsion::calcForce() {
+  void Torsion::calcForce() {
     Vector3d pos1 = atom1_->getPos();
     Vector3d pos2 = atom2_->getPos();
     Vector3d pos3 = atom3_->getPos();
@@ -85,42 +85,42 @@ void Torsion::calcForce() {
     //  sin or cos form will be more stable.  For this,
     //  just look at the value of phi
     //if (fabs(sin_phi) > 0.1) {
-        //  use the sin version to avoid 1/cos terms
+    //  use the sin version to avoid 1/cos terms
 
-        Vector3d dcosdA = (cos_phi * A - B) /rA;
-        Vector3d dcosdB = (cos_phi * B - A) /rB;
+    Vector3d dcosdA = (cos_phi * A - B) /rA;
+    Vector3d dcosdB = (cos_phi * B - A) /rB;
 
-        double dVdcosPhi = -dVdPhi / sin_phi;
+    double dVdcosPhi = -dVdPhi / sin_phi;
 
-        f1 = dVdcosPhi * cross(r32, dcosdA);
-        f2 = dVdcosPhi * ( cross(r43, dcosdB) - cross(r21, dcosdA));
-        f3 = dVdcosPhi * cross(dcosdB, r32);
+    f1 = dVdcosPhi * cross(r32, dcosdA);
+    f2 = dVdcosPhi * ( cross(r43, dcosdB) - cross(r21, dcosdA));
+    f3 = dVdcosPhi * cross(dcosdB, r32);
 
     /** @todo fix below block, must be something wrong with the sign somewhere */
     //} else {
-        //  This angle is closer to 0 or 180 than it is to
-        //  90, so use the cos version to avoid 1/sin terms
+    //  This angle is closer to 0 or 180 than it is to
+    //  90, so use the cos version to avoid 1/sin terms
 
-        //double dVdsinPhi = dVdPhi /cos_phi;
-        //Vector3d dsindB = (sin_phi * B - C) /rB;
-        //Vector3d dsindC = (sin_phi * C - B) /rC;
+    //double dVdsinPhi = dVdPhi /cos_phi;
+    //Vector3d dsindB = (sin_phi * B - C) /rB;
+    //Vector3d dsindC = (sin_phi * C - B) /rC;
 
-        //f1.x() = dVdsinPhi*((r32.y()*r32.y() + r32.z()*r32.z())*dsindC.x() - r32.x()*r32.y()*dsindC.y() - r32.x()*r32.z()*dsindC.z());
+    //f1.x() = dVdsinPhi*((r32.y()*r32.y() + r32.z()*r32.z())*dsindC.x() - r32.x()*r32.y()*dsindC.y() - r32.x()*r32.z()*dsindC.z());
 
-        //f1.y() = dVdsinPhi*((r32.z()*r32.z() + r32.x()*r32.x())*dsindC.y() - r32.y()*r32.z()*dsindC.z() - r32.y()*r32.x()*dsindC.x());
+    //f1.y() = dVdsinPhi*((r32.z()*r32.z() + r32.x()*r32.x())*dsindC.y() - r32.y()*r32.z()*dsindC.z() - r32.y()*r32.x()*dsindC.x());
 
-        //f1.z() = dVdsinPhi*((r32.x()*r32.x() + r32.y()*r32.y())*dsindC.z() - r32.z()*r32.x()*dsindC.x() - r32.z()*r32.y()*dsindC.y());
+    //f1.z() = dVdsinPhi*((r32.x()*r32.x() + r32.y()*r32.y())*dsindC.z() - r32.z()*r32.x()*dsindC.x() - r32.z()*r32.y()*dsindC.y());
 
-        //f2.x() = dVdsinPhi*(-(r32.y()*r21.y() + r32.z()*r21.z())*dsindC.x() + (2.0*r32.x()*r21.y() - r21.x()*r32.y())*dsindC.y()
-        //+ (2.0*r32.x()*r21.z() - r21.x()*r32.z())*dsindC.z() + dsindB.z()*r43.y() - dsindB.y()*r43.z());
+    //f2.x() = dVdsinPhi*(-(r32.y()*r21.y() + r32.z()*r21.z())*dsindC.x() + (2.0*r32.x()*r21.y() - r21.x()*r32.y())*dsindC.y()
+    //+ (2.0*r32.x()*r21.z() - r21.x()*r32.z())*dsindC.z() + dsindB.z()*r43.y() - dsindB.y()*r43.z());
 
-        //f2.y() = dVdsinPhi*(-(r32.z()*r21.z() + r32.x()*r21.x())*dsindC.y() + (2.0*r32.y()*r21.z() - r21.y()*r32.z())*dsindC.z()
-        //+ (2.0*r32.y()*r21.x() - r21.y()*r32.x())*dsindC.x() + dsindB.x()*r43.z() - dsindB.z()*r43.x());
+    //f2.y() = dVdsinPhi*(-(r32.z()*r21.z() + r32.x()*r21.x())*dsindC.y() + (2.0*r32.y()*r21.z() - r21.y()*r32.z())*dsindC.z()
+    //+ (2.0*r32.y()*r21.x() - r21.y()*r32.x())*dsindC.x() + dsindB.x()*r43.z() - dsindB.z()*r43.x());
 
-        //f2.z() = dVdsinPhi*(-(r32.x()*r21.x() + r32.y()*r21.y())*dsindC.z() + (2.0*r32.z()*r21.x() - r21.z()*r32.x())*dsindC.x()
-        //+(2.0*r32.z()*r21.y() - r21.z()*r32.y())*dsindC.y() + dsindB.y()*r43.x() - dsindB.x()*r43.y());
+    //f2.z() = dVdsinPhi*(-(r32.x()*r21.x() + r32.y()*r21.y())*dsindC.z() + (2.0*r32.z()*r21.x() - r21.z()*r32.x())*dsindC.x()
+    //+(2.0*r32.z()*r21.y() - r21.z()*r32.y())*dsindC.y() + dsindB.y()*r43.x() - dsindB.x()*r43.y());
 
-        //f3 = dVdsinPhi * cross(r32, dsindB);
+    //f3 = dVdsinPhi * cross(r32, dsindB);
 
     //}
 
@@ -128,6 +128,6 @@ void Torsion::calcForce() {
     atom2_->addFrc(f2 - f1);
     atom3_->addFrc(f3 - f2);
     atom4_->addFrc(-f3);
-}
+  }
 
 }

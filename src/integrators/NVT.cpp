@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -46,46 +46,46 @@
 
 namespace oopse {
 
-NVT::NVT(SimInfo* info) : VelocityVerletIntegrator(info), chiTolerance_ (1e-6), maxIterNum_(4) {
+  NVT::NVT(SimInfo* info) : VelocityVerletIntegrator(info), chiTolerance_ (1e-6), maxIterNum_(4) {
 
     Globals* simParams = info_->getSimParams();
 
     if (!simParams->getUseInitXSstate()) {
-        Snapshot* currSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
-        currSnapshot->setChi(0.0);
-        currSnapshot->setIntegralOfChiDt(0.0);
+      Snapshot* currSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
+      currSnapshot->setChi(0.0);
+      currSnapshot->setIntegralOfChiDt(0.0);
     }
     
     if (!simParams->haveTargetTemp()) {
-        sprintf(painCave.errMsg, "You can't use the NVT integrator without a targetTemp_!\n");
-        painCave.isFatal = 1;
-        painCave.severity = OOPSE_ERROR;
-        simError();
+      sprintf(painCave.errMsg, "You can't use the NVT integrator without a targetTemp_!\n");
+      painCave.isFatal = 1;
+      painCave.severity = OOPSE_ERROR;
+      simError();
     } else {
-        targetTemp_ = simParams->getTargetTemp();
+      targetTemp_ = simParams->getTargetTemp();
     }
 
     // We must set tauThermostat_.
 
     if (!simParams->haveTauThermostat()) {
-        sprintf(painCave.errMsg, "If you use the constant temperature\n"
-                                     "\tintegrator, you must set tauThermostat_.\n");
+      sprintf(painCave.errMsg, "If you use the constant temperature\n"
+	      "\tintegrator, you must set tauThermostat_.\n");
 
-        painCave.severity = OOPSE_ERROR;
-        painCave.isFatal = 1;
-        simError();
+      painCave.severity = OOPSE_ERROR;
+      painCave.isFatal = 1;
+      simError();
     } else {
-        tauThermostat_ = simParams->getTauThermostat();
+      tauThermostat_ = simParams->getTauThermostat();
     }
 
     update();
-}
+  }
 
-void NVT::doUpdate() {
+  void NVT::doUpdate() {
     oldVel_.resize(info_->getNIntegrableObjects());
     oldJi_.resize(info_->getNIntegrableObjects());    
-}
-void NVT::moveA() {
+  }
+  void NVT::moveA() {
     SimInfo::MoleculeIterator i;
     Molecule::IntegrableObjectIterator  j;
     Molecule* mol;
@@ -105,8 +105,8 @@ void NVT::moveA() {
     double instTemp = thermo.getTemperature();
 
     for (mol = info_->beginMolecule(i); mol != NULL; mol = info_->nextMolecule(i)) {
-        for (integrableObject = mol->beginIntegrableObject(j); integrableObject != NULL;
-               integrableObject = mol->nextIntegrableObject(j)) {
+      for (integrableObject = mol->beginIntegrableObject(j); integrableObject != NULL;
+	   integrableObject = mol->nextIntegrableObject(j)) {
 
         vel = integrableObject->getVel();
         pos = integrableObject->getPos();
@@ -127,20 +127,20 @@ void NVT::moveA() {
 
         if (integrableObject->isDirectional()) {
 
-            //convert the torque to body frame
-            Tb = integrableObject->lab2Body(integrableObject->getTrq());
+	  //convert the torque to body frame
+	  Tb = integrableObject->lab2Body(integrableObject->getTrq());
 
-            // get the angular momentum, and propagate a half step
+	  // get the angular momentum, and propagate a half step
 
-            ji = integrableObject->getJ();
+	  ji = integrableObject->getJ();
 
-            //ji[j] += dt2 * (Tb[j] * OOPSEConstant::energyConvert - ji[j]*chi);
-            ji += dt2*OOPSEConstant::energyConvert*Tb - dt2*chi *ji;
-            rotAlgo->rotate(integrableObject, ji, dt);
+	  //ji[j] += dt2 * (Tb[j] * OOPSEConstant::energyConvert - ji[j]*chi);
+	  ji += dt2*OOPSEConstant::energyConvert*Tb - dt2*chi *ji;
+	  rotAlgo->rotate(integrableObject, ji, dt);
 
-            integrableObject->setJ(ji);
+	  integrableObject->setJ(ji);
         }
-    }
+      }
 
     }
     
@@ -155,9 +155,9 @@ void NVT::moveA() {
 
     currentSnapshot_->setChi(chi);
     currentSnapshot_->setIntegralOfChiDt(integralOfChidt);
-}
+  }
 
-void NVT::moveB() {
+  void NVT::moveB() {
     SimInfo::MoleculeIterator i;
     Molecule::IntegrableObjectIterator  j;
     Molecule* mol;
@@ -179,66 +179,66 @@ void NVT::moveB() {
 
     index = 0;
     for (mol = info_->beginMolecule(i); mol != NULL; mol = info_->nextMolecule(i)) {
-        for (integrableObject = mol->beginIntegrableObject(j); integrableObject != NULL;
-               integrableObject = mol->nextIntegrableObject(j)) {
-                oldVel_[index] = integrableObject->getVel();
-                oldJi_[index] = integrableObject->getJ();                
+      for (integrableObject = mol->beginIntegrableObject(j); integrableObject != NULL;
+	   integrableObject = mol->nextIntegrableObject(j)) {
+	oldVel_[index] = integrableObject->getVel();
+	oldJi_[index] = integrableObject->getJ();                
 
-                ++index;    
-        }
+	++index;    
+      }
            
     }
 
     // do the iteration:
 
     for(int k = 0; k < maxIterNum_; k++) {
-        index = 0;
-        instTemp = thermo.getTemperature();
+      index = 0;
+      instTemp = thermo.getTemperature();
 
-        // evolve chi another half step using the temperature at t + dt/2
+      // evolve chi another half step using the temperature at t + dt/2
 
-        prevChi = chi;
-        chi = oldChi + dt2 * (instTemp / targetTemp_ - 1.0) / (tauThermostat_ * tauThermostat_);
+      prevChi = chi;
+      chi = oldChi + dt2 * (instTemp / targetTemp_ - 1.0) / (tauThermostat_ * tauThermostat_);
 
-        for (mol = info_->beginMolecule(i); mol != NULL; mol = info_->nextMolecule(i)) {
-            for (integrableObject = mol->beginIntegrableObject(j); integrableObject != NULL;
-                   integrableObject = mol->nextIntegrableObject(j)) {
+      for (mol = info_->beginMolecule(i); mol != NULL; mol = info_->nextMolecule(i)) {
+	for (integrableObject = mol->beginIntegrableObject(j); integrableObject != NULL;
+	     integrableObject = mol->nextIntegrableObject(j)) {
 
-                frc = integrableObject->getFrc();
-                vel = integrableObject->getVel();
+	  frc = integrableObject->getFrc();
+	  vel = integrableObject->getVel();
 
-                mass = integrableObject->getMass();
+	  mass = integrableObject->getMass();
 
-                // velocity half step
-                //for(j = 0; j < 3; j++)
-                //    vel[j] = oldVel_[3*i+j] + dt2 * ((frc[j] / mass ) * OOPSEConstant::energyConvert - oldVel_[3*i + j]*chi);
-                vel = oldVel_[index] + dt2/mass*OOPSEConstant::energyConvert * frc - dt2*chi*oldVel_[index];
+	  // velocity half step
+	  //for(j = 0; j < 3; j++)
+	  //    vel[j] = oldVel_[3*i+j] + dt2 * ((frc[j] / mass ) * OOPSEConstant::energyConvert - oldVel_[3*i + j]*chi);
+	  vel = oldVel_[index] + dt2/mass*OOPSEConstant::energyConvert * frc - dt2*chi*oldVel_[index];
             
-                integrableObject->setVel(vel);
+	  integrableObject->setVel(vel);
 
-                if (integrableObject->isDirectional()) {
+	  if (integrableObject->isDirectional()) {
 
-                    // get and convert the torque to body frame
+	    // get and convert the torque to body frame
 
-                    Tb =  integrableObject->lab2Body(integrableObject->getTrq());
+	    Tb =  integrableObject->lab2Body(integrableObject->getTrq());
 
-                    //for(j = 0; j < 3; j++)
-                    //    ji[j] = oldJi_[3*i + j] + dt2 * (Tb[j] * OOPSEConstant::energyConvert - oldJi_[3*i+j]*chi);
-                    ji = oldJi_[index] + dt2*OOPSEConstant::energyConvert*Tb - dt2*chi *oldJi_[index];
+	    //for(j = 0; j < 3; j++)
+	    //    ji[j] = oldJi_[3*i + j] + dt2 * (Tb[j] * OOPSEConstant::energyConvert - oldJi_[3*i+j]*chi);
+	    ji = oldJi_[index] + dt2*OOPSEConstant::energyConvert*Tb - dt2*chi *oldJi_[index];
 
-                    integrableObject->setJ(ji);
-                }
+	    integrableObject->setJ(ji);
+	  }
 
 
-                ++index;
-            }
-        }
+	  ++index;
+	}
+      }
     
 
-        rattle->constraintB();
+      rattle->constraintB();
 
-        if (fabs(prevChi - chi) <= chiTolerance_)
-            break;
+      if (fabs(prevChi - chi) <= chiTolerance_)
+	break;
 
     }
 
@@ -246,10 +246,10 @@ void NVT::moveB() {
 
     currentSnapshot_->setChi(chi);
     currentSnapshot_->setIntegralOfChiDt(integralOfChidt);
-}
+  }
 
 
-double NVT::calcConservedQuantity() {
+  double NVT::calcConservedQuantity() {
 
     double chi = currentSnapshot_->getChi();
     double integralOfChidt = currentSnapshot_->getIntegralOfChiDt();
@@ -270,7 +270,7 @@ double NVT::calcConservedQuantity() {
     conservedQuantity = Energy + thermostat_kinetic + thermostat_potential;
 
     return conservedQuantity;
-}
+  }
 
 
 }//end namespace oopse

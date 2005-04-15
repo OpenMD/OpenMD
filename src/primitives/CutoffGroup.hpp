@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -47,91 +47,91 @@
 #include "math/Vector3.hpp"
 
 namespace oopse {
-class CutoffGroup {
-    public:
+  class CutoffGroup {
+  public:
 
-        CutoffGroup() {
-            haveTotalMass = false;
-            totalMass = 0.0;
-        }
+    CutoffGroup() {
+      haveTotalMass = false;
+      totalMass = 0.0;
+    }
 
-        void addAtom(Atom *atom) {
-            cutoffAtomList.push_back(atom);
-        }
+    void addAtom(Atom *atom) {
+      cutoffAtomList.push_back(atom);
+    }
 
-        Atom *beginAtom(std::vector<Atom *>::iterator & i) {
-            i = cutoffAtomList.begin();
-            return i != cutoffAtomList.end() ? *i : NULL;
-        }
+    Atom *beginAtom(std::vector<Atom *>::iterator & i) {
+      i = cutoffAtomList.begin();
+      return i != cutoffAtomList.end() ? *i : NULL;
+    }
 
-        Atom *nextAtom(std::vector<Atom *>::iterator & i) {
-            i++;
-            return i != cutoffAtomList.end() ? *i : NULL;
-        }
+    Atom *nextAtom(std::vector<Atom *>::iterator & i) {
+      i++;
+      return i != cutoffAtomList.end() ? *i : NULL;
+    }
 
-        std::vector<Atom*> getAtoms() { return cutoffAtomList; }
-        double getMass() {
-            std::vector<Atom *>::iterator i;
-            Atom * atom;
-            double mass;
+    std::vector<Atom*> getAtoms() { return cutoffAtomList; }
+    double getMass() {
+      std::vector<Atom *>::iterator i;
+      Atom * atom;
+      double mass;
 
-            if (!haveTotalMass) {
-                totalMass = 0;
+      if (!haveTotalMass) {
+	totalMass = 0;
 
-                for(atom = beginAtom(i); atom != NULL; atom = nextAtom(i)) {
-                    mass = atom->getMass();
-                    totalMass += mass;
-                }
+	for(atom = beginAtom(i); atom != NULL; atom = nextAtom(i)) {
+	  mass = atom->getMass();
+	  totalMass += mass;
+	}
 
-                haveTotalMass = true;
-            }
+	haveTotalMass = true;
+      }
 
-            return totalMass;
-        }
+      return totalMass;
+    }
 
-        void getCOM(Vector3d & com) {
-            std::vector<Atom *>::iterator i;
-            Atom * atom;
-            Vector3d pos;
-            double mass;
+    void getCOM(Vector3d & com) {
+      std::vector<Atom *>::iterator i;
+      Atom * atom;
+      Vector3d pos;
+      double mass;
 
-            com[0] = 0;
-            com[1] = 0;
-            com[2] = 0;
-            totalMass = getMass();
+      com[0] = 0;
+      com[1] = 0;
+      com[2] = 0;
+      totalMass = getMass();
 
-            if (cutoffAtomList.size() == 1) {
-                com = beginAtom(i)->getPos();
-            } else {
-                for(atom = beginAtom(i); atom != NULL; atom = nextAtom(i)) {
-                    mass = atom->getMass();
-                    pos = atom->getPos();
-                    com += pos * mass;
-                }
+      if (cutoffAtomList.size() == 1) {
+	com = beginAtom(i)->getPos();
+      } else {
+	for(atom = beginAtom(i); atom != NULL; atom = nextAtom(i)) {
+	  mass = atom->getMass();
+	  pos = atom->getPos();
+	  com += pos * mass;
+	}
 
-                com /= totalMass;
-            }
-        }
+	com /= totalMass;
+      }
+    }
 
-        int getNumAtom() {
-            return cutoffAtomList.size();
-        }
+    int getNumAtom() {
+      return cutoffAtomList.size();
+    }
 
-        int getGlobalIndex() {
-            return globalIndex;
-        }
+    int getGlobalIndex() {
+      return globalIndex;
+    }
 
-        void setGlobalIndex(int id) {
-            this->globalIndex = id;
-        }
+    void setGlobalIndex(int id) {
+      this->globalIndex = id;
+    }
 
-    private:
+  private:
 
-        std::vector<Atom *>cutoffAtomList;
-        bool haveTotalMass;
-        double totalMass;
-        int globalIndex;
-};
+    std::vector<Atom *>cutoffAtomList;
+    bool haveTotalMass;
+    double totalMass;
+    int globalIndex;
+  };
 
 }      //end namespace oopse
 

@@ -53,82 +53,82 @@
 
 namespace oopse {
 
-/**
- * @class TimeCorrFunc TimeCorrFunc.hpp "applications/dynamicProps/TimeCorrFunc"
- * @brief Base class for Correlation function
- */
+  /**
+   * @class TimeCorrFunc TimeCorrFunc.hpp "applications/dynamicProps/TimeCorrFunc"
+   * @brief Base class for Correlation function
+   */
  
-class TimeCorrFunc {
-    public:
-        TimeCorrFunc(SimInfo* info, const std::string& filename, 
-            const std::string& sele1, const std::string& sele2, int storageLayout);
+  class TimeCorrFunc {
+  public:
+    TimeCorrFunc(SimInfo* info, const std::string& filename, 
+		 const std::string& sele1, const std::string& sele2, int storageLayout);
         
-        void doCorrelate();
+    void doCorrelate();
 
 
-        void setOutputName(const std::string& filename) {
-            outputFilename_ = filename;
-        }
+    void setOutputName(const std::string& filename) {
+      outputFilename_ = filename;
+    }
 
-        const std::string& getOutputFileName() const {
-            return outputFilename_;
-        }
+    const std::string& getOutputFileName() const {
+      return outputFilename_;
+    }
 
 
-        const std::string& getCorrFuncType() const {
-            return corrFuncType_;
-        }
+    const std::string& getCorrFuncType() const {
+      return corrFuncType_;
+    }
 
-        void setCorrFuncType(const std::string& type) {
-            corrFuncType_ = type;
-        }
+    void setCorrFuncType(const std::string& type) {
+      corrFuncType_ = type;
+    }
 
-        void setExtraInfo(const std::string& extra) {
-            extra_ = extra;
-        }
+    void setExtraInfo(const std::string& extra) {
+      extra_ = extra;
+    }
             
-    protected:
+  protected:
         
-        virtual void preCorrelate();        
-        virtual void postCorrelate();
-        virtual void updateFrame(int frame);
+    virtual void preCorrelate();        
+    virtual void postCorrelate();
+    virtual void updateFrame(int frame);
 
-        double deltaTime_;
-        int nTimeBins_;
-        std::vector<double> histogram_;
-        std::vector<int> count_;
-        std::vector<double> time_;
+    double deltaTime_;
+    int nTimeBins_;
+    std::vector<double> histogram_;
+    std::vector<int> count_;
+    std::vector<double> time_;
         
-        SimInfo* info_;
-        int storageLayout_;
-        std::string dumpFilename_;        
-        SelectionManager seleMan1_;
-        SelectionManager seleMan2_;          
+    SimInfo* info_;
+    int storageLayout_;
+    std::string dumpFilename_;        
+    SelectionManager seleMan1_;
+    SelectionManager seleMan2_;          
 
-        BlockSnapshotManager* bsMan_;       
+    BlockSnapshotManager* bsMan_;       
         
-    private:
+  private:
 
-        void correlateBlocks(int block1, int block2);
-        virtual void correlateFrames(int frame1, int frame2) = 0;       
+    void correlateBlocks(int block1, int block2);
+    virtual void correlateFrames(int frame1, int frame2) = 0;       
         
-        virtual void writeCorrelate();
+    virtual void writeCorrelate();
 
-        virtual void validateSelection(const SelectionManager& seleMan) {}
+    virtual void validateSelection(const SelectionManager& seleMan) {}
 
 
-        std::string selectionScript1_;
-        std::string selectionScript2_;
+    std::string selectionScript1_;
+    std::string selectionScript2_;
         
-        SelectionEvaluator evaluator1_;
-        SelectionEvaluator evaluator2_;
+    SelectionEvaluator evaluator1_;
+    SelectionEvaluator evaluator2_;
  
 
-        std::string outputFilename_;
+    std::string outputFilename_;
 
-        std::string corrFuncType_;
-        std::string extra_;
-};
+    std::string corrFuncType_;
+    std::string extra_;
+  };
 
 }
 #endif

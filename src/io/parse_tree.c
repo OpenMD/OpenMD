@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -140,7 +140,7 @@ void walk_down( struct node_tag* the_node, struct namespc the_namespc ){
 
       case ATOM_HEAD:
 	if( the_namespc.type != MOLECULE_HEAD ){
-	     print_tree_error( the_node,
+	  print_tree_error( the_node,
 			    "The atom block is not in a molecule namespace" );
 	}
 	else{
@@ -396,10 +396,10 @@ void print_tree_error( struct node_tag* err_node, char* err_msg ){
 
   case CONSTRAINT_STMT:
     sprintf( painCave.errMsg,
-	    "Parse tree error: constraint node error => ( %lf )\n"
-	    "                 -> %s\n",
-	    err_node->the_data.cnstr.constraint_val,
-	    err_msg );
+	     "Parse tree error: constraint node error => ( %lf )\n"
+	     "                 -> %s\n",
+	     err_node->the_data.cnstr.constraint_val,
+	     err_msg );
     break;
     
   case ASSIGNMENT_STMT:

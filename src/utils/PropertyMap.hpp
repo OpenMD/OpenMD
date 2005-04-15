@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -58,89 +58,89 @@
 
 namespace oopse{
 
+  /**
+   * @class PropertyMap
+   * PropertyMap class maintains a list of GenericData. Type of Property is actually GenericData.
+   */
+  class PropertyMap{
+  public:
+
+    /** trivial constructor */
+    PropertyMap() {}
+
     /**
-    * @class PropertyMap
-    * PropertyMap class maintains a list of GenericData. Type of Property is actually GenericData.
-    */
-    class PropertyMap{
-        public:
+     * Virtual Destructor responsible for deleting all of the generc data in PropertyMap
+     */
+    virtual ~PropertyMap();
 
-            /** trivial constructor */
-            PropertyMap() {}
+    /**
+     * Adds property into property map
+     *
+     * @param genData GenericData to be added into PropertyMap
+     *
+     * @see #removeProperty
+     * @see #clearProperties
+     */
+    void addProperty(GenericData* genData);
 
-            /**
-            * Virtual Destructor responsible for deleting all of the generc data in PropertyMap
-            */
-            virtual ~PropertyMap();
+    /**
+     * Removes property from PropertyMap by name
+     *
+     * @param propName the name of property to be removed
+     *
+     * @see #addProperty
+     * @see #clearProperties
+     */
+    bool removeProperty(const std::string& propName);
 
-            /**
-            * Adds property into property map
-            *
-            * @param genData GenericData to be added into PropertyMap
-            *
-            * @see #removeProperty
-            * @see #clearProperties
-            */
-            void addProperty(GenericData* genData);
+    /**
+     * clear all of the properties
+     *
+     * @see #addProperty
+     * @see #removeProperty
+     */
+    void clearProperties();
 
-            /**
-            * Removes property from PropertyMap by name
-            *
-            * @param propName the name of property to be removed
-            *
-            * @see #addProperty
-            * @see #clearProperties
-            */
-            bool removeProperty(const std::string& propName);
+    /**
+     * Returns all names of properties
+     *
+     * @return all names of properties
+     */
+    std::vector<std::string> getPropertyNames();
 
-            /**
-            * clear all of the properties
-            *
-            * @see #addProperty
-            * @see #removeProperty
-            */
-            void clearProperties();
+    /**
+     * Returns all of the properties in PropertyMap
+     *
+     * @return all of the properties in PropertyMap
+     *
+     * @see #getPropertyByName
+     */      
+    std::vector<GenericData*> getProperties();
 
-            /**
-            * Returns all names of properties
-            *
-            * @return all names of properties
-            */
-            std::vector<std::string> getPropertyNames();
+    /**
+     * Returns property 
+     *
+     * @param propName name of property
+     *
+     * @return a pointer point to property with propName. If no property named propName
+     * exists, return NULL
+     *
+     * @see #getProperties
+     */      
+    GenericData* getPropertyByName(const std::string& propName);
+    //template<typename T = GenericData*> T getPropertyByName(std:std::string& propName);
 
-            /**
-            * Returns all of the properties in PropertyMap
-            *
-            * @return all of the properties in PropertyMap
-            *
-            * @see #getPropertyByName
-            */      
-            std::vector<GenericData*> getProperties();
+  protected:
+    std::map<std::string, GenericData*> propMap_;
 
-            /**
-            * Returns property 
-            *
-            * @param propName name of property
-            *
-            * @return a pointer point to property with propName. If no property named propName
-            * exists, return NULL
-            *
-            * @see #getProperties
-            */      
-            GenericData* getPropertyByName(const std::string& propName);
-            //template<typename T = GenericData*> T getPropertyByName(std:std::string& propName);
+  private:
 
-            protected:
-            std::map<std::string, GenericData*> propMap_;
+    /** prevent copy constructing */
+    PropertyMap(const PropertyMap&);
 
-        private:
-
-            /** prevent copy constructing */
-            PropertyMap(const PropertyMap&);
-
-            /** prevent copy assignment */
-            PropertyMap& operator=(const PropertyMap&);
-    };
+    /** prevent copy assignment */
+    PropertyMap& operator=(const PropertyMap&);
+  };
 
 }// namespace oopse
 

@@ -47,7 +47,7 @@
 !!
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: simParallel.F90,v 1.3 2005-01-14 20:31:16 gezelter Exp $, $Date: 2005-01-14 20:31:16 $, $Name: not supported by cvs2svn $, $Revision: 1.3 $
+!! @version $Id: simParallel.F90,v 1.4 2005-04-15 22:03:48 gezelter Exp $, $Date: 2005-04-15 22:03:48 $, $Name: not supported by cvs2svn $, $Revision: 1.4 $
 
 module mpiSimulation  
   use definitions
@@ -57,9 +57,9 @@ module mpiSimulation
   PRIVATE
 
 
-!! PUBLIC  Subroutines contained in this module
-!! gather and scatter are a generic interface
-!! to gather and scatter routines
+  !! PUBLIC  Subroutines contained in this module
+  !! gather and scatter are a generic interface
+  !! to gather and scatter routines
   public :: gather, scatter
   public :: setupSimParallel
   public :: replanSimParallel
@@ -71,16 +71,16 @@ module mpiSimulation
   public :: printComponentPlan
   public :: getMyNode
 
-!! PUBLIC  Subroutines contained in MPI module
+  !! PUBLIC  Subroutines contained in MPI module
   public :: mpi_bcast
   public :: mpi_allreduce
-!  public :: mpi_reduce
+  !  public :: mpi_reduce
   public :: mpi_send
   public :: mpi_recv
   public :: mpi_get_processor_name
   public :: mpi_finalize
 
-!! PUBLIC mpi variables
+  !! PUBLIC mpi variables
   public :: mpi_comm_world
   public :: mpi_character
   public :: mpi_integer
@@ -92,12 +92,12 @@ module mpiSimulation
 
 
 
-!! Safety logical to prevent access to ComponetPlan until
-!! set by C++.
+  !! Safety logical to prevent access to ComponetPlan until
+  !! set by C++.
   logical, save :: ComponentPlanSet = .false.
 
 
-!! generic mpi error declaration.
+  !! generic mpi error declaration.
   integer, public :: mpi_err
 
 #ifdef PROFILE
@@ -107,13 +107,13 @@ module mpiSimulation
   real   :: commTimeInitial,commTimeFinal
 #endif
 
-!! Include mpiComponentPlan type. mpiComponentPlan is a 
-!! dual header file for both c and fortran.
+  !! Include mpiComponentPlan type. mpiComponentPlan is a 
+  !! dual header file for both c and fortran.
 #define __FORTRAN90
 #include "UseTheForce/mpiComponentPlan.h"
 
 
-!! Tags used during force loop for parallel simulation
+  !! Tags used during force loop for parallel simulation
   integer, public, allocatable, dimension(:) :: AtomLocalToGlobal
   integer, public, allocatable, dimension(:) :: AtomRowToGlobal
   integer, public, allocatable, dimension(:) :: AtomColToGlobal
@@ -121,13 +121,13 @@ module mpiSimulation
   integer, public, allocatable, dimension(:) :: GroupRowToGlobal
   integer, public, allocatable, dimension(:) :: GroupColToGlobal
 
-!! Logical set true if mpiSimulation has been initialized
+  !! Logical set true if mpiSimulation has been initialized
   logical, save :: isSimSet = .false.
 
 
   type (mpiComponentPlan), save :: mpiSim
 
-!! gs_plan contains plans for gather and scatter routines
+  !! gs_plan contains plans for gather and scatter routines
   type, public :: gs_plan
      private
      type (mpiComponentPlan), pointer :: gsComponentPlan => NULL()
@@ -140,7 +140,7 @@ module mpiSimulation
      integer :: planNprocs  !! Number of processors in this plan
   end type gs_plan
 
-! plans for different decompositions
+  ! plans for different decompositions
   type (gs_plan), public, save :: plan_atom_row
   type (gs_plan), public, save :: plan_atom_row_3d
   type (gs_plan), public, save :: plan_atom_col
@@ -154,21 +154,21 @@ module mpiSimulation
 
   type (mpiComponentPlan), pointer :: simComponentPlan
 
-! interface for gather scatter routines
-!! Generic interface for gather.
-!! Gathers an local array into row or column array
-!! Interface provided for integer, double and double
-!! rank 2 arrays.
+  ! interface for gather scatter routines
+  !! Generic interface for gather.
+  !! Gathers an local array into row or column array
+  !! Interface provided for integer, double and double
+  !! rank 2 arrays.
   interface gather
      module procedure gather_integer
      module procedure gather_double
      module procedure gather_double_2d
   end interface
 
-!! Generic interface for scatter.
-!! Scatters a row or column array, adding componets
-!! and reducing them to a local nComponent array.
-!! Interface provided for double and double rank=2 arrays.
+  !! Generic interface for scatter.
+  !! Scatters a row or column array, adding componets
+  !! and reducing them to a local nComponent array.
+  !! Interface provided for double and double rank=2 arrays.
 
   interface scatter
      module procedure scatter_double
@@ -196,24 +196,24 @@ contains
 
     !write(*,*) 'mpiSim_mod thinks node', thisComponentPlan%myNode, &
     !     ' has atomTags(1) = ', atomTags(1)
-    
+
     status = 0
     if (componentPlanSet) then
        return
     endif
     componentPlanSet = .true.
-    
+
     !! copy c component plan to fortran   
     mpiSim = thisComponentPlan 
     !write(*,*) "Seting up simParallel"
-    
+
     call make_Force_Grid(mpiSim, localStatus)
     if (localStatus /= 0) then
        write(default_error,*) "Error creating force grid"
        status = -1
        return
     endif
-    
+
     call updateGridComponents(mpiSim, localStatus)
     if (localStatus /= 0) then
        write(default_error,*) "Error updating grid components"
@@ -232,7 +232,7 @@ contains
          mpiSim, mpiSim%rowComm, plan_group_row)
     call plan_gather_scatter(nDim, mpiSim%nGroupsLocal, &
          mpiSim, mpiSim%rowComm, plan_group_row_3d)
-        
+
     call plan_gather_scatter(1, mpiSim%nAtomsLocal, &
          mpiSim, mpiSim%columnComm, plan_atom_col)
     call plan_gather_scatter(nDim, mpiSim%nAtomsLocal, &
@@ -243,8 +243,8 @@ contains
          mpiSim, mpiSim%columnComm, plan_group_col)
     call plan_gather_scatter(nDim, mpiSim%nGroupsLocal, &
          mpiSim, mpiSim%columnComm, plan_group_col_3d)
-    
-!  Initialize tags    
+
+    !  Initialize tags    
 
     call setAtomTags(atomTags,localStatus)
     if (localStatus /= 0) then
@@ -261,11 +261,11 @@ contains
 
     isSimSet = .true.
 
-!    call printComponentPlan(mpiSim,0)
+    !    call printComponentPlan(mpiSim,0)
   end subroutine setupSimParallel
 
   subroutine replanSimParallel(thisComponentPlan,status)
-!  Passed Arguments
+    !  Passed Arguments
     !! mpiComponentPlan struct from C
     type (mpiComponentPlan), intent(inout) :: thisComponentPlan   
     integer, intent(out) :: status
@@ -278,7 +278,7 @@ contains
        status = -1
        return
     endif
-    
+
     !! Unplan Gather Scatter plans
     call unplan_gather_scatter(plan_atom_row)
     call unplan_gather_scatter(plan_atom_row_3d)
@@ -303,7 +303,7 @@ contains
          mpiSim, mpiSim%rowComm, plan_group_row)
     call plan_gather_scatter(nDim, mpiSim%nGroupsLocal, &
          mpiSim, mpiSim%rowComm, plan_group_row_3d)
-        
+
     call plan_gather_scatter(1, mpiSim%nAtomsLocal, &
          mpiSim, mpiSim%columnComm, plan_atom_col)
     call plan_gather_scatter(nDim, mpiSim%nAtomsLocal, &
@@ -314,13 +314,13 @@ contains
          mpiSim, mpiSim%columnComm, plan_group_col)
     call plan_gather_scatter(nDim, mpiSim%nGroupsLocal, &
          mpiSim, mpiSim%columnComm, plan_group_col_3d)
-         
+
   end subroutine replanSimParallel
 
   !! Updates number of row and column components for long range forces.
   subroutine updateGridComponents(thisComponentPlan, status)
     type (mpiComponentPlan) :: thisComponentPlan !! mpiComponentPlan
-    
+
     !! Status return
     !! -  0 Success
     !! - -1 Failure
@@ -339,13 +339,13 @@ contains
     if (thisComponentPlan%nAtomsLocal == 0) then
        status = -1
        return
-    endif   
+    endif
     if (thisComponentPlan%nGroupsLocal == 0) then
        write(*,*) 'tcp%ngl = ', thisComponentPlan%nGroupsLocal
        status = -1
        return
     endif
-    
+
     nAtomsLocal = thisComponentPlan%nAtomsLocal
     nGroupsLocal = thisComponentPlan%nGroupsLocal
 
@@ -362,7 +362,7 @@ contains
        status = -1
        return
     endif
-        
+
     call mpi_allreduce(nGroupsLocal, nGroupsInRow, 1, mpi_integer, &
          mpi_sum, thisComponentPlan%rowComm, mpiErrors)
     if (mpiErrors /= 0) then
@@ -401,11 +401,11 @@ contains
     integer :: columnCommunicator
     integer :: myWorldRank
     integer :: i
-    
+
 
     if (.not. ComponentPlanSet) return
     status = 0
-  
+
     !! We make a dangerous assumption here that if numberProcessors is
     !! zero, then we need to get the information from MPI.
     if (thisComponentPlan%nProcessors == 0 ) then 
@@ -419,29 +419,29 @@ contains
           status = -1 
           return
        endif
-       
+
     else
        nWorldProcessors = thisComponentPlan%nProcessors
        myWorldRank = thisComponentPlan%myNode
     endif
-    
+
     nColumnsMax = nint(sqrt(real(nWorldProcessors,kind=dp)))
-    
+
     do i = 1, nColumnsMax
        if (mod(nWorldProcessors,i) == 0) nColumns = i
     end do
-    
+
     nRows = nWorldProcessors/nColumns
-    
+
     rowIndex = myWorldRank/nColumns
-    
+
     call mpi_comm_split(mpi_comm_world,rowIndex,0,rowCommunicator,mpiErrors)
     if ( mpiErrors /= 0 ) then
        write(default_error,*) "MPI comm split failed at row communicator"
        status = -1 
        return
     endif
-    
+
     columnIndex = mod(myWorldRank,nColumns)
     call mpi_comm_split(mpi_comm_world,columnIndex,0,columnCommunicator,mpiErrors)
     if ( mpiErrors /= 0 ) then
@@ -449,7 +449,7 @@ contains
        status = -1 
        return
     endif
-    
+
     ! Set appropriate components of thisComponentPlan
     thisComponentPlan%rowComm = rowCommunicator
     thisComponentPlan%columnComm = columnCommunicator
@@ -459,7 +459,7 @@ contains
     thisComponentPlan%nColumns = nColumns
 
   end subroutine make_Force_Grid
-  
+
   !! initalizes a gather scatter plan
   subroutine plan_gather_scatter( nDim, nObjects, thisComponentPlan, &
        thisComm, this_plan, status)  
@@ -476,17 +476,17 @@ contains
 
     if (present(status)) status = 0
 
-!! Set gsComponentPlan pointer 
-!! to the componet plan we want to use for this gather scatter plan.
-!! WARNING this could be dangerous since thisComponentPlan was origionally
-!! allocated in C++ and there is a significant difference between c and 
-!! f95 pointers....  
+    !! Set gsComponentPlan pointer 
+    !! to the componet plan we want to use for this gather scatter plan.
+    !! WARNING this could be dangerous since thisComponentPlan was origionally
+    !! allocated in C++ and there is a significant difference between c and 
+    !! f95 pointers....  
     this_plan%gsComponentPlan => thisComponentPlan
 
-! Set this plan size for displs array.
+    ! Set this plan size for displs array.
     this_plan%gsPlanSize = nDim * nObjects
 
-! Duplicate communicator for this plan
+    ! Duplicate communicator for this plan
     call mpi_comm_dup(thisComm, this_plan%myPlanComm, mpi_err)
     if (mpi_err /= 0) then
        if (present(status)) status = -1
@@ -519,7 +519,7 @@ contains
        return
     end if
 
-   !! gather all the local sizes into a size # processors array.
+    !! gather all the local sizes into a size # processors array.
     call mpi_allgather(this_plan%gsPlanSize,1,mpi_integer,this_plan%counts, &
          1,mpi_integer,thisComm,mpi_err)
 
@@ -527,10 +527,10 @@ contains
        if (present(status)) status = -1
        return
     end if
-  
+
     !! figure out the total number of particles in this plan
     this_plan%globalPlanSize = sum(this_plan%counts)
-  
+
     !! initialize plan displacements.
     this_plan%displs(0) = 0
     do i = 1, this_plan%planNprocs - 1,1
@@ -540,7 +540,7 @@ contains
 
   subroutine unplan_gather_scatter(this_plan)
     type (gs_plan), intent(inout) :: this_plan
-    
+
     this_plan%gsComponentPlan => null()
     call mpi_comm_free(this_plan%myPlanComm,mpi_err)
 
@@ -561,19 +561,19 @@ contains
     if (present(status)) status = 0
     noffset = this_plan%displs(this_plan%myPlanRank)
 
-!    if (getmyNode() == 1) then
-!       write(*,*) "Node 0 printing allgatherv vars"
-!       write(*,*) "Noffset: ", noffset
-!       write(*,*) "PlanSize: ", this_plan%gsPlanSize
-!       write(*,*) "PlanComm: ", this_plan%myPlanComm
-!    end if
+    !    if (getmyNode() == 1) then
+    !       write(*,*) "Node 0 printing allgatherv vars"
+    !       write(*,*) "Noffset: ", noffset
+    !       write(*,*) "PlanSize: ", this_plan%gsPlanSize
+    !       write(*,*) "PlanComm: ", this_plan%myPlanComm
+    !    end if
 
     call mpi_allgatherv(sbuffer,this_plan%gsPlanSize, mpi_integer, &
          rbuffer,this_plan%counts,this_plan%displs,mpi_integer, &
          this_plan%myPlanComm, mpi_err)
 
     if (mpi_err /= 0) then
-      if (present(status)) status  = -1
+       if (present(status)) status  = -1
     endif
 
   end subroutine gather_integer
@@ -601,7 +601,7 @@ contains
 #endif
 
     if (mpi_err /= 0) then
-      if (present(status)) status  = -1
+       if (present(status)) status  = -1
     endif
 
   end subroutine gather_double
@@ -613,19 +613,19 @@ contains
     real( kind = DP ), dimension(:,:), intent(inout) :: rbuffer
     integer :: noffset,i,ierror
     integer, intent(out), optional :: status
-    
-    external  mpi_allgatherv
-    
-   if (present(status)) status = 0
 
-!    noffset = this_plan%displs(this_plan%me)
+    external  mpi_allgatherv
+
+    if (present(status)) status = 0
+
+    !    noffset = this_plan%displs(this_plan%me)
 #ifdef PROFILE
-   call cpu_time(commTimeInitial)
+    call cpu_time(commTimeInitial)
 #endif
 
     call mpi_allgatherv(sbuffer,this_plan%gsPlanSize, mpi_double_precision, &
-        rbuffer,this_plan%counts,this_plan%displs,mpi_double_precision, &
-        this_plan%myPlanComm, mpi_err)
+         rbuffer,this_plan%counts,this_plan%displs,mpi_double_precision, &
+         this_plan%myPlanComm, mpi_err)
 
 #ifdef PROFILE
     call cpu_time(commTimeFinal)
@@ -633,10 +633,10 @@ contains
 #endif
 
     if (mpi_err /= 0) then
-      if (present(status)) status = -1
+       if (present(status)) status = -1
     endif
 
- end subroutine gather_double_2d
+  end subroutine gather_double_2d
 
   subroutine scatter_double( sbuffer, rbuffer, this_plan, status)
 
@@ -646,10 +646,10 @@ contains
     integer, intent(out), optional :: status
     external mpi_reduce_scatter
 
-   if (present(status)) status = 0
+    if (present(status)) status = 0
 
 #ifdef PROFILE
-   call cpu_time(commTimeInitial)
+    call cpu_time(commTimeInitial)
 #endif
     call mpi_reduce_scatter(sbuffer,rbuffer, this_plan%counts, &
          mpi_double_precision, MPI_SUM, this_plan%myPlanComm, mpi_err)
@@ -659,7 +659,7 @@ contains
 #endif
 
     if (mpi_err /= 0) then
-     if (present(status))  status = -1
+       if (present(status))  status = -1
     endif
 
   end subroutine scatter_double
@@ -671,10 +671,10 @@ contains
     real( kind = DP ), dimension(:,:), intent(inout) :: rbuffer
     integer, intent(out), optional :: status
     external mpi_reduce_scatter
- 
-   if (present(status)) status = 0
+
+    if (present(status)) status = 0
 #ifdef PROFILE
-   call cpu_time(commTimeInitial)
+    call cpu_time(commTimeInitial)
 #endif
 
     call mpi_reduce_scatter(sbuffer,rbuffer, this_plan%counts, &
@@ -685,28 +685,28 @@ contains
 #endif
 
     if (mpi_err /= 0) then
-      if (present(status)) status = -1
+       if (present(status)) status = -1
     endif
 
   end subroutine scatter_double_2d
-  
+
   subroutine setAtomTags(tags, status)
     integer, dimension(:) :: tags
     integer :: status
 
     integer :: alloc_stat
-    
+
     integer :: nAtomsInCol
     integer :: nAtomsInRow
 
     status = 0
-! allocate row arrays
+    ! allocate row arrays
     nAtomsInRow = getNatomsInRow(plan_atom_row)
     nAtomsInCol = getNatomsInCol(plan_atom_col)
-    
+
     if(.not. allocated(AtomLocalToGlobal)) then
        allocate(AtomLocalToGlobal(size(tags)),STAT=alloc_stat)
-        if (alloc_stat /= 0 ) then
+       if (alloc_stat /= 0 ) then
           status = -1 
           return
        endif
@@ -737,7 +737,7 @@ contains
        endif
 
     endif
-! allocate column arrays
+    ! allocate column arrays
     if (.not. allocated(AtomColToGlobal)) then
        allocate(AtomColToGlobal(nAtomsInCol),STAT=alloc_stat)
        if (alloc_stat /= 0 ) then
@@ -752,10 +752,10 @@ contains
           return
        endif
     endif
-    
+
     call gather(tags, AtomRowToGlobal, plan_atom_row)
     call gather(tags, AtomColToGlobal, plan_atom_col)
-    
+
   end subroutine setAtomTags
 
   subroutine setGroupTags(tags, status)
@@ -763,7 +763,7 @@ contains
     integer :: status
 
     integer :: alloc_stat
-    
+
     integer :: nGroupsInCol
     integer :: nGroupsInRow
 
@@ -771,7 +771,7 @@ contains
 
     nGroupsInRow = getNgroupsInRow(plan_group_row)
     nGroupsInCol = getNgroupsInCol(plan_group_col)
-    
+
     if(allocated(GroupLocalToGlobal)) then
        deallocate(GroupLocalToGlobal)
     endif
@@ -780,7 +780,7 @@ contains
        status = -1 
        return
     endif
-    
+
     GroupLocalToGlobal = tags
 
     if(allocated(GroupRowToGlobal)) then
@@ -800,12 +800,12 @@ contains
        status = -1 
        return
     endif
-    
+
     call gather(tags, GroupRowToGlobal, plan_group_row)
     call gather(tags, GroupColToGlobal, plan_group_col)
-    
+
   end subroutine setGroupTags
-  
+
   function getNatomsInCol(thisplan) result(nInCol)
     type (gs_plan), intent(in) :: thisplan
     integer :: nInCol
@@ -817,7 +817,7 @@ contains
     integer :: nInRow
     nInRow = thisplan%gsComponentPlan%nAtomsInRow
   end function getNatomsInRow
- 
+
   function getNgroupsInCol(thisplan) result(nInCol)
     type (gs_plan), intent(in) :: thisplan
     integer :: nInCol
@@ -829,7 +829,7 @@ contains
     integer :: nInRow
     nInRow = thisplan%gsComponentPlan%nGroupsInRow
   end function getNgroupsInRow
-  
+
   function isMPISimSet() result(isthisSimSet)
     logical :: isthisSimSet
     if (isSimSet) then 
@@ -838,7 +838,7 @@ contains
        isthisSimSet = .false.
     endif
   end function isMPISimSet
-  
+
   subroutine printComponentPlan(this_plan,printNode)
 
     type (mpiComponentPlan), intent(in) :: this_plan
@@ -853,7 +853,7 @@ contains
 
     if (print_me) then
        write(default_error,*) "SetupSimParallel: writing component plan"
-       
+
        write(default_error,*) "nMolGlobal: ", mpiSim%nMolGlobal
        write(default_error,*) "nAtomsGlobal: ", mpiSim%nAtomsGlobal
        write(default_error,*) "nAtomsLocal: ", mpiSim%nAtomsLocal

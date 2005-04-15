@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -39,13 +39,13 @@
  * such damages.
  */
  
- /**
-  * @file TypeContainer.hpp
-  * @author tlin
-  * @date 11/04/2004
-  * @time 13:51am
-  * @version 1.0
-  */
+/**
+ * @file TypeContainer.hpp
+ * @author tlin
+ * @date 11/04/2004
+ * @time 13:51am
+ * @version 1.0
+ */
 
 #ifndef UTILS_TYPECONTAINER_HPP
 #define UTILS_TYPECONTAINER_HPP
@@ -57,131 +57,131 @@
 
 namespace oopse {
 
+  /**
+   * @class TypeContainer TypeContainer.hpp "utils/TypeContainer.hpp"
+   */
+  template<class ElemType, int SIZE>
+  class TypeContainer {
+  public:
+            
+    typedef ElemType* ElemPtr;
+    typedef std::vector<std::string> KeyType;
+    typedef typename KeyType::iterator KeyTypeIterator;
+    typedef std::pair<int, ElemPtr> ValueType;
+    typedef typename std::map<KeyType, ValueType> MapType;
+    typedef typename std::map<KeyType, ValueType>::iterator MapTypeIterator;
+    typedef typename MapType::value_type value_type;
+
+    TypeContainer() : index_(0) {}
+            
+    ~TypeContainer() {
+      MapTypeIterator i;
+      for (i = data_.begin(); i != data_.end(); ++i) {
+	delete (i->second).second;
+      }
+      data_.clear();
+    }
+            
+    bool add(KeyType& keys, ElemPtr elem) {
+      assert(keys.size() == SIZE);
+      assert(elem);
+      return data_.insert(value_type(keys, std::make_pair(index_++,elem))).second;
+    }
+
+    /** Exact Match */
+    ElemPtr find(KeyType& keys) {
+      assert(keys.size() == SIZE);
+      MapTypeIterator i;
+      ValueType foundType;
+                
+      i = data_.find(keys);
+      if (i != data_.end()) {
+	return (i->second).second;
+      }
+
+      KeyType reversedKeys = keys;
+      std::reverse(reversedKeys.begin(), reversedKeys.end());
+
+      i = data_.find(reversedKeys);
+      if (i != data_.end()) {
+	return (i->second).second;
+      } else {
+	return NULL;
+      }
+                
+    }
+
     /**
-     * @class TypeContainer TypeContainer.hpp "utils/TypeContainer.hpp"
+     * @todo 
      */
-    template<class ElemType, int SIZE>
-    class TypeContainer {
-        public:
-            
-            typedef ElemType* ElemPtr;
-            typedef std::vector<std::string> KeyType;
-            typedef typename KeyType::iterator KeyTypeIterator;
-            typedef std::pair<int, ElemPtr> ValueType;
-            typedef typename std::map<KeyType, ValueType> MapType;
-            typedef typename std::map<KeyType, ValueType>::iterator MapTypeIterator;
-            typedef typename MapType::value_type value_type;
-
-            TypeContainer() : index_(0) {}
-            
-            ~TypeContainer() {
-                MapTypeIterator i;
-                for (i = data_.begin(); i != data_.end(); ++i) {
-                    delete (i->second).second;
-                }
-                data_.clear();
-            }
-            
-            bool add(KeyType& keys, ElemPtr elem) {
-                assert(keys.size() == SIZE);
-                assert(elem);
-                return data_.insert(value_type(keys, std::make_pair(index_++,elem))).second;
-            }
-
-            /** Exact Match */
-            ElemPtr find(KeyType& keys) {
-                assert(keys.size() == SIZE);
-                MapTypeIterator i;
-                ValueType foundType;
+    ElemPtr find(KeyType& keys, const std::string& wildCard) {
+      assert(keys.size() == SIZE);
                 
-                i = data_.find(keys);
-                if (i != data_.end()) {
-                    return (i->second).second;
-                }
-
-                KeyType reversedKeys = keys;
-                std::reverse(reversedKeys.begin(), reversedKeys.end());
-
-                i = data_.find(reversedKeys);
-                if (i != data_.end()) {
-                    return (i->second).second;
-                } else {
-                    return NULL;
-                }
+      std::vector<KeyTypeIterator> iterCont;
+      KeyType replacedKey;
+      MapTypeIterator i;
+      std::vector<ValueType> foundTypes;
                 
-            }
+      while (replaceWithWildCard(iterCont, keys, replacedKey, wildCard)) {                    
+	i = data_.find(replacedKey);
+	if (i != data_.end()) {
+	  foundTypes.push_back(i->second);
+	}
+      }
 
-            /**
-             * @todo 
-             */
-            ElemPtr find(KeyType& keys, const std::string& wildCard) {
-                assert(keys.size() == SIZE);
-                
-                std::vector<KeyTypeIterator> iterCont;
-                KeyType replacedKey;
-                MapTypeIterator i;
-                std::vector<ValueType> foundTypes;
-                
-                while (replaceWithWildCard(iterCont, keys, replacedKey, wildCard)) {                    
-                    i = data_.find(replacedKey);
-                    if (i != data_.end()) {
-                        foundTypes.push_back(i->second);
-                    }
-                }
+      //reverse the order of keys
+      KeyType reversedKeys = keys;
+      std::reverse(reversedKeys.begin(), reversedKeys.end());
 
-                //reverse the order of keys
-                KeyType reversedKeys = keys;
-                std::reverse(reversedKeys.begin(), reversedKeys.end());
-
-                //if the reversedKeys is the same as keys, just skip it
-                if (reversedKeys != keys) {
+      //if the reversedKeys is the same as keys, just skip it
+      if (reversedKeys != keys) {
 
                     
-                    //empty the iterator container
-                    iterCont.clear();
+	//empty the iterator container
+	iterCont.clear();
 
-                    while (replaceWithWildCard(iterCont, reversedKeys, replacedKey, wildCard)) {
-                        i = data_.find(replacedKey);
-                        if (i != data_.end()) {
-                            foundTypes.push_back(i->second);
-                        }
-                    }
+	while (replaceWithWildCard(iterCont, reversedKeys, replacedKey, wildCard)) {
+	  i = data_.find(replacedKey);
+	  if (i != data_.end()) {
+	    foundTypes.push_back(i->second);
+	  }
+	}
 
-                    //replaceWithWildCard can not generate this particular sequence, we have to 
-                    //do it manually                
-                    KeyType allWildCards(SIZE, wildCard);
-                    i = data_.find(replacedKey);
-                    if (i != data_.end()) {
-                        foundTypes.push_back(i->second);
-                    }
+	//replaceWithWildCard can not generate this particular sequence, we have to 
+	//do it manually                
+	KeyType allWildCards(SIZE, wildCard);
+	i = data_.find(replacedKey);
+	if (i != data_.end()) {
+	  foundTypes.push_back(i->second);
+	}
 
-                }
+      }
 
-                typename std::vector<ValueType>::iterator j;                
-                j = std::min_element(foundTypes.begin(), foundTypes.end());
+      typename std::vector<ValueType>::iterator j;                
+      j = std::min_element(foundTypes.begin(), foundTypes.end());
 
-                return j == foundTypes.end() ? NULL : j->second;
-            }
+      return j == foundTypes.end() ? NULL : j->second;
+    }
 
-            unsigned int size() {
-                return data_.size();
-            }
+    unsigned int size() {
+      return data_.size();
+    }
 
-            ElemPtr beginType(MapTypeIterator& i) {
-                i = data_.begin();
-                return i  != data_.end() ? (i->second).second : NULL;
-            }
+    ElemPtr beginType(MapTypeIterator& i) {
+      i = data_.begin();
+      return i  != data_.end() ? (i->second).second : NULL;
+    }
 
-            ElemPtr nextType(MapTypeIterator& i) {
-                ++i;
-                return i  != data_.end() ? (i->second).second : NULL;
-            }
+    ElemPtr nextType(MapTypeIterator& i) {
+      ++i;
+      return i  != data_.end() ? (i->second).second : NULL;
+    }
             
-        private:
-            int index_;
-            MapType data_;        
+  private:
+    int index_;
+    MapType data_;        
             
-    };
+  };
 
 
 }//end namespace oopse

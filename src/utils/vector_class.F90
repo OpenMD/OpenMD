@@ -60,13 +60,13 @@
 !! @author J. Daniel Gezelter
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: vector_class.F90,v 1.6 2005-04-12 21:28:07 gezelter Exp $, $Date: 2005-04-12 21:28:07 $, $Name: not supported by cvs2svn $, $Revision: 1.6 $
+!! @version $Id: vector_class.F90,v 1.7 2005-04-15 22:03:59 gezelter Exp $, $Date: 2005-04-15 22:03:59 $, $Name: not supported by cvs2svn $, $Revision: 1.7 $
 
 module Vector_class
-  
+
   implicit NONE 
   PRIVATE
-   
+
   public :: initialize
   public :: destroy
   public :: getSize
@@ -78,23 +78,23 @@ module Vector_class
   public :: getElementProperty
   public :: getMatchingElementList
   public :: getFirstMatchingElement
-  
+
 
   integer, parameter :: logical_data_type = 1
   integer, parameter :: integer_data_type = 2
   integer, parameter :: real_data_type = 3
 
-!! 
+  !! 
   type, public :: Vector 
      PRIVATE
      integer :: initialCapacity = 10
      integer :: capacityIncrement = 0
      integer :: elementCount = 0
-     
+
      integer :: initialProperties = 5
      integer :: PropertyIncrement = 0
      integer :: propertyCount = 0
-     
+
      integer, pointer :: ElementData(:) => null()
      character(len=100), pointer :: PropertyDescriptions(:) => null()
      integer, pointer :: PropertyDataType(:) => null()
@@ -103,7 +103,7 @@ module Vector_class
      logical, pointer :: logicalElementProperties(:,:) => null()
   end type Vector
 
-!! Initialize vector
+  !! Initialize vector
   interface initialize
      module procedure initialize_0i
      module procedure initialize_1i
@@ -171,9 +171,9 @@ contains
     integer, intent(in) :: MatchValue
     integer :: id
     integer :: i, j
-    
+
     id = 0
-   
+
     do i = 1, this%propertyCount
        if (this%PropertyDescriptions(i) == MatchName) then
           do j = 1, this%elementCount
@@ -222,7 +222,7 @@ contains
           enddo
        endif
     end do
-    
+
     return
   end function getFirstMatchingElement2i
 
@@ -232,7 +232,7 @@ contains
     logical, intent(in) :: MatchValue
     integer :: id
     integer :: i, j
-    
+
     id = 0
 
     do i = 1, this%propertyCount
@@ -283,7 +283,7 @@ contains
           enddo
        endif
     end do
-    
+
     return
   end function getFirstMatchingElement2l
 
@@ -317,9 +317,9 @@ contains
     integer :: i, MatchID1, MatchID2
     logical :: found1 = .false.
     logical :: found2 = .false.
-    
+
     ! first figure out which properties we are using to do the match:
-    
+
     do i = 1, this%propertyCount
        if (this%PropertyDescriptions(i) == MatchName1) then
           MatchID1 = i
@@ -329,7 +329,7 @@ contains
           MatchID2 = i
           found2 = .true.
        endif
-       
+
        if (found1.and.found2) then
           call getAllMatches2i(this, MatchID1, MatchValue1, &
                MatchID2, MatchValue2, nMatches, MatchList)
@@ -369,9 +369,9 @@ contains
     integer :: i, MatchID1, MatchID2
     logical :: found1 = .false.
     logical :: found2 = .false.
-    
+
     ! first figure out which properties we are using to do the match:
-    
+
     do i = 1, this%propertyCount
        if (this%PropertyDescriptions(i) == MatchName1) then
           MatchID1 = i
@@ -381,7 +381,7 @@ contains
           MatchID2 = i
           found2 = .true.
        endif
-       
+
        if (found1.and.found2) then
           call getAllMatches2l(this, MatchID1, MatchValue1, &
                MatchID2, MatchValue2, nMatches, MatchList)
@@ -390,7 +390,7 @@ contains
     enddo
     return
   end subroutine getMatchingElementList2l
-    
+
   subroutine getAllMatches1i(this, MatchID, MatchValue, nMatches, MatchList)
     type(Vector), pointer :: this
     integer, intent(in) :: MatchID
@@ -399,23 +399,23 @@ contains
     integer, allocatable :: MatchListTemp(:)
     integer, intent(out) :: nMatches
     integer :: error, i
-    
+
     if(associated(MatchList)) deallocate(MatchList)
     MatchList => null()
 
     allocate(MatchListTemp(this%elementCount), stat=error)
     if(error .ne. 0) write(*,*) 'Could not allocate MatchListTemp!'
-    
+
     nMatches = 0
-    
+
     do i = 1, this%elementCount
        if (this%integerElementProperties(i, MatchID) == MatchValue) then
           nMatches = nMatches + 1
           MatchListTemp(nMatches) = i
        endif
     enddo
-    
-    
+
+
     if (nMatches .ne. 0) then
        allocate(MatchList(nMatches), stat=error)
        if (error.ne.0) write(*, *) 'Could not allocate MatchList!'
@@ -423,9 +423,9 @@ contains
           MatchList(i) = MatchListTemp(i)
        enddo
     endif
-    
+
     deallocate(MatchListTemp)
-    
+
 
   end subroutine getAllMatches1i
 
@@ -438,15 +438,15 @@ contains
     integer, allocatable :: MatchListTemp(:)
     integer, intent(out) :: nMatches
     integer :: error, i
-    
+
     if(associated(MatchList)) deallocate(MatchList)
     MatchList => null()
 
     allocate(MatchListTemp(this%elementCount), stat=error)
     if(error .ne. 0) write(*,*) 'Could not allocate MatchListTemp!'
-    
+
     nMatches = 0
-    
+
     do i = 1, this%elementCount
        if ((this%integerElementProperties(i, MatchID1) == MatchValue1) .and. &
             (this%integerElementProperties(i, MatchID2) == MatchValue2)) then
@@ -462,7 +462,7 @@ contains
           MatchList(i) = MatchListTemp(i)
        enddo
     endif
-    
+
     deallocate(MatchListTemp)
 
   end subroutine getAllMatches2i
@@ -475,15 +475,15 @@ contains
     integer, allocatable :: MatchListTemp(:)
     integer, intent(out) :: nMatches
     integer :: error, i
-    
+
     if(associated(MatchList)) deallocate(MatchList)
     MatchList => null()
 
     allocate(MatchListTemp(this%elementCount), stat=error)
     if(error .ne. 0) write(*,*) 'Could not allocate MatchListTemp!'
-    
+
     nMatches = 0
-    
+
     do i = 1, this%elementCount
        if (this%logicalElementProperties(i, MatchID).eqv.MatchValue) then
           nMatches = nMatches + 1
@@ -498,7 +498,7 @@ contains
           MatchList(i) = MatchListTemp(i)
        enddo
     endif
-    
+
     deallocate(MatchListTemp)
 
   end subroutine getAllMatches1l
@@ -512,15 +512,15 @@ contains
     integer, allocatable :: MatchListTemp(:)
     integer, intent(out) :: nMatches
     integer :: error, i
-    
+
     if(associated(MatchList)) deallocate(MatchList)
     MatchList => null()
 
     allocate(MatchListTemp(this%elementCount), stat=error)
     if(error .ne. 0) write(*,*) 'Could not allocate MatchListTemp!'
-    
+
     nMatches = 0
-    
+
     do i = 1, this%elementCount
        if ((this%logicalElementProperties(i, MatchID1).eqv.MatchValue1) .and. &
             (this%logicalElementProperties(i, MatchID2).eqv.MatchValue2)) then
@@ -536,18 +536,18 @@ contains
           MatchList(i) = MatchListTemp(i)
        enddo
     endif
-    
+
     deallocate(MatchListTemp)
 
   end subroutine getAllMatches2l
-  
-     
+
+
   subroutine getElementPropertyReal(this, id, PropName, pv)
     type(Vector), pointer :: this
     integer :: id, whichprop
     character(len=*) :: PropName
     real( kind = 8 ) :: pv
-    
+
     whichprop = getPropertyIndex(this, PropName)
     if (whichprop .eq. 0 ) then 
        write(*,*) 'unknown property: ', PropName
@@ -567,7 +567,7 @@ contains
     integer :: id, whichprop
     character(len=*) :: PropName
     integer :: pv
-    
+
     whichprop = getPropertyIndex(this, PropName)
     if (whichprop .eq. 0 ) then 
        write(*,*) 'unknown property! ', PropName
@@ -587,7 +587,7 @@ contains
     integer :: id, whichprop
     character(len=*) :: PropName
     logical :: pv
-    
+
     whichprop = getPropertyIndex(this, PropName)
     if (whichprop .eq. 0 ) then 
        write(*,*) 'unknown property! ', PropName
@@ -612,7 +612,7 @@ contains
           id = i
           return
        endif
-    enddo    
+    enddo
     id = 0
   end function getPropertyIndex
 
@@ -625,7 +625,7 @@ contains
 
     resizeFlag = .false.
 
-!  first time: allocate a new vector with default size
+    !  first time: allocate a new vector with default size
 
     if (.not. associated(this)) then
        this => initialize()
@@ -633,7 +633,7 @@ contains
 
     oldCapacity = size(this%ElementData)
     oldPropCap  = size(this%PropertyDescriptions)
-    
+
     if (minCapacity > oldCapacity) then
        if (this%capacityIncrement .gt. 0) then
           newCapacity = oldCapacity + this%capacityIncrement
@@ -647,7 +647,7 @@ contains
     else
        newCapacity = oldCapacity
     endif
-    
+
 !!! newCapacity is not set.....
     if (minPropCap > oldPropCap) then
        if (this%PropertyIncrement .gt. 0) then
@@ -662,7 +662,7 @@ contains
     else
        newPropCap = oldPropCap
     endif
-    
+
     if (resizeFlag) then
        that => initialize(newCapacity, newPropCap, &
             this%capacityIncrement, this%PropertyIncrement)       
@@ -671,12 +671,12 @@ contains
        this => that
     endif
   end subroutine ensureCapacityHelper
-  
+
   subroutine copyAllData(v1, v2)
     type(Vector), pointer  :: v1
     type(Vector), pointer  :: v2
     integer :: i, j
-  
+
     do i = 1, v1%elementCount
        v2%elementData(i) = v1%elementData(i)
        do j = 1, v1%propertyCount
@@ -693,15 +693,15 @@ contains
                v1%logicalElementProperties(i,j)                        
        enddo
     enddo
-    
+
     do j = 1, v1%propertyCount
        v2%PropertyDescriptions(j) = v1%PropertyDescriptions(j)
        v2%PropertyDataType(j) = v1%PropertyDataType(j)
     enddo
-    
+
     v2%elementCount = v1%elementCount
     v2%propertyCount = v1%propertyCount
-    
+
     return
   end subroutine copyAllData
 
@@ -709,15 +709,15 @@ contains
     type(Vector), pointer :: this
     integer :: id
     integer :: error
-    
+
     if (.not. associated(this)) then
        call ensureCapacityHelper(this,1,0)
     else
        call ensureCapacityHelper(this, this%elementCount + 1, this%PropertyCount)
     end if
-    
+
     this%elementCount = this%elementCount + 1
-    
+
     !! We never use this and we set the entire array to the same value
     this%elementData = this%elementCount
     id = this%elementCount
@@ -729,7 +729,7 @@ contains
     character(len=*), intent(in) :: PropName
     real( kind = 8 ), intent(in) :: PropValue
     logical :: foundit
-    
+
     foundit = .false.
 
     ! first make sure that the PropName isn't in the list of known properties: 
@@ -742,8 +742,8 @@ contains
     enddo
 
     if (.not.foundit) then
-         call addPropertyToVector(this, PropName, real_data_type)
-         call setElementPropertyReal(this, id, PropName, PropValue)
+       call addPropertyToVector(this, PropName, real_data_type)
+       call setElementPropertyReal(this, id, PropName, PropValue)
     endif
   end subroutine setElementPropertyReal
 
@@ -762,7 +762,7 @@ contains
           this%integerElementProperties(id,i) = PropValue
        endif
     enddo
-    
+
     if (.not.foundit) then
        call addPropertyToVector(this, PropName, integer_data_type)
        call setElementPropertyInt(this, id, PropName, PropValue)
@@ -784,7 +784,7 @@ contains
           this%logicalElementProperties(id,i) = PropValue
        endif
     enddo
-    
+
     if (.not.foundit) then
        call addPropertyToVector(this, PropName, logical_data_type)
        call setElementPropertyLogical(this, id, PropName, PropValue)
@@ -795,13 +795,13 @@ contains
     type(Vector), pointer :: this
     character(len=*), intent(in) :: PropName
     integer data_type
-    
-     call ensureCapacityHelper(this, this%elementCount, this%propertyCount + 1)
-     this%propertyCount = this%propertyCount + 1
-     this%PropertyDescriptions(this%propertyCount) = PropName
-     this%PropertyDataType(this%propertyCount) = data_type
-   end subroutine addPropertyToVector
-  
+
+    call ensureCapacityHelper(this, this%elementCount, this%propertyCount + 1)
+    this%propertyCount = this%propertyCount + 1
+    this%PropertyDescriptions(this%propertyCount) = PropName
+    this%PropertyDataType(this%propertyCount) = data_type
+  end subroutine addPropertyToVector
+
   function initialize_0i() result(this)
     type(Vector), pointer :: this 
     this => initialize_2i(10, 5)
@@ -826,13 +826,13 @@ contains
   end function initialize_3i
 
   function initialize_4i(cap, nprop, capinc, propinc) result(this)
-     integer, intent(in) :: cap, nprop, capinc, propinc
+    integer, intent(in) :: cap, nprop, capinc, propinc
     integer :: error
     type(Vector), pointer :: this 
 
     nullify(this)
 
-     if (cap < 0) then
+    if (cap < 0) then
        write(*,*) 'Bogus Capacity:', cap
        return
     endif
@@ -840,7 +840,7 @@ contains
        write(*,*) 'Bogus Number of Properties:', nprop
        return
     endif
-    
+
     allocate(this,stat=error)
     if ( error /= 0 ) then
        write(*,*) 'Could not allocate Vector!'
@@ -851,10 +851,10 @@ contains
     this%initialProperties = nprop
     this%capacityIncrement = capinc
     this%propertyIncrement = propinc
- 
+
     allocate(this%elementData(this%initialCapacity), stat=error)
     if(error /= 0) write(*,*) 'Could not allocate elementData!'
- 
+
 
     allocate(this%PropertyDescriptions(this%initialProperties), &
          stat=error)
@@ -863,7 +863,7 @@ contains
     allocate(this%PropertyDataType(this%initialProperties), &
          stat=error)
     if(error /=  0) write(*,*) 'Could not allocate PropertyDataType!'
-    
+
     allocate(this%integerElementProperties(this%initialCapacity, &
          this%initialProperties), stat=error)
     if(error /= 0) write(*,*) 'Could not allocate integerElementProperties!'
@@ -878,7 +878,7 @@ contains
 
   end function initialize_4i
 
-    !! This function destroys the vector components....
+  !! This function destroys the vector components....
   function destroy(this) result(null_this)
     logical :: done
     type(Vector), pointer :: this 
@@ -888,35 +888,35 @@ contains
        null_this => null()
        return
     end if
-    
-!! Walk down the list and deallocate each of the vector component
-     if(associated(this%logicalElementProperties)) then
-        deallocate(this%logicalElementProperties)
-        this%logicalElementProperties=>null()
-     endif
-     if(associated(this%realElementProperties)) then
-        deallocate(this%realElementProperties)
-        this%realElementProperties=>null()
-     endif
-     if(associated(this%integerElementProperties)) then
-        deallocate(this%integerElementProperties)
-        this%integerElementProperties=>null()
-     endif
-     if(associated(this%PropertyDataType)) then
-        deallocate(this%PropertyDataType)
-        this%PropertyDataType=>null()
-     endif
-     if(associated(this%PropertyDescriptions)) then
-        deallocate(this%PropertyDescriptions)
-        this%PropertyDescriptions=>null()
-     endif
-     if(associated(this%elementData)) then
-        deallocate(this%elementData)
-        this%elementData=>null()
-     endif
-     deallocate(this)
-     this => null()
-     null_this => null()
+
+    !! Walk down the list and deallocate each of the vector component
+    if(associated(this%logicalElementProperties)) then
+       deallocate(this%logicalElementProperties)
+       this%logicalElementProperties=>null()
+    endif
+    if(associated(this%realElementProperties)) then
+       deallocate(this%realElementProperties)
+       this%realElementProperties=>null()
+    endif
+    if(associated(this%integerElementProperties)) then
+       deallocate(this%integerElementProperties)
+       this%integerElementProperties=>null()
+    endif
+    if(associated(this%PropertyDataType)) then
+       deallocate(this%PropertyDataType)
+       this%PropertyDataType=>null()
+    endif
+    if(associated(this%PropertyDescriptions)) then
+       deallocate(this%PropertyDescriptions)
+       this%PropertyDescriptions=>null()
+    endif
+    if(associated(this%elementData)) then
+       deallocate(this%elementData)
+       this%elementData=>null()
+    endif
+    deallocate(this)
+    this => null()
+    null_this => null()
   end function destroy
-  
+
 end module Vector_class

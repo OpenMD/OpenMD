@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -67,240 +67,240 @@ void createMdFile(const std::string&oldMdFileName, const std::string&newMdFileNa
 
 int main(int argc, char *argv []) {
 
-    //register force fields
-    registerForceFields();
-    registerLattice();
+  //register force fields
+  registerForceFields();
+  registerLattice();
     
-    gengetopt_args_info args_info;
-    std::string latticeType;
-    std::string inputFileName;
-    std::string outPrefix;
-    std::string outMdFileName;
-    std::string outInitFileName;
-    Lattice *simpleLat;
-    int numMol;
-    double latticeConstant;
-    std::vector<double> lc;
-    double mass;
-    const double rhoConvertConst = 1.661;
-    double density;
-    int nx,
+  gengetopt_args_info args_info;
+  std::string latticeType;
+  std::string inputFileName;
+  std::string outPrefix;
+  std::string outMdFileName;
+  std::string outInitFileName;
+  Lattice *simpleLat;
+  int numMol;
+  double latticeConstant;
+  std::vector<double> lc;
+  double mass;
+  const double rhoConvertConst = 1.661;
+  double density;
+  int nx,
     ny,
     nz;
-    Mat3x3d hmat;
-    MoLocator *locator;
-    std::vector<Vector3d> latticePos;
-    std::vector<Vector3d> latticeOrt;
-    int numMolPerCell;
-    int curMolIndex;
-    DumpWriter *writer;
+  Mat3x3d hmat;
+  MoLocator *locator;
+  std::vector<Vector3d> latticePos;
+  std::vector<Vector3d> latticeOrt;
+  int numMolPerCell;
+  int curMolIndex;
+  DumpWriter *writer;
 
-    // parse command line arguments
-    if (cmdline_parser(argc, argv, &args_info) != 0)
-        exit(1);
+  // parse command line arguments
+  if (cmdline_parser(argc, argv, &args_info) != 0)
+    exit(1);
 
-    density = args_info.density_arg;
+  density = args_info.density_arg;
 
-    //get lattice type
-    latticeType = UpperCase(args_info.latticetype_arg);
+  //get lattice type
+  latticeType = UpperCase(args_info.latticetype_arg);
 
-    simpleLat = LatticeFactory::getInstance()->createLattice(latticeType);
+  simpleLat = LatticeFactory::getInstance()->createLattice(latticeType);
     
-    if (simpleLat == NULL) {
-      sprintf(painCave.errMsg, "Lattice Factory can not create %s lattice\n",
-              latticeType.c_str());
-      painCave.isFatal = 1;
-      simError();
-    }
+  if (simpleLat == NULL) {
+    sprintf(painCave.errMsg, "Lattice Factory can not create %s lattice\n",
+	    latticeType.c_str());
+    painCave.isFatal = 1;
+    simError();
+  }
 
-    //get the number of unit cell
-    nx = args_info.nx_arg;
+  //get the number of unit cell
+  nx = args_info.nx_arg;
 
-    if (nx <= 0) {
-        std::cerr << "The number of unit cell in h direction must be greater than 0" << std::endl;
-        exit(1);
-    }
+  if (nx <= 0) {
+    std::cerr << "The number of unit cell in h direction must be greater than 0" << std::endl;
+    exit(1);
+  }
 
-    ny = args_info.ny_arg;
+  ny = args_info.ny_arg;
 
-    if (ny <= 0) {
-        std::cerr << "The number of unit cell in l direction must be greater than 0" << std::endl;
-        exit(1);
-    }
+  if (ny <= 0) {
+    std::cerr << "The number of unit cell in l direction must be greater than 0" << std::endl;
+    exit(1);
+  }
 
-    nz = args_info.nz_arg;
+  nz = args_info.nz_arg;
 
-    if (nz <= 0) {
-        std::cerr << "The number of unit cell in k direction must be greater than 0" << std::endl;
-        exit(1);
-    }
+  if (nz <= 0) {
+    std::cerr << "The number of unit cell in k direction must be greater than 0" << std::endl;
+    exit(1);
+  }
 
-    //get input file name
-    if (args_info.inputs_num)
-        inputFileName = args_info.inputs[0];
-    else {
-        std::cerr << "You must specify a input file name.\n" << std::endl;
-        cmdline_parser_print_help();
-        exit(1);
-    }
+  //get input file name
+  if (args_info.inputs_num)
+    inputFileName = args_info.inputs[0];
+  else {
+    std::cerr << "You must specify a input file name.\n" << std::endl;
+    cmdline_parser_print_help();
+    exit(1);
+  }
 
-    //parse md file and set up the system
-    SimCreator oldCreator;
-    SimInfo* oldInfo = oldCreator.createSim(inputFileName, false);
+  //parse md file and set up the system
+  SimCreator oldCreator;
+  SimInfo* oldInfo = oldCreator.createSim(inputFileName, false);
 
-    if (oldInfo->getNMoleculeStamp()>= 2) {
-        std::cerr << "can not build the system with more than two components"
-            << std::endl;
-        exit(1);
-    }
+  if (oldInfo->getNMoleculeStamp()>= 2) {
+    std::cerr << "can not build the system with more than two components"
+	      << std::endl;
+    exit(1);
+  }
 
-    //get mass of molecule. 
+  //get mass of molecule. 
 
-    mass = getMolMass(oldInfo->getMoleculeStamp(0), oldInfo->getForceField());
+  mass = getMolMass(oldInfo->getMoleculeStamp(0), oldInfo->getForceField());
 
-    //creat lattice
-    simpleLat = LatticeFactory::getInstance()->createLattice(latticeType);
+  //creat lattice
+  simpleLat = LatticeFactory::getInstance()->createLattice(latticeType);
 
-    if (simpleLat == NULL) {
-        std::cerr << "Error in creating lattice" << std::endl;
-        exit(1);
-    }
+  if (simpleLat == NULL) {
+    std::cerr << "Error in creating lattice" << std::endl;
+    exit(1);
+  }
 
-    numMolPerCell = simpleLat->getNumSitesPerCell();
+  numMolPerCell = simpleLat->getNumSitesPerCell();
 
-    //calculate lattice constant (in Angstrom)
-    latticeConstant = pow(rhoConvertConst * numMolPerCell * mass / density,
-                          1.0 / 3.0);
+  //calculate lattice constant (in Angstrom)
+  latticeConstant = pow(rhoConvertConst * numMolPerCell * mass / density,
+			1.0 / 3.0);
 
-    //set lattice constant
-    lc.push_back(latticeConstant);
-    simpleLat->setLatticeConstant(lc);
+  //set lattice constant
+  lc.push_back(latticeConstant);
+  simpleLat->setLatticeConstant(lc);
 
-    //calculate the total number of molecules
-    numMol = nx * ny * nz * numMolPerCell;
+  //calculate the total number of molecules
+  numMol = nx * ny * nz * numMolPerCell;
 
-    if (oldInfo->getNGlobalMolecules() != numMol) {
-        outPrefix = getPrefix(inputFileName.c_str()) + "_" + latticeType;
-        outMdFileName = outPrefix + ".md";
+  if (oldInfo->getNGlobalMolecules() != numMol) {
+    outPrefix = getPrefix(inputFileName.c_str()) + "_" + latticeType;
+    outMdFileName = outPrefix + ".md";
 
-        //creat new .md file on fly which corrects the number of molecule     
-        createMdFile(inputFileName, outMdFileName, numMol);
-        std::cerr
-            << "SimpleBuilder Error: the number of molecule and the density are not matched"
-            << std::endl;
-        std::cerr << "A new .md file: " << outMdFileName
-            << " is generated, use it to rerun the simpleBuilder" << std::endl;
-	exit(1);
-    }
+    //creat new .md file on fly which corrects the number of molecule     
+    createMdFile(inputFileName, outMdFileName, numMol);
+    std::cerr
+      << "SimpleBuilder Error: the number of molecule and the density are not matched"
+      << std::endl;
+    std::cerr << "A new .md file: " << outMdFileName
+	      << " is generated, use it to rerun the simpleBuilder" << std::endl;
+    exit(1);
+  }
 
-    //determine the output file names  
-    if (args_info.output_given)
-        outInitFileName = args_info.output_arg;
-    else
-        outInitFileName = getPrefix(inputFileName.c_str()) + ".in";
+  //determine the output file names  
+  if (args_info.output_given)
+    outInitFileName = args_info.output_arg;
+  else
+    outInitFileName = getPrefix(inputFileName.c_str()) + ".in";
     
-    //creat Molocator
-    locator = new MoLocator(oldInfo->getMoleculeStamp(0), oldInfo->getForceField());
+  //creat Molocator
+  locator = new MoLocator(oldInfo->getMoleculeStamp(0), oldInfo->getForceField());
 
-    //fill Hmat
-    hmat(0, 0)= nx * latticeConstant;
-    hmat(0, 1) = 0.0;
-    hmat(0, 2) = 0.0;
+  //fill Hmat
+  hmat(0, 0)= nx * latticeConstant;
+  hmat(0, 1) = 0.0;
+  hmat(0, 2) = 0.0;
 
-    hmat(1, 0) = 0.0;
-    hmat(1, 1) = ny * latticeConstant;
-    hmat(1, 2) = 0.0;
+  hmat(1, 0) = 0.0;
+  hmat(1, 1) = ny * latticeConstant;
+  hmat(1, 2) = 0.0;
 
-    hmat(2, 0) = 0.0;
-    hmat(2, 1) = 0.0;
-    hmat(2, 2) = nz * latticeConstant;
+  hmat(2, 0) = 0.0;
+  hmat(2, 1) = 0.0;
+  hmat(2, 2) = nz * latticeConstant;
 
-    //set Hmat
-    oldInfo->getSnapshotManager()->getCurrentSnapshot()->setHmat(hmat);
+  //set Hmat
+  oldInfo->getSnapshotManager()->getCurrentSnapshot()->setHmat(hmat);
 
-    //place the molecules
+  //place the molecules
 
-    curMolIndex = 0;
+  curMolIndex = 0;
 
-    //get the orientation of the cell sites
-    //for the same type of molecule in same lattice, it will not change
-    latticeOrt = simpleLat->getLatticePointsOrt();
+  //get the orientation of the cell sites
+  //for the same type of molecule in same lattice, it will not change
+  latticeOrt = simpleLat->getLatticePointsOrt();
 
-    Molecule* mol;
-    SimInfo::MoleculeIterator mi;
-    mol = oldInfo->beginMolecule(mi);
-    for(int i = 0; i < nx; i++) {
-        for(int j = 0; j < ny; j++) {
-            for(int k = 0; k < nz; k++) {
+  Molecule* mol;
+  SimInfo::MoleculeIterator mi;
+  mol = oldInfo->beginMolecule(mi);
+  for(int i = 0; i < nx; i++) {
+    for(int j = 0; j < ny; j++) {
+      for(int k = 0; k < nz; k++) {
 
-                //get the position of the cell sites
-                simpleLat->getLatticePointsPos(latticePos, i, j, k);
+	//get the position of the cell sites
+	simpleLat->getLatticePointsPos(latticePos, i, j, k);
 
-                for(int l = 0; l < numMolPerCell; l++) {
-                    if (mol != NULL) {
-                        locator->placeMol(latticePos[l], latticeOrt[l], mol);
-                    } else {
-                        std::cerr << std::endl;                    
-                    }
-                    mol = oldInfo->nextMolecule(mi);
-                }
-            }
-        }
+	for(int l = 0; l < numMolPerCell; l++) {
+	  if (mol != NULL) {
+	    locator->placeMol(latticePos[l], latticeOrt[l], mol);
+	  } else {
+	    std::cerr << std::endl;                    
+	  }
+	  mol = oldInfo->nextMolecule(mi);
+	}
+      }
     }
+  }
 
-    //create dumpwriter and write out the coordinates
-    oldInfo->setFinalConfigFileName(outInitFileName);
-    writer = new DumpWriter(oldInfo);
+  //create dumpwriter and write out the coordinates
+  oldInfo->setFinalConfigFileName(outInitFileName);
+  writer = new DumpWriter(oldInfo);
 
-    if (writer == NULL) {
-        std::cerr << "error in creating DumpWriter" << std::endl;
-        exit(1);
-    }
+  if (writer == NULL) {
+    std::cerr << "error in creating DumpWriter" << std::endl;
+    exit(1);
+  }
 
-    writer->writeDump();
-    std::cout << "new initial configuration file: " << outInitFileName
-        << " is generated." << std::endl;
+  writer->writeDump();
+  std::cout << "new initial configuration file: " << outInitFileName
+	    << " is generated." << std::endl;
 
-    //delete objects
+  //delete objects
 
-    //delete oldInfo and oldSimSetup
-    if (oldInfo != NULL)
-        delete oldInfo;
+  //delete oldInfo and oldSimSetup
+  if (oldInfo != NULL)
+    delete oldInfo;
 
-    if (writer != NULL)
-        delete writer;
+  if (writer != NULL)
+    delete writer;
     
-    delete simpleLat;
+  delete simpleLat;
 
-    return 0;
+  return 0;
 }
 
 void createMdFile(const std::string&oldMdFileName, const std::string&newMdFileName,
                   int numMol) {
-    ifstream oldMdFile;
-    ofstream newMdFile;
-    const int MAXLEN = 65535;
-    char buffer[MAXLEN];
+  ifstream oldMdFile;
+  ofstream newMdFile;
+  const int MAXLEN = 65535;
+  char buffer[MAXLEN];
 
-    //create new .md file based on old .md file
-    oldMdFile.open(oldMdFileName.c_str());
-    newMdFile.open(newMdFileName.c_str());
+  //create new .md file based on old .md file
+  oldMdFile.open(oldMdFileName.c_str());
+  newMdFile.open(newMdFileName.c_str());
+
+  oldMdFile.getline(buffer, MAXLEN);
+
+  while (!oldMdFile.eof()) {
+
+    //correct molecule number
+    if (strstr(buffer, "nMol") != NULL) {
+      sprintf(buffer, "\t\tnMol = %d;", numMol);
+      newMdFile << buffer << std::endl;
+    } else
+      newMdFile << buffer << std::endl;
 
     oldMdFile.getline(buffer, MAXLEN);
+  }
 
-    while (!oldMdFile.eof()) {
-
-        //correct molecule number
-        if (strstr(buffer, "nMol") != NULL) {
-            sprintf(buffer, "\t\tnMol = %d;", numMol);
-            newMdFile << buffer << std::endl;
-        } else
-            newMdFile << buffer << std::endl;
-
-        oldMdFile.getline(buffer, MAXLEN);
-    }
-
-    oldMdFile.close();
-    newMdFile.close();
+  oldMdFile.close();
+  newMdFile.close();
 }
 

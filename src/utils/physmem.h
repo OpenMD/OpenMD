@@ -5,11 +5,11 @@
 extern "C" {
 #endif
 
-/** Return the total amount of physical memory.  */
-double physmem_total ();
+  /** Return the total amount of physical memory.  */
+  double physmem_total ();
 
-/** Return the amount of physical memory available.  */
-double physmem_available ();
+  /** Return the amount of physical memory available.  */
+  double physmem_available ();
 
 #ifdef  __cplusplus
 }

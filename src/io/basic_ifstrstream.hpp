@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -60,271 +60,271 @@
 
 namespace oopse {
 
-/**
- * @class basic_ifstrstream basic_ifstrstream.hpp "io/basic_ifstrstream.hpp"
- * @brief basic_ifstrstream class provides a stream interface to read data from files.
- * <p>In single mode, it falls back to ifstream. Don't need to read the whole file into memory.
- * In parallel mode, the master node will read the whole file and brocast it to other slave nodes.
- * After brocasting, every node will fall back to stringstream.</p>
- *
- * @code
- *       const int MAXLEN = 1024;
- *       char buffer[MAXLEN];
- *       ifstrstream in;
- *       in.open("Shapes.frc");
- *       if (in.is_open()) {
- *           in.getline(buffer, MAXLEN);
- *       }
- *       in.close();
- * @endcode
- */
-template <class _CharT, class _Traits,  class _Alloc>
-class basic_ifstrstream : public std::basic_istream<_CharT, _Traits> {
-    public:
-        //traits
-        typedef _CharT                     char_type;
-        typedef typename _Traits::int_type int_type;
-        typedef typename _Traits::pos_type pos_type;
-        typedef typename _Traits::off_type off_type;
-        typedef _Traits                    traits_type;
+  /**
+   * @class basic_ifstrstream basic_ifstrstream.hpp "io/basic_ifstrstream.hpp"
+   * @brief basic_ifstrstream class provides a stream interface to read data from files.
+   * <p>In single mode, it falls back to ifstream. Don't need to read the whole file into memory.
+   * In parallel mode, the master node will read the whole file and brocast it to other slave nodes.
+   * After brocasting, every node will fall back to stringstream.</p>
+   *
+   * @code
+   *       const int MAXLEN = 1024;
+   *       char buffer[MAXLEN];
+   *       ifstrstream in;
+   *       in.open("Shapes.frc");
+   *       if (in.is_open()) {
+   *           in.getline(buffer, MAXLEN);
+   *       }
+   *       in.close();
+   * @endcode
+   */
+  template <class _CharT, class _Traits,  class _Alloc>
+  class basic_ifstrstream : public std::basic_istream<_CharT, _Traits> {
+  public:
+    //traits
+    typedef _CharT                     char_type;
+    typedef typename _Traits::int_type int_type;
+    typedef typename _Traits::pos_type pos_type;
+    typedef typename _Traits::off_type off_type;
+    typedef _Traits                    traits_type;
 
-        typedef std::basic_ios<_CharT, _Traits>                _Basic_ios;
-        typedef std::basic_istream<_CharT, _Traits>            _Base;
+    typedef std::basic_ios<_CharT, _Traits>                _Basic_ios;
+    typedef std::basic_istream<_CharT, _Traits>            _Base;
 
 #ifdef IS_MPI
-         typedef std::basic_stringbuf<_CharT, _Traits, _Alloc>  _Buf;        
+    typedef std::basic_stringbuf<_CharT, _Traits, _Alloc>  _Buf;        
 #else
-        typedef std::basic_filebuf<_CharT, _Traits>            _Buf;
+    typedef std::basic_filebuf<_CharT, _Traits>            _Buf;
 #endif
 
-        static  const int FileNotExists = -1;
-        static const int FileIOError = -2;
+    static  const int FileNotExists = -1;
+    static const int FileIOError = -2;
         
-    public:
+  public:
         
-        /**  Constructs an object of class ifstream.  */
-        basic_ifstrstream()
-            :  std::basic_istream<_CharT, _Traits>(0),
-              internalBuf_(), isRead(false)  {
+    /**  Constructs an object of class ifstream.  */
+    basic_ifstrstream()
+      :  std::basic_istream<_CharT, _Traits>(0),
+	 internalBuf_(), isRead(false)  {
     
-            this->init(&internalBuf_);
-        }
+	this->init(&internalBuf_);
+      }
         
-        /**
-         * Explicit constructor
-         * @filename String containing the name of the file to be opened
-         * @mode Flags describing the requested i/o mode for the file, default value is ios_base::in      
-         * @checkFilename Flags indicating checking the file name in parallel
-         */
-        explicit basic_ifstrstream(const char* filename, std::ios_base::openmode mode = std::ios_base::in, bool checkFilename = false)
-            :  std::basic_istream<_CharT, _Traits>(0),
-              internalBuf_(), isRead(false) {
+    /**
+     * Explicit constructor
+     * @filename String containing the name of the file to be opened
+     * @mode Flags describing the requested i/o mode for the file, default value is ios_base::in      
+     * @checkFilename Flags indicating checking the file name in parallel
+     */
+    explicit basic_ifstrstream(const char* filename, std::ios_base::openmode mode = std::ios_base::in, bool checkFilename = false)
+      :  std::basic_istream<_CharT, _Traits>(0),
+	 internalBuf_(), isRead(false) {
 
-             this->init(&internalBuf_);
-             isRead =  internalOpen(filename,  mode | std::ios_base::in, checkFilename);
-         }
+	this->init(&internalBuf_);
+	isRead =  internalOpen(filename,  mode | std::ios_base::in, checkFilename);
+      }
 
-        /**
-         * virtual destructor will close the file(in single mode) and clear the stream buffer
-         */
-        ~basic_ifstrstream(){
-            close();
-        }
+    /**
+     * virtual destructor will close the file(in single mode) and clear the stream buffer
+     */
+    ~basic_ifstrstream(){
+      close();
+    }
 
-        /**
-         * Opens a file and associats a buffer with the specified file to perform the i/o operations 
-         * (single mode). Master reads a file and brocasts its content to the other slave nodes. After
-         * brocasting, every nodes fall back to stringstream (parallel mode).
-         * @filename String containing the name of the file to be opened
-         * @mode Flags describing the requested i/o mode for the file
-         * @checkFilename Flags indicating checking the file name in parallel
-         */
-        void open(const char* filename, std::ios_base::openmode mode = std::ios_base::in, bool checkFilename = false){
+    /**
+     * Opens a file and associats a buffer with the specified file to perform the i/o operations 
+     * (single mode). Master reads a file and brocasts its content to the other slave nodes. After
+     * brocasting, every nodes fall back to stringstream (parallel mode).
+     * @filename String containing the name of the file to be opened
+     * @mode Flags describing the requested i/o mode for the file
+     * @checkFilename Flags indicating checking the file name in parallel
+     */
+    void open(const char* filename, std::ios_base::openmode mode = std::ios_base::in, bool checkFilename = false){
 
-            if (!isRead ) {
-                isRead = internalOpen(filename, mode, checkFilename);
-            }
-        }
+      if (!isRead ) {
+	isRead = internalOpen(filename, mode, checkFilename);
+      }
+    }
 
-        /**
-         * Tests if the stream is currently associated with a valid  buffer.
-         * @return true if a file has successfully been opened (single mode) or the whole file is read 
-         * and spreaded among all of the processors (parallel mode),  otherwise false is returned
-         */
-        bool is_open ( ) {
+    /**
+     * Tests if the stream is currently associated with a valid  buffer.
+     * @return true if a file has successfully been opened (single mode) or the whole file is read 
+     * and spreaded among all of the processors (parallel mode),  otherwise false is returned
+     */
+    bool is_open ( ) {
 #ifdef IS_MPI            
-            return isRead; 
+      return isRead; 
 #else
-            //single version fall back to ifstream
-            return internalBuf_.is_open();
+      //single version fall back to ifstream
+      return internalBuf_.is_open();
 #endif
-        }
+    }
 
-        /**
-         * In single mode, closes a file. The stream's file buffer is released from its association with
-         * the currently open file. In parallel mode, clean the 
-         */
-        void close() {
+    /**
+     * In single mode, closes a file. The stream's file buffer is released from its association with
+     * the currently open file. In parallel mode, clean the 
+     */
+    void close() {
 #ifndef IS_MPI            
-            //single version fall back to ifstream
-            if (!internalBuf_.close())
-                this->setstate(std::ios_base::failbit);
+      //single version fall back to ifstream
+      if (!internalBuf_.close())
+	this->setstate(std::ios_base::failbit);
 #endif             
 
-            isRead = false;
-        }
+      isRead = false;
+    }
         
-        /**
-         * Gets the stream buffer object associated with the stream
-         * @return   A pointer to the  stream buffe object(filebuf in single mode, stringbuf in 
-         * parallel mode) associated with the stream.
-         */
-        _Buf* rdbuf() const{
-            return static_cast<_Buf*>(&internalBuf_); 
-        }
+    /**
+     * Gets the stream buffer object associated with the stream
+     * @return   A pointer to the  stream buffe object(filebuf in single mode, stringbuf in 
+     * parallel mode) associated with the stream.
+     */
+    _Buf* rdbuf() const{
+      return static_cast<_Buf*>(&internalBuf_); 
+    }
 
-    private:
+  private:
 
-        /**
-         * Internal function used to open the file
-         * @return true if succesfully opens a file (single mode) or gets the file content (parallel mode)
-         * otherwise return false
-         * @filename String containing the name of the file to be opened
-         * @mode Flags describing the requested i/o mode for the file
-         * @todo use try - catch syntax to make the program more readable
-         */
-        bool internalOpen(const char* filename, std::ios_base::openmode mode, bool checkFilename){
+    /**
+     * Internal function used to open the file
+     * @return true if succesfully opens a file (single mode) or gets the file content (parallel mode)
+     * otherwise return false
+     * @filename String containing the name of the file to be opened
+     * @mode Flags describing the requested i/o mode for the file
+     * @todo use try - catch syntax to make the program more readable
+     */
+    bool internalOpen(const char* filename, std::ios_base::openmode mode, bool checkFilename){
 
 #ifdef IS_MPI         
-            int commStatus;
-            long fileSize;
-            char* fbuf;
-            int filenameLen;
-            int diffFilename;
-            int error;
-            int myRank;
-            int masterNode;
+      int commStatus;
+      long fileSize;
+      char* fbuf;
+      int filenameLen;
+      int diffFilename;
+      int error;
+      int myRank;
+      int masterNode;
 
-            commStatus = MPI_Comm_rank(MPI_COMM_WORLD, &myRank);
-            masterNode = 0;
+      commStatus = MPI_Comm_rank(MPI_COMM_WORLD, &myRank);
+      masterNode = 0;
             
-            if (myRank == masterNode) {
+      if (myRank == masterNode) {
 
-                if (checkFilename) {
+	if (checkFilename) {
 
-                    //check the filename is the same
-                    filenameLen = strlen(filename);
-                    commStatus = MPI_Bcast(&filenameLen, 1, MPI_INT, masterNode, MPI_COMM_WORLD);     
-                    commStatus = MPI_Bcast((void*)filename, filenameLen, MPI_CHAR, masterNode, MPI_COMM_WORLD);     
+	  //check the filename is the same
+	  filenameLen = strlen(filename);
+	  commStatus = MPI_Bcast(&filenameLen, 1, MPI_INT, masterNode, MPI_COMM_WORLD);     
+	  commStatus = MPI_Bcast((void*)filename, filenameLen, MPI_CHAR, masterNode, MPI_COMM_WORLD);     
 
-                    diffFilename = 0;
-                    commStatus = MPI_Allreduce(&diffFilename, &error, 1,  MPI_INT, MPI_SUM,  MPI_COMM_WORLD);             
+	  diffFilename = 0;
+	  commStatus = MPI_Allreduce(&diffFilename, &error, 1,  MPI_INT, MPI_SUM,  MPI_COMM_WORLD);             
 
-                    //if file names are different just return false
-                    if (error > 0)
-                        return false;   
-                }
+	  //if file names are different just return false
+	  if (error > 0)
+	    return false;   
+	}
                 
-                std::ifstream fin(filename, mode);
+	std::ifstream fin(filename, mode);
 
-                if (fin.is_open()) {
+	if (fin.is_open()) {
                     
-                    fin.seekg(0, std::ios::end); 
-                    fileSize = fin.tellg(); 
-                    fin.seekg(0, std::ios::beg);
+	  fin.seekg(0, std::ios::end); 
+	  fileSize = fin.tellg(); 
+	  fin.seekg(0, std::ios::beg);
                     
-                    // '\0' need one more char
-                    fbuf = new char[fileSize+1];
+	  // '\0' need one more char
+	  fbuf = new char[fileSize+1];
                     
-                    assert(fbuf != 0);
+	  assert(fbuf != 0);
 
-                    fin.read(fbuf, fileSize);
+	  fin.read(fbuf, fileSize);
 
-                    if (fin.fail())
-                        fileSize = FileIOError;
+	  if (fin.fail())
+	    fileSize = FileIOError;
                     
-                    //brocasting the file size
-                    commStatus = MPI_Bcast(&fileSize, 1, MPI_LONG, masterNode, MPI_COMM_WORLD);                   
+	  //brocasting the file size
+	  commStatus = MPI_Bcast(&fileSize, 1, MPI_LONG, masterNode, MPI_COMM_WORLD);                   
 
-                    if (fileSize < 0) {
-                        fin.close();                    
-                        delete fbuf;
+	  if (fileSize < 0) {
+	    fin.close();                    
+	    delete fbuf;
                         
-                        return false;
-                    }
+	    return false;
+	  }
                     
-                    // make a c-style  std::string and brocasting it
-                    fbuf[fileSize] = '\0';
-                    commStatus = MPI_Bcast(fbuf, fileSize + 1, MPI_CHAR, masterNode, MPI_COMM_WORLD); 
+	  // make a c-style  std::string and brocasting it
+	  fbuf[fileSize] = '\0';
+	  commStatus = MPI_Bcast(fbuf, fileSize + 1, MPI_CHAR, masterNode, MPI_COMM_WORLD); 
 
-                    //close the file and delete the buffer
-                    fin.close();      
-                    internalBuf_.str(fbuf);
-                    delete fbuf;
-                }else{
-                    fileSize = FileNotExists;
-                    commStatus = MPI_Bcast(&fileSize, 1, MPI_LONG, masterNode, MPI_COMM_WORLD);   
-                    return false;
-                }
+	  //close the file and delete the buffer
+	  fin.close();      
+	  internalBuf_.str(fbuf);
+	  delete fbuf;
+	}else{
+	  fileSize = FileNotExists;
+	  commStatus = MPI_Bcast(&fileSize, 1, MPI_LONG, masterNode, MPI_COMM_WORLD);   
+	  return false;
+	}
                
-             } else{ //slave nodes
+      } else{ //slave nodes
 
-                    //check file name
-                    if (checkFilename) {
-                        commStatus = MPI_Bcast(&filenameLen, 1, MPI_INT, masterNode, MPI_COMM_WORLD);     
+	//check file name
+	if (checkFilename) {
+	  commStatus = MPI_Bcast(&filenameLen, 1, MPI_INT, masterNode, MPI_COMM_WORLD);     
 
-                        char * masterFilename = new char[filenameLen];
-                        commStatus = MPI_Bcast(masterFilename, filenameLen, MPI_CHAR, masterNode, MPI_COMM_WORLD);     
+	  char * masterFilename = new char[filenameLen];
+	  commStatus = MPI_Bcast(masterFilename, filenameLen, MPI_CHAR, masterNode, MPI_COMM_WORLD);     
         
-                        if( strcmp(masterFilename, filename) == 0)
-                            diffFilename = 0;
-                        else
-                            diffFilename = 1;
+	  if( strcmp(masterFilename, filename) == 0)
+	    diffFilename = 0;
+	  else
+	    diffFilename = 1;
 
-                        delete masterFilename;
+	  delete masterFilename;
                         
-                        commStatus = MPI_Allreduce(&diffFilename, &error, 1,  MPI_INT,  MPI_SUM, MPI_COMM_WORLD);    
+	  commStatus = MPI_Allreduce(&diffFilename, &error, 1,  MPI_INT,  MPI_SUM, MPI_COMM_WORLD);    
 
-                        if (error > 0)
-                            return false;                        
-                    }
-                    //get file size
-                    commStatus = MPI_Bcast(&fileSize, 1, MPI_LONG, masterNode, MPI_COMM_WORLD);   
+	  if (error > 0)
+	    return false;                        
+	}
+	//get file size
+	commStatus = MPI_Bcast(&fileSize, 1, MPI_LONG, masterNode, MPI_COMM_WORLD);   
 
-                    if (fileSize >= 0 ) {
-                        fbuf = new char[fileSize+1];
-                        assert(fbuf);
+	if (fileSize >= 0 ) {
+	  fbuf = new char[fileSize+1];
+	  assert(fbuf);
 
-                        //receive file content
-                        commStatus = MPI_Bcast(fbuf, fileSize + 1, MPI_CHAR, masterNode, MPI_COMM_WORLD); 
+	  //receive file content
+	  commStatus = MPI_Bcast(fbuf, fileSize + 1, MPI_CHAR, masterNode, MPI_COMM_WORLD); 
 
-                        internalBuf_.str(fbuf);
-                        delete fbuf;
+	  internalBuf_.str(fbuf);
+	  delete fbuf;
 
-                    } else if (fileSize == FileNotExists ) {
-                        return false;
+	} else if (fileSize == FileNotExists ) {
+	  return false;
 
-                    } else if (fileSize == FileIOError ) {
-                        return false;
-                    }
-             }
+	} else if (fileSize == FileIOError ) {
+	  return false;
+	}
+      }
 
 #else
-            //in single version, fall back to ifstream
-            if (!internalBuf_.open(filename, mode)) {
-                this->setstate(std::ios_base::failbit);
-                return false;
-            }    
+      //in single version, fall back to ifstream
+      if (!internalBuf_.open(filename, mode)) {
+	this->setstate(std::ios_base::failbit);
+	return false;
+      }    
 
 #endif
-            this->clear();
-            return true;
-        }
+      this->clear();
+      return true;
+    }
         
-        _Buf  internalBuf_; /** internal stream buffer */        
-        bool isRead;                                                                    /** file opened flag */
-};
+    _Buf  internalBuf_; /** internal stream buffer */        
+    bool isRead;                                                                    /** file opened flag */
+  };
 
-typedef basic_ifstrstream<char, std::char_traits<char>, std::allocator<char> > ifstrstream;
+  typedef basic_ifstrstream<char, std::char_traits<char>, std::allocator<char> > ifstrstream;
 }//namespace oopse
 #endif //IO_IFSTRSTREAM_HPP

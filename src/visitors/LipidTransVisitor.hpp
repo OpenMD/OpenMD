@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -51,29 +51,29 @@
 #include "selection/SelectionManager.hpp"
 namespace oopse {
 
-class LipidTransVisitor : public BaseVisitor {
-    public:
-        LipidTransVisitor(SimInfo* info, const std::string& originSeleScript, const std::string& refSeleScript); 
+  class LipidTransVisitor : public BaseVisitor {
+  public:
+    LipidTransVisitor(SimInfo* info, const std::string& originSeleScript, const std::string& refSeleScript); 
         
-        virtual void visit(Atom* atom) { internalVisit(atom); }
-        virtual void visit(DirectionalAtom* datom) { internalVisit(datom);}
-        virtual void visit(RigidBody* rb) { internalVisit(rb);}
+    virtual void visit(Atom* atom) { internalVisit(atom); }
+    virtual void visit(DirectionalAtom* datom) { internalVisit(datom);}
+    virtual void visit(RigidBody* rb) { internalVisit(rb);}
 
-        virtual const std::string toString();
+    virtual const std::string toString();
 
-        void update();
+    void update();
         
-    protected:
-        void internalVisit(StuntDouble* sd);
-        SimInfo* info_;
-        SelectionEvaluator originEvaluator_;
-        SelectionManager originSeleMan_;
-        DirectionalAtom* originDatom_;
-        SelectionEvaluator refEvaluator_;
-        SelectionManager refSeleMan_;
-        StuntDouble* refSd_;
-        RotMat3x3d rotMat_;
-        Vector3d origin_;
-};
+  protected:
+    void internalVisit(StuntDouble* sd);
+    SimInfo* info_;
+    SelectionEvaluator originEvaluator_;
+    SelectionManager originSeleMan_;
+    DirectionalAtom* originDatom_;
+    SelectionEvaluator refEvaluator_;
+    SelectionManager refSeleMan_;
+    StuntDouble* refSd_;
+    RotMat3x3d rotMat_;
+    Vector3d origin_;
+  };
 }
 #endif

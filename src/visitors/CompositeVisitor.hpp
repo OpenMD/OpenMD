@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -49,9 +49,9 @@
 
 namespace oopse {
     
-typedef  std::list<std::pair<BaseVisitor*, int> >::iterator VisitorIterator;
+  typedef  std::list<std::pair<BaseVisitor*, int> >::iterator VisitorIterator;
 
-class CompositeVisitor: public BaseVisitor{
+  class CompositeVisitor: public BaseVisitor{
   public:
     CompositeVisitor() : BaseVisitor() { visitorName = "CompositeVisitor";}
     ~CompositeVisitor();
@@ -59,7 +59,7 @@ class CompositeVisitor: public BaseVisitor{
     virtual void visit(Atom* atom);
     virtual void visit(DirectionalAtom* datom); 
     virtual void visit(RigidBody* rb); 
-     virtual void update();
+    virtual void update();
     
     void addVisitor(BaseVisitor* v, int priority = 0);
     BaseVisitor* beginVisitor(VisitorIterator& i);
@@ -67,8 +67,8 @@ class CompositeVisitor: public BaseVisitor{
 
     const  std::string toString();
   protected:
-     std::list<std::pair<BaseVisitor*, int> > visitorList;
-};
+    std::list<std::pair<BaseVisitor*, int> > visitorList;
+  };
 
 }
 #endif //_COMPOSITEVISITOR_H_

@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -39,13 +39,13 @@
  * such damages.
  */
  
- /**
-  * @file VelocityVerletIntegrator.hpp
-  * @author tlin
-  * @date 11/08/2004
-  * @time 13:25am
-  * @version 1.0
-  */
+/**
+ * @file VelocityVerletIntegrator.hpp
+ * @author tlin
+ * @date 11/08/2004
+ * @time 13:25am
+ * @version 1.0
+ */
 
 #ifndef INTEGRATORS_VELOCITYVERLETINTEGRATOR_HPP
 #define INTEGRATORS_VELOCITYVERLETINTEGRATOR_HPP
@@ -55,64 +55,64 @@
 #include "constraints/Rattle.hpp"
 namespace oopse {
 
-/**
- * @class VelocityVerletIntegrator VelocityVerletIntegrator.hpp "integrators/VelocityVerletIntegrator.hpp"
- * @brief  Velocity-Verlet Family Integrator
- * Template pattern is used in VelocityVerletIntegrator class. 
- */
-class VelocityVerletIntegrator : public Integrator {
-    public:
-        virtual ~VelocityVerletIntegrator();
+  /**
+   * @class VelocityVerletIntegrator VelocityVerletIntegrator.hpp "integrators/VelocityVerletIntegrator.hpp"
+   * @brief  Velocity-Verlet Family Integrator
+   * Template pattern is used in VelocityVerletIntegrator class. 
+   */
+  class VelocityVerletIntegrator : public Integrator {
+  public:
+    virtual ~VelocityVerletIntegrator();
 
-        void setRotationAlgorithm(RotationAlgorithm* algo) {
-            if (algo != rotAlgo && rotAlgo != NULL){            
-                delete rotAlgo;
-            }
+    void setRotationAlgorithm(RotationAlgorithm* algo) {
+      if (algo != rotAlgo && rotAlgo != NULL){            
+	delete rotAlgo;
+      }
             
-            rotAlgo = algo;
-        }
+      rotAlgo = algo;
+    }
         
-    protected:
+  protected:
 
-        VelocityVerletIntegrator(SimInfo* info);
+    VelocityVerletIntegrator(SimInfo* info);
 
-        virtual void doIntegrate();
+    virtual void doIntegrate();
 
-        virtual void initialize();
+    virtual void initialize();
 
-        virtual void preStep();
+    virtual void preStep();
         
-        virtual void integrateStep();        
+    virtual void integrateStep();        
 
-        virtual void postStep();
+    virtual void postStep();
 
-        virtual void finalize();
+    virtual void finalize();
 
-        RotationAlgorithm* rotAlgo;
-        Rattle* rattle;
-        double dt2;
+    RotationAlgorithm* rotAlgo;
+    Rattle* rattle;
+    double dt2;
 
-        double currSample;
-        double currStatus;
-        double currThermal;
+    double currSample;
+    double currStatus;
+    double currThermal;
         
-    private:
+  private:
         
-        virtual void calcForce(bool needPotential, bool needStress);    
+    virtual void calcForce(bool needPotential, bool needStress);    
         
-        virtual void moveA() = 0;
+    virtual void moveA() = 0;
         
-        virtual void moveB() = 0;        
+    virtual void moveB() = 0;        
 
-        virtual double calcConservedQuantity() = 0;
+    virtual double calcConservedQuantity() = 0;
 
-        virtual DumpWriter* createDumpWriter();
+    virtual DumpWriter* createDumpWriter();
 
-        virtual StatWriter* createStatWriter();
+    virtual StatWriter* createStatWriter();
         
-        virtual RestWriter* createRestWriter();
+    virtual RestWriter* createRestWriter();
 
-};
+  };
 
 } //end namespace oopse
 #endif //INTEGRATORS_VELOCITYVERLETINTEGRATOR_HPP

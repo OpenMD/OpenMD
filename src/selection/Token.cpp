@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -43,8 +43,8 @@
 
 namespace oopse {
 
-Token Token::tokenExpressionBegin = Token(Token::expressionBegin, std::string("expressionBegin"));
-Token Token::tokenExpressionEnd = Token(Token::expressionEnd, std::string("expressionEnd"));
+  Token Token::tokenExpressionBegin = Token(Token::expressionBegin, std::string("expressionBegin"));
+  Token Token::tokenExpressionEnd = Token(Token::expressionEnd, std::string("expressionEnd"));
 
 
 }

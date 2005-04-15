@@ -46,37 +46,37 @@
 
 namespace oopse {
 
-GofRAngle::GofRAngle(SimInfo* info, const std::string& filename, const std::string& sele1, 
-    const std::string& sele2, double len, int nrbins, int nangleBins)
+  GofRAngle::GofRAngle(SimInfo* info, const std::string& filename, const std::string& sele1, 
+		       const std::string& sele2, double len, int nrbins, int nangleBins)
     : RadialDistrFunc(info, filename, sele1, sele2), len_(len), nRBins_(nrbins), nAngleBins_(nangleBins){
 
-    deltaR_ = len_ /nRBins_;             
-    deltaCosAngle_ = 2.0 / nAngleBins_;    
+      deltaR_ = len_ /nRBins_;             
+      deltaCosAngle_ = 2.0 / nAngleBins_;    
 
-    histogram_.resize(nRBins_);
-    avgGofr_.resize(nRBins_);
-    for (int i = 0 ; i < nRBins_; ++i) {
+      histogram_.resize(nRBins_);
+      avgGofr_.resize(nRBins_);
+      for (int i = 0 ; i < nRBins_; ++i) {
         histogram_[i].resize(nAngleBins_);
         avgGofr_[i].resize(nAngleBins_);
+      }
     }
-}
 
 
-void GofRAngle::preProcess() {
+  void GofRAngle::preProcess() {
 
     for (int i = 0; i < avgGofr_.size(); ++i) {
-        std::fill(avgGofr_[i].begin(), avgGofr_[i].end(), 0);
+      std::fill(avgGofr_[i].begin(), avgGofr_[i].end(), 0);
     }
-}
+  }
 
-void GofRAngle::initalizeHistogram() {
+  void GofRAngle::initalizeHistogram() {
     npairs_ = 0;
     for (int i = 0; i < histogram_.size(); ++i)
-        std::fill(histogram_[i].begin(), histogram_[i].end(), 0);
-}
+      std::fill(histogram_[i].begin(), histogram_[i].end(), 0);
+  }
 
 
-void GofRAngle::processHistogram() {
+  void GofRAngle::processHistogram() {
 
     int nPairs = getNPairs();
     double volume = info_->getSnapshotManager()->getCurrentSnapshot()->getVolume();
@@ -85,22 +85,22 @@ void GofRAngle::processHistogram() {
 
     for(int i = 0 ; i < histogram_.size(); ++i){
 
-        double rLower = i * deltaR_;
-        double rUpper = rLower + deltaR_;
-        double volSlice = ( rUpper * rUpper * rUpper ) - ( rLower * rLower * rLower );
-        double nIdeal = volSlice * pairConstant;
+      double rLower = i * deltaR_;
+      double rUpper = rLower + deltaR_;
+      double volSlice = ( rUpper * rUpper * rUpper ) - ( rLower * rLower * rLower );
+      double nIdeal = volSlice * pairConstant;
 
-        for (int j = 0; j < histogram_[i].size(); ++j){
-            avgGofr_[i][j] += histogram_[i][j] / nIdeal;    
-        }
+      for (int j = 0; j < histogram_[i].size(); ++j){
+	avgGofr_[i][j] += histogram_[i][j] / nIdeal;    
+      }
     }
 
-}
+  }
 
-void GofRAngle::collectHistogram(StuntDouble* sd1, StuntDouble* sd2) {
+  void GofRAngle::collectHistogram(StuntDouble* sd1, StuntDouble* sd2) {
 
     if (sd1 == sd2) {
-        return;
+      return;
     }
     
     Vector3d pos1 = sd1->getPos();
@@ -112,44 +112,44 @@ void GofRAngle::collectHistogram(StuntDouble* sd1, StuntDouble* sd2) {
     int whichRBin = distance / deltaR_;
 
     if (distance <= len_) {
-        double cosAngle = evaluateAngle(sd1, sd2);
-        double halfBin = (nAngleBins_ - 1) * 0.5;
-        int whichThetaBin = halfBin * (cosAngle + 1.0);
-        ++histogram_[whichRBin][whichThetaBin];
+      double cosAngle = evaluateAngle(sd1, sd2);
+      double halfBin = (nAngleBins_ - 1) * 0.5;
+      int whichThetaBin = halfBin * (cosAngle + 1.0);
+      ++histogram_[whichRBin][whichThetaBin];
         
-        ++npairs_;
+      ++npairs_;
     }
-}
+  }
 
-void GofRAngle::writeRdf() {
+  void GofRAngle::writeRdf() {
     std::ofstream rdfStream(outputFilename_.c_str());
     if (rdfStream.is_open()) {
-        rdfStream << "#radial distribution function\n";
-        rdfStream << "#selection1: (" << selectionScript1_ << ")\t";
-        rdfStream << "selection2: (" << selectionScript2_ << ")\n";
-        rdfStream << "#nRBins = " << nRBins_ << "\t maxLen = " << len_ << "deltaR = " << deltaR_ <<"\n";
-        rdfStream << "#nAngleBins =" << nAngleBins_ << "deltaCosAngle = " << deltaCosAngle_ << "\n";
-        for (int i = 0; i < avgGofr_.size(); ++i) {
-            double r = deltaR_ * (i + 0.5);
+      rdfStream << "#radial distribution function\n";
+      rdfStream << "#selection1: (" << selectionScript1_ << ")\t";
+      rdfStream << "selection2: (" << selectionScript2_ << ")\n";
+      rdfStream << "#nRBins = " << nRBins_ << "\t maxLen = " << len_ << "deltaR = " << deltaR_ <<"\n";
+      rdfStream << "#nAngleBins =" << nAngleBins_ << "deltaCosAngle = " << deltaCosAngle_ << "\n";
+      for (int i = 0; i < avgGofr_.size(); ++i) {
+	double r = deltaR_ * (i + 0.5);
 
-            for(int j = 0; j < avgGofr_[i].size(); ++j) {
-                double cosAngle = -1.0 + (j + 0.5)*deltaCosAngle_;
-                rdfStream << avgGofr_[i][j]/nProcessed_ << "\t";
-            }
+	for(int j = 0; j < avgGofr_[i].size(); ++j) {
+	  double cosAngle = -1.0 + (j + 0.5)*deltaCosAngle_;
+	  rdfStream << avgGofr_[i][j]/nProcessed_ << "\t";
+	}
 
-            rdfStream << "\n";
-        }
+	rdfStream << "\n";
+      }
         
     } else {
-        sprintf(painCave.errMsg, "GofRAngle: unable to open %s\n", outputFilename_.c_str());
-        painCave.isFatal = 1;
-        simError();  
+      sprintf(painCave.errMsg, "GofRAngle: unable to open %s\n", outputFilename_.c_str());
+      painCave.isFatal = 1;
+      simError();  
     }
 
     rdfStream.close();
-}
+  }
 
-double GofRTheta::evaluateAngle(StuntDouble* sd1, StuntDouble* sd2) {
+  double GofRTheta::evaluateAngle(StuntDouble* sd1, StuntDouble* sd2) {
     Vector3d pos1 = sd1->getPos();
     Vector3d pos2 = sd2->getPos();
     Vector3d r12 = pos2 - pos1;
@@ -158,15 +158,15 @@ double GofRTheta::evaluateAngle(StuntDouble* sd1, StuntDouble* sd2) {
     Vector3d dipole = sd1->getElectroFrame().getColumn(2);
     dipole.normalize();    
     return dot(r12, dipole);
-}
+  }
 
-double GofROmega::evaluateAngle(StuntDouble* sd1, StuntDouble* sd2) {
+  double GofROmega::evaluateAngle(StuntDouble* sd1, StuntDouble* sd2) {
     Vector3d v1 = sd1->getElectroFrame().getColumn(2);
     Vector3d v2 = sd2->getElectroFrame().getColumn(2);    
     v1.normalize();
     v2.normalize();
     return dot(v1, v2);
-}
+  }
 
 
 }

@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -39,29 +39,29 @@
  * such damages.
  */
  
- /**
-  * @file NumericConstant.hpp
-  * @author teng lin
-  * @date 11/17/2004
-  * @time 23:33am
-  * @version 1.0
-  */ 
+/**
+ * @file NumericConstant.hpp
+ * @author teng lin
+ * @date 11/17/2004
+ * @time 23:33am
+ * @version 1.0
+ */ 
 
 #ifndef UTILS_NUMERICCONSTANT_HPP
 #define UTILS_NUMERICCONSTANT_HPP
 #include <cmath>
 namespace oopse {
 
-/**
- * @class NumericConstant NumericConstant.hpp "utils/NumericConstant.hpp"
- * @todo document
- */
-namespace NumericConstant {
+  /**
+   * @class NumericConstant NumericConstant.hpp "utils/NumericConstant.hpp"
+   * @todo document
+   */
+  namespace NumericConstant {
 
     static const double epsilon = 0.000001;
     static const double PI = M_PI;
     static const double TWO_PI = 2.0 * PI;
-}
+  }
 
 
 } //end namespace oopse

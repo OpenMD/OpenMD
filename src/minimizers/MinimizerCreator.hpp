@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -46,35 +46,35 @@
 
 namespace oopse {
 
-class Minimizer;
-class SimInfo;
-/**
- * @class Minimizer
- * @todo document
- */
-class MinimizerCreator {
-    public:
-        MinimizerCreator(const std::string& ident) : ident_(ident) {}
-        virtual ~MinimizerCreator() {}
+  class Minimizer;
+  class SimInfo;
+  /**
+   * @class Minimizer
+   * @todo document
+   */
+  class MinimizerCreator {
+  public:
+    MinimizerCreator(const std::string& ident) : ident_(ident) {}
+    virtual ~MinimizerCreator() {}
         
-        const std::string& getIdent() const { return ident_; }
+    const std::string& getIdent() const { return ident_; }
 
-        virtual Minimizer* create(SimInfo* info) const = 0;
+    virtual Minimizer* create(SimInfo* info) const = 0;
             
-    private:
-        std::string ident_;
-};
+  private:
+    std::string ident_;
+  };
 
-/**
- * @class MinimizerBuilder
- * @todo document
- */
-template<class ConcreteMinimizer>
-class MinimizerBuilder : public MinimizerCreator {
-    public:
-        MinimizerBuilder(const std::string& ident) : MinimizerCreator(ident) {}
-        virtual  Minimizer* create(SimInfo* info) const {return new ConcreteMinimizer(info);}
-};
+  /**
+   * @class MinimizerBuilder
+   * @todo document
+   */
+  template<class ConcreteMinimizer>
+  class MinimizerBuilder : public MinimizerCreator {
+  public:
+    MinimizerBuilder(const std::string& ident) : MinimizerCreator(ident) {}
+    virtual  Minimizer* create(SimInfo* info) const {return new ConcreteMinimizer(info);}
+  };
 
 }
 

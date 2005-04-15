@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -48,62 +48,62 @@
 
 namespace oopse {
 
-struct SectionParserContext {
+  struct SectionParserContext {
     int priority;
     SectionParser* sectionParser;
     int lineNo;
     std::streampos  offset;
     bool isActive;
-};
+  };
 
-class SameSectionParserFunctor {
-    public:
-        SameSectionParserFunctor(const std::string section) : section_(section) {}
+  class SameSectionParserFunctor {
+  public:
+    SameSectionParserFunctor(const std::string section) : section_(section) {}
 
-        bool operator()(SectionParserContext context) {
-            return context.sectionParser->getSectionName() == section_;
-        }
+    bool operator()(SectionParserContext context) {
+      return context.sectionParser->getSectionName() == section_;
+    }
         
-    private:
-        std::string section_;
-};
-/**
- * @class SectionParserManager SectionParserManager.hpp "io/SectionParserManager.hpp"
- * SectionParserManager maintains a priority list
- */
-class SectionParserManager {
+  private:
+    std::string section_;
+  };
+  /**
+   * @class SectionParserManager SectionParserManager.hpp "io/SectionParserManager.hpp"
+   * SectionParserManager maintains a priority list
+   */
+  class SectionParserManager {
 
-    public:
-        typedef std::list<SectionParserContext> SectionParserContextList;
-        typedef SectionParserContextList::iterator iterator;
-        typedef SectionParserContextList::const_iterator const_iterator;
+  public:
+    typedef std::list<SectionParserContext> SectionParserContextList;
+    typedef SectionParserContextList::iterator iterator;
+    typedef SectionParserContextList::const_iterator const_iterator;
 
-        SectionParserManager() : beginPriority_(0), priorityDifference_(100) {}
-        ~SectionParserManager();
+    SectionParserManager() : beginPriority_(0), priorityDifference_(100) {}
+    ~SectionParserManager();
 
-        void parse(std::istream& input, ForceField&  ff);
+    void parse(std::istream& input, ForceField&  ff);
         
-        void push_front(SectionParser* sp);
+    void push_front(SectionParser* sp);
 
-        void push_back(SectionParser* sp);
+    void push_back(SectionParser* sp);
         
-        void insert(SectionParser* sp, int priority);
+    void insert(SectionParser* sp, int priority);
         
-        const_iterator begin() const {
-            return sectionParsers_.begin();
-        }
+    const_iterator begin() const {
+      return sectionParsers_.begin();
+    }
 
-        const_iterator end() const{
-            return sectionParsers_.end();
-        }
+    const_iterator end() const{
+      return sectionParsers_.end();
+    }
         
-    private:
-        iterator findSectionParser(const std::string& sectionName);
-        const int beginPriority_;
-        int priorityDifference_;
+  private:
+    iterator findSectionParser(const std::string& sectionName);
+    const int beginPriority_;
+    int priorityDifference_;
         
-        SectionParserContextList sectionParsers_;
-};
+    SectionParserContextList sectionParsers_;
+  };
 
 }
 #endif //IO_SECTIONPARSERMANAGER_HPP

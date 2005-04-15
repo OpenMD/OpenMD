@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -54,48 +54,48 @@
 
 namespace oopse {
 
-/**
- * @class OplsTorsionType OplsTorsionType.hpp "types/OplsTorsionType.hpp"
- * @todo documentation
- */
-class OplsTorsionType : public PolynomialTorsionType{
+  /**
+   * @class OplsTorsionType OplsTorsionType.hpp "types/OplsTorsionType.hpp"
+   * @todo documentation
+   */
+  class OplsTorsionType : public PolynomialTorsionType{
 
-    public:
+  public:
 
-        OplsTorsionType(double v0, double v1, double v2, double v3) :  PolynomialTorsionType(){
+    OplsTorsionType(double v0, double v1, double v2, double v3) :  PolynomialTorsionType(){
 
-            //convert OPLS Torsion Type to Polynomial Torsion type
-            double c0 = v0 + v2 + 0.5*(v1 + v3);
-            double c1 = 0.5 *(3*v3- v1);
-            double c2 = -v2;
-            double c3 = -2.0* v3;
+      //convert OPLS Torsion Type to Polynomial Torsion type
+      double c0 = v0 + v2 + 0.5*(v1 + v3);
+      double c1 = 0.5 *(3*v3- v1);
+      double c2 = -v2;
+      double c3 = -2.0* v3;
 
-            setCoefficient(0, c0);
-            setCoefficient(1, c1);
-            setCoefficient(2, c2);
-            setCoefficient(3, c3);
-        }
+      setCoefficient(0, c0);
+      setCoefficient(1, c1);
+      setCoefficient(2, c2);
+      setCoefficient(3, c3);
+    }
         
-        friend std::ostream& operator <<(std::ostream& os, OplsTorsionType& ott);
+    friend std::ostream& operator <<(std::ostream& os, OplsTorsionType& ott);
 
-    private:
+  private:
         
-        double v0_;
-        double v1_;
-        double v2_;
-        double v3_;
+    double v0_;
+    double v1_;
+    double v2_;
+    double v3_;
         
-};
+  };
 
-std::ostream& operator <<(std::ostream& os, OplsTorsionType& ott) {
+  std::ostream& operator <<(std::ostream& os, OplsTorsionType& ott) {
 
     os << "This OplsTorsionType has below form:" << std::endl;
     os << ott.v0_ << " + " 
-         << ott.v1_ << "/2*(1+cos(Omega))" << " + "
-         << ott.v2_ << "/2*(1-cos(2*Omega))" << " + "
-         << ott.v3_ << "/2*(1+cos(3*Omega))" << std::endl;
+       << ott.v1_ << "/2*(1+cos(Omega))" << " + "
+       << ott.v2_ << "/2*(1-cos(2*Omega))" << " + "
+       << ott.v3_ << "/2*(1+cos(3*Omega))" << std::endl;
     return os;
-}
+  }
 
 
 } //end namespace oopse

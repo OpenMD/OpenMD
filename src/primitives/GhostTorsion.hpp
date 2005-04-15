@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -55,15 +55,15 @@
 
 namespace oopse {
 
-class GhostTorsion : public Torsion {
-    public:
+  class GhostTorsion : public Torsion {
+  public:
 
-        GhostTorsion(Atom *atom1, Atom *atom2,  DirectionalAtom* ghostAtom,
-                        TorsionType* tt);
+    GhostTorsion(Atom *atom1, Atom *atom2,  DirectionalAtom* ghostAtom,
+		 TorsionType* tt);
 
-        virtual void calcForce();
+    virtual void calcForce();
         
-};
+  };
 
 } //end namespace oopse
 

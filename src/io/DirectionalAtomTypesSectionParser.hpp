@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -45,17 +45,17 @@
 #include "io/SectionParser.hpp"
 namespace oopse {
 
-    /**
-     * @class DirectionalAtomTypesSectionParser DirectionalAtomTypesSectionParser.hpp "io/DirectionalAtomTypesSectionParser.hpp"
-     */
-    class DirectionalAtomTypesSectionParser : public SectionParser {
-        public:
-            DirectionalAtomTypesSectionParser();
+  /**
+   * @class DirectionalAtomTypesSectionParser DirectionalAtomTypesSectionParser.hpp "io/DirectionalAtomTypesSectionParser.hpp"
+   */
+  class DirectionalAtomTypesSectionParser : public SectionParser {
+  public:
+    DirectionalAtomTypesSectionParser();
             
-        private:
-            void virtual parseLine(ForceField& ff, const std::string& line, int lineNo);
+  private:
+    void virtual parseLine(ForceField& ff, const std::string& line, int lineNo);
             
-    };
+  };
 
 
 } //namespace oopse

@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -55,16 +55,16 @@
 
 namespace oopse {
 
-class GhostBend : public Bend {
-    public:
-        GhostBend(Atom* atom1, DirectionalAtom* ghostAtom, BendType* bt) 
-            : Bend(atom1, ghostAtom, ghostAtom, bt) {
+  class GhostBend : public Bend {
+  public:
+    GhostBend(Atom* atom1, DirectionalAtom* ghostAtom, BendType* bt) 
+      : Bend(atom1, ghostAtom, ghostAtom, bt) {
 
-        }
+      }
 
-        virtual void calcForce();
+    virtual void calcForce();
         
-};
+  };
 
 } //end namespace oopse
 

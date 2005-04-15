@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -44,50 +44,50 @@
 #include "utils/simError.h"
 namespace oopse {
 
-SimSnapshotManager::SimSnapshotManager(SimInfo* info, int storageLayout) 
+  SimSnapshotManager::SimSnapshotManager(SimInfo* info, int storageLayout) 
     : SnapshotManager(storageLayout), info_(info){
 
-    int nAtoms = info_->getNAtoms();
-    int nRigidBodies = info_->getNRigidBodies();
+      int nAtoms = info_->getNAtoms();
+      int nRigidBodies = info_->getNRigidBodies();
     
-    //allocate memory for snapshots
-    previousSnapshot_ = new Snapshot(nAtoms, nRigidBodies, storageLayout);
-    currentSnapshot_ = new Snapshot(nAtoms, nRigidBodies, storageLayout);
-}
+      //allocate memory for snapshots
+      previousSnapshot_ = new Snapshot(nAtoms, nRigidBodies, storageLayout);
+      currentSnapshot_ = new Snapshot(nAtoms, nRigidBodies, storageLayout);
+    }
 
-SimSnapshotManager::~SimSnapshotManager(){
+  SimSnapshotManager::~SimSnapshotManager(){
     delete previousSnapshot_;
     delete currentSnapshot_;
     previousSnapshot_ = NULL;
     currentSnapshot_ = NULL;
-}
-bool SimSnapshotManager::advance() {
+  }
+  bool SimSnapshotManager::advance() {
 
     *previousSnapshot_ = *currentSnapshot_;
     currentSnapshot_->setID(currentSnapshot_->getID() + 1);    
     return true;
-}
+  }
 
-Snapshot* SimSnapshotManager::getSnapshot(int id) {
+  Snapshot* SimSnapshotManager::getSnapshot(int id) {
     if (currentSnapshot_ != NULL && currentSnapshot_->getID() == id) {
-        return currentSnapshot_;        
+      return currentSnapshot_;        
     } else if (previousSnapshot_!= NULL && previousSnapshot_->getID() == id) {
-        return previousSnapshot_;
+      return previousSnapshot_;
     } else {
-        return NULL;
+      return NULL;
     }
-}    
+  }    
 
-int SimSnapshotManager::getCapacity() {
+  int SimSnapshotManager::getCapacity() {
     return 2;
-}
+  }
 
-void SimSnapshotManager::setCapacity(int capacity) {
+  void SimSnapshotManager::setCapacity(int capacity) {
     //give warning message
     sprintf( painCave.errMsg,
-        "SimSnapshotManager error: can not set capacity for SimSnapshotManager.\n" );
+	     "SimSnapshotManager error: can not set capacity for SimSnapshotManager.\n" );
     painCave.isFatal = 0;
     simError();    
-}
+  }
 
 } //namespace oopse

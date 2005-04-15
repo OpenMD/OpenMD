@@ -7,13 +7,13 @@ subroutine makeShape(nContactFuncs, ContactFuncLValue, &
 
   use definitions
   use shapes, only: newShapeType
-  
+
   integer :: nContactFuncs 
   integer :: nRangeFuncs 
   integer :: nStrengthFuncs 
   integer :: status
   integer :: myATID
-  
+
   integer, dimension(nContactFuncs) :: ContactFuncLValue           
   integer, dimension(nContactFuncs) :: ContactFuncMValue           
   integer, dimension(nContactFuncs) :: ContactFunctionType         
@@ -26,7 +26,7 @@ subroutine makeShape(nContactFuncs, ContactFuncLValue, &
   integer, dimension(nStrengthFuncs) :: StrengthFuncMValue          
   integer, dimension(nStrengthFuncs) :: StrengthFunctionType        
   real(kind=dp), dimension(nStrengthFuncs) :: StrengthFuncCoefficient
-  
+
   call newShapeType(nContactFuncs, ContactFuncLValue, &
        ContactFuncMValue, ContactFunctionType, ContactFuncCoefficient, &
        nRangeFuncs, RangeFuncLValue, RangeFuncMValue, RangeFunctionType, &
@@ -54,7 +54,7 @@ subroutine completeShapeFF(status)
 end subroutine completeShapeFF
 
 subroutine destroyShapeTypes()
- use shapes, only: module_destroyShapeTypes => destroyShapeTypes
- call module_destroyShapeTypes()
+  use shapes, only: module_destroyShapeTypes => destroyShapeTypes
+  call module_destroyShapeTypes()
 
 end subroutine destroyShapeTypes

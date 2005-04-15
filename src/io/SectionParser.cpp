@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -43,45 +43,45 @@
 #include "utils/Trim.hpp"
 namespace oopse {
 
-void SectionParser::parse(std::istream& input, ForceField& ff, int lineNo) {
+  void SectionParser::parse(std::istream& input, ForceField& ff, int lineNo) {
     const int bufferSize = 65535;
     char buffer[bufferSize];
     std::string line;
     while(input.getline(buffer, bufferSize)) {
-        ++lineNo;
-        line = trimLeftCopy(buffer);
-        //a line begins with "//" is comment
-        if (isEndSection(line)) {
-            break;
-        } else if ( line.empty() || (line.size() >= 2 && line[0] == '/' && line[1] == '/')) {
-            continue;
-        } else {
-            parseLine(ff, line, lineNo);
-        }
+      ++lineNo;
+      line = trimLeftCopy(buffer);
+      //a line begins with "//" is comment
+      if (isEndSection(line)) {
+	break;
+      } else if ( line.empty() || (line.size() >= 2 && line[0] == '/' && line[1] == '/')) {
+	continue;
+      } else {
+	parseLine(ff, line, lineNo);
+      }
     }
-}
+  }
 
-bool SectionParser::isEndSection(const std::string& line) {
+  bool SectionParser::isEndSection(const std::string& line) {
     StringTokenizer tokenizer(line);
 
     if (tokenizer.countTokens() >= 2) {
-        std::string keyword = tokenizer.nextToken();
+      std::string keyword = tokenizer.nextToken();
 
-        if (keyword != "end"){
-            return false;
-        } 
+      if (keyword != "end"){
+	return false;
+      } 
 
-        std::string section = tokenizer.nextToken();
-        if (section == sectionName_) {
-            return true;
-        }else {
-            return false;
-        }
+      std::string section = tokenizer.nextToken();
+      if (section == sectionName_) {
+	return true;
+      }else {
+	return false;
+      }
         
     }else {
-        return false;
+      return false;
     }
         
-}
+  }
 
 }//namespace oopse

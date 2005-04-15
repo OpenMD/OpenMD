@@ -1,7 +1,7 @@
 ! provide interface for c calls....
 
 subroutine makeatype(atp, status)
-  
+
   use atype_module, ONLY: new_atype
 
 #define __FORTRAN90
@@ -20,7 +20,7 @@ subroutine makeatype(atp, status)
   is_LennardJones = (atp%is_LennardJones .ne. 0)
   is_Electrostatic = ((atp%is_Charge .ne. 0) .or. (atp%is_Dipole .ne. 0)) &
        .or. (atp%is_Quadrupole .ne. 0)
-  
+
   is_Charge = (atp%is_Charge .ne. 0)
   is_Dipole = (atp%is_Dipole .ne. 0)
   is_Quadrupole = (atp%is_Quadrupole .ne. 0)
@@ -33,8 +33,8 @@ subroutine makeatype(atp, status)
   call new_atype(ident, is_Directional, is_LennardJones, is_Electrostatic, &
        is_Charge, is_Dipole, is_Quadrupole, is_Sticky, is_GayBerne, is_EAM, &
        is_Shape, is_FLARB, status)
-  
-end subroutine
+
+end subroutine makeatype
 
 ! clears memory up
 subroutine deleteAtypes()

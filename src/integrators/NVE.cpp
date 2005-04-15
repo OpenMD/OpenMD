@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -39,13 +39,13 @@
  * such damages.
  */
  
- /**
-  * @file NVE.cpp
-  * @author tlin
-  * @date 11/08/2004
-  * @time 15:13am
-  * @version 1.0
-  */
+/**
+ * @file NVE.cpp
+ * @author tlin
+ * @date 11/08/2004
+ * @time 15:13am
+ * @version 1.0
+ */
 
 #include "integrators/NVE.hpp"
 #include "primitives/Molecule.hpp"
@@ -54,11 +54,11 @@
 namespace oopse {
 
 
-NVE::NVE(SimInfo* info) : VelocityVerletIntegrator(info){
+  NVE::NVE(SimInfo* info) : VelocityVerletIntegrator(info){
 
-}
+  }
 
-void NVE::moveA(){
+  void NVE::moveA(){
     SimInfo::MoleculeIterator i;
     Molecule::IntegrableObjectIterator  j;
     Molecule* mol;
@@ -71,49 +71,49 @@ void NVE::moveA(){
     double mass;
     
     for (mol = info_->beginMolecule(i); mol != NULL; mol = info_->nextMolecule(i)) {
-        for (integrableObject = mol->beginIntegrableObject(j); integrableObject != NULL;
-               integrableObject = mol->nextIntegrableObject(j)) {
+      for (integrableObject = mol->beginIntegrableObject(j); integrableObject != NULL;
+	   integrableObject = mol->nextIntegrableObject(j)) {
 
-                vel =integrableObject->getVel();
-                pos = integrableObject->getPos();
-                frc = integrableObject->getFrc();
-                mass = integrableObject->getMass();
+	vel =integrableObject->getVel();
+	pos = integrableObject->getPos();
+	frc = integrableObject->getFrc();
+	mass = integrableObject->getMass();
                 
-                // velocity half step
-                vel += (dt2 /mass * OOPSEConstant::energyConvert) * frc;
+	// velocity half step
+	vel += (dt2 /mass * OOPSEConstant::energyConvert) * frc;
 
-                // position whole step
-                pos += dt * vel;
+	// position whole step
+	pos += dt * vel;
 
-                integrableObject->setVel(vel);
-                integrableObject->setPos(pos);
+	integrableObject->setVel(vel);
+	integrableObject->setPos(pos);
 
-                if (integrableObject->isDirectional()){
+	if (integrableObject->isDirectional()){
 
-                    // get and convert the torque to body frame
+	  // get and convert the torque to body frame
 
-                    Tb = integrableObject->lab2Body(integrableObject->getTrq());
+	  Tb = integrableObject->lab2Body(integrableObject->getTrq());
 
-                    // get the angular momentum, and propagate a half step
+	  // get the angular momentum, and propagate a half step
 
-                    ji = integrableObject->getJ();
+	  ji = integrableObject->getJ();
 
-                    ji += (dt2  * OOPSEConstant::energyConvert) * Tb;
+	  ji += (dt2  * OOPSEConstant::energyConvert) * Tb;
 
-                    rotAlgo->rotate(integrableObject, ji, dt);
+	  rotAlgo->rotate(integrableObject, ji, dt);
 
-                    integrableObject->setJ(ji);
-                }
+	  integrableObject->setJ(ji);
+	}
 
             
-        }
+      }
     } //end for(mol = info_->beginMolecule(i))
     
     rattle->constraintA();
     
-}    
+  }    
 
-void NVE::moveB(){
+  void NVE::moveB(){
     SimInfo::MoleculeIterator i;
     Molecule::IntegrableObjectIterator  j;
     Molecule* mol;
@@ -125,45 +125,45 @@ void NVE::moveB(){
     double mass;
     
     for (mol = info_->beginMolecule(i); mol != NULL; mol = info_->nextMolecule(i)) {
-        for (integrableObject = mol->beginIntegrableObject(j); integrableObject != NULL;
-               integrableObject = mol->nextIntegrableObject(j)) {
+      for (integrableObject = mol->beginIntegrableObject(j); integrableObject != NULL;
+	   integrableObject = mol->nextIntegrableObject(j)) {
 
-                vel =integrableObject->getVel();
-                frc = integrableObject->getFrc();
-                mass = integrableObject->getMass();
+	vel =integrableObject->getVel();
+	frc = integrableObject->getFrc();
+	mass = integrableObject->getMass();
                 
-                // velocity half step
-                vel += (dt2 /mass * OOPSEConstant::energyConvert) * frc;
+	// velocity half step
+	vel += (dt2 /mass * OOPSEConstant::energyConvert) * frc;
                 
-                integrableObject->setVel(vel);
+	integrableObject->setVel(vel);
 
-                if (integrableObject->isDirectional()){
+	if (integrableObject->isDirectional()){
 
-                    // get and convert the torque to body frame
+	  // get and convert the torque to body frame
 
-                    Tb = integrableObject->lab2Body(integrableObject->getTrq());
+	  Tb = integrableObject->lab2Body(integrableObject->getTrq());
 
-                    // get the angular momentum, and propagate a half step
+	  // get the angular momentum, and propagate a half step
 
-                    ji = integrableObject->getJ();
+	  ji = integrableObject->getJ();
 
-                    ji += (dt2  * OOPSEConstant::energyConvert) * Tb;
+	  ji += (dt2  * OOPSEConstant::energyConvert) * Tb;
 
-                    integrableObject->setJ(ji);
-                }
+	  integrableObject->setJ(ji);
+	}
 
             
-        }
+      }
     } //end for(mol = info_->beginMolecule(i))
   
 
     rattle->constraintB();
 
-}
+  }
 
 
-double NVE::calcConservedQuantity() {
+  double NVE::calcConservedQuantity() {
     return thermo.getTotalE();
-}
+  }
 
 } //end namespace oopse

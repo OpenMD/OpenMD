@@ -84,7 +84,7 @@ module simulation
 
   real(kind=dp), public, dimension(3,3), save :: Hmat, HmatInv
   logical, public, save :: boxIsOrthorhombic
-  
+
   public :: SimulationSetup
   public :: getNlocal
   public :: setBox
@@ -105,9 +105,9 @@ module simulation
   public :: SimRequiresPrepairCalc
   public :: SimRequiresPostpairCalc
 
-  
+
 contains
-  
+
   subroutine SimulationSetup(setThisSim, CnGlobal, CnLocal, c_idents, &
        CnLocalExcludes, CexcludesLocal, CnGlobalExcludes, CexcludesGlobal, &
        CmolMembership, Cmfact, CnGroups, CglobalGroupMembership, &
@@ -180,7 +180,7 @@ contains
     nGroupsInRow = getNgroupsInRow(plan_group_row)
     nGroupsInCol = getNgroupsInCol(plan_group_col)
     mynode = getMyNode()
-    
+
     allocate(c_idents_Row(nAtomsInRow),stat=alloc_stat)
     if (alloc_stat /= 0 ) then
        status = -1
@@ -213,7 +213,7 @@ contains
     if (allocated(c_idents_Row)) then
        deallocate(c_idents_Row)
     endif
-   
+
 #endif
 
 #ifdef IS_MPI
@@ -252,7 +252,7 @@ contains
        status = -1
        return
     endif
-    
+
     glPointer = 1
 
     do i = 1, nGroupsInRow 
@@ -291,7 +291,7 @@ contains
 
     call gather(mfactLocal,      mfactRow,      plan_atom_row)
     call gather(mfactLocal,      mfactCol,      plan_atom_col)
-    
+
     if (allocated(mfactLocal)) then
        deallocate(mfactLocal)
     end if
@@ -351,16 +351,16 @@ contains
        mfactRow(i) = Cmfact(i)
        mfactCol(i) = Cmfact(i)
     end do
-    
+
 #endif
 
 
-! We build the local atid's for both mpi and nonmpi
+    ! We build the local atid's for both mpi and nonmpi
     do i = 1, nLocal
-       
+
        me = getFirstMatchingElement(atypes, "c_ident", c_idents(i))
        atid(i) = me
-  
+
     enddo
 
     do i = 1, nExcludes_Local
@@ -383,225 +383,225 @@ contains
 #ifdef IS_MPI
     do j = 1, nAtomsInRow
 #else
-    do j = 1, nLocal
+       do j = 1, nLocal
 #endif
-       nSkipsForAtom(j) = 0
+          nSkipsForAtom(j) = 0
 #ifdef IS_MPI
-       id1 = AtomRowToGlobal(j)
+          id1 = AtomRowToGlobal(j)
 #else 
-       id1 = j
+          id1 = j
 #endif
-       do i = 1, nExcludes_Local
-          if (excludesLocal(1,i) .eq. id1 ) then
-             nSkipsForAtom(j) = nSkipsForAtom(j) + 1
+          do i = 1, nExcludes_Local
+             if (excludesLocal(1,i) .eq. id1 ) then
+                nSkipsForAtom(j) = nSkipsForAtom(j) + 1
 
-             if (nSkipsForAtom(j) .gt. maxSkipsForAtom) then
-                maxSkipsForAtom = nSkipsForAtom(j)
+                if (nSkipsForAtom(j) .gt. maxSkipsForAtom) then
+                   maxSkipsForAtom = nSkipsForAtom(j)
+                endif
              endif
-          endif
-          if (excludesLocal(2,i) .eq. id1 ) then
-             nSkipsForAtom(j) = nSkipsForAtom(j) + 1
+             if (excludesLocal(2,i) .eq. id1 ) then
+                nSkipsForAtom(j) = nSkipsForAtom(j) + 1
 
-             if (nSkipsForAtom(j) .gt. maxSkipsForAtom) then
-                maxSkipsForAtom = nSkipsForAtom(j)
+                if (nSkipsForAtom(j) .gt. maxSkipsForAtom) then
+                   maxSkipsForAtom = nSkipsForAtom(j)
+                endif
              endif
-          endif
-       end do
-    enddo
+          end do
+       enddo
 
 #ifdef IS_MPI
-    allocate(skipsForAtom(nAtomsInRow, maxSkipsForAtom), stat=alloc_stat)
+       allocate(skipsForAtom(nAtomsInRow, maxSkipsForAtom), stat=alloc_stat)
 #else
-    allocate(skipsForAtom(nLocal, maxSkipsForAtom), stat=alloc_stat)
+       allocate(skipsForAtom(nLocal, maxSkipsForAtom), stat=alloc_stat)
 #endif
-    if (alloc_stat /= 0 ) then
-       write(*,*) 'Could not allocate skipsForAtom array'
-       return
-    endif
+       if (alloc_stat /= 0 ) then
+          write(*,*) 'Could not allocate skipsForAtom array'
+          return
+       endif
 
 #ifdef IS_MPI
-    do j = 1, nAtomsInRow
+       do j = 1, nAtomsInRow
 #else
-    do j = 1, nLocal
+          do j = 1, nLocal
 #endif
-       nSkipsForAtom(j) = 0
+             nSkipsForAtom(j) = 0
 #ifdef IS_MPI
-       id1 = AtomRowToGlobal(j)
+             id1 = AtomRowToGlobal(j)
 #else 
-       id1 = j
+             id1 = j
 #endif
-       do i = 1, nExcludes_Local
-          if (excludesLocal(1,i) .eq. id1 ) then
-             nSkipsForAtom(j) = nSkipsForAtom(j) + 1
-             ! exclude lists have global ID's so this line is 
-             ! the same in MPI and non-MPI
-             id2 = excludesLocal(2,i)
-             skipsForAtom(j, nSkipsForAtom(j)) = id2
+             do i = 1, nExcludes_Local
+                if (excludesLocal(1,i) .eq. id1 ) then
+                   nSkipsForAtom(j) = nSkipsForAtom(j) + 1
+                   ! exclude lists have global ID's so this line is 
+                   ! the same in MPI and non-MPI
+                   id2 = excludesLocal(2,i)
+                   skipsForAtom(j, nSkipsForAtom(j)) = id2
+                endif
+                if (excludesLocal(2, i) .eq. id1 ) then
+                   nSkipsForAtom(j) = nSkipsForAtom(j) + 1
+                   ! exclude lists have global ID's so this line is 
+                   ! the same in MPI and non-MPI
+                   id2 = excludesLocal(1,i)
+                   skipsForAtom(j, nSkipsForAtom(j)) = id2
+                endif
+             end do
+          enddo
+
+          do i = 1, nExcludes_Global
+             excludesGlobal(i) = CexcludesGlobal(i)
+          enddo
+
+          do i = 1, nGlobal
+             molMemberShipList(i) = CmolMembership(i)
+          enddo
+
+          if (status == 0) simulation_setup_complete = .true.
+
+        end subroutine SimulationSetup
+
+        subroutine setBox(cHmat, cHmatInv, cBoxIsOrthorhombic)
+          real(kind=dp), dimension(3,3) :: cHmat, cHmatInv
+          integer :: cBoxIsOrthorhombic
+          integer :: smallest, status, i
+
+          Hmat = cHmat
+          HmatInv = cHmatInv
+          if (cBoxIsOrthorhombic .eq. 0 ) then
+             boxIsOrthorhombic = .false.
+          else 
+             boxIsOrthorhombic = .true.
           endif
-          if (excludesLocal(2, i) .eq. id1 ) then
-             nSkipsForAtom(j) = nSkipsForAtom(j) + 1
-             ! exclude lists have global ID's so this line is 
-             ! the same in MPI and non-MPI
-             id2 = excludesLocal(1,i)
-             skipsForAtom(j, nSkipsForAtom(j)) = id2
+
+          return     
+        end subroutine setBox
+
+        function getDielect() result(dielect)
+          real( kind = dp ) :: dielect
+          dielect = thisSim%dielect
+        end function getDielect
+
+        function SimUsesPBC() result(doesit)
+          logical :: doesit
+          doesit = thisSim%SIM_uses_PBC
+        end function SimUsesPBC
+
+        function SimUsesDirectionalAtoms() result(doesit)
+          logical :: doesit
+          doesit = thisSim%SIM_uses_dipoles .or. thisSim%SIM_uses_sticky .or. &
+               thisSim%SIM_uses_GayBerne .or. thisSim%SIM_uses_Shapes
+        end function SimUsesDirectionalAtoms
+
+        function SimUsesLennardJones() result(doesit)
+          logical :: doesit
+          doesit = thisSim%SIM_uses_LennardJones
+        end function SimUsesLennardJones
+
+        function SimUsesElectrostatics() result(doesit)
+          logical :: doesit
+          doesit = thisSim%SIM_uses_Electrostatics
+        end function SimUsesElectrostatics
+
+        function SimUsesCharges() result(doesit)
+          logical :: doesit
+          doesit = thisSim%SIM_uses_Charges
+        end function SimUsesCharges
+
+        function SimUsesDipoles() result(doesit)
+          logical :: doesit
+          doesit = thisSim%SIM_uses_Dipoles
+        end function SimUsesDipoles
+
+        function SimUsesSticky() result(doesit)
+          logical :: doesit
+          doesit = thisSim%SIM_uses_Sticky
+        end function SimUsesSticky
+
+        function SimUsesGayBerne() result(doesit)
+          logical :: doesit
+          doesit = thisSim%SIM_uses_GayBerne
+        end function SimUsesGayBerne
+
+        function SimUsesEAM() result(doesit)
+          logical :: doesit
+          doesit = thisSim%SIM_uses_EAM
+        end function SimUsesEAM
+
+        function SimUsesShapes() result(doesit)
+          logical :: doesit
+          doesit = thisSim%SIM_uses_Shapes
+        end function SimUsesShapes
+
+        function SimUsesFLARB() result(doesit)
+          logical :: doesit
+          doesit = thisSim%SIM_uses_FLARB
+        end function SimUsesFLARB
+
+        function SimUsesRF() result(doesit)
+          logical :: doesit
+          doesit = thisSim%SIM_uses_RF
+        end function SimUsesRF
+
+        function SimRequiresPrepairCalc() result(doesit)
+          logical :: doesit
+          doesit = thisSim%SIM_uses_EAM
+        end function SimRequiresPrepairCalc
+
+        function SimRequiresPostpairCalc() result(doesit)
+          logical :: doesit
+          doesit = thisSim%SIM_uses_RF
+        end function SimRequiresPostpairCalc
+
+        subroutine InitializeSimGlobals(thisStat)
+          integer, intent(out) :: thisStat
+          integer :: alloc_stat
+
+          thisStat = 0
+
+          call FreeSimGlobals()    
+
+          allocate(excludesLocal(2,nExcludes_Local), stat=alloc_stat)
+          if (alloc_stat /= 0 ) then
+             thisStat = -1
+             return
           endif
-       end do
-    enddo
-    
-    do i = 1, nExcludes_Global
-       excludesGlobal(i) = CexcludesGlobal(i)
-    enddo
 
-    do i = 1, nGlobal
-       molMemberShipList(i) = CmolMembership(i)
-    enddo
-    
-    if (status == 0) simulation_setup_complete = .true.
-    
-  end subroutine SimulationSetup
-  
-  subroutine setBox(cHmat, cHmatInv, cBoxIsOrthorhombic)
-    real(kind=dp), dimension(3,3) :: cHmat, cHmatInv
-    integer :: cBoxIsOrthorhombic
-    integer :: smallest, status, i
-    
-    Hmat = cHmat
-    HmatInv = cHmatInv
-    if (cBoxIsOrthorhombic .eq. 0 ) then
-       boxIsOrthorhombic = .false.
-    else 
-       boxIsOrthorhombic = .true.
-    endif
-    
-    return     
-  end subroutine setBox
+          allocate(excludesGlobal(nExcludes_Global), stat=alloc_stat)
+          if (alloc_stat /= 0 ) then
+             thisStat = -1
+             return
+          endif
 
-  function getDielect() result(dielect)
-    real( kind = dp ) :: dielect
-    dielect = thisSim%dielect
-  end function getDielect
-       
-  function SimUsesPBC() result(doesit)
-    logical :: doesit
-    doesit = thisSim%SIM_uses_PBC
-  end function SimUsesPBC
+          allocate(molMembershipList(nGlobal), stat=alloc_stat)
+          if (alloc_stat /= 0 ) then
+             thisStat = -1
+             return
+          endif
 
-  function SimUsesDirectionalAtoms() result(doesit)
-    logical :: doesit
-    doesit = thisSim%SIM_uses_dipoles .or. thisSim%SIM_uses_sticky .or. &
-         thisSim%SIM_uses_GayBerne .or. thisSim%SIM_uses_Shapes
-  end function SimUsesDirectionalAtoms
+        end subroutine InitializeSimGlobals
 
-  function SimUsesLennardJones() result(doesit)
-    logical :: doesit
-    doesit = thisSim%SIM_uses_LennardJones
-  end function SimUsesLennardJones
+        subroutine FreeSimGlobals()
 
-  function SimUsesElectrostatics() result(doesit)
-    logical :: doesit
-    doesit = thisSim%SIM_uses_Electrostatics
-  end function SimUsesElectrostatics
+          !We free in the opposite order in which we allocate in.
 
-  function SimUsesCharges() result(doesit)
-    logical :: doesit
-    doesit = thisSim%SIM_uses_Charges
-  end function SimUsesCharges
+          if (allocated(skipsForAtom)) deallocate(skipsForAtom)
+          if (allocated(nSkipsForAtom)) deallocate(nSkipsForAtom)
+          if (allocated(mfactLocal)) deallocate(mfactLocal)
+          if (allocated(mfactCol)) deallocate(mfactCol)
+          if (allocated(mfactRow)) deallocate(mfactRow)
+          if (allocated(groupListCol)) deallocate(groupListCol)     
+          if (allocated(groupListRow)) deallocate(groupListRow)    
+          if (allocated(groupStartCol)) deallocate(groupStartCol)
+          if (allocated(groupStartRow)) deallocate(groupStartRow)     
+          if (allocated(molMembershipList)) deallocate(molMembershipList)     
+          if (allocated(excludesGlobal)) deallocate(excludesGlobal)
+          if (allocated(excludesLocal)) deallocate(excludesLocal)
 
-  function SimUsesDipoles() result(doesit)
-    logical :: doesit
-    doesit = thisSim%SIM_uses_Dipoles
-  end function SimUsesDipoles
+        end subroutine FreeSimGlobals
 
-  function SimUsesSticky() result(doesit)
-    logical :: doesit
-    doesit = thisSim%SIM_uses_Sticky
-  end function SimUsesSticky
+        pure function getNlocal() result(n)
+          integer :: n
+          n = nLocal
+        end function getNlocal
 
-  function SimUsesGayBerne() result(doesit)
-    logical :: doesit
-    doesit = thisSim%SIM_uses_GayBerne
-  end function SimUsesGayBerne
-  
-  function SimUsesEAM() result(doesit)
-    logical :: doesit
-    doesit = thisSim%SIM_uses_EAM
-  end function SimUsesEAM
-
-  function SimUsesShapes() result(doesit)
-    logical :: doesit
-    doesit = thisSim%SIM_uses_Shapes
-  end function SimUsesShapes
-
-  function SimUsesFLARB() result(doesit)
-    logical :: doesit
-    doesit = thisSim%SIM_uses_FLARB
-  end function SimUsesFLARB
-
-  function SimUsesRF() result(doesit)
-    logical :: doesit
-    doesit = thisSim%SIM_uses_RF
-  end function SimUsesRF
-
-  function SimRequiresPrepairCalc() result(doesit)
-    logical :: doesit
-    doesit = thisSim%SIM_uses_EAM
-  end function SimRequiresPrepairCalc
-
-  function SimRequiresPostpairCalc() result(doesit)
-    logical :: doesit
-    doesit = thisSim%SIM_uses_RF
-  end function SimRequiresPostpairCalc
-  
-  subroutine InitializeSimGlobals(thisStat)
-    integer, intent(out) :: thisStat
-    integer :: alloc_stat
-    
-    thisStat = 0
-    
-    call FreeSimGlobals()    
-    
-    allocate(excludesLocal(2,nExcludes_Local), stat=alloc_stat)
-    if (alloc_stat /= 0 ) then
-       thisStat = -1
-       return
-    endif
-    
-    allocate(excludesGlobal(nExcludes_Global), stat=alloc_stat)
-    if (alloc_stat /= 0 ) then
-       thisStat = -1
-       return
-    endif
-
-    allocate(molMembershipList(nGlobal), stat=alloc_stat)
-    if (alloc_stat /= 0 ) then
-       thisStat = -1
-       return
-    endif
-    
-  end subroutine InitializeSimGlobals
-  
-  subroutine FreeSimGlobals()
-    
-    !We free in the opposite order in which we allocate in.
-
-    if (allocated(skipsForAtom)) deallocate(skipsForAtom)
-    if (allocated(nSkipsForAtom)) deallocate(nSkipsForAtom)
-    if (allocated(mfactLocal)) deallocate(mfactLocal)
-    if (allocated(mfactCol)) deallocate(mfactCol)
-    if (allocated(mfactRow)) deallocate(mfactRow)
-    if (allocated(groupListCol)) deallocate(groupListCol)     
-    if (allocated(groupListRow)) deallocate(groupListRow)    
-    if (allocated(groupStartCol)) deallocate(groupStartCol)
-    if (allocated(groupStartRow)) deallocate(groupStartRow)     
-    if (allocated(molMembershipList)) deallocate(molMembershipList)     
-    if (allocated(excludesGlobal)) deallocate(excludesGlobal)
-    if (allocated(excludesLocal)) deallocate(excludesLocal)
-    
-  end subroutine FreeSimGlobals
-  
-  pure function getNlocal() result(n)
-    integer :: n
-    n = nLocal
-  end function getNlocal
-  
-end module simulation
+      end module simulation

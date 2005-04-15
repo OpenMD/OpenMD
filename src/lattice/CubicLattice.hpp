@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -47,7 +47,7 @@
 
 namespace oopse {
 
-class CubicLattice : public Lattice{
+  class CubicLattice : public Lattice{
   protected:
     CubicLattice();
   public:
@@ -58,7 +58,7 @@ class CubicLattice : public Lattice{
     virtual void setLatticeConstant(const  std::vector<double>& lc);
   protected:
     double latticeParam;
-};
+  };
 
 }
 #endif

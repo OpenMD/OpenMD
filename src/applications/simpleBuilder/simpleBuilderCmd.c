@@ -33,7 +33,7 @@ cmdline_parser_print_help (void)
 {
   cmdline_parser_print_version ();
   printf("\n"
-  "Usage: %s [OPTIONS]... [FILES]...\n", CMDLINE_PARSER_PACKAGE);
+	 "Usage: %s [OPTIONS]... [FILES]...\n", CMDLINE_PARSER_PACKAGE);
   printf("\n");
   printf("  -h, --help                Print help and exit\n");
   printf("  -V, --version             Print version and exit\n");
@@ -74,10 +74,10 @@ cmdline_parser (int argc, char * const *argv, struct gengetopt_args_info *args_i
   args_info->nx_given = 0 ;
   args_info->ny_given = 0 ;
   args_info->nz_given = 0 ;
-#define clear_args() { \
-  args_info->output_arg = NULL; \
-  args_info->latticetype_arg = gengetopt_strdup("fcc") ;\
-}
+#define clear_args() {						\
+    args_info->output_arg = NULL;				\
+    args_info->latticetype_arg = gengetopt_strdup("fcc") ;	\
+  }
 
   clear_args();
 
@@ -138,75 +138,75 @@ cmdline_parser (int argc, char * const *argv, struct gengetopt_args_info *args_i
         case 0:	/* Long option with no short option */
           /* Lattice type string. Valid types are fcc,hcp,bcc and hcp-water..  */
           if (strcmp (long_options[option_index].name, "latticetype") == 0)
-          {
-            if (args_info->latticetype_given)
-              {
-                fprintf (stderr, "%s: `--latticetype' option given more than once\n", CMDLINE_PARSER_PACKAGE);
-                clear_args ();
-                exit (EXIT_FAILURE);
-              }
-            args_info->latticetype_given = 1;
-            if (args_info->latticetype_arg)
-              free (args_info->latticetype_arg); /* free default string */
-            args_info->latticetype_arg = gengetopt_strdup (optarg);
-            break;
-          }
+	    {
+	      if (args_info->latticetype_given)
+		{
+		  fprintf (stderr, "%s: `--latticetype' option given more than once\n", CMDLINE_PARSER_PACKAGE);
+		  clear_args ();
+		  exit (EXIT_FAILURE);
+		}
+	      args_info->latticetype_given = 1;
+	      if (args_info->latticetype_arg)
+		free (args_info->latticetype_arg); /* free default string */
+	      args_info->latticetype_arg = gengetopt_strdup (optarg);
+	      break;
+	    }
           
           /* density (g/cm^3).  */
           else if (strcmp (long_options[option_index].name, "density") == 0)
-          {
-            if (args_info->density_given)
-              {
-                fprintf (stderr, "%s: `--density' option given more than once\n", CMDLINE_PARSER_PACKAGE);
-                clear_args ();
-                exit (EXIT_FAILURE);
-              }
-            args_info->density_given = 1;
-            args_info->density_arg = strtod (optarg, NULL);
-            break;
-          }
+	    {
+	      if (args_info->density_given)
+		{
+		  fprintf (stderr, "%s: `--density' option given more than once\n", CMDLINE_PARSER_PACKAGE);
+		  clear_args ();
+		  exit (EXIT_FAILURE);
+		}
+	      args_info->density_given = 1;
+	      args_info->density_arg = strtod (optarg, NULL);
+	      break;
+	    }
           
           /* number of unit cells in x.  */
           else if (strcmp (long_options[option_index].name, "nx") == 0)
-          {
-            if (args_info->nx_given)
-              {
-                fprintf (stderr, "%s: `--nx' option given more than once\n", CMDLINE_PARSER_PACKAGE);
-                clear_args ();
-                exit (EXIT_FAILURE);
-              }
-            args_info->nx_given = 1;
-            args_info->nx_arg = strtol (optarg,&stop_char,0);
-            break;
-          }
+	    {
+	      if (args_info->nx_given)
+		{
+		  fprintf (stderr, "%s: `--nx' option given more than once\n", CMDLINE_PARSER_PACKAGE);
+		  clear_args ();
+		  exit (EXIT_FAILURE);
+		}
+	      args_info->nx_given = 1;
+	      args_info->nx_arg = strtol (optarg,&stop_char,0);
+	      break;
+	    }
           
           /* number of unit cells in y.  */
           else if (strcmp (long_options[option_index].name, "ny") == 0)
-          {
-            if (args_info->ny_given)
-              {
-                fprintf (stderr, "%s: `--ny' option given more than once\n", CMDLINE_PARSER_PACKAGE);
-                clear_args ();
-                exit (EXIT_FAILURE);
-              }
-            args_info->ny_given = 1;
-            args_info->ny_arg = strtol (optarg,&stop_char,0);
-            break;
-          }
+	    {
+	      if (args_info->ny_given)
+		{
+		  fprintf (stderr, "%s: `--ny' option given more than once\n", CMDLINE_PARSER_PACKAGE);
+		  clear_args ();
+		  exit (EXIT_FAILURE);
+		}
+	      args_info->ny_given = 1;
+	      args_info->ny_arg = strtol (optarg,&stop_char,0);
+	      break;
+	    }
           
           /* number of unit cells in z.  */
           else if (strcmp (long_options[option_index].name, "nz") == 0)
-          {
-            if (args_info->nz_given)
-              {
-                fprintf (stderr, "%s: `--nz' option given more than once\n", CMDLINE_PARSER_PACKAGE);
-                clear_args ();
-                exit (EXIT_FAILURE);
-              }
-            args_info->nz_given = 1;
-            args_info->nz_arg = strtol (optarg,&stop_char,0);
-            break;
-          }
+	    {
+	      if (args_info->nz_given)
+		{
+		  fprintf (stderr, "%s: `--nz' option given more than once\n", CMDLINE_PARSER_PACKAGE);
+		  clear_args ();
+		  exit (EXIT_FAILURE);
+		}
+	      args_info->nz_given = 1;
+	      args_info->nz_arg = strtol (optarg,&stop_char,0);
+	      break;
+	    }
           
 
         case '?':	/* Invalid option.  */

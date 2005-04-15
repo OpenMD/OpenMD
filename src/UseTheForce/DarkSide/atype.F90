@@ -51,13 +51,13 @@ module atype_module
 
   public :: new_atype
   public :: delete_atypes
-  
+
 contains
-  
+
   subroutine new_atype(ident, is_Directional, is_LennardJones, &
        is_Electrostatic, is_Charge, is_Dipole, is_Quadrupole, &
        is_Sticky, is_GayBerne, is_EAM, is_Shape, is_FLARB, status)
-    
+
     integer,intent(in) :: ident
     logical,intent(in) :: is_Directional, is_LennardJones, is_Electrostatic
     logical,intent(in) :: is_Charge, is_Dipole, is_Quadrupole
@@ -65,9 +65,9 @@ contains
     integer,intent(out) :: status
 
     integer :: me
-        
+
     status = 0
-    
+
     if (.not. associated(atypes)) then
        !! There are 17 properties to worry about for now.  
        !! Fix this if needed for more atomic properties
@@ -77,11 +77,11 @@ contains
           return
        endif
     endif
-    
+
     me = addElement(atypes)
 
     call setElementProperty(atypes, me, "c_ident", ident)
-    
+
     call setElementProperty(atypes, me, "is_Directional", is_Directional)
     call setElementProperty(atypes, me, "is_LennardJones", is_LennardJones)
     call setElementProperty(atypes, me, "is_Electrostatic", is_Electrostatic)
@@ -93,12 +93,12 @@ contains
     call setElementProperty(atypes, me, "is_EAM", is_EAM)
     call setElementProperty(atypes, me, "is_Shape", is_Shape)
     call setElementProperty(atypes, me, "is_FLARB", is_FLARB)
-    
+
   end subroutine new_atype
 
   subroutine delete_atypes()
     atypes => destroy(atypes)
   end subroutine delete_atypes
-  
+
 end module atype_module
 

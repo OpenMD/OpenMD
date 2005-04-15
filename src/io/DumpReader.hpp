@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -39,13 +39,13 @@
  * such damages.
  */
  
- /**
-  * @file DumpReader.hpp
-  * @author tlin
-  * @date 11/15/2004
-  * @time 09:25am
-  * @version 2.0
-  */
+/**
+ * @file DumpReader.hpp
+ * @author tlin
+ * @date 11/15/2004
+ * @time 09:25am
+ * @version 2.0
+ */
 
 #ifndef IO_DUMPREADER_HPP
 #define IO_DUMPREADER_HPP
@@ -56,59 +56,59 @@
 #include "primitives/StuntDouble.hpp"
 namespace oopse {
 
-/**
- * @class DumpReader DumpReader.hpp "io/DumpReader.hpp"
- * @todo get rid of more junk code from DumpReader
- */
-class DumpReader {
-    public:
+  /**
+   * @class DumpReader DumpReader.hpp "io/DumpReader.hpp"
+   * @todo get rid of more junk code from DumpReader
+   */
+  class DumpReader {
+  public:
 
-        DumpReader(SimInfo* info, const std::string & filename);
-        //DumpReader(SimInfo * info, istream & is);
+    DumpReader(SimInfo* info, const std::string & filename);
+    //DumpReader(SimInfo * info, istream & is);
 
-        ~DumpReader();
+    ~DumpReader();
 
-        /** Returns the number of frames in the dump file*/
-        int getNFrames();
+    /** Returns the number of frames in the dump file*/
+    int getNFrames();
 
         
-        void readFrame(int whichFrame);
+    void readFrame(int whichFrame);
 
-    private:
+  private:
 
-        void scanFile();
+    void scanFile();
 
-        void readSet(int whichFrame);
+    void readSet(int whichFrame);
 
-        void parseDumpLine(char *line, StuntDouble* integrableObject);
+    void parseDumpLine(char *line, StuntDouble* integrableObject);
 
-        void parseCommentLine(char* line, Snapshot* s);
+    void parseCommentLine(char* line, Snapshot* s);
 
 
 #ifdef IS_MPI
 
-        void anonymousNodeDie(void);
-        void nodeZeroError(void);
+    void anonymousNodeDie(void);
+    void nodeZeroError(void);
 
 #endif                
-        // the maximum length of a typical MPI package is 15k
-        const static int maxBufferSize = 8192;
+    // the maximum length of a typical MPI package is 15k
+    const static int maxBufferSize = 8192;
         
-        SimInfo* info_;
+    SimInfo* info_;
 
-        std::string filename_;
-        bool isScanned_;
+    std::string filename_;
+    bool isScanned_;
 
-        int nframes_;
+    int nframes_;
 
-        FILE* inFile_;
-        std::vector<fpos_t*> framePos_;
+    FILE* inFile_;
+    std::vector<fpos_t*> framePos_;
 
-        bool needPos_;
-        bool needVel_;
-        bool needQuaternion_;
-        bool needAngMom_;
-};
+    bool needPos_;
+    bool needVel_;
+    bool needQuaternion_;
+    bool needAngMom_;
+  };
 
 }      //end namespace oopse
 

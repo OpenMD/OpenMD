@@ -45,18 +45,18 @@
 
 namespace oopse {
 
-class FrameTimeCorrFunc : public TimeCorrFunc {
-    public:
-        FrameTimeCorrFunc(SimInfo* info, const std::string& filename, 
-            const std::string& sele1, const std::string& sele2, int storageLayout);
+  class FrameTimeCorrFunc : public TimeCorrFunc {
+  public:
+    FrameTimeCorrFunc(SimInfo* info, const std::string& filename, 
+		      const std::string& sele1, const std::string& sele2, int storageLayout);
         
-    protected:
-        virtual void updateFrame(int frame);
+  protected:
+    virtual void updateFrame(int frame);
         
-    private:
+  private:
         
-        virtual void correlateFrames(int frame1, int frame2);
-};
+    virtual void correlateFrames(int frame1, int frame2);
+  };
 
 }
 #endif

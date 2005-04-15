@@ -1249,14 +1249,14 @@ int Globals::globalAssign( event* the_event ){
       switch( the_type ){
 	
       case STRING:
-   strcpy(zconsForcePolicy, the_event->evt.asmt.rhs.sval);
+	strcpy(zconsForcePolicy, the_event->evt.asmt.rhs.sval);
 
-   for(int i = 0; zconsForcePolicy[i] != '\0'; i++)
-	{
-      zconsForcePolicy[i] = toupper(zconsForcePolicy[i]);
-   }
+	for(int i = 0; zconsForcePolicy[i] != '\0'; i++)
+	  {
+	    zconsForcePolicy[i] = toupper(zconsForcePolicy[i]);
+	  }
 	have_zcons_force_policy = 1;
-   return 1;
+	return 1;
 	break;
 	
       case DOUBLE:
@@ -1607,21 +1607,21 @@ int Globals::globalAssign( event* the_event ){
       switch( the_type ){
 	
       case STRING:
-   the_event->err_msg = 
+	the_event->err_msg = 
 	  strdup( "Error in parsing meta-data file!\n\tseed is not a string.\n" );
 	return 0;
-   return 0;
+	return 0;
 	break;
 	
       case DOUBLE:
-   have_seed = 1;
-   seed = (int)the_event->evt.asmt.rhs.dval;
+	have_seed = 1;
+	seed = (int)the_event->evt.asmt.rhs.dval;
 	return 1;
 	break;
 	
       case INT:
-   have_seed = 1;
-   seed =  the_event->evt.asmt.rhs.ival ;
+	have_seed = 1;
+	seed =  the_event->evt.asmt.rhs.ival ;
 	return 1;
 	break;
 	
@@ -1810,7 +1810,7 @@ int Globals::globalAssign( event* the_event ){
       }
       break;
 
-       case G_THERM_INT_OMEGA_SPRING:
+    case G_THERM_INT_OMEGA_SPRING:
       switch( the_type ){
 	
       case STRING:

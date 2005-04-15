@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -52,54 +52,54 @@
 #include "types/BendType.hpp"
 
 namespace oopse {
-/**
- * @class QuarticBendType 
- * @todo document
- */
-class QuarticBendType : public BendType {
+  /**
+   * @class QuarticBendType 
+   * @todo document
+   */
+  class QuarticBendType : public BendType {
 
-    public:
+  public:
         
-        QuarticBendType(double r0, double k4, double k3, double k2, double k1, double k0) 
-            : BendType(r0), k4_(k4), k3_(k3), k2_(k2),  k1_(k1), k0_(k0){
-        }
+    QuarticBendType(double r0, double k4, double k3, double k2, double k1, double k0) 
+      : BendType(r0), k4_(k4), k3_(k3), k2_(k2),  k1_(k1), k0_(k0){
+      }
 
-        void setForceConstant(double k4, double k3, double k2, double k1, double k0) {
-            k4_ = k4;
-            k3_ = k3;
-            k2_ = k2;
-            k1_ = k1;
-            k0_ = k0;
+    void setForceConstant(double k4, double k3, double k2, double k1, double k0) {
+      k4_ = k4;
+      k3_ = k3;
+      k2_ = k2;
+      k1_ = k1;
+      k0_ = k0;
 
-        }
+    }
 
-        void getForceConstant(double& k4, double& k3, double& k2, double& k1, double& k0) {
-            k4 = k4_;
-            k3 = k3_;
-            k2  = k2_;
-            k1 = k1_;
-            k0 = k0_;
-        }
+    void getForceConstant(double& k4, double& k3, double& k2, double& k1, double& k0) {
+      k4 = k4_;
+      k3 = k3_;
+      k2  = k2_;
+      k1 = k1_;
+      k0 = k0_;
+    }
 
-        virtual void calcForce(double theta, double& V, double& dVdTheta) {
-            double delta =  theta- theta0_;
-            double delta2 = delta * delta;
-            double delta3 = delta2 * delta;
-            double delta4 = delta3 * delta;
+    virtual void calcForce(double theta, double& V, double& dVdTheta) {
+      double delta =  theta- theta0_;
+      double delta2 = delta * delta;
+      double delta3 = delta2 * delta;
+      double delta4 = delta3 * delta;
             
-            V =k0_ + k1_ * delta + k2_*delta2 + k3_*delta3 + k4_*delta4;
-            dVdTheta = k1_ + 2.0*k2_ * delta + 3.0 * k3_*delta2 + 4.0*k4_*delta3;            
-        }     
+      V =k0_ + k1_ * delta + k2_*delta2 + k3_*delta3 + k4_*delta4;
+      dVdTheta = k1_ + 2.0*k2_ * delta + 3.0 * k3_*delta2 + 4.0*k4_*delta3;            
+    }     
         
-    private:
+  private:
 
-        double k4_;
-        double k3_;
-        double k2_;
-        double k1_;
-        double k0_;
+    double k4_;
+    double k3_;
+    double k2_;
+    double k1_;
+    double k0_;
 
-};
+  };
 
 }//end namespace oopse
 #endif //TYPES_QUARTICBENDTYPE_HPP

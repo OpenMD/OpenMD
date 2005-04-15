@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -45,51 +45,51 @@
 #include "utils/simError.h"
 namespace oopse {
 
-LennardJonesAtomTypesSectionParser::LennardJonesAtomTypesSectionParser() {
+  LennardJonesAtomTypesSectionParser::LennardJonesAtomTypesSectionParser() {
     setSectionName("LennardJonesAtomTypes");
-}
+  }
 
-void LennardJonesAtomTypesSectionParser::parseLine(ForceField& ff,const std::string& line, int lineNo){
+  void LennardJonesAtomTypesSectionParser::parseLine(ForceField& ff,const std::string& line, int lineNo){
     StringTokenizer tokenizer(line);
     int nTokens = tokenizer.countTokens();    
 
     //in LennardJonesAtomTypesSectionParser, a line at least contains 3 tokens
     //atomTypeName, epsilon and sigma
     if (nTokens < 3)  {
-        sprintf(painCave.errMsg, "LennardJonesAtomTypesSectionParser Error: Not enough tokens at line %d\n",
-                lineNo);
-        painCave.isFatal = 1;
-        simError();                    
+      sprintf(painCave.errMsg, "LennardJonesAtomTypesSectionParser Error: Not enough tokens at line %d\n",
+	      lineNo);
+      painCave.isFatal = 1;
+      simError();                    
     } else {
 
-        std::string atomTypeName = tokenizer.nextToken();    
-        AtomType* atomType = ff.getAtomType(atomTypeName);
+      std::string atomTypeName = tokenizer.nextToken();    
+      AtomType* atomType = ff.getAtomType(atomTypeName);
 
-        if (atomType != NULL) {
-            LJParam ljParam;                        
-            ljParam.epsilon = tokenizer.nextTokenAsDouble();
-            ljParam.sigma = tokenizer.nextTokenAsDouble();
-            ljParam.soft_pot = 0;
+      if (atomType != NULL) {
+	LJParam ljParam;                        
+	ljParam.epsilon = tokenizer.nextTokenAsDouble();
+	ljParam.sigma = tokenizer.nextTokenAsDouble();
+	ljParam.soft_pot = 0;
 
-            if (tokenizer.hasMoreTokens()) {
-                std::string pot_type = tokenizer.nextToken();
-                if (pot_type == "soft") {
-                    ljParam.soft_pot = 1;
-                }
-            }
+	if (tokenizer.hasMoreTokens()) {
+	  std::string pot_type = tokenizer.nextToken();
+	  if (pot_type == "soft") {
+	    ljParam.soft_pot = 1;
+	  }
+	}
             
-            atomType->addProperty(new LJParamGenericData("LennardJones", ljParam));
-            atomType->setLennardJones();
-        }else {
-            sprintf(painCave.errMsg, "LennardJonesAtomTypesSectionParser Error: Atom Type [%s] is not created yet\n", atomTypeName.c_str());
-            painCave.isFatal = 1;
-            simError();    
-        }
+	atomType->addProperty(new LJParamGenericData("LennardJones", ljParam));
+	atomType->setLennardJones();
+      }else {
+	sprintf(painCave.errMsg, "LennardJonesAtomTypesSectionParser Error: Atom Type [%s] is not created yet\n", atomTypeName.c_str());
+	painCave.isFatal = 1;
+	simError();    
+      }
                        
     }    
 
 
-}
+  }
 
 } //end namespace oopse
 

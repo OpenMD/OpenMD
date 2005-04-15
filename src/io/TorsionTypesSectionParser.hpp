@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -45,33 +45,33 @@
 #include "io/SectionParser.hpp"
 namespace oopse {
 
-    /**
-     * @class TorsionTypesSectionParser TorsionTypesSectionParser.hpp "io/TorsionTypesSectionParser.hpp"
-     */
-    class TorsionTypesSectionParser : public SectionParser {
-        public:
+  /**
+   * @class TorsionTypesSectionParser TorsionTypesSectionParser.hpp "io/TorsionTypesSectionParser.hpp"
+   */
+  class TorsionTypesSectionParser : public SectionParser {
+  public:
 
             
-            TorsionTypesSectionParser();
-        private:
+    TorsionTypesSectionParser();
+  private:
 
 
-            enum TorsionTypeEnum{
-                ttGhostTorsion,
-                ttCubic,
-                ttQuartic,
-                ttPolynomial,
-                ttCharmm,
-                ttUnknown
-            };
-
-            TorsionTypeEnum getTorsionTypeEnum(const std::string& str);     
-            
-            void parseLine(ForceField& ff, const std::string& line, int lineNo);
-            
-
-            std::map<std::string, TorsionTypeEnum> stringToEnumMap_;
+    enum TorsionTypeEnum{
+      ttGhostTorsion,
+      ttCubic,
+      ttQuartic,
+      ttPolynomial,
+      ttCharmm,
+      ttUnknown
     };
+
+    TorsionTypeEnum getTorsionTypeEnum(const std::string& str);     
+            
+    void parseLine(ForceField& ff, const std::string& line, int lineNo);
+            
+
+    std::map<std::string, TorsionTypeEnum> stringToEnumMap_;
+  };
 
 
 } //namespace oopse

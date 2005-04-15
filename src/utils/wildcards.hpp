@@ -24,13 +24,13 @@
 
 class Wildcard
 {
-public:
+ public:
   // This function implements the UN*X wildcards and returns:
   // 0 - if *wildcard does not match *test
   // 1 - if *wildcard matches *test
   static int wildcardfit (const char *wildcard, const char *test);
        
-private:
+ private:
   // Scans a set of characters and returns 0 if the set mismatches at this
   // position in the teststring and 1 if it is matching
   // wildcard is set to the closing ] and test is unmodified if mismatched

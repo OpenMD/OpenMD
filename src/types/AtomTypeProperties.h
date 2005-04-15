@@ -26,19 +26,19 @@ typedef  struct{
 
 #ifdef  __FORTRAN90
 
-type :: AtomTypeProperties
-   SEQUENCE
-   integer :: ident
-   integer :: is_Directional
-   integer :: is_LennardJones
-   integer :: is_Charge
-   integer :: is_Dipole
-   integer :: is_SplitDipole
-   integer :: is_Quadrupole
-   integer :: is_Sticky
-   integer :: is_GayBerne
-   integer :: is_EAM
-   integer :: is_Shape
-   integer :: is_FLARB
-end type AtomTypeProperties
+  type :: AtomTypeProperties
+    SEQUENCE
+    integer :: ident
+    integer :: is_Directional
+    integer :: is_LennardJones
+    integer :: is_Charge
+    integer :: is_Dipole
+    integer :: is_SplitDipole
+    integer :: is_Quadrupole
+    integer :: is_Sticky
+    integer :: is_GayBerne
+    integer :: is_EAM
+    integer :: is_Shape
+    integer :: is_FLARB
+  end type AtomTypeProperties
 #endif

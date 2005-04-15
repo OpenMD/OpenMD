@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -49,78 +49,78 @@
 
 namespace oopse {
 
-/**
- * @class BaseAtomVisitor
- * @todo document
- */
-class BaseAtomVisitor : public BaseVisitor{
-    public:
-        virtual void visit(Atom* atom) {}
-        virtual void visit(DirectionalAtom* datom) {}
-        virtual void visit(RigidBody* rb);
-        void setVisited(Atom* atom);
-        bool isVisited(Atom* atom);
+  /**
+   * @class BaseAtomVisitor
+   * @todo document
+   */
+  class BaseAtomVisitor : public BaseVisitor{
+  public:
+    virtual void visit(Atom* atom) {}
+    virtual void visit(DirectionalAtom* datom) {}
+    virtual void visit(RigidBody* rb);
+    void setVisited(Atom* atom);
+    bool isVisited(Atom* atom);
 
-    protected:
-        BaseAtomVisitor(SimInfo* info) : BaseVisitor() {}    
-        SimInfo* info;
-};
+  protected:
+    BaseAtomVisitor(SimInfo* info) : BaseVisitor() {}    
+    SimInfo* info;
+  };
 
-/**
- * @class SSDAtomVisitor
- * @todo document
- */
-class SSDAtomVisitor : public BaseAtomVisitor{
-        public:
-            SSDAtomVisitor(SimInfo* info) : BaseAtomVisitor(info) {
-                visitorName = "SSDAtomVisitor";
-                ssdAtomType.insert("SSD");
-                ssdAtomType.insert("SSD_E");
-                ssdAtomType.insert("SSD_RF");
-                ssdAtomType.insert("SSD1");
-            }
+  /**
+   * @class SSDAtomVisitor
+   * @todo document
+   */
+  class SSDAtomVisitor : public BaseAtomVisitor{
+  public:
+    SSDAtomVisitor(SimInfo* info) : BaseAtomVisitor(info) {
+      visitorName = "SSDAtomVisitor";
+      ssdAtomType.insert("SSD");
+      ssdAtomType.insert("SSD_E");
+      ssdAtomType.insert("SSD_RF");
+      ssdAtomType.insert("SSD1");
+    }
 
-            virtual void visit(Atom* atom) {}
-            virtual void visit(DirectionalAtom* datom);       
-            virtual void visit(RigidBody* rb) {}
+    virtual void visit(Atom* atom) {}
+    virtual void visit(DirectionalAtom* datom);       
+    virtual void visit(RigidBody* rb) {}
 
-            virtual const std::string toString();
-        private:
-            inline bool isSSDAtom(const std::string& atomType);
-            std::set<std::string> ssdAtomType;   
-};
+    virtual const std::string toString();
+  private:
+    inline bool isSSDAtom(const std::string& atomType);
+    std::set<std::string> ssdAtomType;   
+  };
 
-class LinearAtomVisitor : public BaseAtomVisitor{
-    public:
-        LinearAtomVisitor(SimInfo* info) : BaseAtomVisitor(info) {
-            visitorName = "LinearAtomVisitor";
-            linearAtomType.insert("linear");
-        }
+  class LinearAtomVisitor : public BaseAtomVisitor{
+  public:
+    LinearAtomVisitor(SimInfo* info) : BaseAtomVisitor(info) {
+      visitorName = "LinearAtomVisitor";
+      linearAtomType.insert("linear");
+    }
 
-        virtual void visit(Atom* atom) {}
-        virtual void visit(DirectionalAtom* datom);       
-        virtual void visit(RigidBody* rb) {}
+    virtual void visit(Atom* atom) {}
+    virtual void visit(DirectionalAtom* datom);       
+    virtual void visit(RigidBody* rb) {}
 
-        virtual const std::string toString();
-    private:
-        inline bool isLinearAtom(const std::string& atomType);
-        std::set<std::string> linearAtomType;   
-};
-
-
+    virtual const std::string toString();
+  private:
+    inline bool isLinearAtom(const std::string& atomType);
+    std::set<std::string> linearAtomType;   
+  };
 
 
-class DefaultAtomVisitor : public BaseAtomVisitor{
-    public:
-        DefaultAtomVisitor(SimInfo* info) : BaseAtomVisitor(info) { visitorName = "DefaultAtomVisitor";}
 
-        virtual void visit(Atom* atom);    
-        virtual void visit(DirectionalAtom* datom);    
-        virtual void visit(RigidBody* rb) {}
 
-        virtual const std::string toString();
+  class DefaultAtomVisitor : public BaseAtomVisitor{
+  public:
+    DefaultAtomVisitor(SimInfo* info) : BaseAtomVisitor(info) { visitorName = "DefaultAtomVisitor";}
 
-};
+    virtual void visit(Atom* atom);    
+    virtual void visit(DirectionalAtom* datom);    
+    virtual void visit(RigidBody* rb) {}
+
+    virtual const std::string toString();
+
+  };
 
 }//namespace oopse
 #endif

@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -39,13 +39,13 @@
  * such damages.
  */
  
- /**
-  * @file MoleculeCreator.hpp
-  * @author tlin
-  * @date 11/04/2004
-  * @time 13:51am
-  * @version 1.0
-  */
+/**
+ * @file MoleculeCreator.hpp
+ * @author tlin
+ * @date 11/04/2004
+ * @time 13:51am
+ * @version 1.0
+ */
 
 #ifndef BRAINS_MOLECULECREATOR_HPP
 #define BRAINS_MOLECULECREATOR_HPP
@@ -60,32 +60,32 @@
 #include "primitives/Molecule.hpp"
 namespace oopse {
 
-/**
- * @class MoleculeCreator MoleculeCreator.hpp "brains/MoleculeCreator.hpp"
- * @brief
- */
-class MoleculeCreator {
-    public:
-        virtual Molecule* createMolecule(ForceField* ff, MoleculeStamp *molStamp,
-            int stampId, int globalIndex,  LocalIndexManager* localIndexMan);
+  /**
+   * @class MoleculeCreator MoleculeCreator.hpp "brains/MoleculeCreator.hpp"
+   * @brief
+   */
+  class MoleculeCreator {
+  public:
+    virtual Molecule* createMolecule(ForceField* ff, MoleculeStamp *molStamp,
+				     int stampId, int globalIndex,  LocalIndexManager* localIndexMan);
 
-    protected:
+  protected:
         
-        /** Create an atom by its stamp */
-        virtual Atom* createAtom(ForceField* ff, Molecule* mol, AtomStamp* stamp, 
-            LocalIndexManager* localIndexMan);
+    /** Create an atom by its stamp */
+    virtual Atom* createAtom(ForceField* ff, Molecule* mol, AtomStamp* stamp, 
+			     LocalIndexManager* localIndexMan);
 
-        virtual RigidBody* createRigidBody(MoleculeStamp *molStamp, Molecule* mol, 
-            RigidBodyStamp* rbStamp,  LocalIndexManager* localIndexMan); 
+    virtual RigidBody* createRigidBody(MoleculeStamp *molStamp, Molecule* mol, 
+				       RigidBodyStamp* rbStamp,  LocalIndexManager* localIndexMan); 
 
-        virtual Bond* createBond(ForceField* ff, Molecule* mol, BondStamp* stamp);
-        virtual Bend* createBend(ForceField* ff, Molecule* mol, BendStamp* stamp);
-        virtual Torsion* createTorsion(ForceField* ff, Molecule* mol, TorsionStamp* stamp);
-        virtual CutoffGroup* createCutoffGroup(Molecule* mol, CutoffGroupStamp* stamp);
-        virtual CutoffGroup* createCutoffGroup(Molecule * mol, Atom* atom);
-        virtual void createConstraintPair(Molecule* mol);     
-        virtual void createConstraintElem(Molecule* mol);
-};
+    virtual Bond* createBond(ForceField* ff, Molecule* mol, BondStamp* stamp);
+    virtual Bend* createBend(ForceField* ff, Molecule* mol, BendStamp* stamp);
+    virtual Torsion* createTorsion(ForceField* ff, Molecule* mol, TorsionStamp* stamp);
+    virtual CutoffGroup* createCutoffGroup(Molecule* mol, CutoffGroupStamp* stamp);
+    virtual CutoffGroup* createCutoffGroup(Molecule * mol, Atom* atom);
+    virtual void createConstraintPair(Molecule* mol);     
+    virtual void createConstraintElem(Molecule* mol);
+  };
 
 
 }

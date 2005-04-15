@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -46,7 +46,7 @@
 
 class BendStamp{
 
-public:
+ public:
   BendStamp();
   ~BendStamp();
   
@@ -64,7 +64,7 @@ public:
   int haveExtras( void ) { return have_extras; }
   LinkedAssign* getExtras( void ) { return unhandled; }
   
-private:
+ private:
 
   int a, b, c; //the members
   double constraint;

@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -44,100 +44,100 @@
 #include "brains/SimInfo.hpp"
 namespace oopse {
 
-// base class of minimizer's parameter set
+  // base class of minimizer's parameter set
 
-class MinimizerParameterSet {
-    public:
+  class MinimizerParameterSet {
+  public:
 
-        MinimizerParameterSet(SimInfo* info);
+    MinimizerParameterSet(SimInfo* info);
 
-        void setDefaultParameter();
+    void setDefaultParameter();
 
-        void setStepTol(double tol) {
-            stepTol = tol;
-        }
+    void setStepTol(double tol) {
+      stepTol = tol;
+    }
 
-        double getStepTol() {
-            return stepTol;
-        }
+    double getStepTol() {
+      return stepTol;
+    }
 
-        void setStepSize(double size) {
-            stepSize = size;
-        }
+    void setStepSize(double size) {
+      stepSize = size;
+    }
 
-        double getStepSize() {
-            return stepSize;
-        }
+    double getStepSize() {
+      return stepSize;
+    }
 
-        void setMaxIteration(int iter) {
-            maxIteration = iter;
-        }
+    void setMaxIteration(int iter) {
+      maxIteration = iter;
+    }
 
-        int getMaxIteration() {
-            return maxIteration;
-        }
+    int getMaxIteration() {
+      return maxIteration;
+    }
 
-        void setFTol(double tol) {
-            fTol = tol;
-        }
+    void setFTol(double tol) {
+      fTol = tol;
+    }
 
-        double getFTol() {
-            return fTol;
-        }
+    double getFTol() {
+      return fTol;
+    }
 
-        void setGTol(double tol) {
-            gTol = tol;
-        }
+    void setGTol(double tol) {
+      gTol = tol;
+    }
 
-        double getGTol() {
-            return gTol;
-        }
+    double getGTol() {
+      return gTol;
+    }
 
-        void setLineSearchTol(double tol) {
-            lsTol = tol;
-        }
+    void setLineSearchTol(double tol) {
+      lsTol = tol;
+    }
 
-        double getLineSearchTol() {
-            return lsTol;
-        }
+    double getLineSearchTol() {
+      return lsTol;
+    }
 
-        void setLineSearchMaxIteration(int iter) {
-            lsMaxIteration = iter;
-        }
+    void setLineSearchMaxIteration(int iter) {
+      lsMaxIteration = iter;
+    }
 
-        int getLineSearchMaxIteration() {
-            return lsMaxIteration;
-        }
+    int getLineSearchMaxIteration() {
+      return lsMaxIteration;
+    }
 
-        void setWriteFrq(int frq) {
-            writeFrq = frq;
-        }
+    void setWriteFrq(int frq) {
+      writeFrq = frq;
+    }
 
-        int getWriteFrq() {
-            return writeFrq;
-        }
+    int getWriteFrq() {
+      return writeFrq;
+    }
 
-    protected:
+  protected:
 
-        int maxIteration;
+    int maxIteration;
 
-        double stepTol;
+    double stepTol;
 
-        double fTol;
+    double fTol;
 
-        double gTol;
+    double gTol;
 
-        double stepSize;
+    double stepSize;
 
-        int lsMaxIteration;
+    int lsMaxIteration;
 
-        double lsTol;
+    double lsTol;
 
-        int writeFrq;
+    int writeFrq;
 
-        const double  defaultTolerance;
+    const double  defaultTolerance;
 
-};
+  };
 
 }
 #endif

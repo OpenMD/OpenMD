@@ -50,193 +50,193 @@
 namespace oopse {
 
 
-/**
- * @class SelectionCompiler SelectionCompiler.hpp "selection/SelectionCompiler.hpp"
- * @brief compile a selection script to tokens
- * @todo document
- * <pre>
+  /**
+   * @class SelectionCompiler SelectionCompiler.hpp "selection/SelectionCompiler.hpp"
+   * @brief compile a selection script to tokens
+   * @todo document
+   * <pre>
 
-    expression       :: = clauseOr
+   expression       :: = clauseOr
 
-    clauseOr         ::= clauseAnd {OR clauseAnd}*
+   clauseOr         ::= clauseAnd {OR clauseAnd}*
 
-    clauseAnd        ::= clauseNot {AND clauseNot}*
+   clauseAnd        ::= clauseNot {AND clauseNot}*
 
-    clauseNot        ::= NOT clauseNot | clausePrimitive
+   clauseNot        ::= NOT clauseNot | clausePrimitive
 
-    clausePrimitive  ::= clauseComparator |
-                         clauseWithin |
-                         clauseName |
-                         none | all |
-                         ( clauseOr )
+   clausePrimitive  ::= clauseComparator |
+   clauseWithin |
+   clauseName |
+   none | all |
+   ( clauseOr )
 
-    clauseComparator ::= atomproperty comparatorop integer
+   clauseComparator ::= atomproperty comparatorop integer
 
-    clauseWithin     ::= WITHIN ( clauseDistance , expression )
+   clauseWithin     ::= WITHIN ( clauseDistance , expression )
 
-    clauseDistance   ::= integer | decimal
+   clauseDistance   ::= integer | decimal
         
-    clauseName::= *|string{.string{.string}}
+   clauseName::= *|string{.string{.string}}
 
 
- * </pre>
- */
-class SelectionCompiler{
-    public:
-        bool compile(const std::string& filename, const std::string& script );
+   * </pre>
+   */
+  class SelectionCompiler{
+  public:
+    bool compile(const std::string& filename, const std::string& script );
         
 
-        std::vector<int> getLineNumbers() {
-            return lineNumbers;
-        }
+    std::vector<int> getLineNumbers() {
+      return lineNumbers;
+    }
 
-        std::vector<int> getLineIndices() {
-            return lineIndices;
-        }
+    std::vector<int> getLineIndices() {
+      return lineIndices;
+    }
 
-        std::vector<std::vector<Token> > getAatokenCompiled() {
-            return aatokenCompiled;
-        }
+    std::vector<std::vector<Token> > getAatokenCompiled() {
+      return aatokenCompiled;
+    }
 
-        std::string getErrorMessage() {
-            std::string strError = errorMessage;
-            strError += " : " + errorLine + "\n";
+    std::string getErrorMessage() {
+      std::string strError = errorMessage;
+      strError += " : " + errorLine + "\n";
 
-            if (!filename.empty()) {
-                strError += filename;
-            }
+      if (!filename.empty()) {
+	strError += filename;
+      }
 
-            return strError;
-        }
+      return strError;
+    }
 
         
-    private:
+  private:
 
-        bool internalCompile();
+    bool internalCompile();
 
 
-        bool lookingAtLeadingWhitespace();
-        //bool lookingAtComment();
-        bool lookingAtEndOfLine();
-        bool lookingAtEndOfStatement();
-        bool lookingAtString();
-        bool lookingAtDecimal(bool allowNegative);
-        bool lookingAtInteger(bool allowNegative);
-        bool lookingAtLookupToken();
-        bool lookingAtSpecialString();
+    bool lookingAtLeadingWhitespace();
+    //bool lookingAtComment();
+    bool lookingAtEndOfLine();
+    bool lookingAtEndOfStatement();
+    bool lookingAtString();
+    bool lookingAtDecimal(bool allowNegative);
+    bool lookingAtInteger(bool allowNegative);
+    bool lookingAtLookupToken();
+    bool lookingAtSpecialString();
 
-        std::string getUnescapedStringLiteral();
-        int getHexitValue(char ch);        
+    std::string getUnescapedStringLiteral();
+    int getHexitValue(char ch);        
 
-        bool compileCommand(const std::vector<Token>& ltoken);
-        bool compileExpression();        
-        bool compileExpression(int itoken);        
+    bool compileCommand(const std::vector<Token>& ltoken);
+    bool compileExpression();        
+    bool compileExpression(int itoken);        
         
-        bool clauseOr();
-        bool clauseAnd();
-        bool clauseNot();
-        bool clausePrimitive();
-        bool clauseWithin();
-        bool clauseComparator();
-        bool clauseChemObjName();        
-        bool clauseIndex();
-        Token tokenNext();
-        boost::any valuePeek();
-        int tokPeek();
+    bool clauseOr();
+    bool clauseAnd();
+    bool clauseNot();
+    bool clausePrimitive();
+    bool clauseWithin();
+    bool clauseComparator();
+    bool clauseChemObjName();        
+    bool clauseIndex();
+    Token tokenNext();
+    boost::any valuePeek();
+    int tokPeek();
 
-        bool addTokenToPostfix(const Token& token);
-        bool isNameValid(const std::string& name);
+    bool addTokenToPostfix(const Token& token);
+    bool isNameValid(const std::string& name);
 
-        bool compileError(const std::string& errorMsg) {
-            std::cerr << "SelectionCompiler Error: " << errorMsg << std::endl;
-            error = true;
-            this->errorMessage = errorMsg;
-            return false;
-        }
+    bool compileError(const std::string& errorMsg) {
+      std::cerr << "SelectionCompiler Error: " << errorMsg << std::endl;
+      error = true;
+      this->errorMessage = errorMsg;
+      return false;
+    }
         
-        bool commandExpected() {
-            return compileError("command expected");
-        }
+    bool commandExpected() {
+      return compileError("command expected");
+    }
 
-        bool invalidExpressionToken(const std::string& ident) {
-            return compileError("invalid expression token:" + ident);
-        }
+    bool invalidExpressionToken(const std::string& ident) {
+      return compileError("invalid expression token:" + ident);
+    }
 
-        bool unrecognizedToken() {
-            return compileError("unrecognized token");
-        }
+    bool unrecognizedToken() {
+      return compileError("unrecognized token");
+    }
 
-        bool badArgumentCount() {
-            return compileError("bad argument count");
-        }
+    bool badArgumentCount() {
+      return compileError("bad argument count");
+    }
 
-        bool endOfExpressionExpected() {
-            return compileError("end of expression expected");
-        }
+    bool endOfExpressionExpected() {
+      return compileError("end of expression expected");
+    }
 
-        bool leftParenthesisExpected() {
-            return compileError("left parenthesis expected");
-        }
+    bool leftParenthesisExpected() {
+      return compileError("left parenthesis expected");
+    }
 
-        bool rightParenthesisExpected() {
-            return compileError("right parenthesis expected");
-        }
+    bool rightParenthesisExpected() {
+      return compileError("right parenthesis expected");
+    }
 
-        bool commaExpected() {
-            return compileError("comma expected");
-        }
+    bool commaExpected() {
+      return compileError("comma expected");
+    }
 
-        bool unrecognizedExpressionToken() {
-            boost::any tmp = valuePeek();
-            std::string tokenStr;
+    bool unrecognizedExpressionToken() {
+      boost::any tmp = valuePeek();
+      std::string tokenStr;
 
-            try {
-                tokenStr = boost::any_cast<std::string>(tmp);                
-            } catch(const boost::bad_any_cast &) {
-                return compileError("any_cast error");
-            }
+      try {
+	tokenStr = boost::any_cast<std::string>(tmp);                
+      } catch(const boost::bad_any_cast &) {
+	return compileError("any_cast error");
+      }
             
-            return compileError("unrecognized expression token:" + tokenStr);
-        }
+      return compileError("unrecognized expression token:" + tokenStr);
+    }
 
-        bool comparisonOperatorExpected() {
-            return compileError("comparison operator expected");
-        }
+    bool comparisonOperatorExpected() {
+      return compileError("comparison operator expected");
+    }
 
-        bool numberExpected() {
-            return compileError("number expected");
-        }        
+    bool numberExpected() {
+      return compileError("number expected");
+    }        
         
-        bool numberOrKeywordExpected() {
-            return compileError("number or keyword expected");
-        }        
+    bool numberOrKeywordExpected() {
+      return compileError("number or keyword expected");
+    }        
         
-        std::string filename;
-        std::string script;
+    std::string filename;
+    std::string script;
 
-        std::vector<int> lineNumbers;
-        std::vector<int> lineIndices;
-        std::vector<std::vector<Token> >aatokenCompiled;
+    std::vector<int> lineNumbers;
+    std::vector<int> lineIndices;
+    std::vector<std::vector<Token> >aatokenCompiled;
 
-        bool error;
-        std::string errorMessage;
-        std::string errorLine;
+    bool error;
+    std::string errorMessage;
+    std::string errorLine;
 
-        int cchScript;
-        short lineCurrent;
+    int cchScript;
+    short lineCurrent;
 
-        int ichToken;
-        int cchToken;
-        std::vector<Token> atokenCommand;
+    int ichToken;
+    int cchToken;
+    std::vector<Token> atokenCommand;
 
-        int ichCurrentCommand;
+    int ichCurrentCommand;
 
-        std::vector<Token> ltokenPostfix;
-        std::vector<Token> atokenInfix;
-        int itokenInfix;
+    std::vector<Token> ltokenPostfix;
+    std::vector<Token> atokenInfix;
+    int itokenInfix;
 
-        //std::vector<Token> compiledTokens_;
-};
+    //std::vector<Token> compiledTokens_;
+  };
 
 }
 #endif

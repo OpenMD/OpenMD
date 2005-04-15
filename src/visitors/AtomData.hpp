@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -49,49 +49,49 @@
 
 namespace oopse {
 
-struct AtomInfo {
+  struct AtomInfo {
     std::string atomTypeName;
     Vector3d pos;
     Vector3d dipole;  
-};
+  };
 
-class AtomData : public GenericData{
-    public:
+  class AtomData : public GenericData{
+  public:
 
-        AtomData(const std::string& id = "ATOMDATA") : GenericData(id) {}
+    AtomData(const std::string& id = "ATOMDATA") : GenericData(id) {}
 
-        ~AtomData() {
-            std::vector<AtomInfo*>::iterator i;
-            AtomInfo* atomInfo;
+    ~AtomData() {
+      std::vector<AtomInfo*>::iterator i;
+      AtomInfo* atomInfo;
 
-            for(atomInfo = beginAtomInfo(i); atomInfo; atomInfo  = nextAtomInfo(i)) {
-                delete atomInfo;
-            }
-            data.clear();
-        }
+      for(atomInfo = beginAtomInfo(i); atomInfo; atomInfo  = nextAtomInfo(i)) {
+	delete atomInfo;
+      }
+      data.clear();
+    }
         
-        void addAtomInfo(AtomInfo* info) {data.push_back(info);}
+    void addAtomInfo(AtomInfo* info) {data.push_back(info);}
 
-        void clearAllAtomInfo();
+    void clearAllAtomInfo();
 
-        AtomInfo* beginAtomInfo(std::vector<AtomInfo*>::iterator& i){
-            i = data.begin();
-            return i != data.end()? *i : NULL;
-        }
+    AtomInfo* beginAtomInfo(std::vector<AtomInfo*>::iterator& i){
+      i = data.begin();
+      return i != data.end()? *i : NULL;
+    }
 
-        AtomInfo* nextAtomInfo(std::vector<AtomInfo*>::iterator& i){
-            ++i;
-            return i != data.end()? *i: NULL;
-        }
+    AtomInfo* nextAtomInfo(std::vector<AtomInfo*>::iterator& i){
+      ++i;
+      return i != data.end()? *i: NULL;
+    }
 
-        std::vector<AtomInfo*> getData() {return data;}
+    std::vector<AtomInfo*> getData() {return data;}
 
-        int getSize() {return data.size();}
+    int getSize() {return data.size();}
 
-    protected:
+  protected:
 
-        std::vector<AtomInfo*> data;
-};
+    std::vector<AtomInfo*> data;
+  };
 
 
 }

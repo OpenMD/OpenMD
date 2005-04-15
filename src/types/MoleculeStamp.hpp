@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -54,7 +54,7 @@
 
 class MoleculeStamp{
 
-public:
+ public:
   MoleculeStamp();
   ~MoleculeStamp();
 
@@ -90,13 +90,13 @@ public:
   bool isBondInSameRigidBody(BondStamp*bond);
   bool isAtomInRigidBody(int atomIndex);  
   bool isAtomInRigidBody(int atomIndex, int& whichRigidBody, int& consAtomIndex);  
-   std::vector<std::pair<int, int> > getJointAtoms(int rb1, int rb2);
+  std::vector<std::pair<int, int> > getJointAtoms(int rb1, int rb2);
   
   int haveExtras( void ) { return have_extras; }
   LinkedAssign* getUnhandled( void ) { return unhandled; }
   
   static char errMsg[500];
-private:
+ private:
   
   
   char name[100];

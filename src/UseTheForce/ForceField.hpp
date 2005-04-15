@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -39,13 +39,13 @@
  * such damages.
  */
  
- /**
-  * @file ForceField.hpp
-  * @author tlin
-  * @date 11/04/2004
-  * @time 22:51am
-  * @version 1.0
-  */
+/**
+ * @file ForceField.hpp
+ * @author tlin
+ * @date 11/04/2004
+ * @time 22:51am
+ * @version 1.0
+ */
   
 #ifndef USETHEFORCE_FORCEFIELD_HPP
 #define USETHEFORCE_FORCEFIELD_HPP
@@ -65,90 +65,90 @@
 
 namespace oopse {
 
-/**
- * @class ForceField ForceField.hpp ''UseTheForce/ForceField.hpp"
- * @brief
- */
-class ForceField{
+  /**
+   * @class ForceField ForceField.hpp ''UseTheForce/ForceField.hpp"
+   * @brief
+   */
+  class ForceField{
 
-    public:
+  public:
 
-        typedef TypeContainer<AtomType, 1> AtomTypeContainer;
-        typedef TypeContainer<BondType, 2> BondTypeContainer;
-        typedef TypeContainer<BendType, 3> BendTypeContainer;
-        typedef TypeContainer<TorsionType, 4> TorsionTypeContainer;
+    typedef TypeContainer<AtomType, 1> AtomTypeContainer;
+    typedef TypeContainer<BondType, 2> BondTypeContainer;
+    typedef TypeContainer<BendType, 3> BendTypeContainer;
+    typedef TypeContainer<TorsionType, 4> TorsionTypeContainer;
         
-        ForceField(); 
+    ForceField(); 
 
-        virtual ~ForceField();
+    virtual ~ForceField();
 
-        std::string getForceFieldFileName() {
-            return forceFieldFileName_;
-        }
+    std::string getForceFieldFileName() {
+      return forceFieldFileName_;
+    }
 
-        void setForceFieldFileName(const std::string& filename) {
-            forceFieldFileName_ = filename;
-        }
+    void setForceFieldFileName(const std::string& filename) {
+      forceFieldFileName_ = filename;
+    }
         
-        virtual void parse(const std::string& filename) = 0;  
+    virtual void parse(const std::string& filename) = 0;  
 
-        AtomType* getAtomType(const std::string &at);
-        BondType* getBondType(const std::string &at1, const std::string &at2);
-        BendType* getBendType(const std::string &at1, const std::string &at2,
-                                    const std::string &at3);
-        TorsionType* getTorsionType(const std::string &at1, const std::string &at2,
-                                          const std::string &at3, const std::string &at4);
+    AtomType* getAtomType(const std::string &at);
+    BondType* getBondType(const std::string &at1, const std::string &at2);
+    BendType* getBendType(const std::string &at1, const std::string &at2,
+			  const std::string &at3);
+    TorsionType* getTorsionType(const std::string &at1, const std::string &at2,
+				const std::string &at3, const std::string &at4);
 
-        BondType* getExactBondType(const std::string &at1, const std::string &at2);
-        BendType* getExactBendType(const std::string &at1, const std::string &at2,
-                                    const std::string &at3);
-        TorsionType* getExactTorsionType(const std::string &at1, const std::string &at2,
-                                          const std::string &at3, const std::string &at4);
-
-
-        //avoid make virtual function public
-        //Herb Sutter and Andrei Alexandrescu, C++ coding Standards, Addision-Wesley
-        virtual double getRcutFromAtomType(AtomType* at);
-
-        std::string getWildCard() {
-            return wildCardAtomTypeName_;
-        }
-
-        void setWildCard(const std::string& wildCard) {
-            wildCardAtomTypeName_ = wildCard;
-        }
+    BondType* getExactBondType(const std::string &at1, const std::string &at2);
+    BendType* getExactBendType(const std::string &at1, const std::string &at2,
+			       const std::string &at3);
+    TorsionType* getExactTorsionType(const std::string &at1, const std::string &at2,
+				     const std::string &at3, const std::string &at4);
 
 
-        unsigned int getNAtomType() {
-            return atomTypeCont_.size();
-        }
+    //avoid make virtual function public
+    //Herb Sutter and Andrei Alexandrescu, C++ coding Standards, Addision-Wesley
+    virtual double getRcutFromAtomType(AtomType* at);
+
+    std::string getWildCard() {
+      return wildCardAtomTypeName_;
+    }
+
+    void setWildCard(const std::string& wildCard) {
+      wildCardAtomTypeName_ = wildCard;
+    }
+
+
+    unsigned int getNAtomType() {
+      return atomTypeCont_.size();
+    }
         
-        bool addAtomType(const std::string &at, AtomType* atomType);
+    bool addAtomType(const std::string &at, AtomType* atomType);
 
-        bool addBondType(const std::string &at1, const std::string &at2, BondType* bondType);
+    bool addBondType(const std::string &at1, const std::string &at2, BondType* bondType);
 
-        bool addBendType(const std::string &at1, const std::string &at2,
-                                    const std::string &at3, BendType* bendType);
+    bool addBendType(const std::string &at1, const std::string &at2,
+		     const std::string &at3, BendType* bendType);
 
-        bool addTorsionType(const std::string &at1, const std::string &at2,
-                                          const std::string &at3, const std::string &at4, TorsionType* torsionType);
+    bool addTorsionType(const std::string &at1, const std::string &at2,
+			const std::string &at3, const std::string &at4, TorsionType* torsionType);
 
-        ifstrstream* openForceFieldFile(const std::string& filename);
+    ifstrstream* openForceFieldFile(const std::string& filename);
 
-    protected:
+  protected:
 
-        AtomTypeContainer atomTypeCont_;    
-        BondTypeContainer bondTypeCont_;
-        BendTypeContainer bendTypeCont_;
-        TorsionTypeContainer torsionTypeCont_;
+    AtomTypeContainer atomTypeCont_;    
+    BondTypeContainer bondTypeCont_;
+    BendTypeContainer bendTypeCont_;
+    TorsionTypeContainer torsionTypeCont_;
         
-    private:  
-        std::string ffPath_;
+  private:  
+    std::string ffPath_;
 
-        std::string wildCardAtomTypeName_;
+    std::string wildCardAtomTypeName_;
 
-        std::string forceFieldFileName_;
-};
+    std::string forceFieldFileName_;
+  };
 
  
 }//end namespace oopse

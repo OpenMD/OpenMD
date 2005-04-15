@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -49,51 +49,51 @@
 
 
 namespace oopse {
-ZConsWriter::ZConsWriter(SimInfo* info, const std::string& filename) : info_(info) {
-  //use master - slave mode, only master node writes to disk
+  ZConsWriter::ZConsWriter(SimInfo* info, const std::string& filename) : info_(info) {
+    //use master - slave mode, only master node writes to disk
 #ifdef IS_MPI
     if(worldRank == 0){
 #endif
 
-    output_.open(filename.c_str());
+      output_.open(filename.c_str());
 
-    if(!output_){
-         sprintf( painCave.errMsg,
-                  "Could not open %s for z constrain output_ \n", filename.c_str());
-         painCave.isFatal = 1;
-         simError();
-    }
+      if(!output_){
+	sprintf( painCave.errMsg,
+		 "Could not open %s for z constrain output_ \n", filename.c_str());
+	painCave.isFatal = 1;
+	simError();
+      }
 
-    output_ << "//time(fs)" << std::endl;
-    output_ << "//number of fixed z-constrain molecules" << std::endl;
-    output_ << "//global Index of molecule\tzconstrain force\tcurrentZPos" << std::endl;
+      output_ << "//time(fs)" << std::endl;
+      output_ << "//number of fixed z-constrain molecules" << std::endl;
+      output_ << "//global Index of molecule\tzconstrain force\tcurrentZPos" << std::endl;
 
 #ifdef IS_MPI
     }
 #endif  
 
-}
-
-ZConsWriter::~ZConsWriter()
-{
-
-#ifdef IS_MPI
-  if(worldRank == 0 ){
-#endif  
-  output_.close();  
-#ifdef IS_MPI  
   }
-#endif
-}
 
-void ZConsWriter::writeFZ(const std::list<ZconstraintMol>& fixedZmols){
+  ZConsWriter::~ZConsWriter()
+  {
+
+#ifdef IS_MPI
+    if(worldRank == 0 ){
+#endif  
+      output_.close();  
+#ifdef IS_MPI  
+    }
+#endif
+  }
+
+  void ZConsWriter::writeFZ(const std::list<ZconstraintMol>& fixedZmols){
 #ifndef IS_MPI
     output_ << info_->getSnapshotManager()->getCurrentSnapshot()->getTime() << std::endl;
     output_ << fixedZmols.size() << std::endl;
 
     std::list<ZconstraintMol>::const_iterator i;
     for ( i = fixedZmols.begin(); i != fixedZmols.end(); ++i) {
-        output_ << i->mol->getGlobalIndex() <<"\t" << i->fz << "\t" << i->zpos << "\t" << i->param.zTargetPos <<std::endl;
+      output_ << i->mol->getGlobalIndex() <<"\t" << i->fz << "\t" << i->zpos << "\t" << i->param.zTargetPos <<std::endl;
     }
 #else
     int nproc;
@@ -114,56 +114,56 @@ void ZConsWriter::writeFZ(const std::list<ZconstraintMol>& fixedZmols){
     
     if (masterNode == 0) {
 
-        std::vector<ZconsData> zconsData;
-        ZconsData tmpData;       
-        for(int i =0 ; i < nproc; ++i) {
-            if (i == masterNode) {
-                std::list<ZconstraintMol>::const_iterator j;
-                for ( j = fixedZmols.begin(); j != fixedZmols.end(); ++j) {
-                    tmpData.zmolIndex = j->mol->getGlobalIndex() ;
-                    tmpData.zforce= j->fz;
-                    tmpData.zpos = j->zpos;
-                    tmpData.zconsPos = j->param.zTargetPos;
-                    zconsData.push_back(tmpData);
-                }                
+      std::vector<ZconsData> zconsData;
+      ZconsData tmpData;       
+      for(int i =0 ; i < nproc; ++i) {
+	if (i == masterNode) {
+	  std::list<ZconstraintMol>::const_iterator j;
+	  for ( j = fixedZmols.begin(); j != fixedZmols.end(); ++j) {
+	    tmpData.zmolIndex = j->mol->getGlobalIndex() ;
+	    tmpData.zforce= j->fz;
+	    tmpData.zpos = j->zpos;
+	    tmpData.zconsPos = j->param.zTargetPos;
+	    zconsData.push_back(tmpData);
+	  }                
 
-            } else {
-                for(int k =0 ; k < nFixedZmolsInProc[i]; ++k) {
-                    MPI_Recv(&zmolIndex, 1, MPI_INT, i, 0, MPI_COMM_WORLD,&ierr);
-                    MPI_Recv(data, 3, MPI_DOUBLE, i, 0, MPI_COMM_WORLD,&ierr);
-                    tmpData.zmolIndex = zmolIndex;
-                    tmpData.zforce= data[0];
-                    tmpData.zpos = data[1];
-                    tmpData.zconsPos = data[2];
-                    zconsData.push_back(tmpData);                                        
-                }
-            }
+	} else {
+	  for(int k =0 ; k < nFixedZmolsInProc[i]; ++k) {
+	    MPI_Recv(&zmolIndex, 1, MPI_INT, i, 0, MPI_COMM_WORLD,&ierr);
+	    MPI_Recv(data, 3, MPI_DOUBLE, i, 0, MPI_COMM_WORLD,&ierr);
+	    tmpData.zmolIndex = zmolIndex;
+	    tmpData.zforce= data[0];
+	    tmpData.zpos = data[1];
+	    tmpData.zconsPos = data[2];
+	    zconsData.push_back(tmpData);                                        
+	  }
+	}
             
-        }
+      }
 
 
-        output_ << info_->getSnapshotManager()->getCurrentSnapshot()->getTime() << std::endl;
-        output_ << zconsData.size() << std::endl;
+      output_ << info_->getSnapshotManager()->getCurrentSnapshot()->getTime() << std::endl;
+      output_ << zconsData.size() << std::endl;
 
-        std::vector<ZconsData>::iterator l;
-        for (l = zconsData.begin(); l != zconsData.end(); ++l) {
-            output_ << l->zmolIndex << "\t" << l->zforce << "\t" << l->zpos << "\t" <<  l->zconsPos << std::endl;
-        }
+      std::vector<ZconsData>::iterator l;
+      for (l = zconsData.begin(); l != zconsData.end(); ++l) {
+	output_ << l->zmolIndex << "\t" << l->zforce << "\t" << l->zpos << "\t" <<  l->zconsPos << std::endl;
+      }
         
     } else {
 
-        std::list<ZconstraintMol>::const_iterator j;
-        for (j = fixedZmols.begin(); j != fixedZmols.end(); ++j) {
-            zmolIndex = j->mol->getGlobalIndex();            
-            data[0] = j->fz;
-            data[1] = j->zpos;
-            data[2] = j->param.zTargetPos;
-            MPI_Send(&zmolIndex, 1, MPI_INT, masterNode, 0, MPI_COMM_WORLD);
-            MPI_Send(data, 3, MPI_DOUBLE, masterNode, 0, MPI_COMM_WORLD);
+      std::list<ZconstraintMol>::const_iterator j;
+      for (j = fixedZmols.begin(); j != fixedZmols.end(); ++j) {
+	zmolIndex = j->mol->getGlobalIndex();            
+	data[0] = j->fz;
+	data[1] = j->zpos;
+	data[2] = j->param.zTargetPos;
+	MPI_Send(&zmolIndex, 1, MPI_INT, masterNode, 0, MPI_COMM_WORLD);
+	MPI_Send(data, 3, MPI_DOUBLE, masterNode, 0, MPI_COMM_WORLD);
             
-        }
+      }
     }
 #endif
-}
+  }
 
 }

@@ -44,29 +44,29 @@
 #include "applications/staticProps/RadialDistrFunc.hpp"
 namespace oopse {
 
-class GofAngle2 : public RadialDistrFunc {
+  class GofAngle2 : public RadialDistrFunc {
     
-    public:
-        GofAngle2(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2, int nangleBins);
+  public:
+    GofAngle2(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2, int nangleBins);
    
-        int getNAngleBins() {return nAngleBins_;}
+    int getNAngleBins() {return nAngleBins_;}
         
-    private:
+  private:
 
-        virtual void preProcess();
-        virtual void initalizeHistogram();
-        virtual void collectHistogram(StuntDouble* sd1, StuntDouble* sd2);
-        virtual void processHistogram();
+    virtual void preProcess();
+    virtual void initalizeHistogram();
+    virtual void collectHistogram(StuntDouble* sd1, StuntDouble* sd2);
+    virtual void processHistogram();
 
-        virtual void writeRdf();
+    virtual void writeRdf();
 
-        double deltaCosAngle_;
-        int nAngleBins_;
+    double deltaCosAngle_;
+    int nAngleBins_;
         
-        std::vector<std::vector<int> > histogram_;
-        std::vector<std::vector<int> > avgGofr_;
-        int npairs_;
-};
+    std::vector<std::vector<int> > histogram_;
+    std::vector<std::vector<int> > avgGofr_;
+    int npairs_;
+  };
 
 }
 #endif

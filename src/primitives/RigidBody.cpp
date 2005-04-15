@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -45,52 +45,52 @@
 #include "utils/NumericConstant.hpp"
 namespace oopse {
 
-RigidBody::RigidBody() : StuntDouble(otRigidBody, &Snapshot::rigidbodyData), inertiaTensor_(0.0){
+  RigidBody::RigidBody() : StuntDouble(otRigidBody, &Snapshot::rigidbodyData), inertiaTensor_(0.0){
 
-}
+  }
 
-void RigidBody::setPrevA(const RotMat3x3d& a) {
+  void RigidBody::setPrevA(const RotMat3x3d& a) {
     ((snapshotMan_->getPrevSnapshot())->*storage_).aMat[localIndex_] = a;
     //((snapshotMan_->getPrevSnapshot())->*storage_).electroFrame[localIndex_] = a.transpose() * sU_;
 
     for (int i =0 ; i < atoms_.size(); ++i){
-        if (atoms_[i]->isDirectional()) {
-            atoms_[i]->setPrevA(a * refOrients_[i]);
-        }
+      if (atoms_[i]->isDirectional()) {
+	atoms_[i]->setPrevA(a * refOrients_[i]);
+      }
     }
 
-}
+  }
 
       
-void RigidBody::setA(const RotMat3x3d& a) {
+  void RigidBody::setA(const RotMat3x3d& a) {
     ((snapshotMan_->getCurrentSnapshot())->*storage_).aMat[localIndex_] = a;
     //((snapshotMan_->getCurrentSnapshot())->*storage_).electroFrame[localIndex_] = a.transpose() * sU_;
 
     for (int i =0 ; i < atoms_.size(); ++i){
-        if (atoms_[i]->isDirectional()) {
-            atoms_[i]->setA(a * refOrients_[i]);
-        }
+      if (atoms_[i]->isDirectional()) {
+	atoms_[i]->setA(a * refOrients_[i]);
+      }
     }
-}    
+  }    
     
-void RigidBody::setA(const RotMat3x3d& a, int snapshotNo) {
+  void RigidBody::setA(const RotMat3x3d& a, int snapshotNo) {
     ((snapshotMan_->getSnapshot(snapshotNo))->*storage_).aMat[localIndex_] = a;
     //((snapshotMan_->getSnapshot(snapshotNo))->*storage_).electroFrame[localIndex_] = a.transpose() * sU_;    
 
     for (int i =0 ; i < atoms_.size(); ++i){
-        if (atoms_[i]->isDirectional()) {
-            atoms_[i]->setA(a * refOrients_[i], snapshotNo);
-        }
+      if (atoms_[i]->isDirectional()) {
+	atoms_[i]->setA(a * refOrients_[i], snapshotNo);
+      }
     }
 
-}   
+  }   
 
-Mat3x3d RigidBody::getI() {
+  Mat3x3d RigidBody::getI() {
     return inertiaTensor_;
-}    
+  }    
 
-std::vector<double> RigidBody::getGrad() {
-     std::vector<double> grad(6, 0.0);
+  std::vector<double> RigidBody::getGrad() {
+    std::vector<double> grad(6, 0.0);
     Vector3d force;
     Vector3d torque;
     Vector3d myEuler;
@@ -129,60 +129,60 @@ std::vector<double> RigidBody::getGrad() {
 
     //gradient is equal to -force
     for (int j = 0 ; j<3; j++)
-        grad[j] = -force[j];
+      grad[j] = -force[j];
 
     for (int j = 0; j < 3; j++ ) {
 
-        grad[3] += torque[j]*ephi[j];
-        grad[4] += torque[j]*etheta[j];
-        grad[5] += torque[j]*epsi[j];
+      grad[3] += torque[j]*ephi[j];
+      grad[4] += torque[j]*etheta[j];
+      grad[5] += torque[j]*epsi[j];
 
     }
     
     return grad;
-}    
+  }    
 
-void RigidBody::accept(BaseVisitor* v) {
+  void RigidBody::accept(BaseVisitor* v) {
     v->visit(this);
-}    
+  }    
 
-/**@todo need modification */
-void  RigidBody::calcRefCoords() {
+  /**@todo need modification */
+  void  RigidBody::calcRefCoords() {
     double mtmp;
     Vector3d refCOM(0.0);
     mass_ = 0.0;
     for (std::size_t i = 0; i < atoms_.size(); ++i) {
-        mtmp = atoms_[i]->getMass();
-        mass_ += mtmp;
-        refCOM += refCoords_[i]*mtmp;
+      mtmp = atoms_[i]->getMass();
+      mass_ += mtmp;
+      refCOM += refCoords_[i]*mtmp;
     }
     refCOM /= mass_;
 
     // Next, move the origin of the reference coordinate system to the COM:
     for (std::size_t i = 0; i < atoms_.size(); ++i) {
-        refCoords_[i] -= refCOM;
+      refCoords_[i] -= refCOM;
     }
 
-// Moment of Inertia calculation
+    // Moment of Inertia calculation
     Mat3x3d Itmp(0.0);
   
     for (std::size_t i = 0; i < atoms_.size(); i++) {
-        mtmp = atoms_[i]->getMass();
-        Itmp -= outProduct(refCoords_[i], refCoords_[i]) * mtmp;
-        double r2 = refCoords_[i].lengthSquare();
-        Itmp(0, 0) += mtmp * r2;
-        Itmp(1, 1) += mtmp * r2;
-        Itmp(2, 2) += mtmp * r2;
+      mtmp = atoms_[i]->getMass();
+      Itmp -= outProduct(refCoords_[i], refCoords_[i]) * mtmp;
+      double r2 = refCoords_[i].lengthSquare();
+      Itmp(0, 0) += mtmp * r2;
+      Itmp(1, 1) += mtmp * r2;
+      Itmp(2, 2) += mtmp * r2;
     }
 
     //project the inertial moment of directional atoms into this rigid body
     for (std::size_t i = 0; i < atoms_.size(); i++) {
-        if (atoms_[i]->isDirectional()) {
-            RectMatrix<double, 3, 3> Iproject = refOrients_[i].transpose() * atoms_[i]->getI();
-            Itmp(0, 0) += Iproject(0, 0);
-            Itmp(1, 1) += Iproject(1, 1);
-            Itmp(2, 2) += Iproject(2, 2);
-        }
+      if (atoms_[i]->isDirectional()) {
+	RectMatrix<double, 3, 3> Iproject = refOrients_[i].transpose() * atoms_[i]->getI();
+	Itmp(0, 0) += Iproject(0, 0);
+	Itmp(1, 1) += Iproject(1, 1);
+	Itmp(2, 2) += Iproject(2, 2);
+      }
     }
 
     //diagonalize 
@@ -196,30 +196,30 @@ void  RigidBody::calcRefCoords() {
         
     int nLinearAxis = 0;
     for (int i = 0; i < 3; i++) {    
-        if (fabs(evals[i]) < oopse::epsilon) {
-            linear_ = true;
-            linearAxis_ = i;
-            ++ nLinearAxis;
-        }
+      if (fabs(evals[i]) < oopse::epsilon) {
+	linear_ = true;
+	linearAxis_ = i;
+	++ nLinearAxis;
+      }
     }
 
     if (nLinearAxis > 1) {
-        sprintf( painCave.errMsg,
-            "RigidBody error.\n"
-            "\tOOPSE found more than one axis in this rigid body with a vanishing \n"
-            "\tmoment of inertia.  This can happen in one of three ways:\n"
-            "\t 1) Only one atom was specified, or \n"
-            "\t 2) All atoms were specified at the same location, or\n"
-            "\t 3) The programmers did something stupid.\n"
-            "\tIt is silly to use a rigid body to describe this situation.  Be smarter.\n"
-            );
-        painCave.isFatal = 1;
-        simError();
+      sprintf( painCave.errMsg,
+	       "RigidBody error.\n"
+	       "\tOOPSE found more than one axis in this rigid body with a vanishing \n"
+	       "\tmoment of inertia.  This can happen in one of three ways:\n"
+	       "\t 1) Only one atom was specified, or \n"
+	       "\t 2) All atoms were specified at the same location, or\n"
+	       "\t 3) The programmers did something stupid.\n"
+	       "\tIt is silly to use a rigid body to describe this situation.  Be smarter.\n"
+	       );
+      painCave.isFatal = 1;
+      simError();
     }
   
-}
+  }
 
-void  RigidBody::calcForcesAndTorques() {
+  void  RigidBody::calcForcesAndTorques() {
     Vector3d afrc;
     Vector3d atrq;
     Vector3d apos;
@@ -229,32 +229,32 @@ void  RigidBody::calcForcesAndTorques() {
     Vector3d pos = this->getPos();
     for (int i = 0; i < atoms_.size(); i++) {
 
-        afrc = atoms_[i]->getFrc();
-        apos = atoms_[i]->getPos();
-        rpos = apos - pos;
+      afrc = atoms_[i]->getFrc();
+      apos = atoms_[i]->getPos();
+      rpos = apos - pos;
         
-        frc += afrc;
+      frc += afrc;
 
-        trq[0] += rpos[1]*afrc[2] - rpos[2]*afrc[1];
-        trq[1] += rpos[2]*afrc[0] - rpos[0]*afrc[2];
-        trq[2] += rpos[0]*afrc[1] - rpos[1]*afrc[0];
+      trq[0] += rpos[1]*afrc[2] - rpos[2]*afrc[1];
+      trq[1] += rpos[2]*afrc[0] - rpos[0]*afrc[2];
+      trq[2] += rpos[0]*afrc[1] - rpos[1]*afrc[0];
 
-        // If the atom has a torque associated with it, then we also need to 
-        // migrate the torques onto the center of mass:
+      // If the atom has a torque associated with it, then we also need to 
+      // migrate the torques onto the center of mass:
 
-        if (atoms_[i]->isDirectional()) {
-            atrq = atoms_[i]->getTrq();
-            trq += atrq;
-        }
+      if (atoms_[i]->isDirectional()) {
+	atrq = atoms_[i]->getTrq();
+	trq += atrq;
+      }
         
     }
     
     setFrc(frc);
     setTrq(trq);
     
-}
+  }
 
-void  RigidBody::updateAtoms() {
+  void  RigidBody::updateAtoms() {
     unsigned int i;
     Vector3d ref;
     Vector3d apos;
@@ -264,25 +264,25 @@ void  RigidBody::updateAtoms() {
     
     for (i = 0; i < atoms_.size(); i++) {
      
-        ref = body2Lab(refCoords_[i]);
+      ref = body2Lab(refCoords_[i]);
 
-        apos = pos + ref;
+      apos = pos + ref;
 
-        atoms_[i]->setPos(apos);
+      atoms_[i]->setPos(apos);
 
-        if (atoms_[i]->isDirectional()) {
+      if (atoms_[i]->isDirectional()) {
           
-          dAtom = (DirectionalAtom *) atoms_[i];
-          dAtom->setA(a * refOrients_[i]);
-          //dAtom->rotateBy( A );      
-        }
+	dAtom = (DirectionalAtom *) atoms_[i];
+	dAtom->setA(a * refOrients_[i]);
+	//dAtom->rotateBy( A );      
+      }
 
     }
   
-}
+  }
 
 
-void  RigidBody::updateAtoms(int frame) {
+  void  RigidBody::updateAtoms(int frame) {
     unsigned int i;
     Vector3d ref;
     Vector3d apos;
@@ -292,23 +292,23 @@ void  RigidBody::updateAtoms(int frame) {
     
     for (i = 0; i < atoms_.size(); i++) {
      
-        ref = body2Lab(refCoords_[i], frame);
+      ref = body2Lab(refCoords_[i], frame);
 
-        apos = pos + ref;
+      apos = pos + ref;
 
-        atoms_[i]->setPos(apos, frame);
+      atoms_[i]->setPos(apos, frame);
 
-        if (atoms_[i]->isDirectional()) {
+      if (atoms_[i]->isDirectional()) {
           
-          dAtom = (DirectionalAtom *) atoms_[i];
-          dAtom->setA(a * refOrients_[i], frame);
-        }
+	dAtom = (DirectionalAtom *) atoms_[i];
+	dAtom->setA(a * refOrients_[i], frame);
+      }
 
     }
   
-}
+  }
 
-void RigidBody::updateAtomVel() {
+  void RigidBody::updateAtomVel() {
     Mat3x3d skewMat;;
 
     Vector3d ji = getJ();
@@ -332,12 +332,12 @@ void RigidBody::updateAtomVel() {
 
     Vector3d velRot;        
     for (int i =0 ; i < refCoords_.size(); ++i) {
-        atoms_[i]->setVel(rbVel + mat * refCoords_[i]);
+      atoms_[i]->setVel(rbVel + mat * refCoords_[i]);
     }
 
-}
+  }
 
-void RigidBody::updateAtomVel(int frame) {
+  void RigidBody::updateAtomVel(int frame) {
     Mat3x3d skewMat;;
 
     Vector3d ji = getJ(frame);
@@ -361,169 +361,169 @@ void RigidBody::updateAtomVel(int frame) {
 
     Vector3d velRot;        
     for (int i =0 ; i < refCoords_.size(); ++i) {
-        atoms_[i]->setVel(rbVel + mat * refCoords_[i], frame);
+      atoms_[i]->setVel(rbVel + mat * refCoords_[i], frame);
     }
 
-}
+  }
 
         
 
-bool RigidBody::getAtomPos(Vector3d& pos, unsigned int index) {
+  bool RigidBody::getAtomPos(Vector3d& pos, unsigned int index) {
     if (index < atoms_.size()) {
 
-        Vector3d ref = body2Lab(refCoords_[index]);
-        pos = getPos() + ref;
-        return true;
+      Vector3d ref = body2Lab(refCoords_[index]);
+      pos = getPos() + ref;
+      return true;
     } else {
-        std::cerr << index << " is an invalid index, current rigid body contains " 
-                      << atoms_.size() << "atoms" << std::endl;
-        return false;
+      std::cerr << index << " is an invalid index, current rigid body contains " 
+		<< atoms_.size() << "atoms" << std::endl;
+      return false;
     }    
-}
+  }
 
-bool RigidBody::getAtomPos(Vector3d& pos, Atom* atom) {
+  bool RigidBody::getAtomPos(Vector3d& pos, Atom* atom) {
     std::vector<Atom*>::iterator i;
     i = std::find(atoms_.begin(), atoms_.end(), atom);
     if (i != atoms_.end()) {
-        //RigidBody class makes sure refCoords_ and atoms_ match each other 
-        Vector3d ref = body2Lab(refCoords_[i - atoms_.begin()]);
-        pos = getPos() + ref;
-        return true;
+      //RigidBody class makes sure refCoords_ and atoms_ match each other 
+      Vector3d ref = body2Lab(refCoords_[i - atoms_.begin()]);
+      pos = getPos() + ref;
+      return true;
     } else {
-        std::cerr << "Atom " << atom->getGlobalIndex() 
-                      <<" does not belong to Rigid body "<< getGlobalIndex() << std::endl; 
-        return false;
+      std::cerr << "Atom " << atom->getGlobalIndex() 
+		<<" does not belong to Rigid body "<< getGlobalIndex() << std::endl; 
+      return false;
     }
-}
-bool RigidBody::getAtomVel(Vector3d& vel, unsigned int index) {
+  }
+  bool RigidBody::getAtomVel(Vector3d& vel, unsigned int index) {
 
     //velRot = $(A\cdot skew(I^{-1}j))^{T}refCoor$
 
     if (index < atoms_.size()) {
 
-        Vector3d velRot;
-        Mat3x3d skewMat;;
-        Vector3d ref = refCoords_[index];
-        Vector3d ji = getJ();
-        Mat3x3d I =  getI();
+      Vector3d velRot;
+      Mat3x3d skewMat;;
+      Vector3d ref = refCoords_[index];
+      Vector3d ji = getJ();
+      Mat3x3d I =  getI();
 
-        skewMat(0, 0) =0;
-        skewMat(0, 1) = ji[2] /I(2, 2);
-        skewMat(0, 2) = -ji[1] /I(1, 1);
+      skewMat(0, 0) =0;
+      skewMat(0, 1) = ji[2] /I(2, 2);
+      skewMat(0, 2) = -ji[1] /I(1, 1);
 
-        skewMat(1, 0) = -ji[2] /I(2, 2);
-        skewMat(1, 1) = 0;
-        skewMat(1, 2) = ji[0]/I(0, 0);
+      skewMat(1, 0) = -ji[2] /I(2, 2);
+      skewMat(1, 1) = 0;
+      skewMat(1, 2) = ji[0]/I(0, 0);
 
-        skewMat(2, 0) =ji[1] /I(1, 1);
-        skewMat(2, 1) = -ji[0]/I(0, 0);
-        skewMat(2, 2) = 0;
+      skewMat(2, 0) =ji[1] /I(1, 1);
+      skewMat(2, 1) = -ji[0]/I(0, 0);
+      skewMat(2, 2) = 0;
 
-        velRot = (getA() * skewMat).transpose() * ref;
+      velRot = (getA() * skewMat).transpose() * ref;
 
-        vel =getVel() + velRot;
-        return true;
+      vel =getVel() + velRot;
+      return true;
         
     } else {
-        std::cerr << index << " is an invalid index, current rigid body contains " 
-                      << atoms_.size() << "atoms" << std::endl;
-        return false;
+      std::cerr << index << " is an invalid index, current rigid body contains " 
+		<< atoms_.size() << "atoms" << std::endl;
+      return false;
     }
-}
+  }
 
-bool RigidBody::getAtomVel(Vector3d& vel, Atom* atom) {
+  bool RigidBody::getAtomVel(Vector3d& vel, Atom* atom) {
 
     std::vector<Atom*>::iterator i;
     i = std::find(atoms_.begin(), atoms_.end(), atom);
     if (i != atoms_.end()) {
-        return getAtomVel(vel, i - atoms_.begin());
+      return getAtomVel(vel, i - atoms_.begin());
     } else {
-        std::cerr << "Atom " << atom->getGlobalIndex() 
-                      <<" does not belong to Rigid body "<< getGlobalIndex() << std::endl;    
-        return false;
+      std::cerr << "Atom " << atom->getGlobalIndex() 
+		<<" does not belong to Rigid body "<< getGlobalIndex() << std::endl;    
+      return false;
     }    
-}
+  }
 
-bool RigidBody::getAtomRefCoor(Vector3d& coor, unsigned int index) {
+  bool RigidBody::getAtomRefCoor(Vector3d& coor, unsigned int index) {
     if (index < atoms_.size()) {
 
-        coor = refCoords_[index];
-        return true;
+      coor = refCoords_[index];
+      return true;
     } else {
-        std::cerr << index << " is an invalid index, current rigid body contains " 
-                      << atoms_.size() << "atoms" << std::endl;
-        return false;
+      std::cerr << index << " is an invalid index, current rigid body contains " 
+		<< atoms_.size() << "atoms" << std::endl;
+      return false;
     }
 
-}
+  }
 
-bool RigidBody::getAtomRefCoor(Vector3d& coor, Atom* atom) {
+  bool RigidBody::getAtomRefCoor(Vector3d& coor, Atom* atom) {
     std::vector<Atom*>::iterator i;
     i = std::find(atoms_.begin(), atoms_.end(), atom);
     if (i != atoms_.end()) {
-        //RigidBody class makes sure refCoords_ and atoms_ match each other 
-        coor = refCoords_[i - atoms_.begin()];
-        return true;
+      //RigidBody class makes sure refCoords_ and atoms_ match each other 
+      coor = refCoords_[i - atoms_.begin()];
+      return true;
     } else {
-        std::cerr << "Atom " << atom->getGlobalIndex() 
-                      <<" does not belong to Rigid body "<< getGlobalIndex() << std::endl;    
-        return false;
+      std::cerr << "Atom " << atom->getGlobalIndex() 
+		<<" does not belong to Rigid body "<< getGlobalIndex() << std::endl;    
+      return false;
     }
 
-}
-
-
-void RigidBody::addAtom(Atom* at, AtomStamp* ats) {
-
-  Vector3d coords;
-  Vector3d euler;
-  
-
-  atoms_.push_back(at);
- 
-  if( !ats->havePosition() ){
-    sprintf( painCave.errMsg,
-             "RigidBody error.\n"
-             "\tAtom %s does not have a position specified.\n"
-             "\tThis means RigidBody cannot set up reference coordinates.\n",
-             ats->getType() );
-    painCave.isFatal = 1;
-    simError();
   }
+
+
+  void RigidBody::addAtom(Atom* at, AtomStamp* ats) {
+
+    Vector3d coords;
+    Vector3d euler;
   
-  coords[0] = ats->getPosX();
-  coords[1] = ats->getPosY();
-  coords[2] = ats->getPosZ();
 
-  refCoords_.push_back(coords);
-
-  RotMat3x3d identMat = RotMat3x3d::identity();
-  
-  if (at->isDirectional()) {   
-
-    if( !ats->haveOrientation() ){
+    atoms_.push_back(at);
+ 
+    if( !ats->havePosition() ){
       sprintf( painCave.errMsg,
-               "RigidBody error.\n"
-               "\tAtom %s does not have an orientation specified.\n"
-               "\tThis means RigidBody cannot set up reference orientations.\n",
-               ats->getType() );
+	       "RigidBody error.\n"
+	       "\tAtom %s does not have a position specified.\n"
+	       "\tThis means RigidBody cannot set up reference coordinates.\n",
+	       ats->getType() );
       painCave.isFatal = 1;
       simError();
-    }    
-    
-    euler[0] = ats->getEulerPhi() * NumericConstant::PI /180.0;
-    euler[1] = ats->getEulerTheta() * NumericConstant::PI /180.0;
-    euler[2] = ats->getEulerPsi() * NumericConstant::PI /180.0;
+    }
+  
+    coords[0] = ats->getPosX();
+    coords[1] = ats->getPosY();
+    coords[2] = ats->getPosZ();
 
-    RotMat3x3d Atmp(euler);
-    refOrients_.push_back(Atmp);
+    refCoords_.push_back(coords);
+
+    RotMat3x3d identMat = RotMat3x3d::identity();
+  
+    if (at->isDirectional()) {   
+
+      if( !ats->haveOrientation() ){
+	sprintf( painCave.errMsg,
+		 "RigidBody error.\n"
+		 "\tAtom %s does not have an orientation specified.\n"
+		 "\tThis means RigidBody cannot set up reference orientations.\n",
+		 ats->getType() );
+	painCave.isFatal = 1;
+	simError();
+      }    
     
-  }else {
-    refOrients_.push_back(identMat);
+      euler[0] = ats->getEulerPhi() * NumericConstant::PI /180.0;
+      euler[1] = ats->getEulerTheta() * NumericConstant::PI /180.0;
+      euler[2] = ats->getEulerPsi() * NumericConstant::PI /180.0;
+
+      RotMat3x3d Atmp(euler);
+      refOrients_.push_back(Atmp);
+    
+    }else {
+      refOrients_.push_back(identMat);
+    }
+  
+  
   }
-  
-  
-}
 
 }
 

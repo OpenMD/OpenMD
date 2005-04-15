@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -54,21 +54,21 @@
 
 namespace oopse {
   
-/**
- * @class FixedBondType FixedBondType.hpp "types/FixedBondType.hpp"
- * FixedBondType class is responsible for calculating the force and energy of the bond
- */
-class FixedBondType  : public BondType{
-    public:
-        FixedBondType(double r0) : BondType(r0) {}
-        virtual ~FixedBondType() {}
+  /**
+   * @class FixedBondType FixedBondType.hpp "types/FixedBondType.hpp"
+   * FixedBondType class is responsible for calculating the force and energy of the bond
+   */
+  class FixedBondType  : public BondType{
+  public:
+    FixedBondType(double r0) : BondType(r0) {}
+    virtual ~FixedBondType() {}
 
-        virtual void calcForce(double r, double& V, double& dVdr) {
-            V = 0.0;
-            dVdr = 0.0;
-        }
+    virtual void calcForce(double r, double& V, double& dVdr) {
+      V = 0.0;
+      dVdr = 0.0;
+    }
 
-};    
+  };    
 
 
 } //end namespace oopse

@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -43,46 +43,46 @@
 
 namespace oopse {
 
-MinimizerParameterSet::MinimizerParameterSet(SimInfo* info) : defaultTolerance(1.0e-8) {
+  MinimizerParameterSet::MinimizerParameterSet(SimInfo* info) : defaultTolerance(1.0e-8) {
     setDefaultParameter();
 
     Globals* globals = info->getSimParams();
 
     if (globals->haveMinimizer()){
-        setFTol(globals->getMinFTol());
+      setFTol(globals->getMinFTol());
     }
 
     if (globals->haveMinGTol()){
-        setGTol(globals->getMinGTol());
+      setGTol(globals->getMinGTol());
     }
 
     if (globals->haveMinMaxIter()){
-        setMaxIteration(globals->getMinMaxIter());
+      setMaxIteration(globals->getMinMaxIter());
     }
 
     if (globals->haveMinWriteFrq()){
-        setMaxIteration(globals->getMinMaxIter());
+      setMaxIteration(globals->getMinMaxIter());
     }
 
     if (globals->haveMinWriteFrq()){
-        setWriteFrq(globals->getMinWriteFrq());
+      setWriteFrq(globals->getMinWriteFrq());
     }
     
     if (globals->haveMinStepSize()){
-        setStepSize(globals->getMinStepSize());
+      setStepSize(globals->getMinStepSize());
     }
 
     if (globals->haveMinLSMaxIter()){
-        setLineSearchMaxIteration(globals->getMinLSMaxIter());
+      setLineSearchMaxIteration(globals->getMinLSMaxIter());
     }    
 
     if (globals->haveMinLSTol()){
-        setLineSearchTol(globals->getMinLSTol());
+      setLineSearchTol(globals->getMinLSTol());
     }
 
-}
+  }
 
-void MinimizerParameterSet::setDefaultParameter() {
+  void MinimizerParameterSet::setDefaultParameter() {
     maxIteration = 200;
     stepSize = 0.01;
     stepTol = defaultTolerance;
@@ -91,7 +91,7 @@ void MinimizerParameterSet::setDefaultParameter() {
     writeFrq = maxIteration;
     lsMaxIteration = 50;
     lsTol = defaultTolerance;
-}
+  }
 
 
 

@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -81,7 +81,7 @@ extern "C" {
                  int* status);
 
   void completeShapeFF( int* status);
-	void destroyShapeTypes(void);
+  void destroyShapeTypes(void);
 }
     
 #endif

@@ -52,189 +52,189 @@
 #include "UseTheForce/DarkSide/atype_interface.h"
 
 namespace oopse {
+  /**
+   * @class AtomType
+   * AtomType is what OOPSE looks to for unchanging data about an atom.
+   * Things that belong to AtomType are universal properties (i.e. does
+   * this atom have a Charge?  What is it's mass_?)  Dynamic properties of
+   * an atom are not intended to be properties of an atom type
+   */
+  class AtomType {
+  public:
+
+    AtomType();
+
+    virtual ~AtomType() { } ;
+
+    virtual void complete();
+
     /**
-     * @class AtomType
-     * AtomType is what OOPSE looks to for unchanging data about an atom.
-     * Things that belong to AtomType are universal properties (i.e. does
-     * this atom have a Charge?  What is it's mass_?)  Dynamic properties of
-     * an atom are not intended to be properties of an atom type
+     * Finishes off the AtomType by communicating the logical portions of the
+     * structure to the Fortran atype module
      */
-    class AtomType {
-        public:
-
-            AtomType();
-
-            virtual ~AtomType() { } ;
-
-            virtual void complete();
-
-            /**
-             * Finishes off the AtomType by communicating the logical portions of the
-             * structure to the Fortran atype module
-             */
-            void makeFortranAtomType();
+    void makeFortranAtomType();
             
-            void setMass(double m) {
-                mass_ = m;
-            }
+    void setMass(double m) {
+      mass_ = m;
+    }
 
-            double getMass(void) {
-                return mass_;
-            }
+    double getMass(void) {
+      return mass_;
+    }
 
-            void setIdent(int id) {
-                atp.ident = id;
-            }
+    void setIdent(int id) {
+      atp.ident = id;
+    }
 
-            int getIdent() {
-                return atp.ident;
-            }
+    int getIdent() {
+      return atp.ident;
+    }
 
-            void setName(const std::string&name) {
-                name_ = name;
-            }
+    void setName(const std::string&name) {
+      name_ = name;
+    }
 
-            std::string getName() {
-                return name_;
-            }
+    std::string getName() {
+      return name_;
+    }
 
-            void setLennardJones() {
-                atp.is_LennardJones = 1;
-            }
+    void setLennardJones() {
+      atp.is_LennardJones = 1;
+    }
 
-            bool isLennardJones() {
-                return atp.is_LennardJones;
-            }
+    bool isLennardJones() {
+      return atp.is_LennardJones;
+    }
 
 
-            bool isElectrostatic() {
-                return isCharge() || isMultipole();
-            }
+    bool isElectrostatic() {
+      return isCharge() || isMultipole();
+    }
 
-            void setEAM() {
-                atp.is_EAM = 1;
-            }
+    void setEAM() {
+      atp.is_EAM = 1;
+    }
 
-            bool isEAM() {
-                return atp.is_EAM;
-            }
+    bool isEAM() {
+      return atp.is_EAM;
+    }
 
-            void setCharge() {
-                atp.is_Charge = 1;
-            }
+    void setCharge() {
+      atp.is_Charge = 1;
+    }
 
-            bool isCharge() {
-                return atp.is_Charge;
-            }
+    bool isCharge() {
+      return atp.is_Charge;
+    }
 
-            bool isDirectional() {
-                return atp.is_Directional;
-            }
+    bool isDirectional() {
+      return atp.is_Directional;
+    }
 
-            bool isDipole() {
-                return atp.is_Dipole;
-            }
+    bool isDipole() {
+      return atp.is_Dipole;
+    }
 
-            bool isSplitDipole() {
-                return atp.is_SplitDipole;
-            }
+    bool isSplitDipole() {
+      return atp.is_SplitDipole;
+    }
 
-            bool isQuadrupole() {
-                return atp.is_Quadrupole;
-            }
+    bool isQuadrupole() {
+      return atp.is_Quadrupole;
+    }
             
-            bool isMultipole() {
-                return isDipole() || isQuadrupole();
-            }
+    bool isMultipole() {
+      return isDipole() || isQuadrupole();
+    }
 
-            bool isGayBerne() {
-                return atp.is_GayBerne;
-            }
+    bool isGayBerne() {
+      return atp.is_GayBerne;
+    }
 
-            bool isSticky() {
-                return atp.is_Sticky;
-            }
+    bool isSticky() {
+      return atp.is_Sticky;
+    }
 
-            bool isShape() {
-                return atp.is_Shape;
-            }
+    bool isShape() {
+      return atp.is_Shape;
+    }
 
-            //below functions are just forward functions
-            /**
-             * Adds property into property map
-             * @param genData GenericData to be added into PropertyMap
-             */
-            void addProperty(GenericData* genData);
+    //below functions are just forward functions
+    /**
+     * Adds property into property map
+     * @param genData GenericData to be added into PropertyMap
+     */
+    void addProperty(GenericData* genData);
 
-            /**
-             * Removes property from PropertyMap by name
-             * @param propName the name of property to be removed
-             */
-            void removeProperty(const std::string& propName);
+    /**
+     * Removes property from PropertyMap by name
+     * @param propName the name of property to be removed
+     */
+    void removeProperty(const std::string& propName);
 
-            /**
-             * clear all of the properties
-             */
-            void clearProperties();
+    /**
+     * clear all of the properties
+     */
+    void clearProperties();
 
-            /**
-             * Returns all names of properties
-             * @return all names of properties
-             */
-            std::vector<std::string> getPropertyNames();
+    /**
+     * Returns all names of properties
+     * @return all names of properties
+     */
+    std::vector<std::string> getPropertyNames();
 
-            /**
-             * Returns all of the properties in PropertyMap
-             * @return all of the properties in PropertyMap
-             */      
-            std::vector<GenericData*> getProperties();
+    /**
+     * Returns all of the properties in PropertyMap
+     * @return all of the properties in PropertyMap
+     */      
+    std::vector<GenericData*> getProperties();
 
-            /**
-             * Returns property 
-             * @param propName name of property
-             * @return a pointer point to property with propName. If no property named propName
-             * exists, return NULL
-             */      
-        GenericData* getPropertyByName(const std::string& propName);
+    /**
+     * Returns property 
+     * @param propName name of property
+     * @return a pointer point to property with propName. If no property named propName
+     * exists, return NULL
+     */      
+    GenericData* getPropertyByName(const std::string& propName);
 
-        protected:
+  protected:
 
-            AtomTypeProperties atp;
-            double mass_;
-            std::string name_;
+    AtomTypeProperties atp;
+    double mass_;
+    std::string name_;
 
-        private:
-            //prevent copy construction and copy assignment, since property map contains
-            //pointers which can not be copied and managered safely, except make the generic data
-            //at PropertyMap as copy on write shared pointer
-            AtomType(const AtomType&);
-            AtomType& operator=(const AtomType& atomType);
+  private:
+    //prevent copy construction and copy assignment, since property map contains
+    //pointers which can not be copied and managered safely, except make the generic data
+    //at PropertyMap as copy on write shared pointer
+    AtomType(const AtomType&);
+    AtomType& operator=(const AtomType& atomType);
 
             
-            PropertyMap properties_;
+    PropertyMap properties_;
              
-    };
+  };
 
-    struct LJParam {
-        double epsilon;
-        double sigma;
-        int soft_pot;
-    };
-    typedef SimpleTypeData<LJParam> LJParamGenericData;
+  struct LJParam {
+    double epsilon;
+    double sigma;
+    int soft_pot;
+  };
+  typedef SimpleTypeData<LJParam> LJParamGenericData;
 
-    struct EAMParam {
-        double latticeConstant;         
-        int nrho;
-        double drho;
-        int nr;
-        double dr;
-        double rcut;
-        std::vector<double> rvals; 
-        std::vector<double> rhovals;
-        std::vector<double> Frhovals;    
-    };
+  struct EAMParam {
+    double latticeConstant;         
+    int nrho;
+    double drho;
+    int nr;
+    double dr;
+    double rcut;
+    std::vector<double> rvals; 
+    std::vector<double> rhovals;
+    std::vector<double> Frhovals;    
+  };
 
-    typedef SimpleTypeData<EAMParam> EAMParamGenericData;
+  typedef SimpleTypeData<EAMParam> EAMParamGenericData;
 }
 
 #endif

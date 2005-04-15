@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -53,36 +53,36 @@
 #include "integrators/NPT.hpp"
 namespace oopse {
 
-class NPTi : public NPT {
-    public:
+  class NPTi : public NPT {
+  public:
 
-        NPTi(SimInfo* info);
+    NPTi(SimInfo* info);
 
-    private:
+  private:
 
-        virtual void evolveEtaA();
-        virtual void evolveEtaB();
+    virtual void evolveEtaA();
+    virtual void evolveEtaB();
 
-        virtual bool etaConverged();
+    virtual bool etaConverged();
 
-        virtual void scaleSimBox();
+    virtual void scaleSimBox();
 
-        virtual void getVelScaleA(Vector3d& sc, const Vector3d& vel);
-        virtual void getVelScaleB(Vector3d& sc, int index );
-        virtual void getPosScale(const Vector3d& pos, const Vector3d& COM, int index, Vector3d& sc);
+    virtual void getVelScaleA(Vector3d& sc, const Vector3d& vel);
+    virtual void getVelScaleB(Vector3d& sc, int index );
+    virtual void getPosScale(const Vector3d& pos, const Vector3d& COM, int index, Vector3d& sc);
 
-        virtual void calcVelScale();
-        virtual double calcConservedQuantity();
+    virtual void calcVelScale();
+    virtual double calcConservedQuantity();
 
-        virtual void loadEta();
-        virtual void saveEta();
+    virtual void loadEta();
+    virtual void saveEta();
                     
-        double eta;
-        double oldEta;
-        double prevEta;
-        double vScale;
+    double eta;
+    double oldEta;
+    double prevEta;
+    double vScale;
         
-};
+  };
 
 }      //end namespace oopse
 

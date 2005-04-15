@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -48,13 +48,13 @@
 #include "brains/SimInfo.hpp"
 #include "constraints/ZconsStruct.hpp"
 namespace oopse {
-
-
-/**
- * @class ZConsReader
- * @todo document
- */
-class ZConsReader{
+  
+  
+  /**
+   * @class ZConsReader
+   * @todo document
+   */
+  class ZConsReader{
   public:
     
     ZConsReader(SimInfo* info);
@@ -66,7 +66,7 @@ class ZConsReader{
     int getNFixedZmols() {return fixedZmolData_.size();}
     const std::vector<ZconsData>& getFixedZMolData() {return fixedZmolData_; }    
     double getCurTime() {return curTime_; }
-
+    
   private:
     
     std::ifstream istream_;    
@@ -75,7 +75,7 @@ class ZConsReader{
     double curTime_;    
     std::vector<ZconsData> fixedZmolData_;
     const static int MAXBUFFERSIZE = 2000;    
-};
-
+  };
+  
 }
 #endif

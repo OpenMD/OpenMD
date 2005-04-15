@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -42,13 +42,13 @@
 #include "math/ChebyshevPolynomials.hpp"
 
 namespace oopse {
-ChebyshevPolynomials::ChebyshevPolynomials(int maxPower) : maxPower_(maxPower){
+  ChebyshevPolynomials::ChebyshevPolynomials(int maxPower) : maxPower_(maxPower){
 
     assert(maxPower >= 0);
     GeneratePolynomials(maxPower_);
-}
+  }
 
-void ChebyshevPolynomials::GeneratePolynomials(int maxPower) {
+  void ChebyshevPolynomials::GeneratePolynomials(int maxPower) {
 
     GenerateFirstTwoTerms();
 
@@ -58,15 +58,15 @@ void ChebyshevPolynomials::GeneratePolynomials(int maxPower) {
     //recursive generate the high order term of Chebyshev Polynomials
     //Cn+1(x) = Cn(x) * 2x - Cn-1(x)
     for (int i = 2; i <= maxPower; ++i) {
-        DoublePolynomial cn;
+      DoublePolynomial cn;
         
-        cn = polyList_[i-1] * twoX - polyList_[i-2];
-        polyList_.push_back(cn);
+      cn = polyList_[i-1] * twoX - polyList_[i-2];
+      polyList_.push_back(cn);
     }
-}
+  }
 
 
-void ChebyshevT::GenerateFirstTwoTerms() {
+  void ChebyshevT::GenerateFirstTwoTerms() {
     DoublePolynomial t0;
     t0.setCoefficient(0, 1.0);
     polyList_.push_back(t0);
@@ -74,9 +74,9 @@ void ChebyshevT::GenerateFirstTwoTerms() {
     DoublePolynomial t1;
     t1.setCoefficient(1, 1.0);
     polyList_.push_back(t1);    
-}
+  }
 
-void ChebyshevU::GenerateFirstTwoTerms() {
+  void ChebyshevU::GenerateFirstTwoTerms() {
     DoublePolynomial u0;
     u0.setCoefficient(0, 1.0);
     polyList_.push_back(u0);
@@ -84,6 +84,6 @@ void ChebyshevU::GenerateFirstTwoTerms() {
     DoublePolynomial u1;
     u1.setCoefficient(1, 2.0);
     polyList_.push_back(u1);   
-}
+  }
 
 } //end namespace oopse

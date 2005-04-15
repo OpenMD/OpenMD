@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -39,13 +39,13 @@
  * such damages.
  */
   
- /**
-  * @file Snapshot.cpp
-  * @author tlin
-  * @date 11/11/2004
-  * @time 10:56am
-  * @version 1.0
-  */
+/**
+ * @file Snapshot.cpp
+ * @author tlin
+ * @date 11/11/2004
+ * @time 10:56am
+ * @version 1.0
+ */
 
 #include "brains/Snapshot.hpp"
 #include "utils/NumericConstant.hpp"
@@ -53,7 +53,7 @@
 #include "utils/Utility.hpp"
 namespace oopse {
 
-void  Snapshot::setHmat(const Mat3x3d& m) {
+  void  Snapshot::setHmat(const Mat3x3d& m) {
     const double orthoTolerance = NumericConstant::epsilon;
     hmat_ = m;
     invHmat_ = hmat_.inverse();
@@ -75,86 +75,86 @@ void  Snapshot::setHmat(const Mat3x3d& m) {
     orthoRhombic_ = 1;
 
     for (int i = 0; i < 3; i++ ) {
-        for (int j = 0 ; j < 3; j++) {
-            if (i != j) {
-                if (orthoRhombic_) {
-                    if ( fabs(hmat_(i, j)) >= tol)
-                        orthoRhombic_ = 0;
-                }        
-            }
-        }
+      for (int j = 0 ; j < 3; j++) {
+	if (i != j) {
+	  if (orthoRhombic_) {
+	    if ( fabs(hmat_(i, j)) >= tol)
+	      orthoRhombic_ = 0;
+	  }        
+	}
+      }
     }
 
     if( oldOrthoRhombic != orthoRhombic_ ){
 
-        if( orthoRhombic_ ) {
-            sprintf( painCave.errMsg,
-                "OOPSE is switching from the default Non-Orthorhombic\n"
-                "\tto the faster Orthorhombic periodic boundary computations.\n"
-                "\tThis is usually a good thing, but if you wan't the\n"
-                "\tNon-Orthorhombic computations, make the orthoBoxTolerance\n"
-                "\tvariable ( currently set to %G ) smaller.\n",
-                orthoTolerance);
-            painCave.severity = OOPSE_INFO;
-            simError();
-        }
-        else {
-            sprintf( painCave.errMsg,
-                "OOPSE is switching from the faster Orthorhombic to the more\n"
-                "\tflexible Non-Orthorhombic periodic boundary computations.\n"
-                "\tThis is usually because the box has deformed under\n"
-                "\tNPTf integration. If you wan't to live on the edge with\n"
-                "\tthe Orthorhombic computations, make the orthoBoxTolerance\n"
-                "\tvariable ( currently set to %G ) larger.\n",
-                orthoTolerance);
-            painCave.severity = OOPSE_WARNING;
-            simError();
-        }
+      if( orthoRhombic_ ) {
+	sprintf( painCave.errMsg,
+		 "OOPSE is switching from the default Non-Orthorhombic\n"
+		 "\tto the faster Orthorhombic periodic boundary computations.\n"
+		 "\tThis is usually a good thing, but if you wan't the\n"
+		 "\tNon-Orthorhombic computations, make the orthoBoxTolerance\n"
+		 "\tvariable ( currently set to %G ) smaller.\n",
+		 orthoTolerance);
+	painCave.severity = OOPSE_INFO;
+	simError();
+      }
+      else {
+	sprintf( painCave.errMsg,
+		 "OOPSE is switching from the faster Orthorhombic to the more\n"
+		 "\tflexible Non-Orthorhombic periodic boundary computations.\n"
+		 "\tThis is usually because the box has deformed under\n"
+		 "\tNPTf integration. If you wan't to live on the edge with\n"
+		 "\tthe Orthorhombic computations, make the orthoBoxTolerance\n"
+		 "\tvariable ( currently set to %G ) larger.\n",
+		 orthoTolerance);
+	painCave.severity = OOPSE_WARNING;
+	simError();
+      }
     }    
 
     //notify fortran simulation box has changed
     setFortranBox(fortranHmat, fortranInvHmat, &orthoRhombic_);
-}
+  }
 
 
-void Snapshot::wrapVector(Vector3d& pos) {
+  void Snapshot::wrapVector(Vector3d& pos) {
 
     int i;
     Vector3d scaled;
 
     if( !orthoRhombic_ ){
 
-        // calc the scaled coordinates.
-        scaled = invHmat_* pos;
+      // calc the scaled coordinates.
+      scaled = invHmat_* pos;
 
-        // wrap the scaled coordinates
-        for (i = 0; i < 3; ++i) {
-            scaled[i] -= roundMe(scaled[i]);
-        }
+      // wrap the scaled coordinates
+      for (i = 0; i < 3; ++i) {
+	scaled[i] -= roundMe(scaled[i]);
+      }
 
-        // calc the wrapped real coordinates from the wrapped scaled coordinates
-        pos = hmat_ * scaled;    
+      // calc the wrapped real coordinates from the wrapped scaled coordinates
+      pos = hmat_ * scaled;    
 
     } else {//if it is orthoRhombic, we could improve efficiency by only caculating the diagonal element
     
-        // calc the scaled coordinates.
-        for (i=0; i<3; i++) {
-            scaled[i] = pos[i] * invHmat_(i, i);
-        }
+      // calc the scaled coordinates.
+      for (i=0; i<3; i++) {
+	scaled[i] = pos[i] * invHmat_(i, i);
+      }
         
-        // wrap the scaled coordinates
-        for (i = 0; i < 3; ++i) {
-            scaled[i] -= roundMe(scaled[i]);
-        }
+      // wrap the scaled coordinates
+      for (i = 0; i < 3; ++i) {
+	scaled[i] -= roundMe(scaled[i]);
+      }
 
-        // calc the wrapped real coordinates from the wrapped scaled coordinates
-        for (i=0; i<3; i++) {
-            pos[i] = scaled[i] * hmat_(i, i);
-        }
+      // calc the wrapped real coordinates from the wrapped scaled coordinates
+      for (i=0; i<3; i++) {
+	pos[i] = scaled[i] * hmat_(i, i);
+      }
         
     }
 
-}
+  }
 
 }
   

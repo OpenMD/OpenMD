@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -39,13 +39,13 @@
  * such damages.
  */
   
- /**
-  * @file SnapshotManager.hpp
-  * @author tlin
-  * @date 10/20/2004
-  * @time 23:56am
-  * @version 1.0
-  */
+/**
+ * @file SnapshotManager.hpp
+ * @author tlin
+ * @date 10/20/2004
+ * @time 23:56am
+ * @version 1.0
+ */
 #ifndef BRAINS_SNAPSHOTMANAGER_HPP
 #define BRAINS_SNAPSHOTMANAGER_HPP
 
@@ -53,59 +53,59 @@
 
 namespace oopse{
 
+  /**
+   * @class SnapshotManager SnapshotManager.hpp "brains/SnapshotManager.hpp"
+   * @brief SnapshotManager class is an abstract class which maintains 
+   * a series of snapshots.
+   * 
+   * @see SimSnapshotManager
+   * @see PropSnapshotManager
+   */
+  class SnapshotManager {
+  public:
+
+    virtual ~SnapshotManager() {
+      delete currentSnapshot_;
+      delete previousSnapshot_;
+    }
+            
+    virtual bool advance() { return true; }
+
+    virtual Snapshot* getSnapshot(int id) = 0;
+
     /**
-     * @class SnapshotManager SnapshotManager.hpp "brains/SnapshotManager.hpp"
-     * @brief SnapshotManager class is an abstract class which maintains 
-     * a series of snapshots.
-     * 
-     * @see SimSnapshotManager
-     * @see PropSnapshotManager
+     * Returns the pointer of previous snapshot
+     * @return the pointer of previous snapshot
      */
-    class SnapshotManager {
-        public:
+    Snapshot* getPrevSnapshot() {
+      return previousSnapshot_;
+    }
 
-            virtual ~SnapshotManager() {
-                delete currentSnapshot_;
-                delete previousSnapshot_;
-            }
+    /**
+     * Returns the pointer of current snapshot
+     * @return the pointer of current snapshot
+     */            
+    Snapshot* getCurrentSnapshot() {
+      return currentSnapshot_;
+    }
+
+    int getStorageLayout() {
+      return storageLayout_;
+    }
+
+  private:
+    int storageLayout_;
+
+  protected:
+
+    SnapshotManager(int storageLayout) : storageLayout_(storageLayout), currentSnapshot_(NULL), previousSnapshot_(NULL) {
+    }
             
-            virtual bool advance() { return true; }
-
-            virtual Snapshot* getSnapshot(int id) = 0;
-
-            /**
-             * Returns the pointer of previous snapshot
-             * @return the pointer of previous snapshot
-             */
-            Snapshot* getPrevSnapshot() {
-                return previousSnapshot_;
-            }
-
-            /**
-             * Returns the pointer of current snapshot
-             * @return the pointer of current snapshot
-             */            
-            Snapshot* getCurrentSnapshot() {
-                return currentSnapshot_;
-            }
-
-            int getStorageLayout() {
-                return storageLayout_;
-            }
-
-        private:
-            int storageLayout_;
-
-	protected:
-
-            SnapshotManager(int storageLayout) : storageLayout_(storageLayout), currentSnapshot_(NULL), previousSnapshot_(NULL) {
-            }
-            
-            Snapshot* currentSnapshot_;
-            Snapshot* previousSnapshot_;
+    Snapshot* currentSnapshot_;
+    Snapshot* previousSnapshot_;
             
 
-    };
+  };
 
 }
 #endif //BRAINS_SNAPSHOTMANAGER_HPP

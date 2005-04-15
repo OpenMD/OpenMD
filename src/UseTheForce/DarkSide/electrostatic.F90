@@ -40,7 +40,7 @@
 !!
 
 module electrostatic_module
-  
+
   use force_globals
   use definitions
   use atype_module
@@ -97,7 +97,7 @@ contains
 
   subroutine newElectrostaticType(c_ident, is_Charge, is_Dipole, &
        is_SplitDipole, is_Quadrupole, status)
-    
+
     integer, intent(in) :: c_ident
     logical, intent(in) :: is_Charge
     logical, intent(in) :: is_Dipole
@@ -108,30 +108,30 @@ contains
 
     status = 0
     myATID = getFirstMatchingElement(atypes, "c_ident", c_ident)
-    
+
     !! Be simple-minded and assume that we need an ElectrostaticMap that
     !! is the same size as the total number of atom types
 
     if (.not.allocated(ElectrostaticMap)) then
-       
+
        nAtypes = getSize(atypes)
-    
+
        if (nAtypes == 0) then
           status = -1
           return
        end if
-       
+
        if (.not. allocated(ElectrostaticMap)) then
           allocate(ElectrostaticMap(nAtypes))
        endif
-       
+
     end if
 
     if (myATID .gt. size(ElectrostaticMap)) then
        status = -1
        return
     endif
-    
+
     ! set the values for ElectrostaticMap for this atom type:
 
     ElectrostaticMap(myATID)%c_ident = c_ident
@@ -139,7 +139,7 @@ contains
     ElectrostaticMap(myATID)%is_Dipole = is_Dipole
     ElectrostaticMap(myATID)%is_SplitDipole = is_SplitDipole
     ElectrostaticMap(myATID)%is_Quadrupole = is_Quadrupole
-    
+
   end subroutine newElectrostaticType
 
   subroutine setCharge(c_ident, charge, status)
@@ -167,7 +167,7 @@ contains
        call handleError("electrostatic", "Attempt to setCharge of an atom type that is not a charge!")
        status = -1
        return
-    endif       
+    endif
 
     ElectrostaticMap(myATID)%charge = charge
   end subroutine setCharge
@@ -258,30 +258,30 @@ contains
        status = -1
        return
     endif
-    
+
     do i = 1, 3
-          ElectrostaticMap(myATID)%quadrupole_moments(i) = &
-               quadrupole_moments(i)
-       enddo
+       ElectrostaticMap(myATID)%quadrupole_moments(i) = &
+            quadrupole_moments(i)
+    enddo
 
   end subroutine setQuadrupoleMoments
 
-  
+
   function getCharge(atid) result (c)
     integer, intent(in) :: atid
     integer :: localError
     real(kind=dp) :: c
-    
+
     if (.not.allocated(ElectrostaticMap)) then
        call handleError("electrostatic", "no ElectrostaticMap was present before first call of getCharge!")
        return
     end if
-    
+
     if (.not.ElectrostaticMap(atid)%is_Charge) then
        call handleError("electrostatic", "getCharge was called for an atom type that isn't a charge!")
        return
     endif
-    
+
     c = ElectrostaticMap(atid)%charge
   end function getCharge
 
@@ -289,25 +289,25 @@ contains
     integer, intent(in) :: atid
     integer :: localError
     real(kind=dp) :: dm
-    
+
     if (.not.allocated(ElectrostaticMap)) then
        call handleError("electrostatic", "no ElectrostaticMap was present before first call of getDipoleMoment!")
        return
     end if
-    
+
     if (.not.ElectrostaticMap(atid)%is_Dipole) then
        call handleError("electrostatic", "getDipoleMoment was called for an atom type that isn't a dipole!")
        return
     endif
-    
+
     dm = ElectrostaticMap(atid)%dipole_moment
   end function getDipoleMoment
 
   subroutine doElectrostaticPair(atom1, atom2, d, rij, r2, sw, &
        vpair, fpair, pot, eFrame, f, t, do_pot)
-    
+
     logical, intent(in) :: do_pot
-    
+
     integer, intent(in) :: atom1, atom2
     integer :: localError
 
@@ -320,7 +320,7 @@ contains
     real( kind = dp ), dimension(9,nLocal) :: eFrame
     real( kind = dp ), dimension(3,nLocal) :: f
     real( kind = dp ), dimension(3,nLocal) :: t
-    
+
     real (kind = dp), dimension(3) :: ux_i, uy_i, uz_i
     real (kind = dp), dimension(3) :: ux_j, uy_j, uz_j
     real (kind = dp), dimension(3) :: dudux_i, duduy_i, duduz_i
@@ -378,7 +378,7 @@ contains
     if (i_is_Charge) then
        q_i = ElectrostaticMap(me1)%charge      
     endif
-    
+
     if (i_is_Dipole) then
        mu_i = ElectrostaticMap(me1)%dipole_moment
 #ifdef IS_MPI
@@ -395,7 +395,7 @@ contains
        if (i_is_SplitDipole) then
           d_i = ElectrostaticMap(me1)%split_dipole_distance
        endif
-       
+
     endif
 
     if (i_is_Quadrupole) then
@@ -432,7 +432,7 @@ contains
     if (j_is_Charge) then
        q_j = ElectrostaticMap(me2)%charge      
     endif
-    
+
     if (j_is_Dipole) then
        mu_j = ElectrostaticMap(me2)%dipole_moment
 #ifdef IS_MPI
@@ -497,7 +497,7 @@ contains
     if (i_is_Charge) then
 
        if (j_is_Charge) then
-          
+
           vterm = pre11 * q_i * q_j * riji
           vpair = vpair + vterm
           epot = epot + sw*vterm
@@ -507,7 +507,7 @@ contains
           dudx = dudx + dudr * xhat
           dudy = dudy + dudr * yhat
           dudz = dudz + dudr * zhat
-       
+
        endif
 
        if (j_is_Dipole) then
@@ -524,7 +524,7 @@ contains
           ri2 = ri * ri
           ri3 = ri2 * ri
           sc2 = scale * scale
-             
+
           pref = pre12 * q_i * mu_j
           vterm = - pref * ct_j * ri2 * scale
           vpair = vpair + vterm
@@ -541,7 +541,7 @@ contains
           duduz_j(1) = duduz_j(1) - pref * sw * ri2 * xhat * scale
           duduz_j(2) = duduz_j(2) - pref * sw * ri2 * yhat * scale
           duduz_j(3) = duduz_j(3) - pref * sw * ri2 * zhat * scale
-          
+
        endif
 
        if (j_is_Quadrupole) then
@@ -572,7 +572,7 @@ contains
                qxx_j*(6.0_dp*cx_j*ux_j(3) - 2.0_dp*zhat) + &
                qyy_j*(6.0_dp*cy_j*uy_j(3) - 2.0_dp*zhat) + &
                qzz_j*(6.0_dp*cz_j*uz_j(3) - 2.0_dp*zhat) ) 
-          
+
           dudux_j(1) = dudux_j(1) + pref * sw * ri3 * (qxx_j*6.0_dp*cx_j*xhat)
           dudux_j(2) = dudux_j(2) + pref * sw * ri3 * (qxx_j*6.0_dp*cx_j*yhat)
           dudux_j(3) = dudux_j(3) + pref * sw * ri3 * (qxx_j*6.0_dp*cx_j*zhat)
@@ -587,9 +587,9 @@ contains
        endif
 
     endif
-  
+
     if (i_is_Dipole) then 
-       
+
        if (j_is_Charge) then
 
           if (i_is_SplitDipole) then
@@ -604,7 +604,7 @@ contains
           ri2 = ri * ri
           ri3 = ri2 * ri
           sc2 = scale * scale
-             
+
           pref = pre12 * q_j * mu_i
           vterm = pref * ct_i * ri2 * scale
           vpair = vpair + vterm
@@ -651,7 +651,7 @@ contains
           vterm = pref * ri3 * (ct_ij - 3.0d0 * ct_i * ct_j * sc2)
           vpair = vpair + vterm
           epot = epot + sw * vterm
-          
+
           a1 = 5.0d0 * ct_i * ct_j * sc2 - ct_ij
 
           dudx=dudx+pref*sw*3.0d0*ri4*scale*(a1*xhat-ct_i*uz_j(1)-ct_j*uz_i(1))
@@ -671,21 +671,21 @@ contains
 
     if (i_is_Quadrupole) then
        if (j_is_Charge) then
-          
+
           ri2 = riji * riji
           ri3 = ri2 * riji
           ri4 = ri2 * ri2
           cx2 = cx_i * cx_i
           cy2 = cy_i * cy_i
           cz2 = cz_i * cz_i
-          
+
           pref = pre14 * q_j / 3.0_dp
           vterm = pref * ri3 * (qxx_i * (3.0_dp*cx2 - 1.0_dp) + &
                qyy_i * (3.0_dp*cy2 - 1.0_dp) + &
                qzz_i * (3.0_dp*cz2 - 1.0_dp))
           vpair = vpair + vterm
           epot = epot + sw * vterm
-          
+
           dudx = dudx - 5.0_dp*sw*vterm*riji*xhat + pref * sw * ri4 * ( &
                qxx_i*(6.0_dp*cx_i*ux_i(1) - 2.0_dp*xhat) + &
                qyy_i*(6.0_dp*cy_i*uy_i(1) - 2.0_dp*xhat) + &
@@ -698,22 +698,22 @@ contains
                qxx_i*(6.0_dp*cx_i*ux_i(3) - 2.0_dp*zhat) + &
                qyy_i*(6.0_dp*cy_i*uy_i(3) - 2.0_dp*zhat) + &
                qzz_i*(6.0_dp*cz_i*uz_i(3) - 2.0_dp*zhat) ) 
-          
+
           dudux_i(1) = dudux_i(1) + pref * sw * ri3 * (qxx_i*6.0_dp*cx_i*xhat)
           dudux_i(2) = dudux_i(2) + pref * sw * ri3 * (qxx_i*6.0_dp*cx_i*yhat)
           dudux_i(3) = dudux_i(3) + pref * sw * ri3 * (qxx_i*6.0_dp*cx_i*zhat)
-          
+
           duduy_i(1) = duduy_i(1) + pref * sw * ri3 * (qyy_i*6.0_dp*cy_i*xhat)
           duduy_i(2) = duduy_i(2) + pref * sw * ri3 * (qyy_i*6.0_dp*cy_i*yhat)
           duduy_i(3) = duduy_i(3) + pref * sw * ri3 * (qyy_i*6.0_dp*cy_i*zhat)
-          
+
           duduz_i(1) = duduz_i(1) + pref * sw * ri3 * (qzz_i*6.0_dp*cz_i*xhat)
           duduz_i(2) = duduz_i(2) + pref * sw * ri3 * (qzz_i*6.0_dp*cz_i*yhat)
           duduz_i(3) = duduz_i(3) + pref * sw * ri3 * (qzz_i*6.0_dp*cz_i*zhat)
        endif
     endif
-       
-    
+
+
     if (do_pot) then
 #ifdef IS_MPI 
        pot_row(atom1) = pot_row(atom1) + 0.5d0*epot
@@ -722,16 +722,16 @@ contains
        pot = pot + epot
 #endif
     endif
-        
+
 #ifdef IS_MPI
     f_Row(1,atom1) = f_Row(1,atom1) + dudx
     f_Row(2,atom1) = f_Row(2,atom1) + dudy
     f_Row(3,atom1) = f_Row(3,atom1) + dudz
-    
+
     f_Col(1,atom2) = f_Col(1,atom2) - dudx
     f_Col(2,atom2) = f_Col(2,atom2) - dudy
     f_Col(3,atom2) = f_Col(3,atom2) - dudz
-    
+
     if (i_is_Dipole .or. i_is_Quadrupole) then
        t_Row(1,atom1)=t_Row(1,atom1) - uz_i(2)*duduz_i(3) + uz_i(3)*duduz_i(2)
        t_Row(2,atom1)=t_Row(2,atom1) - uz_i(3)*duduz_i(1) + uz_i(1)*duduz_i(3)
@@ -766,11 +766,11 @@ contains
     f(1,atom1) = f(1,atom1) + dudx
     f(2,atom1) = f(2,atom1) + dudy
     f(3,atom1) = f(3,atom1) + dudz
-    
+
     f(1,atom2) = f(1,atom2) - dudx
     f(2,atom2) = f(2,atom2) - dudy
     f(3,atom2) = f(3,atom2) - dudz
-    
+
     if (i_is_Dipole .or. i_is_Quadrupole) then
        t(1,atom1)=t(1,atom1) - uz_i(2)*duduz_i(3) + uz_i(3)*duduz_i(2)
        t(2,atom1)=t(2,atom1) - uz_i(3)*duduz_i(1) + uz_i(1)*duduz_i(3)
@@ -802,7 +802,7 @@ contains
     endif
 
 #endif
-    
+
 #ifdef IS_MPI
     id1 = AtomRowToGlobal(atom1)
     id2 = AtomColToGlobal(atom2)
@@ -812,7 +812,7 @@ contains
 #endif
 
     if (molMembershipList(id1) .ne. molMembershipList(id2)) then
-       
+
        fpair(1) = fpair(1) + dudx
        fpair(2) = fpair(2) + dudy
        fpair(3) = fpair(3) + dudz
@@ -821,11 +821,11 @@ contains
 
     return
   end subroutine doElectrostaticPair
-  
+
 
   subroutine destroyElectrostaticTypes()
-    
-   if(allocated(ElectrostaticMap)) deallocate(ElectrostaticMap)
+
+    if(allocated(ElectrostaticMap)) deallocate(ElectrostaticMap)
 
   end subroutine destroyElectrostaticTypes
 

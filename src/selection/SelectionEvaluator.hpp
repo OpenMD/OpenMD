@@ -59,144 +59,144 @@
 namespace oopse {
 
 
-/**
- * @class SelectionEvaluator SelectionEvaluator.hpp "selection/SelectionEvaluator"
- * @brief Evalute the tokens compiled by SelectionCompiler and return a BitSet
- */
-class SelectionEvaluator{
-    public:
+  /**
+   * @class SelectionEvaluator SelectionEvaluator.hpp "selection/SelectionEvaluator"
+   * @brief Evalute the tokens compiled by SelectionCompiler and return a BitSet
+   */
+  class SelectionEvaluator{
+  public:
 
-        SelectionEvaluator(SimInfo* info);
+    SelectionEvaluator(SimInfo* info);
 
 
-        bool loadScriptString(const std::string& script);
-        bool loadScriptFile(const std::string& filename);
+    bool loadScriptString(const std::string& script);
+    bool loadScriptFile(const std::string& filename);
         
-        BitSet evaluate();
+    BitSet evaluate();
         
-        /**
-         * Tests if the result from evaluation of script is dynamic.
-         */         
-        bool isDynamic() {
-            return isDynamic_;
-        }
+    /**
+     * Tests if the result from evaluation of script is dynamic.
+     */         
+    bool isDynamic() {
+      return isDynamic_;
+    }
 
-        bool hadRuntimeError() const{
-            return error;
-        }
+    bool hadRuntimeError() const{
+      return error;
+    }
 
-        std::string getErrorMessage() const {
-            return errorMessage;
-        }
+    std::string getErrorMessage() const {
+      return errorMessage;
+    }
 
 
-        int getLinenumber() {
-            return linenumbers[pc];
-        }
+    int getLinenumber() {
+      return linenumbers[pc];
+    }
 
-        std::string getLine() {
-            int ichBegin = lineIndices[pc];
-            int ichEnd;
-            if ((ichEnd = script.find('\r', ichBegin)) == std::string::npos &&
-                (ichEnd = script.find('\n', ichBegin)) == std::string::npos) {
-                ichEnd = script.size();
-            }            
-            return script.substr(ichBegin, ichEnd);
-        }
+    std::string getLine() {
+      int ichBegin = lineIndices[pc];
+      int ichEnd;
+      if ((ichEnd = script.find('\r', ichBegin)) == std::string::npos &&
+	  (ichEnd = script.find('\n', ichBegin)) == std::string::npos) {
+	ichEnd = script.size();
+      }            
+      return script.substr(ichBegin, ichEnd);
+    }
   
-    private:
+  private:
 
-        void clearState();
+    void clearState();
         
-        bool loadScript(const std::string& filename, const std::string& script); 
+    bool loadScript(const std::string& filename, const std::string& script); 
 
-        bool loadScriptFileInternal(const std::string& filename);
+    bool loadScriptFileInternal(const std::string& filename);
 
 
-        void clearDefinitionsAndLoadPredefined();
+    void clearDefinitionsAndLoadPredefined();
          
-        void define();
-        void select(BitSet& bs);
-        void predefine(const std::string& script);
+    void define();
+    void select(BitSet& bs);
+    void predefine(const std::string& script);
 
-        void instructionDispatchLoop(BitSet& bs);
+    void instructionDispatchLoop(BitSet& bs);
 
-        void withinInstruction(const Token& instruction, BitSet& bs);
+    void withinInstruction(const Token& instruction, BitSet& bs);
         
-        BitSet comparatorInstruction(const Token& instruction); 
-        void compareProperty(StuntDouble* sd, BitSet& bs, int property, int comparator, float comparisonValue);
-        BitSet nameInstruction(const std::string& name);
-        BitSet indexInstruction(const boost::any& value);
-        BitSet expression(const std::vector<Token>& tokens, int pc);
+    BitSet comparatorInstruction(const Token& instruction); 
+    void compareProperty(StuntDouble* sd, BitSet& bs, int property, int comparator, float comparisonValue);
+    BitSet nameInstruction(const std::string& name);
+    BitSet indexInstruction(const boost::any& value);
+    BitSet expression(const std::vector<Token>& tokens, int pc);
 
-        BitSet lookupValue(const std::string& variable);
+    BitSet lookupValue(const std::string& variable);
         
-        void evalError(const std::string& message) {
-            std::cerr << "SelectionEvaulator Error: " << message <<  std::endl; 
-        }
+    void evalError(const std::string& message) {
+      std::cerr << "SelectionEvaulator Error: " << message <<  std::endl; 
+    }
 
-        void unrecognizedCommand(const Token& token) {
-            evalError("unrecognized command:" + boost::any_cast<std::string>(token.value));
-        }        
+    void unrecognizedCommand(const Token& token) {
+      evalError("unrecognized command:" + boost::any_cast<std::string>(token.value));
+    }        
 
-        void unrecognizedExpression() {
-            evalError("unrecognized expression");
-        }
+    void unrecognizedExpression() {
+      evalError("unrecognized expression");
+    }
 
-        void unrecognizedAtomProperty(int property){
-            evalError("unrecognized atom property");
-        }
+    void unrecognizedAtomProperty(int property){
+      evalError("unrecognized atom property");
+    }
 
-        void unrecognizedIdentifier(const std::string& identifier) {
-            evalError("unrecognized identifier:" + identifier);
-        }    
+    void unrecognizedIdentifier(const std::string& identifier) {
+      evalError("unrecognized identifier:" + identifier);
+    }    
 
-        void invalidIndexRange(std::pair<int, int> range) {
-            evalError("invalid index range: [" + toString(range.first) + ", " + toString(range.second) + ")");
-        }
+    void invalidIndexRange(std::pair<int, int> range) {
+      evalError("invalid index range: [" + toString(range.first) + ", " + toString(range.second) + ")");
+    }
 
-        void invalidIndex(int index) {
-            evalError("invalid index : " + toString(index) );
-        }
+    void invalidIndex(int index) {
+      evalError("invalid index : " + toString(index) );
+    }
 
         
-        bool containDynamicToken(const std::vector<Token>& tokens);
+    bool containDynamicToken(const std::vector<Token>& tokens);
 
-        double getCharge(Atom* atom);
+    double getCharge(Atom* atom);
         
-        SelectionCompiler compiler;
+    SelectionCompiler compiler;
 
-        //const static int scriptLevelMax = 10;
-        //int scriptLevel;
+    //const static int scriptLevelMax = 10;
+    //int scriptLevel;
 
-        //Context stack[scriptLevelMax];
+    //Context stack[scriptLevelMax];
 
-        std::string filename;
-        std::string script;
-        std::vector<int> linenumbers;
-        std::vector<int> lineIndices;
-        std::vector<std::vector<Token> > aatoken;
-        int pc; // program counter
+    std::string filename;
+    std::string script;
+    std::vector<int> linenumbers;
+    std::vector<int> lineIndices;
+    std::vector<std::vector<Token> > aatoken;
+    int pc; // program counter
 
-        bool error;
-        std::string errorMessage;
+    bool error;
+    std::string errorMessage;
 
-        std::vector<Token> statement;
-        int statementLength;
+    std::vector<Token> statement;
+    int statementLength;
 
-        SimInfo* info;
-        NameFinder nameFinder;
-        DistanceFinder distanceFinder;
-        IndexFinder indexFinder;
-        int nStuntDouble;   //natoms + nrigidbodies
+    SimInfo* info;
+    NameFinder nameFinder;
+    DistanceFinder distanceFinder;
+    IndexFinder indexFinder;
+    int nStuntDouble;   //natoms + nrigidbodies
 
-        typedef std::map<std::string, boost::any > VariablesType;
-        VariablesType variables;
+    typedef std::map<std::string, boost::any > VariablesType;
+    VariablesType variables;
 
-        bool isDynamic_;
-        bool isLoaded_;
+    bool isDynamic_;
+    bool isLoaded_;
         
-};
+  };
 
 }
 #endif

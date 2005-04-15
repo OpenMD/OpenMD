@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -70,7 +70,7 @@ using namespace oopse;
 
 Shapes_FF::~Shapes_FF(){
 
-	destroyShapeTypes();
+  destroyShapeTypes();
 #ifdef IS_MPI
   if( worldRank == 0 ){
 #endif // is_mpi
@@ -105,9 +105,9 @@ void Shapes_FF::readParams( void ){
 
   char readLine[1024];
 
-   std::string fileName;
-   std::string shapeFileName;
-   std::string tempString;
+  std::string fileName;
+  std::string shapeFileName;
+  std::string tempString;
 
   char *nameToken;
   char *delim = " ,;\t\n";
@@ -117,27 +117,27 @@ void Shapes_FF::readParams( void ){
   int nStrength = 0;
   int myATID;
   int isError;
-   std::string nameString;
+  std::string nameString;
   AtomType* at;
   DirectionalAtomType* dat;
   ShapeAtomType* st;
 
-   std::map<string, AtomType*>::iterator iter;
+  std::map<string, AtomType*>::iterator iter;
 
   // vectors for shape transfer to fortran
-   std::vector<RealSphericalHarmonic*> tempSHVector;
-   std::vector<int> contactL;
-   std::vector<int> contactM;
-   std::vector<int> contactFunc;
-   std::vector<double> contactCoeff;
-   std::vector<int> rangeL;
-   std::vector<int> rangeM;
-   std::vector<int> rangeFunc;
-   std::vector<double> rangeCoeff;
-   std::vector<int> strengthL;
-   std::vector<int> strengthM;
-   std::vector<int> strengthFunc;
-   std::vector<double> strengthCoeff;
+  std::vector<RealSphericalHarmonic*> tempSHVector;
+  std::vector<int> contactL;
+  std::vector<int> contactM;
+  std::vector<int> contactFunc;
+  std::vector<double> contactCoeff;
+  std::vector<int> rangeL;
+  std::vector<int> rangeM;
+  std::vector<int> rangeFunc;
+  std::vector<double> rangeCoeff;
+  std::vector<int> strengthL;
+  std::vector<int> strengthM;
+  std::vector<int> strengthFunc;
+  std::vector<double> strengthCoeff;
    
   // generate the force file name   
   fileName = "Shapes.frc";
@@ -337,7 +337,7 @@ void Shapes_FF::cleanMe( void ){
 void Shapes_FF::initializeAtoms( int nAtoms, Atom** the_atoms ){
   
   int i,j,k;
-   std::map<string, AtomType*>::iterator iter;
+  std::map<string, AtomType*>::iterator iter;
 
   // initialize the atoms
   DirectionalAtom* dAtom;
@@ -348,7 +348,7 @@ void Shapes_FF::initializeAtoms( int nAtoms, Atom** the_atoms ){
   double ji[3];
   double inertialMat[3][3];
   Mat3x3d momInt;
-   std::string myTypeString;
+  std::string myTypeString;
 
   bigContact = 0.0;
 
@@ -450,9 +450,9 @@ void Shapes_FF::parseShapeFile(string shapeFileName, ShapeAtomType* st){
   int nTokens;
   Mat3x3d momInert;
   RealSphericalHarmonic* rsh;
-   std::vector<RealSphericalHarmonic*> functionVector;
+  std::vector<RealSphericalHarmonic*> functionVector;
   ifstrstream shapeFile;
-   std::string tempString;
+  std::string tempString;
 
   shapeFile.open( shapeFileName.c_str() );
   
@@ -717,7 +717,7 @@ double Shapes_FF::findCutoffDistance(ShapeAtomType* st) {
       sigma = st->getContactValueAt(costheta, phi);
       range = st->getRangeValueAt(costheta, phi);
 
-       // cutoff for a shape is taken to be (1.5*rangeVal + contactVal)
+      // cutoff for a shape is taken to be (1.5*rangeVal + contactVal)
       tempCut = 1.5*range + sigma;
 
       if (tempCut > bigCut) bigCut = tempCut; 

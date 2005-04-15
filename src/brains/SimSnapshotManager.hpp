@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -39,13 +39,13 @@
  * such damages.
  */
  
- /**
-  * @file SimSnapshotManager.hpp
-  * @author tlin
-  * @date 10/20/2004
-  * @time 23:56am
-  * @version 1.0
-  */
+/**
+ * @file SimSnapshotManager.hpp
+ * @author tlin
+ * @date 10/20/2004
+ * @time 23:56am
+ * @version 1.0
+ */
 #ifndef BRAINS_SIMSNAPSHOTMANAGER_HPP
 #define BRAINS_SIMSNAPSHOTMANAGER_HPP
 
@@ -54,29 +54,29 @@
 
 namespace oopse{
 
-//forward declaration
-class SimInfo;
-    /**
-     * @class SimSnapshotManager SimSnapshotManager.hpp "brains/SimSnapshotManager.hpp"
-     * @brief SimSnapshotManager class is the concrete snapshot manager for actual simulation
-     * SimSnapshotManager only maintains two snapshots. 
-     * @see PropSimSnapshotManager
-     */
-    class SimSnapshotManager : public SnapshotManager {
-        public:
-            SimSnapshotManager(SimInfo* info, int storageLayout = 255);
-            ~SimSnapshotManager();
-            virtual bool advance();
+  //forward declaration
+  class SimInfo;
+  /**
+   * @class SimSnapshotManager SimSnapshotManager.hpp "brains/SimSnapshotManager.hpp"
+   * @brief SimSnapshotManager class is the concrete snapshot manager for actual simulation
+   * SimSnapshotManager only maintains two snapshots. 
+   * @see PropSimSnapshotManager
+   */
+  class SimSnapshotManager : public SnapshotManager {
+  public:
+    SimSnapshotManager(SimInfo* info, int storageLayout = 255);
+    ~SimSnapshotManager();
+    virtual bool advance();
 
-            virtual Snapshot* getSnapshot(int id);
+    virtual Snapshot* getSnapshot(int id);
             
-            virtual int getCapacity();
+    virtual int getCapacity();
 
-            virtual void setCapacity(int capacity);
+    virtual void setCapacity(int capacity);
             
-        private:
-            SimInfo* info_;
-    };
+  private:
+    SimInfo* info_;
+  };
 
 }
 #endif //BRAINS_SIMSNAPSHOTMANAGER_HPP

@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -43,39 +43,39 @@
 
 namespace oopse {
 
-CubicLattice::CubicLattice(){
-  latticeParam = 1.0;
+  CubicLattice::CubicLattice(){
+    latticeParam = 1.0;
   
-  cellLen[0] = latticeParam;
-  cellLen[1] = latticeParam;
-  cellLen[2] = latticeParam;
+    cellLen[0] = latticeParam;
+    cellLen[1] = latticeParam;
+    cellLen[2] = latticeParam;
   
-}
-
- std::vector<double> CubicLattice::getLatticeConstant(){
-   std::vector<double> lc;
-  
-  lc.push_back(cellLen.x());
-  return lc;
-}
-
-void CubicLattice::setLatticeConstant(const  std::vector<double>& lc){
-  
-  if(lc.size() < 1){
-    std::cerr << "CubicLattice::setLatticeConstant Error: the size of lattice constant vector  is 0" << std::endl;
-    exit(1);
   }
-  else if (lc.size() > 1){
-    std::cerr << "CubicLattice::setLatticeConstant Warning: the size of lattice constant vector  is " << lc.size() << std::endl;
+
+  std::vector<double> CubicLattice::getLatticeConstant(){
+    std::vector<double> lc;
+  
+    lc.push_back(cellLen.x());
+    return lc;
   }
+
+  void CubicLattice::setLatticeConstant(const  std::vector<double>& lc){
   
-  latticeParam = lc[0];
+    if(lc.size() < 1){
+      std::cerr << "CubicLattice::setLatticeConstant Error: the size of lattice constant vector  is 0" << std::endl;
+      exit(1);
+    }
+    else if (lc.size() > 1){
+      std::cerr << "CubicLattice::setLatticeConstant Warning: the size of lattice constant vector  is " << lc.size() << std::endl;
+    }
   
-  cellLen[0] = latticeParam;
-  cellLen[1] = latticeParam;
-  cellLen[2] = latticeParam;
+    latticeParam = lc[0];
   
-  update();
-}
+    cellLen[0] = latticeParam;
+    cellLen[1] = latticeParam;
+    cellLen[2] = latticeParam;
+  
+    update();
+  }
 
 }

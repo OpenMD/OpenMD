@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -46,7 +46,7 @@
 
 class BondStamp{
 
-public:
+ public:
   BondStamp();
   ~BondStamp();
   
@@ -63,7 +63,7 @@ public:
   int haveExtras( void ) { return have_extras; }
   LinkedAssign* getExtras( void ) { return unhandled; }
 
-private:
+ private:
 
   int a, b; //the members
   double constraint;

@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -146,10 +146,10 @@ namespace oopse {
   
   typedef Vector3<double> Vector3d;    
 
-    const Vector3d V3Zero(0.0 , 0.0, 0.0);
-    const Vector3d V3X( 1.0, 0.0, 0.0 ) ;
-    const Vector3d V3Y( 0.0, 1.0, 0.0 ) ;
-    const Vector3d V3Z ( 0.0, 0.0, 1.0 ) ;    
+  const Vector3d V3Zero(0.0 , 0.0, 0.0);
+  const Vector3d V3X( 1.0, 0.0, 0.0 ) ;
+  const Vector3d V3Y( 0.0, 1.0, 0.0 ) ;
+  const Vector3d V3Z ( 0.0, 0.0, 1.0 ) ;    
   
 }
 

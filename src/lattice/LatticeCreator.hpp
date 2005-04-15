@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -46,35 +46,35 @@
 
 namespace oopse {
 
-class Lattice;
+  class Lattice;
 
-/**
- * @class Lattice
- * @todo document
- */
-class LatticeCreator {
-    public:
-        LatticeCreator(const std::string& ident) : ident_(ident) {}
-        virtual ~LatticeCreator() {}
+  /**
+   * @class Lattice
+   * @todo document
+   */
+  class LatticeCreator {
+  public:
+    LatticeCreator(const std::string& ident) : ident_(ident) {}
+    virtual ~LatticeCreator() {}
         
-        const std::string& getIdent() const { return ident_; }
+    const std::string& getIdent() const { return ident_; }
 
-        virtual Lattice* create() const = 0;
+    virtual Lattice* create() const = 0;
             
-    private:
-        std::string ident_;
-};
+  private:
+    std::string ident_;
+  };
 
-/**
- * @class LatticeBuilder
- * @todo document
- */
-template<class ConcreteLattice>
-class LatticeBuilder : public LatticeCreator {
-    public:
-        LatticeBuilder(const std::string& ident) : LatticeCreator(ident) {}
-        virtual  Lattice* create() const {return new ConcreteLattice();}
-};
+  /**
+   * @class LatticeBuilder
+   * @todo document
+   */
+  template<class ConcreteLattice>
+  class LatticeBuilder : public LatticeCreator {
+  public:
+    LatticeBuilder(const std::string& ident) : LatticeCreator(ident) {}
+    virtual  Lattice* create() const {return new ConcreteLattice();}
+  };
 
 }
 

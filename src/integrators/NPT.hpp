@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -53,136 +53,136 @@
 #include "integrators/VelocityVerletIntegrator.hpp"
 
 namespace oopse {
-    class NPT : public VelocityVerletIntegrator {
-        public:
+  class NPT : public VelocityVerletIntegrator {
+  public:
 
-            NPT(SimInfo * info);
-            virtual ~NPT();
+    NPT(SimInfo * info);
+    virtual ~NPT();
 
 
-            int getMaxIterationNumber() {
-                return maxIterNum_;
-            }
+    int getMaxIterationNumber() {
+      return maxIterNum_;
+    }
 
-            void setMaxIterationNumber(int maxIter) {
-                maxIterNum_ = maxIter;
-            }
-            double getTauThermostat() {
-                return tauThermostat;
-            }
+    void setMaxIterationNumber(int maxIter) {
+      maxIterNum_ = maxIter;
+    }
+    double getTauThermostat() {
+      return tauThermostat;
+    }
 
-            void setTauThermostat(double tt) {
-                tauThermostat = tt;
-            }
+    void setTauThermostat(double tt) {
+      tauThermostat = tt;
+    }
 
-            double getTauBarostat() {
-                return tauBarostat;
-            }
-            void setTauBarostat(double tb) {
-                tauBarostat = tb;
-            }
+    double getTauBarostat() {
+      return tauBarostat;
+    }
+    void setTauBarostat(double tb) {
+      tauBarostat = tb;
+    }
 
-            double getTargetTemp() {
-                return targetTemp;
-            }
+    double getTargetTemp() {
+      return targetTemp;
+    }
             
-            void setTargetTemp(double tt) {
-                targetTemp = tt;
-            }
+    void setTargetTemp(double tt) {
+      targetTemp = tt;
+    }
 
-            double getTargetPressure() {
-                return targetTemp;
-            }
+    double getTargetPressure() {
+      return targetTemp;
+    }
             
-            void setTargetPressure(double tp) {
-                targetPressure = tp;
-            }
+    void setTargetPressure(double tp) {
+      targetPressure = tp;
+    }
 
-            double getChiTolerance() {
-                return chiTolerance;
-            }
+    double getChiTolerance() {
+      return chiTolerance;
+    }
             
-            void setChiTolerance(double tol) {
-                chiTolerance = tol;
-            }
+    void setChiTolerance(double tol) {
+      chiTolerance = tol;
+    }
 
-            double getEtaTolerance() {
-                return etaTolerance;
-            }
+    double getEtaTolerance() {
+      return etaTolerance;
+    }
             
-            void setEtaTolerance(double tol) {
-                etaTolerance = tol;
-            }
+    void setEtaTolerance(double tol) {
+      etaTolerance = tol;
+    }
 
-        protected:
+  protected:
 
-            virtual void integrateStep() {
-                needStress= true;
-                VelocityVerletIntegrator::integrateStep();
-            }
+    virtual void integrateStep() {
+      needStress= true;
+      VelocityVerletIntegrator::integrateStep();
+    }
 
-            virtual void doUpdate();
+    virtual void doUpdate();
             
-            double NkBT;
-            double fkBT;
+    double NkBT;
+    double fkBT;
 
-            double tt2;            
-            double tb2;
+    double tt2;            
+    double tb2;
             
-            double instaTemp;
-            double instaPress;
-            double instaVol;
+    double instaTemp;
+    double instaPress;
+    double instaVol;
 
 
-            // targetTemp, targetPressure, and tauBarostat must be set.
-            // One of qmass or tauThermostat must be set;
+    // targetTemp, targetPressure, and tauBarostat must be set.
+    // One of qmass or tauThermostat must be set;
 
-            double targetTemp;
-            double targetPressure;
-            double tauThermostat;
-            double tauBarostat;
+    double targetTemp;
+    double targetPressure;
+    double tauThermostat;
+    double tauBarostat;
 
-            std::vector<Vector3d> oldPos;
-            std::vector<Vector3d> oldVel;
-            std::vector<Vector3d> oldJi;
+    std::vector<Vector3d> oldPos;
+    std::vector<Vector3d> oldVel;
+    std::vector<Vector3d> oldJi;
 
-            double etaTolerance;
+    double etaTolerance;
        
-            double chi;
-            double integralOfChidt;
-            Mat3x3d press;
+    double chi;
+    double integralOfChidt;
+    Mat3x3d press;
             
-        private:
+  private:
 
-            virtual void moveA();
-            virtual void moveB();
+    virtual void moveA();
+    virtual void moveB();
             
-            virtual void getVelScaleA(Vector3d& sc, const Vector3d& vel) = 0;
+    virtual void getVelScaleA(Vector3d& sc, const Vector3d& vel) = 0;
             
-            virtual void getVelScaleB(Vector3d& sc, int index) = 0;
+    virtual void getVelScaleB(Vector3d& sc, int index) = 0;
             
-            virtual void getPosScale(const Vector3d& pos, const Vector3d& COM, 
-                                                            int index, Vector3d& sc) = 0;
+    virtual void getPosScale(const Vector3d& pos, const Vector3d& COM, 
+			     int index, Vector3d& sc) = 0;
 
-            virtual void calcVelScale() = 0;
+    virtual void calcVelScale() = 0;
 
-            virtual bool etaConverged() = 0;
+    virtual bool etaConverged() = 0;
 
-            virtual void evolveEtaA() = 0;
+    virtual void evolveEtaA() = 0;
 
-            virtual void evolveEtaB() = 0;
+    virtual void evolveEtaB() = 0;
 
-            virtual void scaleSimBox() = 0;
+    virtual void scaleSimBox() = 0;
             
-            virtual double calcConservedQuantity() = 0;      
+    virtual double calcConservedQuantity() = 0;      
 
-            virtual void loadEta() = 0;
-            virtual void saveEta() = 0;
+    virtual void loadEta() = 0;
+    virtual void saveEta() = 0;
             
-            int maxIterNum_;
+    int maxIterNum_;
 
-            double chiTolerance;    
-    };
+    double chiTolerance;    
+  };
 
 }      //end namespace oopse
 

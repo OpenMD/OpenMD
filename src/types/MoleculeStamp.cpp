@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -561,14 +561,14 @@ bool MoleculeStamp::isAtomInRigidBody(int atomIndex, int& whichRigidBody, int& c
 //return the position of joint atom apears in  rigidbody's definition
 //for the time being, we will use the most inefficient algorithm, the complexity is O(N2)
 //actually we could improve the complexity to O(NlgN) by sorting the atom index in rigid body first
- std::vector<std::pair<int, int> > MoleculeStamp::getJointAtoms(int rb1, int rb2){
+std::vector<std::pair<int, int> > MoleculeStamp::getJointAtoms(int rb1, int rb2){
   RigidBodyStamp* rbStamp1;
   RigidBodyStamp* rbStamp2;
   int natomInRb1;
   int natomInRb2;
   int atomIndex1;
   int atomIndex2;
-   std::vector<std::pair<int, int> > jointAtomIndexPair;
+  std::vector<std::pair<int, int> > jointAtomIndexPair;
   
   rbStamp1 = this->getRigidBody(rb1);
   natomInRb1 =rbStamp1->getNMembers();

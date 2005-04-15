@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -45,40 +45,40 @@
 #include "utils/simError.h"
 namespace oopse {
 
-ChargeAtomTypesSectionParser::ChargeAtomTypesSectionParser() {
+  ChargeAtomTypesSectionParser::ChargeAtomTypesSectionParser() {
     setSectionName("ChargeAtomTypes");
-}
+  }
 
-void ChargeAtomTypesSectionParser::parseLine(ForceField& ff,const std::string& line, int lineNo){
+  void ChargeAtomTypesSectionParser::parseLine(ForceField& ff,const std::string& line, int lineNo){
     StringTokenizer tokenizer(line);
     int nTokens = tokenizer.countTokens();    
     
     if (nTokens < 2)  {
-        sprintf(painCave.errMsg, "ChargeAtomTypesSectionParser Error: Not enough tokens at line %d\n",
-                lineNo);
-        painCave.isFatal = 1;
-        simError();
+      sprintf(painCave.errMsg, "ChargeAtomTypesSectionParser Error: Not enough tokens at line %d\n",
+	      lineNo);
+      painCave.isFatal = 1;
+      simError();
     } else {
 
-        std::string atomTypeName = tokenizer.nextToken();    
+      std::string atomTypeName = tokenizer.nextToken();    
         
-        AtomType* atomType = ff.getAtomType(atomTypeName);
-        if (atomType != NULL) {
-            double charge = tokenizer.nextTokenAsDouble();
+      AtomType* atomType = ff.getAtomType(atomTypeName);
+      if (atomType != NULL) {
+	double charge = tokenizer.nextTokenAsDouble();
 
-            atomType->addProperty(new DoubleGenericData("Charge", charge));
-            atomType->setCharge();
-        } else {
+	atomType->addProperty(new DoubleGenericData("Charge", charge));
+	atomType->setCharge();
+      } else {
 
-            sprintf(painCave.errMsg, "ChargeAtomTypesSectionParser Error: Can not find matched AtomType at line %d\n",
-                    lineNo);
-            painCave.isFatal = 1;
-            simError();
-        }
+	sprintf(painCave.errMsg, "ChargeAtomTypesSectionParser Error: Can not find matched AtomType at line %d\n",
+		lineNo);
+	painCave.isFatal = 1;
+	simError();
+      }
                        
     }
 
-}
+  }
 
 
 } //end namespace oopse

@@ -46,105 +46,105 @@
 #include "primitives/StuntDouble.hpp"
 namespace oopse {
 
-class SimInfo;
-/**
- * @class SelectionManager SelectionManager.hpp "selection/SelectionManager.hpp"
- * @brief
- */
-class SelectionManager {
-    public:
-        SelectionManager(SimInfo* info);
+  class SimInfo;
+  /**
+   * @class SelectionManager SelectionManager.hpp "selection/SelectionManager.hpp"
+   * @brief
+   */
+  class SelectionManager {
+  public:
+    SelectionManager(SimInfo* info);
 
-        void addSelection(StuntDouble* sd) {
-            bsSelection_.setBitOn(sd->getGlobalIndex());
-        }
+    void addSelection(StuntDouble* sd) {
+      bsSelection_.setBitOn(sd->getGlobalIndex());
+    }
         
-        void addSelectionSet(const BitSet& bs) {
-            bsSelection_ |= bs;
-        }
+    void addSelectionSet(const BitSet& bs) {
+      bsSelection_ |= bs;
+    }
 
-        void setSelection(StuntDouble* sd) {
-            bsSelection_.clearAll();
-            bsSelection_.setBitOn(sd->getGlobalIndex());
-        }
+    void setSelection(StuntDouble* sd) {
+      bsSelection_.clearAll();
+      bsSelection_.setBitOn(sd->getGlobalIndex());
+    }
         
-        void setSelectionSet(const BitSet& bs) {
-            bsSelection_ = bs;           
-        }
+    void setSelectionSet(const BitSet& bs) {
+      bsSelection_ = bs;           
+    }
 
-        void toggleSelection(StuntDouble* sd) {
-            bsSelection_.flip(sd->getGlobalIndex());
-        }
+    void toggleSelection(StuntDouble* sd) {
+      bsSelection_.flip(sd->getGlobalIndex());
+    }
 
-        void toggleSelection() {
-            bsSelection_.flip();
-        }
+    void toggleSelection() {
+      bsSelection_.flip();
+    }
         
-        void selectAll() {
-            bsSelection_.setAll();                
-        }
+    void selectAll() {
+      bsSelection_.setAll();                
+    }
 
-        void clearSelection() {
-           bsSelection_.clearAll();
-        }
+    void clearSelection() {
+      bsSelection_.clearAll();
+    }
 
-        void clearSelection(StuntDouble* sd) {
-            bsSelection_.setBitOff(sd->getGlobalIndex());
-        }
+    void clearSelection(StuntDouble* sd) {
+      bsSelection_.setBitOff(sd->getGlobalIndex());
+    }
 
-        bool isSelected(StuntDouble* sd) {
-            return bsSelection_[sd->getGlobalIndex()];
-        }
+    bool isSelected(StuntDouble* sd) {
+      return bsSelection_[sd->getGlobalIndex()];
+    }
 
-        bool isEmpty() {
-            return bsSelection_.none();
-        }
+    bool isEmpty() {
+      return bsSelection_.none();
+    }
 
-        int getSelectionCount() {
-            return bsSelection_.countBits();
-        }
+    int getSelectionCount() {
+      return bsSelection_.countBits();
+    }
 
-        BitSet getSelectionSet() {
-            return bsSelection_;
-        }
+    BitSet getSelectionSet() {
+      return bsSelection_;
+    }
 
 
-        StuntDouble* beginSelected(int& i);
-        StuntDouble* nextSelected(int& i);
+    StuntDouble* beginSelected(int& i);
+    StuntDouble* nextSelected(int& i);
 
-        StuntDouble* beginUnselected(int& i);
-        StuntDouble* nextUnSelected(int& i);
+    StuntDouble* beginUnselected(int& i);
+    StuntDouble* nextUnSelected(int& i);
 
-        SelectionManager& operator&= (const SelectionManager &sman) {
-            bsSelection_ &= sman.bsSelection_;
-            return *this; 
-        }
+    SelectionManager& operator&= (const SelectionManager &sman) {
+      bsSelection_ &= sman.bsSelection_;
+      return *this; 
+    }
         
-        SelectionManager& operator|= (const SelectionManager &sman) {
-            bsSelection_ |= sman.bsSelection_;
-            return *this; 
-        }
+    SelectionManager& operator|= (const SelectionManager &sman) {
+      bsSelection_ |= sman.bsSelection_;
+      return *this; 
+    }
         
-        SelectionManager& operator^= (const SelectionManager &sman) {
-            bsSelection_ ^= sman.bsSelection_;
-            return *this; 
-        }
+    SelectionManager& operator^= (const SelectionManager &sman) {
+      bsSelection_ ^= sman.bsSelection_;
+      return *this; 
+    }
 
-        SelectionManager& operator-= (const SelectionManager &sman) {
-            bsSelection_ -= sman.bsSelection_;
-            return *this; 
-        }
+    SelectionManager& operator-= (const SelectionManager &sman) {
+      bsSelection_ -= sman.bsSelection_;
+      return *this; 
+    }
         
-        friend SelectionManager operator| (const SelectionManager& sman1, const SelectionManager& sman2);
-        friend SelectionManager operator& (const SelectionManager& sman1, const SelectionManager& sman2);
-        friend SelectionManager operator^ (const SelectionManager& sman1, const SelectionManager& sman2);
-        friend SelectionManager operator-(const SelectionManager& sman1, const SelectionManager& sman2);
+    friend SelectionManager operator| (const SelectionManager& sman1, const SelectionManager& sman2);
+    friend SelectionManager operator& (const SelectionManager& sman1, const SelectionManager& sman2);
+    friend SelectionManager operator^ (const SelectionManager& sman1, const SelectionManager& sman2);
+    friend SelectionManager operator-(const SelectionManager& sman1, const SelectionManager& sman2);
         
-    private:
-        SimInfo* info_;
-        BitSet bsSelection_;
-        std::vector<StuntDouble*> stuntdoubles_;
-};
+  private:
+    SimInfo* info_;
+    BitSet bsSelection_;
+    std::vector<StuntDouble*> stuntdoubles_;
+  };
 
 }
 #endif

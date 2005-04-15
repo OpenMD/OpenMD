@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -56,250 +56,250 @@
 
 namespace oopse {
 
-/**
- * @class IndexListContainer
- * @brief 
- * @todo documentation
- */
-class IndexListContainer{
-    public:
-        static const int MAX_INTEGER = 2147483647;
-        typedef std::list<std::pair<int, int> >::iterator  IndexListContainerIterator;
+  /**
+   * @class IndexListContainer
+   * @brief 
+   * @todo documentation
+   */
+  class IndexListContainer{
+  public:
+    static const int MAX_INTEGER = 2147483647;
+    typedef std::list<std::pair<int, int> >::iterator  IndexListContainerIterator;
 
         
-        IndexListContainer(int minIndex = 0, int maxIndex = MAX_INTEGER) 
-                                                 :minIndex_(minIndex), maxIndex_(maxIndex) {
+    IndexListContainer(int minIndex = 0, int maxIndex = MAX_INTEGER) 
+      :minIndex_(minIndex), maxIndex_(maxIndex) {
             
-            indexContainer_.push_back(std::make_pair(minIndex, maxIndex));
-        }
+	indexContainer_.push_back(std::make_pair(minIndex, maxIndex));
+      }
         
-        int pop() {
+    int pop() {
             
-            if (indexContainer_.empty()) {
-                std::cerr << "" << std::endl;
-            }
+      if (indexContainer_.empty()) {
+	std::cerr << "" << std::endl;
+      }
 
-            IndexListContainerIterator i = indexContainer_.begin();
-            int result;
+      IndexListContainerIterator i = indexContainer_.begin();
+      int result;
             
-            result = indexContainer_.front().first;
+      result = indexContainer_.front().first;
             
-            if (indexContainer_.front().first  == indexContainer_.front().second) {
-                indexContainer_.pop_front();
-            } else if (indexContainer_.front().first < indexContainer_.front().second) {
-                ++indexContainer_.front().first;
-            } else {
-                std::cerr << "" << std::endl;
-            }
+      if (indexContainer_.front().first  == indexContainer_.front().second) {
+	indexContainer_.pop_front();
+      } else if (indexContainer_.front().first < indexContainer_.front().second) {
+	++indexContainer_.front().first;
+      } else {
+	std::cerr << "" << std::endl;
+      }
 
-            return result;
-        }
+      return result;
+    }
 
 
-        /**
-         *
-         */
-        void insert(int index) {
-            IndexListContainerIterator insertPos = internalInsert(index, index);            
-            merge(insertPos);
-        }
+    /**
+     *
+     */
+    void insert(int index) {
+      IndexListContainerIterator insertPos = internalInsert(index, index);            
+      merge(insertPos);
+    }
 
-        /**
-         * Reclaims an index range
-         * @param beginIndex
-         * @param endIndex
-         */
-        void insert(int beginIndex, int endIndex) {
-             IndexListContainerIterator insertPos = internalInsert(beginIndex, endIndex); 
-             merge(insertPos);            
-        }
+    /**
+     * Reclaims an index range
+     * @param beginIndex
+     * @param endIndex
+     */
+    void insert(int beginIndex, int endIndex) {
+      IndexListContainerIterator insertPos = internalInsert(beginIndex, endIndex); 
+      merge(insertPos);            
+    }
 
-        /**
-         * Reclaims an index array.
-         * @param indices
-         */
-        void insert(std::vector<int>& indices){
+    /**
+     * Reclaims an index array.
+     * @param indices
+     */
+    void insert(std::vector<int>& indices){
 
-            if (indices.empty()) {
-                return;
-            }
+      if (indices.empty()) {
+	return;
+      }
             
-            std::sort(indices.begin(), indices.end());
-            std::unique(indices.begin(), indices.end());
+      std::sort(indices.begin(), indices.end());
+      std::unique(indices.begin(), indices.end());
 
-            std::vector<int>::iterator i;
-            IndexListContainerIterator insertPos;
-            int beginIndex;
+      std::vector<int>::iterator i;
+      IndexListContainerIterator insertPos;
+      int beginIndex;
 
-            beginIndex = indices[0];
+      beginIndex = indices[0];
         
-            for ( i = indices.begin() + 1 ; i != indices.end(); ++i) {
-                if (*i != *(i -1) + 1) {
-                    insert(beginIndex, *(i-1));
-                    beginIndex = *i;
-                }
-            }
+      for ( i = indices.begin() + 1 ; i != indices.end(); ++i) {
+	if (*i != *(i -1) + 1) {
+	  insert(beginIndex, *(i-1));
+	  beginIndex = *i;
+	}
+      }
             
             
-        }
+    }
         
-        std::vector<int> getIndicesBefore(int index) {
-            std::vector<int> result;
-            IndexListContainerIterator i;
+    std::vector<int> getIndicesBefore(int index) {
+      std::vector<int> result;
+      IndexListContainerIterator i;
 
-            for(i = indexContainer_.begin(); i != indexContainer_.end(); ++i) {
-                if ((*i).first > index) {
-                    //we locate the node whose minimum index is greater that index
-                    indexContainer_.erase(indexContainer_.begin(), i);
-                    break;
-                } else if ((*i).second < index) {
-                    //The biggest index current node hold is less than the index we want
-                    for (int j = (*i).first; j <= (*i).second; ++j) {
-                        result.push_back(j);
-                    }
-                    continue;
-                } else if ((*i).first == (*i).second) {
-                    //the index happen to equal to a node which only contains one index
-                    result.push_back((*i).first);
-                    indexContainer_.erase(indexContainer_.begin(), i);
-                    break;
-                } else {
+      for(i = indexContainer_.begin(); i != indexContainer_.end(); ++i) {
+	if ((*i).first > index) {
+	  //we locate the node whose minimum index is greater that index
+	  indexContainer_.erase(indexContainer_.begin(), i);
+	  break;
+	} else if ((*i).second < index) {
+	  //The biggest index current node hold is less than the index we want
+	  for (int j = (*i).first; j <= (*i).second; ++j) {
+	    result.push_back(j);
+	  }
+	  continue;
+	} else if ((*i).first == (*i).second) {
+	  //the index happen to equal to a node which only contains one index
+	  result.push_back((*i).first);
+	  indexContainer_.erase(indexContainer_.begin(), i);
+	  break;
+	} else {
 
-                    for (int j = (*i).first; j < index; ++j) {
-                        result.push_back(j);
-                    }
+	  for (int j = (*i).first; j < index; ++j) {
+	    result.push_back(j);
+	  }
                         
-                    (*i).first =  index;                   
-                    indexContainer_.erase(indexContainer_.begin(), i);
-                    break;
-                }
+	  (*i).first =  index;                   
+	  indexContainer_.erase(indexContainer_.begin(), i);
+	  break;
+	}
                 
-            }
+      }
 
-            return result;
+      return result;
 
-        }
+    }
         
-        int getMaxIndex() {
-            return maxIndex_;
-        }
+    int getMaxIndex() {
+      return maxIndex_;
+    }
                 
-    private:
+  private:
         
-        IndexListContainerIterator internalInsert(int beginIndex, int endIndex) {
+    IndexListContainerIterator internalInsert(int beginIndex, int endIndex) {
 
-            if (beginIndex > endIndex) {
-                std::swap(beginIndex, endIndex);
-                std::cerr << "" << std::endl;
-            }
+      if (beginIndex > endIndex) {
+	std::swap(beginIndex, endIndex);
+	std::cerr << "" << std::endl;
+      }
 
-            if (endIndex > maxIndex_) {
-                std::cerr << "" << std::endl;
-            }
+      if (endIndex > maxIndex_) {
+	std::cerr << "" << std::endl;
+      }
 
                       
-            IndexListContainerIterator j;
+      IndexListContainerIterator j;
 
-            IndexListContainerIterator i = indexContainer_.begin();  
-            for (; i != indexContainer_.end(); ++i) {
-                if ((*i).first > endIndex) {
-                    indexContainer_.insert(i, std::make_pair(beginIndex, endIndex));
-                    return --i;
-                } else if ((*i).second < beginIndex) {
-                    continue;
-                } else {
-                    std::cerr << "" << std::endl;
-                }
-            }
+      IndexListContainerIterator i = indexContainer_.begin();  
+      for (; i != indexContainer_.end(); ++i) {
+	if ((*i).first > endIndex) {
+	  indexContainer_.insert(i, std::make_pair(beginIndex, endIndex));
+	  return --i;
+	} else if ((*i).second < beginIndex) {
+	  continue;
+	} else {
+	  std::cerr << "" << std::endl;
+	}
+      }
 
-            indexContainer_.push_back(std::make_pair(beginIndex, endIndex));
-            return --indexContainer_.end();
+      indexContainer_.push_back(std::make_pair(beginIndex, endIndex));
+      return --indexContainer_.end();
 
-        }
+    }
 
-        void merge(IndexListContainerIterator i) {
-            IndexListContainerIterator j;
+    void merge(IndexListContainerIterator i) {
+      IndexListContainerIterator j;
 
-            //check whether current node can be merged with its previous node            
-            if ( i != indexContainer_.begin()) {
-                j = i;
-                --j;
-                if (j != indexContainer_.begin() && (*j).second + 1 == (*i).first) {
-                    (*i).first = (*j).first;
-                    indexContainer_.erase(j);
-                }
-            }
+      //check whether current node can be merged with its previous node            
+      if ( i != indexContainer_.begin()) {
+	j = i;
+	--j;
+	if (j != indexContainer_.begin() && (*j).second + 1 == (*i).first) {
+	  (*i).first = (*j).first;
+	  indexContainer_.erase(j);
+	}
+      }
 
-            //check whether current node can be merged with its next node            
-            if ( i != indexContainer_.end()) {
-                j = i;
-                ++j;
+      //check whether current node can be merged with its next node            
+      if ( i != indexContainer_.end()) {
+	j = i;
+	++j;
 
-                if (j != indexContainer_.end() && (*i).second + 1 == (*j).first) {
-                    (*i).second = (*j).second;
-                    indexContainer_.erase(j);
-                }
-            }
+	if (j != indexContainer_.end() && (*i).second + 1 == (*j).first) {
+	  (*i).second = (*j).second;
+	  indexContainer_.erase(j);
+	}
+      }
 
-        }
-        int minIndex_;
-        int maxIndex_;        
-        std::list<std::pair<int, int> > indexContainer_;
-};
+    }
+    int minIndex_;
+    int maxIndex_;        
+    std::list<std::pair<int, int> > indexContainer_;
+  };
 
 
-/**
- * @class LocalIndexManager LocalIndexManager.hpp "utils/LocalIndexManager.hpp"
- * @brief
- */
-class LocalIndexManager {
-    public:
+  /**
+   * @class LocalIndexManager LocalIndexManager.hpp "utils/LocalIndexManager.hpp"
+   * @brief
+   */
+  class LocalIndexManager {
+  public:
         
-        int getNextAtomIndex() {
-            return atomIndexContainer_.pop();
-        }
+    int getNextAtomIndex() {
+      return atomIndexContainer_.pop();
+    }
 
-        std::vector<int> getAtomIndicesBefore(int index) {
-            return atomIndexContainer_.getIndicesBefore(index);
-        }
+    std::vector<int> getAtomIndicesBefore(int index) {
+      return atomIndexContainer_.getIndicesBefore(index);
+    }
         
-        void releaseAtomIndex(int index) {
-            atomIndexContainer_.insert(index);
-        }
+    void releaseAtomIndex(int index) {
+      atomIndexContainer_.insert(index);
+    }
 
-        void releaseAtomIndex(int beginIndex, int endIndex) {
-            atomIndexContainer_.insert(beginIndex, endIndex);
-        }
+    void releaseAtomIndex(int beginIndex, int endIndex) {
+      atomIndexContainer_.insert(beginIndex, endIndex);
+    }
 
-        void releaseAtomIndex(std::vector<int> indices) {
-            atomIndexContainer_.insert(indices);
-        }
+    void releaseAtomIndex(std::vector<int> indices) {
+      atomIndexContainer_.insert(indices);
+    }
 
-       int getNextRigidBodyIndex() {
-            return rigidBodyIndexContainer_.pop();
-        }
+    int getNextRigidBodyIndex() {
+      return rigidBodyIndexContainer_.pop();
+    }
 
-        std::vector<int> getRigidBodyIndicesBefore(int index) {
-            return rigidBodyIndexContainer_.getIndicesBefore(index);
-        }
+    std::vector<int> getRigidBodyIndicesBefore(int index) {
+      return rigidBodyIndexContainer_.getIndicesBefore(index);
+    }
         
-        void releaseRigidBodyIndex(int index) {
-            rigidBodyIndexContainer_.insert(index);
-        }
+    void releaseRigidBodyIndex(int index) {
+      rigidBodyIndexContainer_.insert(index);
+    }
 
-        void releaseRigidBodyIndex(int beginIndex, int endIndex) {
-            rigidBodyIndexContainer_.insert(beginIndex, endIndex);
-        }
+    void releaseRigidBodyIndex(int beginIndex, int endIndex) {
+      rigidBodyIndexContainer_.insert(beginIndex, endIndex);
+    }
 
-        void releaseRigidBodyIndex(std::vector<int> indices) {
-            rigidBodyIndexContainer_.insert(indices);
-        }
+    void releaseRigidBodyIndex(std::vector<int> indices) {
+      rigidBodyIndexContainer_.insert(indices);
+    }
  
-    private:
+  private:
 
-        IndexListContainer atomIndexContainer_;
-        IndexListContainer rigidBodyIndexContainer_;
-};
+    IndexListContainer atomIndexContainer_;
+    IndexListContainer rigidBodyIndexContainer_;
+  };
 
 } //end namespace oopse
 #endif //UTILS_LOCALINDEXMANAGER_HPP

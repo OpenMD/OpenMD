@@ -47,59 +47,59 @@
 
 namespace oopse {
 
-/**
- * @class DirectionalAtomType 
- *
- * DirectionalAtomType is what OOPSE looks to for unchanging data
- * about a directional atoms. 
- */
-class DirectionalAtomType : public AtomType {
+  /**
+   * @class DirectionalAtomType 
+   *
+   * DirectionalAtomType is what OOPSE looks to for unchanging data
+   * about a directional atoms. 
+   */
+  class DirectionalAtomType : public AtomType {
 
-    public:
+  public:
 
-        DirectionalAtomType() : AtomType() { atp.is_Directional = 1; }
+    DirectionalAtomType() : AtomType() { atp.is_Directional = 1; }
 
-        Mat3x3d getI() {return I;}
+    Mat3x3d getI() {return I;}
 
-        void    setI(Mat3x3d theI) {I = theI;}
+    void    setI(Mat3x3d theI) {I = theI;}
 
-        RotMat3x3d getElectroBodyFrame() {
-            return electroBodyFrame_;
-        }
+    RotMat3x3d getElectroBodyFrame() {
+      return electroBodyFrame_;
+    }
 
-        void setElectroBodyFrame(const RotMat3x3d& electroBodyFrame) {
-            electroBodyFrame_ =electroBodyFrame;
-        }
+    void setElectroBodyFrame(const RotMat3x3d& electroBodyFrame) {
+      electroBodyFrame_ =electroBodyFrame;
+    }
 
-        void setDipole() { atp.is_Dipole = 1; }
-        void setSplitDipole() { atp.is_SplitDipole = 1; atp.is_Dipole=1;}
-        void setQuadrupole() { atp.is_Quadrupole = 1; }
-        void setGayBerne() { atp.is_GayBerne = 1; }
-        void setSticky() { atp.is_Sticky = 1; }
-        void setShape() { atp.is_Shape = 1;}
+    void setDipole() { atp.is_Dipole = 1; }
+    void setSplitDipole() { atp.is_SplitDipole = 1; atp.is_Dipole=1;}
+    void setQuadrupole() { atp.is_Quadrupole = 1; }
+    void setGayBerne() { atp.is_GayBerne = 1; }
+    void setSticky() { atp.is_Sticky = 1; }
+    void setShape() { atp.is_Shape = 1;}
 
-        virtual void complete();
+    virtual void complete();
 
-    private:
+  private:
 
-        Mat3x3d I;
-        RotMat3x3d electroBodyFrame_;
-};
+    Mat3x3d I;
+    RotMat3x3d electroBodyFrame_;
+  };
 
 
-struct StickyParam {
-double w0;
-double v0;
-double v0p;
-double rl;
-double ru;
-double rlp;
-double rup;
-};
+  struct StickyParam {
+    double w0;
+    double v0;
+    double v0p;
+    double rl;
+    double ru;
+    double rlp;
+    double rup;
+  };
 
-typedef SimpleTypeData<StickyParam> StickyParamGenericData;
+  typedef SimpleTypeData<StickyParam> StickyParamGenericData;
 
-typedef SimpleTypeData<Vector3d> Vector3dGenericData;
+  typedef SimpleTypeData<Vector3d> Vector3dGenericData;
   
 }
 #endif

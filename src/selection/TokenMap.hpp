@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -47,28 +47,28 @@
 namespace oopse {
 
 
-class TokenMap{
-    public:
-        typedef std::map<std::string, Token> TokenMapType;
-        static TokenMap* getInstance(){
-            if (instance_ == NULL) {
-                instance_ = new TokenMap();
-            }
+  class TokenMap{
+  public:
+    typedef std::map<std::string, Token> TokenMapType;
+    static TokenMap* getInstance(){
+      if (instance_ == NULL) {
+	instance_ = new TokenMap();
+      }
 
-            return instance_;
-        }
+      return instance_;
+    }
 
-        Token* getToken(const std::string& ident);
+    Token* getToken(const std::string& ident);
         
-    private:
+  private:
         
-        TokenMap();
+    TokenMap();
         
-        static TokenMap* instance_;
+    static TokenMap* instance_;
 
-        TokenMapType tokenMap_;        
+    TokenMapType tokenMap_;        
         
-};
+  };
 
 }
 #endif

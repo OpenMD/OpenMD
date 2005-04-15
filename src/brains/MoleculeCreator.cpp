@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -39,13 +39,13 @@
  * such damages.
  */
   
- /**
-  * @file MoleculeCreator.cpp
-  * @author tlin
-  * @date 11/04/2004
-  * @time 13:44am
-  * @version 1.0
-  */
+/**
+ * @file MoleculeCreator.cpp
+ * @author tlin
+ * @date 11/04/2004
+ * @time 13:44am
+ * @version 1.0
+ */
 
 #include <cassert>
 #include <set>
@@ -60,8 +60,8 @@
 
 namespace oopse {
 
-Molecule* MoleculeCreator::createMolecule(ForceField* ff, MoleculeStamp *molStamp,
-    int stampId, int globalIndex, LocalIndexManager* localIndexMan) {
+  Molecule* MoleculeCreator::createMolecule(ForceField* ff, MoleculeStamp *molStamp,
+					    int stampId, int globalIndex, LocalIndexManager* localIndexMan) {
 
     Molecule* mol = new Molecule(stampId, globalIndex, molStamp->getID());
     
@@ -70,9 +70,9 @@ Molecule* MoleculeCreator::createMolecule(ForceField* ff, MoleculeStamp *molStam
     AtomStamp* currentAtomStamp;
     int nAtom = molStamp->getNAtoms();
     for (int i = 0; i < nAtom; ++i) {
-        currentAtomStamp = molStamp->getAtom(i);
-        atom = createAtom(ff, mol, currentAtomStamp, localIndexMan);
-        mol->addAtom(atom);
+      currentAtomStamp = molStamp->getAtom(i);
+      atom = createAtom(ff, mol, currentAtomStamp, localIndexMan);
+      mol->addAtom(atom);
     }
 
     //create rigidbodies
@@ -81,9 +81,9 @@ Molecule* MoleculeCreator::createMolecule(ForceField* ff, MoleculeStamp *molStam
     int nRigidbodies = molStamp->getNRigidBodies();
 
     for (int i = 0; i < nRigidbodies; ++i) {
-        currentRigidBodyStamp = molStamp->getRigidBody(i);
-        rb = createRigidBody(molStamp, mol, currentRigidBodyStamp, localIndexMan);
-        mol->addRigidBody(rb);
+      currentRigidBodyStamp = molStamp->getRigidBody(i);
+      rb = createRigidBody(molStamp, mol, currentRigidBodyStamp, localIndexMan);
+      mol->addRigidBody(rb);
     }
 
     //create bonds
@@ -92,9 +92,9 @@ Molecule* MoleculeCreator::createMolecule(ForceField* ff, MoleculeStamp *molStam
     int nBonds = molStamp->getNBonds();
 
     for (int i = 0; i < nBonds; ++i) {
-        currentBondStamp = molStamp->getBond(i);
-        bond = createBond(ff, mol, currentBondStamp);
-        mol->addBond(bond);
+      currentBondStamp = molStamp->getBond(i);
+      bond = createBond(ff, mol, currentBondStamp);
+      mol->addBond(bond);
     }
 
     //create bends
@@ -102,9 +102,9 @@ Molecule* MoleculeCreator::createMolecule(ForceField* ff, MoleculeStamp *molStam
     BendStamp* currentBendStamp;
     int nBends = molStamp->getNBends();
     for (int i = 0; i < nBends; ++i) {
-        currentBendStamp = molStamp->getBend(i);
-        bend = createBend(ff, mol, currentBendStamp);
-        mol->addBend(bend);
+      currentBendStamp = molStamp->getBend(i);
+      bend = createBend(ff, mol, currentBendStamp);
+      mol->addBend(bend);
     }
 
     //create torsions
@@ -112,9 +112,9 @@ Molecule* MoleculeCreator::createMolecule(ForceField* ff, MoleculeStamp *molStam
     TorsionStamp* currentTorsionStamp;
     int nTorsions = molStamp->getNTorsions();
     for (int i = 0; i < nTorsions; ++i) {
-        currentTorsionStamp = molStamp->getTorsion(i);
-        torsion = createTorsion(ff, mol, currentTorsionStamp);
-        mol->addTorsion(torsion);
+      currentTorsionStamp = molStamp->getTorsion(i);
+      torsion = createTorsion(ff, mol, currentTorsionStamp);
+      mol->addTorsion(torsion);
     }
 
     //create cutoffGroups
@@ -122,18 +122,18 @@ Molecule* MoleculeCreator::createMolecule(ForceField* ff, MoleculeStamp *molStam
     CutoffGroupStamp* currentCutoffGroupStamp;
     int nCutoffGroups = molStamp->getNCutoffGroups();
     for (int i = 0; i < nCutoffGroups; ++i) {
-        currentCutoffGroupStamp = molStamp->getCutoffGroup(i);
-        cutoffGroup = createCutoffGroup(mol, currentCutoffGroupStamp);
-        mol->addCutoffGroup(cutoffGroup);
+      currentCutoffGroupStamp = molStamp->getCutoffGroup(i);
+      cutoffGroup = createCutoffGroup(mol, currentCutoffGroupStamp);
+      mol->addCutoffGroup(cutoffGroup);
     }
 
     //every free atom is a cutoff group    
     std::set<Atom*> allAtoms;
-     Molecule::AtomIterator ai;
+    Molecule::AtomIterator ai;
 
     //add all atoms into allAtoms set
     for(atom = mol->beginAtom(ai); atom != NULL; atom = mol->nextAtom(ai)) {
-        allAtoms.insert(atom);
+      allAtoms.insert(atom);
     }
 
     Molecule::CutoffGroupIterator ci;
@@ -143,9 +143,9 @@ Molecule* MoleculeCreator::createMolecule(ForceField* ff, MoleculeStamp *molStam
     //add all of the atoms belong to cutoff groups into cutoffAtoms set
     for (cg = mol->beginCutoffGroup(ci); cg != NULL; cg = mol->nextCutoffGroup(ci)) {
 
-        for(atom = cg->beginAtom(ai); atom != NULL; atom = cg->nextAtom(ai)) {
-            cutoffAtoms.insert(atom);
-        }
+      for(atom = cg->beginAtom(ai); atom != NULL; atom = cg->nextAtom(ai)) {
+	cutoffAtoms.insert(atom);
+      }
 
     }       
     
@@ -155,22 +155,22 @@ Molecule* MoleculeCreator::createMolecule(ForceField* ff, MoleculeStamp *molStam
     //[cutoffAtoms.begin(), cutoffAtoms.end()).
     std::vector<Atom*> freeAtoms;    
     std::set_difference(allAtoms.begin(), allAtoms.end(), cutoffAtoms.begin(), cutoffAtoms.end(),
-                            std::back_inserter(freeAtoms));
+			std::back_inserter(freeAtoms));
 
     if (freeAtoms.size() != allAtoms.size() - cutoffAtoms.size()) {
-        //Some atoms in rigidAtoms are not in allAtoms, something must be wrong
-        sprintf(painCave.errMsg, "Atoms in cutoff groups are not in the atom list of the same molecule");
+      //Some atoms in rigidAtoms are not in allAtoms, something must be wrong
+      sprintf(painCave.errMsg, "Atoms in cutoff groups are not in the atom list of the same molecule");
 
-        painCave.isFatal = 1;
-        simError();        
+      painCave.isFatal = 1;
+      simError();        
     }
 
     //loop over the free atoms and then create one cutoff group for every single free atom
     std::vector<Atom*>::iterator fai;
 
     for (fai = freeAtoms.begin(); fai != freeAtoms.end(); ++fai) {
-        cutoffGroup = createCutoffGroup(mol, *fai);
-        mol->addCutoffGroup(cutoffGroup);
+      cutoffGroup = createCutoffGroup(mol, *fai);
+      mol->addCutoffGroup(cutoffGroup);
     }
     //create constraints
     createConstraintPair(mol);
@@ -180,52 +180,52 @@ Molecule* MoleculeCreator::createMolecule(ForceField* ff, MoleculeStamp *molStam
     mol->complete();
 
     return mol;
-}    
+  }    
 
 
-Atom* MoleculeCreator::createAtom(ForceField* ff, Molecule* mol, AtomStamp* stamp, 
-                                                                  LocalIndexManager* localIndexMan) {
+  Atom* MoleculeCreator::createAtom(ForceField* ff, Molecule* mol, AtomStamp* stamp, 
+				    LocalIndexManager* localIndexMan) {
     AtomType * atomType;
     Atom* atom;
 
     atomType =  ff->getAtomType(stamp->getType());
 
     if (atomType == NULL) {
-        sprintf(painCave.errMsg, "Can not find Matching Atom Type for[%s]",
-                   stamp->getType());
+      sprintf(painCave.errMsg, "Can not find Matching Atom Type for[%s]",
+	      stamp->getType());
 
-        painCave.isFatal = 1;
-        simError();
+      painCave.isFatal = 1;
+      simError();
     }
     
     //below code still have some kind of hard-coding smell
     if (atomType->isDirectional()){
      
-        DirectionalAtomType* dAtomType = dynamic_cast<DirectionalAtomType*>(atomType);
+      DirectionalAtomType* dAtomType = dynamic_cast<DirectionalAtomType*>(atomType);
         
-        if (dAtomType == NULL) {
-            sprintf(painCave.errMsg, "Can not cast AtomType to DirectionalAtomType");
+      if (dAtomType == NULL) {
+	sprintf(painCave.errMsg, "Can not cast AtomType to DirectionalAtomType");
 
-            painCave.isFatal = 1;
-            simError();
-        }
+	painCave.isFatal = 1;
+	simError();
+      }
 
-        DirectionalAtom* dAtom;
-        dAtom = new DirectionalAtom(dAtomType);
-        atom = dAtom;    
+      DirectionalAtom* dAtom;
+      dAtom = new DirectionalAtom(dAtomType);
+      atom = dAtom;    
     }
     else{
-        atom = new Atom(atomType);
+      atom = new Atom(atomType);
     }
 
     atom->setLocalIndex(localIndexMan->getNextAtomIndex());
 
     return atom;
-}
+  }
 
-RigidBody* MoleculeCreator::createRigidBody(MoleculeStamp *molStamp, Molecule* mol,
-                                                                                    RigidBodyStamp* rbStamp, 
-                                                                                    LocalIndexManager* localIndexMan) {
+  RigidBody* MoleculeCreator::createRigidBody(MoleculeStamp *molStamp, Molecule* mol,
+					      RigidBodyStamp* rbStamp, 
+					      LocalIndexManager* localIndexMan) {
     Atom* atom;
     int nAtoms;
     Vector3d refCoor;
@@ -234,11 +234,11 @@ RigidBody* MoleculeCreator::createRigidBody(MoleculeStamp *molStamp, Molecule* m
     RigidBody* rb = new RigidBody();
     nAtoms = rbStamp->getNMembers();    
     for (int i = 0; i < nAtoms; ++i) {
-        //rbStamp->getMember(i) return the local index of current atom inside the molecule.
-        //It is not the same as local index of atom which is the index of atom at DataStorage class
-        atom = mol->getAtomAt(rbStamp->getMember(i));
-        atomStamp= molStamp->getAtom(rbStamp->getMember(i));    
-        rb->addAtom(atom, atomStamp);
+      //rbStamp->getMember(i) return the local index of current atom inside the molecule.
+      //It is not the same as local index of atom which is the index of atom at DataStorage class
+      atom = mol->getAtomAt(rbStamp->getMember(i));
+      atomStamp= molStamp->getAtom(rbStamp->getMember(i));    
+      rb->addAtom(atom, atomStamp);
     }
 
     //after all of the atoms are added, we need to calculate the reference coordinates
@@ -257,9 +257,9 @@ RigidBody* MoleculeCreator::createRigidBody(MoleculeStamp *molStamp, Molecule* m
     rb->setType(mol->getType() + "_RB_" + s.c_str());
 
     return rb;
-}    
+  }    
 
-Bond* MoleculeCreator::createBond(ForceField* ff, Molecule* mol, BondStamp* stamp) {
+  Bond* MoleculeCreator::createBond(ForceField* ff, Molecule* mol, BondStamp* stamp) {
     BondType* bondType;
     Atom* atomA;
     Atom* atomB;
@@ -272,112 +272,112 @@ Bond* MoleculeCreator::createBond(ForceField* ff, Molecule* mol, BondStamp* stam
     bondType = ff->getBondType(atomA->getType(), atomB->getType());
 
     if (bondType == NULL) {
-        sprintf(painCave.errMsg, "Can not find Matching Bond Type for[%s, %s]",
-                   atomA->getType().c_str(),
-                   atomB->getType().c_str());
+      sprintf(painCave.errMsg, "Can not find Matching Bond Type for[%s, %s]",
+	      atomA->getType().c_str(),
+	      atomB->getType().c_str());
 
-        painCave.isFatal = 1;
-        simError();
+      painCave.isFatal = 1;
+      simError();
     }
     return new Bond(atomA, atomB, bondType);    
-}    
+  }    
 
-Bend* MoleculeCreator::createBend(ForceField* ff, Molecule* mol, BendStamp* stamp) {
+  Bend* MoleculeCreator::createBend(ForceField* ff, Molecule* mol, BendStamp* stamp) {
     bool isGhostBend = false;
     int ghostIndex;
 
     
     //
     if (stamp->haveExtras()){
-        LinkedAssign* extras = stamp->getExtras();
-        LinkedAssign* currentExtra = extras;
+      LinkedAssign* extras = stamp->getExtras();
+      LinkedAssign* currentExtra = extras;
 
-        while (currentExtra != NULL){
-            if (!strcmp(currentExtra->getlhs(), "ghostVectorSource")){
-                switch (currentExtra->getType()){
-                case 0:
-                    ghostIndex = currentExtra->getInt();
-                    isGhostBend = true;
-                    break;
+      while (currentExtra != NULL){
+	if (!strcmp(currentExtra->getlhs(), "ghostVectorSource")){
+	  switch (currentExtra->getType()){
+	  case 0:
+	    ghostIndex = currentExtra->getInt();
+	    isGhostBend = true;
+	    break;
 
-                default:
-                sprintf(painCave.errMsg,
-                "SimSetup Error: ghostVectorSource must be an int.\n");
-                painCave.isFatal = 1;
-                simError();
-                }
-            } else{
-                sprintf(painCave.errMsg,
-                "SimSetup Error: unhandled bend assignment:\n");
-                painCave.isFatal = 1;
-                simError();
-            }
-            currentExtra = currentExtra->getNext();
-        }
+	  default:
+	    sprintf(painCave.errMsg,
+		    "SimSetup Error: ghostVectorSource must be an int.\n");
+	    painCave.isFatal = 1;
+	    simError();
+	  }
+	} else{
+	  sprintf(painCave.errMsg,
+		  "SimSetup Error: unhandled bend assignment:\n");
+	  painCave.isFatal = 1;
+	  simError();
+	}
+	currentExtra = currentExtra->getNext();
+      }
         
     }
 
     if (isGhostBend) {
 
-        int indexA = stamp->getA();
-        int indexB= stamp->getB();
+      int indexA = stamp->getA();
+      int indexB= stamp->getB();
 
-        assert(indexA != indexB);
+      assert(indexA != indexB);
 
-        int normalIndex;
-        if (indexA == ghostIndex) {
-            normalIndex = indexB;
-        } else if (indexB == ghostIndex) {
-            normalIndex = indexA;
-        }
+      int normalIndex;
+      if (indexA == ghostIndex) {
+	normalIndex = indexB;
+      } else if (indexB == ghostIndex) {
+	normalIndex = indexA;
+      }
         
-        Atom* normalAtom = mol->getAtomAt(normalIndex) ;        
-        DirectionalAtom* ghostAtom = dynamic_cast<DirectionalAtom*>(mol->getAtomAt(ghostIndex));
-        if (ghostAtom == NULL) {
-            sprintf(painCave.errMsg, "Can not cast Atom to DirectionalAtom");
-            painCave.isFatal = 1;
-            simError();
-        }
+      Atom* normalAtom = mol->getAtomAt(normalIndex) ;        
+      DirectionalAtom* ghostAtom = dynamic_cast<DirectionalAtom*>(mol->getAtomAt(ghostIndex));
+      if (ghostAtom == NULL) {
+	sprintf(painCave.errMsg, "Can not cast Atom to DirectionalAtom");
+	painCave.isFatal = 1;
+	simError();
+      }
                 
-        BendType* bendType = ff->getBendType(normalAtom->getType(), ghostAtom->getType(), "GHOST");
+      BendType* bendType = ff->getBendType(normalAtom->getType(), ghostAtom->getType(), "GHOST");
 
-        if (bendType == NULL) {
-            sprintf(painCave.errMsg, "Can not find Matching Bend Type for[%s, %s, %s]",
-                       normalAtom->getType().c_str(),
-                       ghostAtom->getType().c_str(),
-                       "GHOST");
+      if (bendType == NULL) {
+	sprintf(painCave.errMsg, "Can not find Matching Bend Type for[%s, %s, %s]",
+		normalAtom->getType().c_str(),
+		ghostAtom->getType().c_str(),
+		"GHOST");
 
-            painCave.isFatal = 1;
-            simError();
-        }
+	painCave.isFatal = 1;
+	simError();
+      }
         
-        return new GhostBend(normalAtom, ghostAtom, bendType);       
+      return new GhostBend(normalAtom, ghostAtom, bendType);       
 
     } else {
             
-        Atom* atomA = mol->getAtomAt(stamp->getA());
-        Atom* atomB = mol->getAtomAt(stamp->getB());
-        Atom* atomC = mol->getAtomAt(stamp->getC());
+      Atom* atomA = mol->getAtomAt(stamp->getA());
+      Atom* atomB = mol->getAtomAt(stamp->getB());
+      Atom* atomC = mol->getAtomAt(stamp->getC());
 
-        assert( atomA && atomB && atomC);
+      assert( atomA && atomB && atomC);
         
-        BendType* bendType = ff->getBendType(atomA->getType(), atomB->getType(), atomC->getType());
+      BendType* bendType = ff->getBendType(atomA->getType(), atomB->getType(), atomC->getType());
 
-        if (bendType == NULL) {
-            sprintf(painCave.errMsg, "Can not find Matching Bend Type for[%s, %s, %s]",
-                       atomA->getType().c_str(),
-                       atomB->getType().c_str(),
-                       atomC->getType().c_str());
+      if (bendType == NULL) {
+	sprintf(painCave.errMsg, "Can not find Matching Bend Type for[%s, %s, %s]",
+		atomA->getType().c_str(),
+		atomB->getType().c_str(),
+		atomC->getType().c_str());
 
-            painCave.isFatal = 1;
-            simError();
-        }
+	painCave.isFatal = 1;
+	simError();
+      }
 
-        return new Bend(atomA, atomB, atomC, bendType);       
+      return new Bend(atomA, atomB, atomC, bendType);       
     }
-}    
+  }    
 
-Torsion* MoleculeCreator::createTorsion(ForceField* ff, Molecule* mol, TorsionStamp* stamp) {
+  Torsion* MoleculeCreator::createTorsion(ForceField* ff, Molecule* mol, TorsionStamp* stamp) {
 
     Atom* atomA = mol->getAtomAt(stamp->getA());
     Atom* atomB = mol->getAtomAt(stamp->getB());
@@ -385,56 +385,56 @@ Torsion* MoleculeCreator::createTorsion(ForceField* ff, Molecule* mol, TorsionSt
     Torsion* torsion;
 
     if (stamp->getD() != -1) {
-        Atom* atomD = mol->getAtomAt(stamp->getD());
+      Atom* atomD = mol->getAtomAt(stamp->getD());
 
-        assert(atomA && atomB && atomC && atomD);
+      assert(atomA && atomB && atomC && atomD);
         
-        TorsionType* torsionType = ff->getTorsionType(atomA->getType(), atomB->getType(), 
-                                                           atomC->getType(), atomD->getType());
+      TorsionType* torsionType = ff->getTorsionType(atomA->getType(), atomB->getType(), 
+						    atomC->getType(), atomD->getType());
 
-        if (torsionType == NULL) {
-            sprintf(painCave.errMsg, "Can not find Matching Torsion Type for[%s, %s, %s, %s]",
-                       atomA->getType().c_str(),
-                       atomB->getType().c_str(),
-                       atomC->getType().c_str(),
-                       atomD->getType().c_str());
+      if (torsionType == NULL) {
+	sprintf(painCave.errMsg, "Can not find Matching Torsion Type for[%s, %s, %s, %s]",
+		atomA->getType().c_str(),
+		atomB->getType().c_str(),
+		atomC->getType().c_str(),
+		atomD->getType().c_str());
 
-            painCave.isFatal = 1;
-            simError();
-        }
+	painCave.isFatal = 1;
+	simError();
+      }
         
-        torsion = new Torsion(atomA, atomB, atomC, atomD, torsionType);       
+      torsion = new Torsion(atomA, atomB, atomC, atomD, torsionType);       
     }
     else {
 
-        DirectionalAtom* dAtom = dynamic_cast<DirectionalAtom*>(atomC);
-        if (dAtom == NULL) {
-            sprintf(painCave.errMsg, "Can not cast Atom to DirectionalAtom");
-            painCave.isFatal = 1;
-            simError();
-        }        
+      DirectionalAtom* dAtom = dynamic_cast<DirectionalAtom*>(atomC);
+      if (dAtom == NULL) {
+	sprintf(painCave.errMsg, "Can not cast Atom to DirectionalAtom");
+	painCave.isFatal = 1;
+	simError();
+      }        
 
-        TorsionType* torsionType = ff->getTorsionType(atomA->getType(), atomB->getType(), 
-                                                           atomC->getType(), "GHOST");
+      TorsionType* torsionType = ff->getTorsionType(atomA->getType(), atomB->getType(), 
+						    atomC->getType(), "GHOST");
 
-        if (torsionType == NULL) {
-            sprintf(painCave.errMsg, "Can not find Matching Torsion Type for[%s, %s, %s, %s]",
-                       atomA->getType().c_str(),
-                       atomB->getType().c_str(),
-                       atomC->getType().c_str(),
-                       "GHOST");
+      if (torsionType == NULL) {
+	sprintf(painCave.errMsg, "Can not find Matching Torsion Type for[%s, %s, %s, %s]",
+		atomA->getType().c_str(),
+		atomB->getType().c_str(),
+		atomC->getType().c_str(),
+		"GHOST");
 
-            painCave.isFatal = 1;
-            simError();
-        }
+	painCave.isFatal = 1;
+	simError();
+      }
         
-        torsion = new GhostTorsion(atomA, atomB, dAtom, torsionType);               
+      torsion = new GhostTorsion(atomA, atomB, dAtom, torsionType);               
     }
 
     return torsion;
-}    
+  }    
 
-CutoffGroup* MoleculeCreator::createCutoffGroup(Molecule* mol, CutoffGroupStamp* stamp) {
+  CutoffGroup* MoleculeCreator::createCutoffGroup(Molecule* mol, CutoffGroupStamp* stamp) {
     int nAtoms;
     CutoffGroup* cg;
     Atom* atom;
@@ -442,71 +442,71 @@ CutoffGroup* MoleculeCreator::createCutoffGroup(Molecule* mol, CutoffGroupStamp*
     
     nAtoms = stamp->getNMembers();
     for (int i =0; i < nAtoms; ++i) {
-        atom = mol->getAtomAt(stamp->getMember(i));
-        assert(atom);
-        cg->addAtom(atom);
+      atom = mol->getAtomAt(stamp->getMember(i));
+      assert(atom);
+      cg->addAtom(atom);
     }
 
     return cg;
-}    
+  }    
 
-CutoffGroup* MoleculeCreator::createCutoffGroup(Molecule * mol, Atom* atom) {
+  CutoffGroup* MoleculeCreator::createCutoffGroup(Molecule * mol, Atom* atom) {
     CutoffGroup* cg;
     cg  = new CutoffGroup();
     cg->addAtom(atom);
     return cg;
-}
+  }
 
-void MoleculeCreator::createConstraintPair(Molecule* mol) {
+  void MoleculeCreator::createConstraintPair(Molecule* mol) {
 
     //add bond constraints
     Molecule::BondIterator bi;
     Bond* bond;
     for (bond = mol->beginBond(bi); bond != NULL; bond = mol->nextBond(bi)) {
         
-        BondType* bt = bond->getBondType();
+      BondType* bt = bond->getBondType();
 
-        //class Parent1 {};
-        //class Child1 : public Parent {};
-        //class Child2 : public Parent {};
-        //Child1* ch1 = new Child1();
-        //Child2* ch2 = dynamic_cast<Child2*>(ch1); 
-        //the dynamic_cast is succeed in above line. A compiler bug?        
+      //class Parent1 {};
+      //class Child1 : public Parent {};
+      //class Child2 : public Parent {};
+      //Child1* ch1 = new Child1();
+      //Child2* ch2 = dynamic_cast<Child2*>(ch1); 
+      //the dynamic_cast is succeed in above line. A compiler bug?        
 
-        if (typeid(FixedBondType) == typeid(*bt)) {
-            FixedBondType* fbt = dynamic_cast<FixedBondType*>(bt);
+      if (typeid(FixedBondType) == typeid(*bt)) {
+	FixedBondType* fbt = dynamic_cast<FixedBondType*>(bt);
 
-            ConstraintElem* consElemA = new ConstraintElem(bond->getAtomA());
-            ConstraintElem* consElemB = new ConstraintElem(bond->getAtomB());            
-            ConstraintPair* consPair = new ConstraintPair(consElemA, consElemB, fbt->getEquilibriumBondLength());
-            mol->addConstraintPair(consPair);
-        }
+	ConstraintElem* consElemA = new ConstraintElem(bond->getAtomA());
+	ConstraintElem* consElemB = new ConstraintElem(bond->getAtomB());            
+	ConstraintPair* consPair = new ConstraintPair(consElemA, consElemB, fbt->getEquilibriumBondLength());
+	mol->addConstraintPair(consPair);
+      }
     }
 
     //rigidbody -- rigidbody constraint is not support yet
-}
+  }
 
-void MoleculeCreator::createConstraintElem(Molecule* mol) {
+  void MoleculeCreator::createConstraintElem(Molecule* mol) {
 
     ConstraintPair* consPair;
     Molecule::ConstraintPairIterator cpi;
     std::set<StuntDouble*> sdSet;
     for (consPair = mol->beginConstraintPair(cpi); consPair != NULL; consPair = mol->nextConstraintPair(cpi)) {
 
-        StuntDouble* sdA = consPair->getConsElem1()->getStuntDouble();            
-        if (sdSet.find(sdA) == sdSet.end()){
-            sdSet.insert(sdA);
-            mol->addConstraintElem(new ConstraintElem(sdA));
-        }
+      StuntDouble* sdA = consPair->getConsElem1()->getStuntDouble();            
+      if (sdSet.find(sdA) == sdSet.end()){
+	sdSet.insert(sdA);
+	mol->addConstraintElem(new ConstraintElem(sdA));
+      }
 
-        StuntDouble* sdB = consPair->getConsElem2()->getStuntDouble();            
-        if (sdSet.find(sdB) == sdSet.end()){
-            sdSet.insert(sdB);
-            mol->addConstraintElem(new ConstraintElem(sdB));
-        }
+      StuntDouble* sdB = consPair->getConsElem2()->getStuntDouble();            
+      if (sdSet.find(sdB) == sdSet.end()){
+	sdSet.insert(sdB);
+	mol->addConstraintElem(new ConstraintElem(sdB));
+      }
         
     }
 
-}
+  }
     
 }

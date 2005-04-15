@@ -33,7 +33,7 @@ cmdline_parser_print_help (void)
 {
   cmdline_parser_print_version ();
   printf("\n"
-  "Usage: %s [OPTIONS]...\n", CMDLINE_PARSER_PACKAGE);
+	 "Usage: %s [OPTIONS]...\n", CMDLINE_PARSER_PACKAGE);
   printf("\n");
   printf("  -h, --help                         Print help and exit\n");
   printf("  -V, --version                      Print version and exit\n");
@@ -90,22 +90,22 @@ cmdline_parser (int argc, char * const *argv, struct gengetopt_args_info *args_i
   args_info->repeatX_given = 0 ;
   args_info->repeatY_given = 0 ;
   args_info->repeatZ_given = 0 ;
-#define clear_args() { \
-  args_info->input_arg = NULL; \
-  args_info->output_arg = NULL; \
-  args_info->frame_arg = 1 ;\
-  args_info->water_flag = 0;\
-  args_info->periodicBox_flag = 0;\
-  args_info->zconstraint_flag = 0;\
-  args_info->rigidbody_flag = 0;\
-  args_info->watertype_flag = 1;\
-  args_info->selection_arg = NULL; \
-  args_info->originsele_arg = NULL; \
-  args_info->refsele_arg = NULL; \
-  args_info->repeatX_arg = 0 ;\
-  args_info->repeatY_arg = 0 ;\
-  args_info->repeatZ_arg = 0 ;\
-}
+#define clear_args() {				\
+    args_info->input_arg = NULL;		\
+    args_info->output_arg = NULL;		\
+    args_info->frame_arg = 1 ;			\
+    args_info->water_flag = 0;			\
+    args_info->periodicBox_flag = 0;		\
+    args_info->zconstraint_flag = 0;		\
+    args_info->rigidbody_flag = 0;		\
+    args_info->watertype_flag = 1;		\
+    args_info->selection_arg = NULL;		\
+    args_info->originsele_arg = NULL;		\
+    args_info->refsele_arg = NULL;		\
+    args_info->repeatX_arg = 0 ;		\
+    args_info->repeatY_arg = 0 ;		\
+    args_info->repeatZ_arg = 0 ;		\
+  }
 
   clear_args();
 
@@ -259,73 +259,73 @@ cmdline_parser (int argc, char * const *argv, struct gengetopt_args_info *args_i
         case 0:	/* Long option with no short option */
           /* select origin.  */
           if (strcmp (long_options[option_index].name, "originsele") == 0)
-          {
-            if (args_info->originsele_given)
-              {
-                fprintf (stderr, "%s: `--originsele' option given more than once\n", CMDLINE_PARSER_PACKAGE);
-                clear_args ();
-                exit (EXIT_FAILURE);
-              }
-            args_info->originsele_given = 1;
-            args_info->originsele_arg = gengetopt_strdup (optarg);
-            break;
-          }
+	    {
+	      if (args_info->originsele_given)
+		{
+		  fprintf (stderr, "%s: `--originsele' option given more than once\n", CMDLINE_PARSER_PACKAGE);
+		  clear_args ();
+		  exit (EXIT_FAILURE);
+		}
+	      args_info->originsele_given = 1;
+	      args_info->originsele_arg = gengetopt_strdup (optarg);
+	      break;
+	    }
           
           /* select reference.  */
           else if (strcmp (long_options[option_index].name, "refsele") == 0)
-          {
-            if (args_info->refsele_given)
-              {
-                fprintf (stderr, "%s: `--refsele' option given more than once\n", CMDLINE_PARSER_PACKAGE);
-                clear_args ();
-                exit (EXIT_FAILURE);
-              }
-            args_info->refsele_given = 1;
-            args_info->refsele_arg = gengetopt_strdup (optarg);
-            break;
-          }
+	    {
+	      if (args_info->refsele_given)
+		{
+		  fprintf (stderr, "%s: `--refsele' option given more than once\n", CMDLINE_PARSER_PACKAGE);
+		  clear_args ();
+		  exit (EXIT_FAILURE);
+		}
+	      args_info->refsele_given = 1;
+	      args_info->refsele_arg = gengetopt_strdup (optarg);
+	      break;
+	    }
           
           /* The number of images to repeat in the x direction.  */
           else if (strcmp (long_options[option_index].name, "repeatX") == 0)
-          {
-            if (args_info->repeatX_given)
-              {
-                fprintf (stderr, "%s: `--repeatX' option given more than once\n", CMDLINE_PARSER_PACKAGE);
-                clear_args ();
-                exit (EXIT_FAILURE);
-              }
-            args_info->repeatX_given = 1;
-            args_info->repeatX_arg = strtol (optarg,&stop_char,0);
-            break;
-          }
+	    {
+	      if (args_info->repeatX_given)
+		{
+		  fprintf (stderr, "%s: `--repeatX' option given more than once\n", CMDLINE_PARSER_PACKAGE);
+		  clear_args ();
+		  exit (EXIT_FAILURE);
+		}
+	      args_info->repeatX_given = 1;
+	      args_info->repeatX_arg = strtol (optarg,&stop_char,0);
+	      break;
+	    }
           
           /* The number of images to repeat in the y direction.  */
           else if (strcmp (long_options[option_index].name, "repeatY") == 0)
-          {
-            if (args_info->repeatY_given)
-              {
-                fprintf (stderr, "%s: `--repeatY' option given more than once\n", CMDLINE_PARSER_PACKAGE);
-                clear_args ();
-                exit (EXIT_FAILURE);
-              }
-            args_info->repeatY_given = 1;
-            args_info->repeatY_arg = strtol (optarg,&stop_char,0);
-            break;
-          }
+	    {
+	      if (args_info->repeatY_given)
+		{
+		  fprintf (stderr, "%s: `--repeatY' option given more than once\n", CMDLINE_PARSER_PACKAGE);
+		  clear_args ();
+		  exit (EXIT_FAILURE);
+		}
+	      args_info->repeatY_given = 1;
+	      args_info->repeatY_arg = strtol (optarg,&stop_char,0);
+	      break;
+	    }
           
           /* The number of images to repeat in the z direction.  */
           else if (strcmp (long_options[option_index].name, "repeatZ") == 0)
-          {
-            if (args_info->repeatZ_given)
-              {
-                fprintf (stderr, "%s: `--repeatZ' option given more than once\n", CMDLINE_PARSER_PACKAGE);
-                clear_args ();
-                exit (EXIT_FAILURE);
-              }
-            args_info->repeatZ_given = 1;
-            args_info->repeatZ_arg = strtol (optarg,&stop_char,0);
-            break;
-          }
+	    {
+	      if (args_info->repeatZ_given)
+		{
+		  fprintf (stderr, "%s: `--repeatZ' option given more than once\n", CMDLINE_PARSER_PACKAGE);
+		  clear_args ();
+		  exit (EXIT_FAILURE);
+		}
+	      args_info->repeatZ_given = 1;
+	      args_info->repeatZ_arg = strtol (optarg,&stop_char,0);
+	      break;
+	    }
           
 
         case '?':	/* Invalid option.  */

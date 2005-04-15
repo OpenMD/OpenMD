@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -44,48 +44,48 @@
 
 namespace oopse {
 
-//initialize instance of MinimizerFactory
-MinimizerFactory* MinimizerFactory::instance_ = NULL;
+  //initialize instance of MinimizerFactory
+  MinimizerFactory* MinimizerFactory::instance_ = NULL;
 
-MinimizerFactory::~MinimizerFactory() {
+  MinimizerFactory::~MinimizerFactory() {
     CreatorMapType::iterator i;
     for (i = creatorMap_.begin(); i != creatorMap_.end(); ++i) {
-        delete i->second;
+      delete i->second;
     }
     creatorMap_.clear();
-}
+  }
 
-bool MinimizerFactory::registerMinimizer(MinimizerCreator* creator) {
+  bool MinimizerFactory::registerMinimizer(MinimizerCreator* creator) {
     return creatorMap_.insert(
-        CreatorMapType::value_type(creator->getIdent(), creator)).second;
-}
+			      CreatorMapType::value_type(creator->getIdent(), creator)).second;
+  }
 
-bool MinimizerFactory::unregisterMinimizer(const std::string& id) {
+  bool MinimizerFactory::unregisterMinimizer(const std::string& id) {
     return creatorMap_.erase(id) == 1;
-}
+  }
 
-Minimizer* MinimizerFactory::createMinimizer(const std::string& id, SimInfo* info) {
+  Minimizer* MinimizerFactory::createMinimizer(const std::string& id, SimInfo* info) {
     CreatorMapType::iterator i = creatorMap_.find(id);
     if (i != creatorMap_.end()) {
-        //invoke functor to create object
-        return (i->second)->create(info);
+      //invoke functor to create object
+      return (i->second)->create(info);
     } else {
-        return NULL;
+      return NULL;
     }
-}
+  }
 
-std::vector<std::string> MinimizerFactory::getIdents() {
+  std::vector<std::string> MinimizerFactory::getIdents() {
     IdentVectorType idents;
     CreatorMapType::iterator i;
 
     for (i = creatorMap_.begin(); i != creatorMap_.end(); ++i) {
-        idents.push_back(i->first);
+      idents.push_back(i->first);
     }
     
     return idents;
-}
+  }
 
-std::ostream& operator <<(std::ostream& o, MinimizerFactory& factory) {
+  std::ostream& operator <<(std::ostream& o, MinimizerFactory& factory) {
     MinimizerFactory::IdentVectorType idents;
     MinimizerFactory::IdentVectorIterator i;
 
@@ -93,11 +93,11 @@ std::ostream& operator <<(std::ostream& o, MinimizerFactory& factory) {
 
     o << "Avaliable type identifiers in this factory: " << std::endl;
     for (i = idents.begin(); i != idents.end(); ++i) {
-        o << *i << std::endl;
+      o << *i << std::endl;
     }
 
     return o;
-}
+  }
 
 }
 

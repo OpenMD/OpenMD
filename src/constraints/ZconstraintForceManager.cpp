@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -46,65 +46,65 @@
 #include "utils/OOPSEConstant.hpp"
 #include "utils/StringUtils.hpp"
 namespace oopse {
-ZconstraintForceManager::ZconstraintForceManager(SimInfo* info): ForceManager(info), infiniteTime(1e31) {
+  ZconstraintForceManager::ZconstraintForceManager(SimInfo* info): ForceManager(info), infiniteTime(1e31) {
     currSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
     Globals* simParam = info_->getSimParams();
 
     if (simParam->haveDt()){
-        dt_ = simParam->getDt();
+      dt_ = simParam->getDt();
     } else {
-        sprintf(painCave.errMsg,
-                "Integrator Error: dt is not set\n");
-        painCave.isFatal = 1;
-        simError();    
+      sprintf(painCave.errMsg,
+	      "Integrator Error: dt is not set\n");
+      painCave.isFatal = 1;
+      simError();    
     }
 
     if (simParam->haveZconstraintTime()){
-        zconsTime_ = simParam->getZconsTime();
+      zconsTime_ = simParam->getZconsTime();
     }
     else{
-        sprintf(painCave.errMsg,
-        "ZConstraint error: If you use a ZConstraint,\n"
-        "\tyou must set zconsTime.\n");
-        painCave.isFatal = 1;
-        simError();
+      sprintf(painCave.errMsg,
+	      "ZConstraint error: If you use a ZConstraint,\n"
+	      "\tyou must set zconsTime.\n");
+      painCave.isFatal = 1;
+      simError();
     }
 
     if (simParam->haveZconsTol()){
-        zconsTol_ = simParam->getZconsTol();
+      zconsTol_ = simParam->getZconsTol();
     }
     else{
-        zconsTol_ = 0.01;
-        sprintf(painCave.errMsg,
-            "ZConstraint Warning: Tolerance for z-constraint method is not specified.\n"
-            "\tOOPSE will use a default value of %f.\n"
-            "\tTo set the tolerance, use the zconsTol variable.\n",
-            zconsTol_);
-        painCave.isFatal = 0;
-        simError();      
+      zconsTol_ = 0.01;
+      sprintf(painCave.errMsg,
+	      "ZConstraint Warning: Tolerance for z-constraint method is not specified.\n"
+	      "\tOOPSE will use a default value of %f.\n"
+	      "\tTo set the tolerance, use the zconsTol variable.\n",
+	      zconsTol_);
+      painCave.isFatal = 0;
+      simError();      
     }
 
     //set zcons gap
     if (simParam->haveZConsGap()){
-        usingZconsGap_ = true;
-        zconsGap_ = simParam->getZconsGap();
+      usingZconsGap_ = true;
+      zconsGap_ = simParam->getZconsGap();
     }else {
-        usingZconsGap_ = false;
-        zconsGap_ = 0.0;
+      usingZconsGap_ = false;
+      zconsGap_ = 0.0;
     }
 
     //set zcons fixtime
     if (simParam->haveZConsFixTime()){
-        zconsFixingTime_ = simParam->getZconsFixtime();
+      zconsFixingTime_ = simParam->getZconsFixtime();
     } else {
-        zconsFixingTime_ = infiniteTime;
+      zconsFixingTime_ = infiniteTime;
     }
 
     //set zconsUsingSMD
     if (simParam->haveZConsUsingSMD()){
-        usingSMD_ = simParam->getZconsUsingSMD();
+      usingSMD_ = simParam->getZconsUsingSMD();
     }else {
-        usingSMD_ =false;
+      usingSMD_ =false;
     }
     
     zconsOutput_ = getPrefix(info_->getFinalConfigFileName()) + ".fz";
@@ -114,9 +114,9 @@ ZconstraintForceManager::ZconstraintForceManager(SimInfo* info): ForceManager(in
     double halfOfLargestBox = std::max(hmat(0, 0), std::max(hmat(1, 1), hmat(2, 2))) /2;	
     double targetTemp;
     if (simParam->haveTargetTemp()) {
-        targetTemp = simParam->getTargetTemp();
+      targetTemp = simParam->getTargetTemp();
     } else {
-        targetTemp = 298.0;
+      targetTemp = 298.0;
     }
     double zforceConstant = OOPSEConstant::kb * targetTemp / (halfOfLargestBox * halfOfLargestBox);
          
@@ -125,23 +125,23 @@ ZconstraintForceManager::ZconstraintForceManager(SimInfo* info): ForceManager(in
     //
     for (int i = 0; i < nZconstraints; i++){
 
-        ZconstraintParam param;
-        int zmolIndex = stamp[i]->getMolIndex();
-        if (stamp[i]->haveZpos()) {
-            param.zTargetPos = stamp[i]->getZpos();
-        } else {
-            param.zTargetPos = getZTargetPos(zmolIndex);
-        }
+      ZconstraintParam param;
+      int zmolIndex = stamp[i]->getMolIndex();
+      if (stamp[i]->haveZpos()) {
+	param.zTargetPos = stamp[i]->getZpos();
+      } else {
+	param.zTargetPos = getZTargetPos(zmolIndex);
+      }
 
-        param.kz = zforceConstant * stamp[i]->getKratio();
+      param.kz = zforceConstant * stamp[i]->getKratio();
 
-        if (stamp[i]->haveCantVel()) {
-            param.cantVel = stamp[i]->getCantVel();
-        } else {
-            param.cantVel = 0.0;
-        }
+      if (stamp[i]->haveCantVel()) {
+	param.cantVel = stamp[i]->getCantVel();
+      } else {
+	param.cantVel = 0.0;
+      }
 
-        allZMolIndices_.insert(std::make_pair(zmolIndex, param));
+      allZMolIndices_.insert(std::make_pair(zmolIndex, param));
     }
 
     //create fixedMols_, movingMols_ and unconsMols lists 
@@ -151,13 +151,13 @@ ZconstraintForceManager::ZconstraintForceManager(SimInfo* info): ForceManager(in
     double totMassUnconsMols_local = 0.0;    
     std::vector<Molecule*>::iterator j;
     for ( j = unzconsMols_.begin(); j !=  unzconsMols_.end(); ++j) {
-        totMassUnconsMols_local += (*j)->getMass();
+      totMassUnconsMols_local += (*j)->getMass();
     }    
 #ifndef IS_MPI
     totMassUnconsMols_ = totMassUnconsMols_local;
 #else
     MPI_Allreduce(&totMassUnconsMols_local, &totMassUnconsMols_, 1, MPI_DOUBLE,
-        MPI_SUM, MPI_COMM_WORLD);  
+		  MPI_SUM, MPI_COMM_WORLD);  
 #endif
 
     // creat zconsWriter  
@@ -169,40 +169,40 @@ ZconstraintForceManager::ZconstraintForceManager(SimInfo* info): ForceManager(in
       simError();
     }
 
-}
-
-ZconstraintForceManager::~ZconstraintForceManager(){
-
-  if (fzOut){
-    delete fzOut;
   }
 
-}
+  ZconstraintForceManager::~ZconstraintForceManager(){
 
-void ZconstraintForceManager::update(){
+    if (fzOut){
+      delete fzOut;
+    }
+
+  }
+
+  void ZconstraintForceManager::update(){
     fixedZMols_.clear();
     movingZMols_.clear();
     unzconsMols_.clear();
 
     for (std::map<int, ZconstraintParam>::iterator i = allZMolIndices_.begin(); i != allZMolIndices_.end(); ++i) {
 #ifdef IS_MPI
-        if (info_->getMolToProc(i->first) == worldRank) {
+      if (info_->getMolToProc(i->first) == worldRank) {
 #endif
-            ZconstraintMol zmol;
-            zmol.mol = info_->getMoleculeByGlobalIndex(i->first);
-            assert(zmol.mol);
-            zmol.param = i->second;
-            zmol.cantPos = zmol.param.zTargetPos; /**@todo fixed me when zmol migrate, it is incorrect*/
-            Vector3d com = zmol.mol->getCom();
-            double diff = fabs(zmol.param.zTargetPos - com[whichDirection]);
-            if (diff < zconsTol_) {
-                fixedZMols_.push_back(zmol);
-            } else {
-                movingZMols_.push_back(zmol);            
-            }
+	ZconstraintMol zmol;
+	zmol.mol = info_->getMoleculeByGlobalIndex(i->first);
+	assert(zmol.mol);
+	zmol.param = i->second;
+	zmol.cantPos = zmol.param.zTargetPos; /**@todo fixed me when zmol migrate, it is incorrect*/
+	Vector3d com = zmol.mol->getCom();
+	double diff = fabs(zmol.param.zTargetPos - com[whichDirection]);
+	if (diff < zconsTol_) {
+	  fixedZMols_.push_back(zmol);
+	} else {
+	  movingZMols_.push_back(zmol);            
+	}
 
 #ifdef IS_MPI
-        }
+      }
 #endif
     }
 
@@ -210,73 +210,73 @@ void ZconstraintForceManager::update(){
 
     std::set<int> zmolSet;
     for (std::list<ZconstraintMol>::iterator i = movingZMols_.begin(); i !=  movingZMols_.end(); ++i) {
-        zmolSet.insert(i->mol->getGlobalIndex());
+      zmolSet.insert(i->mol->getGlobalIndex());
     }    
 
     for (std::list<ZconstraintMol>::iterator i = fixedZMols_.begin(); i !=  fixedZMols_.end(); ++i) {
-        zmolSet.insert(i->mol->getGlobalIndex());
+      zmolSet.insert(i->mol->getGlobalIndex());
     }
 
     SimInfo::MoleculeIterator mi;
     Molecule* mol;
     for(mol = info_->beginMolecule(mi); mol != NULL; mol = info_->nextMolecule(mi)) {
-        if (zmolSet.find(mol->getGlobalIndex()) == zmolSet.end()) {
-            unzconsMols_.push_back(mol);
-        }
+      if (zmolSet.find(mol->getGlobalIndex()) == zmolSet.end()) {
+	unzconsMols_.push_back(mol);
+      }
     }
 
-}
+  }
 
-bool ZconstraintForceManager::isZMol(Molecule* mol){
+  bool ZconstraintForceManager::isZMol(Molecule* mol){
     return allZMolIndices_.find(mol->getGlobalIndex()) == allZMolIndices_.end() ? false : true;
-}
+  }
 
-void ZconstraintForceManager::init(){
+  void ZconstraintForceManager::init(){
 
-  //zero out the velocities of center of mass of unconstrained molecules 
-  //and the velocities of center of mass of every single z-constrained molecueles
-  zeroVelocity();
+    //zero out the velocities of center of mass of unconstrained molecules 
+    //and the velocities of center of mass of every single z-constrained molecueles
+    zeroVelocity();
 
-  currZconsTime_ = currSnapshot_->getTime();
-}
+    currZconsTime_ = currSnapshot_->getTime();
+  }
 
-void ZconstraintForceManager::calcForces(bool needPotential, bool needStress){
+  void ZconstraintForceManager::calcForces(bool needPotential, bool needStress){
     ForceManager::calcForces(needPotential, needStress);
     
     if (usingZconsGap_){
-        updateZPos();
+      updateZPos();
     }
 
     if (checkZConsState()){
-        zeroVelocity();    
-        calcTotalMassMovingZMols();
+      zeroVelocity();    
+      calcTotalMassMovingZMols();
     }  
 
     //do zconstraint force; 
     if (haveFixedZMols()){
-        doZconstraintForce();
+      doZconstraintForce();
     }
 
     //use external force to move the molecules to the specified positions
     if (haveMovingZMols()){
-        doHarmonic();
+      doHarmonic();
     }
 
     //write out forces and current positions of z-constraint molecules    
     if (currSnapshot_->getTime() >= currZconsTime_){
-        std::list<ZconstraintMol>::iterator i;
-        Vector3d com;
-        for(i = fixedZMols_.begin(); i != fixedZMols_.end(); ++i) {
-            com = i->mol->getCom();
-            i->zpos = com[whichDirection];
-        }
+      std::list<ZconstraintMol>::iterator i;
+      Vector3d com;
+      for(i = fixedZMols_.begin(); i != fixedZMols_.end(); ++i) {
+	com = i->mol->getCom();
+	i->zpos = com[whichDirection];
+      }
         
-        fzOut->writeFZ(fixedZMols_);
-        currZconsTime_ += zconsTime_;
+      fzOut->writeFZ(fixedZMols_);
+      currZconsTime_ += zconsTime_;
     }
-}
+  }
 
-void ZconstraintForceManager::zeroVelocity(){
+  void ZconstraintForceManager::zeroVelocity(){
 
     Vector3d comVel;
     Vector3d vel;
@@ -287,14 +287,14 @@ void ZconstraintForceManager::zeroVelocity(){
 
     //zero out the velocities of center of mass of fixed z-constrained molecules
     for(i = fixedZMols_.begin(); i != fixedZMols_.end(); ++i) {
-        mol = i->mol;
-        comVel = mol->getComVel();
-        for(integrableObject = mol->beginIntegrableObject(ii); integrableObject != NULL; 
-            integrableObject = mol->nextIntegrableObject(ii)) {
-            vel = integrableObject->getVel();  
-            vel[whichDirection] -= comVel[whichDirection];
-            integrableObject->setVel(vel);
-        }
+      mol = i->mol;
+      comVel = mol->getComVel();
+      for(integrableObject = mol->beginIntegrableObject(ii); integrableObject != NULL; 
+	  integrableObject = mol->nextIntegrableObject(ii)) {
+	vel = integrableObject->getVel();  
+	vel[whichDirection] -= comVel[whichDirection];
+	integrableObject->setVel(vel);
+      }
     }
 
     // calculate the vz of center of mass of moving molecules(include unconstrained molecules 
@@ -303,64 +303,64 @@ void ZconstraintForceManager::zeroVelocity(){
     double pzMovingMols;
     
     for ( i = movingZMols_.begin(); i !=  movingZMols_.end(); ++i) {
-        mol = i->mol;        
-        comVel = mol->getComVel();
-        pzMovingMols_local +=  mol->getMass() * comVel[whichDirection];   
+      mol = i->mol;        
+      comVel = mol->getComVel();
+      pzMovingMols_local +=  mol->getMass() * comVel[whichDirection];   
     }
 
     std::vector<Molecule*>::iterator j;
     for ( j = unzconsMols_.begin(); j !=  unzconsMols_.end(); ++j) {
-        mol =*j;
-        comVel = mol->getComVel();
-        pzMovingMols_local += mol->getMass() * comVel[whichDirection];
+      mol =*j;
+      comVel = mol->getComVel();
+      pzMovingMols_local += mol->getMass() * comVel[whichDirection];
     }
     
 #ifndef IS_MPI
     pzMovingMols = pzMovingMols_local;
 #else
     MPI_Allreduce(&pzMovingMols_local, &pzMovingMols, 1, MPI_DOUBLE,
-        MPI_SUM, MPI_COMM_WORLD);
+		  MPI_SUM, MPI_COMM_WORLD);
 #endif
 
     double vzMovingMols = pzMovingMols / (totMassMovingZMols_ + totMassUnconsMols_);
 
     //modify the velocities of moving z-constrained molecuels
     for ( i = movingZMols_.begin(); i !=  movingZMols_.end(); ++i) {
-        mol = i->mol;
-        for(integrableObject = mol->beginIntegrableObject(ii); integrableObject != NULL; 
-            integrableObject = mol->nextIntegrableObject(ii)) {
+      mol = i->mol;
+      for(integrableObject = mol->beginIntegrableObject(ii); integrableObject != NULL; 
+	  integrableObject = mol->nextIntegrableObject(ii)) {
 
-            vel = integrableObject->getVel();
-            vel[whichDirection] -= vzMovingMols;
-            integrableObject->setVel(vel); 
-        }
+	vel = integrableObject->getVel();
+	vel[whichDirection] -= vzMovingMols;
+	integrableObject->setVel(vel); 
+      }
     }
 
     //modify the velocites of unconstrained molecules  
     for ( j = unzconsMols_.begin(); j !=  unzconsMols_.end(); ++j) {
-        mol =*j;
-        for(integrableObject = mol->beginIntegrableObject(ii); integrableObject != NULL; 
-            integrableObject = mol->nextIntegrableObject(ii)) {
+      mol =*j;
+      for(integrableObject = mol->beginIntegrableObject(ii); integrableObject != NULL; 
+	  integrableObject = mol->nextIntegrableObject(ii)) {
 
-            vel = integrableObject->getVel();
-            vel[whichDirection] -= vzMovingMols;
-            integrableObject->setVel(vel); 
-        }
+	vel = integrableObject->getVel();
+	vel[whichDirection] -= vzMovingMols;
+	integrableObject->setVel(vel); 
+      }
     }
     
-}
+  }
 
 
-void ZconstraintForceManager::doZconstraintForce(){
-  double totalFZ; 
-  double totalFZ_local;
-  Vector3d com;
-  Vector3d force(0.0);
+  void ZconstraintForceManager::doZconstraintForce(){
+    double totalFZ; 
+    double totalFZ_local;
+    Vector3d com;
+    Vector3d force(0.0);
 
-  //constrain the molecules which do not reach the specified positions  
+    //constrain the molecules which do not reach the specified positions  
 
-  //Zero Out the force of z-contrained molecules    
-  totalFZ_local = 0;
+    //Zero Out the force of z-contrained molecules    
+    totalFZ_local = 0;
 
 
     //calculate the total z-contrained force of fixed z-contrained molecules
@@ -370,63 +370,63 @@ void ZconstraintForceManager::doZconstraintForce(){
     Molecule::IntegrableObjectIterator ii;
 
     for ( i = fixedZMols_.begin(); i !=  fixedZMols_.end(); ++i) {
-        mol = i->mol;
-        i->fz = 0.0;
-        for(integrableObject = mol->beginIntegrableObject(ii); integrableObject != NULL; 
-            integrableObject = mol->nextIntegrableObject(ii)) {
+      mol = i->mol;
+      i->fz = 0.0;
+      for(integrableObject = mol->beginIntegrableObject(ii); integrableObject != NULL; 
+	  integrableObject = mol->nextIntegrableObject(ii)) {
 
-            force = integrableObject->getFrc();    
-            i->fz += force[whichDirection]; 
-        }
-         totalFZ_local += i->fz;
+	force = integrableObject->getFrc();    
+	i->fz += force[whichDirection]; 
+      }
+      totalFZ_local += i->fz;
     }
 
-  //calculate total z-constraint force
+    //calculate total z-constraint force
 #ifdef IS_MPI
-  MPI_Allreduce(&totalFZ_local, &totalFZ, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+    MPI_Allreduce(&totalFZ_local, &totalFZ, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
 #else
-  totalFZ = totalFZ_local;
+    totalFZ = totalFZ_local;
 #endif
 
 
-     // apply negative to fixed z-constrained molecues;
+    // apply negative to fixed z-constrained molecues;
     for ( i = fixedZMols_.begin(); i !=  fixedZMols_.end(); ++i) {
-        mol = i->mol;
-        for(integrableObject = mol->beginIntegrableObject(ii); integrableObject != NULL; 
-            integrableObject = mol->nextIntegrableObject(ii)) {
+      mol = i->mol;
+      for(integrableObject = mol->beginIntegrableObject(ii); integrableObject != NULL; 
+	  integrableObject = mol->nextIntegrableObject(ii)) {
 
-            force[whichDirection] = -getZFOfFixedZMols(mol, integrableObject, i->fz);
-            integrableObject->addFrc(force);
-        }
+	force[whichDirection] = -getZFOfFixedZMols(mol, integrableObject, i->fz);
+	integrableObject->addFrc(force);
+      }
     }
 
-  //modify the forces of moving z-constrained molecules
+    //modify the forces of moving z-constrained molecules
     for ( i = movingZMols_.begin(); i !=  movingZMols_.end(); ++i) {
-        mol = i->mol;
-        for(integrableObject = mol->beginIntegrableObject(ii); integrableObject != NULL; 
-            integrableObject = mol->nextIntegrableObject(ii)) {
+      mol = i->mol;
+      for(integrableObject = mol->beginIntegrableObject(ii); integrableObject != NULL; 
+	  integrableObject = mol->nextIntegrableObject(ii)) {
 
-            force[whichDirection] = -getZFOfMovingMols(mol,totalFZ);
-            integrableObject->addFrc(force);
-        }
+	force[whichDirection] = -getZFOfMovingMols(mol,totalFZ);
+	integrableObject->addFrc(force);
+      }
     }
 
-  //modify the forces of unconstrained molecules
+    //modify the forces of unconstrained molecules
     std::vector<Molecule*>::iterator j;
     for ( j = unzconsMols_.begin(); j !=  unzconsMols_.end(); ++j) {
-        mol =*j;
-        for(integrableObject = mol->beginIntegrableObject(ii); integrableObject != NULL; 
-            integrableObject = mol->nextIntegrableObject(ii)) {
+      mol =*j;
+      for(integrableObject = mol->beginIntegrableObject(ii); integrableObject != NULL; 
+	  integrableObject = mol->nextIntegrableObject(ii)) {
 
-            force[whichDirection] = -getZFOfMovingMols(mol, totalFZ);
-            integrableObject->addFrc(force);
-        }
+	force[whichDirection] = -getZFOfMovingMols(mol, totalFZ);
+	integrableObject->addFrc(force);
+      }
     }
 
-}
+  }
 
 
-void ZconstraintForceManager::doHarmonic(){
+  void ZconstraintForceManager::doHarmonic(){
     double totalFZ;
     Vector3d force(0.0);
     Vector3d com;
@@ -436,45 +436,45 @@ void ZconstraintForceManager::doHarmonic(){
     Molecule::IntegrableObjectIterator ii;
     Molecule* mol;
     for ( i = movingZMols_.begin(); i !=  movingZMols_.end(); ++i) {
-        mol = i->mol;
-        com = mol->getCom();   
-        double resPos = usingSMD_? i->cantPos : i->param.zTargetPos;
-        double diff = com[whichDirection] - resPos; 
-        double harmonicU = 0.5 * i->param.kz * diff * diff;
-        currSnapshot_->statData[Stats::LONG_RANGE_POTENTIAL] += harmonicU;
-        double harmonicF = -i->param.kz * diff;
-        totalFZ_local += harmonicF;
+      mol = i->mol;
+      com = mol->getCom();   
+      double resPos = usingSMD_? i->cantPos : i->param.zTargetPos;
+      double diff = com[whichDirection] - resPos; 
+      double harmonicU = 0.5 * i->param.kz * diff * diff;
+      currSnapshot_->statData[Stats::LONG_RANGE_POTENTIAL] += harmonicU;
+      double harmonicF = -i->param.kz * diff;
+      totalFZ_local += harmonicF;
 
-        //adjust force
-        for(integrableObject = mol->beginIntegrableObject(ii); integrableObject != NULL; 
-            integrableObject = mol->nextIntegrableObject(ii)) {
+      //adjust force
+      for(integrableObject = mol->beginIntegrableObject(ii); integrableObject != NULL; 
+	  integrableObject = mol->nextIntegrableObject(ii)) {
 
-            force[whichDirection] = getHFOfFixedZMols(mol, integrableObject, harmonicF);
-            integrableObject->addFrc(force);            
-        }
+	force[whichDirection] = getHFOfFixedZMols(mol, integrableObject, harmonicF);
+	integrableObject->addFrc(force);            
+      }
     }
 
 #ifndef IS_MPI
-  totalFZ = totalFZ_local;
+    totalFZ = totalFZ_local;
 #else
-  MPI_Allreduce(&totalFZ_local, &totalFZ, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);  
+    MPI_Allreduce(&totalFZ_local, &totalFZ, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);  
 #endif
 
     //modify the forces of unconstrained molecules
     std::vector<Molecule*>::iterator j;
     for ( j = unzconsMols_.begin(); j !=  unzconsMols_.end(); ++j) {
-        mol = *j;
-        for(integrableObject = mol->beginIntegrableObject(ii); integrableObject != NULL; 
-            integrableObject = mol->nextIntegrableObject(ii)) {
+      mol = *j;
+      for(integrableObject = mol->beginIntegrableObject(ii); integrableObject != NULL; 
+	  integrableObject = mol->nextIntegrableObject(ii)) {
 
-            force[whichDirection] = getHFOfUnconsMols(mol, totalFZ);
-            integrableObject->addFrc(force);            
-        }
+	force[whichDirection] = getHFOfUnconsMols(mol, totalFZ);
+	integrableObject->addFrc(force);            
+      }
     }
 
-}
+  }
 
-bool ZconstraintForceManager::checkZConsState(){
+  bool ZconstraintForceManager::checkZConsState(){
     Vector3d com;
     double diff;
     int changed_local = 0;
@@ -484,39 +484,39 @@ bool ZconstraintForceManager::checkZConsState(){
     
     std::list<ZconstraintMol> newMovingZMols;
     for ( i = fixedZMols_.begin(); i !=  fixedZMols_.end();) {
-        com = i->mol->getCom();
-        diff = fabs(com[whichDirection] - i->param.zTargetPos);
-        if (diff > zconsTol_) {
-            if (usingZconsGap_) {
-                i->endFixingTime = infiniteTime;
-            }
-            j = i++;
-            newMovingZMols.push_back(*j);
-            fixedZMols_.erase(j);
+      com = i->mol->getCom();
+      diff = fabs(com[whichDirection] - i->param.zTargetPos);
+      if (diff > zconsTol_) {
+	if (usingZconsGap_) {
+	  i->endFixingTime = infiniteTime;
+	}
+	j = i++;
+	newMovingZMols.push_back(*j);
+	fixedZMols_.erase(j);
 	    
-            changed_local = 1;            
-        }else {
-            ++i;
-        }
+	changed_local = 1;            
+      }else {
+	++i;
+      }
     }  
 
     std::list<ZconstraintMol> newFixedZMols;
     for ( i = movingZMols_.begin(); i !=  movingZMols_.end();) {
-        com = i->mol->getCom();
-        diff = fabs(com[whichDirection] - i->param.zTargetPos);
-        if (diff <= zconsTol_) {
-            if (usingZconsGap_) {
-                i->endFixingTime = currSnapshot_->getTime() + zconsFixingTime_;
-            }
-            //this moving zconstraint molecule is about to fixed
-	    //moved this molecule to
-	    j = i++;
-	    newFixedZMols.push_back(*j);
-	    movingZMols_.erase(j);
-            changed_local = 1;            
-        }else {
-            ++i;
-        }
+      com = i->mol->getCom();
+      diff = fabs(com[whichDirection] - i->param.zTargetPos);
+      if (diff <= zconsTol_) {
+	if (usingZconsGap_) {
+	  i->endFixingTime = currSnapshot_->getTime() + zconsFixingTime_;
+	}
+	//this moving zconstraint molecule is about to fixed
+	//moved this molecule to
+	j = i++;
+	newFixedZMols.push_back(*j);
+	movingZMols_.erase(j);
+	changed_local = 1;            
+      }else {
+	++i;
+      }
     }     
 
     //merge the lists
@@ -531,88 +531,88 @@ bool ZconstraintForceManager::checkZConsState(){
 #endif
 
     return (changed > 0);
-}
+  }
 
-bool ZconstraintForceManager::haveFixedZMols(){
-  int havingFixed;
-  int havingFixed_local = fixedZMols_.empty() ? 0 : 1;
-
-#ifndef IS_MPI
-  havingFixed = havingFixed_local;
-#else
-  MPI_Allreduce(&havingFixed_local, &havingFixed, 1, MPI_INT, MPI_SUM,
-                MPI_COMM_WORLD);
-#endif
-
-  return havingFixed > 0;
-}
-
-
-bool ZconstraintForceManager::haveMovingZMols(){
-  int havingMoving_local;
-  int havingMoving;
-
-  havingMoving_local = movingZMols_.empty()? 0 : 1;
+  bool ZconstraintForceManager::haveFixedZMols(){
+    int havingFixed;
+    int havingFixed_local = fixedZMols_.empty() ? 0 : 1;
 
 #ifndef IS_MPI
-  havingMoving = havingMoving_local;
+    havingFixed = havingFixed_local;
 #else
-  MPI_Allreduce(&havingMoving_local, &havingMoving, 1, MPI_INT, MPI_SUM,
-                MPI_COMM_WORLD);
+    MPI_Allreduce(&havingFixed_local, &havingFixed, 1, MPI_INT, MPI_SUM,
+		  MPI_COMM_WORLD);
 #endif
 
-  return havingMoving > 0;
-}
+    return havingFixed > 0;
+  }
 
-void ZconstraintForceManager::calcTotalMassMovingZMols(){
+
+  bool ZconstraintForceManager::haveMovingZMols(){
+    int havingMoving_local;
+    int havingMoving;
+
+    havingMoving_local = movingZMols_.empty()? 0 : 1;
+
+#ifndef IS_MPI
+    havingMoving = havingMoving_local;
+#else
+    MPI_Allreduce(&havingMoving_local, &havingMoving, 1, MPI_INT, MPI_SUM,
+		  MPI_COMM_WORLD);
+#endif
+
+    return havingMoving > 0;
+  }
+
+  void ZconstraintForceManager::calcTotalMassMovingZMols(){
 
     double totMassMovingZMols_local = 0.0;
     std::list<ZconstraintMol>::iterator i;
     for ( i = movingZMols_.begin(); i !=  movingZMols_.end(); ++i) {
-        totMassMovingZMols_local += i->mol->getMass();
+      totMassMovingZMols_local += i->mol->getMass();
     }
     
 #ifdef IS_MPI
     MPI_Allreduce(&totMassMovingZMols_local, &totMassMovingZMols_, 1, MPI_DOUBLE,
-                MPI_SUM, MPI_COMM_WORLD);
+		  MPI_SUM, MPI_COMM_WORLD);
 #else
     totMassMovingZMols_ = totMassMovingZMols_local;
 #endif
 
-}
+  }
 
-double ZconstraintForceManager::getZFOfFixedZMols(Molecule* mol, StuntDouble* sd, double totalForce){
-  return totalForce * sd->getMass() / mol->getMass();
-}
+  double ZconstraintForceManager::getZFOfFixedZMols(Molecule* mol, StuntDouble* sd, double totalForce){
+    return totalForce * sd->getMass() / mol->getMass();
+  }
 
-double ZconstraintForceManager::getZFOfMovingMols(Molecule* mol, double totalForce){
-  return totalForce * mol->getMass() / (totMassUnconsMols_ + totMassMovingZMols_);
-}
+  double ZconstraintForceManager::getZFOfMovingMols(Molecule* mol, double totalForce){
+    return totalForce * mol->getMass() / (totMassUnconsMols_ + totMassMovingZMols_);
+  }
 
-double ZconstraintForceManager::getHFOfFixedZMols(Molecule* mol, StuntDouble*sd, double totalForce){
-  return totalForce * sd->getMass() / mol->getMass();
-}
+  double ZconstraintForceManager::getHFOfFixedZMols(Molecule* mol, StuntDouble*sd, double totalForce){
+    return totalForce * sd->getMass() / mol->getMass();
+  }
 
-double ZconstraintForceManager::getHFOfUnconsMols(Molecule* mol, double totalForce){
-  return totalForce * mol->getMass() / totMassUnconsMols_;
-}
+  double ZconstraintForceManager::getHFOfUnconsMols(Molecule* mol, double totalForce){
+    return totalForce * mol->getMass() / totMassUnconsMols_;
+  }
 
-void ZconstraintForceManager::updateZPos(){
+  void ZconstraintForceManager::updateZPos(){
     double curTime = currSnapshot_->getTime();
     std::list<ZconstraintMol>::iterator i;
     for ( i = fixedZMols_.begin(); i !=  fixedZMols_.end(); ++i) {
-        i->param.zTargetPos += zconsGap_;     
+      i->param.zTargetPos += zconsGap_;     
     }  
-}
+  }
 
-void ZconstraintForceManager::updateCantPos(){
+  void ZconstraintForceManager::updateCantPos(){
     std::list<ZconstraintMol>::iterator i;
     for ( i = movingZMols_.begin(); i !=  movingZMols_.end(); ++i) {
-        i->cantPos += i->param.cantVel * dt_;
+      i->cantPos += i->param.cantVel * dt_;
     }
-}
+  }
 
-double ZconstraintForceManager::getZTargetPos(int index){
+  double ZconstraintForceManager::getZTargetPos(int index){
     double zTargetPos;
 #ifndef IS_MPI    
     Molecule* mol = info_->getMoleculeByGlobalIndex(index);
@@ -624,6 +624,6 @@ double ZconstraintForceManager::getZTargetPos(int index){
     MPI_Bcast(&zTargetPos, 1, MPI_DOUBLE, whicProc, MPI_COMM_WORLD);
 #endif
     return zTargetPos;
-}
+  }
 
 }

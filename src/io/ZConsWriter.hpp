@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -60,21 +60,21 @@
 
 namespace oopse {
 
-class ZConsWriter {
+  class ZConsWriter {
 
-    public:
-        ZConsWriter(SimInfo* info, const std::string& filename);
-        ~ZConsWriter();  
+  public:
+    ZConsWriter(SimInfo* info, const std::string& filename);
+    ~ZConsWriter();  
 
-        void writeFZ(const std::list<ZconstraintMol>& fixedZmols);
+    void writeFZ(const std::list<ZconstraintMol>& fixedZmols);
           
-    private:
-        void writeZPos();
+  private:
+    void writeZPos();
 
-        SimInfo* info_;
-        std::ofstream output_;
+    SimInfo* info_;
+    std::ofstream output_;
 
-};
+  };
 
 }
 #endif

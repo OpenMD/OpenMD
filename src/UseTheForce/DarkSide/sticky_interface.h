@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -58,7 +58,7 @@ extern "C" {
                       double* sticky_rlp,
                       double* sticky_rup,
                       int* isError );
-	void destroyStickyTypes();
+  void destroyStickyTypes();
 }
 
 #endif

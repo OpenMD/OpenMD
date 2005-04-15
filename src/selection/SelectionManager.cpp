@@ -43,7 +43,7 @@
 #include "primitives/Molecule.hpp"
 #include "brains/SimInfo.hpp"
 namespace oopse {
-SelectionManager::SelectionManager(SimInfo* info) : info_(info){
+  SelectionManager::SelectionManager(SimInfo* info) : info_(info){
 
     int nStuntDoubles = info_->getNGlobalAtoms() + info_->getNGlobalRigidBodies();
 
@@ -60,60 +60,60 @@ SelectionManager::SelectionManager(SimInfo* info) : info_(info){
     
     for (mol = info_->beginMolecule(mi); mol != NULL; mol = info_->nextMolecule(mi)) {
         
-        for(atom = mol->beginAtom(ai); atom != NULL; atom = mol->nextAtom(ai)) {
-            stuntdoubles_[atom->getGlobalIndex()] = atom;
-        }
+      for(atom = mol->beginAtom(ai); atom != NULL; atom = mol->nextAtom(ai)) {
+	stuntdoubles_[atom->getGlobalIndex()] = atom;
+      }
 
-        for (rb = mol->beginRigidBody(rbIter); rb != NULL; rb = mol->nextRigidBody(rbIter)) {
-            stuntdoubles_[rb->getGlobalIndex()] = rb;
-        }
+      for (rb = mol->beginRigidBody(rbIter); rb != NULL; rb = mol->nextRigidBody(rbIter)) {
+	stuntdoubles_[rb->getGlobalIndex()] = rb;
+      }
         
     }    
     
-}
+  }
 
 
-StuntDouble* SelectionManager::beginSelected(int& i) {
+  StuntDouble* SelectionManager::beginSelected(int& i) {
     i = bsSelection_.firstOnBit();
     return i == -1 ? NULL : stuntdoubles_[i];
-}
-StuntDouble* SelectionManager::nextSelected(int& i) {
+  }
+  StuntDouble* SelectionManager::nextSelected(int& i) {
     i = bsSelection_.nextOnBit(i);
     return i == -1 ? NULL : stuntdoubles_[i];
-}
+  }
 
-StuntDouble* SelectionManager::beginUnselected(int& i){
+  StuntDouble* SelectionManager::beginUnselected(int& i){
     i = bsSelection_.firstOffBit();
     return i == -1 ? NULL : stuntdoubles_[i];
-}
-StuntDouble* SelectionManager::nextUnSelected(int& i) {
+  }
+  StuntDouble* SelectionManager::nextUnSelected(int& i) {
     i = bsSelection_.nextOffBit(i);
     return i == -1 ? NULL : stuntdoubles_[i];
-}
+  }
 
 
-SelectionManager operator| (const SelectionManager& sman1, const SelectionManager& sman2) {
+  SelectionManager operator| (const SelectionManager& sman1, const SelectionManager& sman2) {
     SelectionManager result(sman1);
     result |= sman2;
     return result;
-}
-SelectionManager operator& (const SelectionManager& sman1, const SelectionManager& sman2) {
+  }
+  SelectionManager operator& (const SelectionManager& sman1, const SelectionManager& sman2) {
     SelectionManager result(sman1);
     result &= sman2;
     return result;
 
-}
-SelectionManager operator^ (const SelectionManager& sman1, const SelectionManager& sman2) {
+  }
+  SelectionManager operator^ (const SelectionManager& sman1, const SelectionManager& sman2) {
     SelectionManager result(sman1);
     result ^= sman2;
     return result;
 
-}
-SelectionManager operator-(const SelectionManager& sman1, const SelectionManager& sman2){
+  }
+  SelectionManager operator-(const SelectionManager& sman1, const SelectionManager& sman2){
     SelectionManager result(sman1);
     result -= sman2;
     return result;
 
-}
+  }
 
 }

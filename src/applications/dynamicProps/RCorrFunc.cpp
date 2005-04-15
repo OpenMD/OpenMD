@@ -42,19 +42,19 @@
 #include "applications/dynamicProps/RCorrFunc.hpp"
 
 namespace oopse {
-RCorrFunc::RCorrFunc(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2)
+  RCorrFunc::RCorrFunc(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2)
     : ParticleTimeCorrFunc(info, filename, sele1, sele2, DataStorage::dslPosition){
 
-    setCorrFuncType("RCorrFunc");
-    setOutputName(getPrefix(dumpFilename_) + ".rcorr");
+      setCorrFuncType("RCorrFunc");
+      setOutputName(getPrefix(dumpFilename_) + ".rcorr");
 
-}
+    }
 
-double RCorrFunc::calcCorrVal(int frame1, int frame2, StuntDouble* sd1, StuntDouble* sd2) {
+  double RCorrFunc::calcCorrVal(int frame1, int frame2, StuntDouble* sd1, StuntDouble* sd2) {
     Vector3d r1 =sd1->getPos(frame1);
     Vector3d r2 = sd2->getPos(frame2);
 
     return (r2-r1).lengthSquare();
-}
+  }
 
 }

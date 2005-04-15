@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -51,27 +51,27 @@
 
 namespace oopse {
   
-/**
- * @class BendType BendType.hpp "types/BendType.hpp"
- */
-class BendType {
-    public:
-        BendType(double theta) : theta0_(theta) {}
-        virtual ~BendType() {}
+  /**
+   * @class BendType BendType.hpp "types/BendType.hpp"
+   */
+  class BendType {
+  public:
+    BendType(double theta) : theta0_(theta) {}
+    virtual ~BendType() {}
 
-        virtual void calcForce(double theta, double& V, double& dVdTheta) = 0;   
+    virtual void calcForce(double theta, double& V, double& dVdTheta) = 0;   
 
-        double getTheta() {
-            return theta0_;
-        }
+    double getTheta() {
+      return theta0_;
+    }
         
-        void setTheta(double theta) {
-            theta0_ = theta;
-        }
+    void setTheta(double theta) {
+      theta0_ = theta;
+    }
 
-    protected:
-        double theta0_;        
-};
+  protected:
+    double theta0_;        
+  };
 
 } //end namespace oopse
 #endif //TYPES_BENDTYPE_HPP

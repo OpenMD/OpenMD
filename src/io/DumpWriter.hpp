@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -63,30 +63,30 @@
 
 namespace oopse {
 
-/**
- * @class DumpWriter DumpWriter.hpp "io/DumpWriter.hpp"
- * @todo 
- */
-class DumpWriter{
+  /**
+   * @class DumpWriter DumpWriter.hpp "io/DumpWriter.hpp"
+   * @todo 
+   */
+  class DumpWriter{
 
-    public:
-        DumpWriter(SimInfo* info);
-        DumpWriter(SimInfo* info, const std::string& filename);
-        ~DumpWriter();
+  public:
+    DumpWriter(SimInfo* info);
+    DumpWriter(SimInfo* info, const std::string& filename);
+    ~DumpWriter();
 
-        void writeDumpAndEor();
-        void writeDump();
-        void writeEor();
+    void writeDumpAndEor();
+    void writeDump();
+    void writeEor();
         
-    private:  
+  private:  
         
-        void writeFrame(std::ostream& os);
-        void writeCommentLine(std::ostream& os, Snapshot* s);
-        SimInfo* info_;
-        std::string filename_;
-        std::ofstream dumpFile_;
-        std::string eorFilename_;
-};
+    void writeFrame(std::ostream& os);
+    void writeCommentLine(std::ostream& os, Snapshot* s);
+    SimInfo* info_;
+    std::string filename_;
+    std::ofstream dumpFile_;
+    std::string eorFilename_;
+  };
 
 }
 #endif //#define IO_DUMPWRITER_HPP

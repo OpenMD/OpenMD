@@ -57,7 +57,7 @@
 
 namespace oopse {
     
-DUFF::DUFF(){
+  DUFF::DUFF(){
 
     //set default force field filename
     setForceFieldFileName("DUFF2.frc");
@@ -82,9 +82,9 @@ DUFF::DUFF(){
     spMan_.push_back(new BendTypesSectionParser());
     spMan_.push_back(new TorsionTypesSectionParser());
     
-}
+  }
 
-void DUFF::parse(const std::string& filename) {
+  void DUFF::parse(const std::string& filename) {
     ifstrstream* ffStream;
     ffStream = openForceFieldFile(filename);
 
@@ -94,19 +94,19 @@ void DUFF::parse(const std::string& filename) {
     AtomType* at;
 
     for (at = atomTypeCont_.beginType(i); at != NULL; at = atomTypeCont_.nextType(i)) {
-        at->makeFortranAtomType();
+      at->makeFortranAtomType();
     }
 
     for (at = atomTypeCont_.beginType(i); at != NULL; at = atomTypeCont_.nextType(i)) {
-        at->complete();
+      at->complete();
     }
 
     delete ffStream;
     
-}
+  }
 
-DUFF::~DUFF(){
-	destroyLJTypes();
-	destroyStickyTypes();
-}
+  DUFF::~DUFF(){
+    destroyLJTypes();
+    destroyStickyTypes();
+  }
 } //end namespace oopse

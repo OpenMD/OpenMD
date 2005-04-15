@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -44,29 +44,29 @@
 #include "utils/StringUtils.hpp"
 namespace oopse {
 
-ZConsReader::ZConsReader(SimInfo* info) : info_(info){
+  ZConsReader::ZConsReader(SimInfo* info) : info_(info){
 
     std::string zconsFileName_ = getPrefix(info_->getFinalConfigFileName()) + ".fz";
     istream_.open(zconsFileName_.c_str());
 
     if (!istream_){
-        std::cerr << "open " << zconsFileName_ << "error" << std::endl;
-        exit(1);
+      std::cerr << "open " << zconsFileName_ << "error" << std::endl;
+      exit(1);
     }
 
     Globals* simParam = info_->getSimParams();
     int nZconstraints = simParam->getNzConstraints();
     ZconStamp** stamp = simParam->getZconStamp();
     for (int i = 0; i < nZconstraints; i++){
-        allZmols_.push_back(stamp[i]->getMolIndex());
+      allZmols_.push_back(stamp[i]->getMolIndex());
     } 
-}
+  }
 
-ZConsReader::~ZConsReader(){
-  istream_.close();
-}
+  ZConsReader::~ZConsReader(){
+    istream_.close();
+  }
 
-void ZConsReader::readNextFrame(){
+  void ZConsReader::readNextFrame(){
     char line[MAXBUFFERSIZE];  
     int nFixedZmol;
     int sscanfCount;
@@ -76,33 +76,33 @@ void ZConsReader::readNextFrame(){
     while(istream_.getline(line, MAXBUFFERSIZE) && line[0] == '/' && line[1] == '/');
     sscanfCount = sscanf(line, "%lf", &curTime_);
     if (sscanfCount != 1){
-        std::cerr << "ZConsReader Error : reading file error" << std::endl;
-        exit(1);
+      std::cerr << "ZConsReader Error : reading file error" << std::endl;
+      exit(1);
     }
 
     istream_.getline(line, MAXBUFFERSIZE);
     sscanfCount = sscanf(line, "%d", &nFixedZmol);
     if (sscanfCount != 1){
-        std::cerr << "ZConsReader Error : reading file error" << std::endl;
-        exit(1);
+      std::cerr << "ZConsReader Error : reading file error" << std::endl;
+      exit(1);
     }
 
     ZconsData data;
     for(int i = 0; i < nFixedZmol; i++){
-        istream_.getline(line, MAXBUFFERSIZE);
-        sscanfCount = sscanf(line, "%d\t%lf\t%lf\t%lf", &data.zmolIndex, &data.zforce, &data.zpos,&data.zconsPos);
-        if (sscanfCount != 4){
-          std::cerr << "ZConsReader Error : reading file error" << std::endl;
-          exit(1);
-        }
+      istream_.getline(line, MAXBUFFERSIZE);
+      sscanfCount = sscanf(line, "%d\t%lf\t%lf\t%lf", &data.zmolIndex, &data.zforce, &data.zpos,&data.zconsPos);
+      if (sscanfCount != 4){
+	std::cerr << "ZConsReader Error : reading file error" << std::endl;
+	exit(1);
+      }
 
-        fixedZmolData_.push_back(data);
+      fixedZmolData_.push_back(data);
     }
 
-}
+  }
 
-bool ZConsReader::hasNextFrame(){
-  return istream_.peek() != EOF ? true : false;
-}
+  bool ZConsReader::hasNextFrame(){
+    return istream_.peek() != EOF ? true : false;
+  }
 
 }

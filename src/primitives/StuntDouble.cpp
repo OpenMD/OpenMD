@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -50,42 +50,42 @@
 
 namespace oopse {
 
-StuntDouble::StuntDouble(ObjectType objType, DataStoragePointer storage) : 
+  StuntDouble::StuntDouble(ObjectType objType, DataStoragePointer storage) : 
     objType_(objType), storage_(storage), snapshotMan_(NULL),    
     linear_(false), linearAxis_(-1), globalIndex_(-1), localIndex_(-1){
-}
+    }
 
-StuntDouble::~StuntDouble() {
+  StuntDouble::~StuntDouble() {
 
-}
+  }
 
-void StuntDouble::zeroForcesAndTorques() {
+  void StuntDouble::zeroForcesAndTorques() {
     setFrc(V3Zero);
     setTrq(V3Zero);
-}
-void StuntDouble::addProperty(GenericData* genData) {
+  }
+  void StuntDouble::addProperty(GenericData* genData) {
     properties_.addProperty(genData);  
-}
+  }
 
-void StuntDouble::removeProperty(const std::string& propName) {
+  void StuntDouble::removeProperty(const std::string& propName) {
     properties_.removeProperty(propName);  
-}
+  }
 
-void StuntDouble::clearProperties() {
+  void StuntDouble::clearProperties() {
     properties_.clearProperties(); 
-}
+  }
 
-std::vector<std::string> StuntDouble::getPropertyNames() {
+  std::vector<std::string> StuntDouble::getPropertyNames() {
     return properties_.getPropertyNames();  
-}
+  }
       
-std::vector<GenericData*> StuntDouble::getProperties() { 
+  std::vector<GenericData*> StuntDouble::getProperties() { 
     return properties_.getProperties(); 
-}
+  }
 
-GenericData* StuntDouble::getPropertyByName(const std::string& propName) {
+  GenericData* StuntDouble::getPropertyByName(const std::string& propName) {
     return properties_.getPropertyByName(propName); 
-}
+  }
 
 
 }

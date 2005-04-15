@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -40,13 +40,13 @@
  */
  
  
- /**
-  * @file StatWriter.hpp
-  * @author tlin
-  * @date 11/08/2004
-  * @time 10:03am
-  * @version 1.0
-  */
+/**
+ * @file StatWriter.hpp
+ * @author tlin
+ * @date 11/08/2004
+ * @time 10:03am
+ * @version 1.0
+ */
 
 
 #ifndef IO_STATWRITER_HPP
@@ -60,44 +60,44 @@
 
 namespace oopse {
 
-typedef std::bitset<Stats::ENDINDEX-Stats::BEGININDEX> StatsBitSet;
+  typedef std::bitset<Stats::ENDINDEX-Stats::BEGININDEX> StatsBitSet;
 
-/**
- * DefaultStatsBitSet includes 
- *    StatsIndex::TIME
- *    StatsIndex::TOTAL_ENERGY
- *    StatsIndex::POTENTIAL_ENERGY
- *    StatsIndex::KINETIC_ENERGY
- *    StatsIndex::TEMPERATURE
- *    StatsIndex::PRESSURE
- *    StatsIndex::CONSERVED_QUANTITY
- */
-const StatsBitSet DefaultStatsBitSet(255ul);
+  /**
+   * DefaultStatsBitSet includes 
+   *    StatsIndex::TIME
+   *    StatsIndex::TOTAL_ENERGY
+   *    StatsIndex::POTENTIAL_ENERGY
+   *    StatsIndex::KINETIC_ENERGY
+   *    StatsIndex::TEMPERATURE
+   *    StatsIndex::PRESSURE
+   *    StatsIndex::CONSERVED_QUANTITY
+   */
+  const StatsBitSet DefaultStatsBitSet(255ul);
 
 
-/**
- * @class StatWriter StatWriter.hpp "io/StatWriter.hpp"
- * @brief A configurable Statistics Writer
- */
-class StatWriter {
-    public:
-        StatWriter(const std::string& filename, const StatsBitSet& mask = DefaultStatsBitSet);
-        ~StatWriter();
+  /**
+   * @class StatWriter StatWriter.hpp "io/StatWriter.hpp"
+   * @brief A configurable Statistics Writer
+   */
+  class StatWriter {
+  public:
+    StatWriter(const std::string& filename, const StatsBitSet& mask = DefaultStatsBitSet);
+    ~StatWriter();
 
-        void writeStat(const Stats& s);
+    void writeStat(const Stats& s);
 
-        StatsBitSet getMask() {
-            return mask_;
-        }
+    StatsBitSet getMask() {
+      return mask_;
+    }
         
-    private:
+  private:
 
-        void writeTitle();
+    void writeTitle();
         
-        std::ofstream statfile_;
-        StatsBitSet mask_;
+    std::ofstream statfile_;
+    StatsBitSet mask_;
         
-};
+  };
 
 }
 #endif //IO_STATWRITER_HPP

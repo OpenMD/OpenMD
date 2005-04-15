@@ -47,38 +47,38 @@
 #include "utils/BitSet.hpp"
 namespace oopse {
 
-class TreeNode{
-    public:
-        ~TreeNode();
-        std::string name;
-        BitSet bs;
-        std::map<std::string, TreeNode*> children;
-};
+  class TreeNode{
+  public:
+    ~TreeNode();
+    std::string name;
+    BitSet bs;
+    std::map<std::string, TreeNode*> children;
+  };
 
-class NameFinder{
-    public:
-        NameFinder(SimInfo* info);
-        ~NameFinder();
-        BitSet  match(const std::string& name);
+  class NameFinder{
+  public:
+    NameFinder(SimInfo* info);
+    ~NameFinder();
+    BitSet  match(const std::string& name);
 
-    private:
-        void loadNames();
-        void matchMolecule(const std::string& molName, BitSet& bs);
-        void matchStuntDouble(const std::string& molName, const std::string& sdName, BitSet& bs);
-        void matchRigidAtoms(const std::string& molName, const std::string& rbName, const std::string& rbAtomName, BitSet& bs);
+  private:
+    void loadNames();
+    void matchMolecule(const std::string& molName, BitSet& bs);
+    void matchStuntDouble(const std::string& molName, const std::string& sdName, BitSet& bs);
+    void matchRigidAtoms(const std::string& molName, const std::string& rbName, const std::string& rbAtomName, BitSet& bs);
 
-        void matchInternalIndex(const std::string& name, int internalIndex, BitSet& bs);
+    void matchInternalIndex(const std::string& name, int internalIndex, BitSet& bs);
 
-        TreeNode* createNode(TreeNode* parent, const std::string& name);
-        std::vector<TreeNode*> getMatchedChildren(TreeNode* node, const std::string& name);
-        bool isMatched(const std::string& str, const std::string& wildcard);
+    TreeNode* createNode(TreeNode* parent, const std::string& name);
+    std::vector<TreeNode*> getMatchedChildren(TreeNode* node, const std::string& name);
+    bool isMatched(const std::string& str, const std::string& wildcard);
 
-        bool isInteger(const std::string str);
+    bool isInteger(const std::string str);
 
-        SimInfo* info_;
-        int nStuntDouble_;
-        TreeNode* root_;
-};
+    SimInfo* info_;
+    int nStuntDouble_;
+    TreeNode* root_;
+  };
 
 
 }

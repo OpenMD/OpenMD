@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -45,16 +45,16 @@
 #include "io/SectionParser.hpp"
 namespace oopse {
 
-    /**
-     * @class StickyAtomTypesSectionParser StickyAtomTypesSectionParser.hpp "io/StickyAtomTypesSectionParser.hpp"
-     */
-    class StickyAtomTypesSectionParser : public SectionParser {
-        public:
-            StickyAtomTypesSectionParser();
-        private:
-            virtual void parseLine(ForceField& ff, const std::string& line, int lineNo);
+  /**
+   * @class StickyAtomTypesSectionParser StickyAtomTypesSectionParser.hpp "io/StickyAtomTypesSectionParser.hpp"
+   */
+  class StickyAtomTypesSectionParser : public SectionParser {
+  public:
+    StickyAtomTypesSectionParser();
+  private:
+    virtual void parseLine(ForceField& ff, const std::string& line, int lineNo);
             
-    };
+  };
 
 
 } //namespace oopse

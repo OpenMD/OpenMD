@@ -63,10 +63,10 @@ cmdline_parser_print_help (void)
 {
   cmdline_parser_print_version ();
   printf("\n"
-  "Purpose:\n"
-  "  Builds penta-hexagonal nanorods and outputs a xyz input file\n"
-  "\n"
-  "Usage: %s [OPTIONS]... [FILES]...\n", CMDLINE_PARSER_PACKAGE);
+	 "Purpose:\n"
+	 "  Builds penta-hexagonal nanorods and outputs a xyz input file\n"
+	 "\n"
+	 "Usage: %s [OPTIONS]... [FILES]...\n", CMDLINE_PARSER_PACKAGE);
   printf("\n");
   printf("%s\n","  -h, --help                Print help and exit");
   printf("%s\n","  -V, --version             Print version and exit");
@@ -220,80 +220,80 @@ cmdline_parser_internal (int argc, char * const *argv, struct gengetopt_args_inf
         case 0:	/* Long option with no short option */
           /* Lattice type string. Valid types are fcc,hcp,bcc..  */
           if (strcmp (long_options[option_index].name, "latticetype") == 0)
-          {
-            if (local_args_info.latticetype_given)
-              {
-                fprintf (stderr, "%s: `--latticetype' option given more than once%s\n", CMDLINE_PARSER_PACKAGE, (additional_error ? additional_error : ""));
-                goto failure;
-              }
-            if (args_info->latticetype_given && ! override)
-              continue;
-            local_args_info.latticetype_given = 1;
-            args_info->latticetype_given = 1;
-            if (args_info->latticetype_arg)
-              free (args_info->latticetype_arg); /* free previous string */
-            args_info->latticetype_arg = gengetopt_strdup (optarg);
-          }
+	    {
+	      if (local_args_info.latticetype_given)
+		{
+		  fprintf (stderr, "%s: `--latticetype' option given more than once%s\n", CMDLINE_PARSER_PACKAGE, (additional_error ? additional_error : ""));
+		  goto failure;
+		}
+	      if (args_info->latticetype_given && ! override)
+		continue;
+	      local_args_info.latticetype_given = 1;
+	      args_info->latticetype_given = 1;
+	      if (args_info->latticetype_arg)
+		free (args_info->latticetype_arg); /* free previous string */
+	      args_info->latticetype_arg = gengetopt_strdup (optarg);
+	    }
           
           /* length of nanorod in Angstroms.  */
           else if (strcmp (long_options[option_index].name, "length") == 0)
-          {
-            if (local_args_info.length_given)
-              {
-                fprintf (stderr, "%s: `--length' option given more than once%s\n", CMDLINE_PARSER_PACKAGE, (additional_error ? additional_error : ""));
-                goto failure;
-              }
-            if (args_info->length_given && ! override)
-              continue;
-            local_args_info.length_given = 1;
-            args_info->length_given = 1;
-            args_info->length_arg = strtod (optarg, NULL);
-          }
+	    {
+	      if (local_args_info.length_given)
+		{
+		  fprintf (stderr, "%s: `--length' option given more than once%s\n", CMDLINE_PARSER_PACKAGE, (additional_error ? additional_error : ""));
+		  goto failure;
+		}
+	      if (args_info->length_given && ! override)
+		continue;
+	      local_args_info.length_given = 1;
+	      args_info->length_given = 1;
+	      args_info->length_arg = strtod (optarg, NULL);
+	    }
           
           /* diameter  of nanorod in Angstroms.  */
           else if (strcmp (long_options[option_index].name, "width") == 0)
-          {
-            if (local_args_info.width_given)
-              {
-                fprintf (stderr, "%s: `--width' option given more than once%s\n", CMDLINE_PARSER_PACKAGE, (additional_error ? additional_error : ""));
-                goto failure;
-              }
-            if (args_info->width_given && ! override)
-              continue;
-            local_args_info.width_given = 1;
-            args_info->width_given = 1;
-            args_info->width_arg = strtod (optarg, NULL);
-          }
+	    {
+	      if (local_args_info.width_given)
+		{
+		  fprintf (stderr, "%s: `--width' option given more than once%s\n", CMDLINE_PARSER_PACKAGE, (additional_error ? additional_error : ""));
+		  goto failure;
+		}
+	      if (args_info->width_given && ! override)
+		continue;
+	      local_args_info.width_given = 1;
+	      args_info->width_given = 1;
+	      args_info->width_arg = strtod (optarg, NULL);
+	    }
           
           /* lattice spacing in Angstrons for cubic lattice.  */
           else if (strcmp (long_options[option_index].name, "latticeCnst") == 0)
-          {
-            if (local_args_info.latticeCnst_given)
-              {
-                fprintf (stderr, "%s: `--latticeCnst' option given more than once%s\n", CMDLINE_PARSER_PACKAGE, (additional_error ? additional_error : ""));
-                goto failure;
-              }
-            if (args_info->latticeCnst_given && ! override)
-              continue;
-            local_args_info.latticeCnst_given = 1;
-            args_info->latticeCnst_given = 1;
-            args_info->latticeCnst_arg = strtod (optarg, NULL);
-          }
+	    {
+	      if (local_args_info.latticeCnst_given)
+		{
+		  fprintf (stderr, "%s: `--latticeCnst' option given more than once%s\n", CMDLINE_PARSER_PACKAGE, (additional_error ? additional_error : ""));
+		  goto failure;
+		}
+	      if (args_info->latticeCnst_given && ! override)
+		continue;
+	      local_args_info.latticeCnst_given = 1;
+	      args_info->latticeCnst_given = 1;
+	      args_info->latticeCnst_arg = strtod (optarg, NULL);
+	    }
           
           /* generate a geomview file with the object geometry.  */
           else if (strcmp (long_options[option_index].name, "genGeomview") == 0)
-          {
-            if (local_args_info.genGeomview_given)
-              {
-                fprintf (stderr, "%s: `--genGeomview' option given more than once%s\n", CMDLINE_PARSER_PACKAGE, (additional_error ? additional_error : ""));
-                goto failure;
-              }
-            if (args_info->genGeomview_given && ! override)
-              continue;
-            local_args_info.genGeomview_given = 1;
-            args_info->genGeomview_given = 1;
-            args_info->genGeomview_arg = strtol (optarg,&stop_char,0);
-          }
+	    {
+	      if (local_args_info.genGeomview_given)
+		{
+		  fprintf (stderr, "%s: `--genGeomview' option given more than once%s\n", CMDLINE_PARSER_PACKAGE, (additional_error ? additional_error : ""));
+		  goto failure;
+		}
+	      if (args_info->genGeomview_given && ! override)
+		continue;
+	      local_args_info.genGeomview_given = 1;
+	      args_info->genGeomview_given = 1;
+	      args_info->genGeomview_arg = strtol (optarg,&stop_char,0);
+	    }
           
 
           break;
@@ -346,7 +346,7 @@ cmdline_parser_internal (int argc, char * const *argv, struct gengetopt_args_inf
   
   return 0;
 
-failure:
+ failure:
   cmdline_parser_free (&local_args_info);
   return (EXIT_FAILURE);
 }

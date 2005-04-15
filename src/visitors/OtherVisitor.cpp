@@ -46,19 +46,19 @@
 #include "brains/SimInfo.hpp"
 namespace oopse {
 
-void WrappingVisitor::visit(Atom *atom) {
-internalVisit(atom);
-}
+  void WrappingVisitor::visit(Atom *atom) {
+    internalVisit(atom);
+  }
 
-void WrappingVisitor::visit(DirectionalAtom *datom) {
-internalVisit(datom);
-}
+  void WrappingVisitor::visit(DirectionalAtom *datom) {
+    internalVisit(datom);
+  }
 
-void WrappingVisitor::visit(RigidBody *rb) {
-internalVisit(rb);
-}
+  void WrappingVisitor::visit(RigidBody *rb) {
+    internalVisit(rb);
+  }
 
-void WrappingVisitor::internalVisit(StuntDouble *sd) {
+  void WrappingVisitor::internalVisit(StuntDouble *sd) {
     GenericData *                     data;
     AtomData *                        atomData;
     AtomInfo *                        atomInfo;
@@ -67,21 +67,21 @@ void WrappingVisitor::internalVisit(StuntDouble *sd) {
     data = sd->getPropertyByName("ATOMDATA");
 
     if (data != NULL) {
-        atomData = dynamic_cast<AtomData *>(data);
+      atomData = dynamic_cast<AtomData *>(data);
 
-        if (atomData == NULL)
-            return;
+      if (atomData == NULL)
+	return;
     } else
-        return;
+      return;
 
     Snapshot* currSnapshot = info->getSnapshotManager()->getCurrentSnapshot();
     
     for( atomInfo = atomData->beginAtomInfo(i); atomInfo; atomInfo = atomData->nextAtomInfo(i) ) {
-        currSnapshot->wrapVector(atomInfo->pos);
+      currSnapshot->wrapVector(atomInfo->pos);
     }
-}
+  }
 
-const std::string WrappingVisitor::toString() {
+  const std::string WrappingVisitor::toString() {
     char        buffer[65535];
     std::string result;
 
@@ -101,45 +101,45 @@ const std::string WrappingVisitor::toString() {
     result += buffer;
 
     return result;
-}
+  }
 
-//----------------------------------------------------------------------------//
+  //----------------------------------------------------------------------------//
 
-ReplicateVisitor::ReplicateVisitor(SimInfo *info, Vector3i opt) :
+  ReplicateVisitor::ReplicateVisitor(SimInfo *info, Vector3i opt) :
     BaseVisitor() {
-    this->info = info;
-    visitorName = "ReplicateVisitor";
-    this->replicateOpt = opt;
+      this->info = info;
+      visitorName = "ReplicateVisitor";
+      this->replicateOpt = opt;
 
-    //generate the replicate directions
-    for( int i = 0; i <= replicateOpt[0]; i++ ) {
+      //generate the replicate directions
+      for( int i = 0; i <= replicateOpt[0]; i++ ) {
         for( int j = 0; j <= replicateOpt[1]; j++ ) {
-            for( int k = 0; k <= replicateOpt[2]; k++ ) {
-                //skip original frame
-                if (i == 0 && j == 0 && k == 0) {
-                    continue; 
-                } else {
-                    dir.push_back(Vector3i(i, j, k));
-                }
-            }
+	  for( int k = 0; k <= replicateOpt[2]; k++ ) {
+	    //skip original frame
+	    if (i == 0 && j == 0 && k == 0) {
+	      continue; 
+	    } else {
+	      dir.push_back(Vector3i(i, j, k));
+	    }
+	  }
         }
-    }
+      }
     
-}
+    }
 
-void ReplicateVisitor::visit(Atom *atom) {
-internalVisit(atom);
-}
+  void ReplicateVisitor::visit(Atom *atom) {
+    internalVisit(atom);
+  }
 
-void ReplicateVisitor::visit(DirectionalAtom *datom) {
-internalVisit(datom);
-}
+  void ReplicateVisitor::visit(DirectionalAtom *datom) {
+    internalVisit(datom);
+  }
 
-void ReplicateVisitor::visit(RigidBody *rb) {
-internalVisit(rb);
-}
+  void ReplicateVisitor::visit(RigidBody *rb) {
+    internalVisit(rb);
+  }
 
-void ReplicateVisitor::internalVisit(StuntDouble *sd) {
+  void ReplicateVisitor::internalVisit(StuntDouble *sd) {
     GenericData *          data;
     AtomData *             atomData;
 
@@ -147,13 +147,13 @@ void ReplicateVisitor::internalVisit(StuntDouble *sd) {
     data = sd->getPropertyByName("ATOMDATA");
 
     if (data != NULL) {
-        atomData = dynamic_cast<AtomData *>(data);
+      atomData = dynamic_cast<AtomData *>(data);
 
-        if (atomData == NULL) {
-            return;
-        }
+      if (atomData == NULL) {
+	return;
+      }
     } else {
-        return;
+      return;
     }
 
     Snapshot* currSnapshot = info->getSnapshotManager()->getCurrentSnapshot();
@@ -162,27 +162,27 @@ void ReplicateVisitor::internalVisit(StuntDouble *sd) {
     std::vector<AtomInfo *> atomInfoList = atomData->getData();
 
     replicate(atomInfoList, atomData, box);
-}
+  }
 
-void ReplicateVisitor::replicate(std::vector<AtomInfo *>&infoList, AtomData *data, const Mat3x3d& box) {
+  void ReplicateVisitor::replicate(std::vector<AtomInfo *>&infoList, AtomData *data, const Mat3x3d& box) {
     AtomInfo* newAtomInfo;
     std::vector<Vector3i>::iterator dirIter;
     std::vector<AtomInfo *>::iterator i;
 
     for( dirIter = dir.begin(); dirIter != dir.end(); ++dirIter ) {
-        for( i = infoList.begin(); i != infoList.end(); i++ ) {
-            newAtomInfo = new AtomInfo();
-            *newAtomInfo = *(*i);
+      for( i = infoList.begin(); i != infoList.end(); i++ ) {
+	newAtomInfo = new AtomInfo();
+	*newAtomInfo = *(*i);
 
-            for( int j = 0; j < 3; j++ )
-                newAtomInfo->pos[j] += (*dirIter)[0]*box(j, 0) + (*dirIter)[1]*box(j, 1) + (*dirIter)[2]*box(j, 2);
+	for( int j = 0; j < 3; j++ )
+	  newAtomInfo->pos[j] += (*dirIter)[0]*box(j, 0) + (*dirIter)[1]*box(j, 1) + (*dirIter)[2]*box(j, 2);
 
-            data->addAtomInfo(newAtomInfo);
-        }
+	data->addAtomInfo(newAtomInfo);
+      }
     } // end for(dirIter)  
-}
+  }
 
-const std::string ReplicateVisitor::toString() {
+  const std::string ReplicateVisitor::toString() {
     char                            buffer[65535];
     std::string                     result;
     std::set<std::string>::iterator i;
@@ -213,59 +213,59 @@ const std::string ReplicateVisitor::toString() {
     result += buffer;
 
     return result;
-}
+  }
 
-//----------------------------------------------------------------------------//
+  //----------------------------------------------------------------------------//
 
-XYZVisitor::XYZVisitor(SimInfo *info) :
+  XYZVisitor::XYZVisitor(SimInfo *info) :
     BaseVisitor(), seleMan(info), evaluator(info){
-    this->info = info;
-    visitorName = "XYZVisitor";
+      this->info = info;
+      visitorName = "XYZVisitor";
 
-    evaluator.loadScriptString("select all");
+      evaluator.loadScriptString("select all");
 
-    if (!evaluator.isDynamic()) {
+      if (!evaluator.isDynamic()) {
         seleMan.setSelectionSet(evaluator.evaluate());
+      }
+
     }
 
-}
-
-XYZVisitor::XYZVisitor(SimInfo *info, const std::string& script) :
+  XYZVisitor::XYZVisitor(SimInfo *info, const std::string& script) :
     BaseVisitor(), seleMan(info), evaluator(info) {
-    this->info = info;
-    visitorName = "XYZVisitor";
+      this->info = info;
+      visitorName = "XYZVisitor";
 
-    evaluator.loadScriptString(script);
+      evaluator.loadScriptString(script);
 
-    if (!evaluator.isDynamic()) {
+      if (!evaluator.isDynamic()) {
         seleMan.setSelectionSet(evaluator.evaluate());
-    }
+      }
           
-}
+    }
     
-void XYZVisitor::visit(Atom *atom) {
+  void XYZVisitor::visit(Atom *atom) {
     if (isSelected(atom))
-        internalVisit(atom);
-}
+      internalVisit(atom);
+  }
 
-void XYZVisitor::visit(DirectionalAtom *datom) {
+  void XYZVisitor::visit(DirectionalAtom *datom) {
     if (isSelected(datom))
-        internalVisit(datom);
-}
+      internalVisit(datom);
+  }
 
-void XYZVisitor::visit(RigidBody *rb) {
+  void XYZVisitor::visit(RigidBody *rb) {
     if (isSelected(rb))
-        internalVisit(rb);
-}
+      internalVisit(rb);
+  }
 
-void XYZVisitor::update() {
+  void XYZVisitor::update() {
     //if dynamic, we need to re-evaluate the selection
     if (evaluator.isDynamic()) {
-       seleMan.setSelectionSet(evaluator.evaluate());
+      seleMan.setSelectionSet(evaluator.evaluate());
     }
-}
+  }
 
-void XYZVisitor::internalVisit(StuntDouble *sd) {
+  void XYZVisitor::internalVisit(StuntDouble *sd) {
     GenericData *                     data;
     AtomData *                        atomData;
     AtomInfo *                        atomInfo;
@@ -276,38 +276,38 @@ void XYZVisitor::internalVisit(StuntDouble *sd) {
     data = sd->getPropertyByName("ATOMDATA");
 
     if (data != NULL) {
-        atomData = dynamic_cast<AtomData *>(data);
+      atomData = dynamic_cast<AtomData *>(data);
 
-        if (atomData == NULL)
-            return;
+      if (atomData == NULL)
+	return;
     } else
-        return;
+      return;
 
     for( atomInfo = atomData->beginAtomInfo(i); atomInfo;
-        atomInfo = atomData->nextAtomInfo(i) ) {
-        sprintf(buffer,
-                "%s%15.8f%15.8f%15.8f%15.8f%15.8f%15.8f",
-                atomInfo->atomTypeName.c_str(),
-                atomInfo->pos[0],
-                atomInfo->pos[1],
-                atomInfo->pos[2],
-                atomInfo->dipole[0],
-                atomInfo->dipole[1],
-                atomInfo->dipole[2]); 
-        frame.push_back(buffer);
+	 atomInfo = atomData->nextAtomInfo(i) ) {
+      sprintf(buffer,
+	      "%s%15.8f%15.8f%15.8f%15.8f%15.8f%15.8f",
+	      atomInfo->atomTypeName.c_str(),
+	      atomInfo->pos[0],
+	      atomInfo->pos[1],
+	      atomInfo->pos[2],
+	      atomInfo->dipole[0],
+	      atomInfo->dipole[1],
+	      atomInfo->dipole[2]); 
+      frame.push_back(buffer);
     }
-}
+  }
 
-bool XYZVisitor::isSelected(StuntDouble *sd) {
+  bool XYZVisitor::isSelected(StuntDouble *sd) {
     return seleMan.isSelected(sd);
-}
+  }
 
-void XYZVisitor::writeFrame(std::ostream &outStream) {
+  void XYZVisitor::writeFrame(std::ostream &outStream) {
     std::vector<std::string>::iterator i;
     char buffer[1024];
 
     if (frame.size() == 0)
-        std::cerr << "Current Frame does not contain any atoms" << std::endl;
+      std::cerr << "Current Frame does not contain any atoms" << std::endl;
 
     //total number of atoms  
     outStream << frame.size() << std::endl;
@@ -326,10 +326,10 @@ void XYZVisitor::writeFrame(std::ostream &outStream) {
     outStream << buffer << std::endl;
 
     for( i = frame.begin(); i != frame.end(); ++i )
-        outStream << *i << std::endl;
-}
+      outStream << *i << std::endl;
+  }
 
-const std::string XYZVisitor::toString() {
+  const std::string XYZVisitor::toString() {
     char        buffer[65535];
     std::string result;
 
@@ -349,11 +349,11 @@ const std::string XYZVisitor::toString() {
     result += buffer;
 
     return result;
-}
+  }
 
-//----------------------------------------------------------------------------//
+  //----------------------------------------------------------------------------//
 
-void PrepareVisitor::internalVisit(Atom *atom) {
+  void PrepareVisitor::internalVisit(Atom *atom) {
     GenericData *data;
     AtomData *   atomData;
 
@@ -361,21 +361,21 @@ void PrepareVisitor::internalVisit(Atom *atom) {
     data = atom->getPropertyByName("VISITED");
 
     if (data != NULL) {
-    atom->removeProperty("VISITED");
+      atom->removeProperty("VISITED");
     }
 
     //remove atomdata
     data = atom->getPropertyByName("ATOMDATA");
 
     if (data != NULL) {
-        atomData = dynamic_cast<AtomData *>(data);
+      atomData = dynamic_cast<AtomData *>(data);
 
-        if (atomData != NULL)
-            atom->removeProperty("ATOMDATA");
+      if (atomData != NULL)
+	atom->removeProperty("ATOMDATA");
     }
-}
+  }
 
-void PrepareVisitor::internalVisit(RigidBody *rb) {
+  void PrepareVisitor::internalVisit(RigidBody *rb) {
     GenericData* data;
     AtomData* atomData;
     std::vector<Atom *> myAtoms;
@@ -385,58 +385,58 @@ void PrepareVisitor::internalVisit(RigidBody *rb) {
     data = rb->getPropertyByName("VISITED");
 
     if (data != NULL) {
-    rb->removeProperty("VISITED");
+      rb->removeProperty("VISITED");
     }
 
     //remove atomdata
     data = rb->getPropertyByName("ATOMDATA");
 
     if (data != NULL) {
-        atomData = dynamic_cast<AtomData *>(data);
+      atomData = dynamic_cast<AtomData *>(data);
 
-        if (atomData != NULL)
-            rb->removeProperty("ATOMDATA");
+      if (atomData != NULL)
+	rb->removeProperty("ATOMDATA");
     }
 
     myAtoms = rb->getAtoms();
 
     for( atomIter = myAtoms.begin(); atomIter != myAtoms.end(); ++atomIter )
-        internalVisit(*atomIter);
-}
+      internalVisit(*atomIter);
+  }
 
-const std::string PrepareVisitor::toString() {
-     char buffer[65535];
-     std::string result;
+  const std::string PrepareVisitor::toString() {
+    char buffer[65535];
+    std::string result;
  
-     sprintf(buffer,
-             "------------------------------------------------------------------\n");
-     result += buffer;
+    sprintf(buffer,
+	    "------------------------------------------------------------------\n");
+    result += buffer;
  
-     sprintf(buffer, "Visitor name: %s", visitorName.c_str());
-     result += buffer;
+    sprintf(buffer, "Visitor name: %s", visitorName.c_str());
+    result += buffer;
  
-     sprintf(buffer,
-             "Visitor Description: prepare for operation of other vistors\n");
-     result += buffer;
+    sprintf(buffer,
+	    "Visitor Description: prepare for operation of other vistors\n");
+    result += buffer;
  
-     sprintf(buffer,
-             "------------------------------------------------------------------\n");
-     result += buffer;
+    sprintf(buffer,
+	    "------------------------------------------------------------------\n");
+    result += buffer;
  
-     return result;
-}
+    return result;
+  }
 
-//----------------------------------------------------------------------------//
+  //----------------------------------------------------------------------------//
 
-WaterTypeVisitor::WaterTypeVisitor() {
+  WaterTypeVisitor::WaterTypeVisitor() {
     visitorName = "WaterTypeVisitor";
     waterTypeList.insert("TIP3P_RB_0");
     waterTypeList.insert("TIP4P_RB_0");
     waterTypeList.insert("TIP5P_RB_0");
     waterTypeList.insert("SPCE_RB_0");
-}
+  }
 
-void WaterTypeVisitor::visit(RigidBody *rb) {
+  void WaterTypeVisitor::visit(RigidBody *rb) {
     std::string rbName;
     std::vector<Atom *> myAtoms;
     std::vector<Atom *>::iterator atomIter;
@@ -448,33 +448,33 @@ void WaterTypeVisitor::visit(RigidBody *rb) {
     rbName = rb->getType();
 
     if (waterTypeList.find(rbName) != waterTypeList.end()) {
-        myAtoms = rb->getAtoms();
+      myAtoms = rb->getAtoms();
 
-        for( atomIter = myAtoms.begin(); atomIter != myAtoms.end();
-            ++atomIter ) {
-            data = (*atomIter)->getPropertyByName("ATOMDATA");
+      for( atomIter = myAtoms.begin(); atomIter != myAtoms.end();
+	   ++atomIter ) {
+	data = (*atomIter)->getPropertyByName("ATOMDATA");
 
-            if (data != NULL) {
-                atomData = dynamic_cast<AtomData *>(data);
+	if (data != NULL) {
+	  atomData = dynamic_cast<AtomData *>(data);
 
-                if (atomData == NULL)
-                    continue;
-            } else
-                continue;
+	  if (atomData == NULL)
+	    continue;
+	} else
+	  continue;
 
-            for( atomInfo = atomData->beginAtomInfo(i); atomInfo;
-                 atomInfo = atomData->nextAtomInfo(i) ) {
-              atomInfo->atomTypeName = trimmedName(atomInfo->atomTypeName);
-            } //end for(atomInfo)
-        }     //end for(atomIter)
+	for( atomInfo = atomData->beginAtomInfo(i); atomInfo;
+	     atomInfo = atomData->nextAtomInfo(i) ) {
+	  atomInfo->atomTypeName = trimmedName(atomInfo->atomTypeName);
+	} //end for(atomInfo)
+      }     //end for(atomIter)
     }         //end if (waterTypeList.find(rbName) != waterTypeList.end())
-}
+  }
 
   std::string WaterTypeVisitor::trimmedName(const std::string&atomTypeName) {
     return atomTypeName.substr(0, atomTypeName.find('_'));
   }
 
-const std::string WaterTypeVisitor::toString() {
+  const std::string WaterTypeVisitor::toString() {
     char buffer[65535];
     std::string result;
 
@@ -494,6 +494,6 @@ const std::string WaterTypeVisitor::toString() {
     result += buffer;
 
     return result;
-}
+  }
 
 } //namespace oopse

@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -39,13 +39,13 @@
  * such damages.
  */
  
- /**
-  * @file NVE.hpp
-  * @author tlin
-  * @date 11/08/2004
-  * @time 13:25am
-  * @version 1.0
-  */
+/**
+ * @file NVE.hpp
+ * @author tlin
+ * @date 11/08/2004
+ * @time 13:25am
+ * @version 1.0
+ */
 
 #ifndef INTEGRATOR_NVE_HPP
 #define INTEGRATOR_NVE_HPP
@@ -54,15 +54,15 @@
 
 namespace oopse {
 
-class NVE : public VelocityVerletIntegrator{
-    public:
-        NVE(SimInfo* info);
+  class NVE : public VelocityVerletIntegrator{
+  public:
+    NVE(SimInfo* info);
 
-    private:
-        virtual void moveA();
-        virtual void moveB();
-        virtual double calcConservedQuantity();        
-};
+  private:
+    virtual void moveA();
+    virtual void moveB();
+    virtual double calcConservedQuantity();        
+  };
 
 } //end namespace oopse
 

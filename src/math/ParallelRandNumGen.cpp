@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -47,19 +47,19 @@ namespace oopse {
 
 
 
-int ParallelRandNumGen::nCreatedRNG_ = 0;
+  int ParallelRandNumGen::nCreatedRNG_ = 0;
 
-ParallelRandNumGen::ParallelRandNumGen( const uint32& oneSeed) {
+  ParallelRandNumGen::ParallelRandNumGen( const uint32& oneSeed) {
 
     const int masterNode = 0;
     int seed = oneSeed;
     MPI_Bcast(&seed, 1, MPI_UNSIGNED_LONG, masterNode, MPI_COMM_WORLD); 
 
     if (seed != oneSeed) {
-        sprintf(painCave.errMsg,
-                "Using different seed to initialize ParallelRandNumGen.\n");
-        painCave.isFatal = 1;;
-        simError();
+      sprintf(painCave.errMsg,
+	      "Using different seed to initialize ParallelRandNumGen.\n");
+      painCave.isFatal = 1;;
+      simError();
     }
 
     int nProcessors;
@@ -72,9 +72,9 @@ ParallelRandNumGen::ParallelRandNumGen( const uint32& oneSeed) {
     mtRand_ = new MTRand(newSeed, nProcessors, myRank_);
 
     ++nCreatedRNG_;
-}
+  }
 
-ParallelRandNumGen::ParallelRandNumGen() {
+  ParallelRandNumGen::ParallelRandNumGen() {
 
     std::vector<uint32> bigSeed;
     const int masterNode = 0;
@@ -84,53 +84,53 @@ ParallelRandNumGen::ParallelRandNumGen() {
     mtRand_ = new MTRand(nProcessors, myRank_);
 
     seed();       /** @todo calling virtual function in constructor is not a good design */
-}
+  }
 
 
-void ParallelRandNumGen::seed( const uint32 oneSeed ) {
+  void ParallelRandNumGen::seed( const uint32 oneSeed ) {
 
     const int masterNode = 0;
     int seed = oneSeed;
     MPI_Bcast(&seed, 1, MPI_UNSIGNED_LONG, masterNode, MPI_COMM_WORLD); 
 
     if (seed != oneSeed) {
-        sprintf(painCave.errMsg,
-                "Using different seed to initialize ParallelRandNumGen.\n");
-        painCave.isFatal = 1;;
-        simError();
+      sprintf(painCave.errMsg,
+	      "Using different seed to initialize ParallelRandNumGen.\n");
+      painCave.isFatal = 1;;
+      simError();
     }
 
     int newSeed = oneSeed +nCreatedRNG_;
     mtRand_->seed(newSeed);
 
     ++nCreatedRNG_;
-}
+  }
         
-void ParallelRandNumGen::seed() {
+  void ParallelRandNumGen::seed() {
 
     std::vector<uint32> bigSeed;
     int size;
     const int masterNode = 0;
     if (worldRank == masterNode) {
-        bigSeed = mtRand_->generateSeeds();
-        size = bigSeed.size();
-        MPI_Bcast(&size, 1, MPI_INT, masterNode, MPI_COMM_WORLD);        
-        MPI_Bcast(&bigSeed[0], size, MPI_UNSIGNED_LONG, masterNode, MPI_COMM_WORLD); 
+      bigSeed = mtRand_->generateSeeds();
+      size = bigSeed.size();
+      MPI_Bcast(&size, 1, MPI_INT, masterNode, MPI_COMM_WORLD);        
+      MPI_Bcast(&bigSeed[0], size, MPI_UNSIGNED_LONG, masterNode, MPI_COMM_WORLD); 
 
     }else {
-        MPI_Bcast(&size, 1, MPI_INT, masterNode, MPI_COMM_WORLD);        
-        bigSeed.resize(size);
-        MPI_Bcast(&bigSeed[0], size, MPI_UNSIGNED_LONG, masterNode, MPI_COMM_WORLD); 
+      MPI_Bcast(&size, 1, MPI_INT, masterNode, MPI_COMM_WORLD);        
+      bigSeed.resize(size);
+      MPI_Bcast(&bigSeed[0], size, MPI_UNSIGNED_LONG, masterNode, MPI_COMM_WORLD); 
     }
     
     if (bigSeed.size() == 1) {
-        mtRand_->seed(bigSeed[0]);
+      mtRand_->seed(bigSeed[0]);
     } else {
-        mtRand_->seed(&bigSeed[0], bigSeed.size());
+      mtRand_->seed(&bigSeed[0], bigSeed.size());
     }
 
     ++nCreatedRNG_;
-}    
+  }    
 
 
 }

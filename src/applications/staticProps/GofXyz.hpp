@@ -44,42 +44,42 @@
 #include "applications/staticProps/RadialDistrFunc.hpp"
 namespace oopse {
 
-class GofXyz : public RadialDistrFunc {
+  class GofXyz : public RadialDistrFunc {
     
-    public:
-        GofXyz(SimInfo* info, const std::string& filename, const std::string& sele1, 
-            const std::string& sele2, const std::string& sele3,double len, int nrbins);
+  public:
+    GofXyz(SimInfo* info, const std::string& filename, const std::string& sele1, 
+	   const std::string& sele2, const std::string& sele3,double len, int nrbins);
 
-        int getNRBins() {
-            return nRBins_;
-        }
+    int getNRBins() {
+      return nRBins_;
+    }
         
-        double getLength() {
-            return len_;
-        }
+    double getLength() {
+      return len_;
+    }
         
-    private:
+  private:
 
-        virtual void preProcess();
-        void initalizeHistogram();
-        virtual void collectHistogram(StuntDouble* sd1, StuntDouble* sd2);
-        virtual void writeRdf();
+    virtual void preProcess();
+    void initalizeHistogram();
+    virtual void collectHistogram(StuntDouble* sd1, StuntDouble* sd2);
+    virtual void writeRdf();
         
-        //virtual void validateSelection1(SelectionManager& sman);
+    //virtual void validateSelection1(SelectionManager& sman);
         
-        double len_;
-        double halfLen_;
-        int nRBins_;
-        double deltaR_;
+    double len_;
+    double halfLen_;
+    int nRBins_;
+    double deltaR_;
 
-        SelectionEvaluator evaluator3_;
-        SelectionManager seleMan3_;
+    SelectionEvaluator evaluator3_;
+    SelectionManager seleMan3_;
         
-        std::vector<std::vector<std::vector<int> > > histogram_;
+    std::vector<std::vector<std::vector<int> > > histogram_;
 
-        std::map<int, RotMat3x3d> rotMats_;
+    std::map<int, RotMat3x3d> rotMats_;
 
-};
+  };
 
 
 }

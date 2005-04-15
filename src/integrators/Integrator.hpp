@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -39,13 +39,13 @@
  * such damages.
  */
  
- /**
-  * @file Integrator.hpp
-  * @author tlin
-  * @date 11/08/2004
-  * @time 13:25am
-  * @version 1.0
-  */
+/**
+ * @file Integrator.hpp
+ * @author tlin
+ * @date 11/08/2004
+ * @time 13:25am
+ * @version 1.0
+ */
 
 #ifndef INTEGRATORS_INTEGRATOR_HPP
 #define INTEGRATORS_INTEGRATOR_HPP
@@ -60,83 +60,83 @@
 namespace oopse {
 
 
-/**
- * @class Integrator Integrator.hpp "integrators/Integrator.hpp"
- * @brief Base class of Integrator
- * @todo document
- */
-class Integrator {
-    public:
+  /**
+   * @class Integrator Integrator.hpp "integrators/Integrator.hpp"
+   * @brief Base class of Integrator
+   * @todo document
+   */
+  class Integrator {
+  public:
 
-        virtual ~Integrator();
+    virtual ~Integrator();
 
-        //avoid public virtual function        
-        void integrate() {
-            doIntegrate();
-        }
+    //avoid public virtual function        
+    void integrate() {
+      doIntegrate();
+    }
 
-        void update() {
-            doUpdate();
-        }
+    void update() {
+      doUpdate();
+    }
 
-        void setForceManager(ForceManager* forceMan) {
-            if (forceMan_ != forceMan && forceMan_  != NULL) {
-                delete forceMan_;
-            }
-            forceMan_ = forceMan;
-        }
+    void setForceManager(ForceManager* forceMan) {
+      if (forceMan_ != forceMan && forceMan_  != NULL) {
+	delete forceMan_;
+      }
+      forceMan_ = forceMan;
+    }
 
-        void setVelocitizer(Velocitizer* velocitizer) {
-            if (velocitizer_ != velocitizer && velocitizer_  != NULL) {
-                delete velocitizer_;
-            }
-            velocitizer_  = velocitizer;
-        }
+    void setVelocitizer(Velocitizer* velocitizer) {
+      if (velocitizer_ != velocitizer && velocitizer_  != NULL) {
+	delete velocitizer_;
+      }
+      velocitizer_  = velocitizer;
+    }
         
-    protected:
+  protected:
 
-        Integrator(SimInfo* info);
+    Integrator(SimInfo* info);
 
-        virtual void doIntegrate() = 0;
+    virtual void doIntegrate() = 0;
 
-        virtual void doUpdate() {}
+    virtual void doUpdate() {}
         
-        void saveConservedQuantity() {
-            currentSnapshot_->statData[Stats::CONSERVED_QUANTITY] = calcConservedQuantity();
-        }
+    void saveConservedQuantity() {
+      currentSnapshot_->statData[Stats::CONSERVED_QUANTITY] = calcConservedQuantity();
+    }
         
-        SimInfo* info_;
-        Globals* simParams;
-        ForceManager* forceMan_;
-        bool needPotential;
-        bool needStress;
+    SimInfo* info_;
+    Globals* simParams;
+    ForceManager* forceMan_;
+    bool needPotential;
+    bool needStress;
         
-        Velocitizer* velocitizer_;
-        bool needVelocityScaling;
-        double targetScalingTemp;
+    Velocitizer* velocitizer_;
+    bool needVelocityScaling;
+    double targetScalingTemp;
     
-        DumpWriter* dumpWriter;
-        StatWriter* statWriter;
-        RestWriter* restWriter;
-        Thermo thermo;
+    DumpWriter* dumpWriter;
+    StatWriter* statWriter;
+    RestWriter* restWriter;
+    Thermo thermo;
 
-        double runTime;
-        double sampleTime;
-        double statusTime;
-        double thermalTime;
-        double dt;
+    double runTime;
+    double sampleTime;
+    double statusTime;
+    double thermalTime;
+    double dt;
 
-        Snapshot* currentSnapshot_; //During the integration, the address of currentSnapshot Will not change
+    Snapshot* currentSnapshot_; //During the integration, the address of currentSnapshot Will not change
 
         
-    private:
+  private:
         
-        virtual double calcConservedQuantity() = 0;
+    virtual double calcConservedQuantity() = 0;
         
-        virtual DumpWriter* createDumpWriter() = 0;
+    virtual DumpWriter* createDumpWriter() = 0;
 
-        virtual StatWriter* createStatWriter() = 0;
-};
+    virtual StatWriter* createStatWriter() = 0;
+  };
 
     
 }

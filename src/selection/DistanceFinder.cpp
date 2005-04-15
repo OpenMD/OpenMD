@@ -43,7 +43,7 @@
 #include "primitives/Molecule.hpp"
 namespace oopse {
 
-DistanceFinder::DistanceFinder(SimInfo* info) : info_(info) {
+  DistanceFinder::DistanceFinder(SimInfo* info) : info_(info) {
 
     nStuntDoubles_ = info_->getNGlobalAtoms() + info_->getNGlobalRigidBodies();
     stuntdoubles_.resize(nStuntDoubles_);
@@ -58,19 +58,19 @@ DistanceFinder::DistanceFinder(SimInfo* info) : info_(info) {
     
     for (mol = info_->beginMolecule(mi); mol != NULL; mol = info_->nextMolecule(mi)) {
         
-        for(atom = mol->beginAtom(ai); atom != NULL; atom = mol->nextAtom(ai)) {
-            stuntdoubles_[atom->getGlobalIndex()] = atom;
-        }
+      for(atom = mol->beginAtom(ai); atom != NULL; atom = mol->nextAtom(ai)) {
+	stuntdoubles_[atom->getGlobalIndex()] = atom;
+      }
 
-        for (rb = mol->beginRigidBody(rbIter); rb != NULL; rb = mol->nextRigidBody(rbIter)) {
-            stuntdoubles_[rb->getGlobalIndex()] = rb;
-        }
+      for (rb = mol->beginRigidBody(rbIter); rb != NULL; rb = mol->nextRigidBody(rbIter)) {
+	stuntdoubles_[rb->getGlobalIndex()] = rb;
+      }
         
     }    
 
-}
+  }
 
-BitSet DistanceFinder::find(const BitSet& bs, double distance) {
+  BitSet DistanceFinder::find(const BitSet& bs, double distance) {
     StuntDouble * center;
     Vector3d centerPos;
     Snapshot* currSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
@@ -78,18 +78,18 @@ BitSet DistanceFinder::find(const BitSet& bs, double distance) {
     assert(bsResult.size() == bs.size());
     
     for (int i = bs.firstOnBit(); i != -1; i = bs.nextOnBit(i)) {
-        center = stuntdoubles_[i];
-        centerPos = center->getPos();
-        for (int j = 0; j < stuntdoubles_.size(); ++j) {
-            Vector3d r =centerPos - stuntdoubles_[j]->getPos();
-            currSnapshot->wrapVector(r);
-            if (r.length() <= distance) {
-                bsResult.setBitOn(j);
-            }
-        }
+      center = stuntdoubles_[i];
+      centerPos = center->getPos();
+      for (int j = 0; j < stuntdoubles_.size(); ++j) {
+	Vector3d r =centerPos - stuntdoubles_[j]->getPos();
+	currSnapshot->wrapVector(r);
+	if (r.length() <= distance) {
+	  bsResult.setBitOn(j);
+	}
+      }
     }
 
     return bsResult;
-}
+  }
 
 }

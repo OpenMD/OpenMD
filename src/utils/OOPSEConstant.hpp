@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -44,11 +44,11 @@
 
 namespace oopse {
 
-    namespace OOPSEConstant {
-         const double kb = 1.9872156E-3; // boltzman's constant in kcal/(mol K)
-         const double kB = 8.31451e-7;// boltzmann constant amu*Ang^2*fs^-2/K
-         const double energyConvert = 4.184E-4; // convert kcal/mol -> (amu A^2)/fs^2
-         const double pressureConvert = 1.63882576e8; // //converts amu*fs^-2*Ang^-1 -> atm
-    }
+  namespace OOPSEConstant {
+    const double kb = 1.9872156E-3; // boltzman's constant in kcal/(mol K)
+    const double kB = 8.31451e-7;// boltzmann constant amu*Ang^2*fs^-2/K
+    const double energyConvert = 4.184E-4; // convert kcal/mol -> (amu A^2)/fs^2
+    const double pressureConvert = 1.63882576e8; // //converts amu*fs^-2*Ang^-1 -> atm
+  }
 }
 #endif 

@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -44,20 +44,20 @@
 
 namespace oopse {
 
-/** Register different force fields */
-void registerForceFields();
+  /** Register different force fields */
+  void registerForceFields();
 
-/** Register all integrators*/
-void registerIntegrators();
+  /** Register all integrators*/
+  void registerIntegrators();
 
-/** Register all minimizers*/
-void registerMinimizers();
+  /** Register all minimizers*/
+  void registerMinimizers();
 
-/** Register all lattice */
-void registerLattice();
+  /** Register all lattice */
+  void registerLattice();
 
-/** register force fields, integrators and  minmizers*/
-void registerAll();
+  /** register force fields, integrators and  minmizers*/
+  void registerAll();
 
 }
 #endif

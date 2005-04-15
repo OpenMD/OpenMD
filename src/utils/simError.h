@@ -55,17 +55,17 @@ extern "C" {
   INTEGER, PARAMETER:: OOPSE_INFO    = 3
   INTEGER, PARAMETER:: MAX_SIM_ERROR_MSG_LENGTH = 2000
   
-type, public :: errorStruct
-  PRIVATE
-  SEQUENCE
-  character(len = MAX_SIM_ERROR_MSG_LENGTH) :: errMsg
-  logical :: isFatal
-  integer :: severity
+  type, public :: errorStruct
+    PRIVATE
+    SEQUENCE
+    character(len = MAX_SIM_ERROR_MSG_LENGTH) :: errMsg
+    logical :: isFatal
+    integer :: severity
 #ifdef IS_MPI
-  logical :: isEventLoop;
+    logical :: isEventLoop;
 #endif // IS_MPI
-end type errorStruct
+  end type errorStruct
 
-type (errorStruct), public, save :: painCave
+  type (errorStruct), public, save :: painCave
 
 #endif // __FORTRAN90

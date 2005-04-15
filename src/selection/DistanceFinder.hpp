@@ -45,17 +45,17 @@
 #include "primitives/StuntDouble.hpp"
 namespace oopse {
 
-class DistanceFinder {
-    public:
-        DistanceFinder(SimInfo* si);
+  class DistanceFinder {
+  public:
+    DistanceFinder(SimInfo* si);
 
-        BitSet find(const BitSet& bs, double distance);
+    BitSet find(const BitSet& bs, double distance);
 
-        SimInfo* info_;
-        std::vector<StuntDouble*> stuntdoubles_;
-        int nStuntDoubles_;
+    SimInfo* info_;
+    std::vector<StuntDouble*> stuntdoubles_;
+    int nStuntDoubles_;
         
-};
+  };
 
 }
 #endif 

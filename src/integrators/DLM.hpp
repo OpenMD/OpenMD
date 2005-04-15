@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -46,16 +46,16 @@
 
 namespace oopse {
 
-/**
- * @class DLM
- * @brief 
- * @todo document
- */
-class DLM : public RotationAlgorithm {
-    private:
-        virtual void doRotate(StuntDouble* sd, Vector3d& ji, double dt); 
-        void rotateStep(int axes1, int axes2, double angle, Vector3d& ji, RotMat3x3d& A);            
-};
+  /**
+   * @class DLM
+   * @brief 
+   * @todo document
+   */
+  class DLM : public RotationAlgorithm {
+  private:
+    virtual void doRotate(StuntDouble* sd, Vector3d& ji, double dt); 
+    void rotateStep(int axes1, int axes2, double angle, Vector3d& ji, RotMat3x3d& A);            
+  };
 
 }
 

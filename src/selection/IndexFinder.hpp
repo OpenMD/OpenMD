@@ -45,22 +45,22 @@
 #include "primitives/StuntDouble.hpp"
 namespace oopse {
 
-class IndexFinder {
-    public:
-        IndexFinder(SimInfo* si);
+  class IndexFinder {
+  public:
+    IndexFinder(SimInfo* si);
 
-        BitSet find(int molIndex);
-        BitSet find(int begMolIndex, int endMolIndex);
+    BitSet find(int molIndex);
+    BitSet find(int begMolIndex, int endMolIndex);
 
-    private:
+  private:
 
-        void init();
+    void init();
         
-        SimInfo* info_;
-        std::vector<BitSet> bitSets_;
-        int nStuntDoubles_;
+    SimInfo* info_;
+    std::vector<BitSet> bitSets_;
+    int nStuntDoubles_;
         
-};
+  };
 
 }
 #endif 

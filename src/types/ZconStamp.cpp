@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -64,12 +64,12 @@ ZconStamp::~ZconStamp(){
 char* ZconStamp::checkMe( void ){
   char myErr[1000];
     
-    //   if( !have_zPos ){
-    //     sprintf( myErr,
-    // 	     "No zPos was given to the Zconstraint[%d].",
-    // 	     index );
-    //     return strdup( myErr );
-    //   }
+  //   if( !have_zPos ){
+  //     sprintf( myErr,
+  // 	     "No zPos was given to the Zconstraint[%d].",
+  // 	     index );
+  //     return strdup( myErr );
+  //   }
   
   if( !have_molIndex ){
     sprintf( myErr,

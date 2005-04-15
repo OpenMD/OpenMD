@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -45,41 +45,41 @@
 #include "primitives/RigidBody.hpp"
 
 namespace oopse {
-void BaseAtomVisitor::visit(RigidBody *rb) {
-//vector<Atom*> myAtoms;
-//vector<Atom*>::iterator atomIter;
+  void BaseAtomVisitor::visit(RigidBody *rb) {
+    //vector<Atom*> myAtoms;
+    //vector<Atom*>::iterator atomIter;
 
-//myAtoms = rb->getAtoms();
+    //myAtoms = rb->getAtoms();
 
-//for(atomIter = myAtoms.begin(); atomIter != myAtoms.end(); ++atomIter)
-//  (*atomIter)->accept(this);
-    }
+    //for(atomIter = myAtoms.begin(); atomIter != myAtoms.end(); ++atomIter)
+    //  (*atomIter)->accept(this);
+  }
 
-void BaseAtomVisitor::setVisited(Atom *atom) {
+  void BaseAtomVisitor::setVisited(Atom *atom) {
     GenericData *data;
     data = atom->getPropertyByName("VISITED");
 
     //if visited property is not existed, add it as new property
     if (data == NULL) {
-        data = new GenericData();
-        data->setID("VISITED");
-        atom->addProperty(data);
+      data = new GenericData();
+      data->setID("VISITED");
+      atom->addProperty(data);
     }
-}
+  }
 
-bool BaseAtomVisitor::isVisited(Atom *atom) {
+  bool BaseAtomVisitor::isVisited(Atom *atom) {
     GenericData *data;
     data = atom->getPropertyByName("VISITED");
     return data == NULL ? false : true;
-}
+  }
 
-bool SSDAtomVisitor::isSSDAtom(const std::string&atomType) {
+  bool SSDAtomVisitor::isSSDAtom(const std::string&atomType) {
     std::set<std::string>::iterator strIter;
     strIter = ssdAtomType.find(atomType);
     return strIter != ssdAtomType.end() ? true : false;
-}
+  }
 
-void SSDAtomVisitor::visit(DirectionalAtom *datom) {
+  void SSDAtomVisitor::visit(DirectionalAtom *datom) {
     std::vector<AtomInfo*>atoms;
 
     //we need to convert SSD into 4 differnet atoms
@@ -101,22 +101,22 @@ void SSDAtomVisitor::visit(DirectionalAtom *datom) {
 
     //if atom is not SSD atom, just skip it
     if (!isSSDAtom(datom->getType()))
-        return;
+      return;
 
     data = datom->getPropertyByName("ATOMDATA");
 
     if (data != NULL) {
-        atomData = dynamic_cast<AtomData *>(data);
+      atomData = dynamic_cast<AtomData *>(data);
 
-        if (atomData == NULL) {
-            std::cerr << "can not get Atom Data from " << datom->getType() << std::endl;
-            atomData = new AtomData;
-            haveAtomData = false;
-        } else
-            haveAtomData = true;
+      if (atomData == NULL) {
+	std::cerr << "can not get Atom Data from " << datom->getType() << std::endl;
+	atomData = new AtomData;
+	haveAtomData = false;
+      } else
+	haveAtomData = true;
     } else {
-        atomData = new AtomData;
-        haveAtomData = false;
+      atomData = new AtomData;
+      haveAtomData = false;
     }
 
     pos = datom->getPos();
@@ -185,14 +185,14 @@ void SSDAtomVisitor::visit(DirectionalAtom *datom) {
     //add atom data into atom's property
 
     if (!haveAtomData) {
-        atomData->setID("ATOMDATA");
-        datom->addProperty(atomData);
+      atomData->setID("ATOMDATA");
+      datom->addProperty(atomData);
     }
 
     setVisited(datom);
-}
+  }
 
-const std::string SSDAtomVisitor::toString() {
+  const std::string SSDAtomVisitor::toString() {
     char   buffer[65535];
     std::string result;
 
@@ -212,16 +212,16 @@ const std::string SSDAtomVisitor::toString() {
     result += buffer;
 
     return result;
-}
+  }
 
-bool LinearAtomVisitor::isLinearAtom(const std::string& atomType){
+  bool LinearAtomVisitor::isLinearAtom(const std::string& atomType){
     std::set<std::string>::iterator strIter;
     strIter = linearAtomType.find(atomType);
 
     return strIter != linearAtomType.end() ? true : false;
-}
+  }
 
-void LinearAtomVisitor::visit(DirectionalAtom* datom){
+  void LinearAtomVisitor::visit(DirectionalAtom* datom){
     std::vector<AtomInfo*> atoms;
     //we need to convert linear into 4 different atoms
     Vector3d c1(0.0, 0.0, -1.8);
@@ -240,21 +240,21 @@ void LinearAtomVisitor::visit(DirectionalAtom* datom){
 
     //if atom is not SSD atom, just skip it
     if(!isLinearAtom(datom->getType()))
-        return;
+      return;
 
     data = datom->getPropertyByName("ATOMDATA");
     if(data != NULL){
-        atomData = dynamic_cast<AtomData*>(data);  
-        if(atomData == NULL){
-            std::cerr << "can not get Atom Data from " << datom->getType() << std::endl;
-            atomData = new AtomData; 
-            haveAtomData = false;      
-        } else {
-            haveAtomData = true;
-        }
+      atomData = dynamic_cast<AtomData*>(data);  
+      if(atomData == NULL){
+	std::cerr << "can not get Atom Data from " << datom->getType() << std::endl;
+	atomData = new AtomData; 
+	haveAtomData = false;      
+      } else {
+	haveAtomData = true;
+      }
     } else {
-        atomData = new AtomData;
-        haveAtomData = false;
+      atomData = new AtomData;
+      haveAtomData = false;
     }
    
   
@@ -312,42 +312,42 @@ void LinearAtomVisitor::visit(DirectionalAtom* datom){
     //add atom data into atom's property
 
     if(!haveAtomData){
-        atomData->setID("ATOMDATA");
-        datom->addProperty(atomData);
+      atomData->setID("ATOMDATA");
+      datom->addProperty(atomData);
     }
 
     setVisited(datom);
 
-}
+  }
 
-const std::string LinearAtomVisitor::toString(){
-  char buffer[65535];
-  std::string result;
+  const std::string LinearAtomVisitor::toString(){
+    char buffer[65535];
+    std::string result;
   
-  sprintf(buffer ,"------------------------------------------------------------------\n");
-  result += buffer;
+    sprintf(buffer ,"------------------------------------------------------------------\n");
+    result += buffer;
 
-  sprintf(buffer ,"Visitor name: %s\n", visitorName.c_str());
-  result += buffer;
+    sprintf(buffer ,"Visitor name: %s\n", visitorName.c_str());
+    result += buffer;
 
-  sprintf(buffer , "Visitor Description: Convert linear into 4 different atoms\n");
-  result += buffer;
+    sprintf(buffer , "Visitor Description: Convert linear into 4 different atoms\n");
+    result += buffer;
 
-  sprintf(buffer ,"------------------------------------------------------------------\n");
-  result += buffer;
+    sprintf(buffer ,"------------------------------------------------------------------\n");
+    result += buffer;
 
-  return result;
-}
+    return result;
+  }
 
-//----------------------------------------------------------------------------//
+  //----------------------------------------------------------------------------//
 
-void DefaultAtomVisitor::visit(Atom *atom) {
+  void DefaultAtomVisitor::visit(Atom *atom) {
     AtomData *atomData;
     AtomInfo *atomInfo;
     Vector3d  pos;
 
     if (isVisited(atom))
-        return;
+      return;
 
     atomInfo = new AtomInfo;
 
@@ -368,16 +368,16 @@ void DefaultAtomVisitor::visit(Atom *atom) {
     atom->addProperty(atomData);
 
     setVisited(atom);
-}
+  }
 
-void DefaultAtomVisitor::visit(DirectionalAtom *datom) {
+  void DefaultAtomVisitor::visit(DirectionalAtom *datom) {
     AtomData *atomData;
     AtomInfo *atomInfo;
     Vector3d  pos;
     Vector3d  u;
 
     if (isVisited(datom))
-        return;
+      return;
 
     pos = datom->getPos();
     u = datom->getElectroFrame().getColumn(2);
@@ -399,9 +399,9 @@ void DefaultAtomVisitor::visit(DirectionalAtom *datom) {
     datom->addProperty(atomData);
 
     setVisited(datom);
-}
+  }
 
-const std::string DefaultAtomVisitor::toString() {
+  const std::string DefaultAtomVisitor::toString() {
     char   buffer[65535];
     std::string result;
 
@@ -421,5 +421,5 @@ const std::string DefaultAtomVisitor::toString() {
     result += buffer;
 
     return result;
-}
+  }
 } //namespace oopse

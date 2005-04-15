@@ -43,16 +43,16 @@
 
 namespace oopse {
 
-CrossTimeCorrFunc::CrossTimeCorrFunc(SimInfo * info, const  std::string & filename,
-    const std :: string & sele1, const std :: string & sele2, int storageLayout) 
+  CrossTimeCorrFunc::CrossTimeCorrFunc(SimInfo * info, const  std::string & filename,
+				       const std :: string & sele1, const std :: string & sele2, int storageLayout) 
     : TimeCorrFunc(info, filename, sele1, sele2, storageLayout) {
     
-    nSelected1_ = seleMan1_.getSelectionCount();  
-    nSelected2_ = seleMan2_.getSelectionCount();  
-    nSelectedPairs_ = nSelected1_ * nSelected2_;
-}
+      nSelected1_ = seleMan1_.getSelectionCount();  
+      nSelected2_ = seleMan2_.getSelectionCount();  
+      nSelectedPairs_ = nSelected1_ * nSelected2_;
+    }
 
-void CrossTimeCorrFunc::correlateFrames(int frame1, int frame2) {
+  void CrossTimeCorrFunc::correlateFrames(int frame1, int frame2) {
     Snapshot* snapshot1 = bsMan_->getSnapshot(frame1);
     Snapshot* snapshot2 = bsMan_->getSnapshot(frame2);
     assert(snapshot1 && snapshot2);
@@ -69,11 +69,11 @@ void CrossTimeCorrFunc::correlateFrames(int frame1, int frame2) {
     StuntDouble* sd2;
     for (sd1 = seleMan1_.beginSelected(i); sd1 != NULL; sd1 = seleMan1_.nextSelected(i)) {
 
-        for (sd2 = seleMan2_.beginSelected(j); sd2 != NULL; sd2 = seleMan2_.nextSelected(j)) {
-            double corrVal = calcCorrVal(frame1, frame2, sd1, sd2);
-            histogram_[timeBin] += corrVal;    
-        }            
+      for (sd2 = seleMan2_.beginSelected(j); sd2 != NULL; sd2 = seleMan2_.nextSelected(j)) {
+	double corrVal = calcCorrVal(frame1, frame2, sd1, sd2);
+	histogram_[timeBin] += corrVal;    
+      }            
     }
-}
+  }
 
 }

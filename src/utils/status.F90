@@ -59,20 +59,20 @@ module status
 !!$
 !!$end interface
 
-public :: handleInfo
-public :: handleError
-public :: handleWarning
-public :: statusMsgSize
-public :: nullchar
-public :: newline
-public :: tab
+  public :: handleInfo
+  public :: handleError
+  public :: handleWarning
+  public :: statusMsgSize
+  public :: nullchar
+  public :: newline
+  public :: tab
 
 contains
 
   subroutine handleInfo(myRoutine, myMessage)
     character(len=*), intent(in) :: myRoutine
     character(len=*), intent(in) :: myMessage
-   
+
     painCave%errMsg = "Location: " // trim(myRoutine) // newline // &
          tab // trim(myMessage) // newline // nullchar
 
@@ -94,7 +94,7 @@ contains
     painCave%isFatal = .true.
 
     call c_simError(painCave)
-    
+
   end subroutine handleError
 
   subroutine handleWarning(myRoutine, myMessage)
@@ -110,5 +110,5 @@ contains
     call c_simError(painCave)
 
   end subroutine handleWarning
-  
+
 end module status

@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -43,10 +43,10 @@
 
 namespace oopse {
 
-GhostTorsion::GhostTorsion(Atom *atom1, Atom *atom2,  DirectionalAtom* ghostAtom,
-                 TorsionType *tt) : Torsion(atom1, atom2, ghostAtom, ghostAtom, tt) {}
+  GhostTorsion::GhostTorsion(Atom *atom1, Atom *atom2,  DirectionalAtom* ghostAtom,
+			     TorsionType *tt) : Torsion(atom1, atom2, ghostAtom, ghostAtom, tt) {}
 
-void GhostTorsion::calcForce() {
+  void GhostTorsion::calcForce() {
     DirectionalAtom* ghostAtom = static_cast<DirectionalAtom*>(atom3_);    
 
     Vector3d pos1 = atom1_->getPos();
@@ -92,7 +92,7 @@ void GhostTorsion::calcForce() {
 
     f3.negate();
     ghostAtom->addTrq(cross(r43, f3));    
-}
+  }
 
 }
 

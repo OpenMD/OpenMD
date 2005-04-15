@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -46,7 +46,7 @@
 
 class AtomStamp{
   
-public:
+ public:
   AtomStamp();
   ~AtomStamp();
 
@@ -68,7 +68,7 @@ public:
   double getEulerPsi( void )   { return ornt[2]; }
   
 
-private:
+ private:
 
   double pos[3]; //the position vector
   short int have_position; // boolean for positions

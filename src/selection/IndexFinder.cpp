@@ -44,14 +44,14 @@ namespace oopse {
 
 
 
-IndexFinder::IndexFinder(SimInfo* info) : info_(info){
+  IndexFinder::IndexFinder(SimInfo* info) : info_(info){
     nStuntDoubles_ = info_->getNGlobalAtoms() + info_->getNGlobalRigidBodies();
     bitSets_.resize(info_->getNGlobalMolecules());
     init();
-}
+  }
 
 
-void IndexFinder::init() {
+  void IndexFinder::init() {
 
     SimInfo::MoleculeIterator mi;
     Molecule* mol;
@@ -62,33 +62,33 @@ void IndexFinder::init() {
     
     for (mol = info_->beginMolecule(mi); mol != NULL; mol = info_->nextMolecule(mi)) {
            
-        BitSet bs(nStuntDoubles_);
-        for(atom = mol->beginAtom(ai); atom != NULL; atom = mol->nextAtom(ai)) {
-            bs.setBitOn(atom->getGlobalIndex());
-        }
+      BitSet bs(nStuntDoubles_);
+      for(atom = mol->beginAtom(ai); atom != NULL; atom = mol->nextAtom(ai)) {
+	bs.setBitOn(atom->getGlobalIndex());
+      }
 
-        for (rb = mol->beginRigidBody(rbIter); rb != NULL; rb = mol->nextRigidBody(rbIter)) {
-            bs.setBitOn(rb->getGlobalIndex());
-        }
+      for (rb = mol->beginRigidBody(rbIter); rb != NULL; rb = mol->nextRigidBody(rbIter)) {
+	bs.setBitOn(rb->getGlobalIndex());
+      }
 
-        bitSets_[mol->getGlobalIndex()] = bs;
+      bitSets_[mol->getGlobalIndex()] = bs;
     }    
 
-}
+  }
 
-BitSet IndexFinder::find(int molIndex){
+  BitSet IndexFinder::find(int molIndex){
     return bitSets_[molIndex];
-}
+  }
 
-BitSet IndexFinder::find(int begMolIndex, int endMolIndex){
+  BitSet IndexFinder::find(int begMolIndex, int endMolIndex){
     BitSet bs(nStuntDoubles_);
         
     for (int i = begMolIndex; i < endMolIndex; ++i) {
-        bs |= bitSets_[i];
+      bs |= bitSets_[i];
     }
     
     return bs;
-}
+  }
 
 
 }

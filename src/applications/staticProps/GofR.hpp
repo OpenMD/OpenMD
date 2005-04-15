@@ -44,36 +44,36 @@
 #include "applications/staticProps/RadialDistrFunc.hpp"
 namespace oopse {
 
-class GofR : public RadialDistrFunc {
+  class GofR : public RadialDistrFunc {
     
-    public:
-        GofR(SimInfo* info, const std::string& filename, const std::string& sele1, 
-            const std::string& sele2, double len, int nrbins);
+  public:
+    GofR(SimInfo* info, const std::string& filename, const std::string& sele1, 
+	 const std::string& sele2, double len, int nrbins);
 
-        int getNRBins() {
-            return nRBins_; 
-        }
+    int getNRBins() {
+      return nRBins_; 
+    }
 
-        double getLength() {
-            return len_;
-        }
+    double getLength() {
+      return len_;
+    }
         
-    private:
+  private:
 
-        virtual void preProcess();
-        virtual void initalizeHistogram();
-        virtual void collectHistogram(StuntDouble* sd1, StuntDouble* sd2);
-        virtual void processHistogram();
+    virtual void preProcess();
+    virtual void initalizeHistogram();
+    virtual void collectHistogram(StuntDouble* sd1, StuntDouble* sd2);
+    virtual void processHistogram();
 
-        virtual void writeRdf();
+    virtual void writeRdf();
 
-        double len_;
-        int nRBins_;
-        double deltaR_;
+    double len_;
+    int nRBins_;
+    double deltaR_;
         
-        std::vector<int> histogram_;
-        std::vector<double> avgGofr_;
-};
+    std::vector<int> histogram_;
+    std::vector<double> avgGofr_;
+  };
 
 }
 #endif

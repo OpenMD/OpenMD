@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -48,36 +48,36 @@
 namespace oopse {
 
 
-/**
- * @class ConstraintPair
- * @todo document
- */
-class ConstraintPair {
+  /**
+   * @class ConstraintPair
+   * @todo document
+   */
+  class ConstraintPair {
 
-    public:
+  public:
 
-        ConstraintPair(ConstraintElem* elem1, ConstraintElem* elem2, double len) 
-            : consElem1_(elem1), consElem2_(elem2), dist2(len*len) { }
+    ConstraintPair(ConstraintElem* elem1, ConstraintElem* elem2, double len) 
+      : consElem1_(elem1), consElem2_(elem2), dist2(len*len) { }
 
-        ~ConstraintPair() {
-            delete consElem1_;
-            delete consElem2_;
-        }
-        /** Return the first constraint elemet */
-        ConstraintElem* getConsElem1() {return consElem1_;}
+    ~ConstraintPair() {
+      delete consElem1_;
+      delete consElem2_;
+    }
+    /** Return the first constraint elemet */
+    ConstraintElem* getConsElem1() {return consElem1_;}
 
-        /** Retunr the second constraint element */
-        ConstraintElem* getConsElem2() {return consElem2_;}
+    /** Retunr the second constraint element */
+    ConstraintElem* getConsElem2() {return consElem2_;}
 
-        bool isMoved() { return consElem1_->getMoved() || consElem2_->getMoved(); }        
-        double getConsDistSquare() {return dist2;}
+    bool isMoved() { return consElem1_->getMoved() || consElem2_->getMoved(); }        
+    double getConsDistSquare() {return dist2;}
 
-    private:
+  private:
         
-        ConstraintElem* consElem1_;
-        ConstraintElem* consElem2_;        
-        double dist2;
-};
+    ConstraintElem* consElem1_;
+    ConstraintElem* consElem2_;        
+    double dist2;
+  };
 
 }
 

@@ -45,19 +45,19 @@
 
 namespace oopse {
 
-class ParticleTimeCorrFunc : public TimeCorrFunc {
-    public:
-        ParticleTimeCorrFunc(SimInfo* info, const std::string& filename, 
-            const std::string& sele1, const std::string& sele2, int storageLayout);
+  class ParticleTimeCorrFunc : public TimeCorrFunc {
+  public:
+    ParticleTimeCorrFunc(SimInfo* info, const std::string& filename, 
+			 const std::string& sele1, const std::string& sele2, int storageLayout);
         
-    private:
+  private:
         
-        virtual void correlateFrames(int frame1, int frame2);
+    virtual void correlateFrames(int frame1, int frame2);
 
-        virtual double calcCorrVal(int frame1, int frame2, StuntDouble* sd1,  StuntDouble* sd2) = 0;
+    virtual double calcCorrVal(int frame1, int frame2, StuntDouble* sd1,  StuntDouble* sd2) = 0;
         
-        int nSelected_;
-};
+    int nSelected_;
+  };
 
 }
 #endif

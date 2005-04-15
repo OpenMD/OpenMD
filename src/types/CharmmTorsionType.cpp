@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -43,36 +43,36 @@
 #include "utils/NumericConstant.hpp"
 namespace oopse {
 
-void CharmmTorsionType::calcForce(double cosPhi, double sinPhi, double& V, double& dVdPhi) {
+  void CharmmTorsionType::calcForce(double cosPhi, double sinPhi, double& V, double& dVdPhi) {
     V = 0;
     dVdPhi = 0; 
     double phi = -std::atan2(sinPhi, cosPhi);
     
     std::vector<CharmmTorsionParameter>::iterator i;
     for (i = parameter_.begin(); i != parameter_.end(); ++i) {
-        double kchi= i->kchi;
-        int n = i->n;        
-        double delta = i->delta;
+      double kchi= i->kchi;
+      int n = i->n;        
+      double delta = i->delta;
 
-        if (n == 0) {
-            //if periodicity is equal to 0, use harmonic form
-            double diff = phi - delta;
+      if (n == 0) {
+	//if periodicity is equal to 0, use harmonic form
+	double diff = phi - delta;
 
-            if (diff < -NumericConstant::PI) {
-                diff += NumericConstant::TWO_PI;
-            } else if (diff > NumericConstant::PI) {
-                diff -= NumericConstant::TWO_PI;
-            }
+	if (diff < -NumericConstant::PI) {
+	  diff += NumericConstant::TWO_PI;
+	} else if (diff > NumericConstant::PI) {
+	  diff -= NumericConstant::TWO_PI;
+	}
             
-            V += kchi * diff * diff;
-            dVdPhi += 2.0 * kchi * diff;
+	V += kchi * diff * diff;
+	dVdPhi += 2.0 * kchi * diff;
 
-        } else {
-            //use normal cos form if periodicity is greater than 0
-            V += kchi * (1 + std::cos(n * phi + delta));
-            dVdPhi += -n * kchi * std::sin(n * phi + delta);
-        }
+      } else {
+	//use normal cos form if periodicity is greater than 0
+	V += kchi * (1 + std::cos(n * phi + delta));
+	dVdPhi += -n * kchi * std::sin(n * phi + delta);
+      }
     } 
-}
+  }
 
 } //end namespace oopse

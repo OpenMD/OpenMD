@@ -3,7 +3,7 @@ subroutine setFsimParallel(thisComponentPlan, nAtomTags, atomTags, &
      nGroupTags, groupTags, status)
 
   use mpiSimulation
-  
+
   !! Passed Arguments
   !! mpiComponentPlan struct from C
   type (mpiComponentPlan), intent(inout) :: thisComponentPlan
@@ -18,8 +18,8 @@ subroutine setFsimParallel(thisComponentPlan, nAtomTags, atomTags, &
 
   call setupSimParallel(thisComponentPlan, nAtomTags, atomTags, &
        nGroupTags, groupTags, status)  
-  
-end subroutine setFsimParallel 
+
+end subroutine setFsimParallel
 
 #else
 

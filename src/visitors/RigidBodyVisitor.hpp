@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -51,20 +51,20 @@
 
 namespace oopse {
     
-class BaseRigidBodyVisitor: public BaseVisitor{
+  class BaseRigidBodyVisitor: public BaseVisitor{
   public:
 
   protected:
-     BaseRigidBodyVisitor(SimInfo* info) : BaseVisitor(){ this->info = info;}
+    BaseRigidBodyVisitor(SimInfo* info) : BaseVisitor(){ this->info = info;}
 
-      SimInfo* info;
-};
+    SimInfo* info;
+  };
 
 
-//LipidHeadVisitor  adds a pesudo atom into rigidbody which holds a dipole moment
-class LipidHeadVisitor : public BaseRigidBodyVisitor{
+  //LipidHeadVisitor  adds a pesudo atom into rigidbody which holds a dipole moment
+  class LipidHeadVisitor : public BaseRigidBodyVisitor{
   public:
-     LipidHeadVisitor(SimInfo* info) : BaseRigidBodyVisitor(info){ visitorName = "LipidHeadVisitor";}
+    LipidHeadVisitor(SimInfo* info) : BaseRigidBodyVisitor(info){ visitorName = "LipidHeadVisitor";}
 
     virtual void visit(Atom* atom) {}
     virtual void visit(DirectionalAtom* datom) {}
@@ -74,12 +74,12 @@ class LipidHeadVisitor : public BaseRigidBodyVisitor{
     virtual const  std::string toString();
     
   protected:
-     bool canVisit(const std::string& name);
+    bool canVisit(const std::string& name);
 
-      std::set<std::string> lipidHeadName;
-};
+    std::set<std::string> lipidHeadName;
+  };
 
-class RBCOMVisitor : public BaseRigidBodyVisitor{
+  class RBCOMVisitor : public BaseRigidBodyVisitor{
   public:
     RBCOMVisitor(SimInfo* info) : BaseRigidBodyVisitor(info){ visitorName = "RBCOMVisitor";}
 
@@ -88,7 +88,7 @@ class RBCOMVisitor : public BaseRigidBodyVisitor{
     virtual void visit(RigidBody* rb);
 
     virtual const  std::string toString();
-};
+  };
 
 }//namespace oopse
 #endif

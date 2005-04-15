@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -39,13 +39,13 @@
  * such damages.
  */
  
- /**
-  * @file EAM_FF.hpp
-  * @author tlin
-  * @date 11/15/2004
-  * @time 13:43am
-  * @version 1.0
-  */
+/**
+ * @file EAM_FF.hpp
+ * @author tlin
+ * @date 11/15/2004
+ * @time 13:43am
+ * @version 1.0
+ */
 #ifndef USETHEFORCE_EAM_FF_HPP
 #define USETHEFORCE_EAM_FF_HPP
 
@@ -54,22 +54,22 @@
 #include "UseTheForce/ForceFieldCreator.hpp"
 namespace oopse {
 
-/**
- * @class EAM_FF EAM_FF.hpp "UseTheForce/EAM_FF.hpp"
- * @brief Embedded Atom Method Force Field Parser
- */
-class EAM_FF : public ForceField {
-    public:
-        EAM_FF();
-        virtual void parse(const std::string& filename);
+  /**
+   * @class EAM_FF EAM_FF.hpp "UseTheForce/EAM_FF.hpp"
+   * @brief Embedded Atom Method Force Field Parser
+   */
+  class EAM_FF : public ForceField {
+  public:
+    EAM_FF();
+    virtual void parse(const std::string& filename);
 
-         virtual double getRcutFromAtomType(AtomType* at);
+    virtual double getRcutFromAtomType(AtomType* at);
 
-  ~EAM_FF();
-    private:
-        SectionParserManager spMan_;
+    ~EAM_FF();
+  private:
+    SectionParserManager spMan_;
 
-};
+  };
 
 } //end namespace oopse
 #endif //USETHEFORCE_EAM_FF_HPP

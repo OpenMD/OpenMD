@@ -22,46 +22,46 @@ extern "C" {
 #define CMDLINE_PARSER_VERSION "0.99"
 #endif
 
-struct gengetopt_args_info
-{
-  char * input_arg;	/* input dump file.  */
-  char * output_arg;	/* output file name.  */
-  int frame_arg;	/* print every n frame (default='1').  */
-  int water_flag;	/* skip the the waters (default=off).  */
-  int periodicBox_flag;	/* map to the periodic box (default=off).  */
-  int zconstraint_flag;	/* replace the atom types of zconstraint molecules (default=off).  */
-  int rigidbody_flag;	/* add a pseudo COM atom to rigidbody (default=off).  */
-  int watertype_flag;	/* replace the atom type of water model (default=on).  */
-  char * selection_arg;	/* general selection syntax.  */
-  char * originsele_arg;	/* select origin.  */
-  char * refsele_arg;	/* select reference.  */
-  int repeatX_arg;	/* The number of images to repeat in the x direction (default='0').  */
-  int repeatY_arg;	/* The number of images to repeat in the y direction (default='0').  */
-  int repeatZ_arg;	/* The number of images to repeat in the z direction (default='0').  */
+  struct gengetopt_args_info
+  {
+    char * input_arg;	/* input dump file.  */
+    char * output_arg;	/* output file name.  */
+    int frame_arg;	/* print every n frame (default='1').  */
+    int water_flag;	/* skip the the waters (default=off).  */
+    int periodicBox_flag;	/* map to the periodic box (default=off).  */
+    int zconstraint_flag;	/* replace the atom types of zconstraint molecules (default=off).  */
+    int rigidbody_flag;	/* add a pseudo COM atom to rigidbody (default=off).  */
+    int watertype_flag;	/* replace the atom type of water model (default=on).  */
+    char * selection_arg;	/* general selection syntax.  */
+    char * originsele_arg;	/* select origin.  */
+    char * refsele_arg;	/* select reference.  */
+    int repeatX_arg;	/* The number of images to repeat in the x direction (default='0').  */
+    int repeatY_arg;	/* The number of images to repeat in the y direction (default='0').  */
+    int repeatZ_arg;	/* The number of images to repeat in the z direction (default='0').  */
 
-  int help_given ;	/* Whether help was given.  */
-  int version_given ;	/* Whether version was given.  */
-  int input_given ;	/* Whether input was given.  */
-  int output_given ;	/* Whether output was given.  */
-  int frame_given ;	/* Whether frame was given.  */
-  int water_given ;	/* Whether water was given.  */
-  int periodicBox_given ;	/* Whether periodicBox was given.  */
-  int zconstraint_given ;	/* Whether zconstraint was given.  */
-  int rigidbody_given ;	/* Whether rigidbody was given.  */
-  int watertype_given ;	/* Whether watertype was given.  */
-  int selection_given ;	/* Whether selection was given.  */
-  int originsele_given ;	/* Whether originsele was given.  */
-  int refsele_given ;	/* Whether refsele was given.  */
-  int repeatX_given ;	/* Whether repeatX was given.  */
-  int repeatY_given ;	/* Whether repeatY was given.  */
-  int repeatZ_given ;	/* Whether repeatZ was given.  */
+    int help_given ;	/* Whether help was given.  */
+    int version_given ;	/* Whether version was given.  */
+    int input_given ;	/* Whether input was given.  */
+    int output_given ;	/* Whether output was given.  */
+    int frame_given ;	/* Whether frame was given.  */
+    int water_given ;	/* Whether water was given.  */
+    int periodicBox_given ;	/* Whether periodicBox was given.  */
+    int zconstraint_given ;	/* Whether zconstraint was given.  */
+    int rigidbody_given ;	/* Whether rigidbody was given.  */
+    int watertype_given ;	/* Whether watertype was given.  */
+    int selection_given ;	/* Whether selection was given.  */
+    int originsele_given ;	/* Whether originsele was given.  */
+    int refsele_given ;	/* Whether refsele was given.  */
+    int repeatX_given ;	/* Whether repeatX was given.  */
+    int repeatY_given ;	/* Whether repeatY was given.  */
+    int repeatZ_given ;	/* Whether repeatZ was given.  */
 
-} ;
+  } ;
 
-int cmdline_parser (int argc, char * const *argv, struct gengetopt_args_info *args_info);
+  int cmdline_parser (int argc, char * const *argv, struct gengetopt_args_info *args_info);
 
-void cmdline_parser_print_help(void);
-void cmdline_parser_print_version(void);
+  void cmdline_parser_print_help(void);
+  void cmdline_parser_print_version(void);
 
 #ifdef __cplusplus
 }

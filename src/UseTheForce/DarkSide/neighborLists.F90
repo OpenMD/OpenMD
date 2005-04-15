@@ -48,18 +48,18 @@
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
 !! @author J. Daniel Gezelter
-!! @version $Id: neighborLists.F90,v 1.2 2005-01-12 22:40:45 gezelter Exp $, 
+!! @version $Id: neighborLists.F90,v 1.3 2005-04-15 22:03:48 gezelter Exp $, 
 
 module neighborLists
-  
+
   use definitions
 #ifdef IS_MPI
   use mpiSimulation
 #endif
-  
+
   implicit none
   PRIVATE
-  
+
   !--------------MODULE VARIABLES---------------------->
   !! Parameter for size > # of long range particles neighbor list
   !! should be.
@@ -82,7 +82,7 @@ module neighborLists
   public :: checkNeighborList
   public :: saveNeighborList
   public :: getNeighborListSize
-  
+
 contains
 
 
@@ -107,7 +107,7 @@ contains
        if (alloc_error /= 0) then
           write(default_error,*) &
                "ExpandNeighborLists: Error in allocating MPI point"
-           error = -1
+          error = -1
           return
        end if
        allocate(list(listMultiplier * getNgroupsInCol(plan_group_col)),stat=alloc_error)
@@ -143,9 +143,9 @@ contains
        return
     end if
 #endif !! //MPI
-    
+
     ! Expand the neighbor list
-    
+
     ! Check to see if we have exceeded the maximum number of allocations.
     if (nAllocations > maxAllocations) then
        write(default_error,*) & 
@@ -162,7 +162,7 @@ contains
        newSize = listMultiplier * nGroups + oldSize
 #endif !! MPI
 
-       
+
 
        allocate(newList(newSize), stat=alloc_error)
        if (alloc_error /= 0) then
@@ -181,16 +181,16 @@ contains
           error = -1
           return
        end if
-       
+
        !! Point list at new list
-       
+
        list => newList
     end if
 
     nAllocations = nAllocations + 1
     listSize = size(list)
   end subroutine expandNeighborList
-  
+
   !! checks to see if any long range particle has moved
   !! through the neighbor list skin thickness.
   subroutine checkNeighborList(nGroups, q, listSkin, update_nlist)
@@ -204,7 +204,7 @@ contains
 
     dispmx = 0.0E0_DP
     !! calculate the largest displacement of any atom in any direction
-    
+
     !! If we have changed the particle idents, then we need to update    
     if (.not. allocated(q0)) then       
        update_nlist = .true.
@@ -218,7 +218,7 @@ contains
 
 
 #ifdef MPI 
-    
+
     dispmx_tmp = 0.0E0_DP
     do i = 1, nGroups
        dispmx_tmp = max( abs ( q(1,i) - q0(1,i) ), dispmx_tmp )
@@ -229,7 +229,7 @@ contains
          mpi_max,mpi_comm_world,mpi_err)
 
 #else
-    
+
     dispmx = 0.0_DP
     do i = 1, nGroups
        dispmx = max( abs ( q(1,i) - q0(1,i) ), dispmx )
@@ -243,10 +243,10 @@ contains
     dispmx = 2.0E0_DP * sqrt (3.0E0_DP * dispmx * dispmx)   
 
     update_nlist = (dispmx.gt.listSkin)
- 
-   end subroutine checkNeighborList
-  
-  
+
+  end subroutine checkNeighborList
+
+
   !! Saves neighbor list for comparison in check.
   !! Save_neighborList will work even if the number of
   !! local atoms has changed.
@@ -255,10 +255,10 @@ contains
     integer :: nGroups
     real(kind = dp ), dimension(3,nGroups), intent(in)  :: q
     integer :: list_size
-    
+
     !! get size of list
     list_size = nGroups
-    
+
     if (.not. allocated(q0)) then
        allocate(q0(3,list_size))
     else if( list_size > size(q0,2)) then
@@ -267,11 +267,11 @@ contains
     endif
     q0 = q
   end subroutine saveNeighborList
-  
-  
+
+
   function getNeighborListSize() result(returnListSize)
     integer :: returnListSize
     returnListSize = listSize
   end function getNeighborListSize
-    
+
 end module neighborLists

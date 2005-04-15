@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -50,117 +50,117 @@
 namespace oopse {
 
 
-/**
- * @class Token
- * @todo document
- * @note translate from jmol
- */
-class Token {
+  /**
+   * @class Token
+   * @todo document
+   * @note translate from jmol
+   */
+  class Token {
 
-    public:
+  public:
 
 
-        int tok;
-        boost::any value;
-        int intValue;
+    int tok;
+    boost::any value;
+    int intValue;
 
-        Token() { tok = unknown;}
+    Token() { tok = unknown;}
 
-        Token(const Token& token) {
-            *this = token;
-        }
+    Token(const Token& token) {
+      *this = token;
+    }
         
-        Token(int MyTok, int myIntValue, const boost::any& myValue) {
-            this->tok = MyTok;
-            this->intValue = myIntValue;
-            this->value = myValue;
-        }
+    Token(int MyTok, int myIntValue, const boost::any& myValue) {
+      this->tok = MyTok;
+      this->intValue = myIntValue;
+      this->value = myValue;
+    }
 
-        Token(int myTok, int myIntValue) {
-        this->tok = myTok;
-        this->intValue = myIntValue;
-        }
+    Token(int myTok, int myIntValue) {
+      this->tok = myTok;
+      this->intValue = myIntValue;
+    }
 
-        Token(int myTok) {
-            this->tok = myTok;
-        }
+    Token(int myTok) {
+      this->tok = myTok;
+    }
 
-        Token(int myTok,  const boost::any& myValue) {
-            this->tok = myTok;
-            this->value = myValue;
-        }
+    Token(int myTok,  const boost::any& myValue) {
+      this->tok = myTok;
+      this->value = myValue;
+    }
         
-        const static int nada              =  0;
-        const static int identifier        =  1;
-        const static int integer           =  2;
-        const static int decimal           =  3;
-        const static int string            =  4;
-        const static int unknown           =  5;
-        const static int keyword           =  6;
-        const static int whitespace        =  7;
-        const static int comment           =  8;
-        const static int endofline         = 9;
-        const static int endofstatement    = 10;
+    const static int nada              =  0;
+    const static int identifier        =  1;
+    const static int integer           =  2;
+    const static int decimal           =  3;
+    const static int string            =  4;
+    const static int unknown           =  5;
+    const static int keyword           =  6;
+    const static int whitespace        =  7;
+    const static int comment           =  8;
+    const static int endofline         = 9;
+    const static int endofstatement    = 10;
 
-        const static int command           = (1 <<  8);
-        const static int expressionCommand = (1 <<  9); // expression command
-        const static int expression        = (1 << 10); /// expression term
+    const static int command           = (1 <<  8);
+    const static int expressionCommand = (1 <<  9); // expression command
+    const static int expression        = (1 << 10); /// expression term
 
-        // generally, the minus sign is used to denote atom ranges
-        // this property is used for the few commands which allow negative integers
-        const static int negnums      = (1 << 11);
+    // generally, the minus sign is used to denote atom ranges
+    // this property is used for the few commands which allow negative integers
+    const static int negnums      = (1 << 11);
 
-        //expression involves coordinates which will change every frame, such as withins
-        const static int dynamic        = (1 << 12);
+    //expression involves coordinates which will change every frame, such as withins
+    const static int dynamic        = (1 << 12);
 
-        // every property is also valid in an expression context
-        const static int atomproperty      = (1 << 12) | expression | negnums;
-        // every predefined is also valid in an expression context
-        const static int comparator        = (1 << 13) | expression;
-        const static int predefinedset     = (1 << 14) | expression;
-        const  static int embeddedExpression= (1 << 15); // embedded expression
-        const static int index = (1 << 16) | expression;
-        // rasmol commands
-        const static int define       = command | expressionCommand |1;
-        const static int select       = command |expressionCommand |2 ;
+    // every property is also valid in an expression context
+    const static int atomproperty      = (1 << 12) | expression | negnums;
+    // every predefined is also valid in an expression context
+    const static int comparator        = (1 << 13) | expression;
+    const static int predefinedset     = (1 << 14) | expression;
+    const  static int embeddedExpression= (1 << 15); // embedded expression
+    const static int index = (1 << 16) | expression;
+    // rasmol commands
+    const static int define       = command | expressionCommand |1;
+    const static int select       = command |expressionCommand |2 ;
 
-        //predefine
-        //const static int selected    = predefinedset |0;
+    //predefine
+    //const static int selected    = predefinedset |0;
 
-        // atom expression operators
-        const static int leftparen    = expression |  0;
-        const static int rightparen   = expression |  1;
-        const static int to                = expression | 2;
-        const static int opAnd        = expression |  3;
-        const static int opOr         = expression |  4;
-        const static int opNot        = expression |  5;
-        const static int within       = expression | dynamic | 6;
-        const static int asterisk     = expression |  7;
-        const static int dot          = expression | 8;
-        const static int all          = expression | 9 ; 
-        const static int none      = expression | 10;
-	const static int name      = expression | 11;
-        // miguel 2005 01 01
-        // these are used to demark the beginning and end of expressions
-        // they do not exist in the source code, but are emitted by the
-        // expression compiler
-        const static int expressionBegin = expression | 100;
-        const static int expressionEnd   = expression | 101;
+    // atom expression operators
+    const static int leftparen    = expression |  0;
+    const static int rightparen   = expression |  1;
+    const static int to                = expression | 2;
+    const static int opAnd        = expression |  3;
+    const static int opOr         = expression |  4;
+    const static int opNot        = expression |  5;
+    const static int within       = expression | dynamic | 6;
+    const static int asterisk     = expression |  7;
+    const static int dot          = expression | 8;
+    const static int all          = expression | 9 ; 
+    const static int none      = expression | 10;
+    const static int name      = expression | 11;
+    // miguel 2005 01 01
+    // these are used to demark the beginning and end of expressions
+    // they do not exist in the source code, but are emitted by the
+    // expression compiler
+    const static int expressionBegin = expression | 100;
+    const static int expressionEnd   = expression | 101;
 
-        const static int mass         = atomproperty | 0;
-        const static int charge       = atomproperty | 1;
+    const static int mass         = atomproperty | 0;
+    const static int charge       = atomproperty | 1;
         
-        const static int opGT         = comparator |  0;
-        const static int opGE         = comparator |  1;
-        const static int opLE         = comparator |  2;
-        const static int opLT         = comparator |  3;
-        const static int opEQ         = comparator |  4;
-        const static int opNE         = comparator |  5;
+    const static int opGT         = comparator |  0;
+    const static int opGE         = comparator |  1;
+    const static int opLE         = comparator |  2;
+    const static int opLT         = comparator |  3;
+    const static int opEQ         = comparator |  4;
+    const static int opNE         = comparator |  5;
  
-        static Token tokenExpressionBegin;
-        static Token tokenExpressionEnd;
+    static Token tokenExpressionBegin;
+    static Token tokenExpressionEnd;
 
-};
+  };
 
 
 }

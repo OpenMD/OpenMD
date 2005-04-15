@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -45,30 +45,30 @@
 #include "io/SectionParser.hpp"
 namespace oopse {
 
-    /**
-     * @class BondTypesSectionParser BondTypesSectionParser.hpp "io/BondTypesSectionParser.hpp"
-     */
-    class BondTypesSectionParser : public SectionParser {
-        public:
-            BondTypesSectionParser();
+  /**
+   * @class BondTypesSectionParser BondTypesSectionParser.hpp "io/BondTypesSectionParser.hpp"
+   */
+  class BondTypesSectionParser : public SectionParser {
+  public:
+    BondTypesSectionParser();
             
-        private:
+  private:
 
-            enum BondTypeEnum{
-                btFixed,
-                btHarmonic,
-                btCubic,
-                btQuartic,
-                btPolynomial,
-                btUnknown
-            };
-            
-            void parseLine(ForceField& ff, const std::string& line, int lineNo);
-  
-            BondTypeEnum getBondTypeEnum(const std::string& str);  
-
-            std::map<std::string, BondTypeEnum> stringToEnumMap_;   
+    enum BondTypeEnum{
+      btFixed,
+      btHarmonic,
+      btCubic,
+      btQuartic,
+      btPolynomial,
+      btUnknown
     };
+            
+    void parseLine(ForceField& ff, const std::string& line, int lineNo);
+  
+    BondTypeEnum getBondTypeEnum(const std::string& str);  
+
+    std::map<std::string, BondTypeEnum> stringToEnumMap_;   
+  };
 
 
 } //namespace oopse

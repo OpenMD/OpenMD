@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -129,7 +129,7 @@ namespace oopse {
   
   void Restraints::Calc_body_thetaVal(RotMat3x3d &matrix, double refUnit[3]){
     ub0x = matrix(0,0)*refUnit[0] + matrix(0,1)*refUnit[1]
-    + matrix(0,2)*refUnit[2];
+      + matrix(0,2)*refUnit[2];
     ub0y = matrix(1,0)*refUnit[0] + matrix(1,1)*refUnit[1]
       + matrix(1,2)*refUnit[2];
     ub0z = matrix(2,0)*refUnit[0] + matrix(2,1)*refUnit[1]

@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -49,81 +49,81 @@
 
 namespace oopse {
 
-// Basic isotropic thermostating and barostating via the Melchionna
-// modification of the Hoover algorithm:
-//
-//    Melchionna, S., Ciccotti, G., and Holian, B. L., 1993,
-//       Molec. Phys., 78, 533.
-//
-//           and
-//
-//    Hoover, W. G., 1986, Phys. Rev. A, 34, 2499.
+  // Basic isotropic thermostating and barostating via the Melchionna
+  // modification of the Hoover algorithm:
+  //
+  //    Melchionna, S., Ciccotti, G., and Holian, B. L., 1993,
+  //       Molec. Phys., 78, 533.
+  //
+  //           and
+  //
+  //    Hoover, W. G., 1986, Phys. Rev. A, 34, 2499.
 
-NPTi::NPTi ( SimInfo *info) : NPT(info){
+  NPTi::NPTi ( SimInfo *info) : NPT(info){
 
-}
+  }
 
-void NPTi::evolveEtaA() {
+  void NPTi::evolveEtaA() {
     eta += dt2 * ( instaVol * (instaPress - targetPressure) /
-         (OOPSEConstant::pressureConvert*NkBT*tb2));
+		   (OOPSEConstant::pressureConvert*NkBT*tb2));
     oldEta = eta;
-}
+  }
 
-void NPTi::evolveEtaB() {
+  void NPTi::evolveEtaB() {
 
     prevEta = eta;
     eta = oldEta + dt2 * ( instaVol * (instaPress - targetPressure) /
-         (OOPSEConstant::pressureConvert*NkBT*tb2));
-}
+			   (OOPSEConstant::pressureConvert*NkBT*tb2));
+  }
 
-void NPTi::calcVelScale() {
+  void NPTi::calcVelScale() {
     vScale = chi + eta;
-}
+  }
 
-void NPTi::getVelScaleA(Vector3d& sc, const Vector3d& vel) {
+  void NPTi::getVelScaleA(Vector3d& sc, const Vector3d& vel) {
     sc = vel * vScale;
-}
+  }
 
-void NPTi::getVelScaleB(Vector3d& sc, int index ){
+  void NPTi::getVelScaleB(Vector3d& sc, int index ){
     sc = oldVel[index] * vScale;    
-}
+  }
 
 
-void NPTi::getPosScale(const Vector3d& pos, const Vector3d& COM,
-                           int index, Vector3d& sc){
+  void NPTi::getPosScale(const Vector3d& pos, const Vector3d& COM,
+			 int index, Vector3d& sc){
     /**@todo*/
     sc  = (oldPos[index] + pos)/2.0 -COM;
     sc *= eta;
-}
+  }
 
-void NPTi::scaleSimBox(){
+  void NPTi::scaleSimBox(){
 
     double scaleFactor;
 
     scaleFactor = exp(dt*eta);
 
     if ((scaleFactor > 1.1) || (scaleFactor < 0.9)) {
-        sprintf( painCave.errMsg,
-             "NPTi error: Attempting a Box scaling of more than 10 percent"
-             " check your tauBarostat, as it is probably too small!\n"
-             " eta = %lf, scaleFactor = %lf\n", eta, scaleFactor
-             );
-        painCave.isFatal = 1;
-        simError();
+      sprintf( painCave.errMsg,
+	       "NPTi error: Attempting a Box scaling of more than 10 percent"
+	       " check your tauBarostat, as it is probably too small!\n"
+	       " eta = %lf, scaleFactor = %lf\n", eta, scaleFactor
+	       );
+      painCave.isFatal = 1;
+      simError();
     } else {
-        Mat3x3d hmat = currentSnapshot_->getHmat();
-        hmat *= scaleFactor;
-        currentSnapshot_->setHmat(hmat);
+      Mat3x3d hmat = currentSnapshot_->getHmat();
+      hmat *= scaleFactor;
+      currentSnapshot_->setHmat(hmat);
     }
 
-}
+  }
 
-bool NPTi::etaConverged() {
+  bool NPTi::etaConverged() {
 
     return ( fabs(prevEta - eta) <= etaTolerance );
-}
+  }
 
-double NPTi::calcConservedQuantity(){
+  double NPTi::calcConservedQuantity(){
 
     chi= currentSnapshot_->getChi();
     integralOfChidt = currentSnapshot_->getIntegralOfChiDt();
@@ -155,15 +155,15 @@ double NPTi::calcConservedQuantity(){
     barostat_kinetic = 3.0 * NkBT * tb2 * eta * eta /(2.0 * OOPSEConstant::energyConvert);
 
     barostat_potential = (targetPressure * thermo.getVolume() / OOPSEConstant::pressureConvert) /
-        OOPSEConstant::energyConvert;
+      OOPSEConstant::energyConvert;
 
     conservedQuantity = Energy + thermostat_kinetic + thermostat_potential +
-        barostat_kinetic + barostat_potential;
+      barostat_kinetic + barostat_potential;
     
     return conservedQuantity;
-}
+  }
 
-void NPTi::loadEta() {
+  void NPTi::loadEta() {
     Mat3x3d etaMat = currentSnapshot_->getEta();
     eta = etaMat(0,0);
     //if (fabs(etaMat(1,1) - eta) >= oopse::epsilon || fabs(etaMat(1,1) - eta) >= oopse::epsilon || !etaMat.isDiagonal()) {
@@ -172,14 +172,14 @@ void NPTi::loadEta() {
     //    painCave.isFatal = 1;
     //    simError();
     //}
-}
+  }
 
-void NPTi::saveEta() {
+  void NPTi::saveEta() {
     Mat3x3d etaMat(0.0);
     etaMat(0, 0) = eta;
     etaMat(1, 1) = eta;
     etaMat(2, 2) = eta;
     currentSnapshot_->setEta(etaMat);
-}
+  }
 
 }

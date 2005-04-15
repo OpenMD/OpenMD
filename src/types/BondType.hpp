@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -51,22 +51,22 @@
 
 namespace oopse {
   
-/**
- * @class BondType BondType.hpp "types/BondType.hpp"
- * BondType class is responsible for calculating the force and energy of the bond
- */
-class BondType {
-    public:
-        BondType(double myR0) : r0(myR0) {}
-        virtual ~BondType() {}
+  /**
+   * @class BondType BondType.hpp "types/BondType.hpp"
+   * BondType class is responsible for calculating the force and energy of the bond
+   */
+  class BondType {
+  public:
+    BondType(double myR0) : r0(myR0) {}
+    virtual ~BondType() {}
 
-        virtual void calcForce(double r, double& V, double& dVdr) = 0;
-        double getEquilibriumBondLength() {return r0;}
-        void setEquilibriumBondLength(double myR0) { r0 = myR0; }
+    virtual void calcForce(double r, double& V, double& dVdr) = 0;
+    double getEquilibriumBondLength() {return r0;}
+    void setEquilibriumBondLength(double myR0) { r0 = myR0; }
 
-    protected:        
-        double r0; /**equilibrium bond length< */
-};    
+  protected:        
+    double r0; /**equilibrium bond length< */
+  };    
 
 
 } //end namespace oopse

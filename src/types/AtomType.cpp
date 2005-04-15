@@ -110,42 +110,42 @@ namespace oopse {
   }
 
 
-void AtomType::complete() {
+  void AtomType::complete() {
     int isError;
     GenericData* data;
     
     //notify a new LJtype atom type is created
     if (isLennardJones()) {
-        data = getPropertyByName("LennardJones");
-        if (data != NULL) {
-            LJParamGenericData* ljData = dynamic_cast<LJParamGenericData*>(data);
+      data = getPropertyByName("LennardJones");
+      if (data != NULL) {
+	LJParamGenericData* ljData = dynamic_cast<LJParamGenericData*>(data);
 
-            if (ljData != NULL) {
-                LJParam ljParam = ljData->getData();
+	if (ljData != NULL) {
+	  LJParam ljParam = ljData->getData();
                 
-                newLJtype(&atp.ident, &ljParam.sigma, &ljParam.epsilon, &ljParam.soft_pot, &isError);
+	  newLJtype(&atp.ident, &ljParam.sigma, &ljParam.epsilon, &ljParam.soft_pot, &isError);
 
-                if (isError != 0) {
-                    sprintf( painCave.errMsg,
-                           "Fortran rejected newLJtype\n");
-                    painCave.severity = OOPSE_ERROR;
-                    painCave.isFatal = 1;
-                    simError();          
-                }
+	  if (isError != 0) {
+	    sprintf( painCave.errMsg,
+		     "Fortran rejected newLJtype\n");
+	    painCave.severity = OOPSE_ERROR;
+	    painCave.isFatal = 1;
+	    simError();          
+	  }
                 
-            } else {
-                    sprintf( painCave.errMsg,
-                           "Can not cast GenericData to LJParam\n");
-                    painCave.severity = OOPSE_ERROR;
-                    painCave.isFatal = 1;
-                    simError();          
-            }            
-        } else {
-            sprintf( painCave.errMsg, "Can not find Parameters for LennardJones\n");
-            painCave.severity = OOPSE_ERROR;
-            painCave.isFatal = 1;
-            simError();          
-        }
+	} else {
+	  sprintf( painCave.errMsg,
+		   "Can not cast GenericData to LJParam\n");
+	  painCave.severity = OOPSE_ERROR;
+	  painCave.isFatal = 1;
+	  simError();          
+	}            
+      } else {
+	sprintf( painCave.errMsg, "Can not find Parameters for LennardJones\n");
+	painCave.severity = OOPSE_ERROR;
+	painCave.isFatal = 1;
+	simError();          
+      }
     }
 
     if (isElectrostatic()) {
@@ -160,95 +160,95 @@ void AtomType::complete() {
     }
       
     if (isCharge()) {
-        data = getPropertyByName("Charge");
-        if (data != NULL) {
-            DoubleGenericData* doubleData= dynamic_cast<DoubleGenericData*>(data);
+      data = getPropertyByName("Charge");
+      if (data != NULL) {
+	DoubleGenericData* doubleData= dynamic_cast<DoubleGenericData*>(data);
 
-            if (doubleData != NULL) {
-                double charge = doubleData->getData();
-                setCharge(&atp.ident, &charge, &isError);
+	if (doubleData != NULL) {
+	  double charge = doubleData->getData();
+	  setCharge(&atp.ident, &charge, &isError);
                 
-                if (isError != 0) {
-                    sprintf( painCave.errMsg,
-                           "Fortran rejected setCharge\n");
-                    painCave.severity = OOPSE_ERROR;
-                    painCave.isFatal = 1;
-                    simError();          
-                }
-            } else {
-                    sprintf( painCave.errMsg,
-                           "Can not cast GenericData to DoubleGenericData\n");
-                    painCave.severity = OOPSE_ERROR;
-                    painCave.isFatal = 1;
-                    simError();          
-            }
-        } else {
-            sprintf( painCave.errMsg, "Can not find Charge Parameters\n");
-            painCave.severity = OOPSE_ERROR;
-            painCave.isFatal = 1;
-            simError();          
-        }
+	  if (isError != 0) {
+	    sprintf( painCave.errMsg,
+		     "Fortran rejected setCharge\n");
+	    painCave.severity = OOPSE_ERROR;
+	    painCave.isFatal = 1;
+	    simError();          
+	  }
+	} else {
+	  sprintf( painCave.errMsg,
+		   "Can not cast GenericData to DoubleGenericData\n");
+	  painCave.severity = OOPSE_ERROR;
+	  painCave.isFatal = 1;
+	  simError();          
+	}
+      } else {
+	sprintf( painCave.errMsg, "Can not find Charge Parameters\n");
+	painCave.severity = OOPSE_ERROR;
+	painCave.isFatal = 1;
+	simError();          
+      }
     }
 
     if (isEAM()) {
-        data = getPropertyByName("EAM");
-        if (data != NULL) {
-            EAMParamGenericData* eamData = dynamic_cast<EAMParamGenericData*>(data);
+      data = getPropertyByName("EAM");
+      if (data != NULL) {
+	EAMParamGenericData* eamData = dynamic_cast<EAMParamGenericData*>(data);
 
-            if (eamData != NULL) {
+	if (eamData != NULL) {
 
-                EAMParam eamParam = eamData->getData();
+	  EAMParam eamParam = eamData->getData();
                 
 
-                newEAMtype(&eamParam.latticeConstant, &eamParam.nrho, &eamParam.drho,  &eamParam.nr, &eamParam.dr, &eamParam.rcut,
-                                &eamParam.rvals[0], &eamParam.rhovals[0], &eamParam.Frhovals[0], &atp.ident, &isError );
+	  newEAMtype(&eamParam.latticeConstant, &eamParam.nrho, &eamParam.drho,  &eamParam.nr, &eamParam.dr, &eamParam.rcut,
+		     &eamParam.rvals[0], &eamParam.rhovals[0], &eamParam.Frhovals[0], &atp.ident, &isError );
 
-                if (isError != 0) {
-                    sprintf( painCave.errMsg,
-                           "Fortran rejected newEAMtype\n");
-                    painCave.severity = OOPSE_ERROR;
-                    painCave.isFatal = 1;
-                    simError();          
-                }
-            } else {
-                    sprintf( painCave.errMsg,
-                           "Can not cast GenericData to EAMParam\n");
-                    painCave.severity = OOPSE_ERROR;
-                    painCave.isFatal = 1;
-                    simError();          
-            }
-        } else {
-            sprintf( painCave.errMsg, "Can not find EAM Parameters\n");
-            painCave.severity = OOPSE_ERROR;
-            painCave.isFatal = 1;
-            simError();          
-        }
+	  if (isError != 0) {
+	    sprintf( painCave.errMsg,
+		     "Fortran rejected newEAMtype\n");
+	    painCave.severity = OOPSE_ERROR;
+	    painCave.isFatal = 1;
+	    simError();          
+	  }
+	} else {
+	  sprintf( painCave.errMsg,
+		   "Can not cast GenericData to EAMParam\n");
+	  painCave.severity = OOPSE_ERROR;
+	  painCave.isFatal = 1;
+	  simError();          
+	}
+      } else {
+	sprintf( painCave.errMsg, "Can not find EAM Parameters\n");
+	painCave.severity = OOPSE_ERROR;
+	painCave.isFatal = 1;
+	simError();          
+      }
     }
 
     
-}
+  }
 
-void AtomType::addProperty(GenericData* genData) {
+  void AtomType::addProperty(GenericData* genData) {
     properties_.addProperty(genData);  
-}
+  }
 
-void AtomType::removeProperty(const std::string& propName) {
+  void AtomType::removeProperty(const std::string& propName) {
     properties_.removeProperty(propName);  
-}
+  }
 
-void AtomType::clearProperties() {
+  void AtomType::clearProperties() {
     properties_.clearProperties(); 
-}
+  }
 
-std::vector<std::string> AtomType::getPropertyNames() {
+  std::vector<std::string> AtomType::getPropertyNames() {
     return properties_.getPropertyNames();  
-}
+  }
       
-std::vector<GenericData*> AtomType::getProperties() { 
+  std::vector<GenericData*> AtomType::getProperties() { 
     return properties_.getProperties(); 
-}
+  }
 
-GenericData* AtomType::getPropertyByName(const std::string& propName) {
+  GenericData* AtomType::getPropertyByName(const std::string& propName) {
     return properties_.getPropertyByName(propName); 
-}  
+  }  
 }

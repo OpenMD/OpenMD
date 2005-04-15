@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -47,18 +47,18 @@
 
 namespace oopse {
 
-    /**
-     * @class EAMAtomTypesSectionParser EAMAtomTypesSectionParser.hpp "io/EAMAtomTypesSectionParser.hpp"
-     */
-    class EAMAtomTypesSectionParser : public SectionParser {
-        public:
-            EAMAtomTypesSectionParser();
+  /**
+   * @class EAMAtomTypesSectionParser EAMAtomTypesSectionParser.hpp "io/EAMAtomTypesSectionParser.hpp"
+   */
+  class EAMAtomTypesSectionParser : public SectionParser {
+  public:
+    EAMAtomTypesSectionParser();
             
-        private:
-            virtual void parseLine(ForceField& ff, const std::string& line, int lineNo);
-            void parseEAMParamFile(ForceField& ff, AtomType* atomType, const std::string& potentialParamFile, int iden);
-            void parseEAMArray(std::istream& input, std::vector<double>& array, int num);
-    };
+  private:
+    virtual void parseLine(ForceField& ff, const std::string& line, int lineNo);
+    void parseEAMParamFile(ForceField& ff, AtomType* atomType, const std::string& potentialParamFile, int iden);
+    void parseEAMArray(std::istream& input, std::vector<double>& array, int num);
+  };
 
 
 } //namespace oopse

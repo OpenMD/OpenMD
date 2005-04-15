@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -45,11 +45,11 @@
 #include "utils/simError.h"
 namespace oopse {
 
-MultipoleAtomTypesSectionParser::MultipoleAtomTypesSectionParser() {
+  MultipoleAtomTypesSectionParser::MultipoleAtomTypesSectionParser() {
     setSectionName("MultipoleAtomTypes");
-}
+  }
 
-void MultipoleAtomTypesSectionParser::parseLine(ForceField& ff,const std::string& line, int lineNo){
+  void MultipoleAtomTypesSectionParser::parseLine(ForceField& ff,const std::string& line, int lineNo){
     StringTokenizer tokenizer(line);
     int nTokens = tokenizer.countTokens();    
 
@@ -70,118 +70,118 @@ void MultipoleAtomTypesSectionParser::parseLine(ForceField& ff,const std::string
     // name sq phi theta psi dipole_moment splitdipole_distance Qxx Qyy Qzz
         
     if (nTokens < 5)  {
-        sprintf(painCave.errMsg, "MultipoleAtomTypesSectionParser Error: Not enough tokens at line %d\n",
-                lineNo);
-        painCave.isFatal = 1;
-        simError();
+      sprintf(painCave.errMsg, "MultipoleAtomTypesSectionParser Error: Not enough tokens at line %d\n",
+	      lineNo);
+      painCave.isFatal = 1;
+      simError();
     } else {
 
-        std::string atomTypeName = tokenizer.nextToken();    
-        std::string multipoleType = tokenizer.nextToken();
-        double phi = tokenizer.nextTokenAsDouble() * NumericConstant::PI /180.0;
-        double theta = tokenizer.nextTokenAsDouble() * NumericConstant::PI /180.0;
-        double psi = tokenizer.nextTokenAsDouble() * NumericConstant::PI /180.0;        
-        nTokens -=  5;
+      std::string atomTypeName = tokenizer.nextToken();    
+      std::string multipoleType = tokenizer.nextToken();
+      double phi = tokenizer.nextTokenAsDouble() * NumericConstant::PI /180.0;
+      double theta = tokenizer.nextTokenAsDouble() * NumericConstant::PI /180.0;
+      double psi = tokenizer.nextTokenAsDouble() * NumericConstant::PI /180.0;        
+      nTokens -=  5;
 
-        AtomType* atomType = ff.getAtomType(atomTypeName);
-        if (atomType == NULL) {
-            sprintf(painCave.errMsg, "MultipoleAtomTypesSectionParser Error: Can not find matched AtomType[%s] at line %d\n",
-                    atomTypeName.c_str(), lineNo);
-            painCave.isFatal = 1;
-            simError();
-        }
+      AtomType* atomType = ff.getAtomType(atomTypeName);
+      if (atomType == NULL) {
+	sprintf(painCave.errMsg, "MultipoleAtomTypesSectionParser Error: Can not find matched AtomType[%s] at line %d\n",
+		atomTypeName.c_str(), lineNo);
+	painCave.isFatal = 1;
+	simError();
+      }
         
-        DirectionalAtomType* dAtomType = dynamic_cast<DirectionalAtomType*>(atomType);            
-        if (dAtomType == NULL) {
-            sprintf(painCave.errMsg, "MultipoleAtomTypesSectionParser Error: Can not Cast Atom to DirectionalAtom at line %d\n", lineNo);
-            painCave.isFatal = 1;
-            simError();
-        }        
+      DirectionalAtomType* dAtomType = dynamic_cast<DirectionalAtomType*>(atomType);            
+      if (dAtomType == NULL) {
+	sprintf(painCave.errMsg, "MultipoleAtomTypesSectionParser Error: Can not Cast Atom to DirectionalAtom at line %d\n", lineNo);
+	painCave.isFatal = 1;
+	simError();
+      }        
         
-        RotMat3x3d electroBodyFrame(phi, theta, psi);        
-        dAtomType->setElectroBodyFrame(electroBodyFrame);        
+      RotMat3x3d electroBodyFrame(phi, theta, psi);        
+      dAtomType->setElectroBodyFrame(electroBodyFrame);        
 
-        if (multipoleType== "d") {
-            parseDipole(tokenizer, dAtomType, lineNo);
-        } else if (multipoleType== "s") {
-            parseSplitDipole(tokenizer, dAtomType, lineNo);
-        } else if (multipoleType== "q") {
-            parseQuadruple( tokenizer, dAtomType, lineNo);
-        } else if (multipoleType== "dq") {
-            parseDipole(tokenizer, dAtomType, lineNo);
-            parseQuadruple( tokenizer, dAtomType, lineNo);
-        } else if (multipoleType== "sq") {
-            parseSplitDipole(tokenizer, dAtomType, lineNo);
-            parseQuadruple( tokenizer, dAtomType, lineNo);
-        } else {
-            sprintf(painCave.errMsg, "MultipoleAtomTypesSectionParser Error: unrecognized multiple type at line %d\n",
-                    lineNo);
-            painCave.isFatal = 1;
-            simError();
-        }
-}
+      if (multipoleType== "d") {
+	parseDipole(tokenizer, dAtomType, lineNo);
+      } else if (multipoleType== "s") {
+	parseSplitDipole(tokenizer, dAtomType, lineNo);
+      } else if (multipoleType== "q") {
+	parseQuadruple( tokenizer, dAtomType, lineNo);
+      } else if (multipoleType== "dq") {
+	parseDipole(tokenizer, dAtomType, lineNo);
+	parseQuadruple( tokenizer, dAtomType, lineNo);
+      } else if (multipoleType== "sq") {
+	parseSplitDipole(tokenizer, dAtomType, lineNo);
+	parseQuadruple( tokenizer, dAtomType, lineNo);
+      } else {
+	sprintf(painCave.errMsg, "MultipoleAtomTypesSectionParser Error: unrecognized multiple type at line %d\n",
+		lineNo);
+	painCave.isFatal = 1;
+	simError();
+      }
+    }
 
-}
+  }
 
-void MultipoleAtomTypesSectionParser::parseDipole(StringTokenizer& tokenizer, 
-    DirectionalAtomType* dAtomType, int lineNo) {
+  void MultipoleAtomTypesSectionParser::parseDipole(StringTokenizer& tokenizer, 
+						    DirectionalAtomType* dAtomType, int lineNo) {
 
     if (tokenizer.hasMoreTokens()) {
-        double dipole = tokenizer.nextTokenAsDouble();
+      double dipole = tokenizer.nextTokenAsDouble();
 
-        dAtomType->addProperty(new DoubleGenericData("Dipole", dipole));
-        dAtomType->setDipole();
+      dAtomType->addProperty(new DoubleGenericData("Dipole", dipole));
+      dAtomType->setDipole();
     } else {
-        sprintf(painCave.errMsg, "MultipoleAtomTypesSectionParser Error: Not enough tokens at line %d\n",
-                lineNo);
-        painCave.isFatal = 1;
-        simError();
+      sprintf(painCave.errMsg, "MultipoleAtomTypesSectionParser Error: Not enough tokens at line %d\n",
+	      lineNo);
+      painCave.isFatal = 1;
+      simError();
     }
-}
+  }
 
-void MultipoleAtomTypesSectionParser::parseSplitDipole(StringTokenizer& tokenizer, 
-    DirectionalAtomType* dAtomType, int lineNo) {
+  void MultipoleAtomTypesSectionParser::parseSplitDipole(StringTokenizer& tokenizer, 
+							 DirectionalAtomType* dAtomType, int lineNo) {
 
     if (tokenizer.hasMoreTokens()) {
-        parseDipole(tokenizer, dAtomType, lineNo);    
-        double splitDipoleDistance = tokenizer.nextTokenAsDouble();
-        dAtomType->addProperty(new DoubleGenericData("SplitDipoleDistance", splitDipoleDistance));
-        dAtomType->setSplitDipole();
+      parseDipole(tokenizer, dAtomType, lineNo);    
+      double splitDipoleDistance = tokenizer.nextTokenAsDouble();
+      dAtomType->addProperty(new DoubleGenericData("SplitDipoleDistance", splitDipoleDistance));
+      dAtomType->setSplitDipole();
     } else {
-        sprintf(painCave.errMsg, "MultipoleAtomTypesSectionParser Error: Not enough tokens at line %d\n",
-                lineNo);
-        painCave.isFatal = 1;
-        simError();
+      sprintf(painCave.errMsg, "MultipoleAtomTypesSectionParser Error: Not enough tokens at line %d\n",
+	      lineNo);
+      painCave.isFatal = 1;
+      simError();
     }
-}
+  }
 
-void MultipoleAtomTypesSectionParser::parseQuadruple(StringTokenizer& tokenizer,
-    DirectionalAtomType* dAtomType, int lineNo) {
+  void MultipoleAtomTypesSectionParser::parseQuadruple(StringTokenizer& tokenizer,
+						       DirectionalAtomType* dAtomType, int lineNo) {
     int nTokens = tokenizer.countTokens();   
     if (nTokens >= 3) {
-        Vector3d Q;
-        Q[0] = tokenizer.nextTokenAsDouble();
-        Q[1] = tokenizer.nextTokenAsDouble();
-        Q[2] = tokenizer.nextTokenAsDouble();
+      Vector3d Q;
+      Q[0] = tokenizer.nextTokenAsDouble();
+      Q[1] = tokenizer.nextTokenAsDouble();
+      Q[2] = tokenizer.nextTokenAsDouble();
 
-        double trace =  Q[0] + Q[1] + Q[2];
+      double trace =  Q[0] + Q[1] + Q[2];
 
-        if (fabs(trace) > oopse::epsilon) {
-            sprintf(painCave.errMsg, "MultipoleAtomTypesSectionParser Error: the trace of qudrupole moments is not zero at line %d\n",
-                    lineNo);
-            painCave.isFatal = 1;
-            simError();
-        }
+      if (fabs(trace) > oopse::epsilon) {
+	sprintf(painCave.errMsg, "MultipoleAtomTypesSectionParser Error: the trace of qudrupole moments is not zero at line %d\n",
+		lineNo);
+	painCave.isFatal = 1;
+	simError();
+      }
 
-        dAtomType->addProperty(new Vector3dGenericData("QuadrupoleMoments", Q));
-        dAtomType->setQuadrupole();
+      dAtomType->addProperty(new Vector3dGenericData("QuadrupoleMoments", Q));
+      dAtomType->setQuadrupole();
     } else {
-        sprintf(painCave.errMsg, "MultipoleAtomTypesSectionParser Error: Not enough tokens at line %d\n",
-                lineNo);
-        painCave.isFatal = 1;
-        simError();
+      sprintf(painCave.errMsg, "MultipoleAtomTypesSectionParser Error: Not enough tokens at line %d\n",
+	      lineNo);
+      painCave.isFatal = 1;
+      simError();
     }
-}
+  }
 
 
 } //end namespace oopse

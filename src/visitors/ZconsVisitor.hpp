@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -51,42 +51,42 @@
 
 namespace oopse {
 
-/**
- * @class ZConsVisitor
- * @note 
- */
-class ZConsVisitor : public BaseVisitor{
-    public:
-        enum ZConsState{zsFixed = 0, zsMoving};
+  /**
+   * @class ZConsVisitor
+   * @note 
+   */
+  class ZConsVisitor : public BaseVisitor{
+  public:
+    enum ZConsState{zsFixed = 0, zsMoving};
 
-        ZConsVisitor(SimInfo* info);
-        ~ZConsVisitor();
+    ZConsVisitor(SimInfo* info);
+    ~ZConsVisitor();
 
-        virtual void visit(Atom* atom);
-        virtual void visit(DirectionalAtom* datom);
-        virtual void visit(RigidBody* rb);
+    virtual void visit(Atom* atom);
+    virtual void visit(DirectionalAtom* datom);
+    virtual void visit(RigidBody* rb);
 
-        virtual void update();
+    virtual void update();
 
-        bool haveZconsMol() {return !zmolStates_.empty(); }
+    bool haveZconsMol() {return !zmolStates_.empty(); }
 
-        virtual const std::string toString();
-        protected:
-        void internalVisit(StuntDouble* sd, const std::string& prefix);
-        bool isZconstraint(int index, std::string& prefix);
-        void readZconsFile(double time);
+    virtual const std::string toString();
+  protected:
+    void internalVisit(StuntDouble* sd, const std::string& prefix);
+    bool isZconstraint(int index, std::string& prefix);
+    void readZconsFile(double time);
 
-    private:  
-        std::vector<double> zconsPos;
-        std::map<int, ZConsState> zmolStates_;
-        double zconsTol_;
-        double zconsTime_;
-        std::string zconsFilename_;
-        ZConsReader* zconsReader_;
-        SimInfo* info_;
-        Snapshot* currSnapshot_;
-        std::map<int, int> zatomToZmol_;
-};
+  private:  
+    std::vector<double> zconsPos;
+    std::map<int, ZConsState> zmolStates_;
+    double zconsTol_;
+    double zconsTime_;
+    std::string zconsFilename_;
+    ZConsReader* zconsReader_;
+    SimInfo* info_;
+    Snapshot* currSnapshot_;
+    std::map<int, int> zatomToZmol_;
+  };
 
 }//namespace oopse
 #endif // _ZCONS_VISITOR_H_

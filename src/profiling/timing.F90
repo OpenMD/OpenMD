@@ -1,21 +1,21 @@
 subroutine getTimes(forceTime,commTime)
-      use doForces
-      use definitions, ONLY: dp
+  use doForces
+  use definitions, ONLY: dp
 #ifdef IS_MPI
-      use mpiSimulation
+  use mpiSimulation
 #endif
-      implicit none
+  implicit none
 
-      real(kind=dp) :: forceTime
-      real(kind=dp) :: commTime
-      
-      forceTime = 0.0
-      commTime  = 0.0
+  real(kind=dp) :: forceTime
+  real(kind=dp) :: commTime
+
+  forceTime = 0.0
+  commTime  = 0.0
 #ifdef PROFILE
-      forceTime = getForceTime()
+  forceTime = getForceTime()
 
 #ifdef IS_MPI
-      commTime  = getCommTime()
+  commTime  = getCommTime()
 #endif
 #endif
 

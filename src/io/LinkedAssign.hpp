@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -44,7 +44,7 @@
 
 class LinkedAssign{
 
-public:
+ public:
   LinkedAssign() { next = NULL; }
   LinkedAssign( char* the_text, int the_ival );
   LinkedAssign( char* the_text, double the_dval );
@@ -69,7 +69,7 @@ public:
 
   LinkedAssign* find( char* key );
 
-private:
+ private:
   char text[100];
   int ival;
   double dval;

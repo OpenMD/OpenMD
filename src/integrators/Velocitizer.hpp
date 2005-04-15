@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -39,13 +39,13 @@
  * such damages.
  */
  
- /**
-  * @file Velocitizer.hpp
-  * @author tlin
-  * @date 11/14/2004
-  * @time 13:25am
-  * @version 1.0
-  */
+/**
+ * @file Velocitizer.hpp
+ * @author tlin
+ * @date 11/14/2004
+ * @time 13:25am
+ * @version 1.0
+ */
 
 #ifndef INTEGRATORS_VELOCITIZER_HPP
 #define INTEGRATORS_VELOCITIZER_HPP
@@ -54,26 +54,26 @@
 
 namespace oopse {
 
-/**
- * @class Velocitizer Velocitizer.hpp "integratos/Velocitizer.hpp"
- * @todo document
- */
-class Velocitizer {
-    public:
-        Velocitizer(SimInfo* info);
-        virtual ~Velocitizer();
+  /**
+   * @class Velocitizer Velocitizer.hpp "integratos/Velocitizer.hpp"
+   * @todo document
+   */
+  class Velocitizer {
+  public:
+    Velocitizer(SimInfo* info);
+    virtual ~Velocitizer();
         
-        void velocitize(double temperature);
+    void velocitize(double temperature);
 
-        void removeComDrift();
+    void removeComDrift();
         
-    private:
+  private:
         
-        SimInfo* info_;
+    SimInfo* info_;
 
-        RandNumGen* randNumGen_;
+    RandNumGen* randNumGen_;
 
-};
+  };
 
 }
 #endif //INTEGRATORS_VELOCITIZER_HPP

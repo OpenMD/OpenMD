@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -52,50 +52,50 @@
 #include "types/BondType.hpp"
 
 namespace oopse {
-/**
- * @class CubicBondType 
- * @todo document
- */
-class CubicBondType : public BondType {
+  /**
+   * @class CubicBondType 
+   * @todo document
+   */
+  class CubicBondType : public BondType {
 
-    public:
+  public:
 
-        CubicBondType(double r0, double k3, double k2, double k1, double k0) 
-            : BondType(r0), k3_(k3), k2_(k2),  k1_(k1), k0_(k0){
-        }
+    CubicBondType(double r0, double k3, double k2, double k1, double k0) 
+      : BondType(r0), k3_(k3), k2_(k2),  k1_(k1), k0_(k0){
+      }
 
-        void setForceConstant(double k3, double k2, double k1, double k0) {
-            k3_ = k3;
-            k2_ = k2;
-            k1_ = k1;
-            k0_ = k0;
+    void setForceConstant(double k3, double k2, double k1, double k0) {
+      k3_ = k3;
+      k2_ = k2;
+      k1_ = k1;
+      k0_ = k0;
 
-        }
+    }
 
-        void getForceConstant(double& k3, double& k2, double& k1, double& k0) {
-            k3 = k3_;
-            k2  = k2_;
-            k1 = k1_;
-            k0 = k0_;
-        }
+    void getForceConstant(double& k3, double& k2, double& k1, double& k0) {
+      k3 = k3_;
+      k2  = k2_;
+      k1 = k1_;
+      k0 = k0_;
+    }
 
-        virtual void calcForce(double r, double& V, double& dVdr) {
-            double dr =  r- r0;
-            double dr2 = dr * dr;
-            double dr3 = dr2 * dr;
+    virtual void calcForce(double r, double& V, double& dVdr) {
+      double dr =  r- r0;
+      double dr2 = dr * dr;
+      double dr3 = dr2 * dr;
             
-            V =k0_ + k1_ * dr + k2_*dr2 + k3_*dr3;
-            dVdr = k1_ + 2.0*k2_ * dr + 3.0 * k3_*dr2;            
-        }
+      V =k0_ + k1_ * dr + k2_*dr2 + k3_*dr3;
+      dVdr = k1_ + 2.0*k2_ * dr + 3.0 * k3_*dr2;            
+    }
         
-    private:
+  private:
 
-        double k3_;
-        double k2_;
-        double k1_;
-        double k0_;
+    double k3_;
+    double k2_;
+    double k1_;
+    double k0_;
 
-};
+  };
 
 }//end namespace oopse
 #endif //TYPES_CUBICBONDTYPE_HPP

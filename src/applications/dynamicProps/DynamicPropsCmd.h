@@ -22,29 +22,29 @@ extern "C" {
 #define CMDLINE_PARSER_VERSION "1.00"
 #endif
 
-struct gengetopt_args_info
-{
-  char * input_arg;	/* input dump file.  */
-  char * output_arg;	/* output file name.  */
-  char * sele1_arg;	/* select first stuntdouble set.  */
-  char * sele2_arg;	/* select second stuntdouble set (if sele2 is not set, use script from sele1).  */
+  struct gengetopt_args_info
+  {
+    char * input_arg;	/* input dump file.  */
+    char * output_arg;	/* output file name.  */
+    char * sele1_arg;	/* select first stuntdouble set.  */
+    char * sele2_arg;	/* select second stuntdouble set (if sele2 is not set, use script from sele1).  */
 
-  int help_given ;	/* Whether help was given.  */
-  int version_given ;	/* Whether version was given.  */
-  int input_given ;	/* Whether input was given.  */
-  int output_given ;	/* Whether output was given.  */
-  int sele1_given ;	/* Whether sele1 was given.  */
-  int sele2_given ;	/* Whether sele2 was given.  */
-  int rcorr_given ;	/* Whether rcorr was given.  */
-  int vcorr_given ;	/* Whether vcorr was given.  */
-  int dcorr_given ;	/* Whether dcorr was given.  */
+    int help_given ;	/* Whether help was given.  */
+    int version_given ;	/* Whether version was given.  */
+    int input_given ;	/* Whether input was given.  */
+    int output_given ;	/* Whether output was given.  */
+    int sele1_given ;	/* Whether sele1 was given.  */
+    int sele2_given ;	/* Whether sele2 was given.  */
+    int rcorr_given ;	/* Whether rcorr was given.  */
+    int vcorr_given ;	/* Whether vcorr was given.  */
+    int dcorr_given ;	/* Whether dcorr was given.  */
 
-} ;
+  } ;
 
-int cmdline_parser (int argc, char * const *argv, struct gengetopt_args_info *args_info);
+  int cmdline_parser (int argc, char * const *argv, struct gengetopt_args_info *args_info);
 
-void cmdline_parser_print_help(void);
-void cmdline_parser_print_version(void);
+  void cmdline_parser_print_help(void);
+  void cmdline_parser_print_version(void);
 
 #ifdef __cplusplus
 }

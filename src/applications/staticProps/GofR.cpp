@@ -46,28 +46,28 @@
 
 namespace oopse {
 
-GofR::GofR(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2, double len, int nrbins)
+  GofR::GofR(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2, double len, int nrbins)
     : RadialDistrFunc(info, filename, sele1, sele2), len_(len), nRBins_(nrbins){
 
-    deltaR_ = len_ /nRBins_;
+      deltaR_ = len_ /nRBins_;
     
-    histogram_.resize(nRBins_);
-    avgGofr_.resize(nRBins_);
+      histogram_.resize(nRBins_);
+      avgGofr_.resize(nRBins_);
 
-    setOutputName(getPrefix(filename) + ".gofr");
-}
+      setOutputName(getPrefix(filename) + ".gofr");
+    }
 
 
-void GofR::preProcess() {
+  void GofR::preProcess() {
     std::fill(avgGofr_.begin(), avgGofr_.end(), 0.0);    
-}
+  }
 
-void GofR::initalizeHistogram() {
+  void GofR::initalizeHistogram() {
     std::fill(histogram_.begin(), histogram_.end(), 0);
-}
+  }
 
 
-void GofR::processHistogram() {
+  void GofR::processHistogram() {
 
     int nPairs = getNPairs();
     double volume = info_->getSnapshotManager()->getCurrentSnapshot()->getVolume();
@@ -76,20 +76,20 @@ void GofR::processHistogram() {
 
     for(int i = 0 ; i < histogram_.size(); ++i){
 
-        double rLower = i * deltaR_;
-        double rUpper = rLower + deltaR_;
-        double volSlice = ( rUpper * rUpper * rUpper ) - ( rLower * rLower * rLower );
-        double nIdeal = volSlice * pairConstant;
+      double rLower = i * deltaR_;
+      double rUpper = rLower + deltaR_;
+      double volSlice = ( rUpper * rUpper * rUpper ) - ( rLower * rLower * rLower );
+      double nIdeal = volSlice * pairConstant;
 
-        avgGofr_[i] += histogram_[i] / nIdeal;    
+      avgGofr_[i] += histogram_[i] / nIdeal;    
     }
 
-}
+  }
 
-void GofR::collectHistogram(StuntDouble* sd1, StuntDouble* sd2) {
+  void GofR::collectHistogram(StuntDouble* sd1, StuntDouble* sd2) {
 
     if (sd1 == sd2) {
-        return;
+      return;
     }
     
     Vector3d pos1 = sd1->getPos();
@@ -100,33 +100,33 @@ void GofR::collectHistogram(StuntDouble* sd1, StuntDouble* sd2) {
     double distance = r12.length();
 
     if (distance < len_) {
-        int whichBin = distance / deltaR_;
-        histogram_[whichBin] += 2;
+      int whichBin = distance / deltaR_;
+      histogram_[whichBin] += 2;
     }
-}
+  }
 
 
-void GofR::writeRdf() {
+  void GofR::writeRdf() {
     std::ofstream rdfStream(outputFilename_.c_str());
     if (rdfStream.is_open()) {
-        rdfStream << "#radial distribution function\n";
-        rdfStream << "#selection1: (" << selectionScript1_ << ")\t";
-        rdfStream << "selection2: (" << selectionScript2_ << ")\n";
-        rdfStream << "#r\tcorrValue\n";
-        for (int i = 0; i < avgGofr_.size(); ++i) {
-            double r = deltaR_ * (i + 0.5);
-            rdfStream << r << "\t" << avgGofr_[i]/nProcessed_ << "\n";
-        }
+      rdfStream << "#radial distribution function\n";
+      rdfStream << "#selection1: (" << selectionScript1_ << ")\t";
+      rdfStream << "selection2: (" << selectionScript2_ << ")\n";
+      rdfStream << "#r\tcorrValue\n";
+      for (int i = 0; i < avgGofr_.size(); ++i) {
+	double r = deltaR_ * (i + 0.5);
+	rdfStream << r << "\t" << avgGofr_[i]/nProcessed_ << "\n";
+      }
         
     } else {
 
-        sprintf(painCave.errMsg, "GofR: unable to open %s\n", outputFilename_.c_str());
-        painCave.isFatal = 1;
-        simError();  
+      sprintf(painCave.errMsg, "GofR: unable to open %s\n", outputFilename_.c_str());
+      painCave.isFatal = 1;
+      simError();  
     }
 
     rdfStream.close();
-}
+  }
 
 }
 

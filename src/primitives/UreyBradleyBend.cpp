@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -42,18 +42,18 @@
 #include "primitives/UreyBradleyBend.hpp"
 
 namespace oopse {
-UreyBradleyBend::UreyBradleyBend(Atom* atom1, Atom* atom2, Atom* atom3, UreyBradleyBendType* bt) 
-                            : Bend(atom1, atom2, atom3, bt), bond_(NULL){
-    bond_ = new Bond(atom1, atom3, bt->getHarmonicBondType());
-}
+  UreyBradleyBend::UreyBradleyBend(Atom* atom1, Atom* atom2, Atom* atom3, UreyBradleyBendType* bt) 
+    : Bend(atom1, atom2, atom3, bt), bond_(NULL){
+      bond_ = new Bond(atom1, atom3, bt->getHarmonicBondType());
+    }
 
-UreyBradleyBend::~UreyBradleyBend() {
+  UreyBradleyBend::~UreyBradleyBend() {
     delete bond_;
-}
+  }
 
-void UreyBradleyBend::calcForce() {
+  void UreyBradleyBend::calcForce() {
     Bend::calcForce();
     bond_->calcForce();
-}
+  }
 
 } //end namespace oopse

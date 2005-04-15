@@ -45,20 +45,20 @@
 
 namespace oopse {
 
-class CrossTimeCorrFunc : public TimeCorrFunc {
-    public:
-        CrossTimeCorrFunc(SimInfo* info, const std::string& filename, 
-            const std::string& sele1, const std::string& sele2, int storageLayout);
+  class CrossTimeCorrFunc : public TimeCorrFunc {
+  public:
+    CrossTimeCorrFunc(SimInfo* info, const std::string& filename, 
+		      const std::string& sele1, const std::string& sele2, int storageLayout);
         
-    private:
+  private:
         
-        virtual void correlateFrames(int frame1, int frame2);
-        virtual double calcCorrVal(int frame1, int frame2, StuntDouble* sd1, StuntDouble* sd2) = 0;
+    virtual void correlateFrames(int frame1, int frame2);
+    virtual double calcCorrVal(int frame1, int frame2, StuntDouble* sd1, StuntDouble* sd2) = 0;
         
-        int nSelected1_;  
-        int nSelected2_;  
-        int nSelectedPairs_;        
-};
+    int nSelected1_;  
+    int nSelected2_;  
+    int nSelectedPairs_;        
+  };
 
 }
 #endif

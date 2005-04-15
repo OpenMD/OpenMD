@@ -44,67 +44,67 @@
 #include "applications/staticProps/RadialDistrFunc.hpp"
 namespace oopse {
 
-class GofRAngle : public RadialDistrFunc {
+  class GofRAngle : public RadialDistrFunc {
     
-    public:
-        GofRAngle(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2, double len, int nrbins, int nangleBins);
+  public:
+    GofRAngle(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2, double len, int nrbins, int nangleBins);
 
-        int getNRBins() {
-            return nRBins_; 
-        }
+    int getNRBins() {
+      return nRBins_; 
+    }
 
-        double getLength() {
-            return len_;
-        }
+    double getLength() {
+      return len_;
+    }
 
-        int getNAngleBins() {return nAngleBins_;}
+    int getNAngleBins() {return nAngleBins_;}
         
-    private:
+  private:
 
-        virtual void preProcess();
-        virtual void initalizeHistogram();
-        virtual void collectHistogram(StuntDouble* sd1, StuntDouble* sd2);
-        virtual void processHistogram();
+    virtual void preProcess();
+    virtual void initalizeHistogram();
+    virtual void collectHistogram(StuntDouble* sd1, StuntDouble* sd2);
+    virtual void processHistogram();
 
-        virtual double evaluateAngle(StuntDouble* sd1, StuntDouble* sd2) = 0;
+    virtual double evaluateAngle(StuntDouble* sd1, StuntDouble* sd2) = 0;
 
-        virtual void writeRdf();
+    virtual void writeRdf();
 
-        double deltaCosAngle_;
-        int nAngleBins_;
-        double len_;
-        int nRBins_;
-        double deltaR_;
+    double deltaCosAngle_;
+    int nAngleBins_;
+    double len_;
+    int nRBins_;
+    double deltaR_;
         
-        std::vector<std::vector<int> > histogram_;
-        std::vector<std::vector<double> > avgGofr_;
-        int npairs_;
-};
+    std::vector<std::vector<int> > histogram_;
+    std::vector<std::vector<double> > avgGofr_;
+    int npairs_;
+  };
 
 
-class GofRTheta : public GofRAngle {
-    public:
-        GofRTheta(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2, double len, int nrbins, int nangleBins)
-            : GofRAngle (info, filename, sele1, sele2, len, nrbins, nangleBins) {
-                setOutputName(getPrefix(filename) + ".gofrt");
-        }
+  class GofRTheta : public GofRAngle {
+  public:
+    GofRTheta(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2, double len, int nrbins, int nangleBins)
+      : GofRAngle (info, filename, sele1, sele2, len, nrbins, nangleBins) {
+	setOutputName(getPrefix(filename) + ".gofrt");
+      }
         
-    private:
+  private:
 
-        virtual double evaluateAngle(StuntDouble* sd1, StuntDouble* sd2);        
-};
+    virtual double evaluateAngle(StuntDouble* sd1, StuntDouble* sd2);        
+  };
 
 
-class GofROmega : public GofRAngle {
-    public:
-        GofROmega(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2, double len, int nrbins, int nangleBins)
-            : GofRAngle (info, filename, sele1, sele2, len, nrbins, nangleBins) {
-                setOutputName(getPrefix(filename) + ".gofro");
-        }
+  class GofROmega : public GofRAngle {
+  public:
+    GofROmega(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2, double len, int nrbins, int nangleBins)
+      : GofRAngle (info, filename, sele1, sele2, len, nrbins, nangleBins) {
+	setOutputName(getPrefix(filename) + ".gofro");
+      }
     
-    private:
-        virtual double evaluateAngle(StuntDouble* sd1, StuntDouble* sd2);        
-};
+  private:
+    virtual double evaluateAngle(StuntDouble* sd1, StuntDouble* sd2);        
+  };
 
 }
 #endif

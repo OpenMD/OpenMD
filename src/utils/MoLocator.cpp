@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -178,8 +178,8 @@ namespace oopse {
     
     //move the reference center of mass to (0,0,0) and adjust the reference coordinate 
     //of the integrabel objects
-  for(int i = 0; i < nIntegrableObjects; i++)
-    refCoords[i] -= refMolCom;
+    for(int i = 0; i < nIntegrableObjects; i++)
+      refCoords[i] -= refMolCom;
   }
   
   double getAtomMass(const std::string& at, ForceField* myFF) {

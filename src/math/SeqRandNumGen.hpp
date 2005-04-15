@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -49,28 +49,28 @@
 
 namespace oopse {
 
-/**
- * @class SeqRandNumGen a sequential random number generator
- */
-class SeqRandNumGen : public RandNumGen{
-    public:
-        typedef unsigned long uint32; 
+  /**
+   * @class SeqRandNumGen a sequential random number generator
+   */
+  class SeqRandNumGen : public RandNumGen{
+  public:
+    typedef unsigned long uint32; 
         
-        SeqRandNumGen( const uint32& oneSeed);
+    SeqRandNumGen( const uint32& oneSeed);
 
-        SeqRandNumGen();
+    SeqRandNumGen();
 	
-	virtual void seed( const uint32 oneSeed );
+    virtual void seed( const uint32 oneSeed );
 	
-	virtual void seed();
+    virtual void seed();
 
-    private:
-         SeqRandNumGen(const SeqRandNumGen&);
-         SeqRandNumGen& operator =(const SeqRandNumGen&);
+  private:
+    SeqRandNumGen(const SeqRandNumGen&);
+    SeqRandNumGen& operator =(const SeqRandNumGen&);
          
-        static int nCreatedRNG_; /**< number of created random number of generator*/
+    static int nCreatedRNG_; /**< number of created random number of generator*/
 
-};
+  };
 
 }
 

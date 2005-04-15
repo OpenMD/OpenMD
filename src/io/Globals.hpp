@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -63,7 +63,7 @@
  */
 class Globals{
   
-public:
+ public:
   
   Globals();
   ~Globals();
@@ -190,7 +190,7 @@ public:
   Component** getComponents( void )   { return components; }
   ZconStamp** getZconStamp( void )    { return zConstraints; }
   
-private:
+ private:
   
 
   typedef std::map<std::string, int> CommandMapType;

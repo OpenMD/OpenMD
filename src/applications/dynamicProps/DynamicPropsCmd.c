@@ -33,7 +33,7 @@ cmdline_parser_print_help (void)
 {
   cmdline_parser_print_version ();
   printf("\n"
-  "Usage: %s [OPTIONS]...\n", CMDLINE_PARSER_PACKAGE);
+	 "Usage: %s [OPTIONS]...\n", CMDLINE_PARSER_PACKAGE);
   printf("\n");
   printf("  -h, --help                    Print help and exit\n");
   printf("  -V, --version                 Print version and exit\n");
@@ -80,12 +80,12 @@ cmdline_parser (int argc, char * const *argv, struct gengetopt_args_info *args_i
   args_info->rcorr_given = 0 ;
   args_info->vcorr_given = 0 ;
   args_info->dcorr_given = 0 ;
-#define clear_args() { \
-  args_info->input_arg = NULL; \
-  args_info->output_arg = NULL; \
-  args_info->sele1_arg = NULL; \
-  args_info->sele2_arg = NULL; \
-}
+#define clear_args() {				\
+    args_info->input_arg = NULL;		\
+    args_info->output_arg = NULL;		\
+    args_info->sele1_arg = NULL;		\
+    args_info->sele2_arg = NULL;		\
+  }
 
   clear_args();
 
@@ -160,7 +160,7 @@ cmdline_parser (int argc, char * const *argv, struct gengetopt_args_info *args_i
             }
           args_info->rcorr_given = 1;
           dynamicProps_group_counter += 1;
-        break;
+	  break;
 
         case 'v':	/* velocity correlation function.  */
           if (args_info->vcorr_given)
@@ -171,7 +171,7 @@ cmdline_parser (int argc, char * const *argv, struct gengetopt_args_info *args_i
             }
           args_info->vcorr_given = 1;
           dynamicProps_group_counter += 1;
-        break;
+	  break;
 
         case 'd':	/* dipole correlation function.  */
           if (args_info->dcorr_given)
@@ -182,37 +182,37 @@ cmdline_parser (int argc, char * const *argv, struct gengetopt_args_info *args_i
             }
           args_info->dcorr_given = 1;
           dynamicProps_group_counter += 1;
-        break;
+	  break;
 
 
         case 0:	/* Long option with no short option */
           /* select first stuntdouble set.  */
           if (strcmp (long_options[option_index].name, "sele1") == 0)
-          {
-            if (args_info->sele1_given)
-              {
-                fprintf (stderr, "%s: `--sele1' option given more than once\n", CMDLINE_PARSER_PACKAGE);
-                clear_args ();
-                exit (EXIT_FAILURE);
-              }
-            args_info->sele1_given = 1;
-            args_info->sele1_arg = gengetopt_strdup (optarg);
-            break;
-          }
+	    {
+	      if (args_info->sele1_given)
+		{
+		  fprintf (stderr, "%s: `--sele1' option given more than once\n", CMDLINE_PARSER_PACKAGE);
+		  clear_args ();
+		  exit (EXIT_FAILURE);
+		}
+	      args_info->sele1_given = 1;
+	      args_info->sele1_arg = gengetopt_strdup (optarg);
+	      break;
+	    }
           
           /* select second stuntdouble set (if sele2 is not set, use script from sele1).  */
           else if (strcmp (long_options[option_index].name, "sele2") == 0)
-          {
-            if (args_info->sele2_given)
-              {
-                fprintf (stderr, "%s: `--sele2' option given more than once\n", CMDLINE_PARSER_PACKAGE);
-                clear_args ();
-                exit (EXIT_FAILURE);
-              }
-            args_info->sele2_given = 1;
-            args_info->sele2_arg = gengetopt_strdup (optarg);
-            break;
-          }
+	    {
+	      if (args_info->sele2_given)
+		{
+		  fprintf (stderr, "%s: `--sele2' option given more than once\n", CMDLINE_PARSER_PACKAGE);
+		  clear_args ();
+		  exit (EXIT_FAILURE);
+		}
+	      args_info->sele2_given = 1;
+	      args_info->sele2_arg = gengetopt_strdup (optarg);
+	      break;
+	    }
           
 
         case '?':	/* Invalid option.  */

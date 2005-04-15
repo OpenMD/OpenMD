@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -42,28 +42,28 @@
 #include "utils/Trim.hpp"
 namespace oopse {
 
-void trimLeft(std::string& str) {
+  void trimLeft(std::string& str) {
     trimLeftIf(str, std::isspace);
-}
+  }
 
-void trimRight(std::string& str) {
+  void trimRight(std::string& str) {
     trimRightIf(str, std::isspace);
-}
+  }
 
-void trim(std::string& str) {
+  void trim(std::string& str) {
     trimIf(str, std::isspace);
-}
+  }
 
-std::string trimLeftCopy(const std::string& input) {
+  std::string trimLeftCopy(const std::string& input) {
     return trimLeftCopyIf(input, std::isspace);
-}
+  }
 
-std::string trimRightCopy(const std::string& input) {
+  std::string trimRightCopy(const std::string& input) {
     return trimRightCopyIf(input, std::isspace);
-}
+  }
 
-std::string trimCopy(const std::string& input) {
+  std::string trimCopy(const std::string& input) {
     return trimCopyIf(input, std::isspace);
-}
+  }
 
 }

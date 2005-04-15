@@ -46,43 +46,43 @@
 #include "primitives/Molecule.hpp"
 namespace oopse {
 
-GofXyz::GofXyz(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2, const std::string& sele3, double len, int nrbins)
+  GofXyz::GofXyz(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2, const std::string& sele3, double len, int nrbins)
     : RadialDistrFunc(info, filename, sele1, sele2), evaluator3_(info), seleMan3_(info), len_(len), halfLen_(len/2), nRBins_(nrbins) {
-    setOutputName(getPrefix(filename) + ".gxyz");
+      setOutputName(getPrefix(filename) + ".gxyz");
 
-    evaluator3_.loadScriptString(sele3);
-    if (!evaluator3_.isDynamic()) {
+      evaluator3_.loadScriptString(sele3);
+      if (!evaluator3_.isDynamic()) {
         seleMan3_.setSelectionSet(evaluator3_.evaluate());
-    }    
+      }    
 
-    deltaR_ =  len_ / nRBins_;
+      deltaR_ =  len_ / nRBins_;
     
-    histogram_.resize(nRBins_);
-    for (int i = 0 ; i < nRBins_; ++i) {
+      histogram_.resize(nRBins_);
+      for (int i = 0 ; i < nRBins_; ++i) {
         histogram_[i].resize(nRBins_);
         for(int j = 0; j < nRBins_; ++j) {
-            histogram_[i][j].resize(nRBins_);
+	  histogram_[i][j].resize(nRBins_);
         }
-    }   
+      }   
    
-}
+    }
 
 
-void GofXyz::preProcess() {
+  void GofXyz::preProcess() {
     for (int i = 0 ; i < nRBins_; ++i) {
-        histogram_[i].resize(nRBins_);
-        for(int j = 0; j < nRBins_; ++j) {
-            std::fill(histogram_[i][j].begin(), histogram_[i][j].end(), 0);
-        }
+      histogram_[i].resize(nRBins_);
+      for(int j = 0; j < nRBins_; ++j) {
+	std::fill(histogram_[i][j].begin(), histogram_[i][j].end(), 0);
+      }
     }   
-}
+  }
 
 
-void GofXyz::initalizeHistogram() {
+  void GofXyz::initalizeHistogram() {
     //calculate the center of mass of the molecule of selected stuntdouble in selection1
 
     if (!evaluator3_.isDynamic()) {
-        seleMan3_.setSelectionSet(evaluator3_.evaluate());
+      seleMan3_.setSelectionSet(evaluator3_.evaluate());
     }    
 
     assert(seleMan1_.getSelectionCount() == seleMan3_.getSelectionCount());
@@ -100,32 +100,32 @@ void GofXyz::initalizeHistogram() {
     StuntDouble* sd3;
     
     for (sd1 = seleMan1_.beginSelected(i), sd3 = seleMan3_.beginSelected(j); 
-        sd1 != NULL, sd3 != NULL;
-        sd1 = seleMan1_.nextSelected(i), sd3 = seleMan3_.nextSelected(j)) {
+	 sd1 != NULL, sd3 != NULL;
+	 sd1 = seleMan1_.nextSelected(i), sd3 = seleMan3_.nextSelected(j)) {
 
-        Vector3d r3 =sd3->getPos();
-        Vector3d r1 = sd1->getPos();
-        Vector3d v1 =  r3 - r1;
-        info_->getSnapshotManager()->getCurrentSnapshot()->wrapVector(v1);
-        Vector3d zaxis = sd1->getElectroFrame().getColumn(2);
-        Vector3d xaxis = cross(v1, zaxis);
-        Vector3d yaxis = cross(zaxis, xaxis);
+      Vector3d r3 =sd3->getPos();
+      Vector3d r1 = sd1->getPos();
+      Vector3d v1 =  r3 - r1;
+      info_->getSnapshotManager()->getCurrentSnapshot()->wrapVector(v1);
+      Vector3d zaxis = sd1->getElectroFrame().getColumn(2);
+      Vector3d xaxis = cross(v1, zaxis);
+      Vector3d yaxis = cross(zaxis, xaxis);
 
-        xaxis.normalize();
-        yaxis.normalize();
-        zaxis.normalize();
+      xaxis.normalize();
+      yaxis.normalize();
+      zaxis.normalize();
 
-        RotMat3x3d rotMat;
-        rotMat.setRow(0, xaxis);
-        rotMat.setRow(1, yaxis);
-        rotMat.setRow(2, zaxis);
+      RotMat3x3d rotMat;
+      rotMat.setRow(0, xaxis);
+      rotMat.setRow(1, yaxis);
+      rotMat.setRow(2, zaxis);
         
-        rotMats_.insert(std::map<int, RotMat3x3d>::value_type(sd1->getGlobalIndex(), rotMat));
+      rotMats_.insert(std::map<int, RotMat3x3d>::value_type(sd1->getGlobalIndex(), rotMat));
     }
 
-}
+  }
 
-void GofXyz::collectHistogram(StuntDouble* sd1, StuntDouble* sd2) {
+  void GofXyz::collectHistogram(StuntDouble* sd1, StuntDouble* sd2) {
 
     Vector3d pos1 = sd1->getPos();
     Vector3d pos2 = sd2->getPos();
@@ -144,36 +144,36 @@ void GofXyz::collectHistogram(StuntDouble* sd1, StuntDouble* sd2) {
     if (xbin < nRBins_ && xbin >=0 &&
         ybin < nRBins_ && ybin >= 0 &&
         zbin < nRBins_ && zbin >=0 ) {
-        ++histogram_[xbin][ybin][zbin];
+      ++histogram_[xbin][ybin][zbin];
     }
     
-}
+  }
 
-void GofXyz::writeRdf() {
+  void GofXyz::writeRdf() {
     std::ofstream rdfStream(outputFilename_.c_str(), std::ios::binary);
     if (rdfStream.is_open()) {
-        //rdfStream << "#g(x, y, z)\n";
-        //rdfStream << "#selection1: (" << selectionScript1_ << ")\t";
-        //rdfStream << "selection2: (" << selectionScript2_ << ")\n";
-        //rdfStream << "#nRBins = " << nRBins_ << "\t maxLen = " << len_ << "deltaR = " << deltaR_ <<"\n";
-        for (int i = 0; i < histogram_.size(); ++i) {
+      //rdfStream << "#g(x, y, z)\n";
+      //rdfStream << "#selection1: (" << selectionScript1_ << ")\t";
+      //rdfStream << "selection2: (" << selectionScript2_ << ")\n";
+      //rdfStream << "#nRBins = " << nRBins_ << "\t maxLen = " << len_ << "deltaR = " << deltaR_ <<"\n";
+      for (int i = 0; i < histogram_.size(); ++i) {
  
-            for(int j = 0; j < histogram_[i].size(); ++j) {
+	for(int j = 0; j < histogram_[i].size(); ++j) {
  
-                for(int k = 0;k < histogram_[i][j].size(); ++k) {
-                    rdfStream.write(reinterpret_cast<char *>(&histogram_[i][j][k] ), sizeof(histogram_[i][j][k] ));
-                }
-            }
-        }
+	  for(int k = 0;k < histogram_[i][j].size(); ++k) {
+	    rdfStream.write(reinterpret_cast<char *>(&histogram_[i][j][k] ), sizeof(histogram_[i][j][k] ));
+	  }
+	}
+      }
         
     } else {
 
-        sprintf(painCave.errMsg, "GofXyz: unable to open %s\n", outputFilename_.c_str());
-        painCave.isFatal = 1;
-        simError();  
+      sprintf(painCave.errMsg, "GofXyz: unable to open %s\n", outputFilename_.c_str());
+      painCave.isFatal = 1;
+      simError();  
     }
 
     rdfStream.close();
-}
+  }
 
 }

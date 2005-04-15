@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -47,71 +47,71 @@
 
 namespace oopse {
 
-int *Exclude::getExcludeList() {
+  int *Exclude::getExcludeList() {
 
     if (modified_) {
-        excludeList_.clear();
+      excludeList_.clear();
 
-        for (std::set<std::pair<int,int> >::iterator i = excludeSet_.begin();i != excludeSet_.end(); ++i) {
-            excludeList_.push_back(i->first + 1);
-            excludeList_.push_back(i->second + 1);            
-        }
-        modified_ = false;
+      for (std::set<std::pair<int,int> >::iterator i = excludeSet_.begin();i != excludeSet_.end(); ++i) {
+	excludeList_.push_back(i->first + 1);
+	excludeList_.push_back(i->second + 1);            
+      }
+      modified_ = false;
     } 
 
     return excludeList_.size() > 0 ? &(excludeList_[0]) : NULL;    
-}
+  }
 
-void Exclude::addPair(int i, int j) {
+  void Exclude::addPair(int i, int j) {
 
     if (i == j) {
-        return;
+      return;
     } else if (i > j) {
-        std::swap(i, j);
+      std::swap(i, j);
     }
 
     std::set<std::pair<int, int> >::iterator iter = excludeSet_.find(std::make_pair(i, j));
 
     if (iter == excludeSet_.end()) {
-        excludeSet_.insert(std::make_pair(i, j));
-        modified_ = true;
+      excludeSet_.insert(std::make_pair(i, j));
+      modified_ = true;
     }
-}
+  }
 
-void Exclude::removePair(int i, int j) {
+  void Exclude::removePair(int i, int j) {
 
     if (i == j) {
-        return;
+      return;
     } else if (i > j) {
-        std::swap(i, j);
+      std::swap(i, j);
     }
 
 
     std::set<std::pair<int, int> >::iterator iter = excludeSet_.find(std::make_pair(i, j));
 
     if (iter != excludeSet_.end()) {
-        excludeSet_.erase(iter);
-        modified_ = true;
+      excludeSet_.erase(iter);
+      modified_ = true;
     }
-}
+  }
 
-bool Exclude::hasPair(int i, int j) {
+  bool Exclude::hasPair(int i, int j) {
 
     if (i == j) {
-        return false;
+      return false;
     } else if (i > j) {
-        std::swap(i, j);
+      std::swap(i, j);
     }
 
     std::set<std::pair<int, int> >::iterator  iter = excludeSet_.find(std::make_pair(i, j));
     return iter == excludeSet_.end() ? false : true; 
-}
+  }
 
-int Exclude::getSize() {
+  int Exclude::getSize() {
     return excludeSet_.size();
-}
+  }
 
-std::ostream& operator <<(std::ostream& o, Exclude& e) {
+  std::ostream& operator <<(std::ostream& o, Exclude& e) {
     std::set<std::pair<int, int> >::iterator i;
 
     int index;
@@ -119,13 +119,13 @@ std::ostream& operator <<(std::ostream& o, Exclude& e) {
     index = 0;
 
     for(i = e.excludeSet_.begin(); i != e.excludeSet_.end(); ++i) {
-        o << "exclude[" << index << "] i, j: " << (*i).first << " - "
-            << (*i).second << "\n";
-        index++;
+      o << "exclude[" << index << "] i, j: " << (*i).first << " - "
+	<< (*i).second << "\n";
+      index++;
     }
 
     return o;
-}
+  }
 
 }
 

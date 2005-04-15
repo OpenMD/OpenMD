@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -39,32 +39,32 @@
  * such damages.
  */
   
- /**
-  * @file Stats.cpp
-  * @author tlin
-  * @date 11/04/2004
-  * @time 14:26am
-  * @version 1.0
-  */
+/**
+ * @file Stats.cpp
+ * @author tlin
+ * @date 11/04/2004
+ * @time 14:26am
+ * @version 1.0
+ */
 
 #include "brains/Stats.hpp"
 
 namespace oopse {
 
-bool Stats::isInit_ = false;
-std::string Stats::title_[Stats::ENDINDEX - Stats::BEGININDEX];
-std::string Stats::units_[Stats::ENDINDEX - Stats::BEGININDEX];
+  bool Stats::isInit_ = false;
+  std::string Stats::title_[Stats::ENDINDEX - Stats::BEGININDEX];
+  std::string Stats::units_[Stats::ENDINDEX - Stats::BEGININDEX];
 
-Stats::Stats() {
+  Stats::Stats() {
 
     if (!isInit_) {
-        init();
-        isInit_ = true;
+      init();
+      isInit_ = true;
     }
 
-}
+  }
 
-void Stats::init() {
+  void Stats::init() {
 
     Stats::title_[TIME] = "Time";
     Stats::title_[TOTAL_ENERGY] = "Total Energy";
@@ -105,6 +105,6 @@ void Stats::init() {
     Stats::units_[IMPROPER_POTENTIAL] = "kcal/mol";
     Stats::units_[VRAW] = "kcal/mol";
     Stats::units_[VHARM] = "kcal/mol";
-}
+  }
 
 }

@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -100,17 +100,17 @@ void throwMPIEvent(event* the_event)
     case MOLECULE:
       mpiEventContainer.type = mpiMOLECULE;
       mpiEventContainer.i1 = the_event->evt.blk_index; // pack block index into first int  
-    break;
+      break;
 
     case RIGIDBODY:
       mpiEventContainer.type = mpiRIGIDBODY;
       mpiEventContainer.i1 = the_event->evt.blk_index; // pack block index into first int  
-    break;
+      break;
 
     case CUTOFFGROUP:
       mpiEventContainer.type = mpiCUTOFFGROUP;
       mpiEventContainer.i1 = the_event->evt.blk_index; // pack block index into first int  
-    break;
+      break;
 
     case ATOM:
       mpiEventContainer.type = mpiATOM;
@@ -347,7 +347,7 @@ void mpiCatchEvent(void)
     the_event.evt.mbrs.nMembers = mpiEventContainer.i1; 
 
     the_event.evt.mbrs.memberList = (int *) calloc(the_event.evt.mbrs.nMembers,
-                                                    sizeof(int));
+						   sizeof(int));
     
     // Grab the member list since we have a number of members:
     MPI_Bcast(the_event.evt.mbrs.memberList, the_event.evt.mbrs.nMembers, 

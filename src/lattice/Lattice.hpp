@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -47,7 +47,7 @@
 
 namespace oopse {
 
-class Lattice{
+  class Lattice{
   protected:
     Lattice(){
       
@@ -63,7 +63,7 @@ class Lattice{
 
     void getLatticePointsPos(std::vector<Vector3d>& latticePos, int nx, int ny, int nz);
 
-     std::vector<Vector3d> getLatticePointsOrt() {return cellSitesOrt;}
+    std::vector<Vector3d> getLatticePointsOrt() {return cellSitesOrt;}
     
     //get lattice constant of unit cell
     virtual  std::vector<double> getLatticeConstant() =0;
@@ -84,10 +84,10 @@ class Lattice{
     
     int nCellSites;
     Vector3d origin;    
-     std::vector<Vector3d> cellSitesPos;
-     std::vector<Vector3d> cellSitesOrt;
+    std::vector<Vector3d> cellSitesPos;
+    std::vector<Vector3d> cellSitesOrt;
     Vector3d cellLen;
-};
+  };
 
 
 }

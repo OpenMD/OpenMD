@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -39,13 +39,13 @@
  * such damages.
  */
  
- /**
-  * @file ForceManager.cpp
-  * @author tlin
-  * @date 11/09/2004
-  * @time 10:39am
-  * @version 1.0
-  */
+/**
+ * @file ForceManager.cpp
+ * @author tlin
+ * @date 11/09/2004
+ * @time 10:39am
+ * @version 1.0
+ */
 
 #include "brains/ForceManager.hpp"
 #include "primitives/Molecule.hpp"
@@ -53,10 +53,10 @@
 #include "utils/simError.h"
 namespace oopse {
 
-void ForceManager::calcForces(bool needPotential, bool needStress) {
+  void ForceManager::calcForces(bool needPotential, bool needStress) {
 
     if (!info_->isFortranInitialized()) {
-        info_->update();
+      info_->update();
     }
 
     preCalculation();
@@ -67,9 +67,9 @@ void ForceManager::calcForces(bool needPotential, bool needStress) {
 
     postCalculation();
         
-}
+  }
 
-void ForceManager::preCalculation() {
+  void ForceManager::preCalculation() {
     SimInfo::MoleculeIterator mi;
     Molecule* mol;
     Molecule::AtomIterator ai;
@@ -80,19 +80,19 @@ void ForceManager::preCalculation() {
     // forces are zeroed here, before any are accumulated.
     // NOTE: do not rezero the forces in Fortran.
     for (mol = info_->beginMolecule(mi); mol != NULL; mol = info_->nextMolecule(mi)) {
-        for(atom = mol->beginAtom(ai); atom != NULL; atom = mol->nextAtom(ai)) {
-            atom->zeroForcesAndTorques();
-        }
+      for(atom = mol->beginAtom(ai); atom != NULL; atom = mol->nextAtom(ai)) {
+	atom->zeroForcesAndTorques();
+      }
         
-        //change the positions of atoms which belong to the rigidbodies
-        for (rb = mol->beginRigidBody(rbIter); rb != NULL; rb = mol->nextRigidBody(rbIter)) {
-            rb->zeroForcesAndTorques();
-        }        
+      //change the positions of atoms which belong to the rigidbodies
+      for (rb = mol->beginRigidBody(rbIter); rb != NULL; rb = mol->nextRigidBody(rbIter)) {
+	rb->zeroForcesAndTorques();
+      }        
     }
     
-}
+  }
 
-void ForceManager::calcShortRangeInteraction() {
+  void ForceManager::calcShortRangeInteraction() {
     Molecule* mol;
     RigidBody* rb;
     Bond* bond;
@@ -107,35 +107,35 @@ void ForceManager::calcShortRangeInteraction() {
     //calculate short range interactions    
     for (mol = info_->beginMolecule(mi); mol != NULL; mol = info_->nextMolecule(mi)) {
 
-        //change the positions of atoms which belong to the rigidbodies
-        for (rb = mol->beginRigidBody(rbIter); rb != NULL; rb = mol->nextRigidBody(rbIter)) {
-            rb->updateAtoms();
-        }
+      //change the positions of atoms which belong to the rigidbodies
+      for (rb = mol->beginRigidBody(rbIter); rb != NULL; rb = mol->nextRigidBody(rbIter)) {
+	rb->updateAtoms();
+      }
 
-        for (bond = mol->beginBond(bondIter); bond != NULL; bond = mol->nextBond(bondIter)) {
-            bond->calcForce();
-        }
+      for (bond = mol->beginBond(bondIter); bond != NULL; bond = mol->nextBond(bondIter)) {
+	bond->calcForce();
+      }
 
-        for (bend = mol->beginBend(bendIter); bend != NULL; bend = mol->nextBend(bendIter)) {
-            bend->calcForce();
-        }
+      for (bend = mol->beginBend(bendIter); bend != NULL; bend = mol->nextBend(bendIter)) {
+	bend->calcForce();
+      }
 
-        for (torsion = mol->beginTorsion(torsionIter); torsion != NULL; torsion = mol->nextTorsion(torsionIter)) {
-            torsion->calcForce();
-        }
+      for (torsion = mol->beginTorsion(torsionIter); torsion != NULL; torsion = mol->nextTorsion(torsionIter)) {
+	torsion->calcForce();
+      }
 
     }
     
     double  shortRangePotential = 0.0;
     for (mol = info_->beginMolecule(mi); mol != NULL; mol = info_->nextMolecule(mi)) {
-        shortRangePotential += mol->getPotential();
+      shortRangePotential += mol->getPotential();
     }
 
     Snapshot* curSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
     curSnapshot->statData[Stats::SHORT_RANGE_POTENTIAL] = shortRangePotential;
-}
+  }
 
-void ForceManager::calcLongRangeInteraction(bool needPotential, bool needStress) {
+  void ForceManager::calcLongRangeInteraction(bool needPotential, bool needStress) {
     Snapshot* curSnapshot;
     DataStorage* config;
     double* frc;
@@ -166,17 +166,17 @@ void ForceManager::calcLongRangeInteraction(bool needPotential, bool needStress)
     
     if(info_->getNCutoffGroups() > 0){
 
-    for (mol = info_->beginMolecule(mi); mol != NULL; mol = info_->nextMolecule(mi)) {
+      for (mol = info_->beginMolecule(mi); mol != NULL; mol = info_->nextMolecule(mi)) {
         for(cg = mol->beginCutoffGroup(ci); cg != NULL; cg = mol->nextCutoffGroup(ci)) {
-            cg->getCOM(com);
-            rcGroup.push_back(com);
+	  cg->getCOM(com);
+	  rcGroup.push_back(com);
         }
-    }// end for (mol)
+      }// end for (mol)
        
-        rc = rcGroup[0].getArrayPointer();
+      rc = rcGroup[0].getArrayPointer();
     } else {
-        // center of mass of the group is the same as position of the atom  if cutoff group does not exist
-        rc = pos;
+      // center of mass of the group is the same as position of the atom  if cutoff group does not exist
+      rc = pos;
     }
   
     //initialize data before passing to fortran
@@ -187,31 +187,31 @@ void ForceManager::calcLongRangeInteraction(bool needPotential, bool needStress)
     int isError = 0;
 
     doForceLoop( pos,
-            rc,
-            A,
-            electroFrame,
-            frc,
-            trq,
-            tau.getArrayPointer(),
-            &longRangePotential, 
-            &passedCalcPot,
-            &passedCalcStress,
-            &isError );
+		 rc,
+		 A,
+		 electroFrame,
+		 frc,
+		 trq,
+		 tau.getArrayPointer(),
+		 &longRangePotential, 
+		 &passedCalcPot,
+		 &passedCalcStress,
+		 &isError );
 
     if( isError ){
-        sprintf( painCave.errMsg,
-             "Error returned from the fortran force calculation.\n" );
-        painCave.isFatal = 1;
-        simError();
+      sprintf( painCave.errMsg,
+	       "Error returned from the fortran force calculation.\n" );
+      painCave.isFatal = 1;
+      simError();
     }
 
     //store the tau and long range potential    
     curSnapshot->statData[Stats::LONG_RANGE_POTENTIAL] = longRangePotential;
     curSnapshot->statData.setTau(tau);
-}
+  }
 
 
-void ForceManager::postCalculation() {
+  void ForceManager::postCalculation() {
     SimInfo::MoleculeIterator mi;
     Molecule* mol;
     Molecule::RigidBodyIterator rbIter;
@@ -219,11 +219,11 @@ void ForceManager::postCalculation() {
     
     // collect the atomic forces onto rigid bodies
     for (mol = info_->beginMolecule(mi); mol != NULL; mol = info_->nextMolecule(mi)) {
-        for (rb = mol->beginRigidBody(rbIter); rb != NULL; rb = mol->nextRigidBody(rbIter)) {
-            rb->calcForcesAndTorques();
-        }
+      for (rb = mol->beginRigidBody(rbIter); rb != NULL; rb = mol->nextRigidBody(rbIter)) {
+	rb->calcForcesAndTorques();
+      }
     }
 
-}
+  }
 
 } //end namespace oopse

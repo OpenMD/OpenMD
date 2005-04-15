@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -55,49 +55,49 @@
 
 namespace oopse {
 
-class Bond {
-    public:
-        Bond(Atom* atom1, Atom* atom2, BondType* bt) : atom1_(atom1), atom2_(atom2), bondType_(bt) {}
-        virtual ~Bond() {}
-        void calcForce() {
-            double len;
-            double dvdr;
-            Vector3d r12;
-            Vector3d force;
+  class Bond {
+  public:
+    Bond(Atom* atom1, Atom* atom2, BondType* bt) : atom1_(atom1), atom2_(atom2), bondType_(bt) {}
+    virtual ~Bond() {}
+    void calcForce() {
+      double len;
+      double dvdr;
+      Vector3d r12;
+      Vector3d force;
 
-            r12 = atom2_->getPos() - atom1_->getPos();
-            len = r12.length();            
-            bondType_->calcForce(len,  potential_, dvdr);
+      r12 = atom2_->getPos() - atom1_->getPos();
+      len = r12.length();            
+      bondType_->calcForce(len,  potential_, dvdr);
 
-            force = r12 * (-dvdr / len);
+      force = r12 * (-dvdr / len);
             
-            atom1_->addFrc(-force);
-            atom2_->addFrc(force);
-       }
+      atom1_->addFrc(-force);
+      atom2_->addFrc(force);
+    }
         
-        double getPotential() {
-            return potential_;
-        }
+    double getPotential() {
+      return potential_;
+    }
 
-        Atom* getAtomA() {
-            return atom1_;
-        }
+    Atom* getAtomA() {
+      return atom1_;
+    }
 
-        Atom* getAtomB() {
-            return atom2_;
-        }
+    Atom* getAtomB() {
+      return atom2_;
+    }
 
-        BondType* getBondType() {
-            return bondType_;
-        }
+    BondType* getBondType() {
+      return bondType_;
+    }
         
-    private:
-        double potential_;
-        Atom* atom1_;
-        Atom* atom2_;        
-        BondType* bondType_; /**< bond type */
+  private:
+    double potential_;
+    Atom* atom1_;
+    Atom* atom2_;        
+    BondType* bondType_; /**< bond type */
 
-};    
+  };    
 
 
 

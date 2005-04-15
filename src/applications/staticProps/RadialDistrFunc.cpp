@@ -46,24 +46,24 @@
 #include "primitives/Molecule.hpp"
 namespace oopse {
 
-RadialDistrFunc::        RadialDistrFunc(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2)
-        : info_(info), currentSnapshot_(NULL), dumpFilename_(filename), step_(1), 
-          selectionScript1_(sele1), selectionScript2_(sele2), evaluator1_(info), evaluator2_(info), 
-          seleMan1_(info), seleMan2_(info), common_(info), sele1_minus_common_(info), sele2_minus_common_(info){
+  RadialDistrFunc::        RadialDistrFunc(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2)
+    : info_(info), currentSnapshot_(NULL), dumpFilename_(filename), step_(1), 
+      selectionScript1_(sele1), selectionScript2_(sele2), evaluator1_(info), evaluator2_(info), 
+      seleMan1_(info), seleMan2_(info), common_(info), sele1_minus_common_(info), sele2_minus_common_(info){
           
-    evaluator1_.loadScriptString(sele1);
-    evaluator2_.loadScriptString(sele2);
+      evaluator1_.loadScriptString(sele1);
+      evaluator2_.loadScriptString(sele2);
 
-    if (!evaluator1_.isDynamic()) {
+      if (!evaluator1_.isDynamic()) {
         seleMan1_.setSelectionSet(evaluator1_.evaluate());
         validateSelection1(seleMan1_);
-    }
-    if (!evaluator2_.isDynamic()) {
+      }
+      if (!evaluator2_.isDynamic()) {
         seleMan2_.setSelectionSet(evaluator2_.evaluate());
         validateSelection2(seleMan2_);
-    }
+      }
 
-    if (!evaluator1_.isDynamic() && !evaluator2_.isDynamic()) {
+      if (!evaluator1_.isDynamic() && !evaluator2_.isDynamic()) {
         //if all selections are static,  we can precompute the number of real pairs    
         common_ = seleMan1_ & seleMan2_;
         sele1_minus_common_ = seleMan1_ - common_;
@@ -74,11 +74,11 @@ RadialDistrFunc::        RadialDistrFunc(SimInfo* info, const std::string& filen
         int nIntersect = common_.getSelectionCount();
         
         nPairs_ = nSelected1 * nSelected2 - (nIntersect +1) * nIntersect/2;            
-    }
+      }
     
-}
+    }
 
-void RadialDistrFunc::process() {
+  void RadialDistrFunc::process() {
     Molecule* mol;
     RigidBody* rb;
     SimInfo::MoleculeIterator mi;
@@ -91,72 +91,72 @@ void RadialDistrFunc::process() {
     nProcessed_ = nFrames / step_;
 
     for (int i = 0; i < nFrames; i += step_) {
-        reader.readFrame(i);
-        currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
+      reader.readFrame(i);
+      currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
 
-        if (evaluator1_.isDynamic()) {
-            seleMan1_.setSelectionSet(evaluator1_.evaluate());
-            validateSelection1(seleMan1_);
-        }
-        if (evaluator2_.isDynamic()) {
-            seleMan2_.setSelectionSet(evaluator2_.evaluate());
-            validateSelection2(seleMan2_);
-        }
+      if (evaluator1_.isDynamic()) {
+	seleMan1_.setSelectionSet(evaluator1_.evaluate());
+	validateSelection1(seleMan1_);
+      }
+      if (evaluator2_.isDynamic()) {
+	seleMan2_.setSelectionSet(evaluator2_.evaluate());
+	validateSelection2(seleMan2_);
+      }
 
-        for (mol = info_->beginMolecule(mi); mol != NULL; mol = info_->nextMolecule(mi)) {
+      for (mol = info_->beginMolecule(mi); mol != NULL; mol = info_->nextMolecule(mi)) {
 
-            //change the positions of atoms which belong to the rigidbodies
-            for (rb = mol->beginRigidBody(rbIter); rb != NULL; rb = mol->nextRigidBody(rbIter)) {
-                rb->updateAtoms();
-            }
-        }
+	//change the positions of atoms which belong to the rigidbodies
+	for (rb = mol->beginRigidBody(rbIter); rb != NULL; rb = mol->nextRigidBody(rbIter)) {
+	  rb->updateAtoms();
+	}
+      }
         
-        initalizeHistogram();
+      initalizeHistogram();
 
 
         
-        //selections may overlap.
-        //
-        // |s1 -c | c |
-        //            | c |s2 - c|
-        //
-        // s1 : number of selected stuntdoubles in selection1
-        // s2 : number of selected stuntdoubles in selection2
-        // c   : number of intersect stuntdouble between selection1 and selection2
-        //when loop over the pairs, we can divide the looping into 3 stages
-        //stage 1 :     [s1-c]      [s2]
-        //stage 2 :     [c]            [s2 - c]
-        //stage 3 :     [c]            [c]
-        //stage 1 and stage 2 are completly non-overlapping
-        //stage 3 are completely overlapping
+      //selections may overlap.
+      //
+      // |s1 -c | c |
+      //            | c |s2 - c|
+      //
+      // s1 : number of selected stuntdoubles in selection1
+      // s2 : number of selected stuntdoubles in selection2
+      // c   : number of intersect stuntdouble between selection1 and selection2
+      //when loop over the pairs, we can divide the looping into 3 stages
+      //stage 1 :     [s1-c]      [s2]
+      //stage 2 :     [c]            [s2 - c]
+      //stage 3 :     [c]            [c]
+      //stage 1 and stage 2 are completly non-overlapping
+      //stage 3 are completely overlapping
 
-        if (evaluator1_.isDynamic() || evaluator2_.isDynamic()) {
+      if (evaluator1_.isDynamic() || evaluator2_.isDynamic()) {
 
-            common_ = seleMan1_ & seleMan2_;
-            sele1_minus_common_ = seleMan1_ - common_;
-            sele2_minus_common_ = seleMan2_ - common_;            
-            int nSelected1 = seleMan1_.getSelectionCount();
-            int nSelected2 = seleMan2_.getSelectionCount();
-            int nIntersect = common_.getSelectionCount();
+	common_ = seleMan1_ & seleMan2_;
+	sele1_minus_common_ = seleMan1_ - common_;
+	sele2_minus_common_ = seleMan2_ - common_;            
+	int nSelected1 = seleMan1_.getSelectionCount();
+	int nSelected2 = seleMan2_.getSelectionCount();
+	int nIntersect = common_.getSelectionCount();
             
-            nPairs_ = nSelected1 * nSelected2 - (nIntersect +1) * nIntersect/2;                      
-        }
+	nPairs_ = nSelected1 * nSelected2 - (nIntersect +1) * nIntersect/2;                      
+      }
 
-        processNonOverlapping(sele1_minus_common_, seleMan2_);
-        processNonOverlapping(common_, sele2_minus_common_);        
-        processOverlapping(common_);
+      processNonOverlapping(sele1_minus_common_, seleMan2_);
+      processNonOverlapping(common_, sele2_minus_common_);        
+      processOverlapping(common_);
         
         
-        processHistogram();
+      processHistogram();
         
     }
 
     postProcess();
 
     writeRdf();
-}
+  }
 
-void RadialDistrFunc::processNonOverlapping( SelectionManager& sman1, SelectionManager& sman2) {
+  void RadialDistrFunc::processNonOverlapping( SelectionManager& sman1, SelectionManager& sman2) {
     StuntDouble* sd1;
     StuntDouble* sd2;
     int i;    
@@ -164,14 +164,14 @@ void RadialDistrFunc::processNonOverlapping( SelectionManager& sman1, SelectionM
     
     for (sd1 = sman1.beginSelected(i); sd1 != NULL; sd1 = sman1.nextSelected(i)) {
 
-        for (sd2 = sman2.beginSelected(j); sd2 != NULL; sd2 = sman2.nextSelected(j)) {
-            collectHistogram(sd1, sd2);
-        }            
+      for (sd2 = sman2.beginSelected(j); sd2 != NULL; sd2 = sman2.nextSelected(j)) {
+	collectHistogram(sd1, sd2);
+      }            
     }
 
-}
+  }
 
-void RadialDistrFunc::processOverlapping( SelectionManager& sman) {
+  void RadialDistrFunc::processOverlapping( SelectionManager& sman) {
     StuntDouble* sd1;
     StuntDouble* sd2;
     int i;    
@@ -182,11 +182,11 @@ void RadialDistrFunc::processOverlapping( SelectionManager& sman) {
     //  for (int j = i + 1; j < n; ++j) {}
     
     for (sd1 = sman.beginSelected(i); sd1 != NULL; sd1 = sman.nextSelected(i)) {                    
-        for (j  = i, sd2 = sman.nextSelected(j); sd2 != NULL; sd2 = sman.nextSelected(j)) {
-            collectHistogram(sd1, sd2);
-        }            
+      for (j  = i, sd2 = sman.nextSelected(j); sd2 != NULL; sd2 = sman.nextSelected(j)) {
+	collectHistogram(sd1, sd2);
+      }            
     }
 
-}
+  }
 
 }

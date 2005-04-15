@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -103,69 +103,69 @@ int main(int argc,char* argv[]){
 
 
 
-    //register forcefields, integrators and minimizers
-    registerAll();
+  //register forcefields, integrators and minimizers
+  registerAll();
 
-    //create simulation model
-    SimCreator creator;
-    SimInfo* info = creator.createSim(argv[1]);
-    Globals* simParams = info->getSimParams();
+  //create simulation model
+  SimCreator creator;
+  SimInfo* info = creator.createSim(argv[1]);
+  Globals* simParams = info->getSimParams();
 
-    if (simParams->haveMinimizer() && simParams->haveEnsemble()) {
-        sprintf(painCave.errMsg, "Minimizer keyword and Ensemble keyword can not exist together\n");
-        painCave.isFatal = 1;
-        simError();        
-    }
+  if (simParams->haveMinimizer() && simParams->haveEnsemble()) {
+    sprintf(painCave.errMsg, "Minimizer keyword and Ensemble keyword can not exist together\n");
+    painCave.isFatal = 1;
+    simError();        
+  }
     
-    if (simParams->haveMinimizer()) {
-        //create minimizer
-        Minimizer* myMinimizer = MinimizerFactory::getInstance()->createMinimizer(simParams->getMinimizer(), info);
+  if (simParams->haveMinimizer()) {
+    //create minimizer
+    Minimizer* myMinimizer = MinimizerFactory::getInstance()->createMinimizer(simParams->getMinimizer(), info);
 
-        if (myMinimizer == NULL) {
-            sprintf(painCave.errMsg, "Minimizer Factory can not create %s Minimizer\n",
-                    simParams->getMinimizer());
-            painCave.isFatal = 1;
-            simError();
-        }
+    if (myMinimizer == NULL) {
+      sprintf(painCave.errMsg, "Minimizer Factory can not create %s Minimizer\n",
+	      simParams->getMinimizer());
+      painCave.isFatal = 1;
+      simError();
+    }
 
-        myMinimizer->minimize();
-        delete myMinimizer;
-    } else if (simParams->haveEnsemble()) {
-        //create Integrator
+    myMinimizer->minimize();
+    delete myMinimizer;
+  } else if (simParams->haveEnsemble()) {
+    //create Integrator
 
-        Integrator* myIntegrator = IntegratorFactory::getInstance()->createIntegrator(simParams->getEnsemble(), info);
+    Integrator* myIntegrator = IntegratorFactory::getInstance()->createIntegrator(simParams->getEnsemble(), info);
 
-        if (myIntegrator == NULL) {
-            sprintf(painCave.errMsg, "Integrator Factory can not create %s Integrator\n",
-                    simParams->getEnsemble());
-            painCave.isFatal = 1;
-            simError();
-        }
+    if (myIntegrator == NULL) {
+      sprintf(painCave.errMsg, "Integrator Factory can not create %s Integrator\n",
+	      simParams->getEnsemble());
+      painCave.isFatal = 1;
+      simError();
+    }
                 
-        //Thermodynamic Integration Method
-        //ForceManager* fman = new ThermodynamicForceManager(info);
-       //myIntegrator->setForceManager(fman);
+    //Thermodynamic Integration Method
+    //ForceManager* fman = new ThermodynamicForceManager(info);
+    //myIntegrator->setForceManager(fman);
 
 
-        //Zconstraint-Method
-        if (simParams->haveZconstraints()) {
-            info->setNZconstraint(simParams->getNzConstraints());
-            ForceManager* fman = new ZconstraintForceManager(info);
-            myIntegrator->setForceManager(fman);
-        }
-        
-        myIntegrator->integrate();
-        delete myIntegrator;
-    }else {
-            sprintf(painCave.errMsg, "Integrator Factory can not create %s Integrator\n",
-            simParams->getEnsemble());
-            painCave.isFatal = 1;
-            simError();
+    //Zconstraint-Method
+    if (simParams->haveZconstraints()) {
+      info->setNZconstraint(simParams->getNzConstraints());
+      ForceManager* fman = new ZconstraintForceManager(info);
+      myIntegrator->setForceManager(fman);
     }
+        
+    myIntegrator->integrate();
+    delete myIntegrator;
+  }else {
+    sprintf(painCave.errMsg, "Integrator Factory can not create %s Integrator\n",
+            simParams->getEnsemble());
+    painCave.isFatal = 1;
+    simError();
+  }
 
 
     
-    delete info;
+  delete info;
 
 #ifdef IS_MPI
   strcpy( checkPointMsg, "Oh what a lovely Tea Party!" );

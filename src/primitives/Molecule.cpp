@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -54,12 +54,12 @@
 #include "utils/simError.h"
 
 namespace oopse {
-Molecule::Molecule(int stampId, int globalIndex, const std::string& molName) 
+  Molecule::Molecule(int stampId, int globalIndex, const std::string& molName) 
     : stampId_(stampId), globalIndex_(globalIndex), moleculeName_(molName) {
 
-}
+    }
 
-Molecule::~Molecule() {
+  Molecule::~Molecule() {
 
     MemoryUtils::deletePointers(atoms_);
     MemoryUtils::deletePointers(bonds_);
@@ -72,60 +72,60 @@ Molecule::~Molecule() {
     //integrableObjects_ don't own the objects
     integrableObjects_.clear();
     
-}
+  }
 
-void Molecule::addAtom(Atom* atom) {
+  void Molecule::addAtom(Atom* atom) {
     if (std::find(atoms_.begin(), atoms_.end(), atom) == atoms_.end()) {
-        atoms_.push_back(atom);
+      atoms_.push_back(atom);
     }
-}
+  }
 
-void Molecule::addBond(Bond* bond) {
+  void Molecule::addBond(Bond* bond) {
     if (std::find(bonds_.begin(), bonds_.end(), bond) == bonds_.end()) {
-        bonds_.push_back(bond);
+      bonds_.push_back(bond);
     }
-}
+  }
 
-void Molecule::addBend(Bend* bend) {
+  void Molecule::addBend(Bend* bend) {
     if (std::find(bends_.begin(), bends_.end(), bend) == bends_.end()) {
-        bends_.push_back(bend);
+      bends_.push_back(bend);
     }
-}
+  }
 
-void Molecule::addTorsion(Torsion* torsion) {
+  void Molecule::addTorsion(Torsion* torsion) {
     if (std::find(torsions_.begin(), torsions_.end(), torsion) == torsions_.end()) {
-        torsions_.push_back(torsion);
+      torsions_.push_back(torsion);
     }
-}
+  }
 
-void Molecule::addRigidBody(RigidBody *rb) {
+  void Molecule::addRigidBody(RigidBody *rb) {
     if (std::find(rigidBodies_.begin(), rigidBodies_.end(), rb) == rigidBodies_.end()) {
-        rigidBodies_.push_back(rb);
+      rigidBodies_.push_back(rb);
     }
-}
+  }
 
-void Molecule::addCutoffGroup(CutoffGroup* cp) {
+  void Molecule::addCutoffGroup(CutoffGroup* cp) {
     if (std::find(cutoffGroups_.begin(), cutoffGroups_.end(), cp) == cutoffGroups_.end()) {
-        cutoffGroups_.push_back(cp);
+      cutoffGroups_.push_back(cp);
     }
 
-}
+  }
 
-void Molecule::addConstraintPair(ConstraintPair* cp) {
+  void Molecule::addConstraintPair(ConstraintPair* cp) {
     if (std::find(constraintPairs_.begin(), constraintPairs_.end(), cp) == constraintPairs_.end()) {
-        constraintPairs_.push_back(cp);
+      constraintPairs_.push_back(cp);
     }
 
-}
+  }
 
-void Molecule::addConstraintElem(ConstraintElem* cp) {
+  void Molecule::addConstraintElem(ConstraintElem* cp) {
     if (std::find(constraintElems_.begin(), constraintElems_.end(), cp) == constraintElems_.end()) {
-        constraintElems_.push_back(cp);
+      constraintElems_.push_back(cp);
     }
 
-}
+  }
 
-void Molecule::complete() {
+  void Molecule::complete() {
     
     std::set<Atom*> rigidAtoms;
     RigidBody* rb;
@@ -133,17 +133,17 @@ void Molecule::complete() {
 
     
     for (rb = beginRigidBody(rbIter); rb != NULL; rb = nextRigidBody(rbIter)) {
-        rigidAtoms.insert(rb->getBeginAtomIter(), rb->getEndAtomIter());
+      rigidAtoms.insert(rb->getBeginAtomIter(), rb->getEndAtomIter());
     }
 
     Atom* atom;
     AtomIterator ai;
     for (atom = beginAtom(ai); atom != NULL; atom = nextAtom(ai)) {
    
-        if (rigidAtoms.find(*ai) == rigidAtoms.end()) {
-            //if an atom does not belong to a rigid body, it is an integrable object
-            integrableObjects_.push_back(*ai);
-        }
+      if (rigidAtoms.find(*ai) == rigidAtoms.end()) {
+	//if an atom does not belong to a rigid body, it is an integrable object
+	integrableObjects_.push_back(*ai);
+      }
     }
 
     //find all free atoms (which do not belong to rigid bodies)  
@@ -164,22 +164,22 @@ void Molecule::complete() {
       integrableObjects_.push_back(rb);
     } 
     //integrableObjects_.insert(integrableObjects_.end(), rigidBodies_.begin(), rigidBodies_.end());
-}
+  }
 
-double Molecule::getMass() {
+  double Molecule::getMass() {
     StuntDouble* sd;
     std::vector<StuntDouble*>::iterator i;
     double mass = 0.0;
 
     for (sd = beginIntegrableObject(i); sd != NULL; sd = nextIntegrableObject(i)){
-        mass += sd->getMass();
+      mass += sd->getMass();
     }
 
     return mass;
 
-}
+  }
 
-Vector3d Molecule::getCom() {
+  Vector3d Molecule::getCom() {
     StuntDouble* sd;
     std::vector<StuntDouble*>::iterator i;
     Vector3d com;
@@ -187,27 +187,27 @@ Vector3d Molecule::getCom() {
     double mass;
     
     for (sd = beginIntegrableObject(i); sd != NULL; sd = nextIntegrableObject(i)){
-        mass = sd->getMass();
-        totalMass += mass;
-        com += sd->getPos() * mass;    
+      mass = sd->getMass();
+      totalMass += mass;
+      com += sd->getPos() * mass;    
     }
 
     com /= totalMass;
 
     return com;
-}
+  }
 
-void Molecule::moveCom(const Vector3d& delta) {
+  void Molecule::moveCom(const Vector3d& delta) {
     StuntDouble* sd;
     std::vector<StuntDouble*>::iterator i;
     
     for (sd = beginIntegrableObject(i); sd != NULL; sd = nextIntegrableObject(i)){
-        sd->setPos(sd->getPos() + delta);
+      sd->setPos(sd->getPos() + delta);
     }
 
-}
+  }
 
-Vector3d Molecule::getComVel() {
+  Vector3d Molecule::getComVel() {
     StuntDouble* sd;
     std::vector<StuntDouble*>::iterator i;
     Vector3d velCom;
@@ -215,17 +215,17 @@ Vector3d Molecule::getComVel() {
     double mass;
     
     for (sd = beginIntegrableObject(i); sd != NULL; sd = nextIntegrableObject(i)){
-        mass = sd->getMass();
-        totalMass += mass;
-        velCom += sd->getVel() * mass;    
+      mass = sd->getMass();
+      totalMass += mass;
+      velCom += sd->getVel() * mass;    
     }
 
     velCom /= totalMass;
 
     return velCom;
-}
+  }
 
-double Molecule::getPotential() {
+  double Molecule::getPotential() {
 
     Bond* bond;
     Bend* bend;
@@ -237,22 +237,22 @@ double Molecule::getPotential() {
     double potential = 0.0;
 
     for (bond = beginBond(bondIter); bond != NULL; bond = nextBond(bondIter)) {
-        potential += bond->getPotential();
+      potential += bond->getPotential();
     }
 
     for (bend = beginBend(bendIter); bend != NULL; bend = nextBend(bendIter)) {
-        potential += bend->getPotential();
+      potential += bend->getPotential();
     }
 
     for (torsion = beginTorsion(torsionIter); torsion != NULL; torsion = nextTorsion(torsionIter)) {
-        potential += torsion->getPotential();
+      potential += torsion->getPotential();
     }
 
     return potential;
 
-}
+  }
 
-std::ostream& operator <<(std::ostream& o, Molecule& mol) {
+  std::ostream& operator <<(std::ostream& o, Molecule& mol) {
     o << std::endl;
     o << "Molecule " << mol.getGlobalIndex() << "has: " << std::endl;
     o << mol.getNAtoms() << " atoms" << std::endl;
@@ -264,6 +264,6 @@ std::ostream& operator <<(std::ostream& o, Molecule& mol) {
     o << mol.getNCutoffGroups() << "cutoff groups" << std::endl;
     o << mol.getNConstraintPairs() << "constraint pairs" << std::endl;
     return o;
-}
+  }
 
 }//end namespace oopse

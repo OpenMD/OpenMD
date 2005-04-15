@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -44,48 +44,48 @@
 
 namespace oopse {
 
-//initialize instance of LatticeFactory
-LatticeFactory* LatticeFactory::instance_ = NULL;
+  //initialize instance of LatticeFactory
+  LatticeFactory* LatticeFactory::instance_ = NULL;
 
-LatticeFactory::~LatticeFactory() {
+  LatticeFactory::~LatticeFactory() {
     CreatorMapType::iterator i;
     for (i = creatorMap_.begin(); i != creatorMap_.end(); ++i) {
-        delete i->second;
+      delete i->second;
     }
     creatorMap_.clear();
-}
+  }
 
-bool LatticeFactory::registerLattice(LatticeCreator* creator) {
+  bool LatticeFactory::registerLattice(LatticeCreator* creator) {
     return creatorMap_.insert(
-        CreatorMapType::value_type(creator->getIdent(), creator)).second;
-}
+			      CreatorMapType::value_type(creator->getIdent(), creator)).second;
+  }
 
-bool LatticeFactory::unregisterLattice(const std::string& id) {
+  bool LatticeFactory::unregisterLattice(const std::string& id) {
     return creatorMap_.erase(id) == 1;
-}
+  }
 
-Lattice* LatticeFactory::createLattice(const std::string& id) {
+  Lattice* LatticeFactory::createLattice(const std::string& id) {
     CreatorMapType::iterator i = creatorMap_.find(id);
     if (i != creatorMap_.end()) {
-        //invoke functor to create object
-        return (i->second)->create();
+      //invoke functor to create object
+      return (i->second)->create();
     } else {
-        return NULL;
+      return NULL;
     }
-}
+  }
 
-std::vector<std::string> LatticeFactory::getIdents() {
+  std::vector<std::string> LatticeFactory::getIdents() {
     IdentVectorType idents;
     CreatorMapType::iterator i;
 
     for (i = creatorMap_.begin(); i != creatorMap_.end(); ++i) {
-        idents.push_back(i->first);
+      idents.push_back(i->first);
     }
     
     return idents;
-}
+  }
 
-std::ostream& operator <<(std::ostream& o, LatticeFactory& factory) {
+  std::ostream& operator <<(std::ostream& o, LatticeFactory& factory) {
     LatticeFactory::IdentVectorType idents;
     LatticeFactory::IdentVectorIterator i;
 
@@ -93,10 +93,10 @@ std::ostream& operator <<(std::ostream& o, LatticeFactory& factory) {
 
     o << "Avaliable type identifiers in this factory: " << std::endl;
     for (i = idents.begin(); i != idents.end(); ++i) {
-        o << *i << std::endl;
+      o << *i << std::endl;
     }
 
     return o;
-}
+  }
 
 }

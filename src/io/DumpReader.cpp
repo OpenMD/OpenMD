@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -70,32 +70,32 @@
 namespace oopse {
   
   DumpReader::DumpReader(SimInfo* info, const std::string& filename)
-  : info_(info), filename_(filename), isScanned_(false), nframes_(0) {
+    : info_(info), filename_(filename), isScanned_(false), nframes_(0) {
     
 #ifdef IS_MPI
     
-    if (worldRank == 0) {
+      if (worldRank == 0) {
 #endif
       
-      inFile_ = fopen(filename_.c_str(), "r");
+	inFile_ = fopen(filename_.c_str(), "r");
       
-      if (inFile_ == NULL) {
-        sprintf(painCave.errMsg, "DumpReader: Cannot open file: %s\n", filename_.c_str());
-        painCave.isFatal = 1;
-        simError();
+	if (inFile_ == NULL) {
+	  sprintf(painCave.errMsg, "DumpReader: Cannot open file: %s\n", filename_.c_str());
+	  painCave.isFatal = 1;
+	  simError();
+	}
+      
+#ifdef IS_MPI
+      
       }
-      
-#ifdef IS_MPI
-      
-    }
     
-    strcpy(checkPointMsg, "Dump file opened for reading successfully.");
-    MPIcheckPoint();
+      strcpy(checkPointMsg, "Dump file opened for reading successfully.");
+      MPIcheckPoint();
     
 #endif
     
-    return;
-  }
+      return;
+    }
   
   DumpReader::~DumpReader() {
     

@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -46,7 +46,7 @@
 extern "C" {
 #endif
 
-void yacc_BASS(const char* file_name );
+  void yacc_BASS(const char* file_name );
 
 #ifdef __cplusplus
 }

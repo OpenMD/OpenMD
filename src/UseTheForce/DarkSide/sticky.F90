@@ -50,7 +50,7 @@
 !! @author Matthew Meineke
 !! @author Christopher Fennell
 !! @author J. Daniel Gezelter
-!! @version $Id: sticky.F90,v 1.6 2005-04-13 20:36:45 chuckv Exp $, $Date: 2005-04-13 20:36:45 $, $Name: not supported by cvs2svn $, $Revision: 1.6 $
+!! @version $Id: sticky.F90,v 1.7 2005-04-15 22:03:49 gezelter Exp $, $Date: 2005-04-15 22:03:49 $, $Name: not supported by cvs2svn $, $Revision: 1.7 $
 
 module sticky
 
@@ -83,7 +83,7 @@ module sticky
      real( kind = dp ) :: rup = 0.0_dp
      real( kind = dp ) :: rbig = 0.0_dp
   end type StickyList
-  
+
   type(StickyList), dimension(:),allocatable :: StickyMap
 
 contains
@@ -97,10 +97,10 @@ contains
     real( kind = dp ), intent(in) :: rlp, rup
     integer :: nATypes, myATID
 
-    
+
     isError = 0
     myATID = getFirstMatchingElement(atypes, "c_ident", c_ident)
-    
+
     !! Be simple-minded and assume that we need a StickyMap that
     !! is the same size as the total number of atom types
 
@@ -129,7 +129,7 @@ contains
     StickyMap(myATID)%c_ident = c_ident
 
     ! we could pass all 5 parameters if we felt like it...
-    
+
     StickyMap(myATID)%w0 = w0
     StickyMap(myATID)%v0 = v0
     StickyMap(myATID)%v0p = v0p
@@ -143,17 +143,17 @@ contains
     else
        StickyMap(myATID)%rbig = StickyMap(myATID)%rup
     endif
-   
+
     return
   end subroutine newStickyType
 
   subroutine do_sticky_pair(atom1, atom2, d, rij, r2, sw, vpair, fpair, &
        pot, A, f, t, do_pot)
-    
+
     !! This routine does only the sticky portion of the SSD potential
     !! [Chandra and Ichiye, J. Chem. Phys. 111, 2701 (1999)].
     !! The Lennard-Jones and dipolar interaction must be handled separately.
-    
+
     !! We assume that the rotation matrices have already been calculated
     !! and placed in the A array.
 
@@ -187,13 +187,13 @@ contains
     real (kind=dp) :: radcomxj, radcomyj, radcomzj
     integer :: id1, id2
     integer :: me1, me2
-   real (kind=dp) :: w0, v0, v0p, rl, ru, rlp, rup, rbig
+    real (kind=dp) :: w0, v0, v0p, rl, ru, rlp, rup, rbig
 
-if (.not.allocated(StickyMap)) then
+    if (.not.allocated(StickyMap)) then
        call handleError("sticky", "no StickyMap was present before first call of do_sticky_pair!")
        return
     end if
-    
+
 #ifdef IS_MPI
     me1 = atid_Row(atom1)
     me2 = atid_Col(atom2)
@@ -461,25 +461,25 @@ if (.not.allocated(StickyMap)) then
        id1 = atom1
        id2 = atom2
 #endif
-       
+
        if (molMembershipList(id1) .ne. molMembershipList(id2)) then
-          
+
           fpair(1) = fpair(1) + fxradial
           fpair(2) = fpair(2) + fyradial
           fpair(3) = fpair(3) + fzradial
-          
+
        endif
     endif
   end subroutine do_sticky_pair
 
   !! calculates the switching functions and their derivatives for a given
   subroutine calc_sw_fnc(r, rl, ru, rlp, rup, s, sp, dsdr, dspdr)
-    
+
     real (kind=dp), intent(in) :: r, rl, ru, rlp, rup
     real (kind=dp), intent(inout) :: s, sp, dsdr, dspdr
-    
+
     ! distances must be in angstroms
-    
+
     if (r.lt.rl) then
        s = 1.0d0
        dsdr = 0.0d0
@@ -503,7 +503,7 @@ if (.not.allocated(StickyMap)) then
             ((rup - rlp)**3)
        dspdr = 6.0d0*(r-rup)*(r-rlp)/((rup - rlp)**3)       
     endif
-    
+
     return
   end subroutine calc_sw_fnc
 

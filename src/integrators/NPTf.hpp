@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -53,38 +53,38 @@
 #include "integrators/NPT.hpp"
 namespace oopse {
 
-class NPTf : public NPT{
-    public:
+  class NPTf : public NPT{
+  public:
 
-        NPTf ( SimInfo* info) : NPT(info) {}
+    NPTf ( SimInfo* info) : NPT(info) {}
 
-    protected:
+  protected:
 
-        Mat3x3d eta;
+    Mat3x3d eta;
 
-    private:
+  private:
 
-        virtual void evolveEtaA();
-        virtual void evolveEtaB();
+    virtual void evolveEtaA();
+    virtual void evolveEtaB();
 
-        virtual bool etaConverged();
+    virtual bool etaConverged();
 
-        virtual void getVelScaleA(Vector3d& sc, const Vector3d& vel);
-        virtual void getVelScaleB(Vector3d& sc, int index );
-        virtual void getPosScale(const Vector3d& pos, const Vector3d& COM,  int index, Vector3d& sc);
+    virtual void getVelScaleA(Vector3d& sc, const Vector3d& vel);
+    virtual void getVelScaleB(Vector3d& sc, int index );
+    virtual void getPosScale(const Vector3d& pos, const Vector3d& COM,  int index, Vector3d& sc);
 
-        virtual void calcVelScale();
+    virtual void calcVelScale();
         
-        virtual void scaleSimBox();
-        virtual double calcConservedQuantity();
+    virtual void scaleSimBox();
+    virtual double calcConservedQuantity();
 
-        virtual void loadEta();
-        virtual void saveEta();
+    virtual void loadEta();
+    virtual void saveEta();
             
-        Mat3x3d oldEta;
-        Mat3x3d prevEta;
-        Mat3x3d vScale;
-};
+    Mat3x3d oldEta;
+    Mat3x3d prevEta;
+    Mat3x3d vScale;
+  };
 
 
 }//end namespace oopse

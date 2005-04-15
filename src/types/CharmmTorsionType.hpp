@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -56,55 +56,55 @@
 #include "types/TorsionType.hpp"
 namespace oopse {
 
-struct CharmmTorsionParameter {
+  struct CharmmTorsionParameter {
     double kchi;
     int n;
     double delta;
-};
+  };
 
-class SamePeriodicityFunctor {
-    public:
-        SamePeriodicityFunctor(int n) : n_(n) {}
-        bool operator()(CharmmTorsionParameter p) {
-            return p.n == n_;
-        }
+  class SamePeriodicityFunctor {
+  public:
+    SamePeriodicityFunctor(int n) : n_(n) {}
+    bool operator()(CharmmTorsionParameter p) {
+      return p.n == n_;
+    }
         
-   private:
-        int n_;
-};
-/**
- * @class CharmmTorsionType CharmmTorsionType.hpp "types/CharmmTorsionType.hpp"
- */
-class CharmmTorsionType : public TorsionType{
-    public:
+  private:
+    int n_;
+  };
+  /**
+   * @class CharmmTorsionType CharmmTorsionType.hpp "types/CharmmTorsionType.hpp"
+   */
+  class CharmmTorsionType : public TorsionType{
+  public:
 
-        void setCharmmTorsionParameter(CharmmTorsionParameter param) {
+    void setCharmmTorsionParameter(CharmmTorsionParameter param) {
 
-            assert(param.n >= 0 && param.n < 6);
+      assert(param.n >= 0 && param.n < 6);
 
-            std::vector<CharmmTorsionParameter>::iterator i ;
-            i = std::find_if(parameter_.begin(), parameter_.end(), SamePeriodicityFunctor(param.n));
+      std::vector<CharmmTorsionParameter>::iterator i ;
+      i = std::find_if(parameter_.begin(), parameter_.end(), SamePeriodicityFunctor(param.n));
 
-            if (i != parameter_.end()) {
-                std::cerr << "a parameter set with " << param.n <<" is already there" << std::endl;
-            } else {
-                parameter_.push_back(param);
-            }            
-        }
+      if (i != parameter_.end()) {
+	std::cerr << "a parameter set with " << param.n <<" is already there" << std::endl;
+      } else {
+	parameter_.push_back(param);
+      }            
+    }
 
-        void setCharmmTorsionParameter(double kchi, int n, double delta) {
-            CharmmTorsionParameter param;
-            param.kchi = kchi;
-            param.n = n;
-            param.delta = delta;
-            setCharmmTorsionParameter(param);
-        }
+    void setCharmmTorsionParameter(double kchi, int n, double delta) {
+      CharmmTorsionParameter param;
+      param.kchi = kchi;
+      param.n = n;
+      param.delta = delta;
+      setCharmmTorsionParameter(param);
+    }
         
-        virtual void calcForce(double cosPhi, double sinPhi, double& V, double& dVdPhi);
+    virtual void calcForce(double cosPhi, double sinPhi, double& V, double& dVdPhi);
 
-    private:
-        std::vector<CharmmTorsionParameter> parameter_;
-};
+  private:
+    std::vector<CharmmTorsionParameter> parameter_;
+  };
   
 } //end namespace oopse
 #endif //TYPES_CHARMMTORSIONTYPE_HPP

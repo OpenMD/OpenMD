@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -57,78 +57,78 @@ using namespace oopse;
 
 int main(int argc, char* argv[]){
   
-    //register force fields
-    registerForceFields();
+  //register force fields
+  registerForceFields();
 
-    gengetopt_args_info args_info;
+  gengetopt_args_info args_info;
 
-    //parse the command line option
-    if (cmdline_parser (argc, argv, &args_info) != 0) {
-        exit(1) ;
-    }
+  //parse the command line option
+  if (cmdline_parser (argc, argv, &args_info) != 0) {
+    exit(1) ;
+  }
 
 
-    //get the dumpfile name and meta-data file name
-    std::string dumpFileName = args_info.input_arg;
+  //get the dumpfile name and meta-data file name
+  std::string dumpFileName = args_info.input_arg;
 
-    std::string mdFileName = dumpFileName.substr(0, dumpFileName.rfind(".")) + ".md";
+  std::string mdFileName = dumpFileName.substr(0, dumpFileName.rfind(".")) + ".md";
 
     
-    std::string sele1;
-    std::string sele2;
+  std::string sele1;
+  std::string sele2;
 
-    if (args_info.sele1_given) {
-        sele1 = args_info.sele1_arg;
+  if (args_info.sele1_given) {
+    sele1 = args_info.sele1_arg;
+  }else {
+    char*  sele1Env= getenv("OOPSE_SELE1");
+    if (sele1Env) {
+      sele1 = sele1Env;
     }else {
-        char*  sele1Env= getenv("OOPSE_SELE1");
-        if (sele1Env) {
-            sele1 = sele1Env;
-        }else {
-            sprintf( painCave.errMsg,
+      sprintf( painCave.errMsg,
                "neither --sele1 option nor $OOPSE_SELE1 is set");
-            painCave.severity = OOPSE_ERROR;
-            painCave.isFatal = 1;
-            simError();
-        }
+      painCave.severity = OOPSE_ERROR;
+      painCave.isFatal = 1;
+      simError();
     }
+  }
     
-    if (args_info.sele2_given) {
-        sele2 = args_info.sele2_arg;
-    }else {
-        char* sele2Env = getenv("OOPSE_SELE2");
-        if (sele2Env) {
-            sele2 = sele2Env;            
-        } else {
-            sele2 = sele1;
-        }
+  if (args_info.sele2_given) {
+    sele2 = args_info.sele2_arg;
+  }else {
+    char* sele2Env = getenv("OOPSE_SELE2");
+    if (sele2Env) {
+      sele2 = sele2Env;            
+    } else {
+      sele2 = sele1;
     }
+  }
 
-    //parse md file and set up the system
-    SimCreator creator;
-    SimInfo* info = creator.createSim(mdFileName, false);
-
-
-    TimeCorrFunc* corrFunc;
-    if (args_info.dcorr_given){
-        corrFunc = new DipoleCorrFunc(info, dumpFileName, sele1, sele2);
-    } else if (args_info.rcorr_given) {
-        corrFunc = new RCorrFunc(info, dumpFileName, sele1, sele2);
-    }
-    else if (args_info.vcorr_given) {
-        corrFunc = new VCorrFunc(info, dumpFileName, sele1, sele2); 
-    }
-
-    if (args_info.output_given) {
-        corrFunc->setOutputName(args_info.output_arg);
-    }
+  //parse md file and set up the system
+  SimCreator creator;
+  SimInfo* info = creator.createSim(mdFileName, false);
 
 
-    corrFunc->doCorrelate();
+  TimeCorrFunc* corrFunc;
+  if (args_info.dcorr_given){
+    corrFunc = new DipoleCorrFunc(info, dumpFileName, sele1, sele2);
+  } else if (args_info.rcorr_given) {
+    corrFunc = new RCorrFunc(info, dumpFileName, sele1, sele2);
+  }
+  else if (args_info.vcorr_given) {
+    corrFunc = new VCorrFunc(info, dumpFileName, sele1, sele2); 
+  }
 
-    delete corrFunc;    
-    delete info;
+  if (args_info.output_given) {
+    corrFunc->setOutputName(args_info.output_arg);
+  }
 
-    return 0;   
+
+  corrFunc->doCorrelate();
+
+  delete corrFunc;    
+  delete info;
+
+  return 0;   
 }
 
 

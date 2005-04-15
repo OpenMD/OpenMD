@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -58,7 +58,7 @@
 #include "utils/simError.h"
 namespace oopse {
     
-EAM_FF::EAM_FF(){
+  EAM_FF::EAM_FF(){
 
     //set default force field filename
     setForceFieldFileName("EAM.frc");
@@ -84,9 +84,9 @@ EAM_FF::EAM_FF(){
     spMan_.push_back(new BendTypesSectionParser());
     spMan_.push_back(new TorsionTypesSectionParser());
     
-}
+  }
 
-void EAM_FF::parse(const std::string& filename) {
+  void EAM_FF::parse(const std::string& filename) {
     ifstrstream* ffStream;
     ffStream = openForceFieldFile(filename);
 
@@ -96,47 +96,47 @@ void EAM_FF::parse(const std::string& filename) {
     AtomType* at;
 
     for (at = atomTypeCont_.beginType(i); at != NULL; at = atomTypeCont_.nextType(i)) {
-        at->makeFortranAtomType();
+      at->makeFortranAtomType();
     }
 
     for (at = atomTypeCont_.beginType(i); at != NULL; at = atomTypeCont_.nextType(i)) {
-        at->complete();
+      at->complete();
     }
 
     delete ffStream;
-}
+  }
 
 
-double EAM_FF::getRcutFromAtomType(AtomType* at){
+  double EAM_FF::getRcutFromAtomType(AtomType* at){
     double rcut = 0.0;    
     if (at->isEAM()) {
-        GenericData* data = at->getPropertyByName("EAM");
-        if (data != NULL) {
-            EAMParamGenericData* eamData = dynamic_cast<EAMParamGenericData*>(data);
+      GenericData* data = at->getPropertyByName("EAM");
+      if (data != NULL) {
+	EAMParamGenericData* eamData = dynamic_cast<EAMParamGenericData*>(data);
 
-            if (eamData != NULL) {
+	if (eamData != NULL) {
 
-                EAMParam& eamParam = eamData->getData();
-                rcut =  eamParam.rcut;
-            } else {
-                    sprintf( painCave.errMsg,
-                           "Can not cast GenericData to EAMParam\n");
-                    painCave.severity = OOPSE_ERROR;
-                    painCave.isFatal = 1;
-                    simError();          
-            }
-        } else {
-            sprintf( painCave.errMsg, "Can not find EAM Parameters\n");
-            painCave.severity = OOPSE_ERROR;
-            painCave.isFatal = 1;
-            simError();          
-        }
+	  EAMParam& eamParam = eamData->getData();
+	  rcut =  eamParam.rcut;
+	} else {
+	  sprintf( painCave.errMsg,
+		   "Can not cast GenericData to EAMParam\n");
+	  painCave.severity = OOPSE_ERROR;
+	  painCave.isFatal = 1;
+	  simError();          
+	}
+      } else {
+	sprintf( painCave.errMsg, "Can not find EAM Parameters\n");
+	painCave.severity = OOPSE_ERROR;
+	painCave.isFatal = 1;
+	simError();          
+      }
     }    else {
-        rcut = ForceField::getRcutFromAtomType(at);
+      rcut = ForceField::getRcutFromAtomType(at);
     }
    
     return rcut;    
-}
+  }
 
   EAM_FF::~EAM_FF(){
     // We need to clean up the fortran side so we don't have bad things happen if

@@ -55,7 +55,7 @@ module shapes
   implicit none
 
   PRIVATE
-  
+
   INTEGER, PARAMETER:: CHEBYSHEV_TN = 1
   INTEGER, PARAMETER:: CHEBYSHEV_UN = 2
   INTEGER, PARAMETER:: LAGUERRE     = 3
@@ -93,14 +93,14 @@ module shapes
      real ( kind = dp )  :: epsilon 
      real ( kind = dp )  :: sigma 
   end type Shape
-  
+
   type, private :: ShapeList
      integer :: n_shapes = 0
      integer :: currentShape = 0
      type (Shape), pointer :: Shapes(:)      => null()
      integer, pointer      :: atidToShape(:) => null()
   end type ShapeList
-  
+
   type(ShapeList), save :: ShapeMap
 
   integer :: lmax
@@ -144,19 +144,19 @@ contains
 
        call getMatchingElementList(atypes, "is_Shape", .true., &
             nShapeTypes, MatchList)
-       
+
        call getMatchingElementList(atypes, "is_LennardJones", .true., &
             nLJTypes, MatchList)
-       
+
        ShapeMap%n_shapes = nShapeTypes + nLJTypes
-       
+
        allocate(ShapeMap%Shapes(nShapeTypes + nLJTypes))
-       
+
        ntypes = getSize(atypes)
-       
+
        allocate(ShapeMap%atidToShape(0:ntypes))
     end if
-    
+
     ShapeMap%currentShape = ShapeMap%currentShape + 1
     current = ShapeMap%currentShape
 
@@ -189,7 +189,7 @@ contains
 
     bigL = -1
     bigM = -1
-    
+
     do j = 1, ShapeMap%Shapes(current)%nContactFuncs
        if (ShapeMap%Shapes(current)%ContactFuncLValue(j) .gt. bigL) then
           bigL = ShapeMap%Shapes(current)%ContactFuncLValue(j)
@@ -227,7 +227,7 @@ contains
     type(Shape), intent(inout) :: myShape
     integer, intent(out) :: stat
     integer :: alloc_stat
- 
+
     stat = 0
     if (associated(myShape%contactFuncLValue)) then
        deallocate(myShape%contactFuncLValue)
@@ -331,7 +331,7 @@ contains
     return
 
   end subroutine allocateShape
-    
+
   subroutine complete_Shape_FF(status)
     integer :: status
     integer :: i, j, l, m, lm, function_type
@@ -345,7 +345,7 @@ contains
        status = -1
        return
     end if
-    
+
     nAtypes = getSize(atypes)
 
     if (nAtypes == 0) then
@@ -355,11 +355,11 @@ contains
 
     ! atypes comes from c side
     do i = 0, nAtypes
-       
+
        call getElementProperty(atypes, i, "is_LennardJones", thisProperty)
-       
+
        if (thisProperty) then
-          
+
           ShapeMap%currentShape = ShapeMap%currentShape + 1
           current = ShapeMap%currentShape
 
@@ -371,18 +371,18 @@ contains
 
           ShapeMap%Shapes(current)%epsilon = getEpsilon(thisIP)
           ShapeMap%Shapes(current)%sigma = getSigma(thisIP)
-          
+
        endif
-       
+
     end do
 
     haveShapeMap = .true.
-    
+
   end subroutine complete_Shape_FF
-    
+
   subroutine do_shape_pair(atom1, atom2, d, rij, r2, sw, vpair, fpair, &
        pot, A, f, t, do_pot)
-    
+
     INTEGER, PARAMETER:: LMAX         = 64
     INTEGER, PARAMETER:: MMAX         = 64
 
@@ -453,7 +453,7 @@ contains
     real (kind=dp) :: dsduxi, dsduyi, dsduzi
     real (kind=dp) :: dsdxj, dsdyj, dsdzj
     real (kind=dp) :: dsduxj, dsduyj, dsduzj
-    
+
     real (kind=dp) :: depsdxi, depsdyi, depsdzi
     real (kind=dp) :: depsduxi, depsduyi, depsduzi
     real (kind=dp) :: depsdxj, depsdyj, depsdzj
@@ -489,13 +489,13 @@ contains
        call handleError("calc_shape", "NO SHAPEMAP!!!!")
        return       
     endif
-    
+
     !! We assume that the rotation matrices have already been calculated
     !! and placed in the A array.
 
     r3 = r2*rij
     r5 = r3*r2
-    
+
     drdxi = -d(1) / rij
     drdyi = -d(2) / rij
     drdzi = -d(3) / rij
@@ -503,7 +503,7 @@ contains
     drdxj = d(1) / rij
     drdyj = d(2) / rij
     drdzj = d(3) / rij
-    
+
     ! find the atom type id (atid) for each atom:
 #ifdef IS_MPI
     atid1 = atid_Row(atom1)
@@ -545,19 +545,19 @@ contains
 #ifdef IS_MPI
        ! rotate the inter-particle separation into the two different
        ! body-fixed coordinate systems:
-       
+
        xi = A_row(1,atom1)*d(1) + A_row(2,atom1)*d(2) + A_row(3,atom1)*d(3)
        yi = A_row(4,atom1)*d(1) + A_row(5,atom1)*d(2) + A_row(6,atom1)*d(3)
        zi = A_row(7,atom1)*d(1) + A_row(8,atom1)*d(2) + A_row(9,atom1)*d(3)
-       
+
 #else
        ! rotate the inter-particle separation into the two different
        ! body-fixed coordinate systems:
-       
+
        xi = a(1,atom1)*d(1) + a(2,atom1)*d(2) + a(3,atom1)*d(3)
        yi = a(4,atom1)*d(1) + a(5,atom1)*d(2) + a(6,atom1)*d(3)
        zi = a(7,atom1)*d(1) + a(8,atom1)*d(2) + a(9,atom1)*d(3)
-       
+
 #endif
 
        xi2 = xi*xi
@@ -601,11 +601,11 @@ contains
           dspidux = - (yi * xi2) / proji3
           dspiduy = yi / proji - (yi2 * yi) / proji3
        endif
-       
+
        cpi = xi / proji
        dcpidz = 0.0d0
        dcpiduz = 0.0d0
-       
+
        spi = yi / proji
        dspidz = 0.0d0
        dspiduz = 0.0d0
@@ -618,7 +618,7 @@ contains
             CHEBYSHEV_TN, tm_i, dtm_i)
        call Orthogonal_Polynomial(cpi, ShapeMap%Shapes(st1)%bigM, MMAX, &
             CHEBYSHEV_UN, um_i, dum_i)
-       
+
        sigma_i = 0.0d0
        s_i = 0.0d0
        eps_i = 0.0d0
@@ -673,7 +673,7 @@ contains
                Phunc * dlm_i(m,l) * dctidy
           dsigmaidz = dsigmaidz + plm_i(m,l)*dPhuncdZ + &
                Phunc * dlm_i(m,l) * dctidz
-          
+
           dsigmaidux = dsigmaidux + plm_i(m,l)* dPhuncdUx + &
                Phunc * dlm_i(m,l) * dctidux
           dsigmaiduy = dsigmaiduy + plm_i(m,l)* dPhuncdUy + &
@@ -688,7 +688,7 @@ contains
           m = ShapeMap%Shapes(st1)%RangeFuncMValue(lm)
           coeff = ShapeMap%Shapes(st1)%RangeFuncCoefficient(lm)
           function_type = ShapeMap%Shapes(st1)%RangeFunctionType(lm)
-          
+
           if ((function_type .eq. SH_COS).or.(m.eq.0)) then
              Phunc = coeff * tm_i(m)
              dPhuncdX = coeff * dtm_i(m) * dcpidx
@@ -708,14 +708,14 @@ contains
           endif
 
           s_i = s_i + plm_i(m,l)*Phunc
-          
+
           dsidx = dsidx + plm_i(m,l)*dPhuncdX + &
                Phunc * dlm_i(m,l) * dctidx
           dsidy = dsidy + plm_i(m,l)*dPhuncdY + &
                Phunc * dlm_i(m,l) * dctidy
           dsidz = dsidz + plm_i(m,l)*dPhuncdZ + &
                Phunc * dlm_i(m,l) * dctidz
-          
+
           dsidux = dsidux + plm_i(m,l)* dPhuncdUx + &
                Phunc * dlm_i(m,l) * dctidux
           dsiduy = dsiduy + plm_i(m,l)* dPhuncdUy + &
@@ -724,13 +724,13 @@ contains
                Phunc * dlm_i(m,l) * dctiduz      
 
        end do
-              
+
        do lm = 1, ShapeMap%Shapes(st1)%nStrengthFuncs
           l = ShapeMap%Shapes(st1)%StrengthFuncLValue(lm)
           m = ShapeMap%Shapes(st1)%StrengthFuncMValue(lm)
           coeff = ShapeMap%Shapes(st1)%StrengthFuncCoefficient(lm)
           function_type = ShapeMap%Shapes(st1)%StrengthFunctionType(lm)
-          
+
           if ((function_type .eq. SH_COS).or.(m.eq.0)) then
              Phunc = coeff * tm_i(m)
              dPhuncdX = coeff * dtm_i(m) * dcpidx
@@ -750,14 +750,14 @@ contains
           endif
 
           eps_i = eps_i + plm_i(m,l)*Phunc
-          
+
           depsidx = depsidx + plm_i(m,l)*dPhuncdX + &
                Phunc * dlm_i(m,l) * dctidx
           depsidy = depsidy + plm_i(m,l)*dPhuncdY + &
                Phunc * dlm_i(m,l) * dctidy
           depsidz = depsidz + plm_i(m,l)*dPhuncdZ + &
                Phunc * dlm_i(m,l) * dctidz
-          
+
           depsidux = depsidux + plm_i(m,l)* dPhuncdUx + &
                Phunc * dlm_i(m,l) * dctidux
           depsiduy = depsiduy + plm_i(m,l)* dPhuncdUy + &
@@ -768,8 +768,8 @@ contains
        end do
 
     endif
-       
-       ! now do j:
+
+    ! now do j:
 
     if (ShapeMap%Shapes(st2)%isLJ) then
        sigma_j = ShapeMap%Shapes(st2)%sigma
@@ -794,12 +794,12 @@ contains
        depsjduy = 0.0d0
        depsjduz = 0.0d0
     else
-       
+
 #ifdef IS_MPI
        ! rotate the inter-particle separation into the two different
        ! body-fixed coordinate systems:
        ! negative sign because this is the vector from j to i:
-       
+
        xj = -(A_Col(1,atom2)*d(1) + A_Col(2,atom2)*d(2) + A_Col(3,atom2)*d(3))
        yj = -(A_Col(4,atom2)*d(1) + A_Col(5,atom2)*d(2) + A_Col(6,atom2)*d(3))
        zj = -(A_Col(7,atom2)*d(1) + A_Col(8,atom2)*d(2) + A_Col(9,atom2)*d(3))
@@ -807,17 +807,17 @@ contains
        ! rotate the inter-particle separation into the two different
        ! body-fixed coordinate systems:
        ! negative sign because this is the vector from j to i:
-       
+
        xj = -(a(1,atom2)*d(1) + a(2,atom2)*d(2) + a(3,atom2)*d(3))
        yj = -(a(4,atom2)*d(1) + a(5,atom2)*d(2) + a(6,atom2)*d(3))
        zj = -(a(7,atom2)*d(1) + a(8,atom2)*d(2) + a(9,atom2)*d(3))
 #endif
-       
+
        xj2 = xj*xj
        yj2 = yj*yj
        zj2 = zj*zj
        ctj = zj / rij
-       
+
        if (ctj .gt. 1.0_dp) ctj = 1.0_dp
        if (ctj .lt. -1.0_dp) ctj = -1.0_dp
 
@@ -827,7 +827,7 @@ contains
        dctjdux = - (zi * xj2) / r3
        dctjduy = - (zj * yj2) / r3
        dctjduz = zj / rij - (zj2 * zj) / r3
-       
+
        ! this is an attempt to try to truncate the singularity when
        ! sin(theta) is near 0.0:
 
@@ -858,7 +858,7 @@ contains
        cpj = xj / projj
        dcpjdz = 0.0d0
        dcpjduz = 0.0d0
-       
+
        spj = yj / projj
        dspjdz = 0.0d0
        dspjduz = 0.0d0
@@ -869,12 +869,12 @@ contains
        call Associated_Legendre(ctj, ShapeMap%Shapes(st2)%bigM, &
             ShapeMap%Shapes(st2)%bigL, LMAX, &
             plm_j, dlm_j)
-       
+
        call Orthogonal_Polynomial(cpj, ShapeMap%Shapes(st2)%bigM, MMAX, &
             CHEBYSHEV_TN, tm_j, dtm_j)
        call Orthogonal_Polynomial(cpj, ShapeMap%Shapes(st2)%bigM, MMAX, &
             CHEBYSHEV_UN, um_j, dum_j)
-       
+
        sigma_j = 0.0d0
        s_j = 0.0d0
        eps_j = 0.0d0
@@ -920,16 +920,16 @@ contains
              dPhuncdUy = coeff*(spj * dum_j(m-1)*dcpjduy + dspjduy *um_j(m-1))
              dPhuncdUz = coeff*(spj * dum_j(m-1)*dcpjduz + dspjduz *um_j(m-1))
           endif
- 
+
           sigma_j = sigma_j + plm_j(m,l)*Phunc
-          
+
           dsigmajdx = dsigmajdx + plm_j(m,l)*dPhuncdX + &
                Phunc * dlm_j(m,l) * dctjdx
           dsigmajdy = dsigmajdy + plm_j(m,l)*dPhuncdY + &
                Phunc * dlm_j(m,l) * dctjdy
           dsigmajdz = dsigmajdz + plm_j(m,l)*dPhuncdZ + &
                Phunc * dlm_j(m,l) * dctjdz
-          
+
           dsigmajdux = dsigmajdux + plm_j(m,l)* dPhuncdUx + &
                Phunc * dlm_j(m,l) * dctjdux
           dsigmajduy = dsigmajduy + plm_j(m,l)* dPhuncdUy + &
@@ -964,14 +964,14 @@ contains
           endif
 
           s_j = s_j + plm_j(m,l)*Phunc
-          
+
           dsjdx = dsjdx + plm_j(m,l)*dPhuncdX + &
                Phunc * dlm_j(m,l) * dctjdx
           dsjdy = dsjdy + plm_j(m,l)*dPhuncdY + &
                Phunc * dlm_j(m,l) * dctjdy
           dsjdz = dsjdz + plm_j(m,l)*dPhuncdZ + &
                Phunc * dlm_j(m,l) * dctjdz
-          
+
           dsjdux = dsjdux + plm_j(m,l)* dPhuncdUx + &
                Phunc * dlm_j(m,l) * dctjdux
           dsjduy = dsjduy + plm_j(m,l)* dPhuncdUy + &
@@ -1008,14 +1008,14 @@ contains
           write(*,*) 'l,m = ', l, m, coeff, dPhuncdUx, dPhuncdUy, dPhuncdUz
 
           eps_j = eps_j + plm_j(m,l)*Phunc
-          
+
           depsjdx = depsjdx + plm_j(m,l)*dPhuncdX + &
                Phunc * dlm_j(m,l) * dctjdx
           depsjdy = depsjdy + plm_j(m,l)*dPhuncdY + &
                Phunc * dlm_j(m,l) * dctjdy
           depsjdz = depsjdz + plm_j(m,l)*dPhuncdZ + &
                Phunc * dlm_j(m,l) * dctjdz
-          
+
           depsjdux = depsjdux + plm_j(m,l)* dPhuncdUx + &
                Phunc * dlm_j(m,l) * dctjdux
           depsjduy = depsjduy + plm_j(m,l)* dPhuncdUy + &
@@ -1076,7 +1076,7 @@ contains
     depsduxj = eps_i * depsjdux / (2.0d0 * eps)
     depsduyj = eps_i * depsjduy / (2.0d0 * eps)
     depsduzj = eps_i * depsjduz / (2.0d0 * eps)
-    
+
 !!$    write(*,*) 'depsidu = ', depsidux, depsiduy, depsiduz
 !!$    write(*,*) 'depsjdu = ', depsjdux, depsjduy, depsjduz
 !!$
@@ -1100,7 +1100,7 @@ contains
     drtduxj = (dsduxj + rt * (drduxj - dsigmaduxj + dsduxj)) / rtdenom
     drtduyj = (dsduyj + rt * (drduyj - dsigmaduyj + dsduyj)) / rtdenom
     drtduzj = (dsduzj + rt * (drduzj - dsigmaduzj + dsduzj)) / rtdenom
-    
+
     rt2 = rt*rt
     rt3 = rt2*rt
     rt5 = rt2*rt3
@@ -1122,7 +1122,7 @@ contains
     endif
 
 !!$    write(*,*) 'drtdu, depsdu = ', drtduxi, depsduxi
-    
+
     dvdxi = 24.0d0*eps*(2.0d0*rt11 - rt5)*drtdxi + 4.0d0*depsdxi*rt126
     dvdyi = 24.0d0*eps*(2.0d0*rt11 - rt5)*drtdyi + 4.0d0*depsdyi*rt126
     dvdzi = 24.0d0*eps*(2.0d0*rt11 - rt5)*drtdzi + 4.0d0*depsdzi*rt126
@@ -1160,12 +1160,12 @@ contains
 !!$    txj = dvduxj * sw
 !!$    tyj = dvduyj * sw
 !!$    tzj = dvduzj * sw
- 
+
     write(*,*) 't1 = ', txi, tyi, tzi
     write(*,*) 't2 = ', txj, tyj, tzj
 
     ! go back to lab frame using transpose of rotation matrix:
-    
+
 #ifdef IS_MPI
     t_Row(1,atom1) = t_Row(1,atom1) + a_Row(1,atom1)*txi + &
          a_Row(4,atom1)*tyi + a_Row(7,atom1)*tzi
@@ -1173,26 +1173,26 @@ contains
          a_Row(5,atom1)*tyi + a_Row(8,atom1)*tzi
     t_Row(3,atom1) = t_Row(3,atom1) + a_Row(3,atom1)*txi + &
          a_Row(6,atom1)*tyi + a_Row(9,atom1)*tzi
-    
+
     t_Col(1,atom2) = t_Col(1,atom2) + a_Col(1,atom2)*txj + &
          a_Col(4,atom2)*tyj + a_Col(7,atom2)*tzj
     t_Col(2,atom2) = t_Col(2,atom2) + a_Col(2,atom2)*txj + &
-            a_Col(5,atom2)*tyj + a_Col(8,atom2)*tzj
+         a_Col(5,atom2)*tyj + a_Col(8,atom2)*tzj
     t_Col(3,atom2) = t_Col(3,atom2) + a_Col(3,atom2)*txj + &
          a_Col(6,atom2)*tyj + a_Col(9,atom2)*tzj
 #else
     t(1,atom1) = t(1,atom1) + a(1,atom1)*txi + a(4,atom1)*tyi + a(7,atom1)*tzi
     t(2,atom1) = t(2,atom1) + a(2,atom1)*txi + a(5,atom1)*tyi + a(8,atom1)*tzi
     t(3,atom1) = t(3,atom1) + a(3,atom1)*txi + a(6,atom1)*tyi + a(9,atom1)*tzi
-    
+
     t(1,atom2) = t(1,atom2) + a(1,atom2)*txj + a(4,atom2)*tyj + a(7,atom2)*tzj
     t(2,atom2) = t(2,atom2) + a(2,atom2)*txj + a(5,atom2)*tyj + a(8,atom2)*tzj
     t(3,atom2) = t(3,atom2) + a(3,atom2)*txj + a(6,atom2)*tyj + a(9,atom2)*tzj
 #endif
     ! Now, on to the forces:
-    
+
     ! first rotate the i terms back into the lab frame:
-    
+
     fxi = dvdxi * sw
     fyi = dvdyi * sw
     fzi = dvdzi * sw
@@ -1213,7 +1213,7 @@ contains
     fxii = a(1,atom1)*fxi + a(4,atom1)*fyi + a(7,atom1)*fzi
     fyii = a(2,atom1)*fxi + a(5,atom1)*fyi + a(8,atom1)*fzi
     fzii = a(3,atom1)*fxi + a(6,atom1)*fyi + a(9,atom1)*fzi
-    
+
     fxjj = a(1,atom2)*fxj + a(4,atom2)*fyj + a(7,atom2)*fzj
     fyjj = a(2,atom2)*fxj + a(5,atom2)*fyj + a(8,atom2)*fzj
     fzjj = a(3,atom2)*fxj + a(6,atom2)*fyj + a(9,atom2)*fzj
@@ -1222,7 +1222,7 @@ contains
     fxij = -fxii
     fyij = -fyii
     fzij = -fzii
-    
+
     fxji = -fxjj
     fyji = -fyjj
     fzji = -fzjj
@@ -1235,7 +1235,7 @@ contains
     f_Row(1,atom1) = f_Row(1,atom1) + fxradial
     f_Row(2,atom1) = f_Row(2,atom1) + fyradial
     f_Row(3,atom1) = f_Row(3,atom1) + fzradial
-    
+
     f_Col(1,atom2) = f_Col(1,atom2) - fxradial
     f_Col(2,atom2) = f_Col(2,atom2) - fyradial
     f_Col(3,atom2) = f_Col(3,atom2) - fzradial
@@ -1243,7 +1243,7 @@ contains
     f(1,atom1) = f(1,atom1) + fxradial
     f(2,atom1) = f(2,atom1) + fyradial
     f(3,atom1) = f(3,atom1) + fzradial
-    
+
     f(1,atom2) = f(1,atom2) - fxradial
     f(2,atom2) = f(2,atom2) - fyradial
     f(3,atom2) = f(3,atom2) - fzradial
@@ -1256,17 +1256,17 @@ contains
     id1 = atom1
     id2 = atom2
 #endif
-    
+
     if (molMembershipList(id1) .ne. molMembershipList(id2)) then
-       
+
        fpair(1) = fpair(1) + fxradial
        fpair(2) = fpair(2) + fyradial
        fpair(3) = fpair(3) + fzradial
-       
+
     endif
 
   end subroutine do_shape_pair
-    
+
   SUBROUTINE Associated_Legendre(x, l, m, lmax, plm, dlm)        
 
     ! Purpose: Compute the associated Legendre functions 
@@ -1284,7 +1284,7 @@ contains
     !
     ! The original Fortran77 codes can be found here:
     ! http://iris-lee3.ece.uiuc.edu/~jjin/routines/routines.html
-    
+
     real (kind=dp), intent(in) :: x
     integer, intent(in) :: l, m, lmax 
     real (kind=dp), dimension(0:lmax,0:m), intent(out) :: PLM, DLM
@@ -1301,7 +1301,7 @@ contains
 
     ! start with 0,0:
     PLM(0,0) = 1.0D0
-  
+
     ! x = +/- 1 functions are easy:
     IF (abs(X).EQ.1.0D0) THEN
        DO I = 1, m
@@ -1356,7 +1356,7 @@ contains
 
 
   subroutine Orthogonal_Polynomial(x, m, mmax, function_type, pl, dpl)
-  
+
     ! Purpose: Compute orthogonal polynomials: Tn(x) or Un(x),
     !          or Ln(x) or Hn(x), and their derivatives
     ! Input :  function_type --- Function code
@@ -1375,12 +1375,12 @@ contains
     !
     ! The original Fortran77 codes can be found here:
     ! http://iris-lee3.ece.uiuc.edu/~jjin/routines/routines.html
-  
+
     real(kind=8), intent(in) :: x
     integer, intent(in):: m, mmax
     integer, intent(in):: function_type
     real(kind=8), dimension(0:mmax), intent(inout) :: pl, dpl
-  
+
     real(kind=8) :: a, b, c, y0, y1, dy0, dy1, yn, dyn
     integer :: k
 
@@ -1426,44 +1426,44 @@ contains
 
 
     RETURN
-    
+
   end subroutine Orthogonal_Polynomial
-  
+
   subroutine deallocateShapes(this)
     type(Shape), pointer :: this
 
-     if (associated( this%ContactFuncLValue)) then
-        deallocate(this%ContactFuncLValue)
-        this%ContactFuncLValue => null()
-     end if
+    if (associated( this%ContactFuncLValue)) then
+       deallocate(this%ContactFuncLValue)
+       this%ContactFuncLValue => null()
+    end if
 
-     if (associated( this%ContactFuncMValue)) then
-        deallocate( this%ContactFuncMValue)
-         this%ContactFuncMValue => null()
-      end if
-      if (associated( this%ContactFunctionType)) then
-         deallocate(this%ContactFunctionType)
-         this%ContactFunctionType => null()
-      end if
+    if (associated( this%ContactFuncMValue)) then
+       deallocate( this%ContactFuncMValue)
+       this%ContactFuncMValue => null()
+    end if
+    if (associated( this%ContactFunctionType)) then
+       deallocate(this%ContactFunctionType)
+       this%ContactFunctionType => null()
+    end if
 
-     if (associated( this%ContactFuncCoefficient)) then 
-        deallocate(this%ContactFuncCoefficient)
-        this%ContactFuncCoefficient => null()
-     end if
+    if (associated( this%ContactFuncCoefficient)) then 
+       deallocate(this%ContactFuncCoefficient)
+       this%ContactFuncCoefficient => null()
+    end if
 
-     if (associated( this%RangeFuncLValue)) then 
-        deallocate(this%RangeFuncLValue)
-        this%RangeFuncLValue => null()
-     end if
-     if (associated( this%RangeFuncMValue)) then 
-        deallocate( this%RangeFuncMValue) 
-         this%RangeFuncMValue => null()
-      end if
+    if (associated( this%RangeFuncLValue)) then 
+       deallocate(this%RangeFuncLValue)
+       this%RangeFuncLValue => null()
+    end if
+    if (associated( this%RangeFuncMValue)) then 
+       deallocate( this%RangeFuncMValue) 
+       this%RangeFuncMValue => null()
+    end if
 
-     if (associated( this%RangeFunctionType)) then
-        deallocate( this%RangeFunctionType) 
-         this%RangeFunctionType => null()
-      end if
+    if (associated( this%RangeFunctionType)) then
+       deallocate( this%RangeFunctionType) 
+       this%RangeFunctionType => null()
+    end if
     if (associated( this%RangeFuncCoefficient)) then
        deallocate(this%RangeFuncCoefficient) 
        this%RangeFuncCoefficient => null()
@@ -1493,17 +1493,17 @@ contains
     integer :: i 
     type(Shape), pointer :: thisShape
 
-! First walk through and kill the shape
+    ! First walk through and kill the shape
     do i = 1,ShapeMap%n_shapes
        thisShape => ShapeMap%Shapes(i)
        call deallocateShapes(thisShape)
     end do
-    
+
     ! set shape map to starting values
     ShapeMap%n_shapes = 0
     ShapeMap%currentShape = 0
-    
-     if (associated(ShapeMap%Shapes)) then
+
+    if (associated(ShapeMap%Shapes)) then
        deallocate(ShapeMap%Shapes)
        ShapeMap%Shapes => null()
     end if
@@ -1516,5 +1516,5 @@ contains
 
   end subroutine destroyShapeTypes
 
-  
+
 end module shapes

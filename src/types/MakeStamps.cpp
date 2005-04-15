@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -120,17 +120,17 @@ int MakeStamps::moleculeAssign( event* the_event ){
     
   case STRING:
     the_event->err_msg = current_mol->assignString( the_event->evt.asmt.lhs,
-				      the_event->evt.asmt.rhs.sval );
+						    the_event->evt.asmt.rhs.sval );
     break;
 
   case DOUBLE:
     the_event->err_msg = current_mol->assignDouble( the_event->evt.asmt.lhs,
-				      the_event->evt.asmt.rhs.dval );
+						    the_event->evt.asmt.rhs.dval );
     break;
     
   case INT:
     the_event->err_msg = current_mol->assignInt( the_event->evt.asmt.lhs,
-				   the_event->evt.asmt.rhs.ival );
+						 the_event->evt.asmt.rhs.ival );
     break;
 
   default:
@@ -393,19 +393,19 @@ int MakeStamps::bondAssign( event* the_event ){
     
   case STRING:
     current_bond->assignString( the_event->evt.asmt.lhs,
-			       the_event->evt.asmt.rhs.sval );
+				the_event->evt.asmt.rhs.sval );
     return 1;
     break;
 
   case DOUBLE:
     current_bond->assignDouble( the_event->evt.asmt.lhs,
-			       the_event->evt.asmt.rhs.dval );
+				the_event->evt.asmt.rhs.dval );
     return 1;
     break;
 
   case INT:
     current_bond->assignInt( the_event->evt.asmt.lhs,
-			    the_event->evt.asmt.rhs.ival );
+			     the_event->evt.asmt.rhs.ival );
     return 1;
     break;
 
@@ -466,19 +466,19 @@ int MakeStamps::bendAssign( event* the_event ){
     
   case STRING:
     current_bend->assignString( the_event->evt.asmt.lhs,
-			       the_event->evt.asmt.rhs.sval );
+				the_event->evt.asmt.rhs.sval );
     return 1;
     break;
 
   case DOUBLE:
     current_bend->assignDouble( the_event->evt.asmt.lhs,
-			       the_event->evt.asmt.rhs.dval );
+				the_event->evt.asmt.rhs.dval );
     return 1;
     break;
 
   case INT:
     current_bend->assignInt( the_event->evt.asmt.lhs,
-			    the_event->evt.asmt.rhs.ival );
+			     the_event->evt.asmt.rhs.ival );
     return 1;
     break;
 
@@ -547,19 +547,19 @@ int MakeStamps::torsionAssign( event* the_event ){
     
   case STRING:
     current_torsion->assignString( the_event->evt.asmt.lhs,
-			       the_event->evt.asmt.rhs.sval );
+				   the_event->evt.asmt.rhs.sval );
     return 1;
     break;
 
   case DOUBLE:
     current_torsion->assignDouble( the_event->evt.asmt.lhs,
-			       the_event->evt.asmt.rhs.dval );
+				   the_event->evt.asmt.rhs.dval );
     return 1;
     break;
 
   case INT:
     current_torsion->assignInt( the_event->evt.asmt.lhs,
-			    the_event->evt.asmt.rhs.ival );
+				the_event->evt.asmt.rhs.ival );
     return 1;
     break;
 

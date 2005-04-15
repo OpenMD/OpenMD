@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -43,7 +43,7 @@
 
 namespace oopse {
 
-void DLM::doRotate(StuntDouble* sd, Vector3d& ji, double dt) {
+  void DLM::doRotate(StuntDouble* sd, Vector3d& ji, double dt) {
     double dt2 = 0.5 * dt;    
     double angle;
 
@@ -53,48 +53,48 @@ void DLM::doRotate(StuntDouble* sd, Vector3d& ji, double dt) {
     // use the angular velocities to propagate the rotation matrix a full time step
     if (sd->isLinear()) {
 
-        int i = sd->linearAxis();
-        int j = (i+1)%3;
-        int k = (i+2)%3;
+      int i = sd->linearAxis();
+      int j = (i+1)%3;
+      int k = (i+2)%3;
 
-        angle = dt2 * ji[j] / I(j, j);
-        rotateStep( k, i, angle, ji, A );
+      angle = dt2 * ji[j] / I(j, j);
+      rotateStep( k, i, angle, ji, A );
 
-        angle = dt * ji[k] / I(k, k);
-        rotateStep( i, j, angle, ji, A);
+      angle = dt * ji[k] / I(k, k);
+      rotateStep( i, j, angle, ji, A);
 
-        angle = dt2 * ji[j] / I(j, j);
-        rotateStep( k, i, angle, ji, A );
+      angle = dt2 * ji[j] / I(j, j);
+      rotateStep( k, i, angle, ji, A );
 
     } else {
-        // rotate about the x-axis
-        angle = dt2 * ji[0] / I(0, 0);
-        rotateStep( 1, 2, angle, ji, A );
+      // rotate about the x-axis
+      angle = dt2 * ji[0] / I(0, 0);
+      rotateStep( 1, 2, angle, ji, A );
 
-        // rotate about the y-axis
-        angle = dt2 * ji[1] / I(1, 1);
-        rotateStep( 2, 0, angle, ji, A );
+      // rotate about the y-axis
+      angle = dt2 * ji[1] / I(1, 1);
+      rotateStep( 2, 0, angle, ji, A );
 
-        // rotate about the z-axis
-        angle = dt * ji[2] / I(2, 2);
-        sd->addZangle(angle);
-        rotateStep( 0, 1, angle, ji, A);
+      // rotate about the z-axis
+      angle = dt * ji[2] / I(2, 2);
+      sd->addZangle(angle);
+      rotateStep( 0, 1, angle, ji, A);
 
-        // rotate about the y-axis
-        angle = dt2 * ji[1] / I(1, 1);
-        rotateStep( 2, 0, angle, ji, A );
+      // rotate about the y-axis
+      angle = dt2 * ji[1] / I(1, 1);
+      rotateStep( 2, 0, angle, ji, A );
 
-        // rotate about the x-axis
-        angle = dt2 * ji[0] / I(0, 0);
-        rotateStep( 1, 2, angle, ji, A );
+      // rotate about the x-axis
+      angle = dt2 * ji[0] / I(0, 0);
+      rotateStep( 1, 2, angle, ji, A );
 
     }
 
     sd->setA( A  );
-}
+  }
 
 
-void DLM::rotateStep(int axes1, int axes2, double angle, Vector3d& ji, RotMat3x3d& A) {
+  void DLM::rotateStep(int axes1, int axes2, double angle, Vector3d& ji, RotMat3x3d& A) {
 
     double sinAngle;
     double cosAngle;
@@ -133,7 +133,7 @@ void DLM::rotateStep(int axes1, int axes2, double angle, Vector3d& ji, RotMat3x3
 
     A = rot * A; //? A = A* rot.transpose();
   
-}
+  }
 
 
 }

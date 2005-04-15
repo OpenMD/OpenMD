@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -43,93 +43,93 @@
 #include "integrators/Integrator.hpp"
 #include "utils/simError.h"
 namespace oopse {
-Integrator::Integrator(SimInfo* info) 
+  Integrator::Integrator(SimInfo* info) 
     : info_(info), forceMan_(NULL) , needPotential(false), needStress(false), velocitizer_(NULL),
       needVelocityScaling(false), dumpWriter(NULL), statWriter(NULL), thermo(info), 
       currentSnapshot_(info->getSnapshotManager()->getCurrentSnapshot()) {
 
-    simParams = info->getSimParams();
+      simParams = info->getSimParams();
 
-    if (simParams->haveDt()) {
+      if (simParams->haveDt()) {
         dt = simParams->getDt();
-    } else {
-            sprintf(painCave.errMsg,
-                    "Integrator Error: dt is not set\n");
-            painCave.isFatal = 1;
-            simError();
-    }
+      } else {
+	sprintf(painCave.errMsg,
+		"Integrator Error: dt is not set\n");
+	painCave.isFatal = 1;
+	simError();
+      }
     
-    if (simParams->haveRunTime()) {
+      if (simParams->haveRunTime()) {
         runTime = simParams->getRunTime();
-    } else {
-            sprintf(painCave.errMsg,
-                    "Integrator Error: runTime is not set\n");
-            painCave.isFatal = 1;
-            simError();
-    }
-    // set the status, sample, and thermal kick times
-    if (simParams->haveSampleTime()){
+      } else {
+	sprintf(painCave.errMsg,
+		"Integrator Error: runTime is not set\n");
+	painCave.isFatal = 1;
+	simError();
+      }
+      // set the status, sample, and thermal kick times
+      if (simParams->haveSampleTime()){
         sampleTime = simParams->getSampleTime();
         statusTime = sampleTime;
-    } else{
+      } else{
         sampleTime = simParams->getRunTime();
         statusTime = sampleTime;
-    }
+      }
 
-    if (simParams->haveStatusTime()){
+      if (simParams->haveStatusTime()){
         statusTime = simParams->getStatusTime();
-    }
+      }
 
-    if (simParams->haveThermalTime()){
+      if (simParams->haveThermalTime()){
         thermalTime = simParams->getThermalTime();
-    } else {
+      } else {
         thermalTime = simParams->getRunTime();
-    }
+      }
 
-    if (!simParams->getUseInitTime()) {
+      if (!simParams->getUseInitTime()) {
         currentSnapshot_->setTime(0.0);
-    }
+      }
     
-    //create a default ForceManager
-    //if the subclass wants to use a different ForceManager, use setForceManager
-    forceMan_ = new ForceManager(info);
+      //create a default ForceManager
+      //if the subclass wants to use a different ForceManager, use setForceManager
+      forceMan_ = new ForceManager(info);
     
-    //set the force manager for thermodynamic integration if specified
-    if (simParams->getUseSolidThermInt() || simParams->getUseLiquidThermInt()){
-      ThermoIntegrationForceManager* thermoForce_ 
-      = new ThermoIntegrationForceManager(info);
-      setForceManager(thermoForce_);
-    }
+      //set the force manager for thermodynamic integration if specified
+      if (simParams->getUseSolidThermInt() || simParams->getUseLiquidThermInt()){
+	ThermoIntegrationForceManager* thermoForce_ 
+	  = new ThermoIntegrationForceManager(info);
+	setForceManager(thermoForce_);
+      }
     
-    // check for the temperature set flag (velocity scaling)      
-    if (simParams->haveTempSet()) {
+      // check for the temperature set flag (velocity scaling)      
+      if (simParams->haveTempSet()) {
         needVelocityScaling = simParams->getTempSet();
 
         if (simParams->haveTargetTemp()) {
-            targetScalingTemp = simParams->getTargetTemp();
+	  targetScalingTemp = simParams->getTargetTemp();
         }
         else {
-            sprintf(painCave.errMsg,
-                    "Integrator Error: Target Temperature is not set\n");
-            painCave.isFatal = 1;
-            simError();
+	  sprintf(painCave.errMsg,
+		  "Integrator Error: Target Temperature is not set\n");
+	  painCave.isFatal = 1;
+	  simError();
 
         }
+      }
+    
+      //create a default a velocitizer
+      //if the subclass want to using different velocitizer, use setVelocitizer
+      velocitizer_ = new Velocitizer(info);
+    
     }
-    
-    //create a default a velocitizer
-    //if the subclass want to using different velocitizer, use setVelocitizer
-    velocitizer_ = new Velocitizer(info);
-    
-}
 
-Integrator::~Integrator(){
+  Integrator::~Integrator(){
     delete forceMan_;
     delete velocitizer_;
     
     delete dumpWriter;
     delete statWriter;
-}
+  }
 
 
 }

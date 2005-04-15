@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -51,48 +51,48 @@
 namespace oopse {
   
   ThermoIntegrationForceManager::ThermoIntegrationForceManager(SimInfo* info): 
-  ForceManager(info){
-    currSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
-    simParam = info_->getSimParams();
+    ForceManager(info){
+      currSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
+      simParam = info_->getSimParams();
     
-    if (simParam->haveThermIntLambda()){
-      tIntLambda_ = simParam->getThermIntLambda();
-    }
-    else{
-      tIntLambda_ = 1.0;
-      sprintf(painCave.errMsg,
-              "ThermoIntegration error: the transformation parameter (lambda) was\n"
-              "\tnot specified. OOPSE will use a default value of %f. To set\n"
-              "\tlambda, use the thermodynamicIntegrationLambda variable.\n",
-              tIntLambda_);
-      painCave.isFatal = 0;
-      simError();
-    }
+      if (simParam->haveThermIntLambda()){
+	tIntLambda_ = simParam->getThermIntLambda();
+      }
+      else{
+	tIntLambda_ = 1.0;
+	sprintf(painCave.errMsg,
+		"ThermoIntegration error: the transformation parameter (lambda) was\n"
+		"\tnot specified. OOPSE will use a default value of %f. To set\n"
+		"\tlambda, use the thermodynamicIntegrationLambda variable.\n",
+		tIntLambda_);
+	painCave.isFatal = 0;
+	simError();
+      }
     
-    if (simParam->haveThermIntK()){
-      tIntK_ = simParam->getThermIntK();
-    }
-    else{
-      tIntK_ = 1.0;
-      sprintf(painCave.errMsg,
-              "ThermoIntegration Warning: the tranformation parameter exponent\n"
-              "\t(k) was not specified. OOPSE will use a default value of %f.\n"
-              "\tTo set k, use the thermodynamicIntegrationK variable.\n",
-              tIntK_);
-      painCave.isFatal = 0;
-      simError();      
-    }
+      if (simParam->haveThermIntK()){
+	tIntK_ = simParam->getThermIntK();
+      }
+      else{
+	tIntK_ = 1.0;
+	sprintf(painCave.errMsg,
+		"ThermoIntegration Warning: the tranformation parameter exponent\n"
+		"\t(k) was not specified. OOPSE will use a default value of %f.\n"
+		"\tTo set k, use the thermodynamicIntegrationK variable.\n",
+		tIntK_);
+	painCave.isFatal = 0;
+	simError();      
+      }
     
-    if (simParam->getUseSolidThermInt()) {
-      // build a restraint object
-      restraint_ =  new Restraints(info_, tIntLambda_, tIntK_);
+      if (simParam->getUseSolidThermInt()) {
+	// build a restraint object
+	restraint_ =  new Restraints(info_, tIntLambda_, tIntK_);
       
-    }
+      }
     
-    // build the scaling factor used to modulate the forces and torques
-    factor_ = pow(tIntLambda_, tIntK_);
+      // build the scaling factor used to modulate the forces and torques
+      factor_ = pow(tIntLambda_, tIntK_);
 
-  }
+    }
   
   ThermoIntegrationForceManager::~ThermoIntegrationForceManager(){
   }

@@ -62,7 +62,7 @@ module force_globals
   real( kind = dp ), allocatable, dimension(:,:), public :: eFrame_Col
   real( kind = dp ), allocatable, dimension(:,:), public :: A_Row
   real( kind = dp ), allocatable, dimension(:,:), public :: A_Col
-  
+
   real( kind = dp ), allocatable, dimension(:), public :: pot_Row
   real( kind = dp ), allocatable, dimension(:), public :: pot_Col
   real( kind = dp ), allocatable, dimension(:), public :: pot_Temp
@@ -85,11 +85,11 @@ module force_globals
   real( kind = dp ), allocatable, dimension(:,:), public :: rf
   real(kind = dp), dimension(9), public :: tau_Temp = 0.0_dp
   real(kind = dp), public :: virial_Temp = 0.0_dp
-  
+
   public :: InitializeForceGlobals
-  
+
 contains
-  
+
   subroutine InitializeForceGlobals(nlocal, thisStat)
     integer, intent(out) :: thisStat
     integer :: nAtomsInRow, nAtomsInCol
@@ -97,19 +97,19 @@ contains
     integer :: nlocal
     integer :: ndim = 3
     integer :: alloc_stat
-    
+
     thisStat = 0
-    
+
 #ifdef IS_MPI
     nAtomsInRow = getNatomsInRow(plan_atom_row)
     nAtomsInCol = getNatomsInCol(plan_atom_col)
     nGroupsInRow = getNgroupsInRow(plan_group_row)
     nGroupsInCol = getNgroupsInCol(plan_group_col)
-    
+
 #endif
-    
+
     call FreeForceGlobals()
-    
+
 #ifdef IS_MPI
 
     allocate(q_Row(ndim,nAtomsInRow),stat=alloc_stat)
@@ -117,7 +117,7 @@ contains
        thisStat = -1
        return
     endif
-        
+
     allocate(q_Col(ndim,nAtomsInCol),stat=alloc_stat)
     if (alloc_stat /= 0 ) then
        thisStat = -1
@@ -129,43 +129,43 @@ contains
        thisStat = -1
        return
     endif
-        
+
     allocate(q_group_Col(ndim,nGroupsInCol),stat=alloc_stat)
     if (alloc_stat /= 0 ) then
        thisStat = -1
        return
     endif
-       
+
     allocate(eFrame_Row(9,nAtomsInRow),stat=alloc_stat)
     if (alloc_stat /= 0 ) then
        thisStat = -1
        return
     endif
-     
+
     allocate(eFrame_Col(9,nAtomsInCol),stat=alloc_stat)
     if (alloc_stat /= 0 ) then
        thisStat = -1
        return
     endif
-    
+
     allocate(A_row(9,nAtomsInRow),stat=alloc_stat)
     if (alloc_stat /= 0 ) then
        thisStat = -1
        return
     endif
-        
+
     allocate(A_Col(9,nAtomsInCol),stat=alloc_stat)
     if (alloc_stat /= 0 ) then
        thisStat = -1
        return
     endif
-    
+
     allocate(pot_row(nAtomsInRow),stat=alloc_stat)
     if (alloc_stat /= 0 ) then
        thisStat = -1
        return
     endif
-    
+
     allocate(pot_Col(nAtomsInCol),stat=alloc_stat)
     if (alloc_stat /= 0 ) then
        thisStat = -1
@@ -177,31 +177,31 @@ contains
        thisStat = -1
        return
     endif
-    
+
     allocate(f_Row(ndim,nAtomsInRow),stat=alloc_stat)
     if (alloc_stat /= 0 ) then
        thisStat = -1
        return
     endif
-    
+
     allocate(f_Col(ndim,nAtomsInCol),stat=alloc_stat)
     if (alloc_stat /= 0 ) then
        thisStat = -1
        return
     endif
-    
+
     allocate(f_Temp(ndim,nlocal),stat=alloc_stat)
     if (alloc_stat /= 0 ) then
        thisStat = -1
        return
     endif
-    
+
     allocate(t_Row(ndim,nAtomsInRow),stat=alloc_stat)
     if (alloc_stat /= 0 ) then
        thisStat = -1
        return
     endif
-    
+
     allocate(t_Col(ndim,nAtomsInCol),stat=alloc_stat)
     if (alloc_stat /= 0 ) then
        thisStat = -1
@@ -260,7 +260,7 @@ contains
     end if
 
 #endif
-    
+
     allocate(rf(ndim,nlocal),stat=alloc_stat)
     if (alloc_stat /= 0 ) then
        thisStat = -1
@@ -270,11 +270,11 @@ contains
     force_globals_initialized = .true.
 
   end subroutine InitializeForceGlobals
-  
+
   subroutine FreeForceGlobals()
-    
+
     !We free in the opposite order in which we allocate in.
-    
+
     if (allocated(rf))         deallocate(rf)
 #ifdef IS_MPI
     if (allocated(rf_Temp))    deallocate(rf_Temp)
@@ -303,7 +303,7 @@ contains
 #else    
     if (allocated(atid))       deallocate(atid)    
 #endif
-        
+
   end subroutine FreeForceGlobals
-    
+
 end module force_globals

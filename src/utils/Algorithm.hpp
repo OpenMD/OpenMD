@@ -43,28 +43,28 @@
 
 namespace oopse {
 
-/** 
- * copy_if is one of the missing functions in STL. 
- * copy_if copies elements from the range [first, last) to the range [result, result + (last-first)), 
- * except that any element for which pred is false is not copied.
- */
-template<typename InputIterator, typename OutputIterator, typename Predicate>
-OutputIterator copy_if(InputIterator first, InputIterator last, OutputIterator result, Predicate p) {
+  /** 
+   * copy_if is one of the missing functions in STL. 
+   * copy_if copies elements from the range [first, last) to the range [result, result + (last-first)), 
+   * except that any element for which pred is false is not copied.
+   */
+  template<typename InputIterator, typename OutputIterator, typename Predicate>
+  OutputIterator copy_if(InputIterator first, InputIterator last, OutputIterator result, Predicate p) {
     while (first != last) {
-        if (p(*first)) {
-            *result++ = *first;
-        }
-        ++first;
+      if (p(*first)) {
+	*result++ = *first;
+      }
+      ++first;
     }
 
     return result;
-}
+  }
 
 
 
-template<typename T>
-struct logical_xor :public std::binary_function<T, T, bool> {
+  template<typename T>
+  struct logical_xor :public std::binary_function<T, T, bool> {
     double operator()(T x, T y) { return x ^ y; }
-};
+  };
 
 }

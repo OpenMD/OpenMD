@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -46,34 +46,34 @@
 
 namespace oopse {
 
-class Integrator;
-class SimInfo;
-/**
- * @class Integrator
- * @todo document
- */
-class IntegratorCreator {
-    public:
-        IntegratorCreator(const std::string& ident) : ident_(ident) {}
-        virtual ~IntegratorCreator() {}
-        const std::string& getIdent() const { return ident_; }
+  class Integrator;
+  class SimInfo;
+  /**
+   * @class Integrator
+   * @todo document
+   */
+  class IntegratorCreator {
+  public:
+    IntegratorCreator(const std::string& ident) : ident_(ident) {}
+    virtual ~IntegratorCreator() {}
+    const std::string& getIdent() const { return ident_; }
 
-        virtual Integrator* create(SimInfo* info) const = 0;
+    virtual Integrator* create(SimInfo* info) const = 0;
             
-    private:
-        std::string ident_;
-};
+  private:
+    std::string ident_;
+  };
 
-/**
- * @class IntegratorBuilder
- * @todo document
- */
-template<class ConcreteIntegrator>
-class IntegratorBuilder : public IntegratorCreator {
-    public:
-        IntegratorBuilder(const std::string& ident) : IntegratorCreator(ident) {}
-        virtual  Integrator* create(SimInfo* info) const {return new ConcreteIntegrator(info);}
-};
+  /**
+   * @class IntegratorBuilder
+   * @todo document
+   */
+  template<class ConcreteIntegrator>
+  class IntegratorBuilder : public IntegratorCreator {
+  public:
+    IntegratorBuilder(const std::string& ident) : IntegratorCreator(ident) {}
+    virtual  Integrator* create(SimInfo* info) const {return new ConcreteIntegrator(info);}
+  };
 
 }
 

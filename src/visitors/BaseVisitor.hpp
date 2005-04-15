@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -46,12 +46,12 @@
 
 namespace oopse {
     
-class Atom;
-class DirectionalAtom;
-class RigidBody;
-class SimInfo;
+  class Atom;
+  class DirectionalAtom;
+  class RigidBody;
+  class SimInfo;
 
-class BaseVisitor{
+  class BaseVisitor{
   public:
     virtual ~BaseVisitor() {}
     virtual void visit(Atom* atom) {}
@@ -82,7 +82,7 @@ class BaseVisitor{
     BaseVisitor() {}
 
     std::string visitorName;
-};
+  };
 
 }//end namespace oopse
 #endif

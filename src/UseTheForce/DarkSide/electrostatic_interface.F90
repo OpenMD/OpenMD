@@ -1,10 +1,10 @@
 subroutine newElectrostaticType(atp, status)
-  
+
   use electrostatic_module, ONLY : module_newElectrostaticType => newElectrostaticType
-  
+
 #define __FORTRAN90
 #include "types/AtomTypeProperties.h"
-  
+
   type(AtomTypeProperties), intent(in) :: atp
   integer, intent(inout) :: status
 
@@ -20,10 +20,10 @@ subroutine newElectrostaticType(atp, status)
   is_Dipole = (atp%is_Dipole .ne. 0)
   is_SplitDipole = (atp%is_SplitDipole .ne. 0)
   is_Quadrupole = (atp%is_Quadrupole .ne. 0)
-    
+
   call module_newElectrostaticType(ident, is_Charge, is_Dipole, &
        is_SplitDipole, is_Quadrupole, status)
-  
+
 end subroutine newElectrostaticType
 
 subroutine setCharge(ident, charge, status)
@@ -34,9 +34,9 @@ subroutine setCharge(ident, charge, status)
   integer,intent(inout) :: ident
   real(kind=dp),intent(inout) :: charge
   integer,intent(inout) :: status
-  
+
   call module_setCharge(ident, charge, status)
-  
+
 end subroutine setCharge
 
 subroutine setDipoleMoment(ident, dipole_moment, status)
@@ -47,9 +47,9 @@ subroutine setDipoleMoment(ident, dipole_moment, status)
   integer,intent(inout) :: ident
   real(kind=dp),intent(inout) :: dipole_moment
   integer,intent(inout) :: status
-  
+
   call module_setDipoleMoment(ident, dipole_moment, status)
-  
+
 end subroutine setDipoleMoment
 
 subroutine setSplitDipoleDistance(ident, split_dipole_distance, status)
@@ -60,22 +60,22 @@ subroutine setSplitDipoleDistance(ident, split_dipole_distance, status)
   integer,intent(inout) :: ident
   real(kind=dp),intent(inout) :: split_dipole_distance
   integer,intent(inout) :: status
-  
+
   call module_setSplitDipoleDistance(ident, split_dipole_distance, status)
-  
+
 end subroutine setSplitDipoleDistance
 
 subroutine setQuadrupoleMoments(ident, quadrupole_moments, status)
-  
+
   use electrostatic_module, ONLY : module_setQuadrupoleMoments => setQuadrupoleMoments
-  
+
   integer, parameter :: DP = selected_real_kind(15)
   integer,intent(inout) :: ident
   real(kind=dp),intent(inout),dimension(3) :: quadrupole_moments
   integer,intent(inout) :: status
-  
+
   call module_setQuadrupoleMoments(ident, quadrupole_moments, status)
-  
+
 end subroutine setQuadrupoleMoments
 
 subroutine destroyElectrostaticTypes()

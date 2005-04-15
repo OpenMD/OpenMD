@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -55,50 +55,50 @@
 
 namespace oopse {
 
-/**
- * @class Torsion Torsion.hpp "types/Torsion.hpp"
- */
-class Torsion {
-    public:
-        Torsion(Atom* atom1, Atom* atom2, Atom* atom3, Atom* atom4, TorsionType* tt);
-        virtual ~Torsion() {}
-        virtual void calcForce();
+  /**
+   * @class Torsion Torsion.hpp "types/Torsion.hpp"
+   */
+  class Torsion {
+  public:
+    Torsion(Atom* atom1, Atom* atom2, Atom* atom3, Atom* atom4, TorsionType* tt);
+    virtual ~Torsion() {}
+    virtual void calcForce();
         
-        double getPotential() {
-            return potential_;
-        }
+    double getPotential() {
+      return potential_;
+    }
 
-        Atom* getAtomA() {
-            return atom1_;
-        }
+    Atom* getAtomA() {
+      return atom1_;
+    }
 
-        Atom* getAtomB() {
-            return atom2_;
-        }
+    Atom* getAtomB() {
+      return atom2_;
+    }
 
-        Atom* getAtomC() {
-            return atom3_;
-        }
+    Atom* getAtomC() {
+      return atom3_;
+    }
 
-        Atom* getAtomD() {
-            return atom4_;
-        }
+    Atom* getAtomD() {
+      return atom4_;
+    }
 
-        TorsionType * getTorsionType() {
-            return torsionType_;
-        }
+    TorsionType * getTorsionType() {
+      return torsionType_;
+    }
         
-    protected:
+  protected:
 
-        Atom* atom1_;
-        Atom* atom2_;
-        Atom* atom3_;
-        Atom* atom4_;
+    Atom* atom1_;
+    Atom* atom2_;
+    Atom* atom3_;
+    Atom* atom4_;
 
-        TorsionType* torsionType_;
+    TorsionType* torsionType_;
 
-        double potential_;
-};    
+    double potential_;
+  };    
 
 }
 #endif //PRIMITIVES_TORSION_HPP

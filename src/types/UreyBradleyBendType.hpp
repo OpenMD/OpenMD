@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -52,44 +52,44 @@
 #include "types/HarmonicBendType.hpp"
 #include "types/HarmonicBondType.hpp"
 namespace oopse {
-/**
- * @class UreyBradleyBendType 
- *
- * @todo documentation
- */
-class UreyBradleyBendType : public HarmonicBendType {
+  /**
+   * @class UreyBradleyBendType 
+   *
+   * @todo documentation
+   */
+  class UreyBradleyBendType : public HarmonicBendType {
 
-    public:
+  public:
 
-        UreyBradleyBendType(double theta0, double ktheta, double s0, double kub)
-            : HarmonicBendType(theta0, ktheta), hbt_(HarmonicBondType(s0, kub)){
-        }
+    UreyBradleyBendType(double theta0, double ktheta, double s0, double kub)
+      : HarmonicBendType(theta0, ktheta), hbt_(HarmonicBondType(s0, kub)){
+      }
 
-        double getUBForceConstant() {
-            return hbt_.getForceConstant();
-        }
+    double getUBForceConstant() {
+      return hbt_.getForceConstant();
+    }
         
-        void setUBForceConstant(double kub) {
-            hbt_.setForceConstant(kub);
-        }
+    void setUBForceConstant(double kub) {
+      hbt_.setForceConstant(kub);
+    }
 
-        double getUBLength() {
-            return hbt_.getEquilibriumBondLength();
-        }
+    double getUBLength() {
+      return hbt_.getEquilibriumBondLength();
+    }
 
-        void setUBLength(double s) {
-            hbt_.setEquilibriumBondLength(s);
-        }
+    void setUBLength(double s) {
+      hbt_.setEquilibriumBondLength(s);
+    }
 
-        HarmonicBondType* getHarmonicBondType() {
-            return &hbt_;
-        }
+    HarmonicBondType* getHarmonicBondType() {
+      return &hbt_;
+    }
                 
-    private:
+  private:
         
-        double k_;
-        HarmonicBondType hbt_;
-};
+    double k_;
+    HarmonicBondType hbt_;
+  };
 
 }//end namespace oopse
 #endif //TYPES_UREYBRADLEYBENDTYPE_HPP

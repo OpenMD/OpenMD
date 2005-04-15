@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -47,20 +47,20 @@
 #include "types/DirectionalAtomType.hpp"
 namespace oopse {
 
-    /**
-     * @class MultipoleAtomTypesSectionParser MultipoleAtomTypesSectionParser.hpp "io/MultipoleAtomTypesSectionParser.hpp"
-     */
-    class MultipoleAtomTypesSectionParser : public SectionParser {
-        public:
-            MultipoleAtomTypesSectionParser();
+  /**
+   * @class MultipoleAtomTypesSectionParser MultipoleAtomTypesSectionParser.hpp "io/MultipoleAtomTypesSectionParser.hpp"
+   */
+  class MultipoleAtomTypesSectionParser : public SectionParser {
+  public:
+    MultipoleAtomTypesSectionParser();
             
-        private:
-            virtual void parseLine(ForceField& ff, const std::string& line, int lineNo);
+  private:
+    virtual void parseLine(ForceField& ff, const std::string& line, int lineNo);
 
-            void parseDipole(StringTokenizer& tokenizer, DirectionalAtomType* dAtomType, int lineNo);
-            void parseSplitDipole(StringTokenizer& tokenizer, DirectionalAtomType* dAtomType, int lineNo);
-            void parseQuadruple(StringTokenizer& tokenizer, DirectionalAtomType* dAtomType, int lineNo);
-    };
+    void parseDipole(StringTokenizer& tokenizer, DirectionalAtomType* dAtomType, int lineNo);
+    void parseSplitDipole(StringTokenizer& tokenizer, DirectionalAtomType* dAtomType, int lineNo);
+    void parseQuadruple(StringTokenizer& tokenizer, DirectionalAtomType* dAtomType, int lineNo);
+  };
 
 
 } //namespace oopse

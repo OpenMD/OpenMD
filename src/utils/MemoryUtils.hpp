@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -51,17 +51,17 @@
 
 
 namespace oopse {
-    class MemoryUtils{
-        public:
+  class MemoryUtils{
+  public:
 
-            template<typename ContainterType>
-            static void deletePointers(ContainterType& container) {
-                for (typename ContainterType::iterator i = container.begin(); i != container.end(); i++) {
-                    delete *i;
-                }
+    template<typename ContainterType>
+    static void deletePointers(ContainterType& container) {
+      for (typename ContainterType::iterator i = container.begin(); i != container.end(); i++) {
+	delete *i;
+      }
                 
-                container.clear();
-            }
-    };
+      container.clear();
+    }
+  };
 }
 #endif //UTILS_MEMORYUTILS_HPP

@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -64,9 +64,9 @@ namespace oopse {
     ShapeAtomType() : DirectionalAtomType() { atp.is_Shape = 1; }
     ~ShapeAtomType();
         
-     std::vector<RealSphericalHarmonic*> getContactFuncs(void) {return contactFuncs;}
-     std::vector<RealSphericalHarmonic*> getRangeFuncs(void) {return rangeFuncs;}
-     std::vector<RealSphericalHarmonic*> getStrengthFuncs(void) {return strengthFuncs;}
+    std::vector<RealSphericalHarmonic*> getContactFuncs(void) {return contactFuncs;}
+    std::vector<RealSphericalHarmonic*> getRangeFuncs(void) {return rangeFuncs;}
+    std::vector<RealSphericalHarmonic*> getStrengthFuncs(void) {return strengthFuncs;}
     
     void setContactFuncs(std::vector<RealSphericalHarmonic*> cf) {
       contactFuncs = cf;
@@ -101,9 +101,9 @@ namespace oopse {
     
   private:
     
-     std::vector<RealSphericalHarmonic*> contactFuncs;  // The contact functions
-     std::vector<RealSphericalHarmonic*> rangeFuncs;    // The range functions
-     std::vector<RealSphericalHarmonic*> strengthFuncs; // The strength functions
+    std::vector<RealSphericalHarmonic*> contactFuncs;  // The contact functions
+    std::vector<RealSphericalHarmonic*> rangeFuncs;    // The range functions
+    std::vector<RealSphericalHarmonic*> strengthFuncs; // The strength functions
     
   }; 
 }

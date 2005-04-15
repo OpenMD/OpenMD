@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -53,7 +53,7 @@
 
 namespace oopse {
 
-double Thermo::getKinetic() {
+  double Thermo::getKinetic() {
     SimInfo::MoleculeIterator miter;
     std::vector<StuntDouble*>::iterator iiter;
     Molecule* mol;
@@ -68,30 +68,30 @@ double Thermo::getKinetic() {
     double kinetic_global = 0.0;
     
     for (mol = info_->beginMolecule(miter); mol != NULL; mol = info_->nextMolecule(miter)) {
-        for (integrableObject = mol->beginIntegrableObject(iiter); integrableObject != NULL; 
-               integrableObject = mol->nextIntegrableObject(iiter)) {
+      for (integrableObject = mol->beginIntegrableObject(iiter); integrableObject != NULL; 
+	   integrableObject = mol->nextIntegrableObject(iiter)) {
 
-            double mass = integrableObject->getMass();
-            Vector3d vel = integrableObject->getVel();
+	double mass = integrableObject->getMass();
+	Vector3d vel = integrableObject->getVel();
 
-            kinetic += mass * (vel[0]*vel[0] + vel[1]*vel[1] + vel[2]*vel[2]);
+	kinetic += mass * (vel[0]*vel[0] + vel[1]*vel[1] + vel[2]*vel[2]);
 
-            if (integrableObject->isDirectional()) {
-                angMom = integrableObject->getJ();
-                I = integrableObject->getI();
+	if (integrableObject->isDirectional()) {
+	  angMom = integrableObject->getJ();
+	  I = integrableObject->getI();
 
-                if (integrableObject->isLinear()) {
-                    i = integrableObject->linearAxis();
-                    j = (i + 1) % 3;
-                    k = (i + 2) % 3;
-                    kinetic += angMom[j] * angMom[j] / I(j, j) + angMom[k] * angMom[k] / I(k, k);
-                } else {                        
-                    kinetic += angMom[0]*angMom[0]/I(0, 0) + angMom[1]*angMom[1]/I(1, 1) 
-                                    + angMom[2]*angMom[2]/I(2, 2);
-                }
-            }
+	  if (integrableObject->isLinear()) {
+	    i = integrableObject->linearAxis();
+	    j = (i + 1) % 3;
+	    k = (i + 2) % 3;
+	    kinetic += angMom[j] * angMom[j] / I(j, j) + angMom[k] * angMom[k] / I(k, k);
+	  } else {                        
+	    kinetic += angMom[0]*angMom[0]/I(0, 0) + angMom[1]*angMom[1]/I(1, 1) 
+	      + angMom[2]*angMom[2]/I(2, 2);
+	  }
+	}
             
-        }
+      }
     }
     
 #ifdef IS_MPI
@@ -105,13 +105,13 @@ double Thermo::getKinetic() {
     kinetic = kinetic * 0.5 / OOPSEConstant::energyConvert;
 
     return kinetic;
-}
+  }
 
-double Thermo::getPotential() {
+  double Thermo::getPotential() {
     double potential = 0.0;
     Snapshot* curSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
     double potential_local = curSnapshot->statData[Stats::LONG_RANGE_POTENTIAL] + 
-                                             curSnapshot->statData[Stats::SHORT_RANGE_POTENTIAL] ;
+      curSnapshot->statData[Stats::SHORT_RANGE_POTENTIAL] ;
 
     // Get total potential for entire system from MPI.
 
@@ -127,27 +127,27 @@ double Thermo::getPotential() {
 #endif // is_mpi
 
     return potential;
-}
+  }
 
-double Thermo::getTotalE() {
+  double Thermo::getTotalE() {
     double total;
 
     total = this->getKinetic() + this->getPotential();
     return total;
-}
+  }
 
-double Thermo::getTemperature() {
+  double Thermo::getTemperature() {
     
     double temperature = ( 2.0 * this->getKinetic() ) / (info_->getNdf()* OOPSEConstant::kb );
     return temperature;
-}
+  }
 
-double Thermo::getVolume() { 
+  double Thermo::getVolume() { 
     Snapshot* curSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
     return curSnapshot->getVolume();
-}
+  }
 
-double Thermo::getPressure() {
+  double Thermo::getPressure() {
 
     // Relies on the calculation of the full molecular pressure tensor
 
@@ -160,9 +160,9 @@ double Thermo::getPressure() {
     pressure = OOPSEConstant::pressureConvert * (tensor(0, 0) + tensor(1, 1) + tensor(2, 2)) / 3.0;
 
     return pressure;
-}
+  }
 
-Mat3x3d Thermo::getPressureTensor() {
+  Mat3x3d Thermo::getPressureTensor() {
     // returns pressure tensor in units amu*fs^-2*Ang^-1
     // routine derived via viral theorem description in:
     // Paci, E. and Marchi, M. J.Phys.Chem. 1996, 100, 4314-4322
@@ -175,13 +175,13 @@ Mat3x3d Thermo::getPressureTensor() {
     Molecule* mol;
     StuntDouble* integrableObject;    
     for (mol = info_->beginMolecule(i); mol != NULL; mol = info_->nextMolecule(i)) {
-        for (integrableObject = mol->beginIntegrableObject(j); integrableObject != NULL; 
-               integrableObject = mol->nextIntegrableObject(j)) {
+      for (integrableObject = mol->beginIntegrableObject(j); integrableObject != NULL; 
+	   integrableObject = mol->nextIntegrableObject(j)) {
 
-            double mass = integrableObject->getMass();
-            Vector3d vcom = integrableObject->getVel();
-            p_local += mass * outProduct(vcom, vcom);         
-        }
+	double mass = integrableObject->getMass();
+	Vector3d vcom = integrableObject->getVel();
+	p_local += mass * outProduct(vcom, vcom);         
+      }
     }
     
 #ifdef IS_MPI
@@ -197,9 +197,9 @@ Mat3x3d Thermo::getPressureTensor() {
     pressureTensor =  (p_global + OOPSEConstant::energyConvert* tau)/volume;
 
     return pressureTensor;
-}
+  }
 
-void Thermo::saveStat(){
+  void Thermo::saveStat(){
     Snapshot* currSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
     Stats& stat = currSnapshot->statData;
     
@@ -213,6 +213,6 @@ void Thermo::saveStat(){
     /**@todo need refactorying*/
     //Conserved Quantity is set by integrator and time is set by setTime
     
-}
+  }
 
 } //end namespace oopse

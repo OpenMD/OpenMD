@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -49,64 +49,64 @@
 #include "io/ZConsWriter.hpp"
 namespace oopse {
 
-class ZconstraintForceManager : public ForceManager {
-    public:
-        ZconstraintForceManager(SimInfo* info);
-        ~ZconstraintForceManager();
+  class ZconstraintForceManager : public ForceManager {
+  public:
+    ZconstraintForceManager(SimInfo* info);
+    ~ZconstraintForceManager();
         
-        virtual void calcForces(bool needPotential, bool needStress);
+    virtual void calcForces(bool needPotential, bool needStress);
 
-        double getZConsTime() { return zconsTime_; }
-        std::string getZConsOutput() { return zconsOutput_; }    
+    double getZConsTime() { return zconsTime_; }
+    std::string getZConsOutput() { return zconsOutput_; }    
 
-        void update();
-        virtual void init();
-    private:
+    void update();
+    virtual void init();
+  private:
 
-        bool isZMol(Molecule* mol);
-        void thermalize(void);
+    bool isZMol(Molecule* mol);
+    void thermalize(void);
 
-        void zeroVelocity();
-        void doZconstraintForce();
-        void doHarmonic();
-        bool checkZConsState();        
-        void updateZPos();
-        void updateCantPos();
-        void calcTotalMassMovingZMols();
-        bool haveMovingZMols();
-        bool haveFixedZMols();
-        double getZTargetPos(int index);        
-        double getZFOfFixedZMols(Molecule* mol, StuntDouble* sd, double totalForce) ;
-        double getZFOfMovingMols(Molecule* mol, double totalForce) ;
-        double getHFOfFixedZMols(Molecule* mol, StuntDouble* sd, double totalForce);
-        double getHFOfUnconsMols(Molecule* mol, double totalForce);        
+    void zeroVelocity();
+    void doZconstraintForce();
+    void doHarmonic();
+    bool checkZConsState();        
+    void updateZPos();
+    void updateCantPos();
+    void calcTotalMassMovingZMols();
+    bool haveMovingZMols();
+    bool haveFixedZMols();
+    double getZTargetPos(int index);        
+    double getZFOfFixedZMols(Molecule* mol, StuntDouble* sd, double totalForce) ;
+    double getZFOfMovingMols(Molecule* mol, double totalForce) ;
+    double getHFOfFixedZMols(Molecule* mol, StuntDouble* sd, double totalForce);
+    double getHFOfUnconsMols(Molecule* mol, double totalForce);        
 
-        std::list<ZconstraintMol> movingZMols_;  /**<   moving zconstraint molecules*/
-        std::list<ZconstraintMol> fixedZMols_;      /**< fixed zconstraint molecules*/
-        std::vector<Molecule*> unzconsMols_;    /**< free molecules*/
+    std::list<ZconstraintMol> movingZMols_;  /**<   moving zconstraint molecules*/
+    std::list<ZconstraintMol> fixedZMols_;      /**< fixed zconstraint molecules*/
+    std::vector<Molecule*> unzconsMols_;    /**< free molecules*/
 
-        double zconsTime_;
-        std::string zconsOutput_;
-        double zconsTol_;
-        bool usingSMD_;
-        double zconsFixingTime_;  
-        double zconsGap_;
-        bool usingZconsGap_;
-        double dt_;
+    double zconsTime_;
+    std::string zconsOutput_;
+    double zconsTol_;
+    bool usingSMD_;
+    double zconsFixingTime_;  
+    double zconsGap_;
+    bool usingZconsGap_;
+    double dt_;
 
-        const static int whichDirection = 2;
+    const static int whichDirection = 2;
 
-        std::map<int, ZconstraintParam> allZMolIndices_;
+    std::map<int, ZconstraintParam> allZMolIndices_;
 
-        Snapshot* currSnapshot_;
-        double currZconsTime_;
+    Snapshot* currSnapshot_;
+    double currZconsTime_;
 
-        double totMassMovingZMols_;
-        double totMassUnconsMols_;  /**< mass of unconstraint molecules in the whole system (never change) */
+    double totMassMovingZMols_;
+    double totMassUnconsMols_;  /**< mass of unconstraint molecules in the whole system (never change) */
 
-        ZConsWriter* fzOut;
-        const double infiniteTime;
-};
+    ZConsWriter* fzOut;
+    const double infiniteTime;
+  };
 
 }
 #endif 

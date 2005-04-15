@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -44,7 +44,7 @@
 using namespace oopse;
 
 ShapeAtomType::~ShapeAtomType() {
-   std::vector<RealSphericalHarmonic*>::iterator iter;
+  std::vector<RealSphericalHarmonic*>::iterator iter;
   for (iter = contactFuncs.begin(); iter != contactFuncs.end(); ++iter) 
     delete (*iter);
   for (iter = rangeFuncs.begin(); iter != rangeFuncs.end(); ++iter) 
@@ -58,7 +58,7 @@ ShapeAtomType::~ShapeAtomType() {
 
 double ShapeAtomType::getContactValueAt(double costheta, double phi) {
   
-   std::vector<RealSphericalHarmonic*>::iterator contactIter;
+  std::vector<RealSphericalHarmonic*>::iterator contactIter;
   double contactVal;
   
   contactVal = 0.0;
@@ -72,7 +72,7 @@ double ShapeAtomType::getContactValueAt(double costheta, double phi) {
 
 double ShapeAtomType::getRangeValueAt(double costheta, double phi) {
   
-   std::vector<RealSphericalHarmonic*>::iterator rangeIter;
+  std::vector<RealSphericalHarmonic*>::iterator rangeIter;
   double rangeVal;
   
   rangeVal = 0.0;
@@ -86,7 +86,7 @@ double ShapeAtomType::getRangeValueAt(double costheta, double phi) {
 
 double ShapeAtomType::getStrengthValueAt(double costheta, double phi) {
   
-   std::vector<RealSphericalHarmonic*>::iterator strengthIter;
+  std::vector<RealSphericalHarmonic*>::iterator strengthIter;
   double strengthVal;
   
   strengthVal = 0.0;

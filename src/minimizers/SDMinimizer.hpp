@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -45,11 +45,11 @@
 #include "minimizers/Minimizer.hpp"
 
 namespace oopse {
-/**
- * @class SDMinimizer 
- * steepest descent minimizer
- */
-class SDMinimizer : public Minimizer{
+  /**
+   * @class SDMinimizer 
+   * steepest descent minimizer
+   */
+  class SDMinimizer : public Minimizer{
   public:
     SDMinimizer(SimInfo* info); 
 
@@ -59,11 +59,11 @@ class SDMinimizer : public Minimizer{
     virtual int checkConvg();
   protected:
 
-     std::vector<double> direction;
+    std::vector<double> direction;
     double prevF;
     double stepSize;
 
-};
+  };
 
 }
 

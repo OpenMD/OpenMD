@@ -42,20 +42,20 @@
 #include "applications/dynamicProps/VCorrFunc.hpp"
 
 namespace oopse {
-VCorrFunc::VCorrFunc(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2)
+  VCorrFunc::VCorrFunc(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2)
     : ParticleTimeCorrFunc(info, filename, sele1, sele2, DataStorage::dslVelocity){
 
-    setCorrFuncType("Velocity Correlation Function");
-    setOutputName(getPrefix(dumpFilename_) + ".vcorr");
+      setCorrFuncType("Velocity Correlation Function");
+      setOutputName(getPrefix(dumpFilename_) + ".vcorr");
 
-}
+    }
 
-double VCorrFunc::calcCorrVal(int frame1, int frame2, StuntDouble* sd1,  StuntDouble* sd2) {
+  double VCorrFunc::calcCorrVal(int frame1, int frame2, StuntDouble* sd1,  StuntDouble* sd2) {
     Vector3d v1 =sd1->getVel(frame1);
     Vector3d v2 = sd2->getVel(frame2);
 
     return dot(v1, v2);
-}
+  }
 
 }
 
