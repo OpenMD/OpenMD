@@ -38,13 +38,15 @@ What you need to compile and use OOPSE:
     with the PATHSCALE compiler on 64-bit AMD Opteron machines
     are ongoing.
 
- 2) GNU make.  Regular make won't work.  Really.  We've tried.
-    Don't bother with regular make.  Seriously.  You need GNU make.
-    Did we mention that you need GNU make?
+ 2) GNU make (also known as gmake).  Regular make won't work.  
+    Really.  We've tried.  Don't bother with regular make.  
+    Seriously.  You need GNU make.  Did we mention that you 
+    need GNU make?
 
  3) Perl.  Compilation dependencies in Fortran95 are somewhat
     complicated, so the build process uses a perl script called
-    filepp to do this job.  You need perl.
+    filepp to do this job.  You need perl for filepp, so you
+    need perl to build OOPSE.
 
  4) MPI is optional for the single processor version of OOPSE, 
     but is required if you want OOPSE to run in parallel. 
