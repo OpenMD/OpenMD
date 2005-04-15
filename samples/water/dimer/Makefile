@@ -7,7 +7,18 @@ Main      =
 SampleFiles =  \
         two.md \
         two.in \
-        water.md
+        water.md \
+        cl.in \
+        cl.md \
+        mix2.in \
+        mix2.md \
+        mix.in \
+        mix.md \
+        ssd.in \
+        ssd.md \
+        two.in \
+        two.md \
+        water.md \
 
 
 DEV_ROOT=../../..
