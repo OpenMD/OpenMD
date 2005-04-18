@@ -39,63 +39,35 @@
  * such damages.
  */
  
-#include "io/DirectionalAtomTypesSectionParser.hpp"
-#include "UseTheForce/ForceField.hpp"
-#include "types/DirectionalAtomType.hpp"
-#include "utils/simError.h"
+#ifndef IO_SHAPEATOMTYPESSECTIONPARSER_HPP
+#define IO_SHAPEATOMTYPESSECTIONPARSER_HPP
+
+#include "io/SectionParser.hpp"
+#include "types/AtomType.hpp"
+#include "types/ShapeAtomType.hpp"
+
 namespace oopse {
+  
+  /**
+   * @class ShapeAtomTypesSectionParser ShapesAtomTypesSectionParser.hpp 
+   *        "io/ShapesAtomTypesSectionParser.hpp"
+   */
+  class ShapeAtomTypesSectionParser : public SectionParser {
 
-  DirectionalAtomTypesSectionParser::DirectionalAtomTypesSectionParser() {
-    setSectionName("DirectionalAtomTypes");
-  }
+  public:
+    ShapeAtomTypesSectionParser();
+    
+  private:
+    virtual void parseLine(ForceField& ff, const std::string& line, int lineNo);
 
-  void DirectionalAtomTypesSectionParser::parseLine(ForceField& ff, 
-                                                    const std::string& line, 
-                                                    int lineNo){
-    StringTokenizer tokenizer(line);
-    int nTokens = tokenizer.countTokens();    
+    void parseShapeFile(ForceField& ff, string shapeFileName, 
+                        ShapeAtomType* st);
 
-    //in AtomTypeSection, a line at least contains 2 tokens
-    //atomTypeName and mass
-    if (nTokens < 4)  {
-      sprintf(painCave.errMsg, 
-              "DirectionalAtomTypesSectionParser Error: Not enough tokens at line %d\n",
-              lineNo);
-      painCave.isFatal = 1;
-      simError();
-                   
-    } else {
+  };
+  
+  
+} //namespace oopse
 
-      std::string atomTypeName = tokenizer.nextToken();    
-      AtomType* atomType = ff.getAtomType(atomTypeName);
-      DirectionalAtomType* dAtomType;
-      if (atomType == NULL) {
-        dAtomType = new DirectionalAtomType();
-        int ident = ff.getNAtomType() + 1;
-        dAtomType->setIdent(ident); 
-        dAtomType->setName(atomTypeName);
-        ff.addAtomType(atomTypeName, dAtomType);
-      } else {
-        dAtomType = dynamic_cast<DirectionalAtomType*>(atomType);
-        if (dAtomType == NULL) {
-          sprintf(painCave.errMsg,
-                  "DirectionalAtomTypesSectionParser:: Can not cast to DirectionalAtomType");
-          painCave.isFatal = 1;
-          simError();
-        }
-      }
-      
-      double Ixx = tokenizer.nextTokenAsDouble();
-      double Iyy = tokenizer.nextTokenAsDouble();
-      double Izz = tokenizer.nextTokenAsDouble();            
-      Mat3x3d inertialMat;
-      inertialMat(0, 0) = Ixx;
-      inertialMat(1, 1) = Iyy;
-      inertialMat(2, 2) = Izz;        
-      dAtomType->setI(inertialMat);            
-                       
-    }    
+#endif //IO_SHAPEATOMTYPESSECTIONPARSER_HPP
 
-  }
 
-} //end namespace oopse
