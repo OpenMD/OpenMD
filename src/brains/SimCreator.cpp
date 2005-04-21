@@ -96,7 +96,8 @@ namespace oopse {
     
   }
   
-  SimInfo*  SimCreator::createSim(const std::string & mdFileName, bool loadInitCoords) {
+  SimInfo*  SimCreator::createSim(const std::string & mdFileName, 
+                                  bool loadInitCoords) {
     
     MakeStamps * stamps = new MakeStamps();
     
@@ -106,11 +107,12 @@ namespace oopse {
     parseFile(mdFileName, stamps, simParams);
     
     //create the force field
-    ForceField * ff = ForceFieldFactory::getInstance()->createForceField(
-                                                                         simParams->getForceField());
+    ForceField * ff = ForceFieldFactory::getInstance()
+      ->createForceField(simParams->getForceField());
     
     if (ff == NULL) {
-      sprintf(painCave.errMsg, "ForceField Factory can not create %s force field\n",
+      sprintf(painCave.errMsg, 
+              "ForceField Factory can not create %s force field\n",
               simParams->getForceField());
       painCave.isFatal = 1;
       simError();

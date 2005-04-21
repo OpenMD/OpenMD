@@ -68,11 +68,11 @@ namespace oopse {
 
     virtual void parse(const std::string& filename);
 
-    virtual void parseShapeFile(string shapeFileName, ShapeAtomType* st);
+//    virtual void parseShapeFile(std::string& shapeFileName, ShapeAtomType* st);
     
-    double findLargestContactDistance(ShapeAtomType* st);
-    double findCutoffDistance(ShapeAtomType* st);
-    virtual void calcRcut( void );
+//    double findLargestContactDistance(ShapeAtomType* st);
+//    double findCutoffDistance(ShapeAtomType* st);
+//    virtual void calcRcut( void );
   
   private:
     SectionParserManager spMan_;

@@ -1,4 +1,14 @@
-begin ShapeTypes
+begin AtomTypes    
+# Name          mass     (amu)
+Ar		39.948
+end AtomTypes
+
+begin LennardJonesAtomTypes
+# Name  epsilon                 sigma   
+Ar        0.238068461226        3.41
+end LennardJonesAtomTypes
+
+begin ShapeAtomTypes
 # shapeName    shapeFile
 linear         linear.shape
-end ShapeTypes
+end ShapeAtomTypes

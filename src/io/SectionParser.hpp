@@ -48,29 +48,28 @@
 #include "utils/StringTokenizer.hpp"
 
 namespace oopse {
-
+  
   class ForceField;
-
+  
   /**
-   * @class SectionParser SectionParser.hpp "io/SectionParser.hpp"
+  * @class SectionParser SectionParser.hpp "io/SectionParser.hpp"
    * @todo document
    */
   class SectionParser {
   public:
     virtual ~SectionParser() {}
     void parse(std::istream& input, ForceField& ff, int lineNo);
-
+    
     const std::string& getSectionName() const {
       return sectionName_;
     }
-
+    
   protected:
     void setSectionName(const std::string& sectionName) {
       sectionName_ = sectionName;
     }
-            
+    
   private:
-
     bool isEndSection(const std::string& line);
     virtual void parseLine(ForceField& ff, const std::string& line, int lineNo) = 0;
     std::string sectionName_;

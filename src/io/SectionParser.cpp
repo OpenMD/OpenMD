@@ -51,37 +51,41 @@ namespace oopse {
       ++lineNo;
       line = trimLeftCopy(buffer);
       //a line begins with "//" is comment
+      // let's also call lines starting with # and ! as comments
       if (isEndSection(line)) {
-	break;
-      } else if ( line.empty() || (line.size() >= 2 && line[0] == '/' && line[1] == '/')) {
-	continue;
+        break;
+      } else if ( line.empty() || 
+                  (line.size() >= 2 && line[0] == '/' && line[1] == '/') ||
+                  (line.size() >= 1 && line[0] == '#') || 
+                  (line.size() >= 1 && line[0] == '!') ) {
+        continue;
       } else {
-	parseLine(ff, line, lineNo);
+        parseLine(ff, line, lineNo);
       }
     }
   }
-
+  
   bool SectionParser::isEndSection(const std::string& line) {
     StringTokenizer tokenizer(line);
-
+    
     if (tokenizer.countTokens() >= 2) {
       std::string keyword = tokenizer.nextToken();
-
+      
       if (keyword != "end"){
-	return false;
+        return false;
       } 
-
+      
       std::string section = tokenizer.nextToken();
       if (section == sectionName_) {
-	return true;
+        return true;
       }else {
-	return false;
+        return false;
       }
-        
+      
     }else {
       return false;
     }
-        
+    
   }
 
 }//namespace oopse

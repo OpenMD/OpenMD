@@ -53,6 +53,7 @@
 #include "math/RealSphericalHarmonic.hpp"
 #include "math/SquareMatrix3.hpp"
 #include "types/DirectionalAtomType.hpp"
+#include "utils/simError.h"
 
 namespace oopse {
   
@@ -98,6 +99,8 @@ namespace oopse {
      * @param phi
      */
     double getStrengthValueAt(double costheta, double phi);
+    
+    virtual void complete();
     
   private:
     

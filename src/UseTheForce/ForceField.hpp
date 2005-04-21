@@ -95,15 +95,17 @@ namespace oopse {
     AtomType* getAtomType(const std::string &at);
     BondType* getBondType(const std::string &at1, const std::string &at2);
     BendType* getBendType(const std::string &at1, const std::string &at2,
-			  const std::string &at3);
+                          const std::string &at3);
     TorsionType* getTorsionType(const std::string &at1, const std::string &at2,
-				const std::string &at3, const std::string &at4);
+                                const std::string &at3, const std::string &at4);
 
     BondType* getExactBondType(const std::string &at1, const std::string &at2);
     BendType* getExactBendType(const std::string &at1, const std::string &at2,
-			       const std::string &at3);
-    TorsionType* getExactTorsionType(const std::string &at1, const std::string &at2,
-				     const std::string &at3, const std::string &at4);
+                               const std::string &at3);
+    TorsionType* getExactTorsionType(const std::string &at1, 
+                                     const std::string &at2,
+                                     const std::string &at3, 
+                                     const std::string &at4);
 
 
     //avoid make virtual function public
@@ -125,7 +127,8 @@ namespace oopse {
         
     bool addAtomType(const std::string &at, AtomType* atomType);
 
-    bool addBondType(const std::string &at1, const std::string &at2, BondType* bondType);
+    bool addBondType(const std::string &at1, const std::string &at2, 
+                     BondType* bondType);
 
     bool addBendType(const std::string &at1, const std::string &at2,
 		     const std::string &at3, BendType* bendType);

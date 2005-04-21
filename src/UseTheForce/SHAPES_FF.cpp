@@ -54,23 +54,24 @@
 #include "io/BendTypesSectionParser.hpp"
 #include "io/TorsionTypesSectionParser.hpp"
 #include "UseTheForce/ForceFieldCreator.hpp"
+#include "UseTheForce/SHAPES_FF.hpp"
 #include "utils/simError.h"
 namespace oopse {
     
   SHAPES_FF::SHAPES_FF(){
     
     //set default force field filename
-    setForceFieldFileName("EAM.frc");
+    setForceFieldFileName("Shapes.frc");
     
-    //The order of adding section parsers are important
-    //DirectionalAtomTypesSectionParser should be added before 
+    //The ordering of section parsers is important
+    //DirectionalAtomTypesSectionParser should be before 
     //AtomTypesSectionParser since these two section parsers will actually 
     //create "real" AtomTypes (AtomTypesSectionParser will create AtomType 
-    //and DirectionalAtomTypesSectionParser will creat DirectionalAtomType 
+    //and DirectionalAtomTypesSectionParser will create DirectionalAtomType 
     //which is a subclass of AtomType, therefore it should come first). Other 
     //AtomTypes Section Parser will not create the "real" AtomType, they only 
-    //add and set some attribute of the AtomType. Thus their order are not
-    //important. AtomTypesSectionParser should be added before other atom 
+    //add and set some attribute of the AtomType. Thus the ordering of these
+    //are not important. AtomTypesSectionParser should be added before other atom 
     //type section parsers. Make sure they are added after 
     //DirectionalAtomTypesSectionParser and AtomTypesSectionParser. The order 
     //of BondTypesSectionParser, BendTypesSectionParser and 
@@ -87,38 +88,39 @@ namespace oopse {
     spMan_.push_back(new BendTypesSectionParser());
     spMan_.push_back(new TorsionTypesSectionParser());
     
-}
-
+  }
+  
   SHAPES_FF::~SHAPES_FF(){
     // We need to clean up the fortran side so we don't have bad things happen if
     // we try to create a second EAM force field.
-    destroyEAMTypes();
+    destroyShapeTypes();
   }
-} //end namespace oopse
-
-void SHAPES_FF::parse(const std::string& filename) {
+  
+  void SHAPES_FF::parse(const std::string& filename) {
     ifstrstream* ffStream;
     ffStream = openForceFieldFile(filename);
-
+    
     spMan_.parse(*ffStream, *this);
-
+    
     ForceField::AtomTypeContainer::MapTypeIterator i;
     AtomType* at;
-
+    
     for (at = atomTypeCont_.beginType(i); at != NULL; at = atomTypeCont_.nextType(i)) {
-        at->makeFortranAtomType();
+      at->makeFortranAtomType();
+    }
+    
+    for (at = atomTypeCont_.beginType(i); at != NULL; at = atomTypeCont_.nextType(i)) {
+      at->complete();
     }
 
-    for (at = atomTypeCont_.beginType(i); at != NULL; at = atomTypeCont_.nextType(i)) {
-        at->complete();
-    }
-
+    int isError = 0;
+    completeShapeFF(&isError);
+    
     delete ffStream;
-}
-
-
-double SHAPES_FF::getRcutFromAtomType(AtomType* at){
-
-}
-
-
+  }
+  
+  
+//  double SHAPES_FF::getRcutFromAtomType(AtomType* at){
+//  }
+} //end namespace oopse 
+  

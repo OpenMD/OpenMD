@@ -77,7 +77,7 @@ extern "C" {
                  int* StrengthFuncMValue, 
                  int* StrengthFunctionType, 
                  double* StrengthFuncCoefficient,
-                 int* myAtid, 
+                 int* c_ident, 
                  int* status);
 
   void completeShapeFF( int* status);

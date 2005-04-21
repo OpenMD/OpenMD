@@ -58,8 +58,9 @@ namespace oopse {
   class ForceField;
   class ForceFieldCreator;
   /**
-   * @class ForceFieldFactory ForceFieldFactory.hpp "UseTheForce/ForceFieldFactory.hpp"
-   * Factory pattern and Singleton Pattern are used to define an interface for creating an ForceField.
+   * @class ForceFieldFactory ForceFieldFactory.hpp 
+   * "UseTheForce/ForceFieldFactory.hpp" Factory pattern and Singleton Pattern 
+   * are used to define an interface for creating an ForceField.
    */
   class ForceFieldFactory {
   public:
@@ -92,18 +93,19 @@ namespace oopse {
     bool registerForceField(ForceFieldCreator* creator);
 
     /**
-     * Unregisters the creator for the given type identifier. If the type identifier 
-     * was previously registered, the function returns true.
-     * @return truethe type identifier was previously registered and the creator is removed,
-     * otherwise return false
+     * Unregisters the creator for the given type identifier. If the type 
+     * identifier was previously registered, the function returns true.
+     * @return truethe type identifier was previously registered and the creator
+     * is removed, otherwise return false
      * @id the identification of the concrete object
      */
     bool unregisterForceField(const std::string& id);
     /**
-     * Looks up the type identifier in the internal map. If it is found, it invokes the
-     * corresponding creator for the type identifier and returns its result. 
-     * @return a pointer of the concrete object, return NULL if no creator is registed for 
-     * creating this concrete object
+     * Looks up the type identifier in the internal map. If it is found, it 
+     * invokes the corresponding creator for the type identifier and returns 
+     * its result. 
+     * @return a pointer of the concrete object, return NULL if no creator is 
+     * registed for creating this concrete object
      * @param id the identification of the concrete object
      */
     ForceField* createForceField(const std::string& id);

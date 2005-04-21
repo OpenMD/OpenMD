@@ -1,8 +1,9 @@
 Package = math
 
 Source    = \
-	ParallelRandNumGen.cpp \
-        SeqRandNumGen.cpp
+				ParallelRandNumGen.cpp \
+        SeqRandNumGen.cpp \
+				RealSphericalHarmonic.cpp 
 
 RmiSource =
 

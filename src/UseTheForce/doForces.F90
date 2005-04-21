@@ -45,7 +45,7 @@
 
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: doForces.F90,v 1.13 2005-04-15 22:03:37 gezelter Exp $, $Date: 2005-04-15 22:03:37 $, $Name: not supported by cvs2svn $, $Revision: 1.13 $
+!! @version $Id: doForces.F90,v 1.14 2005-04-21 14:12:19 chrisfen Exp $, $Date: 2005-04-21 14:12:19 $, $Name: not supported by cvs2svn $, $Revision: 1.14 $
 
 
 module doForces
@@ -991,7 +991,13 @@ contains
           call do_shape_pair(i, j, d, r, rijsq, sw, vpair, fpair, &
                pot, A, f, t, do_pot)
        endif
-
+       if ( (PropertyMap(me_i)%is_Shape .and. &
+            PropertyMap(me_j)%is_LennardJones) .or. & 
+            (PropertyMap(me_i)%is_LennardJones .and. &
+            PropertyMap(me_j)%is_Shape) ) then
+          call do_shape_pair(i, j, d, r, rijsq, sw, vpair, fpair, &
+               pot, A, f, t, do_pot)
+       endif
     endif
 
   end subroutine do_pair

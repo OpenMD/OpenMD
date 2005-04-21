@@ -7,21 +7,33 @@ molecule{
      orientation( 0.0, 0.0, 1.0);
   }
 }
+molecule{
+  name = "Ar";
+  nAtoms = 1;
+  atom[0]{
+     type="Ar";
+     position( 0.0, 0.0, 0.0 );
+     orientation( 0.0, 0.0, 1.0);
+  }
+}
 
 nComponents = 1;
 component{
   type = "linear";
-  nMol = 2;
+  nMol = 1;
 }
 
 initialConfig = "./linear.in";
 
 forceField = "SHAPES";
+cutoffRadius = 12.0;
+switchingRadius = 10.2;
+
 targetTemp = 119.8;
 
 ensemble = "NVE";
 dt = 1.0;
-runTime = 1e1;
+runTime = 1e3;
 
 sampleTime = 1;
 statusTime = 1;

@@ -57,6 +57,7 @@
 #include "UseTheForce/EAM_FF.hpp"
 #include "UseTheForce/ForceFieldFactory.hpp"
 #include "UseTheForce/ForceFieldCreator.hpp"
+#include "UseTheForce/SHAPES_FF.hpp"
 #include "lattice/LatticeFactory.hpp"
 #include "lattice/LatticeCreator.hpp"
 #include "lattice/FCCLattice.hpp"
@@ -72,6 +73,9 @@ namespace oopse {
     ForceFieldFactory::getInstance()->registerForceField(new ForceFieldBuilder<DUFF>("LJ"));
     //in theory, EAM can also be merged
     ForceFieldFactory::getInstance()->registerForceField(new ForceFieldBuilder<EAM_FF>("EAM"));
+    //heck, that worked...  let's try merging SHAPES
+    ForceFieldFactory::getInstance()->registerForceField(new ForceFieldBuilder<SHAPES_FF>("SHAPES"));
+
   }
 
   void registerIntegrators() {

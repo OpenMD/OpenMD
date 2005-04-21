@@ -80,6 +80,7 @@ contains
 
     me = addElement(atypes)
 
+    write(*,*) 'setting c_ident = ', ident
     call setElementProperty(atypes, me, "c_ident", ident)
 
     call setElementProperty(atypes, me, "is_Directional", is_Directional)

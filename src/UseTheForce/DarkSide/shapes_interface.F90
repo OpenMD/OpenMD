@@ -12,7 +12,7 @@ subroutine makeShape(nContactFuncs, ContactFuncLValue, &
   integer :: nRangeFuncs 
   integer :: nStrengthFuncs 
   integer :: status
-  integer :: myATID
+  integer :: c_ident
 
   integer, dimension(nContactFuncs) :: ContactFuncLValue           
   integer, dimension(nContactFuncs) :: ContactFuncMValue           
@@ -32,7 +32,7 @@ subroutine makeShape(nContactFuncs, ContactFuncLValue, &
        nRangeFuncs, RangeFuncLValue, RangeFuncMValue, RangeFunctionType, &
        RangeFuncCoefficient, nStrengthFuncs, StrengthFuncLValue, &
        StrengthFuncMValue, StrengthFunctionType, StrengthFuncCoefficient, &
-       myATID, status)
+       c_ident, status)
 
   return
 end subroutine makeShape

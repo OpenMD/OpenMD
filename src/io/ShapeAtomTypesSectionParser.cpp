@@ -40,7 +40,6 @@
  */
  
 #include "UseTheForce/ForceField.hpp"
-#include "io/basic_ifstrstream.hpp"
 #include "io/ShapeAtomTypesSectionParser.hpp"
 #include "math/RealSphericalHarmonic.hpp"
 #include "math/SquareMatrix3.hpp"
@@ -52,48 +51,41 @@
 
 namespace oopse {
   
-  ShapeAtomTypesSectionParser::ShapesAtomTypesSectionParser() {
-    setSectionName("ShapesAtomTypes");
+  ShapeAtomTypesSectionParser::ShapeAtomTypesSectionParser() {
+    setSectionName("ShapeAtomTypes");
   }
   
   void ShapeAtomTypesSectionParser::parseLine(ForceField& ff, 
                                               const std::string& line, 
                                               int lineNo){
     StringTokenizer tokenizer(line);
-    
+      
     if (tokenizer.countTokens() >= 2) {
       std::string shapeTypeName = tokenizer.nextToken();
       std::string shapeFile = tokenizer.nextToken();
-      
+       
       AtomType* atomType = ff.getAtomType(shapeTypeName);
-      
-      if (atomType != NULL){
-        DirectionalAtomType* dAtomType = 
-        dynamic_cast<DirectionalAtomType*>(atomType);
-        
-        if (dAtomType != NULL) {
-          ShapeAtomType* sAtomType = dynamic_cast<ShapeAtomType*>(dAtomType);
-          
-          sAtomType->setShape();   
-          parseShapesFile(ff, shapeFile, sAtomType);                                                    
-        } else {
-          sprintf(painCave.errMsg, 
-                  "ShapesAtomTypesSectionParser Error: "
-                  "Can't find ShapeAtomType [%s]\n",
-                  atomTypeName.c_str());
+      ShapeAtomType* sAtomType;
+      if (atomType == NULL){
+        sAtomType = new ShapeAtomType();
+        int ident = ff.getNAtomType() + 1;
+        sAtomType->setIdent(ident); 
+        sAtomType->setName(shapeTypeName);
+        ff.addAtomType(shapeTypeName, sAtomType);
+      } else {
+        sAtomType = dynamic_cast<ShapeAtomType*>(atomType);
+        if (sAtomType == NULL) {
+          sprintf(painCave.errMsg,
+                  "ShapeAtomTypesSectionParser:: Can't cast to ShapeAtomType");
           painCave.severity = OOPSE_ERROR;
           painCave.isFatal = 1;
-          simError();  
+          simError();
         }
-      } else {
-        sprintf(painCave.errMsg, 
-                "ShapesAtomTypesSectionParser Error: "
-                "Can't find ShapeAtomType [%s]\n",
-                atomTypeName.c_str());
-        painCave.severity = OOPSE_ERROR;
-        painCave.isFatal = 1;
-        simError();  
       }
+      
+      sAtomType->setShape();   
+      parseShapeFile(ff, shapeFile, sAtomType);                                                    
+  
     } else {
       sprintf(painCave.errMsg, 
               "ShapesAtomTypesSectionParser Error: "
@@ -106,22 +98,60 @@ namespace oopse {
   }
   
   void ShapeAtomTypesSectionParser::parseShapeFile(ForceField& ff,
-                                                   string shapeFileName, 
+                                                   std::string& shapeFileName, 
                                                    ShapeAtomType* st) {
     
-    ifstrstream* shapeStream = ff.openForceFieldFile(shapeFileName);
     const int bufferSize = 65535;
     char buffer[bufferSize];
-    char *token;
+    std::string token;
     std::string line;
     int junk;
     Mat3x3d momInert;
     RealSphericalHarmonic* rsh;
     std::vector<RealSphericalHarmonic*> functionVector;
+    ifstrstream shapeStream;
+    std::string tempString;
+    std::string ffPath;
+    char* tempPath; 
+    
+    tempPath = getenv("FORCE_PARAM_PATH");
+    
+    if (tempPath == NULL) {
+      //convert a macro from compiler to a string in c++
+      STR_DEFINE(ffPath, FRC_PATH );
+    } else {
+      ffPath = tempPath;
+    }
+    
+    shapeStream.open( shapeFileName.c_str() );
+    
+    if( shapeStream == NULL ){
+      
+      tempString = ffPath;
+      tempString += "/";
+      tempString += shapeFileName;
+      shapeFileName = tempString;
+      
+      shapeStream.open( shapeFileName.c_str() );
+      
+      if( shapeStream == NULL ){
+        
+        sprintf( painCave.errMsg,
+                 "Error opening the shape file:\n"
+                 "\t%s\n"
+                 "\tHave you tried setting the FORCE_PARAM_PATH environment "
+                 "variable?\n",
+                 shapeFileName.c_str() );
+        painCave.severity = OOPSE_ERROR;
+        painCave.isFatal = 1;
+        simError();
+      }
+    }
+    
     
     // first parse the info. in the ShapeInfo section
     findBegin( shapeStream, "ShapeInfo");
-    shapeStream->getline(buffer, bufferSize);
+    shapeStream.getline(buffer, bufferSize);
     
     // loop over the interior of the ShapeInfo section
     while( !shapeStream.eof() ) {
@@ -144,20 +174,20 @@ namespace oopse {
             junk = tokenInfo.nextTokenAsInt();
             st->setMass( tokenInfo.nextTokenAsDouble() );
             momInert(0,0) = tokenInfo.nextTokenAsDouble();
-            momInert(1,1) = tokenInfo.nextTokenAsDouble()
-            momInert(2,2) = tokenInfo.nextTokenAsDouble()
+            momInert(1,1) = tokenInfo.nextTokenAsDouble();
+            momInert(2,2) = tokenInfo.nextTokenAsDouble();
             st->setI(momInert);
           }
         }
       }
-      shapeStream->getline(buffer, bufferSize);
+      shapeStream.getline(buffer, bufferSize);
     }
     
     // now grab the contact functions
     findBegin(shapeStream, "ContactFunctions");
     functionVector.clear();
     
-    shapeStream->getline(buffer, bufferSize);
+    shapeStream.getline(buffer, bufferSize);
     while( !shapeStream.eof() ) {
       // toss comment lines
       if( buffer[0] != '!' && buffer[0] != '#' ){
@@ -179,8 +209,9 @@ namespace oopse {
             rsh = new RealSphericalHarmonic();
             rsh->setL( tokenInfo1.nextTokenAsInt() );
             rsh->setM( tokenInfo1.nextTokenAsInt() );
-            token = tokenInfo1.nextTokenAsChar();
-            if (!strcasecmp("sin",token))
+            token = tokenInfo1.nextToken();
+            transform(token.begin(), token.end(), token.begin(), tolower);
+            if (token == "sin")
               rsh->makeSinFunction();
             else
               rsh->makeCosFunction();
@@ -200,7 +231,7 @@ namespace oopse {
     findBegin(shapeStream, "RangeFunctions");
     functionVector.clear();
     
-    shapeStream->getline(buffer, bufferSize);
+    shapeStream.getline(buffer, bufferSize);
     while( !shapeStream.eof() ) {
       // toss comment lines
       if( buffer[0] != '!' && buffer[0] != '#' ){
@@ -222,8 +253,9 @@ namespace oopse {
             rsh = new RealSphericalHarmonic();
             rsh->setL( tokenInfo2.nextTokenAsInt() );
             rsh->setM( tokenInfo2.nextTokenAsInt() );
-            token = tokenInfo2.nextTokenAsChar();
-            if (!strcasecmp("sin",token))
+            token = tokenInfo2.nextToken();
+            transform(token.begin(), token.end(), token.begin(), tolower);
+            if (token == "sin")
               rsh->makeSinFunction();
             else
               rsh->makeCosFunction();
@@ -243,7 +275,7 @@ namespace oopse {
     findBegin(shapeStream, "StrengthFunctions");
     functionVector.clear();
     
-    shapeStream->getline(buffer, bufferSize);
+    shapeStream.getline(buffer, bufferSize);
     while( !shapeStream.eof() ) {
       // toss comment lines
       if( buffer[0] != '!' && buffer[0] != '#' ){
@@ -265,8 +297,9 @@ namespace oopse {
             rsh = new RealSphericalHarmonic();
             rsh->setL( tokenInfo3.nextTokenAsInt() );
             rsh->setM( tokenInfo3.nextTokenAsInt() );
-            token = tokenInfo3.nextTokenAsChar();
-            if (!strcasecmp("sin",token))
+            token = tokenInfo3.nextToken();
+            transform(token.begin(), token.end(), token.begin(), tolower);
+            if (token == "sin")
               rsh->makeSinFunction();
             else
               rsh->makeCosFunction();
@@ -282,7 +315,7 @@ namespace oopse {
     // pass strength functions to ShapeType
     st->setStrengthFuncs(functionVector);
         
-    delete shapeStream;
+  //  delete shapeStream;
   }
 } //end namespace oopse
 

@@ -112,13 +112,14 @@ contains
        nRangeFuncs, RangeFuncLValue, RangeFuncMValue, RangeFunctionType, &
        RangeFuncCoefficient, nStrengthFuncs, StrengthFuncLValue, &
        StrengthFuncMValue, StrengthFunctionType, StrengthFuncCoefficient, &
-       myATID, status)
+       c_ident, status)
 
     integer :: nContactFuncs 
     integer :: nRangeFuncs 
     integer :: nStrengthFuncs 
     integer :: shape_ident
     integer :: status
+    integer :: c_ident
     integer :: myATID
     integer :: bigL
     integer :: bigM
@@ -154,7 +155,7 @@ contains
 
        ntypes = getSize(atypes)
 
-       allocate(ShapeMap%atidToShape(0:ntypes))
+       allocate(ShapeMap%atidToShape(ntypes))
     end if
 
     ShapeMap%currentShape = ShapeMap%currentShape + 1
@@ -166,11 +167,12 @@ contains
        status = -1
        return
     endif
+    
+    myATID = getFirstMatchingElement(atypes, 'c_ident', c_ident)
+!    write(*,*) 'myATID= ', myATID, ' c_ident = ', c_ident
 
-    call getElementProperty(atypes, myATID, 'c_ident', me)
-
-    ShapeMap%atidToShape(me)                         = current
-    ShapeMap%Shapes(current)%atid                    = me
+    ShapeMap%atidToShape(myATID)                     = current
+    ShapeMap%Shapes(current)%atid                    = myATID
     ShapeMap%Shapes(current)%nContactFuncs           = nContactFuncs
     ShapeMap%Shapes(current)%nRangeFuncs             = nRangeFuncs
     ShapeMap%Shapes(current)%nStrengthFuncs          = nStrengthFuncs
@@ -336,7 +338,7 @@ contains
     integer :: status
     integer :: i, j, l, m, lm, function_type
     real(kind=dp) :: thisDP, sigma
-    integer :: alloc_stat, iTheta, iPhi, nSteps, nAtypes, thisIP, current
+    integer :: alloc_stat, iTheta, iPhi, nSteps, nAtypes, myATID, current
     logical :: thisProperty
 
     status = 0
@@ -351,32 +353,37 @@ contains
     if (nAtypes == 0) then
        status = -1
        return
-    end if
+    end if       
 
     ! atypes comes from c side
-    do i = 0, nAtypes
-
-       call getElementProperty(atypes, i, "is_LennardJones", thisProperty)
-
+    do i = 1, nAtypes
+    
+       myATID = getFirstMatchingElement(atypes, 'c_ident', i)
+       call getElementProperty(atypes, myATID, "is_LennardJones", thisProperty)
+!       write(*,*) 'is_LJ = ', thisProperty, ' for atid = ', myATID
+       
        if (thisProperty) then
-
+                 
           ShapeMap%currentShape = ShapeMap%currentShape + 1
           current = ShapeMap%currentShape
 
-          call getElementProperty(atypes, i, "c_ident",  thisIP)
-          ShapeMap%atidToShape(thisIP) = current
-          ShapeMap%Shapes(current)%atid = thisIP
+          ShapeMap%atidToShape(myATID) = current
+          ShapeMap%Shapes(current)%atid = myATID
 
           ShapeMap%Shapes(current)%isLJ = .true.
 
-          ShapeMap%Shapes(current)%epsilon = getEpsilon(thisIP)
-          ShapeMap%Shapes(current)%sigma = getSigma(thisIP)
+          ShapeMap%Shapes(current)%epsilon = getEpsilon(myATID)
+          ShapeMap%Shapes(current)%sigma = getSigma(myATID)
 
        endif
 
     end do
 
     haveShapeMap = .true.
+
+!    do i = 1, ShapeMap%n_shapes
+!       write(*,*) 'i = ', i, ' isLJ = ', ShapeMap%Shapes(i)%isLJ
+!    end do
 
   end subroutine complete_Shape_FF
 
@@ -492,7 +499,6 @@ contains
 
     !! We assume that the rotation matrices have already been calculated
     !! and placed in the A array.
-
     r3 = r2*rij
     r5 = r3*r2
 
@@ -516,6 +522,8 @@ contains
     ! use the atid to find the shape type (st) for each atom:
     st1 = ShapeMap%atidToShape(atid1)
     st2 = ShapeMap%atidToShape(atid2)
+    
+!    write(*,*) atom1, atom2, atid1, atid2, st1, st2, ShapeMap%Shapes(st1)%isLJ, ShapeMap%Shapes(st2)%isLJ
 
     if (ShapeMap%Shapes(st1)%isLJ) then
 
@@ -666,21 +674,23 @@ contains
           endif
 
           sigma_i = sigma_i + plm_i(m,l)*Phunc
-
+          write(*,*) 'dsigmaidux = ', dsigmaidux
+          write(*,*) 'Phunc = ', Phunc
           dsigmaidx = dsigmaidx + plm_i(m,l)*dPhuncdX + &
                Phunc * dlm_i(m,l) * dctidx
           dsigmaidy = dsigmaidy + plm_i(m,l)*dPhuncdY + &
                Phunc * dlm_i(m,l) * dctidy
           dsigmaidz = dsigmaidz + plm_i(m,l)*dPhuncdZ + &
                Phunc * dlm_i(m,l) * dctidz
-
           dsigmaidux = dsigmaidux + plm_i(m,l)* dPhuncdUx + &
                Phunc * dlm_i(m,l) * dctidux
           dsigmaiduy = dsigmaiduy + plm_i(m,l)* dPhuncdUy + &
                Phunc * dlm_i(m,l) * dctiduy
           dsigmaiduz = dsigmaiduz + plm_i(m,l)* dPhuncdUz + &
                Phunc * dlm_i(m,l) * dctiduz
-
+          write(*,*) 'dsigmaidux = ', dsigmaidux, '; dPhuncdUx = ', dPhuncdUx, &
+                     '; dctidux = ', dctidux, '; plm_i(m,l) = ', plm_i(m,l), &
+                     '; dlm_i(m,l) = ', dlm_i(m,l), '; m = ', m, '; l = ', l 
        end do
 
        do lm = 1, ShapeMap%Shapes(st1)%nRangeFuncs
@@ -864,8 +874,8 @@ contains
        dspjduz = 0.0d0
 
 
-       write(*,*) 'dcpdu = ' ,dcpidux, dcpiduy, dcpiduz
-       write(*,*) 'dcpdu = ' ,dcpjdux, dcpjduy, dcpjduz
+!       write(*,*) 'dcpdu = ' ,dcpidux, dcpiduy, dcpiduz
+!       write(*,*) 'dcpdu = ' ,dcpjdux, dcpjduy, dcpjduz
        call Associated_Legendre(ctj, ShapeMap%Shapes(st2)%bigM, &
             ShapeMap%Shapes(st2)%bigL, LMAX, &
             plm_j, dlm_j)
@@ -1005,7 +1015,7 @@ contains
              dPhuncdUz = coeff*(spj * dum_j(m-1)*dcpjduz + dspjduz *um_j(m-1))
           endif
 
-          write(*,*) 'l,m = ', l, m, coeff, dPhuncdUx, dPhuncdUy, dPhuncdUz
+!          write(*,*) 'l,m = ', l, m, coeff, dPhuncdUx, dPhuncdUy, dPhuncdUz
 
           eps_j = eps_j + plm_j(m,l)*Phunc
 
@@ -1030,7 +1040,7 @@ contains
     ! phew, now let's assemble the potential energy:
 
     sigma = 0.5*(sigma_i + sigma_j)
-
+!    write(*,*) sigma_i, ' = sigma_i; ', sigma_j, ' = sigma_j'
     dsigmadxi = 0.5*dsigmaidx
     dsigmadyi = 0.5*dsigmaidy
     dsigmadzi = 0.5*dsigmaidz
@@ -1062,7 +1072,9 @@ contains
     dsduzj = 0.5*dsjduz
 
     eps = sqrt(eps_i * eps_j)
-
+    write(*,*) 'dsidu = ', dsidux, dsiduy, dsiduz
+    write(*,*) 'dsigidu = ', dsigmaidux, dsigmaiduy, dsigmaiduz
+!    write(*,*) sigma_i, ' is sigma i; ', s_i, ' is s i; ', eps_i, ' is eps i'
     depsdxi = eps_j * depsidx / (2.0d0 * eps)
     depsdyi = eps_j * depsidy / (2.0d0 * eps)
     depsdzi = eps_j * depsidz / (2.0d0 * eps)
@@ -1077,11 +1089,11 @@ contains
     depsduyj = eps_i * depsjduy / (2.0d0 * eps)
     depsduzj = eps_i * depsjduz / (2.0d0 * eps)
 
-!!$    write(*,*) 'depsidu = ', depsidux, depsiduy, depsiduz
-!!$    write(*,*) 'depsjdu = ', depsjdux, depsjduy, depsjduz
-!!$
-!!$    write(*,*) 'depsdui = ', depsduxi, depsduyi, depsduzi
-!!$    write(*,*) 'depsduj = ', depsduxj, depsduyj, depsduzj
+!    write(*,*) 'depsidu = ', depsidux, depsiduy, depsiduz
+!    write(*,*) 'depsjdu = ', depsjdux, depsjduy, depsjduz
+
+!    write(*,*) 'depsdui = ', depsduxi, depsduyi, depsduzi
+!    write(*,*) 'depsduj = ', depsduxj, depsduyj, depsduzj
 !!$
 !!$    write(*,*) 's, sig, eps = ', s, sigma, eps
 
@@ -1092,6 +1104,8 @@ contains
     drtdyi = (dsdyi + rt * (drdyi - dsigmadyi + dsdyi)) / rtdenom
     drtdzi = (dsdzi + rt * (drdzi - dsigmadzi + dsdzi)) / rtdenom
     drtduxi = (dsduxi + rt * (drduxi - dsigmaduxi + dsduxi)) / rtdenom
+    write(*,*) dsduxi, ' is dsduxi; ', drduxi, ' is drduxi; ', dsigmaduxi, &
+               ' is dsigmaduxi; ', dsduxi, ' is dsduxi'
     drtduyi = (dsduyi + rt * (drduyi - dsigmaduyi + dsduyi)) / rtdenom
     drtduzi = (dsduzi + rt * (drduzi - dsigmaduzi + dsduzi)) / rtdenom
     drtdxj = (dsdxj + rt * (drdxj - dsigmadxj + dsdxj)) / rtdenom
@@ -1100,6 +1114,9 @@ contains
     drtduxj = (dsduxj + rt * (drduxj - dsigmaduxj + dsduxj)) / rtdenom
     drtduyj = (dsduyj + rt * (drduyj - dsigmaduyj + dsduyj)) / rtdenom
     drtduzj = (dsduzj + rt * (drduzj - dsigmaduzj + dsduzj)) / rtdenom
+
+!    write(*,*) 'drtd_i = ', drtdxi, drtdyi, drtdzi
+!    write(*,*) 'drtdu_i = ', drtduxi, drtduyi, drtduzi
 
     rt2 = rt*rt
     rt3 = rt2*rt
@@ -1136,7 +1153,7 @@ contains
     dvduxj = 24.0d0*eps*(2.0d0*rt11 - rt5)*drtduxj + 4.0d0*depsduxj*rt126
     dvduyj = 24.0d0*eps*(2.0d0*rt11 - rt5)*drtduyj + 4.0d0*depsduyj*rt126
     dvduzj = 24.0d0*eps*(2.0d0*rt11 - rt5)*drtduzj + 4.0d0*depsduzj*rt126
-
+    write(*,*) 'drtduxi = ', drtduxi, ' depsduxi = ', depsduxi
     ! do the torques first since they are easy:
     ! remember that these are still in the body fixed axes
 
@@ -1145,21 +1162,21 @@ contains
 !!$    write(*,*) 'dvdu1 = ', dvduxi, dvduyi, dvduzi
 !!$    write(*,*) 'dvdu2 = ', dvduxj, dvduyj, dvduzj
 !!$
-    txi =  (dvduzi - dvduyi) * sw
-    tyi =  (dvduxi - dvduzi) * sw
-    tzi =  (dvduyi - dvduxi) * sw
+!    txi =  (dvduzi - dvduyi) * sw
+!    tyi =  (dvduxi - dvduzi) * sw
+!    tzi =  (dvduyi - dvduxi) * sw
 
-    txj = (dvduzj - dvduyj) * sw
-    tyj = (dvduxj - dvduzj) * sw
-    tzj = (dvduyj - dvduxj) * sw
+!    txj = (dvduzj - dvduyj) * sw
+!    tyj = (dvduxj - dvduzj) * sw
+!    tzj = (dvduyj - dvduxj) * sw
 
-!!$    txi = -dvduxi * sw
-!!$    tyi = -dvduyi * sw
-!!$    tzi = -dvduzi * sw
-!!$
-!!$    txj = dvduxj * sw
-!!$    tyj = dvduyj * sw
-!!$    tzj = dvduzj * sw
+    txi = dvduxi * sw
+    tyi = dvduyi * sw
+    tzi = dvduzi * sw
+
+    txj = dvduxj * sw
+    tyj = dvduyj * sw
+    tzj = dvduzj * sw
 
     write(*,*) 't1 = ', txi, tyi, tzi
     write(*,*) 't2 = ', txj, tyj, tzj
@@ -1201,6 +1218,7 @@ contains
     fyj = dvdyj * sw
     fzj = dvdzj * sw
 
+
 #ifdef IS_MPI
     fxii = a_Row(1,atom1)*fxi + a_Row(4,atom1)*fyi + a_Row(7,atom1)*fzi
     fyii = a_Row(2,atom1)*fxi + a_Row(5,atom1)*fyi + a_Row(8,atom1)*fzi
@@ -1230,7 +1248,7 @@ contains
     fxradial = 0.5_dp * (fxii + fxji)
     fyradial = 0.5_dp * (fyii + fyji)
     fzradial = 0.5_dp * (fzii + fzji)
-
+    write(*,*) fxradial, ' is fxrad; ', fyradial, ' is fyrad; ', fzradial, 'is fzrad'
 #ifdef IS_MPI
     f_Row(1,atom1) = f_Row(1,atom1) + fxradial
     f_Row(2,atom1) = f_Row(2,atom1) + fyradial

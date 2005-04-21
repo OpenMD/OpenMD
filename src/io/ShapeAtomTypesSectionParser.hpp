@@ -60,7 +60,7 @@ namespace oopse {
   private:
     virtual void parseLine(ForceField& ff, const std::string& line, int lineNo);
 
-    void parseShapeFile(ForceField& ff, string shapeFileName, 
+    void parseShapeFile(ForceField& ff, std::string& shapeFileName, 
                         ShapeAtomType* st);
 
   };
