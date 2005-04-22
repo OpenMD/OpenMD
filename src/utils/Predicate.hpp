@@ -160,7 +160,7 @@ operator||( const PredFacade<Pred1T>& Pred1, const PredFacade<Pred2T>& Pred2 ) {
     // Doing the static_cast with the pointer instead of the reference
     // is a workaround for some compilers which have problems with
     // static_cast's of template references, i.e. CW8. /grafik/
-    return detail::PredOrFunctor<Pred1T,Pred2T>(
+    return PredOrFunctor<Pred1T,Pred2T>(
         *static_cast<const Pred1T*>(&Pred1), 
         *static_cast<const Pred2T*>(&Pred2));
 }
