@@ -44,6 +44,7 @@
 
 #include <string>
 #include <cctype>
+#include "utils/Predicate.hpp"
 
 /**
  * @file Trim.hpp
@@ -56,13 +57,20 @@ namespace oopse {
    * characters are considered spaces
    * @param str An input sequence
    * @param IsSpace An unary predicate identifying spaces 
+   *
+   * @code
+   * std::string str = "  acb  trimLeftIf test case"
+   * trimLeftIf(str, pred() || isFromRange('a', 'c')); 
+   * std::cout << str << std::endl; //print "trimLeft test case"
+   * 
+   * @endcode
    */
   template<typename Predict>     
-  void trimLeftIf(std::string& str, Predict isSpace) {
+  void trimLeftIf(std::string& str, Predict pred) {
     std::string::iterator i = str.begin();
 
     for (; i != str.end(); ++i) {
-      if (!isSpace(*i)) {
+      if (!pred(*i)) {
 	break;
       }
     }
@@ -76,11 +84,11 @@ namespace oopse {
    * @param str An input sequence 
    */
   template<typename Predict>     
-  void trimRightIf(std::string& str, Predict isSpace) {
+  void trimRightIf(std::string& str, Predict pred) {
     std::string::iterator i = str.end();
 
     for (; i != str.begin();) {
-      if (!isSpace(*(--i))) {
+      if (!pred(*(--i))) {
 	++i;
 	break;
       }
@@ -95,9 +103,9 @@ namespace oopse {
    * @param str An input sequence
    */
   template<typename Predict>     
-  void trimIf(std::string& str, Predict isSpace) {
-    trimLeftIf(str, isSpace);
-    trimRightIf(str, isSpace);        
+  void trimIf(std::string& str, Predict pred) {
+    trimLeftIf(str, pred);
+    trimRightIf(str, pred);        
   }
 
   /**
@@ -107,9 +115,9 @@ namespace oopse {
    * @param input An input sequence 
    */
   template<typename Predict>
-  std::string trimLeftCopyIf(const std::string& input, Predict isSpace) {
+  std::string trimLeftCopyIf(const std::string& input, Predict pred) {
     std::string result(input);
-    trimLeftIf(result, isSpace);
+    trimLeftIf(result, pred);
     return result;
   }
 
@@ -120,9 +128,9 @@ namespace oopse {
    * @param input An input sequence
    */
   template<typename Predict>
-  std::string trimRightCopyIf(const std::string& input, Predict isSpace) {
+  std::string trimRightCopyIf(const std::string& input, Predict pred) {
     std::string result(input);
-    trimRightIf(result, isSpace);
+    trimRightIf(result, pred);
     return result;
   }
 
@@ -133,9 +141,9 @@ namespace oopse {
    * @param input An input sequence
    */
   template<typename Predict>     
-  std::string trimCopyIf(const std::string& input, Predict isSpace) {
+  std::string trimCopyIf(const std::string& input, Predict pred) {
     std::string result(input);
-    trimIf(result, isSpace);
+    trimIf(result, pred);
     return result;
   }
 

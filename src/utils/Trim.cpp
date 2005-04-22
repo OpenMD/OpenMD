@@ -40,30 +40,31 @@
  */
  
 #include "utils/Trim.hpp"
+
 namespace oopse {
 
   void trimLeft(std::string& str) {
-    trimLeftIf(str, std::isspace);
+    trimLeftIf(str, isSpace());
   }
 
   void trimRight(std::string& str) {
-    trimRightIf(str, std::isspace);
+    trimRightIf(str, isSpace());
   }
 
   void trim(std::string& str) {
-    trimIf(str, std::isspace);
+    trimIf(str, isSpace());
   }
 
   std::string trimLeftCopy(const std::string& input) {
-    return trimLeftCopyIf(input, std::isspace);
+    return trimLeftCopyIf(input, isSpace());
   }
 
   std::string trimRightCopy(const std::string& input) {
-    return trimRightCopyIf(input, std::isspace);
+    return trimRightCopyIf(input, isSpace());
   }
 
   std::string trimCopy(const std::string& input) {
-    return trimCopyIf(input, std::isspace);
+    return trimCopyIf(input, isSpace());
   }
 
 }
