@@ -57,7 +57,7 @@ contains
   subroutine new_atype(ident, is_Directional, is_LennardJones, &
        is_Electrostatic, is_Charge, is_Dipole, is_Quadrupole, &
        is_Sticky, is_GayBerne, is_EAM, is_Shape, is_FLARB, status)
-
+    integer :: myATID, c_ident
     integer,intent(in) :: ident
     logical,intent(in) :: is_Directional, is_LennardJones, is_Electrostatic
     logical,intent(in) :: is_Charge, is_Dipole, is_Quadrupole
@@ -80,9 +80,7 @@ contains
 
     me = addElement(atypes)
 
-    write(*,*) 'setting c_ident = ', ident
     call setElementProperty(atypes, me, "c_ident", ident)
-
     call setElementProperty(atypes, me, "is_Directional", is_Directional)
     call setElementProperty(atypes, me, "is_LennardJones", is_LennardJones)
     call setElementProperty(atypes, me, "is_Electrostatic", is_Electrostatic)

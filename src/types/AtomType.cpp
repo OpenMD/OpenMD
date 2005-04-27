@@ -98,9 +98,6 @@ namespace oopse {
  
     status = 0;
     
-    
-    std::cout << "Calling makeAtype with atp.ident = " << atp.ident << "\n";
-
     makeAtype(&atp, &status);   
     
     if (status != 0) {

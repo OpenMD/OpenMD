@@ -174,12 +174,10 @@ namespace oopse {
       
       int myATID = getIdent();
       
-      
-      std::cout << "calling makeShape with myATID = " << myATID << "\n";
-
       makeShape( &nContact, &contactL[0], &contactM[0], &contactFunc[0], 
                  &contactCoeff[0],
-                 &nRange, &rangeL[0], &rangeM[0], &rangeFunc[0], &rangeCoeff[0],
+                 &nRange, &rangeL[0], &rangeM[0], &rangeFunc[0], 
+		 &rangeCoeff[0],
                  &nStrength, &strengthL[0], &strengthM[0], &strengthFunc[0], 
                  &strengthCoeff[0],
                  &myATID, 

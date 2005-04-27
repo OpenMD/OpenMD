@@ -3,7 +3,7 @@ subroutine makeShape(nContactFuncs, ContactFuncLValue, &
      nRangeFuncs, RangeFuncLValue, RangeFuncMValue, RangeFunctionType, &
      RangeFuncCoefficient, nStrengthFuncs, StrengthFuncLValue, &
      StrengthFuncMValue, StrengthFunctionType, StrengthFuncCoefficient, &
-     myATID, status)
+     c_ident, status)
 
   use definitions
   use shapes, only: newShapeType

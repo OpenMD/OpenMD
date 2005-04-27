@@ -97,23 +97,23 @@ module shapes
   type, private :: ShapeList
      integer :: n_shapes = 0
      integer :: currentShape = 0
-     type (Shape), pointer :: Shapes(:)      => null()
-     integer, pointer      :: atidToShape(:) => null()
+     type(Shape), pointer :: Shapes(:)      => null()
+     integer, pointer     :: atidToShape(:) => null()
   end type ShapeList
-
+  
   type(ShapeList), save :: ShapeMap
-
+  
   integer :: lmax
-
+  
 contains  
-
+  
   subroutine newShapeType(nContactFuncs, ContactFuncLValue, &
        ContactFuncMValue, ContactFunctionType, ContactFuncCoefficient, &
        nRangeFuncs, RangeFuncLValue, RangeFuncMValue, RangeFunctionType, &
        RangeFuncCoefficient, nStrengthFuncs, StrengthFuncLValue, &
        StrengthFuncMValue, StrengthFunctionType, StrengthFuncCoefficient, &
        c_ident, status)
-
+    
     integer :: nContactFuncs 
     integer :: nRangeFuncs 
     integer :: nStrengthFuncs 
@@ -154,7 +154,7 @@ contains
        allocate(ShapeMap%Shapes(nShapeTypes + nLJTypes))
 
        ntypes = getSize(atypes)
-
+ 
        allocate(ShapeMap%atidToShape(ntypes))
     end if
 
@@ -167,9 +167,8 @@ contains
        status = -1
        return
     endif
-    
-    myATID = getFirstMatchingElement(atypes, 'c_ident', c_ident)
-!    write(*,*) 'myATID= ', myATID, ' c_ident = ', c_ident
+
+    myATID = getFirstMatchingElement(atypes, "c_ident", c_ident)
 
     ShapeMap%atidToShape(myATID)                     = current
     ShapeMap%Shapes(current)%atid                    = myATID
@@ -360,10 +359,8 @@ contains
     
        myATID = getFirstMatchingElement(atypes, 'c_ident', i)
        call getElementProperty(atypes, myATID, "is_LennardJones", thisProperty)
-!       write(*,*) 'is_LJ = ', thisProperty, ' for atid = ', myATID
-       
+         
        if (thisProperty) then
-                 
           ShapeMap%currentShape = ShapeMap%currentShape + 1
           current = ShapeMap%currentShape
 
@@ -487,6 +484,8 @@ contains
     real (kind=dp) :: fxji, fyji, fzji, fxjj, fyjj, fzjj
     real (kind=dp) :: fxradial, fyradial, fzradial
 
+    real (kind=dp) :: xihat, yihat, zihat, xjhat, yjhat, zjhat
+
     real (kind=dp) :: plm_i(0:LMAX,0:MMAX), dlm_i(0:LMAX,0:MMAX)
     real (kind=dp) :: plm_j(0:LMAX,0:MMAX), dlm_j(0:LMAX,0:MMAX)
     real (kind=dp) :: tm_i(0:MMAX), dtm_i(0:MMAX), um_i(0:MMAX), dum_i(0:MMAX)
@@ -505,10 +504,16 @@ contains
     drdxi = -d(1) / rij
     drdyi = -d(2) / rij
     drdzi = -d(3) / rij
+    drduxi = 0.0d0
+    drduyi = 0.0d0
+    drduzi = 0.0d0
 
     drdxj = d(1) / rij
     drdyj = d(2) / rij
     drdzj = d(3) / rij
+    drduxj = 0.0d0
+    drduyj = 0.0d0
+    drduzj = 0.0d0
 
     ! find the atom type id (atid) for each atom:
 #ifdef IS_MPI
@@ -567,7 +572,9 @@ contains
        zi = a(7,atom1)*d(1) + a(8,atom1)*d(2) + a(9,atom1)*d(3)
 
 #endif
-
+       xihat = xi / rij
+       yihat = yi / rij
+       zihat = zi / rij
        xi2 = xi*xi
        yi2 = yi*yi
        zi2 = zi*zi             
@@ -579,9 +586,9 @@ contains
        dctidx = - zi * xi / r3
        dctidy = - zi * yi / r3
        dctidz = 1.0d0 / rij - zi2 / r3
-       dctidux = - (zi * xi2) / r3
-       dctiduy = - (zi * yi2) / r3
-       dctiduz = zi / rij - (zi2 * zi) / r3
+       dctidux = yi / rij ! - (zi * xi2) / r3
+       dctiduy = -xi / rij !- (zi * yi2) / r3
+       dctiduz = 0.0d0 !zi / rij - (zi2 * zi) / r3
 
        ! this is an attempt to try to truncate the singularity when
        ! sin(theta) is near 0.0:
@@ -660,7 +667,7 @@ contains
              dPhuncdX = coeff * dtm_i(m) * dcpidx
              dPhuncdY = coeff * dtm_i(m) * dcpidy
              dPhuncdZ = coeff * dtm_i(m) * dcpidz
-             dPhuncdUz = coeff * dtm_i(m) * dcpidux
+             dPhuncdUx = coeff * dtm_i(m) * dcpidux
              dPhuncdUy = coeff * dtm_i(m) * dcpiduy
              dPhuncdUz = coeff * dtm_i(m) * dcpiduz
           else
@@ -674,8 +681,8 @@ contains
           endif
 
           sigma_i = sigma_i + plm_i(m,l)*Phunc
-          write(*,*) 'dsigmaidux = ', dsigmaidux
-          write(*,*) 'Phunc = ', Phunc
+!!$          write(*,*) 'dsigmaidux = ', dsigmaidux
+!!$          write(*,*) 'Phunc = ', Phunc
           dsigmaidx = dsigmaidx + plm_i(m,l)*dPhuncdX + &
                Phunc * dlm_i(m,l) * dctidx
           dsigmaidy = dsigmaidy + plm_i(m,l)*dPhuncdY + &
@@ -688,9 +695,9 @@ contains
                Phunc * dlm_i(m,l) * dctiduy
           dsigmaiduz = dsigmaiduz + plm_i(m,l)* dPhuncdUz + &
                Phunc * dlm_i(m,l) * dctiduz
-          write(*,*) 'dsigmaidux = ', dsigmaidux, '; dPhuncdUx = ', dPhuncdUx, &
-                     '; dctidux = ', dctidux, '; plm_i(m,l) = ', plm_i(m,l), &
-                     '; dlm_i(m,l) = ', dlm_i(m,l), '; m = ', m, '; l = ', l 
+!!$          write(*,*) 'dsigmaidux = ', dsigmaidux, '; dPhuncdUx = ', dPhuncdUx, &
+!!$                     '; dctidux = ', dctidux, '; plm_i(m,l) = ', plm_i(m,l), &
+!!$                     '; dlm_i(m,l) = ', dlm_i(m,l), '; m = ', m, '; l = ', l 
        end do
 
        do lm = 1, ShapeMap%Shapes(st1)%nRangeFuncs
@@ -704,7 +711,7 @@ contains
              dPhuncdX = coeff * dtm_i(m) * dcpidx
              dPhuncdY = coeff * dtm_i(m) * dcpidy
              dPhuncdZ = coeff * dtm_i(m) * dcpidz
-             dPhuncdUz = coeff * dtm_i(m) * dcpidux
+             dPhuncdUx = coeff * dtm_i(m) * dcpidux
              dPhuncdUy = coeff * dtm_i(m) * dcpiduy
              dPhuncdUz = coeff * dtm_i(m) * dcpiduz
           else
@@ -746,7 +753,7 @@ contains
              dPhuncdX = coeff * dtm_i(m) * dcpidx
              dPhuncdY = coeff * dtm_i(m) * dcpidy
              dPhuncdZ = coeff * dtm_i(m) * dcpidz
-             dPhuncdUz = coeff * dtm_i(m) * dcpidux
+             dPhuncdUx = coeff * dtm_i(m) * dcpidux
              dPhuncdUy = coeff * dtm_i(m) * dcpiduy
              dPhuncdUz = coeff * dtm_i(m) * dcpiduz
           else
@@ -823,6 +830,9 @@ contains
        zj = -(a(7,atom2)*d(1) + a(8,atom2)*d(2) + a(9,atom2)*d(3))
 #endif
 
+       xjhat = xj / rij
+       yjhat = yj / rij
+       zjhat = zj / rij
        xj2 = xj*xj
        yj2 = yj*yj
        zj2 = zj*zj
@@ -834,9 +844,9 @@ contains
        dctjdx = - zj * xj / r3
        dctjdy = - zj * yj / r3
        dctjdz = 1.0d0 / rij - zj2 / r3
-       dctjdux = - (zi * xj2) / r3
-       dctjduy = - (zj * yj2) / r3
-       dctjduz = zj / rij - (zj2 * zj) / r3
+       dctjdux = yj / rij !- (zi * xj2) / r3
+       dctjduy = -xj / rij !- (zj * yj2) / r3
+       dctjduz = 0.0d0 !zj / rij - (zj2 * zj) / r3
 
        ! this is an attempt to try to truncate the singularity when
        ! sin(theta) is near 0.0:
@@ -918,7 +928,7 @@ contains
              dPhuncdX = coeff * dtm_j(m) * dcpjdx
              dPhuncdY = coeff * dtm_j(m) * dcpjdy
              dPhuncdZ = coeff * dtm_j(m) * dcpjdz
-             dPhuncdUz = coeff * dtm_j(m) * dcpjdux
+             dPhuncdUx = coeff * dtm_j(m) * dcpjdux
              dPhuncdUy = coeff * dtm_j(m) * dcpjduy
              dPhuncdUz = coeff * dtm_j(m) * dcpjduz
           else
@@ -960,7 +970,7 @@ contains
              dPhuncdX = coeff * dtm_j(m) * dcpjdx
              dPhuncdY = coeff * dtm_j(m) * dcpjdy
              dPhuncdZ = coeff * dtm_j(m) * dcpjdz
-             dPhuncdUz = coeff * dtm_j(m) * dcpjdux
+             dPhuncdUx = coeff * dtm_j(m) * dcpjdux
              dPhuncdUy = coeff * dtm_j(m) * dcpjduy
              dPhuncdUz = coeff * dtm_j(m) * dcpjduz
           else
@@ -1072,9 +1082,9 @@ contains
     dsduzj = 0.5*dsjduz
 
     eps = sqrt(eps_i * eps_j)
-    write(*,*) 'dsidu = ', dsidux, dsiduy, dsiduz
-    write(*,*) 'dsigidu = ', dsigmaidux, dsigmaiduy, dsigmaiduz
-!    write(*,*) sigma_i, ' is sigma i; ', s_i, ' is s i; ', eps_i, ' is eps i'
+!!$    write(*,*) 'dsidu = ', dsidux, dsiduy, dsiduz
+!!$    write(*,*) 'dsigidu = ', dsigmaidux, dsigmaiduy, dsigmaiduz
+!!$    write(*,*) sigma_j, ' is sigma j; ', s_j, ' is s j; ', eps_j, ' is eps j'
     depsdxi = eps_j * depsidx / (2.0d0 * eps)
     depsdyi = eps_j * depsidy / (2.0d0 * eps)
     depsdzi = eps_j * depsidz / (2.0d0 * eps)
@@ -1089,34 +1099,31 @@ contains
     depsduyj = eps_i * depsjduy / (2.0d0 * eps)
     depsduzj = eps_i * depsjduz / (2.0d0 * eps)
 
-!    write(*,*) 'depsidu = ', depsidux, depsiduy, depsiduz
-!    write(*,*) 'depsjdu = ', depsjdux, depsjduy, depsjduz
+!!$    write(*,*) 'depsidu = ', depsidux, depsiduy, depsiduz
 
-!    write(*,*) 'depsdui = ', depsduxi, depsduyi, depsduzi
-!    write(*,*) 'depsduj = ', depsduxj, depsduyj, depsduzj
+!!$    write(*,*) 'depsjdu = ', depsjdux, depsjduy, depsjduz
+!!$    write(*,*) 'depsduj = ', depsduxj, depsduyj, depsduzj
 !!$
 !!$    write(*,*) 's, sig, eps = ', s, sigma, eps
 
     rtdenom = rij-sigma+s
     rt = s / rtdenom
 
-    drtdxi = (dsdxi + rt * (drdxi - dsigmadxi + dsdxi)) / rtdenom
-    drtdyi = (dsdyi + rt * (drdyi - dsigmadyi + dsdyi)) / rtdenom
-    drtdzi = (dsdzi + rt * (drdzi - dsigmadzi + dsdzi)) / rtdenom
-    drtduxi = (dsduxi + rt * (drduxi - dsigmaduxi + dsduxi)) / rtdenom
-    write(*,*) dsduxi, ' is dsduxi; ', drduxi, ' is drduxi; ', dsigmaduxi, &
-               ' is dsigmaduxi; ', dsduxi, ' is dsduxi'
-    drtduyi = (dsduyi + rt * (drduyi - dsigmaduyi + dsduyi)) / rtdenom
-    drtduzi = (dsduzi + rt * (drduzi - dsigmaduzi + dsduzi)) / rtdenom
-    drtdxj = (dsdxj + rt * (drdxj - dsigmadxj + dsdxj)) / rtdenom
-    drtdyj = (dsdyj + rt * (drdyj - dsigmadyj + dsdyj)) / rtdenom
-    drtdzj = (dsdzj + rt * (drdzj - dsigmadzj + dsdzj)) / rtdenom
-    drtduxj = (dsduxj + rt * (drduxj - dsigmaduxj + dsduxj)) / rtdenom
-    drtduyj = (dsduyj + rt * (drduyj - dsigmaduyj + dsduyj)) / rtdenom
-    drtduzj = (dsduzj + rt * (drduzj - dsigmaduzj + dsduzj)) / rtdenom
+    drtdxi = (dsdxi - rt * (drdxi - dsigmadxi + dsdxi)) / rtdenom
+    drtdyi = (dsdyi - rt * (drdyi - dsigmadyi + dsdyi)) / rtdenom
+    drtdzi = (dsdzi - rt * (drdzi - dsigmadzi + dsdzi)) / rtdenom
+    drtduxi = (dsduxi - rt * (drduxi - dsigmaduxi + dsduxi)) / rtdenom
+    drtduyi = (dsduyi - rt * (drduyi - dsigmaduyi + dsduyi)) / rtdenom
+    drtduzi = (dsduzi - rt * (drduzi - dsigmaduzi + dsduzi)) / rtdenom
+    drtdxj = (dsdxj - rt * (drdxj - dsigmadxj + dsdxj)) / rtdenom
+    drtdyj = (dsdyj - rt * (drdyj - dsigmadyj + dsdyj)) / rtdenom
+    drtdzj = (dsdzj - rt * (drdzj - dsigmadzj + dsdzj)) / rtdenom
+    drtduxj = (dsduxj - rt * (drduxj - dsigmaduxj + dsduxj)) / rtdenom
+    drtduyj = (dsduyj - rt * (drduyj - dsigmaduyj + dsduyj)) / rtdenom
+    drtduzj = (dsduzj - rt * (drduzj - dsigmaduzj + dsduzj)) / rtdenom
 
-!    write(*,*) 'drtd_i = ', drtdxi, drtdyi, drtdzi
-!    write(*,*) 'drtdu_i = ', drtduxi, drtduyi, drtduzi
+!!$    write(*,*) 'drtd_i = ', drtdxi, drtdyi, drtdzi
+!!$    write(*,*) 'drtdu_j = ', drtduxj, drtduyj, drtduzj
 
     rt2 = rt*rt
     rt3 = rt2*rt
@@ -1153,30 +1160,33 @@ contains
     dvduxj = 24.0d0*eps*(2.0d0*rt11 - rt5)*drtduxj + 4.0d0*depsduxj*rt126
     dvduyj = 24.0d0*eps*(2.0d0*rt11 - rt5)*drtduyj + 4.0d0*depsduyj*rt126
     dvduzj = 24.0d0*eps*(2.0d0*rt11 - rt5)*drtduzj + 4.0d0*depsduzj*rt126
-    write(*,*) 'drtduxi = ', drtduxi, ' depsduxi = ', depsduxi
+!!$    write(*,*) 'drtduxi = ', drtduxi, ' depsduxi = ', depsduxi
     ! do the torques first since they are easy:
     ! remember that these are still in the body fixed axes
 
+    txi = 0.0d0
+    tyi = 0.0d0
+    tzi = 0.0d0
 
-!!$    write(*,*) 'sw = ', sw
-!!$    write(*,*) 'dvdu1 = ', dvduxi, dvduyi, dvduzi
-!!$    write(*,*) 'dvdu2 = ', dvduxj, dvduyj, dvduzj
+    txj = 0.0d0
+    tyj = 0.0d0
+    tzj = 0.0d0
+
+    txi = (dvduyi - dvduzi) * sw
+    tyi = (dvduzi - dvduxi) * sw
+    tzi = (dvduxi - dvduyi) * sw
+
+    txj = (dvduyj - dvduzj) * sw
+    tyj = (dvduzj - dvduxj) * sw
+    tzj = (dvduxj - dvduyj) * sw
+
+!!$    txi = dvduxi * sw
+!!$    tyi = dvduyi * sw
+!!$    tzi = dvduzi * sw
 !!$
-!    txi =  (dvduzi - dvduyi) * sw
-!    tyi =  (dvduxi - dvduzi) * sw
-!    tzi =  (dvduyi - dvduxi) * sw
-
-!    txj = (dvduzj - dvduyj) * sw
-!    tyj = (dvduxj - dvduzj) * sw
-!    tzj = (dvduyj - dvduxj) * sw
-
-    txi = dvduxi * sw
-    tyi = dvduyi * sw
-    tzi = dvduzi * sw
-
-    txj = dvduxj * sw
-    tyj = dvduyj * sw
-    tzj = dvduzj * sw
+!!$    txj = dvduxj * sw
+!!$    tyj = dvduyj * sw
+!!$    tzj = dvduzj * sw
 
     write(*,*) 't1 = ', txi, tyi, tzi
     write(*,*) 't2 = ', txj, tyj, tzj
@@ -1205,18 +1215,19 @@ contains
     t(1,atom2) = t(1,atom2) + a(1,atom2)*txj + a(4,atom2)*tyj + a(7,atom2)*tzj
     t(2,atom2) = t(2,atom2) + a(2,atom2)*txj + a(5,atom2)*tyj + a(8,atom2)*tzj
     t(3,atom2) = t(3,atom2) + a(3,atom2)*txj + a(6,atom2)*tyj + a(9,atom2)*tzj
+
 #endif
     ! Now, on to the forces:
 
     ! first rotate the i terms back into the lab frame:
 
-    fxi = dvdxi * sw
-    fyi = dvdyi * sw
-    fzi = dvdzi * sw
+    fxi = -dvdxi * sw
+    fyi = -dvdyi * sw
+    fzi = -dvdzi * sw
 
-    fxj = dvdxj * sw
-    fyj = dvdyj * sw
-    fzj = dvdzj * sw
+    fxj = -dvdxj * sw
+    fyj = -dvdyj * sw
+    fzj = -dvdzj * sw
 
 
 #ifdef IS_MPI
@@ -1245,10 +1256,10 @@ contains
     fyji = -fyjj
     fzji = -fzjj
 
-    fxradial = 0.5_dp * (fxii + fxji)
-    fyradial = 0.5_dp * (fyii + fyji)
-    fzradial = 0.5_dp * (fzii + fzji)
-    write(*,*) fxradial, ' is fxrad; ', fyradial, ' is fyrad; ', fzradial, 'is fzrad'
+    fxradial = (fxii + fxji)
+    fyradial = (fyii + fyji)
+    fzradial = (fzii + fzji)
+!!$    write(*,*) fxradial, ' is fxrad; ', fyradial, ' is fyrad; ', fzradial, 'is fzrad'
 #ifdef IS_MPI
     f_Row(1,atom1) = f_Row(1,atom1) + fxradial
     f_Row(2,atom1) = f_Row(2,atom1) + fyradial
