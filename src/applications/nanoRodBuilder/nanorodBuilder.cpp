@@ -185,6 +185,11 @@ int main(int argc, char *argv []) {
   else
     outInitFileName = getPrefix(inputFileName.c_str()) + ".in";
   
+  
+         
+  
+  
+  
   //creat Molocator
   locator = new MoLocator(oldInfo->getMoleculeStamp(0), oldInfo->getForceField());
   
@@ -205,6 +210,13 @@ int main(int argc, char *argv []) {
   // Create geometry for nanocrystal
 #ifdef HAVE_CGAL
   GeometryBuilder myGeometry(rodLength,rodDiameter);
+  if (args_info.genGeomview_given){
+     if (args_info.genGeomview_flag){
+        outGeomFileName = getPrefix(inputFileName.c_str()) + ".off";
+        myGeometry.dumpGeometry(outGeomFileName);
+     }
+  }
+
 #endif
   
   /*
@@ -241,9 +253,9 @@ int main(int argc, char *argv []) {
   
   
   numMol = 0;
-  for(int i = 0; i < nx; i++) {
-    for(int j = 0; j < ny; j++) {
-      for(int k = 0; k < nz; k++) {
+  for(int i = -nx; i < nx; i++) {     
+    for(int j = -ny; j < ny; j++) {       
+      for(int k = -nz; k < nz; k++) {
         //if (oldInfo->getNGlobalMolecules() != numMol) {
 	
 	
@@ -262,7 +274,7 @@ int main(int argc, char *argv []) {
       }
     }
   }
-  
+  std::cerr << "numMol before is " << numMol << std::endl;
   
   // needed for writing out new md file.
   
@@ -287,35 +299,33 @@ int main(int argc, char *argv []) {
   Molecule* mol;
   SimInfo::MoleculeIterator mi;
   mol = NewInfo->beginMolecule(mi);
-  
-  for(int i = 0; i < nx; i++) {
-    for(int j = 0; j < ny; j++) {
-      for(int k = 0; k < nz; k++) {
-	
-        //get the position of the cell sites
-        simpleLat->getLatticePointsPos(latticePos, i, j, k);
-	
-        for(int l = 0; l < numMolPerCell; l++) {
-          if (mol != NULL) {
-
-#ifdef HAVE_GCAL
-            if (myGeometry.isInsidePolyhedron(latticePos[l][0],latticePos[l][1],latticePos[l][2])){
-              locator->placeMol(latticePos[l], latticeOrt[l], mol);
-            }		
-#else
-            
-            locator->placeMol(latticePos[l], latticeOrt[l], mol);
-#endif
-          } else {
-            std::cerr << std::endl;                    
-          }
-          mol = NewInfo->nextMolecule(mi);
+  numMol = 0;
+  int countMol = 0;
+  for(int i = -nx; i < nx; i++) {
+     for(int j = -ny; j < ny; j++) {
+        for(int k = -nz; k < nz; k++) {
+           
+           //get the position of the cell sites
+           simpleLat->getLatticePointsPos(latticePos, i, j, k);
+           
+           for(int l = 0; l < numMolPerCell; l++) {
+              if (myGeometry.isInsidePolyhedron(latticePos[l][0],latticePos[l][1],latticePos[l][2])){
+                 countMol++;              
+                 if (mol != NULL) {
+                    locator->placeMol(latticePos[l], latticeOrt[l], mol);
+                    numMol++;
+                 } else {
+                    std::cerr<<"Error in placing molecule " << countMol << std::endl;                    
+                 }
+                 mol = NewInfo->nextMolecule(mi);
+              }
+              
+           }
         }
-      }
-    }
+     }
   }
   
-  
+  std::cerr << "numMol after is " << numMol << std::endl;
   
   //fill Hmat
   hmat(0, 0)= nx * latticeConstant;

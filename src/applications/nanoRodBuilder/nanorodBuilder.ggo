@@ -13,4 +13,4 @@ option "latticetype"    - "Lattice type string. Valid types are fcc,hcp,bcc." st
 option "length"        -  "length of nanorod in Angstroms" double yes
 option "width"         -  "diameter  of nanorod in Angstroms" double yes
 option "latticeCnst"   -  "lattice spacing in Angstrons for cubic lattice" double yes
-option "genGeomview"   -  "generate a geomview file with the object geometry" long no
+option "genGeomview"   -  "generate a geomview file with the object geometry" flag off

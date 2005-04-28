@@ -60,7 +60,10 @@
 #include <CGAL/aff_transformation_tags.h>
 #include <iostream>
 #include <algorithm>
+#include <fstream>
+#include <math.h>
 
+using namespace std;
 using namespace oopse;
 
 //typedef CGAL::Homogeneous<int>              Kernel;
@@ -100,6 +103,7 @@ class Build_nanorod : public CGAL::Modifier_base<HDS> {
   Vertex_handle neight1;
   Vertex_handle end2;
   Vertex_handle neight2;
+  Vertex_handle neight3;
   
   Build_nanorod() {}
   void operator()( HDS& hds) {
@@ -117,7 +121,7 @@ class Build_nanorod : public CGAL::Modifier_base<HDS> {
     B.add_vertex( Point(-0.4874571845316,    0.4874571845315,  0.6709272557930));
     B.add_vertex( Point(-0.7887222926324,   -0.4874571845315, -0.2562714077342)); //End vertex
     end1 = B.add_vertex( Point( 0.0000000000000,    1.0000000000000,  0.0000000000000));
-    B.add_vertex( Point(-0.4874571845315,    -0.4874571845316,  0.6709272557930));
+    neight3 = B.add_vertex( Point(-0.4874571845315,    -0.4874571845316,  0.6709272557930));
     neight1 = B.add_vertex( Point(-0.0000000000000,    0.4874571845316, -0.8293116961175));
     B.add_vertex( Point( 0.0000000000000,    -0.4874571845316, -0.8293116961175));
     B.add_vertex( Point( 0.4874571845315,    0.4874571845316,  0.6709272557930));
@@ -270,7 +274,16 @@ GeometryBuilder::GeometryBuilder(double length,double width) {
    
   double y1 = nanorod.end1->point().y() - nanorod.neight1->point().y();
   double y2 = nanorod.end2->point().y() - nanorod.neight2->point().y();
-	
+  
+  double endDist = sqrt(pow(nanorod.neight2->point().x() - nanorod.neight3->point().x(),2)+
+                        pow(nanorod.neight2->point().y() - nanorod.neight3->point().y(),2)+
+                        pow(nanorod.neight2->point().z() - nanorod.neight3->point().z(),2));
+  
+  double endRatio1 = y1/endDist;
+  double endRatio2 = y2/endDist;
+  
+  std::cout << "End dist is " << endDist <<" ratio " << endRatio1 << std::endl;
+  
   CGAL::Aff_transformation_3<Kernel> aff_tranformation( width,
 							0.0,
 							0.0,
@@ -285,16 +298,49 @@ GeometryBuilder::GeometryBuilder(double length,double width) {
 							0.0);	
   std::transform( nanoRodPolyhedron.points_begin(), nanoRodPolyhedron.points_end(), nanoRodPolyhedron.points_begin(), aff_tranformation);
 	
-  Point_3 point1(nanorod.end1->point().x(), y1 + nanorod.neight1->point().y(), nanorod.end1->point().z());
-  Point_3 point2(nanorod.end2->point().x(), y2+ nanorod.neight2->point().y(), nanorod.end2->point().z());
+  
+  double endDist2 = sqrt(pow(nanorod.neight2->point().x() - nanorod.neight3->point().x(),2)+
+                        pow(nanorod.neight2->point().y() - nanorod.neight3->point().y(),2)+
+                        pow(nanorod.neight2->point().z() - nanorod.neight3->point().z(),2));
+  
+  Point_3 point1(nanorod.end1->point().x(), endDist2*endRatio1 + nanorod.neight1->point().y(), nanorod.end1->point().z());
+  Point_3 point2(nanorod.end2->point().x(), endDist2*endRatio2 + nanorod.neight2->point().y(), nanorod.end2->point().z());
   nanorod.end1->point() = point1;
   nanorod.end2->point() = point2;
 	
   // Construct normal vector for each face.
   std::transform( nanoRodPolyhedron.facets_begin(), nanoRodPolyhedron.facets_end(), nanoRodPolyhedron.planes_begin(),
 		  Normal_vector());
- 	
+} 	
+  void GeometryBuilder::dumpGeometry(const std::string& geomFileName){
+     
+     std::ofstream newGeomFile;
+     
+     //create new .md file based on old .md file
+     newGeomFile.open(geomFileName.c_str());
+     
+     // Write polyhedron in Object File Format (OFF).
+     CGAL::set_ascii_mode( std::cout);
+     newGeomFile << "OFF" << std::endl << nanoRodPolyhedron.size_of_vertices() << ' ' 
+        << nanoRodPolyhedron.size_of_facets() << " 0" << std::endl;
+     std::copy( nanoRodPolyhedron.points_begin(), nanoRodPolyhedron.points_end(),
+                std::ostream_iterator<Point_3>( newGeomFile, "\n"));
+     for (  Facet_iterator i = nanoRodPolyhedron.facets_begin(); i != nanoRodPolyhedron.facets_end(); ++i) {
+        Halfedge_facet_circulator j = i->facet_begin();
+        // Facets in polyhedral surfaces are at least triangles.
+        CGAL_assertion( CGAL::circulator_size(j) >= 3);
+        newGeomFile << CGAL::circulator_size(j) << ' ';
+        do {
+           newGeomFile << ' ' << std::distance(nanoRodPolyhedron.vertices_begin(), j->vertex());
+        } while ( ++j != i->facet_begin());
+        newGeomFile << std::endl;
+     }
+     
+     newGeomFile.close();
+     
+     
   
 	
-}
+  }
+
 

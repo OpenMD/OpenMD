@@ -51,7 +51,7 @@
 #ifndef APPLICATIONS_NANORODBUILDER_GEOMETRYBUILDER_HPP
 #define APPLICATIONS_NANORODBUILDER_GEOMETRYBUILDER_HPP
 
-
+#include <string>
 
 namespace oopse {
 	
@@ -63,7 +63,8 @@ namespace oopse {
     GeometryBuilder(double length,double width);
     ~GeometryBuilder(){};
     		
-    bool isInsidePolyhedron(double x, double y, double z);
+    bool isInsidePolyhedron(double x, double y, double z);  
+    void dumpGeometry(const std::string& geomFileName);
   private:
   };
 }
