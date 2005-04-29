@@ -124,6 +124,7 @@ TargetDir         = $(DEV_ROOT)/obj
 ParallelTargetDir = $(DEV_ROOT)/MPIobj
 LibDir            = $(DEV_ROOT)/lib
 MakeDir           = $(DEV_ROOT)/make
+MainMakefile      = $(MakeDir)/Makefile
 BinDir            = $(DEV_ROOT)/bin
 DocsDir           = $(DEV_ROOT)/docs
 CurrentDir        = $(CURDIR)
@@ -336,7 +337,7 @@ InstallProgram         = @INSTALL_PROGRAM@
 InstallScript          = @INSTALL_SCRIPT@
 InstallData            = @INSTALL_DATA@
 MkDir                  = @MKINSTALLDIRS@
-Delete                 = rm -fr
+Delete                 = rm -f
 StaticArchiver         = @AR@
 DynamicArchiver        = @CC@
 FortranCompiler        = @FC@
@@ -451,70 +452,70 @@ $(BinDir) :
 	$(MkDir) $@
 
 # .c -> .o
-$(PackageTargetDir)/%.o : %.c
+$(PackageTargetDir)/%.o : %.c $(MainMakefile)
 	$(Print) $@
 	$(CCompiler) $(COptions) -c $(IncludePath) $< -o $@
 
-$(PackageParallelTargetDir)/%.o : %.c
+$(PackageParallelTargetDir)/%.o : %.c $(MainMakefile)
 	$(Print) $@
 	$(CCompiler) $(CParallelOptions) -c $(IncludePath) $< -o $@
 
 ifeq "$(UseMPI)" "yes"
-%.o : %.c
+%.o : %.c $(MainMakefile)
 	$(MAKE) $(MakeOptions) $(PackageTargetDir)/$@
 	$(MAKE) $(MakeOptions) $(PackageParallelTargetDir)/$@
 else
-%.o : %.c
+%.o : %.c $(MainMakefile)
 	$(MAKE) $(MakeOptions) $(PackageTargetDir)/$@
 endif
 
 # .cpp -> .o
-$(PackageTargetDir)/%.o : %.cpp
+$(PackageTargetDir)/%.o : %.cpp $(MainMakefile)
 	$(CppCompiler) $(CppOptions) -c $(IncludePath) $< -o $@
 
-$(PackageParallelTargetDir)/%.o : %.cpp
+$(PackageParallelTargetDir)/%.o : %.cpp $(MainMakefile)
 	$(CppCompiler) $(CppParallelOptions) -c $(IncludePath) $< -o $@
 
 ifeq "$(UseMPI)" "yes"
-%.o : %.cpp
+%.o : %.cpp $(MainMakefile)
 	$(MAKE) $(MakeOptions) $(PackageTargetDir)/$@
 	$(MAKE) $(MakeOptions) $(PackageParallelTargetDir)/$@
 else
-%.o : %.cpp
+%.o : %.cpp $(MainMakefile)
 	$(MAKE) $(MakeOptions) $(PackageTargetDir)/$@
 endif
 
 # .f -> .o
-$(PackageTargetDir)/%.o : %.f
+$(PackageTargetDir)/%.o : %.f $(MainMakefile)
 	$(FortranCompiler) $(FortranOptions) -c $< -o $@
 
-$(PackageParallelTargetDir)/%.o : %.f
+$(PackageParallelTargetDir)/%.o : %.f $(MainMakefile)
 	$(FortranCompiler) $(FortranParallelOptions) -c $< -o $@
 
 ifeq "$(UseMPI)" "yes"
-%.o : %.f
+%.o : %.f $(MainMakefile)
 	$(MAKE) $(MakeOptions) $(PackageTargetDir)/$@
 	$(MAKE) $(MakeOptions) $(PackageParallelTargetDir)/$@
 else
-%.o : %.f
+%.o : %.f $(MainMakefile)
 	$(MAKE) $(MakeOptions) $(PackageTargetDir)/$@
 endif
 
 # .F90 -> .o
-$(PackageTargetDir)/%.o : %.F90
+$(PackageTargetDir)/%.o : %.F90 $(MainMakefile)
 	$(F90Compiler) $(F90Options) $(IncludePath) -c $< -o $@
 	if test -n "`ls *.$(ModSuffix)`"; then \
 	  $(Move) `ls *.$(ModSuffix)` $(PackageTargetDir);\
 	fi
 
-$(PackageParallelTargetDir)/%.o : %.F90
+$(PackageParallelTargetDir)/%.o : %.F90 $(MainMakefile)
 	$(F90Compiler) $(F90ParallelOptions) $(IncludePath) -c $< -o $@
 	if test -n "`ls *.$(ModSuffix)`"; then \
 	  $(Move) "`ls *.$(ModSuffix)`" $(PackageParallelTargetDir);\
 	fi
 
 ifeq "$(UseMPI)" "yes"
-%.o : %.F90
+%.o : %.F90 $(MainMakefile)
 	$(MAKE) $(MakeOptions) $(PackageTargetDir)/$@
 	if test -n "`ls *.$(ModSuffix)`"; then\
           $(Move) "`ls *.$(ModSuffix)`" $(PackageTargetDir);\
@@ -526,7 +527,7 @@ ifeq "$(UseMPI)" "yes"
 	fi
 
 else
-%.o : %.F90
+%.o : %.F90 $(MainMakefile)
 	$(MAKE) $(MakeOptions) $(PackageTargetDir)/$@
 	if test -n "`ls *.$(ModSuffix)`"; then\
           $(Move) "`ls *.$(ModSuffix)`" $(PackageTargetDir);\
