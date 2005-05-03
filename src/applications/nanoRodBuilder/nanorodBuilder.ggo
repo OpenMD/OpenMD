@@ -14,3 +14,4 @@ option "length"        -  "length of nanorod in Angstroms" double yes
 option "width"         -  "diameter  of nanorod in Angstroms" double yes
 option "latticeCnst"   -  "lattice spacing in Angstrons for cubic lattice" double yes
 option "genGeomview"   -  "generate a geomview file with the object geometry" flag off
+option "twinnedCrystal" - "generate a twinned crystal nanorod" flag off

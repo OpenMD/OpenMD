@@ -97,7 +97,7 @@ Polyhedron nanoRodPolyhedron;
 
 // A modifier creating a triangle with the incremental builder.
 template <class HDS>
-class Build_nanorod : public CGAL::Modifier_base<HDS> {
+class buildSingleCrystal : public CGAL::Modifier_base<HDS> {
  public:
   Vertex_handle end1;
   Vertex_handle neight1;
@@ -105,7 +105,7 @@ class Build_nanorod : public CGAL::Modifier_base<HDS> {
   Vertex_handle neight2;
   Vertex_handle neight3;
   
-  Build_nanorod() {}
+  buildSingleCrystal() {}
   void operator()( HDS& hds) {
     // Postcondition: `hds' is a valid polyhedral surface.
     CGAL::Polyhedron_incremental_builder_3<HDS> B( hds, true);
@@ -268,7 +268,7 @@ bool GeometryBuilder::isInsidePolyhedron(double x, double y, double z) {
 
 GeometryBuilder::GeometryBuilder(double length,double width) {
   // Create the geometry for nanorod
-  Build_nanorod<HalfedgeDS> nanorod;
+ buildSingleCrystal<HalfedgeDS> nanorod;
   
   nanoRodPolyhedron.delegate( nanorod);
    

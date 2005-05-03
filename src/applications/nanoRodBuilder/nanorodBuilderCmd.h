@@ -30,6 +30,7 @@ struct gengetopt_args_info
   double width_arg;	/* diameter  of nanorod in Angstroms.  */
   double latticeCnst_arg;	/* lattice spacing in Angstrons for cubic lattice.  */
   int genGeomview_flag;	/* generate a geomview file with the object geometry (default=off).  */
+  int twinnedCrystal_flag;	/* generate a twinned crystal nanorod (default=off).  */
   
   int help_given ;	/* Whether help was given.  */
   int version_given ;	/* Whether version was given.  */
@@ -39,6 +40,7 @@ struct gengetopt_args_info
   int width_given ;	/* Whether width was given.  */
   int latticeCnst_given ;	/* Whether latticeCnst was given.  */
   int genGeomview_given ;	/* Whether genGeomview was given.  */
+  int twinnedCrystal_given ;	/* Whether twinnedCrystal was given.  */
 
   char **inputs ; /* unamed options */
   unsigned inputs_num ; /* unamed options number */

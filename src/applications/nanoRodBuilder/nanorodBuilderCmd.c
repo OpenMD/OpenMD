@@ -46,6 +46,7 @@ void clear_given (struct gengetopt_args_info *args_info)
   args_info->width_given = 0 ;
   args_info->latticeCnst_given = 0 ;
   args_info->genGeomview_given = 0 ;
+  args_info->twinnedCrystal_given = 0 ;
 }
 
 static
@@ -54,6 +55,7 @@ void clear_args (struct gengetopt_args_info *args_info)
   args_info->output_arg = NULL;
   args_info->latticetype_arg = gengetopt_strdup ("fcc");
   args_info->genGeomview_flag = 0;
+  args_info->twinnedCrystal_flag = 0;
 }
 
 void
@@ -76,6 +78,7 @@ cmdline_parser_print_help (void)
   printf("%s\n","      --width=DOUBLE        diameter  of nanorod in Angstroms");
   printf("%s\n","      --latticeCnst=DOUBLE  lattice spacing in Angstrons for cubic lattice");
   printf("%s\n","      --genGeomview         generate a geomview file with the object geometry  \n                              (default=off)");
+  printf("%s\n","      --twinnedCrystal      generate a twinned crystal nanorod  (default=off)");
   
 }
 
@@ -225,6 +228,7 @@ cmdline_parser_internal (int argc, char * const *argv, struct gengetopt_args_inf
         { "width",	1, NULL, 0 },
         { "latticeCnst",	1, NULL, 0 },
         { "genGeomview",	0, NULL, 0 },
+        { "twinnedCrystal",	0, NULL, 0 },
         { NULL,	0, NULL, 0 }
       };
 
@@ -331,6 +335,20 @@ cmdline_parser_internal (int argc, char * const *argv, struct gengetopt_args_inf
             local_args_info.genGeomview_given = 1;
             args_info->genGeomview_given = 1;
             args_info->genGeomview_flag = !(args_info->genGeomview_flag);
+          }
+          /* generate a twinned crystal nanorod.  */
+          else if (strcmp (long_options[option_index].name, "twinnedCrystal") == 0)
+          {
+            if (local_args_info.twinnedCrystal_given)
+              {
+                fprintf (stderr, "%s: `--twinnedCrystal' option given more than once%s\n", argv[0], (additional_error ? additional_error : ""));
+                goto failure;
+              }
+            if (args_info->twinnedCrystal_given && ! override)
+              continue;
+            local_args_info.twinnedCrystal_given = 1;
+            args_info->twinnedCrystal_given = 1;
+            args_info->twinnedCrystal_flag = !(args_info->twinnedCrystal_flag);
           }
           
           break;
