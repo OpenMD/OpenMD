@@ -10,6 +10,7 @@ Source    = \
 	ChargeAtomTypesSectionParser.cpp \
 	MultipoleAtomTypesSectionParser.cpp \
 	StickyAtomTypesSectionParser.cpp \
+	StickyPowerAtomTypesSectionParser.cpp \
 	TorsionTypesSectionParser.cpp \
 	LennardJonesAtomTypesSectionParser.cpp\
   BondTypesSectionParser.cpp \

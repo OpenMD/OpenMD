@@ -160,7 +160,7 @@ namespace oopse {
     }
     
     //setup sticky atom type in fortran side
-    if (isSticky()) {
+    if (isSticky() || isStickyPower()) {
       data = getPropertyByName("Sticky");
       if (data != NULL) {
         StickyParamGenericData* stickyData = dynamic_cast<StickyParamGenericData*>(data);
@@ -168,8 +168,9 @@ namespace oopse {
         if (stickyData != NULL) {
           StickyParam stickyParam = stickyData->getData();
 
-          newStickyType(&atp.ident,&stickyParam.w0, &stickyParam.v0, &stickyParam.v0p, &stickyParam.rl,
-                        &stickyParam.ru, &stickyParam.rlp, &stickyParam.rup, &isError);
+          newStickyType(&atp.ident,&stickyParam.w0, &stickyParam.v0, 
+                        &stickyParam.v0p, &stickyParam.rl, &stickyParam.ru, 
+                        &stickyParam.rlp, &stickyParam.rup, &isError);
           if (isError != 0) {
             sprintf( painCave.errMsg,
                      "Fortran rejected newLJtype\n");
@@ -196,6 +197,5 @@ namespace oopse {
     //setup GayBerne type in fortran side
 
   }
-
 
 } //end namespace oopse

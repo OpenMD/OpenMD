@@ -68,6 +68,7 @@ namespace oopse {
     atp.is_SplitDipole = 0;
     atp.is_Quadrupole = 0;
     atp.is_Sticky = 0;
+    atp.is_StickyPower = 0;
     atp.is_GayBerne = 0;
     atp.is_EAM = 0;
     atp.is_Shape = 0;
@@ -123,7 +124,8 @@ namespace oopse {
 	if (ljData != NULL) {
 	  LJParam ljParam = ljData->getData();
                 
-	  newLJtype(&atp.ident, &ljParam.sigma, &ljParam.epsilon, &ljParam.soft_pot, &isError);
+	  newLJtype(&atp.ident, &ljParam.sigma, &ljParam.epsilon, &ljParam.soft_pot, 
+              &isError);
 
 	  if (isError != 0) {
 	    sprintf( painCave.errMsg,
@@ -200,8 +202,10 @@ namespace oopse {
 	  EAMParam eamParam = eamData->getData();
                 
 
-	  newEAMtype(&eamParam.latticeConstant, &eamParam.nrho, &eamParam.drho,  &eamParam.nr, &eamParam.dr, &eamParam.rcut,
-		     &eamParam.rvals[0], &eamParam.rhovals[0], &eamParam.Frhovals[0], &atp.ident, &isError );
+	  newEAMtype(&eamParam.latticeConstant, &eamParam.nrho, &eamParam.drho,  
+               &eamParam.nr, &eamParam.dr, &eamParam.rcut, &eamParam.rvals[0], 
+               &eamParam.rhovals[0], &eamParam.Frhovals[0], &atp.ident, 
+               &isError );
 
 	  if (isError != 0) {
 	    sprintf( painCave.errMsg,

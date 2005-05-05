@@ -17,6 +17,7 @@ typedef  struct{
   int SIM_uses_Charges;
   int SIM_uses_Dipoles;
   int SIM_uses_Sticky;
+  int SIM_uses_StickyPower;
   int SIM_uses_GayBerne;
   int SIM_uses_EAM;
   int SIM_uses_Shapes;
@@ -41,6 +42,7 @@ typedef  struct{
     logical :: SIM_uses_Charges
     logical :: SIM_uses_Dipoles
     logical :: SIM_uses_Sticky
+    logical :: SIM_uses_StickyPower
     logical :: SIM_uses_GayBerne
     logical :: SIM_uses_EAM
     logical :: SIM_uses_Shapes

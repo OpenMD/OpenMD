@@ -50,6 +50,7 @@
 #include "io/ChargeAtomTypesSectionParser.hpp"
 #include "io/MultipoleAtomTypesSectionParser.hpp"
 #include "io/StickyAtomTypesSectionParser.hpp"
+#include "io/StickyPowerAtomTypesSectionParser.hpp"
 #include "io/BondTypesSectionParser.hpp"
 #include "io/BendTypesSectionParser.hpp"
 #include "io/TorsionTypesSectionParser.hpp"
@@ -62,22 +63,25 @@ namespace oopse {
     //set default force field filename
     setForceFieldFileName("DUFF2.frc");
 
-    //the order of adding section parsers are important
-    //DirectionalAtomTypesSectionParser should be added before AtomTypesSectionParser Since
-    //These two section parsers will actually create "real" AtomTypes (AtomTypesSectionParser will create
-    //AtomType and DirectionalAtomTypesSectionParser will creat DirectionalAtomType which is a subclass
-    //of AtomType, therefore it should come first). Other AtomTypes Section Parser will not create the 
-    //"real" AtomType, they only add and set some attribute of the AtomType. Thus their order are not
-    //important. AtomTypesSectionParser should be added before other atom type section parsers.
-    //Make sure they are added after DirectionalAtomTypesSectionParser and AtomTypesSectionParser. 
-    //The order of BondTypesSectionParser, BendTypesSectionParser and TorsionTypesSectionParser are
-    //not important.
+    //The order of adding section parsers is important.
+    //DirectionalAtomTypesSectionParser should be added before 
+    //AtomTypesSectionParser, and these two section parsers will actually 
+    //create "real" AtomTypes (AtomTypesSectionParser will create AtomType and 
+    //DirectionalAtomTypesSectionParser will create DirectionalAtomType, which 
+    //is a subclass of AtomType and should come first). Other AtomTypes Section 
+    //Parser will not create the "real" AtomType, they only add and set some 
+    //attribute of the AtomType. Thus their order are not important. 
+    //AtomTypesSectionParser should be added before other atom type section 
+    //parsers. Make sure they are added after DirectionalAtomTypesSectionParser 
+    //and AtomTypesSectionParser. The order of BondTypesSectionParser, 
+    //BendTypesSectionParser and TorsionTypesSectionParser are not important.
     spMan_.push_back(new DirectionalAtomTypesSectionParser());
     spMan_.push_back(new AtomTypesSectionParser());
     spMan_.push_back(new LennardJonesAtomTypesSectionParser());
     spMan_.push_back(new ChargeAtomTypesSectionParser());
     spMan_.push_back(new MultipoleAtomTypesSectionParser());
     spMan_.push_back(new StickyAtomTypesSectionParser());
+    spMan_.push_back(new StickyPowerAtomTypesSectionParser());
     spMan_.push_back(new BondTypesSectionParser());
     spMan_.push_back(new BendTypesSectionParser());
     spMan_.push_back(new TorsionTypesSectionParser());
@@ -93,11 +97,13 @@ namespace oopse {
     ForceField::AtomTypeContainer::MapTypeIterator i;
     AtomType* at;
 
-    for (at = atomTypeCont_.beginType(i); at != NULL; at = atomTypeCont_.nextType(i)) {
+    for (at = atomTypeCont_.beginType(i); at != NULL; 
+         at = atomTypeCont_.nextType(i)) {
       at->makeFortranAtomType();
     }
 
-    for (at = atomTypeCont_.beginType(i); at != NULL; at = atomTypeCont_.nextType(i)) {
+    for (at = atomTypeCont_.beginType(i); at != NULL; 
+         at = atomTypeCont_.nextType(i)) {
       at->complete();
     }
 

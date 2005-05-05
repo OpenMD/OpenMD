@@ -45,7 +45,7 @@
 
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: doForces.F90,v 1.14 2005-04-21 14:12:19 chrisfen Exp $, $Date: 2005-04-21 14:12:19 $, $Name: not supported by cvs2svn $, $Revision: 1.14 $
+!! @version $Id: doForces.F90,v 1.15 2005-05-05 14:47:35 chrisfen Exp $, $Date: 2005-05-05 14:47:35 $, $Name: not supported by cvs2svn $, $Revision: 1.15 $
 
 
 module doForces
@@ -89,7 +89,8 @@ module doForces
   logical, save :: FF_uses_Charges
   logical, save :: FF_uses_Dipoles
   logical, save :: FF_uses_Quadrupoles
-  logical, save :: FF_uses_sticky
+  logical, save :: FF_uses_Sticky
+  logical, save :: FF_uses_StickyPower
   logical, save :: FF_uses_GayBerne
   logical, save :: FF_uses_EAM
   logical, save :: FF_uses_Shapes
@@ -103,6 +104,7 @@ module doForces
   logical, save :: SIM_uses_Dipoles
   logical, save :: SIM_uses_Quadrupoles
   logical, save :: SIM_uses_Sticky
+  logical, save :: SIM_uses_StickyPower
   logical, save :: SIM_uses_GayBerne
   logical, save :: SIM_uses_EAM
   logical, save :: SIM_uses_Shapes
@@ -134,6 +136,7 @@ module doForces
      logical :: is_Dipole        = .false.
      logical :: is_Quadrupole    = .false.
      logical :: is_Sticky        = .false.
+     logical :: is_StickyPower   = .false.
      logical :: is_GayBerne      = .false.
      logical :: is_EAM           = .false.
      logical :: is_Shape         = .false.
@@ -196,6 +199,9 @@ contains
 
        call getElementProperty(atypes, i, "is_Sticky", thisProperty)
        PropertyMap(i)%is_Sticky = thisProperty
+       
+       call getElementProperty(atypes, i, "is_StickyPower", thisProperty)
+       PropertyMap(i)%is_StickyPower = thisProperty
 
        call getElementProperty(atypes, i, "is_GayBerne", thisProperty)
        PropertyMap(i)%is_GayBerne = thisProperty
@@ -221,6 +227,7 @@ contains
     SIM_uses_Charges = SimUsesCharges()
     SIM_uses_Dipoles = SimUsesDipoles()
     SIM_uses_Sticky = SimUsesSticky()
+    SIM_uses_StickyPower = SimUsesStickyPower()
     SIM_uses_GayBerne = SimUsesGayBerne()
     SIM_uses_EAM = SimUsesEAM()
     SIM_uses_Shapes = SimUsesShapes()
@@ -315,6 +322,7 @@ contains
     FF_uses_Charges = .false.    
     FF_uses_Dipoles = .false.
     FF_uses_Sticky = .false.
+    FF_uses_StickyPower = .false.
     FF_uses_GayBerne = .false.
     FF_uses_EAM = .false.
     FF_uses_Shapes = .false.
@@ -364,6 +372,13 @@ contains
        FF_uses_DirectionalAtoms = .true.
     endif
 
+    call getMatchingElementList(atypes, "is_StickyPower", .true., nMatches, &
+         MatchList) 
+    if (nMatches .gt. 0) then
+       FF_uses_StickyPower = .true.
+       FF_uses_DirectionalAtoms = .true.
+    endif
+    
     call getMatchingElementList(atypes, "is_GayBerne", .true., &
          nMatches, MatchList)
     if (nMatches .gt. 0) then
@@ -962,7 +977,14 @@ contains
 
     endif
 
-
+    if (FF_uses_StickyPower .and. SIM_uses_stickypower) then
+       if ( PropertyMap(me_i)%is_StickyPower .and. &
+            PropertyMap(me_j)%is_StickyPower) then
+          call do_sticky_power_pair(i, j, d, r, rijsq, sw, vpair, fpair, &
+               pot, A, f, t, do_pot)
+       endif
+    endif
+    
     if (FF_uses_GayBerne .and. SIM_uses_GayBerne) then
 
        if ( PropertyMap(me_i)%is_GayBerne .and. &
@@ -1240,7 +1262,7 @@ contains
     logical :: doesit
     doesit = FF_uses_DirectionalAtoms .or. FF_uses_Dipoles .or. &
          FF_uses_Quadrupoles .or. FF_uses_Sticky .or. &
-         FF_uses_GayBerne .or. FF_uses_Shapes
+         FF_uses_StickyPower .or. FF_uses_GayBerne .or. FF_uses_Shapes
   end function FF_UsesDirectionalAtoms
 
   function FF_RequiresPrepairCalc() result(doesit)

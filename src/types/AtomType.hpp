@@ -154,6 +154,10 @@ namespace oopse {
     bool isSticky() {
       return atp.is_Sticky;
     }
+    
+    bool isStickyPower() {
+      return atp.is_StickyPower;
+    }
 
     bool isShape() {
       return atp.is_Shape;

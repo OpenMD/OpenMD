@@ -56,12 +56,14 @@ contains
 
   subroutine new_atype(ident, is_Directional, is_LennardJones, &
        is_Electrostatic, is_Charge, is_Dipole, is_Quadrupole, &
-       is_Sticky, is_GayBerne, is_EAM, is_Shape, is_FLARB, status)
+       is_Sticky, is_StickyPower, is_GayBerne, is_EAM, is_Shape, &
+       is_FLARB, status)
     integer :: myATID, c_ident
     integer,intent(in) :: ident
     logical,intent(in) :: is_Directional, is_LennardJones, is_Electrostatic
     logical,intent(in) :: is_Charge, is_Dipole, is_Quadrupole
-    logical,intent(in) :: is_Sticky, is_GayBerne, is_EAM, is_Shape, is_FLARB
+    logical,intent(in) :: is_Sticky, is_StickyPower, is_GayBerne, is_EAM
+    logical,intent(in) :: is_Shape, is_FLARB
     integer,intent(out) :: status
 
     integer :: me
@@ -88,6 +90,7 @@ contains
     call setElementProperty(atypes, me, "is_Dipole", is_Dipole)
     call setElementProperty(atypes, me, "is_Quadrupole", is_Quadrupole)
     call setElementProperty(atypes, me, "is_Sticky", is_Sticky)
+    call setElementProperty(atypes, me, "is_StickyPower", is_StickyPower)
     call setElementProperty(atypes, me, "is_GayBerne", is_GayBerne)
     call setElementProperty(atypes, me, "is_EAM", is_EAM)
     call setElementProperty(atypes, me, "is_Shape", is_Shape)

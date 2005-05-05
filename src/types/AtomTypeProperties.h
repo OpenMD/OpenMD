@@ -16,6 +16,7 @@ typedef  struct{
   int is_SplitDipole;
   int is_Quadrupole;
   int is_Sticky;
+  int is_StickyPower;
   int is_GayBerne;
   int is_EAM;
   int is_Shape;
@@ -36,6 +37,7 @@ typedef  struct{
     integer :: is_SplitDipole
     integer :: is_Quadrupole
     integer :: is_Sticky
+    integer :: is_StickyPower
     integer :: is_GayBerne
     integer :: is_EAM
     integer :: is_Shape

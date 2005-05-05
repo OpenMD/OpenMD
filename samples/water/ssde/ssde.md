@@ -22,11 +22,11 @@ tauThermostat = 1e3;
 tauBarostat = 1e4;
 
 dt = 2.0;
-runTime = 1e4;
+runTime = 5e3;
 useInitialTime = "false";
 useInitialExtendedSystemState = "false";
 
 //tempSet = "true";
 //thermalTime = 10;
-sampleTime = 1000;
-statusTime = 100;
+sampleTime = 100;
+statusTime = 10;

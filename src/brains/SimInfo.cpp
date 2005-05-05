@@ -511,6 +511,7 @@ namespace oopse {
     int useDipole = 0;
     int useGayBerne = 0;
     int useSticky = 0;
+    int useStickyPower = 0;
     int useShape = 0; 
     int useFLARB = 0; //it is not in AtomType yet
     int useDirectionalAtom = 0;    
@@ -529,10 +530,11 @@ namespace oopse {
       useDipole |= (*i)->isDipole();
       useGayBerne |= (*i)->isGayBerne();
       useSticky |= (*i)->isSticky();
+      useStickyPower |= (*i)->isStickyPower();
       useShape |= (*i)->isShape(); 
     }
 
-    if (useSticky || useDipole || useGayBerne || useShape) {
+    if (useSticky || useStickyPower || useDipole || useGayBerne || useShape) {
       useDirectionalAtom = 1;
     }
 
@@ -564,6 +566,9 @@ namespace oopse {
     temp = useSticky;
     MPI_Allreduce(&temp, &useSticky, 1, MPI_INT, MPI_LOR, MPI_COMM_WORLD);    
 
+    temp = useStickyPower;
+    MPI_Allreduce(&temp, &useStickyPower, 1, MPI_INT, MPI_LOR, MPI_COMM_WORLD);    
+    
     temp = useGayBerne;
     MPI_Allreduce(&temp, &useGayBerne, 1, MPI_INT, MPI_LOR, MPI_COMM_WORLD);    
 
@@ -588,6 +593,7 @@ namespace oopse {
     fInfo_.SIM_uses_Charges = useCharge;
     fInfo_.SIM_uses_Dipoles = useDipole;
     fInfo_.SIM_uses_Sticky = useSticky;
+    fInfo_.SIM_uses_StickyPower = useStickyPower;
     fInfo_.SIM_uses_GayBerne = useGayBerne;
     fInfo_.SIM_uses_EAM = useEAM;
     fInfo_.SIM_uses_Shapes = useShape;

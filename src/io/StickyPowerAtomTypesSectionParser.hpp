@@ -39,68 +39,25 @@
  * such damages.
  */
  
-#ifndef TYPES_DIRECTIONALATOMTYPE_HPP
-#define TYPES_DIRECTIONALATOMTYPE_HPP
+#ifndef IO_STICKYPOWERATOMTYPESSECTIONPARSER_HPP
+#define IO_STICKYPOWERATOMTYPESSECTIONPARSER_HPP
 
-#include "types/AtomType.hpp"
-#include "math/SquareMatrix3.hpp"
-
+#include "io/SectionParser.hpp"
 namespace oopse {
 
   /**
-   * @class DirectionalAtomType 
-   *
-   * DirectionalAtomType is what OOPSE looks to for unchanging data
-   * about a directional atoms. 
+   * @class StickyPowerAtomTypesSectionParser StickyPowerAtomTypesSectionParser.hpp "io/StickyAtomTypesSectionParser.hpp"
    */
-  class DirectionalAtomType : public AtomType {
-
+  class StickyPowerAtomTypesSectionParser : public SectionParser {
   public:
-
-    DirectionalAtomType() : AtomType() { atp.is_Directional = 1; }
-
-    Mat3x3d getI() {return I;}
-
-    void    setI(Mat3x3d theI) {I = theI;}
-
-    RotMat3x3d getElectroBodyFrame() {
-      return electroBodyFrame_;
-    }
-
-    void setElectroBodyFrame(const RotMat3x3d& electroBodyFrame) {
-      electroBodyFrame_ =electroBodyFrame;
-    }
-
-    void setDipole() { atp.is_Dipole = 1; }
-    void setSplitDipole() { atp.is_SplitDipole = 1; atp.is_Dipole=1;}
-    void setQuadrupole() { atp.is_Quadrupole = 1; }
-    void setGayBerne() { atp.is_GayBerne = 1; }
-    void setSticky() { atp.is_Sticky = 1; }
-    void setStickyPower() { atp.is_StickyPower = 1; }
-    void setShape() { atp.is_Shape = 1;}
-
-    virtual void complete();
-
+    StickyPowerAtomTypesSectionParser();
   private:
-
-    Mat3x3d I;
-    RotMat3x3d electroBodyFrame_;
+    virtual void parseLine(ForceField& ff, const std::string& line, int lineNo);
+            
   };
 
 
-  struct StickyParam {
-    double w0;
-    double v0;
-    double v0p;
-    double rl;
-    double ru;
-    double rlp;
-    double rup;
-  };
+} //namespace oopse
 
-  typedef SimpleTypeData<StickyParam> StickyParamGenericData;
+#endif //IO_STICKYPOWERATOMTYPESSECTIONPARSER_HPP
 
-  typedef SimpleTypeData<Vector3d> Vector3dGenericData;
-  
-}
-#endif

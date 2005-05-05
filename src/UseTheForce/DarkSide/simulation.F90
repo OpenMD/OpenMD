@@ -97,6 +97,7 @@ module simulation
   public :: SimUsesCharges
   public :: SimUsesDipoles
   public :: SimUsesSticky
+  public :: SimUsesStickyPower
   public :: SimUsesGayBerne
   public :: SimUsesEAM
   public :: SimUsesShapes
@@ -488,7 +489,8 @@ contains
 
         function SimUsesDirectionalAtoms() result(doesit)
           logical :: doesit
-          doesit = thisSim%SIM_uses_dipoles .or. thisSim%SIM_uses_sticky .or. &
+          doesit = thisSim%SIM_uses_dipoles .or. thisSim%SIM_uses_Sticky .or. &
+               thisSim%SIM_uses_StickyPower .or. &
                thisSim%SIM_uses_GayBerne .or. thisSim%SIM_uses_Shapes
         end function SimUsesDirectionalAtoms
 
@@ -516,6 +518,11 @@ contains
           logical :: doesit
           doesit = thisSim%SIM_uses_Sticky
         end function SimUsesSticky
+
+        function SimUsesStickyPower() result(doesit)
+          logical :: doesit
+          doesit = thisSim%SIM_uses_StickyPower
+        end function SimUsesStickyPower
 
         function SimUsesGayBerne() result(doesit)
           logical :: doesit
