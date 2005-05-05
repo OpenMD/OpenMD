@@ -42,10 +42,10 @@ molecule{
 }
 
 molecule{
-  name = "SHED";
+  name = "TAP";
   nAtoms = 1;
   atom[0]{
-    type = "SHED";
+    type = "TAP";
     position( 0.0, 0.0, 0.0 );
     orientation( 0.0, 0.0, 0.0 );
   }
