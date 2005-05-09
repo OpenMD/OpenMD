@@ -54,50 +54,22 @@
     
     class Geometry{
 protected:
-       Geometry(){
-          
-          setOrigin(V3Zero);
-       }
+       Geometry(){}
        
 public:
        
        //virtual destructor of Lattice
        virtual ~Geometry() {}
        
-       int getNumSitesPerCell() {return nCellSites;}
-       
-       void getLatticePointsPos(std::vector<Vector3d>& latticePos, int nx, int ny, int nz);
-       
-       std::vector<Vector3d> getLatticePointsOrt() {return cellSitesOrt;}
-       
-       //get lattice constant of unit cell
-       virtual  std::vector<double> getLatticeConstant() =0;
-       
-       //set lattice constant of unit cell
-       virtual void setLatticeConstant(const  std::vector<double>& lc)=0;
-       
-       //get origin of unit cell
-       Vector3d getOrigin( ) {return origin;} 
-       
-       //set origin of unit cell
-       void setOrigin(const Vector3d& newOrigin){
-          this->origin = newOrigin;
-       }
-       
        // Test if point is inside geometry
-       bool isInside(double x, double y, double z);
+       virtual bool isInside(double x, double y, double z);
        // Dump geometry to a file
-       void dumpGeometry(const std::string& geomFileName);
+       virtual void dumpGeometry(const std::string& geomFileName);
 
        
 protected:
           virtual void update() =0;
        
-       int nCellSites;
-       Vector3d origin;    
-       std::vector<Vector3d> cellSitesPos;
-       std::vector<Vector3d> cellSitesOrt;
-       Vector3d cellLen;
     };
     
     
