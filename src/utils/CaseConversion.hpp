@@ -48,7 +48,7 @@ namespace oopse {
 
     /** tolower functor */
     struct toLowerFunctor : public std::unary_function<char, char> {
-        toLowerFunctor( const std::locale& loc ) : loc( loc ) {}
+        toLowerFunctor( const std::locale& loc ) : loc_( loc ) {}
         char operator()(char c) const {
             return std::tolower(c, loc_);
         }

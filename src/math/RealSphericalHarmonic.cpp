@@ -41,7 +41,7 @@
  
 #include <stdio.h>
 #include <cmath>
-
+#include <limits>
 #include "math/RealSphericalHarmonic.hpp"
 
 using namespace oopse;
@@ -85,7 +85,8 @@ double RealSphericalHarmonic::LegendreP (int l, int m, double x) {
   // check parameters
   if (m < 0 || m > l || fabs(x) > 1.0) {
     printf("LegendreP got a bad argument: l = %d\tm = %d\tx = %lf\n", l, m, x);
-    return NAN;
+//    return NAN;
+	return std::numeric_limits <double>:: quiet_NaN();
   }
   
   double pmm = 1.0;

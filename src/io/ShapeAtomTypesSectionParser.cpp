@@ -48,6 +48,7 @@
 #include "types/ShapeAtomType.hpp"
 #include "utils/StringUtils.hpp"
 #include "utils/simError.h"
+#include "utils/CaseConversion.hpp"
 
 namespace oopse {
   
@@ -210,7 +211,7 @@ namespace oopse {
             rsh->setL( tokenInfo1.nextTokenAsInt() );
             rsh->setM( tokenInfo1.nextTokenAsInt() );
             token = tokenInfo1.nextToken();
-            transform(token.begin(), token.end(), token.begin(), tolower);
+            toLower(token);
             if (token == "sin")
               rsh->makeSinFunction();
             else
@@ -254,7 +255,7 @@ namespace oopse {
             rsh->setL( tokenInfo2.nextTokenAsInt() );
             rsh->setM( tokenInfo2.nextTokenAsInt() );
             token = tokenInfo2.nextToken();
-            transform(token.begin(), token.end(), token.begin(), tolower);
+            toLower(token);
             if (token == "sin")
               rsh->makeSinFunction();
             else
@@ -298,7 +299,7 @@ namespace oopse {
             rsh->setL( tokenInfo3.nextTokenAsInt() );
             rsh->setM( tokenInfo3.nextTokenAsInt() );
             token = tokenInfo3.nextToken();
-            transform(token.begin(), token.end(), token.begin(), tolower);
+            toLower(token);
             if (token == "sin")
               rsh->makeSinFunction();
             else
