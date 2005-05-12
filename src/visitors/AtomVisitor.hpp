@@ -78,6 +78,7 @@ namespace oopse {
       ssdAtomType.insert("SSD_E");
       ssdAtomType.insert("SSD_RF");
       ssdAtomType.insert("SSD1");
+      ssdAtomType.insert("TAP");
     }
 
     virtual void visit(Atom* atom) {}

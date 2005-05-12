@@ -9,7 +9,7 @@ component{
 initialConfig = "./ssd.in";
 
 
-ensemble = NVE;
+ensemble = NVT;
 forceField = "WATER";
 useReactionField = "false";
 dielectric = 80.0;
@@ -25,7 +25,7 @@ tauThermostat = 1e4;
 tauBarostat = 1e4;
 
 dt = 1.0;
-runTime = 1e5;
+runTime = 1e3;
 
 sampleTime = 1e2;
 statusTime = 10;

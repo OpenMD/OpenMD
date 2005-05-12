@@ -50,7 +50,7 @@
 !! @author Matthew Meineke
 !! @author Christopher Fennell
 !! @author J. Daniel Gezelter
-!! @version $Id: sticky.F90,v 1.8 2005-05-05 14:47:35 chrisfen Exp $, $Date: 2005-05-05 14:47:35 $, $Name: not supported by cvs2svn $, $Revision: 1.8 $
+!! @version $Id: sticky.F90,v 1.9 2005-05-12 19:43:48 chrisfen Exp $, $Date: 2005-05-12 19:43:48 $, $Name: not supported by cvs2svn $, $Revision: 1.9 $
 
 module sticky
 
@@ -530,8 +530,9 @@ contains
     logical, intent(in) :: do_pot
 
     real (kind=dp) :: xi, yi, zi, xj, yj, zj, xi2, yi2, zi2, xj2, yj2, zj2
-    real (kind=dp) :: r3, r5, r6, s, sp, dsdr, dspdr
-    real (kind=dp) :: wi, wj, w, wip, wjp, wp, wi2, wj2
+    real (kind=dp) :: xihat, yihat, zihat, xjhat, yjhat, zjhat
+    real (kind=dp) :: rI, rI2, rI3, rI4, rI5, rI6, rI7, s, sp, dsdr, dspdr
+    real (kind=dp) :: wi, wj, w, wip, wjp, wp, wi2, wj2, wip3, wjp3
     real (kind=dp) :: dwidx, dwidy, dwidz, dwjdx, dwjdy, dwjdz
     real (kind=dp) :: dwipdx, dwipdy, dwipdz, dwjpdx, dwjpdy, dwjpdz
     real (kind=dp) :: dwidux, dwiduy, dwiduz, dwjdux, dwjduy, dwjduz
@@ -548,7 +549,20 @@ contains
     integer :: id1, id2
     integer :: me1, me2
     real (kind=dp) :: w0, v0, v0p, rl, ru, rlp, rup, rbig
-
+    real (kind=dp) :: zi3, zi4, zi5, zj3, zj4, zj5
+    real (kind=dp) :: oSw1, oSw2, prodVal
+    real (kind=dp) :: prei1, prei2, prei, prej1, prej2, prej
+    real (kind=dp) :: walt, walti, waltj, dwaltidx, dwaltidy, dwaltidz
+    real (kind=dp) :: dwaltjdx, dwaltjdy, dwaltjdz
+    real (kind=dp) :: dwaltidux, dwaltiduy, dwaltiduz
+    real (kind=dp) :: dwaltjdux, dwaltjduy, dwaltjduz
+    real (kind=dp) :: doSw1idx, doSw1idy, doSw1idz, doSw1jdx, doSw1jdy, doSw1jdz
+    real (kind=dp) :: doSw1idux, doSw1iduy, doSw1iduz
+    real (kind=dp) :: doSw1jdux, doSw1jduy, doSw1jduz
+    real (kind=dp) :: doSw2idx, doSw2idy, doSw2idz, doSw2jdx, doSw2jdy, doSw2jdz
+    real (kind=dp) :: doSw2idux, doSw2iduy, doSw2iduz
+    real (kind=dp) :: doSw2jdux, doSw2jduy, doSw2jduz
+    
     if (.not.allocated(StickyMap)) then
        call handleError("sticky", "no StickyMap was present before first call of do_sticky_power_pair!")
        return
@@ -588,12 +602,17 @@ contains
 
     if ( rij .LE. rbig ) then
 
-       r3 = r2*rij
-       r5 = r3*r2
-
-       drdx = d(1) / rij
-       drdy = d(2) / rij
-       drdz = d(3) / rij
+       rI = 1.0d0/rij
+       rI2 = rI*rI
+       rI3 = rI2*rI
+       rI4 = rI2*rI2
+       rI5 = rI3*rI2
+       rI6 = rI3*rI3
+       rI7 = rI5*rI2
+              
+       drdx = d(1) * rI
+       drdy = d(2) * rI
+       drdz = d(3) * rI
 
 #ifdef IS_MPI
        ! rotate the inter-particle separation into the two different 
@@ -626,94 +645,134 @@ contains
        xi2 = xi*xi
        yi2 = yi*yi
        zi2 = zi*zi
-
+       zi3 = zi2*zi
+       zi4 = zi2*zi2
+       zi5 = zi4*zi
+       xihat = xi*rI
+       yihat = yi*rI
+       zihat = zi*rI
+       
        xj2 = xj*xj
        yj2 = yj*yj
        zj2 = zj*zj
-
+       zj3 = zj2*zj
+       zj4 = zj2*zj2
+       zj5 = zj4*zj
+       xjhat = xj*rI
+       yjhat = yj*rI
+       zjhat = zj*rI
+       
        call calc_sw_fnc(rij, rl, ru, rlp, rup, s, sp, dsdr, dspdr)
+           
+       wi = 2.0d0*(xi2-yi2)*zi * rI3
+       wj = 2.0d0*(xj2-yj2)*zj * rI3
+       
+!       prodVal = zihat*zjhat
+!       if (prodVal .ge. 0.0d0) then
+!         wi = 0.0d0
+!         wj = 0.0d0
+!       endif
 
-       wi = 2.0d0*(xi2-yi2)*zi / r3
-       wj = 2.0d0*(xj2-yj2)*zj / r3
-       !rootwi = sqrt(abs(wi))
-       !rootwj = sqrt(abs(wj))
        wi2 = wi*wi
        wj2 = wj*wj
 
-       
        w = wi*wi2+wj*wj2
 
-       zif = zi/rij - 0.6d0
-       zis = zi/rij + 0.8d0
+       zif = zihat - 0.6d0
+       zis = zihat + 0.8d0
 
-       zjf = zj/rij - 0.6d0
-       zjs = zj/rij + 0.8d0
+       zjf = zjhat - 0.6d0
+       zjs = zjhat + 0.8d0
 
        wip = zif*zif*zis*zis - w0
        wjp = zjf*zjf*zjs*zjs - w0
        wp = wip + wjp
+         
+       !wip = zihat - 0.2d0
+       !wjp = zjhat - 0.2d0
+       !wip3 = wip*wip*wip
+       !wjp3 = wjp*wjp*wjp
+       
+       !wp = wip3*wip + wjp3*wjp
 
        vpair = vpair + 0.5d0*(v0*s*w + v0p*sp*wp)
+       
        if (do_pot) then
 #ifdef IS_MPI 
-          pot_row(atom1) = pot_row(atom1) + 0.25d0*(v0*s*w + v0p*sp*wp)*sw
-          pot_col(atom2) = pot_col(atom2) + 0.25d0*(v0*s*w + v0p*sp*wp)*sw
+         pot_row(atom1) = pot_row(atom1) + 0.25d0*(v0*s*w + v0p*sp*wp)*sw
+         pot_col(atom2) = pot_col(atom2) + 0.25d0*(v0*s*w + v0p*sp*wp)*sw
 #else
-          pot = pot + 0.5d0*(v0*s*w + v0p*sp*wp)*sw
+         pot = pot + 0.5d0*(v0*s*w + v0p*sp*wp)*sw
 #endif  
        endif
 
-!       dwidx = 1.5d0*rootwi*( 4.0d0*xi*zi/r3 - 6.0d0*xi*zi*(xi2-yi2)/r5 )
-!       dwidy = 1.5d0*rootwi*( -4.0d0*yi*zi/r3 - 6.0d0*yi*zi*(xi2-yi2)/r5 )
-!       dwidz = 1.5d0*rootwi*( 2.0d0*(xi2-yi2)/r3 - 6.0d0*zi2*(xi2-yi2)/r5 )
+       dwidx = 3.0d0*wi2*( 4.0d0*xi*zi*rI3 - 6.0d0*xi*zi*(xi2-yi2)*rI5 )
+       dwidy = 3.0d0*wi2*( -4.0d0*yi*zi*rI3 - 6.0d0*yi*zi*(xi2-yi2)*rI5 )
+       dwidz = 3.0d0*wi2*( 2.0d0*(xi2-yi2)*rI3 - 6.0d0*zi2*(xi2-yi2)*rI5 )
 
-!       dwjdx = 1.5d0*rootwj*( 4.0d0*xj*zj/r3  - 6.0d0*xj*zj*(xj2-yj2)/r5 )
-!       dwjdy = 1.5d0*rootwj*( -4.0d0*yj*zj/r3  - 6.0d0*yj*zj*(xj2-yj2)/r5 )
-!       dwjdz = 1.5d0*rootwj*( 2.0d0*(xj2-yj2)/r3  - 6.0d0*zj2*(xj2-yj2)/r5 )
-       
-       dwidx = 3.0d0*wi2*( 4.0d0*xi*zi/r3 - 6.0d0*xi*zi*(xi2-yi2)/r5 )
-       dwidy = 3.0d0*wi2*( -4.0d0*yi*zi/r3 - 6.0d0*yi*zi*(xi2-yi2)/r5 )
-       dwidz = 3.0d0*wi2*( 2.0d0*(xi2-yi2)/r3 - 6.0d0*zi2*(xi2-yi2)/r5 )
-
-       dwjdx = 3.0d0*wj2*( 4.0d0*xj*zj/r3  - 6.0d0*xj*zj*(xj2-yj2)/r5 )
-       dwjdy = 3.0d0*wj2*( -4.0d0*yj*zj/r3  - 6.0d0*yj*zj*(xj2-yj2)/r5 )
-       dwjdz = 3.0d0*wj2*( 2.0d0*(xj2-yj2)/r3  - 6.0d0*zj2*(xj2-yj2)/r5 )
+       dwjdx = 3.0d0*wj2*( 4.0d0*xj*zj*rI3  - 6.0d0*xj*zj*(xj2-yj2)*rI5 )
+       dwjdy = 3.0d0*wj2*( -4.0d0*yj*zj*rI3  - 6.0d0*yj*zj*(xj2-yj2)*rI5 )
+       dwjdz = 3.0d0*wj2*( 2.0d0*(xj2-yj2)*rI3  - 6.0d0*zj2*(xj2-yj2)*rI5 )
 
        uglyi = zif*zif*zis + zif*zis*zis
        uglyj = zjf*zjf*zjs + zjf*zjs*zjs
 
-       dwipdx = -2.0d0*xi*zi*uglyi/r3
-       dwipdy = -2.0d0*yi*zi*uglyi/r3
-       dwipdz = 2.0d0*(1.0d0/rij - zi2/r3)*uglyi
+       dwipdx = -2.0d0*xi*zi*uglyi*rI3
+       dwipdy = -2.0d0*yi*zi*uglyi*rI3
+       dwipdz = 2.0d0*(rI - zi2*rI3)*uglyi
 
-       dwjpdx = -2.0d0*xj*zj*uglyj/r3
-       dwjpdy = -2.0d0*yj*zj*uglyj/r3
-       dwjpdz = 2.0d0*(1.0d0/rij - zj2/r3)*uglyj
+       dwjpdx = -2.0d0*xj*zj*uglyj*rI3
+       dwjpdy = -2.0d0*yj*zj*uglyj*rI3
+       dwjpdz = 2.0d0*(rI - zj2*rI3)*uglyj
 
-!       dwidux = 1.5d0*rootwi*( 4.0d0*(yi*zi2 + 0.5d0*yi*(xi2-yi2))/r3 )
-!       dwiduy = 1.5d0*rootwi*( 4.0d0*(xi*zi2 - 0.5d0*xi*(xi2-yi2))/r3 )
-!       dwiduz = 1.5d0*rootwi*( -8.0d0*xi*yi*zi/r3 )
+       !dwipdx = -4.0d0*wip3*zi*xihat
+       !dwipdy = -4.0d0*wip3*zi*yihat
+       !dwipdz = -4.0d0*wip3*(zi2 - 1.0d0)*rI
 
-!       dwjdux = 1.5d0*rootwj*( 4.0d0*(yj*zj2 + 0.5d0*yj*(xj2-yj2))/r3 )
-!       dwjduy = 1.5d0*rootwj*( 4.0d0*(xj*zj2 - 0.5d0*xj*(xj2-yj2))/r3 )
-!       dwjduz = 1.5d0*rootwj*( -8.0d0*xj*yj*zj/r3 )
+       !dwjpdx = -4.0d0*wjp3*zj*xjhat
+       !dwjpdy = -4.0d0*wjp3*zj*yjhat
+       !dwjpdz = -4.0d0*wjp3*(zj2 - 1.0d0)*rI
        
-       dwidux = 3.0d0*wi2*( 4.0d0*(yi*zi2 + 0.5d0*yi*(xi2-yi2))/r3 )
-       dwiduy = 3.0d0*wi2*( 4.0d0*(xi*zi2 - 0.5d0*xi*(xi2-yi2))/r3 )
-       dwiduz = 3.0d0*wi2*( -8.0d0*xi*yi*zi/r3 )
+       !dwipdx = 0.0d0
+       !dwipdy = 0.0d0
+       !dwipdz = 0.0d0
 
-       dwjdux = 3.0d0*wj2*( 4.0d0*(yj*zj2 + 0.5d0*yj*(xj2-yj2))/r3 )
-       dwjduy = 3.0d0*wj2*( 4.0d0*(xj*zj2 - 0.5d0*xj*(xj2-yj2))/r3 )
-       dwjduz = 3.0d0*wj2*( -8.0d0*xj*yj*zj/r3 )
+       !dwjpdx = 0.0d0
+       !dwjpdy = 0.0d0
+       !dwjpdz = 0.0d0
+       
+       dwidux = 3.0d0*wi2*( 4.0d0*(yi*zi2 + 0.5d0*yi*(xi2-yi2))*rI3 )
+       dwiduy = 3.0d0*wi2*( 4.0d0*(xi*zi2 - 0.5d0*xi*(xi2-yi2))*rI3 )
+       dwiduz = 3.0d0*wi2*( -8.0d0*xi*yi*zi*rI3 )
 
-       dwipdux =  2.0d0*yi*uglyi/rij
-       dwipduy = -2.0d0*xi*uglyi/rij
+       dwjdux = 3.0d0*wj2*( 4.0d0*(yj*zj2 + 0.5d0*yj*(xj2-yj2))*rI3 )
+       dwjduy = 3.0d0*wj2*( 4.0d0*(xj*zj2 - 0.5d0*xj*(xj2-yj2))*rI3 )
+       dwjduz = 3.0d0*wj2*( -8.0d0*xj*yj*zj*rI3 )
+
+       dwipdux =  2.0d0*yi*uglyi*rI
+       dwipduy = -2.0d0*xi*uglyi*rI
        dwipduz =  0.0d0
 
-       dwjpdux =  2.0d0*yj*uglyj/rij
-       dwjpduy = -2.0d0*xj*uglyj/rij
+       dwjpdux =  2.0d0*yj*uglyj*rI
+       dwjpduy = -2.0d0*xj*uglyj*rI
        dwjpduz =  0.0d0
 
+       !dwipdux =  4.0d0*wip3*yihat
+       !dwipduy = -4.0d0*wip3*xihat
+       !dwipduz =  0.0d0
+
+       !dwjpdux =  4.0d0*wjp3*yjhat
+       !dwjpduy = -4.0d0*wjp3*xjhat
+       !dwjpduz =  0.0d0
+
+       !dwipdux = 0.0d0
+       !dwipduy = 0.0d0
+       !dwipduz = 0.0d0
+
+       !dwjpdux = 0.0d0
+       !dwjpduy = 0.0d0
+       !dwjpduz = 0.0d0
+       
        ! do the torques first since they are easy:
        ! remember that these are still in the body fixed axes
 
@@ -814,9 +873,9 @@ contains
 
        ! now assemble these with the radial-only terms:
 
-       fxradial = 0.5d0*(v0*dsdr*drdx*w + v0p*dspdr*drdx*wp + fxii + fxji)
-       fyradial = 0.5d0*(v0*dsdr*drdy*w + v0p*dspdr*drdy*wp + fyii + fyji)
-       fzradial = 0.5d0*(v0*dsdr*drdz*w + v0p*dspdr*drdz*wp + fzii + fzji)
+       fxradial = 0.5d0*((v0*dsdr*w + v0p*dspdr*wp)*drdx + fxii + fxji)
+       fyradial = 0.5d0*((v0*dsdr*w + v0p*dspdr*wp)*drdy + fyii + fyji)
+       fzradial = 0.5d0*((v0*dsdr*w + v0p*dspdr*wp)*drdz + fzii + fzji)
 
 #ifdef IS_MPI
        f_Row(1,atom1) = f_Row(1,atom1) + fxradial

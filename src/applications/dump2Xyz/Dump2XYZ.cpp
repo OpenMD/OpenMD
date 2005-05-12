@@ -99,27 +99,27 @@ int main(int argc, char* argv[]){
   
   
   
-  //creat visitor list
+  //create visitor list
   CompositeVisitor* compositeVisitor = new CompositeVisitor();
     
-  //creat RigidBody Visitor
+  //create RigidBody Visitor
   if(args_info.rigidbody_flag){
     RBCOMVisitor* rbCOMVisitor = new RBCOMVisitor(info);
     compositeVisitor->addVisitor(rbCOMVisitor, 900);
   }
   
-  //creat SSD atom visitor
+  //create SSD atom visitor
   SSDAtomVisitor* ssdVisitor = new SSDAtomVisitor(info);
   compositeVisitor->addVisitor(ssdVisitor, 800);
   
   LinearAtomVisitor* linearVisitor = new LinearAtomVisitor(info);
   compositeVisitor->addVisitor(linearVisitor, 750);
   
-  //creat default atom visitor
+  //create default atom visitor
   DefaultAtomVisitor* defaultAtomVisitor = new DefaultAtomVisitor(info);
   compositeVisitor->addVisitor(defaultAtomVisitor, 700);
   
-  //creat waterType visitor
+  //create waterType visitor
   if(args_info.watertype_flag){
     WaterTypeVisitor* waterTypeVisitor = new WaterTypeVisitor;
     compositeVisitor->addVisitor(waterTypeVisitor, 600);
@@ -137,14 +137,14 @@ int main(int argc, char* argv[]){
     }
   }
   
-  //creat wrapping visitor
+  //create wrapping visitor
   
   if(args_info.periodicBox_flag){
     WrappingVisitor* wrappingVisitor = new WrappingVisitor(info);
     compositeVisitor->addVisitor(wrappingVisitor, 400);
   }
 
-  //creat replicate visitor
+  //create replicate visitor
   if(args_info.repeatX_given > 0 || args_info.repeatY_given > 0 ||args_info.repeatY_given > 0){
     Vector3i replicateOpt(args_info.repeatX_arg, args_info.repeatY_arg, args_info.repeatZ_arg);
     ReplicateVisitor* replicateVisitor = new ReplicateVisitor(info, replicateOpt);
@@ -160,7 +160,7 @@ int main(int argc, char* argv[]){
     exit(1);
   }
     
-  //creat xyzVisitor
+  //create xyzVisitor
   XYZVisitor* xyzVisitor;
   if (args_info.selection_given) {
     xyzVisitor = new XYZVisitor(info, args_info.selection_arg);
@@ -171,7 +171,7 @@ int main(int argc, char* argv[]){
   
   std::cout << compositeVisitor->toString();
   
-  //creat prepareVisitor
+  //create prepareVisitor
   PrepareVisitor* prepareVisitor = new PrepareVisitor();
   
   //open dump file
