@@ -76,6 +76,7 @@ class DirectionalAtomType : public AtomType {
         void setQuadrupole() { atp.is_Quadrupole = 1; }
         void setGayBerne() { atp.is_GayBerne = 1; }
         void setSticky() { atp.is_Sticky = 1; }
+	void setStickyPower() { atp.is_StickyPower = 1; }
         void setShape() { atp.is_Shape = 1;}
 
         virtual void complete();
