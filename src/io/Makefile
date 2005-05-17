@@ -11,6 +11,8 @@ Source    = \
 	StickyAtomTypesSectionParser.cpp \
 	GayBerneAtomTypesSectionParser.cpp \
 	TorsionTypesSectionParser.cpp \
+	StickyPowerAtomTypesSectionParser.cpp \
+	ShapeAtomTypesSectionParser.cpp \
 	LennardJonesAtomTypesSectionParser.cpp\
   BondTypesSectionParser.cpp \
   BendTypesSectionParser.cpp \
