@@ -3,14 +3,13 @@ Package = io
 Source    = \
   AtomTypesSectionParser.cpp \
 	DirectionalAtomTypesSectionParser.cpp \
-	ShapeAtomTypesSectionParser.cpp \
 	SectionParser.cpp \
 	EAMAtomTypesSectionParser.cpp \
 	SectionParserManager.cpp \
 	ChargeAtomTypesSectionParser.cpp \
 	MultipoleAtomTypesSectionParser.cpp \
 	StickyAtomTypesSectionParser.cpp \
-	StickyPowerAtomTypesSectionParser.cpp \
+	GayBerneAtomTypesSectionParser.cpp \
 	TorsionTypesSectionParser.cpp \
 	LennardJonesAtomTypesSectionParser.cpp\
   BondTypesSectionParser.cpp \
