@@ -10,7 +10,7 @@ subroutine newElectrostaticType(atp, status)
 
   integer :: ident
   logical :: is_Electrostatic, is_Charge, is_Dipole
-  logical :: is_SplitDipole, is_Quadrupole
+  logical :: is_SplitDipole, is_Quadrupole, is_Tap
 
   ident = atp%ident
   is_Electrostatic = ((atp%is_Charge .ne. 0) .or. &
@@ -20,9 +20,10 @@ subroutine newElectrostaticType(atp, status)
   is_Dipole = (atp%is_Dipole .ne. 0)
   is_SplitDipole = (atp%is_SplitDipole .ne. 0)
   is_Quadrupole = (atp%is_Quadrupole .ne. 0)
+  is_Tap = (atp%is_StickyPower .ne. 0)
 
   call module_newElectrostaticType(ident, is_Charge, is_Dipole, &
-       is_SplitDipole, is_Quadrupole, status)
+       is_SplitDipole, is_Quadrupole, is_Tap, status)
 
 end subroutine newElectrostaticType
 

@@ -1,3 +1,168 @@
+2005-05-16 23:20  chuckv
+
+	* src/types/: DirectionalAtomType.cpp, DirectionalAtomType.hpp:
+	Fixed merge issues between Kyle and Chris so OOPSE will actually
+	build.
+
+2005-05-16 22:46  kdaily
+
+	* src/io/: GayBerneAtomTypesSectionParser.cpp,
+	GayBerneAtomTypesSectionParser.hpp, Makefile: help
+
+2005-05-16 21:08  kdaily
+
+	* forceFields/DUFF2.frc, src/UseTheForce/doForces.F90,
+	src/UseTheForce/DarkSide/gb.F90, src/io/Makefile,
+	src/types/DirectionalAtomType.cpp,
+	src/types/DirectionalAtomType.hpp: added gb
+
+2005-05-13 15:36  chrisfen
+
+	* forceFields/DUFF2.frc: Better tap
+
+2005-05-12 14:43  chrisfen
+
+	* forceFields/DUFF2.frc, samples/water/dimer/ssd.in,
+	samples/water/dimer/ssd.md, src/UseTheForce/DarkSide/sticky.F90,
+	src/applications/dump2Xyz/Dump2XYZ.cpp,
+	src/visitors/AtomVisitor.hpp: Couple of changes for TAP water. 
+	Need to parametrize.
+
+2005-05-11 18:15  chuckv
+
+	* src/: io/ShapeAtomTypesSectionParser.cpp,
+	math/RealSphericalHarmonic.cpp, utils/CaseConversion.hpp: Fixed
+	build issues under ifc7.
+
+2005-05-09 17:07  chuckv
+
+	* src/applications/nanoRodBuilder/Geometry.hpp: More geometry
+	builder changes.
+
+2005-05-05 10:06  chrisfen
+
+	* forceFields/DUFF2.frc, samples/water/ssde/water.md: Changed SHED
+	to TAP
+
+2005-05-05 09:47  chrisfen
+
+	* forceFields/DUFF2.frc, samples/water/ssde/ssde.md,
+	samples/water/ssde/water.md, src/UseTheForce/DUFF.cpp,
+	src/UseTheForce/doForces.F90, src/UseTheForce/DarkSide/Makefile,
+	src/UseTheForce/DarkSide/atype.F90,
+	src/UseTheForce/DarkSide/atype_interface.F90,
+	src/UseTheForce/DarkSide/simulation.F90,
+	src/UseTheForce/DarkSide/sticky.F90, src/brains/SimInfo.cpp,
+	src/brains/fSimulation.h, src/io/Makefile,
+	src/io/StickyAtomTypesSectionParser.cpp,
+	src/io/StickyPowerAtomTypesSectionParser.cpp,
+	src/io/StickyPowerAtomTypesSectionParser.hpp,
+	src/types/AtomType.cpp, src/types/AtomType.hpp,
+	src/types/AtomTypeProperties.h, src/types/DirectionalAtomType.cpp,
+	src/types/DirectionalAtomType.hpp: OOPSE setup for TAP water.  It's
+	not parametrized, but OOPSE will now let me run it...
+
+2005-05-03 17:55  chuckv
+
+	* src/applications/nanoRodBuilder/: Geometry.cpp, Geometry.hpp,
+	GeometryCreator.hpp, GeometryFactory.cpp, GeometryFactory.hpp:
+	Adding support for generic geometry to nanorodbuilder.
+
+2005-05-03 12:55  chuckv
+
+	* src/applications/nanoRodBuilder/: GeometryBuilder.cpp,
+	nanorodBuilder.cpp, nanorodBuilder.ggo, nanorodBuilderCmd.c,
+	nanorodBuilderCmd.h: More changes to nanoRodBuilder....
+
+2005-04-29 14:16  gezelter
+
+	* make/Makefile.in: [no log message]
+
+2005-04-29 11:26  chrisfen
+
+	* forceFields/DUFF2.frc, samples/water/spce/water.md,
+	samples/water/ssd/water.md, samples/water/ssd-ion/ssdCl.md,
+	samples/water/ssd-ion/water.md, samples/water/ssde/water.md,
+	samples/water/ssdrf/water.md, samples/water/tip3p_ice/water.md,
+	samples/water/tip4p/water.md: Added TIP4P-Ew
+
+2005-04-27 19:24  chuckv
+
+	* src/applications/nanoRodBuilder/: GeometryBuilder.cpp,
+	GeometryBuilder.hpp, nanorodBuilder.cpp, nanorodBuilder.ggo,
+	nanorodBuilderCmd.c, nanorodBuilderCmd.h: Fixed issues with
+	nanoRodBuilder....
+
+2005-04-27 15:13  chrisfen
+
+	* samples/shape/Shapes.frc, samples/shape/linear.shape,
+	src/UseTheForce/DarkSide/atype.F90,
+	src/UseTheForce/DarkSide/shapes.F90,
+	src/UseTheForce/DarkSide/shapes_interface.F90,
+	src/types/AtomType.cpp, src/types/ShapeAtomType.cpp: Got rid of
+	write statements and am closer to a working shapes
+
+2005-04-22 16:57  chuckv
+
+	* src/utils/Predicate.hpp: Fixed gcc4 bug...
+
+2005-04-22 16:52  tim
+
+	* src/utils/: CaseConversion.hpp, Predicate.hpp, Trim.cpp,
+	Trim.hpp: adding CharClassificationFunctor to fix the locale
+	problem  of c++
+
+2005-04-21 09:12  chrisfen
+
+	* samples/shape/Shapes.frc, samples/shape/linear.in,
+	samples/shape/linear.md, src/UseTheForce/ForceField.hpp,
+	src/UseTheForce/ForceFieldFactory.hpp, src/UseTheForce/Makefile,
+	src/UseTheForce/SHAPES_FF.cpp, src/UseTheForce/SHAPES_FF.hpp,
+	src/UseTheForce/doForces.F90, src/UseTheForce/DarkSide/atype.F90,
+	src/UseTheForce/DarkSide/shapes.F90,
+	src/UseTheForce/DarkSide/shapes_interface.F90,
+	src/UseTheForce/DarkSide/shapes_interface.h,
+	src/brains/Register.cpp, src/brains/SimCreator.cpp,
+	src/io/Makefile, src/io/SectionParser.cpp,
+	src/io/SectionParser.hpp, src/io/SectionParserManager.cpp,
+	src/io/ShapeAtomTypesSectionParser.cpp,
+	src/io/ShapeAtomTypesSectionParser.hpp, src/math/Makefile,
+	src/types/AtomType.cpp, src/types/ShapeAtomType.cpp,
+	src/types/ShapeAtomType.hpp: Shapes is limping along with a array
+	bounds overwrite (I think...). At least the parser loads the
+	forcefield fine...
+
+2005-04-18 10:44  chrisfen
+
+	* src/UseTheForce/Shapes_FF.cpp: axed because file causes havoc on
+	Mac (capitalization confusion of filenames)
+
+2005-04-17 22:50  chrisfen
+
+	* src/: UseTheForce/SHAPES_FF.cpp, UseTheForce/SHAPES_FF.hpp,
+	UseTheForce/Shapes_FF.cpp,
+	io/DirectionalAtomTypesSectionParser.cpp,
+	io/ShapeAtomTypesSectionParser.cpp,
+	io/ShapeAtomTypesSectionParser.hpp: Working on the shapes parser...
+
+2005-04-15 17:43  gezelter
+
+	* README: gmake in case people forget
+
+2005-04-15 17:40  gezelter
+
+	* src/applications/oopse/oopse.cpp: fixed the spacing on the
+	banner.  Vanity.
+
+2005-04-15 17:22  gezelter
+
+	* src/: config.h.in, applications/oopse/oopse.cpp: Version string
+	in banner (and version numbers in config.h)
+
+2005-04-15 17:22  gezelter
+
+	* ChangeLog, LICENSE, README: Documentation changes
+
 2005-04-15 17:03  gezelter
 
 	* src/: UseTheForce/DUFF.cpp, UseTheForce/DUFF.hpp,

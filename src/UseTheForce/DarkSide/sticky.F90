@@ -50,7 +50,7 @@
 !! @author Matthew Meineke
 !! @author Christopher Fennell
 !! @author J. Daniel Gezelter
-!! @version $Id: sticky.F90,v 1.9 2005-05-12 19:43:48 chrisfen Exp $, $Date: 2005-05-12 19:43:48 $, $Name: not supported by cvs2svn $, $Revision: 1.9 $
+!! @version $Id: sticky.F90,v 1.10 2005-05-17 22:35:01 chrisfen Exp $, $Date: 2005-05-17 22:35:01 $, $Name: not supported by cvs2svn $, $Revision: 1.10 $
 
 module sticky
 
@@ -550,7 +550,7 @@ contains
     integer :: me1, me2
     real (kind=dp) :: w0, v0, v0p, rl, ru, rlp, rup, rbig
     real (kind=dp) :: zi3, zi4, zi5, zj3, zj4, zj5
-    real (kind=dp) :: oSw1, oSw2, prodVal
+    real (kind=dp) :: frac1, frac2, prodVal
     real (kind=dp) :: prei1, prei2, prei, prej1, prej2, prej
     real (kind=dp) :: walt, walti, waltj, dwaltidx, dwaltidy, dwaltidz
     real (kind=dp) :: dwaltjdx, dwaltjdy, dwaltjdz
@@ -608,7 +608,7 @@ contains
        rI4 = rI2*rI2
        rI5 = rI3*rI2
        rI6 = rI3*rI3
-       rI7 = rI5*rI2
+       rI7 = rI4*rI3
               
        drdx = d(1) * rI
        drdy = d(2) * rI
@@ -664,8 +664,11 @@ contains
        
        call calc_sw_fnc(rij, rl, ru, rlp, rup, s, sp, dsdr, dspdr)
            
-       wi = 2.0d0*(xi2-yi2)*zi * rI3
-       wj = 2.0d0*(xj2-yj2)*zj * rI3
+       frac1 = 0.5d0
+       frac2 = 0.5d0
+       
+       wi = 2.0d0*(xi2-yi2)*zi*rI3
+       wj = 2.0d0*(xj2-yj2)*zj*rI3
        
 !       prodVal = zihat*zjhat
 !       if (prodVal .ge. 0.0d0) then
@@ -676,7 +679,7 @@ contains
        wi2 = wi*wi
        wj2 = wj*wj
 
-       w = wi*wi2+wj*wj2
+       w = frac1*wi*wi2 + frac2*wi + wj*wj2
 
        zif = zihat - 0.6d0
        zis = zihat + 0.8d0
@@ -706,14 +709,22 @@ contains
 #endif  
        endif
 
-       dwidx = 3.0d0*wi2*( 4.0d0*xi*zi*rI3 - 6.0d0*xi*zi*(xi2-yi2)*rI5 )
-       dwidy = 3.0d0*wi2*( -4.0d0*yi*zi*rI3 - 6.0d0*yi*zi*(xi2-yi2)*rI5 )
-       dwidz = 3.0d0*wi2*( 2.0d0*(xi2-yi2)*rI3 - 6.0d0*zi2*(xi2-yi2)*rI5 )
+       dwidx = ( 4.0d0*xi*zi*rI3 - 6.0d0*xi*zi*(xi2-yi2)*rI5 )
+       dwidy = ( -4.0d0*yi*zi*rI3 - 6.0d0*yi*zi*(xi2-yi2)*rI5 )
+       dwidz = ( 2.0d0*(xi2-yi2)*rI3 - 6.0d0*zi2*(xi2-yi2)*rI5 )
+       
+       dwidx = frac1*3.0d0*wi2*dwidx + frac2*dwidx
+       dwidy = frac1*3.0d0*wi2*dwidy + frac2*dwidy
+       dwidz = frac1*3.0d0*wi2*dwidz + frac2*dwidz
 
-       dwjdx = 3.0d0*wj2*( 4.0d0*xj*zj*rI3  - 6.0d0*xj*zj*(xj2-yj2)*rI5 )
-       dwjdy = 3.0d0*wj2*( -4.0d0*yj*zj*rI3  - 6.0d0*yj*zj*(xj2-yj2)*rI5 )
-       dwjdz = 3.0d0*wj2*( 2.0d0*(xj2-yj2)*rI3  - 6.0d0*zj2*(xj2-yj2)*rI5 )
+       dwjdx = ( 4.0d0*xj*zj*rI3  - 6.0d0*xj*zj*(xj2-yj2)*rI5 )
+       dwjdy = ( -4.0d0*yj*zj*rI3  - 6.0d0*yj*zj*(xj2-yj2)*rI5 )
+       dwjdz = ( 2.0d0*(xj2-yj2)*rI3  - 6.0d0*zj2*(xj2-yj2)*rI5 )
 
+       dwjdx = frac1*3.0d0*wj2*dwjdx + frac2*dwjdx
+       dwjdy = frac1*3.0d0*wj2*dwjdy + frac2*dwjdy
+       dwjdz = frac1*3.0d0*wj2*dwjdz + frac2*dwjdz
+       
        uglyi = zif*zif*zis + zif*zis*zis
        uglyj = zjf*zjf*zjs + zjf*zjs*zjs
 
@@ -741,13 +752,21 @@ contains
        !dwjpdy = 0.0d0
        !dwjpdz = 0.0d0
        
-       dwidux = 3.0d0*wi2*( 4.0d0*(yi*zi2 + 0.5d0*yi*(xi2-yi2))*rI3 )
-       dwiduy = 3.0d0*wi2*( 4.0d0*(xi*zi2 - 0.5d0*xi*(xi2-yi2))*rI3 )
-       dwiduz = 3.0d0*wi2*( -8.0d0*xi*yi*zi*rI3 )
+       dwidux = ( 4.0d0*(yi*zi2 + 0.5d0*yi*(xi2-yi2))*rI3 )
+       dwiduy = ( 4.0d0*(xi*zi2 - 0.5d0*xi*(xi2-yi2))*rI3 )
+       dwiduz = ( -8.0d0*xi*yi*zi*rI3 )
 
-       dwjdux = 3.0d0*wj2*( 4.0d0*(yj*zj2 + 0.5d0*yj*(xj2-yj2))*rI3 )
-       dwjduy = 3.0d0*wj2*( 4.0d0*(xj*zj2 - 0.5d0*xj*(xj2-yj2))*rI3 )
-       dwjduz = 3.0d0*wj2*( -8.0d0*xj*yj*zj*rI3 )
+       dwidux = frac1*3.0d0*wi2*dwidux + frac2*dwidux
+       dwiduy = frac1*3.0d0*wi2*dwiduy + frac2*dwiduy
+       dwiduz = frac1*3.0d0*wi2*dwiduz + frac2*dwiduz
+
+       dwjdux = ( 4.0d0*(yj*zj2 + 0.5d0*yj*(xj2-yj2))*rI3 )
+       dwjduy = ( 4.0d0*(xj*zj2 - 0.5d0*xj*(xj2-yj2))*rI3 )
+       dwjduz = ( -8.0d0*xj*yj*zj*rI3 )
+
+       dwjdux = frac1*3.0d0*wj2*dwjdux + frac2*dwjdux
+       dwjduy = frac1*3.0d0*wj2*dwjduy + frac2*dwjduy
+       dwjduz = frac1*3.0d0*wj2*dwjduz + frac2*dwjduz
 
        dwipdux =  2.0d0*yi*uglyi*rI
        dwipduy = -2.0d0*xi*uglyi*rI

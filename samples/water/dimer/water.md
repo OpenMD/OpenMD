@@ -60,6 +60,16 @@ molecule{
 }
 
 molecule{
+  name = "TAP";
+  nAtoms = 1;
+  atom[0]{
+    type = "TAP";
+    position( 0.0, 0.0, 0.0 );
+    orientation( 0.0, 0.0, 0.0 );
+  }
+}
+
+molecule{
   name = "TIP3P";
   nAtoms = 3;
   atom[0]{

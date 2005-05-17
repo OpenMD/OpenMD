@@ -18,14 +18,14 @@ switchingRadius = 7.8;
 
 density = 0.0334;
 
-targetTemp = 0.001;
+targetTemp = 0.1;
 targetPressure = 1.0;
 
 tauThermostat = 1e4;
 tauBarostat = 1e4;
 
 dt = 1.0;
-runTime = 1e3;
+runTime = 1e4;
 
 sampleTime = 1e2;
 statusTime = 10;

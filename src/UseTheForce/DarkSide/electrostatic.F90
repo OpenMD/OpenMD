@@ -85,6 +85,7 @@ module electrostatic_module
      logical :: is_Dipole = .false.
      logical :: is_SplitDipole = .false.
      logical :: is_Quadrupole = .false.
+     logical :: is_Tap = .false.
      real(kind=DP) :: charge = 0.0_DP
      real(kind=DP) :: dipole_moment = 0.0_DP
      real(kind=DP) :: split_dipole_distance = 0.0_DP
@@ -96,13 +97,14 @@ module electrostatic_module
 contains
 
   subroutine newElectrostaticType(c_ident, is_Charge, is_Dipole, &
-       is_SplitDipole, is_Quadrupole, status)
+       is_SplitDipole, is_Quadrupole, is_Tap, status)
 
     integer, intent(in) :: c_ident
     logical, intent(in) :: is_Charge
     logical, intent(in) :: is_Dipole
     logical, intent(in) :: is_SplitDipole
     logical, intent(in) :: is_Quadrupole
+    logical, intent(in) :: is_Tap
     integer, intent(out) :: status
     integer :: nAtypes, myATID, i, j
 
@@ -139,6 +141,7 @@ contains
     ElectrostaticMap(myATID)%is_Dipole = is_Dipole
     ElectrostaticMap(myATID)%is_SplitDipole = is_SplitDipole
     ElectrostaticMap(myATID)%is_Quadrupole = is_Quadrupole
+    ElectrostaticMap(myATID)%is_Tap = is_Tap
 
   end subroutine newElectrostaticType
 
@@ -328,6 +331,7 @@ contains
 
     logical :: i_is_Charge, i_is_Dipole, i_is_SplitDipole, i_is_Quadrupole
     logical :: j_is_Charge, j_is_Dipole, j_is_SplitDipole, j_is_Quadrupole
+    logical :: i_is_Tap, j_is_Tap
     integer :: me1, me2, id1, id2
     real (kind=dp) :: q_i, q_j, mu_i, mu_j, d_i, d_j
     real (kind=dp) :: qxx_i, qyy_i, qzz_i
@@ -340,7 +344,7 @@ contains
     real (kind=dp) :: pref, vterm, epot, dudr    
     real (kind=dp) :: xhat, yhat, zhat
     real (kind=dp) :: dudx, dudy, dudz
-    real (kind=dp) :: scale, sc2, bigR
+    real (kind=dp) :: scale, sc2, bigR, switcher, dswitcher
 
     if (.not.allocated(ElectrostaticMap)) then
        call handleError("electrostatic", "no ElectrostaticMap was present before first call of do_electrostatic_pair!")
@@ -364,16 +368,17 @@ contains
     zhat = d(3) * riji
 
     !! logicals
-
     i_is_Charge = ElectrostaticMap(me1)%is_Charge
     i_is_Dipole = ElectrostaticMap(me1)%is_Dipole
     i_is_SplitDipole = ElectrostaticMap(me1)%is_SplitDipole
     i_is_Quadrupole = ElectrostaticMap(me1)%is_Quadrupole
+    i_is_Tap = ElectrostaticMap(me1)%is_Tap
 
     j_is_Charge = ElectrostaticMap(me2)%is_Charge
     j_is_Dipole = ElectrostaticMap(me2)%is_Dipole
     j_is_SplitDipole = ElectrostaticMap(me2)%is_SplitDipole
     j_is_Quadrupole = ElectrostaticMap(me2)%is_Quadrupole
+    j_is_Tap = ElectrostaticMap(me2)%is_Tap
 
     if (i_is_Charge) then
        q_i = ElectrostaticMap(me1)%charge      
@@ -428,7 +433,6 @@ contains
        cz_i = uz_i(1)*xhat + uz_i(2)*yhat + uz_i(3)*zhat
     endif
 
-
     if (j_is_Charge) then
        q_j = ElectrostaticMap(me2)%charge      
     endif
@@ -480,6 +484,12 @@ contains
        cy_j = uy_j(1)*xhat + uy_j(2)*yhat + uy_j(3)*zhat
        cz_j = uz_j(1)*xhat + uz_j(2)*yhat + uz_j(3)*zhat
     endif
+    
+    switcher = 1.0d0
+    dswitcher = 0.0d0
+!    if (j_is_Tap .and. i_is_Tap) then
+!      call calc_switch(rij, mu_i, switcher, dswitcher)
+!    endif
 
     epot = 0.0_dp
     dudx = 0.0_dp
@@ -654,17 +664,26 @@ contains
 
           a1 = 5.0d0 * ct_i * ct_j * sc2 - ct_ij
 
-          dudx=dudx+pref*sw*3.0d0*ri4*scale*(a1*xhat-ct_i*uz_j(1)-ct_j*uz_i(1))
-          dudy=dudy+pref*sw*3.0d0*ri4*scale*(a1*yhat-ct_i*uz_j(2)-ct_j*uz_i(2))
-          dudz=dudz+pref*sw*3.0d0*ri4*scale*(a1*zhat-ct_i*uz_j(3)-ct_j*uz_i(3))
+          dudx = dudx + switcher*pref*sw*3.0d0*ri4*scale &
+                         *(a1*xhat-ct_i*uz_j(1)-ct_j*uz_i(1)) + vterm*dswitcher
+          dudy = dudy + switcher*pref*sw*3.0d0*ri4*scale &
+                         *(a1*yhat-ct_i*uz_j(2)-ct_j*uz_i(2)) + vterm*dswitcher
+          dudz = dudz + switcher*pref*sw*3.0d0*ri4*scale &
+                         *(a1*zhat-ct_i*uz_j(3)-ct_j*uz_i(3)) + vterm*dswitcher
 
-          duduz_i(1) = duduz_i(1) + pref*sw*ri3*(uz_j(1) - 3.0d0*ct_j*xhat*sc2)
-          duduz_i(2) = duduz_i(2) + pref*sw*ri3*(uz_j(2) - 3.0d0*ct_j*yhat*sc2)
-          duduz_i(3) = duduz_i(3) + pref*sw*ri3*(uz_j(3) - 3.0d0*ct_j*zhat*sc2)
+          duduz_i(1) = duduz_i(1) + switcher*pref*sw*ri3 &
+                                     *(uz_j(1) - 3.0d0*ct_j*xhat*sc2)
+          duduz_i(2) = duduz_i(2) + switcher*pref*sw*ri3 &
+                                     *(uz_j(2) - 3.0d0*ct_j*yhat*sc2)
+          duduz_i(3) = duduz_i(3) + switcher*pref*sw*ri3 &
+                                     *(uz_j(3) - 3.0d0*ct_j*zhat*sc2)
 
-          duduz_j(1) = duduz_j(1) + pref*sw*ri3*(uz_i(1) - 3.0d0*ct_i*xhat*sc2)
-          duduz_j(2) = duduz_j(2) + pref*sw*ri3*(uz_i(2) - 3.0d0*ct_i*yhat*sc2)
-          duduz_j(3) = duduz_j(3) + pref*sw*ri3*(uz_i(3) - 3.0d0*ct_i*zhat*sc2)
+          duduz_j(1) = duduz_j(1) + switcher*pref*sw*ri3 &
+                                     *(uz_i(1) - 3.0d0*ct_i*xhat*sc2)
+          duduz_j(2) = duduz_j(2) + switcher*pref*sw*ri3 &
+                                     *(uz_i(2) - 3.0d0*ct_i*yhat*sc2)
+          duduz_j(3) = duduz_j(3) + switcher*pref*sw*ri3 &
+                                     *(uz_i(3) - 3.0d0*ct_i*zhat*sc2)
        endif
 
     endif
@@ -822,6 +841,34 @@ contains
     return
   end subroutine doElectrostaticPair
 
+  !! calculates the switching functions and their derivatives for a given
+  subroutine calc_switch(r, mu, scale, dscale)
+
+    real (kind=dp), intent(in) :: r, mu
+    real (kind=dp), intent(inout) :: scale, dscale
+    real (kind=dp) :: rl, ru, mulow, minRatio, temp, scaleVal
+
+    ! distances must be in angstroms
+    rl = 2.75d0
+    ru = 2.85d0
+    mulow = 3.3856d0 ! 1.84 * 1.84
+    minRatio = mulow / (mu*mu)
+    scaleVal = 1.0d0 - minRatio
+    
+    if (r.lt.rl) then
+       scale = minRatio
+       dscale = 0.0d0
+    elseif (r.gt.ru) then
+       scale = 1.0d0
+       dscale = 0.0d0
+    else
+       scale = 1.0d0 - scaleVal*((ru + 2.0d0*r - 3.0d0*rl) * (ru-r)**2) &
+                        / ((ru - rl)**3)
+       dscale = -scaleVal * 6.0d0 * (r-ru)*(r-rl)/((ru - rl)**3)    
+    endif
+        
+    return
+  end subroutine calc_switch
 
   subroutine destroyElectrostaticTypes()
 

@@ -51,6 +51,7 @@
 #include "io/MultipoleAtomTypesSectionParser.hpp"
 #include "io/StickyAtomTypesSectionParser.hpp"
 #include "io/StickyPowerAtomTypesSectionParser.hpp"
+#include "io/GayBerneAtomTypesSectionParser.hpp"
 #include "io/BondTypesSectionParser.hpp"
 #include "io/BendTypesSectionParser.hpp"
 #include "io/TorsionTypesSectionParser.hpp"
@@ -82,6 +83,7 @@ namespace oopse {
     spMan_.push_back(new MultipoleAtomTypesSectionParser());
     spMan_.push_back(new StickyAtomTypesSectionParser());
     spMan_.push_back(new StickyPowerAtomTypesSectionParser());
+    spMan_.push_back(new GayBerneAtomTypesSectionParser());
     spMan_.push_back(new BondTypesSectionParser());
     spMan_.push_back(new BendTypesSectionParser());
     spMan_.push_back(new TorsionTypesSectionParser());
