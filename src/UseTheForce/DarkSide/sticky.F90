@@ -50,7 +50,7 @@
 !! @author Matthew Meineke
 !! @author Christopher Fennell
 !! @author J. Daniel Gezelter
-!! @version $Id: sticky.F90,v 1.10 2005-05-17 22:35:01 chrisfen Exp $, $Date: 2005-05-17 22:35:01 $, $Name: not supported by cvs2svn $, $Revision: 1.10 $
+!! @version $Id: sticky.F90,v 1.11 2005-05-18 18:31:40 chrisfen Exp $, $Date: 2005-05-18 18:31:40 $, $Name: not supported by cvs2svn $, $Revision: 1.11 $
 
 module sticky
 
@@ -513,7 +513,7 @@ contains
   end subroutine destroyStickyTypes
   
     subroutine do_sticky_power_pair(atom1, atom2, d, rij, r2, sw, vpair, fpair, &
-       pot, A, f, t, do_pot)
+       pot, A, f, t, do_pot, ebalance)
     !! We assume that the rotation matrices have already been calculated
     !! and placed in the A array.
 
@@ -527,17 +527,15 @@ contains
     real (kind=dp), dimension(9,nLocal) :: A
     real (kind=dp), dimension(3,nLocal) :: f
     real (kind=dp), dimension(3,nLocal) :: t
+    real (kind=dp), intent(in) :: ebalance
     logical, intent(in) :: do_pot
 
     real (kind=dp) :: xi, yi, zi, xj, yj, zj, xi2, yi2, zi2, xj2, yj2, zj2
     real (kind=dp) :: xihat, yihat, zihat, xjhat, yjhat, zjhat
     real (kind=dp) :: rI, rI2, rI3, rI4, rI5, rI6, rI7, s, sp, dsdr, dspdr
-    real (kind=dp) :: wi, wj, w, wip, wjp, wp, wi2, wj2, wip3, wjp3
+    real (kind=dp) :: wi, wj, w, wi2, wj2
     real (kind=dp) :: dwidx, dwidy, dwidz, dwjdx, dwjdy, dwjdz
-    real (kind=dp) :: dwipdx, dwipdy, dwipdz, dwjpdx, dwjpdy, dwjpdz
     real (kind=dp) :: dwidux, dwiduy, dwiduz, dwjdux, dwjduy, dwjduz
-    real (kind=dp) :: dwipdux, dwipduy, dwipduz, dwjpdux, dwjpduy, dwjpduz
-    real (kind=dp) :: zif, zis, zjf, zjs, uglyi, uglyj
     real (kind=dp) :: drdx, drdy, drdz
     real (kind=dp) :: txi, tyi, tzi, txj, tyj, tzj
     real (kind=dp) :: fxii, fyii, fzii, fxjj, fyjj, fzjj
@@ -550,19 +548,8 @@ contains
     integer :: me1, me2
     real (kind=dp) :: w0, v0, v0p, rl, ru, rlp, rup, rbig
     real (kind=dp) :: zi3, zi4, zi5, zj3, zj4, zj5
-    real (kind=dp) :: frac1, frac2, prodVal
-    real (kind=dp) :: prei1, prei2, prei, prej1, prej2, prej
-    real (kind=dp) :: walt, walti, waltj, dwaltidx, dwaltidy, dwaltidz
-    real (kind=dp) :: dwaltjdx, dwaltjdy, dwaltjdz
-    real (kind=dp) :: dwaltidux, dwaltiduy, dwaltiduz
-    real (kind=dp) :: dwaltjdux, dwaltjduy, dwaltjduz
-    real (kind=dp) :: doSw1idx, doSw1idy, doSw1idz, doSw1jdx, doSw1jdy, doSw1jdz
-    real (kind=dp) :: doSw1idux, doSw1iduy, doSw1iduz
-    real (kind=dp) :: doSw1jdux, doSw1jduy, doSw1jduz
-    real (kind=dp) :: doSw2idx, doSw2idy, doSw2idz, doSw2jdx, doSw2jdy, doSw2jdz
-    real (kind=dp) :: doSw2idux, doSw2iduy, doSw2iduz
-    real (kind=dp) :: doSw2jdux, doSw2jduy, doSw2jduz
-    
+    real (kind=dp) :: frac1, frac2
+          
     if (.not.allocated(StickyMap)) then
        call handleError("sticky", "no StickyMap was present before first call of do_sticky_power_pair!")
        return
@@ -647,7 +634,7 @@ contains
        zi2 = zi*zi
        zi3 = zi2*zi
        zi4 = zi2*zi2
-       zi5 = zi4*zi
+       zi5 = zi3*zi2
        xihat = xi*rI
        yihat = yi*rI
        zihat = zi*rI
@@ -657,55 +644,32 @@ contains
        zj2 = zj*zj
        zj3 = zj2*zj
        zj4 = zj2*zj2
-       zj5 = zj4*zj
+       zj5 = zj3*zj2
        xjhat = xj*rI
        yjhat = yj*rI
        zjhat = zj*rI
        
        call calc_sw_fnc(rij, rl, ru, rlp, rup, s, sp, dsdr, dspdr)
            
-       frac1 = 0.5d0
-       frac2 = 0.5d0
+       frac1 = 0.6d0
+       frac2 = 0.0d0
        
        wi = 2.0d0*(xi2-yi2)*zi*rI3
        wj = 2.0d0*(xj2-yj2)*zj*rI3
        
-!       prodVal = zihat*zjhat
-!       if (prodVal .ge. 0.0d0) then
-!         wi = 0.0d0
-!         wj = 0.0d0
-!       endif
-
        wi2 = wi*wi
        wj2 = wj*wj
 
-       w = frac1*wi*wi2 + frac2*wi + wj*wj2
+       w = frac1*wi*wi2 + frac2*wi + frac1*wj*wj2 + frac2*wj
 
-       zif = zihat - 0.6d0
-       zis = zihat + 0.8d0
-
-       zjf = zjhat - 0.6d0
-       zjs = zjhat + 0.8d0
-
-       wip = zif*zif*zis*zis - w0
-       wjp = zjf*zjf*zjs*zjs - w0
-       wp = wip + wjp
-         
-       !wip = zihat - 0.2d0
-       !wjp = zjhat - 0.2d0
-       !wip3 = wip*wip*wip
-       !wjp3 = wjp*wjp*wjp
-       
-       !wp = wip3*wip + wjp3*wjp
-
-       vpair = vpair + 0.5d0*(v0*s*w + v0p*sp*wp)
+       vpair = vpair + 0.5d0*(v0*s*w) + ebalance
        
        if (do_pot) then
 #ifdef IS_MPI 
-         pot_row(atom1) = pot_row(atom1) + 0.25d0*(v0*s*w + v0p*sp*wp)*sw
-         pot_col(atom2) = pot_col(atom2) + 0.25d0*(v0*s*w + v0p*sp*wp)*sw
+         pot_row(atom1) = pot_row(atom1) + 0.25d0*(v0*s*w)*sw
+         pot_col(atom2) = pot_col(atom2) + 0.25d0*(v0*s*w)*sw
 #else
-         pot = pot + 0.5d0*(v0*s*w + v0p*sp*wp)*sw
+         pot = pot + 0.5d0*(v0*s*w)*sw + ebalance
 #endif  
        endif
 
@@ -725,33 +689,6 @@ contains
        dwjdy = frac1*3.0d0*wj2*dwjdy + frac2*dwjdy
        dwjdz = frac1*3.0d0*wj2*dwjdz + frac2*dwjdz
        
-       uglyi = zif*zif*zis + zif*zis*zis
-       uglyj = zjf*zjf*zjs + zjf*zjs*zjs
-
-       dwipdx = -2.0d0*xi*zi*uglyi*rI3
-       dwipdy = -2.0d0*yi*zi*uglyi*rI3
-       dwipdz = 2.0d0*(rI - zi2*rI3)*uglyi
-
-       dwjpdx = -2.0d0*xj*zj*uglyj*rI3
-       dwjpdy = -2.0d0*yj*zj*uglyj*rI3
-       dwjpdz = 2.0d0*(rI - zj2*rI3)*uglyj
-
-       !dwipdx = -4.0d0*wip3*zi*xihat
-       !dwipdy = -4.0d0*wip3*zi*yihat
-       !dwipdz = -4.0d0*wip3*(zi2 - 1.0d0)*rI
-
-       !dwjpdx = -4.0d0*wjp3*zj*xjhat
-       !dwjpdy = -4.0d0*wjp3*zj*yjhat
-       !dwjpdz = -4.0d0*wjp3*(zj2 - 1.0d0)*rI
-       
-       !dwipdx = 0.0d0
-       !dwipdy = 0.0d0
-       !dwipdz = 0.0d0
-
-       !dwjpdx = 0.0d0
-       !dwjpdy = 0.0d0
-       !dwjpdz = 0.0d0
-       
        dwidux = ( 4.0d0*(yi*zi2 + 0.5d0*yi*(xi2-yi2))*rI3 )
        dwiduy = ( 4.0d0*(xi*zi2 - 0.5d0*xi*(xi2-yi2))*rI3 )
        dwiduz = ( -8.0d0*xi*yi*zi*rI3 )
@@ -768,40 +705,16 @@ contains
        dwjduy = frac1*3.0d0*wj2*dwjduy + frac2*dwjduy
        dwjduz = frac1*3.0d0*wj2*dwjduz + frac2*dwjduz
 
-       dwipdux =  2.0d0*yi*uglyi*rI
-       dwipduy = -2.0d0*xi*uglyi*rI
-       dwipduz =  0.0d0
-
-       dwjpdux =  2.0d0*yj*uglyj*rI
-       dwjpduy = -2.0d0*xj*uglyj*rI
-       dwjpduz =  0.0d0
-
-       !dwipdux =  4.0d0*wip3*yihat
-       !dwipduy = -4.0d0*wip3*xihat
-       !dwipduz =  0.0d0
-
-       !dwjpdux =  4.0d0*wjp3*yjhat
-       !dwjpduy = -4.0d0*wjp3*xjhat
-       !dwjpduz =  0.0d0
-
-       !dwipdux = 0.0d0
-       !dwipduy = 0.0d0
-       !dwipduz = 0.0d0
-
-       !dwjpdux = 0.0d0
-       !dwjpduy = 0.0d0
-       !dwjpduz = 0.0d0
-       
        ! do the torques first since they are easy:
        ! remember that these are still in the body fixed axes
 
-       txi = 0.5d0*(v0*s*dwidux + v0p*sp*dwipdux)*sw
-       tyi = 0.5d0*(v0*s*dwiduy + v0p*sp*dwipduy)*sw
-       tzi = 0.5d0*(v0*s*dwiduz + v0p*sp*dwipduz)*sw
+       txi = 0.5d0*(v0*s*dwidux)*sw
+       tyi = 0.5d0*(v0*s*dwiduy)*sw
+       tzi = 0.5d0*(v0*s*dwiduz)*sw
 
-       txj = 0.5d0*(v0*s*dwjdux + v0p*sp*dwjpdux)*sw
-       tyj = 0.5d0*(v0*s*dwjduy + v0p*sp*dwjpduy)*sw
-       tzj = 0.5d0*(v0*s*dwjduz + v0p*sp*dwjpduz)*sw
+       txj = 0.5d0*(v0*s*dwjdux)*sw
+       tyj = 0.5d0*(v0*s*dwjduy)*sw
+       tzj = 0.5d0*(v0*s*dwjduz)*sw
  
        ! go back to lab frame using transpose of rotation matrix:
 
@@ -832,13 +745,13 @@ contains
 
        ! first rotate the i terms back into the lab frame:
 
-       radcomxi = (v0*s*dwidx+v0p*sp*dwipdx)*sw
-       radcomyi = (v0*s*dwidy+v0p*sp*dwipdy)*sw
-       radcomzi = (v0*s*dwidz+v0p*sp*dwipdz)*sw
+       radcomxi = (v0*s*dwidx)*sw
+       radcomyi = (v0*s*dwidy)*sw
+       radcomzi = (v0*s*dwidz)*sw
 
-       radcomxj = (v0*s*dwjdx+v0p*sp*dwjpdx)*sw
-       radcomyj = (v0*s*dwjdy+v0p*sp*dwjpdy)*sw
-       radcomzj = (v0*s*dwjdz+v0p*sp*dwjpdz)*sw
+       radcomxj = (v0*s*dwjdx)*sw
+       radcomyj = (v0*s*dwjdy)*sw
+       radcomzj = (v0*s*dwjdz)*sw
 
 #ifdef IS_MPI    
        fxii = a_Row(1,atom1)*(radcomxi) + &
@@ -892,9 +805,9 @@ contains
 
        ! now assemble these with the radial-only terms:
 
-       fxradial = 0.5d0*((v0*dsdr*w + v0p*dspdr*wp)*drdx + fxii + fxji)
-       fyradial = 0.5d0*((v0*dsdr*w + v0p*dspdr*wp)*drdy + fyii + fyji)
-       fzradial = 0.5d0*((v0*dsdr*w + v0p*dspdr*wp)*drdz + fzii + fzji)
+       fxradial = 0.5d0*(v0*dsdr*w*drdx + fxii + fxji + ebalance*xihat)
+       fyradial = 0.5d0*(v0*dsdr*w*drdy + fyii + fyji + ebalance*yihat)
+       fzradial = 0.5d0*(v0*dsdr*w*drdz + fzii + fzji + ebalance*zihat)
 
 #ifdef IS_MPI
        f_Row(1,atom1) = f_Row(1,atom1) + fxradial

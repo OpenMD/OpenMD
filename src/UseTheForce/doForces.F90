@@ -45,7 +45,7 @@
 
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: doForces.F90,v 1.17 2005-05-17 22:35:01 chrisfen Exp $, $Date: 2005-05-17 22:35:01 $, $Name: not supported by cvs2svn $, $Revision: 1.17 $
+!! @version $Id: doForces.F90,v 1.18 2005-05-18 18:31:40 chrisfen Exp $, $Date: 2005-05-18 18:31:40 $, $Name: not supported by cvs2svn $, $Revision: 1.18 $
 
 
 module doForces
@@ -923,6 +923,7 @@ contains
     real ( kind = dp ), intent(inout) :: rijsq
     real ( kind = dp )                :: r
     real ( kind = dp ), intent(inout) :: d(3)
+    real ( kind = dp ) :: ebalance
     integer :: me_i, me_j
 
     r = sqrt(rijsq)
@@ -953,7 +954,7 @@ contains
        if (PropertyMap(me_i)%is_Electrostatic .and. &
             PropertyMap(me_j)%is_Electrostatic) then
           call doElectrostaticPair(i, j, d, r, rijsq, sw, vpair, fpair, &
-               pot, eFrame, f, t, do_pot)
+               pot, eFrame, f, t, do_pot, ebalance)
        endif
 
        if (FF_uses_dipoles .and. SIM_uses_dipoles) then       
@@ -981,7 +982,7 @@ contains
        if ( PropertyMap(me_i)%is_StickyPower .and. &
             PropertyMap(me_j)%is_StickyPower) then
           call do_sticky_power_pair(i, j, d, r, rijsq, sw, vpair, fpair, &
-               pot, A, f, t, do_pot)
+               pot, A, f, t, do_pot, ebalance)
        endif
     endif
     

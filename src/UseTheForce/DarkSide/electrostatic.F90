@@ -307,7 +307,7 @@ contains
   end function getDipoleMoment
 
   subroutine doElectrostaticPair(atom1, atom2, d, rij, r2, sw, &
-       vpair, fpair, pot, eFrame, f, t, do_pot)
+       vpair, fpair, pot, eFrame, f, t, do_pot, ebalance)
 
     logical, intent(in) :: do_pot
 
@@ -318,6 +318,7 @@ contains
     real(kind=dp), intent(in), dimension(3) :: d
     real(kind=dp), intent(inout) :: vpair
     real(kind=dp), intent(inout), dimension(3) :: fpair
+    real(kind=dp), intent(inout) :: ebalance
 
     real( kind = dp ) :: pot
     real( kind = dp ), dimension(9,nLocal) :: eFrame
@@ -487,6 +488,8 @@ contains
     
     switcher = 1.0d0
     dswitcher = 0.0d0
+    ebalance = 0.0d0
+    ! weaken the dipole interaction at close range for TAP water
 !    if (j_is_Tap .and. i_is_Tap) then
 !      call calc_switch(rij, mu_i, switcher, dswitcher)
 !    endif
@@ -659,8 +662,9 @@ contains
 
           pref = pre22 * mu_i * mu_j
           vterm = pref * ri3 * (ct_ij - 3.0d0 * ct_i * ct_j * sc2)
-          vpair = vpair + vterm
-          epot = epot + sw * vterm
+          ebalance = vterm * (1.0d0 - switcher)
+          vpair = vpair + switcher * vterm
+          epot = epot + sw * switcher * vterm
 
           a1 = 5.0d0 * ct_i * ct_j * sc2 - ct_ij
 
@@ -850,8 +854,8 @@ contains
 
     ! distances must be in angstroms
     rl = 2.75d0
-    ru = 2.85d0
-    mulow = 3.3856d0 ! 1.84 * 1.84
+    ru = 3.75d0
+    mulow = 0.0d0 !3.3856d0 ! 1.84 * 1.84
     minRatio = mulow / (mu*mu)
     scaleVal = 1.0d0 - minRatio
     
