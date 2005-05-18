@@ -50,7 +50,7 @@
 !! @author Matthew Meineke
 !! @author Christopher Fennell
 !! @author J. Daniel Gezelter
-!! @version $Id: sticky.F90,v 1.11 2005-05-18 18:31:40 chrisfen Exp $, $Date: 2005-05-18 18:31:40 $, $Name: not supported by cvs2svn $, $Revision: 1.11 $
+!! @version $Id: sticky.F90,v 1.12 2005-05-18 19:06:22 chrisfen Exp $, $Date: 2005-05-18 19:06:22 $, $Name: not supported by cvs2svn $, $Revision: 1.12 $
 
 module sticky
 
@@ -651,8 +651,8 @@ contains
        
        call calc_sw_fnc(rij, rl, ru, rlp, rup, s, sp, dsdr, dspdr)
            
-       frac1 = 0.6d0
-       frac2 = 0.0d0
+       frac1 = 1.5d0
+       frac2 = 0.5d0
        
        wi = 2.0d0*(xi2-yi2)*zi*rI3
        wj = 2.0d0*(xj2-yj2)*zj*rI3

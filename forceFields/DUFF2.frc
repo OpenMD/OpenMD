@@ -169,7 +169,7 @@ end StickyAtomTypes
 
 begin StickyPowerAtomTypes
 //name w0	v0 (kcal/mol)   v0p	rl (Ang)  ru	rlp	rup
-TAP	0.075	7.5		0.0	2.75	  3.75	2.75	3.25
+TAP	0.075	8.0		0.0	2.75	  3.75	2.75	3.25
 end StickyPowerAtomTypes
 
 begin BondTypes
