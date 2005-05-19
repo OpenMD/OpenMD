@@ -116,6 +116,7 @@
 #define G_THERM_INT_DIST_SPRING  54
 #define G_THERM_INT_THETA_SPRING 55
 #define G_THERM_INT_OMEGA_SPRING 56
+#define G_TARGETSTRESS 57
 
 Globals::Globals(){
   initalize();
@@ -190,6 +191,7 @@ void Globals::initalize(){
   command_table.insert(CommandMapType::value_type("thermIntDistSpringConst", G_THERM_INT_DIST_SPRING));
   command_table.insert(CommandMapType::value_type("thermIntThetaSpringConst", G_THERM_INT_THETA_SPRING));
   command_table.insert(CommandMapType::value_type("thermIntOmegaSpringConst", G_THERM_INT_OMEGA_SPRING));
+  command_table.insert(CommandMapType::value_type("targetStress", G_TARGETSTRESS));
 
 
   strcpy( mixingRule,"standard");  //default mixing rules to standard.
@@ -252,6 +254,7 @@ void Globals::initalize(){
   have_dist_spring_constant =  0;
   have_theta_spring_constant = 0;
   have_omega_spring_constant = 0;
+  have_targetStress = 0;
 }
 
 int Globals::newComponent( event* the_event ){
@@ -1838,6 +1841,38 @@ int Globals::globalAssign( event* the_event ){
         break;
       }
       break;   
+
+      case G_THERM_INT_THETA_SPRING:
+        switch( the_type ){
+      
+        case STRING:
+          the_event->err_msg = 
+            strdup( "Error in parsing meta-data file!\n\ttargetStress is not a double or int.\n" );
+          return 1;
+          break;
+          
+        case DOUBLE:
+          target_stress= the_event->evt.asmt.rhs.dval;
+          have_targetstress = 1;
+          return 1;
+          break;
+          
+        case INT:
+          target_stress = (double)the_event->evt.asmt.rhs.dval;
+          have_targetstress = 1;
+          return 1;
+          break;
+          
+        default:
+          the_event->err_msg = 
+            strdup( "Error in parsing meta-data file!\n\tttargetStress unrecognized.\n" );
+          return 0;
+          break;
+        }
+        break;
+        
+
+      
       // add more token cases here.      
     }
   }

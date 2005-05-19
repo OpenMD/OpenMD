@@ -49,6 +49,9 @@
 #include "integrators/NPTi.hpp"
 #include "integrators/NPTf.hpp"
 #include "integrators/NPTxyz.hpp"
+#include "integrators/NPAT.hpp"
+#include "integrators/NPrT.hpp"
+
 #include "minimizers/MinimizerFactory.hpp"
 #include "minimizers/MinimizerCreator.hpp"
 #include "minimizers/PRCG.hpp"
@@ -84,6 +87,9 @@ namespace oopse {
     IntegratorFactory::getInstance()->registerIntegrator(new IntegratorBuilder<NPTi>("NPTi"));
     IntegratorFactory::getInstance()->registerIntegrator(new IntegratorBuilder<NPTf>("NPTf"));
     IntegratorFactory::getInstance()->registerIntegrator(new IntegratorBuilder<NPTxyz>("NPTxyz"));
+    IntegratorFactory::getInstance()->registerIntegrator(new IntegratorBuilder<NPAT>("NPAT"));
+    IntegratorFactory::getInstance()->registerIntegrator(new IntegratorBuilder<NPrT>("NPrT"));
+
   }
 
   void registerMinimizers() {
