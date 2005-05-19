@@ -50,7 +50,7 @@
 namespace oopse {
   NPrT::NPrT(SimInfo* info) : NPT(info) {
     Globals* simParams = info_->getSimParams();
-    if (!simParams->haveTargetStress()) 
+    if (!simParams->haveTargetStress()) {
       sprintf(painCave.errMsg,
               "If you use the NPT integrator, you must set tauBarostat.\n");
       painCave.severity = OOPSE_ERROR;
@@ -62,6 +62,9 @@ namespace oopse {
 
   }
   void NPrT::evolveEtaA() {
+    Mat3x3d hmat = currentSnapshot_->getHmat();
+    double hz = hmat(2, 2);
+    double Axy = hmat(0,0) * hmat(1, 1);
     double sx = -hz * (press(0, 0) - targetPressure/OOPSEConstant::pressureConvert);
     double sy = -hz * (press(1, 1) - targetPressure/OOPSEConstant::pressureConvert);
     eta(0,0) -= Axy * (sx - targetStress) / (NkBT*tb2);
@@ -71,7 +74,9 @@ namespace oopse {
   }
 
   void NPrT::evolveEtaB() {
-
+    Mat3x3d hmat = currentSnapshot_->getHmat();
+    double hz = hmat(2, 2);
+    double Axy = hmat(0,0) * hmat(1, 1);
     prevEta = eta;
     double sx = -hz * (press(0, 0) - targetPressure/OOPSEConstant::pressureConvert);
     double sy = -hz * (press(1, 1) - targetPressure/OOPSEConstant::pressureConvert);

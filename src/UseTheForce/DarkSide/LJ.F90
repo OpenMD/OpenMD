@@ -43,7 +43,7 @@
 !! Calculates Long Range forces Lennard-Jones interactions.
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: LJ.F90,v 1.11 2005-04-15 22:03:47 gezelter Exp $, $Date: 2005-04-15 22:03:47 $, $Name: not supported by cvs2svn $, $Revision: 1.11 $
+!! @version $Id: LJ.F90,v 1.12 2005-05-19 15:49:53 tim Exp $, $Date: 2005-05-19 15:49:53 $, $Name: not supported by cvs2svn $, $Revision: 1.12 $
 
 
 module lj
@@ -351,14 +351,15 @@ contains
     t12 = t6 * t6     
 
     if (soft_pot) then
-       pot_temp = 4.0E0_DP * epsilon * t12 
-       if (LJ_do_shift) then
-          pot_temp = pot_temp + delta
-       endif
 
-       vpair = vpair + pot_temp
+      pot_temp = 4.0E0_DP * epsilon * t6
+      if (LJ_do_shift) then
+         pot_temp = pot_temp + delta
+      endif
 
-       dudr = sw * 24.0E0_DP * epsilon * (-2.0E0_DP)*t12 / rij
+      vpair = vpair + pot_temp
+
+      dudr = -sw * 24.0E0_DP * epsilon * t6 / rij
 
     else
        pot_temp = 4.0E0_DP * epsilon * (t12 - t6) 

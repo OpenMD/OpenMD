@@ -254,7 +254,7 @@ void Globals::initalize(){
   have_dist_spring_constant =  0;
   have_theta_spring_constant = 0;
   have_omega_spring_constant = 0;
-  have_targetStress = 0;
+  have_targetstress = 0;
 }
 
 int Globals::newComponent( event* the_event ){
@@ -1842,7 +1842,7 @@ int Globals::globalAssign( event* the_event ){
       }
       break;   
 
-      case G_THERM_INT_THETA_SPRING:
+    case G_TARGETSTRESS:
         switch( the_type ){
       
         case STRING:

@@ -12,6 +12,8 @@ Source    = \
 	NPTi.cpp \
 	NPTf.cpp \
 	NPTxyz.cpp \
+	NPAT.cpp \
+	NPrT.cpp
 
 RmiSource =
 
