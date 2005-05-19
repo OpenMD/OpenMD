@@ -139,7 +139,7 @@ class Globals{
   double getDistSpringConst(void)   { return therm_int_dist_spring; }
   double getThetaSpringConst(void)  { return therm_int_theta_spring; }
   double getOmegaSpringConst(void)  { return therm_int_omega_spring; }
-  double getTargetStress(void) {return target_stress; }
+  double getSurfaceTension(void) {return surface_tension; }
   
   short int haveDt( void )            { return have_dt; }
   short int haveRunTime( void )       { return have_run_time; }
@@ -188,7 +188,7 @@ class Globals{
   short int haveDistSpringConst(void) { return have_dist_spring_constant; }
   short int haveThetaSpringConst(void) { return have_theta_spring_constant; }
   short int haveOmegaSpringConst(void) { return have_omega_spring_constant; }
-  short int haveTargetStress(void) { return have_targetstress; }
+  short int haveSurfaceTension(void) { return have_surface_tension; }
   /* other accessors */
   Component** getComponents( void )   { return components; }
   ZconStamp** getZconStamp( void )    { return zConstraints; }
@@ -264,7 +264,7 @@ class Globals{
   double therm_int_dist_spring;
   double therm_int_theta_spring;
   double therm_int_omega_spring;
-  double target_stress;
+  double surface_tension;
   
   //required arguments
   short int have_force_field, have_n_components, have_target_temp;
@@ -292,7 +292,7 @@ class Globals{
   short int have_dist_spring_constant;
   short int have_theta_spring_constant;
   short int have_omega_spring_constant;
-  short int have_targetstress;
+  short int have_surface_tension;
 };
 
 #endif

@@ -88,7 +88,7 @@ namespace oopse {
     Mat3x3d oldEta;
     Mat3x3d prevEta;
     Mat3x3d vScale;
-    double targetStress;
+    double surfaceTension;
   };
 
 

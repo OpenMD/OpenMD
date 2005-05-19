@@ -162,6 +162,23 @@ namespace oopse {
     return pressure;
   }
 
+  double Thermo::getPressure(int direction) {
+
+    // Relies on the calculation of the full molecular pressure tensor
+
+	  
+    Mat3x3d tensor;
+    double pressure;
+
+    tensor = getPressureTensor();
+
+    pressure = OOPSEConstant::pressureConvert * tensor(direction, direction);
+
+    return pressure;
+  }
+
+
+
   Mat3x3d Thermo::getPressureTensor() {
     // returns pressure tensor in units amu*fs^-2*Ang^-1
     // routine derived via viral theorem description in:

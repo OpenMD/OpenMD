@@ -91,97 +91,21 @@ namespace oopse {
   }
 
   void NPAT::scaleSimBox(){
-
-    int i;
-    int j;
-    int k;
     Mat3x3d scaleMat;
-    double eta2ij;
-    double bigScale, smallScale, offDiagMax;
-    Mat3x3d hm;
-    Mat3x3d hmnew;
 
-
-
-    // Scale the box after all the positions have been moved:
-
-    // Use a taylor expansion for eta products:  Hmat = Hmat . exp(dt * etaMat)
-    //  Hmat = Hmat . ( Ident + dt * etaMat  + dt^2 * etaMat*etaMat / 2)
-
-    bigScale = 1.0;
-    smallScale = 1.0;
-    offDiagMax = 0.0;
-
-    for(i=0; i<3; i++){
-      for(j=0; j<3; j++){
-
-	// Calculate the matrix Product of the eta array (we only need
-	// the ij element right now):
-
-	eta2ij = 0.0;
-	for(k=0; k<3; k++){
-	  eta2ij += eta(i, k) * eta(k, j);
-	}
-
-	scaleMat(i, j) = 0.0;
-	// identity matrix (see above):
-	if (i == j) scaleMat(i, j) = 1.0;
-	// Taylor expansion for the exponential truncated at second order:
-	scaleMat(i, j) += dt*eta(i, j)  + 0.5*dt*dt*eta2ij;
-      
-
-	if (i != j)
-	  if (fabs(scaleMat(i, j)) > offDiagMax)
-	    offDiagMax = fabs(scaleMat(i, j));
+    for(int i=0; i<3; i++){
+      for(int j=0; j<3; j++){
+	      scaleMat(i, j) = 0.0;
+	      if(i==j) {
+	        scaleMat(i, j) = 1.0;
+	      }
       }
-
-      if (scaleMat(i, i) > bigScale) bigScale = scaleMat(i, i);
-      if (scaleMat(i, i) < smallScale) smallScale = scaleMat(i, i);
     }
-
-    if ((bigScale > 1.01) || (smallScale < 0.99)) {
-      sprintf( painCave.errMsg,
-	       "NPAT error: Attempting a Box scaling of more than 1 percent.\n"
-	       " Check your tauBarostat, as it is probably too small!\n\n"
-	       " scaleMat = [%lf\t%lf\t%lf]\n"
-	       "            [%lf\t%lf\t%lf]\n"
-	       "            [%lf\t%lf\t%lf]\n"
-	       "      eta = [%lf\t%lf\t%lf]\n"
-	       "            [%lf\t%lf\t%lf]\n"
-	       "            [%lf\t%lf\t%lf]\n",
-	       scaleMat(0, 0),scaleMat(0, 1),scaleMat(0, 2),
-	       scaleMat(1, 0),scaleMat(1, 1),scaleMat(1, 2),
-	       scaleMat(2, 0),scaleMat(2, 1),scaleMat(2, 2),
-	       eta(0, 0),eta(0, 1),eta(0, 2),
-	       eta(1, 0),eta(1, 1),eta(1, 2),
-	       eta(2, 0),eta(2, 1),eta(2, 2));
-      painCave.isFatal = 1;
-      simError();
-    } else if (offDiagMax > 0.01) {
-      sprintf( painCave.errMsg,
-	       "NPAT error: Attempting an off-diagonal Box scaling of more than 1 percent.\n"
-	       " Check your tauBarostat, as it is probably too small!\n\n"
-	       " scaleMat = [%lf\t%lf\t%lf]\n"
-	       "            [%lf\t%lf\t%lf]\n"
-	       "            [%lf\t%lf\t%lf]\n"
-	       "      eta = [%lf\t%lf\t%lf]\n"
-	       "            [%lf\t%lf\t%lf]\n"
-	       "            [%lf\t%lf\t%lf]\n",
-	       scaleMat(0, 0),scaleMat(0, 1),scaleMat(0, 2),
-	       scaleMat(1, 0),scaleMat(1, 1),scaleMat(1, 2),
-	       scaleMat(2, 0),scaleMat(2, 1),scaleMat(2, 2),
-	       eta(0, 0),eta(0, 1),eta(0, 2),
-	       eta(1, 0),eta(1, 1),eta(1, 2),
-	       eta(2, 0),eta(2, 1),eta(2, 2));
-      painCave.isFatal = 1;
-      simError();
-    } else {
-
-      Mat3x3d hmat = currentSnapshot_->getHmat();
-      hmat = hmat *scaleMat;
-      currentSnapshot_->setHmat(hmat);
-        
-    }
+    
+    scaleMat(2, 2) = exp(dt*eta(2, 2));
+    Mat3x3d hmat = currentSnapshot_->getHmat();
+    hmat = hmat *scaleMat;
+    currentSnapshot_->setHmat(hmat);
   }
 
   bool NPAT::etaConverged() {

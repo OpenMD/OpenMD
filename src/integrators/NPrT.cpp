@@ -50,14 +50,14 @@
 namespace oopse {
   NPrT::NPrT(SimInfo* info) : NPT(info) {
     Globals* simParams = info_->getSimParams();
-    if (!simParams->haveTargetStress()) {
+    if (!simParams->haveSurfaceTension()) {
       sprintf(painCave.errMsg,
               "If you use the NPT integrator, you must set tauBarostat.\n");
       painCave.severity = OOPSE_ERROR;
       painCave.isFatal = 1;
       simError();
     } else {
-      targetStress= simParams->getTargetStress();
+      surfaceTension= simParams->getSurfaceTension();
     }
 
   }
@@ -67,8 +67,8 @@ namespace oopse {
     double Axy = hmat(0,0) * hmat(1, 1);
     double sx = -hz * (press(0, 0) - targetPressure/OOPSEConstant::pressureConvert);
     double sy = -hz * (press(1, 1) - targetPressure/OOPSEConstant::pressureConvert);
-    eta(0,0) -= Axy * (sx - targetStress) / (NkBT*tb2);
-    eta(1,1) -= Axy * (sy - targetStress) / (NkBT*tb2);
+    eta(0,0) -= Axy * (sx - surfaceTension) / (NkBT*tb2);
+    eta(1,1) -= Axy * (sy - surfaceTension) / (NkBT*tb2);
     eta(2,2) += dt2 *  instaVol * (press(2, 2) - targetPressure/OOPSEConstant::pressureConvert) / (NkBT*tb2);
     oldEta = eta;  
   }
@@ -80,8 +80,8 @@ namespace oopse {
     prevEta = eta;
     double sx = -hz * (press(0, 0) - targetPressure/OOPSEConstant::pressureConvert);
     double sy = -hz * (press(1, 1) - targetPressure/OOPSEConstant::pressureConvert);
-    eta(0,0) -= Axy * (sx -targetStress) / (NkBT*tb2);
-    eta(1,1) -= Axy * (sy -targetStress) / (NkBT*tb2);
+    eta(0,0) = oldEta(0, 0) - Axy * (sx -surfaceTension) / (NkBT*tb2);
+    eta(1,1) = oldEta(1, 1) - Axy * (sy -surfaceTension) / (NkBT*tb2);
     eta(2,2) = oldEta(2, 2) + dt2 *  instaVol *
 	    (press(2, 2) - targetPressure/OOPSEConstant::pressureConvert) / (NkBT*tb2);
   }
@@ -238,29 +238,26 @@ namespace oopse {
     // of freedom).  
     fkBT = info_->getNdf()*OOPSEConstant::kB *targetTemp;    
     
-    double conservedQuantity;
-    double totalEnergy;
-    double thermostat_kinetic;
-    double thermostat_potential;
-    double barostat_kinetic;
-    double barostat_potential;
-    double trEta;
 
-    totalEnergy = thermo.getTotalE();
+    double totalEnergy = thermo.getTotalE();
 
-    thermostat_kinetic = fkBT * tt2 * chi * chi /(2.0 * OOPSEConstant::energyConvert);
+    double thermostat_kinetic = fkBT * tt2 * chi * chi /(2.0 * OOPSEConstant::energyConvert);
 
-    thermostat_potential = fkBT* integralOfChidt / OOPSEConstant::energyConvert;
+    double thermostat_potential = fkBT* integralOfChidt / OOPSEConstant::energyConvert;
 
     SquareMatrix<double, 3> tmp = eta.transpose() * eta;
-    trEta = tmp.trace();
+    double trEta = tmp.trace();
     
-    barostat_kinetic = NkBT * tb2 * trEta /(2.0 * OOPSEConstant::energyConvert);
+    double barostat_kinetic = NkBT * tb2 * trEta /(2.0 * OOPSEConstant::energyConvert);
 
-    barostat_potential = (targetPressure * thermo.getVolume() / OOPSEConstant::pressureConvert) /OOPSEConstant::energyConvert;
+    double barostat_potential = (targetPressure * thermo.getVolume() / OOPSEConstant::pressureConvert) /OOPSEConstant::energyConvert;
 
-    conservedQuantity = totalEnergy + thermostat_kinetic + thermostat_potential +
-      barostat_kinetic + barostat_potential;
+    Mat3x3d hmat = currentSnapshot_->getHmat();
+    double hz = hmat(2, 2);
+    double area = hmat(0,0) * hmat(1, 1);
+
+    double conservedQuantity = totalEnergy + thermostat_kinetic + thermostat_potential +
+      barostat_kinetic + barostat_potential - surfaceTension * area;
 
     return conservedQuantity;
 
