@@ -191,7 +191,7 @@ void Globals::initalize(){
   command_table.insert(CommandMapType::value_type("thermIntDistSpringConst", G_THERM_INT_DIST_SPRING));
   command_table.insert(CommandMapType::value_type("thermIntThetaSpringConst", G_THERM_INT_THETA_SPRING));
   command_table.insert(CommandMapType::value_type("thermIntOmegaSpringConst", G_THERM_INT_OMEGA_SPRING));
-  command_table.insert(CommandMapType::value_type("targetStress", G_SURFACETENSION));
+  command_table.insert(CommandMapType::value_type("surfaceTension", G_SURFACETENSION));
 
 
   strcpy( mixingRule,"standard");  //default mixing rules to standard.

@@ -49,6 +49,7 @@ namespace oopse {
     const double kB = 8.31451e-7;// boltzmann constant amu*Ang^2*fs^-2/K
     const double energyConvert = 4.184E-4; // convert kcal/mol -> (amu A^2)/fs^2
     const double pressureConvert = 1.63882576e8; // //converts amu*fs^-2*Ang^-1 -> atm
+    const double surfaceTensorConvert = 1.43936; // convert N/m to kcal/mol*Ang^-2
   }
 }
 #endif 
