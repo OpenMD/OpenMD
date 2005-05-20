@@ -67,8 +67,8 @@ namespace oopse {
     double Axy = hmat(0,0) * hmat(1, 1);
     double sx = -hz * (press(0, 0) - targetPressure/OOPSEConstant::pressureConvert);
     double sy = -hz * (press(1, 1) - targetPressure/OOPSEConstant::pressureConvert);
-    eta(0,0) -= Axy * (sx - surfaceTension) / (NkBT*tb2);
-    eta(1,1) -= Axy * (sy - surfaceTension) / (NkBT*tb2);
+    eta(0,0) -= dt2* Axy * (sx - surfaceTension) / (NkBT*tb2);
+    eta(1,1) -= dt2* Axy * (sy - surfaceTension) / (NkBT*tb2);
     eta(2,2) += dt2 *  instaVol * (press(2, 2) - targetPressure/OOPSEConstant::pressureConvert) / (NkBT*tb2);
     oldEta = eta;  
   }
@@ -80,8 +80,8 @@ namespace oopse {
     prevEta = eta;
     double sx = -hz * (press(0, 0) - targetPressure/OOPSEConstant::pressureConvert);
     double sy = -hz * (press(1, 1) - targetPressure/OOPSEConstant::pressureConvert);
-    eta(0,0) = oldEta(0, 0) - Axy * (sx -surfaceTension) / (NkBT*tb2);
-    eta(1,1) = oldEta(1, 1) - Axy * (sy -surfaceTension) / (NkBT*tb2);
+    eta(0,0) = oldEta(0, 0) - dt2 * Axy * (sx -surfaceTension) / (NkBT*tb2);
+    eta(1,1) = oldEta(1, 1) - dt2 * Axy * (sy -surfaceTension) / (NkBT*tb2);
     eta(2,2) = oldEta(2, 2) + dt2 *  instaVol *
 	    (press(2, 2) - targetPressure/OOPSEConstant::pressureConvert) / (NkBT*tb2);
   }
