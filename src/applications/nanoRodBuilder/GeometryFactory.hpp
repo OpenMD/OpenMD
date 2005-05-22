@@ -61,7 +61,7 @@ namespace oopse {
    class GeometryFactory {
 public:
       
-      typedef std::map<std::string, LatticeCreator*> CreatorMapType;
+      typedef std::map<std::string, GeometryCreator*> CreatorMapType;
       typedef std::vector<std::string> IdentVectorType;
       typedef std::vector<std::string>::iterator IdentVectorIterator;
       
@@ -103,7 +103,7 @@ public:
        * creating this concrete object
        * @param id the identification of the concrete object
        */
-      Lattice* createGeometry(const std::string& id);
+      Geometry* createGeometry(const std::string& id);
       
       /** 
          *  Returns all of the registed  type identifiers

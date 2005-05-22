@@ -122,16 +122,7 @@ int main(int argc, char *argv []) {
 	
   //get lattice type
   latticeType = UpperCase(args_info.latticetype_arg);
-  
-  
-  simpleLat = LatticeFactory::getInstance()->createLattice(latticeType);
-  if (simpleLat == NULL) {
-    sprintf(painCave.errMsg, "Lattice Factory can not create %s lattice\n",
-            latticeType.c_str());
-    painCave.isFatal = 1;
-    simError();
-  }	   
-  
+    
   //get input file name
   if (args_info.inputs_num)
     inputFileName = args_info.inputs[0];

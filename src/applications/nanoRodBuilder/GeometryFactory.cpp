@@ -43,8 +43,8 @@
  * such damages.
  */
 
-#include "nanoRodBuilder/GeometryFactory.hpp"
-#include "nanoRodBuilder/GeometryCreator.hpp"
+#include "GeometryFactory.hpp"
+#include "GeometryCreator.hpp"
 
 namespace oopse{
    

@@ -231,7 +231,8 @@ namespace oopse {
       return new StatWriter(info_->getStatFileName(), mask);
     }
 
-    if (simParams->havePrintPresureTensor() && simParams->getPrintPressureTensor()){
+    if (simParams->havePrintPressureTensor() && simParams->getPrintPressureTensor()){
+       StatsBitSet mask;
         mask.set(Stats::TIME);
         mask.set(Stats::TOTAL_ENERGY);
         mask.set(Stats::POTENTIAL_ENERGY);
