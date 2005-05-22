@@ -227,6 +227,12 @@ namespace oopse {
     stat[Stats::PRESSURE] = getPressure();
     stat[Stats::VOLUME] = getVolume();      
 
+    Mat3x3d tensor =getPressureTensor();
+    stat[Stats::PRESSURE_TENSOR_X] = tensor(0, 0);      
+    stat[Stats::PRESSURE_TENSOR_Y] = tensor(1, 1);      
+    stat[Stats::PRESSURE_TENSOR_Z] = tensor(2, 2);      
+
+
     /**@todo need refactorying*/
     //Conserved Quantity is set by integrator and time is set by setTime
     

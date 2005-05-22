@@ -230,7 +230,22 @@ namespace oopse {
       mask.set(Stats::VHARM);
       return new StatWriter(info_->getStatFileName(), mask);
     }
-  
+
+    if (simParams->havePrintPresureTensor() && simParams->getPrintPressureTensor()){
+        mask.set(Stats::TIME);
+        mask.set(Stats::TOTAL_ENERGY);
+        mask.set(Stats::POTENTIAL_ENERGY);
+        mask.set(Stats::KINETIC_ENERGY);
+        mask.set(Stats::TEMPERATURE);
+        mask.set(Stats::PRESSURE);
+        mask.set(Stats::VOLUME);
+        mask.set(Stats::CONSERVED_QUANTITY);
+        mask.set(Stats::PRESSURE_TENSOR_X);
+        mask.set(Stats::PRESSURE_TENSOR_Y);
+        mask.set(Stats::PRESSURE_TENSOR_Z);
+        return new StatWriter(info_->getStatFileName(), mask);
+    }
+    
     return new StatWriter(info_->getStatFileName());
   }
 

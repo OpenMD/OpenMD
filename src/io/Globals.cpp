@@ -117,6 +117,7 @@
 #define G_THERM_INT_THETA_SPRING 55
 #define G_THERM_INT_OMEGA_SPRING 56
 #define G_SURFACETENSION 57
+#define G_PRINTPREESURETENSOR   58
 
 Globals::Globals(){
   initalize();
@@ -192,6 +193,7 @@ void Globals::initalize(){
   command_table.insert(CommandMapType::value_type("thermIntThetaSpringConst", G_THERM_INT_THETA_SPRING));
   command_table.insert(CommandMapType::value_type("thermIntOmegaSpringConst", G_THERM_INT_OMEGA_SPRING));
   command_table.insert(CommandMapType::value_type("surfaceTension", G_SURFACETENSION));
+  command_table.insert(CommandMapType::value_type("printPressureTensor", G_PRINTPREESURETENSOR));
 
 
   strcpy( mixingRule,"standard");  //default mixing rules to standard.
@@ -255,6 +257,7 @@ void Globals::initalize(){
   have_theta_spring_constant = 0;
   have_omega_spring_constant = 0;
   have_surface_tension = 0;
+  have_print_pressure_tensor = 0;
 }
 
 int Globals::newComponent( event* the_event ){
@@ -1870,6 +1873,29 @@ int Globals::globalAssign( event* the_event ){
           break;
         }
         break;
+
+    case G_PRINTPREESURETENSOR:
+          if( the_type == STRING ){
+        
+        if( !strcasecmp( "true", the_event->evt.asmt.rhs.sval )) {
+            have_print_pressure_tensor= 1;
+            print_pressure_tensor = 1;
+        } else if( !strcasecmp( "false", the_event->evt.asmt.rhs.sval )) {
+            have_print_pressure_tensor= 1;
+            print_pressure_tensor = 0;
+        } else{
+          the_event->err_msg = 
+            strdup( "Error in parsing meta-data file!\n\tprintPressureTensor was not \"true\" or \"false\".\n" );
+          return 0;
+        }
+        return 1;
+          }
+          
+          the_event->err_msg = 
+        strdup( "Error in parsing meta-data file!\n\tprintPressureTensor was not \"true\" or \"false\".\n" );
+          return 0;
+          break;
+
         
 
       
