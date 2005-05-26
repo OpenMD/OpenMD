@@ -50,10 +50,13 @@
 #include "utils/simError.h"
 
 #include "applications/staticProps/StaticPropsCmd.h"
+#include "applications/staticProps/StaticAnalyser.hpp"
 #include "applications/staticProps/GofR.hpp"
 #include "applications/staticProps/GofRAngle.hpp"
 #include "applications/staticProps/GofAngle2.hpp"
 #include "applications/staticProps/GofXyz.hpp"
+#include "applications/staticProps/P2OrderParameter.hpp"
+
 
 using namespace oopse;
 
@@ -121,18 +124,18 @@ int main(int argc, char* argv[]){
     maxLen = std::min(std::min(hmat(0, 0), hmat(1, 1)), hmat(2, 2)) /2.0;        
   }    
 
-  RadialDistrFunc* rdf;
+  StaticAnalyser* analyser;
   if (args_info.gofr_given){
-    rdf= new GofR(info, dumpFileName, sele1, sele2, maxLen, args_info.nrbins_arg);        
+    analyser= new GofR(info, dumpFileName, sele1, sele2, maxLen, args_info.nrbins_arg);        
   } else if (args_info.r_theta_given) {
-    rdf  = new GofRTheta(info, dumpFileName, sele1, sele2, maxLen, args_info.nrbins_arg, args_info.nanglebins_arg);
+    analyser  = new GofRTheta(info, dumpFileName, sele1, sele2, maxLen, args_info.nrbins_arg, args_info.nanglebins_arg);
   } else if (args_info.r_omega_given) {
-    rdf  = new GofROmega(info, dumpFileName, sele1, sele2, maxLen, args_info.nrbins_arg, args_info.nanglebins_arg);
+    analyser  = new GofROmega(info, dumpFileName, sele1, sele2, maxLen, args_info.nrbins_arg, args_info.nanglebins_arg);
   } else if (args_info.theta_omega_given) {
-    rdf  = new GofAngle2(info, dumpFileName, sele1, sele2, args_info.nanglebins_arg);
+    analyser  = new GofAngle2(info, dumpFileName, sele1, sele2, args_info.nanglebins_arg);
   } else if (args_info.gxyz_given) {
     if (args_info.refsele_given) {
-      rdf= new GofXyz(info, dumpFileName, sele1, sele2,args_info.refsele_arg, maxLen, args_info.nrbins_arg);        
+      analyser= new GofXyz(info, dumpFileName, sele1, sele2,args_info.refsele_arg, maxLen, args_info.nrbins_arg);        
     } else {
       sprintf( painCave.errMsg,
                "--refsele must set when --gxyz is used");
@@ -140,18 +143,20 @@ int main(int argc, char* argv[]){
       painCave.isFatal = 1;
       simError();  
     }
+  } else if (args_info.p2_given) {
+      analyser  = new P2OrderParameter(info, dumpFileName, sele1, sele2);
   }
     
   if (args_info.output_given) {
-    rdf->setOutputName(args_info.output_arg);
+    analyser->setOutputName(args_info.output_arg);
   }
   if (args_info.step_given) {
-    rdf->setStep(args_info.step_arg);
+    analyser->setStep(args_info.step_arg);
   }
 
-  rdf->process();
+  analyser->process();
 
-  delete rdf;    
+  delete analyser;    
   delete info;
 
   return 0;   

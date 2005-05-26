@@ -38,70 +38,41 @@
  * University of Notre Dame has been advised of the possibility of
  * such damages.
  */
-#ifndef APPLICATIONS_STATICPROPS_RADIALDISTRFUNC_HPP
-#define APPLICATIONS_STATICPROPS_RADIALDISTRFUNC_HPP
-
-#include <string>
-#include <vector>
-
-#include "selection/SelectionEvaluator.hpp"
-#include "selection/SelectionManager.hpp"
-#include "utils/NumericConstant.hpp"
-#include "applications/staticProps/StaticAnalyser.hpp"
+#ifndef APPLICATIONS_STATICPROPS_STATICANALYSER_HPP
+#define APPLICATIONS_STATICPROPS_STATICANALYSER_HPP
 
 namespace oopse {
+#include <string>
+#include "brains/SimInfo.hpp"
 
-  /**
-   * @class RadialDistrFunc
-   * @brief Radial Distribution Function
-   */
-  class RadialDistrFunc : public StaticAnalyser {
-  public:
-    RadialDistrFunc(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2);
+class StaticAnalyser{
+    public:
+        StaticAnalyser(SimInfo* info, const std::string& filename) : info_(info), currentSnapshot_(NULL), dumpFilename_(filename), step_(1) {}
+        virtual ~StaticAnalyser() {}
+        virtual void process()=0;
 
-    virtual ~RadialDistrFunc() {}
+        void setOutputName(const std::string& filename) {
+          outputFilename_ = filename;
+        }
         
-    void process();        
-
-
+        const std::string& getOutputFileName() const {
+          return outputFilename_;
+        }
         
-  protected:
+        void setStep(int step) {
+          assert(step > 0);
+          step_ =step;    
+        }
 
-    virtual void preProcess() {}
-    virtual void postProcess() {}
+        int getStep() { return step_;}
 
-    int getNPairs() { return nPairs_;}
-        
-    Snapshot* currentSnapshot_;
-
-    std::string selectionScript1_;
-    std::string selectionScript2_;
-    int nProcessed_;
-    SelectionManager seleMan1_;
-    SelectionManager seleMan2_;
-        
-  private:
-
-    virtual void initalizeHistogram() {}
-    virtual void collectHistogram(StuntDouble* sd1, StuntDouble* sd2) =0;
-    virtual void processHistogram() {}
-    void processNonOverlapping(SelectionManager& sman1, SelectionManager& sman2);
-    void processOverlapping(SelectionManager& sman);
-
-    virtual void validateSelection1(SelectionManager& sman) {}
-    virtual void validateSelection2(SelectionManager& sman) {}
-    virtual void writeRdf() = 0;
-
-        
-    SelectionEvaluator evaluator1_;
-    SelectionEvaluator evaluator2_;
-
-    SelectionManager sele1_minus_common_;
-    SelectionManager sele2_minus_common_;
-    SelectionManager common_;        
-    int nPairs_;
-  };
-
+    protected:
+        SimInfo* info_;
+        Snapshot* currentSnapshot_;
+        std::string dumpFilename_;        
+        std::string outputFilename_;
+        int step_;        
+};
 
 }
 #endif

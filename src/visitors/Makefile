@@ -6,7 +6,8 @@ Source    = \
 	OtherVisitor.cpp \
 	RigidBodyVisitor.cpp \
 	ZconsVisitor.cpp \
-	LipidTransVisitor.cpp
+	LipidTransVisitor.cpp \
+	AtomNameVisitor.cpp
 
 RmiSource =
 

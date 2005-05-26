@@ -46,8 +46,8 @@
 #include "primitives/Molecule.hpp"
 namespace oopse {
 
-  RadialDistrFunc::        RadialDistrFunc(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2)
-    : info_(info), currentSnapshot_(NULL), dumpFilename_(filename), step_(1), 
+  RadialDistrFunc::RadialDistrFunc(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2)
+    : StaticAnalyser(info, filename), 
       selectionScript1_(sele1), selectionScript2_(sele2), evaluator1_(info), evaluator2_(info), 
       seleMan1_(info), seleMan2_(info), common_(info), sele1_minus_common_(info), sele2_minus_common_(info){
           

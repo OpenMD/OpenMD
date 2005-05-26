@@ -77,10 +77,18 @@ namespace oopse {
     Snapshot* currSnapshot = info->getSnapshotManager()->getCurrentSnapshot();
     
     for( atomInfo = atomData->beginAtomInfo(i); atomInfo; atomInfo = atomData->nextAtomInfo(i) ) {
-      currSnapshot->wrapVector(atomInfo->pos);
+      Vector3d newPos = atomInfo->pos - origin_;
+      currSnapshot->wrapVector(newPos);
+      atomInfo->pos = newPos;
     }
   }
 
+  void WrappingVisitor::update() {
+    if (useCom_){
+      origin_ = info->getCom();
+    }
+  }
+  
   const std::string WrappingVisitor::toString() {
     char        buffer[65535];
     std::string result;

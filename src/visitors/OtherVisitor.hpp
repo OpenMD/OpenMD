@@ -58,7 +58,7 @@ namespace oopse {
 
   class WrappingVisitor : public BaseVisitor{
   public:
-    WrappingVisitor(SimInfo* info) : BaseVisitor() {
+    WrappingVisitor(SimInfo* info, bool useCom = true) : BaseVisitor(), useCom_(useCom) {
       this->info = info;
       visitorName = "WrappingVisitor";
     }
@@ -68,9 +68,13 @@ namespace oopse {
 
     virtual const std::string toString();
 
-  protected:
+    virtual void update();
+    
+  private:
     void internalVisit(StuntDouble* sd);
-    SimInfo* info;
+    SimInfo* info;    
+    Vector3d origin_;
+    bool useCom_;
   };
 
 

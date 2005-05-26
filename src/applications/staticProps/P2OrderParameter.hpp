@@ -38,70 +38,42 @@
  * University of Notre Dame has been advised of the possibility of
  * such damages.
  */
-#ifndef APPLICATIONS_STATICPROPS_RADIALDISTRFUNC_HPP
-#define APPLICATIONS_STATICPROPS_RADIALDISTRFUNC_HPP
-
-#include <string>
-#include <vector>
-
+#ifndef APPLICATIONS_STATICPROPS_P2ORDERPARAMETER_HPP
+#define APPLICATIONS_STATICPROPS_P2ORDERPARAMETER_HPP
 #include "selection/SelectionEvaluator.hpp"
 #include "selection/SelectionManager.hpp"
-#include "utils/NumericConstant.hpp"
 #include "applications/staticProps/StaticAnalyser.hpp"
 
 namespace oopse {
 
-  /**
-   * @class RadialDistrFunc
-   * @brief Radial Distribution Function
-   */
-  class RadialDistrFunc : public StaticAnalyser {
-  public:
-    RadialDistrFunc(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2);
+    struct OrderParam{
+        double p2;
+        Vector3d director;
+        double angle;
+    };
+    class P2OrderParameter : public StaticAnalyser{
+        public:
+            P2OrderParameter(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2);
+            virtual void process();
 
-    virtual ~RadialDistrFunc() {}
-        
-    void process();        
+        private:
+            void writeOrderParam();
 
-
-        
-  protected:
-
-    virtual void preProcess() {}
-    virtual void postProcess() {}
-
-    int getNPairs() { return nPairs_;}
-        
-    Snapshot* currentSnapshot_;
-
-    std::string selectionScript1_;
-    std::string selectionScript2_;
-    int nProcessed_;
-    SelectionManager seleMan1_;
-    SelectionManager seleMan2_;
-        
-  private:
-
-    virtual void initalizeHistogram() {}
-    virtual void collectHistogram(StuntDouble* sd1, StuntDouble* sd2) =0;
-    virtual void processHistogram() {}
-    void processNonOverlapping(SelectionManager& sman1, SelectionManager& sman2);
-    void processOverlapping(SelectionManager& sman);
-
-    virtual void validateSelection1(SelectionManager& sman) {}
-    virtual void validateSelection2(SelectionManager& sman) {}
-    virtual void writeRdf() = 0;
-
-        
-    SelectionEvaluator evaluator1_;
-    SelectionEvaluator evaluator2_;
-
-    SelectionManager sele1_minus_common_;
-    SelectionManager sele2_minus_common_;
-    SelectionManager common_;        
-    int nPairs_;
-  };
-
-
+            SimInfo* info_;
+            Snapshot* currentSnapshot_;
+            std::string dumpFilename_;
+            std::string outputFilename_;
+            std::string selectionScript1_;
+            std::string selectionScript2_;
+            SelectionManager seleMan1_;
+            SelectionManager seleMan2_;       
+            SelectionEvaluator evaluator1_;
+            SelectionEvaluator evaluator2_;
+            std::vector<std::pair<StuntDouble*, StuntDouble*> > sdPairs_;  /**< each pair is used to define a vector, vector = first - second */
+            std::vector<OrderParam> orderParams_;
+            
+    };
 }
+
 #endif
+

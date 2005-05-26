@@ -57,6 +57,7 @@
 #include "selection/SelectionEvaluator.hpp"
 #include "selection/SelectionManager.hpp"
 #include "visitors/LipidTransVisitor.hpp"
+#include "visitors/AtomNameVisitor.hpp"
 
 using namespace oopse;
 
@@ -123,6 +124,12 @@ int main(int argc, char* argv[]){
   if(args_info.watertype_flag){
     WaterTypeVisitor* waterTypeVisitor = new WaterTypeVisitor;
     compositeVisitor->addVisitor(waterTypeVisitor, 600);
+  }
+
+  if (args_info.basetype_flag) {
+      AtomNameVisitor* atomNameVisitor = new AtomNameVisitor(info);
+      compositeVisitor->addVisitor(atomNameVisitor, 550);
+
   }
   
   //create ZconsVisitor
