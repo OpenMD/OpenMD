@@ -46,23 +46,22 @@
 
 namespace oopse {
 
-    struct OrderParam{
-        double p2;
-        Vector3d director;
-        double angle;
-    };
     class P2OrderParameter : public StaticAnalyser{
         public:
             P2OrderParameter(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2);
             virtual void process();
 
         private:
-            void writeOrderParam();
 
-            SimInfo* info_;
+            struct OrderParam{
+                double p2;
+                Vector3d director;
+                double angle;
+            };            
+            void writeP2();
+
             Snapshot* currentSnapshot_;
-            std::string dumpFilename_;
-            std::string outputFilename_;
+
             std::string selectionScript1_;
             std::string selectionScript2_;
             SelectionManager seleMan1_;

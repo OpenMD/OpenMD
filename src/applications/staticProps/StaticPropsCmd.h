@@ -30,9 +30,13 @@ struct gengetopt_args_info
   int nrbins_arg;	/* number of bins for distance (default='100').  */
   int nanglebins_arg;	/* number of bins for cos(angle) (default='50').  */
   double length_arg;	/* maximum length (Defaults to 1/2 smallest length of first frame).  */
-  char * sele1_arg;	/* select first stuntdouble set.  */
-  char * sele2_arg;	/* select second stuntdouble set.  */
+  char * sele1_arg;	/* select the first stuntdouble set.  */
+  char * sele2_arg;	/* select the second stuntdouble set.  */
+  char * sele3_arg;	/* select the third stuntdouble set.  */
   char * refsele_arg;	/* select reference (use and only use with --gxyz).  */
+  char * molname_arg;	/* molecule name.  */
+  int begin_arg;	/* begin interanl index.  */
+  int end_arg;	/* end internal index.  */
 
   int help_given ;	/* Whether help was given.  */
   int version_given ;	/* Whether version was given.  */
@@ -44,13 +48,18 @@ struct gengetopt_args_info
   int length_given ;	/* Whether length was given.  */
   int sele1_given ;	/* Whether sele1 was given.  */
   int sele2_given ;	/* Whether sele2 was given.  */
+  int sele3_given ;	/* Whether sele3 was given.  */
   int refsele_given ;	/* Whether refsele was given.  */
+  int molname_given ;	/* Whether molname was given.  */
+  int begin_given ;	/* Whether begin was given.  */
+  int end_given ;	/* Whether end was given.  */
   int gofr_given ;	/* Whether gofr was given.  */
   int r_theta_given ;	/* Whether r_theta was given.  */
   int r_omega_given ;	/* Whether r_omega was given.  */
   int theta_omega_given ;	/* Whether theta_omega was given.  */
   int gxyz_given ;	/* Whether gxyz was given.  */
   int p2_given ;	/* Whether p2 was given.  */
+  int scd_given ;	/* Whether scd was given.  */
 
 } ;
 

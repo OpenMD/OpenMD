@@ -43,7 +43,7 @@
 #include "utils/simError.h"
 #include "io/DumpReader.hpp"
 #include "primitives/Molecule.hpp"
-
+#include "utils/NumericConstant.hpp"
 namespace oopse {
 
 
@@ -112,7 +112,7 @@ void P2OrderParameter::process() {
   for (int i = 0; i < nFrames; i += step_) {
     reader.readFrame(i);
     currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
-    Mat3x3d orderTensor(0.0);
+
     
     for (mol = info_->beginMolecule(mi); mol != NULL; mol = info_->nextMolecule(mi)) {
         //change the positions of atoms which belong to the rigidbodies
@@ -122,6 +122,7 @@ void P2OrderParameter::process() {
         
     }      
 
+      Mat3x3d orderTensor(0.0);
       for (std::vector<std::pair<StuntDouble*, StuntDouble*> >::iterator j = sdPairs_.begin(); j != sdPairs_.end(); ++j) {
           Vector3d vec = j->first->getPos() - j->second->getPos();
           vec.normalize();
@@ -158,7 +159,7 @@ void P2OrderParameter::process() {
 
           angle += acos(dot(vec, director)) ;
       }
-      angle /= sdPairs_.size();
+      angle = angle / (sdPairs_.size() * NumericConstant::PI) * 180.0;
 
        OrderParam param;
        param.p2 = p2;
@@ -169,11 +170,11 @@ void P2OrderParameter::process() {
     
   }
 
-  writeOrderParam();
+  writeP2();
   
 }
 
-void P2OrderParameter::writeOrderParam() {
+void P2OrderParameter::writeP2() {
 
     std::ofstream os(getOutputFileName().c_str());
     os << "#radial distribution function\n";

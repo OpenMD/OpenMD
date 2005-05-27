@@ -7,6 +7,7 @@ Source    = \
         GofXyz.cpp \
         RadialDistrFunc.cpp \
 	P2OrderParameter.cpp \
+	SCDOrderParameter.cpp \
 	StaticPropsCmd.c \
 	StaticProps.cpp \
 	

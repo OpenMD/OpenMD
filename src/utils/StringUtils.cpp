@@ -178,7 +178,7 @@ namespace oopse {
     return 0;
   }
   
-  std::string OOPSE_itoa(int value, unsigned int base = 10) {    
+  std::string OOPSE_itoa(int value, unsigned int base) {    
     const char digitMap[] = "0123456789abcdef";	
     std::string buf;
 

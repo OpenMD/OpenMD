@@ -12,13 +12,18 @@ option	"step"		n	"process every n frame"					int	default="1"		no
 option	"nrbins"    	r       "number of bins for distance"				int	default="100"		no
 option	"nanglebins"	a	"number of bins for cos(angle)"				int	default="50"		no 
 option	"length"	l	"maximum length (Defaults to 1/2 smallest length of first frame)"	double	no   
-option	"sele1"		-	"select first stuntdouble set"	string	typestr="selection script"	no
-option  "sele2"         -       "select second stuntdouble set" string  typestr="selection script"      no
-option  "refsele"     -       "select reference (use and only use with --gxyz)" string  typestr="selection script"     no
+option	"sele1"		-	"select the first stuntdouble set"	string	typestr="selection script"	no
+option  "sele2"         -       "select the second stuntdouble set" string  typestr="selection script"      no
+option  "sele3"         -       "select the third stuntdouble set" string  typestr="selection script"      no
+option  "refsele"       -       "select reference (use and only use with --gxyz)" string  typestr="selection script"     no
+option  "molname"       -       "molecule name" string       no
+option  "begin"         -       "begin interanl index"                                 int                  no
+option  "end"           -       "end internal index"                                 int                  no
 defgroup "staticProps" groupdesc=" an option of this group is required" yes
 groupoption "gofr" 	- "g(r)" group="staticProps"
 groupoption "r_theta" 	- "g(r, cos(theta))" group="staticProps"
 groupoption "r_omega" 	- "g(r, cos(omega))" group="staticProps"
 groupoption "theta_omega" - "g(cos(theta), cos(omega))" group="staticProps"
 groupoption "gxyz"	-  "g(x, y, z)" group="staticProps"
-groupoption "p2"      -  "p2 order parameter" group="staticProps"
+groupoption "p2"      -  "p2 order parameter (--sele1 and --sele2 must be specified)" group="staticProps"
+groupoption "scd"      -  "scd order parameter(either --sele1, --sele2, --sele3 are specified or --molname, --begin, --end are specified)" group="staticProps"

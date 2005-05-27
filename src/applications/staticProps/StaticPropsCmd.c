@@ -43,9 +43,13 @@ cmdline_parser_print_help (void)
   printf("  -r, --nrbins=INT                number of bins for distance  (default=`100')\n");
   printf("  -a, --nanglebins=INT            number of bins for cos(angle)  (default=\n                                    `50')\n");
   printf("  -l, --length=DOUBLE             maximum length (Defaults to 1/2 smallest \n                                    length of first frame)\n");
-  printf("      --sele1=selection script    select first stuntdouble set\n");
-  printf("      --sele2=selection script    select second stuntdouble set\n");
+  printf("      --sele1=selection script    select the first stuntdouble set\n");
+  printf("      --sele2=selection script    select the second stuntdouble set\n");
+  printf("      --sele3=selection script    select the third stuntdouble set\n");
   printf("      --refsele=selection script  select reference (use and only use with \n                                    --gxyz)\n");
+  printf("      --molname=STRING            molecule name\n");
+  printf("      --begin=INT                 begin interanl index\n");
+  printf("      --end=INT                   end internal index\n");
   printf("\n");
   printf(" Group: staticProps  an option of this group is required\n");
   printf("      --gofr                      g(r)\n");
@@ -53,7 +57,8 @@ cmdline_parser_print_help (void)
   printf("      --r_omega                   g(r, cos(omega))\n");
   printf("      --theta_omega               g(cos(theta), cos(omega))\n");
   printf("      --gxyz                      g(x, y, z)\n");
-  printf("      --p2                        p2 order parameter\n");
+  printf("      --p2                        p2 order parameter (--sele1 and --sele2 must \n                                    be specified)\n");
+  printf("      --scd                       scd order parameter(either --sele1, --sele2, \n                                    --sele3 are specified or --molname, \n                                    --begin, --end are specified)\n");
 }
 
 
@@ -89,13 +94,18 @@ cmdline_parser (int argc, char * const *argv, struct gengetopt_args_info *args_i
   args_info->length_given = 0 ;
   args_info->sele1_given = 0 ;
   args_info->sele2_given = 0 ;
+  args_info->sele3_given = 0 ;
   args_info->refsele_given = 0 ;
+  args_info->molname_given = 0 ;
+  args_info->begin_given = 0 ;
+  args_info->end_given = 0 ;
   args_info->gofr_given = 0 ;
   args_info->r_theta_given = 0 ;
   args_info->r_omega_given = 0 ;
   args_info->theta_omega_given = 0 ;
   args_info->gxyz_given = 0 ;
   args_info->p2_given = 0 ;
+  args_info->scd_given = 0 ;
 #define clear_args() { \
   args_info->input_arg = NULL; \
   args_info->output_arg = NULL; \
@@ -104,7 +114,9 @@ cmdline_parser (int argc, char * const *argv, struct gengetopt_args_info *args_i
   args_info->nanglebins_arg = 50 ;\
   args_info->sele1_arg = NULL; \
   args_info->sele2_arg = NULL; \
+  args_info->sele3_arg = NULL; \
   args_info->refsele_arg = NULL; \
+  args_info->molname_arg = NULL; \
 }
 
   clear_args();
@@ -130,13 +142,18 @@ cmdline_parser (int argc, char * const *argv, struct gengetopt_args_info *args_i
         { "length",	1, NULL, 'l' },
         { "sele1",	1, NULL, 0 },
         { "sele2",	1, NULL, 0 },
+        { "sele3",	1, NULL, 0 },
         { "refsele",	1, NULL, 0 },
+        { "molname",	1, NULL, 0 },
+        { "begin",	1, NULL, 0 },
+        { "end",	1, NULL, 0 },
         { "gofr",	0, NULL, 0 },
         { "r_theta",	0, NULL, 0 },
         { "r_omega",	0, NULL, 0 },
         { "theta_omega",	0, NULL, 0 },
         { "gxyz",	0, NULL, 0 },
         { "p2",	0, NULL, 0 },
+        { "scd",	0, NULL, 0 },
         { NULL,	0, NULL, 0 }
       };
 
@@ -225,7 +242,7 @@ cmdline_parser (int argc, char * const *argv, struct gengetopt_args_info *args_i
 
 
         case 0:	/* Long option with no short option */
-          /* select first stuntdouble set.  */
+          /* select the first stuntdouble set.  */
           if (strcmp (long_options[option_index].name, "sele1") == 0)
           {
             if (args_info->sele1_given)
@@ -239,7 +256,7 @@ cmdline_parser (int argc, char * const *argv, struct gengetopt_args_info *args_i
             break;
           }
           
-          /* select second stuntdouble set.  */
+          /* select the second stuntdouble set.  */
           else if (strcmp (long_options[option_index].name, "sele2") == 0)
           {
             if (args_info->sele2_given)
@@ -250,6 +267,20 @@ cmdline_parser (int argc, char * const *argv, struct gengetopt_args_info *args_i
               }
             args_info->sele2_given = 1;
             args_info->sele2_arg = gengetopt_strdup (optarg);
+            break;
+          }
+          
+          /* select the third stuntdouble set.  */
+          else if (strcmp (long_options[option_index].name, "sele3") == 0)
+          {
+            if (args_info->sele3_given)
+              {
+                fprintf (stderr, "%s: `--sele3' option given more than once\n", CMDLINE_PARSER_PACKAGE);
+                clear_args ();
+                exit (EXIT_FAILURE);
+              }
+            args_info->sele3_given = 1;
+            args_info->sele3_arg = gengetopt_strdup (optarg);
             break;
           }
           
@@ -264,6 +295,48 @@ cmdline_parser (int argc, char * const *argv, struct gengetopt_args_info *args_i
               }
             args_info->refsele_given = 1;
             args_info->refsele_arg = gengetopt_strdup (optarg);
+            break;
+          }
+          
+          /* molecule name.  */
+          else if (strcmp (long_options[option_index].name, "molname") == 0)
+          {
+            if (args_info->molname_given)
+              {
+                fprintf (stderr, "%s: `--molname' option given more than once\n", CMDLINE_PARSER_PACKAGE);
+                clear_args ();
+                exit (EXIT_FAILURE);
+              }
+            args_info->molname_given = 1;
+            args_info->molname_arg = gengetopt_strdup (optarg);
+            break;
+          }
+          
+          /* begin interanl index.  */
+          else if (strcmp (long_options[option_index].name, "begin") == 0)
+          {
+            if (args_info->begin_given)
+              {
+                fprintf (stderr, "%s: `--begin' option given more than once\n", CMDLINE_PARSER_PACKAGE);
+                clear_args ();
+                exit (EXIT_FAILURE);
+              }
+            args_info->begin_given = 1;
+            args_info->begin_arg = strtol (optarg,&stop_char,0);
+            break;
+          }
+          
+          /* end internal index.  */
+          else if (strcmp (long_options[option_index].name, "end") == 0)
+          {
+            if (args_info->end_given)
+              {
+                fprintf (stderr, "%s: `--end' option given more than once\n", CMDLINE_PARSER_PACKAGE);
+                clear_args ();
+                exit (EXIT_FAILURE);
+              }
+            args_info->end_given = 1;
+            args_info->end_arg = strtol (optarg,&stop_char,0);
             break;
           }
           
@@ -337,7 +410,7 @@ cmdline_parser (int argc, char * const *argv, struct gengetopt_args_info *args_i
             break;
           }
           
-          /* p2 order parameter.  */
+          /* p2 order parameter (--sele1 and --sele2 must be specified).  */
           else if (strcmp (long_options[option_index].name, "p2") == 0)
           {
             if (args_info->p2_given)
@@ -347,6 +420,20 @@ cmdline_parser (int argc, char * const *argv, struct gengetopt_args_info *args_i
                 exit (EXIT_FAILURE);
               }
             args_info->p2_given = 1; staticProps_group_counter += 1;
+          
+            break;
+          }
+          
+          /* scd order parameter(either --sele1, --sele2, --sele3 are specified or --molname, --begin, --end are specified).  */
+          else if (strcmp (long_options[option_index].name, "scd") == 0)
+          {
+            if (args_info->scd_given)
+              {
+                fprintf (stderr, "%s: `--scd' option given more than once\n", CMDLINE_PARSER_PACKAGE);
+                clear_args ();
+                exit (EXIT_FAILURE);
+              }
+            args_info->scd_given = 1; staticProps_group_counter += 1;
           
             break;
           }

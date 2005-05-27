@@ -128,7 +128,7 @@ namespace oopse {
     return result;
   }
   
-  std::string OOPSE_itoa(int value, unsigned int base);
+  std::string OOPSE_itoa(int value, unsigned int base = 10);
   
   /**@todo need implementation */
   std::string getPrefix(const std::string& str);

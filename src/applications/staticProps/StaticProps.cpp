@@ -56,7 +56,7 @@
 #include "applications/staticProps/GofAngle2.hpp"
 #include "applications/staticProps/GofXyz.hpp"
 #include "applications/staticProps/P2OrderParameter.hpp"
-
+#include "applications/staticProps/SCDOrderParameter.hpp"
 
 using namespace oopse;
 
@@ -112,6 +112,31 @@ int main(int argc, char* argv[]){
     }
   }
 
+  bool batchMode;
+  if (args_info.scd_given){
+    if (args_info.sele1_given && args_info.sele2_given && args_info.sele3_given) {
+        batchMode = false;
+    } else if (args_info.molname_given && args_info.begin_given && args_info.end_given) {
+        if (args_info.begin_arg < 0 || args_info.end_arg < 0 || args_info.begin_arg > args_info.end_arg-2) {
+            sprintf( painCave.errMsg,
+                     "below conditions are not satisfied:\n"
+                     "0 <= begin && 0<= end && begin <= end-2\n");
+            painCave.severity = OOPSE_ERROR;
+            painCave.isFatal = 1;
+            simError();                    
+        }
+        batchMode = true;        
+    } else{
+        sprintf( painCave.errMsg,
+                 "either --sele1, --sele2, --sele3 are specified,"
+                 " or --molname, --begin, --end are specified\n");
+        painCave.severity = OOPSE_ERROR;
+        painCave.isFatal = 1;
+        simError();        
+    
+    }
+  }
+
   //parse md file and set up the system
   SimCreator creator;
   SimInfo* info = creator.createSim(mdFileName);
@@ -145,6 +170,14 @@ int main(int argc, char* argv[]){
     }
   } else if (args_info.p2_given) {
       analyser  = new P2OrderParameter(info, dumpFileName, sele1, sele2);
+  } else if (args_info.scd_given) {
+      if (batchMode) {
+          analyser  = new SCDOrderParameter(info, dumpFileName, args_info.molname_arg, 
+            args_info.begin_arg, args_info.end_arg);
+      } else{
+          std::string sele3 = args_info.sele3_arg;
+          analyser  = new SCDOrderParameter(info, dumpFileName, sele1, sele2, sele3);
+      }
   }
     
   if (args_info.output_given) {
