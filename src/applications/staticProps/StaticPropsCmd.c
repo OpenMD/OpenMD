@@ -59,6 +59,7 @@ cmdline_parser_print_help (void)
   printf("      --gxyz                      g(x, y, z)\n");
   printf("      --p2                        p2 order parameter (--sele1 and --sele2 must \n                                    be specified)\n");
   printf("      --scd                       scd order parameter(either --sele1, --sele2, \n                                    --sele3 are specified or --molname, \n                                    --begin, --end are specified)\n");
+  printf("      --density                   density plot (--sele1 must be specified)\n");
 }
 
 
@@ -106,6 +107,7 @@ cmdline_parser (int argc, char * const *argv, struct gengetopt_args_info *args_i
   args_info->gxyz_given = 0 ;
   args_info->p2_given = 0 ;
   args_info->scd_given = 0 ;
+  args_info->density_given = 0 ;
 #define clear_args() { \
   args_info->input_arg = NULL; \
   args_info->output_arg = NULL; \
@@ -154,6 +156,7 @@ cmdline_parser (int argc, char * const *argv, struct gengetopt_args_info *args_i
         { "gxyz",	0, NULL, 0 },
         { "p2",	0, NULL, 0 },
         { "scd",	0, NULL, 0 },
+        { "density",	0, NULL, 0 },
         { NULL,	0, NULL, 0 }
       };
 
@@ -434,6 +437,20 @@ cmdline_parser (int argc, char * const *argv, struct gengetopt_args_info *args_i
                 exit (EXIT_FAILURE);
               }
             args_info->scd_given = 1; staticProps_group_counter += 1;
+          
+            break;
+          }
+          
+          /* density plot (--sele1 must be specified).  */
+          else if (strcmp (long_options[option_index].name, "density") == 0)
+          {
+            if (args_info->density_given)
+              {
+                fprintf (stderr, "%s: `--density' option given more than once\n", CMDLINE_PARSER_PACKAGE);
+                clear_args ();
+                exit (EXIT_FAILURE);
+              }
+            args_info->density_given = 1; staticProps_group_counter += 1;
           
             break;
           }

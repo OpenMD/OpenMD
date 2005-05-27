@@ -57,6 +57,7 @@
 #include "applications/staticProps/GofXyz.hpp"
 #include "applications/staticProps/P2OrderParameter.hpp"
 #include "applications/staticProps/SCDOrderParameter.hpp"
+#include "applications/staticProps/DensityPlot.hpp"
 
 using namespace oopse;
 
@@ -88,7 +89,7 @@ int main(int argc, char* argv[]){
     char*  sele1Env= getenv("OOPSE_SELE1");
     if (sele1Env) {
       sele1 = sele1Env;
-    }else {
+    }else if (!args_info.scd_given) {
       sprintf( painCave.errMsg,
                "neither --sele1 option nor $OOPSE_SELE1 is set");
       painCave.severity = OOPSE_ERROR;
@@ -103,7 +104,7 @@ int main(int argc, char* argv[]){
     char* sele2Env = getenv("OOPSE_SELE2");
     if (sele2Env) {
       sele2 = sele2Env;            
-    } else {
+    } else if(!args_info.scd_given && !args_info.density_given)  {
       sprintf( painCave.errMsg,
                "neither --sele2 option nor $OOPSE_SELE2 is set");
       painCave.severity = OOPSE_ERROR;
@@ -178,6 +179,8 @@ int main(int argc, char* argv[]){
           std::string sele3 = args_info.sele3_arg;
           analyser  = new SCDOrderParameter(info, dumpFileName, sele1, sele2, sele3);
       }
+  }else if (args_info.density_given) {
+      analyser= new DensityPlot(info, dumpFileName, sele1, maxLen, args_info.nrbins_arg);  
   }
     
   if (args_info.output_given) {

@@ -125,6 +125,7 @@ void P2OrderParameter::process() {
       Mat3x3d orderTensor(0.0);
       for (std::vector<std::pair<StuntDouble*, StuntDouble*> >::iterator j = sdPairs_.begin(); j != sdPairs_.end(); ++j) {
           Vector3d vec = j->first->getPos() - j->second->getPos();
+          currentSnapshot_->wrapVector(vec);
           vec.normalize();
           orderTensor +=outProduct(vec, vec);
       }
@@ -155,6 +156,7 @@ void P2OrderParameter::process() {
       double angle = 0.0;
       for (std::vector<std::pair<StuntDouble*, StuntDouble*> >::iterator j = sdPairs_.begin(); j != sdPairs_.end(); ++j) {
           Vector3d vec = j->first->getPos() - j->second->getPos();
+          currentSnapshot_->wrapVector(vec);
           vec.normalize();
 
           angle += acos(dot(vec, director)) ;

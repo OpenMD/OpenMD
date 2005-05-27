@@ -8,6 +8,7 @@ Source    = \
         RadialDistrFunc.cpp \
 	P2OrderParameter.cpp \
 	SCDOrderParameter.cpp \
+	DensityPlot.cpp \
 	StaticPropsCmd.c \
 	StaticProps.cpp \
 	
