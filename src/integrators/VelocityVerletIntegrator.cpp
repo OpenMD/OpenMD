@@ -105,7 +105,10 @@ namespace oopse {
     
     currSample = sampleTime + currentSnapshot_->getTime();
     currStatus =  statusTime + currentSnapshot_->getTime();;
-    currThermal = thermalTime +  + currentSnapshot_->getTime();
+    currThermal = thermalTime + currentSnapshot_->getTime();
+    if (needReset) {
+      currReset = resetTime + currentSnapshot_->getTime();
+    }
     needPotential = false;
     needStress = false;       
     
@@ -175,7 +178,11 @@ namespace oopse {
       needStress = false;
       currStatus += statusTime;
     }
-  
+
+      if (needReset && currentSnapshot_->getTime() >= currReset) {    
+        resetIntegrator();
+        currReset += resetTime;
+      }
   
   }
 

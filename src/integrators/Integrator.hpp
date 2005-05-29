@@ -110,7 +110,7 @@ namespace oopse {
     ForceManager* forceMan_;
     bool needPotential;
     bool needStress;
-        
+    bool needReset;    
     Velocitizer* velocitizer_;
     bool needVelocityScaling;
     double targetScalingTemp;
@@ -124,6 +124,7 @@ namespace oopse {
     double sampleTime;
     double statusTime;
     double thermalTime;
+    double resetTime;
     double dt;
 
     Snapshot* currentSnapshot_; //During the integration, the address of currentSnapshot Will not change

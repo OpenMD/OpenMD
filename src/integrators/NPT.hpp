@@ -122,7 +122,11 @@ namespace oopse {
     }
 
     virtual void doUpdate();
-            
+
+    virtual void resetIntegrator();
+
+    virtual void resetEta();
+    
     double NkBT;
     double fkBT;
 

@@ -102,7 +102,9 @@ namespace oopse {
     virtual void moveB();
 
     virtual void doUpdate() ;
-        
+
+    virtual void resetIntegrator();
+    
   private:
     virtual double calcConservedQuantity();              
 

@@ -88,6 +88,8 @@ namespace oopse {
 
     virtual void finalize();
 
+    virtual void resetIntegrator() {}
+    
     RotationAlgorithm* rotAlgo;
     Rattle* rattle;
     double dt2;
@@ -95,6 +97,7 @@ namespace oopse {
     double currSample;
     double currStatus;
     double currThermal;
+    double currReset;
         
   private:
         

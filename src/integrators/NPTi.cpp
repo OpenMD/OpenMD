@@ -181,5 +181,4 @@ namespace oopse {
     etaMat(2, 2) = eta;
     currentSnapshot_->setEta(etaMat);
   }
-
 }

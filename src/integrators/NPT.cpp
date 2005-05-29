@@ -338,4 +338,16 @@ namespace oopse {
     saveEta();
   }
 
+  void NPT::resetIntegrator(){
+      currentSnapshot_->setChi(0.0);
+      currentSnapshot_->setIntegralOfChiDt(0.0);
+      resetEta();
+  }
+
+
+    void NPT::resetEta() {
+      Mat3x3d etaMat(0.0);
+      currentSnapshot_->setEta(etaMat);    
+    }
+    
 }

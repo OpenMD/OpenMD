@@ -248,7 +248,11 @@ namespace oopse {
     currentSnapshot_->setIntegralOfChiDt(integralOfChidt);
   }
 
-
+  void NVT::resetIntegrator() {
+      currentSnapshot_->setChi(0.0);
+      currentSnapshot_->setIntegralOfChiDt(0.0);
+  }
+  
   double NVT::calcConservedQuantity() {
 
     double chi = currentSnapshot_->getChi();

@@ -76,7 +76,7 @@ namespace oopse {
 
     virtual void loadEta();
     virtual void saveEta();
-                    
+    
     double eta;
     double oldEta;
     double prevEta;

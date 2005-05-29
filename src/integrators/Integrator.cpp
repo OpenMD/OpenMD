@@ -44,8 +44,8 @@
 #include "utils/simError.h"
 namespace oopse {
   Integrator::Integrator(SimInfo* info) 
-    : info_(info), forceMan_(NULL) , needPotential(false), needStress(false), velocitizer_(NULL),
-      needVelocityScaling(false), dumpWriter(NULL), statWriter(NULL), thermo(info), 
+    : info_(info), forceMan_(NULL) , needPotential(false), needStress(false), needReset(false), velocitizer_(NULL),
+      needVelocityScaling(false), dumpWriter(NULL), statWriter(NULL), thermo(info)
       currentSnapshot_(info->getSnapshotManager()->getCurrentSnapshot()) {
 
       simParams = info->getSimParams();
@@ -89,7 +89,12 @@ namespace oopse {
       if (!simParams->getUseInitTime()) {
         currentSnapshot_->setTime(0.0);
       }
-    
+
+      if (simParams->haveResetTime()) {
+        needReset = true;
+        resetTime = simParams->getResetTime();
+      }
+      
       //create a default ForceManager
       //if the subclass wants to use a different ForceManager, use setForceManager
       forceMan_ = new ForceManager(info);
