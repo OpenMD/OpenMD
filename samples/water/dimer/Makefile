@@ -16,7 +16,8 @@ SampleFiles =  \
         mix.md \
         ssd.in \
         ssd.md \
-
+	tap.in \
+	tap.md
 
 DEV_ROOT=../../..
 include $(DEV_ROOT)/make/Makefile
