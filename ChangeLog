@@ -1,3 +1,128 @@
+2005-05-28 19:16  tim
+
+	* src/visitors/: AtomNameVisitor.cpp, AtomNameVisitor.hpp: adding
+	AtomNameVisitor
+
+2005-05-28 19:09  tim
+
+	* src/integrators/Integrator.cpp: dding resetIntegrator
+
+2005-05-28 19:06  tim
+
+	* src/integrators/: Integrator.cpp, Integrator.hpp, NPT.cpp,
+	NPT.hpp, NPTi.cpp, NPTi.hpp, NVT.cpp, NVT.hpp,
+	VelocityVerletIntegrator.cpp, VelocityVerletIntegrator.hpp: adding
+	resetIntegrator
+
+2005-05-27 16:11  tim
+
+	* src/applications/staticProps/: DensityPlot.cpp, DensityPlot.hpp,
+	Makefile, P2OrderParameter.cpp, SCDOrderParameter.cpp,
+	SCDOrderParameter.hpp, StaticProps.cpp, StaticProps.ggo,
+	StaticPropsCmd.c, StaticPropsCmd.h: adding DensityPlot into
+	StaticProps
+
+2005-05-26 23:41  tim
+
+	* src/: applications/staticProps/Makefile,
+	applications/staticProps/P2OrderParameter.cpp,
+	applications/staticProps/P2OrderParameter.hpp,
+	applications/staticProps/StaticProps.cpp,
+	applications/staticProps/StaticProps.ggo,
+	applications/staticProps/StaticPropsCmd.c,
+	applications/staticProps/StaticPropsCmd.h, utils/StringUtils.cpp,
+	utils/StringUtils.hpp: adding SCDOrderParameter into StaticProps
+
+2005-05-26 17:45  tim
+
+	* src/: applications/dump2Xyz/Dump2XYZ.cpp,
+	applications/dump2Xyz/Dump2XYZCmd.c,
+	applications/dump2Xyz/Dump2XYZCmd.h,
+	applications/staticProps/Makefile,
+	applications/staticProps/P2OrderParameter.cpp,
+	applications/staticProps/P2OrderParameter.hpp,
+	applications/staticProps/RadialDistrFunc.cpp,
+	applications/staticProps/RadialDistrFunc.hpp,
+	applications/staticProps/StaticAnalyser.hpp,
+	applications/staticProps/StaticProps.cpp,
+	applications/staticProps/StaticProps.ggo,
+	applications/staticProps/StaticPropsCmd.c,
+	applications/staticProps/StaticPropsCmd.h, visitors/Makefile,
+	visitors/OtherVisitor.cpp, visitors/OtherVisitor.hpp: adding
+	AtomNameVisitor to convert atom name to its base name;
+	wrappingvisitor now wrap back to the center of the mass; adding
+	P2OrderParameter into StaticProps
+
+2005-05-22 16:36  chuckv
+
+	* samples/metals/nanorod/Au_nanoparticle_FCC.md,
+	src/applications/nanoRodBuilder/Geometry.cpp,
+	src/applications/nanoRodBuilder/GeometryBuilder.cpp,
+	src/applications/nanoRodBuilder/GeometryFactory.cpp,
+	src/applications/nanoRodBuilder/GeometryFactory.hpp,
+	src/applications/nanoRodBuilder/nanorodBuilder.cpp,
+	src/integrators/VelocityVerletIntegrator.cpp: Fix to print pressure
+	tensor.
+
+2005-05-22 16:05  tim
+
+	* src/: brains/Stats.cpp, brains/Stats.hpp, brains/Thermo.cpp,
+	integrators/VelocityVerletIntegrator.cpp, io/Globals.cpp,
+	io/Globals.hpp, io/SectionParserManager.cpp: adding keyword
+	printPressureTensor
+
+2005-05-20 14:27  tim
+
+	* src/integrators/NPrT.cpp: NPrT in progress
+
+2005-05-20 11:01  tim
+
+	* src/: integrators/NPrT.cpp, io/Globals.cpp,
+	utils/OOPSEConstant.hpp: NPrT in progress
+
+2005-05-19 16:31  tim
+
+	* src/: brains/Thermo.cpp, brains/Thermo.hpp, integrators/NPAT.cpp,
+	integrators/NPrT.cpp, integrators/NPrT.hpp, io/Globals.cpp,
+	io/Globals.hpp: NPAT is working
+
+2005-05-19 10:49  tim
+
+	* src/: UseTheForce/DarkSide/LJ.F90, integrators/Makefile,
+	integrators/NPrT.cpp, io/Globals.cpp: fix bug in NPAT and NPrT
+
+2005-05-18 23:28  tim
+
+	* src/: brains/Register.cpp, integrators/NPAT.cpp,
+	integrators/NPAT.hpp, integrators/NPrT.cpp, integrators/NPrT.hpp,
+	io/Globals.cpp, io/Globals.hpp: adding NPAT and NPrT integrators
+
+2005-05-18 14:06  chrisfen
+
+	* forceFields/DUFF2.frc, src/UseTheForce/DarkSide/sticky.F90: just
+	some tap changes
+
+2005-05-18 13:31  chrisfen
+
+	* src/UseTheForce/: doForces.F90, DarkSide/electrostatic.F90,
+	DarkSide/sticky.F90: Modifications to temper the dipolar strength
+	in the first solvation shell for tap
+
+2005-05-18 07:35  chrisfen
+
+	* samples/water/tap/: tap.in, tap.md, water.md: added a tap example
+	for testing purposes
+
+2005-05-17 17:35  chrisfen
+
+	* ChangeLog, forceFields/DUFF2.frc, samples/water/dimer/ssd.md,
+	samples/water/dimer/water.md, src/UseTheForce/DUFF.cpp,
+	src/UseTheForce/doForces.F90,
+	src/UseTheForce/DarkSide/electrostatic.F90,
+	src/UseTheForce/DarkSide/electrostatic_interface.F90,
+	src/UseTheForce/DarkSide/sticky.F90: Modifications to tap.  Also
+	correcting changes to the previous merge that were not caught
+
 2005-05-16 23:20  chuckv
 
 	* src/types/: DirectionalAtomType.cpp, DirectionalAtomType.hpp:
@@ -5619,7 +5744,8 @@
 
 2004-09-29 12:56  gezelter
 
-	* make/: Make.conf.in, Makefile.in: Working on make stuff
+	* make/: Make.conf.in, Makefile.in, _files/style.css: Working on
+	make stuff
 
 2004-09-29 12:46  tim
 
@@ -5885,7 +6011,8 @@
 	src/visitors/OtherVisitor.cpp, src/visitors/OtherVisitor.hpp,
 	src/visitors/RigidBodyVisitor.cpp,
 	src/visitors/RigidBodyVisitor.hpp, src/visitors/ZconsVisitor.cpp,
-	src/visitors/ZconsVisitor.hpp, make/Makefile, samples/Makefile.in,
+	src/visitors/ZconsVisitor.hpp, make/Makefile,
+	make/_files/style.css, samples/Makefile.in,
 	samples/metals/Au-Core-Ag-Shell_Nanoparticle.in,
 	samples/metals/Au-Core-Ag-Shell_Nanoparticle.md,
 	samples/metals/Au_bulk_FBD.md, samples/metals/Au_bulk_voter.md,
@@ -6060,7 +6187,8 @@
 	src/visitors/OtherVisitor.cpp, src/visitors/OtherVisitor.hpp,
 	src/visitors/RigidBodyVisitor.cpp,
 	src/visitors/RigidBodyVisitor.hpp, src/visitors/ZconsVisitor.cpp,
-	src/visitors/ZconsVisitor.hpp, make/Makefile, samples/Makefile.in,
+	src/visitors/ZconsVisitor.hpp, make/Makefile,
+	make/_files/style.css, samples/Makefile.in,
 	samples/metals/Au-Core-Ag-Shell_Nanoparticle.in,
 	samples/metals/Au-Core-Ag-Shell_Nanoparticle.md,
 	samples/metals/Au_bulk_FBD.md, samples/metals/Au_bulk_voter.md,
