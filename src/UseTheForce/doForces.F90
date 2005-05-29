@@ -45,7 +45,7 @@
 
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: doForces.F90,v 1.18 2005-05-18 18:31:40 chrisfen Exp $, $Date: 2005-05-18 18:31:40 $, $Name: not supported by cvs2svn $, $Revision: 1.18 $
+!! @version $Id: doForces.F90,v 1.19 2005-05-29 21:15:52 chrisfen Exp $, $Date: 2005-05-29 21:15:52 $, $Name: not supported by cvs2svn $, $Revision: 1.19 $
 
 
 module doForces
@@ -954,7 +954,7 @@ contains
        if (PropertyMap(me_i)%is_Electrostatic .and. &
             PropertyMap(me_j)%is_Electrostatic) then
           call doElectrostaticPair(i, j, d, r, rijsq, sw, vpair, fpair, &
-               pot, eFrame, f, t, do_pot, ebalance)
+               pot, eFrame, f, t, do_pot)
        endif
 
        if (FF_uses_dipoles .and. SIM_uses_dipoles) then       
@@ -982,7 +982,7 @@ contains
        if ( PropertyMap(me_i)%is_StickyPower .and. &
             PropertyMap(me_j)%is_StickyPower) then
           call do_sticky_power_pair(i, j, d, r, rijsq, sw, vpair, fpair, &
-               pot, A, f, t, do_pot, ebalance)
+               pot, A, f, t, do_pot)
        endif
     endif
     
