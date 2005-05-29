@@ -307,7 +307,7 @@ contains
   end function getDipoleMoment
 
   subroutine doElectrostaticPair(atom1, atom2, d, rij, r2, sw, &
-       vpair, fpair, pot, eFrame, f, t, do_pot, ebalance)
+       vpair, fpair, pot, eFrame, f, t, do_pot)
 
     logical, intent(in) :: do_pot
 
@@ -318,7 +318,6 @@ contains
     real(kind=dp), intent(in), dimension(3) :: d
     real(kind=dp), intent(inout) :: vpair
     real(kind=dp), intent(inout), dimension(3) :: fpair
-    real(kind=dp), intent(inout) :: ebalance
 
     real( kind = dp ) :: pot
     real( kind = dp ), dimension(9,nLocal) :: eFrame
@@ -485,14 +484,14 @@ contains
        cy_j = uy_j(1)*xhat + uy_j(2)*yhat + uy_j(3)*zhat
        cz_j = uz_j(1)*xhat + uz_j(2)*yhat + uz_j(3)*zhat
     endif
-    
-    switcher = 1.0d0
-    dswitcher = 0.0d0
-    ebalance = 0.0d0
-    ! weaken the dipole interaction at close range for TAP water
-!    if (j_is_Tap .and. i_is_Tap) then
-!      call calc_switch(rij, mu_i, switcher, dswitcher)
-!    endif
+   
+!!$    switcher = 1.0d0
+!!$    dswitcher = 0.0d0
+!!$    ebalance = 0.0d0
+!!$    ! weaken the dipole interaction at close range for TAP water
+!!$    if (j_is_Tap .and. i_is_Tap) then
+!!$      call calc_switch(rij, mu_i, switcher, dswitcher)
+!!$    endif
 
     epot = 0.0_dp
     dudx = 0.0_dp
@@ -662,31 +661,30 @@ contains
 
           pref = pre22 * mu_i * mu_j
           vterm = pref * ri3 * (ct_ij - 3.0d0 * ct_i * ct_j * sc2)
-          ebalance = vterm * (1.0d0 - switcher)
-          vpair = vpair + switcher * vterm
-          epot = epot + sw * switcher * vterm
+          vpair = vpair + vterm
+          epot = epot + sw * vterm
 
           a1 = 5.0d0 * ct_i * ct_j * sc2 - ct_ij
 
-          dudx = dudx + switcher*pref*sw*3.0d0*ri4*scale &
-                         *(a1*xhat-ct_i*uz_j(1)-ct_j*uz_i(1)) + vterm*dswitcher
-          dudy = dudy + switcher*pref*sw*3.0d0*ri4*scale &
-                         *(a1*yhat-ct_i*uz_j(2)-ct_j*uz_i(2)) + vterm*dswitcher
-          dudz = dudz + switcher*pref*sw*3.0d0*ri4*scale &
-                         *(a1*zhat-ct_i*uz_j(3)-ct_j*uz_i(3)) + vterm*dswitcher
+          dudx = dudx + pref*sw*3.0d0*ri4*scale &
+                         *(a1*xhat-ct_i*uz_j(1)-ct_j*uz_i(1))
+          dudy = dudy + pref*sw*3.0d0*ri4*scale &
+                         *(a1*yhat-ct_i*uz_j(2)-ct_j*uz_i(2))
+          dudz = dudz + pref*sw*3.0d0*ri4*scale &
+                         *(a1*zhat-ct_i*uz_j(3)-ct_j*uz_i(3))
 
-          duduz_i(1) = duduz_i(1) + switcher*pref*sw*ri3 &
+          duduz_i(1) = duduz_i(1) + pref*sw*ri3 &
                                      *(uz_j(1) - 3.0d0*ct_j*xhat*sc2)
-          duduz_i(2) = duduz_i(2) + switcher*pref*sw*ri3 &
+          duduz_i(2) = duduz_i(2) + pref*sw*ri3 &
                                      *(uz_j(2) - 3.0d0*ct_j*yhat*sc2)
-          duduz_i(3) = duduz_i(3) + switcher*pref*sw*ri3 &
+          duduz_i(3) = duduz_i(3) + pref*sw*ri3 &
                                      *(uz_j(3) - 3.0d0*ct_j*zhat*sc2)
 
-          duduz_j(1) = duduz_j(1) + switcher*pref*sw*ri3 &
+          duduz_j(1) = duduz_j(1) + pref*sw*ri3 &
                                      *(uz_i(1) - 3.0d0*ct_i*xhat*sc2)
-          duduz_j(2) = duduz_j(2) + switcher*pref*sw*ri3 &
+          duduz_j(2) = duduz_j(2) + pref*sw*ri3 &
                                      *(uz_i(2) - 3.0d0*ct_i*yhat*sc2)
-          duduz_j(3) = duduz_j(3) + switcher*pref*sw*ri3 &
+          duduz_j(3) = duduz_j(3) + pref*sw*ri3 &
                                      *(uz_i(3) - 3.0d0*ct_i*zhat*sc2)
        endif
 

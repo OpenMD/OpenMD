@@ -50,7 +50,7 @@
 !! @author Matthew Meineke
 !! @author Christopher Fennell
 !! @author J. Daniel Gezelter
-!! @version $Id: sticky.F90,v 1.12 2005-05-18 19:06:22 chrisfen Exp $, $Date: 2005-05-18 19:06:22 $, $Name: not supported by cvs2svn $, $Revision: 1.12 $
+!! @version $Id: sticky.F90,v 1.13 2005-05-29 21:16:25 chrisfen Exp $, $Date: 2005-05-29 21:16:25 $, $Name: not supported by cvs2svn $, $Revision: 1.13 $
 
 module sticky
 
@@ -512,13 +512,13 @@ contains
     if(allocated(StickyMap)) deallocate(StickyMap)
   end subroutine destroyStickyTypes
   
-    subroutine do_sticky_power_pair(atom1, atom2, d, rij, r2, sw, vpair, fpair, &
-       pot, A, f, t, do_pot, ebalance)
+  subroutine do_sticky_power_pair(atom1, atom2, d, rij, r2, sw, vpair, fpair, &
+       pot, A, f, t, do_pot)
     !! We assume that the rotation matrices have already been calculated
     !! and placed in the A array.
-
+    
     !! i and j are pointers to the two SSD atoms
-
+    
     integer, intent(in) :: atom1, atom2
     real (kind=dp), intent(inout) :: rij, r2
     real (kind=dp), dimension(3), intent(in) :: d
@@ -527,13 +527,12 @@ contains
     real (kind=dp), dimension(9,nLocal) :: A
     real (kind=dp), dimension(3,nLocal) :: f
     real (kind=dp), dimension(3,nLocal) :: t
-    real (kind=dp), intent(in) :: ebalance
     logical, intent(in) :: do_pot
 
     real (kind=dp) :: xi, yi, zi, xj, yj, zj, xi2, yi2, zi2, xj2, yj2, zj2
     real (kind=dp) :: xihat, yihat, zihat, xjhat, yjhat, zjhat
     real (kind=dp) :: rI, rI2, rI3, rI4, rI5, rI6, rI7, s, sp, dsdr, dspdr
-    real (kind=dp) :: wi, wj, w, wi2, wj2
+    real (kind=dp) :: wi, wj, w, wi2, wj2, eScale, v0scale
     real (kind=dp) :: dwidx, dwidy, dwidz, dwjdx, dwjdy, dwjdz
     real (kind=dp) :: dwidux, dwiduy, dwiduz, dwjdux, dwjduy, dwjduz
     real (kind=dp) :: drdx, drdy, drdz
@@ -651,8 +650,8 @@ contains
        
        call calc_sw_fnc(rij, rl, ru, rlp, rup, s, sp, dsdr, dspdr)
            
-       frac1 = 1.5d0
-       frac2 = 0.5d0
+       frac1 = 0.25d0
+       frac2 = 0.75d0
        
        wi = 2.0d0*(xi2-yi2)*zi*rI3
        wj = 2.0d0*(xj2-yj2)*zj*rI3
@@ -660,16 +659,16 @@ contains
        wi2 = wi*wi
        wj2 = wj*wj
 
-       w = frac1*wi*wi2 + frac2*wi + frac1*wj*wj2 + frac2*wj
+       w = frac1*wi*wi2 + frac2*wi + frac1*wj*wj2 + frac2*wj + v0p
 
-       vpair = vpair + 0.5d0*(v0*s*w) + ebalance
+       vpair = vpair + 0.5d0*(v0*s*w)
        
        if (do_pot) then
 #ifdef IS_MPI 
          pot_row(atom1) = pot_row(atom1) + 0.25d0*(v0*s*w)*sw
          pot_col(atom2) = pot_col(atom2) + 0.25d0*(v0*s*w)*sw
 #else
-         pot = pot + 0.5d0*(v0*s*w)*sw + ebalance
+         pot = pot + 0.5d0*(v0*s*w)*sw
 #endif  
        endif
 
@@ -805,9 +804,9 @@ contains
 
        ! now assemble these with the radial-only terms:
 
-       fxradial = 0.5d0*(v0*dsdr*w*drdx + fxii + fxji + ebalance*xihat)
-       fyradial = 0.5d0*(v0*dsdr*w*drdy + fyii + fyji + ebalance*yihat)
-       fzradial = 0.5d0*(v0*dsdr*w*drdz + fzii + fzji + ebalance*zihat)
+       fxradial = 0.5d0*(v0*dsdr*w*drdx + fxii + fxji)
+       fyradial = 0.5d0*(v0*dsdr*w*drdy + fyii + fyji)
+       fzradial = 0.5d0*(v0*dsdr*w*drdz + fzii + fzji)
 
 #ifdef IS_MPI
        f_Row(1,atom1) = f_Row(1,atom1) + fxradial
