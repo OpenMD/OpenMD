@@ -8,7 +8,7 @@ component{
 
 initialConfig = "./tap.in";
 
-ensemble = NVE;
+ensemble = NVT;
 forceField = "WATER";
 useReactionField = "false";
 dielectric = 80.0;
@@ -22,7 +22,7 @@ tauThermostat = 1e3;
 tauBarostat = 1e4;
 
 dt = 2.0;
-runTime = 5e3;
+runTime = 2.5e4;
 useInitialTime = "false";
 useInitialExtendedSystemState = "false";
 
