@@ -50,6 +50,11 @@
 #include "math/ParallelRandNumGen.hpp"
 #endif
 
+/* Remove me after testing*/
+#include <cstdio>
+#include <iostream>
+/*End remove me*/
+
 namespace oopse {
   
   Velocitizer::Velocitizer(SimInfo* info) : info_(info) {
@@ -91,6 +96,8 @@ namespace oopse {
     const double kb = 8.31451e-7; // kb in amu, angstroms, fs, etc.
     double av2;
     double kebar;
+    
+    Globals * simParams = info_->getSimParams();
     
     SimInfo::MoleculeIterator i;
     Molecule::IntegrableObjectIterator j;
@@ -149,6 +156,8 @@ namespace oopse {
     
     
     removeComDrift();
+    // Remove angular drift if we are not using periodic boundary conditions.
+    if(simParams->getPBC()) removeAngularDrift();
     
   }
   
@@ -176,4 +185,59 @@ namespace oopse {
     
   }
   
+   
+   void Velocitizer::removeAngularDrift() {
+      // Get the Center of Mass drift velocity.
+      
+      Vector3d vdrift;
+      Vector3d com; 
+      
+      info_->getComAll(com,vdrift);
+         
+      Mat3x3d inertiaTensor;
+      Vector3d angularMomentum;
+      Vector3d omega;
+      
+      
+      
+      info_->getInertiaTensor(inertiaTensor,angularMomentum);
+      // We now need the inverse of the inertia tensor.
+      
+      std::cerr << "Angular Momentum before is "
+         << angularMomentum <<  std::endl;
+
+      
+      inertiaTensor.inverse();
+      
+      
+      omega = inertiaTensor*angularMomentum;
+      
+      SimInfo::MoleculeIterator i;
+      Molecule::IntegrableObjectIterator j;
+      Molecule * mol;
+      StuntDouble * integrableObject;
+      Vector3d tempComPos;
+      
+      //  Corrects for the center of mass angular drift.
+      // sums all the angular momentum and divides by total mass.
+      for( mol = info_->beginMolecule(i); mol != NULL;
+           mol = info_->nextMolecule(i) ) {
+         for( integrableObject = mol->beginIntegrableObject(j);
+              integrableObject != NULL;
+              integrableObject = mol->nextIntegrableObject(j) ) {
+            tempComPos = integrableObject->getPos()-com;
+            integrableObject->setVel((integrableObject->getVel() - vdrift)-cross(omega,tempComPos));
+         }
+      }
+      
+      angularMomentum = info_->getAngularMomentum();
+      std::cerr << "Angular Momentum after is "
+         << angularMomentum <<  std::endl;
+
+      
+   }
+   
+   
+   
+   
 }

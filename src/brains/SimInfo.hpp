@@ -57,6 +57,7 @@
 #include "brains/Exclude.hpp"
 #include "io/Globals.hpp"
 #include "math/Vector3.hpp"
+#include "math/SquareMatrix3.hpp"
 #include "types/MoleculeStamp.hpp"
 #include "UseTheForce/ForceField.hpp"
 #include "utils/PropertyMap.hpp"
@@ -255,6 +256,14 @@ namespace oopse{
 
     /** Returns the center of the mass of the whole system.*/
     Vector3d getCom();
+   /** Returns the center of the mass and Center of Mass velocity of the whole system.*/ 
+    void getComAll(Vector3d& com,Vector3d& comVel);
+
+    /** Returns intertia tensor for the entire system and system Angular Momentum.*/
+    void getInertiaTensor(Mat3x3d &intertiaTensor,Vector3d &angularMomentum);
+    
+    /** Returns system angular momentum */
+    Vector3d getAngularMomentum();
 
     /** main driver function to interact with fortran during the initialization and molecule migration */
     void update();

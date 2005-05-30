@@ -66,6 +66,10 @@ namespace oopse {
     void velocitize(double temperature);
 
     void removeComDrift();
+    /* 
+       Removes center of mass angular momemtum
+     */
+    void removeAngularDrift();
         
   private:
         

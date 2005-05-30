@@ -88,7 +88,6 @@ namespace oopse {
     Stats::title_[PRESSURE_TENSOR_X] = "presure tensor x";
     Stats::title_[PRESSURE_TENSOR_Y] = "presure tensor y";
     Stats::title_[PRESSURE_TENSOR_Z] = "presure tensor z";
-    
 
     Stats::units_[TIME] = "fs";
     Stats::units_[TOTAL_ENERGY] = "kcal/mol";
@@ -112,7 +111,6 @@ namespace oopse {
     Stats::units_[PRESSURE_TENSOR_X] = "amu*fs^-2*Ang^-1";
     Stats::units_[PRESSURE_TENSOR_Y] = "amu*fs^-2*Ang^-1";
     Stats::units_[PRESSURE_TENSOR_Z] = "amu*fs^-2*Ang^-1";
-
   }
 
 }

@@ -84,7 +84,7 @@ namespace oopse {
       VHARM,
       PRESSURE_TENSOR_X,
       PRESSURE_TENSOR_Y,
-      PRESSURE_TENSOR_Z,      
+      PRESSURE_TENSOR_Z,  
       ENDINDEX  //internal use
     };
 

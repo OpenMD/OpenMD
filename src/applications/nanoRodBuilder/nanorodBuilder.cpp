@@ -54,6 +54,8 @@
 #ifdef HAVE_CGAL
 #include "GeometryBuilder.hpp"
 #endif
+#include "GeometryFactory.hpp"
+#include "Geometry.hpp"
 #include "lattice/LatticeFactory.hpp"
 #include "utils/MoLocator.hpp"
 #include "lattice/Lattice.hpp"

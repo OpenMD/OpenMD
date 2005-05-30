@@ -945,6 +945,142 @@ namespace oopse {
 
     return o;
   }
+   
+   
+   /* 
+   Returns center of mass and center of mass velocity in one function call.
+   */
+   
+   void SimInfo::getComAll(Vector3d &com, Vector3d &comVel){ 
+      SimInfo::MoleculeIterator i;
+      Molecule* mol;
+      
+    
+      double totalMass = 0.0;
+    
 
+      for (mol = beginMolecule(i); mol != NULL; mol = nextMolecule(i)) {
+         double mass = mol->getMass();
+         totalMass += mass;
+         com += mass * mol->getCom();
+         comVel += mass * mol->getComVel();           
+      }  
+      
+#ifdef IS_MPI
+      double tmpMass = totalMass;
+      Vector3d tmpCom(com);  
+      Vector3d tmpComVel(comVel);
+      MPI_Allreduce(&tmpMass,&totalMass,1,MPI_DOUBLE,MPI_SUM, MPI_COMM_WORLD);
+      MPI_Allreduce(tmpCom.getArrayPointer(), com.getArrayPointer(),3,MPI_DOUBLE,MPI_SUM, MPI_COMM_WORLD);
+      MPI_Allreduce(tmpComVel.getArrayPointer(), comVel.getArrayPointer(),3,MPI_DOUBLE,MPI_SUM, MPI_COMM_WORLD);
+#endif
+      
+      com /= totalMass;
+      comVel /= totalMass;
+   }        
+   
+   /* 
+   Return intertia tensor for entire system and angular momentum Vector.
+    */
+
+   void SimInfo::getInertiaTensor(Mat3x3d &inertiaTensor, Vector3d &angularMomentum){
+      
+ 
+      double xx = 0.0;
+      double yy = 0.0;
+      double zz = 0.0;
+      double xy = 0.0;
+      double xz = 0.0;
+      double yz = 0.0;
+      Vector3d com(0.0);
+      Vector3d comVel(0.0);
+      
+      getComAll(com, comVel);
+      
+      SimInfo::MoleculeIterator i;
+      Molecule* mol;
+      
+      Vector3d thisq(0.0);
+      Vector3d thisv(0.0);
+
+      double thisMass = 0.0;
+     
+      
+      
+   
+      for (mol = beginMolecule(i); mol != NULL; mol = nextMolecule(i)) {
+        
+         thisq = mol->getCom()-com;
+         thisv = mol->getComVel()-comVel;
+         thisMass = mol->getMass();
+         // Compute moment of intertia coefficients.
+         xx += thisq[0]*thisq[0]*thisMass;
+         yy += thisq[1]*thisq[1]*thisMass;
+         zz += thisq[2]*thisq[2]*thisMass;
+         
+         // compute products of intertia
+         xy += thisq[0]*thisq[1]*thisMass;
+         xz += thisq[0]*thisq[2]*thisMass;
+         yz += thisq[1]*thisq[2]*thisMass;
+            
+         angularMomentum += cross( thisq, thisv ) * thisMass;
+            
+      }  
+      
+      
+      inertiaTensor(0,0) = yy + zz;
+      inertiaTensor(0,1) = -xy;
+      inertiaTensor(0,2) = -xz;
+      inertiaTensor(1,0) = -xy;
+      inertiaTensor(2,0) = xx + zz;
+      inertiaTensor(1,2) = -yz;
+      inertiaTensor(2,0) = -xz;
+      inertiaTensor(2,1) = -yz;
+      inertiaTensor(2,2) = xx + yy;
+      
+#ifdef IS_MPI
+      Mat3x3d tmpI(inertiaTensor);
+      Vector3d tmpAngMom;
+      MPI_Allreduce(tmpI.getArrayPointer(), inertiaTensor.getArrayPointer(),9,MPI_DOUBLE,MPI_SUM, MPI_COMM_WORLD);
+      MPI_Allreduce(tmpAngMom.getArrayPointer(), angularMomentum.getArrayPointer(),3,MPI_DOUBLE,MPI_SUM, MPI_COMM_WORLD);
+#endif
+               
+      return;
+   }
+
+   //Returns the angular momentum of the system
+   Vector3d SimInfo::getAngularMomentum(){
+      
+      Vector3d com(0.0);
+      Vector3d comVel(0.0);
+      Vector3d angularMomentum(0.0);
+      
+      getComAll(com,comVel);
+      
+      SimInfo::MoleculeIterator i;
+      Molecule* mol;
+      
+      Vector3d thisq(0.0);
+      Vector3d thisv(0.0);
+      
+      double thisMass = 0.0;
+      
+      for (mol = beginMolecule(i); mol != NULL; mol = nextMolecule(i)) {         
+         thisq = mol->getCom()-com;
+         thisv = mol->getComVel()-comVel;
+         thisMass = mol->getMass();
+         angularMomentum += cross( thisq, thisv ) * thisMass;
+         
+      }  
+       
+#ifdef IS_MPI
+      Vector3d tmpAngMom;
+      MPI_Allreduce(tmpAngMom.getArrayPointer(), angularMomentum.getArrayPointer(),3,MPI_DOUBLE,MPI_SUM, MPI_COMM_WORLD);
+#endif
+      
+      return angularMomentum;
+   }
+   
+   
 }//end namespace oopse
 
