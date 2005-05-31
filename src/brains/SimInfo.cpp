@@ -981,6 +981,11 @@ namespace oopse {
    
    /* 
    Return intertia tensor for entire system and angular momentum Vector.
+
+
+       [  Ixx -Ixy  -Ixz ]
+  J =| -Iyx  Iyy  -Iyz |
+       [ -Izx -Iyz   Izz ]
     */
 
    void SimInfo::getInertiaTensor(Mat3x3d &inertiaTensor, Vector3d &angularMomentum){
@@ -1032,7 +1037,7 @@ namespace oopse {
       inertiaTensor(0,1) = -xy;
       inertiaTensor(0,2) = -xz;
       inertiaTensor(1,0) = -xy;
-      inertiaTensor(2,0) = xx + zz;
+      inertiaTensor(1,1) = xx + zz;
       inertiaTensor(1,2) = -yz;
       inertiaTensor(2,0) = -xz;
       inertiaTensor(2,1) = -yz;
@@ -1060,16 +1065,17 @@ namespace oopse {
       SimInfo::MoleculeIterator i;
       Molecule* mol;
       
-      Vector3d thisq(0.0);
-      Vector3d thisv(0.0);
+      Vector3d thisr(0.0);
+      Vector3d thisp(0.0);
       
-      double thisMass = 0.0;
+      double thisMass;
       
       for (mol = beginMolecule(i); mol != NULL; mol = nextMolecule(i)) {         
-         thisq = mol->getCom()-com;
-         thisv = mol->getComVel()-comVel;
-         thisMass = mol->getMass();
-         angularMomentum += cross( thisq, thisv ) * thisMass;
+        thisMass = mol->getMass(); 
+	thisr = mol->getCom()-com;
+	thisp = (mol->getComVel()-comVel)*thisMass;
+         
+	angularMomentum += cross( thisr, thisp );
          
       }  
        

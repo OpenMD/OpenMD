@@ -157,7 +157,7 @@ namespace oopse {
     
     removeComDrift();
     // Remove angular drift if we are not using periodic boundary conditions.
-    if(simParams->getPBC()) removeAngularDrift();
+    if(!simParams->getPBC()) removeAngularDrift();
     
   }
   
@@ -204,11 +204,14 @@ namespace oopse {
       // We now need the inverse of the inertia tensor.
       
       std::cerr << "Angular Momentum before is "
-         << angularMomentum <<  std::endl;
-
+		<< angularMomentum <<  std::endl;
+      std::cerr << "Inertia Tensor before is "
+		<< inertiaTensor <<  std::endl;
       
-      inertiaTensor.inverse();
       
+      inertiaTensor =inertiaTensor.inverse();
+       std::cerr << "Inertia Tensor after inverse is "
+		<< inertiaTensor <<  std::endl;
       
       omega = inertiaTensor*angularMomentum;
       
