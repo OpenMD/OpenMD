@@ -67,16 +67,19 @@ namespace oopse {
       AtomType* atomType = ff.getAtomType(atomTypeName);
 
       if (atomType == NULL) {
-	atomType = new AtomType();
-	int ident = ff.getNAtomType() + 1;
-	atomType->setIdent(ident); 
-	atomType->setName(atomTypeName);
-	ff.addAtomType(atomTypeName, atomType);
+      	atomType = new AtomType();
+      	int ident = ff.getNAtomType() + 1;
+      	atomType->setIdent(ident); 
+      	atomType->setName(atomTypeName);
+      	ff.addAtomType(atomTypeName, atomType);
       }
         
       double mass = tokenizer.nextTokenAsDouble();              
       atomType->setMass(mass);
-               
+      if (tokenizer.hasMoreTokens()) {
+          double nelectron = tokenizer.nextTokenAsDouble();
+          atomType->addProperty(new DoubleGenericData("nelectron", nelectron));
+      }               
     }    
 
 

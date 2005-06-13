@@ -48,7 +48,7 @@ namespace oopse {
 
     class DensityPlot : public StaticAnalyser{
         public:
-            DensityPlot(SimInfo* info, const std::string& filename, const std::string& sele, double len, int nrbins);
+            DensityPlot(SimInfo* info, const std::string& filename, const std::string& sele, const std::string& cmSele,double len, int nrbins);
             virtual void process();
 
             int getNRBins() {
@@ -61,7 +61,10 @@ namespace oopse {
         
 
         private:
+            Vector3d calcNewOrigin();
+            
             void writeDensity();            
+
             Snapshot* currentSnapshot_;
             double len_;
             double halfLen_;
@@ -72,7 +75,12 @@ namespace oopse {
 
             std::string selectionScript_;
             SelectionManager seleMan_;
-            SelectionEvaluator evaluator_;       
+            SelectionEvaluator evaluator_;
+            std::string cmSelectionScript_;
+            SelectionManager cmSeleMan_;
+            SelectionEvaluator cmEvaluator_;
+
+            
     };
 }
 

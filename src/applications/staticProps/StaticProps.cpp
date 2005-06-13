@@ -104,6 +104,8 @@ int main(int argc, char* argv[]){
     char* sele2Env = getenv("OOPSE_SELE2");
     if (sele2Env) {
       sele2 = sele2Env;            
+    } else if (args_info.density_given) { 
+      sele2 = "select all";
     } else if(!args_info.scd_given && !args_info.density_given)  {
       sprintf( painCave.errMsg,
                "neither --sele2 option nor $OOPSE_SELE2 is set");
@@ -180,7 +182,7 @@ int main(int argc, char* argv[]){
           analyser  = new SCDOrderParameter(info, dumpFileName, sele1, sele2, sele3);
       }
   }else if (args_info.density_given) {
-      analyser= new DensityPlot(info, dumpFileName, sele1, maxLen, args_info.nrbins_arg);  
+      analyser= new DensityPlot(info, dumpFileName, sele1, sele2, maxLen, args_info.nrbins_arg);  
   }
     
   if (args_info.output_given) {

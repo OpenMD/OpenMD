@@ -119,8 +119,10 @@ double SCDElem::calcSCD(Snapshot* snapshot) {
     std::vector<SDTuple3>::iterator i;
     Vector3d normal(0.0, 0.0, 1.0);
     double scd = 0.0;
-    for (i = tuples_.begin(); i != tuples_.end(); ++i) {
-        Vector3d zAxis = i->third->getPos() - i->first->getPos();
+    for (i = tuples_.begin(); i != tuples_.end(); ++i) {        
+        //Egberts B. and Berendsen H.J.C, J.Chem.Phys. 89(6), 3718-3732, 1988
+        
+        Vector3d zAxis =   i->third->getPos() - i->first->getPos();
         snapshot->wrapVector(zAxis);
         Vector3d v12 =  i->second->getPos() - i->first->getPos();
         snapshot->wrapVector(v12);
