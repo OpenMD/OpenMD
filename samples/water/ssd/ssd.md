@@ -24,9 +24,9 @@ tauThermostat = 1e3;
 tauBarostat = 1e4;
 
 dt = 2.0;
-runTime = 1e3;
+runTime = 1e5;
 
 //tempSet = "true";
 //thermalTime = 200;
-sampleTime = 100;
-statusTime = 2;
+sampleTime = 1000;
+statusTime = 10;

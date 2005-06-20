@@ -83,8 +83,8 @@ void DensityPlot::process() {
   
   DumpReader reader(info_, dumpFilename_);    
   int nFrames = reader.getNFrames();
-
-  for (int i = 0; i < nFrames; i += step_) {
+  int i;
+  for (i = 0; i < nFrames; i += step_) {
     reader.readFrame(i);
     currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
 
@@ -109,7 +109,6 @@ void DensityPlot::process() {
     Mat3x3d hmat = currentSnapshot_->getHmat();
     double slabVolume = deltaR_ * hmat(0, 0) * hmat(1, 1);
     
-    int i;        
     for (StuntDouble* sd = seleMan_.beginSelected(i); sd != NULL; sd = seleMan_.nextSelected(i)) {
 
 
