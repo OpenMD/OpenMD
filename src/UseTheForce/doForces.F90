@@ -45,7 +45,7 @@
 
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: doForces.F90,v 1.20 2005-06-27 21:01:30 gezelter Exp $, $Date: 2005-06-27 21:01:30 $, $Name: not supported by cvs2svn $, $Revision: 1.20 $
+!! @version $Id: doForces.F90,v 1.21 2005-06-27 22:21:37 chuckv Exp $, $Date: 2005-06-27 22:21:37 $, $Name: not supported by cvs2svn $, $Revision: 1.21 $
 
 
 module doForces
@@ -116,11 +116,12 @@ module doForces
   logical, save :: SIM_uses_PBC
   logical, save :: SIM_uses_molecular_cutoffs
 
-  real(kind=dp), save :: rlist, rlistsq
+  !!!GO AWAY---------
+  !!!!!real(kind=dp), save :: rlist, rlistsq
 
   public :: init_FF
   public :: do_force_loop
-  public :: setRlistDF
+!  public :: setRlistDF
 
 #ifdef PROFILE
   public :: getforcetime
@@ -146,18 +147,131 @@ module doForces
 
   type(Properties), dimension(:),allocatable :: PropertyMap
 
+
+  
+  type, public :: Interaction
+     integer :: InteractionHash
+     real(kind=dp) :: rCut
+  end type Interaction
+  
+  type(Interaction), public, dimension(:,:), allocatable :: InteractionMap
+  
+  !public :: addInteraction
+  !public :: setInteractionHash
+  !public :: getInteractionHash
+  public :: createInteractionMap
+
 contains
 
-  subroutine setRlistDF( this_rlist )
+ 
+  subroutine createInteractionMap(status)
+    integer :: nAtypes
+    integer :: status
+    integer :: i
+    integer :: j
+    integer :: ihash
+    real(kind=dp) :: myRcut
+! Test Types
+    logical :: i_is_LJ
+    logical :: i_is_Elect
+    logical :: i_is_Sticky
+    logical :: i_is_StickyP
+    logical :: i_is_GB
+    logical :: i_is_EAM
+    logical :: i_is_Shape
+    logical :: j_is_LJ
+    logical :: j_is_Elect
+    logical :: j_is_Sticky
+    logical :: j_is_StickyP
+    logical :: j_is_GB
+    logical :: j_is_EAM
+    logical :: j_is_Shape
+    
+    
+    if (.not. associated(atypes)) then
+       call handleError("atype", "atypes was not present before call of createDefaultInteractionMap!")
+       status = -1
+       return
+    endif
+    
+    nAtypes = getSize(atypes)
+    
+    if (nAtypes == 0) then
+       status = -1
+       return
+    end if
 
-    real(kind=dp) :: this_rlist
+    if (.not. allocated(InteractionMap)) then
+       allocate(InteractionMap(nAtypes,nAtypes))
+    endif
+        
+    do i = 1, nAtypes
+       call getElementProperty(atypes, i, "is_LennardJones", i_is_LJ)
+       call getElementProperty(atypes, i, "is_Electrostatic", i_is_Elect)
+       call getElementProperty(atypes, i, "is_Sticky", i_is_Sticky)
+       call getElementProperty(atypes, i, "is_StickyPower", i_is_StickyP)
+       call getElementProperty(atypes, i, "is_GayBerne", i_is_GB)
+       call getElementProperty(atypes, i, "is_EAM", i_is_EAM)
+       call getElementProperty(atypes, i, "is_Shape", i_is_Shape)
 
-    rlist = this_rlist
-    rlistsq = rlist * rlist
+       do j = i, nAtypes
 
-    haveRlist = .true.
+          iHash = 0
+          myRcut = 0.0_dp
 
-  end subroutine setRlistDF
+          call getElementProperty(atypes, j, "is_LennardJones", j_is_LJ)
+          call getElementProperty(atypes, j, "is_Electrostatic", j_is_Elect)
+          call getElementProperty(atypes, j, "is_Sticky", j_is_Sticky)
+          call getElementProperty(atypes, j, "is_StickyPower", j_is_StickyP)
+          call getElementProperty(atypes, j, "is_GayBerne", j_is_GB)
+          call getElementProperty(atypes, j, "is_EAM", j_is_EAM)
+          call getElementProperty(atypes, j, "is_Shape", j_is_Shape)
+
+          if (i_is_LJ .and. j_is_LJ) then
+             iHash = ior(iHash, LJ_PAIR)
+             
+
+
+          endif
+
+
+
+          if (i_is_Elect .and. j_is_Elect) iHash = ior(iHash, ELECTROSTATIC_PAIR)
+          if (i_is_Sticky .and. j_is_Sticky) iHash = ior(iHash, STICKY_PAIR)
+          if (i_is_StickyP .and. j_is_StickyP) iHash = ior(iHash, STICKYPOWER_PAIR)
+
+          if (i_is_EAM .and. j_is_EAM) iHash = ior(iHash, EAM_PAIR)
+
+          if (i_is_GB .and. j_is_GB) iHash = ior(iHash, GAYBERNE_PAIR)
+          if (i_is_GB .and. j_is_LJ) iHash = ior(iHash, GAYBERNE_LJ)
+          if (i_is_LJ .and. j_is_GB) iHash = ior(iHash, GAYBERNE_LJ)
+
+          if (i_is_Shape .and. j_is_Shape) iHash = ior(iHash, SHAPE_PAIR)
+          if (i_is_Shape .and. j_is_LJ) iHash = ior(iHash, SHAPE_LJ)
+          if (i_is_LJ .and. j_is_Shape) iHash = ior(iHash, SHAPE_LJ)
+
+
+          InteractionMap(i,j)%InteractionHash = iHash
+          InteractionMap(j,i)%InteractionHash = iHash
+
+       end do
+
+    end do
+  end subroutine createInteractionMap
+
+
+
+!!! THIS GOES AWAY FOR SIZE DEPENDENT CUTOFF
+!!$  subroutine setRlistDF( this_rlist )
+!!$
+!!$   real(kind=dp) :: this_rlist
+!!$
+!!$    rlist = this_rlist
+!!$    rlistsq = rlist * rlist
+!!$
+!!$    haveRlist = .true.
+!!$
+!!$  end subroutine setRlistDF
 
   subroutine createPropertyMap(status)
     integer :: nAtypes
