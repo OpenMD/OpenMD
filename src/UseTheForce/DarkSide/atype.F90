@@ -49,8 +49,11 @@ module atype_module
 
   type (Vector), pointer, public :: atypes => null()
 
+
   public :: new_atype
   public :: delete_atypes
+
+  
 
 contains
 
@@ -101,6 +104,9 @@ contains
   subroutine delete_atypes()
     atypes => destroy(atypes)
   end subroutine delete_atypes
+
+
+
 
 end module atype_module
 

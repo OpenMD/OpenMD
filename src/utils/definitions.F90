@@ -63,7 +63,6 @@ module definitions
   INTEGER, PARAMETER :: SP = selected_real_kind(4)
   INTEGER, PARAMETER :: DP = selected_real_kind(8)
 
-
   !! Maximum number of fortran streams...
   INTEGER, PARAMETER :: MAX_UNITS = 100
 

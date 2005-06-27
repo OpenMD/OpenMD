@@ -45,7 +45,7 @@
 
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: doForces.F90,v 1.19 2005-05-29 21:15:52 chrisfen Exp $, $Date: 2005-05-29 21:15:52 $, $Name: not supported by cvs2svn $, $Revision: 1.19 $
+!! @version $Id: doForces.F90,v 1.20 2005-06-27 21:01:30 gezelter Exp $, $Date: 2005-06-27 21:01:30 $, $Name: not supported by cvs2svn $, $Revision: 1.20 $
 
 
 module doForces
@@ -73,6 +73,7 @@ module doForces
 
 #define __FORTRAN90
 #include "UseTheForce/fSwitchingFunction.h"
+#include "UseTheForce/DarkSide/fInteractionMap.h"
 
   INTEGER, PARAMETER:: PREPAIR_LOOP = 1
   INTEGER, PARAMETER:: PAIR_LOOP    = 2
@@ -926,6 +927,8 @@ contains
     real ( kind = dp ) :: ebalance
     integer :: me_i, me_j
 
+    integer :: iMap
+
     r = sqrt(rijsq)
     vpair = 0.0d0
     fpair(1:3) = 0.0d0
@@ -938,26 +941,17 @@ contains
     me_j = atid(j)
 #endif
 
-    !    write(*,*) i, j, me_i, me_j
+    iMap = InteractionMap(me_i, me_j)%InteractionHash
 
-    if (FF_uses_LennardJones .and. SIM_uses_LennardJones) then
-
-       if ( PropertyMap(me_i)%is_LennardJones .and. &
-            PropertyMap(me_j)%is_LennardJones ) then
-          call do_lj_pair(i, j, d, r, rijsq, sw, vpair, fpair, pot, f, do_pot)
-       endif
-
+    if ( iand(iMap, LJ_PAIR).ne.0 ) then
+       call do_lj_pair(i, j, d, r, rijsq, sw, vpair, fpair, pot, f, do_pot)
     endif
 
-    if (FF_uses_Electrostatics .and. SIM_uses_Electrostatics) then
+    if ( iand(iMap, ELECTROSTATIC_PAIR).ne.0 ) then
+       call doElectrostaticPair(i, j, d, r, rijsq, sw, vpair, fpair, &
+            pot, eFrame, f, t, do_pot)
 
-       if (PropertyMap(me_i)%is_Electrostatic .and. &
-            PropertyMap(me_j)%is_Electrostatic) then
-          call doElectrostaticPair(i, j, d, r, rijsq, sw, vpair, fpair, &
-               pot, eFrame, f, t, do_pot)
-       endif
-
-       if (FF_uses_dipoles .and. SIM_uses_dipoles) then       
+       if (FF_uses_dipoles .and. SIM_uses_dipoles) then                 
           if ( PropertyMap(me_i)%is_Dipole .and. &
                PropertyMap(me_j)%is_Dipole) then
              if (FF_uses_RF .and. SIM_uses_RF) then
@@ -968,61 +962,41 @@ contains
        endif
     endif
 
-
-    if (FF_uses_Sticky .and. SIM_uses_sticky) then
-
-       if ( PropertyMap(me_i)%is_Sticky .and. PropertyMap(me_j)%is_Sticky) then
-          call do_sticky_pair(i, j, d, r, rijsq, sw, vpair, fpair, &
-               pot, A, f, t, do_pot)
-       endif
-
+    if ( iand(iMap, STICKY_PAIR).ne.0 ) then
+       call do_sticky_pair(i, j, d, r, rijsq, sw, vpair, fpair, &
+            pot, A, f, t, do_pot)
     endif
 
-    if (FF_uses_StickyPower .and. SIM_uses_stickypower) then
-       if ( PropertyMap(me_i)%is_StickyPower .and. &
-            PropertyMap(me_j)%is_StickyPower) then
-          call do_sticky_power_pair(i, j, d, r, rijsq, sw, vpair, fpair, &
-               pot, A, f, t, do_pot)
-       endif
+    if ( iand(iMap, STICKYPOWER_PAIR).ne.0 ) then
+       call do_sticky_power_pair(i, j, d, r, rijsq, sw, vpair, fpair, &
+            pot, A, f, t, do_pot)
+    endif
+
+    if ( iand(iMap, GAYBERNE_PAIR).ne.0 ) then
+       call do_gb_pair(i, j, d, r, rijsq, sw, vpair, fpair, &
+            pot, A, f, t, do_pot)
     endif
     
-    if (FF_uses_GayBerne .and. SIM_uses_GayBerne) then
-
-       if ( PropertyMap(me_i)%is_GayBerne .and. &
-            PropertyMap(me_j)%is_GayBerne) then
-          call do_gb_pair(i, j, d, r, rijsq, sw, vpair, fpair, &
-               pot, A, f, t, do_pot)
-       endif
-
+    if ( iand(iMap, GAYBERNE_LJ).ne.0 ) then
+       call do_gblj_pair(i, j, d, r, rijsq, sw, vpair, fpair, &
+            pot, A, f, t, do_pot)
     endif
 
-    if (FF_uses_EAM .and. SIM_uses_EAM) then
-
-       if ( PropertyMap(me_i)%is_EAM .and. PropertyMap(me_j)%is_EAM) then
-          call do_eam_pair(i, j, d, r, rijsq, sw, vpair, fpair, pot, f, &
-               do_pot)
-       endif
-
+    if ( iand(iMap, EAM_PAIR).ne.0 ) then       
+       call do_eam_pair(i, j, d, r, rijsq, sw, vpair, fpair, pot, f, &
+            do_pot)
     endif
 
-
-    !    write(*,*) PropertyMap(me_i)%is_Shape,PropertyMap(me_j)%is_Shape
-
-    if (FF_uses_Shapes .and. SIM_uses_Shapes) then
-       if ( PropertyMap(me_i)%is_Shape .and. &
-            PropertyMap(me_j)%is_Shape ) then
-          call do_shape_pair(i, j, d, r, rijsq, sw, vpair, fpair, &
-               pot, A, f, t, do_pot)
-       endif
-       if ( (PropertyMap(me_i)%is_Shape .and. &
-            PropertyMap(me_j)%is_LennardJones) .or. & 
-            (PropertyMap(me_i)%is_LennardJones .and. &
-            PropertyMap(me_j)%is_Shape) ) then
-          call do_shape_pair(i, j, d, r, rijsq, sw, vpair, fpair, &
-               pot, A, f, t, do_pot)
-       endif
+    if ( iand(iMap, SHAPE_PAIR).ne.0 ) then       
+       call do_shape_pair(i, j, d, r, rijsq, sw, vpair, fpair, &
+            pot, A, f, t, do_pot)
     endif
 
+    if ( iand(iMap, SHAPE_LJ).ne.0 ) then       
+       call do_shape_pair(i, j, d, r, rijsq, sw, vpair, fpair, &
+            pot, A, f, t, do_pot)
+    endif
+    
   end subroutine do_pair
 
   subroutine do_prepair(i, j, rijsq, d, sw, rcijsq, dc, &
@@ -1040,18 +1014,7 @@ contains
     real ( kind = dp )                :: r, rc
     real ( kind = dp ), intent(inout) :: d(3), dc(3)
 
-    logical :: is_EAM_i, is_EAM_j
-
-    integer :: me_i, me_j
-
-
-    r = sqrt(rijsq)
-    if (SIM_uses_molecular_cutoffs) then
-       rc = sqrt(rcijsq)
-    else
-       rc = r
-    endif
-
+    integer :: me_i, me_j, iMap
 
 #ifdef IS_MPI   
     me_i = atid_row(i)
@@ -1061,13 +1024,12 @@ contains
     me_j = atid(j)   
 #endif
 
-    if (FF_uses_EAM .and. SIM_uses_EAM) then
+    iMap = InteractionMap(me_i, me_j)%InteractionHash
 
-       if (PropertyMap(me_i)%is_EAM .and. PropertyMap(me_j)%is_EAM) &
+    if ( iand(iMap, EAM_PAIR).ne.0 ) then       
             call calc_EAM_prepair_rho(i, j, d, r, rijsq )
-
     endif
-
+    
   end subroutine do_prepair
 
 
