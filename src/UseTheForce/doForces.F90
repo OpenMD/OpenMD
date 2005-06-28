@@ -45,7 +45,7 @@
 
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: doForces.F90,v 1.21 2005-06-27 22:21:37 chuckv Exp $, $Date: 2005-06-27 22:21:37 $, $Name: not supported by cvs2svn $, $Revision: 1.21 $
+!! @version $Id: doForces.F90,v 1.22 2005-06-28 13:58:45 gezelter Exp $, $Date: 2005-06-28 13:58:45 $, $Name: not supported by cvs2svn $, $Revision: 1.22 $
 
 
 module doForces
@@ -81,7 +81,6 @@ module doForces
   logical, save :: haveRlist = .false.
   logical, save :: haveNeighborList = .false.
   logical, save :: haveSIMvariables = .false.
-  logical, save :: havePropertyMap = .false.
   logical, save :: haveSaneForceField = .false.
 
   logical, save :: FF_uses_DirectionalAtoms
@@ -130,37 +129,18 @@ module doForces
   integer :: nLoops
 #endif
 
-  type :: Properties
-     logical :: is_Directional   = .false.
-     logical :: is_LennardJones  = .false.
-     logical :: is_Electrostatic = .false.
-     logical :: is_Charge        = .false.
-     logical :: is_Dipole        = .false.
-     logical :: is_Quadrupole    = .false.
-     logical :: is_Sticky        = .false.
-     logical :: is_StickyPower   = .false.
-     logical :: is_GayBerne      = .false.
-     logical :: is_EAM           = .false.
-     logical :: is_Shape         = .false.
-     logical :: is_FLARB         = .false.
-  end type Properties
-
-  type(Properties), dimension(:),allocatable :: PropertyMap
-
-
-  
   type, public :: Interaction
      integer :: InteractionHash
      real(kind=dp) :: rCut
   end type Interaction
   
-  type(Interaction), public, dimension(:,:), allocatable :: InteractionMap
+  type(Interaction), dimension(:,:),allocatable :: InteractionMap
   
   !public :: addInteraction
   !public :: setInteractionHash
   !public :: getInteractionHash
   public :: createInteractionMap
-
+  
 contains
 
  
@@ -228,19 +208,24 @@ contains
           call getElementProperty(atypes, j, "is_Shape", j_is_Shape)
 
           if (i_is_LJ .and. j_is_LJ) then
-             iHash = ior(iHash, LJ_PAIR)
-             
-
-
+             iHash = ior(iHash, LJ_PAIR)            
+          endif
+          
+          if (i_is_Elect .and. j_is_Elect) then
+             iHash = ior(iHash, ELECTROSTATIC_PAIR)
+          endif
+          
+          if (i_is_Sticky .and. j_is_Sticky) then
+             iHash = ior(iHash, STICKY_PAIR)
           endif
 
+          if (i_is_StickyP .and. j_is_StickyP) then
+             iHash = ior(iHash, STICKYPOWER_PAIR)
+          endif
 
-
-          if (i_is_Elect .and. j_is_Elect) iHash = ior(iHash, ELECTROSTATIC_PAIR)
-          if (i_is_Sticky .and. j_is_Sticky) iHash = ior(iHash, STICKY_PAIR)
-          if (i_is_StickyP .and. j_is_StickyP) iHash = ior(iHash, STICKYPOWER_PAIR)
-
-          if (i_is_EAM .and. j_is_EAM) iHash = ior(iHash, EAM_PAIR)
+          if (i_is_EAM .and. j_is_EAM) then
+             iHash = ior(iHash, EAM_PAIR)
+          endif
 
           if (i_is_GB .and. j_is_GB) iHash = ior(iHash, GAYBERNE_PAIR)
           if (i_is_GB .and. j_is_LJ) iHash = ior(iHash, GAYBERNE_LJ)
@@ -273,67 +258,6 @@ contains
 !!$
 !!$  end subroutine setRlistDF
 
-  subroutine createPropertyMap(status)
-    integer :: nAtypes
-    integer :: status
-    integer :: i
-    logical :: thisProperty
-    real (kind=DP) :: thisDPproperty
-
-    status = 0
-
-    nAtypes = getSize(atypes)
-
-    if (nAtypes == 0) then
-       status = -1
-       return
-    end if
-
-    if (.not. allocated(PropertyMap)) then
-       allocate(PropertyMap(nAtypes))
-    endif
-
-    do i = 1, nAtypes
-       call getElementProperty(atypes, i, "is_Directional", thisProperty)
-       PropertyMap(i)%is_Directional = thisProperty
-
-       call getElementProperty(atypes, i, "is_LennardJones", thisProperty)
-       PropertyMap(i)%is_LennardJones = thisProperty
-
-       call getElementProperty(atypes, i, "is_Electrostatic", thisProperty)
-       PropertyMap(i)%is_Electrostatic = thisProperty
-
-       call getElementProperty(atypes, i, "is_Charge", thisProperty)
-       PropertyMap(i)%is_Charge = thisProperty
-
-       call getElementProperty(atypes, i, "is_Dipole", thisProperty)
-       PropertyMap(i)%is_Dipole = thisProperty
-
-       call getElementProperty(atypes, i, "is_Quadrupole", thisProperty)
-       PropertyMap(i)%is_Quadrupole = thisProperty
-
-       call getElementProperty(atypes, i, "is_Sticky", thisProperty)
-       PropertyMap(i)%is_Sticky = thisProperty
-       
-       call getElementProperty(atypes, i, "is_StickyPower", thisProperty)
-       PropertyMap(i)%is_StickyPower = thisProperty
-
-       call getElementProperty(atypes, i, "is_GayBerne", thisProperty)
-       PropertyMap(i)%is_GayBerne = thisProperty
-
-       call getElementProperty(atypes, i, "is_EAM", thisProperty)
-       PropertyMap(i)%is_EAM = thisProperty
-
-       call getElementProperty(atypes, i, "is_Shape", thisProperty)
-       PropertyMap(i)%is_Shape = thisProperty
-
-       call getElementProperty(atypes, i, "is_FLARB", thisProperty)
-       PropertyMap(i)%is_FLARB = thisProperty
-    end do
-
-    havePropertyMap = .true.
-
-  end subroutine createPropertyMap
 
   subroutine setSimVariables()
     SIM_uses_DirectionalAtoms = SimUsesDirectionalAtoms()
@@ -364,14 +288,14 @@ contains
 
     error = 0
 
-    if (.not. havePropertyMap) then 
+    if (.not. haveInteractionMap) then 
 
        myStatus = 0
 
-       call createPropertyMap(myStatus)
+       call createInteractionMap(myStatus)
 
        if (myStatus .ne. 0) then
-          write(default_error, *) 'createPropertyMap failed in doForces!'
+          write(default_error, *) 'createInteractionMap failed in doForces!'
           error = -1
           return
        endif
@@ -973,8 +897,9 @@ contains
 #else
              me_i = atid(i)
 #endif
-
-             if (PropertyMap(me_i)%is_Dipole) then
+             iMap = InteractionMap(me_i, me_j)%InteractionHash
+             
+             if ( iand(iMap, ELECTROSTATIC_PAIR).ne.0 ) then
 
                 mu_i = getDipoleMoment(me_i)
 
@@ -1065,15 +990,13 @@ contains
        call doElectrostaticPair(i, j, d, r, rijsq, sw, vpair, fpair, &
             pot, eFrame, f, t, do_pot)
 
-       if (FF_uses_dipoles .and. SIM_uses_dipoles) then                 
-          if ( PropertyMap(me_i)%is_Dipole .and. &
-               PropertyMap(me_j)%is_Dipole) then
-             if (FF_uses_RF .and. SIM_uses_RF) then
-                call accumulate_rf(i, j, r, eFrame, sw)
-                call rf_correct_forces(i, j, d, r, eFrame, sw, f, fpair)
-             endif
-          endif
+       if (FF_uses_RF .and. SIM_uses_RF) then
+
+          ! CHECK ME (RF needs to know about all electrostatic types)
+          call accumulate_rf(i, j, r, eFrame, sw)
+          call rf_correct_forces(i, j, d, r, eFrame, sw, f, fpair)
        endif
+
     endif
 
     if ( iand(iMap, STICKY_PAIR).ne.0 ) then
