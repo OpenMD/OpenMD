@@ -99,7 +99,9 @@ module oopseMPI
      module procedure mpi_allreduce_int_2d
      module procedure mpi_allreduce_dp     
      module procedure mpi_allreduce_dp_1d     
-     module procedure mpi_allreduce_dp_2d     
+     module procedure mpi_allreduce_dp_2d 
+     module procedure mpi_allreduce_logical
+     module procedure mpi_allreduce_logical_1d
   end interface
 
   !  interface mpi_reduce
@@ -507,6 +509,27 @@ contains
     CALL MPI_ALLREDUCE(SENDBUF, RECVBUF, COUNT, DATATYPE, OP,      &
          COMM, IERROR) 
   END SUBROUTINE MPI_ALLREDUCE_DP_2D
+
+
+  SUBROUTINE MPI_ALLREDUCE_LOGICAL(SENDBUF, RECVBUF, COUNT, DATATYPE,  &
+       OP, COMM, IERROR) 
+    LOGICAL :: SENDBUF, RECVBUF 
+    INTEGER COUNT, DATATYPE, OP, COMM, IERROR
+    EXTERNAL MPI_ALLREDUCE
+    CALL MPI_ALLREDUCE(SENDBUF, RECVBUF, COUNT, DATATYPE, OP,      &
+         COMM, IERROR) 
+  END SUBROUTINE MPI_ALLREDUCE_LOGICAL
+
+
+  SUBROUTINE MPI_ALLREDUCE_LOGICAL_1D(SENDBUF, RECVBUF, COUNT, DATATYPE,  &
+       OP, COMM, IERROR) 
+    LOGICAL, dimension(:) :: SENDBUF, RECVBUF 
+    INTEGER COUNT, DATATYPE, OP, COMM, IERROR
+    EXTERNAL MPI_ALLREDUCE
+    CALL MPI_ALLREDUCE(SENDBUF, RECVBUF, COUNT, DATATYPE, OP,      &
+         COMM, IERROR) 
+  end SUBROUTINE MPI_ALLREDUCE_LOGICAL_1D
+
   !-----------------END MPI_ALLREDUCE-------------------------->
 
   !----------------BEGIN MPI_REDUCE_SCATTER

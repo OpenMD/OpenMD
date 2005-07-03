@@ -82,6 +82,7 @@ module simulation
   real(kind=dp), allocatable, dimension(:), public :: mfactCol
   real(kind=dp), allocatable, dimension(:), public :: mfactLocal
 
+  logical, allocatable, dimension(:) :: simHasAtypeMap
   real(kind=dp), public, dimension(3,3), save :: Hmat, HmatInv
   logical, public, save :: boxIsOrthorhombic
 
@@ -105,7 +106,7 @@ module simulation
   public :: SimUsesRF
   public :: SimRequiresPrepairCalc
   public :: SimRequiresPostpairCalc
-
+  public :: SimHasAtype
 
 contains
 
@@ -457,7 +458,12 @@ contains
              molMemberShipList(i) = CmolMembership(i)
           enddo
 
-          if (status == 0) simulation_setup_complete = .true.
+         call createSimHasAtype(alloc_stat)
+         if (alloc_stat /= 0) then
+            status = -1
+         end if
+         
+         if (status == 0) simulation_setup_complete = .true.
 
         end subroutine SimulationSetup
 
@@ -559,7 +565,49 @@ contains
           doesit = thisSim%SIM_uses_RF
         end function SimRequiresPostpairCalc
 
-        subroutine InitializeSimGlobals(thisStat)
+! Function returns true if the simulation has this atype
+        function SimHasAtype(thisAtype) result(doesit)
+          logical :: doesit
+          integer :: thisAtype
+          doesit = .false.
+          if(.not.allocated(SimHasAtypeMap)) return
+
+          doesit = SimHasAtypeMap(thisAtype)
+             
+        end function SimHasAtype
+
+        subroutine createSimHasAtype(status)
+          integer, intent(out) :: status
+          integer :: alloc_stat
+          integer :: me_i
+          integer :: mpiErrors
+          integer :: nAtypes
+          status = 0
+
+          nAtypes = getSize(atypes)
+          ! Setup logical map for atypes in simulation
+          if (.not.allocated(SimHasAtypeMap)) then
+             allocate(SimHasAtypeMap(nAtypes),stat=alloc_stat)
+             if (alloc_stat /= 0 ) then
+                status = -1
+                return
+             end if
+             SimHasAtypeMap = .false.
+          end if
+ ! Loop through the local atoms and grab the atypes present         
+          do me_i = 1,nLocal
+             SimHasAtypeMap(atid(me_i)) = .true.
+          end do
+! For MPI, we need to know all possible atypes present in simulation on all
+! processors. Use LOR operation to set map.
+#ifdef IS_MPI
+          call mpi_allreduce(SimHasAtypeMap, SimHasAtypeMap, nAtypes, mpi_logical, &
+               MPI_LOR, mpi_comm_world, mpiErrors)
+#endif
+
+        end subroutine createSimHasAtype
+ 
+       subroutine InitializeSimGlobals(thisStat)
           integer, intent(out) :: thisStat
           integer :: alloc_stat
 
@@ -610,5 +658,9 @@ contains
           integer :: n
           n = nLocal
         end function getNlocal
+
+
+
+
 
       end module simulation

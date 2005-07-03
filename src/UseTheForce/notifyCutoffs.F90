@@ -42,7 +42,7 @@
 module notifyCutoffs
 
   use definitions
-  use doForces, only:       setRlistDF
+  use doForces, only:       createRCuts
   use reaction_field, only: setCutoffsRF
   use lj, only:             setCutoffLJ
   use eam, only:            setCutoffEAM
@@ -107,7 +107,7 @@ contains
 
     endif
 
-    call setRlistDF( rlist )
+    call createRCuts( rlist )
     call setCutoffsRF( rcut, rsw )
     call setCutoffLJ( rcut, do_shift, localError )
     call setCutoffEAM( rcut, localError)

@@ -45,7 +45,7 @@
 
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: doForces.F90,v 1.22 2005-06-28 13:58:45 gezelter Exp $, $Date: 2005-06-28 13:58:45 $, $Name: not supported by cvs2svn $, $Revision: 1.22 $
+!! @version $Id: doForces.F90,v 1.23 2005-07-03 20:53:43 chuckv Exp $, $Date: 2005-07-03 20:53:43 $, $Name: not supported by cvs2svn $, $Revision: 1.23 $
 
 
 module doForces
@@ -82,6 +82,7 @@ module doForces
   logical, save :: haveNeighborList = .false.
   logical, save :: haveSIMvariables = .false.
   logical, save :: haveSaneForceField = .false.
+  logical, save :: haveInteractionMap = .false.
 
   logical, save :: FF_uses_DirectionalAtoms
   logical, save :: FF_uses_LennardJones
@@ -121,6 +122,11 @@ module doForces
   public :: init_FF
   public :: do_force_loop
 !  public :: setRlistDF
+  !public :: addInteraction
+  !public :: setInteractionHash
+  !public :: getInteractionHash
+  public :: createInteractionMap
+  public :: createRcuts
 
 #ifdef PROFILE
   public :: getforcetime
@@ -131,15 +137,13 @@ module doForces
 
   type, public :: Interaction
      integer :: InteractionHash
-     real(kind=dp) :: rCut
+     real(kind=dp) :: rList = 0.0_dp
+     real(kind=dp) :: rListSq = 0.0_dp
   end type Interaction
   
   type(Interaction), dimension(:,:),allocatable :: InteractionMap
   
-  !public :: addInteraction
-  !public :: setInteractionHash
-  !public :: getInteractionHash
-  public :: createInteractionMap
+
   
 contains
 
@@ -244,6 +248,80 @@ contains
     end do
   end subroutine createInteractionMap
 
+! Query each potential and return the cutoff for that potential. We build the neighbor list based on the largest cutoff value for that atype. Each potential can decide whether to calculate the force for that atype based upon it's own cutoff.
+  subroutine createRcuts(defaultRList)
+    real(kind=dp), intent(in), optional :: defaultRList
+    integer :: iMap
+    integer :: map_i,map_j
+    real(kind=dp) :: thisRCut = 0.0_dp
+    real(kind=dp) :: actualCutoff = 0.0_dp
+    integer :: nAtypes
+
+    if(.not. allocated(InteractionMap)) return
+
+    nAtypes = getSize(atypes)
+! If we pass a default rcut, set all atypes to that cutoff distance
+    if(present(defaultRList)) then
+       InteractionMap(:,:)%rList = defaultRList
+       InteractionMap(:,:)%rListSq = defaultRList*defaultRList
+       haveRlist = .true.
+       return
+    end if
+
+    do map_i = 1,nAtypes
+       do map_j = map_i,nAtypes
+          iMap = InteractionMap(map_i, map_j)%InteractionHash
+          
+          if ( iand(iMap, LJ_PAIR).ne.0 ) then
+ !            thisRCut = getLJCutOff(map_i,map_j)
+             if (thisRcut > actualCutoff) actualCutoff = thisRcut
+          endif
+          
+          if ( iand(iMap, ELECTROSTATIC_PAIR).ne.0 ) then
+ !            thisRCut = getElectrostaticCutOff(map_i,map_j)
+             if (thisRcut > actualCutoff) actualCutoff = thisRcut
+          endif
+          
+          if ( iand(iMap, STICKY_PAIR).ne.0 ) then
+!             thisRCut = getStickyCutOff(map_i,map_j)
+              if (thisRcut > actualCutoff) actualCutoff = thisRcut
+           endif
+           
+           if ( iand(iMap, STICKYPOWER_PAIR).ne.0 ) then
+!              thisRCut = getStickyPowerCutOff(map_i,map_j)
+              if (thisRcut > actualCutoff) actualCutoff = thisRcut
+           endif
+           
+           if ( iand(iMap, GAYBERNE_PAIR).ne.0 ) then
+!              thisRCut = getGayberneCutOff(map_i,map_j)
+              if (thisRcut > actualCutoff) actualCutoff = thisRcut
+           endif
+           
+           if ( iand(iMap, GAYBERNE_LJ).ne.0 ) then
+!              thisRCut = getGaybrneLJCutOff(map_i,map_j)
+              if (thisRcut > actualCutoff) actualCutoff = thisRcut
+           endif
+           
+           if ( iand(iMap, EAM_PAIR).ne.0 ) then       
+!              thisRCut = getEAMCutOff(map_i,map_j)
+              if (thisRcut > actualCutoff) actualCutoff = thisRcut
+           endif
+           
+           if ( iand(iMap, SHAPE_PAIR).ne.0 ) then       
+!              thisRCut = getShapeCutOff(map_i,map_j)
+              if (thisRcut > actualCutoff) actualCutoff = thisRcut
+           endif
+           
+           if ( iand(iMap, SHAPE_LJ).ne.0 ) then       
+!              thisRCut = getShapeLJCutOff(map_i,map_j)
+              if (thisRcut > actualCutoff) actualCutoff = thisRcut
+           endif
+           InteractionMap(map_i, map_j)%rList = actualCutoff
+           InteractionMap(map_i, map_j)%rListSq = actualCutoff * actualCutoff
+        end do
+     end do
+          haveRlist = .true.
+  end subroutine createRcuts
 
 
 !!! THIS GOES AWAY FOR SIZE DEPENDENT CUTOFF
@@ -553,7 +631,7 @@ contains
     integer :: localError
     integer :: propPack_i, propPack_j
     integer :: loopStart, loopEnd, loop
-
+    integer :: iMap
     real(kind=dp) :: listSkin = 1.0   
 
     !! initialize local variables  
@@ -679,7 +757,7 @@ contains
                   q_group(:,j), d_grp, rgrpsq)
 #endif
 
-             if (rgrpsq < rlistsq) then
+             if (rgrpsq < InteractionMap(me_i,me_j)%rListsq) then
                 if (update_nlist) then
                    nlist = nlist + 1
 
@@ -1015,8 +1093,8 @@ contains
     endif
     
     if ( iand(iMap, GAYBERNE_LJ).ne.0 ) then
-       call do_gblj_pair(i, j, d, r, rijsq, sw, vpair, fpair, &
-            pot, A, f, t, do_pot)
+ !      call do_gblj_pair(i, j, d, r, rijsq, sw, vpair, fpair, &
+ !           pot, A, f, t, do_pot)
     endif
 
     if ( iand(iMap, EAM_PAIR).ne.0 ) then       
