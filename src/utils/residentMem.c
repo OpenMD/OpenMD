@@ -23,7 +23,7 @@ double residentMem () {
 
   STR_DEFINE(psPath, PSCOMMAND );
  
-  // null terminated string is one longer....
+  
   strncpy(pscommand, psPath, strlen(psPath)+1);
 
 #ifdef PSTYPE_IS_BSD
@@ -52,12 +52,12 @@ double residentMem () {
   pclose(procresults);
 
 #ifdef __sgi
-  // Damn IRIX machines uses pages for RSS and pagesize is variable 
-  // depending on version of the OS.
+  
+  
   totRSS *= getpagesize() / 1024;
 #endif
 
-  //return in byte
+  
   totRSS *= 1024;
   return(totRSS);
 

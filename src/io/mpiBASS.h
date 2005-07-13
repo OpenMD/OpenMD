@@ -68,7 +68,7 @@ extern "C" {
 }
 #endif
 
-// Structure to pass mpi a BASS event
+/* Structure to pass mpi a BASS event*/
 
 typedef struct mpiBASSEvent{
   int type;
@@ -78,7 +78,7 @@ typedef struct mpiBASSEvent{
   char   lhs[80];
 } mBEvent;
 
-// types for mpiBASSEvent.type
+/* types for mpiBASSEvent.type*/
 #define mpiMOLECULE     0
 #define mpiATOM         1
 #define mpiBOND         2
@@ -99,7 +99,7 @@ typedef struct mpiBASSEvent{
 #define mpiMEMBER       17
 
 
-// Define the mpi datatype
+/* Define the mpi datatype*/
 #ifdef __mpiBASSEVENT
 MPI_Datatype mpiBASSEventType;
 #endif

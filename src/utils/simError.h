@@ -15,7 +15,7 @@ typedef struct{
   int severity;
 #ifdef IS_MPI
   int isEventLoop;
-#endif // IS_MPI
+#endif 
 } errorStruct;
 
 extern errorStruct painCave;
@@ -29,26 +29,26 @@ extern int worldRank;
 
 #ifdef __cplusplus
 extern "C" {
-#endif // __cplusplus
+#endif 
   
-  int simError( void ); // returns 1 if handled. 0 otherwise.
+  int simError( void ); 
 
-  void initSimError( void ); // needed to be called from main before anything
-                             // goes wrong.
+  void initSimError( void ); 
+                             
 
 #ifdef IS_MPI
   
   void MPIcheckPoint( void );
   
-#endif // IS_MPI
+#endif 
 
 #ifdef __cplusplus
 }
-#endif //__cplusplus
+#endif 
 
-#endif // __SIMERROR_H__
+#endif 
 
-#else // __FORTRAN90
+#else 
 
   INTEGER, PARAMETER:: OOPSE_ERROR   = 1
   INTEGER, PARAMETER:: OOPSE_WARNING = 2
@@ -63,9 +63,9 @@ extern "C" {
     integer :: severity
 #ifdef IS_MPI
     logical :: isEventLoop;
-#endif // IS_MPI
+#endif 
   end type errorStruct
 
   type (errorStruct), public, save :: painCave
 
-#endif // __FORTRAN90
+#endif 

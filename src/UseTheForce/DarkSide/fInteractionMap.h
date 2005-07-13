@@ -14,7 +14,7 @@
 #define FLARB_PAIR         512
 
 #endif
-#endif //__C
+#endif /*__C*/
 
 #ifdef  __FORTRAN90
 

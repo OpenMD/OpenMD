@@ -75,8 +75,8 @@ typedef union{
 
 typedef struct assignment_data_tag{
   assign_type type;
-  char* identifier; // left hand side
-  assignment_value rhs; // right hand side
+  char* identifier; /* left hand side*/
+  assignment_value rhs; /* right hand side*/
 } assignment_data;
 
 /* a structure to hold the position information */
@@ -102,10 +102,10 @@ typedef struct orientation_data_tag{
 
 typedef struct node_tag{
   node_type type;
-  int index; // needed for atoms, bonds, etc.
-  struct node_tag* next_stmt; // the next statement
-  struct node_tag* prev_stmt; // the previous statement
-  struct node_tag* stmt_list; // the statment list if this is a block.
+  int index; /* needed for atoms, bonds, etc.*/
+  struct node_tag* next_stmt; /* the next statement*/
+  struct node_tag* prev_stmt; /* the previous statement*/
+  struct node_tag* stmt_list; /* the statment list if this is a block.*/
   
   /* this is a union to hold the statement data */
 

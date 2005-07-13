@@ -8,7 +8,7 @@
 #define GROUP_SWITCH         3
 
 #endif
-#endif //__C
+#endif /*__C*/
 
 #ifdef  __FORTRAN90
 

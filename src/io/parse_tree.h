@@ -56,7 +56,7 @@ extern void pt_me( struct node_tag* head_node );
 
 extern void kill_tree( struct node_tag* the_node );
 
-// function to print out a node causing errors 
+/* function to print out a node causing errors */
 
 extern void print_tree_error( struct node_tag* err_node, char* err_msg );
 

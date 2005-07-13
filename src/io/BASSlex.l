@@ -38,10 +38,10 @@ typedef	unsigned short	my_short;
 
 extern void change_in_file( FILE* in_file );
 
-// the following is used by the include start state
+/* the following is used by the include start state*/
 
 #define MAX_BUFFER_DEPTH 10
-YY_BUFFER_STATE buffer_stack[MAX_BUFFER_DEPTH]; // a stack of the include buffers
+YY_BUFFER_STATE buffer_stack[MAX_BUFFER_DEPTH]; /* a stack of the include buffers*/
 int buffer_stack_ptr = 0;
 struct filename_list{
   char my_name[300];
@@ -52,13 +52,13 @@ struct filename_list* temp_yyfile_name;
 int yylineno_stack[MAX_BUFFER_DEPTH];
 
 
-// the following is a check against the define buffer length
+/* the following is a check against the define buffer length*/
 
 void check_def_buff( char* defined, int index );
 
-//these are used by the ifdef and ifndef statements
+/*these are used by the ifdef and ifndef statements*/
 
-int escape_stack_ptr = 0; //keeps track of the escape stack
+int escape_stack_ptr = 0; /*keeps track of the escape stack*/
 
 
 %}
@@ -108,7 +108,7 @@ int escape_stack_ptr = 0; //keeps track of the escape stack
 				  /* little routine to strip off the quotes */
 				  
 				  my_short i;
-				  i = 0; // index
+				  i = 0; /* index*/
 				  while( yytext[i+1] != '\"' ){
 
 				    yytext[i] = yytext[i+1];
@@ -123,7 +123,7 @@ int escape_stack_ptr = 0; //keeps track of the escape stack
 				  /* little routine to pass a list string */
 				  
 				  my_short i;
-				  i = 0; // index
+				  i = 0; /* index*/
 				  while( yytext[i+1] != ')' ){
 
 				    yytext[i] = yytext[i+1];
@@ -169,7 +169,7 @@ int escape_stack_ptr = 0; //keeps track of the escape stack
 "#"				BEGIN(PRE_P);
 
 .				{
-				  // pass everything else to yacc
+				  /* pass everything else to yacc*/
 				  return yytext[0];
 				}
 
@@ -184,10 +184,10 @@ int escape_stack_ptr = 0; //keeps track of the escape stack
 <INCL>\".*\"			{
 				  char foo_name[300];
 				  
-				  // little routine to strip off the quotes 
+				  /* little routine to strip off the quotes */
 
 				  my_short i;
-				  i = 0; // index
+				  i = 0; /* index*/
 				  while( yytext[i+1] != '\"' ){
 
 				    yytext[i] = yytext[i+1];
@@ -197,7 +197,7 @@ int escape_stack_ptr = 0; //keeps track of the escape stack
 				  yytext[i] = '\0';
 				  strcpy( foo_name, yytext );
 
-				  // now we have the include file name
+				  /* now we have the include file name*/
 				  
 				  if( buffer_stack_ptr >= MAX_BUFFER_DEPTH ){
 				    
@@ -234,10 +234,10 @@ int escape_stack_ptr = 0; //keeps track of the escape stack
 				  char c;
 				  char definition[ DEFINED_BUFFER_SIZE ];
 				  short int done;
-				  short int c_done; // a done marker for the comments
+				  short int c_done; /* a done marker for the comments*/
 				  int def_ptr;
 				  
-				  // initialize the definition buffer
+				  /* initialize the definition buffer*/
 
 				  for( def_ptr = 0; def_ptr < DEFINED_BUFFER_SIZE; def_ptr++ ){
 				    definition[def_ptr] = '\0';
@@ -252,10 +252,10 @@ int escape_stack_ptr = 0; //keeps track of the escape stack
 				    c = input();
 				    if( c == '\"' ){
 				    
-				      // shove the whole quoted string into the macro
+				      /* shove the whole quoted string into the macro*/
 				    
 				      definition[def_ptr] = c;
-				      //fprintf( stderr, "%c", c );
+				      /*fprintf( stderr, "%c", c );*/
 				      def_ptr++;
 				      check_def_buff( yytext, def_ptr );
 				      
@@ -263,20 +263,20 @@ int escape_stack_ptr = 0; //keeps track of the escape stack
 				      while( c != '\"' ){
 				      
 				        definition[def_ptr] = c;
-				        //fprintf( stderr, "%c", c );
+				        /*fprintf( stderr, "%c", c );*/
 					def_ptr++;
 				        check_def_buff( yytext, def_ptr );
 
 					c = input();
 				      }
 				      definition[def_ptr] = c;
-				      //fprintf( stderr, "%c", c );
+				      /*fprintf( stderr, "%c", c );*/
 				      def_ptr++;
 				      check_def_buff( yytext, def_ptr );
 				      c = input();
 				    }
 				    
-				    // handle comments
+				    /* handle comments*/
 
 				    if( c == '/' ){
 				      c = input();
@@ -304,9 +304,9 @@ int escape_stack_ptr = 0; //keeps track of the escape stack
 					  break;
 
 					default:
-					  // the '/' char was a normal symbol
+					  /* the '/' char was a normal symbol*/
 					  definition[def_ptr] = '/';
-				          //fprintf( stderr, "%c", c );
+				          /*fprintf( stderr, "%c", c );*/
 					  def_ptr++;
 					  check_def_buff( yytext, def_ptr );
 					  break;
@@ -320,11 +320,11 @@ int escape_stack_ptr = 0; //keeps track of the escape stack
 				    
 				    else{
 				      
-				      // check for the line wrap character '\'
+				      /* check for the line wrap character '\'*/
 				      
 				      if( c == '\\' ){
 				        
-					// skip the rest of the line until the line return
+					/* skip the rest of the line until the line return*/
 
 					c = input();
 					while( c != '\n' ){
@@ -334,10 +334,10 @@ int escape_stack_ptr = 0; //keeps track of the escape stack
 
 				      else{
 				        
-					// we now know the character is a good one 
+					/* we now know the character is a good one */
 
 					definition[def_ptr] = c;
-				        //fprintf( stderr, "%c", c );
+				        /*fprintf( stderr, "%c", c );*/
 					def_ptr++;
 					check_def_buff( yytext, def_ptr );
 				      }
@@ -403,7 +403,7 @@ int escape_stack_ptr = 0; //keeps track of the escape stack
 <CHECK_ESCAPE>"endif"		{
 				  escape_stack_ptr--;
 				  if( escape_stack_ptr <= 0){
-				    escape_stack_ptr = 0; // just in case something flubbed 
+				    escape_stack_ptr = 0; /* just in case something flubbed */
 				    BEGIN(INITIAL);
 				  }
 				}
@@ -413,7 +413,7 @@ int escape_stack_ptr = 0; //keeps track of the escape stack
 <<EOF>> 			{
 				  buffer_stack_ptr--;
 				  if( buffer_stack_ptr < 0 ){
-                                    //reinitialize buffer_stack_ptr
+                                    /*reinitialize buffer_stack_ptr*/
 				    buffer_stack_ptr = 0; 
 				    yyterminate();
 				  }

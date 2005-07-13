@@ -99,71 +99,71 @@ void throwMPIEvent(event* the_event)
     switch (the_event->event_type){
     case MOLECULE:
       mpiEventContainer.type = mpiMOLECULE;
-      mpiEventContainer.i1 = the_event->evt.blk_index; // pack block index into first int  
+      mpiEventContainer.i1 = the_event->evt.blk_index; /* pack block index into first int  */
       break;
 
     case RIGIDBODY:
       mpiEventContainer.type = mpiRIGIDBODY;
-      mpiEventContainer.i1 = the_event->evt.blk_index; // pack block index into first int  
+      mpiEventContainer.i1 = the_event->evt.blk_index; /* pack block index into first int  */
       break;
 
     case CUTOFFGROUP:
       mpiEventContainer.type = mpiCUTOFFGROUP;
-      mpiEventContainer.i1 = the_event->evt.blk_index; // pack block index into first int  
+      mpiEventContainer.i1 = the_event->evt.blk_index; /* pack block index into first int  */
       break;
 
     case ATOM:
       mpiEventContainer.type = mpiATOM;
-      mpiEventContainer.i1 = the_event->evt.blk_index; // pack block index into first int
+      mpiEventContainer.i1 = the_event->evt.blk_index; /* pack block index into first int*/
       break;
 
     case BOND:
       mpiEventContainer.type = mpiBOND;
-      mpiEventContainer.i1 = the_event->evt.blk_index; // pack block index into first int
+      mpiEventContainer.i1 = the_event->evt.blk_index; /* pack block index into first int*/
       break;
 
     case BEND:
       mpiEventContainer.type = mpiBEND;
-      mpiEventContainer.i1 = the_event->evt.blk_index; // pack block index into first int
+      mpiEventContainer.i1 = the_event->evt.blk_index; /* pack block index into first int*/
       break;
 
     case TORSION:
       mpiEventContainer.type = mpiTORSION;
-      mpiEventContainer.i1 = the_event->evt.blk_index; // pack block index into first int
+      mpiEventContainer.i1 = the_event->evt.blk_index; /* pack block index into first int*/
       break;
 
     case ZCONSTRAINT:
       mpiEventContainer.type = mpiZCONSTRAINT;
-      mpiEventContainer.i1 = the_event->evt.blk_index; // pack block index into first int
+      mpiEventContainer.i1 = the_event->evt.blk_index; /* pack block index into first int*/
       break;
 
     case COMPONENT:
       mpiEventContainer.type = mpiCOMPONENT;
-      mpiEventContainer.i1 = the_event->evt.blk_index; // pack block index into first int
+      mpiEventContainer.i1 = the_event->evt.blk_index; /* pack block index into first int*/
       break;
 
     case POSITION:
       mpiEventContainer.type = mpiPOSITION;
-      mpiEventContainer.d1 = the_event->evt.pos.x; // pack pos coord into d
+      mpiEventContainer.d1 = the_event->evt.pos.x; /* pack pos coord into d*/
       mpiEventContainer.d2 = the_event->evt.pos.y; 
       mpiEventContainer.d3 = the_event->evt.pos.z;   
       break;
 
     case ORIENTATION:
       mpiEventContainer.type = mpiORIENTATION;
-      mpiEventContainer.d1 = the_event->evt.ornt.phi; // pack orientation coord into d
+      mpiEventContainer.d1 = the_event->evt.ornt.phi; /* pack orientation coord into d*/
       mpiEventContainer.d2 = the_event->evt.ornt.theta; 
       mpiEventContainer.d3 = the_event->evt.ornt.psi;   
       break;
       
     case CONSTRAINT:
       mpiEventContainer.type = mpiCONSTRAINT;
-      mpiEventContainer.d1 = the_event->evt.cnstr; // pack constraint coord into d
+      mpiEventContainer.d1 = the_event->evt.cnstr; /* pack constraint coord into d*/
       break;
       
     case MEMBERS:
       mpiEventContainer.type = mpiMEMBERS;
-      mpiEventContainer.i1 = the_event->evt.mbrs.nMembers ; // pack member ints into i
+      mpiEventContainer.i1 = the_event->evt.mbrs.nMembers ; /* pack member ints into i*/
       break;
       
     case ASSIGNMENT:
@@ -208,8 +208,8 @@ void throwMPIEvent(event* the_event)
 
     if (the_event->event_type == MEMBERS) {
 
-      // For member lists, we need a separate broadcast to spew out the
-      // membership array:
+      /* For member lists, we need a separate broadcast to spew out the*/
+      /* membership array:*/
       MPI_Bcast(the_event->evt.mbrs.memberList, the_event->evt.mbrs.nMembers, 
                 MPI_INT, 0, MPI_COMM_WORLD);
       
@@ -223,7 +223,7 @@ void throwMPIEvent(event* the_event)
 }
 
 
-// Everybody but node 0 runs this
+/* Everybody but node 0 runs this*/
 void mpiEventLoop(void)
 {
   int mpiContinue;
@@ -349,7 +349,7 @@ void mpiCatchEvent(void)
     the_event.evt.mbrs.memberList = (int *) calloc(the_event.evt.mbrs.nMembers,
 						   sizeof(int));
     
-    // Grab the member list since we have a number of members:
+    /* Grab the member list since we have a number of members:*/
     MPI_Bcast(the_event.evt.mbrs.memberList, the_event.evt.mbrs.nMembers, 
               MPI_INT, 0, MPI_COMM_WORLD);
     

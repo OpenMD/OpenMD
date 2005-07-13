@@ -48,7 +48,7 @@
 #include <mpi.h>
 
 int nChecks;
-#endif // IS_MPI
+#endif 
 
 #include "utils/simError.h"
 
@@ -147,8 +147,8 @@ void MPIcheckPoint( void ){
 	    nChecks,
 	    checkPointMsg );
   }
-#endif // CHECKPOINT_VERBOSE  
+#endif 
 
 }
 
-#endif // IS_MPI
+#endif 

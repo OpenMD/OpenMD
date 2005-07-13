@@ -24,8 +24,8 @@ typedef  struct{
   int SIM_uses_FLARB;
   int SIM_uses_RF;
 } simtype;
-#endif //__FSIMULATION
-#endif //__C
+#endif /*__FSIMULATION*/
+#endif /*__C*/
 
 #ifdef  __FORTRAN90
 

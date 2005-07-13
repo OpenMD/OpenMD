@@ -361,5 +361,5 @@ void interface_error( event* the_event ){
   simError();
 #ifdef IS_MPI
   mpiInterfaceExit();
-#endif //IS_MPI
+#endif /*IS_MPI*/
 }

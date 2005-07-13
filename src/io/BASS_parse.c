@@ -51,41 +51,41 @@
 #include "io/mpiBASS.h"
 #endif
 
-#define HASH_SIZE 211 // the size of the hash table
-#define SHIFT 4 // the bit shift for the hash index 
+#define HASH_SIZE 211 /* the size of the hash table*/
+#define SHIFT 4 /* the bit shift for the hash index */
 
 
-//*** Global functions, variables, and structures ************
+/**** Global functions, variables, and structures *************/
 
-    unsigned short is_initialized = 0; // tells whether to init the linked list
+    unsigned short is_initialized = 0; /* tells whether to init the linked list*/
 
-// reserved word elements for the hash table
+/* reserved word elements for the hash table*/
 struct res_element{
-  char word[100];        //the reserved word
-  int token;             //the token to return;
+  char word[100];        /*the reserved word*/
+  int token;             /*the token to return;*/
   struct res_element* next;
 };
 
-struct res_element** reserved = NULL; //the table of reserved words
+struct res_element** reserved = NULL; /*the table of reserved words*/
 
-void initialize_res_list(void); // function to initialize the list
+void initialize_res_list(void); /* function to initialize the list*/
 
-int hash ( char* text ); // generates the hash key
+int hash ( char* text ); /* generates the hash key*/
 
-void add_res_element( char* text, int the_token ); //adds elements to the table
+void add_res_element( char* text, int the_token ); /*adds elements to the table*/
 
-// the elements of the defined Hash table
+/* the elements of the defined Hash table*/
 struct defined_element{
   char defined[100];
   char definition[DEFINED_BUFFER_SIZE];
   struct defined_element* next;
 };
 
-struct defined_element** defined_list = NULL; // the defined hash table
+struct defined_element** defined_list = NULL; /* the defined hash table*/
 
 
 
-//*** The Functions *******************************************
+/**** The Functions ********************************************/
 
 
   /*
@@ -94,7 +94,7 @@ struct defined_element** defined_list = NULL; // the defined hash table
 
 void initialize_res_list(){
   
-  register unsigned short i; // loop counter
+  register unsigned short i; /* loop counter*/
 
   reserved = ( struct res_element ** ) 
     calloc( HASH_SIZE, sizeof( struct hash__element* ) );
@@ -104,7 +104,7 @@ void initialize_res_list(){
     reserved[i] = NULL;
   }
 
-  // add the reserved words
+  /* add the reserved words*/
 
   add_res_element( "molecule", MOLECULE );
   add_res_element( "atom", ATOM );
@@ -120,7 +120,7 @@ void initialize_res_list(){
   add_res_element( "rigidBody", RIGIDBODY );
   add_res_element( "cutoffGroup", CUTOFFGROUP );
   
-  is_initialized = 1; // set the initialization boolean to true
+  is_initialized = 1; /* set the initialization boolean to true*/
 }
 
 
@@ -133,31 +133,31 @@ void initialize_res_list(){
 int res_word( char* text ){
   
   int matched = 0;
-  int key; // the hash key
-  struct res_element* current_ptr; // points to the current hash element
-  struct defined_element* def_ptr; // points to the current define element
+  int key; /* the hash key*/
+  struct res_element* current_ptr; /* points to the current hash element*/
+  struct defined_element* def_ptr; /* points to the current define element*/
 
-  if( !is_initialized ){ // initialize the list if not already done
+  if( !is_initialized ){ /* initialize the list if not already done*/
 
     initialize_res_list();
   }
   
-  // get the hash key
+  /* get the hash key*/
 
   key = hash( text );
   current_ptr = reserved[key];
 
-  // walk through possible mutiple entries
+  /* walk through possible mutiple entries*/
 
   while( current_ptr != NULL ){
     
     matched = !strcmp( text, current_ptr->word );
-    if( matched ) return current_ptr->token; // search successful
+    if( matched ) return current_ptr->token; /* search successful*/
 
     current_ptr = current_ptr->next;
   }
 
-  // if no keywords turn up, check the word against the list of defines
+  /* if no keywords turn up, check the word against the list of defines*/
   
   if( defined_list != NULL ){
 
@@ -172,7 +172,7 @@ int res_word( char* text ){
     }
   }
 
-  return 0; //search failed
+  return 0; /*search failed*/
 }
 
 /*
@@ -184,7 +184,7 @@ int is_defined( char* text ){
 
   int matched = 0;
   int key;
-  struct defined_element* def_ptr; // points to the current define element
+  struct defined_element* def_ptr; /* points to the current define element*/
   
   key = hash( text );
 
@@ -194,13 +194,13 @@ int is_defined( char* text ){
     while( def_ptr != NULL ){
       
       matched = !strcmp( text, def_ptr->defined );
-      if( matched ) return 1; // search succesful
+      if( matched ) return 1; /* search succesful*/
       
       def_ptr = def_ptr->next;
     }
   }
 
-  return 0; //search failed
+  return 0; /*search failed*/
 }
 
 /*
@@ -226,7 +226,7 @@ char* get_definition( char* defined ){
     }
   }
   
-  // search failed, therefore there is an error
+  /* search failed, therefore there is an error*/
 
   sprintf( painCave.errMsg, "%s was not found in the defined list\n", 
 	   defined );
@@ -259,12 +259,12 @@ void insert_define( char* defined, char* definition ){
   element = (struct defined_element* )
     malloc( sizeof( struct defined_element ) );
 
-  // fill the element
+  /* fill the element*/
   
   strcpy( element->defined, defined );
   strcpy( element->definition, definition );
 
-  // add the element to the table
+  /* add the element to the table*/
 
   element->next = defined_list[key];
   defined_list[key] = element;
@@ -276,18 +276,18 @@ void insert_define( char* defined, char* definition ){
 
 void add_res_element( char* text, int the_token ){
   
-  int key; // the calculated hash key;
-  struct res_element* element; // the element being added
+  int key; /* the calculated hash key;*/
+  struct res_element* element; /* the element being added*/
 
   key = hash( text );
   element = (struct res_element *) malloc( sizeof( struct res_element ) );
   
-  // fill the element
+  /* fill the element*/
 
   strcpy( element->word, text );
   element->token = the_token;
 
-  // add the element to the table
+  /* add the element to the table*/
 
   element->next = reserved[key];
   reserved[key] = element;
@@ -299,8 +299,8 @@ void add_res_element( char* text, int the_token ){
 
 int hash ( char* text ){
 
-  register unsigned short int i = 0; // loop counter
-  int key = 0; // the hash key
+  register unsigned short int i = 0; /* loop counter*/
+  int key = 0; /* the hash key*/
 
   while( text[i] != '\0' ){
 
@@ -311,7 +311,7 @@ int hash ( char* text ){
   
   if( key < 0 ){
 
-    // if the key is less than zero, we've had an overflow error
+    /* if the key is less than zero, we've had an overflow error*/
 
     sprintf( painCave.errMsg,
 	     "Meta-data parse error: There has been an overflow error in the hash key.");
@@ -373,5 +373,5 @@ void kill_lists( ){
   reserved = NULL;
   defined_list = NULL;
 
-  is_initialized = 0; // initialization is now false
+  is_initialized = 0; /* initialization is now false*/
 }

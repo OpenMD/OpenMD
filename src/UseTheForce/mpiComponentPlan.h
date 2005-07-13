@@ -28,9 +28,9 @@ typedef struct{
   int columnIndex;
 } mpiSimData;
 
-#endif // __MPICOMPONENTPLAN_H__
+#endif /* __MPICOMPONENTPLAN_H__*/
 
-#endif // __C
+#endif /* __C*/
 
 
 #ifdef __FORTRAN90

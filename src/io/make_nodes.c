@@ -301,7 +301,7 @@ struct node_tag* cutoffgroup_blk( int index, struct node_tag* stmt_list ){
   struct node_tag* the_node;
   the_node = ( struct node_tag* )malloc( sizeof( node ) );
   
-  // The guillotine statement:
+  /* The guillotine statement:*/
   the_node->type = CUTOFFGROUP_HEAD;
   the_node->index = index;
   the_node->next_stmt = NULL;

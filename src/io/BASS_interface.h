@@ -83,12 +83,12 @@ typedef struct{
   char* err_msg;
 
   union{
-    int               blk_index; // block index
+    int               blk_index; /* block index*/
     position_event    pos;
-    orientation_event ornt; // use the same structure for orientation
+    orientation_event ornt; /* use the same structure for orientation*/
     assignment_event  asmt;
     members_event     mbrs;
-    double            cnstr; // the constraint value
+    double            cnstr; /* the constraint value*/
   } evt;
 } event;
 
@@ -103,4 +103,4 @@ extern "C" {
 #endif
 
 
-#endif // ifndef __BASS_INTERFACE_H__
+#endif /* ifndef __BASS_INTERFACE_H__*/

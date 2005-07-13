@@ -51,8 +51,8 @@
 #endif
 
 void walk_down( struct node_tag* the_node, struct namespc the_namespc );
-int mol_index; // keeps track of the number of molecules
-int comp_index; // keeps track of the number of components.
+int mol_index; /* keeps track of the number of molecules*/
+int comp_index; /* keeps track of the number of components.*/
 
 /*
  * This is the parse tree function that is called by the yacc
@@ -71,7 +71,7 @@ void pt_me( struct node_tag* head_node ){
     simError();
 #ifdef IS_MPI
     mpiInterfaceExit();
-#endif //is_mpi
+#endif /*is_mpi*/
   }
 
   global_namespc.index = 0;
@@ -80,7 +80,7 @@ void pt_me( struct node_tag* head_node ){
   mol_index = 0;
   comp_index = 0;
   walk_down( head_node->next_stmt, global_namespc ); 
-  // closed global namespace and exit
+  /* closed global namespace and exit*/
 
 }
 
@@ -106,7 +106,7 @@ void walk_down( struct node_tag* the_node, struct namespc the_namespc ){
 
     if( the_node->stmt_list != NULL ){
 
-      // the statement is a block node of some sort
+      /* the statement is a block node of some sort*/
       
       switch( the_node->type ){
 
@@ -238,17 +238,17 @@ void walk_down( struct node_tag* the_node, struct namespc the_namespc ){
     
     else{
       
-      // the node is a statement 
+      /* the node is a statement */
 
       switch( the_node->type ){
 
       case MEMBERS_STMT:
 	switch( the_namespc.type ){
-	case BOND_HEAD: // fall through
-	case BEND_HEAD: // fall through
+	case BOND_HEAD: /* fall through*/
+	case BEND_HEAD: /* fall through*/
 	case TORSION_HEAD: 
         case RIGIDBODY_HEAD:
-        case CUTOFFGROUP_HEAD: // same for the first four
+        case CUTOFFGROUP_HEAD: /* same for the first four*/
 	  init_members( the_node, the_namespc );
 	  break;
 
@@ -262,9 +262,9 @@ void walk_down( struct node_tag* the_node, struct namespc the_namespc ){
 
       case CONSTRAINT_STMT:
 	switch( the_namespc.type ){
-	case BOND_HEAD: // fall through
-	case BEND_HEAD: // fall through
-	case TORSION_HEAD: // same for the first three
+	case BOND_HEAD: /* fall through*/
+	case BEND_HEAD: /* fall through*/
+	case TORSION_HEAD: /* same for the first three*/
 	  init_constraint( the_node, the_namespc );
 	  break;
 
@@ -306,15 +306,15 @@ void walk_down( struct node_tag* the_node, struct namespc the_namespc ){
       }
     }
     
-    // recurse down to the next node
+    /* recurse down to the next node*/
 
     walk_down( the_node->next_stmt, the_namespc );
   }
 
-  // send an end of block signal
+  /* send an end of block signal*/
   else end_of_block();
   
-  // we're done
+  /* we're done*/
 }
 
 
@@ -465,7 +465,7 @@ void print_tree_error( struct node_tag* err_node, char* err_msg ){
   simError();
 #ifdef IS_MPI
   mpiInterfaceExit();
-#endif //is_mpi
+#endif /*is_mpi*/
 
 }
 
@@ -482,14 +482,14 @@ void kill_tree( struct node_tag* the_node ){
     
     if( the_node->stmt_list != NULL ){
 
-      // the statement is a block node of some sort
+      /* the statement is a block node of some sort*/
       
       kill_tree( the_node->stmt_list );
     }
     
     else{
       
-      // the node is a statement 
+      /* the node is a statement */
 
       switch( the_node->type ){
 
@@ -509,16 +509,16 @@ void kill_tree( struct node_tag* the_node ){
 	break;
        
       default:
-	// nothing to do here, everyone else can be freed normally.
+	/* nothing to do here, everyone else can be freed normally.*/
 	break;
       }
     }
     
-    // recurse down to the next node
+    /* recurse down to the next node*/
 
     kill_tree( the_node->next_stmt );
     free( the_node );    
   }
 
-  // we're done
+  /* we're done*/
 }

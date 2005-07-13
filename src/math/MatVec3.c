@@ -201,17 +201,17 @@ double dotProduct3(double a[3], double b[3]){
   return a[0]*b[0] + a[1]*b[1]+ a[2]*b[2];
 }
 
-//----------------------------------------------------------------------------
-// Extract the eigenvalues and eigenvectors from a 3x3 matrix.
-// The eigenvectors (the columns of V) will be normalized. 
-// The eigenvectors are aligned optimally with the x, y, and z
-// axes respectively.
+/*----------------------------------------------------------------------------*/
+/* Extract the eigenvalues and eigenvectors from a 3x3 matrix.*/
+/* The eigenvectors (the columns of V) will be normalized. */
+/* The eigenvectors are aligned optimally with the x, y, and z*/
+/* axes respectively.*/
 
 void diagonalize3x3(const double A[3][3], double w[3], double V[3][3]) {
   int i,j,k,maxI;
   double tmp, maxVal;
 
-  // do the matrix[3][3] to **matrix conversion for Jacobi
+  /* do the matrix[3][3] to **matrix conversion for Jacobi*/
   double C[3][3];
   double *ATemp[3],*VTemp[3];
   for (i = 0; i < 3; i++)
@@ -223,26 +223,26 @@ void diagonalize3x3(const double A[3][3], double w[3], double V[3][3]) {
       VTemp[i] = V[i];
     }
   
-  // diagonalize using Jacobi
+  /* diagonalize using Jacobi*/
   JacobiN(ATemp,3,w,VTemp);
   
-  // if all the eigenvalues are the same, return identity matrix
+  /* if all the eigenvalues are the same, return identity matrix*/
   if (w[0] == w[1] && w[0] == w[2])
     {
       identityMat3(V);
       return;
     }
   
-  // transpose temporarily, it makes it easier to sort the eigenvectors
+  /* transpose temporarily, it makes it easier to sort the eigenvectors*/
   transposeMat3(V,V);
   
-  // if two eigenvalues are the same, re-orthogonalize to optimally line
-  // up the eigenvectors with the x, y, and z axes
+  /* if two eigenvalues are the same, re-orthogonalize to optimally line*/
+  /* up the eigenvectors with the x, y, and z axes*/
   for (i = 0; i < 3; i++)
     {
-      if (w[(i+1)%3] == w[(i+2)%3]) // two eigenvalues are the same
+      if (w[(i+1)%3] == w[(i+2)%3]) /* two eigenvalues are the same*/
         {
-          // find maximum element of the independant eigenvector
+          /* find maximum element of the independant eigenvector*/
           maxVal = fabs(V[i][0]);
           maxI = 0;
           for (j = 1; j < 3; j++)
@@ -253,7 +253,7 @@ void diagonalize3x3(const double A[3][3], double w[3], double V[3][3]) {
                   maxI = j;
                 }
             }
-          // swap the eigenvector into its proper position
+          /* swap the eigenvector into its proper position*/
           if (maxI != i)
             {
               tmp = w[maxI];
@@ -261,7 +261,7 @@ void diagonalize3x3(const double A[3][3], double w[3], double V[3][3]) {
               w[i] = tmp;
               swapVectors3(V[i],V[maxI]);
             }
-          // maximum element of eigenvector should be positive
+          /* maximum element of eigenvector should be positive*/
           if (V[maxI][maxI] < 0)
             {
               V[maxI][0] = -V[maxI][0];
@@ -269,7 +269,7 @@ void diagonalize3x3(const double A[3][3], double w[3], double V[3][3]) {
               V[maxI][2] = -V[maxI][2];
             }
           
-          // re-orthogonalize the other two eigenvectors
+          /* re-orthogonalize the other two eigenvectors*/
           j = (maxI+1)%3;
           k = (maxI+2)%3;
           
@@ -281,17 +281,17 @@ void diagonalize3x3(const double A[3][3], double w[3], double V[3][3]) {
           normalize3(V[k]);
           crossProduct3(V[k],V[maxI],V[j]);
 
-          // transpose vectors back to columns
+          /* transpose vectors back to columns*/
           transposeMat3(V,V);
           return;
         }
     }
   
-  // the three eigenvalues are different, just sort the eigenvectors
-  // to align them with the x, y, and z axes
+  /* the three eigenvalues are different, just sort the eigenvectors*/
+  /* to align them with the x, y, and z axes*/
   
-  // find the vector with the largest x element, make that vector
-  // the first vector
+  /* find the vector with the largest x element, make that vector*/
+  /* the first vector*/
   maxVal = fabs(V[0][0]);
   maxI = 0;
   for (i = 1; i < 3; i++)
@@ -302,7 +302,7 @@ void diagonalize3x3(const double A[3][3], double w[3], double V[3][3]) {
           maxI = i;
         }
     }
-  // swap eigenvalue and eigenvector
+  /* swap eigenvalue and eigenvector*/
   if (maxI != 0)
     {
       tmp = w[maxI];
@@ -310,7 +310,7 @@ void diagonalize3x3(const double A[3][3], double w[3], double V[3][3]) {
       w[0] = tmp;
       swapVectors3(V[maxI],V[0]);
     }
-  // do the same for the y element
+  /* do the same for the y element*/
   if (fabs(V[1][1]) < fabs(V[2][1]))
     {
       tmp = w[2];
@@ -319,7 +319,7 @@ void diagonalize3x3(const double A[3][3], double w[3], double V[3][3]) {
       swapVectors3(V[2],V[1]);
     }
   
-  // ensure that the sign of the eigenvectors is correct
+  /* ensure that the sign of the eigenvectors is correct*/
   for (i = 0; i < 2; i++)
     {
       if (V[i][i] < 0)
@@ -329,7 +329,7 @@ void diagonalize3x3(const double A[3][3], double w[3], double V[3][3]) {
           V[i][2] = -V[i][2];
         }
     }
-  // set sign of final eigenvector to ensure that determinant is positive
+  /* set sign of final eigenvector to ensure that determinant is positive*/
   if (matDet3(V) < 0)
     {
       V[2][0] = -V[2][0];
@@ -337,7 +337,7 @@ void diagonalize3x3(const double A[3][3], double w[3], double V[3][3]) {
       V[2][2] = -V[2][2];
     }
   
-  // transpose the eigenvectors back again
+  /* transpose the eigenvectors back again*/
   transposeMat3(V,V);
 }
 
@@ -346,11 +346,11 @@ void diagonalize3x3(const double A[3][3], double w[3], double V[3][3]) {
 
 #define MAX_ROTATIONS 20
 
-// Jacobi iteration for the solution of eigenvectors/eigenvalues of a nxn
-// real symmetric matrix. Square nxn matrix a; size of matrix in n;
-// output eigenvalues in w; and output eigenvectors in v. Resulting
-// eigenvalues/vectors are sorted in decreasing order; eigenvectors are
-// normalized.
+/* Jacobi iteration for the solution of eigenvectors/eigenvalues of a nxn*/
+/* real symmetric matrix. Square nxn matrix a; size of matrix in n;*/
+/* output eigenvalues in w; and output eigenvectors in v. Resulting*/
+/* eigenvalues/vectors are sorted in decreasing order; eigenvectors are*/
+/* normalized.*/
 int JacobiN(double **a, int n, double *w, double **v) {
 
   int i, j, k, iq, ip, numPos;
@@ -361,14 +361,14 @@ int JacobiN(double **a, int n, double *w, double **v) {
   double *z = zspace;
   
 
-  // only allocate memory if the matrix is large
+  /* only allocate memory if the matrix is large*/
   if (n > 4)
     {
       b = (double *) calloc(n, sizeof(double));
       z = (double *) calloc(n, sizeof(double));
     }
   
-  // initialize
+  /* initialize*/
   for (ip=0; ip<n; ip++) 
     {
       for (iq=0; iq<n; iq++)
@@ -383,7 +383,7 @@ int JacobiN(double **a, int n, double *w, double **v) {
       z[ip] = 0.0;
     }
   
-  // begin rotation sequence
+  /* begin rotation sequence*/
   for (i=0; i<MAX_ROTATIONS; i++) 
     {
       sm = 0.0;
@@ -399,7 +399,7 @@ int JacobiN(double **a, int n, double *w, double **v) {
           break;
         }
       
-      if (i < 3)                                // first 3 sweeps
+      if (i < 3)                                /* first 3 sweeps*/
         {
           tresh = 0.2*sm/(n*n);
         }
@@ -414,7 +414,7 @@ int JacobiN(double **a, int n, double *w, double **v) {
             {
               g = 100.0*fabs(a[ip][iq]);
               
-              // after 4 sweeps
+              /* after 4 sweeps*/
               if (i > 3 && (fabs(w[ip])+g) == fabs(w[ip])
                   && (fabs(w[iq])+g) == fabs(w[iq]))
                 {
@@ -446,17 +446,17 @@ int JacobiN(double **a, int n, double *w, double **v) {
                   w[iq] += h;
                   a[ip][iq]=0.0;
                   
-                  // ip already shifted left by 1 unit
+                  /* ip already shifted left by 1 unit*/
                   for (j = 0;j <= ip-1;j++) 
                     {
                       MAT_ROTATE(a,j,ip,j,iq)
                         }
-                  // ip and iq already shifted left by 1 unit
+                  /* ip and iq already shifted left by 1 unit*/
                   for (j = ip+1;j <= iq-1;j++) 
                     {
                       MAT_ROTATE(a,ip,j,j,iq)
                         }
-                  // iq already shifted left by 1 unit
+                  /* iq already shifted left by 1 unit*/
                   for (j=iq+1; j<n; j++) 
                     {
                       MAT_ROTATE(a,ip,j,iq,j)
@@ -477,7 +477,7 @@ int JacobiN(double **a, int n, double *w, double **v) {
         }
     }
   
-  //// this is NEVER called
+  /*// this is NEVER called*/
   if ( i >= MAX_ROTATIONS )
     {
       sprintf( painCave.errMsg,
@@ -487,14 +487,14 @@ int JacobiN(double **a, int n, double *w, double **v) {
       return 0;
     }
   
-  // sort eigenfunctions                 these changes do not affect accuracy 
-  for (j=0; j<n-1; j++)                  // boundary incorrect
+  /* sort eigenfunctions                 these changes do not affect accuracy */
+  for (j=0; j<n-1; j++)                  /* boundary incorrect*/
     {
       k = j;
       tmp = w[k];
-      for (i=j+1; i<n; i++)             // boundary incorrect, shifted already
+      for (i=j+1; i<n; i++)             /* boundary incorrect, shifted already*/
         {
-          if (w[i] >= tmp)                   // why exchage if same?
+          if (w[i] >= tmp)                   /* why exchage if same?*/
             {
               k = i;
               tmp = w[k];
@@ -512,10 +512,10 @@ int JacobiN(double **a, int n, double *w, double **v) {
             }
         }
     }
-  // insure eigenvector consistency (i.e., Jacobi can compute vectors that
-  // are negative of one another (.707,.707,0) and (-.707,-.707,0). This can
-  // reek havoc in hyperstreamline/other stuff. We will select the most
-  // positive eigenvector.
+  /* insure eigenvector consistency (i.e., Jacobi can compute vectors that*/
+  /* are negative of one another (.707,.707,0) and (-.707,-.707,0). This can*/
+  /* reek havoc in hyperstreamline/other stuff. We will select the most*/
+  /* positive eigenvector.*/
   ceil_half_n = (n >> 1) + (n & 1);
   for (j=0; j<n; j++)
     {
@@ -526,7 +526,7 @@ int JacobiN(double **a, int n, double *w, double **v) {
               numPos++;
             }
         }
-      //    if ( numPos < ceil(double(n)/double(2.0)) )
+      /*    if ( numPos < ceil(double(n)/double(2.0)) )*/
       if ( numPos < ceil_half_n)
         {
           for(i=0; i<n; i++)

@@ -240,7 +240,7 @@ void yacc_BASS( char* file_name ){
   strcpy( checkPointMsg, "yyParse successful." );
   MPIcheckPoint();
   painCave.isEventLoop = 1;
-#endif // is_mpi
+#endif /* is_mpi*/
   
   fclose( in_file );
   kill_lists(); 
@@ -249,7 +249,7 @@ void yacc_BASS( char* file_name ){
 
 #ifdef IS_MPI
   painCave.isEventLoop = 0;
-#endif // is_mpi
+#endif /* is_mpi*/
   
   kill_tree( head_node ); 
   head_node = NULL; 
