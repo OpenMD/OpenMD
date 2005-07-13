@@ -40,6 +40,7 @@
  */
 
 #include <algorithm>
+#include <functional>
 #include "applications/staticProps/DensityPlot.hpp"
 #include "utils/simError.h"
 #include "io/DumpReader.hpp"
@@ -83,8 +84,7 @@ void DensityPlot::process() {
   
   DumpReader reader(info_, dumpFilename_);    
   int nFrames = reader.getNFrames();
-  int i;
-  for (i = 0; i < nFrames; i += step_) {
+  for (int i = 0; i < nFrames; i += step_) {
     reader.readFrame(i);
     currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
 
@@ -108,8 +108,8 @@ void DensityPlot::process() {
 
     Mat3x3d hmat = currentSnapshot_->getHmat();
     double slabVolume = deltaR_ * hmat(0, 0) * hmat(1, 1);
-    
-    for (StuntDouble* sd = seleMan_.beginSelected(i); sd != NULL; sd = seleMan_.nextSelected(i)) {
+    int k; 
+    for (StuntDouble* sd = seleMan_.beginSelected(k); sd != NULL; sd = seleMan_.nextSelected(k)) {
 
 
             if (!sd->isAtom()) {
@@ -161,16 +161,6 @@ void DensityPlot::process() {
             double sigma2 = sigma * sigma;
 
             Vector3d pos = sd->getPos() - origin;
-            /*
-            currentSnapshot_->wrapVector(pos);            
-            double wrappedZdist = pos.z() + halfLen_;
-            if (wrappedZdist < 0.0 || wrappedZdist > len_) {
-                continue;
-            }
-            
-            int which =wrappedZdist / deltaR_;        
-            density_[which] += nelectron;
-            */
             for (int j =0; j < nRBins_; ++j) {
                 Vector3d tmp(pos);
                 double zdist =j * deltaR_ - halfLen_;
