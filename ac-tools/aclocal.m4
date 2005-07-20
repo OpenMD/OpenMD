@@ -955,11 +955,15 @@ AC_SUBST([MPI_INC_DIR])
 
 AC_MSG_CHECKING([for mpi.h])
 have_mpi_h=0
+rm -f conftest*
 echo '#include <mpi.h>' > conftest.cc
-if test -z "`${CXX} -I${MPI_INC_DIR} -c conftest.cc 2>&1`"; then
+if ${CXX} -I${MPI_INC_DIR} -c conftest.cc 2>&1 ; then
         AC_MSG_RESULT(yes)
         have_mpi_h=1
 else
+	if test -s conftest.out ; then
+		cat conftest.out >> config.log
+	fi
         AC_MSG_RESULT(no! Check MPI include paths)
         USE_MPI="no"
 fi
