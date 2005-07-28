@@ -107,11 +107,17 @@ contains
 
     endif
 
-    call createRCuts( rlist )
+    call createRCuts( defaultRlist=rlist,stat=localError )
     call setCutoffsRF( rcut, rsw )
     call setCutoffLJ( rcut, do_shift, localError )
     call setCutoffEAM( rcut, localError)
     call set_switch(GROUP_SWITCH, rsw, rcut)
+
+    if (localError /= 0) then
+       write(errMsg, *) 'An error has occured in setting the default cutoff'
+       call handleError("cutoffNotify", errMsg)
+    end if
+
 
   end subroutine cutoffNotify
 

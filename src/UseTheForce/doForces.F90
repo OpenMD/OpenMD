@@ -45,7 +45,7 @@
 
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: doForces.F90,v 1.23 2005-07-03 20:53:43 chuckv Exp $, $Date: 2005-07-03 20:53:43 $, $Name: not supported by cvs2svn $, $Revision: 1.23 $
+!! @version $Id: doForces.F90,v 1.24 2005-07-28 22:12:45 chuckv Exp $, $Date: 2005-07-28 22:12:45 $, $Name: not supported by cvs2svn $, $Revision: 1.24 $
 
 
 module doForces
@@ -150,7 +150,7 @@ contains
  
   subroutine createInteractionMap(status)
     integer :: nAtypes
-    integer :: status
+    integer, intent(out) :: status
     integer :: i
     integer :: j
     integer :: ihash
@@ -171,6 +171,7 @@ contains
     logical :: j_is_EAM
     logical :: j_is_Shape
     
+    status = 0
     
     if (.not. associated(atypes)) then
        call handleError("atype", "atypes was not present before call of createDefaultInteractionMap!")
@@ -249,15 +250,28 @@ contains
   end subroutine createInteractionMap
 
 ! Query each potential and return the cutoff for that potential. We build the neighbor list based on the largest cutoff value for that atype. Each potential can decide whether to calculate the force for that atype based upon it's own cutoff.
-  subroutine createRcuts(defaultRList)
+  subroutine createRcuts(defaultRList,stat)
     real(kind=dp), intent(in), optional :: defaultRList
     integer :: iMap
     integer :: map_i,map_j
     real(kind=dp) :: thisRCut = 0.0_dp
     real(kind=dp) :: actualCutoff = 0.0_dp
+    integer, intent(out) :: stat
     integer :: nAtypes
+    integer :: myStatus
 
-    if(.not. allocated(InteractionMap)) return
+    stat = 0
+    if (.not. haveInteractionMap) then 
+
+       call createInteractionMap(myStatus)
+
+       if (myStatus .ne. 0) then
+          write(default_error, *) 'createInteractionMap failed in doForces!'
+          stat = -1
+          return
+       endif
+    endif
+
 
     nAtypes = getSize(atypes)
 ! If we pass a default rcut, set all atypes to that cutoff distance
@@ -729,9 +743,11 @@ contains
 
           if (update_nlist) then
 #ifdef IS_MPI
+             me_i = atid_row(i)
              jstart = 1
              jend = nGroupsInCol
 #else
+             me_i = atid(i)
              jstart = i+1
              jend = nGroups
 #endif
@@ -750,9 +766,11 @@ contains
              endif
 
 #ifdef IS_MPI
+             me_j = atid_col(j)
              call get_interatomic_vector(q_group_Row(:,i), &
                   q_group_Col(:,j), d_grp, rgrpsq)
 #else
+             me_j = atid(j)
              call get_interatomic_vector(q_group(:,i), &
                   q_group(:,j), d_grp, rgrpsq)
 #endif
