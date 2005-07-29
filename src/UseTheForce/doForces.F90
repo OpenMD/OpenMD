@@ -45,7 +45,7 @@
 
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: doForces.F90,v 1.25 2005-07-29 17:34:06 tim Exp $, $Date: 2005-07-29 17:34:06 $, $Name: not supported by cvs2svn $, $Revision: 1.25 $
+!! @version $Id: doForces.F90,v 1.26 2005-07-29 19:38:27 gezelter Exp $, $Date: 2005-07-29 19:38:27 $, $Name: not supported by cvs2svn $, $Revision: 1.26 $
 
 
 module doForces
@@ -137,7 +137,8 @@ module doForces
 
   type, public :: Interaction
      integer :: InteractionHash
-     real(kind=dp) :: rList = 0.0_dp
+     real(kind=dp) :: rCut = 0.0_dp
+     real(kind=dp) :: rCutSq = 0.0_dp     
      real(kind=dp) :: rListSq = 0.0_dp
   end type Interaction
   
@@ -171,8 +172,8 @@ contains
     logical :: j_is_EAM
     logical :: j_is_Shape
     
-    status = 0
-    
+    status = 0   
+
     if (.not. associated(atypes)) then
        call handleError("atype", "atypes was not present before call of createDefaultInteractionMap!")
        status = -1
@@ -251,9 +252,14 @@ contains
     haveInteractionMap = .true.
   end subroutine createInteractionMap
 
-! Query each potential and return the cutoff for that potential. We build the neighbor list based on the largest cutoff value for that atype. Each potential can decide whether to calculate the force for that atype based upon it's own cutoff.
-  subroutine createRcuts(defaultRList,stat)
-    real(kind=dp), intent(in), optional :: defaultRList
+  ! Query each potential and return the cutoff for that potential. We
+  ! build the neighbor list based on the largest cutoff value for that
+  ! atype. Each potential can decide whether to calculate the force for
+  ! that atype based upon it's own cutoff.
+  
+  subroutine createRcuts(defaultRcut, defaultSkinThickness, stat)
+
+    real(kind=dp), intent(in), optional :: defaultRCut, defaultSkinThickness
     integer :: iMap
     integer :: map_i,map_j
     real(kind=dp) :: thisRCut = 0.0_dp
@@ -274,12 +280,12 @@ contains
        endif
     endif
 
-
     nAtypes = getSize(atypes)
     !! If we pass a default rcut, set all atypes to that cutoff distance
     if(present(defaultRList)) then
-       InteractionMap(:,:)%rList = defaultRList
-       InteractionMap(:,:)%rListSq = defaultRList*defaultRList
+       InteractionMap(:,:)%rCut = defaultRCut
+       InteractionMap(:,:)%rCutSq = defaultRCut*defaultRCut
+       InteractionMap(:,:)%rListSq = (defaultRCut+defaultSkinThickness)**2
        haveRlist = .true.
        return
     end if
@@ -332,10 +338,19 @@ contains
 !              thisRCut = getShapeLJCutOff(map_i,map_j)
               if (thisRcut > actualCutoff) actualCutoff = thisRcut
            endif
-           InteractionMap(map_i, map_j)%rList = actualCutoff
-           InteractionMap(map_i, map_j)%rListSq = actualCutoff * actualCutoff
+           InteractionMap(map_i, map_j)%rCut = actualCutoff
+           InteractionMap(map_i, map_j)%rCutSq = actualCutoff * actualCutoff
+           InteractionMap(map_i, map_j)%rListSq = (actualCutoff + skinThickness)**2 
+
+           InteractionMap(map_j, map_i)%rCut = InteractionMap(map_i, map_j)%rCut
+           InteractionMap(map_j, map_i)%rCutSq = InteractionMap(map_i, map_j)%rCutSq
+           InteractionMap(map_j, map_i)%rListSq = InteractionMap(map_i, map_j)%rListSq
         end do
      end do
+     ! now the groups
+
+
+
      haveRlist = .true.
   end subroutine createRcuts
 
@@ -383,11 +398,10 @@ contains
     error = 0
 
     if (.not. haveInteractionMap) then 
-
-       myStatus = 0
-
+       
+       myStatus = 0       
        call createInteractionMap(myStatus)
-
+       
        if (myStatus .ne. 0) then
           write(default_error, *) 'createInteractionMap failed in doForces!'
           error = -1
