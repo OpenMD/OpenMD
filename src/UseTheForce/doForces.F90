@@ -45,7 +45,7 @@
 
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: doForces.F90,v 1.24 2005-07-28 22:12:45 chuckv Exp $, $Date: 2005-07-28 22:12:45 $, $Name: not supported by cvs2svn $, $Revision: 1.24 $
+!! @version $Id: doForces.F90,v 1.25 2005-07-29 17:34:06 tim Exp $, $Date: 2005-07-29 17:34:06 $, $Name: not supported by cvs2svn $, $Revision: 1.25 $
 
 
 module doForces
@@ -155,7 +155,7 @@ contains
     integer :: j
     integer :: ihash
     real(kind=dp) :: myRcut
-! Test Types
+    !! Test Types
     logical :: i_is_LJ
     logical :: i_is_Elect
     logical :: i_is_Sticky
@@ -247,6 +247,8 @@ contains
        end do
 
     end do
+
+    haveInteractionMap = .true.
   end subroutine createInteractionMap
 
 ! Query each potential and return the cutoff for that potential. We build the neighbor list based on the largest cutoff value for that atype. Each potential can decide whether to calculate the force for that atype based upon it's own cutoff.
@@ -274,7 +276,7 @@ contains
 
 
     nAtypes = getSize(atypes)
-! If we pass a default rcut, set all atypes to that cutoff distance
+    !! If we pass a default rcut, set all atypes to that cutoff distance
     if(present(defaultRList)) then
        InteractionMap(:,:)%rList = defaultRList
        InteractionMap(:,:)%rListSq = defaultRList*defaultRList
@@ -287,27 +289,27 @@ contains
           iMap = InteractionMap(map_i, map_j)%InteractionHash
           
           if ( iand(iMap, LJ_PAIR).ne.0 ) then
- !            thisRCut = getLJCutOff(map_i,map_j)
+             ! thisRCut = getLJCutOff(map_i,map_j)
              if (thisRcut > actualCutoff) actualCutoff = thisRcut
           endif
           
           if ( iand(iMap, ELECTROSTATIC_PAIR).ne.0 ) then
- !            thisRCut = getElectrostaticCutOff(map_i,map_j)
+             ! thisRCut = getElectrostaticCutOff(map_i,map_j)
              if (thisRcut > actualCutoff) actualCutoff = thisRcut
           endif
           
           if ( iand(iMap, STICKY_PAIR).ne.0 ) then
-!             thisRCut = getStickyCutOff(map_i,map_j)
+             ! thisRCut = getStickyCutOff(map_i,map_j)
               if (thisRcut > actualCutoff) actualCutoff = thisRcut
            endif
            
            if ( iand(iMap, STICKYPOWER_PAIR).ne.0 ) then
-!              thisRCut = getStickyPowerCutOff(map_i,map_j)
+              ! thisRCut = getStickyPowerCutOff(map_i,map_j)
               if (thisRcut > actualCutoff) actualCutoff = thisRcut
            endif
            
            if ( iand(iMap, GAYBERNE_PAIR).ne.0 ) then
-!              thisRCut = getGayberneCutOff(map_i,map_j)
+              ! thisRCut = getGayberneCutOff(map_i,map_j)
               if (thisRcut > actualCutoff) actualCutoff = thisRcut
            endif
            
@@ -334,7 +336,7 @@ contains
            InteractionMap(map_i, map_j)%rListSq = actualCutoff * actualCutoff
         end do
      end do
-          haveRlist = .true.
+     haveRlist = .true.
   end subroutine createRcuts
 
 
@@ -737,17 +739,21 @@ contains
 #endif
        outer: do i = istart, iend
 
+#ifdef IS_MPI
+             me_i = atid_row(i)
+#else
+             me_i = atid(i)
+#endif
+
           if (update_nlist) point(i) = nlist + 1
 
           n_in_i = groupStartRow(i+1) - groupStartRow(i)
 
           if (update_nlist) then
 #ifdef IS_MPI
-             me_i = atid_row(i)
              jstart = 1
              jend = nGroupsInCol
 #else
-             me_i = atid(i)
              jstart = i+1
              jend = nGroups
 #endif
