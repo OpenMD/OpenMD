@@ -45,7 +45,7 @@
 
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: doForces.F90,v 1.26 2005-07-29 19:38:27 gezelter Exp $, $Date: 2005-07-29 19:38:27 $, $Name: not supported by cvs2svn $, $Revision: 1.26 $
+!! @version $Id: doForces.F90,v 1.27 2005-08-09 19:40:56 chuckv Exp $, $Date: 2005-08-09 19:40:56 $, $Name: not supported by cvs2svn $, $Revision: 1.27 $
 
 
 module doForces
@@ -116,8 +116,6 @@ module doForces
   logical, save :: SIM_uses_PBC
   logical, save :: SIM_uses_molecular_cutoffs
 
-  !!!GO AWAY---------
-  !!!!!real(kind=dp), save :: rlist, rlistsq
 
   public :: init_FF
   public :: do_force_loop
@@ -126,7 +124,7 @@ module doForces
   !public :: setInteractionHash
   !public :: getInteractionHash
   public :: createInteractionMap
-  public :: createRcuts
+  public :: createGroupCutoffs
 
 #ifdef PROFILE
   public :: getforcetime
@@ -134,17 +132,27 @@ module doForces
   real :: forceTimeInitial, forceTimeFinal
   integer :: nLoops
 #endif
-
-  type, public :: Interaction
-     integer :: InteractionHash
-     real(kind=dp) :: rCut = 0.0_dp
-     real(kind=dp) :: rCutSq = 0.0_dp     
-     real(kind=dp) :: rListSq = 0.0_dp
-  end type Interaction
   
-  type(Interaction), dimension(:,:),allocatable :: InteractionMap
-  
+!! Variables for cutoff mapping and interaction mapping
+! Bit hash to determine pair-pair interactions.
+  integer, dimension(:,:),allocatable :: InteractionHash
+!! Cuttoffs in OOPSE are handled on a Group-Group pair basis.
+! Largest cutoff for atypes for all potentials
+  real(kind=dp), dimension(:), allocatable :: atypeMaxCuttoff
+! Largest cutoff for groups 
+  real(kind=dp), dimension(:), allocatable :: groupMaxCutoff
+! Group to Gtype transformation Map
+  integer,dimension(:), allocatable :: groupToGtype
+! Group Type Max Cutoff
+  real(kind=dp), dimension(:), allocatable :: gtypeMaxCutoff
+! GroupType definition
+  type ::gtype
+     real(kind=dp) :: rcut ! Group Cutoff
+     real(kind=dp) :: rcutsq ! Group Cutoff Squared
+     real(kind=dp) :: rlistsq ! List cutoff Squared     
+  end type gtype
 
+  type(gtype), dimension(:,:), allocatable :: gtypeCutoffMap
   
 contains
 
@@ -175,7 +183,7 @@ contains
     status = 0   
 
     if (.not. associated(atypes)) then
-       call handleError("atype", "atypes was not present before call of createDefaultInteractionMap!")
+       call handleError("atype", "atypes was not present before call of createDefaultInteractionHash!")
        status = -1
        return
     endif
@@ -187,8 +195,8 @@ contains
        return
     end if
 
-    if (.not. allocated(InteractionMap)) then
-       allocate(InteractionMap(nAtypes,nAtypes))
+    if (.not. allocated(InteractionHash)) then
+       allocate(InteractionHash(nAtypes,nAtypes))
     endif
         
     do i = 1, nAtypes
@@ -242,8 +250,8 @@ contains
           if (i_is_LJ .and. j_is_Shape) iHash = ior(iHash, SHAPE_LJ)
 
 
-          InteractionMap(i,j)%InteractionHash = iHash
-          InteractionMap(j,i)%InteractionHash = iHash
+          InteractionHash(i,j) = iHash
+          InteractionHash(j,i) = iHash
 
        end do
 
@@ -252,14 +260,17 @@ contains
     haveInteractionMap = .true.
   end subroutine createInteractionMap
 
+  subroutine createGroupCutoffs(skinThickness,defaultrList,stat)
+    real(kind=dp), intent(in), optional :: defaultRList
+    real(kind-dp), intent(in), :: skinThickenss 
   ! Query each potential and return the cutoff for that potential. We
   ! build the neighbor list based on the largest cutoff value for that
   ! atype. Each potential can decide whether to calculate the force for
   ! that atype based upon it's own cutoff.
   
-  subroutine createRcuts(defaultRcut, defaultSkinThickness, stat)
 
     real(kind=dp), intent(in), optional :: defaultRCut, defaultSkinThickness
+
     integer :: iMap
     integer :: map_i,map_j
     real(kind=dp) :: thisRCut = 0.0_dp
@@ -352,21 +363,7 @@ contains
 
 
      haveRlist = .true.
-  end subroutine createRcuts
-
-
-!!! THIS GOES AWAY FOR SIZE DEPENDENT CUTOFF
-!!$  subroutine setRlistDF( this_rlist )
-!!$
-!!$   real(kind=dp) :: this_rlist
-!!$
-!!$    rlist = this_rlist
-!!$    rlistsq = rlist * rlist
-!!$
-!!$    haveRlist = .true.
-!!$
-!!$  end subroutine setRlistDF
-
+   end subroutine createGroupCutoffs
 
   subroutine setSimVariables()
     SIM_uses_DirectionalAtoms = SimUsesDirectionalAtoms()
@@ -1013,7 +1010,7 @@ contains
 #else
              me_i = atid(i)
 #endif
-             iMap = InteractionMap(me_i, me_j)%InteractionHash
+             iMap = InteractionHash(me_i,me_j)
              
              if ( iand(iMap, ELECTROSTATIC_PAIR).ne.0 ) then
 
