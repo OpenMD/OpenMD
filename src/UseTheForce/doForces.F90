@@ -45,7 +45,7 @@
 
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: doForces.F90,v 1.27 2005-08-09 19:40:56 chuckv Exp $, $Date: 2005-08-09 19:40:56 $, $Name: not supported by cvs2svn $, $Revision: 1.27 $
+!! @version $Id: doForces.F90,v 1.28 2005-08-09 22:33:37 gezelter Exp $, $Date: 2005-08-09 22:33:37 $, $Name: not supported by cvs2svn $, $Revision: 1.28 $
 
 
 module doForces
@@ -78,53 +78,29 @@ module doForces
   INTEGER, PARAMETER:: PREPAIR_LOOP = 1
   INTEGER, PARAMETER:: PAIR_LOOP    = 2
 
-  logical, save :: haveRlist = .false.
   logical, save :: haveNeighborList = .false.
   logical, save :: haveSIMvariables = .false.
   logical, save :: haveSaneForceField = .false.
-  logical, save :: haveInteractionMap = .false.
+  logical, save :: haveInteractionHash = .false.
+  logical, save :: haveGtypeCutoffMap = .false.
 
   logical, save :: FF_uses_DirectionalAtoms
-  logical, save :: FF_uses_LennardJones
-  logical, save :: FF_uses_Electrostatics
-  logical, save :: FF_uses_Charges
   logical, save :: FF_uses_Dipoles
-  logical, save :: FF_uses_Quadrupoles
-  logical, save :: FF_uses_Sticky
-  logical, save :: FF_uses_StickyPower
   logical, save :: FF_uses_GayBerne
   logical, save :: FF_uses_EAM
-  logical, save :: FF_uses_Shapes
-  logical, save :: FF_uses_FLARB
   logical, save :: FF_uses_RF
 
   logical, save :: SIM_uses_DirectionalAtoms
-  logical, save :: SIM_uses_LennardJones
-  logical, save :: SIM_uses_Electrostatics
-  logical, save :: SIM_uses_Charges
-  logical, save :: SIM_uses_Dipoles
-  logical, save :: SIM_uses_Quadrupoles
-  logical, save :: SIM_uses_Sticky
-  logical, save :: SIM_uses_StickyPower
-  logical, save :: SIM_uses_GayBerne
   logical, save :: SIM_uses_EAM
-  logical, save :: SIM_uses_Shapes
-  logical, save :: SIM_uses_FLARB
   logical, save :: SIM_uses_RF
   logical, save :: SIM_requires_postpair_calc
   logical, save :: SIM_requires_prepair_calc
   logical, save :: SIM_uses_PBC
-  logical, save :: SIM_uses_molecular_cutoffs
-
 
   public :: init_FF
   public :: do_force_loop
-!  public :: setRlistDF
-  !public :: addInteraction
-  !public :: setInteractionHash
-  !public :: getInteractionHash
-  public :: createInteractionMap
-  public :: createGroupCutoffs
+  public :: createInteractionHash
+  public :: createGtypeCutoffMap
 
 #ifdef PROFILE
   public :: getforcetime
@@ -133,37 +109,28 @@ module doForces
   integer :: nLoops
 #endif
   
-!! Variables for cutoff mapping and interaction mapping
-! Bit hash to determine pair-pair interactions.
-  integer, dimension(:,:),allocatable :: InteractionHash
-!! Cuttoffs in OOPSE are handled on a Group-Group pair basis.
-! Largest cutoff for atypes for all potentials
-  real(kind=dp), dimension(:), allocatable :: atypeMaxCuttoff
-! Largest cutoff for groups 
+  !! Variables for cutoff mapping and interaction mapping
+  ! Bit hash to determine pair-pair interactions.
+  integer, dimension(:,:), allocatable :: InteractionHash
+  real(kind=dp), dimension(:), allocatable :: atypeMaxCutoff
   real(kind=dp), dimension(:), allocatable :: groupMaxCutoff
-! Group to Gtype transformation Map
-  integer,dimension(:), allocatable :: groupToGtype
-! Group Type Max Cutoff
+  integer, dimension(:), allocatable :: groupToGtype
   real(kind=dp), dimension(:), allocatable :: gtypeMaxCutoff
-! GroupType definition
-  type ::gtype
-     real(kind=dp) :: rcut ! Group Cutoff
-     real(kind=dp) :: rcutsq ! Group Cutoff Squared
-     real(kind=dp) :: rlistsq ! List cutoff Squared     
-  end type gtype
-
-  type(gtype), dimension(:,:), allocatable :: gtypeCutoffMap
+  type ::gtypeCutoffs
+     real(kind=dp) :: rcut 
+     real(kind=dp) :: rcutsq 
+     real(kind=dp) :: rlistsq
+  end type gtypeCutoffs
+  type(gtypeCutoffs), dimension(:,:), allocatable :: gtypeCutoffMap
   
 contains
 
- 
-  subroutine createInteractionMap(status)
+  subroutine createInteractionHash(status)
     integer :: nAtypes
     integer, intent(out) :: status
     integer :: i
     integer :: j
-    integer :: ihash
-    real(kind=dp) :: myRcut
+    integer :: iHash
     !! Test Types
     logical :: i_is_LJ
     logical :: i_is_Elect
@@ -183,7 +150,7 @@ contains
     status = 0   
 
     if (.not. associated(atypes)) then
-       call handleError("atype", "atypes was not present before call of createDefaultInteractionHash!")
+       call handleError("atype", "atypes was not present before call of createInteractionHash!")
        status = -1
        return
     endif
@@ -198,6 +165,10 @@ contains
     if (.not. allocated(InteractionHash)) then
        allocate(InteractionHash(nAtypes,nAtypes))
     endif
+
+    if (.not. allocated(atypeMaxCutoff)) then
+       allocate(atypeMaxCutoff(nAtypes))
+    endif
         
     do i = 1, nAtypes
        call getElementProperty(atypes, i, "is_LennardJones", i_is_LJ)
@@ -207,6 +178,13 @@ contains
        call getElementProperty(atypes, i, "is_GayBerne", i_is_GB)
        call getElementProperty(atypes, i, "is_EAM", i_is_EAM)
        call getElementProperty(atypes, i, "is_Shape", i_is_Shape)
+
+       if (i_is_LJ) then
+          thisCut = getDefaultLJCutoff(i)
+          if (thisCut .gt. atypeMaxCutoff(i)) atypeMaxCutoff(i) = thisCut
+       endif
+
+
 
        do j = i, nAtypes
 
@@ -257,126 +235,42 @@ contains
 
     end do
 
-    haveInteractionMap = .true.
-  end subroutine createInteractionMap
+    haveInteractionHash = .true.
+  end subroutine createInteractionHash
 
-  subroutine createGroupCutoffs(skinThickness,defaultrList,stat)
-    real(kind=dp), intent(in), optional :: defaultRList
-    real(kind-dp), intent(in), :: skinThickenss 
-  ! Query each potential and return the cutoff for that potential. We
-  ! build the neighbor list based on the largest cutoff value for that
-  ! atype. Each potential can decide whether to calculate the force for
-  ! that atype based upon it's own cutoff.
-  
+  subroutine createGtypeCutoffMap(defaultRcut, defaultSkinThickness, stat)
 
     real(kind=dp), intent(in), optional :: defaultRCut, defaultSkinThickness
-
-    integer :: iMap
-    integer :: map_i,map_j
-    real(kind=dp) :: thisRCut = 0.0_dp
-    real(kind=dp) :: actualCutoff = 0.0_dp
     integer, intent(out) :: stat
-    integer :: nAtypes
-    integer :: myStatus
+
+    integer :: myStatus, nAtypes
 
     stat = 0
-    if (.not. haveInteractionMap) then 
-
-       call createInteractionMap(myStatus)
-
+    if (.not. haveInteractionHash) then 
+       call createInteractionHash(myStatus)      
        if (myStatus .ne. 0) then
-          write(default_error, *) 'createInteractionMap failed in doForces!'
+          write(default_error, *) 'createInteractionHash failed in doForces!'
           stat = -1
           return
        endif
     endif
 
     nAtypes = getSize(atypes)
-    !! If we pass a default rcut, set all atypes to that cutoff distance
-    if(present(defaultRList)) then
-       InteractionMap(:,:)%rCut = defaultRCut
-       InteractionMap(:,:)%rCutSq = defaultRCut*defaultRCut
-       InteractionMap(:,:)%rListSq = (defaultRCut+defaultSkinThickness)**2
-       haveRlist = .true.
-       return
-    end if
 
-    do map_i = 1,nAtypes
-       do map_j = map_i,nAtypes
-          iMap = InteractionMap(map_i, map_j)%InteractionHash
-          
-          if ( iand(iMap, LJ_PAIR).ne.0 ) then
-             ! thisRCut = getLJCutOff(map_i,map_j)
-             if (thisRcut > actualCutoff) actualCutoff = thisRcut
-          endif
-          
-          if ( iand(iMap, ELECTROSTATIC_PAIR).ne.0 ) then
-             ! thisRCut = getElectrostaticCutOff(map_i,map_j)
-             if (thisRcut > actualCutoff) actualCutoff = thisRcut
-          endif
-          
-          if ( iand(iMap, STICKY_PAIR).ne.0 ) then
-             ! thisRCut = getStickyCutOff(map_i,map_j)
-              if (thisRcut > actualCutoff) actualCutoff = thisRcut
-           endif
-           
-           if ( iand(iMap, STICKYPOWER_PAIR).ne.0 ) then
-              ! thisRCut = getStickyPowerCutOff(map_i,map_j)
-              if (thisRcut > actualCutoff) actualCutoff = thisRcut
-           endif
-           
-           if ( iand(iMap, GAYBERNE_PAIR).ne.0 ) then
-              ! thisRCut = getGayberneCutOff(map_i,map_j)
-              if (thisRcut > actualCutoff) actualCutoff = thisRcut
-           endif
-           
-           if ( iand(iMap, GAYBERNE_LJ).ne.0 ) then
-!              thisRCut = getGaybrneLJCutOff(map_i,map_j)
-              if (thisRcut > actualCutoff) actualCutoff = thisRcut
-           endif
-           
-           if ( iand(iMap, EAM_PAIR).ne.0 ) then       
-!              thisRCut = getEAMCutOff(map_i,map_j)
-              if (thisRcut > actualCutoff) actualCutoff = thisRcut
-           endif
-           
-           if ( iand(iMap, SHAPE_PAIR).ne.0 ) then       
-!              thisRCut = getShapeCutOff(map_i,map_j)
-              if (thisRcut > actualCutoff) actualCutoff = thisRcut
-           endif
-           
-           if ( iand(iMap, SHAPE_LJ).ne.0 ) then       
-!              thisRCut = getShapeLJCutOff(map_i,map_j)
-              if (thisRcut > actualCutoff) actualCutoff = thisRcut
-           endif
-           InteractionMap(map_i, map_j)%rCut = actualCutoff
-           InteractionMap(map_i, map_j)%rCutSq = actualCutoff * actualCutoff
-           InteractionMap(map_i, map_j)%rListSq = (actualCutoff + skinThickness)**2 
+    do i = 1, nAtypes
+       
+       atypeMaxCutoff(i) = 
 
-           InteractionMap(map_j, map_i)%rCut = InteractionMap(map_i, map_j)%rCut
-           InteractionMap(map_j, map_i)%rCutSq = InteractionMap(map_i, map_j)%rCutSq
-           InteractionMap(map_j, map_i)%rListSq = InteractionMap(map_i, map_j)%rListSq
-        end do
-     end do
-     ! now the groups
+    
 
 
 
-     haveRlist = .true.
-   end subroutine createGroupCutoffs
+     haveGtypeCutoffMap = .true.
+   end subroutine createGtypeCutoffMap
 
   subroutine setSimVariables()
     SIM_uses_DirectionalAtoms = SimUsesDirectionalAtoms()
-    SIM_uses_LennardJones = SimUsesLennardJones()
-    SIM_uses_Electrostatics = SimUsesElectrostatics()
-    SIM_uses_Charges = SimUsesCharges()
-    SIM_uses_Dipoles = SimUsesDipoles()
-    SIM_uses_Sticky = SimUsesSticky()
-    SIM_uses_StickyPower = SimUsesStickyPower()
-    SIM_uses_GayBerne = SimUsesGayBerne()
     SIM_uses_EAM = SimUsesEAM()
-    SIM_uses_Shapes = SimUsesShapes()
-    SIM_uses_FLARB = SimUsesFLARB()
     SIM_uses_RF = SimUsesRF()
     SIM_requires_postpair_calc = SimRequiresPostpairCalc()
     SIM_requires_prepair_calc = SimRequiresPrepairCalc()
@@ -394,13 +288,21 @@ contains
 
     error = 0
 
-    if (.not. haveInteractionMap) then 
-       
+    if (.not. haveInteractionHash) then       
        myStatus = 0       
-       call createInteractionMap(myStatus)
-       
+       call createInteractionHash(myStatus)       
        if (myStatus .ne. 0) then
-          write(default_error, *) 'createInteractionMap failed in doForces!'
+          write(default_error, *) 'createInteractionHash failed in doForces!'
+          error = -1
+          return
+       endif
+    endif
+
+    if (.not. haveGtypeCutoffMap) then        
+       myStatus = 0       
+       call createGtypeCutoffMap(myStatus)       
+       if (myStatus .ne. 0) then
+          write(default_error, *) 'createGtypeCutoffMap failed in doForces!'
           error = -1
           return
        endif
@@ -461,95 +363,31 @@ contains
     !! interactions are used by the force field.     
 
     FF_uses_DirectionalAtoms = .false.
-    FF_uses_LennardJones = .false.
-    FF_uses_Electrostatics = .false.
-    FF_uses_Charges = .false.    
     FF_uses_Dipoles = .false.
-    FF_uses_Sticky = .false.
-    FF_uses_StickyPower = .false.
     FF_uses_GayBerne = .false.
     FF_uses_EAM = .false.
-    FF_uses_Shapes = .false.
-    FF_uses_FLARB = .false.
 
     call getMatchingElementList(atypes, "is_Directional", .true., &
          nMatches, MatchList)
     if (nMatches .gt. 0) FF_uses_DirectionalAtoms = .true.
 
-    call getMatchingElementList(atypes, "is_LennardJones", .true., &
-         nMatches, MatchList)
-    if (nMatches .gt. 0) FF_uses_LennardJones = .true.
-
-    call getMatchingElementList(atypes, "is_Electrostatic", .true., &
-         nMatches, MatchList)
-    if (nMatches .gt. 0) then
-       FF_uses_Electrostatics = .true.
-    endif
-
-    call getMatchingElementList(atypes, "is_Charge", .true., &
-         nMatches, MatchList)
-    if (nMatches .gt. 0) then
-       FF_uses_Charges = .true.   
-       FF_uses_Electrostatics = .true.
-    endif
-
     call getMatchingElementList(atypes, "is_Dipole", .true., &
          nMatches, MatchList)
-    if (nMatches .gt. 0) then 
-       FF_uses_Dipoles = .true.
-       FF_uses_Electrostatics = .true.
-       FF_uses_DirectionalAtoms = .true.
-    endif
-
-    call getMatchingElementList(atypes, "is_Quadrupole", .true., &
-         nMatches, MatchList)
-    if (nMatches .gt. 0) then 
-       FF_uses_Quadrupoles = .true.
-       FF_uses_Electrostatics = .true.
-       FF_uses_DirectionalAtoms = .true.
-    endif
-
-    call getMatchingElementList(atypes, "is_Sticky", .true., nMatches, &
-         MatchList) 
-    if (nMatches .gt. 0) then
-       FF_uses_Sticky = .true.
-       FF_uses_DirectionalAtoms = .true.
-    endif
-
-    call getMatchingElementList(atypes, "is_StickyPower", .true., nMatches, &
-         MatchList) 
-    if (nMatches .gt. 0) then
-       FF_uses_StickyPower = .true.
-       FF_uses_DirectionalAtoms = .true.
-    endif
+    if (nMatches .gt. 0) FF_uses_Dipoles = .true.
     
     call getMatchingElementList(atypes, "is_GayBerne", .true., &
          nMatches, MatchList)
-    if (nMatches .gt. 0) then
-       FF_uses_GayBerne = .true.
-       FF_uses_DirectionalAtoms = .true.
-    endif
+    if (nMatches .gt. 0) FF_uses_GayBerne = .true.
 
     call getMatchingElementList(atypes, "is_EAM", .true., nMatches, MatchList)
     if (nMatches .gt. 0) FF_uses_EAM = .true.
 
-    call getMatchingElementList(atypes, "is_Shape", .true., &
-         nMatches, MatchList)
-    if (nMatches .gt. 0) then
-       FF_uses_Shapes = .true.
-       FF_uses_DirectionalAtoms = .true.
-    endif
 
-    call getMatchingElementList(atypes, "is_FLARB", .true., &
-         nMatches, MatchList)
-    if (nMatches .gt. 0) FF_uses_FLARB = .true.
-
-    !! Assume sanity (for the sake of argument)
     haveSaneForceField = .true.
 
     !! check to make sure the FF_uses_RF setting makes sense
 
-    if (FF_uses_dipoles) then
+    if (FF_uses_Dipoles) then
        if (FF_uses_RF) then
           dielect = getDielect()
           call initialize_rf(dielect)
@@ -562,16 +400,6 @@ contains
           return
        endif
     endif
-
-    !sticky module does not contain check_sticky_FF anymore
-    !if (FF_uses_sticky) then
-    !   call check_sticky_FF(my_status)
-    !   if (my_status /= 0) then
-    !      thisStat = -1
-    !      haveSaneForceField = .false.
-    !      return
-    !   end if
-    !endif
 
     if (FF_uses_EAM) then
        call init_EAM_FF(my_status) 
@@ -590,9 +418,6 @@ contains
           haveSaneForceField = .false.
           return
        endif
-    endif
-
-    if (FF_uses_GayBerne .and. FF_uses_LennardJones) then
     endif
 
     if (.not. haveNeighborList) then
@@ -658,7 +483,7 @@ contains
     integer :: localError
     integer :: propPack_i, propPack_j
     integer :: loopStart, loopEnd, loop
-    integer :: iMap
+    integer :: iHash
     real(kind=dp) :: listSkin = 1.0   
 
     !! initialize local variables  
@@ -792,7 +617,7 @@ contains
                   q_group(:,j), d_grp, rgrpsq)
 #endif
 
-             if (rgrpsq < InteractionMap(me_i,me_j)%rListsq) then
+             if (rgrpsq < InteractionHash(me_i,me_j)%rListsq) then
                 if (update_nlist) then
                    nlist = nlist + 1
 
@@ -1010,9 +835,9 @@ contains
 #else
              me_i = atid(i)
 #endif
-             iMap = InteractionHash(me_i,me_j)
+             iHash = InteractionHash(me_i,me_j)
              
-             if ( iand(iMap, ELECTROSTATIC_PAIR).ne.0 ) then
+             if ( iand(iHash, ELECTROSTATIC_PAIR).ne.0 ) then
 
                 mu_i = getDipoleMoment(me_i)
 
@@ -1079,7 +904,7 @@ contains
     real ( kind = dp ) :: ebalance
     integer :: me_i, me_j
 
-    integer :: iMap
+    integer :: iHash
 
     r = sqrt(rijsq)
     vpair = 0.0d0
@@ -1093,13 +918,13 @@ contains
     me_j = atid(j)
 #endif
 
-    iMap = InteractionMap(me_i, me_j)%InteractionHash
+    iHash = InteractionHash(me_i, me_j)
 
-    if ( iand(iMap, LJ_PAIR).ne.0 ) then
+    if ( iand(iHash, LJ_PAIR).ne.0 ) then
        call do_lj_pair(i, j, d, r, rijsq, sw, vpair, fpair, pot, f, do_pot)
     endif
 
-    if ( iand(iMap, ELECTROSTATIC_PAIR).ne.0 ) then
+    if ( iand(iHash, ELECTROSTATIC_PAIR).ne.0 ) then
        call doElectrostaticPair(i, j, d, r, rijsq, sw, vpair, fpair, &
             pot, eFrame, f, t, do_pot)
 
@@ -1112,37 +937,37 @@ contains
 
     endif
 
-    if ( iand(iMap, STICKY_PAIR).ne.0 ) then
+    if ( iand(iHash, STICKY_PAIR).ne.0 ) then
        call do_sticky_pair(i, j, d, r, rijsq, sw, vpair, fpair, &
             pot, A, f, t, do_pot)
     endif
 
-    if ( iand(iMap, STICKYPOWER_PAIR).ne.0 ) then
+    if ( iand(iHash, STICKYPOWER_PAIR).ne.0 ) then
        call do_sticky_power_pair(i, j, d, r, rijsq, sw, vpair, fpair, &
             pot, A, f, t, do_pot)
     endif
 
-    if ( iand(iMap, GAYBERNE_PAIR).ne.0 ) then
+    if ( iand(iHash, GAYBERNE_PAIR).ne.0 ) then
        call do_gb_pair(i, j, d, r, rijsq, sw, vpair, fpair, &
             pot, A, f, t, do_pot)
     endif
     
-    if ( iand(iMap, GAYBERNE_LJ).ne.0 ) then
+    if ( iand(iHash, GAYBERNE_LJ).ne.0 ) then
  !      call do_gblj_pair(i, j, d, r, rijsq, sw, vpair, fpair, &
  !           pot, A, f, t, do_pot)
     endif
 
-    if ( iand(iMap, EAM_PAIR).ne.0 ) then       
+    if ( iand(iHash, EAM_PAIR).ne.0 ) then       
        call do_eam_pair(i, j, d, r, rijsq, sw, vpair, fpair, pot, f, &
             do_pot)
     endif
 
-    if ( iand(iMap, SHAPE_PAIR).ne.0 ) then       
+    if ( iand(iHash, SHAPE_PAIR).ne.0 ) then       
        call do_shape_pair(i, j, d, r, rijsq, sw, vpair, fpair, &
             pot, A, f, t, do_pot)
     endif
 
-    if ( iand(iMap, SHAPE_LJ).ne.0 ) then       
+    if ( iand(iHash, SHAPE_LJ).ne.0 ) then       
        call do_shape_pair(i, j, d, r, rijsq, sw, vpair, fpair, &
             pot, A, f, t, do_pot)
     endif
@@ -1164,7 +989,7 @@ contains
     real ( kind = dp )                :: r, rc
     real ( kind = dp ), intent(inout) :: d(3), dc(3)
 
-    integer :: me_i, me_j, iMap
+    integer :: me_i, me_j, iHash
 
 #ifdef IS_MPI   
     me_i = atid_row(i)
@@ -1174,9 +999,9 @@ contains
     me_j = atid(j)   
 #endif
 
-    iMap = InteractionMap(me_i, me_j)%InteractionHash
+    iHash = InteractionHash(me_i, me_j)
 
-    if ( iand(iMap, EAM_PAIR).ne.0 ) then       
+    if ( iand(iHash, EAM_PAIR).ne.0 ) then       
             call calc_EAM_prepair_rho(i, j, d, r, rijsq )
     endif
     
@@ -1373,9 +1198,7 @@ contains
 
   function FF_UsesDirectionalAtoms() result(doesit)
     logical :: doesit
-    doesit = FF_uses_DirectionalAtoms .or. FF_uses_Dipoles .or. &
-         FF_uses_Quadrupoles .or. FF_uses_Sticky .or. &
-         FF_uses_StickyPower .or. FF_uses_GayBerne .or. FF_uses_Shapes
+    doesit = FF_uses_DirectionalAtoms
   end function FF_UsesDirectionalAtoms
 
   function FF_RequiresPrepairCalc() result(doesit)
