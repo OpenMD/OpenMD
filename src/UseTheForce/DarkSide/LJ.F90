@@ -43,12 +43,11 @@
 !! Calculates Long Range forces Lennard-Jones interactions.
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: LJ.F90,v 1.12 2005-05-19 15:49:53 tim Exp $, $Date: 2005-05-19 15:49:53 $, $Name: not supported by cvs2svn $, $Revision: 1.12 $
+!! @version $Id: LJ.F90,v 1.13 2005-08-09 22:33:48 gezelter Exp $, $Date: 2005-08-09 22:33:48 $, $Name: not supported by cvs2svn $, $Revision: 1.13 $
 
 
 module lj
   use atype_module
-  use switcheroo
   use vector_class
   use simulation
   use status
@@ -62,138 +61,187 @@ module lj
 
   integer, parameter :: DP = selected_real_kind(15)
 
-  type, private :: LjType
-     integer :: c_ident
-     integer :: atid
+  logical, save :: useGeometricDistanceMixing = .false.
+  logical, save :: haveMixingMap = .false.
+
+  real(kind=DP), save :: defaultCutoff = 0.0_DP
+  logical, save :: defaultShift = .false.
+  logical, save :: haveDefaultCutoff = .false.
+
+
+  type, private :: LJtype
+     integer       :: atid
      real(kind=dp) :: sigma
      real(kind=dp) :: epsilon
-     logical :: soft_pot
-  end type LjType
+     logical       :: isSoftCore = .false.
+  end type LJtype
 
-  type(LjType), dimension(:), allocatable :: ParameterMap
+  type, private :: LJList
+     integer               :: nLJtypes = 0
+     integer               :: currentLJtype = 0
+     type(LJtype), pointer :: LJtypes(:)      => null()
+     integer, pointer      :: atidToLJtype(:) => null()
+  end type LJList
 
-  logical, save :: haveMixingMap = .false.
+  type(LJList), save :: LJMap
 
   type :: MixParameters
      real(kind=DP) :: sigma
      real(kind=DP) :: epsilon
-     real(kind=dp)  :: sigma6
-     real(kind=dp)  :: tp6
-     real(kind=dp)  :: tp12
-     real(kind=dp)  :: delta 
-     logical :: soft_pot     
+     real(kind=dp) :: sigma6
+     real(kind=dp) :: rCut
+     real(kind=dp) :: delta
+     logical       :: rCutWasSet = .false.
+     logical       :: shiftedPot
+     logical       :: isSoftCore = .false.
   end type MixParameters
 
   type(MixParameters), dimension(:,:), allocatable :: MixingMap
 
-  real(kind=DP), save :: LJ_rcut
-  logical, save :: have_rcut = .false.
-  logical, save :: LJ_do_shift = .false.
-  logical, save :: useGeometricDistanceMixing = .false.
-
-  !! Public methods and data
-
-  public :: setCutoffLJ
-  public :: useGeometricMixing
-  public :: do_lj_pair
-  public :: newLJtype  
+  public :: newLJtype
+  public :: setLJDefaultCutoff
+  public :: setLJUniformCutoff
+  public :: setLJCutoffByTypes
   public :: getSigma
   public :: getEpsilon
-  public :: destroyLJTypes
+  public :: useGeometricMixing
+  public :: do_lj_pair
+  public :: destroyLJtypes
 
 contains
 
-  subroutine newLJtype(c_ident, sigma, epsilon, soft_pot, status)
+  subroutine newLJtype(c_ident, sigma, epsilon, isSoftCore, status)
     integer,intent(in) :: c_ident
     real(kind=dp),intent(in) :: sigma
     real(kind=dp),intent(in) :: epsilon
-    integer, intent(in) :: soft_pot
+    integer, intent(in) :: isSoftCore
     integer,intent(out) :: status
-    integer :: nATypes, myATID
+    integer :: nLJTypes, ntypes, myATID
     integer, pointer :: MatchList(:) => null()
+    integer :: current
 
     status = 0
+    ! check to see if this is the first time into this routine...
+    if (.not.associated(LJMap%LJtypes)) then
 
-    myATID = getFirstMatchingElement(atypes, "c_ident", c_ident)
+       call getMatchingElementList(atypes, "is_LennardJones", .true., &
+            nLJTypes, MatchList)
+       
+       LJMap%nLJtypes =  nLJTypes
 
-    if (.not.allocated(ParameterMap)) then
+       allocate(LJMap%LJtypes(nLJTypes))
 
-       !call getMatchingElementList(atypes, "is_LennardJones", .true., &
-       !     nLJTypes, MatchList)
-       nAtypes = getSize(atypes)
-       if (nAtypes == 0) then
-          status = -1
-          return
-       end if
+       ntypes = getSize(atypes)
 
-       if (.not. allocated(ParameterMap)) then
-          allocate(ParameterMap(nAtypes))
-       endif
-
+       allocate(LJMap%atidToLJtype(ntypes))
     end if
 
-    if (myATID .gt. size(ParameterMap)) then
-       status = -1
-       return
-    endif
+    LJMap%currentLJtype = LJMap%currentLJtype + 1
+    current = LJMap%currentLJtype
 
-    ! set the values for ParameterMap for this atom type:
-
-    ParameterMap(myATID)%c_ident = c_ident
-    ParameterMap(myATID)%atid = myATID
-    ParameterMap(myATID)%epsilon = epsilon
-    ParameterMap(myATID)%sigma = sigma
-    if (soft_pot == 1) then
-       ParameterMap(myATID)%soft_pot = .true.
+    myATID = getFirstMatchingElement(atypes, "c_ident", c_ident)
+    LJMap%atidToLJtype(myATID)        = current
+    LJMap%LJtypes(current)%atid       = myATID
+    LJMap%LJtypes(current)%sigma      = sigma
+    LJMap%LJtypes(current)%epsilon    = epsilon 
+    if (isSoftCore .eq. 1) then
+       LJMap%LJtypes(current)%isSoftCore = .true.
     else
-       ParameterMap(myATID)%soft_pot = .false.
+       LJMap%LJtypes(current)%isSoftCore = .false.
     endif
   end subroutine newLJtype
 
-  function getSigma(atid) result (s)
-    integer, intent(in) :: atid
-    integer :: localError
-    real(kind=dp) :: s
+  subroutine setLJDefaultCutoff(thisRcut, shiftedPot)
+    real(kind=dp), intent(in) :: thisRcut
+    logical, intent(in) :: shiftedPot
+    defaultCutoff = thisRcut
+    defaultShift = shiftedPot
+    haveDefaultCutoff = .true.
+  end subroutine setLJDefaultCutoff
 
-    if (.not.allocated(ParameterMap)) then
-       call handleError("LJ", "no ParameterMap was present before first call of getSigma!")
+  subroutine setLJUniformCutoff(thisRcut, shiftedPot)
+    real(kind=dp), intent(in) :: thisRcut
+    logical, intent(in) :: shiftedPot
+    integer :: nLJtypes, i, j
+
+    if (LJMap%currentLJtype == 0) then
+       call handleError("LJ", "No members in LJMap")
        return
     end if
 
-    s = ParameterMap(atid)%sigma
+    nLJtypes = LJMap%nLJtypes
+    if (.not. allocated(MixingMap)) then
+       allocate(MixingMap(nLJtypes, nLJtypes))
+    endif
+
+    do i = 1, nLJtypes
+       do j = 1, nLJtypes
+          MixingMap(i,j)%rCut = thisRcut
+          MixingMap(i,j)%shiftedPot = shiftedPot
+          MixingMap(i,j)%rCutWasSet = .true.
+       enddo
+    enddo
+    call createMixingMap()
+  end subroutine setLJUniformCutoff
+
+  subroutine setLJCutoffByTypes(atid1, atid2, thisRcut, shiftedPot)
+    integer, intent(in) :: atid1, atid2
+    real(kind=dp), intent(in) :: thisRcut
+    logical, intent(in) :: shiftedPot
+    integer :: nLJtypes, ljt1, ljt2
+
+    if (LJMap%currentLJtype == 0) then
+       call handleError("LJ", "No members in LJMap")
+       return
+    end if
+
+    nLJtypes = LJMap%nLJtypes
+    if (.not. allocated(MixingMap)) then
+       allocate(MixingMap(nLJtypes, nLJtypes))
+    endif
+
+    ljt1 = LJMap%atidToLJtype(atid1)
+    ljt2 = LJMap%atidToLJtype(atid2)
+
+    MixingMap(ljt1,ljt2)%rCut = thisRcut
+    MixingMap(ljt1,ljt2)%shiftedPot = shiftedPot
+    MixingMap(ljt1,ljt2)%rCutWasSet = .true.
+    MixingMap(ljt2,ljt1)%rCut = thisRcut
+    MixingMap(ljt2,ljt1)%shiftedPot = shiftedPot
+    MixingMap(ljt2,ljt1)%rCutWasSet = .true.
+
+    call createMixingMap()
+  end subroutine setLJCutoffByTypes
+
+  function getSigma(atid) result (s)
+    integer, intent(in) :: atid
+    integer :: ljt1
+    real(kind=dp) :: s
+
+    if (LJMap%currentLJtype == 0) then
+       call handleError("LJ", "No members in LJMap")
+       return
+    end if
+
+    ljt1 = LJMap%atidToLJtype(atid)
+    s = LJMap%LJtypes(ljt1)%sigma
+
   end function getSigma
 
   function getEpsilon(atid) result (e)
     integer, intent(in) :: atid
-    integer :: localError
+    integer :: ljt1
     real(kind=dp) :: e
 
-    if (.not.allocated(ParameterMap)) then
-       call handleError("LJ", "no ParameterMap was present before first call of getEpsilon!")
+    if (LJMap%currentLJtype == 0) then
+       call handleError("LJ", "No members in LJMap")
        return
     end if
 
-    e = ParameterMap(atid)%epsilon
+    ljt1 = LJMap%atidToLJtype(atid)
+    e = LJMap%LJtypes(ljt1)%epsilon
+
   end function getEpsilon
-
-
-  subroutine setCutoffLJ(rcut, do_shift, status)
-    logical, intent(in):: do_shift
-    integer :: status, myStatus
-    real(kind=dp) :: rcut
-
-#define __FORTRAN90
-#include "UseTheForce/fSwitchingFunction.h"
-
-    status = 0
-
-    LJ_rcut = rcut
-    LJ_do_shift = do_shift
-    call set_switch(LJ_SWITCH, rcut, rcut)
-    have_rcut = .true.
-
-    return
-  end subroutine setCutoffLJ
 
   subroutine useGeometricMixing() 
     useGeometricDistanceMixing = .true.
@@ -201,108 +249,74 @@ contains
     return
   end subroutine useGeometricMixing
 
-  subroutine createMixingMap(status)
-    integer :: nATIDs
-    integer :: status
-    integer :: i
-    integer :: j
-    real ( kind = dp ) :: Sigma_i, Sigma_j
-    real ( kind = dp ) :: Epsilon_i, Epsilon_j
-    real ( kind = dp ) :: rcut6
-    logical :: i_is_LJ, j_is_LJ
+  subroutine createMixingMap()
+    integer :: nLJtypes, i, j
+    real ( kind = dp ) :: s1, s2, e1, e2
+    real ( kind = dp ) :: rcut6, tp6, tp12
+    logical :: isSoftCore1, isSoftCore2
 
-    status = 0
-
-    if (.not. allocated(ParameterMap)) then
-       call handleError("LJ", "no ParameterMap was present before call of createMixingMap!")
-       status = -1
-       return
-    endif
-
-    nATIDs = size(ParameterMap)
-
-    if (nATIDs == 0) then
-       status = -1
+    if (LJMap%currentLJtype == 0) then
+       call handleError("LJ", "No members in LJMap")
        return
     end if
 
+    nLJtypes = LJMap%nLJtypes
+
     if (.not. allocated(MixingMap)) then
-       allocate(MixingMap(nATIDs, nATIDs))
+       allocate(MixingMap(nLJtypes, nLJtypes))
     endif
 
-    if (.not.have_rcut) then
-       status = -1
-       return
-    endif
+    do i = 1, nLJtypes
 
-    rcut6 = LJ_rcut**6
+       s1 = LJMap%LJtypes(i)%sigma
+       e1 = LJMap%LJtypes(i)%epsilon
+       isSoftCore1 = LJMap%LJtypes(i)%isSoftCore
 
-    ! This loops through all atypes, even those that don't support LJ forces.
-    do i = 1, nATIDs
-       call getElementProperty(atypes, i, "is_LennardJones", i_is_LJ)
-       if (i_is_LJ) then
-          Epsilon_i = ParameterMap(i)%epsilon
-          Sigma_i = ParameterMap(i)%sigma
+       do j = i, nLJtypes
+          
+          s2 = LJMap%LJtypes(j)%sigma
+          e2 = LJMap%LJtypes(j)%epsilon
+          isSoftCore2 = LJMap%LJtypes(j)%isSoftCore
+          
+          MixingMap(i,j)%isSoftCore = isSoftCore1 .or. isSoftCore2
 
-          ! do self mixing rule
-          MixingMap(i,i)%sigma   = Sigma_i          
-          MixingMap(i,i)%sigma6  = Sigma_i ** 6          
-          MixingMap(i,i)%tp6     = (MixingMap(i,i)%sigma6)/rcut6          
-          MixingMap(i,i)%tp12    = (MixingMap(i,i)%tp6) ** 2
-          MixingMap(i,i)%epsilon = Epsilon_i          
-          MixingMap(i,i)%delta   = -4.0_DP * MixingMap(i,i)%epsilon * &
-               (MixingMap(i,i)%tp12 - MixingMap(i,i)%tp6)
-          MixingMap(i,i)%soft_pot = ParameterMap(i)%soft_pot
+          ! only the distance parameter uses different mixing policies
+          if (useGeometricDistanceMixing) then
+             MixingMap(i,j)%sigma = dsqrt(s1 * s2)
+          else
+             MixingMap(i,j)%sigma = 0.5_dp * (s1 + s2)
+          endif
+          
+          MixingMap(i,j)%epsilon = dsqrt(e1 * e2)
 
-          do j = i + 1, nATIDs
-             call getElementProperty(atypes, j, "is_LennardJones", j_is_LJ)
+          MixingMap(i,j)%sigma6 = (MixingMap(i,j)%sigma)**6
 
-             if (j_is_LJ) then
-                Epsilon_j = ParameterMap(j)%epsilon
-                Sigma_j = ParameterMap(j)%sigma
-
-                ! only the distance parameter uses different mixing policies
-                if (useGeometricDistanceMixing) then
-                   ! only for OPLS as far as we can tell
-                   MixingMap(i,j)%sigma = dsqrt(Sigma_i * Sigma_j)
-                else
-                   ! everyone else
-                   MixingMap(i,j)%sigma = 0.5_dp * (Sigma_i + Sigma_j)
-                endif
-
-                ! energy parameter is always geometric mean:
-                MixingMap(i,j)%epsilon = dsqrt(Epsilon_i * Epsilon_j)
-
-                MixingMap(i,j)%sigma6 = (MixingMap(i,j)%sigma)**6
-                MixingMap(i,j)%tp6    = MixingMap(i,j)%sigma6/rcut6
-                MixingMap(i,j)%tp12    = (MixingMap(i,j)%tp6) ** 2
-
-                MixingMap(i,j)%delta = -4.0_DP * MixingMap(i,j)%epsilon * &
-                     (MixingMap(i,j)%tp12 - MixingMap(i,j)%tp6)
-
-                MixingMap(i,j)%soft_pot = ParameterMap(i)%soft_pot .or. ParameterMap(j)%soft_pot
-
-
-                MixingMap(j,i)%sigma   = MixingMap(i,j)%sigma
-                MixingMap(j,i)%sigma6  = MixingMap(i,j)%sigma6
-                MixingMap(j,i)%tp6     = MixingMap(i,j)%tp6
-                MixingMap(j,i)%tp12    = MixingMap(i,j)%tp12
-                MixingMap(j,i)%epsilon = MixingMap(i,j)%epsilon
-                MixingMap(j,i)%delta   = MixingMap(i,j)%delta
-                MixingMap(j,i)%soft_pot   = MixingMap(i,j)%soft_pot
+          if (MixingMap(i,j)%rCutWasSet) then
+             rcut6 = (MixingMap(i,j)%rcut)**6
+          else
+             if (haveDefaultCutoff) then
+                rcut6 = defaultCutoff**6
+             else
+                call handleError("LJ", "No specified or default cutoff value!")
              endif
-          end do
-       endif
-    end do
+          endif
+          
+          tp6    = MixingMap(i,j)%sigma6/rcut6
+          tp12    = tp6**2          
 
+          MixingMap(i,j)%delta =-4.0_DP*MixingMap(i,j)%epsilon*(tp12 - tp6)
+       enddo
+    enddo
+    
     haveMixingMap = .true.
-
+    
   end subroutine createMixingMap
-
+  
   subroutine do_lj_pair(atom1, atom2, d, rij, r2, sw, vpair, fpair, &
        pot, f, do_pot)
 
     integer, intent(in) ::  atom1, atom2
+    integer :: atid1, atid2, ljt1, ljt2
     real( kind = dp ), intent(in) :: rij, r2
     real( kind = dp ) :: pot, sw, vpair
     real( kind = dp ), dimension(3,nLocal) :: f    
@@ -320,55 +334,55 @@ contains
     real( kind = dp ) :: t6
     real( kind = dp ) :: t12
     real( kind = dp ) :: delta
-    logical :: soft_pot
+    logical :: isSoftCore, shiftedPot
     integer :: id1, id2, localError
 
     if (.not.haveMixingMap) then
-       localError = 0
-       call createMixingMap(localError)
-       if ( localError .ne. 0 ) then
-          call handleError("LJ", "MixingMap creation failed!")
-          return
-       end if
+       call createMixingMap()
     endif
 
     ! Look up the correct parameters in the mixing matrix
 #ifdef IS_MPI
-    sigma6   = MixingMap(atid_Row(atom1),atid_Col(atom2))%sigma6
-    epsilon  = MixingMap(atid_Row(atom1),atid_Col(atom2))%epsilon
-    delta    = MixingMap(atid_Row(atom1),atid_Col(atom2))%delta
-    soft_pot =  MixingMap(atid_Row(atom1),atid_Col(atom2))%soft_pot
+    atid1 = atid_Row(atom1)
+    atid2 = atid_Col(atom2)
 #else
-    sigma6   = MixingMap(atid(atom1),atid(atom2))%sigma6
-    epsilon  = MixingMap(atid(atom1),atid(atom2))%epsilon
-    delta    = MixingMap(atid(atom1),atid(atom2))%delta
-    soft_pot    = MixingMap(atid(atom1),atid(atom2))%soft_pot
+    atid1 = atid(atom1)
+    atid2 = atid(atom2)
 #endif
+
+    ljt1 = LJMap%atidToLJtype(atid1)
+    ljt2 = LJMap%atidToLJtype(atid2)
+
+    sigma6     = MixingMap(ljt1,ljt2)%sigma6
+    epsilon    = MixingMap(ljt1,ljt2)%epsilon
+    delta      = MixingMap(ljt1,ljt2)%delta
+    isSoftCore = MixingMap(ljt1,ljt2)%isSoftCore
+    shiftedPot = MixingMap(ljt1,ljt2)%shiftedPot
 
     r6 = r2 * r2 * r2
 
     t6  = sigma6/ r6
     t12 = t6 * t6     
 
-    if (soft_pot) then
-
-      pot_temp = 4.0E0_DP * epsilon * t6
-      if (LJ_do_shift) then
-         pot_temp = pot_temp + delta
-      endif
-
-      vpair = vpair + pot_temp
-
-      dudr = -sw * 24.0E0_DP * epsilon * t6 / rij
-
-    else
-       pot_temp = 4.0E0_DP * epsilon * (t12 - t6) 
-       if (LJ_do_shift) then
+    if (isSoftCore) then
+       
+       pot_temp = 4.0E0_DP * epsilon * t6
+       if (shiftedPot) then
           pot_temp = pot_temp + delta
        endif
-
+       
        vpair = vpair + pot_temp
-
+       
+       dudr = -sw * 24.0E0_DP * epsilon * t6 / rij
+       
+    else
+       pot_temp = 4.0E0_DP * epsilon * (t12 - t6) 
+       if (shiftedPot) then
+          pot_temp = pot_temp + delta
+       endif
+       
+       vpair = vpair + pot_temp
+       
        dudr = sw * 24.0E0_DP * epsilon * (t6 - 2.0E0_DP*t12) / rij
     endif
 
@@ -428,10 +442,21 @@ contains
   end subroutine do_lj_pair
 
   subroutine destroyLJTypes()
-    if(allocated(ParameterMap)) deallocate(ParameterMap)
-    if(allocated(MixingMap)) deallocate(MixingMap)
+
+    LJMap%nLJtypes = 0
+    LJMap%currentLJtype = 0
+    
+    if (associated(LJMap%LJtypes)) then
+       deallocate(LJMap%LJtypes)
+       LJMap%LJtypes => null()
+    end if
+    
+    if (associated(LJMap%atidToLJtype)) then
+       deallocate(LJMap%atidToLJtype)
+       LJMap%atidToLJtype => null()
+    end if
+    
     haveMixingMap = .false.
   end subroutine destroyLJTypes
-
 
 end module lj
