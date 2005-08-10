@@ -65,13 +65,24 @@ namespace oopse{
   /**
    * @class StuntDouble StuntDouble.hpp "Primitives/StuntDouble.hpp"
    * @brief 
+   *     "Don't move, or you're dead! Stand up! Captain, we've got them!"
+   *
+   *     "Spectacular stunt, my friends, but all for naught. Turn around
+   *      please. Ha. What a pity. What a pity. So, Princess, you thought
+   *      you could outwit the imperious forces of...."
+   *
+   *     "You idiots! These are not them. You've captured their stunt
+   *      doubles! Search the area. Find them! Find them!"
+   *
    * StuntDouble is a very strange idea.  A StuntDouble stands in for
    * some object that can be manipulated by the Integrators or
    * Minimizers.  Some of the manipulable objects are Atoms, some are
    * DirectionalAtoms, and some are RigidBodies.  StuntDouble
    * provides an interface for the Integrators and Minimizers to use,
    * and does some preliminary sanity checking so that the program
-   * doesn't try to do something stupid like torque an Atom
+   * doesn't try to do something stupid like torque an Atom (The
+   * quotes above are from Spaceballs...)
+   *
    * @note the dynamic data of stuntdouble will be stored outside of the class
    */
   class StuntDouble{
