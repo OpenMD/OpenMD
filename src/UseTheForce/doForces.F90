@@ -45,7 +45,7 @@
 
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: doForces.F90,v 1.28 2005-08-09 22:33:37 gezelter Exp $, $Date: 2005-08-09 22:33:37 $, $Name: not supported by cvs2svn $, $Revision: 1.28 $
+!! @version $Id: doForces.F90,v 1.29 2005-08-11 21:04:03 gezelter Exp $, $Date: 2005-08-11 21:04:03 $, $Name: not supported by cvs2svn $, $Revision: 1.29 $
 
 
 module doForces
@@ -73,7 +73,9 @@ module doForces
 
 #define __FORTRAN90
 #include "UseTheForce/fSwitchingFunction.h"
+#include "UseTheForce/fCutoffPolicy.h"
 #include "UseTheForce/DarkSide/fInteractionMap.h"
+
 
   INTEGER, PARAMETER:: PREPAIR_LOOP = 1
   INTEGER, PARAMETER:: PAIR_LOOP    = 2
@@ -98,6 +100,7 @@ module doForces
   logical, save :: SIM_uses_PBC
 
   public :: init_FF
+  public :: setDefaultCutoffs
   public :: do_force_loop
   public :: createInteractionHash
   public :: createGtypeCutoffMap
@@ -122,6 +125,9 @@ module doForces
      real(kind=dp) :: rlistsq
   end type gtypeCutoffs
   type(gtypeCutoffs), dimension(:,:), allocatable :: gtypeCutoffMap
+
+  integer, save :: cutoffPolicy = TRADITIONAL_CUTOFF_POLICY
+  real(kind=dp),save :: defaultRcut, defaultRsw, defaultRlist
   
 contains
 
@@ -179,13 +185,6 @@ contains
        call getElementProperty(atypes, i, "is_EAM", i_is_EAM)
        call getElementProperty(atypes, i, "is_Shape", i_is_Shape)
 
-       if (i_is_LJ) then
-          thisCut = getDefaultLJCutoff(i)
-          if (thisCut .gt. atypeMaxCutoff(i)) atypeMaxCutoff(i) = thisCut
-       endif
-
-
-
        do j = i, nAtypes
 
           iHash = 0
@@ -238,10 +237,15 @@ contains
     haveInteractionHash = .true.
   end subroutine createInteractionHash
 
-  subroutine createGtypeCutoffMap(defaultRcut, defaultSkinThickness, stat)
+  subroutine createGtypeCutoffMap()
 
-    real(kind=dp), intent(in), optional :: defaultRCut, defaultSkinThickness
-    integer, intent(out) :: stat
+    logical :: i_is_LJ
+    logical :: i_is_Elect
+    logical :: i_is_Sticky
+    logical :: i_is_StickyP
+    logical :: i_is_GB
+    logical :: i_is_EAM
+    logical :: i_is_Shape
 
     integer :: myStatus, nAtypes
 
@@ -258,16 +262,46 @@ contains
     nAtypes = getSize(atypes)
 
     do i = 1, nAtypes
+       call getElementProperty(atypes, i, "is_LennardJones", i_is_LJ)
+       call getElementProperty(atypes, i, "is_Electrostatic", i_is_Elect)
+       call getElementProperty(atypes, i, "is_Sticky", i_is_Sticky)
+       call getElementProperty(atypes, i, "is_StickyPower", i_is_StickyP)
+       call getElementProperty(atypes, i, "is_GayBerne", i_is_GB)
+       call getElementProperty(atypes, i, "is_EAM", i_is_EAM)
+       call getElementProperty(atypes, i, "is_Shape", i_is_Shape)
        
-       atypeMaxCutoff(i) = 
-
+       if (i_is_LJ) then 
+          thisCut = getSigma(i) * DEFAULT_SIGMA_MULTIPLIER
+          if (thisCut .gt. atypeMaxCutoff(i)) atypeMaxCutoff(i) = thisCut
+       endif
+       if (i_is_Elect) then
+          thisCut = 
     
 
 
 
      haveGtypeCutoffMap = .true.
    end subroutine createGtypeCutoffMap
+ 
+   subroutine setDefaultCutoffs(defRcut, defRsw, defRlist, cutPolicy)
+     real(kind=dp),intent(in) :: defRcut, defRsw, defRlist
+     integer, intent(in) :: cutPolicy
 
+     defaultRcut = defRcut
+     defaultRsw = defRsw
+     defaultRlist = defRlist
+     cutoffPolicy = cutPolicy
+   end subroutine setDefaultCutoffs
+
+   subroutine setCutoffPolicy(cutPolicy)
+
+     integer, intent(in) :: cutPolicy
+     cutoffPolicy = cutPolicy
+     call createGtypeCutoffMap()
+
+   end subroutine setDefaultCutoffs
+    
+     
   subroutine setSimVariables()
     SIM_uses_DirectionalAtoms = SimUsesDirectionalAtoms()
     SIM_uses_EAM = SimUsesEAM()

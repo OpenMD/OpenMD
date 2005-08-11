@@ -42,9 +42,9 @@
 module notifyCutoffs
 
   use definitions
-  use doForces, only:       createRCuts
+  use doForces, only:       setDefaultCutoffs
   use reaction_field, only: setCutoffsRF
-  use lj, only:             setCutoffLJ
+  use lj, only:             setLJDefaultCutoff
   use eam, only:            setCutoffEAM
   use switcheroo, only:     set_switch
   use status
@@ -56,6 +56,7 @@ module notifyCutoffs
 
 #define __FORTRAN90
 #include "UseTheForce/fSwitchingFunction.h"
+#include "UseTheForce/fCutoffPolicy.h"
 
   public::cutoffNotify
 
@@ -107,9 +108,9 @@ contains
 
     endif
 
-    call createRCuts( defaultRlist=rlist,stat=localError )
+    call setDefaultCutoffs(rcut, rsw, rlist, TRADITIONAL_CUTOFF_POLICY) 
     call setCutoffsRF( rcut, rsw )
-    call setCutoffLJ( rcut, do_shift, localError )
+    call setLJDefaultCutoff( rcut, do_shift )
     call setCutoffEAM( rcut, localError)
     call set_switch(GROUP_SWITCH, rsw, rcut)
 
