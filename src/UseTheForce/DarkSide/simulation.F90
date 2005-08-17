@@ -565,7 +565,7 @@ contains
           doesit = thisSim%SIM_uses_RF
         end function SimRequiresPostpairCalc
 
-! Function returns true if the simulation has this atype
+        ! Function returns true if the simulation has this atype
         function SimHasAtype(thisAtype) result(doesit)
           logical :: doesit
           integer :: thisAtype
@@ -594,19 +594,18 @@ contains
              end if
              SimHasAtypeMap = .false.
           end if
- ! Loop through the local atoms and grab the atypes present         
+          ! Loop through the local atoms and grab the atypes present         
           do me_i = 1,nLocal
              SimHasAtypeMap(atid(me_i)) = .true.
           end do
-! For MPI, we need to know all possible atypes present in simulation on all
-! processors. Use LOR operation to set map.
+          ! For MPI, we need to know all possible atypes present in 
+          ! simulation on all processors. Use LOR operation to set map.
 #ifdef IS_MPI
-          call mpi_allreduce(SimHasAtypeMap, SimHasAtypeMap, nAtypes, mpi_logical, &
-               MPI_LOR, mpi_comm_world, mpiErrors)
-#endif
-
+          call mpi_allreduce(SimHasAtypeMap, SimHasAtypeMap, nAtypes, &
+               mpi_logical, MPI_LOR, mpi_comm_world, mpiErrors)
+#endif          
         end subroutine createSimHasAtype
- 
+        
        subroutine InitializeSimGlobals(thisStat)
           integer, intent(out) :: thisStat
           integer :: alloc_stat

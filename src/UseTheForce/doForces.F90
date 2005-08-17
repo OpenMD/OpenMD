@@ -45,7 +45,7 @@
 
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: doForces.F90,v 1.29 2005-08-11 21:04:03 gezelter Exp $, $Date: 2005-08-11 21:04:03 $, $Name: not supported by cvs2svn $, $Revision: 1.29 $
+!! @version $Id: doForces.F90,v 1.30 2005-08-17 15:26:37 gezelter Exp $, $Date: 2005-08-17 15:26:37 $, $Name: not supported by cvs2svn $, $Revision: 1.30 $
 
 
 module doForces
@@ -248,6 +248,7 @@ contains
     logical :: i_is_Shape
 
     integer :: myStatus, nAtypes
+    real(kind=dp):: thisSigma, bigSigma
 
     stat = 0
     if (.not. haveInteractionHash) then 
@@ -260,23 +261,73 @@ contains
     endif
 
     nAtypes = getSize(atypes)
-
-    do i = 1, nAtypes
-       call getElementProperty(atypes, i, "is_LennardJones", i_is_LJ)
-       call getElementProperty(atypes, i, "is_Electrostatic", i_is_Elect)
-       call getElementProperty(atypes, i, "is_Sticky", i_is_Sticky)
-       call getElementProperty(atypes, i, "is_StickyPower", i_is_StickyP)
-       call getElementProperty(atypes, i, "is_GayBerne", i_is_GB)
-       call getElementProperty(atypes, i, "is_EAM", i_is_EAM)
-       call getElementProperty(atypes, i, "is_Shape", i_is_Shape)
-       
-       if (i_is_LJ) then 
-          thisCut = getSigma(i) * DEFAULT_SIGMA_MULTIPLIER
-          if (thisCut .gt. atypeMaxCutoff(i)) atypeMaxCutoff(i) = thisCut
-       endif
-       if (i_is_Elect) then
-          thisCut = 
     
+    do i = 1, nAtypes
+       if (SimHasAtype(i)) then          
+          call getElementProperty(atypes, i, "is_LennardJones", i_is_LJ)
+          call getElementProperty(atypes, i, "is_Electrostatic", i_is_Elect)
+          call getElementProperty(atypes, i, "is_Sticky", i_is_Sticky)
+          call getElementProperty(atypes, i, "is_StickyPower", i_is_StickyP)
+          call getElementProperty(atypes, i, "is_GayBerne", i_is_GB)
+          call getElementProperty(atypes, i, "is_EAM", i_is_EAM)
+          call getElementProperty(atypes, i, "is_Shape", i_is_Shape)
+          
+          if (i_is_LJ) then 
+             thisRcut = getSigma(i) * 2.5_dp
+             if (thisRCut .gt. atypeMaxCutoff(i)) atypeMaxCutoff(i) = thisRCut
+          endif
+          if (i_is_Elect) then
+             thisRcut = defaultRcut
+             if (thisRCut .gt. atypeMaxCutoff(i)) atypeMaxCutoff(i) = thisRCut
+          endif
+          if (i_is_Sticky) then
+             thisRcut = getStickyCut(i)
+             if (thisRCut .gt. atypeMaxCutoff(i)) atypeMaxCutoff(i) = thisRCut
+          endif
+          if (i_is_StickyPower) then
+             thisRcut = getStickyPowerCut(i)
+             if (thisRCut .gt. atypeMaxCutoff(i)) atypeMaxCutoff(i) = thisRCut
+          endif
+          if (i_is_GayBerne) then
+             thisRcut = getGayBerneCut(i)
+             if (thisRCut .gt. atypeMaxCutoff(i)) atypeMaxCutoff(i) = thisRCut
+          endif
+          if (i_is_EAM) then
+             thisRcut = getEAMCut(i)
+             if (thisRCut .gt. atypeMaxCutoff(i)) atypeMaxCutoff(i) = thisRCut
+          endif
+          if (i_is_Shape) then
+             thisRcut = getShapeCut(i)
+             if (thisRCut .gt. atypeMaxCutoff(i)) atypeMaxCutoff(i) = thisRCut
+          endif
+          
+          if (atypeMaxCutoff(i).gt.biggestAtypeCutoff) then
+             biggestAtypeCutoff = atypeMaxCutoff(i)
+          endif
+       endif
+    enddo
+
+    istart = 1
+#ifdef IS_MPI
+    iend = nGroupsInRow
+#else
+    iend = nGroups 
+#endif
+    outer: do i = istart, iend
+
+       n_in_i = groupStartRow(i+1) - groupStartRow(i)
+
+#ifdef IS_MPI
+             jstart = 1
+             jend = nGroupsInCol
+#else
+             jstart = i+1
+             jend = nGroups
+#endif
+
+
+
+             
 
 
 
@@ -608,12 +659,6 @@ contains
        iend = nGroups - 1
 #endif
        outer: do i = istart, iend
-
-#ifdef IS_MPI
-             me_i = atid_row(i)
-#else
-             me_i = atid(i)
-#endif
 
           if (update_nlist) point(i) = nlist + 1
 

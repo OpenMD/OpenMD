@@ -1,0 +1,18 @@
+#ifdef __C
+#ifndef __FCUTOFFPOLICY
+#define __FCUTOFFPOLICY
+
+#define TRADITIONAL_CUTOFF_POLICY  1
+#define MIX_CUTOFF_POLICY          2
+#define MAX_CUTOFF_POLICY          3
+
+#endif
+#endif /*__C*/
+
+#ifdef  __FORTRAN90
+
+  INTEGER, PARAMETER:: TRADITIONAL_CUTOFF_POLICY = 1
+  INTEGER, PARAMETER:: MIX_CUTOFF_POLICY         = 2
+  INTEGER, PARAMETER:: MAX_CUTOFF_POLICY         = 3
+
+#endif
