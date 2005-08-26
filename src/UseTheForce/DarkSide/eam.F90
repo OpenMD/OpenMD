@@ -141,7 +141,7 @@ contains
 
   subroutine newEAMtype(lattice_constant,eam_nrho,eam_drho,eam_nr,&
        eam_dr,rcut,eam_Z_r,eam_rho_r,eam_F_rho,&
-       eam_ident,status)
+       c_ident,status)
     real (kind = dp )                      :: lattice_constant
     integer                                :: eam_nrho
     real (kind = dp )                      :: eam_drho
@@ -151,7 +151,7 @@ contains
     real (kind = dp ), dimension(eam_nr)   :: eam_Z_r
     real (kind = dp ), dimension(eam_nr)   :: eam_rho_r
     real (kind = dp ), dimension(eam_nrho) :: eam_F_rho
-    integer                                :: eam_ident
+    integer                                :: c_ident
     integer                                :: status
 
     integer                                :: nAtypes,nEAMTypes,myATID
@@ -179,7 +179,7 @@ contains
     EAMList%currentAddition = EAMList%currentAddition + 1
     current = EAMList%currentAddition
 
-    myATID =  getFirstMatchingElement(atypes, "c_ident", eam_ident)
+    myATID =  getFirstMatchingElement(atypes, "c_ident", c_ident)
     EAMList%atidToEAMType(myATID) = current
 
     call allocate_EAMType(eam_nrho,eam_nr,EAMList%EAMParams(current),stat=alloc_stat)
@@ -189,7 +189,7 @@ contains
     end if
 
   
-    EAMList%EAMParams(current)%eam_atype    = eam_ident
+    EAMList%EAMParams(current)%eam_atype    = c_ident
     EAMList%EAMParams(current)%eam_lattice  = lattice_constant
     EAMList%EAMParams(current)%eam_nrho     = eam_nrho
     EAMList%EAMParams(current)%eam_drho     = eam_drho
@@ -222,9 +222,11 @@ contains
 
   function getEAMCut(atomID) result(cutValue)
     integer, intent(in) :: atomID
+    integer :: eamID
     real(kind=dp) :: cutValue
     
-    cutValue = eamList%EAMParams(atomID)%eam_rcut
+    eamID = EAMList%atidToEAMType(atomID)
+    cutValue = EAMList%EAMParams(eamID)%eam_rcut
 
   end function getEAMCut
 
