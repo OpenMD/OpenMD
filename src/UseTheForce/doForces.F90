@@ -45,7 +45,7 @@
 
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: doForces.F90,v 1.30 2005-08-17 15:26:37 gezelter Exp $, $Date: 2005-08-17 15:26:37 $, $Name: not supported by cvs2svn $, $Revision: 1.30 $
+!! @version $Id: doForces.F90,v 1.31 2005-08-26 16:36:16 gezelter Exp $, $Date: 2005-08-26 16:36:16 $, $Name: not supported by cvs2svn $, $Revision: 1.31 $
 
 
 module doForces
@@ -152,7 +152,8 @@ contains
     logical :: j_is_GB
     logical :: j_is_EAM
     logical :: j_is_Shape
-    
+    real(kind=dp) :: myRcut
+
     status = 0   
 
     if (.not. associated(atypes)) then
@@ -237,8 +238,9 @@ contains
     haveInteractionHash = .true.
   end subroutine createInteractionHash
 
-  subroutine createGtypeCutoffMap()
+  subroutine createGtypeCutoffMap(stat)
 
+    integer, intent(out), optional :: stat
     logical :: i_is_LJ
     logical :: i_is_Elect
     logical :: i_is_Sticky
@@ -247,8 +249,10 @@ contains
     logical :: i_is_EAM
     logical :: i_is_Shape
 
-    integer :: myStatus, nAtypes
-    real(kind=dp):: thisSigma, bigSigma
+    integer :: myStatus, nAtypes,  i, j, istart, iend, jstart, jend
+    integer :: n_in_i
+    real(kind=dp):: thisSigma, bigSigma, thisRcut
+    real(kind=dp) :: biggestAtypeCutoff
 
     stat = 0
     if (.not. haveInteractionHash) then 
@@ -284,11 +288,11 @@ contains
              thisRcut = getStickyCut(i)
              if (thisRCut .gt. atypeMaxCutoff(i)) atypeMaxCutoff(i) = thisRCut
           endif
-          if (i_is_StickyPower) then
+          if (i_is_StickyP) then
              thisRcut = getStickyPowerCut(i)
              if (thisRCut .gt. atypeMaxCutoff(i)) atypeMaxCutoff(i) = thisRCut
           endif
-          if (i_is_GayBerne) then
+          if (i_is_GB) then
              thisRcut = getGayBerneCut(i)
              if (thisRCut .gt. atypeMaxCutoff(i)) atypeMaxCutoff(i) = thisRCut
           endif
@@ -314,23 +318,24 @@ contains
     iend = nGroups 
 #endif
     outer: do i = istart, iend
-
+       
        n_in_i = groupStartRow(i+1) - groupStartRow(i)
-
+       
 #ifdef IS_MPI
-             jstart = 1
-             jend = nGroupsInCol
+       jstart = 1
+       jend = nGroupsInCol
 #else
-             jstart = i+1
-             jend = nGroups
+       jstart = i+1
+       jend = nGroups
 #endif
-
-
-
-             
-
-
-
+       
+       
+       
+       
+       
+       
+    enddo outer        
+    
      haveGtypeCutoffMap = .true.
    end subroutine createGtypeCutoffMap
  
@@ -350,7 +355,7 @@ contains
      cutoffPolicy = cutPolicy
      call createGtypeCutoffMap()
 
-   end subroutine setDefaultCutoffs
+   end subroutine setCutoffPolicy
     
      
   subroutine setSimVariables()
