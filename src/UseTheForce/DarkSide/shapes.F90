@@ -69,6 +69,7 @@ module shapes
   public :: newShapeType
   public :: complete_Shape_FF
   public :: destroyShapeTypes
+  public :: getShapeCut
 
   type, private :: Shape
      integer :: atid
@@ -383,6 +384,18 @@ contains
 !    end do
 
   end subroutine complete_Shape_FF
+
+  function getShapeCut(atomID) result(cutValue)
+    integer, intent(in) :: atomID
+    real(kind=dp) :: cutValue, whoopdedoo
+
+    !! this is just a placeholder for a cutoff value, hopefully we'll 
+    !! develop a method to calculate a sensible value
+    whoopdedoo = 9.0_dp
+
+    cutValue = whoopdedoo
+
+  end function getShapeCut
 
   subroutine do_shape_pair(atom1, atom2, d, rij, r2, sw, vpair, fpair, &
        pot, A, f, t, do_pot)

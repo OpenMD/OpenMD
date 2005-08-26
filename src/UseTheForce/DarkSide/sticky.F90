@@ -50,7 +50,7 @@
 !! @author Matthew Meineke
 !! @author Christopher Fennell
 !! @author J. Daniel Gezelter
-!! @version $Id: sticky.F90,v 1.13 2005-05-29 21:16:25 chrisfen Exp $, $Date: 2005-05-29 21:16:25 $, $Name: not supported by cvs2svn $, $Revision: 1.13 $
+!! @version $Id: sticky.F90,v 1.14 2005-08-26 21:30:41 chrisfen Exp $, $Date: 2005-08-26 21:30:41 $, $Name: not supported by cvs2svn $, $Revision: 1.14 $
 
 module sticky
 
@@ -71,7 +71,8 @@ module sticky
   public :: do_sticky_pair
   public :: destroyStickyTypes
   public :: do_sticky_power_pair
-
+  public :: getStickyCut
+  public :: getStickyPowerCut
 
   type :: StickyList
      integer :: c_ident
@@ -147,6 +148,20 @@ contains
 
     return
   end subroutine newStickyType
+
+  function getStickyCut(atomID) result(cutValue)
+    integer, intent(in) :: atomID
+    real(kind=dp) :: cutValue
+
+    cutValue = StickyMap(atomID)%rbig
+  end function getStickyCut
+
+  function getStickyPowerCut(atomID) result(cutValue)
+    integer, intent(in) :: atomID
+    real(kind=dp) :: cutValue
+
+    cutValue = StickyMap(atomID)%rbig
+  end function getStickyPowerCut
 
   subroutine do_sticky_pair(atom1, atom2, d, rij, r2, sw, vpair, fpair, &
        pot, A, f, t, do_pot)

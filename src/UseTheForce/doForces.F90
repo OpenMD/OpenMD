@@ -45,7 +45,7 @@
 
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: doForces.F90,v 1.31 2005-08-26 16:36:16 gezelter Exp $, $Date: 2005-08-26 16:36:16 $, $Name: not supported by cvs2svn $, $Revision: 1.31 $
+!! @version $Id: doForces.F90,v 1.32 2005-08-26 21:30:30 chrisfen Exp $, $Date: 2005-08-26 21:30:30 $, $Name: not supported by cvs2svn $, $Revision: 1.32 $
 
 
 module doForces
@@ -104,6 +104,11 @@ module doForces
   public :: do_force_loop
   public :: createInteractionHash
   public :: createGtypeCutoffMap
+  public :: getStickyCut
+  public :: getStickyPowerCut
+  public :: getGayBerneCut
+  public :: getEAMCut
+  public :: getShapeCut
 
 #ifdef PROFILE
   public :: getforcetime
@@ -338,7 +343,7 @@ contains
     
      haveGtypeCutoffMap = .true.
    end subroutine createGtypeCutoffMap
- 
+
    subroutine setDefaultCutoffs(defRcut, defRsw, defRlist, cutPolicy)
      real(kind=dp),intent(in) :: defRcut, defRsw, defRlist
      integer, intent(in) :: cutPolicy

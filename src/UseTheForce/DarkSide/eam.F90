@@ -44,7 +44,7 @@ module eam
   use force_globals
   use status
   use atype_module
-  use Vector_class
+  use vector_class
 #ifdef IS_MPI
   use mpiSimulation
 #endif
@@ -134,6 +134,7 @@ module eam
   public :: calc_eam_preforce_Frho
   public :: clean_EAM
   public :: destroyEAMTypes
+  public :: getEAMCut
 
 contains
 
@@ -178,7 +179,7 @@ contains
     EAMList%currentAddition = EAMList%currentAddition + 1
     current = EAMList%currentAddition
 
-    myATID =  getFirstMatchingElement(atypes, "c_ident", c_ident)
+    myATID =  getFirstMatchingElement(atypes, "c_ident", eam_ident)
     EAMList%atidToEAMType(myATID) = current
 
     call allocate_EAMType(eam_nrho,eam_nr,EAMList%EAMParams(current),stat=alloc_stat)
@@ -218,6 +219,14 @@ contains
     eamList%currentAddition = 0
 
   end subroutine destroyEAMtypes
+
+  function getEAMCut(atomID) result(cutValue)
+    integer, intent(in) :: atomID
+    real(kind=dp) :: cutValue
+    
+    cutValue = eamList%EAMParams(atomID)%eam_rcut
+
+  end function getEAMCut
 
   subroutine init_EAM_FF(status)
     integer :: status

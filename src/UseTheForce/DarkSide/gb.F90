@@ -63,6 +63,7 @@ module gb_pair
   public :: check_gb_pair_FF
   public :: set_gb_pair_params
   public :: do_gb_pair
+  public :: getGayBerneCut
 
 contains
 
@@ -88,6 +89,12 @@ contains
     return
   end subroutine set_gb_pair_params
 
+  function getGayBerneCut(atomID) result(cutValue)
+    integer, intent(in) :: atomID !! nah... we don't need to use this...
+    real(kind=dp) :: cutValue
+
+    cutValue = gb_sigma*2.5_dp
+  end function getGayBerneCut
 
   subroutine do_gb_pair(atom1, atom2, d, r, r2, sw, vpair, fpair, &
        pot, A, f, t, do_pot)
