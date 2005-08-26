@@ -117,6 +117,7 @@ module eam
      integer           :: currentAddition = 0
 
      type (EAMtype), pointer  :: EAMParams(:) => null()
+     integer, pointer         :: atidToEAMType(:) => null()
   end type EAMTypeList
 
 
@@ -152,7 +153,7 @@ contains
     integer                                :: eam_ident
     integer                                :: status
 
-    integer                                :: nAtypes
+    integer                                :: nAtypes,nEAMTypes,myATID
     integer                                :: maxVals
     integer                                :: alloc_stat
     integer                                :: current
@@ -167,14 +168,18 @@ contains
 
     ! check to see if this is the first time into 
     if (.not.associated(EAMList%EAMParams)) then
-       call getMatchingElementList(atypes, "is_EAM", .true., nAtypes, MatchList)
-       EAMList%n_eam_types = nAtypes
-       allocate(EAMList%EAMParams(nAtypes))
+       call getMatchingElementList(atypes, "is_EAM", .true., nEAMtypes, MatchList)
+       EAMList%n_eam_types = nEAMtypes
+       allocate(EAMList%EAMParams(nEAMTypes))
+       nAtypes = getSize(atypes)
+       allocate(EAMList%atidToEAMType(nAtypes))
     end if
 
     EAMList%currentAddition = EAMList%currentAddition + 1
     current = EAMList%currentAddition
 
+    myATID =  getFirstMatchingElement(atypes, "c_ident", c_ident)
+    EAMList%atidToEAMType(myATID) = current
 
     call allocate_EAMType(eam_nrho,eam_nr,EAMList%EAMParams(current),stat=alloc_stat)
     if (alloc_stat /= 0) then
@@ -182,9 +187,7 @@ contains
        return
     end if
 
-    ! this is a possible bug, we assume a correspondence between the vector atypes and
-    ! EAMAtypes
-
+  
     EAMList%EAMParams(current)%eam_atype    = eam_ident
     EAMList%EAMParams(current)%eam_lattice  = lattice_constant
     EAMList%EAMParams(current)%eam_nrho     = eam_nrho
