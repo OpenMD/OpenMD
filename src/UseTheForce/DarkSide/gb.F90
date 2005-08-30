@@ -89,11 +89,13 @@ contains
     return
   end subroutine set_gb_pair_params
 
+  !! gay berne cutoff should be a parameter in globals, this is a temporary 
+  !! work around - this should be fixed when gay berne is up and running
   function getGayBerneCut(atomID) result(cutValue)
     integer, intent(in) :: atomID !! nah... we don't need to use this...
     real(kind=dp) :: cutValue
 
-    cutValue = gb_sigma*2.5_dp
+    cutValue = gb_l2b_ratio*gb_sigma*2.5_dp
   end function getGayBerneCut
 
   subroutine do_gb_pair(atom1, atom2, d, r, r2, sw, vpair, fpair, &

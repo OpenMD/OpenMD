@@ -45,7 +45,7 @@
 
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: doForces.F90,v 1.32 2005-08-26 21:30:30 chrisfen Exp $, $Date: 2005-08-26 21:30:30 $, $Name: not supported by cvs2svn $, $Revision: 1.32 $
+!! @version $Id: doForces.F90,v 1.33 2005-08-30 18:23:29 chrisfen Exp $, $Date: 2005-08-30 18:23:29 $, $Name: not supported by cvs2svn $, $Revision: 1.33 $
 
 
 module doForces
@@ -98,6 +98,8 @@ module doForces
   logical, save :: SIM_requires_postpair_calc
   logical, save :: SIM_requires_prepair_calc
   logical, save :: SIM_uses_PBC
+
+  integer, save :: corrMethod
 
   public :: init_FF
   public :: setDefaultCutoffs
@@ -436,12 +438,14 @@ contains
   end subroutine doReadyCheck
 
 
-  subroutine init_FF(use_RF_c, thisStat)
+  subroutine init_FF(use_RF_c, use_UW_c, use_DW_c, thisStat)
 
     logical, intent(in) :: use_RF_c
-
+    logical, intent(in) :: use_UW_c
+    logical, intent(in) :: use_DW_c
     integer, intent(out) :: thisStat   
     integer :: my_status, nMatches
+    integer :: corrMethod
     integer, pointer :: MatchList(:) => null()
     real(kind=dp) :: rcut, rrf, rt, dielect
 
@@ -451,6 +455,15 @@ contains
     !! Fortran's version of a cast:
     FF_uses_RF = use_RF_c
 
+    !! set the electrostatic correction method
+    if (use_UW_c .eq. .true.) then
+       corrMethod = 1
+    elseif (use_DW_c .eq. .true.) then
+       corrMethod = 2
+    else
+       corrMethod = 0
+    endif
+    
     !! init_FF is called *after* all of the atom types have been 
     !! defined in atype_module using the new_atype subroutine.
     !!
@@ -1015,7 +1028,7 @@ contains
 
     if ( iand(iHash, ELECTROSTATIC_PAIR).ne.0 ) then
        call doElectrostaticPair(i, j, d, r, rijsq, sw, vpair, fpair, &
-            pot, eFrame, f, t, do_pot)
+            pot, eFrame, f, t, do_pot, corrMethod)
 
        if (FF_uses_RF .and. SIM_uses_RF) then
 

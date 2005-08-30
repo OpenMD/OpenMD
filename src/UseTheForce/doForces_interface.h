@@ -51,6 +51,8 @@
 extern "C"{
   
   void initFortranFF( int* useReactionField,
+		      int* useUndampedWolf,
+		      int* useDampedWolf,
                       int *isError );        
 
   

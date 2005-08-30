@@ -118,6 +118,8 @@
 #define G_THERM_INT_OMEGA_SPRING 56
 #define G_SURFACETENSION 57
 #define G_PRINTPREESURETENSOR   58
+#define G_USE_UNDAMPED_WOLF 59
+#define G_USE_DAMPED_WOLF   60
 
 Globals::Globals(){
   initalize();
@@ -194,7 +196,8 @@ void Globals::initalize(){
   command_table.insert(CommandMapType::value_type("thermIntOmegaSpringConst", G_THERM_INT_OMEGA_SPRING));
   command_table.insert(CommandMapType::value_type("surfaceTension", G_SURFACETENSION));
   command_table.insert(CommandMapType::value_type("printPressureTensor", G_PRINTPREESURETENSOR));
-
+  command_table.insert(CommandMapType::value_type("useUndampedWolf", G_USE_UNDAMPED_WOLF));
+  command_table.insert(CommandMapType::value_type("useDampedWolf", G_USE_DAMPED_WOLF));
 
   strcpy( mixingRule,"standard");  //default mixing rules to standard.
   usePBC = 1; //default  periodic boundry conditions to on
@@ -1896,8 +1899,42 @@ int Globals::globalAssign( event* the_event ){
           return 0;
           break;
 
+    case G_USE_UNDAMPED_WOLF:
+      if( the_type == STRING ){
         
-
+        if( !strcasecmp( "true", the_event->evt.asmt.rhs.sval )) useUndampedWolf = 1;
+        else if( !strcasecmp( "false", the_event->evt.asmt.rhs.sval )) useUndampedWolf = 0;
+        else{
+          the_event->err_msg = 
+          strdup( "Error in parsing meta-data file!\n\tuseUndampedWolf was not \"true\" or \"false\".\n" );
+          return 0;
+        }
+        return 1;
+      }
+      
+      the_event->err_msg = 
+      strdup( "Error in parsing meta-data file!\n\tuseUndampedWolf was not \"true\" or \"false\".\n" );
+      return 0;
+      break;
+      
+    case G_USE_DAMPED_WOLF:
+      if( the_type == STRING ){
+        
+        if( !strcasecmp( "true", the_event->evt.asmt.rhs.sval )) useDampedWolf = 1;
+        else if( !strcasecmp( "false", the_event->evt.asmt.rhs.sval )) useDampedWolf = 0;
+        else{
+          the_event->err_msg = 
+          strdup( "Error in parsing meta-data file!\n\tuseDampedWolf was not \"true\" or \"false\".\n" );
+          return 0;
+        }
+        return 1;
+      }
+      
+      the_event->err_msg = 
+      strdup( "Error in parsing meta-data file!\n\tuseDampedWolf was not \"true\" or \"false\".\n" );
+      return 0;
+      break;
+      
       
       // add more token cases here.      
     }

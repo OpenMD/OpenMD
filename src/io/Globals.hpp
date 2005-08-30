@@ -132,15 +132,17 @@ class Globals{
   int    getMinLSMaxIter(void)      { return minimizer_ls_maxiteration; }
   int    getUseSolidThermInt(void)  { return useSolidThermInt; }
   int    getUseLiquidThermInt(void) { return useLiquidThermInt; }
-  double getThermIntLambda(void)   { return thermodynamic_integration_lambda; }
+  double getThermIntLambda(void)    { return thermodynamic_integration_lambda; }
   double getThermIntK(void)         { return thermodynamic_integration_k; }
   char*  getForceFieldVariant( void ) { return forcefield_variant; }
-  char* getForceFieldFileName() { return forcefield_filename;}
+  char*  getForceFieldFileName()    { return forcefield_filename; }
   double getDistSpringConst(void)   { return therm_int_dist_spring; }
   double getThetaSpringConst(void)  { return therm_int_theta_spring; }
   double getOmegaSpringConst(void)  { return therm_int_omega_spring; }
-  double getSurfaceTension(void) {return surface_tension; }
-  bool getPrintPressureTensor(void) {return print_pressure_tensor;}
+  double getSurfaceTension(void)    { return surface_tension; }
+  bool   getPrintPressureTensor(void) { return print_pressure_tensor;}
+  bool   getUseUndampedWolf(void)   { return useUndampedWolf; }
+  bool   getUseDampedWolf(void)     { return useDampedWolf; }
   
   short int haveDt( void )            { return have_dt; }
   short int haveRunTime( void )       { return have_run_time; }
@@ -269,6 +271,8 @@ class Globals{
   double therm_int_omega_spring;
   double surface_tension;
   bool print_pressure_tensor;
+  bool useUndampedWolf;
+  bool useDampedWolf;
   
   //required arguments
   short int have_force_field, have_n_components, have_target_temp;

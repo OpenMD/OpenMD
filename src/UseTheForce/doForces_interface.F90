@@ -1,11 +1,13 @@
 !! Interfaces for C programs to module....
 
-subroutine initFortranFF(use_RF_c, thisStat)
+subroutine initFortranFF(use_RF_c, use_UW_c, use_DW_c, thisStat)
   use doForces, ONLY: init_FF
   logical, intent(in) :: use_RF_c
+  logical, intent(in) :: use_UW_c
+  logical, intent(in) :: use_DW_c
 
   integer, intent(out) :: thisStat   
-  call init_FF(use_RF_c, thisStat)
+  call init_FF(use_RF_c, use_UW_c, use_DW_c, thisStat)
 
 end subroutine initFortranFF
 

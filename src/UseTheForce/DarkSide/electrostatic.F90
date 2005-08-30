@@ -307,12 +307,13 @@ contains
   end function getDipoleMoment
 
   subroutine doElectrostaticPair(atom1, atom2, d, rij, r2, sw, &
-       vpair, fpair, pot, eFrame, f, t, do_pot)
+       vpair, fpair, pot, eFrame, f, t, do_pot, corrMethod)
 
     logical, intent(in) :: do_pot
 
     integer, intent(in) :: atom1, atom2
     integer :: localError
+    integer, intent(in) :: corrMethod
 
     real(kind=dp), intent(in) :: rij, r2, sw
     real(kind=dp), intent(in), dimension(3) :: d
@@ -332,6 +333,7 @@ contains
     logical :: i_is_Charge, i_is_Dipole, i_is_SplitDipole, i_is_Quadrupole
     logical :: j_is_Charge, j_is_Dipole, j_is_SplitDipole, j_is_Quadrupole
     logical :: i_is_Tap, j_is_Tap
+    logical :: use_damped_wolf, use_undamped_wolf
     integer :: me1, me2, id1, id2
     real (kind=dp) :: q_i, q_j, mu_i, mu_j, d_i, d_j
     real (kind=dp) :: qxx_i, qyy_i, qzz_i
@@ -345,6 +347,14 @@ contains
     real (kind=dp) :: xhat, yhat, zhat
     real (kind=dp) :: dudx, dudy, dudz
     real (kind=dp) :: scale, sc2, bigR, switcher, dswitcher
+
+    use_damped_wolf = .false.
+    use_undamped_wolf = .false.
+    if (corrMethod .eq. 1) then
+       use_undamped_wolf = .true.
+    elseif (corrMethod .eq. 2) then
+       use_damped_wolf = .true.
+    endif
 
     if (.not.allocated(ElectrostaticMap)) then
        call handleError("electrostatic", "no ElectrostaticMap was present before first call of do_electrostatic_pair!")

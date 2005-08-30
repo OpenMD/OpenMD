@@ -462,7 +462,8 @@ namespace oopse {
     //setup fortran force field
     /** @deprecate */    
     int isError = 0;
-    initFortranFF( &fInfo_.SIM_uses_RF , &isError );
+    initFortranFF( &fInfo_.SIM_uses_RF, &fInfo_.SIM_uses_UW, 
+		   &fInfo_.SIM_uses_DW, &isError );
     if(isError){
       sprintf( painCave.errMsg,
 	       "ForceField error: There was an error initializing the forceField in fortran.\n" );
@@ -519,6 +520,8 @@ namespace oopse {
     //usePBC and useRF are from simParams
     int usePBC = simParams_->getPBC();
     int useRF = simParams_->getUseRF();
+    int useUW = simParams_->getUseUndampedWolf();
+    int useDW = simParams_->getUseDampedWolf();
 
     //loop over all of the atom types
     for (i = atomTypes.begin(); i != atomTypes.end(); ++i) {
@@ -583,6 +586,12 @@ namespace oopse {
 
     temp = useRF;
     MPI_Allreduce(&temp, &useRF, 1, MPI_INT, MPI_LOR, MPI_COMM_WORLD);    
+
+    temp = useUW;
+    MPI_Allreduce(&temp, &useUW, 1, MPI_INT, MPI_LOR, MPI_COMM_WORLD);   
+
+    temp = useDW;
+    MPI_Allreduce(&temp, &useDW, 1, MPI_INT, MPI_LOR, MPI_COMM_WORLD);   
     
 #endif
 
@@ -599,6 +608,8 @@ namespace oopse {
     fInfo_.SIM_uses_Shapes = useShape;
     fInfo_.SIM_uses_FLARB = useFLARB;
     fInfo_.SIM_uses_RF = useRF;
+    fInfo_.SIM_uses_UW = useUW;
+    fInfo_.SIM_uses_DW = useDW;
 
     if( fInfo_.SIM_uses_Dipoles && fInfo_.SIM_uses_RF) {
 
