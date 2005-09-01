@@ -45,7 +45,7 @@
 
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: doForces.F90,v 1.33 2005-08-30 18:23:29 chrisfen Exp $, $Date: 2005-08-30 18:23:29 $, $Name: not supported by cvs2svn $, $Revision: 1.33 $
+!! @version $Id: doForces.F90,v 1.34 2005-09-01 20:17:55 gezelter Exp $, $Date: 2005-09-01 20:17:55 $, $Name: not supported by cvs2svn $, $Revision: 1.34 $
 
 
 module doForces
@@ -85,6 +85,7 @@ module doForces
   logical, save :: haveSaneForceField = .false.
   logical, save :: haveInteractionHash = .false.
   logical, save :: haveGtypeCutoffMap = .false.
+  logical, save :: haveRlist = .false.
 
   logical, save :: FF_uses_DirectionalAtoms
   logical, save :: FF_uses_Dipoles
@@ -257,8 +258,8 @@ contains
     logical :: i_is_Shape
 
     integer :: myStatus, nAtypes,  i, j, istart, iend, jstart, jend
-    integer :: n_in_i
-    real(kind=dp):: thisSigma, bigSigma, thisRcut
+    integer :: n_in_i, me_i, ia, g, atom1, nGroupTypes
+    real(kind=dp):: thisSigma, bigSigma, thisRcut, tol, skin
     real(kind=dp) :: biggestAtypeCutoff
 
     stat = 0
@@ -317,33 +318,80 @@ contains
           endif
        endif
     enddo
-
+  
+    nGroupTypes = 0
+    
     istart = 1
 #ifdef IS_MPI
     iend = nGroupsInRow
 #else
     iend = nGroups 
 #endif
-    outer: do i = istart, iend
-       
-       n_in_i = groupStartRow(i+1) - groupStartRow(i)
-       
-#ifdef IS_MPI
-       jstart = 1
-       jend = nGroupsInCol
-#else
-       jstart = i+1
-       jend = nGroups
-#endif
-       
-       
-       
-       
-       
-       
-    enddo outer        
+
+    !! allocate the groupToGtype and gtypeMaxCutoff here.
     
-     haveGtypeCutoffMap = .true.
+    !! first we do a single loop over the cutoff groups to find the largest cutoff for any atypes 
+    !! present in this group.   We also create gtypes at this point.
+    tol = 1.0d-6
+    
+    do i = istart, iend       
+       n_in_i = groupStartRow(i+1) - groupStartRow(i)
+       groupMaxCutoff(i) = 0.0_dp
+       do ia = groupStartRow(i), groupStartRow(i+1)-1
+          atom1 = groupListRow(ia)
+#ifdef IS_MPI
+          me_i = atid_row(atom1)
+#else
+          me_i = atid(atom1)
+#endif          
+          if (atypeMaxCutoff(me_i).gt.groupMaxCutoff(i)) then 
+             groupMaxCutoff(i)=atypeMaxCutoff(me_i)
+          endif
+       enddo
+       if (nGroupTypes.eq.0) then
+          nGroupTypes = nGroupTypes + 1
+          gtypeMaxCutoff(nGroupTypes) = groupMaxCutoff(i)
+          groupToGtype(i) = nGroupTypes
+       else
+          do g = 1, nGroupTypes
+             if ( abs(groupMaxCutoff(i) - gtypeMaxCutoff(g)).gt.tol) then
+                nGroupTypes = nGroupTypes + 1
+                gtypeMaxCutoff(nGroupTypes) = groupMaxCutoff(i)
+                groupToGtype(i) = nGroupTypes
+             else
+                groupToGtype(i) = g
+             endif
+          enddo
+       endif
+    enddo
+    
+    !! allocate the gtypeCutoffMap here.
+
+    !! then we do a double loop over all the group TYPES to find the cutoff
+    !! map between groups of two types
+    
+    do i = 1, nGroupTypes
+       do j = 1, nGroupTypes
+       
+          select case(cutoffPolicy)
+             case(TRADITIONAL_CUTOFF_POLICY)
+                thisRcut = maxval(gtypeMaxCutoff)
+             case(MIX_CUTOFF_POLICY)
+                thisRcut = 0.5_dp * (gtypeMaxCutoff(i) + gtypeMaxCutoff(j))
+             case(MAX_CUTOFF_POLICY)
+                thisRcut = max(gtypeMaxCutoff(i), gtypeMaxCutoff(j))
+             case default
+                call handleError("createGtypeCutoffMap", "Unknown Cutoff Policy")
+                return
+          end select       
+         gtypeCutoffMap(i,j)%rcut = thisRcut
+         gtypeCutoffMap(i,j)%rcutsq = thisRcut*thisRcut
+         skin = defaultRlist - defaultRcut
+         gtypeCutoffMap(i,j)%rlistsq = (thisRcut + skin)**2
+       enddo
+    enddo
+    
+    haveGtypeCutoffMap = .true.
    end subroutine createGtypeCutoffMap
 
    subroutine setDefaultCutoffs(defRcut, defRsw, defRlist, cutPolicy)
@@ -438,11 +486,11 @@ contains
   end subroutine doReadyCheck
 
 
-  subroutine init_FF(use_RF_c, use_UW_c, use_DW_c, thisStat)
+  subroutine init_FF(use_RF, use_UW, use_DW, thisStat)
 
-    logical, intent(in) :: use_RF_c
-    logical, intent(in) :: use_UW_c
-    logical, intent(in) :: use_DW_c
+    logical, intent(in) :: use_RF
+    logical, intent(in) :: use_UW
+    logical, intent(in) :: use_DW
     integer, intent(out) :: thisStat   
     integer :: my_status, nMatches
     integer :: corrMethod
@@ -453,12 +501,12 @@ contains
     thisStat = 0
 
     !! Fortran's version of a cast:
-    FF_uses_RF = use_RF_c
+    FF_uses_RF = use_RF
 
     !! set the electrostatic correction method
-    if (use_UW_c .eq. .true.) then
+    if (use_UW) then
        corrMethod = 1
-    elseif (use_DW_c .eq. .true.) then
+    elseif (use_DW) then
        corrMethod = 2
     else
        corrMethod = 0
@@ -719,7 +767,7 @@ contains
                   q_group(:,j), d_grp, rgrpsq)
 #endif
 
-             if (rgrpsq < InteractionHash(me_i,me_j)%rListsq) then
+             if (rgrpsq < gtypeCutoffMap(groupToGtype(i),groupToGtype(j))%rListsq) then
                 if (update_nlist) then
                    nlist = nlist + 1
 

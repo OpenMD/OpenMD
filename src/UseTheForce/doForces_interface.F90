@@ -2,12 +2,17 @@
 
 subroutine initFortranFF(use_RF_c, use_UW_c, use_DW_c, thisStat)
   use doForces, ONLY: init_FF
-  logical, intent(in) :: use_RF_c
-  logical, intent(in) :: use_UW_c
-  logical, intent(in) :: use_DW_c
+  integer, intent(in) :: use_RF_c
+  integer, intent(in) :: use_UW_c
+  integer, intent(in) :: use_DW_c
+  integer, intent(out) :: thisStat
+  logical :: use_RF, use_UW, use_DW
+  
+  use_RF = (use_RF_c .ne. 0)
+  use_UW = (use_UW_c .ne. 0)
+  use_DW = (use_DW_c .ne. 0)
 
-  integer, intent(out) :: thisStat   
-  call init_FF(use_RF_c, use_UW_c, use_DW_c, thisStat)
+  call init_FF(use_RF, use_UW, use_DW, thisStat)
 
 end subroutine initFortranFF
 
