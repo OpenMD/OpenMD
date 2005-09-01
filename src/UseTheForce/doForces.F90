@@ -45,7 +45,7 @@
 
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: doForces.F90,v 1.34 2005-09-01 20:17:55 gezelter Exp $, $Date: 2005-09-01 20:17:55 $, $Name: not supported by cvs2svn $, $Revision: 1.34 $
+!! @version $Id: doForces.F90,v 1.35 2005-09-01 22:56:20 gezelter Exp $, $Date: 2005-09-01 22:56:20 $, $Name: not supported by cvs2svn $, $Revision: 1.35 $
 
 
 module doForces
@@ -275,7 +275,7 @@ contains
     nAtypes = getSize(atypes)
     
     do i = 1, nAtypes
-       if (SimHasAtype(i)) then          
+       if (SimHasAtype(i)) then     
           call getElementProperty(atypes, i, "is_LennardJones", i_is_LJ)
           call getElementProperty(atypes, i, "is_Electrostatic", i_is_Elect)
           call getElementProperty(atypes, i, "is_Sticky", i_is_Sticky)
@@ -284,6 +284,7 @@ contains
           call getElementProperty(atypes, i, "is_EAM", i_is_EAM)
           call getElementProperty(atypes, i, "is_Shape", i_is_Shape)
           
+          atypeMaxCutoff(i) = 0.0_dp
           if (i_is_LJ) then 
              thisRcut = getSigma(i) * 2.5_dp
              if (thisRCut .gt. atypeMaxCutoff(i)) atypeMaxCutoff(i) = thisRCut
@@ -327,11 +328,13 @@ contains
 #else
     iend = nGroups 
 #endif
-
+    
     !! allocate the groupToGtype and gtypeMaxCutoff here.
     
-    !! first we do a single loop over the cutoff groups to find the largest cutoff for any atypes 
-    !! present in this group.   We also create gtypes at this point.
+    !! first we do a single loop over the cutoff groups to find the
+    !! largest cutoff for any atypes present in this group.  We also
+    !! create gtypes at this point.
+    
     tol = 1.0d-6
     
     do i = istart, iend       
@@ -366,7 +369,7 @@ contains
     enddo
     
     !! allocate the gtypeCutoffMap here.
-
+    
     !! then we do a double loop over all the group TYPES to find the cutoff
     !! map between groups of two types
     
@@ -374,37 +377,37 @@ contains
        do j = 1, nGroupTypes
        
           select case(cutoffPolicy)
-             case(TRADITIONAL_CUTOFF_POLICY)
-                thisRcut = maxval(gtypeMaxCutoff)
-             case(MIX_CUTOFF_POLICY)
-                thisRcut = 0.5_dp * (gtypeMaxCutoff(i) + gtypeMaxCutoff(j))
-             case(MAX_CUTOFF_POLICY)
-                thisRcut = max(gtypeMaxCutoff(i), gtypeMaxCutoff(j))
-             case default
-                call handleError("createGtypeCutoffMap", "Unknown Cutoff Policy")
-                return
-          end select       
-         gtypeCutoffMap(i,j)%rcut = thisRcut
-         gtypeCutoffMap(i,j)%rcutsq = thisRcut*thisRcut
-         skin = defaultRlist - defaultRcut
-         gtypeCutoffMap(i,j)%rlistsq = (thisRcut + skin)**2
+          case(TRADITIONAL_CUTOFF_POLICY)
+             thisRcut = maxval(gtypeMaxCutoff)
+          case(MIX_CUTOFF_POLICY)
+             thisRcut = 0.5_dp * (gtypeMaxCutoff(i) + gtypeMaxCutoff(j))
+          case(MAX_CUTOFF_POLICY)
+             thisRcut = max(gtypeMaxCutoff(i), gtypeMaxCutoff(j))
+          case default
+             call handleError("createGtypeCutoffMap", "Unknown Cutoff Policy")
+             return
+          end select
+          gtypeCutoffMap(i,j)%rcut = thisRcut
+          gtypeCutoffMap(i,j)%rcutsq = thisRcut*thisRcut
+          skin = defaultRlist - defaultRcut
+          gtypeCutoffMap(i,j)%rlistsq = (thisRcut + skin)**2
        enddo
     enddo
     
     haveGtypeCutoffMap = .true.
-   end subroutine createGtypeCutoffMap
-
-   subroutine setDefaultCutoffs(defRcut, defRsw, defRlist, cutPolicy)
-     real(kind=dp),intent(in) :: defRcut, defRsw, defRlist
-     integer, intent(in) :: cutPolicy
-
-     defaultRcut = defRcut
-     defaultRsw = defRsw
-     defaultRlist = defRlist
-     cutoffPolicy = cutPolicy
-   end subroutine setDefaultCutoffs
-
-   subroutine setCutoffPolicy(cutPolicy)
+  end subroutine createGtypeCutoffMap
+  
+  subroutine setDefaultCutoffs(defRcut, defRsw, defRlist, cutPolicy)
+    real(kind=dp),intent(in) :: defRcut, defRsw, defRlist
+    integer, intent(in) :: cutPolicy
+    
+    defaultRcut = defRcut
+    defaultRsw = defRsw
+    defaultRlist = defRlist
+    cutoffPolicy = cutPolicy
+  end subroutine setDefaultCutoffs
+  
+  subroutine setCutoffPolicy(cutPolicy)
 
      integer, intent(in) :: cutPolicy
      cutoffPolicy = cutPolicy
