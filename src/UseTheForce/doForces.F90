@@ -45,7 +45,7 @@
 
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: doForces.F90,v 1.35 2005-09-01 22:56:20 gezelter Exp $, $Date: 2005-09-01 22:56:20 $, $Name: not supported by cvs2svn $, $Revision: 1.35 $
+!! @version $Id: doForces.F90,v 1.36 2005-09-06 17:32:42 chuckv Exp $, $Date: 2005-09-06 17:32:42 $, $Name: not supported by cvs2svn $, $Revision: 1.36 $
 
 
 module doForces
@@ -330,7 +330,11 @@ contains
 #endif
     
     !! allocate the groupToGtype and gtypeMaxCutoff here.
-    
+    if(.not.allocated(groupToGtype)) then
+       allocate(groupToGtype(iend))
+       allocate(groupMaxCutoff(iend))
+       allocate(gtypeMaxCutoff(iend))
+    endif
     !! first we do a single loop over the cutoff groups to find the
     !! largest cutoff for any atypes present in this group.  We also
     !! create gtypes at this point.
@@ -369,7 +373,7 @@ contains
     enddo
     
     !! allocate the gtypeCutoffMap here.
-    
+    allocate(gtypeCutoffMap(nGroupTypes,nGroupTypes))
     !! then we do a double loop over all the group TYPES to find the cutoff
     !! map between groups of two types
     
@@ -395,6 +399,7 @@ contains
     enddo
     
     haveGtypeCutoffMap = .true.
+    
   end subroutine createGtypeCutoffMap
   
   subroutine setDefaultCutoffs(defRcut, defRsw, defRlist, cutPolicy)
@@ -460,11 +465,11 @@ contains
        call setSimVariables()
     endif
 
-    if (.not. haveRlist) then
-       write(default_error, *) 'rList has not been set in doForces!'
-       error = -1
-       return
-    endif
+  !  if (.not. haveRlist) then
+  !     write(default_error, *) 'rList has not been set in doForces!'
+  !     error = -1
+  !     return
+  !  endif
 
     if (.not. haveNeighborList) then
        write(default_error, *) 'neighbor list has not been initialized in doForces!'
