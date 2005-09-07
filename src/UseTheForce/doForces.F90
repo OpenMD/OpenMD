@@ -45,7 +45,7 @@
 
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: doForces.F90,v 1.38 2005-09-07 20:46:39 gezelter Exp $, $Date: 2005-09-07 20:46:39 $, $Name: not supported by cvs2svn $, $Revision: 1.38 $
+!! @version $Id: doForces.F90,v 1.39 2005-09-07 22:08:39 gezelter Exp $, $Date: 2005-09-07 22:08:39 $, $Name: not supported by cvs2svn $, $Revision: 1.39 $
 
 
 module doForces
@@ -256,6 +256,7 @@ contains
     logical :: i_is_GB
     logical :: i_is_EAM
     logical :: i_is_Shape
+    logical :: GtypeFound
 
     integer :: myStatus, nAtypes,  i, j, istart, iend, jstart, jend
     integer :: n_in_i, me_i, ia, g, atom1, nGroupTypes
@@ -353,25 +354,29 @@ contains
 #endif          
           if (atypeMaxCutoff(me_i).gt.groupMaxCutoff(i)) then 
              groupMaxCutoff(i)=atypeMaxCutoff(me_i)
-          endif
+          endif          
        enddo
+
        if (nGroupTypes.eq.0) then
           nGroupTypes = nGroupTypes + 1
           gtypeMaxCutoff(nGroupTypes) = groupMaxCutoff(i)
           groupToGtype(i) = nGroupTypes
        else
+          GtypeFound = .false.
           do g = 1, nGroupTypes
-             if ( abs(groupMaxCutoff(i) - gtypeMaxCutoff(g)).gt.tol) then
-                nGroupTypes = nGroupTypes + 1
-                gtypeMaxCutoff(nGroupTypes) = groupMaxCutoff(i)
-                groupToGtype(i) = nGroupTypes
-             else
+             if ( abs(groupMaxCutoff(i) - gtypeMaxCutoff(g)).lt.tol) then
                 groupToGtype(i) = g
+                GtypeFound = .true.
              endif
           enddo
+          if (.not.GtypeFound) then             
+             nGroupTypes = nGroupTypes + 1
+             gtypeMaxCutoff(nGroupTypes) = groupMaxCutoff(i)
+             groupToGtype(i) = nGroupTypes
+          endif
        endif
-    enddo
-    
+    enddo    
+
     !! allocate the gtypeCutoffMap here.
     allocate(gtypeCutoffMap(nGroupTypes,nGroupTypes))
     !! then we do a double loop over all the group TYPES to find the cutoff
@@ -380,7 +385,6 @@ contains
     do i = 1, nGroupTypes
        do j = 1, nGroupTypes
        
-          write(*,*) 'cutoffPolicy = ', cutoffPolicy
           select case(cutoffPolicy)
           case(TRADITIONAL_CUTOFF_POLICY)
              thisRcut = maxval(gtypeMaxCutoff)
