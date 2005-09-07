@@ -120,6 +120,7 @@
 #define G_PRINTPREESURETENSOR   58
 #define G_USE_UNDAMPED_WOLF 59
 #define G_USE_DAMPED_WOLF   60
+#define G_CUTOFFPOLICY      61
 
 Globals::Globals(){
   initalize();
@@ -198,6 +199,7 @@ void Globals::initalize(){
   command_table.insert(CommandMapType::value_type("printPressureTensor", G_PRINTPREESURETENSOR));
   command_table.insert(CommandMapType::value_type("useUndampedWolf", G_USE_UNDAMPED_WOLF));
   command_table.insert(CommandMapType::value_type("useDampedWolf", G_USE_DAMPED_WOLF));
+  command_table.insert(CommandMapType::value_type("cutoffPolicy", G_CUTOFFPOLICY));
 
   strcpy( mixingRule,"standard");  //default mixing rules to standard.
   usePBC = 1; //default  periodic boundry conditions to on
@@ -261,6 +263,7 @@ void Globals::initalize(){
   have_omega_spring_constant = 0;
   have_surface_tension = 0;
   have_print_pressure_tensor = 0;
+  have_cutoff_policy = 0;
 }
 
 int Globals::newComponent( event* the_event ){
@@ -1935,6 +1938,40 @@ int Globals::globalAssign( event* the_event ){
       return 0;
       break;
       
+    case G_CUTOFFPOLICY:
+      switch( the_type ){
+	
+      case STRING:
+	strcpy(cutoffPolicy, the_event->evt.asmt.rhs.sval);
+
+	for(int i = 0; cutoffPolicy[i] != '\0'; i++)
+	  {
+	    cutoffPolicy[i] = toupper(cutoffPolicy[i]);
+	  }
+	have_cutoff_policy = 1;
+	return 1;
+	break;
+	
+      case DOUBLE:
+	the_event->err_msg = 
+	  strdup( "Error in parsing meta-data file!\n\tcutoffPolicy should be a string!\n" );
+	return 0;
+	break;
+	
+      case INT:
+	the_event->err_msg = 
+	  strdup( "Error in parsing meta-data file!\n\tcutoffPolicy should be a string!\n" );
+	return 0;
+	break;
+	
+      default:
+	the_event->err_msg = 
+	  strdup( "Error in parsing meta-data file!\n\tcutoffPolicy unrecognized.\n" );
+	return 0;
+	break;
+      }
+      break;
+
       
       // add more token cases here.      
     }

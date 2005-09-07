@@ -62,10 +62,10 @@ module notifyCutoffs
 
 contains
 
-  subroutine cutoffNotify( this_rcut, this_rsw, this_rlist )
+  subroutine cutoffNotify( this_rcut, this_rsw, this_rlist, cutPolicy)
 
     real(kind=dp), intent(in) :: this_rcut, this_rsw, this_rlist
-
+    integer, intent(in) :: cutPolicy
     real(kind=dp) :: rsw, rcut, rlist
     integer :: localError
     logical :: do_shift
@@ -108,7 +108,7 @@ contains
 
     endif
 
-    call setDefaultCutoffs(rcut, rsw, rlist, TRADITIONAL_CUTOFF_POLICY) 
+    call setDefaultCutoffs(rcut, rsw, rlist, cutPolicy) 
     call setCutoffsRF( rcut, rsw )
     call setLJDefaultCutoff( rcut, do_shift )
     call setCutoffEAM( rcut, localError)

@@ -143,6 +143,7 @@ class Globals{
   bool   getPrintPressureTensor(void) { return print_pressure_tensor;}
   bool   getUseUndampedWolf(void)   { return useUndampedWolf; }
   bool   getUseDampedWolf(void)     { return useDampedWolf; }
+  char*  getCutoffPolicy(void)      { return cutoffPolicy; }
   
   short int haveDt( void )            { return have_dt; }
   short int haveRunTime( void )       { return have_run_time; }
@@ -186,14 +187,15 @@ class Globals{
   short int haveMinLSMaxIter(void)    { return have_minimizer_ls_maxiteration;}
   short int haveThermIntLambda(void)  { return have_thermodynamic_integration_lambda; }
   short int haveThermIntK(void)    { return have_thermodynamic_integration_k; }
-  short int haveForceFieldVariant(void) { return have_forcefield_variant; }
+  short int haveForceFieldVariant(void)  { return have_forcefield_variant; }
   short int haveForceFieldFileName(void) { return have_forcefield_filename; }
-  short int haveDistSpringConst(void) { return have_dist_spring_constant; }
-  short int haveThetaSpringConst(void) { return have_theta_spring_constant; }
-  short int haveOmegaSpringConst(void) { return have_omega_spring_constant; }
-  short int haveSurfaceTension(void) { return have_surface_tension; }
+  short int haveDistSpringConst(void)    { return have_dist_spring_constant; }
+  short int haveThetaSpringConst(void)   { return have_theta_spring_constant; }
+  short int haveOmegaSpringConst(void)   { return have_omega_spring_constant; }
+  short int haveSurfaceTension(void)     { return have_surface_tension; }
   short int havePrintPressureTensor(void) {return have_print_pressure_tensor;}
-  
+  short int haveCutoffPolicy(void)       { return have_cutoff_policy; }
+
   /* other accessors */
   Component** getComponents( void )   { return components; }
   ZconStamp** getZconStamp( void )    { return zConstraints; }
@@ -273,6 +275,7 @@ class Globals{
   bool print_pressure_tensor;
   bool useUndampedWolf;
   bool useDampedWolf;
+  char cutoffPolicy[100];
   
   //required arguments
   short int have_force_field, have_n_components, have_target_temp;
@@ -302,6 +305,7 @@ class Globals{
   short int have_omega_spring_constant;
   short int have_surface_tension;
   short int have_print_pressure_tensor;
+  short int have_cutoff_policy;
 };
 
 #endif

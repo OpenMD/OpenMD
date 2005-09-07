@@ -45,7 +45,7 @@
 
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: doForces.F90,v 1.37 2005-09-07 19:18:54 gezelter Exp $, $Date: 2005-09-07 19:18:54 $, $Name: not supported by cvs2svn $, $Revision: 1.37 $
+!! @version $Id: doForces.F90,v 1.38 2005-09-07 20:46:39 gezelter Exp $, $Date: 2005-09-07 20:46:39 $, $Name: not supported by cvs2svn $, $Revision: 1.38 $
 
 
 module doForces
@@ -380,6 +380,7 @@ contains
     do i = 1, nGroupTypes
        do j = 1, nGroupTypes
        
+          write(*,*) 'cutoffPolicy = ', cutoffPolicy
           select case(cutoffPolicy)
           case(TRADITIONAL_CUTOFF_POLICY)
              thisRcut = maxval(gtypeMaxCutoff)

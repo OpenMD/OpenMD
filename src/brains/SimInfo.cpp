@@ -52,6 +52,7 @@
 #include "brains/SimInfo.hpp"
 #include "math/Vector3.hpp"
 #include "primitives/Molecule.hpp"
+#include "UseTheForce/fCutoffPolicy.h"
 #include "UseTheForce/doForces_interface.h"
 #include "UseTheForce/notifyCutoffs_interface.h"
 #include "utils/MemoryUtils.hpp"
@@ -841,12 +842,34 @@ namespace oopse {
     }
   }
 
-  void SimInfo::setupCutoff() {
+  void SimInfo::setupCutoff() {    
     getCutoff(rcut_, rsw_);    
     double rnblist = rcut_ + 1; // skin of neighbor list
 
     //Pass these cutoff radius etc. to fortran. This function should be called once and only once
-    notifyFortranCutoffs(&rcut_, &rsw_, &rnblist);
+    
+    int cp =  TRADITIONAL_CUTOFF_POLICY;
+    if (simParams_->haveCutoffPolicy()) {
+      std::string myPolicy = simParams_->getCutoffPolicy();
+      if (myPolicy == "MIX") {
+        cp = MIX_CUTOFF_POLICY;
+      } else {
+        if (myPolicy == "MAX") {
+          cp = MAX_CUTOFF_POLICY;
+        } else {
+          if (myPolicy == "TRADITIONAL") {            
+            cp = TRADITIONAL_CUTOFF_POLICY;
+          } else {
+            // throw error        
+            sprintf( painCave.errMsg,
+                     "SimInfo error: Unknown cutoffPolicy. (Input file specified %s .)\n\tcutoffPolicy must be one of: \"Mix\", \"Max\", or \"Traditional\".", myPolicy.c_str() );
+            painCave.isFatal = 1;
+            simError();
+          }     
+        }           
+      }
+    }
+    notifyFortranCutoffs(&rcut_, &rsw_, &rnblist, &cp);
   }
 
   void SimInfo::addProperty(GenericData* genData) {

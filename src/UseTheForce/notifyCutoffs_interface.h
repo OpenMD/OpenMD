@@ -51,7 +51,8 @@ extern "C"{
   
   void notifyFortranCutoffs( double *rCut,
 			     double *rSw,
-			     double *rList );
+			     double *rList,
+                             int* cutPolicy );
   
 }
 #endif
