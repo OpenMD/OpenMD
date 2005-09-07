@@ -47,7 +47,7 @@
 !!
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: simParallel.F90,v 1.4 2005-04-15 22:03:48 gezelter Exp $, $Date: 2005-04-15 22:03:48 $, $Name: not supported by cvs2svn $, $Revision: 1.4 $
+!! @version $Id: simParallel.F90,v 1.5 2005-09-07 22:23:20 chuckv Exp $, $Date: 2005-09-07 22:23:20 $, $Name: not supported by cvs2svn $, $Revision: 1.5 $
 
 module mpiSimulation  
   use definitions
@@ -84,6 +84,8 @@ module mpiSimulation
   public :: mpi_comm_world
   public :: mpi_character
   public :: mpi_integer
+  public :: mpi_lor
+  public :: mpi_logical
   public :: mpi_double_precision
   public :: mpi_sum
   public :: mpi_max
