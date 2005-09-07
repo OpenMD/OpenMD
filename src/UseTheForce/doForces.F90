@@ -45,7 +45,7 @@
 
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: doForces.F90,v 1.36 2005-09-06 17:32:42 chuckv Exp $, $Date: 2005-09-06 17:32:42 $, $Name: not supported by cvs2svn $, $Revision: 1.36 $
+!! @version $Id: doForces.F90,v 1.37 2005-09-07 19:18:54 gezelter Exp $, $Date: 2005-09-07 19:18:54 $, $Name: not supported by cvs2svn $, $Revision: 1.37 $
 
 
 module doForces
@@ -395,6 +395,7 @@ contains
           gtypeCutoffMap(i,j)%rcutsq = thisRcut*thisRcut
           skin = defaultRlist - defaultRcut
           gtypeCutoffMap(i,j)%rlistsq = (thisRcut + skin)**2
+
        enddo
     enddo
     
