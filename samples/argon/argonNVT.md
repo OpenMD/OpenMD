@@ -15,10 +15,10 @@ density = 0.02143659;
 ensemble = "NVT";
 tauThermostat = 1e3;
 dt = 1.0;
-runTime = 1e4;
+runTime = 1e5;
 
-sampleTime = 10;
-statusTime = 1;
+sampleTime = 100;
+statusTime = 10;
 
 thermalTime = 100.0;
 tempSet = "false";
