@@ -45,7 +45,7 @@
 
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: doForces.F90,v 1.39 2005-09-07 22:08:39 gezelter Exp $, $Date: 2005-09-07 22:08:39 $, $Name: not supported by cvs2svn $, $Revision: 1.39 $
+!! @version $Id: doForces.F90,v 1.40 2005-09-07 22:44:48 chuckv Exp $, $Date: 2005-09-07 22:44:48 $, $Name: not supported by cvs2svn $, $Revision: 1.40 $
 
 
 module doForces
@@ -260,6 +260,7 @@ contains
 
     integer :: myStatus, nAtypes,  i, j, istart, iend, jstart, jend
     integer :: n_in_i, me_i, ia, g, atom1, nGroupTypes
+    integer :: nGroupsInRow
     real(kind=dp):: thisSigma, bigSigma, thisRcut, tol, skin
     real(kind=dp) :: biggestAtypeCutoff
 
@@ -272,7 +273,9 @@ contains
           return
        endif
     endif
-
+#ifdef IS_MPI
+    nGroupsInRow = getNgroupsInRow(plan_group_row)
+#endif
     nAtypes = getSize(atypes)
     
     do i = 1, nAtypes
