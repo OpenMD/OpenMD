@@ -43,7 +43,7 @@
 !! Calculates Long Range forces Lennard-Jones interactions.
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: LJ.F90,v 1.13 2005-08-09 22:33:48 gezelter Exp $, $Date: 2005-08-09 22:33:48 $, $Name: not supported by cvs2svn $, $Revision: 1.13 $
+!! @version $Id: LJ.F90,v 1.14 2005-09-14 19:02:33 gezelter Exp $, $Date: 2005-09-14 19:02:33 $, $Name: not supported by cvs2svn $, $Revision: 1.14 $
 
 
 module lj
@@ -253,7 +253,7 @@ contains
     integer :: nLJtypes, i, j
     real ( kind = dp ) :: s1, s2, e1, e2
     real ( kind = dp ) :: rcut6, tp6, tp12
-    logical :: isSoftCore1, isSoftCore2
+    logical :: isSoftCore1, isSoftCore2, doShift
 
     if (LJMap%currentLJtype == 0) then
        call handleError("LJ", "No members in LJMap")
@@ -296,6 +296,7 @@ contains
           else
              if (haveDefaultCutoff) then
                 rcut6 = defaultCutoff**6
+                doShift = defaultShift
              else
                 call handleError("LJ", "No specified or default cutoff value!")
              endif
@@ -303,8 +304,20 @@ contains
           
           tp6    = MixingMap(i,j)%sigma6/rcut6
           tp12    = tp6**2          
-
           MixingMap(i,j)%delta =-4.0_DP*MixingMap(i,j)%epsilon*(tp12 - tp6)
+          MixingMap(i,j)%shiftedPot = doShift
+
+          if (i.ne.j) then
+             MixingMap(j,i)%sigma      = MixingMap(i,j)%sigma
+             MixingMap(j,i)%epsilon    = MixingMap(i,j)%epsilon
+             MixingMap(j,i)%sigma6     = MixingMap(i,j)%sigma6
+             MixingMap(j,i)%rCut       = MixingMap(i,j)%rCut
+             MixingMap(j,i)%delta      = MixingMap(i,j)%delta
+             MixingMap(j,i)%rCutWasSet = MixingMap(i,j)%rCutWasSet
+             MixingMap(j,i)%shiftedPot = MixingMap(i,j)%shiftedPot
+             MixingMap(j,i)%isSoftCore = MixingMap(i,j)%isSoftCore
+          endif
+
        enddo
     enddo
     
@@ -393,7 +406,6 @@ contains
     fx = dudr * drdx
     fy = dudr * drdy
     fz = dudr * drdz
-
 
 #ifdef IS_MPI
     if (do_pot) then
