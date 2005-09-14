@@ -227,7 +227,6 @@ contains
     
     eamID = EAMList%atidToEAMType(atomID)
     cutValue = EAMList%EAMParams(eamID)%eam_rcut
-
   end function getEAMCut
 
   subroutine init_EAM_FF(status)
@@ -560,9 +559,11 @@ contains
     ! we don't use the derivatives, dummy variables
     real( kind = dp) :: drho,d2rho
     integer :: eam_err
+    
+    integer :: atid1,atid2 ! Global atid    
+    integer :: myid_atom1 ! EAM atid
+    integer :: myid_atom2 
 
-    integer :: myid_atom1
-    integer :: myid_atom2
 
     ! check to see if we need to be cleaned at the start of a force loop
 
@@ -570,12 +571,15 @@ contains
 
 
 #ifdef IS_MPI
-    myid_atom1 = atid_Row(atom1)
-    myid_atom2 = atid_Col(atom2)
+    Atid1 = Atid_row(Atom1)
+    Atid2 = Atid_col(Atom2)
 #else
-    myid_atom1 = atid(atom1)
-    myid_atom2 = atid(atom2)
+    Atid1 = Atid(Atom1)
+    Atid2 = Atid(Atom2)
 #endif
+
+    Myid_atom1 = Eamlist%atidtoeamtype(Atid1)
+    Myid_atom2 = Eamlist%atidtoeamtype(Atid2)
 
     if (r.lt.EAMList%EAMParams(myid_atom1)%eam_rcut) then
 
@@ -594,7 +598,7 @@ contains
 #else
        rho(atom2) = rho(atom2) + rho_i_at_j
 #endif
-       !       write(*,*) atom1,atom2,r,rho_i_at_j
+             ! write(*,*) atom1,atom2,r,rho_i_at_j
     endif
 
     if (r.lt.EAMList%EAMParams(myid_atom2)%eam_rcut) then
@@ -632,7 +636,7 @@ contains
     integer :: atom
     real(kind=dp) :: U,U1,U2
     integer :: atype1
-    integer :: me
+    integer :: me,atid1
     integer :: n_rho_points
 
 
@@ -657,7 +661,8 @@ contains
 
     !! Calculate F(rho) and derivative 
     do atom = 1, nlocal
-       me = atid(atom)
+       atid1 = atid(atom)
+       me = eamList%atidToEAMtype(atid1)
        n_rho_points = EAMList%EAMParams(me)%eam_nrho
        !  Check to see that the density is not greater than the larges rho we have calculated
        if (rho(atom) < EAMList%EAMParams(me)%eam_rhovals(n_rho_points)) then
@@ -751,7 +756,7 @@ contains
     integer :: id1,id2
     integer  :: mytype_atom1
     integer  :: mytype_atom2
-
+    integer  :: atid1,atid2
     !Local Variables
 
     ! write(*,*) "Frho: ", Frho(atom1)
@@ -763,12 +768,17 @@ contains
     if (rij .lt. EAM_rcut) then
 
 #ifdef IS_MPI
-       mytype_atom1 = atid_row(atom1)
-       mytype_atom2 = atid_col(atom2)
+       atid1 = atid_row(atom1)
+       atid2 = atid_col(atom2)
 #else
-       mytype_atom1 = atid(atom1)
-       mytype_atom2 = atid(atom2)
+       atid1 = atid(atom1)
+       atid2 = atid(atom2)
 #endif
+
+       mytype_atom1 = EAMList%atidToEAMType(atid1)
+       mytype_atom2 = EAMList%atidTOEAMType(atid2)
+
+
        ! get cutoff for atom 1
        rci = EAMList%EAMParams(mytype_atom1)%eam_rcut
        ! get type specific cutoff for atom 2
