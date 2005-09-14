@@ -45,7 +45,7 @@
 
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: doForces.F90,v 1.40 2005-09-07 22:44:48 chuckv Exp $, $Date: 2005-09-07 22:44:48 $, $Name: not supported by cvs2svn $, $Revision: 1.40 $
+!! @version $Id: doForces.F90,v 1.41 2005-09-14 20:28:05 gezelter Exp $, $Date: 2005-09-14 20:28:05 $, $Name: not supported by cvs2svn $, $Revision: 1.41 $
 
 
 module doForces
@@ -1157,6 +1157,8 @@ contains
     real ( kind = dp ), intent(inout) :: d(3), dc(3)
 
     integer :: me_i, me_j, iHash
+
+    r = sqrt(rijsq)
 
 #ifdef IS_MPI   
     me_i = atid_row(i)
