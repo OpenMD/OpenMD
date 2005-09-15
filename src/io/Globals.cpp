@@ -117,9 +117,9 @@
 #define G_THERM_INT_THETA_SPRING 55
 #define G_THERM_INT_OMEGA_SPRING 56
 #define G_SURFACETENSION 57
-#define G_PRINTPREESURETENSOR   58
-#define G_USE_UNDAMPED_WOLF 59
-#define G_USE_DAMPED_WOLF   60
+#define G_PRINTPRESSURETENSOR   58
+#define G_COULOMBIC_CORRECTION  59
+#define G_DAMPING_ALPHA     60
 #define G_CUTOFFPOLICY      61
 
 Globals::Globals(){
@@ -196,9 +196,9 @@ void Globals::initalize(){
   command_table.insert(CommandMapType::value_type("thermIntThetaSpringConst", G_THERM_INT_THETA_SPRING));
   command_table.insert(CommandMapType::value_type("thermIntOmegaSpringConst", G_THERM_INT_OMEGA_SPRING));
   command_table.insert(CommandMapType::value_type("surfaceTension", G_SURFACETENSION));
-  command_table.insert(CommandMapType::value_type("printPressureTensor", G_PRINTPREESURETENSOR));
-  command_table.insert(CommandMapType::value_type("useUndampedWolf", G_USE_UNDAMPED_WOLF));
-  command_table.insert(CommandMapType::value_type("useDampedWolf", G_USE_DAMPED_WOLF));
+  command_table.insert(CommandMapType::value_type("printPressureTensor", G_PRINTPRESSURETENSOR));
+  command_table.insert(CommandMapType::value_type("coulombicCorrection", G_COULOMBIC_CORRECTION));
+  command_table.insert(CommandMapType::value_type("dampingAlpha", G_DAMPING_ALPHA));
   command_table.insert(CommandMapType::value_type("cutoffPolicy", G_CUTOFFPOLICY));
 
   strcpy( mixingRule,"standard");  //default mixing rules to standard.
@@ -209,6 +209,7 @@ void Globals::initalize(){
   orthoBoxTolerance = 1E-6;
   useSolidThermInt = 0; // default solid-state thermodynamic integration to off
   useLiquidThermInt = 0; // default liquid thermodynamic integration to off
+  dampingAlpha = 1.5; // default damping parameter in Wolf Electrostatics
 
   have_force_field =  0;
   have_n_components = 0;
@@ -263,6 +264,8 @@ void Globals::initalize(){
   have_omega_spring_constant = 0;
   have_surface_tension = 0;
   have_print_pressure_tensor = 0;
+  have_coulombic_correction = 0;
+  have_damping_alpha = 0;
   have_cutoff_policy = 0;
 }
 
@@ -1880,8 +1883,8 @@ int Globals::globalAssign( event* the_event ){
         }
         break;
 
-    case G_PRINTPREESURETENSOR:
-          if( the_type == STRING ){
+    case G_PRINTPRESSURETENSOR:
+      if( the_type == STRING ){
         
         if( !strcasecmp( "true", the_event->evt.asmt.rhs.sval )) {
             have_print_pressure_tensor= 1;
@@ -1902,42 +1905,69 @@ int Globals::globalAssign( event* the_event ){
           return 0;
           break;
 
-    case G_USE_UNDAMPED_WOLF:
-      if( the_type == STRING ){
-        
-        if( !strcasecmp( "true", the_event->evt.asmt.rhs.sval )) useUndampedWolf = 1;
-        else if( !strcasecmp( "false", the_event->evt.asmt.rhs.sval )) useUndampedWolf = 0;
-        else{
-          the_event->err_msg = 
-          strdup( "Error in parsing meta-data file!\n\tuseUndampedWolf was not \"true\" or \"false\".\n" );
-          return 0;
-        }
-        return 1;
+    case G_COULOMBIC_CORRECTION:
+      switch( the_type ){
+	
+      case STRING:
+	strcpy(coulombicCorrection, the_event->evt.asmt.rhs.sval);
+
+	for(int i = 0; coulombicCorrection[i] != '\0'; i++)
+	  {
+	    coulombicCorrection[i] = toupper(coulombicCorrection[i]);
+	  }
+	have_coulombic_correction = 1;
+	return 1;
+	break;
+	
+      case DOUBLE:
+	the_event->err_msg = 
+	  strdup( "Error in parsing meta-data file!\n\tcoulombicCorrection should be a string!\n" );
+	return 0;
+	break;
+	
+      case INT:
+	the_event->err_msg = 
+	  strdup( "Error in parsing meta-data file!\n\tcoulombicCorrection should be a string!\n" );
+	return 0;
+	break;
+	
+      default:
+	the_event->err_msg = 
+	  strdup( "Error in parsing meta-data file!\n\tcoulombicCorrection unrecognized.\n" );
+	return 0;
+	break;
       }
-      
-      the_event->err_msg = 
-      strdup( "Error in parsing meta-data file!\n\tuseUndampedWolf was not \"true\" or \"false\".\n" );
-      return 0;
       break;
-      
-    case G_USE_DAMPED_WOLF:
-      if( the_type == STRING ){
-        
-        if( !strcasecmp( "true", the_event->evt.asmt.rhs.sval )) useDampedWolf = 1;
-        else if( !strcasecmp( "false", the_event->evt.asmt.rhs.sval )) useDampedWolf = 0;
-        else{
-          the_event->err_msg = 
-          strdup( "Error in parsing meta-data file!\n\tuseDampedWolf was not \"true\" or \"false\".\n" );
-          return 0;
-        }
+
+    case G_DAMPING_ALPHA:
+      switch( the_type ){
+	
+      case STRING:
+        the_event->err_msg = 
+          strdup( "Error in parsing meta-data file!\n\tdampingAlpha is not a double or int.\n" );
         return 1;
+        break;
+        
+      case DOUBLE:
+        dampingAlpha = the_event->evt.asmt.rhs.dval;
+        have_damping_alpha = 1;
+        return 1;
+        break;
+        
+      case INT:
+        dampingAlpha = (double)the_event->evt.asmt.rhs.dval;
+        have_damping_alpha = 1;
+        return 1;
+        break;
+        
+      default:
+        the_event->err_msg = 
+          strdup( "Error in parsing meta-data file!\n\tdampingAlpha unrecognized.\n" );
+        return 0;
+        break;
       }
-      
-      the_event->err_msg = 
-      strdup( "Error in parsing meta-data file!\n\tuseDampedWolf was not \"true\" or \"false\".\n" );
-      return 0;
-      break;
-      
+      break;   
+
     case G_CUTOFFPOLICY:
       switch( the_type ){
 	

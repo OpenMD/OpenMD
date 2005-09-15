@@ -53,6 +53,7 @@
 #include "math/Vector3.hpp"
 #include "primitives/Molecule.hpp"
 #include "UseTheForce/fCutoffPolicy.h"
+#include "UseTheForce/fCoulombicCorrection.h"
 #include "UseTheForce/doForces_interface.h"
 #include "UseTheForce/notifyCutoffs_interface.h"
 #include "utils/MemoryUtils.hpp"
@@ -463,8 +464,9 @@ namespace oopse {
     //setup fortran force field
     /** @deprecate */    
     int isError = 0;
-    initFortranFF( &fInfo_.SIM_uses_RF, &fInfo_.SIM_uses_UW, 
-		   &fInfo_.SIM_uses_DW, &isError );
+    
+    setupCoulombicCorrection( isError );
+
     if(isError){
       sprintf( painCave.errMsg,
 	       "ForceField error: There was an error initializing the forceField in fortran.\n" );
@@ -521,8 +523,6 @@ namespace oopse {
     //usePBC and useRF are from simParams
     int usePBC = simParams_->getPBC();
     int useRF = simParams_->getUseRF();
-    int useUW = simParams_->getUseUndampedWolf();
-    int useDW = simParams_->getUseDampedWolf();
 
     //loop over all of the atom types
     for (i = atomTypes.begin(); i != atomTypes.end(); ++i) {
@@ -609,8 +609,6 @@ namespace oopse {
     fInfo_.SIM_uses_Shapes = useShape;
     fInfo_.SIM_uses_FLARB = useFLARB;
     fInfo_.SIM_uses_RF = useRF;
-    fInfo_.SIM_uses_UW = useUW;
-    fInfo_.SIM_uses_DW = useDW;
 
     if( fInfo_.SIM_uses_Dipoles && fInfo_.SIM_uses_RF) {
 
@@ -870,6 +868,49 @@ namespace oopse {
       }
     }
     notifyFortranCutoffs(&rcut_, &rsw_, &rnblist, &cp);
+  }
+
+  void SimInfo::setupCoulombicCorrection( int isError ) {    
+     
+    int errorOut;
+    int cc =  NONE;
+    double alphaVal;
+
+    errorOut = isError;
+
+    if (simParams_->haveCoulombicCorrection()) {
+      std::string myCorrection = simParams_->getCoulombicCorrection();
+      if (myCorrection == "NONE") {
+        cc = NONE;
+      } else {
+        if (myCorrection == "UNDAMPED_WOLF") {
+          cc = UNDAMPED_WOLF;
+        } else {
+          if (myCorrection == "WOLF") {            
+            cc = WOLF;
+	    if (!simParams_->haveDampingAlpha()) {
+	      //throw error
+	      sprintf( painCave.errMsg,
+		       "SimInfo warning: dampingAlpha was not specified in the input file. A default value of %f (1/ang) will be used for the Wolf Coulombic Correction.", simParams_->getDampingAlpha());
+	      painCave.isFatal = 0;
+	      simError();
+	    }
+	    alphaVal = simParams_->getDampingAlpha();
+          } else {
+	    if (myCorrection == "REACTION_FIELD") {
+	      cc = REACTION_FIELD;
+	    } else {
+	      // throw error        
+	      sprintf( painCave.errMsg,
+		       "SimInfo error: Unknown coulombicCorrection. (Input file specified %s .)\n\tcoulombicCorrection must be one of: \"none\", \"undamped_wolf\", \"wolf\", or \"reaction_field\".", myCorrection.c_str() );
+	      painCave.isFatal = 1;
+	      simError();
+	    }     
+	  }           
+	}
+      }
+    }
+    initFortranFF( &fInfo_.SIM_uses_RF, &cc, &alphaVal, &errorOut );
   }
 
   void SimInfo::addProperty(GenericData* genData) {

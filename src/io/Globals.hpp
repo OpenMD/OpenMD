@@ -141,8 +141,8 @@ class Globals{
   double getOmegaSpringConst(void)  { return therm_int_omega_spring; }
   double getSurfaceTension(void)    { return surface_tension; }
   bool   getPrintPressureTensor(void) { return print_pressure_tensor;}
-  bool   getUseUndampedWolf(void)   { return useUndampedWolf; }
-  bool   getUseDampedWolf(void)     { return useDampedWolf; }
+  char*  getCoulombicCorrection(void) { return coulombicCorrection; }
+  double getDampingAlpha(void)      { return dampingAlpha; }
   char*  getCutoffPolicy(void)      { return cutoffPolicy; }
   
   short int haveDt( void )            { return have_dt; }
@@ -186,7 +186,7 @@ class Globals{
   short int haveMinLSTol(void)        { return have_minimizer_ls_tol; }
   short int haveMinLSMaxIter(void)    { return have_minimizer_ls_maxiteration;}
   short int haveThermIntLambda(void)  { return have_thermodynamic_integration_lambda; }
-  short int haveThermIntK(void)    { return have_thermodynamic_integration_k; }
+  short int haveThermIntK(void)       { return have_thermodynamic_integration_k; }
   short int haveForceFieldVariant(void)  { return have_forcefield_variant; }
   short int haveForceFieldFileName(void) { return have_forcefield_filename; }
   short int haveDistSpringConst(void)    { return have_dist_spring_constant; }
@@ -194,6 +194,8 @@ class Globals{
   short int haveOmegaSpringConst(void)   { return have_omega_spring_constant; }
   short int haveSurfaceTension(void)     { return have_surface_tension; }
   short int havePrintPressureTensor(void) {return have_print_pressure_tensor;}
+  short int haveCoulombicCorrection(void) {return have_coulombic_correction;}
+  short int haveDampingAlpha(void)       { return have_damping_alpha; }
   short int haveCutoffPolicy(void)       { return have_cutoff_policy; }
 
   /* other accessors */
@@ -273,8 +275,8 @@ class Globals{
   double therm_int_omega_spring;
   double surface_tension;
   bool print_pressure_tensor;
-  bool useUndampedWolf;
-  bool useDampedWolf;
+  char coulombicCorrection[100];
+  double dampingAlpha;
   char cutoffPolicy[100];
   
   //required arguments
@@ -305,6 +307,8 @@ class Globals{
   short int have_omega_spring_constant;
   short int have_surface_tension;
   short int have_print_pressure_tensor;
+  short int have_coulombic_correction;
+  short int have_damping_alpha;
   short int have_cutoff_policy;
 };
 

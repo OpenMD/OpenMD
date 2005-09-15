@@ -438,6 +438,9 @@ namespace oopse{
     /** Figure out the radius of cutoff, radius of switching function and pass them to fortran */
     void setupCutoff();
 
+    /** Figure out which coulombic correction method to use and pass to fortran */
+    void setupCoulombicCorrection( int isError );
+
     /** Calculates the number of degress of freedom in the whole system */
     void calcNdf();
     void calcNdfRaw();
