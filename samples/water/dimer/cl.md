@@ -2,11 +2,11 @@
 
 nComponents = 2;
 component{
-  type = "TIP4P";
+  type = "Cl-";
   nMol = 1;
 }
 component{
-  type = "Cl-";
+  type = "SSD_E";
   nMol = 1;
 }
 

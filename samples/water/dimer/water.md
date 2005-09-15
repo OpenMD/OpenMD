@@ -14,7 +14,7 @@ molecule{
   name = "Na+";
   nAtoms = 1;
   atom[0]{
-    type = "Na+";
+    type = "Na";
     position(0.0, 0.0, 0.0);
   }
 }
