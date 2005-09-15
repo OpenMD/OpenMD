@@ -45,7 +45,7 @@
 
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: doForces.F90,v 1.41 2005-09-14 20:28:05 gezelter Exp $, $Date: 2005-09-14 20:28:05 $, $Name: not supported by cvs2svn $, $Revision: 1.41 $
+!! @version $Id: doForces.F90,v 1.42 2005-09-15 00:13:14 chrisfen Exp $, $Date: 2005-09-15 00:13:14 $, $Name: not supported by cvs2svn $, $Revision: 1.42 $
 
 
 module doForces
@@ -58,7 +58,7 @@ module doForces
   use lj
   use sticky
   use electrostatic_module
-  use reaction_field
+  use reaction_field_module
   use gb_pair
   use shapes
   use vector_class
@@ -74,6 +74,7 @@ module doForces
 #define __FORTRAN90
 #include "UseTheForce/fSwitchingFunction.h"
 #include "UseTheForce/fCutoffPolicy.h"
+#include "UseTheForce/fCoulombicCorrection.h"
 #include "UseTheForce/DarkSide/fInteractionMap.h"
 
 
@@ -135,7 +136,9 @@ module doForces
   type(gtypeCutoffs), dimension(:,:), allocatable :: gtypeCutoffMap
 
   integer, save :: cutoffPolicy = TRADITIONAL_CUTOFF_POLICY
+  integer, save :: coulombicCorrection = NONE
   real(kind=dp),save :: defaultRcut, defaultRsw, defaultRlist
+  real(kind=dp),save :: rcuti
   
 contains
 
@@ -408,35 +411,34 @@ contains
     enddo
     
     haveGtypeCutoffMap = .true.
-    
-  end subroutine createGtypeCutoffMap
-  
-  subroutine setDefaultCutoffs(defRcut, defRsw, defRlist, cutPolicy)
-    real(kind=dp),intent(in) :: defRcut, defRsw, defRlist
-    integer, intent(in) :: cutPolicy
-    
-    defaultRcut = defRcut
-    defaultRsw = defRsw
-    defaultRlist = defRlist
-    cutoffPolicy = cutPolicy
-  end subroutine setDefaultCutoffs
-  
-  subroutine setCutoffPolicy(cutPolicy)
+   end subroutine createGtypeCutoffMap
+
+   subroutine setDefaultCutoffs(defRcut, defRsw, defRlist, cutPolicy)
+     real(kind=dp),intent(in) :: defRcut, defRsw, defRlist
+     integer, intent(in) :: cutPolicy
+
+     defaultRcut = defRcut
+     defaultRsw = defRsw
+     defaultRlist = defRlist
+     cutoffPolicy = cutPolicy
+     rcuti = 1.0_dp / defaultRcut
+   end subroutine setDefaultCutoffs
+
+   subroutine setCutoffPolicy(cutPolicy)
 
      integer, intent(in) :: cutPolicy
      cutoffPolicy = cutPolicy
      call createGtypeCutoffMap()
-
    end subroutine setCutoffPolicy
     
      
   subroutine setSimVariables()
     SIM_uses_DirectionalAtoms = SimUsesDirectionalAtoms()
     SIM_uses_EAM = SimUsesEAM()
-    SIM_uses_RF = SimUsesRF()
     SIM_requires_postpair_calc = SimRequiresPostpairCalc()
     SIM_requires_prepair_calc = SimRequiresPrepairCalc()
     SIM_uses_PBC = SimUsesPBC()
+    SIM_uses_RF = SimUsesRF()
 
     haveSIMvariables = .true.
 
@@ -503,14 +505,13 @@ contains
   end subroutine doReadyCheck
 
 
-  subroutine init_FF(use_RF, use_UW, use_DW, thisStat)
+  subroutine init_FF(use_RF, correctionMethod, dampingAlpha, thisStat)
 
     logical, intent(in) :: use_RF
-    logical, intent(in) :: use_UW
-    logical, intent(in) :: use_DW
+    integer, intent(in) :: correctionMethod
+    real(kind=dp), intent(in) :: dampingAlpha
     integer, intent(out) :: thisStat   
     integer :: my_status, nMatches
-    integer :: corrMethod
     integer, pointer :: MatchList(:) => null()
     real(kind=dp) :: rcut, rrf, rt, dielect
 
@@ -521,14 +522,20 @@ contains
     FF_uses_RF = use_RF
 
     !! set the electrostatic correction method
-    if (use_UW) then
-       corrMethod = 1
-    elseif (use_DW) then
-       corrMethod = 2
-    else
+    select case(coulombicCorrection)
+    case(NONE)
        corrMethod = 0
-    endif
-    
+    case(UNDAMPED_WOLF)
+       corrMethod = 1
+    case(WOLF)
+       corrMethod = 2
+    case (REACTION_FIELD)
+       corrMethod = 3
+    case default
+       call handleError("init_FF", "Unknown Coulombic Correction Method")
+       return
+    end select
+        
     !! init_FF is called *after* all of the atom types have been 
     !! defined in atype_module using the new_atype subroutine.
     !!
@@ -566,7 +573,7 @@ contains
           call initialize_rf(dielect)
        endif
     else
-       if (FF_uses_RF) then          
+       if ((corrMethod == 3) .or. FF_uses_RF) then
           write(default_error,*) 'Using Reaction Field with no dipoles?  Huh?'
           thisStat = -1
           haveSaneForceField = .false.
@@ -984,7 +991,7 @@ contains
 
     if (FF_RequiresPostpairCalc() .and. SIM_requires_postpair_calc) then
 
-       if (FF_uses_RF .and. SIM_uses_RF) then
+       if ((FF_uses_RF .and. SIM_uses_RF) .or. (corrMethod == 3)) then
 
 #ifdef IS_MPI
           call scatter(rf_Row,rf,plan_atom_row_3d)
@@ -1068,7 +1075,6 @@ contains
     real ( kind = dp ), intent(inout) :: rijsq
     real ( kind = dp )                :: r
     real ( kind = dp ), intent(inout) :: d(3)
-    real ( kind = dp ) :: ebalance
     integer :: me_i, me_j
 
     integer :: iHash
@@ -1093,9 +1099,9 @@ contains
 
     if ( iand(iHash, ELECTROSTATIC_PAIR).ne.0 ) then
        call doElectrostaticPair(i, j, d, r, rijsq, sw, vpair, fpair, &
-            pot, eFrame, f, t, do_pot, corrMethod)
+            pot, eFrame, f, t, do_pot, corrMethod, rcuti)
 
-       if (FF_uses_RF .and. SIM_uses_RF) then
+       if ((FF_uses_RF .and. SIM_uses_RF) .or. (corrMethod == 3)) then
 
           ! CHECK ME (RF needs to know about all electrostatic types)
           call accumulate_rf(i, j, r, eFrame, sw)
@@ -1378,6 +1384,7 @@ contains
   function FF_RequiresPostpairCalc() result(doesit)
     logical :: doesit
     doesit = FF_uses_RF
+    if (corrMethod == 3) doesit = .true.
   end function FF_RequiresPostpairCalc
 
 #ifdef PROFILE

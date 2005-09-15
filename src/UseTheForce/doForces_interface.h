@@ -51,10 +51,10 @@
 extern "C"{
   
   void initFortranFF( int* useReactionField,
-		      int* useUndampedWolf,
-		      int* useDampedWolf,
-                      int *isError );        
-
+		      int* coulombicCorrection,
+		      double *dampingAlpha,
+                      int* isError );        
+ 
   
   void doForceLoop( double* positionArray,
                     double* rcArray,

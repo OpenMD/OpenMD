@@ -43,7 +43,7 @@ module notifyCutoffs
 
   use definitions
   use doForces, only:       setDefaultCutoffs
-  use reaction_field, only: setCutoffsRF
+  use reaction_field_module, only: setCutoffsRF
   use lj, only:             setLJDefaultCutoff
   use eam, only:            setCutoffEAM
   use switcheroo, only:     set_switch
