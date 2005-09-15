@@ -45,7 +45,7 @@
 
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: doForces.F90,v 1.42 2005-09-15 00:13:14 chrisfen Exp $, $Date: 2005-09-15 00:13:14 $, $Name: not supported by cvs2svn $, $Revision: 1.42 $
+!! @version $Id: doForces.F90,v 1.43 2005-09-15 02:48:43 chuckv Exp $, $Date: 2005-09-15 02:48:43 $, $Name: not supported by cvs2svn $, $Revision: 1.43 $
 
 
 module doForces
@@ -280,7 +280,8 @@ contains
     nGroupsInRow = getNgroupsInRow(plan_group_row)
 #endif
     nAtypes = getSize(atypes)
-    
+! Set all of the initial cutoffs to zero.
+    atypeMaxCutoff = 0.0_dp
     do i = 1, nAtypes
        if (SimHasAtype(i)) then     
           call getElementProperty(atypes, i, "is_LennardJones", i_is_LJ)
@@ -291,7 +292,7 @@ contains
           call getElementProperty(atypes, i, "is_EAM", i_is_EAM)
           call getElementProperty(atypes, i, "is_Shape", i_is_Shape)
           
-          atypeMaxCutoff(i) = 0.0_dp
+ 
           if (i_is_LJ) then 
              thisRcut = getSigma(i) * 2.5_dp
              if (thisRCut .gt. atypeMaxCutoff(i)) atypeMaxCutoff(i) = thisRCut
@@ -341,6 +342,8 @@ contains
        allocate(groupToGtype(iend))
        allocate(groupMaxCutoff(iend))
        allocate(gtypeMaxCutoff(iend))
+       groupMaxCutoff = 0.0_dp
+       gtypeMaxCutoff = 0.0_dp
     endif
     !! first we do a single loop over the cutoff groups to find the
     !! largest cutoff for any atypes present in this group.  We also
