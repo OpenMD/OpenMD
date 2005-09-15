@@ -54,6 +54,9 @@ module electrostatic_module
 
   PRIVATE
 
+#define __FORTRAN90
+#include "UseTheForce/DarkSide/fElectrostaticSummationMethod.h"
+
   !! these prefactors convert the multipole interactions into kcal / mol
   !! all were computed assuming distances are measured in angstroms
   !! Charge-Charge, assuming charges are measured in electrons
@@ -68,6 +71,23 @@ module electrostatic_module
   !! This unit is also known affectionately as an esu centi-barn.
   real(kind=dp), parameter :: pre14 = 69.13373_dp
 
+  !! variables to handle different summation methods for long-range electrostatics:
+  integer, save :: summationMethod = NONE
+  real(kind=DP), save :: defaultCutoff = 0.0_DP
+  logical, save :: haveDefaultCutoff = .false.
+  real(kind=DP), save :: dampingAlpha = 0.0_DP
+  logical, save :: haveDampingAlpha = .false.
+  real(kind=DP), save :: dielectric = 0.0_DP
+  logical, save :: haveDielectric = .false.
+  real(kind=DP), save :: constERFC = 0.0_DP
+  real(kind=DP), save :: constEXP = 0.0_DP
+  logical, save :: haveDWAconstants = .false.
+
+
+  public :: setElectrostaticSummationMethod
+  public :: setElectrostaticCutoffRadius
+  public :: setDampedWolfAlpha
+  public :: setReactionFieldDielectric
   public :: newElectrostaticType
   public :: setCharge
   public :: setDipoleMoment
@@ -95,6 +115,34 @@ module electrostatic_module
   type(Electrostatic), dimension(:), allocatable :: ElectrostaticMap
 
 contains
+
+  subroutine setElectrostaticSummationMethod(the_ESM)
+
+    integer, intent(in) :: the_ESM    
+
+    if ((the_ESM .le. 0) .or. (the_ESM .gt. REACTION_FIELD)) then
+       call handleError("setElectrostaticSummationMethod", "Unsupported Summation Method")
+    endif
+
+  end subroutine setElectrostaticSummationMethod
+
+  subroutine setElectrostaticCutoffRadius(thisRcut) 
+    real(kind=dp), intent(in) :: thisRcut
+    defaultCutoff = thisRcut
+    haveDefaultCutoff = .true.
+  end subroutine setElectrostaticCutoffRadius
+
+  subroutine setDampedWolfAlpha(thisAlpha)
+    real(kind=dp), intent(in) :: thisAlpha
+    dampingAlpha = thisAlpha
+    haveDampingAlpha = .true.
+  end subroutine setDampedWolfAlpha
+  
+  subroutine setReactionFieldDielectric(thisDielectric)
+    real(kind=dp), intent(in) :: thisDielectric
+    dielectric = thisDielectric
+    haveDielectric = .true.
+  end subroutine setReactionFieldDielectric
 
   subroutine newElectrostaticType(c_ident, is_Charge, is_Dipole, &
        is_SplitDipole, is_Quadrupole, is_Tap, status)
@@ -306,6 +354,27 @@ contains
     dm = ElectrostaticMap(atid)%dipole_moment
   end function getDipoleMoment
 
+  subroutine checkSummationMethod()
+
+    if (summationMethod .eq. DAMPED_WOLF) then
+       if (.not.haveDWAconstants) then
+          
+          if (.not.haveDampingAlpha) then
+             call handleError("checkSummationMethod", "no Damping Alpha set!")
+          endif
+          
+          if (.not.have....)
+          constEXP = 
+          constERFC = 
+          
+          haveDWAconstants = .true.
+       endif
+    endif
+
+  end subroutine checkSummationMethod
+
+
+
   subroutine doElectrostaticPair(atom1, atom2, d, rij, r2, sw, &
        vpair, fpair, pot, eFrame, f, t, do_pot, corrMethod, rcuti)
 
@@ -352,6 +421,11 @@ contains
        call handleError("electrostatic", "no ElectrostaticMap was present before first call of do_electrostatic_pair!")
        return
     end if
+
+    if (.not.summationMethodChecked) then
+       call checkSummationMethod()
+    endif
+
 
 #ifdef IS_MPI
     me1 = atid_Row(atom1)

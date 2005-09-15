@@ -46,6 +46,11 @@
 
 #include "config.h"
 #include "types/AtomTypeProperties.h"
+ 
+#define setElectrostaticSummationMethod F90_FUNC(setelectrostaticsummationmethod, SETELECTROSTATICSUMMATIONMETHOD)
+#define setElectrostaticCutoffRadius F90_FUNC(setelectrostaticcutoffradius, SETELECTROSTATICCUTOFFRADIUS)
+#define setDampedWolfAlpha F90_FUNC(setdampedwolfalpha, SETDAMPEDWOLFALPHA)
+#define setReactionFieldDielectric F90_FUNC(setfeactionfielddielectric, SETREACTIONFIELDDIELECTRIC)
 
 #define newElectrostaticType F90_FUNC(newelectrostatictype, NEWELECTROSTATICTYPE)
 #define setCharge F90_FUNC(setcharge, SETCHARGE)
@@ -56,6 +61,12 @@
 
 #define destroyElectrostaticTypes F90_FUNC(destroyelectrostatictypes,DESTROYELECTROSTATICTYPES)
 extern "C"{
+
+  void setElectrostaticSummationMethod( int* theESM );
+  void setElectrostaticCutoffRadius( double* theECR );
+  void setDampedWolfAlpha( double* theDWA );
+  void setReactionFieldDielectric( double* theDielectric );
+
   void newElectrostaticType( AtomTypeProperties* atp,
                              int* status);
   

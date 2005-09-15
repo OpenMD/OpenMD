@@ -45,7 +45,7 @@
 
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: doForces.F90,v 1.43 2005-09-15 02:48:43 chuckv Exp $, $Date: 2005-09-15 02:48:43 $, $Name: not supported by cvs2svn $, $Revision: 1.43 $
+!! @version $Id: doForces.F90,v 1.44 2005-09-15 22:05:17 gezelter Exp $, $Date: 2005-09-15 22:05:17 $, $Name: not supported by cvs2svn $, $Revision: 1.44 $
 
 
 module doForces
@@ -74,7 +74,6 @@ module doForces
 #define __FORTRAN90
 #include "UseTheForce/fSwitchingFunction.h"
 #include "UseTheForce/fCutoffPolicy.h"
-#include "UseTheForce/fCoulombicCorrection.h"
 #include "UseTheForce/DarkSide/fInteractionMap.h"
 
 
@@ -136,7 +135,6 @@ module doForces
   type(gtypeCutoffs), dimension(:,:), allocatable :: gtypeCutoffMap
 
   integer, save :: cutoffPolicy = TRADITIONAL_CUTOFF_POLICY
-  integer, save :: coulombicCorrection = NONE
   real(kind=dp),save :: defaultRcut, defaultRsw, defaultRlist
   real(kind=dp),save :: rcuti
   
@@ -524,20 +522,6 @@ contains
     !! Fortran's version of a cast:
     FF_uses_RF = use_RF
 
-    !! set the electrostatic correction method
-    select case(coulombicCorrection)
-    case(NONE)
-       corrMethod = 0
-    case(UNDAMPED_WOLF)
-       corrMethod = 1
-    case(WOLF)
-       corrMethod = 2
-    case (REACTION_FIELD)
-       corrMethod = 3
-    case default
-       call handleError("init_FF", "Unknown Coulombic Correction Method")
-       return
-    end select
         
     !! init_FF is called *after* all of the atom types have been 
     !! defined in atype_module using the new_atype subroutine.
