@@ -32,7 +32,7 @@ Modules = \
 	gb_pair \
 	lj \
 	neighborLists \
-	reaction_field \
+	reaction_field_module \
 	shapes \
 	mpiSimulation \
 	simulation \

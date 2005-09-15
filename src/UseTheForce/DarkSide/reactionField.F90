@@ -39,7 +39,7 @@
 !! such damages.
 !!
 
-module reaction_field
+module reaction_field_module
   use force_globals
   use definitions
   use atype_module
@@ -313,4 +313,4 @@ contains
     end if
     return
   end subroutine rf_correct_forces
-end module reaction_field
+end module reaction_field_module
