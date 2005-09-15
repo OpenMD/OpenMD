@@ -219,6 +219,9 @@ namespace oopse {
   }
   
   void DumpReader::readFrame(int whichFrame) {
+    if (!isScanned_)
+      scanFile();
+        
     int storageLayout = info_->getSnapshotManager()->getStorageLayout();
     
     if (storageLayout & DataStorage::dslPosition) {
