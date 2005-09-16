@@ -83,44 +83,43 @@
 #define G_THERMALTIME       21
 #define G_USEPBC            22
 #define G_MIXINGRULE        23
-#define G_USERF             24
-#define G_TARGETPRESSURE    25
-#define G_TAUTHERMOSTAT     26
-#define G_TAUBAROSTAT       27
-#define G_ZCONSTIME         28
-#define G_NZCONSTRAINTS     29
-#define G_ZCONSTOL          30
-#define G_ZCONSFORCEPOLICY  31
-#define G_SEED              32
-#define G_RESETTIME         33
-#define G_USEINITTIME       34
-#define G_USEINIT_XS_STATE  35
-#define G_ORTHOBOXTOLERANCE 36
-#define G_MINIMIZER         37
-#define G_MIN_MAXITER       38
-#define G_MIN_WRITEFRQ      39
-#define G_MIN_STEPSIZE      40
-#define G_MIN_FTOL          41
-#define G_MIN_GTOL          42
-#define G_MIN_LSTOL         43
-#define G_MIN_LSMAXITER     44
-#define G_ZCONSGAP          45
-#define G_ZCONSFIXTIME      46
-#define G_ZCONSUSINGSMD     47
-#define G_USE_SOLID_THERM_INT     48
-#define G_USE_LIQUID_THERM_INT    49
-#define G_THERM_INT_LAMBDA  50
-#define G_THERM_INT_K       51
-#define G_FORCEFIELD_VARIANT 52
-#define G_FORCEFIELD_FILENAME 53
-#define G_THERM_INT_DIST_SPRING  54
-#define G_THERM_INT_THETA_SPRING 55
-#define G_THERM_INT_OMEGA_SPRING 56
-#define G_SURFACETENSION 57
-#define G_PRINTPRESSURETENSOR   58
-#define G_COULOMBIC_CORRECTION  59
-#define G_DAMPING_ALPHA     60
-#define G_CUTOFFPOLICY      61
+#define G_TARGETPRESSURE    24
+#define G_TAUTHERMOSTAT     25
+#define G_TAUBAROSTAT       26
+#define G_ZCONSTIME         27
+#define G_NZCONSTRAINTS     28
+#define G_ZCONSTOL          29
+#define G_ZCONSFORCEPOLICY  30
+#define G_SEED              31
+#define G_RESETTIME         32
+#define G_USEINITTIME       33
+#define G_USEINIT_XS_STATE  34
+#define G_ORTHOBOXTOLERANCE 35
+#define G_MINIMIZER         36
+#define G_MIN_MAXITER       37
+#define G_MIN_WRITEFRQ      38
+#define G_MIN_STEPSIZE      39
+#define G_MIN_FTOL          40
+#define G_MIN_GTOL          41
+#define G_MIN_LSTOL         42
+#define G_MIN_LSMAXITER     43
+#define G_ZCONSGAP          44
+#define G_ZCONSFIXTIME      45
+#define G_ZCONSUSINGSMD     46
+#define G_USE_SOLID_THERM_INT    47
+#define G_USE_LIQUID_THERM_INT   48
+#define G_THERM_INT_LAMBDA  49
+#define G_THERM_INT_K       50
+#define G_FORCEFIELD_VARIANT     51
+#define G_FORCEFIELD_FILENAME    52
+#define G_THERM_INT_DIST_SPRING  53
+#define G_THERM_INT_THETA_SPRING 54
+#define G_THERM_INT_OMEGA_SPRING 55
+#define G_SURFACETENSION    56
+#define G_PRINTPRESSURETENSOR    57
+#define G_ELECTRO_SUM_METHOD     58
+#define G_DAMPING_ALPHA     59
+#define G_CUTOFFPOLICY      60
 
 Globals::Globals(){
   initalize();
@@ -163,7 +162,6 @@ void Globals::initalize(){
   command_table.insert(CommandMapType::value_type("thermalTime", G_THERMALTIME));
   command_table.insert(CommandMapType::value_type("mixingRule", G_MIXINGRULE));
   command_table.insert(CommandMapType::value_type("usePeriodicBoundaryConditions", G_USEPBC));
-  command_table.insert(CommandMapType::value_type("useReactionField", G_USERF));
   command_table.insert(CommandMapType::value_type("targetPressure", G_TARGETPRESSURE));
   command_table.insert(CommandMapType::value_type("tauThermostat", G_TAUTHERMOSTAT));
   command_table.insert(CommandMapType::value_type("tauBarostat", G_TAUBAROSTAT));
@@ -197,13 +195,12 @@ void Globals::initalize(){
   command_table.insert(CommandMapType::value_type("thermIntOmegaSpringConst", G_THERM_INT_OMEGA_SPRING));
   command_table.insert(CommandMapType::value_type("surfaceTension", G_SURFACETENSION));
   command_table.insert(CommandMapType::value_type("printPressureTensor", G_PRINTPRESSURETENSOR));
-  command_table.insert(CommandMapType::value_type("coulombicCorrection", G_COULOMBIC_CORRECTION));
+  command_table.insert(CommandMapType::value_type("electrostaticSummationMethod", G_ELECTRO_SUM_METHOD));
   command_table.insert(CommandMapType::value_type("dampingAlpha", G_DAMPING_ALPHA));
   command_table.insert(CommandMapType::value_type("cutoffPolicy", G_CUTOFFPOLICY));
 
   strcpy( mixingRule,"standard");  //default mixing rules to standard.
   usePBC = 1; //default  periodic boundry conditions to on
-  useRF  = 0;
   useInitTime = 0; // default to pull init time from the init file
   useInitXSstate = 0; // default to pull the extended state from the init file
   orthoBoxTolerance = 1E-6;
@@ -264,7 +261,7 @@ void Globals::initalize(){
   have_omega_spring_constant = 0;
   have_surface_tension = 0;
   have_print_pressure_tensor = 0;
-  have_coulombic_correction = 0;
+  have_electro_sum_method = 0;
   have_damping_alpha = 0;
   have_cutoff_policy = 0;
 }
@@ -1097,24 +1094,6 @@ int Globals::globalAssign( event* the_event ){
       return 0;
       break;
 
-    case G_USERF:
-      if( the_type == STRING ){
-	
-	if( !strcasecmp( "true", the_event->evt.asmt.rhs.sval )) useRF = 1;
-	else if( !strcasecmp( "false", the_event->evt.asmt.rhs.sval )) useRF = 0;
-	else{
-	  the_event->err_msg = 
-	    strdup( "Error in parsing meta-data file!\n\tuseReactionField was not \"true\" or \"false\".\n" );
-	  return 0;
-	}
-	return 1;
-      }
-      
-      the_event->err_msg = 
-	strdup( "Error in parsing meta-data file!\n\tuseReactionField was not \"true\" or \"false\".\n" );
-      return 0;
-      break;
-
     case G_TARGETPRESSURE:
       switch( the_type ){
 	
@@ -1905,35 +1884,35 @@ int Globals::globalAssign( event* the_event ){
           return 0;
           break;
 
-    case G_COULOMBIC_CORRECTION:
+    case G_ELECTRO_SUM_METHOD:
       switch( the_type ){
 	
       case STRING:
-	strcpy(coulombicCorrection, the_event->evt.asmt.rhs.sval);
+	strcpy(electrostaticSummationMethod, the_event->evt.asmt.rhs.sval);
 
-	for(int i = 0; coulombicCorrection[i] != '\0'; i++)
+	for(int i = 0; electrostaticSummationMethod[i] != '\0'; i++)
 	  {
-	    coulombicCorrection[i] = toupper(coulombicCorrection[i]);
+	    electrostaticSummationMethod[i] = toupper(electrostaticSummationMethod[i]);
 	  }
-	have_coulombic_correction = 1;
+	have_electro_sum_method = 1;
 	return 1;
 	break;
 	
       case DOUBLE:
 	the_event->err_msg = 
-	  strdup( "Error in parsing meta-data file!\n\tcoulombicCorrection should be a string!\n" );
+	  strdup( "Error in parsing meta-data file!\n\telectrostaticSummationMethod should be a string!\n" );
 	return 0;
 	break;
 	
       case INT:
 	the_event->err_msg = 
-	  strdup( "Error in parsing meta-data file!\n\tcoulombicCorrection should be a string!\n" );
+	  strdup( "Error in parsing meta-data file!\n\telectrostaticSummationMethod should be a string!\n" );
 	return 0;
 	break;
 	
       default:
 	the_event->err_msg = 
-	  strdup( "Error in parsing meta-data file!\n\tcoulombicCorrection unrecognized.\n" );
+	  strdup( "Error in parsing meta-data file!\n\telectrostaticSummationMethod unrecognized.\n" );
 	return 0;
 	break;
       }

@@ -113,7 +113,6 @@ class Globals{
   int    getUseInitXSstate( void )  { return useInitXSstate; }
   double getOrthoBoxTolerance(void) { return orthoBoxTolerance; }
   int    getPBC( void )             { return usePBC; }
-  int    getUseRF( void )           { return useRF; }
   char*  getMixingRule( void)       { return mixingRule; }
   double getZconsTime(void)         { return zcons_time; }
   double getZconsTol(void)          { return zcons_tol; }
@@ -141,7 +140,7 @@ class Globals{
   double getOmegaSpringConst(void)  { return therm_int_omega_spring; }
   double getSurfaceTension(void)    { return surface_tension; }
   bool   getPrintPressureTensor(void) { return print_pressure_tensor;}
-  char*  getCoulombicCorrection(void) { return coulombicCorrection; }
+  char*  getElectrostaticSummationMethod(void) { return electrostaticSummationMethod; }
   double getDampingAlpha(void)      { return dampingAlpha; }
   char*  getCutoffPolicy(void)      { return cutoffPolicy; }
   
@@ -194,7 +193,7 @@ class Globals{
   short int haveOmegaSpringConst(void)   { return have_omega_spring_constant; }
   short int haveSurfaceTension(void)     { return have_surface_tension; }
   short int havePrintPressureTensor(void) {return have_print_pressure_tensor;}
-  short int haveCoulombicCorrection(void) {return have_coulombic_correction;}
+  short int haveElectrostaticSummationMethod(void) {return have_electro_sum_method;}
   short int haveDampingAlpha(void)       { return have_damping_alpha; }
   short int haveCutoffPolicy(void)       { return have_cutoff_policy; }
 
@@ -244,7 +243,6 @@ class Globals{
   int useInitTime;
   int useInitXSstate;
   int usePBC;
-  int useRF;
   double q_mass;
   double tau_thermostat;
   double tau_barostat;
@@ -275,7 +273,7 @@ class Globals{
   double therm_int_omega_spring;
   double surface_tension;
   bool print_pressure_tensor;
-  char coulombicCorrection[100];
+  char electrostaticSummationMethod[100];
   double dampingAlpha;
   char cutoffPolicy[100];
   
@@ -307,7 +305,7 @@ class Globals{
   short int have_omega_spring_constant;
   short int have_surface_tension;
   short int have_print_pressure_tensor;
-  short int have_coulombic_correction;
+  short int have_electro_sum_method;
   short int have_damping_alpha;
   short int have_cutoff_policy;
 };

@@ -465,7 +465,7 @@ namespace oopse {
     /** @deprecate */    
     int isError = 0;
     
-    setupCoulombicCorrection( isError );
+    setupElectrostaticSummationMethod( isError );
 
     if(isError){
       sprintf( painCave.errMsg,
@@ -522,7 +522,6 @@ namespace oopse {
     int useElectrostatics = 0;
     //usePBC and useRF are from simParams
     int usePBC = simParams_->getPBC();
-    int useRF = simParams_->getUseRF();
 
     //loop over all of the atom types
     for (i = atomTypes.begin(); i != atomTypes.end(); ++i) {
@@ -585,15 +584,6 @@ namespace oopse {
     temp = useFLARB;
     MPI_Allreduce(&temp, &useFLARB, 1, MPI_INT, MPI_LOR, MPI_COMM_WORLD);    
 
-    temp = useRF;
-    MPI_Allreduce(&temp, &useRF, 1, MPI_INT, MPI_LOR, MPI_COMM_WORLD);    
-
-    temp = useUW;
-    MPI_Allreduce(&temp, &useUW, 1, MPI_INT, MPI_LOR, MPI_COMM_WORLD);   
-
-    temp = useDW;
-    MPI_Allreduce(&temp, &useDW, 1, MPI_INT, MPI_LOR, MPI_COMM_WORLD);   
-    
 #endif
 
     fInfo_.SIM_uses_PBC = usePBC;    
@@ -608,7 +598,6 @@ namespace oopse {
     fInfo_.SIM_uses_EAM = useEAM;
     fInfo_.SIM_uses_Shapes = useShape;
     fInfo_.SIM_uses_FLARB = useFLARB;
-    fInfo_.SIM_uses_RF = useRF;
 
     if( fInfo_.SIM_uses_Dipoles && fInfo_.SIM_uses_RF) {
 
@@ -870,39 +859,39 @@ namespace oopse {
     notifyFortranCutoffs(&rcut_, &rsw_, &rnblist, &cp);
   }
 
-  void SimInfo::setupCoulombicCorrection( int isError ) {    
+  void SimInfo::setupElectrostaticSummationMethod( int isError ) {    
      
     int errorOut;
-    int cc =  NONE;
+    int esm =  NONE;
     double alphaVal;
 
     errorOut = isError;
 
-    if (simParams_->haveCoulombicCorrection()) {
-      std::string myCorrection = simParams_->getCoulombicCorrection();
-      if (myCorrection == "NONE") {
-        cc = NONE;
+    if (simParams_->haveElectrostaticSummationMethod()) {
+      std::string myCorrection = simParams_->getElectrostaticSummationMethod();
+      if (myMethod == "NONE") {
+        esm = NONE;
       } else {
-        if (myCorrection == "UNDAMPED_WOLF") {
-          cc = UNDAMPED_WOLF;
+        if (myMethod == "UNDAMPED_WOLF") {
+          esm = UNDAMPED_WOLF;
         } else {
-          if (myCorrection == "WOLF") {            
-            cc = WOLF;
+          if (myMethod == "DAMPED_WOLF") {            
+            esm = WOLF;
 	    if (!simParams_->haveDampingAlpha()) {
 	      //throw error
 	      sprintf( painCave.errMsg,
-		       "SimInfo warning: dampingAlpha was not specified in the input file. A default value of %f (1/ang) will be used for the Wolf Coulombic Correction.", simParams_->getDampingAlpha());
+		       "SimInfo warning: dampingAlpha was not specified in the input file. A default value of %f (1/ang) will be used for the Damped Wolf Method.", simParams_->getDampingAlpha());
 	      painCave.isFatal = 0;
 	      simError();
 	    }
 	    alphaVal = simParams_->getDampingAlpha();
           } else {
-	    if (myCorrection == "REACTION_FIELD") {
-	      cc = REACTION_FIELD;
+	    if (myMethod == "REACTION_FIELD") {
+	      esm = REACTION_FIELD;
 	    } else {
 	      // throw error        
 	      sprintf( painCave.errMsg,
-		       "SimInfo error: Unknown coulombicCorrection. (Input file specified %s .)\n\tcoulombicCorrection must be one of: \"none\", \"undamped_wolf\", \"wolf\", or \"reaction_field\".", myCorrection.c_str() );
+		       "SimInfo error: Unknown electrostaticSummationMethod. (Input file specified %s .)\n\telectrostaticSummationMethod must be one of: \"none\", \"undamped_wolf\", \"damped_wolf\", or \"reaction_field\".", myMethod.c_str() );
 	      painCave.isFatal = 1;
 	      simError();
 	    }     
@@ -910,7 +899,7 @@ namespace oopse {
 	}
       }
     }
-    initFortranFF( &fInfo_.SIM_uses_RF, &cc, &alphaVal, &errorOut );
+    initFortranFF( &fInfo_.SIM_uses_RF, &esm, &alphaVal, &errorOut );
   }
 
   void SimInfo::addProperty(GenericData* genData) {

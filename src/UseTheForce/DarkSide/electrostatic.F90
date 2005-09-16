@@ -73,6 +73,7 @@ module electrostatic_module
 
   !! variables to handle different summation methods for long-range electrostatics:
   integer, save :: summationMethod = NONE
+  logical, save :: summationMethodChecked = .false.
   real(kind=DP), save :: defaultCutoff = 0.0_DP
   logical, save :: haveDefaultCutoff = .false.
   real(kind=DP), save :: dampingAlpha = 0.0_DP
@@ -363,14 +364,24 @@ contains
              call handleError("checkSummationMethod", "no Damping Alpha set!")
           endif
           
-          if (.not.have....)
-          constEXP = 
-          constERFC = 
+          if (.not.haveDefaultCutoff) then
+             call handleError("checkSummationMethod", "no Default Cutoff set!")
+          endif
+
+          constEXP = exp(-dampingAlpha*dampingAlpha*defaultCutoff*defaultCutoff)
+          constERFC = erfc(dampingAlpha*defaultCutoff)
           
           haveDWAconstants = .true.
        endif
     endif
 
+    if (summationMethod .eq. REACTION_FIELD) then
+       if (.not.haveDielectric) then
+          call handleError("checkSummationMethod", "no reaction field Dielectric set!")
+       endif
+    endif
+
+    summationMethodChecked = .true.
   end subroutine checkSummationMethod
 
 
