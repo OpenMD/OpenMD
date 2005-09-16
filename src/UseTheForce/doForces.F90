@@ -45,7 +45,7 @@
 
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: doForces.F90,v 1.44 2005-09-15 22:05:17 gezelter Exp $, $Date: 2005-09-15 22:05:17 $, $Name: not supported by cvs2svn $, $Revision: 1.44 $
+!! @version $Id: doForces.F90,v 1.45 2005-09-16 20:36:55 chrisfen Exp $, $Date: 2005-09-16 20:36:55 $, $Name: not supported by cvs2svn $, $Revision: 1.45 $
 
 
 module doForces
@@ -91,16 +91,14 @@ module doForces
   logical, save :: FF_uses_Dipoles
   logical, save :: FF_uses_GayBerne
   logical, save :: FF_uses_EAM
-  logical, save :: FF_uses_RF
 
   logical, save :: SIM_uses_DirectionalAtoms
   logical, save :: SIM_uses_EAM
-  logical, save :: SIM_uses_RF
   logical, save :: SIM_requires_postpair_calc
   logical, save :: SIM_requires_prepair_calc
   logical, save :: SIM_uses_PBC
 
-  integer, save :: corrMethod
+  integer, save :: electrostaticSummationMethod
 
   public :: init_FF
   public :: setDefaultCutoffs
@@ -439,7 +437,6 @@ contains
     SIM_requires_postpair_calc = SimRequiresPostpairCalc()
     SIM_requires_prepair_calc = SimRequiresPrepairCalc()
     SIM_uses_PBC = SimUsesPBC()
-    SIM_uses_RF = SimUsesRF()
 
     haveSIMvariables = .true.
 
@@ -506,10 +503,9 @@ contains
   end subroutine doReadyCheck
 
 
-  subroutine init_FF(use_RF, correctionMethod, dampingAlpha, thisStat)
+  subroutine init_FF(thisESM, dampingAlpha, thisStat)
 
-    logical, intent(in) :: use_RF
-    integer, intent(in) :: correctionMethod
+    integer, intent(in) :: thisESM
     real(kind=dp), intent(in) :: dampingAlpha
     integer, intent(out) :: thisStat   
     integer :: my_status, nMatches
@@ -519,10 +515,8 @@ contains
     !! assume things are copacetic, unless they aren't
     thisStat = 0
 
-    !! Fortran's version of a cast:
-    FF_uses_RF = use_RF
+    electrostaticSummationMethod = thisESM
 
-        
     !! init_FF is called *after* all of the atom types have been 
     !! defined in atype_module using the new_atype subroutine.
     !!
@@ -552,15 +546,15 @@ contains
 
     haveSaneForceField = .true.
 
-    !! check to make sure the FF_uses_RF setting makes sense
+    !! check to make sure the reaction field setting makes sense
 
     if (FF_uses_Dipoles) then
-       if (FF_uses_RF) then
+       if (electrostaticSummationMethod == 3) then
           dielect = getDielect()
           call initialize_rf(dielect)
        endif
     else
-       if ((corrMethod == 3) .or. FF_uses_RF) then
+       if (electrostaticSummationMethod == 3) then
           write(default_error,*) 'Using Reaction Field with no dipoles?  Huh?'
           thisStat = -1
           haveSaneForceField = .false.
@@ -978,7 +972,7 @@ contains
 
     if (FF_RequiresPostpairCalc() .and. SIM_requires_postpair_calc) then
 
-       if ((FF_uses_RF .and. SIM_uses_RF) .or. (corrMethod == 3)) then
+       if (electrostaticSummationMethod == 3) then
 
 #ifdef IS_MPI
           call scatter(rf_Row,rf,plan_atom_row_3d)
@@ -1086,9 +1080,9 @@ contains
 
     if ( iand(iHash, ELECTROSTATIC_PAIR).ne.0 ) then
        call doElectrostaticPair(i, j, d, r, rijsq, sw, vpair, fpair, &
-            pot, eFrame, f, t, do_pot, corrMethod, rcuti)
+            pot, eFrame, f, t, do_pot)
 
-       if ((FF_uses_RF .and. SIM_uses_RF) .or. (corrMethod == 3)) then
+       if (electrostaticSummationMethod == 3) then
 
           ! CHECK ME (RF needs to know about all electrostatic types)
           call accumulate_rf(i, j, r, eFrame, sw)
@@ -1370,8 +1364,7 @@ contains
 
   function FF_RequiresPostpairCalc() result(doesit)
     logical :: doesit
-    doesit = FF_uses_RF
-    if (corrMethod == 3) doesit = .true.
+    if (electrostaticSummationMethod == 3) doesit = .true.
   end function FF_RequiresPostpairCalc
 
 #ifdef PROFILE

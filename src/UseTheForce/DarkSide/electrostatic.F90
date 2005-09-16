@@ -83,6 +83,10 @@ module electrostatic_module
   real(kind=DP), save :: constERFC = 0.0_DP
   real(kind=DP), save :: constEXP = 0.0_DP
   logical, save :: haveDWAconstants = .false.
+  real(kind=dp), save :: rcuti = 0.0_dp
+  real(kind=dp), save :: rcuti2 = 0.0_dp
+  real(kind=dp), save :: rcuti3 = 0.0_dp
+  real(kind=dp), save :: rcuti4 = 0.0_dp
 
 
   public :: setElectrostaticSummationMethod
@@ -357,6 +361,15 @@ contains
 
   subroutine checkSummationMethod()
 
+    if (.not.haveDefaultCutoff) then
+       call handleError("checkSummationMethod", "no Default Cutoff set!")
+    endif
+
+    rcuti = 1.0d0 / defaultCutoff
+    rcuti2 = rcuti*rcuti
+    rcuti3 = rcuti2*rcuti
+    rcuti4 = rcuti2*rcuti2
+
     if (summationMethod .eq. DAMPED_WOLF) then
        if (.not.haveDWAconstants) then
           
@@ -387,15 +400,14 @@ contains
 
 
   subroutine doElectrostaticPair(atom1, atom2, d, rij, r2, sw, &
-       vpair, fpair, pot, eFrame, f, t, do_pot, corrMethod, rcuti)
+       vpair, fpair, pot, eFrame, f, t, do_pot)
 
     logical, intent(in) :: do_pot
 
     integer, intent(in) :: atom1, atom2
     integer :: localError
-    integer, intent(in) :: corrMethod
 
-    real(kind=dp), intent(in) :: rij, r2, sw, rcuti
+    real(kind=dp), intent(in) :: rij, r2, sw
     real(kind=dp), intent(in), dimension(3) :: d
     real(kind=dp), intent(inout) :: vpair
     real(kind=dp), intent(inout), dimension(3) :: fpair
@@ -426,7 +438,6 @@ contains
     real (kind=dp) :: xhat, yhat, zhat
     real (kind=dp) :: dudx, dudy, dudz
     real (kind=dp) :: scale, sc2, bigR, switcher, dswitcher
-    real (kind=dp) :: rcuti2, rcuti3, rcuti4
 
     if (.not.allocated(ElectrostaticMap)) then
        call handleError("electrostatic", "no ElectrostaticMap was present before first call of do_electrostatic_pair!")
@@ -453,10 +464,6 @@ contains
     xhat = d(1) * riji
     yhat = d(2) * riji
     zhat = d(3) * riji
-
-    rcuti2 = rcuti*rcuti
-    rcuti3 = rcuti2*rcuti
-    rcuti4 = rcuti2*rcuti2
 
     swi = 1.0d0 / sw
 
@@ -603,7 +610,7 @@ contains
 
        if (j_is_Charge) then
 
-          if (corrMethod .eq. 1) then
+          if (summationMethod .eq. 1) then
              vterm = pre11 * q_i * q_j * (riji - rcuti)
 
              vpair = vpair + vterm
@@ -635,7 +642,7 @@ contains
 
           pref = sw * pre12 * q_i * mu_j
 
-          if (corrMethod .eq. 1) then
+          if (summationMethod .eq. 1) then
              ri2 = riji * riji
              ri3 = ri2 * riji
 
@@ -702,7 +709,7 @@ contains
 
           pref =  sw * pre14 * q_i / 3.0_dp
 
-          if (corrMethod .eq. 1) then
+          if (summationMethod .eq. 1) then
              vterm1 = pref * ri3*( qxx_j * (3.0_dp*cx2 - 1.0_dp) + &
                   qyy_j * (3.0_dp*cy2 - 1.0_dp) + &
                   qzz_j * (3.0_dp*cz2 - 1.0_dp) )
@@ -800,7 +807,7 @@ contains
 
           pref = sw * pre12 * q_j * mu_i
 
-          if (corrMethod .eq. 1) then
+          if (summationMethod .eq. 1) then
              ri2 = riji * riji
              ri3 = ri2 * riji
 
@@ -855,7 +862,7 @@ contains
 
           pref = sw * pre22 * mu_i * mu_j
 
-          if (corrMethod .eq. 1) then
+          if (summationMethod .eq. 1) then
              ri2 = riji * riji
              ri3 = ri2 * riji
              ri4 = ri2 * ri2
@@ -958,7 +965,7 @@ contains
 
           pref = sw * pre14 * q_j / 3.0_dp
 
-          if (corrMethod .eq. 1) then
+          if (summationMethod .eq. 1) then
              vterm1 = pref * ri3*( qxx_i * (3.0_dp*cx2 - 1.0_dp) + &
                   qyy_i * (3.0_dp*cy2 - 1.0_dp) + &
                   qzz_i * (3.0_dp*cz2 - 1.0_dp) )
