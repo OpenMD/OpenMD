@@ -6,19 +6,22 @@ end subroutine setElectrostaticSummationMethod
 
 subroutine setElectrostaticCutoffRadius(the_rcut)
   use electrostatic_module, ONLY : module_setECR => setElectrostaticCutoffRadius
+  use definitions, ONLY : dp
   real(kind=dp), intent(inout) :: the_rcut
   call module_setECR(the_rcut)
 end subroutine setElectrostaticCutoffRadius
 
 subroutine setDampedWolfAlpha(the_alpha)
   use electrostatic_module, ONLY : module_setDWA => setDampedWolfAlpha
-  integer,intent(inout) :: the_alpha
+  use definitions, ONLY : dp
+  real(kind=dp),intent(inout) :: the_alpha
   call module_setDWA(the_alpha)
 end subroutine setDampedWolfAlpha
  
 subroutine setReactionFieldDielectric(the_dielectric)
   use electrostatic_module, ONLY : module_setRFD => setReactionFieldDielectric
-  integer,intent(inout) :: the_dielectric
+  use definitions, ONLY : dp
+  real(kind=dp),intent(inout) :: the_dielectric
   call module_setRFD(the_dielectric)
 end subroutine setReactionFieldDielectric
 

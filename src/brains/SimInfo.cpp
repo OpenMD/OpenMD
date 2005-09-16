@@ -53,7 +53,7 @@
 #include "math/Vector3.hpp"
 #include "primitives/Molecule.hpp"
 #include "UseTheForce/fCutoffPolicy.h"
-#include "UseTheForce/fCoulombicCorrection.h"
+#include "UseTheForce/Darkside/fElectrostaticSummationMethod.h"
 #include "UseTheForce/doForces_interface.h"
 #include "UseTheForce/notifyCutoffs_interface.h"
 #include "utils/MemoryUtils.hpp"
@@ -868,7 +868,7 @@ namespace oopse {
     errorOut = isError;
 
     if (simParams_->haveElectrostaticSummationMethod()) {
-      std::string myCorrection = simParams_->getElectrostaticSummationMethod();
+      std::string myMethod = simParams_->getElectrostaticSummationMethod();
       if (myMethod == "NONE") {
         esm = NONE;
       } else {
@@ -876,7 +876,7 @@ namespace oopse {
           esm = UNDAMPED_WOLF;
         } else {
           if (myMethod == "DAMPED_WOLF") {            
-            esm = WOLF;
+            esm = DAMPED_WOLF;
 	    if (!simParams_->haveDampingAlpha()) {
 	      //throw error
 	      sprintf( painCave.errMsg,

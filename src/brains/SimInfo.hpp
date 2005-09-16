@@ -439,7 +439,7 @@ namespace oopse{
     void setupCutoff();
 
     /** Figure out which coulombic correction method to use and pass to fortran */
-    void setupCoulombicCorrection( int isError );
+    void setupElectrostaticSummationMethod( int isError );
 
     /** Calculates the number of degress of freedom in the whole system */
     void calcNdf();
