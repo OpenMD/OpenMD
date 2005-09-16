@@ -53,7 +53,7 @@
 #include "math/Vector3.hpp"
 #include "primitives/Molecule.hpp"
 #include "UseTheForce/fCutoffPolicy.h"
-#include "UseTheForce/Darkside/fElectrostaticSummationMethod.h"
+#include "UseTheForce/DarkSide/fElectrostaticSummationMethod.h"
 #include "UseTheForce/doForces_interface.h"
 #include "UseTheForce/notifyCutoffs_interface.h"
 #include "utils/MemoryUtils.hpp"
