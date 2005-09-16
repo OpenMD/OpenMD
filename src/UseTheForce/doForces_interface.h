@@ -50,8 +50,7 @@
 
 extern "C"{
   
-  void initFortranFF( int* useReactionField,
-		      int* coulombicCorrection,
+  void initFortranFF( int* coulombicCorrection,
 		      double *dampingAlpha,
                       int* isError );        
  

@@ -899,7 +899,7 @@ namespace oopse {
 	}
       }
     }
-    initFortranFF( &fInfo_.SIM_uses_RF, &esm, &alphaVal, &errorOut );
+    initFortranFF( &esm, &alphaVal, &errorOut );
   }
 
   void SimInfo::addProperty(GenericData* genData) {

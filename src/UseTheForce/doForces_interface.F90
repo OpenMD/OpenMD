@@ -1,10 +1,9 @@
 !! Interfaces for C programs to module....
 
-subroutine initFortranFF(use_RF_c, correctionMethod, dampingAlpha, thisStat)
+subroutine initFortranFF(correctionMethod, dampingAlpha, thisStat)
   use doForces, ONLY: init_FF
   use definitions, ONLY : dp
 
-  integer, intent(in) :: use_RF_c
   integer, intent(in) :: correctionMethod
   real(kind=dp), intent(in) :: dampingAlpha
   integer, intent(out) :: thisStat
@@ -12,12 +11,10 @@ subroutine initFortranFF(use_RF_c, correctionMethod, dampingAlpha, thisStat)
   integer :: correction
   real(kind=dp) :: alpha
   
-
-  use_RF = (use_RF_c .ne. 0)
   correction = correctionMethod
   alpha = dampingAlpha
   
-  call init_FF(use_RF, correction, alpha, thisStat)
+  call init_FF(correction, alpha, thisStat)
 
 end subroutine initFortranFF
 
