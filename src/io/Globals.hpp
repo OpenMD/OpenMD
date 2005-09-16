@@ -143,6 +143,7 @@ class Globals{
   char*  getElectrostaticSummationMethod(void) { return electrostaticSummationMethod; }
   double getDampingAlpha(void)      { return dampingAlpha; }
   char*  getCutoffPolicy(void)      { return cutoffPolicy; }
+  bool   getCompressDumpFile(void)  { return compressDumpFile;}
   
   short int haveDt( void )            { return have_dt; }
   short int haveRunTime( void )       { return have_run_time; }
@@ -196,6 +197,7 @@ class Globals{
   short int haveElectrostaticSummationMethod(void) {return have_electro_sum_method;}
   short int haveDampingAlpha(void)       { return have_damping_alpha; }
   short int haveCutoffPolicy(void)       { return have_cutoff_policy; }
+  short int haveCompressDumpfile(void)   { return have_compress_dumpfile; }
 
   /* other accessors */
   Component** getComponents( void )   { return components; }
@@ -276,6 +278,7 @@ class Globals{
   char electrostaticSummationMethod[100];
   double dampingAlpha;
   char cutoffPolicy[100];
+  bool compressDumpFile;
   
   //required arguments
   short int have_force_field, have_n_components, have_target_temp;
@@ -308,6 +311,7 @@ class Globals{
   short int have_electro_sum_method;
   short int have_damping_alpha;
   short int have_cutoff_policy;
+  short int have_compress_dumpfile;
 };
 
 #endif

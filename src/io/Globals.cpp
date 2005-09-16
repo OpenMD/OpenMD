@@ -120,6 +120,7 @@
 #define G_ELECTRO_SUM_METHOD     58
 #define G_DAMPING_ALPHA     59
 #define G_CUTOFFPOLICY      60
+#define G_COMPRESSDUMPFILE  61
 
 Globals::Globals(){
   initalize();
@@ -198,6 +199,7 @@ void Globals::initalize(){
   command_table.insert(CommandMapType::value_type("electrostaticSummationMethod", G_ELECTRO_SUM_METHOD));
   command_table.insert(CommandMapType::value_type("dampingAlpha", G_DAMPING_ALPHA));
   command_table.insert(CommandMapType::value_type("cutoffPolicy", G_CUTOFFPOLICY));
+  command_table.insert(CommandMapType::value_type("compressDumpFile", G_COMPRESSDUMPFILE));
 
   strcpy( mixingRule,"standard");  //default mixing rules to standard.
   usePBC = 1; //default  periodic boundry conditions to on
@@ -207,6 +209,7 @@ void Globals::initalize(){
   useSolidThermInt = 0; // default solid-state thermodynamic integration to off
   useLiquidThermInt = 0; // default liquid thermodynamic integration to off
   dampingAlpha = 1.5; // default damping parameter in Wolf Electrostatics
+  compressDumpFile = 0; // default compressDumpFile set to off
 
   have_force_field =  0;
   have_n_components = 0;
@@ -264,6 +267,7 @@ void Globals::initalize(){
   have_electro_sum_method = 0;
   have_damping_alpha = 0;
   have_cutoff_policy = 0;
+  have_compress_dumpfile = 0;
 }
 
 int Globals::newComponent( event* the_event ){
@@ -1884,6 +1888,29 @@ int Globals::globalAssign( event* the_event ){
           return 0;
           break;
 
+    case G_COMPRESSDUMPFILE:
+       if( the_type == STRING ){
+          
+          if( !strcasecmp( "true", the_event->evt.asmt.rhs.sval )) {
+             have_compress_dumpfile = 1;
+             compressDumpFile = 1;
+          } else if( !strcasecmp( "false", the_event->evt.asmt.rhs.sval )) {
+             have_compress_dumpfile= 1;
+             compressDumpFile = 0;
+          } else{
+             the_event->err_msg = 
+             strdup( "Error in parsing meta-data file!\n\tcompressDumpFile was not \"true\" or \"false\".\n" );
+             return 0;
+          }
+          return 1;
+       }
+       
+       the_event->err_msg = 
+       strdup( "Error in parsing meta-data file!\n\tcompressDumpFile was not \"true\" or \"false\".\n" );
+       return 0;
+       break;
+       
+       
     case G_ELECTRO_SUM_METHOD:
       switch( the_type ){
 	
