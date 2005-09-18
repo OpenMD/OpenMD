@@ -55,6 +55,7 @@
 #include "UseTheForce/fCutoffPolicy.h"
 #include "UseTheForce/DarkSide/fElectrostaticSummationMethod.h"
 #include "UseTheForce/doForces_interface.h"
+#include "UseTheForce/DarkSide/electrostatic_interface.h"
 #include "UseTheForce/notifyCutoffs_interface.h"
 #include "utils/MemoryUtils.hpp"
 #include "utils/simError.h"
@@ -857,6 +858,8 @@ namespace oopse {
       }
     }
     notifyFortranCutoffs(&rcut_, &rsw_, &rnblist, &cp);
+    // also send cutoff notification to electrostatics
+    setElectrostaticCutoffRadius(&rcut_);
   }
 
   void SimInfo::setupElectrostaticSummationMethod( int isError ) {    
@@ -864,8 +867,11 @@ namespace oopse {
     int errorOut;
     int esm =  NONE;
     double alphaVal;
+    double dielectric;
 
     errorOut = isError;
+    alphaVal = simParams_->getDampingAlpha();
+    dielectric = simParams_->getDielectric();
 
     if (simParams_->haveElectrostaticSummationMethod()) {
       std::string myMethod = simParams_->getElectrostaticSummationMethod();
@@ -880,11 +886,10 @@ namespace oopse {
 	    if (!simParams_->haveDampingAlpha()) {
 	      //throw error
 	      sprintf( painCave.errMsg,
-		       "SimInfo warning: dampingAlpha was not specified in the input file. A default value of %f (1/ang) will be used for the Damped Wolf Method.", simParams_->getDampingAlpha());
+		       "SimInfo warning: dampingAlpha was not specified in the input file. A default value of %f (1/ang) will be used for the Damped Wolf Method.", alphaVal);
 	      painCave.isFatal = 0;
 	      simError();
 	    }
-	    alphaVal = simParams_->getDampingAlpha();
           } else {
 	    if (myMethod == "REACTION_FIELD") {
 	      esm = REACTION_FIELD;
@@ -899,7 +904,11 @@ namespace oopse {
 	}
       }
     }
-    initFortranFF( &esm, &alphaVal, &errorOut );
+    // let's pass some summation method variables to fortran
+    setElectrostaticSummationMethod( &esm );
+    setDampedWolfAlpha( &alphaVal );
+    setReactionFieldDielectric( &dielectric );
+    initFortranFF( &esm, &errorOut );
   }
 
   void SimInfo::addProperty(GenericData* genData) {

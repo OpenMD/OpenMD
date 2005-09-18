@@ -50,7 +50,7 @@
 #define setElectrostaticSummationMethod F90_FUNC(setelectrostaticsummationmethod, SETELECTROSTATICSUMMATIONMETHOD)
 #define setElectrostaticCutoffRadius F90_FUNC(setelectrostaticcutoffradius, SETELECTROSTATICCUTOFFRADIUS)
 #define setDampedWolfAlpha F90_FUNC(setdampedwolfalpha, SETDAMPEDWOLFALPHA)
-#define setReactionFieldDielectric F90_FUNC(setfeactionfielddielectric, SETREACTIONFIELDDIELECTRIC)
+#define setReactionFieldDielectric F90_FUNC(setreactionfielddielectric, SETREACTIONFIELDDIELECTRIC)
 
 #define newElectrostaticType F90_FUNC(newelectrostatictype, NEWELECTROSTATICTYPE)
 #define setCharge F90_FUNC(setcharge, SETCHARGE)

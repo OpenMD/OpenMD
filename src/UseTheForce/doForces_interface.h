@@ -51,7 +51,6 @@
 extern "C"{
   
   void initFortranFF( int* coulombicCorrection,
-		      double *dampingAlpha,
                       int* isError );        
  
   

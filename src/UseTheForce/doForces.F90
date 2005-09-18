@@ -45,7 +45,7 @@
 
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: doForces.F90,v 1.45 2005-09-16 20:36:55 chrisfen Exp $, $Date: 2005-09-16 20:36:55 $, $Name: not supported by cvs2svn $, $Revision: 1.45 $
+!! @version $Id: doForces.F90,v 1.46 2005-09-18 20:45:38 chrisfen Exp $, $Date: 2005-09-18 20:45:38 $, $Name: not supported by cvs2svn $, $Revision: 1.46 $
 
 
 module doForces
@@ -134,7 +134,6 @@ module doForces
 
   integer, save :: cutoffPolicy = TRADITIONAL_CUTOFF_POLICY
   real(kind=dp),save :: defaultRcut, defaultRsw, defaultRlist
-  real(kind=dp),save :: rcuti
   
 contains
 
@@ -420,7 +419,6 @@ contains
      defaultRsw = defRsw
      defaultRlist = defRlist
      cutoffPolicy = cutPolicy
-     rcuti = 1.0_dp / defaultRcut
    end subroutine setDefaultCutoffs
 
    subroutine setCutoffPolicy(cutPolicy)
@@ -503,7 +501,7 @@ contains
   end subroutine doReadyCheck
 
 
-  subroutine init_FF(thisESM, dampingAlpha, thisStat)
+  subroutine init_FF(thisESM, thisStat)
 
     integer, intent(in) :: thisESM
     real(kind=dp), intent(in) :: dampingAlpha

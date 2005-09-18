@@ -122,13 +122,13 @@ module electrostatic_module
 contains
 
   subroutine setElectrostaticSummationMethod(the_ESM)
-
     integer, intent(in) :: the_ESM    
 
     if ((the_ESM .le. 0) .or. (the_ESM .gt. REACTION_FIELD)) then
        call handleError("setElectrostaticSummationMethod", "Unsupported Summation Method")
     endif
 
+    summationMethod = the_ESM
   end subroutine setElectrostaticSummationMethod
 
   subroutine setElectrostaticCutoffRadius(thisRcut) 

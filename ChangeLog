@@ -1,3 +1,332 @@
+2005-09-16 18:04  chuckv
+
+	* src/io/: Globals.cpp, Globals.hpp: Added keywords for compressed
+	dump files.
+
+2005-09-16 16:07  chrisfen
+
+	* src/: UseTheForce/doForces_interface.F90,
+	UseTheForce/doForces_interface.h, brains/SimInfo.cpp: xlf found a
+	bug that ifc missed...
+
+2005-09-16 15:36  chrisfen
+
+	* src/UseTheForce/: doForces.F90, DarkSide/electrostatic.F90:
+	fixing some summation method issues
+
+2005-09-16 14:35  chrisfen
+
+	* src/brains/SimInfo.cpp: fixed a capitalization error
+
+2005-09-16 14:34  chrisfen
+
+	* src/UseTheForce/: fElectrostaticSummationMethod.h,
+	DarkSide/fElectrostaticSummationMethod.h: moved a header file
+	around
+
+2005-09-16 14:00  chrisfen
+
+	* src/: UseTheForce/DarkSide/electrostatic_interface.F90,
+	brains/SimInfo.cpp, brains/SimInfo.hpp: it builds now, but there
+	are known issues - particularly with reaction field...
+
+2005-09-16 11:07  chrisfen
+
+	* src/: UseTheForce/DarkSide/electrostatic.F90, brains/SimInfo.cpp,
+	io/Globals.cpp, io/Globals.hpp: some fixes but even more breaking
+	(cutting out the old way to do reaction field)
+
+2005-09-15 17:05  gezelter
+
+	* src/UseTheForce/: doForces.F90, fCoulombicCorrection.h,
+	fElectrostaticSummationMethod.h, DarkSide/electrostatic.F90,
+	DarkSide/electrostatic_interface.F90,
+	DarkSide/electrostatic_interface.h: Working on adding WOLF
+
+2005-09-15 14:17  tim
+
+	* src/io/DumpReader.cpp: Fix a bug in DumpReader in case readFrame
+	is called without calling getNFrames
+
+2005-09-15 08:47  chrisfen
+
+	* src/UseTheForce/fCoulombicCorrection.h: forgot to add a header
+
+2005-09-14 21:48  chuckv
+
+	* src/UseTheForce/doForces.F90: Fixed bug where gtypeMaxCutoff was
+	not initialized after creation. When maxval(gtypeMaxCutoff) was
+	called, the largest random garbage value was returned from the
+	array.
+
+2005-09-14 19:14  chrisfen
+
+	* src/: brains/SimInfo.cpp, brains/SimInfo.hpp, io/Globals.cpp,
+	io/Globals.hpp: changes to include the coulombicCorrection selector
+
+2005-09-14 19:13  chrisfen
+
+	* src/UseTheForce/DarkSide/: Makefile, electrostatic.F90,
+	reactionField.F90: added in the undamped wolf, in the process of
+	doing the damped wolf
+
+2005-09-14 19:13  chrisfen
+
+	* src/UseTheForce/: doForces.F90, doForces_interface.F90,
+	doForces_interface.h, notifyCutoffs.F90: some changes to activate
+	the coulombicCorrection selector
+
+2005-09-14 19:11  chrisfen
+
+	* samples/water/dimer/: cl.in, cl.md, water.md: just some testing
+
+2005-09-14 19:11  chrisfen
+
+	* samples/argon/: 500.in, 500.md: Equilibrated the sample
+
+2005-09-14 19:10  chrisfen
+
+	* forceFields/DUFF2.frc: re-added Cl- and Na+
+
+2005-09-14 15:31  chuckv
+
+	* src/UseTheForce/DarkSide/eam.F90: EAM now uses eamlist to lookup
+	eamAtypes instead of assuming a 1-1 correspondence to atypes.
+
+2005-09-14 15:28  gezelter
+
+	* src/UseTheForce/doForces.F90: fix to put back calculation of r in
+	do_prepair
+
+2005-09-14 14:02  gezelter
+
+	* src/UseTheForce/DarkSide/LJ.F90: fixed a bug in the
+	createMixingMap routine.  It should now set doShift correctly
+
+2005-09-07 17:44  chuckv
+
+	* src/UseTheForce/doForces.F90: Added nGroupsInRow for mpi build.
+
+2005-09-07 17:23  chuckv
+
+	* src/UseTheForce/DarkSide/simParallel.F90: Added access to mpi
+	logical variables
+
+2005-09-07 17:08  gezelter
+
+	* src/UseTheForce/doForces.F90: bugfix on the grouptype finding
+	algorithm
+
+2005-09-07 15:46  gezelter
+
+	* src/: UseTheForce/doForces.F90,
+	UseTheForce/doForces_interface.F90, UseTheForce/notifyCutoffs.F90,
+	UseTheForce/notifyCutoffs_interface.F90,
+	UseTheForce/notifyCutoffs_interface.h, brains/SimInfo.cpp,
+	io/Globals.cpp, io/Globals.hpp: adding c-side interface to change
+	cutoff Policy
+
+2005-09-07 14:18  gezelter
+
+	* src/UseTheForce/doForces.F90: Some bug hunting
+
+2005-09-07 14:18  gezelter
+
+	* samples/argon/argonNVT.md: Just a longer test
+
+2005-09-06 12:32  chuckv
+
+	* src/UseTheForce/doForces.F90: Added allocation for gtypeCutoffmap
+	etc..
+
+2005-09-01 17:56  gezelter
+
+	* src/UseTheForce/doForces.F90: initialized atomTypeMaxCutoff(i) to
+	zero
+
+2005-09-01 15:17  gezelter
+
+	* src/UseTheForce/: doForces.F90, doForces_interface.F90: wrote
+	createGtypeCutoffMap
+
+2005-08-30 13:23  chrisfen
+
+	* src/: UseTheForce/doForces.F90,
+	UseTheForce/doForces_interface.F90,
+	UseTheForce/doForces_interface.h,
+	UseTheForce/DarkSide/electrostatic.F90,
+	UseTheForce/DarkSide/gb.F90, brains/SimInfo.cpp,
+	brains/fSimulation.h, io/Globals.cpp, io/Globals.hpp: made some
+	changes for implementing the wolf potential
+
+2005-08-26 17:39  chrisfen
+
+	* src/UseTheForce/DarkSide/eam.F90: updated getEAMCut
+
+2005-08-26 16:30  chrisfen
+
+	* src/UseTheForce/: doForces.F90, DarkSide/eam.F90,
+	DarkSide/gb.F90, DarkSide/shapes.F90, DarkSide/sticky.F90: added
+	some probably nonfunctional get*cut routines
+
+2005-08-26 15:34  chuckv
+
+	* src/UseTheForce/DarkSide/eam.F90: Added eamType map to atid map.
+
+2005-08-26 11:36  gezelter
+
+	* src/UseTheForce/doForces.F90: fixing some of the problems in the
+	interactionHash and gtypeCutoff routines
+
+2005-08-17 10:26  gezelter
+
+	* src/UseTheForce/: doForces.F90, fCutoffPolicy.h,
+	DarkSide/simulation.F90: added fCutoffPolicy.h
+
+2005-08-11 16:04  gezelter
+
+	* src/UseTheForce/: doForces.F90, notifyCutoffs.F90: breakage in
+	progress
+
+2005-08-10 14:17  gezelter
+
+	* src/primitives/StuntDouble.hpp: putting spaceballs back where
+	they belong
+
+2005-08-09 17:33  gezelter
+
+	* src/UseTheForce/DarkSide/LJ.F90: Complete rewrite of Lennard
+	Jones module
+
+2005-08-09 17:33  gezelter
+
+	* src/UseTheForce/doForces.F90: Breaky Breaky BREAKY breaky breaky
+
+2005-08-09 14:40  chuckv
+
+	* src/UseTheForce/doForces.F90: In process of re-write for group
+	based cutoff....
+
+2005-07-29 14:38  gezelter
+
+	* src/UseTheForce/doForces.F90: fixes in progress
+
+2005-07-29 12:34  tim
+
+	* src/UseTheForce/doForces.F90: fix a bug which does not update
+	me_i and me_j correctly
+
+2005-07-28 17:12  chuckv
+
+	* src/UseTheForce/: doForces.F90, notifyCutoffs.F90: Changed
+	cutoffs... Segfaults nicely now...
+
+2005-07-20 12:04  gezelter
+
+	* configure, ac-tools/aclocal.m4: fixed ACX_MPI to ignore some text
+	error messages from pathscale compiler
+
+2005-07-13 11:48  tim
+
+	* src/applications/staticProps/DensityPlot.cpp: std::bind2nd is in
+	<functional>
+
+2005-07-13 10:54  tim
+
+	* src/: UseTheForce/fSwitchingFunction.h,
+	UseTheForce/mpiComponentPlan.h,
+	UseTheForce/DarkSide/fInteractionMap.h, brains/fSimulation.h,
+	io/BASS_interface.h, io/BASS_parse.c, io/BASS_parse.h,
+	io/BASSlex.l, io/BASSyacc.y, io/interface.c, io/make_nodes.c,
+	io/mpiBASS.c, io/mpiBASS.h, io/node_list.h, io/parse_tree.c,
+	io/parse_tree.h, math/MatVec3.c, utils/residentMem.c,
+	utils/simError.c, utils/simError.h: replace c++ style comment in c
+	files
+
+2005-07-03 15:53  chuckv
+
+	* src/: UseTheForce/doForces.F90, UseTheForce/notifyCutoffs.F90,
+	UseTheForce/DarkSide/simulation.F90, utils/oopseMPI.F90: Added
+	subroutine to set cuttoff for Interaction map and function in
+	simulation.F90 to determine if a particular atype is present in a
+	simulation.
+
+2005-06-28 08:58  gezelter
+
+	* src/UseTheForce/doForces.F90: [no log message]
+
+2005-06-27 17:21  chuckv
+
+	* src/UseTheForce/doForces.F90: More breaking and destruction of
+	force code. Does not build at this point...
+
+2005-06-27 16:01  gezelter
+
+	* src/: UseTheForce/doForces.F90, UseTheForce/DarkSide/atype.F90,
+	UseTheForce/DarkSide/fInteractionMap.h,
+	UseTheForce/DarkSide/interactions.F90, utils/definitions.F90:
+	Breaky breaky!
+
+2005-06-20 11:03  gezelter
+
+	* samples/water/ssd/ssd.md,
+	src/applications/staticProps/DensityPlot.cpp: fixed a bug and ran a
+	simulation
+
+2005-06-13 13:25  tim
+
+	* src/: applications/staticProps/DensityPlot.cpp,
+	applications/staticProps/DensityPlot.hpp,
+	applications/staticProps/SCDOrderParameter.cpp,
+	applications/staticProps/StaticProps.cpp,
+	io/AtomTypesSectionParser.cpp: working version of DensityPlot
+
+2005-05-31 17:31  chuckv
+
+	* src/: brains/SimInfo.cpp, integrators/Velocitizer.cpp: Changes to
+	remove angular momentum.
+
+2005-05-31 12:34  chuckv
+
+	* src/applications/nanoRodBuilder/nanorodBuilder.cpp: Fixed bug in
+	typo in nanorodBuilder.
+
+2005-05-30 09:01  chuckv
+
+	* src/: applications/nanoRodBuilder/nanorodBuilder.cpp,
+	brains/SimInfo.cpp, brains/SimInfo.hpp, brains/Stats.cpp,
+	brains/Stats.hpp, integrators/Velocitizer.cpp,
+	integrators/Velocitizer.hpp: Added method to remove system angular
+	momentum to velocitizer and added method to calculate system
+	angular momentum to siminfo.
+
+2005-05-29 16:16  chrisfen
+
+	* src/UseTheForce/DarkSide/: electrostatic.F90, sticky.F90: Removed
+	balance from the Darkside (files)
+
+2005-05-29 16:15  chrisfen
+
+	* src/UseTheForce/doForces.F90: Removed balance from doForces
+
+2005-05-29 16:15  chrisfen
+
+	* samples/water/tap/: tap.in, tap.md: Updated tap sample
+
+2005-05-29 16:15  chrisfen
+
+	* samples/water/dimer/: Makefile, tap.in, tap.md: Included a tap
+	dimer for testing purposes
+
+2005-05-29 16:14  chrisfen
+
+	* forceFields/DUFF2.frc: Re-entered the TIP4P-Ew water model. It
+	was apparently wiped earlier this month...
+
+2005-05-29 16:13  chrisfen
+
+	* ChangeLog: ran make cvslog
+
 2005-05-28 19:16  tim
 
 	* src/visitors/: AtomNameVisitor.cpp, AtomNameVisitor.hpp: adding
