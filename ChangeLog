@@ -1,3 +1,14 @@
+2005-09-18 15:45  chrisfen
+
+	* ChangeLog, samples/water/ssdrf/ssdrf.md,
+	src/UseTheForce/doForces.F90,
+	src/UseTheForce/doForces_interface.F90,
+	src/UseTheForce/doForces_interface.h,
+	src/UseTheForce/DarkSide/electrostatic.F90,
+	src/UseTheForce/DarkSide/electrostatic_interface.h,
+	src/brains/SimInfo.cpp: reaction field seems to work now, still
+	need to do some testing...
+
 2005-09-16 18:04  chuckv
 
 	* src/io/: Globals.cpp, Globals.hpp: Added keywords for compressed

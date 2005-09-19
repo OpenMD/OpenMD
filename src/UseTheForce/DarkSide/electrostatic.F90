@@ -446,6 +446,7 @@ contains
 
     if (.not.summationMethodChecked) then
        call checkSummationMethod()
+       
     endif
 
 
@@ -610,7 +611,7 @@ contains
 
        if (j_is_Charge) then
 
-          if (summationMethod .eq. 1) then
+          if (summationMethod .eq. UNDAMPED_WOLF) then
              vterm = pre11 * q_i * q_j * (riji - rcuti)
 
              vpair = vpair + vterm
@@ -642,7 +643,7 @@ contains
 
           pref = sw * pre12 * q_i * mu_j
 
-          if (summationMethod .eq. 1) then
+          if (summationMethod .eq. UNDAMPED_WOLF) then
              ri2 = riji * riji
              ri3 = ri2 * riji
 
@@ -709,7 +710,7 @@ contains
 
           pref =  sw * pre14 * q_i / 3.0_dp
 
-          if (summationMethod .eq. 1) then
+          if (summationMethod .eq. UNDAMPED_WOLF) then
              vterm1 = pref * ri3*( qxx_j * (3.0_dp*cx2 - 1.0_dp) + &
                   qyy_j * (3.0_dp*cy2 - 1.0_dp) + &
                   qzz_j * (3.0_dp*cz2 - 1.0_dp) )
@@ -807,7 +808,7 @@ contains
 
           pref = sw * pre12 * q_j * mu_i
 
-          if (summationMethod .eq. 1) then
+          if (summationMethod .eq. UNDAMPED_WOLF) then
              ri2 = riji * riji
              ri3 = ri2 * riji
 
@@ -862,7 +863,7 @@ contains
 
           pref = sw * pre22 * mu_i * mu_j
 
-          if (summationMethod .eq. 1) then
+          if (summationMethod .eq. UNDAMPED_WOLF) then
              ri2 = riji * riji
              ri3 = ri2 * riji
              ri4 = ri2 * ri2
@@ -965,7 +966,7 @@ contains
 
           pref = sw * pre14 * q_j / 3.0_dp
 
-          if (summationMethod .eq. 1) then
+          if (summationMethod .eq. UNDAMPED_WOLF) then
              vterm1 = pref * ri3*( qxx_i * (3.0_dp*cx2 - 1.0_dp) + &
                   qyy_i * (3.0_dp*cy2 - 1.0_dp) + &
                   qzz_i * (3.0_dp*cz2 - 1.0_dp) )

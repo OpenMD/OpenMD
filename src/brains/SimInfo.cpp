@@ -523,6 +523,14 @@ namespace oopse {
     int useElectrostatics = 0;
     //usePBC and useRF are from simParams
     int usePBC = simParams_->getPBC();
+    int useRF;
+
+    // set the useRF logical
+    std::string myMethod = simParams_->getElectrostaticSummationMethod();
+    if (myMethod == "REACTION_FIELD")
+      useRF = 1;
+    else
+      useRF = 0;
 
     //loop over all of the atom types
     for (i = atomTypes.begin(); i != atomTypes.end(); ++i) {
@@ -585,6 +593,9 @@ namespace oopse {
     temp = useFLARB;
     MPI_Allreduce(&temp, &useFLARB, 1, MPI_INT, MPI_LOR, MPI_COMM_WORLD);    
 
+    temp = useRF;
+    MPI_Allreduce(&temp, &useRF, 1, MPI_INT, MPI_LOR, MPI_COMM_WORLD);    
+
 #endif
 
     fInfo_.SIM_uses_PBC = usePBC;    
@@ -599,8 +610,9 @@ namespace oopse {
     fInfo_.SIM_uses_EAM = useEAM;
     fInfo_.SIM_uses_Shapes = useShape;
     fInfo_.SIM_uses_FLARB = useFLARB;
+    fInfo_.SIM_uses_RF = useRF;
 
-    if( fInfo_.SIM_uses_Dipoles && fInfo_.SIM_uses_RF) {
+    if( fInfo_.SIM_uses_Dipoles && myMethod == "REACTION_FIELD") {
 
       if (simParams_->haveDielectric()) {
 	fInfo_.dielect = simParams_->getDielectric();

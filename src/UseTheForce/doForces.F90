@@ -45,7 +45,7 @@
 
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: doForces.F90,v 1.46 2005-09-18 20:45:38 chrisfen Exp $, $Date: 2005-09-18 20:45:38 $, $Name: not supported by cvs2svn $, $Revision: 1.46 $
+!! @version $Id: doForces.F90,v 1.47 2005-09-19 23:21:46 chrisfen Exp $, $Date: 2005-09-19 23:21:46 $, $Name: not supported by cvs2svn $, $Revision: 1.47 $
 
 
 module doForces
@@ -75,6 +75,7 @@ module doForces
 #include "UseTheForce/fSwitchingFunction.h"
 #include "UseTheForce/fCutoffPolicy.h"
 #include "UseTheForce/DarkSide/fInteractionMap.h"
+#include "UseTheForce/DarkSide/fElectrostaticSummationMethod.h"
 
 
   INTEGER, PARAMETER:: PREPAIR_LOOP = 1
@@ -504,7 +505,6 @@ contains
   subroutine init_FF(thisESM, thisStat)
 
     integer, intent(in) :: thisESM
-    real(kind=dp), intent(in) :: dampingAlpha
     integer, intent(out) :: thisStat   
     integer :: my_status, nMatches
     integer, pointer :: MatchList(:) => null()
@@ -547,12 +547,12 @@ contains
     !! check to make sure the reaction field setting makes sense
 
     if (FF_uses_Dipoles) then
-       if (electrostaticSummationMethod == 3) then
+       if (electrostaticSummationMethod == REACTION_FIELD) then
           dielect = getDielect()
           call initialize_rf(dielect)
        endif
     else
-       if (electrostaticSummationMethod == 3) then
+       if (electrostaticSummationMethod == REACTION_FIELD) then
           write(default_error,*) 'Using Reaction Field with no dipoles?  Huh?'
           thisStat = -1
           haveSaneForceField = .false.
@@ -970,7 +970,7 @@ contains
 
     if (FF_RequiresPostpairCalc() .and. SIM_requires_postpair_calc) then
 
-       if (electrostaticSummationMethod == 3) then
+       if (electrostaticSummationMethod == REACTION_FIELD) then
 
 #ifdef IS_MPI
           call scatter(rf_Row,rf,plan_atom_row_3d)
@@ -1080,7 +1080,7 @@ contains
        call doElectrostaticPair(i, j, d, r, rijsq, sw, vpair, fpair, &
             pot, eFrame, f, t, do_pot)
 
-       if (electrostaticSummationMethod == 3) then
+       if (electrostaticSummationMethod == REACTION_FIELD) then
 
           ! CHECK ME (RF needs to know about all electrostatic types)
           call accumulate_rf(i, j, r, eFrame, sw)
@@ -1362,7 +1362,7 @@ contains
 
   function FF_RequiresPostpairCalc() result(doesit)
     logical :: doesit
-    if (electrostaticSummationMethod == 3) doesit = .true.
+    if (electrostaticSummationMethod == REACTION_FIELD) doesit = .true.
   end function FF_RequiresPostpairCalc
 
 #ifdef PROFILE

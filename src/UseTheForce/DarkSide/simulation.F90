@@ -58,6 +58,7 @@ module simulation
 #define __FORTRAN90
 #include "brains/fSimulation.h"
 #include "UseTheForce/fSwitchingFunction.h"
+#include "UseTheForce/DarkSide/fElectrostaticSummationMethod.h"
 
   type (simtype), public, save :: thisSim
 
