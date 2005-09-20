@@ -32,7 +32,8 @@ Source    = \
 	ZConsReader.cpp \
 	ZConsWriter.cpp \
 	RestReader.cpp \
-	RestWriter.cpp
+	RestWriter.cpp \
+	gzstream.cpp
 
 RmiSource =
 

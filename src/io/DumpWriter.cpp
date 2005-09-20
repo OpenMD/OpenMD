@@ -43,6 +43,9 @@
 #include "primitives/Molecule.hpp"
 #include "utils/simError.h"
 #include "io/basic_teebuf.hpp"
+#include "io/gzstream.hpp"
+#include "io/Globals.hpp"
+
 #ifdef IS_MPI
 #include <mpi.h>
 #endif //is_mpi
@@ -51,12 +54,22 @@ namespace oopse {
 
   DumpWriter::DumpWriter(SimInfo* info) 
     : info_(info), filename_(info->getDumpFileName()), eorFilename_(info->getFinalConfigFileName()){
+
+    Globals* simParams = info->getSimParams();
+    needCompression_ = simParams->getCompressDumpFile();
+
+    if (needCompression_) {
+        filename_ += ".gz";
+        eorFilename_ += ".gz";
+    }
+    
 #ifdef IS_MPI
 
       if (worldRank == 0) {
 #endif // is_mpi
 
-        dumpFile_.open(filename_.c_str(), std::ios::out | std::ios::trunc);
+
+        dumpFile_ = createOStream(filename_);
 
         if (!dumpFile_) {
 	  sprintf(painCave.errMsg, "Could not open \"%s\" for dump output.\n",
@@ -79,13 +92,23 @@ namespace oopse {
 
   DumpWriter::DumpWriter(SimInfo* info, const std::string& filename) 
     : info_(info), filename_(filename){
+
+    Globals* simParams = info->getSimParams();
+    eorFilename_ = filename_.substr(0, filename_.rfind(".")) + ".eor";    
+
+    needCompression_ = simParams->getCompressDumpFile();
+    if (needCompression_) {
+        filename_ += ".gz";
+        eorFilename_ += ".gz";
+    }
+    
 #ifdef IS_MPI
 
       if (worldRank == 0) {
 #endif // is_mpi
 
-        eorFilename_ = filename_.substr(0, filename_.rfind(".")) + ".eor";
-        dumpFile_.open(filename_.c_str(), std::ios::out | std::ios::trunc);
+
+        dumpFile_ = createOStream(filename_);
 
         if (!dumpFile_) {
 	  sprintf(painCave.errMsg, "Could not open \"%s\" for dump output.\n",
@@ -112,7 +135,7 @@ namespace oopse {
     if (worldRank == 0) {
 #endif // is_mpi
 
-      dumpFile_.close();
+      delete dumpFile_;
 
 #ifdef IS_MPI
 
@@ -572,51 +595,48 @@ namespace oopse {
   }
 
   void DumpWriter::writeDump() {
-    writeFrame(dumpFile_);
-
+    writeFrame(*dumpFile_);
   }
 
   void DumpWriter::writeEor() {
-    std::ofstream eorStream;
+    std::ostream* eorStream;
     
 #ifdef IS_MPI
     if (worldRank == 0) {
 #endif // is_mpi
 
-      eorStream.open(eorFilename_.c_str());
-      if (!eorStream.is_open()) {
-	sprintf(painCave.errMsg, "DumpWriter : Could not open \"%s\" for writing.\n",
-		eorFilename_.c_str());
-	painCave.isFatal = 1;
-	simError();
-      }
+      eorStream = createOStream(eorFilename_);
 
 #ifdef IS_MPI
     }
 #endif // is_mpi    
 
-    writeFrame(eorStream);
+    writeFrame(*eorStream);
+
+#ifdef IS_MPI
+    if (worldRank == 0) {
+#endif // is_mpi
+    delete eorStream;
+
+#ifdef IS_MPI
+    }
+#endif // is_mpi  
+
   }
 
 
   void DumpWriter::writeDumpAndEor() {
-    std::ofstream eorStream;
     std::vector<std::streambuf*> buffers;
+    std::ostream* eorStream;
 #ifdef IS_MPI
     if (worldRank == 0) {
 #endif // is_mpi
 
-      buffers.push_back(dumpFile_.rdbuf());
+      buffers.push_back(dumpFile_->rdbuf());
 
-      eorStream.open(eorFilename_.c_str());
-      if (!eorStream.is_open()) {
-	sprintf(painCave.errMsg, "DumpWriter : Could not open \"%s\" for writing.\n",
-		eorFilename_.c_str());
-	painCave.isFatal = 1;
-	simError();
-      }
+      eorStream = createOStream(eorFilename_);
 
-      buffers.push_back(eorStream.rdbuf());
+      buffers.push_back(eorStream->rdbuf());
         
 #ifdef IS_MPI
     }
@@ -626,9 +646,26 @@ namespace oopse {
     std::ostream os(&tbuf);
 
     writeFrame(os);
+
+#ifdef IS_MPI
+    if (worldRank == 0) {
+#endif // is_mpi
+    delete eorStream;
+
+#ifdef IS_MPI
+    }
+#endif // is_mpi  
     
   }
 
-
+std::ostream* DumpWriter::createOStream(const std::string& filename) {
+    std::ostream* newOStream;
+    if (needCompression_) {
+        newOStream = new ogzstream(filename.c_str());
+    } else {
+        newOStream = new std::ofstream(filename.c_str());
+    }
+    return newOStream;
+}
 
 }//end namespace oopse

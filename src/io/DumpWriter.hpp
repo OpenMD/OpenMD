@@ -82,10 +82,13 @@ namespace oopse {
         
     void writeFrame(std::ostream& os);
     void writeCommentLine(std::ostream& os, Snapshot* s);
+    std::ostream* createOStream(const std::string& filename);
+    
     SimInfo* info_;
     std::string filename_;
-    std::ofstream dumpFile_;
+    std::ostream* dumpFile_;
     std::string eorFilename_;
+    bool needCompression_;
   };
 
 }
