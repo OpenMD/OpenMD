@@ -91,6 +91,7 @@ LibraryDirs = \
 	@MPI_LIB_DIR@ 
 
 Libraries = \
+	@LIBS@ \
 	@CGAL_LIBS@ \
 	@MPI_LIB@ \
 	@MPI_F90_LIB@ 
