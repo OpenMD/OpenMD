@@ -19,6 +19,9 @@
 #undef HAVE_GETOPT_H
 #undef HAVE_GETOPT_LONG
 
+/* Define to 1 if you find the <zlib.h> header file. */
+#undef HAVE_LIBZ
+
 /* Define to 1 if you find the <unistd.h> header file. */
 #undef HAVE_UNISTD_H
 

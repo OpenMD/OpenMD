@@ -116,6 +116,7 @@ AC_SUBST(F90_MODULE_NAMES)
 AC_LANG_POP
 
 AC_LANG_PUSH(C)
+ACX_CHECK_ZLIB
 AC_CHECK_HEADERS(unistd.h sys/pstat.h sys/sysmp.h sys/sysinfo.h sys/table.h sys/param.h sys/sysctl.h sys/sytemcfg.h machine/hal_sysinfo.h)
 AC_CHECK_FUNCS(pstat_getstatic sysmp getsysinfo sysctl table)
 # special check for _system_configuration because AIX <4.3.2 do not
