@@ -14,7 +14,7 @@ minimizerWriteFrq = 1;
 minimizerStepSize = 0.0001;
 
 forceField = "WATER";
-useReactionField = "false";
+electrostaticSummationMethod = "none";
 dielectric = 80.0;
 cutoffRadius = 12.0;
 switchingRadius = 9.0;

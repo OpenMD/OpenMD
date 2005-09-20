@@ -23,7 +23,7 @@ zConstraint[0]{
 cutoffRadius = 9.0;
 switchingRadius = 7.8;
 
-useReactionField = "false";
+electrostaticSummationMethod = "none";
 
 dielectric = 80.0;
 

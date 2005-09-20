@@ -10,7 +10,7 @@ initialConfig = "./ssdrf.in";
 
 ensemble = NVE;
 forceField = "WATER";
-electrostaticSummationMethod = "none";
+electrostaticSummationMethod = "reaction_field";
 dielectric = 80.0;
 cutoffRadius = 9.0;
 switchingRadius = 7.7;
