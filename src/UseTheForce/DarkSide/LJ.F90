@@ -43,7 +43,7 @@
 !! Calculates Long Range forces Lennard-Jones interactions.
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: LJ.F90,v 1.14 2005-09-14 19:02:33 gezelter Exp $, $Date: 2005-09-14 19:02:33 $, $Name: not supported by cvs2svn $, $Revision: 1.14 $
+!! @version $Id: LJ.F90,v 1.15 2005-09-21 17:20:14 chrisfen Exp $, $Date: 2005-09-21 17:20:14 $, $Name: not supported by cvs2svn $, $Revision: 1.15 $
 
 
 module lj
@@ -157,6 +157,7 @@ contains
     defaultCutoff = thisRcut
     defaultShift = shiftedPot
     haveDefaultCutoff = .true.
+    call createMixingMap()
   end subroutine setLJDefaultCutoff
 
   subroutine setLJUniformCutoff(thisRcut, shiftedPot)

@@ -45,7 +45,7 @@
 
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: doForces.F90,v 1.47 2005-09-19 23:21:46 chrisfen Exp $, $Date: 2005-09-19 23:21:46 $, $Name: not supported by cvs2svn $, $Revision: 1.47 $
+!! @version $Id: doForces.F90,v 1.48 2005-09-21 17:20:10 chrisfen Exp $, $Date: 2005-09-21 17:20:10 $, $Name: not supported by cvs2svn $, $Revision: 1.48 $
 
 
 module doForces
@@ -86,6 +86,7 @@ module doForces
   logical, save :: haveSaneForceField = .false.
   logical, save :: haveInteractionHash = .false.
   logical, save :: haveGtypeCutoffMap = .false.
+  logical, save :: haveDefaultCutoffs = .false.
   logical, save :: haveRlist = .false.
 
   logical, save :: FF_uses_DirectionalAtoms
@@ -289,38 +290,44 @@ contains
           call getElementProperty(atypes, i, "is_Shape", i_is_Shape)
           
  
-          if (i_is_LJ) then 
-             thisRcut = getSigma(i) * 2.5_dp
-             if (thisRCut .gt. atypeMaxCutoff(i)) atypeMaxCutoff(i) = thisRCut
+          if (haveDefaultCutoffs) then
+             atypeMaxCutoff(i) = defaultRcut
+          else
+             if (i_is_LJ) then           
+                thisRcut = getSigma(i) * 2.5_dp
+                if (thisRCut .gt. atypeMaxCutoff(i)) atypeMaxCutoff(i) = thisRCut
+             endif
+             if (i_is_Elect) then
+                thisRcut = defaultRcut
+                if (thisRCut .gt. atypeMaxCutoff(i)) atypeMaxCutoff(i) = thisRCut
+             endif
+             if (i_is_Sticky) then
+                thisRcut = getStickyCut(i)
+                if (thisRCut .gt. atypeMaxCutoff(i)) atypeMaxCutoff(i) = thisRCut
+             endif
+             if (i_is_StickyP) then
+                thisRcut = getStickyPowerCut(i)
+                if (thisRCut .gt. atypeMaxCutoff(i)) atypeMaxCutoff(i) = thisRCut
+             endif
+             if (i_is_GB) then
+                thisRcut = getGayBerneCut(i)
+                if (thisRCut .gt. atypeMaxCutoff(i)) atypeMaxCutoff(i) = thisRCut
+             endif
+             if (i_is_EAM) then
+                thisRcut = getEAMCut(i)
+                if (thisRCut .gt. atypeMaxCutoff(i)) atypeMaxCutoff(i) = thisRCut
+             endif
+             if (i_is_Shape) then
+                thisRcut = getShapeCut(i)
+                if (thisRCut .gt. atypeMaxCutoff(i)) atypeMaxCutoff(i) = thisRCut
+             endif
           endif
-          if (i_is_Elect) then
-             thisRcut = defaultRcut
-             if (thisRCut .gt. atypeMaxCutoff(i)) atypeMaxCutoff(i) = thisRCut
-          endif
-          if (i_is_Sticky) then
-             thisRcut = getStickyCut(i)
-             if (thisRCut .gt. atypeMaxCutoff(i)) atypeMaxCutoff(i) = thisRCut
-          endif
-          if (i_is_StickyP) then
-             thisRcut = getStickyPowerCut(i)
-             if (thisRCut .gt. atypeMaxCutoff(i)) atypeMaxCutoff(i) = thisRCut
-          endif
-          if (i_is_GB) then
-             thisRcut = getGayBerneCut(i)
-             if (thisRCut .gt. atypeMaxCutoff(i)) atypeMaxCutoff(i) = thisRCut
-          endif
-          if (i_is_EAM) then
-             thisRcut = getEAMCut(i)
-             if (thisRCut .gt. atypeMaxCutoff(i)) atypeMaxCutoff(i) = thisRCut
-          endif
-          if (i_is_Shape) then
-             thisRcut = getShapeCut(i)
-             if (thisRCut .gt. atypeMaxCutoff(i)) atypeMaxCutoff(i) = thisRCut
-          endif
+          
           
           if (atypeMaxCutoff(i).gt.biggestAtypeCutoff) then
              biggestAtypeCutoff = atypeMaxCutoff(i)
           endif
+
        endif
     enddo
   
@@ -406,9 +413,16 @@ contains
           skin = defaultRlist - defaultRcut
           gtypeCutoffMap(i,j)%rlistsq = (thisRcut + skin)**2
 
+          ! sanity check
+
+          if (haveDefaultCutoffs) then
+             if (abs(gtypeCutoffMap(i,j)%rcut - defaultRcut).gt.0.0001) then
+                call handleError("createGtypeCutoffMap", "user-specified rCut does not match computed group Cutoff")
+             endif
+          endif
        enddo
     enddo
-    
+
     haveGtypeCutoffMap = .true.
    end subroutine createGtypeCutoffMap
 
@@ -420,6 +434,8 @@ contains
      defaultRsw = defRsw
      defaultRlist = defRlist
      cutoffPolicy = cutPolicy
+
+     haveDefaultCutoffs = .true.
    end subroutine setDefaultCutoffs
 
    subroutine setCutoffPolicy(cutPolicy)
@@ -768,7 +784,7 @@ contains
              me_j = atid(j)
              call get_interatomic_vector(q_group(:,i), &
                   q_group(:,j), d_grp, rgrpsq)
-#endif
+#endif      
 
              if (rgrpsq < gtypeCutoffMap(groupToGtype(i),groupToGtype(j))%rListsq) then
                 if (update_nlist) then
