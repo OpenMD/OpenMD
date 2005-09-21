@@ -77,9 +77,9 @@ namespace oopse {
       if (worldRank == 0) {
 #endif
       
-	inFile_ = fopen(filename_.c_str(), "r");
+      inFile_ = new std::ifstream(filename_.c_str());
       
-	if (inFile_ == NULL) {
+	if (inFile_->fail()) {
 	  sprintf(painCave.errMsg, "DumpReader: Cannot open file: %s\n", filename_.c_str());
 	  painCave.isFatal = 1;
 	  simError();
@@ -104,16 +104,7 @@ namespace oopse {
     if (worldRank == 0) {
 #endif
       
-      int error;
-      error = fclose(inFile_);
-      
-      if (error) {
-        sprintf(painCave.errMsg, "DumpReader Error: Error closing %s\n", filename_.c_str());
-        painCave.isFatal = 1;            
-        simError();
-      }
-      
-      MemoryUtils::deletePointers(framePos_);
+      delete inFile_;
       
 #ifdef IS_MPI
       
@@ -139,21 +130,21 @@ namespace oopse {
     int i, j;
     int lineNum = 0;
     char readBuffer[maxBufferSize];
-    fpos_t * currPos;
+    std::streampos  currPos;
     
 #ifdef IS_MPI
     
     if (worldRank == 0) {
 #endif // is_mpi
       
-      rewind(inFile_);
+      inFile_->seekg (0, std::ios::beg);
       
-      currPos = new fpos_t;
-      fgetpos(inFile_, currPos);
-      fgets(readBuffer, sizeof(readBuffer), inFile_);
+
+      currPos = inFile_->tellg();
+      inFile_->getline(readBuffer, sizeof(readBuffer));
       lineNum++;
       
-      if (feof(inFile_)) {
+      if (inFile_->eof()) {
         sprintf(painCave.errMsg,
                 "DumpReader Error: File \"%s\" ended unexpectedly at line %d\n",
                 filename_.c_str(),
@@ -162,15 +153,15 @@ namespace oopse {
         simError();
       }
       
-      while (!feof(inFile_)) {
+      while (!inFile_->eof()) {
         framePos_.push_back(currPos);
         
         i = atoi(readBuffer);
         
-        fgets(readBuffer, sizeof(readBuffer), inFile_);
+        inFile_->getline(readBuffer, sizeof(readBuffer));
         lineNum++;
         
-        if (feof(inFile_)) {
+        if (inFile_->eof()) {
           sprintf(painCave.errMsg,
                   "DumpReader Error: File \"%s\" ended unexpectedly at line %d\n",
                   filename_.c_str(),
@@ -180,10 +171,10 @@ namespace oopse {
         }
         
         for(j = 0; j < i; j++) {
-          fgets(readBuffer, sizeof(readBuffer), inFile_);
+          inFile_->getline(readBuffer, sizeof(readBuffer));
           lineNum++;
           
-          if (feof(inFile_)) {
+          if (inFile_->eof()) {
             sprintf(painCave.errMsg,
                     "DumpReader Error: File \"%s\" ended unexpectedly at line %d,"
                     " with atom %d\n", filename_.c_str(),
@@ -195,14 +186,12 @@ namespace oopse {
           }
         }
         
-        currPos = new fpos_t;
-        fgetpos(inFile_, currPos);
-        fgets(readBuffer, sizeof(readBuffer), inFile_);
+        currPos = inFile_->tellg();
+        inFile_->getline(readBuffer, sizeof(readBuffer));
         lineNum++;
       }
-      
-      delete currPos;
-      rewind(inFile_);
+
+      inFile_->seekg (0, std::ios::beg);
       
       nframes_ = framePos_.size();
 #ifdef IS_MPI
@@ -263,11 +252,10 @@ namespace oopse {
     Molecule::IntegrableObjectIterator ii;
     
 #ifndef IS_MPI
-    
-    fsetpos(inFile_, framePos_[whichFrame]);
-    eof_test = fgets(read_buffer, sizeof(read_buffer), inFile_);
-    
-    if (eof_test == NULL) {
+    inFile_->clear(); 
+    inFile_->seekg(framePos_[whichFrame]);
+        
+    if (!inFile_->getline(read_buffer, sizeof(read_buffer))) {
       sprintf(painCave.errMsg,
               "DumpReader error: error reading 1st line of \"%s\"\n",
               filename_.c_str());
@@ -291,9 +279,8 @@ namespace oopse {
     
     //read the box mat from the comment line
     
-    eof_test = fgets(read_buffer, sizeof(read_buffer), inFile_);
     
-    if (eof_test == NULL) {
+    if (!inFile_->getline(read_buffer, sizeof(read_buffer))) {
       sprintf(painCave.errMsg, "DumpReader Error: error in reading commment in %s\n",
               filename_.c_str());
       painCave.isFatal = 1;
@@ -310,9 +297,9 @@ namespace oopse {
       for (integrableObject = mol->beginIntegrableObject(ii); integrableObject != NULL; 
            integrableObject = mol->nextIntegrableObject(ii)) {           
         
-        eof_test = fgets(read_buffer, sizeof(read_buffer), inFile_);
         
-        if (eof_test == NULL) {
+        
+        if (!inFile_->getline(read_buffer, sizeof(read_buffer))) {
           sprintf(painCave.errMsg,
                   "DumpReader Error: error in reading file %s\n"
                   "natoms  = %d; index = %d\n"
@@ -349,11 +336,10 @@ namespace oopse {
     haveError = 0;
     
     if (worldRank == masterNode) {
-      fsetpos(inFile_, framePos_[whichFrame]);
+      inFile_->clear();            
+      inFile_->seekg(framePos_[whichFrame]);
       
-      eof_test = fgets(read_buffer, sizeof(read_buffer), inFile_);
-      
-      if (eof_test == NULL) {
+      if (!inFile_->getline(readBuffer, sizeof(readBuffer))) {
         sprintf(painCave.errMsg, "DumpReader Error: Error reading 1st line of %s \n ",
                 filename_.c_str());
         painCave.isFatal = 1;
@@ -380,9 +366,9 @@ namespace oopse {
       
       //read the boxMat from the comment line
       
-      eof_test = fgets(read_buffer, sizeof(read_buffer), inFile_);
       
-      if (eof_test == NULL) {
+      
+      if (!inFile_->getline(readBuffer, sizeof(readBuffer))) {
         sprintf(painCave.errMsg, "DumpReader Error: error in reading commment in %s\n",
                 filename_.c_str());
         painCave.isFatal = 1;
@@ -414,9 +400,9 @@ namespace oopse {
           for (integrableObject = mol->beginIntegrableObject(ii); integrableObject != NULL; 
                integrableObject = mol->nextIntegrableObject(ii)){
             
-            eof_test = fgets(read_buffer, sizeof(read_buffer), inFile_);
             
-            if (eof_test == NULL) {
+            
+            if (!inFile_->getline(readBuffer, sizeof(readBuffer))) {
               sprintf(painCave.errMsg,
                       "DumpReader Error: error in reading file %s\n"
                       "natoms  = %d; index = %d\n"
@@ -438,9 +424,9 @@ namespace oopse {
                    MPI_COMM_WORLD, &istatus);
           
           for(int j = 0; j < nCurObj; j++) {
-            eof_test = fgets(read_buffer, sizeof(read_buffer), inFile_);
             
-            if (eof_test == NULL) {
+            
+            if (!inFile_->getline(readBuffer, sizeof(readBuffer))) {
               sprintf(painCave.errMsg,
                       "DumpReader Error: error in reading file %s\n"
                       "natoms  = %d; index = %d\n"

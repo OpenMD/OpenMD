@@ -58,10 +58,12 @@ namespace oopse {
     Globals* simParams = info->getSimParams();
     needCompression_ = simParams->getCompressDumpFile();
 
+#ifdef HAVE_LIBZ
     if (needCompression_) {
         filename_ += ".gz";
         eorFilename_ += ".gz";
     }
+#endif
     
 #ifdef IS_MPI
 
@@ -97,10 +99,13 @@ namespace oopse {
     eorFilename_ = filename_.substr(0, filename_.rfind(".")) + ".eor";    
 
     needCompression_ = simParams->getCompressDumpFile();
+
+#ifdef HAVE_LIBZ
     if (needCompression_) {
         filename_ += ".gz";
         eorFilename_ += ".gz";
     }
+#endif
     
 #ifdef IS_MPI
 
@@ -659,12 +664,17 @@ namespace oopse {
   }
 
 std::ostream* DumpWriter::createOStream(const std::string& filename) {
+
     std::ostream* newOStream;
+#ifdef HAVE_LIBZ 
     if (needCompression_) {
         newOStream = new ogzstream(filename.c_str());
     } else {
         newOStream = new std::ofstream(filename.c_str());
     }
+#else
+    newOStream = new std::ofstream(filename.c_str());
+#endif
     return newOStream;
 }
 

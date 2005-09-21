@@ -101,8 +101,9 @@ namespace oopse {
 
     int nframes_;
 
-    FILE* inFile_;
-    std::vector<fpos_t*> framePos_;
+    std::istream* inFile_;
+    
+    std::vector<std::streampos> framePos_;
 
     bool needPos_;
     bool needVel_;
