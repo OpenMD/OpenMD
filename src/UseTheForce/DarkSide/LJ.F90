@@ -43,7 +43,7 @@
 !! Calculates Long Range forces Lennard-Jones interactions.
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: LJ.F90,v 1.15 2005-09-21 17:20:14 chrisfen Exp $, $Date: 2005-09-21 17:20:14 $, $Name: not supported by cvs2svn $, $Revision: 1.15 $
+!! @version $Id: LJ.F90,v 1.16 2005-09-21 23:45:48 chuckv Exp $, $Date: 2005-09-21 23:45:48 $, $Name: not supported by cvs2svn $, $Revision: 1.16 $
 
 
 module lj
@@ -77,7 +77,7 @@ module lj
   end type LJtype
 
   type, private :: LJList
-     integer               :: nLJtypes = 0
+     integer               :: Nljtypes = 0
      integer               :: currentLJtype = 0
      type(LJtype), pointer :: LJtypes(:)      => null()
      integer, pointer      :: atidToLJtype(:) => null()
@@ -157,7 +157,10 @@ contains
     defaultCutoff = thisRcut
     defaultShift = shiftedPot
     haveDefaultCutoff = .true.
-    call createMixingMap()
+    !we only want to build LJ Mixing map if LJ is being used.
+    if(LJMap%nLJTypes /= 0) then
+       call createMixingMap()
+    end if
   end subroutine setLJDefaultCutoff
 
   subroutine setLJUniformCutoff(thisRcut, shiftedPot)
