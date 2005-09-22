@@ -202,12 +202,12 @@ namespace oopse {
       
       info_->getInertiaTensor(inertiaTensor,angularMomentum);
       // We now need the inverse of the inertia tensor.
-      
+      /*      
       std::cerr << "Angular Momentum before is "
 		<< angularMomentum <<  std::endl;
       std::cerr << "Inertia Tensor before is "
 		<< inertiaTensor <<  std::endl;
-      
+      */
       
       inertiaTensor =inertiaTensor.inverse();
        std::cerr << "Inertia Tensor after inverse is "
@@ -234,9 +234,10 @@ namespace oopse {
       }
       
       angularMomentum = info_->getAngularMomentum();
+      /*
       std::cerr << "Angular Momentum after is "
          << angularMomentum <<  std::endl;
-
+      */
       
    }
    
