@@ -210,9 +210,10 @@ namespace oopse {
       */
       
       inertiaTensor =inertiaTensor.inverse();
+      /*
        std::cerr << "Inertia Tensor after inverse is "
 		<< inertiaTensor <<  std::endl;
-      
+      */
       omega = inertiaTensor*angularMomentum;
       
       SimInfo::MoleculeIterator i;
