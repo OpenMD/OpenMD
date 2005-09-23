@@ -45,7 +45,7 @@
 
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: doForces.F90,v 1.48 2005-09-21 17:20:10 chrisfen Exp $, $Date: 2005-09-21 17:20:10 $, $Name: not supported by cvs2svn $, $Revision: 1.48 $
+!! @version $Id: doForces.F90,v 1.49 2005-09-23 20:31:02 chuckv Exp $, $Date: 2005-09-23 20:31:02 $, $Name: not supported by cvs2svn $, $Revision: 1.49 $
 
 
 module doForces
@@ -136,6 +136,7 @@ module doForces
 
   integer, save :: cutoffPolicy = TRADITIONAL_CUTOFF_POLICY
   real(kind=dp),save :: defaultRcut, defaultRsw, defaultRlist
+  real(kind=dp),save :: listSkin
   
 contains
 
@@ -411,6 +412,7 @@ contains
           gtypeCutoffMap(i,j)%rcut = thisRcut
           gtypeCutoffMap(i,j)%rcutsq = thisRcut*thisRcut
           skin = defaultRlist - defaultRcut
+          listSkin = skin ! set neighbor list skin thickness
           gtypeCutoffMap(i,j)%rlistsq = (thisRcut + skin)**2
 
           ! sanity check
@@ -659,7 +661,7 @@ contains
     integer :: propPack_i, propPack_j
     integer :: loopStart, loopEnd, loop
     integer :: iHash
-    real(kind=dp) :: listSkin = 1.0   
+  
 
     !! initialize local variables  
 
