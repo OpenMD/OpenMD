@@ -9,7 +9,7 @@ component{
 initialConfig = "./ssdrf.in";
 
 ensemble = NVE;
-forceField = "WATER";
+forceField = "DUFF";
 electrostaticSummationMethod = "reaction_field";
 dielectric = 80.0;
 cutoffRadius = 9.0;
@@ -28,5 +28,5 @@ useInitialExtendedSystemState = "false";
 
 //tempSet = "true";
 //thermalTime = 10;
-sampleTime = 1000;
-statusTime = 100;
+sampleTime = 100;
+statusTime = 10;
