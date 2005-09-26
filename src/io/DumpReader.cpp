@@ -339,7 +339,7 @@ namespace oopse {
       inFile_->clear();            
       inFile_->seekg(framePos_[whichFrame]);
       
-      if (!inFile_->getline(readBuffer, sizeof(readBuffer))) {
+      if (!inFile_->getline(read_buffer, sizeof(read_buffer))) {
         sprintf(painCave.errMsg, "DumpReader Error: Error reading 1st line of %s \n ",
                 filename_.c_str());
         painCave.isFatal = 1;
@@ -368,7 +368,7 @@ namespace oopse {
       
       
       
-      if (!inFile_->getline(readBuffer, sizeof(readBuffer))) {
+      if (!inFile_->getline(read_buffer, sizeof(read_buffer))) {
         sprintf(painCave.errMsg, "DumpReader Error: error in reading commment in %s\n",
                 filename_.c_str());
         painCave.isFatal = 1;
@@ -402,7 +402,7 @@ namespace oopse {
             
             
             
-            if (!inFile_->getline(readBuffer, sizeof(readBuffer))) {
+            if (!inFile_->getline(read_buffer, sizeof(read_buffer))) {
               sprintf(painCave.errMsg,
                       "DumpReader Error: error in reading file %s\n"
                       "natoms  = %d; index = %d\n"
@@ -426,7 +426,7 @@ namespace oopse {
           for(int j = 0; j < nCurObj; j++) {
             
             
-            if (!inFile_->getline(readBuffer, sizeof(readBuffer))) {
+            if (!inFile_->getline(read_buffer, sizeof(read_buffer))) {
               sprintf(painCave.errMsg,
                       "DumpReader Error: error in reading file %s\n"
                       "natoms  = %d; index = %d\n"
