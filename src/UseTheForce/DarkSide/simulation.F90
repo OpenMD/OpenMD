@@ -84,6 +84,10 @@ module simulation
   real(kind=dp), allocatable, dimension(:), public :: mfactLocal
 
   logical, allocatable, dimension(:) :: simHasAtypeMap
+#ifdef IS_MPI
+  logical, allocatable, dimension(:) :: simHasAtypeMapTemp
+#endif
+
   real(kind=dp), public, dimension(3,3), save :: Hmat, HmatInv
   logical, public, save :: boxIsOrthorhombic
 
@@ -595,6 +599,7 @@ contains
              end if
              SimHasAtypeMap = .false.
           end if
+          
           ! Loop through the local atoms and grab the atypes present         
           do me_i = 1,nLocal
              SimHasAtypeMap(atid(me_i)) = .true.
@@ -602,8 +607,17 @@ contains
           ! For MPI, we need to know all possible atypes present in 
           ! simulation on all processors. Use LOR operation to set map.
 #ifdef IS_MPI
-          call mpi_allreduce(SimHasAtypeMap, SimHasAtypeMap, nAtypes, &
+          if (.not.allocated(SimHasAtypeMapTemp)) then
+             allocate(SimHasAtypeMapTemp(nAtypes),stat=alloc_stat)
+             if (alloc_stat /= 0 ) then
+                status = -1
+                return
+             end if
+          end if
+          call mpi_allreduce(SimHasAtypeMap, SimHasAtypeMaptemp, nAtypes, &
                mpi_logical, MPI_LOR, mpi_comm_world, mpiErrors)
+          simHasAtypeMap = simHasAtypeMapTemp
+          deallocate(simHasAtypeMapTemp)
 #endif          
         end subroutine createSimHasAtype
         
