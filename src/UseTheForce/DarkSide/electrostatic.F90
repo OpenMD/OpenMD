@@ -91,6 +91,9 @@ module electrostatic_module
   logical, save :: is_Damped_Wolf = .false.
 
 
+! error function
+  double precision, external :: derfc
+
   public :: setElectrostaticSummationMethod
   public :: setElectrostaticCutoffRadius
   public :: setDampedWolfAlpha
@@ -387,7 +390,7 @@ contains
           endif
 
           constEXP = exp(-dampingAlpha*dampingAlpha*defaultCutoff*defaultCutoff)
-          constERFC = erfc(dampingAlpha*defaultCutoff)
+          constERFC = derfc(dampingAlpha*defaultCutoff)
           
           haveDWAconstants = .true.
        endif
