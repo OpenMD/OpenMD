@@ -869,6 +869,12 @@ namespace oopse {
         }           
       }
     }
+
+
+    if (simParams_->haveSkinThickness()) {
+      double skinThickness = simParams_->getSkinThickness();
+    }
+
     notifyFortranCutoffs(&rcut_, &rsw_, &rnblist, &cp);
     // also send cutoff notification to electrostatics
     setElectrostaticCutoffRadius(&rcut_);

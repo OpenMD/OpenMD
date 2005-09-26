@@ -121,6 +121,7 @@
 #define G_DAMPING_ALPHA     59
 #define G_CUTOFFPOLICY      60
 #define G_COMPRESSDUMPFILE  61
+#define G_SKINTHICKNESS     62
 
 Globals::Globals(){
   initalize();
@@ -200,6 +201,7 @@ void Globals::initalize(){
   command_table.insert(CommandMapType::value_type("dampingAlpha", G_DAMPING_ALPHA));
   command_table.insert(CommandMapType::value_type("cutoffPolicy", G_CUTOFFPOLICY));
   command_table.insert(CommandMapType::value_type("compressDumpFile", G_COMPRESSDUMPFILE));
+  command_table.insert(CommandMapType::value_type("skinThickness", G_SKINTHICKNESS));
 
   strcpy( mixingRule,"standard");  //default mixing rules to standard.
   usePBC = 1; //default  periodic boundry conditions to on
@@ -210,6 +212,7 @@ void Globals::initalize(){
   useLiquidThermInt = 0; // default liquid thermodynamic integration to off
   dampingAlpha = 1.5; // default damping parameter in Wolf Electrostatics
   compressDumpFile = 0; // default compressDumpFile set to off
+  skinThickness = 1.0; // default neighborlist skin thickness is one angstrom
 
   have_force_field =  0;
   have_n_components = 0;
@@ -218,6 +221,7 @@ void Globals::initalize(){
   have_dt =           0;
   have_run_time =     0;
   
+  have_skin_thickness = 0;
   have_initial_config = 0;
   have_final_config =   0;
   have_n_mol =          0;
@@ -993,6 +997,38 @@ int Globals::globalAssign( event* the_event ){
 	break;
       }
       break;
+
+
+    case G_SKINTHICKNESS:
+      switch( the_type ){
+	
+      case STRING:
+	the_event->err_msg = 
+	  strdup( "Error in parsing meta-data file!\n\tskinThickness is not a double or int.\n" );
+	return 0;
+	break;
+	
+      case DOUBLE:
+	skinThickness = the_event->evt.asmt.rhs.dval;
+	have_skin_thickness = 1;
+	return 1;
+	break;
+	
+      case INT:
+	skinThickness = (double)the_event->evt.asmt.rhs.ival;
+	have_skin_thickness = 1;
+	return 1;
+	break;
+	
+      default:
+	the_event->err_msg = 
+	  strdup( "Error in parsing meta-data file!\n\tskinThickness unrecognized.\n" );
+	return 0;
+	break;
+      }
+      break;
+
+
       
     case G_DIELECTRIC:
       switch( the_type ){

@@ -108,6 +108,7 @@ class Globals{
   double getDielectric( void )      { return dielectric; }
   double getRcut( void )            { return rcut; }
   double getRsw( void )             { return rsw; }
+  double getSkinThickness(void)     { return skinThickness;}
   int    getTempSet( void )         { return tempSet; }
   int    getUseInitTime( void )     { return useInitTime; }
   int    getUseInitXSstate( void )  { return useInitXSstate; }
@@ -198,6 +199,7 @@ class Globals{
   short int haveDampingAlpha(void)       { return have_damping_alpha; }
   short int haveCutoffPolicy(void)       { return have_cutoff_policy; }
   short int haveCompressDumpfile(void)   { return have_compress_dumpfile; }
+  short int haveSkinThickness(void)      {return have_skin_thickness; }
 
   /* other accessors */
   Component** getComponents( void )   { return components; }
@@ -240,6 +242,7 @@ class Globals{
   double thermal_time;
   double rcut;
   double rsw;
+  double skinThickness;
   double dielectric;
   int tempSet;
   int useInitTime;
@@ -312,6 +315,7 @@ class Globals{
   short int have_damping_alpha;
   short int have_cutoff_policy;
   short int have_compress_dumpfile;
+  short int have_skin_thickness;
 };
 
 #endif
