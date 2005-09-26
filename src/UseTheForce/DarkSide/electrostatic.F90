@@ -90,10 +90,11 @@ module electrostatic_module
   logical, save :: is_Undamped_Wolf = .false.
   logical, save :: is_Damped_Wolf = .false.
 
-
-! error function
+#ifdef __IFC
+! error function for ifc version > 7.
   double precision, external :: derfc
-
+#endif
+  
   public :: setElectrostaticSummationMethod
   public :: setElectrostaticCutoffRadius
   public :: setDampedWolfAlpha
