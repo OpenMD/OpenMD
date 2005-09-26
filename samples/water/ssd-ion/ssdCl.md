@@ -32,7 +32,7 @@ initialConfig = "./ssdCl.in";
 
 ensemble = NVT;
 forceField = "DUFF";
-useReactionField = "false";
+electrostaticSummationMethod = "none"
 dielectric = 80.0;
 cutoffRadius = 10.5;
 switchingRadius = 8.925;

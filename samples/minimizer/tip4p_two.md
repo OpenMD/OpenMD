@@ -13,7 +13,7 @@ minimizerMaxIter = 5000;
 minimizerWriteFrq = 1;
 minimizerStepSize = 0.0001;
 
-forceField = "WATER";
+forceField = "DUFF";
 electrostaticSummationMethod = "none";
 dielectric = 80.0;
 cutoffRadius = 12.0;

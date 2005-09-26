@@ -10,8 +10,8 @@ initialConfig = "./two.in";
 
 
 ensemble = NVT;
-forceField = "WATER";
-useReactionField = "false";
+forceField = "DUFF";
+electrostaticSummationMethod = "none"
 dielectric = 80.0;
 cutoffRadius = 9.0;
 switchingRadius = 7.8;
