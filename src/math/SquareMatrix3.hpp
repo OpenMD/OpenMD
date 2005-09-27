@@ -179,7 +179,7 @@ namespace oopse {
       Real ad1, ad2, ad3;    
       t = this->data_[0][0] + this->data_[1][1] + this->data_[2][2] + 1.0;
 
-      if( t > NumericConstant::epsilon ){
+      if( t > 0.0 ){
 
 	s = 0.5 / sqrt( t );
 	q[0] = 0.25 / s;
@@ -188,9 +188,9 @@ namespace oopse {
 	q[3] = (this->data_[0][1] - this->data_[1][0]) * s;
       } else {
 
-	ad1 = fabs( this->data_[0][0] );
-	ad2 = fabs( this->data_[1][1] );
-	ad3 = fabs( this->data_[2][2] );
+	ad1 = this->data_[0][0];
+	ad2 = this->data_[1][1];
+	ad3 = this->data_[2][2];
 
 	if( ad1 >= ad2 && ad1 >= ad3 ){
 
