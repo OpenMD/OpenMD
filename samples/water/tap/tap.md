@@ -10,7 +10,7 @@ initialConfig = "./tap.in";
 
 ensemble = NVT;
 forceField = "DUFF";
-electrostaticSummationMethod = "none"
+electrostaticSummationMethod = "none";
 dielectric = 80.0;
 cutoffRadius = 9.0;
 switchingRadius = 7.7;
