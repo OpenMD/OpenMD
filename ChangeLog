@@ -1,3 +1,152 @@
+2005-09-28 11:55  tim
+
+	* src/math/SquareMatrix3.hpp: using epsilon instead of 0.0 to avoid
+	divergence in rotation matrix to quaternion transformation
+
+2005-09-28 11:32  gezelter
+
+	* src/primitives/RigidBody.cpp: Rotation matrix multiplication
+	order error
+
+2005-09-28 11:32  gezelter
+
+	* src/io/DumpReader.cpp: tracking down quaternion bug
+
+2005-09-28 11:32  gezelter
+
+	* forceFields/DUFF2.frc: Added DIP atom types for 2-point water
+	model
+
+2005-09-27 15:02  tim
+
+	* src/math/SquareMatrix3.hpp: fix a bug in convert rotation matrix
+	to quaternion
+
+2005-09-26 13:38  chuckv
+
+	* src/UseTheForce/DarkSide/electrostatic.F90: Added define for ifc
+	7 so derfc is external. Other compilers should treat erfc as
+	intrinsic.
+
+2005-09-26 12:07  chuckv
+
+	* src/UseTheForce/DarkSide/electrostatic.F90: Changed erfc to derfc
+	and declared it to be external to fix issure with ifc7. Hopefully
+	this will not cause a problem with other compilers where derfc is
+	an intrinsic function.
+
+2005-09-26 11:42  chuckv
+
+	* src/UseTheForce/DarkSide/simulation.F90: MPI fix for SimHasAtype
+	in simulation module. We needed a seperate receive buffer.
+
+2005-09-26 10:58  chuckv
+
+	* src/: brains/SimInfo.cpp, io/Globals.cpp, io/Globals.hpp: Added
+	support for skinThickness keyword to Globals.
+
+2005-09-26 10:56  tim
+
+	* src/io/DumpReader.cpp: fix a typo in DumpReader
+
+2005-09-26 09:27  chrisfen
+
+	* samples/: minimizer/tip4p_two.md,
+	thermoIntegration/liquid/ssde.md, thermoIntegration/solid/ssde.md,
+	water/dimer/cl.md, water/dimer/mix.md, water/dimer/mix2.md,
+	water/dimer/ssd.md, water/dimer/tap.md, water/dimer/two.md,
+	water/spce/spce.md, water/ssd/ssd.md, water/ssd-ion/ssdCl.md,
+	water/ssde/ssde.md, water/tap/tap.md, water/tip3p_ice/tp3.md,
+	water/tip4p/tp4.md: fixing up some samples
+
+2005-09-24 12:39  chrisfen
+
+	* src/UseTheForce/DarkSide/electrostatic.F90: slowdown fixed - now
+	roughly the same speed as the old version when using dipoles
+	
+	energies are now exactly the same between the old version of OOPSE
+	and this version
+
+2005-09-24 12:38  chrisfen
+
+	* samples/water/ssdrf/ssdrf.md: turned rf on
+
+2005-09-23 15:31  chuckv
+
+	* src/UseTheForce/doForces.F90: Fixed "dum-dum" where we ignore the
+	skin thickness and hardcode listSkin to be 1.0. We now get listskin
+	from skin. This will get fixed to where we can manually set skin
+	thickness.
+
+2005-09-22 13:50  gezelter
+
+	* src/math/derfc.F90: added error function
+
+2005-09-21 19:08  chuckv
+
+	* src/integrators/Velocitizer.cpp: Removed print statement for
+	angular momentum and inertia tensor from velocitizer.
+
+2005-09-21 19:04  chuckv
+
+	* src/integrators/Velocitizer.cpp: Removed print statements for
+	remove angular momentum.
+
+2005-09-21 18:45  chuckv
+
+	* src/UseTheForce/DarkSide/LJ.F90: Bug fix: If we are not using LJ
+	(say we are using EAM), we probably shouldn't rebuild the LJ mixing
+	map.
+
+2005-09-21 15:59  tim
+
+	* src/io/: DumpReader.cpp, DumpReader.hpp, DumpWriter.cpp:
+	DumpReader using pure c++ io
+
+2005-09-21 12:20  chrisfen
+
+	* src/UseTheForce/: doForces.F90, DarkSide/LJ.F90: Fixed a
+	defaultCutoff bug (HEMES!)
+
+2005-09-20 17:13  gezelter
+
+	* make/Makefile.in: libz additions
+
+2005-09-20 17:03  gezelter
+
+	* configure, ac-tools/aclocal.m4, ac-tools/configure.in,
+	src/config.h.in: added check for zlib in configure
+
+2005-09-20 16:22  tim
+
+	* src/io/: DumpWriter.cpp, DumpWriter.hpp, Makefile, gzstream.cpp,
+	gzstream.hpp, zipstream.hpp: adding zlib support for DumpWriter
+
+2005-09-20 11:22  tim
+
+	* test/io/: ZipstreamTestCase.cpp, ZipstreamTestCase.hpp: adding
+	testcase for zipstream
+
+2005-09-20 10:41  tim
+
+	* src/io/zipstream.hpp: adding zipstream.hpp
+
+2005-09-20 10:34  chrisfen
+
+	* samples/: dipole/splitInWater.md, dipole/split_SSD.md,
+	dipole/twoSplitDipole.md, minimizer/ssdEM.md,
+	minimizer/tip4p_two.md, water/ssdrf/ssdrf.md, zcons/zconsFixed.md,
+	zcons/zconsMoving.md: fixed up some sample md files
+
+2005-09-19 18:21  chrisfen
+
+	* ChangeLog, samples/water/ssdrf/ssdrf.md,
+	src/UseTheForce/doForces.F90,
+	src/UseTheForce/DarkSide/electrostatic.F90,
+	src/UseTheForce/DarkSide/simulation.F90, src/brains/SimInfo.cpp,
+	src/brains/fSimulation.h: Fixed bugs in reaction field, now it
+	appears as though it really is working...
+
 2005-09-18 15:45  chrisfen
 
 	* ChangeLog, samples/water/ssdrf/ssdrf.md,
@@ -6084,8 +6233,7 @@
 
 2004-09-29 12:56  gezelter
 
-	* make/: Make.conf.in, Makefile.in, _files/style.css: Working on
-	make stuff
+	* make/: Make.conf.in, Makefile.in: Working on make stuff
 
 2004-09-29 12:46  tim
 
@@ -6351,8 +6499,7 @@
 	src/visitors/OtherVisitor.cpp, src/visitors/OtherVisitor.hpp,
 	src/visitors/RigidBodyVisitor.cpp,
 	src/visitors/RigidBodyVisitor.hpp, src/visitors/ZconsVisitor.cpp,
-	src/visitors/ZconsVisitor.hpp, make/Makefile,
-	make/_files/style.css, samples/Makefile.in,
+	src/visitors/ZconsVisitor.hpp, make/Makefile, samples/Makefile.in,
 	samples/metals/Au-Core-Ag-Shell_Nanoparticle.in,
 	samples/metals/Au-Core-Ag-Shell_Nanoparticle.md,
 	samples/metals/Au_bulk_FBD.md, samples/metals/Au_bulk_voter.md,
@@ -6527,8 +6674,7 @@
 	src/visitors/OtherVisitor.cpp, src/visitors/OtherVisitor.hpp,
 	src/visitors/RigidBodyVisitor.cpp,
 	src/visitors/RigidBodyVisitor.hpp, src/visitors/ZconsVisitor.cpp,
-	src/visitors/ZconsVisitor.hpp, make/Makefile,
-	make/_files/style.css, samples/Makefile.in,
+	src/visitors/ZconsVisitor.hpp, make/Makefile, samples/Makefile.in,
 	samples/metals/Au-Core-Ag-Shell_Nanoparticle.in,
 	samples/metals/Au-Core-Ag-Shell_Nanoparticle.md,
 	samples/metals/Au_bulk_FBD.md, samples/metals/Au_bulk_voter.md,
