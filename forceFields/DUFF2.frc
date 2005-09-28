@@ -9,7 +9,8 @@ begin AtomTypes
 CH4		16.05		
 CH3		15.04		
 CH2		14.03		
-CH		13.02		
+CH		13.02
+DIP             9.00765		
 SSD		18.0153		
 SSD1            18.0153 
 SSD_E           18.0153
@@ -57,6 +58,7 @@ end AtomTypes
 
 begin DirectionalAtomTypes
 //Name		I_xx	I_yy	I_zz	(All moments in (amu*Ang^2)
+DIP             0.5     0.5     0
 SSD		1.7696	0.6145	1.1550  
 SSD1		1.7696	0.6145	1.1550  
 SSD_E		1.7696	0.6145	1.1550  
@@ -73,6 +75,7 @@ end GayBerneAtomTypes
 
 begin LennardJonesAtomTypes
 //Name	epsilon			sigma	
+DIP             0.038025        3.12
 SSD	  	0.152		3.051					
 SSD1      	0.152           3.016 
 SSD_E	 	0.152	        3.035
@@ -163,6 +166,7 @@ begin MultipoleAtomTypes
 // Quadrupole moments are given in units of 10^-26 esu cm^2 (also known as an
 //                                                           esu centi-barn)
 //
+DIP     d        0.0     0.0     0.0     1.91
 SSD_E   dq       0.0     0.0     0.0     2.42  -1.682  1.762  -0.08
 SSD_RF  dq       0.0     0.0     0.0     2.48  -1.682  1.762  -0.08
 SSD     dq       0.0     0.0     0.0     2.35  -1.682  1.762  -0.08
