@@ -273,8 +273,7 @@ namespace oopse {
       if (atoms_[i]->isDirectional()) {
           
 	dAtom = (DirectionalAtom *) atoms_[i];
-	dAtom->setA(a * refOrients_[i]);
-	//dAtom->rotateBy( A );      
+	dAtom->setA(refOrients_[i] * a);
       }
 
     }
@@ -301,7 +300,7 @@ namespace oopse {
       if (atoms_[i]->isDirectional()) {
           
 	dAtom = (DirectionalAtom *) atoms_[i];
-	dAtom->setA(a * refOrients_[i], frame);
+	dAtom->setA(refOrients_[i] * a, frame);
       }
 
     }
