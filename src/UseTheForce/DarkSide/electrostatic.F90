@@ -87,9 +87,9 @@ module electrostatic_module
   real(kind=dp), save :: rcuti2 = 0.0_dp
   real(kind=dp), save :: rcuti3 = 0.0_dp
   real(kind=dp), save :: rcuti4 = 0.0_dp
-  logical, save :: is_Undamped_Wolf = .false.
-  logical, save :: is_Damped_Wolf = .false.
-
+  real(kind=dp), save :: alphaPi = 0.0_dp
+  real(kind=dp), save :: invRootPi = 0.0_dp
+  
 #ifdef __IFC
 ! error function for ifc version > 7.
   double precision, external :: derfc
@@ -136,8 +136,6 @@ contains
 
     summationMethod = the_ESM
 
-    if (summationMethod .eq. UNDAMPED_WOLF) is_Undamped_Wolf = .true.
-    if (summationMethod .eq. DAMPED_WOLF) is_Damped_Wolf = .true.
   end subroutine setElectrostaticSummationMethod
 
   subroutine setElectrostaticCutoffRadius(thisRcut) 
@@ -392,6 +390,8 @@ contains
 
           constEXP = exp(-dampingAlpha*dampingAlpha*defaultCutoff*defaultCutoff)
           constERFC = derfc(dampingAlpha*defaultCutoff)
+          invRootPi = 0.56418958354775628695d0
+          alphaPi = 2*dampingAlpha*invRootPi
           
           haveDWAconstants = .true.
        endif
@@ -447,6 +447,7 @@ contains
     real (kind=dp) :: xhat, yhat, zhat
     real (kind=dp) :: dudx, dudy, dudz
     real (kind=dp) :: scale, sc2, bigR
+    real (kind=dp) :: varERFC, varEXP
 
     if (.not.allocated(ElectrostaticMap)) then
        call handleError("electrostatic", "no ElectrostaticMap was present before first call of do_electrostatic_pair!")
@@ -616,7 +617,24 @@ contains
              vpair = vpair + vterm
              epot = epot + sw*vterm
              
-             dudr  = - sw * pre11 * q_i * q_j * (riji*riji*riji - rcuti2*rcuti)
+             dudr  = -sw*pre11*q_i*q_j * (riji*riji*riji - rcuti2*rcuti)
+             
+             dudx = dudx + dudr * d(1)
+             dudy = dudy + dudr * d(2)
+             dudz = dudz + dudr * d(3)
+
+          elseif (summationMethod .eq. DAMPED_WOLF) then
+
+             varERFC = derfc(dampingAlpha*rij)
+             varEXP = exp(-dampingAlpha*dampingAlpha*rij*rij)
+             vterm = pre11 * q_i * q_j * (varERFC*riji - constERFC*rcuti)
+             vpair = vpair + vterm
+             epot = epot + sw*vterm
+             
+             dudr  = -sw*pre11*q_i*q_j * ( riji*(varERFC*riji*riji &
+                                                 + alphaPi*varEXP) &
+                                         - rcuti*(constERFC*rcuti2 &
+                                                 + alphaPi*constEXP) )
              
              dudx = dudx + dudr * d(1)
              dudy = dudy + dudr * d(2)
