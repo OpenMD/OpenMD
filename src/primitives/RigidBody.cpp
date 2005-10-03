@@ -164,21 +164,22 @@ namespace oopse {
     }
 
     // Moment of Inertia calculation
-    Mat3x3d Itmp(0.0);
-  
+    Mat3x3d Itmp(0.0);    
     for (std::size_t i = 0; i < atoms_.size(); i++) {
+      Mat3x3d IAtom(0.0);  
       mtmp = atoms_[i]->getMass();
-      Itmp -= outProduct(refCoords_[i], refCoords_[i]) * mtmp;
+      IAtom -= outProduct(refCoords_[i], refCoords_[i]) * mtmp;
       double r2 = refCoords_[i].lengthSquare();
-      Itmp(0, 0) += mtmp * r2;
-      Itmp(1, 1) += mtmp * r2;
-      Itmp(2, 2) += mtmp * r2;
-    }
+      IAtom(0, 0) += mtmp * r2;
+      IAtom(1, 1) += mtmp * r2;
+      IAtom(2, 2) += mtmp * r2;
 
-    //project the inertial moment of directional atoms into this rigid body
-    for (std::size_t i = 0; i < atoms_.size(); i++) {
+      //project the inertial moment of directional atoms into this rigid body
       if (atoms_[i]->isDirectional()) {
-    	    Itmp += refOrients_[i].transpose() * atoms_[i]->getI() * refOrients_[i];
+        IAtom += atoms_[i]->getI();
+        Itmp += refOrients_[i].transpose() * IAtom * refOrients_[i];
+      } else {
+        Itmp += IAtom;
       }
     }
 

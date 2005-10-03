@@ -148,9 +148,9 @@ namespace oopse {
 
     for (int j = 0; j < 3; j++ ) {
 
-      grad[3] += torque[j]*ephi[j];
-      grad[4] += torque[j]*etheta[j];
-      grad[5] += torque[j]*epsi[j];
+      grad[3] -= torque[j]*ephi[j];
+      grad[4] -= torque[j]*etheta[j];
+      grad[5] -= torque[j]*epsi[j];
 
     }
     
