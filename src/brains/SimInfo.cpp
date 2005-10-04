@@ -83,7 +83,7 @@ namespace oopse {
       MoleculeStamp* molStamp;
       int nMolWithSameStamp;
       int nCutoffAtoms = 0; // number of atoms belong to cutoff groups
-      int nGroups = 0;          //total cutoff groups defined in meta-data file
+      int nGroups = 0;      //total cutoff groups defined in meta-data file
       CutoffGroupStamp* cgStamp;    
       RigidBodyStamp* rbStamp;
       int nRigidAtoms = 0;
@@ -108,6 +108,7 @@ namespace oopse {
         }
 
         nGroups += nCutoffGroupsInStamp * nMolWithSameStamp;
+
         nCutoffAtoms += nAtomsInGroups * nMolWithSameStamp;            
 
         //calculate atoms in rigid bodies
@@ -124,18 +125,21 @@ namespace oopse {
         
       }
 
-      //every free atom (atom does not belong to cutoff groups) is a cutoff group
-      //therefore the total number of cutoff groups in the system is equal to 
-      //the total number of atoms minus number of atoms belong to cutoff group defined in meta-data
-      //file plus the number of cutoff groups defined in meta-data file
+      //every free atom (atom does not belong to cutoff groups) is a cutoff 
+      //group therefore the total number of cutoff groups in the system is 
+      //equal to the total number of atoms minus number of atoms belong to 
+      //cutoff group defined in meta-data file plus the number of cutoff 
+      //groups defined in meta-data file
       nGlobalCutoffGroups_ = nGlobalAtoms_ - nCutoffAtoms + nGroups;
 
-      //every free atom (atom does not belong to rigid bodies) is an integrable object
-      //therefore the total number of  integrable objects in the system is equal to 
-      //the total number of atoms minus number of atoms belong to  rigid body defined in meta-data
-      //file plus the number of  rigid bodies defined in meta-data file
-      nGlobalIntegrableObjects_ = nGlobalAtoms_ - nRigidAtoms + nGlobalRigidBodies_;
-
+      //every free atom (atom does not belong to rigid bodies) is an 
+      //integrable object therefore the total number of integrable objects 
+      //in the system is equal to the total number of atoms minus number of 
+      //atoms belong to rigid body defined in meta-data file plus the number 
+      //of rigid bodies defined in meta-data file
+      nGlobalIntegrableObjects_ = nGlobalAtoms_ - nRigidAtoms 
+	                                        + nGlobalRigidBodies_;
+  
       nGlobalMols_ = molStampIds_.size();
 
 #ifdef IS_MPI    
@@ -662,7 +666,11 @@ namespace oopse {
 
 	totalMass = cg->getMass();
 	for(atom = cg->beginAtom(ai); atom != NULL; atom = cg->nextAtom(ai)) {
-	  mfact.push_back(atom->getMass()/totalMass);
+	  // Check for massless groups - set mfact to 1 if true
+	  if (totalMass != 0)
+	    mfact.push_back(atom->getMass()/totalMass);
+	  else
+	    mfact.push_back( 1.0 );
 	}
 
       }       

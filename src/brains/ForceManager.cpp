@@ -163,9 +163,9 @@ namespace oopse {
     CutoffGroup* cg;
     Vector3d com;
     std::vector<Vector3d> rcGroup;
-    
-    if(info_->getNCutoffGroups() > 0){
 
+    if(info_->getNCutoffGroups() > 0){
+ 
       for (mol = info_->beginMolecule(mi); mol != NULL; mol = info_->nextMolecule(mi)) {
         for(cg = mol->beginCutoffGroup(ci); cg != NULL; cg = mol->nextCutoffGroup(ci)) {
 	  cg->getCOM(com);
