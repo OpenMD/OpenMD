@@ -11,6 +11,7 @@ initialConfig = "./tp4.in";
 ensemble = NVE;
 forceField = "DUFF";
 electrostaticSummationMethod = "none";
+dampingAlpha = 0.25;
 dielectric = 80.0;
 cutoffRadius = 9.0;
 switchingRadius = 7.7;
@@ -28,5 +29,5 @@ useInitialExtendedSystemState = "false";
 
 //tempSet = "true";
 //thermalTime = 10;
-sampleTime = 1000;
-statusTime = 100;
+sampleTime = 100;
+statusTime = 10;

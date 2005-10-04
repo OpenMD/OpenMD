@@ -45,7 +45,7 @@
 
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: doForces.F90,v 1.49 2005-09-23 20:31:02 chuckv Exp $, $Date: 2005-09-23 20:31:02 $, $Name: not supported by cvs2svn $, $Revision: 1.49 $
+!! @version $Id: doForces.F90,v 1.50 2005-10-04 19:32:58 chrisfen Exp $, $Date: 2005-10-04 19:32:58 $, $Name: not supported by cvs2svn $, $Revision: 1.50 $
 
 
 module doForces
@@ -909,6 +909,7 @@ contains
                 endif
              end if
           enddo
+
        enddo outer
 
        if (update_nlist) then
