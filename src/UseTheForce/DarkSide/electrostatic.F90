@@ -392,7 +392,7 @@ contains
           constERFC = derfc(dampingAlpha*defaultCutoff)
           invRootPi = 0.56418958354775628695d0
           alphaPi = 2*dampingAlpha*invRootPi
-          
+  
           haveDWAconstants = .true.
        endif
     endif
@@ -448,6 +448,7 @@ contains
     real (kind=dp) :: dudx, dudy, dudz
     real (kind=dp) :: scale, sc2, bigR
     real (kind=dp) :: varERFC, varEXP
+    real (kind=dp) :: limScale
 
     if (.not.allocated(ElectrostaticMap)) then
        call handleError("electrostatic", "no ElectrostaticMap was present before first call of do_electrostatic_pair!")
@@ -471,7 +472,7 @@ contains
     !! some variables we'll need independent of electrostatic type:
 
     riji = 1.0d0 / rij
-
+   
     xhat = d(1) * riji
     yhat = d(2) * riji
     zhat = d(3) * riji
@@ -617,7 +618,7 @@ contains
              vpair = vpair + vterm
              epot = epot + sw*vterm
              
-             dudr  = -sw*pre11*q_i*q_j * (riji*riji*riji - rcuti2*rcuti)
+             dudr  = -sw*pre11*q_i*q_j * (riji*riji-rcuti2)*riji
              
              dudx = dudx + dudr * d(1)
              dudy = dudy + dudr * d(2)
@@ -631,10 +632,10 @@ contains
              vpair = vpair + vterm
              epot = epot + sw*vterm
              
-             dudr  = -sw*pre11*q_i*q_j * ( riji*(varERFC*riji*riji &
-                                                 + alphaPi*varEXP) &
-                                         - rcuti*(constERFC*rcuti2 &
-                                                 + alphaPi*constEXP) )
+             dudr  = -sw*pre11*q_i*q_j * ( riji*((varERFC*riji*riji &
+                                                  + alphaPi*varEXP) &
+                                                 - (constERFC*rcuti2 &
+                                                    + alphaPi*constEXP)) )
              
              dudx = dudx + dudr * d(1)
              dudy = dudy + dudr * d(2)
