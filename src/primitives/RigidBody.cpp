@@ -176,13 +176,15 @@ namespace oopse {
 
       //project the inertial moment of directional atoms into this rigid body
       if (atoms_[i]->isDirectional()) {
-        IAtom += atoms_[i]->getI();
-        Itmp += refOrients_[i].transpose() * IAtom * refOrients_[i];
+        //IAtom += atoms_[i]->getI();
+        Itmp += IAtom;
+        Itmp += refOrients_[i].transpose() * atoms_[i]->getI() * refOrients_[i];
       } else {
         Itmp += IAtom;
       }
     }
 
+    std::cout << Itmp <<std::endl;
     //diagonalize 
     Vector3d evals;
     Mat3x3d::diagonalize(Itmp, evals, sU_);
