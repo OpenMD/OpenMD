@@ -177,7 +177,6 @@ namespace oopse {
 
       //project the inertial moment of directional atoms into this rigid body
       if (atoms_[i]->isDirectional()) {
-        Itmp += IAtom;
         Itmp += refOrients_[i].transpose() * atoms_[i]->getI() * refOrients_[i];
       } 
     }
