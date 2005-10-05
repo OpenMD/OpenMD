@@ -59,7 +59,7 @@
 #include "utils/StringUtils.hpp"
 
 namespace oopse {
-
+  
   Molecule* MoleculeCreator::createMolecule(ForceField* ff, MoleculeStamp *molStamp,
 					    int stampId, int globalIndex, LocalIndexManager* localIndexMan) {
 
@@ -128,46 +128,29 @@ namespace oopse {
     }
 
     //every free atom is a cutoff group    
-    std::set<Atom*> allAtoms;
-    Molecule::AtomIterator ai;
+    std::vector<Atom*> freeAtoms;
+    std::vector<Atom*>::iterator ai;
+    std::vector<Atom*>::iterator fai;
 
     //add all atoms into allAtoms set
-    for(atom = mol->beginAtom(ai); atom != NULL; atom = mol->nextAtom(ai)) {
-      allAtoms.insert(atom);
+    for(atom = mol->beginAtom(fai); atom != NULL; atom = mol->nextAtom(fai)) {
+      freeAtoms.push_back(atom);
     }
 
     Molecule::CutoffGroupIterator ci;
     CutoffGroup* cg;
-    std::set<Atom*> cutoffAtoms;    
     
-    //add all of the atoms belong to cutoff groups into cutoffAtoms set
     for (cg = mol->beginCutoffGroup(ci); cg != NULL; cg = mol->nextCutoffGroup(ci)) {
 
       for(atom = cg->beginAtom(ai); atom != NULL; atom = cg->nextAtom(ai)) {
-	cutoffAtoms.insert(atom);
+           //erase the atoms belong to cutoff groups from freeAtoms vector
+           freeAtoms.erase(std::remove(freeAtoms.begin(), freeAtoms.end(), atom), freeAtoms.end());
       }
 
     }       
     
-    //find all free atoms (which do not belong to cutoff groups)  
-    //performs the "difference" operation from set theory,  the output range contains a copy of every
-    //element that is contained in [allAtoms.begin(), allAtoms.end()) and not contained in 
-    //[cutoffAtoms.begin(), cutoffAtoms.end()).
-    std::vector<Atom*> freeAtoms;    
-    std::set_difference(allAtoms.begin(), allAtoms.end(), cutoffAtoms.begin(), cutoffAtoms.end(),
-			std::back_inserter(freeAtoms));
-
-    if (freeAtoms.size() != allAtoms.size() - cutoffAtoms.size()) {
-      //Some atoms in rigidAtoms are not in allAtoms, something must be wrong
-      sprintf(painCave.errMsg, "Atoms in cutoff groups are not in the atom list of the same molecule");
-
-      painCave.isFatal = 1;
-      simError();        
-    }
-
     //loop over the free atoms and then create one cutoff group for every single free atom
-    std::vector<Atom*>::iterator fai;
-
+    
     for (fai = freeAtoms.begin(); fai != freeAtoms.end(); ++fai) {
       cutoffGroup = createCutoffGroup(mol, *fai);
       mol->addCutoffGroup(cutoffGroup);
