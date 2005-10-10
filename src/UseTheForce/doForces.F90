@@ -45,7 +45,7 @@
 
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: doForces.F90,v 1.50 2005-10-04 19:32:58 chrisfen Exp $, $Date: 2005-10-04 19:32:58 $, $Name: not supported by cvs2svn $, $Revision: 1.50 $
+!! @version $Id: doForces.F90,v 1.51 2005-10-10 21:20:46 chuckv Exp $, $Date: 2005-10-10 21:20:46 $, $Name: not supported by cvs2svn $, $Revision: 1.51 $
 
 
 module doForces
@@ -124,9 +124,14 @@ module doForces
   ! Bit hash to determine pair-pair interactions.
   integer, dimension(:,:), allocatable :: InteractionHash
   real(kind=dp), dimension(:), allocatable :: atypeMaxCutoff
-  real(kind=dp), dimension(:), allocatable :: groupMaxCutoff
-  integer, dimension(:), allocatable :: groupToGtype
-  real(kind=dp), dimension(:), allocatable :: gtypeMaxCutoff
+  real(kind=dp), dimension(:), allocatable, target :: groupMaxCutoffRow
+  real(kind=dp), dimension(:), pointer :: groupMaxCutoffCol
+
+  integer, dimension(:), allocatable, target :: groupToGtypeRow
+  integer, dimension(:), pointer :: groupToGtypeCol => null()
+
+  real(kind=dp), dimension(:), allocatable,target :: gtypeMaxCutoffRow
+  real(kind=dp), dimension(:), pointer :: gtypeMaxCutoffCol
   type ::gtypeCutoffs
      real(kind=dp) :: rcut 
      real(kind=dp) :: rcutsq 
@@ -260,9 +265,11 @@ contains
     logical :: GtypeFound
 
     integer :: myStatus, nAtypes,  i, j, istart, iend, jstart, jend
-    integer :: n_in_i, me_i, ia, g, atom1, nGroupTypes
+    integer :: n_in_i, me_i, ia, g, atom1
     integer :: nGroupsInRow
-    real(kind=dp):: thisSigma, bigSigma, thisRcut, tol, skin
+    integer :: nGroupsInCol
+    integer :: nGroupTypesRow,nGroupTypesCol
+    real(kind=dp):: thisSigma, bigSigma, thisRcut, tradRcut, tol, skin
     real(kind=dp) :: biggestAtypeCutoff
 
     stat = 0
@@ -276,6 +283,7 @@ contains
     endif
 #ifdef IS_MPI
     nGroupsInRow = getNgroupsInRow(plan_group_row)
+    nGroupsInCol = getNgroupsInCol(plan_group_col)
 #endif
     nAtypes = getSize(atypes)
 ! Set all of the initial cutoffs to zero.
@@ -332,32 +340,81 @@ contains
        endif
     enddo
   
-    nGroupTypes = 0
+
     
     istart = 1
+    jstart = 1
 #ifdef IS_MPI
     iend = nGroupsInRow
+    jend = nGroupsInCol
 #else
     iend = nGroups 
+    jend = nGroups
 #endif
     
     !! allocate the groupToGtype and gtypeMaxCutoff here.
-    if(.not.allocated(groupToGtype)) then
-       allocate(groupToGtype(iend))
-       allocate(groupMaxCutoff(iend))
-       allocate(gtypeMaxCutoff(iend))
-       groupMaxCutoff = 0.0_dp
-       gtypeMaxCutoff = 0.0_dp
+    if(.not.allocated(groupToGtypeRow)) then
+     !  allocate(groupToGtype(iend))
+       allocate(groupToGtypeRow(iend))
+    else
+       deallocate(groupToGtypeRow)
+       allocate(groupToGtypeRow(iend))
     endif
+    if(.not.allocated(groupMaxCutoffRow)) then
+       allocate(groupMaxCutoffRow(iend))
+    else
+       deallocate(groupMaxCutoffRow)
+       allocate(groupMaxCutoffRow(iend))
+    end if
+
+    if(.not.allocated(gtypeMaxCutoffRow)) then
+       allocate(gtypeMaxCutoffRow(iend))
+    else
+       deallocate(gtypeMaxCutoffRow)
+       allocate(gtypeMaxCutoffRow(iend))
+    endif
+
+
+#ifdef IS_MPI
+       ! We only allocate new storage if we are in MPI because Ncol /= Nrow
+    if(.not.allocated(groupToGtypeCol)) then
+       allocate(groupToGtypeCol(jend))
+    else
+       deallocate(groupToGtypeCol)
+       allocate(groupToGtypeCol(jend))
+    end if
+
+    if(.not.allocated(groupToGtypeCol)) then
+       allocate(groupToGtypeCol(jend))
+    else
+       deallocate(groupToGtypeCol)
+       allocate(groupToGtypeCol(jend))
+    end if
+    if(.not.allocated(gtypeMaxCutoffCol)) then
+       allocate(gtypeMaxCutoffCol(jend))
+    else
+       deallocate(gtypeMaxCutoffCol)       
+       allocate(gtypeMaxCutoffCol(jend))
+    end if
+
+       groupMaxCutoffCol = 0.0_dp
+       gtypeMaxCutoffCol = 0.0_dp
+
+#endif
+       groupMaxCutoffRow = 0.0_dp
+       gtypeMaxCutoffRow = 0.0_dp
+
+
     !! first we do a single loop over the cutoff groups to find the
     !! largest cutoff for any atypes present in this group.  We also
     !! create gtypes at this point.
     
     tol = 1.0d-6
-    
+    nGroupTypesRow = 0
+
     do i = istart, iend       
        n_in_i = groupStartRow(i+1) - groupStartRow(i)
-       groupMaxCutoff(i) = 0.0_dp
+       groupMaxCutoffRow(i) = 0.0_dp
        do ia = groupStartRow(i), groupStartRow(i+1)-1
           atom1 = groupListRow(ia)
 #ifdef IS_MPI
@@ -365,46 +422,93 @@ contains
 #else
           me_i = atid(atom1)
 #endif          
-          if (atypeMaxCutoff(me_i).gt.groupMaxCutoff(i)) then 
-             groupMaxCutoff(i)=atypeMaxCutoff(me_i)
+          if (atypeMaxCutoff(me_i).gt.groupMaxCutoffRow(i)) then 
+             groupMaxCutoffRow(i)=atypeMaxCutoff(me_i)
           endif          
        enddo
 
-       if (nGroupTypes.eq.0) then
-          nGroupTypes = nGroupTypes + 1
-          gtypeMaxCutoff(nGroupTypes) = groupMaxCutoff(i)
-          groupToGtype(i) = nGroupTypes
+       if (nGroupTypesRow.eq.0) then
+          nGroupTypesRow = nGroupTypesRow + 1
+          gtypeMaxCutoffRow(nGroupTypesRow) = groupMaxCutoffRow(i)
+          groupToGtypeRow(i) = nGroupTypesRow
        else
           GtypeFound = .false.
-          do g = 1, nGroupTypes
-             if ( abs(groupMaxCutoff(i) - gtypeMaxCutoff(g)).lt.tol) then
-                groupToGtype(i) = g
+          do g = 1, nGroupTypesRow
+             if ( abs(groupMaxCutoffRow(i) - gtypeMaxCutoffRow(g)).lt.tol) then
+                groupToGtypeRow(i) = g
                 GtypeFound = .true.
              endif
           enddo
           if (.not.GtypeFound) then             
-             nGroupTypes = nGroupTypes + 1
-             gtypeMaxCutoff(nGroupTypes) = groupMaxCutoff(i)
-             groupToGtype(i) = nGroupTypes
+             nGroupTypesRow = nGroupTypesRow + 1
+             gtypeMaxCutoffRow(nGroupTypesRow) = groupMaxCutoffRow(i)
+             groupToGtypeRow(i) = nGroupTypesRow
           endif
        endif
     enddo    
 
+#ifdef IS_MPI
+    do j = jstart, jend       
+       n_in_j = groupStartCol(j+1) - groupStartCol(j)
+       groupMaxCutoffCol(j) = 0.0_dp
+       do ja = groupStartCol(j), groupStartCol(j+1)-1
+          atom1 = groupListCol(ja)
+
+          me_j = atid_col(atom1)
+
+          if (atypeMaxCutoff(me_j).gt.groupMaxCutoffCol(j)) then 
+             groupMaxCutoffCol(j)=atypeMaxCutoff(me_j)
+          endif          
+       enddo
+
+       if (nGroupTypesCol.eq.0) then
+          nGroupTypesCol = nGroupTypesCol + 1
+          gtypeMaxCutoffCol(nGroupTypesCol) = groupMaxCutoffCol(j)
+          groupToGtypeCol(j) = nGroupTypesCol
+       else
+          GtypeFound = .false.
+          do g = 1, nGroupTypesCol
+             if ( abs(groupMaxCutoffCol(j) - gtypeMaxCutoffCol(g)).lt.tol) then
+                groupToGtypeCol(j) = g
+                GtypeFound = .true.
+             endif
+          enddo
+          if (.not.GtypeFound) then             
+             nGroupTypesCol = nGroupTypesCol + 1
+             gtypeMaxCutoffCol(nGroupTypesCol) = groupMaxCutoffCol(j)
+             groupToGtypeCol(j) = nGroupTypesCol
+          endif
+       endif
+    enddo    
+
+#else
+! Set pointers to information we just found
+    nGroupTypesCol = nGroupTypesRow
+    groupToGtypeCol => groupToGtypeRow
+    gtypeMaxCutoffCol => gtypeMaxCutoffRow
+    groupMaxCutoffCol => groupMaxCutoffRow
+#endif
+
+
+
+
+
     !! allocate the gtypeCutoffMap here.
-    allocate(gtypeCutoffMap(nGroupTypes,nGroupTypes))
+    allocate(gtypeCutoffMap(nGroupTypesRow,nGroupTypesCol))
     !! then we do a double loop over all the group TYPES to find the cutoff
     !! map between groups of two types
-    
-    do i = 1, nGroupTypes
-       do j = 1, nGroupTypes
+    tradRcut = max(maxval(gtypeMaxCutoffRow),maxval(gtypeMaxCutoffCol))
+
+    do i = 1, nGroupTypesRow
+       do j = 1, nGroupTypesCol
        
           select case(cutoffPolicy)
           case(TRADITIONAL_CUTOFF_POLICY)
-             thisRcut = maxval(gtypeMaxCutoff)
+             thisRcut = tradRcut
           case(MIX_CUTOFF_POLICY)
-             thisRcut = 0.5_dp * (gtypeMaxCutoff(i) + gtypeMaxCutoff(j))
+             thisRcut = 0.5_dp * (gtypeMaxCutoffRow(i) + gtypeMaxCutoffCol(j))
           case(MAX_CUTOFF_POLICY)
-             thisRcut = max(gtypeMaxCutoff(i), gtypeMaxCutoff(j))
+             thisRcut = max(gtypeMaxCutoffRow(i), gtypeMaxCutoffCol(j))
           case default
              call handleError("createGtypeCutoffMap", "Unknown Cutoff Policy")
              return
@@ -424,7 +528,16 @@ contains
           endif
        enddo
     enddo
-
+    if(allocated(gtypeMaxCutoffRow)) deallocate(gtypeMaxCutoffRow)
+    if(allocated(groupMaxCutoffRow)) deallocate(groupMaxCutoffRow)
+    if(allocated(atypeMaxCutoff)) deallocate(atypeMaxCutoff)
+#ifdef IS_MPI
+    if(associated(groupMaxCutoffCol)) deallocate(groupMaxCutoffCol)
+    if(associated(gtypeMaxCutoffCol)) deallocate(gtypeMaxCutoffCol)
+#endif
+    groupMaxCutoffCol => null()
+    gtypeMaxCutoffCol => null()
+    
     haveGtypeCutoffMap = .true.
    end subroutine createGtypeCutoffMap
 
@@ -788,7 +901,7 @@ contains
                   q_group(:,j), d_grp, rgrpsq)
 #endif      
 
-             if (rgrpsq < gtypeCutoffMap(groupToGtype(i),groupToGtype(j))%rListsq) then
+             if (rgrpsq < gtypeCutoffMap(groupToGtypeRow(i),groupToGtypeCol(j))%rListsq) then
                 if (update_nlist) then
                    nlist = nlist + 1
 
