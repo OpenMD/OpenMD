@@ -45,7 +45,7 @@
 
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: doForces.F90,v 1.51 2005-10-10 21:20:46 chuckv Exp $, $Date: 2005-10-10 21:20:46 $, $Name: not supported by cvs2svn $, $Revision: 1.51 $
+!! @version $Id: doForces.F90,v 1.52 2005-10-10 21:34:54 chuckv Exp $, $Date: 2005-10-10 21:34:54 $, $Name: not supported by cvs2svn $, $Revision: 1.52 $
 
 
 module doForces
@@ -265,7 +265,7 @@ contains
     logical :: GtypeFound
 
     integer :: myStatus, nAtypes,  i, j, istart, iend, jstart, jend
-    integer :: n_in_i, me_i, ia, g, atom1
+    integer :: n_in_i, me_i, ia, g, atom1, ja, n_in_j,me_j
     integer :: nGroupsInRow
     integer :: nGroupsInCol
     integer :: nGroupTypesRow,nGroupTypesCol
@@ -377,20 +377,20 @@ contains
 
 #ifdef IS_MPI
        ! We only allocate new storage if we are in MPI because Ncol /= Nrow
-    if(.not.allocated(groupToGtypeCol)) then
+    if(.not.associated(groupToGtypeCol)) then
        allocate(groupToGtypeCol(jend))
     else
        deallocate(groupToGtypeCol)
        allocate(groupToGtypeCol(jend))
     end if
 
-    if(.not.allocated(groupToGtypeCol)) then
+    if(.not.associated(groupToGtypeCol)) then
        allocate(groupToGtypeCol(jend))
     else
        deallocate(groupToGtypeCol)
        allocate(groupToGtypeCol(jend))
     end if
-    if(.not.allocated(gtypeMaxCutoffCol)) then
+    if(.not.associated(gtypeMaxCutoffCol)) then
        allocate(gtypeMaxCutoffCol(jend))
     else
        deallocate(gtypeMaxCutoffCol)       
