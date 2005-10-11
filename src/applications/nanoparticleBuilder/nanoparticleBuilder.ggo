@@ -1,0 +1,18 @@
+# Input file for gengetopt --generates cmdline.c and cmdline.h
+# for parsing command line arguments useing getopt and getoptlong.
+# gengetopt is available from:
+#  http://www.gnu.org/software/gengetopt/gengetopt.html
+package "nanoparticleBuilder"
+version "1.0"
+purpose "Builds spherical random or core-shell nanoparticles and outputs a xyz input file"
+
+# Options
+
+option "output"             o  "Output file name" string no
+option "latticetype"        - "Lattice type string. Valid types are fcc,hcp,bcc." string default="fcc" no
+option "latticeCnst"        -  "Lattice spacing in Angstroms for cubic lattice." double yes
+option "radius"             -  "Nanoparticle radius in Angstroms" double yes
+option "ShellRadius"    -  "Radius from the center of the particle to start a new shell in multi-component core-shell particle. Specified for each component > 1 in md file." double no multiple
+option "molFraction"          -  "(Default) Builds a multi-component random mixed nanoparticle. Mole Fraction must be specified for each componet > 1 in MD file." double no multiple
+option "vacancyPCT"         -  "Percentage of vacancies to build" double no
+option "vacancyRadius"      -  "Radius arround core-shell where vacancies should be located." double no multiple
