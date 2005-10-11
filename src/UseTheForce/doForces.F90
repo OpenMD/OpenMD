@@ -45,7 +45,7 @@
 
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: doForces.F90,v 1.52 2005-10-10 21:34:54 chuckv Exp $, $Date: 2005-10-10 21:34:54 $, $Name: not supported by cvs2svn $, $Revision: 1.52 $
+!! @version $Id: doForces.F90,v 1.53 2005-10-11 22:00:30 chuckv Exp $, $Date: 2005-10-11 22:00:30 $, $Name: not supported by cvs2svn $, $Revision: 1.53 $
 
 
 module doForces
@@ -185,9 +185,15 @@ contains
 
     if (.not. allocated(InteractionHash)) then
        allocate(InteractionHash(nAtypes,nAtypes))
+    else
+       deallocate(InteractionHash)
+       allocate(InteractionHash(nAtypes,nAtypes))
     endif
 
     if (.not. allocated(atypeMaxCutoff)) then
+       allocate(atypeMaxCutoff(nAtypes))
+    else
+       deallocate(atypeMaxCutoff)
        allocate(atypeMaxCutoff(nAtypes))
     endif
         
