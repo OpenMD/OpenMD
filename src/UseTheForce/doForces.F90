@@ -45,7 +45,7 @@
 
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: doForces.F90,v 1.56 2005-10-12 20:18:01 chuckv Exp $, $Date: 2005-10-12 20:18:01 $, $Name: not supported by cvs2svn $, $Revision: 1.56 $
+!! @version $Id: doForces.F90,v 1.57 2005-10-12 21:00:45 gezelter Exp $, $Date: 2005-10-12 21:00:45 $, $Name: not supported by cvs2svn $, $Revision: 1.57 $
 
 
 module doForces
@@ -749,13 +749,13 @@ contains
 
     !! Stress Tensor
     real( kind = dp), dimension(9) :: tau   
-    real ( kind = dp ),dimension(POT_ARRAY_SIZE) :: pot
+    real ( kind = dp ),dimension(LR_POT_TYPES) :: pot
     logical ( kind = 2) :: do_pot_c, do_stress_c
     logical :: do_pot
     logical :: do_stress
     logical :: in_switching_region
 #ifdef IS_MPI 
-    real( kind = DP ), dimension(POT_ARRAY_SIZE) :: pot_local
+    real( kind = DP ), dimension(LR_POT_TYPES) :: pot_local
     integer :: nAtomsInRow
     integer :: nAtomsInCol
     integer :: nprocs
@@ -1088,23 +1088,23 @@ contains
 
     if (do_pot) then
        ! scatter/gather pot_row into the members of my column
-       do i = 1,POT_ARRAY_SIZE
+       do i = 1,LR_POT_TYPES
           call scatter(pot_Row(i,:), pot_Temp(i,:), plan_atom_row)
        end do
        ! scatter/gather pot_local into all other procs
        ! add resultant to get total pot
        do i = 1, nlocal
-          pot_local(1:POT_ARRAY_SIZE) = pot_local(1:POT_ARRAY_SIZE) &
-               + pot_Temp(1:POT_ARRAY_SIZE,i)
+          pot_local(1:LR_POT_TYPES) = pot_local(1:LR_POT_TYPES) &
+               + pot_Temp(1:LR_POT_TYPES,i)
        enddo
 
        pot_Temp = 0.0_DP 
-       do i = 1,POT_ARRAY_SIZE
+       do i = 1,LR_POT_TYPES
           call scatter(pot_Col(i,:), pot_Temp(i,:), plan_atom_col)
        end do
        do i = 1, nlocal
-          pot_local(1:POT_ARRAY_SIZE) = pot_local(1:POT_ARRAY_SIZE)&
-               + pot_Temp(1:POT_ARRAY_SIZE,i)
+          pot_local(1:LR_POT_TYPES) = pot_local(1:LR_POT_TYPES)&
+               + pot_Temp(1:LR_POT_TYPES,i)
        enddo
 
     endif
@@ -1143,9 +1143,9 @@ contains
                 !! potential and torques:
                 call reaction_field_final(i, mu_i, eFrame, rfpot, t, do_pot)
 #ifdef IS_MPI
-                pot_local(RF_POT) = pot_local(RF_POT) + rfpot
+                pot_local(ELECTROSTATIC_POT) = pot_local(ELECTROSTATIC_POT) + rfpot
 #else
-                pot(RF_POT) = pot(RF_POT) + rfpot
+                pot(ELECTROSTATIC_POT) = pot(ELECTROSTATIC_POT) + rfpot
 
 #endif
              endif
@@ -1157,8 +1157,8 @@ contains
 #ifdef IS_MPI
 
     if (do_pot) then
-       pot(1:POT_ARRAY_SIZE) = pot(1:POT_ARRAY_SIZE) &
-            + pot_local(1:POT_ARRAY_SIZE)
+       pot(1:LR_POT_TYPES) = pot(1:LR_POT_TYPES) &
+            + pot_local(1:LR_POT_TYPES)
        !! we assume the c code will do the allreduce to get the total potential
        !! we could do it right here if we needed to...
     endif
@@ -1185,7 +1185,7 @@ contains
        eFrame, A, f, t, pot, vpair, fpair)
 
     real( kind = dp ) :: vpair, sw
-    real( kind = dp ), dimension(POT_ARRAY_SIZE) :: pot
+    real( kind = dp ), dimension(LR_POT_TYPES) :: pot
     real( kind = dp ), dimension(3) :: fpair
     real( kind = dp ), dimension(nLocal)   :: mfact
     real( kind = dp ), dimension(9,nLocal) :: eFrame
@@ -1217,7 +1217,8 @@ contains
     iHash = InteractionHash(me_i, me_j)
 
     if ( iand(iHash, LJ_PAIR).ne.0 ) then
-       call do_lj_pair(i, j, d, r, rijsq, sw, vpair, fpair, pot(LJ_POT), f, do_pot)
+       call do_lj_pair(i, j, d, r, rijsq, sw, vpair, fpair, &
+            pot(VDW_POT), f, do_pot)
     endif
 
     if ( iand(iHash, ELECTROSTATIC_PAIR).ne.0 ) then
@@ -1235,37 +1236,37 @@ contains
 
     if ( iand(iHash, STICKY_PAIR).ne.0 ) then
        call do_sticky_pair(i, j, d, r, rijsq, sw, vpair, fpair, &
-            pot(STICKY_POT), A, f, t, do_pot)
+            pot(HB_POT), A, f, t, do_pot)
     endif
 
     if ( iand(iHash, STICKYPOWER_PAIR).ne.0 ) then
        call do_sticky_power_pair(i, j, d, r, rijsq, sw, vpair, fpair, &
-            pot(STICKYPOWER_POT), A, f, t, do_pot)
+            pot(HB_POT), A, f, t, do_pot)
     endif
 
     if ( iand(iHash, GAYBERNE_PAIR).ne.0 ) then
        call do_gb_pair(i, j, d, r, rijsq, sw, vpair, fpair, &
-            pot(GAYBERNE_POT), A, f, t, do_pot)
+            pot(VDW_POT), A, f, t, do_pot)
     endif
     
     if ( iand(iHash, GAYBERNE_LJ).ne.0 ) then
  !      call do_gblj_pair(i, j, d, r, rijsq, sw, vpair, fpair, &
- !           pot(GAYBERNE_LJ_POT), A, f, t, do_pot)
+ !           pot(VDW_POT), A, f, t, do_pot)
     endif
 
     if ( iand(iHash, EAM_PAIR).ne.0 ) then       
-       call do_eam_pair(i, j, d, r, rijsq, sw, vpair, fpair, pot(EAM_POT), f, &
-            do_pot)
+       call do_eam_pair(i, j, d, r, rijsq, sw, vpair, fpair, &
+            pot(METALLIC_POT), f, do_pot)
     endif
 
     if ( iand(iHash, SHAPE_PAIR).ne.0 ) then       
        call do_shape_pair(i, j, d, r, rijsq, sw, vpair, fpair, &
-            pot(SHAPE_POT), A, f, t, do_pot)
+            pot(VDW_POT), A, f, t, do_pot)
     endif
 
     if ( iand(iHash, SHAPE_LJ).ne.0 ) then       
        call do_shape_pair(i, j, d, r, rijsq, sw, vpair, fpair, &
-            pot(SHAPE_LJ_POT), A, f, t, do_pot)
+            pot(VDW_POT), A, f, t, do_pot)
     endif
     
   end subroutine do_pair
@@ -1274,7 +1275,7 @@ contains
        do_pot, do_stress, eFrame, A, f, t, pot)
 
     real( kind = dp ) :: sw
-    real( kind = dp ), dimension(POT_ARRAY_SIZE) :: pot
+    real( kind = dp ), dimension(LR_POT_TYPES) :: pot
     real( kind = dp ), dimension(9,nLocal) :: eFrame
     real (kind=dp), dimension(9,nLocal) :: A
     real (kind=dp), dimension(3,nLocal) :: f
@@ -1309,10 +1310,10 @@ contains
 
   subroutine do_preforce(nlocal,pot)
     integer :: nlocal
-    real( kind = dp ),dimension(POT_ARRAY_SIZE) :: pot
+    real( kind = dp ),dimension(LR_POT_TYPES) :: pot
 
     if (FF_uses_EAM .and. SIM_uses_EAM) then
-       call calc_EAM_preforce_Frho(nlocal,pot(EAM_POT))
+       call calc_EAM_preforce_Frho(nlocal,pot(METALLIC_POT))
     endif
 
 

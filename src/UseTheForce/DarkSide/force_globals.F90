@@ -162,19 +162,19 @@ contains
        return
     endif
 
-    allocate(pot_row(POT_ARRAY_SIZE,nAtomsInRow),stat=alloc_stat)
+    allocate(pot_row(LR_POT_TYPES,nAtomsInRow),stat=alloc_stat)
     if (alloc_stat /= 0 ) then
        thisStat = -1
        return
     endif
 
-    allocate(pot_Col(POT_ARRAY_SIZE,nAtomsInCol),stat=alloc_stat)
+    allocate(pot_Col(LR_POT_TYPES,nAtomsInCol),stat=alloc_stat)
     if (alloc_stat /= 0 ) then
        thisStat = -1
        return
     endif
 
-    allocate(pot_Temp(POT_ARRAY_SIZE,nlocal),stat=alloc_stat)
+    allocate(pot_Temp(LR_POT_TYPES,nlocal),stat=alloc_stat)
     if (alloc_stat /= 0 ) then
        thisStat = -1
        return

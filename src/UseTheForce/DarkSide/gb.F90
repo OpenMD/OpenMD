@@ -408,8 +408,8 @@ contains
             
     if (do_pot) then
 #ifdef IS_MPI 
-       pot_row(GAYBERNE_POT,atom1) = pot_row(GAYBERNE_POT,atom1) + 2.0d0*eps*R126*sw
-       pot_col(GAYBERNE_POT,atom2) = pot_col(GAYBERNE_POT,atom2) + 2.0d0*eps*R126*sw
+       pot_row(VDW_POT,atom1) = pot_row(VDW_POT,atom1) + 2.0d0*eps*R126*sw
+       pot_col(VDW_POT,atom2) = pot_col(VDW_POT,atom2) + 2.0d0*eps*R126*sw
 #else
        pot = pot + 4.0*eps*R126*sw
 #endif

@@ -13,19 +13,13 @@
 #define SHAPE_LJ           256
 #define FLARB_PAIR         512
 
-#define POT_ARRAY_SIZE 11
+#define LR_POT_TYPES      4
 
-#define LJ_POT            1
+#define VDW_POT           1
 #define ELECTROSTATIC_POT 2
-#define STICKY_POT        3
-#define STICKYPOWER_POT   4
-#define GB_POT            5
-#define GB_LJ_POT         6
-#define EAM_POT           7
-#define SHAPE_POT         8
-#define SHAPE_LJ_POT      9
-#define FLARB_POT         10
-#define RF_POT            11
+#define HB_POT            3
+#define METALLIC_POT      4
+
 
 #endif
 #endif /*__C*/
@@ -43,20 +37,11 @@
   INTEGER, PARAMETER:: SHAPE_LJ           = 256
   INTEGER, PARAMETER:: FLARB_PAIR         = 512
 
-  INTEGER, PARAMETER:: POT_ARRAY_SIZE    =   10
+  INTEGER, PARAMETER:: LR_POT_TYPES      =   4
 
-  INTEGER, PARAMETER:: LJ_POT            =   1
+  INTEGER, PARAMETER:: VDW_POT           =   1
   INTEGER, PARAMETER:: ELECTROSTATIC_POT =   2
-  INTEGER, PARAMETER:: STICKY_POT        =   3
-  INTEGER, PARAMETER:: STICKYPOWER_POT   =   4
-  INTEGER, PARAMETER:: GAYBERNE_POT      =   5
-  INTEGER, PARAMETER:: GAYBERNE_LJ_POT   =   6
-  INTEGER, PARAMETER:: EAM_POT           =   7
-  INTEGER, PARAMETER:: SHAPE_POT         =   8
-  INTEGER, PARAMETER:: SHAPE_LJ_POT      =   9
-  INTEGER, PARAMETER:: FLARB_POT         =   10
-  INTEGER, PARAMETER:: RF_POT            =   11
-
-
+  INTEGER, PARAMETER:: HB_POT            =   3
+  INTEGER, PARAMETER:: METALLIC_POT      =   4
 
 #endif

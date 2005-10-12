@@ -39,7 +39,7 @@ subroutine doForceloop(q, q_group, A, eFrame, f, t, tau, pot, &
 
   !! Stress Tensor
   real( kind = dp), dimension(9) :: tau   
-  real ( kind = dp ),dimension(POT_ARRAY_SIZE) :: pot
+  real ( kind = dp ),dimension(LR_POT_TYPES) :: pot
   logical ( kind = 2) :: do_pot_c, do_stress_c
   integer :: error
 
