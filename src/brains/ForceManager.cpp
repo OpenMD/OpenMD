@@ -50,6 +50,8 @@
 #include "brains/ForceManager.hpp"
 #include "primitives/Molecule.hpp"
 #include "UseTheForce/doForces_interface.h"
+#define __C
+#include "UseTheForce/DarkSide/fInteractionMap.h"
 #include "utils/simError.h"
 namespace oopse {
 
@@ -180,11 +182,19 @@ namespace oopse {
     }
   
     //initialize data before passing to fortran
-    double longRangePotential = 0.0;
+    double longRangePotential[LR_POT_TYPES];
+    double lrPot = 0.0;
+    
     Mat3x3d tau;
     short int passedCalcPot = needPotential;
     short int passedCalcStress = needStress;
     int isError = 0;
+
+    for (int i=0; i<LR_POT_TYPES;i++){
+      longRangePotential[i]=0.0; //Initialize array
+    }
+
+
 
     doForceLoop( pos,
 		 rc,
@@ -193,7 +203,7 @@ namespace oopse {
 		 frc,
 		 trq,
 		 tau.getArrayPointer(),
-		 &longRangePotential, 
+		 longRangePotential, 
 		 &passedCalcPot,
 		 &passedCalcStress,
 		 &isError );
@@ -204,9 +214,13 @@ namespace oopse {
       painCave.isFatal = 1;
       simError();
     }
+    for (int i=0; i<LR_POT_TYPES;i++){
+      lrPot += longRangePotential[i]; //Quick hack
+    }
 
     //store the tau and long range potential    
-    curSnapshot->statData[Stats::LONG_RANGE_POTENTIAL] = longRangePotential;
+    curSnapshot->statData[Stats::LONG_RANGE_POTENTIAL] = lrPot;
+    //  curSnapshot->statData[Stats::LONG_RANGE_POTENTIAL] = longRangePotential;
     curSnapshot->statData.setTau(tau);
   }
 
