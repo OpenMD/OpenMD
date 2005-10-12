@@ -45,7 +45,7 @@
 
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: doForces.F90,v 1.54 2005-10-12 18:59:16 chuckv Exp $, $Date: 2005-10-12 18:59:16 $, $Name: not supported by cvs2svn $, $Revision: 1.54 $
+!! @version $Id: doForces.F90,v 1.55 2005-10-12 19:55:26 chuckv Exp $, $Date: 2005-10-12 19:55:26 $, $Name: not supported by cvs2svn $, $Revision: 1.55 $
 
 
 module doForces
@@ -1088,19 +1088,23 @@ contains
 
     if (do_pot) then
        ! scatter/gather pot_row into the members of my column
-       call scatter(pot_Row, pot_Temp, plan_atom_row)
-
+       do i = 1,POT_ARRAY_SIZE
+          call scatter(pot_Row(i,:), pot_Temp(i,:), plan_atom_row)
+       end do
        ! scatter/gather pot_local into all other procs
        ! add resultant to get total pot
        do i = 1, nlocal
-          pot_local = pot_local + pot_Temp(i)
+          pot_local(1:POT_ARRAY_SIZE) = pot_local(1:POT_ARRAY_SIZE &
+               + pot_Temp(1:POT_ARRAY_SIZE,i)
        enddo
 
        pot_Temp = 0.0_DP 
-
-       call scatter(pot_Col, pot_Temp, plan_atom_col)
+       do i = 1,POT_ARRAY_SIZE
+          call scatter(pot_Col(i,:), pot_Temp(i,:), plan_atom_col)
+       end do
        do i = 1, nlocal
-          pot_local = pot_local + pot_Temp(i)
+          pot_local(1:POT_ARRAY_SIZE) = pot_local(1:POT_ARRAY_SIZE)&
+               + pot_Temp(1:POT_ARRAY_SIZE,i)
        enddo
 
     endif
