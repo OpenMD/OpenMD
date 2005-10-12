@@ -181,6 +181,8 @@ namespace oopse {
       } 
     }
 
+    std::cout << Itmp << std::endl;
+
     //diagonalize 
     Vector3d evals;
     Mat3x3d::diagonalize(Itmp, evals, sU_);

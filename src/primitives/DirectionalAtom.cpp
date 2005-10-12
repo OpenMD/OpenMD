@@ -63,10 +63,10 @@ namespace oopse {
 
       if (nLinearAxis > 1) {
         sprintf( painCave.errMsg,
-		 "Directional Atom error.\n"
+		 "Directional Atom warning.\n"
 		 "\tOOPSE found more than one axis in this directional atom with a vanishing \n"
 		 "\tmoment of inertia.");
-        painCave.isFatal = 1;
+        painCave.isFatal = 0;
         simError();
       }
       
