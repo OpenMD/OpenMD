@@ -20,6 +20,10 @@ subroutine doForceloop(q, q_group, A, eFrame, f, t, tau, pot, &
   use definitions, ONLY: dp
   use simulation
   use doForces, ONLY: do_force_loop
+
+#define __FORTRAN90
+#include "UseTheForce/DarkSide/fInteractionMap.h"
+
   !! Position array provided by C, dimensioned by getNlocal
   real ( kind = dp ), dimension(3, nLocal) :: q
   !! molecular center-of-mass position array
@@ -35,7 +39,7 @@ subroutine doForceloop(q, q_group, A, eFrame, f, t, tau, pot, &
 
   !! Stress Tensor
   real( kind = dp), dimension(9) :: tau   
-  real ( kind = dp ) :: pot
+  real ( kind = dp ),dimension(POT_ARRAY_SIZE) :: pot
   logical ( kind = 2) :: do_pot_c, do_stress_c
   integer :: error
 
