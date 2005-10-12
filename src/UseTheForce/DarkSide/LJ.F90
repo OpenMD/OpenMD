@@ -43,7 +43,7 @@
 !! Calculates Long Range forces Lennard-Jones interactions.
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: LJ.F90,v 1.16 2005-09-21 23:45:48 chuckv Exp $, $Date: 2005-09-21 23:45:48 $, $Name: not supported by cvs2svn $, $Revision: 1.16 $
+!! @version $Id: LJ.F90,v 1.17 2005-10-12 18:59:16 chuckv Exp $, $Date: 2005-10-12 18:59:16 $, $Name: not supported by cvs2svn $, $Revision: 1.17 $
 
 
 module lj
@@ -58,6 +58,8 @@ module lj
 
   implicit none
   PRIVATE
+#define __FORTRAN90
+#include "UseTheForce/DarkSide/fInteractionMap.h"
 
   integer, parameter :: DP = selected_real_kind(15)
 
@@ -413,8 +415,8 @@ contains
 
 #ifdef IS_MPI
     if (do_pot) then
-       pot_Row(atom1) = pot_Row(atom1) + sw*pot_temp*0.5
-       pot_Col(atom2) = pot_Col(atom2) + sw*pot_temp*0.5
+       pot_Row(LJ_POT,atom1) = pot_Row(LJ_POT,atom1) + sw*pot_temp*0.5
+       pot_Col(LJ_POT,atom2) = pot_Col(LJ_POT,atom2) + sw*pot_temp*0.5
     endif
 
     f_Row(1,atom1) = f_Row(1,atom1) + fx 

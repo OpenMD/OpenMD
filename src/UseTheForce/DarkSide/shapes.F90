@@ -55,7 +55,8 @@ module shapes
   implicit none
 
   PRIVATE
-
+#define __FORTRAN90
+#include "UseTheForce/DarkSide/fInteractionMap.h"
   INTEGER, PARAMETER:: CHEBYSHEV_TN = 1
   INTEGER, PARAMETER:: CHEBYSHEV_UN = 2
   INTEGER, PARAMETER:: LAGUERRE     = 3
@@ -1151,8 +1152,8 @@ contains
     vpair = vpair + pot_temp
     if (do_pot) then
 #ifdef IS_MPI
-       pot_row(atom1) = pot_row(atom1) + 0.5d0*pot_temp*sw
-       pot_col(atom2) = pot_col(atom2) + 0.5d0*pot_temp*sw
+       pot_row(SHAPES_POT,atom1) = pot_row(SHAPES_POT,atom1) + 0.5d0*pot_temp*sw
+       pot_col(SHAPES_POT,atom2) = pot_col(SHAPES_POT,atom2) + 0.5d0*pot_temp*sw
 #else
        pot = pot + pot_temp*sw
 #endif

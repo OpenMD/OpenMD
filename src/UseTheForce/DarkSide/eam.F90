@@ -50,6 +50,8 @@ module eam
 #endif
   implicit none
   PRIVATE
+#define __FORTRAN90
+#include "UseTheForce/DarkSide/fInteractionMap.h"
 
   INTEGER, PARAMETER :: DP = selected_real_kind(15)
 
@@ -862,8 +864,8 @@ contains
 
 #ifdef IS_MPI
        if (do_pot) then
-          pot_Row(atom1) = pot_Row(atom1) + phab*0.5
-          pot_Col(atom2) = pot_Col(atom2) + phab*0.5
+          pot_Row(EAM_POT,atom1) = pot_Row(EAM_POT,atom1) + phab*0.5
+          pot_Col(EAM_POT,atom2) = pot_Col(EAM_POT,atom2) + phab*0.5
        end if
 
        f_Row(1,atom1) = f_Row(1,atom1) + fx

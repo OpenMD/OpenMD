@@ -54,8 +54,11 @@ module electrostatic_module
 
   PRIVATE
 
+
 #define __FORTRAN90
+#include "UseTheForce/DarkSide/fInteractionMap.h"
 #include "UseTheForce/DarkSide/fElectrostaticSummationMethod.h"
+
 
   !! these prefactors convert the multipole interactions into kcal / mol
   !! all were computed assuming distances are measured in angstroms
@@ -1081,8 +1084,8 @@ contains
 
     if (do_pot) then
 #ifdef IS_MPI 
-       pot_row(atom1) = pot_row(atom1) + 0.5d0*epot
-       pot_col(atom2) = pot_col(atom2) + 0.5d0*epot
+       pot_row(ELECTROSTATIC_POT,atom1) = pot_row(ELECTROSTATIC_POT,atom1) + 0.5d0*epot
+       pot_col(ELECTROSTATIC_POT,atom2) = pot_col(ELECTROSTATIC_POT,atom2) + 0.5d0*epot
 #else
        pot = pot + epot
 #endif

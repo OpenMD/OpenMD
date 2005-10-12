@@ -50,6 +50,8 @@ module force_globals
 
   implicit none
   PRIVATE
+#define __FORTRAN90
+#include "UseTheForce/DarkSide/fInteractionMap.h"
 
   logical, save :: force_globals_initialized = .false.
 
@@ -63,9 +65,9 @@ module force_globals
   real( kind = dp ), allocatable, dimension(:,:), public :: A_Row
   real( kind = dp ), allocatable, dimension(:,:), public :: A_Col
 
-  real( kind = dp ), allocatable, dimension(:), public :: pot_Row
-  real( kind = dp ), allocatable, dimension(:), public :: pot_Col
-  real( kind = dp ), allocatable, dimension(:), public :: pot_Temp
+  real( kind = dp ), allocatable, dimension(:,:), public :: pot_Row
+  real( kind = dp ), allocatable, dimension(:,:), public :: pot_Col
+  real( kind = dp ), allocatable, dimension(:,:), public :: pot_Temp
   real( kind = dp ), allocatable, dimension(:,:), public :: f_Row
   real( kind = dp ), allocatable, dimension(:,:), public :: f_Col
   real( kind = dp ), allocatable, dimension(:,:), public :: f_Temp
@@ -160,19 +162,19 @@ contains
        return
     endif
 
-    allocate(pot_row(nAtomsInRow),stat=alloc_stat)
+    allocate(pot_row(POT_ARRAY_SIZE,nAtomsInRow),stat=alloc_stat)
     if (alloc_stat /= 0 ) then
        thisStat = -1
        return
     endif
 
-    allocate(pot_Col(nAtomsInCol),stat=alloc_stat)
+    allocate(pot_Col(POT_ARRAY_SIZE,nAtomsInCol),stat=alloc_stat)
     if (alloc_stat /= 0 ) then
        thisStat = -1
        return
     endif
 
-    allocate(pot_Temp(nlocal),stat=alloc_stat)
+    allocate(pot_Temp(POT_ARRAY_SIZE,nlocal),stat=alloc_stat)
     if (alloc_stat /= 0 ) then
        thisStat = -1
        return

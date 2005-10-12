@@ -50,7 +50,7 @@
 !! @author Matthew Meineke
 !! @author Christopher Fennell
 !! @author J. Daniel Gezelter
-!! @version $Id: sticky.F90,v 1.14 2005-08-26 21:30:41 chrisfen Exp $, $Date: 2005-08-26 21:30:41 $, $Name: not supported by cvs2svn $, $Revision: 1.14 $
+!! @version $Id: sticky.F90,v 1.15 2005-10-12 18:59:16 chuckv Exp $, $Date: 2005-10-12 18:59:16 $, $Name: not supported by cvs2svn $, $Revision: 1.15 $
 
 module sticky
 
@@ -66,6 +66,8 @@ module sticky
   implicit none
 
   PRIVATE
+#define __FORTRAN90
+#include "UseTheForce/DarkSide/fInteractionMap.h"
 
   public :: newStickyType
   public :: do_sticky_pair
@@ -306,8 +308,8 @@ contains
        vpair = vpair + 0.5d0*(v0*s*w + v0p*sp*wp)
        if (do_pot) then
 #ifdef IS_MPI 
-          pot_row(atom1) = pot_row(atom1) + 0.25d0*(v0*s*w + v0p*sp*wp)*sw
-          pot_col(atom2) = pot_col(atom2) + 0.25d0*(v0*s*w + v0p*sp*wp)*sw
+          pot_row(STICKY_POT,atom1) = pot_row(STICKY_POT,atom1) + 0.25d0*(v0*s*w + v0p*sp*wp)*sw
+          pot_col(STICKY_POT,atom2) = pot_col(STICKY_POT,atom2) + 0.25d0*(v0*s*w + v0p*sp*wp)*sw
 #else
           pot = pot + 0.5d0*(v0*s*w + v0p*sp*wp)*sw
 #endif  
