@@ -10,18 +10,20 @@ CH4		16.05
 CH3		15.04		
 CH2		14.03		
 CH		13.02
-DIP             9.00765		
+DIP             9.00764		
 SSD		18.0153		
 SSD1            18.0153 
 SSD_E           18.0153
 SSD_RF          18.0153
 TAP		18.0153
+O_DIP3P		15.9994			
 O_TIP3P		15.9994			
 O_TIP4P		15.9994
 O_TIP4P-Ew      15.9994
 O_TIP5P		15.9994	
 O_SPCE		15.9994
 O_SPC		15.9994	
+H_DIP3P		1.0079
 H_TIP3P		1.0079
 H_TIP4P		1.0079
 H_TIP4P-Ew      1.0079
@@ -58,7 +60,8 @@ end AtomTypes
 
 begin DirectionalAtomTypes
 //Name		I_xx	I_yy	I_zz	(All moments in (amu*Ang^2)
-DIP             0.5     0.5     0
+H_DIP3P         0       0       0
+DIP             0.8202  0.8202  0
 SSD		1.7696	0.6145	1.1550  
 SSD1		1.7696	0.6145	1.1550  
 SSD_E		1.7696	0.6145	1.1550  
@@ -81,6 +84,7 @@ SSD1      	0.152           3.016
 SSD_E	 	0.152	        3.035
 SSD_RF    	0.152           3.019
 TAP	  	0.152		2.9 
+O_DIP3P   	0.1521          3.15061 
 O_TIP3P   	0.1521          3.15061 
 O_TIP4P   	0.1550          3.15365 
 O_TIP4P-Ew      0.16275         3.16435
@@ -166,6 +170,7 @@ begin MultipoleAtomTypes
 // Quadrupole moments are given in units of 10^-26 esu cm^2 (also known as an
 //                                                           esu centi-barn)
 //
+H_DIP3P d        0.0     0.0     0.0     1.91
 DIP     d        0.0     0.0     0.0     1.91
 SSD_E   dq       0.0     0.0     0.0     2.42  -1.682  1.762  -0.08
 SSD_RF  dq       0.0     0.0     0.0     2.48  -1.682  1.762  -0.08
