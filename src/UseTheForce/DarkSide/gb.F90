@@ -51,6 +51,8 @@ module gb_pair
   implicit none
 
   PRIVATE
+#define __FORTRAN90
+#include "UseTheForce/DarkSide/fInteractionMap.h"
 
   logical, save :: gb_pair_initialized = .false.
   real(kind=dp), save :: gb_sigma

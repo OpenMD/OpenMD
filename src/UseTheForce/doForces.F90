@@ -45,7 +45,7 @@
 
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: doForces.F90,v 1.55 2005-10-12 19:55:26 chuckv Exp $, $Date: 2005-10-12 19:55:26 $, $Name: not supported by cvs2svn $, $Revision: 1.55 $
+!! @version $Id: doForces.F90,v 1.56 2005-10-12 20:18:01 chuckv Exp $, $Date: 2005-10-12 20:18:01 $, $Name: not supported by cvs2svn $, $Revision: 1.56 $
 
 
 module doForces
@@ -1094,7 +1094,7 @@ contains
        ! scatter/gather pot_local into all other procs
        ! add resultant to get total pot
        do i = 1, nlocal
-          pot_local(1:POT_ARRAY_SIZE) = pot_local(1:POT_ARRAY_SIZE &
+          pot_local(1:POT_ARRAY_SIZE) = pot_local(1:POT_ARRAY_SIZE) &
                + pot_Temp(1:POT_ARRAY_SIZE,i)
        enddo
 
@@ -1157,8 +1157,8 @@ contains
 #ifdef IS_MPI
 
     if (do_pot) then
-       pot(1:SIZE_POT_ARRAY) = pot(1:SIZE_POT_ARRAY) &
-            + pot_local(1:SIZE_POT_ARRAY)
+       pot(1:POT_ARRAY_SIZE) = pot(1:POT_ARRAY_SIZE) &
+            + pot_local(1:POT_ARRAY_SIZE)
        !! we assume the c code will do the allreduce to get the total potential
        !! we could do it right here if we needed to...
     endif

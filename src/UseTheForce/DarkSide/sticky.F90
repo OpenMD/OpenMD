@@ -50,7 +50,7 @@
 !! @author Matthew Meineke
 !! @author Christopher Fennell
 !! @author J. Daniel Gezelter
-!! @version $Id: sticky.F90,v 1.15 2005-10-12 18:59:16 chuckv Exp $, $Date: 2005-10-12 18:59:16 $, $Name: not supported by cvs2svn $, $Revision: 1.15 $
+!! @version $Id: sticky.F90,v 1.16 2005-10-12 20:18:17 chuckv Exp $, $Date: 2005-10-12 20:18:17 $, $Name: not supported by cvs2svn $, $Revision: 1.16 $
 
 module sticky
 
@@ -682,8 +682,8 @@ contains
        
        if (do_pot) then
 #ifdef IS_MPI 
-         pot_row(atom1) = pot_row(atom1) + 0.25d0*(v0*s*w)*sw
-         pot_col(atom2) = pot_col(atom2) + 0.25d0*(v0*s*w)*sw
+         pot_row(STICKY_POT,atom1) = pot_row(STICKY_POT,atom1) + 0.25d0*(v0*s*w)*sw
+         pot_col(STICKY_POT,atom2) = pot_col(STICKY_POT,atom2) + 0.25d0*(v0*s*w)*sw
 #else
          pot = pot + 0.5d0*(v0*s*w)*sw
 #endif  

@@ -1152,8 +1152,8 @@ contains
     vpair = vpair + pot_temp
     if (do_pot) then
 #ifdef IS_MPI
-       pot_row(SHAPES_POT,atom1) = pot_row(SHAPES_POT,atom1) + 0.5d0*pot_temp*sw
-       pot_col(SHAPES_POT,atom2) = pot_col(SHAPES_POT,atom2) + 0.5d0*pot_temp*sw
+       pot_row(SHAPE_POT,atom1) = pot_row(SHAPE_POT,atom1) + 0.5d0*pot_temp*sw
+       pot_col(SHAPE_POT,atom2) = pot_col(SHAPE_POT,atom2) + 0.5d0*pot_temp*sw
 #else
        pot = pot + pot_temp*sw
 #endif
