@@ -55,7 +55,7 @@ namespace oopse {
     }
 
     Globals* simParam = info_->getSimParams();
-    int nZconstraints = simParam->getNzConstraints();
+    int nZconstraints = simParam->getNZconstraints();
     ZconStamp** stamp = simParam->getZconStamp();
     for (int i = 0; i < nZconstraints; i++){
       allZmols_.push_back(stamp[i]->getMolIndex());

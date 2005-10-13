@@ -53,269 +53,218 @@
 #include "types/Component.hpp"
 #include "types/MakeStamps.hpp"
 #include "types/ZconStamp.hpp"
+#include "utils/CaseConversion.hpp"
 
+template<typename T> 
+struct ParameterTraits;
 
+//string
+template<>                     
+struct ParameterTraits<std::string>{
+  typedef std::string RepType;       // Representation type of the value
 
-/**
- * @class Globals Globals.hpp "io/Globals.hpp"
- * @brief parsing and storing global parameters for simulation 
- * @todo need refactorying
- */
-class Globals{
-  
- public:
-  
-  Globals();
-  ~Globals();
-
-  void initalize();
-  
-  int newComponent( event* the_event );
-  int componentAssign( event* the_event );
-  int componentEnd( event* the_event );
-
-  int newZconstraint( event* the_event );
-  int zConstraintAssign( event* the_event );
-  int zConstraintEnd( event* the_event );
-  
-  int globalAssign( event* the_event );
-  int globalEnd( event* the_event );
- 
-  char*  getForceField( void )      { return force_field; }
-  int    getNComponents( void )     { return n_components; }
-  double getTargetTemp( void )      { return target_temp; }
-  double getTargetPressure( void )  { return target_pressure; }
-  double getQmass( void )           { return q_mass; }
-  double getTauThermostat( void )   { return tau_thermostat; }
-  double getTauBarostat( void )     { return tau_barostat; }
-  char*  getEnsemble( void )        { return ensemble; }
-  double getDt( void )              { return dt; }
-  double getRunTime( void )         { return run_time; }
- 
-  int    getNzConstraints( void )   { return n_zConstraints; }
-  char*  getInitialConfig( void )   { return initial_config; }
-  char*  getFinalConfig( void )     { return final_config; }
-  int    getNMol( void )            { return n_mol; }
-  double getDensity( void )         { return density; }
-  double getBox( void )             { return box; }
-  double getBoxX( void )            { return box_x; }
-  double getBoxY( void )            { return box_y; }
-  double getBoxZ( void )            { return box_z; }
-  double getSampleTime( void )      { return sample_time; }
-  double getStatusTime( void )      { return status_time; }
-  double getResetTime( void )       { return resetTime; }
-  double getThermalTime( void )     { return thermal_time; }
-  double getDielectric( void )      { return dielectric; }
-  double getRcut( void )            { return rcut; }
-  double getRsw( void )             { return rsw; }
-  double getSkinThickness(void)     { return skinThickness;}
-  int    getTempSet( void )         { return tempSet; }
-  int    getUseInitTime( void )     { return useInitTime; }
-  int    getUseInitXSstate( void )  { return useInitXSstate; }
-  double getOrthoBoxTolerance(void) { return orthoBoxTolerance; }
-  int    getPBC( void )             { return usePBC; }
-  char*  getMixingRule( void)       { return mixingRule; }
-  double getZconsTime(void)         { return zcons_time; }
-  double getZconsTol(void)          { return zcons_tol; }
-  char*  getZconsForcePolicy(void)  { return zconsForcePolicy; }
-  double getZconsGap(void)          { return zcons_gap; }
-  double getZconsFixtime(void)      { return zcons_fixtime; }
-  int    getZconsUsingSMD(void)     { return zcons_using_smd; }
-  int    getSeed(void)              { return seed; }
-  char*  getMinimizer(void)         { return minimizer_name; }
-  int    getMinMaxIter(void)        { return minimizer_maxiteration; }
-  int    getMinWriteFrq(void)       { return minimizer_writefrq; }
-  double getMinStepSize(void)       { return minimizer_stepsize; }
-  double getMinFTol(void)           { return minimizer_ftol; }
-  double getMinGTol(void)           { return minimizer_gtol; }
-  double getMinLSTol(void)          { return minimizer_ls_tol; }
-  int    getMinLSMaxIter(void)      { return minimizer_ls_maxiteration; }
-  int    getUseSolidThermInt(void)  { return useSolidThermInt; }
-  int    getUseLiquidThermInt(void) { return useLiquidThermInt; }
-  double getThermIntLambda(void)    { return thermodynamic_integration_lambda; }
-  double getThermIntK(void)         { return thermodynamic_integration_k; }
-  char*  getForceFieldVariant( void ) { return forcefield_variant; }
-  char*  getForceFieldFileName()    { return forcefield_filename; }
-  double getDistSpringConst(void)   { return therm_int_dist_spring; }
-  double getThetaSpringConst(void)  { return therm_int_theta_spring; }
-  double getOmegaSpringConst(void)  { return therm_int_omega_spring; }
-  double getSurfaceTension(void)    { return surface_tension; }
-  bool   getPrintPressureTensor(void) { return print_pressure_tensor;}
-  char*  getElectrostaticSummationMethod(void) { return electrostaticSummationMethod; }
-  double getDampingAlpha(void)      { return dampingAlpha; }
-  char*  getCutoffPolicy(void)      { return cutoffPolicy; }
-  bool   getCompressDumpFile(void)  { return compressDumpFile;}
-  
-  short int haveDt( void )            { return have_dt; }
-  short int haveRunTime( void )       { return have_run_time; }
-  short int haveEnsemble( void )      { return have_ensemble; }
-  short int haveTargetTemp( void )    { return have_target_temp; }
-  short int haveInitialConfig( void ) { return have_initial_config; }
-  short int haveFinalConfig( void )   { return have_final_config; }
-  short int haveNMol( void )          { return have_n_mol; }
-  short int haveDensity( void )       { return have_density; }
-  short int haveBox( void )           { return have_box; }
-  short int haveBoxX( void )          { return have_box_x; }
-  short int haveBoxY( void )          { return have_box_y; }
-  short int haveBoxZ( void )          { return have_box_z; }
-  short int haveSampleTime( void )    { return have_sample_time; }
-  short int haveResetTime( void )     { return have_reset_time; }
-  short int haveStatusTime( void )    { return have_status_time; }
-  short int haveThermalTime( void )   { return have_thermal_time; }
-  short int haveRcut( void )          { return have_rcut; }
-  short int haveRsw( void )           { return have_rsw; }
-  short int haveDielectric( void )    { return have_dielectric; }
-  short int haveTempSet( void )       { return have_tempSet; }
-  short int haveTargetPressure( void ){ return have_target_pressure; }
-  short int haveQmass( void )         { return have_q_mass; }
-  short int haveTauThermostat( void ) { return have_tau_thermostat; }
-  short int haveTauBarostat( void )   { return have_tau_barostat; }
-  short int haveZconstraintTime(void) { return have_zcons_time; }
-  short int haveZconstraints( void )  { return have_zConstraints; }
-  short int haveZconsTol(void)        { return have_zcons_tol; }
-  short int haveZconsForcePolicy(void){ return have_zcons_force_policy; }
-  short int haveZConsGap(void)        { return have_zcons_gap; }
-  short int haveZConsFixTime(void)    { return have_zcons_fixtime; }
-  short int haveZConsUsingSMD(void)   { return have_zcons_using_smd; }  
-  short int haveSeed(void)            { return have_seed; }
-  short int haveMinimizer(void)       { return have_minimizer; }
-  short int haveMinMaxIter(void)      { return have_minimizer_maxiteration; }
-  short int haveMinWriteFrq(void)     { return have_minimizer_writefrq; }
-  short int haveMinStepSize(void)     { return have_minimizer_stepsize; }
-  short int haveMinFTol(void)         { return have_minimizer_ftol; }
-  short int haveMinGTol(void)         { return have_minimizer_gtol; }
-  short int haveMinLSTol(void)        { return have_minimizer_ls_tol; }
-  short int haveMinLSMaxIter(void)    { return have_minimizer_ls_maxiteration;}
-  short int haveThermIntLambda(void)  { return have_thermodynamic_integration_lambda; }
-  short int haveThermIntK(void)       { return have_thermodynamic_integration_k; }
-  short int haveForceFieldVariant(void)  { return have_forcefield_variant; }
-  short int haveForceFieldFileName(void) { return have_forcefield_filename; }
-  short int haveDistSpringConst(void)    { return have_dist_spring_constant; }
-  short int haveThetaSpringConst(void)   { return have_theta_spring_constant; }
-  short int haveOmegaSpringConst(void)   { return have_omega_spring_constant; }
-  short int haveSurfaceTension(void)     { return have_surface_tension; }
-  short int havePrintPressureTensor(void) {return have_print_pressure_tensor;}
-  short int haveElectrostaticSummationMethod(void) {return have_electro_sum_method;}
-  short int haveDampingAlpha(void)       { return have_damping_alpha; }
-  short int haveCutoffPolicy(void)       { return have_cutoff_policy; }
-  short int haveCompressDumpfile(void)   { return have_compress_dumpfile; }
-  short int haveSkinThickness(void)      {return have_skin_thickness; }
-
-  /* other accessors */
-  Component** getComponents( void )   { return components; }
-  ZconStamp** getZconStamp( void )    { return zConstraints; }
-  
- private:
-  
-
-  typedef std::map<std::string, int> CommandMapType;
-  CommandMapType command_table;
-
-  
-  char* checkMe( void );
-  
-  Component* current_component;
-  Component** components; // the array of components
-
-  ZconStamp* current_zConstraint;
-  ZconStamp** zConstraints; // the array of zConstraints
-
-  char force_field[100];
-  int n_components;
-  int n_zConstraints;
-  double target_temp;
-  double target_pressure;
-  char ensemble[100];
-  char mixingRule[100];
-  double dt;
-  double run_time;
-  char initial_config[120];
-  char final_config[120];
-  int n_mol;
-  double density;
-  double box;
-  double box_x, box_y, box_z;
-  double sample_time;
-  double status_time;
-  double resetTime;
-  double orthoBoxTolerance;
-  double thermal_time;
-  double rcut;
-  double rsw;
-  double skinThickness;
-  double dielectric;
-  int tempSet;
-  int useInitTime;
-  int useInitXSstate;
-  int usePBC;
-  double q_mass;
-  double tau_thermostat;
-  double tau_barostat;
-  double zcons_time;	
-  double zcons_tol;
-  char zconsForcePolicy[100];
-  double zcons_gap;
-  double zcons_fixtime;
-  int zcons_using_smd;
-  
-  int seed;
-  char minimizer_name[100];
-  int minimizer_maxiteration;
-  int minimizer_writefrq;
-  double minimizer_stepsize;
-  double minimizer_ftol;
-  double minimizer_gtol;
-  double minimizer_ls_tol;
-  int minimizer_ls_maxiteration;
-  int useSolidThermInt;
-  int useLiquidThermInt;
-  double thermodynamic_integration_lambda;
-  double thermodynamic_integration_k;
-  char forcefield_variant[100];
-  char forcefield_filename[100];
-  double therm_int_dist_spring;
-  double therm_int_theta_spring;
-  double therm_int_omega_spring;
-  double surface_tension;
-  bool print_pressure_tensor;
-  char electrostaticSummationMethod[100];
-  double dampingAlpha;
-  char cutoffPolicy[100];
-  bool compressDumpFile;
-  
-  //required arguments
-  short int have_force_field, have_n_components, have_target_temp;
-  short int have_target_pressure, have_ensemble, have_dt, have_run_time;
-  
-  // optional arguments
-  short int have_initial_config, have_final_config, have_n_mol;
-  short int have_density, have_box, have_box_x, have_box_y, have_box_z;
-  short int have_sample_time, have_status_time, have_rcut, have_dielectric;
-  short int have_tempSet, have_thermal_time, have_rsw, have_q_mass;
-  short int have_tau_thermostat, have_tau_barostat;
-  short int have_zcons_time, have_zConstraints, have_n_zConstraints;
-  short int have_zcons_tol, have_seed;
-  short int have_zcons_force_policy, have_reset_time;
-  short int have_zcons_gap, have_zcons_fixtime;
-  short int have_zcons_using_smd;
-  short int have_minimizer, have_minimizer_maxiteration;
-  short int have_minimizer_writefrq, have_minimizer_stepsize;
-  short int have_minimizer_ftol, have_minimizer_gtol;
-  short int have_minimizer_ls_tol, have_minimizer_ls_maxiteration;
-  short int have_thermodynamic_integration_lambda;
-  short int have_thermodynamic_integration_k;
-  short int have_forcefield_variant;
-  short int have_forcefield_filename;  
-  short int have_dist_spring_constant;
-  short int have_theta_spring_constant;
-  short int have_omega_spring_constant;
-  short int have_surface_tension;
-  short int have_print_pressure_tensor;
-  short int have_electro_sum_method;
-  short int have_damping_alpha;
-  short int have_cutoff_policy;
-  short int have_compress_dumpfile;
-  short int have_skin_thickness;
+template<typename T> static bool    convert(T v, RepType& r){return false;} // !NB everything is ok
+template<typename T> static RepType convert(T v)            {RepType tmp; convert(v,tmp);return tmp;} 
+  static bool convert(RepType v, RepType& r) { r = v; return true;}
+}; 
+//bool
+template<>                     
+struct ParameterTraits<bool>{
+  typedef bool RepType;
+  template<typename T> static bool    convert(T, RepType&){return false;} 
+  template<typename T> static RepType convert(T v)        {RepType tmp; convert(v,tmp);return tmp;} 
+  static bool convert(std::string v, RepType& r) { 
+    oopse::toLower(v); 
+    bool result = false;
+    if (v == "true") {
+        r = true;
+        result = true;
+    } else if (v == "false") {
+        r = false;
+        result = true;
+    }
+    
+     return result;
+  }
 };
 
+//int   
+template<>
+struct ParameterTraits<int>{
+    typedef int RepType;
+    template<typename T> static bool    convert(T, RepType&){return false;} 
+    template<typename T> static RepType convert(T v)        {RepType tmp; convert(v,tmp);return tmp;} 
+    static bool convert(RepType v, RepType& r)            { r=v; return true;}
+};
+
+//double
+template<>                     
+struct ParameterTraits<double>{
+    typedef double RepType;
+    template<typename T> static bool    convert(T, RepType&){return false;} 
+    template<typename T> static RepType convert(T v)        {RepType tmp; convert(v,tmp);return tmp;} 
+    static bool convert(RepType v, RepType& r)            {r=v; return true;}
+    static bool convert(int v, RepType& r)                {r = static_cast<double>(v); return true;}
+};
+
+
+class ParameterBase {
+  public:    
+    ParameterBase() : keyword_(), optional_(false), defaultValue_(false), empty_(true) {}
+    bool isOptional() {return optional_;}
+    void setOptional(bool optional) {optional_ = optional;}
+    bool hasDefaultValue() {return defaultValue_;}
+    virtual bool isValid() { return true;}
+    const std::string& getKeyword() {return keyword_;}
+    void setKeyword(const std::string& keyword) { keyword_ = keyword;}
+    bool empty() {return empty_;}
+    virtual bool setData(std::string) = 0;
+    virtual bool setData(int) = 0;
+    virtual bool setData(double) = 0;
+    
+  protected:
+    std::string keyword_;
+    bool optional_;
+    bool defaultValue_;
+    bool empty_;
+};
+
+template<class ParamType>
+class Parameter : public ParameterBase{
+   public:    
+    typedef ParameterTraits<ParamType> ValueType;
+     void setDefaultValue(const ParamType& value) {data_ = value; defaultValue_ = true;}
+     ParamType getData() { return data_;}
+
+    virtual bool setData(std::string sval) {
+        return internalSetData<std::string>(sval);
+    }
+    virtual bool setData(int ial) {
+        return internalSetData<int>(ial);
+    }
+    
+    virtual bool setData(double dval) {
+        return internalSetData<double>(dval);
+    }
+
+   private: 
+     template<class T> bool internalSetData(T data) {
+        ParamType tmp;
+        bool result = ValueType::convert(data, tmp);
+        if (result) {
+            empty_ = false;
+            data_ = tmp;
+        }
+        return result;
+     }
+     
+   private:
+     ParamType data_;
+      
+};
+
+#define DeclareParameter(NAME, TYPE)         \
+    private:                                                   \
+      Parameter<TYPE> NAME;                                     \
+    public:                                                      \
+      bool have##NAME() { return !NAME.empty();}  \
+      TYPE get##NAME() { return NAME.getData();}
+
+
+class Globals {
+  public:
+    Globals();
+    
+  DeclareParameter(ForceField, std::string);
+  DeclareParameter(NComponents, int);  
+  DeclareParameter(TargetTemp, double);
+  DeclareParameter(Ensemble, std::string);
+  DeclareParameter(Dt, double);
+  DeclareParameter(RunTime, double);
+  DeclareParameter(InitialConfig, std::string);
+  DeclareParameter(FinalConfig, std::string);
+  DeclareParameter(NMol, int);
+  DeclareParameter(Density, double);
+  DeclareParameter(Box, double);
+  DeclareParameter(BoxX, double);
+  DeclareParameter(BoxY, double);
+  DeclareParameter(BoxZ, double);
+  DeclareParameter(SampleTime, double);
+  DeclareParameter(ResetTime, double);
+  DeclareParameter(StatusTime, double);
+  DeclareParameter(CutoffRadius, double);
+  DeclareParameter(SwitchingRadius, double);
+  DeclareParameter(Dielectric, double);
+  DeclareParameter(TempSet, bool);
+  DeclareParameter(ThermalTime, double);
+  DeclareParameter(MixingRule, std::string);
+  DeclareParameter(UsePeriodicBoundaryConditions, bool);
+  DeclareParameter(TargetPressure, double);
+  DeclareParameter(TauThermostat, double);
+  DeclareParameter(TauBarostat, double);
+  DeclareParameter(ZconsTime, double);
+  DeclareParameter(NZconstraints, int);
+  DeclareParameter(ZconsTol, double);
+  DeclareParameter(ZconsForcePolicy, std::string);
+  DeclareParameter(Seed, int);
+  DeclareParameter(UseInitalTime, bool);
+  DeclareParameter(UseIntialExtendedSystemState, bool);
+  DeclareParameter(OrthoBoxTolerance, double);
+  DeclareParameter(Minimizer, std::string);
+  DeclareParameter(MinimizerMaxIter, double);
+  DeclareParameter(MinimizerWriteFrq, int);
+  DeclareParameter(MinimizerStepSize, double);
+  DeclareParameter(MinimizerFTol, double);
+  DeclareParameter(MinimizerGTol, double);
+  DeclareParameter(MinimizerLSTol, double);
+  DeclareParameter(MinimizerLSMaxIter, int);
+  DeclareParameter(ZconsGap, double);
+  DeclareParameter(ZconsFixtime, double);
+  DeclareParameter(ZconsUsingSMD, bool);
+  DeclareParameter(UseSolidThermInt, bool);
+  DeclareParameter(UseLiquidThermInt, bool);
+  DeclareParameter(ThermodynamicIntegrationLambda, double);
+  DeclareParameter(ThermodynamicIntegrationK, double);
+  DeclareParameter(ForceFieldVariant, std::string);
+  DeclareParameter(ForceFieldFileName, std::string);
+  DeclareParameter(ThermIntDistSpringConst, double);
+  DeclareParameter(ThermIntThetaSpringConst, double);
+  DeclareParameter(ThermIntOmegaSpringConst, double);
+  DeclareParameter(SurfaceTension, double);
+  DeclareParameter(PrintPressureTensor, bool);
+  DeclareParameter(ElectrostaticSummationMethod, std::string);
+  DeclareParameter(DampingAlpha, double);
+  DeclareParameter(CutoffPolicy, std::string);
+  DeclareParameter(CompressDumpFile, bool);
+  DeclareParameter(SkinThickness, double);
+  DeclareParameter(StatFileFormat, std::string);    
+
+  private:
+    typedef std::map<std::string, ParameterBase*> ParamMap;
+    ParamMap parameters_;
+    
+    Component* current_component;
+    Component** components; // the array of components
+
+    ZconStamp* current_zConstraint;
+    ZconStamp** zConstraints; // the array of zConstraints
+
+    char* checkMe();
+
+  public:
+    int newComponent( event* the_event );
+    int componentAssign( event* the_event );
+    int componentEnd( event* the_event );
+
+    int newZconstraint( event* the_event );
+    int zConstraintAssign( event* the_event );
+    int zConstraintEnd( event* the_event );
+  
+    int globalAssign( event* the_event );
+    int globalEnd( event* the_event );    
+
+    ZconStamp** getZconStamp() {return zConstraints;}
+    Component** getComponents() {return components;}
+};
 #endif
+

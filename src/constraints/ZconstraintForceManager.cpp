@@ -59,7 +59,7 @@ namespace oopse {
       simError();    
     }
 
-    if (simParam->haveZconstraintTime()){
+    if (simParam->haveZconsTime()){
       zconsTime_ = simParam->getZconsTime();
     }
     else{
@@ -85,7 +85,7 @@ namespace oopse {
     }
 
     //set zcons gap
-    if (simParam->haveZConsGap()){
+    if (simParam->haveZconsGap()){
       usingZconsGap_ = true;
       zconsGap_ = simParam->getZconsGap();
     }else {
@@ -94,14 +94,14 @@ namespace oopse {
     }
 
     //set zcons fixtime
-    if (simParam->haveZConsFixTime()){
+    if (simParam->haveZconsFixtime()){
       zconsFixingTime_ = simParam->getZconsFixtime();
     } else {
       zconsFixingTime_ = infiniteTime;
     }
 
     //set zconsUsingSMD
-    if (simParam->haveZConsUsingSMD()){
+    if (simParam->haveZconsUsingSMD()){
       usingSMD_ = simParam->getZconsUsingSMD();
     }else {
       usingSMD_ =false;
@@ -120,7 +120,7 @@ namespace oopse {
     }
     double zforceConstant = OOPSEConstant::kb * targetTemp / (halfOfLargestBox * halfOfLargestBox);
          
-    int nZconstraints = simParam->getNzConstraints();
+    int nZconstraints = simParam->getNZconstraints();
     ZconStamp** stamp = simParam->getZconStamp();
     //
     for (int i = 0; i < nZconstraints; i++){

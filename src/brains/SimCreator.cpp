@@ -71,7 +71,6 @@ namespace oopse {
     if (worldRank == 0) {
 #endif // is_mpi
       
-      simParams->initalize();
       set_interface_stamps(stamps, simParams);
       
 #ifdef IS_MPI
@@ -113,7 +112,7 @@ namespace oopse {
     if (ff == NULL) {
       sprintf(painCave.errMsg, 
               "ForceField Factory can not create %s force field\n",
-              simParams->getForceField());
+              simParams->getForceField().c_str());
       painCave.isFatal = 1;
       simError();
     }
@@ -604,7 +603,7 @@ namespace oopse {
       //invalid initial coordinate file
       sprintf(painCave.errMsg, 
               "Initial configuration file %s should at least contain one frame\n",
-              simParams->getInitialConfig());
+              simParams->getInitialConfig().c_str());
       painCave.isFatal = 1;
       simError();
     }

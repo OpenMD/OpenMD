@@ -126,7 +126,7 @@ int main(int argc,char* argv[]){
 
     if (myMinimizer == NULL) {
       sprintf(painCave.errMsg, "Minimizer Factory can not create %s Minimizer\n",
-	      simParams->getMinimizer());
+	      simParams->getMinimizer().c_str());
       painCave.isFatal = 1;
       simError();
     }
@@ -140,7 +140,7 @@ int main(int argc,char* argv[]){
 
     if (myIntegrator == NULL) {
       sprintf(painCave.errMsg, "Integrator Factory can not create %s Integrator\n",
-	      simParams->getEnsemble());
+	      simParams->getEnsemble().c_str());
       painCave.isFatal = 1;
       simError();
     }
@@ -151,8 +151,8 @@ int main(int argc,char* argv[]){
 
 
     //Zconstraint-Method
-    if (simParams->haveZconstraints()) {
-      info->setNZconstraint(simParams->getNzConstraints());
+    if (simParams->haveNZconstraints()) {
+      info->setNZconstraint(simParams->getNZconstraints());
       ForceManager* fman = new ZconstraintForceManager(info);
       myIntegrator->setForceManager(fman);
     }
@@ -161,7 +161,7 @@ int main(int argc,char* argv[]){
     delete myIntegrator;
   }else {
     sprintf(painCave.errMsg, "Integrator Factory can not create %s Integrator\n",
-            simParams->getEnsemble());
+            simParams->getEnsemble().c_str());
     painCave.isFatal = 1;
     simError();
   }

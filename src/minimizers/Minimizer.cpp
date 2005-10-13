@@ -110,8 +110,8 @@ namespace oopse {
 
 	myGrad = integrableObject->getGrad();
 	for (unsigned int k = 0; k < myGrad.size(); ++k) {
-	  //gradient is equal to -f
-	  grad[index++] = -myGrad[k];
+
+	  grad[index++] = myGrad[k];
 	}
       }            
     }

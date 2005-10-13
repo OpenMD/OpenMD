@@ -66,7 +66,7 @@ namespace oopse {
 
       Globals* simParams = info_->getSimParams();
     
-      if (!simParams->getUseInitXSstate()) {
+      if (!simParams->getUseIntialExtendedSystemState()) {
         Snapshot* currSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
         currSnapshot->setChi(0.0);
         currSnapshot->setIntegralOfChiDt(0.0);

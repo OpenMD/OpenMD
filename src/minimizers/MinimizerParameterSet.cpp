@@ -49,35 +49,35 @@ namespace oopse {
     Globals* globals = info->getSimParams();
 
     if (globals->haveMinimizer()){
-      setFTol(globals->getMinFTol());
+      setFTol(globals->getMinimizerFTol());
     }
 
-    if (globals->haveMinGTol()){
-      setGTol(globals->getMinGTol());
+    if (globals->haveMinimizerGTol()){
+      setGTol(globals->getMinimizerGTol());
     }
 
-    if (globals->haveMinMaxIter()){
-      setMaxIteration(globals->getMinMaxIter());
+    if (globals->haveMinimizerMaxIter()){
+      setMaxIteration(globals->getMinimizerMaxIter());
     }
 
-    if (globals->haveMinWriteFrq()){
-      setMaxIteration(globals->getMinMaxIter());
+    if (globals->haveMinimizerWriteFrq()){
+      setMaxIteration(globals->getMinimizerMaxIter());
     }
 
-    if (globals->haveMinWriteFrq()){
-      setWriteFrq(globals->getMinWriteFrq());
+    if (globals->haveMinimizerWriteFrq()){
+      setWriteFrq(globals->getMinimizerWriteFrq());
     }
     
-    if (globals->haveMinStepSize()){
-      setStepSize(globals->getMinStepSize());
+    if (globals->haveMinimizerStepSize()){
+      setStepSize(globals->getMinimizerStepSize());
     }
 
-    if (globals->haveMinLSMaxIter()){
-      setLineSearchMaxIteration(globals->getMinLSMaxIter());
+    if (globals->haveMinimizerLSMaxIter()){
+      setLineSearchMaxIteration(globals->getMinimizerLSMaxIter());
     }    
 
-    if (globals->haveMinLSTol()){
-      setLineSearchTol(globals->getMinLSTol());
+    if (globals->haveMinimizerLSTol()){
+      setLineSearchTol(globals->getMinimizerLSTol());
     }
 
   }

@@ -61,8 +61,8 @@ namespace oopse {
     lambdaK = lambdaExp;
     
     if (simParam->getUseSolidThermInt()) {
-      if (simParam->haveDistSpringConst()) {
-        kDist = simParam->getDistSpringConst();
+      if (simParam->haveThermIntDistSpringConst()) {
+        kDist = simParam->getThermIntDistSpringConst();
       }
       else{
         kDist = 6.0;
@@ -75,8 +75,8 @@ namespace oopse {
         painCave.isFatal = 0;
         simError(); 
       }
-      if (simParam->haveThetaSpringConst()) {
-        kTheta = simParam->getThetaSpringConst();
+      if (simParam->haveThermIntThetaSpringConst()) {
+        kTheta = simParam->getThermIntThetaSpringConst();
       }
       else{
         kTheta = 7.5;
@@ -89,8 +89,8 @@ namespace oopse {
         painCave.isFatal = 0;
         simError(); 
       }
-      if (simParam->haveOmegaSpringConst()) {
-        kOmega = simParam->getOmegaSpringConst();
+      if (simParam->haveThermIntOmegaSpringConst()) {
+        kOmega = simParam->getThermIntOmegaSpringConst();
       }
       else{
         kOmega = 13.5;

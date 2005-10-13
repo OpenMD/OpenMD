@@ -157,7 +157,7 @@ namespace oopse {
     
     removeComDrift();
     // Remove angular drift if we are not using periodic boundary conditions.
-    if(!simParams->getPBC()) removeAngularDrift();
+    if(!simParams->getUsePeriodicBoundaryConditions()) removeAngularDrift();
     
   }
   

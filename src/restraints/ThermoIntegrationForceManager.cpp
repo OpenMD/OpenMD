@@ -55,8 +55,8 @@ namespace oopse {
       currSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
       simParam = info_->getSimParams();
     
-      if (simParam->haveThermIntLambda()){
-	tIntLambda_ = simParam->getThermIntLambda();
+      if (simParam->haveThermodynamicIntegrationLambda()){
+	tIntLambda_ = simParam->getThermodynamicIntegrationLambda();
       }
       else{
 	tIntLambda_ = 1.0;
@@ -69,8 +69,8 @@ namespace oopse {
 	simError();
       }
     
-      if (simParam->haveThermIntK()){
-	tIntK_ = simParam->getThermIntK();
+      if (simParam->haveThermodynamicIntegrationK()){
+	tIntK_ = simParam->getThermodynamicIntegrationK();
       }
       else{
 	tIntK_ = 1.0;

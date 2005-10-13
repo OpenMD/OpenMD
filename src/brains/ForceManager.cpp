@@ -128,13 +128,34 @@ namespace oopse {
 
     }
     
-    double  shortRangePotential = 0.0;
-    for (mol = info_->beginMolecule(mi); mol != NULL; mol = info_->nextMolecule(mi)) {
-      shortRangePotential += mol->getPotential();
-    }
 
+    double bondPotential = 0.0;
+    double bendPotential = 0.0;
+    double torsionPotential = 0.0;
+
+    for (mol = info_->beginMolecule(mi); mol != NULL; mol = info_->nextMolecule(mi)) {
+
+      for (bond = mol->beginBond(bondIter); bond != NULL; bond = mol->nextBond(bondIter)) {
+	  bondPotential += bond->getPotential();
+      }
+
+      for (bend = mol->beginBend(bendIter); bend != NULL; bend = mol->nextBend(bendIter)) {
+	  bendPotential += bend->getPotential();
+      }
+
+      for (torsion = mol->beginTorsion(torsionIter); torsion != NULL; torsion = mol->nextTorsion(torsionIter)) {
+	  torsionPotential += torsion->getPotential();
+      }
+
+    }    
+
+    double  shortRangePotential = bondPotential + bendPotential + torsionPotential;    
     Snapshot* curSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
     curSnapshot->statData[Stats::SHORT_RANGE_POTENTIAL] = shortRangePotential;
+    curSnapshot->statData[Stats::BOND_POTENTIAL] = bondPotential;
+    curSnapshot->statData[Stats::BEND_POTENTIAL] = bendPotential;
+    curSnapshot->statData[Stats::DIHEDRAL_POTENTIAL] = torsionPotential;
+    
   }
 
   void ForceManager::calcLongRangeInteraction(bool needPotential, bool needStress) {

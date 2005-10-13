@@ -51,7 +51,7 @@ namespace oopse {
     currSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
     Globals* simParam = info_->getSimParams();
 
-    if (simParam->haveZconstraintTime()){
+    if (simParam->haveZconsTime()){
       zconsTime_ = simParam->getZconsTime();
     }
     else{
@@ -76,7 +76,7 @@ namespace oopse {
       simError();      
     }    
          
-    int nZconstraints = simParam->getNzConstraints();
+    int nZconstraints = simParam->getNZconstraints();
     ZconStamp** stamp = simParam->getZconStamp();
     for (int i = 0; i < nZconstraints; i++){
       int zmolIndex = stamp[i]->getMolIndex();

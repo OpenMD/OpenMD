@@ -86,7 +86,7 @@ namespace oopse {
         thermalTime = simParams->getRunTime();
       }
 
-      if (!simParams->getUseInitTime()) {
+      if (!simParams->getUseInitalTime()) {
         currentSnapshot_->setTime(0.0);
       }
 

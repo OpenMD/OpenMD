@@ -526,15 +526,17 @@ namespace oopse {
     int useDirectionalAtom = 0;    
     int useElectrostatics = 0;
     //usePBC and useRF are from simParams
-    int usePBC = simParams_->getPBC();
+    int usePBC = simParams_->getUsePeriodicBoundaryConditions();
     int useRF;
+    std::string myMethod;
 
     // set the useRF logical
-    std::string myMethod = simParams_->getElectrostaticSummationMethod();
-    if (myMethod == "REACTION_FIELD")
-      useRF = 1;
-    else
-      useRF = 0;
+    useRF = 0;
+    if (simParams_->haveElectrostaticSummationMethod()) {
+        myMethod = simParams_->getElectrostaticSummationMethod();
+        if (myMethod == "REACTION_FIELD")
+             useRF = 1;
+    }
 
     //loop over all of the atom types
     for (i = atomTypes.begin(); i != atomTypes.end(); ++i) {
@@ -806,7 +808,7 @@ namespace oopse {
     
     if (fInfo_.SIM_uses_Charges | fInfo_.SIM_uses_Dipoles | fInfo_.SIM_uses_RF) {
         
-      if (!simParams_->haveRcut()){
+      if (!simParams_->haveCutoffRadius()){
 	sprintf(painCave.errMsg,
                 "SimCreator Warning: No value was set for the cutoffRadius.\n"
                 "\tOOPSE will use a default value of 15.0 angstroms"
@@ -815,10 +817,10 @@ namespace oopse {
 	simError();
 	rcut = 15.0;
       } else{
-	rcut = simParams_->getRcut();
+	rcut = simParams_->getCutoffRadius();
       }
 
-      if (!simParams_->haveRsw()){
+      if (!simParams_->haveSwitchingRadius()){
 	sprintf(painCave.errMsg,
                 "SimCreator Warning: No value was set for switchingRadius.\n"
                 "\tOOPSE will use a default value of\n"
@@ -827,22 +829,22 @@ namespace oopse {
 	simError();
 	rsw = 0.95 * rcut;
       } else{
-	rsw = simParams_->getRsw();
+	rsw = simParams_->getSwitchingRadius();
       }
 
     } else {
       // if charge, dipole or reaction field is not used and the cutofff radius is not specified in
       //meta-data file, the maximum cutoff radius calculated from forcefiled will be used
         
-      if (simParams_->haveRcut()) {
-	rcut = simParams_->getRcut();
+      if (simParams_->haveCutoffRadius()) {
+	rcut = simParams_->getCutoffRadius();
       } else {
 	//set cutoff radius to the maximum cutoff radius based on atom types in the whole system
 	rcut = calcMaxCutoffRadius();
       }
 
-      if (simParams_->haveRsw()) {
-	rsw  = simParams_->getRsw();
+      if (simParams_->haveSwitchingRadius()) {
+	rsw  = simParams_->getSwitchingRadius();
       } else {
 	rsw = rcut;
       }
@@ -859,6 +861,7 @@ namespace oopse {
     int cp =  TRADITIONAL_CUTOFF_POLICY;
     if (simParams_->haveCutoffPolicy()) {
       std::string myPolicy = simParams_->getCutoffPolicy();
+      toUpper(myPolicy);
       if (myPolicy == "MIX") {
         cp = MIX_CUTOFF_POLICY;
       } else {
@@ -901,6 +904,7 @@ namespace oopse {
 
     if (simParams_->haveElectrostaticSummationMethod()) {
       std::string myMethod = simParams_->getElectrostaticSummationMethod();
+      toUpper(myMethod);
       if (myMethod == "NONE") {
         esm = NONE;
       } else {
