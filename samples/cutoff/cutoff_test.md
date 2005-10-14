@@ -11,21 +11,20 @@ component{
 }
 
 initialConfig = "./cutoff_test.in";
+cutoffPolicy = "mix";
 
 forceField = "LJ";
-targetTemp = 50;
+targetTemp = 5;
 targetPressure = 1;
 tauThermostat = 1e3;
 tauBarostat = 1e3;
-cutoffRadius = 10.0;
-switchingRadius = 10.0;
 
-ensemble = "NPTi";
-dt = 1;
+ensemble = "NVE";
+dt = 2;
 runTime = 1e5;
 
-sampleTime = 1000;
-statusTime = 10;
+sampleTime = 100;
+statusTime = 1;
 
 thermalTime = 1000.0;
 tempSet = "false";
