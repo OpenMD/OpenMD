@@ -50,6 +50,7 @@
 #include "io/mpiBASS.h"
 #endif // is_mpi
 
+#include "io/ParamConstraint.hpp"
 
 #define DefineParameter(NAME,KEYWORD)                              \
   NAME.setKeyword(KEYWORD);                  \
@@ -62,6 +63,10 @@
 #define DefineOptionalParameterWithDefaultValue(NAME,KEYWORD, DEFAULTVALUE)                              \
   NAME.setKeyword(KEYWORD); NAME.setOptional(true); NAME.setDefaultValue(DEFAULTVALUE);                      \
   parameters_.insert(std::make_pair(std::string(KEYWORD),  &NAME));
+
+#define CheckParameter(NAME, CONSTRAINT)                              \
+  if (!NAME.empty()) { if (!(CONSTRAINT)(NAME.getData())) std::cout <<"Error in parsing " << NAME.getKeyword() << " : "<< (CONSTRAINT).getConstraintDescription() << std::endl; }                 
+
 
 Globals::Globals(){
  
@@ -325,6 +330,67 @@ char* Globals::checkMe( void ){
     }
   }
 
+  CheckParameter(ForceField, isNotEmpty());
+  CheckParameter(NComponents,isPositive()); 
+  CheckParameter(TargetTemp, isPositive());
+  CheckParameter(Ensemble, isEqualIgnoreCase(std::string("NVE")) || isEqualIgnoreCase(std::string("NVT")) ||
+                                          isEqualIgnoreCase(std::string("NPTi")) || isEqualIgnoreCase(std::string("NPTf"))|| 
+                                          isEqualIgnoreCase(std::string("NPTxyz")) );
+
+  CheckParameter(Dt, isPositive());
+  CheckParameter(RunTime, isPositive());
+  CheckParameter(InitialConfig, isNotEmpty());
+  CheckParameter(FinalConfig, isNotEmpty());
+  CheckParameter(NMol, isPositive());
+  CheckParameter(Density, isPositive());
+  CheckParameter(Box, isPositive());
+  CheckParameter(BoxX, isPositive());
+  CheckParameter(BoxY, isPositive());
+  CheckParameter(BoxZ, isPositive());
+  CheckParameter(SampleTime, isNonNegative());
+  CheckParameter(ResetTime, isNonNegative());
+  CheckParameter(StatusTime, isNonNegative());
+  CheckParameter(CutoffRadius, isPositive());
+  CheckParameter(SwitchingRadius, isNonNegative());
+  CheckParameter(Dielectric, isPositive());
+  CheckParameter(ThermalTime,  isNonNegative());
+  CheckParameter(TargetPressure,  isPositive());
+  CheckParameter(TauThermostat, isPositive());
+  CheckParameter(TauBarostat, isPositive());
+  CheckParameter(ZconsTime, isPositive());
+  CheckParameter(NZconstraints, isPositive());  
+  CheckParameter(ZconsTol, isPositive());
+  //CheckParameter(ZconsForcePolicy,);
+  CheckParameter(Seed, isPositive());
+  CheckParameter(Minimizer, isEqualIgnoreCase(std::string("SD")) || isEqualIgnoreCase(std::string("CG")));
+  CheckParameter(MinimizerMaxIter, isPositive());
+  CheckParameter(MinimizerWriteFrq, isPositive());
+  CheckParameter(MinimizerStepSize, isPositive());
+  CheckParameter(MinimizerFTol, isPositive());
+  CheckParameter(MinimizerGTol, isPositive());
+  CheckParameter(MinimizerLSTol, isPositive());
+  CheckParameter(MinimizerLSMaxIter, isPositive());
+  CheckParameter(ZconsGap, isPositive());
+  CheckParameter(ZconsFixtime, isPositive());
+  CheckParameter(ThermodynamicIntegrationLambda, isPositive());
+  CheckParameter(ThermodynamicIntegrationK, isPositive());
+  CheckParameter(ForceFieldVariant, isNotEmpty());
+  CheckParameter(ForceFieldFileName, isNotEmpty());
+  CheckParameter(ThermIntDistSpringConst, isPositive());
+  CheckParameter(ThermIntThetaSpringConst, isPositive());
+  CheckParameter(ThermIntOmegaSpringConst, isPositive());
+  CheckParameter(SurfaceTension, isPositive());
+  CheckParameter(ElectrostaticSummationMethod, isEqualIgnoreCase(std::string("NONE")) || isEqualIgnoreCase(std::string("UNDAMPED_WOLF")) || isEqualIgnoreCase(std::string("DAMPED_WOLF")) || isEqualIgnoreCase(std::string("REACTION_FIELD")) );
+  CheckParameter(CutoffPolicy, isEqualIgnoreCase(std::string("MIX")) || isEqualIgnoreCase(std::string("MAX")) || isEqualIgnoreCase(std::string("TRADITIONAL")));
+  //CheckParameter(StatFileFormat,);     
+  //CheckParameter(MixingRule,);
+  CheckParameter(OrthoBoxTolerance, isPositive());  
+  CheckParameter(ThermIntDistSpringConst, isPositive());
+  CheckParameter(ThermIntThetaSpringConst, isPositive());
+  CheckParameter(ThermIntOmegaSpringConst, isPositive());
+  CheckParameter(DampingAlpha,isPositive());
+  CheckParameter(SkinThickness, isPositive());
+  
   //@todo memory leak
   if( have_err )
     return strdup( err.c_str() );
