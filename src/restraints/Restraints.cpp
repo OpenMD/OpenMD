@@ -65,7 +65,7 @@ namespace oopse {
         kDist = simParam->getThermIntDistSpringConst();
       }
       else{
-        kDist = 6.0;
+        kDist = simParam->getThermIntDistSpringConst();
         sprintf(painCave.errMsg,
                 "ThermoIntegration Warning: the spring constant for the\n"
                 "\ttranslational restraint was not specified. OOPSE will use\n"
@@ -79,7 +79,7 @@ namespace oopse {
         kTheta = simParam->getThermIntThetaSpringConst();
       }
       else{
-        kTheta = 7.5;
+        kTheta = simParam->getThermIntThetaSpringConst();
         sprintf(painCave.errMsg,
                 "ThermoIntegration Warning: the spring constant for the\n"
                 "\tdeflection orientational restraint was not specified.\n"
@@ -93,7 +93,7 @@ namespace oopse {
         kOmega = simParam->getThermIntOmegaSpringConst();
       }
       else{
-        kOmega = 13.5;
+        kOmega = simParam->getThermIntOmegaSpringConst();
         sprintf(painCave.errMsg,
                 "ThermoIntegration Warning: the spring constant for the\n"
                 "\tspin orientational restraint was not specified. OOPSE\n"
