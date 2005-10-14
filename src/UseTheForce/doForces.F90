@@ -45,7 +45,7 @@
 
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: doForces.F90,v 1.57 2005-10-12 21:00:45 gezelter Exp $, $Date: 2005-10-12 21:00:45 $, $Name: not supported by cvs2svn $, $Revision: 1.57 $
+!! @version $Id: doForces.F90,v 1.58 2005-10-14 15:44:37 kdaily Exp $, $Date: 2005-10-14 15:44:37 $, $Name: not supported by cvs2svn $, $Revision: 1.58 $
 
 
 module doForces
@@ -1250,8 +1250,8 @@ contains
     endif
     
     if ( iand(iHash, GAYBERNE_LJ).ne.0 ) then
- !      call do_gblj_pair(i, j, d, r, rijsq, sw, vpair, fpair, &
- !           pot(VDW_POT), A, f, t, do_pot)
+       call do_gb_lj_pair(i, j, d, r, rijsq, sw, vpair, fpair, &
+            pot(VDW_POT), A, f, t, do_pot)
     endif
 
     if ( iand(iHash, EAM_PAIR).ne.0 ) then       

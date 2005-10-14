@@ -55,7 +55,8 @@ Ar		39.948
 Br		79.904		
 Kr		83.80
 U 		1.00
-GB		48.0428		
+GB		48.0428	
+linear		48.0428		
 end AtomTypes
 
 begin DirectionalAtomTypes
@@ -69,11 +70,13 @@ SSD_RF		1.7696	0.6145	1.1550
 TAP		1.7696  0.6145  1.1550
 HEAD		1125	1125	250
 GB		86.477	86.477	0
+linear		86.477	86.477	0
 end DirectionalAtomTypes                    
 
 begin GayBerneAtomTypes
 //Name	Sigma   12b_ratio	eps     eps_ratio	mu      nu             
 GB 	3.35    2.074626866	1.31713 	.178317250385	2.0	1.0
+linear 	3.35    2.074626866	1.31713 	.178317250385	2.0	1.0
 end GayBerneAtomTypes                 	
 
 begin LennardJonesAtomTypes

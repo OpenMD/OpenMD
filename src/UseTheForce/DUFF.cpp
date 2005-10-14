@@ -43,6 +43,7 @@
 #include "UseTheForce/DUFF.hpp"
 #include "UseTheForce/DarkSide/lj_interface.h"
 #include "UseTheForce/DarkSide/sticky_interface.h"
+#include "UseTheForce/DarkSide/gb_interface.h"
 #include "UseTheForce/ForceFieldFactory.hpp"
 #include "io/DirectionalAtomTypesSectionParser.hpp"
 #include "io/AtomTypesSectionParser.hpp"
@@ -109,6 +110,9 @@ namespace oopse {
       at->complete();
     }
 
+    int isError = 0;
+    completeGayBerneFF(&isError);
+
     delete ffStream;
     
   }
@@ -116,5 +120,6 @@ namespace oopse {
   DUFF::~DUFF(){
     destroyLJTypes();
     destroyStickyTypes();
+    destroyGayBerneTypes();
   }
 } //end namespace oopse

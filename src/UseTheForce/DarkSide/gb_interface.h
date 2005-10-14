@@ -47,6 +47,8 @@
 #include "config.h"
 
 #define newGayBerneType F90_FUNC_(set_gb_pair_params, SET_GB_PAIR_PARAMS)
+#define completeGayBerneFF F90_FUNC(completegayberneff, COMPLETEGAYBERNEFF)
+#define destroyGayBerneTypes F90_FUNC(destroygaybernetypes, DESTROYGAYBERNETYPES)
 
 extern "C"{
   void newGayBerneType( double* GB_sigma,
@@ -55,5 +57,8 @@ extern "C"{
                         double* GB_eps_ratio,
                         double* GB_mu,
                         double* GB_nu );
+
+  void completeGayBerneFF( int* status);
+  void destroyGayBerneTypes(void);
 }
 #endif
