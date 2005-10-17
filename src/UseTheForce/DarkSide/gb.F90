@@ -539,12 +539,11 @@ contains
     logical, intent(in) :: do_pot
     real (kind = dp), dimension(3) :: ul
     
-    real(kind=dp) :: gb_sigma, gb_eps, gb_eps_ratio, gb_mu, gb_sigma_l
-    real(kind=dp) :: spar, sperp, slj, par2, perp2, sc, slj2
-    real(kind=dp) :: s_par2mperp2, s_lj2ppar2
-    real(kind=dp) :: enot, eperp, epar, eab, eabf,moom, mum1
-    real(kind=dp) :: dx, dy, dz, drdx,drdy,drdz, rdotu
-    real(kind=dp) :: mess, sab, dsabdct, eprime, deprimedct, depmudct
+    real(kind=dp) :: gb_sigma, gb_eps, gb_eps_ratio, gb_mu, gb_l2b_ratio
+    real(kind=dp) :: s0, l2, d2, lj2
+    real(kind=dp) :: eE, eS, eab, eabf, moom, mum1
+    real(kind=dp) :: dx, dy, dz, drdx, drdy, drdz, rdotu
+    real(kind=dp) :: mess, sab, dsabdct, depmudct
     real(kind=dp) :: epmu, depmudx, depmudy, depmudz
     real(kind=dp) :: depmudux, depmuduy, depmuduz
     real(kind=dp) :: BigR, dBigRdx, dBigRdy, dBigRdz
@@ -554,7 +553,7 @@ contains
     real(kind=dp) :: chipoalphap2, chioalpha2, ec, epsnot
     real(kind=dp) :: drdotudx, drdotudy, drdotudz    
     real(kind=dp) :: drdotudux, drdotuduy, drdotuduz    
-    real(kind=dp) :: ljeps, ljsigma, sigmaratio, sigmaratioi
+    real(kind=dp) :: ljeps, ljsigma
     integer :: ljt1, ljt2, atid1, atid2, gbt1, gbt2
     logical :: gb_first
     
@@ -602,10 +601,10 @@ contains
        ul(3) = A(9,atom1)       
 #endif
        gb_sigma     = GBMap%GBtypes(gbt1)%sigma      
+       gb_l2b_ratio = GBMap%GBtypes(gbt1)%l2b_ratio
        gb_eps       = GBMap%GBtypes(gbt1)%eps        
        gb_eps_ratio = GBMap%GBtypes(gbt1)%eps_ratio  
        gb_mu        = GBMap%GBtypes(gbt1)%mu         
-       gb_sigma_l   = GBMap%GBtypes(gbt1)%sigma_l
 
        ljsigma = getSigma(atid2)
        ljeps = getEpsilon(atid2)
@@ -620,10 +619,10 @@ contains
        ul(3) = A(9,atom2)       
 #endif
        gb_sigma     = GBMap%GBtypes(gbt2)%sigma      
+       gb_l2b_ratio = GBMap%GBtypes(gbt2)%l2b_ratio
        gb_eps       = GBMap%GBtypes(gbt2)%eps        
        gb_eps_ratio = GBMap%GBtypes(gbt2)%eps_ratio  
        gb_mu        = GBMap%GBtypes(gbt2)%mu         
-       gb_sigma_l   = GBMap%GBtypes(gbt2)%sigma_l
 
        ljsigma = getSigma(atid1)
        ljeps = getEpsilon(atid1)
@@ -640,53 +639,41 @@ contains
     drdotuduy = drdy
     drdotuduz = drdz
 
-    
+    l2 = (gb_sigma*gb_l2b_ratio)**2
+    d2 = gb_sigma**2
+    lj2 = ljsigma**2
+    s0 = dsqrt(d2 + lj2)
+
+    chioalpha2 = (l2 - d2)/(l2 + lj2)
+
+    eE = dsqrt(gb_eps*ljeps)
+    eS = dsqrt(gb_eps*gb_eps_ratio*ljeps)
     moom =  1.0d0 / gb_mu
     mum1 = gb_mu-1
-    
-    sperp = gb_sigma
-    spar =  gb_sigma_l
-    slj = ljsigma
-    slj2 = slj*slj
-
-    chioalpha2 =1-((sperp+slj)*(sperp+slj))/((spar+slj)*(spar+slj))
-    sc = (sperp+slj)/2.0d0
-  
-    par2 = spar*spar
-    perp2 = sperp*sperp
-    s_par2mperp2 = par2 - perp2 
-    s_lj2ppar2 = slj2 + par2
-
-    !! check these ! left from old code
-    !! kdaily e0 may need to be (gb_eps + lj_eps)/2 
-    
-    eperp = dsqrt(gb_eps*ljeps)
-    epar = eperp*gb_eps_ratio
-    enot = dsqrt(ljeps*eperp)
-    chipoalphap2 = 1+(dsqrt(epar*ljeps)/enot)**moom
+    chipoalphap2 = 1 - (eE/eS)**moom
 
     !! mess matches cleaver (eq 20)
     
     mess = 1-rdotu*rdotu*chioalpha2
     sab = 1.0d0/dsqrt(mess)
 
-    write(*,*) 's', sc, sab, rdotu, chioalpha2
-    dsabdct = sc*sab*sab*sab*rdotu*chioalpha2
+    write(*,*) 's', s0, sab, rdotu, chioalpha2
+    dsabdct = s0*sab*sab*sab*rdotu*chioalpha2
        
     eab = 1-chipoalphap2*rdotu*rdotu
-    eabf = enot*eab**gb_mu
+    eabf = eS*(eab**gb_mu)
 
-    write(*,*)  'e', enot, chipoalphap2, gb_mu, rdotu, eab, mum1
+    write(*,*)  'e', eS, chipoalphap2, gb_mu, rdotu, eab, mum1
 
-    depmudct = -2*enot*chipoalphap2*gb_mu*rdotu*eab**mum1
+    depmudct = -2*eS*chipoalphap2*gb_mu*rdotu*(eab**mum1)
         
-    BigR = (r - sab*sc + sc)/sc
-    dBigRdx = (drdx -dsabdct*drdotudx)/sc
-    dBigRdy = (drdy -dsabdct*drdotudy)/sc
-    dBigRdz = (drdz -dsabdct*drdotudz)/sc
-    dBigRdux = (-dsabdct*drdotudux)/sc
-    dBigRduy = (-dsabdct*drdotuduy)/sc
-    dBigRduz = (-dsabdct*drdotuduz)/sc
+    BigR = (r - sab*s0 + s0)/s0
+    dBigRdx = (drdx -dsabdct*drdotudx)/s0
+    dBigRdy = (drdy -dsabdct*drdotudy)/s0
+    dBigRdz = (drdz -dsabdct*drdotudz)/s0
+    dBigRdux = (-dsabdct*drdotudux)/s0
+    dBigRduy = (-dsabdct*drdotuduy)/s0
+    dBigRduz = (-dsabdct*drdotuduz)/s0
     
     write(*,*) 'ds dep', dsabdct, depmudct
     write(*,*) 'drdotudu', drdotudux, drdotuduy, drdotuduz
