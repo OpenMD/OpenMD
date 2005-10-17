@@ -111,7 +111,6 @@ namespace oopse {
     }
 
     int isError = 0;
-    completeGayBerneFF(&isError);
 
     delete ffStream;
     

@@ -72,7 +72,7 @@ void GayBerneAtomTypesSectionParser::parseLine(ForceField& ff,const std::string&
             if (dAtomType != NULL) {
                 GayBerneParam gayBerne;
                 gayBerne.GB_sigma = tokenizer.nextTokenAsDouble();
-                gayBerne.GB_12b_ratio = tokenizer.nextTokenAsDouble();  
+                gayBerne.GB_l2b_ratio = tokenizer.nextTokenAsDouble();  
                 gayBerne.GB_eps = tokenizer.nextTokenAsDouble();
                 gayBerne.GB_eps_ratio = tokenizer.nextTokenAsDouble();
                 gayBerne.GB_mu = tokenizer.nextTokenAsDouble();

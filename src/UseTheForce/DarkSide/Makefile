@@ -14,10 +14,10 @@ Source    = \
 	electrostatic_interface.F90 \
 	eam.F90 \
 	eam_interface.F90 \
-	gb.F90 \
-	gb_interface.F90 \
 	LJ.F90 \
 	lj_interface.F90 \
+	gb.F90 \
+	gb_interface.F90 \
 	reactionField.F90 \
 	sticky.F90 \
 	sticky_interface.F90 \

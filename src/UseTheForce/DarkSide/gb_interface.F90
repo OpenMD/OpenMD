@@ -1,34 +1,22 @@
-subroutine set_gb_pair_params(sigma, l2b_ratio, eps, eps_ratio, mu, nu)
-
+subroutine newGBtype(c_ident, sigma, l2b_ratio, eps, eps_ratio, mu, nu, &
+     status)
+  
   use definitions, ONLY : dp
-  use gb_pair, ONLY : module_set_gb_pair_params => set_gb_pair_params
+  use gayberne, ONLY : module_newGBtype => newGBtype
 
+  integer, intent(inout) :: c_ident, status
   real( kind = dp ), intent(inout) :: sigma, l2b_ratio, eps, eps_ratio
   real( kind = dp ), intent(inout) :: mu, nu
 
-  call module_set_gb_pair_params(sigma, l2b_ratio, eps, eps_ratio, mu, nu)
-
-  return
-end subroutine set_gb_pair_params
-
-subroutine completeGayBerneFF(status)
-  use gb_pair, only: complete_GayBerne_FF
+  call module_newGBtype(c_ident, sigma, l2b_ratio, eps, eps_ratio, &
+       mu, nu, status)
   
-  intent(out) :: status
-  integer :: myStatus
-
-  myStatus = 0
-  
-  call complete_GayBerne_FF(myStatus)
-
-  status = myStatus
-
   return
-end subroutine completeGayBerneFF
+end subroutine newGBtype
 
-subroutine destroyGayBerneTypes()
+subroutine destroyGBTypes()
+  use gayberne, ONLY: module_destroyGBTypes => destroyGBTypes
 
-  use gb_pair, only: module_destroyGayBerneTypes => destroyGayBerneTypes
-  call module_destroyGayBerneTypes()
- 
-end subroutine destroyGayBerneTypes
+  call module_destroyGBTypes()
+
+end subroutine destroyGBTypes

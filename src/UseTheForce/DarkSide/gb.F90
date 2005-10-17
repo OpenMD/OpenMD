@@ -40,7 +40,7 @@
 !!
 
 
-module gb_pair
+module gayberne
   use force_globals
   use definitions
   use simulation
@@ -56,220 +56,118 @@ module gb_pair
 
   private
 
-  logical, save :: haveGayBerneLJMap = .false.
-  logical, save :: gb_pair_initialized = .false.
-  logical, save :: gb_lj_pair_initialized = .false.
-  real(kind=dp), save :: gb_sigma
-  real(kind=dp), save :: gb_l2b_ratio
-  real(kind=dp), save :: gb_eps
-  real(kind=dp), save :: gb_eps_ratio
-  real(kind=dp), save :: gb_mu
-  real(kind=dp), save :: gb_nu
-  real(kind=dp), save :: lj_sigma
-  real(kind=dp), save :: lj_eps
-  real(kind=dp), save :: gb_sigma_l
-  real(kind=dp), save :: gb_eps_l
+#define __FORTRAN90
+#include "UseTheForce/DarkSide/fInteractionMap.h"
 
-  public :: check_gb_pair_FF
-  public :: set_gb_pair_params
+  public :: newGBtype
   public :: do_gb_pair
-  public :: getGayBerneCut
-!!$  public :: check_gb_lj_pair_FF
-!!$  public :: set_gb_lj_pair_params
   public :: do_gb_lj_pair
-  public :: createGayBerneLJMap
-  public :: destroyGayBerneTypes
-  public :: complete_GayBerne_FF
-!!may not need
-  type, private :: LJtype
-     integer  :: atid
-     real(kind=dp) :: sigma
-     real(kind=dp) :: epsilon
-  end type LJtype
-!!may not need
-  type, private :: LJList
-     integer       :: Nljtypes =0
-     integer       :: currentLJtype= 0
-     type(LJtype), pointer :: LJtype(:) =>  null()
-     integer, pointer      :: atidToLJtype(:) =>null()
-  end type LJList
+  public :: getGayBerneCut
+  public :: destroyGBtypes
 
-  type(LJList), save :: LJMap
-  
-  type :: GayBerneLJ
-!!$     integer :: atid
-!!$     real(kind = dp ),pointer, dimension(:) ::  epsil_GB      =>null()
-!!$     real(kind = dp ),pointer, dimension(:) ::  sigma_GB        =>null()
-!!$     real(kind = dp ),pointer, dimension(:) ::  epsilon_ratio   =>null()
-!!$     real(kind = dp ),pointer, dimension(:) ::  sigma_ratio     =>null()
-!!$     real(kind = dp ),pointer, dimension(:) ::  mu              =>null()
-     
-     real(kind = dp ) :: sigma_l
-     real(kind = dp ) :: sigma_s 
-     real(kind = dp ) :: sigma_ratio 
-     real(kind = dp ) :: eps_s 
-     real(kind = dp ) :: eps_l 
+  type :: GBtype
+     integer          :: atid
+     real(kind = dp ) :: sigma
+     real(kind = dp ) :: l2b_ratio 
+     real(kind = dp ) :: eps
      real(kind = dp ) :: eps_ratio 
-     integer          :: c_ident 
-     integer          :: status 
-  end type GayBerneLJ
+     real(kind = dp ) :: mu
+     real(kind = dp ) :: nu
+     real(kind = dp ) :: sigma_l
+     real(kind = dp ) :: eps_l 
+  end type GBtype
 
-!!$  type, private :: gayberneLJlist
-!!$     integer:: n_gaybernelj = 0
-!!$     integer:: currentgayberneLJ = 0
-!!$     type(GayBerneLJ),pointer :: GayBerneLJ(:) => null()
-!!$     integer, pointer         :: atidToGayBerneLJ(:) => null()
-!!$  end type gayberneLJlist
+  type, private :: GBList
+     integer               :: nGBtypes = 0
+     integer               :: currentGBtype = 0
+     type(GBtype), pointer :: GBtypes(:)      => null()
+     integer, pointer      :: atidToGBtype(:) => null()
+  end type GBList
 
-  type(gayberneLJ), dimension(:), allocatable :: gayBerneLJMap
+  type(GBList), save :: GBMap
 
 contains
 
-  subroutine check_gb_pair_FF(status)
-    integer :: status 
-    status = -1
-    if (gb_pair_initialized) status = 0
-    return
-  end subroutine check_gb_pair_FF
-
-!!$  subroutine check_gb_lj_pair_FF(status)
-!!$    integer :: status
-!!$    status = -1
-!!$    if (gb_lj_pair_initialized) status = 0
-!!$    return
-!!$  end subroutine check_gb_lj_pair_FF
-
-  subroutine set_gb_pair_params(sigma, l2b_ratio, eps, eps_ratio, mu, nu)
+  subroutine newGBtype(c_ident, sigma, l2b_ratio, eps, eps_ratio, mu, nu, &
+       status)
+    
+    integer, intent(in) :: c_ident
     real( kind = dp ), intent(in) :: sigma, l2b_ratio, eps, eps_ratio
     real( kind = dp ), intent(in) :: mu, nu
-    integer :: ntypes, nljtypes
-!!    integer, intent(in) :: c_ident
-    integer, pointer :: MatchList(:) => null ()
-    integer :: status
-    gb_sigma = sigma
-    gb_l2b_ratio = l2b_ratio
-    gb_eps = eps
-    gb_eps_ratio = eps_ratio
-    gb_mu = mu
-    gb_nu = nu
-    gb_sigma_l = gb_sigma*l2b_ratio
-    gb_eps_l = gb_eps*gb_eps_ratio
+    integer, intent(out) :: status
+
+    integer :: nGBTypes, ntypes, myATID
+    integer, pointer :: MatchList(:) => null()
+    integer :: current, i
     status = 0
 
- 
-      
+    if (.not.associated(GBMap%GBtypes)) then
+                               
+       call getMatchingElementList(atypes, "is_GayBerne", .true., &
+            nGBtypes, MatchList)
+       
+       GBMap%nGBtypes = nGBtypes
+
+       allocate(GBMap%GBtypes(nGBtypes))
+
+       ntypes = getSize(atypes)
+       
+       allocate(GBMap%atidToGBtype(ntypes))
+       
+       !! initialize atidToGBtype to -1 so that we can use this
+       !! array to figure out which atom comes first in the GBLJ 
+       !! routine
+
+       do i = 1, ntypes
+          GBMap%atidToGBtype(i) = -1
+       enddo
+
+    endif
+
+    GBMap%currentGBtype = GBMap%currentGBtype + 1
+    current = GBMap%currentGBtype
+
+    myATID = getFirstMatchingElement(atypes, "c_ident", c_ident)
+    GBMap%atidToGBtype(myATID)        = current
+    GBMap%GBtypes(current)%atid       = myATID
+    GBMap%GBtypes(current)%sigma      = sigma
+    GBMap%GBtypes(current)%l2b_ratio  = l2b_ratio
+    GBMap%GBtypes(current)%eps        = eps
+    GBMap%GBtypes(current)%eps_ratio  = eps_ratio
+    GBMap%GBtypes(current)%mu         = mu
+    GBMap%GBtypes(current)%nu         = nu
+    GBMap%GBtypes(current)%sigma_l    = sigma*l2b_ratio
+    GBMap%GBtypes(current)%eps_l      = eps*eps_ratio
 
     return
-  end subroutine set_gb_pair_params
+  end subroutine newGBtype
+
   
-!!$  subroutine set_gb_lj_pair_params(sigma_gb, l2b_ratio, eps_gb, eps_ratio, mu, nu, sigma_lj, eps_lj, c_ident, status)
-!!$    real( kind = dp ), intent(in) :: sigma_gb, l2b_ratio, eps_gb, eps_ratio, mu, nu
-!!$    real( kind = dp ), intent(in) :: sigma_lj, eps_lj
-!!$    integer, intent(in) :: c_ident
-!!$    integer :: nLJTYPES, nGayBerneTypes, ntypes, current, status
-!!$
-!!$    integer :: myATID 
-!!$    logical :: thisProperty
-!!$    real(kind=dp):: fake
-!!$    
-!!$    status = 0
-!!$
-!!$    if(.not.associated(LJMap%Ljtype)) then
+  !! gay berne cutoff should be a parameter in globals, this is a temporary 
+  !! work around - this should be fixed when gay berne is up and running
 
-!!$       call getMatchingElementList(atypes, "is_GayBerne", .true., &
-!!$            nGayBerneTypes, MatchList)
-!!$       
-!!$       call getMatchingElementList(atypes, "is_LennardJones", .true., &
-!!$            nLJTypes, MatchList)
-!!$ 
-!!$       LJMap%nLJtypes = nLJTypes 
-!!$
-!!$       allocate(LJMap% LJtype(nLJTypes))
-!!$
-!!$       ntypes = getSize(atypes)
-!!$
-!!$       allocate(LJMap%atidToLJtype(ntypes))
-!!$
-!!$   endif
-!!$
-!!$   LJmap%currentLJtype =  LJMap%currentLJtype + 1
-!!$
-!!$   current = LJMap%currentLJtype
-!!$   LJMap%atidToLJtype(myATID)    = current
-!!$   myATID = getFirstMatchingElement(atypes, "c_ident", c_ident)
-!!$   call getElementProperty(atypes, myATID, "is_LennardJones",thisProperty)
-!!$   if(thisProperty) then
-!!$
-!!$      LJMap%LJtype(current)%atid    = myatid
-!!$!!for testing 
-!!$      fake = getSigma(myATID)
-!!$      LJMap%LJtype(current)%sigma   = getSigma(myATID)
-!!$      LJMap%LJtype(current)%epsilon = getEpsilon(myATID)
-!!$   end if
+  function getGayBerneCut(atomID) result(cutValue)
+    integer, intent(in) :: atomID 
+    integer :: gbt1
+    real(kind=dp) :: cutValue, sigma, l2b_ratio
 
-!!$    gb_sigma = sigma_gb
-!!$    gb_l2b_ratio = l2b_ratio
-!!$    gb_eps = eps_gb
-!!$    gb_eps_ratio = eps_ratio
-!!    gb_mu = mu
-!!    gb_nu = nu
-!!$    
-!!$    lj_sigma = sigma_lj
-!!$    lj_eps = eps_lj
-
-!!    gb_lj_pair_initialized = .true.
-!!$  endsubroutine set_gb_lj_pair_params
-
-  subroutine createGayBerneLJMap
-    integer :: ntypes, i, j
-    real(kind=dp) :: s1, s2, e1, e2
-    real(kind=dp) :: sigma_s,sigma_l,eps_s, eps_l
-    
-    if(LJMap%currentLJtype == 0)then
-       call handleError("gayberneLJ", "no members in gayberneLJMap")
+    if (GBMap%currentGBtype == 0) then
+       call handleError("GB", "No members in GBMap")
        return
     end if
 
-    ntypes = getSize(atypes)
-    
-    if(.not.allocated(gayBerneLJMap))then
-       allocate(gayBerneLJMap(ntypes))
-    endif
-    
-    do i = 1, ntypes
-       s1 = LJMap%LJtype(i)%sigma
-       e1 = LJMap%LJtype(i)%epsilon
-     
-!!$       sigma_s = 0.5d0 *(s1+gb_sigma)
-!!$       sigma_l = 0.5d0 *(s1+gb_sigma*gb_l2b_ratio)
-       sigma_s = gb_sigma
-       sigma_l = gb_sigma*gb_l2b_ratio
-       gayBerneLJMap(i)%sigma_s = sigma_s
-       gayBerneLJMap(i)%sigma_l = sigma_l
-       gayBerneLJMap(i)%sigma_ratio = sigma_l/sigma_s
-       eps_s = dsqrt(e1*gb_eps)
-       eps_l = dsqrt(e1*gb_eps_l)
-       gayBerneLJMap(i)%eps_s = eps_s
-       gayBerneLJMap(i)%eps_l = eps_l
-       gayBerneLJMap(i)%eps_ratio = eps_l/eps_s
-    enddo
-    haveGayBerneLJMap = .true.
-    gb_lj_pair_initialized = .true.
-  endsubroutine createGayBerneLJMap
-  !! gay berne cutoff should be a parameter in globals, this is a temporary 
-  !! work around - this should be fixed when gay berne is up and running
-  function getGayBerneCut(atomID) result(cutValue)
-    integer, intent(in) :: atomID !! nah... we don't need to use this...
-    real(kind=dp) :: cutValue
+    gbt1 = GBMap%atidToGBtype(atomID)
+    sigma = GBMap%GBtypes(gbt1)%sigma
+    l2b_ratio = GBMap%GBtypes(gbt1)%l2b_ratio
 
-    cutValue = gb_l2b_ratio*gb_sigma*2.5_dp
+    cutValue = l2b_ratio*sigma*2.5_dp
   end function getGayBerneCut
 
   subroutine do_gb_pair(atom1, atom2, d, r, r2, sw, vpair, fpair, &
        pot, A, f, t, do_pot)
     
     integer, intent(in) :: atom1, atom2
-    integer :: id1, id2
+    integer :: atid1, atid2, gbt1, gbt2, id1, id2
     real (kind=dp), intent(inout) :: r, r2
     real (kind=dp), dimension(3), intent(in) :: d
     real (kind=dp), dimension(3), intent(inout) :: fpair
@@ -281,6 +179,7 @@ contains
     real (kind = dp), dimension(3) :: ul1
     real (kind = dp), dimension(3) :: ul2
 
+    real(kind=dp) :: sigma, l2b_ratio, epsilon, eps_ratio, mu, nu, sigma_l, eps_l
     real(kind=dp) :: chi, chiprime, emu, s2
     real(kind=dp) :: r4, rdotu1, rdotu2, u1dotu2, g, gp, gpi, gmu, gmum
     real(kind=dp) :: curlyE, enu, enum, eps, dotsum, dotdiff, ds2, dd2
@@ -309,8 +208,32 @@ contains
     real(kind=dp) :: term2u2x, term2u2y, term2u2z
     real(kind=dp) :: yick1, yick2, mess1, mess2
     
-    s2 = (gb_l2b_ratio)**2
-    emu = (gb_eps_ratio)**(1.0d0/gb_mu)
+#ifdef IS_MPI
+    atid1 = atid_Row(atom1)
+    atid2 = atid_Col(atom2)
+#else
+    atid1 = atid(atom1)
+    atid2 = atid(atom2)
+#endif
+
+    gbt1 = GBMap%atidToGBtype(atid1)
+    gbt2 = GBMap%atidToGBtype(atid2)
+
+    if (gbt1 .eq. gbt2) then
+       sigma     = GBMap%GBtypes(gbt1)%sigma      
+       l2b_ratio = GBMap%GBtypes(gbt1)%l2b_ratio  
+       epsilon   = GBMap%GBtypes(gbt1)%eps        
+       eps_ratio = GBMap%GBtypes(gbt1)%eps_ratio  
+       mu        = GBMap%GBtypes(gbt1)%mu         
+       nu        = GBMap%GBtypes(gbt1)%nu         
+       sigma_l   = GBMap%GBtypes(gbt1)%sigma_l    
+       eps_l     = GBMap%GBtypes(gbt1)%eps_l      
+    else
+       call handleError("GB", "GB-pair was called with two different GB types! OOPSE can only handle interactions for one GB type at a time.")
+    endif
+
+    s2 = (l2b_ratio)**2
+    emu = (eps_ratio)**(1.0d0/mu)
 
     chi = (s2 - 1.0d0)/(s2 + 1.0d0)
     chiprime = (1.0d0 - emu)/(1.0d0 + emu)
@@ -333,7 +256,6 @@ contains
     ul2(1) = A(3,atom2)
     ul2(2) = A(6,atom2)
     ul2(3) = A(9,atom2)
-
 #endif
     
     dru1dx = ul1(1)
@@ -343,8 +265,6 @@ contains
     dru1dz = ul1(3)
     dru2dz = ul2(3)
         
-
-
     drdx = d(1) / r
     drdy = d(2) / r
     drdz = d(3) / r
@@ -427,7 +347,7 @@ contains
 
     g = 1.0d0 - Chi*(line3a + line3b)/(2.0d0*r2)
   
-    BigR = (r - gb_sigma*(g**(-0.5d0)) + gb_sigma)/gb_sigma
+    BigR = (r - sigma*(g**(-0.5d0)) + sigma)/sigma
     Ri = 1.0d0/BigR
     Ri2 = Ri*Ri
     Ri6 = Ri2*Ri2*Ri2
@@ -437,9 +357,9 @@ contains
 
     gfact = (g**(-1.5d0))*0.5d0
 
-    dBigRdx = drdx/gb_sigma + dgdx*gfact
-    dBigRdy = drdy/gb_sigma + dgdy*gfact
-    dBigRdz = drdz/gb_sigma + dgdz*gfact
+    dBigRdx = drdx/sigma + dgdx*gfact
+    dBigRdy = drdy/sigma + dgdy*gfact
+    dBigRdz = drdz/sigma + dgdz*gfact
 
     dBigRdu1x = dgdu1x*gfact
     dBigRdu1y = dgdu1y*gfact
@@ -493,7 +413,7 @@ contains
     dgpdu2z = pref*(term1u2z+term2u2z)
     
     gp = 1.0d0 - ChiPrime*(line3a + line3b)/(2.0d0*r2)
-    gmu = gp**gb_mu
+    gmu = gp**mu
     gpi = 1.0d0 / gp
     gmum = gmu*gpi
 
@@ -509,13 +429,13 @@ contains
     dcEdu2y = dcE*ul1(2)
     dcEdu2z = dcE*ul1(3)
     
-    enu = curlyE**gb_nu
+    enu = curlyE**nu
     enum = enu/curlyE
   
-    eps = gb_eps*enu*gmu
+    eps = epsilon*enu*gmu
 
-    yick1 = gb_eps*enu*gb_mu*gmum
-    yick2 = gb_eps*gmu*gb_nu*enum
+    yick1 = epsilon*enu*mu*gmum
+    yick2 = epsilon*gmu*nu*enum
 
     depsdu1x = yick1*dgpdu1x + yick2*dcEdu1x
     depsdu1y = yick1*dgpdu1y + yick2*dcEdu1y
@@ -528,11 +448,11 @@ contains
     R137 = 6.0d0*Ri7 - 12.0d0*Ri13
     
     mess1 = gmu*R137
-    mess2 = R126*gb_mu*gmum
+    mess2 = R126*mu*gmum
     
-    dUdx = 4.0d0*gb_eps*enu*(mess1*dBigRdx + mess2*dgpdx)*sw
-    dUdy = 4.0d0*gb_eps*enu*(mess1*dBigRdy + mess2*dgpdy)*sw
-    dUdz = 4.0d0*gb_eps*enu*(mess1*dBigRdz + mess2*dgpdz)*sw
+    dUdx = 4.0d0*epsilon*enu*(mess1*dBigRdx + mess2*dgpdx)*sw
+    dUdy = 4.0d0*epsilon*enu*(mess1*dBigRdy + mess2*dgpdy)*sw
+    dUdz = 4.0d0*epsilon*enu*(mess1*dBigRdz + mess2*dgpdz)*sw
     
     dUdu1x = 4.0d0*(R126*depsdu1x + eps*R137*dBigRdu1x)*sw
     dUdu1y = 4.0d0*(R126*depsdu1y + eps*R137*dBigRdu1y)*sw
@@ -577,13 +497,13 @@ contains
    
     if (do_pot) then
 #ifdef IS_MPI 
-       pot_row(atom1) = pot_row(atom1) + 2.0d0*eps*R126*sw
-       pot_col(atom2) = pot_col(atom2) + 2.0d0*eps*R126*sw
+       pot_row(VDW_POT,atom1) = pot_row(VDW_POT,atom1) + 2.0d0*eps*R126*sw
+       pot_col(VDW_POT,atom2) = pot_col(VDW_POT,atom2) + 2.0d0*eps*R126*sw
 #else
        pot = pot + 4.0*eps*R126*sw
 #endif
     endif
-
+    
     vpair = vpair + 4.0*eps*R126
 #ifdef IS_MPI
     id1 = AtomRowToGlobal(atom1)
@@ -618,26 +538,25 @@ contains
     real (kind=dp), dimension(3,nLocal) :: t
     logical, intent(in) :: do_pot
     real (kind = dp), dimension(3) :: ul
-
-!!  real(kind=dp) :: lj2, s_lj2pperp2,s_perpppar2,eabnu, epspar
+    
+    real(kind=dp) :: gb_sigma, gb_eps, gb_eps_ratio, gb_mu, gb_sigma_l
     real(kind=dp) :: spar, sperp, slj, par2, perp2, sc, slj2
     real(kind=dp) :: s_par2mperp2, s_lj2ppar2
     real(kind=dp) :: enot, eperp, epar, eab, eabf,moom, mum1
-!!    real(kind=dp) :: e_ljpperp, e_perpmpar, e_ljppar
     real(kind=dp) :: dx, dy, dz, drdx,drdy,drdz, rdotu
-!!    real(kind=dp) :: ct, dctdx, dctdy, dctdz, dctdux, dctduy, dctduz
     real(kind=dp) :: mess, sab, dsabdct, eprime, deprimedct, depmudct
     real(kind=dp) :: epmu, depmudx, depmudy, depmudz
     real(kind=dp) :: depmudux, depmuduy, depmuduz
     real(kind=dp) :: BigR, dBigRdx, dBigRdy, dBigRdz
     real(kind=dp) :: dBigRdux, dBigRduy, dBigRduz
     real(kind=dp) :: dUdx, dUdy, dUdz, dUdux, dUduy, dUduz, e0
-    real(kind=dp) :: Ri, Ri3, Ri6, Ri7, Ril2, Ri13, Rl26, R137, prefactor
+    real(kind=dp) :: Ri, Ri3, Ri6, Ri7, Ri12, Ri13, R126, R137, prefactor
     real(kind=dp) :: chipoalphap2, chioalpha2, ec, epsnot
     real(kind=dp) :: drdotudx, drdotudy, drdotudz    
     real(kind=dp) :: ljeps, ljsigma, sigmaratio, sigmaratioi
-    integer :: ljt1, ljt2, atid1, atid2
-    logical :: thisProperty
+    integer :: ljt1, ljt2, atid1, atid2, gbt1, gbt2
+    logical :: gb_first
+    
 #ifdef IS_MPI
     atid1 = atid_Row(atom1)
     atid2 = atid_Col(atom2)
@@ -645,6 +564,22 @@ contains
     atid1 = atid(atom1)
     atid2 = atid(atom2)
 #endif
+    
+    gbt1 = GBMap%atidToGBtype(atid1)
+    gbt2 = GBMap%atidToGBtype(atid2)
+    
+    if (gbt1 .eq. -1) then
+       gb_first = .false.
+       if (gbt2 .eq. -1) then
+          call handleError("GB", "GBLJ was called without a GB type.")
+       endif
+    else
+       gb_first = .true.
+       if (gbt2 .ne. -1) then
+          call handleError("GB", "GBLJ was called with two GB types (instead of one).")
+       endif
+    endif
+    
     ri =1/r
     
     dx = d(1)
@@ -654,250 +589,211 @@ contains
     drdx = dx *ri
     drdy = dy *ri
     drdz = dz *ri
-  
-  
-
-    if(.not.haveGayBerneLJMap) then
-       call createGayBerneLJMap()
-    endif
-!!$   write(*,*) "in gbljpair"
-    call getElementProperty(atypes, atid1, "is_LennardJones",thisProperty)
-!!$    write(*,*) thisProperty
-    if(thisProperty.eqv..true.)then
+    
+    if(gb_first)then
 #ifdef IS_MPI
-       ul(1) = A_Row(3,atom2)
-       ul(2) = A_Row(6,atom2)
-       ul(3) = A_Row(9,atom2)
+       ul(1) = A_Row(3,atom1)
+       ul(2) = A_Row(6,atom1)
+       ul(3) = A_Row(9,atom1)
+#else
+       ul(1) = A(3,atom1)
+       ul(2) = A(6,atom1)
+       ul(3) = A(9,atom1)       
+#endif
+       gb_sigma     = GBMap%GBtypes(gbt1)%sigma      
+       gb_eps       = GBMap%GBtypes(gbt1)%eps        
+       gb_eps_ratio = GBMap%GBtypes(gbt1)%eps_ratio  
+       gb_mu        = GBMap%GBtypes(gbt1)%mu         
+       gb_sigma_l   = GBMap%GBtypes(gbt1)%sigma_l
 
+       ljsigma = getSigma(atid2)
+       ljeps = getEpsilon(atid2)
+    else
+#ifdef IS_MPI
+       ul(1) = A_Col(3,atom2)
+       ul(2) = A_Col(6,atom2)
+       ul(3) = A_Col(9,atom2)
 #else
        ul(1) = A(3,atom2)
        ul(2) = A(6,atom2)
-       ul(3) = A(9,atom2)
+       ul(3) = A(9,atom2)       
 #endif
+       gb_sigma     = GBMap%GBtypes(gbt2)%sigma      
+       gb_eps       = GBMap%GBtypes(gbt2)%eps        
+       gb_eps_ratio = GBMap%GBtypes(gbt2)%eps_ratio  
+       gb_mu        = GBMap%GBtypes(gbt2)%mu         
+       gb_sigma_l   = GBMap%GBtypes(gbt2)%sigma_l
 
-       rdotu = (dx*ul(1)+dy*ul(2)+dz*ul(3))*ri
-
-       ljt1 = LJMap%atidtoLJtype(atid1)
-       ljt2 = LJMap%atidtoLJtype(atid2)
-       
-       ljeps =  LJMap%LJtype(ljt1)%epsilon 
-!!$       write(*,*) "ljeps"
-!!$       write(*,*) ljeps
-       drdotudx = ul(1)*ri-rdotu*dx*ri*ri
-       drdotudy = ul(2)*ri-rdotu*dy*ri*ri
-       drdotudz = ul(3)*ri-rdotu*dz*ri*ri
-
+       ljsigma = getSigma(atid1)
+       ljeps = getEpsilon(atid1)
+    endif
     
-       moom =  1.0d0 / gb_mu
-       mum1 = gb_mu-1
+    rdotu = (dx*ul(1)+dy*ul(2)+dz*ul(3))*ri
+    
+    drdotudx = ul(1)*ri-rdotu*dx*ri*ri
+    drdotudy = ul(2)*ri-rdotu*dy*ri*ri
+    drdotudz = ul(3)*ri-rdotu*dz*ri*ri
+    
+    moom =  1.0d0 / gb_mu
+    mum1 = gb_mu-1
+    
+    sperp = gb_sigma
+    spar =  gb_sigma_l
+    slj = ljsigma
+    slj2 = slj*slj
 
-       sperp = GayBerneLJMap(ljt1)%sigma_s
-       spar =  GayBerneLJMap(ljt1)%sigma_l
-       slj = LJMap%LJtype(ljt1)%sigma
-       slj2 = slj*slj
-!!$       write(*,*) "spar"
-!!$       write(*,*) sperp
-!!$       write(*,*) spar
-!!    chioalpha2 = s_par2mperp2/s_lj2ppar2 
-       chioalpha2 =1-((sperp+slj)*(sperp+slj))/((spar+slj)*(spar+slj))
-       sc = (sperp+slj)/2.0d0
+    chioalpha2 =1-((sperp+slj)*(sperp+slj))/((spar+slj)*(spar+slj))
+    sc = (sperp+slj)/2.0d0
   
-       par2 = spar*spar
-       perp2 = sperp*sperp
-       s_par2mperp2 = par2 - perp2 
-       s_lj2ppar2 = slj2 + par2
+    par2 = spar*spar
+    perp2 = sperp*sperp
+    s_par2mperp2 = par2 - perp2 
+    s_lj2ppar2 = slj2 + par2
 
+    !! check these ! left from old code
+    !! kdaily e0 may need to be (gb_eps + lj_eps)/2 
+    
+    eperp = dsqrt(gb_eps*ljeps)
+    epar = eperp*gb_eps_ratio
+    enot = dsqrt(ljeps*eperp)
+    chipoalphap2 = 1+(dsqrt(epar*ljeps)/enot)**moom
 
-!! check these ! left from old code
-!! kdaily e0 may need to be (gb_eps + lj_eps)/2 
+    !! mess matches cleaver (eq 20)
     
-       eperp = dsqrt(gb_eps*ljeps)
-       epar = eperp*gb_eps_ratio
-       enot = dsqrt(ljeps*eperp)
-       chipoalphap2 = 1+(dsqrt(epar*ljeps)/enot)**moom
-!! to so mess matchs cleaver (eq 20)
+    mess = 1-rdotu*rdotu*chioalpha2
+    sab = 1.0d0/dsqrt(mess)
+    dsabdct = sc*sab*sab*sab*rdotu*chioalpha2
+       
+    eab = 1-chipoalphap2*rdotu*rdotu
+    eabf = enot*eab**gb_mu
+    depmudct = -2*enot*chipoalphap2*gb_mu*rdotu*eab**mum1
+        
+    BigR = (r - sab*sc + sc)/sc
+    dBigRdx = (drdx -dsabdct*drdotudx)/sc
+    dBigRdy = (drdy -dsabdct*drdotudy)/sc
+    dBigRdz = (drdz -dsabdct*drdotudz)/sc
+    dBigRdux = (-dsabdct*drdx)/sc
+    dBigRduy = (-dsabdct*drdy)/sc
+    dBigRduz = (-dsabdct*drdz)/sc
     
-       mess = 1-rdotu*rdotu*chioalpha2
-       sab = 1.0d0/dsqrt(mess)
-       dsabdct = sc*sab*sab*sab*rdotu*chioalpha2
-       
-       eab = 1-chipoalphap2*rdotu*rdotu
-       eabf = enot*eab**gb_mu
-       depmudct = -2*enot*chipoalphap2*gb_mu*rdotu*eab**mum1
-       
-       
-       BigR = (r - sab*sc + sc)/sc
-       dBigRdx = (drdx -dsabdct*drdotudx)/sc
-       dBigRdy = (drdy -dsabdct*drdotudy)/sc
-       dBigRdz = (drdz -dsabdct*drdotudz)/sc
-       dBigRdux = (-dsabdct*drdx)/sc
-       dBigRduy = (-dsabdct*drdy)/sc
-       dBigRduz = (-dsabdct*drdz)/sc
-       
-       depmudx = depmudct*drdotudx
-       depmudy = depmudct*drdotudy
-       depmudz = depmudct*drdotudz
-       depmudux = depmudct*drdx
-       depmuduy = depmudct*drdy
-       depmuduz = depmudct*drdz
-       
-       Ri = 1.0d0/BigR
-       Ri3 = Ri*Ri*Ri
-       Ri6 = Ri3*Ri3
-       Ri7 = Ri6*Ri
-       Ril2 = Ri6*Ri6
-       Ri13 = Ri6*Ri7
-       Rl26 = Ril2 - Ri6
-       R137 = 6.0d0*Ri7 - 12.0d0*Ri13
-       
-       prefactor = 4.0d0
-       
-       dUdx = prefactor*(eabf*R137*dBigRdx + Rl26*depmudx)
-       dUdy = prefactor*(eabf*R137*dBigRdy + Rl26*depmudy)
-       dUdz = prefactor*(eabf*R137*dBigRdz + Rl26*depmudz)
-       dUdux = prefactor*(eabf*R137*dBigRdux + Rl26*depmudux)
-       dUduy = prefactor*(eabf*R137*dBigRduy + Rl26*depmuduy)
-       dUduz = prefactor*(eabf*R137*dBigRduz + Rl26*depmuduz)
-       
+    depmudx = depmudct*drdotudx
+    depmudy = depmudct*drdotudy
+    depmudz = depmudct*drdotudz
+    depmudux = depmudct*drdx
+    depmuduy = depmudct*drdy
+    depmuduz = depmudct*drdz
+    
+    Ri = 1.0d0/BigR
+    Ri3 = Ri*Ri*Ri
+    Ri6 = Ri3*Ri3
+    Ri7 = Ri6*Ri
+    Ri12 = Ri6*Ri6
+    Ri13 = Ri6*Ri7
+    R126 = Ri12 - Ri6
+    R137 = 6.0d0*Ri7 - 12.0d0*Ri13
+    
+    prefactor = 4.0d0
+    
+    dUdx = prefactor*(eabf*R137*dBigRdx + R126*depmudx)
+    dUdy = prefactor*(eabf*R137*dBigRdy + R126*depmudy)
+    dUdz = prefactor*(eabf*R137*dBigRdz + R126*depmudz)
+    write(*,*) 'p', prefactor, eabf, r137,dbigrdux, depmudux, r126
+    dUdux = prefactor*(eabf*R137*dBigRdux + R126*depmudux)
+    dUduy = prefactor*(eabf*R137*dBigRduy + R126*depmuduy)
+    dUduz = prefactor*(eabf*R137*dBigRduz + R126*depmuduz)
+    
 #ifdef IS_MPI
-       f_Row(1,atom1) = f_Row(1,atom1) - dUdx
-       f_Row(2,atom1) = f_Row(2,atom1) - dUdy
-       f_Row(3,atom1) = f_Row(3,atom1) - dUdz
+    f_Row(1,atom1) = f_Row(1,atom1) - dUdx
+    f_Row(2,atom1) = f_Row(2,atom1) - dUdy
+    f_Row(3,atom1) = f_Row(3,atom1) - dUdz
     
-       f_Col(1,atom2) = f_Col(1,atom2) + dUdx
-       f_Col(2,atom2) = f_Col(2,atom2) + dUdy
-       f_Col(3,atom2) = f_Col(3,atom2) + dUdz
-       
-       t_Row(1,atom2) = t_Row(1,atom1) + ul(2)*dUdu1z - ul(3)*dUdu1y
-       t_Row(2,atom2) = t_Row(2,atom1) + ul(3)*dUdu1x - ul(1)*dUdu1z
-       t_Row(3,atom2) = t_Row(3,atom1) + ul(1)*dUdu1y - ul(2)*dUdu1x
-   
-#else
-       
-       !!kdaily changed flx(gbatom) to f(1,atom1)
-       f(1,atom1) = f(1,atom1) + dUdx
-       f(2,atom1) = f(2,atom1) + dUdy
-       f(3,atom1) = f(3,atom1) + dUdz
-       
-       !!kdaily changed flx(ljatom) to f(2,atom2)
-       f(1,atom2) = f(1,atom2) - dUdx
-       f(2,atom2) = f(2,atom2) - dUdy
-       f(3,atom2) = f(3,atom2) - dUdz
-       
-       ! torques are cross products:
-       !!kdaily tlx(gbatom) to t(1, atom1)and ulx(gbatom) to u11(atom1)need mpi
+    f_Col(1,atom2) = f_Col(1,atom2) + dUdx
+    f_Col(2,atom2) = f_Col(2,atom2) + dUdy
+    f_Col(3,atom2) = f_Col(3,atom2) + dUdz
+    
+    if (gb_first) then
+       t_Row(1,atom1) = t_Row(1,atom1) + ul(2)*dUduz - ul(3)*dUduy
+       t_Row(2,atom1) = t_Row(2,atom1) + ul(3)*dUdux - ul(1)*dUduz
+       t_Row(3,atom1) = t_Row(3,atom1) + ul(1)*dUduy - ul(2)*dUdux
+    else
+       t_Col(1,atom2) = t_Col(1,atom2) + ul(2)*dUduz - ul(3)*dUduy
+       t_Col(2,atom2) = t_Col(2,atom2) + ul(3)*dUdux - ul(1)*dUduz
+       t_Col(3,atom2) = t_Col(3,atom2) + ul(1)*dUduy - ul(2)*dUdux
+    endif
+#else    
+    f(1,atom1) = f(1,atom1) + dUdx
+    f(2,atom1) = f(2,atom1) + dUdy
+    f(3,atom1) = f(3,atom1) + dUdz
+    
+    f(1,atom2) = f(1,atom2) - dUdx
+    f(2,atom2) = f(2,atom2) - dUdy
+    f(3,atom2) = f(3,atom2) - dUdz
+    
+    ! torques are cross products:
+    
+    write(*,*) 'dU', dUdux, duduy, duduz
+
+    if (gb_first) then
+       t(1,atom1) = t(1,atom1) + ul(2)*dUduz - ul(3)*dUduy
+       t(2,atom1) = t(2,atom1) + ul(3)*dUdux - ul(1)*dUduz
+       t(3,atom1) = t(3,atom1) + ul(1)*dUduy - ul(2)*dUdux
+       write(*,*) t(1,atom1), t(2,atom1), t(3,atom1)
+    else
        t(1,atom2) = t(1,atom2) + ul(2)*dUduz - ul(3)*dUduy
        t(2,atom2) = t(2,atom2) + ul(3)*dUdux - ul(1)*dUduz
        t(3,atom2) = t(3,atom2) + ul(1)*dUduy - ul(2)*dUdux
-       
-#endif
-       
-       if (do_pot) then
-#ifdef IS_MPI 
-          pot_row(atom1) = pot_row(atom1) + 2.0d0*eps*Rl26*sw
-          pot_col(atom2) = pot_col(atom2) + 2.0d0*eps*Rl26*sw
-#else
-          pot = pot + prefactor*eabf*Rl26*sw
-#endif
-       endif
-       
-       vpair = vpair + 4.0*epmu*Rl26
-#ifdef IS_MPI
-       id1 = AtomRowToGlobal(atom1)
-       id2 = AtomColToGlobal(atom2)
-#else
-       id1 = atom1
-       id2 = atom2
-#endif
-       
-       If (Molmembershiplist(Id1) .Ne. Molmembershiplist(Id2)) Then
-          
-          Fpair(1) = Fpair(1) + Dudx
-          Fpair(2) = Fpair(2) + Dudy
-          Fpair(3) = Fpair(3) + Dudz
-          
-       Endif
-       
-    else 
-       !!need to do this all over but switch the gb and lj
-    endif
-    return
 
+       write(*,*) t(1,atom2), t(2,atom2), t(3,atom2)
+    endif
+
+#endif
+       
+    if (do_pot) then
+#ifdef IS_MPI 
+       pot_row(VDW_POT,atom1) = pot_row(VDW_POT,atom1) + 2.0d0*eps*R126*sw
+       pot_col(VDW_POT,atom2) = pot_col(VDW_POT,atom2) + 2.0d0*eps*R126*sw
+#else
+       pot = pot + prefactor*eabf*R126*sw
+#endif
+    endif
+    
+    vpair = vpair + 4.0*epmu*R126
+#ifdef IS_MPI
+    id1 = AtomRowToGlobal(atom1)
+    id2 = AtomColToGlobal(atom2)
+#else
+    id1 = atom1
+    id2 = atom2
+#endif
+    
+    If (Molmembershiplist(Id1) .Ne. Molmembershiplist(Id2)) Then
+       
+       Fpair(1) = Fpair(1) + Dudx
+       Fpair(2) = Fpair(2) + Dudy
+       Fpair(3) = Fpair(3) + Dudz
+       
+    Endif
+    
+    return
+    
   end subroutine do_gb_lj_pair
 
-  subroutine complete_GayBerne_FF(status)
-    integer :: nLJTYPES, nGayBerneTypes, ntypes, current, status, natypes
-    integer, pointer :: MatchList(:) => null ()
-    integer :: i
-    integer :: myATID 
-    logical :: thisProperty
+  subroutine destroyGBTypes()
+
+    GBMap%nGBtypes = 0
+    GBMap%currentGBtype = 0
     
-    if(.not.associated(LJMap%Ljtype)) then
-       
-       natypes = getSize(atypes)
-       
-       if(nAtypes == 0) then
-          status = -1
-          return
-       end if
-       
-       call getMatchingElementList(atypes, "is_LennardJones", .true., &
-            nLJTypes, MatchList)
-       
-       LJMap%nLJtypes = nLJTypes 
-       
-       if(nLJTypes ==0) then
-          write(*,*)" you broke this thing kyle"
-          return
-       endif
-       allocate(LJMap%LJtype(nLJTypes))
-       
-       ntypes = getSize(atypes)
-       
-       allocate(LJMap%atidToLJtype(ntypes))
+    if (associated(GBMap%GBtypes)) then
+       deallocate(GBMap%GBtypes)
+       GBMap%GBtypes => null()
     end if
     
-    do i =1, ntypes
-       
-       myATID = getFirstMatchingElement(atypes, 'c_ident', i)
-       call getElementProperty(atypes, myATID, "is_LennardJones",thisProperty)
-       
-       if(thisProperty) then
-          current =  LJMap%currentLJtype+1       
-          LJMap%currentLJtype =  current          
-          
-          LJMap%atidToLJtype(myATID)    = current
-          LJMap%LJtype(current)%atid    = myATid
-          
-          LJMap%LJtype(current)%sigma   = getSigma(myATID)
-          LJMap%LJtype(current)%epsilon = getEpsilon(myATID)
-       endif
-       
-    enddo
-    gb_pair_initialized = .true.
+    if (associated(GBMap%atidToGBtype)) then
+       deallocate(GBMap%atidToGBtype)
+       GBMap%atidToGBtype => null()
+    end if
     
-  end subroutine complete_GayBerne_FF
+  end subroutine destroyGBTypes
 
-  subroutine destroyGayBerneTypes()
-
-    LJMap%Nljtypes =0
-    LJMap%currentLJtype=0
-    if(associated(LJMap%LJtype))then
-       deallocate(LJMap%LJtype)
-       LJMap%LJtype => null()
-    end if
-       
-    if(associated(LJMap%atidToLJType))then
-       deallocate(LJMap%atidToLJType)
-       LJMap%atidToLJType => null()
-    end if
-
-!!       deallocate(gayBerneLJMap)
-   
-    haveGayBerneLJMap = .false.
-  end subroutine destroyGayBerneTypes
-
-
-
-end module gb_pair
+end module gayberne
     

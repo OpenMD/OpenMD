@@ -204,14 +204,17 @@ namespace oopse {
             if (gayBerneData != NULL) {
                 GayBerneParam gayBerneParam = gayBerneData->getData();
 
-                /**@todo change fortran interface */
-                //makeGayBerneType(&atp.ident, &gayBerneParam.w0, &gayBerneParam.v0, &gayBerneParam.v0p, &gayBerneParam.rl,
-                //    &gayBerneParam.ru, &gayBerneParam.rlp, &gayBerneParam.rup);
-                newGayBerneType(&gayBerneParam.GB_sigma, &gayBerneParam.GB_12b_ratio, &gayBerneParam.GB_eps,
-				&gayBerneParam.GB_eps_ratio, &gayBerneParam.GB_mu, &gayBerneParam.GB_nu);
+                newGayBerneType(&atp.ident, 
+                                &gayBerneParam.GB_sigma, 
+                                &gayBerneParam.GB_l2b_ratio, 
+                                &gayBerneParam.GB_eps,
+				&gayBerneParam.GB_eps_ratio, 
+                                &gayBerneParam.GB_mu, 
+                                &gayBerneParam.GB_nu, &isError);
+
                 if (isError != 0) {
                     sprintf( painCave.errMsg,
-                           "Fortran rejected newGayBernetype\n");
+                           "Fortran rejected newGayBerneType\n");
                     painCave.severity = OOPSE_ERROR;
                     painCave.isFatal = 1;
                     simError();          

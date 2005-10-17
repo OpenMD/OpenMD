@@ -45,7 +45,7 @@
 
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: doForces.F90,v 1.58 2005-10-14 15:44:37 kdaily Exp $, $Date: 2005-10-14 15:44:37 $, $Name: not supported by cvs2svn $, $Revision: 1.58 $
+!! @version $Id: doForces.F90,v 1.59 2005-10-17 19:12:34 gezelter Exp $, $Date: 2005-10-17 19:12:34 $, $Name: not supported by cvs2svn $, $Revision: 1.59 $
 
 
 module doForces
@@ -59,7 +59,7 @@ module doForces
   use sticky
   use electrostatic_module
   use reaction_field_module
-  use gb_pair
+  use gayberne
   use shapes
   use vector_class
   use eam
@@ -705,15 +705,6 @@ contains
           haveSaneForceField = .false.
           return
        end if
-    endif
-
-    if (FF_uses_GayBerne) then
-       call check_gb_pair_FF(my_status)
-       if (my_status .ne. 0) then
-          thisStat = -1
-          haveSaneForceField = .false.
-          return
-       endif
     endif
 
     if (.not. haveNeighborList) then
