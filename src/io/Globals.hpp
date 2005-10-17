@@ -66,7 +66,7 @@ struct ParameterTraits<std::string>{
 template<typename T> static bool    convert(T v, RepType& r){return false;} // !NB everything is ok
 template<typename T> static RepType convert(T v)            {RepType tmp; convert(v,tmp);return tmp;} 
   static bool convert(RepType v, RepType& r) { r = v; return true;}
-  static char* getParamType() { return "std::string";}  
+  static std::string getParamType() { return "string";}  
 }; 
 //bool
 template<>                     
@@ -87,7 +87,7 @@ struct ParameterTraits<bool>{
     
      return result;
   }
-  static char* getParamType() { return "bool";}  
+  static std::string getParamType() { return "bool";}  
 };
 
 //int   
@@ -97,7 +97,7 @@ struct ParameterTraits<int>{
     template<typename T> static bool    convert(T, RepType&){return false;} 
     template<typename T> static RepType convert(T v)        {RepType tmp; convert(v,tmp);return tmp;} 
     static bool convert(RepType v, RepType& r)            { r=v; return true;}
-    static char* getParamType() { return "int";}  
+    static std::string getParamType() { return "int";}  
 };
 
 //double
@@ -108,7 +108,7 @@ struct ParameterTraits<double>{
     template<typename T> static RepType convert(T v)        {RepType tmp; convert(v,tmp);return tmp;} 
     static bool convert(RepType v, RepType& r)            {r=v; return true;}
     static bool convert(int v, RepType& r)                {r = static_cast<double>(v); return true;}
-    static char* getParamType() { return "double";}    
+    static std::string getParamType() { return "double";}    
 };
 
 
@@ -125,7 +125,7 @@ class ParameterBase {
     virtual bool setData(std::string) = 0;
     virtual bool setData(int) = 0;
     virtual bool setData(double) = 0;
-    virtual char* getParamType() = 0;
+    virtual std::string getParamType() = 0;
   protected:
     std::string keyword_;
     bool optional_;
@@ -151,7 +151,7 @@ class Parameter : public ParameterBase{
         return internalSetData<double>(dval);
     }
 
-    virtual char* getParamType() { return ParameterTraits<ParamType>::getParamType();}
+    virtual std::string getParamType() { return ParameterTraits<ParamType>::getParamType();}
    private: 
      template<class T> bool internalSetData(T data) {
         ParamType tmp;

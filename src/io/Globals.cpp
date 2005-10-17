@@ -65,8 +65,7 @@
   parameters_.insert(std::make_pair(std::string(KEYWORD),  &NAME));
 
 #define CheckParameter(NAME, CONSTRAINT)                              \
-  if (!NAME.empty()) { if (!(CONSTRAINT)(NAME.getData())) std::cout <<"Error in parsing " << NAME.getKeyword() << " : "<< (CONSTRAINT).getConstraintDescription() << std::endl; }                 
-
+  if (!NAME.empty()) { if (!(CONSTRAINT)(NAME.getData())) { sprintf(painCave.errMsg,"Error in checking %s : should be %s\n",NAME.getKeyword().c_str(),(CONSTRAINT).getConstraintDescription().c_str()); painCave.isFatal = 1; painCave.severity = OOPSE_ERROR; simError();} }                 
 
 Globals::Globals(){
  
@@ -142,7 +141,7 @@ Globals::Globals(){
 }
 
 int Globals::globalAssign( event* the_event ){
-  
+  char errorMessage[65535]; 
   int key;
   interface_assign_type the_type =  the_event->evt.asmt.asmt_type;
   char* lhs = the_event->evt.asmt.lhs;
@@ -150,26 +149,34 @@ int Globals::globalAssign( event* the_event ){
 
   bool result = false;
 
+  /**@todo fix memory leak */  
   ParamMap::iterator i =parameters_.find(keyword);
   if (i != parameters_.end()) {
     if( the_type == STRING ){
        result = i->second->setData(std::string(the_event->evt.asmt.rhs.sval));
        if (!result ) {
-  	    sprintf(the_event->err_msg, "Error in parsing %s: expect %s, but get %s.\n", keyword.c_str(), i->second->getParamType(), the_event->evt.asmt.rhs.sval);
+  	    sprintf(errorMessage, "Error in parsing %s: expect %s, but get a string \"%s\".\n", keyword.c_str(), i->second->getParamType().c_str(), the_event->evt.asmt.rhs.sval);
+            the_event->err_msg = strdup(errorMessage);
        }
     } else if( the_type == DOUBLE ){
       result = i->second->setData(the_event->evt.asmt.rhs.dval);
        if (!result )
-         sprintf(the_event->err_msg, "Error in parsing %s: expect %s, but get %f.\n", keyword.c_str(), i->second->getParamType(), the_event->evt.asmt.rhs.dval );
+         sprintf(errorMessage, "Error in parsing %s: expect %s, but get a double %f.\n", keyword.c_str(), i->second->getParamType().c_str(), the_event->evt.asmt.rhs.dval );
+       the_event->err_msg = strdup(errorMessage);
     }      
     else if (the_type == INT ){
       result = i->second->setData(the_event->evt.asmt.rhs.ival);
        if (!result )
-         sprintf(the_event->err_msg,  "Error in parsing %s: expect %s, but get %d.\n", keyword.c_str(), i->second->getParamType(), the_event->evt.asmt.rhs.ival );
+         sprintf(errorMessage,  "Error in parsing %s: expect %s, but get an int %d.\n", keyword.c_str(), i->second->getParamType().c_str(), the_event->evt.asmt.rhs.ival );
+       the_event->err_msg = strdup(errorMessage);
       
     } else {
-        sprintf(the_event->err_msg,  "%s is an unrecognized keyword\n", keyword.c_str() );
+        sprintf(errorMessage,  "Internal error of parser\n");
+	the_event->err_msg = strdup(errorMessage);
     }
+  } else {
+    sprintf(errorMessage,  "%s is an unrecognized keyword\n", keyword.c_str() );
+    the_event->err_msg = strdup(errorMessage);
   }
 
   if (keyword == "nComponents" && getNComponents() > 0) {
