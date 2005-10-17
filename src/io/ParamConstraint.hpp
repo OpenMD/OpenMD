@@ -290,7 +290,7 @@ public:
 
     NotParamConstraint( ConsT cons) : cons_(cons) {
         std::stringstream iss;
-        iss << "(not" << cons1_.getConstraintDescription() << ")"; 
+        iss << "(not" << cons_.getConstraintDescription() << ")"; 
         this->description_ = iss.str(); 
     }
 
