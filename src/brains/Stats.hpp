@@ -51,6 +51,7 @@
 #define BRAINS_STATS_HPP
 
 #include <string>
+#include <map>
 
 #include "math/SquareMatrix3.hpp"
 namespace oopse {
@@ -116,7 +117,10 @@ namespace oopse {
     void setTau(const Mat3x3d& tau) {
       tau_ = tau;
     }
-        
+
+    typedef std::map<std::string, Stats::StatsIndex> StatsMapType;
+    static  StatsMapType statsMap;
+  
   private:
     static void init();
     static bool isInit_;
@@ -125,6 +129,8 @@ namespace oopse {
     static std::string units_[ENDINDEX - BEGININDEX];
     Mat3x3d tau_;
   };
+
+
 
 } //end namespace oopse
 #endif //BRAINS_STATS_HPP

@@ -222,39 +222,23 @@ namespace oopse {
   }
 
   StatWriter* VelocityVerletIntegrator::createStatWriter() {
+
+    std::string statFileFormatString = simParams->getStatFileFormat();
+    StatsBitSet mask = parseStatFileFormat(statFileFormatString);
+    
     // if solidThermInt is true, add extra information to the statfile
     if (simParams->getUseSolidThermInt()){
-      StatsBitSet mask; 
-      mask.set(Stats::TIME);
-      mask.set(Stats::TOTAL_ENERGY);
-      mask.set(Stats::POTENTIAL_ENERGY);
-      mask.set(Stats::KINETIC_ENERGY);
-      mask.set(Stats::TEMPERATURE);
-      mask.set(Stats::PRESSURE);
-      mask.set(Stats::VOLUME);
-      mask.set(Stats::CONSERVED_QUANTITY);
       mask.set(Stats::VRAW);
       mask.set(Stats::VHARM);
-      return new StatWriter(info_->getStatFileName(), mask);
     }
 
     if (simParams->havePrintPressureTensor() && simParams->getPrintPressureTensor()){
-       StatsBitSet mask;
-        mask.set(Stats::TIME);
-        mask.set(Stats::TOTAL_ENERGY);
-        mask.set(Stats::POTENTIAL_ENERGY);
-        mask.set(Stats::KINETIC_ENERGY);
-        mask.set(Stats::TEMPERATURE);
-        mask.set(Stats::PRESSURE);
-        mask.set(Stats::VOLUME);
-        mask.set(Stats::CONSERVED_QUANTITY);
         mask.set(Stats::PRESSURE_TENSOR_X);
         mask.set(Stats::PRESSURE_TENSOR_Y);
         mask.set(Stats::PRESSURE_TENSOR_Z);
-        return new StatWriter(info_->getStatFileName(), mask);
     }
     
-    return new StatWriter(info_->getStatFileName());
+     return new StatWriter(info_->getStatFileName(), mask);
   }
 
   RestWriter* VelocityVerletIntegrator::createRestWriter(){

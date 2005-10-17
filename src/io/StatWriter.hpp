@@ -54,34 +54,27 @@
 #include <bitset>
 #include <fstream>
 #include <iostream>
+#include <string>
 #include <string.h>
 
 #include "brains/Stats.hpp"
+#include "utils/StringTokenizer.hpp"
+#include "utils/CaseConversion.hpp"
+#include "utils/simError.h"
 
 namespace oopse {
 
   typedef std::bitset<Stats::ENDINDEX-Stats::BEGININDEX> StatsBitSet;
 
-  /**
-   * DefaultStatsBitSet includes 
-   *    StatsIndex::TIME
-   *    StatsIndex::TOTAL_ENERGY
-   *    StatsIndex::POTENTIAL_ENERGY
-   *    StatsIndex::KINETIC_ENERGY
-   *    StatsIndex::TEMPERATURE
-   *    StatsIndex::PRESSURE
-   *    StatsIndex::CONSERVED_QUANTITY
-   */
-  const StatsBitSet DefaultStatsBitSet(255ul);
-
-
+  StatsBitSet parseStatFileFormat(const std::string& format);
+  
   /**
    * @class StatWriter StatWriter.hpp "io/StatWriter.hpp"
    * @brief A configurable Statistics Writer
    */
   class StatWriter {
   public:
-    StatWriter(const std::string& filename, const StatsBitSet& mask = DefaultStatsBitSet);
+    StatWriter(const std::string& filename, const StatsBitSet& mask);
     ~StatWriter();
 
     void writeStat(const Stats& s);

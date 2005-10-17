@@ -46,6 +46,27 @@
 #include "utils/simError.h"
 
 namespace oopse {
+  StatsBitSet parseStatFileFormat(const std::string& format) {
+    StringTokenizer tokenizer(format, " ,;|\t\n\r");
+    StatsBitSet mask;
+    while(tokenizer.hasMoreTokens()) {
+        std::string token(tokenizer.nextToken());
+        toUpper(token);
+        Stats::StatsMapType::iterator i = Stats::statsMap.find(token);
+        if (i != Stats::statsMap.end()) {
+            mask.set(i->second);
+        } else {
+          sprintf( painCave.errMsg,
+	               "%s is not a valid statFileFormat keyword.\n", token.c_str() );
+          painCave.isFatal = 0;
+          painCave.severity = OOPSE_ERROR;
+          simError();            
+        }
+    }
+    
+    return mask;
+  }
+  
   StatWriter::StatWriter( const std::string& filename, const StatsBitSet& mask) : mask_(mask){
 
 #ifdef IS_MPI

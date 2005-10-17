@@ -69,7 +69,7 @@ typedef struct{
   union{
     int ival;
     double dval;
-    char sval[120];
+    char sval[1024];
   }rhs;
 } assignment_event;
 

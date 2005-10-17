@@ -122,7 +122,6 @@ Globals::Globals(){
   DefineOptionalParameter(PrintPressureTensor, "printPressureTensor");
   DefineOptionalParameter(ElectrostaticSummationMethod, "electrostaticSummationMethod");
   DefineOptionalParameter(CutoffPolicy, "cutoffPolicy");
-  DefineOptionalParameter(StatFileFormat, "statFileFormat");    
   
   DefineOptionalParameterWithDefaultValue(MixingRule, "mixingRule", "standard");
   DefineOptionalParameterWithDefaultValue(UsePeriodicBoundaryConditions, "usePeriodicBoundaryConditions", true);
@@ -137,6 +136,8 @@ Globals::Globals(){
   DefineOptionalParameterWithDefaultValue(DampingAlpha, "dampingAlpha", 1.5);
   DefineOptionalParameterWithDefaultValue(CompressDumpFile, "compressDumpFile", 0);
   DefineOptionalParameterWithDefaultValue(SkinThickness, "skinThickness", 1.0);
+  DefineOptionalParameterWithDefaultValue(StatFileFormat, "statFileFormat", "TIME|TOTAL_ENERGY|POTENTIAL_ENERGY|KINETIC_ENERGY|TEMPERATURE|PRESSURE|VOLUME|CONSERVED_QUANTITY");    
+
   
 }
 

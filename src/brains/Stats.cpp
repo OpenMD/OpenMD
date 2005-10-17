@@ -54,7 +54,7 @@ namespace oopse {
   bool Stats::isInit_ = false;
   std::string Stats::title_[Stats::ENDINDEX - Stats::BEGININDEX];
   std::string Stats::units_[Stats::ENDINDEX - Stats::BEGININDEX];
-
+  Stats::StatsMapType Stats::statsMap;
   Stats::Stats() {
 
     if (!isInit_) {
@@ -79,6 +79,7 @@ namespace oopse {
     Stats::title_[LONG_RANGE_POTENTIAL] = "Long Range Potential";
     Stats::title_[SHORT_RANGE_POTENTIAL] = "Short Range Potential";
     Stats::title_[VANDERWAALS_POTENTIAL] = "van der waals Potential";
+    Stats::title_[ELECTROSTATIC_POTENTIAL] = "Electrostatic Potential";    
     Stats::title_[BOND_POTENTIAL] = "Bond Potential";
     Stats::title_[BEND_POTENTIAL] = "Bend Potential";
     Stats::title_[DIHEDRAL_POTENTIAL] = "Dihedral Potential";
@@ -102,6 +103,7 @@ namespace oopse {
     Stats::units_[LONG_RANGE_POTENTIAL] = "kcal/mol";
     Stats::units_[SHORT_RANGE_POTENTIAL] = "kcal/mol";
     Stats::units_[VANDERWAALS_POTENTIAL] = "kcal/mol";
+    Stats::units_[ELECTROSTATIC_POTENTIAL] = "kcal/mol";
     Stats::units_[BOND_POTENTIAL] = "kcal/mol";
     Stats::units_[BEND_POTENTIAL] = "kcal/mol";
     Stats::units_[DIHEDRAL_POTENTIAL] = "kcal/mol";
@@ -111,6 +113,30 @@ namespace oopse {
     Stats::units_[PRESSURE_TENSOR_X] = "amu*fs^-2*Ang^-1";
     Stats::units_[PRESSURE_TENSOR_Y] = "amu*fs^-2*Ang^-1";
     Stats::units_[PRESSURE_TENSOR_Z] = "amu*fs^-2*Ang^-1";
+
+    Stats::statsMap.insert(StatsMapType::value_type("TIME", TIME));
+    Stats::statsMap.insert(StatsMapType::value_type("TOTAL_ENERGY", TOTAL_ENERGY));
+    Stats::statsMap.insert(StatsMapType::value_type("POTENTIAL_ENERGY", POTENTIAL_ENERGY));
+    Stats::statsMap.insert(StatsMapType::value_type("KINETIC_ENERGY", KINETIC_ENERGY));
+    Stats::statsMap.insert(StatsMapType::value_type("TEMPERATURE", TEMPERATURE));
+    Stats::statsMap.insert(StatsMapType::value_type("PRESSURE", PRESSURE));
+    Stats::statsMap.insert(StatsMapType::value_type("VOLUME", VOLUME));
+    Stats::statsMap.insert(StatsMapType::value_type("CONSERVED_QUANTITY", CONSERVED_QUANTITY));
+    Stats::statsMap.insert(StatsMapType::value_type("TRANSLATIONAL_KINETIC", TRANSLATIONAL_KINETIC));
+    Stats::statsMap.insert(StatsMapType::value_type("ROTATIONAL_KINETIC", ROTATIONAL_KINETIC));
+    Stats::statsMap.insert(StatsMapType::value_type("LONG_RANGE_POTENTIAL", LONG_RANGE_POTENTIAL));
+    Stats::statsMap.insert(StatsMapType::value_type("SHORT_RANGE_POTENTIAL", SHORT_RANGE_POTENTIAL));
+    Stats::statsMap.insert(StatsMapType::value_type("VANDERWAALS_POTENTIAL", VANDERWAALS_POTENTIAL));
+    Stats::statsMap.insert(StatsMapType::value_type("ELECTROSTATIC_POTENTIAL", ELECTROSTATIC_POTENTIAL));
+    Stats::statsMap.insert(StatsMapType::value_type("BOND_POTENTIAL", BOND_POTENTIAL));
+    Stats::statsMap.insert(StatsMapType::value_type("BEND_POTENTIAL", BEND_POTENTIAL));
+    Stats::statsMap.insert(StatsMapType::value_type("DIHEDRAL_POTENTIAL", DIHEDRAL_POTENTIAL));
+    Stats::statsMap.insert(StatsMapType::value_type("IMPROPER_POTENTIAL", IMPROPER_POTENTIAL));
+    Stats::statsMap.insert(StatsMapType::value_type("VRAW", VRAW));    
+    Stats::statsMap.insert(StatsMapType::value_type("VHARM", VHARM));    
+    Stats::statsMap.insert(StatsMapType::value_type("PRESSURE_TENSOR_X", PRESSURE_TENSOR_X));    
+    Stats::statsMap.insert(StatsMapType::value_type("PRESSURE_TENSOR_Y", PRESSURE_TENSOR_Y));    
+    Stats::statsMap.insert(StatsMapType::value_type("PRESSURE_TENSOR_Z", PRESSURE_TENSOR_Z));    
   }
 
 }
