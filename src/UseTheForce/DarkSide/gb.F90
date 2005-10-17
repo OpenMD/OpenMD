@@ -553,6 +553,7 @@ contains
     real(kind=dp) :: Ri, Ri3, Ri6, Ri7, Ri12, Ri13, R126, R137, prefactor
     real(kind=dp) :: chipoalphap2, chioalpha2, ec, epsnot
     real(kind=dp) :: drdotudx, drdotudy, drdotudz    
+    real(kind=dp) :: drdotudux, drdotuduy, drdotuduz    
     real(kind=dp) :: ljeps, ljsigma, sigmaratio, sigmaratioi
     integer :: ljt1, ljt2, atid1, atid2, gbt1, gbt2
     logical :: gb_first
@@ -627,12 +628,18 @@ contains
        ljsigma = getSigma(atid1)
        ljeps = getEpsilon(atid1)
     endif
-    
+   
+    write(*,*) 'd u', dx, dy, dz, ul(1), ul(2), ul(3)
+ 
     rdotu = (dx*ul(1)+dy*ul(2)+dz*ul(3))*ri
-    
+   
     drdotudx = ul(1)*ri-rdotu*dx*ri*ri
     drdotudy = ul(2)*ri-rdotu*dy*ri*ri
     drdotudz = ul(3)*ri-rdotu*dz*ri*ri
+    drdotudux = drdx
+    drdotuduy = drdy
+    drdotuduz = drdz
+
     
     moom =  1.0d0 / gb_mu
     mum1 = gb_mu-1
@@ -662,26 +669,33 @@ contains
     
     mess = 1-rdotu*rdotu*chioalpha2
     sab = 1.0d0/dsqrt(mess)
+
+    write(*,*) 's', sc, sab, rdotu, chioalpha2
     dsabdct = sc*sab*sab*sab*rdotu*chioalpha2
        
     eab = 1-chipoalphap2*rdotu*rdotu
     eabf = enot*eab**gb_mu
+
+    write(*,*)  'e', enot, chipoalphap2, gb_mu, rdotu, eab, mum1
+
     depmudct = -2*enot*chipoalphap2*gb_mu*rdotu*eab**mum1
         
     BigR = (r - sab*sc + sc)/sc
     dBigRdx = (drdx -dsabdct*drdotudx)/sc
     dBigRdy = (drdy -dsabdct*drdotudy)/sc
     dBigRdz = (drdz -dsabdct*drdotudz)/sc
-    dBigRdux = (-dsabdct*drdx)/sc
-    dBigRduy = (-dsabdct*drdy)/sc
-    dBigRduz = (-dsabdct*drdz)/sc
+    dBigRdux = (-dsabdct*drdotudux)/sc
+    dBigRduy = (-dsabdct*drdotuduy)/sc
+    dBigRduz = (-dsabdct*drdotuduz)/sc
     
+    write(*,*) 'ds dep', dsabdct, depmudct
+    write(*,*) 'drdotudu', drdotudux, drdotuduy, drdotuduz
     depmudx = depmudct*drdotudx
     depmudy = depmudct*drdotudy
     depmudz = depmudct*drdotudz
-    depmudux = depmudct*drdx
-    depmuduy = depmudct*drdy
-    depmuduz = depmudct*drdz
+    depmudux = depmudct*drdotudux
+    depmuduy = depmudct*drdotuduy
+    depmuduz = depmudct*drdotuduz
     
     Ri = 1.0d0/BigR
     Ri3 = Ri*Ri*Ri
@@ -697,7 +711,8 @@ contains
     dUdx = prefactor*(eabf*R137*dBigRdx + R126*depmudx)
     dUdy = prefactor*(eabf*R137*dBigRdy + R126*depmudy)
     dUdz = prefactor*(eabf*R137*dBigRdz + R126*depmudz)
-    write(*,*) 'p', prefactor, eabf, r137,dbigrdux, depmudux, r126
+    write(*,*) 'dRdu',  dbigrdux, dbigrduy, dbigrduz
+    write(*,*) 'dEdu',  depmudux, depmuduy, depmuduz
     dUdux = prefactor*(eabf*R137*dBigRdux + R126*depmudux)
     dUduy = prefactor*(eabf*R137*dBigRduy + R126*depmuduy)
     dUduz = prefactor*(eabf*R137*dBigRduz + R126*depmuduz)
@@ -737,13 +752,13 @@ contains
        t(1,atom1) = t(1,atom1) + ul(2)*dUduz - ul(3)*dUduy
        t(2,atom1) = t(2,atom1) + ul(3)*dUdux - ul(1)*dUduz
        t(3,atom1) = t(3,atom1) + ul(1)*dUduy - ul(2)*dUdux
-       write(*,*) t(1,atom1), t(2,atom1), t(3,atom1)
+       write(*,*) 'T1', t(1,atom1), t(2,atom1), t(3,atom1)
     else
        t(1,atom2) = t(1,atom2) + ul(2)*dUduz - ul(3)*dUduy
        t(2,atom2) = t(2,atom2) + ul(3)*dUdux - ul(1)*dUduz
        t(3,atom2) = t(3,atom2) + ul(1)*dUduy - ul(2)*dUdux
 
-       write(*,*) t(1,atom2), t(2,atom2), t(3,atom2)
+       write(*,*) 'T2', t(1,atom2), t(2,atom2), t(3,atom2)
     endif
 
 #endif
