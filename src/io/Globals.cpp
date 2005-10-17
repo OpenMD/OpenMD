@@ -144,33 +144,31 @@ Globals::Globals(){
 int Globals::globalAssign( event* the_event ){
   
   int key;
-  int token;
   interface_assign_type the_type =  the_event->evt.asmt.asmt_type;
   char* lhs = the_event->evt.asmt.lhs;
   std::string keyword(lhs);
 
-  bool result;
-
+  bool result = false;
 
   ParamMap::iterator i =parameters_.find(keyword);
   if (i != parameters_.end()) {
     if( the_type == STRING ){
        result = i->second->setData(std::string(the_event->evt.asmt.rhs.sval));
        if (!result ) {
-  	    sprintf(the_event->err_msg, "Error in parsing meta-data file!\n\t%s must be a string.\n", keyword.c_str() );
+  	    sprintf(the_event->err_msg, "Error in parsing %s: expect %s, but get %s.\n", keyword.c_str(), i->second->getParamType(), the_event->evt.asmt.rhs.sval);
        }
     } else if( the_type == DOUBLE ){
       result = i->second->setData(the_event->evt.asmt.rhs.dval);
        if (!result )
-         sprintf(the_event->err_msg, "Error in parsing meta-data file!\n\t%s must be a double.\n", keyword.c_str() );
+         sprintf(the_event->err_msg, "Error in parsing %s: expect %s, but get %f.\n", keyword.c_str(), i->second->getParamType(), the_event->evt.asmt.rhs.dval );
     }      
     else if (the_type == INT ){
       result = i->second->setData(the_event->evt.asmt.rhs.ival);
        if (!result )
-         sprintf(the_event->err_msg,  "Error in parsing meta-data file!\n\t%s must be an int.\n", keyword.c_str() );
+         sprintf(the_event->err_msg,  "Error in parsing %s: expect %s, but get %d.\n", keyword.c_str(), i->second->getParamType(), the_event->evt.asmt.rhs.ival );
       
     } else {
-    
+        sprintf(the_event->err_msg,  "%s is an unrecognized keyword\n", keyword.c_str() );
     }
   }
 

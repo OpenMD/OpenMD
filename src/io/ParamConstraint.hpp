@@ -42,7 +42,7 @@
 #ifndef IO_PARAMCONSTRAINT_HPP
 #define IO_PARAMCONSTRAINT_HPP
 #include <sstream>
-
+#include "utils/CaseConversion.hpp"
 /**
   * This class allows to recognize constraint predicates, so that they can be combined using
   * composition operators. Every constraint predicate must be derived from this class
@@ -169,14 +169,14 @@ struct EqualConstraint : public ParamConstraintFacade<EqualConstraint<T> > {
 
 struct EqualIgnoreCaseConstraint : public ParamConstraintFacade<EqualIgnoreCaseConstraint> {
     
-    EqualIgnoreCaseConstraint(std::string rhs) : rhs_(rhs){
+    EqualIgnoreCaseConstraint(std::string rhs) : rhs_(oopse::toUpperCopy(rhs)){
         std::stringstream iss;
         iss << "equal to (case insensitive) " << rhs;
         description_ = iss.str();
     }
     
     bool operator()( std::string data ) const {
-        return data == rhs_; 
+        return oopse::toUpperCopy(data) == rhs_; 
     }
     
     private:
