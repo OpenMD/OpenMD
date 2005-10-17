@@ -43,6 +43,8 @@
 #define IO_PARAMCONSTRAINT_HPP
 #include <sstream>
 #include "utils/CaseConversion.hpp"
+#include "utils/StringTokenizer.hpp"
+
 /**
   * This class allows to recognize constraint predicates, so that they can be combined using
   * composition operators. Every constraint predicate must be derived from this class
@@ -64,7 +66,7 @@ struct NotEmptyConstraint : public ParamConstraintFacade<NotEmptyConstraint>{
 
 struct ZeroConstraint : public ParamConstraintFacade<ZeroConstraint>{
     
-    ZeroConstraint() {description_ = "zero";}
+    ZeroConstraint() {this->description_ = "zero";}
     template<typename DataType>
     bool operator()( DataType data ) const {
         return data == 0;
@@ -72,7 +74,7 @@ struct ZeroConstraint : public ParamConstraintFacade<ZeroConstraint>{
 };
 
 struct NonZeroConstraint : public ParamConstraintFacade<NonZeroConstraint>{
-    NonZeroConstraint() {description_ = "nonzero";}
+    NonZeroConstraint() {this->description_ = "nonzero";}
 
     template<typename DataType>
     bool operator()( DataType data ) const {
@@ -81,7 +83,7 @@ struct NonZeroConstraint : public ParamConstraintFacade<NonZeroConstraint>{
 };
 
 struct PositiveConstraint : public ParamConstraintFacade<PositiveConstraint>{
-    PositiveConstraint() {description_ = "positive";}
+    PositiveConstraint() {this->description_ = "positive";}
     template<typename DataType>
     bool operator()( DataType data ) const
     {
@@ -90,7 +92,7 @@ struct PositiveConstraint : public ParamConstraintFacade<PositiveConstraint>{
 };
 
 struct NonPositiveConstraint : public ParamConstraintFacade<NonPositiveConstraint>{
-    NonPositiveConstraint() {description_ = "nonpositive";}
+    NonPositiveConstraint() {this->description_ = "nonpositive";}
     template<typename DataType>
     bool operator()( DataType data ) const
     {
@@ -99,7 +101,7 @@ struct NonPositiveConstraint : public ParamConstraintFacade<NonPositiveConstrain
 };
 
 struct NegativeConstraint : public ParamConstraintFacade<NegativeConstraint>{
-    NegativeConstraint() {description_ = "negative";}
+    NegativeConstraint() {this->description_ = "negative";}
     template<typename DataType>
     bool operator()( DataType data ) const
     {
@@ -108,7 +110,7 @@ struct NegativeConstraint : public ParamConstraintFacade<NegativeConstraint>{
 };
 
 struct NonNegativeConstraint : public ParamConstraintFacade<NonNegativeConstraint>{
-    NonNegativeConstraint() {description_ = "nonnegative";}
+    NonNegativeConstraint() {this->description_ = "nonnegative";}
     template<typename DataType>
     bool operator()( DataType data ) const
     {
@@ -122,7 +124,7 @@ struct LessThanConstraint : public ParamConstraintFacade<LessThanConstraint<T> >
     LessThanConstraint(T rhs) : rhs_(rhs){
         std::stringstream iss;
         iss << "less than " << rhs;
-        description_ = iss.str();
+        this->description_ = iss.str();
     }
     template<typename DataType>
     bool operator()( DataType data ) const {
@@ -138,7 +140,7 @@ struct LessThanOrEqualToConstraint : public ParamConstraintFacade<LessThanOrEqua
     LessThanOrEqualToConstraint(T rhs) : rhs_(rhs) {
         std::stringstream iss;
         iss << "less than or equal to" << rhs;
-        description_ = iss.str();
+        this->description_ = iss.str();
     }
     
     template<typename DataType>
@@ -156,7 +158,7 @@ struct EqualConstraint : public ParamConstraintFacade<EqualConstraint<T> > {
     EqualConstraint(T rhs) : rhs_(rhs){
         std::stringstream iss;
         iss << "equal to" << rhs;
-        description_ = iss.str();
+        this->description_ = iss.str();
 
     }
     template<typename DataType>
@@ -172,7 +174,7 @@ struct EqualIgnoreCaseConstraint : public ParamConstraintFacade<EqualIgnoreCaseC
     EqualIgnoreCaseConstraint(std::string rhs) : rhs_(oopse::toUpperCopy(rhs)){
         std::stringstream iss;
         iss << "equal to (case insensitive) " << rhs;
-        description_ = iss.str();
+        this->description_ = iss.str();
     }
     
     bool operator()( std::string data ) const {
@@ -183,13 +185,36 @@ struct EqualIgnoreCaseConstraint : public ParamConstraintFacade<EqualIgnoreCaseC
        std::string rhs_;        
 };
 
+struct ContainsConstraint :  public ParamConstraintFacade<EqualIgnoreCaseConstraint> {
+    ContainsConstraint(std::string rhs) : rhs_(oopse::toUpperCopy(rhs)){
+        std::stringstream iss;
+        iss << "contains " << rhs;
+        this->description_ = iss.str();
+    }
+    
+    bool operator()( std::string data ) const {
+        oopse::StringTokenizer tokenizer(oopse::toUpperCopy(data),  " ,;|\t\n\r");
+        while (tokenizer.hasMoreTokens()) {
+            if (tokenizer.nextToken() == rhs_) {
+                return true;
+            }
+        }
+        
+        return  false; 
+    }
+    
+    private:
+       std::string rhs_;        
+
+};
+
 template<typename T>
 struct GreaterThanConstraint : public ParamConstraintFacade<GreaterThanConstraint<T> > {
     
     GreaterThanConstraint(T rhs) : rhs_(rhs){
         std::stringstream iss;
         iss << "greater than" << rhs;
-        description_ = iss.str();
+        this->description_ = iss.str();
     }
     template<typename DataType>
     bool operator()( DataType data ) const {
@@ -205,7 +230,7 @@ struct GreaterThanOrEqualTo : public ParamConstraintFacade<GreaterThanOrEqualTo<
     GreaterThanOrEqualTo(T rhs) : rhs_(rhs){
         std::stringstream iss;
         iss << "greater than or equal to" << rhs;
-        description_ = iss.str();
+        this->description_ = iss.str();
     }
     template<typename DataType>
     bool operator()( DataType data ) const {
@@ -223,7 +248,7 @@ public:
     AndParamConstraint( Cons1T cons1, Cons2T cons2 ) : cons1_(cons1), cons2_(cons2) {
         std::stringstream iss;
         iss << "(" << cons1_.getConstraintDescription() << " and " << cons2_.getConstraintDescription() << ")"; 
-        description_ = iss.str();        
+        this->description_ = iss.str();        
     }
 
     template<typename DataType>
@@ -242,11 +267,10 @@ template<typename Cons1T, typename Cons2T>
 struct OrParamConstraint: public ParamConstraintFacade< OrParamConstraint<Cons1T,Cons2T> > {
 public:
 
-
     OrParamConstraint( Cons1T cons1, Cons2T cons2 ) : cons1_(cons1), cons2_(cons2) {
         std::stringstream iss;
         iss << cons1_.getConstraintDescription() << " or " << cons2_.getConstraintDescription() << ""; 
-        description_ = iss.str(); 
+        this->description_ = iss.str(); 
      }
 
     template<typename DataType>
@@ -267,7 +291,7 @@ public:
     NotParamConstraint( ConsT cons) : cons_(cons) {
         std::stringstream iss;
         iss << "(not" << cons1_.getConstraintDescription() << ")"; 
-        description_ = iss.str(); 
+        this->description_ = iss.str(); 
     }
 
     template<typename DataType>

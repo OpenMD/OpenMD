@@ -115,6 +115,7 @@ struct ParameterTraits<double>{
 class ParameterBase {
   public:    
     ParameterBase() : keyword_(), optional_(false), defaultValue_(false), empty_(true) {}
+    virtual ~ParameterBase() {}
     bool isOptional() {return optional_;}
     void setOptional(bool optional) {optional_ = optional;}
     bool hasDefaultValue() {return defaultValue_;}
