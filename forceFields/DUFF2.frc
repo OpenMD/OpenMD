@@ -75,8 +75,8 @@ end DirectionalAtomTypes
 
 begin GayBerneAtomTypes
 //Name	Sigma   12b_ratio	eps     eps_ratio	mu      nu             
-GB 	3.35    2.074626866	1.31713 	.178317250385	2.0	1.0
-linear 	3.35    2.074626866	1.31713 	.178317250385	2.0	1.0
+GBPaper 	3.35    3	.774729 	.2	2.0	1.0
+linear 	2.8104  3.555721	.774729 	.150814		2.0	1.0
 end GayBerneAtomTypes                 	
 
 begin LennardJonesAtomTypes
