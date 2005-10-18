@@ -888,7 +888,7 @@ namespace oopse {
 
     notifyFortranCutoffs(&rcut_, &rsw_, &rnblist, &cp);
     // also send cutoff notification to electrostatics
-    setElectrostaticCutoffRadius(&rcut_);
+    setElectrostaticCutoffRadius(&rcut_, &rsw_);
   }
 
   void SimInfo::setupElectrostaticSummationMethod( int isError ) {    

@@ -63,7 +63,7 @@
 extern "C"{
 
   void setElectrostaticSummationMethod( int* theESM );
-  void setElectrostaticCutoffRadius( double* theECR );
+  void setElectrostaticCutoffRadius( double* theECR, double* theRSW );
   void setDampedWolfAlpha( double* theDWA );
   void setReactionFieldDielectric( double* theDielectric );
 

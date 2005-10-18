@@ -45,7 +45,7 @@
 
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: doForces.F90,v 1.59 2005-10-17 19:12:34 gezelter Exp $, $Date: 2005-10-17 19:12:34 $, $Name: not supported by cvs2svn $, $Revision: 1.59 $
+!! @version $Id: doForces.F90,v 1.60 2005-10-18 15:01:42 chrisfen Exp $, $Date: 2005-10-18 15:01:42 $, $Name: not supported by cvs2svn $, $Revision: 1.60 $
 
 
 module doForces
@@ -58,7 +58,6 @@ module doForces
   use lj
   use sticky
   use electrostatic_module
-  use reaction_field_module
   use gayberne
   use shapes
   use vector_class
@@ -680,22 +679,6 @@ contains
 
 
     haveSaneForceField = .true.
-
-    !! check to make sure the reaction field setting makes sense
-
-    if (FF_uses_Dipoles) then
-       if (electrostaticSummationMethod == REACTION_FIELD) then
-          dielect = getDielect()
-          call initialize_rf(dielect)
-       endif
-    else
-       if (electrostaticSummationMethod == REACTION_FIELD) then
-          write(default_error,*) 'Using Reaction Field with no dipoles?  Huh?'
-          thisStat = -1
-          haveSaneForceField = .false.
-          return
-       endif
-    endif
 
     if (FF_uses_EAM) then
        call init_EAM_FF(my_status) 

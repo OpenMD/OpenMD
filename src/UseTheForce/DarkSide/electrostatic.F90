@@ -78,21 +78,27 @@ module electrostatic_module
   integer, save :: summationMethod = NONE
   logical, save :: summationMethodChecked = .false.
   real(kind=DP), save :: defaultCutoff = 0.0_DP
+  real(kind=DP), save :: defaultCutoff2 = 0.0_DP
   logical, save :: haveDefaultCutoff = .false.
   real(kind=DP), save :: dampingAlpha = 0.0_DP
   logical, save :: haveDampingAlpha = .false.
-  real(kind=DP), save :: dielectric = 0.0_DP
+  real(kind=DP), save :: dielectric = 1.0_DP
   logical, save :: haveDielectric = .false.
   real(kind=DP), save :: constERFC = 0.0_DP
   real(kind=DP), save :: constEXP = 0.0_DP
   logical, save :: haveDWAconstants = .false.
-  real(kind=dp), save :: rcuti = 0.0_dp
-  real(kind=dp), save :: rcuti2 = 0.0_dp
-  real(kind=dp), save :: rcuti3 = 0.0_dp
-  real(kind=dp), save :: rcuti4 = 0.0_dp
-  real(kind=dp), save :: alphaPi = 0.0_dp
-  real(kind=dp), save :: invRootPi = 0.0_dp
-  
+  real(kind=dp), save :: rcuti = 0.0_DP
+  real(kind=dp), save :: rcuti2 = 0.0_DP
+  real(kind=dp), save :: rcuti3 = 0.0_DP
+  real(kind=dp), save :: rcuti4 = 0.0_DP
+  real(kind=dp), save :: alphaPi = 0.0_DP
+  real(kind=dp), save :: invRootPi = 0.0_DP
+  real(kind=dp), save :: rrf = 1.0_DP
+  real(kind=dp), save :: rt = 1.0_DP
+  real(kind=dp), save :: rrfsq = 1.0_DP
+  real(kind=dp), save :: preRF = 0.0_DP
+  logical, save :: preRFCalculated = .false.
+ 
 #ifdef __IFC
 ! error function for ifc version > 7.
   double precision, external :: derfc
@@ -102,6 +108,7 @@ module electrostatic_module
   public :: setElectrostaticCutoffRadius
   public :: setDampedWolfAlpha
   public :: setReactionFieldDielectric
+  public :: setReactionFieldPrefactor
   public :: newElectrostaticType
   public :: setCharge
   public :: setDipoleMoment
@@ -112,6 +119,10 @@ module electrostatic_module
   public :: getDipoleMoment
   public :: pre22
   public :: destroyElectrostaticTypes
+  public :: accumulate_rf
+  public :: accumulate_self_rf
+  public :: reaction_field_final
+  public :: rf_correct_forces
 
   type :: Electrostatic
      integer :: c_ident
@@ -141,9 +152,12 @@ contains
 
   end subroutine setElectrostaticSummationMethod
 
-  subroutine setElectrostaticCutoffRadius(thisRcut) 
+  subroutine setElectrostaticCutoffRadius(thisRcut, thisRsw) 
     real(kind=dp), intent(in) :: thisRcut
+    real(kind=dp), intent(in) :: thisRsw
     defaultCutoff = thisRcut
+    rrf = defaultCutoff
+    rt = thisRsw
     haveDefaultCutoff = .true.
   end subroutine setElectrostaticCutoffRadius
 
@@ -158,6 +172,19 @@ contains
     dielectric = thisDielectric
     haveDielectric = .true.
   end subroutine setReactionFieldDielectric
+
+  subroutine setReactionFieldPrefactor
+    if (haveDefaultCutoff .and. haveDielectric) then
+       defaultCutoff2 = defaultCutoff*defaultCutoff
+       preRF = pre22 * 2.0d0*(dielectric-1.0d0) / &
+            ((2.0d0*dielectric+1.0d0)*defaultCutoff2*defaultCutoff)
+       preRFCalculated = .true.
+    else if (.not.haveDefaultCutoff) then
+       call handleError("setReactionFieldPrefactor", "Default cutoff not set")
+    else 
+       call handleError("setReactionFieldPrefactor", "Dielectric not set")
+    endif
+  end subroutine setReactionFieldPrefactor
 
   subroutine newElectrostaticType(c_ident, is_Charge, is_Dipole, &
        is_SplitDipole, is_Quadrupole, is_Tap, status)
@@ -1224,5 +1251,216 @@ contains
     if(allocated(ElectrostaticMap)) deallocate(ElectrostaticMap)
 
   end subroutine destroyElectrostaticTypes
+
+  subroutine accumulate_rf(atom1, atom2, rij, eFrame, taper)
+
+    integer, intent(in) :: atom1, atom2
+    real (kind = dp), intent(in) :: rij
+    real (kind = dp), dimension(9,nLocal) :: eFrame
+
+    integer :: me1, me2
+    real (kind = dp), intent(in) :: taper
+    real (kind = dp):: mu1, mu2
+    real (kind = dp), dimension(3) :: ul1
+    real (kind = dp), dimension(3) :: ul2   
+
+    integer :: localError
+
+#ifdef IS_MPI
+    me1 = atid_Row(atom1)
+    ul1(1) = eFrame_Row(3,atom1)
+    ul1(2) = eFrame_Row(6,atom1)
+    ul1(3) = eFrame_Row(9,atom1)
+
+    me2 = atid_Col(atom2)
+    ul2(1) = eFrame_Col(3,atom2)
+    ul2(2) = eFrame_Col(6,atom2)
+    ul2(3) = eFrame_Col(9,atom2)
+#else
+    me1 = atid(atom1)
+    ul1(1) = eFrame(3,atom1)
+    ul1(2) = eFrame(6,atom1)
+    ul1(3) = eFrame(9,atom1)
+
+    me2 = atid(atom2)
+    ul2(1) = eFrame(3,atom2)
+    ul2(2) = eFrame(6,atom2)
+    ul2(3) = eFrame(9,atom2)
+#endif
+
+    mu1 = getDipoleMoment(me1)
+    mu2 = getDipoleMoment(me2)
+
+#ifdef IS_MPI
+    rf_Row(1,atom1) = rf_Row(1,atom1) + ul2(1)*mu2*taper
+    rf_Row(2,atom1) = rf_Row(2,atom1) + ul2(2)*mu2*taper
+    rf_Row(3,atom1) = rf_Row(3,atom1) + ul2(3)*mu2*taper
+
+    rf_Col(1,atom2) = rf_Col(1,atom2) + ul1(1)*mu1*taper
+    rf_Col(2,atom2) = rf_Col(2,atom2) + ul1(2)*mu1*taper
+    rf_Col(3,atom2) = rf_Col(3,atom2) + ul1(3)*mu1*taper
+#else
+    rf(1,atom1) = rf(1,atom1) + ul2(1)*mu2*taper
+    rf(2,atom1) = rf(2,atom1) + ul2(2)*mu2*taper
+    rf(3,atom1) = rf(3,atom1) + ul2(3)*mu2*taper
+
+    rf(1,atom2) = rf(1,atom2) + ul1(1)*mu1*taper
+    rf(2,atom2) = rf(2,atom2) + ul1(2)*mu1*taper
+    rf(3,atom2) = rf(3,atom2) + ul1(3)*mu1*taper     
+#endif
+    return  
+  end subroutine accumulate_rf
+
+  subroutine accumulate_self_rf(atom1, mu1, eFrame)
+
+    integer, intent(in) :: atom1
+    real(kind=dp), intent(in) :: mu1
+    real(kind=dp), dimension(9,nLocal) :: eFrame
+
+    !! should work for both MPI and non-MPI version since this is not pairwise.
+    rf(1,atom1) = rf(1,atom1) + eFrame(3,atom1)*mu1
+    rf(2,atom1) = rf(2,atom1) + eFrame(6,atom1)*mu1
+    rf(3,atom1) = rf(3,atom1) + eFrame(9,atom1)*mu1
+
+    return
+  end subroutine accumulate_self_rf
+
+  subroutine reaction_field_final(a1, mu1, eFrame, rfpot, t, do_pot)
+
+    integer, intent(in) :: a1
+    real (kind=dp), intent(in) :: mu1
+    real (kind=dp), intent(inout) :: rfpot
+    logical, intent(in) :: do_pot
+    real (kind = dp), dimension(9,nLocal) :: eFrame
+    real (kind = dp), dimension(3,nLocal) :: t
+
+    integer :: localError
+
+    if (.not.preRFCalculated) then
+       call setReactionFieldPrefactor()
+    endif
+
+    ! compute torques on dipoles:
+    ! pre converts from mu in units of debye to kcal/mol
+
+    ! The torque contribution is dipole cross reaction_field   
+
+    t(1,a1) = t(1,a1) + preRF*mu1*(eFrame(6,a1)*rf(3,a1) - &
+                                   eFrame(9,a1)*rf(2,a1))
+    t(2,a1) = t(2,a1) + preRF*mu1*(eFrame(9,a1)*rf(1,a1) - &
+                                   eFrame(3,a1)*rf(3,a1))
+    t(3,a1) = t(3,a1) + preRF*mu1*(eFrame(3,a1)*rf(2,a1) - &
+                                   eFrame(6,a1)*rf(1,a1))
+
+    ! the potential contribution is -1/2 dipole dot reaction_field
+
+    if (do_pot) then
+       rfpot = rfpot - 0.5d0 * preRF * mu1 * &
+            (rf(1,a1)*eFrame(3,a1) + rf(2,a1)*eFrame(6,a1) + &
+             rf(3,a1)*eFrame(9,a1))
+    endif
+
+    return
+  end subroutine reaction_field_final
+
+  subroutine rf_correct_forces(atom1, atom2, d, rij, eFrame, taper, f, fpair)
+
+    integer, intent(in) :: atom1, atom2
+    real(kind=dp), dimension(3), intent(in) :: d
+    real(kind=dp), intent(in) :: rij, taper
+    real( kind = dp ), dimension(9,nLocal) :: eFrame
+    real( kind = dp ), dimension(3,nLocal) :: f
+    real( kind = dp ), dimension(3), intent(inout) :: fpair
+
+    real (kind = dp), dimension(3) :: ul1
+    real (kind = dp), dimension(3) :: ul2
+    real (kind = dp) :: dtdr
+    real (kind = dp) :: dudx, dudy, dudz, u1dotu2
+    integer :: me1, me2, id1, id2
+    real (kind = dp) :: mu1, mu2
+
+    integer :: localError
+
+    if (.not.preRFCalculated) then
+       call setReactionFieldPrefactor()
+    endif
+
+    if (rij.le.rrf) then
+
+       if (rij.lt.rt) then
+          dtdr = 0.0d0
+       else
+          !         write(*,*) 'rf correct in taper region'
+          dtdr = 6.0d0*(rij*rij - rij*rt - rij*rrf +rrf*rt)/((rrf-rt)**3)
+       endif
+
+#ifdef IS_MPI
+       me1 = atid_Row(atom1)
+       ul1(1) = eFrame_Row(3,atom1)
+       ul1(2) = eFrame_Row(6,atom1)
+       ul1(3) = eFrame_Row(9,atom1)
+
+       me2 = atid_Col(atom2)
+       ul2(1) = eFrame_Col(3,atom2)
+       ul2(2) = eFrame_Col(6,atom2)
+       ul2(3) = eFrame_Col(9,atom2)
+#else
+       me1 = atid(atom1)
+       ul1(1) = eFrame(3,atom1)
+       ul1(2) = eFrame(6,atom1)
+       ul1(3) = eFrame(9,atom1)
+
+       me2 = atid(atom2)
+       ul2(1) = eFrame(3,atom2)
+       ul2(2) = eFrame(6,atom2)
+       ul2(3) = eFrame(9,atom2)
+#endif
+
+       mu1 = getDipoleMoment(me1)
+       mu2 = getDipoleMoment(me2)
+
+       u1dotu2 = ul1(1)*ul2(1) + ul1(2)*ul2(2) + ul1(3)*ul2(3)
+
+       dudx = - preRF*mu1*mu2*u1dotu2*dtdr*d(1)/rij
+       dudy = - preRF*mu1*mu2*u1dotu2*dtdr*d(2)/rij
+       dudz = - preRF*mu1*mu2*u1dotu2*dtdr*d(3)/rij
+
+#ifdef IS_MPI
+       f_Row(1,atom1) = f_Row(1,atom1) + dudx
+       f_Row(2,atom1) = f_Row(2,atom1) + dudy
+       f_Row(3,atom1) = f_Row(3,atom1) + dudz
+
+       f_Col(1,atom2) = f_Col(1,atom2) - dudx
+       f_Col(2,atom2) = f_Col(2,atom2) - dudy
+       f_Col(3,atom2) = f_Col(3,atom2) - dudz
+#else
+       f(1,atom1) = f(1,atom1) + dudx
+       f(2,atom1) = f(2,atom1) + dudy
+       f(3,atom1) = f(3,atom1) + dudz
+
+       f(1,atom2) = f(1,atom2) - dudx
+       f(2,atom2) = f(2,atom2) - dudy
+       f(3,atom2) = f(3,atom2) - dudz
+#endif
+
+#ifdef IS_MPI
+       id1 = AtomRowToGlobal(atom1)
+       id2 = AtomColToGlobal(atom2)
+#else
+       id1 = atom1
+       id2 = atom2
+#endif
+
+       if (molMembershipList(id1) .ne. molMembershipList(id2)) then
+
+          fpair(1) = fpair(1) + dudx
+          fpair(2) = fpair(2) + dudy
+          fpair(3) = fpair(3) + dudz
+
+       endif
+
+    end if
+    return
+  end subroutine rf_correct_forces
 
 end module electrostatic_module

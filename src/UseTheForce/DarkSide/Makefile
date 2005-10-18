@@ -18,7 +18,6 @@ Source    = \
 	lj_interface.F90 \
 	gb.F90 \
 	gb_interface.F90 \
-	reactionField.F90 \
 	sticky.F90 \
 	sticky_interface.F90 \
 	shapes.F90 \
@@ -32,7 +31,6 @@ Modules = \
 	gb_pair \
 	lj \
 	neighborLists \
-	reaction_field_module \
 	shapes \
 	mpiSimulation \
 	simulation \

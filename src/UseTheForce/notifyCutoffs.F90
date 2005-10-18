@@ -43,7 +43,6 @@ module notifyCutoffs
 
   use definitions
   use doForces, only:       setDefaultCutoffs
-  use reaction_field_module, only: setCutoffsRF
   use lj, only:             setLJDefaultCutoff
   use eam, only:            setCutoffEAM
   use switcheroo, only:     set_switch
@@ -109,7 +108,6 @@ contains
     endif
 
     call setDefaultCutoffs(rcut, rsw, rlist, cutPolicy) 
-    call setCutoffsRF( rcut, rsw )
     call setLJDefaultCutoff( rcut, do_shift )
     call setCutoffEAM( rcut, localError)
     call set_switch(GROUP_SWITCH, rsw, rcut)

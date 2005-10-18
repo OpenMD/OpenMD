@@ -4,11 +4,12 @@ subroutine setElectrostaticSummationMethod(the_ESM)
   call module_setESM(the_ESM)
 end subroutine setElectrostaticSummationMethod
 
-subroutine setElectrostaticCutoffRadius(the_rcut)
+subroutine setElectrostaticCutoffRadius(the_rcut, the_rsw)
   use electrostatic_module, ONLY : module_setECR => setElectrostaticCutoffRadius
   use definitions, ONLY : dp
   real(kind=dp), intent(inout) :: the_rcut
-  call module_setECR(the_rcut)
+  real(kind=dp), intent(inout) :: the_rsw
+  call module_setECR(the_rcut, the_rsw)
 end subroutine setElectrostaticCutoffRadius
 
 subroutine setDampedWolfAlpha(the_alpha)
