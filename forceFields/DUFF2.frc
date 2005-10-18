@@ -55,7 +55,7 @@ Ar		39.948
 Br		79.904		
 Kr		83.80
 U 		1.00
-GB		48.0428	
+GBPaper		48.0428	
 linear		48.0428		
 end AtomTypes
 
@@ -69,14 +69,14 @@ SSD_E		1.7696	0.6145	1.1550
 SSD_RF		1.7696	0.6145	1.1550  
 TAP		1.7696  0.6145  1.1550
 HEAD		1125	1125	250
-GB		86.477	86.477	0
+GBPaper		86.477	86.477	0
 linear		86.477	86.477	0
 end DirectionalAtomTypes                    
 
 begin GayBerneAtomTypes
-//Name	Sigma   12b_ratio	eps     eps_ratio	mu      nu             
-GBPaper 	3.35    3	.774729 	.2	2.0	1.0
-linear 	2.8104  3.555721	.774729 	.150814		2.0	1.0
+//Name	Sigma   l2b_ratio	eps		eps_ratio	mu	nu
+GBPaper	3.35    3.0		0.774729 	0.2		2.0	1.0
+linear	2.8104  3.555721	0.774729 	0.150814	2.0	1.0
 end GayBerneAtomTypes                 	
 
 begin LennardJonesAtomTypes
