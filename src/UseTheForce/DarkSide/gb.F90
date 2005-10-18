@@ -241,20 +241,20 @@ contains
     r4 = r2*r2
 
 #ifdef IS_MPI
-    ul1(1) = A_Row(3,atom1)
-    ul1(2) = A_Row(6,atom1)
+    ul1(1) = A_Row(7,atom1)
+    ul1(2) = A_Row(8,atom1)
     ul1(3) = A_Row(9,atom1)
 
-    ul2(1) = A_Col(3,atom2)
-    ul2(2) = A_Col(6,atom2)
+    ul2(1) = A_Col(7,atom2)
+    ul2(2) = A_Col(8,atom2)
     ul2(3) = A_Col(9,atom2)
 #else
-    ul1(1) = A(3,atom1)
-    ul1(2) = A(6,atom1)
+    ul1(1) = A(7,atom1)
+    ul1(2) = A(8,atom1)
     ul1(3) = A(9,atom1)
 
-    ul2(1) = A(3,atom2)
-    ul2(2) = A(6,atom2)
+    ul2(1) = A(7,atom2)
+    ul2(2) = A(8,atom2)
     ul2(3) = A(9,atom2)
 #endif
     
@@ -418,8 +418,6 @@ contains
     gmum = gmu*gpi
 
     curlyE = 1.0d0/dsqrt(1.0d0 - Chi*Chi*u1dotu2*u1dotu2)
-!!$
-!!$    dcE = -(curlyE**3)*Chi*Chi*u1dotu2
     dcE = (curlyE**3)*Chi*Chi*u1dotu2
 
     dcEdu1x = dcE*ul2(1)
@@ -470,13 +468,13 @@ contains
     f_Col(2,atom2) = f_Col(2,atom2) - dUdy
     f_Col(3,atom2) = f_Col(3,atom2) - dUdz
     
-    t_Row(1,atom1) = t_Row(1,atom1)- ul1(3)*dUdu1y + ul1(2)*dUdu1z 
-    t_Row(2,atom1) = t_Row(2,atom1)- ul1(1)*dUdu1z + ul1(3)*dUdu1x 
-    t_Row(3,atom1) = t_Row(3,atom1)- ul1(2)*dUdu1x + ul1(1)*dUdu1y 
+    t_Row(1,atom1) = t_Row(1,atom1) + ul1(3)*dUdu1y - ul1(2)*dUdu1z 
+    t_Row(2,atom1) = t_Row(2,atom1) + ul1(1)*dUdu1z - ul1(3)*dUdu1x 
+    t_Row(3,atom1) = t_Row(3,atom1) + ul1(2)*dUdu1x - ul1(1)*dUdu1y 
     
-    t_Col(1,atom2) = t_Col(1,atom2) - ul2(3)*dUdu2y + ul2(2)*dUdu2z
-    t_Col(2,atom2) = t_Col(2,atom2) - ul2(1)*dUdu2z + ul2(3)*dUdu2x 
-    t_Col(3,atom2) = t_Col(3,atom2) - ul2(2)*dUdu2x + ul2(1)*dUdu2y
+    t_Col(1,atom2) = t_Col(1,atom2) + ul2(3)*dUdu2y - ul2(2)*dUdu2z
+    t_Col(2,atom2) = t_Col(2,atom2) + ul2(1)*dUdu2z - ul2(3)*dUdu2x 
+    t_Col(3,atom2) = t_Col(3,atom2) + ul2(2)*dUdu2x - ul2(1)*dUdu2y
 #else
     f(1,atom1) = f(1,atom1) + dUdx
     f(2,atom1) = f(2,atom1) + dUdy
@@ -486,13 +484,13 @@ contains
     f(2,atom2) = f(2,atom2) - dUdy
     f(3,atom2) = f(3,atom2) - dUdz
     
-    t(1,atom1) = t(1,atom1)- ul1(3)*dUdu1y + ul1(2)*dUdu1z 
-    t(2,atom1) = t(2,atom1)- ul1(1)*dUdu1z + ul1(3)*dUdu1x 
-    t(3,atom1) = t(3,atom1)- ul1(2)*dUdu1x + ul1(1)*dUdu1y 
+    t(1,atom1) = t(1,atom1) + ul1(3)*dUdu1y - ul1(2)*dUdu1z 
+    t(2,atom1) = t(2,atom1) + ul1(1)*dUdu1z - ul1(3)*dUdu1x 
+    t(3,atom1) = t(3,atom1) + ul1(2)*dUdu1x - ul1(1)*dUdu1y 
     
-    t(1,atom2) = t(1,atom2)- ul2(3)*dUdu2y + ul2(2)*dUdu2z
-    t(2,atom2) = t(2,atom2)- ul2(1)*dUdu2z + ul2(3)*dUdu2x 
-    t(3,atom2) = t(3,atom2)- ul2(2)*dUdu2x + ul2(1)*dUdu2y
+    t(1,atom2) = t(1,atom2) + ul2(3)*dUdu2y - ul2(2)*dUdu2z
+    t(2,atom2) = t(2,atom2) + ul2(1)*dUdu2z - ul2(3)*dUdu2x 
+    t(3,atom2) = t(3,atom2) + ul2(2)*dUdu2x - ul2(1)*dUdu2y
 #endif
    
     if (do_pot) then
@@ -592,12 +590,12 @@ contains
     
     if(gb_first)then
 #ifdef IS_MPI
-       ul(1) = A_Row(3,atom1)
-       ul(2) = A_Row(6,atom1)
+       ul(1) = A_Row(7,atom1)
+       ul(2) = A_Row(8,atom1)
        ul(3) = A_Row(9,atom1)
 #else
-       ul(1) = A(3,atom1)
-       ul(2) = A(6,atom1)
+       ul(1) = A(7,atom1)
+       ul(2) = A(8,atom1)
        ul(3) = A(9,atom1)       
 #endif
        gb_sigma     = GBMap%GBtypes(gbt1)%sigma      
@@ -610,13 +608,13 @@ contains
        ljeps = getEpsilon(atid2)
     else
 #ifdef IS_MPI
-       ul(1) = A_Col(3,atom2)
-       ul(2) = A_Col(6,atom2)
+       ul(1) = A_Col(7,atom2)
+       ul(2) = A_Col(8,atom2)
        ul(3) = A_Col(9,atom2)
 #else
-       ul(1) = A(3,atom2)
-       ul(2) = A(6,atom2)
-       ul(3) = A(9,atom2)       
+       ul(1) = A(7,atom2)
+       ul(2) = A(8,atom2)
+       ul(3) = A(9,atom2)     
 #endif
        gb_sigma     = GBMap%GBtypes(gbt2)%sigma      
        gb_l2b_ratio = GBMap%GBtypes(gbt2)%l2b_ratio
@@ -626,9 +624,7 @@ contains
 
        ljsigma = getSigma(atid1)
        ljeps = getEpsilon(atid1)
-    endif
-   
-    write(*,*) 'd u', dx, dy, dz, ul(1), ul(2), ul(3)
+    endif  
  
     rdotu = (dx*ul(1)+dy*ul(2)+dz*ul(3))*ri
    
@@ -646,8 +642,8 @@ contains
 
     chioalpha2 = (l2 - d2)/(l2 + lj2)
 
-    eE = dsqrt(gb_eps*ljeps)
-    eS = dsqrt(gb_eps*gb_eps_ratio*ljeps)
+    eE = dsqrt(gb_eps*gb_eps_ratio*ljeps)
+    eS = dsqrt(gb_eps*ljeps)
     moom =  1.0d0 / gb_mu
     mum1 = gb_mu-1
     chipoalphap2 = 1 - (eE/eS)**moom
@@ -657,13 +653,10 @@ contains
     mess = 1-rdotu*rdotu*chioalpha2
     sab = 1.0d0/dsqrt(mess)
 
-    write(*,*) 's', s0, sab, rdotu, chioalpha2
     dsabdct = s0*sab*sab*sab*rdotu*chioalpha2
        
     eab = 1-chipoalphap2*rdotu*rdotu
     eabf = eS*(eab**gb_mu)
-
-    write(*,*)  'e', eS, chipoalphap2, gb_mu, rdotu, eab, mum1
 
     depmudct = -2*eS*chipoalphap2*gb_mu*rdotu*(eab**mum1)
         
@@ -675,8 +668,6 @@ contains
     dBigRduy = (-dsabdct*drdotuduy)/s0
     dBigRduz = (-dsabdct*drdotuduz)/s0
     
-    write(*,*) 'ds dep', dsabdct, depmudct
-    write(*,*) 'drdotudu', drdotudux, drdotuduy, drdotuduz
     depmudx = depmudct*drdotudx
     depmudy = depmudct*drdotudy
     depmudz = depmudct*drdotudz
@@ -695,32 +686,31 @@ contains
     
     prefactor = 4.0d0
     
-    dUdx = prefactor*(eabf*R137*dBigRdx + R126*depmudx)
-    dUdy = prefactor*(eabf*R137*dBigRdy + R126*depmudy)
-    dUdz = prefactor*(eabf*R137*dBigRdz + R126*depmudz)
-    write(*,*) 'dRdu',  dbigrdux, dbigrduy, dbigrduz
-    write(*,*) 'dEdu',  depmudux, depmuduy, depmuduz
-    dUdux = prefactor*(eabf*R137*dBigRdux + R126*depmudux)
-    dUduy = prefactor*(eabf*R137*dBigRduy + R126*depmuduy)
-    dUduz = prefactor*(eabf*R137*dBigRduz + R126*depmuduz)
+    dUdx = prefactor*(eabf*R137*dBigRdx + R126*depmudx)*sw
+    dUdy = prefactor*(eabf*R137*dBigRdy + R126*depmudy)*sw
+    dUdz = prefactor*(eabf*R137*dBigRdz + R126*depmudz)*sw
+
+    dUdux = prefactor*(eabf*R137*dBigRdux + R126*depmudux)*sw
+    dUduy = prefactor*(eabf*R137*dBigRduy + R126*depmuduy)*sw
+    dUduz = prefactor*(eabf*R137*dBigRduz + R126*depmuduz)*sw
     
 #ifdef IS_MPI
-    f_Row(1,atom1) = f_Row(1,atom1) - dUdx
-    f_Row(2,atom1) = f_Row(2,atom1) - dUdy
-    f_Row(3,atom1) = f_Row(3,atom1) - dUdz
+    f_Row(1,atom1) = f_Row(1,atom1) + dUdx
+    f_Row(2,atom1) = f_Row(2,atom1) + dUdy
+    f_Row(3,atom1) = f_Row(3,atom1) + dUdz
     
-    f_Col(1,atom2) = f_Col(1,atom2) + dUdx
-    f_Col(2,atom2) = f_Col(2,atom2) + dUdy
-    f_Col(3,atom2) = f_Col(3,atom2) + dUdz
+    f_Col(1,atom2) = f_Col(1,atom2) - dUdx
+    f_Col(2,atom2) = f_Col(2,atom2) - dUdy
+    f_Col(3,atom2) = f_Col(3,atom2) - dUdz
     
     if (gb_first) then
-       t_Row(1,atom1) = t_Row(1,atom1) + ul(2)*dUduz - ul(3)*dUduy
-       t_Row(2,atom1) = t_Row(2,atom1) + ul(3)*dUdux - ul(1)*dUduz
-       t_Row(3,atom1) = t_Row(3,atom1) + ul(1)*dUduy - ul(2)*dUdux
+       t_Row(1,atom1) = t_Row(1,atom1) - ul(2)*dUduz + ul(3)*dUduy
+       t_Row(2,atom1) = t_Row(2,atom1) - ul(3)*dUdux + ul(1)*dUduz
+       t_Row(3,atom1) = t_Row(3,atom1) - ul(1)*dUduy + ul(2)*dUdux
     else
-       t_Col(1,atom2) = t_Col(1,atom2) + ul(2)*dUduz - ul(3)*dUduy
-       t_Col(2,atom2) = t_Col(2,atom2) + ul(3)*dUdux - ul(1)*dUduz
-       t_Col(3,atom2) = t_Col(3,atom2) + ul(1)*dUduy - ul(2)*dUdux
+       t_Col(1,atom2) = t_Col(1,atom2) - ul(2)*dUduz + ul(3)*dUduy
+       t_Col(2,atom2) = t_Col(2,atom2) - ul(3)*dUdux + ul(1)*dUduz
+       t_Col(3,atom2) = t_Col(3,atom2) - ul(1)*dUduy + ul(2)*dUdux
     endif
 #else    
     f(1,atom1) = f(1,atom1) + dUdx
@@ -731,21 +721,16 @@ contains
     f(2,atom2) = f(2,atom2) - dUdy
     f(3,atom2) = f(3,atom2) - dUdz
     
-    ! torques are cross products:
-    
-    write(*,*) 'dU', dUdux, duduy, duduz
+    ! torques are cross products:    
 
     if (gb_first) then
-       t(1,atom1) = t(1,atom1) + ul(2)*dUduz - ul(3)*dUduy
-       t(2,atom1) = t(2,atom1) + ul(3)*dUdux - ul(1)*dUduz
-       t(3,atom1) = t(3,atom1) + ul(1)*dUduy - ul(2)*dUdux
-       write(*,*) 'T1', t(1,atom1), t(2,atom1), t(3,atom1)
+       t(1,atom1) = t(1,atom1) - ul(2)*dUduz + ul(3)*dUduy
+       t(2,atom1) = t(2,atom1) - ul(3)*dUdux + ul(1)*dUduz
+       t(3,atom1) = t(3,atom1) - ul(1)*dUduy + ul(2)*dUdux
     else
-       t(1,atom2) = t(1,atom2) + ul(2)*dUduz - ul(3)*dUduy
-       t(2,atom2) = t(2,atom2) + ul(3)*dUdux - ul(1)*dUduz
-       t(3,atom2) = t(3,atom2) + ul(1)*dUduy - ul(2)*dUdux
-
-       write(*,*) 'T2', t(1,atom2), t(2,atom2), t(3,atom2)
+       t(1,atom2) = t(1,atom2) - ul(2)*dUduz + ul(3)*dUduy
+       t(2,atom2) = t(2,atom2) - ul(3)*dUdux + ul(1)*dUduz
+       t(3,atom2) = t(3,atom2) - ul(1)*dUduy + ul(2)*dUdux
     endif
 
 #endif
