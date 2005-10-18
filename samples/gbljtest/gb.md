@@ -5,7 +5,7 @@ molecule{
   name = "GB";
   nAtoms = 1;
   atom[0]{
-     type="GB";
+     type="GBPaper";
      position( 0.0, 0.0, 0.0 );
      orientation(0.0,0.0,0.0);
   }

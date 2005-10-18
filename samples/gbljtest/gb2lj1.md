@@ -3,19 +3,19 @@
 
 nComponents = 2;
 component{
+  type = "linear";
+  nMol = 2;
+}
+component{
   type = "C";
   nMol =1;
 }
-component{
-  type = "linear";
-  nMol = 1;
-}
 
 
-initialConfig = "./gbRotRoundZ.in";
+initialConfig = "./gb2lj1.in";
 
 ensemble = NVT;
-targetTemp = 0.001;
+targetTemp = 1;
 tauThermostat = 1000;
 forceField = "DUFF";
 
@@ -26,6 +26,5 @@ runTime = 1e5;
 useInitialTime = "false";
 useInitialExtendedSystemState = "false";
 
-//thermalTime = 10;
 sampleTime = 100;
 statusTime = 100;
