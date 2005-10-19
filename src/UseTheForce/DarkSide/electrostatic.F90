@@ -1217,35 +1217,6 @@ contains
     return
   end subroutine doElectrostaticPair
 
-  !! calculates the switching functions and their derivatives for a given
-  subroutine calc_switch(r, mu, scale, dscale)
-
-    real (kind=dp), intent(in) :: r, mu
-    real (kind=dp), intent(inout) :: scale, dscale
-    real (kind=dp) :: rl, ru, mulow, minRatio, temp, scaleVal
-
-    ! distances must be in angstroms
-    rl = 2.75d0
-    ru = 3.75d0
-    mulow = 0.0d0 !3.3856d0 ! 1.84 * 1.84
-    minRatio = mulow / (mu*mu)
-    scaleVal = 1.0d0 - minRatio
-    
-    if (r.lt.rl) then
-       scale = minRatio
-       dscale = 0.0d0
-    elseif (r.gt.ru) then
-       scale = 1.0d0
-       dscale = 0.0d0
-    else
-       scale = 1.0d0 - scaleVal*((ru + 2.0d0*r - 3.0d0*rl) * (ru-r)**2) &
-                        / ((ru - rl)**3)
-       dscale = -scaleVal * 6.0d0 * (r-ru)*(r-rl)/((ru - rl)**3)    
-    endif
-        
-    return
-  end subroutine calc_switch
-
   subroutine destroyElectrostaticTypes()
 
     if(allocated(ElectrostaticMap)) deallocate(ElectrostaticMap)

@@ -45,7 +45,7 @@
 
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: doForces.F90,v 1.60 2005-10-18 15:01:42 chrisfen Exp $, $Date: 2005-10-18 15:01:42 $, $Name: not supported by cvs2svn $, $Revision: 1.60 $
+!! @version $Id: doForces.F90,v 1.61 2005-10-19 19:24:29 chrisfen Exp $, $Date: 2005-10-19 19:24:29 $, $Name: not supported by cvs2svn $, $Revision: 1.61 $
 
 
 module doForces
@@ -1084,50 +1084,46 @@ contains
     endif
 #endif
 
-    if (FF_RequiresPostpairCalc() .and. SIM_requires_postpair_calc) then
-
-       if (electrostaticSummationMethod == REACTION_FIELD) then
-
+    if (SIM_requires_postpair_calc) then
+       
 #ifdef IS_MPI
-          call scatter(rf_Row,rf,plan_atom_row_3d)
-          call scatter(rf_Col,rf_Temp,plan_atom_col_3d)
-          do i = 1,nlocal
-             rf(1:3,i) = rf(1:3,i) + rf_Temp(1:3,i)
-          end do
+       call scatter(rf_Row,rf,plan_atom_row_3d)
+       call scatter(rf_Col,rf_Temp,plan_atom_col_3d)
+       do i = 1,nlocal
+          rf(1:3,i) = rf(1:3,i) + rf_Temp(1:3,i)
+       end do
 #endif
 
-          do i = 1, nLocal
-
-             rfpot = 0.0_DP
+       do i = 1, nLocal
+          
+          rfpot = 0.0_DP
 #ifdef IS_MPI
-             me_i = atid_row(i)
+          me_i = atid_row(i)
 #else
-             me_i = atid(i)
+          me_i = atid(i)
 #endif
-             iHash = InteractionHash(me_i,me_j)
+          iHash = InteractionHash(me_i,me_j)
+          
+          if ( iand(iHash, ELECTROSTATIC_PAIR).ne.0 ) then
              
-             if ( iand(iHash, ELECTROSTATIC_PAIR).ne.0 ) then
-
-                mu_i = getDipoleMoment(me_i)
-
-                !! The reaction field needs to include a self contribution 
-                !! to the field:
-                call accumulate_self_rf(i, mu_i, eFrame)
-                !! Get the reaction field contribution to the 
-                !! potential and torques:
-                call reaction_field_final(i, mu_i, eFrame, rfpot, t, do_pot)
+             mu_i = getDipoleMoment(me_i)
+             
+             !! The reaction field needs to include a self contribution 
+             !! to the field:
+             call accumulate_self_rf(i, mu_i, eFrame)
+             !! Get the reaction field contribution to the 
+             !! potential and torques:
+             call reaction_field_final(i, mu_i, eFrame, rfpot, t, do_pot)
 #ifdef IS_MPI
-                pot_local(ELECTROSTATIC_POT) = pot_local(ELECTROSTATIC_POT) + rfpot
+             pot_local(ELECTROSTATIC_POT) = pot_local(ELECTROSTATIC_POT) + rfpot
 #else
-                pot(ELECTROSTATIC_POT) = pot(ELECTROSTATIC_POT) + rfpot
-
+             pot(ELECTROSTATIC_POT) = pot(ELECTROSTATIC_POT) + rfpot
+             
 #endif
-             endif
-          enddo
-       endif
+          endif
+       enddo
     endif
-
-
+    
 #ifdef IS_MPI
 
     if (do_pot) then
@@ -1479,11 +1475,6 @@ contains
     logical :: doesit
     doesit = FF_uses_EAM
   end function FF_RequiresPrepairCalc
-
-  function FF_RequiresPostpairCalc() result(doesit)
-    logical :: doesit
-    if (electrostaticSummationMethod == REACTION_FIELD) doesit = .true.
-  end function FF_RequiresPostpairCalc
 
 #ifdef PROFILE
   function getforcetime() result(totalforcetime)

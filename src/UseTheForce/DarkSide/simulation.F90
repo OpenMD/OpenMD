@@ -564,7 +564,7 @@ contains
           logical :: doesit
           doesit = thisSim%SIM_uses_EAM
         end function SimRequiresPrepairCalc
-
+        
         function SimRequiresPostpairCalc() result(doesit)
           logical :: doesit
           doesit = thisSim%SIM_uses_RF

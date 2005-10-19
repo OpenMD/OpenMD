@@ -532,10 +532,14 @@ namespace oopse {
 
     // set the useRF logical
     useRF = 0;
+
+
     if (simParams_->haveElectrostaticSummationMethod()) {
-        myMethod = simParams_->getElectrostaticSummationMethod();
-        if (myMethod == "REACTION_FIELD")
-             useRF = 1;
+      std::string myMethod = simParams_->getElectrostaticSummationMethod();
+      toUpper(myMethod);
+      if (myMethod == "REACTION_FIELD") {
+        useRF=1;
+      }
     }
 
     //loop over all of the atom types
@@ -618,8 +622,8 @@ namespace oopse {
     fInfo_.SIM_uses_FLARB = useFLARB;
     fInfo_.SIM_uses_RF = useRF;
 
-    if( fInfo_.SIM_uses_Dipoles && myMethod == "REACTION_FIELD") {
-
+    if( myMethod == "REACTION_FIELD") {
+      
       if (simParams_->haveDielectric()) {
 	fInfo_.dielect = simParams_->getDielectric();
       } else {
@@ -629,12 +633,8 @@ namespace oopse {
 		"\tsetting a dielectric constant!\n");
 	painCave.isFatal = 1;
 	simError();
-      }
-        
-    } else {
-      fInfo_.dielect = 0.0;
+      }      
     }
-
   }
 
   void SimInfo::setupFortranSim() {
@@ -921,7 +921,7 @@ namespace oopse {
 	      simError();
 	    }
           } else {
-	    if (myMethod == "REACTION_FIELD") {
+	    if (myMethod == "REACTION_FIELD") {	      
 	      esm = REACTION_FIELD;
 	    } else {
 	      // throw error        

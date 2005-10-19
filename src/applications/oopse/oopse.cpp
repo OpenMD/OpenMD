@@ -44,6 +44,7 @@
 #endif
 
 #include "utils/simError.h"
+#include "utils/CaseConversion.hpp"
 #include "brains/Register.hpp"
 #include "brains/SimCreator.hpp"
 #include "brains/SimInfo.hpp"
@@ -122,7 +123,7 @@ int main(int argc,char* argv[]){
     
   if (simParams->haveMinimizer()) {
     //create minimizer
-    Minimizer* myMinimizer = MinimizerFactory::getInstance()->createMinimizer(simParams->getMinimizer(), info);
+    Minimizer* myMinimizer = MinimizerFactory::getInstance()->createMinimizer(toUpperCopy(simParams->getMinimizer()), info);
 
     if (myMinimizer == NULL) {
       sprintf(painCave.errMsg, "Minimizer Factory can not create %s Minimizer\n",
@@ -136,7 +137,7 @@ int main(int argc,char* argv[]){
   } else if (simParams->haveEnsemble()) {
     //create Integrator
 
-    Integrator* myIntegrator = IntegratorFactory::getInstance()->createIntegrator(simParams->getEnsemble(), info);
+    Integrator* myIntegrator = IntegratorFactory::getInstance()->createIntegrator(toUpperCopy(simParams->getEnsemble()), info);
 
     if (myIntegrator == NULL) {
       sprintf(painCave.errMsg, "Integrator Factory can not create %s Integrator\n",
@@ -171,7 +172,7 @@ int main(int argc,char* argv[]){
   delete info;
 
 #ifdef IS_MPI
-  strcpy( checkPointMsg, "Oh what a lovely Tea Party!" );
+  strcpy( checkPointMsg, "Yoikes!  It worked!" );
   MPIcheckPoint();
   
   MPI_Finalize();

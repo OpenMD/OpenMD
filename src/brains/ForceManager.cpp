@@ -241,8 +241,8 @@ namespace oopse {
 
     //store the tau and long range potential    
     curSnapshot->statData[Stats::LONG_RANGE_POTENTIAL] = lrPot;
-    //  curSnapshot->statData[Stats::LONG_RANGE_POTENTIAL] = longRangePotential;
-    curSnapshot->statData[Stats::VANDERWAALS_POTENTIAL] = longRangePotential[VDW_POT]; 
+    //    curSnapshot->statData[Stats::LONG_RANGE_POTENTIAL] = longRangePotential;
+    curSnapshot->statData[Stats::VANDERWAALS_POTENTIAL] = longRangePotential[VDW_POT];
     curSnapshot->statData[Stats::ELECTROSTATIC_POTENTIAL] = longRangePotential[ELECTROSTATIC_POT];
 
     curSnapshot->statData.setTau(tau);
