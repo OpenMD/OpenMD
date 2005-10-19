@@ -15,10 +15,10 @@
 
 #define LR_POT_TYPES      4
 
-#define VDW_POT           1
-#define ELECTROSTATIC_POT 2
-#define HB_POT            3
-#define METALLIC_POT      4
+#define VDW_POT           0
+#define ELECTROSTATIC_POT 1
+#define HB_POT            2
+#define METALLIC_POT      3
 
 
 #endif
@@ -38,7 +38,7 @@
   INTEGER, PARAMETER:: FLARB_PAIR         = 512
 
   INTEGER, PARAMETER:: LR_POT_TYPES      =   4
-
+  !! remember fortran is shifted up by one for arrays
   INTEGER, PARAMETER:: VDW_POT           =   1
   INTEGER, PARAMETER:: ELECTROSTATIC_POT =   2
   INTEGER, PARAMETER:: HB_POT            =   3
