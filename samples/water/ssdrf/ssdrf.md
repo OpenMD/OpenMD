@@ -8,7 +8,7 @@ component{
 
 initialConfig = "./ssdrf.in";
 
-ensemble = NVE;
+ensemble = nve;
 forceField = "DUFF";
 electrostaticSummationMethod = "reaction_field";
 dielectric = 80.0;
