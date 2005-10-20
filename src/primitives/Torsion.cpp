@@ -80,12 +80,8 @@ namespace oopse {
     Vector3d f2;
     Vector3d f3;
 
-    //  Next, we want to calculate the forces.  In order
-    //  to do that, we first need to figure out whether the
-    //  sin or cos form will be more stable.  For this,
-    //  just look at the value of phi
-    //if (fabs(sin_phi) > 0.1) {
-    //  use the sin version to avoid 1/cos terms
+    if (fabs(sin_phi) > 0.5) {
+    //use the sin version to  prevent potential singularities
 
     Vector3d dcosdA = (cos_phi * A - B) /rA;
     Vector3d dcosdB = (cos_phi * B - A) /rB;
@@ -96,33 +92,30 @@ namespace oopse {
     f2 = dVdcosPhi * ( cross(r43, dcosdB) - cross(r21, dcosdA));
     f3 = dVdcosPhi * cross(dcosdB, r32);
 
-    /** @todo fix below block, must be something wrong with the sign somewhere */
-    //} else {
-    //  This angle is closer to 0 or 180 than it is to
-    //  90, so use the cos version to avoid 1/sin terms
+    } else {
+    //use the cos version to  prevent potential singularities
 
-    //double dVdsinPhi = dVdPhi /cos_phi;
-    //Vector3d dsindB = (sin_phi * B - C) /rB;
-    //Vector3d dsindC = (sin_phi * C - B) /rC;
+    double dVdsinPhi = dVdPhi /cos_phi;
+    Vector3d dsindB = (sin_phi * B - C) /rB;
+    Vector3d dsindC = (sin_phi * C - B) /rC;
 
-    //f1.x() = dVdsinPhi*((r32.y()*r32.y() + r32.z()*r32.z())*dsindC.x() - r32.x()*r32.y()*dsindC.y() - r32.x()*r32.z()*dsindC.z());
+    f1.x() = dVdsinPhi*((r32.y()*r32.y() + r32.z()*r32.z())*dsindC.x() - r32.x()*r32.y()*dsindC.y() - r32.x()*r32.z()*dsindC.z());
 
-    //f1.y() = dVdsinPhi*((r32.z()*r32.z() + r32.x()*r32.x())*dsindC.y() - r32.y()*r32.z()*dsindC.z() - r32.y()*r32.x()*dsindC.x());
+    f1.y() = dVdsinPhi*((r32.z()*r32.z() + r32.x()*r32.x())*dsindC.y() - r32.y()*r32.z()*dsindC.z() - r32.y()*r32.x()*dsindC.x());
 
-    //f1.z() = dVdsinPhi*((r32.x()*r32.x() + r32.y()*r32.y())*dsindC.z() - r32.z()*r32.x()*dsindC.x() - r32.z()*r32.y()*dsindC.y());
+    f1.z() = dVdsinPhi*((r32.x()*r32.x() + r32.y()*r32.y())*dsindC.z() - r32.z()*r32.x()*dsindC.x() - r32.z()*r32.y()*dsindC.y());
 
-    //f2.x() = dVdsinPhi*(-(r32.y()*r21.y() + r32.z()*r21.z())*dsindC.x() + (2.0*r32.x()*r21.y() - r21.x()*r32.y())*dsindC.y()
-    //+ (2.0*r32.x()*r21.z() - r21.x()*r32.z())*dsindC.z() + dsindB.z()*r43.y() - dsindB.y()*r43.z());
+    f2.x() = dVdsinPhi*(-(r32.y()*r21.y() + r32.z()*r21.z())*dsindC.x() + (2.0*r32.x()*r21.y() - r21.x()*r32.y())*dsindC.y()
+    + (2.0*r32.x()*r21.z() - r21.x()*r32.z())*dsindC.z() + dsindB.z()*r43.y() - dsindB.y()*r43.z());
 
-    //f2.y() = dVdsinPhi*(-(r32.z()*r21.z() + r32.x()*r21.x())*dsindC.y() + (2.0*r32.y()*r21.z() - r21.y()*r32.z())*dsindC.z()
-    //+ (2.0*r32.y()*r21.x() - r21.y()*r32.x())*dsindC.x() + dsindB.x()*r43.z() - dsindB.z()*r43.x());
+    f2.y() = dVdsinPhi*(-(r32.z()*r21.z() + r32.x()*r21.x())*dsindC.y() + (2.0*r32.y()*r21.z() - r21.y()*r32.z())*dsindC.z()
+    + (2.0*r32.y()*r21.x() - r21.y()*r32.x())*dsindC.x() + dsindB.x()*r43.z() - dsindB.z()*r43.x());
 
-    //f2.z() = dVdsinPhi*(-(r32.x()*r21.x() + r32.y()*r21.y())*dsindC.z() + (2.0*r32.z()*r21.x() - r21.z()*r32.x())*dsindC.x()
-    //+(2.0*r32.z()*r21.y() - r21.z()*r32.y())*dsindC.y() + dsindB.y()*r43.x() - dsindB.x()*r43.y());
+    f2.z() = dVdsinPhi*(-(r32.x()*r21.x() + r32.y()*r21.y())*dsindC.z() + (2.0*r32.z()*r21.x() - r21.z()*r32.x())*dsindC.x()
+    +(2.0*r32.z()*r21.y() - r21.z()*r32.y())*dsindC.y() + dsindB.y()*r43.x() - dsindB.x()*r43.y());
 
-    //f3 = dVdsinPhi * cross(r32, dsindB);
-
-    //}
+    f3 = dVdsinPhi * cross(dsindB, r32);
+    }
 
     atom1_->addFrc(f1);
     atom2_->addFrc(f2 - f1);
