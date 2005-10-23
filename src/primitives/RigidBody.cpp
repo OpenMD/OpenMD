@@ -181,7 +181,7 @@ namespace oopse {
       } 
     }
 
-    std::cout << Itmp << std::endl;
+    //    std::cout << Itmp << std::endl;
 
     //diagonalize 
     Vector3d evals;

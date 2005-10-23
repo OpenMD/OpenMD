@@ -45,7 +45,7 @@
 
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: doForces.F90,v 1.61 2005-10-19 19:24:29 chrisfen Exp $, $Date: 2005-10-19 19:24:29 $, $Name: not supported by cvs2svn $, $Revision: 1.61 $
+!! @version $Id: doForces.F90,v 1.62 2005-10-23 21:08:02 chrisfen Exp $, $Date: 2005-10-23 21:08:02 $, $Name: not supported by cvs2svn $, $Revision: 1.62 $
 
 
 module doForces
@@ -754,6 +754,7 @@ contains
     integer :: propPack_i, propPack_j
     integer :: loopStart, loopEnd, loop
     integer :: iHash
+    integer :: ig
   
 
     !! initialize local variables  
@@ -948,12 +949,12 @@ contains
                       else
 #ifdef IS_MPI                      
                          call do_pair(atom1, atom2, ratmsq, d_atm, sw, &
-                              do_pot, &
-                              eFrame, A, f, t, pot_local, vpair, fpair)
+                              do_pot, eFrame, A, f, t, pot_local, vpair, &
+                              fpair, d_grp, rgrp)
 #else
                          call do_pair(atom1, atom2, ratmsq, d_atm, sw, &
-                              do_pot,  &
-                              eFrame, A, f, t, pot, vpair, fpair)
+                              do_pot, eFrame, A, f, t, pot, vpair, fpair, &
+                              d_grp, rgrp)
 #endif
 
                          vij = vij + vpair
@@ -1085,74 +1086,56 @@ contains
 #endif
 
     if (SIM_requires_postpair_calc) then
-       
-#ifdef IS_MPI
-       call scatter(rf_Row,rf,plan_atom_row_3d)
-       call scatter(rf_Col,rf_Temp,plan_atom_col_3d)
-       do i = 1,nlocal
-          rf(1:3,i) = rf(1:3,i) + rf_Temp(1:3,i)
-       end do
-#endif
-
-       do i = 1, nLocal
+       do i = 1, nlocal             
           
-          rfpot = 0.0_DP
-#ifdef IS_MPI
-          me_i = atid_row(i)
-#else
+          ! we loop only over the local atoms, so we don't need row and column
+          ! lookups for the types
+
           me_i = atid(i)
-#endif
-          iHash = InteractionHash(me_i,me_j)
+          
+          ! is the atom electrostatic?  See if it would have an 
+          ! electrostatic interaction with itself
+          iHash = InteractionHash(me_i,me_i)
           
           if ( iand(iHash, ELECTROSTATIC_PAIR).ne.0 ) then
-             
-             mu_i = getDipoleMoment(me_i)
-             
-             !! The reaction field needs to include a self contribution 
-             !! to the field:
-             call accumulate_self_rf(i, mu_i, eFrame)
-             !! Get the reaction field contribution to the 
-             !! potential and torques:
-             call reaction_field_final(i, mu_i, eFrame, rfpot, t, do_pot)
 #ifdef IS_MPI
-             pot_local(ELECTROSTATIC_POT) = pot_local(ELECTROSTATIC_POT) + rfpot
+             call rf_self_self(i, eFrame, pot_local(ELECTROSTATIC_POT), &
+                  t, do_pot)
 #else
-             pot(ELECTROSTATIC_POT) = pot(ELECTROSTATIC_POT) + rfpot
-             
+             call rf_self_self(i, eFrame, pot(ELECTROSTATIC_POT), &
+                  t, do_pot)
 #endif
           endif
        enddo
     endif
     
 #ifdef IS_MPI
-
+    
     if (do_pot) then
-       pot(1:LR_POT_TYPES) = pot(1:LR_POT_TYPES) &
-            + pot_local(1:LR_POT_TYPES)
-       !! we assume the c code will do the allreduce to get the total potential
-       !! we could do it right here if we needed to...
+       call mpi_allreduce(pot_local, pot, LR_POT_TYPES,mpi_double_precision,mpi_sum, &
+            mpi_comm_world,mpi_err)            
     endif
-
+    
     if (do_stress) then
        call mpi_allreduce(tau_Temp, tau, 9,mpi_double_precision,mpi_sum, &
             mpi_comm_world,mpi_err)
        call mpi_allreduce(virial_Temp, virial,1,mpi_double_precision,mpi_sum, &
             mpi_comm_world,mpi_err)
     endif
-
+    
 #else
-
+    
     if (do_stress) then
        tau = tau_Temp
        virial = virial_Temp
     endif
-
+    
 #endif
-
+    
   end subroutine do_force_loop
 
   subroutine do_pair(i, j, rijsq, d, sw, do_pot, &
-       eFrame, A, f, t, pot, vpair, fpair)
+       eFrame, A, f, t, pot, vpair, fpair, d_grp, r_grp)
 
     real( kind = dp ) :: vpair, sw
     real( kind = dp ), dimension(LR_POT_TYPES) :: pot
@@ -1166,8 +1149,10 @@ contains
     logical, intent(inout) :: do_pot
     integer, intent(in) :: i, j
     real ( kind = dp ), intent(inout) :: rijsq
-    real ( kind = dp )                :: r
+    real ( kind = dp ), intent(inout) :: r_grp
     real ( kind = dp ), intent(inout) :: d(3)
+    real ( kind = dp ), intent(inout) :: d_grp(3)
+    real ( kind = dp ) :: r
     integer :: me_i, me_j
 
     integer :: iHash
@@ -1194,14 +1179,6 @@ contains
     if ( iand(iHash, ELECTROSTATIC_PAIR).ne.0 ) then
        call doElectrostaticPair(i, j, d, r, rijsq, sw, vpair, fpair, &
             pot(ELECTROSTATIC_POT), eFrame, f, t, do_pot)
-
-       if (electrostaticSummationMethod == REACTION_FIELD) then
-
-          ! CHECK ME (RF needs to know about all electrostatic types)
-          call accumulate_rf(i, j, r, eFrame, sw)
-          call rf_correct_forces(i, j, d, r, eFrame, sw, f, fpair)
-       endif
-
     endif
 
     if ( iand(iHash, STICKY_PAIR).ne.0 ) then
