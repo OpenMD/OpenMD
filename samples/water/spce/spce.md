@@ -10,8 +10,8 @@ initialConfig = "./spce.in";
 
 ensemble = NVE;
 forceField = "DUFF";
-electrostaticSummationMethod = "none";
-dielectric = 80.0;
+//electrostaticSummationMethod = "reaction_field";
+//dielectric = 80.0;
 cutoffRadius = 9.0;
 switchingRadius = 7.7;
 
@@ -22,11 +22,11 @@ tauThermostat = 1e3;
 tauBarostat = 1e4;
 
 dt = 2.0;
-runTime = 1e4;
+runTime = 5e2;
 useInitialTime = "false";
 useInitialExtendedSystemState = "false";
 
 //tempSet = "true";
 //thermalTime = 10;
-sampleTime = 1000;
-statusTime = 100;
+sampleTime = 100;
+statusTime = 2;
