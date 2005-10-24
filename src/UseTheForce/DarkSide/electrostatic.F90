@@ -726,6 +726,29 @@ contains
              duduz_j(2) = duduz_j(2) - sw*pref*( ri2*yhat - d(2)*rcuti3 )
              duduz_j(3) = duduz_j(3) - sw*pref*( ri2*zhat - d(3)*rcuti3 )
 
+          elseif (summationMethod .eq. REACTION_FIELD) then
+             ri2 = ri * ri
+             ri3 = ri2 * ri
+    
+             pref = pre12 * q_i * mu_j
+             vterm = - pref * ct_j * ( ri2 - preRF2*rij )
+             vpair = vpair + vterm
+             epot = epot + sw*vterm
+             
+             !! this has a + sign in the () because the rij vector is
+             !! r_j - r_i and the charge-dipole potential takes the origin
+             !! as the point dipole, which is atom j in this case.
+             
+             dudx = dudx - sw*pref*( ri3*(uz_j(1) - 3.0d0*ct_j*xhat) - &
+                                     preRF2*uz_j(1) )
+             dudy = dudy - sw*pref*( ri3*(uz_j(2) - 3.0d0*ct_j*yhat) - &
+                                     preRF2*uz_j(2) )
+             dudz = dudz - sw*pref*( ri3*(uz_j(3) - 3.0d0*ct_j*zhat) - &
+                                     preRF2*uz_j(3) )         
+             duduz_j(1) = duduz_j(1) - sw*pref * xhat * ( ri2 - preRF2*rij )
+             duduz_j(2) = duduz_j(2) - sw*pref * yhat * ( ri2 - preRF2*rij )
+             duduz_j(3) = duduz_j(3) - sw*pref * zhat * ( ri2 - preRF2*rij )
+
           else
              if (j_is_SplitDipole) then
                 BigR = sqrt(r2 + 0.25_dp * d_j * d_j)
@@ -891,6 +914,26 @@ contains
              duduz_i(1) = duduz_i(1) - sw*pref*( ri2*xhat - d(1)*rcuti3 )
              duduz_i(2) = duduz_i(2) - sw*pref*( ri2*yhat - d(2)*rcuti3 )
              duduz_i(3) = duduz_i(3) - sw*pref*( ri2*zhat - d(3)*rcuti3 )
+
+          elseif (summationMethod .eq. REACTION_FIELD) then
+             ri2 = ri * ri
+             ri3 = ri2 * ri
+
+             pref = pre12 * q_j * mu_i
+             vterm = pref * ct_i * ( ri2 - preRF*rij )
+             vpair = vpair + vterm
+             epot = epot + sw*vterm
+             
+             dudx = dudx + sw*pref * ri3 * ( uz_i(1) - 3.0d0*ct_i*xhat - &
+                                             preRF*uz_i(1) )
+             dudy = dudy + sw*pref * ri3 * ( uz_i(2) - 3.0d0*ct_i*yhat - &
+                                             preRF*uz_i(2) )
+             dudz = dudz + sw*pref * ri3 * ( uz_i(3) - 3.0d0*ct_i*zhat - &
+                                             preRF*uz_i(3) )
+             
+             duduz_i(1) = duduz_i(1) + sw*pref * xhat * ( ri2 - preRF*rij )
+             duduz_i(2) = duduz_i(2) + sw*pref * yhat * ( ri2 - preRF*rij )
+             duduz_i(3) = duduz_i(3) + sw*pref * zhat * ( ri2 - preRF*rij )
 
           else
              if (i_is_SplitDipole) then
