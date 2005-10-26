@@ -45,7 +45,7 @@
 
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: doForces.F90,v 1.62 2005-10-23 21:08:02 chrisfen Exp $, $Date: 2005-10-23 21:08:02 $, $Name: not supported by cvs2svn $, $Revision: 1.62 $
+!! @version $Id: doForces.F90,v 1.63 2005-10-26 23:31:18 chrisfen Exp $, $Date: 2005-10-26 23:31:18 $, $Name: not supported by cvs2svn $, $Revision: 1.63 $
 
 
 module doForces
@@ -744,6 +744,7 @@ contains
     integer :: nlist
     real( kind = DP ) :: ratmsq, rgrpsq, rgrp, vpair, vij
     real( kind = DP ) :: sw, dswdr, swderiv, mf
+    real( kind = DP ) :: rVal
     real(kind=dp),dimension(3) :: d_atm, d_grp, fpair, fij
     real(kind=dp) :: rfpot, mu_i, virial
     integer :: me_i, me_j, n_in_i, n_in_j
@@ -754,7 +755,8 @@ contains
     integer :: propPack_i, propPack_j
     integer :: loopStart, loopEnd, loop
     integer :: iHash
-    integer :: ig
+    integer :: i1
+    logical :: indirect_only
   
 
     !! initialize local variables  
@@ -921,7 +923,16 @@ contains
 
                       atom2 = groupListCol(jb)
 
-                      if (skipThisPair(atom1, atom2)) cycle inner
+                      indirect_only = .false.
+    
+                      if (skipThisPair(atom1, atom2)) then
+                         if (electrostaticSummationMethod.ne.REACTION_FIELD) then
+                            cycle inner
+                         else
+                            indirect_only = .true.
+                         endif
+                      endif
+     
 
                       if ((n_in_i .eq. 1).and.(n_in_j .eq. 1)) then
                          d_atm(1:3) = d_grp(1:3)
@@ -950,11 +961,11 @@ contains
 #ifdef IS_MPI                      
                          call do_pair(atom1, atom2, ratmsq, d_atm, sw, &
                               do_pot, eFrame, A, f, t, pot_local, vpair, &
-                              fpair, d_grp, rgrp)
+                              fpair, d_grp, rgrp, indirect_only)
 #else
                          call do_pair(atom1, atom2, ratmsq, d_atm, sw, &
                               do_pot, eFrame, A, f, t, pot, vpair, fpair, &
-                              d_grp, rgrp)
+                              d_grp, rgrp, indirect_only)
 #endif
 
                          vij = vij + vpair
@@ -1090,13 +1101,13 @@ contains
           
           ! we loop only over the local atoms, so we don't need row and column
           ! lookups for the types
-
+          
           me_i = atid(i)
           
           ! is the atom electrostatic?  See if it would have an 
           ! electrostatic interaction with itself
           iHash = InteractionHash(me_i,me_i)
-          
+
           if ( iand(iHash, ELECTROSTATIC_PAIR).ne.0 ) then
 #ifdef IS_MPI
              call rf_self_self(i, eFrame, pot_local(ELECTROSTATIC_POT), &
@@ -1106,7 +1117,29 @@ contains
                   t, do_pot)
 #endif
           endif
-       enddo
+  
+          ! loop over the excludes to accumulate any additional RF components
+
+          do i1 = 1, nSkipsForAtom(i)
+             j = skipsForAtom(i, i1)
+             
+             ! prevent overcounting of the skips
+             if (i.lt.j) then
+                call get_interatomic_vector(q(:,i), &
+                     q(:,j), d_atm, ratmsq)
+                rVal = dsqrt(ratmsq)
+                call get_switch(ratmsq, sw, dswdr, rVal, group_switch, &
+                     in_switching_region)
+#ifdef IS_MPI
+                call rf_self_excludes(i, j, sw, eFrame, d_atm, rVal, vpair, &
+                     pot_local(ELECTROSTATIC_POT), f, t, do_pot)
+#else
+                call rf_self_excludes(i, j, sw, eFrame, d_atm, rVal, vpair, &
+                     pot(ELECTROSTATIC_POT), f, t, do_pot)
+#endif
+             endif
+          enddo
+       enddo       
     endif
     
 #ifdef IS_MPI
@@ -1135,7 +1168,7 @@ contains
   end subroutine do_force_loop
 
   subroutine do_pair(i, j, rijsq, d, sw, do_pot, &
-       eFrame, A, f, t, pot, vpair, fpair, d_grp, r_grp)
+       eFrame, A, f, t, pot, vpair, fpair, d_grp, r_grp, indirect_only)
 
     real( kind = dp ) :: vpair, sw
     real( kind = dp ), dimension(LR_POT_TYPES) :: pot
@@ -1147,6 +1180,7 @@ contains
     real( kind = dp ), dimension(3,nLocal) :: t
 
     logical, intent(inout) :: do_pot
+    logical, intent(inout) :: indirect_only
     integer, intent(in) :: i, j
     real ( kind = dp ), intent(inout) :: rijsq
     real ( kind = dp ), intent(inout) :: r_grp
@@ -1171,49 +1205,57 @@ contains
 
     iHash = InteractionHash(me_i, me_j)
 
-    if ( iand(iHash, LJ_PAIR).ne.0 ) then
-       call do_lj_pair(i, j, d, r, rijsq, sw, vpair, fpair, &
-            pot(VDW_POT), f, do_pot)
-    endif
+    if (indirect_only) then
+       if ( iand(iHash, ELECTROSTATIC_PAIR).ne.0 ) then
+          call doElectrostaticPair(i, j, d, r, rijsq, sw, vpair, fpair, &
+               pot(ELECTROSTATIC_POT), eFrame, f, t, do_pot, indirect_only)
+       endif
+    else
+           
+       if ( iand(iHash, LJ_PAIR).ne.0 ) then
+          call do_lj_pair(i, j, d, r, rijsq, sw, vpair, fpair, &
+               pot(VDW_POT), f, do_pot)
+       endif
 
-    if ( iand(iHash, ELECTROSTATIC_PAIR).ne.0 ) then
-       call doElectrostaticPair(i, j, d, r, rijsq, sw, vpair, fpair, &
-            pot(ELECTROSTATIC_POT), eFrame, f, t, do_pot)
-    endif
-
-    if ( iand(iHash, STICKY_PAIR).ne.0 ) then
-       call do_sticky_pair(i, j, d, r, rijsq, sw, vpair, fpair, &
-            pot(HB_POT), A, f, t, do_pot)
-    endif
-
-    if ( iand(iHash, STICKYPOWER_PAIR).ne.0 ) then
-       call do_sticky_power_pair(i, j, d, r, rijsq, sw, vpair, fpair, &
-            pot(HB_POT), A, f, t, do_pot)
-    endif
-
-    if ( iand(iHash, GAYBERNE_PAIR).ne.0 ) then
-       call do_gb_pair(i, j, d, r, rijsq, sw, vpair, fpair, &
-            pot(VDW_POT), A, f, t, do_pot)
-    endif
-    
-    if ( iand(iHash, GAYBERNE_LJ).ne.0 ) then
-       call do_gb_lj_pair(i, j, d, r, rijsq, sw, vpair, fpair, &
-            pot(VDW_POT), A, f, t, do_pot)
-    endif
-
-    if ( iand(iHash, EAM_PAIR).ne.0 ) then       
-       call do_eam_pair(i, j, d, r, rijsq, sw, vpair, fpair, &
-            pot(METALLIC_POT), f, do_pot)
-    endif
-
-    if ( iand(iHash, SHAPE_PAIR).ne.0 ) then       
-       call do_shape_pair(i, j, d, r, rijsq, sw, vpair, fpair, &
-            pot(VDW_POT), A, f, t, do_pot)
-    endif
-
-    if ( iand(iHash, SHAPE_LJ).ne.0 ) then       
-       call do_shape_pair(i, j, d, r, rijsq, sw, vpair, fpair, &
-            pot(VDW_POT), A, f, t, do_pot)
+       if ( iand(iHash, ELECTROSTATIC_PAIR).ne.0 ) then
+          call doElectrostaticPair(i, j, d, r, rijsq, sw, vpair, fpair, &
+               pot(ELECTROSTATIC_POT), eFrame, f, t, do_pot, indirect_only)
+       endif
+       
+       if ( iand(iHash, STICKY_PAIR).ne.0 ) then
+          call do_sticky_pair(i, j, d, r, rijsq, sw, vpair, fpair, &
+               pot(HB_POT), A, f, t, do_pot)
+       endif
+       
+       if ( iand(iHash, STICKYPOWER_PAIR).ne.0 ) then
+          call do_sticky_power_pair(i, j, d, r, rijsq, sw, vpair, fpair, &
+               pot(HB_POT), A, f, t, do_pot)
+       endif
+       
+       if ( iand(iHash, GAYBERNE_PAIR).ne.0 ) then
+          call do_gb_pair(i, j, d, r, rijsq, sw, vpair, fpair, &
+               pot(VDW_POT), A, f, t, do_pot)
+       endif
+       
+       if ( iand(iHash, GAYBERNE_LJ).ne.0 ) then
+          call do_gb_lj_pair(i, j, d, r, rijsq, sw, vpair, fpair, &
+               pot(VDW_POT), A, f, t, do_pot)
+       endif
+       
+       if ( iand(iHash, EAM_PAIR).ne.0 ) then       
+          call do_eam_pair(i, j, d, r, rijsq, sw, vpair, fpair, &
+               pot(METALLIC_POT), f, do_pot)
+       endif
+       
+       if ( iand(iHash, SHAPE_PAIR).ne.0 ) then       
+          call do_shape_pair(i, j, d, r, rijsq, sw, vpair, fpair, &
+               pot(VDW_POT), A, f, t, do_pot)
+       endif
+       
+       if ( iand(iHash, SHAPE_LJ).ne.0 ) then       
+          call do_shape_pair(i, j, d, r, rijsq, sw, vpair, fpair, &
+               pot(VDW_POT), A, f, t, do_pot)
+       endif
     endif
     
   end subroutine do_pair
