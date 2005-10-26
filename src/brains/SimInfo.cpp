@@ -824,10 +824,10 @@ namespace oopse {
 	sprintf(painCave.errMsg,
                 "SimCreator Warning: No value was set for switchingRadius.\n"
                 "\tOOPSE will use a default value of\n"
-                "\t0.95 * cutoffRadius for the switchingRadius\n");
+                "\t0.85 * cutoffRadius for the switchingRadius\n");
 	painCave.isFatal = 0;
 	simError();
-	rsw = 0.95 * rcut;
+	rsw = 0.85 * rcut;
       } else{
 	rsw = simParams_->getSwitchingRadius();
       }
