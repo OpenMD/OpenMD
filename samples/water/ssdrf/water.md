@@ -20,6 +20,45 @@ molecule{
 }
 
 molecule{
+  name = "PAIR";
+  nAtoms = 3;
+  atom[0]{
+    type = "Pchg+";
+    position(0.0, 1, 1.0);
+  }
+  atom[1]{
+    type = "Pchg+";
+    position(0.0, -1, 1.0);
+  }
+  atom[2]{
+    type = "Pchg-";
+    position(0.0, 0.0, -1.0);
+  }
+
+  nRigidBodies = 1;
+  rigidBody[0]{ 
+    nMembers = 3;
+    members(0, 1, 2);
+  }
+
+  nCutoffGroups = 1;
+  cutoffGroup[0]{
+    nMembers = 3;
+    members(0, 1, 2);
+  }
+}
+
+molecule{
+  name = "PDIP";
+  nAtoms = 1;
+  atom[0]{
+    type = "PDIP";
+    position( 0.0, 0.0, 0.0 );
+    orientation( 0.0, 0.0, 0.0 );
+  }
+}
+
+molecule{
   name = "SSD_E";
   nAtoms = 1;
   atom[0]{
