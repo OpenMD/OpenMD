@@ -120,6 +120,7 @@ module electrostatic_module
   public :: getDipoleMoment
   public :: destroyElectrostaticTypes
   public :: rf_self_self
+  public :: rf_self_excludes
 
   type :: Electrostatic
      integer :: c_ident
@@ -437,9 +438,9 @@ contains
 
 
   subroutine doElectrostaticPair(atom1, atom2, d, rij, r2, sw, &
-       vpair, fpair, pot, eFrame, f, t, do_pot)
+       vpair, fpair, pot, eFrame, f, t, do_pot, indirect_only)
 
-    logical, intent(in) :: do_pot
+    logical, intent(in) :: do_pot, indirect_only
 
     integer, intent(in) :: atom1, atom2
     integer :: localError
@@ -674,6 +675,7 @@ contains
              preVal = pre11 * q_i * q_j
              rfVal = preRF*rij*rij
              vterm = preVal * ( riji + rfVal )
+             
              vpair = vpair + vterm
              epot = epot + sw*vterm
              
@@ -727,8 +729,8 @@ contains
              duduz_j(3) = duduz_j(3) - sw*pref*( ri2*zhat - d(3)*rcuti3 )
 
           elseif (summationMethod .eq. REACTION_FIELD) then
-             ri2 = ri * ri
-             ri3 = ri2 * ri
+             ri2 = riji * riji
+             ri3 = ri2 * riji
     
              pref = pre12 * q_i * mu_j
              vterm = - pref * ct_j * ( ri2 - preRF2*rij )
@@ -900,10 +902,6 @@ contains
              vpair = vpair + vterm
              epot = epot + sw*vterm
              
-             !! this has a + sign in the () because the rij vector is
-             !! r_j - r_i and the charge-dipole potential takes the origin
-             !! as the point dipole, which is atom j in this case.
-             
              dudx = dudx + sw*pref * ( ri3*( uz_i(1) - 3.0d0*ct_i*xhat) &
                   - rcuti3*( uz_i(1) - 3.0d0*ct_i*d(1)*rcuti ) )
              dudy = dudy + sw*pref * ( ri3*( uz_i(2) - 3.0d0*ct_i*yhat) &
@@ -911,29 +909,29 @@ contains
              dudz = dudz + sw*pref * ( ri3*( uz_i(3) - 3.0d0*ct_i*zhat) &
                   - rcuti3*( uz_i(3) - 3.0d0*ct_i*d(3)*rcuti ) )
              
-             duduz_i(1) = duduz_i(1) - sw*pref*( ri2*xhat - d(1)*rcuti3 )
-             duduz_i(2) = duduz_i(2) - sw*pref*( ri2*yhat - d(2)*rcuti3 )
-             duduz_i(3) = duduz_i(3) - sw*pref*( ri2*zhat - d(3)*rcuti3 )
+             duduz_i(1) = duduz_i(1) + sw*pref*( ri2*xhat - d(1)*rcuti3 )
+             duduz_i(2) = duduz_i(2) + sw*pref*( ri2*yhat - d(2)*rcuti3 )
+             duduz_i(3) = duduz_i(3) + sw*pref*( ri2*zhat - d(3)*rcuti3 )
 
           elseif (summationMethod .eq. REACTION_FIELD) then
-             ri2 = ri * ri
-             ri3 = ri2 * ri
+             ri2 = riji * riji
+             ri3 = ri2 * riji
 
              pref = pre12 * q_j * mu_i
-             vterm = pref * ct_i * ( ri2 - preRF*rij )
+             vterm = pref * ct_i * ( ri2 - preRF2*rij )
              vpair = vpair + vterm
              epot = epot + sw*vterm
              
-             dudx = dudx + sw*pref * ri3 * ( uz_i(1) - 3.0d0*ct_i*xhat - &
-                                             preRF*uz_i(1) )
-             dudy = dudy + sw*pref * ri3 * ( uz_i(2) - 3.0d0*ct_i*yhat - &
-                                             preRF*uz_i(2) )
-             dudz = dudz + sw*pref * ri3 * ( uz_i(3) - 3.0d0*ct_i*zhat - &
-                                             preRF*uz_i(3) )
+             dudx = dudx + sw*pref * ( ri3*(uz_i(1) - 3.0d0*ct_i*xhat) - &
+                  preRF2*uz_i(1) )
+             dudy = dudy + sw*pref * ( ri3*(uz_i(2) - 3.0d0*ct_i*yhat) - &
+                  preRF2*uz_i(2) )
+             dudz = dudz + sw*pref * ( ri3*(uz_i(3) - 3.0d0*ct_i*zhat) - &
+                  preRF2*uz_i(3) )
              
-             duduz_i(1) = duduz_i(1) + sw*pref * xhat * ( ri2 - preRF*rij )
-             duduz_i(2) = duduz_i(2) + sw*pref * yhat * ( ri2 - preRF*rij )
-             duduz_i(3) = duduz_i(3) + sw*pref * zhat * ( ri2 - preRF*rij )
+             duduz_i(1) = duduz_i(1) + sw*pref * xhat * ( ri2 - preRF2*rij )
+             duduz_i(2) = duduz_i(2) + sw*pref * yhat * ( ri2 - preRF2*rij )
+             duduz_i(3) = duduz_i(3) + sw*pref * zhat * ( ri2 - preRF2*rij )
 
           else
              if (i_is_SplitDipole) then
@@ -1323,6 +1321,10 @@ contains
     real(kind=dp) :: preVal, epot, rfpot
     real(kind=dp) :: eix, eiy, eiz
 
+    if (.not.preRFCalculated) then
+       call setReactionFieldPrefactor()
+    endif
+
     ! this is a local only array, so we use the local atom type id's:
     atid1 = atid(atom1)
     
@@ -1331,13 +1333,13 @@ contains
        
        preVal = pre22 * preRF2 * mu1*mu1
        rfpot = rfpot - 0.5d0*preVal
-
+       
        ! The self-correction term adds into the reaction field vector
        
        eix = preVal * eFrame(3,atom1)
        eiy = preVal * eFrame(6,atom1)
        eiz = preVal * eFrame(9,atom1)
-
+       
        ! once again, this is self-self, so only the local arrays are needed
        ! even for MPI jobs:
        
@@ -1347,10 +1349,145 @@ contains
             eFrame(3,atom1)*eiz
        t(3,atom1)=t(3,atom1) - eFrame(3,atom1)*eiy + &
             eFrame(6,atom1)*eix
-
+       
     endif
     
     return
   end subroutine rf_self_self
+
+  subroutine rf_self_excludes(atom1, atom2, sw, eFrame, d, rij, vpair, rfpot, &
+       f, t, do_pot)
+    logical, intent(in) :: do_pot
+    integer, intent(in) :: atom1
+    integer, intent(in) :: atom2
+    logical :: i_is_Charge, j_is_Charge
+    logical :: i_is_Dipole, j_is_Dipole
+    integer :: atid1
+    integer :: atid2
+    real(kind=dp), intent(in) :: rij
+    real(kind=dp), intent(in) :: sw
+    real(kind=dp), intent(in), dimension(3) :: d
+    real(kind=dp), intent(inout) :: vpair
+    real(kind=dp), dimension(9,nLocal) :: eFrame
+    real(kind=dp), dimension(3,nLocal) :: f
+    real(kind=dp), dimension(3,nLocal) :: t
+    real (kind = dp), dimension(3) :: duduz_i
+    real (kind = dp), dimension(3) :: duduz_j
+    real (kind = dp), dimension(3) :: uz_i
+    real (kind = dp), dimension(3) :: uz_j
+    real(kind=dp) :: q_i, q_j, mu_i, mu_j
+    real(kind=dp) :: xhat, yhat, zhat
+    real(kind=dp) :: ct_i, ct_j
+    real(kind=dp) :: ri2, ri3, riji, vterm
+    real(kind=dp) :: pref, preVal, rfVal, rfpot
+    real(kind=dp) :: dudx, dudy, dudz, dudr
+
+    if (.not.preRFCalculated) then
+       call setReactionFieldPrefactor()
+    endif
+
+    dudx = 0.0d0
+    dudy = 0.0d0
+    dudz = 0.0d0
+
+    riji = 1.0d0/rij
+
+    xhat = d(1) * riji
+    yhat = d(2) * riji
+    zhat = d(3) * riji
+
+    ! this is a local only array, so we use the local atom type id's:
+    atid1 = atid(atom1)
+    atid2 = atid(atom2)
+    i_is_Charge = ElectrostaticMap(atid1)%is_Charge
+    j_is_Charge = ElectrostaticMap(atid2)%is_Charge
+    i_is_Dipole = ElectrostaticMap(atid1)%is_Dipole
+    j_is_Dipole = ElectrostaticMap(atid2)%is_Dipole
+
+    if (i_is_Charge.and.j_is_Charge) then
+       q_i = ElectrostaticMap(atid1)%charge
+       q_j = ElectrostaticMap(atid2)%charge
+       
+       preVal = pre11 * q_i * q_j
+       rfVal = preRF*rij*rij
+       vterm = preVal * rfVal
+
+       rfpot = rfpot + sw*vterm
+       
+       dudr  = sw*preVal * 2.0d0*rfVal*riji
+              
+       dudx = dudx + dudr * xhat
+       dudy = dudy + dudr * yhat
+       dudz = dudz + dudr * zhat
+
+    elseif (i_is_Charge.and.j_is_Dipole) then
+       q_i = ElectrostaticMap(atid1)%charge
+       mu_j = ElectrostaticMap(atid2)%dipole_moment
+       uz_j(1) = eFrame(3,atom2)
+       uz_j(2) = eFrame(6,atom2)
+       uz_j(3) = eFrame(9,atom2)
+       ct_j = uz_j(1)*xhat + uz_j(2)*yhat + uz_j(3)*zhat
+
+       ri2 = riji * riji
+       ri3 = ri2 * riji
+       
+       pref = pre12 * q_i * mu_j
+       vterm = - pref * ct_j * ( ri2 - preRF2*rij )
+       rfpot = rfpot + sw*vterm
+
+       dudx = dudx - sw*pref*( ri3*(uz_j(1)-3.0d0*ct_j*xhat) - preRF2*uz_j(1) )
+       dudy = dudy - sw*pref*( ri3*(uz_j(2)-3.0d0*ct_j*yhat) - preRF2*uz_j(2) )
+       dudz = dudz - sw*pref*( ri3*(uz_j(3)-3.0d0*ct_j*zhat) - preRF2*uz_j(3) )
+
+       duduz_j(1) = duduz_j(1) - sw * pref * xhat * ( ri2 - preRF2*rij )
+       duduz_j(2) = duduz_j(2) - sw * pref * yhat * ( ri2 - preRF2*rij )
+       duduz_j(3) = duduz_j(3) - sw * pref * zhat * ( ri2 - preRF2*rij )
+              
+    elseif (i_is_Dipole.and.j_is_Charge) then
+       mu_i = ElectrostaticMap(atid1)%dipole_moment
+       q_j = ElectrostaticMap(atid2)%charge
+       uz_i(1) = eFrame(3,atom1)
+       uz_i(2) = eFrame(6,atom1)
+       uz_i(3) = eFrame(9,atom1)
+       ct_i = uz_i(1)*xhat + uz_i(2)*yhat + uz_i(3)*zhat
+
+       ri2 = riji * riji
+       ri3 = ri2 * riji
+       
+       pref = pre12 * q_j * mu_i
+       vterm = pref * ct_i * ( ri2 - preRF2*rij )
+       rfpot = rfpot + sw*vterm
+       
+       dudx = dudx + sw*pref*( ri3*(uz_i(1)-3.0d0*ct_i*xhat) - preRF2*uz_i(1) )
+       dudy = dudy + sw*pref*( ri3*(uz_i(2)-3.0d0*ct_i*yhat) - preRF2*uz_i(2) )
+       dudz = dudz + sw*pref*( ri3*(uz_i(3)-3.0d0*ct_i*zhat) - preRF2*uz_i(3) )
+       
+       duduz_i(1) = duduz_i(1) + sw * pref * xhat * ( ri2 - preRF2*rij )
+       duduz_i(2) = duduz_i(2) + sw * pref * yhat * ( ri2 - preRF2*rij )
+       duduz_i(3) = duduz_i(3) + sw * pref * zhat * ( ri2 - preRF2*rij )
+       
+    endif
+    
+    ! accumulate the forces and torques resulting from the RF self term
+    f(1,atom1) = f(1,atom1) + dudx
+    f(2,atom1) = f(2,atom1) + dudy
+    f(3,atom1) = f(3,atom1) + dudz
+    
+    f(1,atom2) = f(1,atom2) - dudx
+    f(2,atom2) = f(2,atom2) - dudy
+    f(3,atom2) = f(3,atom2) - dudz
+    
+    if (i_is_Dipole) then
+       t(1,atom1)=t(1,atom1) - uz_i(2)*duduz_i(3) + uz_i(3)*duduz_i(2)
+       t(2,atom1)=t(2,atom1) - uz_i(3)*duduz_i(1) + uz_i(1)*duduz_i(3)
+       t(3,atom1)=t(3,atom1) - uz_i(1)*duduz_i(2) + uz_i(2)*duduz_i(1)
+    elseif (j_is_Dipole) then
+       t(1,atom2)=t(1,atom2) - uz_j(2)*duduz_j(3) + uz_j(3)*duduz_j(2)
+       t(2,atom2)=t(2,atom2) - uz_j(3)*duduz_j(1) + uz_j(1)*duduz_j(3)
+       t(3,atom2)=t(3,atom2) - uz_j(1)*duduz_j(2) + uz_j(2)*duduz_j(1)
+    endif
+
+    return
+  end subroutine rf_self_excludes
 
 end module electrostatic_module
