@@ -12,6 +12,8 @@
 #define SHAPE_PAIR         128
 #define SHAPE_LJ           256
 #define FLARB_PAIR         512
+#define SUTTONCHEN_PAIR    1024
+#define MEAM_PAIR          2048
 
 #define LR_POT_TYPES      4
 
@@ -36,6 +38,10 @@
   INTEGER, PARAMETER:: SHAPE_PAIR         = 128
   INTEGER, PARAMETER:: SHAPE_LJ           = 256
   INTEGER, PARAMETER:: FLARB_PAIR         = 512
+  INTEGER ,PARAMETER:: SUTTONCHEN_PAIR    = 1024
+  INTEGER ,PARAMETER:: MEAM_PAIR          = 2048
+ 
+
 
   INTEGER, PARAMETER:: LR_POT_TYPES      =   4
   !! remember fortran is shifted up by one for arrays
