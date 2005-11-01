@@ -528,10 +528,12 @@ namespace oopse {
     //usePBC and useRF are from simParams
     int usePBC = simParams_->getUsePeriodicBoundaryConditions();
     int useRF;
+    int useDW;
     std::string myMethod;
 
     // set the useRF logical
     useRF = 0;
+    useDW = 0;
 
 
     if (simParams_->haveElectrostaticSummationMethod()) {
@@ -539,6 +541,10 @@ namespace oopse {
       toUpper(myMethod);
       if (myMethod == "REACTION_FIELD") {
         useRF=1;
+      } else {
+	if (myMethod == "DAMPED_WOLF") {
+	  useDW = 1;
+	}
       }
     }
 
@@ -606,6 +612,9 @@ namespace oopse {
     temp = useRF;
     MPI_Allreduce(&temp, &useRF, 1, MPI_INT, MPI_LOR, MPI_COMM_WORLD);    
 
+    temp = useDW;
+    MPI_Allreduce(&temp, &useDW, 1, MPI_INT, MPI_LOR, MPI_COMM_WORLD);    
+
 #endif
 
     fInfo_.SIM_uses_PBC = usePBC;    
@@ -621,6 +630,7 @@ namespace oopse {
     fInfo_.SIM_uses_Shapes = useShape;
     fInfo_.SIM_uses_FLARB = useFLARB;
     fInfo_.SIM_uses_RF = useRF;
+    fInfo_.SIM_uses_DampedWolf = useDW;
 
     if( myMethod == "REACTION_FIELD") {
       
@@ -635,6 +645,7 @@ namespace oopse {
 	simError();
       }      
     }
+
   }
 
   void SimInfo::setupFortranSim() {

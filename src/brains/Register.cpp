@@ -84,11 +84,11 @@ namespace oopse {
   void registerIntegrators() {
     IntegratorFactory::getInstance()->registerIntegrator(new IntegratorBuilder<NVE>("NVE"));
     IntegratorFactory::getInstance()->registerIntegrator(new IntegratorBuilder<NVT>("NVT"));
-    IntegratorFactory::getInstance()->registerIntegrator(new IntegratorBuilder<NPTi>("NPTi"));
-    IntegratorFactory::getInstance()->registerIntegrator(new IntegratorBuilder<NPTf>("NPTf"));
-    IntegratorFactory::getInstance()->registerIntegrator(new IntegratorBuilder<NPTxyz>("NPTxyz"));
+    IntegratorFactory::getInstance()->registerIntegrator(new IntegratorBuilder<NPTi>("NPTI"));
+    IntegratorFactory::getInstance()->registerIntegrator(new IntegratorBuilder<NPTf>("NPTF"));
+    IntegratorFactory::getInstance()->registerIntegrator(new IntegratorBuilder<NPTxyz>("NPTXYZ"));
     IntegratorFactory::getInstance()->registerIntegrator(new IntegratorBuilder<NPAT>("NPAT"));
-    IntegratorFactory::getInstance()->registerIntegrator(new IntegratorBuilder<NPrT>("NPrT"));
+    IntegratorFactory::getInstance()->registerIntegrator(new IntegratorBuilder<NPrT>("NPRT"));
 
   }
 

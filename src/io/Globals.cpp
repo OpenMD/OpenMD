@@ -342,7 +342,6 @@ char* Globals::checkMe( void ){
   CheckParameter(Ensemble, isEqualIgnoreCase(std::string("NVE")) || isEqualIgnoreCase(std::string("NVT")) ||
                                           isEqualIgnoreCase(std::string("NPTi")) || isEqualIgnoreCase(std::string("NPTf"))|| 
                                           isEqualIgnoreCase(std::string("NPTxyz")) );
-
   CheckParameter(Dt, isPositive());
   CheckParameter(RunTime, isPositive());
   CheckParameter(InitialConfig, isNotEmpty());

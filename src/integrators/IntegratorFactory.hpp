@@ -86,7 +86,7 @@ namespace oopse {
 
     /**
      * Registers a creator with a type identifier
-     * @return true if registration is succeed, otherwise return false
+     * @return true if registration is successful, otherwise return false
      * @id the identification of the concrete object
      * @creator the object responsible to create the concrete object 
      */
