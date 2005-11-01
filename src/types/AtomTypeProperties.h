@@ -21,6 +21,8 @@ typedef  struct{
   int is_EAM;
   int is_Shape;
   int is_FLARB;
+  int is_SuttonChen;
+  int is_MEAM;
 } AtomTypeProperties;
 #endif 
 #endif 
@@ -42,5 +44,7 @@ typedef  struct{
     integer :: is_EAM
     integer :: is_Shape
     integer :: is_FLARB
+    integer :: is_SuttonChen
+    integer :: is_MEAM
   end type AtomTypeProperties
 #endif

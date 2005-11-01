@@ -73,6 +73,8 @@ namespace oopse {
     atp.is_EAM = 0;
     atp.is_Shape = 0;
     atp.is_FLARB = 0;  
+    atp.is_SuttonChen = 0;
+    atp.is_MEAM = 0;
   }
     
   void AtomType::makeFortranAtomType() {

@@ -76,7 +76,7 @@ module suttonchen
 
   type, private :: SCtype
      integer           :: atid       
-     real(kind=dp)     :: c
+     real(kind=dp)     :: c 
      real(kind=dp)     :: m
      real(kind=dp)     :: n
      real(kind=dp)     :: alpha
@@ -113,10 +113,24 @@ module suttonchen
      integer, pointer         :: atidToSCtype(:) => null()
   end type SCTypeList
 
-
   type (SCTypeList), save :: SCList
 
-  !! standard eam stuff  
+
+
+
+ type :: MixParameters
+     real(kind=DP) :: alpha
+     real(kind=DP) :: epsilon
+     real(kind=dp) :: sigma6
+     real(kind=dp) :: rCut
+     real(kind=dp) :: delta
+     logical       :: rCutWasSet = .false.
+     logical       :: shiftedPot
+     logical       :: isSoftCore = .false.
+  end type MixParameters
+
+  type(MixParameters), dimension(:,:), allocatable :: MixingMap
+
 
 
   public :: init_SC_FF
@@ -131,9 +145,7 @@ module suttonchen
 contains
 
 
-  subroutine newEAMtype(lattice_constant,eam_nrho,eam_drho,eam_nr,&
-       eam_dr,rcut,eam_Z_r,eam_rho_r,eam_F_rho,&
-       c_ident,status)
+  subroutine newSCtype(c,m,n,alpha,epsilon,c_ident,status)
     real (kind = dp )                      :: lattice_constant
     integer                                :: eam_nrho
     real (kind = dp )                      :: eam_drho
