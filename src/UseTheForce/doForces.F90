@@ -45,7 +45,7 @@
 
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: doForces.F90,v 1.64 2005-11-01 19:09:23 chrisfen Exp $, $Date: 2005-11-01 19:09:23 $, $Name: not supported by cvs2svn $, $Revision: 1.64 $
+!! @version $Id: doForces.F90,v 1.65 2005-11-01 19:24:54 chrisfen Exp $, $Date: 2005-11-01 19:24:54 $, $Name: not supported by cvs2svn $, $Revision: 1.65 $
 
 
 module doForces
@@ -1163,13 +1163,10 @@ contains
 
   subroutine do_pair(i, j, rijsq, d, sw, do_pot, &
        eFrame, A, f, t, pot, vpair, fpair, d_grp, r_grp)
-!!$  subroutine do_pair(i, j, rijsq, d, sw, do_pot, &
-!!$       eFrame, A, f, t, pot, vpair, fpair, d_grp, r_grp, felec)
 
     real( kind = dp ) :: vpair, sw
     real( kind = dp ), dimension(LR_POT_TYPES) :: pot
     real( kind = dp ), dimension(3) :: fpair
-    real( kind = dp ), dimension(3) :: felec
     real( kind = dp ), dimension(nLocal)   :: mfact
     real( kind = dp ), dimension(9,nLocal) :: eFrame
     real( kind = dp ), dimension(9,nLocal) :: A
@@ -1209,8 +1206,6 @@ contains
     if ( iand(iHash, ELECTROSTATIC_PAIR).ne.0 ) then
        call doElectrostaticPair(i, j, d, r, rijsq, sw, vpair, fpair, &
             pot(ELECTROSTATIC_POT), eFrame, f, t, do_pot)
-!!$       call doElectrostaticPair(i, j, d, r, rijsq, sw, vpair, fpair, &
-!!$            pot(ELECTROSTATIC_POT), eFrame, f, t, do_pot, felec)
     endif
     
     if ( iand(iHash, STICKY_PAIR).ne.0 ) then

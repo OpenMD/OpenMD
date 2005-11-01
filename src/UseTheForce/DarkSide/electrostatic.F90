@@ -420,11 +420,9 @@ contains
     summationMethodChecked = .true.
   end subroutine checkSummationMethod
 
-!!$
-!!$  subroutine doElectrostaticPair(atom1, atom2, d, rij, r2, sw, &
-!!$       vpair, fpair, pot, eFrame, f, t, do_pot)
+
   subroutine doElectrostaticPair(atom1, atom2, d, rij, r2, sw, &
-       vpair, fpair, pot, eFrame, f, t, do_pot, felec)
+       vpair, fpair, pot, eFrame, f, t, do_pot)
 
     logical, intent(in) :: do_pot
 
@@ -435,7 +433,6 @@ contains
     real(kind=dp), intent(in), dimension(3) :: d
     real(kind=dp), intent(inout) :: vpair
     real(kind=dp), intent(inout), dimension(3) :: fpair    
-    real(kind=dp), intent(inout), dimension(3) :: felec
 
     real( kind = dp ) :: pot
     real( kind = dp ), dimension(9,nLocal) :: eFrame
