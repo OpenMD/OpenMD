@@ -54,6 +54,7 @@
 #include "primitives/Molecule.hpp"
 #include "UseTheForce/fCutoffPolicy.h"
 #include "UseTheForce/DarkSide/fElectrostaticSummationMethod.h"
+#include "UseTheForce/DarkSide/fScreeningMethod.h"
 #include "UseTheForce/doForces_interface.h"
 #include "UseTheForce/DarkSide/electrostatic_interface.h"
 #include "UseTheForce/notifyCutoffs_interface.h"
@@ -542,7 +543,7 @@ namespace oopse {
       if (myMethod == "REACTION_FIELD") {
         useRF=1;
       } else {
-	if (myMethod == "DAMPED_WOLF") {
+	if (myMethod == "SHIFTED_POTENTIAL") {
 	  useDW = 1;
 	}
       }
@@ -906,6 +907,7 @@ namespace oopse {
      
     int errorOut;
     int esm =  NONE;
+    int sm = UNDAMPED;
     double alphaVal;
     double dielectric;
 
@@ -919,35 +921,58 @@ namespace oopse {
       if (myMethod == "NONE") {
         esm = NONE;
       } else {
-        if (myMethod == "UNDAMPED_WOLF") {
-          esm = UNDAMPED_WOLF;
+        if (myMethod == "SWITCHING_FUNCTION") {
+          esm = SWITCHING_FUNCTION;
         } else {
-          if (myMethod == "DAMPED_WOLF") {            
-            esm = DAMPED_WOLF;
-	    if (!simParams_->haveDampingAlpha()) {
-	      //throw error
-	      sprintf( painCave.errMsg,
-		       "SimInfo warning: dampingAlpha was not specified in the input file. A default value of %f (1/ang) will be used for the Damped Wolf Method.", alphaVal);
-	      painCave.isFatal = 0;
-	      simError();
-	    }
-          } else {
-	    if (myMethod == "REACTION_FIELD") {	      
-	      esm = REACTION_FIELD;
+	  if (myMethod == "SHIFTED_POTENTIAL") {
+	    esm = SHIFTED_POTENTIAL;
+	  } else {
+	    if (myMethod == "SHIFTED_FORCE") {            
+	      esm = SHIFTED_FORCE;
 	    } else {
-	      // throw error        
-	      sprintf( painCave.errMsg,
-		       "SimInfo error: Unknown electrostaticSummationMethod. (Input file specified %s .)\n\telectrostaticSummationMethod must be one of: \"none\", \"undamped_wolf\", \"damped_wolf\", or \"reaction_field\".", myMethod.c_str() );
-	      painCave.isFatal = 1;
-	      simError();
-	    }     
-	  }           
+	      if (myMethod == "REACTION_FIELD") {	      
+		esm = REACTION_FIELD;
+	      } else {
+		// throw error        
+		sprintf( painCave.errMsg,
+			 "SimInfo error: Unknown electrostaticSummationMethod. (Input file specified %s .)\n\telectrostaticSummationMethod must be one of: \"none\", \"shifted_potential\", \"shifted_force\", or \"reaction_field\".", myMethod.c_str() );
+		painCave.isFatal = 1;
+		simError();
+	      }     
+	    }           
+	  }
+	}
+      }
+    }
+    
+    if (simParams_->haveScreeningMethod()) {
+      std::string myScreen = simParams_->getScreeningMethod();
+      toUpper(myScreen);
+      if (myScreen == "UNDAMPED") {
+	sm = UNDAMPED;
+      } else {
+	if (myScreen == "DAMPED") {
+	  sm = DAMPED;
+	  if (!simParams_->haveDampingAlpha()) {
+	    //throw error
+	    sprintf( painCave.errMsg,
+		     "SimInfo warning: dampingAlpha was not specified in the input file. A default value of %f (1/ang) will be used.", alphaVal);
+	    painCave.isFatal = 0;
+	    simError();
+	  } else {
+	    // throw error        
+	    sprintf( painCave.errMsg,
+		     "SimInfo error: Unknown electrostaticSummationMethod. (Input file specified %s .)\n\telectrostaticSummationMethod must be one of: \"undamped\" or \"damped\".", myScreen.c_str() );
+	    painCave.isFatal = 1;
+	    simError();
+	  }
 	}
       }
     }
     // let's pass some summation method variables to fortran
     setElectrostaticSummationMethod( &esm );
-    setDampedWolfAlpha( &alphaVal );
+    setScreeningMethod( &sm );
+    setDampingAlpha( &alphaVal );
     setReactionFieldDielectric( &dielectric );
     initFortranFF( &esm, &errorOut );
   }
