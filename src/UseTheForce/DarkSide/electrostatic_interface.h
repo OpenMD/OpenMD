@@ -48,8 +48,9 @@
 #include "types/AtomTypeProperties.h"
  
 #define setElectrostaticSummationMethod F90_FUNC(setelectrostaticsummationmethod, SETELECTROSTATICSUMMATIONMETHOD)
+#define setScreeningMethod F90_FUNC(setscreeningmethod, SETSCREENINGMETHOD)
 #define setElectrostaticCutoffRadius F90_FUNC(setelectrostaticcutoffradius, SETELECTROSTATICCUTOFFRADIUS)
-#define setDampedWolfAlpha F90_FUNC(setdampedwolfalpha, SETDAMPEDWOLFALPHA)
+#define setDampingAlpha F90_FUNC(setdampingalpha, SETDAMPINGALPHA)
 #define setReactionFieldDielectric F90_FUNC(setreactionfielddielectric, SETREACTIONFIELDDIELECTRIC)
 
 #define newElectrostaticType F90_FUNC(newelectrostatictype, NEWELECTROSTATICTYPE)
@@ -63,8 +64,9 @@
 extern "C"{
 
   void setElectrostaticSummationMethod( int* theESM );
+  void setScreeningMethod( int* theSM );
   void setElectrostaticCutoffRadius( double* theECR, double* theRSW );
-  void setDampedWolfAlpha( double* theDWA );
+  void setDampingAlpha( double* theDA );
   void setReactionFieldDielectric( double* theDielectric );
 
   void newElectrostaticType( AtomTypeProperties* atp,

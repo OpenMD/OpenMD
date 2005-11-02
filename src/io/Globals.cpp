@@ -121,6 +121,7 @@ Globals::Globals(){
   DefineOptionalParameter(SurfaceTension, "surfaceTension");
   DefineOptionalParameter(PrintPressureTensor, "printPressureTensor");
   DefineOptionalParameter(ElectrostaticSummationMethod, "electrostaticSummationMethod");
+  DefineOptionalParameter(ScreeningMethod, "screeningMethod");
   DefineOptionalParameter(CutoffPolicy, "cutoffPolicy");
   
   DefineOptionalParameterWithDefaultValue(MixingRule, "mixingRule", "standard");
@@ -385,7 +386,8 @@ char* Globals::checkMe( void ){
   CheckParameter(ThermIntThetaSpringConst, isPositive());
   CheckParameter(ThermIntOmegaSpringConst, isPositive());
   CheckParameter(SurfaceTension, isPositive());
-  CheckParameter(ElectrostaticSummationMethod, isEqualIgnoreCase(std::string("NONE")) || isEqualIgnoreCase(std::string("UNDAMPED_WOLF")) || isEqualIgnoreCase(std::string("DAMPED_WOLF")) || isEqualIgnoreCase(std::string("REACTION_FIELD")) );
+  CheckParameter(ElectrostaticSummationMethod, isEqualIgnoreCase(std::string("NONE")) || isEqualIgnoreCase(std::string("SHIFTED_POTENTIAL")) || isEqualIgnoreCase(std::string("SHIFTED_FORCE"))  || isEqualIgnoreCase(std::string("REACTION_FIELD")));
+  CheckParameter(ScreeningMethod, isEqualIgnoreCase(std::string("UNDAMPED")) || isEqualIgnoreCase(std::string("DAMPED"))); 
   CheckParameter(CutoffPolicy, isEqualIgnoreCase(std::string("MIX")) || isEqualIgnoreCase(std::string("MAX")) || isEqualIgnoreCase(std::string("TRADITIONAL")));
   //CheckParameter(StatFileFormat,);     
   //CheckParameter(MixingRule,);

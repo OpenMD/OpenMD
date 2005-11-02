@@ -4,6 +4,12 @@ subroutine setElectrostaticSummationMethod(the_ESM)
   call module_setESM(the_ESM)
 end subroutine setElectrostaticSummationMethod
 
+subroutine setScreeningMethod(the_SM)
+  use electrostatic_module, ONLY : module_setSM => setScreeningMethod
+  integer,intent(inout) :: the_SM
+  call module_setSM(the_SM)
+end subroutine setScreeningMethod
+
 subroutine setElectrostaticCutoffRadius(the_rcut, the_rsw)
   use electrostatic_module, ONLY : module_setECR => setElectrostaticCutoffRadius
   use definitions, ONLY : dp
@@ -12,12 +18,12 @@ subroutine setElectrostaticCutoffRadius(the_rcut, the_rsw)
   call module_setECR(the_rcut, the_rsw)
 end subroutine setElectrostaticCutoffRadius
 
-subroutine setDampedWolfAlpha(the_alpha)
-  use electrostatic_module, ONLY : module_setDWA => setDampedWolfAlpha
+subroutine setDampingAlpha(the_alpha)
+  use electrostatic_module, ONLY : module_setDA => setDampingAlpha
   use definitions, ONLY : dp
   real(kind=dp),intent(inout) :: the_alpha
-  call module_setDWA(the_alpha)
-end subroutine setDampedWolfAlpha
+  call module_setDA(the_alpha)
+end subroutine setDampingAlpha
  
 subroutine setReactionFieldDielectric(the_dielectric)
   use electrostatic_module, ONLY : module_setRFD => setReactionFieldDielectric

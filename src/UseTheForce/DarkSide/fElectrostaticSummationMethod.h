@@ -3,13 +3,14 @@
 #define __FELECTROSTATICSUMMATIONMETHOD
 
 #define NONE                   1
-#define UNDAMPED_WOLF          2
-#define DAMPED_WOLF            3
-#define REACTION_FIELD         4
+#define SWITCHING_FUNCTION     2
+#define SHIFTED_POTENTIAL      3
+#define SHIFTED_FORCE          4
+#define REACTION_FIELD         5
 /* Ewald methods aren't supported yet */
-#define EWALD_FULL             5 
-#define EWALD_PME              6
-#define EWALD_SPME             7
+#define EWALD_FULL             6 
+#define EWALD_PME              7
+#define EWALD_SPME             8
 
 #endif
 #endif /*__C*/
@@ -17,11 +18,12 @@
 #ifdef  __FORTRAN90
 
   INTEGER, PARAMETER:: NONE                      = 1
-  INTEGER, PARAMETER:: UNDAMPED_WOLF             = 2
-  INTEGER, PARAMETER:: DAMPED_WOLF               = 3
-  INTEGER, PARAMETER:: REACTION_FIELD            = 4
-  INTEGER, PARAMETER:: EWALD_FULL                = 5
-  INTEGER, PARAMETER:: EWALD_PME                 = 6
-  INTEGER, PARAMETER:: EWALD_SPME                = 7
+  INTEGER, PARAMETER:: SWITCHING_FUNCTION        = 2
+  INTEGER, PARAMETER:: SHIFTED_POTENTIAL         = 3
+  INTEGER, PARAMETER:: SHIFTED_FORCE             = 4
+  INTEGER, PARAMETER:: REACTION_FIELD            = 5
+  INTEGER, PARAMETER:: EWALD_FULL                = 6
+  INTEGER, PARAMETER:: EWALD_PME                 = 7
+  INTEGER, PARAMETER:: EWALD_SPME                = 8
 
 #endif
