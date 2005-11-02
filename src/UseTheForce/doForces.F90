@@ -45,7 +45,7 @@
 
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: doForces.F90,v 1.66 2005-11-02 20:35:34 chrisfen Exp $, $Date: 2005-11-02 20:35:34 $, $Name: not supported by cvs2svn $, $Revision: 1.66 $
+!! @version $Id: doForces.F90,v 1.67 2005-11-02 21:01:18 chrisfen Exp $, $Date: 2005-11-02 21:01:18 $, $Name: not supported by cvs2svn $, $Revision: 1.67 $
 
 
 module doForces
@@ -745,7 +745,6 @@ contains
     real( kind = DP ) :: sw, dswdr, swderiv, mf
     real( kind = DP ) :: rVal
     real(kind=dp),dimension(3) :: d_atm, d_grp, fpair, fij
-    real(kind=dp), dimension(3) :: fstrs, f2strs
     real(kind=dp) :: rfpot, mu_i, virial
     integer :: me_i, me_j, n_in_i, n_in_j
     logical :: is_dp_i
@@ -953,13 +952,12 @@ contains
 #ifdef IS_MPI                      
                             call do_pair(atom1, atom2, ratmsq, d_atm, sw, &
                                  do_pot, eFrame, A, f, t, pot_local, vpair, &
-                                 fpair, d_grp, rgrp, fstrs)
+                                 fpair, d_grp, rgrp)
 #else
                             call do_pair(atom1, atom2, ratmsq, d_atm, sw, &
                                  do_pot, eFrame, A, f, t, pot, vpair, fpair, &
-                                 d_grp, rgrp, fstrs)
+                                 d_grp, rgrp)
 #endif
-                            f2strs(1:3) = f2strs(1:3) + fstrs(1:3)
                             vij = vij + vpair
                             fij(1:3) = fij(1:3) + fpair(1:3)
                          endif
@@ -1165,15 +1163,12 @@ contains
     
   end subroutine do_force_loop
 
-!!$  subroutine do_pair(i, j, rijsq, d, sw, do_pot, &
-!!$       eFrame, A, f, t, pot, vpair, fpair, d_grp, r_grp)
   subroutine do_pair(i, j, rijsq, d, sw, do_pot, &
-       eFrame, A, f, t, pot, vpair, fpair, d_grp, r_grp, fstrs)
+       eFrame, A, f, t, pot, vpair, fpair, d_grp, r_grp)
 
     real( kind = dp ) :: vpair, sw
     real( kind = dp ), dimension(LR_POT_TYPES) :: pot
     real( kind = dp ), dimension(3) :: fpair
-    real( kind = dp ), dimension(3) :: fstrs
     real( kind = dp ), dimension(nLocal)   :: mfact
     real( kind = dp ), dimension(9,nLocal) :: eFrame
     real( kind = dp ), dimension(9,nLocal) :: A
@@ -1211,10 +1206,8 @@ contains
     endif
     
     if ( iand(iHash, ELECTROSTATIC_PAIR).ne.0 ) then
-!!$       call doElectrostaticPair(i, j, d, r, rijsq, sw, vpair, fpair, &
-!!$            pot(ELECTROSTATIC_POT), eFrame, f, t, do_pot)
        call doElectrostaticPair(i, j, d, r, rijsq, sw, vpair, fpair, &
-            pot(ELECTROSTATIC_POT), eFrame, f, t, do_pot, fstrs)
+            pot(ELECTROSTATIC_POT), eFrame, f, t, do_pot)
     endif
     
     if ( iand(iHash, STICKY_PAIR).ne.0 ) then

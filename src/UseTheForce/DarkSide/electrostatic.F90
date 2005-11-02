@@ -75,7 +75,8 @@ module electrostatic_module
   !! This unit is also known affectionately as an esu centi-barn.
   real(kind=dp), parameter :: pre14 = 69.13373_dp
 
-  !! variables to handle different summation methods for long-range electrostatics:
+  !! variables to handle different summation methods for long-range 
+  !! electrostatics:
   integer, save :: summationMethod = NONE
   integer, save :: screeningMethod = UNDAMPED
   logical, save :: summationMethodChecked = .false.
@@ -428,11 +429,9 @@ contains
     summationMethodChecked = .true.
   end subroutine checkSummationMethod
 
-!!$
-!!$  subroutine doElectrostaticPair(atom1, atom2, d, rij, r2, sw, &
-!!$       vpair, fpair, pot, eFrame, f, t, do_pot)
+
   subroutine doElectrostaticPair(atom1, atom2, d, rij, r2, sw, &
-       vpair, fpair, pot, eFrame, f, t, do_pot, fstrs)
+       vpair, fpair, pot, eFrame, f, t, do_pot)
 
     logical, intent(in) :: do_pot
 
@@ -443,7 +442,6 @@ contains
     real(kind=dp), intent(in), dimension(3) :: d
     real(kind=dp), intent(inout) :: vpair
     real(kind=dp), intent(inout), dimension(3) :: fpair    
-    real(kind=dp), intent(inout), dimension(3) :: fstrs
 
     real( kind = dp ) :: pot
     real( kind = dp ), dimension(9,nLocal) :: eFrame
