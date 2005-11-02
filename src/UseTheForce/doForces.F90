@@ -45,7 +45,7 @@
 
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: doForces.F90,v 1.65 2005-11-01 19:24:54 chrisfen Exp $, $Date: 2005-11-01 19:24:54 $, $Name: not supported by cvs2svn $, $Revision: 1.65 $
+!! @version $Id: doForces.F90,v 1.66 2005-11-02 20:35:34 chrisfen Exp $, $Date: 2005-11-02 20:35:34 $, $Name: not supported by cvs2svn $, $Revision: 1.66 $
 
 
 module doForces
@@ -745,6 +745,7 @@ contains
     real( kind = DP ) :: sw, dswdr, swderiv, mf
     real( kind = DP ) :: rVal
     real(kind=dp),dimension(3) :: d_atm, d_grp, fpair, fij
+    real(kind=dp), dimension(3) :: fstrs, f2strs
     real(kind=dp) :: rfpot, mu_i, virial
     integer :: me_i, me_j, n_in_i, n_in_j
     logical :: is_dp_i
@@ -902,108 +903,111 @@ contains
 
                    list(nlist) = j
                 endif
+                
+                if (rgrpsq < gtypeCutoffMap(groupToGtypeRow(i),groupToGtypeCol(j))%rCutsq) then
 
-                if (loop .eq. PAIR_LOOP) then
-                   vij = 0.0d0
-                   fij(1:3) = 0.0d0
-                endif
-
-                call get_switch(rgrpsq, sw, dswdr, rgrp, group_switch, &
-                     in_switching_region)
-
-                n_in_j = groupStartCol(j+1) - groupStartCol(j)
-
-                do ia = groupStartRow(i), groupStartRow(i+1)-1
-
-                   atom1 = groupListRow(ia)
-
-                   inner: do jb = groupStartCol(j), groupStartCol(j+1)-1
-
-                      atom2 = groupListCol(jb)
-    
-                      if (skipThisPair(atom1, atom2))  cycle inner
-                      
-                      if ((n_in_i .eq. 1).and.(n_in_j .eq. 1)) then
-                         d_atm(1:3) = d_grp(1:3)
-                         ratmsq = rgrpsq
-                      else
-#ifdef IS_MPI
-                         call get_interatomic_vector(q_Row(:,atom1), &
-                              q_Col(:,atom2), d_atm, ratmsq)
-#else
-                         call get_interatomic_vector(q(:,atom1), &
-                              q(:,atom2), d_atm, ratmsq)
-#endif
-                      endif
-
-                      if (loop .eq. PREPAIR_LOOP) then
-#ifdef IS_MPI                      
-                         call do_prepair(atom1, atom2, ratmsq, d_atm, sw, &
-                              rgrpsq, d_grp, do_pot, do_stress, &
-                              eFrame, A, f, t, pot_local)
-#else
-                         call do_prepair(atom1, atom2, ratmsq, d_atm, sw, &
-                              rgrpsq, d_grp, do_pot, do_stress, &
-                              eFrame, A, f, t, pot)
-#endif                                               
-                      else
-#ifdef IS_MPI                      
-                         call do_pair(atom1, atom2, ratmsq, d_atm, sw, &
-                              do_pot, eFrame, A, f, t, pot_local, vpair, &
-                              fpair, d_grp, rgrp)
-#else
-                         call do_pair(atom1, atom2, ratmsq, d_atm, sw, &
-                              do_pot, eFrame, A, f, t, pot, vpair, fpair, &
-                              d_grp, rgrp)
-#endif
-
-                         vij = vij + vpair
-                         fij(1:3) = fij(1:3) + fpair(1:3)
-                      endif
-                   enddo inner
-                enddo
-
-                if (loop .eq. PAIR_LOOP) then
-                   if (in_switching_region) then
-                      swderiv = vij*dswdr/rgrp
-                      fij(1) = fij(1) + swderiv*d_grp(1)
-                      fij(2) = fij(2) + swderiv*d_grp(2)
-                      fij(3) = fij(3) + swderiv*d_grp(3)
-
-                      do ia=groupStartRow(i), groupStartRow(i+1)-1
-                         atom1=groupListRow(ia)
-                         mf = mfactRow(atom1)
-#ifdef IS_MPI
-                         f_Row(1,atom1) = f_Row(1,atom1) + swderiv*d_grp(1)*mf
-                         f_Row(2,atom1) = f_Row(2,atom1) + swderiv*d_grp(2)*mf
-                         f_Row(3,atom1) = f_Row(3,atom1) + swderiv*d_grp(3)*mf
-#else
-                         f(1,atom1) = f(1,atom1) + swderiv*d_grp(1)*mf
-                         f(2,atom1) = f(2,atom1) + swderiv*d_grp(2)*mf
-                         f(3,atom1) = f(3,atom1) + swderiv*d_grp(3)*mf
-#endif
-                      enddo
-
-                      do jb=groupStartCol(j), groupStartCol(j+1)-1
-                         atom2=groupListCol(jb)
-                         mf = mfactCol(atom2)
-#ifdef IS_MPI
-                         f_Col(1,atom2) = f_Col(1,atom2) - swderiv*d_grp(1)*mf
-                         f_Col(2,atom2) = f_Col(2,atom2) - swderiv*d_grp(2)*mf
-                         f_Col(3,atom2) = f_Col(3,atom2) - swderiv*d_grp(3)*mf
-#else
-                         f(1,atom2) = f(1,atom2) - swderiv*d_grp(1)*mf
-                         f(2,atom2) = f(2,atom2) - swderiv*d_grp(2)*mf
-                         f(3,atom2) = f(3,atom2) - swderiv*d_grp(3)*mf
-#endif
-                      enddo
+                   if (loop .eq. PAIR_LOOP) then
+                      vij = 0.0d0
+                      fij(1:3) = 0.0d0
                    endif
+                   
+                   call get_switch(rgrpsq, sw, dswdr, rgrp, group_switch, &
+                        in_switching_region)
+                   
+                   n_in_j = groupStartCol(j+1) - groupStartCol(j)
+                   
+                   do ia = groupStartRow(i), groupStartRow(i+1)-1
+                      
+                      atom1 = groupListRow(ia)
+                      
+                      inner: do jb = groupStartCol(j), groupStartCol(j+1)-1
+                         
+                         atom2 = groupListCol(jb)
+                         
+                         if (skipThisPair(atom1, atom2))  cycle inner
+                         
+                         if ((n_in_i .eq. 1).and.(n_in_j .eq. 1)) then
+                            d_atm(1:3) = d_grp(1:3)
+                            ratmsq = rgrpsq
+                         else
+#ifdef IS_MPI
+                            call get_interatomic_vector(q_Row(:,atom1), &
+                                 q_Col(:,atom2), d_atm, ratmsq)
+#else
+                            call get_interatomic_vector(q(:,atom1), &
+                                 q(:,atom2), d_atm, ratmsq)
+#endif
+                         endif
+                         
+                         if (loop .eq. PREPAIR_LOOP) then
+#ifdef IS_MPI                      
+                            call do_prepair(atom1, atom2, ratmsq, d_atm, sw, &
+                                 rgrpsq, d_grp, do_pot, do_stress, &
+                                 eFrame, A, f, t, pot_local)
+#else
+                            call do_prepair(atom1, atom2, ratmsq, d_atm, sw, &
+                                 rgrpsq, d_grp, do_pot, do_stress, &
+                                 eFrame, A, f, t, pot)
+#endif                                               
+                         else
+#ifdef IS_MPI                      
+                            call do_pair(atom1, atom2, ratmsq, d_atm, sw, &
+                                 do_pot, eFrame, A, f, t, pot_local, vpair, &
+                                 fpair, d_grp, rgrp, fstrs)
+#else
+                            call do_pair(atom1, atom2, ratmsq, d_atm, sw, &
+                                 do_pot, eFrame, A, f, t, pot, vpair, fpair, &
+                                 d_grp, rgrp, fstrs)
+#endif
+                            f2strs(1:3) = f2strs(1:3) + fstrs(1:3)
+                            vij = vij + vpair
+                            fij(1:3) = fij(1:3) + fpair(1:3)
+                         endif
+                      enddo inner
+                   enddo
 
-                   if (do_stress) call add_stress_tensor(d_grp, fij)
+                   if (loop .eq. PAIR_LOOP) then
+                      if (in_switching_region) then
+                         swderiv = vij*dswdr/rgrp
+                         fij(1) = fij(1) + swderiv*d_grp(1)
+                         fij(2) = fij(2) + swderiv*d_grp(2)
+                         fij(3) = fij(3) + swderiv*d_grp(3)
+                         
+                         do ia=groupStartRow(i), groupStartRow(i+1)-1
+                            atom1=groupListRow(ia)
+                            mf = mfactRow(atom1)
+#ifdef IS_MPI
+                            f_Row(1,atom1) = f_Row(1,atom1) + swderiv*d_grp(1)*mf
+                            f_Row(2,atom1) = f_Row(2,atom1) + swderiv*d_grp(2)*mf
+                            f_Row(3,atom1) = f_Row(3,atom1) + swderiv*d_grp(3)*mf
+#else
+                            f(1,atom1) = f(1,atom1) + swderiv*d_grp(1)*mf
+                            f(2,atom1) = f(2,atom1) + swderiv*d_grp(2)*mf
+                            f(3,atom1) = f(3,atom1) + swderiv*d_grp(3)*mf
+#endif
+                         enddo
+                         
+                         do jb=groupStartCol(j), groupStartCol(j+1)-1
+                            atom2=groupListCol(jb)
+                            mf = mfactCol(atom2)
+#ifdef IS_MPI
+                            f_Col(1,atom2) = f_Col(1,atom2) - swderiv*d_grp(1)*mf
+                            f_Col(2,atom2) = f_Col(2,atom2) - swderiv*d_grp(2)*mf
+                            f_Col(3,atom2) = f_Col(3,atom2) - swderiv*d_grp(3)*mf
+#else
+                            f(1,atom2) = f(1,atom2) - swderiv*d_grp(1)*mf
+                            f(2,atom2) = f(2,atom2) - swderiv*d_grp(2)*mf
+                            f(3,atom2) = f(3,atom2) - swderiv*d_grp(3)*mf
+#endif
+                         enddo
+                      endif
+
+                      if (do_stress) call add_stress_tensor(d_grp, fij)
+                   endif
                 endif
-             end if
+             endif
           enddo
-
+          
        enddo outer
 
        if (update_nlist) then
@@ -1108,7 +1112,7 @@ contains
           endif
   
           
-!!$          if (electrostaticSummationMethod.eq.REACTION_FIELD) then
+          if (electrostaticSummationMethod.eq.REACTION_FIELD) then
              
              ! loop over the excludes to accumulate RF stuff we've
              ! left out of the normal pair loop
@@ -1132,7 +1136,7 @@ contains
 #endif
                 endif
              enddo
-!!$          endif
+          endif
        enddo
     endif
     
@@ -1161,12 +1165,15 @@ contains
     
   end subroutine do_force_loop
 
+!!$  subroutine do_pair(i, j, rijsq, d, sw, do_pot, &
+!!$       eFrame, A, f, t, pot, vpair, fpair, d_grp, r_grp)
   subroutine do_pair(i, j, rijsq, d, sw, do_pot, &
-       eFrame, A, f, t, pot, vpair, fpair, d_grp, r_grp)
+       eFrame, A, f, t, pot, vpair, fpair, d_grp, r_grp, fstrs)
 
     real( kind = dp ) :: vpair, sw
     real( kind = dp ), dimension(LR_POT_TYPES) :: pot
     real( kind = dp ), dimension(3) :: fpair
+    real( kind = dp ), dimension(3) :: fstrs
     real( kind = dp ), dimension(nLocal)   :: mfact
     real( kind = dp ), dimension(9,nLocal) :: eFrame
     real( kind = dp ), dimension(9,nLocal) :: A
@@ -1204,8 +1211,10 @@ contains
     endif
     
     if ( iand(iHash, ELECTROSTATIC_PAIR).ne.0 ) then
+!!$       call doElectrostaticPair(i, j, d, r, rijsq, sw, vpair, fpair, &
+!!$            pot(ELECTROSTATIC_POT), eFrame, f, t, do_pot)
        call doElectrostaticPair(i, j, d, r, rijsq, sw, vpair, fpair, &
-            pot(ELECTROSTATIC_POT), eFrame, f, t, do_pot)
+            pot(ELECTROSTATIC_POT), eFrame, f, t, do_pot, fstrs)
     endif
     
     if ( iand(iHash, STICKY_PAIR).ne.0 ) then
@@ -1379,7 +1388,6 @@ contains
        call clean_EAM()
     endif
 
-    rf = 0.0_dp
     tau_Temp = 0.0_dp
     virial_Temp = 0.0_dp
   end subroutine zero_work_arrays
