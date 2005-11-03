@@ -1368,20 +1368,20 @@ contains
           
        endif
 
-!!$    elseif (summationMethod .eq. SHIFTED_FORCE) then
-!!$       if (ElectrostaticMap(atid1)%is_Charge) then
-!!$          c1 = getCharge(atid1)
-!!$          
-!!$          if (screeningMethod .eq. DAMPED) then
-!!$             mypot = mypot - (f0c * rcuti * 0.5_dp + &
-!!$                  dampingAlpha*invRootPi) * c1 * c1    
-!!$             
-!!$          else             
-!!$             mypot = mypot - (rcuti * 0.5_dp * c1 * c1)
-!!$             
-!!$          endif
-!!$       endif
-!!$    endif
+    elseif (summationMethod .eq. SHIFTED_FORCE) then
+       if (ElectrostaticMap(atid1)%is_Charge) then
+          c1 = getCharge(atid1)
+          
+          if (screeningMethod .eq. DAMPED) then
+             mypot = mypot - (f0c * rcuti * 0.5_dp + &
+                  dampingAlpha*invRootPi) * c1 * c1    
+             
+          else             
+             mypot = mypot - (rcuti * 0.5_dp * c1 * c1)
+             
+          endif
+       endif
+    endif
     
     return
   end subroutine self_self
