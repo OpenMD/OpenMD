@@ -10,8 +10,10 @@ initialConfig = "./spce.in";
 
 ensemble = NVE;
 forceField = "DUFF";
-//electrostaticSummationMethod = "reaction_field";
-//dielectric = 80.0;
+electrostaticSummationMethod = "shifted_force";
+electrostaticScreeningMethod = "damped";
+dielectric = 80.0;
+dampingAlpha = 0.2;
 cutoffRadius = 9.0;
 switchingRadius = 7.7;
 
@@ -22,7 +24,7 @@ tauThermostat = 1e3;
 tauBarostat = 1e4;
 
 dt = 2.0;
-runTime = 5e2;
+runTime = 1e3;
 useInitialTime = "false";
 useInitialExtendedSystemState = "false";
 
