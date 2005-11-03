@@ -121,7 +121,7 @@ Globals::Globals(){
   DefineOptionalParameter(SurfaceTension, "surfaceTension");
   DefineOptionalParameter(PrintPressureTensor, "printPressureTensor");
   DefineOptionalParameter(ElectrostaticSummationMethod, "electrostaticSummationMethod");
-  DefineOptionalParameter(ScreeningMethod, "screeningMethod");
+  DefineOptionalParameter(ElectrostaticScreeningMethod, "electrostaticScreeningMethod");
   DefineOptionalParameter(CutoffPolicy, "cutoffPolicy");
   
   DefineOptionalParameterWithDefaultValue(MixingRule, "mixingRule", "standard");
@@ -134,7 +134,7 @@ Globals::Globals(){
   DefineOptionalParameterWithDefaultValue(ThermIntDistSpringConst, "thermIntDistSpringConst", 6.0);
   DefineOptionalParameterWithDefaultValue(ThermIntThetaSpringConst, "thermIntThetaSpringConst", 7.5);
   DefineOptionalParameterWithDefaultValue(ThermIntOmegaSpringConst, "thermIntOmegaSpringConst", 13.5);
-  DefineOptionalParameterWithDefaultValue(DampingAlpha, "dampingAlpha", 1.5);
+  DefineOptionalParameterWithDefaultValue(DampingAlpha, "dampingAlpha", 0.2);
   DefineOptionalParameterWithDefaultValue(CompressDumpFile, "compressDumpFile", 0);
   DefineOptionalParameterWithDefaultValue(SkinThickness, "skinThickness", 1.0);
   DefineOptionalParameterWithDefaultValue(StatFileFormat, "statFileFormat", "TIME|TOTAL_ENERGY|POTENTIAL_ENERGY|KINETIC_ENERGY|TEMPERATURE|PRESSURE|VOLUME|CONSERVED_QUANTITY");    
@@ -387,7 +387,7 @@ char* Globals::checkMe( void ){
   CheckParameter(ThermIntOmegaSpringConst, isPositive());
   CheckParameter(SurfaceTension, isPositive());
   CheckParameter(ElectrostaticSummationMethod, isEqualIgnoreCase(std::string("NONE")) || isEqualIgnoreCase(std::string("SHIFTED_POTENTIAL")) || isEqualIgnoreCase(std::string("SHIFTED_FORCE"))  || isEqualIgnoreCase(std::string("REACTION_FIELD")));
-  CheckParameter(ScreeningMethod, isEqualIgnoreCase(std::string("UNDAMPED")) || isEqualIgnoreCase(std::string("DAMPED"))); 
+  CheckParameter(ElectrostaticScreeningMethod, isEqualIgnoreCase(std::string("UNDAMPED")) || isEqualIgnoreCase(std::string("DAMPED"))); 
   CheckParameter(CutoffPolicy, isEqualIgnoreCase(std::string("MIX")) || isEqualIgnoreCase(std::string("MAX")) || isEqualIgnoreCase(std::string("TRADITIONAL")));
   //CheckParameter(StatFileFormat,);     
   //CheckParameter(MixingRule,);
@@ -395,7 +395,7 @@ char* Globals::checkMe( void ){
   CheckParameter(ThermIntDistSpringConst, isPositive());
   CheckParameter(ThermIntThetaSpringConst, isPositive());
   CheckParameter(ThermIntOmegaSpringConst, isPositive());
-  CheckParameter(DampingAlpha,isPositive());
+  CheckParameter(DampingAlpha,isNonNegative());
   CheckParameter(SkinThickness, isPositive());
   
   //@todo memory leak

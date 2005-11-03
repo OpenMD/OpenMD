@@ -239,7 +239,7 @@ class Globals {
   DeclareParameter(SurfaceTension, double);
   DeclareParameter(PrintPressureTensor, bool);
   DeclareParameter(ElectrostaticSummationMethod, std::string);
-  DeclareParameter(ScreeningMethod, std::string);
+  DeclareParameter(ElectrostaticScreeningMethod, std::string);
   DeclareParameter(DampingAlpha, double);
   DeclareParameter(CutoffPolicy, std::string);
   DeclareParameter(CompressDumpFile, bool);

@@ -54,7 +54,7 @@
 #include "primitives/Molecule.hpp"
 #include "UseTheForce/fCutoffPolicy.h"
 #include "UseTheForce/DarkSide/fElectrostaticSummationMethod.h"
-#include "UseTheForce/DarkSide/fScreeningMethod.h"
+#include "UseTheForce/DarkSide/fElectrostaticScreeningMethod.h"
 #include "UseTheForce/doForces_interface.h"
 #include "UseTheForce/DarkSide/electrostatic_interface.h"
 #include "UseTheForce/notifyCutoffs_interface.h"
@@ -945,8 +945,8 @@ namespace oopse {
       }
     }
     
-    if (simParams_->haveScreeningMethod()) {
-      std::string myScreen = simParams_->getScreeningMethod();
+    if (simParams_->haveElectrostaticScreeningMethod()) {
+      std::string myScreen = simParams_->getElectrostaticScreeningMethod();
       toUpper(myScreen);
       if (myScreen == "UNDAMPED") {
 	sm = UNDAMPED;
@@ -959,16 +959,17 @@ namespace oopse {
 		     "SimInfo warning: dampingAlpha was not specified in the input file. A default value of %f (1/ang) will be used.", alphaVal);
 	    painCave.isFatal = 0;
 	    simError();
-	  } else {
-	    // throw error        
-	    sprintf( painCave.errMsg,
-		     "SimInfo error: Unknown electrostaticSummationMethod. (Input file specified %s .)\n\telectrostaticSummationMethod must be one of: \"undamped\" or \"damped\".", myScreen.c_str() );
-	    painCave.isFatal = 1;
-	    simError();
 	  }
+	} else {
+	  // throw error        
+	  sprintf( painCave.errMsg,
+		   "SimInfo error: Unknown electrostaticScreeningMethod. (Input file specified %s .)\n\telectrostaticScreeningMethod must be one of: \"undamped\" or \"damped\".", myScreen.c_str() );
+	  painCave.isFatal = 1;
+	  simError();
 	}
       }
     }
+    
     // let's pass some summation method variables to fortran
     setElectrostaticSummationMethod( &esm );
     setScreeningMethod( &sm );

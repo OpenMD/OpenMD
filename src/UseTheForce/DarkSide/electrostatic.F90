@@ -58,7 +58,7 @@ module electrostatic_module
 #define __FORTRAN90
 #include "UseTheForce/DarkSide/fInteractionMap.h"
 #include "UseTheForce/DarkSide/fElectrostaticSummationMethod.h"
-#include "UseTheForce/DarkSide/fScreeningMethod.h"
+#include "UseTheForce/DarkSide/fElectrostaticScreeningMethod.h"
 
 
   !! these prefactors convert the multipole interactions into kcal / mol
@@ -84,10 +84,10 @@ module electrostatic_module
   real(kind=DP), save :: defaultCutoff2 = 0.0_DP
   logical, save :: haveDefaultCutoff = .false.
   real(kind=DP), save :: dampingAlpha = 0.0_DP
+  real(kind=DP), save :: alpha2 = 0.0_DP
   logical, save :: haveDampingAlpha = .false.
   real(kind=DP), save :: dielectric = 1.0_DP
   logical, save :: haveDielectric = .false.
-  real(kind=DP), save :: constERFC = 0.0_DP
   real(kind=DP), save :: constEXP = 0.0_DP
   real(kind=dp), save :: rcuti = 0.0_DP
   real(kind=dp), save :: rcuti2 = 0.0_DP
@@ -100,7 +100,13 @@ module electrostatic_module
   real(kind=dp), save :: rrfsq = 1.0_DP
   real(kind=dp), save :: preRF = 0.0_DP
   real(kind=dp), save :: preRF2 = 0.0_DP
- 
+  real(kind=dp), save :: f0 = 1.0_DP
+  real(kind=dp), save :: f1 = 1.0_DP
+  real(kind=dp), save :: f2 = 0.0_DP
+  real(kind=dp), save :: f0c = 1.0_DP
+  real(kind=dp), save :: f1c = 1.0_DP
+  real(kind=dp), save :: f2c = 0.0_DP
+
 #ifdef __IFC
 ! error function for ifc version > 7.
   double precision, external :: derfc
@@ -168,6 +174,7 @@ contains
   subroutine setDampingAlpha(thisAlpha)
     real(kind=dp), intent(in) :: thisAlpha
     dampingAlpha = thisAlpha
+    alpha2 = dampingAlpha*dampingAlpha
     haveDampingAlpha = .true.
   end subroutine setDampingAlpha
   
@@ -407,11 +414,13 @@ contains
           call handleError("checkSummationMethod", "no Default Cutoff set!")
        endif
 
-       constEXP = exp(-dampingAlpha*dampingAlpha*defaultCutoff*defaultCutoff)
-       constERFC = derfc(dampingAlpha*defaultCutoff)
+       constEXP = exp(-alpha2*defaultCutoff*defaultCutoff)
        invRootPi = 0.56418958354775628695d0
-       alphaPi = 2*dampingAlpha*invRootPi
-       
+       alphaPi = 2.0d0*dampingAlpha*invRootPi
+       f0c = derfc(dampingAlpha*defaultCutoff)
+       f1c = alphaPi*defaultCutoff*constEXP + f0c
+       f2c = alphaPi*2.0d0*alpha2*constEXP*rcuti2
+
     endif
 
     if (summationMethod .eq. REACTION_FIELD) then
@@ -470,7 +479,7 @@ contains
     real (kind=dp) :: xhat, yhat, zhat
     real (kind=dp) :: dudx, dudy, dudz
     real (kind=dp) :: scale, sc2, bigR
-    real (kind=dp) :: varERFC, varEXP
+    real (kind=dp) :: varEXP
     real (kind=dp) :: limScale
     real (kind=dp) :: preVal, rfVal
 
@@ -639,61 +648,40 @@ contains
        if (j_is_Charge) then
 
           if (summationMethod .eq. SHIFTED_POTENTIAL) then
+             if (screeningMethod .eq. DAMPED) then
+                f0 = derfc(dampingAlpha*rij)
+                varEXP = exp(-alpha2*rij*rij)
+                f1 = alphaPi*rij*varEXP + f0c
+             endif
 
-             vterm = pre11 * q_i * q_j * (riji - rcuti)
+             vterm = pre11 * q_i * q_j * (riji*f0 - rcuti*f0c)
              vpair = vpair + vterm
              epot = epot + sw*vterm
              
-             dudr  = -sw*pre11*q_i*q_j * (riji*riji)
+             dudr  = -sw*pre11*q_i*q_j * riji * riji * f1
              
              dudx = dudx + dudr * xhat
              dudy = dudy + dudr * yhat
              dudz = dudz + dudr * zhat
 
-!!$          elseif (summationMethod .eq. DAMPED_WOLF) then
-!!$             varERFC = derfc(dampingAlpha*rij)
-!!$             varEXP = exp(-dampingAlpha*dampingAlpha*rij*rij)
-!!$             vterm = pre11 * q_i * q_j * (varERFC*riji - constERFC*rcuti)
-!!$             vpair = vpair + vterm
-!!$             epot = epot + sw*vterm
-!!$             
-!!$!             dudr  = -sw*pre11*q_i*q_j * (((varERFC*riji*riji &
-!!$!                  + alphaPi*varEXP*riji) - (constERFC*rcuti2 &
-!!$!                  + alphaPi*constEXP*rcuti)) )
-!!$             dudr  = -sw*pre11*q_i*q_j * (varERFC*riji*riji &
-!!$                  + alphaPi*varEXP*riji) 
-!!$             
-!!$             dudx = dudx + dudr * xhat
-!!$             dudy = dudy + dudr * yhat
-!!$             dudz = dudz + dudr * zhat
-
           elseif (summationMethod .eq. SHIFTED_FORCE) then
-             vterm = pre11 * q_i * q_j * (riji + rij*rcuti2 - 2.0d0*rcuti)
+             if (screeningMethod .eq. DAMPED) then
+                f0 = derfc(dampingAlpha*rij)
+                varEXP = exp(-alpha2*rij*rij)
+                f1 = alphaPi*rij*varEXP + f0
+             endif
+             
+             vterm = pre11 * q_i * q_j * ( riji*f0 - rcuti*f0c + &
+                  f1c*rcuti2*(rij-defaultCutoff) )
+             
              vpair = vpair + vterm
              epot = epot + sw*vterm
              
-             dudr  = -sw*pre11*q_i*q_j * (riji*riji-rcuti2)
+             dudr  = -sw*pre11*q_i*q_j * (riji*riji*f1 - rcuti2*f1c)
                           
              dudx = dudx + dudr * xhat
              dudy = dudy + dudr * yhat
              dudz = dudz + dudr * zhat
-
-!!$          elseif (summationMethod .eq. DAMPED_SHIFTED_FORCE) then
-!!$             varERFC = derfc(dampingAlpha*rij)
-!!$             varEXP = exp(-dampingAlpha*dampingAlpha*rij*rij)
-!!$             vterm = pre11 * q_i * q_j * (varERFC*riji - constERFC*rcuti)
-!!$             vpair = vpair + vterm
-!!$             epot = epot + sw*vterm
-!!$             
-!!$!             dudr  = -sw*pre11*q_i*q_j * (((varERFC*riji*riji &
-!!$!                  + alphaPi*varEXP*riji) - (constERFC*rcuti2 &
-!!$!                  + alphaPi*constEXP*rcuti)) )
-!!$             dudr  = -sw*pre11*q_i*q_j * (varERFC*riji*riji &
-!!$                  + alphaPi*varEXP*riji) 
-!!$             
-!!$             dudx = dudx + dudr * xhat
-!!$             dudy = dudy + dudr * yhat
-!!$             dudz = dudz + dudr * zhat
 
           elseif (summationMethod .eq. REACTION_FIELD) then
              preVal = pre11 * q_i * q_j
@@ -1028,33 +1016,6 @@ contains
 !!$             duduz_j(3) = duduz_j(3) + sw*pref*(ri3*(uz_i(3)-3.0d0*ct_i*zhat) &
 !!$                  - rcuti3*(uz_i(3) - 3.0d0*ct_i*zhat))
 !!$          
-!!$          elseif (summationMethod .eq. DAMPED_WOLF) then
-!!$             ct_ij = uz_i(1)*uz_j(1) + uz_i(2)*uz_j(2) + uz_i(3)*uz_j(3)
-!!$             
-!!$             ri2 = riji * riji
-!!$             ri3 = ri2 * riji
-!!$             ri4 = ri2 * ri2
-!!$             sc2 = scale * scale
-!!$             
-!!$             pref = pre22 * mu_i * mu_j
-!!$             vterm = pref * ri3 * (ct_ij - 3.0d0 * ct_i * ct_j)
-!!$             vpair = vpair + vterm
-!!$             epot = epot + sw*vterm
-!!$             
-!!$             a1 = 5.0d0 * ct_i * ct_j * sc2 - ct_ij
-!!$             
-!!$             dudx = dudx + sw*pref*3.0d0*ri4*(a1*xhat-ct_i*uz_j(1)-ct_j*uz_i(1))
-!!$             dudy = dudy + sw*pref*3.0d0*ri4*(a1*yhat-ct_i*uz_j(2)-ct_j*uz_i(2))
-!!$             dudz = dudz + sw*pref*3.0d0*ri4*(a1*zhat-ct_i*uz_j(3)-ct_j*uz_i(3))
-!!$             
-!!$             duduz_i(1) = duduz_i(1) + sw*pref*ri3 *(uz_j(1) - 3.0d0*ct_j*xhat)
-!!$             duduz_i(2) = duduz_i(2) + sw*pref*ri3 *(uz_j(2) - 3.0d0*ct_j*yhat)
-!!$             duduz_i(3) = duduz_i(3) + sw*pref*ri3 *(uz_j(3) - 3.0d0*ct_j*zhat)
-!!$             
-!!$             duduz_j(1) = duduz_j(1) + sw*pref*ri3 *(uz_i(1) - 3.0d0*ct_i*xhat)
-!!$             duduz_j(2) = duduz_j(2) + sw*pref*ri3 *(uz_i(2) - 3.0d0*ct_i*yhat)
-!!$             duduz_j(3) = duduz_j(3) + sw*pref*ri3 *(uz_i(3) - 3.0d0*ct_i*zhat)
-!!$             
 !!$          elseif (summationMethod .eq. REACTION_FIELD) then
           if (summationMethod .eq. REACTION_FIELD) then
              ct_ij = uz_i(1)*uz_j(1) + uz_i(2)*uz_j(2) + uz_i(3)*uz_j(3)
@@ -1407,21 +1368,20 @@ contains
           
        endif
 
-!!$    elseif (summationMethod .eq. UNDAMPED_WOLF) then
+!!$    elseif (summationMethod .eq. SHIFTED_FORCE) then
 !!$       if (ElectrostaticMap(atid1)%is_Charge) then
 !!$          c1 = getCharge(atid1)
 !!$          
-!!$          mypot = mypot - (rcuti * 0.5_dp * c1 * c1)
+!!$          if (screeningMethod .eq. DAMPED) then
+!!$             mypot = mypot - (f0c * rcuti * 0.5_dp + &
+!!$                  dampingAlpha*invRootPi) * c1 * c1    
+!!$             
+!!$          else             
+!!$             mypot = mypot - (rcuti * 0.5_dp * c1 * c1)
+!!$             
+!!$          endif
 !!$       endif
-!!$       
-!!$    elseif (summationMethod .eq. DAMPED_WOLF) then
-!!$       if (ElectrostaticMap(atid1)%is_Charge) then
-!!$          c1 = getCharge(atid1)
-!!$          
-!!$          mypot = mypot - (constERFC * rcuti * 0.5_dp + &
-!!$               dampingAlpha*invRootPi) * c1 * c1      
-!!$       endif
-    endif
+!!$    endif
     
     return
   end subroutine self_self
