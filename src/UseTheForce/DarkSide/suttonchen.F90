@@ -66,7 +66,7 @@ module suttonchen
   logical, save,:: haveMixingMap = .false.
 
   character(len = statusMsgSize) :: errMesg
-  integer :: eam_err
+  integer :: sc_err
 
   character(len = 200) :: errMsg
   character(len=*), parameter :: RoutineName =  "Sutton-Chen MODULE"
@@ -174,7 +174,7 @@ contains
 
 
     ! check to see if this is the first time into 
-    if (.not.associated(EAMList%EAMParams)) then
+    if (.not.associated(SCTypeList%EAMParams)) then
        call getMatchingElementList(atypes, "is_SuttonChen", .true., nSCtypes, MatchList)
        SCTypeList%nSCtypes = nSCtypes
        allocate(SCTypeList%SCTypes(nSCTypes))
@@ -215,8 +215,8 @@ contains
     integer :: eamID
     real(kind=dp) :: cutValue
     
-    eamID = EAMList%atidToEAMType(atomID)
-    cutValue = EAMList%EAMParams(eamID)%eam_rcut
+    eamID = SCTypeList%atidToEAMType(atomID)
+    cutValue = SCTypeList%EAMParams(eamID)%eam_rcut
   end function getSCCut
 
 
@@ -432,7 +432,7 @@ contains
 
     ! we don't use the derivatives, dummy variables
     real( kind = dp) :: drho,d2rho
-    integer :: eam_err
+    integer :: sc_err
     
     integer :: atid1,atid2 ! Global atid    
     integer :: myid_atom1 ! EAM atid
@@ -469,12 +469,10 @@ contains
        rho(atom1) = rho(atom1) + rho_j_at_i
 #endif
 
-
-
   end subroutine calc_sc_prepair_rho
 
 
-!! Calculate the functional F(rho) for all local atoms
+!! Calculate the rho_a for all local atoms
   subroutine calc_eam_preforce_Frho(nlocal,pot)
     integer :: nlocal
     real(kind=dp) :: pot
@@ -489,13 +487,13 @@ contains
     cleanme = .true.
     !! Scatter the electron density from  pre-pair calculation back to local atoms
 #ifdef IS_MPI
-    call scatter(rho_row,rho,plan_atom_row,eam_err)
-    if (eam_err /= 0 ) then
+    call scatter(rho_row,rho,plan_atom_row,sc_err)
+    if (sc_err /= 0 ) then
        write(errMsg,*) " Error scattering rho_row into rho"
        call handleError(RoutineName,errMesg)
     endif
-    call scatter(rho_col,rho_tmp,plan_atom_col,eam_err)
-    if (eam_err /= 0 ) then
+    call scatter(rho_col,rho_tmp,plan_atom_col,sc_err)
+    if (sc_err /= 0 ) then
        write(errMsg,*) " Error scattering rho_col into rho"
        call handleError(RoutineName,errMesg)
 
@@ -518,20 +516,20 @@ contains
 
     #ifdef IS_MPI
     !! communicate f(rho) and derivatives back into row and column arrays
-    call gather(frho,frho_row,plan_atom_row, eam_err)
-    if (eam_err /=  0) then
+    call gather(frho,frho_row,plan_atom_row, sc_err)
+    if (sc_err /=  0) then
        call handleError("cal_eam_forces()","MPI gather frho_row failure")
     endif
-    call gather(dfrhodrho,dfrhodrho_row,plan_atom_row, eam_err)
-    if (eam_err /=  0) then
+    call gather(dfrhodrho,dfrhodrho_row,plan_atom_row, sc_err)
+    if (sc_err /=  0) then
        call handleError("cal_eam_forces()","MPI gather dfrhodrho_row failure")
     endif
-    call gather(frho,frho_col,plan_atom_col, eam_err)
-    if (eam_err /=  0) then
+    call gather(frho,frho_col,plan_atom_col, sc_err)
+    if (sc_err /=  0) then
        call handleError("cal_eam_forces()","MPI gather frho_col failure")
     endif
-    call gather(dfrhodrho,dfrhodrho_col,plan_atom_col, eam_err)
-    if (eam_err /=  0) then
+    call gather(dfrhodrho,dfrhodrho_col,plan_atom_col, sc_err)
+    if (sc_err /=  0) then
        call handleError("cal_eam_forces()","MPI gather dfrhodrho_col failure")
     endif
 
@@ -564,7 +562,7 @@ contains
     real( kind = dp ) :: rha,drha,d2rha, dpha
     real( kind = dp ) :: rhb,drhb,d2rhb, dphb
     real( kind = dp ) :: dudr
-    real( kind = dp ) :: rci,rcj
+    real( kind = dp ) :: rcij
     real( kind = dp ) :: drhoidr,drhojdr
     real( kind = dp ) :: d2rhoidrdr
     real( kind = dp ) :: d2rhojdrdr
@@ -583,7 +581,6 @@ contains
     dvpdr = 0.0E0_DP
     d2vpdrdr = 0.0E0_DP
 
-    if (rij .lt. EAM_rcut) then
 
 #ifdef IS_MPI
        atid1 = atid_row(atom1)
@@ -593,85 +590,43 @@ contains
        atid2 = atid(atom2)
 #endif
 
-       mytype_atom1 = EAMList%atidToEAMType(atid1)
-       mytype_atom2 = EAMList%atidTOEAMType(atid2)
-
-
-       ! get cutoff for atom 1
-       rci = EAMList%EAMParams(mytype_atom1)%eam_rcut
-       ! get type specific cutoff for atom 2
-       rcj = EAMList%EAMParams(mytype_atom2)%eam_rcut
+       mytype_atom1 = SCTypeList%atidToSCType(atid1)
+       mytype_atom2 = SCTypeList%atidTOSCType(atid2)
 
        drdx = d(1)/rij
        drdy = d(2)/rij
        drdz = d(3)/rij
 
-       if (rij.lt.rci) then
-          call eam_splint(EAMList%EAMParams(mytype_atom1)%eam_nr, &
-               EAMList%EAMParams(mytype_atom1)%eam_rvals, &
-               EAMList%EAMParams(mytype_atom1)%eam_rho_r, &
-               EAMList%EAMParams(mytype_atom1)%eam_rho_r_pp, &
-               rij, rha,drha,d2rha)
-          !! Calculate Phi(r) for atom1.
-          call eam_splint(EAMList%EAMParams(mytype_atom1)%eam_nr, &
-               EAMList%EAMParams(mytype_atom1)%eam_rvals, &
-               EAMList%EAMParams(mytype_atom1)%eam_phi_r, &
-               EAMList%EAMParams(mytype_atom1)%eam_phi_r_pp, &
-               rij, pha,dpha,d2pha)
-       endif
+                 
+       epsilonij = MixingMap(mytype_atom1,mytype_atom2)%epsilon
+       aij       = MixingMap(mytype_atom1,mytype_atom2)%alpha
+       nij       = MixingMap(mytype_atom1,mytype_atom2)%n
+       mij       = MixingMap(mytype_atom1,mytype_atom2)%m
+       vcij      = MixingMap(mytype_atom1,mytype_atom2)%vpair_pot               
 
-       if (rij.lt.rcj) then      
-          ! Calculate rho,drho and d2rho for atom1
-          call eam_splint(EAMList%EAMParams(mytype_atom2)%eam_nr, &
-               EAMList%EAMParams(mytype_atom2)%eam_rvals, &
-               EAMList%EAMParams(mytype_atom2)%eam_rho_r, &
-               EAMList%EAMParams(mytype_atom2)%eam_rho_r_pp, &
-               rij, rhb,drhb,d2rhb)
+       vptmp = dij*((aij/r)**nij)
 
-          !! Calculate Phi(r) for atom2.
-          call eam_splint(EAMList%EAMParams(mytype_atom2)%eam_nr, &
-               EAMList%EAMParams(mytype_atom2)%eam_rvals, &
-               EAMList%EAMParams(mytype_atom2)%eam_phi_r, &
-               EAMList%EAMParams(mytype_atom2)%eam_phi_r_pp, &
-               rij, phb,dphb,d2phb)
-       endif
 
-       if (rij.lt.rci) then 
-          phab = phab + 0.5E0_DP*(rhb/rha)*pha
-          dvpdr = dvpdr + 0.5E0_DP*((rhb/rha)*dpha + &
-               pha*((drhb/rha) - (rhb*drha/rha/rha)))
-          d2vpdrdr = d2vpdrdr + 0.5E0_DP*((rhb/rha)*d2pha + &
-               2.0E0_DP*dpha*((drhb/rha) - (rhb*drha/rha/rha)) + &
-               pha*((d2rhb/rha) - 2.0E0_DP*(drhb*drha/rha/rha) + &
-               (2.0E0_DP*rhb*drha*drha/rha/rha/rha) - (rhb*d2rha/rha/rha)))
-       endif
-
-       if (rij.lt.rcj) then
-          phab = phab + 0.5E0_DP*(rha/rhb)*phb
-          dvpdr = dvpdr + 0.5E0_DP*((rha/rhb)*dphb + &
-               phb*((drha/rhb) - (rha*drhb/rhb/rhb)))
-          d2vpdrdr = d2vpdrdr + 0.5E0_DP*((rha/rhb)*d2phb + &
-               2.0E0_DP*dphb*((drha/rhb) - (rha*drhb/rhb/rhb)) + &
-               phb*((d2rha/rhb) - 2.0E0_DP*(drha*drhb/rhb/rhb) + &
-               (2.0E0_DP*rha*drhb*drhb/rhb/rhb/rhb) - (rha*d2rhb/rhb/rhb)))
-       endif
-
-       drhoidr = drha
-       drhojdr = drhb
-
-       d2rhoidrdr = d2rha
-       d2rhojdrdr = d2rhb
-
+       dvpdr = -nij*vptmp/r
+       d2vpdrdr = -dvpdr*(nij+1.0d0)/r
+       
+       drhodr = -mij*((aij/r)**mij)/r
+       d2rhodrdr = -drhodr*(mij+1.0d0)/r
+       
+       dudr = drhodr*(dfrhodrho(i)+dfrhodrho(j)) &
+            + dvpdr
+ 
+ 
 
 #ifdef IS_MPI
-       dudr = drhojdr*dfrhodrho_row(atom1)+drhoidr*dfrhodrho_col(atom2) &
+       dudr = drhodr*(dfrhodrho_row(atom1)+dfrhodrho_col(atom2)) &
             + dvpdr
 
 #else
-       dudr = drhojdr*dfrhodrho(atom1)+drhoidr*dfrhodrho(atom2) &
+       dudr = drhodr*(dfrhodrho(atom1)+dfrhodrho(atom2)) &
             + dvpdr
-       ! write(*,*) "Atom1,Atom2, dfrhodrho(atom1) dfrhodrho(atom2): ", atom1,atom2,dfrhodrho(atom1),dfrhodrho(atom2)
 #endif
+
 
        fx = dudr * drdx
        fy = dudr * drdy
