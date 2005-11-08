@@ -529,12 +529,12 @@ namespace oopse {
     //usePBC and useRF are from simParams
     int usePBC = simParams_->getUsePeriodicBoundaryConditions();
     int useRF;
-    int useDW;
+    int useSF;
     std::string myMethod;
 
     // set the useRF logical
     useRF = 0;
-    useDW = 0;
+    useSF = 0;
 
 
     if (simParams_->haveElectrostaticSummationMethod()) {
@@ -543,8 +543,8 @@ namespace oopse {
       if (myMethod == "REACTION_FIELD") {
         useRF=1;
       } else {
-	if (myMethod == "SHIFTED_POTENTIAL") {
-	  useDW = 1;
+	if (myMethod == "SHIFTED_FORCE") {
+	  useSF = 1;
 	}
       }
     }
@@ -613,8 +613,8 @@ namespace oopse {
     temp = useRF;
     MPI_Allreduce(&temp, &useRF, 1, MPI_INT, MPI_LOR, MPI_COMM_WORLD);    
 
-    temp = useDW;
-    MPI_Allreduce(&temp, &useDW, 1, MPI_INT, MPI_LOR, MPI_COMM_WORLD);    
+    temp = useSF;
+    MPI_Allreduce(&temp, &useSF, 1, MPI_INT, MPI_LOR, MPI_COMM_WORLD);    
 
 #endif
 
@@ -631,7 +631,7 @@ namespace oopse {
     fInfo_.SIM_uses_Shapes = useShape;
     fInfo_.SIM_uses_FLARB = useFLARB;
     fInfo_.SIM_uses_RF = useRF;
-    fInfo_.SIM_uses_DampedWolf = useDW;
+    fInfo_.SIM_uses_SF = useSF;
 
     if( myMethod == "REACTION_FIELD") {
       
