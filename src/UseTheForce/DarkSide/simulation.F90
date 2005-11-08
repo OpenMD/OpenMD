@@ -109,7 +109,7 @@ module simulation
   public :: SimUsesShapes
   public :: SimUsesFLARB
   public :: SimUsesRF
-  public :: SimUsesDampedWolf
+  public :: SimUsesSF
   public :: SimRequiresPrepairCalc
   public :: SimRequiresPostpairCalc
   public :: SimHasAtype
@@ -561,10 +561,10 @@ contains
           doesit = thisSim%SIM_uses_RF
         end function SimUsesRF
 
-        function SimUsesDampedWolf() result(doesit)
+        function SimUsesSF() result(doesit)
           logical :: doesit
-          doesit = thisSim%SIM_uses_DampedWolf
-        end function SimUsesDampedWolf
+          doesit = thisSim%SIM_uses_SF
+        end function SimUsesSF
 
         function SimRequiresPrepairCalc() result(doesit)
           logical :: doesit
@@ -573,7 +573,7 @@ contains
         
         function SimRequiresPostpairCalc() result(doesit)
           logical :: doesit
-          doesit = thisSim%SIM_uses_RF .or. thisSim%SIM_uses_DampedWolf
+          doesit = thisSim%SIM_uses_RF .or. thisSim%SIM_uses_SF
         end function SimRequiresPostpairCalc
 
         ! Function returns true if the simulation has this atype
