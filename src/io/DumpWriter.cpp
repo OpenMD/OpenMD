@@ -57,6 +57,7 @@ namespace oopse {
 
     Globals* simParams = info->getSimParams();
     needCompression_ = simParams->getCompressDumpFile();
+    needForceVector_ = simParams->getDumpForceVector();
 
 #ifdef HAVE_LIBZ
     if (needCompression_) {
@@ -99,6 +100,7 @@ namespace oopse {
     eorFilename_ = filename_.substr(0, filename_.rfind(".")) + ".eor";    
 
     needCompression_ = simParams->getCompressDumpFile();
+    needForceVector_ = simParams->getDumpForceVector();
 
 #ifdef HAVE_LIBZ
     if (needCompression_) {
@@ -191,6 +193,8 @@ namespace oopse {
     Vector3d ji;
     Vector3d pos;
     Vector3d vel;
+    Vector3d frc;
+    Vector3d trq;
 
     Molecule* mol;
     StuntDouble* integrableObject;
@@ -227,14 +231,25 @@ namespace oopse {
 	  q = integrableObject->getQ();
 	  ji = integrableObject->getJ();
 
-	  sprintf(tempBuffer, "%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\n", 
+	  sprintf(tempBuffer, "%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf", 
 		  q[0], q[1], q[2], q[3],
 		  ji[0], ji[1], ji[2]);
 	  strcat(writeLine, tempBuffer);
 	} else {
-	  strcat(writeLine, "0.0\t0.0\t0.0\t0.0\t0.0\t0.0\t0.0\n");
+	  strcat(writeLine, "0.0\t0.0\t0.0\t0.0\t0.0\t0.0\t0.0");
 	}
 
+	if (needForceVector_) {
+	  frc = integrableObject->getFrc();
+	  trq = integrableObject->getTrq();
+	  
+	  sprintf(tempBuffer, "\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf", 
+		  frc[0], frc[1], frc[2],
+		  trq[0], trq[1], trq[2]);
+	  strcat(writeLine, tempBuffer);
+	}
+	
+	strcat(writeLine, "\n");
 	os << writeLine;
 
       }
@@ -284,7 +299,7 @@ namespace oopse {
     int myPotato;
     int nProc;
     int which_node;
-    double atomData[13];
+    double atomData[19];
     int isDirectional;
     char MPIatomTypeString[MINIBUFFERSIZE];
     int msgLen; // the length of message actually recieved at master nodes
@@ -359,13 +374,13 @@ namespace oopse {
 
 	    myPotato++;
 
-	    MPI_Recv(atomData, 13, MPI_DOUBLE, which_node, myPotato,
+	    MPI_Recv(atomData, 19, MPI_DOUBLE, which_node, myPotato,
 		     MPI_COMM_WORLD, &istatus);
 	    myPotato++;
 
 	    MPI_Get_count(&istatus, MPI_DOUBLE, &msgLen);
 
-	    if (msgLen == 13)
+	    if (msgLen == 13 || msgLen == 19)
 	      isDirectional = 1;
 	    else
 	      isDirectional = 0;
@@ -380,10 +395,10 @@ namespace oopse {
 		      atomData[5]);
 
 	      strcat(writeLine,
-		     "0.0\t0.0\t0.0\t0.0\t0.0\t0.0\t0.0\n");
+		     "0.0\t0.0\t0.0\t0.0\t0.0\t0.0\t0.0");
 	    } else {
 	      sprintf(writeLine,
-		      "%s\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\n",
+		      "%s\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf",
 		      MPIatomTypeString,
 		      atomData[0],
 		      atomData[1],
@@ -399,7 +414,28 @@ namespace oopse {
 		      atomData[11],
 		      atomData[12]);
 	    }
+	    
+	    if (needForceVector_) {
+	      if (!isDirectional) {
+		sprintf(writeLine, "\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf",
+			atomData[6], 
+			atomData[7], 
+			atomData[8],
+			atomData[9],
+			atomData[10],
+			atomData[11]);
+	      } else {
+		sprintf(writeLine, "\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf",
+			atomData[13], 
+			atomData[14], 
+			atomData[15],
+			atomData[16],
+			atomData[17],
+			atomData[18]);
+	      }
+	    }
 
+	    sprintf(writeLine, "\n");
 	    os << writeLine;
 
 	  } // end for(int l =0)
@@ -451,6 +487,27 @@ namespace oopse {
 	      atomData[12] = ji[2];
 	    }
 
+	    if (needForceVector_) {
+	      frc = integrableObject->getFrc();
+	      trq = integrableObject->getTrq();
+
+	      if (!isDirectional) {
+		atomData[6] = frc[0];
+		atomData[7] = frc[1];
+		atomData[8] = frc[2];
+		atomData[9] = trq[0];
+		atomData[10] = trq[1];
+		atomData[11] = trq[2];
+	      } else {
+		atomData[13] = frc[0];
+		atomData[14] = frc[1];
+		atomData[15] = frc[2];
+		atomData[16] = trq[0];
+		atomData[17] = trq[1];
+		atomData[18] = trq[2];
+	      }
+	    }
+
 	    // If we've survived to here, format the line:
 
 	    if (!isDirectional) {
@@ -461,10 +518,10 @@ namespace oopse {
 		      atomData[5]);
 
 	      strcat(writeLine,
-		     "0.0\t0.0\t0.0\t0.0\t0.0\t0.0\t0.0\n");
+		     "0.0\t0.0\t0.0\t0.0\t0.0\t0.0\t0.0");
 	    } else {
 	      sprintf(writeLine,
-		      "%s\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\n",
+		      "%s\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf",
 		      integrableObject->getType().c_str(),
 		      atomData[0],
 		      atomData[1],
@@ -481,7 +538,27 @@ namespace oopse {
 		      atomData[12]);
 	    }
 
+	    if (needForceVector_) {
+	      if (!isDirectional) {
+	      sprintf(writeLine, "\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf",
+		      atomData[6],
+		      atomData[7], 
+		      atomData[8],
+		      atomData[9],
+		      atomData[10],
+		      atomData[11]);
+	      } else {
+		sprintf(writeLine, "\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf",
+			atomData[13],
+			atomData[14], 
+			atomData[15],
+			atomData[16],
+			atomData[17],
+			atomData[18]);
+	      }
+	    }
 
+	    sprintf(writeLine, "\n");
 	    os << writeLine;
 
 	  } //end for(iter = integrableObject.begin())
@@ -567,6 +644,29 @@ namespace oopse {
 	      atomData[12] = ji[2];
 	    }
 
+	    if (needForceVector_) {
+	      frc = integrableObject->getFrc();
+	      trq = integrableObject->getTrq();
+	      
+	      if (!isDirectional) {
+		atomData[6] = frc[0];
+		atomData[7] = frc[1];
+		atomData[8] = frc[2];
+		
+		atomData[9] = trq[0];
+		atomData[10] = trq[1];
+		atomData[11] = trq[2];
+	      } else {
+		atomData[13] = frc[0];
+		atomData[14] = frc[1];
+		atomData[15] = frc[2];
+		
+		atomData[16] = trq[0];
+		atomData[17] = trq[1];
+		atomData[18] = trq[2];
+	      }
+	    }
+
 	    strncpy(MPIatomTypeString, integrableObject->getType().c_str(), MINIBUFFERSIZE);
 
 	    // null terminate the  std::string before sending (just in case):
@@ -577,8 +677,14 @@ namespace oopse {
 
 	    myPotato++;
 
-	    if (isDirectional) {
+	    if (isDirectional && needForceVector_) {
+	      MPI_Send(atomData, 19, MPI_DOUBLE, 0, myPotato,
+		       MPI_COMM_WORLD);
+	    } else if (isDirectional) {
 	      MPI_Send(atomData, 13, MPI_DOUBLE, 0, myPotato,
+		       MPI_COMM_WORLD);
+	    } else if (needForceVector_) {
+	      MPI_Send(atomData, 12, MPI_DOUBLE, 0, myPotato,
 		       MPI_COMM_WORLD);
 	    } else {
 	      MPI_Send(atomData, 6, MPI_DOUBLE, 0, myPotato,

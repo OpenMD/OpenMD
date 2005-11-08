@@ -89,6 +89,7 @@ namespace oopse {
     std::ostream* dumpFile_;
     std::string eorFilename_;
     bool needCompression_;
+    bool needForceVector_;
   };
 
 }

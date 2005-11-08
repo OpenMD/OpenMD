@@ -243,6 +243,7 @@ class Globals {
   DeclareParameter(DampingAlpha, double);
   DeclareParameter(CutoffPolicy, std::string);
   DeclareParameter(CompressDumpFile, bool);
+  DeclareParameter(DumpForceVector, bool);
   DeclareParameter(SkinThickness, double);
   DeclareParameter(StatFileFormat, std::string);    
 
