@@ -13,7 +13,7 @@ forceField = "DUFF";
 electrostaticSummationMethod = "shifted_force";
 electrostaticScreeningMethod = "damped";
 dielectric = 80.0;
-dampingAlpha = 0.2;
+dampingAlpha = 0.12;
 cutoffRadius = 9.0;
 switchingRadius = 7.7;
 
@@ -32,3 +32,4 @@ useInitialExtendedSystemState = "false";
 //thermalTime = 10;
 sampleTime = 100;
 statusTime = 2;
+dumpForceVector = "true";
