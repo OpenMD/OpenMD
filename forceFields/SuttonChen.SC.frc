@@ -1,0 +1,32 @@
+// This is the forcefield file for the Sutton-Chen formulation of the Finnis-Sinclair metallic potential
+// See Rafii-Tabar and Chen Phil. Mag. Letters. 63(1991), 217-224 for alloy formulation for SC varient
+
+
+begin AtomTypes
+//Name        mass(amu)
+Ni	58.710
+Cu	63.550
+Rh	102.90550
+Pd	106.42
+Ag	107.8682
+Ir	192.217
+Pt	195.09
+Au	196.97
+Pb	207.2
+Al	26.981538
+end AtomTypes
+
+
+begin SCAtomTypes
+// Name  epsilon(eV)      c      m       n      alpha(angstroms)
+Ni	0.0015714	39.755	6.0	9.0	3.52 
+Cu	0.0012386	39.755	6.0	9.0	3.61
+Rh	0.00049371	145.658	6.0	12.0	3.80
+Pd	0.00041790	108.526	7.0	12.0	3.89
+Ag	0.00025415	145.658	6.0	12.0	4.09
+Ir	0.00024489	337.831	6.0	14.0	3.84	
+Pt	0.0019835	34.428	8.0	10.0	3.92
+Au	0.0012794	34.428	8.0	10.0	4.08
+Pb	0.00055772	45.882	7.0	10.0	4.95
+Al	0.0033307	16.460	6.0	7.0	4.05
+end SCAtomTypes
