@@ -55,9 +55,11 @@
 #include "UseTheForce/fCutoffPolicy.h"
 #include "UseTheForce/DarkSide/fElectrostaticSummationMethod.h"
 #include "UseTheForce/DarkSide/fElectrostaticScreeningMethod.h"
+#include "UseTheForce/DarkSide/fSwitchingFunctionType.h"
 #include "UseTheForce/doForces_interface.h"
 #include "UseTheForce/DarkSide/electrostatic_interface.h"
 #include "UseTheForce/notifyCutoffs_interface.h"
+#include "UseTheForce/DarkSide/switcheroo_interface.h"
 #include "utils/MemoryUtils.hpp"
 #include "utils/simError.h"
 #include "selection/SelectionManager.hpp"
@@ -472,6 +474,7 @@ namespace oopse {
     int isError = 0;
     
     setupElectrostaticSummationMethod( isError );
+    setupSwitchingFunction();
 
     if(isError){
       sprintf( painCave.errMsg,
@@ -976,6 +979,32 @@ namespace oopse {
     setDampingAlpha( &alphaVal );
     setReactionFieldDielectric( &dielectric );
     initFortranFF( &esm, &errorOut );
+  }
+
+  void SimInfo::setupSwitchingFunction() {    
+    int ft = CUBIC;
+
+    if (simParams_->haveSwitchingFunctionType()) {
+      std::string funcType = simParams_->getSwitchingFunctionType();
+      toUpper(funcType);
+      if (funcType == "CUBIC") {
+        ft = CUBIC;
+      } else {
+        if (funcType == "FIFTH_ORDER_POLYNOMIAL") {
+          ft = FIFTH_ORDER_POLY;
+	} else {
+	  // throw error        
+	  sprintf( painCave.errMsg,
+		   "SimInfo error: Unknown switchingFunctionType. (Input file specified %s .)\n\tswitchingFunctionType must be one of: \"cubic\" or \"fifth_order_polynomial\".", funcType.c_str() );
+	  painCave.isFatal = 1;
+	  simError();
+        }           
+      }
+    }
+
+    // send switching function notification to switcheroo
+    setFunctionType(&ft);
+
   }
 
   void SimInfo::addProperty(GenericData* genData) {

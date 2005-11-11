@@ -441,6 +441,9 @@ namespace oopse{
     /** Figure out which coulombic correction method to use and pass to fortran */
     void setupElectrostaticSummationMethod( int isError );
 
+    /** Figure out which polynomial type to use for the switching function */
+    void setupSwitchingFunction();
+
     /** Calculates the number of degress of freedom in the whole system */
     void calcNdf();
     void calcNdfRaw();

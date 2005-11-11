@@ -57,7 +57,7 @@ namespace oopse {
 
     Globals* simParams = info->getSimParams();
     needCompression_ = simParams->getCompressDumpFile();
-    needForceVector_ = simParams->getDumpForceVector();
+    needForceVector_ = simParams->getOutputForceVector();
 
 #ifdef HAVE_LIBZ
     if (needCompression_) {
@@ -100,7 +100,7 @@ namespace oopse {
     eorFilename_ = filename_.substr(0, filename_.rfind(".")) + ".eor";    
 
     needCompression_ = simParams->getCompressDumpFile();
-    needForceVector_ = simParams->getDumpForceVector();
+    needForceVector_ = simParams->getOutputForceVector();
 
 #ifdef HAVE_LIBZ
     if (needCompression_) {

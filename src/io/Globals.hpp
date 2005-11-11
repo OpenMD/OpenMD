@@ -242,8 +242,9 @@ class Globals {
   DeclareParameter(ElectrostaticScreeningMethod, std::string);
   DeclareParameter(DampingAlpha, double);
   DeclareParameter(CutoffPolicy, std::string);
+  DeclareParameter(SwitchingFunctionType, std::string);
   DeclareParameter(CompressDumpFile, bool);
-  DeclareParameter(DumpForceVector, bool);
+  DeclareParameter(OutputForceVector, bool);
   DeclareParameter(SkinThickness, double);
   DeclareParameter(StatFileFormat, std::string);    
 
