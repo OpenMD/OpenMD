@@ -8,6 +8,7 @@ Source    = \
 	atype_interface.F90 \
 	force_globals.F90 \
 	switcheroo.F90 \
+	switcheroo_interface.F90 \
 	simulation.F90 \
 	simulation_interface.F90 \
 	electrostatic.F90 \

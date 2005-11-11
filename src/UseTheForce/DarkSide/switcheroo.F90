@@ -48,16 +48,21 @@ module switcheroo
 
 #define __FORTRAN90
 #include "UseTheForce/fSwitchingFunction.h"
+#include "UseTheForce/DarkSide/fSwitchingFunctionType.h"
 
   real ( kind = dp ), dimension(NSWITCHTYPES) :: rin
   real ( kind = dp ), dimension(NSWITCHTYPES) :: rout
   real ( kind = dp ), dimension(NSWITCHTYPES) :: rin2
   real ( kind = dp ), dimension(NSWITCHTYPES) :: rout2
+  real ( kind = dp ), save :: c0, c1, c2, c3, c4, c5
 
   logical, dimension(NSWITCHTYPES) :: isOK
+  logical, save :: haveFunctionType = .false.
+  integer, save :: functionType = CUBIC
 
 
   public::set_switch
+  public::set_function_type
   public::get_switch
 
 contains
@@ -95,11 +100,27 @@ contains
 
   end subroutine set_switch
 
+  subroutine set_function_type(functionForm)
+    integer, intent(in) :: functionForm    
+    functionType = functionForm
+
+    if (functionType .eq. FIFTH_ORDER_POLY) then
+       c0 = 1.0d0
+       c1 = 0.0d0
+       c2 = 0.0d0
+       c3 = -10.0d0
+       c4 = 15.0d0
+       c5 = -6.0d0
+    endif
+  end subroutine set_function_type
+
   subroutine get_switch(r2, sw, dswdr, r, SwitchType, in_switching_region)
 
     real( kind = dp ), intent(in) :: r2
     real( kind = dp ), intent(inout) :: sw, dswdr, r
     real( kind = dp ) :: ron, roff
+    real( kind = dp ) :: rval, rval2, rval3, rval4, rval5
+    real( kind = dp ) :: rvaldi, rvaldi2, rvaldi3, rvaldi4, rvaldi5
     integer, intent(in)    :: SwitchType
     logical, intent(inout) :: in_switching_region
 
@@ -127,9 +148,28 @@ contains
           ron = rin(SwitchType)
           roff = rout(SwitchType)
 
-          sw = (roff + 2.0d0*r - 3.0d0*ron)*(roff-r)**2/ ((roff-ron)**3)
-          dswdr = 6.0d0*(r*r - r*ron - r*roff +roff*ron)/((roff-ron)**3)
+          if (functionType .eq. FIFTH_ORDER_POLY) then
+             rval = ( r - ron )
+             rval2 = rval*rval
+             rval3 = rval2*rval
+             rval4 = rval2*rval2
+             rval5 = rval3*rval2
+             rvaldi = 1.0d0/( roff - ron )
+             rvaldi2 = rvaldi*rvaldi
+             rvaldi3 = rvaldi2*rvaldi
+             rvaldi4 = rvaldi2*rvaldi2
+             rvaldi5 = rvaldi3*rvaldi2
+             sw = c0 + c1*rval*rvaldi + c2*rval2*rvaldi2 + c3*rval3*rvaldi3 &
+                  + c4*rval4*rvaldi4 + c5*rval5*rvaldi5
+             dswdr = c1*rvaldi + 2.0d0*c2*rval*rvaldi2 &
+                  + 3.0d0*c3*rval2*rvaldi3 + 4.0d0*c4*rval3*rvaldi4 &
+                  + 5.0d0*c5*rval4*rvaldi5
 
+          else
+             sw = (roff + 2.0d0*r - 3.0d0*ron)*(roff-r)**2/ ((roff-ron)**3)
+             dswdr = 6.0d0*(r*r - r*ron - r*roff +roff*ron)/((roff-ron)**3)
+
+          endif
           in_switching_region = .true.
           return          
        endif
@@ -138,4 +178,5 @@ contains
     endif
 
   end subroutine get_switch
+
 end module switcheroo
