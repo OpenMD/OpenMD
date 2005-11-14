@@ -44,7 +44,7 @@
  *
  *  Created by Charles F. Vardeman II on 11/10/05.
  *  @author  Charles F. Vardeman II 
- *  @version $Id: suttonchen_interface.h,v 1.1 2005-11-14 21:29:32 chuckv Exp $
+ *  @version $Id: suttonchen_interface.h,v 1.2 2005-11-14 22:20:35 chuckv Exp $
  *
  */
 #ifndef USETHEFORCE_DARKSIDE_SUTTONCHEN_INTERFACE_H
@@ -56,7 +56,7 @@
 
 #define newSCtype F90_FUNC(newsctype, NEWSCTYPE)
 #define useSCGeometricMixing F90_FUNC(usescgeometricmixing, USESCGEOMETRICMIXING)
-#define destroySCypes F90_FUNC(destroysctypes, DESTROYSCTYPES)
+#define destroySCTypes F90_FUNC(destroysctypes, DESTROYSCTYPES)
 
 extern "C"{
   void newSCtype( int* ident,
@@ -68,6 +68,6 @@ extern "C"{
                   int* status);
   
   void useSCGeometricMixing( );
-  void destroySCTypes( void );
+  void destroySCTypes( );
 }  
 #endif

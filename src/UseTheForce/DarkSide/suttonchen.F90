@@ -524,7 +524,7 @@ contains
        pot = pot + u
     enddo
 
-    #ifdef IS_MPI
+#ifdef IS_MPI
     !! communicate f(rho) and derivatives back into row and column arrays
     call gather(frho,frho_row,plan_atom_row, sc_err)
     if (sc_err /=  0) then
