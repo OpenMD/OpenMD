@@ -15,7 +15,7 @@ subroutine makeatype(atp, status)
   logical :: is_Charge, is_Dipole, is_Quadrupole
   logical :: is_Sticky, is_StickyPower, is_GayBerne, is_EAM
   logical :: is_Shape, is_FLARB
-  logical :: is_MEAM,is_SuttonChen
+  logical :: is_MEAM,is_SC
 
   ident = atp%ident
   is_Directional = (atp%is_Directional .ne. 0)
@@ -32,12 +32,12 @@ subroutine makeatype(atp, status)
   is_EAM = (atp%is_EAM .ne. 0)
   is_Shape = (atp%is_Shape .ne. 0)
   is_FLARB = (atp%is_FLARB .ne. 0)
-  is_SuttonChen = (atp%is_SuttonChen .ne. 0)
+  is_SC = (atp%is_SC .ne. 0)
   is_MEAM = (atp%is_MEAM .ne. 0)
 
   call new_atype(ident, is_Directional, is_LennardJones, is_Electrostatic, &
        is_Charge, is_Dipole, is_Quadrupole, is_Sticky, is_StickyPower, &
-       is_GayBerne, is_EAM, is_Shape, is_FLARB, is_SuttonChen, is_MEAM,status)
+       is_GayBerne, is_EAM, is_Shape, is_FLARB, is_SC, is_MEAM,status)
 
 end subroutine makeatype
 

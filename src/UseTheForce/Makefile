@@ -8,6 +8,7 @@ Source    = \
         DUFF.cpp \
 	EAM_FF.cpp \
 	SHAPES_FF.cpp \
+	SC_FF.cpp \
 	notifyCutoffs.F90 \
 	notifyCutoffs_interface.F90
 

@@ -22,7 +22,9 @@ Source    = \
 	sticky.F90 \
 	sticky_interface.F90 \
 	shapes.F90 \
-	shapes_interface.F90
+	shapes_interface.F90 \
+	suttonchen.F90 \
+	suttonchen_interface.F90
 
 Modules = \
 	atype_module \
@@ -36,7 +38,8 @@ Modules = \
 	mpiSimulation \
 	simulation \
 	sticky \
-	switcheroo
+	switcheroo \
+	suttonchen 
 
 RmiSource =
 
