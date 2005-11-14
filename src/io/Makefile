@@ -14,6 +14,7 @@ Source    = \
 	StickyPowerAtomTypesSectionParser.cpp \
 	ShapeAtomTypesSectionParser.cpp \
 	LennardJonesAtomTypesSectionParser.cpp\
+	SCAtomTypesSectionParser.cpp \
   BondTypesSectionParser.cpp \
   BendTypesSectionParser.cpp \
   BASSlex.l \
