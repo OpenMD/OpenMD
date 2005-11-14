@@ -63,7 +63,11 @@ module suttonchen
   integer, save :: SC_Mixing_Policy
   real(kind = dp), save :: SC_rcut
   logical, save :: haveRcut = .false.
-  logical, save,:: haveMixingMap = .false.
+  logical, save :: haveMixingMap = .false.
+  logical, save :: useGeometricDistanceMixing = .false.
+
+
+
 
   character(len = statusMsgSize) :: errMesg
   integer :: sc_err
@@ -82,6 +86,7 @@ module suttonchen
      real(kind=dp)     :: n
      real(kind=dp)     :: alpha
      real(kind=dp)     :: epsilon
+     real(kind=dp)     :: sc_rcut
   end type SCtype
 
 
@@ -89,7 +94,7 @@ module suttonchen
   real( kind = dp), dimension(:), allocatable :: rho
   real( kind = dp), dimension(:), allocatable :: frho
   real( kind = dp), dimension(:), allocatable :: dfrhodrho
-  real( kind = dp), dimension(:), allocatable :: d2frhodrhodrho
+
 
 
   !! Arrays for MPI storage
@@ -101,8 +106,6 @@ module suttonchen
   real( kind = dp),save, dimension(:), allocatable :: rho_row
   real( kind = dp),save, dimension(:), allocatable :: rho_col
   real( kind = dp),save, dimension(:), allocatable :: rho_tmp
-  real( kind = dp),save, dimension(:), allocatable :: d2frhodrhodrho_col
-  real( kind = dp),save, dimension(:), allocatable :: d2frhodrhodrho_row
 #endif
 
   type, private :: SCTypeList
@@ -121,19 +124,18 @@ module suttonchen
  type :: MixParameters
      real(kind=DP) :: alpha
      real(kind=DP) :: epsilon
-     real(kind=dp) :: sigma6
+     real(kind=DP) :: m
+     real(Kind=DP) :: n
+     real(kind=DP) :: vpair_pot
      real(kind=dp) :: rCut
-     real(kind=dp) :: vpair_pot
      logical       :: rCutWasSet = .false.
-     logical       :: shiftedPot
-     logical       :: isSoftCore = .false.
+
   end type MixParameters
 
   type(MixParameters), dimension(:,:), allocatable :: MixingMap
 
 
 
-  public :: init_SC_FF
   public :: setCutoffSC
   public :: do_SC_pair
   public :: newSCtype
@@ -141,22 +143,21 @@ module suttonchen
   public :: clean_SC
   public :: destroySCtypes
   public :: getSCCut
-  public :: setSCDefaultCutoff
-  public :: setSCUniformCutoff
+ ! public :: setSCDefaultCutoff
+ ! public :: setSCUniformCutoff
+  public :: useGeometricMixing
 
 contains
 
 
-  subroutine newSCtype(c,m,n,alpha,epsilon,c_ident,status)
-    real (kind = dp )                      :: lattice_constant
-    integer                                :: eam_nrho
-    real (kind = dp )                      :: eam_drho
-    integer                                :: eam_nr
-    real (kind = dp )                      :: eam_dr
-    real (kind = dp )                      :: rcut
-    real (kind = dp ), dimension(eam_nr)   :: eam_Z_r
-    real (kind = dp ), dimension(eam_nr)   :: eam_rho_r
-    real (kind = dp ), dimension(eam_nrho) :: eam_F_rho
+  subroutine newSCtype(c_ident,c,m,n,alpha,epsilon,status)
+    real (kind = dp )                      :: c ! Density Scaling
+    real (kind = dp )                      :: m ! Density Exponent
+    real (kind = dp )                      :: n ! Pair Potential Exponent
+    real (kind = dp )                      :: alpha ! Length Scaling
+    real (kind = dp )                      :: epsilon ! Energy Scaling
+
+
     integer                                :: c_ident
     integer                                :: status
 
@@ -170,40 +171,43 @@ contains
 
 
     !! Assume that atypes has already been set and get the total number of types in atypes
-    !! Also assume that every member of atypes is a EAM model.
 
 
     ! check to see if this is the first time into 
-    if (.not.associated(SCTypeList%EAMParams)) then
+    if (.not.associated(SCList%SCTypes)) then
        call getMatchingElementList(atypes, "is_SuttonChen", .true., nSCtypes, MatchList)
-       SCTypeList%nSCtypes = nSCtypes
-       allocate(SCTypeList%SCTypes(nSCTypes))
+       SCList%nSCtypes = nSCtypes
+       allocate(SCList%SCTypes(nSCTypes))
        nAtypes = getSize(atypes)
-       allocate(SCTypeList%atidToSCType(nAtypes))
+       allocate(SCList%atidToSCType(nAtypes))
     end if
 
-    SCTypeList%currentSCType = SCTypeList%currentSCType + 1
-    current = SCTypeList%currentSCType
+    SCList%currentSCType = SCList%currentSCType + 1
+    current = SCList%currentSCType
 
     myATID =  getFirstMatchingElement(atypes, "c_ident", c_ident)
-    SCTypeList%atidToSCType(myATID) = current
+    SCList%atidToSCType(myATID) = current
 
 
   
-    SCTypeList%SCTypes(current)%atid         = c_ident
-    SCTypeList%SCTypes(current)%alpha        = alpha
-    SCTypeList%SCTypes(current)%c            = c
-    SCTypeList%SCTypes(current)%m            = m
-    SCTypeList%SCTypes(current)%n            = n
-    SCTypeList%SCTypes(current)%epsilon      = epsilon
+    SCList%SCTypes(current)%atid         = c_ident
+    SCList%SCTypes(current)%alpha        = alpha
+    SCList%SCTypes(current)%c            = c
+    SCList%SCTypes(current)%m            = m
+    SCList%SCTypes(current)%n            = n
+    SCList%SCTypes(current)%epsilon      = epsilon
   end subroutine newSCtype
 
   
   subroutine destroySCTypes()
-
-    
-    if(allocated(SCTypeList)) deallocate(SCTypeList)
-
+    if (associated(SCList%SCtypes)) then
+       deallocate(SCList%SCTypes)
+       SCList%SCTypes=>null()
+    end if
+    if (associated(SCList%atidToSCtype)) then
+       deallocate(SCList%atidToSCtype)
+       SCList%atidToSCtype=>null()
+    end if
 
 
   end subroutine destroySCTypes
@@ -212,11 +216,11 @@ contains
 
   function getSCCut(atomID) result(cutValue)
     integer, intent(in) :: atomID
-    integer :: eamID
+    integer :: scID
     real(kind=dp) :: cutValue
     
-    eamID = SCTypeList%atidToEAMType(atomID)
-    cutValue = SCTypeList%EAMParams(eamID)%eam_rcut
+    scID = SCList%atidToSCType(atomID)
+    cutValue = SCList%SCTypes(scID)%sc_rcut
   end function getSCCut
 
 
@@ -254,14 +258,27 @@ contains
           n2 = SCList%SCtypes(j)%n
           alpha2 = SCList%SCtypes(j)%alpha
 
-          MixingMap(i,j)%epsilon = dsqrt(e1 * e2)
+          if (useGeometricDistanceMixing) then
+             MixingMap(i,j)%alpha = sqrt(alpha1 * alpha2) !SC formulation
+          else
+             MixingMap(i,j)%alpha = 0.5_dp * (alpha1 + alpha2) ! Goddard formulation
+          endif
+
+          MixingMap(i,j)%epsilon = sqrt(e1 * e2)
           MixingMap(i,j)%m = 0.5_dp*(m1+m2)
           MixingMap(i,j)%n = 0.5_dp*(n1+n2)
           MixingMap(i,j)%alpha = 0.5_dp*(alpha1+alpha2)
           MixingMap(i,j)%rcut = 2.0_dp *MixingMap(i,j)%alpha
-          MixingMap(i,j)%vpair_rcut = MixingMap%epsilon(i,j)* &
-               (MixingMap%alpha(i,j)/MixingMap(i,j)%rcut)**MixingMap(i,j)%n
-
+          MixingMap(i,j)%vpair_pot = MixingMap(i,j)%epsilon* &
+               (MixingMap(i,j)%alpha/MixingMap(i,j)%rcut)**MixingMap(i,j)%n
+          if (i.ne.j) then
+             MixingMap(j,i)%epsilon    = MixingMap(i,j)%epsilon
+             MixingMap(j,i)%m          = MixingMap(i,j)%m
+             MixingMap(j,i)%n          = MixingMap(i,j)%n
+             MixingMap(j,i)%alpha      = MixingMap(i,j)%alpha
+             MixingMap(j,i)%rcut = MixingMap(i,j)%rcut
+             MixingMap(j,i)%vpair_pot = MixingMap(i,j)%vpair_pot
+          endif
        enddo
     enddo
     
@@ -311,13 +328,6 @@ contains
        return
     end if
 
-    if (allocated(d2frhodrhodrho)) deallocate(d2frhodrhodrho)
-    allocate(d2frhodrhodrho(nlocal),stat=alloc_stat)
-    if (alloc_stat /= 0) then 
-       status = -1
-       return
-    end if
-
 #ifdef IS_MPI
 
     if (allocated(rho_tmp)) deallocate(rho_tmp)
@@ -346,12 +356,6 @@ contains
        status = -1
        return
     end if
-    if (allocated(d2frhodrhodrho_row)) deallocate(d2frhodrhodrho_row)
-    allocate(d2frhodrhodrho_row(nAtomsInRow),stat=alloc_stat)
-    if (alloc_stat /= 0) then 
-       status = -1
-       return
-    end if
 
 
     ! Now do column arrays
@@ -374,12 +378,6 @@ contains
        status = -1
        return
     end if
-    if (allocated(d2frhodrhodrho_col)) deallocate(d2frhodrhodrho_col)
-    allocate(d2frhodrhodrho_col(nAtomsInCol),stat=alloc_stat)
-    if (alloc_stat /= 0) then 
-       status = -1
-       return
-    end if
 
 #endif
 
@@ -397,9 +395,21 @@ contains
 
   end subroutine setCutoffSC
 
+  subroutine useGeometricMixing() 
+    useGeometricDistanceMixing = .true.
+    haveMixingMap = .false.
+    return
+  end subroutine useGeometricMixing
+  
 
 
-  subroutine clean_EAM()
+
+
+
+
+
+
+  subroutine clean_SC()
 
     ! clean non-IS_MPI first
     frho = 0.0_dp
@@ -415,7 +425,7 @@ contains
     dfrhodrho_row = 0.0_dp
     dfrhodrho_col = 0.0_dp
 #endif
-  end subroutine clean_EAM
+  end subroutine clean_SC
 
 
 
@@ -431,7 +441,7 @@ contains
     real(kind = dp) :: rho_j_at_i
 
     ! we don't use the derivatives, dummy variables
-    real( kind = dp) :: drho,d2rho
+    real( kind = dp) :: drho
     integer :: sc_err
     
     integer :: atid1,atid2 ! Global atid    
@@ -452,8 +462,8 @@ contains
     Atid2 = Atid(Atom2)
 #endif
 
-    Myid_atom1 = SCTypeList%atidtoSCtype(Atid1)
-    Myid_atom2 = SCTypeList%atidtoSCtype(Atid2)
+    Myid_atom1 = SCList%atidtoSCtype(Atid1)
+    Myid_atom2 = SCList%atidtoSCtype(Atid2)
 
 
 
@@ -473,15 +483,15 @@ contains
 
 
 !! Calculate the rho_a for all local atoms
-  subroutine calc_eam_preforce_Frho(nlocal,pot)
+  subroutine calc_sc_preforce_Frho(nlocal,pot)
     integer :: nlocal
     real(kind=dp) :: pot
     integer :: i,j
     integer :: atom
     real(kind=dp) :: U,U1,U2
     integer :: atype1
-    integer :: me,atid1
-    integer :: n_rho_points
+    integer :: atid1
+    integer :: myid
 
 
     cleanme = .true.
@@ -506,11 +516,11 @@ contains
 
     !! Calculate F(rho) and derivative
     do atom = 1, nlocal
-       Myid = ScTypeList%atidtoSctype(Atid(atom))
-       frho(atom) = -MixingMap(Myid,Myid)%c * MixingMap(Myid,Myid)%epsilon &
-            * sqrt(rho(i))
+       Myid = SCList%atidtoSctype(Atid(atom))
+       frho(atom) = -SCList%SCTypes(Myid)%c * &
+            SCList%SCTypes(Myid)%epsilon * sqrt(rho(i))
+
        dfrhodrho(atom) = 0.5_dp*frho(atom)/rho(atom)
-       d2frhodrhodrho(atom) = -0.5_dp*dfrhodrho(atom)/rho(atom)
        pot = pot + u
     enddo
 
@@ -532,19 +542,14 @@ contains
     if (sc_err /=  0) then
        call handleError("cal_eam_forces()","MPI gather dfrhodrho_col failure")
     endif
-
-    if (nmflag) then
-       call gather(d2frhodrhodrho,d2frhodrhodrho_row,plan_atom_row)
-       call gather(d2frhodrhodrho,d2frhodrhodrho_col,plan_atom_col)
-    endif
 #endif
     
     
-  end subroutine calc_eam_preforce_Frho
+  end subroutine calc_sc_preforce_Frho
 
 
   !! Does Sutton-Chen  pairwise Force calculation.  
-  subroutine do_eam_pair(atom1, atom2, d, rij, r2, sw, vpair, fpair, &
+  subroutine do_sc_pair(atom1, atom2, d, rij, r2, sw, vpair, fpair, &
        pot, f, do_pot)
     !Arguments    
     integer, intent(in) ::  atom1, atom2
@@ -557,18 +562,15 @@ contains
     logical, intent(in) :: do_pot
 
     real( kind = dp ) :: drdx,drdy,drdz
-    real( kind = dp ) :: d2
-    real( kind = dp ) :: phab,pha,dvpdr,d2vpdrdr
-    real( kind = dp ) :: rha,drha,d2rha, dpha
-    real( kind = dp ) :: rhb,drhb,d2rhb, dphb
+    real( kind = dp ) :: dvpdr
+    real( kind = dp ) :: drhodr
     real( kind = dp ) :: dudr
     real( kind = dp ) :: rcij
     real( kind = dp ) :: drhoidr,drhojdr
-    real( kind = dp ) :: d2rhoidrdr
-    real( kind = dp ) :: d2rhojdrdr
     real( kind = dp ) :: Fx,Fy,Fz
     real( kind = dp ) :: r,d2pha,phb,d2phb
-
+    real( kind = dp ) :: pot_temp,vptmp
+    real( kind = dp ) :: epsilonij,aij,nij,mij,vcij
     integer :: id1,id2
     integer  :: mytype_atom1
     integer  :: mytype_atom2
@@ -577,9 +579,8 @@ contains
 
     ! write(*,*) "Frho: ", Frho(atom1)
 
-    phab = 0.0E0_DP
+
     dvpdr = 0.0E0_DP
-    d2vpdrdr = 0.0E0_DP
 
 
 #ifdef IS_MPI
@@ -590,8 +591,8 @@ contains
        atid2 = atid(atom2)
 #endif
 
-       mytype_atom1 = SCTypeList%atidToSCType(atid1)
-       mytype_atom2 = SCTypeList%atidTOSCType(atid2)
+       mytype_atom1 = SCList%atidToSCType(atid1)
+       mytype_atom2 = SCList%atidTOSCType(atid2)
 
        drdx = d(1)/rij
        drdy = d(2)/rij
@@ -604,18 +605,17 @@ contains
        mij       = MixingMap(mytype_atom1,mytype_atom2)%m
        vcij      = MixingMap(mytype_atom1,mytype_atom2)%vpair_pot               
 
-       vptmp = dij*((aij/r)**nij)
+       vptmp = epsilonij*((aij/r)**nij)
 
 
        dvpdr = -nij*vptmp/r
-       d2vpdrdr = -dvpdr*(nij+1.0d0)/r
-       
        drhodr = -mij*((aij/r)**mij)/r
-       d2rhodrdr = -drhodr*(mij+1.0d0)/r
+
        
-       dudr = drhodr*(dfrhodrho(i)+dfrhodrho(j)) &
+       dudr = drhodr*(dfrhodrho(atom1)+dfrhodrho(atom2)) &
             + dvpdr
- 
+       
+       pot_temp = vptmp + vcij
  
 
 #ifdef IS_MPI
@@ -635,8 +635,8 @@ contains
 
 #ifdef IS_MPI
        if (do_pot) then
-          pot_Row(METALLIC_POT,atom1) = pot_Row(METALLIC_POT,atom1) + phab*0.5
-          pot_Col(METALLIC_POT,atom2) = pot_Col(METALLIC_POT,atom2) + phab*0.5
+          pot_Row(METALLIC_POT,atom1) = pot_Row(METALLIC_POT,atom1) + (pot_temp)*0.5
+          pot_Col(METALLIC_POT,atom2) = pot_Col(METALLIC_POT,atom2) + (pot_temp)*0.5
        end if
 
        f_Row(1,atom1) = f_Row(1,atom1) + fx
@@ -649,7 +649,7 @@ contains
 #else
 
        if(do_pot) then
-          pot = pot + phab
+          pot = pot + pot_temp
        end if
 
        f(1,atom1) = f(1,atom1) + fx
@@ -661,7 +661,7 @@ contains
        f(3,atom2) = f(3,atom2) - fz
 #endif
 
-       vpair = vpair + phab
+       
 #ifdef IS_MPI
        id1 = AtomRowToGlobal(atom1)
        id2 = AtomColToGlobal(atom2)
@@ -678,32 +678,8 @@ contains
 
        endif
 
-       if (nmflag) then
 
-          drhoidr = drha
-          drhojdr = drhb
-          d2rhoidrdr = d2rha
-          d2rhojdrdr = d2rhb
-
-#ifdef IS_MPI
-          d2 = d2vpdrdr + &
-               d2rhoidrdr*dfrhodrho_col(atom2) + &
-               d2rhojdrdr*dfrhodrho_row(atom1) + &
-               drhoidr*drhoidr*d2frhodrhodrho_col(atom2) + &
-               drhojdr*drhojdr*d2frhodrhodrho_row(atom1)
-
-#else
-
-          d2 = d2vpdrdr + &
-               d2rhoidrdr*dfrhodrho(atom2) + &
-               d2rhojdrdr*dfrhodrho(atom1) + &
-               drhoidr*drhoidr*d2frhodrhodrho(atom2) + &
-               drhojdr*drhojdr*d2frhodrhodrho(atom1)
-#endif
-       end if
-
-    endif
-  end subroutine do_eam_pair
+  end subroutine do_sc_pair
 
 
 

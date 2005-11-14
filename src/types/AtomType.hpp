@@ -163,6 +163,24 @@ namespace oopse {
       return atp.is_Shape;
     }
 
+    bool isSC() {
+      return atp.is_SC;
+    }
+    
+    void setSC() {
+      atp.is_SC = 1;
+    }
+    
+    
+    bool isMEAM() {
+      return atp.is_MEAM;
+    }
+    
+    void setMEAM() {
+      atp.is_MEAM = 1;
+    }
+    
+    
     //below functions are just forward functions
     /**
      * Adds property into property map
@@ -239,6 +257,19 @@ namespace oopse {
   };
 
   typedef SimpleTypeData<EAMParam> EAMParamGenericData;
+  
+  struct SCParam {
+    double c;
+    double m;
+    double n;
+    double alpha;
+    double epsilon;
+  };
+  typedef SimpleTypeData<SCParam> SCParamGenericData;
+  
+  
+  
+  
 }
 
 #endif

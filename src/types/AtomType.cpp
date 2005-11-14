@@ -51,6 +51,7 @@
 #include "UseTheForce/DarkSide/lj_interface.h"
 #include "UseTheForce/DarkSide/eam_interface.h"
 #include "UseTheForce/DarkSide/electrostatic_interface.h"
+#include "UseTheForce/DarkSide/suttonchen_interface.h"
 namespace oopse {
   AtomType::AtomType(){
     
@@ -73,7 +74,7 @@ namespace oopse {
     atp.is_EAM = 0;
     atp.is_Shape = 0;
     atp.is_FLARB = 0;  
-    atp.is_SuttonChen = 0;
+    atp.is_SC = 0;
     atp.is_MEAM = 0;
   }
     
@@ -231,6 +232,44 @@ namespace oopse {
       }
     }
 
+    
+    if (isSC()) {
+      data = getPropertyByName("SC");
+      if (data != NULL) {
+        SCParamGenericData* SCData = dynamic_cast<SCParamGenericData*>(data);
+        
+        if (SCData != NULL) {
+          
+          SCParam scParam = SCData->getData();
+          
+          
+          newSCtype(&atp.ident, &scParam.c, &scParam.m,  
+                     &scParam.n, &scParam.alpha, &scParam.epsilon, 
+                     &isError );
+          
+          if (isError != 0) {
+            sprintf( painCave.errMsg,
+                     "Fortran rejected newSCtype\n");
+            painCave.severity = OOPSE_ERROR;
+            painCave.isFatal = 1;
+            simError();          
+          }
+        } else {
+          sprintf( painCave.errMsg,
+                   "Can not cast GenericData to SCParam\n");
+          painCave.severity = OOPSE_ERROR;
+          painCave.isFatal = 1;
+          simError();          
+        }
+      } else {
+        sprintf( painCave.errMsg, "Can not find SC Parameters\n");
+        painCave.severity = OOPSE_ERROR;
+        painCave.isFatal = 1;
+        simError();          
+      }
+    }
+    
+      
     
   }
 
