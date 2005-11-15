@@ -44,7 +44,7 @@
  *
  *  Created by Charles F. Vardeman II on 11/9/05.
  *  @author  Charles F. Vardeman II 
- *  @version $Id: SC_FF.cpp,v 1.1 2005-11-14 21:29:25 chuckv Exp $
+ *  @version $Id: SC_FF.cpp,v 1.2 2005-11-15 16:18:36 chuckv Exp $
  *
  */
 
@@ -121,7 +121,7 @@ namespace oopse {
     
   SC_FF::~SC_FF(){
     // We need to clean up the fortran side so we don't have bad things happen if
-    // we try to create a second EAM force field.
+    // we try to create a second SC force field.
     destroySCTypes();
   }
 } //end namespace oopse

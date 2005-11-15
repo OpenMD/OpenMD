@@ -140,6 +140,7 @@ module suttonchen
   public :: do_SC_pair
   public :: newSCtype
   public :: calc_SC_prepair_rho
+  public :: calc_SC_preforce_Frho
   public :: clean_SC
   public :: destroySCtypes
   public :: getSCCut
