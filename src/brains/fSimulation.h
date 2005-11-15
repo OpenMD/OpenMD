@@ -24,7 +24,7 @@ typedef  struct{
   int SIM_uses_FLARB;
   int SIM_uses_RF;
   int SIM_uses_SF;
-  int SIM_uses_SuttonChen;
+  int SIM_uses_SC;
   int SIM_uses_MEAM;
 } simtype;
 #endif /*__FSIMULATION*/
@@ -52,8 +52,8 @@ typedef  struct{
     logical :: SIM_uses_FLARB
     logical :: SIM_uses_RF
     logical :: SIM_uses_SF
-    logical :: SIM_uses_SuttonChen
-    logical :: SIM_uses_MEAM;
+    logical :: SIM_uses_SC
+    logical :: SIM_uses_MEAM
   end type simtype
 
 #endif

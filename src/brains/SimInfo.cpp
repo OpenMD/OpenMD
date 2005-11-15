@@ -519,6 +519,7 @@ namespace oopse {
     int useLennardJones = 0;
     int useElectrostatic = 0;
     int useEAM = 0;
+    int useSC = 0;
     int useCharge = 0;
     int useDirectional = 0;
     int useDipole = 0;
@@ -557,6 +558,7 @@ namespace oopse {
       useLennardJones |= (*i)->isLennardJones();
       useElectrostatic |= (*i)->isElectrostatic();
       useEAM |= (*i)->isEAM();
+      useSC |= (*i)->isSC();
       useCharge |= (*i)->isCharge();
       useDirectional |= (*i)->isDirectional();
       useDipole |= (*i)->isDipole();
@@ -607,6 +609,9 @@ namespace oopse {
     temp = useEAM;
     MPI_Allreduce(&temp, &useEAM, 1, MPI_INT, MPI_LOR, MPI_COMM_WORLD);    
 
+    temp = useSC;
+    MPI_Allreduce(&temp, &useSC, 1, MPI_INT, MPI_LOR, MPI_COMM_WORLD);
+    
     temp = useShape;
     MPI_Allreduce(&temp, &useShape, 1, MPI_INT, MPI_LOR, MPI_COMM_WORLD);   
 
@@ -631,6 +636,7 @@ namespace oopse {
     fInfo_.SIM_uses_StickyPower = useStickyPower;
     fInfo_.SIM_uses_GayBerne = useGayBerne;
     fInfo_.SIM_uses_EAM = useEAM;
+    fInfo_.SIM_uses_SC = useSC;
     fInfo_.SIM_uses_Shapes = useShape;
     fInfo_.SIM_uses_FLARB = useFLARB;
     fInfo_.SIM_uses_RF = useRF;
