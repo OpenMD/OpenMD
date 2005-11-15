@@ -10,12 +10,13 @@ initialConfig = "./spce.in";
 
 ensemble = NVE;
 forceField = "DUFF";
-electrostaticSummationMethod = "shifted_force";
-electrostaticScreeningMethod = "damped";
+electrostaticSummationMethod = "shifted_potential";
+//electrostaticScreeningMethod = "damped";
 dielectric = 80.0;
-dampingAlpha = 0.12;
+dampingAlpha = 0.25;
 cutoffRadius = 9.0;
-switchingRadius = 7.7;
+switchingRadius = 9.0;
+//switchingFunctionType = "fifth_order_polynomial";
 
 targetTemp = 300;
 targetPressure = 1.0;
@@ -24,7 +25,7 @@ tauThermostat = 1e3;
 tauBarostat = 1e4;
 
 dt = 2.0;
-runTime = 1e3;
+runTime = 5e3;
 useInitialTime = "false";
 useInitialExtendedSystemState = "false";
 
@@ -32,4 +33,3 @@ useInitialExtendedSystemState = "false";
 //thermalTime = 10;
 sampleTime = 100;
 statusTime = 2;
-dumpForceVector = "true";
