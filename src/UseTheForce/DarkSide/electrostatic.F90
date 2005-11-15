@@ -691,37 +691,10 @@ contains
 
           pref = pre12 * q_i * mu_j
 
-!!$          if (summationMethod .eq. UNDAMPED_WOLF) then
-!!$             ri2 = riji * riji
-!!$             ri3 = ri2 * riji
-!!$
-!!$             pref = pre12 * q_i * mu_j
-!!$             vterm = - pref * ct_j * (ri2 - rcuti2)
-!!$             vpair = vpair + vterm
-!!$             epot = epot + sw*vterm
-!!$             
-!!$             !! this has a + sign in the () because the rij vector is
-!!$             !! r_j - r_i and the charge-dipole potential takes the origin
-!!$             !! as the point dipole, which is atom j in this case.
-!!$             
-!!$             dudx = dudx - sw*pref * ( ri3*( uz_j(1) - 3.0d0*ct_j*xhat) &
-!!$                  - rcuti3*( uz_j(1) - 3.0d0*ct_j*d(1)*rcuti ) )
-!!$             dudy = dudy - sw*pref * ( ri3*( uz_j(2) - 3.0d0*ct_j*yhat) &
-!!$                  - rcuti3*( uz_j(2) - 3.0d0*ct_j*d(2)*rcuti ) )
-!!$             dudz = dudz - sw*pref * ( ri3*( uz_j(3) - 3.0d0*ct_j*zhat) &
-!!$                  - rcuti3*( uz_j(3) - 3.0d0*ct_j*d(3)*rcuti ) )
-!!$             
-!!$             duduz_j(1) = duduz_j(1) - sw*pref*( ri2*xhat - d(1)*rcuti3 )
-!!$             duduz_j(2) = duduz_j(2) - sw*pref*( ri2*yhat - d(2)*rcuti3 )
-!!$             duduz_j(3) = duduz_j(3) - sw*pref*( ri2*zhat - d(3)*rcuti3 )
-!!$
-!!$          elseif (summationMethod .eq. REACTION_FIELD) then
-
           if (summationMethod .eq. REACTION_FIELD) then
              ri2 = riji * riji
              ri3 = ri2 * riji
     
-             pref = pre12 * q_i * mu_j
              vterm = - pref * ct_j * ( ri2 - preRF2*rij )
              vpair = vpair + vterm
              epot = epot + sw*vterm
@@ -754,7 +727,6 @@ contains
              ri3 = ri2 * ri
              sc2 = scale * scale
 
-             pref = pre12 * q_i * mu_j
              vterm = - pref * ct_j * ri2 * scale
              vpair = vpair + vterm
              epot = epot + sw*vterm
@@ -782,109 +754,51 @@ contains
           cy2 = cy_j * cy_j
           cz2 = cz_j * cz_j
 
-!!$          if (summationMethod .eq. UNDAMPED_WOLF) then
-!!$             pref =  pre14 * q_i / 3.0_dp
-!!$             vterm1 = pref * ri3*( qxx_j * (3.0_dp*cx2 - 1.0_dp) + &
-!!$                  qyy_j * (3.0_dp*cy2 - 1.0_dp) + &
-!!$                  qzz_j * (3.0_dp*cz2 - 1.0_dp) )
-!!$             vterm2 = pref * rcuti3*( qxx_j * (3.0_dp*cx2 - 1.0_dp) + &
-!!$                  qyy_j * (3.0_dp*cy2 - 1.0_dp) + &
-!!$                  qzz_j * (3.0_dp*cz2 - 1.0_dp) )
-!!$             vpair = vpair + ( vterm1 - vterm2 )
-!!$             epot = epot + sw*( vterm1 - vterm2 )
-!!$             
-!!$             dudx = dudx - (5.0_dp * &
-!!$                  (vterm1*riji*xhat - vterm2*rcuti2*d(1))) + sw*pref * ( &
-!!$                  (ri4 - rcuti4)*(qxx_j*(6.0_dp*cx_j*ux_j(1)) - &
-!!$                  qxx_j*2.0_dp*(xhat - rcuti*d(1))) + &
-!!$                  (ri4 - rcuti4)*(qyy_j*(6.0_dp*cy_j*uy_j(1)) - &
-!!$                  qyy_j*2.0_dp*(xhat - rcuti*d(1))) + &
-!!$                  (ri4 - rcuti4)*(qzz_j*(6.0_dp*cz_j*uz_j(1)) - &
-!!$                  qzz_j*2.0_dp*(xhat - rcuti*d(1))) ) 
-!!$             dudy = dudy - (5.0_dp * &
-!!$                  (vterm1*riji*yhat - vterm2*rcuti2*d(2))) + sw*pref * ( &
-!!$                  (ri4 - rcuti4)*(qxx_j*(6.0_dp*cx_j*ux_j(2)) - &
-!!$                  qxx_j*2.0_dp*(yhat - rcuti*d(2))) + &
-!!$                  (ri4 - rcuti4)*(qyy_j*(6.0_dp*cy_j*uy_j(2)) - &
-!!$                  qyy_j*2.0_dp*(yhat - rcuti*d(2))) + &
-!!$                  (ri4 - rcuti4)*(qzz_j*(6.0_dp*cz_j*uz_j(2)) - &
-!!$                  qzz_j*2.0_dp*(yhat - rcuti*d(2))) )
-!!$             dudz = dudz - (5.0_dp * &
-!!$                  (vterm1*riji*zhat - vterm2*rcuti2*d(3))) + sw*pref * ( &
-!!$                  (ri4 - rcuti4)*(qxx_j*(6.0_dp*cx_j*ux_j(3)) - &
-!!$                  qxx_j*2.0_dp*(zhat - rcuti*d(3))) + &
-!!$                  (ri4 - rcuti4)*(qyy_j*(6.0_dp*cy_j*uy_j(3)) - &
-!!$                  qyy_j*2.0_dp*(zhat - rcuti*d(3))) + &
-!!$                  (ri4 - rcuti4)*(qzz_j*(6.0_dp*cz_j*uz_j(3)) - &
-!!$                  qzz_j*2.0_dp*(zhat - rcuti*d(3))) ) 
-!!$             
-!!$             dudux_j(1) = dudux_j(1) + sw*pref*(ri3*(qxx_j*6.0_dp*cx_j*xhat) -&
-!!$                  rcuti4*(qxx_j*6.0_dp*cx_j*d(1)))
-!!$             dudux_j(2) = dudux_j(2) + sw*pref*(ri3*(qxx_j*6.0_dp*cx_j*yhat) -&
-!!$                  rcuti4*(qxx_j*6.0_dp*cx_j*d(2)))
-!!$             dudux_j(3) = dudux_j(3) + sw*pref*(ri3*(qxx_j*6.0_dp*cx_j*zhat) -&
-!!$                  rcuti4*(qxx_j*6.0_dp*cx_j*d(3)))
-!!$             
-!!$             duduy_j(1) = duduy_j(1) + sw*pref*(ri3*(qyy_j*6.0_dp*cy_j*xhat) -&
-!!$                  rcuti4*(qyy_j*6.0_dp*cx_j*d(1)))
-!!$             duduy_j(2) = duduy_j(2) + sw*pref*(ri3*(qyy_j*6.0_dp*cy_j*yhat) -&
-!!$                  rcuti4*(qyy_j*6.0_dp*cx_j*d(2)))
-!!$             duduy_j(3) = duduy_j(3) + sw*pref*(ri3*(qyy_j*6.0_dp*cy_j*zhat) -&
-!!$                  rcuti4*(qyy_j*6.0_dp*cx_j*d(3)))
-!!$             
-!!$             duduz_j(1) = duduz_j(1) + sw*pref*(ri3*(qzz_j*6.0_dp*cz_j*xhat) -&
-!!$                  rcuti4*(qzz_j*6.0_dp*cx_j*d(1)))
-!!$             duduz_j(2) = duduz_j(2) + sw*pref*(ri3*(qzz_j*6.0_dp*cz_j*yhat) -&
-!!$                  rcuti4*(qzz_j*6.0_dp*cx_j*d(2)))
-!!$             duduz_j(3) = duduz_j(3) + sw*pref*(ri3*(qzz_j*6.0_dp*cz_j*zhat) -&
-!!$                  rcuti4*(qzz_j*6.0_dp*cx_j*d(3)))
-!!$         
-!!$          else
-             pref =  pre14 * q_i / 3.0_dp
-             vterm = pref * ri3 * (qxx_j * (3.0_dp*cx2 - 1.0_dp) + &
-                  qyy_j * (3.0_dp*cy2 - 1.0_dp) + &
-                  qzz_j * (3.0_dp*cz2 - 1.0_dp))
-             vpair = vpair + vterm
-             epot = epot + sw*vterm
-             
-             dudx = dudx - 5.0_dp*sw*vterm*riji*xhat + sw*pref * ri4 * ( &
-                  qxx_j*(6.0_dp*cx_j*ux_j(1) - 2.0_dp*xhat) + &
-                  qyy_j*(6.0_dp*cy_j*uy_j(1) - 2.0_dp*xhat) + &
-                  qzz_j*(6.0_dp*cz_j*uz_j(1) - 2.0_dp*xhat) ) 
-             dudy = dudy - 5.0_dp*sw*vterm*riji*yhat + sw*pref * ri4 * ( &
-                  qxx_j*(6.0_dp*cx_j*ux_j(2) - 2.0_dp*yhat) + &
-                  qyy_j*(6.0_dp*cy_j*uy_j(2) - 2.0_dp*yhat) + &
-                  qzz_j*(6.0_dp*cz_j*uz_j(2) - 2.0_dp*yhat) )
-             dudz = dudz - 5.0_dp*sw*vterm*riji*zhat + sw*pref * ri4 * ( &
-                  qxx_j*(6.0_dp*cx_j*ux_j(3) - 2.0_dp*zhat) + &
-                  qyy_j*(6.0_dp*cy_j*uy_j(3) - 2.0_dp*zhat) + &
-                  qzz_j*(6.0_dp*cz_j*uz_j(3) - 2.0_dp*zhat) ) 
-             
-             dudux_j(1) = dudux_j(1) + sw*pref * ri3*(qxx_j*6.0_dp*cx_j*xhat)
-             dudux_j(2) = dudux_j(2) + sw*pref * ri3*(qxx_j*6.0_dp*cx_j*yhat)
-             dudux_j(3) = dudux_j(3) + sw*pref * ri3*(qxx_j*6.0_dp*cx_j*zhat)
-             
-             duduy_j(1) = duduy_j(1) + sw*pref * ri3*(qyy_j*6.0_dp*cy_j*xhat)
-             duduy_j(2) = duduy_j(2) + sw*pref * ri3*(qyy_j*6.0_dp*cy_j*yhat)
-             duduy_j(3) = duduy_j(3) + sw*pref * ri3*(qyy_j*6.0_dp*cy_j*zhat)
-             
-             duduz_j(1) = duduz_j(1) + sw*pref * ri3*(qzz_j*6.0_dp*cz_j*xhat)
-             duduz_j(2) = duduz_j(2) + sw*pref * ri3*(qzz_j*6.0_dp*cz_j*yhat)
-             duduz_j(3) = duduz_j(3) + sw*pref * ri3*(qzz_j*6.0_dp*cz_j*zhat)
+          pref =  pre14 * q_i / 3.0_dp
+          vterm = pref * ri3 * (qxx_j * (3.0_dp*cx2 - 1.0_dp) + &
+               qyy_j * (3.0_dp*cy2 - 1.0_dp) + &
+               qzz_j * (3.0_dp*cz2 - 1.0_dp))
+          vpair = vpair + vterm
+          epot = epot + sw*vterm
           
-!!$          endif
+          dudx = dudx - 5.0_dp*sw*vterm*riji*xhat + sw*pref * ri4 * ( &
+               qxx_j*(6.0_dp*cx_j*ux_j(1) - 2.0_dp*xhat) + &
+               qyy_j*(6.0_dp*cy_j*uy_j(1) - 2.0_dp*xhat) + &
+               qzz_j*(6.0_dp*cz_j*uz_j(1) - 2.0_dp*xhat) ) 
+          dudy = dudy - 5.0_dp*sw*vterm*riji*yhat + sw*pref * ri4 * ( &
+               qxx_j*(6.0_dp*cx_j*ux_j(2) - 2.0_dp*yhat) + &
+               qyy_j*(6.0_dp*cy_j*uy_j(2) - 2.0_dp*yhat) + &
+               qzz_j*(6.0_dp*cz_j*uz_j(2) - 2.0_dp*yhat) )
+          dudz = dudz - 5.0_dp*sw*vterm*riji*zhat + sw*pref * ri4 * ( &
+               qxx_j*(6.0_dp*cx_j*ux_j(3) - 2.0_dp*zhat) + &
+               qyy_j*(6.0_dp*cy_j*uy_j(3) - 2.0_dp*zhat) + &
+               qzz_j*(6.0_dp*cz_j*uz_j(3) - 2.0_dp*zhat) ) 
+          
+          dudux_j(1) = dudux_j(1) + sw*pref * ri3*(qxx_j*6.0_dp*cx_j*xhat)
+          dudux_j(2) = dudux_j(2) + sw*pref * ri3*(qxx_j*6.0_dp*cx_j*yhat)
+          dudux_j(3) = dudux_j(3) + sw*pref * ri3*(qxx_j*6.0_dp*cx_j*zhat)
+          
+          duduy_j(1) = duduy_j(1) + sw*pref * ri3*(qyy_j*6.0_dp*cy_j*xhat)
+          duduy_j(2) = duduy_j(2) + sw*pref * ri3*(qyy_j*6.0_dp*cy_j*yhat)
+          duduy_j(3) = duduy_j(3) + sw*pref * ri3*(qyy_j*6.0_dp*cy_j*zhat)
+          
+          duduz_j(1) = duduz_j(1) + sw*pref * ri3*(qzz_j*6.0_dp*cz_j*xhat)
+          duduz_j(2) = duduz_j(2) + sw*pref * ri3*(qzz_j*6.0_dp*cz_j*yhat)
+          duduz_j(3) = duduz_j(3) + sw*pref * ri3*(qzz_j*6.0_dp*cz_j*zhat)
+          
        endif
     endif
-
+    
     if (i_is_Dipole) then 
 
        if (j_is_Charge) then
+          
+          pref = pre12 * q_j * mu_i
           
           if (summationMethod .eq. SHIFTED_POTENTIAL) then
              ri2 = riji * riji
              ri3 = ri2 * riji
              
-             pref = pre12 * q_j * mu_i
              pot_term = ri2 - rcuti2
              vterm = pref * ct_i * pot_term
              vpair = vpair + vterm
@@ -902,7 +816,6 @@ contains
              ri2 = riji * riji
              ri3 = ri2 * riji
 
-             pref = pre12 * q_j * mu_i
              pot_term = ri2 - rcuti2 + 2.0d0*rcuti3*( rij - defaultCutoff )
              vterm = pref * ct_i * pot_term
              vpair = vpair + vterm
@@ -920,7 +833,6 @@ contains
              ri2 = riji * riji
              ri3 = ri2 * riji
 
-             pref = pre12 * q_j * mu_i
              vterm = pref * ct_i * ( ri2 - preRF2*rij )
              vpair = vpair + vterm
              epot = epot + sw*vterm
@@ -950,7 +862,6 @@ contains
              ri3 = ri2 * ri
              sc2 = scale * scale
 
-             pref = pre12 * q_j * mu_i
              vterm = pref * ct_i * ri2 * scale
              vpair = vpair + vterm
              epot = epot + sw*vterm
@@ -974,67 +885,6 @@ contains
           
           pref = pre22 * mu_i * mu_j
 
-!!$          if (summationMethod .eq. SHIFTED_POTENTIAL) then
-!!$             a0 = ct_ij - 3.0d0 * ct_i * ct_j
-!!$             pot_term = ri3 - rcuti3
-!!$             
-!!$             vterm = pref*pot_term*a0
-!!$             vpair = vpair + vterm
-!!$             epot = epot + sw*vterm
-!!$             
-!!$             a1 = 5.0d0 * ct_i * ct_j - ct_ij
-!!$             
-!!$             dudx = dudx + sw*pref*3.0d0*ri4 &
-!!$                  * (a1*xhat-ct_i*uz_j(1)-ct_j*uz_i(1))
-!!$             dudy = dudy + sw*pref*3.0d0*ri4 &
-!!$                  * (a1*yhat-ct_i*uz_j(2)-ct_j*uz_i(2))
-!!$             dudz = dudz + sw*pref*3.0d0*ri4 &
-!!$                  * (a1*zhat-ct_i*uz_j(3)-ct_j*uz_i(3))
-!!$             
-!!$             duduz_i(1) = duduz_i(1) + sw*pref*( pot_term &
-!!$                  * (uz_j(1) - 3.0d0*ct_j*xhat) )
-!!$             duduz_i(2) = duduz_i(2) + sw*pref*( pot_term & 
-!!$                  * (uz_j(2) - 3.0d0*ct_j*yhat) )
-!!$             duduz_i(3) = duduz_i(3) + sw*pref*( pot_term &
-!!$                  * (uz_j(3) - 3.0d0*ct_j*zhat) )
-!!$             duduz_j(1) = duduz_j(1) + sw*pref*( pot_term &
-!!$                  * (uz_i(1) - 3.0d0*ct_i*xhat) )
-!!$             duduz_j(2) = duduz_j(2) + sw*pref*( pot_term &
-!!$                  * (uz_i(2) - 3.0d0*ct_i*yhat) )
-!!$             duduz_j(3) = duduz_j(3) + sw*pref*( pot_term &
-!!$                  * (uz_i(3) - 3.0d0*ct_i*zhat) )
-!!$
-!!$          elseif (summationMethod .eq. SHIFTED_FORCE) then
-!!$             a0 = ct_ij - 3.0d0 * ct_i * ct_j
-!!$             pot_term = ri3 - rcuti3 + 3.0d0*rcuti4*( rij - defaultCutoff )
-!!$             
-!!$             vterm = pref*pot_term*a0
-!!$             vpair = vpair + vterm
-!!$             epot = epot + sw*vterm
-!!$             
-!!$             a1 = 5.0d0 * ct_i * ct_j - ct_ij
-!!$             
-!!$             dudx = dudx + sw*pref*3.0d0*( ri4 - rcuti4 ) &
-!!$                             * (a1*xhat-ct_i*uz_j(1)-ct_j*uz_i(1))
-!!$             dudy = dudy + sw*pref*3.0d0*( ri4 - rcuti4 ) &
-!!$                             * (a1*yhat-ct_i*uz_j(2)-ct_j*uz_i(2))
-!!$             dudz = dudz + sw*pref*3.0d0*( ri4 - rcuti4 ) &
-!!$                             * (a1*zhat-ct_i*uz_j(3)-ct_j*uz_i(3))
-!!$             
-!!$             duduz_i(1) = duduz_i(1) + sw*pref*( pot_term &
-!!$                  * (uz_j(1) - 3.0d0*ct_j*xhat) )
-!!$             duduz_i(2) = duduz_i(2) + sw*pref*( pot_term & 
-!!$                  * (uz_j(2) - 3.0d0*ct_j*yhat) )
-!!$             duduz_i(3) = duduz_i(3) + sw*pref*( pot_term &
-!!$                  * (uz_j(3) - 3.0d0*ct_j*zhat) )
-!!$             duduz_j(1) = duduz_j(1) + sw*pref*( pot_term &
-!!$                  * (uz_i(1) - 3.0d0*ct_i*xhat) )
-!!$             duduz_j(2) = duduz_j(2) + sw*pref*( pot_term &
-!!$                  * (uz_i(2) - 3.0d0*ct_i*yhat) )
-!!$             duduz_j(3) = duduz_j(3) + sw*pref*( pot_term &
-!!$                  * (uz_i(3) - 3.0d0*ct_i*zhat) )
-!!$             
-!!$          elseif (summationMethod .eq. REACTION_FIELD) then
           if (summationMethod .eq. REACTION_FIELD) then
              vterm = pref*( ri3*(ct_ij - 3.0d0 * ct_i * ct_j) - &
                   preRF2*ct_ij )
@@ -1117,7 +967,6 @@ contains
 
     if (i_is_Quadrupole) then
        if (j_is_Charge) then
-
           ri2 = riji * riji
           ri3 = ri2 * riji
           ri4 = ri2 * ri2
@@ -1125,93 +974,38 @@ contains
           cy2 = cy_i * cy_i
           cz2 = cz_i * cz_i
 
-!!$          if (summationMethod .eq. UNDAMPED_WOLF) then
-!!$             pref = pre14 * q_j / 3.0_dp
-!!$             vterm1 = pref * ri3*( qxx_i * (3.0_dp*cx2 - 1.0_dp) + &
-!!$                  qyy_i * (3.0_dp*cy2 - 1.0_dp) + &
-!!$                  qzz_i * (3.0_dp*cz2 - 1.0_dp) )
-!!$             vterm2 = pref * rcuti3*( qxx_i * (3.0_dp*cx2 - 1.0_dp) + &
-!!$                  qyy_i * (3.0_dp*cy2 - 1.0_dp) + &
-!!$                  qzz_i * (3.0_dp*cz2 - 1.0_dp) )
-!!$             vpair = vpair + ( vterm1 - vterm2 )
-!!$             epot = epot + sw*( vterm1 - vterm2 )
-!!$             
-!!$             dudx = dudx - sw*(5.0_dp*(vterm1*riji*xhat-vterm2*rcuti2*d(1))) +&
-!!$                  sw*pref * ( (ri4 - rcuti4)*(qxx_i*(6.0_dp*cx_i*ux_i(1)) - &
-!!$                  qxx_i*2.0_dp*(xhat - rcuti*d(1))) + &
-!!$                  (ri4 - rcuti4)*(qyy_i*(6.0_dp*cy_i*uy_i(1)) - &
-!!$                  qyy_i*2.0_dp*(xhat - rcuti*d(1))) + &
-!!$                  (ri4 - rcuti4)*(qzz_i*(6.0_dp*cz_i*uz_i(1)) - &
-!!$                  qzz_i*2.0_dp*(xhat - rcuti*d(1))) ) 
-!!$             dudy = dudy - sw*(5.0_dp*(vterm1*riji*yhat-vterm2*rcuti2*d(2))) +&
-!!$                  sw*pref * ( (ri4 - rcuti4)*(qxx_i*(6.0_dp*cx_i*ux_i(2)) - &
-!!$                  qxx_i*2.0_dp*(yhat - rcuti*d(2))) + &
-!!$                  (ri4 - rcuti4)*(qyy_i*(6.0_dp*cy_i*uy_i(2)) - &
-!!$                  qyy_i*2.0_dp*(yhat - rcuti*d(2))) + &
-!!$                  (ri4 - rcuti4)*(qzz_i*(6.0_dp*cz_i*uz_i(2)) - &
-!!$                  qzz_i*2.0_dp*(yhat - rcuti*d(2))) )
-!!$             dudz = dudz - sw*(5.0_dp*(vterm1*riji*zhat-vterm2*rcuti2*d(3))) +&
-!!$                  sw*pref * ( (ri4 - rcuti4)*(qxx_i*(6.0_dp*cx_i*ux_i(3)) - &
-!!$                  qxx_i*2.0_dp*(zhat - rcuti*d(3))) + &
-!!$                  (ri4 - rcuti4)*(qyy_i*(6.0_dp*cy_i*uy_i(3)) - &
-!!$                  qyy_i*2.0_dp*(zhat - rcuti*d(3))) + &
-!!$                  (ri4 - rcuti4)*(qzz_i*(6.0_dp*cz_i*uz_i(3)) - &
-!!$                  qzz_i*2.0_dp*(zhat - rcuti*d(3))) ) 
-!!$             
-!!$             dudux_i(1) = dudux_i(1) + sw*pref*(ri3*(qxx_i*6.0_dp*cx_i*xhat) -&
-!!$                  rcuti4*(qxx_i*6.0_dp*cx_i*d(1)))
-!!$             dudux_i(2) = dudux_i(2) + sw*pref*(ri3*(qxx_i*6.0_dp*cx_i*yhat) -&
-!!$                  rcuti4*(qxx_i*6.0_dp*cx_i*d(2)))
-!!$             dudux_i(3) = dudux_i(3) + sw*pref*(ri3*(qxx_i*6.0_dp*cx_i*zhat) -&
-!!$                  rcuti4*(qxx_i*6.0_dp*cx_i*d(3)))
-!!$             
-!!$             duduy_i(1) = duduy_i(1) + sw*pref*(ri3*(qyy_i*6.0_dp*cy_i*xhat) -&
-!!$                  rcuti4*(qyy_i*6.0_dp*cx_i*d(1)))
-!!$             duduy_i(2) = duduy_i(2) + sw*pref*(ri3*(qyy_i*6.0_dp*cy_i*yhat) -&
-!!$                  rcuti4*(qyy_i*6.0_dp*cx_i*d(2)))
-!!$             duduy_i(3) = duduy_i(3) + sw*pref*(ri3*(qyy_i*6.0_dp*cy_i*zhat) -&
-!!$                  rcuti4*(qyy_i*6.0_dp*cx_i*d(3)))
-!!$             
-!!$             duduz_i(1) = duduz_i(1) + sw*pref*(ri3*(qzz_i*6.0_dp*cz_i*xhat) -&
-!!$                  rcuti4*(qzz_i*6.0_dp*cx_i*d(1)))
-!!$             duduz_i(2) = duduz_i(2) + sw*pref*(ri3*(qzz_i*6.0_dp*cz_i*yhat) -&
-!!$                  rcuti4*(qzz_i*6.0_dp*cx_i*d(2)))
-!!$             duduz_i(3) = duduz_i(3) + sw*pref*(ri3*(qzz_i*6.0_dp*cz_i*zhat) -&
-!!$                  rcuti4*(qzz_i*6.0_dp*cx_i*d(3)))
-!!$
-!!$          else
-             pref = pre14 * q_j / 3.0_dp
-             vterm = pref * ri3 * (qxx_i * (3.0_dp*cx2 - 1.0_dp) + &
-                  qyy_i * (3.0_dp*cy2 - 1.0_dp) + &
-                  qzz_i * (3.0_dp*cz2 - 1.0_dp))
-             vpair = vpair + vterm
-             epot = epot + sw*vterm
-             
-             dudx = dudx - 5.0_dp*sw*vterm*riji*xhat + sw*pref*ri4 * ( &
-                  qxx_i*(6.0_dp*cx_i*ux_i(1) - 2.0_dp*xhat) + &
-                  qyy_i*(6.0_dp*cy_i*uy_i(1) - 2.0_dp*xhat) + &
-                  qzz_i*(6.0_dp*cz_i*uz_i(1) - 2.0_dp*xhat) ) 
-             dudy = dudy - 5.0_dp*sw*vterm*riji*yhat + sw*pref*ri4 * ( &
-                  qxx_i*(6.0_dp*cx_i*ux_i(2) - 2.0_dp*yhat) + &
-                  qyy_i*(6.0_dp*cy_i*uy_i(2) - 2.0_dp*yhat) + &
-                  qzz_i*(6.0_dp*cz_i*uz_i(2) - 2.0_dp*yhat) )
-             dudz = dudz - 5.0_dp*sw*vterm*riji*zhat + sw*pref*ri4 * ( &
-                  qxx_i*(6.0_dp*cx_i*ux_i(3) - 2.0_dp*zhat) + &
-                  qyy_i*(6.0_dp*cy_i*uy_i(3) - 2.0_dp*zhat) + &
-                  qzz_i*(6.0_dp*cz_i*uz_i(3) - 2.0_dp*zhat) ) 
-             
-             dudux_i(1) = dudux_i(1) + sw*pref*ri3*(qxx_i*6.0_dp*cx_i*xhat)
-             dudux_i(2) = dudux_i(2) + sw*pref*ri3*(qxx_i*6.0_dp*cx_i*yhat)
-             dudux_i(3) = dudux_i(3) + sw*pref*ri3*(qxx_i*6.0_dp*cx_i*zhat)
-             
-             duduy_i(1) = duduy_i(1) + sw*pref*ri3*(qyy_i*6.0_dp*cy_i*xhat)
-             duduy_i(2) = duduy_i(2) + sw*pref*ri3*(qyy_i*6.0_dp*cy_i*yhat)
-             duduy_i(3) = duduy_i(3) + sw*pref*ri3*(qyy_i*6.0_dp*cy_i*zhat)
-             
-             duduz_i(1) = duduz_i(1) + sw*pref*ri3*(qzz_i*6.0_dp*cz_i*xhat)
-             duduz_i(2) = duduz_i(2) + sw*pref*ri3*(qzz_i*6.0_dp*cz_i*yhat)
-             duduz_i(3) = duduz_i(3) + sw*pref*ri3*(qzz_i*6.0_dp*cz_i*zhat)
-!!$          endif
+          pref = pre14 * q_j / 3.0_dp
+          vterm = pref * ri3 * (qxx_i * (3.0_dp*cx2 - 1.0_dp) + &
+               qyy_i * (3.0_dp*cy2 - 1.0_dp) + &
+               qzz_i * (3.0_dp*cz2 - 1.0_dp))
+          vpair = vpair + vterm
+          epot = epot + sw*vterm
+          
+          dudx = dudx - 5.0_dp*sw*vterm*riji*xhat + sw*pref*ri4 * ( &
+               qxx_i*(6.0_dp*cx_i*ux_i(1) - 2.0_dp*xhat) + &
+               qyy_i*(6.0_dp*cy_i*uy_i(1) - 2.0_dp*xhat) + &
+               qzz_i*(6.0_dp*cz_i*uz_i(1) - 2.0_dp*xhat) ) 
+          dudy = dudy - 5.0_dp*sw*vterm*riji*yhat + sw*pref*ri4 * ( &
+               qxx_i*(6.0_dp*cx_i*ux_i(2) - 2.0_dp*yhat) + &
+               qyy_i*(6.0_dp*cy_i*uy_i(2) - 2.0_dp*yhat) + &
+               qzz_i*(6.0_dp*cz_i*uz_i(2) - 2.0_dp*yhat) )
+          dudz = dudz - 5.0_dp*sw*vterm*riji*zhat + sw*pref*ri4 * ( &
+               qxx_i*(6.0_dp*cx_i*ux_i(3) - 2.0_dp*zhat) + &
+               qyy_i*(6.0_dp*cy_i*uy_i(3) - 2.0_dp*zhat) + &
+               qzz_i*(6.0_dp*cz_i*uz_i(3) - 2.0_dp*zhat) ) 
+          
+          dudux_i(1) = dudux_i(1) + sw*pref*ri3*(qxx_i*6.0_dp*cx_i*xhat)
+          dudux_i(2) = dudux_i(2) + sw*pref*ri3*(qxx_i*6.0_dp*cx_i*yhat)
+          dudux_i(3) = dudux_i(3) + sw*pref*ri3*(qxx_i*6.0_dp*cx_i*zhat)
+          
+          duduy_i(1) = duduy_i(1) + sw*pref*ri3*(qyy_i*6.0_dp*cy_i*xhat)
+          duduy_i(2) = duduy_i(2) + sw*pref*ri3*(qyy_i*6.0_dp*cy_i*yhat)
+          duduy_i(3) = duduy_i(3) + sw*pref*ri3*(qyy_i*6.0_dp*cy_i*zhat)
+          
+          duduz_i(1) = duduz_i(1) + sw*pref*ri3*(qzz_i*6.0_dp*cz_i*xhat)
+          duduz_i(2) = duduz_i(2) + sw*pref*ri3*(qzz_i*6.0_dp*cz_i*yhat)
+          duduz_i(3) = duduz_i(3) + sw*pref*ri3*(qzz_i*6.0_dp*cz_i*zhat)
+
        endif
     endif
 
