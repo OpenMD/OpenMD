@@ -28,6 +28,8 @@ ForcefieldFiles = \
  Pt.u3.funcfl \
  Pt.u6.funcfl \
  Pt.VC.funcfl \
+ SuttonChen.SC.frc \
+ SuttonChen.QSC.frc \
 
 DEV_ROOT=..
 include $(DEV_ROOT)/make/Makefile
