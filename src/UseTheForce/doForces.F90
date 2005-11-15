@@ -45,7 +45,7 @@
 
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: doForces.F90,v 1.67 2005-11-02 21:01:18 chrisfen Exp $, $Date: 2005-11-02 21:01:18 $, $Name: not supported by cvs2svn $, $Revision: 1.67 $
+!! @version $Id: doForces.F90,v 1.68 2005-11-15 16:01:06 chuckv Exp $, $Date: 2005-11-15 16:01:06 $, $Name: not supported by cvs2svn $, $Revision: 1.68 $
 
 
 module doForces
@@ -62,6 +62,7 @@ module doForces
   use shapes
   use vector_class
   use eam
+  use suttonchen
   use status
 #ifdef IS_MPI
   use mpiSimulation
@@ -92,9 +93,14 @@ module doForces
   logical, save :: FF_uses_Dipoles
   logical, save :: FF_uses_GayBerne
   logical, save :: FF_uses_EAM
+  logical, save :: FF_uses_SC
+  logical, save :: FF_uses_MEAM
+ 
 
   logical, save :: SIM_uses_DirectionalAtoms
   logical, save :: SIM_uses_EAM
+  logical, save :: SIM_uses_SC
+  logical, save :: SIM_uses_MEAM
   logical, save :: SIM_requires_postpair_calc
   logical, save :: SIM_requires_prepair_calc
   logical, save :: SIM_uses_PBC
@@ -158,6 +164,8 @@ contains
     logical :: i_is_GB
     logical :: i_is_EAM
     logical :: i_is_Shape
+    logical :: i_is_SC
+    logical :: i_is_MEAM
     logical :: j_is_LJ
     logical :: j_is_Elect
     logical :: j_is_Sticky
@@ -165,7 +173,10 @@ contains
     logical :: j_is_GB
     logical :: j_is_EAM
     logical :: j_is_Shape
+    logical :: j_is_SC
+    logical :: j_is_MEAM
     real(kind=dp) :: myRcut
+
 
     status = 0   
 
@@ -204,6 +215,8 @@ contains
        call getElementProperty(atypes, i, "is_GayBerne", i_is_GB)
        call getElementProperty(atypes, i, "is_EAM", i_is_EAM)
        call getElementProperty(atypes, i, "is_Shape", i_is_Shape)
+       call getElementProperty(atypes, i, "is_SC", i_is_SC)
+       call getElementProperty(atypes, i, "is_MEAM", i_is_MEAM)
 
        do j = i, nAtypes
 
@@ -217,6 +230,8 @@ contains
           call getElementProperty(atypes, j, "is_GayBerne", j_is_GB)
           call getElementProperty(atypes, j, "is_EAM", j_is_EAM)
           call getElementProperty(atypes, j, "is_Shape", j_is_Shape)
+          call getElementProperty(atypes, j, "is_SC", j_is_SC)
+          call getElementProperty(atypes, j, "is_MEAM", j_is_MEAM)
 
           if (i_is_LJ .and. j_is_LJ) then
              iHash = ior(iHash, LJ_PAIR)            
@@ -236,6 +251,10 @@ contains
 
           if (i_is_EAM .and. j_is_EAM) then
              iHash = ior(iHash, EAM_PAIR)
+          endif
+
+          if (i_is_SC .and. j_is_SC) then
+             iHash = ior(iHash, SC_PAIR)
           endif
 
           if (i_is_GB .and. j_is_GB) iHash = ior(iHash, GAYBERNE_PAIR)
@@ -569,6 +588,7 @@ contains
   subroutine setSimVariables()
     SIM_uses_DirectionalAtoms = SimUsesDirectionalAtoms()
     SIM_uses_EAM = SimUsesEAM()
+    SIM_uses_SC  = SimUsesSC()
     SIM_requires_postpair_calc = SimRequiresPostpairCalc()
     SIM_requires_prepair_calc = SimRequiresPrepairCalc()
     SIM_uses_PBC = SimUsesPBC()
@@ -1244,6 +1264,13 @@ contains
        call do_shape_pair(i, j, d, r, rijsq, sw, vpair, fpair, &
             pot(VDW_POT), A, f, t, do_pot)
     endif
+
+    if ( iand(iHash, SC_PAIR).ne.0 ) then       
+       call do_SC_pair(i, j, d, r, rijsq, sw, vpair, fpair, &
+            pot(METALLIC_POT), f, do_pot)
+    endif
+
+    
      
   end subroutine do_pair
 
@@ -1280,6 +1307,10 @@ contains
     if ( iand(iHash, EAM_PAIR).ne.0 ) then       
             call calc_EAM_prepair_rho(i, j, d, r, rijsq )
     endif
+
+    if ( iand(iHash, SC_PAIR).ne.0 ) then       
+            call calc_SC_prepair_rho(i, j, d, r, rijsq )
+    endif
     
   end subroutine do_prepair
 
@@ -1290,6 +1321,9 @@ contains
 
     if (FF_uses_EAM .and. SIM_uses_EAM) then
        call calc_EAM_preforce_Frho(nlocal,pot(METALLIC_POT))
+    endif
+    if (FF_uses_SC .and. SIM_uses_SC) then
+       call calc_SC_preforce_Frho(nlocal,pot(METALLIC_POT))
     endif
 
 
@@ -1474,7 +1508,8 @@ contains
 
   function FF_RequiresPrepairCalc() result(doesit)
     logical :: doesit
-    doesit = FF_uses_EAM
+    doesit = FF_uses_EAM .or. FF_uses_SC &
+         .or. FF_uses_MEAM
   end function FF_RequiresPrepairCalc
 
 #ifdef PROFILE

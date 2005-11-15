@@ -113,6 +113,8 @@ module simulation
   public :: SimRequiresPrepairCalc
   public :: SimRequiresPostpairCalc
   public :: SimHasAtype
+  public :: SimUsesSC
+  public :: SimUsesMEAM
 
 contains
 
@@ -546,6 +548,18 @@ contains
           doesit = thisSim%SIM_uses_EAM
         end function SimUsesEAM
 
+
+        function SimUsesSC() result(doesit)
+          logical :: doesit
+          doesit = thisSim%SIM_uses_SC
+        end function SimUsesSC
+
+        function SimUsesMEAM() result(doesit)
+          logical :: doesit
+          doesit = thisSim%SIM_uses_MEAM
+        end function SimUsesMEAM
+
+
         function SimUsesShapes() result(doesit)
           logical :: doesit
           doesit = thisSim%SIM_uses_Shapes
@@ -568,7 +582,8 @@ contains
 
         function SimRequiresPrepairCalc() result(doesit)
           logical :: doesit
-          doesit = thisSim%SIM_uses_EAM
+          doesit = thisSim%SIM_uses_EAM .or. thisSim%SIM_uses_SC &
+               .or. thisSim%SIM_uses_MEAM
         end function SimRequiresPrepairCalc
         
         function SimRequiresPostpairCalc() result(doesit)
