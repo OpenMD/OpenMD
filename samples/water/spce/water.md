@@ -209,11 +209,11 @@ molecule{
     members(0, 1, 2);
   }
 
-//  nCutoffGroups = 1;
-//  cutoffGroup[0]{
-//    nMembers = 3;
-//    members(0, 1, 2);
-//  }
+  nCutoffGroups = 1;
+  cutoffGroup[0]{
+    nMembers = 3;
+    members(0, 1, 2);
+  }
 }
 
 molecule{
