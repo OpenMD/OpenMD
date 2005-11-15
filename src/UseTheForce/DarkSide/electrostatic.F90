@@ -651,14 +651,14 @@ contains
              if (screeningMethod .eq. DAMPED) then
                 f0 = derfc(dampingAlpha*rij)
                 varEXP = exp(-alpha2*rij*rij)
-                f1 = alphaPi*rij*varEXP + f0c
+                f1 = alphaPi*rij*varEXP + f0
              endif
 
              vterm = pre11 * q_i * q_j * (riji*f0 - rcuti*f0c)
              vpair = vpair + vterm
              epot = epot + sw*vterm
              
-             dudr  = -sw*pre11*q_i*q_j * riji * riji * f1
+             dudr  = -sw*pre11*q_i*q_j * riji*riji*f1
              
              dudx = dudx + dudr * xhat
              dudy = dudy + dudr * yhat
