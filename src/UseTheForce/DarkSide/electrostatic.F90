@@ -646,69 +646,44 @@ contains
     if (i_is_Charge) then
 
        if (j_is_Charge) then
+          if (screeningMethod .eq. DAMPED) then
+             f0 = derfc(dampingAlpha*rij)
+             varEXP = exp(-alpha2*rij*rij)
+             f1 = alphaPi*rij*varEXP + f0
+          endif
+
+          preVal = pre11 * q_i * q_j
 
           if (summationMethod .eq. SHIFTED_POTENTIAL) then
-             if (screeningMethod .eq. DAMPED) then
-                f0 = derfc(dampingAlpha*rij)
-                varEXP = exp(-alpha2*rij*rij)
-                f1 = alphaPi*rij*varEXP + f0
-             endif
-
-             vterm = pre11 * q_i * q_j * (riji*f0 - rcuti*f0c)
-             vpair = vpair + vterm
-             epot = epot + sw*vterm
+             vterm = preVal * (riji*f0 - rcuti*f0c)
              
-             dudr  = -sw*pre11*q_i*q_j * riji*riji*f1
-             
-             dudx = dudx + dudr * xhat
-             dudy = dudy + dudr * yhat
-             dudz = dudz + dudr * zhat
-
+             dudr  = -sw * preVal * riji * riji * f1
+  
           elseif (summationMethod .eq. SHIFTED_FORCE) then
-             if (screeningMethod .eq. DAMPED) then
-                f0 = derfc(dampingAlpha*rij)
-                varEXP = exp(-alpha2*rij*rij)
-                f1 = alphaPi*rij*varEXP + f0
-             endif
-
-             vterm = pre11 * q_i * q_j * ( riji*f0 - rcuti*f0c + &
+             vterm = preVal * ( riji*f0 - rcuti*f0c + &
                   f1c*rcuti2*(rij-defaultCutoff) )
              
-             vpair = vpair + vterm
-             epot = epot + sw*vterm
-             
-             dudr  = -sw*pre11*q_i*q_j * (riji*riji*f1 - rcuti2*f1c)
-                          
-             dudx = dudx + dudr * xhat
-             dudy = dudy + dudr * yhat
-             dudz = dudz + dudr * zhat
-
+             dudr  = -sw*preVal * (riji*riji*f1 - rcuti2*f1c)
+  
           elseif (summationMethod .eq. REACTION_FIELD) then
-             preVal = pre11 * q_i * q_j
              rfVal = preRF*rij*rij
              vterm = preVal * ( riji + rfVal )
              
-             vpair = vpair + vterm
-             epot = epot + sw*vterm
-             
              dudr  = sw * preVal * ( 2.0d0*rfVal - riji )*riji
-             
-             dudx = dudx + dudr * xhat
-             dudy = dudy + dudr * yhat
-             dudz = dudz + dudr * zhat
-
+  
           else
-             vterm = pre11 * q_i * q_j * riji
-             vpair = vpair + vterm
-             epot = epot + sw*vterm
+             vterm = preVal * riji*f0
              
-             dudr  = - sw * vterm * riji
-             
-             dudx = dudx + dudr * xhat
-             dudy = dudy + dudr * yhat
-             dudz = dudz + dudr * zhat
-
+             dudr  = - sw * preVal * riji*riji*f1
+  
           endif
+
+          vpair = vpair + vterm
+          epot = epot + sw*vterm
+
+          dudx = dudx + dudr * xhat
+          dudy = dudy + dudr * yhat
+          dudz = dudz + dudr * zhat
 
        endif
 
