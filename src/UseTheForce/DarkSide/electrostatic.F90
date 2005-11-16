@@ -1166,7 +1166,8 @@ contains
           
        endif
 
-    elseif (summationMethod .eq. SHIFTED_FORCE) then
+    elseif ( (summationMethod .eq. SHIFTED_FORCE) .or. &
+         (summationMethod .eq. SHIFTED_POTENTIAL) ) then
        if (ElectrostaticMap(atid1)%is_Charge) then
           c1 = getCharge(atid1)
           
