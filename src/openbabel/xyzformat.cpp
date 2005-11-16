@@ -13,56 +13,13 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 ***********************************************************************/
 
-#include "mol.hpp"
-#include "obconversion.hpp"
-#include "obmolecformat.hpp"
+#include "xyzformat.hpp"
 
-#ifdef HAVE_SSTREAM
-#include <sstream>
-#else
-#include <strstream>
-#endif
 
 using namespace std;
 namespace OpenBabel
 {
 
-class XYZFormat : public OBMoleculeFormat
-{
-public:
-  //Register this format type ID
-  XYZFormat()
-  {
-    OBConversion::RegisterFormat("xyz", this, "chemical/x-xyz");
-  }
-
-  virtual const char* Description() //required
-  {
-    return
-      "XYZ cartesian coordinates format\n \
-       Read Options e.g. -as\n\
-        s  Output single bonds only\n\
-        b  Disable bonding entirely\n\n";
-  };
-
-  virtual const char* SpecificationURL()
-  {return "http://openbabel.sourceforge.net/formats/xyz.shtml";}; //optional
-
-  virtual const char* GetMIMEType() 
-  { return "chemical/x-xyz"; };
-
-  //*** This section identical for most OBMol conversions ***
-  ////////////////////////////////////////////////////
-  /// The "API" interface functions
-  virtual bool ReadMolecule(OBBase* pOb, OBConversion* pConv);
-  virtual bool WriteMolecule(OBBase* pOb, OBConversion* pConv);
-};
-//***
-
-//Make an instance of the format class
-XYZFormat theXYZFormat;
-
-/////////////////////////////////////////////////////////////////
 bool XYZFormat::ReadMolecule(OBBase* pOb, OBConversion* pConv)
 {
     OBMol* pmol = dynamic_cast<OBMol*>(pOb);
