@@ -52,20 +52,6 @@
 
 #include "io/ParamConstraint.hpp"
 
-#define DefineParameter(NAME,KEYWORD)                              \
-  NAME.setKeyword(KEYWORD);                  \
-  parameters_.insert(std::make_pair(std::string(KEYWORD),  &NAME));
-
-#define DefineOptionalParameter(NAME,KEYWORD)                              \
-  NAME.setKeyword(KEYWORD); NAME.setOptional(true);                    \
-  parameters_.insert(std::make_pair(std::string(KEYWORD),  &NAME));
-
-#define DefineOptionalParameterWithDefaultValue(NAME,KEYWORD, DEFAULTVALUE)                              \
-  NAME.setKeyword(KEYWORD); NAME.setOptional(true); NAME.setDefaultValue(DEFAULTVALUE);                      \
-  parameters_.insert(std::make_pair(std::string(KEYWORD),  &NAME));
-
-#define CheckParameter(NAME, CONSTRAINT)                              \
-  if (!NAME.empty()) { if (!(CONSTRAINT)(NAME.getData())) { sprintf(painCave.errMsg,"Error in checking %s : should be %s\n",NAME.getKeyword().c_str(),(CONSTRAINT).getConstraintDescription().c_str()); painCave.isFatal = 1; painCave.severity = OOPSE_ERROR; simError();} }                 
 
 Globals::Globals(){
  

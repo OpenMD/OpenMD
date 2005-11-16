@@ -44,7 +44,7 @@
  *
  *  Created by Charles F. Vardeman II on 11/9/05.
  *  @author  Charles F. Vardeman II 
- *  @version $Id: SC_FF.cpp,v 1.2 2005-11-15 16:18:36 chuckv Exp $
+ *  @version $Id: SC_FF.cpp,v 1.3 2005-11-16 21:37:43 chuckv Exp $
  *
  */
 
@@ -86,14 +86,6 @@ namespace oopse {
     //not important.
     spMan_.push_back(new DirectionalAtomTypesSectionParser());
     spMan_.push_back(new AtomTypesSectionParser());
-    spMan_.push_back(new LennardJonesAtomTypesSectionParser());
-    spMan_.push_back(new ChargeAtomTypesSectionParser());
-    spMan_.push_back(new MultipoleAtomTypesSectionParser());
-    spMan_.push_back(new EAMAtomTypesSectionParser());
-    spMan_.push_back(new StickyAtomTypesSectionParser());
-    spMan_.push_back(new BondTypesSectionParser());
-    spMan_.push_back(new BendTypesSectionParser());
-    spMan_.push_back(new TorsionTypesSectionParser());
     spMan_.push_back(new SCAtomTypesSectionParser());
     
   }

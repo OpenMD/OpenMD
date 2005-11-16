@@ -39,62 +39,45 @@
  * such damages.
  *
  *
- *  SCAtomTypesSectionParser.cpp
+ *  OptionSectionParser.hpp
  *  OOPSE-2.0
  *
- *  Created by Charles F. Vardeman II on 11/14/05.
+ *  Created by Charles F. Vardeman II on 11/15/05.
  *  @author  Charles F. Vardeman II 
- *  @version $Id: SCAtomTypesSectionParser.cpp,v 1.2 2005-11-16 21:37:41 chuckv Exp $
+ *  @version $Id: OptionSectionParser.hpp,v 1.1 2005-11-16 21:37:41 chuckv Exp $
  *
  */
 
-#include "io/SCAtomTypesSectionParser.hpp"
+#ifndef IO_OPTIONSECTIONPARSER_HPP
+#define IO_OPTIONSECTIONPARSER_HPP
+
+#include "io/SectionParser.hpp"
 #include "types/AtomType.hpp"
-#include "UseTheForce/ForceField.hpp"
-#include "utils/simError.h"
+
 namespace oopse {
   
-  SCAtomTypesSectionParser::SCAtomTypesSectionParser() {
-    setSectionName("SCAtomTypes");
-  }
+  /**
+  * @class OptionSectionParser OptionSectionParser.hpp "io/OptionSectionParser.hpp"
+   */
+  class OptionSectionParser : public SectionParser {
+public:
+    OptionSectionParser();
+    
+    DeclareParameter(MixingRule, std::string);
+    
+private:
+    virtual void parseLine(ForceField& ff, const std::string& line, int lineNo);
+    
+    typedef std::map<std::string, ParameterBase*> ParamMap;
+    ParamMap parameters_;
+      
+    
+    
+  };
   
-  void SCAtomTypesSectionParser::parseLine(ForceField& ff,const std::string& line, int lineNo){
-    StringTokenizer tokenizer(line);
-    int nTokens = tokenizer.countTokens();    
-    
-    //in SCAtomTypesSectionParser, a line at least contains 6 tokens
-    //atomTypeName, epsilon,c,m,n and alpha
-    if (nTokens < 6)  {
-      sprintf(painCave.errMsg, "SCAtomTypesSectionParser Error: Not enough tokens at line %d\n",
-              lineNo);
-      painCave.isFatal = 1;
-      simError();                    
-    } else {
-      
-      std::string atomTypeName = tokenizer.nextToken();    
-      AtomType* atomType = ff.getAtomType(atomTypeName);
-      
-      if (atomType != NULL) {
-        SCParam scParam;                        
-        scParam.epsilon = tokenizer.nextTokenAsDouble();
-        scParam.c = tokenizer.nextTokenAsDouble();
-        scParam.m = tokenizer.nextTokenAsDouble();
-        scParam.n = tokenizer.nextTokenAsDouble();
-        scParam.alpha = tokenizer.nextTokenAsDouble();
-        
-        
-        atomType->addProperty(new SCParamGenericData("SC", scParam));
-        atomType->setSC();
-      }else {
-        sprintf(painCave.errMsg, "SCAtomTypesSectionParser Error: Atom Type [%s] is not created yet\n", atomTypeName.c_str());
-        painCave.isFatal = 1;
-        simError();    
-      }
-      
-    }    
-    
-    
-  }
   
-} //end namespace oopse
+} //namespace oopse
+
+#endif //IO_OPTIONSECTIONPARSER_HPP
+
 
