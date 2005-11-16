@@ -141,11 +141,12 @@ namespace oopse {
       needPotential = true;
       needStress = true;   
     }
-  
+
+    std::cout << currentSnapshot_->getTime()<< ": \n";  
   }
 
   void VelocityVerletIntegrator::postStep() {
-  
+
     //save snapshot
     info_->getSnapshotManager()->advance();
   

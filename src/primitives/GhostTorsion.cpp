@@ -46,7 +46,7 @@ namespace oopse {
   GhostTorsion::GhostTorsion(Atom *atom1, Atom *atom2,  DirectionalAtom* ghostAtom,
 			     TorsionType *tt) : Torsion(atom1, atom2, ghostAtom, ghostAtom, tt) {}
 
-  void GhostTorsion::calcForce() {
+  void GhostTorsion::calcForce(double& angle) {
     DirectionalAtom* ghostAtom = static_cast<DirectionalAtom*>(atom3_);    
 
     Vector3d pos1 = atom1_->getPos();
@@ -71,15 +71,12 @@ namespace oopse {
     
     //  Calculate the sin and cos
     double cos_phi = dot(A, B) ;
-    double sin_phi = dot(C, B);
 
-    double dVdPhi;
-    torsionType_->calcForce(cos_phi, sin_phi, potential_, dVdPhi);
+    double dVdcosPhi;
+    torsionType_->calcForce(cos_phi, potential_, dVdcosPhi);
 
     Vector3d dcosdA = (cos_phi * A - B) /rA;
     Vector3d dcosdB = (cos_phi * B - A) /rB;
-
-    double dVdcosPhi = -dVdPhi / sin_phi;
 
     Vector3d f1 = dVdcosPhi * cross(r32, dcosdA);
     Vector3d f2 = dVdcosPhi * ( cross(r43, dcosdB) - cross(r21, dcosdA));
@@ -92,6 +89,8 @@ namespace oopse {
 
     f3.negate();
     ghostAtom->addTrq(cross(r43, f3));    
+
+    angle = acos(cos_phi) /M_PI * 180.0;
   }
 
 }

@@ -2,8 +2,9 @@ Package = math
 
 Source    = \
 				ParallelRandNumGen.cpp \
-        SeqRandNumGen.cpp \
-				RealSphericalHarmonic.cpp 
+                                SeqRandNumGen.cpp \
+				RealSphericalHarmonic.cpp \
+				ChebyshevPolynomials.cpp
 
 RmiSource =
 

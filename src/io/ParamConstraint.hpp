@@ -44,7 +44,7 @@
 #include <sstream>
 #include "utils/CaseConversion.hpp"
 #include "utils/StringTokenizer.hpp"
-
+namespace oopse {
 /**
   * This class allows to recognize constraint predicates, so that they can be combined using
   * composition operators. Every constraint predicate must be derived from this class
@@ -331,61 +331,42 @@ operator !( const ParamConstraintFacade<ConsT>& cons ) {
 }
 
 
-NotEmptyConstraint isNotEmpty() {
-    return NotEmptyConstraint();
-}
+NotEmptyConstraint isNotEmpty();
+ZeroConstraint isZero();
 
-ZeroConstraint isZero() {
-    return ZeroConstraint();
-}
+ParamConstraintFacade<NonZeroConstraint> isNonZero();
+PositiveConstraint isPositive();
+NonPositiveConstraint isNonPositive();
 
-ParamConstraintFacade<NonZeroConstraint> isNonZero() {
-    return ParamConstraintFacade<NonZeroConstraint>();
-}
+NegativeConstraint isNegative();
 
-PositiveConstraint isPositive() {
-    return PositiveConstraint();
-}
-
-NonPositiveConstraint isNonPositive() {
-    return NonPositiveConstraint();
-}
-
-NegativeConstraint isNegative() {
-    return NegativeConstraint();
-}
-
-NonNegativeConstraint isNonNegative() {
-    return NonNegativeConstraint();
-}
+NonNegativeConstraint isNonNegative();
 
 template<typename T>
-LessThanConstraint<T>isLessThan(T& v ) {
+inline LessThanConstraint<T>isLessThan(T& v ) {
     return LessThanConstraint<T>(v);
 }
 
 template<typename T>
-LessThanOrEqualToConstraint<T> isLessThanOrEqualTo(T& v ) {
+inline LessThanOrEqualToConstraint<T> isLessThanOrEqualTo(T& v ) {
     return ParamConstraintFacade<LessThanOrEqualToConstraint<T> >(v);
 }
 
 template<typename T>
-EqualConstraint<T> isEqual(T& v ) {
+inline EqualConstraint<T> isEqual(T& v ) {
     return EqualConstraint<T>(v);
 }
 
 template<typename T>
-GreaterThanConstraint<T> isGreaterThan(T& v ) {
+inline GreaterThanConstraint<T> isGreaterThan(T& v ) {
     return GreaterThanConstraint<T>(v);
 }
 
 template<typename T>
-GreaterThanOrEqualTo<T> isGreaterThanOrEqualTo(T& v ) {
+inline GreaterThanOrEqualTo<T> isGreaterThanOrEqualTo(T& v ) {
     return GreaterThanOrEqualTo<T>(v);
 }
 
-EqualIgnoreCaseConstraint isEqualIgnoreCase(std::string str) {
-    return EqualIgnoreCaseConstraint(str);
+EqualIgnoreCaseConstraint isEqualIgnoreCase(std::string str);
 }
-
 #endif

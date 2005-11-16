@@ -44,34 +44,31 @@
  *
  *  Created by Charles F. Vardeman II on 11/15/05.
  *  @author  Charles F. Vardeman II 
- *  @version $Id: OptionSectionParser.hpp,v 1.1 2005-11-16 21:37:41 chuckv Exp $
+ *  @version $Id: OptionSectionParser.hpp,v 1.2 2005-11-16 23:10:02 tim Exp $
  *
  */
 
 #ifndef IO_OPTIONSECTIONPARSER_HPP
 #define IO_OPTIONSECTIONPARSER_HPP
 
+#include "io/ForceFieldOptions.hpp"
 #include "io/SectionParser.hpp"
 #include "types/AtomType.hpp"
 
 namespace oopse {
+
   
   /**
   * @class OptionSectionParser OptionSectionParser.hpp "io/OptionSectionParser.hpp"
    */
   class OptionSectionParser : public SectionParser {
 public:
-    OptionSectionParser();
-    
-    DeclareParameter(MixingRule, std::string);
-    
+    OptionSectionParser(ForceFieldOptions& options);    
+     virtual void validateSection();
+
 private:
     virtual void parseLine(ForceField& ff, const std::string& line, int lineNo);
-    
-    typedef std::map<std::string, ParameterBase*> ParamMap;
-    ParamMap parameters_;
-      
-    
+    ForceFieldOptions& options_;
     
   };
   

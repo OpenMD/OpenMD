@@ -79,10 +79,9 @@ namespace oopse {
       polynomial_ = p;
     }
         
-    virtual void calcForce(double cosPhi, double sinPhi, double& V, double& dVdPhi) {
+    virtual void calcForce(double cosPhi, double& V, double& dVdCosPhi) {
       V = polynomial_.evaluate(cosPhi);
-      double dVdcosPhi = polynomial_.evaluateDerivative(cosPhi); 
-      dVdPhi = - dVdcosPhi * sinPhi;
+      dVdCosPhi = polynomial_.evaluateDerivative(cosPhi); 
     }
 
     friend std::ostream& operator <<(std::ostream& os, PolynomialTorsionType& pbt);
@@ -92,6 +91,7 @@ namespace oopse {
     DoublePolynomial polynomial_;
   };
 
+/*  
   std::ostream& operator <<(std::ostream& os, PolynomialTorsionType& ptt) {
     DoublePolynomial::const_iterator i;
 
@@ -121,7 +121,7 @@ namespace oopse {
     return os;
   }
 
-
+*/
 } //end namespace oopse
 #endif //TYPES_POLYNOMIALBONDTYPE_HPP
 

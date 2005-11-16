@@ -187,7 +187,7 @@ namespace oopse {
   
   void SimCreator::gatherParameters(SimInfo *info, const std::string& mdfile) {
     
-    //figure out the ouput file names
+    //figure out the output file names
     std::string prefix;
     
 #ifdef IS_MPI

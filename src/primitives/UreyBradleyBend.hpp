@@ -60,7 +60,7 @@ namespace oopse {
   public:
     UreyBradleyBend(Atom* atom1, Atom* atom2, Atom* atom3, UreyBradleyBendType* bt);
     virtual ~UreyBradleyBend();
-    virtual void calcForce();
+    virtual void calcForce(double& angle);
 
   protected:
     virtual UreyBradleyBendType* getUreyBradleyBendType() {

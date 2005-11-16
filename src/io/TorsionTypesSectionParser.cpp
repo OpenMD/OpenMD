@@ -151,15 +151,17 @@ namespace oopse {
       } else {
 	int nSets = nTokens / 3;
   
-	CharmmTorsionType* ctt = new CharmmTorsionType();
-                
+      std::vector<CharmmTorsionParameter> parameters;             
 	for (int i = 0; i < nSets; ++i) {
-	  double kchi = tokenizer.nextTokenAsDouble();
-	  int n = tokenizer.nextTokenAsInt();
-	  double delta = tokenizer.nextTokenAsDouble();
-    
-	  ctt->setCharmmTorsionParameter(kchi, n, delta);
+        CharmmTorsionParameter currParam;
+	  currParam.kchi = tokenizer.nextTokenAsDouble();
+	  currParam.n = tokenizer.nextTokenAsInt();
+	  currParam.delta = tokenizer.nextTokenAsDouble();
+        parameters.push_back(currParam);
 	}
+
+	CharmmTorsionType* ctt = new CharmmTorsionType(parameters);
+
       }
 
       break;

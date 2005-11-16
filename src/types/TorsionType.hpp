@@ -58,7 +58,7 @@ namespace oopse {
   public:
     virtual ~TorsionType() {}
     
-    virtual void calcForce(double cosPhi, double sinPhi, double& V, double& dVdPhi) = 0;
+    virtual void calcForce(double cosPhi, double& V, double& dVdCosPhi) = 0;
 
   };
   

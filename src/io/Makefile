@@ -34,7 +34,9 @@ Source    = \
 	ZConsWriter.cpp \
 	RestReader.cpp \
 	RestWriter.cpp \
-	gzstream.cpp
+	gzstream.cpp\
+        ParamConstraint.cpp \
+	OptionSectionParser.cpp
 
 RmiSource =
 

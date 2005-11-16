@@ -62,7 +62,7 @@ namespace oopse {
 
       }
 
-    virtual void calcForce();
+    virtual void calcForce(double& angle);
         
   };
 

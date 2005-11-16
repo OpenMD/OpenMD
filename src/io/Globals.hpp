@@ -59,6 +59,7 @@
 class Globals {
   public:
     Globals();
+    ~Globals();
     
   DeclareParameter(ForceField, std::string);
   DeclareParameter(NComponents, int);  

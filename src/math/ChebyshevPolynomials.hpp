@@ -63,7 +63,7 @@ namespace oopse {
   class ChebyshevPolynomials {
   public:
     ChebyshevPolynomials(int maxPower);
-
+    virtual ~ChebyshevPolynomials() {}
     /**
      * Calculates the value of the nth Chebyshev Polynomial evaluated at the given x value.
      * @return The value of the nth Chebyshev Polynomial evaluates at the given x value

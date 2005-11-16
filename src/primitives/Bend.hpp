@@ -52,6 +52,16 @@
 #include "primitives/Atom.hpp"
 #include "types/BendType.hpp"
 namespace oopse {
+struct BendData {
+    double angle;
+    double potential;
+};
+
+struct BendDataSet {
+    double deltaV;
+    BendData prev;
+    BendData curr;
+};
 
   class Bend {
   public:
@@ -59,7 +69,7 @@ namespace oopse {
       : atom1_(atom1), atom2_(atom2), atom3_(atom3), bendType_(bt) {}
 
     virtual ~Bend() {}
-    virtual void calcForce();
+    virtual void calcForce(double& angle);
         
     double getPotential() {
       return potential_;

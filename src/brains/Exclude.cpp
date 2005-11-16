@@ -78,6 +78,23 @@ namespace oopse {
     }
   }
 
+void Exclude::addPairs(std::set<int>& set1, std::set<int>& set2) {
+    for (std::set<int>::iterator iter1 = set1.begin(); iter1 !=  set1.end(); ++ iter1) {
+        for(std::set<int>::iterator iter2 = set2.begin(); iter2 != set2.end(); ++ iter2) {
+            this->addPair(*iter1, * iter2);
+        }
+    }    
+}
+
+template<typename IterType1, typename IterType2>
+void Exclude::addPairs(IterType1 iter1_first, IterType1 iter1_last, IterType2 iter2_first, IterType2 iter2_last) {
+    for (IterType1 iter1 = iter1_first; iter1 != iter1_last; ++ iter1) {
+        for(IterType2 iter2 = iter2_first; iter2 != iter2_last; ++ iter2) {
+            this->addPair(*iter1, * iter2);
+        }
+    }
+}
+
   void Exclude::removePair(int i, int j) {
 
     if (i == j) {
@@ -94,6 +111,23 @@ namespace oopse {
       modified_ = true;
     }
   }
+
+void Exclude::removePairs(std::set<int>& set1, std::set<int>& set2) {
+    for (std::set<int>::iterator iter1 = set1.begin(); iter1 !=  set1.end(); ++ iter1) {
+        for(std::set<int>::iterator iter2 = set2.begin(); iter2 != set2.end(); ++ iter2) {
+            this->removePair(*iter1, * iter2);
+        }
+    }    
+}
+
+template<typename IterType1, typename IterType2>
+void Exclude::removePairs(IterType1 iter1_first, IterType1 iter1_last, IterType2 iter2_first, IterType2 iter2_last) {
+    for (IterType1 iter1 = iter1_first; iter1 != iter1_last; ++ iter1) {
+        for(IterType2 iter2 = iter2_first; iter2 != iter2_last; ++ iter2) {
+            this->removePair(*iter1, * iter2);
+        }
+    }
+}
 
   bool Exclude::hasPair(int i, int j) {
 

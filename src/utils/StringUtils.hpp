@@ -127,6 +127,18 @@ namespace oopse {
     }
     return result;
   }
+
+
+  template<typename T>
+  bool isType(const std::string& str) {
+    T result;
+    std::istringstream iss(str);        
+    bool ret = true;
+    if (!(iss >> result)) {
+        ret = false;
+    }
+    return ret;
+  }
   
   std::string OOPSE_itoa(int value, unsigned int base = 10);
   

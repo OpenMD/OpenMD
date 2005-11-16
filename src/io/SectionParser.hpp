@@ -63,7 +63,7 @@ namespace oopse {
     const std::string& getSectionName() const {
       return sectionName_;
     }
-    
+    virtual void validateSection() {}
   protected:
     void setSectionName(const std::string& sectionName) {
       sectionName_ = sectionName;
@@ -72,6 +72,8 @@ namespace oopse {
   private:
     bool isEndSection(const std::string& line);
     virtual void parseLine(ForceField& ff, const std::string& line, int lineNo) = 0;
+
+    
     std::string sectionName_;
   };
 

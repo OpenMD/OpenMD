@@ -61,7 +61,7 @@ namespace oopse {
     GhostTorsion(Atom *atom1, Atom *atom2,  DirectionalAtom* ghostAtom,
 		 TorsionType* tt);
 
-    virtual void calcForce();
+    virtual void calcForce(double& angle);
         
   };
 

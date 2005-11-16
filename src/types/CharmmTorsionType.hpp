@@ -54,6 +54,7 @@
 #include <vector>
 
 #include "types/TorsionType.hpp"
+#include "types/PolynomialTorsionType.hpp"
 namespace oopse {
 
   struct CharmmTorsionParameter {
@@ -62,48 +63,23 @@ namespace oopse {
     double delta;
   };
 
-  class SamePeriodicityFunctor {
+  class LessThanPeriodicityFunctor {
   public:
-    SamePeriodicityFunctor(int n) : n_(n) {}
-    bool operator()(CharmmTorsionParameter p) {
-      return p.n == n_;
+    bool operator()(const CharmmTorsionParameter& p1, const CharmmTorsionParameter& p2) {
+      return p1.n < p2.n;
     }
-        
-  private:
-    int n_;
   };
   /**
    * @class CharmmTorsionType CharmmTorsionType.hpp "types/CharmmTorsionType.hpp"
    */
   class CharmmTorsionType : public TorsionType{
   public:
+    CharmmTorsionType(std::vector<CharmmTorsionParameter>& parameters);
+            
+    virtual void calcForce(double cosPhi, double& V, double& dVdCosPhi) { torsionType_->calcForce(cosPhi, V, dVdCosPhi);}
 
-    void setCharmmTorsionParameter(CharmmTorsionParameter param) {
-
-      assert(param.n >= 0 && param.n < 6);
-
-      std::vector<CharmmTorsionParameter>::iterator i ;
-      i = std::find_if(parameter_.begin(), parameter_.end(), SamePeriodicityFunctor(param.n));
-
-      if (i != parameter_.end()) {
-	std::cerr << "a parameter set with " << param.n <<" is already there" << std::endl;
-      } else {
-	parameter_.push_back(param);
-      }            
-    }
-
-    void setCharmmTorsionParameter(double kchi, int n, double delta) {
-      CharmmTorsionParameter param;
-      param.kchi = kchi;
-      param.n = n;
-      param.delta = delta;
-      setCharmmTorsionParameter(param);
-    }
-        
-    virtual void calcForce(double cosPhi, double sinPhi, double& V, double& dVdPhi);
-
-  private:
-    std::vector<CharmmTorsionParameter> parameter_;
+  private:    
+    PolynomialTorsionType* torsionType_;
   };
   
 } //end namespace oopse

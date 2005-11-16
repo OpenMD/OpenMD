@@ -74,12 +74,15 @@ namespace oopse {
   class Polynomial {
 
   public:
-        
+    typedef Polynomial<ElemType> PolynomialType;    
     typedef int ExponentType;
     typedef ElemType CoefficientType;
     typedef std::map<ExponentType, CoefficientType> PolynomialPairMap;
     typedef typename PolynomialPairMap::iterator iterator;
     typedef typename PolynomialPairMap::const_iterator const_iterator;
+
+    Polynomial() {}
+    Polynomial(ElemType v) {setCoefficient(0, v);}
     /** 
      * Calculates the value of this Polynomial evaluated at the given x value.
      * @return The value of this Polynomial evaluates at the given x value
@@ -185,7 +188,38 @@ namespace oopse {
     size_t size() {
       return polyPairMap_.size();
     }
-        
+
+    PolynomialType& operator += (const PolynomialType& p) {
+        typename Polynomial<ElemType>::const_iterator i;
+
+        for (i =  p.begin(); i  != p.end(); ++i) {
+          this->addCoefficient(i->first, i->second);
+        }
+
+        return *this;        
+    }
+
+    PolynomialType& operator -= (const PolynomialType& p) {
+        typename Polynomial<ElemType>::const_iterator i;
+        for (i =  p.begin(); i  != p.end(); ++i) {
+          this->addCoefficient(i->first, -i->second);
+        }        
+    }
+
+    PolynomialType& operator *= (const PolynomialType& p) {
+    typename Polynomial<ElemType>::const_iterator i;
+    typename Polynomial<ElemType>::const_iterator j;
+    
+    for (i = this->begin(); i !=this->end(); ++i) {
+      for (j = p.begin(); j !=p.end(); ++j) {
+	this->addCoefficient( i->first + j->first, i->second * j->second);
+      }
+    }
+
+    return *this;
+    }
+
+   
   private:
         
     PolynomialPairMap polyPairMap_;

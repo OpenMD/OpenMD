@@ -44,7 +44,7 @@
 namespace oopse {
 
   /**@todo still a lot left to improve*/
-  void GhostBend::calcForce() {
+  void GhostBend::calcForce(double& angle) {
     DirectionalAtom* ghostAtom = static_cast<DirectionalAtom*>(atom2_);
     
     Vector3d pos1 = atom1_->getPos();
@@ -90,6 +90,8 @@ namespace oopse {
     ghostAtom->addFrc(-force1);
     /**@todo test correctness */
     ghostAtom->addTrq(cross(r32, force3) );
+
+    angle = theta /M_PI * 180.0;
 
   }
 

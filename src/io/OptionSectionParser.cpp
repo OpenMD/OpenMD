@@ -44,7 +44,7 @@
  *
  *  Created by Charles F. Vardeman II on 11/15/05.
  *  @author  Charles F. Vardeman II 
- *  @version $Id: OptionSectionParser.cpp,v 1.1 2005-11-16 21:37:41 chuckv Exp $
+ *  @version $Id: OptionSectionParser.cpp,v 1.2 2005-11-16 23:10:02 tim Exp $
  *
  */
 
@@ -52,13 +52,34 @@
 #include "types/AtomType.hpp"
 #include "UseTheForce/ForceField.hpp"
 #include "utils/simError.h"
+#include "utils/StringUtils.hpp"
 namespace oopse {
-  
-  OptionSectionParser::OptionSectionParser() {
-    setSectionName("Options");
-    DefineOptionalParameter(MixingRule, "standard");
-    
-    
+
+  bool ForceFieldOptions::setData(const std::string& keyword, const std::string& value) {
+      bool result;
+      ParamMap::iterator i =parameters_.find(keyword);
+      if (i != parameters_.end()) {
+        if(isType<int>(value)){
+          int ival = lexi_cast<int>(value);
+          result = i->second->setData(ival);
+        }      
+        else if (isType<double>(value)){
+          double dval = lexi_cast<double>(value);
+          result = i->second->setData(dval);
+        } else{
+           result = i->second->setData(value);
+        }
+      } else {
+        sprintf(painCave.errMsg,  "%s is an unrecognized keyword\n", keyword.c_str() );
+	  painCave.isFatal = 0;
+	  simError();        
+      }
+
+      return result;
+  }
+ 
+  OptionSectionParser::OptionSectionParser(ForceFieldOptions& options) : options_(options) {
+    setSectionName("Options");        
   }
   
   void OptionSectionParser::parseLine(ForceField& ff,const std::string& line, int lineNo){
@@ -66,10 +87,10 @@ namespace oopse {
     StringTokenizer tokenizer(line);
     
     if (tokenizer.countTokens() >= 2) {
-      std::string OptionName = tokenizer.nextToken();
-      std::string OptionValue = tokenizer.nextToken();
+      std::string optionName = tokenizer.nextToken();
+      std::string optionValue = tokenizer.nextToken();
       
-      
+      options_.setData(optionName, optionValue);
       
     } else {
       sprintf(painCave.errMsg, "OptionSectionParser Error: Not enough tokens at line %d\n",
@@ -79,6 +100,9 @@ namespace oopse {
     }
     
   }
-  
+
+  void OptionSectionParser::validateSection() {
+    options_.validateOptions();
+  }
 
 } //end namespace oopse  

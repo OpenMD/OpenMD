@@ -44,7 +44,7 @@
 namespace oopse {
 
   /**@todo still a lot left to improve*/
-  void Bend::calcForce() {
+  void Bend::calcForce(double& angle) {
     Vector3d pos1 = atom1_->getPos();
     Vector3d pos2 = atom2_->getPos();
     Vector3d pos3 = atom3_->getPos();
@@ -73,6 +73,8 @@ namespace oopse {
     double dVdTheta;
 
     bendType_->calcForce(theta, potential_, dVdTheta);
+    //std::cout << atom1_->getType() << "\t" << atom2_->getType() << "\t" << atom3_->getType() << "\t";
+    //std::cout << "theta = " << theta/M_PI * 180.0 <<", potential = " << potential_ << std::endl;
 
     double sinTheta = sqrt(1.0 - cosTheta * cosTheta);
 
@@ -93,6 +95,8 @@ namespace oopse {
     atom1_->addFrc(force1);
     atom2_->addFrc(force2);
     atom3_->addFrc(force3);
+
+    angle = theta /M_PI * 180.0;
   }
 
 } //end namespace oopse

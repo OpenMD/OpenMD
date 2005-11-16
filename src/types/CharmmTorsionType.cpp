@@ -38,41 +38,32 @@
  * University of Notre Dame has been advised of the possibility of
  * such damages.
  */
+#include <algorithm>
 #include <cmath> 
 #include "types/CharmmTorsionType.hpp"
 #include "utils/NumericConstant.hpp"
+#include "math/ChebyshevPolynomials.hpp"
 namespace oopse {
-
-  void CharmmTorsionType::calcForce(double cosPhi, double sinPhi, double& V, double& dVdPhi) {
-    V = 0;
-    dVdPhi = 0; 
-    double phi = -std::atan2(sinPhi, cosPhi);
-    
+CharmmTorsionType::CharmmTorsionType(std::vector<CharmmTorsionParameter>& parameters) {
     std::vector<CharmmTorsionParameter>::iterator i;
-    for (i = parameter_.begin(); i != parameter_.end(); ++i) {
-      double kchi= i->kchi;
-      int n = i->n;        
-      double delta = i->delta;
+    i = std::max_element(parameters.begin(), parameters.end(), LessThanPeriodicityFunctor());
+    if (i != parameters.end()) {
+        int maxPower = i->n;
+        ChebyshevT T(maxPower);
+        ChebyshevU U(maxPower);
 
-      if (n == 0) {
-	//if periodicity is equal to 0, use harmonic form
-	double diff = phi - delta;
-
-	if (diff < -NumericConstant::PI) {
-	  diff += NumericConstant::TWO_PI;
-	} else if (diff > NumericConstant::PI) {
-	  diff -= NumericConstant::TWO_PI;
-	}
-            
-	V += kchi * diff * diff;
-	dVdPhi += 2.0 * kchi * diff;
-
-      } else {
-	//use normal cos form if periodicity is greater than 0
-	V += kchi * (1 + std::cos(n * phi + delta));
-	dVdPhi += -n * kchi * std::sin(n * phi + delta);
-      }
-    } 
-  }
+        // convert parameters of charmm type torsion into PolynomialTorsion's parameters
+        DoublePolynomial finalPolynomial;
+        for (i = parameters.begin(); i != parameters.end(); ++i) {
+            DoublePolynomial cosTerm = T.getChebyshevPolynomial(i->n);
+            cosTerm *= cos(i->delta) * i->kchi;
+            DoublePolynomial sinTerm = U.getChebyshevPolynomial(i->n);
+            sinTerm *= -sin(i->delta) * i->kchi;
+            finalPolynomial = cosTerm + sinTerm;
+            finalPolynomial += i->kchi;
+        }
+        torsionType_->setPolynomial(finalPolynomial);
+    }
+}
 
 } //end namespace oopse

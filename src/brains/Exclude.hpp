@@ -64,8 +64,16 @@ namespace oopse {
     /** Adds a pair into this Exclude class */
     void addPair(int i, int j);
 
+    void addPairs(std::set<int>& set1, std::set<int>& set2);
+    template<typename IterType1, typename IterType2>
+    void addPairs(IterType1 iter1_first, IterType1 iter1_last, IterType2 iter2_first, IterType2 iter2_last);
+
     /** Remove a pair from Exclude class */
     void removePair(int i, int j);
+
+    void removePairs(std::set<int>& set1, std::set<int>& set2);
+    template<typename IterType1, typename IterType2>
+    void removePairs(IterType1 iter1_first, IterType1 iter1_last, IterType2 iter2_first, IterType2 iter2_last);
 
     /** Checks whether pair (i, j) is in this Exclude class */
     bool hasPair(int i, int j);

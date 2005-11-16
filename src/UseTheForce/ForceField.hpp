@@ -57,6 +57,7 @@
 #include <utility>
 
 #include "io/basic_ifstrstream.hpp"
+#include "io/ForceFieldOptions.hpp"
 #include "utils/TypeContainer.hpp"
 #include "types/AtomType.hpp"
 #include "types/BondType.hpp"
@@ -138,13 +139,15 @@ namespace oopse {
 
     ifstrstream* openForceFieldFile(const std::string& filename);
 
+    ForceFieldOptions& getForceFieldOptions() {return forceFieldOptions_;}
   protected:
 
     AtomTypeContainer atomTypeCont_;    
     BondTypeContainer bondTypeCont_;
     BendTypeContainer bendTypeCont_;
     TorsionTypeContainer torsionTypeCont_;
-        
+    ForceFieldOptions forceFieldOptions_;
+    
   private:  
     std::string ffPath_;
 

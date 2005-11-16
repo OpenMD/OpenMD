@@ -51,9 +51,8 @@
 #define BRAINS_FORCEMANAGER_HPP
 
 #include "brains/SimInfo.hpp"
-
+#include "primitives/Molecule.hpp"
 namespace oopse {
-
   /**
    * @class ForceManager ForceManager.hpp "brains/ForceManager.hpp"
    * ForceManager is responsible for calculating the short range interactions (c++) and
@@ -86,6 +85,9 @@ namespace oopse {
  
     SimInfo * info_;        
 
+    std::map<Bend*, BendDataSet> bendDataSets;
+    std::map<Torsion*, TorsionDataSet> torsionDataSets;
+    
   };
 
 } //end namespace oopse

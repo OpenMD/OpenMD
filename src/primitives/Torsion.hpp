@@ -54,6 +54,17 @@
 #include "types/TorsionType.hpp"
 
 namespace oopse {
+struct TorsionData {
+    double angle;
+    double potential;
+};
+
+struct TorsionDataSet {
+    double deltaV;
+    TorsionData prev;
+    TorsionData curr;
+};
+
 
   /**
    * @class Torsion Torsion.hpp "types/Torsion.hpp"
@@ -62,7 +73,7 @@ namespace oopse {
   public:
     Torsion(Atom* atom1, Atom* atom2, Atom* atom3, Atom* atom4, TorsionType* tt);
     virtual ~Torsion() {}
-    virtual void calcForce();
+    virtual void calcForce(double& angle);
         
     double getPotential() {
       return potential_;

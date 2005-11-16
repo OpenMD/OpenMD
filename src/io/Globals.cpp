@@ -52,6 +52,7 @@
 
 #include "io/ParamConstraint.hpp"
 
+using namespace oopse;
 
 Globals::Globals(){
  
@@ -126,6 +127,20 @@ Globals::Globals(){
   DefineOptionalParameterWithDefaultValue(SkinThickness, "skinThickness", 1.0);
   DefineOptionalParameterWithDefaultValue(StatFileFormat, "statFileFormat", "TIME|TOTAL_ENERGY|POTENTIAL_ENERGY|KINETIC_ENERGY|TEMPERATURE|PRESSURE|VOLUME|CONSERVED_QUANTITY");    
 
+  
+}
+
+Globals::~Globals(){
+  int i;
+  if( components != NULL ){
+    for( i=0; i< getNComponents(); i++ ) delete components[i];
+    delete[] components;
+  }
+  
+  if( zConstraints != NULL ){
+    for( i=0; i< getNZconstraints(); i++ ) delete zConstraints[i];
+    delete[] zConstraints;
+  }
   
 }
 

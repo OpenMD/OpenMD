@@ -78,13 +78,12 @@ namespace oopse {
       k0 = k0_;
     }
 
-    virtual void calcForce(double cosPhi, double sinPhi, double& V, double& dVdPhi){ 
+    virtual void calcForce(double cosPhi, double& V, double& dVdCosPhi){ 
       double cosPhi2 = cosPhi * cosPhi;
       double cosPhi3 = cosPhi2 * cosPhi;
             
       V =k0_ + k1_ * cosPhi + k2_*cosPhi2 + k3_*cosPhi3;
-      dVdPhi = k1_ + 2.0*k2_ * cosPhi + 3.0 * k3_*cosPhi2;     
-      dVdPhi *= -sinPhi;
+      dVdCosPhi = k1_ + 2.0*k2_ * cosPhi + 3.0 * k3_*cosPhi2;     
     }
         
   private:

@@ -141,6 +141,7 @@ namespace oopse {
         input.clear();            
         input.seekg(i->offset);
         (i->sectionParser)->parse(input, ff, i->lineNo);
+        (i->sectionParser)->validateSection();
       }
     }
     
