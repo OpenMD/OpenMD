@@ -52,6 +52,7 @@ PackageLibs = \
 	selection \
 	restraints \
 	lattice \
+	openbabel
 
 #packages containing applications
 Applications = \
@@ -61,6 +62,7 @@ Applications = \
 	applications/dynamicProps \
         applications/simpleBuilder\
 	applications/nanoRodBuilder \
+	applications/mdinConverter
 
 Samples = \
 	samples/argon \
@@ -820,11 +822,11 @@ statistics : $(PackageListLoop)
 	$(Print) Done statistics.
 
 # make pure
-$(Executable).pure :
-	$(Purify) $(PurifyOptions) $(CppCompiler) $(LinkOptions) $(LibDirs) \
-	$(LibList) $(ObjectFiles) -o $@
-
-pure : $(Executable).pure
+#$(Executable).pure :
+#	$(Purify) $(PurifyOptions) $(CppCompiler) $(LinkOptions) $(LibDirs) \
+#	$(LibList) $(ObjectFiles) -o $@
+#
+#pure : $(Executable).pure
 
 #make cvslog
 cvslog:
