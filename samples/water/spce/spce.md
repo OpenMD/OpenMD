@@ -10,13 +10,13 @@ initialConfig = "./spce.in";
 
 ensemble = NVE;
 forceField = "DUFF";
-electrostaticSummationMethod = "shifted_force";
+electrostaticSummationMethod = "none";
 //electrostaticScreeningMethod = "damped";
 dielectric = 80.0;
-dampingAlpha = 0.25;
+dampingAlpha = 0.15;
 cutoffRadius = 9.0;
 //switchingRadius = 9.0;
-//switchingFunctionType = "fifth_order_polynomial";
+switchingFunctionType = "fifth_order_polynomial";
 
 targetTemp = 300;
 targetPressure = 1.0;
