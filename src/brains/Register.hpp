@@ -59,6 +59,8 @@ namespace oopse {
   /** register force fields, integrators and  minmizers*/
   void registerAll();
 
+  /** register openbabel readers/writers */
+  void registerOBFormats();
 }
 #endif
 
