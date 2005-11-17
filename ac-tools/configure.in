@@ -115,9 +115,21 @@ esac
 AC_SUBST(F90_MODULE_NAMES)
 AC_LANG_POP
 
+AC_LANG_CPLUSPLUS
+dnl Checks for libraries.
+AC_CHECK_LIB(m, asin, , exit)
+
 AC_LANG_PUSH(C)
 ACX_CHECK_ZLIB
-AC_CHECK_HEADERS(unistd.h sys/pstat.h sys/sysmp.h sys/sysinfo.h sys/table.h sys/param.h sys/sysctl.h sys/sytemcfg.h machine/hal_sysinfo.h)
+dnl Checks for header files.
+AC_CHECK_HEADERS(sys/time.h unistd.h stdlib.h stdio.h conio.h string.h)
+AC_CHECK_HEADERS(strstream.h iostream.h fstream.h math.h time.h)
+AC_LANG_CPLUSPLUS
+AC_CHECK_HEADERS(ctype.h iostream fstream sstream strstream)
+AC_LANG_C
+AC_CHECK_HEADERS(sys/pstat.h sys/sysmp.h sys/sysinfo.h)
+AC_CHECK_HEADERS(sys/table.h sys/param.h sys/sysctl.h sys/sytemcfg.h)
+AC_CHECK_HEADERS(machine/hal_sysinfo.h)
 AC_CHECK_FUNCS(pstat_getstatic sysmp getsysinfo sysctl table)
 # special check for _system_configuration because AIX <4.3.2 do not
 # contain the `physmem' member.
@@ -128,6 +140,15 @@ AC_TRY_COMPILE([#include <sys/systemcfg.h>],
   AC_DEFINE(HAVE__SYSTEM_CONFIGURATION, 1,
             [Define if you have the _system_configuration variable.])],
   [AC_MSG_RESULT([no])])
+AC_HEADER_TIME
+
+dnl Checks for typedefs, structures, and compiler characteristics.
+AC_CHECK_TYPES(clock_t)
+AC_C_CONST
+AC_C_INLINE
+
+dnl Checks for library functions.
+AC_CHECK_FUNCS([rint sranddev])
 
 dnl check for system getopt
 adl_FUNC_GETOPT_LONG
@@ -182,6 +203,8 @@ AC_CACHE_CHECK([for POSIX or BSD ps syntax], ac_cv_prog_ps_syntax, [
 ])
 
 AC_DEFINE_UNQUOTED(PSCOMMAND, $PS, [Path to ps program])
+AC_DEFINE([OBAPI], [], [Used to export symbols for DLL / shared library builds])
+
 
 if test "$ac_cv_prog_ps_syntax" = BSD; then
   AC_DEFINE(PSTYPE_IS_BSD, 1)
