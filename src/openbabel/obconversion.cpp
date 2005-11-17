@@ -61,7 +61,7 @@ const char* OBFormat::TargetClassDescription()
 		return OBConversion::GetDefaultFormat()->TargetClassDescription();
 	else
 		return "";
-};
+}
 const type_info& OBFormat::GetType()
 {
 	//Provides info on class of default format unless overridden
@@ -69,7 +69,7 @@ const type_info& OBFormat::GetType()
 		return OBConversion::GetDefaultFormat()->GetType();
 	else
 		return typeid(this); //rubbish return if DefaultFormat not set
-};
+}
 
 //***************************************************
 
