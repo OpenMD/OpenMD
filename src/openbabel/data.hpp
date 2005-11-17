@@ -20,7 +20,7 @@ GNU General Public License for more details.
 #ifndef OB_DATA_H
 #define OB_DATA_H
 
-#include "babelconfig.hpp"
+#include "config.h"
 
 #include <stdio.h>
 
@@ -52,7 +52,7 @@ class OBBitVec;
 //! \brief Base data table class, handles reading data files
 //!
 //! Base data table class--reads ASCII data files in various formats
-//! -# Checks for the environment variable _envvar (defaults to "BABEL_DATADIR")
+//! -# Checks for the environment variable _envvar (defaults to "FORCE_PARAM_PATH")
 //!     - Tries the _subdir directory if defined (def. "data") and then the main directory
 //! -# Checks for the directory _dir (def. determined by the build environment)
 //!     - Tries the subdirectory corresponding to this version, then the main directory

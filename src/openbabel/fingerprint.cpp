@@ -16,7 +16,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 ***********************************************************************/
 
-#include "babelconfig.hpp"
+#include "config.h"
 #include <vector>
 #include <algorithm>
 

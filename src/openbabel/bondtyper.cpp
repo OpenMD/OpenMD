@@ -41,8 +41,8 @@ rules and apply them to molecules.
 OBBondTyper::OBBondTyper()
 {
     _init = false;
-    _dir = BABEL_DATADIR;
-    _envvar = "BABEL_DATADIR";
+    STR_DEFINE(_dir, FRC_PATH );
+    _envvar = "FORCE_PARAM_PATH";
     _filename = "bondtyp.txt";
     _subdir = "data";
     _dataptr = BondTypeData;

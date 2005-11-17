@@ -25,7 +25,7 @@ GNU General Public License for more details.
 #include <vector>
 #include <string>
 
-#include "babelconfig.hpp"
+#include "config.h"
 
 using namespace std;
 /*

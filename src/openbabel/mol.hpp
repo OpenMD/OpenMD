@@ -22,7 +22,7 @@ GNU General Public License for more details.
 #ifndef OB_MOL_H
 #define OB_MOL_H
 
-#include "babelconfig.hpp"
+#include "config.h"
 
 #ifndef EXTERN
 #  define EXTERN extern

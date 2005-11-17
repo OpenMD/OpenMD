@@ -26,7 +26,7 @@ obtained in part or whole from RasMol2 by Roger Sayle.
 // File Includes
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "babelconfig.hpp"
+#include "config.h"
 
 #if HAVE_IOSTREAM
 #include <iostream>

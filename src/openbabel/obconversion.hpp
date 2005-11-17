@@ -19,7 +19,7 @@ GNU General Public License for more details.
 #ifndef OB_CONV_H
 #define OB_CONV_H
 
-#include "babelconfig.hpp"
+#include "config.h"
 
 #if HAVE_IOSTREAM
 #include <iostream>

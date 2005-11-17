@@ -21,7 +21,7 @@ GNU General Public License for more details.
 #pragma warning (disable : 4786)
 #endif
 
-#include "babelconfig.hpp"
+#include "config.h"
 #include "data.hpp"
 #include "mol.hpp"
 
@@ -79,8 +79,8 @@ OBResidueData    resdat;
 OBElementTable::OBElementTable()
 {
     _init = false;
-    _dir = BABEL_DATADIR;
-    _envvar = "BABEL_DATADIR";
+    STR_DEFINE(_dir, FRC_PATH);
+    _envvar = "FORCE_PARAM_PATH";
     _filename = "element.txt";
     _subdir = "data";
     _dataptr = ElementData;
@@ -331,8 +331,8 @@ int OBElementTable::GetAtomicNum(const char *sym, int &iso)
 OBIsotopeTable::OBIsotopeTable()
 {
     _init = false;
-    _dir = BABEL_DATADIR;
-    _envvar = "BABEL_DATADIR";
+    STR_DEFINE(_dir, FRC_PATH);
+    _envvar = "FORCE_PARAM_PATH";
     _filename = "isotope.txt";
     _subdir = "data";
     _dataptr = IsotopeData;
@@ -435,8 +435,8 @@ Current atom types include (defined in the top line of the data file types.txt):
 OBTypeTable::OBTypeTable()
 {
     _init = false;
-    _dir = BABEL_DATADIR;
-    _envvar = "BABEL_DATADIR";
+    STR_DEFINE(_dir, FRC_PATH);
+    _envvar = "FORCE_PARAM_PATH";
     _filename = "types.txt";
     _subdir = "data";
     _dataptr = TypesData;
@@ -590,8 +590,8 @@ void Tolower(string &s)
 OBResidueData::OBResidueData()
 {
     _init = false;
-    _dir = BABEL_DATADIR;
-    _envvar = "BABEL_DATADIR";
+    STR_DEFINE(_dir, FRC_PATH);
+    _envvar = "FORCE_PARAM_PATH";
     _filename = "resdata.txt";
     _subdir = "data";
     _dataptr = ResidueData;

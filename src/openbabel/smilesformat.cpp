@@ -2049,7 +2049,8 @@ bool OBMol2Smi::GetSmilesElement(OBSmiNode *node,char *element)
     case 7:
         if (atom->IsAromatic() && atom->GetHvyValence() == 2 && atom->GetImplicitValence() == 3)
         {
-            bracketElement = !(normalValence = false);
+            normalValence = false;
+            bracketElement = !(normalValence);
             break;
         }
         else

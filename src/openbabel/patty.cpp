@@ -75,20 +75,20 @@ void patty::read_rules(const string &infile)
     ifsP= &ifs;
     if (!ifs)
     {
-        if (getenv("BABEL_DATADIR") == NULL)
+        if (getenv("FORCE_PARAM_PATH") == NULL)
         {
 #ifdef HAVE_SSTREAM
 	  stringstream errorMsg;
 #else
 	  strstream errorMsg;
 #endif
-	  errorMsg << "The BABEL_DATADIR environment variable is not defined" << endl;
+	  errorMsg << "The FORCE_PARAM_PATH environment variable is not defined" << endl;
           errorMsg << "Please define it so the program can find " << infile << endl;
 	  obErrorLog.ThrowError(__FUNCTION__, errorMsg.str(), obWarning);
 	    //            exit(0);
         }
         else
-            strcpy(patty_dir,getenv("BABEL_DATADIR"));
+            strcpy(patty_dir,getenv("FORCE_PARAM_PATH"));
         strcat(patty_dir,FILE_SEP_CHAR);
         strcat(patty_dir,infile.c_str());
         ifs1.open(patty_dir);

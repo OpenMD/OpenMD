@@ -52,8 +52,8 @@ atom->GetHyb();
 OBAtomTyper::OBAtomTyper()
 {
     _init = false;
-    _dir = BABEL_DATADIR;
-    _envvar = "BABEL_DATADIR";
+    STR_DEFINE(_dir, FRC_PATH);
+    _envvar = "FORCE_PARAM_PATH";
     _filename = "atomtyp.txt";
     _subdir = "data";
     _dataptr = AtomTypeData;
@@ -515,8 +515,8 @@ void OBAtomTyper::CorrectAromaticNitrogens(OBMol &mol)
 OBAromaticTyper::OBAromaticTyper()
 {
     _init = false;
-    _dir = BABEL_DATADIR;
-    _envvar = "BABEL_DATADIR";
+    STR_DEFINE(_dir, FRC_PATH);
+    _envvar = "FORCE_PARAM_PATH";
     _filename = "aromatic.txt";
     _subdir = "data";
     _dataptr = AromaticData;

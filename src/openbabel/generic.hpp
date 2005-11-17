@@ -20,7 +20,7 @@ GNU General Public License for more details.
 #ifndef OB_GENERIC_H
 #define OB_GENERIC_H
 
-#include "babelconfig.hpp"
+#include "config.h"
 
 #include <string>
 #include <vector>

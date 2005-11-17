@@ -22,7 +22,7 @@ GNU General Public License for more details.
 #include <stdlib.h>
 
 /* ---- OpenBabel include ---- */
-#include "babelconfig.hpp"
+#include "config.h"
 #include "mol.hpp"
 #include "obconversion.hpp"
 

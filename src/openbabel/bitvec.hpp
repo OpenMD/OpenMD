@@ -20,7 +20,7 @@ GNU General Public License for more details.
 #ifndef OB_BITVEC_H
 #define OB_BITVEC_H
 
-#include "babelconfig.hpp"
+#include "config.h"
 
 #ifdef WIN32
 #pragma warning (disable : 4786)

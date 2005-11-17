@@ -15,7 +15,7 @@ GNU General Public License for more details.
 #ifndef OB_PDBFORMAT_HPP
 #define OB_PDBFORMAT_HPP
 
-#include "babelconfig.hpp"
+#include "config.h"
 #include "mol.hpp"
 #include "obconversion.hpp"
 #include "obmolecformat.hpp"

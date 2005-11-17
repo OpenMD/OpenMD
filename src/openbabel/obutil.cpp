@@ -17,7 +17,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 ***********************************************************************/
 
-#include "babelconfig.hpp"
+#include "config.h"
 #include "matrix3x3.hpp"
 #include "vector3.hpp"
 #include "mol.hpp"
