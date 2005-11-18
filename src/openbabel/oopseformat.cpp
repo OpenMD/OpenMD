@@ -202,6 +202,7 @@ void OOPSEFormat::WriteMDFile(vector<OBMol*> mols, vector<int> numMols, ostream&
             os << identLevel1 << "}\n";
             atomMap[&(*atom)] = ai++;
         }        
+        os << "\n";
 
         //bond
         FOR_BONDS_OF_MOL(bond, *pmol ) {
@@ -246,8 +247,11 @@ void OOPSEFormat::WriteMDFile(vector<OBMol*> mols, vector<int> numMols, ostream&
         }
         */
         os << "}\n";
+        os << "\n";
+
     }
 
+    os << "\n";
     os << "nComponents = " << mols.size() << ";\n";
     
     for(unsigned int i =0; i < mols.size(); ++i)
