@@ -47,7 +47,7 @@ public:
   };
 
   virtual const char* SpecificationURL()
-  { return "";}; //optional
+  { return "http://www.oopse.org";}; //optional
 
   virtual const char* GetMIMEType() 
   { return "chemical/x-in"; };
@@ -64,7 +64,7 @@ public:
       bool AreSameFragments(OBMol& mol, vector<int>& frag1, vector<int>& frag2);
       void findAngles(OBMol& mol);
       OBMol* createMolFromFragment(OBMol& mol, vector<int>& fragment);
-      void WriteMDFile(vector<OBMol*> mols, vector<int> numMols);
+      void WriteMDFile(vector<OBMol*> mols, vector<int> numMols, ostream& os);
       void WriteINFile(OBMol& mol, ostream& ofs, vector<int>& indices);
 };
 }

@@ -62,7 +62,7 @@ Applications = \
 	applications/dynamicProps \
         applications/simpleBuilder\
 	applications/nanoRodBuilder \
-	applications/mdinConverter
+	applications/atom2mdin
 
 Samples = \
 	samples/argon \

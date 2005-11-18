@@ -14,6 +14,7 @@ GNU General Public License for more details.
 ***********************************************************************/
 
 #include "oopseformat.hpp"
+#include <fstream>
 namespace OpenBabel
 {
 
@@ -65,7 +66,20 @@ bool OOPSEFormat::WriteMolecule(OBBase* pOb, OBConversion* pConv)
         numMols.push_back((*i).size());
     }
 
-    WriteMDFile(mdMols, numMols);    
+    string OutputFileName = pConv->GetInFilename();
+    unsigned int pos = OutputFileName.rfind(".");
+    if(pos==string::npos)
+        OutputFileName += ".md";
+    else
+        OutputFileName = OutputFileName.substr(0, pos) + ".md";       
+    ofstream ofs(OutputFileName.c_str());
+    if(!ofs)
+    {
+    	 cerr << "Cannot write to " << OutputFileName <<endl;
+   	 return false;
+    }
+                
+    WriteMDFile(mdMols, numMols, ofs);    
 
     for(vector<OBMol*>::iterator  i = mdMols.begin(); i != mdMols.end(); ++i) 
     {
@@ -163,12 +177,11 @@ OBMol* OOPSEFormat::createMolFromFragment(OBMol& mol, vector<int>& fragment)
     newMol->FindTorsions();
     return newMol;
 }
-void OOPSEFormat::WriteMDFile(vector<OBMol*> mols, vector<int> numMols)
+void OOPSEFormat::WriteMDFile(vector<OBMol*> mols, vector<int> numMols, ostream& os)
 {
     std::string identLevel1("\t");
     std::string identLevel2("\t\t");
     std::string molPrefix("MolName");
-    ostream& ofs = std::cout;
     const int BUFFLEN = 1024;
     char buffer[BUFFLEN];
     
@@ -176,29 +189,25 @@ void OOPSEFormat::WriteMDFile(vector<OBMol*> mols, vector<int> numMols)
     {
         OBMol* pmol = mols[i];
         map<OBAtom*, int> atomMap;
-        ofs << "molecule {\n";
+        os << "molecule {\n";
         sprintf(buffer, "%d", i);
-        ofs << identLevel1 << "name = " << "\"" << molPrefix << buffer << "\"" << ";\n";
+        os << identLevel1 << "name = " << "\"" << molPrefix << buffer << "\"" << ";\n";
 
         
         //atom
-        ofs << identLevel1 << "nAtoms = " << pmol->NumAtoms() << ";\n";
         int ai = 0;
         FOR_ATOMS_OF_MOL(atom, *pmol ) {
-            ofs << identLevel1 << "atom[" << ai << "] {\n";
-            ofs << identLevel2 << "type = " << "\"" << atom->GetType() << "\"" << ";\n";
-            ofs << identLevel2 << "position(" << atom->GetX() << ", " << atom->GetY() << ", " << atom->GetZ() << ");\n";
-            ofs << identLevel1 << "}\n";
+            os << identLevel1 << "atom[" << ai << "] {\n";
+            os << identLevel2 << "type = " << "\"" << atom->GetType() << "\"" << ";\n";
+            os << identLevel1 << "}\n";
             atomMap[&(*atom)] = ai++;
         }        
 
         //bond
-        ofs << identLevel1 << "nBonds = " << pmol->NumBonds() << ";\n";
-        int bi = 0;
         FOR_BONDS_OF_MOL(bond, *pmol ) {
-            ofs << identLevel1 << "bond[" << bi++ << "] {\n";
-            ofs << identLevel2 << "member(" << atomMap[bond->GetBeginAtom()] <<  ", " << atomMap[bond->GetEndAtom()] << ");\n";
-            ofs << identLevel1 << "}\n";
+            os << identLevel1 << "bond {\n";
+            os << identLevel2 << "members(" << atomMap[bond->GetBeginAtom()] <<  ", " << atomMap[bond->GetEndAtom()] << ");\n";
+            os << identLevel1 << "}\n";
         }  
         /*
         //bend
@@ -206,14 +215,14 @@ void OOPSEFormat::WriteMDFile(vector<OBMol*> mols, vector<int> numMols)
         OBAngleData* pAngleData = dynamic_cast<OBAngleData*>(pGenericData);
         vector<OBAngle> angles = pAngleData->GetData();
 
-        ofs << identLevel1 << "nBends = " << angles.size() << ";\n";        
+        os << identLevel1 << "nBends = " << angles.size() << ";\n";        
         int bendIndex = 0;
         for (vector<OBAngle>::iterator ti = angles.begin(); ti != angles.end(); ++ti)
         {
             triple<OBAtom*, OBAtom*, OBAtom*> bendAtoms = ti->getAtoms();
-            ofs << identLevel1 << "bend[" << bendIndex++ << "] {\n";
-            ofs << identLevel2 << "member(" << atomMap[bendAtoms.first] <<  ", " << atomMap[bendAtoms.second] << atomMap[bendAtoms.third] <<");\n";
-            ofs << identLevel1 << "}\n";            
+            os << identLevel1 << "bend[" << bendIndex++ << "] {\n";
+            os << identLevel2 << "member(" << atomMap[bendAtoms.first] <<  ", " << atomMap[bendAtoms.second] << atomMap[bendAtoms.third] <<");\n";
+            os << identLevel1 << "}\n";            
         }
         
         //torsion
@@ -227,27 +236,27 @@ void OOPSEFormat::WriteMDFile(vector<OBMol*> mols, vector<int> numMols)
             torsionArray.insert(torsionArray.end(), tmpTorsions.begin(), tmpTorsions.end());            
         }
 
-        ofs << identLevel1 << "nTorsions = " << torsionArray.size() << ";\n";
+        os << identLevel1 << "nTorsions = " << torsionArray.size() << ";\n";
         int torsionIndex = 0;
         for (vector<quad<OBAtom*,OBAtom*,OBAtom*,OBAtom*> >::iterator ti = torsionArray.begin(); ti != torsionArray.end(); ++ti)
         {
-            ofs << identLevel1 << "torsion[" << torsionIndex++ << "] {\n";
-            ofs << identLevel2 << "member(" << atomMap[ti->first] <<  ", " << atomMap[ti->second] <<", " << atomMap[ti->third] <<", " << atomMap[ti->forth] << ");\n";
-            ofs << identLevel1 << "}\n";          
+            os << identLevel1 << "torsion[" << torsionIndex++ << "] {\n";
+            os << identLevel2 << "member(" << atomMap[ti->first] <<  ", " << atomMap[ti->second] <<", " << atomMap[ti->third] <<", " << atomMap[ti->forth] << ");\n";
+            os << identLevel1 << "}\n";          
         }
         */
-        ofs << "}\n";
+        os << "}\n";
     }
 
-    ofs << "nComponents = " << mols.size() << ";\n";
+    os << "nComponents = " << mols.size() << ";\n";
     
     for(unsigned int i =0; i < mols.size(); ++i)
     {
-        ofs << "component{\n";
+        os << "component{\n";
         sprintf(buffer, "%d", i);
-        ofs << "type = " << molPrefix << buffer << ";\n";
-        ofs << "nMol = " << numMols[i]<< ";\n";
-        ofs << "}\n";
+        os << "type = " << molPrefix << buffer << ";\n";
+        os << "nMol = " << numMols[i]<< ";\n";
+        os << "}\n";
     }
 }
 void OOPSEFormat::WriteINFile(OBMol& mol, ostream& ofs, vector<int>& indices)
