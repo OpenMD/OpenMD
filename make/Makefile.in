@@ -420,6 +420,10 @@ ifneq "$(words $(Main))" "0"
     InstallFiles             = $(Executable)
   endif 
   InstallCommand           = $(InstallProgram)
+  ifneq "$(words $(LinkTargets))" "0"
+    MyLinkSource = $(patsubst %, $(MyInstallDir)/%,$(Main)) 
+    MyLinkTargets = $(patsubst %, $(MyInstallDir)/%,$(LinkTargets))
+  endif
 endif
 
 ifneq "$(words $(ForcefieldFiles))" "0"
@@ -815,10 +819,9 @@ ifneq "$(words $(InstallFiles))" "0"
 endif	    
 
 _installlinks :  $(MyInstallDir)
-	$(Print) $(LinkTargets) 
-ifneq "$(words $(LinkTargets))" "0"
+ifneq "$(words $(MyLinkTargets))" "0"
 	@cd $(MyInstallDir)
-	$(foreach thisLink,$(LinkTargets),$(call do_link,$(Executable),$(thisLink)))
+	$(foreach thisLink,$(MyLinkTargets),$(call do_link,$(MyLinkSource),$(thisLink)))
 endif	    
 
 # make statistics
