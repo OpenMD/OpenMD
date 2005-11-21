@@ -6,9 +6,6 @@
 #include <unistd.h>
 #endif
 
-#define to_string( s ) # s
-#define STR_DEFINE(t, s) t = to_string(s)
-
 /* 
  * returns an estimate of the resident memory size in kB 
  */
