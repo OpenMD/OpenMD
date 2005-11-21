@@ -51,15 +51,14 @@ namespace oopse {
 
     public:
         ForceFieldOptions() {
-          DefineOptionalParameter(MixingRule, "arthimatic");
+          DefineOptionalParameter(MixingRule, "arithmetic");
         }
         
         ForceFieldOptions(const ForceFieldOptions&);
         ForceFieldOptions& operator = (const ForceFieldOptions&);
 
         void validateOptions() {
-          CheckParameter(MixingRule, isEqualIgnoreCase(std::string("arthimatic")) || 
-		 isEqualIgnoreCase(std::string("geometric"))); 
+          CheckParameter(MixingRule, isEqualIgnoreCase(std::string("arithmetic")) || isEqualIgnoreCase(std::string("geometric")));
 
         }
 
