@@ -299,15 +299,16 @@ namespace oopse{
       return i != molecules_.end() ? i->second : NULL;
     }
 
-    /** Calculate the maximum cutoff radius based on the atom types */
-    double calcMaxCutoffRadius();
-
     double getRcut() {
       return rcut_;
     }
 
     double getRsw() {
       return rsw_;
+    }
+
+    double getList() {
+      return rlist_;
     }
         
     std::string getFinalConfigFileName() {
@@ -522,6 +523,7 @@ namespace oopse{
         
     double rcut_;       /**< cutoff radius*/
     double rsw_;        /**< radius of switching function*/
+    double rlist_;      /**< neighbor list radius */
 
     bool fortranInitialized_; /**< flag indicate whether fortran side is initialized */
 

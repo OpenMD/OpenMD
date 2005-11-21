@@ -59,7 +59,6 @@
 #include "UseTheForce/DarkSide/fSwitchingFunctionType.h"
 #include "UseTheForce/doForces_interface.h"
 #include "UseTheForce/DarkSide/electrostatic_interface.h"
-#include "UseTheForce/notifyCutoffs_interface.h"
 #include "UseTheForce/DarkSide/switcheroo_interface.h"
 #include "utils/MemoryUtils.hpp"
 #include "utils/simError.h"
@@ -923,83 +922,9 @@ namespace oopse {
 
 #endif
 
-  double SimInfo::calcMaxCutoffRadius() {
-
-
-    std::set<AtomType*> atomTypes;
-    std::set<AtomType*>::iterator i;
-    std::vector<double> cutoffRadius;
-
-    //get the unique atom types
-    atomTypes = getUniqueAtomTypes();
-
-    //query the max cutoff radius among these atom types
-    for (i = atomTypes.begin(); i != atomTypes.end(); ++i) {
-      cutoffRadius.push_back(forceField_->getRcutFromAtomType(*i));
-    }
-
-    double maxCutoffRadius = *(std::max_element(cutoffRadius.begin(), cutoffRadius.end()));
-#ifdef IS_MPI
-    //pick the max cutoff radius among the processors
-#endif
-
-    return maxCutoffRadius;
-  }
-
-  void SimInfo::getCutoff(double& rcut, double& rsw) {
+  void SimInfo::setupCutoff() {           
     
-    if (fInfo_.SIM_uses_Charges | fInfo_.SIM_uses_Dipoles | fInfo_.SIM_uses_RF) {
-        
-      if (!simParams_->haveCutoffRadius()){
-	sprintf(painCave.errMsg,
-                "SimCreator Warning: No value was set for the cutoffRadius.\n"
-                "\tOOPSE will use a default value of 15.0 angstroms"
-                "\tfor the cutoffRadius.\n");
-	painCave.isFatal = 0;
-	simError();
-	rcut = 15.0;
-      } else{
-	rcut = simParams_->getCutoffRadius();
-      }
-
-      if (!simParams_->haveSwitchingRadius()){
-	sprintf(painCave.errMsg,
-                "SimCreator Warning: No value was set for switchingRadius.\n"
-                "\tOOPSE will use a default value of\n"
-                "\t0.85 * cutoffRadius for the switchingRadius\n");
-	painCave.isFatal = 0;
-	simError();
-	rsw = 0.85 * rcut;
-      } else{
-	rsw = simParams_->getSwitchingRadius();
-      }
-
-    } else {
-      // if charge, dipole or reaction field is not used and the cutofff radius is not specified in
-      //meta-data file, the maximum cutoff radius calculated from forcefiled will be used
-        
-      if (simParams_->haveCutoffRadius()) {
-	rcut = simParams_->getCutoffRadius();
-      } else {
-	//set cutoff radius to the maximum cutoff radius based on atom types in the whole system
-	rcut = calcMaxCutoffRadius();
-      }
-
-      if (simParams_->haveSwitchingRadius()) {
-	rsw  = simParams_->getSwitchingRadius();
-      } else {
-	rsw = rcut;
-      }
-    
-    }
-  }
-
-  void SimInfo::setupCutoff() {    
-    getCutoff(rcut_, rsw_);    
-    double rnblist = rcut_ + 1; // skin of neighbor list
-
-    //Pass these cutoff radius etc. to fortran. This function should be called once and only once
-    
+    // Check the cutoff policy
     int cp =  TRADITIONAL_CUTOFF_POLICY;
     if (simParams_->haveCutoffPolicy()) {
       std::string myPolicy = simParams_->getCutoffPolicy();
@@ -1021,16 +946,73 @@ namespace oopse {
           }     
         }           
       }
-    }
+    }           
+    notifyFortranCutoffPolicy(&cp);
 
-
+    // Check the Skin Thickness for neighborlists
+    double skin;
     if (simParams_->haveSkinThickness()) {
-      double skinThickness = simParams_->getSkinThickness();
-    }
+      skin = simParams_->getSkinThickness();
+      notifyFortranSkinThickness(&skin);
+    }            
+        
+    // Check if the cutoff was set explicitly:
+    if (simParams_->haveCutoffRadius()) {
+      rcut_ = simParams_->getCutoffRadius();
+      if (simParams_->haveSwitchingRadius()) {
+	rsw_  = simParams_->getSwitchingRadius();
+      } else {
+	rsw_ = rcut_;
+      }
+      notifyFortranCutoffs(&rcut_, &rsw_);
+      
+    } else {
+      
+      // For electrostatic atoms, we'll assume a large safe value:
+      if (fInfo_.SIM_uses_Charges | fInfo_.SIM_uses_Dipoles | fInfo_.SIM_uses_RF) {
+        sprintf(painCave.errMsg,
+                "SimCreator Warning: No value was set for the cutoffRadius.\n"
+                "\tOOPSE will use a default value of 15.0 angstroms"
+                "\tfor the cutoffRadius.\n");
+        painCave.isFatal = 0;
+	simError();
+	rcut_ = 15.0;
+      
+        if (simParams_->haveElectrostaticSummationMethod()) {
+          std::string myMethod = simParams_->getElectrostaticSummationMethod();
+          toUpper(myMethod);
+          if (myMethod == "SHIFTED_POTENTIAL" || myMethod == "SHIFTED_FORCE") {
+            if (simParams_->haveSwitchingRadius()){
+              sprintf(painCave.errMsg,
+                      "SimInfo Warning: A value was set for the switchingRadius\n"
+                      "\teven though the electrostaticSummationMethod was\n"
+                      "\tset to %s\n", myMethod.c_str());
+              painCave.isFatal = 1;
+              simError();            
+            } 
+          }
+        }
+      
+        if (simParams_->haveSwitchingRadius()){
+          rsw_ = simParams_->getSwitchingRadius();
+        } else {        
+          sprintf(painCave.errMsg,
+                  "SimCreator Warning: No value was set for switchingRadius.\n"
+                  "\tOOPSE will use a default value of\n"
+                  "\t0.85 * cutoffRadius for the switchingRadius\n");
+          painCave.isFatal = 0;
+          simError();
+          rsw_ = 0.85 * rcut_;
+        }
+        notifyFortranCutoffs(&rcut_, &rsw_);
+      } else {
+        // We didn't set rcut explicitly, and we don't have electrostatic atoms, so
+        // We'll punt and let fortran figure out the cutoffs later.
+        
+        notifyFortranYouAreOnYourOwn();
 
-    notifyFortranCutoffs(&rcut_, &rsw_, &rnblist, &cp);
-    // also send cutoff notification to electrostatics
-    setElectrostaticCutoffRadius(&rcut_, &rsw_);
+      }
+    }
   }
 
   void SimInfo::setupElectrostaticSummationMethod( int isError ) {    
@@ -1065,7 +1047,11 @@ namespace oopse {
 	      } else {
 		// throw error        
 		sprintf( painCave.errMsg,
-			 "SimInfo error: Unknown electrostaticSummationMethod. (Input file specified %s .)\n\telectrostaticSummationMethod must be one of: \"none\", \"shifted_potential\", \"shifted_force\", or \"reaction_field\".", myMethod.c_str() );
+			 "SimInfo error: Unknown electrostaticSummationMethod.\n"
+                         "\t(Input file specified %s .)\n"
+                         "\telectrostaticSummationMethod must be one of: \"none\",\n"
+                         "\t\"shifted_potential\", \"shifted_force\", or \n"
+                         "\t\"reaction_field\".\n", myMethod.c_str() );
 		painCave.isFatal = 1;
 		simError();
 	      }     
@@ -1086,14 +1072,18 @@ namespace oopse {
 	  if (!simParams_->haveDampingAlpha()) {
 	    //throw error
 	    sprintf( painCave.errMsg,
-		     "SimInfo warning: dampingAlpha was not specified in the input file. A default value of %f (1/ang) will be used.", alphaVal);
+		     "SimInfo warning: dampingAlpha was not specified in the input file.\n"
+                     "\tA default value of %f (1/ang) will be used.\n", alphaVal);
 	    painCave.isFatal = 0;
 	    simError();
 	  }
 	} else {
 	  // throw error        
 	  sprintf( painCave.errMsg,
-		   "SimInfo error: Unknown electrostaticScreeningMethod. (Input file specified %s .)\n\telectrostaticScreeningMethod must be one of: \"undamped\" or \"damped\".", myScreen.c_str() );
+		   "SimInfo error: Unknown electrostaticScreeningMethod.\n"
+                   "\t(Input file specified %s .)\n"
+                   "\telectrostaticScreeningMethod must be one of: \"undamped\"\n"
+                   "or \"damped\".\n", myScreen.c_str() );
 	  painCave.isFatal = 1;
 	  simError();
 	}
@@ -1102,10 +1092,11 @@ namespace oopse {
     
     // let's pass some summation method variables to fortran
     setElectrostaticSummationMethod( &esm );
+    notifyFortranElectrostaticMethod( &esm );
     setScreeningMethod( &sm );
     setDampingAlpha( &alphaVal );
     setReactionFieldDielectric( &dielectric );
-    initFortranFF( &esm, &errorOut );
+    initFortranFF( &errorOut );
   }
 
   void SimInfo::setupSwitchingFunction() {    
