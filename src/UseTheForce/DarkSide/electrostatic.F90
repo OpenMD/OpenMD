@@ -439,7 +439,7 @@ contains
   end subroutine checkSummationMethod
 
 
-  subroutine doElectrostaticPair(atom1, atom2, d, rij, r2, sw, &
+  subroutine doElectrostaticPair(atom1, atom2, d, rij, r2, rcut, sw, &
        vpair, fpair, pot, eFrame, f, t, do_pot)
 
     logical, intent(in) :: do_pot
@@ -447,7 +447,7 @@ contains
     integer, intent(in) :: atom1, atom2
     integer :: localError
 
-    real(kind=dp), intent(in) :: rij, r2, sw
+    real(kind=dp), intent(in) :: rij, r2, sw, rcut
     real(kind=dp), intent(in), dimension(3) :: d
     real(kind=dp), intent(inout) :: vpair
     real(kind=dp), intent(inout), dimension(3) :: fpair    

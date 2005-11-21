@@ -522,12 +522,12 @@ contains
     return
   end subroutine do_gb_pair
 
-  subroutine do_gb_lj_pair(atom1, atom2, d, r, r2, sw, vpair, fpair, &
+  subroutine do_gb_lj_pair(atom1, atom2, d, r, r2, rcut, sw, vpair, fpair, &
        pot, A, f, t, do_pot)
     
     integer, intent(in) :: atom1, atom2
     integer :: id1, id2
-    real (kind=dp), intent(inout) :: r, r2
+    real (kind=dp), intent(inout) :: r, r2, rcut
     real (kind=dp), dimension(3), intent(in) :: d
     real (kind=dp), dimension(3), intent(inout) :: fpair
     real (kind=dp) :: pot, sw, vpair

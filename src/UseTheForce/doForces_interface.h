@@ -47,13 +47,16 @@
 
 #define initFortranFF F90_FUNC(initfortranff, INITFORTRANFF)
 #define doForceLoop F90_FUNC(doforceloop, DOFORCELOOP)
+#define notifyFortranElectrostaticMethod F90_FUNC(notifyfortranelectrostaticmethod, NOTIFYFORTRANELECTROSTATICMETHOD)
+#define notifyFortranCutoffPolicy F90_FUNC(notifyfortrancutoffpolicy, NOTIFYFORTRANCUTOFFPOLICY)
+#define notifyFortranSkinThickness F90_FUNC(notifyfortranskinthickness, NOTIFYFORTRANSKINTHICKNESS)
+#define notifyFortranCutoffs F90_FUNC(notifyfortrancutoffs, NOTIFYFORTRANCUTOFFS)
+#define notifyFortranYouAreOnYourOwn F90_FUNC(notifyfortranyouareonyourown, NOTIFYFORTRANYOUAREONYOUROWN)
 
 extern "C"{
   
-  void initFortranFF( int* coulombicCorrection,
-                      int* isError );        
+  void initFortranFF( int* isError );        
  
-  
   void doForceLoop( double* positionArray,
                     double* rcArray,
                     double* RotationMatrixArray,
@@ -65,5 +68,17 @@ extern "C"{
                     short int* doPotentialCalc, 
                     short int* doStressCalc,
                     int* isError );
+
+  void notifyFortranElectrostaticMethod( int* electrostaticMethod );
+
+  void notifyFortranCutoffPolicy( int* cutPolicy );
+
+  void notifyFortranSkinThickness( double *skinThickness );
+
+  void notifyFortranCutoffs( double *rCut,
+			     double *rSw );
+
+  void notifyFortranYouAreOnYourOwn( );
+
 }
 #endif

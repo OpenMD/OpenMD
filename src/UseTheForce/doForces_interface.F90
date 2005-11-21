@@ -1,16 +1,12 @@
 !! Interfaces for C programs to module....
 
-subroutine initFortranFF(correctionMethod, thisStat)
+subroutine initFortranFF(thisStat)
   use doForces, ONLY: init_FF
   use definitions, ONLY : dp
 
-  integer, intent(in) :: correctionMethod
   integer, intent(out) :: thisStat
-  integer :: correction
   
-  correction = correctionMethod
-  
-  call init_FF(correction, thisStat)
+  call init_FF(thisStat)
 
 end subroutine initFortranFF
 
@@ -48,3 +44,46 @@ subroutine doForceloop(q, q_group, A, eFrame, f, t, tau, pot, &
 
 end subroutine doForceloop
 
+subroutine notifyFortranElectrostaticMethod(electrostaticMethod)
+  use doForces, ONLY : setElectrostaticMethod
+
+  integer, intent(in) :: electrostaticMethod
+
+  call setElectrostaticMethod(electrostaticMethod)
+
+end subroutine notifyFortranElectrostaticMethod
+
+subroutine notifyFortranCutoffPolicy(cutPolicy)
+  use doForces, ONLY : setCutoffPolicy
+
+  integer, intent(in) :: cutPolicy
+
+  call setCutoffPolicy( cutPolicy )
+
+end subroutine notifyFortranCutoffPolicy
+
+subroutine notifyFortranSkinThickness(this_skin)
+  use doForces, ONLY : setSkinThickness
+  use definitions, ONLY : dp
+
+  real(kind=dp), intent(in) :: this_skin
+
+  call setSkinThickness( this_skin )
+
+end subroutine notifyFortranSkinThickness
+
+subroutine notifyFortranCutoffs(this_rcut, this_rsw)
+  use doForces, ONLY : setCutoffs
+  use definitions, ONLY : dp
+
+  real(kind=dp), intent(in) :: this_rcut, this_rsw
+
+  call setCutoffs(this_rcut, this_rsw)
+
+end subroutine notifyFortranCutoffs
+
+subroutine notifyFortranYouAreOnYourOwn()
+  use doForces, ONLY : cWasLame
+
+  call cWasLame()
+end subroutine notifyFortranYouAreOnYourOwn

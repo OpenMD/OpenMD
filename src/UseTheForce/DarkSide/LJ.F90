@@ -43,7 +43,7 @@
 !! Calculates Long Range forces Lennard-Jones interactions.
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: LJ.F90,v 1.18 2005-10-12 21:00:49 gezelter Exp $, $Date: 2005-10-12 21:00:49 $, $Name: not supported by cvs2svn $, $Revision: 1.18 $
+!! @version $Id: LJ.F90,v 1.19 2005-11-21 22:59:01 gezelter Exp $, $Date: 2005-11-21 22:59:01 $, $Name: not supported by cvs2svn $, $Revision: 1.19 $
 
 
 module lj
@@ -102,8 +102,6 @@ module lj
 
   public :: newLJtype
   public :: setLJDefaultCutoff
-  public :: setLJUniformCutoff
-  public :: setLJCutoffByTypes
   public :: getSigma
   public :: getEpsilon
   public :: useGeometricMixing
@@ -164,60 +162,6 @@ contains
        call createMixingMap()
     end if
   end subroutine setLJDefaultCutoff
-
-  subroutine setLJUniformCutoff(thisRcut, shiftedPot)
-    real(kind=dp), intent(in) :: thisRcut
-    logical, intent(in) :: shiftedPot
-    integer :: nLJtypes, i, j
-
-    if (LJMap%currentLJtype == 0) then
-       call handleError("LJ", "No members in LJMap")
-       return
-    end if
-
-    nLJtypes = LJMap%nLJtypes
-    if (.not. allocated(MixingMap)) then
-       allocate(MixingMap(nLJtypes, nLJtypes))
-    endif
-
-    do i = 1, nLJtypes
-       do j = 1, nLJtypes
-          MixingMap(i,j)%rCut = thisRcut
-          MixingMap(i,j)%shiftedPot = shiftedPot
-          MixingMap(i,j)%rCutWasSet = .true.
-       enddo
-    enddo
-    call createMixingMap()
-  end subroutine setLJUniformCutoff
-
-  subroutine setLJCutoffByTypes(atid1, atid2, thisRcut, shiftedPot)
-    integer, intent(in) :: atid1, atid2
-    real(kind=dp), intent(in) :: thisRcut
-    logical, intent(in) :: shiftedPot
-    integer :: nLJtypes, ljt1, ljt2
-
-    if (LJMap%currentLJtype == 0) then
-       call handleError("LJ", "No members in LJMap")
-       return
-    end if
-
-    nLJtypes = LJMap%nLJtypes
-    if (.not. allocated(MixingMap)) then
-       allocate(MixingMap(nLJtypes, nLJtypes))
-    endif
-
-    ljt1 = LJMap%atidToLJtype(atid1)
-    ljt2 = LJMap%atidToLJtype(atid2)
-
-    MixingMap(ljt1,ljt2)%rCut = thisRcut
-    MixingMap(ljt1,ljt2)%shiftedPot = shiftedPot
-    MixingMap(ljt1,ljt2)%rCutWasSet = .true.
-    MixingMap(ljt2,ljt1)%rCut = thisRcut
-    MixingMap(ljt2,ljt1)%shiftedPot = shiftedPot
-    MixingMap(ljt2,ljt1)%rCutWasSet = .true.
-
-    call createMixingMap()
-  end subroutine setLJCutoffByTypes
 
   function getSigma(atid) result (s)
     integer, intent(in) :: atid
@@ -297,21 +241,16 @@ contains
 
           MixingMap(i,j)%sigma6 = (MixingMap(i,j)%sigma)**6
 
-          if (MixingMap(i,j)%rCutWasSet) then
-             rcut6 = (MixingMap(i,j)%rcut)**6
+          if (haveDefaultCutoff) then
+             rcut6 = defaultCutoff**6
+             tp6    = MixingMap(i,j)%sigma6/rcut6
+             tp12    = tp6**2          
+             MixingMap(i,j)%delta =-4.0_DP*MixingMap(i,j)%epsilon*(tp12 - tp6)
+             MixingMap(i,j)%shiftedPot = defaultShift
           else
-             if (haveDefaultCutoff) then
-                rcut6 = defaultCutoff**6
-                doShift = defaultShift
-             else
-                call handleError("LJ", "No specified or default cutoff value!")
-             endif
-          endif
-          
-          tp6    = MixingMap(i,j)%sigma6/rcut6
-          tp12    = tp6**2          
-          MixingMap(i,j)%delta =-4.0_DP*MixingMap(i,j)%epsilon*(tp12 - tp6)
-          MixingMap(i,j)%shiftedPot = doShift
+             MixingMap(i,j)%delta = 0.0_DP
+             MixingMap(i,j)%shiftedPot = defaultShift
+          endif          
 
           if (i.ne.j) then
              MixingMap(j,i)%sigma      = MixingMap(i,j)%sigma
@@ -331,12 +270,12 @@ contains
     
   end subroutine createMixingMap
   
-  subroutine do_lj_pair(atom1, atom2, d, rij, r2, sw, vpair, fpair, &
+  subroutine do_lj_pair(atom1, atom2, d, rij, r2, rcut, sw, vpair, fpair, &
        pot, f, do_pot)
-
+    
     integer, intent(in) ::  atom1, atom2
     integer :: atid1, atid2, ljt1, ljt2
-    real( kind = dp ), intent(in) :: rij, r2
+    real( kind = dp ), intent(in) :: rij, r2, rcut
     real( kind = dp ) :: pot, sw, vpair
     real( kind = dp ), dimension(3,nLocal) :: f    
     real( kind = dp ), intent(in), dimension(3) :: d
@@ -349,9 +288,9 @@ contains
     real( kind = dp ) :: pot_temp, dudr
     real( kind = dp ) :: sigma6
     real( kind = dp ) :: epsilon
-    real( kind = dp ) :: r6
-    real( kind = dp ) :: t6
-    real( kind = dp ) :: t12
+    real( kind = dp ) :: r6, rc6
+    real( kind = dp ) :: t6, tp6
+    real( kind = dp ) :: t12, tp12
     real( kind = dp ) :: delta
     logical :: isSoftCore, shiftedPot
     integer :: id1, id2, localError
@@ -387,6 +326,9 @@ contains
        
        pot_temp = 4.0E0_DP * epsilon * t6
        if (shiftedPot) then
+          rc6 = rcut**6
+          tp6 = sigma6 / rc6
+          delta =-4.0_DP*epsilon*(tp6)
           pot_temp = pot_temp + delta
        endif
        
@@ -397,6 +339,10 @@ contains
     else
        pot_temp = 4.0E0_DP * epsilon * (t12 - t6) 
        if (shiftedPot) then
+          rc6 = rcut**6
+          tp6 = sigma6 / rc6
+          tp12 = tp6*tp6
+          delta =-4.0_DP*epsilon*(tp12 - tp6)
           pot_temp = pot_temp + delta
        endif
        

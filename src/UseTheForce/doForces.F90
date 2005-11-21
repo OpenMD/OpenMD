@@ -45,7 +45,7 @@
 
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: doForces.F90,v 1.68 2005-11-15 16:01:06 chuckv Exp $, $Date: 2005-11-15 16:01:06 $, $Name: not supported by cvs2svn $, $Revision: 1.68 $
+!! @version $Id: doForces.F90,v 1.69 2005-11-21 22:58:35 gezelter Exp $, $Date: 2005-11-21 22:58:35 $, $Name: not supported by cvs2svn $, $Revision: 1.69 $
 
 
 module doForces
@@ -87,7 +87,10 @@ module doForces
   logical, save :: haveInteractionHash = .false.
   logical, save :: haveGtypeCutoffMap = .false.
   logical, save :: haveDefaultCutoffs = .false.
-  logical, save :: haveRlist = .false.
+  logical, save :: haveSkinThickness = .false.
+  logical, save :: haveElectrostaticSummationMethod = .false.
+  logical, save :: haveCutoffPolicy = .false.
+  logical, save :: VisitCutoffsAfterComputing = .false.
 
   logical, save :: FF_uses_DirectionalAtoms
   logical, save :: FF_uses_Dipoles
@@ -106,17 +109,19 @@ module doForces
   logical, save :: SIM_uses_PBC
 
   integer, save :: electrostaticSummationMethod
+  integer, save :: cutoffPolicy = TRADITIONAL_CUTOFF_POLICY
+
+  real(kind=dp), save :: defaultRcut, defaultRsw, largestRcut
+  real(kind=dp), save :: skinThickness
+  logical, save :: defaultDoShift
 
   public :: init_FF
-  public :: setDefaultCutoffs
+  public :: setCutoffs
+  public :: cWasLame
+  public :: setElectrostaticMethod
+  public :: setCutoffPolicy
+  public :: setSkinThickness
   public :: do_force_loop
-  public :: createInteractionHash
-  public :: createGtypeCutoffMap
-  public :: getStickyCut
-  public :: getStickyPowerCut
-  public :: getGayBerneCut
-  public :: getEAMCut
-  public :: getShapeCut
 
 #ifdef PROFILE
   public :: getforcetime
@@ -144,15 +149,10 @@ module doForces
   end type gtypeCutoffs
   type(gtypeCutoffs), dimension(:,:), allocatable :: gtypeCutoffMap
 
-  integer, save :: cutoffPolicy = TRADITIONAL_CUTOFF_POLICY
-  real(kind=dp),save :: defaultRcut, defaultRsw, defaultRlist
-  real(kind=dp),save :: listSkin
-  
 contains
 
-  subroutine createInteractionHash(status)
+  subroutine createInteractionHash()
     integer :: nAtypes
-    integer, intent(out) :: status
     integer :: i
     integer :: j
     integer :: iHash
@@ -177,19 +177,15 @@ contains
     logical :: j_is_MEAM
     real(kind=dp) :: myRcut
 
-
-    status = 0   
-
     if (.not. associated(atypes)) then
-       call handleError("atype", "atypes was not present before call of createInteractionHash!")
-       status = -1
+       call handleError("doForces", "atypes was not present before call of createInteractionHash!")
        return
     endif
     
     nAtypes = getSize(atypes)
     
     if (nAtypes == 0) then
-       status = -1
+       call handleError("doForces", "nAtypes was zero during call of createInteractionHash!")
        return
     end if
 
@@ -276,9 +272,8 @@ contains
     haveInteractionHash = .true.
   end subroutine createInteractionHash
 
-  subroutine createGtypeCutoffMap(stat)
+  subroutine createGtypeCutoffMap()
 
-    integer, intent(out), optional :: stat
     logical :: i_is_LJ
     logical :: i_is_Elect
     logical :: i_is_Sticky
@@ -293,17 +288,11 @@ contains
     integer :: nGroupsInRow
     integer :: nGroupsInCol
     integer :: nGroupTypesRow,nGroupTypesCol
-    real(kind=dp):: thisSigma, bigSigma, thisRcut, tradRcut, tol, skin
+    real(kind=dp):: thisSigma, bigSigma, thisRcut, tradRcut, tol
     real(kind=dp) :: biggestAtypeCutoff
 
-    stat = 0
     if (.not. haveInteractionHash) then 
-       call createInteractionHash(myStatus)      
-       if (myStatus .ne. 0) then
-          write(default_error, *) 'createInteractionHash failed in doForces!'
-          stat = -1
-          return
-       endif
+       call createInteractionHash()      
     endif
 #ifdef IS_MPI
     nGroupsInRow = getNgroupsInRow(plan_group_row)
@@ -355,16 +344,13 @@ contains
                 if (thisRCut .gt. atypeMaxCutoff(i)) atypeMaxCutoff(i) = thisRCut
              endif
           endif
-          
-          
+                    
           if (atypeMaxCutoff(i).gt.biggestAtypeCutoff) then
              biggestAtypeCutoff = atypeMaxCutoff(i)
           endif
 
        endif
     enddo
-  
-
     
     istart = 1
     jstart = 1
@@ -513,17 +499,13 @@ contains
     groupMaxCutoffCol => groupMaxCutoffRow
 #endif
 
-
-
-
-
     !! allocate the gtypeCutoffMap here.
     allocate(gtypeCutoffMap(nGroupTypesRow,nGroupTypesCol))
     !! then we do a double loop over all the group TYPES to find the cutoff
     !! map between groups of two types
     tradRcut = max(maxval(gtypeMaxCutoffRow),maxval(gtypeMaxCutoffCol))
 
-    do i = 1, nGroupTypesRow
+    do i = 1, nGroupTypesRow      
        do j = 1, nGroupTypesCol
        
           select case(cutoffPolicy)
@@ -538,10 +520,16 @@ contains
              return
           end select
           gtypeCutoffMap(i,j)%rcut = thisRcut
+          
+          if (thisRcut.gt.largestRcut) largestRcut = thisRcut
+
           gtypeCutoffMap(i,j)%rcutsq = thisRcut*thisRcut
-          skin = defaultRlist - defaultRcut
-          listSkin = skin ! set neighbor list skin thickness
-          gtypeCutoffMap(i,j)%rlistsq = (thisRcut + skin)**2
+
+          if (.not.haveSkinThickness) then
+             skinThickness = 1.0_dp
+          endif
+
+          gtypeCutoffMap(i,j)%rlistsq = (thisRcut + skinThickness)**2
 
           ! sanity check
 
@@ -552,6 +540,7 @@ contains
           endif
        enddo
     enddo
+
     if(allocated(gtypeMaxCutoffRow)) deallocate(gtypeMaxCutoffRow)
     if(allocated(groupMaxCutoffRow)) deallocate(groupMaxCutoffRow)
     if(allocated(atypeMaxCutoff)) deallocate(atypeMaxCutoff)
@@ -565,38 +554,90 @@ contains
     haveGtypeCutoffMap = .true.
    end subroutine createGtypeCutoffMap
 
-   subroutine setDefaultCutoffs(defRcut, defRsw, defRlist, cutPolicy)
-     real(kind=dp),intent(in) :: defRcut, defRsw, defRlist
-     integer, intent(in) :: cutPolicy
+   subroutine setCutoffs(defRcut, defRsw)
+
+     real(kind=dp),intent(in) :: defRcut, defRsw
+     character(len = statusMsgSize) :: errMsg
+     integer :: localError
 
      defaultRcut = defRcut
      defaultRsw = defRsw
-     defaultRlist = defRlist
-     cutoffPolicy = cutPolicy
-
-     haveDefaultCutoffs = .true.
-   end subroutine setDefaultCutoffs
-
-   subroutine setCutoffPolicy(cutPolicy)
-
-     integer, intent(in) :: cutPolicy
-     cutoffPolicy = cutPolicy
-     call createGtypeCutoffMap()
-   end subroutine setCutoffPolicy
-    
      
-  subroutine setSimVariables()
-    SIM_uses_DirectionalAtoms = SimUsesDirectionalAtoms()
-    SIM_uses_EAM = SimUsesEAM()
-    SIM_uses_SC  = SimUsesSC()
-    SIM_requires_postpair_calc = SimRequiresPostpairCalc()
-    SIM_requires_prepair_calc = SimRequiresPrepairCalc()
-    SIM_uses_PBC = SimUsesPBC()
+     defaultDoShift = .false.
+     if (abs(defaultRcut-defaultRsw) .lt. 0.0001) then
+        
+        write(errMsg, *) &
+             'cutoffRadius and switchingRadius are set to the same', newline &
+             // tab, 'value.  OOPSE will use shifted ', newline &
+             // tab, 'potentials instead of switching functions.'
+        
+        call handleInfo("setCutoffs", errMsg)
+        
+        defaultDoShift = .true.
+        
+     endif
 
-    haveSIMvariables = .true.
+     localError = 0
+     call setLJDefaultCutoff( defaultRcut, defaultDoShift )
+     call setCutoffEAM( defaultRcut, localError)
+     if (localError /= 0) then
+       write(errMsg, *) 'An error has occured in setting the EAM cutoff'
+       call handleError("setCutoffs", errMsg)
+     end if
+     call set_switch(GROUP_SWITCH, defaultRsw, defaultRcut)
+     
+     haveDefaultCutoffs = .true.
+   end subroutine setCutoffs
 
-    return
-  end subroutine setSimVariables
+   subroutine cWasLame()
+     
+     VisitCutoffsAfterComputing = .true.
+     return
+     
+   end subroutine cWasLame
+   
+   subroutine setCutoffPolicy(cutPolicy)
+     
+     integer, intent(in) :: cutPolicy
+     
+     cutoffPolicy = cutPolicy
+     haveCutoffPolicy = .true.
+
+     call createGtypeCutoffMap()
+     
+   end subroutine setCutoffPolicy
+   
+   subroutine setElectrostaticMethod( thisESM )
+
+     integer, intent(in) :: thisESM
+
+     electrostaticSummationMethod = thisESM
+     haveElectrostaticSummationMethod = .true.
+    
+   end subroutine setElectrostaticMethod
+
+   subroutine setSkinThickness( thisSkin )
+     
+     real(kind=dp), intent(in) :: thisSkin
+     
+     skinThickness = thisSkin
+     haveSkinThickness = .true.
+     
+     call createGtypeCutoffMap()
+     
+   end subroutine setSkinThickness
+      
+   subroutine setSimVariables()
+     SIM_uses_DirectionalAtoms = SimUsesDirectionalAtoms()
+     SIM_uses_EAM = SimUsesEAM()
+     SIM_requires_postpair_calc = SimRequiresPostpairCalc()
+     SIM_requires_prepair_calc = SimRequiresPrepairCalc()
+     SIM_uses_PBC = SimUsesPBC()
+     
+     haveSIMvariables = .true.
+     
+     return
+   end subroutine setSimVariables
 
   subroutine doReadyCheck(error)
     integer, intent(out) :: error
@@ -606,24 +647,18 @@ contains
     error = 0
 
     if (.not. haveInteractionHash) then       
-       myStatus = 0       
-       call createInteractionHash(myStatus)       
-       if (myStatus .ne. 0) then
-          write(default_error, *) 'createInteractionHash failed in doForces!'
-          error = -1
-          return
-       endif
+       call createInteractionHash()       
     endif
 
     if (.not. haveGtypeCutoffMap) then        
-       myStatus = 0       
-       call createGtypeCutoffMap(myStatus)       
-       if (myStatus .ne. 0) then
-          write(default_error, *) 'createGtypeCutoffMap failed in doForces!'
-          error = -1
-          return
-       endif
+       call createGtypeCutoffMap()       
     endif
+
+
+    if (VisitCutoffsAfterComputing) then
+       call set_switch(GROUP_SWITCH, largestRcut, largestRcut)       
+    endif
+
 
     if (.not. haveSIMvariables) then
        call setSimVariables()
@@ -658,17 +693,14 @@ contains
   end subroutine doReadyCheck
 
 
-  subroutine init_FF(thisESM, thisStat)
+  subroutine init_FF(thisStat)
 
-    integer, intent(in) :: thisESM
     integer, intent(out) :: thisStat   
     integer :: my_status, nMatches
     integer, pointer :: MatchList(:) => null()
 
     !! assume things are copacetic, unless they aren't
     thisStat = 0
-
-    electrostaticSummationMethod = thisESM
 
     !! init_FF is called *after* all of the atom types have been 
     !! defined in atype_module using the new_atype subroutine.
@@ -766,6 +798,7 @@ contains
     real( kind = DP ) :: rVal
     real(kind=dp),dimension(3) :: d_atm, d_grp, fpair, fij
     real(kind=dp) :: rfpot, mu_i, virial
+    real(kind=dp):: rCut
     integer :: me_i, me_j, n_in_i, n_in_j
     logical :: is_dp_i
     integer :: neighborListSize
@@ -839,10 +872,10 @@ contains
        ! (but only on the first time through):
        if (loop .eq. loopStart) then
 #ifdef IS_MPI
-          call checkNeighborList(nGroupsInRow, q_group_row, listSkin, &
+          call checkNeighborList(nGroupsInRow, q_group_row, skinThickness, &
                update_nlist)
 #else
-          call checkNeighborList(nGroups, q_group, listSkin, &
+          call checkNeighborList(nGroups, q_group, skinThickness, &
                update_nlist)
 #endif
        endif
@@ -922,16 +955,19 @@ contains
 
                    list(nlist) = j
                 endif
+ 
+
                 
                 if (rgrpsq < gtypeCutoffMap(groupToGtypeRow(i),groupToGtypeCol(j))%rCutsq) then
 
+                   rCut = gtypeCutoffMap(groupToGtypeRow(i),groupToGtypeCol(j))%rCut
                    if (loop .eq. PAIR_LOOP) then
                       vij = 0.0d0
                       fij(1:3) = 0.0d0
                    endif
                    
-                   call get_switch(rgrpsq, sw, dswdr, rgrp, group_switch, &
-                        in_switching_region)
+                   call get_switch(rgrpsq, sw, dswdr, rgrp, &
+                        group_switch, in_switching_region)
                    
                    n_in_j = groupStartCol(j+1) - groupStartCol(j)
                    
@@ -961,22 +997,22 @@ contains
                          if (loop .eq. PREPAIR_LOOP) then
 #ifdef IS_MPI                      
                             call do_prepair(atom1, atom2, ratmsq, d_atm, sw, &
-                                 rgrpsq, d_grp, do_pot, do_stress, &
+                                 rgrpsq, d_grp, rCut, do_pot, do_stress, &
                                  eFrame, A, f, t, pot_local)
 #else
                             call do_prepair(atom1, atom2, ratmsq, d_atm, sw, &
-                                 rgrpsq, d_grp, do_pot, do_stress, &
+                                 rgrpsq, d_grp, rCut, do_pot, do_stress, &
                                  eFrame, A, f, t, pot)
 #endif                                               
                          else
 #ifdef IS_MPI                      
                             call do_pair(atom1, atom2, ratmsq, d_atm, sw, &
                                  do_pot, eFrame, A, f, t, pot_local, vpair, &
-                                 fpair, d_grp, rgrp)
+                                 fpair, d_grp, rgrp, rCut)
 #else
                             call do_pair(atom1, atom2, ratmsq, d_atm, sw, &
                                  do_pot, eFrame, A, f, t, pot, vpair, fpair, &
-                                 d_grp, rgrp)
+                                 d_grp, rgrp, rCut)
 #endif
                             vij = vij + vpair
                             fij(1:3) = fij(1:3) + fpair(1:3)
@@ -1184,7 +1220,7 @@ contains
   end subroutine do_force_loop
 
   subroutine do_pair(i, j, rijsq, d, sw, do_pot, &
-       eFrame, A, f, t, pot, vpair, fpair, d_grp, r_grp)
+       eFrame, A, f, t, pot, vpair, fpair, d_grp, r_grp, rCut)
 
     real( kind = dp ) :: vpair, sw
     real( kind = dp ), dimension(LR_POT_TYPES) :: pot
@@ -1201,6 +1237,7 @@ contains
     real ( kind = dp ), intent(inout) :: r_grp
     real ( kind = dp ), intent(inout) :: d(3)
     real ( kind = dp ), intent(inout) :: d_grp(3)
+    real ( kind = dp ), intent(inout) :: rCut 
     real ( kind = dp ) :: r
     integer :: me_i, me_j
 
@@ -1221,12 +1258,12 @@ contains
     iHash = InteractionHash(me_i, me_j)
     
     if ( iand(iHash, LJ_PAIR).ne.0 ) then
-       call do_lj_pair(i, j, d, r, rijsq, sw, vpair, fpair, &
+       call do_lj_pair(i, j, d, r, rijsq, rcut, sw, vpair, fpair, &
             pot(VDW_POT), f, do_pot)
     endif
     
     if ( iand(iHash, ELECTROSTATIC_PAIR).ne.0 ) then
-       call doElectrostaticPair(i, j, d, r, rijsq, sw, vpair, fpair, &
+       call doElectrostaticPair(i, j, d, r, rijsq, rcut, sw, vpair, fpair, &
             pot(ELECTROSTATIC_POT), eFrame, f, t, do_pot)
     endif
     
@@ -1246,7 +1283,7 @@ contains
     endif
     
     if ( iand(iHash, GAYBERNE_LJ).ne.0 ) then
-       call do_gb_lj_pair(i, j, d, r, rijsq, sw, vpair, fpair, &
+       call do_gb_lj_pair(i, j, d, r, rijsq, rcut, sw, vpair, fpair, &
             pot(VDW_POT), A, f, t, do_pot)
     endif
     
@@ -1266,7 +1303,7 @@ contains
     endif
 
     if ( iand(iHash, SC_PAIR).ne.0 ) then       
-       call do_SC_pair(i, j, d, r, rijsq, sw, vpair, fpair, &
+       call do_SC_pair(i, j, d, r, rijsq, rcut, sw, vpair, fpair, &
             pot(METALLIC_POT), f, do_pot)
     endif
 
@@ -1274,7 +1311,7 @@ contains
      
   end subroutine do_pair
 
-  subroutine do_prepair(i, j, rijsq, d, sw, rcijsq, dc, &
+  subroutine do_prepair(i, j, rijsq, d, sw, rcijsq, dc, rCut, &
        do_pot, do_stress, eFrame, A, f, t, pot)
 
     real( kind = dp ) :: sw
@@ -1286,7 +1323,7 @@ contains
 
     logical, intent(inout) :: do_pot, do_stress
     integer, intent(in) :: i, j
-    real ( kind = dp ), intent(inout)    :: rijsq, rcijsq
+    real ( kind = dp ), intent(inout)    :: rijsq, rcijsq, rCut
     real ( kind = dp )                :: r, rc
     real ( kind = dp ), intent(inout) :: d(3), dc(3)
 
@@ -1305,11 +1342,11 @@ contains
     iHash = InteractionHash(me_i, me_j)
 
     if ( iand(iHash, EAM_PAIR).ne.0 ) then       
-            call calc_EAM_prepair_rho(i, j, d, r, rijsq )
+            call calc_EAM_prepair_rho(i, j, d, r, rijsq)
     endif
 
     if ( iand(iHash, SC_PAIR).ne.0 ) then       
-            call calc_SC_prepair_rho(i, j, d, r, rijsq )
+            call calc_SC_prepair_rho(i, j, d, r, rijsq, rcut )
     endif
     
   end subroutine do_prepair

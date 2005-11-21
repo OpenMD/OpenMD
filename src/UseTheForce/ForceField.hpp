@@ -50,9 +50,7 @@
 #ifndef USETHEFORCE_FORCEFIELD_HPP
 #define USETHEFORCE_FORCEFIELD_HPP
 
-#define MK_STR(s) # s
-#define STR_DEFINE(t, s) t = MK_STR(s)
-
+#include "config.h"
 #include <string>
 #include <utility>
 

@@ -431,11 +431,11 @@ contains
 
 
   !! Calculates rho_r
-  subroutine calc_sc_prepair_rho(atom1,atom2,d,r,rijsq)
+  subroutine calc_sc_prepair_rho(atom1,atom2,d,r,rijsq, rcut)
     integer :: atom1,atom2
     real(kind = dp), dimension(3) :: d
     real(kind = dp), intent(inout)               :: r
-    real(kind = dp), intent(inout)               :: rijsq
+    real(kind = dp), intent(inout)               :: rijsq, rcut
     ! value of electron density rho do to atom i at atom j
     real(kind = dp) :: rho_i_at_j
     ! value of electron density rho do to atom j at atom i
@@ -550,11 +550,11 @@ contains
 
 
   !! Does Sutton-Chen  pairwise Force calculation.  
-  subroutine do_sc_pair(atom1, atom2, d, rij, r2, sw, vpair, fpair, &
+  subroutine do_sc_pair(atom1, atom2, d, rij, r2, rcut, sw, vpair, fpair, &
        pot, f, do_pot)
     !Arguments    
     integer, intent(in) ::  atom1, atom2
-    real( kind = dp ), intent(in) :: rij, r2
+    real( kind = dp ), intent(in) :: rij, r2, rcut
     real( kind = dp ) :: pot, sw, vpair
     real( kind = dp ), dimension(3,nLocal) :: f
     real( kind = dp ), intent(in), dimension(3) :: d
