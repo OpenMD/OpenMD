@@ -1,10 +1,10 @@
 Package = openbabel
 
 Source    = \
-    atom.cpp\
+    obatom.cpp\
     base.cpp \
     bitvec.cpp\
-    bond.cpp\
+    obbond.cpp\
     bondtyper.cpp\
     chains.cpp\
     chiral.cpp\
