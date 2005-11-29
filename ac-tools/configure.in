@@ -130,6 +130,7 @@ AC_LANG_C
 AC_CHECK_HEADERS(sys/pstat.h sys/sysmp.h sys/sysinfo.h)
 AC_CHECK_HEADERS(sys/table.h sys/param.h sys/sysctl.h sys/sytemcfg.h)
 AC_CHECK_HEADERS(machine/hal_sysinfo.h)
+AC_CHECK_FUNCS(rint snprintf sranddev strncasecmp)
 AC_CHECK_FUNCS(pstat_getstatic sysmp getsysinfo sysctl table)
 # special check for _system_configuration because AIX <4.3.2 do not
 # contain the `physmem' member.
