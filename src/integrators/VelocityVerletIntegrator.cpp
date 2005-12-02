@@ -141,7 +141,6 @@ namespace oopse {
       needPotential = true;
       needStress = true;   
     }
-
   }
 
   void VelocityVerletIntegrator::postStep() {
