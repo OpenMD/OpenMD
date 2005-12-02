@@ -37,7 +37,7 @@ namespace {
 		}
 		ANTLR_USE_NAMESPACE(std)ostream& out;
 	};
-};
+}
 
 TokenStreamRewriteEngine::TokenStreamRewriteEngine(TokenStream& upstream)
 : stream(upstream)
