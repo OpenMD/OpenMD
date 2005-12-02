@@ -1,6 +1,5 @@
 #include "lj.md"
 
-nComponents = 2;
 component{
   type = "Kr";
   nMol = 9;

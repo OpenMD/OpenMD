@@ -3,7 +3,6 @@
 
 molecule{
   name = "linear";
-  nAtoms = 1;
   atom[0]{
      type="linear";
      position( 0.0, 0.0, 0.0 );
