@@ -108,16 +108,14 @@ namespace oopse {
     
     std::sort(bendOrderStruct.begin(), bendOrderStruct.end(), std::ptr_fun(BendSortFunctor));
     std::sort(torsionOrderStruct.begin(), torsionOrderStruct.end(), std::ptr_fun(TorsionSortFunctor));
-    std::cout << "bend" << std::endl;
     for (std::vector<BendOrderStruct>::iterator k = bendOrderStruct.begin(); k != bendOrderStruct.end(); ++k) {
         Bend* bend = k->bend;
-        std::cout << "atom1=" <<bend->getAtomA()->getGlobalIndex() << ",atom2 = "<< bend->getAtomB()->getGlobalIndex() << ",atom3="<<bend->getAtomC()->getGlobalIndex() << " ";
+        std::cout << "Bend: atom1=" <<bend->getAtomA()->getGlobalIndex() << ",atom2 = "<< bend->getAtomB()->getGlobalIndex() << ",atom3="<<bend->getAtomC()->getGlobalIndex() << " ";
         std::cout << "deltaV=" << k->dataSet.deltaV << ",p_theta=" << k->dataSet.prev.angle <<",p_pot=" << k->dataSet.prev.potential<< ",c_theta=" << k->dataSet.curr.angle << ", c_pot = " << k->dataSet.curr.potential <<std::endl;
     }
-    std::cout << "torsio" << std::endl;
     for (std::vector<TorsionOrderStruct>::iterator l = torsionOrderStruct.begin(); l != torsionOrderStruct.end(); ++l) {
         Torsion* torsion = l->torsion;
-        std::cout << "atom1=" <<torsion->getAtomA()->getGlobalIndex() << ",atom2 = "<< torsion->getAtomB()->getGlobalIndex() << ",atom3="<<torsion->getAtomC()->getGlobalIndex() << ",atom4="<<torsion->getAtomD()->getGlobalIndex()<< " ";
+        std::cout << "Torsion: atom1=" <<torsion->getAtomA()->getGlobalIndex() << ",atom2 = "<< torsion->getAtomB()->getGlobalIndex() << ",atom3="<<torsion->getAtomC()->getGlobalIndex() << ",atom4="<<torsion->getAtomD()->getGlobalIndex()<< " ";
         std::cout << "deltaV=" << l->dataSet.deltaV << ",p_theta=" << l->dataSet.prev.angle <<",p_pot=" << l->dataSet.prev.potential<< ",c_theta=" << l->dataSet.curr.angle << ", c_pot = " << l->dataSet.curr.potential <<std::endl;
     }
    */ 
