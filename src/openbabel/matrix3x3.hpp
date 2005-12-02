@@ -139,7 +139,7 @@ public:
     }
 
     //! Calculates the inverse of a matrix.
-    matrix3x3 inverse(void) const throw(OBError);
+    matrix3x3 inverse(void);
 
     //! Calculates the transpose of a matrix.
     matrix3x3 transpose(void) const;
@@ -208,22 +208,22 @@ public:
     //! access function
     /*! \warning If column is not in the range 0..2, the vector
     remains unchanged and an exception is thrown. */
-    void SetColumn(int column, const vector3 &v) throw(OBError);
+    void SetColumn(int column, const vector3 &v);
 
     //! access function
     /*! \warning If column is not in the range 0..2, the vector
     remains unchanged and an exception is thrown. */
-    void SetRow(int row, const vector3 &v) throw(OBError);
+    void SetRow(int row, const vector3 &v);
 
     //! access function
     /*! \warning If col is not in the range 0..2, an exception is
     thrown. */
-    vector3 GetColumn(unsigned int col) const throw(OBError);
+    vector3 GetColumn(unsigned int col);
 
     //! access function
     /*! \warning If row is not in the range 0..2, an exception is
     thrown. */
-    vector3 GetRow(unsigned int row) const throw(OBError);
+    vector3 GetRow(unsigned int row);
 
 
     //! divides all entries of the matrix by a scalar c
@@ -240,7 +240,7 @@ public:
     void FillOrth(double,double,double,double,double,double);
 
     //! find the eigenvalues and -vectors of a symmetric matrix
-    matrix3x3 findEigenvectorsIfSymmetric(vector3 &eigenvals) const throw(OBError);
+    matrix3x3 findEigenvectorsIfSymmetric(vector3 &eigenvals);
 
     //! matrix-vector multiplication
     friend OBAPI vector3 operator *(const matrix3x3 &,const vector3 &);

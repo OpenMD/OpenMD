@@ -177,14 +177,12 @@ void matrix3x3::RotAboutAxisByAngle(const vector3 &v,const double angle)
 #undef y
 #undef z
 
-void matrix3x3::SetColumn(int col, const vector3 &v) throw(OBError)
+void matrix3x3::SetColumn(int col, const vector3 &v)
 {
     if (col > 2)
     {
-        OBError er("matrix3x3::SetColumn(int col, const vector3 &v)",
-                   "The method was called with col > 2.",
-                   "This is a programming error in your application.");
-        throw er;
+        obErrorLog.ThrowError(__FUNCTION__,
+                              "The method was called with col > 2.", obError);
     }
 
     ele[0][col] = v.x();
@@ -192,14 +190,12 @@ void matrix3x3::SetColumn(int col, const vector3 &v) throw(OBError)
     ele[2][col] = v.z();
 }
 
-void matrix3x3::SetRow(int row, const vector3 &v) throw(OBError)
+void matrix3x3::SetRow(int row, const vector3 &v)
 {
     if (row > 2)
     {
-        OBError er("matrix3x3::SetRow(int row, const vector3 &v)",
-                   "The method was called with row > 2.",
-                   "This is a programming error in your application.");
-        throw er;
+        obErrorLog.ThrowError(__FUNCTION__,
+                              "The method was called with row > 2.", obError);
     }
 
     ele[row][0] = v.x();
@@ -207,27 +203,23 @@ void matrix3x3::SetRow(int row, const vector3 &v) throw(OBError)
     ele[row][2] = v.z();
 }
 
-vector3 matrix3x3::GetColumn(unsigned int col) const throw(OBError)
+vector3 matrix3x3::GetColumn(unsigned int col)
 {
     if (col > 2)
     {
-        OBError er("matrix3x3::GetColumn(unsigned int col) const",
-                   "The method was called with col > 2.",
-                   "This is a programming error in your application.");
-        throw er;
+        obErrorLog.ThrowError(__FUNCTION__,
+                              "The method was called with col > 2.", obError);
     }
 
     return vector3(ele[0][col], ele[1][col], ele[2][col]);
 }
 
-vector3 matrix3x3::GetRow(unsigned int row) const throw(OBError)
+vector3 matrix3x3::GetRow(unsigned int row)
 {
     if (row > 2)
     {
-        OBError er("matrix3x3::GetRow(unsigned int row) const",
-                   "The method was called with row > 2.",
-                   "This is a programming error in your application.");
-        throw er;
+        obErrorLog.ThrowError(__FUNCTION__,
+                              "The method was called with row > 2.", obError);
     }
 
     return vector3(ele[row][0], ele[row][1], ele[row][2]);
@@ -294,15 +286,13 @@ vector3 &vector3::operator *= (const matrix3x3 &m)
   discouraged, unless you are certain that the determinant is in a
   reasonable range, away from 0.0 (Stefan Kebekus)
 */
-matrix3x3 matrix3x3::inverse(void) const throw(OBError)
+matrix3x3 matrix3x3::inverse(void)
 {
     double det = determinant();
     if (fabs(det) <= 1e-6)
     {
-        OBError er("matrix3x3::invert(void)",
-                   "The method was called on a matrix with |determinant| <= 1e-6.",
-                   "This is a runtime or a programming error in your application.");
-        throw er;
+        obErrorLog.ThrowError(__FUNCTION__,
+                              "The method was called on a matrix with |determinant| <= 1e-6.", obError);
     }
 
     matrix3x3 inverse;
@@ -435,16 +425,14 @@ bool matrix3x3::isUnitMatrix(void) const
   \endcode
   
 */
-matrix3x3 matrix3x3::findEigenvectorsIfSymmetric(vector3 &eigenvals) const throw(OBError)
+matrix3x3 matrix3x3::findEigenvectorsIfSymmetric(vector3 &eigenvals)
 {
     matrix3x3 result;
 
     if (!isSymmetric())
     {
-        OBError er("matrix3x3::findEigenvectorsIfSymmetric(vector3 &eigenvals) const throw(OBError)",
-                   "The method was called on a matrix that was not symmetric, i.e. where isSymetric() == false.",
-                   "This is a runtime or a programming error in your application.");
-        throw er;
+        obErrorLog.ThrowError(__FUNCTION__,
+                              "The method was called on a matrix that was not symmetric, i.e. where isSymetric() == false.", obError);
     }
 
     double d[3];
