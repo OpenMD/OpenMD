@@ -52,8 +52,9 @@ PackageLibs = \
 	selection \
 	restraints \
 	lattice \
-	openbabel
-
+	openbabel\
+        antlr\
+        mdParser
 #packages containing applications
 Applications = \
 	applications/oopse \
