@@ -63,14 +63,14 @@ namespace oopse {
   Molecule* MoleculeCreator::createMolecule(ForceField* ff, MoleculeStamp *molStamp,
 					    int stampId, int globalIndex, LocalIndexManager* localIndexMan) {
 
-    Molecule* mol = new Molecule(stampId, globalIndex, molStamp->getID());
+    Molecule* mol = new Molecule(stampId, globalIndex, molStamp->getName());
     
     //create atoms
     Atom* atom;
     AtomStamp* currentAtomStamp;
     int nAtom = molStamp->getNAtoms();
     for (int i = 0; i < nAtom; ++i) {
-      currentAtomStamp = molStamp->getAtom(i);
+      currentAtomStamp = molStamp->getAtomStamp(i);
       atom = createAtom(ff, mol, currentAtomStamp, localIndexMan);
       mol->addAtom(atom);
     }
@@ -81,7 +81,7 @@ namespace oopse {
     int nRigidbodies = molStamp->getNRigidBodies();
 
     for (int i = 0; i < nRigidbodies; ++i) {
-      currentRigidBodyStamp = molStamp->getRigidBody(i);
+      currentRigidBodyStamp = molStamp->getRigidBodyStamp(i);
       rb = createRigidBody(molStamp, mol, currentRigidBodyStamp, localIndexMan);
       mol->addRigidBody(rb);
     }
@@ -92,7 +92,7 @@ namespace oopse {
     int nBonds = molStamp->getNBonds();
 
     for (int i = 0; i < nBonds; ++i) {
-      currentBondStamp = molStamp->getBond(i);
+      currentBondStamp = molStamp->getBondStamp(i);
       bond = createBond(ff, mol, currentBondStamp);
       mol->addBond(bond);
     }
@@ -102,7 +102,7 @@ namespace oopse {
     BendStamp* currentBendStamp;
     int nBends = molStamp->getNBends();
     for (int i = 0; i < nBends; ++i) {
-      currentBendStamp = molStamp->getBend(i);
+      currentBendStamp = molStamp->getBendStamp(i);
       bend = createBend(ff, mol, currentBendStamp);
       mol->addBend(bend);
     }
@@ -112,7 +112,7 @@ namespace oopse {
     TorsionStamp* currentTorsionStamp;
     int nTorsions = molStamp->getNTorsions();
     for (int i = 0; i < nTorsions; ++i) {
-      currentTorsionStamp = molStamp->getTorsion(i);
+      currentTorsionStamp = molStamp->getTorsionStamp(i);
       torsion = createTorsion(ff, mol, currentTorsionStamp);
       mol->addTorsion(torsion);
     }
@@ -122,7 +122,7 @@ namespace oopse {
     CutoffGroupStamp* currentCutoffGroupStamp;
     int nCutoffGroups = molStamp->getNCutoffGroups();
     for (int i = 0; i < nCutoffGroups; ++i) {
-      currentCutoffGroupStamp = molStamp->getCutoffGroup(i);
+      currentCutoffGroupStamp = molStamp->getCutoffGroupStamp(i);
       cutoffGroup = createCutoffGroup(mol, currentCutoffGroupStamp);
       mol->addCutoffGroup(cutoffGroup);
     }
@@ -175,7 +175,7 @@ namespace oopse {
 
     if (atomType == NULL) {
       sprintf(painCave.errMsg, "Can not find Matching Atom Type for[%s]",
-	      stamp->getType());
+	      stamp->getType().c_str());
 
       painCave.isFatal = 1;
       simError();
@@ -219,8 +219,8 @@ namespace oopse {
     for (int i = 0; i < nAtoms; ++i) {
       //rbStamp->getMember(i) return the local index of current atom inside the molecule.
       //It is not the same as local index of atom which is the index of atom at DataStorage class
-      atom = mol->getAtomAt(rbStamp->getMember(i));
-      atomStamp= molStamp->getAtom(rbStamp->getMember(i));    
+      atom = mol->getAtomAt(rbStamp->getMemberAt(i));
+      atomStamp= molStamp->getAtomStamp(rbStamp->getMemberAt(i));    
       rb->addAtom(atom, atomStamp);
     }
 
@@ -266,54 +266,31 @@ namespace oopse {
   }    
 
   Bend* MoleculeCreator::createBend(ForceField* ff, Molecule* mol, BendStamp* stamp) {
-    bool isGhostBend = false;
-    int ghostIndex;
+    Bend* bend = NULL; 
+    std::vector<int> bendAtoms = stamp->getMembers(); 
+    if (bendAtoms.size() == 3) {
+      Atom* atomA = mol->getAtomAt(bendAtoms[0]);
+      Atom* atomB = mol->getAtomAt(bendAtoms[1]);
+      Atom* atomC = mol->getAtomAt(bendAtoms[2]);
 
-    
-    //
-    if (stamp->haveExtras()){
-      LinkedAssign* extras = stamp->getExtras();
-      LinkedAssign* currentExtra = extras;
+      assert( atomA && atomB && atomC);
 
-      while (currentExtra != NULL){
-	if (!strcmp(currentExtra->getlhs(), "ghostVectorSource")){
-	  switch (currentExtra->getType()){
-	  case 0:
-	    ghostIndex = currentExtra->getInt();
-	    isGhostBend = true;
-	    break;
+      BendType* bendType = ff->getBendType(atomA->getType().c_str(), atomB->getType().c_str(), atomC->getType().c_str());
 
-	  default:
-	    sprintf(painCave.errMsg,
-		    "SimSetup Error: ghostVectorSource must be an int.\n");
-	    painCave.isFatal = 1;
-	    simError();
-	  }
-	} else{
-	  sprintf(painCave.errMsg,
-		  "SimSetup Error: unhandled bend assignment:\n");
-	  painCave.isFatal = 1;
-	  simError();
-	}
-	currentExtra = currentExtra->getNext();
+      if (bendType == NULL) {
+        sprintf(painCave.errMsg, "Can not find Matching Bend Type for[%s, %s, %s]",
+                atomA->getType().c_str(),
+                atomB->getType().c_str(),
+                atomC->getType().c_str());
+
+        painCave.isFatal = 1;
+        simError();
       }
-        
-    }
 
-    if (isGhostBend) {
-
-      int indexA = stamp->getA();
-      int indexB= stamp->getB();
-
-      assert(indexA != indexB);
-
-      int normalIndex;
-      if (indexA == ghostIndex) {
-	normalIndex = indexB;
-      } else if (indexB == ghostIndex) {
-	normalIndex = indexA;
-      }
-        
+      bend = new Bend(atomA, atomB, atomC, bendType);
+    } else if ( bendAtoms.size() == 2 && stamp->haveGhostVectorSource()) {
+      int ghostIndex = stamp->getGhostVectorSource();
+      int normalIndex = ghostIndex != bendAtoms[0] ? bendAtoms[0] : bendAtoms[1]; 
       Atom* normalAtom = mol->getAtomAt(normalIndex) ;        
       DirectionalAtom* ghostAtom = dynamic_cast<DirectionalAtom*>(mol->getAtomAt(ghostIndex));
       if (ghostAtom == NULL) {
@@ -334,41 +311,27 @@ namespace oopse {
 	simError();
       }
         
-      return new GhostBend(normalAtom, ghostAtom, bendType);       
+      bend = new GhostBend(normalAtom, ghostAtom, bendType);       
 
-    } else {
-            
-      Atom* atomA = mol->getAtomAt(stamp->getA());
-      Atom* atomB = mol->getAtomAt(stamp->getB());
-      Atom* atomC = mol->getAtomAt(stamp->getC());
-
-      assert( atomA && atomB && atomC);
-        
-      BendType* bendType = ff->getBendType(atomA->getType(), atomB->getType(), atomC->getType());
-
-      if (bendType == NULL) {
-	sprintf(painCave.errMsg, "Can not find Matching Bend Type for[%s, %s, %s]",
-		atomA->getType().c_str(),
-		atomB->getType().c_str(),
-		atomC->getType().c_str());
-
-	painCave.isFatal = 1;
-	simError();
-      }
-
-      return new Bend(atomA, atomB, atomC, bendType);       
-    }
+    } 
+    
+    return bend;
   }    
 
   Torsion* MoleculeCreator::createTorsion(ForceField* ff, Molecule* mol, TorsionStamp* stamp) {
 
-    Atom* atomA = mol->getAtomAt(stamp->getA());
-    Atom* atomB = mol->getAtomAt(stamp->getB());
-    Atom* atomC = mol->getAtomAt(stamp->getC());
-    Torsion* torsion;
+    Torsion* torsion = NULL;
+    std::vector<int> torsionAtoms = stamp->getMembers();
+    if (torsionAtoms.size() < 3) {
+	return torsion;
+    }
 
-    if (stamp->getD() != -1) {
-      Atom* atomD = mol->getAtomAt(stamp->getD());
+    Atom* atomA = mol->getAtomAt(torsionAtoms[0]);
+    Atom* atomB = mol->getAtomAt(torsionAtoms[1]);
+    Atom* atomC = mol->getAtomAt(torsionAtoms[2]);
+
+    if (torsionAtoms.size() == 4) {
+      Atom* atomD = mol->getAtomAt(torsionAtoms[3]);
 
       assert(atomA && atomB && atomC && atomD);
         
@@ -390,7 +353,7 @@ namespace oopse {
     }
     else {
 
-      DirectionalAtom* dAtom = dynamic_cast<DirectionalAtom*>(atomC);
+      DirectionalAtom* dAtom = dynamic_cast<DirectionalAtom*>(mol->getAtomAt(stamp->getGhostVectorSource()));
       if (dAtom == NULL) {
 	sprintf(painCave.errMsg, "Can not cast Atom to DirectionalAtom");
 	painCave.isFatal = 1;
@@ -425,7 +388,7 @@ namespace oopse {
     
     nAtoms = stamp->getNMembers();
     for (int i =0; i < nAtoms; ++i) {
-      atom = mol->getAtomAt(stamp->getMember(i));
+      atom = mol->getAtomAt(stamp->getMemberAt(i));
       assert(atom);
       cg->addAtom(atom);
     }

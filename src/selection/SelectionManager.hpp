@@ -42,7 +42,7 @@
 #ifndef SELECTION_SELECTIONMANAGER_HPP
 #define SELECTION_SELECTIONMANAGER_HPP
 
-#include "utils/BitSet.hpp"
+#include "utils/OOPSEBitSet.hpp"
 #include "primitives/StuntDouble.hpp"
 namespace oopse {
 
@@ -59,7 +59,7 @@ namespace oopse {
       bsSelection_.setBitOn(sd->getGlobalIndex());
     }
         
-    void addSelectionSet(const BitSet& bs) {
+    void addSelectionSet(const OOPSEBitSet& bs) {
       bsSelection_ |= bs;
     }
 
@@ -68,7 +68,7 @@ namespace oopse {
       bsSelection_.setBitOn(sd->getGlobalIndex());
     }
         
-    void setSelectionSet(const BitSet& bs) {
+    void setSelectionSet(const OOPSEBitSet& bs) {
       bsSelection_ = bs;           
     }
 
@@ -104,7 +104,7 @@ namespace oopse {
       return bsSelection_.countBits();
     }
 
-    BitSet getSelectionSet() {
+    OOPSEBitSet getSelectionSet() {
       return bsSelection_;
     }
 
@@ -142,7 +142,7 @@ namespace oopse {
         
   private:
     SimInfo* info_;
-    BitSet bsSelection_;
+    OOPSEBitSet bsSelection_;
     std::vector<StuntDouble*> stuntdoubles_;
   };
 

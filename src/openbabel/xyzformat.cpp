@@ -88,7 +88,7 @@ bool XYZFormat::ReadMolecule(OBBase* pOb, OBConversion* pConv)
 	  return(false);
         }
         tokenize(vs,buffer);
-        if (vs.size() != 4)
+        if (vs.size() < 4)
         {
           errorMsg << "Problems reading an XYZ file: "
 		   << "Could not read line #" << i+2 << "." << endl

@@ -41,7 +41,7 @@
 #ifndef SELECTION_INDEXFINDER_HPP
 #define SELECTION_INDEXFINDER_HPP
 #include "brains/SimInfo.hpp"
-#include "utils/BitSet.hpp"
+#include "utils/OOPSEBitSet.hpp"
 #include "primitives/StuntDouble.hpp"
 namespace oopse {
 
@@ -49,15 +49,15 @@ namespace oopse {
   public:
     IndexFinder(SimInfo* si);
 
-    BitSet find(int molIndex);
-    BitSet find(int begMolIndex, int endMolIndex);
+    OOPSEBitSet find(int molIndex);
+    OOPSEBitSet find(int begMolIndex, int endMolIndex);
 
   private:
 
     void init();
         
     SimInfo* info_;
-    std::vector<BitSet> bitSets_;
+    std::vector<OOPSEBitSet> bitSets_;
     int nStuntDoubles_;
         
   };

@@ -42,7 +42,7 @@
 #ifndef SELECTION_TOKENMAP_HPP
 #define SELECTION_TOKENMAP_HPP
 
-#include "selection/Token.hpp"
+#include "selection/SelectionToken.hpp"
 
 namespace oopse {
 

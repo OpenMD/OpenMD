@@ -95,7 +95,7 @@ namespace oopse{
      * @param simParams 
      * @note
      */
-    SimInfo(MakeStamps* stamps, std::vector<std::pair<MoleculeStamp*, int> >& molStampPairs, ForceField* ff, Globals* simParams);
+    SimInfo(ForceField* ff, Globals* simParams);
     virtual ~SimInfo();
 
     /**
@@ -450,17 +450,16 @@ namespace oopse{
     void calcNdfRaw();
     void calcNdfTrans();
 
+    ForceField* forceField_;      
+    Globals* simParams_;
+
+    std::map<int, Molecule*>  molecules_; /**< Molecule array */
+
     /**
      * Adds molecule stamp and the total number of the molecule with same molecule stamp in the whole
      * system.
      */
     void addMoleculeStamp(MoleculeStamp* molStamp, int nmol);
-
-    MakeStamps* stamps_;
-    ForceField* forceField_;      
-    Globals* simParams_;
-
-    std::map<int, Molecule*>  molecules_; /**< Molecule array */
         
     //degress of freedom
     int ndf_;           /**< number of degress of freedom (excludes constraints),  ndf_ is local */

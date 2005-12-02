@@ -115,7 +115,7 @@ namespace oopse {
     return loadScript(filename, script);
   }
 
-  void SelectionEvaluator::instructionDispatchLoop(BitSet& bs){
+  void SelectionEvaluator::instructionDispatchLoop(OOPSEBitSet& bs){
     
     while ( pc < aatoken.size()) {
       statement = aatoken[pc++];
@@ -136,9 +136,9 @@ namespace oopse {
 
   }
 
-  BitSet SelectionEvaluator::expression(const std::vector<Token>& code, int pcStart) {
-    BitSet bs;
-    std::stack<BitSet> stack;
+  OOPSEBitSet SelectionEvaluator::expression(const std::vector<Token>& code, int pcStart) {
+    OOPSEBitSet bs;
+    std::stack<OOPSEBitSet> stack;
     
     for (int pc = pcStart; pc < code.size(); ++pc) {
       Token instruction = code[pc];
@@ -149,12 +149,12 @@ namespace oopse {
       case Token::expressionEnd:
         break;
       case Token::all:
-        bs = BitSet(nStuntDouble);
+        bs = OOPSEBitSet(nStuntDouble);
         bs.setAll();
         stack.push(bs);            
         break;
       case Token::none:
-        bs = BitSet(nStuntDouble);
+        bs = OOPSEBitSet(nStuntDouble);
         stack.push(bs);            
         break;
       case Token::opOr:
@@ -206,12 +206,12 @@ namespace oopse {
 
 
 
-  BitSet SelectionEvaluator::comparatorInstruction(const Token& instruction) {
+  OOPSEBitSet SelectionEvaluator::comparatorInstruction(const Token& instruction) {
     int comparator = instruction.tok;
     int property = instruction.intValue;
     float comparisonValue = boost::any_cast<float>(instruction.value);
     float propertyValue;
-    BitSet bs(nStuntDouble);
+    OOPSEBitSet bs(nStuntDouble);
     bs.clearAll();
     
     SimInfo::MoleculeIterator mi;
@@ -235,7 +235,7 @@ namespace oopse {
     return bs;
   }
 
-  void SelectionEvaluator::compareProperty(StuntDouble* sd, BitSet& bs, int property, int comparator, float comparisonValue) {
+  void SelectionEvaluator::compareProperty(StuntDouble* sd, OOPSEBitSet& bs, int property, int comparator, float comparisonValue) {
     double propertyValue = 0.0;
     switch (property) {
     case Token::mass:
@@ -284,7 +284,7 @@ namespace oopse {
 
   }
 
-  void SelectionEvaluator::withinInstruction(const Token& instruction, BitSet& bs){
+  void SelectionEvaluator::withinInstruction(const Token& instruction, OOPSEBitSet& bs){
     
     boost::any withinSpec = instruction.value;
     float distance;
@@ -341,18 +341,18 @@ namespace oopse {
 
   }
 
-  void SelectionEvaluator::select(BitSet& bs){
+  void SelectionEvaluator::select(OOPSEBitSet& bs){
     bs = expression(statement, 1);
   }
 
-  BitSet SelectionEvaluator::lookupValue(const std::string& variable){
+  OOPSEBitSet SelectionEvaluator::lookupValue(const std::string& variable){
 
-    BitSet bs(nStuntDouble);
+    OOPSEBitSet bs(nStuntDouble);
     std::map<std::string, boost::any>::iterator i = variables.find(variable);
     
     if (i != variables.end()) {
-      if (i->second.type() == typeid(BitSet)) {
-	return boost::any_cast<BitSet>(i->second);
+      if (i->second.type() == typeid(OOPSEBitSet)) {
+	return boost::any_cast<OOPSEBitSet>(i->second);
       } else if (i->second.type() ==  typeid(std::vector<Token>)){
 	bs = expression(boost::any_cast<std::vector<Token> >(i->second), 2);
 	i->second =  bs; /**@todo fixme */
@@ -365,7 +365,7 @@ namespace oopse {
     return bs;
   }
 
-  BitSet SelectionEvaluator::nameInstruction(const std::string& name){
+  OOPSEBitSet SelectionEvaluator::nameInstruction(const std::string& name){
     
     return nameFinder.match(name);
 
@@ -388,8 +388,8 @@ namespace oopse {
     //predefine();
   }
 
-  BitSet SelectionEvaluator::evaluate() {
-    BitSet bs(nStuntDouble);
+  OOPSEBitSet SelectionEvaluator::evaluate() {
+    OOPSEBitSet bs(nStuntDouble);
     if (isLoaded_) {
       pc = 0;
       instructionDispatchLoop(bs);
@@ -398,8 +398,8 @@ namespace oopse {
     return bs;
   }
 
-  BitSet SelectionEvaluator::indexInstruction(const boost::any& value) {
-    BitSet bs(nStuntDouble);
+  OOPSEBitSet SelectionEvaluator::indexInstruction(const boost::any& value) {
+    OOPSEBitSet bs(nStuntDouble);
 
     if (value.type() == typeid(int)) {
       int index = boost::any_cast<int>(value);

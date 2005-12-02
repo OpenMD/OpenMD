@@ -12,7 +12,7 @@ MySource    = \
         StringTokenizer.cpp \
 	Utility.cpp \
 	Trim.cpp \
-	BitSet.cpp \
+	OOPSEBitSet.cpp \
 	MoLocator.cpp \
 	wildcards.cpp \
 	residentMem.c\

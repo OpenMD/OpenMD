@@ -51,6 +51,7 @@
 #define UTIL_STRINGTOKENIZER_HPP
 
 #include <string>
+#include <vector>
 
 namespace oopse {
 
@@ -173,6 +174,11 @@ namespace oopse {
       return tokenString_;
     }
 
+    /** 
+     * Returns all of the tokens
+     * @return all of the tokens
+     */
+    std::vector<std::string> getAllTokens();
   private:
 
     /**

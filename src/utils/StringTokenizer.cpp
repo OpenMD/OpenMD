@@ -205,6 +205,13 @@ namespace oopse {
     return result;    
   }
 
+ std::vector<std::string>  StringTokenizer::getAllTokens() {
+    std::vector<std::string> tokens;
+    while (hasMoreTokens()) {
+        tokens.push_back(nextToken());
+    }
+    return tokens;
+ }
   void StringTokenizer::convertFortranNumber(std::string& fortranNumber) {
     std::string::iterator i;
     for(i = fortranNumber.begin(); i != fortranNumber.end(); ++i) {

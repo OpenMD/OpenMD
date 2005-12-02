@@ -1,7 +1,7 @@
 Package = selection
 
 Source    = \
-	Token.cpp \
+	SelectionToken.cpp \
 	TokenMap.cpp \
 	SelectionCompiler.cpp \
 	SelectionEvaluator.cpp \

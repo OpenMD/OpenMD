@@ -80,9 +80,8 @@ namespace oopse {
     return result;
   }
   
-  SimInfo::SimInfo(MakeStamps* stamps, std::vector<std::pair<MoleculeStamp*, int> >& molStampPairs, 
-		   ForceField* ff, Globals* simParams) : 
-    stamps_(stamps), forceField_(ff), simParams_(simParams), 
+  SimInfo::SimInfo(ForceField* ff, Globals* simParams) : 
+    forceField_(ff), simParams_(simParams), 
     ndf_(0), ndfRaw_(0), ndfTrans_(0), nZconstraint_(0),
     nGlobalMols_(0), nGlobalAtoms_(0), nGlobalCutoffGroups_(0), 
     nGlobalIntegrableObjects_(0), nGlobalRigidBodies_(0),
@@ -90,8 +89,6 @@ namespace oopse {
     nIntegrableObjects_(0),  nCutoffGroups_(0), nConstraints_(0),
     sman_(NULL), fortranInitialized_(false) {
 
-            
-      std::vector<std::pair<MoleculeStamp*, int> >::iterator i;
       MoleculeStamp* molStamp;
       int nMolWithSameStamp;
       int nCutoffAtoms = 0; // number of atoms belong to cutoff groups
@@ -99,23 +96,23 @@ namespace oopse {
       CutoffGroupStamp* cgStamp;    
       RigidBodyStamp* rbStamp;
       int nRigidAtoms = 0;
-    
-      for (i = molStampPairs.begin(); i !=molStampPairs.end(); ++i) {
-        molStamp = i->first;
-        nMolWithSameStamp = i->second;
+      std::vector<Component*> components = simParams->getComponents();
+      
+      for (std::vector<Component*>::iterator i = components.begin(); i !=components.end(); ++i) {
+        molStamp = (*i)->getMoleculeStamp();
+        nMolWithSameStamp = (*i)->getNMol();
         
         addMoleculeStamp(molStamp, nMolWithSameStamp);
 
         //calculate atoms in molecules
         nGlobalAtoms_ += molStamp->getNAtoms() *nMolWithSameStamp;   
 
-
         //calculate atoms in cutoff groups
         int nAtomsInGroups = 0;
         int nCutoffGroupsInStamp = molStamp->getNCutoffGroups();
         
         for (int j=0; j < nCutoffGroupsInStamp; j++) {
-	  cgStamp = molStamp->getCutoffGroup(j);
+	  cgStamp = molStamp->getCutoffGroupStamp(j);
 	  nAtomsInGroups += cgStamp->getNMembers();
         }
 
@@ -128,7 +125,7 @@ namespace oopse {
         int nRigidBodiesInStamp = molStamp->getNRigidBodies();
         
         for (int j=0; j < nRigidBodiesInStamp; j++) {
-	  rbStamp = molStamp->getRigidBody(j);
+	  rbStamp = molStamp->getRigidBodyStamp(j);
 	  nAtomsInRigidBodies += rbStamp->getNMembers();
         }
 
@@ -167,7 +164,6 @@ namespace oopse {
     }
     molecules_.clear();
        
-    delete stamps_;
     delete sman_;
     delete simParams_;
     delete forceField_;
@@ -274,8 +270,8 @@ namespace oopse {
 	  }
 	}
             
-      }//end for (integrableObject)
-    }// end for (mol)
+      }
+    }
     
     // n_constraints is local, so subtract them on each processor
     ndf_local -= nConstraints_;

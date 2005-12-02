@@ -57,6 +57,7 @@
 #include "primitives/Bend.hpp"
 namespace oopse {
 
+/*
   struct BendOrderStruct {
     Bend* bend;
     BendDataSet dataSet;
@@ -73,7 +74,7 @@ namespace oopse {
   bool  TorsionSortFunctor(const TorsionOrderStruct& t1, const TorsionOrderStruct& t2) {
     return t1.dataSet.deltaV < t2.dataSet.deltaV;
   }
-  
+  */
   void ForceManager::calcForces(bool needPotential, bool needStress) {
 
     if (!info_->isFortranInitialized()) {
@@ -88,6 +89,7 @@ namespace oopse {
 
     postCalculation();
 
+/*
     std::vector<BendOrderStruct> bendOrderStruct;
     for(std::map<Bend*, BendDataSet>::iterator i = bendDataSets.begin(); i != bendDataSets.end(); ++i) {
         BendOrderStruct tmp;
@@ -118,7 +120,7 @@ namespace oopse {
         std::cout << "atom1=" <<torsion->getAtomA()->getGlobalIndex() << ",atom2 = "<< torsion->getAtomB()->getGlobalIndex() << ",atom3="<<torsion->getAtomC()->getGlobalIndex() << ",atom4="<<torsion->getAtomD()->getGlobalIndex()<< " ";
         std::cout << "deltaV=" << l->dataSet.deltaV << ",p_theta=" << l->dataSet.prev.angle <<",p_pot=" << l->dataSet.prev.potential<< ",c_theta=" << l->dataSet.curr.angle << ", c_pot = " << l->dataSet.curr.potential <<std::endl;
     }
-    
+   */ 
   }
 
   void ForceManager::preCalculation() {
@@ -172,9 +174,9 @@ namespace oopse {
         bondPotential += bond->getPotential();
       }
 
-      //int i =0;
+
       for (bend = mol->beginBend(bendIter); bend != NULL; bend = mol->nextBend(bendIter)) {
-          //std::cout << i++ << "\t";
+
           double angle;
 	    bend->calcForce(angle);
           double currBendPot = bend->getPotential();          

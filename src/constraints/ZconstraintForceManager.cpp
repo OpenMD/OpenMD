@@ -120,8 +120,8 @@ namespace oopse {
     }
     double zforceConstant = OOPSEConstant::kb * targetTemp / (halfOfLargestBox * halfOfLargestBox);
          
-    int nZconstraints = simParam->getNZconstraints();
-    ZconStamp** stamp = simParam->getZconStamp();
+    int nZconstraints = simParam->getNZconsStamps();
+    std::vector<ZConsStamp*> stamp = simParam->getZconsStamps();
     //
     for (int i = 0; i < nZconstraints; i++){
 

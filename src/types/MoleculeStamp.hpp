@@ -49,77 +49,84 @@
 #include "types/TorsionStamp.hpp"
 #include "types/RigidBodyStamp.hpp"
 #include "types/CutoffGroupStamp.hpp"
-#include "io/LinkedAssign.hpp"
+#include "types/FragmentStamp.hpp"
 
-
-class MoleculeStamp{
-
- public:
-  MoleculeStamp();
-  ~MoleculeStamp();
-
-  char* assignString( char* lhs, char* rhs );
-  char* assignDouble( char* lhs, double rhs );
-  char* assignInt( char* lhs, int rhs );
-  char* checkMe( void );
-
-  char* addAtom( AtomStamp* the_atom, int atomIndex );
-  char* addRigidBody( RigidBodyStamp* the_rigidbody, int rigidBodyIndex );
-  char* addCutoffGroup( CutoffGroupStamp* the_cutoffgroup, int cutoffGroupIndex );
-  char* addBond( BondStamp* the_bond, int bondIndex );
-  char* addBend( BendStamp* the_bend, int bendIndex );
-  char* addTorsion( TorsionStamp* the_torsion, int torsionIndex );  
-
-  char* getID( void )         { return name; }
-  int   getNAtoms( void )     { return n_atoms; }
-  int   getNBonds( void )     { return n_bonds; }
-  int   getNBends( void )     { return n_bends; }
-  int   getNTorsions( void )  { return n_torsions; }
-  int   getNRigidBodies(void) { return n_rigidbodies; }
-  int   getNCutoffGroups(void){ return n_cutoffgroups; }  
-  int   getNIntegrable(void)  { return n_integrable; }
-
-  AtomStamp* getAtom( int index ) { return atoms[index]; }
-  BondStamp* getBond( int index ) { return bonds[index]; }
-  BendStamp* getBend( int index ) { return bends[index]; }
-  TorsionStamp* getTorsion( int index ) { return torsions[index]; }
-  RigidBodyStamp* getRigidBody( int index ) { return rigidBodies[index]; }
-  CutoffGroupStamp* getCutoffGroup( int index ) { return cutoffGroups[index]; }
-
-
-  bool isBondInSameRigidBody(BondStamp*bond);
-  bool isAtomInRigidBody(int atomIndex);  
-  bool isAtomInRigidBody(int atomIndex, int& whichRigidBody, int& consAtomIndex);  
-  std::vector<std::pair<int, int> > getJointAtoms(int rb1, int rb2);
+namespace oopse {
+class MoleculeStamp : public DataHolder {
+    DeclareParameter(Name, std::string);
+  public:
+    MoleculeStamp();
+    virtual ~MoleculeStamp();
+    
+    bool addAtomStamp( AtomStamp* atom);
+    bool addBondStamp( BondStamp* bond);
+    bool addBendStamp( BendStamp* bend);
+    bool addTorsionStamp( TorsionStamp* torsion);  
+    bool addRigidBodyStamp( RigidBodyStamp* rigidbody);
+    bool addCutoffGroupStamp( CutoffGroupStamp* cutoffgroup);
+    bool addFragmentStamp( FragmentStamp* fragment);
   
-  int haveExtras( void ) { return have_extras; }
-  LinkedAssign* getUnhandled( void ) { return unhandled; }
-  
-  static char errMsg[500];
- private:
-  
-  
-  char name[100];
-  int n_atoms;
-  int n_bonds;
-  int n_bends;
-  int n_torsions;
-  int n_rigidbodies;
-  int n_cutoffgroups;
-  int n_integrable;
-  
-  int have_name, have_atoms, have_bonds, have_bends, have_torsions;
-  int have_rigidbodies, have_cutoffgroups;
+    int  getNAtoms() { return atomStamps_.size(); }
+    int  getNBonds() { return bondStamps_.size(); }
+    int  getNBends() { return bendStamps_.size(); }
+    int  getNTorsions() { return torsionStamps_.size(); }
+    int  getNRigidBodies() { return rigidBodyStamps_.size(); }
+    int  getNCutoffGroups() { return cutoffGroupStamps_.size(); }  
+    int getNIntegrable() { return nintegrable_;}
+    virtual void validate();
+    
+    AtomStamp* getAtomStamp(int index) { return atomStamps_[index]; }
+    BondStamp* getBondStamp(int index) { return bondStamps_[index]; }
+    BendStamp* getBendStamp(int index) { return bendStamps_[index]; }
+    TorsionStamp* getTorsionStamp(int index) { return torsionStamps_[index]; }
+    RigidBodyStamp* getRigidBodyStamp(int index) { return rigidBodyStamps_[index]; }
+    CutoffGroupStamp* getCutoffGroupStamp(int index) { return cutoffGroupStamps_[index]; }
+    FragmentStamp* getFragmentStamp(int index) { return fragmentStamps_[index]; }
 
-  AtomStamp** atoms;
-  BondStamp** bonds;
-  BendStamp** bends;
-  TorsionStamp** torsions;  
-  RigidBodyStamp** rigidBodies;  
-  CutoffGroupStamp** cutoffGroups;  
+    bool isBondInSameRigidBody(BondStamp*bond);
+    bool isAtomInRigidBody(int atomIndex);  
+    bool isAtomInRigidBody(int atomIndex, int& whichRigidBody, int& consAtomIndex);  
+    std::vector<std::pair<int, int> > getJointAtoms(int rb1, int rb2);
+  
+  private:
 
-  LinkedAssign* unhandled; // the unhandled assignments
-  short int have_extras;
+    void fillBondInfo();
+    void findBends();
+    void findTorsions();
+    
+    template <class Cont, class T>
+    bool addIndexSensitiveStamp(Cont& cont, T* stamp) {
+    typename Cont::iterator i;
+    int index = stamp->getIndex();
+    bool ret = false;
+    size_t size = cont.size();
+    
+    if (size >= index +1) {
+        if (cont[index]!= NULL) {
+            ret = false;
+        }else {
+            cont[index] = stamp;
+            ret = true;
+        }
+    } else {
+        cont.insert(cont.end(), index - cont.size() + 1, NULL);
+        cont[index] = stamp;
+        ret = true;
+    }
+    
+    return ret;
+    }
+    
+    std::vector<AtomStamp*> atomStamps_;
+    std::vector<BondStamp*> bondStamps_;
+    std::vector<BendStamp*> bendStamps_;
+    std::vector<TorsionStamp*> torsionStamps_;
+    std::vector<RigidBodyStamp*> rigidBodyStamps_;
+    std::vector<CutoffGroupStamp*> cutoffGroupStamps_;
+    std::vector<FragmentStamp*> fragmentStamps_;
+    std::vector<int> atom2Rigidbody;
+    int nintegrable_;
 };
 
+}
 #endif

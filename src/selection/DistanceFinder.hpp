@@ -41,7 +41,7 @@
 #ifndef SELECTION_DISTANCEFINDER_HPP
 #define SELECTION_DISTANCEFINDER_HPP
 #include "brains/SimInfo.hpp"
-#include "utils/BitSet.hpp"
+#include "utils/OOPSEBitSet.hpp"
 #include "primitives/StuntDouble.hpp"
 namespace oopse {
 
@@ -49,7 +49,7 @@ namespace oopse {
   public:
     DistanceFinder(SimInfo* si);
 
-    BitSet find(const BitSet& bs, double distance);
+    OOPSEBitSet find(const OOPSEBitSet& bs, double distance);
 
     SimInfo* info_;
     std::vector<StuntDouble*> stuntdoubles_;

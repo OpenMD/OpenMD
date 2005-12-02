@@ -41,40 +41,21 @@
  
 #ifndef TYPES_CUTOFFGROUPSTAMP_HPP
 #define TYPES_CUTOFFGROUPSTAMP_HPP
-
-#include "io/LinkedAssign.hpp"
-#include "types/AtomStamp.hpp"
-
-
-class CutoffGroupStamp{
-
- public:
-  CutoffGroupStamp();
-  ~CutoffGroupStamp();
-
-  char* assignString( char* lhs, char* rhs );
-  char* assignDouble( char* lhs, double rhs );
-  char* assignInt( char* lhs, int rhs );
-  char* checkMe( void );
-
-  char*      addMember( int atomIndex );
-  int        getNMembers( void )    { return n_members; }
-  int        getMember( int index ) { return members[index]; }
-  
-  int haveExtras( void ) { return have_extras; }
-  LinkedAssign* getExtras( void ) { return unhandled; }
-
-  static char errMsg[500];
- private:
-
-  int n_members;
-  int which;
-  short int have_members;
-  
-  int* members;
-
-  LinkedAssign* unhandled; // the unhandled assignments
-  short int have_extras;
+#include "types/DataHolder.hpp"
+namespace oopse {
+class CutoffGroupStamp : public DataHolder {
+    public:
+        CutoffGroupStamp();
+        int getMemberAt(int index) {return members_[index];}
+        int getNMembers() {return members_.size();}
+        std::vector<int> getMembers() {return members_;}
+        bool setMembers(const std::vector<int>& members) {
+            members_ = members;
+            return true;
+        }
+        virtual void validate();
+    private:
+        std::vector<int> members_;
 };
-
+}
 #endif

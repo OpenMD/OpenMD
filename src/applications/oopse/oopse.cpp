@@ -152,8 +152,8 @@ int main(int argc,char* argv[]){
 
 
     //Zconstraint-Method
-    if (simParams->haveNZconstraints()) {
-      info->setNZconstraint(simParams->getNZconstraints());
+    if (simParams->getNZconsStamps() > 0) {
+      info->setNZconstraint(simParams->getNZconsStamps());
       ForceManager* fman = new ZconstraintForceManager(info);
       myIntegrator->setForceManager(fman);
     }

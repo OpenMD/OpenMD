@@ -43,6 +43,7 @@
 #include "visitors/ZconsVisitor.hpp"
 #include "primitives/Molecule.hpp"
 #include "utils/StringUtils.hpp"
+#include "types/ZconsStamp.hpp"
 namespace oopse {
 
   ZConsVisitor::ZConsVisitor(SimInfo* info) : BaseVisitor(), info_(info), zconsReader_(NULL){
@@ -76,8 +77,8 @@ namespace oopse {
       simError();      
     }    
          
-    int nZconstraints = simParam->getNZconstraints();
-    ZconStamp** stamp = simParam->getZconStamp();
+    int nZconstraints = simParam->getNZconsStamps();
+    std::vector<ZConsStamp*> stamp = simParam->getZconsStamps();
     for (int i = 0; i < nZconstraints; i++){
       int zmolIndex = stamp[i]->getMolIndex();
       zmolStates_.insert(std::make_pair(zmolIndex, zsMoving));

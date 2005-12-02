@@ -42,37 +42,33 @@
 #ifndef TYPES_BENDSTAMP_HPP
 #define TYPES_BENDSTAMP_HPP
 
-#include "io/LinkedAssign.hpp"
+#include "types/DataHolder.hpp"
+namespace oopse {
 
-class BendStamp{
+class BendStamp : public DataHolder {
+    DeclareParameter(GhostVectorSource, int);
+    public:
 
- public:
-  BendStamp();
-  ~BendStamp();
-  
-  void assignString( char* lhs, char* rhs );
-  void assignDouble( char* lhs, double rhs );
-  void assignInt( char* lhs, int rhs );
-  void members( int the_a, int the_b, int the_c );
-  void constrain( double the_constraint );
-  char* checkMe( void );
+        BendStamp();
+        virtual ~BendStamp();
 
-  int getA( void ){ return a; }
-  int getB( void ){ return b; }
-  int getC( void ){ return c; }
+        int getMemberAt( int index ) {return members_.at(index);}
+        int getNMembers() {return members_.size();}
+        std::vector<int> getMembers() {return members_;}
+        bool setMembers(const std::vector<int>& members) {            
+            members_ = members;
+            bool ret = false;
+            if (members_.size() == 3 || members_.size() == 2) {
+                ret = true;
+            }
+            return ret;
+        }
+        
+        virtual void validate();
 
-  int haveExtras( void ) { return have_extras; }
-  LinkedAssign* getExtras( void ) { return unhandled; }
-  
- private:
-
-  int a, b, c; //the members
-  double constraint;
-  short int have_mbrs, have_constraint;
-
-  LinkedAssign* unhandled; // the unhandled assignments
-  short int have_extras;
-
+    private:
+    
+        std::vector<int> members_;
 };
-
+}
 #endif

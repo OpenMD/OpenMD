@@ -101,10 +101,14 @@ bool OOPSEFormat::AreSameFragments(OBMol& mol, vector<int>& frag1, vector<int>& 
         return false;
     }
 
-    //exact graph matching is a NP complete problem, 
+    //exact graph matching is a NP complete problem
+    /** @todo using sparse matrix to store the connectivities*/
     for (unsigned int i =0 ; i < frag1.size(); ++i)
     {
-        if (strcmp(mol.GetAtom(frag1[i])->GetType(), mol.GetAtom(frag2[i])->GetType()) )
+        OBAtom* atom1 = mol.GetAtom(frag1[i]);
+        OBAtom* atom2 = mol.GetAtom(frag2[i]);
+        
+        if (atom1->GetAtomicNum() != atom2->GetAtomicNum())
         {
             return false;
         }
@@ -198,7 +202,7 @@ void OOPSEFormat::WriteMDFile(vector<OBMol*> mols, vector<int> numMols, ostream&
         int ai = 0;
         FOR_ATOMS_OF_MOL(atom, *pmol ) {
             os << identLevel1 << "atom[" << ai << "] {\n";
-            os << identLevel2 << "type = " << "\"" << atom->GetType() << "\"" << ";\n";
+            os << identLevel2 << "type = " << "\"" << etab.GetSymbol(atom->GetAtomicNum()) << "\"" << ";\n";
             os << identLevel1 << "}\n";
             atomMap[&(*atom)] = ai++;
         }        
@@ -280,8 +284,8 @@ void OOPSEFormat::WriteINFile(OBMol& mol, ostream& ofs, vector<int>& indices)
     for(vector<int>::iterator i = indices.begin();i != indices.end(); ++i)
     {
         atom = mol.GetAtom(*i);
-        sprintf(buffer,"%15s%15.5f%15.5f%15.5f%15.5f%15.5f%15.5f%15.5f%15.5f%15.5f%15.5f%15.5f%15.5f%15.5f",
-                atom->GetType(),
+        sprintf(buffer,"%-10s%-15.5f%-15.5f%-15.5f%-15.5f%-15.5f%-15.5f%-15.5f%-15.5f%-15.5f%-15.5f%-15.5f%-15.5f%-15.5f",
+                etab.GetSymbol(atom->GetAtomicNum()),
                 atom->GetX(), atom->GetY(), atom->GetZ(),
                 0.0, 0.0, 0.0,
                 0.0, 0.0, 0.0, 0.0,

@@ -45,7 +45,7 @@
 #include <string>
 #include <vector>
 
-#include "selection/Token.hpp"
+#include "selection/SelectionToken.hpp"
 #include "selection/TokenMap.hpp"
 namespace oopse {
 

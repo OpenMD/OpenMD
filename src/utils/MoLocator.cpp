@@ -107,15 +107,15 @@ namespace oopse {
     
     for(size_t i=0; i<nAtoms; i++){
       
-      currAtomStamp = myStamp->getAtom(i);
+      currAtomStamp = myStamp->getAtomStamp(i);
       
       if( !currAtomStamp->havePosition() ){
         sprintf( painCave.errMsg,
                  "MoLocator error.\n"
                  "  Component %s, atom %s does not have a position specified.\n"
                  "  This means MoLocator cannot initalize it's position.\n",
-                 myStamp->getID(),
-                 currAtomStamp->getType() );
+                 myStamp->getName().c_str(),
+                 currAtomStamp->getType().c_str());
         
         painCave.isFatal = 1;
         simError();
@@ -138,7 +138,7 @@ namespace oopse {
     
     for(int i = 0; i < nRigidBodies; i++){
       
-      rbStamp = myStamp->getRigidBody(i);
+      rbStamp = myStamp->getRigidBodyStamp(i);
       nAtomsInRb = rbStamp->getNMembers();
       
       coor.x() = 0.0;
@@ -148,7 +148,7 @@ namespace oopse {
       
       for(int j = 0; j < nAtomsInRb; j++){
         
-        currAtomStamp = myStamp->getAtom(rbStamp->getMember(j));
+        currAtomStamp = myStamp->getAtomStamp(rbStamp->getMemberAt(j));
         currAtomMass = getAtomMass(currAtomStamp->getType(), myFF);
         totMassInRb +=  currAtomMass;
         
@@ -200,7 +200,7 @@ namespace oopse {
     nAtoms = molStamp->getNAtoms();
     
     for(size_t i = 0; i < nAtoms; i++) {
-      AtomStamp *currAtomStamp = molStamp->getAtom(i);
+      AtomStamp *currAtomStamp = molStamp->getAtomStamp(i);
       totMass += getAtomMass(currAtomStamp->getType(), myFF);         
     }
     return totMass;

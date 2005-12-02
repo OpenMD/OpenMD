@@ -17,16 +17,7 @@ Source    = \
 	SCAtomTypesSectionParser.cpp \
   BondTypesSectionParser.cpp \
   BendTypesSectionParser.cpp \
-  BASSlex.l \
-	BASSyacc.y \
-	BASS_interface.cpp \
-	BASS_parse.c \
 	Globals.cpp \
-	interface.c \
-	LinkedAssign.cpp \
-	make_nodes.c \
-	mpiBASS.c \
-	parse_tree.c \
 	DumpReader.cpp \
 	DumpWriter.cpp \
 	StatWriter.cpp \

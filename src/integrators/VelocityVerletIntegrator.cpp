@@ -142,7 +142,6 @@ namespace oopse {
       needStress = true;   
     }
 
-    std::cout << currentSnapshot_->getTime()<< ": \n";  
   }
 
   void VelocityVerletIntegrator::postStep() {

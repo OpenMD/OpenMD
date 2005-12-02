@@ -47,63 +47,108 @@
  * @version 1.0
  */
 
+#include <iostream>
+#include <sstream>
+#include <string>
+
 #include "brains/MoleculeCreator.hpp"
 #include "brains/SimCreator.hpp"
 #include "brains/SimSnapshotManager.hpp"
 #include "io/DumpReader.hpp"
-#include "io/parse_me.h"
 #include "UseTheForce/ForceFieldFactory.hpp"
 #include "utils/simError.h"
 #include "utils/StringUtils.hpp"
 #include "math/SeqRandNumGen.hpp"
+#include "mdParser/MDLexer.hpp"
+#include "mdParser/MDParser.hpp"
+#include "mdParser/MDTreeParser.hpp"
+#include "mdParser/SimplePreprocessor.hpp"
+
+
 #ifdef IS_MPI
-#include "io/mpiBASS.h"
 #include "math/ParallelRandNumGen.hpp"
 #endif
 
 namespace oopse {
   
-  void SimCreator::parseFile(const std::string mdFileName,  MakeStamps* stamps, 
-                             Globals* simParams){
+Globals* SimCreator::parseFile(const std::string mdFileName){
+        Globals* simParams = NULL;
+        try {
+
+            // Create a preprocessor that preprocesses md file into an ostringstream
+            std::stringstream ppStream;
+#ifdef IS_MPI            
+            int streamSize;
+            const int masterNode = 0;
+            int commStatus;
+            if (worldRank == masterNode) {
+#endif 
+                
+                SimplePreprocessor preprocessor;
+                preprocessor.preprocess(mdFileName, ppStream);
+                
+#ifdef IS_MPI            
+                //brocasting the stream size
+                streamSize = ppStream.str().size() +1;
+                commStatus = MPI_Bcast(&streamSize, 1, MPI_LONG, masterNode, MPI_COMM_WORLD);                   
+
+                commStatus = MPI_Bcast(ppStream.str().c_str(), streamSize, MPI_CHAR, masterNode, MPI_COMM_WORLD); 
+            
+                
+            } else {
+                //get stream size
+                commStatus = MPI_Bcast(&streamSize, 1, MPI_LONG, masterNode, MPI_COMM_WORLD);   
+                
+                  char* buf = new char[streamSize];
+                  assert(buf);
+                
+                  //receive file content
+                  commStatus = MPI_Bcast(buf, streamSize, MPI_CHAR, masterNode, MPI_COMM_WORLD); 
+                
+                  ppStream.str(buf);
+                  delete buf;
+
+            }
+#endif            
+            // Create a scanner that reads from the input stream
+            MDLexer lexer(ppStream);
+            lexer.setFilename(mdFileName);
+            lexer.initDeferredLineCount();
     
-#ifdef IS_MPI
+            // Create a parser that reads from the scanner
+            MDParser parser(lexer);
+            parser.setFilename(mdFileName);
+
+            // Create an observer that synchorizes file name change
+            FilenameObserver observer;
+            observer.setLexer(&lexer);
+            observer.setParser(&parser);
+            lexer.setObserver(&observer);
     
-    if (worldRank == 0) {
-#endif // is_mpi
-      
-      set_interface_stamps(stamps, simParams);
-      
-#ifdef IS_MPI
-      
-      mpiEventInit();
-      
-#endif
-      
-      yacc_BASS(mdFileName.c_str());
-      
-#ifdef IS_MPI
-      
-      throwMPIEvent(NULL);
-    } else {
-      set_interface_stamps(stamps, simParams);
-      mpiEventInit();
-      MPIcheckPoint();
-      mpiEventLoop();
-    }
-    
-#endif
-    
+	    antlr::ASTFactory factory;
+            parser.initializeASTFactory(factory);
+            parser.setASTFactory(&factory);
+            parser.mdfile();
+
+            // Create a tree parser that reads information into Globals
+            MDTreeParser treeParser;
+            treeParser.initializeASTFactory(factory);
+            treeParser.setASTFactory(&factory);
+             simParams = treeParser.walkTree(parser.getAST());
+
+        }
+        catch (exception& e) {
+            cerr << "parser exception: " << e.what() << endl;
+        }
+
+        return simParams;
   }
   
   SimInfo*  SimCreator::createSim(const std::string & mdFileName, 
                                   bool loadInitCoords) {
-    
-    MakeStamps * stamps = new MakeStamps();
-    
-    Globals * simParams = new Globals();
-    
+
     //parse meta-data file
-    parseFile(mdFileName, stamps, simParams);
+    Globals* simParams = parseFile(mdFileName);
     
     //create the force field
     ForceField * ff = ForceFieldFactory::getInstance()
@@ -141,13 +186,9 @@ namespace oopse {
     } 
     
     ff->parse(forcefieldFileName);
-    
-    //extract the molecule stamps
-    std::vector < std::pair<MoleculeStamp *, int> > moleculeStampPairs;
-    compList(stamps, simParams, moleculeStampPairs);
-    
+        
     //create SimInfo
-    SimInfo * info = new SimInfo(stamps, moleculeStampPairs, ff, simParams);
+    SimInfo * info = new SimInfo(ff, simParams);
      
     //gather parameters (SimCreator only retrieves part of the parameters)
     gatherParameters(info, mdFileName);
@@ -393,65 +434,7 @@ namespace oopse {
       
     } //end for(int i=0)   
   }
-  
-  void SimCreator::compList(MakeStamps *stamps, Globals* simParams,
-                            std::vector < std::pair<MoleculeStamp *, int> > &moleculeStampPairs) {
-    int i;
-    char * id;
-    MoleculeStamp * currentStamp;
-    Component** the_components = simParams->getComponents();
-    int n_components = simParams->getNComponents();
     
-    if (!simParams->haveNMol()) {
-      // we don't have the total number of molecules, so we assume it is
-      // given in each component
-      
-      for(i = 0; i < n_components; i++) {
-        if (!the_components[i]->haveNMol()) {
-          // we have a problem
-          sprintf(painCave.errMsg,
-                  "SimCreator Error. No global NMol or component NMol given.\n"
-                  "\tCannot calculate the number of atoms.\n");
-          
-          painCave.isFatal = 1;
-          simError();
-        }
-        
-        id = the_components[i]->getType();
-
-        currentStamp = stamps->getMolStamp(id);
-        if (currentStamp == NULL) {
-          sprintf(painCave.errMsg,
-                  "SimCreator error: Component \"%s\" was not found in the "
-                  "list of declared molecules\n", id);
-          
-          painCave.isFatal = 1;
-          simError();
-        }
-        
-        moleculeStampPairs.push_back(
-                                     std::make_pair(currentStamp, the_components[i]->getNMol()));
-      } //end for (i = 0; i < n_components; i++)
-    } else {
-      sprintf(painCave.errMsg, "SimSetup error.\n"
-              "\tSorry, the ability to specify total"
-              " nMols and then give molfractions in the components\n"
-              "\tis not currently supported."
-              " Please give nMol in the components.\n");
-      
-      painCave.isFatal = 1;
-      simError();
-    }
-    
-#ifdef IS_MPI
-    
-    strcpy(checkPointMsg, "Component stamps successfully extracted\n");
-    MPIcheckPoint();
-    
-#endif // is_mpi
-    
-  }
-  
   void SimCreator::setGlobalIndex(SimInfo *info) {
     SimInfo::MoleculeIterator mi;
     Molecule::AtomIterator ai;

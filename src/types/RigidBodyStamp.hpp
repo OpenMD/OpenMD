@@ -42,39 +42,30 @@
 #ifndef TYPES_RIGIDBODYSTAMP_HPP
 #define TYPES_RIGIDBODYSTAMP_HPP
 
-#include "io/LinkedAssign.hpp"
-#include "types/AtomStamp.hpp"
+#include "types/DataHolder.hpp"
 
+namespace oopse {
 
-class RigidBodyStamp{
+class RigidBodyStamp : public DataHolder {
+    public:
+        RigidBodyStamp(int index);        
+        int getIndex() { return index_;}
+ 
+        int getMemberAt( int index ) {return members_.at(index);}
+        int getNMembers() {return members_.size();}
+        std::vector<int> getMembers() {return members_;}
 
- public:
-  RigidBodyStamp();
-  ~RigidBodyStamp();
+        bool setMembers(const std::vector<int>& members) {
+            members_ = members;
+            return true;
+        }
+        
+        virtual void validate();
 
-  char* assignString( char* lhs, char* rhs );
-  char* assignDouble( char* lhs, double rhs );
-  char* assignInt( char* lhs, int rhs );
-  char* checkMe( void );
+    private:
+        int index_;        
+        std::vector<int> members_;
 
-  char*      addMember( int atomIndex );
-  int        getNMembers( void )    { return n_members; }
-  int        getMember( int index ) { return members[index]; }
-  
-  int haveExtras( void ) { return have_extras; }
-  LinkedAssign* getExtras( void ) { return unhandled; }
-
-  static char errMsg[500];
- private:
-
-  int n_members;
-  int which;
-  short int have_members;
-  
-  int* members;
-
-  LinkedAssign* unhandled; // the unhandled assignments
-  short int have_extras;
 };
-
+}
 #endif

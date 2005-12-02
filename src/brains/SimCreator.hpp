@@ -53,13 +53,8 @@
 
 #include "primitives/Molecule.hpp"
 #include "brains/SimInfo.hpp"
-#include "types/MakeStamps.hpp"
 #include "io/Globals.hpp"
 #include "UseTheForce/ForceField.hpp"
-
-// this routine is defined in BASS_interface.cpp
-//another OOPS
-extern void set_interface_stamps( MakeStamps* ms, Globals* g );
 
 namespace oopse {
 
@@ -85,10 +80,9 @@ namespace oopse {
     /**
      * Parses the meta-data file
      * @param mdfile
-     * @param stamps
-     * @param simParams
+     * @return simParams
      */
-    void parseFile(const std::string mdFileName,  MakeStamps* stamps, Globals* simParams);
+    Globals*  parseFile(const std::string mdFileName);
 
 
     /** create the molecules belong to current processor*/
@@ -103,12 +97,7 @@ namespace oopse {
     void setGlobalIndex(SimInfo* info);
 
     void gatherParameters(SimInfo *info, const std::string& mdfile);             
-
         
-    /** Extracts the molecules stamps and adds them into SimInfo class */
-    void compList(MakeStamps* stamps,  Globals* simParams, 
-		  std::vector<std::pair<MoleculeStamp*, int> >& moleculeStamps) ;
-
     /**
      * Divide the molecules among the processors 
      */

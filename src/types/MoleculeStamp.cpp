@@ -46,456 +46,198 @@
 
 #include "types/MoleculeStamp.hpp"
 
-char MoleculeStamp::errMsg[500];
-
-MoleculeStamp::MoleculeStamp(){
-  
-  n_atoms = 0;
-  n_bonds = 0;
-  n_bends = 0;
-  n_torsions = 0;
-  n_rigidbodies = 0;
-  n_cutoffgroups = 0;
-  n_integrable = 0;
-
-  unhandled = NULL;
-  atoms = NULL;
-  bonds = NULL;
-  bends = NULL;
-  torsions = NULL;
-  rigidBodies = NULL;
-  cutoffGroups = NULL;
-
-  have_name = 0;
-  have_atoms = 0;
-  have_bonds = 0;
-  have_bends = 0;
-  have_torsions = 0;
-  have_rigidbodies = 0;
-  have_cutoffgroups = 0;
-
-}
-
-MoleculeStamp::~MoleculeStamp(){
-  int i;
-  
-  if( unhandled != NULL) delete unhandled;
-  
-  if( rigidBodies != NULL ) {
-    for( i=0; i<n_rigidbodies; i++ ) delete rigidBodies[i];
-  }
-  delete[] rigidBodies;
-
-  if( cutoffGroups != NULL ) {
-    for( i=0; i<n_cutoffgroups; i++ ) delete cutoffGroups[i];
-  }
-  delete[] cutoffGroups;
-  
-  if( atoms != NULL ){
-    for( i=0; i<n_atoms; i++ ) delete atoms[i];
-  }
-  delete[] atoms;
-  
-  if( bonds != NULL ){
-    for( i=0; i<n_bonds; i++ ) delete bonds[i];
-  }
-  delete[] bonds;
-  
-  if( bends != NULL ){
-    for( i=0; i<n_bends; i++ ) delete bends[i];
-  }
-  delete[] bends;
-  
-  if( torsions != NULL ){
-    for( i=0; i<n_torsions; i++ ) delete torsions[i];
-  }
-  delete[] torsions;
-  
-
-
-
-}
-
-char* MoleculeStamp::assignString( char* lhs, char* rhs ){
-  
-  if( !strcmp( lhs, "name" ) ){
-    strcpy( name, rhs );
-    have_name = 1;
-  }
-  else{
-    if( unhandled == NULL ) unhandled = new LinkedAssign( lhs, rhs );
-    else unhandled->add( lhs, rhs );
-    have_extras = 1;
-  }
-  return NULL;
-}
-
-char* MoleculeStamp::assignDouble( char* lhs, double rhs ){
-  int i;
-
-  if( !strcmp( lhs, "nAtoms" ) ){
-    n_atoms = (int)rhs;
+namespace oopse {
+MoleculeStamp::MoleculeStamp() {
+    DefineParameter(Name, "name");
     
-    if( have_atoms ){
-      sprintf( errMsg,
-	       "MoleculeStamp error, n_atoms already declared"
-	       " for molecule: %s\n",
-	       name);
-      return strdup( errMsg );
-    }
-    have_atoms = 1;
-    atoms = new AtomStamp*[n_atoms];
-    for( i=0; i<n_atoms; i++ ) atoms[i] = NULL;
-  }
-  
-  else if( !strcmp( lhs, "nBonds" ) ){
-    n_bonds = (int)rhs;
-
-    if( have_bonds ){
-      sprintf( errMsg,  
-	       "MoleculeStamp error, n_bonds already declared for"
-	       " molecule: %s\n",
-	       name);
-      return strdup( errMsg );
-    }
-    have_bonds = 1;
-    bonds = new BondStamp*[n_bonds];
-    for( i=0; i<n_bonds; i++ ) bonds[i] = NULL;
-  }
-  
-  else if( !strcmp( lhs, "nBends" ) ){
-    n_bends = (int)rhs;
-
-    if( have_bends ){
-      sprintf( errMsg,
-	       "MoleculeStamp error, n_bends already declared for"
-	       " molecule: %s\n",
-	       name);
-      return strdup( errMsg );
-    }
-    have_bends = 1;
-    bends = new BendStamp*[n_bends];
-    for( i=0; i<n_bends; i++ ) bends[i] = NULL;
-  }
-  
-  else if( !strcmp( lhs, "nTorsions" ) ){
-    n_torsions = (int)rhs;
-
-    if( have_torsions ){
-      sprintf( errMsg,
-	       "MoleculeStamp error, n_torsions already declared for"
-	       " molecule: %s\n",
-	       name );
-      return strdup( errMsg );
-    }
-    have_torsions = 1;
-    torsions = new TorsionStamp*[n_torsions];
-    for( i=0; i<n_torsions; i++ ) torsions[i] = NULL;
-  }
-
-  else if( !strcmp( lhs, "nRigidBodies" ) ){
-    n_rigidbodies = (int)rhs;
-
-    if( have_rigidbodies ){
-      sprintf( errMsg,
-	       "MoleculeStamp error, n_rigidbodies already declared for"
-	       " molecule: %s\n",
-	       name );
-      return strdup( errMsg );
-    }
-    have_rigidbodies = 1;
-    rigidBodies = new RigidBodyStamp*[n_rigidbodies];
-    for( i=0; i<n_rigidbodies; i++ ) rigidBodies[i] = NULL;
-  }
-
-  else if( !strcmp( lhs, "nCutoffGroups" ) ){
-    n_cutoffgroups = (int)rhs;
-
-    if( have_cutoffgroups ){
-      sprintf( errMsg,
-	       "MoleculeStamp error, n_cutoffgroups already declared for"
-	       " molecule: %s\n",
-	       name );
-      return strdup( errMsg );
-    }
-    have_cutoffgroups = 1;
-    cutoffGroups = new CutoffGroupStamp*[n_cutoffgroups];
-    for( i=0; i<n_cutoffgroups; i++ ) cutoffGroups[i] = NULL;
-  }
-  
-  else{
-    if( unhandled == NULL ) unhandled = new LinkedAssign( lhs, rhs );
-    else unhandled->add( lhs, rhs );
-    have_extras = 1;
-  }
-  return NULL;
-}
-
-char*  MoleculeStamp::assignInt( char* lhs, int rhs ){
-  int i;
-  
-  if( !strcmp( lhs, "nAtoms" ) ){
-    n_atoms = rhs;
+    deprecatedKeywords_.insert("nAtoms");
+    deprecatedKeywords_.insert("nBonds");
+    deprecatedKeywords_.insert("nBends");
+    deprecatedKeywords_.insert("nTorsions");
+    deprecatedKeywords_.insert("nRigidBodies");
+    deprecatedKeywords_.insert("nCutoffGroups");
     
-    if( have_atoms ){
-      sprintf( errMsg,
-	       "MoleculeStamp error, n_atoms already declared for"
-	       " molecule: %s\n",
-	       name);
-      return strdup( errMsg );
-    }
-    have_atoms = 1;
-    atoms = new AtomStamp*[n_atoms];
-    for( i=0; i<n_atoms; i++ ) atoms[i] = NULL;
-  }
-  
-  else if( !strcmp( lhs, "nBonds" ) ){
-    n_bonds = rhs;
-
-    if( have_bonds ){
-      sprintf( errMsg,
-	       "MoleculeStamp error, n_bonds already declared for"
-	       " molecule: %s\n",
-	       name);
-      return strdup( errMsg );
-    }
-    have_bonds = 1;
-    bonds = new BondStamp*[n_bonds];
-    for( i=0; i<n_bonds; i++ ) bonds[i] = NULL;
-  }
-  
-  else if( !strcmp( lhs, "nBends" ) ){
-    n_bends = rhs;
-
-    if( have_bends ){
-      sprintf( errMsg,
-	       "MoleculeStamp error, n_bends already declared for"
-	       " molecule: %s\n",
-	       name );
-      return strdup( errMsg );
-    }
-    have_bends = 1;
-    bends = new BendStamp*[n_bends];
-    for( i=0; i<n_bends; i++ ) bends[i] = NULL;
-  }
-  
-  else if( !strcmp( lhs, "nTorsions" ) ){
-    n_torsions = rhs;
-
-    if( have_torsions ){
-      sprintf( errMsg,
-	       "MoleculeStamp error, n_torsions already declared for"
-	       " molecule: %s\n",
-	       name);
-      return strdup( errMsg );
-    }
-    have_torsions = 1;
-    torsions = new TorsionStamp*[n_torsions];
-    for( i=0; i<n_torsions; i++ ) torsions[i] = NULL;
-  }
-
-  else if( !strcmp( lhs, "nRigidBodies" ) ){
-    n_rigidbodies = rhs;
-
-    if( have_rigidbodies ){
-      sprintf( errMsg,
-	       "MoleculeStamp error, n_rigidbodies already declared for"
-	       " molecule: %s\n",
-	       name);
-      return strdup( errMsg );
-    }
-    have_rigidbodies = 1;
-    rigidBodies = new RigidBodyStamp*[n_rigidbodies];
-    for( i=0; i<n_rigidbodies; i++ ) rigidBodies[i] = NULL;
-  }
-  else if( !strcmp( lhs, "nCutoffGroups" ) ){
-    n_cutoffgroups = rhs;
-
-    if( have_cutoffgroups ){
-      sprintf( errMsg,
-	       "MoleculeStamp error, n_cutoffgroups already declared for"
-	       " molecule: %s\n",
-	       name);
-      return strdup( errMsg );
-    }
-    have_cutoffgroups = 1;
-    cutoffGroups = new CutoffGroupStamp*[n_cutoffgroups];
-    for( i=0; i<n_cutoffgroups; i++ ) cutoffGroups[i] = NULL;
-  }
-  else{
-    if( unhandled == NULL ) unhandled = new LinkedAssign( lhs, rhs );
-    else unhandled->add( lhs, rhs );
-    have_extras = 1;
-  }
-  return NULL;
 }
 
-char* MoleculeStamp::addAtom( AtomStamp* the_atom, int atomIndex ){
-  
-  if( have_atoms && atomIndex < n_atoms ) atoms[atomIndex] = the_atom;
-  else {
-    if( have_atoms ){
-      sprintf( errMsg, "MoleculeStamp error, %d out of nAtoms range", 
-	       atomIndex );
-      return strdup( errMsg );
-    }
-    else return strdup("MoleculeStamp error, nAtoms not given before"
-		       " first atom declaration." );
-  }
+MoleculeStamp::~MoleculeStamp() {
 
-  return NULL;
 }
 
-char* MoleculeStamp::addRigidBody( RigidBodyStamp* the_rigidbody, 
-                                   int rigidBodyIndex ){
-  
-  if( have_rigidbodies && rigidBodyIndex < n_rigidbodies ) 
-    rigidBodies[rigidBodyIndex] = the_rigidbody;
-  else {
-    if( have_rigidbodies ){
-      sprintf( errMsg, "MoleculeStamp error, %d out of nRigidBodies range", 
-	       rigidBodyIndex );
-      return strdup( errMsg );
+bool MoleculeStamp::addAtomStamp( AtomStamp* atom) {
+    bool ret = addIndexSensitiveStamp(atomStamps_, atom);
+    if (!ret) {
+        std::cout << "multiple atoms have the same index: " << atom->getIndex() <<" in " << getName()  << " Molecule\n";
     }
-    else return strdup("MoleculeStamp error, nRigidBodies not given before"
-		       " first rigidBody declaration." );
-  }
-  
-  return NULL;
+    return ret;
+    
 }
 
-char* MoleculeStamp::addCutoffGroup( CutoffGroupStamp* the_cutoffgroup, 
-                                     int cutoffGroupIndex ){
-  
-  if( have_cutoffgroups && cutoffGroupIndex < n_cutoffgroups ) 
-    cutoffGroups[cutoffGroupIndex] = the_cutoffgroup;
-  else {
-    if( have_cutoffgroups ){
-      sprintf( errMsg, "MoleculeStamp error, %d out of nCutoffGroups range", 
-	       cutoffGroupIndex );
-      return strdup( errMsg );
-    }
-    else return strdup("MoleculeStamp error, nCutoffGroups not given before"
-		       " first CutoffGroup declaration." );
-  }
-  
-  return NULL;
+bool MoleculeStamp::addBondStamp( BondStamp* bond) {
+    bondStamps_.push_back(bond);
+    return true;
 }
 
-char* MoleculeStamp::addBond( BondStamp* the_bond, int bondIndex ){
-  
-  
-  if( have_bonds && bondIndex < n_bonds ) bonds[bondIndex] = the_bond;
-  else{
-    if( have_bonds ){
-      sprintf( errMsg, "MoleculeStamp error, %d out of nBonds range", 
-	       bondIndex );
-      return strdup( errMsg );
-    }
-    else return strdup("MoleculeStamp error, nBonds not given before"
-		       "first bond declaration." );
-  }
-
-  return NULL;
+bool MoleculeStamp::addBendStamp( BendStamp* bend) {
+    bendStamps_.push_back(bend);
+    return true;
 }
 
-char* MoleculeStamp::addBend( BendStamp* the_bend, int bendIndex ){
-  
-  
-  if( have_bends && bendIndex < n_bends ) bends[bendIndex] = the_bend;
-  else{
-    if( have_bends ){
-      sprintf( errMsg, "MoleculeStamp error, %d out of nBends range", 
-	       bendIndex );
-      return strdup( errMsg );
-    }
-    else return strdup("MoleculeStamp error, nBends not given before"
-		       "first bend declaration." );
-  }
-
-  return NULL;
+bool MoleculeStamp::addTorsionStamp( TorsionStamp* torsion) {
+    torsionStamps_.push_back(torsion);
+    return true;
 }
 
-char* MoleculeStamp::addTorsion( TorsionStamp* the_torsion, int torsionIndex ){
-  
-  
-  if( have_torsions && torsionIndex < n_torsions ) 
-    torsions[torsionIndex] = the_torsion;
-  else{
-    if( have_torsions ){
-      sprintf( errMsg, "MoleculeStamp error, %d out of nTorsions range", 
-	       torsionIndex );
-      return strdup( errMsg );
+bool MoleculeStamp::addRigidBodyStamp( RigidBodyStamp* rigidbody) {
+    bool ret = addIndexSensitiveStamp(rigidBodyStamps_, rigidbody);
+    if (!ret) {
+        std::cout << "multiple rigidbodies have the same index: " << rigidbody->getIndex() <<" in " << getName()  << " Molecule\n";
     }
-    else return strdup("MoleculeStamp error, nTorsions not given before"
-		       "first torsion declaration." );
-  }
-
-  return NULL;
+    return ret;
 }
 
-char* MoleculeStamp::checkMe( void ){
-  
-  int i;
-  short int no_atom, no_rigidbody, no_cutoffgroup;
+bool MoleculeStamp::addCutoffGroupStamp( CutoffGroupStamp* cutoffgroup) {
+    cutoffGroupStamps_.push_back(cutoffgroup);
+    return true;
+}
 
-  if( !have_name ) return strdup( "MoleculeStamp error. Molecule's name"
-                                  " was not given.\n" );
-  
-  if( !have_atoms ){
-    return strdup( "MoleculeStamp error. Molecule contains no atoms." );
-  }
-  
-  no_rigidbody = 0;
-  for( i=0; i<n_rigidbodies; i++ ){
-    if( rigidBodies[i] == NULL ) no_rigidbody = 1;
-  }
+bool MoleculeStamp::addFragmentStamp( FragmentStamp* fragment) {
+    return addIndexSensitiveStamp(fragmentStamps_, fragment);
+}
+    
+void MoleculeStamp::validate() {
+    DataHolder::validate();
 
-  if( no_rigidbody ){
-    sprintf( errMsg, 
-	     "MoleculeStamp error. Not all of the RigidBodies were"
-	     " declared in molecule \"%s\".\n", name );
-    return strdup( errMsg );
-  }
+    std::vector<AtomStamp*>::iterator ai = std::find(atomStamps_.begin(), atomStamps_.end(), static_cast<AtomStamp*>(NULL));
+    if (ai != atomStamps_.end()) {
+        std::cout << "Error in Molecule " << getName() << ": atom[" << ai - atomStamps_.begin()<< "] is missing\n";
+    }
 
-  no_cutoffgroup = 0;
-  for( i=0; i<n_cutoffgroups; i++ ){
-    if( cutoffGroups[i] == NULL ) no_cutoffgroup = 1;
-  }
+     std::vector<RigidBodyStamp*>::iterator ri = std::find(rigidBodyStamps_.begin(), rigidBodyStamps_.end(), static_cast<RigidBodyStamp*>(NULL));
+     if (ri != rigidBodyStamps_.end()) {
+         std::cout << "Error in Molecule " << getName() << ":rigidBody[" <<  ri - rigidBodyStamps_.begin()<< "] is missing\n";
+     }
+    
+    std::vector<FragmentStamp*>::iterator fi = std::find(fragmentStamps_.begin(), fragmentStamps_.end(), static_cast<FragmentStamp*>(NULL));
+    if (fi != fragmentStamps_.end()) {
+        std::cout << "Error in Molecule " << getName() << ":fragment[" <<  fi - fragmentStamps_.begin()<< "] is missing\n";
+    }
 
-  if( no_cutoffgroup ){
-    sprintf( errMsg, 
-	     "MoleculeStamp error. Not all of the CutoffGroups were"
-	     " declared in molecule \"%s\".\n", name );
-    return strdup( errMsg );
-  }
-  
-  no_atom = 0;
-  for( i=0; i<n_atoms; i++ ){
-    if( atoms[i] == NULL ) no_atom = 1;
-  }
+    //make sure index is not out of range
+    int natoms = getNAtoms();
+    for(int i = 0; i < getNBonds(); ++i) {
+        BondStamp* bondStamp = getBondStamp(i);
+        if (bondStamp->getA() >=  natoms && bondStamp->getB() >= natoms) {
+            std::cout << "Error in Molecule " << getName() <<  ": bond between " << bondStamp->getA() << " and " << bondStamp->getB() << " is invalid\n";
+        }
+    }
+    for(int i = 0; i < getNBends(); ++i) {
+        BendStamp* bendStamp = getBendStamp(i);
+        std::vector<int> bendAtoms =  bendStamp->getMembers();
+        std::vector<int>::iterator j =std::find_if(bendAtoms.begin(), bendAtoms.end(), std::bind2nd(std::greater<int>(), natoms-1));
+        if (j != bendAtoms.end()) {
+            std::cout << "Error in Molecule " << getName();
+        }
 
-  if( no_atom ){
-    sprintf( errMsg, 
-	     "MoleculeStamp error. Not all of the atoms were"
-	     " declared in molecule \"%s\".\n", name );
-    return strdup( errMsg );
-  }
+        if (bendAtoms.size() == 2 && !bendStamp->haveGhostVectorSource()) {
+            std::cout << "Error in Molecule " << getName() << ": ghostVectorSouce is missing";
+        }
+    }    
+    for(int i = 0; i < getNBends(); ++i) {
+        TorsionStamp* torsionStamp = getTorsionStamp(i);
+        std::vector<int> torsionAtoms =  torsionStamp ->getMembers();
+        std::vector<int>::iterator j =std::find_if(torsionAtoms.begin(), torsionAtoms.end(), std::bind2nd(std::greater<int>(), natoms-1));
+        if (j != torsionAtoms.end()) {
+            std::cout << "Error in Molecule " << getName();
+        }
+    }
+    for(int i = 0; i < getNCutoffGroups(); ++i) {
+        CutoffGroupStamp* cutoffGroupStamp = getCutoffGroupStamp(i);
+        std::vector<int> cutoffGroupAtoms =  cutoffGroupStamp ->getMembers();
+        std::vector<int>::iterator j =std::find_if(cutoffGroupAtoms.begin(), cutoffGroupAtoms.end(), std::bind2nd(std::greater<int>(), natoms-1));
+        if (j != cutoffGroupAtoms.end()) {
+            std::cout << "Error in Molecule " << getName();
+        }
+    }
+        
+    atom2Rigidbody.resize(natoms); 
+    // negative number means atom is a free atom, does not belong to rigidbody
+    //every element in atom2Rigidbody has unique negative number at the very beginning
+    for(int i = 0; i < atom2Rigidbody.size(); ++i) {
+        atom2Rigidbody[i] = -1 - i;
+    }
 
-  n_integrable = n_atoms;
-  for (i = 0; i < n_rigidbodies; i++) 
-    n_integrable = n_integrable - rigidBodies[i]->getNMembers() + 1; //rigidbody is an integrable object
-  
-  if (n_integrable <= 0 || n_integrable > n_atoms) {
-    sprintf( errMsg, 
-	     "MoleculeStamp error. n_integrable is either <= 0 or"
-	     " greater than n_atoms in molecule \"%s\".\n", name );
-    return strdup( errMsg );
-  }
+    for (int i = 0; i < getNRigidBodies(); ++i) {
+        RigidBodyStamp* rbStamp = getRigidBodyStamp(i);
+        std::vector<int> members = rbStamp->getMembers();
+        for(std::vector<int>::iterator j = members.begin(); j != members.end(); ++j) {
+            atom2Rigidbody[*j] = i;                 
+        }
+    }
+    //make sure atoms belong to same rigidbody do not bond to each other
+    for(int i = 0; i < getNBonds(); ++i) {
+        BondStamp* bondStamp = getBondStamp(i);
+        if (atom2Rigidbody[bondStamp->getA()] == atom2Rigidbody[bondStamp->getB()])
+            std::cout << "Error in Molecule " << getName() << ": "<<"bond between " << bondStamp->getA() << " and " << bondStamp->getB() << "belong to same rigidbody " << atom2Rigidbody[bondStamp->getA()] << "\n";
+        }
+        
+    for(int i = 0; i < getNBends(); ++i) {
+        BendStamp* bendStamp = getBendStamp(i);
+        std::vector<int> bendAtoms =  bendStamp->getMembers();
+        std::vector<int> rigidSet(getNRigidBodies(), 0);
+        std::vector<int>::iterator j;
+        for( j = bendAtoms.begin(); j != bendAtoms.end(); ++j) {
+            int rigidbodyIndex = atom2Rigidbody[*j];
+            if (rigidbodyIndex >= 0) {
+                ++rigidSet[rigidbodyIndex];
+                if (rigidSet[rigidbodyIndex] > 1) {
+                    std::cout << "Error in Molecule " << getName() << ": ";
+                    //std::cout << "atoms of bend " <<  << "belong to same rigidbody " << rigidbodyIndex << "\n";                    
+                }
+            }
+        }
+    }      
+    for(int i = 0; i < getNTorsions(); ++i) {
+        TorsionStamp* torsionStamp = getTorsionStamp(i);
+        std::vector<int> torsionAtoms =  torsionStamp->getMembers();
+        std::vector<int> rigidSet(getNRigidBodies(), 0);
+        std::vector<int>::iterator j;
+        for( j = torsionAtoms.begin(); j != torsionAtoms.end(); ++j) {
+            int rigidbodyIndex = atom2Rigidbody[*j];
+            if (rigidbodyIndex >= 0) {
+                ++rigidSet[rigidbodyIndex];
+                if (rigidSet[rigidbodyIndex] > 1) {
+                    std::cout << "Error in Molecule " << getName() << ": ";
+                    //std::cout << "atoms of torsion " <<  << "belong to same rigidbody " << rigidbodyIndex << "\n";                    
+                }
+            }
+        }
+    } 
 
-  return NULL;
-}  
 
+    //fill in bond information into atom
+    fillBondInfo();
+    findBends();
+    findTorsions();
+
+    int nrigidAtoms = 0;
+    for (int i = 0; i < getNRigidBodies(); ++i) {
+        RigidBodyStamp* rbStamp = getRigidBodyStamp(i);
+        nrigidAtoms += rbStamp->getNMembers();
+    }
+    nintegrable_ = getNAtoms()+ getNRigidBodies() - nrigidAtoms;
+
+ }
+
+void MoleculeStamp::fillBondInfo() {
+}
+
+void MoleculeStamp::findBends() {
+
+}
+
+void MoleculeStamp::findTorsions() {
+
+}
 
 //Function Name: isBondInSameRigidBody
 //Return true is both atoms of the bond belong to the same rigid body, otherwise return false
@@ -544,10 +286,10 @@ bool MoleculeStamp::isAtomInRigidBody(int atomIndex, int& whichRigidBody, int& c
   numRb = this->getNRigidBodies();
   
   for(int i = 0 ; i < numRb; i++){
-    rbStamp = this->getRigidBody(i);
+    rbStamp = this->getRigidBodyStamp(i);
     numAtom = rbStamp->getNMembers();
     for(int j = 0; j < numAtom; j++)
-      if (rbStamp->getMember(j) == atomIndex){
+      if (rbStamp->getMemberAt(j) == atomIndex){
         whichRigidBody = i;
         consAtomIndex = j;
         return true;
@@ -570,26 +312,28 @@ std::vector<std::pair<int, int> > MoleculeStamp::getJointAtoms(int rb1, int rb2)
   int atomIndex2;
   std::vector<std::pair<int, int> > jointAtomIndexPair;
   
-  rbStamp1 = this->getRigidBody(rb1);
+  rbStamp1 = this->getRigidBodyStamp(rb1);
   natomInRb1 =rbStamp1->getNMembers();
 
-  rbStamp2 = this->getRigidBody(rb2);
+  rbStamp2 = this->getRigidBodyStamp(rb2);
   natomInRb2 =rbStamp2->getNMembers();
 
   for(int i = 0; i < natomInRb1; i++){
-    atomIndex1 = rbStamp1->getMember(i);
+    atomIndex1 = rbStamp1->getMemberAt(i);
       
     for(int j= 0; j < natomInRb1; j++){
-      atomIndex2 = rbStamp2->getMember(j);
+      atomIndex2 = rbStamp2->getMemberAt(j);
 
       if(atomIndex1 == atomIndex2){
         jointAtomIndexPair.push_back(std::make_pair(i, j));
         break;
       }
       
-    }//end for(j =0)
+    }
 
-  }//end for (i = 0)
+  }
 
   return jointAtomIndexPair;
+}
+
 }

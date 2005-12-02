@@ -48,12 +48,12 @@
 #include <fstream>
 
 #include "brains/SimInfo.hpp"
-#include "selection/Token.hpp"
+#include "selection/SelectionToken.hpp"
 #include "selection/SelectionCompiler.hpp"
 #include "selection/NameFinder.hpp"
 #include "selection/DistanceFinder.hpp"
 #include "selection/IndexFinder.hpp"
-#include "utils/BitSet.hpp"
+#include "utils/OOPSEBitSet.hpp"
 #include "primitives/StuntDouble.hpp"
 #include "utils/StringUtils.hpp"
 namespace oopse {
@@ -61,7 +61,7 @@ namespace oopse {
 
   /**
    * @class SelectionEvaluator SelectionEvaluator.hpp "selection/SelectionEvaluator"
-   * @brief Evalute the tokens compiled by SelectionCompiler and return a BitSet
+   * @brief Evalute the tokens compiled by SelectionCompiler and return a OOPSEBitSet
    */
   class SelectionEvaluator{
   public:
@@ -72,7 +72,7 @@ namespace oopse {
     bool loadScriptString(const std::string& script);
     bool loadScriptFile(const std::string& filename);
         
-    BitSet evaluate();
+    OOPSEBitSet evaluate();
         
     /**
      * Tests if the result from evaluation of script is dynamic.
@@ -116,20 +116,20 @@ namespace oopse {
     void clearDefinitionsAndLoadPredefined();
          
     void define();
-    void select(BitSet& bs);
+    void select(OOPSEBitSet& bs);
     void predefine(const std::string& script);
 
-    void instructionDispatchLoop(BitSet& bs);
+    void instructionDispatchLoop(OOPSEBitSet& bs);
 
-    void withinInstruction(const Token& instruction, BitSet& bs);
+    void withinInstruction(const Token& instruction, OOPSEBitSet& bs);
         
-    BitSet comparatorInstruction(const Token& instruction); 
-    void compareProperty(StuntDouble* sd, BitSet& bs, int property, int comparator, float comparisonValue);
-    BitSet nameInstruction(const std::string& name);
-    BitSet indexInstruction(const boost::any& value);
-    BitSet expression(const std::vector<Token>& tokens, int pc);
+    OOPSEBitSet comparatorInstruction(const Token& instruction); 
+    void compareProperty(StuntDouble* sd, OOPSEBitSet& bs, int property, int comparator, float comparisonValue);
+    OOPSEBitSet nameInstruction(const std::string& name);
+    OOPSEBitSet indexInstruction(const boost::any& value);
+    OOPSEBitSet expression(const std::vector<Token>& tokens, int pc);
 
-    BitSet lookupValue(const std::string& variable);
+    OOPSEBitSet lookupValue(const std::string& variable);
         
     void evalError(const std::string& message) {
       std::cerr << "SelectionEvaulator Error: " << message <<  std::endl; 

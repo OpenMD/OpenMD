@@ -49,32 +49,24 @@
 #include <string>
 #include <map>
 
-#include "io/BASS_interface.h"
 #include "types/Component.hpp"
-#include "types/MakeStamps.hpp"
-#include "types/ZconStamp.hpp"
-
+#include "types/ZconsStamp.hpp"
+#include "types/MoleculeStamp.hpp"
 #include "utils/ParameterManager.hpp"
 
-class Globals {
+namespace oopse {
+class Globals : public DataHolder {
   public:
     Globals();
-    ~Globals();
+    virtual ~Globals();
     
   DeclareParameter(ForceField, std::string);
-  DeclareParameter(NComponents, int);  
   DeclareParameter(TargetTemp, double);
   DeclareParameter(Ensemble, std::string);
   DeclareParameter(Dt, double);
   DeclareParameter(RunTime, double);
   DeclareParameter(InitialConfig, std::string);
   DeclareParameter(FinalConfig, std::string);
-  DeclareParameter(NMol, int);
-  DeclareParameter(Density, double);
-  DeclareParameter(Box, double);
-  DeclareParameter(BoxX, double);
-  DeclareParameter(BoxY, double);
-  DeclareParameter(BoxZ, double);
   DeclareParameter(SampleTime, double);
   DeclareParameter(ResetTime, double);
   DeclareParameter(StatusTime, double);
@@ -89,7 +81,6 @@ class Globals {
   DeclareParameter(TauThermostat, double);
   DeclareParameter(TauBarostat, double);
   DeclareParameter(ZconsTime, double);
-  DeclareParameter(NZconstraints, int);
   DeclareParameter(ZconsTol, double);
   DeclareParameter(ZconsForcePolicy, std::string);
   DeclareParameter(Seed, int);
@@ -128,32 +119,25 @@ class Globals {
   DeclareParameter(SkinThickness, double);
   DeclareParameter(StatFileFormat, std::string);    
 
-  private:
-    typedef std::map<std::string, ParameterBase*> ParamMap;
-    ParamMap parameters_;
-    
-    Component* current_component;
-    Component** components; // the array of components
-
-    ZconStamp* current_zConstraint;
-    ZconStamp** zConstraints; // the array of zConstraints
-
-    char* checkMe();
-
   public:
-    int newComponent( event* the_event );
-    int componentAssign( event* the_event );
-    int componentEnd( event* the_event );
+    bool addComponent(Component* comp);
+    bool addZConsStamp(ZConsStamp* zcons);
+    bool addMoleculeStamp(MoleculeStamp* molStamp);
+    int getNComponents() {return components_.size();}
+    std::vector<Component*> getComponents() {return components_;}
+    Component* getComponentAt(int index) {return components_.at(index);}    
 
-    int newZconstraint( event* the_event );
-    int zConstraintAssign( event* the_event );
-    int zConstraintEnd( event* the_event );
-  
-    int globalAssign( event* the_event );
-    int globalEnd( event* the_event );    
+    int getNZconsStamps() {return zconstraints_.size();}
+    std::vector<ZConsStamp*> getZconsStamps() {return zconstraints_;}
+    ZConsStamp* getZconsStampAt(int index) {return zconstraints_.at(index);}    
 
-    ZconStamp** getZconStamp() {return zConstraints;}
-    Component** getComponents() {return components;}
+    virtual void validate();
+  private:
+    std::vector<Component*> components_;
+    std::vector<ZConsStamp*> zconstraints_;    
+    std::map<std::string, MoleculeStamp*> moleculeStamps_;
+
 };
+}
 #endif
 

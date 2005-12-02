@@ -41,38 +41,31 @@
  
 #ifndef TYPES_TORSIONSTAMP_HPP
 #define TYPES_TORSIONSTAMP_HPP
+#include "types/DataHolder.hpp"
+namespace oopse {
+class TorsionStamp : public DataHolder {
+    DeclareParameter(GhostVectorSource, int);
+    public:
 
-#include "io/LinkedAssign.hpp"
+        TorsionStamp();
+        virtual ~TorsionStamp();
+        
+        int getMemberAt( int index ) {return members_.at(index);}
+        int getNMembers() {return members_.size();}
+        std::vector<int> getMembers() {return members_;}
+        bool setMembers(const std::vector<int>& members) {
+            members_ = members;
+            bool ret = false;
+            if (members_.size() == 4 || members_.size() == 3) {
+                ret = true;
+            }
+            return ret;            
+        }        
+        virtual void validate();
 
-class TorsionStamp{
-
- public:
-  TorsionStamp();
-  ~TorsionStamp();
-  
-  void assignString( char* lhs, char* rhs );
-  void assignDouble( char* lhs, double rhs );
-  void assignInt( char* lhs, int rhs );
-  void members( int a, int b, int c, int d );
-  void constrain( double constraint );
-  char* checkMe( void );
-
-  int getA( void ){ return a; }
-  int getB( void ){ return b; }
-  int getC( void ){ return c; }
-  int getD( void ){ return d; }
-
-  int haveExtras( void ) { return have_extras; }
-  LinkedAssign* getExtras( void ) { return unhandled; }
-
- private:
-
-  int a, b, c, d; //the members
-  double constraint;
-  short int have_mbrs, have_constraint;
-
-  LinkedAssign* unhandled; // the unhandled assignments
-  short int have_extras;  
+    private:
+    
+        std::vector<int> members_;
 };
-
+}
 #endif

@@ -70,11 +70,11 @@ namespace oopse {
 
   }
 
-  BitSet DistanceFinder::find(const BitSet& bs, double distance) {
+  OOPSEBitSet DistanceFinder::find(const OOPSEBitSet& bs, double distance) {
     StuntDouble * center;
     Vector3d centerPos;
     Snapshot* currSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
-    BitSet bsResult(nStuntDoubles_);
+    OOPSEBitSet bsResult(nStuntDoubles_);
     assert(bsResult.size() == bs.size());
     
     for (int i = bs.firstOnBit(); i != -1; i = bs.nextOnBit(i)) {

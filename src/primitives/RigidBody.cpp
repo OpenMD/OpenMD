@@ -483,7 +483,7 @@ namespace oopse {
 	       "RigidBody error.\n"
 	       "\tAtom %s does not have a position specified.\n"
 	       "\tThis means RigidBody cannot set up reference coordinates.\n",
-	       ats->getType() );
+	       ats->getType().c_str() );
       painCave.isFatal = 1;
       simError();
     }
@@ -503,7 +503,7 @@ namespace oopse {
 		 "RigidBody error.\n"
 		 "\tAtom %s does not have an orientation specified.\n"
 		 "\tThis means RigidBody cannot set up reference orientations.\n",
-		 ats->getType() );
+		 ats->getType().c_str() );
 	painCave.isFatal = 1;
 	simError();
       }    

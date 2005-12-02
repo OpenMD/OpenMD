@@ -42,37 +42,29 @@
 #ifndef TYPES_BONDSTAMP_HPP
 #define TYPES_BONDSTAMP_HPP
 
-#include "io/LinkedAssign.hpp"
+#include "types/DataHolder.hpp"
 
-class BondStamp{
+namespace oopse {
+class BondStamp : public DataHolder {
 
- public:
-  BondStamp();
-  ~BondStamp();
-  
-  void assignString( char* lhs, char* rhs );
-  void assignDouble( char* lhs, double rhs );
-  void assignInt( char* lhs, int rhs );
-  void members( int the_a, int the_b );
-  void constrain( double the_constraint );
-  char* checkMe( void );
+    public:
+      bool setMembers(std::vector<int> members) {
+        bool ret = false;
+        if (members.size() ==2) {
+            a = members[0];
+            b = members[1];
+            ret = true;
+        }
 
-  int getA( void ){ return a; }
-  int getB( void ){ return b; }
-
-  int haveExtras( void ) { return have_extras; }
-  LinkedAssign* getExtras( void ) { return unhandled; }
-
- private:
-
-  int a, b; //the members
-  double constraint;
-  short int have_mbrs, have_constraint;
-
-  LinkedAssign* unhandled; // the unhandled assignments
-  short int have_extras;
-
+        return ret;
+      }
+      
+      int getA() {return a;} 
+      int getB() {return b;}
+    private:
+        int a;
+        int b;
 };
 
-
+}
 #endif

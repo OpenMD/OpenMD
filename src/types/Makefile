@@ -6,15 +6,15 @@ Source    = \
 	BondStamp.cpp \
 	Component.cpp \
 	CutoffGroupStamp.cpp \
-	MakeStamps.cpp \
 	MoleculeStamp.cpp \
 	RigidBodyStamp.cpp \
 	TorsionStamp.cpp \
-	ZconStamp.cpp \
+	ZconsStamp.cpp \
 	AtomType.cpp \
 	DirectionalAtomType.cpp \
 	ShapeAtomType.cpp \
-	CharmmTorsionType.cpp
+	CharmmTorsionType.cpp \
+	FragmentStamp.cpp
 
 RmiSource =
 

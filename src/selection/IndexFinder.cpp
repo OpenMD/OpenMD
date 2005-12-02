@@ -62,7 +62,7 @@ namespace oopse {
     
     for (mol = info_->beginMolecule(mi); mol != NULL; mol = info_->nextMolecule(mi)) {
            
-      BitSet bs(nStuntDoubles_);
+      OOPSEBitSet bs(nStuntDoubles_);
       for(atom = mol->beginAtom(ai); atom != NULL; atom = mol->nextAtom(ai)) {
 	bs.setBitOn(atom->getGlobalIndex());
       }
@@ -76,12 +76,12 @@ namespace oopse {
 
   }
 
-  BitSet IndexFinder::find(int molIndex){
+  OOPSEBitSet IndexFinder::find(int molIndex){
     return bitSets_[molIndex];
   }
 
-  BitSet IndexFinder::find(int begMolIndex, int endMolIndex){
-    BitSet bs(nStuntDoubles_);
+  OOPSEBitSet IndexFinder::find(int begMolIndex, int endMolIndex){
+    OOPSEBitSet bs(nStuntDoubles_);
         
     for (int i = begMolIndex; i < endMolIndex; ++i) {
       bs |= bitSets_[i];

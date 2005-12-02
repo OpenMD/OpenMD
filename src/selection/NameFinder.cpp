@@ -127,8 +127,8 @@ namespace oopse {
     return node;
   }
 
-  BitSet NameFinder::match(const std::string& name){
-    BitSet bs(nStuntDouble_);
+  OOPSEBitSet NameFinder::match(const std::string& name){
+    OOPSEBitSet bs(nStuntDouble_);
   
     StringTokenizer tokenizer(name, ".");
 
@@ -173,7 +173,7 @@ namespace oopse {
     return bs; 
   }
 
-  void NameFinder::matchMolecule(const std::string& molName, BitSet& bs) {
+  void NameFinder::matchMolecule(const std::string& molName, OOPSEBitSet& bs) {
     std::vector<TreeNode*> molNodes = getMatchedChildren(root_, molName);            
     std::vector<TreeNode*>::iterator i;
     for( i = molNodes.begin(); i != molNodes.end(); ++i ) {
@@ -181,7 +181,7 @@ namespace oopse {
     }    
   }
 
-  void NameFinder::matchStuntDouble(const std::string& molName, const std::string& sdName, BitSet& bs){
+  void NameFinder::matchStuntDouble(const std::string& molName, const std::string& sdName, OOPSEBitSet& bs){
     std::vector<TreeNode*> molNodes = getMatchedChildren(root_, molName);            
     std::vector<TreeNode*>::iterator i;
     for( i = molNodes.begin(); i != molNodes.end(); ++i ) {
@@ -194,7 +194,7 @@ namespace oopse {
 
   }
 
-  void NameFinder::matchRigidAtoms(const std::string& molName, const std::string& rbName, const std::string& rbAtomName, BitSet& bs){
+  void NameFinder::matchRigidAtoms(const std::string& molName, const std::string& rbName, const std::string& rbAtomName, OOPSEBitSet& bs){
     std::vector<TreeNode*> molNodes = getMatchedChildren(root_, molName);            
     std::vector<TreeNode*>::iterator i;
     for( i = molNodes.begin(); i != molNodes.end(); ++i ) {
@@ -229,7 +229,7 @@ namespace oopse {
   }
 
 
-  void NameFinder::matchInternalIndex(const std::string& name, int internalIndex, BitSet& bs){
+  void NameFinder::matchInternalIndex(const std::string& name, int internalIndex, OOPSEBitSet& bs){
 
     std::map<std::string, TreeNode*>::iterator foundIter;
     SimInfo::MoleculeIterator mi;
