@@ -1,6 +1,6 @@
-#define OOPSE_VERSION_MAJOR 2
-#define OOPSE_VERSION_MINOR 0
-#define OOPSE_VERSION_TINY  0
+#define OOPSE_VERSION_MAJOR 3
+#define OOPSE_VERSION_MINOR 1
+#define OOPSE_VERSION_TINY  4
 
 #define MK_STR(s) # s
 #define STR_DEFINE(t, s) t = MK_STR(s)
