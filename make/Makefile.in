@@ -338,6 +338,7 @@ Linker                 = @CXX@
 MakeDepend             = makedepend
 LN_S                   = @LN_S@
 INSTALL                = @INSTALL@
+EGREP                  = @EGREP@
 InstallProgram         = @INSTALL_PROGRAM@
 InstallScript          = @INSTALL_SCRIPT@
 InstallData            = @INSTALL_DATA@
@@ -643,21 +644,25 @@ document :
 	$(Doxygen) $(DEV_ROOT)/make/Doxyfile
 
 #GUN make funtions to merge the libraries
-find_objs = $(shell $(StaticArchiver) -t $(1))
+find_objs = $(shell $(StaticArchiver) -t $(1) | $(EGREP) -v "SYMDEF")
 extract_objs = $(shell $(StaticArchiver) -x $(1) $(call find_objs, $(1)))
 create_archive = $(shell  $(StaticArchiver) $(StaticArchiverOptions) $(2) $(call find_objs, $(1)))
 remove_objs = $(shell $(Delete) $(call find_objs, $(1)))
 do_create = $(call extract_objs,$(1))$(call create_archive,$(1),$(2))$(call remove_objs,$(1))  
 do_link = $(shell $(LN_S) $(1) $(2))
+all_objs = $(foreach thisLib,$(LibNames), $(call find_objs, $(thisLib)))
+all_parallel_objs = $(foreach thisLib,$(ParallelLibNames), $(call find_objs, $(thisLib)))
+all_lib_objs = $(patsubst %,$(TargetDir)/%,$(call all_objs))
+all_lib_parallel_objs = $(patsubst %,$(TargetDir)/%,$(call all_parallel_objs))
 
 $(CombinedStaticLib) : $(LibDir)/.stamp_UP
-	$(Print) create $@     	
-	$(foreach thisLib,$(LibNames),$(call do_create,$(thisLib),$@))
+	$(Print) creating $@     	
+	$(StaticArchiver) $(StaticArchiverOptions) $@ $(call all_lib_objs)
 	$(Ranlib) $(CombinedStaticLib)
 
 $(CombinedParallelStaticLib) : $(LibDir)/.stamp_MPI
-	$(Print) create $@
-	$(foreach thisLib,$(ParallelLibNames), $(call do_create, $(thisLib), $@))
+	$(Print) creating $@
+	$(StaticArchiver) $(StaticArchiverOptions) $@ $(call all_lib_parallel_objs)
 	$(Ranlib) $(CombinedParallelStaticLib)
 
 # Executable
