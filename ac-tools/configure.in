@@ -36,6 +36,12 @@ AC_PROG_CC([icc xlc gcc cc])
 dnl Checks for C++ compiler
 AC_PROG_CXX([icpc icc xlc++ xlC CC g++ c++])
 
+dnl Checks for C preprocessor
+AC_PROG_CPP
+
+dnl Checks for grep and egrep
+AC_PROG_EGREP
+
 dnl If we are not running g++ then we might need some other flags
 dnl to get the templates compiled correctly
 OOPSE_TEMPLATE_FLAGS=""
@@ -119,7 +125,7 @@ AC_LANG_CPLUSPLUS
 dnl Checks for libraries.
 AC_CHECK_LIB(m, asin, , exit)
 
-AC_LANG_PUSH(C)
+AC_LANG_C
 ACX_CHECK_ZLIB
 dnl Checks for header files.
 AC_CHECK_HEADERS(sys/time.h unistd.h stdlib.h stdio.h conio.h string.h)
