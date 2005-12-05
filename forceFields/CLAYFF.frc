@@ -1,0 +1,163 @@
+// This is the forcefield file for the Clay Force Field (CLAYFF)
+// 
+// Details can be found in the following article:
+// 
+// "Molecular Models of Hydroxide, Oxyhydroxid, and Clay Phases and
+//  the Development of a General Force Field" by Randall T. Cygan, 
+//  Jian-Jie Liang, and Andrey G. Kalinichev, J. Phys. Chem. B 108,
+//  pp. 1255-1266 (2004).
+//
+// This file defines the following atom types:
+//
+// h*   water hydrogen          
+// ho   hydroxyl hydrogen 	
+// o*   water oxygen            
+// oh   hydroxyl oxygen 	
+// ob   bridging oxygen 	
+// obos bridging oxygen with octahedral substitution
+// obts bridging oxygen with tetrahedral substitution
+// obss bridging oxygen with double substitution
+// ohs  hydroxyl oxygen with substitution
+// st   tetrahedral silicon 	
+// ao   octahedral aluminum 	
+// at   tetrahedral aluminum 	
+// mgo  octahedral magnesium 	
+// mgh  hydroxide magnesium 	
+// cao  octahedral calcium 	
+// cah  hydroxide calcium 	
+// feo  octahedral iron 	
+// lio  octahedral lithium 	
+// Na   aqueous sodium ion
+// K    aqueous potassium ion
+// Cs   aqueous cesium ion
+// Ca   aqueous calcium ion
+// Ba   aqueous barium ion 	
+// Cl   aqueous chloride ion
+
+begin Options
+      Name                   = "CLAYFF"
+      vdWtype                = "Lennard-Jones"
+      DistanceMixingRule     = "Arithmetic"
+      DistanceType           = "Rmin"
+      EnergyMixingRule       = "Geometric"
+      vdW-14-scale           = 0.0
+      electrostatic-14-scale = 0.0
+      dielectric             = 1.0
+end Options
+
+begin AtomTypes    
+//Name	mass	 (amu)
+h*	1.0079
+ho	1.0079
+o*	15.9994
+oh	15.9994
+ob	15.9994
+obos	15.9994
+obts	15.9994
+obss	15.9994
+ohs	15.9994
+st	28.0855
+ao	26.981538
+at	26.981538
+mgo	24.3050
+mgh	24.3050
+cao	40.078
+cah	40.078
+feo	55.845
+lio	6.941
+Na	22.98977
+K	39.0983
+Cs	132.90545
+Ca	40.078
+Ba	137.327
+Cl	35.453
+end AtomTypes
+
+begin LennardJonesAtomTypes
+//Name	epsilon         R0
+o*	0.1554          3.5532
+oh	0.1554          3.5532
+ob	0.1554          3.5532
+obos	0.1554          3.5532
+obts	0.1554          3.5532
+obss	0.1554          3.5532
+ohs	0.1554          3.5532
+st	1.8405e-6	3.7064
+ao	1.3298e-6	4.7943
+at	1.8405e-6	3.7064
+mgo	9.0298e-7	5.9090
+mgh	9.0298e-7	5.9090
+cao	5.0298e-6	6.2484
+cah	5.0298e-6	6.2428
+feo	9.0298e-6	5.5070
+lio	9.0298e-6	4.7257
+Na	0.1301          2.6378
+K	0.1000          3.7423
+Cs	0.1000          4.3002
+Ca	0.1000          3.2237
+Ba	0.0470          4.2840
+Cl	0.1001          4.9388
+end LennardJonesAtomTypes
+
+begin ChargeAtomTypes
+// Name charge
+h*	0.4100
+ho	0.4250
+o*	-0.8200
+oh	-0.9500
+ob	-1.0500
+obos	-1.1808
+obts	-1.1688
+obss	-1.2996
+ohs	-1.0808
+st	2.1000 
+ao	1.5750 
+at	1.5750 
+mgo	1.3600 
+mgh	1.0500 
+cao	1.3600 
+cah	1.0500 
+feo	1.5750 
+lio	0.5250 
+Na	1.0    
+K	1.0    
+Cs	1.0    
+Ca	2.0    
+Ba	2.0    
+Cl	-1.0   
+end ChargeAtomTypes
+
+begin BondTypes
+
+//Atom1	Atom2	Harmonic	b0	Kb (kcal/mol)
+//V_Harmonic = 0.5*Kb(b- bo)^2
+
+o*      h*      Harmonic                1.0000          277.06745
+oh      ho      Harmonic                1.0000          277.06745
+ohs     ho      Harmonic                1.0000          277.06745
+
+end BondTypes
+
+begin BendTypes
+
+//Harmonic
+//Atom1	Atom2	Atom3	Harmonic	Theta0	Ktheta
+//V_Harmonic = 0.5*Ktheta(Theta - Theta0)^2
+//Ktheta: kcal/mole/rad**2
+//Theta0: degrees
+
+h*      o*      h*      Harmonic        109.47  22.8848
+ao      oh      ho      Harmonic        109.47  15.0
+ao      ohs     ho      Harmonic        109.47  15.0
+at      oh      ho      Harmonic        109.47  15.0
+at      ohs     ho      Harmonic        109.47  15.0
+mgh     oh      ho      Harmonic        109.47  15.0
+mgh     ohs     ho      Harmonic        109.47  15.0
+cah     oh      ho      Harmonic        109.47  15.0
+cah     ohs     ho      Harmonic        109.47  15.0
+feo     oh      ho      Harmonic        109.47  15.0
+feo     ohs     ho      Harmonic        109.47  15.0
+lio     oh      ho      Harmonic        109.47  15.0
+lio     ohs     ho      Harmonic        109.47  15.0
+
+end BendTypes
