@@ -42,6 +42,9 @@
 #ifndef TYPES_ATOMSTAMP_HPP
 #define TYPES_ATOMSTAMP_HPP
 
+#include <set>
+#include <vector>
+
 #include "types/DataHolder.hpp"
 namespace oopse {
 
@@ -63,9 +66,29 @@ class AtomStamp  : public DataHolder {
       double getEulerPsi()   { return orientation_[2]; }
       int getIndex() { return index_;}
       virtual void validate();
-
-      AtomStamp* getNextBondedAtom();
+      typedef std::set<int>::iterator AtomIter;
+      typedef std::vector<int>::iterator BondIter;
+      int getFirstBonedAtom(AtomIter& ai) {
+        ai = bondedAtoms_.begin();
+        return ai != bondedAtoms_.end() ? *ai : -1;
+      }
       
+      int getNextBonedAtom(AtomIter& ai) {
+        ++ai;
+        return ai != bondedAtoms_.end() ? *ai : -1;
+      }
+      
+      int getFirstBond(BondIter& bi) {
+        bi = bonds_.begin();
+        return bi != bonds_.end()? *bi: -1;
+      }
+      int getNextBond(BondIter& bi) {
+        ++bi; 
+        return bi != bonds_.end()? *bi: -1;
+      }
+      
+      void addBond(int bondIndex) {bonds_.push_back(bondIndex);}
+      void addBondedAtom(int atomIndex) {bondedAtoms_.insert(atomIndex);}
     private:
         Vector3d position_;
         Vector3d orientation_;
@@ -73,6 +96,7 @@ class AtomStamp  : public DataHolder {
         bool haveOrt_;
         int index_;
         std::vector<int> bonds_;
+        std::set<int> bondedAtoms_;
 };
 
 }

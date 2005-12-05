@@ -43,6 +43,7 @@
 #define TYPES_BENDSTAMP_HPP
 
 #include "types/DataHolder.hpp"
+#include "utils/Tuple.hpp"
 namespace oopse {
 
 class BendStamp : public DataHolder {
@@ -63,7 +64,12 @@ class BendStamp : public DataHolder {
             }
             return ret;
         }
-        
+        bool setMembers(IntTuple3 tuple) {
+            members_.push_back(tuple.first);
+            members_.push_back(tuple.second);
+            members_.push_back(tuple.third);
+            return true;
+        }
         virtual void validate();
 
     private:

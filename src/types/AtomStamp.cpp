@@ -78,10 +78,6 @@ bool AtomStamp::setOrientation(const std::vector<double>& ort) {
     return ret;
 }
 
-AtomStamp* AtomStamp::getNextBondedAtom() {
-
-}
-
 void AtomStamp::validate() {
     DataHolder::validate();
     CheckParameter(Type, isNotEmpty());

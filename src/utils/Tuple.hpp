@@ -84,6 +84,12 @@ namespace oopse {
     return tuple4<T1,T2,T3,T4>( t1, t2, t3, t4 );
   }
 
+
+typedef tuple3<int, int, int> IntTuple3;
+typedef tuple4<int, int, int, int> IntTuple4;
+
 }
+
+
 #endif //UTILS_TUPLE_HPP
 

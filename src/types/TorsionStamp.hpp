@@ -42,6 +42,7 @@
 #ifndef TYPES_TORSIONSTAMP_HPP
 #define TYPES_TORSIONSTAMP_HPP
 #include "types/DataHolder.hpp"
+#include "utils/Tuple.hpp"
 namespace oopse {
 class TorsionStamp : public DataHolder {
     DeclareParameter(GhostVectorSource, int);
@@ -61,6 +62,14 @@ class TorsionStamp : public DataHolder {
             }
             return ret;            
         }        
+
+        bool setMembers(IntTuple4 tuple) {
+            members_.push_back(tuple.first);
+            members_.push_back(tuple.second);
+            members_.push_back(tuple.third);
+            members_.push_back(tuple.fourth);            
+            return true;
+        }
         virtual void validate();
 
     private:

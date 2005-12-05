@@ -39,12 +39,10 @@
  * such damages.
  */
  
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
 #include <iostream>
-
+#include <functional>
 #include "types/MoleculeStamp.hpp"
+#include "utils/Tuple.hpp"
 
 namespace oopse {
 MoleculeStamp::MoleculeStamp() {
@@ -107,19 +105,42 @@ bool MoleculeStamp::addFragmentStamp( FragmentStamp* fragment) {
 void MoleculeStamp::validate() {
     DataHolder::validate();
 
+    atom2Rigidbody.resize(getNAtoms()); 
+    // negative number means atom is a free atom, does not belong to rigidbody
+    //every element in atom2Rigidbody has unique negative number at the very beginning
+    for(int i = 0; i < atom2Rigidbody.size(); ++i) {
+        atom2Rigidbody[i] = -1 - i;
+    }
+    for (int i = 0; i < getNRigidBodies(); ++i) {
+        RigidBodyStamp* rbStamp = getRigidBodyStamp(i);
+        std::vector<int> members = rbStamp->getMembers();
+        for(std::vector<int>::iterator j = members.begin(); j != members.end(); ++j) {
+            atom2Rigidbody[*j] = i;                 
+        }
+    }
+
+    checkAtoms();
+    checkBonds();
+    fillBondInfo();
+    checkBends();
+    checkTorsions();
+    checkRigidBodies();
+    checkCutoffGroups();
+    checkFragments();
+
+    int nrigidAtoms = 0;
+    for (int i = 0; i < getNRigidBodies(); ++i) {
+        RigidBodyStamp* rbStamp = getRigidBodyStamp(i);
+        nrigidAtoms += rbStamp->getNMembers();
+    }
+    nintegrable_ = getNAtoms()+ getNRigidBodies() - nrigidAtoms;
+
+ }
+
+void MoleculeStamp::checkAtoms() {
     std::vector<AtomStamp*>::iterator ai = std::find(atomStamps_.begin(), atomStamps_.end(), static_cast<AtomStamp*>(NULL));
     if (ai != atomStamps_.end()) {
         std::cout << "Error in Molecule " << getName() << ": atom[" << ai - atomStamps_.begin()<< "] is missing\n";
-    }
-
-     std::vector<RigidBodyStamp*>::iterator ri = std::find(rigidBodyStamps_.begin(), rigidBodyStamps_.end(), static_cast<RigidBodyStamp*>(NULL));
-     if (ri != rigidBodyStamps_.end()) {
-         std::cout << "Error in Molecule " << getName() << ":rigidBody[" <<  ri - rigidBodyStamps_.begin()<< "] is missing\n";
-     }
-    
-    std::vector<FragmentStamp*>::iterator fi = std::find(fragmentStamps_.begin(), fragmentStamps_.end(), static_cast<FragmentStamp*>(NULL));
-    if (fi != fragmentStamps_.end()) {
-        std::cout << "Error in Molecule " << getName() << ":fragment[" <<  fi - fragmentStamps_.begin()<< "] is missing\n";
     }
 
     //make sure index is not out of range
@@ -130,56 +151,75 @@ void MoleculeStamp::validate() {
             std::cout << "Error in Molecule " << getName() <<  ": bond between " << bondStamp->getA() << " and " << bondStamp->getB() << " is invalid\n";
         }
     }
+}
+
+void MoleculeStamp::checkBonds() {
+    //make sure bonds are unique
+    std::set<std::pair<int, int> > allBonds;
+    for(int i = 0; i < getNBonds(); ++i) {
+        BondStamp* bondStamp= getBondStamp(i);        
+        std::pair<int, int> bondPair(bondStamp->getA(), bondStamp->getB());
+        //make sure bondTuple.first is always less than or equal to bondTuple.third
+        if (bondPair.first > bondPair.second) {
+            std::swap(bondPair.first, bondPair.second);
+        }
+        
+        std::set<std::pair<int, int> >::iterator iter = allBonds.find(bondPair);
+        if ( iter != allBonds.end()) {
+            std::cout << "Error in Molecule " << getName() << ": " << "Bond appears multiple times\n";
+        } else {
+            allBonds.insert(bondPair);
+        }
+    }
+    
+    //make sure atoms belong to same rigidbody do not bond to each other
+    for(int i = 0; i < getNBonds(); ++i) {
+        BondStamp* bondStamp = getBondStamp(i);
+        if (atom2Rigidbody[bondStamp->getA()] == atom2Rigidbody[bondStamp->getB()]) {
+            std::cout << "Error in Molecule " << getName() << ": "<<"bond between " << bondStamp->getA() << " and " << bondStamp->getB() << " belong to same rigidbody " << atom2Rigidbody[bondStamp->getA()] << "\n";
+        }
+    }
+    
+}
+
+struct BendLessThan : public std::binary_function<IntTuple4, IntTuple4, bool> {
+    bool operator()(IntTuple3 b1, IntTuple3 b2) {
+        return b1.first < b2.first
+             || (!(b2.first < b1.first) && b1.second < b2.second)
+             || (!(b2.first < b1.first) && !(b2.second < b2.second) && b1.third < b2.third);
+    }
+};
+
+void MoleculeStamp::checkBends() {
     for(int i = 0; i < getNBends(); ++i) {
         BendStamp* bendStamp = getBendStamp(i);
         std::vector<int> bendAtoms =  bendStamp->getMembers();
-        std::vector<int>::iterator j =std::find_if(bendAtoms.begin(), bendAtoms.end(), std::bind2nd(std::greater<int>(), natoms-1));
+        std::vector<int>::iterator j =std::find_if(bendAtoms.begin(), bendAtoms.end(), std::bind2nd(std::greater<int>(), getNAtoms()-1));
         if (j != bendAtoms.end()) {
             std::cout << "Error in Molecule " << getName();
         }
 
-        if (bendAtoms.size() == 2 && !bendStamp->haveGhostVectorSource()) {
-            std::cout << "Error in Molecule " << getName() << ": ghostVectorSouce is missing";
+        if (bendAtoms.size() == 2 ) {
+            if (!bendStamp->haveGhostVectorSource()) {
+                std::cout << "Error in Molecule " << getName() << ": ghostVectorSouce is missing\n";
+            }else{
+                int ghostIndex = bendStamp->getGhostVectorSource();
+                if (ghostIndex < getNAtoms()) {
+                    if (std::find(bendAtoms.begin(), bendAtoms.end(), ghostIndex) == bendAtoms.end()) {
+                      std::cout <<  "Error in Molecule " << getName() << ": ghostVectorSouce "<< ghostIndex<<"is invalid\n"; 
+                    }
+                    if (!getAtomStamp(ghostIndex)->haveOrientation()) {
+                        std::cout <<  "Error in Molecule " << getName() << ": ghost atom must be a directioanl atom\n"; 
+                    }
+                }else {
+                    std::cout << "Error in Molecule " << getName() <<  ": ghostVectorsource " << ghostIndex<< "  is invalid\n";
+                }
+            }
+        } else if (bendAtoms.size() == 3 && bendStamp->haveGhostVectorSource()) {
+            std::cout <<  "Error in Molecule " << getName() << ": normal bend should not have ghostVectorSouce\n"; 
         }
-    }    
-    for(int i = 0; i < getNBends(); ++i) {
-        TorsionStamp* torsionStamp = getTorsionStamp(i);
-        std::vector<int> torsionAtoms =  torsionStamp ->getMembers();
-        std::vector<int>::iterator j =std::find_if(torsionAtoms.begin(), torsionAtoms.end(), std::bind2nd(std::greater<int>(), natoms-1));
-        if (j != torsionAtoms.end()) {
-            std::cout << "Error in Molecule " << getName();
-        }
-    }
-    for(int i = 0; i < getNCutoffGroups(); ++i) {
-        CutoffGroupStamp* cutoffGroupStamp = getCutoffGroupStamp(i);
-        std::vector<int> cutoffGroupAtoms =  cutoffGroupStamp ->getMembers();
-        std::vector<int>::iterator j =std::find_if(cutoffGroupAtoms.begin(), cutoffGroupAtoms.end(), std::bind2nd(std::greater<int>(), natoms-1));
-        if (j != cutoffGroupAtoms.end()) {
-            std::cout << "Error in Molecule " << getName();
-        }
-    }
-        
-    atom2Rigidbody.resize(natoms); 
-    // negative number means atom is a free atom, does not belong to rigidbody
-    //every element in atom2Rigidbody has unique negative number at the very beginning
-    for(int i = 0; i < atom2Rigidbody.size(); ++i) {
-        atom2Rigidbody[i] = -1 - i;
     }
 
-    for (int i = 0; i < getNRigidBodies(); ++i) {
-        RigidBodyStamp* rbStamp = getRigidBodyStamp(i);
-        std::vector<int> members = rbStamp->getMembers();
-        for(std::vector<int>::iterator j = members.begin(); j != members.end(); ++j) {
-            atom2Rigidbody[*j] = i;                 
-        }
-    }
-    //make sure atoms belong to same rigidbody do not bond to each other
-    for(int i = 0; i < getNBonds(); ++i) {
-        BondStamp* bondStamp = getBondStamp(i);
-        if (atom2Rigidbody[bondStamp->getA()] == atom2Rigidbody[bondStamp->getB()])
-            std::cout << "Error in Molecule " << getName() << ": "<<"bond between " << bondStamp->getA() << " and " << bondStamp->getB() << "belong to same rigidbody " << atom2Rigidbody[bondStamp->getA()] << "\n";
-        }
-        
     for(int i = 0; i < getNBends(); ++i) {
         BendStamp* bendStamp = getBendStamp(i);
         std::vector<int> bendAtoms =  bendStamp->getMembers();
@@ -195,7 +235,112 @@ void MoleculeStamp::validate() {
                 }
             }
         }
-    }      
+    } 
+    
+    
+    std::set<IntTuple3, BendLessThan> allBends;
+    std::set<IntTuple3, BendLessThan>::iterator iter;
+    for(int i = 0; i < getNBends(); ++i) {
+        BendStamp* bendStamp= getBendStamp(i);
+        std::vector<int> bend = bendStamp->getMembers();
+        if (bend.size() == 2) {
+        // in case we have two ghost bend. For example, 
+        // bend {
+        // members (0, 1);
+        //   ghostVectorSource = 0;
+        // }
+        // and
+        // bend {
+        //   members (0, 1);
+        // ghostVectorSource = 0;
+        // }
+        // In order to distinguish them. we expand them to Tuple3.
+        // the first one is expanded to (0, 0, 1) while the second one is expaned to (0, 1, 1)
+             int ghostIndex = bendStamp->getGhostVectorSource();
+             std::vector<int>::iterator j = std::find(bend.begin(), bend.end(), ghostIndex);
+             if (j != bend.end()) {
+                bend.insert(j, ghostIndex);
+             }
+        }
+        
+        IntTuple3 bendTuple(bend[0], bend[1], bend[2]);
+        //make sure bendTuple.first is always less than or equal to bendTuple.third
+        if (bendTuple.first > bendTuple.third) {
+            std::swap(bendTuple.first, bendTuple.third);
+        }
+        
+        iter = allBends.find(bendTuple);
+        if ( iter != allBends.end()) {
+            std::cout << "Error in Molecule " << getName() << ": " << "Bend appears multiple times\n";
+        } else {
+            allBends.insert(bendTuple);
+        }
+    }
+
+    for (int i = 0; i < getNBonds(); ++i) {
+        BondStamp* bondStamp = getBondStamp(i);
+        int a = bondStamp->getA();
+        int b = bondStamp->getB();
+
+        AtomStamp* atomA = getAtomStamp(a);
+        AtomStamp* atomB = getAtomStamp(b);
+
+        //find bend c--a--b
+        AtomStamp::AtomIter ai;
+        for(int c= atomA->getFirstBonedAtom(ai);c != -1;c = atomA->getNextBonedAtom(ai))
+        {
+            if(b == c)
+                continue;          
+            
+            IntTuple3 newBend(c, a, b);
+            if (newBend.first > newBend.third) {
+                std::swap(newBend.first, newBend.third);
+            }
+
+            if (allBends.find(newBend) == allBends.end() ) {                
+                allBends.insert(newBend);
+                BendStamp * newBendStamp = new BendStamp();
+                newBendStamp->setMembers(newBend);
+                addBendStamp(newBendStamp);
+            }
+        }        
+
+        //find bend a--b--c
+        for(int c= atomB->getFirstBonedAtom(ai);c != -1;c = atomB->getNextBonedAtom(ai))
+        {
+            if(a == c)
+                continue;          
+
+            IntTuple3 newBend( a, b, c);
+            if (newBend.first > newBend.third) {
+                std::swap(newBend.first, newBend.third);
+            }            
+            if (allBends.find(newBend) == allBends.end() ) {                
+                allBends.insert(newBend);
+                BendStamp * newBendStamp = new BendStamp();
+                newBendStamp->setMembers(newBend);
+                addBendStamp(newBendStamp);
+            }
+        }        
+    }
+
+}
+
+struct TorsionLessThan : public std::binary_function<IntTuple4, IntTuple4, bool> {
+    bool operator()(IntTuple4 t1, IntTuple4 t2) {
+
+        return t1.first < t2.first
+             || (!(t2.first < t1.first) && t1.second < t2.second)
+             || (!(t2.first < t1.first) && !(t2.second < t2.second) && t1.third < t2.third)
+             ||(!(t2.first < t1.first) && !(t2.second < t2.second) && !(t2.third < t1.third) && t1.fourth < t2.fourth);
+    }
+
+
+
+};
+
+
+void MoleculeStamp::checkTorsions() {
     for(int i = 0; i < getNTorsions(); ++i) {
         TorsionStamp* torsionStamp = getTorsionStamp(i);
         std::vector<int> torsionAtoms =  torsionStamp->getMembers();
@@ -211,33 +356,129 @@ void MoleculeStamp::validate() {
                 }
             }
         }
-    } 
+    }     
 
+    std::set<IntTuple4, TorsionLessThan> allTorsions;
+    std::set<IntTuple4, TorsionLessThan>::iterator iter;
+     for(int i = 0; i < getNTorsions(); ++i) {
+         TorsionStamp* torsionStamp= getTorsionStamp(i);
+         std::vector<int> torsion = torsionStamp->getMembers();
+         if (torsion.size() == 3) {
+             int ghostIndex = torsionStamp->getGhostVectorSource();
+             std::vector<int>::iterator j = std::find(torsion.begin(), torsion.end(), ghostIndex);
+             if (j != torsion.end()) {
+                torsion.insert(j, ghostIndex);
+             }
+         }
 
-    //fill in bond information into atom
-    fillBondInfo();
-    findBends();
-    findTorsions();
+        IntTuple4 torsionTuple(torsion[0], torsion[1], torsion[2], torsion[3]);
+        if (torsionTuple.first > torsionTuple.fourth) {
+            std::swap(torsionTuple.first, torsionTuple.fourth);
+            std::swap(torsionTuple.second, torsionTuple.third);                    
+        }                
 
-    int nrigidAtoms = 0;
+         iter = allTorsions.find(torsionTuple);
+         if ( iter == allTorsions.end()) {
+            allTorsions.insert(torsionTuple);
+         } else {
+            std::cout << "Error in Molecule " << getName() << ": " << "Torsion appears multiple times\n";
+         }
+     }
+
+    for (int i = 0; i < getNBonds(); ++i) {
+        BondStamp* bondStamp = getBondStamp(i);
+        int b = bondStamp->getA();
+        int c = bondStamp->getB();
+
+        AtomStamp* atomB = getAtomStamp(b);
+        AtomStamp* atomC = getAtomStamp(c);
+
+        AtomStamp::AtomIter ai2;
+        AtomStamp::AtomIter ai3;
+
+        for(int a = atomB->getFirstBonedAtom(ai2);a != -1;a = atomB->getNextBonedAtom(ai2))
+        {
+            if(a == c)
+                continue;
+
+            for(int d = atomC->getFirstBonedAtom(ai3);d != -1;d = atomC->getNextBonedAtom(ai3))
+            {
+                if(d == b)
+                    continue;
+                
+                IntTuple4 newTorsion(a, b, c, d);
+                //make sure the first element is always less than or equal to the fourth element in IntTuple4
+                if (newTorsion.first > newTorsion.fourth) {
+                    std::swap(newTorsion.first, newTorsion.fourth);
+                    std::swap(newTorsion.second, newTorsion.third);                    
+                }                
+                if (allTorsions.find(newTorsion) == allTorsions.end() ) {                
+                    allTorsions.insert(newTorsion);
+                    TorsionStamp * newTorsionStamp = new TorsionStamp();
+                    newTorsionStamp->setMembers(newTorsion);
+                    addTorsionStamp(newTorsionStamp);                    
+                }            
+            }
+        }    
+    }
+
+}
+
+void MoleculeStamp::checkRigidBodies() {
+     std::vector<RigidBodyStamp*>::iterator ri = std::find(rigidBodyStamps_.begin(), rigidBodyStamps_.end(), static_cast<RigidBodyStamp*>(NULL));
+     if (ri != rigidBodyStamps_.end()) {
+         std::cout << "Error in Molecule " << getName() << ":rigidBody[" <<  ri - rigidBodyStamps_.begin()<< "] is missing\n";
+     }
+
     for (int i = 0; i < getNRigidBodies(); ++i) {
         RigidBodyStamp* rbStamp = getRigidBodyStamp(i);
-        nrigidAtoms += rbStamp->getNMembers();
-    }
-    nintegrable_ = getNAtoms()+ getNRigidBodies() - nrigidAtoms;
+        std::vector<int> rigidAtoms =  rbStamp ->getMembers();
+        std::vector<int>::iterator j =std::find_if(rigidAtoms.begin(), rigidAtoms.end(), std::bind2nd(std::greater<int>(), getNAtoms()-1));
+        if (j != rigidAtoms.end()) {
+            std::cout << "Error in Molecule " << getName();
+        }
+        
+    }    
+}
 
- }
+void MoleculeStamp::checkCutoffGroups() {
+
+    for(int i = 0; i < getNCutoffGroups(); ++i) {
+        CutoffGroupStamp* cutoffGroupStamp = getCutoffGroupStamp(i);
+        std::vector<int> cutoffGroupAtoms =  cutoffGroupStamp ->getMembers();
+        std::vector<int>::iterator j =std::find_if(cutoffGroupAtoms.begin(), cutoffGroupAtoms.end(), std::bind2nd(std::greater<int>(), getNAtoms()-1));
+        if (j != cutoffGroupAtoms.end()) {
+            std::cout << "Error in Molecule " << getName() << ": cutoffGroup" << " is out of range\n"; 
+        }
+    }    
+}
+
+void MoleculeStamp::checkFragments() {
+
+    std::vector<FragmentStamp*>::iterator fi = std::find(fragmentStamps_.begin(), fragmentStamps_.end(), static_cast<FragmentStamp*>(NULL));
+    if (fi != fragmentStamps_.end()) {
+        std::cout << "Error in Molecule " << getName() << ":fragment[" <<  fi - fragmentStamps_.begin()<< "] is missing\n";
+    }
+    
+}
 
 void MoleculeStamp::fillBondInfo() {
+
+    for (int i = 0; i < getNBonds(); ++i) {
+        BondStamp* bondStamp = getBondStamp(i);
+        int a = bondStamp->getA();
+        int b = bondStamp->getB();
+        AtomStamp* atomA = getAtomStamp(a);
+        AtomStamp* atomB = getAtomStamp(b);
+        atomA->addBond(i);
+        atomA->addBondedAtom(b);
+        atomB->addBond(i);        
+        atomB->addBondedAtom(a);
+
+    }
 }
 
-void MoleculeStamp::findBends() {
 
-}
-
-void MoleculeStamp::findTorsions() {
-
-}
 
 //Function Name: isBondInSameRigidBody
 //Return true is both atoms of the bond belong to the same rigid body, otherwise return false

@@ -91,9 +91,13 @@ class MoleculeStamp : public DataHolder {
   private:
 
     void fillBondInfo();
-    void findBends();
-    void findTorsions();
-    
+    void checkAtoms();
+    void checkBonds();
+    void checkBends();
+    void checkTorsions();
+    void checkRigidBodies();
+    void checkCutoffGroups();
+    void checkFragments();
     template <class Cont, class T>
     bool addIndexSensitiveStamp(Cont& cont, T* stamp) {
     typename Cont::iterator i;
