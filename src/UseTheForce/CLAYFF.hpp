@@ -37,49 +37,38 @@
  * arising out of the use of or inability to use software, even if the
  * University of Notre Dame has been advised of the possibility of
  * such damages.
- *
- *
- *  OptionSectionParser.cpp
- *  OOPSE-2.0
- *
- *  Created by Charles F. Vardeman II on 11/15/05.
- *  @author  Charles F. Vardeman II 
- *  @version $Id: OptionSectionParser.cpp,v 1.3 2005-12-05 22:23:57 gezelter Exp $
- *
  */
+ 
+/**
+ * @file DUFF.hpp
+ * @author tlin
+ * @date 11/15/2004
+ * @time 13:43am
+ * @version 1.0
+ */
+#ifndef USETHEFORCE_CLAYFF_HPP
+#define USETHEFORCE_CLAYFF_HPP
 
-#include "io/OptionSectionParser.hpp"
-#include "types/AtomType.hpp"
 #include "UseTheForce/ForceField.hpp"
-#include "utils/simError.h"
-#include "utils/StringUtils.hpp"
+#include "io/SectionParserManager.hpp"
+#include "UseTheForce/ForceFieldCreator.hpp"
 namespace oopse {
 
-  OptionSectionParser::OptionSectionParser(ForceFieldOptions& options) : options_(options) {
-    setSectionName("Options");        
-  }
-  
-  void OptionSectionParser::parseLine(ForceField& ff,const std::string& line, int lineNo){
-    
-    StringTokenizer tokenizer(line);
-    
-    if (tokenizer.countTokens() >= 2) {
-      std::string optionName = tokenizer.nextToken();
-      std::string optionValue = tokenizer.nextToken();
-      
-      options_.setData(optionName, optionValue);
-      
-    } else {
-      sprintf(painCave.errMsg, "OptionSectionParser Error: Not enough tokens at line %d\n",
-              lineNo);
-      painCave.isFatal = 1;
-      simError();    
-    }
-    
-  }
+  /**
+   * @class CLAYFF CLAYFF.hpp "UseTheForce/CLAYFF.hpp"
+   * @brief Dipole United Atom Force Field Parser
+   */
+  class CLAYFF : public ForceField {
+  public:
+    CLAYFF();
+    virtual void parse(const std::string& filename);
+    ~CLAYFF();
 
-  void OptionSectionParser::validateSection() {
-    options_.validateOptions();
-  }
+  private:
+    SectionParserManager spMan_;
 
-} //end namespace oopse  
+  };
+
+} //end namespace oopse
+#endif //USETHEFORCE_CLAYFF_HPP
+

@@ -37,49 +37,62 @@
  * arising out of the use of or inability to use software, even if the
  * University of Notre Dame has been advised of the possibility of
  * such damages.
- *
- *
- *  OptionSectionParser.cpp
- *  OOPSE-2.0
- *
- *  Created by Charles F. Vardeman II on 11/15/05.
- *  @author  Charles F. Vardeman II 
- *  @version $Id: OptionSectionParser.cpp,v 1.3 2005-12-05 22:23:57 gezelter Exp $
- *
  */
 
+
+#include "UseTheForce/CLAYFF.hpp"
+#include "UseTheForce/DarkSide/lj_interface.h"
+#include "UseTheForce/ForceFieldFactory.hpp"
+#include "io/AtomTypesSectionParser.hpp"
+#include "io/LennardJonesAtomTypesSectionParser.hpp"
+#include "io/ChargeAtomTypesSectionParser.hpp"
+#include "io/BondTypesSectionParser.hpp"
+#include "io/BendTypesSectionParser.hpp"
 #include "io/OptionSectionParser.hpp"
-#include "types/AtomType.hpp"
-#include "UseTheForce/ForceField.hpp"
-#include "utils/simError.h"
-#include "utils/StringUtils.hpp"
+#include "UseTheForce/ForceFieldCreator.hpp"
+
 namespace oopse {
+    
+  CLAYFF::CLAYFF(){
 
-  OptionSectionParser::OptionSectionParser(ForceFieldOptions& options) : options_(options) {
-    setSectionName("Options");        
+    //set default force field filename
+    setForceFieldFileName("CLAYFF.frc");
+
+    spMan_.push_back(new OptionSectionParser(forceFieldOptions_));    
+    spMan_.push_back(new AtomTypesSectionParser());
+    spMan_.push_back(new LennardJonesAtomTypesSectionParser());
+    spMan_.push_back(new ChargeAtomTypesSectionParser());
+    spMan_.push_back(new BondTypesSectionParser());
+    spMan_.push_back(new BendTypesSectionParser());
+    
   }
-  
-  void OptionSectionParser::parseLine(ForceField& ff,const std::string& line, int lineNo){
-    
-    StringTokenizer tokenizer(line);
-    
-    if (tokenizer.countTokens() >= 2) {
-      std::string optionName = tokenizer.nextToken();
-      std::string optionValue = tokenizer.nextToken();
-      
-      options_.setData(optionName, optionValue);
-      
-    } else {
-      sprintf(painCave.errMsg, "OptionSectionParser Error: Not enough tokens at line %d\n",
-              lineNo);
-      painCave.isFatal = 1;
-      simError();    
+
+  void CLAYFF::parse(const std::string& filename) {
+    ifstrstream* ffStream;
+    ffStream = openForceFieldFile(filename);
+
+    spMan_.parse(*ffStream, *this);
+
+    ForceField::AtomTypeContainer::MapTypeIterator i;
+    AtomType* at;
+
+    for (at = atomTypeCont_.beginType(i); at != NULL; 
+         at = atomTypeCont_.nextType(i)) {
+      at->makeFortranAtomType();
     }
+
+    for (at = atomTypeCont_.beginType(i); at != NULL; 
+         at = atomTypeCont_.nextType(i)) {
+      at->complete();
+    }
+
+    int isError = 0;
+
+    delete ffStream;
     
   }
 
-  void OptionSectionParser::validateSection() {
-    options_.validateOptions();
+  CLAYFF::~CLAYFF(){
+    destroyLJTypes();
   }
-
-} //end namespace oopse  
+} //end namespace oopse

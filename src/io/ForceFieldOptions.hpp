@@ -43,32 +43,79 @@
 #define IO_FORCEFIELDOPTIONS_HPP
 #include "utils/simError.h"
 #include "utils/ParameterManager.hpp"
+#include "utils/StringUtils.hpp"
 #include "io/ParamConstraint.hpp"
+
 namespace oopse {
   
   class ForceFieldOptions {
-    DeclareParameter(MixingRule, std::string);
-
-    public:
-        ForceFieldOptions() {
-          DefineOptionalParameter(MixingRule, "arithmetic");
-        }
+    DeclareParameter(Name, std::string);
+    DeclareParameter(vdWtype, std::string);
+    DeclareParameter(DistanceMixingRule, std::string);
+    DeclareParameter(DistanceType, std::string);
+    DeclareParameter(EnergyMixingRule, std::string);
+    DeclareParameter(EnergyUnitScaling, double);
+    DeclareParameter(DistanceUnitScaling, double);
+    DeclareParameter(AngleUnitScaling, double);
+    DeclareParameter(TorsionAngleConvention, std::string);
+    DeclareParameter(vdw14scale, double);
+    DeclareParameter(electrostatic14scale, double);
+    DeclareParameter(dielectric, double);
+    
+  public:
+    ForceFieldOptions() {
+      DefineOptionalParameter(Name, "Name");
+      DefineOptionalParameterWithDefaultValue(vdWtype, "vdWtype", "Lennard-Jones");
+      DefineOptionalParameterWithDefaultValue(DistanceMixingRule, "DistanceMixingRule", "arithmetic");
+      DefineOptionalParameterWithDefaultValue(DistanceType, "DistanceType", "sigma");
+      DefineOptionalParameterWithDefaultValue(EnergyMixingRule, "EnergyMixingRule", "geometric");
+      DefineOptionalParameterWithDefaultValue(EnergyUnitScaling, "EnergyUnitScaling", 1.0);
+      DefineOptionalParameterWithDefaultValue(DistanceUnitScaling, "DistanceUnitScaling", 1.0);
+      DefineOptionalParameterWithDefaultValue(AngleUnitScaling, "AngleUnitScaling", 1.0);
+      DefineOptionalParameterWithDefaultValue(TorsionAngleConvention, "TorsionAngleConvention", "180 is trans");
+      DefineOptionalParameterWithDefaultValue(vdw14scale, "vdW-14-scale", 0.0);
+      DefineOptionalParameterWithDefaultValue(electrostatic14scale, "electrostatic-14-scale", 0.0);
+      DefineOptionalParameterWithDefaultValue(dielectric, "dielectric", 1.0);
+    }
         
-        ForceFieldOptions(const ForceFieldOptions&);
-        ForceFieldOptions& operator = (const ForceFieldOptions&);
-
-        void validateOptions() {
-          CheckParameter(MixingRule, isEqualIgnoreCase(std::string("arithmetic")) || isEqualIgnoreCase(std::string("geometric")));
-
+    ForceFieldOptions(const ForceFieldOptions&);
+    ForceFieldOptions& operator = (const ForceFieldOptions&);
+    
+    void validateOptions() {
+      CheckParameter(vdWtype, isEqualIgnoreCase(std::string("Lennard-Jones")));
+      CheckParameter(DistanceMixingRule, isEqualIgnoreCase(std::string("arithmetic")) || isEqualIgnoreCase(std::string("geometric")));
+      CheckParameter(DistanceType, isEqualIgnoreCase(std::string("sigma")) || isEqualIgnoreCase(std::string("Rmin")));
+      CheckParameter(EnergyMixingRule, isEqualIgnoreCase(std::string("arithmetic")) || isEqualIgnoreCase(std::string("geometric")));
+      CheckParameter(TorsionAngleConvention, isEqualIgnoreCase(std::string("180 is trans")) || isEqualIgnoreCase(std::string("0 is trans")));
+    }
+    
+    bool setData(const std::string& keyword, const std::string& value) {
+      bool result;
+      ParamMap::iterator i =parameters_.find(keyword);
+      if (i != parameters_.end()) {
+        if(isType<int>(value)){
+          int ival = lexi_cast<int>(value);
+          result = i->second->setData(ival);
+        }      
+        else if (isType<double>(value)){
+          double dval = lexi_cast<double>(value);
+          result = i->second->setData(dval);
+        } else{
+          result = i->second->setData(value);
         }
-
-        bool setData(const std::string& keyword, const std::string& value);
-
-    private:
-        typedef std::map<std::string, ParameterBase*> ParamMap;
-        ParamMap parameters_;                  
+      } else {
+        sprintf(painCave.errMsg,  "%s is an unrecognized keyword\n", keyword.c_str() );
+        painCave.isFatal = 0;
+        simError();        
+      }
+      
+      return result;
+    }
+    
+  private:
+    typedef std::map<std::string, ParameterBase*> ParamMap;
+    ParamMap parameters_;                  
   };
   
 }
-
 #endif
