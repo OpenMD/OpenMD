@@ -205,7 +205,7 @@ bool Globals::addMoleculeStamp(MoleculeStamp* molStamp) {
         moleculeStamps_.insert(std::map<std::string, MoleculeStamp*>::value_type(molStampName, molStamp));
         ret = true;
     } else {
-
+        std::cout << "Globals Error: Molecule Stamp " << molStamp->getName() << "appears multiple times\n";
     }
     return ret;
 }

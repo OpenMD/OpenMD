@@ -27,7 +27,8 @@ Source    = \
 	RestWriter.cpp \
 	gzstream.cpp\
         ParamConstraint.cpp \
-	OptionSectionParser.cpp
+	OptionSectionParser.cpp \
+	ForceFieldOptions.cpp
 
 RmiSource =
 
