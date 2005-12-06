@@ -58,7 +58,7 @@ namespace oopse {
     Globals* simParams = info->getSimParams();
     needCompression_ = simParams->getCompressDumpFile();
     needForceVector_ = simParams->getOutputForceVector();
-
+    createDumpFile_ = true;
 #ifdef HAVE_LIBZ
     if (needCompression_) {
         filename_ += ".gz";
@@ -71,7 +71,7 @@ namespace oopse {
       if (worldRank == 0) {
 #endif // is_mpi
 
-
+        
         dumpFile_ = createOStream(filename_);
 
         if (!dumpFile_) {
@@ -101,7 +101,7 @@ namespace oopse {
 
     needCompression_ = simParams->getCompressDumpFile();
     needForceVector_ = simParams->getOutputForceVector();
-
+    createDumpFile_ = true;
 #ifdef HAVE_LIBZ
     if (needCompression_) {
         filename_ += ".gz";
@@ -114,7 +114,7 @@ namespace oopse {
       if (worldRank == 0) {
 #endif // is_mpi
 
-
+      
         dumpFile_ = createOStream(filename_);
 
         if (!dumpFile_) {
@@ -134,6 +134,54 @@ namespace oopse {
 #endif // is_mpi
 
     }
+  
+  DumpWriter::DumpWriter(SimInfo* info, const std::string& filename, bool writeDumpFile) 
+  : info_(info), filename_(filename){
+    
+    Globals* simParams = info->getSimParams();
+    eorFilename_ = filename_.substr(0, filename_.rfind(".")) + ".eor";    
+    
+    needCompression_ = simParams->getCompressDumpFile();
+    needForceVector_ = simParams->getOutputForceVector();
+    
+#ifdef HAVE_LIBZ
+    if (needCompression_) {
+      filename_ += ".gz";
+      eorFilename_ += ".gz";
+    }
+#endif
+    
+#ifdef IS_MPI
+    
+    if (worldRank == 0) {
+#endif // is_mpi
+      
+      createDumpFile_ = writeDumpFile;
+      if (createDumpFile_) {
+        dumpFile_ = createOStream(filename_);
+      
+        if (!dumpFile_) {
+          sprintf(painCave.errMsg, "Could not open \"%s\" for dump output.\n",
+                  filename_.c_str());
+          painCave.isFatal = 1;
+          simError();
+        }
+      }
+#ifdef IS_MPI
+      
+    }
+    
+    sprintf(checkPointMsg, "Sucessfully opened output file for dumping.\n");
+    MPIcheckPoint();
+    
+#endif // is_mpi
+    
+  }
+  
+  
+  
+  
+  
 
   DumpWriter::~DumpWriter() {
 
@@ -141,9 +189,9 @@ namespace oopse {
 
     if (worldRank == 0) {
 #endif // is_mpi
-
-      delete dumpFile_;
-
+      if (createDumpFile_){
+        delete dumpFile_;
+      }
 #ifdef IS_MPI
 
     }

@@ -72,12 +72,13 @@ namespace oopse {
   public:
     DumpWriter(SimInfo* info);
     DumpWriter(SimInfo* info, const std::string& filename);
+    DumpWriter(SimInfo* info, const std::string& filename,  bool writeDumpFile);
     ~DumpWriter();
 
     void writeDumpAndEor();
     void writeDump();
     void writeEor();
-        
+    
   private:  
         
     void writeFrame(std::ostream& os);
@@ -90,6 +91,7 @@ namespace oopse {
     std::string eorFilename_;
     bool needCompression_;
     bool needForceVector_;
+    bool createDumpFile_;
   };
 
 }
