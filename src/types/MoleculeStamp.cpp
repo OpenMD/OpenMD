@@ -360,7 +360,7 @@ struct TorsionLessThan : public std::binary_function<IntTuple4, IntTuple4, bool>
 
 
 void MoleculeStamp::checkTorsions() {
-    for(int i = 0; i < getNBends(); ++i) {
+    for(int i = 0; i < getNTorsions(); ++i) {
         TorsionStamp* torsionStamp = getTorsionStamp(i);
         std::vector<int> torsionAtoms =  torsionStamp ->getMembers();
         std::vector<int>::iterator j =std::find_if(torsionAtoms.begin(), torsionAtoms.end(), std::bind2nd(std::greater<int>(), getNAtoms()-1));
