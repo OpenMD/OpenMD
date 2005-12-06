@@ -337,7 +337,7 @@ int main(int argc, char *argv []) {
     exit(1);
   }
   
-  writer->writeDump();
+  writer->writeEor();
   std::cout << "new initial configuration file: " << outInitFileName
             << " is generated." << std::endl;
   

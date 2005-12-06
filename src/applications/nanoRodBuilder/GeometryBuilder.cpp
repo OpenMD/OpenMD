@@ -83,9 +83,11 @@ typedef Polyhedron::Plane_iterator Plane_iterator;
 typedef Polyhedron::Vertex_handle Vertex_handle;
 
 Polyhedron nanoRodPolyhedron;
-
-
-
+Polyhedron nanoRodTwinnedPolyhedron1;
+Polyhedron nanoRodTwinnedPolyhedron2;
+Polyhedron nanoRodTwinnedPolyhedron3;
+Polyhedron nanoRodTwinnedPolyhedron4;
+Polyhedron nanoRodTwinnedPolyhedron5;
 
 
 
@@ -236,6 +238,382 @@ class buildSingleCrystal : public CGAL::Modifier_base<HDS> {
 
 
 
+/* First Crystal*/
+
+ template <class HDS>
+ class buildtwinned1 : public CGAL::Modifier_base<HDS> {
+public:
+   Vertex_handle end1;
+   Vertex_handle neight1;
+   Vertex_handle end2;
+   Vertex_handle neight2;
+   Vertex_handle neight3;
+   
+   buildtwinned1() {}
+   void operator()( HDS& hds) {
+     // Postcondition: `hds' is a valid polyhedral surface.
+     CGAL::Polyhedron_incremental_builder_3<HDS> B( hds, true);
+     B.begin_surface( 12, 5, 6);
+     typedef typename HDS::Vertex   Vertex;
+     typedef typename Vertex::Point Point;
+     
+     
+     
+     
+     
+     B.add_vertex( Point(-0.7887222926324,    0.4874571845315, -0.2562714077342));
+     B.add_vertex( Point(-0.4874571845316,    0.4874571845315,  0.6709272557930));
+     B.add_vertex( Point(-0.7887222926324,   -0.4874571845315, -0.2562714077342)); //End vertex
+     end1 = B.add_vertex( Point( 0.0000000000000,    1.0000000000000,  0.0000000000000));
+     neight3 = B.add_vertex( Point(-0.4874571845315,    -0.4874571845316,  0.6709272557930));
+     neight1 = B.add_vertex( Point(-0.0000000000000,    0.4874571845316, -0.8293116961175));
+     B.add_vertex( Point( 0.0000000000000,    -0.4874571845316, -0.8293116961175));
+     B.add_vertex( Point( 0.4874571845315,    0.4874571845316,  0.6709272557930));
+     end2 = B.add_vertex( Point(-0.0000000000000,    -1.0000000000000,  0.0000000000000)); //End Vertex
+     B.add_vertex( Point( 0.7887222926324,    0.4874571845315, -0.2562714077342));
+     neight2 = B.add_vertex( Point( 0.4874571845316,    -0.4874571845315,  0.6709272557930));
+     B.add_vertex( Point( 0.7887222926324,    -0.4874571845315, -0.2562714077342));
+     
+     B.begin_facet();
+     B.add_vertex_to_facet( 8);
+     B.add_vertex_to_facet( 4);
+     B.add_vertex_to_facet( 1);
+     B.add_vertex_to_facet( 3);
+     B.end_facet();
+     
+     B.begin_facet();
+     B.add_vertex_to_facet( 3);
+     B.add_vertex_to_facet( 0);
+     B.add_vertex_to_facet( 2);
+     B.add_vertex_to_facet( 8);
+     B.end_facet();
+     
+     B.begin_facet();
+     B.add_vertex_to_facet( 0);
+     B.add_vertex_to_facet( 1);
+     B.add_vertex_to_facet( 4);
+     B.add_vertex_to_facet( 2);
+     B.end_facet();    
+     
+     
+     B.begin_facet();
+     B.add_vertex_to_facet( 3);
+     B.add_vertex_to_facet( 1);
+     B.add_vertex_to_facet( 0);
+     B.end_facet();
+     
+     B.begin_facet();
+     B.add_vertex_to_facet( 4);
+     B.add_vertex_to_facet( 8);
+     B.add_vertex_to_facet( 2);
+     B.end_facet();
+     
+     B.end_surface();
+   }
+ };
+ 
+ 
+
+
+/*second crystal*/
+ template <class HDS>
+ class buildtwinned2 : public CGAL::Modifier_base<HDS> {
+public:
+   Vertex_handle end1;
+   Vertex_handle neight1;
+   Vertex_handle end2;
+   Vertex_handle neight2;
+   Vertex_handle neight3;
+   
+   buildtwinned2() {}
+   void operator()( HDS& hds) {
+     // Postcondition: `hds' is a valid polyhedral surface.
+     CGAL::Polyhedron_incremental_builder_3<HDS> B( hds, true);
+     B.begin_surface( 12, 5, 6);
+     typedef typename HDS::Vertex   Vertex;
+     typedef typename Vertex::Point Point;
+     
+     
+     
+     
+     
+     B.add_vertex( Point(-0.7887222926324,    0.4874571845315, -0.2562714077342));
+     B.add_vertex( Point(-0.4874571845316,    0.4874571845315,  0.6709272557930));
+     B.add_vertex( Point(-0.7887222926324,   -0.4874571845315, -0.2562714077342)); //End vertex
+     end1 = B.add_vertex( Point( 0.0000000000000,    1.0000000000000,  0.0000000000000));
+     neight3 = B.add_vertex( Point(-0.4874571845315,    -0.4874571845316,  0.6709272557930));
+     neight1 = B.add_vertex( Point(-0.0000000000000,    0.4874571845316, -0.8293116961175));
+     B.add_vertex( Point( 0.0000000000000,    -0.4874571845316, -0.8293116961175));
+     B.add_vertex( Point( 0.4874571845315,    0.4874571845316,  0.6709272557930));
+     end2 = B.add_vertex( Point(-0.0000000000000,    -1.0000000000000,  0.0000000000000)); //End Vertex
+     B.add_vertex( Point( 0.7887222926324,    0.4874571845315, -0.2562714077342));
+     neight2 = B.add_vertex( Point( 0.4874571845316,    -0.4874571845315,  0.6709272557930));
+     B.add_vertex( Point( 0.7887222926324,    -0.4874571845315, -0.2562714077342));
+     
+     B.begin_facet();
+     B.add_vertex_to_facet( 8);
+     B.add_vertex_to_facet( 2);
+     B.add_vertex_to_facet( 0);
+     B.add_vertex_to_facet( 3);
+     B.end_facet();
+     
+     B.begin_facet();
+     B.add_vertex_to_facet( 3);
+     B.add_vertex_to_facet( 5);
+     B.add_vertex_to_facet( 6);
+     B.add_vertex_to_facet( 8);
+     B.end_facet();
+     
+     B.begin_facet();
+     B.add_vertex_to_facet( 5);
+     B.add_vertex_to_facet( 0);
+     B.add_vertex_to_facet( 2);
+     B.add_vertex_to_facet( 6);
+     B.end_facet();    
+     
+     
+     B.begin_facet();
+     B.add_vertex_to_facet( 3);
+     B.add_vertex_to_facet( 0);
+     B.add_vertex_to_facet( 5);
+     B.end_facet();
+     
+     B.begin_facet();
+     B.add_vertex_to_facet( 8);
+     B.add_vertex_to_facet( 6);
+     B.add_vertex_to_facet( 2);
+     B.end_facet();
+     
+     B.end_surface();
+   }
+ };
+
+/* Third Crystal*/
+
+ template <class HDS>
+ class buildtwinned3 : public CGAL::Modifier_base<HDS> {
+public:
+   Vertex_handle end1;
+   Vertex_handle neight1;
+   Vertex_handle end2;
+   Vertex_handle neight2;
+   Vertex_handle neight3;
+   
+   buildtwinned3() {}
+   void operator()( HDS& hds) {
+     // Postcondition: `hds' is a valid polyhedral surface.
+     CGAL::Polyhedron_incremental_builder_3<HDS> B( hds, true);
+     B.begin_surface( 12, 5, 6);
+     typedef typename HDS::Vertex   Vertex;
+     typedef typename Vertex::Point Point;
+     
+     
+     
+     
+     
+     B.add_vertex( Point(-0.7887222926324,    0.4874571845315, -0.2562714077342));
+     B.add_vertex( Point(-0.4874571845316,    0.4874571845315,  0.6709272557930));
+     B.add_vertex( Point(-0.7887222926324,   -0.4874571845315, -0.2562714077342)); //End vertex
+     end1 = B.add_vertex( Point( 0.0000000000000,    1.0000000000000,  0.0000000000000));
+     neight3 = B.add_vertex( Point(-0.4874571845315,    -0.4874571845316,  0.6709272557930));
+     neight1 = B.add_vertex( Point(-0.0000000000000,    0.4874571845316, -0.8293116961175));
+     B.add_vertex( Point( 0.0000000000000,    -0.4874571845316, -0.8293116961175));
+     B.add_vertex( Point( 0.4874571845315,    0.4874571845316,  0.6709272557930));
+     end2 = B.add_vertex( Point(-0.0000000000000,    -1.0000000000000,  0.0000000000000)); //End Vertex
+     B.add_vertex( Point( 0.7887222926324,    0.4874571845315, -0.2562714077342));
+     neight2 = B.add_vertex( Point( 0.4874571845316,    -0.4874571845315,  0.6709272557930));
+     B.add_vertex( Point( 0.7887222926324,    -0.4874571845315, -0.2562714077342));
+     
+     B.begin_facet();
+     B.add_vertex_to_facet( 8);
+     B.add_vertex_to_facet( 6);
+     B.add_vertex_to_facet( 5);
+     B.add_vertex_to_facet( 3);
+     B.end_facet();
+     
+     B.begin_facet();
+     B.add_vertex_to_facet( 3);
+     B.add_vertex_to_facet( 9);
+     B.add_vertex_to_facet( 11);
+     B.add_vertex_to_facet( 8);
+     B.end_facet();
+     
+     B.begin_facet();
+     B.add_vertex_to_facet( 9);
+     B.add_vertex_to_facet( 5);
+     B.add_vertex_to_facet( 6);
+     B.add_vertex_to_facet( 11);
+     B.end_facet();    
+     
+     
+     B.begin_facet();
+     B.add_vertex_to_facet( 3);
+     B.add_vertex_to_facet( 5);
+     B.add_vertex_to_facet( 9);
+     B.end_facet();
+     
+     B.begin_facet();
+     B.add_vertex_to_facet( 8);
+     B.add_vertex_to_facet( 11);
+     B.add_vertex_to_facet( 6);
+     B.end_facet();
+     
+     B.end_surface();
+   }
+ };
+
+/*Fourth Segment*/
+ template <class HDS>
+ class buildtwinned4 : public CGAL::Modifier_base<HDS> {
+public:
+   Vertex_handle end1;
+   Vertex_handle neight1;
+   Vertex_handle end2;
+   Vertex_handle neight2;
+   Vertex_handle neight3;
+   
+   buildtwinned4() {}
+   void operator()( HDS& hds) {
+     // Postcondition: `hds' is a valid polyhedral surface.
+     CGAL::Polyhedron_incremental_builder_3<HDS> B( hds, true);
+     B.begin_surface( 12, 5, 6);
+     typedef typename HDS::Vertex   Vertex;
+     typedef typename Vertex::Point Point;
+     
+     
+     
+     
+     
+     B.add_vertex( Point(-0.7887222926324,    0.4874571845315, -0.2562714077342));
+     B.add_vertex( Point(-0.4874571845316,    0.4874571845315,  0.6709272557930));
+     B.add_vertex( Point(-0.7887222926324,   -0.4874571845315, -0.2562714077342)); //End vertex
+     end1 = B.add_vertex( Point( 0.0000000000000,    1.0000000000000,  0.0000000000000));
+     neight3 = B.add_vertex( Point(-0.4874571845315,    -0.4874571845316,  0.6709272557930));
+     neight1 = B.add_vertex( Point(-0.0000000000000,    0.4874571845316, -0.8293116961175));
+     B.add_vertex( Point( 0.0000000000000,    -0.4874571845316, -0.8293116961175));
+     B.add_vertex( Point( 0.4874571845315,    0.4874571845316,  0.6709272557930));
+     end2 = B.add_vertex( Point(-0.0000000000000,    -1.0000000000000,  0.0000000000000)); //End Vertex
+     B.add_vertex( Point( 0.7887222926324,    0.4874571845315, -0.2562714077342));
+     neight2 = B.add_vertex( Point( 0.4874571845316,    -0.4874571845315,  0.6709272557930));
+     B.add_vertex( Point( 0.7887222926324,    -0.4874571845315, -0.2562714077342));
+     
+     B.begin_facet();
+     B.add_vertex_to_facet( 8);
+     B.add_vertex_to_facet( 11);
+     B.add_vertex_to_facet( 9);
+     B.add_vertex_to_facet( 3);
+     B.end_facet();
+     
+     B.begin_facet();
+     B.add_vertex_to_facet( 3);
+     B.add_vertex_to_facet( 7);
+     B.add_vertex_to_facet( 10);
+     B.add_vertex_to_facet( 8);
+     B.end_facet();
+     
+     B.begin_facet();
+     B.add_vertex_to_facet( 7);
+     B.add_vertex_to_facet( 9);
+     B.add_vertex_to_facet( 11);
+     B.add_vertex_to_facet( 10);
+     B.end_facet();    
+     
+     
+     B.begin_facet();
+     B.add_vertex_to_facet( 3);
+     B.add_vertex_to_facet( 9);
+     B.add_vertex_to_facet( 7);
+     B.end_facet();
+     
+     B.begin_facet();
+     B.add_vertex_to_facet( 8);
+     B.add_vertex_to_facet( 10);
+     B.add_vertex_to_facet( 11);
+     B.end_facet();
+     
+     B.end_surface();
+   }
+ };
+ 
+
+/*Fifth Segment*/
+template <class HDS>
+class buildtwinned5 : public CGAL::Modifier_base<HDS> {
+public:
+  Vertex_handle end1;
+  Vertex_handle neight1;
+  Vertex_handle end2;
+  Vertex_handle neight2;
+  Vertex_handle neight3;
+  
+  buildtwinned5() {}
+  void operator()( HDS& hds) {
+    // Postcondition: `hds' is a valid polyhedral surface.
+    CGAL::Polyhedron_incremental_builder_3<HDS> B( hds, true);
+    B.begin_surface( 12, 5, 6);
+    typedef typename HDS::Vertex   Vertex;
+    typedef typename Vertex::Point Point;
+    
+    
+    
+    
+    
+    B.add_vertex( Point(-0.7887222926324,    0.4874571845315, -0.2562714077342));
+    B.add_vertex( Point(-0.4874571845316,    0.4874571845315,  0.6709272557930));
+    B.add_vertex( Point(-0.7887222926324,   -0.4874571845315, -0.2562714077342)); //End vertex
+    end1 = B.add_vertex( Point( 0.0000000000000,    1.0000000000000,  0.0000000000000));
+    neight3 = B.add_vertex( Point(-0.4874571845315,    -0.4874571845316,  0.6709272557930));
+    neight1 = B.add_vertex( Point(-0.0000000000000,    0.4874571845316, -0.8293116961175));
+    B.add_vertex( Point( 0.0000000000000,    -0.4874571845316, -0.8293116961175));
+    B.add_vertex( Point( 0.4874571845315,    0.4874571845316,  0.6709272557930));
+    end2 = B.add_vertex( Point(-0.0000000000000,    -1.0000000000000,  0.0000000000000)); //End Vertex
+    B.add_vertex( Point( 0.7887222926324,    0.4874571845315, -0.2562714077342));
+    neight2 = B.add_vertex( Point( 0.4874571845316,    -0.4874571845315,  0.6709272557930));
+    B.add_vertex( Point( 0.7887222926324,    -0.4874571845315, -0.2562714077342));
+    
+    B.begin_facet();
+    B.add_vertex_to_facet( 8);
+    B.add_vertex_to_facet( 4);
+    B.add_vertex_to_facet( 1);
+    B.add_vertex_to_facet( 3);
+    B.end_facet();
+    
+    B.begin_facet();
+    B.add_vertex_to_facet( 3);
+    B.add_vertex_to_facet( 7);
+    B.add_vertex_to_facet( 10);
+    B.add_vertex_to_facet( 8);
+    B.end_facet();
+    
+    B.begin_facet();
+    B.add_vertex_to_facet( 7);
+    B.add_vertex_to_facet( 1);
+    B.add_vertex_to_facet( 4);
+    B.add_vertex_to_facet( 10);
+    B.end_facet();    
+    
+    
+    B.begin_facet();
+    B.add_vertex_to_facet( 1);
+    B.add_vertex_to_facet( 7);
+    B.add_vertex_to_facet( 3);
+    B.end_facet();
+    
+    B.begin_facet();
+    B.add_vertex_to_facet( 10);
+    B.add_vertex_to_facet( 4);
+    B.add_vertex_to_facet( 8);
+    B.end_facet();
+    
+    B.end_surface();
+  }
+};
+
+
+
+
+
+
 struct Normal_vector {
   template <class Facet>
   typename Facet::Plane_3 operator()( Facet& f) {
@@ -272,16 +650,16 @@ bool GeometryBuilder::isInsidePolyhedron(double x, double y, double z) {
 
 GeometryBuilder::GeometryBuilder(double length,double width) {
   // Create the geometry for nanorod
- buildSingleCrystal<HalfedgeDS> nanorod;
+ buildSingleCrystal<HalfedgeDS> singleCrystalNanorod;
   
-  nanoRodPolyhedron.delegate( nanorod);
+  nanoRodPolyhedron.delegate( singleCrystalNanorod);
    
-  double y1 = nanorod.end1->point().y() - nanorod.neight1->point().y();
-  double y2 = nanorod.end2->point().y() - nanorod.neight2->point().y();
+  double y1 = singleCrystalNanorod.end1->point().y() - singleCrystalNanorod.neight1->point().y();
+  double y2 = singleCrystalNanorod.end2->point().y() - singleCrystalNanorod.neight2->point().y();
   
-  double endDist = sqrt(pow(nanorod.neight2->point().x() - nanorod.neight3->point().x(),2)+
-                        pow(nanorod.neight2->point().y() - nanorod.neight3->point().y(),2)+
-                        pow(nanorod.neight2->point().z() - nanorod.neight3->point().z(),2));
+  double endDist = sqrt(pow(singleCrystalNanorod.neight2->point().x() - singleCrystalNanorod.neight3->point().x(),2)+
+                        pow(singleCrystalNanorod.neight2->point().y() - singleCrystalNanorod.neight3->point().y(),2)+
+                        pow(singleCrystalNanorod.neight2->point().z() - singleCrystalNanorod.neight3->point().z(),2));
   
   double endRatio1 = y1/endDist;
   double endRatio2 = y2/endDist;
@@ -303,19 +681,92 @@ GeometryBuilder::GeometryBuilder(double length,double width) {
   std::transform( nanoRodPolyhedron.points_begin(), nanoRodPolyhedron.points_end(), nanoRodPolyhedron.points_begin(), aff_tranformation);
 	
   
-  double endDist2 = sqrt(pow(nanorod.neight2->point().x() - nanorod.neight3->point().x(),2)+
-                        pow(nanorod.neight2->point().y() - nanorod.neight3->point().y(),2)+
-                        pow(nanorod.neight2->point().z() - nanorod.neight3->point().z(),2));
+  double endDist2 = sqrt(pow(singleCrystalNanorod.neight2->point().x() -singleCrystalNanorod.neight3->point().x(),2)+
+                        pow(singleCrystalNanorod.neight2->point().y() - singleCrystalNanorod.neight3->point().y(),2)+
+                        pow(singleCrystalNanorod.neight2->point().z() - singleCrystalNanorod.neight3->point().z(),2));
   
-  Point_3 point1(nanorod.end1->point().x(), endDist2*endRatio1 + nanorod.neight1->point().y(), nanorod.end1->point().z());
-  Point_3 point2(nanorod.end2->point().x(), endDist2*endRatio2 + nanorod.neight2->point().y(), nanorod.end2->point().z());
-  nanorod.end1->point() = point1;
-  nanorod.end2->point() = point2;
+  Point_3 point1(singleCrystalNanorod.end1->point().x(), endDist2*endRatio1 + singleCrystalNanorod.neight1->point().y(), singleCrystalNanorod.end1->point().z());
+  Point_3 point2(singleCrystalNanorod.end2->point().x(), endDist2*endRatio2 + singleCrystalNanorod.neight2->point().y(), singleCrystalNanorod.end2->point().z());
+  singleCrystalNanorod.end1->point() = point1;
+  singleCrystalNanorod.end2->point() = point2;
 	
   // Construct normal vector for each face.
   std::transform( nanoRodPolyhedron.facets_begin(), nanoRodPolyhedron.facets_end(), nanoRodPolyhedron.planes_begin(),
 		  Normal_vector());
 } 	
+
+
+
+GeometryBuilder::GeometryBuilder(double length,double width, bool twinned) {
+  // Create the geometry for nanorod
+  
+  buildtwinned1<HalfedgeDS> crystal1;  
+  buildtwinned2<HalfedgeDS> crystal2;  
+  buildtwinned3<HalfedgeDS> crystal3;  
+  buildtwinned4<HalfedgeDS> crystal4;  
+  buildtwinned5<HalfedgeDS> crystal5;  
+  
+  
+  nanoRodTwinnedPolyhedron1.delegate( crystal1);
+  nanoRodTwinnedPolyhedron2.delegate( crystal2);
+  nanoRodTwinnedPolyhedron3.delegate( crystal3);
+  nanoRodTwinnedPolyhedron4.delegate( crystal4);
+  nanoRodTwinnedPolyhedron5.delegate( crystal5);
+  
+  
+  
+  
+  
+  
+  double y1 = crystal1.end1->point().y() - crystal1.neight1->point().y();
+  double y2 = crystal1.end2->point().y() - crystal1.neight2->point().y();
+  
+  double endDist = sqrt(pow(crystal1.neight2->point().x() - crystal1.neight3->point().x(),2)+
+                        pow(crystal1.neight2->point().y() - crystal1.neight3->point().y(),2)+
+                        pow(crystal1.neight2->point().z() - crystal1.neight3->point().z(),2));
+  
+  double endRatio1 = y1/endDist;
+  double endRatio2 = y2/endDist;
+  
+  std::cout << "End dist is " << endDist <<" ratio " << endRatio1 << std::endl;
+  
+  CGAL::Aff_transformation_3<Kernel> aff_tranformation( width,
+                                                        0.0,
+                                                        0.0,
+                                                        0.0,
+                                                        0.0,
+                                                        length,
+                                                        0.0,
+                                                        0.0,
+                                                        0.0,
+                                                        0.0,
+                                                        width,
+                                                        0.0);	
+  std::transform(nanoRodTwinnedPolyhedron1.points_begin(), nanoRodTwinnedPolyhedron1.points_end(), nanoRodTwinnedPolyhedron1.points_begin(), aff_tranformation);
+	
+  
+  double endDist2 = sqrt(pow(crystal1.neight2->point().x() - crystal1.neight3->point().x(),2)+
+                         pow(crystal1.neight2->point().y() - crystal1.neight3->point().y(),2)+
+                         pow(crystal1.neight2->point().z() - crystal1.neight3->point().z(),2));
+  
+  Point_3 point1(crystal1.end1->point().x(), endDist2*endRatio1 + crystal1.neight1->point().y(), crystal1.end1->point().z());
+  Point_3 point2(crystal1.end2->point().x(), endDist2*endRatio2 + crystal1.neight2->point().y(), crystal1.end2->point().z());
+  crystal1.end1->point() = point1;
+  crystal1.end2->point() = point2;
+	
+  // Construct normal vector for each face.
+  std::transform( nanoRodTwinnedPolyhedron1.facets_begin(), nanoRodTwinnedPolyhedron1.facets_end(), nanoRodTwinnedPolyhedron1.planes_begin(),
+                  Normal_vector());
+} 	
+
+
+
+
+
+
+
+
+
   void GeometryBuilder::dumpGeometry(const std::string& geomFileName){
      
      std::ofstream newGeomFile;

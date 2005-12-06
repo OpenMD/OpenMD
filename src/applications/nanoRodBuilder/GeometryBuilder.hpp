@@ -61,6 +61,7 @@ namespace oopse {
   public:
 		
     GeometryBuilder(double length,double width);
+    GeometryBuilder(double length,double width, bool twinned);
     ~GeometryBuilder(){};
     		
     bool isInsidePolyhedron(double x, double y, double z);  
