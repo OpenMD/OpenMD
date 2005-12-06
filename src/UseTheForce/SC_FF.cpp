@@ -44,7 +44,7 @@
  *
  *  Created by Charles F. Vardeman II on 11/9/05.
  *  @author  Charles F. Vardeman II 
- *  @version $Id: SC_FF.cpp,v 1.3 2005-11-16 21:37:43 chuckv Exp $
+ *  @version $Id: SC_FF.cpp,v 1.4 2005-12-06 19:26:37 chuckv Exp $
  *
  */
 
@@ -65,6 +65,7 @@
 #include "io/BendTypesSectionParser.hpp"
 #include "io/TorsionTypesSectionParser.hpp"
 #include "io/SCAtomTypesSectionParser.hpp"
+#include "io/OptionSectionParser.hpp"
 #include "UseTheForce/ForceFieldCreator.hpp"
 #include "utils/simError.h"
 namespace oopse {
@@ -84,6 +85,7 @@ namespace oopse {
     //Make sure they are added after DirectionalAtomTypesSectionParser and AtomTypesSectionParser. 
     //The order of BondTypesSectionParser, BendTypesSectionParser and TorsionTypesSectionParser are
     //not important.
+    spMan_.push_back(new OptionSectionParser(SCForceFieldOptions_));
     spMan_.push_back(new DirectionalAtomTypesSectionParser());
     spMan_.push_back(new AtomTypesSectionParser());
     spMan_.push_back(new SCAtomTypesSectionParser());
@@ -99,9 +101,12 @@ namespace oopse {
     ForceField::AtomTypeContainer::MapTypeIterator i;
     AtomType* at;
     
+    // Set forcefield options
+    
     for (at = atomTypeCont_.beginType(i); at != NULL; at = atomTypeCont_.nextType(i)) {
       at->makeFortranAtomType();
     }
+    
     
     for (at = atomTypeCont_.beginType(i); at != NULL; at = atomTypeCont_.nextType(i)) {
       at->complete();
