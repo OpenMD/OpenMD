@@ -1,6 +1,6 @@
 #include "alkanes.md"
 
-nComponents = 1;
+
 component{
   type = "butane";
   nMol = 32;

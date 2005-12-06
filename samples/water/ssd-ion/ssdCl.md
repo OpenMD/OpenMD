@@ -2,7 +2,7 @@
 
 molecule{
   name = "Cl-";
-  nAtoms = 1;
+  
   atom[0]{
     type = "Cl-";
     position(0.0, 0.0, 0.0);
@@ -11,14 +11,14 @@ molecule{
 
 molecule{
   name = "Na+";
-  nAtoms = 1;
+  
   atom[0]{
     type = "Na+";
     position(0.0, 0.0, 0.0);
   }
 }
 
-nComponents = 2;
+
 component{
   type = "SSD_E";
   nMol = 500;

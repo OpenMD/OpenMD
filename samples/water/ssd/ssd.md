@@ -1,6 +1,6 @@
 #include "water.md"
 
-nComponents = 1;
+
 component{
   type = "SSD";
   nMol = 256;
@@ -16,7 +16,7 @@ cutoffRadius = 9.0;
 switchingRadius = 7.8;
 switchingFunctionType = "fifth_order_polynomial";
 
-density = 0.0334;
+
 
 targetTemp = 300;
 targetPressure = 1.0;

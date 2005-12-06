@@ -1,7 +1,7 @@
 #include "gb.md"
 #include "lj.md"
 
-nComponents = 2;
+
 component{
   type = "C";
   nMol =1;

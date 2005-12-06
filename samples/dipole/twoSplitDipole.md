@@ -1,6 +1,6 @@
 #include "splitDipole.md"
 
-nComponents = 1;
+
 component{
   type = "HEAD";
   nMol = 2;
@@ -17,7 +17,7 @@ dielectric = 80.0;
 cutoffRadius = 9.0;
 switchingRadius = 7.8;
 
-density = 0.0334;
+
 
 targetTemp = 10.0;
 targetPressure = 1.0;

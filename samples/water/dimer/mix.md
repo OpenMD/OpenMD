@@ -1,6 +1,6 @@
 #include "water.md"
 
-nComponents = 2;
+
 component{
   type = "TIP4P";
   nMol = 1;
@@ -20,7 +20,7 @@ dielectric = 80.0;
 cutoffRadius = 9.0;
 switchingRadius = 7.8;
 
-density = 0.0334;
+
 
 targetTemp = 0.001;
 targetPressure = 1.0;

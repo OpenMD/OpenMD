@@ -1,7 +1,7 @@
 molecule {
 
   name = "HEAD";
-  nAtoms = 3;
+  
 
   atom[0]{
     type = "HDP";
@@ -19,9 +19,9 @@ molecule {
     position( 0.0, 0.0, -2.315 );
   }
 
-  nRigidBodies = 1;
+  
   rigidBody[0]{
-    nMembers = 3;
+    
     members(0, 1, 2);
   }
 

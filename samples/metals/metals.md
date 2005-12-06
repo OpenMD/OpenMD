@@ -3,7 +3,7 @@
 
 molecule{
   name = "Au";
-  nAtoms = 1;
+  
   atom[0]{
      type="Au";
      position( 0.0, 0.0, 0.0 );
@@ -11,7 +11,7 @@ molecule{
 }
 molecule{
   name = "Ag";
-  nAtoms = 1;
+  
   atom[0]{
      type="Ag";
      position( 0.0, 0.0, 0.0 );
@@ -19,7 +19,7 @@ molecule{
 }
 molecule{
   name = "Pt";
-  nAtoms = 1;
+  
   atom[0]{
      type="Pt";
      position( 0.0, 0.0, 0.0 );

@@ -1,6 +1,6 @@
 #include "lj.md"
 
-nComponents = 1;
+
 component{
   type = "Ar";
   nMol = 108;
@@ -10,7 +10,7 @@ initialConfig = "./argonNVT.in";
 
 forceField = "LJ";
 targetTemp = 119.8;
-density = 0.02143659;
+
 
 ensemble = "NVT";
 tauThermostat = 1e3;

@@ -1,6 +1,6 @@
 #include "water.md"
 
-nComponents = 1;
+
 component{
   type = "SSD_E";
   nMol = 256;

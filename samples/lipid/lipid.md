@@ -1,7 +1,7 @@
 molecule{
   
   name = "simpleLipid_16";
-  nAtoms = 17;
+  
 
   atom[0]{
     type = "HEAD";
@@ -73,147 +73,147 @@ molecule{
     position( 0.0, 0.0, -20.672 );
   }
 
-  nBonds = 16;
+  
 
-  bond[0]{
+  bond{
     members( 0, 1 );
   }
-  bond[1]{
+  bond{
     members( 1, 2 );
   }
-  bond[2]{
+  bond{
     members( 2, 3 );
   }
-  bond[3]{
+  bond{
     members( 3, 4 );
   }
-  bond[4]{
+  bond{
     members( 4, 5 );
   }
-  bond[5]{
+  bond{
     members( 5, 6 );
   }
-  bond[6]{
+  bond{
     members( 6, 7 );
   }
-  bond[7]{
+  bond{
     members( 7, 8 );
   }
-  bond[8]{
+  bond{
     members( 8, 9 );
   }
-  bond[9]{
+  bond{
     members( 9, 10 );
   }
-  bond[10]{
+  bond{
     members( 10, 11 );
   }
-  bond[11]{
+  bond{
     members( 11, 12 );
   }
-  bond[12]{
+  bond{
     members( 12, 13 );
   }
-  bond[13]{
+  bond{
     members( 13, 14 );
   }
-  bond[14]{
+  bond{
     members( 14, 15 );
   }
-  bond[15]{
+  bond{
     members( 15, 16 );
   }
 
-  nBends = 15;
+  
 
-  bend[0]{
+  bend{
     members( 0, 1, 2 );
   }
-  bend[1]{
+  bend{
     members( 1, 2, 3 );
   }
-  bend[2]{
+  bend{
     members( 2, 3, 4 );
   }
-  bend[3]{
+  bend{
     members( 3, 4, 5 );
   }
-  bend[4]{
+  bend{
     members( 4, 5, 6 );
   }
-  bend[5]{
+  bend{
     members( 5, 6, 7 );
   }
-  bend[6]{
+  bend{
     members( 6, 7, 8 );
   }
-  bend[7]{
+  bend{
     members( 7, 8, 9 );
   }
-  bend[8]{
+  bend{
     members( 8, 9, 10 );
   }
-  bend[9]{
+  bend{
     members( 9, 10, 11 );
   }
-  bend[10]{
+  bend{
     members( 10, 11, 12 );
   }
-  bend[11]{
+  bend{
     members( 11, 12, 13 );
   }
-  bend[12]{
+  bend{
     members( 12, 13, 14 );
   }
-  bend[13]{
+  bend{
     members( 13, 14, 15 );
   }
-  bend[14]{
+  bend{
     members( 14, 15, 16 );
   }
 
-  nTorsions = 14;
+  
 
-  torsion[0]{
+  torsion{
     members( 0, 1, 2, 3 );
   }
-  torsion[1]{
+  torsion{
     members( 1, 2, 3, 4 );
   }
-  torsion[2]{
+  torsion{
     members( 2, 3, 4, 5 );
   }
-  torsion[3]{
+  torsion{
     members( 3, 4, 5, 6 );
   }
-  torsion[4]{
+  torsion{
     members( 4, 5, 6, 7 );
   }
-  torsion[5]{
+  torsion{
     members( 5, 6, 7, 8 );
   }
-  torsion[6]{
+  torsion{
     members( 6, 7, 8, 9 );
   }
-  torsion[7]{
+  torsion{
     members( 7, 8, 9, 10 );
   }
-  torsion[8]{
+  torsion{
     members( 8, 9, 10, 11 );
   }
-  torsion[9]{
+  torsion{
     members( 9, 10, 11, 12 );
   }
-  torsion[10]{
+  torsion{
     members( 10, 11, 12, 13 );
   }
-  torsion[11]{
+  torsion{
     members( 11, 12, 13, 14 );
   }
-  torsion[12]{
+  torsion{
     members( 12, 13, 14, 15 );
   }
-  torsion[13]{
+  torsion{
     members( 13, 14, 15, 16 );
   }
 }
@@ -221,7 +221,7 @@ molecule{
 molecule{
   
   name = "simpleLipid_16G";
-  nAtoms = 17;
+  
 
   atom[0]{
     type = "HEAD";
@@ -293,152 +293,152 @@ molecule{
     position( 0.0, 0.0, -20.672 );
   }
 
-  nBonds = 16;
+  
 
-  bond[0]{
+  bond{
     members( 0, 1 );
   }
-  bond[1]{
+  bond{
     members( 1, 2 );
   }
-  bond[2]{
+  bond{
     members( 2, 3 );
   }
-  bond[3]{
+  bond{
     members( 3, 4 );
   }
-  bond[4]{
+  bond{
     members( 4, 5 );
   }
-  bond[5]{
+  bond{
     members( 5, 6 );
   }
-  bond[6]{
+  bond{
     members( 6, 7 );
   }
-  bond[7]{
+  bond{
     members( 7, 8 );
   }
-  bond[8]{
+  bond{
     members( 8, 9 );
   }
-  bond[9]{
+  bond{
     members( 9, 10 );
   }
-  bond[10]{
+  bond{
     members( 10, 11 );
   }
-  bond[11]{
+  bond{
     members( 11, 12 );
   }
-  bond[12]{
+  bond{
     members( 12, 13 );
   }
-  bond[13]{
+  bond{
     members( 13, 14 );
   }
-  bond[14]{
+  bond{
     members( 14, 15 );
   }
-  bond[15]{
+  bond{
     members( 15, 16 );
   }
 
-  nBends = 16;
+  
 
-  bend[0]{
+  bend{
     members( 0, 1, 2 );
   }
-  bend[1]{
+  bend{
     members( 1, 2, 3 );
   }
-  bend[2]{
+  bend{
     members( 2, 3, 4 );
   }
-  bend[3]{
+  bend{
     members( 3, 4, 5 );
   }
-  bend[4]{
+  bend{
     members( 4, 5, 6 );
   }
-  bend[5]{
+  bend{
     members( 5, 6, 7 );
   }
-  bend[6]{
+  bend{
     members( 6, 7, 8 );
   }
-  bend[7]{
+  bend{
     members( 7, 8, 9 );
   }
-  bend[8]{
+  bend{
     members( 8, 9, 10 );
   }
-  bend[9]{
+  bend{
     members( 9, 10, 11 );
   }
-  bend[10]{
+  bend{
     members( 10, 11, 12 );
   }
-  bend[11]{
+  bend{
     members( 11, 12, 13 );
   }
-  bend[12]{
+  bend{
     members( 12, 13, 14 );
   }
-  bend[13]{
+  bend{
     members( 13, 14, 15 );
   }
-  bend[14]{
+  bend{
     members( 14, 15, 16 );
   }
-  bend[15]{
+  bend{
     members( 0, 1 );
     ghostVectorSource = 0;
   }
 
 
-  nTorsions = 14;
+  
 
-  torsion[0]{
+  torsion{
     members( 0, 1, 2, 3 );
   }
-  torsion[1]{
+  torsion{
     members( 1, 2, 3, 4 );
   }
-  torsion[2]{
+  torsion{
     members( 2, 3, 4, 5 );
   }
-  torsion[3]{
+  torsion{
     members( 3, 4, 5, 6 );
   }
-  torsion[4]{
+  torsion{
     members( 4, 5, 6, 7 );
   }
-  torsion[5]{
+  torsion{
     members( 5, 6, 7, 8 );
   }
-  torsion[6]{
+  torsion{
     members( 6, 7, 8, 9 );
   }
-  torsion[7]{
+  torsion{
     members( 7, 8, 9, 10 );
   }
-  torsion[8]{
+  torsion{
     members( 8, 9, 10, 11 );
   }
-  torsion[9]{
+  torsion{
     members( 9, 10, 11, 12 );
   }
-  torsion[10]{
+  torsion{
     members( 10, 11, 12, 13 );
   }
-  torsion[11]{
+  torsion{
     members( 11, 12, 13, 14 );
   }
-  torsion[12]{
+  torsion{
     members( 12, 13, 14, 15 );
   }
-  torsion[13]{
+  torsion{
     members( 13, 14, 15, 16 );
   }
 }
@@ -446,7 +446,7 @@ molecule{
 molecule{
   
   name = "twoChain_14G";
-  nAtoms = 31;
+  
 
   atom[0]{
     type = "HEAD";
@@ -574,277 +574,277 @@ molecule{
     position( 6.164077, -0.903155, -19.023077 );
   }
 
-  nBonds = 30;
+  
 
-  bond[0]{
+  bond{
     members( 0, 1 );
   }
-  bond[1]{
+  bond{
     members( 1, 2 );
   }
-  bond[2]{
+  bond{
     members( 2, 3 );
   }
-  bond[3]{
+  bond{
     members( 3, 4 );
   }
-  bond[4]{
+  bond{
     members( 4, 5 );
   }
-  bond[5]{
+  bond{
     members( 5, 6 );
   }
-  bond[6]{
+  bond{
     members( 6, 7 );
   }
-  bond[7]{
+  bond{
     members( 7, 8 );
   }
-  bond[8]{
+  bond{
     members( 8, 9 );
   }
-  bond[9]{
+  bond{
     members( 9, 10 );
   }
-  bond[10]{
+  bond{
     members( 10, 11 );
   }
-  bond[11]{
+  bond{
     members( 11, 12 );
   }
-  bond[12]{
+  bond{
     members( 12, 13 );
   }
-  bond[13]{
+  bond{
     members( 13, 14 );
   }
-  bond[14]{
+  bond{
     members( 14, 15 );
   }
-  bond[15]{
+  bond{
     members( 15, 16 );
   }
-  bond[16]{
+  bond{
     members( 2, 17 );
   }
-  bond[17]{
+  bond{
     members( 17, 18 );
   }
-  bond[18]{
+  bond{
     members( 18, 19 );
   }
-  bond[19]{
+  bond{
     members( 19, 20 );
   }
-  bond[20]{
+  bond{
     members( 20, 21 );
   }
-  bond[21]{
+  bond{
     members( 21, 22 );
   }
-  bond[22]{
+  bond{
     members( 22, 23 );
   }
-  bond[23]{
+  bond{
     members( 23, 24 );
   }
-  bond[24]{
+  bond{
     members( 24, 25 );
   }
-  bond[25]{
+  bond{
     members( 25, 26 );
   }
-  bond[26]{
+  bond{
     members( 26, 27 );
   }
-  bond[27]{
+  bond{
     members( 27, 28 );
   }
-  bond[28]{
+  bond{
     members( 28, 29 );
   }
-  bond[29]{
+  bond{
     members( 29, 30 );
   }
 
-  nBends = 30;
+  
 
-  bend[0]{
+  bend{
     members( 0, 1, 2 );
   }
-  bend[1]{
+  bend{
     members( 1, 2, 3 );
   }
-  bend[2]{
+  bend{
     members( 2, 3, 4 );
   }
-  bend[3]{
+  bend{
     members( 3, 4, 5 );
   }
-  bend[4]{
+  bend{
     members( 4, 5, 6 );
   }
-  bend[5]{
+  bend{
     members( 5, 6, 7 );
   }
-  bend[6]{
+  bend{
     members( 6, 7, 8 );
   }
-  bend[7]{
+  bend{
     members( 7, 8, 9 );
   }
-  bend[8]{
+  bend{
     members( 8, 9, 10 );
   }
-  bend[9]{
+  bend{
     members( 9, 10, 11 );
   }
-  bend[10]{
+  bend{
     members( 10, 11, 12 );
   }
-  bend[11]{
+  bend{
     members( 11, 12, 13 );
   }
-  bend[12]{
+  bend{
     members( 12, 13, 14 );
   }
-  bend[13]{
+  bend{
     members( 13, 14, 15 );
   }
-  bend[14]{
+  bend{
     members( 14, 15, 16 );
   }
-  bend[15]{
+  bend{
     members( 0, 1 );
     ghostVectorSource = 0;
   }
-  bend[16]{
+  bend{
     members( 1, 2, 17 );
   }
-  bend[17]{
+  bend{
     members( 2, 17, 18 );
   }
-  bend[18]{
+  bend{
     members( 17, 18, 19 );
   }
-  bend[19]{
+  bend{
     members( 18, 19, 20 );
   }
-  bend[20]{
+  bend{
     members( 19, 20, 21 );
   }
-  bend[21]{
+  bend{
     members( 20, 21, 22 );
   }
-  bend[22]{
+  bend{
     members( 21, 22, 23 );
   }
-  bend[23]{
+  bend{
     members( 22, 23, 24 );
   }
-  bend[24]{
+  bend{
     members( 23, 24, 25 );
   }
-  bend[25]{
+  bend{
     members( 24, 25, 26 );
   }
-  bend[26]{
+  bend{
     members( 25, 26, 27 );
   }
-  bend[27]{
+  bend{
     members( 26, 27, 28 );
   }
-  bend[28]{
+  bend{
     members( 27, 28, 29 );
   }
-  bend[29]{
+  bend{
     members( 28, 29, 30 );
   }
 
 
 
 
-  nTorsions = 27;
+  
 
-  torsion[0]{
+  torsion{
     members( 0, 1, 2, 3 );
   }
-  torsion[1]{
+  torsion{
     members( 1, 2, 3, 4 );
   }
-  torsion[2]{
+  torsion{
     members( 2, 3, 4, 5 );
   }
-  torsion[3]{
+  torsion{
     members( 3, 4, 5, 6 );
   }
-  torsion[4]{
+  torsion{
     members( 4, 5, 6, 7 );
   }
-  torsion[5]{
+  torsion{
     members( 5, 6, 7, 8 );
   }
-  torsion[6]{
+  torsion{
     members( 6, 7, 8, 9 );
   }
-  torsion[7]{
+  torsion{
     members( 7, 8, 9, 10 );
   }
-  torsion[8]{
+  torsion{
     members( 8, 9, 10, 11 );
   }
-  torsion[9]{
+  torsion{
     members( 9, 10, 11, 12 );
   }
-  torsion[10]{
+  torsion{
     members( 10, 11, 12, 13 );
   }
-  torsion[11]{
+  torsion{
     members( 11, 12, 13, 14 );
   }
-  torsion[12]{
+  torsion{
     members( 12, 13, 14, 15 );
   }
-  torsion[13]{
+  torsion{
     members( 13, 14, 15, 16 );
   }
-  torsion[14]{
+  torsion{
     members( 1, 2, 17, 18 );
   }
-  torsion[15]{
+  torsion{
     members( 2, 17, 18, 19 );
   }
-  torsion[16]{
+  torsion{
     members( 17, 18, 19, 20 );
   }
-  torsion[17]{
+  torsion{
     members( 18, 19, 20, 21 );
   }
-  torsion[18]{
+  torsion{
     members( 19, 20, 21, 22 );
   }
-  torsion[19]{
+  torsion{
     members( 20, 21, 22, 23 );
   }
-  torsion[20]{
+  torsion{
     members( 21, 22, 23, 24 );
   }
-  torsion[21]{
+  torsion{
     members( 22, 23, 24, 25 );
   }
-  torsion[22]{
+  torsion{
     members( 23, 24, 25, 26 );
   }
-  torsion[23]{
+  torsion{
     members( 24, 25, 26, 27 );
   }
-  torsion[24]{
+  torsion{
     members( 25, 26, 27, 28 );
   }
-  torsion[25]{
+  torsion{
     members( 26, 27, 28, 29 );
   }
-  torsion[26]{
+  torsion{
     members( 27, 28, 29, 30 );
   }
 

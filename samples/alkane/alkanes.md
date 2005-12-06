@@ -3,7 +3,7 @@
 
 molecule{
   name = "methane";
-  nAtoms = 1;
+  
   atom[0]{
     type="CH4";
     position( 0.0, 0.0, 0.0 );
@@ -12,7 +12,7 @@ molecule{
 
 molecule{
   name = "ethane";
-  nAtoms = 2;
+  
   atom[0]{
     type = "CH3";
     position( 0.0, 0.0, 0.0 );
@@ -22,15 +22,15 @@ molecule{
     position( 0.0, 1.54, 0.0 );
   }
 
-  nBonds = 1;
-  bond[0]{
+  
+  bond{
     members( 0, 1 );
   }
 }
 
 molecule{
   name = "ethane2";
-  nAtoms = 2;
+  
   atom[0]{
     type = "CH3";
     position( 0.0, 0.0, 0.0 );
@@ -40,8 +40,8 @@ molecule{
     position( 0.0, 1.54, 0.0 );
   }
 
-  nBonds = 1;
-  bond[0]{
+  
+  bond{
     members( 0, 1 );
   }
 }
@@ -51,7 +51,7 @@ molecule{
 molecule{
 
   name = "propane";
-  nAtoms = 3;
+  
   
   atom[0]{
     type = "CH3";
@@ -68,18 +68,18 @@ molecule{
     position( 1.54, 0.0, 0.0 );
   }
 
-  nBonds = 2;
+  
 
-  bond[0]{
+  bond{
     members( 0, 1 );
   }
 
-  bond[1]{
+  bond{
     members( 1, 2 );
   }
 
-  nBends = 1;
-  bend[0]{
+  
+  bend{
     members( 0, 1, 2 );
   }
 }
@@ -87,7 +87,7 @@ molecule{
 molecule{
 
   name = "butane";
-  nAtoms = 4;
+  
   
   atom[0]{
     type = "CH3";
@@ -110,31 +110,31 @@ molecule{
   }
   
 
-  nBonds = 3;
+  
 
-  bond[0]{
+  bond{
     members( 0, 1 );
   }
 
-  bond[1]{
+  bond{
     members( 1, 2 );
   }
 
-  bond[2]{
+  bond{
     members( 2, 3 );
   }
 
-  nBends = 2;
-  bend[0]{
+  
+  bend{
     members( 0, 1, 2 );
   }
 
-  bend[1]{
+  bend{
     members( 1, 2, 3 );
   }
 
-  nTorsions = 1;
-  torsion[0]{
+  
+  torsion{
     members( 0, 1, 2, 3 );
   }
 }
@@ -142,7 +142,7 @@ molecule{
 molecule{
 
   name = "pentane";
-  nAtoms = 5;
+  
   
   atom[0]{
     type = "CH3";
@@ -170,43 +170,43 @@ molecule{
   }
   
 
-  nBonds = 4;
+  
 
-  bond[0]{
+  bond{
     members( 0, 1 );
   }
 
-  bond[1]{
+  bond{
     members( 1, 2 );
   }
 
-  bond[2]{
+  bond{
     members( 2, 3 );
   }
 
-  bond[3]{
+  bond{
     members( 3, 4 );
   }
 
-  nBends = 3;
-  bend[0]{
+  
+  bend{
     members( 0, 1, 2 );
   }
 
-  bend[1]{
+  bend{
     members( 1, 2, 3 );
   }
 
-  bend[2]{
+  bend{
     members( 2, 3, 4 );
   }
 
-  nTorsions = 2;
-  torsion[0]{
+  
+  torsion{
     members( 0, 1, 2, 3 );
   }
 
-  torsion[1]{
+  torsion{
     members( 1, 2, 3, 4 );
   }
 }
@@ -214,7 +214,7 @@ molecule{
 molecule{
 
   name = "pseudoButane";
-  nAtoms = 4;
+  
   
   atom[0]{
     type = "CH3";
@@ -237,51 +237,51 @@ molecule{
   }
   
 
-  nBonds = 3;
+  
 
-  bond[0]{
+  bond{
     members( 0, 1 );
   }
 
-  bond[1]{
+  bond{
     members( 1, 2 );
   }
 
-  bond[2]{
+  bond{
     members( 2, 3 );
   }
 
-  nBends = 2;
-  bend[0]{
+  
+  bend{
     members( 0, 1, 2 );
   }
 
-  bend[1]{
+  bend{
     members( 1, 2, 3 );
   }
 
-  nTorsions = 1;
-  torsion[0]{
+  
+  torsion{
     members( 0, 1, 2, 3 );
   }
 
-  nRigidBodies = 4;
+  
   rigidBody[0]{
-    nMembers = 1;
+    
     members(0);
   }
   rigidBody[1]{
-    nMembers = 1;
+    
     members(1);
   }
 
   rigidBody[2]{
-    nMembers = 1;
+    
     members(2);
   }
 
   rigidBody[3]{
-    nMembers = 1;
+    
     members(3);
   }
 

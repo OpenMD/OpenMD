@@ -1,7 +1,7 @@
 #include "gb.md"
 #include "lj.md"
 
-nComponents = 1;
+
 component{
   type = "linear";
   nMol = 2;

@@ -1,6 +1,6 @@
 #include "water.md"
 
-nComponents = 1;
+
 component{
   type = "SSD";
   nMol = 256;
@@ -27,7 +27,7 @@ electrostaticSummationMethod = "none";
 
 dielectric = 80.0;
 
-density = 0.0334;
+
 
 targetTemp = 300;
 targetPressure = 1.0;

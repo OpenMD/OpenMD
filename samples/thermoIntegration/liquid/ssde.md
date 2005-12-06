@@ -1,6 +1,6 @@
 #include "water.md"
 
-nComponents = 1;
+
 component{
   type = "SSD_E";
   nMol = 256;
@@ -15,7 +15,7 @@ dielectric = 80.0;
 cutoffRadius = 9.0;
 switchingRadius = 7.7;
 
-density = 0.0334;
+
 
 targetTemp = 300;
 targetPressure = 1.0;

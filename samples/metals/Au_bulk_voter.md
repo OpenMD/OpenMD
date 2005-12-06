@@ -1,6 +1,6 @@
 #include "metals.md"
 
-nComponents = 1;
+
 component{
   type = "Au";
   nMol = 1372;

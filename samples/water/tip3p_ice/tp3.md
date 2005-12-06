@@ -1,6 +1,6 @@
 #include "water.md"
 
-nComponents = 1;
+
 component{
   type = "TIP3P";
   nMol = 1000;
@@ -15,7 +15,7 @@ dielectric = 80.0;
 cutoffRadius = 9.0;
 switchingRadius = 7.7;
 
-density = 0.0334;
+
 
 targetTemp = 200;
 targetPressure = 1.0;
