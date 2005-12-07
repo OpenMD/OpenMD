@@ -40,12 +40,13 @@
  */
  
 #include "io/LennardJonesAtomTypesSectionParser.hpp"
+#include "io/ForceFieldOptions.hpp"
 #include "types/AtomType.hpp"
 #include "UseTheForce/ForceField.hpp"
 #include "utils/simError.h"
 namespace oopse {
 
-  LennardJonesAtomTypesSectionParser::LennardJonesAtomTypesSectionParser() {
+  LennardJonesAtomTypesSectionParser::LennardJonesAtomTypesSectionParser(ForceFieldOptions& options) : options_(options) {
     setSectionName("LennardJonesAtomTypes");
   }
 
@@ -70,7 +71,10 @@ namespace oopse {
 	ljParam.epsilon = tokenizer.nextTokenAsDouble();
 	ljParam.sigma = tokenizer.nextTokenAsDouble();
 	ljParam.soft_pot = 0;
-
+  
+  ljParam.epsilon *= options_.getEnergyUnitScaling();
+  ljParam.sigma   *= options_.getDistanceUnitScaling();
+  
 	if (tokenizer.hasMoreTokens()) {
 	  std::string pot_type = tokenizer.nextToken();
 	  if (pot_type == "soft") {

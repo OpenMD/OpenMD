@@ -42,6 +42,7 @@
 #ifndef IO_LENNARDJONESATOMTYPESSECTIONPARSER_HPP
 #define IO_LENNARDJONESATOMTYPESSECTIONPARSER_HPP
 
+#include "io/ForceFieldOptions.hpp"
 #include "io/SectionParser.hpp"
 namespace oopse {
 
@@ -50,11 +51,11 @@ namespace oopse {
    */
   class LennardJonesAtomTypesSectionParser : public SectionParser {
   public:
-    LennardJonesAtomTypesSectionParser();
+    LennardJonesAtomTypesSectionParser(ForceFieldOptions& options);
             
   private:
     void parseLine(ForceField& ff, const std::string& line, int lineNo);
-            
+    ForceFieldOptions& options_;
   };
 
 
