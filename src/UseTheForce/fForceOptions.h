@@ -21,7 +21,7 @@ typedef  struct{
   INTEGER, PARAMETER:: GEOMETRIC_MIXING_RULE  = 1
   INTEGER, PARAMETER:: ARITHMETIC_MIXING_RULE = 2
 
-  type :: ForceOptions
+  type,public :: ForceOptions
     SEQUENCE
     integer :: DistanceMixingRule
     integer :: EnergyMixingRule
