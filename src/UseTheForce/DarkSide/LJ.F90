@@ -43,7 +43,7 @@
 !! Calculates Long Range forces Lennard-Jones interactions.
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: LJ.F90,v 1.19 2005-11-21 22:59:01 gezelter Exp $, $Date: 2005-11-21 22:59:01 $, $Name: not supported by cvs2svn $, $Revision: 1.19 $
+!! @version $Id: LJ.F90,v 1.20 2005-12-07 19:58:18 chuckv Exp $, $Date: 2005-12-07 19:58:18 $, $Name: not supported by cvs2svn $, $Revision: 1.20 $
 
 
 module lj
@@ -51,6 +51,7 @@ module lj
   use vector_class
   use simulation
   use status
+  use fForceOptions
 #ifdef IS_MPI
   use mpiSimulation
 #endif
@@ -104,7 +105,6 @@ module lj
   public :: setLJDefaultCutoff
   public :: getSigma
   public :: getEpsilon
-  public :: useGeometricMixing
   public :: do_lj_pair
   public :: destroyLJtypes
 
@@ -193,12 +193,6 @@ contains
 
   end function getEpsilon
 
-  subroutine useGeometricMixing() 
-    useGeometricDistanceMixing = .true.
-    haveMixingMap = .false.
-    return
-  end subroutine useGeometricMixing
-
   subroutine createMixingMap()
     integer :: nLJtypes, i, j
     real ( kind = dp ) :: s1, s2, e1, e2
@@ -216,6 +210,7 @@ contains
        allocate(MixingMap(nLJtypes, nLJtypes))
     endif
 
+    useGeometricDistanceMixing = usesGeometricDistanceMixing()
     do i = 1, nLJtypes
 
        s1 = LJMap%LJtypes(i)%sigma

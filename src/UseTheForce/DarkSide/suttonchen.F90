@@ -49,6 +49,7 @@ module suttonchen
   use status
   use atype_module
   use vector_class
+  use fForceOptions
 #ifdef IS_MPI
   use mpiSimulation
 #endif
@@ -146,7 +147,7 @@ module suttonchen
   public :: getSCCut
  ! public :: setSCDefaultCutoff
  ! public :: setSCUniformCutoff
-  public :: useGeometricMixing
+ 
 
 contains
 
@@ -243,7 +244,7 @@ contains
     if (.not. allocated(MixingMap)) then
        allocate(MixingMap(nSCtypes, nSCtypes))
     endif
-
+    useGeometricDistanceMixing = usesGeometricDistanceMixing()
     do i = 1, nSCtypes
 
        e1 = SCList%SCtypes(i)%epsilon
@@ -395,20 +396,6 @@ contains
     SC_rcut = rcut
 
   end subroutine setCutoffSC
-
-  subroutine useGeometricMixing() 
-    useGeometricDistanceMixing = .true.
-    haveMixingMap = .false.
-    return
-  end subroutine useGeometricMixing
-  
-
-
-
-
-
-
-
 
   subroutine clean_SC()
 

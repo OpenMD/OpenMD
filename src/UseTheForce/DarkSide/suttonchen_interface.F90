@@ -47,7 +47,7 @@
 !!  PURPOSE:
 !!
 !! @author Charles F. Vardeman II 
-!! @version $Id: suttonchen_interface.F90,v 1.1 2005-11-14 21:29:32 chuckv Exp $
+!! @version $Id: suttonchen_interface.F90,v 1.2 2005-12-07 19:58:18 chuckv Exp $
 
 
 
@@ -67,13 +67,6 @@ subroutine newSCtype(c_ident,c,m,n,alpha,epsilon,status)
   call module_newSCtype(c_ident,c,m,n,alpha,epsilon,status)
 
 end subroutine newSCtype
-
-subroutine useSCGeometricMixing()
-  use suttonchen, ONLY: module_useGeometricMixing => useGeometricMixing
-
-  call module_useGeometricMixing()
-  return
-end subroutine useSCGeometricMixing
 
 subroutine destroySCTypes()
   use suttonchen, ONLY: module_destroySCTypes => destroySCTypes

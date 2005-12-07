@@ -47,7 +47,6 @@
 #include "config.h"
 
 #define newLJtype F90_FUNC(newljtype, NEWLJTYPE)
-#define useGeometricMixing F90_FUNC(usegeometricmixing, USEGEOMETRICMIXING)
 #define destroyLJTypes F90_FUNC(destroyljtypes, DESTROYLJTYPES)
 
 extern "C"{
@@ -57,7 +56,6 @@ extern "C"{
                   int* soft_pot,
                   int* status);
 
-  void useGeometricMixing( );
   void destroyLJTypes( void );
 }  
 #endif
