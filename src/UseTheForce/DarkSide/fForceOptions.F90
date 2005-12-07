@@ -47,7 +47,7 @@
 !!  PURPOSE:
 !!
 !! @author Charles F. Vardeman II 
-!! @version $Id: fForceOptions.F90,v 1.1 2005-12-07 19:38:03 chuckv Exp $
+!! @version $Id: fForceOptions.F90,v 1.2 2005-12-07 19:46:56 chuckv Exp $
 
 !! Handles Mixing options for Fortran.
 
@@ -65,7 +65,7 @@ type(ForceOptions), save :: fortranForceOptions
 logical, save :: haveForceOptions = .false.
 
 
-
+public :: ForceOptions
 public :: getVDW14Scale
 public :: getElectrostatic14Scale
 public :: getEnergyMixingRule
