@@ -7,6 +7,8 @@ Source    = \
 	atype.F90 \
 	atype_interface.F90 \
 	force_globals.F90 \
+	fForceOptions.F90 \
+	fForceOptions_interface.F90 \
 	switcheroo.F90 \
 	switcheroo_interface.F90 \
 	simulation.F90 \
@@ -31,6 +33,7 @@ Modules = \
 	eam \
 	electrostatic_module \
 	force_globals \
+	fforceoptions \
 	gb_pair \
 	lj \
 	neighborLists \
