@@ -81,7 +81,7 @@ namespace oopse {
     spMan_.push_back(new OptionSectionParser(forceFieldOptions_));    
     spMan_.push_back(new DirectionalAtomTypesSectionParser());
     spMan_.push_back(new AtomTypesSectionParser());
-    spMan_.push_back(new LennardJonesAtomTypesSectionParser());
+    spMan_.push_back(new LennardJonesAtomTypesSectionParser(forceFieldOptions_));
     spMan_.push_back(new ChargeAtomTypesSectionParser());
     spMan_.push_back(new MultipoleAtomTypesSectionParser());
     spMan_.push_back(new StickyAtomTypesSectionParser());

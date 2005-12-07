@@ -52,6 +52,7 @@
 #include "UseTheForce/ForceField.hpp"
 #include "io/SectionParserManager.hpp"
 #include "UseTheForce/ForceFieldCreator.hpp"
+#include "io/ForceFieldOptions.hpp"
 namespace oopse {
 
   /**

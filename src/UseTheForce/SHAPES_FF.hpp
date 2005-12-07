@@ -54,6 +54,7 @@
 #include "io/SectionParserManager.hpp"
 #include "UseTheForce/ForceFieldCreator.hpp"
 #include "types/ShapeAtomType.hpp"
+#include "io/ForceFieldOptions.hpp"
 
 namespace oopse {
 

@@ -54,6 +54,7 @@
 #include "io/BondTypesSectionParser.hpp"
 #include "io/BendTypesSectionParser.hpp"
 #include "io/TorsionTypesSectionParser.hpp"
+#include "io/OptionSectionParser.hpp"
 #include "UseTheForce/ForceFieldCreator.hpp"
 #include "utils/simError.h"
 namespace oopse {
@@ -73,16 +74,11 @@ namespace oopse {
     //Make sure they are added after DirectionalAtomTypesSectionParser and AtomTypesSectionParser. 
     //The order of BondTypesSectionParser, BendTypesSectionParser and TorsionTypesSectionParser are
     //not important.
+    spMan_.push_back(new OptionSectionParser(forceFieldOptions_));
     spMan_.push_back(new DirectionalAtomTypesSectionParser());
     spMan_.push_back(new AtomTypesSectionParser());
-    spMan_.push_back(new LennardJonesAtomTypesSectionParser());
-    spMan_.push_back(new ChargeAtomTypesSectionParser());
-    spMan_.push_back(new MultipoleAtomTypesSectionParser());
     spMan_.push_back(new EAMAtomTypesSectionParser());
-    spMan_.push_back(new StickyAtomTypesSectionParser());
-    spMan_.push_back(new BondTypesSectionParser());
-    spMan_.push_back(new BendTypesSectionParser());
-    spMan_.push_back(new TorsionTypesSectionParser());
+
     
   }
 
