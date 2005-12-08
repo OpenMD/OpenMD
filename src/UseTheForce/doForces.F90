@@ -45,7 +45,7 @@
 
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: doForces.F90,v 1.69 2005-11-21 22:58:35 gezelter Exp $, $Date: 2005-11-21 22:58:35 $, $Name: not supported by cvs2svn $, $Revision: 1.69 $
+!! @version $Id: doForces.F90,v 1.70 2005-12-08 22:04:40 gezelter Exp $, $Date: 2005-12-08 22:04:40 $, $Name: not supported by cvs2svn $, $Revision: 1.70 $
 
 
 module doForces
@@ -602,6 +602,7 @@ contains
      
      cutoffPolicy = cutPolicy
      haveCutoffPolicy = .true.
+     write(*,*) 'have cutoffPolicy in F = ', cutPolicy
 
      call createGtypeCutoffMap()
      
