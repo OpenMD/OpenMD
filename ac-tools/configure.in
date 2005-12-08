@@ -31,10 +31,10 @@ AC_CANONICAL_HOST
 
 
 dnl Checks for C compiler
-AC_PROG_CC([icc xlc gcc cc])
+AC_PROG_CC([pathcc icc xlc gcc cc])
 
 dnl Checks for C++ compiler
-AC_PROG_CXX([icpc icc xlc++ xlC CC g++ c++])
+AC_PROG_CXX([pathCC icpc icc xlc++ xlC CC g++ c++])
 
 dnl Checks for C preprocessor
 AC_PROG_CPP
@@ -89,7 +89,7 @@ AC_SUBST(EXTRA_CC_FLAG)
 
 dnl Fortran 90 compilation checks are next
 
-AC_PROG_F90([ifort ifc f90 xlf90 pgf90 epcf90 f95 xlf95 lf95 fort g95])
+AC_PROG_F90([pathf95 ifort ifc f90 xlf90 pgf90 epcf90 f95 xlf95 lf95 fort g95])
 dnl Check the flag for Fortran90 preprocessing
 ACX_PROG_F90_PREPFLAG
 dnl Check to see if a flag is required for preprocessing defines
@@ -214,10 +214,10 @@ AC_DEFINE([OBAPI], [], [Used to export symbols for DLL / shared library builds])
 
 
 if test "$ac_cv_prog_ps_syntax" = BSD; then
-  AC_DEFINE(PSTYPE_IS_BSD, 1)
+  AC_DEFINE(PSTYPE_IS_BSD, 1, [ps uses BSD-style arguments])
 else
    if test "$ac_cv_prog_ps_syntax" = POSIX; then
-       AC_DEFINE(PSTYPE_IS_POSIX, 1)
+       AC_DEFINE(PSTYPE_IS_POSIX, 1, [ps uses POSIX-style arguments])
    else
        AC_MSG_ERROR(Unknown ps syntax type!)
    fi
