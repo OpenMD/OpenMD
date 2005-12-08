@@ -45,7 +45,7 @@
 #include "utils/simError.h"
 namespace oopse {
 
-  EAMAtomTypesSectionParser::EAMAtomTypesSectionParser() {
+  EAMAtomTypesSectionParser::EAMAtomTypesSectionParser(ForceFieldOptions& options) : options_(options){
     setSectionName("EAMAtomTypes");
   }
 

@@ -44,7 +44,7 @@
  *
  *  Created by Charles F. Vardeman II on 11/14/05.
  *  @author  Charles F. Vardeman II 
- *  @version $Id: SCAtomTypesSectionParser.hpp,v 1.1 2005-11-14 21:29:27 chuckv Exp $
+ *  @version $Id: SCAtomTypesSectionParser.hpp,v 1.2 2005-12-08 15:38:49 chuckv Exp $
  *
  */
 
@@ -53,6 +53,7 @@
 
 #include "io/SectionParser.hpp"
 #include "types/AtomType.hpp"
+#include "io/ForceFieldOptions.hpp"
 
 namespace oopse {
   
@@ -61,10 +62,11 @@ namespace oopse {
    */
   class SCAtomTypesSectionParser : public SectionParser {
 public:
-    SCAtomTypesSectionParser();
+    SCAtomTypesSectionParser(ForceFieldOptions& options);
     
 private:
     virtual void parseLine(ForceField& ff, const std::string& line, int lineNo);
+    ForceFieldOptions& options_;
   };
   
   

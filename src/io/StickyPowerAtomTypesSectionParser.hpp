@@ -43,6 +43,8 @@
 #define IO_STICKYPOWERATOMTYPESSECTIONPARSER_HPP
 
 #include "io/SectionParser.hpp"
+#include "io/ForceFieldOptions.hpp"
+
 namespace oopse {
 
   /**
@@ -50,10 +52,10 @@ namespace oopse {
    */
   class StickyPowerAtomTypesSectionParser : public SectionParser {
   public:
-    StickyPowerAtomTypesSectionParser();
+    StickyPowerAtomTypesSectionParser(ForceFieldOptions& options);
   private:
     virtual void parseLine(ForceField& ff, const std::string& line, int lineNo);
-            
+    ForceFieldOptions& options_;
   };
 
 

@@ -43,6 +43,7 @@
 #define IO_BENDTYPESSECTIONPARSER_HPP
 #include <map>
 #include "io/SectionParser.hpp"
+#include "io/ForceFieldOptions.hpp"
 namespace oopse {
 
   /**
@@ -50,7 +51,7 @@ namespace oopse {
    */
   class BendTypesSectionParser : public SectionParser {
   public:
-    BendTypesSectionParser();
+    BendTypesSectionParser(ForceFieldOptions& options);
             
   private:
 
@@ -68,7 +69,8 @@ namespace oopse {
 
     BendTypeEnum getBendTypeEnum(const std::string& str);  
 
-    std::map<std::string, BendTypeEnum> stringToEnumMap_;               
+    std::map<std::string, BendTypeEnum> stringToEnumMap_;  
+    ForceFieldOptions& options_;
   };
 
 

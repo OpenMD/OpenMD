@@ -55,14 +55,14 @@ namespace oopse {
   class ShapeAtomTypesSectionParser : public SectionParser {
 
   public:
-    ShapeAtomTypesSectionParser();
+    ShapeAtomTypesSectionParser(ForceFieldOptions& options);
     
   private:
     virtual void parseLine(ForceField& ff, const std::string& line, int lineNo);
 
     void parseShapeFile(ForceField& ff, std::string& shapeFileName, 
                         ShapeAtomType* st);
-
+    ForceFieldOptions& options_;
   };
   
   

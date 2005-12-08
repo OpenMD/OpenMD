@@ -43,6 +43,7 @@
 #define IO_DIRECTIONALATOMTYPESSECTIONPARSER_HPP
 
 #include "io/SectionParser.hpp"
+#include "io/ForceFieldOptions.hpp"
 namespace oopse {
 
   /**
@@ -50,10 +51,11 @@ namespace oopse {
    */
   class DirectionalAtomTypesSectionParser : public SectionParser {
   public:
-    DirectionalAtomTypesSectionParser();
+    DirectionalAtomTypesSectionParser(ForceFieldOptions& options);
             
   private:
     void virtual parseLine(ForceField& ff, const std::string& line, int lineNo);
+    ForceFieldOptions& options_;
             
   };
 

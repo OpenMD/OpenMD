@@ -50,7 +50,7 @@
 #include "utils/simError.h"
 namespace oopse {
 
-  BendTypesSectionParser::BendTypesSectionParser() {
+  BendTypesSectionParser::BendTypesSectionParser(ForceFieldOptions& options) : options_(options){
     setSectionName("BendTypes");
 
     stringToEnumMap_["Harmonic"] =  btHarmonic;       

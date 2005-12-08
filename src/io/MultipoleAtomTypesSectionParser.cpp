@@ -45,7 +45,7 @@
 #include "utils/simError.h"
 namespace oopse {
 
-  MultipoleAtomTypesSectionParser::MultipoleAtomTypesSectionParser() {
+  MultipoleAtomTypesSectionParser::MultipoleAtomTypesSectionParser(ForceFieldOptions& options) : options_(options){
     setSectionName("MultipoleAtomTypes");
   }
 

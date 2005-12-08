@@ -52,7 +52,7 @@
 
 namespace oopse {
   
-  ShapeAtomTypesSectionParser::ShapeAtomTypesSectionParser() {
+  ShapeAtomTypesSectionParser::ShapeAtomTypesSectionParser(ForceFieldOptions& options) : options_(options) {
     setSectionName("ShapeAtomTypes");
   }
   

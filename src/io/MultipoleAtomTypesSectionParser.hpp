@@ -45,6 +45,7 @@
 
 #include "io/SectionParser.hpp"
 #include "types/DirectionalAtomType.hpp"
+#include "io/ForceFieldOptions.hpp"
 namespace oopse {
 
   /**
@@ -52,7 +53,7 @@ namespace oopse {
    */
   class MultipoleAtomTypesSectionParser : public SectionParser {
   public:
-    MultipoleAtomTypesSectionParser();
+    MultipoleAtomTypesSectionParser(ForceFieldOptions& options);
             
   private:
     virtual void parseLine(ForceField& ff, const std::string& line, int lineNo);
@@ -60,6 +61,7 @@ namespace oopse {
     void parseDipole(StringTokenizer& tokenizer, DirectionalAtomType* dAtomType, int lineNo);
     void parseSplitDipole(StringTokenizer& tokenizer, DirectionalAtomType* dAtomType, int lineNo);
     void parseQuadruple(StringTokenizer& tokenizer, DirectionalAtomType* dAtomType, int lineNo);
+    ForceFieldOptions& options_;
   };
 
 

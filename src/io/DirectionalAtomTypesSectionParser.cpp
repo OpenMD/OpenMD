@@ -45,7 +45,7 @@
 #include "utils/simError.h"
 namespace oopse {
 
-  DirectionalAtomTypesSectionParser::DirectionalAtomTypesSectionParser() {
+  DirectionalAtomTypesSectionParser::DirectionalAtomTypesSectionParser(ForceFieldOptions& options)  : options_(options){
     setSectionName("DirectionalAtomTypes");
   }
 

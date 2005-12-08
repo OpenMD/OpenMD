@@ -67,6 +67,7 @@ namespace oopse {
     setForceFieldFileName("DUFF2.frc");
 
     //The order of adding section parsers is important.
+    //OptionSectionParser must come first to set options for other parsers
     //DirectionalAtomTypesSectionParser should be added before 
     //AtomTypesSectionParser, and these two section parsers will actually 
     //create "real" AtomTypes (AtomTypesSectionParser will create AtomType and 
@@ -79,17 +80,17 @@ namespace oopse {
     //and AtomTypesSectionParser. The order of BondTypesSectionParser, 
     //BendTypesSectionParser and TorsionTypesSectionParser are not important.
     spMan_.push_back(new OptionSectionParser(forceFieldOptions_));    
-    spMan_.push_back(new DirectionalAtomTypesSectionParser());
+    spMan_.push_back(new DirectionalAtomTypesSectionParser(forceFieldOptions_));
     spMan_.push_back(new AtomTypesSectionParser());
     spMan_.push_back(new LennardJonesAtomTypesSectionParser(forceFieldOptions_));
-    spMan_.push_back(new ChargeAtomTypesSectionParser());
-    spMan_.push_back(new MultipoleAtomTypesSectionParser());
-    spMan_.push_back(new StickyAtomTypesSectionParser());
-    spMan_.push_back(new StickyPowerAtomTypesSectionParser());
-    spMan_.push_back(new GayBerneAtomTypesSectionParser());
-    spMan_.push_back(new BondTypesSectionParser());
-    spMan_.push_back(new BendTypesSectionParser());
-    spMan_.push_back(new TorsionTypesSectionParser());
+    spMan_.push_back(new ChargeAtomTypesSectionParser(forceFieldOptions_));
+    spMan_.push_back(new MultipoleAtomTypesSectionParser(forceFieldOptions_));
+    spMan_.push_back(new StickyAtomTypesSectionParser(forceFieldOptions_));
+    spMan_.push_back(new StickyPowerAtomTypesSectionParser(forceFieldOptions_));
+    spMan_.push_back(new GayBerneAtomTypesSectionParser(forceFieldOptions_));
+    spMan_.push_back(new BondTypesSectionParser(forceFieldOptions_));
+    spMan_.push_back(new BendTypesSectionParser(forceFieldOptions_));
+    spMan_.push_back(new TorsionTypesSectionParser(forceFieldOptions_));
     
   }
 

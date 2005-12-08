@@ -44,7 +44,7 @@
  *
  *  Created by Charles F. Vardeman II on 11/9/05.
  *  @author  Charles F. Vardeman II 
- *  @version $Id: SC_FF.cpp,v 1.4 2005-12-06 19:26:37 chuckv Exp $
+ *  @version $Id: SC_FF.cpp,v 1.5 2005-12-08 15:38:49 chuckv Exp $
  *
  */
 
@@ -76,6 +76,7 @@ namespace oopse {
     setForceFieldFileName("SuttonChen.QSC.frc");
     
     //the order of adding section parsers are important
+    //OptionSectionParser must come first to set options for other parsers
     //DirectionalAtomTypesSectionParser should be added before AtomTypesSectionParser Since
     //These two section parsers will actually create "real" AtomTypes (AtomTypesSectionParser will create
     //AtomType and DirectionalAtomTypesSectionParser will creat DirectionalAtomType which is a subclass
@@ -86,9 +87,8 @@ namespace oopse {
     //The order of BondTypesSectionParser, BendTypesSectionParser and TorsionTypesSectionParser are
     //not important.
     spMan_.push_back(new OptionSectionParser(SCForceFieldOptions_));
-    spMan_.push_back(new DirectionalAtomTypesSectionParser());
     spMan_.push_back(new AtomTypesSectionParser());
-    spMan_.push_back(new SCAtomTypesSectionParser());
+    spMan_.push_back(new SCAtomTypesSectionParser(SCForceFieldOptions_));
     
   }
   

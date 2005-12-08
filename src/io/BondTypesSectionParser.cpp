@@ -49,7 +49,7 @@
 #include "utils/simError.h"
 namespace oopse {
 
-  BondTypesSectionParser::BondTypesSectionParser() {
+  BondTypesSectionParser::BondTypesSectionParser(ForceFieldOptions& options) : options_(options){
     setSectionName("BondTypes");
 
     stringToEnumMap_["Fixed"] =  btFixed;                

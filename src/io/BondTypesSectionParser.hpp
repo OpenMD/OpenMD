@@ -43,6 +43,7 @@
 #define IO_BONDTYPESSECTIONPARSER_HPP
 #include <map>
 #include "io/SectionParser.hpp"
+#include "io/ForceFieldOptions.hpp"
 namespace oopse {
 
   /**
@@ -50,7 +51,7 @@ namespace oopse {
    */
   class BondTypesSectionParser : public SectionParser {
   public:
-    BondTypesSectionParser();
+    BondTypesSectionParser(ForceFieldOptions& options);
             
   private:
 
@@ -68,6 +69,7 @@ namespace oopse {
     BondTypeEnum getBondTypeEnum(const std::string& str);  
 
     std::map<std::string, BondTypeEnum> stringToEnumMap_;   
+    ForceFieldOptions& options_;
   };
 
 

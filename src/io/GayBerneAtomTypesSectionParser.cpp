@@ -48,7 +48,7 @@
 
 namespace oopse {
 
-GayBerneAtomTypesSectionParser::GayBerneAtomTypesSectionParser() {
+  GayBerneAtomTypesSectionParser::GayBerneAtomTypesSectionParser(ForceFieldOptions& options) : options_(options){
     setSectionName("GayBerneAtomTypes");
 }
 

@@ -45,25 +45,27 @@
 
 #include "io/SectionParser.hpp"
 #include "types/DirectionalAtomType.hpp"
+#include "io/ForceFieldOptions.hpp"
 namespace oopse {
-
-    /**
-     * @class GayBerneAtomTypesSectionParser GayBerneAtomTypesSectionParser.hpp "io/GayBerneAtomTypesSectionParser.hpp"
+  
+  /**
+  * @class GayBerneAtomTypesSectionParser GayBerneAtomTypesSectionParser.hpp "io/GayBerneAtomTypesSectionParser.hpp"
      */
-    class GayBerneAtomTypesSectionParser : public SectionParser {
-        public:
-            GayBerneAtomTypesSectionParser();
-            
-        private:
-            virtual void parseLine(ForceField& ff, const std::string& line, int lineNo);
-
-      //???????????            void parseCharge(StringTokenizer& tokenizer, AtomType* atomType);
-      //?????????????      void parseDipole(StringTokenizer& tokenizer, DirectionalAtomType* dAtomType);
-      //????????????      void parseQuadruple(StringTokenizer& tokenizer, DirectionalAtomType* dAtomType);
-      //???????????????            void parseElectroBodyFrame(StringTokenizer& tokenizer, DirectionalAtomType* dAtomType);
-    };
-
-
+  class GayBerneAtomTypesSectionParser : public SectionParser {
+public:
+    GayBerneAtomTypesSectionParser(ForceFieldOptions& options);
+    
+private:
+    virtual void parseLine(ForceField& ff, const std::string& line, int lineNo);
+    ForceFieldOptions& options_;
+    
+    //???????????            void parseCharge(StringTokenizer& tokenizer, AtomType* atomType);
+    //?????????????      void parseDipole(StringTokenizer& tokenizer, DirectionalAtomType* dAtomType);
+    //????????????      void parseQuadruple(StringTokenizer& tokenizer, DirectionalAtomType* dAtomType);
+    //???????????????            void parseElectroBodyFrame(StringTokenizer& tokenizer, DirectionalAtomType* dAtomType);
+  };
+  
+  
 } //namespace oopse
 
 #endif //IO_GAYBERNEATOMTYPESECTIONPARSER_HPP

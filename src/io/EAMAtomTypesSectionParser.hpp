@@ -44,6 +44,7 @@
 
 #include "io/SectionParser.hpp"
 #include "types/AtomType.hpp"
+#include "io/ForceFieldOptions.hpp"
 
 namespace oopse {
 
@@ -52,12 +53,13 @@ namespace oopse {
    */
   class EAMAtomTypesSectionParser : public SectionParser {
   public:
-    EAMAtomTypesSectionParser();
+    EAMAtomTypesSectionParser(ForceFieldOptions& options);
             
   private:
     virtual void parseLine(ForceField& ff, const std::string& line, int lineNo);
     void parseEAMParamFile(ForceField& ff, AtomType* atomType, const std::string& potentialParamFile, int iden);
     void parseEAMArray(std::istream& input, std::vector<double>& array, int num);
+    ForceFieldOptions& options_;
   };
 
 

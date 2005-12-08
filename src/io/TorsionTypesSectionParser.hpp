@@ -43,6 +43,8 @@
 #define IO_TORSIONTYPESSECTIONPARSER_HPP
 #include <map>
 #include "io/SectionParser.hpp"
+#include "io/ForceFieldOptions.hpp"
+
 namespace oopse {
 
   /**
@@ -52,7 +54,7 @@ namespace oopse {
   public:
 
             
-    TorsionTypesSectionParser();
+    TorsionTypesSectionParser(ForceFieldOptions& options);
   private:
 
 
@@ -71,6 +73,7 @@ namespace oopse {
             
 
     std::map<std::string, TorsionTypeEnum> stringToEnumMap_;
+    ForceFieldOptions& options_;
   };
 
 

@@ -44,7 +44,7 @@
  *
  *  Created by Charles F. Vardeman II on 11/14/05.
  *  @author  Charles F. Vardeman II 
- *  @version $Id: SCAtomTypesSectionParser.cpp,v 1.2 2005-11-16 21:37:41 chuckv Exp $
+ *  @version $Id: SCAtomTypesSectionParser.cpp,v 1.3 2005-12-08 15:38:49 chuckv Exp $
  *
  */
 
@@ -54,7 +54,7 @@
 #include "utils/simError.h"
 namespace oopse {
   
-  SCAtomTypesSectionParser::SCAtomTypesSectionParser() {
+  SCAtomTypesSectionParser::SCAtomTypesSectionParser(ForceFieldOptions& options) : options_(options){
     setSectionName("SCAtomTypes");
   }
   

@@ -49,7 +49,7 @@
 
 namespace oopse {
 
-  TorsionTypesSectionParser::TorsionTypesSectionParser() {
+  TorsionTypesSectionParser::TorsionTypesSectionParser(ForceFieldOptions& options) : options_(options){
     setSectionName("TorsionTypes");
 
 

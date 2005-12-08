@@ -65,6 +65,7 @@ namespace oopse {
     setForceFieldFileName("EAM.frc");
 
     //the order of adding section parsers are important
+    //OptionSectionParser must come first to set options for other parsers
     //DirectionalAtomTypesSectionParser should be added before AtomTypesSectionParser Since
     //These two section parsers will actually create "real" AtomTypes (AtomTypesSectionParser will create
     //AtomType and DirectionalAtomTypesSectionParser will creat DirectionalAtomType which is a subclass
@@ -75,9 +76,8 @@ namespace oopse {
     //The order of BondTypesSectionParser, BendTypesSectionParser and TorsionTypesSectionParser are
     //not important.
     spMan_.push_back(new OptionSectionParser(forceFieldOptions_));
-    spMan_.push_back(new DirectionalAtomTypesSectionParser());
     spMan_.push_back(new AtomTypesSectionParser());
-    spMan_.push_back(new EAMAtomTypesSectionParser());
+    spMan_.push_back(new EAMAtomTypesSectionParser(forceFieldOptions_));
 
     
   }

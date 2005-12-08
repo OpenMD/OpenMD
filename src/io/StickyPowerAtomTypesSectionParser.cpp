@@ -46,7 +46,7 @@
 #include "utils/simError.h"
 namespace oopse {
   
-  StickyPowerAtomTypesSectionParser::StickyPowerAtomTypesSectionParser() {
+  StickyPowerAtomTypesSectionParser::StickyPowerAtomTypesSectionParser(ForceFieldOptions& options) : options_(options){
     setSectionName("StickyPowerAtomTypes");
   }
   

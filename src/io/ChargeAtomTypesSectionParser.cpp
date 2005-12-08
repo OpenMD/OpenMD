@@ -45,7 +45,7 @@
 #include "utils/simError.h"
 namespace oopse {
 
-  ChargeAtomTypesSectionParser::ChargeAtomTypesSectionParser() {
+  ChargeAtomTypesSectionParser::ChargeAtomTypesSectionParser(ForceFieldOptions& options) : options_(options) {
     setSectionName("ChargeAtomTypes");
   }
 

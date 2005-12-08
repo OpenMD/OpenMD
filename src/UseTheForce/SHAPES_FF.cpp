@@ -64,7 +64,8 @@ namespace oopse {
     //set default force field filename
     setForceFieldFileName("Shapes.frc");
     
-    //The ordering of section parsers is important
+    //The ordering of section parsers is important...
+    //OptionSectionParser must come first to set options for other parsers
     //DirectionalAtomTypesSectionParser should be before 
     //AtomTypesSectionParser since these two section parsers will actually 
     //create "real" AtomTypes (AtomTypesSectionParser will create AtomType 
@@ -78,16 +79,16 @@ namespace oopse {
     //of BondTypesSectionParser, BendTypesSectionParser and 
     //TorsionTypesSectionParser are not important.
     spMan_.push_back(new OptionSectionParser(forceFieldOptions_));
-    spMan_.push_back(new ShapeAtomTypesSectionParser());
-    spMan_.push_back(new DirectionalAtomTypesSectionParser());
+    spMan_.push_back(new ShapeAtomTypesSectionParser(forceFieldOptions_));
+    spMan_.push_back(new DirectionalAtomTypesSectionParser(forceFieldOptions_));
     spMan_.push_back(new AtomTypesSectionParser());
     spMan_.push_back(new LennardJonesAtomTypesSectionParser(forceFieldOptions_));
-    spMan_.push_back(new ChargeAtomTypesSectionParser());
-    spMan_.push_back(new MultipoleAtomTypesSectionParser());
-    spMan_.push_back(new StickyAtomTypesSectionParser());
-    spMan_.push_back(new BondTypesSectionParser());
-    spMan_.push_back(new BendTypesSectionParser());
-    spMan_.push_back(new TorsionTypesSectionParser());
+    spMan_.push_back(new ChargeAtomTypesSectionParser(forceFieldOptions_));
+    spMan_.push_back(new MultipoleAtomTypesSectionParser(forceFieldOptions_));
+    spMan_.push_back(new StickyAtomTypesSectionParser(forceFieldOptions_));
+    spMan_.push_back(new BondTypesSectionParser(forceFieldOptions_));
+    spMan_.push_back(new BendTypesSectionParser(forceFieldOptions_));
+    spMan_.push_back(new TorsionTypesSectionParser(forceFieldOptions_));
     
   }
   
