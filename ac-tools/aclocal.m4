@@ -462,7 +462,9 @@ AC_CACHE_CHECK(whether we are *really* using GNU cc, ac_cv_prog_really_gcc,
 dnl The semicolon after "yes" below is to pacify NeXT's syntax-checking cpp.
 cat > conftest.c <<EOF
 #ifdef __GNUC__
-  #ifndef __INTEL_COMPILER
+  #if defined(__INTEL_COMPILER) || defined(__PATHCC__)
+     no;
+  #else
      yes;
   #endif
 #endif
@@ -489,8 +491,10 @@ AC_CACHE_CHECK(whether we are *really* using GNU c++, ac_cv_prog_really_gxx,
 [
 dnl The semicolon after "yes" below is to pacify NeXT's syntax-checking cpp.
 cat > conftest.cpp <<EOF
-#ifdef __GNUC__ 
-  #ifndef __INTEL_COMPILER
+#ifdef __GNUC__
+  #if defined(__INTEL_COMPILER) || defined(__PATHCC__)
+     no;
+  #else
      yes;
   #endif
 #endif

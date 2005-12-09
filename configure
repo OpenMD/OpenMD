@@ -7622,7 +7622,9 @@ else
 
 cat > conftest.c <<EOF
 #ifdef __GNUC__
-  #ifndef __INTEL_COMPILER
+  #if defined(__INTEL_COMPILER) || defined(__PATHCC__)
+     no;
+  #else
      yes;
   #endif
 #endif
@@ -8083,7 +8085,9 @@ else
 
 cat > conftest.cpp <<EOF
 #ifdef __GNUC__
-  #ifndef __INTEL_COMPILER
+  #if defined(__INTEL_COMPILER) || defined(__PATHCC__)
+     no;
+  #else
      yes;
   #endif
 #endif
