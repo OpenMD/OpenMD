@@ -43,6 +43,7 @@
 
 #include <cctype>
 #include <locale>
+#include <algorithm>
 
 namespace oopse {
 
