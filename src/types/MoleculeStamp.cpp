@@ -202,14 +202,6 @@ void MoleculeStamp::checkBonds() {
     
 }
 
-struct BendLessThan : public std::binary_function<IntTuple4, IntTuple4, bool> {
-    bool operator()(IntTuple3 b1, IntTuple3 b2) {
-        return b1.first < b2.first
-             || (!(b2.first < b1.first) && b1.second < b2.second)
-             || (!(b2.first < b1.first) && !(b2.second < b2.second) && b1.third < b2.third);
-    }
-};
-
 void MoleculeStamp::checkBends() {
     for(int i = 0; i < getNBends(); ++i) {
         BendStamp* bendStamp = getBendStamp(i);
@@ -257,8 +249,8 @@ void MoleculeStamp::checkBends() {
     } 
     
     
-    std::set<IntTuple3, BendLessThan> allBends;
-    std::set<IntTuple3, BendLessThan>::iterator iter;
+    std::set<IntTuple3> allBends;
+    std::set<IntTuple3>::iterator iter;
     for(int i = 0; i < getNBends(); ++i) {
         BendStamp* bendStamp= getBendStamp(i);
         std::vector<int> bend = bendStamp->getMembers();
@@ -345,20 +337,6 @@ void MoleculeStamp::checkBends() {
 
 }
 
-struct TorsionLessThan : public std::binary_function<IntTuple4, IntTuple4, bool> {
-    bool operator()(IntTuple4 t1, IntTuple4 t2) {
-
-        return t1.first < t2.first
-             || (!(t2.first < t1.first) && t1.second < t2.second)
-             || (!(t2.first < t1.first) && !(t2.second < t2.second) && t1.third < t2.third)
-             ||(!(t2.first < t1.first) && !(t2.second < t2.second) && !(t2.third < t1.third) && t1.fourth < t2.fourth);
-    }
-
-
-
-};
-
-
 void MoleculeStamp::checkTorsions() {
     for(int i = 0; i < getNTorsions(); ++i) {
         TorsionStamp* torsionStamp = getTorsionStamp(i);
@@ -385,8 +363,8 @@ void MoleculeStamp::checkTorsions() {
         }
     }     
 
-    std::set<IntTuple4, TorsionLessThan> allTorsions;
-    std::set<IntTuple4, TorsionLessThan>::iterator iter;
+    std::set<IntTuple4> allTorsions;
+    std::set<IntTuple4>::iterator iter;
      for(int i = 0; i < getNTorsions(); ++i) {
          TorsionStamp* torsionStamp= getTorsionStamp(i);
          std::vector<int> torsion = torsionStamp->getMembers();

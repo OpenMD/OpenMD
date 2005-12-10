@@ -84,7 +84,22 @@ namespace oopse {
     return tuple4<T1,T2,T3,T4>( t1, t2, t3, t4 );
   }
 
+template<class T1, class T2, class T3>
+inline bool operator < (const tuple3<T1, T2, T3>& t1, const tuple3<T1, T2, T3>& t2) {
 
+        return t1.first < t2.first
+             || (!(t2.first < t1.first) && t1.second < t2.second)
+             || (!(t2.first < t1.first) && !(t2.second < t2.second) && t1.third < t2.third);
+}
+
+template<class T1, class T2, class T3, class T4>
+inline bool operator < (const tuple4<T1, T2, T3, T4>& t1, const tuple4<T1, T2, T3, T4>& t2) {
+
+        return t1.first < t2.first
+             || (!(t2.first < t1.first) && t1.second < t2.second)
+             || (!(t2.first < t1.first) && !(t2.second < t2.second) && t1.third < t2.third)
+             ||(!(t2.first < t1.first) && !(t2.second < t2.second) && !(t2.third < t1.third) && t1.fourth < t2.fourth);
+}
 typedef tuple3<int, int, int> IntTuple3;
 typedef tuple4<int, int, int, int> IntTuple4;
 
