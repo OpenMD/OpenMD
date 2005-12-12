@@ -48,6 +48,7 @@
  */
 
 #include <cassert>
+#include <typeinfo>
 #include <set>
 
 #include "brains/MoleculeCreator.hpp"

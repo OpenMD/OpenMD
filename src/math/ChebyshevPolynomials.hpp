@@ -50,6 +50,7 @@
 #define MATH_CHEBYSHEVPOLYNOMIALS_HPP
 
 #include <vector>
+#include <cassert>
 
 #include "math/Polynomial.hpp"
 

@@ -1,8 +1,8 @@
-subroutine setElectrostaticSummationMethod(the_ESM)
-  use electrostatic_module, ONLY : module_setESM => setElectrostaticSummationMethod
+subroutine setElectrostaticSumMethod(the_ESM)
+  use electrostatic_module, ONLY : module_setESM => setElectrostaticSumMethod
   integer,intent(inout) :: the_ESM
   call module_setESM(the_ESM)
-end subroutine setElectrostaticSummationMethod
+end subroutine setElectrostaticSumMethod
 
 subroutine setScreeningMethod(the_SM)
   use electrostatic_module, ONLY : module_setSM => setScreeningMethod

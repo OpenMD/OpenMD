@@ -107,12 +107,12 @@ module electrostatic_module
   real(kind=dp), save :: f1c = 1.0_DP
   real(kind=dp), save :: f2c = 0.0_DP
 
-#ifdef __IFC
+#if defined(__IFC) || defined(__PGI)
 ! error function for ifc version > 7.
   double precision, external :: derfc
 #endif
   
-  public :: setElectrostaticSummationMethod
+  public :: setElectrostaticSumMethod
   public :: setScreeningMethod
   public :: setElectrostaticCutoffRadius
   public :: setDampingAlpha
@@ -146,16 +146,16 @@ module electrostatic_module
 
 contains
 
-  subroutine setElectrostaticSummationMethod(the_ESM)
+  subroutine setElectrostaticSumMethod(the_ESM)
     integer, intent(in) :: the_ESM    
 
     if ((the_ESM .le. 0) .or. (the_ESM .gt. REACTION_FIELD)) then
-       call handleError("setElectrostaticSummationMethod", "Unsupported Summation Method")
+       call handleError("setElectrostaticSumMethod", "Unsupported Summation Method")
     endif
 
     summationMethod = the_ESM
 
-  end subroutine setElectrostaticSummationMethod
+  end subroutine setElectrostaticSumMethod
 
   subroutine setScreeningMethod(the_SM)
     integer, intent(in) :: the_SM    

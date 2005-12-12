@@ -41,6 +41,7 @@ GNU General Public License for more details.
 #include <string>
 #include <vector>
 #include <map>
+#include <typeinfo>
 
 //#include "dlhandler.h"
 

@@ -47,7 +47,7 @@
 #include "config.h"
 #include "types/AtomTypeProperties.h"
  
-#define setElectrostaticSummationMethod F90_FUNC(setelectrostaticsummationmethod, SETELECTROSTATICSUMMATIONMETHOD)
+#define setElectrostaticSumMethod F90_FUNC(setelectrostaticsummethod, SETELECTROSTATICSUMMETHOD)
 #define setScreeningMethod F90_FUNC(setscreeningmethod, SETSCREENINGMETHOD)
 #define setElectrostaticCutoffRadius F90_FUNC(setelectrostaticcutoffradius, SETELECTROSTATICCUTOFFRADIUS)
 #define setDampingAlpha F90_FUNC(setdampingalpha, SETDAMPINGALPHA)
@@ -63,7 +63,7 @@
 #define destroyElectrostaticTypes F90_FUNC(destroyelectrostatictypes,DESTROYELECTROSTATICTYPES)
 extern "C"{
 
-  void setElectrostaticSummationMethod( int* theESM );
+  void setElectrostaticSumMethod( int* theESM );
   void setScreeningMethod( int* theSM );
   void setElectrostaticCutoffRadius( double* theECR, double* theRSW );
   void setDampingAlpha( double* theDA );

@@ -44,14 +44,14 @@ subroutine doForceloop(q, q_group, A, eFrame, f, t, tau, pot, &
 
 end subroutine doForceloop
 
-subroutine notifyFortranElectrostaticMethod(electrostaticMethod)
+subroutine setFortranElectrostaticMethod(electrostaticMethod)
   use doForces, ONLY : setElectrostaticMethod
 
   integer, intent(in) :: electrostaticMethod
 
   call setElectrostaticMethod(electrostaticMethod)
 
-end subroutine notifyFortranElectrostaticMethod
+end subroutine setFortranElectrostaticMethod
 
 subroutine notifyFortranCutoffPolicy(cutPolicy)
   use doForces, ONLY : setCutoffPolicy
