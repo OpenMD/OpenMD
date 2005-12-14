@@ -256,9 +256,9 @@ void MDTreeParser::constant(ANTLR_USE_NAMESPACE(antlr)RefAST _t,
 		case OCTALINT:
 		case DECIMALINT:
 		case HEXADECIMALINT:
-		case MINUS:
 		case FLOATONE:
 		case FLOATTWO:
+		case MINUS:
 		{
 			signedIntOrFloat(_t,id);
 			_t = _retTree;
@@ -477,7 +477,7 @@ int  MDTreeParser::intConst(ANTLR_USE_NAMESPACE(antlr)RefAST _t) {
 }
 
 double  MDTreeParser::floatConst(ANTLR_USE_NAMESPACE(antlr)RefAST _t) {
-#line 266 "MDTreeParser.g"
+#line 264 "MDTreeParser.g"
 	double dval;
 #line 483 "MDTreeParser.cpp"
 	ANTLR_USE_NAMESPACE(antlr)RefAST floatConst_AST_in = (_t == ASTNULL) ? ANTLR_USE_NAMESPACE(antlr)nullAST : _t;
@@ -493,7 +493,7 @@ double  MDTreeParser::floatConst(ANTLR_USE_NAMESPACE(antlr)RefAST _t) {
 			d1 = _t;
 			match(_t,FLOATONE);
 			_t = _t->getNextSibling();
-#line 267 "MDTreeParser.g"
+#line 265 "MDTreeParser.g"
 			dval = lexi_cast<double>(d1->getText());
 #line 499 "MDTreeParser.cpp"
 			break;
@@ -503,7 +503,7 @@ double  MDTreeParser::floatConst(ANTLR_USE_NAMESPACE(antlr)RefAST _t) {
 			d2 = _t;
 			match(_t,FLOATTWO);
 			_t = _t->getNextSibling();
-#line 268 "MDTreeParser.g"
+#line 266 "MDTreeParser.g"
 			dval = lexi_cast<double>(d2->getText());
 #line 509 "MDTreeParser.cpp"
 			break;
@@ -1027,7 +1027,7 @@ vector<double>  MDTreeParser::signedNumberTuple(ANTLR_USE_NAMESPACE(antlr)RefAST
 		for (;;) {
 			if (_t == ANTLR_USE_NAMESPACE(antlr)nullAST )
 				_t = ASTNULL;
-			if ((_tokenSet_2.member(_t->getType()))) {
+			if (((_t->getType() >= OCTALINT && _t->getType() <= FLOATTWO))) {
 				dval=signedNumber(_t);
 				_t = _retTree;
 #line 238 "MDTreeParser.g"
@@ -1354,8 +1354,6 @@ double  MDTreeParser::signedNumber(ANTLR_USE_NAMESPACE(antlr)RefAST _t) {
 	double dval;
 #line 1356 "MDTreeParser.cpp"
 	ANTLR_USE_NAMESPACE(antlr)RefAST signedNumber_AST_in = (_t == ASTNULL) ? ANTLR_USE_NAMESPACE(antlr)nullAST : _t;
-	ANTLR_USE_NAMESPACE(antlr)RefAST icMinus = ANTLR_USE_NAMESPACE(antlr)nullAST;
-	ANTLR_USE_NAMESPACE(antlr)RefAST fcMinus = ANTLR_USE_NAMESPACE(antlr)nullAST;
 	ANTLR_USE_NAMESPACE(antlr)RefAST ic = ANTLR_USE_NAMESPACE(antlr)nullAST;
 	ANTLR_USE_NAMESPACE(antlr)RefAST fc = ANTLR_USE_NAMESPACE(antlr)nullAST;
 	
@@ -1363,88 +1361,27 @@ double  MDTreeParser::signedNumber(ANTLR_USE_NAMESPACE(antlr)RefAST _t) {
 		if (_t == ANTLR_USE_NAMESPACE(antlr)nullAST )
 			_t = ASTNULL;
 		switch ( _t->getType()) {
-		case MINUS:
-		{
-			ANTLR_USE_NAMESPACE(antlr)RefAST __t75 = _t;
-			ANTLR_USE_NAMESPACE(antlr)RefAST tmp30_AST_in = _t;
-			match(_t,MINUS);
-			_t = _t->getFirstChild();
-			{
-			if (_t == ANTLR_USE_NAMESPACE(antlr)nullAST )
-				_t = ASTNULL;
-			switch ( _t->getType()) {
-			case OCTALINT:
-			case DECIMALINT:
-			case HEXADECIMALINT:
-			{
-				icMinus = (_t == ASTNULL) ? ANTLR_USE_NAMESPACE(antlr)nullAST : _t;
-				intConst(_t);
-				_t = _retTree;
-#line 257 "MDTreeParser.g"
-				dval = lexi_cast<double>(icMinus->getText()); dval = -dval;
-#line 1386 "MDTreeParser.cpp"
-				break;
-			}
-			case FLOATONE:
-			case FLOATTWO:
-			{
-				fcMinus = (_t == ASTNULL) ? ANTLR_USE_NAMESPACE(antlr)nullAST : _t;
-				floatConst(_t);
-				_t = _retTree;
-				break;
-			}
-			default:
-			{
-				throw ANTLR_USE_NAMESPACE(antlr)NoViableAltException(_t);
-			}
-			}
-			}
-#line 258 "MDTreeParser.g"
-			dval = lexi_cast<double>(fcMinus->getText());dval = -dval;
-#line 1405 "MDTreeParser.cpp"
-			_t = __t75;
-			_t = _t->getNextSibling();
-			break;
-		}
 		case OCTALINT:
 		case DECIMALINT:
 		case HEXADECIMALINT:
+		{
+			ic = (_t == ASTNULL) ? ANTLR_USE_NAMESPACE(antlr)nullAST : _t;
+			intConst(_t);
+			_t = _retTree;
+#line 258 "MDTreeParser.g"
+			dval = lexi_cast<double>(ic->getText());
+#line 1374 "MDTreeParser.cpp"
+			break;
+		}
 		case FLOATONE:
 		case FLOATTWO:
 		{
-			{
-			if (_t == ANTLR_USE_NAMESPACE(antlr)nullAST )
-				_t = ASTNULL;
-			switch ( _t->getType()) {
-			case OCTALINT:
-			case DECIMALINT:
-			case HEXADECIMALINT:
-			{
-				ic = (_t == ASTNULL) ? ANTLR_USE_NAMESPACE(antlr)nullAST : _t;
-				intConst(_t);
-				_t = _retTree;
-#line 260 "MDTreeParser.g"
-				dval = lexi_cast<double>(ic->getText());
-#line 1429 "MDTreeParser.cpp"
-				break;
-			}
-			case FLOATONE:
-			case FLOATTWO:
-			{
-				fc = (_t == ASTNULL) ? ANTLR_USE_NAMESPACE(antlr)nullAST : _t;
-				floatConst(_t);
-				_t = _retTree;
-#line 261 "MDTreeParser.g"
-				dval = lexi_cast<double>(fc->getText());
-#line 1440 "MDTreeParser.cpp"
-				break;
-			}
-			default:
-			{
-				throw ANTLR_USE_NAMESPACE(antlr)NoViableAltException(_t);
-			}
-			}
-			}
+			fc = (_t == ASTNULL) ? ANTLR_USE_NAMESPACE(antlr)nullAST : _t;
+			floatConst(_t);
+			_t = _retTree;
+#line 259 "MDTreeParser.g"
+			dval = lexi_cast<double>(fc->getText());
+#line 1385 "MDTreeParser.cpp"
 			break;
 		}
 		default:
@@ -1498,8 +1435,6 @@ const char* MDTreeParser::tokenNames[] = {
 	"OCTALINT",
 	"DECIMALINT",
 	"HEXADECIMALINT",
-	"PLUS",
-	"MINUS",
 	"FLOATONE",
 	"FLOATTWO",
 	"DOT",
@@ -1522,6 +1457,7 @@ const char* MDTreeParser::tokenNames[] = {
 	"Exponent",
 	"Vocabulary",
 	"Number",
+	"MINUS",
 	0
 };
 
@@ -1532,8 +1468,5 @@ const unsigned long MDTreeParser::_tokenSet_1_data_[] = { 540544UL, 0UL, 0UL, 0U
 // "atom" "bond" "bend" "torsion" "rigidBody" "cutoffGroup" "fragment" 
 // ASSIGNEQUAL 
 const ANTLR_USE_NAMESPACE(antlr)BitSet MDTreeParser::_tokenSet_1(_tokenSet_1_data_,4);
-const unsigned long MDTreeParser::_tokenSet_2_data_[] = { 3758096384UL, 14UL, 0UL, 0UL };
-// OCTALINT DECIMALINT HEXADECIMALINT MINUS FLOATONE FLOATTWO 
-const ANTLR_USE_NAMESPACE(antlr)BitSet MDTreeParser::_tokenSet_2(_tokenSet_2_data_,4);
 
 

@@ -18,7 +18,7 @@
 #line 19 "MDLexer.hpp"
 class CUSTOM_API MDLexer : public ANTLR_USE_NAMESPACE(antlr)CharScanner, public MDTokenTypes
 {
-#line 173 "MDParser.g"
+#line 170 "MDParser.g"
 
 
 
@@ -64,8 +64,6 @@ public:
 	public: void mRBRACKET(bool _createToken);
 	public: void mLCURLY(bool _createToken);
 	public: void mRCURLY(bool _createToken);
-	public: void mPLUS(bool _createToken);
-	public: void mMINUS(bool _createToken);
 	public: void mWhitespace(bool _createToken);
 	public: void mComment(bool _createToken);
 	protected: void mEndOfLine(bool _createToken);

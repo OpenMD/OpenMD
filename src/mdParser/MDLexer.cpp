@@ -120,18 +120,6 @@ ANTLR_USE_NAMESPACE(antlr)RefToken MDLexer::nextToken()
 				theRetToken=_returnToken;
 				break;
 			}
-			case 0x2b /* '+' */ :
-			{
-				mPLUS(true);
-				theRetToken=_returnToken;
-				break;
-			}
-			case 0x2d /* '-' */ :
-			{
-				mMINUS(true);
-				theRetToken=_returnToken;
-				break;
-			}
 			case 0x9 /* '\t' */ :
 			case 0xa /* '\n' */ :
 			case 0xc /* '\14' */ :
@@ -161,6 +149,8 @@ ANTLR_USE_NAMESPACE(antlr)RefToken MDLexer::nextToken()
 				theRetToken=_returnToken;
 				break;
 			}
+			case 0x2b /* '+' */ :
+			case 0x2d /* '-' */ :
 			case 0x2e /* '.' */ :
 			case 0x30 /* '0' */ :
 			case 0x31 /* '1' */ :
@@ -427,34 +417,6 @@ void MDLexer::mRCURLY(bool _createToken) {
 	_saveIndex=0;
 }
 
-void MDLexer::mPLUS(bool _createToken) {
-	int _ttype; ANTLR_USE_NAMESPACE(antlr)RefToken _token; ANTLR_USE_NAMESPACE(std)string::size_type _begin = text.length();
-	_ttype = PLUS;
-	ANTLR_USE_NAMESPACE(std)string::size_type _saveIndex;
-	
-	match('+' /* charlit */ );
-	if ( _createToken && _token==ANTLR_USE_NAMESPACE(antlr)nullToken && _ttype!=ANTLR_USE_NAMESPACE(antlr)Token::SKIP ) {
-	   _token = makeToken(_ttype);
-	   _token->setText(text.substr(_begin, text.length()-_begin));
-	}
-	_returnToken = _token;
-	_saveIndex=0;
-}
-
-void MDLexer::mMINUS(bool _createToken) {
-	int _ttype; ANTLR_USE_NAMESPACE(antlr)RefToken _token; ANTLR_USE_NAMESPACE(std)string::size_type _begin = text.length();
-	_ttype = MINUS;
-	ANTLR_USE_NAMESPACE(std)string::size_type _saveIndex;
-	
-	match('-' /* charlit */ );
-	if ( _createToken && _token==ANTLR_USE_NAMESPACE(antlr)nullToken && _ttype!=ANTLR_USE_NAMESPACE(antlr)Token::SKIP ) {
-	   _token = makeToken(_ttype);
-	   _token->setText(text.substr(_begin, text.length()-_begin));
-	}
-	_returnToken = _token;
-	_saveIndex=0;
-}
-
 void MDLexer::mWhitespace(bool _createToken) {
 	int _ttype; ANTLR_USE_NAMESPACE(antlr)RefToken _token; ANTLR_USE_NAMESPACE(std)string::size_type _begin = text.length();
 	_ttype = Whitespace;
@@ -511,9 +473,9 @@ void MDLexer::mWhitespace(bool _createToken) {
 		
 		}
 		if ( inputState->guessing==0 ) {
-#line 262 "MDParser.g"
+#line 259 "MDParser.g"
 			newline();
-#line 517 "MDLexer.cpp"
+#line 479 "MDLexer.cpp"
 		}
 		break;
 	}
@@ -539,10 +501,10 @@ void MDLexer::mWhitespace(bool _createToken) {
 		
 		}
 		if ( inputState->guessing==0 ) {
-#line 267 "MDParser.g"
+#line 264 "MDParser.g"
 			printf("CPP_parser.g continuation line detected\n");
 			deferredNewline();
-#line 546 "MDLexer.cpp"
+#line 508 "MDLexer.cpp"
 		}
 		break;
 	}
@@ -553,9 +515,9 @@ void MDLexer::mWhitespace(bool _createToken) {
 	}
 	}
 	if ( inputState->guessing==0 ) {
-#line 270 "MDParser.g"
+#line 267 "MDParser.g"
 		_ttype = ANTLR_USE_NAMESPACE(antlr)Token::SKIP;
-#line 559 "MDLexer.cpp"
+#line 521 "MDLexer.cpp"
 	}
 	if ( _createToken && _token==ANTLR_USE_NAMESPACE(antlr)nullToken && _ttype!=ANTLR_USE_NAMESPACE(antlr)Token::SKIP ) {
 	   _token = makeToken(_ttype);
@@ -579,9 +541,9 @@ void MDLexer::mComment(bool _createToken) {
 		else if ((LA(1) == 0xa /* '\n' */  || LA(1) == 0xd /* '\r' */ )) {
 			mEndOfLine(false);
 			if ( inputState->guessing==0 ) {
-#line 277 "MDParser.g"
+#line 274 "MDParser.g"
 				deferredNewline();
-#line 585 "MDLexer.cpp"
+#line 547 "MDLexer.cpp"
 			}
 		}
 		else if ((_tokenSet_0.member(LA(1)))) {
@@ -590,17 +552,17 @@ void MDLexer::mComment(bool _createToken) {
 			}
 		}
 		else {
-			goto _loop81;
+			goto _loop78;
 		}
 		
 	}
-	_loop81:;
+	_loop78:;
 	} // ( ... )*
 	match("*/");
 	if ( inputState->guessing==0 ) {
-#line 280 "MDParser.g"
+#line 277 "MDParser.g"
 		_ttype = ANTLR_USE_NAMESPACE(antlr)Token::SKIP;
-#line 604 "MDLexer.cpp"
+#line 566 "MDLexer.cpp"
 	}
 	if ( _createToken && _token==ANTLR_USE_NAMESPACE(antlr)nullToken && _ttype!=ANTLR_USE_NAMESPACE(antlr)Token::SKIP ) {
 	   _token = makeToken(_ttype);
@@ -652,17 +614,17 @@ void MDLexer::mCPPComment(bool _createToken) {
 			}
 		}
 		else {
-			goto _loop85;
+			goto _loop82;
 		}
 		
 	}
-	_loop85:;
+	_loop82:;
 	} // ( ... )*
 	mEndOfLine(false);
 	if ( inputState->guessing==0 ) {
-#line 286 "MDParser.g"
+#line 283 "MDParser.g"
 		_ttype = ANTLR_USE_NAMESPACE(antlr)Token::SKIP; newline();
-#line 666 "MDLexer.cpp"
+#line 628 "MDLexer.cpp"
 	}
 	if ( _createToken && _token==ANTLR_USE_NAMESPACE(antlr)nullToken && _ttype!=ANTLR_USE_NAMESPACE(antlr)Token::SKIP ) {
 	   _token = makeToken(_ttype);
@@ -680,9 +642,9 @@ void MDLexer::mPREPROC_DIRECTIVE(bool _createToken) {
 	match('#' /* charlit */ );
 	mLineDirective(false);
 	if ( inputState->guessing==0 ) {
-#line 293 "MDParser.g"
+#line 290 "MDParser.g"
 		_ttype = ANTLR_USE_NAMESPACE(antlr)Token::SKIP; newline();
-#line 686 "MDLexer.cpp"
+#line 648 "MDLexer.cpp"
 	}
 	if ( _createToken && _token==ANTLR_USE_NAMESPACE(antlr)nullToken && _ttype!=ANTLR_USE_NAMESPACE(antlr)Token::SKIP ) {
 	   _token = makeToken(_ttype);
@@ -700,11 +662,11 @@ void MDLexer::mLineDirective(bool _createToken) {
 	ANTLR_USE_NAMESPACE(antlr)RefToken sl;
 	
 	if ( inputState->guessing==0 ) {
-#line 299 "MDParser.g"
+#line 296 "MDParser.g"
 		
 		deferredLineCount = 0;
 		
-#line 708 "MDLexer.cpp"
+#line 670 "MDLexer.cpp"
 	}
 	{
 	switch ( LA(1)) {
@@ -726,74 +688,74 @@ void MDLexer::mLineDirective(bool _createToken) {
 	}
 	}
 	{ // ( ... )+
-	int _cnt90=0;
+	int _cnt87=0;
 	for (;;) {
 		if ((LA(1) == 0x9 /* '\t' */  || LA(1) == 0xc /* '\14' */  || LA(1) == 0x20 /* ' ' */ )) {
 			mSpace(false);
 		}
 		else {
-			if ( _cnt90>=1 ) { goto _loop90; } else {throw ANTLR_USE_NAMESPACE(antlr)NoViableAltForCharException(LA(1), getFilename(), getLine(), getColumn());}
+			if ( _cnt87>=1 ) { goto _loop87; } else {throw ANTLR_USE_NAMESPACE(antlr)NoViableAltForCharException(LA(1), getFilename(), getLine(), getColumn());}
 		}
 		
-		_cnt90++;
+		_cnt87++;
 	}
-	_loop90:;
+	_loop87:;
 	}  // ( ... )+
 	mDecimal(true);
 	n=_returnToken;
 	if ( inputState->guessing==0 ) {
-#line 304 "MDParser.g"
+#line 301 "MDParser.g"
 		setLine(oopse::lexi_cast<int>(n->getText()) - 1);
-#line 748 "MDLexer.cpp"
+#line 710 "MDLexer.cpp"
 	}
 	{ // ( ... )+
-	int _cnt92=0;
+	int _cnt89=0;
 	for (;;) {
 		if ((LA(1) == 0x9 /* '\t' */  || LA(1) == 0xc /* '\14' */  || LA(1) == 0x20 /* ' ' */ )) {
 			mSpace(false);
 		}
 		else {
-			if ( _cnt92>=1 ) { goto _loop92; } else {throw ANTLR_USE_NAMESPACE(antlr)NoViableAltForCharException(LA(1), getFilename(), getLine(), getColumn());}
+			if ( _cnt89>=1 ) { goto _loop89; } else {throw ANTLR_USE_NAMESPACE(antlr)NoViableAltForCharException(LA(1), getFilename(), getLine(), getColumn());}
 		}
 		
-		_cnt92++;
+		_cnt89++;
 	}
-	_loop92:;
+	_loop89:;
 	}  // ( ... )+
 	{
 	mStringLiteral(true);
 	sl=_returnToken;
 	}
 	if ( inputState->guessing==0 ) {
-#line 306 "MDParser.g"
+#line 303 "MDParser.g"
 		std::string filename = sl->getText().substr(1,sl->getText().length()-2); observer->notify(filename);
-#line 771 "MDLexer.cpp"
+#line 733 "MDLexer.cpp"
 	}
 	{ // ( ... )*
 	for (;;) {
 		if ((LA(1) == 0x9 /* '\t' */  || LA(1) == 0xc /* '\14' */  || LA(1) == 0x20 /* ' ' */ )) {
 			{ // ( ... )+
-			int _cnt96=0;
+			int _cnt93=0;
 			for (;;) {
 				if ((LA(1) == 0x9 /* '\t' */  || LA(1) == 0xc /* '\14' */  || LA(1) == 0x20 /* ' ' */ )) {
 					mSpace(false);
 				}
 				else {
-					if ( _cnt96>=1 ) { goto _loop96; } else {throw ANTLR_USE_NAMESPACE(antlr)NoViableAltForCharException(LA(1), getFilename(), getLine(), getColumn());}
+					if ( _cnt93>=1 ) { goto _loop93; } else {throw ANTLR_USE_NAMESPACE(antlr)NoViableAltForCharException(LA(1), getFilename(), getLine(), getColumn());}
 				}
 				
-				_cnt96++;
+				_cnt93++;
 			}
-			_loop96:;
+			_loop93:;
 			}  // ( ... )+
 			mDecimal(false);
 		}
 		else {
-			goto _loop97;
+			goto _loop94;
 		}
 		
 	}
-	_loop97:;
+	_loop94:;
 	} // ( ... )*
 	mEndOfLine(false);
 	if ( _createToken && _token==ANTLR_USE_NAMESPACE(antlr)nullToken && _ttype!=ANTLR_USE_NAMESPACE(antlr)Token::SKIP ) {
@@ -846,18 +808,18 @@ void MDLexer::mDecimal(bool _createToken) {
 	ANTLR_USE_NAMESPACE(std)string::size_type _saveIndex;
 	
 	{ // ( ... )+
-	int _cnt122=0;
+	int _cnt119=0;
 	for (;;) {
 		if (((LA(1) >= 0x30 /* '0' */  && LA(1) <= 0x39 /* '9' */ ))) {
 			matchRange('0','9');
 		}
 		else {
-			if ( _cnt122>=1 ) { goto _loop122; } else {throw ANTLR_USE_NAMESPACE(antlr)NoViableAltForCharException(LA(1), getFilename(), getLine(), getColumn());}
+			if ( _cnt119>=1 ) { goto _loop119; } else {throw ANTLR_USE_NAMESPACE(antlr)NoViableAltForCharException(LA(1), getFilename(), getLine(), getColumn());}
 		}
 		
-		_cnt122++;
+		_cnt119++;
 	}
-	_loop122:;
+	_loop119:;
 	}  // ( ... )+
 	if ( _createToken && _token==ANTLR_USE_NAMESPACE(antlr)nullToken && _ttype!=ANTLR_USE_NAMESPACE(antlr)Token::SKIP ) {
 	   _token = makeToken(_ttype);
@@ -895,9 +857,9 @@ void MDLexer::mStringLiteral(bool _createToken) {
 			
 			}
 			if ( inputState->guessing==0 ) {
-#line 346 "MDParser.g"
+#line 343 "MDParser.g"
 				deferredNewline();
-#line 901 "MDLexer.cpp"
+#line 863 "MDLexer.cpp"
 			}
 		}
 		else if ((_tokenSet_3.member(LA(1)))) {
@@ -906,11 +868,11 @@ void MDLexer::mStringLiteral(bool _createToken) {
 			}
 		}
 		else {
-			goto _loop107;
+			goto _loop104;
 		}
 		
 	}
-	_loop107:;
+	_loop104:;
 	} // ( ... )*
 	match('\"' /* charlit */ );
 	if ( _createToken && _token==ANTLR_USE_NAMESPACE(antlr)nullToken && _ttype!=ANTLR_USE_NAMESPACE(antlr)Token::SKIP ) {
@@ -1070,7 +1032,7 @@ void MDLexer::mEscape(bool _createToken) {
 	{
 		match('x' /* charlit */ );
 		{ // ( ... )+
-		int _cnt118=0;
+		int _cnt115=0;
 		for (;;) {
 			if (((LA(1) >= 0x30 /* '0' */  && LA(1) <= 0x39 /* '9' */ )) && (_tokenSet_1.member(LA(2))) && (true)) {
 				mDigit(false);
@@ -1082,12 +1044,12 @@ void MDLexer::mEscape(bool _createToken) {
 				matchRange('A','F');
 			}
 			else {
-				if ( _cnt118>=1 ) { goto _loop118; } else {throw ANTLR_USE_NAMESPACE(antlr)NoViableAltForCharException(LA(1), getFilename(), getLine(), getColumn());}
+				if ( _cnt115>=1 ) { goto _loop115; } else {throw ANTLR_USE_NAMESPACE(antlr)NoViableAltForCharException(LA(1), getFilename(), getLine(), getColumn());}
 			}
 			
-			_cnt118++;
+			_cnt115++;
 		}
-		_loop118:;
+		_loop115:;
 		}  // ( ... )+
 		break;
 	}
@@ -1271,18 +1233,18 @@ void MDLexer::mExponent(bool _createToken) {
 	}
 	}
 	{ // ( ... )+
-	int _cnt130=0;
+	int _cnt127=0;
 	for (;;) {
 		if (((LA(1) >= 0x30 /* '0' */  && LA(1) <= 0x39 /* '9' */ ))) {
 			mDigit(false);
 		}
 		else {
-			if ( _cnt130>=1 ) { goto _loop130; } else {throw ANTLR_USE_NAMESPACE(antlr)NoViableAltForCharException(LA(1), getFilename(), getLine(), getColumn());}
+			if ( _cnt127>=1 ) { goto _loop127; } else {throw ANTLR_USE_NAMESPACE(antlr)NoViableAltForCharException(LA(1), getFilename(), getLine(), getColumn());}
 		}
 		
-		_cnt130++;
+		_cnt127++;
 	}
-	_loop130:;
+	_loop127:;
 	}  // ( ... )+
 	if ( _createToken && _token==ANTLR_USE_NAMESPACE(antlr)nullToken && _ttype!=ANTLR_USE_NAMESPACE(antlr)Token::SKIP ) {
 	   _token = makeToken(_ttype);
@@ -1311,26 +1273,59 @@ void MDLexer::mNumber(bool _createToken) {
 	_ttype = Number;
 	ANTLR_USE_NAMESPACE(std)string::size_type _saveIndex;
 	
-	bool synPredMatched137 = false;
+	{
+	switch ( LA(1)) {
+	case 0x2b /* '+' */ :
+	{
+		match('+' /* charlit */ );
+		break;
+	}
+	case 0x2d /* '-' */ :
+	{
+		match('-' /* charlit */ );
+		break;
+	}
+	case 0x2e /* '.' */ :
+	case 0x30 /* '0' */ :
+	case 0x31 /* '1' */ :
+	case 0x32 /* '2' */ :
+	case 0x33 /* '3' */ :
+	case 0x34 /* '4' */ :
+	case 0x35 /* '5' */ :
+	case 0x36 /* '6' */ :
+	case 0x37 /* '7' */ :
+	case 0x38 /* '8' */ :
+	case 0x39 /* '9' */ :
+	{
+		break;
+	}
+	default:
+	{
+		throw ANTLR_USE_NAMESPACE(antlr)NoViableAltForCharException(LA(1), getFilename(), getLine(), getColumn());
+	}
+	}
+	}
+	{
+	bool synPredMatched136 = false;
 	if ((((LA(1) >= 0x30 /* '0' */  && LA(1) <= 0x39 /* '9' */ )) && (_tokenSet_6.member(LA(2))) && (true))) {
-		int _m137 = mark();
-		synPredMatched137 = true;
+		int _m136 = mark();
+		synPredMatched136 = true;
 		inputState->guessing++;
 		try {
 			{
 			{ // ( ... )+
-			int _cnt135=0;
+			int _cnt134=0;
 			for (;;) {
 				if (((LA(1) >= 0x30 /* '0' */  && LA(1) <= 0x39 /* '9' */ ))) {
 					mDigit(false);
 				}
 				else {
-					if ( _cnt135>=1 ) { goto _loop135; } else {throw ANTLR_USE_NAMESPACE(antlr)NoViableAltForCharException(LA(1), getFilename(), getLine(), getColumn());}
+					if ( _cnt134>=1 ) { goto _loop134; } else {throw ANTLR_USE_NAMESPACE(antlr)NoViableAltForCharException(LA(1), getFilename(), getLine(), getColumn());}
 				}
 				
-				_cnt135++;
+				_cnt134++;
 			}
-			_loop135:;
+			_loop134:;
 			}  // ( ... )+
 			{
 			switch ( LA(1)) {
@@ -1368,25 +1363,25 @@ void MDLexer::mNumber(bool _createToken) {
 			}
 		}
 		catch (ANTLR_USE_NAMESPACE(antlr)RecognitionException& pe) {
-			synPredMatched137 = false;
+			synPredMatched136 = false;
 		}
-		rewind(_m137);
+		rewind(_m136);
 		inputState->guessing--;
 	}
-	if ( synPredMatched137 ) {
+	if ( synPredMatched136 ) {
 		{ // ( ... )+
-		int _cnt139=0;
+		int _cnt138=0;
 		for (;;) {
 			if (((LA(1) >= 0x30 /* '0' */  && LA(1) <= 0x39 /* '9' */ ))) {
 				mDigit(false);
 			}
 			else {
-				if ( _cnt139>=1 ) { goto _loop139; } else {throw ANTLR_USE_NAMESPACE(antlr)NoViableAltForCharException(LA(1), getFilename(), getLine(), getColumn());}
+				if ( _cnt138>=1 ) { goto _loop138; } else {throw ANTLR_USE_NAMESPACE(antlr)NoViableAltForCharException(LA(1), getFilename(), getLine(), getColumn());}
 			}
 			
-			_cnt139++;
+			_cnt138++;
 		}
-		_loop139:;
+		_loop138:;
 		}  // ( ... )+
 		{
 		switch ( LA(1)) {
@@ -1399,11 +1394,11 @@ void MDLexer::mNumber(bool _createToken) {
 					mDigit(false);
 				}
 				else {
-					goto _loop142;
+					goto _loop141;
 				}
 				
 			}
-			_loop142:;
+			_loop141:;
 			} // ( ... )*
 			{
 			if ((_tokenSet_7.member(LA(1)))) {
@@ -1414,9 +1409,9 @@ void MDLexer::mNumber(bool _createToken) {
 			
 			}
 			if ( inputState->guessing==0 ) {
-#line 451 "MDParser.g"
+#line 450 "MDParser.g"
 				_ttype = FLOATONE;
-#line 1420 "MDLexer.cpp"
+#line 1415 "MDLexer.cpp"
 			}
 			break;
 		}
@@ -1427,9 +1422,9 @@ void MDLexer::mNumber(bool _createToken) {
 		{
 			mExponent(false);
 			if ( inputState->guessing==0 ) {
-#line 452 "MDParser.g"
+#line 451 "MDParser.g"
 				_ttype = FLOATTWO;
-#line 1433 "MDLexer.cpp"
+#line 1428 "MDLexer.cpp"
 			}
 			break;
 		}
@@ -1480,7 +1475,7 @@ void MDLexer::mNumber(bool _createToken) {
 		}
 		}
 		{ // ( ... )+
-		int _cnt160=0;
+		int _cnt159=0;
 		for (;;) {
 			switch ( LA(1)) {
 			case 0x61 /* 'a' */ :
@@ -1519,12 +1514,12 @@ void MDLexer::mNumber(bool _createToken) {
 			}
 			default:
 			{
-				if ( _cnt160>=1 ) { goto _loop160; } else {throw ANTLR_USE_NAMESPACE(antlr)NoViableAltForCharException(LA(1), getFilename(), getLine(), getColumn());}
+				if ( _cnt159>=1 ) { goto _loop159; } else {throw ANTLR_USE_NAMESPACE(antlr)NoViableAltForCharException(LA(1), getFilename(), getLine(), getColumn());}
 			}
 			}
-			_cnt160++;
+			_cnt159++;
 		}
-		_loop160:;
+		_loop159:;
 		}  // ( ... )+
 		{ // ( ... )*
 		for (;;) {
@@ -1543,40 +1538,40 @@ void MDLexer::mNumber(bool _createToken) {
 			}
 			default:
 			{
-				goto _loop162;
+				goto _loop161;
 			}
 			}
 		}
-		_loop162:;
+		_loop161:;
 		} // ( ... )*
 		if ( inputState->guessing==0 ) {
-#line 480 "MDParser.g"
+#line 479 "MDParser.g"
 			_ttype = HEXADECIMALINT;
-#line 1556 "MDLexer.cpp"
+#line 1551 "MDLexer.cpp"
 		}
 	}
 	else if ((LA(1) == 0x2e /* '.' */ )) {
 		match('.' /* charlit */ );
 		if ( inputState->guessing==0 ) {
-#line 458 "MDParser.g"
+#line 457 "MDParser.g"
 			_ttype = DOT;
-#line 1564 "MDLexer.cpp"
+#line 1559 "MDLexer.cpp"
 		}
 		{
 		if (((LA(1) >= 0x30 /* '0' */  && LA(1) <= 0x39 /* '9' */ ))) {
 			{ // ( ... )+
-			int _cnt147=0;
+			int _cnt146=0;
 			for (;;) {
 				if (((LA(1) >= 0x30 /* '0' */  && LA(1) <= 0x39 /* '9' */ ))) {
 					mDigit(false);
 				}
 				else {
-					if ( _cnt147>=1 ) { goto _loop147; } else {throw ANTLR_USE_NAMESPACE(antlr)NoViableAltForCharException(LA(1), getFilename(), getLine(), getColumn());}
+					if ( _cnt146>=1 ) { goto _loop146; } else {throw ANTLR_USE_NAMESPACE(antlr)NoViableAltForCharException(LA(1), getFilename(), getLine(), getColumn());}
 				}
 				
-				_cnt147++;
+				_cnt146++;
 			}
-			_loop147:;
+			_loop146:;
 			}  // ( ... )+
 			{
 			if ((_tokenSet_7.member(LA(1)))) {
@@ -1587,9 +1582,9 @@ void MDLexer::mNumber(bool _createToken) {
 			
 			}
 			if ( inputState->guessing==0 ) {
-#line 459 "MDParser.g"
+#line 458 "MDParser.g"
 				_ttype = FLOATONE;
-#line 1593 "MDLexer.cpp"
+#line 1588 "MDLexer.cpp"
 			}
 			{
 			switch ( LA(1)) {
@@ -1624,11 +1619,11 @@ void MDLexer::mNumber(bool _createToken) {
 				matchRange('0','7');
 			}
 			else {
-				goto _loop151;
+				goto _loop150;
 			}
 			
 		}
-		_loop151:;
+		_loop150:;
 		} // ( ... )*
 		{ // ( ... )*
 		for (;;) {
@@ -1647,16 +1642,16 @@ void MDLexer::mNumber(bool _createToken) {
 			}
 			default:
 			{
-				goto _loop153;
+				goto _loop152;
 			}
 			}
 		}
-		_loop153:;
+		_loop152:;
 		} // ( ... )*
 		if ( inputState->guessing==0 ) {
-#line 469 "MDParser.g"
+#line 468 "MDParser.g"
 			_ttype = OCTALINT;
-#line 1660 "MDLexer.cpp"
+#line 1655 "MDLexer.cpp"
 		}
 	}
 	else if (((LA(1) >= 0x31 /* '1' */  && LA(1) <= 0x39 /* '9' */ )) && (true) && (true)) {
@@ -1667,11 +1662,11 @@ void MDLexer::mNumber(bool _createToken) {
 				mDigit(false);
 			}
 			else {
-				goto _loop155;
+				goto _loop154;
 			}
 			
 		}
-		_loop155:;
+		_loop154:;
 		} // ( ... )*
 		{ // ( ... )*
 		for (;;) {
@@ -1690,22 +1685,23 @@ void MDLexer::mNumber(bool _createToken) {
 			}
 			default:
 			{
-				goto _loop157;
+				goto _loop156;
 			}
 			}
 		}
-		_loop157:;
+		_loop156:;
 		} // ( ... )*
 		if ( inputState->guessing==0 ) {
-#line 474 "MDParser.g"
+#line 473 "MDParser.g"
 			_ttype = DECIMALINT;
-#line 1703 "MDLexer.cpp"
+#line 1698 "MDLexer.cpp"
 		}
 	}
 	else {
 		throw ANTLR_USE_NAMESPACE(antlr)NoViableAltForCharException(LA(1), getFilename(), getLine(), getColumn());
 	}
 	
+	}
 	if ( _createToken && _token==ANTLR_USE_NAMESPACE(antlr)nullToken && _ttype!=ANTLR_USE_NAMESPACE(antlr)Token::SKIP ) {
 	   _token = makeToken(_ttype);
 	   _token->setText(text.substr(_begin, text.length()-_begin));
@@ -1876,11 +1872,11 @@ void MDLexer::mID(bool _createToken) {
 		}
 		default:
 		{
-			goto _loop166;
+			goto _loop165;
 		}
 		}
 	}
-	_loop166:;
+	_loop165:;
 	} // ( ... )*
 	_ttype = testLiteralsTable(_ttype);
 	if ( _createToken && _token==ANTLR_USE_NAMESPACE(antlr)nullToken && _ttype!=ANTLR_USE_NAMESPACE(antlr)Token::SKIP ) {
@@ -1895,31 +1891,31 @@ void MDLexer::mID(bool _createToken) {
 const unsigned long MDLexer::_tokenSet_0_data_[] = { 4294958079UL, 4294966271UL, 4294967295UL, 4294967295UL, 4294967295UL, 4294967295UL, 4294967295UL, 4294967295UL, 0UL, 0UL, 0UL, 0UL, 0UL, 0UL, 0UL, 0UL };
 // 0x0 0x1 0x2 0x3 0x4 0x5 0x6 0x7 0x8 0x9 0xb 0xc 0xe 0xf 0x10 0x11 0x12 
 // 0x13 0x14 0x15 0x16 0x17 0x18 0x19 0x1a 0x1b 0x1c 0x1d 0x1e 0x1f   ! 
-// \" # $ % & \' ( ) + , - . / 0 1 2 3 4 5 6 7 
+// \" # $ % & \' ( ) + , - . / 0 1 2 3 4 5 
 const ANTLR_USE_NAMESPACE(antlr)BitSet MDLexer::_tokenSet_0(_tokenSet_0_data_,16);
 const unsigned long MDLexer::_tokenSet_1_data_[] = { 4294958079UL, 4294967295UL, 4294967295UL, 4294967295UL, 4294967295UL, 4294967295UL, 4294967295UL, 4294967295UL, 0UL, 0UL, 0UL, 0UL, 0UL, 0UL, 0UL, 0UL };
 // 0x0 0x1 0x2 0x3 0x4 0x5 0x6 0x7 0x8 0x9 0xb 0xc 0xe 0xf 0x10 0x11 0x12 
 // 0x13 0x14 0x15 0x16 0x17 0x18 0x19 0x1a 0x1b 0x1c 0x1d 0x1e 0x1f   ! 
-// \" # $ % & \' ( ) * + , - . / 0 1 2 3 4 5 6 7 
+// \" # $ % & \' ( ) * + , - . / 0 1 2 3 4 5 
 const ANTLR_USE_NAMESPACE(antlr)BitSet MDLexer::_tokenSet_1(_tokenSet_1_data_,16);
 const unsigned long MDLexer::_tokenSet_2_data_[] = { 0UL, 2164195460UL, 268435456UL, 22298694UL, 0UL, 0UL, 0UL, 0UL, 0UL, 0UL };
-// \" \' 0 1 2 3 4 5 6 7 
+// \" \' 0 1 2 3 4 5 
 const ANTLR_USE_NAMESPACE(antlr)BitSet MDLexer::_tokenSet_2(_tokenSet_2_data_,10);
 const unsigned long MDLexer::_tokenSet_3_data_[] = { 4294958079UL, 4294967291UL, 4026531839UL, 4294967295UL, 4294967295UL, 4294967295UL, 4294967295UL, 4294967295UL, 0UL, 0UL, 0UL, 0UL, 0UL, 0UL, 0UL, 0UL };
 // 0x0 0x1 0x2 0x3 0x4 0x5 0x6 0x7 0x8 0x9 0xb 0xc 0xe 0xf 0x10 0x11 0x12 
 // 0x13 0x14 0x15 0x16 0x17 0x18 0x19 0x1a 0x1b 0x1c 0x1d 0x1e 0x1f   ! 
-// # $ % & \' ( ) * + , - . / 0 1 2 3 4 5 6 7 
+// # $ % & \' ( ) * + , - . / 0 1 2 3 4 5 
 const ANTLR_USE_NAMESPACE(antlr)BitSet MDLexer::_tokenSet_3(_tokenSet_3_data_,16);
 const unsigned long MDLexer::_tokenSet_4_data_[] = { 0UL, 67043456UL, 126UL, 126UL, 0UL, 0UL, 0UL, 0UL, 0UL, 0UL };
-// \' 0 1 2 3 4 5 6 7 
+// \' 0 1 2 3 4 5 
 const ANTLR_USE_NAMESPACE(antlr)BitSet MDLexer::_tokenSet_4(_tokenSet_4_data_,10);
 const unsigned long MDLexer::_tokenSet_5_data_[] = { 4294967295UL, 4294967167UL, 4294967295UL, 4294967295UL, 4294967295UL, 4294967295UL, 4294967295UL, 4294967295UL, 0UL, 0UL, 0UL, 0UL, 0UL, 0UL, 0UL, 0UL };
 // 0x0 0x1 0x2 0x3 0x4 0x5 0x6 0x7 0x8 0x9 0xa 0xb 0xc 0xd 0xe 0xf 0x10 
 // 0x11 0x12 0x13 0x14 0x15 0x16 0x17 0x18 0x19 0x1a 0x1b 0x1c 0x1d 0x1e 
-// 0x1f   ! \" # $ % & ( ) * + , - . / 0 1 2 3 4 5 6 7 
+// 0x1f   ! \" # $ % & ( ) * + , - . / 0 1 2 3 4 5 
 const ANTLR_USE_NAMESPACE(antlr)BitSet MDLexer::_tokenSet_5(_tokenSet_5_data_,16);
 const unsigned long MDLexer::_tokenSet_6_data_[] = { 0UL, 67059712UL, 48UL, 48UL, 0UL, 0UL, 0UL, 0UL, 0UL, 0UL };
-// . 0 1 2 3 4 5 6 7 
+// . 0 1 2 3 4 5 
 const ANTLR_USE_NAMESPACE(antlr)BitSet MDLexer::_tokenSet_6(_tokenSet_6_data_,10);
 const unsigned long MDLexer::_tokenSet_7_data_[] = { 0UL, 0UL, 48UL, 48UL, 0UL, 0UL, 0UL, 0UL, 0UL, 0UL };
 const ANTLR_USE_NAMESPACE(antlr)BitSet MDLexer::_tokenSet_7(_tokenSet_7_data_,10);

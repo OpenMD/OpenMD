@@ -41,9 +41,6 @@ tokens
   ENDBLOCK;
 }
 
-{
-    // Suppport C++-style single-line comments?
-}
 
 mdfile  : (statement)*
         ;
@@ -145,7 +142,7 @@ intConst
         ;
 
 protected
-signedNumber  : (PLUS! | MINUS^)? 
+signedNumber  :  
                 (intConst | floatConst)
               ;
               
@@ -209,8 +206,6 @@ RBRACKET        : ']' ;
 LCURLY          : '{' ;
 RCURLY          : '}' ;
 
-PLUS            : '+' ;
-MINUS           : '-' ;
 
 /*
 EQUAL           : "==" ;
@@ -445,7 +440,9 @@ Vocabulary
   ;
 
 Number
-  : 
+  :
+  ('+'|'-')?
+  (
     ( (Digit)+ ('.' | 'e' | 'E' | 'd' | 'D' ) )=> 
     (Digit)+
     ( '.' (Digit)* (Exponent)? {_ttype = FLOATONE;} //Zuo 3/12/01
@@ -478,6 +475,7 @@ Number
     (LongSuffix                //{_ttype = LongHexConst;}
     |UnsignedSuffix            //{_ttype = UnsignedHexConst;}
     )*                         {_ttype = HEXADECIMALINT;}   
+  )
   ;
 
 ID

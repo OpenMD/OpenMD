@@ -254,12 +254,10 @@ intConst returns [int ival]
 
 protected
 signedNumber  returns [double dval]
-              : #(MINUS (icMinus:intConst {dval = lexi_cast<double>(icMinus->getText()); dval = -dval;}
-                | fcMinus:floatConst) {dval = lexi_cast<double>(fcMinus->getText());dval = -dval;}
-                ) 
-              | (ic:intConst {dval = lexi_cast<double>(ic->getText());}
+              : 
+                ic:intConst {dval = lexi_cast<double>(ic->getText());}
                 | fc:floatConst {dval = lexi_cast<double>(fc->getText());} 
-                )               
+                               
               ;
               
 protected

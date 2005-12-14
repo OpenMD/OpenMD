@@ -18,9 +18,7 @@
 #line 19 "MDParser.hpp"
 class CUSTOM_API MDParser : public ANTLR_USE_NAMESPACE(antlr)LLkParser, public MDTokenTypes
 {
-#line 44 "MDParser.g"
-
-    // Suppport C++-style single-line comments?
+#line 1 "MDParser.g"
 #line 23 "MDParser.hpp"
 public:
 	void initializeASTFactory( ANTLR_USE_NAMESPACE(antlr)ASTFactory& factory );
@@ -84,10 +82,10 @@ protected:
 private:
 	static const char* tokenNames[];
 #ifndef NO_STATIC_CONSTS
-	static const int NUM_TOKENS = 56;
+	static const int NUM_TOKENS = 54;
 #else
 	enum {
-		NUM_TOKENS = 56
+		NUM_TOKENS = 54
 	};
 #endif
 	
