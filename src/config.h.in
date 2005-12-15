@@ -119,6 +119,18 @@
 /* Define to 1 if you have the `sranddev' function. */
 #undef HAVE_SRANDDEV
 
+/* Define to 1 if you have the `strcasecmp' function. */
+#undef HAVE_STRCASECMP
+
+/* Define to 1 if you have the `strncasecmp' function. */
+#undef HAVE_STRNCASECMP
+
+/* Define to 1 if you have the `stricmp' function. */
+#undef HAVE_STRICMP
+
+/* Define to 1 if you have the `strnicmp' function. */
+#undef HAVE_STRNICMP
+
 /* Define to 1 if you have the <sstream> header file. */
 #undef HAVE_SSTREAM
 

@@ -5,6 +5,9 @@ AC_CONFIG_AUX_DIR(ac-tools)
 
 builtin(include, ac-tools/fortran90.m4)
 builtin(include, ac-tools/aclocal.m4)
+builtin(include, ac-tools/AC_CXX_HAVE_STL.m4)
+builtin(include, ac-tools/AC_CXX_NAMESPACES.m4)
+builtin(include, ac-tools/AC_CXX_STD.m4)
 
 AC_CONFIG_SRCDIR([src/applications/oopse/oopse.cpp])
 
@@ -122,22 +125,21 @@ AC_SUBST(F90_MODULE_NAMES)
 AC_LANG_POP
 
 AC_LANG_CPLUSPLUS
+AC_HEADER_STDC
+AC_CXX_NAMESPACES
+AC_CXX_STD
+
 dnl Checks for libraries.
 AC_CHECK_LIB(m, asin, , exit)
 
 AC_LANG_C
 ACX_CHECK_ZLIB
 dnl Checks for header files.
-AC_CHECK_HEADERS(sys/time.h unistd.h stdlib.h stdio.h conio.h string.h)
-AC_CHECK_HEADERS(strstream.h iostream.h fstream.h math.h time.h)
+AC_CHECK_HEADERS([stdlib.h string.h sys/param.h unistd.h sys/time.h stdio.h conio.h strstream.h iostream.h fstream.h math.h time.h sys/pstat.h sys/sysmp.h sys/sysinfo.h sys/table.h sys/sysctl.h sys/sytemcfg.h machine/hal_sysinfo.h])
 AC_LANG_CPLUSPLUS
-AC_CHECK_HEADERS(ctype.h iostream fstream sstream strstream)
+AC_CHECK_HEADERS([ctype.h iostream fstream sstream strstream])
 AC_LANG_C
-AC_CHECK_HEADERS(sys/pstat.h sys/sysmp.h sys/sysinfo.h)
-AC_CHECK_HEADERS(sys/table.h sys/param.h sys/sysctl.h sys/sytemcfg.h)
-AC_CHECK_HEADERS(machine/hal_sysinfo.h)
-AC_CHECK_FUNCS(rint snprintf sranddev strncasecmp)
-AC_CHECK_FUNCS(pstat_getstatic sysmp getsysinfo sysctl table)
+AC_CHECK_FUNCS([rint snprintf sranddev strcasecmp strncasecmp stricmp strnicmp pstat_getstatic sysmp getsysinfo sysctl table])
 # special check for _system_configuration because AIX <4.3.2 do not
 # contain the `physmem' member.
 AC_MSG_CHECKING([for external symbol _system_configuration])
@@ -154,8 +156,6 @@ AC_CHECK_TYPES(clock_t)
 AC_C_CONST
 AC_C_INLINE
 
-dnl Checks for library functions.
-AC_CHECK_FUNCS([rint sranddev])
 
 dnl check for system getopt
 adl_FUNC_GETOPT_LONG
