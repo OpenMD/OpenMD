@@ -5,7 +5,7 @@
  * Project led by Terence Parr at http://www.jGuru.com
  * Software rights: http://www.antlr.org/license.html
  *
- * $Id: config.hpp,v 1.1 2005-12-02 15:38:02 tim Exp $
+ * $Id: config.hpp,v 1.2 2005-12-15 14:48:26 gezelter Exp $
  */
 
 /*
@@ -85,7 +85,6 @@
 # define NEEDS_OPERATOR_LESS_THAN
 // No strcasecmp in the C library (so use stricmp instead)
 // - Anyone know which is in which standard?
-# define NO_STRCASECMP
 # undef ANTLR_CCTYPE_NEEDS_STD
 
 // needed for CharScannerLiteralsLess
@@ -162,7 +161,6 @@
  *****************************************************************************/
 #ifdef __BCPLUSPLUS__
 # define NO_TEMPLATE_PARTS
-# define NO_STRCASECMP
 # undef ANTLR_CCTYPE_NEEDS_STD
 #endif	// End of C++ Builder 3.0
 /*}}}*/
@@ -173,7 +171,6 @@
 
 // No strcasecmp in the C library (so use stricmp instead)
 // - Anyone know which is in which standard?
-# define NO_STRCASECMP
 # undef ANTLR_CCTYPE_NEEDS_STD
 
 #endif	// end IBM VisualAge C++
@@ -187,7 +184,6 @@
 # endif
 
 // CW 6.0 and 7.0 still do not have it.
-# define ANTLR_REALLY_NO_STRCASECMP
 
 # undef ANTLR_C_USING
 # define ANTLR_C_USING(_x_)   using std:: ## _x_;
@@ -230,11 +226,6 @@
 #	  undef ANTLR_IOS_BASE
 #	  define ANTLR_IOS_BASE ios
 #	  undef ANTLR_CCTYPE_NEEDS_STD
-// compiling with -ansi ?
-#	  ifdef __STRICT_ANSI__
-#		undef ANTLR_REALLY_NO_STRCASECMP
-#		define ANTLR_REALLY_NO_STRCASECMP
-#	  endif
 #	else
 // experimental .96 .97 branches..
 #	 undef ANTLR_CCTYPE_NEEDS_STD

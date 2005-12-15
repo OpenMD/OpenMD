@@ -5,7 +5,7 @@
  * Project led by Terence Parr at http://www.jGuru.com
  * Software rights: http://www.antlr.org/license.html
  *
- * $Id: CharScanner.hpp,v 1.1 2005-12-02 15:38:02 tim Exp $
+ * $Id: CharScanner.hpp,v 1.2 2005-12-15 14:48:26 gezelter Exp $
  */
 
 #include <antlr/config.hpp>
@@ -40,9 +40,15 @@ class ANTLR_API CharScanner;
 
 ANTLR_C_USING(tolower)
 
-#ifdef ANTLR_REALLY_NO_STRCASECMP
-// Apparently, neither strcasecmp nor stricmp is standard, and Codewarrior
-// on the mac has neither...
+#if !defined(HAVE_STRCASECMP) && defined(HAVE_STRICMP) && !defined(stricmp)
+#define strcasecmp stricmp
+#endif
+#if !defined(HAVE_STRNCASECMP) && defined(HAVE_STRNICMP) && !defined(strnicmp)
+#define strncasecmp strnicmp
+#endif
+
+
+#if !defined(HAVE_STRCASECMP) && !defined(HAVE_STRICMP)
 inline int strcasecmp(const char *s1, const char *s2)
 {
 	while (true)
@@ -54,12 +60,6 @@ inline int strcasecmp(const char *s1, const char *s2)
 		if (c1 == 0) return 0;
 	}
 }
-#else
-#ifdef NO_STRCASECMP
-ANTLR_C_USING(stricmp)
-#else
-ANTLR_C_USING(strcasecmp)
-#endif
 #endif
 
 /** Functor for the literals map
