@@ -45,7 +45,7 @@
 
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: doForces.F90,v 1.70 2005-12-08 22:04:40 gezelter Exp $, $Date: 2005-12-08 22:04:40 $, $Name: not supported by cvs2svn $, $Revision: 1.70 $
+!! @version $Id: doForces.F90,v 1.71 2005-12-15 21:43:16 gezelter Exp $, $Date: 2005-12-15 21:43:16 $, $Name: not supported by cvs2svn $, $Revision: 1.71 $
 
 
 module doForces
@@ -436,7 +436,6 @@ contains
              groupMaxCutoffRow(i)=atypeMaxCutoff(me_i)
           endif          
        enddo
-
        if (nGroupTypesRow.eq.0) then
           nGroupTypesRow = nGroupTypesRow + 1
           gtypeMaxCutoffRow(nGroupTypesRow) = groupMaxCutoffRow(i)
@@ -579,14 +578,16 @@ contains
 
      localError = 0
      call setLJDefaultCutoff( defaultRcut, defaultDoShift )
+     call setElectrostaticCutoffRadius( defaultRcut, defaultRsw )
      call setCutoffEAM( defaultRcut, localError)
      if (localError /= 0) then
        write(errMsg, *) 'An error has occured in setting the EAM cutoff'
        call handleError("setCutoffs", errMsg)
      end if
      call set_switch(GROUP_SWITCH, defaultRsw, defaultRcut)
-     
+
      haveDefaultCutoffs = .true.
+     haveGtypeCutoffMap = .false.
    end subroutine setCutoffs
 
    subroutine cWasLame()
@@ -602,9 +603,7 @@ contains
      
      cutoffPolicy = cutPolicy
      haveCutoffPolicy = .true.
-     write(*,*) 'have cutoffPolicy in F = ', cutPolicy
-
-     call createGtypeCutoffMap()
+     haveGtypeCutoffMap = .false.
      
    end subroutine setCutoffPolicy
    
@@ -622,9 +621,8 @@ contains
      real(kind=dp), intent(in) :: thisSkin
      
      skinThickness = thisSkin
-     haveSkinThickness = .true.
-     
-     call createGtypeCutoffMap()
+     haveSkinThickness = .true.    
+     haveGtypeCutoffMap = .false.
      
    end subroutine setSkinThickness
       
