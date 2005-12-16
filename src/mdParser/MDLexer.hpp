@@ -18,7 +18,7 @@
 #line 19 "MDLexer.hpp"
 class CUSTOM_API MDLexer : public ANTLR_USE_NAMESPACE(antlr)CharScanner, public MDTokenTypes
 {
-#line 170 "MDParser.g"
+#line 171 "MDParser.g"
 
 
 
@@ -76,13 +76,12 @@ public:
 	public: void mCharLiteral(bool _createToken);
 	protected: void mEscape(bool _createToken);
 	protected: void mDigit(bool _createToken);
-	protected: void mLongSuffix(bool _createToken);
-	protected: void mUnsignedSuffix(bool _createToken);
-	protected: void mFloatSuffix(bool _createToken);
-	protected: void mExponent(bool _createToken);
 	protected: void mVocabulary(bool _createToken);
-	public: void mNumber(bool _createToken);
 	public: void mID(bool _createToken);
+	protected: void mHEX_DIGIT(bool _createToken);
+	public: void mNUM_INT(bool _createToken);
+	protected: void mEXPONENT(bool _createToken);
+	protected: void mFLOAT_SUFFIX(bool _createToken);
 private:
 	
 	static const unsigned long _tokenSet_0_data_[];
@@ -101,6 +100,8 @@ private:
 	static const ANTLR_USE_NAMESPACE(antlr)BitSet _tokenSet_6;
 	static const unsigned long _tokenSet_7_data_[];
 	static const ANTLR_USE_NAMESPACE(antlr)BitSet _tokenSet_7;
+	static const unsigned long _tokenSet_8_data_[];
+	static const ANTLR_USE_NAMESPACE(antlr)BitSet _tokenSet_8;
 };
 
 #endif /*INC_MDLexer_hpp_*/

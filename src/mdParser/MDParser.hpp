@@ -51,7 +51,8 @@ public:
 	public: void moleculeblock();
 	public: void zconstraintblock();
 	public: void constant();
-	protected: void signedNumber();
+	protected: void intConst();
+	protected: void floatConst();
 	public: void moleculestatement();
 	public: void atomblock();
 	public: void bondblock();
@@ -60,9 +61,8 @@ public:
 	public: void rigidbodyblock();
 	public: void cutoffgroupblock();
 	public: void fragmentblock();
-	protected: void intConst();
 	public: void atomstatement();
-	public: void signedNumberTuple();
+	public: void doubleNumberTuple();
 	public: void bondstatement();
 	public: void inttuple();
 	public: void bendstatement();
@@ -70,7 +70,7 @@ public:
 	public: void rigidbodystatement();
 	public: void cutoffgroupstatement();
 	public: void fragmentstatement();
-	protected: void floatConst();
+	protected: void doubleNumber();
 public:
 	ANTLR_USE_NAMESPACE(antlr)RefAST getAST()
 	{
@@ -82,10 +82,10 @@ protected:
 private:
 	static const char* tokenNames[];
 #ifndef NO_STATIC_CONSTS
-	static const int NUM_TOKENS = 54;
+	static const int NUM_TOKENS = 51;
 #else
 	enum {
-		NUM_TOKENS = 54
+		NUM_TOKENS = 51
 	};
 #endif
 	
@@ -117,6 +117,8 @@ private:
 	static const ANTLR_USE_NAMESPACE(antlr)BitSet _tokenSet_12;
 	static const unsigned long _tokenSet_13_data_[];
 	static const ANTLR_USE_NAMESPACE(antlr)BitSet _tokenSet_13;
+	static const unsigned long _tokenSet_14_data_[];
+	static const ANTLR_USE_NAMESPACE(antlr)BitSet _tokenSet_14;
 };
 
 #endif /*INC_MDParser_hpp_*/

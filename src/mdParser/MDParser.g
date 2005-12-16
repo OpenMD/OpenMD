@@ -54,7 +54,8 @@ statement : assignment
 assignment  : ID ASSIGNEQUAL^ constant SEMICOLON!
             ;
             
-constant    : signedNumber
+constant    : intConst
+						| floatConst
             | ID
             | StringLiteral
             ;
@@ -82,8 +83,8 @@ atomblock : ATOM^ LBRACKET! intConst RBRACKET! LCURLY! (atomstatement)* RCURLY {
           ;
 
 atomstatement : assignment
-              | POSITION^ LPAREN! signedNumberTuple RPAREN! SEMICOLON!
-              | ORIENTATION^  LPAREN! signedNumberTuple RPAREN! SEMICOLON!
+              | POSITION^ LPAREN! doubleNumberTuple RPAREN! SEMICOLON!
+              | ORIENTATION^  LPAREN! doubleNumberTuple RPAREN! SEMICOLON!
               ;
 
                       
@@ -130,7 +131,7 @@ fragmentstatement : assignment
 
 
               
-signedNumberTuple   : signedNumber (COMMA! signedNumber)* 
+doubleNumberTuple   : doubleNumber (COMMA! doubleNumber)* 
               ;
                           
 inttuple      : intConst (COMMA! intConst)*
@@ -138,18 +139,18 @@ inttuple      : intConst (COMMA! intConst)*
               
 protected
 intConst
-        :  OCTALINT | DECIMALINT | HEXADECIMALINT
+        :  NUM_INT | NUM_LONG
         ;
 
 protected
-signedNumber  :  
+doubleNumber  :  
                 (intConst | floatConst)
               ;
               
 protected
 floatConst
         : 
-          FLOATONE | FLOATTWO
+          NUM_FLOAT | NUM_DOUBLE
         ;
 
 
@@ -205,46 +206,6 @@ LBRACKET        : '[' ;
 RBRACKET        : ']' ;
 LCURLY          : '{' ;
 RCURLY          : '}' ;
-
-
-/*
-EQUAL           : "==" ;
-NOTEQUAL        : "!=" ;
-LESSTHANOREQUALTO     : "<=" ;
-LESSTHAN              : "<" ;
-GREATERTHANOREQUALTO  : ">=" ;
-GREATERTHAN           : ">" ;
-
-DIVIDE          : '/' ;
-DIVIDEEQUAL     : "/=" ;
-PLUS            : '+' ;
-PLUSEQUAL       : "+=" ;
-PLUSPLUS        : "++" ;
-MINUS           : '-' ;
-MINUSEQUAL      : "-=" ;
-MINUSMINUS      : "--" ;
-STAR            : '*' ;
-TIMESEQUAL      : "*=" ;
-MOD             : '%' ;
-MODEQUAL        : "%=" ;
-SHIFTRIGHT      : ">>" ;
-SHIFTRIGHTEQUAL : ">>=" ;
-SHIFTLEFT       : "<<" ;
-SHIFTLEFTEQUAL  : "<<=" ;
-
-AND            : "&&" ;
-NOT            : '!' ;
-OR             : "||" ;
-
-AMPERSAND       : '&' ;
-BITWISEANDEQUAL : "&=" ;
-TILDE           : '~' ;
-BITWISEOR       : '|' ;
-BITWISEOREQUAL  : "|=" ;
-BITWISEXOR      : '^' ;
-BITWISEXOREQUAL : "^=" ;
-*/
-
 
 Whitespace  
   : 
@@ -395,7 +356,21 @@ Escape
     )
   ;
 
-// Numeric Constants: 
+
+protected
+Vocabulary
+  : 
+    '\3'..'\377'
+  ;
+
+
+ID
+  options {testLiterals = true;}
+  : 
+    ('a'..'z'|'A'..'Z'|'_')
+    ('a'..'z'|'A'..'Z'|'_'|'0'..'9')*
+  ;
+
 
 protected
 Digit
@@ -409,78 +384,83 @@ Decimal
     ('0'..'9')+
   ;
 
+// hexadecimal digit (again, note it's protected!)
 protected
-LongSuffix
-  : 'l'
-  | 'L'
-  ;
+HEX_DIGIT
+	:	('0'..'9'|'A'..'F'|'a'..'f')
+	;
 
-protected
-UnsignedSuffix
-  : 'u'
-  | 'U'
-  ;
 
-protected
-FloatSuffix
-  : 'f'
-  | 'F'
-  ;
+// a numeric literal
+NUM_INT
+	{
+		bool isDecimal = false;
+		ANTLR_USE_NAMESPACE(antlr)RefToken t = ANTLR_USE_NAMESPACE(antlr)nullToken;
+	}
+    : ('+' | '-')?
+    (
+      '.' {_ttype = DOT;}
+            (	('0'..'9')+ (EXPONENT)? (f1:FLOAT_SUFFIX {t=f1;})?
+            {
+					if ( t &&
+						  (t->getText().find('f') != ANTLR_USE_NAMESPACE(std)string::npos ||
+							t->getText().find('F') != ANTLR_USE_NAMESPACE(std)string::npos ) ) {
+						_ttype = NUM_FLOAT;
+					}
+					else {
+						_ttype = NUM_DOUBLE; // assume double
+					}
+				}
+            )?
 
-protected
-Exponent
-  : 
-    ('e'|'E'|'d'|'D') ('+'|'-')? (Digit)+
-  ;
+	|	(	'0' {isDecimal = true;} // special case for just '0'
+			(	('x'|'X')
+				(											// hex
+					// the 'e'|'E' and float suffix stuff look
+					// like hex digits, hence the (...)+ doesn't
+					// know when to stop: ambig.  ANTLR resolves
+					// it correctly by matching immediately.  It
+					// is therefor ok to hush warning.
+					options {
+						warnWhenFollowAmbig=false;
+					}
+				:	HEX_DIGIT
+				)+
+			|	//float or double with leading zero
+				(('0'..'9')+ ('.'|EXPONENT|FLOAT_SUFFIX)) => ('0'..'9')+
+			|	('0'..'7')+									// octal
+			)?
+		|	('1'..'9') ('0'..'9')*  {isDecimal=true;}		// non-zero decimal
+		)
+		(	('l'|'L') { _ttype = NUM_LONG; }
 
-protected
-Vocabulary
-  : 
-    '\3'..'\377'
-  ;
-
-Number
-  :
-  ('+'|'-')?
-  (
-    ( (Digit)+ ('.' | 'e' | 'E' | 'd' | 'D' ) )=> 
-    (Digit)+
-    ( '.' (Digit)* (Exponent)? {_ttype = FLOATONE;} //Zuo 3/12/01
-    | Exponent                 {_ttype = FLOATTWO;} //Zuo 3/12/01
-    )                          //{_ttype = DoubleDoubleConst;}
-    (FloatSuffix               //{_ttype = FloatDoubleConst;}
-    |LongSuffix                //{_ttype = LongDoubleConst;}
-    )?
-  | 
-    '.'                        {_ttype = DOT;}
-    ( (Digit)+ (Exponent)?   {_ttype = FLOATONE;} //Zuo 3/12/01
-                                   //{_ttype = DoubleDoubleConst;}
-      (FloatSuffix           //{_ttype = FloatDoubleConst;}
-      |LongSuffix            //{_ttype = LongDoubleConst;}
-      )?
-    )?
-  | 
-    '0' ('0'..'7')*            //{_ttype = IntOctalConst;}
-    (LongSuffix                //{_ttype = LongOctalConst;}
-    |UnsignedSuffix            //{_ttype = UnsignedOctalConst;}
-    )*                         {_ttype = OCTALINT;}
-  | 
-    '1'..'9' (Digit)*          //{_ttype = IntIntConst;}
-    (LongSuffix                //{_ttype = LongIntConst;}
-    |UnsignedSuffix            //{_ttype = UnsignedIntConst;}
-    )*                         {_ttype = DECIMALINT;}  
-  | 
-    '0' ('x' | 'X') ('a'..'f' | 'A'..'F' | Digit)+
-                                   //{_ttype = IntHexConst;}
-    (LongSuffix                //{_ttype = LongHexConst;}
-    |UnsignedSuffix            //{_ttype = UnsignedHexConst;}
-    )*                         {_ttype = HEXADECIMALINT;}   
+		// only check to see if it's a float if looks like decimal so far
+		|	{isDecimal}?
+            (   '.' ('0'..'9')* (EXPONENT)? (f2:FLOAT_SUFFIX {t=f2;})?
+            |   EXPONENT (f3:FLOAT_SUFFIX {t=f3;})?
+            |   f4:FLOAT_SUFFIX {t=f4;}
+            )
+            {
+					if ( t &&
+						  (t->getText().find('f') != ANTLR_USE_NAMESPACE(std)string::npos ||
+							t->getText().find('F') != ANTLR_USE_NAMESPACE(std)string::npos ) ) {
+						_ttype = NUM_FLOAT;
+					}
+					else {
+						_ttype = NUM_DOUBLE; // assume double
+					}
+				}
+        )?
   )
-  ;
+	;
 
-ID
-  options {testLiterals = true;}
-  : 
-    ('a'..'z'|'A'..'Z'|'_')
-    ('a'..'z'|'A'..'Z'|'_'|'0'..'9')*
-  ;
+// a couple protected methods to assist in matching floating point numbers
+protected
+EXPONENT
+	:	('e'|'E') ('+'|'-')? ('0'..'9')+
+	;
+
+protected
+FLOAT_SUFFIX
+	:	'f'|'F'|'d'|'D'
+	;

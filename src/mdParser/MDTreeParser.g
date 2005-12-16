@@ -44,8 +44,13 @@ statement : assignment
 assignment  : #(ASSIGNEQUAL id:ID constant[#id]) //{blockStack.top()->assign(#ID->getText(),);}
             ;
             
-constant [ANTLR_USE_NAMESPACE(antlr)RefAST id]    
-            : signedIntOrFloat[#id]
+constant [ANTLR_USE_NAMESPACE(antlr)RefAST id]
+{
+  int ival;
+  double dval;
+}    
+            : ival=intConst {blockStack.top()->assign(id->getText(), ival);}
+            | dval=floatConst {blockStack.top()->assign(id->getText(), dval);}
             | str1:ID {blockStack.top()->assign(id->getText(), str1->getText());}
             | str2:StringLiteral { std::string s =  str2->getText();
                                    s = s.substr(1, s.length()-2);
@@ -53,18 +58,6 @@ constant [ANTLR_USE_NAMESPACE(antlr)RefAST id]
                                  }
             ;
             
-signedIntOrFloat [ANTLR_USE_NAMESPACE(antlr)RefAST id]  
-{
-  int ival;
-  double dval;
-}
-              : #(MINUS (icMinus:intConst {ival = lexi_cast<int>(icMinus->getText()); ival = -ival; blockStack.top()->assign(id->getText(), ival);}
-                | fcMinus:floatConst) {dval = lexi_cast<double>(fcMinus->getText());dval = -dval;  blockStack.top()->assign(id->getText(), dval);}
-                ) 
-              | (ic:intConst {ival = lexi_cast<int>(ic->getText()); blockStack.top()->assign(id->getText(), ival);}
-                | fc:floatConst {dval = lexi_cast<double>(fc->getText());  blockStack.top()->assign(id->getText(), dval);} 
-                )               
-              ;
 
 componentblock  : #(COMPONENT  {Component* currComponet = new Component(); blockStack.push(currComponet);}
                       (assignment)* 
@@ -112,8 +105,8 @@ AtomStamp* currAtomStamp =  static_cast<AtomStamp*>(blockStack.top());
 
 }
               : assignment
-              | #(POSITION dvec=signedNumberTuple) {currAtomStamp->setPosition(dvec);}
-              | #(ORIENTATION dvec=signedNumberTuple) {currAtomStamp->setOrientation(dvec);}
+              | #(POSITION dvec=doubleNumberTuple) {currAtomStamp->setPosition(dvec);}
+              | #(ORIENTATION dvec=doubleNumberTuple) {currAtomStamp->setOrientation(dvec);}
               ;
 
                       
@@ -231,11 +224,11 @@ fragmentstatement : assignment
 
 
               
-signedNumberTuple   returns [vector<double> dvec]
+doubleNumberTuple   returns [vector<double> dvec]
 {
   double dval;
 }
-              : (dval=signedNumber {dvec.push_back(dval);})+  
+              : (dval=doubleNumber {dvec.push_back(dval);})+  
               ;
                           
 inttuple  returns [vector<int> ivec]
@@ -247,13 +240,12 @@ inttuple  returns [vector<int> ivec]
 
 protected
 intConst returns [int ival]
-        : oival:OCTALINT {ival = lexi_cast<int>(oival->getText());} 
-        | dival:DECIMALINT {ival = lexi_cast<int>(dival->getText());}
-        | hival:HEXADECIMALINT {ival = lexi_cast<int>(hival->getText());}
+        : i1:NUM_INT {ival = lexi_cast<int>(i1->getText());} 
+        | i2:NUM_LONG {ival = lexi_cast<int>(i2->getText());}
         ;
 
 protected
-signedNumber  returns [double dval]
+doubleNumber  returns [double dval]
               : 
                 ic:intConst {dval = lexi_cast<double>(ic->getText());}
                 | fc:floatConst {dval = lexi_cast<double>(fc->getText());} 
@@ -262,7 +254,7 @@ signedNumber  returns [double dval]
               
 protected
 floatConst returns [double dval]
-        : d1:FLOATONE {dval = lexi_cast<double>(d1->getText());}  
-        | d2:FLOATTWO {dval = lexi_cast<double>(d2->getText());} 
+        : d1:NUM_FLOAT {dval = lexi_cast<double>(d1->getText());}  
+        | d2:NUM_DOUBLE {dval = lexi_cast<double>(d2->getText());} 
         ;
         
