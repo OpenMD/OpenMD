@@ -10,6 +10,14 @@
  #define UTILS_PREDICATE_HPP
 #include <locale>
 
+
+
+#if defined(__SUNPRO_CC)
+#  define USE_FACET(Type, loc) std::use_facet(loc, static_cast<Type*>(0))
+#else
+#  define USE_FACET(Type, loc) std::use_facet< Type >(loc)
+#endif
+
 namespace oopse {
 
 template<typename Derived>
@@ -22,7 +30,7 @@ struct CharClassification: public PredFacade<CharClassification> {
 
     template<typename CharT>
     bool operator()( CharT c ) const {
-        return std::use_facet< std::ctype<CharT> >(loc_).is( type_, c );
+        return USE_FACET(std::ctype<CharT>, loc_).is( type_, c );
     }
 
     private:

@@ -44,7 +44,7 @@
 #include <sstream>
 #include "types/MoleculeStamp.hpp"
 #include "utils/Tuple.hpp"
-
+#include "utils/MemoryUtils.hpp"
 namespace oopse {
 
 template<class ContainerType>
@@ -77,7 +77,13 @@ MoleculeStamp::MoleculeStamp() {
 }
 
 MoleculeStamp::~MoleculeStamp() {
-
+    MemoryUtils::deletePointers(atomStamps_);
+    MemoryUtils::deletePointers(bondStamps_);
+    MemoryUtils::deletePointers(bendStamps_);
+    MemoryUtils::deletePointers(torsionStamps_);
+    MemoryUtils::deletePointers(rigidBodyStamps_);
+    MemoryUtils::deletePointers(cutoffGroupStamps_);
+    MemoryUtils::deletePointers(fragmentStamps_);    
 }
 
 bool MoleculeStamp::addAtomStamp( AtomStamp* atom) {

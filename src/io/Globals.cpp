@@ -45,9 +45,9 @@
 #include <string>
 
 #include "io/Globals.hpp"
-#include "utils/simError.h"
-
 #include "io/ParamConstraint.hpp"
+#include "utils/MemoryUtils.hpp"
+#include "utils/simError.h"
 
 namespace oopse {
 Globals::Globals() {
@@ -121,8 +121,8 @@ Globals::Globals() {
 }
 
 Globals::~Globals() {
-
-
+    MemoryUtils::deletePointers(components_);
+    MemoryUtils::deletePointers(zconstraints_);
 }
 
 void Globals::validate() {

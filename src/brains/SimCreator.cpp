@@ -63,7 +63,17 @@
 #include "mdParser/MDParser.hpp"
 #include "mdParser/MDTreeParser.hpp"
 #include "mdParser/SimplePreprocessor.hpp"
+#include "antlr/ANTLRException.hpp"
+#include "antlr/TokenStreamRecognitionException.hpp"
+#include "antlr/TokenStreamIOException.hpp"
+#include "antlr/TokenStreamException.hpp"
+#include "antlr/RecognitionException.hpp"
+#include "antlr/CharStreamException.hpp"
 
+#include "antlr/MismatchedCharException.hpp"
+#include "antlr/MismatchedTokenException.hpp"
+#include "antlr/NoViableAltForCharException.hpp"
+#include "antlr/NoViableAltException.hpp"
 
 #ifdef IS_MPI
 #include "math/ParallelRandNumGen.hpp"
@@ -137,6 +147,34 @@ Globals* SimCreator::parseFile(const std::string mdFileName){
              simParams = treeParser.walkTree(parser.getAST());
 
         }
+      
+      catch(antlr::MismatchedCharException& e) {
+          cerr<< "parser exception: " << e.getMessage() << " " <<  e.getFilename() << ":" << e.getLine() << " " << e.getColumn() << endl;
+      }
+      catch(antlr::MismatchedTokenException &e) {
+          cerr<< "parser exception: " << e.getMessage() << " " <<  e.getFilename() << ":" << e.getLine() << " " << e.getColumn() << endl;
+      }
+      catch(antlr::NoViableAltForCharException &e) {
+          cerr<< "parser exception: " << e.getMessage() << " " <<  e.getFilename() << ":" << e.getLine() << " " << e.getColumn() << endl;
+      }
+      catch(antlr::NoViableAltException &e) {
+          cerr<< "parser exception: " << e.getMessage() << " " <<  e.getFilename() << ":" << e.getLine() << " " << e.getColumn() << endl;
+      }
+	catch(antlr::TokenStreamRecognitionException& e) {
+          cerr<< "parser exception: " << e.getMessage() << " " <<  e.getFilename() << ":" << e.getLine() << " " << e.getColumn() << endl;
+	}
+	catch(antlr::TokenStreamIOException& e) {
+          cerr<< "parser exception: " << e.getMessage() << endl;
+	}
+	catch(antlr::TokenStreamException& e) {
+          cerr<< "parser exception: " << e.getMessage() << endl;
+	}        
+       catch (antlr::RecognitionException& e) {
+          cerr<< "parser exception: " << e.getMessage() << " " <<  e.getFilename() << ":" << e.getLine() << " " << e.getColumn() << endl;
+       }
+       catch (antlr::CharStreamException& e) {
+            cerr << "parser exception: " << e.getMessage() << endl;
+       }
         catch (exception& e) {
             cerr << "parser exception: " << e.what() << endl;
         }
