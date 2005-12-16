@@ -7,7 +7,7 @@ component{
 }
 component{
   type = "Ar";
-  nMol =863;
+  nMol =862;
 }
 
 
