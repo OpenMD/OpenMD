@@ -364,7 +364,7 @@ static bool ParseConectRecord(char *buffer,OBMol &mol)
 		 << "  According to the PDB specification,\n"
 		 << "  the record should have 70 columns, but OpenBabel found "
 		 << strlen(buffer) << " columns.";
-	obErrorLog.ThrowError(__FUNCTION__, errorMsg.str() , obInfo);
+	obErrorLog.ThrowError(__func__, errorMsg.str() , obInfo);
     }
 
     // Serial number of the first atom, read from column 7-11 of the
@@ -377,7 +377,7 @@ static bool ParseConectRecord(char *buffer,OBMol &mol)
 	       << "  According to the PDB specification,\n"
 	       << "  columns 7-11 should contain the serial number of an atom.\n"
 	       << "  THIS CONECT RECORD WILL BE IGNORED.";
-	obErrorLog.ThrowError(__FUNCTION__, errorMsg.str() , obWarning);
+	obErrorLog.ThrowError(__func__, errorMsg.str() , obWarning);
         return(false);
     }
 
@@ -399,7 +399,7 @@ static bool ParseConectRecord(char *buffer,OBMol &mol)
 		 << "  columns 7-11 should contain the serial number of an atom.\n"
 		 << "  No atom was found with this serial number.\n"
 		 << "  THIS CONECT RECORD WILL BE IGNORED.";
-	obErrorLog.ThrowError(__FUNCTION__, errorMsg.str() , obWarning);
+	obErrorLog.ThrowError(__func__, errorMsg.str() , obWarning);
         return(false);
     }
 
@@ -448,7 +448,7 @@ static bool ParseConectRecord(char *buffer,OBMol &mol)
 		     << " should be connected\n"
 		     << "  However, an atom with serial #" << boundedAtomsSerialNumbers[k] << " was not found.\n"
 		     << "  THIS CONECT RECORD WILL BE IGNORED.";
-	    obErrorLog.ThrowError(__FUNCTION__, errorMsg.str() , obWarning);
+	    obErrorLog.ThrowError(__func__, errorMsg.str() , obWarning);
             break;
         }
 

@@ -362,7 +362,7 @@ void OBIsotopeTable::ParseLine(const char *buffer)
             _isotopes.push_back(row);
         }
 	else
-	  obErrorLog.ThrowError(__FUNCTION__, " Could not parse line in isotope table isotope.txt", obInfo);
+	  obErrorLog.ThrowError(__func__, " Could not parse line in isotope table isotope.txt", obInfo);
     }
 }
 
@@ -464,7 +464,7 @@ void OBTypeTable::ParseLine(const char *buffer)
 	    stringstream errorMsg;
 	    errorMsg << " Could not parse line in type translation table types.txt -- incorect number of columns";
 	    errorMsg << " found " << vc.size() << " expected " << _ncols << ".";
-	    obErrorLog.ThrowError(__FUNCTION__, errorMsg.str(), obInfo);
+	    obErrorLog.ThrowError(__func__, errorMsg.str(), obInfo);
 	  }
     }
     _linecount++;
@@ -485,7 +485,7 @@ bool OBTypeTable::SetFromType(const char* from)
             return(true);
         }
 
-    obErrorLog.ThrowError(__FUNCTION__, "Requested type column not found", obInfo);
+    obErrorLog.ThrowError(__func__, "Requested type column not found", obInfo);
 
     return(false);
 }
@@ -505,7 +505,7 @@ bool OBTypeTable::SetToType(const char* to)
             return(true);
         }
 
-    obErrorLog.ThrowError(__FUNCTION__, "Requested type column not found", obInfo);
+    obErrorLog.ThrowError(__func__, "Requested type column not found", obInfo);
 
     return(false);
 }
@@ -545,7 +545,7 @@ bool OBTypeTable::Translate(string &to, const string &from)
       }
 
     // Throw an error, copy the string and return false
-    obErrorLog.ThrowError(__FUNCTION__, "Cannot perform atom type translation: table cannot find requested types.", obWarning);
+    obErrorLog.ThrowError(__func__, "Cannot perform atom type translation: table cannot find requested types.", obWarning);
     to = from;
     return(false);
 }
@@ -878,7 +878,7 @@ void OBGlobalDataBase::Init()
             string s = "Unable to open data file '";
             s += _filename;
             s += "'";
-	    obErrorLog.ThrowError(__FUNCTION__, s, obWarning);
+	    obErrorLog.ThrowError(__func__, s, obWarning);
         }
 
     if (ifs1)
@@ -895,7 +895,7 @@ void OBGlobalDataBase::Init()
             string s = "Cannot initialize database '";
             s += _filename;
             s += "' which may cause further errors.";
-      obErrorLog.ThrowError(__FUNCTION__, "Cannot initialize database", obWarning);
+      obErrorLog.ThrowError(__func__, "Cannot initialize database", obWarning);
       }
       
 }

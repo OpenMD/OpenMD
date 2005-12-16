@@ -371,7 +371,7 @@ static ByteCode *AllocateByteCode(int type)
     result = (ByteCode*)malloc(sizeof(ByteCode));
     if( !result )
     {
-      obErrorLog.ThrowError(__FUNCTION__, "Unable to allocate byte codes for biomolecule residue perception.", obError);
+      obErrorLog.ThrowError(__func__, "Unable to allocate byte codes for biomolecule residue perception.", obError);
 	//        exit(1);
     }
     result->type = type;
@@ -442,7 +442,7 @@ static void DeleteByteCode(ByteCode *node)
 
 static void FatalMemoryError(void)
 {
-      obErrorLog.ThrowError(__FUNCTION__, "Unable to allocate memory for biomolecule residue / chain perception.", obError);
+      obErrorLog.ThrowError(__func__, "Unable to allocate memory for biomolecule residue / chain perception.", obError);
     //    exit(1);
 }
 
@@ -650,7 +650,7 @@ void GenerateByteCodes(ByteCode **node, int resid, int curr, int prev, int bond)
         errorMsg << "Residue " << ChainsResName[resid] << " atom " 
 		 << curr << endl;
 	errorMsg << "Previous = " << prev << " Fanout = " << count << endl;
-	obErrorLog.ThrowError(__FUNCTION__, errorMsg.str(), obWarning);
+	obErrorLog.ThrowError(__func__, errorMsg.str(), obWarning);
 	//        exit(1);
     }
     else if( StackPtr )
@@ -946,7 +946,7 @@ bool OBChainsParser::PerceiveChains(OBMol &mol, bool nukeSingleResidue)
     SetResidueInformation(mol, nukeSingleResidue);
     CleanupMol();
 
-    obErrorLog.ThrowError(__FUNCTION__,
+    obErrorLog.ThrowError(__func__,
 			  "Ran OpenBabel::PerceiveChains", obAuditMsg);
 
     return result;

@@ -78,7 +78,7 @@ void OBMol::FindSSSR()
     if (HasSSSRPerceived())
         return;
     SetSSSRPerceived();
-    obErrorLog.ThrowError(__FUNCTION__,
+    obErrorLog.ThrowError(__func__,
                           "Ran OpenBabel::FindSSSR", obAuditMsg);
 
     OBRing *ring;
@@ -330,7 +330,7 @@ void OBMol::FindRingAtomsAndBonds()
         return;
     SetFlag(OB_RINGFLAGS_MOL);
 
-    obErrorLog.ThrowError(__FUNCTION__,
+    obErrorLog.ThrowError(__func__,
                           "Ran OpenBabel::FindRingAtomsAndBonds", obAuditMsg);
 
     OBBitVec avisit,bvisit;

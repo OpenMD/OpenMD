@@ -66,7 +66,7 @@ public:
 		    std::string auditMsg = "OpenBabel::Read molecule ";
 		    std::string description(Description());
 		    auditMsg += description.substr(0,description.find('\n'));
-		    obErrorLog.ThrowError(__FUNCTION__,
+		    obErrorLog.ThrowError(__func__,
 					  auditMsg,
 					  obAuditMsg);
 
@@ -96,7 +96,7 @@ public:
 				std::string auditMsg = "OpenBabel::Molecule ";
 				auditMsg += pmol->GetTitle();
 				auditMsg += " has 0 atoms";
-				obErrorLog.ThrowError(__FUNCTION__,
+				obErrorLog.ThrowError(__func__,
 						auditMsg,
 						obInfo);
 			}
@@ -105,7 +105,7 @@ public:
 			std::string auditMsg = "OpenBabel::Write molecule ";
 			std::string description(Description());
 			auditMsg += description.substr(0,description.find('\n'));
-			obErrorLog.ThrowError(__FUNCTION__,
+			obErrorLog.ThrowError(__func__,
 					      auditMsg,
 					      obAuditMsg);
 

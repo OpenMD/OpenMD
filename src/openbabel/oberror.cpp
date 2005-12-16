@@ -113,7 +113,7 @@ Therefore, it is very easy to log errors:
 
 \code
    if (atomIndex < 1 || atomIndex > mol.NumAtoms() )
-    obErrorLog.ThrowError(__FUNCTION__, "Requested Atom Out of Range", obDebug);
+    obErrorLog.ThrowError(__func__, "Requested Atom Out of Range", obDebug);
 \endcode
 
 or
@@ -122,10 +122,10 @@ or
      stringstream errorMsg;
      errorMsg << " Could not parse line in type translation table types.txt -- incorect number of columns";
      errorMsg << " found " << vc.size() << " expected " << _ncols << ".";
-     obErrorLog.ThrowError(__FUNCTION__, errorMsg.str(), obInfo);
+     obErrorLog.ThrowError(__func__, errorMsg.str(), obInfo);
 \endcode
 
-The __FUNCTION__ builtin is defined by many compilers (e.g., <a
+The __func__ builtin is defined by many compilers (e.g., <a
 href="http://gcc.gnu.org/">GCC</a>) but can be defined to an empty
 string on some platforms without this compiler extension.
 

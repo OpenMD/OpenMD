@@ -181,7 +181,7 @@ void matrix3x3::SetColumn(int col, const vector3 &v)
 {
     if (col > 2)
     {
-        obErrorLog.ThrowError(__FUNCTION__,
+        obErrorLog.ThrowError(__func__,
                               "The method was called with col > 2.", obError);
     }
 
@@ -194,7 +194,7 @@ void matrix3x3::SetRow(int row, const vector3 &v)
 {
     if (row > 2)
     {
-        obErrorLog.ThrowError(__FUNCTION__,
+        obErrorLog.ThrowError(__func__,
                               "The method was called with row > 2.", obError);
     }
 
@@ -207,7 +207,7 @@ vector3 matrix3x3::GetColumn(unsigned int col)
 {
     if (col > 2)
     {
-        obErrorLog.ThrowError(__FUNCTION__,
+        obErrorLog.ThrowError(__func__,
                               "The method was called with col > 2.", obError);
     }
 
@@ -218,7 +218,7 @@ vector3 matrix3x3::GetRow(unsigned int row)
 {
     if (row > 2)
     {
-        obErrorLog.ThrowError(__FUNCTION__,
+        obErrorLog.ThrowError(__func__,
                               "The method was called with row > 2.", obError);
     }
 
@@ -291,7 +291,7 @@ matrix3x3 matrix3x3::inverse(void)
     double det = determinant();
     if (fabs(det) <= 1e-6)
     {
-        obErrorLog.ThrowError(__FUNCTION__,
+        obErrorLog.ThrowError(__func__,
                               "The method was called on a matrix with |determinant| <= 1e-6.", obError);
     }
 
@@ -431,7 +431,7 @@ matrix3x3 matrix3x3::findEigenvectorsIfSymmetric(vector3 &eigenvals)
 
     if (!isSymmetric())
     {
-        obErrorLog.ThrowError(__FUNCTION__,
+        obErrorLog.ThrowError(__func__,
                               "The method was called on a matrix that was not symmetric, i.e. where isSymetric() == false.", obError);
     }
 

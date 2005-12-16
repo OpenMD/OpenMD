@@ -71,7 +71,7 @@ void OBBondTyper::ParseLine(const char *buffer)
 	  errorMsg << " Error in OBBondTyper. Pattern is incorrect, found "
 		   << vs.size() << " tokens." << endl;
 	  errorMsg << " Buffer is: " << buffer << endl;
-	  obErrorLog.ThrowError(__FUNCTION__, errorMsg.str(), obInfo);
+	  obErrorLog.ThrowError(__func__, errorMsg.str(), obInfo);
 	  return;
         }
 

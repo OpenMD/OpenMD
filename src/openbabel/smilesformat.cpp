@@ -204,7 +204,7 @@ bool SMIFormat::WriteMolecule(OBBase* pOb,OBConversion* pConv)
 #endif
 	errorMsg << "SMILES Conversion failed: Molecule is too large to convert. Open Babel is currently limited to 1000 atoms." << endl;
 	errorMsg << "  Molecule size: " << mol.NumAtoms() << " atoms " << endl;
-	obErrorLog.ThrowError(__FUNCTION__, errorMsg.str(), obWarning);
+	obErrorLog.ThrowError(__func__, errorMsg.str(), obWarning);
 	return(false);
       }
 
@@ -2462,7 +2462,7 @@ bool FIXFormat::WriteMolecule(OBBase* pOb, OBConversion* pConv)
 #endif
       errorMsg << "SMILES Conversion failed: Molecule is too large to convert. Open Babel is currently limited to 1000 atoms." << endl;
       errorMsg << "  Molecule size: " << mol.NumAtoms() << " atoms " << endl;
-      obErrorLog.ThrowError(__FUNCTION__, errorMsg.str(), obInfo);
+      obErrorLog.ThrowError(__func__, errorMsg.str(), obInfo);
       return(false);
     }
 

@@ -535,13 +535,13 @@ static unsigned int GetAtomIDNumber(const char *atomid)
         }
         else
         {
-	  obErrorLog.ThrowError(__FUNCTION__, "Maximum number of atom ids exceeded", obWarning);
+	  obErrorLog.ThrowError(__func__, "Maximum number of atom ids exceeded", obWarning);
 	  return 0;
         }
     }
     else
     {
-      obErrorLog.ThrowError(__FUNCTION__, "NULL Atom IDs specified", obWarning);
+      obErrorLog.ThrowError(__func__, "NULL Atom IDs specified", obWarning);
       return 0;
     }
 }

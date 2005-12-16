@@ -532,7 +532,7 @@ if test "$ac_test_CFLAGS" != "set"; then
                     CFLAGS="-O"
                 fi;;
   sparc-solaris2*) if test "$CC" = cc; then
-                    CFLAGS="-native -fast -xO5 -dalign"
+                    CFLAGS="-O -dalign"
                  fi;;
 
   alpha*-osf*)  if test "$CC" = cc; then
@@ -660,7 +660,7 @@ if test "$ac_test_CXXFLAGS" != "set"; then
                     CXXFLAGS="-O"
                 fi;;
   sparc-solaris2*) if test "$CXX" = CC; then
-                    CXXFLAGS="-native -fast -xO5 -dalign"
+                    CXXFLAGS="-features=extensions -O -dalign"
                  fi;;
    rs6000*-aix*)  if test "$CXX" = xlC; then
                     CXXFLAGS="-O3 -qarch=pwrx -qtune=pwrx -qansialias -w"

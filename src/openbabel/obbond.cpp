@@ -102,7 +102,7 @@ void OBBond::SetLength(OBAtom *fixed, double length)
     vector3 v1,v2,v3,v4,v5;
     vector<int> children;
 
-    obErrorLog.ThrowError(__FUNCTION__,
+    obErrorLog.ThrowError(__func__,
                           "Ran OpenBabel::SetBondLength", obAuditMsg);
 
     int a = fixed->GetIdx();
@@ -433,7 +433,7 @@ bool OBBond::IsClosure()
 
     mol->SetClosureBondsPerceived();
 
-    obErrorLog.ThrowError(__FUNCTION__,
+    obErrorLog.ThrowError(__func__,
                           "Ran OpenBabel::PerceiveClosureBonds", obAuditMsg);
 
     OBBond *bond;

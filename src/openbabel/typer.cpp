@@ -69,7 +69,7 @@ void OBAtomTyper::ParseLine(const char *buffer)
         tokenize(vs,buffer);
         if (vs.empty() || vs.size() < 3)
 	  {
-	    obErrorLog.ThrowError(__FUNCTION__, " Could not parse INTHYB line in atom type table from atomtyp.txt", obInfo);
+	    obErrorLog.ThrowError(__func__, " Could not parse INTHYB line in atom type table from atomtyp.txt", obInfo);
             return;
 	  }
 
@@ -80,7 +80,7 @@ void OBAtomTyper::ParseLine(const char *buffer)
         {
             delete sp;
             sp = NULL;
-	    obErrorLog.ThrowError(__FUNCTION__, " Could not parse INTHYB line in atom type table from atomtyp.txt", obInfo);
+	    obErrorLog.ThrowError(__func__, " Could not parse INTHYB line in atom type table from atomtyp.txt", obInfo);
 	    return;
         }
     }
@@ -89,7 +89,7 @@ void OBAtomTyper::ParseLine(const char *buffer)
         tokenize(vs,buffer);
         if (vs.empty() || vs.size() < 3)
 	  {
-	    obErrorLog.ThrowError(__FUNCTION__, " Could not parse IMPVAL line in atom type table from atomtyp.txt", obInfo);
+	    obErrorLog.ThrowError(__func__, " Could not parse IMPVAL line in atom type table from atomtyp.txt", obInfo);
             return;
 	  }
 
@@ -98,7 +98,7 @@ void OBAtomTyper::ParseLine(const char *buffer)
             _vimpval.push_back(pair<OBSmartsPattern*,int> (sp,atoi((char*)vs[2].c_str())));
         else
         {
-	    obErrorLog.ThrowError(__FUNCTION__, " Could not parse IMPVAL line in atom type table from atomtyp.txt", obInfo);
+	    obErrorLog.ThrowError(__func__, " Could not parse IMPVAL line in atom type table from atomtyp.txt", obInfo);
             delete sp;
             sp = NULL;
 	    return;
@@ -109,7 +109,7 @@ void OBAtomTyper::ParseLine(const char *buffer)
         tokenize(vs,buffer);
         if (vs.empty() || vs.size() < 3)
 	  {
-	    obErrorLog.ThrowError(__FUNCTION__, " Could not parse EXTTYP line in atom type table from atomtyp.txt", obInfo);
+	    obErrorLog.ThrowError(__func__, " Could not parse EXTTYP line in atom type table from atomtyp.txt", obInfo);
             return;
 	  }
         sp = new OBSmartsPattern;
@@ -119,7 +119,7 @@ void OBAtomTyper::ParseLine(const char *buffer)
         {
             delete sp;
             sp = NULL;
-	    obErrorLog.ThrowError(__FUNCTION__, " Could not parse EXTTYP line in atom type table from atomtyp.txt", obInfo);
+	    obErrorLog.ThrowError(__func__, " Could not parse EXTTYP line in atom type table from atomtyp.txt", obInfo);
 	    return;
         }
     }
@@ -153,7 +153,7 @@ void OBAtomTyper::AssignTypes(OBMol &mol)
     if (!_init)
         Init();
 
-    obErrorLog.ThrowError(__FUNCTION__,
+    obErrorLog.ThrowError(__func__,
                           "Ran OpenBabel::AssignTypes", obAuditMsg);
 
     mol.SetAtomTypesPerceived();
@@ -178,7 +178,7 @@ void OBAtomTyper::AssignHyb(OBMol &mol)
     aromtyper.AssignAromaticFlags(mol);
 
     mol.SetHybridizationPerceived();
-    obErrorLog.ThrowError(__FUNCTION__,
+    obErrorLog.ThrowError(__func__,
                           "Ran OpenBabel::AssignHybridization", obAuditMsg);
 
     OBAtom *atom;
@@ -208,7 +208,7 @@ void OBAtomTyper::AssignImplicitValence(OBMol &mol)
         Init();
 
     mol.SetImplicitValencePerceived();
-    obErrorLog.ThrowError(__FUNCTION__,
+    obErrorLog.ThrowError(__func__,
                           "Ran OpenBabel::AssignImplicitValence", obAuditMsg);
 
     // FF Ensure that the aromatic typer will not be called
@@ -544,14 +544,14 @@ void OBAromaticTyper::ParseLine(const char *buffer)
         }
         else
         {
-	    obErrorLog.ThrowError(__FUNCTION__, " Could not parse line in aromatic typer from aromatic.txt", obInfo);
+	    obErrorLog.ThrowError(__func__, " Could not parse line in aromatic typer from aromatic.txt", obInfo);
             delete sp;
             sp = NULL;
 	    return;
         }
     }
     else
-      obErrorLog.ThrowError(__FUNCTION__, " Could not parse line in aromatic typer from aromatic.txt", obInfo);
+      obErrorLog.ThrowError(__func__, " Could not parse line in aromatic typer from aromatic.txt", obInfo);
 }
 
 OBAromaticTyper::~OBAromaticTyper()
@@ -572,7 +572,7 @@ void OBAromaticTyper::AssignAromaticFlags(OBMol &mol)
     if (mol.HasAromaticPerceived())
         return;
     mol.SetAromaticPerceived();
-    obErrorLog.ThrowError(__FUNCTION__,
+    obErrorLog.ThrowError(__func__,
                           "Ran OpenBabel::AssignAromaticFlags", obAuditMsg);
 
     _vpa.clear();

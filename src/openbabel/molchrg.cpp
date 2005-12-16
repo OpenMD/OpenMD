@@ -57,7 +57,7 @@ J. Gasteiger & M. Marsili, "A New Model for Calculating Atomic Charges in Molecu
 bool OBGastChrg::AssignPartialCharges(OBMol &mol)
 {
     //InitialPartialCharges(mol);
-    obErrorLog.ThrowError(__FUNCTION__,
+    obErrorLog.ThrowError(__func__,
                           "Ran OpenBabel::AssignPartialCharges", obAuditMsg);
 
     OBAtom *atom;

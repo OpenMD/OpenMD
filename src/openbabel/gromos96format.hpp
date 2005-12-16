@@ -107,7 +107,7 @@ public:
 	std::string auditMsg = "OpenBabel::Write molecule ";
 	std::string description(Description());
         auditMsg += description.substr( 0, description.find('\n') );
-        obErrorLog.ThrowError(__FUNCTION__,
+        obErrorLog.ThrowError(__func__,
                               auditMsg,
                               obAuditMsg);
 

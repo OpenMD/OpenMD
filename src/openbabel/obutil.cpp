@@ -288,7 +288,7 @@ OBAPI bool SafeOpen(ifstream &fs,char *filename)
         string error = "Unable to open file \'";
         error += filename;
         error += "\' in read mode";
-        obErrorLog.ThrowError(__FUNCTION__, error, obError);
+        obErrorLog.ThrowError(__func__, error, obError);
         return(false);
     }
 
@@ -314,7 +314,7 @@ OBAPI bool SafeOpen(ofstream &fs,char *filename)
         string error = "Unable to open file \'";
         error += filename;
         error += "\' in write mode";
-        obErrorLog.ThrowError(__FUNCTION__, error, obError);
+        obErrorLog.ThrowError(__func__, error, obError);
         return(false);
     }
 
@@ -404,7 +404,7 @@ OBAPI void InternalToCartesian(std::vector<OBInternalCoord*> &vic,OBMol &mol)
     if (vic.empty())
         return;
 
-    obErrorLog.ThrowError(__FUNCTION__,
+    obErrorLog.ThrowError(__func__,
                           "Ran OpenBabel::InternalToCartesian", obAuditMsg);
 
     for (atom = mol.BeginAtom(i);atom;atom = mol.NextAtom(i))
@@ -485,7 +485,7 @@ OBAPI void CartesianToInternal(std::vector<OBInternalCoord*> &vic,OBMol &mol)
     OBAtom *atom,*nbr,*ref;
     vector<OBNodeBase*>::iterator i,j,m;
 
-    obErrorLog.ThrowError(__FUNCTION__,
+    obErrorLog.ThrowError(__func__,
                           "Ran OpenBabel::CartesianToInternal", obAuditMsg);
 
     //set reference atoms

@@ -36,7 +36,7 @@ void OBMol::FindChiralCenters()
         return;
     SetChiralityPerceived();
 
-    obErrorLog.ThrowError(__FUNCTION__,
+    obErrorLog.ThrowError(__func__,
                           "Ran OpenBabel::FindChiralCenters", obAuditMsg);
 
     //do quick test to see if there are any possible chiral centers
@@ -280,7 +280,7 @@ double CalcSignedVolume(OBMol &mol,OBAtom *atm)
       strstream errorMsg;
 #endif
       errorMsg << "Cannot calculate a signed volume for an atom with a heavy atom valence of " << atm->GetHvyValence() << endl;
-      obErrorLog.ThrowError(__FUNCTION__, errorMsg.str(), obInfo);
+      obErrorLog.ThrowError(__func__, errorMsg.str(), obInfo);
       return(0.0);
     }
 
@@ -313,7 +313,7 @@ double CalcSignedVolume(OBMol &mol,OBAtom *atm)
         if (nbr_crds[j]==0 && use_central_atom==false)use_central_atom=true;
         else if (nbr_crds[j]==0)
 	  {
-	    obErrorLog.ThrowError(__FUNCTION__, "More than 2 neighbours have 0 co-ords when attempting 3D chiral calculation", obInfo);
+	    obErrorLog.ThrowError(__func__, "More than 2 neighbours have 0 co-ords when attempting 3D chiral calculation", obInfo);
 	  }
     }
 

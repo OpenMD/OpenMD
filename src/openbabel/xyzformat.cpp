@@ -42,14 +42,14 @@ bool XYZFormat::ReadMolecule(OBBase* pOb, OBConversion* pConv)
 
     if (!ifs.getline(buffer,BUFF_SIZE))
       {
-	obErrorLog.ThrowError(__FUNCTION__,
+	obErrorLog.ThrowError(__func__,
 			      "Problems reading an XYZ file: Cannot read the first line.", obWarning);
 	return(false);
       }
 
     if (sscanf(buffer, "%d", &natoms) == 0 || !natoms)
     {
-      obErrorLog.ThrowError(__FUNCTION__,
+      obErrorLog.ThrowError(__func__,
 			    "Problems reading an XYZ file: The first line must contain the number of atoms.", obWarning);
       return(false);
     }
@@ -61,7 +61,7 @@ bool XYZFormat::ReadMolecule(OBBase* pOb, OBConversion* pConv)
     // empty. Otherwise, use the title given by the calling function.
     if (!ifs.getline(buffer,BUFF_SIZE))
     {
-      obErrorLog.ThrowError(__FUNCTION__,
+      obErrorLog.ThrowError(__func__,
 			    "Problems reading an XYZ file: Could not read the second line (title/comments).", obWarning);
         return(false);
     }
@@ -84,7 +84,7 @@ bool XYZFormat::ReadMolecule(OBBase* pOb, OBConversion* pConv)
 		   << " According to line one, there should be " << natoms 
 		   << " atoms, and therefore " << natoms+2 << " lines in the file.";
 
-	  obErrorLog.ThrowError(__FUNCTION__, errorMsg.str() , obWarning);
+	  obErrorLog.ThrowError(__func__, errorMsg.str() , obWarning);
 	  return(false);
         }
         tokenize(vs,buffer);
@@ -96,7 +96,7 @@ bool XYZFormat::ReadMolecule(OBBase* pOb, OBConversion* pConv)
 		   << "According to the specifications, this line should contain exactly 4 entries, separated by white space." << endl
 		   << "However, OpenBabel found " << vs.size() << " items.";
 
-	  obErrorLog.ThrowError(__FUNCTION__, errorMsg.str() , obWarning);
+	  obErrorLog.ThrowError(__func__, errorMsg.str() , obWarning);
 	  return(false);
         }
 
@@ -124,7 +124,7 @@ bool XYZFormat::ReadMolecule(OBBase* pOb, OBConversion* pConv)
 		   << "According to the specifications, this line should contain exactly 4 entries, separated by white space." << endl
 		   << "OpenBabel could not interpret item #1 as a number.";
 
-	  obErrorLog.ThrowError(__FUNCTION__, errorMsg.str() , obWarning);
+	  obErrorLog.ThrowError(__func__, errorMsg.str() , obWarning);
 	  return(false);
         }
         double y = strtod((char*)vs[2].c_str(),&endptr);
@@ -136,7 +136,7 @@ bool XYZFormat::ReadMolecule(OBBase* pOb, OBConversion* pConv)
 		   << "According to the specifications, this line should contain exactly 4 entries, separated by white space." << endl
 		   << "OpenBabel could not interpret item #2 as a number.";
 
-	  obErrorLog.ThrowError(__FUNCTION__, errorMsg.str() , obWarning);
+	  obErrorLog.ThrowError(__func__, errorMsg.str() , obWarning);
 	  return(false);
         }
         double z = strtod((char*)vs[3].c_str(),&endptr);
@@ -148,7 +148,7 @@ bool XYZFormat::ReadMolecule(OBBase* pOb, OBConversion* pConv)
 		   << "According to the specifications, this line should contain exactly 4 entries, separated by white space." << endl
 		   << "OpenBabel could not interpret item #3 as a number.";
 
-	  obErrorLog.ThrowError(__FUNCTION__, errorMsg.str() , obWarning);
+	  obErrorLog.ThrowError(__func__, errorMsg.str() , obWarning);
 	  return(false);
         }
         atom->SetVector(x,y,z); //set coordinates

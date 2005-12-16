@@ -292,7 +292,7 @@ OBBitVec &OBBitVec::operator^= (OBBitVec &bv)
 OBBitVec &OBBitVec::operator-= (OBBitVec &bv)
 {
     if (GetSize() != bv._size)
-      obErrorLog.ThrowError(__FUNCTION__, "Subtracting sets of != size", obDebug);
+      obErrorLog.ThrowError(__func__, "Subtracting sets of != size", obDebug);
     else
     {
         OBBitVec tmp;
@@ -398,7 +398,7 @@ istream& operator>> ( istream &is, OBBitVec &bv )
 		    strstream errorMsg;
 #endif
             errorMsg << "Negative Bit: " << bit << endl;
-	    obErrorLog.ThrowError(__FUNCTION__, errorMsg.str(), obDebug);
+	    obErrorLog.ThrowError(__func__, errorMsg.str(), obDebug);
 	  }
     }
 
@@ -497,7 +497,7 @@ void OBBitVec::FromString(string &line, int bits)
 	    strstream errorMsg;
 #endif
             errorMsg << "Negative Bit: " << bit << endl;
-	    obErrorLog.ThrowError(__FUNCTION__, errorMsg.str(), obDebug);
+	    obErrorLog.ThrowError(__func__, errorMsg.str(), obDebug);
 	  }
     }
 }

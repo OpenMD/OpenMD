@@ -1164,7 +1164,7 @@ bool OBAtom::HtoMethyl()
     if (!IsHydrogen())
         return(false);
 
-    obErrorLog.ThrowError(__FUNCTION__,
+    obErrorLog.ThrowError(__func__,
                           "Ran OpenBabel::HtoMethyl", obAuditMsg);
 
     OBMol *mol = (OBMol*)GetParent();
@@ -1231,7 +1231,7 @@ static void ApplyRotMatToBond(OBMol &mol,matrix3x3 &m,OBAtom *a1,OBAtom *a2)
 
 bool OBAtom::SetHybAndGeom(int hyb)
 {
-    obErrorLog.ThrowError(__FUNCTION__,
+    obErrorLog.ThrowError(__func__,
                           "Ran OpenBabel::SetHybridizationAndGeometry",
 			  obAuditMsg);
 

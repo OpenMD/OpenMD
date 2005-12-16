@@ -162,7 +162,7 @@ void OBMol::NewPerceiveKekuleBonds()
 	}
 	if (bestorden==99) {  // no electron giving atom found
 	  errorMsg << "Kekulize: Huckel rule not satisfied for molecule " << GetTitle() << endl;
-	  obErrorLog.ThrowError(__FUNCTION__, errorMsg.str(), obInfo);
+	  obErrorLog.ThrowError(__func__, errorMsg.str(), obInfo);
 	  break;             // Huckel rule cannot be satisfied
 	}                    // try to kekulize anyway
 	else {
@@ -189,7 +189,7 @@ void OBMol::NewPerceiveKekuleBonds()
 	  }
 	  if (bestorden==99) {  // no electron giving atom found
 	    errorMsg << "Kekulize: Cannot get an even number of electron for molecule " << GetTitle() << "\n";
-	  obErrorLog.ThrowError(__FUNCTION__, errorMsg.str(), obInfo);
+	  obErrorLog.ThrowError(__func__, errorMsg.str(), obInfo);
 	    break;             // impossible to choose an atom to obtain an even number of electron
 	  }                    // try to kekulize anyway
 	  else {
@@ -338,7 +338,7 @@ void OBMol::start_kekulize( std::vector <OBAtom*> &cycle, std::vector<int> &elec
     strstream errorMsg;
 #endif
     errorMsg << "Kekulize Error for molecule " << GetTitle() << endl;
-    obErrorLog.ThrowError(__FUNCTION__, errorMsg.str(), obInfo);
+    obErrorLog.ThrowError(__func__, errorMsg.str(), obInfo);
     }
 
   // Set the double bonds
@@ -418,7 +418,7 @@ int OBMol::expand_kekulize(OBAtom *atom1, OBAtom *atom2, std::vector<int> &curre
 
     errorMsg << "unexpected state:" << "atom " << Idx1 << " " << currentState[Idx1] 
 	 << " atom " << Idx2 << " " << currentState[Idx2] << endl;
-    obErrorLog.ThrowError(__FUNCTION__, errorMsg.str(), obDebug);
+    obErrorLog.ThrowError(__func__, errorMsg.str(), obDebug);
     return(false);
   }
 

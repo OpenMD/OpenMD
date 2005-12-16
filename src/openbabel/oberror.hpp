@@ -58,7 +58,7 @@ class OBAPI OBError
 {
 public:
 
-  //! Constructor for an error message e.g. OBError(__FUNCTION__, " message ")
+  //! Constructor for an error message e.g. OBError(__func__, " message ")
   OBError( const std::string &method = "",
 	   const std::string &errorMsg = "",
 	   const std::string &explanation = "",

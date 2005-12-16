@@ -229,7 +229,7 @@ contains
        sigma_l   = GBMap%GBtypes(gbt1)%sigma_l    
        eps_l     = GBMap%GBtypes(gbt1)%eps_l      
     else
-       call handleError("GB", "GB-pair was called with two different GB types! OOPSE can only handle interactions for one GB type at a time.")
+       call handleError("GB", "GB-pair was called with two different GB types!")
     endif
 
     s2 = (l2b_ratio)**2

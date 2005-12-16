@@ -132,7 +132,6 @@ AC_CXX_STD
 dnl Checks for libraries.
 AC_CHECK_LIB(m, asin, , exit)
 
-AC_LANG_C
 ACX_CHECK_ZLIB
 dnl Checks for header files.
 AC_CHECK_HEADERS([stdlib.h string.h sys/param.h unistd.h sys/time.h stdio.h conio.h strstream.h iostream.h fstream.h math.h time.h sys/pstat.h sys/sysmp.h sys/sysinfo.h sys/table.h sys/sysctl.h sys/sytemcfg.h machine/hal_sysinfo.h])
@@ -171,6 +170,37 @@ case $debug in
    ACX_PROG_F90_MAXOPT
      ;;
 esac
+
+AC_LANG_CPLUSPLUS
+# AC_CPP_FUNC
+# ------------------ #
+# Checks to see if ANSI C99 CPP variable __func__ works.
+# If not, perhaps __FUNCTION__ works instead. 
+# If not, we'll just define __func__ to "". 
+AC_DEFUN([AC_CPP_FUNC],
+[AC_REQUIRE([AC_PROG_CC_STDC])dnl
+AC_CACHE_CHECK([for an ANSI C99-conforming __func__], ac_cv_cpp_func,
+[AC_COMPILE_IFELSE([AC_LANG_PROGRAM([],
+[[const char *foo = __func__;]])],
+  [ac_cv_cpp_func=yes], 
+  [AC_COMPILE_IFELSE([AC_LANG_PROGRAM([],
+[[const char *foo = __FUNCTION__;]])],
+  [ac_cv_cpp_func=__FUNCTION__], 
+  [ac_cv_cpp_func=no])])])
+if test $ac_cv_cpp_func = __FUNCTION__; then
+  AC_DEFINE(__func__,__FUNCTION__,
+            [Define to __FUNCTION__ or "" if `__func__' does not conform to 
+ANSI C.])
+elif test $ac_cv_cpp_func = no; then
+  AC_DEFINE(__func__,"",
+            [Define to __FUNCTION__ or "" if `__func__' does not conform to 
+ANSI C.])
+fi
+])# AC_CPP_FUNC
+
+AC_CPP_FUNC
+AC_SUBST(__func__)
+AC_LANG_C
 
 AC_PROG_INSTALL
 AC_PROG_LN_S

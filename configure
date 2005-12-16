@@ -312,7 +312,7 @@ ac_includes_default="\
 # include <unistd.h>
 #endif"
 
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS PROGNAME debug build build_cpu build_vendor build_os host host_cpu host_vendor host_os CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT CXX CXXFLAGS ac_ct_CXX CPP EGREP OOPSE_TEMPLATE_FLAGS EXTRA_CC_FLAG F90 F90FLAGS ac_ct_F90 PREPFLAG PREPDEFFLAG F90LIBS F90_FUNC F90_FUNC_ MOD F90_WORK_FILES_ARG MODDIRFLAG F90MODINCSPEC F90_MODULE_NAMES CXXCPP LIBOBJS INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA LN_S SET_MAKE RANLIB ac_ct_RANLIB YACC LEX LEXLIB LEX_OUTPUT_ROOT PERLINTERP PERL_SHEBANG AR PS MPI_LIB_DIR MPI_INC_DIR MPI_F90_INC MPI_LIB MPI_F90_LIB USE_MPI USE_CGAL CGAL_INC_DIR CGAL_LIB_DIR CGAL_RLIB_DIR CGAL_DEFINES CGAL_CXXFLAGS CGAL_LIBS DOXYGEN DOT DOC enable_dot enable_html_docs enable_latex_docs BATEXT MKINSTALLDIRS OOPSE OOPSE_HOME SUBDIRS FFLAGS LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS PROGNAME debug build build_cpu build_vendor build_os host host_cpu host_vendor host_os CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT CXX CXXFLAGS ac_ct_CXX CPP EGREP OOPSE_TEMPLATE_FLAGS EXTRA_CC_FLAG F90 F90FLAGS ac_ct_F90 PREPFLAG PREPDEFFLAG F90LIBS F90_FUNC F90_FUNC_ MOD F90_WORK_FILES_ARG MODDIRFLAG F90MODINCSPEC F90_MODULE_NAMES CXXCPP LIBOBJS __func__ INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA LN_S SET_MAKE RANLIB ac_ct_RANLIB YACC LEX LEXLIB LEX_OUTPUT_ROOT PERLINTERP PERL_SHEBANG AR PS MPI_LIB_DIR MPI_INC_DIR MPI_F90_INC MPI_LIB MPI_F90_LIB USE_MPI USE_CGAL CGAL_INC_DIR CGAL_LIB_DIR CGAL_RLIB_DIR CGAL_DEFINES CGAL_CXXFLAGS CGAL_LIBS DOXYGEN DOT DOC enable_dot enable_html_docs enable_latex_docs BATEXT MKINSTALLDIRS OOPSE OOPSE_HOME SUBDIRS FFLAGS LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -6688,12 +6688,6 @@ else
 fi
 
 
-ac_ext=c
-ac_cpp='$CPP $CPPFLAGS'
-ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
-ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
-ac_compiler_gnu=$ac_cv_c_compiler_gnu
-
 
 #
 # Handle user hints
@@ -6957,11 +6951,11 @@ else
 fi
 
 
-        ac_ext=c
-ac_cpp='$CPP $CPPFLAGS'
-ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
-ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
-ac_compiler_gnu=$ac_cv_c_compiler_gnu
+        ac_ext=cc
+ac_cpp='$CXXCPP $CPPFLAGS'
+ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
         if test "$zlib_cv_libz" = "yes" -a "$zlib_cv_zlib_h" = "yes"
         then
@@ -7007,7 +7001,7 @@ if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
   cat conftest.err >&5
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
   (exit $ac_status); } &&
-	 { ac_try='test -z "$ac_c_werror_flag"
+	 { ac_try='test -z "$ac_cxx_werror_flag"
 			 || test ! -s conftest.err'
   { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
   (eval $ac_try) 2>&5
@@ -7115,7 +7109,7 @@ if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   cat conftest.err >&5
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
   (exit $ac_status); } &&
-	 { ac_try='test -z "$ac_c_werror_flag"
+	 { ac_try='test -z "$ac_cxx_werror_flag"
 			 || test ! -s conftest.err'
   { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
   (eval $ac_try) 2>&5
@@ -7159,8 +7153,8 @@ if { (eval echo "$as_me:$LINENO: \"$ac_cpp conftest.$ac_ext\"") >&5
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
   (exit $ac_status); } >/dev/null; then
   if test -s conftest.err; then
-    ac_cpp_err=$ac_c_preproc_warn_flag
-    ac_cpp_err=$ac_cpp_err$ac_c_werror_flag
+    ac_cpp_err=$ac_cxx_preproc_warn_flag
+    ac_cpp_err=$ac_cpp_err$ac_cxx_werror_flag
   else
     ac_cpp_err=
   fi
@@ -7180,7 +7174,7 @@ echo "$as_me:$LINENO: result: $ac_header_preproc" >&5
 echo "${ECHO_T}$ac_header_preproc" >&6
 
 # So?  What about this header?
-case $ac_header_compiler:$ac_header_preproc:$ac_c_preproc_warn_flag in
+case $ac_header_compiler:$ac_header_preproc:$ac_cxx_preproc_warn_flag in
   yes:no: )
     { echo "$as_me:$LINENO: WARNING: $ac_header: accepted by the compiler, rejected by the preprocessor!" >&5
 echo "$as_me: WARNING: $ac_header: accepted by the compiler, rejected by the preprocessor!" >&2;}
@@ -8285,7 +8279,7 @@ if test "$ac_test_CFLAGS" != "set"; then
                     CFLAGS="-O"
                 fi;;
   sparc-solaris2*) if test "$CC" = cc; then
-                    CFLAGS="-native -fast -xO5 -dalign"
+                    CFLAGS="-O -dalign"
                  fi;;
 
   alpha*-osf*)  if test "$CC" = cc; then
@@ -8748,7 +8742,7 @@ if test "$ac_test_CXXFLAGS" != "set"; then
                     CXXFLAGS="-O"
                 fi;;
   sparc-solaris2*) if test "$CXX" = CC; then
-                    CXXFLAGS="-native -fast -xO5 -dalign"
+                    CXXFLAGS="-features=extensions -O -dalign"
                  fi;;
    rs6000*-aix*)  if test "$CXX" = xlC; then
                     CXXFLAGS="-O3 -qarch=pwrx -qtune=pwrx -qansialias -w"
@@ -9258,6 +9252,139 @@ fi
 
      ;;
 esac
+
+ac_ext=cc
+ac_cpp='$CXXCPP $CPPFLAGS'
+ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
+
+# AC_CPP_FUNC
+# ------------------ #
+# Checks to see if ANSI C99 CPP variable __func__ works.
+# If not, perhaps __FUNCTION__ works instead.
+# If not, we'll just define __func__ to "".
+# AC_CPP_FUNC
+
+
+echo "$as_me:$LINENO: checking for an ANSI C99-conforming __func__" >&5
+echo $ECHO_N "checking for an ANSI C99-conforming __func__... $ECHO_C" >&6
+if test "${ac_cv_cpp_func+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+int
+main ()
+{
+const char *foo = __func__;
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext
+if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
+  (eval $ac_compile) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_cxx_werror_flag"
+			 || test ! -s conftest.err'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest.$ac_objext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  ac_cv_cpp_func=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+int
+main ()
+{
+const char *foo = __FUNCTION__;
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext
+if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
+  (eval $ac_compile) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_cxx_werror_flag"
+			 || test ! -s conftest.err'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest.$ac_objext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  ac_cv_cpp_func=__FUNCTION__
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+ac_cv_cpp_func=no
+fi
+rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
+fi
+rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
+fi
+echo "$as_me:$LINENO: result: $ac_cv_cpp_func" >&5
+echo "${ECHO_T}$ac_cv_cpp_func" >&6
+if test $ac_cv_cpp_func = __FUNCTION__; then
+
+cat >>confdefs.h <<\_ACEOF
+#define __func__ __FUNCTION__
+_ACEOF
+
+elif test $ac_cv_cpp_func = no; then
+
+cat >>confdefs.h <<\_ACEOF
+#define __func__ ""
+_ACEOF
+
+fi
+
+
+ac_ext=c
+ac_cpp='$CPP $CPPFLAGS'
+ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
+
 
 # Find a good install program.  We prefer a C program (faster),
 # so one script is as good as another.  But avoid the broken or
@@ -11876,6 +12003,7 @@ s,@F90MODINCSPEC@,$F90MODINCSPEC,;t t
 s,@F90_MODULE_NAMES@,$F90_MODULE_NAMES,;t t
 s,@CXXCPP@,$CXXCPP,;t t
 s,@LIBOBJS@,$LIBOBJS,;t t
+s,@__func__@,$__func__,;t t
 s,@INSTALL_PROGRAM@,$INSTALL_PROGRAM,;t t
 s,@INSTALL_SCRIPT@,$INSTALL_SCRIPT,;t t
 s,@INSTALL_DATA@,$INSTALL_DATA,;t t

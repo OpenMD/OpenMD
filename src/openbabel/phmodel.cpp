@@ -68,7 +68,7 @@ void OBPhModel::ParseLine(const char *buffer)
         tokenize(vs,buffer);
         if (vs.empty() || vs.size() < 4)
 	  {
-	    obErrorLog.ThrowError(__FUNCTION__, " Could not parse line in phmodel table from phmodel.txt", obInfo);
+	    obErrorLog.ThrowError(__func__, " Could not parse line in phmodel table from phmodel.txt", obInfo);
             return;
 	  }
 
@@ -77,7 +77,7 @@ void OBPhModel::ParseLine(const char *buffer)
         {
             delete tsfm;
             tsfm = NULL;
-	    obErrorLog.ThrowError(__FUNCTION__, " Could not parse line in phmodel table from phmodel.txt", obInfo);
+	    obErrorLog.ThrowError(__func__, " Could not parse line in phmodel table from phmodel.txt", obInfo);
             return;
         }
 
@@ -88,7 +88,7 @@ void OBPhModel::ParseLine(const char *buffer)
         tokenize(vs,buffer);
         if (vs.empty() || vs.size() < 2)
 	  {
-	    obErrorLog.ThrowError(__FUNCTION__, " Could not parse line in phmodel table from phmodel.txt", obInfo);
+	    obErrorLog.ThrowError(__func__, " Could not parse line in phmodel table from phmodel.txt", obInfo);
             return;
 	  }
 
@@ -97,7 +97,7 @@ void OBPhModel::ParseLine(const char *buffer)
         {
             delete sp;
             sp = NULL;
-	    obErrorLog.ThrowError(__FUNCTION__, " Could not parse line in phmodel table from phmodel.txt", obInfo);
+	    obErrorLog.ThrowError(__func__, " Could not parse line in phmodel table from phmodel.txt", obInfo);
             return;
         }
 
@@ -144,7 +144,7 @@ void OBPhModel::CorrectForPH(OBMol &mol)
 
     mol.SetCorrectedForPH();
 
-    obErrorLog.ThrowError(__FUNCTION__,
+    obErrorLog.ThrowError(__func__,
                           "Ran OpenBabel::CorrectForPH", obAuditMsg);
 
     OBAtom *atom;
@@ -267,7 +267,7 @@ bool OBChemTsfm::Apply(OBMol &mol)
 
     vector<vector<int> > mlist = _bgn.GetUMapList();
 
-    obErrorLog.ThrowError(__FUNCTION__,
+    obErrorLog.ThrowError(__func__,
                           "Ran OpenBabel::OBChemTransform", obAuditMsg);
 
     if (!_vchrg.empty()) //modify charges
@@ -294,7 +294,7 @@ bool OBChemTsfm::Apply(OBMol &mol)
                 bond = mol.GetBond((*i)[j->first.first],(*i)[j->first.second]);
                 if (!bond)
                 {
-		  obErrorLog.ThrowError(__FUNCTION__, "unable to find bond", obDebug);
+		  obErrorLog.ThrowError(__func__, "unable to find bond", obDebug);
                     continue;
                 }
 

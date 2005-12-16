@@ -2,6 +2,8 @@
 #define OOPSE_VERSION_MINOR 1
 #define OOPSE_VERSION_TINY  4
 
+#undef __func__
+
 #define MK_STR(s) # s
 #define STR_DEFINE(t, s) t = MK_STR(s)
 

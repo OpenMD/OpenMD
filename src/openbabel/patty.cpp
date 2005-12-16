@@ -84,7 +84,7 @@ void patty::read_rules(const string &infile)
 #endif
 	  errorMsg << "The FORCE_PARAM_PATH environment variable is not defined" << endl;
           errorMsg << "Please define it so the program can find " << infile << endl;
-	  obErrorLog.ThrowError(__FUNCTION__, errorMsg.str(), obWarning);
+	  obErrorLog.ThrowError(__func__, errorMsg.str(), obWarning);
 	    //            exit(0);
         }
         else
@@ -108,7 +108,7 @@ void patty::read_rules(const string &infile)
       strstream errorMsg;
 #endif
         errorMsg << "Could not open " << patty_dir << endl;
-	obErrorLog.ThrowError(__FUNCTION__, errorMsg.str(), obWarning);
+	obErrorLog.ThrowError(__func__, errorMsg.str(), obWarning);
 	//        exit(0);
     }
     while (ifsP->getline(buffer,BUFF_SIZE))
@@ -161,7 +161,7 @@ void patty::assign_types(OBMol &mol, std::vector<std::string> &atm_typ)
 {
     atm_typ.resize(mol.NumAtoms()+1);
 
-    obErrorLog.ThrowError(__FUNCTION__,
+    obErrorLog.ThrowError(__func__,
                           "Ran OpenBabel::PATTY::AssignTypes", obAuditMsg);
 
     for (unsigned int i = 0; i < _sp.size(); i++)
@@ -179,7 +179,7 @@ void patty::assign_types(OBMol &mol, std::vector<std::string> &atm_typ)
 		strstream errorMsg;
 #endif
                 errorMsg << typ[i] << " " << smarts[i] << " matched ";
-		obErrorLog.ThrowError(__FUNCTION__, errorMsg.str(), obDebug);
+		obErrorLog.ThrowError(__func__, errorMsg.str(), obDebug);
 	      }
 
             for (unsigned int j = 0; j < match.size(); j++)
@@ -192,7 +192,7 @@ void patty::assign_types(OBMol &mol, std::vector<std::string> &atm_typ)
 		    strstream errorMsg;
 #endif
                     errorMsg << match[j][0] << " ";
-		    obErrorLog.ThrowError(__FUNCTION__, errorMsg.str(), obDebug);
+		    obErrorLog.ThrowError(__func__, errorMsg.str(), obDebug);
 		  }
                 atm_typ[match[j][0]] = typ[i];
             }
@@ -204,7 +204,7 @@ void patty::assign_types(OBMol &mol,vector<int> &atm_typ)
 {
     atm_typ.resize(mol.NumAtoms()+1);
 
-    obErrorLog.ThrowError(__FUNCTION__,
+    obErrorLog.ThrowError(__func__,
                           "Ran OpenBabel::PATTY::AssignTypes", obAuditMsg);
 
     for (unsigned int i = 0; i < _sp.size(); i++)
@@ -222,7 +222,7 @@ void patty::assign_types(OBMol &mol,vector<int> &atm_typ)
 		    strstream errorMsg;
 #endif
                     errorMsg << typ[i] << " " << smarts[i] << " matched " ;
-		    obErrorLog.ThrowError(__FUNCTION__, errorMsg.str(), obDebug);
+		    obErrorLog.ThrowError(__func__, errorMsg.str(), obDebug);
 	      }
 
             for (unsigned int j = 0; j < match.size(); j++)
@@ -235,7 +235,7 @@ void patty::assign_types(OBMol &mol,vector<int> &atm_typ)
 		    strstream errorMsg;
 #endif
                     errorMsg << match[j][0] << " ";
-		    obErrorLog.ThrowError(__FUNCTION__, errorMsg.str(), obDebug);
+		    obErrorLog.ThrowError(__func__, errorMsg.str(), obDebug);
 		  }
                 atm_typ[match[j][0]] = type_to_int(typ[i]);
             }
@@ -286,7 +286,7 @@ int patty::type_to_int(const string &type, bool failOnUndefined)
 #endif
 	  errorMsg << "Unable to find type of feature passed in " << endl;
 	  errorMsg << "Feature passed in is " << type << endl;
-	  obErrorLog.ThrowError(__FUNCTION__, errorMsg.str(), obInfo);
+	  obErrorLog.ThrowError(__func__, errorMsg.str(), obInfo);
 	  //	  exit(-1);
         }
       else

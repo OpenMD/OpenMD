@@ -160,7 +160,7 @@ bool FastSearch::Find(OBBase* pOb, vector<unsigned int>& SeekPositions,
 	    strstream errorMsg;
 #endif
 	    errorMsg << "Stopped looking after " << i << " molecules." << endl;
-	    obErrorLog.ThrowError(__FUNCTION__, errorMsg.str(), obInfo);
+	    obErrorLog.ThrowError(__func__, errorMsg.str(), obInfo);
 	  }
 
 	vector<unsigned int>::iterator itr;
@@ -263,7 +263,7 @@ string FastSearch::ReadIndex(istream* pIndexstream)
 #endif
 		  errorMsg << "Index has Fingerprints of type '" << _index.header.fpid 
 			   << " which is not currently loaded." << endl;
-		  obErrorLog.ThrowError(__FUNCTION__, errorMsg.str(), obWarning);
+		  obErrorLog.ThrowError(__func__, errorMsg.str(), obWarning);
 		  *(_index.header.datafilename) = '\0';	
 		}
 
@@ -286,7 +286,7 @@ FastSearchIndexer::FastSearchIndexer(string& datafilename, ostream* os,
 	    strstream errorMsg;
 #endif
 	    errorMsg << "Fingerprint type '" << fpid << "' not available" << endl;
-	    obErrorLog.ThrowError(__FUNCTION__, errorMsg.str(), obWarning);
+	    obErrorLog.ThrowError(__func__, errorMsg.str(), obWarning);
 	  }
 
 	_nbits=FptBits;
@@ -305,7 +305,7 @@ FastSearchIndexer::~FastSearchIndexer()
 	_indexstream->write((const char*)&_pindex->fptdata[0], _pindex->fptdata.size()*sizeof(unsigned int));
 	_indexstream->write((const char*)&_pindex->seekdata[0], _pindex->seekdata.size()*sizeof(unsigned int));
 	if(!_indexstream)
-	  obErrorLog.ThrowError(__FUNCTION__,
+	  obErrorLog.ThrowError(__func__,
 				"Difficulty writing index", obWarning);
 	delete _pindex;
 }
@@ -326,7 +326,7 @@ bool FastSearchIndexer::Add(OBBase* pOb, streampos seekpos)
 		_pindex->seekdata.push_back(seekpos);
 		return true;	
 	}
-	obErrorLog.ThrowError(__FUNCTION__, "Failed to make a fingerprint", obWarning);
+	obErrorLog.ThrowError(__func__, "Failed to make a fingerprint", obWarning);
 	return false;
 
 }

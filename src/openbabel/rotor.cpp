@@ -54,7 +54,7 @@ bool OBRotorList::Setup(OBMol &mol)
             char buffer[BUFF_SIZE];
             sprintf(buffer,"The rotor has no associated torsion values -> %d %d %d %d",ref[0],ref[1],ref[2],ref[3]);
 
-            obErrorLog.ThrowError(__FUNCTION__, buffer, obDebug);
+            obErrorLog.ThrowError(__func__, buffer, obDebug);
         }
 
     return(true);
@@ -66,7 +66,7 @@ bool OBRotorList::FindRotors(OBMol &mol)
     vector<int> gtd;
     mol.GetGTDVector(gtd);
 
-    obErrorLog.ThrowError(__FUNCTION__,
+    obErrorLog.ThrowError(__func__,
                           "Ran OpenBabel::FindRotors", obAuditMsg);
 
     OBBond *bond;
@@ -226,7 +226,7 @@ void OBRotorList::RemoveSymVals(OBMol &mol)
 	      errorMsg << bond->GetBeginAtomIdx() << ' ' << bond->GetEndAtomIdx() << ' ' ;
 	      errorMsg << "rms = " << ' ';
 	      errorMsg << MinimumPairRMS(mol,c1,c2,one2one) << endl;
-	      obErrorLog.ThrowError(__FUNCTION__, errorMsg.str(), obDebug);
+	      obErrorLog.ThrowError(__func__, errorMsg.str(), obDebug);
             }
             continue;
         }
@@ -253,7 +253,7 @@ void OBRotorList::RemoveSymVals(OBMol &mol)
 	      errorMsg << bond->GetBeginAtomIdx() << ' ' << bond->GetEndAtomIdx() << ' ' ;
 	      errorMsg << "rms = " << ' ';
 	      errorMsg << MinimumPairRMS(mol,c1,c2,one2one) << endl;
-	      obErrorLog.ThrowError(__FUNCTION__, errorMsg.str(), obDebug);
+	      obErrorLog.ThrowError(__func__, errorMsg.str(), obDebug);
             }
         }
     }
@@ -288,7 +288,7 @@ void OBRotorList::RemoveSymVals(OBMol &mol)
 #endif
 	      errorMsg << "2-fold pattern-based symmetry found = " << ' ';
 	      errorMsg << ref[1] << ' ' << ref[2] << endl;
-	      obErrorLog.ThrowError(__FUNCTION__, errorMsg.str(), obDebug);
+	      obErrorLog.ThrowError(__func__, errorMsg.str(), obDebug);
                         }
                     }
                 }
@@ -316,7 +316,7 @@ void OBRotorList::RemoveSymVals(OBMol &mol)
 #endif
 			  errorMsg << "3-fold pattern-based symmetry found = " << ' ';
 			  errorMsg << ref[1] << ' ' << ref[2] << endl;
-			  obErrorLog.ThrowError(__FUNCTION__, errorMsg.str(), obDebug);
+			  obErrorLog.ThrowError(__func__, errorMsg.str(), obDebug);
                         }
                     }
                 }
@@ -941,7 +941,7 @@ void OBRotorRules::ParseLine(const char *buffer)
         {
             string err = "The following rule has no associated torsions: ";
             err += vs[0];
-            obErrorLog.ThrowError(__FUNCTION__, err, obDebug);
+            obErrorLog.ThrowError(__func__, err, obDebug);
         }
         OBRotorRule *rr = new OBRotorRule (temp_buffer,ref,vals,delta);
         if (rr->IsValid())
@@ -1050,7 +1050,7 @@ void OBRotorRules::GetRotorIncrements(OBMol &mol,OBBond *bond,
             sprintf(buffer,"%3d%3d%3d%3d %s",
                     ref[0],ref[1],ref[2],ref[3],
                     ((*i)->GetSmartsString()).c_str());
-            obErrorLog.ThrowError(__FUNCTION__, buffer, obDebug);
+            obErrorLog.ThrowError(__func__, buffer, obDebug);
         }
         return;
     }
@@ -1082,7 +1082,7 @@ void OBRotorRules::GetRotorIncrements(OBMol &mol,OBBond *bond,
             char buffer[BUFF_SIZE];
             sprintf(buffer,"%3d%3d%3d%3d %s",
                     ref[0],ref[1],ref[2],ref[3],"sp3-sp3");
-	    obErrorLog.ThrowError(__FUNCTION__, buffer, obDebug);
+	    obErrorLog.ThrowError(__func__, buffer, obDebug);
         }
     }
     else
@@ -1095,7 +1095,7 @@ void OBRotorRules::GetRotorIncrements(OBMol &mol,OBBond *bond,
                 char buffer[BUFF_SIZE];
                 sprintf(buffer,"%3d%3d%3d%3d %s",
                         ref[0],ref[1],ref[2],ref[3],"sp2-sp2");
-		obErrorLog.ThrowError(__FUNCTION__, buffer, obDebug);
+		obErrorLog.ThrowError(__func__, buffer, obDebug);
             }
         }
         else //must be sp2-sp3
@@ -1107,7 +1107,7 @@ void OBRotorRules::GetRotorIncrements(OBMol &mol,OBBond *bond,
                 char buffer[BUFF_SIZE];
                 sprintf(buffer,"%3d%3d%3d%3d %s",
                         ref[0],ref[1],ref[2],ref[3],"sp2-sp3");
-		obErrorLog.ThrowError(__FUNCTION__, buffer, obDebug);
+		obErrorLog.ThrowError(__func__, buffer, obDebug);
             }
         }
 }
