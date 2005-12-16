@@ -44,7 +44,7 @@
 #include <cctype>
 #include <locale>
 #include <algorithm>
-
+#include <functional>
 namespace oopse {
 
     /** tolower functor */

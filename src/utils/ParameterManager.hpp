@@ -44,7 +44,7 @@
  *
  *  Created by Charles F. Vardeman II on 11/16/05.
  *  @author  Charles F. Vardeman II 
- *  @version $Id: ParameterManager.hpp,v 1.1 2005-11-16 21:37:45 chuckv Exp $
+ *  @version $Id: ParameterManager.hpp,v 1.2 2005-12-16 18:55:55 tim Exp $
  *
  */
 
@@ -189,15 +189,15 @@ TYPE get##NAME() { return NAME.getData();}
 
 #define DefineParameter(NAME,KEYWORD)                              \
 NAME.setKeyword(KEYWORD);                  \
-parameters_.insert(std::make_pair(std::string(KEYWORD),  &NAME));
+parameters_.insert(std::map<std::string, ParameterBase*>::value_type(std::string(KEYWORD), static_cast<ParameterBase*>(&NAME)));
 
 #define DefineOptionalParameter(NAME,KEYWORD)                              \
 NAME.setKeyword(KEYWORD); NAME.setOptional(true);                    \
-parameters_.insert(std::make_pair(std::string(KEYWORD),  &NAME));
+parameters_.insert(std::map<std::string, ParameterBase*>::value_type(std::string(KEYWORD), static_cast<ParameterBase*>(&NAME)));
 
 #define DefineOptionalParameterWithDefaultValue(NAME,KEYWORD, DEFAULTVALUE)                              \
 NAME.setKeyword(KEYWORD); NAME.setOptional(true); NAME.setDefaultValue(DEFAULTVALUE);                      \
-parameters_.insert(std::make_pair(std::string(KEYWORD),  &NAME));
+parameters_.insert(std::map<std::string, ParameterBase*>::value_type(std::string(KEYWORD), static_cast<ParameterBase*>(&NAME)));
 
 #define CheckParameter(NAME, CONSTRAINT)                              \
 if (!NAME.empty()) { if (!(CONSTRAINT)(NAME.getData())) { sprintf(painCave.errMsg,"Error in checking %s : should be %s\n",NAME.getKeyword().c_str(),(CONSTRAINT).getConstraintDescription().c_str()); painCave.isFatal = 1; painCave.severity = OOPSE_ERROR; simError();} }                 
