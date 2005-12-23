@@ -38,8 +38,10 @@
  * University of Notre Dame has been advised of the possibility of
  * such damages.
  */
-
+#define __C
 #include "io/ForceFieldOptions.hpp"
+#include "UseTheForce/fForceOptions.h"
+#include "UseTheForce/DarkSide/fForceOptions_interface.h"
 namespace oopse {
 
     ForceFieldOptions::ForceFieldOptions() {
@@ -56,5 +58,15 @@ namespace oopse {
       DefineOptionalParameterWithDefaultValue(electrostatic14scale, "electrostatic-14-scale", 0.0);
       DefineOptionalParameterWithDefaultValue(dielectric, "dielectric", 1.0);
     }
+
+
+  void ForceFieldOptions::tellFortranOptions(){
+    ForceOptions fortranForceOptions;
+    
+    fortranForceOptions.vdw14scale = this->getvdw14scale();
+    fortranForceOptions.vdw14scale = this->getvdw14scale();
+    
+
+  }
 
 }

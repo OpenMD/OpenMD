@@ -97,7 +97,8 @@ namespace oopse {
       
       return result;
     }
-    
+ 
+    void tellFortranOptions();
   private:
     typedef std::map<std::string, ParameterBase*> ParamMap;
     ParamMap parameters_;                  

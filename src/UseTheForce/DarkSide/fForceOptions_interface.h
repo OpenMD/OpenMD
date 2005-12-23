@@ -44,12 +44,12 @@
  *
  *  Created by Charles F. Vardeman II on 12/7/05.
  *  @author  Charles F. Vardeman II 
- *  @version $Id: fForceOptions_interface.h,v 1.1 2005-12-07 19:38:03 chuckv Exp $
+ *  @version $Id: fForceOptions_interface.h,v 1.2 2005-12-23 23:04:25 chuckv Exp $
  *
  */
 
 
-*/
+
 #ifndef USETHEFORCE_DARKSIDE_FFORCEOPTIONS_INTERFACE_H
 #define USETHEFORCE_DARKSIDE_FFORCEOPTIONS_INTERFACE_H
 
@@ -58,10 +58,10 @@
 #include "config.h"
 #include "UseTheForce/fForceOptions.h"
 
-#define setfForceOptions F90_FUNC(setforceoptions, SETFORCEOPTIONS)
+#define setfForceOptions F90_FUNC(setfforceoptions, SETFFORCEOPTIONS)
 
 extern "C"{
-  void setfForceOptions(ForceOptions* thefForceOptions )
+  void setfForceOptions(ForceOptions* thefForceOption);
 }  
 #endif
 
