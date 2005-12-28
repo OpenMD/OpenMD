@@ -40,8 +40,7 @@
  */
 #define __C
 #include "io/ForceFieldOptions.hpp"
-#include "UseTheForce/fForceOptions.h"
-#include "UseTheForce/DarkSide/fForceOptions_interface.h"
+
 namespace oopse {
 
     ForceFieldOptions::ForceFieldOptions() {
@@ -60,12 +59,30 @@ namespace oopse {
     }
 
 
-  void ForceFieldOptions::tellFortranOptions(){
-    ForceOptions fortranForceOptions;
+  void ForceFieldOptions::makeFortranOptions(ForceOptions& fortranForceOptions){
     
     fortranForceOptions.vdw14scale = this->getvdw14scale();
-    fortranForceOptions.vdw14scale = this->getvdw14scale();
-    
+    fortranForceOptions.electrostatic14scale = this->getelectrostatic14scale();
+
+    std::string DistanceMix = this->getDistanceMixingRule();
+    toUpper(DistanceMix);
+    if(DistanceMix == "ARITHMETIC"){
+      fortranForceOptions.DistanceMixingRule = ARITHMETIC_MIXING_RULE;
+    }else if(DistanceMix == "GEOMETRIC"){
+      fortranForceOptions.DistanceMixingRule = GEOMETRIC_MIXING_RULE;
+    }else{
+      fortranForceOptions.DistanceMixingRule = ARITHMETIC_MIXING_RULE;
+    }
+    std::string EnergyMix = this->getEnergyMixingRule();  
+    toUpper(EnergyMix);
+    if(EnergyMix == "ARITHMETIC"){
+      fortranForceOptions.EnergyMixingRule = ARITHMETIC_MIXING_RULE;
+    }else if(EnergyMix == "GEOMETRIC"){
+      fortranForceOptions.EnergyMixingRule = GEOMETRIC_MIXING_RULE;
+    }else{
+      fortranForceOptions.EnergyMixingRule = GEOMETRIC_MIXING_RULE;
+    }
+
 
   }
 

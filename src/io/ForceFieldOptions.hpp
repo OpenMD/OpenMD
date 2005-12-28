@@ -45,6 +45,8 @@
 #include "utils/ParameterManager.hpp"
 #include "utils/StringUtils.hpp"
 #include "io/ParamConstraint.hpp"
+#define __C
+#include "UseTheForce/fForceOptions.h"
 
 namespace oopse {
   
@@ -97,8 +99,8 @@ namespace oopse {
       
       return result;
     }
- 
-    void tellFortranOptions();
+
+    void makeFortranOptions(ForceOptions & fortranForceOptions);
   private:
     typedef std::map<std::string, ParameterBase*> ParamMap;
     ParamMap parameters_;                  
