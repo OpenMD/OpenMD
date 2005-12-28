@@ -50,6 +50,7 @@
 #include "UseTheForce/ForceField.hpp"
 #include "utils/simError.h"
 #include "UseTheForce/DarkSide/atype_interface.h"
+#include "UseTheForce/DarkSide/fForceOptions_interface.h"
 namespace oopse {
 
   ForceField::ForceField() { 
@@ -252,4 +253,9 @@ namespace oopse {
 
   }
 
+  void ForceField::setFortranForceOptions(){
+    ForceOptions theseFortranOptions;
+    forceFieldOptions_.makeFortranOptions(theseFortranOptions);
+    setfForceOptions(&theseFortranOptions);
+  }
 } //end namespace oopse

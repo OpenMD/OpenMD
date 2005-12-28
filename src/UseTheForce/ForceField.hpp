@@ -61,7 +61,7 @@
 #include "types/BondType.hpp"
 #include "types/BendType.hpp"
 #include "types/TorsionType.hpp"
-
+#include "UseTheForce/fForceOptions.h"
 namespace oopse {
 
   /**
@@ -138,6 +138,8 @@ namespace oopse {
     ifstrstream* openForceFieldFile(const std::string& filename);
 
     ForceFieldOptions& getForceFieldOptions() {return forceFieldOptions_;}
+
+    void setFortranForceOptions(void);
   protected:
 
     AtomTypeContainer atomTypeCont_;    
