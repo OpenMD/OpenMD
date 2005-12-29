@@ -2,6 +2,15 @@
 // Useing the quantum corrections due to Kimura, Qi, Cagin and Goddard. For example see
 // PHYSICAL REVIEW B 59 (5): 3468-3473 FEB 1 1999 
 
+begin Options
+      Name                   "SCQSC"
+      DistanceMixingRule     "Arithmetic"
+      EnergyMixingRule       "Geometric"
+//  energy unit are eV. Convert to kcal/mol
+      EnergyUnitScaling      0.02306054
+end Options
+
+
 begin AtomTypes
 //Name        mass(amu)
 Ni	58.710
