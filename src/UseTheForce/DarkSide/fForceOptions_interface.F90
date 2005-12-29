@@ -47,13 +47,13 @@
 !!  PURPOSE:
 !!
 !! @author Charles F. Vardeman II 
-!! @version $Id: fForceOptions_interface.F90,v 1.1 2005-12-07 19:38:03 chuckv Exp $
+!! @version $Id: fForceOptions_interface.F90,v 1.2 2005-12-29 16:03:11 chuckv Exp $
 
 
 
 
-subroutine  setForceOptions(theseOptions) 
+subroutine  setfForceOptions(theseOptions) 
 use fForceOptions, only : module_setForceOptions => setForceOptions,ForceOptions
 type(ForceOptions) :: theseOptions
 call module_setForceOptions(theseOptions)
-end subroutine setForceOptions
+end subroutine setfForceOptions
