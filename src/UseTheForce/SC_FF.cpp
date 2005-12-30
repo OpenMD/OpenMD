@@ -44,7 +44,7 @@
  *
  *  Created by Charles F. Vardeman II on 11/9/05.
  *  @author  Charles F. Vardeman II 
- *  @version $Id: SC_FF.cpp,v 1.6 2005-12-30 00:18:28 chuckv Exp $
+ *  @version $Id: SC_FF.cpp,v 1.7 2005-12-30 23:15:59 chuckv Exp $
  *
  */
 
@@ -73,7 +73,7 @@ namespace oopse {
   SC_FF::SC_FF(){
     
     //set default force field filename
-    setForceFieldFileName("SuttonChen.frc");
+    //setForceFieldFileName("SuttonChen.frc");
     
     //the order of adding section parsers are important
     //OptionSectionParser must come first to set options for other parsers

@@ -45,7 +45,7 @@
 
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: doForces.F90,v 1.73 2005-12-30 21:25:56 tim Exp $, $Date: 2005-12-30 21:25:56 $, $Name: not supported by cvs2svn $, $Revision: 1.73 $
+!! @version $Id: doForces.F90,v 1.74 2005-12-30 23:15:59 chuckv Exp $, $Date: 2005-12-30 23:15:59 $, $Name: not supported by cvs2svn $, $Revision: 1.74 $
 
 
 module doForces
@@ -716,6 +716,7 @@ contains
     FF_uses_Dipoles = .false.
     FF_uses_GayBerne = .false.
     FF_uses_EAM = .false.
+    FF_uses_SC = .false.
 
     call getMatchingElementList(atypes, "is_Directional", .true., &
          nMatches, MatchList)
@@ -731,6 +732,9 @@ contains
 
     call getMatchingElementList(atypes, "is_EAM", .true., nMatches, MatchList)
     if (nMatches .gt. 0) FF_uses_EAM = .true.
+
+    call getMatchingElementList(atypes, "is_SC", .true., nMatches, MatchList)
+    if (nMatches .gt. 0) FF_uses_SC = .true.
 
 
     haveSaneForceField = .true.

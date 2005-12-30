@@ -11,6 +11,7 @@ targetTemp = 500.0;
 targetPressure = 1.0;
 
 forceField = "SC";
+forceFieldFileName = "SuttonChen.frc";
 //forceFieldVariant="SC";
 
 ensemble = "NVE";

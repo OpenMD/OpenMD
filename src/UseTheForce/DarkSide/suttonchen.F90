@@ -439,7 +439,7 @@ contains
 
     ! check to see if we need to be cleaned at the start of a force loop
 
-
+    if (.not.haveMixingMap) call createMixingMap()
 
 
 #ifdef IS_MPI

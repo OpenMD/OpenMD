@@ -63,6 +63,8 @@
 #include "utils/MemoryUtils.hpp"
 #include "utils/simError.h"
 #include "selection/SelectionManager.hpp"
+#include "io/ForceFieldOptions.hpp"
+#include "UseTheForce/ForceField.hpp"
 
 #ifdef IS_MPI
 #include "UseTheForce/mpiComponentPlan.h"
@@ -920,10 +922,19 @@ namespace oopse {
 
   void SimInfo::setupCutoff() {           
     
+    ForceFieldOptions& forceFieldOptions_ = forceField_->getForceFieldOptions();
+
     // Check the cutoff policy
-    int cp =  TRADITIONAL_CUTOFF_POLICY;
-    if (simParams_->haveCutoffPolicy()) {
-      std::string myPolicy = simParams_->getCutoffPolicy();
+    int cp =  TRADITIONAL_CUTOFF_POLICY; // Set to traditional by default
+
+    std::string myPolicy;
+    if (forceFieldOptions_.haveCutoffPolicy()){
+      myPolicy = forceFieldOptions_.getCutoffPolicy();
+    }else if (simParams_->haveCutoffPolicy()) {
+      myPolicy = simParams_->getCutoffPolicy();
+    }
+
+    if (!myPolicy.empty()){
       toUpper(myPolicy);
       if (myPolicy == "MIX") {
         cp = MIX_CUTOFF_POLICY;

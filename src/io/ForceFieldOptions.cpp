@@ -45,6 +45,7 @@ namespace oopse {
 
     ForceFieldOptions::ForceFieldOptions() {
       DefineOptionalParameter(Name, "Name");
+      DefineOptionalParameter(CutoffPolicy, "cutoffPolicy");
       DefineOptionalParameterWithDefaultValue(vdWtype, "vdWtype", "Lennard-Jones");
       DefineOptionalParameterWithDefaultValue(DistanceMixingRule, "DistanceMixingRule", "arithmetic");
       DefineOptionalParameterWithDefaultValue(DistanceType, "DistanceType", "sigma");

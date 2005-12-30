@@ -56,6 +56,7 @@ namespace oopse {
     DeclareParameter(DistanceMixingRule, std::string);
     DeclareParameter(DistanceType, std::string);
     DeclareParameter(EnergyMixingRule, std::string);
+    DeclareParameter(CutoffPolicy, std::string);
     DeclareParameter(EnergyUnitScaling, double);
     DeclareParameter(DistanceUnitScaling, double);
     DeclareParameter(AngleUnitScaling, double);
@@ -75,7 +76,8 @@ namespace oopse {
       CheckParameter(DistanceType, isEqualIgnoreCase(std::string("sigma")) || isEqualIgnoreCase(std::string("Rmin")));
       CheckParameter(EnergyMixingRule, isEqualIgnoreCase(std::string("arithmetic")) || isEqualIgnoreCase(std::string("geometric")));
       CheckParameter(TorsionAngleConvention, isEqualIgnoreCase(std::string("180 is trans")) || isEqualIgnoreCase(std::string("0 is trans")));
-    }
+      CheckParameter(CutoffPolicy, isEqualIgnoreCase(std::string("MIX")) || isEqualIgnoreCase(std::string("MAX")) || isEqualIgnoreCase(std::string("TRADITIONAL")));
+   }
     
     bool setData(const std::string& keyword, const std::string& value) {
       bool result;
