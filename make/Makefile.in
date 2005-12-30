@@ -657,7 +657,7 @@ do_link = $(shell $(LN_S) $(1) $(2))
 all_objs = $(foreach thisLib,$(LibNames), $(call find_objs, $(thisLib)))
 all_parallel_objs = $(foreach thisLib,$(ParallelLibNames), $(call find_objs, $(thisLib)))
 all_lib_objs = $(patsubst %,$(TargetDir)/%,$(call all_objs))
-all_lib_parallel_objs = $(patsubst %,$(TargetDir)/%,$(call all_parallel_objs))
+all_lib_parallel_objs = $(patsubst %,$(ParallelTargetDir)/%,$(call all_parallel_objs))
 
 $(CombinedStaticLib) : $(LibDir)/.stamp_UP
 	$(Print) creating $@     	

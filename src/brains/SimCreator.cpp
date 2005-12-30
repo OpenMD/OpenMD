@@ -102,7 +102,7 @@ Globals* SimCreator::parseFile(const std::string mdFileName){
                 streamSize = ppStream.str().size() +1;
                 commStatus = MPI_Bcast(&streamSize, 1, MPI_LONG, masterNode, MPI_COMM_WORLD);                   
 
-                commStatus = MPI_Bcast(ppStream.str().c_str(), streamSize, MPI_CHAR, masterNode, MPI_COMM_WORLD); 
+                commStatus = MPI_Bcast(static_cast<void*>(const_cast<char*>(ppStream.str().c_str())), streamSize, MPI_CHAR, masterNode, MPI_COMM_WORLD); 
             
                 
             } else {
