@@ -45,7 +45,7 @@
 
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: doForces.F90,v 1.72 2005-12-30 00:18:28 chuckv Exp $, $Date: 2005-12-30 00:18:28 $, $Name: not supported by cvs2svn $, $Revision: 1.72 $
+!! @version $Id: doForces.F90,v 1.73 2005-12-30 21:25:56 tim Exp $, $Date: 2005-12-30 21:25:56 $, $Name: not supported by cvs2svn $, $Revision: 1.73 $
 
 
 module doForces
@@ -399,11 +399,11 @@ contains
        allocate(groupToGtypeCol(jend))
     end if
 
-    if(.not.associated(groupToGtypeCol)) then
-       allocate(groupToGtypeCol(jend))
+    if(.not.associated(groupMaxCutoffCol)) then
+       allocate(groupMaxCutoffCol(jend))
     else
-       deallocate(groupToGtypeCol)
-       allocate(groupToGtypeCol(jend))
+       deallocate(groupMaxCutoffCol)
+       allocate(groupMaxCutoffCol(jend))
     end if
     if(.not.associated(gtypeMaxCutoffCol)) then
        allocate(gtypeMaxCutoffCol(jend))
@@ -426,7 +426,7 @@ contains
     
     tol = 1.0d-6
     nGroupTypesRow = 0
-
+    nGroupTypesCol = 0
     do i = istart, iend       
        n_in_i = groupStartRow(i+1) - groupStartRow(i)
        groupMaxCutoffRow(i) = 0.0_dp

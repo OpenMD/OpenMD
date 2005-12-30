@@ -110,19 +110,19 @@ namespace oopse {
   double Thermo::getPotential() {
     double potential = 0.0;
     Snapshot* curSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
-    double potential_local = curSnapshot->statData[Stats::LONG_RANGE_POTENTIAL] + 
-      curSnapshot->statData[Stats::SHORT_RANGE_POTENTIAL] ;
+    double shortRangePot_local =  curSnapshot->statData[Stats::SHORT_RANGE_POTENTIAL] ;
 
     // Get total potential for entire system from MPI.
 
 #ifdef IS_MPI
 
-    MPI_Allreduce(&potential_local, &potential, 1, MPI_DOUBLE, MPI_SUM,
+    MPI_Allreduce(&shortRangePot_local, &potential, 1, MPI_DOUBLE, MPI_SUM,
                   MPI_COMM_WORLD);
+    potential += curSnapshot->statData[Stats::LONG_RANGE_POTENTIAL];
 
 #else
 
-    potential = potential_local;
+    potential = shortRangePot_local + curSnapshot->statData[Stats::LONG_RANGE_POTENTIAL];
 
 #endif // is_mpi
 
