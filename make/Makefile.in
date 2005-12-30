@@ -79,6 +79,10 @@ Samples = \
 	samples/alkane \
 	samples/minimizer \
 	samples/metals \
+	samples/metals/EAM \
+	samples/metals/EAM/nanoparticle \
+	samples/metals/EAM/nanorod \
+	samples/metals/Sutton-Chen \
 	samples/thermoIntegration/liquid \
 	samples/thermoIntegration/solid \
 	samples/dipole \

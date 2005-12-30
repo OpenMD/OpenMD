@@ -45,7 +45,7 @@
 
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: doForces.F90,v 1.71 2005-12-15 21:43:16 gezelter Exp $, $Date: 2005-12-15 21:43:16 $, $Name: not supported by cvs2svn $, $Revision: 1.71 $
+!! @version $Id: doForces.F90,v 1.72 2005-12-30 00:18:28 chuckv Exp $, $Date: 2005-12-30 00:18:28 $, $Name: not supported by cvs2svn $, $Revision: 1.72 $
 
 
 module doForces
@@ -281,6 +281,7 @@ contains
     logical :: i_is_GB
     logical :: i_is_EAM
     logical :: i_is_Shape
+    logical :: i_is_SC
     logical :: GtypeFound
 
     integer :: myStatus, nAtypes,  i, j, istart, iend, jstart, jend
@@ -310,7 +311,7 @@ contains
           call getElementProperty(atypes, i, "is_GayBerne", i_is_GB)
           call getElementProperty(atypes, i, "is_EAM", i_is_EAM)
           call getElementProperty(atypes, i, "is_Shape", i_is_Shape)
-          
+          call getElementProperty(atypes, i, "is_SC", i_is_SC)
  
           if (haveDefaultCutoffs) then
              atypeMaxCutoff(i) = defaultRcut
@@ -341,6 +342,10 @@ contains
              endif
              if (i_is_Shape) then
                 thisRcut = getShapeCut(i)
+                if (thisRCut .gt. atypeMaxCutoff(i)) atypeMaxCutoff(i) = thisRCut
+             endif
+             if (i_is_SC) then
+                thisRcut = getSCCut(i)
                 if (thisRCut .gt. atypeMaxCutoff(i)) atypeMaxCutoff(i) = thisRCut
              endif
           endif

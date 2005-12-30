@@ -177,7 +177,7 @@ contains
 
     ! check to see if this is the first time into 
     if (.not.associated(SCList%SCTypes)) then
-       call getMatchingElementList(atypes, "is_SuttonChen", .true., nSCtypes, MatchList)
+       call getMatchingElementList(atypes, "is_SC", .true., nSCtypes, MatchList)
        SCList%nSCtypes = nSCtypes
        allocate(SCList%SCTypes(nSCTypes))
        nAtypes = getSize(atypes)
@@ -222,7 +222,7 @@ contains
     real(kind=dp) :: cutValue
     
     scID = SCList%atidToSCType(atomID)
-    cutValue = SCList%SCTypes(scID)%sc_rcut
+    cutValue = 2.0_dp * SCList%SCTypes(scID)%alpha
   end function getSCCut
 
 
