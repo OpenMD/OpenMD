@@ -66,8 +66,8 @@ module suttonchen
   logical, save :: haveRcut = .false.
   logical, save :: haveMixingMap = .false.
   logical, save :: useGeometricDistanceMixing = .false.
-
-
+  logical, save :: cleanArrays = .true.
+  logical, save :: arraysAllocated = .false.
 
 
   character(len = statusMsgSize) :: errMesg
@@ -76,7 +76,6 @@ module suttonchen
   character(len = 200) :: errMsg
   character(len=*), parameter :: RoutineName =  "Sutton-Chen MODULE"
   !! Logical that determines if eam arrays should be zeroed
-  logical :: cleanme = .true.
   logical :: nmflag  = .false.
 
 
@@ -291,8 +290,8 @@ contains
 
   !! routine checks to see if array is allocated, deallocates array if allocated
   !! and then creates the array to the required size
-  subroutine allocateSC(status)
-    integer, intent(out) :: status
+  subroutine allocateSC()
+    integer :: status
 
 #ifdef IS_MPI
     integer :: nAtomsInRow
@@ -300,7 +299,7 @@ contains
 #endif
     integer :: alloc_stat
 
-
+    
     status = 0
 #ifdef IS_MPI
     nAtomsInRow = getNatomsInRow(plan_atom_row)
@@ -313,21 +312,18 @@ contains
     allocate(frho(nlocal),stat=alloc_stat)
     if (alloc_stat /= 0) then
        status = -1
-       return
     end if
 
     if (allocated(rho)) deallocate(rho)
     allocate(rho(nlocal),stat=alloc_stat)
     if (alloc_stat /= 0) then 
        status = -1
-       return
     end if
 
     if (allocated(dfrhodrho)) deallocate(dfrhodrho)
     allocate(dfrhodrho(nlocal),stat=alloc_stat)
     if (alloc_stat /= 0) then 
        status = -1
-       return
     end if
 
 #ifdef IS_MPI
@@ -336,7 +332,6 @@ contains
     allocate(rho_tmp(nlocal),stat=alloc_stat)
     if (alloc_stat /= 0) then 
        status = -1
-       return
     end if
 
 
@@ -344,19 +339,16 @@ contains
     allocate(frho_row(nAtomsInRow),stat=alloc_stat)
     if (alloc_stat /= 0) then 
        status = -1
-       return
     end if
     if (allocated(rho_row)) deallocate(rho_row)
     allocate(rho_row(nAtomsInRow),stat=alloc_stat)
     if (alloc_stat /= 0) then 
        status = -1
-       return
     end if
     if (allocated(dfrhodrho_row)) deallocate(dfrhodrho_row)
     allocate(dfrhodrho_row(nAtomsInRow),stat=alloc_stat)
     if (alloc_stat /= 0) then 
        status = -1
-       return
     end if
 
 
@@ -366,23 +358,23 @@ contains
     allocate(frho_col(nAtomsInCol),stat=alloc_stat)
     if (alloc_stat /= 0) then 
        status = -1
-       return
     end if
     if (allocated(rho_col)) deallocate(rho_col)
     allocate(rho_col(nAtomsInCol),stat=alloc_stat)
     if (alloc_stat /= 0) then 
        status = -1
-       return
     end if
     if (allocated(dfrhodrho_col)) deallocate(dfrhodrho_col)
     allocate(dfrhodrho_col(nAtomsInCol),stat=alloc_stat)
     if (alloc_stat /= 0) then 
        status = -1
-       return
     end if
 
 #endif
-
+    if (status == -1) then
+       call handleError("SuttonChen:allocateSC","Error in allocating SC arrays")
+    end if
+    arraysAllocated = .true.
   end subroutine allocateSC
 
   !! C sets rcut to be the largest cutoff of any atype 
@@ -397,8 +389,10 @@ contains
 
   end subroutine setCutoffSC
 
+!! This array allocates module arrays if needed and builds mixing map.
   subroutine clean_SC()
-
+    if (.not.arraysAllocated) call allocateSC()
+    if (.not.haveMixingMap) call createMixingMap()
     ! clean non-IS_MPI first
     frho = 0.0_dp
     rho  = 0.0_dp
@@ -439,8 +433,8 @@ contains
 
     ! check to see if we need to be cleaned at the start of a force loop
 
-    if (.not.haveMixingMap) call createMixingMap()
-
+    if (cleanArrays) call clean_SC()
+    cleanArrays = .false.
 
 #ifdef IS_MPI
     Atid1 = Atid_row(Atom1)
@@ -482,7 +476,6 @@ contains
     integer :: myid
 
 
-    cleanme = .true.
     !! Scatter the electron density from  pre-pair calculation back to local atoms
 #ifdef IS_MPI
     call scatter(rho_row,rho,plan_atom_row,sc_err)
@@ -566,7 +559,8 @@ contains
     !Local Variables
 
     ! write(*,*) "Frho: ", Frho(atom1)
-
+    
+    cleanArrays = .true.
 
     dvpdr = 0.0E0_DP
 
