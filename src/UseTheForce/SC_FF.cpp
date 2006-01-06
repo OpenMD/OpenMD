@@ -44,7 +44,7 @@
  *
  *  Created by Charles F. Vardeman II on 11/9/05.
  *  @author  Charles F. Vardeman II 
- *  @version $Id: SC_FF.cpp,v 1.7 2005-12-30 23:15:59 chuckv Exp $
+ *  @version $Id: SC_FF.cpp,v 1.8 2006-01-06 21:15:14 tim Exp $
  *
  */
 
@@ -86,9 +86,9 @@ namespace oopse {
     //Make sure they are added after DirectionalAtomTypesSectionParser and AtomTypesSectionParser. 
     //The order of BondTypesSectionParser, BendTypesSectionParser and TorsionTypesSectionParser are
     //not important.
-    spMan_.push_back(new OptionSectionParser(SCForceFieldOptions_));
+    spMan_.push_back(new OptionSectionParser(forceFieldOptions_));
     spMan_.push_back(new AtomTypesSectionParser());
-    spMan_.push_back(new SCAtomTypesSectionParser(SCForceFieldOptions_));
+    spMan_.push_back(new SCAtomTypesSectionParser(forceFieldOptions_));
     
   }
   

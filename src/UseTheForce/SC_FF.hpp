@@ -44,7 +44,7 @@
  *
  *  Created by Charles F. Vardeman II on 11/9/05.
  *  @author  Charles F. Vardeman II 
- *  @version $Id: SC_FF.hpp,v 1.2 2005-12-06 19:26:37 chuckv Exp $
+ *  @version $Id: SC_FF.hpp,v 1.3 2006-01-06 21:15:14 tim Exp $
  *
  */
 #ifndef USETHEFORCE_SC_FF_HPP
@@ -68,7 +68,6 @@ public:
     ~SC_FF();
 private:
       SectionParserManager spMan_;
-    ForceFieldOptions SCForceFieldOptions_;
   };
   
 } //end namespace oopse
