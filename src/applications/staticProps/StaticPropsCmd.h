@@ -61,6 +61,7 @@ struct gengetopt_args_info
   int p2_given ;	/* Whether p2 was given.  */
   int scd_given ;	/* Whether scd was given.  */
   int density_given ;	/* Whether density was given.  */
+  int slab_density_given ;	/* Whether slab_density was given.  */
 
 } ;
 

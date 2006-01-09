@@ -44,7 +44,7 @@
  *
  *  Created by Charles F. Vardeman II on 11/26/05.
  *  @author  Charles F. Vardeman II 
- *  @version $Id: RhoZ.hpp,v 1.1 2005-11-30 21:00:39 chuckv Exp $
+ *  @version $Id: RhoZ.hpp,v 1.2 2006-01-09 22:14:32 tim Exp $
  *
  */
 #ifndef APPLICATIONS_STATICPROPS_RHOZ_HPP
@@ -53,11 +53,10 @@
 #include "applications/staticProps/RadialDistrFunc.hpp"
 namespace oopse {
   
-  class RhoZ : public RadialDistrFunc {
+  class RhoZ : public StaticAnalyser {
     
 public:
-    RhoZ(SimInfo* info, const std::string& filename, const std::string& sele1, 
-         const std::string& sele2, double len, int nrbins);
+    RhoZ(SimInfo* info, const std::string& filename, const std::string& sele, int len, int nrbins);
     
     int getNRBins() {
       return nRBins_; 
@@ -66,22 +65,27 @@ public:
     double getLength() {
       return len_;
     }
+
+    virtual void process();
     
 private:
-      
-      virtual void preProcess();
-    virtual void initalizeHistogram();
-    virtual void collectHistogram(StuntDouble* sd1, StuntDouble* sd2);
-    virtual void processHistogram();
     
-    virtual void writeRdf();
+    virtual void writeDensity();
+
+
+    Snapshot* currentSnapshot_;
+
+    int nProcessed_;
+    std::string selectionScript_;
+    SelectionEvaluator evaluator_;
+    SelectionManager seleMan_;
     
     double len_;
     int nRBins_;
     double deltaR_;
-    
-    std::vector<int> histogram_;
-    std::vector<double> avgGofr_;
+
+    std::vector<std::vector<StuntDouble*> > sliceSDLists_;
+    std::vector<double> density_;
   };
   
 }

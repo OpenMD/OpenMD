@@ -44,7 +44,7 @@
  *
  *  Created by Charles F. Vardeman II on 11/26/05.
  *  @author  Charles F. Vardeman II 
- *  @version $Id: RhoZ.cpp,v 1.1 2005-11-30 21:00:39 chuckv Exp $
+ *  @version $Id: RhoZ.cpp,v 1.2 2006-01-09 22:14:32 tim Exp $
  *
  */
 
@@ -54,79 +54,89 @@
 #include <fstream>
 #include "applications/staticProps/RhoZ.hpp"
 #include "utils/simError.h"
-
+#include "io/DumpReader.hpp"
+#include "primitives/Molecule.hpp"
 namespace oopse {
   
-  RhoZ::RhoZ(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2, double len, int nrbins)
-  : RadialDistrFunc(info, filename, sele1, sele2), len_(len), nRBins_(nrbins){
+  RhoZ::RhoZ(SimInfo* info, const std::string& filename, const std::string& sele, int len, int nrbins)
+  : StaticAnalyser(info, filename), selectionScript_(sele),  evaluator_(info), seleMan_(info), len_(len), nRBins_(nrbins){
+
+    evaluator_.loadScriptString(sele);
+    if (!evaluator_.isDynamic()) {
+      seleMan_.setSelectionSet(evaluator_.evaluate());
+    }
+      
     
     deltaR_ = len_ /nRBins_;
     
-    histogram_.resize(nRBins_);
-    avgRhoZ_.resize(nRBins_);
+    sliceSDLists_.resize(nRBins_);
+    density_.resize(nRBins_);
     
     setOutputName(getPrefix(filename) + ".RhoZ");
   }
-  
-  
-  void RhoZ::preProcess() {
-    std::fill(avgRhoZ_.begin(), avgRhoZ_.end(), 0.0);    
-  }
-  
-  void RhoZ::initalizeHistogram() {
-    std::fill(histogram_.begin(), histogram_.end(), 0);
-  }
-  
-  
-  void RhoZ::processHistogram() {
-    
-    int nPairs = getNPairs();
-    double volume = info_->getSnapshotManager()->getCurrentSnapshot()->getVolume();
-    double pairDensity = nPairs /volume * 2.0;
-    double pairConstant = ( 4.0 * NumericConstant::PI * pairDensity ) / 3.0;
-    
-    for(int i = 0 ; i < histogram_.size(); ++i){
-      
-      double rLower = i * deltaR_;
-      double rUpper = rLower + deltaR_;
-      double volSlice = ( rUpper * rUpper * rUpper ) - ( rLower * rLower * rLower );
-      double nIdeal = volSlice * pairConstant;
-      
-      avgRhoZ_[i] += histogram_[i] / nIdeal;    
+
+  void RhoZ::process() {
+    DumpReader reader(info_, dumpFilename_);    
+    int nFrames = reader.getNFrames();
+    nProcessed_ = nFrames / step_;
+
+
+    for (int istep = 0; istep < nFrames; istep += step_) {
+
+        StuntDouble* sd;
+        int i;    
+        reader.readFrame(istep);
+        currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
+
+        double sliceVolume = currentSnapshot_->getVolume() /nRBins_;
+        //assume simulation box will never change
+        //Mat3x3d hmat = currentSnapshot_->getHmat();
+        double halfBoxZ = len_ /2;      
+        
+        if (evaluator_.isDynamic()) {
+          seleMan_.setSelectionSet(evaluator_.evaluate());
+        }
+
+        //wrap the stuntdoubles into a cell      
+        for (sd = seleMan_.beginSelected(i); sd != NULL; sd = seleMan_.nextSelected(i)) {
+            Vector3d pos = sd->getPos();
+            currentSnapshot_->wrapVector(pos);
+            sd->setPos(pos);
+        }
+
+        //determine which atom belong to which slice
+        for (sd = seleMan_.beginSelected(i); sd != NULL; sd = seleMan_.nextSelected(i)) {
+           Vector3d pos = sd->getPos();
+           int binNo = (pos.z() + halfBoxZ) /deltaR_;
+           sliceSDLists_[binNo].push_back(sd);
+        }
+
+        //loop over the slices to calculate the densities
+        for (std::size_t j = 0; j < sliceSDLists_.size(); ++j) {
+            double totalMass = 0;
+            for (int k = 0; k < sliceSDLists_[j].size(); ++k) {
+                totalMass += sliceSDLists_[j][k]->getMass();
+            }
+            density_[j] += totalMass/sliceVolume;
+        }
     }
+
     
+    writeDensity();
+
   }
-  
-  void RhoZ::collectHistogram(StuntDouble* sd1, StuntDouble* sd2) {
+
+ 
     
-    if (sd1 == sd2) {
-      return;
-    }
-    
-    Vector3d pos1 = sd1->getPosZ();
-    Vector3d pos2 = sd2->getPosZ();
-    Vector3d r12 = pos2 - pos1;
-    currentSnapshot_->wrapVector(r12);
-    
-    double distance = r12.length();
-    
-    if (distance < len_) {
-      int whichBin = distance / deltaR_;
-      histogram_[whichBin] += 2;
-    }
-  }
-  
-  
-  void RhoZ::writeRdf() {
+  void RhoZ::writeDensity() {
     std::ofstream rdfStream(outputFilename_.c_str());
     if (rdfStream.is_open()) {
-      rdfStream << "#radial distribution function\n";
-      rdfStream << "#selection1: (" << selectionScript1_ << ")\t";
-      rdfStream << "selection2: (" << selectionScript2_ << ")\n";
-      rdfStream << "#r\tcorrValue\n";
-      for (int i = 0; i < avgRhoZ_.size(); ++i) {
+      rdfStream << "#RhoZ\n";
+      rdfStream << "#selection: (" << selectionScript_ << ")\t";
+      rdfStream << "#z\tdensity\n";
+      for (int i = 0; i < density_.size(); ++i) {
         double r = deltaR_ * (i + 0.5);
-        rdfStream << r << "\t" << avgRhoZ_[i]/nProcessed_ << "\n";
+        rdfStream << r << "\t" << density_[i]/nProcessed_ << "\n";
       }
       
     } else {

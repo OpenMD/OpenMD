@@ -58,6 +58,7 @@
 #include "applications/staticProps/P2OrderParameter.hpp"
 #include "applications/staticProps/SCDOrderParameter.hpp"
 #include "applications/staticProps/DensityPlot.hpp"
+#include "applications/staticProps/RhoZ.hpp"
 
 using namespace oopse;
 
@@ -106,7 +107,7 @@ int main(int argc, char* argv[]){
       sele2 = sele2Env;            
     } else if (args_info.density_given) { 
       sele2 = "select all";
-    } else if(!args_info.scd_given && !args_info.density_given)  {
+    } else if(!args_info.scd_given && !args_info.density_given && !args_info.slab_density_given)  {
       sprintf( painCave.errMsg,
                "neither --sele2 option nor $OOPSE_SELE2 is set");
       painCave.severity = OOPSE_ERROR;
@@ -183,6 +184,9 @@ int main(int argc, char* argv[]){
       }
   }else if (args_info.density_given) {
       analyser= new DensityPlot(info, dumpFileName, sele1, sele2, maxLen, args_info.nrbins_arg);  
+  } else if (args_info.slab_density_given) {
+      Mat3x3d hmat = info->getSnapshotManager()->getCurrentSnapshot()->getHmat();
+      analyser = new RhoZ(info, dumpFileName, sele1, hmat(2, 2), args_info.nrbins_arg);
   }
     
   if (args_info.output_given) {
