@@ -139,6 +139,8 @@ namespace oopse {
     }
     return ret;
   }
+
+  bool isInteger(const std::string& str);
   
   std::string OOPSE_itoa(int value, unsigned int base = 10);
   

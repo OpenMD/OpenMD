@@ -83,7 +83,7 @@ namespace oopse {
       bool result;
       ParamMap::iterator i =parameters_.find(keyword);
       if (i != parameters_.end()) {
-        if(isType<int>(value)){
+        if(isInteger(value)){
           int ival = lexi_cast<int>(value);
           result = i->second->setData(ival);
         }      

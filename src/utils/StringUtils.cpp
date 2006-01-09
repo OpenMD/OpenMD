@@ -217,4 +217,20 @@ namespace oopse {
     return str.substr(0, str.find('.'));
   }
 
+bool isInteger(const std::string& str) {
+
+    bool result = false;
+
+    std::string::const_iterator i = str.begin();    
+    if (i != str.end() && (*i == '+' || *i == '-' || std::isdigit(*i) )) {
+        ++i;        
+        while (i != str.end() && std::isdigit(*i))
+            ++i;
+        if (i == str.end())
+            result = true;
+    }
+    
+    return result;
+}
+
 }
