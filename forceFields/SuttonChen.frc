@@ -7,7 +7,7 @@ begin Options
       EnergyMixingRule      Geometric
 //  energy unit are eV. Convert to kcal/mol
       EnergyUnitScaling     0.02306054
-      CutoffPolicy         MIX
+      cutoffPolicy         MIX
 end Options
 
 begin AtomTypes

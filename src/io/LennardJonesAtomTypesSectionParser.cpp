@@ -72,8 +72,8 @@ namespace oopse {
 	ljParam.sigma = tokenizer.nextTokenAsDouble();
 	ljParam.soft_pot = 0;
   
-  ljParam.epsilon *= options_.getEnergyUnitScaling();
-  ljParam.sigma   *= options_.getDistanceUnitScaling();
+	ljParam.epsilon *= options_.getEnergyUnitScaling();
+	ljParam.sigma   *= options_.getDistanceUnitScaling();
   
 	if (tokenizer.hasMoreTokens()) {
 	  std::string pot_type = tokenizer.nextToken();
