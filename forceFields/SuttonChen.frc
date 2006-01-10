@@ -6,7 +6,7 @@ begin Options
       DistanceMixingRule    Geometric
       EnergyMixingRule      Geometric
 //  energy unit are eV. Convert to kcal/mol
-      EnergyUnitScaling     0.02306054
+      EnergyUnitScaling     23.060523
       cutoffPolicy         MIX
 end Options
 
