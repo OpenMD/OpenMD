@@ -1,4 +1,4 @@
-!!
+ !!
 !! Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
 !!
 !! The University of Notre Dame grants you ("Licensee") a
@@ -272,6 +272,7 @@ contains
           MixingMap(i,j)%rcut = 2.0_dp *MixingMap(i,j)%alpha
           MixingMap(i,j)%vpair_pot = MixingMap(i,j)%epsilon* &
                (MixingMap(i,j)%alpha/MixingMap(i,j)%rcut)**MixingMap(i,j)%n
+
           if (i.ne.j) then
              MixingMap(j,i)%epsilon    = MixingMap(i,j)%epsilon
              MixingMap(j,i)%m          = MixingMap(i,j)%m
@@ -470,7 +471,6 @@ contains
     real(kind=dp) :: pot
     integer :: i,j
     integer :: atom
-    real(kind=dp) :: U,U1,U2
     integer :: atype1
     integer :: atid1
     integer :: myid
@@ -499,10 +499,11 @@ contains
     do atom = 1, nlocal
        Myid = SCList%atidtoSctype(Atid(atom))
        frho(atom) = -SCList%SCTypes(Myid)%c * &
-            SCList%SCTypes(Myid)%epsilon * sqrt(rho(i))
+            SCList%SCTypes(Myid)%epsilon * sqrt(rho(atom))
 
        dfrhodrho(atom) = 0.5_dp*frho(atom)/rho(atom)
-       pot = pot + u
+
+       pot = pot + frho(atom)
     enddo
 
 #ifdef IS_MPI
@@ -546,10 +547,9 @@ contains
     real( kind = dp ) :: dvpdr
     real( kind = dp ) :: drhodr
     real( kind = dp ) :: dudr
-    real( kind = dp ) :: rcij
     real( kind = dp ) :: drhoidr,drhojdr
     real( kind = dp ) :: Fx,Fy,Fz
-    real( kind = dp ) :: r,d2pha,phb,d2phb
+    real( kind = dp ) :: d2pha,phb,d2phb
     real( kind = dp ) :: pot_temp,vptmp
     real( kind = dp ) :: epsilonij,aij,nij,mij,vcij
     integer :: id1,id2
@@ -587,11 +587,11 @@ contains
        mij       = MixingMap(mytype_atom1,mytype_atom2)%m
        vcij      = MixingMap(mytype_atom1,mytype_atom2)%vpair_pot               
 
-       vptmp = epsilonij*((aij/r)**nij)
+       vptmp = epsilonij*((aij/rij)**nij)
 
 
-       dvpdr = -nij*vptmp/r
-       drhodr = -mij*((aij/r)**mij)/r
+       dvpdr = -nij*vptmp/rij
+       drhodr = -mij*((aij/rij)**mij)/rij
 
        
        dudr = drhodr*(dfrhodrho(atom1)+dfrhodrho(atom2)) &

@@ -19,7 +19,7 @@ dt = 4.0;
 runTime = 1e5;
 
 
-sampleTime = 10.0;
+sampleTime = 1000.0;
 seed = 985456376;
 
 useInitialExtendedSystemState="false";
