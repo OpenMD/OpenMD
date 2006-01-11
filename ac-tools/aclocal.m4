@@ -21,6 +21,7 @@ $5], [AC_MSG_RESULT([no])
 $6])]
 CXXFLAGS="$save_CXXFLAGS_CHECK_CXX_LIB"
 LIBS="$save_LIBS_CHECK_CXX_LIB")dnl
+
 dnl
 dnl AC_CHECK_MODSUFFIX
 dnl
@@ -30,7 +31,7 @@ AC_MSG_CHECKING(for module suffix)
 rm -f conftest*
 # Intel ifc compiler generates files by the name of work.pc and work.pcl (!)
 rm -f work*
-cat >conftest.f90 <<EOF
+cat >conftest.$ac_ext <<EOF
         module conftest
         integer n
         parameter (n=1)
@@ -39,12 +40,12 @@ EOF
 # SGI and absoft compilers generates module name in upper case!
 testname="conftest"
 modcase="lower"
-if $F90 -c conftest.f90 > conftest.out 2>&1 ; then
-    MOD=`ls conftest* | grep -v conftest.f | grep -v conftest.o`
+if (eval $ac_compile) 2>/dev/null ; then
+    MOD=`ls conftest* | grep -v conftest.$ac_ext | grep -v conftest.o`
     MOD=`echo "$MOD" | sed -e 's/conftest\.//g'`
     if test -z "$MOD" ; then
         MOD=`ls CONFTEST* 2>/dev/null \
-                | grep -v CONFTEST.f | grep -v CONFTEST.o`
+                | grep -v CONFTEST.$ac_ext | grep -v CONFTEST.o`
         MOD=`echo "$MOD" | sed -e 's/CONFTEST\.//g'`
         if test -n "$MOD" ; then
             testname="CONFTEST"
@@ -84,7 +85,7 @@ AC_MSG_CHECKING(for module directory path flag)
 rm -f conftest*
 # Intel ifc compiler generates files by the name of work.pc and work.pcl (!)
 rm -f work*
-cat >conftest.f90 <<EOF
+cat >conftest.$ac_ext <<EOF
         module conftest
         integer n
         parameter (n=1)
@@ -92,8 +93,8 @@ cat >conftest.f90 <<EOF
 EOF
 # SGI and absoft compilers generates module name in upper case!
 testname="conftest"
-if $F90 -c conftest.f90 > conftest.out 2>&1 ; then
-   mod=`ls CONFTEST* 2>/dev/null | grep -v CONFTEST.f | grep -v CONFTEST.o`
+if (eval $ac_compile) 2>/dev/null ; then
+   mod=`ls CONFTEST* 2>/dev/null | grep -v CONFTEST.$ac_ext | grep -v CONFTEST.o`
    mod=`echo "$mod" | sed -e 's/CONFTEST\.//g'`
    if test -n "$mod" ; then
       testname="CONFTEST"
@@ -102,7 +103,7 @@ if $F90 -c conftest.f90 > conftest.out 2>&1 ; then
    if test ! -d conf ; then mkdir conf ; madedir=1; fi
    cp $testname.$MOD conf
    rm -f conftest* CONFTEST*
-   cat >conftest1.f90 <<EOF
+   cat >conftest1.$ac_ext <<EOF
         program main
         use conftest
         print *, n
@@ -110,15 +111,15 @@ if $F90 -c conftest.f90 > conftest.out 2>&1 ; then
 EOF
    F90_WORK_FILES_ARG=""
    F90MODINCSPEC=""
-   if $F90 -c -Iconf conftest1.f90 > conftest.out 2>&1 ; then
+   if $FC -c -Iconf $FCFLAGS $FCFLAGS_SRCEXT conftest1.$ac_ext > conftest.out 2>&1 ; then
        MODDIRFLAG="-I"
        F90MODINCSPEC="-I<dir>"
        AC_MSG_RESULT(-I)
-   elif $F90 -c -Mconf conftest1.f90 >> conftest.out 2>&1 ; then
+   elif $FC -c -Mconf $FCFLAGS $FCFLAGS_SRCEXT conftest1.$ac_ext >> conftest.out 2>&1 ; then
        MODDIRFLAG="-M"
        F90MODINCSPEC="-M<dir>"
        AC_MSG_RESULT(-M)
-   elif $F90 -c -pconf conftest1.f90 >> conftest.out 2>&1 ; then
+   elif $FC -c -pconf $FCFLAGS $FCFLAGS_SRCEXT conftest1.$ac_ext >> conftest.out 2>&1 ; then
        MODDIRFLAG="-p"
        F90MODINCSPEC="-p<dir>"
        AC_MSG_RESULT(-p)
@@ -126,7 +127,7 @@ EOF
         cp work.pc conf/mpimod.pc
         echo "mpimod.pc" > conf/mpimod.pcl
         echo "`pwd`/conf/mpimod.pc" >> conf/mpimod.pcl
-        if $F90 -c -cl,conf/mpimod.pcl conftest1.f >>conftest.out 2>&1 ; then
+        if $FC -c -cl,conf/mpimod.pcl $FCFLAGS $FCFLAGS_SRCEXT conftest1.$ac_ext >>conftest.out 2>&1 ; then
             MODDIRFLAG='-cl,mpimod.pcl'
             AC_MSG_RESULT([-cl,filename where filename contains a list of files and directories])
             F90_WORK_FILES_ARG="-cl,mpimod.pcl"
@@ -150,187 +151,12 @@ fi
 
 ])
 
-
-dnl
-dnl AC_CHECK_MPI_F90MOD
-dnl
-AC_DEFUN([AC_CHECK_MPI_F90MOD],[
-
-  AC_ARG_WITH(mpi_f90_mods, [  --with-mpi_f90_mods=<dir>
-                          Location where MPI f90 modules are installed ],
-	                   mpi_f90_mods="$withval", 
-	                   mpi_f90_mods="/usr/local/include/f90choice")
-
-  AC_MSG_CHECKING(for MPI F90 modules)
-  AC_LANG_SAVE()
-  AC_LANG([Fortran 90])
-  ac_save_F90FLAGS=$F90FLAGS
-
-  AS_IF([test "$mpi_f90_mods"], [F90FLAGS="${F90FLAGS} ${MODDIRFLAG}${mpi_f90_mods}"])
-    _AC_COMPILE_IFELSE([
-    AC_LANG_PROGRAM([
-use mpi
-integer :: ierr
-call MPI_Init(ierr)
-])], [HAVE_MPI_MOD=1], [HAVE_MPI_MOD=0])
- 
-  F90FLAGS=$ac_save_F90FLAGS 
-  AC_LANG_RESTORE()
-
-  if test "$HAVE_MPI_MOD" = 1; then
-    AC_MSG_RESULT(yes)
-    AC_DEFINE(MPI_MOD, 1, [have mpi module])
-    MPI_F90_MODS="${mpi_f90_mods}"
-    AC_SUBST(MPI_F90_MODS)        
-    # The library name:
-    if test -z "$MPI_LIB" ; then 
-       MPI_LIBNAME=-lmpich
-    else 
-       MPI_LIBNAME="$MPI_LIB" 
-    fi
-    if test -z "$MPIMODLIBNAME" ; then
-       MPIMODLIBNAME="${MPI_LIBNAME}f90"
-    fi
-    AC_SUBST(MPIMODLIBNAME)
-  else
-    AC_MSG_RESULT(no)
-    AC_MSG_WARN([Couldn't locate MPI F90 Modules])
-  fi
-
-])
-
-
-
-
-dnl
-dnl AM_PATH_SPRNG
-dnl
-AC_DEFUN([AM_PATH_SPRNG],[
-
-  AC_ARG_WITH(sprng_prefix, [  --with-sprng_prefix=PREFIX
-                          Prefix where SPRNG is installed ],
-                           sprng_prefix="$withval",
-                           sprng_prefix="/usr/local")
-  AC_ARG_WITH(sprng-libdir, [  --with-sprng-libdir=PREFIX  SPRNG library directory],
-                           sprng_libdir="$withval",
-                           sprng_libdir="/usr/local/lib")
-  AC_ARG_WITH(sprng-include, [  --with-sprng-include=PREFIX
-                          SPRNG include directory],
-                           sprng_include="$withval",
-                           sprng_include="/usr/local/include/sprng")
-
-  if test x$sprng_libdir = x ; then
-    sprng_libdir=${sprng_prefix}/lib
-  fi
-
-  if test x$sprng_include = x ; then
-    sprng_include=${sprng_prefix}/include
-  fi
-
-  AC_MSG_CHECKING(for SPRNG include files in $sprng_include)
-  if test -f ${sprng_include}/sprng.h; then
-    have_sprngincl=yes
-    AC_MSG_RESULT(yes)
-  else
-    have_sprngincl=no
-    AC_MSG_RESULT(no)
-    AC_MSG_ERROR(Could not locate the SPRNG include files)
-  fi
-
-  AC_MSG_CHECKING(for SPRNG libraries in $sprng_libdir)
-  if test -f ${sprng_libdir}/libsprng.a; then
-    have_sprnglib=yes
-    AC_MSG_RESULT(yes)
-  else
-    have_sprnglib=no
-    AC_MSG_RESULT(no)
-    AC_MSG_ERROR(Could not locate the SPRNG libraries)
-  fi
-
-  AC_LANG_SAVE()
-  AC_LANG([C])
-  ac_save_CPPFLAGS=$CPPFLAGS
-  CPPFLAGS="${CPPFLAGS} -I${sprng_include}"
-  ac_save_LDFLAGS=$LDFLAGS
-  LDFLAGS="${LDFLAGS} -L${sprng_libdir} -lsprng"
-  AC_CHECK_HEADER(sprng.h, [
-    AC_CHECK_LIB(sprng, 
-                 init_rng, 
-                    [SPRNG_LIBDIR="${sprng_libdir}"
-                     SPRNG_LIB="-lsprng" SPRNG_INC="-I${sprng_include}"
-                     HAVE_SPRNG="yes"])])
-  CPPFLAGS=$ac_save_CPPFLAGS 
-  LDFLAGS=$ac_save_LDFLAGS 
-  AC_LANG_RESTORE()
-  
-  if test x_$HAVE_SPRNG != x_yes; then
-        AC_MSG_ERROR(Can't build with SPRNG)
-  fi
-  AC_SUBST(SPRNG_LIBDIR)
-  AC_SUBST(SPRNG_LIB)
-  AC_SUBST(SPRNG_INC)
-  AC_SUBST(HAVE_SPRNG)
-])
-
-dnl
-dnl CHECK_MKL
-dnl
-AC_DEFUN([CHECK_MKL],
-[AC_MSG_CHECKING(if MKL is wanted)
-AC_ARG_WITH(mkl,
-	      [  --with-mkl              Do we want MKL [will check /usr/local/intel/mkl61 /opt/intel/mkl61]],
-[   AC_MSG_RESULT(yes)
-    for dir in $withval /usr/local/intel/mkl61 /opt/intel/mkl61; do
-        mkldir="$dir"
-        if test -f "$dir/include/mkl.h"; then
-            found_mkl="yes";
-            break;
-        fi
-    done
-    if test x_$found_mkl != x_yes; then
-        AC_MSG_ERROR(Cannot find MKL includes)
-    else
-        printf "MKL includes found in $mkldir/include\n";
-    fi
-
-  AC_LANG_SAVE()
-  AC_LANG([C])
-  ac_save_CPPFLAGS=$CPPFLAGS
-  CPPFLAGS="${CPPFLAGS} -I${mkldir}/include"
-  ac_save_LDFLAGS=$LDFLAGS
-  LDFLAGS="${LDFLAGS} -L${mkldir}/lib/32 -lmkl -lvml -lguide"
-  AC_CHECK_HEADER(mkl.h, [
-    AC_CHECK_LIB(mkl, 
-                 vslNewStream, 
-                    [MKL_LIBDIR="${mkldir}/lib/32", 
-                     MKL_LIB="-lmkl -lvml -lguide",
-                     HAVE_MKL="yes"]) 
-    ], [MKL_INC="-I${mkldir}/include"])
-  CPPFLAGS=$ac_save_CPPFLAGS 
-  LDFLAGS=$ac_save_LDFLAGS 
-  AC_LANG_RESTORE()
-  
-  if test x_$HAVE_MKL != x_yes; then
-        AC_MSG_ERROR(Can't build with MKL)
-  fi
-  AC_SUBST(MKL_LIBDIR)
-  AC_SUBST(MKL_LIB)
-  AC_SUBST(MKL_INC)
-  AC_SUBST(HAVE_MKL)
-],
-[
-    AC_MSG_RESULT(no)
-])
-])
-dnl
-
-
 AC_DEFUN(ACX_CHECK_CC_FLAGS,
 [
 AC_REQUIRE([AC_PROG_CC])
-AC_CACHE_CHECK(whether ${CC-cc} accepts $1, ac_$2,
+AC_CACHE_CHECK(whether ${CC} accepts $1, ac_$2,
 [echo 'void f(){}' > conftest.c
-if test -z "`${CC-cc} $1 -c conftest.c 2>&1`"; then
+if test -z "`${CC} $1 -c conftest.c 2>&1`"; then
         ac_$2=yes
 else
         ac_$2=no
@@ -349,9 +175,9 @@ fi
 AC_DEFUN(ACX_CHECK_CXX_FLAGS,
 [
 AC_REQUIRE([AC_PROG_CXX])
-AC_CACHE_CHECK(whether ${CXX-c++} accepts $1, ac_$2,
+AC_CACHE_CHECK(whether ${CXX} accepts $1, ac_$2,
 [echo 'void f(){}' > conftest.cpp
-if test -z "`${CXX-c++} $1 -c conftest.cpp 2>&1`"; then
+if test -z "`${CXX} $1 -c conftest.cpp 2>&1`"; then
         ac_$2=yes
 else
         ac_$2=no
@@ -368,19 +194,19 @@ fi
 ])
 
 dnl -------------------------------------------------------------------------
-dnl ACX_CHECK_F90_FLAGS()
+dnl ACX_CHECK_FC_FLAGS()
 dnl
 dnl     Check for optimizer flags the Fortran compiler can use.
 dnl
-AC_DEFUN(ACX_CHECK_F90_FLAGS,
+AC_DEFUN(ACX_CHECK_FC_FLAGS,
 [
-AC_CACHE_CHECK(whether ${F90-f90} accepts $1, ac_$2,
+AC_CACHE_CHECK(whether ${FC} accepts $1, ac_$2,
 [
 AC_LANG_SAVE
-AC_LANG([Fortran 90])
+AC_LANG(Fortran)
 echo 'program main' > conftest.$ac_ext
 echo 'end program main' >> conftest.$ac_ext
-ac_compile='${F90-f90} -c $1 $F90FLAGS conftest.$ac_ext 1>&AC_FD_CC'
+ac_compile='${FC} -c $1 $FCFLAGS $FCFLAGS_SRCEXT conftest.$ac_ext 1>&AC_FD_CC'
 if AC_TRY_EVAL(ac_compile); then
         ac_$2=yes
 else
@@ -762,67 +588,67 @@ if test "$ac_test_CXXFLAGS" != "set"; then
 fi
 ])
 
-AC_DEFUN(ACX_PROG_F90_MAXOPT,
+AC_DEFUN(ACX_PROG_FC_MAXOPT,
 [
-AC_REQUIRE([AC_PROG_F90])
+AC_REQUIRE([AC_PROG_FC])
 AC_REQUIRE([AC_CANONICAL_HOST])
 
 # Try to determine "good" native compiler flags if none specified on command
 # line
 
-if test x"$F90FLAGS" = x ; then
-  F90FLAGS=""
+if test "$ac_test_FCFLAGS" != "set"; then
+  FCFLAGS=""
   case "${host_cpu}-${host_os}" in
 
-  *linux*) if test "$F90" = ifc -o "$F90" = ifort; then
-                    F90FLAGS="-O"
+  *linux*) if test "$FC" = ifc -o "$FC" = ifort; then
+                    FCFLAGS="-O"
                 fi;;
-   rs6000*-aix*)  if test "$F90" = xlf90 -o "$F90" = f90; then
-                    F90FLAGS="-O3 -qarch=pwrx -qtune=pwrx -qansialias -w"
+   rs6000*-aix*)  if test "$FC" = xlf90 -o "$FC" = f90 -o "$FC" = xlf95; then
+                    FCFLAGS="-O3 -qarch=pwrx -qtune=pwrx -qansialias -w"
                 fi;;
    powerpc*-aix*)
-	if test "$F90" = f90 -o "$F90" = xlf90; then
-        	F90FLAGS="-O3 -qarch=ppc -qansialias -w"
+	if test "$FC" = f90 -o "$FC" = xlf90 -o "$FC" = xlf95; then
+        	FCFLAGS="-O3 -qarch=ppc -qansialias -w"
 		echo "*******************************************************"
 		echo "*  You have AIX on an unknown powerpc system.  It is  *"
 		echo "*  recommended that you use                           *"
 		echo "*                                                     *"
-		echo "*  F90FLAGS=-O3 -qarch=ppc -qtune=xxx -qansialias -w  *"
+		echo "*   FCFLAGS=-O3 -qarch=ppc -qtune=xxx -qansialias -w  *"
 		echo "*                                 ^^^                 *"
 		echo "*  where xxx is 601, 603, 604, or whatever kind of    *"
                 echo "*  PowerPC CPU you have.   For more info, man xlf.    *"
 		echo "*******************************************************"
         fi;;
    *darwin*)
-	if test "$F90" = f90 -o "$F90" = xlf90 -o "$F90" = xlf95; then
-        	F90FLAGS="-qthreaded -O -qtune=auto -qarch=auto -qunroll=auto"
+	if test "$FC" = f90 -o "$FC" = xlf90 -o "$FC" = xlf95; then
+        	FCFLAGS="-qthreaded -O -qtune=auto -qarch=auto -qunroll=auto"
         fi;;
   esac
 
   if test -n "$CPU_FLAGS"; then
-        F90FLAGS="$F90FLAGS $CPU_FLAGS"
+        FCFLAGS="$FCFLAGS $CPU_FLAGS"
   fi
 
-  if test -z "$F90FLAGS"; then
+  if test -z "$FCFLAGS"; then
 	echo ""
-	echo "**********************************************************"
-        echo "* WARNING: Don't know the best F90FLAGS for this system  *"
-        echo "* Use  make F90FLAGS=..., or edit the top level Makefile *"
-	echo "* (otherwise, a default of F90FLAGS=-O3 will be used)    *"
-	echo "**********************************************************"
+	echo "*********************************************************"
+        echo "* WARNING: Don't know the best FCFLAGS for this system  *"
+        echo "* Use  make FCFLAGS=..., or edit the top level Makefile *"
+	echo "* (otherwise, a default of FCFLAGS=-O3 will be used)    *"
+	echo "*********************************************************"
 	echo ""
-        F90FLAGS="-O3"
+        FCFLAGS="-O3"
   fi
 
-  ACX_CHECK_F90_FLAGS(${F90FLAGS}, guessed_f90flags, , [
+  ACX_CHECK_FC_FLAGS(${FCFLAGS}, guessed_f90flags, , [
 	echo ""
         echo "**********************************************************"
-        echo "* WARNING: The guessed F90FLAGS don't seem to work with  *"
-        echo "* your compiler.                                         *"
-        echo "* Use  make F90FLAGS=..., or edit the top level Makefile *"
-        echo "**********************************************************"
+        echo "* WARNING: The guessed FCFLAGS don't seem to work with  *"
+        echo "* your compiler.                                        *"
+        echo "* Use  make FCFLAGS=..., or edit the top level Makefile *"
+        echo "*********************************************************"
         echo ""
-        F90FLAGS=""
+        FCFLAGS=""
   ])
 
 fi
@@ -830,7 +656,7 @@ fi
 
 AC_DEFUN(ACX_PROG_F90_PREPFLAG,
 [
-AC_REQUIRE([AC_PROG_F90])
+AC_REQUIRE([AC_PROG_FC])
 AC_REQUIRE([AC_CANONICAL_HOST])
 
 # Try to determine native compiler flags that allow us to use F90 suffix
@@ -840,14 +666,14 @@ if test "$ac_test_PREPFLAG" != "set"; then
   PREPFLAG=""
   case "${host_cpu}-${host_os}" in
 
-  *linux*) if test "$F90" = ifc -o "$F90" = ifort; then
+  *linux*) if test "$FC" = ifc -o "$FC" = ifort; then
                     PREPFLAG="-fpp1 "
                 fi;;
-  *aix*)  if test "$F90" = xlf90 -o "$F90" = f90; then
+  *aix*)  if test "$FC" = xlf90 -o "$FC" = f90 -o "$FC" = xlf95; then
                     PREPFLAG="-qsuffix=cpp=F90 "
                 fi;;
   *darwin*)
-	if test "$F90" = f90 -o "$F90" = xlf90; then
+	if test "$FC" = f90 -o "$FC" = xlf90 -o "$FC" = xlf95; then
         	PREPFLAG="-qsuffix=cpp=F90 "
         fi;;
   esac
@@ -859,25 +685,28 @@ if test "$ac_test_PREPFLAG" != "set"; then
 
   AC_MSG_CHECKING(to make sure F90 preprocessor flag works)
   AC_LANG_SAVE()
-  AC_LANG([Fortran 90])
+  AC_LANG(Fortran)
   ac_save_ext=$ac_ext
   ac_ext=F90
-  ac_save_F90FLAGS=$F90FLAGS
+  ac_save_FCFLAGS_SRCEXT=$FCFLAGS_SRCEXT
 
-  AS_IF([test "$PREPFLAG"], [F90FLAGS="${F90FLAGS} ${PREPFLAG}-DTEST"])
+  AS_IF([test "$PREPFLAG"], [FCFLAGS_SRCEXT="${PREPFLAG}"])
     _AC_COMPILE_IFELSE([
-      AC_LANG_PROGRAM([
+      AC_LANG_SOURCE([
+program conftest
   integer :: i
   i = 1
+end program conftest
 ])], [prepflagworks=1], [prepflagworks=0])
 
-  F90FLAGS=$ac_save_F90FLAGS 
+  FCFLAGS_SRCEXT=$ac_save_FCFLAGS_SRCEXT
   ac_ext=$ac_save_ext
   AC_LANG_RESTORE()
 
   if test "$prepflagworks" = 1; then
     AC_MSG_RESULT(yes)
-    AC_SUBST(PREPFLAG)
+    FCFLAGS_SRCEXT="${PREPFLAG}"
+    AC_SUBST(FCFLAGS_SRCEXT)
   else
     AC_MSG_RESULT(no)
     AC_MSG_ERROR([Can't figure out working Fortran90 preprocessor flag])
@@ -888,7 +717,7 @@ fi
 
 AC_DEFUN(ACX_PROG_F90_PREPDEFFLAG,
 [
-AC_REQUIRE([AC_PROG_F90])
+AC_REQUIRE([AC_PROG_FC])
 AC_REQUIRE([AC_CANONICAL_HOST])
 
 # Try to determine native compiler flags that allow us to use F90 suffix
@@ -898,14 +727,14 @@ if test "$ac_test_PREPDEFFLAG" != "set"; then
   PREPDEFFLAG=""
   case "${host_cpu}-${host_os}" in
 
-  *linux*) if test "$F90" = ifc -o "$F90" = ifort; then
+  *linux*) if test "$FC" = ifc -o "$FC" = ifort; then
                     PREPDEFFLAG=" "
                 fi;;
-  *aix*)  if test "$F90" = xlf90 -o "$F90" = f90; then
+  *aix*)  if test "$FC" = xlf90 -o "$FC" = f90 -o "$FC" = xlf95; then
                     PREPDEFFLAG="-WF,"
                 fi;;
   *darwin*)
-	if test "$F90" = f90 -o "$F90" = xlf90; then
+	if test "$FC" = f90 -o "$FC" = xlf90 -o "$FC" = xlf95; then
         	PREPDEFFLAG="-WF,"
         fi;;
   esac
@@ -917,26 +746,27 @@ if test "$ac_test_PREPDEFFLAG" != "set"; then
 
   AC_MSG_CHECKING(to make sure F90 preprocessor define flag works)
   AC_LANG_SAVE()
-  AC_LANG([Fortran 90])
+  AC_LANG(Fortran)
   ac_save_ext=$ac_ext
   ac_ext=F90
-  ac_save_F90FLAGS=$F90FLAGS
+  ac_save_FCFLAGS=$FCFLAGS
 
-  AS_IF([test "$PREPDEFFLAG"], [F90FLAGS="${F90FLAGS} ${PREPFLAG} ${PREPDEFFLAG}-DTEST"])
+  AS_IF([test "$PREPDEFFLAG"], [FCFLAGS="${FCFLAGS} ${PREPDEFFLAG}-DTEST"])
     _AC_COMPILE_IFELSE([
-      AC_LANG_PROGRAM([
+      AC_LANG_SOURCE([
+program conftest
   integer :: i
 #ifdef TEST
   i = 1
 #else
   choke me
 #endif
+end program conftest
 ])], [prepdefflagworks=1], [prepdefflagworks=0])
 
-  F90FLAGS=$ac_save_F90FLAGS 
+  FCFLAGS=$ac_save_FCFLAGS 
   ac_ext=$ac_save_ext
   AC_LANG_RESTORE()
-
 
   if test "$prepdefflagworks" = 1; then
     AC_MSG_RESULT(yes)
@@ -979,12 +809,12 @@ fi
 AC_MSG_CHECKING([whether mpif.h is usable])
 have_mpif_h=0
 rm -f conftest*
-cat >conftest.f90 <<EOF
+cat >conftest.$ac_ext <<EOF
 program main
    include 'mpif.h'
 end
 EOF
-if $F90 -I$MPI_INC_DIR -c conftest.f90 > conftest.out 2>&1 ; then
+if $FC -I$MPI_INC_DIR -c $FCFLAGS $FCFLAGS_SRCEXT conftest.$ac_ext > conftest.out 2>&1 ; then
         AC_MSG_RESULT(yes)
         MPI_F90_INC="$MPI_INC_DIR"
         have_mpif_h=1
@@ -1047,46 +877,6 @@ fi
 AC_MSG_RESULT([found $MPI_F90_LIB])
 AC_SUBST(MPI_F90_LIB)
 ])dnl ACX_MPI
-
-
-dnl check for the required SPRNG library
-AC_DEFUN([ACX_SPRNG], [
-
-# Set variables...
-SPRNG_LIB_DIR="$SPRNG/lib"
-SPRNG_INC_DIR="$SPRNG/include"
-AC_SUBST([SPRNG_LIB_DIR])
-AC_SUBST([SPRNG_INC_DIR])
-
-AC_MSG_CHECKING([for sprng.h])
-have_sprng_h=0
-echo '#include <sprng.h>' > conftest.cc
-if test -z "`${CXX} -I${SPRNG_INC_DIR} -c conftest.cc 2>&1`"; then
-        AC_MSG_RESULT(yes)
-        have_sprng_h=1
-else
-        AC_MSG_RESULT([no! Check SPRNG include path!])
-        USE_SPRNG="no"
-fi
-rm -f conftest*
-if test "$have_sprng_h" = 1; then
-    AC_DEFINE(HAVE_SPRNG_H, 1, [have sprng.h])
-fi
-
-AC_LANG_PUSH(C)
-ac_save_LDFLAGS=$LDFLAGS
-LDFLAGS="${LDFLAGS} -L${SPRNG_LIB_DIR} "
-
-AC_CHECK_LIB(sprng, init_rng, [SPRNG_LIB="-lsprng"], [
-             AC_MSG_ERROR([Didn't find libsprng; check path for SPRNG package first...])
-             USE_SPRNG="no"
-             ])
-
-if test "$USE_SPRNG" = "no"; then
-  AC_MSG_ERROR(No working SPRNG library found)
-fi
-AC_SUBST(SPRNG_LIB)
-])dnl ACX_SPRNG
 
 AC_DEFUN([adl_FUNC_GETOPT_LONG],
  [AC_PREREQ(2.49)dnl
@@ -1307,3 +1097,131 @@ then
 fi
 
 ])
+# AC_F90_MODULE_NAMES
+# -------------------
+#
+# Figure out how the Fortran 90 compiler constructs module file names
+# 
+AC_DEFUN([AC_F90_MODULE_NAMES],
+[AC_REQUIRE([AC_PROG_FC])dnl
+AC_CACHE_CHECK([for Fortran 90 module file names],
+               ac_cv_f90_module_names,
+[AC_LANG_PUSH(Fortran)
+# carry out the test in a new directory, so that we don't miss anything
+mkdir conftest
+cd conftest
+AC_COMPILE_IFELSE(
+[MODULE Bar
+END MODULE Bar],
+ac_cv_f90_module_names=
+[ac_file_list=*
+for ac_file in $ac_file_list; do
+   case $ac_file in
+      # don't care for original source and object files 
+      conftest.$ac_ext | conftest.$ac_objext | conftest.err )
+          :
+          ;;
+      # look for new files derived from the file name 
+      *conftest*)
+          ac_pat=`echo $ac_file | sed s/conftest/%FILE%/`
+	  _AC_LIST_MEMBER_IF($ac_pat, $ac_cv_f90_module_names,,
+              ac_cv_f90_module_names="$ac_cv_f90_module_names $ac_pat")
+          ;;
+      # look for new files derived from the module name,
+      # with different case translation schemes 
+      *Bar*)
+          ac_pat=`echo $ac_file | sed s/Bar/%Module%/`
+	  _AC_LIST_MEMBER_IF($ac_pat, $ac_cv_f90_module_names,,
+              ac_cv_f90_module_names="$ac_cv_f90_module_names $ac_pat")
+          ;;
+      *bar*)
+          ac_pat=`echo $ac_file | sed s/bar/%module%/`
+	  _AC_LIST_MEMBER_IF($ac_pat, $ac_cv_f90_module_names,,
+              ac_cv_f90_module_names="$ac_cv_f90_module_names $ac_pat")
+          ;;
+      *BAR*)
+          ac_pat=`echo $ac_file | sed s/BAR/%MODULE%/`
+	  _AC_LIST_MEMBER_IF($ac_pat, $ac_cv_f90_module_names,,
+              ac_cv_f90_module_names="$ac_cv_f90_module_names $ac_pat")
+          ;;
+       # Other files - we have no idea how they are generated
+       *)
+          AC_MSG_WARN([Bogus file found: $ac_file])
+          ;;
+   esac
+done
+if test "x$ac_cv_f90_module_names" = "x"; then
+  AC_MSG_WARN([Couldn't determine module file names])
+fi
+],
+[ac_cv_f90_module_names=
+AC_MSG_WARN([Couldn't determine module file names])])
+cd ..
+# cleanup
+rm -rf conftest
+AC_LANG_POP()dnl
+]) # AC_CACHE_CHECK
+
+# We now generate a shell script that will help us to figure out the correct 
+# module file names, using the value of ac_cv_f90_module_names
+
+echo "Generating shell script modnam"
+
+cat > scripts/modnam << EOF
+#! /bin/sh
+# This script is auto-generated by configure
+#
+usage="\\
+Usage: \$[0] [[FILES]]
+
+[[FILES]] are Fortran 90 source files. 
+The output is a list of module file names that the Fortran 90 compiler 
+generates when compiling [[FILES]]."
+
+list=
+empty=
+
+if test \$[@%:@] -eq 0; then
+   echo "\$usage"; exit 0
+fi
+
+while test \$[@%:@] != 0; do
+
+  file=\$[1]
+  shift
+
+# strip suffix
+  base=\`echo \$file | sed 's/[[.]][[^.]]*$//'\`
+
+  test ! -f \$file && continue
+
+# Look for module definitions and transform them to upper / lower case
+  mods=\`cat \$file | sed '/^ *[[mM][oO][dD][uU][lL][eE]]/!d;s/^ *[[mM][oO][dD][uU][lL][eE]] *\([[A-Za-z_][A-Za-z0-9_]]*\).*\$/\1/'\`
+  upper=\`echo \$mods | tr a-z A-Z\`
+  lower=\`echo \$mods | tr A-Z a-z\`
+
+# Here, the patterns for generating module file names were inserted by configure
+  for trans in $ac_cv_f90_module_names; do
+
+    pat=\`echo \$trans | sed 's/.*\(%.*%\).*/\1/'\`
+    var=empty
+    case \$pat in 
+       %MODULE%) 
+          var=upper ;;
+       %Module%)
+          var=mods ;;
+       %module%) 
+          var=lower ;;
+       %FILE%)
+          test -n "\$mods" && var=base ;;
+    esac
+    new=\`eval '(for i in \$'\$var '; do echo \$trans | sed s/\$pat/\$i/; done)'\`
+    list="\$list \$new"
+  done
+done
+
+echo \$list
+# end of configure-generated script
+EOF
+chmod 755 scripts/modnam
+]) # AC_F90_MODULE_NAMES
