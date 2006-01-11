@@ -59,7 +59,7 @@ class TorsionStamp : public DataHolder {
             bool ret = false;
             if (members_.size() < 3 || members_.size() > 4) {
                 std::ostringstream oss;
-                oss << "members" << containerToString(members) << " is an invalid" << std::endl;
+                oss << "members" << containerToString(members) << " is invalid" << std::endl;
                 throw OOPSEException(oss.str());
             }
         }        

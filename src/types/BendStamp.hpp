@@ -60,7 +60,7 @@ class BendStamp : public DataHolder {
             members_ = members;
             if (members_.size() < 2  || members_.size() >3) {
                 std::ostringstream oss;
-                oss << "members" << containerToString(members) << " is an invalid" << std::endl;
+                oss << "members" << containerToString(members) << " is invalid" << std::endl;
                 throw OOPSEException(oss.str());
             }
         }

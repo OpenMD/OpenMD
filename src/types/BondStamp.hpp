@@ -54,12 +54,12 @@ class BondStamp : public DataHolder {
             b = members[1];
             if (a < 0 || b < 0) {
                 std::ostringstream oss;
-                oss << "BondStamp Error: members" << containerToString(members) << " is an invalid" << std::endl;
+                oss << "BondStamp Error: members" << containerToString(members) << " is invalid" << std::endl;
                 throw OOPSEException(oss.str());
             }
         } else {
             std::ostringstream oss;
-            oss << "BondStamp Error: members" << containerToString(members) << " is an invalid" << std::endl;
+            oss << "BondStamp Error: members" << containerToString(members) << " is invalid" << std::endl;
             throw OOPSEException(oss.str());
         }
         
