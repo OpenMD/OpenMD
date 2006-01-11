@@ -68,12 +68,12 @@ class AtomStamp  : public DataHolder {
       virtual void validate();
       typedef std::set<int>::iterator AtomIter;
       typedef std::vector<int>::iterator BondIter;
-      int getFirstBonedAtom(AtomIter& ai) {
+      int getFirstBondedAtom(AtomIter& ai) {
         ai = bondedAtoms_.begin();
         return ai != bondedAtoms_.end() ? *ai : -1;
       }
       
-      int getNextBonedAtom(AtomIter& ai) {
+      int getNextBondedAtom(AtomIter& ai) {
         ++ai;
         return ai != bondedAtoms_.end() ? *ai : -1;
       }

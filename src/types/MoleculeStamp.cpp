@@ -304,7 +304,7 @@ void MoleculeStamp::checkBends() {
 
         //find bend c--a--b
         AtomStamp::AtomIter ai;
-        for(int c= atomA->getFirstBonedAtom(ai);c != -1;c = atomA->getNextBonedAtom(ai))
+        for(int c= atomA->getFirstBondedAtom(ai);c != -1;c = atomA->getNextBondedAtom(ai))
         {
             if(b == c)
                 continue;          
@@ -323,7 +323,7 @@ void MoleculeStamp::checkBends() {
         }        
 
         //find bend a--b--c
-        for(int c= atomB->getFirstBonedAtom(ai);c != -1;c = atomB->getNextBonedAtom(ai))
+        for(int c= atomB->getFirstBondedAtom(ai);c != -1;c = atomB->getNextBondedAtom(ai))
         {
             if(a == c)
                 continue;          
@@ -407,12 +407,12 @@ void MoleculeStamp::checkTorsions() {
         AtomStamp::AtomIter ai2;
         AtomStamp::AtomIter ai3;
 
-        for(int a = atomB->getFirstBonedAtom(ai2);a != -1;a = atomB->getNextBonedAtom(ai2))
+        for(int a = atomB->getFirstBondedAtom(ai2);a != -1;a = atomB->getNextBondedAtom(ai2))
         {
             if(a == c)
                 continue;
 
-            for(int d = atomC->getFirstBonedAtom(ai3);d != -1;d = atomC->getNextBonedAtom(ai3))
+            for(int d = atomC->getFirstBondedAtom(ai3);d != -1;d = atomC->getNextBondedAtom(ai3))
             {
                 if(d == b)
                     continue;
