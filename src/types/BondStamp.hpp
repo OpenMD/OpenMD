@@ -48,15 +48,22 @@ namespace oopse {
 class BondStamp : public DataHolder {
 
     public:
-      bool setMembers(std::vector<int> members) {
-        bool ret = false;
+      void setMembers(std::vector<int> members) {
         if (members.size() ==2) {
             a = members[0];
             b = members[1];
-            ret = true;
+            if (a < 0 || b < 0) {
+                std::ostringstream oss;
+                oss << "BondStamp Error: members" << containerToString(members) << " is an invalid" << std::endl;
+                throw OOPSEException(oss.str());
+            }
+        } else {
+            std::ostringstream oss;
+            oss << "BondStamp Error: members" << containerToString(members) << " is an invalid" << std::endl;
+            throw OOPSEException(oss.str());
         }
+        
 
-        return ret;
       }
       
       int getA() {return a;} 

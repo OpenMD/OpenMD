@@ -59,7 +59,9 @@ bool AtomStamp::setPosition(const std::vector<double>& pos) {
         position_[2] = pos[2];
         havePos_ = true;
     }else {
-        std::cout << "invalid position\n";
+        std::ostringstream oss;
+        oss << "position" << containerToString(pos) << " is invalid" << std::endl;
+        throw OOPSEException(oss.str());    
     }
     return ret;
 }
@@ -72,7 +74,9 @@ bool AtomStamp::setOrientation(const std::vector<double>& ort) {
         position_[2] = ort[2];
         haveOrt_ = true;
     }else {
-        std::cout << "invalid orientation\n";
+        std::ostringstream oss;
+        oss << "orientation" << containerToString(ort) << " is invalid" << std::endl;
+        throw OOPSEException(oss.str());    
     }
     
     return ret;

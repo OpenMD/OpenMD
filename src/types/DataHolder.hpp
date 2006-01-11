@@ -43,14 +43,16 @@
 #define TYPES_DATAHOLDER_HPP
 
 #include <iostream>
-
 #include <string>
+#include <sstream>
 #include <map>
 #include <set>
 #include "math/Vector3.hpp"
 #include "utils/ParameterManager.hpp"
 #include "io/ParamConstraint.hpp"
 #include "utils/simError.h"
+#include "utils/OOPSEException.hpp"
+#include "utils/StringUtils.hpp"
 namespace oopse {
 
 class DataHolder {
@@ -64,12 +66,16 @@ class DataHolder {
               if (i != parameters_.end()) {
                    bool result = i->second->setData(val);
                    if (!result ) {
-              	  std::cout <<   "Error in parsing " << keyword << ": expect " << i->second->getParamType() <<"\n";
+                     std::stringstream ss;
+              	  ss <<   "Error in parsing " << keyword << ": expect " << i->second->getParamType() <<"\n";
+                      throw OOPSEException(ss.str());
                     }
               }else if (deprecatedKeywords_.find(keyword) != deprecatedKeywords_.end()){
                      std::cout << keyword << " is  deprecated\n";
               }else {
-                     std::cout << keyword << " can not be recognized\n";
+                     std::stringstream ss;
+                     ss << keyword << " can not be recognized\n";
+                     throw OOPSEException(ss.str());
               }
         }
 
@@ -77,7 +83,9 @@ class DataHolder {
           ParamMap::iterator i;
           for (i = parameters_.begin(); i != parameters_.end(); ++i) {
             if (!i->second->isOptional() && i->second->empty()) {
-                std::cout <<  i->second->getKeyword()  << " must be set\n";
+                std::stringstream ss;
+                ss <<  i->second->getKeyword()  << " must be set\n";
+                throw OOPSEException(ss.str());
             }
           }
         }

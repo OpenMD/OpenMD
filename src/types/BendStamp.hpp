@@ -56,19 +56,18 @@ class BendStamp : public DataHolder {
         int getMemberAt( int index ) {return members_.at(index);}
         int getNMembers() {return members_.size();}
         std::vector<int> getMembers() {return members_;}
-        bool setMembers(const std::vector<int>& members) {            
+        void setMembers(const std::vector<int>& members) {            
             members_ = members;
-            bool ret = false;
-            if (members_.size() == 3 || members_.size() == 2) {
-                ret = true;
+            if (members_.size() < 2  || members_.size() >3) {
+                std::ostringstream oss;
+                oss << "members" << containerToString(members) << " is an invalid" << std::endl;
+                throw OOPSEException(oss.str());
             }
-            return ret;
         }
-        bool setMembers(IntTuple3 tuple) {
+        void setMembers(IntTuple3 tuple) {
             members_.push_back(tuple.first);
             members_.push_back(tuple.second);
             members_.push_back(tuple.third);
-            return true;
         }
         virtual void validate();
 

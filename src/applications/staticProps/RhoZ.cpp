@@ -44,7 +44,7 @@
  *
  *  Created by Charles F. Vardeman II on 11/26/05.
  *  @author  Charles F. Vardeman II 
- *  @version $Id: RhoZ.cpp,v 1.2 2006-01-09 22:14:32 tim Exp $
+ *  @version $Id: RhoZ.cpp,v 1.3 2006-01-11 19:01:20 tim Exp $
  *
  */
 
@@ -104,7 +104,7 @@ namespace oopse {
             sd->setPos(pos);
         }
 
-        //determine which atom belong to which slice
+        //determine which atom belongs to which slice
         for (sd = seleMan_.beginSelected(i); sd != NULL; sd = seleMan_.nextSelected(i)) {
            Vector3d pos = sd->getPos();
            int binNo = (pos.z() + halfBoxZ) /deltaR_;

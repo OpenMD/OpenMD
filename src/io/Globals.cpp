@@ -181,7 +181,9 @@ void Globals::validate() {
 
   for(std::vector<Component*>::iterator i = components_.begin(); i != components_.end(); ++i) {
     if (!(*i)->findMoleculeStamp(moleculeStamps_)) {
-        std::cout << "Globals Error: can not find molecule stamp for component" << std::endl;
+        std::ostringstream oss;
+        oss << "Globals Error: can not find molecule stamp for component " << (*i)->getType() << std::endl;
+        throw OOPSEException(oss.str());           
     }
   }
 }
@@ -205,7 +207,9 @@ bool Globals::addMoleculeStamp(MoleculeStamp* molStamp) {
         moleculeStamps_.insert(std::map<std::string, MoleculeStamp*>::value_type(molStampName, molStamp));
         ret = true;
     } else {
-        std::cout << "Globals Error: Molecule Stamp " << molStamp->getName() << "appears multiple times\n";
+        std::ostringstream oss;
+        oss << "Globals Error: Molecule Stamp " << molStamp->getName() << "appears multiple times\n";
+        throw OOPSEException(oss.str());  
     }
     return ret;
 }

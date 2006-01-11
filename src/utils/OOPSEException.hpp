@@ -38,43 +38,21 @@
  * University of Notre Dame has been advised of the possibility of
  * such damages.
  */
- 
-#ifndef TYPES_TORSIONSTAMP_HPP
-#define TYPES_TORSIONSTAMP_HPP
-#include "types/DataHolder.hpp"
-#include "utils/Tuple.hpp"
+
+#ifndef UTILS_OOPSEEXCEPTION_HPP
+#define UTILS_OOPSEEXCEPTION_HPP
 namespace oopse {
-class TorsionStamp : public DataHolder {
-    DeclareParameter(GhostVectorSource, int);
+
+class OOPSEException {
     public:
-
-        TorsionStamp();
-        virtual ~TorsionStamp();
-        
-        int getMemberAt( int index ) {return members_.at(index);}
-        int getNMembers() {return members_.size();}
-        std::vector<int> getMembers() {return members_;}
-        void setMembers(const std::vector<int>& members) {
-            members_ = members;
-            bool ret = false;
-            if (members_.size() < 3 || members_.size() > 4) {
-                std::ostringstream oss;
-                oss << "members" << containerToString(members) << " is an invalid" << std::endl;
-                throw OOPSEException(oss.str());
-            }
-        }        
-
-        void setMembers(IntTuple4 tuple) {
-            members_.push_back(tuple.first);
-            members_.push_back(tuple.second);
-            members_.push_back(tuple.third);
-            members_.push_back(tuple.fourth);            
-        }
-        virtual void validate();
-
+        OOPSEException() : msg_("") {}
+        OOPSEException(const std::string msg) : msg_(msg) {}
+        const std::string getMessage() {return msg_;}
     private:
-    
-        std::vector<int> members_;
+
+        std::string msg_;
+
 };
+
 }
 #endif

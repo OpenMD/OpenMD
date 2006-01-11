@@ -46,7 +46,7 @@
  * @time 13:51am
  * @version 1.0
  */
-
+#include <exception>
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -147,37 +147,88 @@ Globals* SimCreator::parseFile(const std::string mdFileName){
              simParams = treeParser.walkTree(parser.getAST());
 
         }
+
       
       catch(antlr::MismatchedCharException& e) {
-          cerr<< "parser exception: " << e.getMessage() << " " <<  e.getFilename() << ":" << e.getLine() << " " << e.getColumn() << endl;
+          sprintf(painCave.errMsg, 
+                  "parser exception: %s %s:%d:%d\n",
+                  e.getMessage().c_str(),e.getFilename().c_str(), e.getLine(), e.getColumn());
+          painCave.isFatal = 1;
+          simError();           
       }
       catch(antlr::MismatchedTokenException &e) {
-          cerr<< "parser exception: " << e.getMessage() << " " <<  e.getFilename() << ":" << e.getLine() << " " << e.getColumn() << endl;
+          sprintf(painCave.errMsg, 
+                  "parser exception: %s %s:%d:%d\n",
+                  e.getMessage().c_str(),e.getFilename().c_str(), e.getLine(), e.getColumn());
+          painCave.isFatal = 1;
+          simError();   
       }
       catch(antlr::NoViableAltForCharException &e) {
-          cerr<< "parser exception: " << e.getMessage() << " " <<  e.getFilename() << ":" << e.getLine() << " " << e.getColumn() << endl;
+          sprintf(painCave.errMsg, 
+                  "parser exception: %s %s:%d:%d\n",
+                  e.getMessage().c_str(),e.getFilename().c_str(), e.getLine(), e.getColumn());
+          painCave.isFatal = 1;
+          simError();   
       }
       catch(antlr::NoViableAltException &e) {
-          cerr<< "parser exception: " << e.getMessage() << " " <<  e.getFilename() << ":" << e.getLine() << " " << e.getColumn() << endl;
+          sprintf(painCave.errMsg, 
+                  "parser exception: %s %s:%d:%d\n",
+                  e.getMessage().c_str(),e.getFilename().c_str(), e.getLine(), e.getColumn());
+          painCave.isFatal = 1;
+          simError();   
       }
+      
 	catch(antlr::TokenStreamRecognitionException& e) {
-          cerr<< "parser exception: " << e.getMessage() << " " <<  e.getFilename() << ":" << e.getLine() << " " << e.getColumn() << endl;
+          sprintf(painCave.errMsg, 
+                  "parser exception: %s %s:%d:%d\n",
+                  e.getMessage().c_str(),e.getFilename().c_str(), e.getLine(), e.getColumn());
+          painCave.isFatal = 1;
+          simError();   
 	}
+	
 	catch(antlr::TokenStreamIOException& e) {
-          cerr<< "parser exception: " << e.getMessage() << endl;
+          sprintf(painCave.errMsg, 
+                  "parser exception: %s\n",
+                  e.getMessage().c_str());
+          painCave.isFatal = 1;
+          simError();
 	}
+	
 	catch(antlr::TokenStreamException& e) {
-          cerr<< "parser exception: " << e.getMessage() << endl;
+          sprintf(painCave.errMsg, 
+                  "parser exception: %s\n",
+                  e.getMessage().c_str());
+          painCave.isFatal = 1;
+          simError();
 	}        
        catch (antlr::RecognitionException& e) {
-          cerr<< "parser exception: " << e.getMessage() << " " <<  e.getFilename() << ":" << e.getLine() << " " << e.getColumn() << endl;
+          sprintf(painCave.errMsg, 
+                  "parser exception: %s %s:%d:%d\n",
+                  e.getMessage().c_str(),e.getFilename().c_str(), e.getLine(), e.getColumn());
+          painCave.isFatal = 1;
+          simError();          
        }
        catch (antlr::CharStreamException& e) {
-            cerr << "parser exception: " << e.getMessage() << endl;
+          sprintf(painCave.errMsg, 
+                  "parser exception: %s\n",
+                  e.getMessage().c_str());
+          painCave.isFatal = 1;
+          simError();        
        }
-        catch (exception& e) {
-            cerr << "parser exception: " << e.what() << endl;
-        }
+       catch (OOPSEException& e) {
+          sprintf(painCave.errMsg, 
+                  "%s\n",
+                  e.getMessage().c_str());
+          painCave.isFatal = 1;
+          simError();
+       }
+       catch (std::exception& e) {
+          sprintf(painCave.errMsg, 
+                  "parser exception: %s\n",
+                  e.what());
+          painCave.isFatal = 1;
+          simError();
+       }
 
         return simParams;
   }

@@ -150,7 +150,23 @@ namespace oopse {
   /**@todo need implementation */
   std::string getSuffix(const std::string& str);
   
-  
+
+template<class ContainerType>
+std::string containerToString(const ContainerType& cont) {
+    std::ostringstream oss;
+    oss << "(";
+    typename ContainerType::const_iterator i = cont.begin();
+    if (i != cont.end()) {
+        oss << *i;
+        ++i;
+    }
+    for (; i != cont.end();++i) {
+        oss << ", ";
+        oss << *i;
+    }
+    oss << ")";
+    return oss.str();
+}  
 
   
 }  
