@@ -46,9 +46,9 @@
 
 #include "utils/simError.h" 
 
-void F90_FUNC_(c_simerror, C_SIMERROR) (errorStruct* pc);
+void FC_FUNC_(c_simerror, C_SIMERROR) (errorStruct* pc);
 
-void F90_FUNC_(c_simerror, C_SIMERROR) (errorStruct* pc){
+void FC_FUNC_(c_simerror, C_SIMERROR) (errorStruct* pc){
 
   strcpy(painCave.errMsg, (*pc).errMsg);
   painCave.severity = (*pc).severity;

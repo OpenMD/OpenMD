@@ -9,10 +9,10 @@
 
 /* Define to a macro mangling the given C identifier (in lower and upper
  *    case), which must not contain underscores, for linking with Fortran. */
-#undef F90_FUNC
+#undef FC_FUNC
 
 /* As F90_FUNC, but for C identifiers containing underscores. */
-#undef F90_FUNC_
+#undef FC_FUNC_
 
 /* Define to 1 if you find the <mpi.h> header file. */
 #undef HAVE_MPI_H

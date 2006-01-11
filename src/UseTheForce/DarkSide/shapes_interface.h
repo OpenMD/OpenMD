@@ -53,9 +53,9 @@
 
 #include "config.h"
 
-#define makeShape F90_FUNC(makeshape, MAKESHAPE)
-#define completeShapeFF F90_FUNC(completeshapeff, COMPLETESHAPEFF)
-#define destroyShapeTypes F90_FUNC(destroyshapetypes, DESTROYSHAPETYPES)
+#define makeShape FC_FUNC(makeshape, MAKESHAPE)
+#define completeShapeFF FC_FUNC(completeshapeff, COMPLETESHAPEFF)
+#define destroyShapeTypes FC_FUNC(destroyshapetypes, DESTROYSHAPETYPES)
 
 #define SH_COS 0
 #define SH_SIN 1

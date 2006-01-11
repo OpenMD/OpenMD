@@ -47,20 +47,20 @@
 #include "config.h"
 #include "types/AtomTypeProperties.h"
  
-#define setElectrostaticSumMethod F90_FUNC(setelectrostaticsummethod, SETELECTROSTATICSUMMETHOD)
-#define setScreeningMethod F90_FUNC(setscreeningmethod, SETSCREENINGMETHOD)
-#define setElectrostaticCutoffRadius F90_FUNC(setelectrostaticcutoffradius, SETELECTROSTATICCUTOFFRADIUS)
-#define setDampingAlpha F90_FUNC(setdampingalpha, SETDAMPINGALPHA)
-#define setReactionFieldDielectric F90_FUNC(setreactionfielddielectric, SETREACTIONFIELDDIELECTRIC)
+#define setElectrostaticSumMethod FC_FUNC(setelectrostaticsummethod, SETELECTROSTATICSUMMETHOD)
+#define setScreeningMethod FC_FUNC(setscreeningmethod, SETSCREENINGMETHOD)
+#define setElectrostaticCutoffRadius FC_FUNC(setelectrostaticcutoffradius, SETELECTROSTATICCUTOFFRADIUS)
+#define setDampingAlpha FC_FUNC(setdampingalpha, SETDAMPINGALPHA)
+#define setReactionFieldDielectric FC_FUNC(setreactionfielddielectric, SETREACTIONFIELDDIELECTRIC)
 
-#define newElectrostaticType F90_FUNC(newelectrostatictype, NEWELECTROSTATICTYPE)
-#define setCharge F90_FUNC(setcharge, SETCHARGE)
-#define setDipoleMoment F90_FUNC(setdipolemoment, SETDIPOLEMOMENT)
-#define setSplitDipoleDistance F90_FUNC(setsplitdipoledistance, SETSPLITDIPOLEDISTANCE)
+#define newElectrostaticType FC_FUNC(newelectrostatictype, NEWELECTROSTATICTYPE)
+#define setCharge FC_FUNC(setcharge, SETCHARGE)
+#define setDipoleMoment FC_FUNC(setdipolemoment, SETDIPOLEMOMENT)
+#define setSplitDipoleDistance FC_FUNC(setsplitdipoledistance, SETSPLITDIPOLEDISTANCE)
 
-#define setQuadrupoleMoments F90_FUNC(setquadrupolemoments, SETQUADRUPOLEMOMENTS)
+#define setQuadrupoleMoments FC_FUNC(setquadrupolemoments, SETQUADRUPOLEMOMENTS)
 
-#define destroyElectrostaticTypes F90_FUNC(destroyelectrostatictypes,DESTROYELECTROSTATICTYPES)
+#define destroyElectrostaticTypes FC_FUNC(destroyelectrostatictypes,DESTROYELECTROSTATICTYPES)
 extern "C"{
 
   void setElectrostaticSumMethod( int* theESM );

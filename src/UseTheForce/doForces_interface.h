@@ -45,13 +45,13 @@
 #define __C
 #include "config.h"
 
-#define initFortranFF F90_FUNC(initfortranff, INITFORTRANFF)
-#define doForceLoop F90_FUNC(doforceloop, DOFORCELOOP)
-#define setFortranElectrostaticMethod F90_FUNC(setfortranelectrostaticmethod, SETFORTRANELECTROSTATICMETHOD)
-#define notifyFortranCutoffPolicy F90_FUNC(notifyfortrancutoffpolicy, NOTIFYFORTRANCUTOFFPOLICY)
-#define notifyFortranSkinThickness F90_FUNC(notifyfortranskinthickness, NOTIFYFORTRANSKINTHICKNESS)
-#define notifyFortranCutoffs F90_FUNC(notifyfortrancutoffs, NOTIFYFORTRANCUTOFFS)
-#define notifyFortranYouAreOnYourOwn F90_FUNC(notifyfortranyouareonyourown, NOTIFYFORTRANYOUAREONYOUROWN)
+#define initFortranFF FC_FUNC(initfortranff, INITFORTRANFF)
+#define doForceLoop FC_FUNC(doforceloop, DOFORCELOOP)
+#define setFortranElectrostaticMethod FC_FUNC(setfortranelectrostaticmethod, SETFORTRANELECTROSTATICMETHOD)
+#define notifyFortranCutoffPolicy FC_FUNC(notifyfortrancutoffpolicy, NOTIFYFORTRANCUTOFFPOLICY)
+#define notifyFortranSkinThickness FC_FUNC(notifyfortranskinthickness, NOTIFYFORTRANSKINTHICKNESS)
+#define notifyFortranCutoffs FC_FUNC(notifyfortrancutoffs, NOTIFYFORTRANCUTOFFS)
+#define notifyFortranYouAreOnYourOwn FC_FUNC(notifyfortranyouareonyourown, NOTIFYFORTRANYOUAREONYOUROWN)
 
 extern "C"{
   

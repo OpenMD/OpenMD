@@ -46,7 +46,7 @@
 
 #include "config.h"
 
-#define newEAMtype F90_FUNC(neweamtype, NEWEAMTYPE)
+#define newEAMtype FC_FUNC(neweamtype, NEWEAMTYPE)
 
 extern "C"{
   void newEAMtype( double* lattice_constant, 
@@ -62,7 +62,7 @@ extern "C"{
                    int* status );
 }  
 
-#define destroyEAMTypes F90_FUNC(destroyeamtypes,DESTROYEAMTYPES)
+#define destroyEAMTypes FC_FUNC(destroyeamtypes,DESTROYEAMTYPES)
 extern "C"{
   void destroyEAMTypes(void);
 }

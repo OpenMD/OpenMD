@@ -45,7 +45,7 @@
 #define __C
 #include "config.h"
 
-#define setFsimParallel F90_FUNC(setfsimparallel, SETFSIMPARALLEL)
+#define setFsimParallel FC_FUNC(setfsimparallel, SETFSIMPARALLEL)
 
 extern "C" {
 

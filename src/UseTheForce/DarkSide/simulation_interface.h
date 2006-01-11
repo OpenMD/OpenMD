@@ -46,8 +46,8 @@
 #include "brains/fSimulation.h"
 #include "config.h"
 
-#define setFortranSim F90_FUNC(setfortransim, SETFORTRANSIM)
-#define setFortranBox F90_FUNC(setfortranbox, SETFORTRANBOX)
+#define setFortranSim FC_FUNC(setfortransim, SETFORTRANSIM)
+#define setFortranBox FC_FUNC(setfortranbox, SETFORTRANBOX)
 
 extern "C"{
   void setFortranSim( simtype* the_Info,

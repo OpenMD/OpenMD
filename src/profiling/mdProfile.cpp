@@ -78,7 +78,7 @@ namespace mdProfileSpace {
 
 extern "C"{
   
-  void F90_FUNC(gettimes, GETTIMES)(double* forceTime, 
+  void FC_FUNC(gettimes, GETTIMES)(double* forceTime, 
 				    double* commTime);
 }
 
@@ -191,7 +191,7 @@ void writeProfiles( void ){
   secs = (int)donkey;
   msecs = (int)( (donkey - secs) * 1000 );
 
-  F90_FUNC(gettimes, GETTIMES)(&forceTime, &commTime);
+  FC_FUNC(gettimes, GETTIMES)(&forceTime, &commTime);
 
   fprintf( stdout,
 	   "----------------------------------------------------------------------------\n"
@@ -250,7 +250,7 @@ void writeProfiles( void ){
     secs = (int)donkey;
     msecs = (int)( (donkey - secs) * 1000 );
     
-    F90_FUNC(gettimes, GETTIMES)(&forceTime, &commTime);
+    FC_FUNC(gettimes, GETTIMES)(&forceTime, &commTime);
 
     fprintf( stdout,
 	     "----------------------------------------------------------------------------\n"
@@ -419,7 +419,7 @@ void writeProfiles( void ){
       
       if( worldRank == j ){
 	
-	F90_FUNC(gettimes, GETTIMES)(&forceTime, &commTime);
+	FC_FUNC(gettimes, GETTIMES)(&forceTime, &commTime);
 
 	MPI_Send( accumTime, N_PROFILES, MPI_DOUBLE, 0, 1, MPI_COMM_WORLD );
 	MPI_Send( &forceTime, 1, MPI_DOUBLE, 0, 1, MPI_COMM_WORLD );

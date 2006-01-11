@@ -46,7 +46,7 @@
 
 #include "config.h"
  
-#define setFunctionType F90_FUNC(setfunctiontype, SETFUNCTIONTYPE)
+#define setFunctionType FC_FUNC(setfunctiontype, SETFUNCTIONTYPE)
 
 extern "C"{
 

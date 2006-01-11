@@ -115,10 +115,10 @@ UseMPI          = @USE_MPI@
 ModuleCase      = @F90_MODULE_NAMES@
 ModSuffix       = @MOD@
 LinkOptions = \
-	@F90LIBS@ 
+	@FCLIBS@ 
 
 ParallelLinkOptions = \
-	@F90LIBS@ 
+	@FCLIBS@ 
 
 
 #---------------------------------------------------------------------------
@@ -351,7 +351,6 @@ Delete                 = rm -f
 StaticArchiver         = @AR@
 DynamicArchiver        = @CC@
 FortranCompiler        = @FC@
-F90Compiler            = @F90@
 JavaCompiler           = $(JAVA_HOME)/bin/javac
 JavaArchiver           = $(JAVA_HOME)/bin/jar
 JarSigner              = $(JAVA_HOME)/bin/jarsigner
@@ -377,11 +376,10 @@ RmiOptions             = -d $(TargetDir) -classpath $(ClassPath) \
 			 -sourcepath $(SourceDir)
 COptions               = $(FrcDeclare) @CFLAGS@
 CParallelOptions       = $(FrcDeclare) $(ParallelDeclare) @CFLAGS@
-CppOptions             = $(FrcDeclare) @CXXFLAGS@ @OOPSE_TEMPLATE_FLAGS@
-CppParallelOptions     = $(FrcDeclare) $(ParallelDeclare) @CXXFLAGS@ @OOPSE_TEMPLATE_FLAGS@
-FortranOptions         =
-F90Options             =  @PREPFLAG@ @F90FLAGS@ @MODDIRFLAG@$(SourceDir) @MODDIRFLAG@$(TargetDir) 
-F90ParallelOptions     =  @PREPFLAG@ @F90FLAGS@ @MODDIRFLAG@$(SourceDir) @MODDIRFLAG@$(ParallelTargetDir)  @PREPDEFFLAG@$(ParallelDeclare)
+CppOptions             = $(FrcDeclare) @CXXFLAGS@
+CppParallelOptions     = $(FrcDeclare) $(ParallelDeclare) @CXXFLAGS@
+FortranOptions         =  @FCFLAGS@ @MODDIRFLAG@$(SourceDir) @MODDIRFLAG@$(TargetDir) @FCFLAGS_SRCEXT@
+FortranParallelOptions =  @FCFLAGS@ @MODDIRFLAG@$(SourceDir) @MODDIRFLAG@$(ParallelTargetDir) @PREPDEFFLAG@$(ParallelDeclar) @FCFLAGS_SRCEXT@ 
 JavaCompilerOptions    = -d $(TargetDir) -classpath $(ClassPath) \
 			 -sourcepath $(SourceDir) -deprecation
 JavaRunOptions         = -classpath $(ClassPath) 
@@ -517,13 +515,13 @@ endif
 
 # .F90 -> .o
 $(PackageTargetDir)/%.o : %.F90 $(MainMakefile)
-	$(F90Compiler) $(F90Options) $(IncludePath) -c $< -o $@
+	$(FortranCompiler) $(FortranOptions) $(IncludePath) -c $< -o $@
 	if test -n "`ls *.$(ModSuffix)`"; then \
 	  $(Move) `ls *.$(ModSuffix)` $(PackageTargetDir);\
 	fi
 
 $(PackageParallelTargetDir)/%.o : %.F90 $(MainMakefile)
-	$(F90Compiler) $(F90ParallelOptions) $(IncludePath) -c $< -o $@
+	$(FortranCompiler) $(FortranParallelOptions) $(IncludePath) -c $< -o $@
 	if test -n "`ls *.$(ModSuffix)`"; then \
 	  $(Move) "`ls *.$(ModSuffix)`" $(PackageParallelTargetDir);\
 	fi

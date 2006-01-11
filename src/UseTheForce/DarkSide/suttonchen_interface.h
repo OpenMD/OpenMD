@@ -44,7 +44,7 @@
  *
  *  Created by Charles F. Vardeman II on 11/10/05.
  *  @author  Charles F. Vardeman II 
- *  @version $Id: suttonchen_interface.h,v 1.3 2005-12-07 19:58:18 chuckv Exp $
+ *  @version $Id: suttonchen_interface.h,v 1.4 2006-01-11 23:04:40 gezelter Exp $
  *
  */
 #ifndef USETHEFORCE_DARKSIDE_SUTTONCHEN_INTERFACE_H
@@ -54,8 +54,8 @@
 
 #include "config.h"
 
-#define newSCtype F90_FUNC(newsctype, NEWSCTYPE)
-#define destroySCTypes F90_FUNC(destroysctypes, DESTROYSCTYPES)
+#define newSCtype FC_FUNC(newsctype, NEWSCTYPE)
+#define destroySCTypes FC_FUNC(destroysctypes, DESTROYSCTYPES)
 
 extern "C"{
   void newSCtype( int* ident,

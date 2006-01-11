@@ -457,7 +457,7 @@ NUM_INT
 // a couple protected methods to assist in matching floating point numbers
 protected
 EXPONENT
-	:	('e'|'E') ('+'|'-')? ('0'..'9')+
+	:	('e'|'E'|'d'|'D') ('+'|'-')? ('0'..'9')+
 	;
 
 protected

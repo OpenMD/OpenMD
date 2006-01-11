@@ -45,8 +45,8 @@
 #define __C
 #include "config.h"
 
-#define newStickyType F90_FUNC(newstickytype, NEWSTICKYTYPE)
-#define destroyStickyTypes F90_FUNC(destroystickytypes,DESTROYSTICKYTYPES)
+#define newStickyType FC_FUNC(newstickytype, NEWSTICKYTYPE)
+#define destroyStickyTypes FC_FUNC(destroystickytypes,DESTROYSTICKYTYPES)
 extern "C" {
   
   void newStickyType( int* c_ident, 

@@ -46,8 +46,8 @@
 
 #include "config.h"
 
-#define newLJtype F90_FUNC(newljtype, NEWLJTYPE)
-#define destroyLJTypes F90_FUNC(destroyljtypes, DESTROYLJTYPES)
+#define newLJtype FC_FUNC(newljtype, NEWLJTYPE)
+#define destroyLJTypes FC_FUNC(destroyljtypes, DESTROYLJTYPES)
 
 extern "C"{
   void newLJtype( int* ident,

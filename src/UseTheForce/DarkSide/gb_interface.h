@@ -46,8 +46,8 @@
 
 #include "config.h"
 
-#define newGayBerneType F90_FUNC(newgbtype, NEWGBTYPE)
-#define destroyGayBerneTypes F90_FUNC(destroygbtypes, DESTROYGBTYPES)
+#define newGayBerneType FC_FUNC(newgbtype, NEWGBTYPE)
+#define destroyGayBerneTypes FC_FUNC(destroygbtypes, DESTROYGBTYPES)
 
 extern "C"{
   void newGayBerneType( int* ident,

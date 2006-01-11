@@ -47,8 +47,8 @@
 #include "config.h"
 #include "types/AtomTypeProperties.h"
 
-#define makeAtype F90_FUNC(makeatype, MAKEATYPE)
-#define deleteAtypes F90_FUNC(deleteatypes, DELETEATYPES)
+#define makeAtype FC_FUNC(makeatype, MAKEATYPE)
+#define deleteAtypes FC_FUNC(deleteatypes, DELETEATYPES)
 
 extern "C" {
   void makeAtype(AtomTypeProperties* atp, int* status );
