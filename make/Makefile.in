@@ -66,7 +66,20 @@ Applications = \
 	applications/atom2mdin
 
 Samples = \
+	samples/alkane \
 	samples/argon \
+	samples/cutoff \
+	samples/dipole \
+	samples/gbljtest \
+	samples/lipid \
+	samples/metals/EAM \
+	samples/metals/EAM/nanoparticle \
+	samples/metals/EAM/nanorod \
+	samples/metals/Sutton-Chen \
+	samples/minimizer \
+	samples/shape \
+	samples/thermoIntegration/liquid \
+	samples/thermoIntegration/solid \
         samples/water/dimer \
 	samples/water/spce \
 	samples/water/ssd \
@@ -75,18 +88,7 @@ Samples = \
 	samples/water/ssd-ion \
 	samples/water/tip3p_ice \
 	samples/water/tip4p \
-	samples/lipid \
-	samples/alkane \
-	samples/minimizer \
-	samples/metals/EAM \
-	samples/metals/EAM/nanoparticle \
-	samples/metals/EAM/nanorod \
-	samples/metals/Sutton-Chen \
-	samples/thermoIntegration/liquid \
-	samples/thermoIntegration/solid \
-	samples/dipole \
-        samples/shape \
-	samples/zcons \
+	samples/zcons 
 
 IncludeDirs = \
 	@CGAL_INC_DIR@ \
@@ -668,6 +670,7 @@ $(CombinedParallelStaticLib) : $(LibDir)/.stamp_MPI
 
 # Executable
 $(Executable) : $(CombinedStaticLib) $(ObjectFiles) $(BinDir)
+	@echo $(Executable) : $(CombinedStaticLib) $(ObjectFiles) $(BinDir)
 	$(Linker) $(ObjectFiles) $(CombinedStaticLib) $(LinkOptions) $(LibDirs) $(Libraries) -o $@
 
 $(ParallelExecutable) : $(CombinedParallelStaticLib) $(ParallelObjectFiles) $(BinDir)
