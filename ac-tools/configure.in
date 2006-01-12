@@ -1,7 +1,7 @@
 dnl **** Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.59)
-AC_INIT(OOPSE, 2.0, gezelter@nd.edu, oopse)
+AC_INIT(OOPSE, 3.0, gezelter@nd.edu, oopse)
 AC_CONFIG_AUX_DIR(ac-tools)
 AC_CONFIG_SRCDIR([src/applications/oopse/oopse.cpp])
 AC_CONFIG_HEADER([src/config.h])
@@ -141,8 +141,7 @@ ACX_CHECK_ZLIB
 
 # Checks for header files.
 AC_HEADER_STDC
-AC_CHECK_HEADERS([libintl.h limits.h stddef.h stdlib.h string.h strings.h sys/param.h sys/time.h unistd.h])
-AC_CHECK_HEADERS([stdio.h conio.h strstream.h iostream.h fstream.h math.h time.h sys/pstat.h sys/sysmp.h sys/sysinfo.h sys/table.h sys/sysctl.h sys/sytemcfg.h machine/hal_sysinfo.h])
+AC_CHECK_HEADERS([conio.h dlfcn.h fstream.h iostream.h libintl.h limits.h machine/hal_sysinfo.h math.h stddef.h stdio.h stdlib.h string.h strings.h strstream.h sys/param.h sys/pstat.h sys/sysmp.h sys/sysctl.h sys/sysinfo.h sys/systemcfg.h sys/table.h sys/time.h time.h unistd.h zlib.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_HEADER_STDBOOL
@@ -162,7 +161,7 @@ AC_FUNC_REALLOC
 AC_FUNC_SELECT_ARGTYPES
 AC_FUNC_STRFTIME
 AC_FUNC_STRTOD
-AC_CHECK_FUNCS([floor getpagesize gettimeofday memchr memmove memset pow pstat_getdynamic rint select snprintf sranddev sqrt strcasecmp strchr strdup stricmp strncasecmp strnicmp strrchr strstr strtol sysmp getsysinfo sysctl table])
+AC_CHECK_FUNCS([floor getpagesize gettimeofday memchr memmove memset pow pstat_getdynamic pstat_getstatic rint select snprintf sranddev sqrt strcasecmp strchr strdup stricmp strncasecmp strnicmp strrchr strstr strtol sysmp getsysinfo sysctl table])
 
 # special check for _system_configuration because AIX <4.3.2 do not
 # contain the `physmem' member.
