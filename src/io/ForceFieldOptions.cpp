@@ -53,7 +53,7 @@ namespace oopse {
       DefineOptionalParameterWithDefaultValue(EnergyUnitScaling, "EnergyUnitScaling", 1.0);
       DefineOptionalParameterWithDefaultValue(DistanceUnitScaling, "DistanceUnitScaling", 1.0);
       DefineOptionalParameterWithDefaultValue(AngleUnitScaling, "AngleUnitScaling", 1.0);
-      DefineOptionalParameterWithDefaultValue(TorsionAngleConvention, "TorsionAngleConvention", "180 is trans");
+      DefineOptionalParameterWithDefaultValue(TorsionAngleConvention, "TorsionAngleConvention", "180_is_trans");
       DefineOptionalParameterWithDefaultValue(vdw14scale, "vdW-14-scale", 0.0);
       DefineOptionalParameterWithDefaultValue(electrostatic14scale, "electrostatic-14-scale", 0.0);
       DefineOptionalParameterWithDefaultValue(dielectric, "dielectric", 1.0);

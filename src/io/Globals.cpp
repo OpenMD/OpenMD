@@ -130,11 +130,7 @@ void Globals::validate() {
 
   CheckParameter(ForceField, isNotEmpty());
   CheckParameter(TargetTemp, isPositive());
-  CheckParameter(Ensemble, isEqualIgnoreCase(std::string("NVE")) || 
-		 isEqualIgnoreCase(std::string("NVT")) || 
-		 isEqualIgnoreCase(std::string("NPTi")) || 
-		 isEqualIgnoreCase(std::string("NPTf")) || 
-		 isEqualIgnoreCase(std::string("NPTxyz")) );
+  CheckParameter(Ensemble, isEqualIgnoreCase("NVE") || isEqualIgnoreCase("NVT") || isEqualIgnoreCase("NPTi") || isEqualIgnoreCase("NPTf") || isEqualIgnoreCase("NPTxyz") );
   CheckParameter(Dt, isPositive());
   CheckParameter(RunTime, isPositive());
   CheckParameter(InitialConfig, isNotEmpty());
@@ -152,8 +148,7 @@ void Globals::validate() {
   CheckParameter(ZconsTime, isPositive());
   CheckParameter(ZconsTol, isPositive());
   CheckParameter(Seed, isPositive());
-  CheckParameter(Minimizer, isEqualIgnoreCase(std::string("SD")) || 
-		 isEqualIgnoreCase(std::string("CG")));
+  CheckParameter(Minimizer, isEqualIgnoreCase("SD") || isEqualIgnoreCase("CG"));
   CheckParameter(MinimizerMaxIter, isPositive());
   CheckParameter(MinimizerWriteFrq, isPositive());
   CheckParameter(MinimizerStepSize, isPositive());
@@ -171,20 +166,10 @@ void Globals::validate() {
   CheckParameter(ThermIntThetaSpringConst, isPositive());
   CheckParameter(ThermIntOmegaSpringConst, isPositive());
   CheckParameter(SurfaceTension, isPositive());
-  CheckParameter(ElectrostaticSummationMethod, 
-		 isEqualIgnoreCase(std::string("NONE")) || 
-		 isEqualIgnoreCase(std::string("SHIFTED_POTENTIAL")) || 
-		 isEqualIgnoreCase(std::string("SHIFTED_FORCE")) || 
-		 isEqualIgnoreCase(std::string("REACTION_FIELD")));
-  CheckParameter(ElectrostaticScreeningMethod, 
-		 isEqualIgnoreCase(std::string("UNDAMPED")) || 
-		 isEqualIgnoreCase(std::string("DAMPED"))); 
-  CheckParameter(CutoffPolicy, isEqualIgnoreCase(std::string("MIX")) || 
-		 isEqualIgnoreCase(std::string("MAX")) || 
-		 isEqualIgnoreCase(std::string("TRADITIONAL")));
-  CheckParameter(SwitchingFunctionType, 
-		 isEqualIgnoreCase(std::string("CUBIC")) || 
-		 isEqualIgnoreCase(std::string("FIFTH_ORDER_POLYNOMIAL")));
+  CheckParameter(ElectrostaticSummationMethod, isEqualIgnoreCase("NONE") || isEqualIgnoreCase("SHIFTED_POTENTIAL") || isEqualIgnoreCase("SHIFTED_FORCE") || isEqualIgnoreCase("REACTION_FIELD"));
+  CheckParameter(ElectrostaticScreeningMethod, isEqualIgnoreCase("UNDAMPED") || isEqualIgnoreCase("DAMPED")); 
+  CheckParameter(CutoffPolicy, isEqualIgnoreCase("MIX") || isEqualIgnoreCase("MAX") || isEqualIgnoreCase("TRADITIONAL"));
+  CheckParameter(SwitchingFunctionType, isEqualIgnoreCase("CUBIC") || isEqualIgnoreCase("FIFTH_ORDER_POLYNOMIAL"));
   //CheckParameter(StatFileFormat,);     
   //CheckParameter(MixingRule,);
   CheckParameter(OrthoBoxTolerance, isPositive());  
