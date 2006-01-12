@@ -221,7 +221,7 @@ namespace oopse {
 
     //write out additional parameters, such as chi and eta
 
-    os << chi << "\t" << integralOfChiDt << "\t;";
+    os << chi << "\t" << integralOfChiDt << ";\t";
 
     os << eta(0, 0) << "\t" << eta(1, 0) << "\t" << eta(2, 0) << ";\t" 
        << eta(0, 1) << "\t" << eta(1, 1) << "\t" << eta(2, 1) << ";\t"
