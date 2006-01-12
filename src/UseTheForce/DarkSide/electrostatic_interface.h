@@ -47,7 +47,7 @@
 #include "config.h"
 #include "types/AtomTypeProperties.h"
  
-#define setElectrostaticSumMethod FC_FUNC(setelectrostaticsummethod, SETELECTROSTATICSUMMETHOD)
+#define setElectrostaticSummationMethod FC_FUNC(setelectrostaticsummationmethod, SETELECTROSTATICSUMMATIONMETHOD)
 #define setScreeningMethod FC_FUNC(setscreeningmethod, SETSCREENINGMETHOD)
 #define setElectrostaticCutoffRadius FC_FUNC(setelectrostaticcutoffradius, SETELECTROSTATICCUTOFFRADIUS)
 #define setDampingAlpha FC_FUNC(setdampingalpha, SETDAMPINGALPHA)
@@ -63,7 +63,7 @@
 #define destroyElectrostaticTypes FC_FUNC(destroyelectrostatictypes,DESTROYELECTROSTATICTYPES)
 extern "C"{
 
-  void setElectrostaticSumMethod( int* theESM );
+  void setElectrostaticSummationMethod( int* theESM );
   void setScreeningMethod( int* theSM );
   void setElectrostaticCutoffRadius( double* theECR, double* theRSW );
   void setDampingAlpha( double* theDA );

@@ -116,7 +116,7 @@ module electrostatic_module
   double precision, external :: derfc
 #endif
   
-  public :: setElectrostaticSumMethod
+  public :: setElectrostaticSummationMethod
   public :: setScreeningMethod
   public :: setElectrostaticCutoffRadius
   public :: setDampingAlpha
@@ -150,16 +150,16 @@ module electrostatic_module
 
 contains
 
-  subroutine setElectrostaticSumMethod(the_ESM)
+  subroutine setElectrostaticSummationMethod(the_ESM)
     integer, intent(in) :: the_ESM    
 
     if ((the_ESM .le. 0) .or. (the_ESM .gt. REACTION_FIELD)) then
-       call handleError("setElectrostaticSumMethod", "Unsupported Summation Method")
+       call handleError("setElectrostaticSummationMethod", "Unsupported Summation Method")
     endif
 
     summationMethod = the_ESM
 
-  end subroutine setElectrostaticSumMethod
+  end subroutine setElectrostaticSummationMethod
 
   subroutine setScreeningMethod(the_SM)
     integer, intent(in) :: the_SM    

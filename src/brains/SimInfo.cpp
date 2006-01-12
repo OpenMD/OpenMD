@@ -1098,7 +1098,7 @@ namespace oopse {
     }
     
     // let's pass some summation method variables to fortran
-    setElectrostaticSumMethod( &esm );
+    setElectrostaticSummationMethod( &esm );
     setFortranElectrostaticMethod( &esm );
     setScreeningMethod( &sm );
     setDampingAlpha( &alphaVal );
