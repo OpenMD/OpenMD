@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2006 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -74,7 +74,7 @@ int main(int argc,char* argv[]){
       "  |    ____  ____  ____  _____ ______  The OpenSource, Object-oriented   |\n" <<
       "  |   / __ \\/ __ \\/ __ \\/ ___// ____/  Parallel Simulation Engine.       |\n" <<
       "  |  / / / / / / / /_/ /\\__ \\/ __/                                       |\n" <<
-      "  | / /_/ / /_/ / ____/___/ / /___     Copyright 2004-2005 by the        |\n" <<
+      "  | / /_/ / /_/ / ____/___/ / /___     Copyright 2004-2006 by the        |\n" <<
       "  | \\____/\\____/_/    /____/_____/     University of Notre Dame.         |\n" <<
       "  |                                                                      |\n" <<
       "  |                     version " << 
