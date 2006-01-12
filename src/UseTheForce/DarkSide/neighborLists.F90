@@ -48,7 +48,7 @@
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
 !! @author J. Daniel Gezelter
-!! @version $Id: neighborLists.F90,v 1.3 2005-04-15 22:03:48 gezelter Exp $, 
+!! @version $Id: neighborLists.F90,v 1.4 2006-01-12 04:13:46 chrisfen Exp $, 
 
 module neighborLists
 
@@ -65,7 +65,7 @@ module neighborLists
   !! should be.
   integer, parameter :: listMultiplier = 80
   !! Maximum number of times we should reallocate neighbor list.
-  integer, parameter :: maxAllocations = 5
+  integer, parameter :: maxAllocations = 10
   !! Number of times we have allocated the neighbor list.
   integer, save       :: nAllocations = 0
   !! Pointer array to location in list for atom i.
