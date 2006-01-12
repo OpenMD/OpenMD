@@ -5,12 +5,12 @@ RmiSource =
 Main      = 
 
 SampleFiles =  \
-             Au_bulk_FBD.md \
-             Au_bulk_voter.md \
-             metals.md \
-             Au_bulk.in
+               Au-Core-Ag-Shell_Nanoparticle.in \
+               Au-Core-Ag-Shell_Nanoparticle.md \
+               Au_nanoparticle.in \
+               Au_nanoparticle.md \
+               metals.md
 
-
-DEV_ROOT=../../../
+DEV_ROOT=../../../..
 include $(DEV_ROOT)/make/Makefile
 
