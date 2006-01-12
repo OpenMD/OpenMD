@@ -669,11 +669,16 @@ $(CombinedParallelStaticLib) : $(LibDir)/.stamp_MPI
 	$(Ranlib) $(CombinedParallelStaticLib)
 
 # Executable
-$(Executable) : $(CombinedStaticLib) $(ObjectFiles) $(BinDir)
-	@echo $(Executable) : $(CombinedStaticLib) $(ObjectFiles) $(BinDir)
+$(Executable) : $(CombinedStaticLib) $(ObjectFiles)
+	if test ! -d $(BinDir); then \
+		$(MkDir) $(BinDir) ;\
+	fi
 	$(Linker) $(ObjectFiles) $(CombinedStaticLib) $(LinkOptions) $(LibDirs) $(Libraries) -o $@
 
-$(ParallelExecutable) : $(CombinedParallelStaticLib) $(ParallelObjectFiles) $(BinDir)
+$(ParallelExecutable) : $(CombinedParallelStaticLib) $(ParallelObjectFiles)
+	if test ! -d $(BinDir); then \
+		$(MkDir) $(BinDir) ;\
+	fi
 	$(Linker) $(ParallelObjectFiles) $(CombinedParallelStaticLib) $(ParallelLinkOptions) $(LibDirs) $(Libraries) -o $@
 
 # Anything else is just copied from source to target
