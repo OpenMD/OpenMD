@@ -1,77 +1,41 @@
 #define OOPSE_VERSION_MAJOR 3
-#define OOPSE_VERSION_MINOR 1
-#define OOPSE_VERSION_TINY  4
-
-#undef __func__
-
-#define MK_STR(s) # s
-#define STR_DEFINE(t, s) t = MK_STR(s)
-
-/* Define to a macro mangling the given C identifier (in lower and upper
- *    case), which must not contain underscores, for linking with Fortran. */
-#undef FC_FUNC
-
-/* As F90_FUNC, but for C identifiers containing underscores. */
-#undef FC_FUNC_
-
-/* Define to 1 if you find the <mpi.h> header file. */
-#undef HAVE_MPI_H
-
-/* Define to 1 if you find the <mpif.h> header file. */
-#undef HAVE_MPIF_H
-
-/* Define to 1 if you find the <getopt.h> header file. */
-#undef HAVE_GETOPT_H
-#undef HAVE_GETOPT_LONG
-
-/* Define to 1 if you find the <sys/pstat.h> header file. */
-#undef HAVE_SYS_PSTAT_H
-
-/* Define to 1 if you find the <sys/sysmp.h> header file. */
-#undef HAVE_SYS_SYSMP_H
-
-/* Define to 1 if you find the <sys/sysinfo.h> header file. */
-#undef HAVE_SYS_SYSINFO_H 
-
-/* Define to 1 if you find the <machine/hal_sysinfo.h> header file. */
-#undef HAVE_MACHINE_HAL_SYSINFO_H
-
-/* Define to 1 if you find the <sys/table.h> header file. */
-#undef HAVE_SYS_TABLE_H
-
-/* Define to 1 if you find the <sys/param.h> header file. */
-#undef HAVE_SYS_PARAM_H
-
-/* Define to 1 if you find the <sys/sysctl.h> header file. */
-#undef HAVE_SYS_SYSCTL_H
-
-/* Define to 1 if you find the <sys/systemcfg.h> header file. */
-#undef HAVE_SYS_SYSTEMCFG_H
-
-#undef HAVE_PSTAT_GETSTATIC
-#undef HAVE_SYSMP
-#undef HAVE_GETSYSINFO
-#undef HAVE_SYSCTL
-#undef HAVE__SYSTEM_CONFIGURATION
-#undef HAVE_TABLE 
-#undef HAVE_CGAL
-
-/* Define to the path to the ps command on this machine. */
-#undef PSCOMMAND
-
-/* Define to 1 if the ps command understands POSIX-style arguments. */
-#undef PSTYPE_IS_POSIX
-
-/* Define to 1 if the ps command understands BSD-style arguments. */
-#undef PSTYPE_IS_BSD
-
-/* what follows is required for the openbabel directory */
-
+#define OOPSE_VERSION_MINOR 0
+#define OOPSE_VERSION_TINY  0
 /* The version of Open Babel */
 #define BABEL_VERSION "2.0.0rc1"
+#define MK_STR(s) # s
+#define STR_DEFINE(t, s) t = MK_STR(s)
+/* The file extension used for shared modules */
+#undef MODULE_EXTENSION
+
+/* The CGAL version number. */
+#undef CGAL_VERSION
+
+/* Define to dummy `main' function (if any) required to link to the Fortran
+   libraries. */
+#undef FC_DUMMY_MAIN
+
+/* Define if F77 and FC dummy `main' functions are identical. */
+#undef FC_DUMMY_MAIN_EQ_F77
+
+/* Define to a macro mangling the given C identifier (in lower and upper
+   case), which must not contain underscores, for linking with Fortran. */
+#undef FC_FUNC
+
+/* As FC_FUNC, but for C identifiers containing underscores. */
+#undef FC_FUNC_
+
+/* define if fstream::open() accepts third parameter. */
+#undef FSTREAM_OPEN_PROT
+
+/* Is defined if the CGAL library is available. */
+#undef HAVE_CGAL
 
 /* Define to 1 if the system has the type `clock_t'. */
 #undef HAVE_CLOCK_T
+
+/* Define to 1 if you have the <cmath> header file. */
+#undef HAVE_CMATH
 
 /* Define to 1 if you have the <conio.h> header file. */
 #undef HAVE_CONIO_H
@@ -82,17 +46,44 @@
 /* Define to 1 if you have the <dlfcn.h> header file. */
 #undef HAVE_DLFCN_H
 
+/* Define to 1 if you have the `floor' function. */
+#undef HAVE_FLOOR
+
 /* Define to 1 if you have the <fstream> header file. */
 #undef HAVE_FSTREAM
+
+/* define if we have fstream::attach(). */
+#undef HAVE_FSTREAM_ATTACH
 
 /* Define to 1 if you have the <fstream.h> header file. */
 #undef HAVE_FSTREAM_H
 
-/* Define to 1 if you have the <iconv.h> header file. */
-#undef HAVE_ICONV_H
+/* define if we have fstream::open(). */
+#undef HAVE_FSTREAM_OPEN
+
+/* Define to 1 if you have the <getopt.h> header file. */
+#undef HAVE_GETOPT_H
+
+/* Define to 1 if you have the `getopt_long' function. */
+#undef HAVE_GETOPT_LONG
+
+/* Define to 1 if you have the `getpagesize' function. */
+#undef HAVE_GETPAGESIZE
+
+/* Define to 1 if you have the `getsysinfo' function. */
+#undef HAVE_GETSYSINFO
+
+/* Define to 1 if you have the `gettimeofday' function. */
+#undef HAVE_GETTIMEOFDAY
 
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
+
+/* Define to 1 if you have the <iomanip> header file. */
+#undef HAVE_IOMANIP
+
+/* Define to 1 if you have the <iomanip.h> header file. */
+#undef HAVE_IOMANIP_H
 
 /* Define to 1 if you have the <iostream> header file. */
 #undef HAVE_IOSTREAM
@@ -100,41 +91,85 @@
 /* Define to 1 if you have the <iostream.h> header file. */
 #undef HAVE_IOSTREAM_H
 
+/* Define to 1 if you have the <libintl.h> header file. */
+#undef HAVE_LIBINTL_H
+
 /* Define to 1 if you have the `m' library (-lm). */
 #undef HAVE_LIBM
 
 /* Define to 1 if you have the `z' library (-lz). */
 #undef HAVE_LIBZ
 
+/* Define to 1 if you have the <limits.h> header file. */
+#undef HAVE_LIMITS_H
+
+/* Define to 1 if you have the <machine/hal_sysinfo.h> header file. */
+#undef HAVE_MACHINE_HAL_SYSINFO_H
+
+/* Define to 1 if your system has a GNU libc compatible `malloc' function, and
+   to 0 otherwise. */
+#undef HAVE_MALLOC
+
 /* Define to 1 if you have the <math.h> header file. */
 #undef HAVE_MATH_H
+
+/* Define to 1 if you have the `memchr' function. */
+#undef HAVE_MEMCHR
+
+/* Define to 1 if you have the `memmove' function. */
+#undef HAVE_MEMMOVE
 
 /* Define to 1 if you have the <memory.h> header file. */
 #undef HAVE_MEMORY_H
 
+/* Define to 1 if you have the `memset' function. */
+#undef HAVE_MEMSET
+
+/* have mpif.h */
+#undef HAVE_MPIF_H
+
+/* have mpi.h */
+#undef HAVE_MPI_H
+
+/* define if the compiler implements namespaces */
+#undef HAVE_NAMESPACES
+
+/* Define to 1 if you have the `pow' function. */
+#undef HAVE_POW
+
+/* Define to 1 if you have the `pstat_getdynamic' function. */
+#undef HAVE_PSTAT_GETDYNAMIC
+
+/* Define to 1 if you have the `pstat_getstatic' function. */
+#undef HAVE_PSTAT_GETSTATIC
+
+/* Define to 1 if your system has a GNU libc compatible `realloc' function,
+   and to 0 otherwise. */
+#undef HAVE_REALLOC
+
 /* Define to 1 if you have the `rint' function. */
 #undef HAVE_RINT
+
+/* Define to 1 if you have the `select' function. */
+#undef HAVE_SELECT
 
 /* Define to 1 if you have the `snprintf' function. */
 #undef HAVE_SNPRINTF
 
+/* Define to 1 if you have the `sqrt' function. */
+#undef HAVE_SQRT
+
 /* Define to 1 if you have the `sranddev' function. */
 #undef HAVE_SRANDDEV
 
-/* Define to 1 if you have the `strcasecmp' function. */
-#undef HAVE_STRCASECMP
-
-/* Define to 1 if you have the `strncasecmp' function. */
-#undef HAVE_STRNCASECMP
-
-/* Define to 1 if you have the `stricmp' function. */
-#undef HAVE_STRICMP
-
-/* Define to 1 if you have the `strnicmp' function. */
-#undef HAVE_STRNICMP
-
 /* Define to 1 if you have the <sstream> header file. */
 #undef HAVE_SSTREAM
+
+/* Define to 1 if stdbool.h conforms to C99. */
+#undef HAVE_STDBOOL_H
+
+/* Define to 1 if you have the <stddef.h> header file. */
+#undef HAVE_STDDEF_H
 
 /* Define to 1 if you have the <stdint.h> header file. */
 #undef HAVE_STDINT_H
@@ -145,6 +180,30 @@
 /* Define to 1 if you have the <stdlib.h> header file. */
 #undef HAVE_STDLIB_H
 
+/* define if C++ iostream is in namespace std. */
+#undef HAVE_STD_IOSTREAM
+
+/* define if C++ Standard Template Library is in namespace std */
+#undef HAVE_STD_STL
+
+/* define if the compiler supports Standard Template Library */
+#undef HAVE_STL
+
+/* Define to 1 if you have the `strcasecmp' function. */
+#undef HAVE_STRCASECMP
+
+/* Define to 1 if you have the `strchr' function. */
+#undef HAVE_STRCHR
+
+/* Define to 1 if you have the `strdup' function. */
+#undef HAVE_STRDUP
+
+/* Define to 1 if you have the `strftime' function. */
+#undef HAVE_STRFTIME
+
+/* Define to 1 if you have the `stricmp' function. */
+#undef HAVE_STRICMP
+
 /* Define to 1 if you have the <strings.h> header file. */
 #undef HAVE_STRINGS_H
 
@@ -154,20 +213,68 @@
 /* Define to 1 if you have the `strncasecmp' function. */
 #undef HAVE_STRNCASECMP
 
+/* Define to 1 if you have the `strnicmp' function. */
+#undef HAVE_STRNICMP
+
+/* Define to 1 if you have the `strrchr' function. */
+#undef HAVE_STRRCHR
+
+/* Define to 1 if you have the `strstr' function. */
+#undef HAVE_STRSTR
+
 /* Define to 1 if you have the <strstream> header file. */
 #undef HAVE_STRSTREAM
 
 /* Define to 1 if you have the <strstream.h> header file. */
 #undef HAVE_STRSTREAM_H
 
+/* Define to 1 if you have the `strtol' function. */
+#undef HAVE_STRTOL
+
+/* Define to 1 if you have the `sysctl' function. */
+#undef HAVE_SYSCTL
+
+/* Define to 1 if you have the `sysmp' function. */
+#undef HAVE_SYSMP
+
+/* Define to 1 if you have the <sys/param.h> header file. */
+#undef HAVE_SYS_PARAM_H
+
+/* Define to 1 if you have the <sys/pstat.h> header file. */
+#undef HAVE_SYS_PSTAT_H
+
+/* Define to 1 if you have the <sys/select.h> header file. */
+#undef HAVE_SYS_SELECT_H
+
+/* Define to 1 if you have the <sys/socket.h> header file. */
+#undef HAVE_SYS_SOCKET_H
+
 /* Define to 1 if you have the <sys/stat.h> header file. */
 #undef HAVE_SYS_STAT_H
+
+/* Define to 1 if you have the <sys/sysctl.h> header file. */
+#undef HAVE_SYS_SYSCTL_H
+
+/* Define to 1 if you have the <sys/sysinfo.h> header file. */
+#undef HAVE_SYS_SYSINFO_H
+
+/* Define to 1 if you have the <sys/sysmp.h> header file. */
+#undef HAVE_SYS_SYSMP_H
+
+/* Define to 1 if you have the <sys/systemcfg.h> header file. */
+#undef HAVE_SYS_SYSTEMCFG_H
+
+/* Define to 1 if you have the <sys/table.h> header file. */
+#undef HAVE_SYS_TABLE_H
 
 /* Define to 1 if you have the <sys/time.h> header file. */
 #undef HAVE_SYS_TIME_H
 
 /* Define to 1 if you have the <sys/types.h> header file. */
 #undef HAVE_SYS_TYPES_H
+
+/* Define to 1 if you have the `table' function. */
+#undef HAVE_TABLE
 
 /* Define to 1 if you have the <time.h> header file. */
 #undef HAVE_TIME_H
@@ -178,8 +285,11 @@
 /* Define to 1 if you have the <zlib.h> header file. */
 #undef HAVE_ZLIB_H
 
-/* The file extension used for shared modules */
-#undef MODULE_EXTENSION
+/* Define to 1 if the system has the type `_Bool'. */
+#undef HAVE__BOOL
+
+/* Define if you have the _system_configuration variable. */
+#undef HAVE__SYSTEM_CONFIGURATION
 
 /* Used to export symbols for DLL / shared library builds */
 #undef OBAPI
@@ -199,11 +309,23 @@
 /* Define to the version of this package. */
 #undef PACKAGE_VERSION
 
-/* set if scandir needs a const */
-#undef SCANDIR_CONST
+/* Path to ps program */
+#undef PSCOMMAND
 
-/* set if scandir needs a const */
-#undef SCANDIR_T
+/* ps uses BSD-style arguments */
+#undef PSTYPE_IS_BSD
+
+/* ps uses POSIX-style arguments */
+#undef PSTYPE_IS_POSIX
+
+/* Define to the type of arg 1 for `select'. */
+#undef SELECT_TYPE_ARG1
+
+/* Define to the type of args 2, 3 and 4 for `select'. */
+#undef SELECT_TYPE_ARG234
+
+/* Define to the type of arg 5 for `select'. */
+#undef SELECT_TYPE_ARG5
 
 /* Define to 1 if you have the ANSI C header files. */
 #undef STDC_HEADERS
@@ -211,11 +333,33 @@
 /* Define to 1 if you can safely include both <sys/time.h> and <time.h>. */
 #undef TIME_WITH_SYS_TIME
 
+/* needed by DEC/Compaq/HP cxx to activate ANSI standard iostream. */
+#undef __USE_STD_IOSTREAM
+
+/* Define to __FUNCTION__ or "" if `__func__' does not conform to ANSI C. */
+#undef __func__
+
 /* Define to empty if `const' does not conform to ANSI C. */
 #undef const
+
+/* Code compiled in debug mode */
+#undef debug
 
 /* Define to `__inline__' or `__inline' if that's what the C compiler
    calls it, or to nothing if 'inline' is not supported under any name.  */
 #ifndef __cplusplus
 #undef inline
 #endif
+
+/* Define to rpl_malloc if the replacement function should be used. */
+#undef malloc
+
+/* Define to rpl_realloc if the replacement function should be used. */
+#undef realloc
+
+/* Define to equivalent of C99 restrict keyword, or to nothing if this is not
+   supported. Do not define if restrict is supported directly. */
+#undef restrict
+
+/* Define to `unsigned' if <sys/types.h> does not define. */
+#undef size_t
