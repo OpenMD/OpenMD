@@ -78,7 +78,6 @@ Samples = \
 	samples/lipid \
 	samples/alkane \
 	samples/minimizer \
-	samples/metals \
 	samples/metals/EAM \
 	samples/metals/EAM/nanoparticle \
 	samples/metals/EAM/nanorod \
