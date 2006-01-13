@@ -49,9 +49,9 @@ fi
 AC_SUBST(debug)
 
 # Checks for programs.
-AC_PROG_CXX([pathCC icpc icc xlc++ xlC CC g++ c++])
-AC_PROG_CC([pathcc icc xlc gcc cc])
-AC_PROG_FC([pathf95 ifort ifc xlf95 pgf95 lf95 epcf90 xlf90 pgf90 fort f95 f90 g95 f77], 95)
+AC_PROG_CXX([icpc icc pgCC pathCC c++ xlc++ xlC g++ CC])
+AC_PROG_CC([icc pgcc pathcc cc xlc gcc])
+AC_PROG_FC([ifort ifc pgf95 pathf95 xlf95 lf95 epcf90 pathf90 xlf90 f95 f90 gfortran g95 fort], 95)
 AC_PROG_CPP
 AC_PROG_EGREP
 AC_PROG_LN_S
