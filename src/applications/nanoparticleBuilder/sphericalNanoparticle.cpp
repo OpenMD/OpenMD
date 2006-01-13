@@ -71,11 +71,11 @@
 using namespace std;
 using namespace oopse;
 
-sphericalNanoparticle::sphericalNanoparticle(double radius, int latticeCnst){
+sphericalNanoparticle::sphericalNanoparticle(double radius, int latticeConstant){
   
-  particleRadius = radius;
-  particleDiameter = 2.0 * radius;
-  latticeConstant = latticeCnst;
+  particleRadius_ = radius;
+  particleDiameter_ = 2.0 * radius;
+  latticeConstant_ = latticeConstant;
   
   // Number of Unit Cells in Length first
   ny_ = (int)(particleDiameter/latticeConstant);

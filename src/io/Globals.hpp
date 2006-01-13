@@ -75,7 +75,6 @@ class Globals : public DataHolder {
   DeclareParameter(Dielectric, double);
   DeclareParameter(TempSet, bool);
   DeclareParameter(ThermalTime, double);
-  DeclareParameter(MixingRule, std::string);
   DeclareParameter(UsePeriodicBoundaryConditions, bool);
   DeclareParameter(TargetPressure, double);
   DeclareParameter(TauThermostat, double);

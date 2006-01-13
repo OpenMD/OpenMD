@@ -98,7 +98,6 @@ Globals::Globals() {
   DefineOptionalParameter(ElectrostaticScreeningMethod, "electrostaticScreeningMethod");
   DefineOptionalParameter(CutoffPolicy, "cutoffPolicy");
   DefineOptionalParameter(SwitchingFunctionType, "switchingFunctionType");
-  DefineOptionalParameterWithDefaultValue(MixingRule, "mixingRule", "standard");
   DefineOptionalParameterWithDefaultValue(UsePeriodicBoundaryConditions, "usePeriodicBoundaryConditions", true);
   DefineOptionalParameterWithDefaultValue(UseInitalTime, "useInitialTime", false);
   DefineOptionalParameterWithDefaultValue(UseIntialExtendedSystemState, "useInitialExtendedSystemState", false);
@@ -171,7 +170,6 @@ void Globals::validate() {
   CheckParameter(CutoffPolicy, isEqualIgnoreCase("MIX") || isEqualIgnoreCase("MAX") || isEqualIgnoreCase("TRADITIONAL"));
   CheckParameter(SwitchingFunctionType, isEqualIgnoreCase("CUBIC") || isEqualIgnoreCase("FIFTH_ORDER_POLYNOMIAL"));
   //CheckParameter(StatFileFormat,);     
-  //CheckParameter(MixingRule,);
   CheckParameter(OrthoBoxTolerance, isPositive());  
   CheckParameter(ThermIntDistSpringConst, isPositive());
   CheckParameter(ThermIntThetaSpringConst, isPositive());
