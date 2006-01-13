@@ -3,11 +3,11 @@
 // PHYSICAL REVIEW B 59 (5): 3468-3473 FEB 1 1999 
 
 begin Options
-      Name                   "SCQSC"
-      DistanceMixingRule     "Arithmetic"
-      EnergyMixingRule       "Geometric"
+      Name                   SCQSC
+      DistanceMixingRule     Arithmetic
+      EnergyMixingRule       Geometric
 //  energy unit are eV. Convert to kcal/mol
-      EnergyUnitScaling      0.02306054
+      EnergyUnitScaling      23.0605423
 end Options
 
 
@@ -26,12 +26,12 @@ end AtomTypes
 
 begin SCAtomTypes
 // Name  epsilon(eV)      c      m       n      alpha(angstroms)
-Ni	0.00073767	84.745	5.0	10.0	3.5157 
-Cu	0.00057921	84.843	5.0	10.0	3.6030
-Rh	0.00024612	305.499	5.0	13.0	3.7984
-Pd	0.00032864	148.205	6.0	12.0	3.8813
-Ag	0.00039450	96.524	6.0	11.0	4.0691
-Ir	0.00037674	224.815	6.0	13.0	3.8344	
-Pt	0.00097894	71.336	7.0	11.0	3.9163
-Au	0.00078052	53.581	8.0	11.0	4.0651
+Ni	0.0073767	84.745	5.0	10.0	3.5157 
+Cu	0.0057921	84.843	5.0	10.0	3.6030
+Rh	0.0024612	305.499	5.0	13.0	3.7984
+Pd	0.0032864	148.205	6.0	12.0	3.8813
+Ag	0.0039450	96.524	6.0	11.0	4.0691
+Ir	0.0037674	224.815	6.0	13.0	3.8344	
+Pt	0.0097894	71.336	7.0	11.0	3.9163
+Au	0.0078052	53.581	8.0	11.0	4.0651
 end SCAtomTypes

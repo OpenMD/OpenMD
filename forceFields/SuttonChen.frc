@@ -6,7 +6,7 @@ begin Options
       DistanceMixingRule    Geometric
       EnergyMixingRule      Geometric
 //  energy unit are eV. Convert to kcal/mol
-      EnergyUnitScaling     23.060523
+      EnergyUnitScaling     23.0605423
       cutoffPolicy         MIX
 end Options
 
@@ -27,14 +27,14 @@ end AtomTypes
 
 begin SCAtomTypes
 // Name  epsilon(eV)      c      m       n      alpha(angstroms)
-Ni	0.0015714	39.755	6.0	9.0	3.52 
-Cu	0.0012386	39.755	6.0	9.0	3.61
-Rh	0.00049371	145.658	6.0	12.0	3.80
-Pd	0.00041790	108.526	7.0	12.0	3.89
-Ag	0.00025415	145.658	6.0	12.0	4.09
-Ir	0.00024489	337.831	6.0	14.0	3.84	
-Pt	0.0019835	34.428	8.0	10.0	3.92
-Au	0.0012794	34.428	8.0	10.0	4.08
-Pb	0.00055772	45.882	7.0	10.0	4.95
-Al	0.0033307	16.460	6.0	7.0	4.05
+Ni	0.015714	39.755	6.0	9.0	3.52 
+Cu	0.012386	39.755	6.0	9.0	3.61
+Rh	0.0049371	145.658	6.0	12.0	3.80
+Pd	0.0041790	108.526	7.0	12.0	3.89
+Ag	0.0025415	145.658	6.0	12.0	4.09
+Ir	0.0024489	337.831	6.0	14.0	3.84	
+Pt	0.019835	34.428	8.0	10.0	3.92
+Au	0.012896	34.428	8.0	10.0	4.08
+Pb	0.0055772	45.882	7.0	10.0	4.95
+Al	0.033307	16.460	6.0	7.0	4.05
 end SCAtomTypes

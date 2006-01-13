@@ -11,15 +11,15 @@ targetTemp = 400.0;
 targetPressure = 1.0;
 
 forceField = "SC";
-forceFieldFileName = "SuttonChen.frc";
-//forceFieldVariant="SC";
+forceFieldFileName = "SuttonChen.QSC.frc";
+//forceFieldVariant="QSC";
 
 ensemble = "NVE";
 dt = 4.0;
 runTime = 3e4;
 
-
-sampleTime = 1000.0;
+thermalTime = 400.0;
+sampleTime = 500.0;
 seed = 985456376;
 
 tempSet="true";
