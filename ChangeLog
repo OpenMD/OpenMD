@@ -1,3 +1,1448 @@
+2006-01-16 10:26  gezelter
+
+	* configure: Testing commit
+
+2006-01-13 16:57  chuckv
+
+	* src/: UseTheForce/SC_FF.cpp,
+	applications/nanoparticleBuilder/sphericalNanoparticle.cpp,
+	io/Globals.cpp, io/Globals.hpp: Removed MixingRule from Globals.
+	Handled by forceField now.
+
+2006-01-13 14:17  chuckv
+
+	* src/io/Globals.cpp: Added NPAT to Globals integrators.
+
+2006-01-13 11:33  gezelter
+
+	* Makefile: [no log message]
+
+2006-01-13 11:26  gezelter
+
+	* Makefile: testing to make sure GNU make is the make that was used
+	to build OOPSE
+
+2006-01-13 10:48  gezelter
+
+	* configure, ac-tools/configure.in: changed compiler search order
+
+2006-01-12 19:09  chuckv
+
+	* forceFields/SuttonChen.QSC.frc, forceFields/SuttonChen.frc,
+	samples/metals/Sutton-Chen/Au_bulk.in,
+	samples/metals/Sutton-Chen/Au_bulk_QSC.md,
+	samples/metals/Sutton-Chen/Au_bulk_SC.md: Changes in Sutton-Chen
+	units
+
+2006-01-12 16:16  gezelter
+
+	* LICENSE, configure, src/applications/oopse/oopse.cpp: fixed some
+	version info and the copyright date
+
+2006-01-12 15:52  gezelter
+
+	* src/config.h.in: added some missing checks for header files
+	(particularly zlib.h), used autoheader to help generate config.h.in
+
+2006-01-12 15:51  gezelter
+
+	* configure, ac-tools/configure.in: added some missing checks for
+	header files (particularly zlib.h)
+
+2006-01-12 15:19  gezelter
+
+	* make/Makefile.in: fixed a dependency problem for the Executable
+	builds
+
+2006-01-12 15:02  gezelter
+
+	* samples/gbljtest/Makefile: Missing Makefile in this sample
+	directory
+
+2006-01-12 15:01  gezelter
+
+	* make/Makefile.in, samples/Makefile.in, samples/cutoff/Makefile:
+	Old makefile.in no longer required
+
+2006-01-12 15:01  gezelter
+
+	* forceFields/: Makefile, Makefile.in: All of the OpenBabel stuff
+	needs to be installed
+
+2006-01-12 14:56  chuckv
+
+	* src/io/DumpWriter.cpp: Changed formating.
+
+2006-01-12 11:47  chrisfen
+
+	* samples/water/tip4p/tp4.md,
+	src/UseTheForce/DarkSide/electrostatic.F90,
+	src/UseTheForce/DarkSide/electrostatic_interface.F90,
+	src/UseTheForce/DarkSide/electrostatic_interface.h,
+	src/brains/SimInfo.cpp: unifying function name in electrostatics
+
+2006-01-12 11:04  tim
+
+	* samples/metals/: EAM/nanoparticle/Makefile,
+	EAM/nanorod/Au_nanoparticle.in, EAM/nanorod/Makefile,
+	Sutton-Chen/Makefile: fix make install problem for metals samples
+
+2006-01-12 10:22  tim
+
+	* make/Makefile.in: remove samples/metals from install list.
+
+2006-01-12 09:31  tim
+
+	* src/io/: ForceFieldOptions.cpp, Globals.cpp: filepp can not
+	handle multiple line macro, just convert multiple line macro into
+	single line macro.
+
+2006-01-11 23:13  chrisfen
+
+	* src/: UseTheForce/DarkSide/electrostatic.F90,
+	UseTheForce/DarkSide/neighborLists.F90, io/Globals.cpp: Made some
+	changes to electrostatics for shifted-potential and shifted-force
+	with mono and multipoles
+
+2006-01-11 18:04  gezelter
+
+	* src/config.h.in, src/UseTheForce/doForces_interface.h,
+	src/UseTheForce/DarkSide/atype_interface.h,
+	src/UseTheForce/DarkSide/eam_interface.h,
+	src/UseTheForce/DarkSide/electrostatic_interface.h,
+	src/UseTheForce/DarkSide/fForceOptions_interface.h,
+	src/UseTheForce/DarkSide/gb_interface.h,
+	src/UseTheForce/DarkSide/lj_interface.h,
+	src/UseTheForce/DarkSide/shapes_interface.h,
+	src/UseTheForce/DarkSide/simParallel_interface.h,
+	src/UseTheForce/DarkSide/simulation_interface.h,
+	src/UseTheForce/DarkSide/sticky_interface.h,
+	src/UseTheForce/DarkSide/suttonchen_interface.h,
+	src/UseTheForce/DarkSide/switcheroo_interface.h,
+	src/mdParser/MDParser.g, src/profiling/mdProfile.cpp,
+	src/utils/fError.c, configure, make/Makefile.in: autoconf
+	modernization and cruft removal
+
+2006-01-11 18:04  gezelter
+
+	* ac-tools/: aclocal.m4, configure.in, fortran90.m4: autoconf
+	modernization and cruft-removal
+
+2006-01-11 17:50  tim
+
+	* src/types/: BendStamp.hpp, BondStamp.hpp, TorsionStamp.hpp: fix
+	some error messages
+
+2006-01-11 14:01  tim
+
+	* src/: applications/staticProps/RhoZ.cpp, brains/SimCreator.cpp,
+	io/Globals.cpp, types/AtomStamp.cpp, types/BendStamp.hpp,
+	types/BondStamp.hpp, types/DataHolder.hpp, types/MoleculeStamp.cpp,
+	types/TorsionStamp.hpp, utils/OOPSEException.hpp,
+	utils/StringUtils.hpp: instead of printing to std::cout, throwing
+	an exception when error is found.
+
+2006-01-11 13:41  gezelter
+
+	* src/types/: AtomStamp.hpp, MoleculeStamp.cpp: Fixed a spelling
+	error
+
+2006-01-10 17:55  chuckv
+
+	* forceFields/SuttonChen.frc: Changed conversion factor.
+
+2006-01-10 16:14  chuckv
+
+	* samples/metals/Sutton-Chen/Au_bulk_SC.md,
+	src/UseTheForce/DarkSide/suttonchen.F90: Sutton and Chen should be
+	working now.
+
+2006-01-09 17:22  chuckv
+
+	* src/UseTheForce/doForces.F90: Fixed SC bug with SIM_uses_SC
+
+2006-01-09 17:14  tim
+
+	* src/applications/staticProps/: Makefile, RhoZ.cpp, RhoZ.hpp,
+	StaticProps.cpp, StaticProps.ggo, StaticPropsCmd.c,
+	StaticPropsCmd.h: fixing RhoZ
+
+2006-01-09 14:26  chuckv
+
+	* forceFields/SuttonChen.frc,
+	samples/metals/Sutton-Chen/Au_bulk_SC.md,
+	src/io/LennardJonesAtomTypesSectionParser.cpp,
+	src/io/SCAtomTypesSectionParser.cpp: Added energy scaling to
+	section parsers.
+
+2006-01-09 14:11  tim
+
+	* src/: io/ForceFieldOptions.hpp, utils/StringUtils.cpp,
+	utils/StringUtils.hpp: replace isType<int> with isInteger
+
+2006-01-06 16:15  tim
+
+	* src/UseTheForce/: SC_FF.cpp, SC_FF.hpp: remove extra
+	forceFieldOptions from SC_FF
+
+2006-01-06 15:27  chuckv
+
+	* forceFields/SuttonChen.frc: Add force file.
+
+2005-12-31 17:42  chuckv
+
+	* src/UseTheForce/DarkSide/suttonchen.F90: Sutton-Chen no longer
+	segfaults or produces 0 potential, but rather produces Inf for the
+	potential. Progress....
+
+2005-12-30 18:15  chuckv
+
+	* samples/metals/Sutton-Chen/Au_bulk_SC.md,
+	src/UseTheForce/SC_FF.cpp, src/UseTheForce/doForces.F90,
+	src/UseTheForce/DarkSide/suttonchen.F90, src/brains/SimInfo.cpp,
+	src/io/ForceFieldOptions.cpp, src/io/ForceFieldOptions.hpp: More
+	Sutton-Chen bug fixes.
+
+2005-12-30 16:25  tim
+
+	* src/: UseTheForce/doForces.F90, brains/Thermo.cpp: Long range
+	potential return from fortran is already accumulated, it should not
+	be accumulated again; nGroupTypesCol is not initialized;
+	GroupMaxCutoffCol is not allocated;
+
+2005-12-30 10:32  tim
+
+	* make/Makefile.in, src/brains/SimCreator.cpp: In order to compile
+	MPI version, we need to cast const char* to void* for
+	stringstream.str(); Previous Makefile use bjects of single version
+	to make the MPI library;
+
+2005-12-29 19:18  chuckv
+
+	* make/Makefile.in, samples/metals/Makefile,
+	src/UseTheForce/SC_FF.cpp, src/UseTheForce/doForces.F90,
+	src/UseTheForce/DarkSide/suttonchen.F90: Sutton-Chen bug fixes.
+	Almost there...
+
+2005-12-29 15:19  chuckv
+
+	* forceFields/: SuttonChen.QSC.frc, SuttonChen.SC.frc: Changes in
+	forcefield.
+
+2005-12-29 15:07  chuckv
+
+	* samples/metals/Sutton-Chen/: Au_bulk.in, Au_bulk_SC.md, Makefile,
+	metals.md: added files for sutton-chen
+
+2005-12-29 11:37  chuckv
+
+	* samples/metals/EAM/nanorod/: Au_nanoparticle_FCC.md, Makefile,
+	metals.md: More cvs changing.
+
+2005-12-29 11:34  chuckv
+
+	* samples/metals/Au_nanoparticle.in: More moving...
+
+2005-12-29 11:33  chuckv
+
+	* samples/metals/EAM/nanoparticle/:
+	Au-Core-Ag-Shell_Nanoparticle.in, Au-Core-Ag-Shell_Nanoparticle.md,
+	Au_nanoparticle.in, Au_nanoparticle.md, Makefile, metals.md: More
+	changes to directory structure.
+
+2005-12-29 11:21  chuckv
+
+	* samples/metals/EAM/: Au_bulk.in, Au_bulk_FBD.md,
+	Au_bulk_voter.md, Makefile, metals.md: More Directory changes...
+
+2005-12-29 11:17  chuckv
+
+	* samples/metals/: Au-Core-Ag-Shell_Nanoparticle.in,
+	Au-Core-Ag-Shell_Nanoparticle.md, Au_bulk.in, Au_bulk_FBD.md,
+	Au_bulk_voter.md, Au_nanoparticle.md, metals.md: More changing of
+	directory structure
+
+2005-12-29 11:03  chuckv
+
+	* src/: UseTheForce/DarkSide/fForceOptions_interface.F90,
+	brains/SimCreator.cpp: Fixed issue with symbol naming and added
+	call to set force options in SimCreator.
+
+2005-12-28 16:44  chuckv
+
+	* src/io/: ForceFieldOptions.cpp, ForceFieldOptions.hpp: More
+	changes to forcefield options.
+
+2005-12-28 16:42  chuckv
+
+	* src/UseTheForce/: ForceField.cpp, ForceField.hpp: Force options
+	passed to fortran.
+
+2005-12-23 18:04  chuckv
+
+	* src/: UseTheForce/DarkSide/fForceOptions_interface.h,
+	io/ForceFieldOptions.cpp, io/ForceFieldOptions.hpp: Force option
+	changes.
+
+2005-12-16 16:52  tim
+
+	* configure, ac-tools/aclocal.m4, ac-tools/configure.in,
+	src/config.h.in, src/UseTheForce/DarkSide/gb.F90,
+	src/openbabel/bitvec.cpp, src/openbabel/bondtyper.cpp,
+	src/openbabel/chains.cpp, src/openbabel/chiral.cpp,
+	src/openbabel/data.cpp, src/openbabel/fingerprint.cpp,
+	src/openbabel/fingerprintformat.cpp, src/openbabel/generic.cpp,
+	src/openbabel/gromos96format.hpp, src/openbabel/kekulize.cpp,
+	src/openbabel/matrix3x3.cpp, src/openbabel/mol.cpp,
+	src/openbabel/molchrg.cpp, src/openbabel/obatom.cpp,
+	src/openbabel/obbond.cpp, src/openbabel/oberror.cpp,
+	src/openbabel/oberror.hpp, src/openbabel/obmolecformat.hpp,
+	src/openbabel/obutil.cpp, src/openbabel/patty.cpp,
+	src/openbabel/pdbformat.cpp, src/openbabel/phmodel.cpp,
+	src/openbabel/povrayformat.hpp, src/openbabel/residue.cpp,
+	src/openbabel/ring.cpp, src/openbabel/rotor.cpp,
+	src/openbabel/smilesformat.cpp, src/openbabel/tinkerformat.hpp,
+	src/openbabel/typer.cpp, src/openbabel/xyzformat.cpp: changed
+	__FUNCTION__ to __func__ to match C99 standard, and then added an
+	autoconf test to check for __func__ usability.	Changed some
+	default compile flags for the Sun architecture
+
+2005-12-16 14:01  gezelter
+
+	* ac-tools/AC_CXX_HAVE_STL.m4: added the STL check
+
+2005-12-16 13:55  tim
+
+	* src/utils/: CaseConversion.hpp, ParameterManager.hpp: make minor
+	change to build oopse under solaris
+
+2005-12-16 13:26  tim
+
+	* src/: brains/SimCreator.cpp, io/Globals.cpp,
+	types/MoleculeStamp.cpp, utils/Predicate.hpp: the standard library
+	came with SUN compiler does not have a conforming std::use_facet,
+	define a macro to handle it. Adding exception handling to
+	SimCreator.
+
+2005-12-16 10:53  gezelter
+
+	* samples/cutoff/: GB-Ar-max.md, GB-Ar-mix.md,
+	GB-Ar-traditional.md, gb-ar.in: Removed one parasitic argon atom
+	which was living inside the GB particle.  No alien-like ripping out
+	of the stomach was required.
+
+2005-12-15 21:57  tim
+
+	* src/mdParser/: MDLexer.cpp, MDLexer.hpp, MDParser.cpp,
+	MDParser.g, MDParser.hpp, MDTokenTypes.hpp, MDTreeParser.cpp,
+	MDTreeParser.g, MDTreeParser.hpp, MDTreeParserTokenTypes.hpp:
+	replace grammar for numerical parsing
+
+2005-12-15 16:43  gezelter
+
+	* src/UseTheForce/doForces.F90: fixed a cutoff bug
+
+2005-12-15 09:48  gezelter
+
+	* src/antlr/: CharScanner.hpp, config.hpp: Removing compiler
+	dependencies and replacing them with real autoconf checks
+
+2005-12-15 09:47  gezelter
+
+	* configure, ac-tools/AC_CXX_NAMESPACES.m4, ac-tools/AC_CXX_STD.m4,
+	ac-tools/configure.in, src/config.h.in: Adding checks for various
+	features used by ANTLR
+
+2005-12-14 13:02  tim
+
+	* src/mdParser/: MDLexer.cpp, MDLexer.hpp, MDParser.cpp,
+	MDParser.g, MDParser.hpp, MDTokenTypes.hpp, MDTreeParser.cpp,
+	MDTreeParser.g, MDTreeParser.hpp, MDTreeParserTokenTypes.hpp: fix a
+	nasty negative integer parsing problem by refining the grammar
+
+2005-12-12 14:32  gezelter
+
+	* src/: UseTheForce/doForces_interface.F90,
+	UseTheForce/doForces_interface.h,
+	UseTheForce/DarkSide/electrostatic.F90,
+	UseTheForce/DarkSide/electrostatic_interface.F90,
+	UseTheForce/DarkSide/electrostatic_interface.h,
+	brains/MoleculeCreator.cpp, brains/SimInfo.cpp,
+	math/ChebyshevPolynomials.hpp, openbabel/obconversion.hpp: made
+	some minor changes to allow compilation with the portland group
+	compilers
+
+2005-12-10 11:54  tim
+
+	* src/: types/MoleculeStamp.cpp, utils/Tuple.hpp: fixed compilation
+	problem for icc7
+
+2005-12-09 16:18  gezelter
+
+	* src/utils/CaseConversion.hpp: added missing include
+
+2005-12-09 12:11  gezelter
+
+	* configure, ac-tools/aclocal.m4: added some checks for pathscale
+	compiler
+
+2005-12-08 17:05  gezelter
+
+	* src/io/ForceFieldOptions.cpp: added copyright
+
+2005-12-08 17:04  gezelter
+
+	* src/UseTheForce/doForces.F90: added info printout
+
+2005-12-08 17:04  gezelter
+
+	* configure, ac-tools/configure.in: added pathscale
+
+2005-12-08 10:38  chuckv
+
+	* src/: UseTheForce/CLAYFF.cpp, UseTheForce/DUFF.cpp,
+	UseTheForce/EAM_FF.cpp, UseTheForce/SC_FF.cpp,
+	UseTheForce/SHAPES_FF.cpp, io/BendTypesSectionParser.cpp,
+	io/BendTypesSectionParser.hpp, io/BondTypesSectionParser.cpp,
+	io/BondTypesSectionParser.hpp, io/ChargeAtomTypesSectionParser.cpp,
+	io/ChargeAtomTypesSectionParser.hpp,
+	io/DirectionalAtomTypesSectionParser.cpp,
+	io/DirectionalAtomTypesSectionParser.hpp,
+	io/EAMAtomTypesSectionParser.cpp, io/EAMAtomTypesSectionParser.hpp,
+	io/GayBerneAtomTypesSectionParser.cpp,
+	io/GayBerneAtomTypesSectionParser.hpp,
+	io/MultipoleAtomTypesSectionParser.cpp,
+	io/MultipoleAtomTypesSectionParser.hpp,
+	io/SCAtomTypesSectionParser.cpp, io/SCAtomTypesSectionParser.hpp,
+	io/ShapeAtomTypesSectionParser.cpp,
+	io/ShapeAtomTypesSectionParser.hpp,
+	io/StickyAtomTypesSectionParser.cpp,
+	io/StickyAtomTypesSectionParser.hpp,
+	io/StickyPowerAtomTypesSectionParser.cpp,
+	io/StickyPowerAtomTypesSectionParser.hpp,
+	io/TorsionTypesSectionParser.cpp, io/TorsionTypesSectionParser.hpp:
+	Wow thats alot o' files. Now passing forceFieldOptions to all of
+	the parsers.
+
+2005-12-07 18:10  chuckv
+
+	* src/UseTheForce/: CLAYFF.cpp, DUFF.cpp, EAM_FF.cpp, EAM_FF.hpp,
+	SHAPES_FF.cpp, SHAPES_FF.hpp: This should really break things....
+	Started adding support for ForceOptions to section parsers.
+
+2005-12-07 18:01  gezelter
+
+	* src/UseTheForce/DarkSide/gb_interface.h: [no log message]
+
+2005-12-07 18:00  chuckv
+
+	* src/io/: LennardJonesAtomTypesSectionParser.cpp,
+	LennardJonesAtomTypesSectionParser.hpp: Added forceOptions to
+	section parser
+
+2005-12-07 14:58  chuckv
+
+	* src/UseTheForce/DarkSide/: LJ.F90, lj_interface.F90,
+	lj_interface.h, suttonchen.F90, suttonchen_interface.F90,
+	suttonchen_interface.h: Removed geometric distance mixing from
+	individual modules and now use force options to detemine what the
+	deal is.
+
+2005-12-07 14:46  chuckv
+
+	* src/UseTheForce/: fForceOptions.h, DarkSide/fForceOptions.F90:
+	Further fixes for compiler issues.
+
+2005-12-07 14:44  chuckv
+
+	* src/UseTheForce/fForceOptions.h: Fixed ifc public-private issue.
+
+2005-12-07 14:38  chuckv
+
+	* src/UseTheForce/DarkSide/: Makefile, fForceOptions.F90,
+	fForceOptions_interface.F90, fForceOptions_interface.h: Added
+	support for fortran force options.
+
+2005-12-06 16:01  tim
+
+	* src/types/MoleculeStamp.cpp: Fixed a bug in checkTorsion
+
+2005-12-06 14:26  chuckv
+
+	* src/UseTheForce/: SC_FF.cpp, SC_FF.hpp: Changes to SC.
+
+2005-12-06 12:53  chuckv
+
+	* src/applications/nanoRodBuilder/: GeometryBuilder.cpp,
+	GeometryBuilder.hpp, nanorodBuilder.cpp: Changes to build twinned
+	crystal
+
+2005-12-06 12:52  chuckv
+
+	* src/io/: DumpWriter.cpp, DumpWriter.hpp: Overloaded interface for
+	dumpwriter.
+
+2005-12-06 11:49  tim
+
+	* samples/: alkane/alkanes.md, alkane/butane.md, argon/500.md,
+	argon/ar864.md, argon/argonNVT.md, argon/lj.md,
+	dipole/splitDipole.md, dipole/splitInWater.md, dipole/split_SSD.md,
+	dipole/twoSplitDipole.md, dipole/water.md, gbljtest/2gb.md,
+	gbljtest/gb.md, gbljtest/gb2lj1.md, gbljtest/gbRotRoundX.md,
+	gbljtest/gbRotRoundY.md, gbljtest/gbRotRoundZ.md, gbljtest/lj.md,
+	lipid/5x5.md, lipid/lipid.md, lipid/water.md,
+	metals/Au-Core-Ag-Shell_Nanoparticle.md, metals/Au_bulk_FBD.md,
+	metals/Au_bulk_voter.md, metals/Au_nanoparticle.md,
+	metals/metals.md, minimizer/ssdEM.md, minimizer/tip4p_two.md,
+	minimizer/water.md, shape/linear.md,
+	thermoIntegration/liquid/ssde.md,
+	thermoIntegration/liquid/water.md, thermoIntegration/solid/ssde.md,
+	thermoIntegration/solid/water.md, water/dimer/cl.md,
+	water/dimer/mix.md, water/dimer/mix2.md, water/dimer/ssd.md,
+	water/dimer/tap.md, water/dimer/two.md, water/dimer/water.md,
+	water/spce/spce.md, water/spce/water.md, water/ssd/ssd.md,
+	water/ssd/water.md, water/ssd-ion/ssdCl.md, water/ssd-ion/water.md,
+	water/ssde/ssde.md, water/ssde/water.md, water/ssdrf/ssdrf.md,
+	water/ssdrf/water.md, water/tap/tap.md, water/tap/water.md,
+	water/tip3p_ice/tp3.md, water/tip3p_ice/water.md,
+	water/tip4p/tp4.md, water/tip4p/water.md, zcons/water.md,
+	zcons/zconsFixed.md, zcons/zconsMoving.md: remove deprecated
+	keywords from samples
+
+2005-12-05 18:37  tim
+
+	* src/io/: ForceFieldOptions.cpp, ForceFieldOptions.hpp,
+	Globals.cpp, Makefile: Fix parsing error in OptionSectionParser
+
+2005-12-05 17:23  gezelter
+
+	* src/: UseTheForce/CLAYFF.cpp, UseTheForce/CLAYFF.hpp,
+	UseTheForce/Makefile, brains/Register.cpp,
+	io/ForceFieldOptions.hpp, io/OptionSectionParser.cpp: Adding
+	handler for CLAY force field
+
+2005-12-05 16:45  chuckv
+
+	* src/openbabel/: zipstream.hpp, zipstreamimpl.hpp: Fixed build bug
+	in openbabel.
+
+2005-12-05 14:10  tim
+
+	* src/types/MoleculeStamp.cpp: reformat error message
+
+2005-12-05 14:07  gezelter
+
+	* forceFields/CLAYFF.frc: Adding .frc file for CLAYFF
+
+2005-12-05 13:23  tim
+
+	* src/: types/AtomStamp.cpp, types/AtomStamp.hpp,
+	types/BendStamp.hpp, types/MoleculeStamp.cpp,
+	types/MoleculeStamp.hpp, types/TorsionStamp.hpp, utils/Tuple.hpp:
+	adding more checking for topology
+
+2005-12-02 17:37  gezelter
+
+	* src/antlr/TokenStreamRewriteEngine.cpp: Spurious semicolon
+	removal
+
+2005-12-02 17:37  gezelter
+
+	* src/config.h.in: We've made big changes.  This isn't 2.0 anymore.
+
+2005-12-02 17:37  gezelter
+
+	* samples/cutoff/: GB-Ar-max.md, GB-Ar-mix.md,
+	GB-Ar-traditional.md, cutoff_test.md, gb.md, lj.md, max.md, mix.md,
+	traditional.md: removing deprecated nAtoms and nComponents lines
+
+2005-12-02 15:34  tim
+
+	* src/selection/SelectionToken.cpp: adding SelectionToken.cpp
+
+2005-12-02 15:18  tim
+
+	* src/types/: FragmentStamp.cpp, FragmentStamp.hpp: Adding
+	FragmentStamp
+
+2005-12-02 15:11  gezelter
+
+	* src/openbabel/: matrix3x3.cpp, matrix3x3.hpp: Errors are no
+	longer thrown with consts (fixes compilation bug on the Mac).
+
+2005-12-02 15:10  gezelter
+
+	* src/integrators/VelocityVerletIntegrator.cpp: Got rid of spurious
+	printing out of timestep
+
+2005-12-02 15:10  gezelter
+
+	* src/brains/ForceManager.cpp: Got rid of spurious printing out of
+	junk
+
+2005-12-02 15:10  gezelter
+
+	* make/Makefile.in: Change build process for libOOPSE.a so that the
+	libraries aren't unpacked.  libOOPSE.a is now made directly from
+	the object files
+
+2005-12-02 15:09  gezelter
+
+	* configure, ac-tools/configure.in: added check for egrep (grep -E)
+	needed for new build of libOOPSE.a
+
+2005-12-02 13:43  tim
+
+	* src/types/DataHolder.hpp: adding DataHolder
+
+2005-12-02 12:01  gezelter
+
+	* samples/cutoff/: GB-Ar-max.md, GB-Ar-mix.md,
+	GB-Ar-traditional.md, gb-ar.in, gb.md: Added Gay-Berne / Argon test
+	case for the cutoff policies
+
+2005-12-02 10:38  tim
+
+	* make/Makefile.in: update Makefile
+
+2005-12-02 10:38  tim
+
+	* src/: antlr/ANTLRException.hpp, antlr/ANTLRUtil.cpp,
+	antlr/ANTLRUtil.hpp, antlr/AST.hpp, antlr/ASTArray.hpp,
+	antlr/ASTFactory.cpp, antlr/ASTFactory.hpp, antlr/ASTNULLType.cpp,
+	antlr/ASTNULLType.hpp, antlr/ASTPair.hpp, antlr/ASTRefCount.cpp,
+	antlr/ASTRefCount.hpp, antlr/BaseAST.cpp, antlr/BaseAST.hpp,
+	antlr/BitSet.cpp, antlr/BitSet.hpp, antlr/CharBuffer.cpp,
+	antlr/CharBuffer.hpp, antlr/CharInputBuffer.hpp,
+	antlr/CharScanner.cpp, antlr/CharScanner.hpp,
+	antlr/CharStreamException.hpp, antlr/CharStreamIOException.hpp,
+	antlr/CircularQueue.hpp, antlr/CommonAST.cpp, antlr/CommonAST.hpp,
+	antlr/CommonASTWithHiddenTokens.cpp,
+	antlr/CommonASTWithHiddenTokens.hpp,
+	antlr/CommonHiddenStreamToken.cpp,
+	antlr/CommonHiddenStreamToken.hpp, antlr/CommonToken.cpp,
+	antlr/CommonToken.hpp, antlr/IOException.hpp,
+	antlr/InputBuffer.cpp, antlr/InputBuffer.hpp, antlr/LLkParser.cpp,
+	antlr/LLkParser.hpp, antlr/LexerSharedInputState.hpp,
+	antlr/Makefile, antlr/MismatchedCharException.cpp,
+	antlr/MismatchedCharException.hpp,
+	antlr/MismatchedTokenException.cpp,
+	antlr/MismatchedTokenException.hpp, antlr/NoViableAltException.cpp,
+	antlr/NoViableAltException.hpp,
+	antlr/NoViableAltForCharException.cpp,
+	antlr/NoViableAltForCharException.hpp, antlr/Parser.cpp,
+	antlr/Parser.hpp, antlr/ParserSharedInputState.hpp,
+	antlr/RecognitionException.cpp, antlr/RecognitionException.hpp,
+	antlr/RefCount.hpp, antlr/SemanticException.hpp, antlr/String.cpp,
+	antlr/String.hpp, antlr/Token.cpp, antlr/Token.hpp,
+	antlr/TokenBuffer.cpp, antlr/TokenBuffer.hpp,
+	antlr/TokenRefCount.cpp, antlr/TokenRefCount.hpp,
+	antlr/TokenStream.hpp, antlr/TokenStreamBasicFilter.cpp,
+	antlr/TokenStreamBasicFilter.hpp, antlr/TokenStreamException.hpp,
+	antlr/TokenStreamHiddenTokenFilter.cpp,
+	antlr/TokenStreamHiddenTokenFilter.hpp,
+	antlr/TokenStreamIOException.hpp,
+	antlr/TokenStreamRecognitionException.hpp,
+	antlr/TokenStreamRetryException.hpp,
+	antlr/TokenStreamRewriteEngine.cpp,
+	antlr/TokenStreamRewriteEngine.hpp, antlr/TokenStreamSelector.cpp,
+	antlr/TokenStreamSelector.hpp, antlr/TokenWithIndex.hpp,
+	antlr/TreeParser.cpp, antlr/TreeParser.hpp,
+	antlr/TreeParserSharedInputState.hpp, antlr/config.hpp,
+	applications/oopse/oopse.cpp, brains/ForceManager.cpp,
+	brains/MoleculeCreator.cpp, brains/SimCreator.cpp,
+	brains/SimCreator.hpp, brains/SimInfo.cpp, brains/SimInfo.hpp,
+	constraints/ZconstraintForceManager.cpp,
+	integrators/VelocityVerletIntegrator.cpp, io/BASS_interface.cpp,
+	io/BASS_interface.h, io/BASS_parse.c, io/BASS_parse.h,
+	io/BASSlex.l, io/BASSyacc.y, io/Globals.cpp, io/Globals.hpp,
+	io/LinkedAssign.cpp, io/LinkedAssign.hpp, io/Makefile,
+	io/ZConsReader.cpp, io/interface.c, io/make_nodes.c,
+	io/make_nodes.h, io/mpiBASS.c, io/mpiBASS.h, io/node_list.h,
+	io/parse_interface.h, io/parse_me.h, io/parse_tree.c,
+	io/parse_tree.h, mdParser/FilenameObserver.cpp,
+	mdParser/FilenameObserver.hpp, mdParser/MDLexer.cpp,
+	mdParser/MDLexer.hpp, mdParser/MDParser.cpp, mdParser/MDParser.g,
+	mdParser/MDParser.hpp, mdParser/MDTokenTypes.hpp,
+	mdParser/MDTreeParser.cpp, mdParser/MDTreeParser.g,
+	mdParser/MDTreeParser.hpp, mdParser/MDTreeParserTokenTypes.hpp,
+	mdParser/Makefile, mdParser/SimplePreprocessor.hpp,
+	openbabel/obconversion.cpp, openbabel/oopseformat.cpp,
+	openbabel/xyzformat.cpp, primitives/RigidBody.cpp,
+	selection/DistanceFinder.cpp, selection/DistanceFinder.hpp,
+	selection/IndexFinder.cpp, selection/IndexFinder.hpp,
+	selection/Makefile, selection/NameFinder.cpp,
+	selection/NameFinder.hpp, selection/SelectionCompiler.hpp,
+	selection/SelectionEvaluator.cpp, selection/SelectionEvaluator.hpp,
+	selection/SelectionManager.hpp, selection/SelectionToken.hpp,
+	selection/Token.cpp, selection/Token.hpp, selection/TokenMap.hpp,
+	types/AtomStamp.cpp, types/AtomStamp.hpp, types/BendStamp.cpp,
+	types/BendStamp.hpp, types/BondStamp.cpp, types/BondStamp.hpp,
+	types/Component.cpp, types/Component.hpp,
+	types/CutoffGroupStamp.cpp, types/CutoffGroupStamp.hpp,
+	types/MakeStamps.cpp, types/MakeStamps.hpp, types/Makefile,
+	types/MoleculeStamp.cpp, types/MoleculeStamp.hpp,
+	types/RigidBodyStamp.cpp, types/RigidBodyStamp.hpp,
+	types/TorsionStamp.cpp, types/TorsionStamp.hpp,
+	types/ZconStamp.cpp, types/ZconStamp.hpp, types/ZconsStamp.cpp,
+	types/ZconsStamp.hpp, utils/BitSet.cpp, utils/BitSet.hpp,
+	utils/Makefile.in, utils/MoLocator.cpp, utils/OOPSEBitSet.cpp,
+	utils/OOPSEBitSet.hpp, utils/StringTokenizer.cpp,
+	utils/StringTokenizer.hpp, visitors/ZconsVisitor.cpp: End of the
+	Link --> List Return of the Oject-Oriented replace yacc/lex parser
+	with antlr parser
+
+2005-11-30 16:00  chuckv
+
+	* src/applications/staticProps/: RhoZ.cpp, RhoZ.hpp: Code to
+	calculate rho(Z) to calculate density profiles for water slabs.
+
+2005-11-29 17:54  chuckv
+
+	* configure, ac-tools/configure.in: added checks for some functions
+	to configure script
+
+2005-11-22 20:05  chuckv
+
+	* src/openbabel/: Makefile, atom.cpp, bond.cpp, obatom.cpp,
+	obbond.cpp: Changed file names that conflict w/ oopse file name
+	object files.
+
+2005-11-21 17:59  gezelter
+
+	* src/utils/residentMem.c: compilation bug
+
+2005-11-21 17:59  gezelter
+
+	* src/io/: ForceFieldOptions.hpp, Globals.cpp: parsing by filepp
+
+2005-11-21 17:59  gezelter
+
+	* src/brains/: SimInfo.cpp, SimInfo.hpp: Cutoff Mixing fixes
+
+2005-11-21 17:59  gezelter
+
+	* src/applications/atom2mdin/: Makefile, atom2mdin.cpp: compilation
+	issue
+
+2005-11-21 17:58  gezelter
+
+	* src/UseTheForce/: ForceField.hpp, Makefile, doForces.F90,
+	doForces_interface.F90, doForces_interface.h, fForceOptions.h,
+	notifyCutoffs.F90, notifyCutoffs_interface.F90,
+	notifyCutoffs_interface.h, DarkSide/LJ.F90,
+	DarkSide/electrostatic.F90, DarkSide/gb.F90,
+	DarkSide/suttonchen.F90: Cutoff mixing fixes have been made.
+
+2005-11-21 11:22  tim
+
+	* src/io/ParamConstraint.cpp: Adding  ParamConstraint.cpp
+
+2005-11-21 09:59  tim
+
+	* forceFields/: SMARTS_InteLigand_051110.txt, aromatic.txt,
+	atomtyp.txt, bondtyp.txt, element.txt, extable.txt,
+	isotope-small.txt, isotope.txt, patterns.txt, phmodel.txt,
+	resdata.txt, torlib.txt, types.txt: adding openbabel data files
+
+2005-11-18 15:17  tim
+
+	* src/: applications/atom2mdin/Makefile, openbabel/oopseformat.cpp:
+	adding support for soft linking
+
+2005-11-18 15:17  tim
+
+	* make/Makefile.in: Adding support for soft linking
+
+2005-11-18 12:50  gezelter
+
+	* make/Makefile.in: Adding linking stuff
+
+2005-11-18 11:38  tim
+
+	* make/Makefile.in, src/applications/atom2mdin/Makefile,
+	src/applications/atom2mdin/atom2mdin.cpp,
+	src/openbabel/oopseformat.cpp, src/openbabel/oopseformat.hpp:
+	rename mdinConverter to atom2mdin
+
+2005-11-17 15:44  gezelter
+
+	* src/openbabel/obconversion.cpp: fixed a bug
+
+2005-11-17 15:39  gezelter
+
+	* configure: Adding some config checks for OpenBabel codes we are
+	using
+
+2005-11-17 15:39  gezelter
+
+	* ac-tools/configure.in: Adding some checks for OpenBabel code
+
+2005-11-17 15:39  gezelter
+
+	* src/config.h.in: Unifying config.h stuff from OOPSE and OpenBabel
+
+2005-11-17 15:38  gezelter
+
+	* src/openbabel/: babelconfig.hpp, base.cpp, base.hpp, bitvec.hpp,
+	bondtyper.cpp, config.h.in, config.hpp, data.cpp, data.hpp,
+	fingerprint.cpp, generic.hpp, grid.hpp, matrix.hpp, mol.hpp,
+	obconversion.hpp, oberror.cpp, oberror.hpp, obutil.cpp, obutil.hpp,
+	patty.cpp, pdbformat.hpp, phmodel.cpp, povrayformat.hpp,
+	residue.cpp, rotor.cpp, smilesformat.cpp, tokenst.cpp, typer.cpp:
+	Unifying config.h stuff and making sure the OpenBabel codes can
+	find our default (and environment variable) Force Field
+	directories.
+
+2005-11-17 13:35  tim
+
+	* src/io/ForceFieldOptions.hpp: adding ForceFieldOptions
+
+2005-11-16 18:10  tim
+
+	* src/: UseTheForce/DUFF.cpp, UseTheForce/ForceField.hpp,
+	brains/Exclude.cpp, brains/Exclude.hpp, brains/ForceManager.cpp,
+	brains/ForceManager.hpp, brains/SimCreator.cpp, brains/SimInfo.cpp,
+	integrators/VelocityVerletIntegrator.cpp, io/Globals.cpp,
+	io/Globals.hpp, io/Makefile, io/OptionSectionParser.cpp,
+	io/OptionSectionParser.hpp, io/ParamConstraint.hpp,
+	io/SectionParser.hpp, io/SectionParserManager.cpp,
+	io/TorsionTypesSectionParser.cpp, math/ChebyshevPolynomials.hpp,
+	math/Makefile, math/Polynomial.hpp, primitives/Bend.cpp,
+	primitives/Bend.hpp, primitives/GhostBend.cpp,
+	primitives/GhostBend.hpp, primitives/GhostTorsion.cpp,
+	primitives/GhostTorsion.hpp, primitives/Torsion.cpp,
+	primitives/Torsion.hpp, primitives/UreyBradleyBend.cpp,
+	primitives/UreyBradleyBend.hpp, types/CharmmTorsionType.cpp,
+	types/CharmmTorsionType.hpp, types/CubicTorsionType.hpp,
+	types/PolynomialTorsionType.hpp, types/QuarticTorsionType.hpp,
+	types/TorsionType.hpp, utils/StringUtils.hpp: OptionSectionParser
+	get compiled
+
+2005-11-16 16:37  chuckv
+
+	* src/: io/Globals.cpp, io/Globals.hpp, io/OptionSectionParser.cpp,
+	io/OptionSectionParser.hpp, io/SCAtomTypesSectionParser.cpp,
+	UseTheForce/SC_FF.cpp, utils/ParameterManager.hpp: ForceField
+	optional parameters....
+
+2005-11-16 16:22  tim
+
+	* src/openbabel/: Makefile, amberformat.cpp, amberformat.hpp,
+	fingerprint.hpp, fingerprintformat.cpp, fingerprintformat.hpp,
+	gromos96format.cpp, gromos96format.hpp, oopseformat.cpp,
+	oopseformat.hpp, pdbformat.cpp, pdbformat.hpp, povrayformat.cpp,
+	povrayformat.hpp, smilesformat.cpp, smilesformat.hpp,
+	tinkerformat.cpp, tinkerformat.hpp, xyzformat.cpp, xyzformat.hpp:
+	adding more readers/writers
+
+2005-11-16 16:20  tim
+
+	* make/Makefile.in: adding openbabel
+
+2005-11-16 16:20  tim
+
+	* src/brains/: Register.cpp, Register.hpp: register openbabel
+	readers/writers
+
+2005-11-16 14:57  chrisfen
+
+	* src/UseTheForce/DarkSide/electrostatic.F90: included shifted
+	potential self term
+
+2005-11-16 14:57  chrisfen
+
+	* samples/water/spce/spce.md: just some parameters
+
+2005-11-16 14:42  tim
+
+	* src/openbabel/: Makefile, aromatic.hpp, atom.cpp, atomtyp.hpp,
+	babelconfig.hpp, base.cpp, base.hpp, bitvec.cpp, bitvec.hpp,
+	bond.cpp, bondtyp.hpp, bondtyper.cpp, bondtyper.hpp, chains.cpp,
+	chains.hpp, chiral.cpp, chiral.hpp, config.h.in, config.hpp,
+	data.cpp, data.hpp, element.hpp, extable.hpp, fingerprint.cpp,
+	fingerprint.hpp, generic.cpp, generic.hpp, grid.cpp, grid.hpp,
+	isotope.hpp, kekulize.cpp, matrix.cpp, matrix.hpp, matrix3x3.cpp,
+	matrix3x3.hpp, mol.cpp, mol.hpp, molchrg.cpp, molchrg.hpp,
+	obconversion.cpp, obconversion.hpp, obconversion.lo, oberror.cpp,
+	oberror.hpp, obiter.cpp, obiter.hpp, obmolecformat.hpp, obutil.cpp,
+	obutil.hpp, oopseformat.cpp, parsmart.cpp, parsmart.hpp, patty.cpp,
+	patty.hpp, pdbformat.cpp, phmodel.cpp, phmodel.hpp,
+	phmodeldata.hpp, rand.cpp, reaction.hpp, resdata.hpp, residue.cpp,
+	ring.cpp, ring.hpp, rotamer.cpp, rotamer.hpp, rotor.cpp, rotor.hpp,
+	snprintf.c, snprintf.h, strncasecmp.c, tinkerformat.cpp,
+	tokenst.cpp, torlib.hpp, transform.cpp, typer.cpp, typer.hpp,
+	types.hpp, vector3.cpp, vector3.hpp, xyzformat.cpp, zipstream.hpp,
+	zipstreamimpl.hpp: adding openbabel
+
+2005-11-15 14:42  chrisfen
+
+	* src/UseTheForce/DarkSide/electrostatic.F90: removed unnecessary
+	commented code
+
+2005-11-15 14:04  chrisfen
+
+	* src/UseTheForce/DarkSide/electrostatic.F90: cleaned up the
+	charge-charge interactions a bit...
+
+2005-11-15 14:03  chrisfen
+
+	* samples/water/spce/: spce.md, water.md: just playing
+
+2005-11-15 11:38  chrisfen
+
+	* src/UseTheForce/DarkSide/electrostatic.F90: fixed a bug in the
+	shifted_potential case
+
+2005-11-15 11:37  chrisfen
+
+	* samples/: argon/500.md, water/spce/spce.md, water/spce/water.md:
+	just playing around - we need to refresh all the samples sometime
+	soon...
+
+2005-11-15 11:18  chuckv
+
+	* src/UseTheForce/: SC_FF.cpp, DarkSide/suttonchen.F90: Made
+	preforce calc public in suttonchen.
+
+2005-11-15 11:05  chuckv
+
+	* src/brains/: SimInfo.cpp, fSimulation.h: Sutton-Chen added to
+	SimInfo
+
+2005-11-15 11:01  chuckv
+
+	* src/UseTheForce/: doForces.F90, DarkSide/fInteractionMap.h,
+	DarkSide/simulation.F90: Added Sutton-Chen to force loop...
+
+2005-11-15 10:34  chuckv
+
+	* forceFields/Makefile: Added sutton-chen to makefile.
+
+2005-11-14 17:20  chuckv
+
+	* src/UseTheForce/DarkSide/: suttonchen.F90,
+	suttonchen_interface.h: Build Fixes for sutton-chen.
+
+2005-11-14 17:03  chuckv
+
+	* src/io/Makefile: Missed makefile for sutton-chen.
+
+2005-11-14 17:03  chuckv
+
+	* src/UseTheForce/: Makefile, DarkSide/Makefile,
+	DarkSide/atype.F90, DarkSide/atype_interface.F90: Sutton-chen stuff
+
+2005-11-14 16:29  chuckv
+
+	* src/: UseTheForce/SC_FF.cpp, UseTheForce/SC_FF.hpp,
+	io/SCAtomTypesSectionParser.cpp, io/SCAtomTypesSectionParser.hpp,
+	UseTheForce/DarkSide/suttonchen.F90,
+	UseTheForce/DarkSide/suttonchen_interface.F90,
+	UseTheForce/DarkSide/suttonchen_interface.h, brains/Register.cpp,
+	brains/fSimulation.h, types/AtomType.cpp, types/AtomType.hpp,
+	types/AtomTypeProperties.h: Sutton-Chen almost done. Just need to
+	fix do_forces to use Sutton-Chen.
+
+2005-11-11 12:21  chrisfen
+
+	* src/UseTheForce/DarkSide/: fSwitchingFunctionType.h,
+	switcheroo_interface.F90, switcheroo_interface.h: Forgot to add
+	some files
+
+2005-11-11 10:22  chrisfen
+
+	* src/: brains/SimInfo.cpp, brains/SimInfo.hpp, io/DumpWriter.cpp,
+	io/Globals.cpp, io/Globals.hpp: added in a 5th order polynomial
+	switching function option
+
+2005-11-11 10:21  chrisfen
+
+	* src/UseTheForce/DarkSide/: Makefile, switcheroo.F90: added in a
+	5th order polynomial switching function
+
+2005-11-11 10:21  chrisfen
+
+	* samples/water/ssd/ssd.md: playing with switching functions again
+
+2005-11-11 10:21  chrisfen
+
+	* samples/argon/500.md: playing with switching functions
+
+2005-11-08 19:11  chuckv
+
+	* forceFields/: SuttonChen.QSC.frc, SuttonChen.SC.frc: Added force
+	files for Sutton-Chen and Quantum Sutton-Chen
+
+2005-11-08 08:32  chrisfen
+
+	* src/io/: DumpReader.cpp, DumpReader.hpp, DumpWriter.cpp,
+	DumpWriter.hpp, Globals.cpp, Globals.hpp: Added a keyword and
+	ability to output forces and torques
+
+2005-11-08 08:32  chrisfen
+
+	* src/brains/: SimInfo.cpp, fSimulation.h: Added a keyword for
+	output of forces and torques
+
+2005-11-08 08:31  chrisfen
+
+	* src/UseTheForce/DarkSide/: electrostatic.F90, simulation.F90:
+	Working on shifted_force...
+
+2005-11-08 08:31  chrisfen
+
+	* samples/water/: spce/spce.md, ssde/ssde.md: Just testing...
+
+2005-11-03 18:22  chrisfen
+
+	* src/UseTheForce/DarkSide/electrostatic.F90: removed a poorly
+	commented section
+
+2005-11-03 18:12  chrisfen
+
+	* src/: UseTheForce/DarkSide/electrostatic.F90,
+	UseTheForce/DarkSide/fElectrostaticScreeningMethod.h,
+	UseTheForce/DarkSide/fScreeningMethod.h, brains/SimInfo.cpp,
+	io/Globals.cpp, io/Globals.hpp: improvements in shifted-force
+
+2005-11-03 18:11  chrisfen
+
+	* samples/water/spce/spce.md: mmm...  damped shifted force...
+
+2005-11-03 18:06  chuckv
+
+	* src/UseTheForce/DarkSide/suttonchen.F90: More work on SC.
+
+2005-11-02 18:50  chuckv
+
+	* src/UseTheForce/DarkSide/suttonchen.F90: More work on suttonchen.
+
+2005-11-02 16:01  chrisfen
+
+	* src/UseTheForce/: doForces.F90, DarkSide/electrostatic.F90:
+	removed some test code
+
+2005-11-02 15:45  chrisfen
+
+	* src/UseTheForce/DarkSide/fScreeningMethod.h: forgot to add the
+	screening method header
+
+2005-11-02 15:36  chrisfen
+
+	* src/brains/SimInfo.cpp: again, changing how we deal with
+	summation and screening methods
+
+2005-11-02 15:36  chrisfen
+
+	* src/: UseTheForce/DarkSide/electrostatic.F90,
+	UseTheForce/DarkSide/electrostatic_interface.F90,
+	UseTheForce/DarkSide/electrostatic_interface.h,
+	UseTheForce/DarkSide/fElectrostaticSummationMethod.h,
+	io/Globals.cpp, io/Globals.hpp: changing how we deal with summation
+	and screening methods
+
+2005-11-02 15:35  chrisfen
+
+	* src/UseTheForce/doForces.F90: debug stuff for rf removed
+
+2005-11-01 18:32  chuckv
+
+	* src/: UseTheForce/DarkSide/atype.F90,
+	UseTheForce/DarkSide/atype_interface.F90,
+	UseTheForce/DarkSide/suttonchen.F90, types/AtomType.cpp,
+	types/AtomTypeProperties.h: Added suppport to atypes for MEAM and
+	sutton-chen
+
+2005-11-01 14:24  chrisfen
+
+	* src/UseTheForce/: doForces.F90, DarkSide/electrostatic.F90:
+	removed some testing code...
+
+2005-11-01 14:14  chrisfen
+
+	* src/: brains/Register.cpp, brains/SimInfo.cpp,
+	brains/fSimulation.h, integrators/IntegratorFactory.hpp,
+	io/Globals.cpp: fixed a capitalization problem with NPT integrator
+	initialization
+
+2005-11-01 14:13  chrisfen
+
+	* src/applications/oopse/oopse.cpp: nothing
+
+2005-11-01 14:09  chrisfen
+
+	* src/UseTheForce/: doForces.F90, DarkSide/electrostatic.F90,
+	DarkSide/simulation.F90: still fixing up wolf...
+
+2005-11-01 13:29  chuckv
+
+	* src/UseTheForce/DarkSide/: fInteractionMap.h, suttonchen.F90: In
+	process of adding sutton-chen forcefield.
+
+2005-10-26 18:32  chrisfen
+
+	* src/brains/SimInfo.cpp: changed the default switching radius to
+	85% of rcut
+
+2005-10-26 18:31  chrisfen
+
+	* src/UseTheForce/DarkSide/electrostatic.F90: reaction field looks
+	to be working now - for charges and dipoles alike
+
+2005-10-26 18:31  chrisfen
+
+	* src/UseTheForce/doForces.F90: reaction field looks to be working
+	now
+
+2005-10-26 18:30  chrisfen
+
+	* samples/water/ssdrf/water.md: added a test molecule
+
+2005-10-26 18:30  chrisfen
+
+	* forceFields/DUFF2.frc: added a test atom type
+
+2005-10-24 09:06  chrisfen
+
+	* src/UseTheForce/DarkSide/electrostatic.F90: added charge-dipole
+	reaction field - don't know if it works...
+
+2005-10-23 16:08  chrisfen
+
+	* src/: UseTheForce/doForces.F90,
+	UseTheForce/DarkSide/electrostatic.F90, primitives/RigidBody.cpp:
+	streamlined reaction field for dipoles (now a good bit faster) and
+	added reaction field for charges - still need to do charge-dipole
+	RF
+
+2005-10-23 16:07  chrisfen
+
+	* samples/water/ssdrf/ssdrf.md: minor changes when testing reaction
+	field
+
+2005-10-23 16:06  chrisfen
+
+	* samples/water/spce/spce.md: reaction field now works for charges
+
+2005-10-20 15:27  tim
+
+	* src/primitives/Torsion.cpp: Fix the other branch of force
+	calculation in Torision.cpp
+
+2005-10-19 14:24  chrisfen
+
+	* src/: UseTheForce/doForces.F90,
+	UseTheForce/DarkSide/electrostatic.F90,
+	UseTheForce/DarkSide/simulation.F90, applications/oopse/oopse.cpp,
+	brains/ForceManager.cpp, brains/SimInfo.cpp: Still had some globals
+	toUpper problems - these changes should fix those...
+
+2005-10-19 14:23  chrisfen
+
+	* samples/water/ssdrf/ssdrf.md: nothing
+
+2005-10-19 12:03  gezelter
+
+	* src/UseTheForce/DarkSide/gb.F90: fixed an MPI compilation bug in
+	GayBerne
+
+2005-10-19 11:49  tim
+
+	* src/: UseTheForce/DarkSide/fInteractionMap.h,
+	brains/ForceManager.cpp: fix an index mismathcing between c and
+	fortran
+
+2005-10-18 18:03  gezelter
+
+	* samples/cutoff/: lj.md, max.md, mix.md, traditional.md: added
+	samples for the cutoff methods that Yang Zheng has been working on
+
+2005-10-18 16:13  gezelter
+
+	* src/UseTheForce/DarkSide/gb.F90: fixed gb/lj and gb/gb torques
+	and a rotation matrix bug
+
+2005-10-18 16:13  gezelter
+
+	* samples/gbljtest/: 2gb.in, 2gb.md, gb.md, gb2lj1.in, gb2lj1.md,
+	gbRotRoundY.in, gbRotRoundY.md, gbRotRoundZ.in, gbRotRoundZ.md:
+	added a few GB test cases
+
+2005-10-18 16:13  gezelter
+
+	* forceFields/DUFF2.frc: Fixing GB parameters
+
+2005-10-18 13:36  kdaily
+
+	* forceFields/DUFF2.frc: Changed the parameters for the Gay-Berne
+	type
+
+2005-10-18 10:01  chrisfen
+
+	* src/: UseTheForce/doForces.F90, UseTheForce/notifyCutoffs.F90,
+	UseTheForce/DarkSide/Makefile,
+	UseTheForce/DarkSide/electrostatic.F90,
+	UseTheForce/DarkSide/electrostatic_interface.F90,
+	UseTheForce/DarkSide/electrostatic_interface.h,
+	UseTheForce/DarkSide/reactionField.F90, brains/SimInfo.cpp: merged
+	reaction field with electrostatics.F90
+
+2005-10-17 18:13  tim
+
+	* src/: brains/ForceManager.cpp, brains/Stats.cpp,
+	brains/Stats.hpp, integrators/VelocityVerletIntegrator.cpp,
+	io/BASS_interface.h, io/Globals.cpp, io/StatWriter.cpp,
+	io/StatWriter.hpp: Customized StatWriter is working
+
+2005-10-17 17:42  kdaily
+
+	* src/UseTheForce/DarkSide/gb.F90: using notation from Cleaver
+	paper
+
+2005-10-17 16:47  gezelter
+
+	* src/UseTheForce/DarkSide/gb.F90: bugtracking gb
+
+2005-10-17 14:24  tim
+
+	* src/io/ParamConstraint.hpp: Another bug fix
+
+2005-10-17 14:22  tim
+
+	* src/io/: Globals.hpp, ParamConstraint.hpp: fix some namespace
+	issues in Globals
+
+2005-10-17 14:12  gezelter
+
+	* src/: UseTheForce/DUFF.cpp, UseTheForce/doForces.F90,
+	UseTheForce/DarkSide/Makefile, UseTheForce/DarkSide/gb.F90,
+	UseTheForce/DarkSide/gb_interface.F90,
+	UseTheForce/DarkSide/gb_interface.h,
+	io/GayBerneAtomTypesSectionParser.cpp,
+	types/DirectionalAtomType.cpp, types/DirectionalAtomType.hpp:
+	changing GB architecture
+
+2005-10-17 14:12  gezelter
+
+	* samples/gbljtest/: gbRotRoundX.in, gbRotRoundY.in,
+	gbRotRoundZ.in: Adding samples for gb tests
+
+2005-10-16 22:06  tim
+
+	* src/io/: Globals.cpp, Globals.hpp: fix a seg fault when try copy
+	a  string to event's err_msg, there are still tons of memory
+	leaking problem in Globals
+
+2005-10-16 19:51  tim
+
+	* src/io/: Globals.cpp, Globals.hpp, ParamConstraint.hpp: Change
+	error message in Globals
+
+2005-10-14 16:43  tim
+
+	* src/io/: Globals.cpp, ParamConstraint.hpp: Constraints for
+	parameters are working now
+
+2005-10-14 11:43  gezelter
+
+	* samples/gbljtest/: gb.md, lj.md: Adding .md files for GB/LJ tests
+
+2005-10-14 11:05  gezelter
+
+	* samples/gbljtest/: gbRotRoundX.in, gbRotRoundX.md,
+	gbRotRoundY.in, gbRotRoundY.md, gbRotRoundZ.in, gbRotRoundZ.md:
+	Adding some Gay Berne tests
+
+2005-10-14 11:05  gezelter
+
+	* samples/cutoff/: cutoff_test.in, cutoff_test.md: Adding some
+	cutoff tests
+
+2005-10-14 10:44  kdaily
+
+	* forceFields/DUFF2.frc, src/UseTheForce/DUFF.cpp,
+	src/UseTheForce/doForces.F90, src/UseTheForce/DarkSide/gb.F90,
+	src/UseTheForce/DarkSide/gb_interface.F90,
+	src/UseTheForce/DarkSide/gb_interface.h: Add parts for the GayBerne
+	LJ
+
+2005-10-14 09:48  tim
+
+	* src/io/ParamConstraint.hpp: Adding Parameter Constraint class
+
+2005-10-14 09:18  chrisfen
+
+	* samples/thermoIntegration/liquid/ssde.md,
+	samples/thermoIntegration/solid/ssde.md, src/io/Globals.cpp,
+	src/restraints/Restraints.cpp: added default restraint spring
+	constants into Globals
+
+2005-10-13 17:26  tim
+
+	* src/: applications/oopse/oopse.cpp, brains/ForceManager.cpp,
+	brains/SimCreator.cpp, brains/SimInfo.cpp, brains/Snapshot.hpp,
+	constraints/ZconstraintForceManager.cpp,
+	integrators/Integrator.cpp, integrators/NPT.cpp,
+	integrators/NVT.cpp, integrators/Velocitizer.cpp, io/Globals.cpp,
+	io/Globals.hpp, io/ZConsReader.cpp, minimizers/Minimizer.cpp,
+	minimizers/MinimizerParameterSet.cpp, restraints/Restraints.cpp,
+	restraints/ThermoIntegrationForceManager.cpp,
+	visitors/ZconsVisitor.cpp: rewrite Globals
+
+2005-10-12 16:57  chuckv
+
+	* src/brains/ForceManager.cpp: Fix to forceManager to pass
+	potential array to fortran.
+
+2005-10-12 16:00  gezelter
+
+	* src/primitives/: DirectionalAtom.cpp, RigidBody.cpp: Don't
+	remember what we did
+
+2005-10-12 16:00  gezelter
+
+	* src/UseTheForce/: doForces.F90, doForces_interface.F90,
+	DarkSide/LJ.F90, DarkSide/eam.F90, DarkSide/fInteractionMap.h,
+	DarkSide/force_globals.F90, DarkSide/gb.F90, DarkSide/shapes.F90,
+	DarkSide/sticky.F90: simplifying long range potential array
+
+2005-10-12 16:00  gezelter
+
+	* samples/cutoff/: cutoff_test.in, cutoff_test.md: Testing new
+	cutoff methods
+
+2005-10-12 16:00  gezelter
+
+	* forceFields/DUFF2.frc: Messing with 2-point water models
+
+2005-10-12 15:22  chuckv
+
+	* src/UseTheForce/doForces_interface.F90: Breaky, Breaky: c-fortran
+	interface now expects an array for pot.
+
+2005-10-12 15:18  chuckv
+
+	* src/UseTheForce/: doForces.F90, DarkSide/gb.F90,
+	DarkSide/shapes.F90, DarkSide/sticky.F90: More Change goodness for
+	calculation of potential.
+
+2005-10-12 14:55  chuckv
+
+	* src/UseTheForce/doForces.F90: More changes to MPI potential
+	calculations.
+
+2005-10-12 13:59  chuckv
+
+	* src/UseTheForce/: doForces.F90, DarkSide/LJ.F90,
+	DarkSide/eam.F90, DarkSide/electrostatic.F90,
+	DarkSide/fInteractionMap.h, DarkSide/force_globals.F90,
+	DarkSide/gb.F90, DarkSide/shapes.F90, DarkSide/sticky.F90: Breaky
+	Breaky: Add Support for seperating potential contributions.
+
+2005-10-11 17:00  chuckv
+
+	* src/UseTheForce/doForces.F90: Free some variables that weren't
+	freed before.
+
+2005-10-11 16:59  chuckv
+
+	* src/applications/nanoRodBuilder/: Geometry.cpp, Geometry.hpp,
+	GeometryCreator.hpp, GeometryFactory.cpp: Design change for nanoRod
+	builder --twinned.
+
+2005-10-11 16:57  chuckv
+
+	* src/applications/nanoparticleBuilder/: nanoparticleBuilder.cpp,
+	nanoparticleBuilder.ggo, nanoparticleBuilderCmd.c,
+	nanoparticleBuilderCmd.h, sphericalNanoparticle.cpp,
+	sphericalNanoparticle.hpp: Added code for nanoparticle builder to
+	cvs.
+
+2005-10-10 16:34  chuckv
+
+	* src/UseTheForce/doForces.F90: Bug fix, undeclared local variable
+	in MPI.
+
+2005-10-10 16:20  chuckv
+
+	* src/UseTheForce/doForces.F90: Fixed MPI bug with Row and Column
+	indexing of groupToGtype. We now have two seperate maps
+	groupToGtypeRow and groupToGypeCol. GroupToGtypeCol is a pointer
+	that is set to groupToGtypeRow in the single processor version.
+
+2005-10-06 13:44  chrisfen
+
+	* samples/water/: dimer/water.md, spce/water.md, ssd/water.md,
+	ssd-ion/water.md, ssde/water.md, ssdrf/water.md, tap/water.md,
+	tip3p_ice/water.md, tip4p/water.md: fixing up the samples
+
+2005-10-05 16:12  tim
+
+	* src/primitives/RigidBody.cpp: There is still something wrong with
+	inertia tensor projection
+
+2005-10-05 14:35  tim
+
+	* src/primitives/RigidBody.cpp: erase output of inertia tensor.
+	There is still something wrong with current implementation.
+
+2005-10-05 14:34  tim
+
+	* src/brains/MoleculeCreator.cpp: fix a bug in creating
+	cutoffGroup. When cutoffGroup is turned off, there is a mismatch
+	between group and center of mass array
+
+2005-10-05 14:12  tim
+
+	* src/primitives/RigidBody.cpp: fix a bug in creating cutoffGroup.
+	When cutoffGroup is turned off, there is a mismatch between group
+	and center of mass array
+
+2005-10-04 14:34  chrisfen
+
+	* src/brains/: ForceManager.cpp, SimInfo.cpp: fixed an annoying
+	mass ratio bug that results in simulation failure with massless
+	particles
+
+2005-10-04 14:33  chrisfen
+
+	* src/UseTheForce/DarkSide/electrostatic.F90: maybe some work on
+	wolf
+
+2005-10-04 14:32  chrisfen
+
+	* samples/water/dimer/two.md, samples/water/dimer/water.md,
+	samples/water/tip3p_ice/tp3.md, samples/water/tip3p_ice/water.md,
+	samples/water/tip4p/tp4.md, src/UseTheForce/doForces.F90: just some
+	random changes when testing
+
+2005-10-03 10:54  tim
+
+	* src/primitives/: DirectionalAtom.cpp, RigidBody.cpp: fix a bug in
+	projecting the inertia tensor of directional atom in rigibody into
+	rigidbody's body frame (previous commit is wrong)
+
+2005-10-03 09:31  tim
+
+	* src/primitives/RigidBody.cpp: fix a bug in projecting the inertia
+	tensor of directional atom in rigibody into rigidbody's body frame
+
+2005-09-28 13:47  chrisfen
+
+	* src/UseTheForce/DarkSide/electrostatic.F90: working on wolf
+
+2005-09-28 13:46  chrisfen
+
+	* samples/water/: dimer/cl.md, dimer/mix.md, dimer/mix2.md,
+	dimer/ssd.md, dimer/tap.md, dimer/two.md, spce/spce.md, ssd/ssd.md,
+	ssd-ion/ssdCl.md, ssde/ssde.md, tap/tap.md, tip3p_ice/tp3.md,
+	tip4p/tp4.md: fixed some samples
+
+2005-09-28 13:46  chrisfen
+
+	* ChangeLog: updated
+
 2005-09-28 11:55  tim
 
 	* src/math/SquareMatrix3.hpp: using epsilon instead of 0.0 to avoid
@@ -544,13 +1989,12 @@
 
 2005-05-22 16:36  chuckv
 
-	* samples/metals/nanorod/Au_nanoparticle_FCC.md,
-	src/applications/nanoRodBuilder/Geometry.cpp,
-	src/applications/nanoRodBuilder/GeometryBuilder.cpp,
-	src/applications/nanoRodBuilder/GeometryFactory.cpp,
-	src/applications/nanoRodBuilder/GeometryFactory.hpp,
-	src/applications/nanoRodBuilder/nanorodBuilder.cpp,
-	src/integrators/VelocityVerletIntegrator.cpp: Fix to print pressure
+	* src/: applications/nanoRodBuilder/Geometry.cpp,
+	applications/nanoRodBuilder/GeometryBuilder.cpp,
+	applications/nanoRodBuilder/GeometryFactory.cpp,
+	applications/nanoRodBuilder/GeometryFactory.hpp,
+	applications/nanoRodBuilder/nanorodBuilder.cpp,
+	integrators/VelocityVerletIntegrator.cpp: Fix to print pressure
 	tensor.
 
 2005-05-22 16:05  tim
@@ -1218,12 +2662,6 @@
 2005-04-11 19:28  chuckv
 
 	* src/utils/vector_class.F90: Added code to delete vector.
-
-2005-04-11 17:03  chuckv
-
-	* samples/metals/nanorod/: Au_nanoparticle.md,
-	Au_nanoparticle_FCC.md, Au_nanoparticle_linux.md, metals.md: Why
-	aren't these here?
 
 2005-04-11 16:58  tim
 

@@ -5,7 +5,7 @@ It is primarily used to perform molecular dynamics simulations on
 "strange" atom types that are not normally handled by other simulation
 packages.  This includes atoms with orientational degrees of freedom
 (point dipoles, sticky atoms), as well as transition metals under the
-Embedded Atom Method (EAM). 
+Embedded Atom Method (EAM) or Sutton-Chen (SC) potentials. 
 
 Simulations are started in OOPSE using two files: 
 
@@ -24,19 +24,25 @@ What you need to compile and use OOPSE:
 
     Architecture                CC     CXX     F90    Notes
     -------------------------   ----   -----   -----  ----------------------
-    ix86-pc-linux-gnu           icc    icpc    ifort  (Intel versions 7 & 8)
-    powerpc-apple-darwin7.8.0   xlc    xlc++   xlf    (IBM XL v. 6.0/8.1)
-    mips-sgi-irix6.5            cc     CC      f90    (MIPSpro 7.4)
-    sparc-sun-solaris2.8        cc     CC      f95    (Forte Developer 7)
+    ix86-pc-linux-gnu           icc    icpc    ifort  (Intel versions 7-9)
+    powerpc-apple-darwin8.4.0   gcc    g++     xlf    (GNU v.4 / IBM XL v. 8.1)
+    x86_64-unknown-linux-gnu    pgcc   pgCC    pgf95  (Portland Group v. 6.0)
+    sparc-sun-solaris2.8        cc     CC      f95    (Sun ONE Studio 10)
     
-    We've successfully compiled OOPSE with gcc and g++, as well as
-    pgcc and pgCC in linux environments.  However, you will need to
+    We've successfully compiled OOPSE with the Pathscale c, c++, and 
+    Fortran95 compilers on the  x86_64-unknown-linux-gnu architecture,
+    but a bug in the exception handling on these compilers causes
+    OOPSE to abort (rather than providing a useful error message) when
+    an error is found in the meta-data file.
+  
+    The GNU compilers, gcc and g++, work very well, but you will need to
     use a Fortran *95* compler for the fortran side of OOPSE, and
     pgf90 does not implement the required portions of the f95
     language.  Fortran77 and Fortran90 (i.e. g77 and pgf90) are *not*
-    sufficient to compile the fortran portions of OOPSE.  Tests
-    with the PATHSCALE compiler on 64-bit AMD Opteron machines
-    are ongoing.
+    sufficient to compile the fortran portions of OOPSE.   Gfortran
+    does not yet build our fortran code, but g95 might.  If you use
+    one of these compilers, please let us know of any build or runtime
+    errors.
 
  2) GNU make (also known as gmake).  Regular make won't work.  
     Really.  We've tried.  Don't bother with regular make.  
@@ -54,8 +60,6 @@ What you need to compile and use OOPSE:
     We like MPICH-1.2.*.  Other implementations might work, but we
     haven't tried.  You can get MPICH here:
     http://www-unix.mcs.anl.gov/mpi/mpich/
-
- 5) Assorted unix utilities (lexx, yacc) or their GNU equivalents. 
 
 INSTRUCTIONS
 
