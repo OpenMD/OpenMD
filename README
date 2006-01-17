@@ -27,7 +27,7 @@ What you need to compile and use OOPSE:
     ix86-pc-linux-gnu           icc    icpc    ifort  (Intel versions 7-9)
     powerpc-apple-darwin8.4.0   gcc    g++     xlf    (GNU v.4 / IBM XL v. 8.1)
     x86_64-unknown-linux-gnu    pgcc   pgCC    pgf95  (Portland Group v. 6.0)
-    sparc-sun-solaris2.8        cc     CC      f95    (Sun ONE Studio 10)
+    sparc-sun-solaris2.10       cc     CC      f95    (Sun ONE Studio 10)
     
     We've successfully compiled OOPSE with the Pathscale c, c++, and 
     Fortran95 compilers on the  x86_64-unknown-linux-gnu architecture,
@@ -35,14 +35,18 @@ What you need to compile and use OOPSE:
     OOPSE to abort (rather than providing a useful error message) when
     an error is found in the meta-data file.
   
-    The GNU compilers, gcc and g++, work very well, but you will need to
-    use a Fortran *95* compler for the fortran side of OOPSE, and
-    pgf90 does not implement the required portions of the f95
-    language.  Fortran77 and Fortran90 (i.e. g77 and pgf90) are *not*
-    sufficient to compile the fortran portions of OOPSE.   Gfortran
-    does not yet build our fortran code, but g95 might.  If you use
-    one of these compilers, please let us know of any build or runtime
-    errors.
+    OOPSE uses features of the Fortran 95 language. The fortran
+    portions of our code will not compile if your compiler does not
+    support these particular features. Some (but not all) Fortran 90
+    compilers do support these features. None of the Fortran 77
+    compilers can be used to compile OOPSE.
+
+    Compilers that are known to fail on OOPSE: g77, Gfortran, Older
+    Portland Group compilers (pgf77, pgf90).
+
+    Compilers that are known to work on OOPSE: Intel's ifort,
+    Pathscale's pathf95, IBM's xlf95, Portland's pgf95 (version 6 or
+    higher), Sun's f95. There may be others that work also.
 
  2) GNU make (also known as gmake).  Regular make won't work.  
     Really.  We've tried.  Don't bother with regular make.  
