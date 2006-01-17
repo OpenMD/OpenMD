@@ -1,3 +1,17 @@
+2006-01-17 10:32  gezelter
+
+	* src/config.h.in: new version number
+
+2006-01-17 10:32  gezelter
+
+	* doc/: OOPSE.pdf, SelectionExpression.html, cppstyle.html,
+	definition.jpg, gofr.jpg, gofrtheta.jpg, heirarchy.png,
+	oopseManual.pdf: Updated Documentation
+
+2006-01-16 18:10  gezelter
+
+	* ChangeLog, README: Getting ready for release!
+
 2006-01-16 10:26  gezelter
 
 	* configure: Testing commit
