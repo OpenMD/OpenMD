@@ -105,7 +105,7 @@ int main(int argc, char *argv []) {
   
   DumpWriter *writer;
   
-  // parse command line arguments
+  // Parse Command Line Arguments
   if (cmdline_parser(argc, argv, &args_info) != 0)
     exit(1);
   
@@ -168,11 +168,11 @@ int main(int argc, char *argv []) {
   
   
   /*determine the output file names*/
-  if (args_info.output_given)
+  if (args_info.output_given){
     outInitFileName = args_info.output_arg;
-  else
+  }else{
     outInitFileName = getPrefix(inputFileName.c_str()) + ".in";
-  
+  }
   
          
   
@@ -185,9 +185,9 @@ int main(int argc, char *argv []) {
   nanoparticle = new sphericalNanoparticle(particleRadius,latticeConstant);
   /* Build a nanoparticle to see how many sites are there */
   numSites = new int[nComponents]
-  nanoparticle.getNMol(numSites);
+  int numSites = nanoparticle.getNMol(simpleLat);
   
-  numMol = new int[nComponents];
+
   /* Random particle is the default case*/
   if (!args_info.ShellRadius_given){
     std::cout << "Creating a random nanoparticle" << std::endl;

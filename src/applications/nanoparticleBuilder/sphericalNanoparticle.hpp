@@ -53,16 +53,15 @@ namespace oopse {
   class sphericalNanoparticle{
     
     
-public:
+  public:
     
-    sphericalNanoparticle(double radius, int latticeCnst);
+    sphericalNanoparticle(double radius, double latticeCnst);
     ~sphericalNanoparticle(){};
     
     int getNParticleSites(Lattice &simpleLat);
-    int getNParticleSites(Lattice &simpleLat,int nComponents,double &shellRadius,int &numSites);
     int getNVacancy(void);
     
-private:
+  protected:
        
       
     double particleRadius_;
@@ -70,7 +69,7 @@ private:
     int nx_;
     int ny_;
     int nz_;
-    int latticeConstant_;
+    double latticeConstant_;
     int nVacancy_;
     
     
