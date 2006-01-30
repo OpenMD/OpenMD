@@ -38,41 +38,42 @@
  * University of Notre Dame has been advised of the possibility of
  * such damages.
  */
-
-#include "applications/dynamicProps/DipoleCorrFunc.hpp"
-#include "utils/simError.h"
+ 
+#include "math/LegendrePolynomial.hpp"
 
 namespace oopse {
-  DipoleCorrFunc::DipoleCorrFunc(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2)
-    : ParticleTimeCorrFunc(info, filename, sele1, sele2, DataStorage::dslElectroFrame){
+  LegendrePolynomial::LegendrePolynomial(int maxPower) : maxPower_(maxPower){
 
-      setCorrFuncType("Dipole Correlation Function");
-      setOutputName(getPrefix(dumpFilename_) + ".dcorr");
+    assert(maxPower >= 0);
+    GeneratePolynomials(maxPower_);
+  }
 
+  void LegendrePolynomial::GeneratePolynomials(int maxPower) {
+
+    GenerateFirstTwoTerms();
+
+    DoublePolynomial x;
+    x.setCoefficient(1, 1.0);
+
+    //recursive generate the high order term of Legendre Polynomials
+    //P_{l+1}= \frac{(2l+1)(x)P_l-l P_{l-1}{l+1}
+    for (int i = 2; i <= maxPower; ++i) {
+      DoublePolynomial pn;
+        
+      pn = polyList_[i-1] * x * static_cast<double>((2*i+1)/(i+1)) - polyList_[i-2] * static_cast<double>(i/(i+1));
+      polyList_.push_back(pn);
     }
-
-  double DipoleCorrFunc::calcCorrVal(int frame1, int frame2, StuntDouble* sd1,  StuntDouble* sd2) {
-    Vector3d v1 =sd1->getElectroFrame().getColumn(2);
-    Vector3d v2 = sd2->getElectroFrame().getColumn(2);
-
-    return dot(v1, v2);
   }
 
 
-  void DipoleCorrFunc::validateSelection(const SelectionManager& seleMan) {
-    StuntDouble* sd;
-    int i;    
-    for (sd = seleMan1_.beginSelected(i); sd != NULL; sd = seleMan1_.nextSelected(i)) {
-      if (!sd->isDirectionalAtom()) {
-	sprintf(painCave.errMsg,
-                "DipoleCorrFunc::validateSelection Error: selected atoms do not have dipole moment\n");
-	painCave.isFatal = 1;
-	simError();        
-      }
-    }
+  void LegendrePolynomial::GenerateFirstTwoTerms() {
+    DoublePolynomial p0;
+    p0.setCoefficient(0, 1.0);
+    polyList_.push_back(p0);
     
+    DoublePolynomial p1;
+    p1.setCoefficient(1, 1.0);
+    polyList_.push_back(p1);    
   }
 
 }
-
-

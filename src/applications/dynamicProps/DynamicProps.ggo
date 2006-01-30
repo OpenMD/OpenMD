@@ -10,7 +10,9 @@ option	"input"		i	"input dump file"					string	typestr="filename" 	yes
 option	"output"	o	"output file name"					string	typestr="filename"	no
 option	"sele1"		-	"select first stuntdouble set"	string	typestr="selection script"	no
 option  "sele2"         -       "select second stuntdouble set (if sele2 is not set, use script from sele1)" string  typestr="selection script"      no
+option  "order"         -       "Lengendre Polynomial Order"  int  no
 defgroup "dynamicProps" groupdesc=" an option of this group is required" yes
 groupoption "rcorr"	r	"rmsd" group="dynamicProps"
 groupoption "vcorr" 	v	"velocity correlation function" group="dynamicProps"
 groupoption "dcorr"	d	"dipole correlation function" group="dynamicProps"
+groupoption "lcorr"     l       "Lengendre correlation function" group="dynamicProps"

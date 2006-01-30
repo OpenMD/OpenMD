@@ -38,41 +38,24 @@
  * University of Notre Dame has been advised of the possibility of
  * such damages.
  */
+#ifndef APPLICATIONS_DYNAMICPROPS_LEGENDRECORRFUNC_HPP
+#define APPLICATIONS_DYNAMICPROPS_LEGENDRECORRFUNC_HPP
 
-#include "applications/dynamicProps/DipoleCorrFunc.hpp"
-#include "utils/simError.h"
-
+#include "math/Polynomial.hpp"
+#include "applications/dynamicProps/ParticleTimeCorrFunc.hpp"
 namespace oopse {
-  DipoleCorrFunc::DipoleCorrFunc(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2)
-    : ParticleTimeCorrFunc(info, filename, sele1, sele2, DataStorage::dslElectroFrame){
 
-      setCorrFuncType("Dipole Correlation Function");
-      setOutputName(getPrefix(dumpFilename_) + ".dcorr");
+  class LegendreCorrFunc : public ParticleTimeCorrFunc {
+  public:
+    LegendreCorrFunc(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2, int order);   
 
-    }
+  private:
+    virtual double calcCorrVal(int frame1, int frame2, StuntDouble* sd1,  StuntDouble* sd2);
 
-  double DipoleCorrFunc::calcCorrVal(int frame1, int frame2, StuntDouble* sd1,  StuntDouble* sd2) {
-    Vector3d v1 =sd1->getElectroFrame().getColumn(2);
-    Vector3d v2 = sd2->getElectroFrame().getColumn(2);
-
-    return dot(v1, v2);
-  }
-
-
-  void DipoleCorrFunc::validateSelection(const SelectionManager& seleMan) {
-    StuntDouble* sd;
-    int i;    
-    for (sd = seleMan1_.beginSelected(i); sd != NULL; sd = seleMan1_.nextSelected(i)) {
-      if (!sd->isDirectionalAtom()) {
-	sprintf(painCave.errMsg,
-                "DipoleCorrFunc::validateSelection Error: selected atoms do not have dipole moment\n");
-	painCave.isFatal = 1;
-	simError();        
-      }
-    }
-    
-  }
+    virtual void validateSelection(const SelectionManager& seleMan);
+    int order_;
+    DoublePolynomial legendre_;
+  };
 
 }
-
-
+#endif

@@ -38,41 +38,79 @@
  * University of Notre Dame has been advised of the possibility of
  * such damages.
  */
+ 
+/**
+ * @file LegendrePolynomial.hpp
+ * @author    teng lin
+ * @date  11/16/2004
+ * @version 1.0
+ */ 
 
-#include "applications/dynamicProps/DipoleCorrFunc.hpp"
-#include "utils/simError.h"
+#ifndef MATH_CHEBYSHEVPOLYNOMIALS_HPP
+#define MATH_CHEBYSHEVPOLYNOMIALS_HPP
+
+#include <vector>
+#include <cassert>
+
+#include "math/Polynomial.hpp"
 
 namespace oopse {
-  DipoleCorrFunc::DipoleCorrFunc(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2)
-    : ParticleTimeCorrFunc(info, filename, sele1, sele2, DataStorage::dslElectroFrame){
 
-      setCorrFuncType("Dipole Correlation Function");
-      setOutputName(getPrefix(dumpFilename_) + ".dcorr");
-
+  /**
+   * @class LegendrePolynomial
+   * A collection of Chebyshev Polynomials.
+   * @todo document
+   */
+  class LegendrePolynomial {
+  public:
+    LegendrePolynomial(int maxPower);
+    virtual ~LegendrePolynomial() {}
+    /**
+     * Calculates the value of the nth Chebyshev Polynomial evaluated at the given x value.
+     * @return The value of the nth Chebyshev Polynomial evaluates at the given x value
+     * @param n
+     * @param x the value of the independent variable for the nth Chebyshev Polynomial  function
+     */
+        
+    double evaluate(int n, double x) {
+      assert (n <= maxPower_ && n >=0); 
+      return polyList_[n].evaluate(x);
     }
 
-  double DipoleCorrFunc::calcCorrVal(int frame1, int frame2, StuntDouble* sd1,  StuntDouble* sd2) {
-    Vector3d v1 =sd1->getElectroFrame().getColumn(2);
-    Vector3d v2 = sd2->getElectroFrame().getColumn(2);
-
-    return dot(v1, v2);
-  }
-
-
-  void DipoleCorrFunc::validateSelection(const SelectionManager& seleMan) {
-    StuntDouble* sd;
-    int i;    
-    for (sd = seleMan1_.beginSelected(i); sd != NULL; sd = seleMan1_.nextSelected(i)) {
-      if (!sd->isDirectionalAtom()) {
-	sprintf(painCave.errMsg,
-                "DipoleCorrFunc::validateSelection Error: selected atoms do not have dipole moment\n");
-	painCave.isFatal = 1;
-	simError();        
-      }
+    /**
+     * Returns the first derivative of the nth Chebyshev Polynomial.
+     * @return the first derivative of the nth Chebyshev Polynomial
+     * @param n
+     * @param x the value of the independent variable for the nth Chebyshev Polynomial  function
+     */
+    double evaluateDerivative(int n, double x) {
+      assert (n <= maxPower_ && n >=0); 
+      return polyList_[n].evaluateDerivative(x);        
     }
-    
-  }
 
-}
+    /**
+     * Returns the nth Chebyshev Polynomial 
+     * @return the nth Chebyshev Polynomial
+     * @param n
+     */
+    const DoublePolynomial& getLegendrePolynomial(int n) const {
+      assert (n <= maxPower_ && n >=0); 
+      return polyList_[n];
+    }
 
+  protected:
+
+    std::vector<DoublePolynomial> polyList_;
+                
+  private:
+        
+    void GeneratePolynomials(int maxPower);
+    virtual void GenerateFirstTwoTerms();
+        
+    int maxPower_;
+  };    
+
+
+} //end namespace oopse
+#endif //MATH_CHEBYSHEVPOLYNOMIALS_HPP
 

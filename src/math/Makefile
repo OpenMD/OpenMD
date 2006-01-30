@@ -4,8 +4,8 @@ Source    = \
 				ParallelRandNumGen.cpp \
                                 SeqRandNumGen.cpp \
 				RealSphericalHarmonic.cpp \
-				ChebyshevPolynomials.cpp
-
+				ChebyshevPolynomials.cpp \
+                                LegendrePolynomial.cpp
 RmiSource =
 
 Main      =

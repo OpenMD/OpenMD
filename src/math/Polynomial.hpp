@@ -245,6 +245,30 @@ namespace oopse {
     return p;
   }
 
+  template<typename ElemType>
+  Polynomial<ElemType> operator *(const Polynomial<ElemType>& p, const ElemType v) {
+    typename Polynomial<ElemType>::const_iterator i;
+    Polynomial<ElemType> result;
+    
+    for (i = p.begin(); i !=p.end(); ++i) {
+ 	result.addCoefficient( i->first , i->second * v);
+    }
+
+    return result;
+  }
+
+  template<typename ElemType>
+  Polynomial<ElemType> operator *( const ElemType v, const Polynomial<ElemType>& p) {
+    typename Polynomial<ElemType>::const_iterator i;
+    Polynomial<ElemType> result;
+    
+    for (i = p.begin(); i !=p.end(); ++i) {
+ 	result.addCoefficient( i->first , i->second * v);
+    }
+
+    return result;
+  }
+  
   /**
    * Generates and returns the sum of two given Polynomials.
    * @param p1 the first polynomial
