@@ -189,7 +189,7 @@ namespace oopse{
     VectorTypeData(const std::string& id) 
       : GenericData(id){}
             
-    VectorTypeData(const SelfType& s) : SelfType(s){}
+    VectorTypeData(const SelfType& s) : data_(s){}
 
     SelfType& operator =(const SelfType& s){
       if (this == &s)

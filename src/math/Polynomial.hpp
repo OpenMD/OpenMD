@@ -204,6 +204,7 @@ namespace oopse {
         for (i =  p.begin(); i  != p.end(); ++i) {
           this->addCoefficient(i->first, -i->second);
         }        
+        return *this;
     }
 
     PolynomialType& operator *= (const PolynomialType& p) {

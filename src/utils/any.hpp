@@ -205,10 +205,10 @@ namespace boost
   }
 
 
-  template<typename T> 
-  bool equal_any_type(const any& operand) {
-
-  }
+//  template<typename T> 
+//  bool equal_any_type(const any& operand) {
+//
+//  }
 
 }
 
