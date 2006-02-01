@@ -969,8 +969,27 @@ namespace oopse {
       if (simParams_->haveSwitchingRadius()) {
 	rsw_  = simParams_->getSwitchingRadius();
       } else {
-	rsw_ = rcut_;
-      }
+	if (fInfo_.SIM_uses_Charges | 
+	    fInfo_.SIM_uses_Dipoles | 
+	    fInfo_.SIM_uses_RF) {
+	  
+	  rsw_ = 0.85 * rcut_;
+	  sprintf(painCave.errMsg,
+		  "SimCreator Warning: No value was set for the switchingRadius.\n"
+		  "\tOOPSE will use a default value of 85\% of the cutoffRadius"
+		  "\tswitchingRadius = %f. for this simulation\n", rsw_);
+        painCave.isFatal = 0;
+	simError();
+	} else {
+	  rsw_ = rcut_;
+	  sprintf(painCave.errMsg,
+		  "SimCreator Warning: No value was set for the switchingRadius.\n"
+		  "\tOOPSE will use the same value as the cutoffRadius.\n"
+		  "\tswitchingRadius = %f. for this simulation\n", rsw_);
+	  painCave.isFatal = 0;
+	  simError();
+	}
+	  
       notifyFortranCutoffs(&rcut_, &rsw_);
       
     } else {

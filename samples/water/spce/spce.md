@@ -15,7 +15,6 @@ electrostaticSummationMethod = "none";
 dielectric = 80.0;
 dampingAlpha = 0.15;
 cutoffRadius = 9.0;
-//switchingRadius = 9.0;
 switchingFunctionType = "fifth_order_polynomial";
 
 targetTemp = 300;
