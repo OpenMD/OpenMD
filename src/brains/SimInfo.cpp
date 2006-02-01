@@ -976,7 +976,7 @@ namespace oopse {
 	  rsw_ = 0.85 * rcut_;
 	  sprintf(painCave.errMsg,
 		  "SimCreator Warning: No value was set for the switchingRadius.\n"
-		  "\tOOPSE will use a default value of 85\% of the cutoffRadius"
+		  "\tOOPSE will use a default value of 85 percent of the cutoffRadius.\n"
 		  "\tswitchingRadius = %f. for this simulation\n", rsw_);
         painCave.isFatal = 0;
 	simError();
@@ -989,7 +989,8 @@ namespace oopse {
 	  painCave.isFatal = 0;
 	  simError();
 	}
-	  
+      }
+      
       notifyFortranCutoffs(&rcut_, &rsw_);
       
     } else {
