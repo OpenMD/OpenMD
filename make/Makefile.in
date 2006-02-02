@@ -116,10 +116,12 @@ UseMPI          = @USE_MPI@
 ModuleCase      = @F90_MODULE_NAMES@
 ModSuffix       = @MOD@
 LinkOptions = \
-	@FCLIBS@ 
+	@FCLIBS@ \
+	@CXXFLAGS@
 
 ParallelLinkOptions = \
-	@FCLIBS@ 
+	@FCLIBS@ \
+	@CXXFLAGS@
 
 
 #---------------------------------------------------------------------------
