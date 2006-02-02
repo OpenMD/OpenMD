@@ -311,7 +311,7 @@ namespace oopse {
 
   /**
    * Tests if two polynomial have the same exponents
-   * @return true if these all of the exponents in these Polynomial are identical
+   * @return true if all of the exponents in these Polynomial are identical
    * @param p1 the first polynomial
    * @param p2 the second polynomial
    * @note this function does not compare the coefficient

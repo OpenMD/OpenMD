@@ -69,9 +69,9 @@ bool AtomStamp::setPosition(const std::vector<double>& pos) {
 bool AtomStamp::setOrientation(const std::vector<double>& ort) {
     bool ret = false;
     if (ort.size() == 3) {
-        position_[0] = ort[0];
-        position_[1] = ort[1];
-        position_[2] = ort[2];
+        orientation_[0] = ort[0];
+        orientation_[1] = ort[1];
+        orientation_[2] = ort[2];
         haveOrt_ = true;
     }else {
         std::ostringstream oss;

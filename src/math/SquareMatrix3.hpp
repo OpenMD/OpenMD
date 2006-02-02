@@ -317,6 +317,16 @@ namespace oopse {
       m /= det;
       return m;
     }
+
+    SquareMatrix3<Real> transpose() const{
+      SquareMatrix3<Real> result;
+                
+      for (unsigned int i = 0; i < 3; i++)
+	for (unsigned int j = 0; j < 3; j++)              
+	  result(j, i) = this->data_[i][j];
+
+      return result;
+    }
     /**
      * Extract the eigenvalues and eigenvectors from a 3x3 matrix.
      * The eigenvectors (the columns of V) will be normalized. 
