@@ -51,11 +51,10 @@ namespace oopse {
 
   void RigidBody::setPrevA(const RotMat3x3d& a) {
     ((snapshotMan_->getPrevSnapshot())->*storage_).aMat[localIndex_] = a;
-    //((snapshotMan_->getPrevSnapshot())->*storage_).electroFrame[localIndex_] = a.transpose() * sU_;
 
     for (int i =0 ; i < atoms_.size(); ++i){
       if (atoms_[i]->isDirectional()) {
-	atoms_[i]->setPrevA(a * refOrients_[i]);
+	atoms_[i]->setPrevA(refOrients_[i].transpose() * a);
       }
     }
 
@@ -64,11 +63,10 @@ namespace oopse {
       
   void RigidBody::setA(const RotMat3x3d& a) {
     ((snapshotMan_->getCurrentSnapshot())->*storage_).aMat[localIndex_] = a;
-    //((snapshotMan_->getCurrentSnapshot())->*storage_).electroFrame[localIndex_] = a.transpose() * sU_;
 
     for (int i =0 ; i < atoms_.size(); ++i){
       if (atoms_[i]->isDirectional()) {
-	atoms_[i]->setA(a * refOrients_[i]);
+	atoms_[i]->setA(refOrients_[i].transpose() * a);
       }
     }
   }    
@@ -79,7 +77,7 @@ namespace oopse {
 
     for (int i =0 ; i < atoms_.size(); ++i){
       if (atoms_[i]->isDirectional()) {
-	atoms_[i]->setA(a * refOrients_[i], snapshotNo);
+	atoms_[i]->setA(refOrients_[i].transpose() * a, snapshotNo);
       }
     }
 
@@ -271,7 +269,7 @@ namespace oopse {
       if (atoms_[i]->isDirectional()) {
           
 	dAtom = (DirectionalAtom *) atoms_[i];
-	dAtom->setA(refOrients_[i] * a);
+	dAtom->setA(refOrients_[i].transpose() * a);
       }
 
     }
@@ -298,7 +296,7 @@ namespace oopse {
       if (atoms_[i]->isDirectional()) {
           
 	dAtom = (DirectionalAtom *) atoms_[i];
-	dAtom->setA(refOrients_[i] * a, frame);
+	dAtom->setA(refOrients_[i].transpose() * a, frame);
       }
 
     }
