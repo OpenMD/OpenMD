@@ -108,7 +108,22 @@ namespace oopse {
     std::set<std::string> linearAtomType;   
   };
 
+  class GBLipidAtomVisitor : public BaseAtomVisitor{
+  public:
+    GBLipidAtomVisitor(SimInfo* info) : BaseAtomVisitor(info) {
+      visitorName = "GBLipidAtomVisitor";
+      GBLipidAtomType.insert("GBlipid");
+    }
 
+    virtual void visit(Atom* atom) {}
+    virtual void visit(DirectionalAtom* datom);       
+    virtual void visit(RigidBody* rb) {}
+
+    virtual const std::string toString();
+  private:
+    inline bool isGBLipidAtom(const std::string& atomType);
+    std::set<std::string> GBLipidAtomType;   
+  };
 
 
   class DefaultAtomVisitor : public BaseAtomVisitor{
