@@ -60,6 +60,7 @@ linear		48.0428
 Pchg+		5.000	
 Pchg-		5.000	
 PDIP		10.000	
+DPD		72.06112
 end AtomTypes
 
 begin DirectionalAtomTypes
@@ -127,6 +128,7 @@ U	  	1.0		1.0
 Pchg+		0.1		3.0
 Pchg-		0.1		3.0
 PDIP		0.15		5.0
+DPD		1.194		4.70
 end LennardJonesAtomTypes
 
 begin ChargeAtomTypes
