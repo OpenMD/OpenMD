@@ -60,7 +60,7 @@ namespace oopse {
     for (int i = 2; i <= maxPower; ++i) {
       DoublePolynomial pn;
         
-      pn = polyList_[i-1] * x * static_cast<double>((2*i+1)/(i+1)) - polyList_[i-2] * static_cast<double>(i/(i+1));
+      pn = polyList_[i-1] * x * ((2.0*i-1.0)/i) - polyList_[i-2] * ((i-1.0)/i);
       polyList_.push_back(pn);
     }
   }

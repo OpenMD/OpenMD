@@ -347,7 +347,8 @@ namespace oopse {
     inline bool isNormalized() {
       return equal(lengthSquare(), 1.0);
     }           
-            
+
+    unsigned int size() {return Dim;}
   protected:
     Real data_[Dim];
         
