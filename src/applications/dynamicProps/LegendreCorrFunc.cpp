@@ -56,8 +56,8 @@ namespace oopse {
     }
 
   double LegendreCorrFunc::calcCorrVal(int frame1, int frame2, StuntDouble* sd1,  StuntDouble* sd2) {
-    Vector3d v1 =sd1->getElectroFrame(frame1).getColumn(2);
-    Vector3d v2 = sd2->getElectroFrame(frame2).getColumn(2);
+    Vector3d v1 =sd1->getA(frame1).getColumn(2);
+    Vector3d v2 = sd2->getA(frame2).getColumn(2);
 
     return legendre_.evaluate(dot(v1, v2));
   }
@@ -69,7 +69,7 @@ namespace oopse {
     for (sd = seleMan1_.beginSelected(i); sd != NULL; sd = seleMan1_.nextSelected(i)) {
       if (!sd->isDirectionalAtom()) {
 	sprintf(painCave.errMsg,
-                "LegendreCorrFunc::validateSelection Error: selected atoms do not have dipole moment\n");
+                "LegendreCorrFunc::validateSelection Error: selected atoms do not Directional\n");
 	painCave.isFatal = 1;
 	simError();        
       }
