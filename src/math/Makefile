@@ -5,7 +5,9 @@ Source    = \
                                 SeqRandNumGen.cpp \
 				RealSphericalHarmonic.cpp \
 				ChebyshevPolynomials.cpp \
-                                LegendrePolynomial.cpp
+                                LegendrePolynomial.cpp \
+                                linearAlgebra.F90
+
 RmiSource =
 
 Main      =

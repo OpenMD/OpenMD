@@ -45,7 +45,7 @@
 
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: doForces.F90,v 1.75 2006-01-09 22:22:35 chuckv Exp $, $Date: 2006-01-09 22:22:35 $, $Name: not supported by cvs2svn $, $Revision: 1.75 $
+!! @version $Id: doForces.F90,v 1.76 2006-02-16 21:40:20 gezelter Exp $, $Date: 2006-02-16 21:40:20 $, $Name: not supported by cvs2svn $, $Revision: 1.76 $
 
 
 module doForces
@@ -590,6 +590,7 @@ contains
        call handleError("setCutoffs", errMsg)
      end if
      call set_switch(GROUP_SWITCH, defaultRsw, defaultRcut)
+     call setHmatDangerousRcutValue(defaultRcut)
 
      haveDefaultCutoffs = .true.
      haveGtypeCutoffMap = .false.
@@ -662,6 +663,7 @@ contains
 
     if (VisitCutoffsAfterComputing) then
        call set_switch(GROUP_SWITCH, largestRcut, largestRcut)       
+       call setHmatDangerousRcutValue(largestRcut)
     endif
 
 

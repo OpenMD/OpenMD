@@ -43,6 +43,8 @@
 
 module simulation
   use definitions
+  use status
+  use linearAlgebra
   use neighborLists
   use force_globals
   use vector_class
@@ -89,11 +91,13 @@ module simulation
 #endif
 
   real(kind=dp), public, dimension(3,3), save :: Hmat, HmatInv
+  real(kind=dp), save :: DangerRcut
   logical, public, save :: boxIsOrthorhombic
 
   public :: SimulationSetup
   public :: getNlocal
   public :: setBox
+  public :: checkBox
   public :: getDielect
   public :: SimUsesPBC
 
@@ -115,6 +119,7 @@ module simulation
   public :: SimHasAtype
   public :: SimUsesSC
   public :: SimUsesMEAM
+  public :: setHmatDangerousRcutValue
 
 contains
 
@@ -478,7 +483,7 @@ contains
         subroutine setBox(cHmat, cHmatInv, cBoxIsOrthorhombic)
           real(kind=dp), dimension(3,3) :: cHmat, cHmatInv
           integer :: cBoxIsOrthorhombic
-          integer :: smallest, status, i
+          integer :: smallest, status
 
           Hmat = cHmat
           HmatInv = cHmatInv
@@ -488,8 +493,43 @@ contains
              boxIsOrthorhombic = .true.
           endif
 
-          return     
+          call checkBox()
+          return
         end subroutine setBox
+
+        subroutine checkBox()
+
+          integer :: i
+          real(kind=dp), dimension(3) :: hx, hy, hz, ax, ay, az, piped
+          character(len = statusMsgSize) :: errMsg
+
+          hx = Hmat(1,:)
+          hy = Hmat(2,:)
+          hz = Hmat(3,:)
+
+          ax = cross_product(hy, hz)
+          ay = cross_product(hx, hz)
+          az = cross_product(hx, hy)
+
+          ax = ax / length(ax)
+          ay = ay / length(ay)
+          az = az / length(az)
+
+          piped(1) = abs(dot_product(ax, hx))
+          piped(2) = abs(dot_product(ay, hy))
+          piped(3) = abs(dot_product(az, hz))
+          
+          do i = 1, 3
+             if ((0.5_dp * piped(i)).lt.DangerRcut) then                
+                write(errMsg, '(a94,f9.4,a1)') 'One of the dimensions of the Periodic ' &
+                     // 'Box is smaller than ' // newline // tab // &
+                     'the largest cutoff radius' // &
+                     ' (rCut = ', DangerRcut, ')'
+                call handleError("checkBox", errMsg)
+             end if
+          enddo        
+          return     
+        end subroutine checkBox
 
         function getDielect() result(dielect)
           real( kind = dp ) :: dielect
@@ -694,7 +734,14 @@ contains
           n = nLocal
         end function getNlocal
 
+        subroutine setHmatDangerousRcutValue(dangerWillRobinson)
+          real(kind=dp), intent(in) :: dangerWillRobinson
+          DangerRcut = dangerWillRobinson
 
+          call checkBox()
+
+          return
+        end subroutine setHmatDangerousRcutValue
 
 
 
