@@ -91,7 +91,7 @@ namespace oopse {
 	sprintf( painCave.errMsg,
 		 "OOPSE is switching from the default Non-Orthorhombic\n"
 		 "\tto the faster Orthorhombic periodic boundary computations.\n"
-		 "\tThis is usually a good thing, but if you wan't the\n"
+		 "\tThis is usually a good thing, but if you want the\n"
 		 "\tNon-Orthorhombic computations, make the orthoBoxTolerance\n"
 		 "\tvariable ( currently set to %G ) smaller.\n",
 		 orthoTolerance);
@@ -103,7 +103,7 @@ namespace oopse {
 		 "OOPSE is switching from the faster Orthorhombic to the more\n"
 		 "\tflexible Non-Orthorhombic periodic boundary computations.\n"
 		 "\tThis is usually because the box has deformed under\n"
-		 "\tNPTf integration. If you wan't to live on the edge with\n"
+		 "\tNPTf integration. If you want to live on the edge with\n"
 		 "\tthe Orthorhombic computations, make the orthoBoxTolerance\n"
 		 "\tvariable ( currently set to %G ) larger.\n",
 		 orthoTolerance);
