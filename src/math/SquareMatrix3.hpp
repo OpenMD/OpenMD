@@ -168,6 +168,26 @@ namespace oopse {
       *this = q.toRotationMatrix3();
     }
 
+    void setupSkewMat(Vector3<Real> v) {
+        setupSkewMat(v[0], v[1], v[2]);
+    }
+
+    void setupSkewMat(Real v1, Real v2, Real v3) {
+        this->data_[0][0] = 0;
+        this->data_[0][1] = -v3;
+        this->data_[0][2] = v2;
+        this->data_[1][0] = v3;
+        this->data_[1][1] = 0;
+        this->data_[1][2] = -v1;
+        this->data_[2][0] = -v2;
+        this->data_[2][1] = v1;
+        this->data_[2][2] = 0;
+        
+        
+    }
+
+
+
     /**
      * Returns the quaternion from this rotation matrix
      * @return the quaternion from this rotation matrix

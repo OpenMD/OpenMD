@@ -40,65 +40,78 @@
  */
  
 /**
- * @file RectMatrix.hpp
+ * @file DynamicRectMatrix.hpp
  * @author Teng Lin
  * @date 10/11/2004
  * @version 1.0
  */
 
-#ifndef MATH_RECTMATRIX_HPP
-#define MATH_RECTMATRIX_HPP
+#ifndef MATH_DYNAMICRECTMATRIX_HPP
+#define MATH_DYNAMICRECTMATRIX_HPP
 #include <math.h>
 #include <cmath>
-#include "Vector.hpp"
+#include "math/DynamicVector.hpp"
 
 namespace oopse {
 
   /**
-   * @class RectMatrix RectMatrix.hpp "math/RectMatrix.hpp"
+   * @class DynamicRectMatrix DynamicRectMatrix.hpp "math/DynamicRectMatrix.hpp"
    * @brief rectangular matrix class
    */
-  template<typename Real, unsigned int Row, unsigned int Col> 
-  class RectMatrix {
+  template<typename Real> 
+  class DynamicRectMatrix {
   public:
     typedef Real ElemType;
     typedef Real* ElemPoinerType;
+    typedef DynamicRectMatrix<Real> SelfType;
             
     /** default constructor */
-    RectMatrix() {
-      for (unsigned int i = 0; i < Row; i++)
-	for (unsigned int j = 0; j < Col; j++)
+    DynamicRectMatrix(int nrow, int ncol) {
+      allocate(nrow, ncol);
+
+      for (unsigned int i = 0; i < nrow_; i++)
+	for (unsigned int j = 0; j < ncol_; j++)
 	  this->data_[i][j] = 0.0;
     }
 
     /** Constructs and initializes every element of this matrix to a scalar */ 
-    RectMatrix(Real s) {
-      for (unsigned int i = 0; i < Row; i++)
-	for (unsigned int j = 0; j < Col; j++)
+    DynamicRectMatrix(int nrow, int ncol, Real s) {
+      allocate(nrow, ncol);
+      for (unsigned int i = 0; i < nrow_; i++)
+	for (unsigned int j = 0; j < ncol_; j++)
 	  this->data_[i][j] = s;
     }
 
-    RectMatrix(Real* array) {
-      for (unsigned int i = 0; i < Row; i++)
-	for (unsigned int j = 0; j < Col; j++)
-	  this->data_[i][j] = array[i * Row + j];
+    DynamicRectMatrix(int nrow, int ncol, Real* array) {
+      allocate(nrow, ncol);
+      for (unsigned int i = 0; i < nrow_; i++)
+	for (unsigned int j = 0; j < ncol_; j++)
+	  this->data_[i][j] = array[i * nrow_ + j];
     }
 
     /** copy constructor */
-    RectMatrix(const RectMatrix<Real, Row, Col>& m) {
-      *this = m;
+    DynamicRectMatrix(const SelfType& m) {
+      allocate(m.getNRow(), m.getNCol());
+      
+      for (unsigned int i = 0; i < nrow_; i++)
+        for (unsigned int j = 0; j < ncol_; j++)
+	    this->data_[i][j] = m.data_[i][j];
     }
             
     /** destructor*/
-    ~RectMatrix() {}
+    ~DynamicRectMatrix() { deallocate();}
 
     /** copy assignment operator */
-    RectMatrix<Real, Row, Col>& operator =(const RectMatrix<Real, Row, Col>& m) {
+    DynamicRectMatrix<Real> operator =(const DynamicRectMatrix<Real> m) {
       if (this == &m)
-	return *this;
-                
-      for (unsigned int i = 0; i < Row; i++)
-	for (unsigned int j = 0; j < Col; j++)
+	  return *this;
+      if (nrow_ != m.getNRow() || ncol_ != m.getNCol()) {
+        deallocate();
+        allocate(m.getNRow(), m.getNCol());
+      }
+      
+      for (unsigned int i = 0; i < nrow_; i++)
+	for (unsigned int j = 0; j < ncol_; j++)
 	  this->data_[i][j] = m.data_[i][j];
       return *this;
     }
@@ -110,7 +123,6 @@ namespace oopse {
      * @param j Column index
      */
     Real& operator()(unsigned int i, unsigned int j) {
-      //assert( i < Row && j < Col);
       return this->data_[i][j];
     }
 
@@ -130,17 +142,11 @@ namespace oopse {
      * @param array the pointer of destination array
      */
     void getArray(Real* array) {
-      for (unsigned int i = 0; i < Row; i++) {
-	for (unsigned int j = 0; j < Col; j++) {
-	  array[i * Row + j] = this->data_[i][j];
+      for (unsigned int i = 0; i < nrow_; i++) {
+	for (unsigned int j = 0; j < ncol_; j++) {
+	  array[i * nrow_ + j] = this->data_[i][j];
 	}
       }
-    }
-
-
-    /** Returns the pointer of internal array */
-    Real* getArrayPointer() {
-      return &this->data_[0][0];
     }
 
     /**
@@ -148,10 +154,10 @@ namespace oopse {
      * @return a row of  this matrix as a vector 
      * @param row the row index
      */                
-    Vector<Real, Row> getRow(unsigned int row) {
-      Vector<Real, Row> v;
+    DynamicVector<Real> getRow(unsigned int row) {
+      DynamicVector<Real> v;
 
-      for (unsigned int i = 0; i < Col; i++)
+      for (unsigned int i = 0; i < ncol_; i++)
 	v[i] = this->data_[row][i];
 
       return v;
@@ -162,9 +168,9 @@ namespace oopse {
      * @param row the row index
      * @param v the vector to be set
      */                
-    void setRow(unsigned int row, const Vector<Real, Row>& v) {
-
-      for (unsigned int i = 0; i < Col; i++)
+    void setRow(unsigned int row, const DynamicVector<Real>& v) {
+      assert(v.size() == nrow_);
+      for (unsigned int i = 0; i < ncol_; i++)
 	this->data_[row][i] = v[i];
     }
 
@@ -173,10 +179,10 @@ namespace oopse {
      * @return a column of  this matrix as a vector 
      * @param col the column index
      */                
-    Vector<Real, Col> getColumn(unsigned int col) {
-      Vector<Real, Col> v;
+    DynamicVector<Real> getColumn(unsigned int col) {
+      DynamicVector<Real> v(ncol_);
 
-      for (unsigned int j = 0; j < Row; j++)
+      for (unsigned int j = 0; j < nrow_; j++)
 	v[j] = this->data_[j][col];
 
       return v;
@@ -187,9 +193,9 @@ namespace oopse {
      * @param col the column index
      * @param v the vector to be set
      */                
-    void setColumn(unsigned int col, const Vector<Real, Col>& v){
+    void setColumn(unsigned int col, const DynamicVector<Real>& v){
 
-      for (unsigned int j = 0; j < Row; j++)
+      for (unsigned int j = 0; j < nrow_; j++)
 	this->data_[j][col] = v[j];
     }         
 
@@ -199,9 +205,9 @@ namespace oopse {
      * @param j the second row
      */
     void swapRow(unsigned int i, unsigned int j){
-      assert(i < Row && j < Row);
+      assert(i < nrow_ && j < nrow_);
 
-      for (unsigned int k = 0; k < Col; k++)
+      for (unsigned int k = 0; k < ncol_; k++)
 	std::swap(this->data_[i][k], this->data_[j][k]);
     }
 
@@ -211,9 +217,9 @@ namespace oopse {
      * @param j the second Column
      */
     void swapColumn(unsigned int i, unsigned int j){
-      assert(i < Col && j < Col);
+      assert(i < ncol_ && j < ncol_);
                     
-      for (unsigned int k = 0; k < Row; k++)
+      for (unsigned int k = 0; k < nrow_; k++)
 	std::swap(this->data_[k][i], this->data_[k][j]);
     }
 
@@ -224,9 +230,10 @@ namespace oopse {
      *
      * @todo replace operator == by template function equal
      */
-    bool operator ==(const RectMatrix<Real, Row, Col>& m) {
-      for (unsigned int i = 0; i < Row; i++)
-	for (unsigned int j = 0; j < Col; j++)
+    bool operator ==(const DynamicRectMatrix<Real> m) {
+      assert(nrow_ == m.getNRow() && ncol_ == m.getNCol());
+      for (unsigned int i = 0; i < nrow_; i++)
+	for (unsigned int j = 0; j < ncol_; j++)
 	  if (!equal(this->data_[i][j], m.data_[i][j]))
 	    return false;
 
@@ -238,14 +245,14 @@ namespace oopse {
      * @return true if this matrix is not equal to the matrix m, return false otherwise
      * @m matrix to be compared
      */
-    bool operator !=(const RectMatrix<Real, Row, Col>& m) {
+    bool operator !=(const DynamicRectMatrix<Real> m) {
       return !(*this == m);
     }
 
     /** Negates the value of this matrix in place. */           
     inline void negate() {
-      for (unsigned int i = 0; i < Row; i++)
-	for (unsigned int j = 0; j < Col; j++)
+      for (unsigned int i = 0; i < nrow_; i++)
+	for (unsigned int j = 0; j < ncol_; j++)
 	  this->data_[i][j] = -this->data_[i][j];
     }
             
@@ -253,9 +260,9 @@ namespace oopse {
      * Sets the value of this matrix to the negation of matrix m.
      * @param m the source matrix
      */
-    inline void negate(const RectMatrix<Real, Row, Col>& m) {
-      for (unsigned int i = 0; i < Row; i++)
-	for (unsigned int j = 0; j < Col; j++)
+    inline void negate(const DynamicRectMatrix<Real> m) {
+      for (unsigned int i = 0; i < nrow_; i++)
+	for (unsigned int j = 0; j < ncol_; j++)
 	  this->data_[i][j] = -m.data_[i][j];        
     }
             
@@ -263,9 +270,10 @@ namespace oopse {
      * Sets the value of this matrix to the sum of itself and m (*this += m).
      * @param m the other matrix
      */
-    inline void add( const RectMatrix<Real, Row, Col>& m ) {
-      for (unsigned int i = 0; i < Row; i++)
-	for (unsigned int j = 0; j < Col; j++)        
+    inline void add( const DynamicRectMatrix<Real> m ) {
+      assert(nrow_ == m.getNRow() && ncol_ == m.getNCol());
+      for (unsigned int i = 0; i < nrow_; i++)
+	for (unsigned int j = 0; j < ncol_; j++)        
 	  this->data_[i][j] += m.data_[i][j];
     }
             
@@ -274,9 +282,10 @@ namespace oopse {
      * @param m1 the first matrix
      * @param m2 the second matrix
      */
-    inline void add( const RectMatrix<Real, Row, Col>& m1, const RectMatrix<Real, Row, Col>& m2 ) {
-      for (unsigned int i = 0; i < Row; i++)
-	for (unsigned int j = 0; j < Col; j++)        
+    inline void add( const DynamicRectMatrix<Real> m1, const DynamicRectMatrix<Real> m2 ) {
+      assert(m1.getNRow() == m2.getNRow() && m1.getNCol() == m2.getNCol());
+      for (unsigned int i = 0; i < nrow_; i++)
+	for (unsigned int j = 0; j < ncol_; j++)        
 	  this->data_[i][j] = m1.data_[i][j] + m2.data_[i][j];
     }
             
@@ -284,9 +293,10 @@ namespace oopse {
      * Sets the value of this matrix to the difference  of itself and m (*this -= m).
      * @param m the other matrix
      */
-    inline void sub( const RectMatrix<Real, Row, Col>& m ) {
-      for (unsigned int i = 0; i < Row; i++)
-	for (unsigned int j = 0; j < Col; j++)        
+    inline void sub( const DynamicRectMatrix<Real> m ) {
+      assert(nrow_ == m.getNRow() && ncol_ == m.getNCol());
+      for (unsigned int i = 0; i < nrow_; i++)
+	for (unsigned int j = 0; j < ncol_; j++)        
 	  this->data_[i][j] -= m.data_[i][j];
     }
             
@@ -295,9 +305,10 @@ namespace oopse {
      * @param m1 the first matrix
      * @param m2 the second matrix
      */
-    inline void sub( const RectMatrix<Real, Row, Col>& m1, const RectMatrix<Real, Row, Col>& m2){
-      for (unsigned int i = 0; i < Row; i++)
-	for (unsigned int j = 0; j < Col; j++)        
+    inline void sub( const DynamicRectMatrix<Real> m1, const DynamicRectMatrix<Real> m2){
+      assert(m1.getNRow() == m2.getNRow() && m1.getNCol() == m2.getNCol());
+      for (unsigned int i = 0; i < nrow_; i++)
+	for (unsigned int j = 0; j < ncol_; j++)        
 	  this->data_[i][j] = m1.data_[i][j] - m2.data_[i][j];
     }
 
@@ -306,8 +317,8 @@ namespace oopse {
      * @param s the scalar value
      */
     inline void mul( Real s ) {
-      for (unsigned int i = 0; i < Row; i++)
-	for (unsigned int j = 0; j < Col; j++)  
+      for (unsigned int i = 0; i < nrow_; i++)
+	for (unsigned int j = 0; j < ncol_; j++)  
 	  this->data_[i][j] *= s;
     }
 
@@ -316,9 +327,10 @@ namespace oopse {
      * @param s the scalar value
      * @param m the matrix
      */
-    inline void mul( Real s, const RectMatrix<Real, Row, Col>& m ) {
-      for (unsigned int i = 0; i < Row; i++)
-	for (unsigned int j = 0; j < Col; j++)  
+    inline void mul( Real s, const DynamicRectMatrix<Real> m ) {
+      assert(nrow_ == m.getNRow() && ncol_ == m.getNCol());    
+      for (unsigned int i = 0; i < nrow_; i++)
+	for (unsigned int j = 0; j < ncol_; j++)  
 	  this->data_[i][j] = s * m.data_[i][j];
     }
 
@@ -327,8 +339,8 @@ namespace oopse {
      * @param s the scalar value
      */             
     inline void div( Real s) {
-      for (unsigned int i = 0; i < Row; i++)
-	for (unsigned int j = 0; j < Col; j++)  
+      for (unsigned int i = 0; i < nrow_; i++)
+	for (unsigned int j = 0; j < ncol_; j++)  
 	  this->data_[i][j] /= s;
     }
 
@@ -337,9 +349,10 @@ namespace oopse {
      * @param s the scalar value
      * @param m the matrix
      */
-    inline void div( Real s, const RectMatrix<Real, Row, Col>& m ) {
-      for (unsigned int i = 0; i < Row; i++)
-	for (unsigned int j = 0; j < Col; j++)  
+    inline void div( Real s, const DynamicRectMatrix<Real> m ) {
+      assert(nrow_ == m.getNRow() && ncol_ == m.getNCol());
+      for (unsigned int i = 0; i < nrow_; i++)
+	for (unsigned int j = 0; j < ncol_; j++)  
 	  this->data_[i][j] = m.data_[i][j] / s;
     }
 
@@ -347,7 +360,7 @@ namespace oopse {
      *  Multiples a scalar into every element of this matrix.
      * @param s the scalar value
      */
-    RectMatrix<Real, Row, Col>& operator *=(const Real s) {
+    DynamicRectMatrix<Real> operator *=(const Real s) {
       this->mul(s);
       return *this;
     }
@@ -356,7 +369,7 @@ namespace oopse {
      *  Divides every element of this matrix by a scalar.
      * @param s the scalar value
      */
-    RectMatrix<Real, Row, Col>& operator /=(const Real s) {
+    DynamicRectMatrix<Real> operator /=(const Real s) {
       this->div(s);
       return *this;
     }
@@ -365,7 +378,8 @@ namespace oopse {
      * Sets the value of this matrix to the sum of the other matrix and itself (*this += m).
      * @param m the other matrix
      */
-    RectMatrix<Real, Row, Col>& operator += (const RectMatrix<Real, Row, Col>& m) {
+    DynamicRectMatrix<Real> operator += (const DynamicRectMatrix<Real> m) {
+      assert(nrow_ == m.getNRow() && ncol_ == m.getNCol());
       add(m);
       return *this;
     }
@@ -374,26 +388,30 @@ namespace oopse {
      * Sets the value of this matrix to the differerence of itself and the other matrix (*this -= m) 
      * @param m the other matrix
      */
-    RectMatrix<Real, Row, Col>& operator -= (const RectMatrix<Real, Row, Col>& m){
+    DynamicRectMatrix<Real> operator -= (const DynamicRectMatrix<Real> m){
+      assert(nrow_ == m.getNRow() && ncol_ == m.getNCol());
       sub(m);
       return *this;
     }
 
     /** Return the transpose of this matrix */
-    RectMatrix<Real,  Col, Row> transpose() const{
-      RectMatrix<Real,  Col, Row> result;
+    DynamicRectMatrix<Real> transpose() const{
+      DynamicRectMatrix<Real> result(ncol_,nrow_);
                 
-      for (unsigned int i = 0; i < Row; i++)
-	for (unsigned int j = 0; j < Col; j++)              
+      for (unsigned int i = 0; i < nrow_; i++)
+	for (unsigned int j = 0; j < ncol_; j++)              
 	  result(j, i) = this->data_[i][j];
 
       return result;
     }
 
+    unsigned int getNRow() const {return nrow_;}
+    unsigned int getNCol() const {return ncol_;}
+
     template<class MatrixType>
     void setSubMatrix(unsigned int beginRow, unsigned int beginCol, const MatrixType& m) {
-        assert(beginRow + m.getNRow() -1 <= getNRow());
-        assert(beginCol + m.getNCol() -1 <= getNCol());
+        assert(beginRow + m.getNRow() -1 <= nrow_);
+        assert(beginCol + m.getNCol() -1 <= ncol_);
 
         for (unsigned int i = 0; i < m.getNRow(); ++i)
             for (unsigned int j = 0; j < m.getNCol(); ++j)
@@ -402,25 +420,43 @@ namespace oopse {
 
     template<class MatrixType>
     void getSubMatrix(unsigned int beginRow, unsigned int beginCol, MatrixType& m) {
-        assert(beginRow + m.getNRow() -1 <= getNRow());
-        assert(beginCol + m.getNCol() - 1 <= getNCol());
+        assert(beginRow + m.getNRow() -1 <= nrow_);
+        assert(beginCol + m.getNCol() - 1 <= ncol_);
 
         for (unsigned int i = 0; i < m.getNRow(); ++i)
             for (unsigned int j = 0; j < m.getNCol(); ++j)
                 m(i, j) = this->data_[beginRow+i][beginCol+j];
     }
     
-    unsigned int getNRow() const {return Row;}
-    unsigned int getNCol() const {return Col;}        
-
   protected:
-    Real data_[Row][Col];
+    Real** data_;
+    unsigned int nrow_;
+    unsigned int ncol_;
+  private:
+    void allocate(int nrow, int ncol) {
+        nrow_ = nrow;
+        ncol_ = ncol;
+        data_ = new Real*[nrow_];
+        for (int i = 0; i < nrow_; ++i)
+            data_[i] = new Real[ncol_];
+    }
+
+    void deallocate() {
+      for (int i = 0; i < nrow_; ++i)
+        delete data_[i];
+      delete []data_;
+
+      nrow_ = 0;
+      ncol_ = 0;
+      data_ = NULL;
+    }
+    
   };
 
   /** Negate the value of every element of this matrix. */
-  template<typename Real, unsigned int Row, unsigned int Col> 
-  inline RectMatrix<Real, Row, Col> operator -(const RectMatrix<Real, Row, Col>& m) {
-    RectMatrix<Real, Row, Col> result(m);
+  template<typename Real> 
+  inline DynamicRectMatrix<Real> operator -(const DynamicRectMatrix<Real> m) {
+    DynamicRectMatrix<Real> result(m);
 
     result.negate();
 
@@ -433,9 +469,10 @@ namespace oopse {
    * @param m1 the first matrix
    * @param m2 the second matrix
    */ 
-  template<typename Real, unsigned int Row, unsigned int Col> 
-  inline RectMatrix<Real, Row, Col> operator + (const RectMatrix<Real, Row, Col>& m1,const RectMatrix<Real, Row, Col>& m2) {
-    RectMatrix<Real, Row, Col> result;
+  template<typename Real> 
+  inline DynamicRectMatrix<Real> operator + (const DynamicRectMatrix<Real> m1,const DynamicRectMatrix<Real> m2) {
+    
+    DynamicRectMatrix<Real> result(m1.getNRow(), m1.getNCol());
 
     result.add(m1, m2);
 
@@ -448,9 +485,9 @@ namespace oopse {
    * @param m1 the first matrix
    * @param m2 the second matrix
    */
-  template<typename Real, unsigned int Row, unsigned int Col> 
-  inline RectMatrix<Real, Row, Col> operator - (const RectMatrix<Real, Row, Col>& m1, const RectMatrix<Real, Row, Col>& m2) {
-    RectMatrix<Real, Row, Col> result;
+  template<typename Real> 
+  inline DynamicRectMatrix<Real> operator - (const DynamicRectMatrix<Real> m1, const DynamicRectMatrix<Real> m2) {
+    DynamicRectMatrix<Real> result(m1.getNRow(), m1.getNCol());
 
     result.sub(m1, m2);
 
@@ -463,9 +500,9 @@ namespace oopse {
    * @param m the matrix
    * @param s the scalar
    */
-  template<typename Real, unsigned int Row, unsigned int Col> 
-  inline RectMatrix<Real, Row, Col> operator *(const RectMatrix<Real, Row, Col>& m, Real s) {
-    RectMatrix<Real, Row, Col> result;
+  template<typename Real> 
+  inline DynamicRectMatrix<Real> operator *(const DynamicRectMatrix<Real> m, Real s) {
+    DynamicRectMatrix<Real> result(m.getNRow(), m.getNCol());
 
     result.mul(s, m);
 
@@ -478,9 +515,9 @@ namespace oopse {
    * @param s the scalar
    * @param m the matrix
    */
-  template<typename Real, unsigned int Row, unsigned int Col> 
-  inline RectMatrix<Real, Row, Col> operator *(Real s, const RectMatrix<Real, Row, Col>& m) {
-    RectMatrix<Real, Row, Col> result;
+  template<typename Real> 
+  inline DynamicRectMatrix<Real> operator *(Real s, const DynamicRectMatrix<Real> m) {
+    DynamicRectMatrix<Real> result(m.getNRow(), m.getNCol());
 
     result.mul(s, m);
 
@@ -493,13 +530,16 @@ namespace oopse {
    * @param m1 the first matrix
    * @param m2 the second matrix
    */
-  template<typename Real, unsigned int Row, unsigned int Col, unsigned int SameDim> 
-  inline RectMatrix<Real, Row, Col> operator *(const RectMatrix<Real, Row, SameDim>& m1, const RectMatrix<Real, SameDim, Col>& m2) {
-    RectMatrix<Real, Row, Col> result;
-
-    for (unsigned int i = 0; i < Row; i++)
-      for (unsigned int j = 0; j < Col; j++)
-	for (unsigned int k = 0; k < SameDim; k++)
+  template<typename Real> 
+  inline DynamicRectMatrix<Real> operator *(const DynamicRectMatrix<Real>& m1, const DynamicRectMatrix<Real>& m2) {
+    assert(m1.getNCol() == m2.getNRow());
+    unsigned int sameDim = m1.getNCol();
+    int nrow = m1.getNRow();
+    int ncol = m2.getNCol();
+    DynamicRectMatrix<Real> result(nrow, ncol );
+    for (unsigned int i = 0; i < nrow; i++)
+      for (unsigned int j = 0; j < ncol; j++)
+	for (unsigned int k = 0; k < sameDim; k++)
 	  result(i, j)  += m1(i, k) * m2(k, j);                
 
     return result;
@@ -511,12 +551,15 @@ namespace oopse {
    * @param m the matrix
    * @param v the vector
    */
-  template<typename Real, unsigned int Row, unsigned int Col>
-  inline Vector<Real, Row> operator *(const RectMatrix<Real, Row, Col>& m, const Vector<Real, Col>& v) {
-    Vector<Real, Row> result;
-
-    for (unsigned int i = 0; i < Row ; i++)
-      for (unsigned int j = 0; j < Col ; j++)            
+  template<typename Real>
+  inline DynamicVector<Real> operator *(const DynamicRectMatrix<Real> m, const DynamicVector<Real>& v) {
+    int nrow = m.getNRow();
+    int ncol = m.getNCol();
+    assert(ncol = v.size());
+    DynamicVector<Real> result(nrow);
+    
+    for (unsigned int i = 0; i < nrow ; i++)
+      for (unsigned int j = 0; j < ncol ; j++)            
 	result[i] += m(i, j) * v[j];
             
     return result;                                                                 
@@ -528,9 +571,9 @@ namespace oopse {
    * @param m the matrix
    * @param s the scalar
    */
-  template<typename Real, unsigned int Row, unsigned int Col> 
-  inline RectMatrix<Real, Row, Col> operator /(const RectMatrix<Real, Row, Col>& m, Real s) {
-    RectMatrix<Real, Row, Col> result;
+  template<typename Real> 
+  inline DynamicRectMatrix<Real> operator /(const DynamicRectMatrix<Real> m, Real s) {
+    DynamicRectMatrix<Real> result(m.getNRow(), m.getNCol());
 
     result.div(s, m);
 
@@ -540,13 +583,13 @@ namespace oopse {
   /**
    * Write to an output stream
    */
-  template<typename Real,  unsigned int Row, unsigned int Col>
-  std::ostream &operator<< ( std::ostream& o, const RectMatrix<Real, Row, Col>& m) {
-    for (unsigned int i = 0; i < Row ; i++) {
+  template<typename Real>
+  std::ostream &operator<< ( std::ostream& o, const DynamicRectMatrix<Real> m) {
+    for (unsigned int i = 0; i < m.getNRow() ; i++) {
       o << "(";
-      for (unsigned int j = 0; j < Col ; j++) {
+      for (unsigned int j = 0; j < m.getNCol() ; j++) {
 	o << m(i, j);
-	if (j != Col -1)
+	if (j != m.getNCol() -1)
 	  o << "\t";
       }
       o << ")" << std::endl;
@@ -555,3 +598,4 @@ namespace oopse {
   }    
 }
 #endif //MATH_RECTMATRIX_HPP
+

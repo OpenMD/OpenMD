@@ -1,0 +1,14 @@
+# Input file for gengetopt --generates cmdline.c and cmdline.h
+# for parsing command line arguments useing getopt and getoptlong.
+# gengetopt is available from:
+#  http://www.gnu.org/software/gengetopt/gengetopt.html
+package "Hydro"
+version "1.0"
+
+# Options
+option	"input"		i	"input dump file"					string	typestr="filename" 	yes
+option	"output"	o	"output file prefix"					string	default="hydro"	        no
+option	"viscosity"     -	"viscosity of solvent"					double		                yes
+option  "sigma"         -       "diameter of beads(use with rough shell model)"		double				no
+option  "model"         -       "hydrodynamics model (support RoughShell and BeadModel)" string			        yes
+
