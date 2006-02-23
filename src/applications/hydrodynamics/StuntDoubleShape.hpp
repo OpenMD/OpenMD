@@ -78,14 +78,15 @@ class Ellipsoid : public Shape{
         Mat3x3d rotMat_;
 };
 
-/** @class MoleculeShape */
-class MoleculeShape {
+/** @class StuntDoubleShape */
+class StuntDoubleShape {
     public:
-        MoleculeShape(Molecule* mol);
-        ~MoleculeShape();
+        StuntDoubleShape(StuntDouble* sd);
+        ~StuntDoubleShape();
         std::pair<Vector3d, Vector3d> getBox();
         bool isInterior(Vector3d pos);
     private:
+        Shape* createShape(Atom* atom);
         std::vector<Shape*> shapes_;
 };
 

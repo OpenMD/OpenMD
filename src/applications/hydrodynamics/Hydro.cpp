@@ -58,7 +58,7 @@ using namespace oopse;
 /** Register different hydrodynamics models */
 void registerHydrodynamicsModels();
 
-bool calcHydrodynamicsProp(const std::string& modelType, Molecule* mol, const DynamicProperty& param, const std::string& prefix,double viscosity);
+bool calcHydrodynamicsProp(const std::string& modelType, StuntDouble* sd, const DynamicProperty& param, std::ostream& os,  const std::string& prefix);
 
 int main(int argc, char* argv[]){
   //register force fields
@@ -91,8 +91,12 @@ int main(int argc, char* argv[]){
   } else {
     prefix = "hydro";    
   }
+  std::string outputFilename = prefix + ".diff";
 
   DynamicProperty param;
+  param.insert(DynamicProperty::value_type("Viscosity", args_info.viscosity_arg));
+  param.insert(DynamicProperty::value_type("Temperature", args_info.temperature_arg));
+  
   if (args_info.sigma_given) {
     param.insert(DynamicProperty::value_type("Sigma", args_info.sigma_arg));
   }
@@ -104,19 +108,35 @@ int main(int argc, char* argv[]){
     
   SimInfo::MoleculeIterator mi;
   Molecule* mol;
-  Molecule::RigidBodyIterator ri;
-  RigidBody* rb;
-    //update atoms of rigidbody
+  Molecule::IntegrableObjectIterator  ii;
+  StuntDouble* integrableObject;
+  Mat3x3d identMat;
+  identMat(0,0) = 1.0;
+  identMat(1,1) = 1.0;
+  identMat(2,2) = 1.0;
+  
+ 
+  std::map<std::string, StuntDouble*> uniqueStuntDoubles;
+  
   for (mol = info->beginMolecule(mi); mol != NULL; mol = info->nextMolecule(mi)) {
-      
-      //change the positions of atoms which belong to the rigidbodies
-      for (rb = mol->beginRigidBody(ri); rb != NULL; rb = mol->nextRigidBody(ri)) {
-        rb->updateAtoms();
-      }
+      for (integrableObject = mol->beginIntegrableObject(ii); integrableObject != NULL;
+	   integrableObject = mol->nextIntegrableObject(ii)) {
+          if (uniqueStuntDoubles.find(integrableObject->getType()) ==  uniqueStuntDoubles.end()) {
+            uniqueStuntDoubles.insert(std::map<std::string, StuntDouble*>::value_type(integrableObject->getType(), integrableObject));
+            integrableObject->setPos(V3Zero);
+            integrableObject->setA(identMat);
+            if (integrableObject->isRigidBody()) {
+                RigidBody* rb = static_cast<RigidBody*>(integrableObject);
+                rb->updateAtoms();
+            }
+          }
+	}
   }
-    
-  for (mol = info->beginMolecule(mi); mol != NULL; mol = info->nextMolecule(mi)) {
-    calcHydrodynamicsProp(args_info.model_arg, mol, param, prefix, args_info.viscosity_arg);
+
+  std::map<std::string, StuntDouble*>::iterator iter;
+  std::ofstream outputDiff(outputFilename.c_str());
+  for (iter = uniqueStuntDoubles.begin(); iter != uniqueStuntDoubles.end(); ++iter) {
+    calcHydrodynamicsProp(args_info.model_arg, iter->second, param, outputDiff, prefix);
   }
   
   delete info;
@@ -129,24 +149,20 @@ void registerHydrodynamicsModels() {
 
 }
 
-bool calcHydrodynamicsProp(const std::string& modelType, Molecule* mol, const DynamicProperty& param, const std::string& prefix,double viscosity) {
-    HydrodynamicsModel* hydroModel = HydrodynamicsModelFactory::getInstance()->createHydrodynamicsModel(modelType, mol, param);
+bool calcHydrodynamicsProp(const std::string& modelType, StuntDouble* sd, const DynamicProperty& param, std::ostream& os, const std::string& prefix) {
+    HydrodynamicsModel* hydroModel = HydrodynamicsModelFactory::getInstance()->createHydrodynamicsModel(modelType, sd, param);
     bool ret = false;
     if (hydroModel == NULL) {
         std::cout << "Integrator Factory can not create " << modelType <<std::endl;
     }    
 
-    if (hydroModel->calcHydrodyanmicsProps(viscosity)) {
-        ret = true;
-        std::stringstream outputDiffTensor;
-        outputDiffTensor << prefix << "_" << mol->getType() << ".diff";
+    if (hydroModel->calcHydrodyanmicsProps()) {
+        ret = true;        
+        hydroModel->writeDiffCenterAndDiffTensor(os);
+
         std::ofstream ofs;
-        ofs.open(outputDiffTensor.str().c_str());
-        hydroModel->writeDiffCenterAndDiffTensor(ofs);
-        ofs.close();
-        
         std::stringstream outputBeads;
-        outputBeads << prefix << "_" << mol->getType() << ".xyz";
+        outputBeads << prefix << "_" << sd->getType() << ".xyz";
         ofs.open(outputBeads.str().c_str());
         hydroModel->writeBeads(ofs);
         ofs.close();

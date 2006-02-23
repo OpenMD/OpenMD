@@ -46,7 +46,7 @@
 #include "math/SquareMatrix3.hpp"
 #include "math/DynamicRectMatrix.hpp"
 #include "primitives/Molecule.hpp"
-#include "applications/hydrodynamics/MoleculeShape.hpp"
+#include "applications/hydrodynamics/StuntDoubleShape.hpp"
 #include "utils/any.hpp"
 namespace oopse {
 struct HydrodynamicProps {
@@ -66,8 +66,8 @@ typedef std::map<std::string, boost::any> DynamicProperty;
 
 class HydrodynamicsModel {
     public:
-        HydrodynamicsModel(Molecule* mol, const DynamicProperty& extraParams) : mol_(mol) {}
-        bool calcHydrodyanmicsProps(double eta);
+        HydrodynamicsModel(StuntDouble* sd, const DynamicProperty& extraParams);
+        bool calcHydrodyanmicsProps();
 
         Vector3d getDiffCenter();
         Mat3x3d getTransDiff();
@@ -76,13 +76,15 @@ class HydrodynamicsModel {
         void writeBeads(std::ostream& os);
         void writeDiffCenterAndDiffTensor(std::ostream& os);
     protected:
-        Molecule* mol_;
+        StuntDouble* sd_;
     private:
         virtual bool createBeads(std::vector<BeadParam>& beads) = 0;
 
 
         HydrodynamicProps props_;
         std::vector<BeadParam> beads_;
+        double viscosity_;
+        double temperature_;
         
 };
 

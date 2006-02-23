@@ -39,7 +39,7 @@
  * such damages.
  */
 
-#include "applications/hydrodynamics/MoleculeShape.hpp" 
+#include "applications/hydrodynamics/StuntDoubleShape.hpp" 
 #include "utils/MemoryUtils.hpp"
 
 namespace oopse {
@@ -100,10 +100,44 @@ std::pair<Vector3d, Vector3d> Ellipsoid::getBox() {
 }
 
 
-MoleculeShape::MoleculeShape(Molecule* mol) {
-    std::vector<Atom*>::iterator ai; 
-    Atom* atom;
-    for(atom = mol->beginAtom(ai); atom != NULL; atom = mol->nextAtom(ai)) {
+StuntDoubleShape::StuntDoubleShape(StuntDouble* sd) {
+    if (sd->isAtom()) {
+      Shape* currShape = createShape(static_cast<Atom*>(sd));
+
+        if (currShape != NULL)
+            shapes_.push_back(currShape);
+
+    } else if (sd->isRigidBody()) {
+        RigidBody* rb = static_cast<RigidBody*>(sd);
+        std::vector<Atom*>::iterator ai; 
+        Atom* atom;
+        for (atom = rb->beginAtom(ai); atom != NULL; atom = rb->nextAtom(ai)) {
+            Shape* currShape = createShape(static_cast<Atom*>(sd));
+
+            if (currShape != NULL)
+                shapes_.push_back(currShape);
+        }
+    }
+
+}
+
+StuntDoubleShape::~StuntDoubleShape() {
+    MemoryUtils::deletePointers(shapes_);
+}
+bool StuntDoubleShape::isInterior(Vector3d pos) {
+    bool result = false;
+    std::vector<Shape*>::iterator iter;
+    for (iter = shapes_.begin(); iter != shapes_.end(); ++ iter) {
+        if ((*iter)->isInterior(pos)) {
+            result = true;
+            break;
+        }
+    }
+
+    return result;
+}
+
+Shape* StuntDoubleShape::createShape(Atom* atom) {
         AtomType* atomType = atom->getAtomType();
         Shape* currShape = NULL;
         if (atomType->isGayBerne()) {
@@ -147,29 +181,9 @@ MoleculeShape::MoleculeShape(Molecule* mol) {
             }
 
         }
-
-        if (currShape != NULL)
-            shapes_.push_back(currShape);
-
-    }
-
-}
-
-MoleculeShape::~MoleculeShape() {
-    MemoryUtils::deletePointers(shapes_);
-}
-bool MoleculeShape::isInterior(Vector3d pos) {
-    bool result = false;
-    std::vector<Shape*>::iterator iter;
-    for (iter = shapes_.begin(); iter != shapes_.end(); ++ iter) {
-        if ((*iter)->isInterior(pos)) {
-            result = true;
-            break;
-        }
-    }
-
-    return result;
-}
+	
+	return currShape;
+  }
 
 template<class Cont, class Predict>
 void swap_if(Cont& b1, Cont& b2, Predict predict) {
@@ -182,7 +196,7 @@ void swap_if(Cont& b1, Cont& b2, Predict predict) {
 
 }
 
-std::pair<Vector3d, Vector3d> MoleculeShape::getBox() {
+std::pair<Vector3d, Vector3d> StuntDoubleShape::getBox() {
     std::vector<Shape*>::iterator iter = shapes_.begin();
     std::pair<Vector3d, Vector3d>  boundary = (*iter)->getBox();
     for (++iter; iter != shapes_.end(); ++iter) {

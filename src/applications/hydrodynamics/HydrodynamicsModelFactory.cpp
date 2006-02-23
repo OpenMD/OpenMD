@@ -64,11 +64,11 @@ namespace oopse {
     return creatorMap_.erase(id) == 1;
   }
 
-  HydrodynamicsModel* HydrodynamicsModelFactory::createHydrodynamicsModel(const std::string& id, Molecule* mol, const DynamicProperty& param) {
+  HydrodynamicsModel* HydrodynamicsModelFactory::createHydrodynamicsModel(const std::string& id, StuntDouble* sd, const DynamicProperty& param) {
     CreatorMapType::iterator i = creatorMap_.find(id);
     if (i != creatorMap_.end()) {
       //invoke functor to create object
-      return (i->second)->create(mol, param);
+      return (i->second)->create(sd, param);
     } else {
       return NULL;
     }

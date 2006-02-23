@@ -59,7 +59,7 @@ namespace oopse {
   //forward declaration
   class HydrodynamicsModel;
   class HydrodynamicsModelCreator;
-  class Molecule;
+  class StuntDouble;
   typedef std::map<std::string, boost::any> DynamicProperty;  
 
   /**
@@ -111,7 +111,7 @@ namespace oopse {
      * creating this concrete object
      * @param id the identification of the concrete object
      */
-    HydrodynamicsModel* createHydrodynamicsModel(const std::string& id, Molecule* mol, const DynamicProperty& param);
+    HydrodynamicsModel* createHydrodynamicsModel(const std::string& id, StuntDouble* sd, const DynamicProperty& param);
 
     /** 
      *  Returns all of the registed  type identifiers
