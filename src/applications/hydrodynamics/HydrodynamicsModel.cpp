@@ -95,7 +95,7 @@ bool HydrodynamicsModel::calcHydrodyanmicsProps() {
                 double rij2 = rij * rij;
                 double sumSigma2OverRij2 = ((beads_[i].radius*beads_[i].radius) + (beads_[i].radius*beads_[i].radius)) / rij2;                
                 Mat3x3d tmpMat;
-                tmpMat = outProduct(beads_[i].pos, beads_[j].pos) / rij2;
+                tmpMat = outProduct(Rij, Rij) / rij2;
                 double constant = 8.0 * NumericConstant::PI * viscosity_ * rij;
                 Tij = ((1.0 + sumSigma2OverRij2/3.0) * I + (1.0 - sumSigma2OverRij2) * tmpMat ) / constant;
             }else {
@@ -105,11 +105,18 @@ bool HydrodynamicsModel::calcHydrodyanmicsProps() {
                 Tij(2, 2) = constant;
             }
             B.setSubMatrix(i*3, j*3, Tij);
+            std::cout << Tij << std::endl;
         }
     }
 
+    std::cout << "B=\n"
+                  << B << std::endl;
     //invert B Matrix
     invertMatrix(B, C);
+
+    std::cout << "C=\n"
+                  << C << std::endl;
+
     //prepare U Matrix relative to arbitrary origin O(0.0, 0.0, 0.0)
     std::vector<Mat3x3d> U;
     for (int i = 0; i < nbeads; ++i) {
@@ -122,6 +129,13 @@ bool HydrodynamicsModel::calcHydrodyanmicsProps() {
     Mat3x3d Xitt;
     Mat3x3d Xirr;
     Mat3x3d Xitr;
+
+    //calculate the total volume
+
+    double volume = 0.0;
+    for (std::vector<BeadParam>::iterator iter = beads_.begin(); iter != beads_.end(); ++iter) {
+        volume = 4.0/3.0 * NumericConstant::PI * pow((*iter).radius,3);
+    }
         
     for (std::size_t i = 0; i < nbeads; ++i) {
         for (std::size_t j = 0; j < nbeads; ++j) {
@@ -129,8 +143,9 @@ bool HydrodynamicsModel::calcHydrodyanmicsProps() {
             C.getSubMatrix(i*3, j*3, Cij);
             
             Xitt += Cij;
-            Xirr += U[i] * Cij;
-            Xitr += U[i] * Cij * U[j];            
+            Xitr += U[i] * Cij;
+            Xirr += -U[i] * Cij * U[j];            
+            //Xirr += -U[i] * Cij * U[j] + (0.166*6 * viscosity_ * volume) * I;            
         }
     }
 
@@ -150,33 +165,30 @@ bool HydrodynamicsModel::calcHydrodyanmicsProps() {
     Mat3x3d Dorr; //rotational diffusion tensor at arbitrary origin O
     Mat3x3d Dotr; //translation-rotation couplingl diffusion tensor at arbitrary origin O
 
-    Mat3x3d XirrInv(0.0);
-    Mat3x3d XirrCopy;
-    XirrCopy = Xirr;
+    const static Mat3x3d zeroMat(0.0);
     
     Mat3x3d XittInv(0.0);
-    Mat3x3d XittCopy;
-    XittCopy = Xitt;
-    invertMatrix(XittCopy, XittInv);
+    XittInv = Xitt.inverse();
+    
+    //Xirr may not be inverted,if it one of the diagonal element is zero, for example
+    //( a11 a12 0)
+    //( a21 a22 0)
+    //( 0    0    0)
+    Mat3x3d XirrInv;
+    XirrInv = Xirr.inverse();
 
     Mat3x3d tmp;
     Mat3x3d tmpInv;
     tmp = Xitt - Xitr.transpose() * XirrInv * Xitr;
-
-    const static Mat3x3d zeroMat(0.0);
-    if (!invertMatrix(tmp, tmpInv)) {
-        tmpInv = zeroMat;
-    }
+    tmpInv = tmp.inverse();
 
     Dott = kt * tmpInv;
-    Dotr = -kt*XirrInv * Xitr * tmpInv;
+    Dotr = -kt*XirrInv * Xitr * tmpInv* 1.0E8;
 
-    tmp = Xirr - Xitr * XittInv * Xitr.transpose();
+    tmp = Xirr - Xitr * XittInv * Xitr.transpose();    
+    tmpInv = tmp.inverse();
     
-    if(!invertMatrix(tmp, tmpInv)) {
-        tmpInv = zeroMat;
-    }
-    Dorr = kt * tmpInv;
+    Dorr = kt * tmpInv*1.0E16;
 
     //Do.getSubMatrix(0, 0 , Dott);
     //Do.getSubMatrix(3, 0, Dotr);
@@ -198,9 +210,7 @@ bool HydrodynamicsModel::calcHydrodyanmicsProps() {
     tmpVec[1] = Dotr(2, 0) - Dotr(0, 2);
     tmpVec[2] = Dotr(0, 1) - Dotr(1, 0);
 
-    if(!invertMatrix(tmp, tmpInv)) {
-        tmpInv = zeroMat;
-    }
+    tmpInv = tmp.inverse();
     
     Vector3d rod = tmpInv * tmpVec;
 
@@ -246,7 +256,7 @@ void HydrodynamicsModel::writeDiffCenterAndDiffTensor(std::ostream& os) {
     os << "//translational diffusion tensor" << std::endl;
     os << props_.transDiff << std::endl;
 
-    os << "//translational diffusion tensor" << std::endl;
+    os << "//translation-rotation coupling diffusion tensor" << std::endl;
     os << props_.transRotDiff << std::endl;
 
     os << "//rotational diffusion tensor" << std::endl;
