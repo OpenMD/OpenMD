@@ -44,7 +44,7 @@
  *
  *  Created by Charles F. Vardeman II on 11/26/05.
  *  @author  Charles F. Vardeman II 
- *  @version $Id: RhoZ.cpp,v 1.3 2006-01-11 19:01:20 tim Exp $
+ *  @version $Id: RhoZ.cpp,v 1.4 2006-03-07 16:43:52 gezelter Exp $
  *
  */
 
@@ -58,8 +58,8 @@
 #include "primitives/Molecule.hpp"
 namespace oopse {
   
-  RhoZ::RhoZ(SimInfo* info, const std::string& filename, const std::string& sele, int len, int nrbins)
-  : StaticAnalyser(info, filename), selectionScript_(sele),  evaluator_(info), seleMan_(info), len_(len), nRBins_(nrbins){
+  RhoZ::RhoZ(SimInfo* info, const std::string& filename, const std::string& sele, double len, int nrbins)
+    : StaticAnalyser(info, filename), selectionScript_(sele),  evaluator_(info), seleMan_(info), len_(len), nRBins_(nrbins){
 
     evaluator_.loadScriptString(sele);
     if (!evaluator_.isDynamic()) {
@@ -67,7 +67,7 @@ namespace oopse {
     }
       
     
-    deltaR_ = len_ /nRBins_;
+    deltaR_ = len_ /(nRBins_);
     
     sliceSDLists_.resize(nRBins_);
     density_.resize(nRBins_);
@@ -78,20 +78,23 @@ namespace oopse {
   void RhoZ::process() {
     DumpReader reader(info_, dumpFilename_);    
     int nFrames = reader.getNFrames();
-    nProcessed_ = nFrames / step_;
-
+    nProcessed_ = nFrames/step_;
 
     for (int istep = 0; istep < nFrames; istep += step_) {
 
-        StuntDouble* sd;
-        int i;    
-        reader.readFrame(istep);
-        currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
+      int i;    
+      for (i=0; i < nRBins_; i++) {
+        sliceSDLists_[i].clear();
+      }
 
-        double sliceVolume = currentSnapshot_->getVolume() /nRBins_;
-        //assume simulation box will never change
-        //Mat3x3d hmat = currentSnapshot_->getHmat();
-        double halfBoxZ = len_ /2;      
+      StuntDouble* sd;
+      reader.readFrame(istep);
+      currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
+      
+      double sliceVolume = currentSnapshot_->getVolume() /nRBins_;
+      //assume simulation box will never change
+      //Mat3x3d hmat = currentSnapshot_->getHmat();
+      double halfBoxZ_ = len_ / 2.0;      
         
         if (evaluator_.isDynamic()) {
           seleMan_.setSelectionSet(evaluator_.evaluate());
@@ -107,21 +110,22 @@ namespace oopse {
         //determine which atom belongs to which slice
         for (sd = seleMan_.beginSelected(i); sd != NULL; sd = seleMan_.nextSelected(i)) {
            Vector3d pos = sd->getPos();
-           int binNo = (pos.z() + halfBoxZ) /deltaR_;
+           //int binNo = (pos.z() /deltaR_) - 1;
+           int binNo = (pos.z() + halfBoxZ_) /deltaR_   ;
+           //std::cout << "pos.z = " << pos.z() << " halfBoxZ_ = " << halfBoxZ_ << " deltaR_ = "  << deltaR_ << " binNo = " << binNo << "\n";
            sliceSDLists_[binNo].push_back(sd);
         }
 
         //loop over the slices to calculate the densities
-        for (std::size_t j = 0; j < sliceSDLists_.size(); ++j) {
+        for (i = 0; i < nRBins_; i++) {
             double totalMass = 0;
-            for (int k = 0; k < sliceSDLists_[j].size(); ++k) {
-                totalMass += sliceSDLists_[j][k]->getMass();
+            for (int k = 0; k < sliceSDLists_[i].size(); ++k) {
+                totalMass += sliceSDLists_[i][k]->getMass();
             }
-            density_[j] += totalMass/sliceVolume;
+            density_[i] += totalMass/sliceVolume;
         }
     }
 
-    
     writeDensity();
 
   }
@@ -132,11 +136,12 @@ namespace oopse {
     std::ofstream rdfStream(outputFilename_.c_str());
     if (rdfStream.is_open()) {
       rdfStream << "#RhoZ\n";
-      rdfStream << "#selection: (" << selectionScript_ << ")\t";
+      rdfStream << "#nFrames:\t" << nProcessed_ << "\n";
+      rdfStream << "#selection: (" << selectionScript_ << ")\n";
       rdfStream << "#z\tdensity\n";
       for (int i = 0; i < density_.size(); ++i) {
         double r = deltaR_ * (i + 0.5);
-        rdfStream << r << "\t" << density_[i]/nProcessed_ << "\n";
+        rdfStream << r << "\t" << 1.660535*density_[i]/nProcessed_ << "\n";
       }
       
     } else {

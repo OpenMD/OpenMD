@@ -44,7 +44,7 @@
  *
  *  Created by Charles F. Vardeman II on 11/26/05.
  *  @author  Charles F. Vardeman II 
- *  @version $Id: RhoZ.hpp,v 1.2 2006-01-09 22:14:32 tim Exp $
+ *  @version $Id: RhoZ.hpp,v 1.3 2006-03-07 16:43:53 gezelter Exp $
  *
  */
 #ifndef APPLICATIONS_STATICPROPS_RHOZ_HPP
@@ -56,7 +56,7 @@ namespace oopse {
   class RhoZ : public StaticAnalyser {
     
 public:
-    RhoZ(SimInfo* info, const std::string& filename, const std::string& sele, int len, int nrbins);
+    RhoZ(SimInfo* info, const std::string& filename, const std::string& sele, double  len, int nrbins);
     
     int getNRBins() {
       return nRBins_; 
@@ -81,9 +81,9 @@ private:
     SelectionManager seleMan_;
     
     double len_;
-    int nRBins_;
+    int nRBins_; 
     double deltaR_;
-
+    
     std::vector<std::vector<StuntDouble*> > sliceSDLists_;
     std::vector<double> density_;
   };
