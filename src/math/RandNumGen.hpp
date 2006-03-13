@@ -108,7 +108,7 @@ namespace oopse {
     }
 	
     /** Access to nonuniform random number distributions */
-    double randNorm( const double& mean, const double& variance) {
+    double randNorm( const double mean, const double variance) {
       return mtRand_->randNorm(mean, variance);
     }
 	

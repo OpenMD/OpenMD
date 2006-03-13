@@ -117,7 +117,7 @@ class Globals : public DataHolder {
   DeclareParameter(OutputForceVector, bool);
   DeclareParameter(SkinThickness, double);
   DeclareParameter(StatFileFormat, std::string);    
-
+  DeclareParameter(HydroPropFile, std::string);
   public:
     bool addComponent(Component* comp);
     bool addZConsStamp(ZConsStamp* zcons);
@@ -132,6 +132,9 @@ class Globals : public DataHolder {
 
     virtual void validate();
   private:
+
+    void parseHydroPropFile(const std::string& filename);
+    
     std::vector<Component*> components_;
     std::vector<ZConsStamp*> zconstraints_;    
     std::map<std::string, MoleculeStamp*> moleculeStamps_;

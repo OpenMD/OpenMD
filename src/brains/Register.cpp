@@ -51,6 +51,7 @@
 #include "integrators/NPTxyz.hpp"
 #include "integrators/NPAT.hpp"
 #include "integrators/NPrT.hpp"
+#include "integrators/LangevinDynamics.hpp"
 
 #include "minimizers/MinimizerFactory.hpp"
 #include "minimizers/MinimizerCreator.hpp"
@@ -104,6 +105,8 @@ namespace oopse {
     IntegratorFactory::getInstance()->registerIntegrator(new IntegratorBuilder<NPTxyz>("NPTXYZ"));
     IntegratorFactory::getInstance()->registerIntegrator(new IntegratorBuilder<NPAT>("NPAT"));
     IntegratorFactory::getInstance()->registerIntegrator(new IntegratorBuilder<NPrT>("NPRT"));
+    IntegratorFactory::getInstance()->registerIntegrator(new IntegratorBuilder<LangevinDynamics>("LANGEVINDYNAMICS"));
+    
 
   }
 

@@ -47,7 +47,7 @@
  */
 #ifndef MATH_SQUAREMATRIX3_HPP
 #define  MATH_SQUAREMATRIX3_HPP
-
+#include <vector>
 #include "Quaternion.hpp"
 #include "SquareMatrix.hpp"
 #include "Vector3.hpp"
@@ -322,19 +322,51 @@ namespace oopse {
       if (fabs(det) <= oopse::epsilon) {
 	//"The method was called on a matrix with |determinant| <= 1e-6.",
 	//"This is a runtime or a programming error in your application.");
-      }
+        std::vector<int> zeroDiagElementIndex;
+        for (int i =0; i < 3; ++i) {
+            if (fabs(this->data_[i][i]) <= oopse::epsilon) {
+                zeroDiagElementIndex.push_back(i);
+            }
+        }
 
-      m(0, 0) = this->data_[1][1]*this->data_[2][2] - this->data_[1][2]*this->data_[2][1];
-      m(1, 0) = this->data_[1][2]*this->data_[2][0] - this->data_[1][0]*this->data_[2][2];
-      m(2, 0) = this->data_[1][0]*this->data_[2][1] - this->data_[1][1]*this->data_[2][0];
-      m(0, 1) = this->data_[2][1]*this->data_[0][2] - this->data_[2][2]*this->data_[0][1];
-      m(1, 1) = this->data_[2][2]*this->data_[0][0] - this->data_[2][0]*this->data_[0][2];
-      m(2, 1) = this->data_[2][0]*this->data_[0][1] - this->data_[2][1]*this->data_[0][0];
-      m(0, 2) = this->data_[0][1]*this->data_[1][2] - this->data_[0][2]*this->data_[1][1];
-      m(1, 2) = this->data_[0][2]*this->data_[1][0] - this->data_[0][0]*this->data_[1][2];
-      m(2, 2) = this->data_[0][0]*this->data_[1][1] - this->data_[0][1]*this->data_[1][0];
+        if (zeroDiagElementIndex.size() == 2) {
+            int index = zeroDiagElementIndex[0];
+            m(index, index) = 1.0 / this->data_[index][index];
+        }else if (zeroDiagElementIndex.size() == 1) {
 
-      m /= det;
+            int a = (zeroDiagElementIndex[0] + 1) % 3;
+            int b = (zeroDiagElementIndex[0] + 2) %3;
+            double denom = this->data_[a][a] * this->data_[b][b] - this->data_[b][a]*this->data_[a][b];
+            m(a, a) = this->data_[b][b] /denom;
+            m(b, a) = -this->data_[b][a]/denom;
+
+            m(a,b) = -this->data_[a][b]/denom;
+            m(b, b) = this->data_[a][a]/denom;
+                
+        }
+      
+/*
+        for(std::vector<int>::iterator iter = zeroDiagElementIndex.begin(); iter != zeroDiagElementIndex.end() ++iter) {
+            if (this->data_[*iter][0] > oopse::epsilon || this->data_[*iter][1] ||this->data_[*iter][2] ||
+                this->data_[0][*iter] > oopse::epsilon || this->data_[1][*iter] ||this->data_[2][*iter] ) {
+                std::cout << "can not inverse matrix" << std::endl;
+            }
+        }
+*/
+      } else {
+
+          m(0, 0) = this->data_[1][1]*this->data_[2][2] - this->data_[1][2]*this->data_[2][1];
+          m(1, 0) = this->data_[1][2]*this->data_[2][0] - this->data_[1][0]*this->data_[2][2];
+          m(2, 0) = this->data_[1][0]*this->data_[2][1] - this->data_[1][1]*this->data_[2][0];
+          m(0, 1) = this->data_[2][1]*this->data_[0][2] - this->data_[2][2]*this->data_[0][1];
+          m(1, 1) = this->data_[2][2]*this->data_[0][0] - this->data_[2][0]*this->data_[0][2];
+          m(2, 1) = this->data_[2][0]*this->data_[0][1] - this->data_[2][1]*this->data_[0][0];
+          m(0, 2) = this->data_[0][1]*this->data_[1][2] - this->data_[0][2]*this->data_[1][1];
+          m(1, 2) = this->data_[0][2]*this->data_[1][0] - this->data_[0][0]*this->data_[1][2];
+          m(2, 2) = this->data_[0][0]*this->data_[1][1] - this->data_[0][1]*this->data_[1][0];
+
+          m /= det;
+	}
       return m;
     }
 

@@ -112,7 +112,7 @@ namespace oopse {
     double rand53();  // real number in [0,1)
 	
     // Access to nonuniform random number distributions
-    double randNorm( const double& mean = 0.0, const double& variance = 0.0 );
+    double randNorm( const double mean = 0.0, const double variance = 0.0 );
 	
     // Re-seeding functions with same behavior as initializers
     void seed( const uint32 oneSeed );
@@ -180,7 +180,7 @@ namespace oopse {
     return ( a * 67108864.0 + b ) * (1.0/9007199254740992.0);  // by Isaku Wada
   }
 
-  inline double MTRand::randNorm( const double& mean, const double& variance )
+  inline double MTRand::randNorm( const double mean, const double variance )
   {
     // Return a real number from a normal (Gaussian) distribution with given
     // mean and variance by Box-Muller method

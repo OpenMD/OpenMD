@@ -64,7 +64,7 @@ std::pair<Vector3d, Vector3d> Spheric::getBox() {
     std::pair<Vector3d, Vector3d>  boundary;
     Vector3d r(radius_, radius_, radius_);
     boundary.first = origin_ - r;
-    boundary.first = origin_ + r;
+    boundary.second = origin_ + r;
     return boundary;
 }
 Ellipsoid::Ellipsoid(Vector3d origin, double radius, double ratio, Mat3x3d rotMat) 
@@ -95,7 +95,7 @@ std::pair<Vector3d, Vector3d> Ellipsoid::getBox() {
     double rad  = a_ > b_ ? a_ : b_; 
     Vector3d r(rad, rad, rad);
     boundary.first = origin_ - r;
-    boundary.first = origin_ + r;
+    boundary.second = origin_ + r;
     return boundary;
 }
 

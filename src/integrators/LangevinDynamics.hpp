@@ -38,62 +38,27 @@
  * University of Notre Dame has been advised of the possibility of
  * such damages.
  */
-#ifndef APPLICATION_HYDRODYNAMICS_HYDRODYNAMICSMODEL_HPP
-#define APPLICATION_HYDRODYNAMICS_HYDRODYNAMICSMODEL_HPP
+
+#ifndef INTEGRATOR_LANGEVINDYNAMICS_HPP
+#define INTEGRATOR_LANGEVINDYNAMICS_HPP
+#include <map>
 #include <vector>
+#include "integrators/VelocityVerletIntegrator.hpp"
 
-#include "math/Vector3.hpp"
-#include "math/SquareMatrix3.hpp"
-#include "math/DynamicRectMatrix.hpp"
-#include "primitives/Molecule.hpp"
-#include "applications/hydrodynamics/StuntDoubleShape.hpp"
-#include "utils/any.hpp"
 namespace oopse {
-struct HydrodynamicProps {
-    Vector3d diffCenter;
-    Mat3x3d Ddtt;
-    Mat3x3d Ddtr;
-    Mat3x3d Ddrr;
-    Mat3x3d Xidtt;
-    Mat3x3d Xidrt;
-    Mat3x3d Xidtr;
-    Mat3x3d Xidrr;
+
+
+
+class LangevinDynamics: public VelocityVerletIntegrator {
+  public:
+    LangevinDynamics(SimInfo* info);
+
+  private:    
+    virtual void moveA();
+    virtual void moveB();
+    virtual double calcConservedQuantity();            
+    
 };
-
-struct BeadParam {
-    std::string atomName;
-    Vector3d pos;
-    double radius;
-};
-
-typedef std::map<std::string, boost::any> DynamicProperty;
-
-class HydrodynamicsModel {
-    public:
-        HydrodynamicsModel(StuntDouble* sd, const DynamicProperty& extraParams);
-        bool calcHydrodyanmicsProps();
-
-        Vector3d getDiffCenter();
-        Mat3x3d getTransDiff();
-        Mat3x3d getRotDiff();
-        Mat3x3d getTransRotDiff();
-        void writeBeads(std::ostream& os);
-        void writeDiffCenterAndDiffTensor(std::ostream& os);
-    protected:
-        StuntDouble* sd_;
-    private:
-        virtual bool createBeads(std::vector<BeadParam>& beads) = 0;
-
-        void calcResistanceTensor();
-        void calcDiffusionTensor();
-        HydrodynamicProps props_;
-        std::vector<BeadParam> beads_;
-        double viscosity_;
-        double temperature_;
-        
-};
-
 
 }
-
 #endif

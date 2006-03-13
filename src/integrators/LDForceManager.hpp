@@ -38,19 +38,18 @@
  * University of Notre Dame has been advised of the possibility of
  * such damages.
  */
-#ifndef APPLICATION_HYDRODYNAMICS_HYDRODYNAMICSMODEL_HPP
-#define APPLICATION_HYDRODYNAMICS_HYDRODYNAMICSMODEL_HPP
-#include <vector>
+ 
+#ifndef INTEGRATOR_LDFORCEMANAGER_HPP
+#define INTEGRATOR_LDFORCEMANAGER_HPP
 
-#include "math/Vector3.hpp"
-#include "math/SquareMatrix3.hpp"
-#include "math/DynamicRectMatrix.hpp"
+#include "brains/ForceManager.hpp"
 #include "primitives/Molecule.hpp"
-#include "applications/hydrodynamics/StuntDoubleShape.hpp"
-#include "utils/any.hpp"
+#include "math/SeqRandNumGen.hpp"
+
 namespace oopse {
-struct HydrodynamicProps {
-    Vector3d diffCenter;
+
+struct HydroProp{
+    Vector3d cod;
     Mat3x3d Ddtt;
     Mat3x3d Ddtr;
     Mat3x3d Ddrr;
@@ -58,42 +57,29 @@ struct HydrodynamicProps {
     Mat3x3d Xidrt;
     Mat3x3d Xidtr;
     Mat3x3d Xidrr;
+
 };
 
-struct BeadParam {
-    std::string atomName;
-    Vector3d pos;
-    double radius;
+  /**
+   * @class LDForceManager
+   * Force manager for Lagevin Dynamics applying friction and random forces as well as torques.
+   */
+class LDForceManager : public ForceManager{
+
+  public:
+    LDForceManager(SimInfo * info);
+
+  protected:
+    virtual void postCalculation();
+
+  private:
+    std::map<std::string, HydroProp> parseFrictionFile(const std::string& filename);    
+    void genRandomForceAndTorque(Vector3d& force, Vector3d& torque, unsigned int index, double variance);
+    std::vector<HydroProp> hydroProps_;
+    SeqRandNumGen randNumGen_;    
+    double variance_;
 };
 
-typedef std::map<std::string, boost::any> DynamicProperty;
+} //end namespace oopse
+#endif //BRAINS_FORCEMANAGER_HPP
 
-class HydrodynamicsModel {
-    public:
-        HydrodynamicsModel(StuntDouble* sd, const DynamicProperty& extraParams);
-        bool calcHydrodyanmicsProps();
-
-        Vector3d getDiffCenter();
-        Mat3x3d getTransDiff();
-        Mat3x3d getRotDiff();
-        Mat3x3d getTransRotDiff();
-        void writeBeads(std::ostream& os);
-        void writeDiffCenterAndDiffTensor(std::ostream& os);
-    protected:
-        StuntDouble* sd_;
-    private:
-        virtual bool createBeads(std::vector<BeadParam>& beads) = 0;
-
-        void calcResistanceTensor();
-        void calcDiffusionTensor();
-        HydrodynamicProps props_;
-        std::vector<BeadParam> beads_;
-        double viscosity_;
-        double temperature_;
-        
-};
-
-
-}
-
-#endif

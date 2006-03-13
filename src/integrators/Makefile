@@ -13,7 +13,9 @@ Source    = \
 	NPTf.cpp \
 	NPTxyz.cpp \
 	NPAT.cpp \
-	NPrT.cpp
+	NPrT.cpp \
+	LDForceManager.cpp \
+        LangevinDynamics.cpp	
 
 RmiSource =
 
