@@ -63,7 +63,8 @@ Applications = \
 	applications/dynamicProps \
         applications/simpleBuilder\
 	applications/nanoRodBuilder \
-	applications/atom2mdin
+	applications/atom2mdin \
+	applications/hydrodynamics
 
 Samples = \
 	samples/alkane \
