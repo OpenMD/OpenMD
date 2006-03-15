@@ -245,8 +245,8 @@ namespace oopse {
         
     }
     
-    setFrc(frc);
-    setTrq(trq);
+    addFrc(frc);
+    addTrq(trq);
     
   }
 
