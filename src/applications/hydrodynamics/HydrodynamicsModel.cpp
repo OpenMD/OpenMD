@@ -175,13 +175,13 @@ void HydrodynamicsModel::calcDiffusionTensor() {
     tmp = Xitt - Xitr.transpose() * XirrInv * Xitr;
     tmpInv = tmp.inverse();
 
-    Dott = kt*tmpInv;
-    Dotr = -kt*XirrInv * Xitr * tmpInv;
+    Dott = tmpInv;
+    Dotr = -XirrInv * Xitr * tmpInv;
     
     tmp = Xirr - Xitr * XittInv * Xitr.transpose();    
     tmpInv = tmp.inverse();
     
-    Dorr = kt * tmpInv;
+    Dorr = tmpInv;
 
     //calculate center of diffusion
     tmp(0, 0) = Dorr(1, 1) + Dorr(2, 2);
@@ -228,8 +228,12 @@ void HydrodynamicsModel::calcDiffusionTensor() {
     SquareMatrix<double, 6> Xid;
     invertMatrix(Dd, Xid);
 
+    Ddtt *= kt;
+    Ddtr *=kt;
+    Ddrr *= kt;
+
     //Xidtt in units of kcal*fs*mol^-1*Ang^-2
-    Xid *= OOPSEConstant::kb*temperature_;
+    Xid *= OOPSEConstant::kb*temperature_/kt;
 
     Xid.getSubMatrix(0, 0, props_.Xidtt);
     Xid.getSubMatrix(0, 3, props_.Xidrt);
@@ -237,6 +241,8 @@ void HydrodynamicsModel::calcDiffusionTensor() {
     Xid.getSubMatrix(3, 3, props_.Xidrr);
 
 
+    std::cout << "viscosity = " << viscosity_ << std::endl;
+    std::cout << "temperature = " << temperature_ << std::endl;
     std::cout << "center of diffusion :" << std::endl;
     std::cout << rod << std::endl;
     std::cout << "diffusion tensor at center of diffusion " << std::endl;

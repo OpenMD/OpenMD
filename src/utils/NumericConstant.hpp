@@ -50,6 +50,7 @@
 #ifndef UTILS_NUMERICCONSTANT_HPP
 #define UTILS_NUMERICCONSTANT_HPP
 #include <cmath>
+#include <limits>
 namespace oopse {
 
   /**
@@ -58,7 +59,7 @@ namespace oopse {
    */
   namespace NumericConstant {
 
-    static const double epsilon = 0.000001;
+    static const double epsilon = std::numeric_limits<double>::epsilon();
     static const double PI = M_PI;
     static const double TWO_PI = 2.0 * PI;
   }
