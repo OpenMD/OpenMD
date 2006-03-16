@@ -41,6 +41,7 @@
 #include <fstream> 
 #include "integrators/LDForceManager.hpp"
 #include "math/CholeskyDecomposition.hpp"
+#include "utils/OOPSEConstant.hpp"
 namespace oopse {
 
   LDForceManager::LDForceManager(SimInfo* info) : ForceManager(info){
@@ -68,7 +69,7 @@ namespace oopse {
             
 	   }
     }
-    variance_ = 2.0*simParams->getDt();
+    variance_ = 2.0 * OOPSEConstant::kb*simParams->getTargetTemp()/simParams->getDt();
   }
   std::map<std::string, HydroProp> LDForceManager::parseFrictionFile(const std::string& filename) {
     std::map<std::string, HydroProp> props;
@@ -173,6 +174,7 @@ namespace oopse {
     Vector3d pos;
     Vector3d frc;
     Mat3x3d A;
+    Mat3x3d Atrans;
     Vector3d Tb;
     Vector3d ji;
     double mass;
@@ -203,18 +205,24 @@ namespace oopse {
 
              //apply friction force and torque at center of diffusion
              A = integrableObject->getA();
-             Vector3d rcd = A.transpose() * hydroProps_[index].cod;  
+             Atrans = A.transpose();
+             Vector3d rcd = Atrans * hydroProps_[index].cod;  
              Vector3d vcd = vel + cross(omega, rcd);
+             vcd = A* vcd;
              Vector3d frictionForce = -(hydroProps_[index].Xidtt * vcd + hydroProps_[index].Xidrt * omega);
+             frictionForce = Atrans*frictionForce;
              integrableObject->addFrc(frictionForce);
              Vector3d frictionTorque = - (hydroProps_[index].Xidtr * vcd + hydroProps_[index].Xidrr * omega);
-             integrableObject->addTrq(frictionTorque);
+             frictionTorque = Atrans*frictionTorque;
+             integrableObject->addTrq(frictionTorque+ cross(rcd, frictionForce));
              
              //apply random force and torque at center of diffustion
              Vector3d randomForce;
              Vector3d randomTorque;
              genRandomForceAndTorque(randomForce, randomTorque, index, variance_);
-             integrableObject->addFrc(randomForce);
+             randomForce = Atrans*randomForce;
+             randomTorque = Atrans* randomTorque;
+             integrableObject->addFrc(randomForce);            
              integrableObject->addTrq(randomTorque + cross(rcd, randomForce ));
              
           } else {
@@ -223,6 +231,9 @@ namespace oopse {
              Vector3d randomForce;
              Vector3d randomTorque;
              genRandomForceAndTorque(randomForce, randomTorque, index, variance_);
+
+             //randomForce /= OOPSEConstant::energyConvert;
+             //randomTorque /= OOPSEConstant::energyConvert;
              integrableObject->addFrc(frictionForce+randomForce);             
           }
 
@@ -238,6 +249,7 @@ namespace oopse {
   }
 
 void LDForceManager::genRandomForceAndTorque(Vector3d& force, Vector3d& torque, unsigned int index, double variance) {
+    /*
     SquareMatrix<double, 6> Dd;
     SquareMatrix<double, 6> S;
     Vector<double, 6> Z;
@@ -247,15 +259,38 @@ void LDForceManager::genRandomForceAndTorque(Vector3d& force, Vector3d& torque, 
     Dd.setSubMatrix(3, 0, hydroProps_[index].Ddtr);
     Dd.setSubMatrix(3, 3, hydroProps_[index].Ddrr);
     CholeskyDecomposition(Dd, S);
-    
+    */
+
+    SquareMatrix<double, 6> Xid;
+    SquareMatrix<double, 6> S;
+    Vector<double, 6> Z;
+    Vector<double, 6> generalForce;
+    Xid.setSubMatrix(0, 0, hydroProps_[index].Xidtt);
+    Xid.setSubMatrix(0, 3, hydroProps_[index].Xidrt);
+    Xid.setSubMatrix(3, 0, hydroProps_[index].Xidtr);
+    Xid.setSubMatrix(3, 3, hydroProps_[index].Xidrr);
+    CholeskyDecomposition(Xid, S);
+
+    /*
+    Xid *= variance;
+    Z[0] = randNumGen_.randNorm(0, 1.0);
+    Z[1] = randNumGen_.randNorm(0, 1.0);
+    Z[2] = randNumGen_.randNorm(0, 1.0);
+    Z[3] = randNumGen_.randNorm(0, 1.0);
+    Z[4] = randNumGen_.randNorm(0, 1.0);
+    Z[5] = randNumGen_.randNorm(0, 1.0);
+    */
+        
     Z[0] = randNumGen_.randNorm(0, variance);
     Z[1] = randNumGen_.randNorm(0, variance);
     Z[2] = randNumGen_.randNorm(0, variance);
     Z[3] = randNumGen_.randNorm(0, variance);
     Z[4] = randNumGen_.randNorm(0, variance);
     Z[5] = randNumGen_.randNorm(0, variance);
-        
+     
+
     generalForce = S*Z;
+    
     force[0] = generalForce[0];
     force[1] = generalForce[1];
     force[2] = generalForce[2];

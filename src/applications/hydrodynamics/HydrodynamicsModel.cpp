@@ -221,15 +221,16 @@ void HydrodynamicsModel::calcDiffusionTensor() {
     Dd.setSubMatrix(3, 0, Ddtr);
     Dd.setSubMatrix(3, 3, Ddrr);    
     SquareMatrix<double, 6> Xid;
-    invertMatrix(Dd, Xid);
-
     Ddtt *= kt;
     Ddtr *=kt;
     Ddrr *= kt;
+    invertMatrix(Dd, Xid);
+
+
 
     //Xidtt in units of kcal*fs*mol^-1*Ang^-2
-    Xid *= OOPSEConstant::kb*temperature_/kt;
-
+    //Xid /= OOPSEConstant::energyConvert;
+    Xid *= OOPSEConstant::kb * temperature_;
     props_.diffCenter = rod;
     props_.Ddtt = Ddtt;
     props_.Ddtr = Ddtr;
