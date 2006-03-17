@@ -41,7 +41,8 @@
  
 #include "applications/hydrodynamics/HydrodynamicsModelFactory.hpp"
 #include "applications/hydrodynamics/HydrodynamicsModelCreator.hpp"
-
+#include "applications/hydrodynamics/HydrodynamicsModel.hpp"
+#include "brains/SimInfo.hpp"
 namespace oopse {
 
   //initialize instance of HydrodynamicsModelFactory
@@ -64,11 +65,11 @@ namespace oopse {
     return creatorMap_.erase(id) == 1;
   }
 
-  HydrodynamicsModel* HydrodynamicsModelFactory::createHydrodynamicsModel(const std::string& id, StuntDouble* sd, const DynamicProperty& param) {
+  HydrodynamicsModel* HydrodynamicsModelFactory::createHydrodynamicsModel(const std::string& id, StuntDouble* sd, SimInfo* info) {
     CreatorMapType::iterator i = creatorMap_.find(id);
     if (i != creatorMap_.end()) {
       //invoke functor to create object
-      return (i->second)->create(sd, param);
+      return (i->second)->create(sd, info);
     } else {
       return NULL;
     }

@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
@@ -39,21 +38,23 @@
  * University of Notre Dame has been advised of the possibility of
  * such damages.
  */
-#ifndef APPLICATION_HYDRODYNAMICS_BEADMODEL_HPP
-#define APPLICATION_HYDRODYNAMICS_BEADMODEL_HPP
 
-#include "applications/hydrodynamics/ApproximationModel.hpp"
-
+#ifndef APPLICATION_HYDRODYNAMICS_SHAPEBUILDER_HPP 
+#define APPLICATION_HYDRODYNAMICS_SHAPEBUILDER_HPP 
+#include "applications/hydrodynamics/Shape.hpp"
+#include "primitives/Molecule.hpp"
 namespace oopse {
 
-class BeadModel : public ApproximationModel {
+class ShapeBuilder {
     public:
-        BeadModel(StuntDouble* sd, SimInfo* info) : ApproximationModel(sd, info) {}
+    
+        static Shape* createShape(StuntDouble* sd);
     private:
-        virtual bool createBeads(std::vector<BeadParam>& beads);
-        bool createSingleBead(Atom* atom, std::vector<BeadParam>& beads);        
+        static Shape* internalCreateShape(Atom* atom);        
+        static Shape* internalCreateShape(DirectionalAtom* datom);
+        static Shape* internalCreateShape(RigidBody* rb);
+        
 };
 
 }
-
 #endif

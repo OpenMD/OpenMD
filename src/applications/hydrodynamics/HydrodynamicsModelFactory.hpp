@@ -60,7 +60,7 @@ namespace oopse {
   class HydrodynamicsModel;
   class HydrodynamicsModelCreator;
   class StuntDouble;
-  typedef std::map<std::string, boost::any> DynamicProperty;  
+  class SimInfo;
 
   /**
    * @class HydrodynamicsModelFactory HydrodynamicsModelFactory.hpp "UseTheForce/HydrodynamicsModelFactory.hpp"
@@ -111,7 +111,7 @@ namespace oopse {
      * creating this concrete object
      * @param id the identification of the concrete object
      */
-    HydrodynamicsModel* createHydrodynamicsModel(const std::string& id, StuntDouble* sd, const DynamicProperty& param);
+    HydrodynamicsModel* createHydrodynamicsModel(const std::string& id, StuntDouble* sd, SimInfo* info);
 
     /** 
      *  Returns all of the registed  type identifiers

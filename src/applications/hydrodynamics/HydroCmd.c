@@ -35,14 +35,11 @@ cmdline_parser_print_help (void)
   printf("\n"
   "Usage: %s [OPTIONS]...\n", CMDLINE_PARSER_PACKAGE);
   printf("\n");
-  printf("  -h, --help                Print help and exit\n");
-  printf("  -V, --version             Print version and exit\n");
-  printf("  -i, --input=filename      input dump file\n");
-  printf("  -o, --output=STRING       output file prefix  (default=`hydro')\n");
-  printf("      --viscosity=DOUBLE    viscosity of solvent\n");
-  printf("      --temperature=DOUBLE  temperature of the system\n");
-  printf("      --sigma=DOUBLE        diameter of beads(use with rough shell model)\n");
-  printf("      --model=STRING        hydrodynamics model (support RoughShell and \n                              BeadModel)\n");
+  printf("  -h, --help            Print help and exit\n");
+  printf("  -V, --version         Print version and exit\n");
+  printf("  -i, --input=filename  input dump file\n");
+  printf("  -o, --output=STRING   output file prefix  (default=`hydro')\n");
+  printf("      --model=STRING    hydrodynamics model (support RoughShell and BeadModel)\n");
 }
 
 
@@ -70,9 +67,6 @@ cmdline_parser (int argc, char * const *argv, struct gengetopt_args_info *args_i
   args_info->version_given = 0 ;
   args_info->input_given = 0 ;
   args_info->output_given = 0 ;
-  args_info->viscosity_given = 0 ;
-  args_info->temperature_given = 0 ;
-  args_info->sigma_given = 0 ;
   args_info->model_given = 0 ;
 #define clear_args() { \
   args_info->input_arg = NULL; \
@@ -97,9 +91,6 @@ cmdline_parser (int argc, char * const *argv, struct gengetopt_args_info *args_i
         { "version",	0, NULL, 'V' },
         { "input",	1, NULL, 'i' },
         { "output",	1, NULL, 'o' },
-        { "viscosity",	1, NULL, 0 },
-        { "temperature",	1, NULL, 0 },
-        { "sigma",	1, NULL, 0 },
         { "model",	1, NULL, 0 },
         { NULL,	0, NULL, 0 }
       };
@@ -147,50 +138,8 @@ cmdline_parser (int argc, char * const *argv, struct gengetopt_args_info *args_i
 
 
         case 0:	/* Long option with no short option */
-          /* viscosity of solvent.  */
-          if (strcmp (long_options[option_index].name, "viscosity") == 0)
-          {
-            if (args_info->viscosity_given)
-              {
-                fprintf (stderr, "%s: `--viscosity' option given more than once\n", CMDLINE_PARSER_PACKAGE);
-                clear_args ();
-                exit (EXIT_FAILURE);
-              }
-            args_info->viscosity_given = 1;
-            args_info->viscosity_arg = strtod (optarg, NULL);
-            break;
-          }
-          
-          /* temperature of the system.  */
-          else if (strcmp (long_options[option_index].name, "temperature") == 0)
-          {
-            if (args_info->temperature_given)
-              {
-                fprintf (stderr, "%s: `--temperature' option given more than once\n", CMDLINE_PARSER_PACKAGE);
-                clear_args ();
-                exit (EXIT_FAILURE);
-              }
-            args_info->temperature_given = 1;
-            args_info->temperature_arg = strtod (optarg, NULL);
-            break;
-          }
-          
-          /* diameter of beads(use with rough shell model).  */
-          else if (strcmp (long_options[option_index].name, "sigma") == 0)
-          {
-            if (args_info->sigma_given)
-              {
-                fprintf (stderr, "%s: `--sigma' option given more than once\n", CMDLINE_PARSER_PACKAGE);
-                clear_args ();
-                exit (EXIT_FAILURE);
-              }
-            args_info->sigma_given = 1;
-            args_info->sigma_arg = strtod (optarg, NULL);
-            break;
-          }
-          
           /* hydrodynamics model (support RoughShell and BeadModel).  */
-          else if (strcmp (long_options[option_index].name, "model") == 0)
+          if (strcmp (long_options[option_index].name, "model") == 0)
           {
             if (args_info->model_given)
               {
@@ -218,16 +167,6 @@ cmdline_parser (int argc, char * const *argv, struct gengetopt_args_info *args_i
   if (! args_info->input_given)
     {
       fprintf (stderr, "%s: '--input' ('-i') option required\n", CMDLINE_PARSER_PACKAGE);
-      missing_required_options = 1;
-    }
-  if (! args_info->viscosity_given)
-    {
-      fprintf (stderr, "%s: '--viscosity' option required\n", CMDLINE_PARSER_PACKAGE);
-      missing_required_options = 1;
-    }
-  if (! args_info->temperature_given)
-    {
-      fprintf (stderr, "%s: '--temperature' option required\n", CMDLINE_PARSER_PACKAGE);
       missing_required_options = 1;
     }
   if (! args_info->model_given)

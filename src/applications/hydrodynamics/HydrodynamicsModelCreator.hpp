@@ -58,7 +58,7 @@ namespace oopse {
     virtual ~HydrodynamicsModelCreator() {}
     const std::string& getIdent() const { return ident_; }
 
-    virtual HydrodynamicsModel* create(StuntDouble* sd, const DynamicProperty& param ) const = 0;
+    virtual HydrodynamicsModel* create(StuntDouble* sd, SimInfo* info) const = 0;
             
   private:
     std::string ident_;
@@ -72,7 +72,7 @@ namespace oopse {
   class HydrodynamicsModelBuilder : public HydrodynamicsModelCreator {
   public:
     HydrodynamicsModelBuilder(const std::string& ident) : HydrodynamicsModelCreator(ident) {}
-    virtual  HydrodynamicsModel* create(StuntDouble* sd, const DynamicProperty& param ) const {return new ConcreteHydrodynamicsModel(sd, param);}
+    virtual  HydrodynamicsModel* create(StuntDouble* sd, SimInfo* info) const {return new ConcreteHydrodynamicsModel(sd, info);}
   };
 
 }

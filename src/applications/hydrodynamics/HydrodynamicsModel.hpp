@@ -46,19 +46,10 @@
 #include "math/SquareMatrix3.hpp"
 #include "math/DynamicRectMatrix.hpp"
 #include "primitives/Molecule.hpp"
-#include "applications/hydrodynamics/StuntDoubleShape.hpp"
-#include "utils/any.hpp"
+#include "utils/HydroProps.hpp"
+#include "utils/OOPSEConstant.hpp"
+#include "utils/HydroProps.hpp"
 namespace oopse {
-struct HydrodynamicProps {
-    Vector3d diffCenter;
-    Mat3x3d Ddtt;
-    Mat3x3d Ddtr;
-    Mat3x3d Ddrr;
-    Mat3x3d Xidtt;
-    Mat3x3d Xidrt;
-    Mat3x3d Xidtr;
-    Mat3x3d Xidrr;
-};
 
 struct BeadParam {
     std::string atomName;
@@ -66,33 +57,35 @@ struct BeadParam {
     double radius;
 };
 
-typedef std::map<std::string, boost::any> DynamicProperty;
+class Spheric;
+class Ellipsoid;
+class CompositeShape;
 
 class HydrodynamicsModel {
     public:
-        HydrodynamicsModel(StuntDouble* sd, const DynamicProperty& extraParams);
-        bool calcHydrodyanmicsProps();
+        HydrodynamicsModel(StuntDouble* sd, SimInfo* info) : sd_(sd), info_(info) {}
+        virtual ~HydrodynamicsModel() {}
+        virtual bool calcHydroProps(Spheric* spheric, double viscosity, double temperature);
+        virtual bool calcHydroProps(Ellipsoid* ellipsoid, double viscosity, double temperature);
+        virtual bool calcHydroProps(CompositeShape* compositexShape, double viscosity, double temperature);
 
-        Vector3d getDiffCenter();
-        Mat3x3d getTransDiff();
-        Mat3x3d getRotDiff();
-        Mat3x3d getTransRotDiff();
-        void writeBeads(std::ostream& os);
-        void writeDiffCenterAndDiffTensor(std::ostream& os);
+        
+        virtual void writeBeads(std::ostream& os) {}
+        void writeHydroProps(std::ostream& os);
+        HydroProps getHydroPropsAtCR() {return cr_;}
+        HydroProps getHydroPropsAtCD() {return cd_;}
+        
+        void setCR(const HydroProps cr) {cr_ = cr;}
+        void setCD(const HydroProps cd) { cd_ = cd;}
+        std::string getStuntDoubleName() { return sd_->getType();}
     protected:
         StuntDouble* sd_;
+        SimInfo* info_;
     private:
-        virtual bool createBeads(std::vector<BeadParam>& beads) = 0;
-
-        void calcResistanceTensor();
-        void calcDiffusionTensor();
-        HydrodynamicProps props_;
+        HydroProps cr_;
+        HydroProps cd_;
         std::vector<BeadParam> beads_;
-        double viscosity_;
-        double temperature_;
-        
 };
-
 
 }
 

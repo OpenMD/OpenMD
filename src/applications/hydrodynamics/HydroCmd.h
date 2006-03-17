@@ -26,18 +26,12 @@ struct gengetopt_args_info
 {
   char * input_arg;	/* input dump file.  */
   char * output_arg;	/* output file prefix (default='hydro').  */
-  double viscosity_arg;	/* viscosity of solvent.  */
-  double temperature_arg;	/* temperature of the system.  */
-  double sigma_arg;	/* diameter of beads(use with rough shell model).  */
   char * model_arg;	/* hydrodynamics model (support RoughShell and BeadModel).  */
 
   int help_given ;	/* Whether help was given.  */
   int version_given ;	/* Whether version was given.  */
   int input_given ;	/* Whether input was given.  */
   int output_given ;	/* Whether output was given.  */
-  int viscosity_given ;	/* Whether viscosity was given.  */
-  int temperature_given ;	/* Whether temperature was given.  */
-  int sigma_given ;	/* Whether sigma was given.  */
   int model_given ;	/* Whether model was given.  */
 
 } ;

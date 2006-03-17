@@ -80,84 +80,96 @@ namespace oopse {
 
     const unsigned int BufferSize = 65535;
     char buffer[BufferSize];   
+    Mat3x3d Ddtt;
+    Mat3x3d Ddtr;
+    Mat3x3d Ddrr;
     while (ifs.getline(buffer, BufferSize)) {
         StringTokenizer tokenizer(buffer);
         HydroProp currProp;
-        if (tokenizer.countTokens() >= 67) {
+        if (tokenizer.countTokens() >= 40) {
             std::string atomName = tokenizer.nextToken();
-            currProp.cod[0] = tokenizer.nextTokenAsDouble();
-            currProp.cod[1] = tokenizer.nextTokenAsDouble();
-            currProp.cod[2] = tokenizer.nextTokenAsDouble();
+            currProp.cor[0] = tokenizer.nextTokenAsDouble();
+            currProp.cor[1] = tokenizer.nextTokenAsDouble();
+            currProp.cor[2] = tokenizer.nextTokenAsDouble();
 
-            currProp.Ddtt(0,0) = tokenizer.nextTokenAsDouble();
-            currProp.Ddtt(0,1) = tokenizer.nextTokenAsDouble();
-            currProp.Ddtt(0,2) = tokenizer.nextTokenAsDouble();
-            currProp.Ddtt(1,0) = tokenizer.nextTokenAsDouble();
-            currProp.Ddtt(1,1) = tokenizer.nextTokenAsDouble();
-            currProp.Ddtt(1,2) = tokenizer.nextTokenAsDouble();
-            currProp.Ddtt(2,0) = tokenizer.nextTokenAsDouble();
-            currProp.Ddtt(2,1) = tokenizer.nextTokenAsDouble();
-            currProp.Ddtt(2,2) = tokenizer.nextTokenAsDouble();
 
-            currProp.Ddtr(0,0) = tokenizer.nextTokenAsDouble();
-            currProp.Ddtr(0,1) = tokenizer.nextTokenAsDouble();
-            currProp.Ddtr(0,2) = tokenizer.nextTokenAsDouble();
-            currProp.Ddtr(1,0) = tokenizer.nextTokenAsDouble();
-            currProp.Ddtr(1,1) = tokenizer.nextTokenAsDouble();
-            currProp.Ddtr(1,2) = tokenizer.nextTokenAsDouble();
-            currProp.Ddtr(2,0) = tokenizer.nextTokenAsDouble();
-            currProp.Ddtr(2,1) = tokenizer.nextTokenAsDouble();
-            currProp.Ddtr(2,2) = tokenizer.nextTokenAsDouble();
+            Ddtt(0,0) = tokenizer.nextTokenAsDouble();
+            Ddtt(0,1) = tokenizer.nextTokenAsDouble();
+            Ddtt(0,2) = tokenizer.nextTokenAsDouble();
+            Ddtt(1,0) = tokenizer.nextTokenAsDouble();
+            Ddtt(1,1) = tokenizer.nextTokenAsDouble();
+            Ddtt(1,2) = tokenizer.nextTokenAsDouble();
+            Ddtt(2,0) = tokenizer.nextTokenAsDouble();
+            Ddtt(2,1) = tokenizer.nextTokenAsDouble();
+            Ddtt(2,2) = tokenizer.nextTokenAsDouble();
 
-            currProp.Ddrr(0,0) = tokenizer.nextTokenAsDouble();
-            currProp.Ddrr(0,1) = tokenizer.nextTokenAsDouble();
-            currProp.Ddrr(0,2) = tokenizer.nextTokenAsDouble();
-            currProp.Ddrr(1,0) = tokenizer.nextTokenAsDouble();
-            currProp.Ddrr(1,1) = tokenizer.nextTokenAsDouble();
-            currProp.Ddrr(1,2) = tokenizer.nextTokenAsDouble();
-            currProp.Ddrr(2,0) = tokenizer.nextTokenAsDouble();
-            currProp.Ddrr(2,1) = tokenizer.nextTokenAsDouble();
-            currProp.Ddrr(2,2) = tokenizer.nextTokenAsDouble();                
+            Ddtr(0,0) = tokenizer.nextTokenAsDouble();
+            Ddtr(0,1) = tokenizer.nextTokenAsDouble();
+            Ddtr(0,2) = tokenizer.nextTokenAsDouble();
+            Ddtr(1,0) = tokenizer.nextTokenAsDouble();
+            Ddtr(1,1) = tokenizer.nextTokenAsDouble();
+            Ddtr(1,2) = tokenizer.nextTokenAsDouble();
+            Ddtr(2,0) = tokenizer.nextTokenAsDouble();
+            Ddtr(2,1) = tokenizer.nextTokenAsDouble();
+            Ddtr(2,2) = tokenizer.nextTokenAsDouble();
 
-            currProp.Xidtt(0,0) = tokenizer.nextTokenAsDouble();
-            currProp.Xidtt(0,1) = tokenizer.nextTokenAsDouble();
-            currProp.Xidtt(0,2) = tokenizer.nextTokenAsDouble();
-            currProp.Xidtt(1,0) = tokenizer.nextTokenAsDouble();
-            currProp.Xidtt(1,1) = tokenizer.nextTokenAsDouble();
-            currProp.Xidtt(1,2) = tokenizer.nextTokenAsDouble();
-            currProp.Xidtt(2,0) = tokenizer.nextTokenAsDouble();
-            currProp.Xidtt(2,1) = tokenizer.nextTokenAsDouble();
-            currProp.Xidtt(2,2) = tokenizer.nextTokenAsDouble();
+            Ddrr(0,0) = tokenizer.nextTokenAsDouble();
+            Ddrr(0,1) = tokenizer.nextTokenAsDouble();
+            Ddrr(0,2) = tokenizer.nextTokenAsDouble();
+            Ddrr(1,0) = tokenizer.nextTokenAsDouble();
+            Ddrr(1,1) = tokenizer.nextTokenAsDouble();
+            Ddrr(1,2) = tokenizer.nextTokenAsDouble();
+            Ddrr(2,0) = tokenizer.nextTokenAsDouble();
+            Ddrr(2,1) = tokenizer.nextTokenAsDouble();
+            Ddrr(2,2) = tokenizer.nextTokenAsDouble();                
 
-            currProp.Xidrt(0,0) = tokenizer.nextTokenAsDouble();
-            currProp.Xidrt(0,1) = tokenizer.nextTokenAsDouble();
-            currProp.Xidrt(0,2) = tokenizer.nextTokenAsDouble();
-            currProp.Xidrt(1,0) = tokenizer.nextTokenAsDouble();
-            currProp.Xidrt(1,1) = tokenizer.nextTokenAsDouble();
-            currProp.Xidrt(1,2) = tokenizer.nextTokenAsDouble();
-            currProp.Xidrt(2,0) = tokenizer.nextTokenAsDouble();
-            currProp.Xidrt(2,1) = tokenizer.nextTokenAsDouble();
-            currProp.Xidrt(2,2) = tokenizer.nextTokenAsDouble();
-            
-            currProp.Xidtr(0,0) = tokenizer.nextTokenAsDouble();
-            currProp.Xidtr(0,1) = tokenizer.nextTokenAsDouble();
-            currProp.Xidtr(0,2) = tokenizer.nextTokenAsDouble();
-            currProp.Xidtr(1,0) = tokenizer.nextTokenAsDouble();
-            currProp.Xidtr(1,1) = tokenizer.nextTokenAsDouble();
-            currProp.Xidtr(1,2) = tokenizer.nextTokenAsDouble();
-            currProp.Xidtr(2,0) = tokenizer.nextTokenAsDouble();
-            currProp.Xidtr(2,1) = tokenizer.nextTokenAsDouble();
-            currProp.Xidtr(2,2) = tokenizer.nextTokenAsDouble();
+            currProp.Xirtt(0,0) = tokenizer.nextTokenAsDouble();
+            currProp.Xirtt(0,1) = tokenizer.nextTokenAsDouble();
+            currProp.Xirtt(0,2) = tokenizer.nextTokenAsDouble();
+            currProp.Xirtt(1,0) = tokenizer.nextTokenAsDouble();
+            currProp.Xirtt(1,1) = tokenizer.nextTokenAsDouble();
+            currProp.Xirtt(1,2) = tokenizer.nextTokenAsDouble();
+            currProp.Xirtt(2,0) = tokenizer.nextTokenAsDouble();
+            currProp.Xirtt(2,1) = tokenizer.nextTokenAsDouble();
+            currProp.Xirtt(2,2) = tokenizer.nextTokenAsDouble();
 
-            currProp.Xidrr(0,0) = tokenizer.nextTokenAsDouble();
-            currProp.Xidrr(0,1) = tokenizer.nextTokenAsDouble();
-            currProp.Xidrr(0,2) = tokenizer.nextTokenAsDouble();
-            currProp.Xidrr(1,0) = tokenizer.nextTokenAsDouble();
-            currProp.Xidrr(1,1) = tokenizer.nextTokenAsDouble();
-            currProp.Xidrr(1,2) = tokenizer.nextTokenAsDouble();
-            currProp.Xidrr(2,0) = tokenizer.nextTokenAsDouble();
-            currProp.Xidrr(2,1) = tokenizer.nextTokenAsDouble();
-            currProp.Xidrr(2,2) = tokenizer.nextTokenAsDouble(); 
+            currProp.Xirrt(0,0) = tokenizer.nextTokenAsDouble();
+            currProp.Xirrt(0,1) = tokenizer.nextTokenAsDouble();
+            currProp.Xirrt(0,2) = tokenizer.nextTokenAsDouble();
+            currProp.Xirrt(1,0) = tokenizer.nextTokenAsDouble();
+            currProp.Xirrt(1,1) = tokenizer.nextTokenAsDouble();
+            currProp.Xirrt(1,2) = tokenizer.nextTokenAsDouble();
+            currProp.Xirrt(2,0) = tokenizer.nextTokenAsDouble();
+            currProp.Xirrt(2,1) = tokenizer.nextTokenAsDouble();
+            currProp.Xirrt(2,2) = tokenizer.nextTokenAsDouble();
+         
+            currProp.Xirtr(0,0) = tokenizer.nextTokenAsDouble();
+            currProp.Xirtr(0,1) = tokenizer.nextTokenAsDouble();
+            currProp.Xirtr(0,2) = tokenizer.nextTokenAsDouble();
+            currProp.Xirtr(1,0) = tokenizer.nextTokenAsDouble();
+            currProp.Xirtr(1,1) = tokenizer.nextTokenAsDouble();
+            currProp.Xirtr(1,2) = tokenizer.nextTokenAsDouble();
+            currProp.Xirtr(2,0) = tokenizer.nextTokenAsDouble();
+            currProp.Xirtr(2,1) = tokenizer.nextTokenAsDouble();
+            currProp.Xirtr(2,2) = tokenizer.nextTokenAsDouble();
+
+            currProp.Xirrr(0,0) = tokenizer.nextTokenAsDouble();
+            currProp.Xirrr(0,1) = tokenizer.nextTokenAsDouble();
+            currProp.Xirrr(0,2) = tokenizer.nextTokenAsDouble();
+            currProp.Xirrr(1,0) = tokenizer.nextTokenAsDouble();
+            currProp.Xirrr(1,1) = tokenizer.nextTokenAsDouble();
+            currProp.Xirrr(1,2) = tokenizer.nextTokenAsDouble();
+            currProp.Xirrr(2,0) = tokenizer.nextTokenAsDouble();
+            currProp.Xirrr(2,1) = tokenizer.nextTokenAsDouble();
+            currProp.Xirrr(2,2) = tokenizer.nextTokenAsDouble(); 
+
+            SquareMatrix<double, 6> Xir;
+            Xir.setSubMatrix(0, 0, currProp.Xirtt);
+            Xir.setSubMatrix(0, 3, currProp.Xirrt);
+            Xir.setSubMatrix(3, 0, currProp.Xirtr);
+            Xir.setSubMatrix(3, 3, currProp.Xirrr);
+            CholeskyDecomposition(Xir, currProp.S);            
+
             props.insert(std::map<std::string, HydroProp>::value_type(atomName, currProp));
         }
     }
@@ -203,37 +215,35 @@ namespace oopse {
                  omega[2] = angMom[2] /I(2, 2);
              }
 
-             //apply friction force and torque at center of diffusion
+             //apply friction force and torque at center of resistance
              A = integrableObject->getA();
              Atrans = A.transpose();
-             Vector3d rcd = Atrans * hydroProps_[index].cod;  
-             Vector3d vcd = vel + cross(omega, rcd);
-             vcd = A* vcd;
-             Vector3d frictionForce = -(hydroProps_[index].Xidtt * vcd + hydroProps_[index].Xidrt * omega);
-             frictionForce = Atrans*frictionForce;
-             integrableObject->addFrc(frictionForce);
-             Vector3d frictionTorque = - (hydroProps_[index].Xidtr * vcd + hydroProps_[index].Xidrr * omega);
-             frictionTorque = Atrans*frictionTorque;
-             integrableObject->addTrq(frictionTorque+ cross(rcd, frictionForce));
-             
-             //apply random force and torque at center of diffustion
-             Vector3d randomForce;
-             Vector3d randomTorque;
-             genRandomForceAndTorque(randomForce, randomTorque, index, variance_);
-             randomForce = Atrans*randomForce;
-             randomTorque = Atrans* randomTorque;
-             integrableObject->addFrc(randomForce);            
-             integrableObject->addTrq(randomTorque + cross(rcd, randomForce ));
-             
+             Vector3d rcr = Atrans * hydroProps_[index].cor;  
+             Vector3d vcdLab = vel + cross(omega, rcr);
+             Vector3d vcdBody = A* vcdLab;
+             Vector3d frictionForceBody = -(hydroProps_[index].Xirtt * vcdBody + hydroProps_[index].Xirrt * omega);
+             Vector3d frictionForceLab = Atrans*frictionForceBody;
+             integrableObject->addFrc(frictionForceLab);
+             Vector3d frictionTorqueBody = - (hydroProps_[index].Xirtr * vcdBody + hydroProps_[index].Xirrr * omega);
+             Vector3d frictionTorqueLab = Atrans*frictionTorqueBody;
+             integrableObject->addTrq(frictionTorqueLab+ cross(rcr, frictionForceLab));
+
+             //apply random force and torque at center of resistance
+             Vector3d randomForceBody;
+             Vector3d randomTorqueBody;
+             genRandomForceAndTorque(randomForceBody, randomTorqueBody, index, variance_);
+             Vector3d randomForceLab = Atrans*randomForceBody;
+             Vector3d randomTorqueLab = Atrans* randomTorqueBody;
+             integrableObject->addFrc(randomForceLab);            
+             integrableObject->addTrq(randomTorqueLab + cross(rcr, randomForceLab ));             
+
           } else {
              //spheric atom
-             Vector3d frictionForce = -(hydroProps_[index].Xidtt *vel);     
+             Vector3d frictionForce = -(hydroProps_[index].Xirtt *vel);     
              Vector3d randomForce;
              Vector3d randomTorque;
              genRandomForceAndTorque(randomForce, randomTorque, index, variance_);
 
-             //randomForce /= OOPSEConstant::energyConvert;
-             //randomTorque /= OOPSEConstant::energyConvert;
              integrableObject->addFrc(frictionForce+randomForce);             
           }
 
@@ -249,37 +259,11 @@ namespace oopse {
   }
 
 void LDForceManager::genRandomForceAndTorque(Vector3d& force, Vector3d& torque, unsigned int index, double variance) {
-    /*
-    SquareMatrix<double, 6> Dd;
-    SquareMatrix<double, 6> S;
+
+
     Vector<double, 6> Z;
     Vector<double, 6> generalForce;
-    Dd.setSubMatrix(0, 0, hydroProps_[index].Ddtt);
-    Dd.setSubMatrix(0, 3, hydroProps_[index].Ddtr.transpose());
-    Dd.setSubMatrix(3, 0, hydroProps_[index].Ddtr);
-    Dd.setSubMatrix(3, 3, hydroProps_[index].Ddrr);
-    CholeskyDecomposition(Dd, S);
-    */
 
-    SquareMatrix<double, 6> Xid;
-    SquareMatrix<double, 6> S;
-    Vector<double, 6> Z;
-    Vector<double, 6> generalForce;
-    Xid.setSubMatrix(0, 0, hydroProps_[index].Xidtt);
-    Xid.setSubMatrix(0, 3, hydroProps_[index].Xidrt);
-    Xid.setSubMatrix(3, 0, hydroProps_[index].Xidtr);
-    Xid.setSubMatrix(3, 3, hydroProps_[index].Xidrr);
-    CholeskyDecomposition(Xid, S);
-
-    /*
-    Xid *= variance;
-    Z[0] = randNumGen_.randNorm(0, 1.0);
-    Z[1] = randNumGen_.randNorm(0, 1.0);
-    Z[2] = randNumGen_.randNorm(0, 1.0);
-    Z[3] = randNumGen_.randNorm(0, 1.0);
-    Z[4] = randNumGen_.randNorm(0, 1.0);
-    Z[5] = randNumGen_.randNorm(0, 1.0);
-    */
         
     Z[0] = randNumGen_.randNorm(0, variance);
     Z[1] = randNumGen_.randNorm(0, variance);
@@ -289,7 +273,7 @@ void LDForceManager::genRandomForceAndTorque(Vector3d& force, Vector3d& torque, 
     Z[5] = randNumGen_.randNorm(0, variance);
      
 
-    generalForce = S*Z;
+    generalForce = hydroProps_[index].S*Z;
     
     force[0] = generalForce[0];
     force[1] = generalForce[1];

@@ -41,8 +41,8 @@
 #ifndef APPLICATION_HYDRODYNAMICS_ROUGHSHELL_HPP
 #define APPLICATION_HYDRODYNAMICS_ROUGHSHELL_HPP
 
-#include "applications/hydrodynamics/HydrodynamicsModel.hpp"
-
+#include "applications/hydrodynamics/ApproximationModel.hpp"
+#include "applications/hydrodynamics/CompositeShape.hpp"
 namespace oopse {
 /**
  * @class Grid3d
@@ -110,13 +110,17 @@ class Grid3D {
 };
     
     
-class RoughShell : public HydrodynamicsModel {
+class RoughShell : public ApproximationModel {
     public:
-        RoughShell(StuntDouble* sd, const DynamicProperty& extraParams);
+        RoughShell(StuntDouble* sd, SimInfo* info);
+        virtual ~RoughShell() { delete shape_;}
+        void setSigma(double sigma) {sigma_ = sigma;}
+        double getSigma() {return sigma_;}
     private:
         virtual bool createBeads(std::vector<BeadParam>& beads);
-        StuntDoubleShape sdShape_;
+        //StuntDoubleShape sdShape_;
         double sigma_;
+        Shape* shape_;
 };
 
 }

@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
@@ -39,21 +38,41 @@
  * University of Notre Dame has been advised of the possibility of
  * such damages.
  */
-#ifndef APPLICATION_HYDRODYNAMICS_BEADMODEL_HPP
-#define APPLICATION_HYDRODYNAMICS_BEADMODEL_HPP
+#ifndef APPLICATION_HYDRODYNAMICS_APPROXIMATIONMODEL_HPP
+#define APPLICATION_HYDRODYNAMICS_APPROXIMATIONMODEL_HPP
+#include <vector>
 
-#include "applications/hydrodynamics/ApproximationModel.hpp"
-
+#include "math/Vector3.hpp"
+#include "math/SquareMatrix3.hpp"
+#include "math/DynamicRectMatrix.hpp"
+#include "primitives/Molecule.hpp"
+#include "utils/any.hpp"
+#include "applications/hydrodynamics/HydrodynamicsModel.hpp"
 namespace oopse {
 
-class BeadModel : public ApproximationModel {
+class Shape;
+class ApproximationModel :  public HydrodynamicsModel {
     public:
-        BeadModel(StuntDouble* sd, SimInfo* info) : ApproximationModel(sd, info) {}
+        ApproximationModel(StuntDouble* sd, SimInfo* info);
+
+        virtual bool calcHydroProps(Spheric* spheric, double viscosity, double temperature);
+        virtual bool calcHydroProps(Ellipsoid* ellipsoid, double viscosity, double temperature);
+        virtual bool calcHydroProps(CompositeShape* compositexShape, double viscosity, double temperature);
+
+
     private:
-        virtual bool createBeads(std::vector<BeadParam>& beads);
-        bool createSingleBead(Atom* atom, std::vector<BeadParam>& beads);        
+        bool internalCalcHydroProps(Shape* shape, double viscosity, double temperature);
+
+        
+        virtual bool createBeads(std::vector<BeadParam>& beads) = 0;
+
+        bool calcHydroPropsAtCR(std::vector<BeadParam>& beads, double viscosity, double temperature, HydroProps& cr);
+        bool calcHydroPropsAtCD(std::vector<BeadParam>& beads, double viscosity, double temperature, HydroProps& cd);
+        std::vector<BeadParam> beads_;
 };
+
 
 }
 
 #endif
+

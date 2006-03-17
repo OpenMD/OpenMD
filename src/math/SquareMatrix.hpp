@@ -387,6 +387,7 @@ namespace oopse {
   }
 
 
+  typedef SquareMatrix<double, 6> Mat6x6d;
 }
 #endif //MATH_SQUAREMATRIX_HPP 
 

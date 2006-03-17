@@ -99,6 +99,9 @@ Globals::Globals() {
   DefineOptionalParameter(CutoffPolicy, "cutoffPolicy");
   DefineOptionalParameter(SwitchingFunctionType, "switchingFunctionType");
   DefineOptionalParameter(HydroPropFile, "HydroPropFile");
+  DefineOptionalParameter(Viscosity, "viscosity");
+  DefineOptionalParameter(BeadSize, "beadSize");
+  
   DefineOptionalParameterWithDefaultValue(UsePeriodicBoundaryConditions, "usePeriodicBoundaryConditions", true);
   DefineOptionalParameterWithDefaultValue(UseInitalTime, "useInitialTime", false);
   DefineOptionalParameterWithDefaultValue(UseIntialExtendedSystemState, "useInitialExtendedSystemState", false);
@@ -177,7 +180,8 @@ void Globals::validate() {
   CheckParameter(ThermIntOmegaSpringConst, isPositive());
   CheckParameter(DampingAlpha,isNonNegative());
   CheckParameter(SkinThickness, isPositive());
-
+  CheckParameter(Viscosity,isNonNegative());
+  CheckParameter(BeadSize,isPositive());
   for(std::vector<Component*>::iterator i = components_.begin(); i != components_.end(); ++i) {
     if (!(*i)->findMoleculeStamp(moleculeStamps_)) {
         std::ostringstream oss;

@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
@@ -39,21 +38,36 @@
  * University of Notre Dame has been advised of the possibility of
  * such damages.
  */
-#ifndef APPLICATION_HYDRODYNAMICS_BEADMODEL_HPP
-#define APPLICATION_HYDRODYNAMICS_BEADMODEL_HPP
 
-#include "applications/hydrodynamics/ApproximationModel.hpp"
-
+#include "applications/hydrodynamics/Spheric.hpp"
+#include "applications/hydrodynamics/HydrodynamicsModel.hpp"
 namespace oopse {
-
-class BeadModel : public ApproximationModel {
-    public:
-        BeadModel(StuntDouble* sd, SimInfo* info) : ApproximationModel(sd, info) {}
-    private:
-        virtual bool createBeads(std::vector<BeadParam>& beads);
-        bool createSingleBead(Atom* atom, std::vector<BeadParam>& beads);        
-};
+Spheric::Spheric(Vector3d origin, double radius) : origin_(origin), radius_(radius){
 
 }
 
-#endif
+bool Spheric::isInterior(Vector3d pos) {
+    Vector3d r = pos - origin_;
+
+    bool result;
+    if (r.length() < radius_)
+        result = true;
+    else
+        result = false;
+    
+    return result;
+}
+
+std::pair<Vector3d, Vector3d> Spheric::getBox() {
+    std::pair<Vector3d, Vector3d>  boundary;
+    Vector3d r(radius_, radius_, radius_);
+    boundary.first = origin_ - r;
+    boundary.second = origin_ + r;
+    return boundary;
+}
+
+bool Spheric::calcHydroProps(HydrodynamicsModel* model, double viscosity, double temperature) {
+    return model->calcHydroProps(this, viscosity, temperature);
+}
+
+}

@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
@@ -39,19 +38,33 @@
  * University of Notre Dame has been advised of the possibility of
  * such damages.
  */
-#ifndef APPLICATION_HYDRODYNAMICS_BEADMODEL_HPP
-#define APPLICATION_HYDRODYNAMICS_BEADMODEL_HPP
 
-#include "applications/hydrodynamics/ApproximationModel.hpp"
-
+#ifndef APPLICATION_HYDRODYNAMICS_ELLIPSOID_HPP
+#define APPLICATION_HYDRODYNAMICS_ELLIPSOID_HPP
+#include "applications/hydrodynamics/Shape.hpp"
+#include "math/SquareMatrix3.hpp"
 namespace oopse {
 
-class BeadModel : public ApproximationModel {
+/** @class Ellipsoid */
+class Ellipsoid : public Shape{
     public:
-        BeadModel(StuntDouble* sd, SimInfo* info) : ApproximationModel(sd, info) {}
-    private:
-        virtual bool createBeads(std::vector<BeadParam>& beads);
-        bool createSingleBead(Atom* atom, std::vector<BeadParam>& beads);        
+        Ellipsoid(Vector3d origin, double radius, double ratio, Mat3x3d rotMat);
+        virtual bool isInterior(Vector3d pos);
+        virtual std::pair<Vector3d, Vector3d> getBox();
+        virtual bool hasAnalyticalSolution() {return true;}
+
+       virtual bool calcHydroProps(HydrodynamicsModel* model, double viscosity, double temperature);
+
+
+        double getA() {return a_;}
+        double getB() {return b_;}
+
+     private:
+
+        Vector3d origin_;
+        double a_;
+        double b_;
+        Mat3x3d rotMat_;
 };
 
 }

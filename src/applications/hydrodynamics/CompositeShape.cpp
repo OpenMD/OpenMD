@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
@@ -39,21 +38,53 @@
  * University of Notre Dame has been advised of the possibility of
  * such damages.
  */
-#ifndef APPLICATION_HYDRODYNAMICS_BEADMODEL_HPP
-#define APPLICATION_HYDRODYNAMICS_BEADMODEL_HPP
 
-#include "applications/hydrodynamics/ApproximationModel.hpp"
-
+#include "applications/hydrodynamics/CompositeShape.hpp" 
+#include "utils/MemoryUtils.hpp"
+#include "applications/hydrodynamics/HydrodynamicsModel.hpp"
 namespace oopse {
 
-class BeadModel : public ApproximationModel {
-    public:
-        BeadModel(StuntDouble* sd, SimInfo* info) : ApproximationModel(sd, info) {}
-    private:
-        virtual bool createBeads(std::vector<BeadParam>& beads);
-        bool createSingleBead(Atom* atom, std::vector<BeadParam>& beads);        
-};
+CompositeShape::~CompositeShape() {
+    MemoryUtils::deletePointers(shapes_);
+}
+bool CompositeShape::isInterior(Vector3d pos) {
+    bool result = false;
+    std::vector<Shape*>::iterator iter;
+    for (iter = shapes_.begin(); iter != shapes_.end(); ++ iter) {
+        if ((*iter)->isInterior(pos)) {
+            result = true;
+            break;
+        }
+    }
+
+    return result;
+}
+
+template<class Cont, class Predict>
+void swap_if(Cont& b1, Cont& b2, Predict predict) {
+    unsigned int size = b1.size();
+    assert(size == b2.size());
+    for (unsigned int i = 0 ; i < size; ++i) {
+        if (predict(b1[i], b2[i]))
+            std::swap(b1[i], b2[i]);
+    }
 
 }
 
-#endif
+std::pair<Vector3d, Vector3d> CompositeShape::getBox() {
+    std::vector<Shape*>::iterator iter = shapes_.begin();
+    std::pair<Vector3d, Vector3d>  boundary = (*iter)->getBox();
+    for (++iter; iter != shapes_.end(); ++iter) {
+        std::pair<Vector3d, Vector3d> currBoundary = (*iter)->getBox();
+            swap_if(boundary.first, currBoundary.first, std::less<double>());
+            swap_if(boundary.second, currBoundary.second, std::greater<double>());        
+    }
+
+    return boundary;
+}
+
+bool CompositeShape::calcHydroProps(HydrodynamicsModel* model, double viscosity, double temperature) {
+    return model->calcHydroProps(this, viscosity, temperature);
+}
+
+}

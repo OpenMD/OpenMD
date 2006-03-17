@@ -48,16 +48,14 @@
 
 namespace oopse {
 
-struct HydroProp{
-    Vector3d cod;
-    Mat3x3d Ddtt;
-    Mat3x3d Ddtr;
-    Mat3x3d Ddrr;
-    Mat3x3d Xidtt;
-    Mat3x3d Xidrt;
-    Mat3x3d Xidtr;
-    Mat3x3d Xidrr;
 
+struct HydroProp{
+    Vector3d cor;
+    Mat3x3d Xirtt;
+    Mat3x3d Xirrt; //Xirrt == Xirtr
+    Mat3x3d Xirtr;
+    Mat3x3d Xirrr;
+    Mat6x6d S;
 };
 
   /**

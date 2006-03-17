@@ -40,16 +40,17 @@
  */
 
 #include "applications/hydrodynamics/RoughShell.hpp"
-
+#include "applications/hydrodynamics/ShapeBuilder.hpp"
+#include "brains/SimInfo.hpp"
 namespace oopse {
 
-RoughShell::RoughShell(StuntDouble* sd, const DynamicProperty& extraParams) : HydrodynamicsModel(sd, extraParams), sdShape_(sd){
-    DynamicProperty::const_iterator iter = extraParams.find("Sigma");
-    if (iter != extraParams.end()) {
-        boost::any param = iter->second;
-        sigma_ = boost::any_cast<double>(param);
+RoughShell::RoughShell(StuntDouble* sd, SimInfo* info) : ApproximationModel(sd, info){
+    shape_=ShapeBuilder::createShape(sd);
+    Globals* simParams = info->getSimParams();
+    if (simParams->haveBeadSize()) {
+        sigma_ = simParams->getBeadSize();
     }else {
-        std::cout << "RoughShell Model Error\n" ;
+
     }
 }
 
@@ -75,7 +76,7 @@ struct InteriorFunctor  : public std::unary_function<BeadLattice, bool>{
 
 };
 bool RoughShell::createBeads(std::vector<BeadParam>& beads) {
-    std::pair<Vector3d, Vector3d> boxBoundary = sdShape_.getBox();
+    std::pair<Vector3d, Vector3d> boxBoundary = shape_->getBox();
     double len = boxBoundary.second[0] - boxBoundary.first[0];
     int numLattices = static_cast<int>(len/sigma_) + 1;
     Grid3D<BeadLattice>  grid(numLattices, numLattices, numLattices);
@@ -87,7 +88,7 @@ bool RoughShell::createBeads(std::vector<BeadParam>& beads) {
                 BeadLattice& currentBead = grid(i, j, k);
                 currentBead.origin = Vector3d(i*sigma_ + boxBoundary.first[0], j *sigma_ + boxBoundary.first[1], k*sigma_+ boxBoundary.first[2]);
                 currentBead.radius = sigma_;
-                currentBead.interior = sdShape_.isInterior(grid(i, j, k).origin);                
+                currentBead.interior = shape_->isInterior(grid(i, j, k).origin);                
             }
         }
     }

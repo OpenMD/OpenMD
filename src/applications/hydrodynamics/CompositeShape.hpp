@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
@@ -39,21 +38,32 @@
  * University of Notre Dame has been advised of the possibility of
  * such damages.
  */
-#ifndef APPLICATION_HYDRODYNAMICS_BEADMODEL_HPP
-#define APPLICATION_HYDRODYNAMICS_BEADMODEL_HPP
 
-#include "applications/hydrodynamics/ApproximationModel.hpp"
-
+#ifndef APPLICATION_HYDRODYNAMICS_COMPOSITESHAPE_HPP
+#define APPLICATION_HYDRODYNAMICS_COMPOSITESHAPE_HPP
+#include "applications/hydrodynamics/Shape.hpp"
+#include <vector>
 namespace oopse {
+/**
+ * @class CompositexShape
+ * Combine composite pattern and visitor pattern
+ */ 
+class CompositeShape : public Shape {
 
-class BeadModel : public ApproximationModel {
     public:
-        BeadModel(StuntDouble* sd, SimInfo* info) : ApproximationModel(sd, info) {}
+        CompositeShape() {}
+        virtual ~CompositeShape();
+        virtual bool isInterior(Vector3d pos);
+        virtual std::pair<Vector3d, Vector3d> getBox();
+        virtual bool hasAnalyticalSolution() { return false;}
+       virtual bool calcHydroProps(HydrodynamicsModel* model, double viscosity, double temperature);
+        void addShape(Shape* s) {shapes_.push_back(s);}
+
     private:
-        virtual bool createBeads(std::vector<BeadParam>& beads);
-        bool createSingleBead(Atom* atom, std::vector<BeadParam>& beads);        
+
+        std::vector<Shape*> shapes_;        
+
 };
 
 }
-
 #endif

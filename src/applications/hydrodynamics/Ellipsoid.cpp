@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
@@ -39,21 +38,45 @@
  * University of Notre Dame has been advised of the possibility of
  * such damages.
  */
-#ifndef APPLICATION_HYDRODYNAMICS_BEADMODEL_HPP
-#define APPLICATION_HYDRODYNAMICS_BEADMODEL_HPP
 
-#include "applications/hydrodynamics/ApproximationModel.hpp"
-
+#include "applications/hydrodynamics/Ellipsoid.hpp"
+#include "applications/hydrodynamics/HydrodynamicsModel.hpp"
 namespace oopse {
 
-class BeadModel : public ApproximationModel {
-    public:
-        BeadModel(StuntDouble* sd, SimInfo* info) : ApproximationModel(sd, info) {}
-    private:
-        virtual bool createBeads(std::vector<BeadParam>& beads);
-        bool createSingleBead(Atom* atom, std::vector<BeadParam>& beads);        
-};
+Ellipsoid::Ellipsoid(Vector3d origin, double radius, double ratio, Mat3x3d rotMat) 
+    : origin_(origin), a_(radius), b_(radius*ratio), rotMat_(rotMat) {
 
 }
+bool Ellipsoid::isInterior(Vector3d pos) {
+    Vector3d r = pos - origin_;
+    Vector3d rbody = rotMat_ * r;
+    double xovera = rbody[0]/a_;
+    double yovera = rbody[1]/a_;
+    double zoverb = rbody[2]/b_;
 
-#endif
+    bool result;
+    if (xovera*xovera + yovera*yovera + zoverb*zoverb < 1)
+        result = true;
+    else
+        result = false;
+
+    return result;
+        
+}
+
+std::pair<Vector3d, Vector3d> Ellipsoid::getBox() {
+
+    std::pair<Vector3d, Vector3d>  boundary;
+    //make a cubic box
+    double rad  = a_ > b_ ? a_ : b_; 
+    Vector3d r(rad, rad, rad);
+    boundary.first = origin_ - r;
+    boundary.second = origin_ + r;
+    return boundary;
+}
+
+bool Ellipsoid::calcHydroProps(HydrodynamicsModel* model, double viscosity, double temperature) {
+    return model->calcHydroProps(this, viscosity, temperature);
+}
+
+}

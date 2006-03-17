@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
@@ -39,19 +38,28 @@
  * University of Notre Dame has been advised of the possibility of
  * such damages.
  */
-#ifndef APPLICATION_HYDRODYNAMICS_BEADMODEL_HPP
-#define APPLICATION_HYDRODYNAMICS_BEADMODEL_HPP
 
-#include "applications/hydrodynamics/ApproximationModel.hpp"
-
+#ifndef APPLICATION_HYDRODYNAMICS_SPHERIC_HPP
+#define APPLICATION_HYDRODYNAMICS_SPHERIC_HPP
+#include "applications/hydrodynamics/Shape.hpp"
+#include "math/Vector3.hpp"
 namespace oopse {
-
-class BeadModel : public ApproximationModel {
+/** @class Spheric */
+class Spheric : public Shape {
     public:
-        BeadModel(StuntDouble* sd, SimInfo* info) : ApproximationModel(sd, info) {}
-    private:
-        virtual bool createBeads(std::vector<BeadParam>& beads);
-        bool createSingleBead(Atom* atom, std::vector<BeadParam>& beads);        
+        Spheric(Vector3d origin, double radius);
+        virtual bool isInterior(Vector3d pos);
+        virtual std::pair<Vector3d, Vector3d> getBox();
+        virtual bool hasAnalyticalSolution() {return true;}
+
+       virtual bool calcHydroProps(HydrodynamicsModel* model, double viscosity, double temperature);
+ 
+
+        double getRadius() {return radius_;}
+        
+   private:
+        Vector3d origin_;
+        double radius_;
 };
 
 }

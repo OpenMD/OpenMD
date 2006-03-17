@@ -118,6 +118,9 @@ class Globals : public DataHolder {
   DeclareParameter(SkinThickness, double);
   DeclareParameter(StatFileFormat, std::string);    
   DeclareParameter(HydroPropFile, std::string);
+  DeclareParameter(Viscosity, double);
+  DeclareParameter(BeadSize, double);  
+  
   public:
     bool addComponent(Component* comp);
     bool addZConsStamp(ZConsStamp* zcons);
