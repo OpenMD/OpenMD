@@ -69,7 +69,7 @@ void calcHydrodynamicsProp(HydrodynamicsModel* model, Shape* shape,double viscos
 int main(int argc, char* argv[]){
   //register force fields
   registerForceFields();    
-
+  registerHydrodynamicsModels();
   
   gengetopt_args_info args_info;
   std::string dumpFileName;
@@ -119,7 +119,7 @@ int main(int argc, char* argv[]){
   if (simParams->haveViscosity()) {
     viscosity = simParams->getViscosity();
   } else {
-    sprintf(painCave.errMsg, "target temperature must be set\n");
+    sprintf(painCave.errMsg, "viscosity must be set\n");
     painCave.isFatal = 1;
     simError();  
   }
@@ -127,7 +127,7 @@ int main(int argc, char* argv[]){
   if (simParams->haveTargetTemp()) {
     temperature = simParams->getTargetTemp();
   } else {
-    sprintf(painCave.errMsg, "viscosity must be set\n");
+    sprintf(painCave.errMsg, "target temperaturemust be set\n");
     painCave.isFatal = 1;
     simError();  
   }
@@ -157,7 +157,7 @@ int main(int argc, char* argv[]){
   
   std::ofstream outputDiff(outputFilename.c_str());
   std::map<std::string, SDShape>::iterator si;
-  for (si != uniqueStuntDoubles.begin(); si != uniqueStuntDoubles.end(); ++si) {
+  for (si = uniqueStuntDoubles.begin(); si != uniqueStuntDoubles.end(); ++si) {
       HydrodynamicsModel* model;
       Shape* shape = si->second.shape;
       StuntDouble* sd = si->second.sd;;

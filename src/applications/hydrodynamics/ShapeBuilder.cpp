@@ -47,9 +47,9 @@ namespace oopse {
 Shape* ShapeBuilder::createShape(StuntDouble* sd) {
     Shape* currShape = NULL;
             if (sd->isDirectionalAtom()) {
-              currShape = internalCreateShape(static_cast<Atom*>(sd));
+              currShape = internalCreateShape(static_cast<DirectionalAtom*>(sd));
             } else if (sd->isAtom()) {
-                currShape = internalCreateShape(static_cast<DirectionalAtom*>(sd));
+                currShape = internalCreateShape(static_cast<Atom*>(sd));
             } else if (sd->isRigidBody()) {
                 currShape = internalCreateShape(static_cast<RigidBody*>(sd));
             }
@@ -122,9 +122,9 @@ Shape* ShapeBuilder::internalCreateShape(RigidBody* rb) {
         for (atom = rb->beginAtom(ai); atom != NULL; atom = rb->nextAtom(ai)) {
             Shape* currShape = NULL;
             if (atom->isDirectionalAtom()){
-                currShape = internalCreateShape(static_cast<Atom*>(atom));
+                currShape = internalCreateShape(static_cast<DirectionalAtom*>(atom));
             }else if (atom->isAtom()){
-                currShape =  internalCreateShape(static_cast<DirectionalAtom*>(atom));
+                currShape =  internalCreateShape(static_cast<Atom*>(atom));
             }
             if (currShape != NULL)
                 compositeShape->addShape(currShape);
