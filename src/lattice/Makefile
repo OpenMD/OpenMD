@@ -4,7 +4,8 @@ Source    = \
 	Lattice.cpp \
 	CubicLattice.cpp \
 	FCCLattice.cpp \
-	LatticeFactory.cpp
+	LatticeFactory.cpp \
+	shapedLattice.cpp 
 
 RmiSource =
 
