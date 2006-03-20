@@ -74,62 +74,55 @@ bool AnalyticalModel::calcHydroProps(Spheric* spheric, double viscosity, double 
 }
 
 /**
- * calculate the ratio of friction coeffiction constant between ellipsoid and spheric 
- * with same volume.
- * @param m
- * @param n 
- * @note 
  * Reference:
- *
- * (1) Victor A. Bloomfield, On-Line Biophysics Textbook, Volume: Separations and Hydrodynamics
- * Chapter 1,Survey of Biomolecular Hydrodynamics
- * http://www.biophysics.org/education/vbloomfield.pdf 
  * (2) F. Perrin , J. Phys. Radium, [7] 5, 497-511, 1934
  * (3) F. Perrin, J. Phys. Radium, [7] 7, 1-11, 1936
  */        
 bool AnalyticalModel::calcHydroProps(Ellipsoid* ellipsoid, double viscosity, double temperature) {
-    double ft;
-    double fra;
-    double frb;
-    double a = ellipsoid->getA();
-    double b = ellipsoid->getB();
-    double q = a/b; //?
-    if (q > 1.0) {//prolate
-        ft = sqrt(1-q*q)/(pow(q, 2.0/3.0)*log((1 + sqrt(1-q*q))/q));
-        fra = 4*(1-q*q)/(3*(2 - 2*pow(q, 4.0/3.0)/ft)); //not sure
-        frb = 4*(1-q*q*q*q) /(3*q*q*(2*pow(q, -2.0/3.0)*(2-q*q)/ft-2));
-    } else {//oblate
-        ft = sqrt(1-q*q)/(pow(q, 2.0/3.0)*atan(sqrt(q*q-1)));
-        fra = 4*(1-q*q)/(3*(2 - 2*pow(q, 4.0/3.0)/ft)); //not sure
-        frb = 4*(1-q*q*q*q) /(3*q*q*(2*pow(q, -2.0/3.0)*(2-q*q)/ft-2));
+
+    double rMajor = ellipsoid->getRMajor();
+    double rMinor = ellipsoid->getRMinor();
+
+    double a = rMinor;
+    double b = rMajor;
+    double a2 = a * a;
+    double b2 = b* b;
+    
+    double p = a /b;
+    double S;
+    if (p > 1.0) { //prolate
+        S = 2.0/sqrt(a2 - b2) * log((a + sqrt(a2-b2))/b);
+    } { //oblate
+        S = 2.0/sqrt(b2 - a2) * atan(sqrt(b2-a2)/a);
     }
-                    
-    double radius = pow(a*a*b, 1.0/3.0);
+
+    double P = 1.0/(a2 - b2) * (S - 2.0/a);
+    double Q = 0.5/(a2-b2) * (2.0*a/b2 - S);
+
+    double transMinor = 16.0 * NumericConstant::PI * viscosity * (a2 - b2) /((2.0*a2-b2)*S -2.0*a);
+    double transMajor = 32.0 * NumericConstant::PI * viscosity * (a2 - b2) /((2.0*a2-3.0*b2)*S +2.0*a);
+    double rotMinor = 32.0/3.0 * NumericConstant::PI * viscosity *(a2 - b2) * b2 /(2.0*a -b2*S);
+    double rotMajor = 32.0/3.0 * NumericConstant::PI * viscosity *(a2*a2 - b2*b2)/((2.0*a2-b2)*S-2.0*a);
+    
+        
     HydroProps props;
-    double Xitt  = 6.0 * NumericConstant::PI * viscosity * radius;
-    double Xirr = 8.0 * NumericConstant::PI * viscosity * radius * radius * radius;
-    props.Xi(0, 0) = Xitt;
-    props.Xi(1, 1) = Xitt;
-    props.Xi(2, 2) = Xitt;
-    props.Xi(3, 3) = Xirr;
-    props.Xi(4, 4) = Xirr;
-    props.Xi(5, 5) = Xirr;
+
+    props.Xi(0,0) = transMajor;
+    props.Xi(1,1) = transMajor;
+    props.Xi(2,2) = transMinor;
+    props.Xi(3,3) = rotMajor;
+    props.Xi(4,4) = rotMajor;
+    props.Xi(5,5) = rotMinor;
     
     const double convertConstant = 6.023; //convert poise.angstrom to amu/fs
     props.Xi *= convertConstant;    
-    props.Xi(0,0) *= ft;
-    props.Xi(1,1) *= ft;
-    props.Xi(2,2) *= ft;
-    props.Xi(3,3) *= fra;
-    props.Xi(4,4) *= fra;
-    props.Xi(5,5) *= frb;
     
     Mat6x6d XiCopy = props.Xi;
-    XiCopy /= OOPSEConstant::kb * temperature;
     invertMatrix(XiCopy, props.D);
     double kt = OOPSEConstant::kB * temperature;
     props.D *= kt;
-
+    props.Xi *= OOPSEConstant::kb * temperature;
+    
     setCR(props);
     setCD(props);
 

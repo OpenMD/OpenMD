@@ -80,9 +80,6 @@ namespace oopse {
 
     const unsigned int BufferSize = 65535;
     char buffer[BufferSize];   
-    Mat3x3d Ddtt;
-    Mat3x3d Ddtr;
-    Mat3x3d Ddrr;
     while (ifs.getline(buffer, BufferSize)) {
         StringTokenizer tokenizer(buffer);
         HydroProp currProp;
@@ -91,38 +88,7 @@ namespace oopse {
             currProp.cor[0] = tokenizer.nextTokenAsDouble();
             currProp.cor[1] = tokenizer.nextTokenAsDouble();
             currProp.cor[2] = tokenizer.nextTokenAsDouble();
-
-
-            Ddtt(0,0) = tokenizer.nextTokenAsDouble();
-            Ddtt(0,1) = tokenizer.nextTokenAsDouble();
-            Ddtt(0,2) = tokenizer.nextTokenAsDouble();
-            Ddtt(1,0) = tokenizer.nextTokenAsDouble();
-            Ddtt(1,1) = tokenizer.nextTokenAsDouble();
-            Ddtt(1,2) = tokenizer.nextTokenAsDouble();
-            Ddtt(2,0) = tokenizer.nextTokenAsDouble();
-            Ddtt(2,1) = tokenizer.nextTokenAsDouble();
-            Ddtt(2,2) = tokenizer.nextTokenAsDouble();
-
-            Ddtr(0,0) = tokenizer.nextTokenAsDouble();
-            Ddtr(0,1) = tokenizer.nextTokenAsDouble();
-            Ddtr(0,2) = tokenizer.nextTokenAsDouble();
-            Ddtr(1,0) = tokenizer.nextTokenAsDouble();
-            Ddtr(1,1) = tokenizer.nextTokenAsDouble();
-            Ddtr(1,2) = tokenizer.nextTokenAsDouble();
-            Ddtr(2,0) = tokenizer.nextTokenAsDouble();
-            Ddtr(2,1) = tokenizer.nextTokenAsDouble();
-            Ddtr(2,2) = tokenizer.nextTokenAsDouble();
-
-            Ddrr(0,0) = tokenizer.nextTokenAsDouble();
-            Ddrr(0,1) = tokenizer.nextTokenAsDouble();
-            Ddrr(0,2) = tokenizer.nextTokenAsDouble();
-            Ddrr(1,0) = tokenizer.nextTokenAsDouble();
-            Ddrr(1,1) = tokenizer.nextTokenAsDouble();
-            Ddrr(1,2) = tokenizer.nextTokenAsDouble();
-            Ddrr(2,0) = tokenizer.nextTokenAsDouble();
-            Ddrr(2,1) = tokenizer.nextTokenAsDouble();
-            Ddrr(2,2) = tokenizer.nextTokenAsDouble();                
-
+            
             currProp.Xirtt(0,0) = tokenizer.nextTokenAsDouble();
             currProp.Xirtt(0,1) = tokenizer.nextTokenAsDouble();
             currProp.Xirtt(0,2) = tokenizer.nextTokenAsDouble();

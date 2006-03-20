@@ -48,7 +48,7 @@ namespace oopse {
 /** @class Ellipsoid */
 class Ellipsoid : public Shape{
     public:
-        Ellipsoid(Vector3d origin, double radius, double ratio, Mat3x3d rotMat);
+        Ellipsoid(Vector3d origin, double rMajor, double rMinor, Mat3x3d rotMat);
         virtual bool isInterior(Vector3d pos);
         virtual std::pair<Vector3d, Vector3d> getBox();
         virtual bool hasAnalyticalSolution() {return true;}
@@ -56,14 +56,14 @@ class Ellipsoid : public Shape{
        virtual bool calcHydroProps(HydrodynamicsModel* model, double viscosity, double temperature);
 
 
-        double getA() {return a_;}
-        double getB() {return b_;}
+        double getRMajor() {return rMajor_;}
+        double getRMinor() {return rMinor_;}
 
      private:
 
         Vector3d origin_;
-        double a_;
-        double b_;
+        double rMajor_;
+        double rMinor_;
         Mat3x3d rotMat_;
 };
 

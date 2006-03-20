@@ -43,16 +43,16 @@
 #include "applications/hydrodynamics/HydrodynamicsModel.hpp"
 namespace oopse {
 
-Ellipsoid::Ellipsoid(Vector3d origin, double radius, double ratio, Mat3x3d rotMat) 
-    : origin_(origin), a_(radius), b_(radius*ratio), rotMat_(rotMat) {
+Ellipsoid::Ellipsoid(Vector3d origin, double rMajor, double rMinor,Mat3x3d rotMat) 
+    : origin_(origin), rMajor_(rMajor), rMinor_(rMinor), rotMat_(rotMat) {
 
 }
 bool Ellipsoid::isInterior(Vector3d pos) {
     Vector3d r = pos - origin_;
     Vector3d rbody = rotMat_ * r;
-    double xovera = rbody[0]/a_;
-    double yovera = rbody[1]/a_;
-    double zoverb = rbody[2]/b_;
+    double xovera = rbody[0]/rMajor_;
+    double yovera = rbody[1]/rMajor_;
+    double zoverb = rbody[2]/rMinor_;
 
     bool result;
     if (xovera*xovera + yovera*yovera + zoverb*zoverb < 1)
@@ -68,7 +68,7 @@ std::pair<Vector3d, Vector3d> Ellipsoid::getBox() {
 
     std::pair<Vector3d, Vector3d>  boundary;
     //make a cubic box
-    double rad  = a_ > b_ ? a_ : b_; 
+    double rad  = rMajor_ > rMinor_ ? rMajor_ : rMinor_; 
     Vector3d r(rad, rad, rad);
     boundary.first = origin_ - r;
     boundary.second = origin_ + r;
