@@ -111,6 +111,23 @@ Shape* ShapeBuilder::internalCreateShape(DirectionalAtom* datom) {
     	  painCave.isFatal = 1;
     	  simError();    
         }            
+    }else if (atomType->isLennardJones()){
+        GenericData* data = atomType->getPropertyByName("LennardJones");
+        if (data != NULL) {
+            LJParamGenericData* ljData = dynamic_cast<LJParamGenericData*>(data);
+
+            if (ljData != NULL) {
+                LJParam ljParam = ljData->getData();
+                currShape = new Spheric(datom->getPos(), ljParam.sigma/2.0);
+        } else {
+            sprintf( painCave.errMsg,
+            "Can not cast GenericData to LJParam\n");
+            painCave.severity = OOPSE_ERROR;
+            painCave.isFatal = 1;
+            simError();          
+            }       
+        }
+
     }
     return currShape;
 }

@@ -45,15 +45,28 @@ namespace oopse {
 bool BeadModel::createBeads(std::vector<BeadParam>& beads) {
 
     if (sd_->isAtom()) {
-        createSingleBead(static_cast<Atom*>(sd_), beads);
+        if (!createSingleBead(static_cast<Atom*>(sd_), beads)) {
+            sprintf( painCave.errMsg,
+            "BeadModel::createBeads Error: GayBerne and other non-spheric atoms should use RoughShell model\n");
+            painCave.severity = OOPSE_ERROR;
+            painCave.isFatal = 1;
+            simError();    
+            return false;
+        }
     }
     else if (sd_->isRigidBody()) {
         RigidBody* rb = static_cast<RigidBody*>(sd_);
         std::vector<Atom*>::iterator ai; 
         Atom* atom;
         for (atom = rb->beginAtom(ai); atom != NULL; atom = rb->nextAtom(ai)) {
-            if (!createSingleBead(atom, beads))
+            if (!createSingleBead(atom, beads)) {
+                sprintf( painCave.errMsg,
+                    "BeadModel::createBeads Error: GayBerne and other non-spheric atoms should use RoughShell model\n");
+                painCave.severity = OOPSE_ERROR;
+                painCave.isFatal = 1;
+                simError();    
                 return false;
+            }
         }
     }
 

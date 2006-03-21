@@ -92,7 +92,7 @@ bool AnalyticalModel::calcHydroProps(Ellipsoid* ellipsoid, double viscosity, dou
     double S;
     if (p > 1.0) { //prolate
         S = 2.0/sqrt(a2 - b2) * log((a + sqrt(a2-b2))/b);
-    } { //oblate
+    } else { //oblate
         S = 2.0/sqrt(b2 - a2) * atan(sqrt(b2-a2)/a);
     }
 

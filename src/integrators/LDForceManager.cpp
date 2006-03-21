@@ -50,7 +50,11 @@ namespace oopse {
     if (simParams->haveHydroPropFile()) {
         hydroPropMap = parseFrictionFile(simParams->getHydroPropFile());
     } else {
-        //error
+                sprintf( painCave.errMsg,
+                       "HydroPropFile keyword must be set if Lagevin Dynamics is used\n");
+                painCave.severity = OOPSE_ERROR;
+                painCave.isFatal = 1;
+                simError();  
     }
 
     SimInfo::MoleculeIterator i;
@@ -64,7 +68,11 @@ namespace oopse {
             if (iter != hydroPropMap.end()) {
                 hydroProps_.push_back(iter->second);
             } else {
-                //error
+                sprintf( painCave.errMsg,
+                       "Can not find resistance tensor for atom [%s]\n", integrableObject->getType().c_str());
+                painCave.severity = OOPSE_ERROR;
+                painCave.isFatal = 1;
+                simError();  
             }
             
 	   }
