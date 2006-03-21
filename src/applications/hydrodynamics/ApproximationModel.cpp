@@ -124,7 +124,7 @@ bool ApproximationModel::calcHydroPropsAtCR(std::vector<BeadParam>& beads, doubl
                 Vector3d Rij = beads[i].pos - beads[j].pos;
                 double rij = Rij.length();
                 double rij2 = rij * rij;
-                double sumSigma2OverRij2 = ((beads[i].radius*beads[i].radius) + (beads[i].radius*beads[i].radius)) / rij2;                
+                double sumSigma2OverRij2 = ((beads[i].radius*beads[i].radius) + (beads[j].radius*beads[j].radius)) / rij2;                
                 Mat3x3d tmpMat;
                 tmpMat = outProduct(Rij, Rij) / rij2;
                 double constant = 8.0 * NumericConstant::PI * viscosity * rij;
@@ -141,7 +141,7 @@ bool ApproximationModel::calcHydroPropsAtCR(std::vector<BeadParam>& beads, doubl
 
     //invert B Matrix
     invertMatrix(B, C);
-
+    
     //prepare U Matrix relative to arbitrary origin O(0.0, 0.0, 0.0)
     std::vector<Mat3x3d> U;
     for (int i = 0; i < nbeads; ++i) {
@@ -287,7 +287,7 @@ bool ApproximationModel::calcHydroPropsAtCD(std::vector<BeadParam>& beads, doubl
                 Vector3d Rij = beads[i].pos - beads[j].pos;
                 double rij = Rij.length();
                 double rij2 = rij * rij;
-                double sumSigma2OverRij2 = ((beads[i].radius*beads[i].radius) + (beads[i].radius*beads[i].radius)) / rij2;                
+                double sumSigma2OverRij2 = ((beads[i].radius*beads[i].radius) + (beads[j].radius*beads[j].radius)) / rij2;                
                 Mat3x3d tmpMat;
                 tmpMat = outProduct(Rij, Rij) / rij2;
                 double constant = 8.0 * NumericConstant::PI * viscosity * rij;
