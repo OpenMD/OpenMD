@@ -47,11 +47,11 @@
 #include <string>
 #include <map>
 #include <fstream>
+#include <algorithm>
 
 #include "config.h"
-
+#include "shapedLatticeSpherical.hpp"
 #include "nanoparticleBuilderCmd.h"
-#include "sphericalNanoparticle.hpp"
 #include "lattice/LatticeFactory.hpp"
 #include "utils/MoLocator.hpp"
 #include "lattice/Lattice.hpp"
@@ -67,7 +67,7 @@ using namespace std;
 using namespace oopse;
 void createMdFile(const std::string&oldMdFileName, 
                   const std::string&newMdFileName,
-                  int numMol);
+                  int components,int* numMol);
 
 int main(int argc, char *argv []) {
   
@@ -85,18 +85,19 @@ int main(int argc, char *argv []) {
   
   
   Lattice *simpleLat;
-  int numMol;
+  MoLocator* locator;
+  int* numMol;
+  int nComponents;
   double latticeConstant;
   std::vector<double> lc;
   double mass;
   const double rhoConvertConst = 1.661;
   double density;
+  double particleRadius;
   
   
 
   Mat3x3d hmat;
-  MoLocator *locator;
-  sphericalNanoparticle *nanoparticle;
   std::vector<Vector3d> latticePos;
   std::vector<Vector3d> latticeOrt;
   int numMolPerCell;
@@ -127,32 +128,6 @@ int main(int argc, char *argv []) {
   SimCreator oldCreator;
   SimInfo* oldInfo = oldCreator.createSim(inputFileName, false);
   
-  nShells = 0;
-  if (args_info.coreShellRadius_given){
-    nShells = args_info.coreShellRadius_given;
-  }
-  
-  nComponents = oldInfo->getNMoleculeStamp();
-  
-  /* Check to see if we have enough components to build that many shells. */
-  if (nShells){
-    if (oldInfo->getNMoleculeStamp() != nShells) {
-      std::cerr << "Not enough components present in MD file to build specified number of shells"
-      << std::endl;
-      exit(1);
-    }
-  }
-  
-  
-  //creat lattice
-  simpleLat = LatticeFactory::getInstance()->createLattice(latticeType);
-  
-  if (simpleLat == NULL) {
-    std::cerr << "Error in creating lattice" << std::endl;
-    exit(1);
-  }
-  
-  numMolPerCell = simpleLat->getNumSitesPerCell();
   
   /*calculate lattice constant (in Angstrom)
   latticeConstant = pow(rhoConvertConst * numMolPerCell * mass / density,
@@ -160,12 +135,10 @@ int main(int argc, char *argv []) {
   
   latticeConstant = args_info.latticeCnst_arg;
   particleRadius = args_info.radius_arg;
-  particleDiameter = 2.0 * particleRadius;
+  Globals* simParams = oldInfo->getSimParams();
   
-  /* set lattice constant */
-  lc.push_back(latticeConstant);
-  simpleLat->setLatticeConstant(lc);
-  
+  /* Find out how many different components in this simualtion */
+  nComponents =simParams->getNComponents();
   
   /*determine the output file names*/
   if (args_info.output_given){
@@ -173,50 +146,52 @@ int main(int argc, char *argv []) {
   }else{
     outInitFileName = getPrefix(inputFileName.c_str()) + ".in";
   }
-  
-         
-  
+   
   
   
   /* create Molocators */
   locator = new MoLocator(oldInfo->getMoleculeStamp(0), oldInfo->getForceField());
   
-  /* create a new spherical nanoparticle */
-  nanoparticle = new sphericalNanoparticle(particleRadius,latticeConstant);
-  /* Build a nanoparticle to see how many sites are there */
-  numSites = new int[nComponents]
-  int numSites = nanoparticle.getNMol(simpleLat);
+  /* Create nanoparticle */
+  shapedLatticeSpherical nanoParticle(latticeConstant,latticeType,particleRadius);
+  /* Build a lattice and get lattice points for this lattice constant */
+  vector<Vector3d> nanoParticleSites = nanoParticle.getPoints();
+  /* Get number of lattice sites */
+  numSites = nanoParticleSites.size();
+ 
+  numMol = new int[nComponents];
+ 
   
-
   /* Random particle is the default case*/
   if (!args_info.ShellRadius_given){
     std::cout << "Creating a random nanoparticle" << std::endl;
     /* Check to see if we have enough components */
     if (nComponents != args_info.molFraction_given + 1){
       std::cerr << "Number of components does not equal molFraction occurances." << std::endl;
-      exit 1;
+      exit(1);
     }
+    /* Build the mole fractions and number of molecules of each type */   
     int totComponents = 0;
     for (int i = 0;i<nComponents-2;i++){ /* Figure out Percent for each component */
       numMol[i] = int((double)numSites * args_info.molFraction_arg[i]);
       totComponents += numMol[i];
     }
     numMol[nComponents-1] = numSites - totComponents;
-
+	/* do the iPod thing, Shuffle da vector */
+	std::random_shuffle(nanoParticleSites.begin(), nanoParticleSites.end());
   } else{ /*Handle core-shell with multiple components.*/
     std::cout << "Creating a core-shell nanoparticle." << std::endl;
     if (nComponents != args_info.ShellRadius_given + 1){
       std::cerr << "Number of components does not equal ShellRadius occurances." << std::endl;
-      exit 1;
-    }
-    
-    
+      exit(1);
+    }   
     
   }
 
+
    //get the orientation of the cell sites
   //for the same type of molecule in same lattice, it will not change
-   latticeOrt = simpleLat->getLatticePointsOrt();
+   latticeOrt = nanoParticle.getPointsOrt();
   
   
   
@@ -226,7 +201,7 @@ int main(int argc, char *argv []) {
     outMdFileName = outPrefix + ".md";
   
     //creat new .md file on fly which corrects the number of molecule     
-    createMdFile(inputFileName, outMdFileName, numcomponents,numMol);
+    createMdFile(inputFileName, outMdFileName, nComponents,numMol);
   
   if (oldInfo != NULL)
     delete oldInfo;
@@ -238,52 +213,34 @@ int main(int argc, char *argv []) {
   
   SimInfo* NewInfo = oldCreator.createSim(outMdFileName, false);
   
-  // This was so much fun the first time, lets do it again.
   
+  // Place molecules
   Molecule* mol;
   SimInfo::MoleculeIterator mi;
   mol = NewInfo->beginMolecule(mi);
-
-
-  for(int i = -nx; i < nx; i++) {
-     for(int j = -ny; j < ny; j++) {
-        for(int k = -nz; k < nz; k++) {
-           
-           //get the position of the cell sites
-           simpleLat->getLatticePointsPos(latticePos, i, j, k);
-           
-           for(int l = 0; l < numMolPerCell; l++) {
-#ifdef HAVE_CGAL              
-              if (myGeometry->isInsidePolyhedron(latticePos[l][0],latticePos[l][1],latticePos[l][2])){
-#endif                              
-                 if (mol != NULL) {
-                    locator->placeMol(latticePos[l], latticeOrt[l], mol);
-                 } else {
-                    std::cerr<<"Error in placing molecule " << std::endl;                    
-                 }
-                 mol = NewInfo->nextMolecule(mi);
-#ifdef HAVE_CGAL                
-              }
-#endif              
-           }
-        }
-     }
+ int l = 0;
+ for (mol = NewInfo->beginMolecule(mi); mol != NULL; mol = NewInfo->nextMolecule(mi)) {
+  	locator->placeMol(latticePos[l], latticeOrt[l], mol);
+  	l++;
   }
-  
+
+
+
+
 
   
   //fill Hmat
-  hmat(0, 0)= nx * latticeConstant;
+  hmat(0, 0)=  latticeConstant;
   hmat(0, 1) = 0.0;
   hmat(0, 2) = 0.0;
   
   hmat(1, 0) = 0.0;
-  hmat(1, 1) = ny * latticeConstant;
+  hmat(1, 1) =  latticeConstant;
   hmat(1, 2) = 0.0;
   
   hmat(2, 0) = 0.0;
   hmat(2, 1) = 0.0;
-  hmat(2, 2) = nz * latticeConstant;
+  hmat(2, 2) =  latticeConstant;
   
   //set Hmat
   NewInfo->getSnapshotManager()->getCurrentSnapshot()->setHmat(hmat);
@@ -310,14 +267,13 @@ int main(int argc, char *argv []) {
     delete NewInfo;
   
   if (writer != NULL)
-    delete writer;
-  delete simpleLat;	
+    delete writer;	
   cmdline_parser_free(&args_info);
   return 0;
 }
 
 void createMdFile(const std::string&oldMdFileName, const std::string&newMdFileName,
-                  int components,int &nummol) {
+                  int components,int* numMol) {
   ifstream oldMdFile;
   ofstream newMdFile;
   const int MAXLEN = 65535;
@@ -328,13 +284,17 @@ void createMdFile(const std::string&oldMdFileName, const std::string&newMdFileNa
   newMdFile.open(newMdFileName.c_str());
   
   oldMdFile.getline(buffer, MAXLEN);
-  
+ 
+  int i = 0;
   while (!oldMdFile.eof()) {
     
     //correct molecule number
     if (strstr(buffer, "nMol") != NULL) {
-      sprintf(buffer, "\tnMol = %i;", numMol);				
+    	if(i<components){
+      sprintf(buffer, "\tnMol = %i;", numMol[i]);				
       newMdFile << buffer << std::endl;
+      i++;
+    	}
     } else
       newMdFile << buffer << std::endl;
     
