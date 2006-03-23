@@ -70,7 +70,7 @@ class HydrodynamicsModel {
         virtual bool calcHydroProps(CompositeShape* compositexShape, double viscosity, double temperature);
 
         
-        virtual void writeBeads(std::ostream& os) {}
+        virtual void writeBeads(std::ostream& os) = 0;
         void writeHydroProps(std::ostream& os);
         HydroProps getHydroPropsAtCR() {return cr_;}
         HydroProps getHydroPropsAtCD() {return cd_;}

@@ -51,7 +51,7 @@ class AnalyticalModel : public HydrodynamicsModel {
         virtual bool calcHydroProps(Spheric* spheric, double viscosity, double temperature);
         virtual bool calcHydroProps(Ellipsoid* ellipsoid, double viscosity, double temperature);
         virtual bool calcHydroProps(CompositeShape* compositexShape, double viscosity, double temperature);
-
+        virtual void writeBeads(std::ostream& os);
 };
 
 }

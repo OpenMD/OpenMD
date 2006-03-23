@@ -460,7 +460,7 @@ bool ApproximationModel::calcHydroPropsAtCD(std::vector<BeadParam>& beads, doubl
       
 }
 
-/*
+
 void ApproximationModel::writeBeads(std::ostream& os) {
     std::vector<BeadParam>::iterator iter;
     os << beads_.size() << std::endl;
@@ -470,7 +470,7 @@ void ApproximationModel::writeBeads(std::ostream& os) {
     }
 
 }
-*/
+
 
 
 }
