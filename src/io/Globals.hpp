@@ -135,8 +135,6 @@ class Globals : public DataHolder {
 
     virtual void validate();
   private:
-
-    void parseHydroPropFile(const std::string& filename);
     
     std::vector<Component*> components_;
     std::vector<ZConsStamp*> zconstraints_;    
