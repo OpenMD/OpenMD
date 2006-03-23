@@ -57,7 +57,7 @@ int CholeskyDecomposition(MatrixType& A, MatrixType& L) {
             for (int k = 0; k < i-1; ++k) {
                 sum2 += L(j ,k)*L(i, k);
             }
-            A(j, i) = (A(j, i) - sum2) /L(i,i);
+            L(j, i) = (A(j, i) - sum2) /L(i,i);
         }
     }
 
