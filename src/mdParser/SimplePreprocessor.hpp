@@ -44,8 +44,11 @@
 #include <iostream>
 #include <set>
 #include <fstream>
+#include <sstream>
 #include "utils/StringTokenizer.hpp"
 #include "utils/Trim.hpp"
+#include "utils/OOPSEException.hpp"
+
 /**
  * @class SimplePreprocessor
  * @brief A simple preprocessor.
@@ -66,7 +69,11 @@ class SimplePreprocessor {
     private:
         bool doPreprocess(const std::string& filename, ostream& os, std::set<std::string>& defineSet, std::stack<bool>& ifStates) {
             std::ifstream input(filename.c_str());
-            
+            if (!input.is_open()) {
+                std::stringstream ss;
+                ss << "Can not open " << filename << " for preprocessing\n";
+                throw OOPSEException(ss.str());                
+            }
             int lineNo =1;
             os << "#line " << lineNo << " \"" << filename << "\"\n";
             while(input.getline(buffer, bufferSize)) {
