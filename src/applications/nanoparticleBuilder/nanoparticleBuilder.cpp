@@ -147,18 +147,23 @@ int main(int argc, char *argv []) {
     outInitFileName = getPrefix(inputFileName.c_str()) + ".in";
   }
    
-  
+  std::cout <<"Before build shaped lattice. "<<std::endl;
   
   /* create Molocators */
   locator = new MoLocator(oldInfo->getMoleculeStamp(0), oldInfo->getForceField());
   
   /* Create nanoparticle */
   shapedLatticeSpherical nanoParticle(latticeConstant,latticeType,particleRadius);
+  
+  std::cout <<"Before build getPoints. "<<std::endl;
   /* Build a lattice and get lattice points for this lattice constant */
   vector<Vector3d> nanoParticleSites = nanoParticle.getPoints();
+  
   /* Get number of lattice sites */
   numSites = nanoParticleSites.size();
  
+ //std::cout <<"numSites are %d "<<numSites<<std::endl;
+// std::cout <<"nComponents are %d "<<nComponents<<std::endl;
   numMol = new int[nComponents];
  
   
@@ -214,18 +219,21 @@ int main(int argc, char *argv []) {
   SimInfo* NewInfo = oldCreator.createSim(outMdFileName, false);
   
   
+std::cout << "Contents of nanoParticleSites to follow: " << std::endl;
+for (int i=0; i< nanoParticleSites.size()
+     ; i++) {
+  cout<<nanoParticleSites.at(i)<<endl;
+}
   // Place molecules
   Molecule* mol;
   SimInfo::MoleculeIterator mi;
   mol = NewInfo->beginMolecule(mi);
  int l = 0;
  for (mol = NewInfo->beginMolecule(mi); mol != NULL; mol = NewInfo->nextMolecule(mi)) {
-  	locator->placeMol(latticePos[l], latticeOrt[l], mol);
+  	locator->placeMol(nanoParticleSites[l], latticeOrt[l], mol);
   	l++;
   }
-
-
-
+ 
 
 
   
