@@ -37,7 +37,6 @@ struct gengetopt_args_info
   int sele1_given ;	/* Whether sele1 was given.  */
   int sele2_given ;	/* Whether sele2 was given.  */
   int order_given ;	/* Whether order was given.  */
-  int rmsd_given ;	/* Whether rmsd was given.  */
   int rcorr_given ;	/* Whether rcorr was given.  */
   int vcorr_given ;	/* Whether vcorr was given.  */
   int dcorr_given ;	/* Whether dcorr was given.  */

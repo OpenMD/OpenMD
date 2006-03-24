@@ -5,7 +5,6 @@ Source    = \
 	    CrossTimeCorrFunc.cpp \
 	    ParticleTimeCorrFunc.cpp \
             DipoleCorrFunc.cpp \
-            RMSD.cpp \
             RCorrFunc.cpp \
             VCorrFunc.cpp \
             DynamicProps.cpp \

@@ -54,7 +54,7 @@ namespace oopse {
     Vector3d r1 =sd1->getPos(frame1);
     Vector3d r2 = sd2->getPos(frame2);
 
-    return dot(r1, r2);
+    return (r2-r1).lengthSquare();
   }
 
 }

@@ -44,8 +44,7 @@ cmdline_parser_print_help (void)
   printf("      --order=INT               Lengendre Polynomial Order\n");
   printf("\n");
   printf(" Group: dynamicProps  an option of this group is required\n");
-  printf("  -m, --rmsd                    rmsd\n");
-  printf("  -r, --rcorr                   position correlation function\n");
+  printf("  -r, --rcorr                   rmsd\n");
   printf("  -v, --vcorr                   velocity correlation function\n");
   printf("  -d, --dcorr                   dipole correlation function\n");
   printf("  -l, --lcorr                   Lengendre correlation function\n");
@@ -81,7 +80,6 @@ cmdline_parser (int argc, char * const *argv, struct gengetopt_args_info *args_i
   args_info->sele1_given = 0 ;
   args_info->sele2_given = 0 ;
   args_info->order_given = 0 ;
-  args_info->rmsd_given = 0 ;
   args_info->rcorr_given = 0 ;
   args_info->vcorr_given = 0 ;
   args_info->dcorr_given = 0 ;
@@ -113,7 +111,6 @@ cmdline_parser (int argc, char * const *argv, struct gengetopt_args_info *args_i
         { "sele1",	1, NULL, 0 },
         { "sele2",	1, NULL, 0 },
         { "order",	1, NULL, 0 },
-        { "rmsd",	0, NULL, 'm' },
         { "rcorr",	0, NULL, 'r' },
         { "vcorr",	0, NULL, 'v' },
         { "dcorr",	0, NULL, 'd' },
@@ -122,7 +119,7 @@ cmdline_parser (int argc, char * const *argv, struct gengetopt_args_info *args_i
       };
 
       stop_char = 0;
-      c = getopt_long (argc, argv, "hVi:o:mrvdl", long_options, &option_index);
+      c = getopt_long (argc, argv, "hVi:o:rvdl", long_options, &option_index);
 
       if (c == -1) break;	/* Exit from `while (1)' loop.  */
 
@@ -160,18 +157,7 @@ cmdline_parser (int argc, char * const *argv, struct gengetopt_args_info *args_i
           args_info->output_arg = gengetopt_strdup (optarg);
           break;
 
-        case 'm':	/* rmsd.  */
-          if (args_info->rmsd_given)
-            {
-              fprintf (stderr, "%s: `--rmsd' (`-m') option given more than once\n", CMDLINE_PARSER_PACKAGE);
-              clear_args ();
-              exit (EXIT_FAILURE);
-            }
-          args_info->rmsd_given = 1;
-          dynamicProps_group_counter += 1;
-        break;
-
-        case 'r':	/* position correlation function.  */
+        case 'r':	/* rmsd.  */
           if (args_info->rcorr_given)
             {
               fprintf (stderr, "%s: `--rcorr' (`-r') option given more than once\n", CMDLINE_PARSER_PACKAGE);
