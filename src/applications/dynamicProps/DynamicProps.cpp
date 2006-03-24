@@ -50,6 +50,7 @@
 
 #include "applications/dynamicProps/DynamicPropsCmd.h"
 #include "applications/dynamicProps/DipoleCorrFunc.hpp"
+#include "applications/dynamicProps/RMSD.hpp"
 #include "applications/dynamicProps/RCorrFunc.hpp"
 #include "applications/dynamicProps/VCorrFunc.hpp"
 #include "applications/dynamicProps/LegendreCorrFunc.hpp"
@@ -111,7 +112,9 @@ int main(int argc, char* argv[]){
 
 
   TimeCorrFunc* corrFunc;
-  if (args_info.dcorr_given){
+  if (args_info.rmsd_given) {
+    corrFunc = new RMSD(info, dumpFileName, sele1, sele2);
+  } else if (args_info.dcorr_given){
     corrFunc = new DipoleCorrFunc(info, dumpFileName, sele1, sele2);
   } else if (args_info.rcorr_given) {
     corrFunc = new RCorrFunc(info, dumpFileName, sele1, sele2);
