@@ -42,7 +42,7 @@
  *
  *  Created by Charles F. Vardeman II on 17 Feb 2006.
  *  @author  Charles F. Vardeman II
- *  @version $Id: shapedLattice.cpp,v 1.1 2006-03-17 16:10:19 chuckv Exp $
+ *  @version $Id: shapedLattice.cpp,v 1.2 2006-03-27 16:03:50 chuckv Exp $
  *
  */
 
@@ -68,9 +68,6 @@ namespace oopse{
     std::vector<double> lc;
     lc.push_back(latticeConstant_);
 		simpleLattice_->setLatticeConstant(lc);
-    origin_[0]=0.0;
-    origin_[1]=0.0;
-    origin_[2]=0.0;
 	}
 	
   
@@ -78,31 +75,17 @@ namespace oopse{
   void shapedLattice::setGridDimension(Vector3d dimension){
     dimension_ = dimension;
 		// Find	number of unit cells in each direction
-		beginNx_ = -(int) ceil(dimension_[0]/latticeConstant_) ;
-		beginNy_ = -(int) ceil(dimension_[1]/latticeConstant_) ;
-		beginNz_ = -(int) ceil(dimension_[2]/latticeConstant_) ;    
-    endNx_ = (int) ceil(dimension_[0]/latticeConstant_);
-		endNy_ = (int) ceil(dimension_[1]/latticeConstant_);
-		endNz_ = (int) ceil(dimension_[2]/latticeConstant_);    
-    
+		beginNx_ = -(int) ceil(0.5*dimension_[0]/latticeConstant_) ;
+		beginNy_ = -(int) ceil(0.5*dimension_[1]/latticeConstant_) ;
+		beginNz_ = -(int) ceil(0.5*dimension_[2]/latticeConstant_) ;    
+    endNx_ = (int) ceil(0.5*dimension_[0]/latticeConstant_);
+		endNy_ = (int) ceil(0.5*dimension_[1]/latticeConstant_);
+		endNz_ = (int) ceil(0.5*dimension_[2]/latticeConstant_);    
   }
   
   
   
-  void shapedLattice::setGridDimension(Vector3d dimension, Vector3d origin){
-    dimension_ = dimension;
-    origin_ = origin;
-		// Find	number of unit cells in each direction
-		beginNx_ = -(int) ceil(dimension_[0]/latticeConstant_) + (int) floor(origin[0]);
-		beginNy_ = -(int) ceil(dimension_[1]/latticeConstant_) + (int) floor(origin[1]);
-		beginNz_ = -(int) ceil(dimension_[2]/latticeConstant_) + (int) floor(origin[2]);    
-    endNx_ = (int) ceil(dimension_[0]/latticeConstant_) + (int) floor(origin[0]);
-		endNy_ = (int) ceil(dimension_[1]/latticeConstant_) + (int) floor(origin[1]);
-		endNz_ = (int) ceil(dimension_[2]/latticeConstant_) + (int) floor(origin[2]);    
-    
-  }
-  
-  std::vector<Vector3d> shapedLattice::getPoints(){
+    std::vector<Vector3d> shapedLattice::getPoints(){
 			std::vector<Vector3d> latticePos;
 			
       int numMolPerCell = simpleLattice_->getNumSitesPerCell();	
@@ -114,8 +97,10 @@ namespace oopse{
             
             for(int l = 0; l < numMolPerCell; l++) {
               
+              
               if (isInterior(latticePos[l])){
-                coords_.push_back(latticePos[l]);
+              	Vector3d myPoint = latticePos[l];
+                coords_.push_back(myPoint);
               }
             }
           }

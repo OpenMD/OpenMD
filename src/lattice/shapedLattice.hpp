@@ -42,12 +42,12 @@
  *
  *  Created by Charles F. Vardeman II on 17 Feb 2006.
  *  @author  Charles F. Vardeman II
- *  @version $Id: shapedLattice.hpp,v 1.1 2006-03-17 16:10:19 chuckv Exp $
+ *  @version $Id: shapedLattice.hpp,v 1.2 2006-03-27 16:03:50 chuckv Exp $
  *
  */
 
-#ifndef NANOPARTICLEBUILDER_SHAPEDLATTICE_HPP
-#define NANOPARTICLEBUILDER_SHAPEDLATTICE_HPP 
+#ifndef LATTICE_SHAPEDLATTICE_HPP
+#define LATTICE_SHAPEDLATTICE_HPP 
 
 #include "math/Vector3.hpp"
 #include "lattice/LatticeFactory.hpp"
@@ -64,22 +64,23 @@ namespace oopse{
   class shapedLattice{
   public:
     shapedLattice(double latticeConstant,std::string latticeType);
-    ~shapedLattice(){};
+    virtual ~shapedLattice(){};
     /**
       * setGridDimension:  
      * 
      */
     void setGridDimension(Vector3d dimension);
-    void setGridDimension(Vector3d dimension, Vector3d origin);
 	virtual bool isInterior(Vector3d point) =0;
 	std::vector<Vector3d> getPoints();
-  private:
+	std::vector<Vector3d> getPointsOrt(){ return simpleLattice_->getLatticePointsOrt();}
+protected:
+Vector3d dimension_;
+//Vector3d origin_;  
+private:
     std::vector<Vector3d> coords_;
     Lattice *simpleLattice_;
     double latticeConstant_;
     std::string latticeType_;
-    Vector3d dimension_;
-    Vector3d origin_;
     int beginNx_;
     int beginNy_;
     int beginNz_;
@@ -89,4 +90,4 @@ namespace oopse{
     
   };
 }
-#endif /* NANOPARTICLEBUILDER_SHAPEDLATTICE_HPP */
+#endif /* LATTICE_SHAPEDLATTICE_HPP */

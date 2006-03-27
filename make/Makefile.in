@@ -61,10 +61,12 @@ Applications = \
 	applications/dump2Xyz \
 	applications/staticProps \
 	applications/dynamicProps \
-        applications/simpleBuilder\
+	applications/simpleBuilder \
 	applications/nanoRodBuilder \
+	applications/nanoparticleBuilder \
 	applications/atom2mdin \
 	applications/hydrodynamics
+
 
 Samples = \
 	samples/alkane \
