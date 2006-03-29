@@ -59,7 +59,7 @@ namespace oopse {
     Vector3d v1 =sd1->getA(frame1).getColumn(2);
     Vector3d v2 = sd2->getA(frame2).getColumn(2);
 
-    return legendre_.evaluate(dot(v1, v2));
+    return legendre_.evaluate(dot(v1, v2)/(v1.length()*v2.length()));
   }
 
 

@@ -55,7 +55,7 @@ namespace oopse {
     Vector3d v1 =sd1->getElectroFrame(frame1).getColumn(2);
     Vector3d v2 = sd2->getElectroFrame(frame2).getColumn(2);
 
-    return dot(v1, v2);
+    return dot(v1, v2)/(v1.length()*v2.length());
   }
 
 
