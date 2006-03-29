@@ -48,6 +48,8 @@
 #include "utils/StringTokenizer.hpp"
 #include "utils/Trim.hpp"
 #include "utils/OOPSEException.hpp"
+#include "utils/simError.h"
+
 
 /**
  * @class SimplePreprocessor
@@ -72,6 +74,14 @@ class SimplePreprocessor {
             if (!input.is_open()) {
                 std::stringstream ss;
                 ss << "Can not open " << filename << " for preprocessing\n";
+                
+                sprintf(painCave.errMsg,
+                        "Can not open (%s) for processing. \n"
+                        "\tPlease check md file name syntax.\n", filename.c_str());
+                
+                painCave.isFatal = 1;
+                simError();
+                
                 throw OOPSEException(ss.str());                
             }
             int lineNo =1;
