@@ -40,6 +40,7 @@ cmdline_parser_print_help (void)
   printf("  -i, --input=filename  input dump file\n");
   printf("  -o, --output=STRING   output file prefix  (default=`hydro')\n");
   printf("      --model=STRING    hydrodynamics model (support RoughShell and BeadModel)\n");
+  printf("  -b, --beads           generate the beads only, hydrodynamics will be \n                          performed  (default=off)\n");
 }
 
 
@@ -68,10 +69,12 @@ cmdline_parser (int argc, char * const *argv, struct gengetopt_args_info *args_i
   args_info->input_given = 0 ;
   args_info->output_given = 0 ;
   args_info->model_given = 0 ;
+  args_info->beads_given = 0 ;
 #define clear_args() { \
   args_info->input_arg = NULL; \
   args_info->output_arg = gengetopt_strdup("hydro") ;\
   args_info->model_arg = NULL; \
+  args_info->beads_flag = 0;\
 }
 
   clear_args();
@@ -92,11 +95,12 @@ cmdline_parser (int argc, char * const *argv, struct gengetopt_args_info *args_i
         { "input",	1, NULL, 'i' },
         { "output",	1, NULL, 'o' },
         { "model",	1, NULL, 0 },
+        { "beads",	0, NULL, 'b' },
         { NULL,	0, NULL, 0 }
       };
 
       stop_char = 0;
-      c = getopt_long (argc, argv, "hVi:o:", long_options, &option_index);
+      c = getopt_long (argc, argv, "hVi:o:b", long_options, &option_index);
 
       if (c == -1) break;	/* Exit from `while (1)' loop.  */
 
@@ -134,6 +138,17 @@ cmdline_parser (int argc, char * const *argv, struct gengetopt_args_info *args_i
           if (args_info->output_arg)
             free (args_info->output_arg); /* free default string */
           args_info->output_arg = gengetopt_strdup (optarg);
+          break;
+
+        case 'b':	/* generate the beads only, hydrodynamics will be performed.  */
+          if (args_info->beads_given)
+            {
+              fprintf (stderr, "%s: `--beads' (`-b') option given more than once\n", CMDLINE_PARSER_PACKAGE);
+              clear_args ();
+              exit (EXIT_FAILURE);
+            }
+          args_info->beads_given = 1;
+          args_info->beads_flag = !(args_info->beads_flag);
           break;
 
 

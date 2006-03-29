@@ -77,8 +77,10 @@ struct InteriorFunctor  : public std::unary_function<BeadLattice, bool>{
 };
 bool RoughShell::createBeads(std::vector<BeadParam>& beads) {
     std::pair<Vector3d, Vector3d> boxBoundary = shape_->getBox();
-    double len = boxBoundary.second[0] - boxBoundary.first[0];
-    int numLattices = static_cast<int>(len/sigma_) + 1;
+    double firstMin = std::min(std::min(boxBoundary.first[0], boxBoundary.first[1]), boxBoundary.first[2]);
+    double secondMax = std::max(std::max(boxBoundary.second[0], boxBoundary.second[1]), boxBoundary.second[2]);
+    double len = secondMax - firstMin;
+    int numLattices = static_cast<int>(len/sigma_) + 2;
     Grid3D<BeadLattice>  grid(numLattices, numLattices, numLattices);
 
     //fill beads
@@ -86,7 +88,7 @@ bool RoughShell::createBeads(std::vector<BeadParam>& beads) {
         for (int j = 0; j < numLattices; ++j) {
             for (int k = 0; k < numLattices; ++k) {
                 BeadLattice& currentBead = grid(i, j, k);
-                currentBead.origin = Vector3d(i*sigma_ + boxBoundary.first[0], j *sigma_ + boxBoundary.first[1], k*sigma_+ boxBoundary.first[2]);
+                currentBead.origin = Vector3d((i-1)*sigma_ + boxBoundary.first[0], (j-1) *sigma_ + boxBoundary.first[1], (k-1)*sigma_+ boxBoundary.first[2]);
                 currentBead.radius = sigma_;
                 currentBead.interior = shape_->isInterior(grid(i, j, k).origin);                
             }
@@ -100,17 +102,26 @@ bool RoughShell::createBeads(std::vector<BeadParam>& beads) {
                  std::vector<BeadLattice> neighborCells = grid.getAllNeighbors(i, j, k);
                  //if one of its neighbor cells is exterior, current cell is on the surface
 
-                 std::vector<BeadLattice>::iterator ei = std::find_if(neighborCells.begin(), neighborCells.end(), ExteriorFunctor());                
-                 std::vector<BeadLattice>::iterator ii = std::find_if(neighborCells.begin(), neighborCells.end(), InteriorFunctor());                
-                 
-                  if (ei != neighborCells.end() && ii != neighborCells.end()) {
+                 if (grid(i, j, k).interior){
+
+                    bool allNeighBorIsInterior = true;
+                    for (std::vector<BeadLattice>::iterator l = neighborCells.begin(); l != neighborCells.end(); ++l) {
+                        if (!l->interior) {
+                            allNeighBorIsInterior = false;
+                            break;
+                        }
+                    }
+
+                    if (allNeighBorIsInterior)
+                        continue;
+
                       BeadParam surfaceBead;
-                      surfaceBead.atomName = "Bead";
+                      surfaceBead.atomName = "H";
                       surfaceBead.pos = grid(i, j, k).origin;
                       surfaceBead.radius = grid(i, j, k).radius;
-                      beads.push_back(surfaceBead);
-                  }
+                      beads.push_back(surfaceBead);                    
 
+                 }
             }
         }
     }

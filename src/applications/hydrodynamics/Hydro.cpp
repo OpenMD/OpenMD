@@ -64,7 +64,6 @@ struct SDShape{
     Shape* shape;
 };
 void registerHydrodynamicsModels();
-void calcHydrodynamicsProp(HydrodynamicsModel* model, Shape* shape,double viscosity,  double temperature, std::ostream& os, const std::string& prefix);
 
 int main(int argc, char* argv[]){
   //register force fields
@@ -139,16 +138,18 @@ int main(int argc, char* argv[]){
 	   integrableObject = mol->nextIntegrableObject(ii)) {
           if (uniqueStuntDoubles.find(integrableObject->getType()) ==  uniqueStuntDoubles.end()) {
 
-            SDShape tmp;
-            tmp.shape = ShapeBuilder::createShape(integrableObject);
-            tmp.sd = integrableObject;    
-            uniqueStuntDoubles.insert(std::map<std::string, SDShape>::value_type(integrableObject->getType(), tmp));
             integrableObject->setPos(V3Zero);
             integrableObject->setA(identMat);
             if (integrableObject->isRigidBody()) {
                 RigidBody* rb = static_cast<RigidBody*>(integrableObject);
                 rb->updateAtoms();
             }
+
+            SDShape tmp;
+            tmp.shape = ShapeBuilder::createShape(integrableObject);
+            tmp.sd = integrableObject;    
+            uniqueStuntDoubles.insert(std::map<std::string, SDShape>::value_type(integrableObject->getType(), tmp));
+
           }
 	}
   }
@@ -168,7 +169,22 @@ int main(int argc, char* argv[]){
       } else {
         model = new BeadModel(sd, info);
       }
-        calcHydrodynamicsProp(model, shape, viscosity, temperature, outputDiff, prefix);          
+
+        model->init();
+        
+        std::ofstream ofs;
+        std::stringstream outputBeads;
+        outputBeads << prefix << "_" << model->getStuntDoubleName() << ".xyz";
+        ofs.open(outputBeads.str().c_str());        
+        model->writeBeads(ofs);
+        ofs.close();
+
+        //if beads option is turned on, skip the calculation
+        if (!args_info.beads_flag) {
+            shape->calcHydroProps(model, viscosity, temperature);
+            model->writeHydroProps(outputDiff);
+        }
+
         delete model;
   }
 
@@ -184,14 +200,4 @@ void registerHydrodynamicsModels() {
     HydrodynamicsModelFactory::getInstance()->registerHydrodynamicsModel(new HydrodynamicsModelBuilder<AnalyticalModel>("AnalyticalModel"));
 
 }
-void calcHydrodynamicsProp(HydrodynamicsModel* model, Shape* shape,double viscosity,  double temperature, std::ostream& os, const std::string& prefix) {
 
-       shape->calcHydroProps(model, viscosity, temperature);
-        model->writeHydroProps(os);
-        std::ofstream ofs;
-        std::stringstream outputBeads;
-        outputBeads << prefix << "_" << model->getStuntDoubleName() << ".xyz";
-        ofs.open(outputBeads.str().c_str());        
-        model->writeBeads(ofs);
-        ofs.close();
-}

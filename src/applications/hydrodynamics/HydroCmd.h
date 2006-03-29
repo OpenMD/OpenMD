@@ -27,12 +27,14 @@ struct gengetopt_args_info
   char * input_arg;	/* input dump file.  */
   char * output_arg;	/* output file prefix (default='hydro').  */
   char * model_arg;	/* hydrodynamics model (support RoughShell and BeadModel).  */
+  int beads_flag;	/* generate the beads only, hydrodynamics will be performed (default=off).  */
 
   int help_given ;	/* Whether help was given.  */
   int version_given ;	/* Whether version was given.  */
   int input_given ;	/* Whether input was given.  */
   int output_given ;	/* Whether output was given.  */
   int model_given ;	/* Whether model was given.  */
+  int beads_given ;	/* Whether beads was given.  */
 
 } ;
 

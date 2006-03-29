@@ -9,4 +9,4 @@ version "1.0"
 option	"input"		i	"input dump file"					string	typestr="filename" 	yes
 option	"output"	o	"output file prefix"					string	default="hydro"	        no
 option  "model"         -       "hydrodynamics model (support RoughShell and BeadModel)" string			        yes
-
+option  "beads"	        b       "generate the beads only, hydrodynamics will be performed" flag    	                off 

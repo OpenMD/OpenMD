@@ -76,8 +76,8 @@ std::pair<Vector3d, Vector3d> CompositeShape::getBox() {
     std::pair<Vector3d, Vector3d>  boundary = (*iter)->getBox();
     for (++iter; iter != shapes_.end(); ++iter) {
         std::pair<Vector3d, Vector3d> currBoundary = (*iter)->getBox();
-            swap_if(boundary.first, currBoundary.first, std::less<double>());
-            swap_if(boundary.second, currBoundary.second, std::greater<double>());        
+            swap_if(boundary.first, currBoundary.first, std::greater<double>());
+            swap_if(boundary.second, currBoundary.second, std::less<double>());        
     }
 
     return boundary;

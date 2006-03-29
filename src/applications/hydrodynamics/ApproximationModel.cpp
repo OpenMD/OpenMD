@@ -48,6 +48,7 @@
 #include "applications/hydrodynamics/Ellipsoid.hpp"
 #include "applications/hydrodynamics/CompositeShape.hpp"
 #include "math/LU.hpp"
+#include "utils/simError.h"
 namespace oopse {
 /**
  * Reference:
@@ -57,25 +58,7 @@ namespace oopse {
  */
 
 ApproximationModel::ApproximationModel(StuntDouble* sd, SimInfo* info): HydrodynamicsModel(sd, info){
-/*
-    DynamicProperty::const_iterator iter;
 
-    iter = extraParams.find("Viscosity");
-    if (iter != extraParams.end()) {
-        boost::any param = iter->second;
-        viscosity = boost::any_cast<double>(param);
-    }else {
-        std::cout << "ApproximationModel Error\n" ;
-    }
-
-    iter = extraParams.find("Temperature");
-    if (iter != extraParams.end()) {
-        boost::any param = iter->second;
-        temperature = boost::any_cast<double>(param);
-    }else {
-        std::cout << "ApproximationModel Error\n" ;
-    }    
-*/
 }
 
 bool ApproximationModel::calcHydroProps(Spheric* spheric, double viscosity, double temperature) {
@@ -89,12 +72,16 @@ bool ApproximationModel::calcHydroProps(CompositeShape* compositeShape, double v
     return internalCalcHydroProps(static_cast<Shape*>(compositeShape), viscosity, temperature);
 }
 
- 
-bool ApproximationModel::internalCalcHydroProps(Shape* shape, double viscosity, double temperature) {
+void ApproximationModel::init() {
     if (!createBeads(beads_)) {
-        std::cout << "can not create beads" << std::endl;
-        return false;
+      sprintf(painCave.errMsg, "ApproximationModel::init() : Can not create beads\n");
+      painCave.isFatal = 1;
+      simError();        
     }
+
+}
+
+bool ApproximationModel::internalCalcHydroProps(Shape* shape, double viscosity, double temperature) {
 
     bool ret = true;
     HydroProps cr;
