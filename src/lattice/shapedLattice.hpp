@@ -42,7 +42,7 @@
  *
  *  Created by Charles F. Vardeman II on 17 Feb 2006.
  *  @author  Charles F. Vardeman II
- *  @version $Id: shapedLattice.hpp,v 1.2 2006-03-27 16:03:50 chuckv Exp $
+ *  @version $Id: shapedLattice.hpp,v 1.3 2006-03-29 19:17:20 chuckv Exp $
  *
  */
 
@@ -72,12 +72,13 @@ namespace oopse{
     void setGridDimension(Vector3d dimension);
 	virtual bool isInterior(Vector3d point) =0;
 	std::vector<Vector3d> getPoints();
-	std::vector<Vector3d> getPointsOrt(){ return simpleLattice_->getLatticePointsOrt();}
+	std::vector<Vector3d> getPointsOrt(){ return coordsOrt_;}
 protected:
 Vector3d dimension_;
 //Vector3d origin_;  
 private:
     std::vector<Vector3d> coords_;
+    std::vector<Vector3d> coordsOrt_;
     Lattice *simpleLattice_;
     double latticeConstant_;
     std::string latticeType_;

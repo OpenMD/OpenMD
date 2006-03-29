@@ -42,7 +42,7 @@
  *
  *  Created by Charles F. Vardeman II on 17 Feb 2006.
  *  @author  Charles F. Vardeman II
- *  @version $Id: shapedLattice.cpp,v 1.2 2006-03-27 16:03:50 chuckv Exp $
+ *  @version $Id: shapedLattice.cpp,v 1.3 2006-03-29 19:17:20 chuckv Exp $
  *
  */
 
@@ -88,6 +88,8 @@ namespace oopse{
     std::vector<Vector3d> shapedLattice::getPoints(){
 			std::vector<Vector3d> latticePos;
 			
+      
+      std::vector<Vector3d> pointsOrt =  simpleLattice_->getLatticePointsOrt();
       int numMolPerCell = simpleLattice_->getNumSitesPerCell();	
       for(int i = beginNx_; i < endNx_; i++) {     
         for(int j = beginNy_; j < endNy_; j++) {       
@@ -100,7 +102,9 @@ namespace oopse{
               
               if (isInterior(latticePos[l])){
               	Vector3d myPoint = latticePos[l];
+                Vector3d myOrt = pointsOrt[l];
                 coords_.push_back(myPoint);
+                coordsOrt_.push_back(myOrt);
               }
             }
           }

@@ -197,9 +197,11 @@ int main(int argc, char *argv []) {
    //get the orientation of the cell sites
   //for the same type of molecule in same lattice, it will not change
    latticeOrt = nanoParticle.getPointsOrt();
+std::cout<<"Orientational vector Size: "<< std::endl;
+std::cout<<latticeOrt.size()<< std::endl;
+ 
   
-  
-  
+
   // needed for writing out new md file.
   
     outPrefix = getPrefix(inputFileName.c_str()) + "_" + latticeType;
@@ -219,11 +221,6 @@ int main(int argc, char *argv []) {
   SimInfo* NewInfo = oldCreator.createSim(outMdFileName, false);
   
   
-std::cout << "Contents of nanoParticleSites to follow: " << std::endl;
-for (int i=0; i< nanoParticleSites.size()
-     ; i++) {
-  cout<<nanoParticleSites.at(i)<<endl;
-}
   // Place molecules
   Molecule* mol;
   SimInfo::MoleculeIterator mi;
