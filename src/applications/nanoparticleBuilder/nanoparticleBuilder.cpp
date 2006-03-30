@@ -171,17 +171,19 @@ int main(int argc, char *argv []) {
   if (!args_info.ShellRadius_given){
     std::cout << "Creating a random nanoparticle" << std::endl;
     /* Check to see if we have enough components */
-    if (nComponents != args_info.molFraction_given + 1){
+    if (nComponents != args_info.molFraction_given && nComponents != 1){
       std::cerr << "Number of components does not equal molFraction occurances." << std::endl;
       exit(1);
     }
     /* Build the mole fractions and number of molecules of each type */   
     int totComponents = 0;
-    for (int i = 0;i<nComponents-2;i++){ /* Figure out Percent for each component */
+    for (int i = 0;i<nComponents-1;i++){ /* Figure out Percent for each component */
       numMol[i] = int((double)numSites * args_info.molFraction_arg[i]);
+      std::cout<<numMol[i]<<std::endl;
       totComponents += numMol[i];
     }
     numMol[nComponents-1] = numSites - totComponents;
+   
 	/* do the iPod thing, Shuffle da vector */
 	std::random_shuffle(nanoParticleSites.begin(), nanoParticleSites.end());
   } else{ /*Handle core-shell with multiple components.*/
@@ -217,8 +219,8 @@ std::cout<<latticeOrt.size()<< std::endl;
   // We need to read in new siminfo object.	
   //parse md file and set up the system
   //SimCreator NewCreator;
-  
-  SimInfo* NewInfo = oldCreator.createSim(outMdFileName, false);
+   SimCreator newCreator;
+  SimInfo* NewInfo = newCreator.createSim(outMdFileName, false);
   
   
   // Place molecules
