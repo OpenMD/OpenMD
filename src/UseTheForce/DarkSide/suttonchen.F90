@@ -209,7 +209,9 @@ contains
        deallocate(SCList%atidToSCtype)
        SCList%atidToSCtype=>null()
     end if
-
+! Reset Capacity
+    SCList% nSCTypes = 0
+    SCList%currentSCtype=0
 
   end subroutine destroySCTypes
 
