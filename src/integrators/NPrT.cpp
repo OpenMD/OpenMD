@@ -57,7 +57,7 @@ namespace oopse {
       painCave.isFatal = 1;
       simError();
     } else {
-      surfaceTension= simParams->getSurfaceTension();
+      surfaceTension= simParams->getSurfaceTension()* OOPSEConstant::surfaceTensorConvert * OOPSEConstant::energyConvert;
     }
 
   }
@@ -175,7 +175,7 @@ namespace oopse {
     double area = hmat(0,0) * hmat(1, 1);
 
     double conservedQuantity = totalEnergy + thermostat_kinetic + thermostat_potential +
-      barostat_kinetic + barostat_potential - surfaceTension * area;
+      barostat_kinetic + barostat_potential - surfaceTension * area/ OOPSEConstant::energyConvert;
 
     return conservedQuantity;
 

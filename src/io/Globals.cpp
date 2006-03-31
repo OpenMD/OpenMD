@@ -133,7 +133,7 @@ void Globals::validate() {
 
   CheckParameter(ForceField, isNotEmpty());
   CheckParameter(TargetTemp, isPositive());
-  CheckParameter(Ensemble, isEqualIgnoreCase("NVE") || isEqualIgnoreCase("NVT") || isEqualIgnoreCase("NPTi") || isEqualIgnoreCase("NPTf") || isEqualIgnoreCase("NPTxyz") || isEqualIgnoreCase("NPAT")  || isEqualIgnoreCase("LANGEVINDYNAMICS") );
+  CheckParameter(Ensemble, isEqualIgnoreCase("NVE") || isEqualIgnoreCase("NVT") || isEqualIgnoreCase("NPTi") || isEqualIgnoreCase("NPTf") || isEqualIgnoreCase("NPTxyz") || isEqualIgnoreCase("NPAT")  || isEqualIgnoreCase("LANGEVINDYNAMICS") || isEqualIgnoreCase("NPRT"));
   CheckParameter(Dt, isPositive());
   CheckParameter(RunTime, isPositive());
   CheckParameter(InitialConfig, isNotEmpty());
@@ -168,7 +168,7 @@ void Globals::validate() {
   CheckParameter(ThermIntDistSpringConst, isPositive());
   CheckParameter(ThermIntThetaSpringConst, isPositive());
   CheckParameter(ThermIntOmegaSpringConst, isPositive());
-  CheckParameter(SurfaceTension, isPositive());
+  CheckParameter(SurfaceTension, isNonNegative());
   CheckParameter(ElectrostaticSummationMethod, isEqualIgnoreCase("NONE") || isEqualIgnoreCase("SHIFTED_POTENTIAL") || isEqualIgnoreCase("SHIFTED_FORCE") || isEqualIgnoreCase("REACTION_FIELD"));
   CheckParameter(ElectrostaticScreeningMethod, isEqualIgnoreCase("UNDAMPED") || isEqualIgnoreCase("DAMPED")); 
   CheckParameter(CutoffPolicy, isEqualIgnoreCase("MIX") || isEqualIgnoreCase("MAX") || isEqualIgnoreCase("TRADITIONAL"));
