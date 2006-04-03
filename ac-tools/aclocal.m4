@@ -848,7 +848,7 @@ if test x = x"$MPI_LIB"; then
 fi
 $as_unset ac_cv_lib_mpich_MPI_Init
 if test x = x"$MPI_LIB"; then
-        AC_CHECK_LIB(mpich, MPI_Init, [MPI_LIB="-lmpich -lpmpich"], [],
+        AC_CHECK_LIB(mpich, MPI_Init, [MPI_LIB="-lpmpich -lmpich"], [],
                      "-lpmpich")
 fi
 

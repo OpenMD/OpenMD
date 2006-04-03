@@ -47,10 +47,11 @@
 !!
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: simParallel.F90,v 1.5 2005-09-07 22:23:20 chuckv Exp $, $Date: 2005-09-07 22:23:20 $, $Name: not supported by cvs2svn $, $Revision: 1.5 $
+!! @version $Id: simParallel.F90,v 1.6 2006-04-03 15:37:43 chuckv Exp $, $Date: 2006-04-03 15:37:43 $, $Name: not supported by cvs2svn $, $Revision: 1.6 $
 
 module mpiSimulation  
   use definitions
+  use status
 #ifdef IS_MPI
   use oopseMPI
   implicit none
@@ -101,6 +102,7 @@ module mpiSimulation
 
   !! generic mpi error declaration.
   integer, public :: mpi_err
+  character(len = statusMsgSize) :: errMsg
 
 #ifdef PROFILE
   public :: printCommTime
@@ -207,18 +209,20 @@ contains
 
     !! copy c component plan to fortran   
     mpiSim = thisComponentPlan 
-    !write(*,*) "Seting up simParallel"
+    write(*,*) "Seting up simParallel"
 
     call make_Force_Grid(mpiSim, localStatus)
     if (localStatus /= 0) then
-       write(default_error,*) "Error creating force grid"
+       write(errMsg, *) 'An error in making the force grid has occurred'
+       call handleError("setupSimParallel", errMsg)
        status = -1
        return
     endif
 
     call updateGridComponents(mpiSim, localStatus)
     if (localStatus /= 0) then
-       write(default_error,*) "Error updating grid components"
+       write(errMsg,*) "Error updating grid components"
+       call handleError("setupSimParallel", errMsg)
        status = -1
        return
     endif
@@ -250,6 +254,8 @@ contains
 
     call setAtomTags(atomTags,localStatus)
     if (localStatus /= 0) then
+       write(errMsg, *) 'An error in setting Atom Tags has occured'
+       call handleError("setupSimParallel", errMsg)
        status = -1
        return
     endif
@@ -257,6 +263,8 @@ contains
 
     call setGroupTags(groupTags,localStatus)
     if (localStatus /= 0) then
+       write(errMsg, *) 'An error in setting Group Tags has occured'
+       call handleError("setupSimParallel", errMsg)
        status = -1
        return
     endif

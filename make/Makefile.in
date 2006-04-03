@@ -385,7 +385,7 @@ CParallelOptions       = $(FrcDeclare) $(ParallelDeclare) @CFLAGS@
 CppOptions             = $(FrcDeclare) @CXXFLAGS@
 CppParallelOptions     = $(FrcDeclare) $(ParallelDeclare) @CXXFLAGS@
 FortranOptions         =  @FCFLAGS@ @MODDIRFLAG@$(SourceDir) @MODDIRFLAG@$(TargetDir) @FCFLAGS_SRCEXT@
-FortranParallelOptions =  @FCFLAGS@ @MODDIRFLAG@$(SourceDir) @MODDIRFLAG@$(ParallelTargetDir) @PREPDEFFLAG@$(ParallelDeclar) @FCFLAGS_SRCEXT@ 
+FortranParallelOptions =  @FCFLAGS@ @MODDIRFLAG@$(SourceDir) @MODDIRFLAG@$(ParallelTargetDir) @PREPDEFFLAG@$(ParallelDeclare) @FCFLAGS_SRCEXT@ 
 JavaCompilerOptions    = -d $(TargetDir) -classpath $(ClassPath) \
 			 -sourcepath $(SourceDir) -deprecation
 JavaRunOptions         = -classpath $(ClassPath) 
