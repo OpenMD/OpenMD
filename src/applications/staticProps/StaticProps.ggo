@@ -12,6 +12,7 @@ option	"step"		n	"process every n frame"					int	default="1"		no
 option	"nrbins"    	r       "number of bins for distance"				int	default="100"		no
 option	"nanglebins"	a	"number of bins for cos(angle)"				int	default="50"		no 
 option	"length"	l	"maximum length (Defaults to 1/2 smallest length of first frame)"	double	no   
+option  "zoffset"       z       "Where to set the zero for the slab_density calculation"        double  default="0"     no
 option	"sele1"		-	"select the first stuntdouble set"	string	typestr="selection script"	no
 option  "sele2"         -       "select the second stuntdouble set" string  typestr="selection script"      no
 option  "sele3"         -       "select the third stuntdouble set" string  typestr="selection script"      no
