@@ -47,7 +47,7 @@
 !!           precomputation of spline parameters.
 !!
 !! @author Charles F. Vardeman II 
-!! @version $Id: interpolation.F90,v 1.1 2006-04-14 19:57:04 gezelter Exp $
+!! @version $Id: interpolation.F90,v 1.2 2006-04-14 20:04:31 gezelter Exp $
 
 
 module  INTERPOLATION
@@ -64,15 +64,8 @@ module  INTERPOLATION
      real(kind=dp) :: dx
      real(kind=dp) :: dx_i
      real (kind=dp), pointer,dimension(:)   :: x => null()
-     real (kind=dp), pointer,dimension(4,:) :: c => null()
+     real (kind=dp), pointer,dimension(:,:) :: c => null()
   end type cubicSpline
-
-  interface splineLookup
-     module procedure multiSplint
-     module procedure splintd
-     module procedure splintd1
-     module procedure splintd2
-  end interface
 
   interface newSpline
      module procedure newSplineWithoutDerivs
@@ -189,7 +182,7 @@ contains
     do i = 2, cs%np - 1 
        cs%c(4,i) = 2.0_DP * ( x(i+1) - x(i-1) )
     end do
-    cs%c(4,n) = 1.0_DP
+    cs%c(4,cs%np) = 1.0_DP
     !
     !  Set the off-diagonal coefficients.
     !
@@ -223,11 +216,11 @@ contains
        cs%c(4,i) = divdif3 / ( dx * dx )
     end do
 
-    cs%c(3,np) = 0.0_DP
-    cs%c(4,np) = 0.0_DP
+    cs%c(3,cs%np) = 0.0_DP
+    cs%c(4,cs%np) = 0.0_DP
 
     cs%dx = dx
-    cs%dxi = 1.0_DP / dx
+    cs%dx_i = 1.0_DP / dx
     return
   end subroutine newSplineWithoutDerivs
 
@@ -286,7 +279,7 @@ contains
     do i = 2, cs%np - 1 
        cs%c(4,i) = 2.0_DP * ( x(i+1) - x(i-1) )
     end do
-    cs%c(4,n) = 1.0_DP
+    cs%c(4,cs%np) = 1.0_DP
     !
     !  Set the off-diagonal coefficients.
     !
@@ -320,14 +313,14 @@ contains
        cs%c(4,i) = divdif3 / ( dx * dx )
     end do
 
-    cs%c(3,np) = 0.0_DP
-    cs%c(4,np) = 0.0_DP
+    cs%c(3,cs%np) = 0.0_DP
+    cs%c(4,cs%np) = 0.0_DP
 
     cs%dx = dx
-    cs%dxi = 1.0_DP / dx
+    cs%dx_i = 1.0_DP / dx
 
     return
-  end subroutine newSplineWithoutDerivs
+  end subroutine newSplineWithDerivs
 
   subroutine deleteSpline(this)
 
@@ -375,6 +368,7 @@ contains
     type (cubicSpline), intent(in) :: cs
     real( kind = DP ), intent(in)  :: xval
     real( kind = DP ), intent(out) :: yval
+    real( kind = DP ) :: dx
     integer :: i, j
     !
     !  Find the interval J = [ cs%x(J), cs%x(J+1) ] that contains 
@@ -429,12 +423,13 @@ contains
     type (cubicSpline), intent(in) :: cs
     real( kind = DP ), intent(in)  :: xval
     real( kind = DP ), intent(out) :: yval
+    real( kind = DP ) :: dx
     integer :: i, j
     !
     !  Find the interval J = [ cs%x(J), cs%x(J+1) ] that contains 
     !  or is nearest to xval.
 
-    j = MAX(1, MIN(cs%np, idint((xval-cs%x(1)) * cs%dxi) + 1))
+    j = MAX(1, MIN(cs%np, idint((xval-cs%x(1)) * cs%dx_i) + 1))
 
     dx = xval - cs%x(j)
 

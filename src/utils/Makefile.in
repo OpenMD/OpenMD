@@ -2,6 +2,7 @@ Package = utils
 
 MySource    = \
 	definitions.F90 \
+	interpolation.F90 \
 	fError.c \
 	PropertyMap.cpp \
 	oopseMPI.F90 \
