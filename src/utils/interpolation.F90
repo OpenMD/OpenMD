@@ -48,7 +48,7 @@
 !!           spline parameters.
 !!
 !! @author Charles F. Vardeman II 
-!! @version $Id: interpolation.F90,v 1.4 2006-04-14 21:49:54 gezelter Exp $
+!! @version $Id: interpolation.F90,v 1.5 2006-04-14 21:59:23 gezelter Exp $
 
 
 module  INTERPOLATION
@@ -219,7 +219,7 @@ contains
     cs%dx_i = 1.0_DP / dx
 
     return
-  end subroutine newSplineWithoutDerivs
+  end subroutine newSpline
 
   subroutine deleteSpline(this)
 
