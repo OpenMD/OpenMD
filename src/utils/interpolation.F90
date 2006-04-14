@@ -43,11 +43,12 @@
 !!
 !!  Created by Charles F. Vardeman II on 03 Apr 2006.
 !!
-!!  PURPOSE: Generic Spline interplelation routines. These routines assume that we are on a uniform grid for
-!!           precomputation of spline parameters.
+!!  PURPOSE: Generic Spline interpolation routines. These routines 
+!!           assume that we are on a uniform grid for precomputation of 
+!!           spline parameters.
 !!
 !! @author Charles F. Vardeman II 
-!! @version $Id: interpolation.F90,v 1.3 2006-04-14 21:06:55 chrisfen Exp $
+!! @version $Id: interpolation.F90,v 1.4 2006-04-14 21:49:54 gezelter Exp $
 
 
 module  INTERPOLATION
@@ -60,27 +61,27 @@ module  INTERPOLATION
 
   type, public :: cubicSpline
      private
+     logical :: isUniform = .false.
      integer :: np = 0
-     real(kind=dp) :: dx
      real(kind=dp) :: dx_i
      real (kind=dp), pointer,dimension(:)   :: x => null()
      real (kind=dp), pointer,dimension(:,:) :: c => null()
   end type cubicSpline
 
-  interface newSpline
-     module procedure newSpline
-  end interface
-
+  public :: newSpline
   public :: deleteSpline
-
+  public :: lookup_spline
+  public :: lookup_uniform_spline
+  public :: lookup_nonuniform_spline
+  
 contains
+  
 
-
-  subroutine newSpline(cs, x, y, yp1, ypn)
-
+  subroutine newSpline(cs, x, y, yp1, ypn, isUniform)
+    
     !************************************************************************
     !
-    ! newSplineWithoutDerivs solves for slopes defining a cubic spline.
+    ! newSpline solves for slopes defining a cubic spline.
     !
     !  Discussion:
     !
@@ -103,47 +104,50 @@ contains
     !    Input, real y(I), contains the function value at x(I) for 
     !      I = 1, N.
     !
-    !    yp1 contains the slope at x(1) and ypn contains
-    !    the slope at x(N).
+    !    Input, real yp1 contains the slope at x(1) 
+    !    Input, real ypn contains the slope at x(N)
     !
-    !    On output, the intermediate slopes at x(I) have been
-    !    stored in cs%C(2,I), for I = 2 to N-1.
+    !    On output, the slopes at x(I) have been stored in 
+    !               cs%C(2,I), for I = 1 to N.
 
     implicit none
 
     type (cubicSpline), intent(inout) :: cs
     real( kind = DP ), intent(in) :: x(:), y(:)
     real( kind = DP ), intent(in) :: yp1, ypn
+    logical, intent(in) :: isUniform
     real( kind = DP ) :: g, divdif1, divdif3, dx
     integer :: i, alloc_error, np
 
     alloc_error = 0
 
     if (cs%np .ne. 0) then
-       call handleWarning("interpolation::newSplineWithoutDerivs", &
-            "Type was already created")
+       call handleWarning("interpolation::newSpline", &
+            "cubicSpline struct was already created")
        call deleteSpline(cs)
     end if
 
     ! make sure the sizes match
 
-    if (size(x) .ne. size(y)) then
-       call handleError("interpolation::newSplineWithoutDerivs", &
+    np = size(x)
+
+    if ( size(y) .ne. np ) then
+       call handleError("interpolation::newSpline", &
             "Array size mismatch")
     end if
-
-    np = size(x)
+    
     cs%np = np
+    cs%isUniform = isUniform
 
     allocate(cs%x(np), stat=alloc_error)
     if(alloc_error .ne. 0) then
-       call handleError("interpolation::newSplineWithoutDerivs", &
+       call handleError("interpolation::newSpline", &
             "Error in allocating storage for x")
     endif
 
     allocate(cs%c(4,np), stat=alloc_error)
     if(alloc_error .ne. 0) then
-       call handleError("interpolation::newSplineWithoutDerivs", &
+       call handleError("interpolation::newSpline", &
             "Error in allocating storage for c")
     endif
        
@@ -158,15 +162,16 @@ contains
     cs%c(2,1) = yp1
     cs%c(2,np) = ypn
     
-
     !
     !  Set up the right hand side of the linear system.
     !
+
     do i = 2, cs%np - 1
        cs%c(2,i) = 3.0_DP * ( &
             (x(i) - x(i-1)) * (cs%c(1,i+1) - cs%c(1,i)) / (x(i+1) - x(i)) + &
             (x(i+1) - x(i)) * (cs%c(1,i) - cs%c(1,i-1)) / (x(i) - x(i-1)))
     end do
+
     !
     !  Set the diagonal coefficients.
     !
@@ -211,8 +216,8 @@ contains
     cs%c(3,cs%np) = 0.0_DP
     cs%c(4,cs%np) = 0.0_DP
 
-    cs%dx = dx
     cs%dx_i = 1.0_DP / dx
+
     return
   end subroutine newSplineWithoutDerivs
 
@@ -331,5 +336,20 @@ contains
     
     return
   end subroutine lookup_uniform_spline
+
+  subroutine lookup_spline(cs, xval, yval)
+
+    type (cubicSpline), intent(in) :: cs
+    real( kind = DP ), intent(inout) :: xval
+    real( kind = DP ), intent(inout) :: yval
+    
+    if (cs%isUniform) then
+       call lookup_uniform_spline(cs, xval, yval)
+    else
+       call lookup_nonuniform_spline(cs, xval, yval)
+    endif
+
+    return
+  end subroutine lookup_spline
   
 end module INTERPOLATION
