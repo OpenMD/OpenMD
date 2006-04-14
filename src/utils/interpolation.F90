@@ -47,7 +47,7 @@
 !!           precomputation of spline parameters.
 !!
 !! @author Charles F. Vardeman II 
-!! @version $Id: interpolation.F90,v 1.2 2006-04-14 20:04:31 gezelter Exp $
+!! @version $Id: interpolation.F90,v 1.3 2006-04-14 21:06:55 chrisfen Exp $
 
 
 module  INTERPOLATION
@@ -68,8 +68,7 @@ module  INTERPOLATION
   end type cubicSpline
 
   interface newSpline
-     module procedure newSplineWithoutDerivs
-     module procedure newSplineWithDerivs
+     module procedure newSpline
   end interface
 
   public :: deleteSpline
@@ -77,7 +76,7 @@ module  INTERPOLATION
 contains
 
 
-  subroutine newSplineWithoutDerivs(cs, x, y, yp1, ypn, boundary)
+  subroutine newSpline(cs, x, y, yp1, ypn)
 
     !************************************************************************
     !
@@ -98,7 +97,7 @@ contains
     !  Parameters:
     !
     !    Input, real x(N), the abscissas or X values of
-    !    the data points.  The entries of TAU are assumed to be
+    !    the data points.  The entries of x are assumed to be
     !    strictly increasing.
     !
     !    Input, real y(I), contains the function value at x(I) for 
@@ -115,7 +114,6 @@ contains
     type (cubicSpline), intent(inout) :: cs
     real( kind = DP ), intent(in) :: x(:), y(:)
     real( kind = DP ), intent(in) :: yp1, ypn
-    character(len=*), intent(in) :: boundary
     real( kind = DP ) :: g, divdif1, divdif3, dx
     integer :: i, alloc_error, np
 
@@ -154,18 +152,12 @@ contains
        cs%c(1,i) = y(i)       
     enddo
 
-    if ((boundary.eq.'l').or.(boundary.eq.'L').or. &
-         (boundary.eq.'b').or.(boundary.eq.'B')) then
-       cs%c(2,1) = yp1
-    else
-       cs%c(2,1) = 0.0_DP
-    endif
-    if ((boundary.eq.'u').or.(boundary.eq.'U').or. &
-         (boundary.eq.'b').or.(boundary.eq.'B')) then
-       cs%c(2,1) = ypn
-    else
-       cs%c(2,1) = 0.0_DP
-    endif
+    ! Set the first derivative of the function to the second coefficient of 
+    ! each of the endpoints
+
+    cs%c(2,1) = yp1
+    cs%c(2,np) = ypn
+    
 
     !
     !  Set up the right hand side of the linear system.
@@ -223,104 +215,6 @@ contains
     cs%dx_i = 1.0_DP / dx
     return
   end subroutine newSplineWithoutDerivs
-
-  subroutine newSplineWithDerivs(cs, x, y, yp)
-
-    !************************************************************************
-    !
-    ! newSplineWithDerivs 
-
-    implicit none
-
-    type (cubicSpline), intent(inout) :: cs
-    real( kind = DP ), intent(in) :: x(:), y(:), yp(:)
-    real( kind = DP ) :: g, divdif1, divdif3, dx
-    integer :: i, alloc_error, np
-
-    alloc_error = 0
-
-    if (cs%np .ne. 0) then
-       call handleWarning("interpolation::newSplineWithDerivs", &
-            "Type was already created")
-       call deleteSpline(cs)
-    end if
-
-    ! make sure the sizes match
-
-    if ((size(x) .ne. size(y)).or.(size(x) .ne. size(yp))) then
-       call handleError("interpolation::newSplineWithDerivs", &
-            "Array size mismatch")
-    end if
-    
-    np = size(x)
-    cs%np = np
-
-    allocate(cs%x(np), stat=alloc_error)
-    if(alloc_error .ne. 0) then
-       call handleError("interpolation::newSplineWithDerivs", &
-            "Error in allocating storage for x")
-    endif
-    
-    allocate(cs%c(4,np), stat=alloc_error)
-    if(alloc_error .ne. 0) then
-       call handleError("interpolation::newSplineWithDerivs", &
-            "Error in allocating storage for c")
-    endif
-    
-    do i = 1, np
-       cs%x(i) = x(i)
-       cs%c(1,i) = y(i)       
-       cs%c(2,i) = yp(i)
-    enddo
-    !
-    !  Set the diagonal coefficients.
-    !
-    cs%c(4,1) = 1.0_DP
-    do i = 2, cs%np - 1 
-       cs%c(4,i) = 2.0_DP * ( x(i+1) - x(i-1) )
-    end do
-    cs%c(4,cs%np) = 1.0_DP
-    !
-    !  Set the off-diagonal coefficients.
-    !
-    cs%c(3,1) = 0.0_DP
-    do i = 2, cs%np
-       cs%c(3,i) = x(i) - x(i-1)
-    end do
-    !
-    !  Forward elimination.
-    !
-    do i = 2, cs%np - 1
-       g = -cs%c(3,i+1) / cs%c(4,i-1)
-       cs%c(4,i) = cs%c(4,i) + g * cs%c(3,i-1)
-       cs%c(2,i) = cs%c(2,i) + g * cs%c(2,i-1)
-    end do
-    !
-    !  Back substitution for the interior slopes.
-    !
-    do i = cs%np - 1, 2, -1
-       cs%c(2,i) = ( cs%c(2,i) - cs%c(3,i) * cs%c(2,i+1) ) / cs%c(4,i)
-    end do
-    !
-    !  Now compute the quadratic and cubic coefficients used in the 
-    !  piecewise polynomial representation.
-    !
-    do i = 1, cs%np - 1
-       dx = x(i+1) - x(i)
-       divdif1 = ( cs%c(1,i+1) - cs%c(1,i) ) / dx
-       divdif3 = cs%c(2,i) + cs%c(2,i+1) - 2.0_DP * divdif1
-       cs%c(3,i) = ( divdif1 - cs%c(2,i) - divdif3 ) / dx
-       cs%c(4,i) = divdif3 / ( dx * dx )
-    end do
-
-    cs%c(3,cs%np) = 0.0_DP
-    cs%c(4,cs%np) = 0.0_DP
-
-    cs%dx = dx
-    cs%dx_i = 1.0_DP / dx
-
-    return
-  end subroutine newSplineWithDerivs
 
   subroutine deleteSpline(this)
 
