@@ -2,12 +2,12 @@ Package = utils
 
 MySource    = \
 	definitions.F90 \
+	status.F90 \
 	interpolation.F90 \
 	fError.c \
 	PropertyMap.cpp \
 	oopseMPI.F90 \
 	simError.c \
-	status.F90 \
 	StringUtils.cpp \
 	vector_class.F90 \
         StringTokenizer.cpp \
