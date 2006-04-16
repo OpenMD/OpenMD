@@ -42,6 +42,7 @@
 module switcheroo
 
   use definitions
+  use interpolation
 
   implicit none
   PRIVATE
@@ -58,8 +59,18 @@ module switcheroo
 
   logical, dimension(NSWITCHTYPES) :: isOK
   logical, save :: haveFunctionType = .false.
+  logical, save :: haveSqrtSpline = .false.
+  logical, save :: useSpline = .true.
   integer, save :: functionType = CUBIC
 
+
+  ! spline variables
+  type(cubicSpline), save :: scoef
+  real ( kind = dp ), dimension(SPLINE_SEGMENTS) :: xValues
+  real ( kind = dp ), dimension(SPLINE_SEGMENTS) :: yValues
+  real ( kind = dp ), save :: dSqrt1, dSqrtN, range, dX
+  real ( kind = dp ), save :: lowerBound
+  logical, save :: uniformSpline = .true.
 
   public::set_switch
   public::set_function_type
@@ -71,6 +82,7 @@ contains
 
     real ( kind = dp ), intent(in):: rinner, router
     integer, intent(in) :: SwitchType
+    integer :: i
 
     if (SwitchType .gt. NSWITCHTYPES) then
        write(default_error, *) &
@@ -98,6 +110,29 @@ contains
     rout2(SwitchType) = router * router
     isOK(SwitchType) = .true.
 
+    if (.not.haveSqrtSpline) then
+       ! fill arrays for building the spline
+       lowerBound = 1.0d0 ! the smallest value expected for r2
+       range = rout2(SwitchType) - lowerBound
+       dX = range / (SPLINE_SEGMENTS - 1)
+       
+       ! the spline is bracketed by lowerBound and rout2 endpoints
+       xValues(1) = lowerBound
+       yValues(1) = dsqrt(lowerBound)
+       do i = 1, SPLINE_SEGMENTS-1
+          xValues(i+1) = i * dX
+          yValues(i+1) = dsqrt( i * dX )
+       enddo
+       
+       ! set the endpoint derivatives
+       dSqrt1 = 1 / ( 2.0d0 * dsqrt( xValues(1) ) )
+       dSqrtN = 1 / ( 2.0d0 * dsqrt( xValues(SPLINE_SEGMENTS) ) )
+
+       ! call newSpline to fill the coefficient array
+       call newSpline(scoef, xValues, yValues, dSqrt1, dSqrtN, uniformSpline)
+       
+    endif
+    
   end subroutine set_switch
 
   subroutine set_function_type(functionForm)
@@ -142,8 +177,11 @@ contains
           return
 
        else
-
-          r = dsqrt(r2)
+          if (useSpline) then
+             call lookup_uniform_spline(scoef, r2, r)
+          else
+             r = dsqrt(r2)
+          endif
 
           ron = rin(SwitchType)
           roff = rout(SwitchType)

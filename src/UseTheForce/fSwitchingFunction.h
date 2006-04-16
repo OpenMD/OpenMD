@@ -6,6 +6,7 @@
 #define LJ_SWITCH            1
 #define ELECTROSTATIC_SWITCH 2
 #define GROUP_SWITCH         3
+#define SPLINE_SEGMENTS      101
 
 #endif
 #endif /*__C*/
@@ -16,5 +17,6 @@
   INTEGER, PARAMETER:: LJ_SWITCH            = 1
   INTEGER, PARAMETER:: ELECTROSTATIC_SWITCH = 2
   INTEGER, PARAMETER:: GROUP_SWITCH         = 3
+  INTEGER, PARAMETER:: SPLINE_SEGMENTS      = 101
 
 #endif

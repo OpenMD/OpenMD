@@ -47,6 +47,7 @@ module electrostatic_module
   use vector_class
   use simulation
   use status
+  use interpolation
 #ifdef IS_MPI
   use mpiSimulation
 #endif
@@ -121,6 +122,7 @@ module electrostatic_module
   public :: setElectrostaticCutoffRadius
   public :: setDampingAlpha
   public :: setReactionFieldDielectric
+  public :: buildElectroSplines
   public :: newElectrostaticType
   public :: setCharge
   public :: setDipoleMoment
@@ -132,6 +134,7 @@ module electrostatic_module
   public :: destroyElectrostaticTypes
   public :: self_self
   public :: rf_self_excludes
+
 
   type :: Electrostatic
      integer :: c_ident
@@ -188,6 +191,9 @@ contains
     dielectric = thisDielectric
     haveDielectric = .true.
   end subroutine setReactionFieldDielectric
+
+  subroutine buildElectroSplines()
+  end subroutine buildElectroSplines
 
   subroutine newElectrostaticType(c_ident, is_Charge, is_Dipole, &
        is_SplitDipole, is_Quadrupole, is_Tap, status)

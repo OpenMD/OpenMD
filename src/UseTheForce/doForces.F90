@@ -45,7 +45,7 @@
 
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: doForces.F90,v 1.76 2006-02-16 21:40:20 gezelter Exp $, $Date: 2006-02-16 21:40:20 $, $Name: not supported by cvs2svn $, $Revision: 1.76 $
+!! @version $Id: doForces.F90,v 1.77 2006-04-16 02:51:16 chrisfen Exp $, $Date: 2006-04-16 02:51:16 $, $Name: not supported by cvs2svn $, $Revision: 1.77 $
 
 
 module doForces
@@ -64,6 +64,7 @@ module doForces
   use eam
   use suttonchen
   use status
+  use interpolation
 #ifdef IS_MPI
   use mpiSimulation
 #endif
