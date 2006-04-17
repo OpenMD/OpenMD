@@ -67,14 +67,14 @@ class DataHolder {
                    bool result = i->second->setData(val);
                    if (!result ) {
                      std::stringstream ss;
-              	  ss <<   "Error in parsing " << keyword << ": expect " << i->second->getParamType() <<"\n";
+              	  ss <<   "Error in parsing " << keyword << ": expected " << i->second->getParamType() <<"\n";
                       throw OOPSEException(ss.str());
                     }
               }else if (deprecatedKeywords_.find(keyword) != deprecatedKeywords_.end()){
-                     std::cout << keyword << " is  deprecated\n";
+                     std::cout << keyword << " has been deprecated in OOPSE 3.  Please update your .md file.\n";
               }else {
                      std::stringstream ss;
-                     ss << keyword << " can not be recognized\n";
+                     ss << keyword << " is not a recognized keyword.\n";
                      throw OOPSEException(ss.str());
               }
         }
@@ -84,7 +84,7 @@ class DataHolder {
           for (i = parameters_.begin(); i != parameters_.end(); ++i) {
             if (!i->second->isOptional() && i->second->empty()) {
                 std::stringstream ss;
-                ss <<  i->second->getKeyword()  << " must be set\n";
+                ss <<  i->second->getKeyword()  << " must be set.\n";
                 throw OOPSEException(ss.str());
             }
           }

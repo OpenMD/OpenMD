@@ -15,10 +15,11 @@ forceFieldVariant="VC";
 
 ensemble = "NVE";
 dt = 4.0;
-runTime = 1e5;
+runTime = 6e3;
 
 
 sampleTime = 200.0;
+statusTime = 40.0;
 seed = 985456376;
 
 useInitialExtendedSystemState="false";

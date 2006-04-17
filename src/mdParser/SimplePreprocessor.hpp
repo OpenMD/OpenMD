@@ -54,8 +54,8 @@
 /**
  * @class SimplePreprocessor
  * @brief A simple preprocessor.
- * @note only support #include #ifdef, #ifndef, #endif, #define and #undef, c-like multiple line
- *  comment is not support, macro substitude is not support.
+ * @note only supports #include #ifdef, #ifndef, #endif, #define and #undef, c-like multiple line
+ *  comment is not supported, macro substitute is not supported.
  */
 namespace oopse { 
 class SimplePreprocessor {
@@ -135,7 +135,7 @@ class SimplePreprocessor {
                            }
                            os << std::endl;
                         } else {
-                            std::cout << tokens[0] << " is not support" << std::endl;
+                            std::cout << tokens[0] << " is not supported (yet)." << std::endl;
                             return false;
                         }
                     }else {

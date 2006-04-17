@@ -11137,7 +11137,7 @@ case $debug in
 # Try to determine "good" native compiler flags if none specified on command
 # line
 
-if test "$ac_test_FCFLAGS" != "set"; then
+if test "$ac_test_FFLAGS" != "set"; then
   FCFLAGS=""
   case "${host_cpu}-${host_os}" in
 
@@ -12501,7 +12501,7 @@ if test "${ac_cv_lib_mpich_MPI_Init+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
   ac_check_lib_save_LIBS=$LIBS
-LIBS="-lpmpich "-lmpich" $LIBS"
+LIBS="-lmpich "-lpmpich" $LIBS"
 cat >conftest.$ac_ext <<_ACEOF
 /* confdefs.h.  */
 _ACEOF
@@ -14621,6 +14621,4 @@ if test "$no_create" != yes; then
   # would make configure fail if this is the last instruction.
   $ac_cs_success || { (exit 1); exit 1; }
 fi
-
-
 

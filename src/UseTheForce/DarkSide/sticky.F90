@@ -50,7 +50,7 @@
 !! @author Matthew Meineke
 !! @author Christopher Fennell
 !! @author J. Daniel Gezelter
-!! @version $Id: sticky.F90,v 1.17 2005-10-12 21:00:50 gezelter Exp $, $Date: 2005-10-12 21:00:50 $, $Name: not supported by cvs2svn $, $Revision: 1.17 $
+!! @version $Id: sticky.F90,v 1.18 2006-04-17 21:49:12 gezelter Exp $, $Date: 2006-04-17 21:49:12 $, $Name: not supported by cvs2svn $, $Revision: 1.18 $
 
 module sticky
 
@@ -89,6 +89,7 @@ module sticky
   end type StickyList
 
   type(StickyList), dimension(:),allocatable :: StickyMap
+  logical, save :: hasStickyMap = .false.
 
 contains
 
@@ -148,6 +149,8 @@ contains
        StickyMap(myATID)%rbig = StickyMap(myATID)%rup
     endif
 
+    hasStickyMap = .true.
+
     return
   end subroutine newStickyType
 
@@ -206,11 +209,6 @@ contains
     integer :: id1, id2
     integer :: me1, me2
     real (kind=dp) :: w0, v0, v0p, rl, ru, rlp, rup, rbig
-
-    if (.not.allocated(StickyMap)) then
-       call handleError("sticky", "no StickyMap was present before first call of do_sticky_pair!")
-       return
-    end if
 
 #ifdef IS_MPI
     me1 = atid_Row(atom1)

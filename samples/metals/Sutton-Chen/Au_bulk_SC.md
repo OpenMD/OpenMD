@@ -16,10 +16,11 @@ forceFieldFileName = "SuttonChen.frc";
 
 ensemble = "NVE";
 dt = 4.0;
-runTime = 3e4;
+runTime = 6e3;
 
 
-sampleTime = 1000.0;
+sampleTime = 200.0;
+statusTime = 40.0;
 seed = 985456376;
 
 tempSet="true";

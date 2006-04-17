@@ -45,7 +45,7 @@
 
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: doForces.F90,v 1.77 2006-04-16 02:51:16 chrisfen Exp $, $Date: 2006-04-16 02:51:16 $, $Name: not supported by cvs2svn $, $Revision: 1.77 $
+!! @version $Id: doForces.F90,v 1.78 2006-04-17 21:49:12 gezelter Exp $, $Date: 2006-04-17 21:49:12 $, $Name: not supported by cvs2svn $, $Revision: 1.78 $
 
 
 module doForces
@@ -585,11 +585,8 @@ contains
      localError = 0
      call setLJDefaultCutoff( defaultRcut, defaultDoShift )
      call setElectrostaticCutoffRadius( defaultRcut, defaultRsw )
-     call setCutoffEAM( defaultRcut, localError)
-     if (localError /= 0) then
-       write(errMsg, *) 'An error has occured in setting the EAM cutoff'
-       call handleError("setCutoffs", errMsg)
-     end if
+     call setCutoffEAM( defaultRcut )
+     call setCutoffSC( defaultRcut )
      call set_switch(GROUP_SWITCH, defaultRsw, defaultRcut)
      call setHmatDangerousRcutValue(defaultRcut)
 
@@ -665,6 +662,10 @@ contains
     if (VisitCutoffsAfterComputing) then
        call set_switch(GROUP_SWITCH, largestRcut, largestRcut)       
        call setHmatDangerousRcutValue(largestRcut)
+       call setLJsplineRmax(largestRcut)
+       call setCutoffEAM(largestRcut)
+       call setCutoffSC(largestRcut)
+       VisitCutoffsAfterComputing = .false.
     endif
 
 
@@ -975,7 +976,9 @@ contains
                    rCut = gtypeCutoffMap(groupToGtypeRow(i),groupToGtypeCol(j))%rCut
                    if (loop .eq. PAIR_LOOP) then
                       vij = 0.0d0
-                      fij(1:3) = 0.0d0
+                      fij(1) = 0.0_dp
+                      fij(2) = 0.0_dp
+                      fij(3) = 0.0_dp
                    endif
                    
                    call get_switch(rgrpsq, sw, dswdr, rgrp, &
@@ -994,7 +997,9 @@ contains
                          if (skipThisPair(atom1, atom2))  cycle inner
                          
                          if ((n_in_i .eq. 1).and.(n_in_j .eq. 1)) then
-                            d_atm(1:3) = d_grp(1:3)
+                            d_atm(1) = d_grp(1)
+                            d_atm(2) = d_grp(2)
+                            d_atm(3) = d_grp(3)
                             ratmsq = rgrpsq
                          else
 #ifdef IS_MPI
@@ -1027,7 +1032,9 @@ contains
                                  d_grp, rgrp, rCut)
 #endif
                             vij = vij + vpair
-                            fij(1:3) = fij(1:3) + fpair(1:3)
+                            fij(1) = fij(1) + fpair(1)
+                            fij(2) = fij(2) + fpair(2)
+                            fij(3) = fij(3) + fpair(3)
                          endif
                       enddo inner
                    enddo
@@ -1387,7 +1394,9 @@ contains
     real( kind = dp ) :: d(3), scaled(3)
     integer i
 
-    d(1:3) = q_j(1:3) - q_i(1:3)
+    d(1) = q_j(1) - q_i(1)
+    d(2) = q_j(2) - q_i(2)
+    d(3) = q_j(3) - q_i(3)
 
     ! Wrap back into periodic box if necessary
     if ( SIM_uses_PBC ) then
@@ -1410,23 +1419,29 @@ contains
        else
           ! calc the scaled coordinates.
 
-          do i = 1, 3
-             scaled(i) = d(i) * HmatInv(i,i)
 
-             ! wrap the scaled coordinates
+          scaled(1) = d(1) * HmatInv(1,1)
+          scaled(2) = d(2) * HmatInv(2,2)
+          scaled(3) = d(3) * HmatInv(3,3)
+          
+          ! wrap the scaled coordinates
+          
+          scaled(1) = scaled(1) - dnint(scaled(1))
+          scaled(2) = scaled(2) - dnint(scaled(2))
+          scaled(3) = scaled(3) - dnint(scaled(3))
 
-             scaled(i) = scaled(i) - anint(scaled(i))
+          ! calc the wrapped real coordinates from the wrapped scaled 
+          ! coordinates
 
-             ! calc the wrapped real coordinates from the wrapped scaled 
-             ! coordinates
+          d(1) = scaled(1)*Hmat(1,1)
+          d(2) = scaled(2)*Hmat(2,2)
+          d(3) = scaled(3)*Hmat(3,3)
 
-             d(i) = scaled(i)*Hmat(i,i)
-          enddo
        endif
 
     endif
 
-    r_sq = dot_product(d,d)
+    r_sq = d(1)*d(1) + d(2)*d(2) + d(3)*d(3)
 
   end subroutine get_interatomic_vector
 

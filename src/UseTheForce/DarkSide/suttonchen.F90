@@ -50,6 +50,7 @@ module suttonchen
   use atype_module
   use vector_class
   use fForceOptions
+  use interpolation
 #ifdef IS_MPI
   use mpiSimulation
 #endif
@@ -59,6 +60,8 @@ module suttonchen
 #include "UseTheForce/DarkSide/fInteractionMap.h"
 
   INTEGER, PARAMETER :: DP = selected_real_kind(15)
+  !! number of points for the spline approximations
+  INTEGER, PARAMETER :: np = 3000
 
   logical, save :: SC_FF_initialized = .false.
   integer, save :: SC_Mixing_Policy
@@ -75,28 +78,23 @@ module suttonchen
 
   character(len = 200) :: errMsg
   character(len=*), parameter :: RoutineName =  "Sutton-Chen MODULE"
-  !! Logical that determines if eam arrays should be zeroed
-  logical :: nmflag  = .false.
-
-
+  
   type, private :: SCtype
-     integer           :: atid       
-     real(kind=dp)     :: c 
-     real(kind=dp)     :: m
-     real(kind=dp)     :: n
-     real(kind=dp)     :: alpha
-     real(kind=dp)     :: epsilon
-     real(kind=dp)     :: sc_rcut
+     integer       :: atid       
+     real(kind=dp) :: c 
+     real(kind=dp) :: m
+     real(kind=dp) :: n
+     real(kind=dp) :: alpha
+     real(kind=dp) :: epsilon
+     real(kind=dp) :: sc_rcut
   end type SCtype
-
+  
 
   !! Arrays for derivatives used in force calculation
   real( kind = dp), dimension(:), allocatable :: rho
   real( kind = dp), dimension(:), allocatable :: frho
   real( kind = dp), dimension(:), allocatable :: dfrhodrho
-
-
-
+  
   !! Arrays for MPI storage
 #ifdef IS_MPI
   real( kind = dp),save, dimension(:), allocatable :: dfrhodrho_col
@@ -110,31 +108,26 @@ module suttonchen
 
   type, private :: SCTypeList
      integer           :: nSCTypes = 0
-     integer           :: currentSCtype = 0
-
-     type (SCtype), pointer  :: SCtypes(:) => null()
-     integer, pointer         :: atidToSCtype(:) => null()
+     integer           :: currentSCtype = 0     
+     type (SCtype), pointer :: SCtypes(:) => null()
+     integer, pointer       :: atidToSCtype(:) => null()
   end type SCTypeList
 
   type (SCTypeList), save :: SCList
 
-
-
-
- type :: MixParameters
+  type:: MixParameters
      real(kind=DP) :: alpha
      real(kind=DP) :: epsilon
-     real(kind=DP) :: m
+     real(kind=DP) :: m 
      real(Kind=DP) :: n
-     real(kind=DP) :: vpair_pot
      real(kind=dp) :: rCut
+     real(kind=dp) :: vCut
      logical       :: rCutWasSet = .false.
-
+     type(cubicSpline) :: V
+     type(cubicSpline) :: phi
   end type MixParameters
 
   type(MixParameters), dimension(:,:), allocatable :: MixingMap
-
-
 
   public :: setCutoffSC
   public :: do_SC_pair
@@ -157,11 +150,8 @@ contains
     real (kind = dp )                      :: n ! Pair Potential Exponent
     real (kind = dp )                      :: alpha ! Length Scaling
     real (kind = dp )                      :: epsilon ! Energy Scaling
-
-
     integer                                :: c_ident
     integer                                :: status
-
     integer                                :: nAtypes,nSCTypes,myATID
     integer                                :: maxVals
     integer                                :: alloc_stat
@@ -188,8 +178,6 @@ contains
 
     myATID =  getFirstMatchingElement(atypes, "c_ident", c_ident)
     SCList%atidToSCType(myATID) = current
-
-
   
     SCList%SCTypes(current)%atid         = c_ident
     SCList%SCTypes(current)%alpha        = alpha
@@ -210,12 +198,10 @@ contains
        SCList%atidToSCtype=>null()
     end if
 ! Reset Capacity
-    SCList% nSCTypes = 0
+    SCList%nSCTypes = 0
     SCList%currentSCtype=0
 
   end subroutine destroySCTypes
-
-
 
   function getSCCut(atomID) result(cutValue)
     integer, intent(in) :: atomID
@@ -226,14 +212,11 @@ contains
     cutValue = 2.0_dp * SCList%SCTypes(scID)%alpha
   end function getSCCut
 
-
-
-
   subroutine createMixingMap()
-    integer :: nSCtypes, i, j
-    real ( kind = dp ) :: e1, e2,m1,m2,alpha1,alpha2,n1,n2
-    real ( kind = dp ) :: rcut6, tp6, tp12
-    logical :: isSoftCore1, isSoftCore2, doShift
+    integer :: nSCtypes, i, j, k
+    real ( kind = dp ) :: e1, e2, m1, m2, alpha1, alpha2, n1, n2
+    real ( kind = dp ) :: epsilon, m, n, alpha, rCut, vCut, dr, r
+    real ( kind = dp ), dimension(np) :: rvals, vvals, phivals
 
     if (SCList%currentSCtype == 0) then
        call handleError("SuttonChen", "No members in SCMap")
@@ -253,36 +236,48 @@ contains
        n1 = SCList%SCtypes(i)%n
        alpha1 = SCList%SCtypes(i)%alpha
 
-       do j = i, nSCtypes
+       do j = 1, nSCtypes
           
-
           e2 = SCList%SCtypes(j)%epsilon
           m2 = SCList%SCtypes(j)%m
           n2 = SCList%SCtypes(j)%n
           alpha2 = SCList%SCtypes(j)%alpha
 
           if (useGeometricDistanceMixing) then
-             MixingMap(i,j)%alpha = sqrt(alpha1 * alpha2) !SC formulation
+             alpha = sqrt(alpha1 * alpha2) !SC formulation
           else
-             MixingMap(i,j)%alpha = 0.5_dp * (alpha1 + alpha2) ! Goddard formulation
+             alpha = 0.5_dp * (alpha1 + alpha2) ! Goddard formulation
           endif
+          rcut = 2.0_dp * alpha
+          epsilon = sqrt(e1 * e2)
+          m = 0.5_dp*(m1+m2)
+          n = 0.5_dp*(n1+n2)
 
-          MixingMap(i,j)%epsilon = sqrt(e1 * e2)
-          MixingMap(i,j)%m = 0.5_dp*(m1+m2)
-          MixingMap(i,j)%n = 0.5_dp*(n1+n2)
-          MixingMap(i,j)%alpha = 0.5_dp*(alpha1+alpha2)
-          MixingMap(i,j)%rcut = 2.0_dp *MixingMap(i,j)%alpha
-          MixingMap(i,j)%vpair_pot = MixingMap(i,j)%epsilon* &
-               (MixingMap(i,j)%alpha/MixingMap(i,j)%rcut)**MixingMap(i,j)%n
+          dr = (rCut) / dble(np-1)
+          rvals(1) = 0.0d0
+          vvals(1) = 0.0d0
+          phivals(1) = 0.0d0
 
-          if (i.ne.j) then
-             MixingMap(j,i)%epsilon    = MixingMap(i,j)%epsilon
-             MixingMap(j,i)%m          = MixingMap(i,j)%m
-             MixingMap(j,i)%n          = MixingMap(i,j)%n
-             MixingMap(j,i)%alpha      = MixingMap(i,j)%alpha
-             MixingMap(j,i)%rcut = MixingMap(i,j)%rcut
-             MixingMap(j,i)%vpair_pot = MixingMap(i,j)%vpair_pot
-          endif
+          do k = 2, np
+             r = dble(k-1)*dr
+             rvals(k) = r
+             vvals(k) = epsilon*((alpha/r)**n)
+             phivals(k) = (alpha/r)**m
+          enddo
+
+          vCut = epsilon*((alpha/rCut)**n)
+
+          call newSpline(MixingMap(i,j)%V, rvals, vvals, &
+               0.0d0, 0.0d0, .true.)
+          call newSpline(MixingMap(i,j)%phi, rvals, phivals, &
+               0.0d0, 0.0d0, .true.)
+
+          MixingMap(i,j)%epsilon = epsilon
+          MixingMap(i,j)%m = m
+          MixingMap(i,j)%n = n
+          MixingMap(i,j)%alpha = alpha
+          MixingMap(i,j)%rCut = rcut
+          MixingMap(i,j)%vCut = vCut
        enddo
     enddo
     
@@ -308,8 +303,6 @@ contains
     nAtomsInRow = getNatomsInRow(plan_atom_row)
     nAtomsInCol = getNatomsInCol(plan_atom_col)
 #endif
-
-
 
     if (allocated(frho)) deallocate(frho)
     allocate(frho(nlocal),stat=alloc_stat)
@@ -380,19 +373,12 @@ contains
     arraysAllocated = .true.
   end subroutine allocateSC
 
-  !! C sets rcut to be the largest cutoff of any atype 
-  !! present in this simulation. Doesn't include all atypes
-  !! sim knows about, just those in the simulation.
-  subroutine setCutoffSC(rcut, status)
+  subroutine setCutoffSC(rcut)
     real(kind=dp) :: rcut
-    integer :: status
-    status = 0
-
     SC_rcut = rcut
-
   end subroutine setCutoffSC
-
-!! This array allocates module arrays if needed and builds mixing map.
+  
+  !! This array allocates module arrays if needed and builds mixing map.
   subroutine clean_SC()
     if (.not.arraysAllocated) call allocateSC()
     if (.not.haveMixingMap) call createMixingMap()
@@ -412,10 +398,8 @@ contains
 #endif
   end subroutine clean_SC
 
-
-
   !! Calculates rho_r
-  subroutine calc_sc_prepair_rho(atom1,atom2,d,r,rijsq, rcut)
+  subroutine calc_sc_prepair_rho(atom1, atom2, d, r, rijsq, rcut)
     integer :: atom1,atom2
     real(kind = dp), dimension(3) :: d
     real(kind = dp), intent(inout)               :: r
@@ -449,25 +433,23 @@ contains
 
     Myid_atom1 = SCList%atidtoSCtype(Atid1)
     Myid_atom2 = SCList%atidtoSCtype(Atid2)
-
-
-
-       rho_i_at_j = (MixingMap(Myid_atom1,Myid_atom2)%alpha/r)&
-            **MixingMap(Myid_atom1,Myid_atom2)%m
-       rho_j_at_i = rho_i_at_j
+    
+    call lookupUniformSpline(MixingMap(myid_atom1,myid_atom2)%phi, r, &
+         rho_i_at_j)
+    rho_j_at_i = rho_i_at_j
 
 #ifdef  IS_MPI
-       rho_col(atom2) = rho_col(atom2) + rho_i_at_j
-       rho_row(atom1) = rho_row(atom1) + rho_j_at_i
+    rho_col(atom2) = rho_col(atom2) + rho_i_at_j
+    rho_row(atom1) = rho_row(atom1) + rho_j_at_i
 #else
-       rho(atom2) = rho(atom2) + rho_i_at_j
-       rho(atom1) = rho(atom1) + rho_j_at_i
+    rho(atom2) = rho(atom2) + rho_i_at_j
+    rho(atom1) = rho(atom1) + rho_j_at_i
 #endif
-
+    
   end subroutine calc_sc_prepair_rho
 
 
-!! Calculate the rho_a for all local atoms
+  !! Calculate the rho_a for all local atoms
   subroutine calc_sc_preforce_Frho(nlocal,pot)
     integer :: nlocal
     real(kind=dp) :: pot
@@ -477,8 +459,8 @@ contains
     integer :: atid1
     integer :: myid
 
-
-    !! Scatter the electron density from  pre-pair calculation back to local atoms
+    !! Scatter the electron density from  pre-pair calculation back to 
+    !! local atoms
 #ifdef IS_MPI
     call scatter(rho_row,rho,plan_atom_row,sc_err)
     if (sc_err /= 0 ) then
@@ -494,13 +476,11 @@ contains
 
     rho(1:nlocal) = rho(1:nlocal) + rho_tmp(1:nlocal)
 #endif
-
-
-
+    
     !! Calculate F(rho) and derivative
     do atom = 1, nlocal
        Myid = SCList%atidtoSctype(Atid(atom))
-       frho(atom) = -SCList%SCTypes(Myid)%c * &
+       frho(atom) = - SCList%SCTypes(Myid)%c * &
             SCList%SCTypes(Myid)%epsilon * sqrt(rho(atom))
 
        dfrhodrho(atom) = 0.5_dp*frho(atom)/rho(atom)
@@ -529,9 +509,8 @@ contains
 #endif
     
     
-  end subroutine calc_sc_preforce_Frho
-
-
+  end subroutine calc_sc_preforce_Frho  
+  
   !! Does Sutton-Chen  pairwise Force calculation.  
   subroutine do_sc_pair(atom1, atom2, d, rij, r2, rcut, sw, vpair, fpair, &
        pot, f, do_pot)
@@ -545,27 +524,20 @@ contains
 
     logical, intent(in) :: do_pot
 
-    real( kind = dp ) :: drdx,drdy,drdz
+    real( kind = dp ) :: drdx, drdy, drdz
     real( kind = dp ) :: dvpdr
-    real( kind = dp ) :: drhodr
+    real( kind = dp ) :: rhtmp, drhodr
     real( kind = dp ) :: dudr
-    real( kind = dp ) :: drhoidr,drhojdr
     real( kind = dp ) :: Fx,Fy,Fz
-    real( kind = dp ) :: d2pha,phb,d2phb
-    real( kind = dp ) :: pot_temp,vptmp
-    real( kind = dp ) :: epsilonij,aij,nij,mij,vcij
-    integer :: id1,id2
+    real( kind = dp ) :: pot_temp, vptmp
+    real( kind = dp ) :: rcij, vcij
+    integer :: id1, id2
     integer  :: mytype_atom1
     integer  :: mytype_atom2
-    integer  :: atid1,atid2
+    integer  :: atid1, atid2
     !Local Variables
-
-    ! write(*,*) "Frho: ", Frho(atom1)
     
     cleanArrays = .true.
-
-    dvpdr = 0.0E0_DP
-
 
 #ifdef IS_MPI
        atid1 = atid_row(atom1)
@@ -581,41 +553,27 @@ contains
        drdx = d(1)/rij
        drdy = d(2)/rij
        drdz = d(3)/rij
-
                  
-       epsilonij = MixingMap(mytype_atom1,mytype_atom2)%epsilon
-       aij       = MixingMap(mytype_atom1,mytype_atom2)%alpha
-       nij       = MixingMap(mytype_atom1,mytype_atom2)%n
-       mij       = MixingMap(mytype_atom1,mytype_atom2)%m
-       vcij      = MixingMap(mytype_atom1,mytype_atom2)%vpair_pot               
-
-       vptmp = epsilonij*((aij/rij)**nij)
-
-
-       dvpdr = -nij*vptmp/rij
-       drhodr = -mij*((aij/rij)**mij)/rij
-
+       rcij = MixingMap(mytype_atom1,mytype_atom2)%rCut
+       vcij = MixingMap(mytype_atom1,mytype_atom2)%vCut
        
-       dudr = drhodr*(dfrhodrho(atom1)+dfrhodrho(atom2)) &
-            + dvpdr
-       
-       pot_temp = vptmp + vcij
- 
+       call lookupUniformSpline1d(MixingMap(mytype_atom1, mytype_atom2)%phi, &
+            rij, rhtmp, drhodr)
 
+       call lookupUniformSpline1d(MixingMap(mytype_atom1, mytype_atom2)%V, &
+            rij, vptmp, dvpdr)
+       
 #ifdef IS_MPI
-       dudr = drhodr*(dfrhodrho_row(atom1)+dfrhodrho_col(atom2)) &
-            + dvpdr
-
+       dudr = drhodr*(dfrhodrho_row(atom1) + dfrhodrho_col(atom2)) + dvpdr
 #else
-       dudr = drhodr*(dfrhodrho(atom1)+dfrhodrho(atom2)) &
-            + dvpdr
+       dudr = drhodr*(dfrhodrho(atom1)+ dfrhodrho(atom2)) + dvpdr
 #endif
-
-
+              
+       pot_temp = vptmp - vcij
+ 
        fx = dudr * drdx
        fy = dudr * drdy
        fz = dudr * drdz
-
 
 #ifdef IS_MPI
        if (do_pot) then
@@ -661,10 +619,5 @@ contains
           fpair(3) = fpair(3) + fz
 
        endif
-
-
   end subroutine do_sc_pair
-
-
-
 end module suttonchen

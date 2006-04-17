@@ -48,10 +48,10 @@
 !!           spline parameters.
 !!
 !! @author Charles F. Vardeman II 
-!! @version $Id: interpolation.F90,v 1.5 2006-04-14 21:59:23 gezelter Exp $
+!! @version $Id: interpolation.F90,v 1.6 2006-04-17 21:49:12 gezelter Exp $
 
 
-module  INTERPOLATION
+module interpolation
   use definitions
   use status
   implicit none
@@ -60,7 +60,6 @@ module  INTERPOLATION
   character(len = statusMsgSize) :: errMSG
 
   type, public :: cubicSpline
-     private
      logical :: isUniform = .false.
      integer :: np = 0
      real(kind=dp) :: dx_i
@@ -70,9 +69,10 @@ module  INTERPOLATION
 
   public :: newSpline
   public :: deleteSpline
-  public :: lookup_spline
-  public :: lookup_uniform_spline
-  public :: lookup_nonuniform_spline
+  public :: lookupSpline
+  public :: lookupUniformSpline
+  public :: lookupNonuniformSpline
+  public :: lookupUniformSpline1d
   
 contains
   
@@ -238,11 +238,11 @@ contains
     
   end subroutine deleteSpline
 
-  subroutine lookup_nonuniform_spline(cs, xval, yval)
+  subroutine lookupNonuniformSpline(cs, xval, yval)
     
     !*************************************************************************
     !
-    ! lookup_nonuniform_spline evaluates a piecewise cubic Hermite interpolant.
+    ! lookupNonuniformSpline evaluates a piecewise cubic Hermite interpolant.
     !
     !  Discussion:
     !
@@ -291,13 +291,13 @@ contains
     yval = cs%c(1,j) + dx * ( cs%c(2,j) + dx * ( cs%c(3,j) + dx * cs%c(4,j) ) )
     
     return
-  end subroutine lookup_nonuniform_spline
+  end subroutine lookupNonuniformSpline
 
-  subroutine lookup_uniform_spline(cs, xval, yval)
+  subroutine lookupUniformSpline(cs, xval, yval)
     
     !*************************************************************************
     !
-    ! lookup_uniform_spline evaluates a piecewise cubic Hermite interpolant.
+    ! lookupUniformSpline evaluates a piecewise cubic Hermite interpolant.
     !
     !  Discussion:
     !
@@ -322,7 +322,7 @@ contains
     type (cubicSpline), intent(in) :: cs
     real( kind = DP ), intent(in)  :: xval
     real( kind = DP ), intent(out) :: yval
-    real( kind = DP ) :: dx
+    real( kind = DP ) :: a, b, c, d, dx
     integer :: i, j
     !
     !  Find the interval J = [ cs%x(J), cs%x(J+1) ] that contains 
@@ -332,24 +332,63 @@ contains
 
     dx = xval - cs%x(j)
 
-    yval = cs%c(1,j) + dx * ( cs%c(2,j) + dx * ( cs%c(3,j) + dx * cs%c(4,j) ) )
+    a = cs%c(1,j)
+    b = cs%c(2,j)
+    c = cs%c(3,j)
+    d = cs%c(4,j)
+
+    yval = c + dx * d
+    yval = b + dx * yval  
+    yval = a + dx * yval
     
     return
-  end subroutine lookup_uniform_spline
+  end subroutine lookupUniformSpline
 
-  subroutine lookup_spline(cs, xval, yval)
+  subroutine lookupUniformSpline1d(cs, xval, yval, dydx)
+    
+    implicit none
+
+    type (cubicSpline), intent(in) :: cs
+    real( kind = DP ), intent(in)  :: xval
+    real( kind = DP ), intent(out) :: yval, dydx
+    real( kind = DP ) :: a, b, c, d, dx
+    integer :: i, j
+    
+    !  Find the interval J = [ cs%x(J), cs%x(J+1) ] that contains 
+    !  or is nearest to xval.
+
+    j = MAX(1, MIN(cs%np, idint((xval-cs%x(1)) * cs%dx_i) + 1))
+
+    dx = xval - cs%x(j)
+
+    a = cs%c(1,j)
+    b = cs%c(2,j)
+    c = cs%c(3,j)
+    d = cs%c(4,j)
+
+    yval = c + dx * d
+    yval = b + dx * yval  
+    yval = a + dx * yval
+
+    dydx = 2.0d0 * c + 3.0d0 * d * dx
+    dydx = b + dx * dydx
+       
+    return
+  end subroutine lookupUniformSpline1d
+
+  subroutine lookupSpline(cs, xval, yval)
 
     type (cubicSpline), intent(in) :: cs
     real( kind = DP ), intent(inout) :: xval
     real( kind = DP ), intent(inout) :: yval
     
     if (cs%isUniform) then
-       call lookup_uniform_spline(cs, xval, yval)
+       call lookupUniformSpline(cs, xval, yval)
     else
-       call lookup_nonuniform_spline(cs, xval, yval)
+       call lookupNonuniformSpline(cs, xval, yval)
     endif
 
     return
-  end subroutine lookup_spline
+  end subroutine lookupSpline
   
-end module INTERPOLATION
+end module interpolation

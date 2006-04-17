@@ -4,6 +4,26 @@
 #  http://www.gnu.org/software/gengetopt/gengetopt.html
 package "Hydro"
 version "1.0"
+purpose
+      "
++----------------------------------------------------------------------+ 
+|    ____  ____  ____  _____ ______  The OpenSource, Object-oriented   | 
+|   / __ \\/ __ \\/ __ \\/ ___// ____/  Parallel Simulation Engine.       | 
+|  / / / / / / / /_/ /\\__ \\/ __/                                       | 
+| / /_/ / /_/ / ____/___/ / /___     Copyright 2004-2006 by the        | 
+| \\____/\\____/_/    /____/_____/     University of Notre Dame.         | 
+|                                                                      | 
+|                                    http://www.oopse.org              |
+|                                                                      | 
+| OOPSE is an OpenScience project.  All source code is available for   |
+| any use subject to only one condition:                               | 
+|                                                                      |
+| Any published work resulting from the use of this code must cite the | 
+| following paper:       M. A. Meineke, C. F. Vardeman II, T. Lin,     | 
+|                        C. J. Fennell, and J. D. Gezelter,            | 
+|                        J. Comput. Chem. 26, pp. 252-271 (2005).      | 
++----------------------------------------------------------------------+"
+
 
 # Options
 option	"input"		i	"input dump file"					string	typestr="filename" 	yes

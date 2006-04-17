@@ -43,7 +43,7 @@
 !! Calculates Long Range forces Lennard-Jones interactions.
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: LJ.F90,v 1.20 2005-12-07 19:58:18 chuckv Exp $, $Date: 2005-12-07 19:58:18 $, $Name: not supported by cvs2svn $, $Revision: 1.20 $
+!! @version $Id: LJ.F90,v 1.21 2006-04-17 21:49:12 gezelter Exp $, $Date: 2006-04-17 21:49:12 $, $Name: not supported by cvs2svn $, $Revision: 1.21 $
 
 
 module lj
@@ -52,6 +52,7 @@ module lj
   use simulation
   use status
   use fForceOptions
+  use interpolation
 #ifdef IS_MPI
   use mpiSimulation
 #endif
@@ -66,11 +67,11 @@ module lj
 
   logical, save :: useGeometricDistanceMixing = .false.
   logical, save :: haveMixingMap = .false.
+  logical, save :: useSplines = .false.
 
   real(kind=DP), save :: defaultCutoff = 0.0_DP
   logical, save :: defaultShift = .false.
   logical, save :: haveDefaultCutoff = .false.
-
 
   type, private :: LJtype
      integer       :: atid
@@ -91,9 +92,8 @@ module lj
   type :: MixParameters
      real(kind=DP) :: sigma
      real(kind=DP) :: epsilon
-     real(kind=dp) :: sigma6
+     real(kind=dp) :: sigmai
      real(kind=dp) :: rCut
-     real(kind=dp) :: delta
      logical       :: rCutWasSet = .false.
      logical       :: shiftedPot
      logical       :: isSoftCore = .false.
@@ -101,12 +101,18 @@ module lj
 
   type(MixParameters), dimension(:,:), allocatable :: MixingMap
 
+  type(cubicSpline), save :: vLJspline
+  type(cubicSpline), save :: vLJpspline
+  type(cubicSpline), save :: vSoftSpline
+  type(cubicSpline), save :: vSoftpSpline
+
   public :: newLJtype
   public :: setLJDefaultCutoff
   public :: getSigma
   public :: getEpsilon
   public :: do_lj_pair
   public :: destroyLJtypes
+  public :: setLJsplineRmax
 
 contains
 
@@ -157,10 +163,12 @@ contains
     defaultCutoff = thisRcut
     defaultShift = shiftedPot
     haveDefaultCutoff = .true.
-    !we only want to build LJ Mixing map if LJ is being used.
+    !we only want to build LJ Mixing map and spline if LJ is being used.
     if(LJMap%nLJTypes /= 0) then
        call createMixingMap()
+       call setLJsplineRmax(defaultCutoff)
     end if
+
   end subroutine setLJDefaultCutoff
 
   function getSigma(atid) result (s)
@@ -234,25 +242,19 @@ contains
           
           MixingMap(i,j)%epsilon = dsqrt(e1 * e2)
 
-          MixingMap(i,j)%sigma6 = (MixingMap(i,j)%sigma)**6
+          MixingMap(i,j)%sigmai = 1.0_DP  / (MixingMap(i,j)%sigma)
 
           if (haveDefaultCutoff) then
-             rcut6 = defaultCutoff**6
-             tp6    = MixingMap(i,j)%sigma6/rcut6
-             tp12    = tp6**2          
-             MixingMap(i,j)%delta =-4.0_DP*MixingMap(i,j)%epsilon*(tp12 - tp6)
              MixingMap(i,j)%shiftedPot = defaultShift
           else
-             MixingMap(i,j)%delta = 0.0_DP
              MixingMap(i,j)%shiftedPot = defaultShift
           endif          
 
           if (i.ne.j) then
              MixingMap(j,i)%sigma      = MixingMap(i,j)%sigma
              MixingMap(j,i)%epsilon    = MixingMap(i,j)%epsilon
-             MixingMap(j,i)%sigma6     = MixingMap(i,j)%sigma6
+             MixingMap(j,i)%sigmai     = MixingMap(i,j)%sigmai
              MixingMap(j,i)%rCut       = MixingMap(i,j)%rCut
-             MixingMap(j,i)%delta      = MixingMap(i,j)%delta
              MixingMap(j,i)%rCutWasSet = MixingMap(i,j)%rCutWasSet
              MixingMap(j,i)%shiftedPot = MixingMap(i,j)%shiftedPot
              MixingMap(j,i)%isSoftCore = MixingMap(i,j)%isSoftCore
@@ -265,6 +267,46 @@ contains
     
   end subroutine createMixingMap
   
+  subroutine setLJsplineRmax(largestRcut)
+    real( kind = dp ), intent(in) :: largestRcut
+    real( kind = dp ) :: s, bigS, smallS, rmax, rmin
+    integer :: np, i
+
+    if (LJMap%nLJtypes .ne. 0) then
+
+       !
+       ! find the largest and smallest values of sigma that we'll need
+       !
+       bigS = 0.0_DP
+       smallS = 1.0e9
+       do i = 1, LJMap%nLJtypes
+          s = LJMap%LJtypes(i)%sigma
+          if (s .gt. bigS) bigS = s
+          if (s .lt. smallS) smallS = s
+       enddo
+       
+       !
+       ! give ourselves a 20% margin just in case
+       !
+       rmax = 1.2 * largestRcut / smallS    
+       !
+       ! assume atoms will never get closer than 1 angstrom
+       !
+       rmin = 1 / bigS
+       !
+       ! assume 500 points is enough
+       !
+       np = 500
+       
+       write(*,*) 'calling setupSplines with rmin = ', rmin, ' rmax = ', rmax, &
+            ' np = ', np
+       
+       call setupSplines(rmin, rmax, np)
+
+    endif
+    return
+  end subroutine setLJsplineRmax
+        
   subroutine do_lj_pair(atom1, atom2, d, rij, r2, rcut, sw, vpair, fpair, &
        pot, f, do_pot)
     
@@ -280,13 +322,10 @@ contains
     ! local Variables
     real( kind = dp ) :: drdx, drdy, drdz
     real( kind = dp ) :: fx, fy, fz
+    real( kind = dp ) :: myPot, myPotC, myDeriv, myDerivC, ros, rcos
     real( kind = dp ) :: pot_temp, dudr
-    real( kind = dp ) :: sigma6
+    real( kind = dp ) :: sigmai
     real( kind = dp ) :: epsilon
-    real( kind = dp ) :: r6, rc6
-    real( kind = dp ) :: t6, tp6
-    real( kind = dp ) :: t12, tp12
-    real( kind = dp ) :: delta
     logical :: isSoftCore, shiftedPot
     integer :: id1, id2, localError
 
@@ -306,45 +345,39 @@ contains
     ljt1 = LJMap%atidToLJtype(atid1)
     ljt2 = LJMap%atidToLJtype(atid2)
 
-    sigma6     = MixingMap(ljt1,ljt2)%sigma6
+    sigmai     = MixingMap(ljt1,ljt2)%sigmai
     epsilon    = MixingMap(ljt1,ljt2)%epsilon
-    delta      = MixingMap(ljt1,ljt2)%delta
     isSoftCore = MixingMap(ljt1,ljt2)%isSoftCore
     shiftedPot = MixingMap(ljt1,ljt2)%shiftedPot
 
-    r6 = r2 * r2 * r2
-
-    t6  = sigma6/ r6
-    t12 = t6 * t6     
+    ros = rij * sigmai
+    myPotC = 0.0_DP
 
     if (isSoftCore) then
-       
-       pot_temp = 4.0E0_DP * epsilon * t6
+
+       call getSoftFunc(ros, myPot, myDeriv)
+
        if (shiftedPot) then
-          rc6 = rcut**6
-          tp6 = sigma6 / rc6
-          delta =-4.0_DP*epsilon*(tp6)
-          pot_temp = pot_temp + delta
+          rcos = rcut * sigmai
+          call getSoftFunc(rcos, myPotC, myDerivC)
        endif
-       
-       vpair = vpair + pot_temp
-       
-       dudr = -sw * 24.0E0_DP * epsilon * t6 / rij
-       
+              
     else
-       pot_temp = 4.0E0_DP * epsilon * (t12 - t6) 
+
+       call getLJfunc(ros, myPot, myDeriv)
+
        if (shiftedPot) then
-          rc6 = rcut**6
-          tp6 = sigma6 / rc6
-          tp12 = tp6*tp6
-          delta =-4.0_DP*epsilon*(tp12 - tp6)
-          pot_temp = pot_temp + delta
+          rcos = rcut * sigmai
+          call getLJfunc(rcos, myPotC, myDerivC)
        endif
        
-       vpair = vpair + pot_temp
-       
-       dudr = sw * 24.0E0_DP * epsilon * (t6 - 2.0E0_DP*t12) / rij
     endif
+
+    !write(*,*) rij, ros, rcos, myPot, myDeriv, myPotC
+
+    pot_temp = epsilon * (myPot - myPotC)
+    vpair = vpair + pot_temp
+    dudr = sw * epsilon * myDeriv * sigmai
 
     drdx = d(1) / rij
     drdy = d(2) / rij
@@ -416,6 +449,141 @@ contains
     end if
     
     haveMixingMap = .false.
+
+    call deleteSpline(vLJspline)
+    call deleteSpline(vLJpspline) 
+    call deleteSpline(vSoftSpline)
+    call deleteSpline(vSoftpSpline)
+
   end subroutine destroyLJTypes
 
+  subroutine getLJfunc(r, myPot, myDeriv)
+
+    real(kind=dp), intent(in) :: r
+    real(kind=dp), intent(inout) :: myPot, myDeriv
+    real(kind=dp) :: ri, ri2, ri6, ri7, ri12, ri13
+    real(kind=dp) :: a, b, c, d, dx
+    integer :: j
+
+    if (useSplines) then
+       j = MAX(1, MIN(vLJspline%np, idint((r-vLJspline%x(1)) * vLJspline%dx_i) + 1))
+       
+       dx = r - vLJspline%x(j)
+       
+       a = vLJspline%c(1,j)
+       b = vLJspline%c(2,j)
+       c = vLJspline%c(3,j)
+       d = vLJspline%c(4,j)
+       
+       myPot = c + dx * d
+       myPot = b + dx * myPot
+       myPot = a + dx * myPot
+
+       a = vLJpspline%c(1,j)
+       b = vLJpspline%c(2,j)
+       c = vLJpspline%c(3,j)
+       d = vLJpspline%c(4,j)
+       
+       myDeriv = c + dx * d
+       myDeriv = b + dx * myDeriv  
+       myDeriv = a + dx * myDeriv
+       
+    else
+       ri = 1.0_DP / r
+       ri2 = ri*ri
+       ri6 = ri2*ri2*ri2
+       ri7 = ri6*ri
+       ri12 = ri6*ri6
+       ri13 = ri12*ri
+       
+       myPot = 4.0_DP * (ri12 - ri6)
+       myDeriv = 24.0_DP * (ri7 - 2.0_DP * ri13)
+    endif
+
+    return
+  end subroutine getLJfunc
+
+  subroutine getSoftFunc(r, myPot, myDeriv)
+    
+    real(kind=dp), intent(in) :: r
+    real(kind=dp), intent(inout) :: myPot, myDeriv
+    real(kind=dp) :: ri, ri2, ri6, ri7
+    real(kind=dp) :: a, b, c, d, dx
+    integer :: j
+    
+    if (useSplines) then
+       j = MAX(1, MIN(vSoftSpline%np, idint((r-vSoftSpline%x(1)) * vSoftSpline%dx_i) + 1))
+       
+       dx = r - vSoftSpline%x(j)
+       
+       a = vSoftSpline%c(1,j)
+       b = vSoftSpline%c(2,j)
+       c = vSoftSpline%c(3,j)
+       d = vSoftSpline%c(4,j)
+       
+       myPot = c + dx * d
+       myPot = b + dx * myPot
+       myPot = a + dx * myPot
+
+       a = vSoftPspline%c(1,j)
+       b = vSoftPspline%c(2,j)
+       c = vSoftPspline%c(3,j)
+       d = vSoftPspline%c(4,j)
+       
+       myDeriv = c + dx * d
+       myDeriv = b + dx * myDeriv  
+       myDeriv = a + dx * myDeriv
+       
+    else
+       ri = 1.0_DP / r    
+       ri2 = ri*ri
+       ri6 = ri2*ri2*ri2
+       ri7 = ri6*ri
+       myPot = 4.0_DP * (ri6)
+       myDeriv = - 24.0_DP * ri7 
+    endif
+
+    return
+  end subroutine getSoftFunc
+
+  subroutine setupSplines(rmin, rmax, np)
+    real( kind = dp ), intent(in) :: rmin, rmax
+    integer, intent(in) :: np
+    real( kind = dp ) :: rvals(np), vLJ(np), vLJp(np), vSoft(np), vSoftp(np)
+    real( kind = dp ) :: dr, r, ri, ri2, ri6, ri7, ri12, ri13
+    real( kind = dp ) :: vljpp1, vljppn, vsoftpp1, vsoftppn
+    integer :: i
+
+    dr = (rmax-rmin) / float(np-1)
+    
+    do i = 1, np
+       r = rmin + dble(i-1)*dr
+       ri = 1.0_DP / r
+       ri2 = ri*ri
+       ri6 = ri2*ri2*ri2
+       ri7 = ri6*ri
+       ri12 = ri6*ri6
+       ri13 = ri12*ri
+
+       rvals(i) = r
+       vLJ(i) = 4.0_DP * (ri12 - ri6)
+       vLJp(i) = 24.0_DP * (ri7 - 2.0_DP * ri13)
+
+       vSoft(i) = 4.0_DP * (ri6)
+       vSoftp(i) = - 24.0_DP * ri7       
+    enddo
+
+    vljpp1 = 624.0_DP / (rmin)**(14)  - 168.0_DP / (rmin)**(8)
+    vljppn = 624.0_DP / (rmax)**(14)  - 168.0_DP / (rmax)**(8)
+
+    vsoftpp1 = 168.0_DP / (rmin)**(8)
+    vsoftppn = 168.0_DP / (rmax)**(8)
+
+    call newSpline(vLJspline, rvals, vLJ, vLJp(1), vLJp(np), .true.)
+    call newSpline(vLJpspline, rvals, vLJp, vljpp1, vljppn, .true.)
+    call newSpline(vSoftSpline, rvals, vSoft, vSoftp(1), vSoftp(np), .true.)
+    call newSpline(vSoftpSpline, rvals, vSoftp, vsoftpp1, vsoftppn, .true.)
+
+    return
+  end subroutine setupSplines
 end module lj

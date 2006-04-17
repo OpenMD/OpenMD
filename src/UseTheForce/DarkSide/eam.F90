@@ -45,6 +45,7 @@ module eam
   use status
   use atype_module
   use vector_class
+  use interpolation
 #ifdef IS_MPI
   use mpiSimulation
 #endif
@@ -67,39 +68,22 @@ module eam
   character(len=*), parameter :: RoutineName =  "EAM MODULE"
   !! Logical that determines if eam arrays should be zeroed
   logical :: cleanme = .true.
-  logical :: nmflag  = .false.
-
 
   type, private :: EAMtype
      integer           :: eam_atype       
-     real( kind = DP ) :: eam_dr          
-     integer           :: eam_nr           
-     integer           :: eam_nrho          
      real( kind = DP ) :: eam_lattice        
-     real( kind = DP ) :: eam_drho      
      real( kind = DP ) :: eam_rcut     
      integer           :: eam_atype_map
-
-     real( kind = DP ), pointer, dimension(:) :: eam_rvals        => null()
-     real( kind = DP ), pointer, dimension(:) :: eam_rhovals      => null()
-     real( kind = DP ), pointer, dimension(:) :: eam_F_rho        => null()
-     real( kind = DP ), pointer, dimension(:) :: eam_Z_r          => null()
-     real( kind = DP ), pointer, dimension(:) :: eam_rho_r        => null()
-     real( kind = DP ), pointer, dimension(:) :: eam_phi_r        => null()
-     real( kind = DP ), pointer, dimension(:) :: eam_F_rho_pp     => null()
-     real( kind = DP ), pointer, dimension(:) :: eam_Z_r_pp       => null()
-     real( kind = DP ), pointer, dimension(:) :: eam_rho_r_pp     => null()
-     real( kind = DP ), pointer, dimension(:) :: eam_phi_r_pp     => null()
+     type(cubicSpline) :: rho 
+     type(cubicSpline) :: Z
+     type(cubicSpline) :: F
+     type(cubicSpline) :: phi
   end type EAMtype
-
 
   !! Arrays for derivatives used in force calculation
   real( kind = dp), dimension(:), allocatable :: frho
   real( kind = dp), dimension(:), allocatable :: rho
-
   real( kind = dp), dimension(:), allocatable :: dfrhodrho
-  real( kind = dp), dimension(:), allocatable :: d2frhodrhodrho
-
 
   !! Arrays for MPI storage
 #ifdef IS_MPI
@@ -110,8 +94,6 @@ module eam
   real( kind = dp),save, dimension(:), allocatable :: rho_row
   real( kind = dp),save, dimension(:), allocatable :: rho_col
   real( kind = dp),save, dimension(:), allocatable :: rho_tmp
-  real( kind = dp),save, dimension(:), allocatable :: d2frhodrhodrho_col
-  real( kind = dp),save, dimension(:), allocatable :: d2frhodrhodrho_row
 #endif
 
   type, private :: EAMTypeList
@@ -121,7 +103,6 @@ module eam
      type (EAMtype), pointer  :: EAMParams(:) => null()
      integer, pointer         :: atidToEAMType(:) => null()
   end type EAMTypeList
-
 
   type (eamTypeList), save :: EAMList
 
@@ -140,34 +121,30 @@ module eam
 
 contains
 
-
   subroutine newEAMtype(lattice_constant,eam_nrho,eam_drho,eam_nr,&
-       eam_dr,rcut,eam_Z_r,eam_rho_r,eam_F_rho,&
-       c_ident,status)
+       eam_dr,rcut,eam_Z_r,eam_rho_r,eam_F_rho, c_ident, status)
     real (kind = dp )                      :: lattice_constant
     integer                                :: eam_nrho
     real (kind = dp )                      :: eam_drho
     integer                                :: eam_nr
     real (kind = dp )                      :: eam_dr
     real (kind = dp )                      :: rcut
-    real (kind = dp ), dimension(eam_nr)   :: eam_Z_r
-    real (kind = dp ), dimension(eam_nr)   :: eam_rho_r
-    real (kind = dp ), dimension(eam_nrho) :: eam_F_rho
+    real (kind = dp ), dimension(eam_nr)   :: eam_Z_r, rvals
+    real (kind = dp ), dimension(eam_nr)   :: eam_rho_r, eam_phi_r
+    real (kind = dp ), dimension(eam_nrho) :: eam_F_rho, rhovals
     integer                                :: c_ident
     integer                                :: status
 
     integer                                :: nAtypes,nEAMTypes,myATID
     integer                                :: maxVals
     integer                                :: alloc_stat
-    integer                                :: current
+    integer                                :: current, j
     integer,pointer                        :: Matchlist(:) => null()
 
     status = 0
 
-
     !! Assume that atypes has already been set and get the total number of types in atypes
     !! Also assume that every member of atypes is a EAM model.
-
 
     ! check to see if this is the first time into 
     if (.not.associated(EAMList%EAMParams)) then
@@ -184,24 +161,39 @@ contains
     myATID =  getFirstMatchingElement(atypes, "c_ident", c_ident)
     EAMList%atidToEAMType(myATID) = current
 
-    call allocate_EAMType(eam_nrho,eam_nr,EAMList%EAMParams(current),stat=alloc_stat)
-    if (alloc_stat /= 0) then
-       status = -1
-       return
-    end if
-
-  
     EAMList%EAMParams(current)%eam_atype    = c_ident
     EAMList%EAMParams(current)%eam_lattice  = lattice_constant
-    EAMList%EAMParams(current)%eam_nrho     = eam_nrho
-    EAMList%EAMParams(current)%eam_drho     = eam_drho
-    EAMList%EAMParams(current)%eam_nr       = eam_nr
-    EAMList%EAMParams(current)%eam_dr       = eam_dr
     EAMList%EAMParams(current)%eam_rcut     = rcut
-    EAMList%EAMParams(current)%eam_Z_r      = eam_Z_r
-    EAMList%EAMParams(current)%eam_rho_r    = eam_rho_r
-    EAMList%EAMParams(current)%eam_F_rho    = eam_F_rho
 
+    ! Build array of r values
+    do j = 1, eam_nr
+       rvals(j) = real(j-1,kind=dp) * eam_dr
+    end do
+    
+    ! Build array of rho values
+    do j = 1, eam_nrho
+       rhovals(j) = real(j-1,kind=dp) * eam_drho
+    end do
+
+    ! convert from eV to kcal / mol:
+    do j = 1, eam_nrho
+       eam_F_rho(j) = eam_F_rho(j) * 23.06054E0_DP
+    end do
+    
+    ! precompute the pair potential and get it into kcal / mol:
+    eam_phi_r(1) = 0.0E0_DP
+    do j = 2, eam_nr
+       eam_phi_r(j) = 331.999296E0_DP * (eam_Z_r(j)**2) / rvals(j)
+    enddo
+
+    call newSpline(EAMList%EAMParams(current)%rho, rvals, rhovals, &
+         0.0d0, 0.0d0, .true.)
+    call newSpline(EAMList%EAMParams(current)%Z,   rvals, eam_Z_r, &
+         0.0d0, 0.0d0, .true.)
+    call newSpline(EAMList%EAMParams(current)%F, rhovals, eam_F_rho, &
+         0.0d0, 0.0d0, .true.)
+    call newSpline(EAMList%EAMParams(current)%phi, rvals, eam_phi_r, &
+         0.0d0, 0.0d0, .true.)
   end subroutine newEAMtype
 
 
@@ -219,7 +211,6 @@ contains
 
     eamList%n_eam_types = 0
     eamList%currentAddition = 0
-
   end subroutine destroyEAMtypes
 
   function getEAMCut(atomID) result(cutValue)
@@ -235,9 +226,12 @@ contains
     integer :: status
     integer :: i,j
     real(kind=dp) :: current_rcut_max
+#ifdef IS_MPI
+    integer :: nAtomsInRow
+    integer :: nAtomsInCol
+#endif
     integer :: alloc_stat
     integer :: number_r, number_rho
-
 
     status = 0
     if (EAMList%currentAddition == 0) then
@@ -245,92 +239,9 @@ contains
        status = -1
        return
     end if
-
-
-    do i = 1, EAMList%currentAddition
-
-       ! Build array of r values
-
-       do j = 1,EAMList%EAMParams(i)%eam_nr
-          EAMList%EAMParams(i)%eam_rvals(j) = &
-               real(j-1,kind=dp)* &
-               EAMList%EAMParams(i)%eam_dr
-       end do
-       ! Build array of rho values
-       do j = 1,EAMList%EAMParams(i)%eam_nrho
-          EAMList%EAMParams(i)%eam_rhovals(j) = &
-               real(j-1,kind=dp)* &
-               EAMList%EAMParams(i)%eam_drho
-       end do
-       ! convert from eV to kcal / mol:
-       EAMList%EAMParams(i)%eam_F_rho = EAMList%EAMParams(i)%eam_F_rho * 23.06054E0_DP
-
-       ! precompute the pair potential and get it into kcal / mol:
-       EAMList%EAMParams(i)%eam_phi_r(1) = 0.0E0_DP
-       do j = 2, EAMList%EAMParams(i)%eam_nr
-          EAMList%EAMParams(i)%eam_phi_r(j) = (EAMList%EAMParams(i)%eam_Z_r(j)**2)/EAMList%EAMParams(i)%eam_rvals(j)
-          EAMList%EAMParams(i)%eam_phi_r(j) =  EAMList%EAMParams(i)%eam_phi_r(j)*331.999296E0_DP
-       enddo
-    end do
-
-
-    do i = 1,  EAMList%currentAddition
-       number_r   = EAMList%EAMParams(i)%eam_nr
-       number_rho = EAMList%EAMParams(i)%eam_nrho
-
-       call eam_spline(number_r, EAMList%EAMParams(i)%eam_rvals, &
-            EAMList%EAMParams(i)%eam_rho_r, &
-            EAMList%EAMParams(i)%eam_rho_r_pp, &
-            0.0E0_DP, 0.0E0_DP, 'N')
-       call eam_spline(number_r, EAMList%EAMParams(i)%eam_rvals, &
-            EAMList%EAMParams(i)%eam_Z_r, &
-            EAMList%EAMParams(i)%eam_Z_r_pp, &
-            0.0E0_DP, 0.0E0_DP, 'N')
-       call eam_spline(number_rho, EAMList%EAMParams(i)%eam_rhovals, &
-            EAMList%EAMParams(i)%eam_F_rho, &
-            EAMList%EAMParams(i)%eam_F_rho_pp, &
-            0.0E0_DP, 0.0E0_DP, 'N')
-       call eam_spline(number_r, EAMList%EAMParams(i)%eam_rvals, &
-            EAMList%EAMParams(i)%eam_phi_r, &
-            EAMList%EAMParams(i)%eam_phi_r_pp, &
-            0.0E0_DP, 0.0E0_DP, 'N')
-    enddo
-
-    !       current_rcut_max = EAMList%EAMParams(1)%eam_rcut
-    !! find the smallest rcut for any eam atype
-    !       do i = 2, EAMList%currentAddition 
-    !          current_rcut_max =max(current_rcut_max,EAMList%EAMParams(i)%eam_rcut)
-    !       end do
-
-    !       EAM_rcut = current_rcut_max
-    !       EAM_rcut_orig = current_rcut_max
-    !       do i = 1, EAMList%currentAddition
-    !          EAMList%EAMParam(i)s%eam_atype_map(eam_atype(i)) = i
-    !       end do
+    
     !! Allocate arrays for force calculation
-
-    call allocateEAM(alloc_stat)
-    if (alloc_stat /= 0 ) then
-       write(*,*) "allocateEAM failed"
-       status = -1
-       return
-    endif
-
-  end subroutine init_EAM_FF
-
-  !! routine checks to see if array is allocated, deallocates array if allocated
-  !! and then creates the array to the required size
-  subroutine allocateEAM(status)
-    integer, intent(out) :: status
-
-#ifdef IS_MPI
-    integer :: nAtomsInRow
-    integer :: nAtomsInCol
-#endif
-    integer :: alloc_stat
-
-
-    status = 0
+    
 #ifdef IS_MPI
     nAtomsInRow = getNatomsInRow(plan_atom_row)
     nAtomsInCol = getNatomsInCol(plan_atom_col)
@@ -342,6 +253,7 @@ contains
        status = -1
        return
     end if
+
     if (allocated(rho)) deallocate(rho)
     allocate(rho(nlocal),stat=alloc_stat)
     if (alloc_stat /= 0) then 
@@ -356,13 +268,6 @@ contains
        return
     end if
 
-    if (allocated(d2frhodrhodrho)) deallocate(d2frhodrhodrho)
-    allocate(d2frhodrhodrho(nlocal),stat=alloc_stat)
-    if (alloc_stat /= 0) then 
-       status = -1
-       return
-    end if
-
 #ifdef IS_MPI
 
     if (allocated(rho_tmp)) deallocate(rho_tmp)
@@ -371,7 +276,6 @@ contains
        status = -1
        return
     end if
-
 
     if (allocated(frho_row)) deallocate(frho_row)
     allocate(frho_row(nAtomsInRow),stat=alloc_stat)
@@ -391,13 +295,6 @@ contains
        status = -1
        return
     end if
-    if (allocated(d2frhodrhodrho_row)) deallocate(d2frhodrhodrho_row)
-    allocate(d2frhodrhodrho_row(nAtomsInRow),stat=alloc_stat)
-    if (alloc_stat /= 0) then 
-       status = -1
-       return
-    end if
-
 
     ! Now do column arrays
 
@@ -419,30 +316,15 @@ contains
        status = -1
        return
     end if
-    if (allocated(d2frhodrhodrho_col)) deallocate(d2frhodrhodrho_col)
-    allocate(d2frhodrhodrho_col(nAtomsInCol),stat=alloc_stat)
-    if (alloc_stat /= 0) then 
-       status = -1
-       return
-    end if
 
 #endif
 
-  end subroutine allocateEAM
+  end subroutine init_EAM_FF
 
-  !! C sets rcut to be the largest cutoff of any atype 
-  !! present in this simulation. Doesn't include all atypes
-  !! sim knows about, just those in the simulation.
-  subroutine setCutoffEAM(rcut, status)
+  subroutine setCutoffEAM(rcut)
     real(kind=dp) :: rcut
-    integer :: status
-    status = 0
-
     EAM_rcut = rcut
-
   end subroutine setCutoffEAM
-
-
 
   subroutine clean_EAM()
 
@@ -462,94 +344,19 @@ contains
 #endif
   end subroutine clean_EAM
 
-
-
-  subroutine allocate_EAMType(eam_n_rho,eam_n_r,thisEAMType,stat)
-    integer, intent(in)          :: eam_n_rho
-    integer, intent(in)          :: eam_n_r
-    type (EAMType)               :: thisEAMType
-    integer, optional   :: stat
-    integer             :: alloc_stat
-
-
-
-    if (present(stat)) stat = 0
-
-    allocate(thisEAMType%eam_rvals(eam_n_r),stat=alloc_stat)   
-    if (alloc_stat /= 0 ) then
-       if (present(stat)) stat = -1
-       return
-    end if
-    allocate(thisEAMType%eam_rhovals(eam_n_rho),stat=alloc_stat)   
-    if (alloc_stat /= 0 ) then
-       if (present(stat)) stat = -1
-       return
-    end if
-    allocate(thisEAMType%eam_F_rho(eam_n_rho),stat=alloc_stat)   
-    if (alloc_stat /= 0 ) then
-       if (present(stat)) stat = -1
-       return
-    end if
-    allocate(thisEAMType%eam_Z_r(eam_n_r),stat=alloc_stat)        
-    if (alloc_stat /= 0 ) then
-       if (present(stat)) stat = -1
-       return
-    end if
-    allocate(thisEAMType%eam_rho_r(eam_n_r),stat=alloc_stat)      
-    if (alloc_stat /= 0 ) then
-       if (present(stat)) stat = -1
-       return
-    end if
-    allocate(thisEAMType%eam_phi_r(eam_n_r),stat=alloc_stat)      
-    if (alloc_stat /= 0 ) then
-       if (present(stat)) stat = -1
-       return
-    end if
-    allocate(thisEAMType%eam_F_rho_pp(eam_n_rho),stat=alloc_stat)   
-    if (alloc_stat /= 0 ) then
-       if (present(stat)) stat = -1
-       return
-    end if
-    allocate(thisEAMType%eam_Z_r_pp(eam_n_r),stat=alloc_stat)   
-    if (alloc_stat /= 0 ) then
-       if (present(stat)) stat = -1
-       return
-    end if
-    allocate(thisEAMType%eam_rho_r_pp(eam_n_r),stat=alloc_stat)   
-    if (alloc_stat /= 0 ) then
-       if (present(stat)) stat = -1
-       return
-    end if
-    allocate(thisEAMType%eam_phi_r_pp(eam_n_r),stat=alloc_stat)
-    if (alloc_stat /= 0 ) then
-       if (present(stat)) stat = -1
-       return
-    end if
-
-
-  end subroutine allocate_EAMType
-
-
   subroutine deallocate_EAMType(thisEAMType)
     type (EAMtype), pointer :: thisEAMType
 
-    ! free Arrays in reverse order of allocation...
-    if(associated(thisEAMType%eam_phi_r_pp)) deallocate(thisEAMType%eam_phi_r_pp)      
-    if(associated(thisEAMType%eam_rho_r_pp)) deallocate(thisEAMType%eam_rho_r_pp)   
-    if(associated(thisEAMType%eam_Z_r_pp)) deallocate(thisEAMType%eam_Z_r_pp)   
-    if(associated(thisEAMType%eam_F_rho_pp)) deallocate(thisEAMType%eam_F_rho_pp)   
-    if(associated(thisEAMType%eam_phi_r)) deallocate(thisEAMType%eam_phi_r)      
-    if(associated(thisEAMType%eam_rho_r)) deallocate(thisEAMType%eam_rho_r)      
-    if(associated(thisEAMType%eam_Z_r)) deallocate(thisEAMType%eam_Z_r)   
-    if(associated(thisEAMType%eam_F_rho)) deallocate(thisEAMType%eam_F_rho)
-    if(associated(thisEAMType%eam_rhovals)) deallocate(thisEAMType%eam_rhovals)
-    if(associated(thisEAMType%eam_rvals)) deallocate(thisEAMType%eam_rvals)
+    call deleteSpline(thisEAMType%F)
+    call deleteSpline(thisEAMType%rho)
+    call deleteSpline(thisEAMType%phi)
+    call deleteSpline(thisEAMType%Z)
 
   end subroutine deallocate_EAMType
 
   !! Calculates rho_r
   subroutine calc_eam_prepair_rho(atom1,atom2,d,r,rijsq)
-    integer :: atom1,atom2
+    integer :: atom1, atom2
     real(kind = dp), dimension(3) :: d
     real(kind = dp), intent(inout)               :: r
     real(kind = dp), intent(inout)               :: rijsq
@@ -557,20 +364,13 @@ contains
     real(kind = dp) :: rho_i_at_j
     ! value of electron density rho do to atom j at atom i
     real(kind = dp) :: rho_j_at_i
-
-    ! we don't use the derivatives, dummy variables
-    real( kind = dp) :: drho,d2rho
     integer :: eam_err
     
-    integer :: atid1,atid2 ! Global atid    
+    integer :: atid1, atid2 ! Global atid    
     integer :: myid_atom1 ! EAM atid
     integer :: myid_atom2 
 
-
     ! check to see if we need to be cleaned at the start of a force loop
-
-
-
 
 #ifdef IS_MPI
     Atid1 = Atid_row(Atom1)
@@ -585,33 +385,20 @@ contains
 
     if (r.lt.EAMList%EAMParams(myid_atom1)%eam_rcut) then
 
-
-
-       call eam_splint(EAMList%EAMParams(myid_atom1)%eam_nr, &
-            EAMList%EAMParams(myid_atom1)%eam_rvals, &
-            EAMList%EAMParams(myid_atom1)%eam_rho_r, &
-            EAMList%EAMParams(myid_atom1)%eam_rho_r_pp, &
-            r, rho_i_at_j,drho,d2rho)
-
-
+       call lookupUniformSpline(EAMList%EAMParams(myid_atom1)%rho, r, &
+            rho_i_at_j)
 
 #ifdef  IS_MPI
        rho_col(atom2) = rho_col(atom2) + rho_i_at_j
 #else
        rho(atom2) = rho(atom2) + rho_i_at_j
 #endif
-             ! write(*,*) atom1,atom2,r,rho_i_at_j
     endif
 
     if (r.lt.EAMList%EAMParams(myid_atom2)%eam_rcut) then
-       call eam_splint(EAMList%EAMParams(myid_atom2)%eam_nr, &
-            EAMList%EAMParams(myid_atom2)%eam_rvals, &
-            EAMList%EAMParams(myid_atom2)%eam_rho_r, &
-            EAMList%EAMParams(myid_atom2)%eam_rho_r_pp, &
-            r, rho_j_at_i,drho,d2rho)
 
-
-
+       call lookupUniformSpline(EAMList%EAMParams(myid_atom2)%rho, r, &
+            rho_j_at_i)
 
 #ifdef  IS_MPI
        rho_row(atom1) = rho_row(atom1) + rho_j_at_i
@@ -620,30 +407,22 @@ contains
 #endif
     endif
 
-
-
-
-
-
   end subroutine calc_eam_prepair_rho
 
 
-
-
   !! Calculate the functional F(rho) for all local atoms
-  subroutine calc_eam_preforce_Frho(nlocal,pot)
+  subroutine calc_eam_preforce_Frho(nlocal, pot)
     integer :: nlocal
     real(kind=dp) :: pot
-    integer :: i,j
+    integer :: i, j
     integer :: atom
-    real(kind=dp) :: U,U1,U2
+    real(kind=dp) :: U,U1
     integer :: atype1
-    integer :: me,atid1
-    integer :: n_rho_points
-
+    integer :: me, atid1
 
     cleanme = .true.
-    !! Scatter the electron density from  pre-pair calculation back to local atoms
+    !! Scatter the electron density from  pre-pair calculation back to 
+    !! local atoms
 #ifdef IS_MPI
     call scatter(rho_row,rho,plan_atom_row,eam_err)
     if (eam_err /= 0 ) then
@@ -659,40 +438,18 @@ contains
     rho(1:nlocal) = rho(1:nlocal) + rho_tmp(1:nlocal)
 #endif
 
-
-
     !! Calculate F(rho) and derivative 
     do atom = 1, nlocal
        atid1 = atid(atom)
        me = eamList%atidToEAMtype(atid1)
-       n_rho_points = EAMList%EAMParams(me)%eam_nrho
-       !  Check to see that the density is not greater than the larges rho we have calculated
-       if (rho(atom) < EAMList%EAMParams(me)%eam_rhovals(n_rho_points)) then
-          call eam_splint(n_rho_points, &
-               EAMList%EAMParams(me)%eam_rhovals, &
-               EAMList%EAMParams(me)%eam_f_rho, &
-               EAMList%EAMParams(me)%eam_f_rho_pp, &
-               rho(atom), & ! Actual Rho
-               u, u1, u2)
-       else 
-          ! Calculate F(rho with the largest available rho value
-          call eam_splint(n_rho_points, &
-               EAMList%EAMParams(me)%eam_rhovals, &
-               EAMList%EAMParams(me)%eam_f_rho, &
-               EAMList%EAMParams(me)%eam_f_rho_pp, &
-               EAMList%EAMParams(me)%eam_rhovals(n_rho_points), & ! Largest rho
-               u,u1,u2)
-       end if
 
-
+       call lookupUniformSpline1d(EAMList%EAMParams(me)%F, rho(atom), &
+            u, u1)
+       
        frho(atom) = u
        dfrhodrho(atom) = u1
-       d2frhodrhodrho(atom) = u2
        pot = pot + u
-
     enddo
-
-
 
 #ifdef IS_MPI
     !! communicate f(rho) and derivatives back into row and column arrays
@@ -712,23 +469,11 @@ contains
     if (eam_err /=  0) then
        call handleError("cal_eam_forces()","MPI gather dfrhodrho_col failure")
     endif
-
-
-
-
-
-    if (nmflag) then
-       call gather(d2frhodrhodrho,d2frhodrhodrho_row,plan_atom_row)
-       call gather(d2frhodrhodrho,d2frhodrhodrho_col,plan_atom_col)
-    endif
 #endif
 
 
   end subroutine calc_eam_preforce_Frho
-
-
-
-
+  
   !! Does EAM pairwise Force calculation.  
   subroutine do_eam_pair(atom1, atom2, d, rij, r2, sw, vpair, fpair, &
        pot, f, do_pot)
@@ -742,30 +487,23 @@ contains
 
     logical, intent(in) :: do_pot
 
-    real( kind = dp ) :: drdx,drdy,drdz
-    real( kind = dp ) :: d2
-    real( kind = dp ) :: phab,pha,dvpdr,d2vpdrdr
-    real( kind = dp ) :: rha,drha,d2rha, dpha
-    real( kind = dp ) :: rhb,drhb,d2rhb, dphb
+    real( kind = dp ) :: drdx, drdy, drdz
+    real( kind = dp ) :: phab, pha, dvpdr
+    real( kind = dp ) :: rha, drha, dpha
+    real( kind = dp ) :: rhb, drhb, dphb
     real( kind = dp ) :: dudr
-    real( kind = dp ) :: rci,rcj
-    real( kind = dp ) :: drhoidr,drhojdr
-    real( kind = dp ) :: d2rhoidrdr
-    real( kind = dp ) :: d2rhojdrdr
-    real( kind = dp ) :: Fx,Fy,Fz
-    real( kind = dp ) :: r,d2pha,phb,d2phb
+    real( kind = dp ) :: rci, rcj
+    real( kind = dp ) :: drhoidr, drhojdr
+    real( kind = dp ) :: Fx, Fy, Fz
+    real( kind = dp ) :: r, phb
 
-    integer :: id1,id2
+    integer :: id1, id2
     integer  :: mytype_atom1
     integer  :: mytype_atom2
-    integer  :: atid1,atid2
-    !Local Variables
-
-    ! write(*,*) "Frho: ", Frho(atom1)
+    integer  :: atid1, atid2
 
     phab = 0.0E0_DP
     dvpdr = 0.0E0_DP
-    d2vpdrdr = 0.0E0_DP
 
     if (rij .lt. EAM_rcut) then
 
@@ -791,61 +529,47 @@ contains
        drdz = d(3)/rij
 
        if (rij.lt.rci) then
-          call eam_splint(EAMList%EAMParams(mytype_atom1)%eam_nr, &
-               EAMList%EAMParams(mytype_atom1)%eam_rvals, &
-               EAMList%EAMParams(mytype_atom1)%eam_rho_r, &
-               EAMList%EAMParams(mytype_atom1)%eam_rho_r_pp, &
-               rij, rha,drha,d2rha)
-          !! Calculate Phi(r) for atom1.
-          call eam_splint(EAMList%EAMParams(mytype_atom1)%eam_nr, &
-               EAMList%EAMParams(mytype_atom1)%eam_rvals, &
-               EAMList%EAMParams(mytype_atom1)%eam_phi_r, &
-               EAMList%EAMParams(mytype_atom1)%eam_phi_r_pp, &
-               rij, pha,dpha,d2pha)
+
+          ! Calculate rho and drho for atom1
+
+          call lookupUniformSpline1d(EAMList%EAMParams(mytype_atom1)%rho, &
+               rij, rha, drha)
+          
+          ! Calculate Phi(r) for atom1.
+          
+          call lookupUniformSpline1d(EAMList%EAMParams(mytype_atom1)%phi, &
+               rij, pha, dpha)
+
        endif
 
        if (rij.lt.rcj) then      
-          ! Calculate rho,drho and d2rho for atom1
-          call eam_splint(EAMList%EAMParams(mytype_atom2)%eam_nr, &
-               EAMList%EAMParams(mytype_atom2)%eam_rvals, &
-               EAMList%EAMParams(mytype_atom2)%eam_rho_r, &
-               EAMList%EAMParams(mytype_atom2)%eam_rho_r_pp, &
-               rij, rhb,drhb,d2rhb)
 
-          !! Calculate Phi(r) for atom2.
-          call eam_splint(EAMList%EAMParams(mytype_atom2)%eam_nr, &
-               EAMList%EAMParams(mytype_atom2)%eam_rvals, &
-               EAMList%EAMParams(mytype_atom2)%eam_phi_r, &
-               EAMList%EAMParams(mytype_atom2)%eam_phi_r_pp, &
-               rij, phb,dphb,d2phb)
+          ! Calculate rho and drho for atom2
+
+          call lookupUniformSpline1d(EAMList%EAMParams(mytype_atom2)%rho, &
+               rij, rhb, drhb)
+
+          ! Calculate Phi(r) for atom2.
+
+          call lookupUniformSpline1d(EAMList%EAMParams(mytype_atom2)%phi, &
+               rij, phb, dphb)
+
        endif
 
        if (rij.lt.rci) then 
           phab = phab + 0.5E0_DP*(rhb/rha)*pha
           dvpdr = dvpdr + 0.5E0_DP*((rhb/rha)*dpha + &
                pha*((drhb/rha) - (rhb*drha/rha/rha)))
-          d2vpdrdr = d2vpdrdr + 0.5E0_DP*((rhb/rha)*d2pha + &
-               2.0E0_DP*dpha*((drhb/rha) - (rhb*drha/rha/rha)) + &
-               pha*((d2rhb/rha) - 2.0E0_DP*(drhb*drha/rha/rha) + &
-               (2.0E0_DP*rhb*drha*drha/rha/rha/rha) - (rhb*d2rha/rha/rha)))
        endif
 
        if (rij.lt.rcj) then
           phab = phab + 0.5E0_DP*(rha/rhb)*phb
           dvpdr = dvpdr + 0.5E0_DP*((rha/rhb)*dphb + &
                phb*((drha/rhb) - (rha*drhb/rhb/rhb)))
-          d2vpdrdr = d2vpdrdr + 0.5E0_DP*((rha/rhb)*d2phb + &
-               2.0E0_DP*dphb*((drha/rhb) - (rha*drhb/rhb/rhb)) + &
-               phb*((d2rha/rhb) - 2.0E0_DP*(drha*drhb/rhb/rhb) + &
-               (2.0E0_DP*rha*drhb*drhb/rhb/rhb/rhb) - (rha*d2rhb/rhb/rhb)))
        endif
 
        drhoidr = drha
        drhojdr = drhb
-
-       d2rhoidrdr = d2rha
-       d2rhojdrdr = d2rhb
-
 
 #ifdef IS_MPI
        dudr = drhojdr*dfrhodrho_row(atom1)+drhoidr*dfrhodrho_col(atom2) &
@@ -854,7 +578,6 @@ contains
 #else
        dudr = drhojdr*dfrhodrho(atom1)+drhoidr*dfrhodrho(atom2) &
             + dvpdr
-       ! write(*,*) "Atom1,Atom2, dfrhodrho(atom1) dfrhodrho(atom2): ", atom1,atom2,dfrhodrho(atom1),dfrhodrho(atom2)
 #endif
 
        fx = dudr * drdx
@@ -891,6 +614,7 @@ contains
 #endif
 
        vpair = vpair + phab
+
 #ifdef IS_MPI
        id1 = AtomRowToGlobal(atom1)
        id2 = AtomColToGlobal(atom2)
@@ -906,146 +630,7 @@ contains
           fpair(3) = fpair(3) + fz
 
        endif
-
-       if (nmflag) then
-
-          drhoidr = drha
-          drhojdr = drhb
-          d2rhoidrdr = d2rha
-          d2rhojdrdr = d2rhb
-
-#ifdef IS_MPI
-          d2 = d2vpdrdr + &
-               d2rhoidrdr*dfrhodrho_col(atom2) + &
-               d2rhojdrdr*dfrhodrho_row(atom1) + &
-               drhoidr*drhoidr*d2frhodrhodrho_col(atom2) + &
-               drhojdr*drhojdr*d2frhodrhodrho_row(atom1)
-
-#else
-
-          d2 = d2vpdrdr + &
-               d2rhoidrdr*dfrhodrho(atom2) + &
-               d2rhojdrdr*dfrhodrho(atom1) + &
-               drhoidr*drhoidr*d2frhodrhodrho(atom2) + &
-               drhojdr*drhojdr*d2frhodrhodrho(atom1)
-#endif
-       end if
-
     endif
   end subroutine do_eam_pair
-
-
-  subroutine eam_splint(nx, xa, ya, yppa, x, y, dy, d2y)
-
-    integer :: atype, nx, j
-    real( kind = DP ), dimension(:) :: xa
-    real( kind = DP ), dimension(:) :: ya
-    real( kind = DP ), dimension(:) :: yppa
-    real( kind = DP ) :: x, y
-    real( kind = DP ) :: dy, d2y
-    real( kind = DP ) :: del, h, a, b, c, d
-    integer :: pp_arraySize
-
-
-    ! this spline code assumes that the x points are equally spaced
-    ! do not attempt to use this code if they are not.
-
-
-    ! find the closest point with a value below our own:
-    j = FLOOR(real((nx-1),kind=dp) * (x - xa(1)) / (xa(nx) - xa(1))) + 1
-
-    ! check to make sure we're inside the spline range:
-    if ((j.gt.nx).or.(j.lt.1)) then
-       write(errMSG,*) "EAM_splint: x is outside bounds of spline: ",x,j
-       call handleError(routineName,errMSG)
-    endif
-    ! check to make sure we haven't screwed up the calculation of j:
-    if ((x.lt.xa(j)).or.(x.gt.xa(j+1))) then
-       if (j.ne.nx) then
-          write(errMSG,*) "EAM_splint:",x," x is outside bounding range"
-          call handleError(routineName,errMSG)
-       endif
-    endif
-
-    del = xa(j+1) - x
-    h = xa(j+1) - xa(j)
-
-    a = del / h
-    b = 1.0E0_DP - a
-    c = a*(a*a - 1.0E0_DP)*h*h/6.0E0_DP
-    d = b*(b*b - 1.0E0_DP)*h*h/6.0E0_DP
-
-    y = a*ya(j) + b*ya(j+1) + c*yppa(j) + d*yppa(j+1)
-
-    dy = (ya(j+1)-ya(j))/h &
-         - (3.0E0_DP*a*a - 1.0E0_DP)*h*yppa(j)/6.0E0_DP &
-         + (3.0E0_DP*b*b - 1.0E0_DP)*h*yppa(j+1)/6.0E0_DP
-
-
-    d2y = a*yppa(j) + b*yppa(j+1)
-
-
-  end subroutine eam_splint
-
-
-  subroutine eam_spline(nx, xa, ya, yppa, yp1, ypn, boundary)
-
-
-    ! yp1 and ypn are the first derivatives of y at the two endpoints
-    ! if boundary is 'L' the lower derivative is used
-    ! if boundary is 'U' the upper derivative is used
-    ! if boundary is 'B' then both derivatives are used
-    ! if boundary is anything else, then both derivatives are assumed to be 0
-
-    integer :: nx, i, k, max_array_size
-
-    real( kind = DP ), dimension(:)        :: xa
-    real( kind = DP ), dimension(:)        :: ya
-    real( kind = DP ), dimension(:)        :: yppa
-    real( kind = DP ), dimension(size(xa)) :: u
-    real( kind = DP ) :: yp1,ypn,un,qn,sig,p
-    character(len=*) :: boundary
-
-    ! make sure the sizes match
-    if ((nx /= size(xa)) .or. (nx /= size(ya))) then
-       call handleWarning("EAM_SPLINE","Array size mismatch")
-    end if
-
-    if ((boundary.eq.'l').or.(boundary.eq.'L').or. &
-         (boundary.eq.'b').or.(boundary.eq.'B')) then
-       yppa(1) = -0.5E0_DP
-       u(1) = (3.0E0_DP/(xa(2)-xa(1)))*((ya(2)-&
-            ya(1))/(xa(2)-xa(1))-yp1)
-    else
-       yppa(1) = 0.0E0_DP
-       u(1)  = 0.0E0_DP
-    endif
-
-    do i = 2, nx - 1
-       sig = (xa(i) - xa(i-1)) / (xa(i+1) - xa(i-1))
-       p = sig * yppa(i-1) + 2.0E0_DP
-       yppa(i) = (sig - 1.0E0_DP) / p
-       u(i) = (6.0E0_DP*((ya(i+1)-ya(i))/(xa(i+1)-xa(i)) - &
-            (ya(i)-ya(i-1))/(xa(i)-xa(i-1)))/ &
-            (xa(i+1)-xa(i-1)) - sig * u(i-1))/p
-    enddo
-
-    if ((boundary.eq.'u').or.(boundary.eq.'U').or. &
-         (boundary.eq.'b').or.(boundary.eq.'B')) then
-       qn = 0.5E0_DP
-       un = (3.0E0_DP/(xa(nx)-xa(nx-1)))* &
-            (ypn-(ya(nx)-ya(nx-1))/(xa(nx)-xa(nx-1)))
-    else
-       qn = 0.0E0_DP
-       un = 0.0E0_DP
-    endif
-
-    yppa(nx)=(un-qn*u(nx-1))/(qn*yppa(nx-1)+1.0E0_DP)
-
-    do k = nx-1, 1, -1
-       yppa(k)=yppa(k)*yppa(k+1)+u(k)
-    enddo
-
-  end subroutine eam_spline
 
 end module eam

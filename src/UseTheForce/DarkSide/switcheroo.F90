@@ -63,20 +63,38 @@ module switcheroo
   logical, save :: useSpline = .true.
   integer, save :: functionType = CUBIC
 
-
-  ! spline variables
-  type(cubicSpline), save :: scoef
-  real ( kind = dp ), dimension(SPLINE_SEGMENTS) :: xValues
-  real ( kind = dp ), dimension(SPLINE_SEGMENTS) :: yValues
-  real ( kind = dp ), save :: dSqrt1, dSqrtN, range, dX
-  real ( kind = dp ), save :: lowerBound
-  logical, save :: uniformSpline = .true.
+  ! spline structure
+  type(cubicSpline), save :: splineSqrt
 
   public::set_switch
   public::set_function_type
   public::get_switch
 
 contains
+
+  subroutine setupSqrtSpline(rmin, rmax, np)
+    real( kind = dp ), intent(in) :: rmin, rmax
+    integer, intent(in) :: np
+    real( kind = dp ) :: rvals(np), yvals(np)
+    real( kind = dp ) :: dr, r
+    real( kind = dp ) :: yprime1, yprimen
+    integer :: i
+
+    dr = (rmax-rmin) / float(np-1)
+    
+    do i = 1, np
+       r = rmin + float(i-1)*dr
+       rvals(i) = r
+       yvals(i) = dsqrt(r)
+    enddo
+
+    yprime1 = 1.0d0 / ( 2.0d0 * dsqrt( rmin ) )
+    yprimeN = 1.0d0 / ( 2.0d0 * dsqrt( rmax ) )
+
+    call newSpline(splineSqrt, rvals, yvals, yprime1, yprimen, .true.)
+
+    return
+  end subroutine setupSqrtSpline
 
   subroutine set_switch(SwitchType, rinner, router)
 
@@ -112,25 +130,8 @@ contains
 
     if (.not.haveSqrtSpline) then
        ! fill arrays for building the spline
-       lowerBound = 1.0d0 ! the smallest value expected for r2
-       range = rout2(SwitchType) - lowerBound
-       dX = range / (SPLINE_SEGMENTS - 1)
-       
-       ! the spline is bracketed by lowerBound and rout2 endpoints
-       xValues(1) = lowerBound
-       yValues(1) = dsqrt(lowerBound)
-       do i = 1, SPLINE_SEGMENTS-1
-          xValues(i+1) = i * dX
-          yValues(i+1) = dsqrt( i * dX )
-       enddo
-       
-       ! set the endpoint derivatives
-       dSqrt1 = 1 / ( 2.0d0 * dsqrt( xValues(1) ) )
-       dSqrtN = 1 / ( 2.0d0 * dsqrt( xValues(SPLINE_SEGMENTS) ) )
-
-       ! call newSpline to fill the coefficient array
-       call newSpline(scoef, xValues, yValues, dSqrt1, dSqrtN, uniformSpline)
-       
+       call setupSqrtSpline(1.0d0, rout2(switchType), SPLINE_SEGMENTS)
+       haveSqrtSpline = .true.
     endif
     
   end subroutine set_switch
@@ -153,11 +154,12 @@ contains
 
     real( kind = dp ), intent(in) :: r2
     real( kind = dp ), intent(inout) :: sw, dswdr, r
-    real( kind = dp ) :: ron, roff
+    real( kind = dp ) :: ron, roff, a, b, c, d, dx
     real( kind = dp ) :: rval, rval2, rval3, rval4, rval5
     real( kind = dp ) :: rvaldi, rvaldi2, rvaldi3, rvaldi4, rvaldi5
     integer, intent(in)    :: SwitchType
     logical, intent(inout) :: in_switching_region
+    integer :: j
 
     sw = 0.0d0
     dswdr = 0.0d0
@@ -178,7 +180,18 @@ contains
 
        else
           if (useSpline) then
-             call lookup_uniform_spline(scoef, r2, r)
+             j = MAX(1, MIN(splineSqrt%np, idint((r2-splineSqrt%x(1)) * splineSqrt%dx_i) + 1))
+       
+             dx = r2 - splineSqrt%x(j)
+       
+             a = splineSqrt%c(1,j)
+             b = splineSqrt%c(2,j)
+             c = splineSqrt%c(3,j)
+             d = splineSqrt%c(4,j)
+             
+             r = c + dx * d
+             r = b + dx * r
+             r = a + dx * r
           else
              r = dsqrt(r2)
           endif
