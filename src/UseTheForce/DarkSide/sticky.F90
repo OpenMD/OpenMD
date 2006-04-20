@@ -50,7 +50,7 @@
 !! @author Matthew Meineke
 !! @author Christopher Fennell
 !! @author J. Daniel Gezelter
-!! @version $Id: sticky.F90,v 1.18 2006-04-17 21:49:12 gezelter Exp $, $Date: 2006-04-17 21:49:12 $, $Name: not supported by cvs2svn $, $Revision: 1.18 $
+!! @version $Id: sticky.F90,v 1.19 2006-04-20 21:02:00 chrisfen Exp $, $Date: 2006-04-20 21:02:00 $, $Name: not supported by cvs2svn $, $Revision: 1.19 $
 
 module sticky
 
@@ -60,6 +60,7 @@ module sticky
   use vector_class
   use simulation
   use status
+  use interpolation
 #ifdef IS_MPI
   use mpiSimulation
 #endif
@@ -86,6 +87,8 @@ module sticky
      real( kind = dp ) :: rlp = 0.0_dp
      real( kind = dp ) :: rup = 0.0_dp
      real( kind = dp ) :: rbig = 0.0_dp
+     type(cubicSpline) :: stickySpline
+     type(cubicSpline) :: stickySplineP
   end type StickyList
 
   type(StickyList), dimension(:),allocatable :: StickyMap
@@ -100,6 +103,7 @@ contains
     real( kind = dp ), intent(in) :: w0, v0, v0p
     real( kind = dp ), intent(in) :: rl, ru
     real( kind = dp ), intent(in) :: rlp, rup
+    real( kind = dp ), dimension(2) :: rCubVals, sCubVals, rpCubVals, spCubVals
     integer :: nATypes, myATID
 
 
@@ -148,6 +152,19 @@ contains
     else
        StickyMap(myATID)%rbig = StickyMap(myATID)%rup
     endif
+
+    ! build the 2 cubic splines for the sticky switching functions
+
+    rCubVals(1) = rl
+    rCubVals(2) = ru
+    sCubVals(1) = 1.0d0
+    sCubVals(2) = 0.0d0      
+    call newSpline(StickyMap(myATID)%stickySpline, rCubVals, sCubVals, .true.)
+    rpCubVals(1) = rlp
+    rpCubVals(2) = rup
+    spCubVals(1) = 1.0d0
+    spCubVals(2) = 0.0d0      
+    call newSpline(StickyMap(myATID)%stickySplineP,rpCubVals,spCubVals,.true.)
 
     hasStickyMap = .true.
 
@@ -208,7 +225,7 @@ contains
     real (kind=dp) :: radcomxj, radcomyj, radcomzj
     integer :: id1, id2
     integer :: me1, me2
-    real (kind=dp) :: w0, v0, v0p, rl, ru, rlp, rup, rbig
+    real (kind=dp) :: w0, v0, v0p, rl, ru, rlp, rup, rbig, dx
 
 #ifdef IS_MPI
     me1 = atid_Row(atom1)
@@ -287,7 +304,47 @@ contains
        yj2 = yj*yj
        zj2 = zj*zj
 
-       call calc_sw_fnc(rij, rl, ru, rlp, rup, s, sp, dsdr, dspdr)
+
+       ! calculate the switching info. from the splines
+       if (me1.eq.me2) then
+          s = 0.0d0
+          dsdr = 0.0d0
+          sp = 0.0d0
+          dspdr = 0.0d0
+          
+          if (rij.lt.ru) then
+             if (rij.lt.rl) then
+                s = 1.0d0
+                dsdr = 0.0d0
+             else         
+                ! we are in the switching region 
+                dx = rij - rl
+                s = StickyMap(me1)%stickySpline%y(1) + &
+                     dx*(dx*(StickyMap(me1)%stickySpline%c(1) + &
+                     dx*StickyMap(me1)%stickySpline%d(1)))
+                dsdr = dx*(2.0d0 * StickyMap(me1)%stickySpline%c(1) + &
+                     3.0d0 * dx * StickyMap(me1)%stickySpline%d(1))
+             endif
+          endif
+          if (rij.lt.rup) then
+             if (rij.lt.rlp) then
+                sp = 1.0d0
+                dspdr = 0.0d0
+             else
+                ! we are in the switching region 
+                dx = rij - rlp
+                sp = StickyMap(me1)%stickySplineP%y(1) + &
+                     dx*(dx*(StickyMap(me1)%stickySplineP%c(1) + &
+                     dx*StickyMap(me1)%stickySplineP%d(1)))
+                dspdr = dx*(2.0d0 * StickyMap(me1)%stickySplineP%c(1) + &
+                     3.0d0 * dx * StickyMap(me1)%stickySplineP%d(1))
+             endif
+          endif
+       else
+          ! calculate the switching function explicitly rather than from 
+          ! the splines with mixed sticky maps
+          call calc_sw_fnc(rij, rl, ru, rlp, rup, s, sp, dsdr, dspdr)
+       endif
 
        wi = 2.0d0*(xi2-yi2)*zi / r3
        wj = 2.0d0*(xj2-yj2)*zj / r3
@@ -495,29 +552,31 @@ contains
     real (kind=dp), intent(inout) :: s, sp, dsdr, dspdr
 
     ! distances must be in angstroms
-
-    if (r.lt.rl) then
-       s = 1.0d0
-       dsdr = 0.0d0
-    elseif (r.gt.ru) then
-       s = 0.0d0
-       dsdr = 0.0d0
-    else
-       s = ((ru + 2.0d0*r - 3.0d0*rl) * (ru-r)**2) / &
-            ((ru - rl)**3)
-       dsdr = 6.0d0*(r-ru)*(r-rl)/((ru - rl)**3)
+    s = 0.0d0
+    dsdr = 0.0d0
+    sp = 0.0d0
+    dspdr = 0.0d0
+    
+    if (r.lt.ru) then
+       if (r.lt.rl) then
+          s = 1.0d0
+          dsdr = 0.0d0
+       else
+          s = ((ru + 2.0d0*r - 3.0d0*rl) * (ru-r)**2) / &
+               ((ru - rl)**3)
+          dsdr = 6.0d0*(r-ru)*(r-rl)/((ru - rl)**3)
+       endif
     endif
 
-    if (r.lt.rlp) then
-       sp = 1.0d0       
-       dspdr = 0.0d0
-    elseif (r.gt.rup) then
-       sp = 0.0d0
-       dspdr = 0.0d0
-    else
-       sp = ((rup + 2.0d0*r - 3.0d0*rlp) * (rup-r)**2) / &
-            ((rup - rlp)**3)
-       dspdr = 6.0d0*(r-rup)*(r-rlp)/((rup - rlp)**3)       
+    if (r.lt.rup) then
+       if (r.lt.rlp) then
+          sp = 1.0d0       
+          dspdr = 0.0d0
+       else
+          sp = ((rup + 2.0d0*r - 3.0d0*rlp) * (rup-r)**2) / &
+               ((rup - rlp)**3)
+          dspdr = 6.0d0*(r-rup)*(r-rlp)/((rup - rlp)**3)       
+       endif
     endif
 
     return

@@ -184,17 +184,17 @@ contains
     integer :: j
     real ( kind = dp ) :: a, b, c, d, dx
 
-    sw = 0.0d0
+    sw = 1.0d0
     dswdr = 0.0d0
     in_switching_region = .false.
 
-    if (r2.lt.rout2) then
-       if (r2.lt.rin2) then
+    if (r2.gt.rin2) then
+       if (r2.gt.rout2) then
 
-          sw = 1.0d0
+          sw = 0.0d0
           dswdr = 0.0d0
           return
-
+          
        else         
           
           call lookupUniformSpline(r2Spline, r2, r)
