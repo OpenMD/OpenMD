@@ -76,6 +76,8 @@ module electrostatic_module
   !! This unit is also known affectionately as an esu centi-barn.
   real(kind=dp), parameter :: pre14 = 69.13373d0
 
+  real(kind=dp), parameter :: zero = 0.0d0
+
   !! variables to handle different summation methods for long-range 
   !! electrostatics:
   integer, save :: summationMethod = NONE
@@ -550,7 +552,7 @@ contains
        if (i_is_SplitDipole) then
           d_i = ElectrostaticMap(me1)%split_dipole_distance
        endif
-
+       duduz_i = zero
     endif
 
     if (i_is_Quadrupole) then
@@ -581,6 +583,9 @@ contains
        cx_i = ux_i(1)*xhat + ux_i(2)*yhat + ux_i(3)*zhat
        cy_i = uy_i(1)*xhat + uy_i(2)*yhat + uy_i(3)*zhat
        cz_i = uz_i(1)*xhat + uz_i(2)*yhat + uz_i(3)*zhat
+       dudux_i = zero
+       duduy_i = zero
+       duduz_i = zero
     endif
 
     if (j_is_Charge) then
@@ -603,6 +608,7 @@ contains
        if (j_is_SplitDipole) then
           d_j = ElectrostaticMap(me2)%split_dipole_distance
        endif
+       duduz_j = zero
     endif
 
     if (j_is_Quadrupole) then
@@ -633,20 +639,15 @@ contains
        cx_j = ux_j(1)*xhat + ux_j(2)*yhat + ux_j(3)*zhat
        cy_j = uy_j(1)*xhat + uy_j(2)*yhat + uy_j(3)*zhat
        cz_j = uz_j(1)*xhat + uz_j(2)*yhat + uz_j(3)*zhat
+       dudux_j = zero
+       duduy_j = zero
+       duduz_j = zero
     endif
    
-    epot = 0.0d0
-    dudx = 0.0d0
-    dudy = 0.0d0
-    dudz = 0.0d0
-
-    dudux_i = 0.0d0
-    duduy_i = 0.0d0
-    duduz_i = 0.0d0
-
-    dudux_j = 0.0d0
-    duduy_j = 0.0d0
-    duduz_j = 0.0d0
+    epot = zero
+    dudx = zero
+    dudy = zero
+    dudz = zero  
 
     if (i_is_Charge) then
 
@@ -1326,9 +1327,9 @@ contains
        call checkSummationMethod()
     endif
 
-    dudx = 0.0d0
-    dudy = 0.0d0
-    dudz = 0.0d0
+    dudx = zero
+    dudy = zero
+    dudz = zero
 
     riji = 1.0d0/rij
 

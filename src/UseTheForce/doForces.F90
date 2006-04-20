@@ -45,7 +45,7 @@
 
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: doForces.F90,v 1.78 2006-04-17 21:49:12 gezelter Exp $, $Date: 2006-04-17 21:49:12 $, $Name: not supported by cvs2svn $, $Revision: 1.78 $
+!! @version $Id: doForces.F90,v 1.79 2006-04-20 18:24:24 gezelter Exp $, $Date: 2006-04-20 18:24:24 $, $Name: not supported by cvs2svn $, $Revision: 1.79 $
 
 
 module doForces
@@ -73,14 +73,13 @@ module doForces
   PRIVATE
 
 #define __FORTRAN90
-#include "UseTheForce/fSwitchingFunction.h"
 #include "UseTheForce/fCutoffPolicy.h"
 #include "UseTheForce/DarkSide/fInteractionMap.h"
 #include "UseTheForce/DarkSide/fElectrostaticSummationMethod.h"
 
-
   INTEGER, PARAMETER:: PREPAIR_LOOP = 1
   INTEGER, PARAMETER:: PAIR_LOOP    = 2
+  INTEGER, PARAMETER:: np = 500
 
   logical, save :: haveNeighborList = .false.
   logical, save :: haveSIMvariables = .false.
@@ -92,6 +91,7 @@ module doForces
   logical, save :: haveElectrostaticSummationMethod = .false.
   logical, save :: haveCutoffPolicy = .false.
   logical, save :: VisitCutoffsAfterComputing = .false.
+  logical, save :: haveSplineSqrt = .false.
 
   logical, save :: FF_uses_DirectionalAtoms
   logical, save :: FF_uses_Dipoles
@@ -149,6 +149,11 @@ module doForces
      real(kind=dp) :: rlistsq
   end type gtypeCutoffs
   type(gtypeCutoffs), dimension(:,:), allocatable :: gtypeCutoffMap
+
+  ! variables for the spline of the sqrt
+  type(cubicSpline), save :: splineSqrt
+  logical, save :: useSpline = .true.
+  
 
 contains
 
@@ -581,17 +586,19 @@ contains
         defaultDoShift = .true.
         
      endif
-
+     
      localError = 0
      call setLJDefaultCutoff( defaultRcut, defaultDoShift )
      call setElectrostaticCutoffRadius( defaultRcut, defaultRsw )
      call setCutoffEAM( defaultRcut )
      call setCutoffSC( defaultRcut )
-     call set_switch(GROUP_SWITCH, defaultRsw, defaultRcut)
+     call set_switch(defaultRsw, defaultRcut)
      call setHmatDangerousRcutValue(defaultRcut)
-
+     call setupSplineSqrt(defaultRcut)
+         
      haveDefaultCutoffs = .true.
      haveGtypeCutoffMap = .false.
+
    end subroutine setCutoffs
 
    subroutine cWasLame()
@@ -645,7 +652,6 @@ contains
 
   subroutine doReadyCheck(error)
     integer, intent(out) :: error
-
     integer :: myStatus
 
     error = 0
@@ -658,9 +664,8 @@ contains
        call createGtypeCutoffMap()       
     endif
 
-
     if (VisitCutoffsAfterComputing) then
-       call set_switch(GROUP_SWITCH, largestRcut, largestRcut)       
+       call set_switch(largestRcut, largestRcut)       
        call setHmatDangerousRcutValue(largestRcut)
        call setLJsplineRmax(largestRcut)
        call setCutoffEAM(largestRcut)
@@ -668,29 +673,26 @@ contains
        VisitCutoffsAfterComputing = .false.
     endif
 
+    if (.not. haveSplineSqrt) then
+       call setupSplineSqrt(largestRcut)
+    endif
 
     if (.not. haveSIMvariables) then
        call setSimVariables()
     endif
-
-  !  if (.not. haveRlist) then
-  !     write(default_error, *) 'rList has not been set in doForces!'
-  !     error = -1
-  !     return
-  !  endif
 
     if (.not. haveNeighborList) then
        write(default_error, *) 'neighbor list has not been initialized in doForces!'
        error = -1
        return
     end if
-
+    
     if (.not. haveSaneForceField) then
        write(default_error, *) 'Force Field is not sane in doForces!'
        error = -1
        return
     end if
-
+    
 #ifdef IS_MPI
     if (.not. isMPISimSet()) then
        write(default_error,*) "ERROR: mpiSimulation has not been initialized!"
@@ -968,9 +970,7 @@ contains
 
                    list(nlist) = j
                 endif
- 
-
-                
+                 
                 if (rgrpsq < gtypeCutoffMap(groupToGtypeRow(i),groupToGtypeCol(j))%rCutsq) then
 
                    rCut = gtypeCutoffMap(groupToGtypeRow(i),groupToGtypeCol(j))%rCut
@@ -981,8 +981,7 @@ contains
                       fij(3) = 0.0_dp
                    endif
                    
-                   call get_switch(rgrpsq, sw, dswdr, rgrp, &
-                        group_switch, in_switching_region)
+                   call get_switch(rgrpsq, sw, dswdr,rgrp, in_switching_region)
                    
                    n_in_j = groupStartCol(j+1) - groupStartCol(j)
                    
@@ -1195,11 +1194,9 @@ contains
                 
                 ! prevent overcounting of the skips
                 if (i.lt.j) then
-                   call get_interatomic_vector(q(:,i), &
-                        q(:,j), d_atm, ratmsq)
+                   call get_interatomic_vector(q(:,i), q(:,j), d_atm, ratmsq)
                    rVal = dsqrt(ratmsq)
-                   call get_switch(ratmsq, sw, dswdr, rVal, group_switch, &
-                        in_switching_region)
+                   call get_switch(ratmsq, sw, dswdr, rVal,in_switching_region)
 #ifdef IS_MPI
                    call rf_self_excludes(i, j, sw, eFrame, d_atm, rVal, &
                         vpair, pot_local(ELECTROSTATIC_POT), f, t, do_pot)
@@ -1258,11 +1255,18 @@ contains
     real ( kind = dp ), intent(inout) :: d_grp(3)
     real ( kind = dp ), intent(inout) :: rCut 
     real ( kind = dp ) :: r
+    real ( kind = dp ) :: a_k, b_k, c_k, d_k, dx
     integer :: me_i, me_j
+    integer :: k
 
     integer :: iHash
 
-    r = sqrt(rijsq)
+    if (useSpline) then
+       call lookupUniformSpline(splineSqrt, rijsq, r)
+    else
+       r = sqrt(rijsq)
+    endif
+
     vpair = 0.0d0
     fpair(1:3) = 0.0d0
 
@@ -1325,8 +1329,6 @@ contains
        call do_SC_pair(i, j, d, r, rijsq, rcut, sw, vpair, fpair, &
             pot(METALLIC_POT), f, do_pot)
     endif
-
-    
      
   end subroutine do_pair
 
@@ -1348,7 +1350,11 @@ contains
 
     integer :: me_i, me_j, iHash
 
-    r = sqrt(rijsq)
+    if (useSpline) then
+       call lookupUniformSpline(splineSqrt, rijsq, r)
+    else
+       r = sqrt(rijsq)
+    endif
 
 #ifdef IS_MPI   
     me_i = atid_row(i)
@@ -1381,8 +1387,6 @@ contains
     if (FF_uses_SC .and. SIM_uses_SC) then
        call calc_SC_preforce_Frho(nlocal,pot(METALLIC_POT))
     endif
-
-
   end subroutine do_preforce
 
 
@@ -1403,22 +1407,27 @@ contains
 
        if( .not.boxIsOrthorhombic ) then
           ! calc the scaled coordinates.
+          ! scaled = matmul(HmatInv, d)
 
-          scaled = matmul(HmatInv, d)
-
+          scaled(1) = HmatInv(1,1)*d(1) + HmatInv(1,2)*d(2) + HmatInv(1,3)*d(3)
+          scaled(2) = HmatInv(2,1)*d(1) + HmatInv(2,2)*d(2) + HmatInv(2,3)*d(3)
+          scaled(3) = HmatInv(3,1)*d(1) + HmatInv(3,2)*d(2) + HmatInv(3,3)*d(3)
+          
           ! wrap the scaled coordinates
 
-          scaled = scaled  - anint(scaled)
-
+          scaled(1) = scaled(1) - dnint(scaled(1))
+          scaled(2) = scaled(2) - dnint(scaled(2))
+          scaled(3) = scaled(3) - dnint(scaled(3))
 
           ! calc the wrapped real coordinates from the wrapped scaled 
           ! coordinates
-
-          d = matmul(Hmat,scaled)
+          ! d = matmul(Hmat,scaled)
+          d(1)= Hmat(1,1)*scaled(1) + Hmat(1,2)*scaled(2) + Hmat(1,3)*scaled(3)
+          d(2)= Hmat(2,1)*scaled(1) + Hmat(2,2)*scaled(2) + Hmat(2,3)*scaled(3)
+          d(3)= Hmat(3,1)*scaled(1) + Hmat(3,2)*scaled(2) + Hmat(3,3)*scaled(3)
 
        else
           ! calc the scaled coordinates.
-
 
           scaled(1) = d(1) * HmatInv(1,1)
           scaled(2) = d(2) * HmatInv(2,2)
@@ -1607,5 +1616,34 @@ contains
          (tau_Temp(1) + tau_Temp(5) + tau_Temp(9))
 
   end subroutine add_stress_tensor
+
+  subroutine setupSplineSqrt(rmax)
+    real(kind=dp), intent(in) :: rmax
+    real(kind=dp), dimension(np) :: xvals, yvals
+    real(kind=dp) :: r2_1, r2_n, dx, r2
+    integer :: i
+
+    r2_1 = 0.5d0
+    r2_n = rmax*rmax
+
+    dx = (r2_n-r2_1) / dble(np-1)
+    
+    do i = 1, np
+       r2 = r2_1 + dble(i-1)*dx
+       xvals(i) = r2
+       yvals(i) = dsqrt(r2)
+    enddo
+
+    call newSpline(splineSqrt, xvals, yvals, .true.)
+    
+    haveSplineSqrt = .true.
+    return
+  end subroutine setupSplineSqrt
+
+  subroutine deleteSplineSqrt()
+    call deleteSpline(splineSqrt)
+    haveSplineSqrt = .false.
+    return
+  end subroutine deleteSplineSqrt
 
 end module doForces

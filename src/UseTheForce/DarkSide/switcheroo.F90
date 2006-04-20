@@ -38,196 +38,185 @@
 !! University of Notre Dame has been advised of the possibility of
 !! such damages.
 !!
-
+!!$
 module switcheroo
 
   use definitions
   use interpolation
+  use status
 
   implicit none
   PRIVATE
 
 #define __FORTRAN90
-#include "UseTheForce/fSwitchingFunction.h"
 #include "UseTheForce/DarkSide/fSwitchingFunctionType.h"
+  
+  !! number of points for the spline approximations
+  INTEGER, PARAMETER :: np = 150
 
-  real ( kind = dp ), dimension(NSWITCHTYPES) :: rin
-  real ( kind = dp ), dimension(NSWITCHTYPES) :: rout
-  real ( kind = dp ), dimension(NSWITCHTYPES) :: rin2
-  real ( kind = dp ), dimension(NSWITCHTYPES) :: rout2
-  real ( kind = dp ), save :: c0, c1, c2, c3, c4, c5
+  real ( kind = dp ), save :: rin
+  real ( kind = dp ), save :: rout
+  real ( kind = dp ), save :: rin2
+  real ( kind = dp ), save :: rout2
 
-  logical, dimension(NSWITCHTYPES) :: isOK
-  logical, save :: haveFunctionType = .false.
-  logical, save :: haveSqrtSpline = .false.
-  logical, save :: useSpline = .true.
+  logical, save :: haveSplines = .false.
+  logical, save :: switchIsCubic = .true.
   integer, save :: functionType = CUBIC
 
-  ! spline structure
-  type(cubicSpline), save :: splineSqrt
+  ! spline structures
+  type(cubicSpline), save :: r2Spline
+  type(cubicSpline), save :: switchSpline
 
+  public::set_switch_type
   public::set_switch
-  public::set_function_type
   public::get_switch
+  public::delete_switch
 
 contains
 
-  subroutine setupSqrtSpline(rmin, rmax, np)
-    real( kind = dp ), intent(in) :: rmin, rmax
-    integer, intent(in) :: np
-    real( kind = dp ) :: rvals(np), yvals(np)
-    real( kind = dp ) :: dr, r
-    real( kind = dp ) :: yprime1, yprimen
-    integer :: i
-
-    dr = (rmax-rmin) / float(np-1)
-    
-    do i = 1, np
-       r = rmin + float(i-1)*dr
-       rvals(i) = r
-       yvals(i) = dsqrt(r)
-    enddo
-
-    yprime1 = 1.0d0 / ( 2.0d0 * dsqrt( rmin ) )
-    yprimeN = 1.0d0 / ( 2.0d0 * dsqrt( rmax ) )
-
-    call newSpline(splineSqrt, rvals, yvals, yprime1, yprimen, .true.)
-
-    return
-  end subroutine setupSqrtSpline
-
-  subroutine set_switch(SwitchType, rinner, router)
+  subroutine set_switch(rinner, router)
 
     real ( kind = dp ), intent(in):: rinner, router
-    integer, intent(in) :: SwitchType
+    real ( kind = dp ), dimension(np) :: xvals, yvals
+    real ( kind = dp ), dimension(2) :: rCubVals, sCubVals
+    real ( kind = dp ) :: rval, rval2, rval3, rval4, rval5
+    real ( kind = dp ) :: rvaldi, rvaldi2, rvaldi3, rvaldi4, rvaldi5
+    real ( kind = dp ) :: c0, c3, c4, c5, dx, r, r2
     integer :: i
 
-    if (SwitchType .gt. NSWITCHTYPES) then
-       write(default_error, *) &
-            'set_switch:  not that many switch types! '
-       return
-    endif
-
-    isOK(SwitchType) = .false.
-
     if (router .lt. rinner) then
-       write(default_error, *) &
-            'set_switch:  router is less than rinner '
+       call handleError("set_switch", "router is less than rinner")
        return
     endif
 
     if ((router .lt. 0.0d0) .or. (rinner .lt. 0.0d0))  then
-       write(default_error, *) &
-            'set_switch:  one of the switches is negative!'
+       call handleError("set_switch", "one of the switches is negative!")
        return
     endif
 
-    rin(SwitchType) = rinner
-    rout(SwitchType) = router
-    rin2(SwitchType) = rinner * rinner
-    rout2(SwitchType) = router * router
-    isOK(SwitchType) = .true.
+    rin = rinner
+    rout = router
+    rin2 = rinner * rinner
+    rout2 = router * router
 
-    if (.not.haveSqrtSpline) then
-       ! fill arrays for building the spline
-       call setupSqrtSpline(1.0d0, rout2(switchType), SPLINE_SEGMENTS)
-       haveSqrtSpline = .true.
+    if ((router-rinner) .lt. 1e-8)  then
+       ! no reason to set up splines if the switching region is tiny
+       return
     endif
-    
-  end subroutine set_switch
 
-  subroutine set_function_type(functionForm)
-    integer, intent(in) :: functionForm    
-    functionType = functionForm
+    dx = (rout2-rin2) / dble(np-1)
+    
+    do i = 1, np
+       r2 = rin2 + dble(i-1)*dx
+       xvals(i) = r2
+       yvals(i) = dsqrt(r2)
+    enddo
+
+    call newSpline(r2spline, xvals, yvals, .true.)
 
     if (functionType .eq. FIFTH_ORDER_POLY) then
        c0 = 1.0d0
-       c1 = 0.0d0
-       c2 = 0.0d0
        c3 = -10.0d0
        c4 = 15.0d0
        c5 = -6.0d0
-    endif
-  end subroutine set_function_type
 
-  subroutine get_switch(r2, sw, dswdr, r, SwitchType, in_switching_region)
+       dx = (rout-rin) / dble(np-1)
+    
+       do i = 1, np
+          r = rin + dble(i-1)*dx
+          xvals(i) = r
+
+          rval = ( r - rin )
+          rval2 = rval*rval
+          rval3 = rval2*rval
+          rval4 = rval2*rval2
+          rval5 = rval3*rval2
+          rvaldi = 1.0d0/( rout - rin )
+          rvaldi2 = rvaldi*rvaldi
+          rvaldi3 = rvaldi2*rvaldi
+          rvaldi4 = rvaldi2*rvaldi2
+          rvaldi5 = rvaldi3*rvaldi2
+          yvals(i)= c0 + c3*rval3*rvaldi3 + c4*rval4*rvaldi4 + c5*rval5*rvaldi5
+       enddo
+       
+       call newSpline(switchSpline, xvals, yvals, .true.)
+       
+       switchIsCubic = .false.
+    else
+       rCubVals(1) = rin
+       rCubVals(2) = rout
+       sCubVals(1) = 1.0d0
+       sCubVals(2) = 0.0d0      
+       call newSpline(switchSpline, rCubVals, sCubVals, .true.)
+    endif
+    
+    haveSplines = .true.
+    return
+  end subroutine set_switch
+
+  subroutine set_switch_type(functionForm)
+    integer, intent(in) :: functionForm    
+    functionType = functionForm
+
+    if ((functionType.eq.FIFTH_ORDER_POLY).or.(functionType.eq.CUBIC)) then
+       if (haveSplines) then
+          call delete_switch()
+          call set_switch(rin, rout)
+       endif
+    else
+       call handleError("set_switch_type", &
+            "Unknown type of switching function!")
+       return      
+    endif
+  end subroutine set_switch_type
+  
+  subroutine delete_switch()
+    call deleteSpline(switchSpline)
+    call deleteSpline(r2spline)
+    return
+  end subroutine delete_switch
+  
+  subroutine get_switch(r2, sw, dswdr, r, in_switching_region)
 
     real( kind = dp ), intent(in) :: r2
     real( kind = dp ), intent(inout) :: sw, dswdr, r
-    real( kind = dp ) :: ron, roff, a, b, c, d, dx
-    real( kind = dp ) :: rval, rval2, rval3, rval4, rval5
-    real( kind = dp ) :: rvaldi, rvaldi2, rvaldi3, rvaldi4, rvaldi5
-    integer, intent(in)    :: SwitchType
     logical, intent(inout) :: in_switching_region
     integer :: j
+    real ( kind = dp ) :: a, b, c, d, dx
 
     sw = 0.0d0
     dswdr = 0.0d0
     in_switching_region = .false.
 
-    if (.not.isOK(SwitchType)) then
-       write(default_error, *) &
-            'get_switch:  this switching function has not been set up!'
-       return
-    endif
-
-    if (r2.lt.rout2(SwitchType)) then
-       if (r2.lt.rin2(SwitchType)) then
+    if (r2.lt.rout2) then
+       if (r2.lt.rin2) then
 
           sw = 1.0d0
           dswdr = 0.0d0
           return
 
-       else
-          if (useSpline) then
-             j = MAX(1, MIN(splineSqrt%np, idint((r2-splineSqrt%x(1)) * splineSqrt%dx_i) + 1))
-       
-             dx = r2 - splineSqrt%x(j)
-       
-             a = splineSqrt%c(1,j)
-             b = splineSqrt%c(2,j)
-             c = splineSqrt%c(3,j)
-             d = splineSqrt%c(4,j)
-             
-             r = c + dx * d
-             r = b + dx * r
-             r = a + dx * r
+       else         
+          
+          call lookupUniformSpline(r2Spline, r2, r)
+          if (switchIsCubic) then
+             ! super zippy automated use of precomputed spline coefficients
+             dx = r - rin
+             sw = switchSpline%y(1) + dx*(dx*(switchSpline%c(1) + &
+                  dx*switchSpline%d(1)))
+             dswdr = dx*(2.0d0 * switchSpline%c(1) + &
+                  3.0d0 * dx * switchSpline%d(1))
           else
-             r = dsqrt(r2)
+             call lookupUniformSpline1d(switchSpline, r, sw, dswdr)
           endif
-
-          ron = rin(SwitchType)
-          roff = rout(SwitchType)
-
-          if (functionType .eq. FIFTH_ORDER_POLY) then
-             rval = ( r - ron )
-             rval2 = rval*rval
-             rval3 = rval2*rval
-             rval4 = rval2*rval2
-             rval5 = rval3*rval2
-             rvaldi = 1.0d0/( roff - ron )
-             rvaldi2 = rvaldi*rvaldi
-             rvaldi3 = rvaldi2*rvaldi
-             rvaldi4 = rvaldi2*rvaldi2
-             rvaldi5 = rvaldi3*rvaldi2
-             sw = c0 + c1*rval*rvaldi + c2*rval2*rvaldi2 + c3*rval3*rvaldi3 &
-                  + c4*rval4*rvaldi4 + c5*rval5*rvaldi5
-             dswdr = c1*rvaldi + 2.0d0*c2*rval*rvaldi2 &
-                  + 3.0d0*c3*rval2*rvaldi3 + 4.0d0*c4*rval3*rvaldi4 &
-                  + 5.0d0*c5*rval4*rvaldi5
-
-          else
-             sw = (roff + 2.0d0*r - 3.0d0*ron)*(roff-r)**2/ ((roff-ron)**3)
-             dswdr = 6.0d0*(r*r - r*ron - r*roff +roff*ron)/((roff-ron)**3)
-
-          endif
+          
           in_switching_region = .true.
+          
           return          
        endif
     else
        return
     endif
-
+    
   end subroutine get_switch
 
 end module switcheroo

@@ -43,7 +43,7 @@
 !! Calculates Long Range forces Lennard-Jones interactions.
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: LJ.F90,v 1.21 2006-04-17 21:49:12 gezelter Exp $, $Date: 2006-04-17 21:49:12 $, $Name: not supported by cvs2svn $, $Revision: 1.21 $
+!! @version $Id: LJ.F90,v 1.22 2006-04-20 18:24:24 gezelter Exp $, $Date: 2006-04-20 18:24:24 $, $Name: not supported by cvs2svn $, $Revision: 1.22 $
 
 
 module lj
@@ -466,27 +466,8 @@ contains
     integer :: j
 
     if (useSplines) then
-       j = MAX(1, MIN(vLJspline%np, idint((r-vLJspline%x(1)) * vLJspline%dx_i) + 1))
-       
-       dx = r - vLJspline%x(j)
-       
-       a = vLJspline%c(1,j)
-       b = vLJspline%c(2,j)
-       c = vLJspline%c(3,j)
-       d = vLJspline%c(4,j)
-       
-       myPot = c + dx * d
-       myPot = b + dx * myPot
-       myPot = a + dx * myPot
 
-       a = vLJpspline%c(1,j)
-       b = vLJpspline%c(2,j)
-       c = vLJpspline%c(3,j)
-       d = vLJpspline%c(4,j)
-       
-       myDeriv = c + dx * d
-       myDeriv = b + dx * myDeriv  
-       myDeriv = a + dx * myDeriv
+       call lookupUniformSpline1d(vLJSpline, r, myPot, myDeriv)
        
     else
        ri = 1.0_DP / r
@@ -512,27 +493,8 @@ contains
     integer :: j
     
     if (useSplines) then
-       j = MAX(1, MIN(vSoftSpline%np, idint((r-vSoftSpline%x(1)) * vSoftSpline%dx_i) + 1))
-       
-       dx = r - vSoftSpline%x(j)
-       
-       a = vSoftSpline%c(1,j)
-       b = vSoftSpline%c(2,j)
-       c = vSoftSpline%c(3,j)
-       d = vSoftSpline%c(4,j)
-       
-       myPot = c + dx * d
-       myPot = b + dx * myPot
-       myPot = a + dx * myPot
 
-       a = vSoftPspline%c(1,j)
-       b = vSoftPspline%c(2,j)
-       c = vSoftPspline%c(3,j)
-       d = vSoftPspline%c(4,j)
-       
-       myDeriv = c + dx * d
-       myDeriv = b + dx * myDeriv  
-       myDeriv = a + dx * myDeriv
+       call lookupUniformSpline1d(vSoftSpline, r, myPot, myDeriv)
        
     else
        ri = 1.0_DP / r    
@@ -551,7 +513,6 @@ contains
     integer, intent(in) :: np
     real( kind = dp ) :: rvals(np), vLJ(np), vLJp(np), vSoft(np), vSoftp(np)
     real( kind = dp ) :: dr, r, ri, ri2, ri6, ri7, ri12, ri13
-    real( kind = dp ) :: vljpp1, vljppn, vsoftpp1, vsoftppn
     integer :: i
 
     dr = (rmax-rmin) / float(np-1)
@@ -573,16 +534,10 @@ contains
        vSoftp(i) = - 24.0_DP * ri7       
     enddo
 
-    vljpp1 = 624.0_DP / (rmin)**(14)  - 168.0_DP / (rmin)**(8)
-    vljppn = 624.0_DP / (rmax)**(14)  - 168.0_DP / (rmax)**(8)
-
-    vsoftpp1 = 168.0_DP / (rmin)**(8)
-    vsoftppn = 168.0_DP / (rmax)**(8)
-
-    call newSpline(vLJspline, rvals, vLJ, vLJp(1), vLJp(np), .true.)
-    call newSpline(vLJpspline, rvals, vLJp, vljpp1, vljppn, .true.)
-    call newSpline(vSoftSpline, rvals, vSoft, vSoftp(1), vSoftp(np), .true.)
-    call newSpline(vSoftpSpline, rvals, vSoftp, vsoftpp1, vsoftppn, .true.)
+    call newSpline(vLJspline, rvals, vLJ,  .true.)
+    call newSpline(vLJpspline, rvals, vLJp, .true.)
+    call newSpline(vSoftSpline, rvals, vSoft,  .true.)
+    call newSpline(vSoftpSpline, rvals, vSoftp, .true.)
 
     return
   end subroutine setupSplines

@@ -186,14 +186,10 @@ contains
        eam_phi_r(j) = 331.999296E0_DP * (eam_Z_r(j)**2) / rvals(j)
     enddo
 
-    call newSpline(EAMList%EAMParams(current)%rho, rvals, rhovals, &
-         0.0d0, 0.0d0, .true.)
-    call newSpline(EAMList%EAMParams(current)%Z,   rvals, eam_Z_r, &
-         0.0d0, 0.0d0, .true.)
-    call newSpline(EAMList%EAMParams(current)%F, rhovals, eam_F_rho, &
-         0.0d0, 0.0d0, .true.)
-    call newSpline(EAMList%EAMParams(current)%phi, rvals, eam_phi_r, &
-         0.0d0, 0.0d0, .true.)
+    call newSpline(EAMList%EAMParams(current)%rho, rvals, eam_rho_r, .true.)
+    call newSpline(EAMList%EAMParams(current)%Z,   rvals, eam_Z_r, .true.)
+    call newSpline(EAMList%EAMParams(current)%F, rhovals, eam_F_rho, .true.)
+    call newSpline(EAMList%EAMParams(current)%phi, rvals, eam_phi_r, .true.)
   end subroutine newEAMtype
 
 
@@ -406,7 +402,6 @@ contains
        rho(atom1) = rho(atom1) + rho_j_at_i
 #endif
     endif
-
   end subroutine calc_eam_prepair_rho
 
 
@@ -449,6 +444,7 @@ contains
        frho(atom) = u
        dfrhodrho(atom) = u1
        pot = pot + u
+
     enddo
 
 #ifdef IS_MPI

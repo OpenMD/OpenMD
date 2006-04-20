@@ -43,12 +43,10 @@
 !!
 !!  Created by Charles F. Vardeman II on 03 Apr 2006.
 !!
-!!  PURPOSE: Generic Spline interpolation routines. These routines 
-!!           assume that we are on a uniform grid for precomputation of 
-!!           spline parameters.
+!!  PURPOSE: Generic Spline interpolation routines. 
 !!
 !! @author Charles F. Vardeman II 
-!! @version $Id: interpolation.F90,v 1.6 2006-04-17 21:49:12 gezelter Exp $
+!! @version $Id: interpolation.F90,v 1.7 2006-04-20 18:24:24 gezelter Exp $
 
 
 module interpolation
@@ -57,14 +55,15 @@ module interpolation
   implicit none
   PRIVATE
 
-  character(len = statusMsgSize) :: errMSG
-
   type, public :: cubicSpline
      logical :: isUniform = .false.
-     integer :: np = 0
+     integer :: n = 0
      real(kind=dp) :: dx_i
      real (kind=dp), pointer,dimension(:)   :: x => null()
-     real (kind=dp), pointer,dimension(:,:) :: c => null()
+     real (kind=dp), pointer,dimension(:)   :: y => null()
+     real (kind=dp), pointer,dimension(:)   :: b => null()
+     real (kind=dp), pointer,dimension(:)   :: c => null()
+     real (kind=dp), pointer,dimension(:)   :: d => null()
   end type cubicSpline
 
   public :: newSpline
@@ -77,51 +76,21 @@ module interpolation
 contains
   
 
-  subroutine newSpline(cs, x, y, yp1, ypn, isUniform)
+  subroutine newSpline(cs, x, y, isUniform)
     
-    !************************************************************************
-    !
-    ! newSpline solves for slopes defining a cubic spline.
-    !
-    !  Discussion:
-    !
-    !    A tridiagonal linear system for the unknown slopes S(I) of
-    !    F at x(I), I=1,..., N, is generated and then solved by Gauss
-    !    elimination, with S(I) ending up in cs%C(2,I), for all I.
-    !
-    !  Reference:
-    !
-    !    Carl DeBoor,
-    !    A Practical Guide to Splines,
-    !    Springer Verlag.
-    !
-    !  Parameters:
-    !
-    !    Input, real x(N), the abscissas or X values of
-    !    the data points.  The entries of x are assumed to be
-    !    strictly increasing.
-    !
-    !    Input, real y(I), contains the function value at x(I) for 
-    !      I = 1, N.
-    !
-    !    Input, real yp1 contains the slope at x(1) 
-    !    Input, real ypn contains the slope at x(N)
-    !
-    !    On output, the slopes at x(I) have been stored in 
-    !               cs%C(2,I), for I = 1 to N.
-
     implicit none
 
     type (cubicSpline), intent(inout) :: cs
     real( kind = DP ), intent(in) :: x(:), y(:)
-    real( kind = DP ), intent(in) :: yp1, ypn
+    real( kind = DP ) :: fp1, fpn, p
+    REAL( KIND = DP), DIMENSION(size(x)-1) :: diff_y, H
+
     logical, intent(in) :: isUniform
-    real( kind = DP ) :: g, divdif1, divdif3, dx
-    integer :: i, alloc_error, np
+    integer :: i, alloc_error, n, k
 
     alloc_error = 0
 
-    if (cs%np .ne. 0) then
+    if (cs%n .ne. 0) then
        call handleWarning("interpolation::newSpline", &
             "cubicSpline struct was already created")
        call deleteSpline(cs)
@@ -129,98 +98,156 @@ contains
 
     ! make sure the sizes match
 
-    np = size(x)
-
-    if ( size(y) .ne. np ) then
+    n = size(x)
+    
+    if ( size(y) .ne. size(x) ) then
        call handleError("interpolation::newSpline", &
             "Array size mismatch")
     end if
     
-    cs%np = np
+    cs%n = n
     cs%isUniform = isUniform
 
-    allocate(cs%x(np), stat=alloc_error)
+    allocate(cs%x(n), stat=alloc_error)
     if(alloc_error .ne. 0) then
        call handleError("interpolation::newSpline", &
             "Error in allocating storage for x")
     endif
 
-    allocate(cs%c(4,np), stat=alloc_error)
+    allocate(cs%y(n), stat=alloc_error)
+    if(alloc_error .ne. 0) then
+       call handleError("interpolation::newSpline", &
+            "Error in allocating storage for y")
+    endif
+
+    allocate(cs%b(n), stat=alloc_error)
+    if(alloc_error .ne. 0) then
+       call handleError("interpolation::newSpline", &
+            "Error in allocating storage for b")
+    endif
+
+    allocate(cs%c(n), stat=alloc_error)
     if(alloc_error .ne. 0) then
        call handleError("interpolation::newSpline", &
             "Error in allocating storage for c")
     endif
-       
-    do i = 1, np
+
+    allocate(cs%d(n), stat=alloc_error)
+    if(alloc_error .ne. 0) then
+       call handleError("interpolation::newSpline", &
+            "Error in allocating storage for d")
+    endif
+
+    ! make sure we are monotinically increasing in x:
+
+    h = diff(x)
+    if (any(h <= 0)) then
+       call handleError("interpolation::newSpline", &
+            "Negative dx interval found")
+    end if
+
+    ! load x and y values into the cubicSpline structure:
+
+    do i = 1, n
        cs%x(i) = x(i)
-       cs%c(1,i) = y(i)       
-    enddo
+       cs%y(i) = y(i)
+    end do
 
-    ! Set the first derivative of the function to the second coefficient of 
-    ! each of the endpoints
+    ! Calculate coefficients for the tridiagonal system: store
+    ! sub-diagonal in B, diagonal in D, difference quotient in C.
 
-    cs%c(2,1) = yp1
-    cs%c(2,np) = ypn
+    cs%b(1:n-1) = h
+    diff_y = diff(y)
+    cs%c(1:n-1) = diff_y / h
+
+    if (n == 2) then
+       ! Assume the derivatives at both endpoints are zero
+       ! another assumption could be made to have a linear interpolant
+       ! between the two points.  In that case, the b coefficients
+       ! below would be diff_y(1)/h(1) and the c and d coefficients would
+       ! both be zero.
+       cs%b(1) = 0.0_dp
+       cs%c(1) = -3.0_dp * (diff_y(1)/h(1))**2
+       cs%d(1) = -2.0_dp * (diff_y(1)/h(1))**3
+       cs%b(2) = cs%b(1)
+       cs%c(2) = 0.0_dp
+       cs%d(2) = 0.0_dp
+       cs%dx_i = 1.0_dp / h(1)
+      return
+    end if
+
+    cs%d(1) = 2.0_dp * cs%b(1)
+    do i = 2, n-1
+      cs%d(i) = 2.0_dp * (cs%b(i) + cs%b(i-1))
+    end do
+    cs%d(n) = 2.0_dp * cs%b(n-1)
+
+    ! Calculate estimates for the end slopes using polynomials
+    ! that interpolate the data nearest the end.
     
-    !
-    !  Set up the right hand side of the linear system.
-    !
+    fp1 = cs%c(1) - cs%b(1)*(cs%c(2) - cs%c(1))/(cs%b(1) + cs%b(2))
+    if (n > 3) then
+      fp1 = fp1 + cs%b(1)*((cs%b(1) + cs%b(2))*(cs%c(3) - cs%c(2))/ &
+           (cs%b(2) + cs%b(3)) - cs%c(2) + cs%c(1))/(x(4) - x(1))
+    end if
+          
+    fpn = cs%c(n-1) + cs%b(n-1)*(cs%c(n-1) - cs%c(n-2))/(cs%b(n-2) + cs%b(n-1))
+    if (n > 3) then
+      fpn = fpn + cs%b(n-1)*(cs%c(n-1) - cs%c(n-2) - (cs%b(n-2) + cs%b(n-1))* &
+           (cs%c(n-2) - cs%c(n-3))/(cs%b(n-2) + cs%b(n-3)))/(x(n) - x(n-3))
+    end if
 
-    do i = 2, cs%np - 1
-       cs%c(2,i) = 3.0_DP * ( &
-            (x(i) - x(i-1)) * (cs%c(1,i+1) - cs%c(1,i)) / (x(i+1) - x(i)) + &
-            (x(i+1) - x(i)) * (cs%c(1,i) - cs%c(1,i-1)) / (x(i) - x(i-1)))
-    end do
+    ! Calculate the right hand side and store it in C.
 
-    !
-    !  Set the diagonal coefficients.
-    !
-    cs%c(4,1) = 1.0_DP
-    do i = 2, cs%np - 1 
-       cs%c(4,i) = 2.0_DP * ( x(i+1) - x(i-1) )
+    cs%c(n) = 3.0_dp * (fpn - cs%c(n-1))
+    do i = n-1,2,-1
+      cs%c(i) = 3.0_dp * (cs%c(i) - cs%c(i-1))
     end do
-    cs%c(4,cs%np) = 1.0_DP
-    !
-    !  Set the off-diagonal coefficients.
-    !
-    cs%c(3,1) = 0.0_DP
-    do i = 2, cs%np
-       cs%c(3,i) = x(i) - x(i-1)
+    cs%c(1) = 3.0_dp * (cs%c(1) - fp1)
+
+    ! Solve the tridiagonal system.
+
+    do k = 2, n
+      p = cs%b(k-1) / cs%d(k-1)
+      cs%d(k) = cs%d(k) - p*cs%b(k-1)
+      cs%c(k) = cs%c(k) - p*cs%c(k-1)
     end do
-    !
-    !  Forward elimination.
-    !
-    do i = 2, cs%np - 1
-       g = -cs%c(3,i+1) / cs%c(4,i-1)
-       cs%c(4,i) = cs%c(4,i) + g * cs%c(3,i-1)
-       cs%c(2,i) = cs%c(2,i) + g * cs%c(2,i-1)
-    end do
-    !
-    !  Back substitution for the interior slopes.
-    !
-    do i = cs%np - 1, 2, -1
-       cs%c(2,i) = ( cs%c(2,i) - cs%c(3,i) * cs%c(2,i+1) ) / cs%c(4,i)
-    end do
-    !
-    !  Now compute the quadratic and cubic coefficients used in the 
-    !  piecewise polynomial representation.
-    !
-    do i = 1, cs%np - 1
-       dx = x(i+1) - x(i)
-       divdif1 = ( cs%c(1,i+1) - cs%c(1,i) ) / dx
-       divdif3 = cs%c(2,i) + cs%c(2,i+1) - 2.0_DP * divdif1
-       cs%c(3,i) = ( divdif1 - cs%c(2,i) - divdif3 ) / dx
-       cs%c(4,i) = divdif3 / ( dx * dx )
+    cs%c(n) = cs%c(n) / cs%d(n)
+    do k = n-1, 1, -1
+      cs%c(k) = (cs%c(k) - cs%b(k) * cs%c(k+1)) / cs%d(k)
     end do
 
-    cs%c(3,cs%np) = 0.0_DP
-    cs%c(4,cs%np) = 0.0_DP
+    ! Calculate the coefficients defining the spline.
 
-    cs%dx_i = 1.0_DP / dx
+    cs%d(1:n-1) = diff(cs%c) / (3.0_dp * h)
+    cs%b(1:n-1) = diff_y / h - h * (cs%c(1:n-1) + h * cs%d(1:n-1))
+    cs%b(n) = cs%b(n-1) + h(n-1) * (2.0_dp*cs%c(n-1) + h(n-1)*3.0_dp*cs%d(n-1))
+
+    if (isUniform) then
+       cs%dx_i = 1.0d0 / (x(2) - x(1))
+    endif
 
     return
+    
+  contains
+    
+    function diff(v)
+      ! Auxiliary function to compute the forward difference
+      ! of data stored in a vector v.
+      
+      implicit none
+      real (kind = dp), dimension(:), intent(in) :: v
+      real (kind = dp), dimension(size(v)-1) :: diff
+      
+      integer :: n
+      
+      n = size(v)
+      diff = v(2:n) - v(1:n-1)
+      return
+    end function diff
+    
   end subroutine newSpline
-
+       
   subroutine deleteSpline(this)
 
     type(cubicSpline) :: this
@@ -234,48 +261,26 @@ contains
        this%c => null()
     end if
     
-    this%np = 0
+    this%n = 0
     
   end subroutine deleteSpline
 
   subroutine lookupNonuniformSpline(cs, xval, yval)
     
-    !*************************************************************************
-    !
-    ! lookupNonuniformSpline evaluates a piecewise cubic Hermite interpolant.
-    !
-    !  Discussion:
-    !
-    !    newSpline must be called first, to set up the
-    !    spline data from the raw function and derivative data.
-    !
-    !  Modified:
-    !
-    !    06 April 1999
-    !
-    !  Reference:
-    !
-    !    Conte and de Boor,
-    !    Algorithm PCUBIC,
-    !    Elementary Numerical Analysis, 
-    !    1973, page 234.
-    !
-    !  Parameters:
-    !
     implicit none
 
     type (cubicSpline), intent(in) :: cs
     real( kind = DP ), intent(in)  :: xval
     real( kind = DP ), intent(out) :: yval
-    real( kind = DP ) :: dx
+    real( kind = DP ) ::  dx
     integer :: i, j
     !
     !  Find the interval J = [ cs%x(J), cs%x(J+1) ] that contains 
     !  or is nearest to xval.
     !
-    j = cs%np - 1
+    j = cs%n - 1
 
-    do i = 1, cs%np - 2
+    do i = 0, cs%n - 2
 
        if ( xval < cs%x(i+1) ) then
           j = i
@@ -287,59 +292,28 @@ contains
     !  Evaluate the cubic polynomial.
     !
     dx = xval - cs%x(j)
-
-    yval = cs%c(1,j) + dx * ( cs%c(2,j) + dx * ( cs%c(3,j) + dx * cs%c(4,j) ) )
+    yval = cs%y(j) + dx*(cs%b(j) + dx*(cs%c(j) + dx*cs%d(j)))
     
     return
   end subroutine lookupNonuniformSpline
 
   subroutine lookupUniformSpline(cs, xval, yval)
     
-    !*************************************************************************
-    !
-    ! lookupUniformSpline evaluates a piecewise cubic Hermite interpolant.
-    !
-    !  Discussion:
-    !
-    !    newSpline must be called first, to set up the
-    !    spline data from the raw function and derivative data.
-    !
-    !  Modified:
-    !
-    !    06 April 1999
-    !
-    !  Reference:
-    !
-    !    Conte and de Boor,
-    !    Algorithm PCUBIC,
-    !    Elementary Numerical Analysis, 
-    !    1973, page 234.
-    !
-    !  Parameters:
-    !
     implicit none
 
     type (cubicSpline), intent(in) :: cs
     real( kind = DP ), intent(in)  :: xval
     real( kind = DP ), intent(out) :: yval
-    real( kind = DP ) :: a, b, c, d, dx
+    real( kind = DP ) ::  dx
     integer :: i, j
     !
     !  Find the interval J = [ cs%x(J), cs%x(J+1) ] that contains 
     !  or is nearest to xval.
-
-    j = MAX(1, MIN(cs%np, idint((xval-cs%x(1)) * cs%dx_i) + 1))
-
+    
+    j = MAX(1, MIN(cs%n-1, idint((xval-cs%x(1)) * cs%dx_i) + 1))
+    
     dx = xval - cs%x(j)
-
-    a = cs%c(1,j)
-    b = cs%c(2,j)
-    c = cs%c(3,j)
-    d = cs%c(4,j)
-
-    yval = c + dx * d
-    yval = b + dx * yval  
-    yval = a + dx * yval
+    yval = cs%y(j) + dx*(cs%b(j) + dx*(cs%c(j) + dx*cs%d(j)))
     
     return
   end subroutine lookupUniformSpline
@@ -351,27 +325,19 @@ contains
     type (cubicSpline), intent(in) :: cs
     real( kind = DP ), intent(in)  :: xval
     real( kind = DP ), intent(out) :: yval, dydx
-    real( kind = DP ) :: a, b, c, d, dx
+    real( kind = DP ) :: dx
     integer :: i, j
     
     !  Find the interval J = [ cs%x(J), cs%x(J+1) ] that contains 
     !  or is nearest to xval.
 
-    j = MAX(1, MIN(cs%np, idint((xval-cs%x(1)) * cs%dx_i) + 1))
 
+    j = MAX(1, MIN(cs%n-1, idint((xval-cs%x(1)) * cs%dx_i) + 1))
+    
     dx = xval - cs%x(j)
+    yval = cs%y(j) + dx*(cs%b(j) + dx*(cs%c(j) + dx*cs%d(j)))
 
-    a = cs%c(1,j)
-    b = cs%c(2,j)
-    c = cs%c(3,j)
-    d = cs%c(4,j)
-
-    yval = c + dx * d
-    yval = b + dx * yval  
-    yval = a + dx * yval
-
-    dydx = 2.0d0 * c + 3.0d0 * d * dx
-    dydx = b + dx * dydx
+    dydx = cs%b(j) + dx*(2.0d0 * cs%c(j) + 3.0d0 * dx * cs%d(j))
        
     return
   end subroutine lookupUniformSpline1d

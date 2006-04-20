@@ -16,14 +16,15 @@ forceFieldFileName = "SuttonChen.frc";
 
 ensemble = "NVE";
 dt = 4.0;
-runTime = 6e3;
+runTime = 3e3;
 
 
 sampleTime = 200.0;
-statusTime = 40.0;
+statusTime = 4.0;
 seed = 985456376;
 
 tempSet="true";
+thermalTime = 500;
 useInitialExtendedSystemState="false";
 useInitialTime="false";
 tauThermostat = 1E3;

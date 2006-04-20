@@ -1,4 +1,4 @@
- !!
+!!
 !! Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
 !!
 !! The University of Notre Dame grants you ("Licensee") a
@@ -267,10 +267,8 @@ contains
 
           vCut = epsilon*((alpha/rCut)**n)
 
-          call newSpline(MixingMap(i,j)%V, rvals, vvals, &
-               0.0d0, 0.0d0, .true.)
-          call newSpline(MixingMap(i,j)%phi, rvals, phivals, &
-               0.0d0, 0.0d0, .true.)
+          call newSpline(MixingMap(i,j)%V, rvals, vvals, .true.)
+          call newSpline(MixingMap(i,j)%phi, rvals, phivals, .true.)
 
           MixingMap(i,j)%epsilon = epsilon
           MixingMap(i,j)%m = m

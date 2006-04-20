@@ -8,7 +8,7 @@ component{
 
 initialConfig = "./ssde.in";
 
-ensemble = NPTi;
+ensemble = NVE;
 forceField = "DUFF";
 electrostaticSummationMethod = "shifted_potential";
 dielectric = 80.0;
@@ -22,7 +22,7 @@ tauThermostat = 1e3;
 tauBarostat = 1e4;
 
 dt = 2.0;
-runTime = 1e4;
+runTime = 3e3;
 useInitialTime = "false";
 useInitialExtendedSystemState = "false";
 

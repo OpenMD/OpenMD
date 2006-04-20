@@ -51,6 +51,7 @@
 #include "utils/simError.h"
 #include "UseTheForce/DarkSide/atype_interface.h"
 #include "UseTheForce/DarkSide/fForceOptions_interface.h"
+#include "UseTheForce/DarkSide/switcheroo_interface.h"
 namespace oopse {
 
   ForceField::ForceField() { 
@@ -68,6 +69,7 @@ namespace oopse {
 
   ForceField::~ForceField() {
     deleteAtypes();
+    deleteSwitch();
   }
 
   AtomType* ForceField::getAtomType(const std::string &at) {

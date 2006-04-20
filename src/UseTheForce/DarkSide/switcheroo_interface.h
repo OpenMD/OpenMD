@@ -47,10 +47,12 @@
 #include "config.h"
  
 #define setFunctionType FC_FUNC(setfunctiontype, SETFUNCTIONTYPE)
+#define deleteSwitch FC_FUNC(deleteswitch, DELETESWITCH)
 
 extern "C"{
 
   void setFunctionType( int* theFT );
+  void deleteSwitch( );
 
 }  
 #endif
