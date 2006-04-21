@@ -77,6 +77,9 @@ module electrostatic_module
   real(kind=dp), parameter :: pre14 = 69.13373d0
 
   real(kind=dp), parameter :: zero = 0.0d0
+  
+  !! number of points for electrostatic splines 
+  integer, parameter :: np = 100
 
   !! variables to handle different summation methods for long-range 
   !! electrostatics:
@@ -113,6 +116,10 @@ module electrostatic_module
   real(kind=dp), save :: f2c = 0.0_DP
   real(kind=dp), save :: f3c = 0.0_DP
   real(kind=dp), save :: f4c = 0.0_DP
+  real(kind=dp), save :: df0 = 0.0_DP
+  type(cubicSpline), save :: f0spline
+  logical, save :: haveElectroSpline = .false.
+
 
 #if defined(__IFC) || defined(__PGI)
 ! error function for ifc version > 7.
@@ -124,7 +131,7 @@ module electrostatic_module
   public :: setElectrostaticCutoffRadius
   public :: setDampingAlpha
   public :: setReactionFieldDielectric
-  public :: buildElectroSplines
+  public :: buildElectroSpline
   public :: newElectrostaticType
   public :: setCharge
   public :: setDipoleMoment
@@ -196,8 +203,25 @@ contains
     haveDielectric = .true.
   end subroutine setReactionFieldDielectric
 
-  subroutine buildElectroSplines()
-  end subroutine buildElectroSplines
+  subroutine buildElectroSpline()
+    real( kind = dp ), dimension(np) :: xvals, yvals
+    real( kind = dp ) :: dx, rmin, rval
+    integer :: i
+
+    rmin = 0.0d0
+
+    dx = (defaultCutoff-rmin) / dble(np-1)
+    
+    do i = 1, np
+       rval = rmin + dble(i-1)*dx
+       xvals(i) = rval
+       yvals(i) = derfc(dampingAlpha*rval)
+    enddo
+
+    call newSpline(f0spline, xvals, yvals, .true.)
+
+    haveElectroSpline = .true.
+  end subroutine buildElectroSpline
 
   subroutine newElectrostaticType(c_ident, is_Charge, is_Dipole, &
        is_SplitDipole, is_Quadrupole, is_Tap, status)
@@ -450,6 +474,10 @@ contains
        
     endif
 
+    if (.not.haveElectroSpline) then
+       call buildElectroSpline()
+    end if
+
     summationMethodChecked = .true.
   end subroutine checkSummationMethod
 
@@ -653,9 +681,11 @@ contains
 
        if (j_is_Charge) then
           if (screeningMethod .eq. DAMPED) then
-             f0 = derfc(dampingAlpha*rij)
-             varEXP = exp(-alpha2*rij*rij)
-             f1 = alphaPi*rij*varEXP + f0
+             call lookupUniformSpline1d(f0spline, rij, f0, df0)
+             f1 = -rij * df0 + f0
+!!$             f0 = derfc(dampingAlpha*rij)
+!!$             varEXP = exp(-alpha2*rij*rij)
+!!$             f1 = alphaPi*rij*varEXP + f0
           endif
 
           preVal = pre11 * q_i * q_j
@@ -695,10 +725,13 @@ contains
 
        if (j_is_Dipole) then
           if (screeningMethod .eq. DAMPED) then
-             f0 = derfc(dampingAlpha*rij)
-             varEXP = exp(-alpha2*rij*rij)
-             f1 = alphaPi*rij*varEXP + f0
-             f3 = alphaPi*2.0d0*alpha2*varEXP*rij*rij*rij
+             call lookupUniformSpline1d(f0spline, rij, f0, df0)
+             f1 = -rij * df0 + f0
+             f3 = -2.0d0*alpha2*df0*rij*rij*rij
+!!$             f0 = derfc(dampingAlpha*rij)
+!!$             varEXP = exp(-alpha2*rij*rij)
+!!$             f1 = alphaPi*rij*varEXP + f0
+!!$             f3 = alphaPi*2.0d0*alpha2*varEXP*rij*rij*rij
           endif
 
           pref = pre12 * q_i * mu_j
@@ -764,10 +797,13 @@ contains
 
        if (j_is_Quadrupole) then
           if (screeningMethod .eq. DAMPED) then
-             f0 = derfc(dampingAlpha*rij)
-             varEXP = exp(-alpha2*rij*rij)
-             f1 = alphaPi*rij*varEXP + f0
-             f2 = alphaPi*2.0d0*alpha2*varEXP
+             call lookupUniformSpline1d(f0spline, rij, f0, df0)
+!!$             f0 = derfc(dampingAlpha*rij)
+!!$             varEXP = exp(-alpha2*rij*rij)
+!!$             f1 = alphaPi*rij*varEXP + f0
+!!$             f2 = alphaPi*2.0d0*alpha2*varEXP
+             f1 = -rij * df0 + f0
+             f2 = -2.0d0*alpha2*df0
              f3 = f2*rij*rij*rij
              f4 = 2.0d0*alpha2*f2*rij
           endif
@@ -834,10 +870,13 @@ contains
 
        if (j_is_Charge) then
           if (screeningMethod .eq. DAMPED) then
-             f0 = derfc(dampingAlpha*rij)
-             varEXP = exp(-alpha2*rij*rij)
-             f1 = alphaPi*rij*varEXP + f0
-             f3 = alphaPi*2.0d0*alpha2*varEXP*rij*rij*rij
+             call lookupUniformSpline1d(f0spline, rij, f0, df0)
+             f1 = -rij * df0 + f0
+             f3 = -2.0d0*alpha2*df0*rij*rij*rij
+!!$             f0 = derfc(dampingAlpha*rij)
+!!$             varEXP = exp(-alpha2*rij*rij)
+!!$             f1 = alphaPi*rij*varEXP + f0
+!!$             f3 = alphaPi*2.0d0*alpha2*varEXP*rij*rij*rij
           endif
           
           pref = pre12 * q_j * mu_i
@@ -934,10 +973,13 @@ contains
        
        if (j_is_Dipole) then
           if (screeningMethod .eq. DAMPED) then
-             f0 = derfc(dampingAlpha*rij)
-             varEXP = exp(-alpha2*rij*rij)
-             f1 = alphaPi*rij*varEXP + f0
-             f2 = alphaPi*2.0d0*alpha2*varEXP
+             call lookupUniformSpline1d(f0spline, rij, f0, df0)
+!!$             f0 = derfc(dampingAlpha*rij)
+!!$             varEXP = exp(-alpha2*rij*rij)
+!!$             f1 = alphaPi*rij*varEXP + f0
+!!$             f2 = alphaPi*2.0d0*alpha2*varEXP
+             f1 = -rij * df0 + f0
+             f2 = -2.0d0*alpha2*df0
              f3 = f2*rij*rij*rij
              f4 = 2.0d0*alpha2*f3*rij*rij
           endif
@@ -1054,10 +1096,13 @@ contains
     if (i_is_Quadrupole) then
        if (j_is_Charge) then
           if (screeningMethod .eq. DAMPED) then
-             f0 = derfc(dampingAlpha*rij)
-             varEXP = exp(-alpha2*rij*rij)
-             f1 = alphaPi*rij*varEXP + f0
-             f2 = alphaPi*2.0d0*alpha2*varEXP
+             call lookupUniformSpline1d(f0spline, rij, f0, df0)
+!!$             f0 = derfc(dampingAlpha*rij)
+!!$             varEXP = exp(-alpha2*rij*rij)
+!!$             f1 = alphaPi*rij*varEXP + f0
+!!$             f2 = alphaPi*2.0d0*alpha2*varEXP
+             f1 = -rij * df0 + f0
+             f2 = -2.0d0*alpha2*df0
              f3 = f2*rij*rij*rij
              f4 = 2.0d0*alpha2*f2*rij
           endif
