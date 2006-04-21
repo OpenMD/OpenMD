@@ -32,8 +32,9 @@ initialConfig = "./ssdCl.in";
 
 ensemble = NVT;
 forceField = "DUFF";
-electrostaticSummationMethod = "none";
-dielectric = 80.0;
+electrostaticSummationMethod = "shifted_force";
+electrostaticScreeningMethod = "damped";
+dampingAlpha = 0.20;
 cutoffRadius = 10.5;
 switchingRadius = 8.925;
 

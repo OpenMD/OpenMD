@@ -1,3 +1,468 @@
+2006-04-20 23:19  chrisfen
+
+	* samples/water/spce/spce.md,
+	src/UseTheForce/DarkSide/electrostatic.F90: Electrosplines added...
+
+2006-04-20 17:02  chrisfen
+
+	* samples/argon/500.md, src/UseTheForce/DarkSide/sticky.F90,
+	src/UseTheForce/DarkSide/switcheroo.F90: splined up sticky
+
+2006-04-20 14:24  gezelter
+
+	* samples/metals/EAM/Au_bulk_voter.md,
+	samples/metals/Sutton-Chen/Au_bulk_SC.md,
+	samples/water/ssde/ssde.md, src/UseTheForce/ForceField.cpp,
+	src/UseTheForce/doForces.F90, src/UseTheForce/DarkSide/LJ.F90,
+	src/UseTheForce/DarkSide/eam.F90,
+	src/UseTheForce/DarkSide/electrostatic.F90,
+	src/UseTheForce/DarkSide/suttonchen.F90,
+	src/UseTheForce/DarkSide/switcheroo.F90,
+	src/UseTheForce/DarkSide/switcheroo_interface.F90,
+	src/UseTheForce/DarkSide/switcheroo_interface.h,
+	src/utils/interpolation.F90: Complete rewrite of spline code and
+	everything that uses it.
+
+2006-04-17 17:49  gezelter
+
+	* configure, ac-tools/aclocal.m4, samples/argon/500.md,
+	samples/metals/EAM/Au_bulk_voter.md,
+	samples/metals/Sutton-Chen/Au_bulk_SC.md,
+	samples/water/ssde/ssde.md, src/UseTheForce/doForces.F90,
+	src/UseTheForce/DarkSide/LJ.F90, src/UseTheForce/DarkSide/eam.F90,
+	src/UseTheForce/DarkSide/electrostatic.F90,
+	src/UseTheForce/DarkSide/interpolation.F90,
+	src/UseTheForce/DarkSide/sticky.F90,
+	src/UseTheForce/DarkSide/suttonchen.F90,
+	src/UseTheForce/DarkSide/switcheroo.F90,
+	src/applications/hydrodynamics/Hydro.ggo,
+	src/applications/hydrodynamics/HydroCmd.c,
+	src/applications/hydrodynamics/HydroCmd.h,
+	src/mdParser/SimplePreprocessor.hpp, src/types/DataHolder.hpp,
+	src/utils/interpolation.F90: Many performance improvements
+
+2006-04-15 22:51  chrisfen
+
+	* configure, samples/argon/500.md, src/UseTheForce/doForces.F90,
+	src/UseTheForce/fSwitchingFunction.h,
+	src/UseTheForce/DarkSide/electrostatic.F90,
+	src/UseTheForce/DarkSide/switcheroo.F90: added a cubic spline to
+	switcheroo
+
+2006-04-15 17:58  chrisfen
+
+	* src/utils/Makefile.in: Since status.F90 is used by
+	interpolation.F90, the former needs to be listed above the later in
+	the Makefile.
+
+2006-04-14 17:59  gezelter
+
+	* src/utils/interpolation.F90: changed the interface a bit
+
+2006-04-14 17:49  gezelter
+
+	* src/utils/interpolation.F90: added some logical flags
+
+2006-04-14 17:06  chrisfen
+
+	* src/utils/interpolation.F90: Wiped the spline with derivatives
+	and corrected a boundary comparision error by eliminating the
+	check.	This algorithm REQUIRES known first derivatives at the
+	endpoints.
+
+2006-04-14 16:04  gezelter
+
+	* src/utils/: Makefile.in, interpolation.F90: bug fixes for
+	interpolation module
+
+2006-04-14 15:57  gezelter
+
+	* src/utils/interpolation.F90: Heavily modified interpolation
+	module, also moved to "utils"
+
+2006-04-12 17:15  chuckv
+
+	* src/UseTheForce/DarkSide/interpolation.F90: Added interpolation
+	module.
+
+2006-04-11 11:33  gezelter
+
+	* src/applications/staticProps/: StaticProps.ggo, StaticPropsCmd.c,
+	StaticPropsCmd.h: [no log message]
+
+2006-04-03 11:37  chuckv
+
+	* configure, ac-tools/aclocal.m4, make/Makefile.in,
+	src/UseTheForce/DarkSide/simParallel.F90: Added status module to
+	simParallel for error reporting.
+
+2006-03-31 13:09  tim
+
+	* src/: integrators/NPrT.cpp, io/Globals.cpp: NPrT might work now
+
+2006-03-30 16:08  chuckv
+
+	* src/UseTheForce/DarkSide/suttonchen.F90: Fixed memory leak bug
+	where SCList capacity was not reset to zero on destruction.
+
+2006-03-30 14:37  chuckv
+
+	* src/applications/nanoparticleBuilder/nanoparticleBuilder.cpp:
+	More testing of nanoparticleBuilder.
+
+2006-03-29 17:24  chuckv
+
+	* src/mdParser/SimplePreprocessor.hpp: Added check to make sure md
+	file exists.
+
+2006-03-29 14:17  chuckv
+
+	* src/: applications/nanoparticleBuilder/nanoparticleBuilder.cpp,
+	lattice/shapedLattice.cpp, lattice/shapedLattice.hpp: Fixed
+	latticeOrt in shapedlatice and latticebuilder.
+
+2006-03-29 13:11  tim
+
+	* src/applications/dynamicProps/: DipoleCorrFunc.cpp,
+	LegendreCorrFunc.cpp, VCorrFunc.cpp: Fix the normalization problem
+	in calculating correlation functions
+
+2006-03-29 13:09  tim
+
+	* src/applications/hydrodynamics/: ApproximationModel.cpp,
+	ApproximationModel.hpp, CompositeShape.cpp, Hydro.cpp, Hydro.ggo,
+	HydroCmd.c, HydroCmd.h, HydrodynamicsModel.hpp, RoughShell.cpp: (1)
+	RoughShell Model is working; (20)Adding a new option into Hydro
+	which allows user to generate the beads only
+
+2006-03-27 11:21  chuckv
+
+	* src/applications/nanoparticleBuilder/Makefile: Makefile for
+	nanoparticle builder.
+
+2006-03-27 11:03  chuckv
+
+	* make/Makefile.in, src/lattice/shapedLattice.cpp,
+	src/lattice/shapedLattice.hpp: Added nanoparticle builder to
+	makefile
+
+2006-03-24 15:46  chuckv
+
+	* src/applications/nanoparticleBuilder/nanoparticleBuilder.cpp:
+	Debugging changes to nanoparticle builder.
+
+2006-03-24 12:29  tim
+
+	* src/applications/dynamicProps/: DynamicProps.cpp,
+	DynamicProps.ggo, DynamicPropsCmd.c, DynamicPropsCmd.h, Makefile,
+	RCorrFunc.cpp, RMSD.cpp, RMSD.hpp: back to previous DynamicProps
+
+2006-03-24 11:49  tim
+
+	* src/applications/dynamicProps/: DynamicProps.cpp,
+	DynamicProps.ggo, DynamicPropsCmd.c, DynamicPropsCmd.h, Makefile,
+	RCorrFunc.cpp, RMSD.cpp, RMSD.hpp: Adding position correlation
+	function. The command line option for DynamicProps is now changed.
+	--rcorr is for position correlation and --rmsd is for mean square
+	displacement.
+
+2006-03-23 10:03  tim
+
+	* src/applications/hydrodynamics/: AnalyticalModel.cpp,
+	AnalyticalModel.hpp, ApproximationModel.cpp,
+	ApproximationModel.hpp, HydrodynamicsModel.hpp: update writeBeads
+	method
+
+2006-03-23 10:02  tim
+
+	* src/io/Globals.hpp: remove a unknown method
+
+2006-03-23 10:00  tim
+
+	* src/math/CholeskyDecomposition.hpp: The off diagnal is not set
+
+2006-03-23 09:59  tim
+
+	* src/mdParser/SimplePreprocessor.hpp: Throw exception if the file
+	can not be opened for preprocessing
+
+2006-03-22 15:57  chuckv
+
+	* src/applications/nanoparticleBuilder/: nanoparticleBuilder.cpp,
+	shapedLatticeSpherical.cpp, shapedLatticeSpherical.hpp: Added
+	shaped lattice.
+
+2006-03-21 10:33  tim
+
+	* src/applications/hydrodynamics/ApproximationModel.cpp: fix a bug
+	in calculating hydrodynamics tensor when the radius of beads are
+	not the same
+
+2006-03-20 19:26  tim
+
+	* src/: applications/hydrodynamics/AnalyticalModel.cpp,
+	applications/hydrodynamics/BeadModel.cpp,
+	applications/hydrodynamics/ShapeBuilder.cpp,
+	integrators/LDForceManager.cpp: Fix a bug in friction calculation
+	for ellipsoid
+
+2006-03-20 14:12  tim
+
+	* src/: applications/hydrodynamics/AnalyticalModel.cpp,
+	applications/hydrodynamics/Ellipsoid.cpp,
+	applications/hydrodynamics/Ellipsoid.hpp,
+	applications/hydrodynamics/ShapeBuilder.cpp,
+	integrators/LDForceManager.cpp: Verify the correctness of
+	Ellipsoid's hydrodynamics properties
+
+2006-03-17 18:51  tim
+
+	* src/applications/hydrodynamics/: Hydro.cpp, ShapeBuilder.cpp: New
+	version of Hydro is working now.
+
+2006-03-17 18:20  tim
+
+	* src/: applications/hydrodynamics/AnalyticalModel.cpp,
+	applications/hydrodynamics/AnalyticalModel.hpp,
+	applications/hydrodynamics/ApproximationModel.cpp,
+	applications/hydrodynamics/ApproximationModel.hpp,
+	applications/hydrodynamics/BeadModel.hpp,
+	applications/hydrodynamics/CompositeShape.cpp,
+	applications/hydrodynamics/CompositeShape.hpp,
+	applications/hydrodynamics/Ellipsoid.cpp,
+	applications/hydrodynamics/Ellipsoid.hpp,
+	applications/hydrodynamics/Hydro.cpp,
+	applications/hydrodynamics/Hydro.ggo,
+	applications/hydrodynamics/HydroCmd.c,
+	applications/hydrodynamics/HydroCmd.h,
+	applications/hydrodynamics/HydrodynamicsModel.cpp,
+	applications/hydrodynamics/HydrodynamicsModel.hpp,
+	applications/hydrodynamics/HydrodynamicsModelCreator.hpp,
+	applications/hydrodynamics/HydrodynamicsModelFactory.cpp,
+	applications/hydrodynamics/HydrodynamicsModelFactory.hpp,
+	applications/hydrodynamics/Makefile,
+	applications/hydrodynamics/RoughShell.cpp,
+	applications/hydrodynamics/RoughShell.hpp,
+	applications/hydrodynamics/Shape.hpp,
+	applications/hydrodynamics/ShapeBuilder.cpp,
+	applications/hydrodynamics/ShapeBuilder.hpp,
+	applications/hydrodynamics/Spheric.cpp,
+	applications/hydrodynamics/Spheric.hpp,
+	applications/hydrodynamics/StuntDoubleShape.cpp,
+	applications/hydrodynamics/StuntDoubleShape.hpp,
+	integrators/LDForceManager.cpp, integrators/LDForceManager.hpp,
+	io/Globals.cpp, io/Globals.hpp, math/SquareMatrix.hpp,
+	utils/HydroProps.hpp: refactor Hydrodynamics module.
+
+2006-03-17 11:10  chuckv
+
+	* src/lattice/: shapedLattice.cpp, shapedLattice.hpp, Makefile:
+	Generic Shaped Lattice for oopse. Can overload to get spherical or
+	nanorod.
+
+2006-03-16 17:50  tim
+
+	* src/: applications/hydrodynamics/HydrodynamicsModel.cpp,
+	integrators/LDForceManager.cpp, math/MersenneTwister.hpp:
+	LagevinDynamics is working?
+
+2006-03-16 16:52  gezelter
+
+	* src/applications/hydrodynamics/RoughShell.hpp: fixed a const
+	problem
+
+2006-03-15 17:08  tim
+
+	* src/applications/hydrodynamics/HydrodynamicsModel.cpp: unit
+	conversion for diffusion tensor is wrong
+
+2006-03-15 16:28  tim
+
+	* src/: applications/hydrodynamics/HydrodynamicsModel.cpp,
+	utils/NumericConstant.hpp: change the epsilon of numeric_limit
+
+2006-03-15 15:58  tim
+
+	* src/applications/hydrodynamics/HydrodynamicsModel.cpp: correcting
+	the unit in HydrodynamicsModel
+
+2006-03-15 12:35  tim
+
+	* src/primitives/RigidBody.cpp: using setFrc in
+	RigidBody::calcForcesAndTorques will discard if there are force and
+	torque applied in rigid body itself. use addFrc instead.
+
+2006-03-15 10:51  tim
+
+	* src/applications/hydrodynamics/: BeadModel.cpp, BeadModel.hpp,
+	RoughShell.cpp, RoughShell.hpp: Adding RoughShell and BeadModel
+
+2006-03-15 10:50  tim
+
+	* make/Makefile.in, src/applications/hydrodynamics/Makefile: adding
+	hydrodynamics module into build system
+
+2006-03-14 18:46  tim
+
+	* src/math/CholeskyDecomposition.hpp: adding Cholesky Decomposition
+
+2006-03-13 17:42  tim
+
+	* src/: applications/hydrodynamics/HydrodynamicsModel.cpp,
+	applications/hydrodynamics/HydrodynamicsModel.hpp,
+	applications/hydrodynamics/StuntDoubleShape.cpp,
+	applications/hydrodynamics/StuntDoubleShape.hpp,
+	brains/Register.cpp, integrators/LDForceManager.cpp,
+	integrators/LDForceManager.hpp, integrators/LangevinDynamics.cpp,
+	integrators/LangevinDynamics.hpp, integrators/Makefile,
+	io/Globals.cpp, io/Globals.hpp, math/MersenneTwister.hpp,
+	math/RandNumGen.hpp, math/SquareMatrix3.hpp: LangevinDynamics in
+	progress
+
+2006-03-07 11:43  gezelter
+
+	* src/applications/staticProps/: RhoZ.cpp, RhoZ.hpp: Fixed a
+	double/int bug.  Surprised no one ever noticed before...
+
+2006-02-24 16:17  tim
+
+	* src/applications/hydrodynamics/HydrodynamicsModel.cpp: fix bugs
+	in HydrodynamicsModel; (1) sign issue of Xirr calculation (2) out
+	product of Rij
+
+2006-02-23 18:16  tim
+
+	* src/applications/hydrodynamics/: Hydro.cpp, Hydro.ggo,
+	HydroCmd.c, HydroCmd.h, HydrodynamicsModel.cpp,
+	HydrodynamicsModel.hpp, HydrodynamicsModelCreator.hpp,
+	HydrodynamicsModelFactory.cpp, HydrodynamicsModelFactory.hpp,
+	MoleculeShape.cpp, MoleculeShape.hpp, StuntDoubleShape.cpp,
+	StuntDoubleShape.hpp: Bead Model is working
+
+2006-02-22 15:35  tim
+
+	* src/: applications/hydrodynamics/Hydro.cpp,
+	applications/hydrodynamics/Hydro.ggo,
+	applications/hydrodynamics/HydroCmd.c,
+	applications/hydrodynamics/HydroCmd.h,
+	applications/hydrodynamics/HydrodynamicsModel.cpp,
+	applications/hydrodynamics/HydrodynamicsModel.hpp,
+	applications/hydrodynamics/HydrodynamicsModelCreator.hpp,
+	applications/hydrodynamics/HydrodynamicsModelFactory.cpp,
+	applications/hydrodynamics/HydrodynamicsModelFactory.hpp,
+	applications/hydrodynamics/MoleculeShape.cpp,
+	applications/hydrodynamics/MoleculeShape.hpp,
+	math/DynamicRectMatrix.hpp, math/DynamicVector.hpp, math/LU.hpp,
+	math/RectMatrix.hpp, math/SquareMatrix3.hpp: Adding Hydrodynamics
+	Module
+
+2006-02-16 17:05  gezelter
+
+	* src/brains/Snapshot.cpp: fixed a spelling error
+
+2006-02-16 16:40  gezelter
+
+	* src/: UseTheForce/doForces.F90,
+	UseTheForce/DarkSide/simulation.F90, math/Makefile,
+	math/linearAlgebra.F90: fixed a problem with cutoff radii being set
+	larger than 1/2 the length of the shortest box dimension.  added a
+	few fortran utility routines
+
+2006-02-15 15:46  chuckv
+
+	* src/applications/nanoparticleBuilder/: sphericalNanoparticle.cpp,
+	sphericalNanoparticle.hpp: Changed Names of class files.
+
+2006-02-10 10:45  kdaily
+
+	* src/applications/dynamicProps/LegendreCorrFunc.cpp: [no log
+	message]
+
+2006-02-10 10:12  tim
+
+	* src/math/: LegendrePolynomial.cpp, Vector.hpp: fix a bug in
+	converting integer to double
+
+2006-02-08 13:21  chrisfen
+
+	* forceFields/DUFF2.frc: added DPD molecule type parameters
+
+2006-02-07 11:39  tim
+
+	* src/applications/dynamicProps/: DipoleCorrFunc.cpp,
+	LegendreCorrFunc.cpp: Fixing a bug which reads the wrong frame of
+	trajectory file during analysis
+
+2006-02-02 12:14  tim
+
+	* src/: math/Polynomial.hpp, math/SquareMatrix3.hpp,
+	types/AtomStamp.cpp: adding transpose into SquareMatrix3; fix a bug
+	in AtomStamp where orientation is not set correctly.
+
+2006-02-02 11:49  gezelter
+
+	* src/primitives/RigidBody.cpp: fixed a bug in rigid bodies that
+	contain directional atoms
+
+2006-02-02 10:49  xsun
+
+	* src/: applications/dump2Xyz/Dump2XYZ.cpp,
+	visitors/AtomVisitor.cpp, visitors/AtomVisitor.hpp: Adding visitor
+	for GBlipid atom type
+
+2006-02-01 21:57  gezelter
+
+	* make/Makefile.in: added CXXFLAGS to the LinkOptions to allow
+	compilation with icc9 (skipping the gcc-4 std c++ libraries).
+
+2006-02-01 16:06  chrisfen
+
+	* src/brains/SimInfo.cpp: Missing brace caused the last commit not
+	to build
+
+2006-02-01 15:54  chrisfen
+
+	* samples/water/spce/spce.md, src/brains/SimInfo.cpp: Changes to
+	cutoff radius setting to a more logical procedure - still may
+	change...
+
+2006-02-01 12:26  gezelter
+
+	* src/: math/Polynomial.hpp, utils/GenericData.hpp, utils/any.hpp:
+	Fixing some compile-time warnings and bugs for icc 9.1 on Mac OS X
+
+2006-01-30 17:25  tim
+
+	* src/: applications/dynamicProps/DipoleCorrFunc.cpp,
+	applications/dynamicProps/DynamicProps.cpp,
+	applications/dynamicProps/DynamicProps.ggo,
+	applications/dynamicProps/DynamicPropsCmd.c,
+	applications/dynamicProps/DynamicPropsCmd.h,
+	applications/dynamicProps/LegendreCorrFunc.cpp,
+	applications/dynamicProps/LegendreCorrFunc.hpp,
+	applications/dynamicProps/Makefile, math/LegendrePolynomial.cpp,
+	math/LegendrePolynomial.hpp, math/Makefile, math/Polynomial.hpp:
+	Adding :LegendrePolynomial
+
+2006-01-19 17:54  chuckv
+
+	* src/applications/nanoparticleBuilder/: Makefile,
+	nanoparticleBuilder.cpp, sphericalNanoparticle.hpp: Changes to
+	nanoparticle builder
+
+2006-01-18 16:08  chuckv
+
+	* src/applications/nanoparticleBuilder/Makefile: Added Makefile for
+	nanoparticle builder.
+
+2006-01-17 11:16  gezelter
+
+	* AUTHORS, README: Cleaning up for 3.0.1 release
+
+2006-01-17 10:50  gezelter
+
+	* ChangeLog: Prepping 3.0.1 release
+
 2006-01-17 10:32  gezelter
 
 	* src/config.h.in: new version number
@@ -776,6 +1241,8 @@
 
 	* make/Makefile.in, src/applications/atom2mdin/Makefile,
 	src/applications/atom2mdin/atom2mdin.cpp,
+	src/applications/mdinConverter/Makefile,
+	src/applications/mdinConverter/mdinConverter.cpp,
 	src/openbabel/oopseformat.cpp, src/openbabel/oopseformat.hpp:
 	rename mdinConverter to atom2mdin
 
@@ -839,6 +1306,11 @@
 	io/OptionSectionParser.hpp, io/SCAtomTypesSectionParser.cpp,
 	UseTheForce/SC_FF.cpp, utils/ParameterManager.hpp: ForceField
 	optional parameters....
+
+2005-11-16 16:24  tim
+
+	* src/applications/mdinConverter/: Makefile, mdinConverter.cpp:
+	adding mdinConverter
 
 2005-11-16 16:22  tim
 
@@ -7685,7 +8157,8 @@
 
 2004-09-29 12:56  gezelter
 
-	* make/: Make.conf.in, Makefile.in: Working on make stuff
+	* make/: Make.conf.in, Makefile.in, _files/style.css: Working on
+	make stuff
 
 2004-09-29 12:46  tim
 
@@ -7951,7 +8424,8 @@
 	src/visitors/OtherVisitor.cpp, src/visitors/OtherVisitor.hpp,
 	src/visitors/RigidBodyVisitor.cpp,
 	src/visitors/RigidBodyVisitor.hpp, src/visitors/ZconsVisitor.cpp,
-	src/visitors/ZconsVisitor.hpp, make/Makefile, samples/Makefile.in,
+	src/visitors/ZconsVisitor.hpp, make/Makefile,
+	make/_files/style.css, samples/Makefile.in,
 	samples/metals/Au-Core-Ag-Shell_Nanoparticle.in,
 	samples/metals/Au-Core-Ag-Shell_Nanoparticle.md,
 	samples/metals/Au_bulk_FBD.md, samples/metals/Au_bulk_voter.md,
@@ -8126,7 +8600,8 @@
 	src/visitors/OtherVisitor.cpp, src/visitors/OtherVisitor.hpp,
 	src/visitors/RigidBodyVisitor.cpp,
 	src/visitors/RigidBodyVisitor.hpp, src/visitors/ZconsVisitor.cpp,
-	src/visitors/ZconsVisitor.hpp, make/Makefile, samples/Makefile.in,
+	src/visitors/ZconsVisitor.hpp, make/Makefile,
+	make/_files/style.css, samples/Makefile.in,
 	samples/metals/Au-Core-Ag-Shell_Nanoparticle.in,
 	samples/metals/Au-Core-Ag-Shell_Nanoparticle.md,
 	samples/metals/Au_bulk_FBD.md, samples/metals/Au_bulk_voter.md,

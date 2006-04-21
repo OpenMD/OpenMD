@@ -10,8 +10,7 @@ initialConfig = "./tp4.in";
 
 ensemble = NVE;
 forceField = "DUFF";
-electrostaticSummationMethod = "none";
-dampingAlpha = 0.25;
+electrostaticSummationMethod = "shifted_force";
 dielectric = 80.0;
 cutoffRadius = 9.0;
 switchingRadius = 7.7;

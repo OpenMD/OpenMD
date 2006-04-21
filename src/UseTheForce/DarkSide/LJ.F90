@@ -43,7 +43,7 @@
 !! Calculates Long Range forces Lennard-Jones interactions.
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: LJ.F90,v 1.22 2006-04-20 18:24:24 gezelter Exp $, $Date: 2006-04-20 18:24:24 $, $Name: not supported by cvs2svn $, $Revision: 1.22 $
+!! @version $Id: LJ.F90,v 1.23 2006-04-21 19:32:07 chrisfen Exp $, $Date: 2006-04-21 19:32:07 $, $Name: not supported by cvs2svn $, $Revision: 1.23 $
 
 
 module lj
@@ -52,7 +52,6 @@ module lj
   use simulation
   use status
   use fForceOptions
-  use interpolation
 #ifdef IS_MPI
   use mpiSimulation
 #endif
@@ -67,7 +66,6 @@ module lj
 
   logical, save :: useGeometricDistanceMixing = .false.
   logical, save :: haveMixingMap = .false.
-  logical, save :: useSplines = .false.
 
   real(kind=DP), save :: defaultCutoff = 0.0_DP
   logical, save :: defaultShift = .false.
@@ -101,18 +99,12 @@ module lj
 
   type(MixParameters), dimension(:,:), allocatable :: MixingMap
 
-  type(cubicSpline), save :: vLJspline
-  type(cubicSpline), save :: vLJpspline
-  type(cubicSpline), save :: vSoftSpline
-  type(cubicSpline), save :: vSoftpSpline
-
   public :: newLJtype
   public :: setLJDefaultCutoff
   public :: getSigma
   public :: getEpsilon
   public :: do_lj_pair
   public :: destroyLJtypes
-  public :: setLJsplineRmax
 
 contains
 
@@ -163,10 +155,9 @@ contains
     defaultCutoff = thisRcut
     defaultShift = shiftedPot
     haveDefaultCutoff = .true.
-    !we only want to build LJ Mixing map and spline if LJ is being used.
+    !we only want to build LJ Mixing map if LJ is being used.
     if(LJMap%nLJTypes /= 0) then
        call createMixingMap()
-       call setLJsplineRmax(defaultCutoff)
     end if
 
   end subroutine setLJDefaultCutoff
@@ -266,47 +257,7 @@ contains
     haveMixingMap = .true.
     
   end subroutine createMixingMap
-  
-  subroutine setLJsplineRmax(largestRcut)
-    real( kind = dp ), intent(in) :: largestRcut
-    real( kind = dp ) :: s, bigS, smallS, rmax, rmin
-    integer :: np, i
-
-    if (LJMap%nLJtypes .ne. 0) then
-
-       !
-       ! find the largest and smallest values of sigma that we'll need
-       !
-       bigS = 0.0_DP
-       smallS = 1.0e9
-       do i = 1, LJMap%nLJtypes
-          s = LJMap%LJtypes(i)%sigma
-          if (s .gt. bigS) bigS = s
-          if (s .lt. smallS) smallS = s
-       enddo
-       
-       !
-       ! give ourselves a 20% margin just in case
-       !
-       rmax = 1.2 * largestRcut / smallS    
-       !
-       ! assume atoms will never get closer than 1 angstrom
-       !
-       rmin = 1 / bigS
-       !
-       ! assume 500 points is enough
-       !
-       np = 500
-       
-       write(*,*) 'calling setupSplines with rmin = ', rmin, ' rmax = ', rmax, &
-            ' np = ', np
-       
-       call setupSplines(rmin, rmax, np)
-
-    endif
-    return
-  end subroutine setLJsplineRmax
-        
+          
   subroutine do_lj_pair(atom1, atom2, d, rij, r2, rcut, sw, vpair, fpair, &
        pot, f, do_pot)
     
@@ -450,11 +401,6 @@ contains
     
     haveMixingMap = .false.
 
-    call deleteSpline(vLJspline)
-    call deleteSpline(vLJpspline) 
-    call deleteSpline(vSoftSpline)
-    call deleteSpline(vSoftpSpline)
-
   end subroutine destroyLJTypes
 
   subroutine getLJfunc(r, myPot, myDeriv)
@@ -465,22 +411,16 @@ contains
     real(kind=dp) :: a, b, c, d, dx
     integer :: j
 
-    if (useSplines) then
-
-       call lookupUniformSpline1d(vLJSpline, r, myPot, myDeriv)
-       
-    else
-       ri = 1.0_DP / r
-       ri2 = ri*ri
-       ri6 = ri2*ri2*ri2
-       ri7 = ri6*ri
-       ri12 = ri6*ri6
-       ri13 = ri12*ri
-       
-       myPot = 4.0_DP * (ri12 - ri6)
-       myDeriv = 24.0_DP * (ri7 - 2.0_DP * ri13)
-    endif
-
+    ri = 1.0_DP / r
+    ri2 = ri*ri
+    ri6 = ri2*ri2*ri2
+    ri7 = ri6*ri
+    ri12 = ri6*ri6
+    ri13 = ri12*ri
+    
+    myPot = 4.0_DP * (ri12 - ri6)
+    myDeriv = 24.0_DP * (ri7 - 2.0_DP * ri13)
+    
     return
   end subroutine getLJfunc
 
@@ -492,53 +432,14 @@ contains
     real(kind=dp) :: a, b, c, d, dx
     integer :: j
     
-    if (useSplines) then
-
-       call lookupUniformSpline1d(vSoftSpline, r, myPot, myDeriv)
-       
-    else
-       ri = 1.0_DP / r    
-       ri2 = ri*ri
-       ri6 = ri2*ri2*ri2
-       ri7 = ri6*ri
-       myPot = 4.0_DP * (ri6)
-       myDeriv = - 24.0_DP * ri7 
-    endif
-
+    ri = 1.0_DP / r    
+    ri2 = ri*ri
+    ri6 = ri2*ri2*ri2
+    ri7 = ri6*ri
+    myPot = 4.0_DP * (ri6)
+    myDeriv = - 24.0_DP * ri7 
+    
     return
   end subroutine getSoftFunc
 
-  subroutine setupSplines(rmin, rmax, np)
-    real( kind = dp ), intent(in) :: rmin, rmax
-    integer, intent(in) :: np
-    real( kind = dp ) :: rvals(np), vLJ(np), vLJp(np), vSoft(np), vSoftp(np)
-    real( kind = dp ) :: dr, r, ri, ri2, ri6, ri7, ri12, ri13
-    integer :: i
-
-    dr = (rmax-rmin) / float(np-1)
-    
-    do i = 1, np
-       r = rmin + dble(i-1)*dr
-       ri = 1.0_DP / r
-       ri2 = ri*ri
-       ri6 = ri2*ri2*ri2
-       ri7 = ri6*ri
-       ri12 = ri6*ri6
-       ri13 = ri12*ri
-
-       rvals(i) = r
-       vLJ(i) = 4.0_DP * (ri12 - ri6)
-       vLJp(i) = 24.0_DP * (ri7 - 2.0_DP * ri13)
-
-       vSoft(i) = 4.0_DP * (ri6)
-       vSoftp(i) = - 24.0_DP * ri7       
-    enddo
-
-    call newSpline(vLJspline, rvals, vLJ,  .true.)
-    call newSpline(vLJpspline, rvals, vLJp, .true.)
-    call newSpline(vSoftSpline, rvals, vSoft,  .true.)
-    call newSpline(vSoftpSpline, rvals, vSoftp, .true.)
-
-    return
-  end subroutine setupSplines
 end module lj

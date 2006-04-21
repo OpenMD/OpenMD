@@ -10,8 +10,7 @@ initialConfig = "./ssde.in";
 
 ensemble = NVE;
 forceField = "DUFF";
-electrostaticSummationMethod = "shifted_potential";
-dielectric = 80.0;
+electrostaticSummationMethod = "none";
 cutoffRadius = 9.0;
 switchingRadius = 7.7;
 

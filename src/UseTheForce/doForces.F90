@@ -45,7 +45,7 @@
 
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: doForces.F90,v 1.79 2006-04-20 18:24:24 gezelter Exp $, $Date: 2006-04-20 18:24:24 $, $Name: not supported by cvs2svn $, $Revision: 1.79 $
+!! @version $Id: doForces.F90,v 1.80 2006-04-21 19:32:07 chrisfen Exp $, $Date: 2006-04-21 19:32:07 $, $Name: not supported by cvs2svn $, $Revision: 1.80 $
 
 
 module doForces
@@ -64,7 +64,6 @@ module doForces
   use eam
   use suttonchen
   use status
-  use interpolation
 #ifdef IS_MPI
   use mpiSimulation
 #endif
@@ -79,7 +78,6 @@ module doForces
 
   INTEGER, PARAMETER:: PREPAIR_LOOP = 1
   INTEGER, PARAMETER:: PAIR_LOOP    = 2
-  INTEGER, PARAMETER:: np = 500
 
   logical, save :: haveNeighborList = .false.
   logical, save :: haveSIMvariables = .false.
@@ -91,7 +89,6 @@ module doForces
   logical, save :: haveElectrostaticSummationMethod = .false.
   logical, save :: haveCutoffPolicy = .false.
   logical, save :: VisitCutoffsAfterComputing = .false.
-  logical, save :: haveSplineSqrt = .false.
 
   logical, save :: FF_uses_DirectionalAtoms
   logical, save :: FF_uses_Dipoles
@@ -150,10 +147,6 @@ module doForces
   end type gtypeCutoffs
   type(gtypeCutoffs), dimension(:,:), allocatable :: gtypeCutoffMap
 
-  ! variables for the spline of the sqrt
-  type(cubicSpline), save :: splineSqrt
-  logical, save :: useSpline = .true.
-  
 
 contains
 
@@ -594,7 +587,6 @@ contains
      call setCutoffSC( defaultRcut )
      call set_switch(defaultRsw, defaultRcut)
      call setHmatDangerousRcutValue(defaultRcut)
-     call setupSplineSqrt(defaultRcut)
          
      haveDefaultCutoffs = .true.
      haveGtypeCutoffMap = .false.
@@ -667,14 +659,9 @@ contains
     if (VisitCutoffsAfterComputing) then
        call set_switch(largestRcut, largestRcut)       
        call setHmatDangerousRcutValue(largestRcut)
-       call setLJsplineRmax(largestRcut)
        call setCutoffEAM(largestRcut)
        call setCutoffSC(largestRcut)
        VisitCutoffsAfterComputing = .false.
-    endif
-
-    if (.not. haveSplineSqrt) then
-       call setupSplineSqrt(largestRcut)
     endif
 
     if (.not. haveSIMvariables) then
@@ -1261,12 +1248,8 @@ contains
 
     integer :: iHash
 
-    if (useSpline) then
-       call lookupUniformSpline(splineSqrt, rijsq, r)
-    else
-       r = sqrt(rijsq)
-    endif
-
+    r = sqrt(rijsq)
+    
     vpair = 0.0d0
     fpair(1:3) = 0.0d0
 
@@ -1350,12 +1333,8 @@ contains
 
     integer :: me_i, me_j, iHash
 
-    if (useSpline) then
-       call lookupUniformSpline(splineSqrt, rijsq, r)
-    else
-       r = sqrt(rijsq)
-    endif
-
+    r = sqrt(rijsq)
+    
 #ifdef IS_MPI   
     me_i = atid_row(i)
     me_j = atid_col(j)   
@@ -1616,34 +1595,5 @@ contains
          (tau_Temp(1) + tau_Temp(5) + tau_Temp(9))
 
   end subroutine add_stress_tensor
-
-  subroutine setupSplineSqrt(rmax)
-    real(kind=dp), intent(in) :: rmax
-    real(kind=dp), dimension(np) :: xvals, yvals
-    real(kind=dp) :: r2_1, r2_n, dx, r2
-    integer :: i
-
-    r2_1 = 0.5d0
-    r2_n = rmax*rmax
-
-    dx = (r2_n-r2_1) / dble(np-1)
-    
-    do i = 1, np
-       r2 = r2_1 + dble(i-1)*dx
-       xvals(i) = r2
-       yvals(i) = dsqrt(r2)
-    enddo
-
-    call newSpline(splineSqrt, xvals, yvals, .true.)
-    
-    haveSplineSqrt = .true.
-    return
-  end subroutine setupSplineSqrt
-
-  subroutine deleteSplineSqrt()
-    call deleteSpline(splineSqrt)
-    haveSplineSqrt = .false.
-    return
-  end subroutine deleteSplineSqrt
 
 end module doForces

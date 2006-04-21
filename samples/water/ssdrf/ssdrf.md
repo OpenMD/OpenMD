@@ -13,7 +13,7 @@ forceField = "DUFF";
 electrostaticSummationMethod = "reaction_field";
 dielectric = 80.0;
 cutoffRadius = 9.0;
-switchingRadius = 7.7;
+switchingRadius = 7.65;
 
 targetTemp = 300;
 targetPressure = 1.0;

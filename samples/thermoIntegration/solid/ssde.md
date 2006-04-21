@@ -10,12 +10,10 @@ initialConfig = "./ssde.in";
 
 ensemble = NVT;
 forceField = "DUFF";
-electrostaticSummationMethod = "none";
+electrostaticSummationMethod = "shifted_force";
 dielectric = 80.0;
 cutoffRadius = 9.0;
 switchingRadius = 7.7;
-
-
 
 targetTemp = 200;
 targetPressure = 1.0;
