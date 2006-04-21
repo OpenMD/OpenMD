@@ -118,6 +118,8 @@ module eam
   public :: clean_EAM
   public :: destroyEAMTypes
   public :: getEAMCut
+  public :: lookupEAMSpline
+  public :: lookupEAMSpline1d
 
 contains
 
@@ -381,7 +383,7 @@ contains
 
     if (r.lt.EAMList%EAMParams(myid_atom1)%eam_rcut) then
 
-       call lookupUniformSpline(EAMList%EAMParams(myid_atom1)%rho, r, &
+       call lookupEAMSpline(EAMList%EAMParams(myid_atom1)%rho, r, &
             rho_i_at_j)
 
 #ifdef  IS_MPI
@@ -393,7 +395,7 @@ contains
 
     if (r.lt.EAMList%EAMParams(myid_atom2)%eam_rcut) then
 
-       call lookupUniformSpline(EAMList%EAMParams(myid_atom2)%rho, r, &
+       call lookupEAMSpline(EAMList%EAMParams(myid_atom2)%rho, r, &
             rho_j_at_i)
 
 #ifdef  IS_MPI
@@ -438,7 +440,7 @@ contains
        atid1 = atid(atom)
        me = eamList%atidToEAMtype(atid1)
 
-       call lookupUniformSpline1d(EAMList%EAMParams(me)%F, rho(atom), &
+       call lookupEAMSpline1d(EAMList%EAMParams(me)%F, rho(atom), &
             u, u1)
        
        frho(atom) = u
@@ -528,12 +530,12 @@ contains
 
           ! Calculate rho and drho for atom1
 
-          call lookupUniformSpline1d(EAMList%EAMParams(mytype_atom1)%rho, &
+          call lookupEAMSpline1d(EAMList%EAMParams(mytype_atom1)%rho, &
                rij, rha, drha)
           
           ! Calculate Phi(r) for atom1.
           
-          call lookupUniformSpline1d(EAMList%EAMParams(mytype_atom1)%phi, &
+          call lookupEAMSpline1d(EAMList%EAMParams(mytype_atom1)%phi, &
                rij, pha, dpha)
 
        endif
@@ -542,12 +544,12 @@ contains
 
           ! Calculate rho and drho for atom2
 
-          call lookupUniformSpline1d(EAMList%EAMParams(mytype_atom2)%rho, &
+          call lookupEAMSpline1d(EAMList%EAMParams(mytype_atom2)%rho, &
                rij, rhb, drhb)
 
           ! Calculate Phi(r) for atom2.
 
-          call lookupUniformSpline1d(EAMList%EAMParams(mytype_atom2)%phi, &
+          call lookupEAMSpline1d(EAMList%EAMParams(mytype_atom2)%phi, &
                rij, phb, dphb)
 
        endif
@@ -628,5 +630,50 @@ contains
        endif
     endif
   end subroutine do_eam_pair
+
+  subroutine lookupEAMSpline(cs, xval, yval)
+    
+    implicit none
+
+    type (cubicSpline), intent(in) :: cs
+    real( kind = DP ), intent(in)  :: xval
+    real( kind = DP ), intent(out) :: yval
+    real( kind = DP ) ::  dx
+    integer :: i, j
+    !
+    !  Find the interval J = [ cs%x(J), cs%x(J+1) ] that contains 
+    !  or is nearest to xval.
+    
+    j = MAX(1, MIN(cs%n-1, idint((xval-cs%x(1)) * cs%dx_i) + 1))
+    
+    dx = xval - cs%x(j)
+    yval = cs%y(j) + dx*(cs%b(j) + dx*(cs%c(j) + dx*cs%d(j)))
+    
+    return
+  end subroutine lookupEAMSpline
+
+  subroutine lookupEAMSpline1d(cs, xval, yval, dydx)
+    
+    implicit none
+
+    type (cubicSpline), intent(in) :: cs
+    real( kind = DP ), intent(in)  :: xval
+    real( kind = DP ), intent(out) :: yval, dydx
+    real( kind = DP ) :: dx
+    integer :: i, j
+    
+    !  Find the interval J = [ cs%x(J), cs%x(J+1) ] that contains 
+    !  or is nearest to xval.
+
+
+    j = MAX(1, MIN(cs%n-1, idint((xval-cs%x(1)) * cs%dx_i) + 1))
+    
+    dx = xval - cs%x(j)
+    yval = cs%y(j) + dx*(cs%b(j) + dx*(cs%c(j) + dx*cs%d(j)))
+
+    dydx = cs%b(j) + dx*(2.0d0 * cs%c(j) + 3.0d0 * dx * cs%d(j))
+       
+    return
+  end subroutine lookupEAMSpline1d
 
 end module eam
