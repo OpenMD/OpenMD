@@ -42,65 +42,81 @@
 #include "applications/hydrodynamics/BeadModel.hpp"
 
 namespace oopse {
-bool BeadModel::createBeads(std::vector<BeadParam>& beads) {
-
+  bool BeadModel::createBeads(std::vector<BeadParam>& beads) {
+    
     if (sd_->isAtom()) {
-        if (!createSingleBead(static_cast<Atom*>(sd_), beads)) {
-            sprintf( painCave.errMsg,
-            "BeadModel::createBeads Error: GayBerne and other non-spheric atoms should use RoughShell model\n");
-            painCave.severity = OOPSE_ERROR;
-            painCave.isFatal = 1;
-            simError();    
-            return false;
-        }
+      if (!createSingleBead(static_cast<Atom*>(sd_), beads)) {
+        sprintf( painCave.errMsg,
+                 "BeadModel::createBeads Error: GayBerne and other non-spheric atoms should use RoughShell model\n");
+        painCave.severity = OOPSE_ERROR;
+        painCave.isFatal = 1;
+        simError();    
+        return false;
+      }
     }
     else if (sd_->isRigidBody()) {
-        RigidBody* rb = static_cast<RigidBody*>(sd_);
-        std::vector<Atom*>::iterator ai; 
-        Atom* atom;
-        for (atom = rb->beginAtom(ai); atom != NULL; atom = rb->nextAtom(ai)) {
-            if (!createSingleBead(atom, beads)) {
-                sprintf( painCave.errMsg,
-                    "BeadModel::createBeads Error: GayBerne and other non-spheric atoms should use RoughShell model\n");
-                painCave.severity = OOPSE_ERROR;
-                painCave.isFatal = 1;
-                simError();    
-                return false;
-            }
+      RigidBody* rb = static_cast<RigidBody*>(sd_);
+      std::vector<Atom*>::iterator ai; 
+      Atom* atom;
+      for (atom = rb->beginAtom(ai); atom != NULL; atom = rb->nextAtom(ai)) {
+        if (!createSingleBead(atom, beads)) {
+          sprintf( painCave.errMsg,
+                   "BeadModel::createBeads Error: GayBerne and other non-spheric atoms should use RoughShell model\n");
+          painCave.severity = OOPSE_ERROR;
+          painCave.isFatal = 1;
+          simError();    
+          return false;
         }
-    }
-
+      }
+    }    
     return true;
-}
-
-bool BeadModel::createSingleBead(Atom* atom, std::vector<BeadParam>& beads) {
+  }
+  
+  bool BeadModel::createSingleBead(Atom* atom, std::vector<BeadParam>& beads) {
     AtomType* atomType = atom->getAtomType();
-
+    
     if (atomType->isGayBerne()) {
-        return false;
+      return false;
     } else if (atomType->isLennardJones()){
-        GenericData* data = atomType->getPropertyByName("LennardJones");
-        if (data != NULL) {
-            LJParamGenericData* ljData = dynamic_cast<LJParamGenericData*>(data);
-
-            if (ljData != NULL) {
-                LJParam ljParam = ljData->getData();
-                BeadParam currBead;
-                currBead.atomName = atom->getType();
-                currBead.pos = atom->getPos();
-                currBead.radius = ljParam.sigma/2.0;
-                beads.push_back(currBead);
+      GenericData* data = atomType->getPropertyByName("LennardJones");
+      if (data != NULL) {
+        LJParamGenericData* ljData = dynamic_cast<LJParamGenericData*>(data);
+        
+        if (ljData != NULL) {
+          LJParam ljParam = ljData->getData();
+          BeadParam currBead;
+          currBead.atomName = atom->getType();
+          currBead.pos = atom->getPos();
+          currBead.radius = ljParam.sigma/2.0;
+          beads.push_back(currBead);
         } else {
-            sprintf( painCave.errMsg,
-            "Can not cast GenericData to LJParam\n");
-            painCave.severity = OOPSE_ERROR;
-            painCave.isFatal = 1;
-            simError();          
-            }       
-        }
-    }
-
-    return true;
-}
-
+          sprintf( painCave.errMsg,
+                   "Can not cast GenericData to LJParam\n");
+          painCave.severity = OOPSE_ERROR;
+          painCave.isFatal = 1;
+          simError();          
+        }       
+      }
+    } else if (atomType->isEAM()) {
+      GenericData* data = atomType->getPropertyByName("EAM");
+      if (data != NULL) {
+        EAMParamGenericData* eamData = dynamic_cast<EAMParamGenericData*>(data);          
+        if (eamData != NULL) {
+          EAMParam eamParam = eamData->getData();
+          BeadParam currBead;
+          currBead.atomName = atom->getType();
+          currBead.pos = atom->getPos();
+          currBead.radius = eamParam.rcut;
+          beads.push_back(currBead);
+        } else {
+          sprintf( painCave.errMsg,
+                   "Can not cast GenericData to EAMParam\n");
+          painCave.severity = OOPSE_ERROR;
+          painCave.isFatal = 1;
+          simError();          
+        }       
+      }
+      return true;
+    }   
+  }
 }

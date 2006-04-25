@@ -43,111 +43,135 @@
 #include "applications/hydrodynamics/Ellipsoid.hpp"
 #include "applications/hydrodynamics/CompositeShape.hpp"
 namespace oopse {
-
-Shape* ShapeBuilder::createShape(StuntDouble* sd) {
+  
+  Shape* ShapeBuilder::createShape(StuntDouble* sd) {
     Shape* currShape = NULL;
-            if (sd->isDirectionalAtom()) {
-              currShape = internalCreateShape(static_cast<DirectionalAtom*>(sd));
-            } else if (sd->isAtom()) {
-                currShape = internalCreateShape(static_cast<Atom*>(sd));
-            } else if (sd->isRigidBody()) {
-                currShape = internalCreateShape(static_cast<RigidBody*>(sd));
-            }
-            
-
-	
-	return currShape;
-
-}
-
-Shape* ShapeBuilder::internalCreateShape(Atom* atom) {
+    if (sd->isDirectionalAtom()) {
+      currShape = internalCreateShape(static_cast<DirectionalAtom*>(sd));
+    } else if (sd->isAtom()) {
+      currShape = internalCreateShape(static_cast<Atom*>(sd));
+    } else if (sd->isRigidBody()) {
+      currShape = internalCreateShape(static_cast<RigidBody*>(sd));
+    }       
+    return currShape;   
+  }
+  
+  Shape* ShapeBuilder::internalCreateShape(Atom* atom) {
     AtomType* atomType = atom->getAtomType();
     Shape* currShape = NULL;
     if (atomType->isLennardJones()){
-        GenericData* data = atomType->getPropertyByName("LennardJones");
-        if (data != NULL) {
-            LJParamGenericData* ljData = dynamic_cast<LJParamGenericData*>(data);
-
-            if (ljData != NULL) {
-                LJParam ljParam = ljData->getData();
-                currShape = new Spheric(atom->getPos(), ljParam.sigma/2.0);
+      GenericData* data = atomType->getPropertyByName("LennardJones");
+      if (data != NULL) {
+        LJParamGenericData* ljData = dynamic_cast<LJParamGenericData*>(data);
+        
+        if (ljData != NULL) {
+          LJParam ljParam = ljData->getData();
+          currShape = new Spheric(atom->getPos(), ljParam.sigma/2.0);
         } else {
-            sprintf( painCave.errMsg,
-            "Can not cast GenericData to LJParam\n");
-            painCave.severity = OOPSE_ERROR;
-            painCave.isFatal = 1;
-            simError();          
-            }       
-        }
-
-    }
-
+          sprintf( painCave.errMsg,
+                   "Can not cast GenericData to LJParam\n");
+          painCave.severity = OOPSE_ERROR;
+          painCave.isFatal = 1;
+          simError();          
+        }       
+      }
+    } else if (atomType->isEAM()) {
+      GenericData* data = atomType->getPropertyByName("EAM");
+      if (data != NULL) {
+        EAMParamGenericData* eamData = dynamic_cast<EAMParamGenericData*>(data);
+        
+        if (eamData != NULL) {
+          EAMParam eamParam = eamData->getData();
+          currShape = new Spheric(atom->getPos(), eamParam.rcut);
+        } else {
+          sprintf( painCave.errMsg,
+                   "Can not cast GenericData to EAMParam\n");
+          painCave.severity = OOPSE_ERROR;
+          painCave.isFatal = 1;
+          simError();          
+        }       
+      }
+    }    
     return currShape;
-}
-
-Shape* ShapeBuilder::internalCreateShape(DirectionalAtom* datom) {
+  }
+  
+  Shape* ShapeBuilder::internalCreateShape(DirectionalAtom* datom) {
     AtomType* atomType = datom->getAtomType();
     Shape* currShape = NULL;
     if (atomType->isGayBerne()) {
-        DirectionalAtomType* dAtomType = dynamic_cast<DirectionalAtomType*>(atomType);
-
-        GenericData* data = dAtomType->getPropertyByName("GayBerne");
-        if (data != NULL) {
-            GayBerneParamGenericData* gayBerneData = dynamic_cast<GayBerneParamGenericData*>(data);
-
-            if (gayBerneData != NULL) {  
-                GayBerneParam gayBerneParam = gayBerneData->getData();
-                currShape = new Ellipsoid(datom->getPos(), gayBerneParam.GB_sigma/2.0, gayBerneParam.GB_l2b_ratio*gayBerneParam.GB_sigma/2.0, datom->getA());
-            } else {
-                sprintf( painCave.errMsg,
-                       "Can not cast GenericData to GayBerneParam\n");
-                painCave.severity = OOPSE_ERROR;
-                painCave.isFatal = 1;
-                simError();   
-            }
+      DirectionalAtomType* dAtomType = dynamic_cast<DirectionalAtomType*>(atomType);
+      
+      GenericData* data = dAtomType->getPropertyByName("GayBerne");
+      if (data != NULL) {
+        GayBerneParamGenericData* gayBerneData = dynamic_cast<GayBerneParamGenericData*>(data);
+        
+        if (gayBerneData != NULL) {  
+          GayBerneParam gayBerneParam = gayBerneData->getData();
+          currShape = new Ellipsoid(datom->getPos(), gayBerneParam.GB_sigma/2.0, gayBerneParam.GB_l2b_ratio*gayBerneParam.GB_sigma/2.0, datom->getA());
         } else {
-    	  sprintf( painCave.errMsg, "Can not find Parameters for GayBerne\n");
-    	  painCave.severity = OOPSE_ERROR;
-    	  painCave.isFatal = 1;
-    	  simError();    
-        }            
-    }else if (atomType->isLennardJones()){
-        GenericData* data = atomType->getPropertyByName("LennardJones");
-        if (data != NULL) {
-            LJParamGenericData* ljData = dynamic_cast<LJParamGenericData*>(data);
-
-            if (ljData != NULL) {
-                LJParam ljParam = ljData->getData();
-                currShape = new Spheric(datom->getPos(), ljParam.sigma/2.0);
+          sprintf( painCave.errMsg,
+                   "Can not cast GenericData to GayBerneParam\n");
+          painCave.severity = OOPSE_ERROR;
+          painCave.isFatal = 1;
+          simError();   
+        }
+      } else {
+        sprintf( painCave.errMsg, "Can not find Parameters for GayBerne\n");
+        painCave.severity = OOPSE_ERROR;
+        painCave.isFatal = 1;
+        simError();    
+      }            
+    } else if (atomType->isLennardJones()) {
+      GenericData* data = atomType->getPropertyByName("LennardJones");
+      if (data != NULL) {
+        LJParamGenericData* ljData = dynamic_cast<LJParamGenericData*>(data);
+        
+        if (ljData != NULL) {
+          LJParam ljParam = ljData->getData();
+          currShape = new Spheric(datom->getPos(), ljParam.sigma/2.0);
         } else {
+          sprintf( painCave.errMsg,
+                   "Can not cast GenericData to LJParam\n");
+          painCave.severity = OOPSE_ERROR;
+          painCave.isFatal = 1;
+          simError();          
+        }       
+      } else if (atomType->isEAM()) {
+        GenericData* data = atomType->getPropertyByName("EAM");
+        if (data != NULL) {
+          EAMParamGenericData* eamData = dynamic_cast<EAMParamGenericData*>(data);          
+          if (eamData != NULL) {
+            EAMParam eamParam = eamData->getData();
+            currShape = new Spheric(datom->getPos(), eamParam.rcut);
+          } else {
             sprintf( painCave.errMsg,
-            "Can not cast GenericData to LJParam\n");
+                     "Can not cast GenericData to EAMParam\n");
             painCave.severity = OOPSE_ERROR;
             painCave.isFatal = 1;
             simError();          
-            }       
+          }       
         }
-
+      }
     }
     return currShape;
-}
-Shape* ShapeBuilder::internalCreateShape(RigidBody* rb) {
+  }
 
-        std::vector<Atom*>::iterator ai; 
-        CompositeShape* compositeShape = new CompositeShape;
-        Atom* atom;
-        for (atom = rb->beginAtom(ai); atom != NULL; atom = rb->nextAtom(ai)) {
-            Shape* currShape = NULL;
-            if (atom->isDirectionalAtom()){
-                currShape = internalCreateShape(static_cast<DirectionalAtom*>(atom));
-            }else if (atom->isAtom()){
-                currShape =  internalCreateShape(static_cast<Atom*>(atom));
-            }
-            if (currShape != NULL)
-                compositeShape->addShape(currShape);
-        }
-
-        return compositeShape;
-}
-
+  Shape* ShapeBuilder::internalCreateShape(RigidBody* rb) {
+    
+    std::vector<Atom*>::iterator ai; 
+    CompositeShape* compositeShape = new CompositeShape;
+    Atom* atom;
+    for (atom = rb->beginAtom(ai); atom != NULL; atom = rb->nextAtom(ai)) {
+      Shape* currShape = NULL;
+      if (atom->isDirectionalAtom()){
+        currShape = internalCreateShape(static_cast<DirectionalAtom*>(atom));
+      }else if (atom->isAtom()){
+        currShape =  internalCreateShape(static_cast<Atom*>(atom));
+      }
+      if (currShape != NULL)
+        compositeShape->addShape(currShape);
+    }
+    
+    return compositeShape;
+  }  
 }
