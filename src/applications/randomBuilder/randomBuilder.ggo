@@ -1,0 +1,19 @@
+# Input file for gengetopt --generates cmdline.c and cmdline.h
+# for parsing command line arguments useing getopt and getoptlong.
+# gengetopt is available from:
+#  http://www.gnu.org/software/gengetopt/gengetopt.html
+package "simpleBuilder"
+version "1.0"
+
+# Options
+
+option "output"        o  "Output file name" string no
+option "latticetype"    - "Lattice type string. Valid types are fcc,hcp,bcc and hcp-water." string default="fcc" no
+option "density"       -  "density (g/cm^3)" double yes
+option "nx"            -  "number of unit cells in x" int yes 
+option "ny"            -  "number of unit cells in y" int yes
+option "nz"            -  "number of unit cells in z" int yes
+option "molFraction"          -  "(Default) Builds a multi-component random mixed nanoparticle. Mole Fraction must be specified for each componet > 1 in MD file." double no multiple
+#option "a1"            -  "lattice spacing in Angstroms h - for cubic lattice, specify this parameter" double no
+#option "a2"            -  "lattice spacing in Angstroms k" double no
+#option "a3"            -  "lattice spacing in Angstroms l" double no
