@@ -53,11 +53,11 @@
 #include "integrators/LDForceManager.hpp"
 namespace oopse {
 
-
+  
   LangevinDynamics::LangevinDynamics(SimInfo* info) : VelocityVerletIntegrator(info){
     setForceManager(new LDForceManager(info));
   }
-
+  
   void LangevinDynamics::moveA(){
     SimInfo::MoleculeIterator i;
     Molecule::IntegrableObjectIterator  j;

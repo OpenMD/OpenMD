@@ -279,7 +279,8 @@ Globals* SimCreator::parseFile(const std::string mdFileName){
     //create SimInfo
     SimInfo * info = new SimInfo(ff, simParams);
      
-    //gather parameters (SimCreator only retrieves part of the parameters)
+    //gather parameters (SimCreator only retrieves part of the
+    //parameters)
     gatherParameters(info, mdFileName);
     
     //divide the molecules and determine the global index of molecules
@@ -291,18 +292,23 @@ Globals* SimCreator::parseFile(const std::string mdFileName){
     createMolecules(info);
     
     
-    //allocate memory for DataStorage(circular reference, need to break it)
+    //allocate memory for DataStorage(circular reference, need to
+    //break it)
     info->setSnapshotManager(new SimSnapshotManager(info));
     
-    //set the global index of atoms, rigidbodies and cutoffgroups (only need to be set once, the
-    //global index will never change again). Local indices of atoms and rigidbodies are already set by 
-    //MoleculeCreator class which actually delegates the responsibility to LocalIndexManager. 
+    //set the global index of atoms, rigidbodies and cutoffgroups
+    //(only need to be set once, the global index will never change
+    //again). Local indices of atoms and rigidbodies are already set
+    //by MoleculeCreator class which actually delegates the
+    //responsibility to LocalIndexManager.
     setGlobalIndex(info);
     
-    //Alought addExculdePairs is called inside SimInfo's addMolecule method, at that point
-    //atoms don't have the global index yet  (their global index are all initialized to -1).
-    //Therefore we have to call addExcludePairs explicitly here. A way to work around is that
-    //we can determine the beginning global indices of atoms before they get created.
+    //Although addExcludePairs is called inside SimInfo's addMolecule
+    //method, at that point atoms don't have the global index yet
+    //(their global index are all initialized to -1).  Therefore we
+    //have to call addExcludePairs explicitly here. A way to work
+    //around is that we can determine the beginning global indices of
+    //atoms before they get created.
     SimInfo::MoleculeIterator mi;
     Molecule* mol;
     for (mol= info->beginMolecule(mi); mol != NULL; mol = info->nextMolecule(mi)) {

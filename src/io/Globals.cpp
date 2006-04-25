@@ -101,6 +101,8 @@ Globals::Globals() {
   DefineOptionalParameter(HydroPropFile, "HydroPropFile");
   DefineOptionalParameter(Viscosity, "viscosity");
   DefineOptionalParameter(BeadSize, "beadSize");
+  DefineOptionalParameter(FrozenBufferRadius, "frozenBufferRadius");
+  DefineOptionalParameter(LangevinBufferRadius, "langevinBufferRadius");
   
   DefineOptionalParameterWithDefaultValue(UsePeriodicBoundaryConditions, "usePeriodicBoundaryConditions", true);
   DefineOptionalParameterWithDefaultValue(UseInitalTime, "useInitialTime", false);
@@ -116,6 +118,7 @@ Globals::Globals() {
   DefineOptionalParameterWithDefaultValue(OutputForceVector, "outputForceVector", 0);
   DefineOptionalParameterWithDefaultValue(SkinThickness, "skinThickness", 1.0);
   DefineOptionalParameterWithDefaultValue(StatFileFormat, "statFileFormat", "TIME|TOTAL_ENERGY|POTENTIAL_ENERGY|KINETIC_ENERGY|TEMPERATURE|PRESSURE|VOLUME|CONSERVED_QUANTITY");    
+  DefineOptionalParameterWithDefaultValue(UseSphericalBoundaryConditions, "useSphericalBoundaryConditions", false);
 
 
     deprecatedKeywords_.insert("nComponents");
@@ -133,7 +136,7 @@ void Globals::validate() {
 
   CheckParameter(ForceField, isNotEmpty());
   CheckParameter(TargetTemp, isPositive());
-  CheckParameter(Ensemble, isEqualIgnoreCase("NVE") || isEqualIgnoreCase("NVT") || isEqualIgnoreCase("NPTi") || isEqualIgnoreCase("NPTf") || isEqualIgnoreCase("NPTxyz") || isEqualIgnoreCase("NPAT")  || isEqualIgnoreCase("LANGEVINDYNAMICS") || isEqualIgnoreCase("NPRT"));
+  CheckParameter(Ensemble, isEqualIgnoreCase("NVE") || isEqualIgnoreCase("NVT") || isEqualIgnoreCase("NPTi") || isEqualIgnoreCase("NPTf") || isEqualIgnoreCase("NPTxyz") || isEqualIgnoreCase("NPAT")  || isEqualIgnoreCase("LANGEVINDYNAMICS") || isEqualIgnoreCase("LD") || isEqualIgnoreCase("NPRT") || isEqualIgnoreCase("NPGT"));
   CheckParameter(Dt, isPositive());
   CheckParameter(RunTime, isPositive());
   CheckParameter(InitialConfig, isNotEmpty());
@@ -180,8 +183,10 @@ void Globals::validate() {
   CheckParameter(ThermIntOmegaSpringConst, isPositive());
   CheckParameter(DampingAlpha,isNonNegative());
   CheckParameter(SkinThickness, isPositive());
-  CheckParameter(Viscosity,isNonNegative());
-  CheckParameter(BeadSize,isPositive());
+  CheckParameter(Viscosity, isNonNegative());
+  CheckParameter(BeadSize, isPositive());
+  CheckParameter(FrozenBufferRadius, isPositive());
+  CheckParameter(LangevinBufferRadius, isPositive());
   for(std::vector<Component*>::iterator i = components_.begin(); i != components_.end(); ++i) {
     if (!(*i)->findMoleculeStamp(moleculeStamps_)) {
         std::ostringstream oss;

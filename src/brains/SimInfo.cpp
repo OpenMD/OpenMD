@@ -84,7 +84,7 @@ namespace oopse {
   
   SimInfo::SimInfo(ForceField* ff, Globals* simParams) : 
     forceField_(ff), simParams_(simParams), 
-    ndf_(0), ndfRaw_(0), ndfTrans_(0), nZconstraint_(0),
+    ndf_(0), fdf_local(0), ndfRaw_(0), ndfTrans_(0), nZconstraint_(0),
     nGlobalMols_(0), nGlobalAtoms_(0), nGlobalCutoffGroups_(0), 
     nGlobalIntegrableObjects_(0), nGlobalRigidBodies_(0),
     nAtoms_(0), nBonds_(0),  nBends_(0), nTorsions_(0), nRigidBodies_(0),
@@ -290,6 +290,15 @@ namespace oopse {
 
   }
 
+  int SimInfo::getFdf() {
+#ifdef IS_MPI
+    MPI_Allreduce(&fdf_local,&fdf_,1,MPI_INT,MPI_SUM, MPI_COMM_WORLD);
+#else
+    fdf_ = fdf_local;
+#endif
+    return fdf_;
+  }
+    
   void SimInfo::calcNdfRaw() {
     int ndfRaw_local;
 

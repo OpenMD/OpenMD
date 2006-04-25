@@ -47,37 +47,41 @@
 #include "math/SeqRandNumGen.hpp"
 
 namespace oopse {
-
-
-struct HydroProp{
+  
+  
+  struct HydroProp{
     Vector3d cor;
     Mat3x3d Xirtt;
     Mat3x3d Xirrt; //Xirrt == Xirtr
     Mat3x3d Xirtr;
     Mat3x3d Xirrr;
     Mat6x6d S;
-};
-
+  };
+  
   /**
    * @class LDForceManager
-   * Force manager for Lagevin Dynamics applying friction and random forces as well as torques.
+   * Force manager for Lagevin Dynamics applying friction and random 
+   * forces as well as torques.
    */
-class LDForceManager : public ForceManager{
-
+  class LDForceManager : public ForceManager{
+    
   public:
     LDForceManager(SimInfo * info);
-
+    
   protected:
     virtual void postCalculation();
-
+    
   private:
     std::map<std::string, HydroProp> parseFrictionFile(const std::string& filename);    
     void genRandomForceAndTorque(Vector3d& force, Vector3d& torque, unsigned int index, double variance);
     std::vector<HydroProp> hydroProps_;
     SeqRandNumGen randNumGen_;    
     double variance_;
-};
-
+    double langevinBufferRadius_;
+    double frozenBufferRadius_;
+    bool sphericalBoundaryConditions_;
+  };
+  
 } //end namespace oopse
 #endif //BRAINS_FORCEMANAGER_HPP
 

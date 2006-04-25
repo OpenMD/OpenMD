@@ -75,13 +75,12 @@ namespace oopse{
   class SelectionManager;
   /**
    * @class SimInfo SimInfo.hpp "brains/SimInfo.hpp" 
-   * @brief As one of the heavy weight class of OOPSE, SimInfo
-   * One of the major changes in SimInfo class is the data struct. It only maintains a list of molecules.
-   * And the Molecule class will maintain all of the concrete objects (atoms, bond, bend, torsions, rigid bodies,
-   * cutoff groups, constrains).
-   * Another major change is the index. No matter single version or parallel version,  atoms and
-   * rigid bodies have both global index and local index. Local index is not important to molecule as well as
-   * cutoff group. 
+   * @brief One of the heavy weight classes of OOPSE, SimInfo maintains a list of molecules.
+   * The Molecule class maintains all of the concrete objects 
+   * (atoms, bond, bend, torsions, rigid bodies, cutoff groups, constrains).
+   * In both the  single and parallel versions,  atoms and
+   * rigid bodies have both global and local indices.  The local index is 
+   * not relevant to molecules or cutoff groups.
    */
   class SimInfo {
   public:
@@ -207,7 +206,7 @@ namespace oopse{
 
     /** Returns the number of degrees of freedom */
     int getNdf() {
-      return ndf_;
+      return ndf_ - getFdf();
     }
 
     /** Returns the number of raw degrees of freedom */
@@ -220,6 +219,13 @@ namespace oopse{
       return ndfTrans_;
     }
 
+    /** sets the current number of frozen degrees of freedom */
+    void setFdf(int fdf) {
+      fdf_local = fdf;
+    }
+
+    int getFdf(); 
+    
     //getNZconstraint and setNZconstraint ruin the coherent of SimInfo class, need refactorying
         
     /** Returns the total number of z-constraint molecules in the system */
@@ -463,6 +469,8 @@ namespace oopse{
         
     //degress of freedom
     int ndf_;           /**< number of degress of freedom (excludes constraints),  ndf_ is local */
+    int fdf_local;       /**< number of frozen degrees of freedom */
+    int fdf_;            /**< number of frozen degrees of freedom */
     int ndfRaw_;    /**< number of degress of freedom (includes constraints),  ndfRaw_ is local */
     int ndfTrans_; /**< number of translation degress of freedom, ndfTrans_ is local */
     int nZconstraint_; /** number of  z-constraint molecules, nZconstraint_ is global */

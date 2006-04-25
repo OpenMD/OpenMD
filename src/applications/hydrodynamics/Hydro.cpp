@@ -126,7 +126,7 @@ int main(int argc, char* argv[]){
   if (simParams->haveTargetTemp()) {
     temperature = simParams->getTargetTemp();
   } else {
-    sprintf(painCave.errMsg, "target temperaturemust be set\n");
+    sprintf(painCave.errMsg, "target temperature must be set\n");
     painCave.isFatal = 1;
     simError();  
   }

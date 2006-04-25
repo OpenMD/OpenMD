@@ -168,6 +168,29 @@ namespace oopse{
     }
 
     /**
+     * Freezes out all velocity, angular velocity, forces and torques
+     * on this StuntDouble.  Also computes the number of frozen degrees
+     * of freedom.
+     * @return the total number of frozen degrees of freedom
+     */   
+    int freeze() {
+      
+      int fdf = 3;
+
+      setVel(V3Zero);
+      setFrc(V3Zero);
+      if (isDirectional()){
+        setJ(V3Zero);
+        setTrq(V3Zero);
+        if (isLinear()) 
+          fdf +=2;
+        else 
+          fdf +=3;        
+      }      
+      return fdf;
+    }
+
+    /**
      * Returns the previous position of this stuntdouble
      * @return the position of this stuntdouble
      */    

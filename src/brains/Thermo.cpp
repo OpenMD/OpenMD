@@ -70,12 +70,12 @@ namespace oopse {
     for (mol = info_->beginMolecule(miter); mol != NULL; mol = info_->nextMolecule(miter)) {
       for (integrableObject = mol->beginIntegrableObject(iiter); integrableObject != NULL; 
 	   integrableObject = mol->nextIntegrableObject(iiter)) {
-
+        
 	double mass = integrableObject->getMass();
 	Vector3d vel = integrableObject->getVel();
-
+        
 	kinetic += mass * (vel[0]*vel[0] + vel[1]*vel[1] + vel[2]*vel[2]);
-
+        
 	if (integrableObject->isDirectional()) {
 	  angMom = integrableObject->getJ();
 	  I = integrableObject->getI();

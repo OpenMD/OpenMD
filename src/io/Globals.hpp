@@ -120,6 +120,9 @@ class Globals : public DataHolder {
   DeclareParameter(HydroPropFile, std::string);
   DeclareParameter(Viscosity, double);
   DeclareParameter(BeadSize, double);  
+  DeclareParameter(UseSphericalBoundaryConditions, bool);
+  DeclareParameter(FrozenBufferRadius, double);
+  DeclareParameter(LangevinBufferRadius, double);
   
   public:
     bool addComponent(Component* comp);

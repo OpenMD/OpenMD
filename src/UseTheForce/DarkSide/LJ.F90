@@ -43,7 +43,7 @@
 !! Calculates Long Range forces Lennard-Jones interactions.
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: LJ.F90,v 1.23 2006-04-21 19:32:07 chrisfen Exp $, $Date: 2006-04-21 19:32:07 $, $Name: not supported by cvs2svn $, $Revision: 1.23 $
+!! @version $Id: LJ.F90,v 1.24 2006-04-25 02:09:01 gezelter Exp $, $Date: 2006-04-25 02:09:01 $, $Name: not supported by cvs2svn $, $Revision: 1.24 $
 
 
 module lj
@@ -323,8 +323,6 @@ contains
        endif
        
     endif
-
-    !write(*,*) rij, ros, rcos, myPot, myDeriv, myPotC
 
     pot_temp = epsilon * (myPot - myPotC)
     vpair = vpair + pot_temp

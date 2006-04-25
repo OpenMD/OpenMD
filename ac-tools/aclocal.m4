@@ -388,6 +388,9 @@ if test "$ac_test_CFLAGS" != "set"; then
    *darwin*)
 	if test "$CC" = xlc -o "$CC" = cc; then
         	CFLAGS="-qthreaded -O -qtune=auto -qarch=auto -qunroll=auto -qaltivec"
+        fi
+	if test "$CC" = icc; then
+        	CFLAGS="-O3 -ip -no-prec-div -mdynamic-no-pic"
         fi;;
   esac
 
@@ -507,6 +510,9 @@ if test "$ac_test_CXXFLAGS" != "set"; then
    *darwin*)
 	if test "$CXX" = xlc++ -o "$CXX" = xlC ; then
         	CXXFLAGS="-qthreaded -O -qtune=auto -qarch=auto -qunroll=auto -qaltivec"
+        fi
+	if test "$CXX" = icpc; then
+        	CXXFLAGS="-O3 -ip -no-prec-div -mdynamic-no-pic"
         fi;;
   esac
 
@@ -601,7 +607,7 @@ if test "$ac_test_FFLAGS" != "set"; then
   case "${host_cpu}-${host_os}" in
 
   *linux*) if test "$FC" = ifc -o "$FC" = ifort; then
-                    FCFLAGS="-O"
+                    FCFLAGS="-fast"
                 fi;;
    rs6000*-aix*)  if test "$FC" = xlf90 -o "$FC" = f90 -o "$FC" = xlf95; then
                     FCFLAGS="-O3 -qarch=pwrx -qtune=pwrx -qansialias -w"
@@ -622,6 +628,9 @@ if test "$ac_test_FFLAGS" != "set"; then
    *darwin*)
 	if test "$FC" = f90 -o "$FC" = xlf90 -o "$FC" = xlf95; then
         	FCFLAGS="-qthreaded -O -qtune=auto -qarch=auto -qunroll=auto"
+        fi
+	if test "$FC" = ifort; then
+        	FCFLAGS="-O3 -ip -no-prec-dev -mdynamic-no-pic"
         fi;;
   esac
 
