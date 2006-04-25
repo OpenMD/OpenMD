@@ -1,14 +1,14 @@
-Package = applications/simpleBuilder
+Package = applications/randomBuilder
 
 Source    = \
-	simpleBuilderCmd.c \
-	simpleBuilder.cpp \
+	randomBuilderCmd.c \
+	randomBuilder.cpp \
 	
 BuiltParallelExe = 0
 
 RmiSource =
 
-Main      = simpleBuilder
+Main      = randomBuilder
 
 DEV_ROOT=../../..
 include $(DEV_ROOT)/make/Makefile
