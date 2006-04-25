@@ -90,7 +90,7 @@ int main(int argc, char *argv []) {
   int nComponents;
   double latticeConstant;
   std::vector<double> lc;
-  double mass;
+  double mass;											    
   const double rhoConvertConst = 1.661;
   double density;
   double particleRadius;
@@ -130,8 +130,8 @@ int main(int argc, char *argv []) {
   
   
   /*calculate lattice constant (in Angstrom)
-  latticeConstant = pow(rhoConvertConst * numMolPerCell * mass / density,
-                        1.0 / 3.0);*/
+    latticeConstant = pow(rhoConvertConst * numMolPerCell * mass / density,
+    1.0 / 3.0);*/
   
   latticeConstant = args_info.latticeCnst_arg;
   particleRadius = args_info.radius_arg;
@@ -162,8 +162,8 @@ int main(int argc, char *argv []) {
   /* Get number of lattice sites */
   numSites = nanoParticleSites.size();
  
- //std::cout <<"numSites are %d "<<numSites<<std::endl;
-// std::cout <<"nComponents are %d "<<nComponents<<std::endl;
+  //std::cout <<"numSites are %d "<<numSites<<std::endl;
+  // std::cout <<"nComponents are %d "<<nComponents<<std::endl;
   numMol = new int[nComponents];
  
   
@@ -184,8 +184,8 @@ int main(int argc, char *argv []) {
     }
     numMol[nComponents-1] = numSites - totComponents;
    
-	/* do the iPod thing, Shuffle da vector */
-	std::random_shuffle(nanoParticleSites.begin(), nanoParticleSites.end());
+    /* do the iPod thing, Shuffle da vector */
+    std::random_shuffle(nanoParticleSites.begin(), nanoParticleSites.end());
   } else{ /*Handle core-shell with multiple components.*/
     std::cout << "Creating a core-shell nanoparticle." << std::endl;
     if (nComponents != args_info.ShellRadius_given + 1){
@@ -195,22 +195,22 @@ int main(int argc, char *argv []) {
     
   }
 
-
-   //get the orientation of the cell sites
-  //for the same type of molecule in same lattice, it will not change
-   latticeOrt = nanoParticle.getPointsOrt();
-std::cout<<"Orientational vector Size: "<< std::endl;
-std::cout<<latticeOrt.size()<< std::endl;
- 
   
-
+  //get the orientation of the cell sites
+  //for the same type of molecule in same lattice, it will not change
+  latticeOrt = nanoParticle.getPointsOrt();
+  std::cout<<"Orientational vector Size: "<< std::endl;
+  std::cout<<latticeOrt.size()<< std::endl;
+  
+  
+  
   // needed for writing out new md file.
   
-    outPrefix = getPrefix(inputFileName.c_str()) + "_" + latticeType;
-    outMdFileName = outPrefix + ".md";
+  outPrefix = getPrefix(inputFileName.c_str()) + "_" + latticeType;
+  outMdFileName = outPrefix + ".md";
   
-    //creat new .md file on fly which corrects the number of molecule     
-    createMdFile(inputFileName, outMdFileName, nComponents,numMol);
+  //creat new .md file on fly which corrects the number of molecule     
+  createMdFile(inputFileName, outMdFileName, nComponents,numMol);
   
   if (oldInfo != NULL)
     delete oldInfo;
@@ -219,7 +219,7 @@ std::cout<<latticeOrt.size()<< std::endl;
   // We need to read in new siminfo object.	
   //parse md file and set up the system
   //SimCreator NewCreator;
-   SimCreator newCreator;
+  SimCreator newCreator;
   SimInfo* NewInfo = newCreator.createSim(outMdFileName, false);
   
   
@@ -227,10 +227,10 @@ std::cout<<latticeOrt.size()<< std::endl;
   Molecule* mol;
   SimInfo::MoleculeIterator mi;
   mol = NewInfo->beginMolecule(mi);
- int l = 0;
- for (mol = NewInfo->beginMolecule(mi); mol != NULL; mol = NewInfo->nextMolecule(mi)) {
-  	locator->placeMol(nanoParticleSites[l], latticeOrt[l], mol);
-  	l++;
+  int l = 0;
+  for (mol = NewInfo->beginMolecule(mi); mol != NULL; mol = NewInfo->nextMolecule(mi)) {
+    locator->placeMol(nanoParticleSites[l], latticeOrt[l], mol);
+    l++;
   }
  
 
@@ -297,11 +297,11 @@ void createMdFile(const std::string&oldMdFileName, const std::string&newMdFileNa
     
     //correct molecule number
     if (strstr(buffer, "nMol") != NULL) {
-    	if(i<components){
-      sprintf(buffer, "\tnMol = %i;", numMol[i]);				
-      newMdFile << buffer << std::endl;
-      i++;
-    	}
+      if(i<components){
+	sprintf(buffer, "\tnMol = %i;", numMol[i]);				
+	newMdFile << buffer << std::endl;
+	i++;
+      }
     } else
       newMdFile << buffer << std::endl;
     
