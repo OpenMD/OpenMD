@@ -62,6 +62,7 @@ Applications = \
 	applications/staticProps \
 	applications/dynamicProps \
 	applications/simpleBuilder \
+	applications/randomBuilder \
 	applications/nanoRodBuilder \
 	applications/nanoparticleBuilder \
 	applications/atom2mdin \
