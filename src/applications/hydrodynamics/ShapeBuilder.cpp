@@ -75,23 +75,18 @@ namespace oopse {
           simError();          
         }       
       }
-    } else if (atomType->isEAM()) {
-      GenericData* data = atomType->getPropertyByName("EAM");
-      if (data != NULL) {
-        EAMParamGenericData* eamData = dynamic_cast<EAMParamGenericData*>(data);
-        
-        if (eamData != NULL) {
-          EAMParam eamParam = eamData->getData();
-          currShape = new Spheric(atom->getPos(), eamParam.rcut);
-        } else {
-          sprintf( painCave.errMsg,
-                   "Can not cast GenericData to EAMParam\n");
-          painCave.severity = OOPSE_ERROR;
-          painCave.isFatal = 1;
-          simError();          
-        }       
+    } else {
+      int obanum = etab.GetAtomicNum((atom->getType()).c_str());
+      if (obanum != 0) {
+        currShape = new Spheric(atom->getPos(), etab.GetVdwRad(obanum));
+      } else {
+        sprintf( painCave.errMsg,
+                 "Could not find atom type in default element.txt\n");
+        painCave.severity = OOPSE_ERROR;
+        painCave.isFatal = 1;
+        simError();          
       }
-    }    
+    }
     return currShape;
   }
   
@@ -136,22 +131,18 @@ namespace oopse {
           painCave.isFatal = 1;
           simError();          
         }       
-      } else if (atomType->isEAM()) {
-        GenericData* data = atomType->getPropertyByName("EAM");
-        if (data != NULL) {
-          EAMParamGenericData* eamData = dynamic_cast<EAMParamGenericData*>(data);          
-          if (eamData != NULL) {
-            EAMParam eamParam = eamData->getData();
-            currShape = new Spheric(datom->getPos(), eamParam.rcut);
-          } else {
-            sprintf( painCave.errMsg,
-                     "Can not cast GenericData to EAMParam\n");
-            painCave.severity = OOPSE_ERROR;
-            painCave.isFatal = 1;
-            simError();          
-          }       
+      } else {
+        int obanum = etab.GetAtomicNum((datom->getType()).c_str());
+        if (obanum != 0) {
+          currShape = new Spheric(datom->getPos(), etab.GetVdwRad(obanum));
+        } else {
+          sprintf( painCave.errMsg,
+                   "Could not find atom type in default element.txt\n");
+          painCave.severity = OOPSE_ERROR;
+          painCave.isFatal = 1;
+          simError();          
         }
-      }
+      }      
     }
     return currShape;
   }

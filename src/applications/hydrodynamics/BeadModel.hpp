@@ -43,7 +43,9 @@
 #define APPLICATION_HYDRODYNAMICS_BEADMODEL_HPP
 
 #include "applications/hydrodynamics/ApproximationModel.hpp"
+#include "openbabel/mol.hpp"
 
+using namespace OpenBabel;
 namespace oopse {
 
 class BeadModel : public ApproximationModel {

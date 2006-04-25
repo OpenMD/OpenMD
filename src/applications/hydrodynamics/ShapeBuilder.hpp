@@ -43,6 +43,9 @@
 #define APPLICATION_HYDRODYNAMICS_SHAPEBUILDER_HPP 
 #include "applications/hydrodynamics/Shape.hpp"
 #include "primitives/Molecule.hpp"
+#include "openbabel/mol.hpp"
+
+using namespace OpenBabel;
 namespace oopse {
 
 class ShapeBuilder {
