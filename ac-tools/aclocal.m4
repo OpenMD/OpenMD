@@ -607,7 +607,7 @@ if test "$ac_test_FFLAGS" != "set"; then
   case "${host_cpu}-${host_os}" in
 
   *linux*) if test "$FC" = ifc -o "$FC" = ifort; then
-                    FCFLAGS="-fast"
+                    FCFLAGS="-O3 -ip -no-prec-div -cxxlib-icc"
                 fi;;
    rs6000*-aix*)  if test "$FC" = xlf90 -o "$FC" = f90 -o "$FC" = xlf95; then
                     FCFLAGS="-O3 -qarch=pwrx -qtune=pwrx -qansialias -w"
