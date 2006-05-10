@@ -20,3 +20,5 @@ option	"refsele"	-	"select reference"					string  typestr="selection script"    
 option	"repeatX"	-	"The number of images to repeat in the x direction"	int	default="0"		no
 option	"repeatY"	-	"The number of images to repeat in the y direction"	int	default="0"		no
 option	"repeatZ"	-	"The number of images to repeat in the z direction"	int	default="0"		no
+option  "gb"		-	"Replace the Gay-Berne atom with four linear atoms"	string	typestr="atomtype"	no
+option	"basetype"	b	"Convert to base atom type"				flag				off			

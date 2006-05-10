@@ -115,6 +115,9 @@ int main(int argc, char* argv[]){
   
   LinearAtomVisitor* linearVisitor = new LinearAtomVisitor(info);
   compositeVisitor->addVisitor(linearVisitor, 750);
+  if (args_info.gb_given) {
+    linearVisitor->addGayBerneAtomType(args_info.gb_arg);
+  }
   
   GBLipidAtomVisitor* gbLipidVisitor = new GBLipidAtomVisitor(info);
   compositeVisitor->addVisitor(gbLipidVisitor, 740);

@@ -32,13 +32,14 @@ struct gengetopt_args_info
   int zconstraint_flag;	/* replace the atom types of zconstraint molecules (default=off).  */
   int rigidbody_flag;	/* add a pseudo COM atom to rigidbody (default=off).  */
   int watertype_flag;	/* replace the atom type of water model (default=on).  */
-  int basetype_flag;	/* using base atom type (default=off).  */
   char * selection_arg;	/* general selection syntax.  */
   char * originsele_arg;	/* select origin.  */
   char * refsele_arg;	/* select reference.  */
   int repeatX_arg;	/* The number of images to repeat in the x direction (default='0').  */
   int repeatY_arg;	/* The number of images to repeat in the y direction (default='0').  */
   int repeatZ_arg;	/* The number of images to repeat in the z direction (default='0').  */
+  char * gb_arg;	/* Replace the Gay-Berne atom with four linear atoms.  */
+  int basetype_flag;	/* Convert to base atom type (default=off).  */
 
   int help_given ;	/* Whether help was given.  */
   int version_given ;	/* Whether version was given.  */
@@ -50,13 +51,14 @@ struct gengetopt_args_info
   int zconstraint_given ;	/* Whether zconstraint was given.  */
   int rigidbody_given ;	/* Whether rigidbody was given.  */
   int watertype_given ;	/* Whether watertype was given.  */
-  int basetype_given ;	/* Whether basetype was given.  */
   int selection_given ;	/* Whether selection was given.  */
   int originsele_given ;	/* Whether originsele was given.  */
   int refsele_given ;	/* Whether refsele was given.  */
   int repeatX_given ;	/* Whether repeatX was given.  */
   int repeatY_given ;	/* Whether repeatY was given.  */
   int repeatZ_given ;	/* Whether repeatZ was given.  */
+  int gb_given ;	/* Whether gb was given.  */
+  int basetype_given ;	/* Whether basetype was given.  */
 
 } ;
 

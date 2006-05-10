@@ -98,6 +98,7 @@ namespace oopse {
       linearAtomType.insert("linear");
     }
 
+    void addGayBerneAtomType(const std::string& atomType); 
     virtual void visit(Atom* atom) {}
     virtual void visit(DirectionalAtom* datom);       
     virtual void visit(RigidBody* rb) {}

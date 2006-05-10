@@ -87,7 +87,7 @@ bool ApproximationModel::internalCalcHydroProps(Shape* shape, double viscosity, 
     HydroProps cr;
     HydroProps cd;
     calcHydroPropsAtCR(beads_, viscosity, temperature, cr);
-    calcHydroPropsAtCD(beads_, viscosity, temperature, cd);
+    //calcHydroPropsAtCD(beads_, viscosity, temperature, cd);
     setCR(cr);
     setCD(cd);
     
@@ -156,7 +156,8 @@ bool ApproximationModel::calcHydroPropsAtCR(std::vector<BeadParam>& beads, doubl
             
             Xiott += Cij;
             Xiotr += U[i] * Cij;
-            Xiorr += -U[i] * Cij * U[j] + (6 * viscosity * volume) * I;            
+            //Xiorr += -U[i] * Cij * U[j] + (6 * viscosity * volume) * I;    
+	    Xiorr += -U[i] * Cij * U[j]; 
         }
     }
 
@@ -319,7 +320,8 @@ bool ApproximationModel::calcHydroPropsAtCD(std::vector<BeadParam>& beads, doubl
             
             Xitt += Cij;
             Xitr += U[i] * Cij;
-            Xirr += -U[i] * Cij * U[j] + (6 * viscosity * volume) * I;            
+            //Xirr += -U[i] * Cij * U[j] + (6 * viscosity * volume) * I;            
+	    Xirr += -U[i] * Cij * U[j];
         }
     }
 

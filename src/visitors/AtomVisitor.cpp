@@ -221,6 +221,10 @@ namespace oopse {
     return strIter != linearAtomType.end() ? true : false;
   }
 
+  void LinearAtomVisitor::addGayBerneAtomType(const std::string& atomType){
+   linearAtomType.insert(atomType); 
+  }
+
   void LinearAtomVisitor::visit(DirectionalAtom* datom){
     std::vector<AtomInfo*> atoms;
     //we need to convert linear into 4 different atoms
