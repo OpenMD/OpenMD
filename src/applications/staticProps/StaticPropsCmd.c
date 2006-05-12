@@ -44,6 +44,8 @@ void clear_given (struct gengetopt_args_info *args_info)
   args_info->output_given = 0 ;
   args_info->step_given = 0 ;
   args_info->nrbins_given = 0 ;
+  args_info->nbins_x_given = 0 ;
+  args_info->nbins_y_given = 0 ;
   args_info->nanglebins_given = 0 ;
   args_info->length_given = 0 ;
   args_info->zoffset_given = 0 ;
@@ -63,6 +65,7 @@ void clear_given (struct gengetopt_args_info *args_info)
   args_info->scd_given = 0 ;
   args_info->density_given = 0 ;
   args_info->slab_density_given = 0 ;
+  args_info->hxy_given = 0 ;
   args_info->staticProps_group_counter = 0 ;
 }
 
@@ -77,6 +80,10 @@ void clear_args (struct gengetopt_args_info *args_info)
   args_info->step_orig = NULL;
   args_info->nrbins_arg = 100;
   args_info->nrbins_orig = NULL;
+  args_info->nbins_x_arg = 100;
+  args_info->nbins_x_orig = NULL;
+  args_info->nbins_y_arg = 100;
+  args_info->nbins_y_orig = NULL;
   args_info->nanglebins_arg = 50;
   args_info->nanglebins_orig = NULL;
   args_info->length_orig = NULL;
@@ -113,7 +120,9 @@ cmdline_parser_print_help (void)
   printf("%s\n","  -i, --input=filename          input dump file");
   printf("%s\n","  -o, --output=filename         output file name");
   printf("%s\n","  -n, --step=INT                process every n frame  (default=`1')");
-  printf("%s\n","  -r, --nrbins=INT              number of bins for distance  (default=`100')");
+  printf("%s\n","  -x,  --nbins_x=INT              number of bins in x axis  (default=`100')");
+  printf("%s\n","  -y , --nbins_y=INT              number of bins in y axis  (default=`100')");
+   printf("%s\n","  -r, --nrbins=INT              number of bins for distance  (default=`100')");
   printf("%s\n","  -a, --nanglebins=INT          number of bins for cos(angle)  (default=`50')");
   printf("%s\n","  -l, --length=DOUBLE           maximum length (Defaults to 1/2 smallest length \n                                  of first frame)");
   printf("%s\n","  -z, --zoffset=DOUBLE          Where to set the zero for the slab_density \n                                  calculation  (default=`0')");
@@ -134,6 +143,7 @@ cmdline_parser_print_help (void)
   printf("%s\n","      --scd                     scd order parameter(either --sele1, --sele2, \n                                  --sele3 are specified or --molname, --begin, \n                                  --end are specified)");
   printf("%s\n","      --density                 density plot (--sele1 must be specified)");
   printf("%s\n","      --slab_density            slab density (--sele1 must be specified)");
+  printf("%s\n","      --hxy            hxy (--sele1 must be specified)");
   
 }
 
@@ -178,6 +188,17 @@ cmdline_parser_release (struct gengetopt_args_info *args_info)
       free (args_info->nrbins_orig); /* free previous argument */
       args_info->nrbins_orig = 0;
     }
+    if (args_info->nbins_x_orig)
+    {
+      free (args_info->nbins_x_orig); /* free previous argument */
+      args_info->nbins_x_orig = 0;
+    }
+  if (args_info->nbins_y_orig)
+    {
+      free (args_info->nbins_y_orig); /* free previous argument */
+      args_info->nbins_y_orig = 0;
+    }
+	
   if (args_info->nanglebins_orig)
     {
       free (args_info->nanglebins_orig); /* free previous argument */
@@ -305,6 +326,20 @@ cmdline_parser_file_save(const char *filename, struct gengetopt_args_info *args_
       fprintf(outfile, "%s\n", "nrbins");
     }
   }
+  if (args_info->nbins_x_given) {
+    if (args_info->nbins_x_orig) {
+      fprintf(outfile, "%s=\"%s\"\n", "nbins_x", args_info->nbins_x_orig);
+    } else {
+      fprintf(outfile, "%s\n", "nbins_x");
+    }
+  }
+  if (args_info->nbins_y_given) {
+    if (args_info->nbins_y_orig) {
+      fprintf(outfile, "%s=\"%s\"\n", "nbins_y", args_info->nbins_y_orig);
+    } else {
+      fprintf(outfile, "%s\n", "nbins_y");
+    }
+  }
   if (args_info->nanglebins_given) {
     if (args_info->nanglebins_orig) {
       fprintf(outfile, "%s=\"%s\"\n", "nanglebins", args_info->nanglebins_orig);
@@ -402,7 +437,9 @@ cmdline_parser_file_save(const char *filename, struct gengetopt_args_info *args_
   if (args_info->slab_density_given) {
     fprintf(outfile, "%s\n", "slab_density");
   }
-  
+  if (args_info->hxy_given) {
+    fprintf(outfile, "%s\n", "hxy");
+  }
   fclose (outfile);
 
   i = EXIT_SUCCESS;
@@ -450,6 +487,7 @@ reset_group_staticProps(struct gengetopt_args_info *args_info)
   args_info->scd_given = 0 ;
   args_info->density_given = 0 ;
   args_info->slab_density_given = 0 ;
+  args_info->hxy_given= 0 ;
 
   args_info->staticProps_group_counter = 0;
 }
@@ -562,6 +600,7 @@ cmdline_parser_internal (int argc, char * const *argv, struct gengetopt_args_inf
         { "scd",	0, NULL, 0 },
         { "density",	0, NULL, 0 },
         { "slab_density",	0, NULL, 0 },
+        { "hxy",	0, NULL, 0 },
         { NULL,	0, NULL, 0 }
       };
 
@@ -656,6 +695,46 @@ cmdline_parser_internal (int argc, char * const *argv, struct gengetopt_args_inf
           if (args_info->nrbins_orig)
             free (args_info->nrbins_orig); /* free previous string */
           args_info->nrbins_orig = gengetopt_strdup (optarg);
+          break;
+
+        case 'x':	/* number of bins in x axis.  */
+          if (local_args_info.nbins_x_given)
+            {
+              fprintf (stderr, "%s: `--nbins_x' (`-r') option given more than once%s\n", argv[0], (additional_error ? additional_error : ""));
+              goto failure;
+            }
+          if (args_info->nbins_x_given && ! override)
+            continue;
+          local_args_info.nbins_x_given = 1;
+          args_info->nbins_x_given = 1;
+          args_info->nbins_x_arg = strtol (optarg, &stop_char, 0);
+          if (!(stop_char && *stop_char == '\0')) {
+            fprintf(stderr, "%s: invalid numeric value: %s\n", argv[0], optarg);
+            goto failure;
+          }
+          if (args_info->nbins_x_orig)
+            free (args_info->nbins_x_orig); /* free previous string */
+          args_info->nbins_x_orig = gengetopt_strdup (optarg);
+          break;
+
+        case 'y':	/* number of bins in y axis.  */
+          if (local_args_info.nbins_y_given)
+            {
+              fprintf (stderr, "%s: `--nbins_y' (`-r') option given more than once%s\n", argv[0], (additional_error ? additional_error : ""));
+              goto failure;
+            }
+          if (args_info->nbins_y_given && ! override)
+            continue;
+          local_args_info.nbins_y_given = 1;
+          args_info->nbins_y_given = 1;
+          args_info->nbins_y_arg = strtol (optarg, &stop_char, 0);
+          if (!(stop_char && *stop_char == '\0')) {
+            fprintf(stderr, "%s: invalid numeric value: %s\n", argv[0], optarg);
+            goto failure;
+          }
+          if (args_info->nbins_y_orig)
+            free (args_info->nbins_y_orig); /* free previous string */
+          args_info->nbins_y_orig = gengetopt_strdup (optarg);
           break;
 
         case 'a':	/* number of bins for cos(angle).  */
@@ -1005,6 +1084,23 @@ cmdline_parser_internal (int argc, char * const *argv, struct gengetopt_args_inf
               continue;
             local_args_info.slab_density_given = 1;
             args_info->slab_density_given = 1;
+            if (args_info->staticProps_group_counter && override)
+              reset_group_staticProps (args_info);
+            args_info->staticProps_group_counter += 1;
+            break;
+          }
+          /* hxy (--sele1 must be specified).  */
+          else if (strcmp (long_options[option_index].name, "hxy") == 0)
+          {
+            if (local_args_info.hxy_given)
+              {
+                fprintf (stderr, "%s: `--hxy' option given more than once%s\n", argv[0], (additional_error ? additional_error : ""));
+                goto failure;
+              }
+            if (args_info->hxy_given && ! override)
+              continue;
+            local_args_info.hxy_given = 1;
+            args_info->hxy_given = 1;
             if (args_info->staticProps_group_counter && override)
               reset_group_staticProps (args_info);
             args_info->staticProps_group_counter += 1;

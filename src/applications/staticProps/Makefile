@@ -11,7 +11,8 @@ Source    = \
 	DensityPlot.cpp \
 	StaticPropsCmd.c \
 	StaticProps.cpp \
-	RhoZ.cpp
+	RhoZ.cpp \
+	Hxy.cpp
 	
 BuiltParallelExe = 0
 

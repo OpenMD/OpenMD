@@ -32,6 +32,10 @@ struct gengetopt_args_info
   char * step_orig;	/* process every n frame original value given at command line.  */
   int nrbins_arg;	/* number of bins for distance (default='100').  */
   char * nrbins_orig;	/* number of bins for distance original value given at command line.  */
+  int nbins_x_arg;  /* number of bins in x axis. */
+  char * nbins_x_orig;	/* number of bins in x axis original value given at command line.  */
+  int nbins_y_arg; /* number of bins in y axis. */
+  char * nbins_y_orig;	/* number of bins in y axis original value given at command line.  */
   int nanglebins_arg;	/* number of bins for cos(angle) (default='50').  */
   char * nanglebins_orig;	/* number of bins for cos(angle) original value given at command line.  */
   double length_arg;	/* maximum length (Defaults to 1/2 smallest length of first frame).  */
@@ -58,6 +62,8 @@ struct gengetopt_args_info
   int input_given ;	/* Whether input was given.  */
   int output_given ;	/* Whether output was given.  */
   int step_given ;	/* Whether step was given.  */
+  int nbins_x_given;  /*  Whether nbins_x was given */
+  int nbins_y_given; /* Whether nbins_y was given */
   int nrbins_given ;	/* Whether nrbins was given.  */
   int nanglebins_given ;	/* Whether nanglebins was given.  */
   int length_given ;	/* Whether length was given.  */
@@ -78,6 +84,7 @@ struct gengetopt_args_info
   int scd_given ;	/* Whether scd was given.  */
   int density_given ;	/* Whether density was given.  */
   int slab_density_given ;	/* Whether slab_density was given.  */
+  int hxy_given;         /*Whether hxy was given. */
 
   int staticProps_group_counter; /* counter for group staticProps */
 } ;
