@@ -44,7 +44,7 @@
  *
  *  Created by Xiuquan Sun on 05/09/06.
  *  @author  Xiuquan Sun 
- *  @version $Id: Hxy.cpp,v 1.2 2006-05-16 02:06:37 gezelter Exp $
+ *  @version $Id: Hxy.cpp,v 1.3 2006-05-16 20:38:23 gezelter Exp $
  *
  */
 
@@ -60,9 +60,6 @@
 #include<string.h>
 #include<stdlib.h>
 #include<math.h>
-#ifndef WITHOUT_FFTW
-#include<fftw3.h>
-#endif
 
 namespace oopse {
   
@@ -90,8 +87,7 @@ namespace oopse {
   }
 
   void Hxy::process() {
-#ifndef WITHOUT_FFTW  
-
+#if defined(HAVE_FFTW_H) || defined(HAVE_DFFTW_H) || defined(HAVE_FFTW3_H)
     DumpReader reader(info_, dumpFilename_);    
     int nFrames = reader.getNFrames();
     nProcessed_ = nFrames/step_;
@@ -115,20 +111,26 @@ namespace oopse {
       reader.readFrame(istep);
       currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
       nMolecules = info_->getNGlobalMolecules();
-
-      Mat3x3d hmat = currentSnapshot_->getHmat();
-
       
-      fftw_complex *in, *out;
+      Mat3x3d hmat = currentSnapshot_->getHmat();
+      
+#ifdef HAVE_FFTW3_H
       fftw_plan p;
+#else
+      fftwnd_plan p;
+#endif
+      fftw_complex *in, *out;
+
       
       in = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * (nBinsX_*nBinsY_));
       out = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) *(nBinsX_*nBinsY_));
-      p =  fftw_plan_dft_2d(nBinsX_, 
-			    nBinsY_, 
-			    in, out,
-			    FFTW_FORWARD, 
-			    FFTW_ESTIMATE);
+
+#ifdef HAVE_FFTW3_H
+      p = fftw_plan_dft_2d(nBinsX_, nBinsY_, in, out, 
+                           FFTW_FORWARD, FFTW_ESTIMATE); 
+#else
+      p = fftw2d_create_plan(nBinsX_, nBinsY_, FFTW_FORWARD, FFTW_ESTIMATE);
+#endif
       
       int i, j;   
       
@@ -265,8 +267,11 @@ namespace oopse {
 	  c_im(in[newindex]) = 0.0;
 	} 
       }
-      
-      fftw_execute(p); 
+#ifdef HAVE_FFTW3_H
+      fftw_execute(p);
+#else
+      fftwnd_one(p, in, out);
+#endif
       
       for (i=0; i< nBinsX_; i++) {
 	for(j=0; j< nBinsY_; j++) {
@@ -274,8 +279,11 @@ namespace oopse {
 	  mag[newindex] = pow(c_re(out[newindex]),2) + pow(c_im(out[newindex]),2);
 	}
       }
-      
+#ifdef HAVE_FFTW3_H
       fftw_destroy_plan(p);
+#else
+      fftwnd_destroy_plan(p);
+#endif      
       fftw_free(out);
       fftw_free(in);
 

@@ -44,14 +44,30 @@
  *
  *  Created by Xiuquan Sun on 05/09/06.
  *  @author  Xiuquan Sun
- *  @version $Id: Hxy.hpp,v 1.2 2006-05-16 02:06:37 gezelter Exp $
+ *  @version $Id: Hxy.hpp,v 1.3 2006-05-16 20:38:23 gezelter Exp $
  *
  */
 #ifndef APPLICATIONS_STATICPROPS_HXY_HPP
 #define APPLICATIONS_STATICPROPS_HXY_HPP
 
+#include "config.h"
+
+#if defined(HAVE_FFTW_H) || defined(HAVE_DFFTW_H) || defined(HAVE_FFTW3_H)
+
+#ifdef HAVE_FFTW_H
+#include <fftw.h>
+#endif
+
+#ifdef HAVE_DFFTW_H
+#include <dfftw.h>
+#endif
+
+#ifdef HAVE_FFTW3_H
+#include <fftw3.h>
 #define c_re(c) ((c)[0])
 #define c_im(c) ((c)[1])
+#endif
+#endif
 
 #include "applications/staticProps/RadialDistrFunc.hpp"
 namespace oopse {

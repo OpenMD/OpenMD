@@ -46,17 +46,14 @@
 /* Define to 1 if you have the <dlfcn.h> header file. */
 #undef HAVE_DLFCN_H
 
-/* Disable all FFTW (and thus Undulation Spectrum) support */
-#undef WITHOUT_FFTW
+/* define if fftw3.h exists */
+#undef HAVE_FFTW3_H
 
-/* Use the d prefix on fftw includes */
-#undef FFTW_NAME_DFFTW
+/* define if fftw.h exists */
+#undef HAVE_FFTW_H
 
-/* Dont use any prefix on fftw includes */
-#undef FFTW_NAME_FFTW
-
-/* Use the s prefix on fftw includes */
-#undef FFTW_NAME_SFFTW
+/* define if dfftw.h exists */
+#undef HAVE_DFFTW_H
 
 /* Define to 1 if you have the `floor' function. */
 #undef HAVE_FLOOR

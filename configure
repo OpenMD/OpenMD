@@ -312,7 +312,7 @@ ac_includes_default="\
 # include <unistd.h>
 #endif"
 
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os PROGNAME debug CXX CXXFLAGS LDFLAGS CPPFLAGS ac_ct_CXX EXEEXT OBJEXT CC CFLAGS ac_ct_CC FC FCFLAGS ac_ct_FC CPP EGREP LN_S SET_MAKE RANLIB ac_ct_RANLIB PERLINTERP PERL_SHEBANG INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA AR PS FCFLAGS_F90 FCFLAGS_SRCEXT PREPDEFFLAG FCLIBS FC_FUNC FC_FUNC_ MOD F90_WORK_FILES_ARG MODDIRFLAG F90MODINCSPEC F90_MODULE_NAMES LIBOBJS POW_LIB CXXCPP __func__ MPI_LIB_DIR MPI_INC_DIR MPI_F90_INC MPI_LIB MPI_F90_LIB USE_MPI USE_CGAL CGAL_INC_DIR CGAL_LIB_DIR CGAL_RLIB_DIR CGAL_DEFINES CGAL_CXXFLAGS CGAL_LIBS DOXYGEN DOT DOC enable_dot enable_html_docs enable_latex_docs BATEXT MKINSTALLDIRS OOPSE OOPSE_HOME SUBDIRS LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os PROGNAME debug CXX CXXFLAGS LDFLAGS CPPFLAGS ac_ct_CXX EXEEXT OBJEXT CC CFLAGS ac_ct_CC FC FCFLAGS ac_ct_FC CPP EGREP LN_S SET_MAKE RANLIB ac_ct_RANLIB PERLINTERP PERL_SHEBANG INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA AR PS FCFLAGS_F90 FCFLAGS_SRCEXT PREPDEFFLAG FCLIBS FC_FUNC FC_FUNC_ MOD F90_WORK_FILES_ARG MODDIRFLAG F90MODINCSPEC F90_MODULE_NAMES FFTW_INC_DIR FFTW_LIB_DIR FFTW_LIBS LIBOBJS POW_LIB CXXCPP __func__ MPI_LIB_DIR MPI_INC_DIR MPI_F90_INC MPI_LIB MPI_F90_LIB USE_MPI USE_CGAL CGAL_INC_DIR CGAL_LIB_DIR CGAL_RLIB_DIR CGAL_DEFINES CGAL_CXXFLAGS CGAL_LIBS DOXYGEN DOT DOC enable_dot enable_html_docs enable_latex_docs BATEXT MKINSTALLDIRS OOPSE OOPSE_HOME SUBDIRS LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -884,7 +884,8 @@ Optional Packages:
   --with-zlib=DIR root directory path of zlib installation defaults to
                     /usr/local or /usr if not found in /usr/local
   --without-zlib to disable zlib usage completely
-  --without-fftw          if you turn this off you cannot compute undulation spectra
+  --with-fftw=DIR         root directory path of fftw installation (defaults
+                          to /usr/local or /usr if not found in /usr/local)
   --with-mpi=<prefix>     compile with MPI installed in <prefix> [default=no]
   --with-cgal-makefile=FILE  CGAL makefile that should be used
 
@@ -1414,17 +1415,6 @@ ac_configure="$SHELL $ac_aux_dir/configure" # This should be Cygnus configure.
 
 
 
-# ACX_CHECK_FFTW()
-# ----------------
-# This macro checks for fftw header files and libraries,
-# including the possible prefixing with s or d to determine precision.
-# Arg 1 is the fftw header/library name to check for, without
-# prefix or anything else (e.g. rfftw_mpi for real MPI transforms)
-# Arg 2 is the size of the real variable used.
-
-
-
-
 
 
 
@@ -1436,6 +1426,9 @@ ac_configure="$SHELL $ac_aux_dir/configure" # This should be Cygnus configure.
 #
 #
 #
+
+
+
 
 
 # AC_F90_MODULE_NAMES
@@ -1444,6 +1437,58 @@ ac_configure="$SHELL $ac_aux_dir/configure" # This should be Cygnus configure.
 # Figure out how the Fortran 90 compiler constructs module file names
 #
  # AC_F90_MODULE_NAMES
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2740,7 +2785,7 @@ fi
 
 
 # Provide some information about the compiler.
-echo "$as_me:2743:" \
+echo "$as_me:2788:" \
      "checking for Fortran compiler version" >&5
 ac_compiler=`set X $ac_compile; echo $2`
 { (eval echo "$as_me:$LINENO: \"$ac_compiler --version </dev/null >&5\"") >&5
@@ -3492,9 +3537,6 @@ echo "${ECHO_T}no" >&6
 fi
 
 if test "$AR" = "NONE"; then
-  { { echo "$as_me:$LINENO: error: --> Can't find \`ar'!" >&5
-echo "$as_me: error: --> Can't find \`ar'!" >&2;}
-   { (exit 1); exit 1; }; }
   cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
 # tests run on this system so they can be shared between configure
@@ -3991,7 +4033,7 @@ _ACEOF
 # flags.
 ac_save_FFLAGS=$FCFLAGS
 FCFLAGS="$FCFLAGS $ac_verb"
-(eval echo $as_me:3994: \"$ac_link\") >&5
+(eval echo $as_me:4036: \"$ac_link\") >&5
 ac_fc_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
 echo "$ac_fc_v_output" >&5
 FCFLAGS=$ac_save_FFLAGS
@@ -4069,7 +4111,7 @@ _ACEOF
 # flags.
 ac_save_FFLAGS=$FCFLAGS
 FCFLAGS="$FCFLAGS $ac_cv_prog_fc_v"
-(eval echo $as_me:4072: \"$ac_link\") >&5
+(eval echo $as_me:4114: \"$ac_link\") >&5
 ac_fc_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
 echo "$ac_fc_v_output" >&5
 FCFLAGS=$ac_save_FFLAGS
@@ -4805,7 +4847,7 @@ _ACEOF
 # flags.
 ac_save_FFLAGS=$FCFLAGS
 FCFLAGS="$FCFLAGS $ac_verb"
-(eval echo $as_me:4808: \"$ac_link\") >&5
+(eval echo $as_me:4850: \"$ac_link\") >&5
 ac_fc_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
 echo "$ac_fc_v_output" >&5
 FCFLAGS=$ac_save_FFLAGS
@@ -4883,7 +4925,7 @@ _ACEOF
 # flags.
 ac_save_FFLAGS=$FCFLAGS
 FCFLAGS="$FCFLAGS $ac_cv_prog_fc_v"
-(eval echo $as_me:4886: \"$ac_link\") >&5
+(eval echo $as_me:4928: \"$ac_link\") >&5
 ac_fc_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
 echo "$ac_fc_v_output" >&5
 FCFLAGS=$ac_save_FFLAGS
@@ -6141,50 +6183,73 @@ echo "$as_me: error: either specify a valid zlib installation with --with-zlib=D
 fi
 
 
+#
+# Handle user hints
+#
 
 # Check whether --with-fftw or --without-fftw was given.
 if test "${with_fftw+set}" = set; then
   withval="$with_fftw"
-
+  fftw_dir="$withval"
 else
-  with_fftw=yes
+  		fftw_dir="not_set"
 fi;
-if test "$with_fftw" = "no"; then
+if test "$fftw_dir" != "no"; then
 
-cat >>confdefs.h <<\_ACEOF
-#define WITHOUT_FFTW
-_ACEOF
-
+if test "$fftw_dir" != "not_set" ; then
+  if test -d "$fftw_dir"
+  then
+    FFTW_HOME="$fftw_dir"
+  else
+    { echo "$as_me:$LINENO: WARNING: Sorry, $fftw_dir does not exist, checking usual places" >&5
+echo "$as_me: WARNING: Sorry, $fftw_dir does not exist, checking usual places" >&2;}
+  fi
 fi
-if test "$with_fftw" = "yes"; then
-  sizeof_real=8
+
+FFTW_HOME=/usr/local
+if test ! -f "${FFTW_HOME}/include/fftw3.h" -o -f "${FFTW_HOME}/include/fftw.h" -o  -f "${FFTW_HOME}/include/dfftw.h"
+then
+        FFTW_HOME=/usr
+fi
+
+#
+# Locate fftw, if wanted
+#
+if test -n "${FFTW_HOME}"
+then
+        FFTW_OLD_LDFLAGS=$LDFLAGS
+        FFTW_OLD_CPPFLAGS=$LDFLAGS
+        LDFLAGS="$LDFLAGS -L${FFTW_HOME}/lib"
+        CPPFLAGS="$CPPFLAGS -I${FFTW_HOME}/include"
 
 
-if test -z "$ac_fftw_firstname"; then
+        ac_ext=c
+ac_cpp='$CPP $CPPFLAGS'
+ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
-sizeof_real=$sizeof_real
-if test $sizeof_real = 8; then
-  prec="double"
-  fftwcheckprefix=d
+        echo "$as_me:$LINENO: checking for fftw_execute in -lfftw3" >&5
+echo $ECHO_N "checking for fftw_execute in -lfftw3... $ECHO_C" >&6
+if test "${ac_cv_lib_fftw3_fftw_execute+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
 else
-  prec="single"
-  fftwcheckprefix=s
-fi
-
-xfftwname=${fftwcheckprefix}fftw3
-
-ok="no"
-# check header doesn't work, since we must use mpicc to get includes,
-# we cant trust cpp.
-echo "$as_me:$LINENO: checking for $xfftwname.h" >&5
-echo $ECHO_N "checking for $xfftwname.h... $ECHO_C" >&6
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lfftw3  $LIBS"
 cat >conftest.$ac_ext <<_ACEOF
 /* confdefs.h.  */
 _ACEOF
 cat confdefs.h >>conftest.$ac_ext
 cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
-#include <$xfftwname.h>
+
+/* Override any gcc2 internal prototype to avoid an error.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+/* We use char because int might match the return type of a gcc2
+   builtin and then its argument prototype would still apply.  */
+char fftw_execute ();
 #ifdef FC_DUMMY_MAIN
 #ifndef FC_DUMMY_MAIN_EQ_F77
 #  ifdef __cplusplus
@@ -6196,14 +6261,14 @@ cat >>conftest.$ac_ext <<_ACEOF
 int
 main ()
 {
-
+fftw_execute ();
   ;
   return 0;
 }
 _ACEOF
-rm -f conftest.$ac_objext
-if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
-  (eval $ac_compile) 2>conftest.er1
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+  (eval $ac_link) 2>conftest.er1
   ac_status=$?
   grep -v '^ *+' conftest.er1 >conftest.err
   rm -f conftest.er1
@@ -6217,114 +6282,51 @@ if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   ac_status=$?
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
   (exit $ac_status); }; } &&
-	 { ac_try='test -s conftest.$ac_objext'
+	 { ac_try='test -s conftest$ac_exeext'
   { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
   (eval $ac_try) 2>&5
   ac_status=$?
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
   (exit $ac_status); }; }; then
-
-fftwname=$xfftwname
-echo "$as_me:$LINENO: result: yes" >&5
-echo "${ECHO_T}yes" >&6
-
+  ac_cv_lib_fftw3_fftw_execute=yes
 else
   echo "$as_me: failed program was:" >&5
 sed 's/^/| /' conftest.$ac_ext >&5
 
-echo "$as_me:$LINENO: result: no" >&5
-echo "${ECHO_T}no" >&6
+ac_cv_lib_fftw3_fftw_execute=no
 fi
-rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
-
-# fftwname was set if we found a header
-
-if test -n "$fftwname"; then
-# we cannot run the code since an MPI program might not be allowed
-# on a login node of a supercomputer
-cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-#include <$fftwname.h>
-#ifdef FC_DUMMY_MAIN
-#ifndef FC_DUMMY_MAIN_EQ_F77
-#  ifdef __cplusplus
-     extern "C"
-#  endif
-   int FC_DUMMY_MAIN() { return 1; }
-#endif
-#endif
-int
-main ()
-{
-int _array_ [1 - 2 * !((sizeof(fftw_real)) == $sizeof_real)];
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext
-if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
-  (eval $ac_compile) 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } &&
-	 { ac_try='test -z "$ac_c_werror_flag"
-			 || test ! -s conftest.err'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; } &&
-	 { ac_try='test -s conftest.$ac_objext'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; }; then
-
-ok=yes
-usedprefix=$fftwcheckprefix
-
+rm -f conftest.err conftest.$ac_objext \
+      conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+echo "$as_me:$LINENO: result: $ac_cv_lib_fftw3_fftw_execute" >&5
+echo "${ECHO_T}$ac_cv_lib_fftw3_fftw_execute" >&6
+if test $ac_cv_lib_fftw3_fftw_execute = yes; then
+  fftw_cv_libfftw3=yes
 else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-ok=no
-fi
-rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
+  fftw_cv_libfftw3=no
 fi
 
-if test "$ok" != "yes"; then
+        if test "${ac_cv_header_fftw3_h+set}" = set; then
   echo "$as_me:$LINENO: checking for fftw3.h" >&5
 echo $ECHO_N "checking for fftw3.h... $ECHO_C" >&6
-  cat >conftest.$ac_ext <<_ACEOF
+if test "${ac_cv_header_fftw3_h+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+fi
+echo "$as_me:$LINENO: result: $ac_cv_header_fftw3_h" >&5
+echo "${ECHO_T}$ac_cv_header_fftw3_h" >&6
+else
+  # Is the header compilable?
+echo "$as_me:$LINENO: checking fftw3.h usability" >&5
+echo $ECHO_N "checking fftw3.h usability... $ECHO_C" >&6
+cat >conftest.$ac_ext <<_ACEOF
 /* confdefs.h.  */
 _ACEOF
 cat confdefs.h >>conftest.$ac_ext
 cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
+$ac_includes_default
 #include <fftw3.h>
-#ifdef FC_DUMMY_MAIN
-#ifndef FC_DUMMY_MAIN_EQ_F77
-#  ifdef __cplusplus
-     extern "C"
-#  endif
-   int FC_DUMMY_MAIN() { return 1; }
-#endif
-#endif
-int
-main ()
-{
-
-  ;
-  return 0;
-}
 _ACEOF
 rm -f conftest.$ac_objext
 if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
@@ -6348,43 +6350,20 @@ if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   ac_status=$?
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
   (exit $ac_status); }; }; then
-  echo "$as_me:$LINENO: result: yes" >&5
-echo "${ECHO_T}yes" >&6
+  ac_header_compiler=yes
 else
   echo "$as_me: failed program was:" >&5
 sed 's/^/| /' conftest.$ac_ext >&5
 
-
-echo "$as_me:$LINENO: result: no" >&5
-echo "${ECHO_T}no" >&6
-{ { echo "$as_me:$LINENO: error: Cannot find any $prec precision $xfftwname.h or fftw3.h
-Do you have $prec precision FFTW installed? If you are using packages,
-note that you also need fftw-devel to use FFTW with OOPSE. You can find the
-software at www.fftw.org.
-If you compiled FFTW yourself:
-Note that the default FFTW setup is double precision.  If you want MPI support,
-use --with-mpi. It is a good idea to install both single & double.
-If you have installed FFTW in a non-standard location, you should
-provide the correct paths in the CPPFLAGS and LDFLAGS environment
-variables before running configure.
-That is also necessary to do if your compiler doesn't search
-/usr/local/include and /usr/local/lib by default." >&5
-echo "$as_me: error: Cannot find any $prec precision $xfftwname.h or fftw3.h
-Do you have $prec precision FFTW installed? If you are using packages,
-note that you also need fftw-devel to use FFTW with OOPSE. You can find the
-software at www.fftw.org.
-If you compiled FFTW yourself:
-Note that the default FFTW setup is double precision.  If you want MPI support,
-use --with-mpi. It is a good idea to install both single & double.
-If you have installed FFTW in a non-standard location, you should
-provide the correct paths in the CPPFLAGS and LDFLAGS environment
-variables before running configure.
-That is also necessary to do if your compiler doesn't search
-/usr/local/include and /usr/local/lib by default." >&2;}
-   { (exit 1); exit 1; }; }
-
+ac_header_compiler=no
 fi
 rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
+echo "$as_me:$LINENO: result: $ac_header_compiler" >&5
+echo "${ECHO_T}$ac_header_compiler" >&6
+
+# Is the header present?
+echo "$as_me:$LINENO: checking fftw3.h presence" >&5
+echo $ECHO_N "checking fftw3.h presence... $ECHO_C" >&6
 cat >conftest.$ac_ext <<_ACEOF
 /* confdefs.h.  */
 _ACEOF
@@ -6392,835 +6371,605 @@ cat confdefs.h >>conftest.$ac_ext
 cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
 #include <fftw3.h>
-#ifdef FC_DUMMY_MAIN
-#ifndef FC_DUMMY_MAIN_EQ_F77
-#  ifdef __cplusplus
-     extern "C"
-#  endif
-   int FC_DUMMY_MAIN() { return 1; }
-#endif
-#endif
-int
-main ()
-{
-int _array_ [1 - 2 * !((sizeof(fftw_real)) == $sizeof_real)];
-  ;
-  return 0;
-}
 _ACEOF
-rm -f conftest.$ac_objext
-if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
-  (eval $ac_compile) 2>conftest.er1
+if { (eval echo "$as_me:$LINENO: \"$ac_cpp conftest.$ac_ext\"") >&5
+  (eval $ac_cpp conftest.$ac_ext) 2>conftest.er1
   ac_status=$?
   grep -v '^ *+' conftest.er1 >conftest.err
   rm -f conftest.er1
   cat conftest.err >&5
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } &&
-	 { ac_try='test -z "$ac_c_werror_flag"
-			 || test ! -s conftest.err'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; } &&
-	 { ac_try='test -s conftest.$ac_objext'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; }; then
-
-usedprefix=""
-fftwname=fftw3
-
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-
-{ { echo "$as_me:$LINENO: error: Cannot find any $prec precision $xfftwname.h or fftw3.h
-Do you have $prec precision FFTW installed? If you are using packages,
-note that you also need fftw-devel to use FFTW with OOPSE. You can find the
-software at www.fftw.org.
-If you compiled FFTW yourself:
-Note that the default FFTW setup is double precision.  If you want MPI support,
-use --with-mpi. It is a good idea to install both single & double.
-If you have installed FFTW in a non-standard location, you should
-provide the correct paths in the CPPFLAGS and LDFLAGS environment
-variables before running configure.
-That is also necessary to do if your compiler doesn't search
-/usr/local/include and /usr/local/lib by default." >&5
-echo "$as_me: error: Cannot find any $prec precision $xfftwname.h or fftw3.h
-Do you have $prec precision FFTW installed? If you are using packages,
-note that you also need fftw-devel to use FFTW with OOPSE. You can find the
-software at www.fftw.org.
-If you compiled FFTW yourself:
-Note that the default FFTW setup is double precision.  If you want MPI support,
-use --with-mpi. It is a good idea to install both single & double.
-If you have installed FFTW in a non-standard location, you should
-provide the correct paths in the CPPFLAGS and LDFLAGS environment
-variables before running configure.
-That is also necessary to do if your compiler doesn't search
-/usr/local/include and /usr/local/lib by default." >&2;}
-   { (exit 1); exit 1; }; }
-fi
-rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
-fi
-
-
-as_ac_Lib=`echo "ac_cv_lib_$fftwname''_main" | $as_tr_sh`
-echo "$as_me:$LINENO: checking for main in -l$fftwname" >&5
-echo $ECHO_N "checking for main in -l$fftwname... $ECHO_C" >&6
-if eval "test \"\${$as_ac_Lib+set}\" = set"; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-l$fftwname  $LIBS"
-cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-
-
-#ifdef FC_DUMMY_MAIN
-#ifndef FC_DUMMY_MAIN_EQ_F77
-#  ifdef __cplusplus
-     extern "C"
-#  endif
-   int FC_DUMMY_MAIN() { return 1; }
-#endif
-#endif
-int
-main ()
-{
-main ();
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext conftest$ac_exeext
-if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
-  (eval $ac_link) 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } &&
-	 { ac_try='test -z "$ac_c_werror_flag"
-			 || test ! -s conftest.err'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; } &&
-	 { ac_try='test -s conftest$ac_exeext'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; }; then
-  eval "$as_ac_Lib=yes"
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-eval "$as_ac_Lib=no"
-fi
-rm -f conftest.err conftest.$ac_objext \
-      conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-echo "$as_me:$LINENO: result: `eval echo '${'$as_ac_Lib'}'`" >&5
-echo "${ECHO_T}`eval echo '${'$as_ac_Lib'}'`" >&6
-if test `eval echo '${'$as_ac_Lib'}'` = yes; then
-  cat >>confdefs.h <<_ACEOF
-#define `echo "HAVE_LIB$fftwname" | $as_tr_cpp` 1
-_ACEOF
-
-  LIBS="-l$fftwname $LIBS"
-
-else
-  { { echo "$as_me:$LINENO: error: Can't find a library to match the $fftwname header" >&5
-echo "$as_me: error: Can't find a library to match the $fftwname header" >&2;}
-   { (exit 1); exit 1; }; }
-fi
-
-ac_fftw_savedprefix=$usedprefix
-ac_fftw_firstname=$fftwname
-
-else
-
-fftwname=${ac_fftw_savedprefix}fftw3
-echo "$as_me:$LINENO: checking for $fftwname.h" >&5
-echo $ECHO_N "checking for $fftwname.h... $ECHO_C" >&6
-cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-#include <$fftwname.h>
-#ifdef FC_DUMMY_MAIN
-#ifndef FC_DUMMY_MAIN_EQ_F77
-#  ifdef __cplusplus
-     extern "C"
-#  endif
-   int FC_DUMMY_MAIN() { return 1; }
-#endif
-#endif
-int
-main ()
-{
-
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext
-if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
-  (eval $ac_compile) 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } &&
-	 { ac_try='test -z "$ac_c_werror_flag"
-			 || test ! -s conftest.err'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; } &&
-	 { ac_try='test -s conftest.$ac_objext'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; }; then
-  echo "$as_me:$LINENO: result: yes" >&5
-echo "${ECHO_T}yes" >&6
-LIBS="-l$fftwname $LIBS"
-cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-
-
-#ifdef FC_DUMMY_MAIN
-#ifndef FC_DUMMY_MAIN_EQ_F77
-#  ifdef __cplusplus
-     extern "C"
-#  endif
-   int FC_DUMMY_MAIN() { return 1; }
-#endif
-#endif
-int
-main ()
-{
-main ();
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext conftest$ac_exeext
-if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
-  (eval $ac_link) 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } &&
-	 { ac_try='test -z "$ac_c_werror_flag"
-			 || test ! -s conftest.err'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; } &&
-	 { ac_try='test -s conftest$ac_exeext'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; }; then
-  :
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-fi
-rm -f conftest.err conftest.$ac_objext \
-      conftest$ac_exeext conftest.$ac_ext
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-
-echo "$as_me:$LINENO: result: no" >&5
-echo "${ECHO_T}no" >&6
-{ { echo "$as_me:$LINENO: error: Cant find $fftwname.h header. Make sure all your
-fftw prefixes match - we already use $ac_fftw_firstname.h" >&5
-echo "$as_me: error: Cant find $fftwname.h header. Make sure all your
-fftw prefixes match - we already use $ac_fftw_firstname.h" >&2;}
-   { (exit 1); exit 1; }; }
-
-fi
-rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
-
-fi
-
-
-
-  if test "$with_mpi" = "yes"; then
-
-if test -z "$ac_fftw_firstname"; then
-
-sizeof_real=$sizeof_real
-if test $sizeof_real = 8; then
-  prec="double"
-  fftwcheckprefix=d
-else
-  prec="single"
-  fftwcheckprefix=s
-fi
-
-xfftwname=${fftwcheckprefix}fftw3_mpi
-
-ok="no"
-# check header doesn't work, since we must use mpicc to get includes,
-# we cant trust cpp.
-echo "$as_me:$LINENO: checking for $xfftwname.h" >&5
-echo $ECHO_N "checking for $xfftwname.h... $ECHO_C" >&6
-cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-#include <$xfftwname.h>
-#ifdef FC_DUMMY_MAIN
-#ifndef FC_DUMMY_MAIN_EQ_F77
-#  ifdef __cplusplus
-     extern "C"
-#  endif
-   int FC_DUMMY_MAIN() { return 1; }
-#endif
-#endif
-int
-main ()
-{
-
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext
-if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
-  (eval $ac_compile) 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } &&
-	 { ac_try='test -z "$ac_c_werror_flag"
-			 || test ! -s conftest.err'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; } &&
-	 { ac_try='test -s conftest.$ac_objext'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; }; then
-
-fftwname=$xfftwname
-echo "$as_me:$LINENO: result: yes" >&5
-echo "${ECHO_T}yes" >&6
-
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-echo "$as_me:$LINENO: result: no" >&5
-echo "${ECHO_T}no" >&6
-fi
-rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
-
-# fftwname was set if we found a header
-
-if test -n "$fftwname"; then
-# we cannot run the code since an MPI program might not be allowed
-# on a login node of a supercomputer
-cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-#include <$fftwname.h>
-#ifdef FC_DUMMY_MAIN
-#ifndef FC_DUMMY_MAIN_EQ_F77
-#  ifdef __cplusplus
-     extern "C"
-#  endif
-   int FC_DUMMY_MAIN() { return 1; }
-#endif
-#endif
-int
-main ()
-{
-int _array_ [1 - 2 * !((sizeof(fftw_real)) == $sizeof_real)];
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext
-if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
-  (eval $ac_compile) 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } &&
-	 { ac_try='test -z "$ac_c_werror_flag"
-			 || test ! -s conftest.err'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; } &&
-	 { ac_try='test -s conftest.$ac_objext'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; }; then
-
-ok=yes
-usedprefix=$fftwcheckprefix
-
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-ok=no
-fi
-rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
-fi
-
-if test "$ok" != "yes"; then
-  echo "$as_me:$LINENO: checking for fftw3_mpi.h" >&5
-echo $ECHO_N "checking for fftw3_mpi.h... $ECHO_C" >&6
-  cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-#include <fftw3_mpi.h>
-#ifdef FC_DUMMY_MAIN
-#ifndef FC_DUMMY_MAIN_EQ_F77
-#  ifdef __cplusplus
-     extern "C"
-#  endif
-   int FC_DUMMY_MAIN() { return 1; }
-#endif
-#endif
-int
-main ()
-{
-
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext
-if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
-  (eval $ac_compile) 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } &&
-	 { ac_try='test -z "$ac_c_werror_flag"
-			 || test ! -s conftest.err'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; } &&
-	 { ac_try='test -s conftest.$ac_objext'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; }; then
-  echo "$as_me:$LINENO: result: yes" >&5
-echo "${ECHO_T}yes" >&6
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-
-echo "$as_me:$LINENO: result: no" >&5
-echo "${ECHO_T}no" >&6
-{ { echo "$as_me:$LINENO: error: Cannot find any $prec precision $xfftwname.h or fftw3_mpi.h
-Do you have $prec precision FFTW installed? If you are using packages,
-note that you also need fftw-devel to use FFTW with OOPSE. You can find the
-software at www.fftw.org.
-If you compiled FFTW yourself:
-Note that the default FFTW setup is double precision.  If you want MPI support,
-use --with-mpi. It is a good idea to install both single & double.
-If you have installed FFTW in a non-standard location, you should
-provide the correct paths in the CPPFLAGS and LDFLAGS environment
-variables before running configure.
-That is also necessary to do if your compiler doesn't search
-/usr/local/include and /usr/local/lib by default." >&5
-echo "$as_me: error: Cannot find any $prec precision $xfftwname.h or fftw3_mpi.h
-Do you have $prec precision FFTW installed? If you are using packages,
-note that you also need fftw-devel to use FFTW with OOPSE. You can find the
-software at www.fftw.org.
-If you compiled FFTW yourself:
-Note that the default FFTW setup is double precision.  If you want MPI support,
-use --with-mpi. It is a good idea to install both single & double.
-If you have installed FFTW in a non-standard location, you should
-provide the correct paths in the CPPFLAGS and LDFLAGS environment
-variables before running configure.
-That is also necessary to do if your compiler doesn't search
-/usr/local/include and /usr/local/lib by default." >&2;}
-   { (exit 1); exit 1; }; }
-
-fi
-rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
-cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-#include <fftw3_mpi.h>
-#ifdef FC_DUMMY_MAIN
-#ifndef FC_DUMMY_MAIN_EQ_F77
-#  ifdef __cplusplus
-     extern "C"
-#  endif
-   int FC_DUMMY_MAIN() { return 1; }
-#endif
-#endif
-int
-main ()
-{
-int _array_ [1 - 2 * !((sizeof(fftw_real)) == $sizeof_real)];
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext
-if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
-  (eval $ac_compile) 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } &&
-	 { ac_try='test -z "$ac_c_werror_flag"
-			 || test ! -s conftest.err'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; } &&
-	 { ac_try='test -s conftest.$ac_objext'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; }; then
-
-usedprefix=""
-fftwname=fftw3_mpi
-
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-
-{ { echo "$as_me:$LINENO: error: Cannot find any $prec precision $xfftwname.h or fftw3_mpi.h
-Do you have $prec precision FFTW installed? If you are using packages,
-note that you also need fftw-devel to use FFTW with OOPSE. You can find the
-software at www.fftw.org.
-If you compiled FFTW yourself:
-Note that the default FFTW setup is double precision.  If you want MPI support,
-use --with-mpi. It is a good idea to install both single & double.
-If you have installed FFTW in a non-standard location, you should
-provide the correct paths in the CPPFLAGS and LDFLAGS environment
-variables before running configure.
-That is also necessary to do if your compiler doesn't search
-/usr/local/include and /usr/local/lib by default." >&5
-echo "$as_me: error: Cannot find any $prec precision $xfftwname.h or fftw3_mpi.h
-Do you have $prec precision FFTW installed? If you are using packages,
-note that you also need fftw-devel to use FFTW with OOPSE. You can find the
-software at www.fftw.org.
-If you compiled FFTW yourself:
-Note that the default FFTW setup is double precision.  If you want MPI support,
-use --with-mpi. It is a good idea to install both single & double.
-If you have installed FFTW in a non-standard location, you should
-provide the correct paths in the CPPFLAGS and LDFLAGS environment
-variables before running configure.
-That is also necessary to do if your compiler doesn't search
-/usr/local/include and /usr/local/lib by default." >&2;}
-   { (exit 1); exit 1; }; }
-fi
-rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
-fi
-
-
-as_ac_Lib=`echo "ac_cv_lib_$fftwname''_main" | $as_tr_sh`
-echo "$as_me:$LINENO: checking for main in -l$fftwname" >&5
-echo $ECHO_N "checking for main in -l$fftwname... $ECHO_C" >&6
-if eval "test \"\${$as_ac_Lib+set}\" = set"; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-l$fftwname  $LIBS"
-cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-
-
-#ifdef FC_DUMMY_MAIN
-#ifndef FC_DUMMY_MAIN_EQ_F77
-#  ifdef __cplusplus
-     extern "C"
-#  endif
-   int FC_DUMMY_MAIN() { return 1; }
-#endif
-#endif
-int
-main ()
-{
-main ();
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext conftest$ac_exeext
-if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
-  (eval $ac_link) 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } &&
-	 { ac_try='test -z "$ac_c_werror_flag"
-			 || test ! -s conftest.err'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; } &&
-	 { ac_try='test -s conftest$ac_exeext'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; }; then
-  eval "$as_ac_Lib=yes"
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-eval "$as_ac_Lib=no"
-fi
-rm -f conftest.err conftest.$ac_objext \
-      conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-echo "$as_me:$LINENO: result: `eval echo '${'$as_ac_Lib'}'`" >&5
-echo "${ECHO_T}`eval echo '${'$as_ac_Lib'}'`" >&6
-if test `eval echo '${'$as_ac_Lib'}'` = yes; then
-  cat >>confdefs.h <<_ACEOF
-#define `echo "HAVE_LIB$fftwname" | $as_tr_cpp` 1
-_ACEOF
-
-  LIBS="-l$fftwname $LIBS"
-
-else
-  { { echo "$as_me:$LINENO: error: Can't find a library to match the $fftwname header" >&5
-echo "$as_me: error: Can't find a library to match the $fftwname header" >&2;}
-   { (exit 1); exit 1; }; }
-fi
-
-ac_fftw_savedprefix=$usedprefix
-ac_fftw_firstname=$fftwname
-
-else
-
-fftwname=${ac_fftw_savedprefix}fftw3_mpi
-echo "$as_me:$LINENO: checking for $fftwname.h" >&5
-echo $ECHO_N "checking for $fftwname.h... $ECHO_C" >&6
-cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-#include <$fftwname.h>
-#ifdef FC_DUMMY_MAIN
-#ifndef FC_DUMMY_MAIN_EQ_F77
-#  ifdef __cplusplus
-     extern "C"
-#  endif
-   int FC_DUMMY_MAIN() { return 1; }
-#endif
-#endif
-int
-main ()
-{
-
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext
-if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
-  (eval $ac_compile) 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } &&
-	 { ac_try='test -z "$ac_c_werror_flag"
-			 || test ! -s conftest.err'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; } &&
-	 { ac_try='test -s conftest.$ac_objext'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; }; then
-  echo "$as_me:$LINENO: result: yes" >&5
-echo "${ECHO_T}yes" >&6
-LIBS="-l$fftwname $LIBS"
-cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-
-
-#ifdef FC_DUMMY_MAIN
-#ifndef FC_DUMMY_MAIN_EQ_F77
-#  ifdef __cplusplus
-     extern "C"
-#  endif
-   int FC_DUMMY_MAIN() { return 1; }
-#endif
-#endif
-int
-main ()
-{
-main ();
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext conftest$ac_exeext
-if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
-  (eval $ac_link) 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } &&
-	 { ac_try='test -z "$ac_c_werror_flag"
-			 || test ! -s conftest.err'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; } &&
-	 { ac_try='test -s conftest$ac_exeext'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; }; then
-  :
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-fi
-rm -f conftest.err conftest.$ac_objext \
-      conftest$ac_exeext conftest.$ac_ext
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-
-echo "$as_me:$LINENO: result: no" >&5
-echo "${ECHO_T}no" >&6
-{ { echo "$as_me:$LINENO: error: Cant find $fftwname.h header. Make sure all your
-fftw prefixes match - we already use $ac_fftw_firstname.h" >&5
-echo "$as_me: error: Cant find $fftwname.h header. Make sure all your
-fftw prefixes match - we already use $ac_fftw_firstname.h" >&2;}
-   { (exit 1); exit 1; }; }
-
-fi
-rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
-
-fi
-
-
+  (exit $ac_status); } >/dev/null; then
+  if test -s conftest.err; then
+    ac_cpp_err=$ac_c_preproc_warn_flag
+    ac_cpp_err=$ac_cpp_err$ac_c_werror_flag
+  else
+    ac_cpp_err=
   fi
-
-  case ${ac_fftw_savedprefix} in
-   d)
-cat >>confdefs.h <<\_ACEOF
-#define FFTW_NAME_DFFTW
-_ACEOF
- ;;
-   *)
-cat >>confdefs.h <<\_ACEOF
-#define FFTW_NAME_FFTW
-_ACEOF
- ;;
-  esac
 else
-  echo "*******************************************************************"
-  echo "* FFTW libraries and include files are required for computing     *"
-  echo "* undulation spectra with the staticProps program.  If you don't  *"
-  echo "* fftw turned on, OOPSE will still work, but you won't be able to *"
-  echo "* analyze your trajectories for this property.                    *"
-  echo "*******************************************************************"
-fi # end of fftw check
+  ac_cpp_err=yes
+fi
+if test -z "$ac_cpp_err"; then
+  ac_header_preproc=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+  ac_header_preproc=no
+fi
+rm -f conftest.err conftest.$ac_ext
+echo "$as_me:$LINENO: result: $ac_header_preproc" >&5
+echo "${ECHO_T}$ac_header_preproc" >&6
+
+# So?  What about this header?
+case $ac_header_compiler:$ac_header_preproc:$ac_c_preproc_warn_flag in
+  yes:no: )
+    { echo "$as_me:$LINENO: WARNING: fftw3.h: accepted by the compiler, rejected by the preprocessor!" >&5
+echo "$as_me: WARNING: fftw3.h: accepted by the compiler, rejected by the preprocessor!" >&2;}
+    { echo "$as_me:$LINENO: WARNING: fftw3.h: proceeding with the compiler's result" >&5
+echo "$as_me: WARNING: fftw3.h: proceeding with the compiler's result" >&2;}
+    ac_header_preproc=yes
+    ;;
+  no:yes:* )
+    { echo "$as_me:$LINENO: WARNING: fftw3.h: present but cannot be compiled" >&5
+echo "$as_me: WARNING: fftw3.h: present but cannot be compiled" >&2;}
+    { echo "$as_me:$LINENO: WARNING: fftw3.h:     check for missing prerequisite headers?" >&5
+echo "$as_me: WARNING: fftw3.h:     check for missing prerequisite headers?" >&2;}
+    { echo "$as_me:$LINENO: WARNING: fftw3.h: see the Autoconf documentation" >&5
+echo "$as_me: WARNING: fftw3.h: see the Autoconf documentation" >&2;}
+    { echo "$as_me:$LINENO: WARNING: fftw3.h:     section \"Present But Cannot Be Compiled\"" >&5
+echo "$as_me: WARNING: fftw3.h:     section \"Present But Cannot Be Compiled\"" >&2;}
+    { echo "$as_me:$LINENO: WARNING: fftw3.h: proceeding with the preprocessor's result" >&5
+echo "$as_me: WARNING: fftw3.h: proceeding with the preprocessor's result" >&2;}
+    { echo "$as_me:$LINENO: WARNING: fftw3.h: in the future, the compiler will take precedence" >&5
+echo "$as_me: WARNING: fftw3.h: in the future, the compiler will take precedence" >&2;}
+    (
+      cat <<\_ASBOX
+## ------------------------------ ##
+## Report this to gezelter@nd.edu ##
+## ------------------------------ ##
+_ASBOX
+    ) |
+      sed "s/^/$as_me: WARNING:     /" >&2
+    ;;
+esac
+echo "$as_me:$LINENO: checking for fftw3.h" >&5
+echo $ECHO_N "checking for fftw3.h... $ECHO_C" >&6
+if test "${ac_cv_header_fftw3_h+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  ac_cv_header_fftw3_h=$ac_header_preproc
+fi
+echo "$as_me:$LINENO: result: $ac_cv_header_fftw3_h" >&5
+echo "${ECHO_T}$ac_cv_header_fftw3_h" >&6
+
+fi
+if test $ac_cv_header_fftw3_h = yes; then
+  fftw_cv_fftw3_h=yes
+else
+  fftw_cv_fftw3_h=no
+fi
+
+
+        if test "$fftw_cv_libfftw3" = "no" -o "$fftw_cv_fftw3_h" = "no"
+        then
+                echo "$as_me:$LINENO: checking for fftwnd_one in -lfftw" >&5
+echo $ECHO_N "checking for fftwnd_one in -lfftw... $ECHO_C" >&6
+if test "${ac_cv_lib_fftw_fftwnd_one+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lfftw  $LIBS"
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+/* Override any gcc2 internal prototype to avoid an error.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+/* We use char because int might match the return type of a gcc2
+   builtin and then its argument prototype would still apply.  */
+char fftwnd_one ();
+#ifdef FC_DUMMY_MAIN
+#ifndef FC_DUMMY_MAIN_EQ_F77
+#  ifdef __cplusplus
+     extern "C"
+#  endif
+   int FC_DUMMY_MAIN() { return 1; }
+#endif
+#endif
+int
+main ()
+{
+fftwnd_one ();
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+  (eval $ac_link) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_c_werror_flag"
+			 || test ! -s conftest.err'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest$ac_exeext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  ac_cv_lib_fftw_fftwnd_one=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+ac_cv_lib_fftw_fftwnd_one=no
+fi
+rm -f conftest.err conftest.$ac_objext \
+      conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+echo "$as_me:$LINENO: result: $ac_cv_lib_fftw_fftwnd_one" >&5
+echo "${ECHO_T}$ac_cv_lib_fftw_fftwnd_one" >&6
+if test $ac_cv_lib_fftw_fftwnd_one = yes; then
+  fftw_cv_libfftw=yes
+else
+  fftw_cv_libfftw=no
+fi
+
+                if test "${ac_cv_header_fftw_h+set}" = set; then
+  echo "$as_me:$LINENO: checking for fftw.h" >&5
+echo $ECHO_N "checking for fftw.h... $ECHO_C" >&6
+if test "${ac_cv_header_fftw_h+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+fi
+echo "$as_me:$LINENO: result: $ac_cv_header_fftw_h" >&5
+echo "${ECHO_T}$ac_cv_header_fftw_h" >&6
+else
+  # Is the header compilable?
+echo "$as_me:$LINENO: checking fftw.h usability" >&5
+echo $ECHO_N "checking fftw.h usability... $ECHO_C" >&6
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+$ac_includes_default
+#include <fftw.h>
+_ACEOF
+rm -f conftest.$ac_objext
+if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
+  (eval $ac_compile) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_c_werror_flag"
+			 || test ! -s conftest.err'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest.$ac_objext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  ac_header_compiler=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+ac_header_compiler=no
+fi
+rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
+echo "$as_me:$LINENO: result: $ac_header_compiler" >&5
+echo "${ECHO_T}$ac_header_compiler" >&6
+
+# Is the header present?
+echo "$as_me:$LINENO: checking fftw.h presence" >&5
+echo $ECHO_N "checking fftw.h presence... $ECHO_C" >&6
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+#include <fftw.h>
+_ACEOF
+if { (eval echo "$as_me:$LINENO: \"$ac_cpp conftest.$ac_ext\"") >&5
+  (eval $ac_cpp conftest.$ac_ext) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } >/dev/null; then
+  if test -s conftest.err; then
+    ac_cpp_err=$ac_c_preproc_warn_flag
+    ac_cpp_err=$ac_cpp_err$ac_c_werror_flag
+  else
+    ac_cpp_err=
+  fi
+else
+  ac_cpp_err=yes
+fi
+if test -z "$ac_cpp_err"; then
+  ac_header_preproc=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+  ac_header_preproc=no
+fi
+rm -f conftest.err conftest.$ac_ext
+echo "$as_me:$LINENO: result: $ac_header_preproc" >&5
+echo "${ECHO_T}$ac_header_preproc" >&6
+
+# So?  What about this header?
+case $ac_header_compiler:$ac_header_preproc:$ac_c_preproc_warn_flag in
+  yes:no: )
+    { echo "$as_me:$LINENO: WARNING: fftw.h: accepted by the compiler, rejected by the preprocessor!" >&5
+echo "$as_me: WARNING: fftw.h: accepted by the compiler, rejected by the preprocessor!" >&2;}
+    { echo "$as_me:$LINENO: WARNING: fftw.h: proceeding with the compiler's result" >&5
+echo "$as_me: WARNING: fftw.h: proceeding with the compiler's result" >&2;}
+    ac_header_preproc=yes
+    ;;
+  no:yes:* )
+    { echo "$as_me:$LINENO: WARNING: fftw.h: present but cannot be compiled" >&5
+echo "$as_me: WARNING: fftw.h: present but cannot be compiled" >&2;}
+    { echo "$as_me:$LINENO: WARNING: fftw.h:     check for missing prerequisite headers?" >&5
+echo "$as_me: WARNING: fftw.h:     check for missing prerequisite headers?" >&2;}
+    { echo "$as_me:$LINENO: WARNING: fftw.h: see the Autoconf documentation" >&5
+echo "$as_me: WARNING: fftw.h: see the Autoconf documentation" >&2;}
+    { echo "$as_me:$LINENO: WARNING: fftw.h:     section \"Present But Cannot Be Compiled\"" >&5
+echo "$as_me: WARNING: fftw.h:     section \"Present But Cannot Be Compiled\"" >&2;}
+    { echo "$as_me:$LINENO: WARNING: fftw.h: proceeding with the preprocessor's result" >&5
+echo "$as_me: WARNING: fftw.h: proceeding with the preprocessor's result" >&2;}
+    { echo "$as_me:$LINENO: WARNING: fftw.h: in the future, the compiler will take precedence" >&5
+echo "$as_me: WARNING: fftw.h: in the future, the compiler will take precedence" >&2;}
+    (
+      cat <<\_ASBOX
+## ------------------------------ ##
+## Report this to gezelter@nd.edu ##
+## ------------------------------ ##
+_ASBOX
+    ) |
+      sed "s/^/$as_me: WARNING:     /" >&2
+    ;;
+esac
+echo "$as_me:$LINENO: checking for fftw.h" >&5
+echo $ECHO_N "checking for fftw.h... $ECHO_C" >&6
+if test "${ac_cv_header_fftw_h+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  ac_cv_header_fftw_h=$ac_header_preproc
+fi
+echo "$as_me:$LINENO: result: $ac_cv_header_fftw_h" >&5
+echo "${ECHO_T}$ac_cv_header_fftw_h" >&6
+
+fi
+if test $ac_cv_header_fftw_h = yes; then
+  fftw_cv_fftw_h=yes
+else
+  fftw_cv_fftw_h=no
+fi
+
+
+                if test "$fftw_cv_libfftw" = "no" -o "$fftw_cv_fftw_h" = "no"
+                then
+                        echo "$as_me:$LINENO: checking for fftwnd_one in -ldfftw" >&5
+echo $ECHO_N "checking for fftwnd_one in -ldfftw... $ECHO_C" >&6
+if test "${ac_cv_lib_dfftw_fftwnd_one+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-ldfftw  $LIBS"
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+/* Override any gcc2 internal prototype to avoid an error.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+/* We use char because int might match the return type of a gcc2
+   builtin and then its argument prototype would still apply.  */
+char fftwnd_one ();
+#ifdef FC_DUMMY_MAIN
+#ifndef FC_DUMMY_MAIN_EQ_F77
+#  ifdef __cplusplus
+     extern "C"
+#  endif
+   int FC_DUMMY_MAIN() { return 1; }
+#endif
+#endif
+int
+main ()
+{
+fftwnd_one ();
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+  (eval $ac_link) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_c_werror_flag"
+			 || test ! -s conftest.err'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest$ac_exeext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  ac_cv_lib_dfftw_fftwnd_one=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+ac_cv_lib_dfftw_fftwnd_one=no
+fi
+rm -f conftest.err conftest.$ac_objext \
+      conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+echo "$as_me:$LINENO: result: $ac_cv_lib_dfftw_fftwnd_one" >&5
+echo "${ECHO_T}$ac_cv_lib_dfftw_fftwnd_one" >&6
+if test $ac_cv_lib_dfftw_fftwnd_one = yes; then
+  fftw_cv_libdfftw=yes
+else
+  fftw_cv_libdfftw=no
+fi
+
+                        if test "${ac_cv_header_dfftw_h+set}" = set; then
+  echo "$as_me:$LINENO: checking for dfftw.h" >&5
+echo $ECHO_N "checking for dfftw.h... $ECHO_C" >&6
+if test "${ac_cv_header_dfftw_h+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+fi
+echo "$as_me:$LINENO: result: $ac_cv_header_dfftw_h" >&5
+echo "${ECHO_T}$ac_cv_header_dfftw_h" >&6
+else
+  # Is the header compilable?
+echo "$as_me:$LINENO: checking dfftw.h usability" >&5
+echo $ECHO_N "checking dfftw.h usability... $ECHO_C" >&6
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+$ac_includes_default
+#include <dfftw.h>
+_ACEOF
+rm -f conftest.$ac_objext
+if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
+  (eval $ac_compile) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_c_werror_flag"
+			 || test ! -s conftest.err'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest.$ac_objext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  ac_header_compiler=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+ac_header_compiler=no
+fi
+rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
+echo "$as_me:$LINENO: result: $ac_header_compiler" >&5
+echo "${ECHO_T}$ac_header_compiler" >&6
+
+# Is the header present?
+echo "$as_me:$LINENO: checking dfftw.h presence" >&5
+echo $ECHO_N "checking dfftw.h presence... $ECHO_C" >&6
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+#include <dfftw.h>
+_ACEOF
+if { (eval echo "$as_me:$LINENO: \"$ac_cpp conftest.$ac_ext\"") >&5
+  (eval $ac_cpp conftest.$ac_ext) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } >/dev/null; then
+  if test -s conftest.err; then
+    ac_cpp_err=$ac_c_preproc_warn_flag
+    ac_cpp_err=$ac_cpp_err$ac_c_werror_flag
+  else
+    ac_cpp_err=
+  fi
+else
+  ac_cpp_err=yes
+fi
+if test -z "$ac_cpp_err"; then
+  ac_header_preproc=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+  ac_header_preproc=no
+fi
+rm -f conftest.err conftest.$ac_ext
+echo "$as_me:$LINENO: result: $ac_header_preproc" >&5
+echo "${ECHO_T}$ac_header_preproc" >&6
+
+# So?  What about this header?
+case $ac_header_compiler:$ac_header_preproc:$ac_c_preproc_warn_flag in
+  yes:no: )
+    { echo "$as_me:$LINENO: WARNING: dfftw.h: accepted by the compiler, rejected by the preprocessor!" >&5
+echo "$as_me: WARNING: dfftw.h: accepted by the compiler, rejected by the preprocessor!" >&2;}
+    { echo "$as_me:$LINENO: WARNING: dfftw.h: proceeding with the compiler's result" >&5
+echo "$as_me: WARNING: dfftw.h: proceeding with the compiler's result" >&2;}
+    ac_header_preproc=yes
+    ;;
+  no:yes:* )
+    { echo "$as_me:$LINENO: WARNING: dfftw.h: present but cannot be compiled" >&5
+echo "$as_me: WARNING: dfftw.h: present but cannot be compiled" >&2;}
+    { echo "$as_me:$LINENO: WARNING: dfftw.h:     check for missing prerequisite headers?" >&5
+echo "$as_me: WARNING: dfftw.h:     check for missing prerequisite headers?" >&2;}
+    { echo "$as_me:$LINENO: WARNING: dfftw.h: see the Autoconf documentation" >&5
+echo "$as_me: WARNING: dfftw.h: see the Autoconf documentation" >&2;}
+    { echo "$as_me:$LINENO: WARNING: dfftw.h:     section \"Present But Cannot Be Compiled\"" >&5
+echo "$as_me: WARNING: dfftw.h:     section \"Present But Cannot Be Compiled\"" >&2;}
+    { echo "$as_me:$LINENO: WARNING: dfftw.h: proceeding with the preprocessor's result" >&5
+echo "$as_me: WARNING: dfftw.h: proceeding with the preprocessor's result" >&2;}
+    { echo "$as_me:$LINENO: WARNING: dfftw.h: in the future, the compiler will take precedence" >&5
+echo "$as_me: WARNING: dfftw.h: in the future, the compiler will take precedence" >&2;}
+    (
+      cat <<\_ASBOX
+## ------------------------------ ##
+## Report this to gezelter@nd.edu ##
+## ------------------------------ ##
+_ASBOX
+    ) |
+      sed "s/^/$as_me: WARNING:     /" >&2
+    ;;
+esac
+echo "$as_me:$LINENO: checking for dfftw.h" >&5
+echo $ECHO_N "checking for dfftw.h... $ECHO_C" >&6
+if test "${ac_cv_header_dfftw_h+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  ac_cv_header_dfftw_h=$ac_header_preproc
+fi
+echo "$as_me:$LINENO: result: $ac_cv_header_dfftw_h" >&5
+echo "${ECHO_T}$ac_cv_header_dfftw_h" >&6
+
+fi
+if test $ac_cv_header_dfftw_h = yes; then
+  fftw_cv_dfftw_h=yes
+else
+  fftw_cv_dfftw_h=no
+fi
+
+
+                fi
+        fi
+        ac_ext=c
+ac_cpp='$CPP $CPPFLAGS'
+ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
+
+
+        if test "$fftw_cv_libfftw3" = "yes" -a "$fftw_cv_fftw3_h" = "yes"
+        then
+
+cat >>confdefs.h <<\_ACEOF
+#define HAVE_FFTW3_H 1
+_ACEOF
+
+                FFTW_INC_DIR="${FFTW_HOME}/include"
+                FFTW_LIB_DIR="${FFTW_HOME}/lib"
+                FFTW_LIBS="-lfftw3"
+        else
+        if test "$fftw_cv_libfftw" = "yes" -a "$fftw_cv_fftw_h" = "yes"
+        then
+
+cat >>confdefs.h <<\_ACEOF
+#define HAVE_FFTW_H 1
+_ACEOF
+
+                FFTW_INC_DIR="${FFTW_HOME}/include"
+                FFTW_LIB_DIR="${FFTW_HOME}/lib"
+                FFTW_LIBS="-lfftw"
+        else
+        if test "$fftw_cv_libdfftw" = "yes" -a "$fftw_cv_dfftw_h" = "yes"
+        then
+
+cat >>confdefs.h <<\_ACEOF
+#define HAVE_DFFTW_H 1
+_ACEOF
+
+                FFTW_INC_DIR="${FFTW_HOME}/include"
+                FFTW_LIB_DIR="${FFTW_HOME}/lib"
+                FFTW_LIBS="-ldfftw"
+        else
+                echo "$as_me:$LINENO: checking fftw in ${FFTW_HOME}" >&5
+echo $ECHO_N "checking fftw in ${FFTW_HOME}... $ECHO_C" >&6
+                FFTW_INC_DIR=
+                FFTW_LIB_DIR=
+                FFTW_LIBS=
+                LDFLAGS="$FFTW_OLD_LDFLAGS"
+                CPPFLAGS="$FFTW_OLD_CPPFLAGS"
+                echo "$as_me:$LINENO: result: failed" >&5
+echo "${ECHO_T}failed" >&6
+	echo ""
+	echo "*********************************************************"
+        echo "* WARNING: Could not find a working FFTW installation   *"
+        echo "* If you need the staticProps program to be able to     *"
+        echo "* compute undulation spectra, be sure to specify a      *"
+	echo "* valid fftw installation with --with-fftw=DIR          *"
+        echo "*                                                       *"
+        echo "* OOPSE will still work without fftw installed.         *"
+	echo "*********************************************************"
+	echo ""
+        fi
+        fi
+        fi
+
+
+
+fi
+fi
+
+
 
 # Checks for header files.
 echo "$as_me:$LINENO: checking for ANSI C header files" >&5
@@ -13783,7 +13532,6 @@ fi
 
 
 
-
 USE_CGAL=no
 cgal_makefile=auto
 
@@ -14232,7 +13980,6 @@ CGAL_INC_DIR="${CGAL_INCLDIR} ${CGAL_INCLCONFDIR}"
 CGAL_LIB_DIR=${CGAL_LIBDIR}
 
 CGAL_RLIB_DIR=${CGAL_RLIBDIR}
-
 
 
 
@@ -15061,6 +14808,9 @@ s,@F90_WORK_FILES_ARG@,$F90_WORK_FILES_ARG,;t t
 s,@MODDIRFLAG@,$MODDIRFLAG,;t t
 s,@F90MODINCSPEC@,$F90MODINCSPEC,;t t
 s,@F90_MODULE_NAMES@,$F90_MODULE_NAMES,;t t
+s,@FFTW_INC_DIR@,$FFTW_INC_DIR,;t t
+s,@FFTW_LIB_DIR@,$FFTW_LIB_DIR,;t t
+s,@FFTW_LIBS@,$FFTW_LIBS,;t t
 s,@LIBOBJS@,$LIBOBJS,;t t
 s,@POW_LIB@,$POW_LIB,;t t
 s,@CXXCPP@,$CXXCPP,;t t

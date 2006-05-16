@@ -96,15 +96,18 @@ Samples = \
 	samples/zcons 
 
 IncludeDirs = \
+	@FFTW_INC_DIR@ \
 	@CGAL_INC_DIR@ \
 	@MPI_INC_DIR@ 
 
 LibraryDirs = \
+	@FFTW_LIB_DIR@ \
 	@CGAL_LIB_DIR@ \
 	@MPI_LIB_DIR@ 
 
 Libraries = \
 	@LIBS@ \
+	@FFTW_LIBS@ \
 	@CGAL_LIBS@ \
 	@MPI_LIB@ \
 	@MPI_F90_LIB@ 
