@@ -52,6 +52,7 @@ PackageLibs = \
 	selection \
 	restraints \
 	lattice \
+	hydrodynamics \
 	openbabel\
         antlr\
         mdParser
@@ -120,10 +121,13 @@ UseMPI          = @USE_MPI@
 ModuleCase      = @F90_MODULE_NAMES@
 ModSuffix       = @MOD@
 LinkOptions = \
+	@LDFLAGS@ \
 	@FCLIBS@ \
-	@CXXFLAGS@
+	@CXXFLAGS@ 
+        
 
 ParallelLinkOptions = \
+	@LDFLAGS@ \
 	@FCLIBS@ \
 	@CXXFLAGS@
 
@@ -381,10 +385,10 @@ JavaArchiverOptions    =
 JniOptions             =
 RmiOptions             = -d $(TargetDir) -classpath $(ClassPath) \
 			 -sourcepath $(SourceDir)
-COptions               = $(FrcDeclare) @CFLAGS@
-CParallelOptions       = $(FrcDeclare) $(ParallelDeclare) @CFLAGS@
-CppOptions             = $(FrcDeclare) @CXXFLAGS@
-CppParallelOptions     = $(FrcDeclare) $(ParallelDeclare) @CXXFLAGS@
+COptions               = $(FrcDeclare) @CPPFLAGS@ @CFLAGS@
+CParallelOptions       = $(FrcDeclare) $(ParallelDeclare) @CPPFLAGS@ @CFLAGS@
+CppOptions             = $(FrcDeclare) @CPPFLAGS@ @CXXFLAGS@
+CppParallelOptions     = $(FrcDeclare) $(ParallelDeclare) @CPPFLAGS@ @CXXFLAGS@
 FortranOptions         =  @FCFLAGS@ @MODDIRFLAG@$(SourceDir) @MODDIRFLAG@$(TargetDir) @FCFLAGS_SRCEXT@
 FortranParallelOptions =  @FCFLAGS@ @MODDIRFLAG@$(SourceDir) @MODDIRFLAG@$(ParallelTargetDir) @PREPDEFFLAG@$(ParallelDeclare) @FCFLAGS_SRCEXT@ 
 JavaCompilerOptions    = -d $(TargetDir) -classpath $(ClassPath) \

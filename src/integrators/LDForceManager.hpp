@@ -45,9 +45,14 @@
 #include "brains/ForceManager.hpp"
 #include "primitives/Molecule.hpp"
 #include "math/SeqRandNumGen.hpp"
+#include "hydrodynamics/Shape.hpp"
 
 namespace oopse {
-  
+   
+  struct SDShape{
+    StuntDouble* sd;
+    Shape* shape;
+  };
   
   struct HydroProp{
     Vector3d cor;

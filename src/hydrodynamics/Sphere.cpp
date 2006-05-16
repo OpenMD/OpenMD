@@ -39,20 +39,57 @@
  * such damages.
  */
 
-#ifndef UTILS_HYDROPROPS_HPP
-#define UTILS_HYDROPROPS_HPP
-
-#include "math/Vector3.hpp"
-#include "math/SquareMatrix.hpp"
+#include "hydrodynamics/Sphere.hpp"
+#include "utils/OOPSEConstant.hpp"
+#include "math/LU.hpp"
 
 namespace oopse {
   
-  struct HydroProps {
-    Vector3d center;
-    Mat6x6d Xi;
-    Mat6x6d D;
-  };
+  Sphere::Sphere(Vector3d origin, double radius) : origin_(origin), radius_(radius){
+    
+  }
+  
+  bool Sphere::isInterior(Vector3d pos) {
+    Vector3d r = pos - origin_;
+    
+    bool result;
+    if (r.length() < radius_)
+      result = true;
+    else
+      result = false;
+    
+    return result;
+  }
+  
+  std::pair<Vector3d, Vector3d> Sphere::getBoundingBox() {
+    std::pair<Vector3d, Vector3d>  boundary;
+    Vector3d r(radius_, radius_, radius_);
+    boundary.first = origin_ - r;
+    boundary.second = origin_ + r;
+    return boundary;
+  }
+  
+  HydroProps Sphere::getHydroProps(double viscosity, double temperature) {
+    HydroProps props;
+    props.center =V3Zero;
+    double Xitt  = 6.0 * NumericConstant::PI * viscosity * radius_;
+    double Xirr = 8.0 * NumericConstant::PI * viscosity * radius_ * radius_ * radius_;
+    props.Xi(0, 0) = Xitt;
+    props.Xi(1, 1) = Xitt;
+    props.Xi(2, 2) = Xitt;
+    props.Xi(3, 3) = Xirr;
+    props.Xi(4, 4) = Xirr;
+    props.Xi(5, 5) = Xirr;
+    
+    const double convertConstant = 6.023; //convert poise.angstrom to amu/fs
+    props.Xi *= convertConstant;
+    Mat6x6d XiCopy = props.Xi;
+    invertMatrix(XiCopy, props.D);
+    double kt = OOPSEConstant::kB * temperature;
+    props.D *= kt;
+    props.Xi *= OOPSEConstant::kb * temperature;
+    
+    return props;
+  }
   
 }
-
-#endif

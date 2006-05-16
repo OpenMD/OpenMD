@@ -44,7 +44,7 @@
  *
  *  Created by Xiuquan Sun on 05/09/06.
  *  @author  Xiuquan Sun
- *  @version $Id: Hxy.hpp,v 1.1 2006-05-12 21:34:43 xsun Exp $
+ *  @version $Id: Hxy.hpp,v 1.2 2006-05-16 02:06:37 gezelter Exp $
  *
  */
 #ifndef APPLICATIONS_STATICPROPS_HXY_HPP
@@ -58,40 +58,39 @@ namespace oopse {
   
   class Hxy : public StaticAnalyser {
     
-public:
+  public:
     Hxy(SimInfo* info, const std::string& filename, const std::string& sele, int nbins_x, int nbins_y, int nrbins);
     
     int getnbins() {
-      return nbins; 
+      return nbins_; 
     }
     
     int getnBinsX() {
       return nBinsX_;
     }
-
+    
     int getnBinsY() {
       return nBinsY_;
     }
-
+    
     virtual void process();
     
-private:
+  private:
     
     virtual void printSpectrum();
-
-
+        
     Snapshot* currentSnapshot_;
-
+    
     int nProcessed_;
     std::string selectionScript_;
     SelectionEvaluator evaluator_;
     SelectionManager seleMan_;
-
+    
     double nBinsX_;
     double nBinsY_;
-    int nbins; 
+    int nbins_; 
     double dfreq;
-
+    
     std::vector<double> gridZ_;
     std::vector<int> gridsample_;
     std::vector< std::vector<double> > bin;

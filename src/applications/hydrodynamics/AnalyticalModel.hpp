@@ -39,20 +39,19 @@
  * such damages.
  */
 
-#ifndef APPLICATION_HYDRODYNAMICS_ANALYTICALMODEL_HPP
-#define APPLICATION_HYDRODYNAMICS_ANALYTICALMODEL_HPP
+#ifndef HYDRODYNAMICS_ANALYTICALMODEL_HPP
+#define HYDRODYNAMICS_ANALYTICALMODEL_HPP
 
-#include "applications/hydrodynamics/HydrodynamicsModel.hpp"
+#include "hydrodynamics/HydrodynamicsModel.hpp"
 namespace oopse {
-
-class AnalyticalModel : public HydrodynamicsModel {
-    public:
-        AnalyticalModel(StuntDouble* sd, SimInfo* info) : HydrodynamicsModel(sd, info) {}
-        virtual bool calcHydroProps(Spheric* spheric, double viscosity, double temperature);
-        virtual bool calcHydroProps(Ellipsoid* ellipsoid, double viscosity, double temperature);
-        virtual bool calcHydroProps(CompositeShape* compositexShape, double viscosity, double temperature);
-        virtual void writeBeads(std::ostream& os);
-};
-
+  
+  class AnalyticalModel : public HydrodynamicsModel {
+  public:
+    AnalyticalModel(StuntDouble* sd, SimInfo* info) : HydrodynamicsModel(sd, info) {}
+    virtual bool calcHydroProps(Sphere* sphere, double viscosity, double temperature);
+    virtual bool calcHydroProps(Ellipsoid* ellipsoid, double viscosity, double temperature);
+    virtual bool calcHydroProps(CompositeShape* compositeShape, double viscosity, double temperature);
+    virtual void writeBeads(std::ostream& os);
+  };  
 }
 #endif 

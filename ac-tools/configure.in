@@ -138,6 +138,32 @@ AC_LANG_C
 dnl Checks for libraries.
 AC_CHECK_LIB(m, asin, , exit)
 ACX_CHECK_ZLIB
+AC_ARG_WITH(fftw,
+ [  --without-fftw          if you turn this off you cannot compute undulation spectra],, with_fftw=yes)
+if test "$with_fftw" = "no"; then
+  AC_DEFINE(WITHOUT_FFTW,,[Disable all FFTW (and thus undulation spectrum) support])
+fi
+if test "$with_fftw" = "yes"; then
+  sizeof_real=8
+
+  ACX_CHECK_FFTW(fftw3,$sizeof_real)
+
+  if test "$with_mpi" = "yes"; then
+    ACX_CHECK_FFTW(fftw3_mpi,$sizeof_real)
+  fi
+
+  case ${ac_fftw_savedprefix} in
+   d) AC_DEFINE(FFTW_NAME_DFFTW,,[Use the d prefix on fftw includes]) ;;
+   *) AC_DEFINE(FFTW_NAME_FFTW,,[Dont use any prefix on fftw includes]) ;;
+  esac
+else
+  echo "*******************************************************************"
+  echo "* FFTW libraries and include files are required for computing     *"
+  echo "* undulation spectra with the staticProps program.  If you don't  *"
+  echo "* fftw turned on, OOPSE will still work, but you won't be able to *"
+  echo "* analyze your trajectories for this property.                    *"
+  echo "*******************************************************************"
+fi # end of fftw check
 
 # Checks for header files.
 AC_HEADER_STDC
@@ -244,6 +270,7 @@ if test "$USE_MPI" = "yes"; then
         ACX_MPI
 fi
 AC_SUBST(USE_MPI)
+
 
 dnl ########################################
 dnl # Check for CGAL headers and libraries #

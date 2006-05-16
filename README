@@ -25,7 +25,8 @@ What you need to compile and use OOPSE:
     Architecture                CC     CXX     F90    Notes
     -------------------------   ----   -----   -----  ----------------------
     ix86-pc-linux-gnu           icc    icpc    ifort  (Intel versions 7-9)
-    powerpc-apple-darwin8.4.0   gcc    g++     xlf    (GNU v.4 / IBM XL v. 8.1)
+    i386-apple-darwin8.6.1      icc    icpc    ifort  (Intel version 9.1)
+    powerpc-apple-darwin8.6.0   gcc    g++     xlf95  (GNU v.4 / IBM XL v. 8.1)
     x86_64-unknown-linux-gnu    pgcc   pgCC    pgf95  (Portland Group v. 6.0)
     sparc-sun-solaris2.10       cc     CC      f95    (Sun ONE Studio 10)
     

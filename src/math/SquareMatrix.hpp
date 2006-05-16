@@ -49,6 +49,7 @@
 #define MATH_SQUAREMATRIX_HPP 
 
 #include "math/RectMatrix.hpp"
+#include "utils/NumericConstant.hpp"
 
 namespace oopse {
 
@@ -138,7 +139,7 @@ namespace oopse {
     bool isSymmetric() const {
       for (unsigned int i = 0; i < Dim - 1; i++)
 	for (unsigned int j = i; j < Dim; j++)
-	  if (fabs(this->data_[i][j] - this->data_[j][i]) > oopse::epsilon) 
+	  if (fabs(this->data_[i][j] - this->data_[j][i]) > epsilon) 
 	    return false;
                         
       return true;
@@ -157,7 +158,7 @@ namespace oopse {
     bool isDiagonal() const {
       for (unsigned int i = 0; i < Dim ; i++)
 	for (unsigned int j = 0; j < Dim; j++)
-	  if (i !=j && fabs(this->data_[i][j]) > oopse::epsilon) 
+	  if (i !=j && fabs(this->data_[i][j]) > epsilon) 
 	    return false;
                         
       return true;
@@ -169,7 +170,7 @@ namespace oopse {
 	return false;
                 
       for (unsigned int i = 0; i < Dim ; i++)
-	if (fabs(this->data_[i][i] - 1) > oopse::epsilon)
+	if (fabs(this->data_[i][i] - 1) > epsilon)
 	  return false;
                     
       return true;

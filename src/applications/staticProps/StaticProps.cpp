@@ -59,7 +59,9 @@
 #include "applications/staticProps/SCDOrderParameter.hpp"
 #include "applications/staticProps/DensityPlot.hpp"
 #include "applications/staticProps/RhoZ.hpp"
+#ifndef WITHOUT_FFTW  
 #include "applications/staticProps/Hxy.hpp"
+#endif
 
 using namespace oopse;
 
@@ -188,8 +190,10 @@ int main(int argc, char* argv[]){
   } else if (args_info.slab_density_given) {
       Mat3x3d hmat = info->getSnapshotManager()->getCurrentSnapshot()->getHmat();
       analyser = new RhoZ(info, dumpFileName, sele1, hmat(2, 2), args_info.nrbins_arg);
+#ifndef WITHOUT_FFTW  
   }else if (args_info.hxy_given) {
       analyser = new Hxy(info, dumpFileName, sele1, args_info.nbins_x_arg, args_info.nbins_y_arg, args_info.nrbins_arg);
+#endif
   }
     
   if (args_info.output_given) {

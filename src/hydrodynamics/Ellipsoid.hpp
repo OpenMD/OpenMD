@@ -39,20 +39,33 @@
  * such damages.
  */
 
-#ifndef UTILS_HYDROPROPS_HPP
-#define UTILS_HYDROPROPS_HPP
-
-#include "math/Vector3.hpp"
-#include "math/SquareMatrix.hpp"
-
+#ifndef HYDRODYNAMICS_ELLIPSOID_HPP
+#define HYDRODYNAMICS_ELLIPSOID_HPP
+#include "hydrodynamics/Shape.hpp"
+#include "math/SquareMatrix3.hpp"
 namespace oopse {
   
-  struct HydroProps {
-    Vector3d center;
-    Mat6x6d Xi;
-    Mat6x6d D;
-  };
-  
+  /** @class Ellipsoid */
+  class Ellipsoid : public Shape{
+  public:
+    Ellipsoid(Vector3d origin, double rMajor, double rMinor, Mat3x3d rotMat);
+    virtual bool isInterior(Vector3d pos);
+    virtual std::pair<Vector3d, Vector3d> getBoundingBox();
+    virtual bool hasAnalyticalSolution() {return true;}
+    
+    virtual HydroProps getHydroProps(double viscosity, double temperature);
+    
+    
+    double getRMajor() {return rMajor_;}
+    double getRMinor() {return rMinor_;}
+    
+  private:
+    
+    Vector3d origin_;
+    double rMajor_;
+    double rMinor_;
+    Mat3x3d rotMat_;
+  };  
 }
 
 #endif

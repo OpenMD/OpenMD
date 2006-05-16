@@ -42,22 +42,16 @@
 #include "integrators/LDForceManager.hpp"
 #include "math/CholeskyDecomposition.hpp"
 #include "utils/OOPSEConstant.hpp"
+#include "hydrodynamics/Sphere.hpp"
+#include "hydrodynamics/Ellipsoid.hpp"
+#include "openbabel/mol.hpp"
+
+using namespace OpenBabel;
 namespace oopse {
 
   LDForceManager::LDForceManager(SimInfo* info) : ForceManager(info){
     Globals* simParams = info->getSimParams();
-    
-    std::map<std::string, HydroProp> hydroPropMap;
-    if (simParams->haveHydroPropFile()) {
-      hydroPropMap = parseFrictionFile(simParams->getHydroPropFile());
-    } else {
-      sprintf( painCave.errMsg,
-               "HydroPropFile must be set if Langevin Dynamics is specified.\n");
-      painCave.severity = OOPSE_ERROR;
-      painCave.isFatal = 1;
-      simError();  
-    }
-    
+        
     sphericalBoundaryConditions_ = false;
     if (simParams->getUseSphericalBoundaryConditions()) {
       sphericalBoundaryConditions_ = true;
@@ -92,29 +86,153 @@ namespace oopse {
         simError();  
       }
     }
-      
-    SimInfo::MoleculeIterator i;
-    Molecule::IntegrableObjectIterator  j;
+
+    // Build the hydroProp map:
+    std::map<std::string, HydroProp> hydroPropMap;
+
     Molecule* mol;
     StuntDouble* integrableObject;
-    for (mol = info->beginMolecule(i); mol != NULL; mol = info->nextMolecule(i)) {
-      for (integrableObject = mol->beginIntegrableObject(j); integrableObject != NULL;
+    SimInfo::MoleculeIterator i;
+    Molecule::IntegrableObjectIterator  j;		
+    bool needHydroPropFile = false;
+    
+    for (mol = info->beginMolecule(i); mol != NULL; 
+         mol = info->nextMolecule(i)) {
+      for (integrableObject = mol->beginIntegrableObject(j); 
+           integrableObject != NULL;
            integrableObject = mol->nextIntegrableObject(j)) {
-        std::map<std::string, HydroProp>::iterator iter = hydroPropMap.find(integrableObject->getType());
-        if (iter != hydroPropMap.end()) {
-          hydroProps_.push_back(iter->second);
-        } else {
-          sprintf( painCave.errMsg,
-                   "Can not find resistance tensor for atom [%s]\n", integrableObject->getType().c_str());
-          painCave.severity = OOPSE_ERROR;
-          painCave.isFatal = 1;
-          simError();  
+        
+        if (integrableObject->isRigidBody()) {
+          RigidBody* rb = static_cast<RigidBody*>(integrableObject);
+          if (rb->getNumAtoms() > 1) needHydroPropFile = true;
         }
         
       }
     }
+        
+
+    if (needHydroPropFile) {               
+      if (simParams->haveHydroPropFile()) {
+        hydroPropMap = parseFrictionFile(simParams->getHydroPropFile());
+      } else {               
+        sprintf( painCave.errMsg,
+                 "HydroPropFile must be set to a file name if Langevin\n"
+                 "\tDynamics is specified for rigidBodies which contain more\n"
+                 "\tthan one atom.  To create a HydroPropFile, run \"Hydro\".\n");
+        painCave.severity = OOPSE_ERROR;
+        painCave.isFatal = 1;
+        simError();  
+      }      
+      std::map<std::string, HydroProp>::iterator iter = hydroPropMap.find(integrableObject->getType());
+      if (iter != hydroPropMap.end()) {
+        hydroProps_.push_back(iter->second);
+      } else {
+        sprintf( painCave.errMsg,
+                 "Can not find resistance tensor for atom [%s]\n", integrableObject->getType().c_str());
+        painCave.severity = OOPSE_ERROR;
+        painCave.isFatal = 1;
+        simError();  
+      }
+    } else {
+
+      std::map<std::string, HydroProp> hydroPropMap;
+      for (mol = info->beginMolecule(i); mol != NULL; 
+           mol = info->nextMolecule(i)) {
+        for (integrableObject = mol->beginIntegrableObject(j); 
+             integrableObject != NULL;
+             integrableObject = mol->nextIntegrableObject(j)) {
+          Shape* currShape = NULL;
+          if (integrableObject->isDirectionalAtom()) {
+            DirectionalAtom* dAtom = static_cast<DirectionalAtom*>(integrableObject);
+            AtomType* atomType = dAtom->getAtomType();
+            if (atomType->isGayBerne()) {
+              DirectionalAtomType* dAtomType = dynamic_cast<DirectionalAtomType*>(atomType);
+              
+              GenericData* data = dAtomType->getPropertyByName("GayBerne");
+              if (data != NULL) {
+                GayBerneParamGenericData* gayBerneData = dynamic_cast<GayBerneParamGenericData*>(data);
+                
+                if (gayBerneData != NULL) {  
+                  GayBerneParam gayBerneParam = gayBerneData->getData();
+                  currShape = new Ellipsoid(V3Zero, 
+                                            gayBerneParam.GB_sigma/2.0, 
+                                            gayBerneParam.GB_l2b_ratio*gayBerneParam.GB_sigma/2.0, 
+                                            Mat3x3d::identity());
+                } else {
+                  sprintf( painCave.errMsg,
+                           "Can not cast GenericData to GayBerneParam\n");
+                  painCave.severity = OOPSE_ERROR;
+                  painCave.isFatal = 1;
+                  simError();   
+                }
+              } else {
+                sprintf( painCave.errMsg, "Can not find Parameters for GayBerne\n");
+                painCave.severity = OOPSE_ERROR;
+                painCave.isFatal = 1;
+                simError();    
+              }
+            }
+          } else {
+            Atom* atom = static_cast<Atom*>(integrableObject);
+            AtomType* atomType = atom->getAtomType();
+            if (atomType->isLennardJones()){
+              GenericData* data = atomType->getPropertyByName("LennardJones");
+              if (data != NULL) {
+                LJParamGenericData* ljData = dynamic_cast<LJParamGenericData*>(data);
+                
+                if (ljData != NULL) {
+                  LJParam ljParam = ljData->getData();
+                  currShape = new Sphere(atom->getPos(), ljParam.sigma/2.0);
+                } else {
+                  sprintf( painCave.errMsg,
+                           "Can not cast GenericData to LJParam\n");
+                  painCave.severity = OOPSE_ERROR;
+                  painCave.isFatal = 1;
+                  simError();          
+                }       
+              }
+            } else {
+              int obanum = etab.GetAtomicNum((atom->getType()).c_str());
+              if (obanum != 0) {
+                currShape = new Sphere(atom->getPos(), etab.GetVdwRad(obanum));
+              } else {
+                sprintf( painCave.errMsg,
+                         "Could not find atom type in default element.txt\n");
+                painCave.severity = OOPSE_ERROR;
+                painCave.isFatal = 1;
+                simError();          
+              }
+            }
+          }
+          HydroProps currHydroProp = currShape->getHydroProps(simParams->getViscosity(),simParams->getTargetTemp());
+          std::map<std::string, HydroProp>::iterator iter = hydroPropMap.find(integrableObject->getType());
+          if (iter != hydroPropMap.end()) 
+            hydroProps_.push_back(iter->second);
+          else {
+            HydroProp myProp;
+            myProp.cor = V3Zero;
+            for (int i1 = 0; i1 < 3; i1++) {
+              for (int j1 = 0; j1 < 3; j1++) {
+                myProp.Xirtt(i1,j1) = currHydroProp.Xi(i1,j1);
+                myProp.Xirrt(i1,j1) = currHydroProp.Xi(i1,j1+3);
+                myProp.Xirtr(i1,j1) = currHydroProp.Xi(i1+3,j1);
+                myProp.Xirrr(i1,j1) = currHydroProp.Xi(i1+3,j1+3);
+              }
+            }
+            CholeskyDecomposition(currHydroProp.Xi, myProp.S);
+            hydroPropMap.insert(std::map<std::string, HydroProp>::value_type(integrableObject->getType(), myProp));
+            hydroProps_.push_back(myProp);
+          }
+        }
+      }
+    }
     variance_ = 2.0 * OOPSEConstant::kb*simParams->getTargetTemp()/simParams->getDt();
   }
+  
+  
+
+
+
   std::map<std::string, HydroProp> LDForceManager::parseFrictionFile(const std::string& filename) {
     std::map<std::string, HydroProp> props;
     std::ifstream ifs(filename.c_str());
@@ -226,10 +344,13 @@ namespace oopse {
         }
       }
       
-      if (doLangevinForces) {
-        for (integrableObject = mol->beginIntegrableObject(j); integrableObject != NULL;
-             integrableObject = mol->nextIntegrableObject(j)) {
+      for (integrableObject = mol->beginIntegrableObject(j); integrableObject != NULL;
+           integrableObject = mol->nextIntegrableObject(j)) {
           
+        if (freezeMolecule) 
+          fdf += integrableObject->freeze();
+        
+        if (doLangevinForces) {          
           vel =integrableObject->getVel(); 
           if (integrableObject->isDirectional()){
             //calculate angular velocity in lab frame
@@ -281,18 +402,12 @@ namespace oopse {
             
             integrableObject->addFrc(frictionForce+randomForce);             
           }
+        }
           
-          ++index;
+        ++index;
     
-        }
       }
-      if (freezeMolecule) 
-        for (integrableObject = mol->beginIntegrableObject(j); integrableObject != NULL;
-             integrableObject = mol->nextIntegrableObject(j)) {          
-          fdf += integrableObject->freeze();
-        }
-    }
-    
+    }    
     info_->setFdf(fdf);
     
     ForceManager::postCalculation();   

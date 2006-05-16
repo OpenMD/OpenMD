@@ -887,6 +887,120 @@ AC_MSG_RESULT([found $MPI_F90_LIB])
 AC_SUBST(MPI_F90_LIB)
 ])dnl ACX_MPI
 
+# ACX_CHECK_FFTW()
+# ----------------
+# This macro checks for fftw header files and libraries,
+# including the possible prefixing with s or d to determine precision.
+# Arg 1 is the fftw header/library name to check for, without 
+# prefix or anything else (e.g. rfftw_mpi for real MPI transforms)
+# Arg 2 is the size of the real variable used.
+AC_DEFUN(ACX_CHECK_FFTW,
+[
+if test -z "$ac_fftw_firstname"; then
+
+sizeof_real=$2
+if test $sizeof_real = 8; then
+  prec="double"
+  fftwcheckprefix=d
+else
+  prec="single"
+  fftwcheckprefix=s
+fi
+
+xfftwname=${fftwcheckprefix}$1
+
+ok="no"
+# check header doesn't work, since we must use mpicc to get includes, 
+# we cant trust cpp.
+AC_MSG_CHECKING([for $xfftwname.h])
+AC_TRY_COMPILE([#include <$xfftwname.h>],,
+[
+fftwname=$xfftwname 
+AC_MSG_RESULT(yes)
+],
+AC_MSG_RESULT(no))
+
+# fftwname was set if we found a header
+
+if test -n "$fftwname"; then
+# we cannot run the code since an MPI program might not be allowed 
+# on a login node of a supercomputer
+AC_TRY_COMPILE([#include <$fftwname.h>], 
+[int _array_ [1 - 2 * !((sizeof(fftw_real)) == $sizeof_real)]; ],
+[
+ok=yes
+usedprefix=$fftwcheckprefix
+],[ok=no])
+fi
+
+if test "$ok" != "yes"; then
+  AC_MSG_CHECKING([for $1.h])
+  AC_TRY_COMPILE([#include <$1.h>],,AC_MSG_RESULT(yes),
+[
+AC_MSG_RESULT(no)
+AC_MSG_ERROR([Cannot find any $prec precision $xfftwname.h or $1.h]
+[Do you have $prec precision FFTW installed? If you are using packages,]
+[note that you also need fftw-devel to use FFTW with OOPSE. You can find the ]
+[software at www.fftw.org.]
+[If you compiled FFTW yourself:                                        ]
+[Note that the default FFTW setup is double precision.  If you want MPI support,]
+[use --with-mpi. It is a good idea to install both single & double.] 
+[If you have installed FFTW in a non-standard location, you should ]
+[provide the correct paths in the CPPFLAGS and LDFLAGS environment ]
+[variables before running configure.]
+[That is also necessary to do if your compiler doesn't search]
+[/usr/local/include and /usr/local/lib by default.])
+])
+AC_TRY_COMPILE([#include <$1.h>],
+[int _array_ [1 - 2 * !((sizeof(fftw_real)) == $sizeof_real)];],
+[
+usedprefix=""
+fftwname=$1
+],
+[
+AC_MSG_ERROR([Cannot find any $prec precision $xfftwname.h or $1.h]
+[Do you have $prec precision FFTW installed? If you are using packages,]
+[note that you also need fftw-devel to use FFTW with OOPSE. You can find the ]
+[software at www.fftw.org.]
+[If you compiled FFTW yourself:                                        ]
+[Note that the default FFTW setup is double precision.  If you want MPI support,]
+[use --with-mpi. It is a good idea to install both single & double.] 
+[If you have installed FFTW in a non-standard location, you should ]
+[provide the correct paths in the CPPFLAGS and LDFLAGS environment ]
+[variables before running configure.]
+[That is also necessary to do if your compiler doesn't search]
+[/usr/local/include and /usr/local/lib by default.])])
+fi
+
+AC_CHECK_LIB($fftwname,main,,
+AC_MSG_ERROR([Can't find a library to match the $fftwname header]))
+ac_fftw_savedprefix=$usedprefix
+ac_fftw_firstname=$fftwname
+
+else
+
+fftwname=${ac_fftw_savedprefix}$1
+AC_MSG_CHECKING([for $fftwname.h])
+AC_TRY_COMPILE(
+[#include <$fftwname.h>],,
+[AC_MSG_RESULT(yes)
+LIBS="-l$fftwname $LIBS"
+AC_TRY_LINK_FUNC([main],,,
+AC_MSG_ERROR([Can't find a library to match the $fftwname header]))],
+[
+AC_MSG_RESULT(no)
+AC_MSG_ERROR([Cant find $fftwname.h header. Make sure all your 
+fftw prefixes match - we already use $ac_fftw_firstname.h])
+])
+
+fi
+
+])
+
+
+
+
+
 AC_DEFUN([adl_FUNC_GETOPT_LONG],
  [AC_PREREQ(2.49)dnl
   # clean out junk possibly left behind by a previous configuration

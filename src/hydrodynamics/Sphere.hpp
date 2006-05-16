@@ -39,20 +39,27 @@
  * such damages.
  */
 
-#ifndef UTILS_HYDROPROPS_HPP
-#define UTILS_HYDROPROPS_HPP
-
+#ifndef HYDRODYNAMICS_SPHERE_HPP
+#define HYDRODYNAMICS_SPHERE_HPP
+#include "hydrodynamics/Shape.hpp"
 #include "math/Vector3.hpp"
-#include "math/SquareMatrix.hpp"
 
 namespace oopse {
-  
-  struct HydroProps {
-    Vector3d center;
-    Mat6x6d Xi;
-    Mat6x6d D;
+  /** @class Sphere */
+  class Sphere : public Shape {
+  public:
+    Sphere(Vector3d origin, double radius);
+    virtual bool isInterior(Vector3d pos);
+    virtual std::pair<Vector3d, Vector3d> getBoundingBox();
+    virtual bool hasAnalyticalSolution() {return true;}    
+    virtual HydroProps getHydroProps(double viscosity, double temperature);
+    
+    double getRadius() {return radius_;}
+    
+  private:
+    Vector3d origin_;
+    double radius_;
   };
   
 }
-
 #endif

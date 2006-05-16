@@ -44,7 +44,7 @@
  *
  *  Created by Xiuquan Sun on 05/09/06.
  *  @author  Xiuquan Sun 
- *  @version $Id: Hxy.cpp,v 1.1 2006-05-12 21:34:43 xsun Exp $
+ *  @version $Id: Hxy.cpp,v 1.2 2006-05-16 02:06:37 gezelter Exp $
  *
  */
 
@@ -60,8 +60,9 @@
 #include<string.h>
 #include<stdlib.h>
 #include<math.h>
+#ifndef WITHOUT_FFTW
 #include<fftw3.h>
-#include<mkl_lapack64.h>
+#endif
 
 namespace oopse {
   
@@ -76,23 +77,25 @@ namespace oopse {
     gridsample_.resize(nBinsX_*nBinsY_);
     gridZ_.resize(nBinsX_*nBinsY_);
 
-    sum_bin.resize(nbins);
-    avg_bin.resize(nbins);
-    errbin_sum.resize(nbins);
-    errbin.resize(nbins);
-    sum_bin_sq.resize(nbins);
-    avg_bin_sq.resize(nbins);
-    errbin_sum_sq.resize(nbins);
-    errbin_sq.resize(nbins);
+    sum_bin.resize(nbins_);
+    avg_bin.resize(nbins_);
+    errbin_sum.resize(nbins_);
+    errbin.resize(nbins_);
+    sum_bin_sq.resize(nbins_);
+    avg_bin_sq.resize(nbins_);
+    errbin_sum_sq.resize(nbins_);
+    errbin_sq.resize(nbins_);
 
     setOutputName(getPrefix(filename) + ".Hxy");
   }
 
   void Hxy::process() {
+#ifndef WITHOUT_FFTW  
+
     DumpReader reader(info_, dumpFilename_);    
     int nFrames = reader.getNFrames();
     nProcessed_ = nFrames/step_;
-
+    
     std::vector<double> mag, newmag;
     double lenX_, lenY_;
     double gridX_, gridY_;
@@ -105,16 +108,22 @@ namespace oopse {
     double freq_x, freq_y, zero_freq_x, zero_freq_y, freq;
     double maxfreqx, maxfreqy, maxfreq, dfreq;
     int whichbin;
+    int nMolecules;
     
     for (int istep = 0; istep < nFrames; istep += step_) {
       
-      int nMolecules = reader.getNMolecules();
+      reader.readFrame(istep);
+      currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
+      nMolecules = info_->getNGlobalMolecules();
 
+      Mat3x3d hmat = currentSnapshot_->getHmat();
+
+      
       fftw_complex *in, *out;
       fftw_plan p;
-
-      in = fftw_malloc(sizeof(fftw_complex) * (nBinsX_*nBinsY_));
-      out = fftw_malloc(sizeof(fftw_complex) *(nBinsX_*nBinsY_));
+      
+      in = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * (nBinsX_*nBinsY_));
+      out = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) *(nBinsX_*nBinsY_));
       p =  fftw_plan_dft_2d(nBinsX_, 
 			    nBinsY_, 
 			    in, out,
@@ -122,46 +131,34 @@ namespace oopse {
 			    FFTW_ESTIMATE);
       
       int i, j;   
-
-      for(i=0; i < nBinsX_*nBinsY_; i++){
-	gridsample_[i].clear();
-	gridZ_[i].clear();
-      }
-
-      for(i=0; i < nbins; i++){
-	sum_bin[i].clear();
-	avg_bin[i].clear();
-	errbin_sum[i].clear();
-	errbin[i].clear();
-	sum_bin_sq[i].clear();
-	avg_bin_sq[i].clear();
-	errbin_sum_sq[i].clear();
-	errbin_sq[i].clear();
-      }
-
+      
+      gridsample_.clear();
+      gridZ_.clear();
+      sum_bin.clear();
+      avg_bin.clear();
+      errbin_sum.clear();
+      errbin.clear();
+      sum_bin_sq.clear();
+      avg_bin_sq.clear();
+      errbin_sum_sq.clear();
+      errbin_sq.clear();
+      
       mag.resize(nBinsX_*nBinsY_);
-      newmag.resize(nBinsX_*nBinsY_);
-
-      for(i=0; i < nBinsX_*nBinsY_; i++){
-	mag[i].clear();
-	newmag[i].clear();
-      }
+      newmag.resize(nBinsX_*nBinsY_);     
+      mag.clear();
+      newmag.clear();
       
       StuntDouble* sd;
-      reader.readFrame(istep);
-      currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
-	
-      Mat3x3d hmat = currentSnapshot_->getHmat();
-
+      
       lenX_ = hmat(0,0);
       lenY_ = hmat(1,1);
-
+      
       gridX_ = lenX_ /(nBinsX_);
       gridY_ = lenY_ /(nBinsY_);
-
+      
       double halfBoxX_ = lenX_ / 2.0;      
       double halfBoxY_ = lenY_ / 2.0;      
-        
+      
       if (evaluator_.isDynamic()) {
 	seleMan_.setSelectionSet(evaluator_.evaluate());
       }
@@ -203,7 +200,7 @@ namespace oopse {
 	  }
 	}
       }
-	
+      
       for (i=0; i< nBinsX_; i++) {
 	for(j=0; j< nBinsY_; j++) {
 	  newindex = i*nBinsY_ + j;
@@ -248,11 +245,11 @@ namespace oopse {
 	    px = i + 1;
 	    py = j;
 	    newp = px*nBinsY_ + py;
-	    if ((px < nBinsX_) && (gridsample_[newp] > 0)) {
-	      interpsum += gridZ_[newp];
-	      ninterp++;
-	    } 
-	    
+	    if ( (px < nBinsX_ ) && ( gridsample_[newp] > 0 )) { 
+              interpsum += gridZ_[newp];
+              ninterp++;
+            } 
+	
 	    value = interpsum / (double)ninterp;
 	    
 	    gridZ_[newindex] = value;
@@ -328,7 +325,7 @@ namespace oopse {
       //  printf("%lf\t%lf\t%lf\t%lf\n", dx, dy, maxfreqx, maxfreqy);
       
       maxfreq = sqrt(maxfreqx*maxfreqx + maxfreqy*maxfreqy);
-      dfreq = maxfreq/(double)(nbins-1);
+      dfreq = maxfreq/(double)(nbins_-1);
     
       //printf("%lf\n", dfreq);
       
@@ -351,7 +348,7 @@ namespace oopse {
 	}
       }
       
-      for ( i = 0; i < nbins; i++) {
+      for ( i = 0; i < nbins_; i++) {
 	if ( samples[i][istep] > 0) {
 	  bin[i][istep] = 4.0 * sqrt(bin[i][istep] / (double)samples[i][istep]) / (double)nMolecules;
 	}
@@ -359,29 +356,36 @@ namespace oopse {
       
     }
   
-    for (i = 0; i < nbins; i++) {
-      for (j = 0; j < nFrames; j++) {
+    for (int i = 0; i < nbins_; i++) {
+      for (int j = 0; j < nFrames; j++) {
 	sum_bin[i] += bin[i][j];
 	sum_bin_sq[i] += bin[i][j] * bin[i][j];
       }
       avg_bin[i] = sum_bin[i] / (double)nFrames;
       avg_bin_sq[i] = sum_bin_sq[i] / (double)nFrames;
-      for (j = 0; j < nFrames; j++) {
+      for (int j = 0; j < nFrames; j++) {
 	errbin_sum[i] += pow((bin[i][j] - avg_bin[i]), 2);
 	errbin_sum_sq[i] += pow((bin[i][j] * bin[i][j] - avg_bin_sq[i]), 2);
       }
       errbin[i] = sqrt( errbin_sum[i] / (double)nFrames );
       errbin_sq[i] = sqrt( errbin_sum_sq[i] / (double)nFrames );
     }
-
+    
     printSpectrum();
-  }
+#else
+    sprintf(painCave.errMsg, "Hxy: FFTW support was not compiled in!\n");
+    painCave.isFatal = 1;
+    simError();  
+
+#endif
+
+}
     
   void Hxy::printSpectrum() {
     std::ofstream rdfStream(outputFilename_.c_str());
     if (rdfStream.is_open()) {
       
-      for (int i = 0; i < nbins; i++) {
+      for (int i = 0; i < nbins_; i++) {
 	if ( avg_bin[i] > 0 ){
 	  rdfStream << i*dfreq << "\t"
                     <<pow(avg_bin[i], 2)<<"\t"
