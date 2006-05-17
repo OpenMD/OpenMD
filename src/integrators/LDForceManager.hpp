@@ -78,12 +78,12 @@ namespace oopse {
     
   private:
     std::map<std::string, HydroProp> parseFrictionFile(const std::string& filename);    
-    void genRandomForceAndTorque(Vector3d& force, Vector3d& torque, unsigned int index, double variance);
+    void genRandomForceAndTorque(Vector3d& force, Vector3d& torque, unsigned int index, RealType variance);
     std::vector<HydroProp> hydroProps_;
     SeqRandNumGen randNumGen_;    
-    double variance_;
-    double langevinBufferRadius_;
-    double frozenBufferRadius_;
+    RealType variance_;
+    RealType langevinBufferRadius_;
+    RealType frozenBufferRadius_;
     bool sphericalBoundaryConditions_;
   };
   

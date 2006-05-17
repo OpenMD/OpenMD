@@ -80,7 +80,7 @@ namespace oopse {
     virtual void calcVelScale();
         
     virtual void scaleSimBox();
-    virtual double calcConservedQuantity();
+    virtual RealType calcConservedQuantity();
 
     virtual void loadEta();
     virtual void saveEta();

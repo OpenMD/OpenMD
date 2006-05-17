@@ -75,13 +75,13 @@ typedef WINBOOL (WINAPI *PFN_MS_EX) (lMEMORYSTATUSEX*);
 #endif
 
 /* Return the total amount of physical memory.  */
-double
+RealType
 physmem_total ()
 {
 #if defined _SC_PHYS_PAGES && defined _SC_PAGESIZE
   { /* This works on linux-gnu, solaris2 and cygwin.  */
-    double pages = sysconf (_SC_PHYS_PAGES);
-    double pagesize = sysconf (_SC_PAGESIZE);
+    RealType pages = sysconf (_SC_PHYS_PAGES);
+    RealType pagesize = sysconf (_SC_PAGESIZE);
     if (0 <= pages && 0 <= pagesize)
       return pages * pagesize;
   }
@@ -92,8 +92,8 @@ physmem_total ()
     struct pst_static pss;
     if (0 <= pstat_getstatic (&pss, sizeof pss, 1, 0))
       {
-	double pages = pss.physical_memory;
-	double pagesize = pss.page_size;
+	RealType pages = pss.physical_memory;
+	RealType pagesize = pss.page_size;
 	if (0 <= pages && 0 <= pagesize)
 	  return pages * pagesize;
       }
@@ -105,8 +105,8 @@ physmem_total ()
     struct rminfo realmem;
     if (sysmp (MP_SAGET, MPSA_RMINFO, &realmem, sizeof realmem) == 0)
       {
-	double pagesize = sysconf (_SC_PAGESIZE);
-	double pages = realmem.physmem;
+	RealType pagesize = sysconf (_SC_PAGESIZE);
+	RealType pages = realmem.physmem;
 	if (0 <= pages && 0 <= pagesize)
 	  return pages * pagesize;
       }
@@ -120,7 +120,7 @@ physmem_total ()
     if (getsysinfo (GSI_PHYSMEM, (caddr_t) &physmem, sizeof (physmem),
 		    NULL, NULL, NULL) == 1)
       {
-	double kbytes = physmem;
+	RealType kbytes = physmem;
 
 	if (0 <= kbytes)
 	  return kbytes * 1024.0;
@@ -136,7 +136,7 @@ physmem_total ()
 
     if (sysctl (mib, 2, &physmem, &len, NULL, 0) == 0
 	&& len == sizeof (physmem))
-      return (double) physmem;
+      return (RealType) physmem;
   }
 #endif
 
@@ -160,7 +160,7 @@ physmem_total ()
 	lms_ex.dwLength = sizeof lms_ex;
 	if (!pfnex (&lms_ex))
 	  return 0.0;
-	return (double) lms_ex.ullTotalPhys;
+	return (RealType) lms_ex.ullTotalPhys;
       }
 
     /*  Fall back to GlobalMemoryStatus which is always available.
@@ -169,7 +169,7 @@ physmem_total ()
       {
 	MEMORYSTATUS ms;
 	GlobalMemoryStatus (&ms);
-	return (double) ms.dwTotalPhys;
+	return (RealType) ms.dwTotalPhys;
       }
   }
 #endif
@@ -179,13 +179,13 @@ physmem_total ()
 }
 
 /* Return the amount of physical memory available.  */
-double
+RealType
 physmem_available ()
 {
 #if defined _SC_AVPHYS_PAGES && defined _SC_PAGESIZE
   { /* This works on linux-gnu, solaris2 and cygwin.  */
-    double pages = sysconf (_SC_AVPHYS_PAGES);
-    double pagesize = sysconf (_SC_PAGESIZE);
+    RealType pages = sysconf (_SC_AVPHYS_PAGES);
+    RealType pagesize = sysconf (_SC_PAGESIZE);
     if (0 <= pages && 0 <= pagesize)
       return pages * pagesize;
   }
@@ -198,8 +198,8 @@ physmem_available ()
     if (0 <= pstat_getstatic (&pss, sizeof pss, 1, 0)
 	&& 0 <= pstat_getdynamic (&psd, sizeof psd, 1, 0))
       {
-	double pages = psd.psd_free;
-	double pagesize = pss.page_size;
+	RealType pages = psd.psd_free;
+	RealType pagesize = pss.page_size;
 	if (0 <= pages && 0 <= pagesize)
 	  return pages * pagesize;
       }
@@ -211,8 +211,8 @@ physmem_available ()
     struct rminfo realmem;
     if (sysmp (MP_SAGET, MPSA_RMINFO, &realmem, sizeof realmem) == 0)
       {
-	double pagesize = sysconf (_SC_PAGESIZE);
-	double pages = realmem.availrmem;
+	RealType pagesize = sysconf (_SC_PAGESIZE);
+	RealType pages = realmem.availrmem;
 	if (0 <= pages && 0 <= pagesize)
 	  return pages * pagesize;
       }
@@ -225,8 +225,8 @@ physmem_available ()
 
     if (table (TBL_VMSTATS, 0, &vmstats, 1, sizeof (vmstats)) == 1)
       {
-	double pages = vmstats.free_count;
-	double pagesize = vmstats.pagesize;
+	RealType pages = vmstats.free_count;
+	RealType pagesize = vmstats.pagesize;
 
 	if (0 <= pages && 0 <= pagesize)
 	  return pages * pagesize;
@@ -242,7 +242,7 @@ physmem_available ()
 
     if (sysctl (mib, 2, &usermem, &len, NULL, 0) == 0
 	&& len == sizeof (usermem))
-      return (double) usermem;
+      return (RealType) usermem;
   }
 #endif
 
@@ -261,7 +261,7 @@ physmem_available ()
 	lms_ex.dwLength = sizeof lms_ex;
 	if (!pfnex (&lms_ex))
 	  return 0.0;
-	return (double) lms_ex.ullAvailPhys;
+	return (RealType) lms_ex.ullAvailPhys;
       }
 
     /*  Fall back to GlobalMemoryStatus which is always available.
@@ -270,7 +270,7 @@ physmem_available ()
       {
 	MEMORYSTATUS ms;
 	GlobalMemoryStatus (&ms);
-	return (double) ms.dwAvailPhys;
+	return (RealType) ms.dwAvailPhys;
       }
   }
 #endif

@@ -43,6 +43,7 @@
 #define MATH_RANDNUMGEN_HPP
 
 #include <vector>
+#include "config.h"
 #include "MersenneTwister.hpp"
 #include "utils/simError.h"
 
@@ -63,32 +64,32 @@ namespace oopse {
     }
         
     /** Returns a real number in [0,1] */
-    double rand() {
+    RealType rand() {
       return mtRand_->rand();
     }
 
     /** Returns a real number in [0, n] */
-    double rand( const double& n ) {
+    RealType rand( const RealType& n ) {
       return mtRand_->rand(n);
     }
 
     /** Returns a real number in [0, 1) */
-    double randExc() {
+    RealType randExc() {
       return mtRand_->randExc();
     }
 
     /** Returns a real number in [0, n) */        
-    double randExc( const double& n ) {
+    RealType randExc( const RealType& n ) {
       return mtRand_->randExc(n);
     }
 
     /** Returns a real number in (0, 1) */                
-    double randDblExc() {
+    RealType randDblExc() {
       return mtRand_->randDblExc();
     }
 
     /** Returns a real number in (0, n) */                        
-    double randDblExc( const double& n ) {
+    RealType randDblExc( const RealType& n ) {
       return mtRand_->randDblExc(n);
     }
 
@@ -102,13 +103,13 @@ namespace oopse {
       return mtRand_->randInt(n);
     }
 	
-    /** Returns a 53-bitreal number in [0,1) (capacity of IEEE double precision) */
-    double rand53() {
+    /** Returns a 53-bitreal number in [0,1) (capacity of IEEE RealType precision) */
+    RealType rand53() {
       return mtRand_->rand53();
     }
 	
     /** Access to nonuniform random number distributions */
-    double randNorm( const double mean, const double variance) {
+    RealType randNorm( const RealType mean, const RealType variance) {
       return mtRand_->randNorm(mean, variance);
     }
 	

@@ -122,7 +122,7 @@ namespace oopse {
   }
   
   
-//  double SHAPES_FF::getRcutFromAtomType(AtomType* at){
+//  RealType SHAPES_FF::getRcutFromAtomType(AtomType* at){
 //  }
 } //end namespace oopse 
   

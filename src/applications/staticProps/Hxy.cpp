@@ -44,7 +44,7 @@
  *
  *  Created by Xiuquan Sun on 05/09/06.
  *  @author  Xiuquan Sun 
- *  @version $Id: Hxy.cpp,v 1.3 2006-05-16 20:38:23 gezelter Exp $
+ *  @version $Id: Hxy.cpp,v 1.4 2006-05-17 21:51:42 tim Exp $
  *
  */
 
@@ -92,17 +92,17 @@ namespace oopse {
     int nFrames = reader.getNFrames();
     nProcessed_ = nFrames/step_;
     
-    std::vector<double> mag, newmag;
-    double lenX_, lenY_;
-    double gridX_, gridY_;
-    double halfBoxX_, halfBoxY_;
+    std::vector<RealType> mag, newmag;
+    RealType lenX_, lenY_;
+    RealType gridX_, gridY_;
+    RealType halfBoxX_, halfBoxY_;
     int binNoX, binNoY;
-    double interpsum, value;
+    RealType interpsum, value;
     int ninterp, px, py, newp;
     int newx, newy, newindex, index;
     int new_i, new_j, new_index;
-    double freq_x, freq_y, zero_freq_x, zero_freq_y, freq;
-    double maxfreqx, maxfreqy, maxfreq, dfreq;
+    RealType freq_x, freq_y, zero_freq_x, zero_freq_y, freq;
+    RealType maxfreqx, maxfreqy, maxfreq, dfreq;
     int whichbin;
     int nMolecules;
     
@@ -158,8 +158,8 @@ namespace oopse {
       gridX_ = lenX_ /(nBinsX_);
       gridY_ = lenY_ /(nBinsY_);
       
-      double halfBoxX_ = lenX_ / 2.0;      
-      double halfBoxY_ = lenY_ / 2.0;      
+      RealType halfBoxX_ = lenX_ / 2.0;      
+      RealType halfBoxY_ = lenY_ / 2.0;      
       
       if (evaluator_.isDynamic()) {
 	seleMan_.setSelectionSet(evaluator_.evaluate());
@@ -198,7 +198,7 @@ namespace oopse {
 	for(j = 0; j < nBinsY_; j++){
 	  newindex = i * nBinsY_ + j;
 	  if(gridsample_[newindex] > 0){
-	    gridZ_[newindex] = gridZ_[newindex] / (double)gridsample_[newindex];
+	    gridZ_[newindex] = gridZ_[newindex] / (RealType)gridsample_[newindex];
 	  }
 	}
       }
@@ -252,7 +252,7 @@ namespace oopse {
               ninterp++;
             } 
 	
-	    value = interpsum / (double)ninterp;
+	    value = interpsum / (RealType)ninterp;
 	    
 	    gridZ_[newindex] = value;
 	  }
@@ -333,7 +333,7 @@ namespace oopse {
       //  printf("%lf\t%lf\t%lf\t%lf\n", dx, dy, maxfreqx, maxfreqy);
       
       maxfreq = sqrt(maxfreqx*maxfreqx + maxfreqy*maxfreqy);
-      dfreq = maxfreq/(double)(nbins_-1);
+      dfreq = maxfreq/(RealType)(nbins_-1);
     
       //printf("%lf\n", dfreq);
       
@@ -343,8 +343,8 @@ namespace oopse {
       for (i=0; i< nBinsX_; i++) {
 	for(j=0; j< nBinsY_; j++) {
 	  
-	  freq_x = (double)(i - zero_freq_x)*maxfreqx*2 / nBinsX_;
-	  freq_y = (double)(j - zero_freq_y)*maxfreqy*2 / nBinsY_;
+	  freq_x = (RealType)(i - zero_freq_x)*maxfreqx*2 / nBinsX_;
+	  freq_y = (RealType)(j - zero_freq_y)*maxfreqy*2 / nBinsY_;
 	  
 	  freq = sqrt(freq_x*freq_x + freq_y*freq_y);
 	  
@@ -358,7 +358,7 @@ namespace oopse {
       
       for ( i = 0; i < nbins_; i++) {
 	if ( samples[i][istep] > 0) {
-	  bin[i][istep] = 4.0 * sqrt(bin[i][istep] / (double)samples[i][istep]) / (double)nMolecules;
+	  bin[i][istep] = 4.0 * sqrt(bin[i][istep] / (RealType)samples[i][istep]) / (RealType)nMolecules;
 	}
       }    
       
@@ -369,14 +369,14 @@ namespace oopse {
 	sum_bin[i] += bin[i][j];
 	sum_bin_sq[i] += bin[i][j] * bin[i][j];
       }
-      avg_bin[i] = sum_bin[i] / (double)nFrames;
-      avg_bin_sq[i] = sum_bin_sq[i] / (double)nFrames;
+      avg_bin[i] = sum_bin[i] / (RealType)nFrames;
+      avg_bin_sq[i] = sum_bin_sq[i] / (RealType)nFrames;
       for (int j = 0; j < nFrames; j++) {
 	errbin_sum[i] += pow((bin[i][j] - avg_bin[i]), 2);
 	errbin_sum_sq[i] += pow((bin[i][j] * bin[i][j] - avg_bin_sq[i]), 2);
       }
-      errbin[i] = sqrt( errbin_sum[i] / (double)nFrames );
-      errbin_sq[i] = sqrt( errbin_sum_sq[i] / (double)nFrames );
+      errbin[i] = sqrt( errbin_sum[i] / (RealType)nFrames );
+      errbin_sq[i] = sqrt( errbin_sum_sq[i] / (RealType)nFrames );
     }
     
     printSpectrum();

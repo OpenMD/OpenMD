@@ -67,10 +67,10 @@ namespace mdProfileSpace {
   struct timeval startTime[N_PROFILES];
   struct timeval endTime[N_PROFILES];
     
-  double accumTime[N_PROFILES];
+  RealType accumTime[N_PROFILES];
   
 #ifdef IS_MPI
-  double globalTime[N_PROFILES];
+  RealType globalTime[N_PROFILES];
 #endif //is_mpi
 
   
@@ -78,8 +78,8 @@ namespace mdProfileSpace {
 
 extern "C"{
   
-  void FC_FUNC(gettimes, GETTIMES)(double* forceTime, 
-				    double* commTime);
+  void FC_FUNC(gettimes, GETTIMES)(RealType* forceTime, 
+				    RealType* commTime);
 }
 
 
@@ -118,15 +118,15 @@ void startProfile( proNames theProfile ){
 
 void endProfile( proNames theProfile ){
   struct timezone tz;
-  double startVal, endVal;
+  RealType startVal, endVal;
 
   gettimeofday( &endTime[theProfile], &tz );
 
-  startVal = (double)startTime[theProfile].tv_sec 
-    + (double)startTime[theProfile].tv_usec / 1000000.0;
+  startVal = (RealType)startTime[theProfile].tv_sec 
+    + (RealType)startTime[theProfile].tv_usec / 1000000.0;
 
-  endVal = (double)endTime[theProfile].tv_sec 
-    + (double)endTime[theProfile].tv_usec / 1000000.0;
+  endVal = (RealType)endTime[theProfile].tv_sec 
+    + (RealType)endTime[theProfile].tv_usec / 1000000.0;
   
   accumTime[theProfile] += endVal - startVal;
 }
@@ -135,25 +135,25 @@ void endProfile( proNames theProfile ){
 void writeProfiles( void ){
  
   int i;
-  double totalTime;
-  double percentTime[N_PROFILES];
+  RealType totalTime;
+  RealType percentTime[N_PROFILES];
   int days, hours, minutes, secs, msecs;
-  double donkey;
+  RealType donkey;
   
-  double forceTime, commTime;
+  RealType forceTime, commTime;
   
 #ifdef IS_MPI
   int j;
 
   MPI_Status istatus;    
 
-  double nodeTime, nodeForceTime, nodeCommTime;
-  double nodeAccum[N_PROFILES];
-  double nodePercent[N_PROFILES];
+  RealType nodeTime, nodeForceTime, nodeCommTime;
+  RealType nodeAccum[N_PROFILES];
+  RealType nodePercent[N_PROFILES];
 
-  double globalTime, globalForceTime, globalCommTime;
-  double globalAccum[N_PROFILES];
-  double globalPercent[N_PROFILES];
+  RealType globalTime, globalForceTime, globalCommTime;
+  RealType globalAccum[N_PROFILES];
+  RealType globalPercent[N_PROFILES];
 #endif // is_mpi
 
 
@@ -211,8 +211,8 @@ void writeProfiles( void ){
 
   if( worldRank == 0 ){
     
-    double *nodeTots = new double[mpiSim->getNProcessors()];
-    double *nodePercentTots = new double[mpiSim->getNProcessors()];
+    RealType *nodeTots = new RealType[mpiSim->getNProcessors()];
+    RealType *nodePercentTots = new RealType[mpiSim->getNProcessors()];
     
     totalTime = 0.0;
     for(i=0;i<N_PROFILES;i++)
@@ -281,12 +281,12 @@ void writeProfiles( void ){
       
       nodeTime = 0.0;
      
-      MPI_Recv(nodeAccum, N_PROFILES, MPI_DOUBLE, j,
+      MPI_Recv(nodeAccum, N_PROFILES, MPI_REALTYPE, j,
 	       1, MPI_COMM_WORLD, &istatus );
 
-      MPI_Recv(&nodeForceTime, 1, MPI_DOUBLE, j,
+      MPI_Recv(&nodeForceTime, 1, MPI_REALTYPE, j,
 	       1, MPI_COMM_WORLD, &istatus );
-      MPI_Recv(&nodeCommTime, 1, MPI_DOUBLE, j,
+      MPI_Recv(&nodeCommTime, 1, MPI_REALTYPE, j,
 	       1, MPI_COMM_WORLD, &istatus );
 
       for(i=0;i<N_PROFILES;i++){
@@ -421,9 +421,9 @@ void writeProfiles( void ){
 	
 	FC_FUNC(gettimes, GETTIMES)(&forceTime, &commTime);
 
-	MPI_Send( accumTime, N_PROFILES, MPI_DOUBLE, 0, 1, MPI_COMM_WORLD );
-	MPI_Send( &forceTime, 1, MPI_DOUBLE, 0, 1, MPI_COMM_WORLD );
-	MPI_Send( &commTime, 1, MPI_DOUBLE, 0, 1, MPI_COMM_WORLD );
+	MPI_Send( accumTime, N_PROFILES, MPI_REALTYPE, 0, 1, MPI_COMM_WORLD );
+	MPI_Send( &forceTime, 1, MPI_REALTYPE, 0, 1, MPI_COMM_WORLD );
+	MPI_Send( &commTime, 1, MPI_REALTYPE, 0, 1, MPI_COMM_WORLD );
       }
     }
   }

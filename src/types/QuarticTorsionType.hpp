@@ -61,11 +61,11 @@ namespace oopse {
   public:
         
         
-    QuarticTorsionType(double k4, double k3, double k2, double k1, double k0) 
+    QuarticTorsionType(RealType k4, RealType k3, RealType k2, RealType k1, RealType k0) 
       : k4_(k4), k3_(k3), k2_(k2),  k1_(k1), k0_(k0){
       }
 
-    void setForceConstant(double k4, double k3, double k2, double k1, double k0) {
+    void setForceConstant(RealType k4, RealType k3, RealType k2, RealType k1, RealType k0) {
       k4_ = k4;
       k3_ = k3;
       k2_ = k2;
@@ -74,7 +74,7 @@ namespace oopse {
 
     }
 
-    void getForceConstant(double& k4, double& k3, double& k2, double& k1, double& k0) {
+    void getForceConstant(RealType& k4, RealType& k3, RealType& k2, RealType& k1, RealType& k0) {
       k4 = k4_;
       k3 = k3_;
       k2  = k2_;
@@ -82,21 +82,21 @@ namespace oopse {
       k0 = k0_;
     }
 
-    virtual void calcForce(double cosPhi, double& V, double& dVdcosPhi){ 
-      double cosPhi2 = cosPhi * cosPhi;
-      double cosPhi3 = cosPhi2 * cosPhi;
-      double cosPhi4 = cosPhi3 * cosPhi;
+    virtual void calcForce(RealType cosPhi, RealType& V, RealType& dVdcosPhi){ 
+      RealType cosPhi2 = cosPhi * cosPhi;
+      RealType cosPhi3 = cosPhi2 * cosPhi;
+      RealType cosPhi4 = cosPhi3 * cosPhi;
             
       V =k0_ + k1_ * cosPhi + k2_*cosPhi2 + k3_*cosPhi3 + k4_*cosPhi4;
       dVdcosPhi = k1_ + 2.0*k2_ * cosPhi + 3.0 * k3_*cosPhi2 + 4.0*k4_*cosPhi3;            
     }        
         
   private:
-    double k4_;
-    double k3_;
-    double k2_;
-    double k1_;
-    double k0_;
+    RealType k4_;
+    RealType k3_;
+    RealType k2_;
+    RealType k1_;
+    RealType k0_;
 
   };
 

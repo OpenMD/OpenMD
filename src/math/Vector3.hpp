@@ -144,7 +144,7 @@ namespace oopse {
 
   typedef Vector3<int> Vector3i;
   
-  typedef Vector3<double> Vector3d;    
+  typedef Vector3<RealType> Vector3d;    
 
   const Vector3d V3Zero(0.0 , 0.0, 0.0);
   const Vector3d V3X( 1.0, 0.0, 0.0 ) ;

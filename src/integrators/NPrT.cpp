@@ -63,10 +63,10 @@ namespace oopse {
   }
   void NPrT::evolveEtaA() {
     Mat3x3d hmat = currentSnapshot_->getHmat();
-    double hz = hmat(2, 2);
-    double Axy = hmat(0,0) * hmat(1, 1);
-    double sx = -hz * (press(0, 0) - targetPressure/OOPSEConstant::pressureConvert);
-    double sy = -hz * (press(1, 1) - targetPressure/OOPSEConstant::pressureConvert);
+    RealType hz = hmat(2, 2);
+    RealType Axy = hmat(0,0) * hmat(1, 1);
+    RealType sx = -hz * (press(0, 0) - targetPressure/OOPSEConstant::pressureConvert);
+    RealType sy = -hz * (press(1, 1) - targetPressure/OOPSEConstant::pressureConvert);
     eta(0,0) -= dt2* Axy * (sx - surfaceTension) / (NkBT*tb2);
     eta(1,1) -= dt2* Axy * (sy - surfaceTension) / (NkBT*tb2);
     eta(2,2) += dt2 *  instaVol * (press(2, 2) - targetPressure/OOPSEConstant::pressureConvert) / (NkBT*tb2);
@@ -75,11 +75,11 @@ namespace oopse {
 
   void NPrT::evolveEtaB() {
     Mat3x3d hmat = currentSnapshot_->getHmat();
-    double hz = hmat(2, 2);
-    double Axy = hmat(0,0) * hmat(1, 1);
+    RealType hz = hmat(2, 2);
+    RealType Axy = hmat(0,0) * hmat(1, 1);
     prevEta = eta;
-    double sx = -hz * (press(0, 0) - targetPressure/OOPSEConstant::pressureConvert);
-    double sy = -hz * (press(1, 1) - targetPressure/OOPSEConstant::pressureConvert);
+    RealType sx = -hz * (press(0, 0) - targetPressure/OOPSEConstant::pressureConvert);
+    RealType sy = -hz * (press(1, 1) - targetPressure/OOPSEConstant::pressureConvert);
     eta(0,0) = oldEta(0, 0) - dt2 * Axy * (sx -surfaceTension) / (NkBT*tb2);
     eta(1,1) = oldEta(1, 1) - dt2 * Axy * (sy -surfaceTension) / (NkBT*tb2);
     eta(2,2) = oldEta(2, 2) + dt2 *  instaVol *
@@ -110,7 +110,7 @@ namespace oopse {
   void NPrT::getPosScale(const Vector3d& pos, const Vector3d& COM, int index, Vector3d& sc) {
 
     /**@todo */
-    Vector3d rj = (oldPos[index] + pos)/2.0 -COM;
+    Vector3d rj = (oldPos[index] + pos)/(RealType)2.0 -COM;
     sc = eta * rj;
   }
 
@@ -128,7 +128,7 @@ namespace oopse {
 
   bool NPrT::etaConverged() {
     int i;
-    double diffEta, sumEta;
+    RealType diffEta, sumEta;
 
     sumEta = 0;
     for(i = 0; i < 3; i++) {
@@ -140,7 +140,7 @@ namespace oopse {
     return ( diffEta <= etaTolerance );
   }
 
-  double NPrT::calcConservedQuantity(){
+  RealType NPrT::calcConservedQuantity(){
 
     chi= currentSnapshot_->getChi();
     integralOfChidt = currentSnapshot_->getIntegralOfChiDt();
@@ -157,24 +157,24 @@ namespace oopse {
     fkBT = info_->getNdf()*OOPSEConstant::kB *targetTemp;    
     
 
-    double totalEnergy = thermo.getTotalE();
+    RealType totalEnergy = thermo.getTotalE();
 
-    double thermostat_kinetic = fkBT * tt2 * chi * chi /(2.0 * OOPSEConstant::energyConvert);
+    RealType thermostat_kinetic = fkBT * tt2 * chi * chi /(2.0 * OOPSEConstant::energyConvert);
 
-    double thermostat_potential = fkBT* integralOfChidt / OOPSEConstant::energyConvert;
+    RealType thermostat_potential = fkBT* integralOfChidt / OOPSEConstant::energyConvert;
 
-    SquareMatrix<double, 3> tmp = eta.transpose() * eta;
-    double trEta = tmp.trace();
+    SquareMatrix<RealType, 3> tmp = eta.transpose() * eta;
+    RealType trEta = tmp.trace();
     
-    double barostat_kinetic = NkBT * tb2 * trEta /(2.0 * OOPSEConstant::energyConvert);
+    RealType barostat_kinetic = NkBT * tb2 * trEta /(2.0 * OOPSEConstant::energyConvert);
 
-    double barostat_potential = (targetPressure * thermo.getVolume() / OOPSEConstant::pressureConvert) /OOPSEConstant::energyConvert;
+    RealType barostat_potential = (targetPressure * thermo.getVolume() / OOPSEConstant::pressureConvert) /OOPSEConstant::energyConvert;
 
     Mat3x3d hmat = currentSnapshot_->getHmat();
-    double hz = hmat(2, 2);
-    double area = hmat(0,0) * hmat(1, 1);
+    RealType hz = hmat(2, 2);
+    RealType area = hmat(0,0) * hmat(1, 1);
 
-    double conservedQuantity = totalEnergy + thermostat_kinetic + thermostat_potential +
+    RealType conservedQuantity = totalEnergy + thermostat_kinetic + thermostat_potential +
       barostat_kinetic + barostat_potential - surfaceTension * area/ OOPSEConstant::energyConvert;
 
     return conservedQuantity;

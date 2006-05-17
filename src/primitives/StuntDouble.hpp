@@ -97,7 +97,7 @@ namespace oopse{
     virtual ~StuntDouble();
         
     /**
-     * Returns the global index of this stuntdouble.
+     * Returns the global index of this stuntRealType.
      * @return  the global index of this stuntdouble 
      */
     int getGlobalIndex() {
@@ -105,7 +105,7 @@ namespace oopse{
     }
 
     /**
-     * Sets the global index of this stuntdouble.
+     * Sets the global index of this stuntRealType.
      * @param new global index to be set
      */
     void setGlobalIndex(int index) {
@@ -483,7 +483,7 @@ namespace oopse{
     }
 
     /**
-     * Sets  the previous euler angles of this stuntdouble.
+     * Sets  the previous euler angles of this stuntRealType.
      * @param euler  new euler angles 
      * @see #getEuler
      * @note actual storage data is rotation matrix         
@@ -710,7 +710,7 @@ namespace oopse{
      * Returns the previous z-angle of this stuntdouble
      * @return the z-angle of this stuntdouble
      */    
-    double getPrevZangle() {
+    RealType getPrevZangle() {
       return ((snapshotMan_->getPrevSnapshot())->*storage_).zAngle[localIndex_];
     }
        
@@ -718,7 +718,7 @@ namespace oopse{
      * Returns the current z-angle of this stuntdouble
      * @return the z-angle of this stuntdouble
      */    
-    double getZangle() {
+    RealType getZangle() {
       return ((snapshotMan_->getCurrentSnapshot())->*storage_).zAngle[localIndex_];
     }
 
@@ -727,7 +727,7 @@ namespace oopse{
      * @return the z-angle of this stuntdouble
      * @param snapshotNo
      */    
-    double getZangle(int snapshotNo) {
+    RealType getZangle(int snapshotNo) {
       return ((snapshotMan_->getSnapshot(snapshotNo))->*storage_).zAngle[localIndex_];
     }
 
@@ -736,7 +736,7 @@ namespace oopse{
      * @param angle  new z-angle 
      * @see #getZangle
      */         
-    void setPrevZangle(double angle) {
+    void setPrevZangle(RealType angle) {
       ((snapshotMan_->getPrevSnapshot())->*storage_).zAngle[localIndex_] = angle;
     }
        
@@ -744,7 +744,7 @@ namespace oopse{
      * Sets  the current z-angle of this stuntdouble
      * @param angle  new z-angle 
      */         
-    void setZangle(double angle) {
+    void setZangle(RealType angle) {
       ((snapshotMan_->getCurrentSnapshot())->*storage_).zAngle[localIndex_] = angle;
     }
 
@@ -754,7 +754,7 @@ namespace oopse{
      * @param snapshotNo 
      * @see #getZangle
      */         
-    void setZangle(double angle, int snapshotNo) {
+    void setZangle(RealType angle, int snapshotNo) {
       ((snapshotMan_->getSnapshot(snapshotNo))->*storage_).zAngle[localIndex_] = angle;
     }
 
@@ -763,7 +763,7 @@ namespace oopse{
      * @param angle  new z-angle 
      * @see #getZangle
      */         
-    void addPrevZangle(double angle) {
+    void addPrevZangle(RealType angle) {
       ((snapshotMan_->getPrevSnapshot())->*storage_).zAngle[localIndex_] += angle;
     }
        
@@ -771,7 +771,7 @@ namespace oopse{
      * Adds z-angle into the current z-angle of this stuntdouble
      * @param angle  new z-angle 
      */         
-    void addZangle(double angle) {
+    void addZangle(RealType angle) {
       ((snapshotMan_->getCurrentSnapshot())->*storage_).zAngle[localIndex_] += angle;
     }
 
@@ -781,7 +781,7 @@ namespace oopse{
      * @param snapshotNo 
      * @see #getZangle
      */         
-    void addZangle(double angle, int snapshotNo) {
+    void addZangle(RealType angle, int snapshotNo) {
       ((snapshotMan_->getSnapshot(snapshotNo))->*storage_).zAngle[localIndex_] += angle;
     }       
 
@@ -797,7 +797,7 @@ namespace oopse{
      * Returns the gradient of this stuntdouble
      * @return the gradient of this stuntdouble
      */ 
-    virtual std::vector<double> getGrad() = 0;
+    virtual std::vector<RealType> getGrad() = 0;
 
     /**
      * Tests the  if this stuntdouble is a  linear rigidbody
@@ -823,7 +823,7 @@ namespace oopse{
     }
 
     /** Returns the mass of this stuntdouble */
-    double getMass() {
+    RealType getMass() {
       return mass_;
     }
 
@@ -831,14 +831,14 @@ namespace oopse{
      * Sets the mass of this stuntdoulbe
      * @param mass the mass to be set
      */         
-    void setMass(double mass) {
+    void setMass(RealType mass) {
       mass_ = mass;
     }
 
     /** Returns the name of this stuntdouble */
     virtual std::string getType() = 0;
         
-    /** Sets the name of this stuntdouble*/
+    /** Sets the name of this stuntRealType*/
     virtual void setType(const std::string& name) {}
 
     /**
@@ -935,7 +935,7 @@ namespace oopse{
     int localIndex_;
 
 
-    double mass_;
+    RealType mass_;
         
   private:
         

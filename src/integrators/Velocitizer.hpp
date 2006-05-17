@@ -63,7 +63,7 @@ namespace oopse {
     Velocitizer(SimInfo* info);
     virtual ~Velocitizer();
         
-    void velocitize(double temperature);
+    void velocitize(RealType temperature);
 
     void removeComDrift();
     /* 

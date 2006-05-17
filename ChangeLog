@@ -1,14 +1,180 @@
-2006-04-20 23:19  chrisfen
+2006-05-17 14:54  gezelter
+
+	* configure, ac-tools/configure.in, make/Makefile.in,
+	src/UseTheForce/doForces.F90,
+	src/UseTheForce/DarkSide/neighborLists.F90,
+	src/UseTheForce/DarkSide/shapes.F90,
+	src/UseTheForce/DarkSide/simParallel.F90,
+	src/UseTheForce/DarkSide/simulation_interface.F90,
+	src/utils/definitions.F90: Adding single precision capabilities to
+	the fortran side
+
+2006-05-17 11:10  gezelter
+
+	* configure, ac-tools/configure.in, src/config.h.in: adding
+	--enable-single to configure script
+
+2006-05-17 10:37  gezelter
+
+	* ac-tools/aclocal.m4, src/UseTheForce/doForces.F90,
+	src/UseTheForce/DarkSide/LJ.F90, src/UseTheForce/DarkSide/eam.F90,
+	src/UseTheForce/DarkSide/electrostatic.F90,
+	src/UseTheForce/DarkSide/electrostatic_interface.F90,
+	src/UseTheForce/DarkSide/gb.F90,
+	src/UseTheForce/DarkSide/lj_interface.F90,
+	src/UseTheForce/DarkSide/shapes.F90,
+	src/UseTheForce/DarkSide/sticky.F90,
+	src/UseTheForce/DarkSide/suttonchen.F90,
+	src/UseTheForce/DarkSide/suttonchen_interface.F90,
+	src/UseTheForce/DarkSide/switcheroo.F90, src/math/derfc.F90,
+	src/math/erfc.F90, src/utils/interpolation.F90: Getting fortran
+	side prepped for single precision...
+
+2006-05-17 09:03  chrisfen
+
+	* samples/water/ssd-ion/ssdCl.md,
+	src/UseTheForce/DarkSide/electrostatic.F90: electrostatic
+	refinement
+
+2006-05-16 22:03  gezelter
+
+	* configure, ac-tools/OOPSE.m4, make/Makefile.in: zlib fixes
+
+2006-05-16 15:38  gezelter
+
+	* configure, ac-tools/OOPSE.m4, ac-tools/config.guess,
+	ac-tools/config.sub, ac-tools/configure.in, ac-tools/install-sh,
+	ac-tools/missing, ac-tools/mkinstalldirs, make/Makefile.in,
+	src/config.h.in, src/applications/staticProps/Hxy.cpp,
+	src/applications/staticProps/Hxy.hpp,
+	src/applications/staticProps/StaticProps.cpp: Autoconf fixes for
+	FFTW.  Multiple FFTW version support.
+
+2006-05-15 21:06  gezelter
+
+	* README, configure, ac-tools/aclocal.m4, ac-tools/configure.in,
+	make/Makefile.in, src/config.h.in,
+	src/applications/hydrodynamics/AnalyticalModel.cpp,
+	src/applications/hydrodynamics/AnalyticalModel.hpp,
+	src/applications/staticProps/Hxy.cpp,
+	src/applications/staticProps/Hxy.hpp,
+	src/applications/staticProps/StaticProps.cpp,
+	src/hydrodynamics/Ellipsoid.cpp, src/hydrodynamics/Ellipsoid.hpp,
+	src/hydrodynamics/Makefile, src/hydrodynamics/Shape.hpp,
+	src/hydrodynamics/Sphere.cpp, src/hydrodynamics/Sphere.hpp,
+	src/integrators/LDForceManager.cpp,
+	src/integrators/LDForceManager.hpp, src/math/SquareMatrix.hpp,
+	src/utils/HydroProps.hpp: [no log message]
+
+2006-05-12 16:34  xsun
+
+	* src/applications/staticProps/: Hxy.cpp, Hxy.hpp, Makefile,
+	StaticProps.cpp, StaticPropsCmd.c, StaticPropsCmd.h: Changes to
+	calculate undulation spectrum
+
+2006-05-09 20:44  tim
+
+	* src/: applications/dump2Xyz/Dump2XYZ.cpp,
+	applications/dump2Xyz/Dump2XYZ.ggo,
+	applications/dump2Xyz/Dump2XYZCmd.c,
+	applications/dump2Xyz/Dump2XYZCmd.h,
+	applications/hydrodynamics/ApproximationModel.cpp,
+	visitors/AtomVisitor.cpp, visitors/AtomVisitor.hpp: adding a
+	gay-berne switch to Dump2XYZ
+
+2006-05-05 12:58  gezelter
+
+	* src/UseTheForce/DarkSide/qpole.F90: Adding qpole
+
+2006-05-05 09:34  tim
+
+	* ac-tools/aclocal.m4: finding ifort arguments that won't die under
+	two different versions of the intel fortran compiler
+
+2006-05-03 08:15  chrisfen
+
+	* src/applications/randomBuilder/Makefile: missing makefile was
+	hanging up 'make clean'
+
+2006-04-25 17:59  chuckv
+
+	* src/applications/randomBuilder/: randomBuilder.cpp,
+	randomBuilder.ggo, randomBuilderCmd.c, randomBuilderCmd.h: Added
+	random builder to cvs.
+
+2006-04-25 17:54  chuckv
+
+	* src/applications/nanoparticleBuilder/nanoparticleBuilder.cpp:
+	Change in siminfo used in nanoparticleBuilder.
+
+2006-04-25 17:30  chuckv
+
+	* make/Makefile.in: Added random builder
+
+2006-04-25 17:29  chuckv
+
+	* src/applications/simpleBuilder/: Makefile, randomBuilder.cpp,
+	randomBuilder.ggo, randomBuilderCmd.c, randomBuilderCmd.h: Added a
+	random builder to oopse.
+
+2006-04-25 08:35  gezelter
+
+	* src/applications/hydrodynamics/: BeadModel.cpp, BeadModel.hpp,
+	ShapeBuilder.cpp, ShapeBuilder.hpp: Using OpenBabel element table
+	to pick vdw radii for hydrodynamics if the LJ sigma can't be found.
+
+2006-04-24 21:09  gezelter
+
+	* configure, ac-tools/aclocal.m4, src/UseTheForce/DarkSide/LJ.F90,
+	src/applications/hydrodynamics/Hydro.cpp, src/brains/Register.cpp,
+	src/brains/SimCreator.cpp, src/brains/SimInfo.cpp,
+	src/brains/SimInfo.hpp, src/brains/Thermo.cpp,
+	src/brains/Thermo.hpp, src/integrators/LDForceManager.cpp,
+	src/integrators/LDForceManager.hpp,
+	src/integrators/LangevinDynamics.cpp, src/io/Globals.cpp,
+	src/io/Globals.hpp, src/primitives/StuntDouble.hpp: Adding
+	spherical boundary conditions to LD integrator
+
+2006-04-24 21:06  gezelter
+
+	* src/applications/hydrodynamics/: BeadModel.cpp, ShapeBuilder.cpp:
+	Added EAM atom types to Hydro models
+
+2006-04-21 15:02  chrisfen
+
+	* src/UseTheForce/DarkSide/eam.F90: put spline subroutines in the
+	EAM module
+
+2006-04-21 14:32  chrisfen
+
+	* ChangeLog, samples/shape/5CB.shape, samples/shape/8CB.shape,
+	samples/shape/C60.shape, samples/shape/C70.shape,
+	samples/shape/Makefile, samples/shape/Shapes.frc,
+	samples/shape/cholesterol.shape, samples/shape/ethylBenzene.shape,
+	samples/shape/linear.in, samples/shape/linear.md,
+	samples/shape/linear.shape, samples/shape/toluene.shape,
+	samples/thermoIntegration/liquid/ssde.md,
+	samples/thermoIntegration/solid/ssde.md,
+	samples/water/spce/spce.md, samples/water/ssd/ssd.md,
+	samples/water/ssd-ion/ssdCl.md, samples/water/ssde/ssde.md,
+	samples/water/ssdrf/ssdrf.md, samples/water/tip3p_ice/tp3.md,
+	samples/water/tip4p/tp4.md, src/UseTheForce/doForces.F90,
+	src/UseTheForce/DarkSide/LJ.F90: Removed sqrt splines and shape
+	stuff (doesn't work, so why was it in there?).	Changed some of the
+	water samples to use shifted_force.  Probably should set the
+	defaults to use the damped version now that we sped it up.
+
+2006-04-20 22:19  chrisfen
 
 	* samples/water/spce/spce.md,
 	src/UseTheForce/DarkSide/electrostatic.F90: Electrosplines added...
 
-2006-04-20 17:02  chrisfen
+2006-04-20 16:02  chrisfen
 
 	* samples/argon/500.md, src/UseTheForce/DarkSide/sticky.F90,
 	src/UseTheForce/DarkSide/switcheroo.F90: splined up sticky
 
-2006-04-20 14:24  gezelter
+2006-04-20 13:24  gezelter
 
 	* samples/metals/EAM/Au_bulk_voter.md,
 	samples/metals/Sutton-Chen/Au_bulk_SC.md,
@@ -23,7 +189,7 @@
 	src/utils/interpolation.F90: Complete rewrite of spline code and
 	everything that uses it.
 
-2006-04-17 17:49  gezelter
+2006-04-17 16:49  gezelter
 
 	* configure, ac-tools/aclocal.m4, samples/argon/500.md,
 	samples/metals/EAM/Au_bulk_voter.md,
@@ -41,7 +207,7 @@
 	src/mdParser/SimplePreprocessor.hpp, src/types/DataHolder.hpp,
 	src/utils/interpolation.F90: Many performance improvements
 
-2006-04-15 22:51  chrisfen
+2006-04-15 21:51  chrisfen
 
 	* configure, samples/argon/500.md, src/UseTheForce/doForces.F90,
 	src/UseTheForce/fSwitchingFunction.h,
@@ -49,48 +215,48 @@
 	src/UseTheForce/DarkSide/switcheroo.F90: added a cubic spline to
 	switcheroo
 
-2006-04-15 17:58  chrisfen
+2006-04-15 16:58  chrisfen
 
 	* src/utils/Makefile.in: Since status.F90 is used by
 	interpolation.F90, the former needs to be listed above the later in
 	the Makefile.
 
-2006-04-14 17:59  gezelter
+2006-04-14 16:59  gezelter
 
 	* src/utils/interpolation.F90: changed the interface a bit
 
-2006-04-14 17:49  gezelter
+2006-04-14 16:49  gezelter
 
 	* src/utils/interpolation.F90: added some logical flags
 
-2006-04-14 17:06  chrisfen
+2006-04-14 16:06  chrisfen
 
 	* src/utils/interpolation.F90: Wiped the spline with derivatives
 	and corrected a boundary comparision error by eliminating the
 	check.	This algorithm REQUIRES known first derivatives at the
 	endpoints.
 
-2006-04-14 16:04  gezelter
+2006-04-14 15:04  gezelter
 
 	* src/utils/: Makefile.in, interpolation.F90: bug fixes for
 	interpolation module
 
-2006-04-14 15:57  gezelter
+2006-04-14 14:57  gezelter
 
 	* src/utils/interpolation.F90: Heavily modified interpolation
 	module, also moved to "utils"
 
-2006-04-12 17:15  chuckv
+2006-04-12 16:15  chuckv
 
 	* src/UseTheForce/DarkSide/interpolation.F90: Added interpolation
 	module.
 
-2006-04-11 11:33  gezelter
+2006-04-11 10:33  gezelter
 
 	* src/applications/staticProps/: StaticProps.ggo, StaticPropsCmd.c,
 	StaticPropsCmd.h: [no log message]
 
-2006-04-03 11:37  chuckv
+2006-04-03 10:37  chuckv
 
 	* configure, ac-tools/aclocal.m4, make/Makefile.in,
 	src/UseTheForce/DarkSide/simParallel.F90: Added status module to
@@ -1241,8 +1407,6 @@
 
 	* make/Makefile.in, src/applications/atom2mdin/Makefile,
 	src/applications/atom2mdin/atom2mdin.cpp,
-	src/applications/mdinConverter/Makefile,
-	src/applications/mdinConverter/mdinConverter.cpp,
 	src/openbabel/oopseformat.cpp, src/openbabel/oopseformat.hpp:
 	rename mdinConverter to atom2mdin
 
@@ -1306,11 +1470,6 @@
 	io/OptionSectionParser.hpp, io/SCAtomTypesSectionParser.cpp,
 	UseTheForce/SC_FF.cpp, utils/ParameterManager.hpp: ForceField
 	optional parameters....
-
-2005-11-16 16:24  tim
-
-	* src/applications/mdinConverter/: Makefile, mdinConverter.cpp:
-	adding mdinConverter
 
 2005-11-16 16:22  tim
 

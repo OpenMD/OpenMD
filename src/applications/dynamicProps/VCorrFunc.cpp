@@ -50,7 +50,7 @@ namespace oopse {
 
     }
 
-  double VCorrFunc::calcCorrVal(int frame1, int frame2, StuntDouble* sd1,  StuntDouble* sd2) {
+  RealType VCorrFunc::calcCorrVal(int frame1, int frame2, StuntDouble* sd1,  StuntDouble* sd2) {
     Vector3d v1 =sd1->getVel(frame1);
     Vector3d v2 = sd2->getVel(frame2);
 

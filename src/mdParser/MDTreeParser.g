@@ -47,7 +47,7 @@ assignment  : #(ASSIGNEQUAL id:ID constant[#id]) //{blockStack.top()->assign(#ID
 constant [ANTLR_USE_NAMESPACE(antlr)RefAST id]
 {
   int ival;
-  double dval;
+  RealType dval;
 }    
             : ival=intConst {blockStack.top()->assign(id->getText(), ival);}
             | dval=floatConst {blockStack.top()->assign(id->getText(), dval);}
@@ -100,7 +100,7 @@ atomblock
 
 atomstatement 
 {
-vector<double> dvec;
+vector<RealType> dvec;
 AtomStamp* currAtomStamp =  static_cast<AtomStamp*>(blockStack.top());
 
 }
@@ -224,9 +224,9 @@ fragmentstatement : assignment
 
 
               
-doubleNumberTuple   returns [vector<double> dvec]
+doubleNumberTuple   returns [vector<RealType> dvec]
 {
-  double dval;
+  RealType dval;
 }
               : (dval=doubleNumber {dvec.push_back(dval);})+  
               ;
@@ -245,16 +245,16 @@ intConst returns [int ival]
         ;
 
 protected
-doubleNumber  returns [double dval]
+doubleNumber  returns [RealType dval]
               : 
-                ic:intConst {dval = lexi_cast<double>(ic->getText());}
-                | fc:floatConst {dval = lexi_cast<double>(fc->getText());} 
+                ic:intConst {dval = lexi_cast<RealType>(ic->getText());}
+                | fc:floatConst {dval = lexi_cast<RealType>(fc->getText());} 
                                
               ;
               
 protected
-floatConst returns [double dval]
-        : d1:NUM_FLOAT {dval = lexi_cast<double>(d1->getText());}  
-        | d2:NUM_DOUBLE {dval = lexi_cast<double>(d2->getText());} 
+floatConst returns [RealType dval]
+        : d1:NUM_FLOAT {dval = lexi_cast<RealType>(d1->getText());}  
+        | d2:NUM_DOUBLE {dval = lexi_cast<RealType>(d2->getText());} 
         ;
         

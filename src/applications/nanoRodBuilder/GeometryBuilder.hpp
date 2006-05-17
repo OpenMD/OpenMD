@@ -60,11 +60,11 @@ namespace oopse {
     
   public:
 		
-    GeometryBuilder(double length,double width);
-    GeometryBuilder(double length,double width, bool twinned);
+    GeometryBuilder(RealType length,RealType width);
+    GeometryBuilder(RealType length,RealType width, bool twinned);
     ~GeometryBuilder(){};
     		
-    bool isInsidePolyhedron(double x, double y, double z);  
+    bool isInsidePolyhedron(RealType x, RealType y, RealType z);  
     void dumpGeometry(const std::string& geomFileName);
   private:
   };

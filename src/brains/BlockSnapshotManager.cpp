@@ -55,9 +55,9 @@ namespace oopse {
       nAtoms_ = info->getNGlobalAtoms();
       nRigidBodies_ = info->getNGlobalRigidBodies();
 
-      double physMem = physmem_total();
-      double rssMem = residentMem();
-      double avaliablePhysMem = physMem - rssMem;
+      RealType physMem = physmem_total();
+      RealType rssMem = residentMem();
+      RealType avaliablePhysMem = physMem - rssMem;
     
       int bytesPerStuntDouble = DataStorage::getBytesPerStuntDouble(storageLayout);
 

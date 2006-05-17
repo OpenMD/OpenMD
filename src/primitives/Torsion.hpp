@@ -55,12 +55,12 @@
 
 namespace oopse {
 struct TorsionData {
-    double angle;
-    double potential;
+    RealType angle;
+    RealType potential;
 };
 
 struct TorsionDataSet {
-    double deltaV;
+    RealType deltaV;
     TorsionData prev;
     TorsionData curr;
 };
@@ -73,9 +73,9 @@ struct TorsionDataSet {
   public:
     Torsion(Atom* atom1, Atom* atom2, Atom* atom3, Atom* atom4, TorsionType* tt);
     virtual ~Torsion() {}
-    virtual void calcForce(double& angle);
+    virtual void calcForce(RealType& angle);
         
-    double getPotential() {
+    RealType getPotential() {
       return potential_;
     }
 
@@ -108,7 +108,7 @@ struct TorsionDataSet {
 
     TorsionType* torsionType_;
 
-    double potential_;
+    RealType potential_;
   };    
 
 }

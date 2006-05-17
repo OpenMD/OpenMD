@@ -89,22 +89,22 @@ class DirectionalAtomType : public AtomType {
 
 
 struct StickyParam {
-  double w0;
-  double v0;
-  double v0p;
-  double rl;
-  double ru;
-  double rlp;
-  double rup;
+  RealType w0;
+  RealType v0;
+  RealType v0p;
+  RealType rl;
+  RealType ru;
+  RealType rlp;
+  RealType rup;
 };
 
 struct GayBerneParam{
-  double GB_sigma;
-  double GB_eps;
-  double GB_mu;
-  double GB_nu;
-  double GB_eps_ratio;
-  double GB_l2b_ratio;
+  RealType GB_sigma;
+  RealType GB_eps;
+  RealType GB_mu;
+  RealType GB_nu;
+  RealType GB_eps_ratio;
+  RealType GB_l2b_ratio;
 };
 
 typedef SimpleTypeData<StickyParam> StickyParamGenericData;

@@ -105,14 +105,14 @@ namespace oopse {
     /** Sets the storage layout  */
     void setStorageLayout(int layout);
     /** Returns the pointer of internal array */
-    double *getArrayPointer(int whichArray);
+    RealType *getArrayPointer(int whichArray);
 
     std::vector<Vector3d> position;               /** position array */
     std::vector<Vector3d> velocity;               /** velocity array */
     std::vector<RotMat3x3d> aMat;            /** rotation matrix array */
     std::vector<Vector3d> angularMomentum;/** angular momentum array (body-fixed) */
     std::vector<Mat3x3d> electroFrame;                /** the lab frame unit std::vector array*/
-    std::vector<double> zAngle;              /** z -angle array */        
+    std::vector<RealType> zAngle;              /** z -angle array */        
     std::vector<Vector3d> force;               /** force array */
     std::vector<Vector3d> torque;               /** torque array */
 
@@ -120,10 +120,10 @@ namespace oopse {
 
   private:
 
-    double* internalGetArrayPointer(std::vector<Vector3d>& v);
+    RealType* internalGetArrayPointer(std::vector<Vector3d>& v);
             
-    double* internalGetArrayPointer(std::vector<RotMat3x3d>& v);
-    double* internalGetArrayPointer(std::vector<double>& v);
+    RealType* internalGetArrayPointer(std::vector<RotMat3x3d>& v);
+    RealType* internalGetArrayPointer(std::vector<RealType>& v);
             
     template<typename T>
     void internalResize(std::vector<T>& v, int newSize);

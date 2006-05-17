@@ -70,10 +70,10 @@ namespace oopse {
     }
 
     std::vector<Atom*> getAtoms() { return cutoffAtomList; }
-    double getMass() {
+    RealType getMass() {
       std::vector<Atom *>::iterator i;
       Atom * atom;
-      double mass;
+      RealType mass;
 
       if (!haveTotalMass) {
 	totalMass = 0;
@@ -93,7 +93,7 @@ namespace oopse {
       std::vector<Atom *>::iterator i;
       Atom * atom;
       Vector3d pos;
-      double mass;
+      RealType mass;
 
       com[0] = 0;
       com[1] = 0;
@@ -129,7 +129,7 @@ namespace oopse {
 
     std::vector<Atom *>cutoffAtomList;
     bool haveTotalMass;
-    double totalMass;
+    RealType totalMass;
     int globalIndex;
   };
 

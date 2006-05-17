@@ -236,7 +236,7 @@ namespace oopse {
   }
 
   void SelectionEvaluator::compareProperty(StuntDouble* sd, OOPSEBitSet& bs, int property, int comparator, float comparisonValue) {
-    double propertyValue = 0.0;
+    RealType propertyValue = 0.0;
     switch (property) {
     case Token::mass:
       propertyValue = sd->getMass();
@@ -422,8 +422,8 @@ namespace oopse {
   }
 
 
-  double SelectionEvaluator::getCharge(Atom* atom) {
-    double charge =0.0;
+  RealType SelectionEvaluator::getCharge(Atom* atom) {
+    RealType charge =0.0;
     AtomType* atomType = atom->getAtomType();
     if (atomType->isCharge()) {
       GenericData* data = atomType->getPropertyByName("Charge");

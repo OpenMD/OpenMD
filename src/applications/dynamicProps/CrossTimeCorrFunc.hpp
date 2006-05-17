@@ -53,7 +53,7 @@ namespace oopse {
   private:
         
     virtual void correlateFrames(int frame1, int frame2);
-    virtual double calcCorrVal(int frame1, int frame2, StuntDouble* sd1, StuntDouble* sd2) = 0;
+    virtual RealType calcCorrVal(int frame1, int frame2, StuntDouble* sd1, StuntDouble* sd2) = 0;
         
     int nSelected1_;  
     int nSelected2_;  

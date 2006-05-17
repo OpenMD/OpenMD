@@ -251,7 +251,7 @@ void MDTreeParser::constant(ANTLR_USE_NAMESPACE(antlr)RefAST _t,
 #line 47 "MDTreeParser.g"
 	
 	int ival;
-	double dval;
+	RealType dval;
 	
 #line 257 "MDTreeParser.cpp"
 	
@@ -363,9 +363,9 @@ int  MDTreeParser::intConst(ANTLR_USE_NAMESPACE(antlr)RefAST _t) {
 	return ival;
 }
 
-double  MDTreeParser::floatConst(ANTLR_USE_NAMESPACE(antlr)RefAST _t) {
+RealType  MDTreeParser::floatConst(ANTLR_USE_NAMESPACE(antlr)RefAST _t) {
 #line 256 "MDTreeParser.g"
-	double dval;
+	RealType dval;
 #line 370 "MDTreeParser.cpp"
 	ANTLR_USE_NAMESPACE(antlr)RefAST floatConst_AST_in = (_t == ASTNULL) ? ANTLR_USE_NAMESPACE(antlr)nullAST : _t;
 	ANTLR_USE_NAMESPACE(antlr)RefAST d1 = ANTLR_USE_NAMESPACE(antlr)nullAST;
@@ -381,7 +381,7 @@ double  MDTreeParser::floatConst(ANTLR_USE_NAMESPACE(antlr)RefAST _t) {
 			match(_t,NUM_FLOAT);
 			_t = _t->getNextSibling();
 #line 257 "MDTreeParser.g"
-			dval = lexi_cast<double>(d1->getText());
+			dval = lexi_cast<RealType>(d1->getText());
 #line 386 "MDTreeParser.cpp"
 			break;
 		}
@@ -391,7 +391,7 @@ double  MDTreeParser::floatConst(ANTLR_USE_NAMESPACE(antlr)RefAST _t) {
 			match(_t,NUM_DOUBLE);
 			_t = _t->getNextSibling();
 #line 258 "MDTreeParser.g"
-			dval = lexi_cast<double>(d2->getText());
+			dval = lexi_cast<RealType>(d2->getText());
 #line 396 "MDTreeParser.cpp"
 			break;
 		}
@@ -837,7 +837,7 @@ void MDTreeParser::atomstatement(ANTLR_USE_NAMESPACE(antlr)RefAST _t) {
 	ANTLR_USE_NAMESPACE(antlr)RefAST atomstatement_AST_in = (_t == ASTNULL) ? ANTLR_USE_NAMESPACE(antlr)nullAST : _t;
 #line 101 "MDTreeParser.g"
 	
-	vector<double> dvec;
+	vector<RealType> dvec;
 	AtomStamp* currAtomStamp =  static_cast<AtomStamp*>(blockStack.top());
 	
 	
@@ -897,14 +897,14 @@ void MDTreeParser::atomstatement(ANTLR_USE_NAMESPACE(antlr)RefAST _t) {
 	_retTree = _t;
 }
 
-vector<double>  MDTreeParser::doubleNumberTuple(ANTLR_USE_NAMESPACE(antlr)RefAST _t) {
+vector<RealType>  MDTreeParser::doubleNumberTuple(ANTLR_USE_NAMESPACE(antlr)RefAST _t) {
 #line 227 "MDTreeParser.g"
-	vector<double> dvec;
+	vector<RealType> dvec;
 #line 904 "MDTreeParser.cpp"
 	ANTLR_USE_NAMESPACE(antlr)RefAST doubleNumberTuple_AST_in = (_t == ASTNULL) ? ANTLR_USE_NAMESPACE(antlr)nullAST : _t;
 #line 227 "MDTreeParser.g"
 	
-	double dval;
+	RealType dval;
 	
 #line 910 "MDTreeParser.cpp"
 	
@@ -1236,9 +1236,9 @@ void MDTreeParser::fragmentstatement(ANTLR_USE_NAMESPACE(antlr)RefAST _t) {
 	_retTree = _t;
 }
 
-double  MDTreeParser::doubleNumber(ANTLR_USE_NAMESPACE(antlr)RefAST _t) {
+RealType  MDTreeParser::doubleNumber(ANTLR_USE_NAMESPACE(antlr)RefAST _t) {
 #line 248 "MDTreeParser.g"
-	double dval;
+	RealType dval;
 #line 1243 "MDTreeParser.cpp"
 	ANTLR_USE_NAMESPACE(antlr)RefAST doubleNumber_AST_in = (_t == ASTNULL) ? ANTLR_USE_NAMESPACE(antlr)nullAST : _t;
 	ANTLR_USE_NAMESPACE(antlr)RefAST ic = ANTLR_USE_NAMESPACE(antlr)nullAST;
@@ -1255,7 +1255,7 @@ double  MDTreeParser::doubleNumber(ANTLR_USE_NAMESPACE(antlr)RefAST _t) {
 			intConst(_t);
 			_t = _retTree;
 #line 250 "MDTreeParser.g"
-			dval = lexi_cast<double>(ic->getText());
+			dval = lexi_cast<RealType>(ic->getText());
 #line 1260 "MDTreeParser.cpp"
 			break;
 		}
@@ -1266,7 +1266,7 @@ double  MDTreeParser::doubleNumber(ANTLR_USE_NAMESPACE(antlr)RefAST _t) {
 			floatConst(_t);
 			_t = _retTree;
 #line 251 "MDTreeParser.g"
-			dval = lexi_cast<double>(fc->getText());
+			dval = lexi_cast<RealType>(fc->getText());
 #line 1271 "MDTreeParser.cpp"
 			break;
 		}

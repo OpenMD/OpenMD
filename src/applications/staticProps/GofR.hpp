@@ -48,13 +48,13 @@ namespace oopse {
     
   public:
     GofR(SimInfo* info, const std::string& filename, const std::string& sele1, 
-	 const std::string& sele2, double len, int nrbins);
+	 const std::string& sele2, RealType len, int nrbins);
 
     int getNRBins() {
       return nRBins_; 
     }
 
-    double getLength() {
+    RealType getLength() {
       return len_;
     }
         
@@ -67,12 +67,12 @@ namespace oopse {
 
     virtual void writeRdf();
 
-    double len_;
+    RealType len_;
     int nRBins_;
-    double deltaR_;
+    RealType deltaR_;
         
     std::vector<int> histogram_;
-    std::vector<double> avgGofr_;
+    std::vector<RealType> avgGofr_;
   };
 
 }

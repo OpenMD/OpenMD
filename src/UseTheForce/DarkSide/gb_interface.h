@@ -51,12 +51,12 @@
 
 extern "C"{
   void newGayBerneType( int* ident,
-                        double* GB_sigma,
-                        double* GB_l2b_ratio,
-                        double* GB_eps,
-                        double* GB_eps_ratio,
-                        double* GB_mu,
-                        double* GB_nu,
+                        RealType* GB_sigma,
+                        RealType* GB_l2b_ratio,
+                        RealType* GB_eps,
+                        RealType* GB_eps_ratio,
+                        RealType* GB_mu,
+                        RealType* GB_nu,
                         int* status);
 
   void destroyGayBerneTypes( void );

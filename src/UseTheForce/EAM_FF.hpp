@@ -64,7 +64,7 @@ namespace oopse {
     EAM_FF();
     virtual void parse(const std::string& filename);
 
-    virtual double getRcutFromAtomType(AtomType* at);
+    virtual RealType getRcutFromAtomType(AtomType* at);
 
     ~EAM_FF();
   private:

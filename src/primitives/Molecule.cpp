@@ -166,10 +166,10 @@ namespace oopse {
     //integrableObjects_.insert(integrableObjects_.end(), rigidBodies_.begin(), rigidBodies_.end());
   }
 
-  double Molecule::getMass() {
+  RealType Molecule::getMass() {
     StuntDouble* sd;
     std::vector<StuntDouble*>::iterator i;
-    double mass = 0.0;
+    RealType mass = 0.0;
 
     for (sd = beginIntegrableObject(i); sd != NULL; sd = nextIntegrableObject(i)){
       mass += sd->getMass();
@@ -183,8 +183,8 @@ namespace oopse {
     StuntDouble* sd;
     std::vector<StuntDouble*>::iterator i;
     Vector3d com;
-    double totalMass = 0;
-    double mass;
+    RealType totalMass = 0;
+    RealType mass;
     
     for (sd = beginIntegrableObject(i); sd != NULL; sd = nextIntegrableObject(i)){
       mass = sd->getMass();
@@ -211,8 +211,8 @@ namespace oopse {
     StuntDouble* sd;
     std::vector<StuntDouble*>::iterator i;
     Vector3d velCom;
-    double totalMass = 0;
-    double mass;
+    RealType totalMass = 0;
+    RealType mass;
     
     for (sd = beginIntegrableObject(i); sd != NULL; sd = nextIntegrableObject(i)){
       mass = sd->getMass();
@@ -225,7 +225,7 @@ namespace oopse {
     return velCom;
   }
 
-  double Molecule::getPotential() {
+  RealType Molecule::getPotential() {
 
     Bond* bond;
     Bend* bend;
@@ -234,7 +234,7 @@ namespace oopse {
     Molecule::BendIterator  bendIter;
     Molecule::TorsionIterator  torsionIter;
 
-    double potential = 0.0;
+    RealType potential = 0.0;
 
     for (bond = beginBond(bondIter); bond != NULL; bond = nextBond(bondIter)) {
       potential += bond->getPotential();

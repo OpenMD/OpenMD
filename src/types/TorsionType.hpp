@@ -48,7 +48,7 @@
 
 #ifndef TYPES_TORSIONTYPE_HPP
 #define TYPES_TORSIONTYPE_HPP
-
+#include "config.h"
 namespace oopse {
   
   /**
@@ -58,7 +58,7 @@ namespace oopse {
   public:
     virtual ~TorsionType() {}
     
-    virtual void calcForce(double cosPhi, double& V, double& dVdCosPhi) = 0;
+    virtual void calcForce(RealType cosPhi, RealType& V, RealType& dVdCosPhi) = 0;
 
   };
   

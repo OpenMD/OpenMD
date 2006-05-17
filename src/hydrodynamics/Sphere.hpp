@@ -48,17 +48,17 @@ namespace oopse {
   /** @class Sphere */
   class Sphere : public Shape {
   public:
-    Sphere(Vector3d origin, double radius);
+    Sphere(Vector3d origin, RealType radius);
     virtual bool isInterior(Vector3d pos);
     virtual std::pair<Vector3d, Vector3d> getBoundingBox();
     virtual bool hasAnalyticalSolution() {return true;}    
-    virtual HydroProps getHydroProps(double viscosity, double temperature);
+    virtual HydroProps getHydroProps(RealType viscosity, RealType temperature);
     
-    double getRadius() {return radius_;}
+    RealType getRadius() {return radius_;}
     
   private:
     Vector3d origin_;
-    double radius_;
+    RealType radius_;
   };
   
 }

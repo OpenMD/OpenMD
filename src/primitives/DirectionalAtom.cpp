@@ -104,13 +104,13 @@ namespace oopse {
     setA(m *getA());
   }
 
-  std::vector<double> DirectionalAtom::getGrad() {
-    std::vector<double> grad(6, 0.0);
+  std::vector<RealType> DirectionalAtom::getGrad() {
+    std::vector<RealType> grad(6, 0.0);
     Vector3d force;
     Vector3d torque;
     Vector3d myEuler;
-    double phi, theta, psi;
-    double cphi, sphi, ctheta, stheta;
+    RealType phi, theta, psi;
+    RealType cphi, sphi, ctheta, stheta;
     Vector3d ephi;
     Vector3d etheta;
     Vector3d epsi;

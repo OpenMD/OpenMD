@@ -64,7 +64,7 @@ namespace oopse{
 
     virtual std::string getType() { return name_;}
         
-    /** Sets the name of this stuntdouble*/
+    /** Sets the name of this stuntRealType*/
     virtual void setType(const std::string& name) { name_ = name;}
     
 
@@ -97,14 +97,14 @@ namespace oopse{
 
 
     /** Sets the internal unit frame of this stuntdouble by three euler angles */
-    void setElectroFrameFromEuler(double phi, double theta, double psi);
+    void setElectroFrameFromEuler(RealType phi, RealType theta, RealType psi);
         
     /**
      * Returns the gradient of this stuntdouble
      * @return the inertia tensor of this stuntdouble
      * @see #setI
      */ 
-    virtual std::vector<double> getGrad();
+    virtual std::vector<RealType> getGrad();
 
     virtual void accept(BaseVisitor* v);
 

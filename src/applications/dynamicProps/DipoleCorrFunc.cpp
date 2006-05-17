@@ -51,7 +51,7 @@ namespace oopse {
 
     }
 
-  double DipoleCorrFunc::calcCorrVal(int frame1, int frame2, StuntDouble* sd1,  StuntDouble* sd2) {
+  RealType DipoleCorrFunc::calcCorrVal(int frame1, int frame2, StuntDouble* sd1,  StuntDouble* sd2) {
     Vector3d v1 =sd1->getElectroFrame(frame1).getColumn(2);
     Vector3d v2 = sd2->getElectroFrame(frame2).getColumn(2);
 

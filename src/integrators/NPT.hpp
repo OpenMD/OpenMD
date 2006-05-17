@@ -67,50 +67,50 @@ namespace oopse {
     void setMaxIterationNumber(int maxIter) {
       maxIterNum_ = maxIter;
     }
-    double getTauThermostat() {
+    RealType getTauThermostat() {
       return tauThermostat;
     }
 
-    void setTauThermostat(double tt) {
+    void setTauThermostat(RealType tt) {
       tauThermostat = tt;
     }
 
-    double getTauBarostat() {
+    RealType getTauBarostat() {
       return tauBarostat;
     }
-    void setTauBarostat(double tb) {
+    void setTauBarostat(RealType tb) {
       tauBarostat = tb;
     }
 
-    double getTargetTemp() {
+    RealType getTargetTemp() {
       return targetTemp;
     }
             
-    void setTargetTemp(double tt) {
+    void setTargetTemp(RealType tt) {
       targetTemp = tt;
     }
 
-    double getTargetPressure() {
+    RealType getTargetPressure() {
       return targetTemp;
     }
             
-    void setTargetPressure(double tp) {
+    void setTargetPressure(RealType tp) {
       targetPressure = tp;
     }
 
-    double getChiTolerance() {
+    RealType getChiTolerance() {
       return chiTolerance;
     }
             
-    void setChiTolerance(double tol) {
+    void setChiTolerance(RealType tol) {
       chiTolerance = tol;
     }
 
-    double getEtaTolerance() {
+    RealType getEtaTolerance() {
       return etaTolerance;
     }
             
-    void setEtaTolerance(double tol) {
+    void setEtaTolerance(RealType tol) {
       etaTolerance = tol;
     }
 
@@ -127,33 +127,33 @@ namespace oopse {
 
     virtual void resetEta();
     
-    double NkBT;
-    double fkBT;
+    RealType NkBT;
+    RealType fkBT;
 
-    double tt2;            
-    double tb2;
+    RealType tt2;            
+    RealType tb2;
             
-    double instaTemp;
-    double instaPress;
-    double instaVol;
+    RealType instaTemp;
+    RealType instaPress;
+    RealType instaVol;
 
 
     // targetTemp, targetPressure, and tauBarostat must be set.
     // One of qmass or tauThermostat must be set;
 
-    double targetTemp;
-    double targetPressure;
-    double tauThermostat;
-    double tauBarostat;
+    RealType targetTemp;
+    RealType targetPressure;
+    RealType tauThermostat;
+    RealType tauBarostat;
 
     std::vector<Vector3d> oldPos;
     std::vector<Vector3d> oldVel;
     std::vector<Vector3d> oldJi;
 
-    double etaTolerance;
+    RealType etaTolerance;
        
-    double chi;
-    double integralOfChidt;
+    RealType chi;
+    RealType integralOfChidt;
     Mat3x3d press;
             
   private:
@@ -178,14 +178,14 @@ namespace oopse {
 
     virtual void scaleSimBox() = 0;
             
-    virtual double calcConservedQuantity() = 0;      
+    virtual RealType calcConservedQuantity() = 0;      
 
     virtual void loadEta() = 0;
     virtual void saveEta() = 0;
             
     int maxIterNum_;
 
-    double chiTolerance;    
+    RealType chiTolerance;    
   };
 
 }      //end namespace oopse

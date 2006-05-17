@@ -6,8 +6,6 @@ Source    = \
             BeadModel.cpp \
             HydrodynamicsModel.cpp \
             RoughShell.cpp \
-            Spheric.cpp \
-            Ellipsoid.cpp \
             CompositeShape.cpp \
             Hydro.cpp \
             HydroCmd.c \

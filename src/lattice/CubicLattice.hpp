@@ -52,12 +52,12 @@ namespace oopse {
     CubicLattice();
   public:
     //get lattice constant of unit cell
-    virtual  std::vector<double> getLatticeConstant();
+    virtual  std::vector<RealType> getLatticeConstant();
 
     //set lattice constant of unit cell
-    virtual void setLatticeConstant(const  std::vector<double>& lc);
+    virtual void setLatticeConstant(const  std::vector<RealType>& lc);
   protected:
-    double latticeParam;
+    RealType latticeParam;
   };
 
 }

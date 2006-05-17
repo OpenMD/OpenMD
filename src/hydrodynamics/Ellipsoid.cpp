@@ -45,16 +45,16 @@
 
 namespace oopse {
   
-  Ellipsoid::Ellipsoid(Vector3d origin, double rMajor, double rMinor,Mat3x3d rotMat) 
+  Ellipsoid::Ellipsoid(Vector3d origin, RealType rMajor, RealType rMinor,Mat3x3d rotMat) 
     : origin_(origin), rMajor_(rMajor), rMinor_(rMinor), rotMat_(rotMat) {
     
   }
   bool Ellipsoid::isInterior(Vector3d pos) {
     Vector3d r = pos - origin_;
     Vector3d rbody = rotMat_ * r;
-    double xovera = rbody[0]/rMajor_;
-    double yovera = rbody[1]/rMajor_;
-    double zoverb = rbody[2]/rMinor_;
+    RealType xovera = rbody[0]/rMajor_;
+    RealType yovera = rbody[1]/rMajor_;
+    RealType zoverb = rbody[2]/rMinor_;
     
     bool result;
     if (xovera*xovera + yovera*yovera + zoverb*zoverb < 1)
@@ -69,35 +69,35 @@ namespace oopse {
     
     std::pair<Vector3d, Vector3d>  boundary;
     //make a cubic box
-    double rad  = rMajor_ > rMinor_ ? rMajor_ : rMinor_; 
+    RealType rad  = rMajor_ > rMinor_ ? rMajor_ : rMinor_; 
     Vector3d r(rad, rad, rad);
     boundary.first = origin_ - r;
     boundary.second = origin_ + r;
     return boundary;
   }
   
-  HydroProps Ellipsoid::getHydroProps(double viscosity, double temperature) {
+  HydroProps Ellipsoid::getHydroProps(RealType viscosity, RealType temperature) {
     
-    double a = rMinor_;
-    double b = rMajor_;
-    double a2 = a * a;
-    double b2 = b* b;
+    RealType a = rMinor_;
+    RealType b = rMajor_;
+    RealType a2 = a * a;
+    RealType b2 = b* b;
     
-    double p = a /b;
-    double S;
+    RealType p = a /b;
+    RealType S;
     if (p > 1.0) { //prolate
       S = 2.0/sqrt(a2 - b2) * log((a + sqrt(a2-b2))/b);
     } else { //oblate
       S = 2.0/sqrt(b2 - a2) * atan(sqrt(b2-a2)/a);
     }
     
-    double P = 1.0/(a2 - b2) * (S - 2.0/a);
-    double Q = 0.5/(a2-b2) * (2.0*a/b2 - S);
+    RealType P = 1.0/(a2 - b2) * (S - 2.0/a);
+    RealType Q = 0.5/(a2-b2) * (2.0*a/b2 - S);
     
-    double transMinor = 16.0 * NumericConstant::PI * viscosity * (a2 - b2) /((2.0*a2-b2)*S -2.0*a);
-    double transMajor = 32.0 * NumericConstant::PI * viscosity * (a2 - b2) /((2.0*a2-3.0*b2)*S +2.0*a);
-    double rotMinor = 32.0/3.0 * NumericConstant::PI * viscosity *(a2 - b2) * b2 /(2.0*a -b2*S);
-    double rotMajor = 32.0/3.0 * NumericConstant::PI * viscosity *(a2*a2 - b2*b2)/((2.0*a2-b2)*S-2.0*a);
+    RealType transMinor = 16.0 * NumericConstant::PI * viscosity * (a2 - b2) /((2.0*a2-b2)*S -2.0*a);
+    RealType transMajor = 32.0 * NumericConstant::PI * viscosity * (a2 - b2) /((2.0*a2-3.0*b2)*S +2.0*a);
+    RealType rotMinor = 32.0/3.0 * NumericConstant::PI * viscosity *(a2 - b2) * b2 /(2.0*a -b2*S);
+    RealType rotMajor = 32.0/3.0 * NumericConstant::PI * viscosity *(a2*a2 - b2*b2)/((2.0*a2-b2)*S-2.0*a);
     
     
     HydroProps props;
@@ -109,12 +109,12 @@ namespace oopse {
     props.Xi(4,4) = rotMajor;
     props.Xi(5,5) = rotMinor;
     
-    const double convertConstant = 6.023; //convert poise.angstrom to amu/fs
+    const RealType convertConstant = 6.023; //convert poise.angstrom to amu/fs
     props.Xi *= convertConstant;    
     
     Mat6x6d XiCopy = props.Xi;
     invertMatrix(XiCopy, props.D);
-    double kt = OOPSEConstant::kB * temperature;
+    RealType kt = OOPSEConstant::kB * temperature;
     props.D *= kt;
     props.Xi *= OOPSEConstant::kb * temperature;
    

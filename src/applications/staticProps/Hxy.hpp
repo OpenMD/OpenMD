@@ -44,7 +44,7 @@
  *
  *  Created by Xiuquan Sun on 05/09/06.
  *  @author  Xiuquan Sun
- *  @version $Id: Hxy.hpp,v 1.3 2006-05-16 20:38:23 gezelter Exp $
+ *  @version $Id: Hxy.hpp,v 1.4 2006-05-17 21:51:42 tim Exp $
  *
  */
 #ifndef APPLICATIONS_STATICPROPS_HXY_HPP
@@ -102,17 +102,17 @@ namespace oopse {
     SelectionEvaluator evaluator_;
     SelectionManager seleMan_;
     
-    double nBinsX_;
-    double nBinsY_;
+    RealType nBinsX_;
+    RealType nBinsY_;
     int nbins_; 
-    double dfreq;
+    RealType dfreq;
     
-    std::vector<double> gridZ_;
+    std::vector<RealType> gridZ_;
     std::vector<int> gridsample_;
-    std::vector< std::vector<double> > bin;
+    std::vector< std::vector<RealType> > bin;
     std::vector< std::vector<int> > samples;
-    std::vector<double> sum_bin, sum_bin_sq, avg_bin, avg_bin_sq;
-    std::vector<double> errbin_sum, errbin_sum_sq, errbin, errbin_sq;
+    std::vector<RealType> sum_bin, sum_bin_sq, avg_bin, avg_bin_sq;
+    std::vector<RealType> errbin_sum, errbin_sum_sq, errbin, errbin_sq;
   };
   
 }

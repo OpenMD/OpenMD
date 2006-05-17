@@ -56,21 +56,21 @@ namespace oopse {
    */
   class BendType {
   public:
-    BendType(double theta) : theta0_(theta) {}
+    BendType(RealType theta) : theta0_(theta) {}
     virtual ~BendType() {}
 
-    virtual void calcForce(double theta, double& V, double& dVdTheta) = 0;   
+    virtual void calcForce(RealType theta, RealType& V, RealType& dVdTheta) = 0;   
 
-    double getTheta() {
+    RealType getTheta() {
       return theta0_;
     }
         
-    void setTheta(double theta) {
+    void setTheta(RealType theta) {
       theta0_ = theta;
     }
 
   protected:
-    double theta0_;        
+    RealType theta0_;        
   };
 
 } //end namespace oopse

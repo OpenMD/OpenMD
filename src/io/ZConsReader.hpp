@@ -65,14 +65,14 @@ namespace oopse {
     int getNZMols() {return allZmols_.size();}
     int getNFixedZmols() {return fixedZmolData_.size();}
     const std::vector<ZconsData>& getFixedZMolData() {return fixedZmolData_; }    
-    double getCurTime() {return curTime_; }
+    RealType getCurTime() {return curTime_; }
     
   private:
     
     std::ifstream istream_;    
     SimInfo* info_;    
     std::vector<int> allZmols_;
-    double curTime_;    
+    RealType curTime_;    
     std::vector<ZconsData> fixedZmolData_;
     const static int MAXBUFFERSIZE = 2000;    
   };

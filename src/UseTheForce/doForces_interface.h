@@ -57,14 +57,14 @@ extern "C"{
   
   void initFortranFF( int* isError );        
  
-  void doForceLoop( double* positionArray,
-                    double* rcArray,
-                    double* RotationMatrixArray,
-                    double* unitVectorArray_l,
-                    double* forceArray,
-                    double *torqueArray,
-                    double* StressTensor, 
-                    double* potentialEnergy, 
+  void doForceLoop( RealType* positionArray,
+                    RealType* rcArray,
+                    RealType* RotationMatrixArray,
+                    RealType* unitVectorArray_l,
+                    RealType* forceArray,
+                    RealType *torqueArray,
+                    RealType* StressTensor, 
+                    RealType* potentialEnergy, 
                     short int* doPotentialCalc, 
                     short int* doStressCalc,
                     int* isError );
@@ -73,10 +73,10 @@ extern "C"{
 
   void notifyFortranCutoffPolicy( int* cutPolicy );
 
-  void notifyFortranSkinThickness( double *skinThickness );
+  void notifyFortranSkinThickness( RealType *skinThickness );
 
-  void notifyFortranCutoffs( double *rCut,
-			     double *rSw );
+  void notifyFortranCutoffs( RealType *rCut,
+			     RealType *rSw );
 
   void notifyFortranYouAreOnYourOwn( );
 

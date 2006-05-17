@@ -189,10 +189,10 @@ namespace oopse {
     return torsionTypeCont_.add(keys, torsionType);
   }
 
-  double ForceField::getRcutFromAtomType(AtomType* at) {
+  RealType ForceField::getRcutFromAtomType(AtomType* at) {
     /**@todo */
     GenericData* data;
-    double rcut = 0.0;
+    RealType rcut = 0.0;
 
     if (at->isLennardJones()) {
       data = at->getPropertyByName("LennardJones");

@@ -46,7 +46,7 @@ namespace oopse {
   GhostTorsion::GhostTorsion(Atom *atom1, Atom *atom2,  DirectionalAtom* ghostAtom,
 			     TorsionType *tt) : Torsion(atom1, atom2, ghostAtom, ghostAtom, tt) {}
 
-  void GhostTorsion::calcForce(double& angle) {
+  void GhostTorsion::calcForce(RealType& angle) {
     DirectionalAtom* ghostAtom = static_cast<DirectionalAtom*>(atom3_);    
 
     Vector3d pos1 = atom1_->getPos();
@@ -59,20 +59,20 @@ namespace oopse {
 
     //  Calculate the cross products and distances
     Vector3d A = cross(r21, r32);
-    double rA = A.length();
+    RealType rA = A.length();
     Vector3d B = cross(r32, r43);
-    double rB = B.length();
+    RealType rB = B.length();
     Vector3d C = cross(r32, A);
-    double rC = C.length();
+    RealType rC = C.length();
 
     A.normalize();
     B.normalize();
     C.normalize();
     
     //  Calculate the sin and cos
-    double cos_phi = dot(A, B) ;
+    RealType cos_phi = dot(A, B) ;
 
-    double dVdcosPhi;
+    RealType dVdcosPhi;
     torsionType_->calcForce(cos_phi, potential_, dVdcosPhi);
 
     Vector3d dcosdA = (cos_phi * A - B) /rA;

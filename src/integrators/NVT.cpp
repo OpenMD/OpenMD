@@ -92,17 +92,17 @@ namespace oopse {
     StuntDouble* integrableObject;
     Vector3d Tb;
     Vector3d ji;
-    double mass;
+    RealType mass;
     Vector3d vel;
     Vector3d pos;
     Vector3d frc;
 
-    double chi = currentSnapshot_->getChi();
-    double integralOfChidt = currentSnapshot_->getIntegralOfChiDt();
+    RealType chi = currentSnapshot_->getChi();
+    RealType integralOfChidt = currentSnapshot_->getIntegralOfChiDt();
     
     // We need the temperature at time = t for the chi update below:
 
-    double instTemp = thermo.getTemperature();
+    RealType instTemp = thermo.getTemperature();
 
     for (mol = info_->beginMolecule(i); mol != NULL; mol = info_->nextMolecule(i)) {
       for (integrableObject = mol->beginIntegrableObject(j); integrableObject != NULL;
@@ -167,15 +167,15 @@ namespace oopse {
     Vector3d ji;    
     Vector3d vel;
     Vector3d frc;
-    double mass;
-    double instTemp;
+    RealType mass;
+    RealType instTemp;
     int index;
     // Set things up for the iteration:
 
-    double chi = currentSnapshot_->getChi();
-    double oldChi = chi;
-    double  prevChi;
-    double integralOfChidt = currentSnapshot_->getIntegralOfChiDt();
+    RealType chi = currentSnapshot_->getChi();
+    RealType oldChi = chi;
+    RealType  prevChi;
+    RealType integralOfChidt = currentSnapshot_->getIntegralOfChiDt();
 
     index = 0;
     for (mol = info_->beginMolecule(i); mol != NULL; mol = info_->nextMolecule(i)) {
@@ -253,15 +253,15 @@ namespace oopse {
       currentSnapshot_->setIntegralOfChiDt(0.0);
   }
   
-  double NVT::calcConservedQuantity() {
+  RealType NVT::calcConservedQuantity() {
 
-    double chi = currentSnapshot_->getChi();
-    double integralOfChidt = currentSnapshot_->getIntegralOfChiDt();
-    double conservedQuantity;
-    double fkBT;
-    double Energy;
-    double thermostat_kinetic;
-    double thermostat_potential;
+    RealType chi = currentSnapshot_->getChi();
+    RealType integralOfChidt = currentSnapshot_->getIntegralOfChiDt();
+    RealType conservedQuantity;
+    RealType fkBT;
+    RealType Energy;
+    RealType thermostat_kinetic;
+    RealType thermostat_potential;
     
     fkBT = info_->getNdf() *OOPSEConstant::kB *targetTemp_;
 

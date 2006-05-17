@@ -538,7 +538,7 @@ namespace oopse {
       q[2] = tokenizer.nextTokenAsDouble(); 
       q[3] = tokenizer.nextTokenAsDouble(); 
        
-      double qlen = q.length(); 
+      RealType qlen = q.length(); 
       if (qlen < oopse::epsilon) { //check quaternion is not equal to 0 
          
         sprintf(painCave.errMsg, 
@@ -565,10 +565,10 @@ namespace oopse {
    
    
   void DumpReader::parseCommentLine(char* line, Snapshot* s) { 
-    double currTime; 
+    RealType currTime; 
     Mat3x3d hmat; 
-    double chi; 
-    double integralOfChiDt; 
+    RealType chi; 
+    RealType integralOfChiDt; 
     Mat3x3d eta; 
      
     StringTokenizer tokenizer(line); 

@@ -54,8 +54,8 @@
 #include "UseTheForce/ForceField.hpp"
 namespace oopse {
   //convert lattice vector to rotation matrix
-  double getAtomMass(const std::string& at, ForceField* myFF);
-  double getMolMass(MoleculeStamp *molStamp, ForceField *myFF);
+  RealType getAtomMass(const std::string& at, ForceField* myFF);
+  RealType getMolMass(MoleculeStamp *molStamp, ForceField *myFF);
   RotMat3x3d latVec2RotMat(const Vector3d& lv);
   class MoLocator{
   public:

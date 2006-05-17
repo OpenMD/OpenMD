@@ -110,7 +110,7 @@ namespace oopse {
 
     MPI_Status ierr;
     int zmolIndex;
-    double data[3];
+    RealType data[3];
     
     if (masterNode == 0) {
 
@@ -130,7 +130,7 @@ namespace oopse {
 	} else {
 	  for(int k =0 ; k < nFixedZmolsInProc[i]; ++k) {
 	    MPI_Recv(&zmolIndex, 1, MPI_INT, i, 0, MPI_COMM_WORLD,&ierr);
-	    MPI_Recv(data, 3, MPI_DOUBLE, i, 0, MPI_COMM_WORLD,&ierr);
+	    MPI_Recv(data, 3, MPI_REALTYPE, i, 0, MPI_COMM_WORLD,&ierr);
 	    tmpData.zmolIndex = zmolIndex;
 	    tmpData.zforce= data[0];
 	    tmpData.zpos = data[1];
@@ -159,7 +159,7 @@ namespace oopse {
 	data[1] = j->zpos;
 	data[2] = j->param.zTargetPos;
 	MPI_Send(&zmolIndex, 1, MPI_INT, masterNode, 0, MPI_COMM_WORLD);
-	MPI_Send(data, 3, MPI_DOUBLE, masterNode, 0, MPI_COMM_WORLD);
+	MPI_Send(data, 3, MPI_REALTYPE, masterNode, 0, MPI_COMM_WORLD);
             
       }
     }

@@ -157,8 +157,8 @@ namespace oopse {
     
   }
 
-  void ZConsVisitor::readZconsFile(double time) {
-    double tempTime;
+  void ZConsVisitor::readZconsFile(RealType time) {
+    RealType tempTime;
     while(zconsReader_->hasNextFrame()){
       tempTime = zconsReader_->getCurTime();
       if(tempTime >= time) {

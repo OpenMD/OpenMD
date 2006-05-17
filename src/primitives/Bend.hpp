@@ -53,12 +53,12 @@
 #include "types/BendType.hpp"
 namespace oopse {
 struct BendData {
-    double angle;
-    double potential;
+    RealType angle;
+    RealType potential;
 };
 
 struct BendDataSet {
-    double deltaV;
+    RealType deltaV;
     BendData prev;
     BendData curr;
 };
@@ -69,9 +69,9 @@ struct BendDataSet {
       : atom1_(atom1), atom2_(atom2), atom3_(atom3), bendType_(bt) {}
 
     virtual ~Bend() {}
-    virtual void calcForce(double& angle);
+    virtual void calcForce(RealType& angle);
         
-    double getPotential() {
+    RealType getPotential() {
       return potential_;
     }
 
@@ -93,7 +93,7 @@ struct BendDataSet {
 
   protected:
         
-    double potential_;
+    RealType potential_;
     Atom* atom1_;
     Atom* atom2_;
     Atom* atom3_;

@@ -79,7 +79,7 @@ namespace oopse {
     std::string at2 = tokenizer.nextToken();
     std::string at3 = tokenizer.nextToken();
     BendTypeEnum bt = getBendTypeEnum(tokenizer.nextToken());
-    double theta0 = tokenizer.nextTokenAsDouble() / 180.0 * NumericConstant::PI; //convert to rad
+    RealType theta0 = tokenizer.nextTokenAsDouble() / 180.0 * NumericConstant::PI; //convert to rad
     nTokens -= 5;
 
     //switch is a maintain nightmare
@@ -94,7 +94,7 @@ namespace oopse {
 	simError();
       } else {
 
-	double ktheta = tokenizer.nextTokenAsDouble();
+	RealType ktheta = tokenizer.nextTokenAsDouble();
 	bendType = new HarmonicBendType(theta0, ktheta);
       }
       break;
@@ -105,7 +105,7 @@ namespace oopse {
 	painCave.isFatal = 1;
 	simError();
       } else {
-	double ktheta = tokenizer.nextTokenAsDouble();
+	RealType ktheta = tokenizer.nextTokenAsDouble();
 	bendType = new HarmonicBendType(theta0, ktheta);                
       }
       break;            
@@ -117,9 +117,9 @@ namespace oopse {
 	painCave.isFatal = 1;
 	simError();
       } else {
-	double ktheta = tokenizer.nextTokenAsDouble();
-	double s0 =  tokenizer.nextTokenAsDouble();
-	double kub = tokenizer.nextTokenAsDouble();
+	RealType ktheta = tokenizer.nextTokenAsDouble();
+	RealType s0 =  tokenizer.nextTokenAsDouble();
+	RealType kub = tokenizer.nextTokenAsDouble();
 	bendType = new UreyBradleyBendType(theta0, ktheta, s0, kub);                
       }
       break; 
@@ -132,10 +132,10 @@ namespace oopse {
 	simError();
       } else {
 
-	double k3 = tokenizer.nextTokenAsDouble();
-	double k2 = tokenizer.nextTokenAsDouble();
-	double k1 = tokenizer.nextTokenAsDouble();
-	double k0 = tokenizer.nextTokenAsDouble();
+	RealType k3 = tokenizer.nextTokenAsDouble();
+	RealType k2 = tokenizer.nextTokenAsDouble();
+	RealType k1 = tokenizer.nextTokenAsDouble();
+	RealType k0 = tokenizer.nextTokenAsDouble();
                 
 	bendType = new CubicBendType(theta0, k3, k2, k1, k0);
       }
@@ -150,11 +150,11 @@ namespace oopse {
       } else {
 
 	theta0 = tokenizer.nextTokenAsDouble();
-	double k4 = tokenizer.nextTokenAsDouble();
-	double k3 = tokenizer.nextTokenAsDouble();
-	double k2 = tokenizer.nextTokenAsDouble();
-	double k1 = tokenizer.nextTokenAsDouble();
-	double k0 = tokenizer.nextTokenAsDouble();
+	RealType k4 = tokenizer.nextTokenAsDouble();
+	RealType k3 = tokenizer.nextTokenAsDouble();
+	RealType k2 = tokenizer.nextTokenAsDouble();
+	RealType k1 = tokenizer.nextTokenAsDouble();
+	RealType k0 = tokenizer.nextTokenAsDouble();
                 
 	bendType = new QuarticBendType(theta0, k4, k3, k2, k1, k0);
       }
@@ -169,7 +169,7 @@ namespace oopse {
       } else {
 	int nPairs = nTokens / 2;
 	int power;
-	double coefficient;
+	RealType coefficient;
 	PolynomialBendType* pbt = new PolynomialBendType(theta0);
                 
 	for (int i = 0; i < nPairs; ++i) {

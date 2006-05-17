@@ -97,22 +97,22 @@ namespace oopse {
     // reading 624 consecutive values.
 	
     // Access to 32-bit random numbers
-    double rand();                          // real number in [0,1]
-    double rand( const double& n );         // real number in [0,n]
-    double randExc();                       // real number in [0,1)
-    double randExc( const double& n );      // real number in [0,n)
-    double randDblExc();                    // real number in (0,1)
-    double randDblExc( const double& n );   // real number in (0,n)
+    RealType rand();                          // real number in [0,1]
+    RealType rand( const RealType& n );         // real number in [0,n]
+    RealType randExc();                       // real number in [0,1)
+    RealType randExc( const RealType& n );      // real number in [0,n)
+    RealType randDblExc();                    // real number in (0,1)
+    RealType randDblExc( const RealType& n );   // real number in (0,n)
     uint32 randInt();                       // integer in [0,2^32-1] (modified for striding)
     uint32 rawRandInt();                    // original randInt
     uint32 randInt( const uint32& n );      // integer in [0,n] for n < 2^32
-    double operator()() { return rand(); }  // same as rand()
+    RealType operator()() { return rand(); }  // same as rand()
 	
-    // Access to 53-bit random numbers (capacity of IEEE double precision)
-    double rand53();  // real number in [0,1)
+    // Access to 53-bit random numbers (capacity of IEEE RealType precision)
+    RealType rand53();  // real number in [0,1)
 	
     // Access to nonuniform random number distributions
-    double randNorm( const double mean = 0.0, const double variance = 0.0 );
+    RealType randNorm( const RealType mean = 0.0, const RealType variance = 0.0 );
 	
     // Re-seeding functions with same behavior as initializers
     void seed( const uint32 oneSeed );
@@ -156,37 +156,37 @@ namespace oopse {
     seed(); 
   }
 
-  inline double MTRand::rand()
-  { return double(randInt()) * (1.0/4294967295.0); }
+  inline RealType MTRand::rand()
+  { return RealType(randInt()) * (1.0/4294967295.0); }
 
-  inline double MTRand::rand( const double& n )
+  inline RealType MTRand::rand( const RealType& n )
   { return rand() * n; }
 
-  inline double MTRand::randExc()
-  { return double(randInt()) * (1.0/4294967296.0); }
+  inline RealType MTRand::randExc()
+  { return RealType(randInt()) * (1.0/4294967296.0); }
 
-  inline double MTRand::randExc( const double& n )
+  inline RealType MTRand::randExc( const RealType& n )
   { return randExc() * n; }
 
-  inline double MTRand::randDblExc()
-  { return ( double(randInt()) + 0.5 ) * (1.0/4294967296.0); }
+  inline RealType MTRand::randDblExc()
+  { return ( RealType(randInt()) + 0.5 ) * (1.0/4294967296.0); }
 
-  inline double MTRand::randDblExc( const double& n )
+  inline RealType MTRand::randDblExc( const RealType& n )
   { return randDblExc() * n; }
 
-  inline double MTRand::rand53()
+  inline RealType MTRand::rand53()
   {
     uint32 a = randInt() >> 5, b = randInt() >> 6;
     return ( a * 67108864.0 + b ) * (1.0/9007199254740992.0);  // by Isaku Wada
   }
 
-  inline double MTRand::randNorm( const double mean, const double variance )
+  inline RealType MTRand::randNorm( const RealType mean, const RealType variance )
   {
     // Return a real number from a normal (Gaussian) distribution with given
     // mean and variance by Box-Muller method
     assert(variance > 0);
-    double r = sqrt( -2.0 * log( 1.0-randDblExc()) * variance);
-    double phi = 2.0 * 3.14159265358979323846264338328 * randExc();
+    RealType r = sqrt( -2.0 * log( 1.0-randDblExc()) * variance);
+    RealType phi = 2.0 * 3.14159265358979323846264338328 * randExc();
     return mean + r * cos(phi);
   }
 

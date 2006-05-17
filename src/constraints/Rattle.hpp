@@ -64,8 +64,8 @@ namespace oopse {
     int getMaxConsIteration() { return maxConsIteration_; }
     void setMaxConsIteration(int iteration) { maxConsIteration_ = iteration; }
 
-    double getConsTolerance() { return consTolerance_; } 
-    void setConsTolerance(double tolerance) { consTolerance_ = tolerance;}        
+    RealType getConsTolerance() { return consTolerance_; } 
+    void setConsTolerance(RealType tolerance) { consTolerance_ = tolerance;}        
 
   private:
     typedef int (Rattle::*ConstraintPairFuncPtr)(ConstraintPair*);
@@ -75,8 +75,8 @@ namespace oopse {
 
     SimInfo* info_;
     int maxConsIteration_;        
-    double consTolerance_;
-    double dt_;
+    RealType consTolerance_;
+    RealType dt_;
     Snapshot* currentSnapshot_;     
   };
 

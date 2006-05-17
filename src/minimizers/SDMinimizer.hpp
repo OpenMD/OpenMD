@@ -59,9 +59,9 @@ namespace oopse {
     virtual int checkConvg();
   protected:
 
-    std::vector<double> direction;
-    double prevF;
-    double stepSize;
+    std::vector<RealType> direction;
+    RealType prevF;
+    RealType stepSize;
 
   };
 

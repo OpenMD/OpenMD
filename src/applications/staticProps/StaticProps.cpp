@@ -148,7 +148,7 @@ int main(int argc, char* argv[]){
   SimCreator creator;
   SimInfo* info = creator.createSim(mdFileName);
 
-  double maxLen;
+  RealType maxLen;
   if (args_info.length_given) {
     maxLen = args_info.length_arg;
   } else {

@@ -305,15 +305,15 @@ namespace oopse{
       return i != molecules_.end() ? i->second : NULL;
     }
 
-    double getRcut() {
+    RealType getRcut() {
       return rcut_;
     }
 
-    double getRsw() {
+    RealType getRsw() {
       return rsw_;
     }
 
-    double getList() {
+    RealType getList() {
       return rlist_;
     }
         
@@ -429,7 +429,7 @@ namespace oopse{
         
     friend std::ostream& operator <<(std::ostream& o, SimInfo& info);
 
-    void getCutoff(double& rcut, double& rsw);
+    void getCutoff(RealType& rcut, RealType& rsw);
         
   private:
 
@@ -528,9 +528,9 @@ namespace oopse{
     std::string statFileName_;
     std::string restFileName_;
         
-    double rcut_;       /**< cutoff radius*/
-    double rsw_;        /**< radius of switching function*/
-    double rlist_;      /**< neighbor list radius */
+    RealType rcut_;       /**< cutoff radius*/
+    RealType rsw_;        /**< radius of switching function*/
+    RealType rlist_;      /**< neighbor list radius */
 
     bool fortranInitialized_; /**< flag indicate whether fortran side is initialized */
 

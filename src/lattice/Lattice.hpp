@@ -66,10 +66,10 @@ namespace oopse {
     std::vector<Vector3d> getLatticePointsOrt() {return cellSitesOrt;}
     
     //get lattice constant of unit cell
-    virtual  std::vector<double> getLatticeConstant() =0;
+    virtual  std::vector<RealType> getLatticeConstant() =0;
 
     //set lattice constant of unit cell
-    virtual void setLatticeConstant(const  std::vector<double>& lc)=0;
+    virtual void setLatticeConstant(const  std::vector<RealType>& lc)=0;
 
     //get origin of unit cell
     Vector3d getOrigin( ) {return origin;} 

@@ -94,13 +94,13 @@ namespace oopse {
     RigidBodyStamp* rbStamp;
     int nAtoms; 
     int nRigidBodies;
-    std::vector<double> mass;
+    std::vector<RealType> mass;
     Vector3d coor;
     Vector3d refMolCom;  
     int nAtomsInRb;
-    double totMassInRb;
-    double currAtomMass;
-    double molMass;
+    RealType totMassInRb;
+    RealType currAtomMass;
+    RealType molMass;
     
     nAtoms= myStamp->getNAtoms();
     nRigidBodies = myStamp->getNRigidBodies();
@@ -182,8 +182,8 @@ namespace oopse {
       refCoords[i] -= refMolCom;
   }
   
-  double getAtomMass(const std::string& at, ForceField* myFF) {
-    double mass;
+  RealType getAtomMass(const std::string& at, ForceField* myFF) {
+    RealType mass;
     AtomType* atomType= myFF->getAtomType(at);
     if (atomType != NULL) {
       mass =     atomType->getMass();
@@ -194,9 +194,9 @@ namespace oopse {
     return mass;
   }
   
-  double getMolMass(MoleculeStamp *molStamp, ForceField *myFF) {
+  RealType getMolMass(MoleculeStamp *molStamp, ForceField *myFF) {
     int nAtoms;
-    double totMass = 0;
+    RealType totMass = 0;
     nAtoms = molStamp->getNAtoms();
     
     for(size_t i = 0; i < nAtoms; i++) {
@@ -207,9 +207,9 @@ namespace oopse {
   }
   RotMat3x3d latVec2RotMat(const Vector3d& lv){
     
-    double theta =acos(lv[2]);
-    double phi = atan2(lv[1], lv[0]);
-    double psi = 0;
+    RealType theta =acos(lv[2]);
+    RealType phi = atan2(lv[1], lv[0]);
+    RealType psi = 0;
     
     return RotMat3x3d(phi, theta, psi);
     

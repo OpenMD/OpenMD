@@ -57,13 +57,13 @@ namespace oopse {
     DeclareParameter(DistanceType, std::string);
     DeclareParameter(EnergyMixingRule, std::string);
     DeclareParameter(CutoffPolicy, std::string);
-    DeclareParameter(EnergyUnitScaling, double);
-    DeclareParameter(DistanceUnitScaling, double);
-    DeclareParameter(AngleUnitScaling, double);
+    DeclareParameter(EnergyUnitScaling, RealType);
+    DeclareParameter(DistanceUnitScaling, RealType);
+    DeclareParameter(AngleUnitScaling, RealType);
     DeclareParameter(TorsionAngleConvention, std::string);
-    DeclareParameter(vdw14scale, double);
-    DeclareParameter(electrostatic14scale, double);
-    DeclareParameter(dielectric, double);
+    DeclareParameter(vdw14scale, RealType);
+    DeclareParameter(electrostatic14scale, RealType);
+    DeclareParameter(dielectric, RealType);
     
   public:
     ForceFieldOptions();
@@ -87,8 +87,8 @@ namespace oopse {
           int ival = lexi_cast<int>(value);
           result = i->second->setData(ival);
         }      
-        else if (isType<double>(value)){
-          double dval = lexi_cast<double>(value);
+        else if (isType<RealType>(value)){
+          RealType dval = lexi_cast<RealType>(value);
           result = i->second->setData(dval);
         } else{
           result = i->second->setData(value);

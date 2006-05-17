@@ -53,7 +53,7 @@
 #include <list>
 #include <map>
 #include <utility>
-
+#include "config.h"
 namespace oopse {
 
   template<typename ElemType> ElemType pow(ElemType x, int N) {
@@ -335,7 +335,7 @@ namespace oopse {
     return true;
   }
 
-  typedef Polynomial<double> DoublePolynomial;
+  typedef Polynomial<RealType> DoublePolynomial;
 
 } //end namespace oopse
 #endif //MATH_POLYNOMIAL_HPP

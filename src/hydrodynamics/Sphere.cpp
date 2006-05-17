@@ -45,7 +45,7 @@
 
 namespace oopse {
   
-  Sphere::Sphere(Vector3d origin, double radius) : origin_(origin), radius_(radius){
+  Sphere::Sphere(Vector3d origin, RealType radius) : origin_(origin), radius_(radius){
     
   }
   
@@ -69,11 +69,11 @@ namespace oopse {
     return boundary;
   }
   
-  HydroProps Sphere::getHydroProps(double viscosity, double temperature) {
+  HydroProps Sphere::getHydroProps(RealType viscosity, RealType temperature) {
     HydroProps props;
     props.center =V3Zero;
-    double Xitt  = 6.0 * NumericConstant::PI * viscosity * radius_;
-    double Xirr = 8.0 * NumericConstant::PI * viscosity * radius_ * radius_ * radius_;
+    RealType Xitt  = 6.0 * NumericConstant::PI * viscosity * radius_;
+    RealType Xirr = 8.0 * NumericConstant::PI * viscosity * radius_ * radius_ * radius_;
     props.Xi(0, 0) = Xitt;
     props.Xi(1, 1) = Xitt;
     props.Xi(2, 2) = Xitt;
@@ -81,11 +81,11 @@ namespace oopse {
     props.Xi(4, 4) = Xirr;
     props.Xi(5, 5) = Xirr;
     
-    const double convertConstant = 6.023; //convert poise.angstrom to amu/fs
+    const RealType convertConstant = 6.023; //convert poise.angstrom to amu/fs
     props.Xi *= convertConstant;
     Mat6x6d XiCopy = props.Xi;
     invertMatrix(XiCopy, props.D);
-    double kt = OOPSEConstant::kB * temperature;
+    RealType kt = OOPSEConstant::kB * temperature;
     props.D *= kt;
     props.Xi *= OOPSEConstant::kb * temperature;
     

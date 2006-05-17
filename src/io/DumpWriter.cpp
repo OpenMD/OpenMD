@@ -202,10 +202,10 @@ namespace oopse {
 
   void DumpWriter::writeCommentLine(std::ostream& os, Snapshot* s) {
 
-    double currentTime;
+    RealType currentTime;
     Mat3x3d hmat;
-    double chi;
-    double integralOfChiDt;
+    RealType chi;
+    RealType integralOfChiDt;
     Mat3x3d eta;
     
     currentTime = s->getTime();
@@ -347,7 +347,7 @@ namespace oopse {
     int myPotato;
     int nProc;
     int which_node;
-    double atomData[19];
+    RealType atomData[19];
     int isDirectional;
     char MPIatomTypeString[MINIBUFFERSIZE];
     int msgLen; // the length of message actually recieved at master nodes
@@ -422,11 +422,11 @@ namespace oopse {
 
 	    myPotato++;
 
-	    MPI_Recv(atomData, 19, MPI_DOUBLE, which_node, myPotato,
+	    MPI_Recv(atomData, 19, MPI_REALTYPE, which_node, myPotato,
 		     MPI_COMM_WORLD, &istatus);
 	    myPotato++;
 
-	    MPI_Get_count(&istatus, MPI_DOUBLE, &msgLen);
+	    MPI_Get_count(&istatus, MPI_REALTYPE, &msgLen);
 
 	    if (msgLen == 13 || msgLen == 19)
 	      isDirectional = 1;
@@ -726,16 +726,16 @@ namespace oopse {
 	    myPotato++;
 
 	    if (isDirectional && needForceVector_) {
-	      MPI_Send(atomData, 19, MPI_DOUBLE, 0, myPotato,
+	      MPI_Send(atomData, 19, MPI_REALTYPE, 0, myPotato,
 		       MPI_COMM_WORLD);
 	    } else if (isDirectional) {
-	      MPI_Send(atomData, 13, MPI_DOUBLE, 0, myPotato,
+	      MPI_Send(atomData, 13, MPI_REALTYPE, 0, myPotato,
 		       MPI_COMM_WORLD);
 	    } else if (needForceVector_) {
-	      MPI_Send(atomData, 12, MPI_DOUBLE, 0, myPotato,
+	      MPI_Send(atomData, 12, MPI_REALTYPE, 0, myPotato,
 		       MPI_COMM_WORLD);
 	    } else {
-	      MPI_Send(atomData, 6, MPI_DOUBLE, 0, myPotato,
+	      MPI_Send(atomData, 6, MPI_REALTYPE, 0, myPotato,
 		       MPI_COMM_WORLD);
 	    }
 

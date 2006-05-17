@@ -59,13 +59,13 @@ extern "C"{
                       int* nGlobalExcludes,
                       int* excludesGlobalArray,
                       int* molMembershipArray,
-                      double* mfact,
+                      RealType* mfact,
                       int* ngroup,
                       int* globalGroupMembership,
                       int* isError );
   
-  void setFortranBox( double *Hmat,
-                      double *HmatI,
+  void setFortranBox( RealType *Hmat,
+                      RealType *HmatI,
                       int* orthoRhombic );
 }
 #endif

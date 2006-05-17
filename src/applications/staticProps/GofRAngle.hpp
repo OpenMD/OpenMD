@@ -47,13 +47,13 @@ namespace oopse {
   class GofRAngle : public RadialDistrFunc {
     
   public:
-    GofRAngle(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2, double len, int nrbins, int nangleBins);
+    GofRAngle(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2, RealType len, int nrbins, int nangleBins);
 
     int getNRBins() {
       return nRBins_; 
     }
 
-    double getLength() {
+    RealType getLength() {
       return len_;
     }
 
@@ -66,44 +66,44 @@ namespace oopse {
     virtual void collectHistogram(StuntDouble* sd1, StuntDouble* sd2);
     virtual void processHistogram();
 
-    virtual double evaluateAngle(StuntDouble* sd1, StuntDouble* sd2) = 0;
+    virtual RealType evaluateAngle(StuntDouble* sd1, StuntDouble* sd2) = 0;
 
     virtual void writeRdf();
 
-    double deltaCosAngle_;
+    RealType deltaCosAngle_;
     int nAngleBins_;
-    double len_;
+    RealType len_;
     int nRBins_;
-    double deltaR_;
+    RealType deltaR_;
         
     std::vector<std::vector<int> > histogram_;
-    std::vector<std::vector<double> > avgGofr_;
+    std::vector<std::vector<RealType> > avgGofr_;
     int npairs_;
   };
 
 
   class GofRTheta : public GofRAngle {
   public:
-    GofRTheta(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2, double len, int nrbins, int nangleBins)
+    GofRTheta(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2, RealType len, int nrbins, int nangleBins)
       : GofRAngle (info, filename, sele1, sele2, len, nrbins, nangleBins) {
 	setOutputName(getPrefix(filename) + ".gofrt");
       }
         
   private:
 
-    virtual double evaluateAngle(StuntDouble* sd1, StuntDouble* sd2);        
+    virtual RealType evaluateAngle(StuntDouble* sd1, StuntDouble* sd2);        
   };
 
 
   class GofROmega : public GofRAngle {
   public:
-    GofROmega(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2, double len, int nrbins, int nangleBins)
+    GofROmega(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2, RealType len, int nrbins, int nangleBins)
       : GofRAngle (info, filename, sele1, sele2, len, nrbins, nangleBins) {
 	setOutputName(getPrefix(filename) + ".gofro");
       }
     
   private:
-    virtual double evaluateAngle(StuntDouble* sd1, StuntDouble* sd2);        
+    virtual RealType evaluateAngle(StuntDouble* sd1, StuntDouble* sd2);        
   };
 
 }

@@ -68,7 +68,7 @@ namespace oopse {
     Vector3d frc;
     Vector3d Tb;
     Vector3d ji;
-    double mass;
+    RealType mass;
     
     for (mol = info_->beginMolecule(i); mol != NULL; mol = info_->nextMolecule(i)) {
       for (integrableObject = mol->beginIntegrableObject(j); integrableObject != NULL;
@@ -122,7 +122,7 @@ namespace oopse {
     Vector3d frc;
     Vector3d Tb;
     Vector3d ji;
-    double mass;
+    RealType mass;
     
     for (mol = info_->beginMolecule(i); mol != NULL; mol = info_->nextMolecule(i)) {
       for (integrableObject = mol->beginIntegrableObject(j); integrableObject != NULL;
@@ -162,7 +162,7 @@ namespace oopse {
   }
 
 
-  double NVE::calcConservedQuantity() {
+  RealType NVE::calcConservedQuantity() {
     return thermo.getTotalE();
   }
 

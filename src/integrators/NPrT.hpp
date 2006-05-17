@@ -80,7 +80,7 @@ namespace oopse {
     virtual void calcVelScale();
         
     virtual void scaleSimBox();
-    virtual double calcConservedQuantity();
+    virtual RealType calcConservedQuantity();
 
     virtual void loadEta();
     virtual void saveEta();
@@ -88,7 +88,7 @@ namespace oopse {
     Mat3x3d oldEta;
     Mat3x3d prevEta;
     Mat3x3d vScale;
-    double surfaceTension;
+    RealType surfaceTension;
   };
 
 

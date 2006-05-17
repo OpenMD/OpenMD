@@ -9,7 +9,7 @@
 /* 
  * returns an estimate of the resident memory size in kB 
  */
-double residentMem () {
+RealType residentMem () {
 
   FILE* procresults;
   char buf[150];

@@ -74,10 +74,10 @@ namespace oopse {
       	ff.addAtomType(atomTypeName, atomType);
       }
         
-      double mass = tokenizer.nextTokenAsDouble();              
+      RealType mass = tokenizer.nextTokenAsDouble();              
       atomType->setMass(mass);
       if (tokenizer.hasMoreTokens()) {
-          double nelectron = tokenizer.nextTokenAsDouble();
+          RealType nelectron = tokenizer.nextTokenAsDouble();
           atomType->addProperty(new DoubleGenericData("nelectron", nelectron));
       }               
     }    

@@ -59,9 +59,9 @@ namespace oopse {
    */
   namespace NumericConstant {
 
-    static const double epsilon = std::numeric_limits<double>::epsilon();
-    static const double PI = M_PI;
-    static const double TWO_PI = 2.0 * PI;
+    static const RealType epsilon = std::numeric_limits<RealType>::epsilon();
+    static const RealType PI = M_PI;
+    static const RealType TWO_PI = 2.0 * PI;
   }
 
 

@@ -46,7 +46,7 @@
 
 namespace oopse {
 
-  GofR::GofR(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2, double len, int nrbins)
+  GofR::GofR(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2, RealType len, int nrbins)
     : RadialDistrFunc(info, filename, sele1, sele2), len_(len), nRBins_(nrbins){
 
       deltaR_ = len_ /nRBins_;
@@ -70,16 +70,16 @@ namespace oopse {
   void GofR::processHistogram() {
 
     int nPairs = getNPairs();
-    double volume = info_->getSnapshotManager()->getCurrentSnapshot()->getVolume();
-    double pairDensity = nPairs /volume * 2.0;
-    double pairConstant = ( 4.0 * NumericConstant::PI * pairDensity ) / 3.0;
+    RealType volume = info_->getSnapshotManager()->getCurrentSnapshot()->getVolume();
+    RealType pairDensity = nPairs /volume * 2.0;
+    RealType pairConstant = ( 4.0 * NumericConstant::PI * pairDensity ) / 3.0;
 
     for(int i = 0 ; i < histogram_.size(); ++i){
 
-      double rLower = i * deltaR_;
-      double rUpper = rLower + deltaR_;
-      double volSlice = ( rUpper * rUpper * rUpper ) - ( rLower * rLower * rLower );
-      double nIdeal = volSlice * pairConstant;
+      RealType rLower = i * deltaR_;
+      RealType rUpper = rLower + deltaR_;
+      RealType volSlice = ( rUpper * rUpper * rUpper ) - ( rLower * rLower * rLower );
+      RealType nIdeal = volSlice * pairConstant;
 
       avgGofr_[i] += histogram_[i] / nIdeal;    
     }
@@ -97,7 +97,7 @@ namespace oopse {
     Vector3d r12 = pos2 - pos1;
     currentSnapshot_->wrapVector(r12);
 
-    double distance = r12.length();
+    RealType distance = r12.length();
 
     if (distance < len_) {
       int whichBin = distance / deltaR_;
@@ -114,7 +114,7 @@ namespace oopse {
       rdfStream << "selection2: (" << selectionScript2_ << ")\n";
       rdfStream << "#r\tcorrValue\n";
       for (int i = 0; i < avgGofr_.size(); ++i) {
-	double r = deltaR_ * (i + 0.5);
+	RealType r = deltaR_ * (i + 0.5);
 	rdfStream << r << "\t" << avgGofr_[i]/nProcessed_ << "\n";
       }
         

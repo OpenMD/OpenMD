@@ -60,8 +60,8 @@ namespace oopse {
     Bond(Atom* atom1, Atom* atom2, BondType* bt) : atom1_(atom1), atom2_(atom2), bondType_(bt) {}
     virtual ~Bond() {}
     void calcForce() {
-      double len;
-      double dvdr;
+      RealType len;
+      RealType dvdr;
       Vector3d r12;
       Vector3d force;
 
@@ -75,7 +75,7 @@ namespace oopse {
       atom2_->addFrc(force);
     }
         
-    double getPotential() {
+    RealType getPotential() {
       return potential_;
     }
 
@@ -92,7 +92,7 @@ namespace oopse {
     }
         
   private:
-    double potential_;
+    RealType potential_;
     Atom* atom1_;
     Atom* atom2_;        
     BondType* bondType_; /**< bond type */

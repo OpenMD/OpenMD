@@ -54,16 +54,16 @@ class AtomStamp  : public DataHolder {
         AtomStamp(int index);
     public:
 
-      bool setPosition(const std::vector<double>& pos);
-      bool setOrientation(const std::vector<double>& ort);
+      bool setPosition(const std::vector<RealType>& pos);
+      bool setOrientation(const std::vector<RealType>& ort);
       bool havePosition() { return havePos_; }
       bool haveOrientation() { return haveOrt_; }      
-      double getPosX() { return position_[0]; }
-      double getPosY() { return position_[1]; }
-      double getPosZ() { return position_[2]; }
-      double getEulerPhi()   { return orientation_[0]; }
-      double getEulerTheta() { return orientation_[1]; }
-      double getEulerPsi()   { return orientation_[2]; }
+      RealType getPosX() { return position_[0]; }
+      RealType getPosY() { return position_[1]; }
+      RealType getPosZ() { return position_[2]; }
+      RealType getEulerPhi()   { return orientation_[0]; }
+      RealType getEulerTheta() { return orientation_[1]; }
+      RealType getEulerPsi()   { return orientation_[2]; }
       int getIndex() { return index_;}
       virtual void validate();
       typedef std::set<int>::iterator AtomIter;

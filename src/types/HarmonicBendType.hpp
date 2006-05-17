@@ -61,22 +61,22 @@ namespace oopse {
 
   public:
 
-    HarmonicBendType(double theta, double k) : BendType(theta) , k_(k){
+    HarmonicBendType(RealType theta, RealType k) : BendType(theta) , k_(k){
     }
 
-    void setForceConstant(double k) {k_ = k; }
+    void setForceConstant(RealType k) {k_ = k; }
 
-    double getForceConstant() {return k_;}
+    RealType getForceConstant() {return k_;}
 
-    void calcForce(double theta, double& V, double& dVdr) {
-      double delta = theta - theta0_;
+    void calcForce(RealType theta, RealType& V, RealType& dVdr) {
+      RealType delta = theta - theta0_;
 
       V = 0.5 * k_ * delta * delta;
       dVdr = k_ * delta;
     }
                 
   private:
-    double k_;
+    RealType k_;
 
   };
 

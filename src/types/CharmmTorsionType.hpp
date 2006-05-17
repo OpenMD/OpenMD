@@ -58,9 +58,9 @@
 namespace oopse {
 
   struct CharmmTorsionParameter {
-    double kchi;
+    RealType kchi;
     int n;
-    double delta;
+    RealType delta;
   };
 
   class LessThanPeriodicityFunctor {
@@ -76,7 +76,7 @@ namespace oopse {
   public:
     CharmmTorsionType(std::vector<CharmmTorsionParameter>& parameters);
             
-    virtual void calcForce(double cosPhi, double& V, double& dVdCosPhi) { torsionType_->calcForce(cosPhi, V, dVdCosPhi);}
+    virtual void calcForce(RealType cosPhi, RealType& V, RealType& dVdCosPhi) { torsionType_->calcForce(cosPhi, V, dVdCosPhi);}
 
   private:    
     PolynomialTorsionType* torsionType_;

@@ -49,7 +49,7 @@
 namespace oopse {
 
 
-DensityPlot::DensityPlot(SimInfo* info, const std::string& filename, const std::string& sele, const std::string& cmSele, double len, int nrbins)
+DensityPlot::DensityPlot(SimInfo* info, const std::string& filename, const std::string& sele, const std::string& cmSele, RealType len, int nrbins)
   : StaticAnalyser(info, filename), selectionScript_(sele), evaluator_(info), seleMan_(info), 
     cmSelectionScript_(cmSele), cmEvaluator_(info), cmSeleMan_(info),     
     len_(len), nRBins_(nrbins), halfLen_(len/2)     {
@@ -107,7 +107,7 @@ void DensityPlot::process() {
     Vector3d origin = calcNewOrigin();
 
     Mat3x3d hmat = currentSnapshot_->getHmat();
-    double slabVolume = deltaR_ * hmat(0, 0) * hmat(1, 1);
+    RealType slabVolume = deltaR_ * hmat(0, 0) * hmat(1, 1);
     int k; 
     for (StuntDouble* sd = seleMan_.beginSelected(k); sd != NULL; sd = seleMan_.nextSelected(k)) {
 
@@ -137,7 +137,7 @@ void DensityPlot::process() {
                 simError();   
             }
             
-            double nelectron = doubleData->getData();
+            RealType nelectron = doubleData->getData();
 
             data = atom->getAtomType()->getPropertyByName("LennardJones");
             if (data == NULL) {
@@ -157,17 +157,17 @@ void DensityPlot::process() {
             }
 
             LJParam ljParam = ljData->getData();
-            double sigma = ljParam.sigma * 0.5;
-            double sigma2 = sigma * sigma;
+            RealType sigma = ljParam.sigma * 0.5;
+            RealType sigma2 = sigma * sigma;
 
             Vector3d pos = sd->getPos() - origin;
             for (int j =0; j < nRBins_; ++j) {
                 Vector3d tmp(pos);
-                double zdist =j * deltaR_ - halfLen_;
+                RealType zdist =j * deltaR_ - halfLen_;
                 tmp[2] += zdist;
                 currentSnapshot_->wrapVector(tmp);
 
-                double wrappedZdist = tmp.z() + halfLen_;
+                RealType wrappedZdist = tmp.z() + halfLen_;
                 if (wrappedZdist < 0.0 || wrappedZdist > len_) {
                     continue;
                 }
@@ -183,7 +183,7 @@ void DensityPlot::process() {
     }
 
   int nProcessed = nFrames /step_;
-  std::transform(density_.begin(), density_.end(), density_.begin(), std::bind2nd(std::divides<double>(), nProcessed));  
+  std::transform(density_.begin(), density_.end(), density_.begin(), std::bind2nd(std::divides<RealType>(), nProcessed));  
   writeDensity();
         
 
@@ -194,9 +194,9 @@ Vector3d DensityPlot::calcNewOrigin() {
 
     int i;
     Vector3d newOrigin(0.0);
-    double totalMass = 0.0;
+    RealType totalMass = 0.0;
     for (StuntDouble* sd = seleMan_.beginSelected(i); sd != NULL; sd = seleMan_.nextSelected(i)) {
-        double mass = sd->getMass();
+        RealType mass = sd->getMass();
         totalMass += mass;
         newOrigin += sd->getPos() * mass;        
     }

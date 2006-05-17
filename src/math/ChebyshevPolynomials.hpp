@@ -72,7 +72,7 @@ namespace oopse {
      * @param x the value of the independent variable for the nth Chebyshev Polynomial  function
      */
         
-    double evaluate(int n, double x) {
+    RealType evaluate(int n, RealType x) {
       assert (n <= maxPower_ && n >=0); 
       return polyList_[n].evaluate(x);
     }
@@ -83,7 +83,7 @@ namespace oopse {
      * @param n
      * @param x the value of the independent variable for the nth Chebyshev Polynomial  function
      */
-    double evaluateDerivative(int n, double x) {
+    RealType evaluateDerivative(int n, RealType x) {
       assert (n <= maxPower_ && n >=0); 
       return polyList_[n].evaluateDerivative(x);        
     }

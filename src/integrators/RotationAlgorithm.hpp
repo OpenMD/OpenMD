@@ -53,11 +53,11 @@ namespace oopse {
    */
   class RotationAlgorithm {
   public:
-    void rotate(StuntDouble* sd, Vector3d& ji,  double dt) {
+    void rotate(StuntDouble* sd, Vector3d& ji,  RealType dt) {
       doRotate(sd, ji, dt);
     }
   private:
-    virtual void doRotate(StuntDouble* sd, Vector3d& ji,  double dt) = 0;
+    virtual void doRotate(StuntDouble* sd, Vector3d& ji,  RealType dt) = 0;
 
   };
 

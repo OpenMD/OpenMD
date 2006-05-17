@@ -53,8 +53,8 @@ namespace oopse {
 
   void FCCLattice::update(){
 
-    double cellLenOver2;
-    double oneOverRoot3;
+    RealType cellLenOver2;
+    RealType oneOverRoot3;
 
     cellLenOver2  = 0.5 * latticeParam;
     oneOverRoot3 = 1.0 / sqrt(3.0);

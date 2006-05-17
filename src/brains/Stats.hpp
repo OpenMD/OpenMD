@@ -90,12 +90,12 @@ namespace oopse {
     };
 
     Stats();
-    const double& operator [](int index) const {
+    const RealType& operator [](int index) const {
       assert(index >=0 && index < ENDINDEX);
       return data_[index];
     }
 
-    double& operator [](int index){
+    RealType& operator [](int index){
       assert(index >=0 && index < ENDINDEX);            
       return data_[index];
     }
@@ -124,7 +124,7 @@ namespace oopse {
   private:
     static void init();
     static bool isInit_;
-    double data_[ENDINDEX - BEGININDEX];
+    RealType data_[ENDINDEX - BEGININDEX];
     static std::string title_[ENDINDEX - BEGININDEX];
     static std::string units_[ENDINDEX - BEGININDEX];
     Mat3x3d tau_;

@@ -60,10 +60,10 @@ namespace oopse {
    */
   class FixedBondType  : public BondType{
   public:
-    FixedBondType(double r0) : BondType(r0) {}
+    FixedBondType(RealType r0) : BondType(r0) {}
     virtual ~FixedBondType() {}
 
-    virtual void calcForce(double r, double& V, double& dVdr) {
+    virtual void calcForce(RealType r, RealType& V, RealType& dVdr) {
       V = 0.0;
       dVdr = 0.0;
     }

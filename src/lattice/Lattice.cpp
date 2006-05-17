@@ -48,9 +48,9 @@ namespace oopse{
                                                            
     for( int i=0;i < nCellSites;i++){
 
-      latticePos[i][0] = origin[0] + cellSitesPos[i][0] + cellLen[0] * (double(nx) - 0.5);
-      latticePos[i][1] = origin[1] + cellSitesPos[i][1] + cellLen[1] * (double(ny) - 0.5);
-      latticePos[i][2] = origin[2] + cellSitesPos[i][2] + cellLen[2] * (double(nz) - 0.5);    
+      latticePos[i][0] = origin[0] + cellSitesPos[i][0] + cellLen[0] * (RealType(nx) - 0.5);
+      latticePos[i][1] = origin[1] + cellSitesPos[i][1] + cellLen[1] * (RealType(ny) - 0.5);
+      latticePos[i][2] = origin[2] + cellSitesPos[i][2] + cellLen[2] * (RealType(nz) - 0.5);    
     }
 
   }

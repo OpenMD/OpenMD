@@ -65,27 +65,27 @@ extern "C"{
 
   void setElectrostaticSummationMethod( int* theESM );
   void setScreeningMethod( int* theSM );
-  void setElectrostaticCutoffRadius( double* theECR, double* theRSW );
-  void setDampingAlpha( double* theDA );
-  void setReactionFieldDielectric( double* theDielectric );
+  void setElectrostaticCutoffRadius( RealType* theECR, RealType* theRSW );
+  void setDampingAlpha( RealType* theDA );
+  void setReactionFieldDielectric( RealType* theDielectric );
 
   void newElectrostaticType( AtomTypeProperties* atp,
                              int* status);
   
   void setCharge( int* c_ident, 
-                  double* charge,
+                  RealType* charge,
                   int* status);
   
   void setDipoleMoment( int* c_ident,
-                        double* dipole_moment,
+                        RealType* dipole_moment,
                         int* status);
   
   void setSplitDipoleDistance( int* c_ident,
-                               double* split_dipole_distance,
+                               RealType* split_dipole_distance,
                                int* status);
   
   void setQuadrupoleMoments( int* c_ident,
-                             double* quadrupole_moments,
+                             RealType* quadrupole_moments,
                              int* status);
 	
   void destroyElectrostaticTypes(void);

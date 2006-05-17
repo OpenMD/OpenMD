@@ -56,7 +56,7 @@ class LangevinDynamics: public VelocityVerletIntegrator {
   private:    
     virtual void moveA();
     virtual void moveB();
-    virtual double calcConservedQuantity();            
+    virtual RealType calcConservedQuantity();            
     
 };
 

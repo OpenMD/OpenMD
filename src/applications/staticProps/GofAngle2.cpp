@@ -102,10 +102,10 @@ namespace oopse {
     dipole2.normalize();    
     
 
-    double cosAngle1 = dot(r12, dipole1);
-    double cosAngle2 = dot(dipole1, dipole2);
+    RealType cosAngle1 = dot(r12, dipole1);
+    RealType cosAngle2 = dot(dipole1, dipole2);
 
-    double halfBin = (nAngleBins_ - 1) * 0.5;
+    RealType halfBin = (nAngleBins_ - 1) * 0.5;
     int angleBin1 = halfBin * (cosAngle1 + 1.0);
     int angleBin2 = halfBin * (cosAngle1 + 1.0);
 
@@ -121,10 +121,10 @@ namespace oopse {
       rdfStream << "selection2: (" << selectionScript2_ << ")\n";
       rdfStream << "#nAngleBins =" << nAngleBins_ << "deltaCosAngle = " << deltaCosAngle_ << "\n";
       for (int i = 0; i < avgGofr_.size(); ++i) {
-	double cosAngle1 = -1.0 + (i + 0.5)*deltaCosAngle_;
+	RealType cosAngle1 = -1.0 + (i + 0.5)*deltaCosAngle_;
 
 	for(int j = 0; j < avgGofr_[i].size(); ++j) {
-	  double cosAngle2 = -1.0 + (j + 0.5)*deltaCosAngle_;
+	  RealType cosAngle2 = -1.0 + (j + 0.5)*deltaCosAngle_;
 	  rdfStream <<avgGofr_[i][j]/nProcessed_ << "\t";
 	}
 

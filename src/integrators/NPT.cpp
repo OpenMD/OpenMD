@@ -137,7 +137,7 @@ namespace oopse {
     Molecule* mol;
     StuntDouble* integrableObject;
     Vector3d Tb, ji;
-    double mass;
+    RealType mass;
     Vector3d vel;
     Vector3d pos;
     Vector3d frc;
@@ -256,13 +256,13 @@ namespace oopse {
     Vector3d sc;
     Vector3d vel;
     Vector3d frc;
-    double mass;
+    RealType mass;
 
 
     chi= currentSnapshot_->getChi();
     integralOfChidt = currentSnapshot_->getIntegralOfChiDt();
-    double oldChi  = chi;
-    double prevChi;
+    RealType oldChi  = chi;
+    RealType prevChi;
 
     loadEta();
     

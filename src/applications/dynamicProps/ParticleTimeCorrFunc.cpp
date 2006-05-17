@@ -57,8 +57,8 @@ namespace oopse {
     Snapshot* snapshot2 = bsMan_->getSnapshot(frame2);
     assert(snapshot1 && snapshot2);
 
-    double time1 = snapshot1->getTime();
-    double time2 = snapshot2->getTime();
+    RealType time1 = snapshot1->getTime();
+    RealType time2 = snapshot2->getTime();
 
     int timeBin = int ((time2 - time1) /deltaTime_ + 0.5);
     count_[timeBin] += nSelected_;    
@@ -72,7 +72,7 @@ namespace oopse {
 	 sd1 != NULL && sd2 != NULL;
 	 sd1 = seleMan1_.nextSelected(i), sd2 = seleMan2_.nextSelected(j)) {
 
-      double corrVal = calcCorrVal(frame1, frame2, sd1, sd2);
+      RealType corrVal = calcCorrVal(frame1, frame2, sd1, sd2);
       histogram_[timeBin] += corrVal;    
     }
     

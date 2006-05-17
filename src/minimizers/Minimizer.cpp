@@ -46,13 +46,13 @@
 #include "minimizers/Minimizer.hpp"
 #include "primitives/Molecule.hpp"
 namespace oopse {
-  double dotProduct(const std::vector<double>& v1, const std::vector<double>& v2) {
+  RealType dotProduct(const std::vector<RealType>& v1, const std::vector<RealType>& v2) {
     if (v1.size() != v2.size()) {
 
     }
 
 
-    double result = 0.0;    
+    RealType result = 0.0;    
     for (unsigned int i = 0; i < v1.size(); ++i) {
       result += v1[i] * v2[i];
     }
@@ -76,14 +76,14 @@ namespace oopse {
     delete paramSet;
   }
 
-  void Minimizer::calcEnergyGradient(std::vector<double> &x,
-				     std::vector<double> &grad, double&energy, int&status) {
+  void Minimizer::calcEnergyGradient(std::vector<RealType> &x,
+				     std::vector<RealType> &grad, RealType&energy, int&status) {
 
     SimInfo::MoleculeIterator i;
     Molecule::IntegrableObjectIterator  j;
     Molecule* mol;
     StuntDouble* integrableObject;    
-    std::vector<double> myGrad;    
+    std::vector<RealType> myGrad;    
     int shakeStatus;
 
     status = 1;
@@ -118,7 +118,7 @@ namespace oopse {
 
   }
 
-  void Minimizer::setCoor(std::vector<double> &x) {
+  void Minimizer::setCoor(std::vector<RealType> &x) {
     Vector3d position;
     Vector3d eulerAngle;
     SimInfo::MoleculeIterator i;
@@ -149,7 +149,7 @@ namespace oopse {
     
   }
 
-  std::vector<double> Minimizer::getCoor() {
+  std::vector<RealType> Minimizer::getCoor() {
     Vector3d position;
     Vector3d eulerAngle;
     SimInfo::MoleculeIterator i;
@@ -157,7 +157,7 @@ namespace oopse {
     Molecule* mol;
     StuntDouble* integrableObject;    
     int index = 0;
-    std::vector<double> x(getDim());
+    std::vector<RealType> x(getDim());
 
     for (mol = info->beginMolecule(i); mol != NULL; mol = info->nextMolecule(i)) {
       for (integrableObject = mol->beginIntegrableObject(j); integrableObject != NULL;
@@ -186,32 +186,32 @@ namespace oopse {
 
     int    done;
 
-    double posA[3], posB[3];
+    RealType posA[3], posB[3];
 
-    double velA[3], velB[3];
+    RealType velA[3], velB[3];
 
-    double pab[3];
+    RealType pab[3];
 
-    double rab[3];
+    RealType rab[3];
 
     int    a,       b,
     ax,      ay,
     az,      bx,
     by,      bz;
 
-    double rma,     rmb;
+    RealType rma,     rmb;
 
-    double dx,      dy,
+    RealType dx,      dy,
     dz;
 
-    double rpab;
+    RealType rpab;
 
-    double rabsq,   pabsq,
+    RealType rabsq,   pabsq,
     rpabsq;
 
-    double diffsq;
+    RealType diffsq;
 
-    double gab;
+    RealType gab;
 
     int    iteration;
 
@@ -377,26 +377,26 @@ namespace oopse {
 
     int    done;
 
-    double posA[3], posB[3];
+    RealType posA[3], posB[3];
 
-    double frcA[3], frcB[3];
+    RealType frcA[3], frcB[3];
 
-    double rab[3],  fpab[3];
+    RealType rab[3],  fpab[3];
 
     int    a,       b,
     ax,      ay,
     az,      bx,
     by,      bz;
 
-    double rma,     rmb;
+    RealType rma,     rmb;
 
-    double rvab;
+    RealType rvab;
 
-    double gab;
+    RealType gab;
 
-    double rabsq;
+    RealType rabsq;
 
-    double rfab;
+    RealType rfab;
 
     int    iteration;
 
@@ -524,8 +524,8 @@ namespace oopse {
     calcEnergyGradient(curX, curG, curF, egEvalStatus);
   }
 
-  void Minimizer::calcF(std::vector < double > &x, double&f, int&status) {
-    std::vector < double > tempG;
+  void Minimizer::calcF(std::vector < RealType > &x, RealType&f, int&status) {
+    std::vector < RealType > tempG;
 
     tempG.resize(x.size());
 
@@ -538,7 +538,7 @@ namespace oopse {
     calcEnergyGradient(curX, curG, curF, egEvalStatus);
   }
 
-  void Minimizer::calcG(std::vector<double>& x, std::vector<double>& g, double&f, int&status) {
+  void Minimizer::calcG(std::vector<RealType>& x, std::vector<RealType>& g, RealType&f, int&status) {
     calcEnergyGradient(x, g, f, status);
   }
 
@@ -564,7 +564,7 @@ namespace oopse {
     }
   }
 
-  void Minimizer::setX(std::vector < double > &x) {
+  void Minimizer::setX(std::vector < RealType > &x) {
     if (x.size() != ndim) {
       sprintf(painCave.errMsg, "Minimizer Error: dimesion of x and curX does not match\n");
       painCave.isFatal = 1;
@@ -574,7 +574,7 @@ namespace oopse {
     curX = x;
   }
 
-  void Minimizer::setG(std::vector < double > &g) {
+  void Minimizer::setG(std::vector < RealType > &g) {
     if (g.size() != ndim) {
       sprintf(painCave.errMsg, "Minimizer Error: dimesion of g and curG does not match\n");
       painCave.isFatal = 1;
@@ -596,33 +596,33 @@ namespace oopse {
   * @todo optimize this line search algorithm
   */
 
-  int Minimizer::doLineSearch(std::vector<double> &direction,
-			      double stepSize) {
+  int Minimizer::doLineSearch(std::vector<RealType> &direction,
+			      RealType stepSize) {
 
-    std::vector<double> xa;
-    std::vector<double> xb;
-    std::vector<double> xc;
-    std::vector<double> ga;
-    std::vector<double> gb;
-    std::vector<double> gc;
-    double fa;
-    double fb;
-    double fc;
-    double a;
-    double b;
-    double c;
+    std::vector<RealType> xa;
+    std::vector<RealType> xb;
+    std::vector<RealType> xc;
+    std::vector<RealType> ga;
+    std::vector<RealType> gb;
+    std::vector<RealType> gc;
+    RealType fa;
+    RealType fb;
+    RealType fc;
+    RealType a;
+    RealType b;
+    RealType c;
     int    status;
-    double initSlope;
-    double slopeA;
-    double slopeB;
-    double slopeC;
+    RealType initSlope;
+    RealType slopeA;
+    RealType slopeB;
+    RealType slopeC;
     bool   foundLower;
     int    iter;
     int    maxLSIter;
-    double mu;
-    double eta;
-    double ftol;
-    double lsTol;
+    RealType mu;
+    RealType eta;
+    RealType ftol;
+    RealType lsTol;
 
     xa.resize(ndim);
     xb.resize(ndim);
@@ -902,16 +902,16 @@ namespace oopse {
   }
 
 
-  double Minimizer::calcPotential() {
+  RealType Minimizer::calcPotential() {
     forceMan->calcForces(true, false);
 
     Snapshot* curSnapshot = info->getSnapshotManager()->getCurrentSnapshot();
-    double potential_local = curSnapshot->statData[Stats::LONG_RANGE_POTENTIAL] + 
+    RealType potential_local = curSnapshot->statData[Stats::LONG_RANGE_POTENTIAL] + 
       curSnapshot->statData[Stats::SHORT_RANGE_POTENTIAL] ;    
-    double potential;
+    RealType potential;
 
 #ifdef IS_MPI
-    MPI_Allreduce(&potential_local, &potential, 1, MPI_DOUBLE, MPI_SUM,
+    MPI_Allreduce(&potential_local, &potential, 1, MPI_REALTYPE, MPI_SUM,
                   MPI_COMM_WORLD);
 #else
     potential = potential_local;

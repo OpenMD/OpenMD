@@ -43,9 +43,9 @@
 
 namespace oopse {
 
-  void DLM::doRotate(StuntDouble* sd, Vector3d& ji, double dt) {
-    double dt2 = 0.5 * dt;    
-    double angle;
+  void DLM::doRotate(StuntDouble* sd, Vector3d& ji, RealType dt) {
+    RealType dt2 = 0.5 * dt;    
+    RealType angle;
 
     RotMat3x3d A = sd->getA();
     Mat3x3d I = sd->getI();
@@ -94,13 +94,13 @@ namespace oopse {
   }
 
 
-  void DLM::rotateStep(int axes1, int axes2, double angle, Vector3d& ji, RotMat3x3d& A) {
+  void DLM::rotateStep(int axes1, int axes2, RealType angle, Vector3d& ji, RotMat3x3d& A) {
 
-    double sinAngle;
-    double cosAngle;
-    double angleSqr;
-    double angleSqrOver4;
-    double top, bottom;
+    RealType sinAngle;
+    RealType cosAngle;
+    RealType angleSqr;
+    RealType angleSqrOver4;
+    RealType top, bottom;
 
     RotMat3x3d tempA(A);  // initialize the tempA
     Vector3d tempJ(0.0);

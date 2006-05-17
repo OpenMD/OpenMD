@@ -62,18 +62,18 @@ namespace oopse {
   class PolynomialBondType : public BondType{
 
   public:
-    PolynomialBondType(double r0) : BondType(r0) {}
+    PolynomialBondType(RealType r0) : BondType(r0) {}
 
-    void setCoefficient(int power, double coefficient) {
+    void setCoefficient(int power, RealType coefficient) {
       polynomial_.setCoefficient(power, coefficient);
     }
 
-    double getCoefficient(int power) {
+    RealType getCoefficient(int power) {
       return polynomial_.getCoefficient(power);
     }
         
-    void calcForce(double r, double & V, double & dVdr) {
-      double delta = r - r0;
+    void calcForce(RealType r, RealType & V, RealType & dVdr) {
+      RealType delta = r - r0;
       V = polynomial_.evaluate(delta);
       dVdr = polynomial_.evaluateDerivative(delta);
 

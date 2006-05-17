@@ -56,7 +56,7 @@ namespace oopse {
         
     virtual void calcForces(bool needPotential, bool needStress);
 
-    double getZConsTime() { return zconsTime_; }
+    RealType getZConsTime() { return zconsTime_; }
     std::string getZConsOutput() { return zconsOutput_; }    
 
     void update();
@@ -75,37 +75,37 @@ namespace oopse {
     void calcTotalMassMovingZMols();
     bool haveMovingZMols();
     bool haveFixedZMols();
-    double getZTargetPos(int index);        
-    double getZFOfFixedZMols(Molecule* mol, StuntDouble* sd, double totalForce) ;
-    double getZFOfMovingMols(Molecule* mol, double totalForce) ;
-    double getHFOfFixedZMols(Molecule* mol, StuntDouble* sd, double totalForce);
-    double getHFOfUnconsMols(Molecule* mol, double totalForce);        
+    RealType getZTargetPos(int index);        
+    RealType getZFOfFixedZMols(Molecule* mol, StuntDouble* sd, RealType totalForce) ;
+    RealType getZFOfMovingMols(Molecule* mol, RealType totalForce) ;
+    RealType getHFOfFixedZMols(Molecule* mol, StuntDouble* sd, RealType totalForce);
+    RealType getHFOfUnconsMols(Molecule* mol, RealType totalForce);        
 
     std::list<ZconstraintMol> movingZMols_;  /**<   moving zconstraint molecules*/
     std::list<ZconstraintMol> fixedZMols_;      /**< fixed zconstraint molecules*/
     std::vector<Molecule*> unzconsMols_;    /**< free molecules*/
 
-    double zconsTime_;
+    RealType zconsTime_;
     std::string zconsOutput_;
-    double zconsTol_;
+    RealType zconsTol_;
     bool usingSMD_;
-    double zconsFixingTime_;  
-    double zconsGap_;
+    RealType zconsFixingTime_;  
+    RealType zconsGap_;
     bool usingZconsGap_;
-    double dt_;
+    RealType dt_;
 
     const static int whichDirection = 2;
 
     std::map<int, ZconstraintParam> allZMolIndices_;
 
     Snapshot* currSnapshot_;
-    double currZconsTime_;
+    RealType currZconsTime_;
 
-    double totMassMovingZMols_;
-    double totMassUnconsMols_;  /**< mass of unconstraint molecules in the whole system (never change) */
+    RealType totMassMovingZMols_;
+    RealType totMassUnconsMols_;  /**< mass of unconstraint molecules in the whole system (never change) */
 
     ZConsWriter* fzOut;
-    const double infiniteTime;
+    const RealType infiniteTime;
   };
 
 }

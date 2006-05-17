@@ -88,13 +88,13 @@ int main(int argc, char *argv []) {
   
   Lattice *simpleLat;
   int numMol;
-  double latticeConstant;
-  std::vector<double> lc;
-  double mass;
-  const double rhoConvertConst = 1.661;
-  double density;
-  double rodLength;
-  double rodDiameter;
+  RealType latticeConstant;
+  std::vector<RealType> lc;
+  RealType mass;
+  const RealType rhoConvertConst = 1.661;
+  RealType density;
+  RealType rodLength;
+  RealType rodDiameter;
   
   
   int nx, ny, nz;

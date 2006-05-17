@@ -62,18 +62,18 @@ namespace oopse {
   class PolynomialBendType : public BendType{
 
   public:
-    PolynomialBendType(double theta) : BendType(theta) {}
+    PolynomialBendType(RealType theta) : BendType(theta) {}
 
-    void setCoefficient(int power, double coefficient) {
+    void setCoefficient(int power, RealType coefficient) {
       polynomial_.setCoefficient(power, coefficient);
     }
 
-    double getCoefficient(int power) {
+    RealType getCoefficient(int power) {
       return polynomial_.getCoefficient(power);
     }
         
-    void calcForce(double theta, double & V, double & dVdr) {
-      double delta = theta - theta0_;
+    void calcForce(RealType theta, RealType & V, RealType & dVdr) {
+      RealType delta = theta - theta0_;
       V = polynomial_.evaluate(delta);
       dVdr = polynomial_.evaluateDerivative(delta);
 

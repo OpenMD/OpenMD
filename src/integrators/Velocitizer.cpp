@@ -83,7 +83,7 @@ namespace oopse {
     delete randNumGen_;
   }
   
-  void Velocitizer::velocitize(double temperature) {
+  void Velocitizer::velocitize(RealType temperature) {
     Vector3d aVel;
     Vector3d aJ;
     Mat3x3d I;
@@ -91,11 +91,11 @@ namespace oopse {
     int m;
     int n; 
     Vector3d vdrift;
-    double vbar;
+    RealType vbar;
     /**@todo refactory kb */
-    const double kb = 8.31451e-7; // kb in amu, angstroms, fs, etc.
-    double av2;
-    double kebar;
+    const RealType kb = 8.31451e-7; // kb in amu, angstroms, fs, etc.
+    RealType av2;
+    RealType kebar;
     
     Globals * simParams = info_->getSimParams();
     

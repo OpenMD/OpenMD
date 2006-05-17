@@ -372,7 +372,7 @@ namespace oopse {
 	  numPos++;
 	}
       }
-      //    if ( numPos < ceil(double(n)/double(2.0)) )
+      //    if ( numPos < ceil(RealType(n)/RealType(2.0)) )
       if ( numPos < ceil_half_n) {
 	for (i=0; i<n; i++) {
 	  v(i, j) *= -1.0;
@@ -388,7 +388,7 @@ namespace oopse {
   }
 
 
-  typedef SquareMatrix<double, 6> Mat6x6d;
+  typedef SquareMatrix<RealType, 6> Mat6x6d;
 }
 #endif //MATH_SQUAREMATRIX_HPP 
 

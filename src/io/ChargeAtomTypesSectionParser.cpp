@@ -64,7 +64,7 @@ namespace oopse {
         
       AtomType* atomType = ff.getAtomType(atomTypeName);
       if (atomType != NULL) {
-	double charge = tokenizer.nextTokenAsDouble();
+	RealType charge = tokenizer.nextTokenAsDouble();
 
 	atomType->addProperty(new DoubleGenericData("Charge", charge));
 	atomType->setCharge();

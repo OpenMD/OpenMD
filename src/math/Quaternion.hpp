@@ -58,7 +58,7 @@ namespace oopse{
    * @class Quaternion Quaternion.hpp "math/Quaternion.hpp"
    * Quaternion is a sort of a higher-level complex number.
    * It is defined as Q = w + x*i + y*j + z*k,
-   * where w, x, y, and z are numbers of type T (e.g. double), and
+   * where w, x, y, and z are numbers of type T (e.g. RealType), and
    * i*i = -1; j*j = -1; k*k = -1;
    * i*j = k; j*k = i; k*i = j;
    */
@@ -355,6 +355,6 @@ namespace oopse{
     return equal(lhs[0] ,rhs[0]) && equal(lhs[1] , rhs[1]) && equal(lhs[2], rhs[2]) && equal(lhs[3], rhs[3]);
   }
     
-  typedef Quaternion<double> Quat4d;
+  typedef Quaternion<RealType> Quat4d;
 }
 #endif //MATH_QUATERNION_HPP 

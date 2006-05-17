@@ -113,26 +113,26 @@ namespace oopse {
     bool needReset;    
     Velocitizer* velocitizer_;
     bool needVelocityScaling;
-    double targetScalingTemp;
+    RealType targetScalingTemp;
     
     DumpWriter* dumpWriter;
     StatWriter* statWriter;
     RestWriter* restWriter;
     Thermo thermo;
 
-    double runTime;
-    double sampleTime;
-    double statusTime;
-    double thermalTime;
-    double resetTime;
-    double dt;
+    RealType runTime;
+    RealType sampleTime;
+    RealType statusTime;
+    RealType thermalTime;
+    RealType resetTime;
+    RealType dt;
 
     Snapshot* currentSnapshot_; //During the integration, the address of currentSnapshot Will not change
 
         
   private:
         
-    virtual double calcConservedQuantity() = 0;
+    virtual RealType calcConservedQuantity() = 0;
         
     virtual DumpWriter* createDumpWriter() = 0;
 

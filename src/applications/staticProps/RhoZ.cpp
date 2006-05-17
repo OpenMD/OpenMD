@@ -44,7 +44,7 @@
  *
  *  Created by Charles F. Vardeman II on 11/26/05.
  *  @author  Charles F. Vardeman II 
- *  @version $Id: RhoZ.cpp,v 1.4 2006-03-07 16:43:52 gezelter Exp $
+ *  @version $Id: RhoZ.cpp,v 1.5 2006-05-17 21:51:42 tim Exp $
  *
  */
 
@@ -58,7 +58,7 @@
 #include "primitives/Molecule.hpp"
 namespace oopse {
   
-  RhoZ::RhoZ(SimInfo* info, const std::string& filename, const std::string& sele, double len, int nrbins)
+  RhoZ::RhoZ(SimInfo* info, const std::string& filename, const std::string& sele, RealType len, int nrbins)
     : StaticAnalyser(info, filename), selectionScript_(sele),  evaluator_(info), seleMan_(info), len_(len), nRBins_(nrbins){
 
     evaluator_.loadScriptString(sele);
@@ -91,10 +91,10 @@ namespace oopse {
       reader.readFrame(istep);
       currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
       
-      double sliceVolume = currentSnapshot_->getVolume() /nRBins_;
+      RealType sliceVolume = currentSnapshot_->getVolume() /nRBins_;
       //assume simulation box will never change
       //Mat3x3d hmat = currentSnapshot_->getHmat();
-      double halfBoxZ_ = len_ / 2.0;      
+      RealType halfBoxZ_ = len_ / 2.0;      
         
         if (evaluator_.isDynamic()) {
           seleMan_.setSelectionSet(evaluator_.evaluate());
@@ -118,7 +118,7 @@ namespace oopse {
 
         //loop over the slices to calculate the densities
         for (i = 0; i < nRBins_; i++) {
-            double totalMass = 0;
+            RealType totalMass = 0;
             for (int k = 0; k < sliceSDLists_[i].size(); ++k) {
                 totalMass += sliceSDLists_[i][k]->getMass();
             }
@@ -140,7 +140,7 @@ namespace oopse {
       rdfStream << "#selection: (" << selectionScript_ << ")\n";
       rdfStream << "#z\tdensity\n";
       for (int i = 0; i < density_.size(); ++i) {
-        double r = deltaR_ * (i + 0.5);
+        RealType r = deltaR_ * (i + 0.5);
         rdfStream << r << "\t" << 1.660535*density_[i]/nProcessed_ << "\n";
       }
       

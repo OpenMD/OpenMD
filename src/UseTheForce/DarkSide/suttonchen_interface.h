@@ -44,7 +44,7 @@
  *
  *  Created by Charles F. Vardeman II on 11/10/05.
  *  @author  Charles F. Vardeman II 
- *  @version $Id: suttonchen_interface.h,v 1.4 2006-01-11 23:04:40 gezelter Exp $
+ *  @version $Id: suttonchen_interface.h,v 1.5 2006-05-17 21:51:42 tim Exp $
  *
  */
 #ifndef USETHEFORCE_DARKSIDE_SUTTONCHEN_INTERFACE_H
@@ -59,11 +59,11 @@
 
 extern "C"{
   void newSCtype( int* ident,
-                  double* c,
-                  double* m,
-                  double* n,
-                  double* alpha,
-                  double* epsilon,                  
+                  RealType* c,
+                  RealType* m,
+                  RealType* n,
+                  RealType* alpha,
+                  RealType* epsilon,                  
                   int* status);
   
     void destroySCTypes( );

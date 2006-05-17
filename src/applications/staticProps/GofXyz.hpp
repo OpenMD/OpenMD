@@ -48,13 +48,13 @@ namespace oopse {
     
   public:
     GofXyz(SimInfo* info, const std::string& filename, const std::string& sele1, 
-	   const std::string& sele2, const std::string& sele3,double len, int nrbins);
+	   const std::string& sele2, const std::string& sele3,RealType len, int nrbins);
 
     int getNRBins() {
       return nRBins_;
     }
         
-    double getLength() {
+    RealType getLength() {
       return len_;
     }
         
@@ -67,10 +67,10 @@ namespace oopse {
         
     //virtual void validateSelection1(SelectionManager& sman);
         
-    double len_;
-    double halfLen_;
+    RealType len_;
+    RealType halfLen_;
     int nRBins_;
-    double deltaR_;
+    RealType deltaR_;
 
     SelectionEvaluator evaluator3_;
     SelectionManager seleMan3_;

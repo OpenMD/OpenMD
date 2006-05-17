@@ -47,7 +47,7 @@ namespace oopse {
 		   TorsionType *tt) :
     atom1_(atom1), atom2_(atom2), atom3_(atom3), atom4_(atom4), torsionType_(tt) { }
 
-  void Torsion::calcForce(double& angle) {
+  void Torsion::calcForce(RealType& angle) {
 
     Vector3d pos1 = atom1_->getPos();
     Vector3d pos2 = atom2_->getPos();
@@ -60,22 +60,22 @@ namespace oopse {
 
     //  Calculate the cross products and distances
     Vector3d A = cross(r21, r32);
-    double rA = A.length();
+    RealType rA = A.length();
     Vector3d B = cross(r32, r43);
-    double rB = B.length();
+    RealType rB = B.length();
     Vector3d C = cross(r32, A);
-    double rC = C.length();
+    RealType rC = C.length();
 
     A.normalize();
     B.normalize();
     C.normalize();
     
     //  Calculate the sin and cos
-    double cos_phi = dot(A, B) ;
+    RealType cos_phi = dot(A, B) ;
     if (cos_phi > 1.0) cos_phi = 1.0;
     if (cos_phi < -1.0) cos_phi = -1.0; 
 
-    double dVdcosPhi;
+    RealType dVdcosPhi;
     torsionType_->calcForce(cos_phi, potential_, dVdcosPhi);
     Vector3d f1;
     Vector3d f2;

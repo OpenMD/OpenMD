@@ -49,17 +49,17 @@ using namespace oopse;
 RealSphericalHarmonic::RealSphericalHarmonic() {
 }
 
-double RealSphericalHarmonic::getValueAt(double costheta, double phi) {
+RealType RealSphericalHarmonic::getValueAt(RealType costheta, RealType phi) {
   
-  double p, phase;
+  RealType p, phase;
   
   // associated Legendre polynomial
   p = LegendreP(L,M,costheta);
  
   if (functionType == RSH_SIN) {
-    phase = sin((double)M * phi);
+    phase = sin((RealType)M * phi);
   } else {
-    phase = cos((double)M * phi);
+    phase = cos((RealType)M * phi);
   }
   
   return coefficient*p*phase;
@@ -68,7 +68,7 @@ double RealSphericalHarmonic::getValueAt(double costheta, double phi) {
 
 //---------------------------------------------------------------------------//
 //
-// double LegendreP (int l, int m, double x);
+// RealType LegendreP (int l, int m, RealType x);
 //
 // Computes the value of the associated Legendre polynomial P_lm (x)
 // of order l at a given point.
@@ -81,17 +81,17 @@ double RealSphericalHarmonic::getValueAt(double costheta, double phi) {
 //   value of the polynomial in x
 //
 //---------------------------------------------------------------------------//
-double RealSphericalHarmonic::LegendreP (int l, int m, double x) {
+RealType RealSphericalHarmonic::LegendreP (int l, int m, RealType x) {
   // check parameters
   if (m < 0 || m > l || fabs(x) > 1.0) {
     printf("LegendreP got a bad argument: l = %d\tm = %d\tx = %lf\n", l, m, x);
 //    return NAN;
-	return std::numeric_limits <double>:: quiet_NaN();
+	return std::numeric_limits <RealType>:: quiet_NaN();
   }
   
-  double pmm = 1.0;
+  RealType pmm = 1.0;
   if (m > 0) {
-    double h = sqrt((1.0-x)*(1.0+x)),
+    RealType h = sqrt((1.0-x)*(1.0+x)),
       f = 1.0;
     for (int i = 1; i <= m; i++) {
       pmm *= -f * h;
@@ -101,11 +101,11 @@ double RealSphericalHarmonic::LegendreP (int l, int m, double x) {
   if (l == m)
     return pmm;
   else {
-    double pmmp1 = x * (2 * m + 1) * pmm;
+    RealType pmmp1 = x * (2 * m + 1) * pmm;
     if (l == (m+1))
       return pmmp1;
     else {
-      double pll = 0.0;
+      RealType pll = 0.0;
       for (int ll = m+2; ll <= l; ll++) {
         pll = (x * (2 * ll - 1) * pmmp1 - (ll + m - 1) * pmm) / (ll - m);
         pmm = pmmp1;

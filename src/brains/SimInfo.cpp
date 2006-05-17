@@ -799,14 +799,14 @@ namespace oopse {
     }
 
     //calculate mass ratio of cutoff group
-    std::vector<double> mfact;
+    std::vector<RealType> mfact;
     SimInfo::MoleculeIterator mi;
     Molecule* mol;
     Molecule::CutoffGroupIterator ci;
     CutoffGroup* cg;
     Molecule::AtomIterator ai;
     Atom* atom;
-    double totalMass;
+    RealType totalMass;
 
     //to avoid memory reallocation, reserve enough space for mfact
     mfact.reserve(getNCutoffGroups());
@@ -966,7 +966,7 @@ namespace oopse {
     notifyFortranCutoffPolicy(&cp);
 
     // Check the Skin Thickness for neighborlists
-    double skin;
+    RealType skin;
     if (simParams_->haveSkinThickness()) {
       skin = simParams_->getSkinThickness();
       notifyFortranSkinThickness(&skin);
@@ -1056,8 +1056,8 @@ namespace oopse {
     int errorOut;
     int esm =  NONE;
     int sm = UNDAMPED;
-    double alphaVal;
-    double dielectric;
+    RealType alphaVal;
+    RealType dielectric;
 
     errorOut = isError;
     alphaVal = simParams_->getDampingAlpha();
@@ -1217,20 +1217,20 @@ namespace oopse {
     Molecule* mol;
 
     Vector3d comVel(0.0);
-    double totalMass = 0.0;
+    RealType totalMass = 0.0;
     
  
     for (mol = beginMolecule(i); mol != NULL; mol = nextMolecule(i)) {
-      double mass = mol->getMass();
+      RealType mass = mol->getMass();
       totalMass += mass;
       comVel += mass * mol->getComVel();
     }  
 
 #ifdef IS_MPI
-    double tmpMass = totalMass;
+    RealType tmpMass = totalMass;
     Vector3d tmpComVel(comVel);    
-    MPI_Allreduce(&tmpMass,&totalMass,1,MPI_DOUBLE,MPI_SUM, MPI_COMM_WORLD);
-    MPI_Allreduce(tmpComVel.getArrayPointer(), comVel.getArrayPointer(),3,MPI_DOUBLE,MPI_SUM, MPI_COMM_WORLD);
+    MPI_Allreduce(&tmpMass,&totalMass,1,MPI_REALTYPE,MPI_SUM, MPI_COMM_WORLD);
+    MPI_Allreduce(tmpComVel.getArrayPointer(), comVel.getArrayPointer(),3,MPI_REALTYPE,MPI_SUM, MPI_COMM_WORLD);
 #endif
 
     comVel /= totalMass;
@@ -1243,19 +1243,19 @@ namespace oopse {
     Molecule* mol;
 
     Vector3d com(0.0);
-    double totalMass = 0.0;
+    RealType totalMass = 0.0;
      
     for (mol = beginMolecule(i); mol != NULL; mol = nextMolecule(i)) {
-      double mass = mol->getMass();
+      RealType mass = mol->getMass();
       totalMass += mass;
       com += mass * mol->getCom();
     }  
 
 #ifdef IS_MPI
-    double tmpMass = totalMass;
+    RealType tmpMass = totalMass;
     Vector3d tmpCom(com);    
-    MPI_Allreduce(&tmpMass,&totalMass,1,MPI_DOUBLE,MPI_SUM, MPI_COMM_WORLD);
-    MPI_Allreduce(tmpCom.getArrayPointer(), com.getArrayPointer(),3,MPI_DOUBLE,MPI_SUM, MPI_COMM_WORLD);
+    MPI_Allreduce(&tmpMass,&totalMass,1,MPI_REALTYPE,MPI_SUM, MPI_COMM_WORLD);
+    MPI_Allreduce(tmpCom.getArrayPointer(), com.getArrayPointer(),3,MPI_REALTYPE,MPI_SUM, MPI_COMM_WORLD);
 #endif
 
     com /= totalMass;
@@ -1279,23 +1279,23 @@ namespace oopse {
       Molecule* mol;
       
     
-      double totalMass = 0.0;
+      RealType totalMass = 0.0;
     
 
       for (mol = beginMolecule(i); mol != NULL; mol = nextMolecule(i)) {
-         double mass = mol->getMass();
+         RealType mass = mol->getMass();
          totalMass += mass;
          com += mass * mol->getCom();
          comVel += mass * mol->getComVel();           
       }  
       
 #ifdef IS_MPI
-      double tmpMass = totalMass;
+      RealType tmpMass = totalMass;
       Vector3d tmpCom(com);  
       Vector3d tmpComVel(comVel);
-      MPI_Allreduce(&tmpMass,&totalMass,1,MPI_DOUBLE,MPI_SUM, MPI_COMM_WORLD);
-      MPI_Allreduce(tmpCom.getArrayPointer(), com.getArrayPointer(),3,MPI_DOUBLE,MPI_SUM, MPI_COMM_WORLD);
-      MPI_Allreduce(tmpComVel.getArrayPointer(), comVel.getArrayPointer(),3,MPI_DOUBLE,MPI_SUM, MPI_COMM_WORLD);
+      MPI_Allreduce(&tmpMass,&totalMass,1,MPI_REALTYPE,MPI_SUM, MPI_COMM_WORLD);
+      MPI_Allreduce(tmpCom.getArrayPointer(), com.getArrayPointer(),3,MPI_REALTYPE,MPI_SUM, MPI_COMM_WORLD);
+      MPI_Allreduce(tmpComVel.getArrayPointer(), comVel.getArrayPointer(),3,MPI_REALTYPE,MPI_SUM, MPI_COMM_WORLD);
 #endif
       
       com /= totalMass;
@@ -1314,12 +1314,12 @@ namespace oopse {
    void SimInfo::getInertiaTensor(Mat3x3d &inertiaTensor, Vector3d &angularMomentum){
       
  
-      double xx = 0.0;
-      double yy = 0.0;
-      double zz = 0.0;
-      double xy = 0.0;
-      double xz = 0.0;
-      double yz = 0.0;
+      RealType xx = 0.0;
+      RealType yy = 0.0;
+      RealType zz = 0.0;
+      RealType xy = 0.0;
+      RealType xz = 0.0;
+      RealType yz = 0.0;
       Vector3d com(0.0);
       Vector3d comVel(0.0);
       
@@ -1331,7 +1331,7 @@ namespace oopse {
       Vector3d thisq(0.0);
       Vector3d thisv(0.0);
 
-      double thisMass = 0.0;
+      RealType thisMass = 0.0;
      
       
       
@@ -1369,8 +1369,8 @@ namespace oopse {
 #ifdef IS_MPI
       Mat3x3d tmpI(inertiaTensor);
       Vector3d tmpAngMom;
-      MPI_Allreduce(tmpI.getArrayPointer(), inertiaTensor.getArrayPointer(),9,MPI_DOUBLE,MPI_SUM, MPI_COMM_WORLD);
-      MPI_Allreduce(tmpAngMom.getArrayPointer(), angularMomentum.getArrayPointer(),3,MPI_DOUBLE,MPI_SUM, MPI_COMM_WORLD);
+      MPI_Allreduce(tmpI.getArrayPointer(), inertiaTensor.getArrayPointer(),9,MPI_REALTYPE,MPI_SUM, MPI_COMM_WORLD);
+      MPI_Allreduce(tmpAngMom.getArrayPointer(), angularMomentum.getArrayPointer(),3,MPI_REALTYPE,MPI_SUM, MPI_COMM_WORLD);
 #endif
                
       return;
@@ -1391,7 +1391,7 @@ namespace oopse {
       Vector3d thisr(0.0);
       Vector3d thisp(0.0);
       
-      double thisMass;
+      RealType thisMass;
       
       for (mol = beginMolecule(i); mol != NULL; mol = nextMolecule(i)) {         
         thisMass = mol->getMass(); 
@@ -1404,7 +1404,7 @@ namespace oopse {
        
 #ifdef IS_MPI
       Vector3d tmpAngMom;
-      MPI_Allreduce(tmpAngMom.getArrayPointer(), angularMomentum.getArrayPointer(),3,MPI_DOUBLE,MPI_SUM, MPI_COMM_WORLD);
+      MPI_Allreduce(tmpAngMom.getArrayPointer(), angularMomentum.getArrayPointer(),3,MPI_REALTYPE,MPI_SUM, MPI_COMM_WORLD);
 #endif
       
       return angularMomentum;

@@ -47,13 +47,13 @@ int CholeskyDecomposition(MatrixType& A, MatrixType& L) {
     int n = A.getNRow();
     assert(n == A.getNCol() && n == L.getNRow()&& n==L.getNCol());
     for(int i = 0; i < n; ++i) {
-        double sum1 = 0;
+        RealType sum1 = 0;
         for (int k = 0; k < i -1; ++k) {
             sum1 +=L(i,k)*L(i,k);
         }
         L(i, i) = sqrt(A(i, i) - sum1);
         for (int j = i+1; j < n; ++j) {
-            double sum2 = 0;
+            RealType sum2 = 0;
             for (int k = 0; k < i-1; ++k) {
                 sum2 += L(j ,k)*L(i, k);
             }

@@ -162,7 +162,7 @@ namespace oopse {
         
     bool containDynamicToken(const std::vector<Token>& tokens);
 
-    double getCharge(Atom* atom);
+    RealType getCharge(Atom* atom);
         
     SelectionCompiler compiler;
 

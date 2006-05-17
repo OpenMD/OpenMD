@@ -53,7 +53,7 @@ using namespace std;
 
 namespace oopse {
   
-  Restraints::Restraints(SimInfo* info, double lambdaVal, double lambdaExp){
+  Restraints::Restraints(SimInfo* info, RealType lambdaVal, RealType lambdaExp){
     info_ = info;
     Globals* simParam = info_->getSimParams();
 
@@ -119,7 +119,7 @@ namespace oopse {
   Restraints::~Restraints(){
   }
   
-  void Restraints::Calc_rVal(Vector3d &position, double refPosition[3]){
+  void Restraints::Calc_rVal(Vector3d &position, RealType refPosition[3]){
     delRx = position.x() - refPosition[0];
     delRy = position.y() - refPosition[1];
     delRz = position.z() - refPosition[2];
@@ -127,7 +127,7 @@ namespace oopse {
     return;
   }
   
-  void Restraints::Calc_body_thetaVal(RotMat3x3d &matrix, double refUnit[3]){
+  void Restraints::Calc_body_thetaVal(RotMat3x3d &matrix, RealType refUnit[3]){
     ub0x = matrix(0,0)*refUnit[0] + matrix(0,1)*refUnit[1]
       + matrix(0,2)*refUnit[2];
     ub0y = matrix(1,0)*refUnit[0] + matrix(1,1)*refUnit[1]
@@ -146,10 +146,10 @@ namespace oopse {
     return;
   }
   
-  void Restraints::Calc_body_omegaVal(double zAngle){
-    double zRotator[3][3];
-    double tempOmega;
-    double wholeTwoPis;
+  void Restraints::Calc_body_omegaVal(RealType zAngle){
+    RealType zRotator[3][3];
+    RealType tempOmega;
+    RealType wholeTwoPis;
     // Use the omega accumulated from the rotation propagation
     omega = zAngle;
     
@@ -185,20 +185,20 @@ namespace oopse {
     return;
   }
   
-  double Restraints::Calc_Restraint_Forces(){
+  RealType Restraints::Calc_Restraint_Forces(){
     SimInfo::MoleculeIterator mi;
     Molecule* mol;
     Molecule::IntegrableObjectIterator ii;
     StuntDouble* integrableObject;
     Vector3d pos;
     RotMat3x3d A;
-    double refPos[3];
-    double refVec[3];
-    double tolerance;
-    double tempPotent;
-    double factor;
-    double spaceTrq[3];
-    double omegaPass;
+    RealType refPos[3];
+    RealType refVec[3];
+    RealType tolerance;
+    RealType tempPotent;
+    RealType factor;
+    RealType spaceTrq[3];
+    RealType omegaPass;
     GenericData* data;
     DoubleGenericData* doubleData;
     

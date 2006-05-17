@@ -68,7 +68,7 @@ namespace oopse {
   const int LS_ERROR  = -1;
 
   /** @todo move to math module */
-  double dotProduct(const std::vector<double>& v1, const std::vector<double>& v2);
+  RealType dotProduct(const std::vector<RealType>& v1, const std::vector<RealType>& v2);
 
   /**
    * @class Minimizer
@@ -94,7 +94,7 @@ namespace oopse {
     virtual void prepareStep() {};
 
     //line search algorithm, for the time being, we use back track algorithm
-    virtual int doLineSearch(std::vector<double>& direction, double stepSize);
+    virtual int doLineSearch(std::vector<RealType>& direction, RealType stepSize);
 
     virtual int checkConvg() = 0;
 
@@ -117,45 +117,45 @@ namespace oopse {
     void setVerbose(bool verbose) {  bVerbose = verbose;}
 
     //get and set the coordinate
-    std::vector<double> getX() {  return curX;  }
-    void setX(std::vector<double>& x);
+    std::vector<RealType> getX() {  return curX;  }
+    void setX(std::vector<RealType>& x);
 
     //get and set the value of object function
-    double getF() {  return curF;  }
-    void setF(double f)  { curF = f;  }
+    RealType getF() {  return curF;  }
+    void setF(RealType f)  { curF = f;  }
 
-    std::vector<double> getG() {  return curG;  }
-    void setG(std::vector<double>& g);
+    std::vector<RealType> getG() {  return curG;  }
+    void setG(std::vector<RealType>& g);
 
     //get and set the gradient
-    std::vector<double> getGrad() {  return curG;  }
-    void setGrad(std::vector<double>& g) {  curG = g;  }
+    std::vector<RealType> getGrad() {  return curG;  }
+    void setGrad(std::vector<RealType>& g) {  curG = g;  }
 
     //interal function to evaluate the energy and gradient in OOPSE
-    void calcEnergyGradient(std::vector<double>& x,  std::vector<double>& grad, double&
+    void calcEnergyGradient(std::vector<RealType>& x,  std::vector<RealType>& grad, RealType&
 			    energy, int& status);
 
     //calculate the value of object function
     virtual void calcF();
-    virtual void calcF(std::vector<double>& x, double&f, int& status);
+    virtual void calcF(std::vector<RealType>& x, RealType&f, int& status);
 
     //calculate the gradient
     virtual void calcG();
-    virtual void calcG(std::vector<double>& x,  std::vector<double>& g, double& f, int& status);
+    virtual void calcG(std::vector<RealType>& x,  std::vector<RealType>& g, RealType& f, int& status);
 
     //calculate the hessian
     //virtual void calcH(int& status);
-    //virtual void calcH(vector<double>& x,  std::vector<dobule>& g, SymMatrix& h, int& status);
+    //virtual void calcH(vector<RealType>& x,  std::vector<dobule>& g, SymMatrix& h, int& status);
 
     friend std::ostream& operator<<(std::ostream& os, const Minimizer& minimizer);
 
   protected:
 
     // transfrom cartesian and rotational coordinates into minimization coordinates 
-    std::vector<double> getCoor();
+    std::vector<RealType> getCoor();
 
     // transfrom minimization coordinates into cartesian and rotational coordinates  
-    void setCoor(std::vector<double>& x);
+    void setCoor(std::vector<RealType>& x);
 
 
 
@@ -165,7 +165,7 @@ namespace oopse {
     //remove the force component along the bond direction
     int shakeF() { return 0;}
 
-    double calcPotential();
+    RealType calcPotential();
         
     SimInfo* info;
 
@@ -195,16 +195,16 @@ namespace oopse {
     int egEvalStatus;
 
     //initial coordinates
-    //vector<double> initX;
+    //vector<RealType> initX;
 
     //current value  of the function
-    double curF;
+    RealType curF;
         
     // current coordinates
-    std::vector<double> curX;
+    std::vector<RealType> curX;
 
     //gradient at curent coordinates
-    std::vector<double> curG;
+    std::vector<RealType> curG;
 
     //hessian at current coordinates
     //SymMatrix curH;

@@ -49,15 +49,15 @@
 #define newEAMtype FC_FUNC(neweamtype, NEWEAMTYPE)
 
 extern "C"{
-  void newEAMtype( double* lattice_constant, 
+  void newEAMtype( RealType* lattice_constant, 
                    int* eam_nrho,
-                   double* eam_drho,
+                   RealType* eam_drho,
                    int* eam_nr,
-                   double* eam_dr,
-                   double* eam_rcut,
-                   double* eam_rvals, 
-                   double* eam_rhovals,
-                   double* eam_Frhovals,
+                   RealType* eam_dr,
+                   RealType* eam_rcut,
+                   RealType* eam_rvals, 
+                   RealType* eam_rhovals,
+                   RealType* eam_Frhovals,
                    int* eam_ident,
                    int* status );
 }  

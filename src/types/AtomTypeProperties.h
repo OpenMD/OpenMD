@@ -5,7 +5,7 @@
 /** 
  * This header provides dual access for the AtomTypeProperties between
  * fortran and C. NOTE: The sequence of struct components MUST match
- * between C and Fortran and in general be packed double,int,char.
+ * between C and Fortran and in general be packed RealType,int,char.
  */
 typedef  struct{
   int ident;

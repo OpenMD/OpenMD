@@ -130,7 +130,7 @@ namespace oopse {
   void NPTf::getPosScale(const Vector3d& pos, const Vector3d& COM, int index, Vector3d& sc) {
 
     /**@todo */
-    Vector3d rj = (oldPos[index] + pos)/2.0 -COM;
+    Vector3d rj = (oldPos[index] + pos)/(RealType)2.0 -COM;
     sc = eta * rj;
   }
 
@@ -140,8 +140,8 @@ namespace oopse {
     int j;
     int k;
     Mat3x3d scaleMat;
-    double eta2ij;
-    double bigScale, smallScale, offDiagMax;
+    RealType eta2ij;
+    RealType bigScale, smallScale, offDiagMax;
     Mat3x3d hm;
     Mat3x3d hmnew;
 
@@ -230,7 +230,7 @@ namespace oopse {
 
   bool NPTf::etaConverged() {
     int i;
-    double diffEta, sumEta;
+    RealType diffEta, sumEta;
 
     sumEta = 0;
     for(i = 0; i < 3; i++) {
@@ -242,7 +242,7 @@ namespace oopse {
     return ( diffEta <= etaTolerance );
   }
 
-  double NPTf::calcConservedQuantity(){
+  RealType NPTf::calcConservedQuantity(){
 
     chi= currentSnapshot_->getChi();
     integralOfChidt = currentSnapshot_->getIntegralOfChiDt();
@@ -258,13 +258,13 @@ namespace oopse {
     // of freedom).  
     fkBT = info_->getNdf()*OOPSEConstant::kB *targetTemp;    
     
-    double conservedQuantity;
-    double totalEnergy;
-    double thermostat_kinetic;
-    double thermostat_potential;
-    double barostat_kinetic;
-    double barostat_potential;
-    double trEta;
+    RealType conservedQuantity;
+    RealType totalEnergy;
+    RealType thermostat_kinetic;
+    RealType thermostat_potential;
+    RealType barostat_kinetic;
+    RealType barostat_potential;
+    RealType trEta;
 
     totalEnergy = thermo.getTotalE();
 
@@ -272,7 +272,7 @@ namespace oopse {
 
     thermostat_potential = fkBT* integralOfChidt / OOPSEConstant::energyConvert;
 
-    SquareMatrix<double, 3> tmp = eta.transpose() * eta;
+    SquareMatrix<RealType, 3> tmp = eta.transpose() * eta;
     trEta = tmp.trace();
     
     barostat_kinetic = NkBT * tb2 * trEta /(2.0 * OOPSEConstant::energyConvert);

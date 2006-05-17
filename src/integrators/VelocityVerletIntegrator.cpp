@@ -135,7 +135,7 @@ namespace oopse {
 
 
   void VelocityVerletIntegrator::preStep() {
-    double difference = currentSnapshot_->getTime() + dt - currStatus;
+    RealType difference = currentSnapshot_->getTime() + dt - currStatus;
   
     if (difference > 0 || fabs(difference) < oopse::epsilon) {
       needPotential = true;

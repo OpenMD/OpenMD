@@ -62,11 +62,11 @@ namespace oopse {
     Restraints* restraint_;
     Snapshot* currSnapshot_;
 
-    double tIntLambda_;
-    double tIntK_;
-    double factor_;
-    double lrPot_;
-    double vHarm_;
+    RealType tIntLambda_;
+    RealType tIntK_;
+    RealType factor_;
+    RealType lrPot_;
+    RealType vHarm_;
   };
   
 }

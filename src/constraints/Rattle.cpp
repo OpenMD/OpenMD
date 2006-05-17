@@ -160,10 +160,10 @@ namespace oopse {
 
     currentSnapshot_->wrapVector(pab);
 
-    double pabsq = pab.lengthSquare();
+    RealType pabsq = pab.lengthSquare();
 
-    double rabsq = consPair->getConsDistSquare();
-    double diffsq = rabsq - pabsq;
+    RealType rabsq = consPair->getConsDistSquare();
+    RealType diffsq = rabsq - pabsq;
 
     // the original rattle code from alan tidesley
     if (fabs(diffsq) > (consTolerance_ * rabsq * 2)){
@@ -175,17 +175,17 @@ namespace oopse {
 
       currentSnapshot_->wrapVector(rab);
 
-      double rpab = dot(rab, pab);
-      double rpabsq = rpab * rpab;
+      RealType rpab = dot(rab, pab);
+      RealType rpabsq = rpab * rpab;
 
       if (rpabsq < (rabsq * -diffsq)){
 	return consFail;
       }
 
-      double rma = 1.0 / consElem1->getMass();
-      double rmb = 1.0 / consElem2->getMass();
+      RealType rma = 1.0 / consElem1->getMass();
+      RealType rmb = 1.0 / consElem2->getMass();
 
-      double gab = diffsq / (2.0 * (rma + rmb) * rpab);
+      RealType gab = diffsq / (2.0 * (rma + rmb) * rpab);
 
       Vector3d delta = rab * gab;
 
@@ -234,12 +234,12 @@ namespace oopse {
 
     currentSnapshot_->wrapVector(rab);
 
-    double rma = 1.0 / consElem1->getMass();
-    double rmb = 1.0 / consElem2->getMass();
+    RealType rma = 1.0 / consElem1->getMass();
+    RealType rmb = 1.0 / consElem2->getMass();
 
-    double rvab = dot(rab, dv);
+    RealType rvab = dot(rab, dv);
 
-    double gab = -rvab / ((rma + rmb) * consPair->getConsDistSquare());
+    RealType gab = -rvab / ((rma + rmb) * consPair->getConsDistSquare());
 
     if (fabs(gab) > consTolerance_){
       Vector3d delta = rab * gab;

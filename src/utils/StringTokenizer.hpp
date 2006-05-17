@@ -52,7 +52,7 @@
 
 #include <string>
 #include <vector>
-
+#include "config.h"
 namespace oopse {
 
   /**
@@ -147,10 +147,10 @@ namespace oopse {
     float nextTokenAsFloat();
 
     /**
-     * Returns the next token from this string tokenizer as a double.
-     * @return the next token from this string tokenizer as a double.
+     * Returns the next token from this string tokenizer as a RealType.
+     * @return the next token from this string tokenizer as a RealType.
      */
-    double nextTokenAsDouble();
+    RealType nextTokenAsDouble();
 
     /**
      * Returns the next token without advancing the position of the StringTokenizer.

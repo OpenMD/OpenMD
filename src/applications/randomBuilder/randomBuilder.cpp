@@ -42,7 +42,7 @@
  *
  *  Created by Charles F. Vardeman II on 10 Apr 2006.
  *  @author  Charles F. Vardeman II
- *  @version $Id: randomBuilder.cpp,v 1.1 2006-04-25 22:59:27 chuckv Exp $
+ *  @version $Id: randomBuilder.cpp,v 1.2 2006-05-17 21:51:42 tim Exp $
  *
  */
 
@@ -89,11 +89,11 @@ int main(int argc, char *argv []) {
   std::string outInitFileName;
   Lattice *simpleLat;
   int* numMol;
-  double latticeConstant;
-  std::vector<double> lc;
-  double mass;
-  const double rhoConvertConst = 1.661;
-  double density;
+  RealType latticeConstant;
+  std::vector<RealType> lc;
+  RealType mass;
+  const RealType rhoConvertConst = 1.661;
+  RealType density;
   int nx,
     ny,
     nz;
@@ -182,7 +182,7 @@ int main(int argc, char *argv []) {
 
   //calculate lattice constant (in Angstrom)
   latticeConstant = pow(rhoConvertConst * numMolPerCell * mass / density,
-			1.0 / 3.0);
+			(RealType)(1.0 / 3.0));
 
   //set lattice constant
   lc.push_back(latticeConstant);
@@ -217,7 +217,7 @@ int main(int argc, char *argv []) {
   }
   int totComponents = 0;
   for (int i = 0;i<nComponents-1;i++){ /* Figure out Percent for each component */
-    numMol[i] = int((double)numSites * args_info.molFraction_arg[i]);
+    numMol[i] = int((RealType)numSites * args_info.molFraction_arg[i]);
     std::cout<<numMol[i]<<std::endl;
     totComponents += numMol[i];
   }

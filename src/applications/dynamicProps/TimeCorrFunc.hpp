@@ -93,11 +93,11 @@ namespace oopse {
     virtual void postCorrelate();
     virtual void updateFrame(int frame);
 
-    double deltaTime_;
+    RealType deltaTime_;
     int nTimeBins_;
-    std::vector<double> histogram_;
+    std::vector<RealType> histogram_;
     std::vector<int> count_;
-    std::vector<double> time_;
+    std::vector<RealType> time_;
         
     SimInfo* info_;
     int storageLayout_;

@@ -53,7 +53,7 @@
 
 namespace oopse {
 
-  double Thermo::getKinetic() {
+  RealType Thermo::getKinetic() {
     SimInfo::MoleculeIterator miter;
     std::vector<StuntDouble*>::iterator iiter;
     Molecule* mol;
@@ -64,14 +64,14 @@ namespace oopse {
     int i;
     int j;
     int k;
-    double kinetic = 0.0;
-    double kinetic_global = 0.0;
+    RealType kinetic = 0.0;
+    RealType kinetic_global = 0.0;
     
     for (mol = info_->beginMolecule(miter); mol != NULL; mol = info_->nextMolecule(miter)) {
       for (integrableObject = mol->beginIntegrableObject(iiter); integrableObject != NULL; 
 	   integrableObject = mol->nextIntegrableObject(iiter)) {
         
-	double mass = integrableObject->getMass();
+	RealType mass = integrableObject->getMass();
 	Vector3d vel = integrableObject->getVel();
         
 	kinetic += mass * (vel[0]*vel[0] + vel[1]*vel[1] + vel[2]*vel[2]);
@@ -96,7 +96,7 @@ namespace oopse {
     
 #ifdef IS_MPI
 
-    MPI_Allreduce(&kinetic, &kinetic_global, 1, MPI_DOUBLE, MPI_SUM,
+    MPI_Allreduce(&kinetic, &kinetic_global, 1, MPI_REALTYPE, MPI_SUM,
                   MPI_COMM_WORLD);
     kinetic = kinetic_global;
 
@@ -107,16 +107,16 @@ namespace oopse {
     return kinetic;
   }
 
-  double Thermo::getPotential() {
-    double potential = 0.0;
+  RealType Thermo::getPotential() {
+    RealType potential = 0.0;
     Snapshot* curSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
-    double shortRangePot_local =  curSnapshot->statData[Stats::SHORT_RANGE_POTENTIAL] ;
+    RealType shortRangePot_local =  curSnapshot->statData[Stats::SHORT_RANGE_POTENTIAL] ;
 
     // Get total potential for entire system from MPI.
 
 #ifdef IS_MPI
 
-    MPI_Allreduce(&shortRangePot_local, &potential, 1, MPI_DOUBLE, MPI_SUM,
+    MPI_Allreduce(&shortRangePot_local, &potential, 1, MPI_REALTYPE, MPI_SUM,
                   MPI_COMM_WORLD);
     potential += curSnapshot->statData[Stats::LONG_RANGE_POTENTIAL];
 
@@ -129,31 +129,31 @@ namespace oopse {
     return potential;
   }
 
-  double Thermo::getTotalE() {
-    double total;
+  RealType Thermo::getTotalE() {
+    RealType total;
 
     total = this->getKinetic() + this->getPotential();
     return total;
   }
 
-  double Thermo::getTemperature() {
+  RealType Thermo::getTemperature() {
     
-    double temperature = ( 2.0 * this->getKinetic() ) / (info_->getNdf()* OOPSEConstant::kb );
+    RealType temperature = ( 2.0 * this->getKinetic() ) / (info_->getNdf()* OOPSEConstant::kb );
     return temperature;
   }
 
-  double Thermo::getVolume() { 
+  RealType Thermo::getVolume() { 
     Snapshot* curSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
     return curSnapshot->getVolume();
   }
 
-  double Thermo::getPressure() {
+  RealType Thermo::getPressure() {
 
     // Relies on the calculation of the full molecular pressure tensor
 
 
     Mat3x3d tensor;
-    double pressure;
+    RealType pressure;
 
     tensor = getPressureTensor();
 
@@ -162,13 +162,13 @@ namespace oopse {
     return pressure;
   }
 
-  double Thermo::getPressure(int direction) {
+  RealType Thermo::getPressure(int direction) {
 
     // Relies on the calculation of the full molecular pressure tensor
 
 	  
     Mat3x3d tensor;
-    double pressure;
+    RealType pressure;
 
     tensor = getPressureTensor();
 
@@ -195,19 +195,19 @@ namespace oopse {
       for (integrableObject = mol->beginIntegrableObject(j); integrableObject != NULL; 
 	   integrableObject = mol->nextIntegrableObject(j)) {
 
-	double mass = integrableObject->getMass();
+	RealType mass = integrableObject->getMass();
 	Vector3d vcom = integrableObject->getVel();
 	p_local += mass * outProduct(vcom, vcom);         
       }
     }
     
 #ifdef IS_MPI
-    MPI_Allreduce(p_local.getArrayPointer(), p_global.getArrayPointer(), 9, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+    MPI_Allreduce(p_local.getArrayPointer(), p_global.getArrayPointer(), 9, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
 #else
     p_global = p_local;
 #endif // is_mpi
 
-    double volume = this->getVolume();
+    RealType volume = this->getVolume();
     Snapshot* curSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
     Mat3x3d tau = curSnapshot->statData.getTau();
 

@@ -70,7 +70,7 @@ namespace oopse {
 
   }
 
-  OOPSEBitSet DistanceFinder::find(const OOPSEBitSet& bs, double distance) {
+  OOPSEBitSet DistanceFinder::find(const OOPSEBitSet& bs, RealType distance) {
     StuntDouble * center;
     Vector3d centerPos;
     Snapshot* currSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();

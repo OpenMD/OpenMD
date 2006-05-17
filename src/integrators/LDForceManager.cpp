@@ -291,7 +291,7 @@ namespace oopse {
         currProp.Xirrr(2,1) = tokenizer.nextTokenAsDouble();
         currProp.Xirrr(2,2) = tokenizer.nextTokenAsDouble(); 
         
-        SquareMatrix<double, 6> Xir;
+        SquareMatrix<RealType, 6> Xir;
         Xir.setSubMatrix(0, 0, currProp.Xirtt);
         Xir.setSubMatrix(0, 3, currProp.Xirrt);
         Xir.setSubMatrix(3, 0, currProp.Xirtr);
@@ -317,7 +317,7 @@ namespace oopse {
     Mat3x3d Atrans;
     Vector3d Tb;
     Vector3d ji;
-    double mass;
+    RealType mass;
     unsigned int index = 0;
     bool doLangevinForces;
     bool freezeMolecule;
@@ -329,7 +329,7 @@ namespace oopse {
       if (sphericalBoundaryConditions_) {
         
         Vector3d molPos = mol->getCom();
-        double molRad = molPos.length();
+        RealType molRad = molPos.length();
         
         doLangevinForces = false;
         freezeMolecule = false;
@@ -413,11 +413,11 @@ namespace oopse {
     ForceManager::postCalculation();   
   }
 
-void LDForceManager::genRandomForceAndTorque(Vector3d& force, Vector3d& torque, unsigned int index, double variance) {
+void LDForceManager::genRandomForceAndTorque(Vector3d& force, Vector3d& torque, unsigned int index, RealType variance) {
 
 
-    Vector<double, 6> Z;
-    Vector<double, 6> generalForce;
+    Vector<RealType, 6> Z;
+    Vector<RealType, 6> generalForce;
 
         
     Z[0] = randNumGen_.randNorm(0, variance);

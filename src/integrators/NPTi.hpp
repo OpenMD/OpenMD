@@ -72,15 +72,15 @@ namespace oopse {
     virtual void getPosScale(const Vector3d& pos, const Vector3d& COM, int index, Vector3d& sc);
 
     virtual void calcVelScale();
-    virtual double calcConservedQuantity();
+    virtual RealType calcConservedQuantity();
 
     virtual void loadEta();
     virtual void saveEta();
     
-    double eta;
-    double oldEta;
-    double prevEta;
-    double vScale;
+    RealType eta;
+    RealType oldEta;
+    RealType prevEta;
+    RealType vScale;
         
   };
 

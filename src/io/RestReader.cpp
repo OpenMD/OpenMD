@@ -366,12 +366,12 @@ namespace oopse {
     
     char *foo; // the pointer to the current string token
     
-    double pos[3];        // position place holders
-    double q[4];          // the quaternions
-    double RfromQ[3][3];  // the rotation matrix 
-    double normalize;     // to normalize the reference unit vector
-    double uX, uY, uZ;    // reference unit vector place holders
-    double uselessToken;
+    RealType pos[3];        // position place holders
+    RealType q[4];          // the quaternions
+    RealType RfromQ[3][3];  // the rotation matrix 
+    RealType normalize;     // to normalize the reference unit vector
+    RealType uX, uY, uZ;    // reference unit vector place holders
+    RealType uselessToken;
     StringTokenizer tokenizer(readLine);
     int nTokens;
     
@@ -492,7 +492,7 @@ namespace oopse {
     char *parseErr;
     
     std::vector<StuntDouble*> vecParticles;
-    std::vector<double> tempZangs;
+    std::vector<RealType> tempZangs;
       
     inAngFileName = info_->getRestFileName();
     
@@ -600,7 +600,7 @@ namespace oopse {
     int index;    
 
     int nCurObj;
-    double angleTranfer;
+    RealType angleTranfer;
     
     nTotObjs = info_->getNGlobalIntegrableObjects();
     haveError = 0;
@@ -669,7 +669,7 @@ namespace oopse {
 	  
 	  for(j=0; j < nCurObj; j++){	 	 
 	    angleTransfer = tempZangs[index];
-	    MPI_Send(&angleTransfer, 1, MPI_DOUBLE, which_node, 
+	    MPI_Send(&angleTransfer, 1, MPI_REALTYPE, which_node, 
 		     TAKE_THIS_TAG_DOUBLE, MPI_COMM_WORLD);      	  
 	    index++;
 	  }
@@ -704,7 +704,7 @@ namespace oopse {
                integrableObject != NULL; 
                integrableObject = mol->nextIntegrableObject(ii)){
 	    
-	    MPI_Recv(&angleTransfer, 1, MPI_DOUBLE, 0,
+	    MPI_Recv(&angleTransfer, 1, MPI_REALTYPE, 0,
 		     TAKE_THIS_TAG_DOUBLE, MPI_COMM_WORLD, &istatus);
 
 	    integrableObject->setZangle(angleTransfer);
@@ -753,7 +753,7 @@ namespace oopse {
     MPI_Status istatus;
     
     int nCurObj;
-    double angleTranfer;
+    RealType angleTranfer;
     
     nTotObjs = info_->getNGlobalIntegrableObjects();
     haveError = 0;
@@ -789,7 +789,7 @@ namespace oopse {
 	  
 	  for(j=0; j < nCurObj; j++){	 	 
 	    angleTransfer = 0.0;
-	    MPI_Send(&angleTransfer, 1, MPI_DOUBLE, which_node, 
+	    MPI_Send(&angleTransfer, 1, MPI_REALTYPE, which_node, 
 		     TAKE_THIS_TAG_DOUBLE, MPI_COMM_WORLD);      	  
 	    
 	  }
@@ -822,7 +822,7 @@ namespace oopse {
                integrableObject != NULL; 
                integrableObject = mol->nextIntegrableObject(ii)){
 	    
-            MPI_Recv(&angleTransfer, 1, MPI_DOUBLE, 0,
+            MPI_Recv(&angleTransfer, 1, MPI_REALTYPE, 0,
                      TAKE_THIS_TAG_DOUBLE, MPI_COMM_WORLD, &istatus);
             vecParticles[j]->setZangle(angleTransfer);
           }	

@@ -48,14 +48,14 @@ namespace oopse {
 
     class DensityPlot : public StaticAnalyser{
         public:
-            DensityPlot(SimInfo* info, const std::string& filename, const std::string& sele, const std::string& cmSele,double len, int nrbins);
+            DensityPlot(SimInfo* info, const std::string& filename, const std::string& sele, const std::string& cmSele,RealType len, int nrbins);
             virtual void process();
 
             int getNRBins() {
               return nRBins_; 
             }
             
-            double getLength() {
+            RealType getLength() {
               return len_;
             }
         
@@ -66,12 +66,12 @@ namespace oopse {
             void writeDensity();            
 
             Snapshot* currentSnapshot_;
-            double len_;
-            double halfLen_;
+            RealType len_;
+            RealType halfLen_;
             int nRBins_;
-            double deltaR_;                
+            RealType deltaR_;                
             std::vector<int> histogram_; 
-            std::vector<double> density_; 
+            std::vector<RealType> density_; 
 
             std::string selectionScript_;
             SelectionManager seleMan_;

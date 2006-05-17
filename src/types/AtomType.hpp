@@ -44,7 +44,7 @@
 #define TYPES_ATOMTYPE_HPP
 
 #include <string>
-
+#include "config.h"
 #include "utils/PropertyMap.hpp"
 
 #define __C
@@ -74,11 +74,11 @@ namespace oopse {
      */
     void makeFortranAtomType();
             
-    void setMass(double m) {
+    void setMass(RealType m) {
       mass_ = m;
     }
 
-    double getMass(void) {
+    RealType getMass(void) {
       return mass_;
     }
 
@@ -222,7 +222,7 @@ namespace oopse {
   protected:
 
     AtomTypeProperties atp;
-    double mass_;
+    RealType mass_;
     std::string name_;
 
   private:
@@ -238,32 +238,32 @@ namespace oopse {
   };
 
   struct LJParam {
-    double epsilon;
-    double sigma;
+    RealType epsilon;
+    RealType sigma;
     int soft_pot;
   };
   typedef SimpleTypeData<LJParam> LJParamGenericData;
 
   struct EAMParam {
-    double latticeConstant;         
+    RealType latticeConstant;         
     int nrho;
-    double drho;
+    RealType drho;
     int nr;
-    double dr;
-    double rcut;
-    std::vector<double> rvals; 
-    std::vector<double> rhovals;
-    std::vector<double> Frhovals;    
+    RealType dr;
+    RealType rcut;
+    std::vector<RealType> rvals; 
+    std::vector<RealType> rhovals;
+    std::vector<RealType> Frhovals;    
   };
 
   typedef SimpleTypeData<EAMParam> EAMParamGenericData;
   
   struct SCParam {
-    double c;
-    double m;
-    double n;
-    double alpha;
-    double epsilon;
+    RealType c;
+    RealType m;
+    RealType n;
+    RealType alpha;
+    RealType epsilon;
   };
   typedef SimpleTypeData<SCParam> SCParamGenericData;
   

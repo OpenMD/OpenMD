@@ -91,8 +91,8 @@ namespace oopse {
 
     //The Second line contains atomic number, atomic mass, a lattice constant and lattic type
     int junk;
-    double mass;
-    double latticeConstant; 
+    RealType mass;
+    RealType latticeConstant; 
     std::string lattice;
     if (ppfStream->getline(buffer, bufferSize)) {       
       StringTokenizer tokenizer1(buffer);
@@ -141,7 +141,7 @@ namespace oopse {
   }
 
   void EAMAtomTypesSectionParser::parseEAMArray(std::istream& input, 
-						std::vector<double>& array, int num) {
+						std::vector<RealType>& array, int num) {
     
     const int dataPerLine = 5;
     if (num % dataPerLine != 0) {

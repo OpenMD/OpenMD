@@ -155,9 +155,9 @@ namespace oopse {
     Molecule::BondIterator bondIter;;
     Molecule::BendIterator  bendIter;
     Molecule::TorsionIterator  torsionIter;
-    double bondPotential = 0.0;
-    double bendPotential = 0.0;
-    double torsionPotential = 0.0;
+    RealType bondPotential = 0.0;
+    RealType bendPotential = 0.0;
+    RealType torsionPotential = 0.0;
 
     //calculate short range interactions    
     for (mol = info_->beginMolecule(mi); mol != NULL; mol = info_->nextMolecule(mi)) {
@@ -175,9 +175,9 @@ namespace oopse {
 
       for (bend = mol->beginBend(bendIter); bend != NULL; bend = mol->nextBend(bendIter)) {
 
-          double angle;
+          RealType angle;
 	    bend->calcForce(angle);
-          double currBendPot = bend->getPotential();          
+          RealType currBendPot = bend->getPotential();          
   	    bendPotential += bend->getPotential();
           std::map<Bend*, BendDataSet>::iterator i = bendDataSets.find(bend);
           if (i == bendDataSets.end()) {
@@ -196,9 +196,9 @@ namespace oopse {
       }
 
       for (torsion = mol->beginTorsion(torsionIter); torsion != NULL; torsion = mol->nextTorsion(torsionIter)) {
-        double angle;
+        RealType angle;
   	  torsion->calcForce(angle);
-        double currTorsionPot = torsion->getPotential();
+        RealType currTorsionPot = torsion->getPotential();
 	  torsionPotential += torsion->getPotential();
           std::map<Torsion*, TorsionDataSet>::iterator i = torsionDataSets.find(torsion);
           if (i == torsionDataSets.end()) {
@@ -218,7 +218,7 @@ namespace oopse {
 
     }
     
-    double  shortRangePotential = bondPotential + bendPotential + torsionPotential;    
+    RealType  shortRangePotential = bondPotential + bendPotential + torsionPotential;    
     Snapshot* curSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
     curSnapshot->statData[Stats::SHORT_RANGE_POTENTIAL] = shortRangePotential;
     curSnapshot->statData[Stats::BOND_POTENTIAL] = bondPotential;
@@ -230,12 +230,12 @@ namespace oopse {
   void ForceManager::calcLongRangeInteraction(bool needPotential, bool needStress) {
     Snapshot* curSnapshot;
     DataStorage* config;
-    double* frc;
-    double* pos;
-    double* trq;
-    double* A;
-    double* electroFrame;
-    double* rc;
+    RealType* frc;
+    RealType* pos;
+    RealType* trq;
+    RealType* A;
+    RealType* electroFrame;
+    RealType* rc;
     
     //get current snapshot from SimInfo
     curSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
@@ -272,8 +272,8 @@ namespace oopse {
     }
   
     //initialize data before passing to fortran
-    double longRangePotential[LR_POT_TYPES];
-    double lrPot = 0.0;
+    RealType longRangePotential[LR_POT_TYPES];
+    RealType lrPot = 0.0;
     
     Mat3x3d tau;
     short int passedCalcPot = needPotential;

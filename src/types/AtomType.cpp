@@ -170,7 +170,7 @@ namespace oopse {
 	DoubleGenericData* doubleData= dynamic_cast<DoubleGenericData*>(data);
 
 	if (doubleData != NULL) {
-	  double charge = doubleData->getData();
+	  RealType charge = doubleData->getData();
 	  setCharge(&atp.ident, &charge, &isError);
                 
 	  if (isError != 0) {

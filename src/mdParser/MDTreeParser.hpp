@@ -57,7 +57,7 @@ public:
 		ANTLR_USE_NAMESPACE(antlr)RefAST id
 	);
 	protected: int  intConst(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
-	protected: double  floatConst(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
+	protected: RealType  floatConst(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
 	public: void moleculestatement(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
 	public: void atomblock(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
 	public: void bondblock(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
@@ -67,7 +67,7 @@ public:
 	public: void cutoffgroupblock(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
 	public: void fragmentblock(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
 	public: void atomstatement(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
-	public: vector<double>  doubleNumberTuple(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
+	public: vector<RealType>  doubleNumberTuple(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
 	public: void bondstatement(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
 	public: vector<int>  inttuple(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
 	public: void bendstatement(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
@@ -75,7 +75,7 @@ public:
 	public: void rigidbodystatement(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
 	public: void cutoffgroupstatement(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
 	public: void fragmentstatement(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
-	protected: double  doubleNumber(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
+	protected: RealType  doubleNumber(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
 public:
 	ANTLR_USE_NAMESPACE(antlr)RefAST getAST()
 	{

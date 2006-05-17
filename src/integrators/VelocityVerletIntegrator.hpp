@@ -92,12 +92,12 @@ namespace oopse {
     
     RotationAlgorithm* rotAlgo;
     Rattle* rattle;
-    double dt2;
+    RealType dt2;
 
-    double currSample;
-    double currStatus;
-    double currThermal;
-    double currReset;
+    RealType currSample;
+    RealType currStatus;
+    RealType currThermal;
+    RealType currReset;
         
   private:
         
@@ -107,7 +107,7 @@ namespace oopse {
         
     virtual void moveB() = 0;        
 
-    virtual double calcConservedQuantity() = 0;
+    virtual RealType calcConservedQuantity() = 0;
 
     virtual DumpWriter* createDumpWriter();
 

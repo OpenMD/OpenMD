@@ -61,23 +61,23 @@ namespace oopse {
 
   public:
 
-    UreyBradleyBendType(double theta0, double ktheta, double s0, double kub)
+    UreyBradleyBendType(RealType theta0, RealType ktheta, RealType s0, RealType kub)
       : HarmonicBendType(theta0, ktheta), hbt_(HarmonicBondType(s0, kub)){
       }
 
-    double getUBForceConstant() {
+    RealType getUBForceConstant() {
       return hbt_.getForceConstant();
     }
         
-    void setUBForceConstant(double kub) {
+    void setUBForceConstant(RealType kub) {
       hbt_.setForceConstant(kub);
     }
 
-    double getUBLength() {
+    RealType getUBLength() {
       return hbt_.getEquilibriumBondLength();
     }
 
-    void setUBLength(double s) {
+    void setUBLength(RealType s) {
       hbt_.setEquilibriumBondLength(s);
     }
 
@@ -87,7 +87,7 @@ namespace oopse {
                 
   private:
         
-    double k_;
+    RealType k_;
     HarmonicBondType hbt_;
   };
 

@@ -51,7 +51,7 @@ AtomStamp::AtomStamp(int index) : havePos_(false), haveOrt_(false),  index_(inde
     DefineParameter(Type, "type");
 }
 
-bool AtomStamp::setPosition(const std::vector<double>& pos) {
+bool AtomStamp::setPosition(const std::vector<RealType>& pos) {
     bool ret = false;
     if (pos.size() == 3) {
         position_[0] = pos[0];
@@ -66,7 +66,7 @@ bool AtomStamp::setPosition(const std::vector<double>& pos) {
     return ret;
 }
 
-bool AtomStamp::setOrientation(const std::vector<double>& ort) {
+bool AtomStamp::setOrientation(const std::vector<RealType>& ort) {
     bool ret = false;
     if (ort.size() == 3) {
         orientation_[0] = ort[0];

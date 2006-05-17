@@ -6,10 +6,10 @@
 /** This header provides dual access for the simulation structure between 
     fortran and C for the simtype structure. NOTE: Sequence of struct 
     components must match between C and fortran and in general be packed 
-    double,int,char. 
+    RealType,int,char. 
 */
 typedef  struct{
-  double dielect;
+  RealType dielect;
   int SIM_uses_PBC;
   int SIM_uses_DirectionalAtoms;
   int SIM_uses_LennardJones;

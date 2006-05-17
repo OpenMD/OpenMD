@@ -52,7 +52,7 @@ namespace oopse {
             std::string getSelection1() const {return sele1_;}
             std::string getSelection2() const {return sele2_;}
             std::string getSelection3() const {return sele3_;}
-            double calcSCD(Snapshot* snapshot);
+            RealType calcSCD(Snapshot* snapshot);
             
         private:
             
@@ -79,7 +79,7 @@ namespace oopse {
             void writeSCD();
 
             std::vector<SCDElem> scdElems_;
-            std::vector<double> scdParam_;
+            std::vector<RealType> scdParam_;
             
             Snapshot* currentSnapshot_;
 

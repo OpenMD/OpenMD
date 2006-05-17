@@ -227,7 +227,7 @@ namespace oopse {
     resize(size_);
   }
 
-  double* DataStorage::getArrayPointer(int whichArray) {
+  RealType* DataStorage::getArrayPointer(int whichArray) {
 
     switch (whichArray) {
     case dslPosition:
@@ -269,7 +269,7 @@ namespace oopse {
     }
   }    
 
-  double* DataStorage::internalGetArrayPointer(std::vector<Vector3d>& v) {
+  RealType* DataStorage::internalGetArrayPointer(std::vector<Vector3d>& v) {
     if (v.size() == 0) {
       return NULL;
     } else {
@@ -277,7 +277,7 @@ namespace oopse {
     }
   }
 
-  double* DataStorage::internalGetArrayPointer(std::vector<RotMat3x3d>& v) {
+  RealType* DataStorage::internalGetArrayPointer(std::vector<RotMat3x3d>& v) {
     if (v.size() == 0) {
       return NULL;
     } else {
@@ -286,7 +286,7 @@ namespace oopse {
 
   }
 
-  double* DataStorage::internalGetArrayPointer(std::vector<double>& v) {
+  RealType* DataStorage::internalGetArrayPointer(std::vector<RealType>& v) {
     if (v.size() == 0) {
       return NULL;
     } else {

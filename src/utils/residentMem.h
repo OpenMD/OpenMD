@@ -6,7 +6,7 @@ extern "C" {
 #endif
 
   /** Returns an estimate of the amount of memory being used by other processes.  */
-  double residentMem ();
+  RealType residentMem ();
 
 #ifdef  __cplusplus
 }

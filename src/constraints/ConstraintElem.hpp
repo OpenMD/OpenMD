@@ -94,7 +94,7 @@ namespace oopse {
     StuntDouble* getStuntDouble() { return sd_; }
     
     /**
-     * Returns the global index of this stuntdouble.
+     * Returns the global index of this stuntRealType.
      * @return  the global index of this stuntdouble 
      */
     int getGlobalIndex() {
@@ -102,7 +102,7 @@ namespace oopse {
     }
     
     /**
-     * Sets the global index of this stuntdouble.
+     * Sets the global index of this stuntRealType.
      * @param new global index to be set
      */
     void setGlobalIndex(int index) {
@@ -454,7 +454,7 @@ namespace oopse {
     }
     
     /**
-     * Sets  the previous euler angles of this stuntdouble.
+     * Sets  the previous euler angles of this stuntRealType.
      * @param euler  new euler angles 
      * @see #getEuler
      * @note actual storage data is rotation matrix         
@@ -692,7 +692,7 @@ namespace oopse {
      * Returns the gradient of this stuntdouble
      * @return the gradient of this stuntdouble
      */ 
-    std::vector<double> getGrad() {
+    std::vector<RealType> getGrad() {
       return sd_->getGrad();
     }
     
@@ -720,7 +720,7 @@ namespace oopse {
     }
     
     /** Returns the mass of this stuntdouble */
-    double getMass() {
+    RealType getMass() {
       return sd_->getMass();
     }
     
@@ -728,7 +728,7 @@ namespace oopse {
      * Sets the mass of this stuntdoulbe
      * @param mass the mass to be set
      */         
-    void setMass(double mass) {
+    void setMass(RealType mass) {
       sd_->setMass(mass);
     }
     
@@ -737,7 +737,7 @@ namespace oopse {
       return sd_->getType();
     }
     
-    /** Sets the name of this stuntdouble*/
+    /** Sets the name of this stuntRealType*/
     void setType(const std::string& name) {
       sd_->setType(name);
     }

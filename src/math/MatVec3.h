@@ -48,22 +48,22 @@
 extern "C" {
 #endif
 
-  void   identityMat3(double A[3][3]);
-  void   swapVectors3(double v1[3], double v2[3]);
-  static double norm3(const double x[3]){ return sqrt(x[0]*x[0] + x[1]*x[1] + x[2]*x[2]); };
-  double normalize3(double x[3]);
-  void   matMul3(double a[3][3], double b[3][3], double out[3][3]);
-  void   matVecMul3(double m[3][3], double inVec[3], double outVec[3]);
-  double matDet3(double m[3][3]);
-  void   invertMat3(double in[3][3], double out[3][3]);
-  void   transposeMat3(double in[3][3], double out[3][3]);
-  void   printMat3(double A[3][3]);
-  void   printMat9(double A[9]);
-  double matTrace3(double m[3][3]);
-  void   crossProduct3(double a[3],double b[3], double out[3]);
-  double dotProduct3(double a[3], double b[3]);
-  void   diagonalize3x3(const double A[3][3],double w[3],double V[3][3]);
-  int    JacobiN(double **a, int n, double *w, double **v);
+  void   identityMat3(RealType A[3][3]);
+  void   swapVectors3(RealType v1[3], RealType v2[3]);
+  static RealType norm3(const RealType x[3]){ return sqrt(x[0]*x[0] + x[1]*x[1] + x[2]*x[2]); };
+  RealType normalize3(RealType x[3]);
+  void   matMul3(RealType a[3][3], RealType b[3][3], RealType out[3][3]);
+  void   matVecMul3(RealType m[3][3], RealType inVec[3], RealType outVec[3]);
+  RealType matDet3(RealType m[3][3]);
+  void   invertMat3(RealType in[3][3], RealType out[3][3]);
+  void   transposeMat3(RealType in[3][3], RealType out[3][3]);
+  void   printMat3(RealType A[3][3]);
+  void   printMat9(RealType A[9]);
+  RealType matTrace3(RealType m[3][3]);
+  void   crossProduct3(RealType a[3],RealType b[3], RealType out[3]);
+  RealType dotProduct3(RealType a[3], RealType b[3]);
+  void   diagonalize3x3(const RealType A[3][3],RealType w[3],RealType V[3][3]);
+  int    JacobiN(RealType **a, int n, RealType *w, RealType **v);
 
 #ifdef __cplusplus
 }

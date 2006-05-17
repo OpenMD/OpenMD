@@ -375,3 +375,15 @@
 
 /* Define to `unsigned' if <sys/types.h> does not define. */
 #undef size_t
+
+#ifdef SINGLE_PRECISION
+typedef float RealType;
+#ifdef IS_MPI
+#define MPI_REALTYPE MPI_FLOAT
+#endif
+#else
+typedef double RealType;
+#ifdef IS_MPI
+#define MPI_REALTYPE MPI_DOUBLE
+#endif
+#endif

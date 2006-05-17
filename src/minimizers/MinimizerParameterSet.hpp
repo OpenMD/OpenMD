@@ -53,19 +53,19 @@ namespace oopse {
 
     void setDefaultParameter();
 
-    void setStepTol(double tol) {
+    void setStepTol(RealType tol) {
       stepTol = tol;
     }
 
-    double getStepTol() {
+    RealType getStepTol() {
       return stepTol;
     }
 
-    void setStepSize(double size) {
+    void setStepSize(RealType size) {
       stepSize = size;
     }
 
-    double getStepSize() {
+    RealType getStepSize() {
       return stepSize;
     }
 
@@ -77,27 +77,27 @@ namespace oopse {
       return maxIteration;
     }
 
-    void setFTol(double tol) {
+    void setFTol(RealType tol) {
       fTol = tol;
     }
 
-    double getFTol() {
+    RealType getFTol() {
       return fTol;
     }
 
-    void setGTol(double tol) {
+    void setGTol(RealType tol) {
       gTol = tol;
     }
 
-    double getGTol() {
+    RealType getGTol() {
       return gTol;
     }
 
-    void setLineSearchTol(double tol) {
+    void setLineSearchTol(RealType tol) {
       lsTol = tol;
     }
 
-    double getLineSearchTol() {
+    RealType getLineSearchTol() {
       return lsTol;
     }
 
@@ -121,21 +121,21 @@ namespace oopse {
 
     int maxIteration;
 
-    double stepTol;
+    RealType stepTol;
 
-    double fTol;
+    RealType fTol;
 
-    double gTol;
+    RealType gTol;
 
-    double stepSize;
+    RealType stepSize;
 
     int lsMaxIteration;
 
-    double lsTol;
+    RealType lsTol;
 
     int writeFrq;
 
-    const double  defaultTolerance;
+    const RealType  defaultTolerance;
 
   };
 

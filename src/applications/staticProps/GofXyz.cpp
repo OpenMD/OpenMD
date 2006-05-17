@@ -46,7 +46,7 @@
 #include "primitives/Molecule.hpp"
 namespace oopse {
 
-  GofXyz::GofXyz(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2, const std::string& sele3, double len, int nrbins)
+  GofXyz::GofXyz(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2, const std::string& sele3, RealType len, int nrbins)
     : RadialDistrFunc(info, filename, sele1, sele2), evaluator3_(info), seleMan3_(info), len_(len), halfLen_(len/2), nRBins_(nrbins) {
       setOutputName(getPrefix(filename) + ".gxyz");
 

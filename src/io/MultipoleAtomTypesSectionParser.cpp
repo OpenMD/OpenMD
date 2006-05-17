@@ -78,9 +78,9 @@ namespace oopse {
 
       std::string atomTypeName = tokenizer.nextToken();    
       std::string multipoleType = tokenizer.nextToken();
-      double phi = tokenizer.nextTokenAsDouble() * NumericConstant::PI /180.0;
-      double theta = tokenizer.nextTokenAsDouble() * NumericConstant::PI /180.0;
-      double psi = tokenizer.nextTokenAsDouble() * NumericConstant::PI /180.0;        
+      RealType phi = tokenizer.nextTokenAsDouble() * NumericConstant::PI /180.0;
+      RealType theta = tokenizer.nextTokenAsDouble() * NumericConstant::PI /180.0;
+      RealType psi = tokenizer.nextTokenAsDouble() * NumericConstant::PI /180.0;        
       nTokens -=  5;
 
       AtomType* atomType = ff.getAtomType(atomTypeName);
@@ -127,7 +127,7 @@ namespace oopse {
 						    DirectionalAtomType* dAtomType, int lineNo) {
 
     if (tokenizer.hasMoreTokens()) {
-      double dipole = tokenizer.nextTokenAsDouble();
+      RealType dipole = tokenizer.nextTokenAsDouble();
 
       dAtomType->addProperty(new DoubleGenericData("Dipole", dipole));
       dAtomType->setDipole();
@@ -144,7 +144,7 @@ namespace oopse {
 
     if (tokenizer.hasMoreTokens()) {
       parseDipole(tokenizer, dAtomType, lineNo);    
-      double splitDipoleDistance = tokenizer.nextTokenAsDouble();
+      RealType splitDipoleDistance = tokenizer.nextTokenAsDouble();
       dAtomType->addProperty(new DoubleGenericData("SplitDipoleDistance", splitDipoleDistance));
       dAtomType->setSplitDipole();
     } else {
@@ -164,7 +164,7 @@ namespace oopse {
       Q[1] = tokenizer.nextTokenAsDouble();
       Q[2] = tokenizer.nextTokenAsDouble();
 
-      double trace =  Q[0] + Q[1] + Q[2];
+      RealType trace =  Q[0] + Q[1] + Q[2];
 
       if (fabs(trace) > oopse::epsilon) {
 	sprintf(painCave.errMsg, "MultipoleAtomTypesSectionParser Error: the trace of qudrupole moments is not zero at line %d\n",

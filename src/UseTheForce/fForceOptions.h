@@ -8,8 +8,8 @@
 typedef  struct{
   int DistanceMixingRule;
   int EnergyMixingRule;
-  double vdw14scale;
-  double electrostatic14scale;  
+  RealType vdw14scale;
+  RealType electrostatic14scale;  
 } ForceOptions;
 
 

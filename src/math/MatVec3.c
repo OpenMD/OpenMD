@@ -49,7 +49,7 @@
  * length 3 vectors
  */
 
-void identityMat3(double A[3][3]) {
+void identityMat3(RealType A[3][3]) {
   int i;
   for (i = 0; i < 3; i++) {
     A[i][0] = A[i][1] = A[i][2] = 0.0;
@@ -57,17 +57,17 @@ void identityMat3(double A[3][3]) {
   }
 }
 
-void swapVectors3(double v1[3], double v2[3]) {
+void swapVectors3(RealType v1[3], RealType v2[3]) {
   int i;
   for (i = 0; i < 3; i++) {
-    double tmp = v1[i];
+    RealType tmp = v1[i];
     v1[i] = v2[i];
     v2[i] = tmp;
   }
 }
 
-double normalize3(double x[3]) {
-  double den; 
+RealType normalize3(RealType x[3]) {
+  RealType den; 
   int i;
   if ( (den = norm3(x)) != 0.0 ) {
     for (i=0; i < 3; i++)
@@ -78,8 +78,8 @@ double normalize3(double x[3]) {
   return den;
 }
 
-void matMul3(double a[3][3], double b[3][3], double c[3][3]) {
-  double r00, r01, r02, r10, r11, r12, r20, r21, r22;
+void matMul3(RealType a[3][3], RealType b[3][3], RealType c[3][3]) {
+  RealType r00, r01, r02, r10, r11, r12, r20, r21, r22;
   
   r00 = a[0][0]*b[0][0] + a[0][1]*b[1][0] + a[0][2]*b[2][0];
   r01 = a[0][0]*b[0][1] + a[0][1]*b[1][1] + a[0][2]*b[2][1];
@@ -98,8 +98,8 @@ void matMul3(double a[3][3], double b[3][3], double c[3][3]) {
   c[2][0] = r20; c[2][1] = r21; c[2][2] = r22;
 }
 
-void matVecMul3(double m[3][3], double inVec[3], double outVec[3]) {
-  double a0, a1, a2;
+void matVecMul3(RealType m[3][3], RealType inVec[3], RealType outVec[3]) {
+  RealType a0, a1, a2;
   
   a0 = inVec[0];  a1 = inVec[1];  a2 = inVec[2];
   
@@ -108,9 +108,9 @@ void matVecMul3(double m[3][3], double inVec[3], double outVec[3]) {
   outVec[2] = m[2][0]*a0 + m[2][1]*a1 + m[2][2]*a2;
 }
 
-double matDet3(double a[3][3]) {
+RealType matDet3(RealType a[3][3]) {
   int i, j, k;
-  double determinant;
+  RealType determinant;
   
   determinant = 0.0;
   
@@ -124,10 +124,10 @@ double matDet3(double a[3][3]) {
   return determinant;
 }
 
-void invertMat3(double a[3][3], double b[3][3]) {
+void invertMat3(RealType a[3][3], RealType b[3][3]) {
   
   int  i, j, k, l, m, n;
-  double determinant;
+  RealType determinant;
   
   determinant = matDet3( a );
   
@@ -150,8 +150,8 @@ void invertMat3(double a[3][3], double b[3][3]) {
   }
 }
 
-void transposeMat3(double in[3][3], double out[3][3]) {
-  double temp[3][3];
+void transposeMat3(RealType in[3][3], RealType out[3][3]) {
+  RealType temp[3][3];
   int i, j;
   
   for (i = 0; i < 3; i++) {
@@ -166,7 +166,7 @@ void transposeMat3(double in[3][3], double out[3][3]) {
   }
 }
 
-void printMat3(double A[3][3] ){
+void printMat3(RealType A[3][3] ){
   
   fprintf(stderr, "[ %g, %g, %g ]\n[ %g, %g, %g ]\n[ %g, %g, %g ]\n",          
           A[0][0] , A[0][1] , A[0][2], 
@@ -174,7 +174,7 @@ void printMat3(double A[3][3] ){
           A[2][0] , A[2][1] , A[2][2]) ;
 }
 
-void printMat9(double A[9] ){
+void printMat9(RealType A[9] ){
   
   fprintf(stderr, "[ %g, %g, %g ]\n[ %g, %g, %g ]\n[ %g, %g, %g ]\n",          
           A[0], A[1], A[2],
@@ -182,14 +182,14 @@ void printMat9(double A[9] ){
           A[6], A[7], A[8]);
 }
 
-double matTrace3(double m[3][3]){
-  double trace;
+RealType matTrace3(RealType m[3][3]){
+  RealType trace;
   trace = m[0][0] + m[1][1] + m[2][2];
   
   return trace;
 }
 
-void crossProduct3(double a[3],double b[3], double out[3]){
+void crossProduct3(RealType a[3],RealType b[3], RealType out[3]){
   
   out[0] = a[1] * b[2] - a[2] * b[1];
   out[1] = a[2] * b[0] - a[0] * b[2] ;
@@ -197,7 +197,7 @@ void crossProduct3(double a[3],double b[3], double out[3]){
   
 }
 
-double dotProduct3(double a[3], double b[3]){
+RealType dotProduct3(RealType a[3], RealType b[3]){
   return a[0]*b[0] + a[1]*b[1]+ a[2]*b[2];
 }
 
@@ -207,13 +207,13 @@ double dotProduct3(double a[3], double b[3]){
 /* The eigenvectors are aligned optimally with the x, y, and z*/
 /* axes respectively.*/
 
-void diagonalize3x3(const double A[3][3], double w[3], double V[3][3]) {
+void diagonalize3x3(const RealType A[3][3], RealType w[3], RealType V[3][3]) {
   int i,j,k,maxI;
-  double tmp, maxVal;
+  RealType tmp, maxVal;
 
   /* do the matrix[3][3] to **matrix conversion for Jacobi*/
-  double C[3][3];
-  double *ATemp[3],*VTemp[3];
+  RealType C[3][3];
+  RealType *ATemp[3],*VTemp[3];
   for (i = 0; i < 3; i++)
     {
       C[i][0] = A[i][0];
@@ -351,21 +351,21 @@ void diagonalize3x3(const double A[3][3], double w[3], double V[3][3]) {
 /* output eigenvalues in w; and output eigenvectors in v. Resulting*/
 /* eigenvalues/vectors are sorted in decreasing order; eigenvectors are*/
 /* normalized.*/
-int JacobiN(double **a, int n, double *w, double **v) {
+int JacobiN(RealType **a, int n, RealType *w, RealType **v) {
 
   int i, j, k, iq, ip, numPos;
   int ceil_half_n;
-  double tresh, theta, tau, t, sm, s, h, g, c, tmp;
-  double bspace[4], zspace[4];
-  double *b = bspace;
-  double *z = zspace;
+  RealType tresh, theta, tau, t, sm, s, h, g, c, tmp;
+  RealType bspace[4], zspace[4];
+  RealType *b = bspace;
+  RealType *z = zspace;
   
 
   /* only allocate memory if the matrix is large*/
   if (n > 4)
     {
-      b = (double *) calloc(n, sizeof(double));
-      z = (double *) calloc(n, sizeof(double));
+      b = (RealType *) calloc(n, sizeof(RealType));
+      z = (RealType *) calloc(n, sizeof(RealType));
     }
   
   /* initialize*/
@@ -526,7 +526,7 @@ int JacobiN(double **a, int n, double *w, double **v) {
               numPos++;
             }
         }
-      /*    if ( numPos < ceil(double(n)/double(2.0)) )*/
+      /*    if ( numPos < ceil(RealType(n)/RealType(2.0)) )*/
       if ( numPos < ceil_half_n)
         {
           for(i=0; i<n; i++)

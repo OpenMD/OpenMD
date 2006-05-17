@@ -352,12 +352,12 @@ Globals* SimCreator::parseFile(const std::string mdFileName){
   
 #ifdef IS_MPI
   void SimCreator::divideMolecules(SimInfo *info) {
-    double numerator;
-    double denominator;
-    double precast;
-    double x;
-    double y;
-    double a;
+    RealType numerator;
+    RealType denominator;
+    RealType precast;
+    RealType x;
+    RealType y;
+    RealType a;
     int old_atoms;
     int add_atoms;
     int new_atoms;
@@ -469,7 +469,7 @@ Globals* SimCreator::parseFile(const std::string mdFileName){
           //           Pacc(x) = exp(- a * x)
           // where a = penalty / (average atoms per molecule)
           
-          x = (double)(new_atoms - nTarget);
+          x = (RealType)(new_atoms - nTarget);
           y = myRandom->rand();
           
           if (y < exp(- a * x)) {

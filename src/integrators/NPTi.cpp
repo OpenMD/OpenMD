@@ -92,13 +92,13 @@ namespace oopse {
   void NPTi::getPosScale(const Vector3d& pos, const Vector3d& COM,
 			 int index, Vector3d& sc){
     /**@todo*/
-    sc  = (oldPos[index] + pos)/2.0 -COM;
+    sc  = (oldPos[index] + pos)/(RealType)2.0 -COM;
     sc *= eta;
   }
 
   void NPTi::scaleSimBox(){
 
-    double scaleFactor;
+    RealType scaleFactor;
 
     scaleFactor = exp(dt*eta);
 
@@ -123,7 +123,7 @@ namespace oopse {
     return ( fabs(prevEta - eta) <= etaTolerance );
   }
 
-  double NPTi::calcConservedQuantity(){
+  RealType NPTi::calcConservedQuantity(){
 
     chi= currentSnapshot_->getChi();
     integralOfChidt = currentSnapshot_->getIntegralOfChiDt();
@@ -138,12 +138,12 @@ namespace oopse {
     // of freedom).  
     fkBT = info_->getNdf()*OOPSEConstant::kB *targetTemp;    
     
-    double conservedQuantity;
-    double Energy;
-    double thermostat_kinetic;
-    double thermostat_potential;
-    double barostat_kinetic;
-    double barostat_potential;
+    RealType conservedQuantity;
+    RealType Energy;
+    RealType thermostat_kinetic;
+    RealType thermostat_potential;
+    RealType barostat_kinetic;
+    RealType barostat_potential;
 
     Energy =thermo.getTotalE();
 

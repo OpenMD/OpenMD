@@ -123,10 +123,10 @@ namespace oopse {
     
     MPI_Status ierr;
     int intObIndex;
-    double zAngle;
+    RealType zAngle;
    
     if (masterNode == 0) {
-      std::map<int, double> zAngData;
+      std::map<int, RealType> zAngData;
       for(int i = 0 ; i < nproc; ++i) {
         if (i == masterNode) {
           for (mol = info_->beginMolecule(mi); mol != NULL; 
@@ -138,15 +138,15 @@ namespace oopse {
               
               intObIndex = integrableObject->getGlobalIndex() ;
               zAngle = integrableObject->getZangle();
-              zAngData.insert(std::pair<int, double>(intObIndex, zAngle));
+              zAngData.insert(std::pair<int, RealType>(intObIndex, zAngle));
             }      
           }
           
         } else {
           for(int k = 0; k < nIntObjectsInProc[i]; ++k) {
             MPI_Recv(&intObIndex, 1, MPI_INT, i, 0, MPI_COMM_WORLD,&ierr);
-            MPI_Recv(&zAngle, 1, MPI_DOUBLE, i, 0, MPI_COMM_WORLD,&ierr);
-            zAngData.insert(std::pair<int, double>(intObIndex, zAngle));
+            MPI_Recv(&zAngle, 1, MPI_REALTYPE, i, 0, MPI_COMM_WORLD,&ierr);
+            zAngData.insert(std::pair<int, RealType>(intObIndex, zAngle));
           }
         }
         
@@ -156,7 +156,7 @@ namespace oopse {
         << info_->getSnapshotManager()->getCurrentSnapshot()->getTime()
         << " : omega values at this time\n";
       
-      std::map<int, double>::iterator l;
+      std::map<int, RealType>::iterator l;
       for (l = zAngData.begin(); l != zAngData.end(); ++l) {
         finalOut << l->second << "\n";
       }
@@ -172,7 +172,7 @@ namespace oopse {
           intObIndex = integrableObject->getGlobalIndex();            
           zAngle = integrableObject->getZangle();
           MPI_Send(&intObIndex, 1, MPI_INT, masterNode, 0, MPI_COMM_WORLD);
-          MPI_Send(&zAngle, 1, MPI_DOUBLE, masterNode, 0, MPI_COMM_WORLD);
+          MPI_Send(&zAngle, 1, MPI_REALTYPE, masterNode, 0, MPI_COMM_WORLD);
         }
       }
     }

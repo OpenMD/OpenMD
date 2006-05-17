@@ -67,7 +67,7 @@ using namespace std;
 using namespace oopse;
 
 //typedef CGAL::Homogeneous<int>              Kernel;
-typedef CGAL::Simple_cartesian<double>     Kernel;
+typedef CGAL::Simple_cartesian<RealType>     Kernel;
 //typedef CGAL::Polyhedron_3<Kernel>         Polyhedron;
 
 typedef Kernel::Point_3                    Point_3;
@@ -627,7 +627,7 @@ struct Normal_vector {
 };
 
 
-bool GeometryBuilder::isInsidePolyhedron(double x, double y, double z) {
+bool GeometryBuilder::isInsidePolyhedron(RealType x, RealType y, RealType z) {
 	
   Point_3 point(x,y,z);
   Plane_iterator i;
@@ -637,7 +637,7 @@ bool GeometryBuilder::isInsidePolyhedron(double x, double y, double z) {
     
     Vector_3 newVector = point - k->vertex()->point();
     Vector_3 normal = *i;		
-    double dot_product = newVector.x() * normal.x() + newVector.y() * normal.y() + newVector.z() * normal.z();
+    RealType dot_product = newVector.x() * normal.x() + newVector.y() * normal.y() + newVector.z() * normal.z();
     
     if (dot_product < 0) {
       return false;	
@@ -648,21 +648,21 @@ bool GeometryBuilder::isInsidePolyhedron(double x, double y, double z) {
 }
 
 
-GeometryBuilder::GeometryBuilder(double length,double width) {
+GeometryBuilder::GeometryBuilder(RealType length,RealType width) {
   // Create the geometry for nanorod
  buildSingleCrystal<HalfedgeDS> singleCrystalNanorod;
   
   nanoRodPolyhedron.delegate( singleCrystalNanorod);
    
-  double y1 = singleCrystalNanorod.end1->point().y() - singleCrystalNanorod.neight1->point().y();
-  double y2 = singleCrystalNanorod.end2->point().y() - singleCrystalNanorod.neight2->point().y();
+  RealType y1 = singleCrystalNanorod.end1->point().y() - singleCrystalNanorod.neight1->point().y();
+  RealType y2 = singleCrystalNanorod.end2->point().y() - singleCrystalNanorod.neight2->point().y();
   
-  double endDist = sqrt(pow(singleCrystalNanorod.neight2->point().x() - singleCrystalNanorod.neight3->point().x(),2)+
+  RealType endDist = sqrt(pow(singleCrystalNanorod.neight2->point().x() - singleCrystalNanorod.neight3->point().x(),2)+
                         pow(singleCrystalNanorod.neight2->point().y() - singleCrystalNanorod.neight3->point().y(),2)+
                         pow(singleCrystalNanorod.neight2->point().z() - singleCrystalNanorod.neight3->point().z(),2));
   
-  double endRatio1 = y1/endDist;
-  double endRatio2 = y2/endDist;
+  RealType endRatio1 = y1/endDist;
+  RealType endRatio2 = y2/endDist;
   
   std::cout << "End dist is " << endDist <<" ratio " << endRatio1 << std::endl;
   
@@ -681,7 +681,7 @@ GeometryBuilder::GeometryBuilder(double length,double width) {
   std::transform( nanoRodPolyhedron.points_begin(), nanoRodPolyhedron.points_end(), nanoRodPolyhedron.points_begin(), aff_tranformation);
 	
   
-  double endDist2 = sqrt(pow(singleCrystalNanorod.neight2->point().x() -singleCrystalNanorod.neight3->point().x(),2)+
+  RealType endDist2 = sqrt(pow(singleCrystalNanorod.neight2->point().x() -singleCrystalNanorod.neight3->point().x(),2)+
                         pow(singleCrystalNanorod.neight2->point().y() - singleCrystalNanorod.neight3->point().y(),2)+
                         pow(singleCrystalNanorod.neight2->point().z() - singleCrystalNanorod.neight3->point().z(),2));
   
@@ -697,7 +697,7 @@ GeometryBuilder::GeometryBuilder(double length,double width) {
 
 
 
-GeometryBuilder::GeometryBuilder(double length,double width, bool twinned) {
+GeometryBuilder::GeometryBuilder(RealType length,RealType width, bool twinned) {
   // Create the geometry for nanorod
   
   buildtwinned1<HalfedgeDS> crystal1;  
@@ -718,15 +718,15 @@ GeometryBuilder::GeometryBuilder(double length,double width, bool twinned) {
   
   
   
-  double y1 = crystal1.end1->point().y() - crystal1.neight1->point().y();
-  double y2 = crystal1.end2->point().y() - crystal1.neight2->point().y();
+  RealType y1 = crystal1.end1->point().y() - crystal1.neight1->point().y();
+  RealType y2 = crystal1.end2->point().y() - crystal1.neight2->point().y();
   
-  double endDist = sqrt(pow(crystal1.neight2->point().x() - crystal1.neight3->point().x(),2)+
+  RealType endDist = sqrt(pow(crystal1.neight2->point().x() - crystal1.neight3->point().x(),2)+
                         pow(crystal1.neight2->point().y() - crystal1.neight3->point().y(),2)+
                         pow(crystal1.neight2->point().z() - crystal1.neight3->point().z(),2));
   
-  double endRatio1 = y1/endDist;
-  double endRatio2 = y2/endDist;
+  RealType endRatio1 = y1/endDist;
+  RealType endRatio2 = y2/endDist;
   
   std::cout << "End dist is " << endDist <<" ratio " << endRatio1 << std::endl;
   
@@ -745,7 +745,7 @@ GeometryBuilder::GeometryBuilder(double length,double width, bool twinned) {
   std::transform(nanoRodTwinnedPolyhedron1.points_begin(), nanoRodTwinnedPolyhedron1.points_end(), nanoRodTwinnedPolyhedron1.points_begin(), aff_tranformation);
 	
   
-  double endDist2 = sqrt(pow(crystal1.neight2->point().x() - crystal1.neight3->point().x(),2)+
+  RealType endDist2 = sqrt(pow(crystal1.neight2->point().x() - crystal1.neight3->point().x(),2)+
                          pow(crystal1.neight2->point().y() - crystal1.neight3->point().y(),2)+
                          pow(crystal1.neight2->point().z() - crystal1.neight3->point().z(),2));
   

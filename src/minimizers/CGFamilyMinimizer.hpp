@@ -58,11 +58,11 @@ namespace oopse {
   protected:
     CGFamilyMinimizer(SimInfo* info);
         
-    std::vector<double> direction;
-    std::vector<double> prevX;
-    std::vector<double> prevG;
-    double prevF;
-    double stepSize;
+    std::vector<RealType> direction;
+    std::vector<RealType> prevX;
+    std::vector<RealType> prevG;
+    RealType prevF;
+    RealType stepSize;
   };
 
 }

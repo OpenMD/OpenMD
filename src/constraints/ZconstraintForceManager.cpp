@@ -111,14 +111,14 @@ namespace oopse {
 
     //estimate the force constant of harmonical potential
     Mat3x3d hmat = currSnapshot_->getHmat();
-    double halfOfLargestBox = std::max(hmat(0, 0), std::max(hmat(1, 1), hmat(2, 2))) /2;	
-    double targetTemp;
+    RealType halfOfLargestBox = std::max(hmat(0, 0), std::max(hmat(1, 1), hmat(2, 2))) /2;	
+    RealType targetTemp;
     if (simParam->haveTargetTemp()) {
       targetTemp = simParam->getTargetTemp();
     } else {
       targetTemp = 298.0;
     }
-    double zforceConstant = OOPSEConstant::kb * targetTemp / (halfOfLargestBox * halfOfLargestBox);
+    RealType zforceConstant = OOPSEConstant::kb * targetTemp / (halfOfLargestBox * halfOfLargestBox);
          
     int nZconstraints = simParam->getNZconsStamps();
     std::vector<ZConsStamp*> stamp = simParam->getZconsStamps();
@@ -148,7 +148,7 @@ namespace oopse {
     update();
     
     //calculate masss of unconstraint molecules in the whole system (never change during the simulation)
-    double totMassUnconsMols_local = 0.0;    
+    RealType totMassUnconsMols_local = 0.0;    
     std::vector<Molecule*>::iterator j;
     for ( j = unzconsMols_.begin(); j !=  unzconsMols_.end(); ++j) {
       totMassUnconsMols_local += (*j)->getMass();
@@ -156,7 +156,7 @@ namespace oopse {
 #ifndef IS_MPI
     totMassUnconsMols_ = totMassUnconsMols_local;
 #else
-    MPI_Allreduce(&totMassUnconsMols_local, &totMassUnconsMols_, 1, MPI_DOUBLE,
+    MPI_Allreduce(&totMassUnconsMols_local, &totMassUnconsMols_, 1, MPI_REALTYPE,
 		  MPI_SUM, MPI_COMM_WORLD);  
 #endif
 
@@ -194,7 +194,7 @@ namespace oopse {
 	zmol.param = i->second;
 	zmol.cantPos = zmol.param.zTargetPos; /**@todo fixed me when zmol migrate, it is incorrect*/
 	Vector3d com = zmol.mol->getCom();
-	double diff = fabs(zmol.param.zTargetPos - com[whichDirection]);
+	RealType diff = fabs(zmol.param.zTargetPos - com[whichDirection]);
 	if (diff < zconsTol_) {
 	  fixedZMols_.push_back(zmol);
 	} else {
@@ -299,8 +299,8 @@ namespace oopse {
 
     // calculate the vz of center of mass of moving molecules(include unconstrained molecules 
     // and moving z-constrained molecules)  
-    double pzMovingMols_local = 0.0;
-    double pzMovingMols;
+    RealType pzMovingMols_local = 0.0;
+    RealType pzMovingMols;
     
     for ( i = movingZMols_.begin(); i !=  movingZMols_.end(); ++i) {
       mol = i->mol;        
@@ -318,11 +318,11 @@ namespace oopse {
 #ifndef IS_MPI
     pzMovingMols = pzMovingMols_local;
 #else
-    MPI_Allreduce(&pzMovingMols_local, &pzMovingMols, 1, MPI_DOUBLE,
+    MPI_Allreduce(&pzMovingMols_local, &pzMovingMols, 1, MPI_REALTYPE,
 		  MPI_SUM, MPI_COMM_WORLD);
 #endif
 
-    double vzMovingMols = pzMovingMols / (totMassMovingZMols_ + totMassUnconsMols_);
+    RealType vzMovingMols = pzMovingMols / (totMassMovingZMols_ + totMassUnconsMols_);
 
     //modify the velocities of moving z-constrained molecuels
     for ( i = movingZMols_.begin(); i !=  movingZMols_.end(); ++i) {
@@ -352,8 +352,8 @@ namespace oopse {
 
 
   void ZconstraintForceManager::doZconstraintForce(){
-    double totalFZ; 
-    double totalFZ_local;
+    RealType totalFZ; 
+    RealType totalFZ_local;
     Vector3d com;
     Vector3d force(0.0);
 
@@ -383,7 +383,7 @@ namespace oopse {
 
     //calculate total z-constraint force
 #ifdef IS_MPI
-    MPI_Allreduce(&totalFZ_local, &totalFZ, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+    MPI_Allreduce(&totalFZ_local, &totalFZ, 1, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
 #else
     totalFZ = totalFZ_local;
 #endif
@@ -427,10 +427,10 @@ namespace oopse {
 
 
   void ZconstraintForceManager::doHarmonic(){
-    double totalFZ;
+    RealType totalFZ;
     Vector3d force(0.0);
     Vector3d com;
-    double totalFZ_local = 0;
+    RealType totalFZ_local = 0;
     std::list<ZconstraintMol>::iterator i;
     StuntDouble* integrableObject;
     Molecule::IntegrableObjectIterator ii;
@@ -438,11 +438,11 @@ namespace oopse {
     for ( i = movingZMols_.begin(); i !=  movingZMols_.end(); ++i) {
       mol = i->mol;
       com = mol->getCom();   
-      double resPos = usingSMD_? i->cantPos : i->param.zTargetPos;
-      double diff = com[whichDirection] - resPos; 
-      double harmonicU = 0.5 * i->param.kz * diff * diff;
+      RealType resPos = usingSMD_? i->cantPos : i->param.zTargetPos;
+      RealType diff = com[whichDirection] - resPos; 
+      RealType harmonicU = 0.5 * i->param.kz * diff * diff;
       currSnapshot_->statData[Stats::LONG_RANGE_POTENTIAL] += harmonicU;
-      double harmonicF = -i->param.kz * diff;
+      RealType harmonicF = -i->param.kz * diff;
       totalFZ_local += harmonicF;
 
       //adjust force
@@ -457,7 +457,7 @@ namespace oopse {
 #ifndef IS_MPI
     totalFZ = totalFZ_local;
 #else
-    MPI_Allreduce(&totalFZ_local, &totalFZ, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);  
+    MPI_Allreduce(&totalFZ_local, &totalFZ, 1, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);  
 #endif
 
     //modify the forces of unconstrained molecules
@@ -476,7 +476,7 @@ namespace oopse {
 
   bool ZconstraintForceManager::checkZConsState(){
     Vector3d com;
-    double diff;
+    RealType diff;
     int changed_local = 0;
 
     std::list<ZconstraintMol>::iterator i;
@@ -566,14 +566,14 @@ namespace oopse {
 
   void ZconstraintForceManager::calcTotalMassMovingZMols(){
 
-    double totMassMovingZMols_local = 0.0;
+    RealType totMassMovingZMols_local = 0.0;
     std::list<ZconstraintMol>::iterator i;
     for ( i = movingZMols_.begin(); i !=  movingZMols_.end(); ++i) {
       totMassMovingZMols_local += i->mol->getMass();
     }
     
 #ifdef IS_MPI
-    MPI_Allreduce(&totMassMovingZMols_local, &totMassMovingZMols_, 1, MPI_DOUBLE,
+    MPI_Allreduce(&totMassMovingZMols_local, &totMassMovingZMols_, 1, MPI_REALTYPE,
 		  MPI_SUM, MPI_COMM_WORLD);
 #else
     totMassMovingZMols_ = totMassMovingZMols_local;
@@ -581,24 +581,24 @@ namespace oopse {
 
   }
 
-  double ZconstraintForceManager::getZFOfFixedZMols(Molecule* mol, StuntDouble* sd, double totalForce){
+  RealType ZconstraintForceManager::getZFOfFixedZMols(Molecule* mol, StuntDouble* sd, RealType totalForce){
     return totalForce * sd->getMass() / mol->getMass();
   }
 
-  double ZconstraintForceManager::getZFOfMovingMols(Molecule* mol, double totalForce){
+  RealType ZconstraintForceManager::getZFOfMovingMols(Molecule* mol, RealType totalForce){
     return totalForce * mol->getMass() / (totMassUnconsMols_ + totMassMovingZMols_);
   }
 
-  double ZconstraintForceManager::getHFOfFixedZMols(Molecule* mol, StuntDouble*sd, double totalForce){
+  RealType ZconstraintForceManager::getHFOfFixedZMols(Molecule* mol, StuntDouble*sd, RealType totalForce){
     return totalForce * sd->getMass() / mol->getMass();
   }
 
-  double ZconstraintForceManager::getHFOfUnconsMols(Molecule* mol, double totalForce){
+  RealType ZconstraintForceManager::getHFOfUnconsMols(Molecule* mol, RealType totalForce){
     return totalForce * mol->getMass() / totMassUnconsMols_;
   }
 
   void ZconstraintForceManager::updateZPos(){
-    double curTime = currSnapshot_->getTime();
+    RealType curTime = currSnapshot_->getTime();
     std::list<ZconstraintMol>::iterator i;
     for ( i = fixedZMols_.begin(); i !=  fixedZMols_.end(); ++i) {
       i->param.zTargetPos += zconsGap_;     
@@ -612,8 +612,8 @@ namespace oopse {
     }
   }
 
-  double ZconstraintForceManager::getZTargetPos(int index){
-    double zTargetPos;
+  RealType ZconstraintForceManager::getZTargetPos(int index){
+    RealType zTargetPos;
 #ifndef IS_MPI    
     Molecule* mol = info_->getMoleculeByGlobalIndex(index);
     assert(mol);
@@ -621,7 +621,7 @@ namespace oopse {
     zTargetPos = com[whichDirection];
 #else
     int whicProc = info_->getMolToProc(index);
-    MPI_Bcast(&zTargetPos, 1, MPI_DOUBLE, whicProc, MPI_COMM_WORLD);
+    MPI_Bcast(&zTargetPos, 1, MPI_REALTYPE, whicProc, MPI_COMM_WORLD);
 #endif
     return zTargetPos;
   }

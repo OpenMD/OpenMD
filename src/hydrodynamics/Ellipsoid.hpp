@@ -48,22 +48,22 @@ namespace oopse {
   /** @class Ellipsoid */
   class Ellipsoid : public Shape{
   public:
-    Ellipsoid(Vector3d origin, double rMajor, double rMinor, Mat3x3d rotMat);
+    Ellipsoid(Vector3d origin, RealType rMajor, RealType rMinor, Mat3x3d rotMat);
     virtual bool isInterior(Vector3d pos);
     virtual std::pair<Vector3d, Vector3d> getBoundingBox();
     virtual bool hasAnalyticalSolution() {return true;}
     
-    virtual HydroProps getHydroProps(double viscosity, double temperature);
+    virtual HydroProps getHydroProps(RealType viscosity, RealType temperature);
     
     
-    double getRMajor() {return rMajor_;}
-    double getRMinor() {return rMinor_;}
+    RealType getRMajor() {return rMajor_;}
+    RealType getRMinor() {return rMinor_;}
     
   private:
     
     Vector3d origin_;
-    double rMajor_;
-    double rMinor_;
+    RealType rMajor_;
+    RealType rMinor_;
     Mat3x3d rotMat_;
   };  
 }

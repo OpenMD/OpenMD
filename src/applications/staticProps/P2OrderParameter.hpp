@@ -54,9 +54,9 @@ namespace oopse {
         private:
 
             struct OrderParam{
-                double p2;
+                RealType p2;
                 Vector3d director;
-                double angle;
+                RealType angle;
             };            
             void writeP2();
 

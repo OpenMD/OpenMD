@@ -69,7 +69,7 @@ namespace oopse{
      * Returns the gradient of this stuntdouble
      * @return the inertia tensor of this stuntdouble
      */ 
-    virtual std::vector<double> getGrad();
+    virtual std::vector<RealType> getGrad();
 
     virtual void accept(BaseVisitor* v);
 

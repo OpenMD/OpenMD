@@ -56,7 +56,7 @@ namespace oopse {
 
   public:
 
-    ConstraintPair(ConstraintElem* elem1, ConstraintElem* elem2, double len) 
+    ConstraintPair(ConstraintElem* elem1, ConstraintElem* elem2, RealType len) 
       : consElem1_(elem1), consElem2_(elem2), dist2(len*len) { }
 
     ~ConstraintPair() {
@@ -70,13 +70,13 @@ namespace oopse {
     ConstraintElem* getConsElem2() {return consElem2_;}
 
     bool isMoved() { return consElem1_->getMoved() || consElem2_->getMoved(); }        
-    double getConsDistSquare() {return dist2;}
+    RealType getConsDistSquare() {return dist2;}
 
   private:
         
     ConstraintElem* consElem1_;
     ConstraintElem* consElem2_;        
-    double dist2;
+    RealType dist2;
   };
 
 }

@@ -58,7 +58,7 @@ namespace oopse {
   private:
     virtual void parseLine(ForceField& ff, const std::string& line, int lineNo);
     void parseEAMParamFile(ForceField& ff, AtomType* atomType, const std::string& potentialParamFile, int iden);
-    void parseEAMArray(std::istream& input, std::vector<double>& array, int num);
+    void parseEAMArray(std::istream& input, std::vector<RealType>& array, int num);
     ForceFieldOptions& options_;
   };
 

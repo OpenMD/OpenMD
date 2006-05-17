@@ -131,21 +131,21 @@ void P2OrderParameter::process() {
       }
       
       orderTensor /= sdPairs_.size();
-      orderTensor -= 1.0/3.0 * Mat3x3d::identity();  
+      orderTensor -= (RealType)(1.0/3.0) * Mat3x3d::identity();  
       
       Vector3d eigenvalues;
       Mat3x3d eigenvectors;    
       Mat3x3d::diagonalize(orderTensor, eigenvalues, eigenvectors);
       
       int which;
-      double maxEval = 0.0;
+      RealType maxEval = 0.0;
       for(int k = 0; k< 3; k++){
         if(fabs(eigenvalues[k]) > maxEval){
           which = k;
           maxEval = fabs(eigenvalues[k]);
         }
       }
-      double p2 = 1.5 * maxEval;
+      RealType p2 = 1.5 * maxEval;
       
       //the eigen vector is already normalized in SquareMatrix3::diagonalize
       Vector3d director = eigenvectors.getColumn(which);
@@ -153,7 +153,7 @@ void P2OrderParameter::process() {
           director.negate();
       }   
 
-      double angle = 0.0;
+      RealType angle = 0.0;
       for (std::vector<std::pair<StuntDouble*, StuntDouble*> >::iterator j = sdPairs_.begin(); j != sdPairs_.end(); ++j) {
           Vector3d vec = j->first->getPos() - j->second->getPos();
           currentSnapshot_->wrapVector(vec);

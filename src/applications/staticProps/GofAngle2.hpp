@@ -60,7 +60,7 @@ namespace oopse {
 
     virtual void writeRdf();
 
-    double deltaCosAngle_;
+    RealType deltaCosAngle_;
     int nAngleBins_;
         
     std::vector<std::vector<int> > histogram_;

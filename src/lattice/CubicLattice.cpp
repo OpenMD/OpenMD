@@ -52,14 +52,14 @@ namespace oopse {
   
   }
 
-  std::vector<double> CubicLattice::getLatticeConstant(){
-    std::vector<double> lc;
+  std::vector<RealType> CubicLattice::getLatticeConstant(){
+    std::vector<RealType> lc;
   
     lc.push_back(cellLen.x());
     return lc;
   }
 
-  void CubicLattice::setLatticeConstant(const  std::vector<double>& lc){
+  void CubicLattice::setLatticeConstant(const  std::vector<RealType>& lc){
   
     if(lc.size() < 1){
       std::cerr << "CubicLattice::setLatticeConstant Error: the size of lattice constant vector  is 0" << std::endl;

@@ -47,7 +47,7 @@
 namespace oopse {
 
   GofRAngle::GofRAngle(SimInfo* info, const std::string& filename, const std::string& sele1, 
-		       const std::string& sele2, double len, int nrbins, int nangleBins)
+		       const std::string& sele2, RealType len, int nrbins, int nangleBins)
     : RadialDistrFunc(info, filename, sele1, sele2), len_(len), nRBins_(nrbins), nAngleBins_(nangleBins){
 
       deltaR_ = len_ /nRBins_;             
@@ -79,16 +79,16 @@ namespace oopse {
   void GofRAngle::processHistogram() {
 
     int nPairs = getNPairs();
-    double volume = info_->getSnapshotManager()->getCurrentSnapshot()->getVolume();
-    double pairDensity = nPairs /volume;
-    double pairConstant = ( 4.0 * NumericConstant::PI * pairDensity ) / 3.0;
+    RealType volume = info_->getSnapshotManager()->getCurrentSnapshot()->getVolume();
+    RealType pairDensity = nPairs /volume;
+    RealType pairConstant = ( 4.0 * NumericConstant::PI * pairDensity ) / 3.0;
 
     for(int i = 0 ; i < histogram_.size(); ++i){
 
-      double rLower = i * deltaR_;
-      double rUpper = rLower + deltaR_;
-      double volSlice = ( rUpper * rUpper * rUpper ) - ( rLower * rLower * rLower );
-      double nIdeal = volSlice * pairConstant;
+      RealType rLower = i * deltaR_;
+      RealType rUpper = rLower + deltaR_;
+      RealType volSlice = ( rUpper * rUpper * rUpper ) - ( rLower * rLower * rLower );
+      RealType nIdeal = volSlice * pairConstant;
 
       for (int j = 0; j < histogram_[i].size(); ++j){
 	avgGofr_[i][j] += histogram_[i][j] / nIdeal;    
@@ -108,12 +108,12 @@ namespace oopse {
     Vector3d r12 = pos2 - pos1;
     currentSnapshot_->wrapVector(r12);
 
-    double distance = r12.length();
+    RealType distance = r12.length();
     int whichRBin = distance / deltaR_;
 
     if (distance <= len_) {
-      double cosAngle = evaluateAngle(sd1, sd2);
-      double halfBin = (nAngleBins_ - 1) * 0.5;
+      RealType cosAngle = evaluateAngle(sd1, sd2);
+      RealType halfBin = (nAngleBins_ - 1) * 0.5;
       int whichThetaBin = halfBin * (cosAngle + 1.0);
       ++histogram_[whichRBin][whichThetaBin];
         
@@ -130,10 +130,10 @@ namespace oopse {
       rdfStream << "#nRBins = " << nRBins_ << "\t maxLen = " << len_ << "deltaR = " << deltaR_ <<"\n";
       rdfStream << "#nAngleBins =" << nAngleBins_ << "deltaCosAngle = " << deltaCosAngle_ << "\n";
       for (int i = 0; i < avgGofr_.size(); ++i) {
-	double r = deltaR_ * (i + 0.5);
+	RealType r = deltaR_ * (i + 0.5);
 
 	for(int j = 0; j < avgGofr_[i].size(); ++j) {
-	  double cosAngle = -1.0 + (j + 0.5)*deltaCosAngle_;
+	  RealType cosAngle = -1.0 + (j + 0.5)*deltaCosAngle_;
 	  rdfStream << avgGofr_[i][j]/nProcessed_ << "\t";
 	}
 
@@ -149,7 +149,7 @@ namespace oopse {
     rdfStream.close();
   }
 
-  double GofRTheta::evaluateAngle(StuntDouble* sd1, StuntDouble* sd2) {
+  RealType GofRTheta::evaluateAngle(StuntDouble* sd1, StuntDouble* sd2) {
     Vector3d pos1 = sd1->getPos();
     Vector3d pos2 = sd2->getPos();
     Vector3d r12 = pos2 - pos1;
@@ -160,7 +160,7 @@ namespace oopse {
     return dot(r12, dipole);
   }
 
-  double GofROmega::evaluateAngle(StuntDouble* sd1, StuntDouble* sd2) {
+  RealType GofROmega::evaluateAngle(StuntDouble* sd1, StuntDouble* sd2) {
     Vector3d v1 = sd1->getElectroFrame().getColumn(2);
     Vector3d v2 = sd2->getElectroFrame().getColumn(2);    
     v1.normalize();

@@ -61,7 +61,7 @@ namespace oopse {
         DoubleGenericData* doubleData= dynamic_cast<DoubleGenericData*>(data);
         
         if (doubleData != NULL) {
-          double dipole = doubleData->getData();
+          RealType dipole = doubleData->getData();
           
           setDipoleMoment(&atp.ident, &dipole, &isError);
           if (isError != 0) {
@@ -93,7 +93,7 @@ namespace oopse {
         DoubleGenericData* doubleData= dynamic_cast<DoubleGenericData*>(data);
         
         if (doubleData != NULL) {
-          double splitDipoleDistance = doubleData->getData();
+          RealType splitDipoleDistance = doubleData->getData();
           
           setSplitDipoleDistance(&atp.ident, &splitDipoleDistance, &isError);
           if (isError != 0) {

@@ -53,22 +53,23 @@
 #include <cmath>
 #include <iostream>
 #include <math.h>
+#include "config.h"
 namespace oopse {
 
-  static const double epsilon = 0.000001;
+  static const RealType epsilon = 0.000001;
 
   template<typename T>
   inline bool equal(T e1, T e2) {
     return e1 == e2;
   }
 
-  template<>
-  inline bool equal(float e1, float e2) {
-    return fabs(e1 - e2) < epsilon;
-  }
+  //template<>
+  //inline bool equal(float e1, float e2) {
+  //  return fabs(e1 - e2) < epsilon;
+  //}
 
   template<>
-  inline bool equal(double e1, double e2) {
+  inline bool equal(RealType e1, RealType e2) {
     return fabs(e1 - e2) < epsilon;
   }
 
@@ -345,7 +346,7 @@ namespace oopse {
      * @return true if this vector is normalized, otherwise return false
      */
     inline bool isNormalized() {
-      return equal(lengthSquare(), 1.0);
+      return equal(lengthSquare(), (RealType)1);
     }           
 
     unsigned int size() {return Dim;}

@@ -61,7 +61,7 @@ namespace oopse {
   private:
     virtual void moveA();
     virtual void moveB();
-    virtual double calcConservedQuantity();        
+    virtual RealType calcConservedQuantity();        
   };
 
 } //end namespace oopse

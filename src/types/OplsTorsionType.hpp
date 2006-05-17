@@ -62,13 +62,13 @@ namespace oopse {
 
   public:
 
-    OplsTorsionType(double v0, double v1, double v2, double v3) :  PolynomialTorsionType(){
+    OplsTorsionType(RealType v0, RealType v1, RealType v2, RealType v3) :  PolynomialTorsionType(){
 
       //convert OPLS Torsion Type to Polynomial Torsion type
-      double c0 = v0 + v2 + 0.5*(v1 + v3);
-      double c1 = 0.5 *(3*v3- v1);
-      double c2 = -v2;
-      double c3 = -2.0* v3;
+      RealType c0 = v0 + v2 + 0.5*(v1 + v3);
+      RealType c1 = 0.5 *(3*v3- v1);
+      RealType c2 = -v2;
+      RealType c3 = -2.0* v3;
 
       setCoefficient(0, c0);
       setCoefficient(1, c1);
@@ -80,10 +80,10 @@ namespace oopse {
 
   private:
         
-    double v0_;
-    double v1_;
-    double v2_;
-    double v3_;
+    RealType v0_;
+    RealType v1_;
+    RealType v2_;
+    RealType v3_;
         
   };
 

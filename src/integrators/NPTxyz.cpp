@@ -60,7 +60,7 @@
 namespace oopse {
 
     
-  double NPTxyz::calcConservedQuantity(){
+  RealType NPTxyz::calcConservedQuantity(){
 
     // We need NkBT a lot, so just set it here: This is the RAW number
     // of integrableObjects, so no subtraction or addition of constraints or
@@ -72,13 +72,13 @@ namespace oopse {
     // of freedom).  
     fkBT = info_->getNdf()*OOPSEConstant::kB *targetTemp;        
 
-    double conservedQuantity;
-    double totalEnergy;
-    double thermostat_kinetic;
-    double thermostat_potential;
-    double barostat_kinetic;
-    double barostat_potential;
-    double trEta;
+    RealType conservedQuantity;
+    RealType totalEnergy;
+    RealType thermostat_kinetic;
+    RealType thermostat_potential;
+    RealType barostat_kinetic;
+    RealType barostat_potential;
+    RealType trEta;
 
     totalEnergy = thermo.getTotalE();
 
@@ -86,7 +86,7 @@ namespace oopse {
 
     thermostat_potential = fkBT* integralOfChidt / OOPSEConstant::energyConvert;
 
-    SquareMatrix<double, 3> tmp = eta.transpose() * eta;
+    SquareMatrix<RealType, 3> tmp = eta.transpose() * eta;
     trEta = tmp.trace();
 
     barostat_kinetic = NkBT * tb2 * trEta /(2.0 * OOPSEConstant::energyConvert);
@@ -106,8 +106,8 @@ namespace oopse {
 
     int i,j,k;
     Mat3x3d scaleMat;
-    double eta2ij, scaleFactor;
-    double bigScale, smallScale, offDiagMax;
+    RealType eta2ij, scaleFactor;
+    RealType bigScale, smallScale, offDiagMax;
     Mat3x3d hm;
     Mat3x3d hmnew;
 

@@ -63,15 +63,15 @@ namespace oopse {
   public:
     PolynomialTorsionType() {}
 
-    double getCoefficient(int power) {
+    RealType getCoefficient(int power) {
       return polynomial_.getCoefficient(power);
     }
 
-    void addCoefficient(int power, double coefficient) {
+    void addCoefficient(int power, RealType coefficient) {
       polynomial_.addCoefficient(power, coefficient);
     }
 
-    void setCoefficient(int power, double coefficient) {
+    void setCoefficient(int power, RealType coefficient) {
       polynomial_.setCoefficient(power, coefficient);
     }
 
@@ -79,7 +79,7 @@ namespace oopse {
       polynomial_ = p;
     }
         
-    virtual void calcForce(double cosPhi, double& V, double& dVdCosPhi) {
+    virtual void calcForce(RealType cosPhi, RealType& V, RealType& dVdCosPhi) {
       V = polynomial_.evaluate(cosPhi);
       dVdCosPhi = polynomial_.evaluateDerivative(cosPhi); 
     }

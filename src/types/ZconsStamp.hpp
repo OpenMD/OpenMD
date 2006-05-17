@@ -46,9 +46,9 @@
 namespace oopse {
 class ZConsStamp : public DataHolder {
     DeclareParameter(MolIndex, int);
-    DeclareParameter(Zpos, double);
-    DeclareParameter(Kratio, double);
-    DeclareParameter(CantVel, double);
+    DeclareParameter(Zpos, RealType);
+    DeclareParameter(Kratio, RealType);
+    DeclareParameter(CantVel, RealType);
     public:
         ZConsStamp();
         virtual ~ZConsStamp();

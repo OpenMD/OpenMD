@@ -54,23 +54,23 @@
 namespace oopse {
 
   void  Snapshot::setHmat(const Mat3x3d& m) {
-    const double orthoTolerance = NumericConstant::epsilon;
+    const RealType orthoTolerance = NumericConstant::epsilon;
     hmat_ = m;
     invHmat_ = hmat_.inverse();
     
     //prepare fortran Hmat 
-    double fortranHmat[9];
-    double fortranInvHmat[9];
+    RealType fortranHmat[9];
+    RealType fortranInvHmat[9];
     hmat_.getArray(fortranHmat);
     invHmat_.getArray(fortranInvHmat);
 
     //determine whether the box is orthoTolerance or not
     int oldOrthoRhombic = orthoRhombic_;
     
-    double smallDiag = fabs(hmat_(0, 0));
+    RealType smallDiag = fabs(hmat_(0, 0));
     if(smallDiag > fabs(hmat_(1, 1))) smallDiag = fabs(hmat_(1, 1));
     if(smallDiag > fabs(hmat_(2, 2))) smallDiag = fabs(hmat_(2, 2));    
-    double tol = smallDiag * orthoTolerance;
+    RealType tol = smallDiag * orthoTolerance;
 
     orthoRhombic_ = 1;
 

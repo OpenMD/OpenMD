@@ -109,7 +109,7 @@ namespace oopse {
 
     //avoid make virtual function public
     //Herb Sutter and Andrei Alexandrescu, C++ coding Standards, Addision-Wesley
-    virtual double getRcutFromAtomType(AtomType* at);
+    virtual RealType getRcutFromAtomType(AtomType* at);
 
     std::string getWildCard() {
       return wildCardAtomTypeName_;

@@ -74,7 +74,7 @@ namespace oopse {
     std::string at1 = tokenizer.nextToken();
     std::string at2 = tokenizer.nextToken();
     BondTypeEnum bt = getBondTypeEnum(tokenizer.nextToken());
-    double b0 = tokenizer.nextTokenAsDouble();
+    RealType b0 = tokenizer.nextTokenAsDouble();
     nTokens -= 4;
 
     //switch is a maintain nightmare
@@ -91,7 +91,7 @@ namespace oopse {
 	simError();
       } else {
 
-	double kb = tokenizer.nextTokenAsDouble();
+	RealType kb = tokenizer.nextTokenAsDouble();
 	bondType = new HarmonicBondType(b0, kb);
       }
 
@@ -105,10 +105,10 @@ namespace oopse {
 	simError();
       } else {
 
-	double k3 = tokenizer.nextTokenAsDouble();
-	double k2 = tokenizer.nextTokenAsDouble();
-	double k1 = tokenizer.nextTokenAsDouble();
-	double k0 = tokenizer.nextTokenAsDouble();
+	RealType k3 = tokenizer.nextTokenAsDouble();
+	RealType k2 = tokenizer.nextTokenAsDouble();
+	RealType k1 = tokenizer.nextTokenAsDouble();
+	RealType k0 = tokenizer.nextTokenAsDouble();
                 
 	bondType = new CubicBondType(b0, k3, k2, k1, k0);
       }
@@ -125,11 +125,11 @@ namespace oopse {
       } else {
 
 	b0 = tokenizer.nextTokenAsDouble();
-	double k4 = tokenizer.nextTokenAsDouble();
-	double k3 = tokenizer.nextTokenAsDouble();
-	double k2 = tokenizer.nextTokenAsDouble();
-	double k1 = tokenizer.nextTokenAsDouble();
-	double k0 = tokenizer.nextTokenAsDouble();
+	RealType k4 = tokenizer.nextTokenAsDouble();
+	RealType k3 = tokenizer.nextTokenAsDouble();
+	RealType k2 = tokenizer.nextTokenAsDouble();
+	RealType k1 = tokenizer.nextTokenAsDouble();
+	RealType k0 = tokenizer.nextTokenAsDouble();
                 
 	bondType = new QuarticBondType(b0, k4, k3, k2, k1, k0);
       }
@@ -145,7 +145,7 @@ namespace oopse {
       } else {
 	int nPairs = nTokens / 2;
 	int power;
-	double coefficient;
+	RealType coefficient;
 	PolynomialBondType* pbt = new PolynomialBondType(b0);
                 
 	for (int i = 0; i < nPairs; ++i) {

@@ -74,13 +74,13 @@ namespace oopse {
   protected:
     void internalVisit(StuntDouble* sd, const std::string& prefix);
     bool isZconstraint(int index, std::string& prefix);
-    void readZconsFile(double time);
+    void readZconsFile(RealType time);
 
   private:  
-    std::vector<double> zconsPos;
+    std::vector<RealType> zconsPos;
     std::map<int, ZConsState> zmolStates_;
-    double zconsTol_;
-    double zconsTime_;
+    RealType zconsTol_;
+    RealType zconsTime_;
     std::string zconsFilename_;
     ZConsReader* zconsReader_;
     SimInfo* info_;

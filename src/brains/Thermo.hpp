@@ -55,24 +55,24 @@ namespace oopse {
 
     // note: all the following energies are in kcal/mol
 
-    double getKinetic(); // the total kinetic energy 
-    double getPotential(); // the total potential energy
-    double getTotalE(); // gets the total energy
+    RealType getKinetic(); // the total kinetic energy 
+    RealType getPotential(); // the total potential energy
+    RealType getTotalE(); // gets the total energy
 
-    double getTemperature(); // gives the instant temp. in K
+    RealType getTemperature(); // gives the instant temp. in K
 
-    double getPressure(); // gives the instant pressure in atm;
-    double getPressureX() { return getPressure(0); }
-    double getPressureY() { return getPressure(1); }
-    double getPressureZ() { return getPressure(2); }
+    RealType getPressure(); // gives the instant pressure in atm;
+    RealType getPressureX() { return getPressure(0); }
+    RealType getPressureY() { return getPressure(1); }
+    RealType getPressureZ() { return getPressure(2); }
     
     Mat3x3d getPressureTensor(); // gives the pressure  tensor in amu*fs^-2*Ang^-1
-    double getVolume();   // gives the volume in Ang^3 
+    RealType getVolume();   // gives the volume in Ang^3 
     
     void saveStat();
     
   private:
-    double getPressure(int direction);
+    RealType getPressure(int direction);
     
     SimInfo* info_;
   };

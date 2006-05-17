@@ -45,26 +45,26 @@
 namespace oopse {
 
   struct ZconstraintParam {
-    double zTargetPos;   /**< target zconstraint position */
-    double kz;                  /**< force constant */
-    double cantVel;         /**< The velocity of cantilever */
+    RealType zTargetPos;   /**< target zconstraint position */
+    RealType kz;                  /**< force constant */
+    RealType cantVel;         /**< The velocity of cantilever */
   };
 
   struct ZconstraintMol {
     Molecule* mol;
     ZconstraintParam param;
-    double fz;
-    double zpos;
-    double cantPos;         /**< current position of cantilever */
-    double endFixingTime;    
+    RealType fz;
+    RealType zpos;
+    RealType cantPos;         /**< current position of cantilever */
+    RealType endFixingTime;    
   };
 
 
   struct ZconsData{
     int zmolIndex;
-    double zforce;
-    double zpos;
-    double zconsPos;
+    RealType zforce;
+    RealType zpos;
+    RealType zconsPos;
   };
 
 }

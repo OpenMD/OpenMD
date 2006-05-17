@@ -83,7 +83,7 @@ namespace oopse {
     std::string inIdealFileName;
     bool isScanned;
     
-    double angleTransfer;
+    RealType angleTransfer;
     std::vector<fpos_t*> framePos;
     SimInfo *info_;
   };

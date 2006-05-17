@@ -53,8 +53,8 @@ namespace oopse {
    */
   class DLM : public RotationAlgorithm {
   private:
-    virtual void doRotate(StuntDouble* sd, Vector3d& ji, double dt); 
-    void rotateStep(int axes1, int axes2, double angle, Vector3d& ji, RotMat3x3d& A);            
+    virtual void doRotate(StuntDouble* sd, Vector3d& ji, RealType dt); 
+    void rotateStep(int axes1, int axes2, RealType angle, Vector3d& ji, RotMat3x3d& A);            
   };
 
 }

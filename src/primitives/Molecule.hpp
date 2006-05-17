@@ -283,10 +283,10 @@ namespace oopse{
     }
         
     /** return the total potential energy of short range interaction of this molecule */
-    double getPotential();
+    RealType getPotential();
 
     /** get total mass of this molecule */        
-    double getMass();
+    RealType getMass();
 
     /** return the center of mass of this molecule */
     Vector3d getCom();

@@ -259,7 +259,7 @@ namespace oopse {
                 
       // set the tolerance for Euler angles and rotation elements
 
-      theta = acos(std::min(1.0, std::max(-1.0,this->data_[2][2])));
+      theta = acos(std::min((RealType)1.0, std::max((RealType)-1.0,this->data_[2][2])));
       ctheta = this->data_[2][2]; 
       stheta = sqrt(1.0 - ctheta * ctheta);
 
@@ -318,7 +318,7 @@ namespace oopse {
      */
     SquareMatrix3<Real>  inverse() const {
       SquareMatrix3<Real> m;
-      double det = determinant();
+      RealType det = determinant();
       if (fabs(det) <= oopse::epsilon) {
 	//"The method was called on a matrix with |determinant| <= 1e-6.",
 	//"This is a runtime or a programming error in your application.");
@@ -336,7 +336,7 @@ namespace oopse {
 
             int a = (zeroDiagElementIndex[0] + 1) % 3;
             int b = (zeroDiagElementIndex[0] + 2) %3;
-            double denom = this->data_[a][a] * this->data_[b][b] - this->data_[b][a]*this->data_[a][b];
+            RealType denom = this->data_[a][a] * this->data_[b][b] - this->data_[b][a]*this->data_[a][b];
             m(a, a) = this->data_[b][b] /denom;
             m(b, a) = -this->data_[b][a]/denom;
 
@@ -561,8 +561,8 @@ namespace oopse {
   }
 
     
-  typedef SquareMatrix3<double> Mat3x3d;
-  typedef SquareMatrix3<double> RotMat3x3d;
+  typedef SquareMatrix3<RealType> Mat3x3d;
+  typedef SquareMatrix3<RealType> RotMat3x3d;
 
 } //namespace oopse
 #endif // MATH_SQUAREMATRIX_HPP

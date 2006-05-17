@@ -84,21 +84,21 @@ namespace oopse {
      * @param costheta
      * @param phi
      */
-    double getContactValueAt(double costheta, double phi);
+    RealType getContactValueAt(RealType costheta, RealType phi);
     
     /**
      * Gets the value of the range function at a particular orientation
      * @param costheta
      * @param phi
      */
-    double getRangeValueAt(double costheta, double phi);
+    RealType getRangeValueAt(RealType costheta, RealType phi);
     
     /**
      * Gets the value of the strength function at a particular orientation
      * @param costheta
      * @param phi
      */
-    double getStrengthValueAt(double costheta, double phi);
+    RealType getStrengthValueAt(RealType costheta, RealType phi);
     
     virtual void complete();
     

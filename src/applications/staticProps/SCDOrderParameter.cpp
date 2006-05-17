@@ -115,10 +115,10 @@ SCDElem::SCDElem(SimInfo* info, const std::string& sele1, const std::string& sel
 
 }
 
-double SCDElem::calcSCD(Snapshot* snapshot) {
+RealType SCDElem::calcSCD(Snapshot* snapshot) {
     std::vector<SDTuple3>::iterator i;
     Vector3d normal(0.0, 0.0, 1.0);
-    double scd = 0.0;
+    RealType scd = 0.0;
     for (i = tuples_.begin(); i != tuples_.end(); ++i) {        
         //Egberts B. and Berendsen H.J.C, J.Chem.Phys. 89(6), 3718-3732, 1988
         
@@ -132,10 +132,10 @@ double SCDElem::calcSCD(Snapshot* snapshot) {
         xAxis.normalize();
         yAxis.normalize();
         zAxis.normalize();
-        double cosThetaX = dot(xAxis, normal);
-        double sxx = 0.5*(3*cosThetaX * cosThetaX - 1.0);
-        double cosThetaY = dot(yAxis, normal);
-        double syy = 0.5*(3*cosThetaY * cosThetaY - 1.0);
+        RealType cosThetaX = dot(xAxis, normal);
+        RealType sxx = 0.5*(3*cosThetaX * cosThetaX - 1.0);
+        RealType cosThetaY = dot(yAxis, normal);
+        RealType syy = 0.5*(3*cosThetaY * cosThetaY - 1.0);
         scd += 2.0/3.0*sxx + 1.0/3.0*syy;
     }
     scd /= tuples_.size();

@@ -51,8 +51,8 @@
 
 extern "C"{
   void newLJtype( int* ident,
-                  double* sigma,
-                  double* epsilon,
+                  RealType* sigma,
+                  RealType* epsilon,
                   int* soft_pot,
                   int* status);
 

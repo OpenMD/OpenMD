@@ -174,7 +174,7 @@ namespace oopse {
     return (float) (atof(token.c_str()));
   }
 
-  double StringTokenizer::nextTokenAsDouble() {
+  RealType StringTokenizer::nextTokenAsDouble() {
     std::string token = nextToken();
     convertFortranNumber(token);
     return atof(token.c_str());

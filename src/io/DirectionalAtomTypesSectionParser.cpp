@@ -85,9 +85,9 @@ namespace oopse {
         }
       }
       
-      double Ixx = tokenizer.nextTokenAsDouble();
-      double Iyy = tokenizer.nextTokenAsDouble();
-      double Izz = tokenizer.nextTokenAsDouble();            
+      RealType Ixx = tokenizer.nextTokenAsDouble();
+      RealType Iyy = tokenizer.nextTokenAsDouble();
+      RealType Izz = tokenizer.nextTokenAsDouble();            
       Mat3x3d inertialMat;
       inertialMat(0, 0) = Ixx;
       inertialMat(1, 1) = Iyy;

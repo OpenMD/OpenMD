@@ -50,8 +50,8 @@ namespace oopse {
     return Mat3x3d::identity();
   }    
 
-  std::vector<double> Atom::getGrad() {
-    std::vector<double> grad(3);
+  std::vector<RealType> Atom::getGrad() {
+    std::vector<RealType> grad(3);
     Vector3d force= getFrc();
 
     grad[0] = -force[0];

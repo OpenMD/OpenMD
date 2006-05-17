@@ -55,14 +55,14 @@ namespace oopse {
   class Restraints{
     
   public:
-    Restraints(SimInfo * info, double lambdaVal, double lambdaExp);
+    Restraints(SimInfo * info, RealType lambdaVal, RealType lambdaExp);
     ~Restraints();
     
-    void Calc_rVal(Vector3d &position, double refPosition[3]);
-    void Calc_body_thetaVal(RotMat3x3d &matrix, double refUnit[3]);
-    void Calc_body_omegaVal(double zAngle);
-    double Calc_Restraint_Forces();
-    double getVharm() { return harmPotent; }
+    void Calc_rVal(Vector3d &position, RealType refPosition[3]);
+    void Calc_body_thetaVal(RotMat3x3d &matrix, RealType refUnit[3]);
+    void Calc_body_omegaVal(RealType zAngle);
+    RealType Calc_Restraint_Forces();
+    RealType getVharm() { return harmPotent; }
     
   private:
     SimInfo * info_;
@@ -72,23 +72,23 @@ namespace oopse {
     
     int i, j;
     
-    double scaleLam;
-    double delRx, delRy, delRz;
-    double theta, omega;
-    double vProj0[3];
-    double vProjDist;
-    double uTx, uTy, uTz, vTx, vTy, vTz;
-    double ub0x, ub0y, ub0z, vb0x, vb0y, vb0z;
-    double kTheta, kOmega, kDist;
-    double restraintFrc[3];
-    double restraintTrq[3];
-    double normalize;
-    double dVdrx, dVdry, dVdrz;
-    double dVdux, dVduy, dVduz;
-    double dVdvx, dVdvy, dVdvz;
-    double harmPotent;
-    double lambdaValue;
-    double lambdaK;
+    RealType scaleLam;
+    RealType delRx, delRy, delRz;
+    RealType theta, omega;
+    RealType vProj0[3];
+    RealType vProjDist;
+    RealType uTx, uTy, uTz, vTx, vTy, vTz;
+    RealType ub0x, ub0y, ub0z, vb0x, vb0y, vb0z;
+    RealType kTheta, kOmega, kDist;
+    RealType restraintFrc[3];
+    RealType restraintTrq[3];
+    RealType normalize;
+    RealType dVdrx, dVdry, dVdrz;
+    RealType dVdux, dVduy, dVduz;
+    RealType dVdvx, dVdvy, dVdvz;
+    RealType harmPotent;
+    RealType lambdaValue;
+    RealType lambdaK;
     
     char *token;
     char fileName[200];

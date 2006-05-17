@@ -54,6 +54,7 @@
 #include <list>
 #include <string>
 #include <vector>
+#include "config.h"
 namespace oopse{
 
   /**
@@ -148,8 +149,8 @@ namespace oopse{
   /** FloatGenericData is a generic data type contains a float variable */
   typedef SimpleTypeData<float> FloatGenericData;
 
-  /** DoubleGenericData is a generic data type contains a double variable */
-  typedef SimpleTypeData<double> DoubleGenericData;
+  /** DoubleGenericData is a generic data type contains a RealType variable */
+  typedef SimpleTypeData<RealType> DoubleGenericData;
   
   /**
    * @typedef StringGenericData
@@ -217,9 +218,9 @@ namespace oopse{
 
   /**
    * @typedef IntVectorGenericData
-   * A generic data type contains a  std::vector<double> variable.
+   * A generic data type contains a  std::vector<RealType> variable.
    */  
-  typedef VectorTypeData<double> DoubleVectorGenericData;
+  typedef VectorTypeData<RealType> DoubleVectorGenericData;
 
   /** 
    * @typedef StringVectorGenericData

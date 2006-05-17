@@ -51,7 +51,7 @@ namespace oopse {
     delete bond_;
   }
 
-  void UreyBradleyBend::calcForce(double& angle) {
+  void UreyBradleyBend::calcForce(RealType& angle) {
     Bend::calcForce(angle);
     bond_->calcForce();
   }

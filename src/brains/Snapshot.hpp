@@ -111,7 +111,7 @@ namespace oopse{
     /** Sets the H-Matrix */
     void setHmat(const Mat3x3d& m);
             
-    double getVolume() {
+    RealType getVolume() {
       return hmat_.determinant();
     }
 
@@ -124,33 +124,33 @@ namespace oopse{
     void wrapVector(Vector3d& v);
 
             
-    double getTime() {
+    RealType getTime() {
       return currentTime_;
     }
 
-    void increaseTime(double dt) {
+    void increaseTime(RealType dt) {
       setTime(getTime() + dt);
     }
 
-    void setTime(double time) {
+    void setTime(RealType time) {
       currentTime_ =time;
       //time at statData is redundant
       statData[Stats::TIME] = currentTime_;
     }
 
-    double getChi() {
+    RealType getChi() {
       return chi_;
     }
 
-    void setChi(double chi) {
+    void setChi(RealType chi) {
       chi_ = chi;
     }
 
-    double getIntegralOfChiDt() {
+    RealType getIntegralOfChiDt() {
       return integralOfChiDt_;
     }
 
-    void setIntegralOfChiDt(double integralOfChiDt) {
+    void setIntegralOfChiDt(RealType integralOfChiDt) {
       integralOfChiDt_ = integralOfChiDt;
     }
             
@@ -167,14 +167,14 @@ namespace oopse{
     Stats statData;
             
   private:
-    double currentTime_;
+    RealType currentTime_;
 
     Mat3x3d hmat_;
     Mat3x3d invHmat_;
     int orthoRhombic_;
 
-    double chi_;
-    double integralOfChiDt_;
+    RealType chi_;
+    RealType integralOfChiDt_;
     Mat3x3d eta_;
             
     int id_; /**< identification number of the snapshot */

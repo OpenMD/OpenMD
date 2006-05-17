@@ -42,7 +42,7 @@
  *
  *  Created by Charles F. Vardeman II on 17 Feb 2006.
  *  @author  Charles F. Vardeman II
- *  @version $Id: shapedLattice.hpp,v 1.3 2006-03-29 19:17:20 chuckv Exp $
+ *  @version $Id: shapedLattice.hpp,v 1.4 2006-05-17 21:51:42 tim Exp $
  *
  */
 
@@ -63,7 +63,7 @@ namespace oopse{
    
   class shapedLattice{
   public:
-    shapedLattice(double latticeConstant,std::string latticeType);
+    shapedLattice(RealType latticeConstant,std::string latticeType);
     virtual ~shapedLattice(){};
     /**
       * setGridDimension:  
@@ -80,7 +80,7 @@ private:
     std::vector<Vector3d> coords_;
     std::vector<Vector3d> coordsOrt_;
     Lattice *simpleLattice_;
-    double latticeConstant_;
+    RealType latticeConstant_;
     std::string latticeType_;
     int beginNx_;
     int beginNy_;

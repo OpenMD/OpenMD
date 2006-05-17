@@ -87,10 +87,10 @@ namespace oopse {
 
       } else {
 
-	double k3 = tokenizer.nextTokenAsDouble();
-	double k2 = tokenizer.nextTokenAsDouble();
-	double k1 = tokenizer.nextTokenAsDouble();
-	double k0 = tokenizer.nextTokenAsDouble();
+	RealType k3 = tokenizer.nextTokenAsDouble();
+	RealType k2 = tokenizer.nextTokenAsDouble();
+	RealType k1 = tokenizer.nextTokenAsDouble();
+	RealType k0 = tokenizer.nextTokenAsDouble();
                 
 	torsionType = new CubicTorsionType(k3, k2, k1, k0);
       }
@@ -101,10 +101,10 @@ namespace oopse {
 
       } else {
 
-	double k3 = tokenizer.nextTokenAsDouble();
-	double k2 = tokenizer.nextTokenAsDouble();
-	double k1 = tokenizer.nextTokenAsDouble();
-	double k0 = tokenizer.nextTokenAsDouble();
+	RealType k3 = tokenizer.nextTokenAsDouble();
+	RealType k2 = tokenizer.nextTokenAsDouble();
+	RealType k1 = tokenizer.nextTokenAsDouble();
+	RealType k0 = tokenizer.nextTokenAsDouble();
                 
 	torsionType = new CubicTorsionType(k3, k2, k1, k0);
       }
@@ -115,11 +115,11 @@ namespace oopse {
 
       } else {
 
-	double k4 = tokenizer.nextTokenAsDouble();
-	double k3 = tokenizer.nextTokenAsDouble();
-	double k2 = tokenizer.nextTokenAsDouble();
-	double k1 = tokenizer.nextTokenAsDouble();
-	double k0 = tokenizer.nextTokenAsDouble();
+	RealType k4 = tokenizer.nextTokenAsDouble();
+	RealType k3 = tokenizer.nextTokenAsDouble();
+	RealType k2 = tokenizer.nextTokenAsDouble();
+	RealType k1 = tokenizer.nextTokenAsDouble();
+	RealType k0 = tokenizer.nextTokenAsDouble();
                 
 	torsionType = new QuarticTorsionType( k4, k3, k2, k1, k0);
       }
@@ -132,7 +132,7 @@ namespace oopse {
       } else {
 	int nPairs = nTokens / 2;
 	int power;
-	double coefficient;
+	RealType coefficient;
 	PolynomialTorsionType* ptt = new PolynomialTorsionType();
                 
 	for (int i = 0; i < nPairs; ++i) {

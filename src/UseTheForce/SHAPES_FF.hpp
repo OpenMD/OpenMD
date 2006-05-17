@@ -71,8 +71,8 @@ namespace oopse {
 
 //    virtual void parseShapeFile(std::string& shapeFileName, ShapeAtomType* st);
     
-//    double findLargestContactDistance(ShapeAtomType* st);
-//    double findCutoffDistance(ShapeAtomType* st);
+//    RealType findLargestContactDistance(ShapeAtomType* st);
+//    RealType findCutoffDistance(ShapeAtomType* st);
 //    virtual void calcRcut( void );
   
   private:

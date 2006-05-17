@@ -44,7 +44,7 @@
  *
  *  Created by Charles F. Vardeman II on 11/16/05.
  *  @author  Charles F. Vardeman II 
- *  @version $Id: ParameterManager.hpp,v 1.2 2005-12-16 18:55:55 tim Exp $
+ *  @version $Id: ParameterManager.hpp,v 1.3 2006-05-17 21:51:42 tim Exp $
  *
  */
 
@@ -57,7 +57,7 @@
 #include <vector>
 #include <string>
 #include <map>
-
+#include "config.h"
 
 
 #include "utils/CaseConversion.hpp"
@@ -109,15 +109,15 @@ struct ParameterTraits<int>{
   static std::string getParamType() { return "int";}  
 };
 
-//double
+//RealType
 template<>                     
-struct ParameterTraits<double>{
-  typedef double RepType;
+struct ParameterTraits<RealType>{
+  typedef RealType RepType;
   template<typename T> static bool    convert(T, RepType&){return false;} 
   template<typename T> static RepType convert(T v)        {RepType tmp; convert(v,tmp);return tmp;} 
   static bool convert(RepType v, RepType& r)            {r=v; return true;}
-  static bool convert(int v, RepType& r)                {r = static_cast<double>(v); return true;}
-  static std::string getParamType() { return "double";}    
+  static bool convert(int v, RepType& r)                {r = static_cast<RealType>(v); return true;}
+  static std::string getParamType() { return "RealType";}    
 };
 
 
@@ -134,7 +134,7 @@ public:
   bool empty() {return empty_;}
   virtual bool setData(std::string) = 0;
   virtual bool setData(int) = 0;
-  virtual bool setData(double) = 0;
+  virtual bool setData(RealType) = 0;
   virtual std::string getParamType() = 0;
 protected:
     std::string keyword_;
@@ -157,8 +157,8 @@ public:
     return internalSetData<int>(ival);
   }
   
-  virtual bool setData(double dval) {
-    return internalSetData<double>(dval);
+  virtual bool setData(RealType dval) {
+    return internalSetData<RealType>(dval);
   }
   
   virtual std::string getParamType() { return ParameterTraits<ParamType>::getParamType();}

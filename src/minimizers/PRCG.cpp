@@ -69,8 +69,8 @@ namespace oopse {
   }
 
   void PRCGMinimizer::prepareStep(){
-    std::vector<double> deltaGrad;
-    double beta;
+    std::vector<RealType> deltaGrad;
+    RealType beta;
     size_t i;
 
     deltaGrad.resize(ndim);
@@ -83,16 +83,16 @@ namespace oopse {
 #ifndef IS_MPI
     beta = dotProduct(deltaGrad, curG) / dotProduct(prevG, prevG);
 #else
-    double localDP1;
-    double localDP2;
-    double globalDP1;
-    double globalDP2;
+    RealType localDP1;
+    RealType localDP2;
+    RealType globalDP1;
+    RealType globalDP2;
 
     localDP1 =  dotProduct(deltaGrad, curG);
     localDP2 = dotProduct(prevG, prevG);
 
-    MPI_Allreduce(&localDP1, &globalDP1, 1, MPI_DOUBLE,MPI_SUM, MPI_COMM_WORLD);
-    MPI_Allreduce(&localDP2, &globalDP2, 1, MPI_DOUBLE,MPI_SUM, MPI_COMM_WORLD);
+    MPI_Allreduce(&localDP1, &globalDP1, 1, MPI_REALTYPE,MPI_SUM, MPI_COMM_WORLD);
+    MPI_Allreduce(&localDP2, &globalDP2, 1, MPI_REALTYPE,MPI_SUM, MPI_COMM_WORLD);
   
     beta = globalDP1 / globalDP2;
 #endif

@@ -44,22 +44,22 @@
 namespace oopse {
 
   /**@todo still a lot left to improve*/
-  void Bend::calcForce(double& angle) {
+  void Bend::calcForce(RealType& angle) {
     Vector3d pos1 = atom1_->getPos();
     Vector3d pos2 = atom2_->getPos();
     Vector3d pos3 = atom3_->getPos();
 
     Vector3d r21 = pos1 - pos2;
-    double d21 = r21.length();
+    RealType d21 = r21.length();
 
-    double d21inv = 1.0 / d21;
+    RealType d21inv = 1.0 / d21;
 
     Vector3d r23 = pos3 - pos2;
-    double d23 = r23.length();
+    RealType d23 = r23.length();
 
-    double d23inv = 1.0 / d23;
+    RealType d23inv = 1.0 / d23;
 
-    double cosTheta = dot(r21, r23) / (d21 * d23);
+    RealType cosTheta = dot(r21, r23) / (d21 * d23);
 
     //check roundoff     
     if (cosTheta > 1.0) {
@@ -68,22 +68,22 @@ namespace oopse {
       cosTheta = -1.0;
     }
 
-    double theta = acos(cosTheta);
+    RealType theta = acos(cosTheta);
 
-    double dVdTheta;
+    RealType dVdTheta;
 
     bendType_->calcForce(theta, potential_, dVdTheta);
     //std::cout << atom1_->getType() << "\t" << atom2_->getType() << "\t" << atom3_->getType() << "\t";
     //std::cout << "theta = " << theta/M_PI * 180.0 <<", potential = " << potential_ << std::endl;
 
-    double sinTheta = sqrt(1.0 - cosTheta * cosTheta);
+    RealType sinTheta = sqrt(1.0 - cosTheta * cosTheta);
 
     if (fabs(sinTheta) < 1.0E-6) {
       sinTheta = 1.0E-6;
     }
 
-    double commonFactor1 = dVdTheta / sinTheta * d21inv;
-    double commonFactor2 = dVdTheta / sinTheta * d23inv;
+    RealType commonFactor1 = dVdTheta / sinTheta * d21inv;
+    RealType commonFactor2 = dVdTheta / sinTheta * d23inv;
 
     Vector3d force1 = commonFactor1 * (r23 * d23inv - r21*d21inv*cosTheta);
     Vector3d force3 = commonFactor2 * (r21 * d21inv - r23*d23inv*cosTheta);

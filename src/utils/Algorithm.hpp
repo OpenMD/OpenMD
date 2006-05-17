@@ -40,7 +40,7 @@
  */
 
 #include <functional>
-
+#include "config.h"
 namespace oopse {
 
   /** 
@@ -64,7 +64,7 @@ namespace oopse {
 
   template<typename T>
   struct logical_xor :public std::binary_function<T, T, bool> {
-    double operator()(T x, T y) { return x ^ y; }
+    RealType operator()(T x, T y) { return x ^ y; }
   };
 
 }

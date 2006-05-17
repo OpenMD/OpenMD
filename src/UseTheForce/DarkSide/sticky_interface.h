@@ -50,13 +50,13 @@
 extern "C" {
   
   void newStickyType( int* c_ident, 
-                      double* sticky_w0, 
-                      double* sticky_v0,
-                      double* sticky_v0p,
-                      double* sticky_rl,
-                      double* sticky_ru,
-                      double* sticky_rlp,
-                      double* sticky_rup,
+                      RealType* sticky_w0, 
+                      RealType* sticky_v0,
+                      RealType* sticky_v0p,
+                      RealType* sticky_rl,
+                      RealType* sticky_ru,
+                      RealType* sticky_rlp,
+                      RealType* sticky_rup,
                       int* isError );
   void destroyStickyTypes();
 }

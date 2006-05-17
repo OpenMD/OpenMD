@@ -49,7 +49,7 @@ namespace oopse {
   public:
     DistanceFinder(SimInfo* si);
 
-    OOPSEBitSet find(const OOPSEBitSet& bs, double distance);
+    OOPSEBitSet find(const OOPSEBitSet& bs, RealType distance);
 
     SimInfo* info_;
     std::vector<StuntDouble*> stuntdoubles_;

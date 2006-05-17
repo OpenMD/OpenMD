@@ -57,15 +57,15 @@ namespace oopse {
    */
   class BondType {
   public:
-    BondType(double myR0) : r0(myR0) {}
+    BondType(RealType myR0) : r0(myR0) {}
     virtual ~BondType() {}
 
-    virtual void calcForce(double r, double& V, double& dVdr) = 0;
-    double getEquilibriumBondLength() {return r0;}
-    void setEquilibriumBondLength(double myR0) { r0 = myR0; }
+    virtual void calcForce(RealType r, RealType& V, RealType& dVdr) = 0;
+    RealType getEquilibriumBondLength() {return r0;}
+    void setEquilibriumBondLength(RealType myR0) { r0 = myR0; }
 
   protected:        
-    double r0; /**equilibrium bond length< */
+    RealType r0; /**equilibrium bond length< */
   };    
 
 

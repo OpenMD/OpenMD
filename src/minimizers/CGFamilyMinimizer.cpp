@@ -56,12 +56,12 @@ namespace oopse {
   }
 
   int CGFamilyMinimizer::checkConvg(){
-    double fTol;
-    double relativeFTol;  // relative tolerance
-    double deltaF;
-    double gTol;
-    double relativeGTol;
-    double gnorm;
+    RealType fTol;
+    RealType relativeFTol;  // relative tolerance
+    RealType deltaF;
+    RealType gTol;
+    RealType relativeGTol;
+    RealType gnorm;
   
 
     // test function tolerance test
@@ -86,11 +86,11 @@ namespace oopse {
 #ifndef IS_MPI
     gnorm = sqrt(dotProduct(curG, curG));
 #else
-    double localDP;
-    double globalDP;
+    RealType localDP;
+    RealType globalDP;
 
     localDP = dotProduct(curG, curG);
-    MPI_Allreduce(&localDP, &globalDP, 1, MPI_DOUBLE,MPI_SUM, MPI_COMM_WORLD);  
+    MPI_Allreduce(&localDP, &globalDP, 1, MPI_REALTYPE,MPI_SUM, MPI_COMM_WORLD);  
     gnorm  = sqrt(globalDP);
 #endif
 

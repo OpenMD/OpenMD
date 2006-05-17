@@ -43,10 +43,11 @@
 #define UTILS_UTILITY_HPP
 #include <vector>
 #include <math.h>
+#include "config.h"
 #include "utils/next_combination.hpp"
 
 namespace oopse {
-  inline double roundMe( double x ){
+  inline RealType roundMe( RealType x ){
     return ( x >= 0 ) ? floor( x + 0.5 ) : ceil( x - 0.5 );
   }
 

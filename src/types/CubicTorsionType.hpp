@@ -60,27 +60,27 @@ namespace oopse {
 
   public:
 
-    CubicTorsionType(double k3, double k2, double k1, double k0) 
+    CubicTorsionType(RealType k3, RealType k2, RealType k1, RealType k0) 
       : k3_(k3), k2_(k2),  k1_(k1), k0_(k0){
       }
 
-    void setForceConstant(double k3, double k2, double k1, double k0) {
+    void setForceConstant(RealType k3, RealType k2, RealType k1, RealType k0) {
       k3_ = k3;
       k2_ = k2;
       k1_ = k1;
       k0_ = k0;
     }
 
-    void getForceConstant(double& k3, double& k2, double& k1, double& k0) {
+    void getForceConstant(RealType& k3, RealType& k2, RealType& k1, RealType& k0) {
       k3 = k3_;
       k2  = k2_;
       k1 = k1_;
       k0 = k0_;
     }
 
-    virtual void calcForce(double cosPhi, double& V, double& dVdCosPhi){ 
-      double cosPhi2 = cosPhi * cosPhi;
-      double cosPhi3 = cosPhi2 * cosPhi;
+    virtual void calcForce(RealType cosPhi, RealType& V, RealType& dVdCosPhi){ 
+      RealType cosPhi2 = cosPhi * cosPhi;
+      RealType cosPhi3 = cosPhi2 * cosPhi;
             
       V =k0_ + k1_ * cosPhi + k2_*cosPhi2 + k3_*cosPhi3;
       dVdCosPhi = k1_ + 2.0*k2_ * cosPhi + 3.0 * k3_*cosPhi2;     
@@ -88,10 +88,10 @@ namespace oopse {
         
   private:
 
-    double k3_;
-    double k2_;
-    double k1_;
-    double k0_;
+    RealType k3_;
+    RealType k2_;
+    RealType k1_;
+    RealType k0_;
 
   };
 

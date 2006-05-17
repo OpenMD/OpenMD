@@ -44,23 +44,23 @@
 namespace oopse {
 
   /**@todo still a lot left to improve*/
-  void GhostBend::calcForce(double& angle) {
+  void GhostBend::calcForce(RealType& angle) {
     DirectionalAtom* ghostAtom = static_cast<DirectionalAtom*>(atom2_);
     
     Vector3d pos1 = atom1_->getPos();
     Vector3d pos2 = ghostAtom->getPos();
 
     Vector3d r12 = pos1 - pos2;
-    double d12 = r12.length();
+    RealType d12 = r12.length();
 
-    double d12inv = 1.0 / d12;
+    RealType d12inv = 1.0 / d12;
 
     Vector3d r32 = ghostAtom->getElectroFrame().getColumn(2);
-    double d32 = r32.length();
+    RealType d32 = r32.length();
 
-    double d32inv = 1.0 / d32;
+    RealType d32inv = 1.0 / d32;
 
-    double cosTheta = dot(r12, r32) / (d12 * d32);
+    RealType cosTheta = dot(r12, r32) / (d12 * d32);
 
     //check roundoff     
     if (cosTheta > 1.0) {
@@ -69,20 +69,20 @@ namespace oopse {
       cosTheta = -1.0;
     }
 
-    double theta = acos(cosTheta);
+    RealType theta = acos(cosTheta);
 
-    double firstDerivative;
+    RealType firstDerivative;
 
     bendType_->calcForce(theta, firstDerivative, potential_);
 
-    double sinTheta = sqrt(1.0 - cosTheta * cosTheta);
+    RealType sinTheta = sqrt(1.0 - cosTheta * cosTheta);
 
     if (fabs(sinTheta) < 1.0E-12) {
       sinTheta = 1.0E-12;
     }
 
-    double commonFactor1 = -firstDerivative / sinTheta * d12inv;
-    double commonFactor2 = -firstDerivative / sinTheta * d32inv;
+    RealType commonFactor1 = -firstDerivative / sinTheta * d12inv;
+    RealType commonFactor2 = -firstDerivative / sinTheta * d32inv;
 
     Vector3d force1 = commonFactor1*(r12*(d12inv*cosTheta) - r32*d32inv);
     Vector3d force3 = commonFactor2*(r32*(d32inv*cosTheta) - r12*d12inv);

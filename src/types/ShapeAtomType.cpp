@@ -57,10 +57,10 @@ namespace oopse {
     strengthFuncs.clear();
   }
   
-  double ShapeAtomType::getContactValueAt(double costheta, double phi) {
+  RealType ShapeAtomType::getContactValueAt(RealType costheta, RealType phi) {
     
     std::vector<RealSphericalHarmonic*>::iterator contactIter;
-    double contactVal;
+    RealType contactVal;
     
     contactVal = 0.0;
     
@@ -71,10 +71,10 @@ namespace oopse {
     return contactVal;
   }
   
-  double ShapeAtomType::getRangeValueAt(double costheta, double phi) {
+  RealType ShapeAtomType::getRangeValueAt(RealType costheta, RealType phi) {
     
     std::vector<RealSphericalHarmonic*>::iterator rangeIter;
-    double rangeVal;
+    RealType rangeVal;
     
     rangeVal = 0.0;
     
@@ -85,10 +85,10 @@ namespace oopse {
     return rangeVal;
   }
   
-  double ShapeAtomType::getStrengthValueAt(double costheta, double phi) {
+  RealType ShapeAtomType::getStrengthValueAt(RealType costheta, RealType phi) {
     
     std::vector<RealSphericalHarmonic*>::iterator strengthIter;
-    double strengthVal;
+    RealType strengthVal;
     
     strengthVal = 0.0;
     
@@ -114,15 +114,15 @@ namespace oopse {
       std::vector<int> contactL;
       std::vector<int> contactM;
       std::vector<int> contactFunc;
-      std::vector<double> contactCoeff;
+      std::vector<RealType> contactCoeff;
       std::vector<int> rangeL;
       std::vector<int> rangeM;
       std::vector<int> rangeFunc;
-      std::vector<double> rangeCoeff;
+      std::vector<RealType> rangeCoeff;
       std::vector<int> strengthL;
       std::vector<int> strengthM;
       std::vector<int> strengthFunc;
-      std::vector<double> strengthCoeff;
+      std::vector<RealType> strengthCoeff;
       
       tempSHVector.clear();
       contactL.clear();

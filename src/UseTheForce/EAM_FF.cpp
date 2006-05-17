@@ -103,8 +103,8 @@ namespace oopse {
   }
 
 
-  double EAM_FF::getRcutFromAtomType(AtomType* at){
-    double rcut = 0.0;    
+  RealType EAM_FF::getRcutFromAtomType(AtomType* at){
+    RealType rcut = 0.0;    
     if (at->isEAM()) {
       GenericData* data = at->getPropertyByName("EAM");
       if (data != NULL) {

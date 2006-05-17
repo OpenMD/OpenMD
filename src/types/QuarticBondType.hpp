@@ -61,11 +61,11 @@ namespace oopse {
   public:
         
         
-    QuarticBondType(double r0, double k4, double k3, double k2, double k1, double k0) 
+    QuarticBondType(RealType r0, RealType k4, RealType k3, RealType k2, RealType k1, RealType k0) 
       : BondType(r0), k4_(k4), k3_(k3), k2_(k2),  k1_(k1), k0_(k0){
       }
 
-    void setForceConstant(double k4, double k3, double k2, double k1, double k0) {
+    void setForceConstant(RealType k4, RealType k3, RealType k2, RealType k1, RealType k0) {
       k4_ = k4;
       k3_ = k3;
       k2_ = k2;
@@ -74,7 +74,7 @@ namespace oopse {
 
     }
 
-    void getForceConstant(double& k4, double& k3, double& k2, double& k1, double& k0) {
+    void getForceConstant(RealType& k4, RealType& k3, RealType& k2, RealType& k1, RealType& k0) {
       k4 = k4_;
       k3 = k3_;
       k2  = k2_;
@@ -82,22 +82,22 @@ namespace oopse {
       k0 = k0_;
     }
 
-    virtual void calcForce(double r, double& V, double& dVdr) {
-      double dr =  r- r0;
-      double dr2 = dr * dr;
-      double dr3 = dr2 * dr;
-      double dr4 = dr3 * dr;
+    virtual void calcForce(RealType r, RealType& V, RealType& dVdr) {
+      RealType dr =  r- r0;
+      RealType dr2 = dr * dr;
+      RealType dr3 = dr2 * dr;
+      RealType dr4 = dr3 * dr;
             
       V =k0_ + k1_ * dr + k2_*dr2 + k3_*dr3 + k4_*dr4;
       dVdr = k1_ + 2.0*k2_ * dr + 3.0 * k3_*dr2 + 4.0*k4_*dr3;            
     }        
         
   private:
-    double k4_;
-    double k3_;
-    double k2_;
-    double k1_;
-    double k0_;
+    RealType k4_;
+    RealType k3_;
+    RealType k2_;
+    RealType k1_;
+    RealType k0_;
 
   };
 

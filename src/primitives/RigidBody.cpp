@@ -87,13 +87,13 @@ namespace oopse {
     return inertiaTensor_;
   }    
 
-  std::vector<double> RigidBody::getGrad() {
-    std::vector<double> grad(6, 0.0);
+  std::vector<RealType> RigidBody::getGrad() {
+    std::vector<RealType> grad(6, 0.0);
     Vector3d force;
     Vector3d torque;
     Vector3d myEuler;
-    double phi, theta, psi;
-    double cphi, sphi, ctheta, stheta;
+    RealType phi, theta, psi;
+    RealType cphi, sphi, ctheta, stheta;
     Vector3d ephi;
     Vector3d etheta;
     Vector3d epsi;
@@ -146,7 +146,7 @@ namespace oopse {
 
   /**@todo need modification */
   void  RigidBody::calcRefCoords() {
-    double mtmp;
+    RealType mtmp;
     Vector3d refCOM(0.0);
     mass_ = 0.0;
     for (std::size_t i = 0; i < atoms_.size(); ++i) {
@@ -167,7 +167,7 @@ namespace oopse {
       Mat3x3d IAtom(0.0);  
       mtmp = atoms_[i]->getMass();
       IAtom -= outProduct(refCoords_[i], refCoords_[i]) * mtmp;
-      double r2 = refCoords_[i].lengthSquare();
+      RealType r2 = refCoords_[i].lengthSquare();
       IAtom(0, 0) += mtmp * r2;
       IAtom(1, 1) += mtmp * r2;
       IAtom(2, 2) += mtmp * r2;

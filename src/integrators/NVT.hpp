@@ -71,27 +71,27 @@ namespace oopse {
       maxIterNum_ = maxIter;
     }
 
-    double getTauThermostat() {
+    RealType getTauThermostat() {
       return tauThermostat_;
     }
 
-    void setTauThermostat(double tt) {
+    void setTauThermostat(RealType tt) {
       tauThermostat_ = tt;
     }
 
-    double getTargetTemp() {
+    RealType getTargetTemp() {
       return targetTemp_;
     }
 
-    void setTargetTemp(double tt) {
+    void setTargetTemp(RealType tt) {
       targetTemp_ = tt;
     }
 
-    double getChiTolerance() {
+    RealType getChiTolerance() {
       return chiTolerance_;
     }
 
-    void setChiTolerance(double tol) {
+    void setChiTolerance(RealType tol) {
       chiTolerance_ = tol;
     }
 
@@ -106,12 +106,12 @@ namespace oopse {
     virtual void resetIntegrator();
     
   private:
-    virtual double calcConservedQuantity();              
+    virtual RealType calcConservedQuantity();              
 
     int maxIterNum_;
-    double targetTemp_;
-    double tauThermostat_;
-    double chiTolerance_;
+    RealType targetTemp_;
+    RealType tauThermostat_;
+    RealType chiTolerance_;
 
     std::vector<Vector3d> oldVel_;
     std::vector<Vector3d> oldJi_;
