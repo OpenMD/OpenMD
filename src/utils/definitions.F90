@@ -61,7 +61,11 @@ module definitions
   !! Various precision parameters
 
   INTEGER, PARAMETER :: SP = selected_real_kind(4)
+#ifdef SINGLE_PRECISION
+  INTEGER, PARAMETER :: DP = selected_real_kind(4)
+#else
   INTEGER, PARAMETER :: DP = selected_real_kind(8)
+#endif
 
   !! Maximum number of fortran streams...
   INTEGER, PARAMETER :: MAX_UNITS = 100

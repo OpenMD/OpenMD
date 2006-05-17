@@ -45,7 +45,7 @@
 
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: doForces.F90,v 1.81 2006-05-17 15:37:14 gezelter Exp $, $Date: 2006-05-17 15:37:14 $, $Name: not supported by cvs2svn $, $Revision: 1.81 $
+!! @version $Id: doForces.F90,v 1.82 2006-05-17 19:54:26 gezelter Exp $, $Date: 2006-05-17 19:54:26 $, $Name: not supported by cvs2svn $, $Revision: 1.82 $
 
 
 module doForces
@@ -1200,15 +1200,27 @@ contains
 #ifdef IS_MPI
     
     if (do_pot) then
+#ifdef SINGLE_PRECISION
+       call mpi_allreduce(pot_local, pot, LR_POT_TYPES,mpi_real,mpi_sum, &
+            mpi_comm_world,mpi_err)            
+#else
        call mpi_allreduce(pot_local, pot, LR_POT_TYPES,mpi_double_precision,mpi_sum, &
             mpi_comm_world,mpi_err)            
+#endif
     endif
     
     if (do_stress) then
+#ifdef SINGLE_PRECISION
+       call mpi_allreduce(tau_Temp, tau, 9,mpi_real,mpi_sum, &
+            mpi_comm_world,mpi_err)
+       call mpi_allreduce(virial_Temp, virial,1,mpi_real,mpi_sum, &
+            mpi_comm_world,mpi_err)
+#else
        call mpi_allreduce(tau_Temp, tau, 9,mpi_double_precision,mpi_sum, &
             mpi_comm_world,mpi_err)
        call mpi_allreduce(virial_Temp, virial,1,mpi_double_precision,mpi_sum, &
             mpi_comm_world,mpi_err)
+#endif
     endif
     
 #else

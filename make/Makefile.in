@@ -122,7 +122,14 @@ InstallBinDir   = $(OopseHome)/bin
 DocDir          = $(OopseHome)/doc
 FrcDeclare      = -DFRC_PATH="$(ForceParamDir)"
 F90Declare      = -D__FORTRAN90
+UseSingle       = @USE_SINGLE_PRECISION@
+ifeq "$(UseSingle)" "yes"
+SingleDeclare   = -DSINGLE_PRECISION
+else
+SingleDeclare   = 
+endif
 ParallelDeclare = -DIS_MPI
+SinglePrecision = -DSINGLE_PRECISION
 UseMPI          = @USE_MPI@
 ModuleCase      = @F90_MODULE_NAMES@
 ModSuffix       = @MOD@
@@ -391,12 +398,17 @@ JavaArchiverOptions    =
 JniOptions             =
 RmiOptions             = -d $(TargetDir) -classpath $(ClassPath) \
 			 -sourcepath $(SourceDir)
-COptions               = $(FrcDeclare) @CPPFLAGS@ @CFLAGS@
-CParallelOptions       = $(FrcDeclare) $(ParallelDeclare) @CPPFLAGS@ @CFLAGS@
-CppOptions             = $(FrcDeclare) @CPPFLAGS@ @CXXFLAGS@
-CppParallelOptions     = $(FrcDeclare) $(ParallelDeclare) @CPPFLAGS@ @CXXFLAGS@
+COptions               = $(FrcDeclare) $(SingleDeclare) @CPPFLAGS@ @CFLAGS@
+CParallelOptions       = $(FrcDeclare) $(SingleDeclare) $(ParallelDeclare) @CPPFLAGS@ @CFLAGS@
+CppOptions             = $(FrcDeclare) $(SingleDeclare) @CPPFLAGS@ @CXXFLAGS@
+CppParallelOptions     = $(FrcDeclare) $(SingleDeclare) $(ParallelDeclare) @CPPFLAGS@ @CXXFLAGS@
+ifeq "$(UseSingle)" "yes"
+FortranOptions         =  @FCFLAGS@ @MODDIRFLAG@$(SourceDir) @MODDIRFLAG@$(TargetDir) @PREPDEFFLAG@$(SingleDeclare) @FCFLAGS_SRCEXT@
+FortranParallelOptions =  @FCFLAGS@ @MODDIRFLAG@$(SourceDir) @MODDIRFLAG@$(ParallelTargetDir) @PREPDEFFLAG@$(SingleDeclare) @PREPDEFFLAG@$(ParallelDeclare) @FCFLAGS_SRCEXT@ 
+else
 FortranOptions         =  @FCFLAGS@ @MODDIRFLAG@$(SourceDir) @MODDIRFLAG@$(TargetDir) @FCFLAGS_SRCEXT@
 FortranParallelOptions =  @FCFLAGS@ @MODDIRFLAG@$(SourceDir) @MODDIRFLAG@$(ParallelTargetDir) @PREPDEFFLAG@$(ParallelDeclare) @FCFLAGS_SRCEXT@ 
+endif
 JavaCompilerOptions    = -d $(TargetDir) -classpath $(ClassPath) \
 			 -sourcepath $(SourceDir) -deprecation
 JavaRunOptions         = -classpath $(ClassPath) 

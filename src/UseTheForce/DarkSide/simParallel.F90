@@ -47,7 +47,7 @@
 !!
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: simParallel.F90,v 1.6 2006-04-03 15:37:43 chuckv Exp $, $Date: 2006-04-03 15:37:43 $, $Name: not supported by cvs2svn $, $Revision: 1.6 $
+!! @version $Id: simParallel.F90,v 1.7 2006-05-17 19:54:27 gezelter Exp $, $Date: 2006-05-17 19:54:27 $, $Name: not supported by cvs2svn $, $Revision: 1.7 $
 
 module mpiSimulation  
   use definitions
@@ -87,6 +87,7 @@ module mpiSimulation
   public :: mpi_integer
   public :: mpi_lor
   public :: mpi_logical
+  public :: mpi_real
   public :: mpi_double_precision
   public :: mpi_sum
   public :: mpi_max
@@ -602,9 +603,15 @@ contains
 #ifdef PROFILE
     call cpu_time(commTimeInitial)
 #endif
+#ifdef SINGLE_PRECISION
+    call mpi_allgatherv(sbuffer,this_plan%gsPlanSize, mpi_real, &
+         rbuffer,this_plan%counts,this_plan%displs,mpi_real, &
+         this_plan%myPlanComm, mpi_err)
+#else
     call mpi_allgatherv(sbuffer,this_plan%gsPlanSize, mpi_double_precision, &
          rbuffer,this_plan%counts,this_plan%displs,mpi_double_precision, &
          this_plan%myPlanComm, mpi_err)
+#endif
 #ifdef PROFILE
     call cpu_time(commTimeFinal)
     commTime = commTime + commTimeFinal - commTimeInitial
@@ -633,9 +640,15 @@ contains
     call cpu_time(commTimeInitial)
 #endif
 
+#ifdef SINGLE_PRECISION
+    call mpi_allgatherv(sbuffer,this_plan%gsPlanSize, mpi_real, &
+         rbuffer,this_plan%counts,this_plan%displs,mpi_real, &
+         this_plan%myPlanComm, mpi_err)
+#else
     call mpi_allgatherv(sbuffer,this_plan%gsPlanSize, mpi_double_precision, &
          rbuffer,this_plan%counts,this_plan%displs,mpi_double_precision, &
          this_plan%myPlanComm, mpi_err)
+#endif
 
 #ifdef PROFILE
     call cpu_time(commTimeFinal)
@@ -661,8 +674,13 @@ contains
 #ifdef PROFILE
     call cpu_time(commTimeInitial)
 #endif
+#ifdef SINGLE_PRECISION
+    call mpi_reduce_scatter(sbuffer,rbuffer, this_plan%counts, &
+         mpi_real, MPI_SUM, this_plan%myPlanComm, mpi_err)
+#else
     call mpi_reduce_scatter(sbuffer,rbuffer, this_plan%counts, &
          mpi_double_precision, MPI_SUM, this_plan%myPlanComm, mpi_err)
+#endif
 #ifdef PROFILE
     call cpu_time(commTimeFinal)
     commTime = commTime + commTimeFinal - commTimeInitial
@@ -686,9 +704,13 @@ contains
 #ifdef PROFILE
     call cpu_time(commTimeInitial)
 #endif
-
+#ifdef SINGLE_PRECISION
+    call mpi_reduce_scatter(sbuffer,rbuffer, this_plan%counts, &
+         mpi_real, MPI_SUM, this_plan%myPlanComm, mpi_err)
+#else
     call mpi_reduce_scatter(sbuffer,rbuffer, this_plan%counts, &
          mpi_double_precision, MPI_SUM, this_plan%myPlanComm, mpi_err)
+#endif
 #ifdef PROFILE
     call cpu_time(commTimeFinal)
     commTime = commTime + commTimeFinal - commTimeInitial

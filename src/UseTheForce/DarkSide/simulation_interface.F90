@@ -2,7 +2,7 @@ subroutine setFortranSim(setThisSim, CnGlobal, CnLocal, c_idents, &
      CnLocalExcludes, CexcludesLocal, CnGlobalExcludes, CexcludesGlobal, &
      CmolMembership, Cmfact, CnGroups, CglobalGroupMembership, &
      status)
-  use definitions, ONLY : dp    
+  use definitions   
   use simulation
 
   type (simtype) :: setThisSim
@@ -30,7 +30,7 @@ end subroutine setFortranSim
 
 subroutine setFortranBox(cHmat, cHmatInv, cBoxIsOrthorhombic)
   use simulation, only : setBox
-  use definitions, ONLY : dp
+  use definitions
   real(kind=dp), dimension(3,3) :: cHmat, cHmatInv
   integer :: cBoxIsOrthorhombic
 

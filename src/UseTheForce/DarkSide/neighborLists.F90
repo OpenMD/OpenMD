@@ -48,7 +48,7 @@
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
 !! @author J. Daniel Gezelter
-!! @version $Id: neighborLists.F90,v 1.4 2006-01-12 04:13:46 chrisfen Exp $, 
+!! @version $Id: neighborLists.F90,v 1.5 2006-05-17 19:54:26 gezelter Exp $, 
 
 module neighborLists
 
@@ -225,8 +225,13 @@ contains
        dispmx_tmp = max( abs ( q(2,i) - q0(2,i) ), dispmx_tmp )
        dispmx_tmp = max( abs ( q(3,i) - q0(3,i) ), dispmx_tmp )
     end do
+#ifdef SINGLE_PRECISION
+    call mpi_allreduce(dispmx_tmp,dispmx,1,mpi_real, & 
+         mpi_max,mpi_comm_world,mpi_err)
+#else
     call mpi_allreduce(dispmx_tmp,dispmx,1,mpi_double_precision, & 
          mpi_max,mpi_comm_world,mpi_err)
+#endif
 
 #else
 

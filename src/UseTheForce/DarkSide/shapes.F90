@@ -1419,12 +1419,12 @@ contains
     ! The original Fortran77 codes can be found here:
     ! http://iris-lee3.ece.uiuc.edu/~jjin/routines/routines.html
 
-    real(kind=8), intent(in) :: x
+    real(kind=dp), intent(in) :: x
     integer, intent(in):: m, mmax
     integer, intent(in):: function_type
-    real(kind=8), dimension(0:mmax), intent(inout) :: pl, dpl
+    real(kind=dp), dimension(0:mmax), intent(inout) :: pl, dpl
 
-    real(kind=8) :: a, b, c, y0, y1, dy0, dy1, yn, dyn
+    real(kind=dp) :: a, b, c, y0, y1, dy0, dy1, yn, dyn
     integer :: k
 
     A = 2.0_DP

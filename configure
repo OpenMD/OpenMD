@@ -312,7 +312,7 @@ ac_includes_default="\
 # include <unistd.h>
 #endif"
 
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os PROGNAME debug CXX CXXFLAGS LDFLAGS CPPFLAGS ac_ct_CXX EXEEXT OBJEXT CC CFLAGS ac_ct_CC FC FCFLAGS ac_ct_FC CPP EGREP LN_S SET_MAKE RANLIB ac_ct_RANLIB PERLINTERP PERL_SHEBANG INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA AR PS FCFLAGS_F90 FCFLAGS_SRCEXT PREPDEFFLAG FCLIBS FC_FUNC FC_FUNC_ MOD F90_WORK_FILES_ARG MODDIRFLAG F90MODINCSPEC F90_MODULE_NAMES ZLIB_INC_DIR ZLIB_LIB_DIR ZLIB FFTW_INC_DIR FFTW_LIB_DIR FFTW_LIBS LIBOBJS POW_LIB CXXCPP __func__ MPI_LIB_DIR MPI_INC_DIR MPI_F90_INC MPI_LIB MPI_F90_LIB USE_MPI USE_CGAL CGAL_INC_DIR CGAL_LIB_DIR CGAL_RLIB_DIR CGAL_DEFINES CGAL_CXXFLAGS CGAL_LIBS DOXYGEN DOT DOC enable_dot enable_html_docs enable_latex_docs BATEXT MKINSTALLDIRS OOPSE OOPSE_HOME SUBDIRS LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os PROGNAME debug USE_SINGLE_PRECISION CXX CXXFLAGS LDFLAGS CPPFLAGS ac_ct_CXX EXEEXT OBJEXT CC CFLAGS ac_ct_CC FC FCFLAGS ac_ct_FC CPP EGREP LN_S SET_MAKE RANLIB ac_ct_RANLIB PERLINTERP PERL_SHEBANG INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA AR PS FCFLAGS_F90 FCFLAGS_SRCEXT PREPDEFFLAG FCLIBS FC_FUNC FC_FUNC_ MOD F90_WORK_FILES_ARG MODDIRFLAG F90MODINCSPEC F90_MODULE_NAMES ZLIB_INC_DIR ZLIB_LIB_DIR ZLIB FFTW_INC_DIR FFTW_LIB_DIR FFTW_LIBS LIBOBJS POW_LIB CXXCPP __func__ MPI_LIB_DIR MPI_INC_DIR MPI_F90_INC MPI_LIB MPI_F90_LIB USE_MPI USE_CGAL CGAL_INC_DIR CGAL_LIB_DIR CGAL_RLIB_DIR CGAL_DEFINES CGAL_CXXFLAGS CGAL_LIBS DOXYGEN DOT DOC enable_dot enable_html_docs enable_latex_docs BATEXT MKINSTALLDIRS OOPSE OOPSE_HOME SUBDIRS LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -1644,9 +1644,8 @@ cat >>confdefs.h <<\_ACEOF
 #define SINGLE_PRECISION 1
 _ACEOF
 
-        PRECISION=s
-else
-        PRECISION=d
+        USE_SINGLE_PRECISION=yes
+
 fi
 
 # Checks for programs.
@@ -2810,7 +2809,7 @@ fi
 
 
 # Provide some information about the compiler.
-echo "$as_me:2813:" \
+echo "$as_me:2812:" \
      "checking for Fortran compiler version" >&5
 ac_compiler=`set X $ac_compile; echo $2`
 { (eval echo "$as_me:$LINENO: \"$ac_compiler --version </dev/null >&5\"") >&5
@@ -4058,7 +4057,7 @@ _ACEOF
 # flags.
 ac_save_FFLAGS=$FCFLAGS
 FCFLAGS="$FCFLAGS $ac_verb"
-(eval echo $as_me:4061: \"$ac_link\") >&5
+(eval echo $as_me:4060: \"$ac_link\") >&5
 ac_fc_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
 echo "$ac_fc_v_output" >&5
 FCFLAGS=$ac_save_FFLAGS
@@ -4136,7 +4135,7 @@ _ACEOF
 # flags.
 ac_save_FFLAGS=$FCFLAGS
 FCFLAGS="$FCFLAGS $ac_cv_prog_fc_v"
-(eval echo $as_me:4139: \"$ac_link\") >&5
+(eval echo $as_me:4138: \"$ac_link\") >&5
 ac_fc_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
 echo "$ac_fc_v_output" >&5
 FCFLAGS=$ac_save_FFLAGS
@@ -4872,7 +4871,7 @@ _ACEOF
 # flags.
 ac_save_FFLAGS=$FCFLAGS
 FCFLAGS="$FCFLAGS $ac_verb"
-(eval echo $as_me:4875: \"$ac_link\") >&5
+(eval echo $as_me:4874: \"$ac_link\") >&5
 ac_fc_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
 echo "$ac_fc_v_output" >&5
 FCFLAGS=$ac_save_FFLAGS
@@ -4950,7 +4949,7 @@ _ACEOF
 # flags.
 ac_save_FFLAGS=$FCFLAGS
 FCFLAGS="$FCFLAGS $ac_cv_prog_fc_v"
-(eval echo $as_me:4953: \"$ac_link\") >&5
+(eval echo $as_me:4952: \"$ac_link\") >&5
 ac_fc_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
 echo "$ac_fc_v_output" >&5
 FCFLAGS=$ac_save_FFLAGS
@@ -14728,6 +14727,7 @@ s,@host_vendor@,$host_vendor,;t t
 s,@host_os@,$host_os,;t t
 s,@PROGNAME@,$PROGNAME,;t t
 s,@debug@,$debug,;t t
+s,@USE_SINGLE_PRECISION@,$USE_SINGLE_PRECISION,;t t
 s,@CXX@,$CXX,;t t
 s,@CXXFLAGS@,$CXXFLAGS,;t t
 s,@LDFLAGS@,$LDFLAGS,;t t
