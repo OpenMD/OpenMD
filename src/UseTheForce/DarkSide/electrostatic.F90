@@ -65,18 +65,18 @@ module electrostatic_module
   !! these prefactors convert the multipole interactions into kcal / mol
   !! all were computed assuming distances are measured in angstroms
   !! Charge-Charge, assuming charges are measured in electrons
-  real(kind=dp), parameter :: pre11 = 332.0637778d0
+  real(kind=dp), parameter :: pre11 = 332.0637778_dp
   !! Charge-Dipole, assuming charges are measured in electrons, and
   !! dipoles are measured in debyes
-  real(kind=dp), parameter :: pre12 = 69.13373d0
+  real(kind=dp), parameter :: pre12 = 69.13373_dp
   !! Dipole-Dipole, assuming dipoles are measured in debyes
-  real(kind=dp), parameter :: pre22 = 14.39325d0
+  real(kind=dp), parameter :: pre22 = 14.39325_dp
   !! Charge-Quadrupole, assuming charges are measured in electrons, and
   !! quadrupoles are measured in 10^-26 esu cm^2
   !! This unit is also known affectionately as an esu centi-barn.
-  real(kind=dp), parameter :: pre14 = 69.13373d0
+  real(kind=dp), parameter :: pre14 = 69.13373_dp
 
-  real(kind=dp), parameter :: zero = 0.0d0
+  real(kind=dp), parameter :: zero = 0.0_dp
   
   !! number of points for electrostatic splines 
   integer, parameter :: np = 100
@@ -119,7 +119,7 @@ module electrostatic_module
   real(kind=dp), save :: df0 = 0.0_DP
   type(cubicSpline), save :: f0spline
   logical, save :: haveElectroSpline = .false.
-
+  real(kind=dp), save :: one_third = 1.0_DP / 3.0_DP
 
 #if defined(__IFC) || defined(__PGI)
 ! error function for ifc version > 7.
@@ -208,7 +208,7 @@ contains
     real( kind = dp ) :: dx, rmin, rval
     integer :: i
 
-    rmin = 0.0d0
+    rmin = 0.0_dp
 
     dx = (defaultCutoff-rmin) / dble(np-1)
     
@@ -439,7 +439,7 @@ contains
        call handleError("checkSummationMethod", "no Default Cutoff set!")
     endif
 
-    rcuti = 1.0d0 / defaultCutoff
+    rcuti = 1.0_dp / defaultCutoff
     rcuti2 = rcuti*rcuti
     rcuti3 = rcuti2*rcuti
     rcuti4 = rcuti2*rcuti2
@@ -454,20 +454,20 @@ contains
        endif
 
        constEXP = exp(-alpha2*defaultCutoff2)
-       invRootPi = 0.56418958354775628695d0
-       alphaPi = 2.0d0*dampingAlpha*invRootPi
+       invRootPi = 0.56418958354775628695_dp
+       alphaPi = 2.0_dp*dampingAlpha*invRootPi
        f0c = derfc(dampingAlpha*defaultCutoff)
        f1c = alphaPi*defaultCutoff*constEXP + f0c
-       f2c = alphaPi*2.0d0*alpha2*constEXP
-       f3c = alphaPi*2.0d0*alpha2*constEXP*defaultCutoff2*defaultCutoff
+       f2c = alphaPi*2.0_dp*alpha2*constEXP
+       f3c = alphaPi*2.0_dp*alpha2*constEXP*defaultCutoff2*defaultCutoff
     endif
 
     if (summationMethod .eq. REACTION_FIELD) then
        if (haveDielectric) then
           defaultCutoff2 = defaultCutoff*defaultCutoff
-          preRF = (dielectric-1.0d0) / &
-               ((2.0d0*dielectric+1.0d0)*defaultCutoff2*defaultCutoff)
-          preRF2 = 2.0d0*preRF
+          preRF = (dielectric-1.0_dp) / &
+               ((2.0_dp*dielectric+1.0_dp)*defaultCutoff2*defaultCutoff)
+          preRF2 = 2.0_dp*preRF
        else 
           call handleError("checkSummationMethod", "Dielectric not set")
        endif
@@ -525,7 +525,10 @@ contains
     real (kind=dp) :: varEXP
     real (kind=dp) :: pot_term
     real (kind=dp) :: preVal, rfVal
-    real (kind=dp) :: f13, f134
+    real (kind=dp) :: cti3, ctj3, ctidotj
+    real (kind=dp) :: ri7damp, ri5damp, prei3, prei4
+    real (kind=dp) :: xhatdot2, yhatdot2, zhatdot2
+    real (kind=dp) :: xhatdot5, yhatdot5, zhatdot5
 
     if (.not.summationMethodChecked) then
        call checkSummationMethod()
@@ -541,7 +544,7 @@ contains
 
     !! some variables we'll need independent of electrostatic type:
 
-    riji = 1.0d0 / rij
+    riji = 1.0_dp / rij
    
     xhat = d(1) * riji
     yhat = d(2) * riji
@@ -681,11 +684,9 @@ contains
 
        if (j_is_Charge) then
           if (screeningMethod .eq. DAMPED) then
+             ! assemble the damping variables
              call lookupUniformSpline1d(f0spline, rij, f0, df0)
              f1 = -rij * df0 + f0
-!!$             f0 = derfc(dampingAlpha*rij)
-!!$             varEXP = exp(-alpha2*rij*rij)
-!!$             f1 = alphaPi*rij*varEXP + f0
           endif
 
           preVal = pre11 * q_i * q_j
@@ -705,7 +706,7 @@ contains
              rfVal = preRF*rij*rij
              vterm = preVal * ( riji + rfVal )
              
-             dudr  = sw * preVal * ( 2.0d0*rfVal - riji )*riji
+             dudr  = sw * preVal * ( 2.0_dp*rfVal - riji )*riji
   
           else
              vterm = preVal * riji*f0
@@ -725,13 +726,10 @@ contains
 
        if (j_is_Dipole) then
           if (screeningMethod .eq. DAMPED) then
+             ! assemble the damping variables
              call lookupUniformSpline1d(f0spline, rij, f0, df0)
              f1 = -rij * df0 + f0
-             f3 = -2.0d0*alpha2*df0*rij*rij*rij
-!!$             f0 = derfc(dampingAlpha*rij)
-!!$             varEXP = exp(-alpha2*rij*rij)
-!!$             f1 = alphaPi*rij*varEXP + f0
-!!$             f3 = alphaPi*2.0d0*alpha2*varEXP*rij*rij*rij
+             f3 = -2.0_dp*alpha2*df0*rij*rij*rij
           endif
 
           pref = pre12 * q_i * mu_j
@@ -744,15 +742,11 @@ contains
              vpair = vpair + vterm
              epot = epot + sw*vterm
              
-             !! this has a + sign in the () because the rij vector is
-             !! r_j - r_i and the charge-dipole potential takes the origin
-             !! as the point dipole, which is atom j in this case.
-             
-             dudx = dudx - sw*pref*( ri3*(uz_j(1) - 3.0d0*ct_j*xhat) - &
+             dudx = dudx - sw*pref*( ri3*(uz_j(1) - 3.0_dp*ct_j*xhat) - &
                                      preRF2*uz_j(1) )
-             dudy = dudy - sw*pref*( ri3*(uz_j(2) - 3.0d0*ct_j*yhat) - &
+             dudy = dudy - sw*pref*( ri3*(uz_j(2) - 3.0_dp*ct_j*yhat) - &
                                      preRF2*uz_j(2) )
-             dudz = dudz - sw*pref*( ri3*(uz_j(3) - 3.0d0*ct_j*zhat) - &
+             dudz = dudz - sw*pref*( ri3*(uz_j(3) - 3.0_dp*ct_j*zhat) - &
                                      preRF2*uz_j(3) )         
              duduz_j(1) = duduz_j(1) - sw*pref * xhat * ( ri2 - preRF2*rij )
              duduz_j(2) = duduz_j(2) - sw*pref * yhat * ( ri2 - preRF2*rij )
@@ -760,12 +754,12 @@ contains
 
           else
              if (j_is_SplitDipole) then
-                BigR = sqrt(r2 + 0.25d0 * d_j * d_j)
-                ri = 1.0d0 / BigR
+                BigR = sqrt(r2 + 0.25_dp * d_j * d_j)
+                ri = 1.0_dp / BigR
                 scale = rij * ri
              else
                 ri = riji
-                scale = 1.0d0
+                scale = 1.0_dp
              endif
              
              ri2 = ri * ri
@@ -773,20 +767,16 @@ contains
              sc2 = scale * scale
 
              pot_term =  ri2 * scale * f1
-             vterm = - pref * ct_j * pot_term
+             vterm = -pref * ct_j * pot_term
              vpair = vpair + vterm
              epot = epot + sw*vterm
              
-             !! this has a + sign in the () because the rij vector is
-             !! r_j - r_i and the charge-dipole potential takes the origin
-             !! as the point dipole, which is atom j in this case.
+             prei3 = sw*pref*ri3
+             ri5damp = 3.0_dp*f1 + f3
              
-             dudx = dudx - sw*pref * ri3 * ( uz_j(1)*f1 - &
-                  ct_j*xhat*sc2*( 3.0d0*f1 + f3 ) )
-             dudy = dudy - sw*pref * ri3 * ( uz_j(2)*f1 - &
-                  ct_j*yhat*sc2*( 3.0d0*f1 + f3 ) )
-             dudz = dudz - sw*pref * ri3 * ( uz_j(3)*f1 - &
-                  ct_j*zhat*sc2*( 3.0d0*f1 + f3 ) )
+             dudx = dudx - prei3 * ( uz_j(1)*f1 - ct_j*xhat*sc2*ri5damp )
+             dudy = dudy - prei3 * ( uz_j(2)*f1 - ct_j*yhat*sc2*ri5damp )
+             dudz = dudz - prei3 * ( uz_j(3)*f1 - ct_j*zhat*sc2*ri5damp )
                           
              duduz_j(1) = duduz_j(1) - sw*pref * pot_term * xhat
              duduz_j(2) = duduz_j(2) - sw*pref * pot_term * yhat
@@ -797,71 +787,66 @@ contains
 
        if (j_is_Quadrupole) then
           if (screeningMethod .eq. DAMPED) then
+             ! assemble the damping variables
              call lookupUniformSpline1d(f0spline, rij, f0, df0)
-!!$             f0 = derfc(dampingAlpha*rij)
-!!$             varEXP = exp(-alpha2*rij*rij)
-!!$             f1 = alphaPi*rij*varEXP + f0
-!!$             f2 = alphaPi*2.0d0*alpha2*varEXP
              f1 = -rij * df0 + f0
-             f2 = -2.0d0*alpha2*df0
-             f3 = f2*rij*rij*rij
-             f4 = 2.0d0*alpha2*f2*rij
+             f2 = -2.0_dp*alpha2*df0
+             f3 = f2*r2*rij
+             f4 = 0.4_dp*alpha2*f3*r2
           endif
+          ri5damp = f1 + f3*one_third
+          ri7damp = ri5damp + f4
 
           ri2 = riji * riji
           ri3 = ri2 * riji
-          ri4 = ri2 * ri2
           cx2 = cx_j * cx_j
           cy2 = cy_j * cy_j
           cz2 = cz_j * cz_j
 
-          pref =  pre14 * q_i / 3.0d0
-          pot_term = ri3*(qxx_j * (3.0d0*cx2 - 1.0d0) + &
-               qyy_j * (3.0d0*cy2 - 1.0d0) + &
-               qzz_j * (3.0d0*cz2 - 1.0d0))
-          vterm = pref * (pot_term*f1 + (qxx_j*cx2 + qyy_j*cy2 + qzz_j*cz2)*f2)
+          pref =  pre14 * q_i * one_third
+
+          pot_term = ri3*( qxx_j*(3.0_dp*cx2*ri5damp - f1) + &
+               qyy_j*(3.0_dp*cy2*ri5damp - f1) + &
+               qzz_j*(3.0_dp*cz2*ri5damp - f1) )
+          vterm = pref * pot_term
           vpair = vpair + vterm
           epot = epot + sw*vterm
+
+          ! precompute variables for convenience (and obfuscation unfortunatly)
+          prei3 = 3.0_dp*sw*pref*ri3
+          prei4 = prei3*riji
+          xhatdot2 = xhat*2.0_dp * ri5damp
+          yhatdot2 = yhat*2.0_dp * ri5damp
+          zhatdot2 = zhat*2.0_dp * ri5damp
+          xhatdot5 = xhat*5.0_dp * ri7damp
+          yhatdot5 = yhat*5.0_dp * ri7damp
+          zhatdot5 = zhat*5.0_dp * ri7damp
+
+          dudx = dudx - prei4 * ( &
+               qxx_j*(cx2*xhatdot5 - (2.0_dp*cx_j*ux_j(1) + xhat)*ri5damp) + &
+               qyy_j*(cy2*xhatdot5 - (2.0_dp*cy_j*uy_j(1) + xhat)*ri5damp) + &
+               qzz_j*(cz2*xhatdot5 - (2.0_dp*cz_j*uz_j(1) + xhat)*ri5damp) ) 
+          dudy = dudy - prei4 * ( &
+               qxx_j*(cx2*yhatdot5 - (2.0_dp*cx_j*ux_j(2) + yhat)*ri5damp) + &
+               qyy_j*(cy2*yhatdot5 - (2.0_dp*cy_j*uy_j(2) + yhat)*ri5damp) + &
+               qzz_j*(cz2*yhatdot5 - (2.0_dp*cz_j*uz_j(2) + yhat)*ri5damp) ) 
+          dudz = dudz - prei4 * ( &
+               qxx_j*(cx2*zhatdot5 - (2.0_dp*cx_j*ux_j(3) + zhat)*ri5damp) + &
+               qyy_j*(cy2*zhatdot5 - (2.0_dp*cy_j*uy_j(3) + zhat)*ri5damp) + &
+               qzz_j*(cz2*zhatdot5 - (2.0_dp*cz_j*uz_j(3) + zhat)*ri5damp) ) 
           
-          dudx = dudx - sw*pref*pot_term*riji*xhat*(5.0d0*f1 + f3) + &
-               sw*pref*ri4 * ( &
-               qxx_j*(2.0d0*cx_j*ux_j(1)*(3.0d0*f1 + f3) - 2.0d0*xhat*f1) + &
-               qyy_j*(2.0d0*cy_j*uy_j(1)*(3.0d0*f1 + f3) - 2.0d0*xhat*f1) + &
-               qzz_j*(2.0d0*cz_j*uz_j(1)*(3.0d0*f1 + f3) - 2.0d0*xhat*f1) ) &
-               + (qxx_j*cx2 + qyy_j*cy2 + qzz_j*cz2)*f4
-          dudy = dudy - sw*pref*pot_term*riji*yhat*(5.0d0*f1 + f3) + &
-               sw*pref*ri4 * ( &
-               qxx_j*(2.0d0*cx_j*ux_j(2)*(3.0d0*f1 + f3) - 2.0d0*yhat*f1) + &
-               qyy_j*(2.0d0*cy_j*uy_j(2)*(3.0d0*f1 + f3) - 2.0d0*yhat*f1) + &
-               qzz_j*(2.0d0*cz_j*uz_j(2)*(3.0d0*f1 + f3) - 2.0d0*yhat*f1) ) &
-               + (qxx_j*cx2 + qyy_j*cy2 + qzz_j*cz2)*f4
-          dudz = dudz - sw*pref*pot_term*riji*zhat*(5.0d0*f1 + f3) + &
-               sw*pref*ri4 * ( &
-               qxx_j*(2.0d0*cx_j*ux_j(3)*(3.0d0*f1 + f3) - 2.0d0*zhat*f1) + &
-               qyy_j*(2.0d0*cy_j*uy_j(3)*(3.0d0*f1 + f3) - 2.0d0*zhat*f1) + &
-               qzz_j*(2.0d0*cz_j*uz_j(3)*(3.0d0*f1 + f3) - 2.0d0*zhat*f1) ) &
-               + (qxx_j*cx2 + qyy_j*cy2 + qzz_j*cz2)*f4
+          dudux_j(1) = dudux_j(1) + prei3*(qxx_j*cx_j*xhatdot2)
+          dudux_j(2) = dudux_j(2) + prei3*(qxx_j*cx_j*yhatdot2)
+          dudux_j(3) = dudux_j(3) + prei3*(qxx_j*cx_j*zhatdot2)
           
-          dudux_j(1) = dudux_j(1) + sw*pref*ri3*( (qxx_j*2.0d0*cx_j*xhat) &
-               * (3.0d0*f1 + f3) )
-          dudux_j(2) = dudux_j(2) + sw*pref*ri3*( (qxx_j*2.0d0*cx_j*yhat) &
-               * (3.0d0*f1 + f3) )
-          dudux_j(3) = dudux_j(3) + sw*pref*ri3*( (qxx_j*2.0d0*cx_j*zhat) &
-               * (3.0d0*f1 + f3) )
+          duduy_j(1) = duduy_j(1) + prei3*(qyy_j*cy_j*xhatdot2)
+          duduy_j(2) = duduy_j(2) + prei3*(qyy_j*cy_j*yhatdot2)
+          duduy_j(3) = duduy_j(3) + prei3*(qyy_j*cy_j*zhatdot2)
           
-          duduy_j(1) = duduy_j(1) + sw*pref*ri3*( (qyy_j*2.0d0*cy_j*xhat) &
-               * (3.0d0*f1 + f3) )
-          duduy_j(2) = duduy_j(2) + sw*pref*ri3*( (qyy_j*2.0d0*cy_j*yhat) &
-               * (3.0d0*f1 + f3) )
-          duduy_j(3) = duduy_j(3) + sw*pref*ri3*( (qyy_j*2.0d0*cy_j*zhat) &
-               * (3.0d0*f1 + f3) )
-          
-          duduz_j(1) = duduz_j(1) + sw*pref*ri3*( (qzz_j*2.0d0*cz_j*xhat) &
-               * (3.0d0*f1 + f3) )
-          duduz_j(2) = duduz_j(2) + sw*pref*ri3*( (qzz_j*2.0d0*cz_j*yhat) &
-               * (3.0d0*f1 + f3) )
-          duduz_j(3) = duduz_j(3) + sw*pref*ri3*( (qzz_j*2.0d0*cz_j*zhat) &
-               * (3.0d0*f1 + f3) )
+          duduz_j(1) = duduz_j(1) + prei3*(qzz_j*cz_j*xhatdot2)
+          duduz_j(2) = duduz_j(2) + prei3*(qzz_j*cz_j*yhatdot2)
+          duduz_j(3) = duduz_j(3) + prei3*(qzz_j*cz_j*zhatdot2)
+
            
        endif
     endif
@@ -870,57 +855,16 @@ contains
 
        if (j_is_Charge) then
           if (screeningMethod .eq. DAMPED) then
+             ! assemble the damping variables
              call lookupUniformSpline1d(f0spline, rij, f0, df0)
              f1 = -rij * df0 + f0
-             f3 = -2.0d0*alpha2*df0*rij*rij*rij
-!!$             f0 = derfc(dampingAlpha*rij)
-!!$             varEXP = exp(-alpha2*rij*rij)
-!!$             f1 = alphaPi*rij*varEXP + f0
-!!$             f3 = alphaPi*2.0d0*alpha2*varEXP*rij*rij*rij
+             f3 = -2.0_dp*alpha2*df0*r2*rij
           endif
           
           pref = pre12 * q_j * mu_i
           
-          if (summationMethod .eq. SHIFTED_POTENTIAL) then
-             ri2 = riji * riji
-             ri3 = ri2 * riji
-             
-             pot_term = ri2*f1 - rcuti2*f1c
-             vterm = pref * ct_i * pot_term
-             vpair = vpair + vterm
-             epot = epot + sw*vterm
-             
-             dudx = dudx + sw*pref*( ri3*(uz_i(1)*f1-ct_i*xhat*(3.0d0*f1+f3)) )
-             dudy = dudy + sw*pref*( ri3*(uz_i(2)*f1-ct_i*yhat*(3.0d0*f1+f3)) )
-             dudz = dudz + sw*pref*( ri3*(uz_i(3)*f1-ct_i*zhat*(3.0d0*f1+f3)) )
-             
-             duduz_i(1) = duduz_i(1) + sw*pref * xhat * pot_term
-             duduz_i(2) = duduz_i(2) + sw*pref * yhat * pot_term
-             duduz_i(3) = duduz_i(3) + sw*pref * zhat * pot_term
+          if (summationMethod .eq. REACTION_FIELD) then
 
-          elseif (summationMethod .eq. SHIFTED_FORCE) then
-             ri2 = riji * riji
-             ri3 = ri2 * riji
-
-             !! might need a -(f1c-f0c) or dct_i/dr in the derivative term...
-             pot_term = ri2*f1 - rcuti2*f1c + &
-                  (2.0d0*rcuti3*f1c + f2c)*( rij - defaultCutoff )
-             vterm = pref * ct_i * pot_term
-             vpair = vpair + vterm
-             epot = epot + sw*vterm
-             
-             dudx = dudx + sw*pref*( ri3*(uz_i(1)*f1-ct_i*xhat*(3.0d0*f1+f3)) &
-                  - rcuti3*(uz_i(1)*f1c-ct_i*xhat*(3.0d0*f1c+f3c)) )
-             dudy = dudy + sw*pref*( ri3*(uz_i(2)*f1-ct_i*yhat*(3.0d0*f1+f3)) &
-                  - rcuti3*(uz_i(1)*f1c-ct_i*xhat*(3.0d0*f1c+f3c)) )
-             dudz = dudz + sw*pref*( ri3*(uz_i(3)*f1-ct_i*zhat*(3.0d0*f1+f3)) &
-                  - rcuti3*(uz_i(1)*f1c-ct_i*xhat*(3.0d0*f1c+f3c)) )
-             
-             duduz_i(1) = duduz_i(1) + sw*pref * xhat * pot_term
-             duduz_i(2) = duduz_i(2) + sw*pref * yhat * pot_term
-             duduz_i(3) = duduz_i(3) + sw*pref * zhat * pot_term
- 
-          elseif (summationMethod .eq. REACTION_FIELD) then
              ri2 = riji * riji
              ri3 = ri2 * riji
 
@@ -928,11 +872,11 @@ contains
              vpair = vpair + vterm
              epot = epot + sw*vterm
              
-             dudx = dudx + sw*pref * ( ri3*(uz_i(1) - 3.0d0*ct_i*xhat) - &
+             dudx = dudx + sw*pref * ( ri3*(uz_i(1) - 3.0_dp*ct_i*xhat) - &
                   preRF2*uz_i(1) )
-             dudy = dudy + sw*pref * ( ri3*(uz_i(2) - 3.0d0*ct_i*yhat) - &
+             dudy = dudy + sw*pref * ( ri3*(uz_i(2) - 3.0_dp*ct_i*yhat) - &
                   preRF2*uz_i(2) )
-             dudz = dudz + sw*pref * ( ri3*(uz_i(3) - 3.0d0*ct_i*zhat) - &
+             dudz = dudz + sw*pref * ( ri3*(uz_i(3) - 3.0_dp*ct_i*zhat) - &
                   preRF2*uz_i(3) )
              
              duduz_i(1) = duduz_i(1) + sw*pref * xhat * ( ri2 - preRF2*rij )
@@ -941,12 +885,12 @@ contains
 
           else
              if (i_is_SplitDipole) then
-                BigR = sqrt(r2 + 0.25d0 * d_i * d_i)
-                ri = 1.0d0 / BigR
+                BigR = sqrt(r2 + 0.25_dp * d_i * d_i)
+                ri = 1.0_dp / BigR
                 scale = rij * ri
              else
                 ri = riji
-                scale = 1.0d0
+                scale = 1.0_dp
              endif
              
              ri2 = ri * ri
@@ -958,31 +902,29 @@ contains
              vpair = vpair + vterm
              epot = epot + sw*vterm
              
-             dudx = dudx + sw*pref * ri3 * ( uz_i(1)*f1 - &
-                  ct_i*xhat*sc2*( 3.0d0*f1 + f3 ) )
-             dudy = dudy + sw*pref * ri3 * ( uz_i(2)*f1 - &
-                  ct_i*yhat*sc2*( 3.0d0*f1 + f3 ) )
-             dudz = dudz + sw*pref * ri3 * ( uz_i(3)*f1 - &
-                  ct_i*zhat*sc2*( 3.0d0*f1 + f3 ) )
+             prei3 = sw*pref*ri3
+             ri5damp = 3.0_dp*f1 + f3
              
+             dudx = dudx + prei3 * ( uz_i(1)*f1 - ct_i*xhat*sc2*ri5damp )
+             dudy = dudy + prei3 * ( uz_i(2)*f1 - ct_i*yhat*sc2*ri5damp )
+             dudz = dudz + prei3 * ( uz_i(3)*f1 - ct_i*zhat*sc2*ri5damp )
+
              duduz_i(1) = duduz_i(1) + sw*pref * pot_term * xhat
              duduz_i(2) = duduz_i(2) + sw*pref * pot_term * yhat
              duduz_i(3) = duduz_i(3) + sw*pref * pot_term * zhat
+             
           endif
        endif
        
        if (j_is_Dipole) then
-          if (screeningMethod .eq. DAMPED) then
-             call lookupUniformSpline1d(f0spline, rij, f0, df0)
-!!$             f0 = derfc(dampingAlpha*rij)
-!!$             varEXP = exp(-alpha2*rij*rij)
-!!$             f1 = alphaPi*rij*varEXP + f0
-!!$             f2 = alphaPi*2.0d0*alpha2*varEXP
-             f1 = -rij * df0 + f0
-             f2 = -2.0d0*alpha2*df0
-             f3 = f2*rij*rij*rij
-             f4 = 2.0d0*alpha2*f3*rij*rij
-          endif
+!!$          if (screeningMethod .eq. DAMPED) then
+!!$             ! assemble the damping variables
+!!$             call lookupUniformSpline1d(f0spline, rij, f0, df0)
+!!$             f1 = -rij * df0 + f0
+!!$             f2 = -2.0_dp*alpha2*df0
+!!$             f3 = f2*r2*rij
+!!$             f4 = 0.4_dp*alpha2*f3*r2
+!!$          endif
 
           ct_ij = uz_i(1)*uz_j(1) + uz_i(2)*uz_j(2) + uz_i(3)*uz_j(3)
           
@@ -993,102 +935,103 @@ contains
           pref = pre22 * mu_i * mu_j
 
           if (summationMethod .eq. REACTION_FIELD) then
-             vterm = pref*( ri3*(ct_ij - 3.0d0 * ct_i * ct_j) - &
+             vterm = pref*( ri3*(ct_ij - 3.0_dp * ct_i * ct_j) - &
                   preRF2*ct_ij )
              vpair = vpair + vterm
              epot = epot + sw*vterm
              
-             a1 = 5.0d0 * ct_i * ct_j - ct_ij
+             a1 = 5.0_dp * ct_i * ct_j - ct_ij
              
-             dudx = dudx + sw*pref*3.0d0*ri4 &
+             dudx = dudx + sw*pref*3.0_dp*ri4 &
                              * (a1*xhat-ct_i*uz_j(1)-ct_j*uz_i(1))
-             dudy = dudy + sw*pref*3.0d0*ri4 &
+             dudy = dudy + sw*pref*3.0_dp*ri4 &
                              * (a1*yhat-ct_i*uz_j(2)-ct_j*uz_i(2))
-             dudz = dudz + sw*pref*3.0d0*ri4 &
+             dudz = dudz + sw*pref*3.0_dp*ri4 &
                              * (a1*zhat-ct_i*uz_j(3)-ct_j*uz_i(3))
              
-             duduz_i(1) = duduz_i(1) + sw*pref*(ri3*(uz_j(1)-3.0d0*ct_j*xhat) &
+             duduz_i(1) = duduz_i(1) + sw*pref*(ri3*(uz_j(1)-3.0_dp*ct_j*xhat) &
                   - preRF2*uz_j(1))
-             duduz_i(2) = duduz_i(2) + sw*pref*(ri3*(uz_j(2)-3.0d0*ct_j*yhat) &
+             duduz_i(2) = duduz_i(2) + sw*pref*(ri3*(uz_j(2)-3.0_dp*ct_j*yhat) &
                   - preRF2*uz_j(2))
-             duduz_i(3) = duduz_i(3) + sw*pref*(ri3*(uz_j(3)-3.0d0*ct_j*zhat) &
+             duduz_i(3) = duduz_i(3) + sw*pref*(ri3*(uz_j(3)-3.0_dp*ct_j*zhat) &
                   - preRF2*uz_j(3))
-             duduz_j(1) = duduz_j(1) + sw*pref*(ri3*(uz_i(1)-3.0d0*ct_i*xhat) &
+             duduz_j(1) = duduz_j(1) + sw*pref*(ri3*(uz_i(1)-3.0_dp*ct_i*xhat) &
                   - preRF2*uz_i(1))
-             duduz_j(2) = duduz_j(2) + sw*pref*(ri3*(uz_i(2)-3.0d0*ct_i*yhat) &
+             duduz_j(2) = duduz_j(2) + sw*pref*(ri3*(uz_i(2)-3.0_dp*ct_i*yhat) &
                   - preRF2*uz_i(2))
-             duduz_j(3) = duduz_j(3) + sw*pref*(ri3*(uz_i(3)-3.0d0*ct_i*zhat) &
+             duduz_j(3) = duduz_j(3) + sw*pref*(ri3*(uz_i(3)-3.0_dp*ct_i*zhat) &
                   - preRF2*uz_i(3))
 
           else
              if (i_is_SplitDipole) then
                 if (j_is_SplitDipole) then
-                   BigR = sqrt(r2 + 0.25d0 * d_i * d_i + 0.25d0 * d_j * d_j)
+                   BigR = sqrt(r2 + 0.25_dp * d_i * d_i + 0.25_dp * d_j * d_j)
                 else
-                   BigR = sqrt(r2 + 0.25d0 * d_i * d_i)
+                   BigR = sqrt(r2 + 0.25_dp * d_i * d_i)
                 endif
-                ri = 1.0d0 / BigR
+                ri = 1.0_dp / BigR
                 scale = rij * ri                
              else
                 if (j_is_SplitDipole) then
-                   BigR = sqrt(r2 + 0.25d0 * d_j * d_j)
-                   ri = 1.0d0 / BigR
+                   BigR = sqrt(r2 + 0.25_dp * d_j * d_j)
+                   ri = 1.0_dp / BigR
                    scale = rij * ri                             
                 else                
                    ri = riji
-                   scale = 1.0d0
+                   scale = 1.0_dp
                 endif
              endif
              
              sc2 = scale * scale
 
-             pot_term = (ct_ij - 3.0d0 * ct_i * ct_j * sc2)
-             vterm = pref * ( ri3*pot_term*f1 + (ct_i * ct_j)*f2 )
+             pot_term = (ct_ij - 3.0_dp * ct_i * ct_j * sc2)
+!!$             vterm = pref * ( ri3*pot_term*f1 + (ct_i * ct_j * sc2)*f2 )
+             vterm = pref * ri3 * pot_term
              vpair = vpair + vterm
              epot = epot + sw*vterm
              
-             f13 = f1+f3
-             f134 = f13 + f4
-             
-!!$             dudx = dudx + sw*pref * ( ri4*scale*( &
-!!$                  3.0d0*(a1*xhat-ct_i*uz_j(1)-ct_j*uz_i(1))*f1 & 
-!!$                  - pot_term*f3) &
-!!$                  + 2.0d0*ct_i*ct_j*xhat*(ct_i*uz_j(1)+ct_j*uz_i(1))*f3 &
-!!$                  + (ct_i * ct_j)*f4 )
-!!$             dudy = dudy + sw*pref * ( ri4*scale*( &
-!!$                  3.0d0*(a1*yhat-ct_i*uz_j(2)-ct_j*uz_i(2))*f1 &
-!!$                  - pot_term*f3) &
-!!$                  + 2.0d0*ct_i*ct_j*yhat*(ct_i*uz_j(2)+ct_j*uz_i(2))*f3 &
-!!$                  + (ct_i * ct_j)*f4 )
-!!$             dudz = dudz + sw*pref * ( ri4*scale*( &
-!!$                  3.0d0*(a1*zhat-ct_i*uz_j(3)-ct_j*uz_i(3))*f1 &
-!!$                  - pot_term*f3) &
-!!$                  + 2.0d0*ct_i*ct_j*zhat*(ct_i*uz_j(3)+ct_j*uz_i(3))*f3 &
-!!$                  + (ct_i * ct_j)*f4 )
+             ! precompute variables for convenience (and obfuscation 
+             ! unfortunatly)
+!!$             ri5damp = f1 + f3*one_third
+!!$             ri7damp = 5.0_dp*(ri5damp + f4)
+             prei3 = sw*pref*ri3
+             prei4 = 3.0_dp*sw*pref*ri4*scale
+!!$             cti3 = 3.0_dp*ct_i*sc2*ri5damp
+!!$             ctj3 = 3.0_dp*ct_j*sc2*ri5damp
+             cti3 = 3.0_dp*ct_i*sc2
+             ctj3 = 3.0_dp*ct_j*sc2
+             ctidotj = ct_i * ct_j * sc2
 
-             dudx = dudx + sw*pref * ( ri4*scale*( &
-                  15.0d0*(ct_i * ct_j * sc2)*xhat*f134 - &
-                  3.0d0*(ct_i*uz_j(1) + ct_j*uz_i(1) + ct_ij*xhat)*f134) )
-             dudy = dudy + sw*pref * ( ri4*scale*( &
-                  15.0d0*(ct_i * ct_j * sc2)*yhat*f134 - &
-                  3.0d0*(ct_i*uz_j(2) + ct_j*uz_i(2) + ct_ij*yhat)*f134) )
-             dudz = dudz + sw*pref * ( ri4*scale*( &
-                  15.0d0*(ct_i * ct_j * sc2)*zhat*f134 - &
-                  3.0d0*(ct_i*uz_j(3) + ct_j*uz_i(3) + ct_ij*zhat)*f134) )
+             dudx = dudx + prei4 * ( 5.0_dp*ctidotj*xhat - &
+                  (ct_i*uz_j(1) + ct_j*uz_i(1) + ct_ij*xhat) )
+             dudy = dudy + prei4 * ( 5.0_dp*ctidotj*yhat - &
+                  (ct_i*uz_j(2) + ct_j*uz_i(2) + ct_ij*yhat) )
+             dudz = dudz + prei4 * ( 5.0_dp*ctidotj*zhat - &
+                  (ct_i*uz_j(3) + ct_j*uz_i(3) + ct_ij*zhat) )
+
+             duduz_i(1) = duduz_i(1) + prei3 * ( uz_j(1) - ctj3*xhat )
+             duduz_i(2) = duduz_i(2) + prei3 * ( uz_j(2) - ctj3*yhat )
+             duduz_i(3) = duduz_i(3) + prei3 * ( uz_j(3) - ctj3*zhat )
              
-             duduz_i(1) = duduz_i(1) + sw*pref * &
-                  ( ri3*(uz_j(1) - 3.0d0*ct_j*xhat*sc2)*f1 + (ct_j*xhat)*f2 )
-             duduz_i(2) = duduz_i(2) + sw*pref * &
-                  ( ri3*(uz_j(2) - 3.0d0*ct_j*yhat*sc2)*f1 + (ct_j*yhat)*f2 )
-             duduz_i(3) = duduz_i(3) + sw*pref * &
-                  ( ri3*(uz_j(3) - 3.0d0*ct_j*zhat*sc2)*f1 + (ct_j*zhat)*f2 )
-             
-             duduz_j(1) = duduz_j(1) + sw*pref * &
-                  ( ri3*(uz_i(1) - 3.0d0*ct_i*xhat*sc2)*f1 + (ct_i*xhat)*f2 )
-             duduz_j(2) = duduz_j(2) + sw*pref * &
-                  ( ri3*(uz_i(2) - 3.0d0*ct_i*yhat*sc2)*f1 + (ct_i*yhat)*f2 )
-             duduz_j(3) = duduz_j(3) + sw*pref * &
-                  ( ri3*(uz_i(3) - 3.0d0*ct_i*zhat*sc2)*f1 + (ct_i*zhat)*f2 )
+             duduz_j(1) = duduz_j(1) + prei3 * ( uz_i(1) - cti3*xhat )
+             duduz_j(2) = duduz_j(2) + prei3 * ( uz_i(2) - cti3*yhat )
+             duduz_j(3) = duduz_j(3) + prei3 * ( uz_i(3) - cti3*zhat )
+
+!!$             dudx = dudx + prei4 * ( ctidotj*xhat*ri7damp - &
+!!$                  (ct_i*uz_j(1) + ct_j*uz_i(1) + ct_ij*xhat)*ri5damp )
+!!$             dudy = dudy + prei4 * ( ctidotj*yhat*ri7damp - &
+!!$                  (ct_i*uz_j(2) + ct_j*uz_i(2) + ct_ij*yhat)*ri5damp )
+!!$             dudz = dudz + prei4 * ( ctidotj*zhat*ri7damp - &
+!!$                  (ct_i*uz_j(3) + ct_j*uz_i(3) + ct_ij*zhat)*ri5damp )
+!!$
+!!$             duduz_i(1) = duduz_i(1) + prei3 * ( uz_j(1)*f1 - ctj3*xhat )
+!!$             duduz_i(2) = duduz_i(2) + prei3 * ( uz_j(2)*f1 - ctj3*yhat )
+!!$             duduz_i(3) = duduz_i(3) + prei3 * ( uz_j(3)*f1 - ctj3*zhat )
+!!$             
+!!$             duduz_j(1) = duduz_j(1) + prei3 * ( uz_i(1)*f1 - cti3*xhat )
+!!$             duduz_j(2) = duduz_j(2) + prei3 * ( uz_i(2)*f1 - cti3*yhat )
+!!$             duduz_j(3) = duduz_j(3) + prei3 * ( uz_i(3)*f1 - cti3*zhat )
+
           endif
        endif
     endif
@@ -1096,16 +1039,15 @@ contains
     if (i_is_Quadrupole) then
        if (j_is_Charge) then
           if (screeningMethod .eq. DAMPED) then
+             ! assemble the damping variables
              call lookupUniformSpline1d(f0spline, rij, f0, df0)
-!!$             f0 = derfc(dampingAlpha*rij)
-!!$             varEXP = exp(-alpha2*rij*rij)
-!!$             f1 = alphaPi*rij*varEXP + f0
-!!$             f2 = alphaPi*2.0d0*alpha2*varEXP
              f1 = -rij * df0 + f0
-             f2 = -2.0d0*alpha2*df0
-             f3 = f2*rij*rij*rij
-             f4 = 2.0d0*alpha2*f2*rij
+             f2 = -2.0_dp*alpha2*df0
+             f3 = f2*r2*rij
+             f4 = 0.4_dp*alpha2*f3*r2
           endif
+          ri5damp = f1 + f3*one_third
+          ri7damp = ri5damp + f4
 
           ri2 = riji * riji
           ri3 = ri2 * riji
@@ -1114,62 +1056,58 @@ contains
           cy2 = cy_i * cy_i
           cz2 = cz_i * cz_i
 
-          pref = pre14 * q_j / 3.0d0
-          pot_term = ri3 * (qxx_i * (3.0d0*cx2 - 1.0d0) + &
-                            qyy_i * (3.0d0*cy2 - 1.0d0) + &
-                            qzz_i * (3.0d0*cz2 - 1.0d0))
-          vterm = pref * (pot_term*f1 + (qxx_i*cx2 + qyy_i*cy2 + qzz_i*cz2)*f2)
+          pref = pre14 * q_j * one_third
+
+          pot_term = ri3 * ( qxx_i * (3.0_dp*cx2*ri5damp - f1) + &
+                             qyy_i * (3.0_dp*cy2*ri5damp - f1) + &
+                             qzz_i * (3.0_dp*cz2*ri5damp - f1) )
+
+          vterm = pref * pot_term
           vpair = vpair + vterm
           epot = epot + sw*vterm
-          
-          dudx = dudx - sw*pref*pot_term*riji*xhat*(5.0d0*f1 + f3) + &
-               sw*pref*ri4 * ( &
-               qxx_i*(2.0d0*cx_i*ux_i(1)*(3.0d0*f1 + f3) - 2.0d0*xhat*f1) + &
-               qyy_i*(2.0d0*cy_i*uy_i(1)*(3.0d0*f1 + f3) - 2.0d0*xhat*f1) + &
-               qzz_i*(2.0d0*cz_i*uz_i(1)*(3.0d0*f1 + f3) - 2.0d0*xhat*f1) ) &
-               + (qxx_i*cx2 + qyy_i*cy2 + qzz_i*cz2)*f4
-          dudy = dudy - sw*pref*pot_term*riji*yhat*(5.0d0*f1 + f3) + &
-               sw*pref*ri4 * ( &
-               qxx_i*(2.0d0*cx_i*ux_i(2)*(3.0d0*f1 + f3) - 2.0d0*yhat*f1) + &
-               qyy_i*(2.0d0*cy_i*uy_i(2)*(3.0d0*f1 + f3) - 2.0d0*yhat*f1) + &
-               qzz_i*(2.0d0*cz_i*uz_i(2)*(3.0d0*f1 + f3) - 2.0d0*yhat*f1) ) &
-               + (qxx_i*cx2 + qyy_i*cy2 + qzz_i*cz2)*f4
-          dudz = dudz - sw*pref*pot_term*riji*zhat*(5.0d0*f1 + f3) + &
-               sw*pref*ri4 * ( &
-               qxx_i*(2.0d0*cx_i*ux_i(3)*(3.0d0*f1 + f3) - 2.0d0*zhat*f1) + &
-               qyy_i*(2.0d0*cy_i*uy_i(3)*(3.0d0*f1 + f3) - 2.0d0*zhat*f1) + &
-               qzz_i*(2.0d0*cz_i*uz_i(3)*(3.0d0*f1 + f3) - 2.0d0*zhat*f1) ) &
-               + (qxx_i*cx2 + qyy_i*cy2 + qzz_i*cz2)*f4
-          
-          dudux_i(1) = dudux_i(1) + sw*pref*( ri3*(qxx_i*2.0d0*cx_i*xhat) &
-               * (3.0d0*f1 + f3) )
-          dudux_i(2) = dudux_i(2) + sw*pref*( ri3*(qxx_i*2.0d0*cx_i*yhat) &
-               * (3.0d0*f1 + f3) )
-          dudux_i(3) = dudux_i(3) + sw*pref*( ri3*(qxx_i*2.0d0*cx_i*zhat) &
-               * (3.0d0*f1 + f3) )
-          
-          duduy_i(1) = duduy_i(1) + sw*pref*( ri3*(qyy_i*2.0d0*cy_i*xhat) &
-               * (3.0d0*f1 + f3) )
-          duduy_i(2) = duduy_i(2) + sw*pref*( ri3*(qyy_i*2.0d0*cy_i*yhat) &
-               * (3.0d0*f1 + f3) )
-          duduy_i(3) = duduy_i(3) + sw*pref*( ri3*(qyy_i*2.0d0*cy_i*zhat) &
-               * (3.0d0*f1 + f3) )
-          
-          duduz_i(1) = duduz_i(1) + sw*pref*( ri3*(qzz_i*2.0d0*cz_i*xhat) &
-               * (3.0d0*f1 + f3) )
-          duduz_i(2) = duduz_i(2) + sw*pref*( ri3*(qzz_i*2.0d0*cz_i*yhat) &
-               * (3.0d0*f1 + f3) )
-          duduz_i(3) = duduz_i(3) + sw*pref*( ri3*(qzz_i*2.0d0*cz_i*zhat) &
-               * (3.0d0*f1 + f3) )
+ 
+          ! precompute variables for convenience (and obfuscation unfortunatly)
+          prei3 = 3.0_dp*sw*pref*ri3
+          prei4 = prei3*riji
+          xhatdot2 = xhat*2.0_dp * ri5damp
+          yhatdot2 = yhat*2.0_dp * ri5damp
+          zhatdot2 = zhat*2.0_dp * ri5damp
+          xhatdot5 = xhat*5.0_dp * ri7damp
+          yhatdot5 = yhat*5.0_dp * ri7damp
+          zhatdot5 = zhat*5.0_dp * ri7damp
 
+          dudx = dudx - prei4 * ( &
+               qxx_i*(cx2*xhatdot5 - (2.0_dp*cx_i*ux_i(1) + xhat)*ri5damp) + &
+               qyy_i*(cy2*xhatdot5 - (2.0_dp*cy_i*uy_i(1) + xhat)*ri5damp) + &
+               qzz_i*(cz2*xhatdot5 - (2.0_dp*cz_i*uz_i(1) + xhat)*ri5damp) ) 
+          dudy = dudy - prei4 * ( &
+               qxx_i*(cx2*yhatdot5 - (2.0_dp*cx_i*ux_i(2) + yhat)*ri5damp) + &
+               qyy_i*(cy2*yhatdot5 - (2.0_dp*cy_i*uy_i(2) + yhat)*ri5damp) + &
+               qzz_i*(cz2*yhatdot5 - (2.0_dp*cz_i*uz_i(2) + yhat)*ri5damp) ) 
+          dudz = dudz - prei4 * ( &
+               qxx_i*(cx2*zhatdot5 - (2.0_dp*cx_i*ux_i(3) + zhat)*ri5damp) + &
+               qyy_i*(cy2*zhatdot5 - (2.0_dp*cy_i*uy_i(3) + zhat)*ri5damp) + &
+               qzz_i*(cz2*zhatdot5 - (2.0_dp*cz_i*uz_i(3) + zhat)*ri5damp) ) 
+          
+          dudux_i(1) = dudux_i(1) + prei3*(qxx_i*cx_i*xhatdot2)
+          dudux_i(2) = dudux_i(2) + prei3*(qxx_i*cx_i*yhatdot2)
+          dudux_i(3) = dudux_i(3) + prei3*(qxx_i*cx_i*zhatdot2)
+          
+          duduy_i(1) = duduy_i(1) + prei3*(qyy_i*cy_i*xhatdot2)
+          duduy_i(2) = duduy_i(2) + prei3*(qyy_i*cy_i*yhatdot2)
+          duduy_i(3) = duduy_i(3) + prei3*(qyy_i*cy_i*zhatdot2)
+          
+          duduz_i(1) = duduz_i(1) + prei3*(qzz_i*cz_i*xhatdot2)
+          duduz_i(2) = duduz_i(2) + prei3*(qzz_i*cz_i*yhatdot2)
+          duduz_i(3) = duduz_i(3) + prei3*(qzz_i*cz_i*zhatdot2)
        endif
     endif
 
 
     if (do_pot) then
 #ifdef IS_MPI 
-       pot_row(ELECTROSTATIC_POT,atom1) = pot_row(ELECTROSTATIC_POT,atom1) + 0.5d0*epot
-       pot_col(ELECTROSTATIC_POT,atom2) = pot_col(ELECTROSTATIC_POT,atom2) + 0.5d0*epot
+       pot_row(ELECTROSTATIC_POT,atom1) = pot_row(ELECTROSTATIC_POT,atom1) + 0.5_dp*epot
+       pot_col(ELECTROSTATIC_POT,atom2) = pot_col(ELECTROSTATIC_POT,atom2) + 0.5_dp*epot
 #else
        pot = pot + epot
 #endif
@@ -1302,7 +1240,7 @@ contains
           mu1 = getDipoleMoment(atid1)
           
           preVal = pre22 * preRF2 * mu1*mu1
-          mypot = mypot - 0.5d0*preVal
+          mypot = mypot - 0.5_dp*preVal
           
           ! The self-correction term adds into the reaction field vector
           
@@ -1328,11 +1266,11 @@ contains
           c1 = getCharge(atid1)
           
           if (screeningMethod .eq. DAMPED) then
-             mypot = mypot - (f0c * rcuti * 0.5d0 + &
+             mypot = mypot - (f0c * rcuti * 0.5_dp + &
                   dampingAlpha*invRootPi) * c1 * c1    
              
           else             
-             mypot = mypot - (rcuti * 0.5d0 * c1 * c1)
+             mypot = mypot - (rcuti * 0.5_dp * c1 * c1)
              
           endif
        endif
@@ -1376,7 +1314,7 @@ contains
     dudy = zero
     dudz = zero
 
-    riji = 1.0d0/rij
+    riji = 1.0_dp/rij
 
     xhat = d(1) * riji
     yhat = d(2) * riji
@@ -1400,7 +1338,7 @@ contains
        
        myPot = myPot + sw*vterm
        
-       dudr  = sw*preVal * 2.0d0*rfVal*riji
+       dudr  = sw*preVal * 2.0_dp*rfVal*riji
        
        dudx = dudx + dudr * xhat
        dudy = dudy + dudr * yhat
@@ -1421,11 +1359,11 @@ contains
        vterm = - pref * ct_j * ( ri2 - preRF2*rij )
        myPot = myPot + sw*vterm
        
-       dudx = dudx - sw*pref*( ri3*(uz_j(1)-3.0d0*ct_j*xhat) &
+       dudx = dudx - sw*pref*( ri3*(uz_j(1)-3.0_dp*ct_j*xhat) &
             - preRF2*uz_j(1) )
-       dudy = dudy - sw*pref*( ri3*(uz_j(2)-3.0d0*ct_j*yhat) &
+       dudy = dudy - sw*pref*( ri3*(uz_j(2)-3.0_dp*ct_j*yhat) &
             - preRF2*uz_j(2) )
-       dudz = dudz - sw*pref*( ri3*(uz_j(3)-3.0d0*ct_j*zhat) &
+       dudz = dudz - sw*pref*( ri3*(uz_j(3)-3.0_dp*ct_j*zhat) &
             - preRF2*uz_j(3) )
        
        duduz_j(1) = duduz_j(1) - sw * pref * xhat * ( ri2 - preRF2*rij )
@@ -1447,11 +1385,11 @@ contains
        vterm = pref * ct_i * ( ri2 - preRF2*rij )
        myPot = myPot + sw*vterm
        
-       dudx = dudx + sw*pref*( ri3*(uz_i(1)-3.0d0*ct_i*xhat) &
+       dudx = dudx + sw*pref*( ri3*(uz_i(1)-3.0_dp*ct_i*xhat) &
             - preRF2*uz_i(1) )
-       dudy = dudy + sw*pref*( ri3*(uz_i(2)-3.0d0*ct_i*yhat) &
+       dudy = dudy + sw*pref*( ri3*(uz_i(2)-3.0_dp*ct_i*yhat) &
             - preRF2*uz_i(2) )
-       dudz = dudz + sw*pref*( ri3*(uz_i(3)-3.0d0*ct_i*zhat) &
+       dudz = dudz + sw*pref*( ri3*(uz_i(3)-3.0_dp*ct_i*zhat) &
             - preRF2*uz_i(3) )
        
        duduz_i(1) = duduz_i(1) + sw * pref * xhat * ( ri2 - preRF2*rij )

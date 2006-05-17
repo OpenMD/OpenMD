@@ -1,24 +1,5 @@
 #include "water.md"
 
-molecule{
-  name = "Cl-";
-  
-  atom[0]{
-    type = "Cl-";
-    position(0.0, 0.0, 0.0);
-  }
-}
-
-molecule{
-  name = "Na+";
-  
-  atom[0]{
-    type = "Na+";
-    position(0.0, 0.0, 0.0);
-  }
-}
-
-
 component{
   type = "SSD_E";
   nMol = 500;
@@ -32,8 +13,8 @@ initialConfig = "./ssdCl.in";
 
 ensemble = NVT;
 forceField = "DUFF";
-electrostaticSummationMethod = "shifted_force";
-electrostaticScreeningMethod = "damped";
+electrostaticSummationMethod = "none";
+electrostaticScreeningMethod = "undamped";
 dampingAlpha = 0.20;
 cutoffRadius = 10.5;
 switchingRadius = 8.925;
