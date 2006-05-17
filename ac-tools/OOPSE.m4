@@ -1050,22 +1050,25 @@ AC_DEFUN([ACX_CHECK_ZLIB],
 #
 # Handle user hints
 #
-[AC_MSG_CHECKING(if zlib is wanted)
-AC_ARG_WITH(zlib,
-[  --with-zlib=DIR root directory path of zlib installation [defaults to
-                    /usr/local or /usr if not found in /usr/local]
-  --without-zlib to disable zlib usage completely],
-[if test "$withval" != no ; then
-  AC_MSG_RESULT(yes)
-  if test -d "$withval"
+[AC_ARG_WITH(zlib,
+                AC_HELP_STRING([--with-zlib=DIR],
+           [root directory path of zlib installation (defaults to /usr/local or /usr if not found in /usr/local)]dnl
+		           ),
+		[zlib_dir="$withval"]dnl
+		            ,dnl
+		[zlib_dir="not_set"]dnl
+    )dnl
+
+if test "$zlib_dir" != "no"; then
+
+if test "$zlib_dir" != "not_set" ; then
+  if test -d "$zlib_dir"
   then
-    ZLIB_HOME="$withval"
+    ZLIB_HOME="$zlib_dir"
   else
-    AC_MSG_WARN([Sorry, $withval does not exist, checking usual places])
+    AC_MSG_WARN([Sorry, $zlib_dir does not exist, checking usual places])
   fi
-else
-  AC_MSG_RESULT(no)
-fi])
+fi
 
 ZLIB_HOME=/usr/local
 if test ! -f "${ZLIB_HOME}/include/zlib.h"
@@ -1087,27 +1090,39 @@ then
         AC_CHECK_LIB(z, inflateEnd, [zlib_cv_libz=yes], [zlib_cv_libz=no])
         AC_CHECK_HEADER(zlib.h, [zlib_cv_zlib_h=yes], [zlib_cv_zlib_h=no])
         AC_LANG_RESTORE
-        if test "$zlib_cv_libz" = "yes" -a "$zlib_cv_zlib_h" = "yes"
-        then
-                #
-                # If both library and header were found, use them
-                #
-                AC_CHECK_LIB(z, inflateEnd)
-                AC_MSG_CHECKING(zlib in ${ZLIB_HOME})
-                AC_MSG_RESULT(ok)
+
+        if test "$zlib_cv_libz" = "yes" -a "$zlib_cv_zlib_h" = "yes"; then
+                AC_DEFINE(HAVE_ZLIB_H, 1, [have zlib.h])
+                AC_DEFINE(HAVE_LIBZ, 1, [have libz.a])
+                ZLIB_INC_DIR="${ZLIB_HOME}/include"
+                ZLIB_LIB_DIR="${ZLIB_HOME}/lib"
+                ZLIB="-lz"
         else
-                #
-                # If either header or library was not found, revert and bomb
-                #
                 AC_MSG_CHECKING(zlib in ${ZLIB_HOME})
+                ZLIB_INC_DIR=
+                ZLIB_LIB_DIR=
+                ZLIB=
                 LDFLAGS="$ZLIB_OLD_LDFLAGS"
                 CPPFLAGS="$ZLIB_OLD_CPPFLAGS"
                 AC_MSG_RESULT(failed)
-                AC_MSG_ERROR(either specify a valid zlib installation with --with-zlib=DIR or disable zlib usage with --without-zlib)
+	        echo ""
+	        echo "*********************************************************"
+                echo "* WARNING: Could not find a working zlib installation   *"
+                echo "* If you need OOPSE to be able to deal with compressed  *"
+                echo "* trajectory dump files be sure to specify a valid zlib *"
+	        echo "* installation with --with-zlib=DIR                     *"
+                echo "*                                                       *"
+                echo "* OOPSE will still work without zlib installed.         *"
+	        echo "*********************************************************"
+	        echo ""
         fi
+        AC_SUBST(ZLIB_INC_DIR)
+        AC_SUBST(ZLIB_LIB_DIR)
+        AC_SUBST(ZLIB)
 fi
-
+fi
 ])
+
 
 AC_DEFUN([ACX_CHECK_FFTW],
 #
