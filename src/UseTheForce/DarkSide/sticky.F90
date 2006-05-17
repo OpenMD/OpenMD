@@ -50,7 +50,7 @@
 !! @author Matthew Meineke
 !! @author Christopher Fennell
 !! @author J. Daniel Gezelter
-!! @version $Id: sticky.F90,v 1.19 2006-04-20 21:02:00 chrisfen Exp $, $Date: 2006-04-20 21:02:00 $, $Name: not supported by cvs2svn $, $Revision: 1.19 $
+!! @version $Id: sticky.F90,v 1.20 2006-05-17 15:37:15 gezelter Exp $, $Date: 2006-05-17 15:37:15 $, $Name: not supported by cvs2svn $, $Revision: 1.20 $
 
 module sticky
 
@@ -157,13 +157,13 @@ contains
 
     rCubVals(1) = rl
     rCubVals(2) = ru
-    sCubVals(1) = 1.0d0
-    sCubVals(2) = 0.0d0      
+    sCubVals(1) = 1.0_dp
+    sCubVals(2) = 0.0_dp      
     call newSpline(StickyMap(myATID)%stickySpline, rCubVals, sCubVals, .true.)
     rpCubVals(1) = rlp
     rpCubVals(2) = rup
-    spCubVals(1) = 1.0d0
-    spCubVals(2) = 0.0d0      
+    spCubVals(1) = 1.0_dp
+    spCubVals(2) = 0.0_dp      
     call newSpline(StickyMap(myATID)%stickySplineP,rpCubVals,spCubVals,.true.)
 
     hasStickyMap = .true.
@@ -307,37 +307,37 @@ contains
 
        ! calculate the switching info. from the splines
        if (me1.eq.me2) then
-          s = 0.0d0
-          dsdr = 0.0d0
-          sp = 0.0d0
-          dspdr = 0.0d0
+          s = 0.0_dp
+          dsdr = 0.0_dp
+          sp = 0.0_dp
+          dspdr = 0.0_dp
           
           if (rij.lt.ru) then
              if (rij.lt.rl) then
-                s = 1.0d0
-                dsdr = 0.0d0
+                s = 1.0_dp
+                dsdr = 0.0_dp
              else         
                 ! we are in the switching region 
                 dx = rij - rl
                 s = StickyMap(me1)%stickySpline%y(1) + &
                      dx*(dx*(StickyMap(me1)%stickySpline%c(1) + &
                      dx*StickyMap(me1)%stickySpline%d(1)))
-                dsdr = dx*(2.0d0 * StickyMap(me1)%stickySpline%c(1) + &
-                     3.0d0 * dx * StickyMap(me1)%stickySpline%d(1))
+                dsdr = dx*(2.0_dp * StickyMap(me1)%stickySpline%c(1) + &
+                     3.0_dp * dx * StickyMap(me1)%stickySpline%d(1))
              endif
           endif
           if (rij.lt.rup) then
              if (rij.lt.rlp) then
-                sp = 1.0d0
-                dspdr = 0.0d0
+                sp = 1.0_dp
+                dspdr = 0.0_dp
              else
                 ! we are in the switching region 
                 dx = rij - rlp
                 sp = StickyMap(me1)%stickySplineP%y(1) + &
                      dx*(dx*(StickyMap(me1)%stickySplineP%c(1) + &
                      dx*StickyMap(me1)%stickySplineP%d(1)))
-                dspdr = dx*(2.0d0 * StickyMap(me1)%stickySplineP%c(1) + &
-                     3.0d0 * dx * StickyMap(me1)%stickySplineP%d(1))
+                dspdr = dx*(2.0_dp * StickyMap(me1)%stickySplineP%c(1) + &
+                     3.0_dp * dx * StickyMap(me1)%stickySplineP%d(1))
              endif
           endif
        else
@@ -346,75 +346,75 @@ contains
           call calc_sw_fnc(rij, rl, ru, rlp, rup, s, sp, dsdr, dspdr)
        endif
 
-       wi = 2.0d0*(xi2-yi2)*zi / r3
-       wj = 2.0d0*(xj2-yj2)*zj / r3
+       wi = 2.0_dp*(xi2-yi2)*zi / r3
+       wj = 2.0_dp*(xj2-yj2)*zj / r3
        w = wi+wj
 
-       zif = zi/rij - 0.6d0
-       zis = zi/rij + 0.8d0
+       zif = zi/rij - 0.6_dp
+       zis = zi/rij + 0.8_dp
 
-       zjf = zj/rij - 0.6d0
-       zjs = zj/rij + 0.8d0
+       zjf = zj/rij - 0.6_dp
+       zjs = zj/rij + 0.8_dp
 
        wip = zif*zif*zis*zis - w0
        wjp = zjf*zjf*zjs*zjs - w0
        wp = wip + wjp
 
-       vpair = vpair + 0.5d0*(v0*s*w + v0p*sp*wp)
+       vpair = vpair + 0.5_dp*(v0*s*w + v0p*sp*wp)
        if (do_pot) then
 #ifdef IS_MPI 
-          pot_row(HB_POT,atom1) = pot_row(HB_POT,atom1) + 0.25d0*(v0*s*w + v0p*sp*wp)*sw
-          pot_col(HB_POT,atom2) = pot_col(HB_POT,atom2) + 0.25d0*(v0*s*w + v0p*sp*wp)*sw
+          pot_row(HB_POT,atom1) = pot_row(HB_POT,atom1) + 0.25_dp*(v0*s*w + v0p*sp*wp)*sw
+          pot_col(HB_POT,atom2) = pot_col(HB_POT,atom2) + 0.25_dp*(v0*s*w + v0p*sp*wp)*sw
 #else
-          pot = pot + 0.5d0*(v0*s*w + v0p*sp*wp)*sw
+          pot = pot + 0.5_dp*(v0*s*w + v0p*sp*wp)*sw
 #endif  
        endif
 
-       dwidx =   4.0d0*xi*zi/r3  - 6.0d0*xi*zi*(xi2-yi2)/r5
-       dwidy = - 4.0d0*yi*zi/r3  - 6.0d0*yi*zi*(xi2-yi2)/r5
-       dwidz =   2.0d0*(xi2-yi2)/r3  - 6.0d0*zi2*(xi2-yi2)/r5
+       dwidx =   4.0_dp*xi*zi/r3  - 6.0_dp*xi*zi*(xi2-yi2)/r5
+       dwidy = - 4.0_dp*yi*zi/r3  - 6.0_dp*yi*zi*(xi2-yi2)/r5
+       dwidz =   2.0_dp*(xi2-yi2)/r3  - 6.0_dp*zi2*(xi2-yi2)/r5
 
-       dwjdx =   4.0d0*xj*zj/r3  - 6.0d0*xj*zj*(xj2-yj2)/r5
-       dwjdy = - 4.0d0*yj*zj/r3  - 6.0d0*yj*zj*(xj2-yj2)/r5
-       dwjdz =   2.0d0*(xj2-yj2)/r3  - 6.0d0*zj2*(xj2-yj2)/r5
+       dwjdx =   4.0_dp*xj*zj/r3  - 6.0_dp*xj*zj*(xj2-yj2)/r5
+       dwjdy = - 4.0_dp*yj*zj/r3  - 6.0_dp*yj*zj*(xj2-yj2)/r5
+       dwjdz =   2.0_dp*(xj2-yj2)/r3  - 6.0_dp*zj2*(xj2-yj2)/r5
 
        uglyi = zif*zif*zis + zif*zis*zis
        uglyj = zjf*zjf*zjs + zjf*zjs*zjs
 
-       dwipdx = -2.0d0*xi*zi*uglyi/r3
-       dwipdy = -2.0d0*yi*zi*uglyi/r3
-       dwipdz = 2.0d0*(1.0d0/rij - zi2/r3)*uglyi
+       dwipdx = -2.0_dp*xi*zi*uglyi/r3
+       dwipdy = -2.0_dp*yi*zi*uglyi/r3
+       dwipdz = 2.0_dp*(1.0_dp/rij - zi2/r3)*uglyi
 
-       dwjpdx = -2.0d0*xj*zj*uglyj/r3
-       dwjpdy = -2.0d0*yj*zj*uglyj/r3
-       dwjpdz = 2.0d0*(1.0d0/rij - zj2/r3)*uglyj
+       dwjpdx = -2.0_dp*xj*zj*uglyj/r3
+       dwjpdy = -2.0_dp*yj*zj*uglyj/r3
+       dwjpdz = 2.0_dp*(1.0_dp/rij - zj2/r3)*uglyj
 
-       dwidux = 4.0d0*(yi*zi2 + 0.5d0*yi*(xi2-yi2))/r3
-       dwiduy = 4.0d0*(xi*zi2 - 0.5d0*xi*(xi2-yi2))/r3
-       dwiduz = - 8.0d0*xi*yi*zi/r3
+       dwidux = 4.0_dp*(yi*zi2 + 0.5_dp*yi*(xi2-yi2))/r3
+       dwiduy = 4.0_dp*(xi*zi2 - 0.5_dp*xi*(xi2-yi2))/r3
+       dwiduz = - 8.0_dp*xi*yi*zi/r3
 
-       dwjdux = 4.0d0*(yj*zj2 + 0.5d0*yj*(xj2-yj2))/r3
-       dwjduy = 4.0d0*(xj*zj2 - 0.5d0*xj*(xj2-yj2))/r3
-       dwjduz = - 8.0d0*xj*yj*zj/r3
+       dwjdux = 4.0_dp*(yj*zj2 + 0.5_dp*yj*(xj2-yj2))/r3
+       dwjduy = 4.0_dp*(xj*zj2 - 0.5_dp*xj*(xj2-yj2))/r3
+       dwjduz = - 8.0_dp*xj*yj*zj/r3
 
-       dwipdux =  2.0d0*yi*uglyi/rij
-       dwipduy = -2.0d0*xi*uglyi/rij
-       dwipduz =  0.0d0
+       dwipdux =  2.0_dp*yi*uglyi/rij
+       dwipduy = -2.0_dp*xi*uglyi/rij
+       dwipduz =  0.0_dp
 
-       dwjpdux =  2.0d0*yj*uglyj/rij
-       dwjpduy = -2.0d0*xj*uglyj/rij
-       dwjpduz =  0.0d0
+       dwjpdux =  2.0_dp*yj*uglyj/rij
+       dwjpduy = -2.0_dp*xj*uglyj/rij
+       dwjpduz =  0.0_dp
 
        ! do the torques first since they are easy:
        ! remember that these are still in the body fixed axes
 
-       txi = 0.5d0*(v0*s*dwidux + v0p*sp*dwipdux)*sw
-       tyi = 0.5d0*(v0*s*dwiduy + v0p*sp*dwipduy)*sw
-       tzi = 0.5d0*(v0*s*dwiduz + v0p*sp*dwipduz)*sw
+       txi = 0.5_dp*(v0*s*dwidux + v0p*sp*dwipdux)*sw
+       tyi = 0.5_dp*(v0*s*dwiduy + v0p*sp*dwipduy)*sw
+       tzi = 0.5_dp*(v0*s*dwiduz + v0p*sp*dwipduz)*sw
 
-       txj = 0.5d0*(v0*s*dwjdux + v0p*sp*dwjpdux)*sw
-       tyj = 0.5d0*(v0*s*dwjduy + v0p*sp*dwjpduy)*sw
-       tzj = 0.5d0*(v0*s*dwjduz + v0p*sp*dwjpduz)*sw
+       txj = 0.5_dp*(v0*s*dwjdux + v0p*sp*dwjpdux)*sw
+       tyj = 0.5_dp*(v0*s*dwjduy + v0p*sp*dwjpduy)*sw
+       tzj = 0.5_dp*(v0*s*dwjduz + v0p*sp*dwjpduz)*sw
 
        ! go back to lab frame using transpose of rotation matrix:
 
@@ -505,9 +505,9 @@ contains
 
        ! now assemble these with the radial-only terms:
 
-       fxradial = 0.5d0*(v0*dsdr*drdx*w + v0p*dspdr*drdx*wp + fxii + fxji)
-       fyradial = 0.5d0*(v0*dsdr*drdy*w + v0p*dspdr*drdy*wp + fyii + fyji)
-       fzradial = 0.5d0*(v0*dsdr*drdz*w + v0p*dspdr*drdz*wp + fzii + fzji)
+       fxradial = 0.5_dp*(v0*dsdr*drdx*w + v0p*dspdr*drdx*wp + fxii + fxji)
+       fyradial = 0.5_dp*(v0*dsdr*drdy*w + v0p*dspdr*drdy*wp + fyii + fyji)
+       fzradial = 0.5_dp*(v0*dsdr*drdz*w + v0p*dspdr*drdz*wp + fzii + fzji)
 
 #ifdef IS_MPI
        f_Row(1,atom1) = f_Row(1,atom1) + fxradial
@@ -552,30 +552,30 @@ contains
     real (kind=dp), intent(inout) :: s, sp, dsdr, dspdr
 
     ! distances must be in angstroms
-    s = 0.0d0
-    dsdr = 0.0d0
-    sp = 0.0d0
-    dspdr = 0.0d0
+    s = 0.0_dp
+    dsdr = 0.0_dp
+    sp = 0.0_dp
+    dspdr = 0.0_dp
     
     if (r.lt.ru) then
        if (r.lt.rl) then
-          s = 1.0d0
-          dsdr = 0.0d0
+          s = 1.0_dp
+          dsdr = 0.0_dp
        else
-          s = ((ru + 2.0d0*r - 3.0d0*rl) * (ru-r)**2) / &
+          s = ((ru + 2.0_dp*r - 3.0_dp*rl) * (ru-r)**2) / &
                ((ru - rl)**3)
-          dsdr = 6.0d0*(r-ru)*(r-rl)/((ru - rl)**3)
+          dsdr = 6.0_dp*(r-ru)*(r-rl)/((ru - rl)**3)
        endif
     endif
 
     if (r.lt.rup) then
        if (r.lt.rlp) then
-          sp = 1.0d0       
-          dspdr = 0.0d0
+          sp = 1.0_dp       
+          dspdr = 0.0_dp
        else
-          sp = ((rup + 2.0d0*r - 3.0d0*rlp) * (rup-r)**2) / &
+          sp = ((rup + 2.0_dp*r - 3.0_dp*rlp) * (rup-r)**2) / &
                ((rup - rlp)**3)
-          dspdr = 6.0d0*(r-rup)*(r-rlp)/((rup - rlp)**3)       
+          dspdr = 6.0_dp*(r-rup)*(r-rlp)/((rup - rlp)**3)       
        endif
     endif
 
@@ -662,7 +662,7 @@ contains
 
     if ( rij .LE. rbig ) then
 
-       rI = 1.0d0/rij
+       rI = 1.0_dp/rij
        rI2 = rI*rI
        rI3 = rI2*rI
        rI4 = rI2*rI2
@@ -724,70 +724,70 @@ contains
        
        call calc_sw_fnc(rij, rl, ru, rlp, rup, s, sp, dsdr, dspdr)
            
-       frac1 = 0.25d0
-       frac2 = 0.75d0
+       frac1 = 0.25_dp
+       frac2 = 0.75_dp
        
-       wi = 2.0d0*(xi2-yi2)*zi*rI3
-       wj = 2.0d0*(xj2-yj2)*zj*rI3
+       wi = 2.0_dp*(xi2-yi2)*zi*rI3
+       wj = 2.0_dp*(xj2-yj2)*zj*rI3
        
        wi2 = wi*wi
        wj2 = wj*wj
 
        w = frac1*wi*wi2 + frac2*wi + frac1*wj*wj2 + frac2*wj + v0p
 
-       vpair = vpair + 0.5d0*(v0*s*w)
+       vpair = vpair + 0.5_dp*(v0*s*w)
        
        if (do_pot) then
 #ifdef IS_MPI 
-         pot_row(HB_POT,atom1) = pot_row(HB_POT,atom1) + 0.25d0*(v0*s*w)*sw
-         pot_col(HB_POT,atom2) = pot_col(HB_POT,atom2) + 0.25d0*(v0*s*w)*sw
+         pot_row(HB_POT,atom1) = pot_row(HB_POT,atom1) + 0.25_dp*(v0*s*w)*sw
+         pot_col(HB_POT,atom2) = pot_col(HB_POT,atom2) + 0.25_dp*(v0*s*w)*sw
 #else
-         pot = pot + 0.5d0*(v0*s*w)*sw
+         pot = pot + 0.5_dp*(v0*s*w)*sw
 #endif  
        endif
 
-       dwidx = ( 4.0d0*xi*zi*rI3 - 6.0d0*xi*zi*(xi2-yi2)*rI5 )
-       dwidy = ( -4.0d0*yi*zi*rI3 - 6.0d0*yi*zi*(xi2-yi2)*rI5 )
-       dwidz = ( 2.0d0*(xi2-yi2)*rI3 - 6.0d0*zi2*(xi2-yi2)*rI5 )
+       dwidx = ( 4.0_dp*xi*zi*rI3 - 6.0_dp*xi*zi*(xi2-yi2)*rI5 )
+       dwidy = ( -4.0_dp*yi*zi*rI3 - 6.0_dp*yi*zi*(xi2-yi2)*rI5 )
+       dwidz = ( 2.0_dp*(xi2-yi2)*rI3 - 6.0_dp*zi2*(xi2-yi2)*rI5 )
        
-       dwidx = frac1*3.0d0*wi2*dwidx + frac2*dwidx
-       dwidy = frac1*3.0d0*wi2*dwidy + frac2*dwidy
-       dwidz = frac1*3.0d0*wi2*dwidz + frac2*dwidz
+       dwidx = frac1*3.0_dp*wi2*dwidx + frac2*dwidx
+       dwidy = frac1*3.0_dp*wi2*dwidy + frac2*dwidy
+       dwidz = frac1*3.0_dp*wi2*dwidz + frac2*dwidz
 
-       dwjdx = ( 4.0d0*xj*zj*rI3  - 6.0d0*xj*zj*(xj2-yj2)*rI5 )
-       dwjdy = ( -4.0d0*yj*zj*rI3  - 6.0d0*yj*zj*(xj2-yj2)*rI5 )
-       dwjdz = ( 2.0d0*(xj2-yj2)*rI3  - 6.0d0*zj2*(xj2-yj2)*rI5 )
+       dwjdx = ( 4.0_dp*xj*zj*rI3  - 6.0_dp*xj*zj*(xj2-yj2)*rI5 )
+       dwjdy = ( -4.0_dp*yj*zj*rI3  - 6.0_dp*yj*zj*(xj2-yj2)*rI5 )
+       dwjdz = ( 2.0_dp*(xj2-yj2)*rI3  - 6.0_dp*zj2*(xj2-yj2)*rI5 )
 
-       dwjdx = frac1*3.0d0*wj2*dwjdx + frac2*dwjdx
-       dwjdy = frac1*3.0d0*wj2*dwjdy + frac2*dwjdy
-       dwjdz = frac1*3.0d0*wj2*dwjdz + frac2*dwjdz
+       dwjdx = frac1*3.0_dp*wj2*dwjdx + frac2*dwjdx
+       dwjdy = frac1*3.0_dp*wj2*dwjdy + frac2*dwjdy
+       dwjdz = frac1*3.0_dp*wj2*dwjdz + frac2*dwjdz
        
-       dwidux = ( 4.0d0*(yi*zi2 + 0.5d0*yi*(xi2-yi2))*rI3 )
-       dwiduy = ( 4.0d0*(xi*zi2 - 0.5d0*xi*(xi2-yi2))*rI3 )
-       dwiduz = ( -8.0d0*xi*yi*zi*rI3 )
+       dwidux = ( 4.0_dp*(yi*zi2 + 0.5_dp*yi*(xi2-yi2))*rI3 )
+       dwiduy = ( 4.0_dp*(xi*zi2 - 0.5_dp*xi*(xi2-yi2))*rI3 )
+       dwiduz = ( -8.0_dp*xi*yi*zi*rI3 )
 
-       dwidux = frac1*3.0d0*wi2*dwidux + frac2*dwidux
-       dwiduy = frac1*3.0d0*wi2*dwiduy + frac2*dwiduy
-       dwiduz = frac1*3.0d0*wi2*dwiduz + frac2*dwiduz
+       dwidux = frac1*3.0_dp*wi2*dwidux + frac2*dwidux
+       dwiduy = frac1*3.0_dp*wi2*dwiduy + frac2*dwiduy
+       dwiduz = frac1*3.0_dp*wi2*dwiduz + frac2*dwiduz
 
-       dwjdux = ( 4.0d0*(yj*zj2 + 0.5d0*yj*(xj2-yj2))*rI3 )
-       dwjduy = ( 4.0d0*(xj*zj2 - 0.5d0*xj*(xj2-yj2))*rI3 )
-       dwjduz = ( -8.0d0*xj*yj*zj*rI3 )
+       dwjdux = ( 4.0_dp*(yj*zj2 + 0.5_dp*yj*(xj2-yj2))*rI3 )
+       dwjduy = ( 4.0_dp*(xj*zj2 - 0.5_dp*xj*(xj2-yj2))*rI3 )
+       dwjduz = ( -8.0_dp*xj*yj*zj*rI3 )
 
-       dwjdux = frac1*3.0d0*wj2*dwjdux + frac2*dwjdux
-       dwjduy = frac1*3.0d0*wj2*dwjduy + frac2*dwjduy
-       dwjduz = frac1*3.0d0*wj2*dwjduz + frac2*dwjduz
+       dwjdux = frac1*3.0_dp*wj2*dwjdux + frac2*dwjdux
+       dwjduy = frac1*3.0_dp*wj2*dwjduy + frac2*dwjduy
+       dwjduz = frac1*3.0_dp*wj2*dwjduz + frac2*dwjduz
 
        ! do the torques first since they are easy:
        ! remember that these are still in the body fixed axes
 
-       txi = 0.5d0*(v0*s*dwidux)*sw
-       tyi = 0.5d0*(v0*s*dwiduy)*sw
-       tzi = 0.5d0*(v0*s*dwiduz)*sw
+       txi = 0.5_dp*(v0*s*dwidux)*sw
+       tyi = 0.5_dp*(v0*s*dwiduy)*sw
+       tzi = 0.5_dp*(v0*s*dwiduz)*sw
 
-       txj = 0.5d0*(v0*s*dwjdux)*sw
-       tyj = 0.5d0*(v0*s*dwjduy)*sw
-       tzj = 0.5d0*(v0*s*dwjduz)*sw
+       txj = 0.5_dp*(v0*s*dwjdux)*sw
+       tyj = 0.5_dp*(v0*s*dwjduy)*sw
+       tzj = 0.5_dp*(v0*s*dwjduz)*sw
  
        ! go back to lab frame using transpose of rotation matrix:
 
@@ -878,9 +878,9 @@ contains
 
        ! now assemble these with the radial-only terms:
 
-       fxradial = 0.5d0*(v0*dsdr*w*drdx + fxii + fxji)
-       fyradial = 0.5d0*(v0*dsdr*w*drdy + fyii + fyji)
-       fzradial = 0.5d0*(v0*dsdr*w*drdz + fzii + fzji)
+       fxradial = 0.5_dp*(v0*dsdr*w*drdx + fxii + fxji)
+       fyradial = 0.5_dp*(v0*dsdr*w*drdy + fyii + fyji)
+       fzradial = 0.5_dp*(v0*dsdr*w*drdz + fzii + fzji)
 
 #ifdef IS_MPI
        f_Row(1,atom1) = f_Row(1,atom1) + fxradial

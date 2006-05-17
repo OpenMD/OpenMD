@@ -89,7 +89,7 @@ contains
        return
     endif
 
-    if ((router .lt. 0.0d0) .or. (rinner .lt. 0.0d0))  then
+    if ((router .lt. 0.0_dp) .or. (rinner .lt. 0.0_dp))  then
        call handleError("set_switch", "one of the switches is negative!")
        return
     endif
@@ -109,16 +109,16 @@ contains
     do i = 1, np
        r2 = rin2 + dble(i-1)*dx
        xvals(i) = r2
-       yvals(i) = dsqrt(r2)
+       yvals(i) = sqrt(r2)
     enddo
 
     call newSpline(r2spline, xvals, yvals, .true.)
 
     if (functionType .eq. FIFTH_ORDER_POLY) then
-       c0 = 1.0d0
-       c3 = -10.0d0
-       c4 = 15.0d0
-       c5 = -6.0d0
+       c0 = 1.0_dp
+       c3 = -10.0_dp
+       c4 = 15.0_dp
+       c5 = -6.0_dp
 
        dx = (rout-rin) / dble(np-1)
     
@@ -131,7 +131,7 @@ contains
           rval3 = rval2*rval
           rval4 = rval2*rval2
           rval5 = rval3*rval2
-          rvaldi = 1.0d0/( rout - rin )
+          rvaldi = 1.0_dp/( rout - rin )
           rvaldi2 = rvaldi*rvaldi
           rvaldi3 = rvaldi2*rvaldi
           rvaldi4 = rvaldi2*rvaldi2
@@ -145,8 +145,8 @@ contains
     else
        rCubVals(1) = rin
        rCubVals(2) = rout
-       sCubVals(1) = 1.0d0
-       sCubVals(2) = 0.0d0      
+       sCubVals(1) = 1.0_dp
+       sCubVals(2) = 0.0_dp      
        call newSpline(switchSpline, rCubVals, sCubVals, .true.)
     endif
     
@@ -184,15 +184,15 @@ contains
     integer :: j
     real ( kind = dp ) :: a, b, c, d, dx
 
-    sw = 1.0d0
-    dswdr = 0.0d0
+    sw = 1.0_dp
+    dswdr = 0.0_dp
     in_switching_region = .false.
 
     if (r2.gt.rin2) then
        if (r2.gt.rout2) then
 
-          sw = 0.0d0
-          dswdr = 0.0d0
+          sw = 0.0_dp
+          dswdr = 0.0_dp
           return
           
        else         
@@ -203,8 +203,8 @@ contains
              dx = r - rin
              sw = switchSpline%y(1) + dx*(dx*(switchSpline%c(1) + &
                   dx*switchSpline%d(1)))
-             dswdr = dx*(2.0d0 * switchSpline%c(1) + &
-                  3.0d0 * dx * switchSpline%d(1))
+             dswdr = dx*(2.0_dp * switchSpline%c(1) + &
+                  3.0_dp * dx * switchSpline%d(1))
           else
              call lookupUniformSpline1d(switchSpline, r, sw, dswdr)
           endif

@@ -417,7 +417,7 @@ contains
     gpi = 1.0d0 / gp
     gmum = gmu*gpi
 
-    curlyE = 1.0d0/dsqrt(1.0d0 - Chi*Chi*u1dotu2*u1dotu2)
+    curlyE = 1.0d0/sqrt(1.0d0 - Chi*Chi*u1dotu2*u1dotu2)
     dcE = (curlyE**3)*Chi*Chi*u1dotu2
 
     dcEdu1x = dcE*ul2(1)
@@ -638,12 +638,12 @@ contains
     l2 = (gb_sigma*gb_l2b_ratio)**2
     d2 = gb_sigma**2
     lj2 = ljsigma**2
-    s0 = dsqrt(d2 + lj2)
+    s0 = sqrt(d2 + lj2)
 
     chioalpha2 = (l2 - d2)/(l2 + lj2)
 
-    eE = dsqrt(gb_eps*gb_eps_ratio*ljeps)
-    eS = dsqrt(gb_eps*ljeps)
+    eE = sqrt(gb_eps*gb_eps_ratio*ljeps)
+    eS = sqrt(gb_eps*ljeps)
     moom =  1.0d0 / gb_mu
     mum1 = gb_mu-1
     chipoalphap2 = 1 - (eE/eS)**moom
@@ -651,7 +651,7 @@ contains
     !! mess matches cleaver (eq 20)
     
     mess = 1-rdotu*rdotu*chioalpha2
-    sab = 1.0d0/dsqrt(mess)
+    sab = 1.0d0/sqrt(mess)
 
     dsabdct = s0*sab*sab*sab*rdotu*chioalpha2
        

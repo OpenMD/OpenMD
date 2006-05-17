@@ -11,25 +11,34 @@ subroutine setScreeningMethod(the_SM)
 end subroutine setScreeningMethod
 
 subroutine setElectrostaticCutoffRadius(the_rcut, the_rsw)
-  use electrostatic_module, ONLY : module_setECR => setElectrostaticCutoffRadius
+
   use definitions, ONLY : dp
+  use electrostatic_module, ONLY : module_setECR => setElectrostaticCutoffRadius
+
   real(kind=dp), intent(inout) :: the_rcut
   real(kind=dp), intent(inout) :: the_rsw
   call module_setECR(the_rcut, the_rsw)
+
 end subroutine setElectrostaticCutoffRadius
 
 subroutine setDampingAlpha(the_alpha)
-  use electrostatic_module, ONLY : module_setDA => setDampingAlpha
+
   use definitions, ONLY : dp
+  use electrostatic_module, ONLY : module_setDA => setDampingAlpha
+
   real(kind=dp),intent(inout) :: the_alpha
   call module_setDA(the_alpha)
+
 end subroutine setDampingAlpha
  
 subroutine setReactionFieldDielectric(the_dielectric)
-  use electrostatic_module, ONLY : module_setRFD => setReactionFieldDielectric
+
   use definitions, ONLY : dp
+  use electrostatic_module, ONLY : module_setRFD => setReactionFieldDielectric
+
   real(kind=dp),intent(inout) :: the_dielectric
   call module_setRFD(the_dielectric)
+
 end subroutine setReactionFieldDielectric
 
 subroutine newElectrostaticType(atp, status)
@@ -63,9 +72,9 @@ end subroutine newElectrostaticType
 
 subroutine setCharge(ident, charge, status)
 
+  use definitions, ONLY : dp
   use electrostatic_module, ONLY : module_setCharge => setCharge
 
-  integer, parameter :: DP = selected_real_kind(15)
   integer,intent(inout) :: ident
   real(kind=dp),intent(inout) :: charge
   integer,intent(inout) :: status
@@ -76,9 +85,9 @@ end subroutine setCharge
 
 subroutine setDipoleMoment(ident, dipole_moment, status)
 
+  use definitions, ONLY : dp
   use electrostatic_module, ONLY : module_setDipoleMoment => setDipoleMoment
 
-  integer, parameter :: DP = selected_real_kind(15)
   integer,intent(inout) :: ident
   real(kind=dp),intent(inout) :: dipole_moment
   integer,intent(inout) :: status
@@ -89,9 +98,9 @@ end subroutine setDipoleMoment
 
 subroutine setSplitDipoleDistance(ident, split_dipole_distance, status)
 
+  use definitions, ONLY : dp
   use electrostatic_module, ONLY : module_setSplitDipoleDistance => setSplitDipoleDistance
 
-  integer, parameter :: DP = selected_real_kind(15)
   integer,intent(inout) :: ident
   real(kind=dp),intent(inout) :: split_dipole_distance
   integer,intent(inout) :: status
@@ -102,9 +111,9 @@ end subroutine setSplitDipoleDistance
 
 subroutine setQuadrupoleMoments(ident, quadrupole_moments, status)
 
+  use definitions, ONLY : dp
   use electrostatic_module, ONLY : module_setQuadrupoleMoments => setQuadrupoleMoments
 
-  integer, parameter :: DP = selected_real_kind(15)
   integer,intent(inout) :: ident
   real(kind=dp),intent(inout),dimension(3) :: quadrupole_moments
   integer,intent(inout) :: status

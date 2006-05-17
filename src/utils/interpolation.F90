@@ -46,7 +46,7 @@
 !!  PURPOSE: Generic Spline interpolation routines. 
 !!
 !! @author Charles F. Vardeman II 
-!! @version $Id: interpolation.F90,v 1.7 2006-04-20 18:24:24 gezelter Exp $
+!! @version $Id: interpolation.F90,v 1.8 2006-05-17 15:37:15 gezelter Exp $
 
 
 module interpolation
@@ -224,7 +224,7 @@ contains
     cs%b(n) = cs%b(n-1) + h(n-1) * (2.0_dp*cs%c(n-1) + h(n-1)*3.0_dp*cs%d(n-1))
 
     if (isUniform) then
-       cs%dx_i = 1.0d0 / (x(2) - x(1))
+       cs%dx_i = 1.0_dp / (x(2) - x(1))
     endif
 
     return
@@ -310,7 +310,7 @@ contains
     !  Find the interval J = [ cs%x(J), cs%x(J+1) ] that contains 
     !  or is nearest to xval.
     
-    j = MAX(1, MIN(cs%n-1, idint((xval-cs%x(1)) * cs%dx_i) + 1))
+    j = MAX(1, MIN(cs%n-1, int((xval-cs%x(1)) * cs%dx_i) + 1))
     
     dx = xval - cs%x(j)
     yval = cs%y(j) + dx*(cs%b(j) + dx*(cs%c(j) + dx*cs%d(j)))
@@ -332,12 +332,12 @@ contains
     !  or is nearest to xval.
 
 
-    j = MAX(1, MIN(cs%n-1, idint((xval-cs%x(1)) * cs%dx_i) + 1))
+    j = MAX(1, MIN(cs%n-1, int((xval-cs%x(1)) * cs%dx_i) + 1))
     
     dx = xval - cs%x(j)
     yval = cs%y(j) + dx*(cs%b(j) + dx*(cs%c(j) + dx*cs%d(j)))
 
-    dydx = cs%b(j) + dx*(2.0d0 * cs%c(j) + 3.0d0 * dx * cs%d(j))
+    dydx = cs%b(j) + dx*(2.0_dp * cs%c(j) + 3.0_dp * dx * cs%d(j))
        
     return
   end subroutine lookupUniformSpline1d

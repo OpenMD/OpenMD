@@ -40,6 +40,7 @@
 !!
 
 module eam
+  use definitions
   use simulation
   use force_globals
   use status
@@ -53,8 +54,6 @@ module eam
   PRIVATE
 #define __FORTRAN90
 #include "UseTheForce/DarkSide/fInteractionMap.h"
-
-  INTEGER, PARAMETER :: DP = selected_real_kind(15)
 
   logical, save :: EAM_FF_initialized = .false.
   integer, save :: EAM_Mixing_Policy
@@ -644,7 +643,7 @@ contains
     !  Find the interval J = [ cs%x(J), cs%x(J+1) ] that contains 
     !  or is nearest to xval.
     
-    j = MAX(1, MIN(cs%n-1, idint((xval-cs%x(1)) * cs%dx_i) + 1))
+    j = MAX(1, MIN(cs%n-1, int((xval-cs%x(1)) * cs%dx_i) + 1))
     
     dx = xval - cs%x(j)
     yval = cs%y(j) + dx*(cs%b(j) + dx*(cs%c(j) + dx*cs%d(j)))
@@ -666,7 +665,7 @@ contains
     !  or is nearest to xval.
 
 
-    j = MAX(1, MIN(cs%n-1, idint((xval-cs%x(1)) * cs%dx_i) + 1))
+    j = MAX(1, MIN(cs%n-1, int((xval-cs%x(1)) * cs%dx_i) + 1))
     
     dx = xval - cs%x(j)
     yval = cs%y(j) + dx*(cs%b(j) + dx*(cs%c(j) + dx*cs%d(j)))

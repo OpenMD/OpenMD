@@ -123,7 +123,7 @@ module electrostatic_module
 
 #if defined(__IFC) || defined(__PGI)
 ! error function for ifc version > 7.
-  double precision, external :: derfc
+  real(kind=dp), external :: erfc
 #endif
   
   public :: setElectrostaticSummationMethod
@@ -215,7 +215,7 @@ contains
     do i = 1, np
        rval = rmin + dble(i-1)*dx
        xvals(i) = rval
-       yvals(i) = derfc(dampingAlpha*rval)
+       yvals(i) = erfc(dampingAlpha*rval)
     enddo
 
     call newSpline(f0spline, xvals, yvals, .true.)
@@ -456,7 +456,7 @@ contains
        constEXP = exp(-alpha2*defaultCutoff2)
        invRootPi = 0.56418958354775628695_dp
        alphaPi = 2.0_dp*dampingAlpha*invRootPi
-       f0c = derfc(dampingAlpha*defaultCutoff)
+       f0c = erfc(dampingAlpha*defaultCutoff)
        f1c = alphaPi*defaultCutoff*constEXP + f0c
        f2c = alphaPi*2.0_dp*alpha2*constEXP
        f3c = alphaPi*2.0_dp*alpha2*constEXP*defaultCutoff2*defaultCutoff

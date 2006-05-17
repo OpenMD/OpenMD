@@ -47,13 +47,13 @@
 !!  PURPOSE:
 !!
 !! @author Charles F. Vardeman II 
-!! @version $Id: suttonchen_interface.F90,v 1.2 2005-12-07 19:58:18 chuckv Exp $
+!! @version $Id: suttonchen_interface.F90,v 1.3 2006-05-17 15:37:15 gezelter Exp $
 
 
 
 subroutine newSCtype(c_ident,c,m,n,alpha,epsilon,status)
+  use definitions
   use suttonchen, ONLY : module_newSCtype => newSCtype
-  integer, parameter              :: DP = selected_real_kind(15)
   integer,intent(inout)           :: c_ident
   real (kind = dp ),intent(inout) :: c ! Density Scaling
   real (kind = dp ),intent(inout) :: m ! Density Exponent

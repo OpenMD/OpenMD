@@ -44,6 +44,7 @@
 
 
 module suttonchen
+  use definitions
   use simulation
   use force_globals
   use status
@@ -59,7 +60,6 @@ module suttonchen
 #define __FORTRAN90
 #include "UseTheForce/DarkSide/fInteractionMap.h"
 
-  INTEGER, PARAMETER :: DP = selected_real_kind(15)
   !! number of points for the spline approximations
   INTEGER, PARAMETER :: np = 3000
 
@@ -254,9 +254,9 @@ contains
           n = 0.5_dp*(n1+n2)
 
           dr = (rCut) / dble(np-1)
-          rvals(1) = 0.0d0
-          vvals(1) = 0.0d0
-          phivals(1) = 0.0d0
+          rvals(1) = 0.0_dp
+          vvals(1) = 0.0_dp
+          phivals(1) = 0.0_dp
 
           do k = 2, np
              r = dble(k-1)*dr

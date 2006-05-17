@@ -45,7 +45,7 @@
 
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: doForces.F90,v 1.80 2006-04-21 19:32:07 chrisfen Exp $, $Date: 2006-04-21 19:32:07 $, $Name: not supported by cvs2svn $, $Revision: 1.80 $
+!! @version $Id: doForces.F90,v 1.81 2006-05-17 15:37:14 gezelter Exp $, $Date: 2006-05-17 15:37:14 $, $Name: not supported by cvs2svn $, $Revision: 1.81 $
 
 
 module doForces
@@ -423,7 +423,7 @@ contains
     !! largest cutoff for any atypes present in this group.  We also
     !! create gtypes at this point.
     
-    tol = 1.0d-6
+    tol = 1.0e-6_dp
     nGroupTypesRow = 0
     nGroupTypesCol = 0
     do i = istart, iend       
@@ -962,7 +962,7 @@ contains
 
                    rCut = gtypeCutoffMap(groupToGtypeRow(i),groupToGtypeCol(j))%rCut
                    if (loop .eq. PAIR_LOOP) then
-                      vij = 0.0d0
+                      vij = 0.0_dp
                       fij(1) = 0.0_dp
                       fij(2) = 0.0_dp
                       fij(3) = 0.0_dp
@@ -1182,7 +1182,7 @@ contains
                 ! prevent overcounting of the skips
                 if (i.lt.j) then
                    call get_interatomic_vector(q(:,i), q(:,j), d_atm, ratmsq)
-                   rVal = dsqrt(ratmsq)
+                   rVal = sqrt(ratmsq)
                    call get_switch(ratmsq, sw, dswdr, rVal,in_switching_region)
 #ifdef IS_MPI
                    call rf_self_excludes(i, j, sw, eFrame, d_atm, rVal, &
@@ -1250,8 +1250,8 @@ contains
 
     r = sqrt(rijsq)
     
-    vpair = 0.0d0
-    fpair(1:3) = 0.0d0
+    vpair = 0.0_dp
+    fpair(1:3) = 0.0_dp
 
 #ifdef IS_MPI
     me_i = atid_row(i)
@@ -1394,9 +1394,9 @@ contains
           
           ! wrap the scaled coordinates
 
-          scaled(1) = scaled(1) - dnint(scaled(1))
-          scaled(2) = scaled(2) - dnint(scaled(2))
-          scaled(3) = scaled(3) - dnint(scaled(3))
+          scaled(1) = scaled(1) - anint(scaled(1), kind=dp)
+          scaled(2) = scaled(2) - anint(scaled(2), kind=dp)
+          scaled(3) = scaled(3) - anint(scaled(3), kind=dp)
 
           ! calc the wrapped real coordinates from the wrapped scaled 
           ! coordinates
@@ -1414,9 +1414,9 @@ contains
           
           ! wrap the scaled coordinates
           
-          scaled(1) = scaled(1) - dnint(scaled(1))
-          scaled(2) = scaled(2) - dnint(scaled(2))
-          scaled(3) = scaled(3) - dnint(scaled(3))
+          scaled(1) = scaled(1) - anint(scaled(1), kind=dp)
+          scaled(2) = scaled(2) - anint(scaled(2), kind=dp)
+          scaled(3) = scaled(3) - anint(scaled(3), kind=dp)
 
           ! calc the wrapped real coordinates from the wrapped scaled 
           ! coordinates

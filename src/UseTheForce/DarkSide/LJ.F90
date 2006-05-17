@@ -43,10 +43,11 @@
 !! Calculates Long Range forces Lennard-Jones interactions.
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: LJ.F90,v 1.24 2006-04-25 02:09:01 gezelter Exp $, $Date: 2006-04-25 02:09:01 $, $Name: not supported by cvs2svn $, $Revision: 1.24 $
+!! @version $Id: LJ.F90,v 1.25 2006-05-17 15:37:14 gezelter Exp $, $Date: 2006-05-17 15:37:14 $, $Name: not supported by cvs2svn $, $Revision: 1.25 $
 
 
 module lj
+  use definitions
   use atype_module
   use vector_class
   use simulation
@@ -61,8 +62,6 @@ module lj
   PRIVATE
 #define __FORTRAN90
 #include "UseTheForce/DarkSide/fInteractionMap.h"
-
-  integer, parameter :: DP = selected_real_kind(15)
 
   logical, save :: useGeometricDistanceMixing = .false.
   logical, save :: haveMixingMap = .false.
@@ -226,12 +225,12 @@ contains
 
           ! only the distance parameter uses different mixing policies
           if (useGeometricDistanceMixing) then
-             MixingMap(i,j)%sigma = dsqrt(s1 * s2)
+             MixingMap(i,j)%sigma = sqrt(s1 * s2)
           else
              MixingMap(i,j)%sigma = 0.5_dp * (s1 + s2)
           endif
           
-          MixingMap(i,j)%epsilon = dsqrt(e1 * e2)
+          MixingMap(i,j)%epsilon = sqrt(e1 * e2)
 
           MixingMap(i,j)%sigmai = 1.0_DP  / (MixingMap(i,j)%sigma)
 

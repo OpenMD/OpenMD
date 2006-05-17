@@ -518,16 +518,16 @@ contains
     drdxi = -d(1) / rij
     drdyi = -d(2) / rij
     drdzi = -d(3) / rij
-    drduxi = 0.0d0
-    drduyi = 0.0d0
-    drduzi = 0.0d0
+    drduxi = 0.0_dp
+    drduyi = 0.0_dp
+    drduzi = 0.0_dp
 
     drdxj = d(1) / rij
     drdyj = d(2) / rij
     drdzj = d(3) / rij
-    drduxj = 0.0d0
-    drduyj = 0.0d0
-    drduzj = 0.0d0
+    drduxj = 0.0_dp
+    drduyj = 0.0_dp
+    drduzj = 0.0_dp
 
     ! find the atom type id (atid) for each atom:
 #ifdef IS_MPI
@@ -549,24 +549,24 @@ contains
        sigma_i = ShapeMap%Shapes(st1)%sigma
        s_i = ShapeMap%Shapes(st1)%sigma
        eps_i = ShapeMap%Shapes(st1)%epsilon
-       dsigmaidx = 0.0d0
-       dsigmaidy = 0.0d0
-       dsigmaidz = 0.0d0
-       dsigmaidux = 0.0d0
-       dsigmaiduy = 0.0d0
-       dsigmaiduz = 0.0d0
-       dsidx = 0.0d0
-       dsidy = 0.0d0
-       dsidz = 0.0d0
-       dsidux = 0.0d0
-       dsiduy = 0.0d0
-       dsiduz = 0.0d0
-       depsidx = 0.0d0
-       depsidy = 0.0d0
-       depsidz = 0.0d0
-       depsidux = 0.0d0
-       depsiduy = 0.0d0
-       depsiduz = 0.0d0
+       dsigmaidx = 0.0_dp
+       dsigmaidy = 0.0_dp
+       dsigmaidz = 0.0_dp
+       dsigmaidux = 0.0_dp
+       dsigmaiduy = 0.0_dp
+       dsigmaiduz = 0.0_dp
+       dsidx = 0.0_dp
+       dsidy = 0.0_dp
+       dsidz = 0.0_dp
+       dsidux = 0.0_dp
+       dsiduy = 0.0_dp
+       dsiduz = 0.0_dp
+       depsidx = 0.0_dp
+       depsidy = 0.0_dp
+       depsidz = 0.0_dp
+       depsidux = 0.0_dp
+       depsiduy = 0.0_dp
+       depsiduz = 0.0_dp
     else
 
 #ifdef IS_MPI
@@ -599,45 +599,45 @@ contains
 
        dctidx = - zi * xi / r3
        dctidy = - zi * yi / r3
-       dctidz = 1.0d0 / rij - zi2 / r3
+       dctidz = 1.0_dp / rij - zi2 / r3
        dctidux = yi / rij ! - (zi * xi2) / r3
        dctiduy = -xi / rij !- (zi * yi2) / r3
-       dctiduz = 0.0d0 !zi / rij - (zi2 * zi) / r3
+       dctiduz = 0.0_dp !zi / rij - (zi2 * zi) / r3
 
        ! this is an attempt to try to truncate the singularity when
        ! sin(theta) is near 0.0:
 
        sti2 = 1.0_dp - cti*cti
-       if (dabs(sti2) .lt. 1.0d-12) then
-          proji = sqrt(rij * 1.0d-12)
-          dcpidx = 1.0d0 / proji
-          dcpidy = 0.0d0
+       if (abs(sti2) .lt. 1.0e-12_dp) then
+          proji = sqrt(rij * 1.0e-12_dp)
+          dcpidx = 1.0_dp / proji
+          dcpidy = 0.0_dp
           dcpidux = xi / proji
-          dcpiduy = 0.0d0
-          dspidx = 0.0d0
-          dspidy = 1.0d0 / proji
-          dspidux = 0.0d0
+          dcpiduy = 0.0_dp
+          dspidx = 0.0_dp
+          dspidy = 1.0_dp / proji
+          dspidux = 0.0_dp
           dspiduy = yi / proji
        else
           proji = sqrt(xi2 + yi2)
           proji3 = proji*proji*proji
-          dcpidx = 1.0d0 / proji - xi2 / proji3
+          dcpidx = 1.0_dp / proji - xi2 / proji3
           dcpidy = - xi * yi / proji3
           dcpidux = xi / proji - (xi2 * xi) / proji3
           dcpiduy = - (xi * yi2) / proji3
           dspidx = - xi * yi / proji3
-          dspidy = 1.0d0 / proji - yi2 / proji3
+          dspidy = 1.0_dp / proji - yi2 / proji3
           dspidux = - (yi * xi2) / proji3
           dspiduy = yi / proji - (yi2 * yi) / proji3
        endif
 
        cpi = xi / proji
-       dcpidz = 0.0d0
-       dcpiduz = 0.0d0
+       dcpidz = 0.0_dp
+       dcpiduz = 0.0_dp
 
        spi = yi / proji
-       dspidz = 0.0d0
-       dspiduz = 0.0d0
+       dspidz = 0.0_dp
+       dspiduz = 0.0_dp
 
        call Associated_Legendre(cti, ShapeMap%Shapes(st1)%bigM, &
             ShapeMap%Shapes(st1)%bigL, LMAX, &
@@ -648,27 +648,27 @@ contains
        call Orthogonal_Polynomial(cpi, ShapeMap%Shapes(st1)%bigM, MMAX, &
             CHEBYSHEV_UN, um_i, dum_i)
 
-       sigma_i = 0.0d0
-       s_i = 0.0d0
-       eps_i = 0.0d0
-       dsigmaidx = 0.0d0
-       dsigmaidy = 0.0d0
-       dsigmaidz = 0.0d0
-       dsigmaidux = 0.0d0
-       dsigmaiduy = 0.0d0
-       dsigmaiduz = 0.0d0
-       dsidx = 0.0d0
-       dsidy = 0.0d0
-       dsidz = 0.0d0
-       dsidux = 0.0d0
-       dsiduy = 0.0d0
-       dsiduz = 0.0d0
-       depsidx = 0.0d0
-       depsidy = 0.0d0
-       depsidz = 0.0d0
-       depsidux = 0.0d0
-       depsiduy = 0.0d0
-       depsiduz = 0.0d0
+       sigma_i = 0.0_dp
+       s_i = 0.0_dp
+       eps_i = 0.0_dp
+       dsigmaidx = 0.0_dp
+       dsigmaidy = 0.0_dp
+       dsigmaidz = 0.0_dp
+       dsigmaidux = 0.0_dp
+       dsigmaiduy = 0.0_dp
+       dsigmaiduz = 0.0_dp
+       dsidx = 0.0_dp
+       dsidy = 0.0_dp
+       dsidz = 0.0_dp
+       dsidux = 0.0_dp
+       dsiduy = 0.0_dp
+       dsiduz = 0.0_dp
+       depsidx = 0.0_dp
+       depsidy = 0.0_dp
+       depsidz = 0.0_dp
+       depsidux = 0.0_dp
+       depsiduy = 0.0_dp
+       depsiduz = 0.0_dp
 
        do lm = 1, ShapeMap%Shapes(st1)%nContactFuncs
           l = ShapeMap%Shapes(st1)%ContactFuncLValue(lm)
@@ -806,24 +806,24 @@ contains
        sigma_j = ShapeMap%Shapes(st2)%sigma
        s_j = ShapeMap%Shapes(st2)%sigma
        eps_j = ShapeMap%Shapes(st2)%epsilon
-       dsigmajdx = 0.0d0
-       dsigmajdy = 0.0d0
-       dsigmajdz = 0.0d0
-       dsigmajdux = 0.0d0
-       dsigmajduy = 0.0d0
-       dsigmajduz = 0.0d0
-       dsjdx = 0.0d0
-       dsjdy = 0.0d0
-       dsjdz = 0.0d0
-       dsjdux = 0.0d0
-       dsjduy = 0.0d0
-       dsjduz = 0.0d0
-       depsjdx = 0.0d0
-       depsjdy = 0.0d0
-       depsjdz = 0.0d0
-       depsjdux = 0.0d0
-       depsjduy = 0.0d0
-       depsjduz = 0.0d0
+       dsigmajdx = 0.0_dp
+       dsigmajdy = 0.0_dp
+       dsigmajdz = 0.0_dp
+       dsigmajdux = 0.0_dp
+       dsigmajduy = 0.0_dp
+       dsigmajduz = 0.0_dp
+       dsjdx = 0.0_dp
+       dsjdy = 0.0_dp
+       dsjdz = 0.0_dp
+       dsjdux = 0.0_dp
+       dsjduy = 0.0_dp
+       dsjduz = 0.0_dp
+       depsjdx = 0.0_dp
+       depsjdy = 0.0_dp
+       depsjdz = 0.0_dp
+       depsjdux = 0.0_dp
+       depsjduy = 0.0_dp
+       depsjduz = 0.0_dp
     else
 
 #ifdef IS_MPI
@@ -857,45 +857,45 @@ contains
 
        dctjdx = - zj * xj / r3
        dctjdy = - zj * yj / r3
-       dctjdz = 1.0d0 / rij - zj2 / r3
+       dctjdz = 1.0_dp / rij - zj2 / r3
        dctjdux = yj / rij !- (zi * xj2) / r3
        dctjduy = -xj / rij !- (zj * yj2) / r3
-       dctjduz = 0.0d0 !zj / rij - (zj2 * zj) / r3
+       dctjduz = 0.0_dp !zj / rij - (zj2 * zj) / r3
 
        ! this is an attempt to try to truncate the singularity when
        ! sin(theta) is near 0.0:
 
        stj2 = 1.0_dp - ctj*ctj
-       if (dabs(stj2) .lt. 1.0d-12) then
-          projj = sqrt(rij * 1.0d-12)
-          dcpjdx = 1.0d0 / projj 
-          dcpjdy = 0.0d0
+       if (abs(stj2) .lt. 1.0e-12_dp) then
+          projj = sqrt(rij * 1.0e-12_dp)
+          dcpjdx = 1.0_dp / projj 
+          dcpjdy = 0.0_dp
           dcpjdux = xj / projj
-          dcpjduy = 0.0d0
-          dspjdx = 0.0d0
-          dspjdy = 1.0d0 / projj
-          dspjdux = 0.0d0
+          dcpjduy = 0.0_dp
+          dspjdx = 0.0_dp
+          dspjdy = 1.0_dp / projj
+          dspjdux = 0.0_dp
           dspjduy = yj / projj
        else
           projj = sqrt(xj2 + yj2)
           projj3 = projj*projj*projj
-          dcpjdx = 1.0d0 / projj - xj2 / projj3
+          dcpjdx = 1.0_dp / projj - xj2 / projj3
           dcpjdy = - xj * yj / projj3
           dcpjdux = xj / projj - (xj2 * xj) / projj3
           dcpjduy = - (xj * yj2) / projj3
           dspjdx = - xj * yj / projj3
-          dspjdy = 1.0d0 / projj - yj2 / projj3
+          dspjdy = 1.0_dp / projj - yj2 / projj3
           dspjdux = - (yj * xj2) / projj3
           dspjduy = yj / projj - (yj2 * yj) / projj3
        endif
 
        cpj = xj / projj
-       dcpjdz = 0.0d0
-       dcpjduz = 0.0d0
+       dcpjdz = 0.0_dp
+       dcpjduz = 0.0_dp
 
        spj = yj / projj
-       dspjdz = 0.0d0
-       dspjduz = 0.0d0
+       dspjdz = 0.0_dp
+       dspjduz = 0.0_dp
 
 
 !       write(*,*) 'dcpdu = ' ,dcpidux, dcpiduy, dcpiduz
@@ -909,27 +909,27 @@ contains
        call Orthogonal_Polynomial(cpj, ShapeMap%Shapes(st2)%bigM, MMAX, &
             CHEBYSHEV_UN, um_j, dum_j)
 
-       sigma_j = 0.0d0
-       s_j = 0.0d0
-       eps_j = 0.0d0
-       dsigmajdx = 0.0d0
-       dsigmajdy = 0.0d0
-       dsigmajdz = 0.0d0
-       dsigmajdux = 0.0d0
-       dsigmajduy = 0.0d0
-       dsigmajduz = 0.0d0
-       dsjdx = 0.0d0
-       dsjdy = 0.0d0
-       dsjdz = 0.0d0
-       dsjdux = 0.0d0
-       dsjduy = 0.0d0
-       dsjduz = 0.0d0
-       depsjdx = 0.0d0
-       depsjdy = 0.0d0
-       depsjdz = 0.0d0
-       depsjdux = 0.0d0
-       depsjduy = 0.0d0
-       depsjduz = 0.0d0
+       sigma_j = 0.0_dp
+       s_j = 0.0_dp
+       eps_j = 0.0_dp
+       dsigmajdx = 0.0_dp
+       dsigmajdy = 0.0_dp
+       dsigmajdz = 0.0_dp
+       dsigmajdux = 0.0_dp
+       dsigmajduy = 0.0_dp
+       dsigmajduz = 0.0_dp
+       dsjdx = 0.0_dp
+       dsjdy = 0.0_dp
+       dsjdz = 0.0_dp
+       dsjdux = 0.0_dp
+       dsjduy = 0.0_dp
+       dsjduz = 0.0_dp
+       depsjdx = 0.0_dp
+       depsjdy = 0.0_dp
+       depsjdz = 0.0_dp
+       depsjdux = 0.0_dp
+       depsjduy = 0.0_dp
+       depsjduz = 0.0_dp
 
        do lm = 1, ShapeMap%Shapes(st2)%nContactFuncs
           l = ShapeMap%Shapes(st2)%ContactFuncLValue(lm)
@@ -1099,19 +1099,19 @@ contains
 !!$    write(*,*) 'dsidu = ', dsidux, dsiduy, dsiduz
 !!$    write(*,*) 'dsigidu = ', dsigmaidux, dsigmaiduy, dsigmaiduz
 !!$    write(*,*) sigma_j, ' is sigma j; ', s_j, ' is s j; ', eps_j, ' is eps j'
-    depsdxi = eps_j * depsidx / (2.0d0 * eps)
-    depsdyi = eps_j * depsidy / (2.0d0 * eps)
-    depsdzi = eps_j * depsidz / (2.0d0 * eps)
-    depsduxi = eps_j * depsidux / (2.0d0 * eps)
-    depsduyi = eps_j * depsiduy / (2.0d0 * eps)
-    depsduzi = eps_j * depsiduz / (2.0d0 * eps)
+    depsdxi = eps_j * depsidx / (2.0_dp * eps)
+    depsdyi = eps_j * depsidy / (2.0_dp * eps)
+    depsdzi = eps_j * depsidz / (2.0_dp * eps)
+    depsduxi = eps_j * depsidux / (2.0_dp * eps)
+    depsduyi = eps_j * depsiduy / (2.0_dp * eps)
+    depsduzi = eps_j * depsiduz / (2.0_dp * eps)
 
-    depsdxj = eps_i * depsjdx / (2.0d0 * eps)
-    depsdyj = eps_i * depsjdy / (2.0d0 * eps)
-    depsdzj = eps_i * depsjdz / (2.0d0 * eps)
-    depsduxj = eps_i * depsjdux / (2.0d0 * eps)
-    depsduyj = eps_i * depsjduy / (2.0d0 * eps)
-    depsduzj = eps_i * depsjduz / (2.0d0 * eps)
+    depsdxj = eps_i * depsjdx / (2.0_dp * eps)
+    depsdyj = eps_i * depsjdy / (2.0_dp * eps)
+    depsdzj = eps_i * depsjdz / (2.0_dp * eps)
+    depsduxj = eps_i * depsjdux / (2.0_dp * eps)
+    depsduyj = eps_i * depsjduy / (2.0_dp * eps)
+    depsduzj = eps_i * depsjduz / (2.0_dp * eps)
 
 !!$    write(*,*) 'depsidu = ', depsidux, depsiduy, depsiduz
 
@@ -1147,13 +1147,13 @@ contains
     rt12 = rt6*rt6
     rt126 = rt12 - rt6
 
-    pot_temp = 4.0d0 * eps * rt126
+    pot_temp = 4.0_dp * eps * rt126
 
     vpair = vpair + pot_temp
     if (do_pot) then
 #ifdef IS_MPI
-       pot_row(VDW_POT,atom1) = pot_row(VDW_POT,atom1) + 0.5d0*pot_temp*sw
-       pot_col(VDW_POT,atom2) = pot_col(VDW_POT,atom2) + 0.5d0*pot_temp*sw
+       pot_row(VDW_POT,atom1) = pot_row(VDW_POT,atom1) + 0.5_dp*pot_temp*sw
+       pot_col(VDW_POT,atom2) = pot_col(VDW_POT,atom2) + 0.5_dp*pot_temp*sw
 #else
        pot = pot + pot_temp*sw
 #endif
@@ -1161,30 +1161,30 @@ contains
 
 !!$    write(*,*) 'drtdu, depsdu = ', drtduxi, depsduxi
 
-    dvdxi = 24.0d0*eps*(2.0d0*rt11 - rt5)*drtdxi + 4.0d0*depsdxi*rt126
-    dvdyi = 24.0d0*eps*(2.0d0*rt11 - rt5)*drtdyi + 4.0d0*depsdyi*rt126
-    dvdzi = 24.0d0*eps*(2.0d0*rt11 - rt5)*drtdzi + 4.0d0*depsdzi*rt126
-    dvduxi = 24.0d0*eps*(2.0d0*rt11 - rt5)*drtduxi + 4.0d0*depsduxi*rt126
-    dvduyi = 24.0d0*eps*(2.0d0*rt11 - rt5)*drtduyi + 4.0d0*depsduyi*rt126
-    dvduzi = 24.0d0*eps*(2.0d0*rt11 - rt5)*drtduzi + 4.0d0*depsduzi*rt126
+    dvdxi = 24.0_dp*eps*(2.0_dp*rt11 - rt5)*drtdxi + 4.0_dp*depsdxi*rt126
+    dvdyi = 24.0_dp*eps*(2.0_dp*rt11 - rt5)*drtdyi + 4.0_dp*depsdyi*rt126
+    dvdzi = 24.0_dp*eps*(2.0_dp*rt11 - rt5)*drtdzi + 4.0_dp*depsdzi*rt126
+    dvduxi = 24.0_dp*eps*(2.0_dp*rt11 - rt5)*drtduxi + 4.0_dp*depsduxi*rt126
+    dvduyi = 24.0_dp*eps*(2.0_dp*rt11 - rt5)*drtduyi + 4.0_dp*depsduyi*rt126
+    dvduzi = 24.0_dp*eps*(2.0_dp*rt11 - rt5)*drtduzi + 4.0_dp*depsduzi*rt126
 
-    dvdxj = 24.0d0*eps*(2.0d0*rt11 - rt5)*drtdxj + 4.0d0*depsdxj*rt126
-    dvdyj = 24.0d0*eps*(2.0d0*rt11 - rt5)*drtdyj + 4.0d0*depsdyj*rt126
-    dvdzj = 24.0d0*eps*(2.0d0*rt11 - rt5)*drtdzj + 4.0d0*depsdzj*rt126
-    dvduxj = 24.0d0*eps*(2.0d0*rt11 - rt5)*drtduxj + 4.0d0*depsduxj*rt126
-    dvduyj = 24.0d0*eps*(2.0d0*rt11 - rt5)*drtduyj + 4.0d0*depsduyj*rt126
-    dvduzj = 24.0d0*eps*(2.0d0*rt11 - rt5)*drtduzj + 4.0d0*depsduzj*rt126
+    dvdxj = 24.0_dp*eps*(2.0_dp*rt11 - rt5)*drtdxj + 4.0_dp*depsdxj*rt126
+    dvdyj = 24.0_dp*eps*(2.0_dp*rt11 - rt5)*drtdyj + 4.0_dp*depsdyj*rt126
+    dvdzj = 24.0_dp*eps*(2.0_dp*rt11 - rt5)*drtdzj + 4.0_dp*depsdzj*rt126
+    dvduxj = 24.0_dp*eps*(2.0_dp*rt11 - rt5)*drtduxj + 4.0_dp*depsduxj*rt126
+    dvduyj = 24.0_dp*eps*(2.0_dp*rt11 - rt5)*drtduyj + 4.0_dp*depsduyj*rt126
+    dvduzj = 24.0_dp*eps*(2.0_dp*rt11 - rt5)*drtduzj + 4.0_dp*depsduzj*rt126
 !!$    write(*,*) 'drtduxi = ', drtduxi, ' depsduxi = ', depsduxi
     ! do the torques first since they are easy:
     ! remember that these are still in the body fixed axes
 
-    txi = 0.0d0
-    tyi = 0.0d0
-    tzi = 0.0d0
+    txi = 0.0_dp
+    tyi = 0.0_dp
+    tzi = 0.0_dp
 
-    txj = 0.0d0
-    tyj = 0.0d0
-    tzj = 0.0d0
+    txj = 0.0_dp
+    tyj = 0.0_dp
+    tzj = 0.0_dp
 
     txi = (dvduyi - dvduzi) * sw
     tyi = (dvduzi - dvduxi) * sw
@@ -1343,20 +1343,20 @@ contains
     end DO
 
     ! start with 0,0:
-    PLM(0,0) = 1.0D0
+    PLM(0,0) = 1.0_DP
 
     ! x = +/- 1 functions are easy:
-    IF (abs(X).EQ.1.0D0) THEN
+    IF (abs(X).EQ.1.0_DP) THEN
        DO I = 1, m
           PLM(0, I) = X**I
-          DLM(0, I) = 0.5D0*I*(I+1.0D0)*X**(I+1)
+          DLM(0, I) = 0.5_DP*I*(I+1.0_DP)*X**(I+1)
        end DO
        DO J = 1, m
           DO I = 1, l
              IF (I.EQ.1) THEN
                 DLM(I, J) = 1.0D+300
              ELSE IF (I.EQ.2) THEN
-                DLM(I, J) = -0.25D0*(J+2)*(J+1)*J*(J-1)*X**(J+1)
+                DLM(I, J) = -0.25_DP*(J+2)*(J+1)*J*(J-1)*X**(J+1)
              ENDIF
           end DO
        end DO
@@ -1364,33 +1364,33 @@ contains
     ENDIF
 
     LS = 1
-    IF (abs(X).GT.1.0D0) LS = -1
-    XQ = sqrt(LS*(1.0D0-X*X))
-    XS = LS*(1.0D0-X*X)
+    IF (abs(X).GT.1.0_DP) LS = -1
+    XQ = sqrt(LS*(1.0_DP-X*X))
+    XS = LS*(1.0_DP-X*X)
 
     DO I = 1, l
-       PLM(I, I) = -LS*(2.0D0*I-1.0D0)*XQ*PLM(I-1, I-1)
+       PLM(I, I) = -LS*(2.0_DP*I-1.0_DP)*XQ*PLM(I-1, I-1)
     enddo
 
     DO I = 0, l
-       PLM(I, I+1)=(2.0D0*I+1.0D0)*X*PLM(I, I)
+       PLM(I, I+1)=(2.0_DP*I+1.0_DP)*X*PLM(I, I)
     enddo
 
     DO I = 0, l
        DO J = I+2, m
-          PLM(I, J)=((2.0D0*J-1.0D0)*X*PLM(I,J-1) - &
-               (I+J-1.0D0)*PLM(I,J-2))/(J-I)
+          PLM(I, J)=((2.0_DP*J-1.0_DP)*X*PLM(I,J-1) - &
+               (I+J-1.0_DP)*PLM(I,J-2))/(J-I)
        end DO
     end DO
 
-    DLM(0, 0)=0.0D0
+    DLM(0, 0)=0.0_DP
     DO J = 1, m
        DLM(0, J)=LS*J*(PLM(0,J-1)-X*PLM(0,J))/XS
     end DO
 
     DO I = 1, l
        DO J = I, m
-          DLM(I,J) = LS*I*X*PLM(I, J)/XS + (J+I)*(J-I+1.0D0)/XQ*PLM(I-1, J)
+          DLM(I,J) = LS*I*X*PLM(I, J)/XS + (J+I)*(J-I+1.0_DP)/XQ*PLM(I-1, J)
        end DO
     end DO
 
@@ -1427,35 +1427,35 @@ contains
     real(kind=8) :: a, b, c, y0, y1, dy0, dy1, yn, dyn
     integer :: k
 
-    A = 2.0D0
-    B = 0.0D0
-    C = 1.0D0
-    Y0 = 1.0D0
-    Y1 = 2.0D0*X
-    DY0 = 0.0D0
-    DY1 = 2.0D0
-    PL(0) = 1.0D0
-    PL(1) = 2.0D0*X
-    DPL(0) = 0.0D0
-    DPL(1) = 2.0D0
+    A = 2.0_DP
+    B = 0.0_DP
+    C = 1.0_DP
+    Y0 = 1.0_DP
+    Y1 = 2.0_DP*X
+    DY0 = 0.0_DP
+    DY1 = 2.0_DP
+    PL(0) = 1.0_DP
+    PL(1) = 2.0_DP*X
+    DPL(0) = 0.0_DP
+    DPL(1) = 2.0_DP
     IF (function_type.EQ.CHEBYSHEV_TN) THEN
        Y1 = X
-       DY1 = 1.0D0
+       DY1 = 1.0_DP
        PL(1) = X
-       DPL(1) = 1.0D0
+       DPL(1) = 1.0_DP
     ELSE IF (function_type.EQ.LAGUERRE) THEN
-       Y1 = 1.0D0-X
-       DY1 = -1.0D0
-       PL(1) = 1.0D0-X
-       DPL(1) = -1.0D0
+       Y1 = 1.0_DP-X
+       DY1 = -1.0_DP
+       PL(1) = 1.0_DP-X
+       DPL(1) = -1.0_DP
     ENDIF
     DO K = 2, m
        IF (function_type.EQ.LAGUERRE) THEN
-          A = -1.0D0/K
-          B = 2.0D0+A
-          C = 1.0D0+A
+          A = -1.0_DP/K
+          B = 2.0_DP+A
+          C = 1.0_DP+A
        ELSE IF (function_type.EQ.HERMITE) THEN
-          C = 2.0D0*(K-1.0D0)
+          C = 2.0_DP*(K-1.0_DP)
        ENDIF
        YN = (A*X+B)*Y1-C*Y0
        DYN = A*Y1+(A*X+B)*DY1-C*DY0
