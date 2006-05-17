@@ -8,6 +8,9 @@
 /* The file extension used for shared modules */
 #undef MODULE_EXTENSION
 
+/* Is defined if OOPSE should be compiled with single precision arithmetic. */
+#undef SINGLE_PRECISION
+
 /* The CGAL version number. */
 #undef CGAL_VERSION
 

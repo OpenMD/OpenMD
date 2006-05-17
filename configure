@@ -871,6 +871,8 @@ Optional Features:
   --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
   --enable-oopse-home=DIR      define oopse home dir PREFIX/oopse
   --enable-debug          Compile OOPSE in debug mode
+  --enable-single         compile OOPSE in single precision
+  --enable-float          synonym for --enable-single
   --enable-doxygen        enable documentation generation with doxygen (auto)
   --enable-dot            use 'dot' to generate graphs in doxygen (auto)
   --enable-html-docs      enable HTML generation with doxygen (yes)
@@ -1623,6 +1625,29 @@ _ACEOF
   msg="$msg, debug mode"
 fi
 
+
+# Check whether --enable-single or --disable-single was given.
+if test "${enable_single+set}" = set; then
+  enableval="$enable_single"
+  ok=$enableval
+else
+  ok=no
+fi;
+# Check whether --enable-float or --disable-float was given.
+if test "${enable_float+set}" = set; then
+  enableval="$enable_float"
+  ok=$enableval
+fi;
+if test "$ok" = "yes"; then
+
+cat >>confdefs.h <<\_ACEOF
+#define SINGLE_PRECISION 1
+_ACEOF
+
+        PRECISION=s
+else
+        PRECISION=d
+fi
 
 # Checks for programs.
 ac_ext=cc
@@ -2785,7 +2810,7 @@ fi
 
 
 # Provide some information about the compiler.
-echo "$as_me:2788:" \
+echo "$as_me:2813:" \
      "checking for Fortran compiler version" >&5
 ac_compiler=`set X $ac_compile; echo $2`
 { (eval echo "$as_me:$LINENO: \"$ac_compiler --version </dev/null >&5\"") >&5
@@ -4033,7 +4058,7 @@ _ACEOF
 # flags.
 ac_save_FFLAGS=$FCFLAGS
 FCFLAGS="$FCFLAGS $ac_verb"
-(eval echo $as_me:4036: \"$ac_link\") >&5
+(eval echo $as_me:4061: \"$ac_link\") >&5
 ac_fc_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
 echo "$ac_fc_v_output" >&5
 FCFLAGS=$ac_save_FFLAGS
@@ -4111,7 +4136,7 @@ _ACEOF
 # flags.
 ac_save_FFLAGS=$FCFLAGS
 FCFLAGS="$FCFLAGS $ac_cv_prog_fc_v"
-(eval echo $as_me:4114: \"$ac_link\") >&5
+(eval echo $as_me:4139: \"$ac_link\") >&5
 ac_fc_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
 echo "$ac_fc_v_output" >&5
 FCFLAGS=$ac_save_FFLAGS
@@ -4847,7 +4872,7 @@ _ACEOF
 # flags.
 ac_save_FFLAGS=$FCFLAGS
 FCFLAGS="$FCFLAGS $ac_verb"
-(eval echo $as_me:4850: \"$ac_link\") >&5
+(eval echo $as_me:4875: \"$ac_link\") >&5
 ac_fc_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
 echo "$ac_fc_v_output" >&5
 FCFLAGS=$ac_save_FFLAGS
@@ -4925,7 +4950,7 @@ _ACEOF
 # flags.
 ac_save_FFLAGS=$FCFLAGS
 FCFLAGS="$FCFLAGS $ac_cv_prog_fc_v"
-(eval echo $as_me:4928: \"$ac_link\") >&5
+(eval echo $as_me:4953: \"$ac_link\") >&5
 ac_fc_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
 echo "$ac_fc_v_output" >&5
 FCFLAGS=$ac_save_FFLAGS
