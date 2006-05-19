@@ -606,8 +606,7 @@ namespace oopse {
 	      }
 	    }
 
-	    sprintf(writeLine, "\n");
-	    os << writeLine;
+	    os << writeLine << "\n";
 
 	  } //end for(iter = integrableObject.begin())
 	}
