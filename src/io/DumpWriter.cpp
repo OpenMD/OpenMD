@@ -483,8 +483,7 @@ namespace oopse {
 	      }
 	    }
 
-	    sprintf(writeLine, "\n");
-	    os << writeLine;
+	    os << writeLine << "\n";
 
 	  } // end for(int l =0)
 
