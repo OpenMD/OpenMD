@@ -96,24 +96,24 @@ Samples = \
 	samples/zcons 
 
 IncludeDirs = \
-	@ZLIB_INC_DIR@ \
+	@MPI_INC_DIR@ \
 	@FFTW_INC_DIR@ \
 	@CGAL_INC_DIR@ \
-	@MPI_INC_DIR@ 
+	@ZLIB_INC_DIR@ 
 
 LibraryDirs = \
-	@ZLIB_LIB_DIR@ \
+	@MPI_LIB_DIR@ \
 	@FFTW_LIB_DIR@ \
 	@CGAL_LIB_DIR@ \
-	@MPI_LIB_DIR@ 
+	@ZLIB_LIB_DIR@ 
 
 Libraries = \
 	@LIBS@ \
-	@ZLIB@ \
+	@MPI_LIB@ \
+	@MPI_F90_LIB@ \
 	@FFTW_LIBS@ \
 	@CGAL_LIBS@ \
-	@MPI_LIB@ \
-	@MPI_F90_LIB@ 
+	@ZLIB@ 
 
 OopseHome       = @OOPSE_HOME@
 ForceParamDir   = $(OopseHome)/share/forceFields
@@ -398,10 +398,10 @@ JavaArchiverOptions    =
 JniOptions             =
 RmiOptions             = -d $(TargetDir) -classpath $(ClassPath) \
 			 -sourcepath $(SourceDir)
-COptions               = $(FrcDeclare) $(SingleDeclare) @CPPFLAGS@ @CFLAGS@
-CParallelOptions       = $(FrcDeclare) $(SingleDeclare) $(ParallelDeclare) @CPPFLAGS@ @CFLAGS@
-CppOptions             = $(FrcDeclare) $(SingleDeclare) @CPPFLAGS@ @CXXFLAGS@
-CppParallelOptions     = $(FrcDeclare) $(SingleDeclare) $(ParallelDeclare) @CPPFLAGS@ @CXXFLAGS@
+COptions               = $(FrcDeclare) $(SingleDeclare) @CFLAGS@
+CParallelOptions       = $(FrcDeclare) $(SingleDeclare) $(ParallelDeclare) @CFLAGS@
+CppOptions             = $(FrcDeclare) $(SingleDeclare) @CXXFLAGS@
+CppParallelOptions     = $(FrcDeclare) $(SingleDeclare) $(ParallelDeclare) @CXXFLAGS@
 ifeq "$(UseSingle)" "yes"
 FortranOptions         =  @FCFLAGS@ @MODDIRFLAG@$(SourceDir) @MODDIRFLAG@$(TargetDir) @PREPDEFFLAG@$(SingleDeclare) @FCFLAGS_SRCEXT@
 FortranParallelOptions =  @FCFLAGS@ @MODDIRFLAG@$(SourceDir) @MODDIRFLAG@$(ParallelTargetDir) @PREPDEFFLAG@$(SingleDeclare) @PREPDEFFLAG@$(ParallelDeclare) @FCFLAGS_SRCEXT@ 
