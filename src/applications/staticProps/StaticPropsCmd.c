@@ -120,9 +120,9 @@ cmdline_parser_print_help (void)
   printf("%s\n","  -i, --input=filename          input dump file");
   printf("%s\n","  -o, --output=filename         output file name");
   printf("%s\n","  -n, --step=INT                process every n frame  (default=`1')");
-  printf("%s\n","  -x,  --nbins_x=INT              number of bins in x axis  (default=`100')");
-  printf("%s\n","  -y , --nbins_y=INT              number of bins in y axis  (default=`100')");
-   printf("%s\n","  -r, --nrbins=INT              number of bins for distance  (default=`100')");
+  printf("%s\n","  -r, --nrbins=INT              number of bins for distance  (default=`100')");
+  printf("%s\n","  -x, --nbins_x=INT             number of bins in x axis  (default=`100')");
+  printf("%s\n","  -y, --nbins_y=INT             number of bins in y axis  (default=`100')");
   printf("%s\n","  -a, --nanglebins=INT          number of bins for cos(angle)  (default=`50')");
   printf("%s\n","  -l, --length=DOUBLE           maximum length (Defaults to 1/2 smallest length \n                                  of first frame)");
   printf("%s\n","  -z, --zoffset=DOUBLE          Where to set the zero for the slab_density \n                                  calculation  (default=`0')");
@@ -143,7 +143,7 @@ cmdline_parser_print_help (void)
   printf("%s\n","      --scd                     scd order parameter(either --sele1, --sele2, \n                                  --sele3 are specified or --molname, --begin, \n                                  --end are specified)");
   printf("%s\n","      --density                 density plot (--sele1 must be specified)");
   printf("%s\n","      --slab_density            slab density (--sele1 must be specified)");
-  printf("%s\n","      --hxy            hxy (--sele1 must be specified)");
+  printf("%s\n","      --hxy                     hxy (--sele1 must be specified)");
   
 }
 
@@ -188,7 +188,7 @@ cmdline_parser_release (struct gengetopt_args_info *args_info)
       free (args_info->nrbins_orig); /* free previous argument */
       args_info->nrbins_orig = 0;
     }
-    if (args_info->nbins_x_orig)
+  if (args_info->nbins_x_orig)
     {
       free (args_info->nbins_x_orig); /* free previous argument */
       args_info->nbins_x_orig = 0;
@@ -198,7 +198,6 @@ cmdline_parser_release (struct gengetopt_args_info *args_info)
       free (args_info->nbins_y_orig); /* free previous argument */
       args_info->nbins_y_orig = 0;
     }
-	
   if (args_info->nanglebins_orig)
     {
       free (args_info->nanglebins_orig); /* free previous argument */
@@ -440,6 +439,7 @@ cmdline_parser_file_save(const char *filename, struct gengetopt_args_info *args_
   if (args_info->hxy_given) {
     fprintf(outfile, "%s\n", "hxy");
   }
+  
   fclose (outfile);
 
   i = EXIT_SUCCESS;
@@ -487,7 +487,7 @@ reset_group_staticProps(struct gengetopt_args_info *args_info)
   args_info->scd_given = 0 ;
   args_info->density_given = 0 ;
   args_info->slab_density_given = 0 ;
-  args_info->hxy_given= 0 ;
+  args_info->hxy_given = 0 ;
 
   args_info->staticProps_group_counter = 0;
 }
@@ -581,6 +581,8 @@ cmdline_parser_internal (int argc, char * const *argv, struct gengetopt_args_inf
         { "output",	1, NULL, 'o' },
         { "step",	1, NULL, 'n' },
         { "nrbins",	1, NULL, 'r' },
+        { "nbins_x",	1, NULL, 'x' },
+        { "nbins_y",	1, NULL, 'y' },
         { "nanglebins",	1, NULL, 'a' },
         { "length",	1, NULL, 'l' },
         { "zoffset",	1, NULL, 'z' },
@@ -605,7 +607,7 @@ cmdline_parser_internal (int argc, char * const *argv, struct gengetopt_args_inf
       };
 
       stop_char = 0;
-      c = getopt_long (argc, argv, "hVi:o:n:r:a:l:z:", long_options, &option_index);
+      c = getopt_long (argc, argv, "hVi:o:n:r:x:y:a:l:z:", long_options, &option_index);
 
       if (c == -1) break;	/* Exit from `while (1)' loop.  */
 
@@ -700,7 +702,7 @@ cmdline_parser_internal (int argc, char * const *argv, struct gengetopt_args_inf
         case 'x':	/* number of bins in x axis.  */
           if (local_args_info.nbins_x_given)
             {
-              fprintf (stderr, "%s: `--nbins_x' (`-r') option given more than once%s\n", argv[0], (additional_error ? additional_error : ""));
+              fprintf (stderr, "%s: `--nbins_x' (`-x') option given more than once%s\n", argv[0], (additional_error ? additional_error : ""));
               goto failure;
             }
           if (args_info->nbins_x_given && ! override)
@@ -720,7 +722,7 @@ cmdline_parser_internal (int argc, char * const *argv, struct gengetopt_args_inf
         case 'y':	/* number of bins in y axis.  */
           if (local_args_info.nbins_y_given)
             {
-              fprintf (stderr, "%s: `--nbins_y' (`-r') option given more than once%s\n", argv[0], (additional_error ? additional_error : ""));
+              fprintf (stderr, "%s: `--nbins_y' (`-y') option given more than once%s\n", argv[0], (additional_error ? additional_error : ""));
               goto failure;
             }
           if (args_info->nbins_y_given && ! override)

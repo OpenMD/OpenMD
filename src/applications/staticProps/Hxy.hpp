@@ -44,7 +44,7 @@
  *
  *  Created by Xiuquan Sun on 05/09/06.
  *  @author  Xiuquan Sun
- *  @version $Id: Hxy.hpp,v 1.4 2006-05-17 21:51:42 tim Exp $
+ *  @version $Id: Hxy.hpp,v 1.5 2006-05-22 15:30:42 xsun Exp $
  *
  */
 #ifndef APPLICATIONS_STATICPROPS_HXY_HPP
@@ -76,7 +76,7 @@ namespace oopse {
     
   public:
     Hxy(SimInfo* info, const std::string& filename, const std::string& sele, int nbins_x, int nbins_y, int nrbins);
-    
+    virtual ~Hxy();
     int getnbins() {
       return nbins_; 
     }
@@ -102,8 +102,8 @@ namespace oopse {
     SelectionEvaluator evaluator_;
     SelectionManager seleMan_;
     
-    RealType nBinsX_;
-    RealType nBinsY_;
+    int nBinsX_;
+    int nBinsY_;
     int nbins_; 
     RealType dfreq;
     
@@ -111,8 +111,11 @@ namespace oopse {
     std::vector<int> gridsample_;
     std::vector< std::vector<RealType> > bin;
     std::vector< std::vector<int> > samples;
+
     std::vector<RealType> sum_bin, sum_bin_sq, avg_bin, avg_bin_sq;
     std::vector<RealType> errbin_sum, errbin_sum_sq, errbin, errbin_sq;
+    std::vector<RealType> mag, newmag;
+
   };
   
 }

@@ -44,7 +44,7 @@
  *
  *  Created by Xiuquan Sun on 05/09/06.
  *  @author  Xiuquan Sun 
- *  @version $Id: Hxy.cpp,v 1.4 2006-05-17 21:51:42 tim Exp $
+ *  @version $Id: Hxy.cpp,v 1.5 2006-05-22 15:30:42 xsun Exp $
  *
  */
 
@@ -73,6 +73,8 @@ namespace oopse {
 
     gridsample_.resize(nBinsX_*nBinsY_);
     gridZ_.resize(nBinsX_*nBinsY_);
+    mag.resize(nBinsX_*nBinsY_);
+    newmag.resize(nBinsX_*nBinsY_);     
 
     sum_bin.resize(nbins_);
     avg_bin.resize(nbins_);
@@ -83,7 +85,31 @@ namespace oopse {
     errbin_sum_sq.resize(nbins_);
     errbin_sq.resize(nbins_);
 
+    bin.resize(nbins_);
+    samples.resize(nbins_);
+
     setOutputName(getPrefix(filename) + ".Hxy");
+  }
+
+  Hxy::~Hxy(){
+      gridsample_.clear();
+      gridZ_.clear();
+      sum_bin.clear();
+      avg_bin.clear();
+      errbin_sum.clear();
+      errbin.clear();
+      sum_bin_sq.clear();
+      avg_bin_sq.clear();
+      errbin_sum_sq.clear();
+      errbin_sq.clear();
+      
+      for(int i=0; i < bin.size(); i++)
+	bin[i].clear();
+      for(int i=0; i < samples.size(); i++)
+	samples[i].clear();
+
+      mag.clear();
+      newmag.clear();
   }
 
   void Hxy::process() {
@@ -92,20 +118,27 @@ namespace oopse {
     int nFrames = reader.getNFrames();
     nProcessed_ = nFrames/step_;
     
-    std::vector<RealType> mag, newmag;
+    for(int k=0; k < bin.size(); k++)
+      bin[k].resize(nFrames);
+    for(int k=0; k < samples.size(); k++)
+      samples[k].resize(nFrames);
+
     RealType lenX_, lenY_;
     RealType gridX_, gridY_;
     RealType halfBoxX_, halfBoxY_;
+
     int binNoX, binNoY;
     RealType interpsum, value;
     int ninterp, px, py, newp;
     int newx, newy, newindex, index;
     int new_i, new_j, new_index;
+
     RealType freq_x, freq_y, zero_freq_x, zero_freq_y, freq;
-    RealType maxfreqx, maxfreqy, maxfreq, dfreq;
+    RealType maxfreqx, maxfreqy, maxfreq;
+
     int whichbin;
     int nMolecules;
-    
+
     for (int istep = 0; istep < nFrames; istep += step_) {
       
       reader.readFrame(istep);
@@ -120,7 +153,6 @@ namespace oopse {
       fftwnd_plan p;
 #endif
       fftw_complex *in, *out;
-
       
       in = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * (nBinsX_*nBinsY_));
       out = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) *(nBinsX_*nBinsY_));
@@ -134,21 +166,24 @@ namespace oopse {
       
       int i, j;   
       
-      gridsample_.clear();
-      gridZ_.clear();
-      sum_bin.clear();
-      avg_bin.clear();
-      errbin_sum.clear();
-      errbin.clear();
-      sum_bin_sq.clear();
-      avg_bin_sq.clear();
-      errbin_sum_sq.clear();
-      errbin_sq.clear();
-      
-      mag.resize(nBinsX_*nBinsY_);
-      newmag.resize(nBinsX_*nBinsY_);     
-      mag.clear();
-      newmag.clear();
+      std::fill(gridsample_.begin(), gridsample_.end(), 0);
+      std::fill(gridZ_.begin(), gridZ_.end(), 0.0);
+      std::fill(sum_bin.begin(), sum_bin.end(), 0.0);
+      std::fill(avg_bin.begin(), avg_bin.end(), 0.0);
+      std::fill(errbin_sum.begin(), errbin_sum.end(), 0.0);
+      std::fill(errbin.begin(), errbin.end(), 0.0);
+      std::fill(sum_bin_sq.begin(), sum_bin_sq.end(), 0.0);
+      std::fill(avg_bin_sq.begin(), avg_bin_sq.end(), 0.0);
+      std::fill(errbin_sum_sq.begin(), errbin_sum_sq.end(), 0.0);
+      std::fill(errbin_sq.begin(), errbin_sq.end(), 0.0);
+      std::fill(mag.begin(), mag.end(), 0.0);
+      std::fill(newmag.begin(), newmag.end(), 0.0);
+
+      for(i=0; i < bin.size(); i++)
+	std::fill(bin[i].begin(), bin[i].end(), 0.0);
+
+      for(i=0; i < samples.size(); i++)
+	std::fill(samples[i].begin(), samples[i].end(), 0);
       
       StuntDouble* sd;
       
@@ -158,8 +193,8 @@ namespace oopse {
       gridX_ = lenX_ /(nBinsX_);
       gridY_ = lenY_ /(nBinsY_);
       
-      RealType halfBoxX_ = lenX_ / 2.0;      
-      RealType halfBoxY_ = lenY_ / 2.0;      
+      halfBoxX_ = lenX_ / 2.0;      
+      halfBoxY_ = lenY_ / 2.0;      
       
       if (evaluator_.isDynamic()) {
 	seleMan_.setSelectionSet(evaluator_.evaluate());
@@ -170,14 +205,14 @@ namespace oopse {
 	Vector3d pos = sd->getPos();
 	currentSnapshot_->wrapVector(pos);
 	sd->setPos(pos);
-      }
+      } 
       
       //determine which atom belongs to which grid
       for (sd = seleMan_.beginSelected(i); sd != NULL; sd = seleMan_.nextSelected(i)) {
 	Vector3d pos = sd->getPos();
 	//int binNo = (pos.z() /deltaR_) - 1;
-	int binNoX = (pos.x() + halfBoxX_) /gridX_; 
-	int binNoY = (pos.y() + halfBoxY_) /gridY_;
+	int binNoX = (int) ((pos.x() + halfBoxX_) / gridX_);
+	int binNoY = (int) ((pos.y() + halfBoxY_) / gridY_);
 	//std::cout << "pos.z = " << pos.z() << " halfBoxZ_ = " << halfBoxZ_ << " deltaR_ = "  << deltaR_ << " binNo = " << binNo << "\n";
 	gridZ_[binNoX*nBinsY_+binNoY] += pos.z();
 	gridsample_[binNoX*nBinsY_+binNoY]++;
@@ -185,14 +220,6 @@ namespace oopse {
       
       // FFT stuff depends on nx and ny, so delay allocation until we have
       // that information
-      
-      for (i=0; i< nBinsX_; i++) {
-	for(j=0; j< nBinsY_; j++) {
-	  newindex = i*nBinsY_ + j;
-	  mag[newindex] = 0.0;
-	  newmag[newindex] = 0.0;
-	}
-      }
       
       for(i = 0; i < nBinsX_; i++){
 	for(j = 0; j < nBinsY_; j++){
@@ -267,6 +294,7 @@ namespace oopse {
 	  c_im(in[newindex]) = 0.0;
 	} 
       }
+
 #ifdef HAVE_FFTW3_H
       fftw_execute(p);
 #else
@@ -279,6 +307,7 @@ namespace oopse {
 	  mag[newindex] = pow(c_re(out[newindex]),2) + pow(c_im(out[newindex]),2);
 	}
       }
+
 #ifdef HAVE_FFTW3_H
       fftw_destroy_plan(p);
 #else
@@ -361,9 +390,8 @@ namespace oopse {
 	  bin[i][istep] = 4.0 * sqrt(bin[i][istep] / (RealType)samples[i][istep]) / (RealType)nMolecules;
 	}
       }    
-      
     }
-  
+
     for (int i = 0; i < nbins_; i++) {
       for (int j = 0; j < nFrames; j++) {
 	sum_bin[i] += bin[i][j];
@@ -378,24 +406,24 @@ namespace oopse {
       errbin[i] = sqrt( errbin_sum[i] / (RealType)nFrames );
       errbin_sq[i] = sqrt( errbin_sum_sq[i] / (RealType)nFrames );
     }
-    
+
     printSpectrum();
+
 #else
     sprintf(painCave.errMsg, "Hxy: FFTW support was not compiled in!\n");
     painCave.isFatal = 1;
     simError();  
 
 #endif
-
-}
+  }
     
   void Hxy::printSpectrum() {
     std::ofstream rdfStream(outputFilename_.c_str());
     if (rdfStream.is_open()) {
-      
-      for (int i = 0; i < nbins_; i++) {
+
+      for (int i = 0; i < nbins_; ++i) {
 	if ( avg_bin[i] > 0 ){
-	  rdfStream << i*dfreq << "\t"
+	  rdfStream << (RealType)i * dfreq << "\t"
                     <<pow(avg_bin[i], 2)<<"\t"
 	            <<errbin_sq[i]<<"\t"
 	            <<avg_bin[i]<<"\t"
@@ -408,8 +436,9 @@ namespace oopse {
       painCave.isFatal = 1;
       simError();  
     }
-    
+
     rdfStream.close();
+
   }
   
 }

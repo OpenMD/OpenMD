@@ -10,6 +10,8 @@ option	"input"		i	"input dump file"					string	typestr="filename" 	yes
 option	"output"	o	"output file name"					string	typestr="filename"	no
 option	"step"		n	"process every n frame"					int	default="1"		no
 option	"nrbins"    	r       "number of bins for distance"				int	default="100"		no
+option	"nbins_x"    	x       "number of bins in x axis"				int	default="100"		no
+option	"nbins_y"    	y       "number of bins in y axis"				int	default="100"		no
 option	"nanglebins"	a	"number of bins for cos(angle)"				int	default="50"		no 
 option	"length"	l	"maximum length (Defaults to 1/2 smallest length of first frame)"	double	no   
 option  "zoffset"       z       "Where to set the zero for the slab_density calculation"        double  default="0"     no
@@ -30,3 +32,4 @@ groupoption "p2"      -  "p2 order parameter (--sele1 and --sele2 must be specif
 groupoption "scd"      -  "scd order parameter(either --sele1, --sele2, --sele3 are specified or --molname, --begin, --end are specified)" group="staticProps"
 groupoption "density"      -  "density plot (--sele1 must be specified)" group="staticProps"
 groupoption "slab_density"      -  "slab density (--sele1 must be specified)" group="staticProps"
+groupoption "hxy"      -  "hxy (--sele1 must be specified)" group="staticProps"
