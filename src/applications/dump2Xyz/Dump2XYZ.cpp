@@ -152,10 +152,10 @@ int main(int argc, char* argv[]){
   
   //create wrapping visitor
   
-  if(args_info.periodicBox_flag){
-    WrappingVisitor* wrappingVisitor = new WrappingVisitor(info);
-    compositeVisitor->addVisitor(wrappingVisitor, 400);
-  }
+  //if(args_info.periodicBox_flag){
+  //  WrappingVisitor* wrappingVisitor = new WrappingVisitor(info);
+  //  compositeVisitor->addVisitor(wrappingVisitor, 400);
+  //}
 
   //create replicate visitor
   if(args_info.repeatX_given > 0 || args_info.repeatY_given > 0 ||args_info.repeatY_given > 0){
@@ -202,10 +202,29 @@ int main(int argc, char* argv[]){
   Molecule* mol;
   StuntDouble* integrableObject;
   RigidBody* rb;
+  Vector3d molCom;
+  Vector3d newMolCom;
+  Vector3d displacement;
+  Mat3x3d hmat;
+  Snapshot* currentSnapshot;
        
   for (int i = 0; i < nframes; i += args_info.frame_arg){
     dumpReader->readFrame(i);
-    
+
+    //wrapping the molecule
+    if(args_info.periodicBox_flag) {
+      currentSnapshot = info->getSnapshotManager()->getCurrentSnapshot();    
+      for (mol = info->beginMolecule(miter); mol != NULL; mol = info->nextMolecule(miter)) {
+          molCom = mol->getCom();
+          newMolCom = molCom;
+          currentSnapshot->wrapVector(newMolCom);
+          displacement = newMolCom - molCom;
+        for (integrableObject = mol->beginIntegrableObject(iiter); integrableObject != NULL;
+             integrableObject = mol->nextIntegrableObject(iiter)) {  
+          integrableObject->setPos(integrableObject->getPos() + displacement);
+        }
+      }    
+    }
     //update atoms of rigidbody
     for (mol = info->beginMolecule(miter); mol != NULL; mol = info->nextMolecule(miter)) {
       
