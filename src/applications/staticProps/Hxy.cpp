@@ -44,7 +44,7 @@
  *
  *  Created by Xiuquan Sun on 05/09/06.
  *  @author  Xiuquan Sun 
- *  @version $Id: Hxy.cpp,v 1.5 2006-05-22 15:30:42 xsun Exp $
+ *  @version $Id: Hxy.cpp,v 1.6 2006-05-23 21:12:45 xsun Exp $
  *
  */
 
@@ -139,6 +139,21 @@ namespace oopse {
     int whichbin;
     int nMolecules;
 
+    std::fill(sum_bin.begin(), sum_bin.end(), 0.0);
+    std::fill(avg_bin.begin(), avg_bin.end(), 0.0);
+    std::fill(errbin_sum.begin(), errbin_sum.end(), 0.0);
+    std::fill(errbin.begin(), errbin.end(), 0.0);
+    std::fill(sum_bin_sq.begin(), sum_bin_sq.end(), 0.0);
+    std::fill(avg_bin_sq.begin(), avg_bin_sq.end(), 0.0);
+    std::fill(errbin_sum_sq.begin(), errbin_sum_sq.end(), 0.0);
+    std::fill(errbin_sq.begin(), errbin_sq.end(), 0.0);
+    
+    for(int i=0; i < bin.size(); i++)
+      std::fill(bin[i].begin(), bin[i].end(), 0.0);
+    
+    for(int i=0; i < samples.size(); i++)
+      std::fill(samples[i].begin(), samples[i].end(), 0);
+    
     for (int istep = 0; istep < nFrames; istep += step_) {
       
       reader.readFrame(istep);
@@ -163,27 +178,13 @@ namespace oopse {
 #else
       p = fftw2d_create_plan(nBinsX_, nBinsY_, FFTW_FORWARD, FFTW_ESTIMATE);
 #endif
-      
-      int i, j;   
-      
+
       std::fill(gridsample_.begin(), gridsample_.end(), 0);
       std::fill(gridZ_.begin(), gridZ_.end(), 0.0);
-      std::fill(sum_bin.begin(), sum_bin.end(), 0.0);
-      std::fill(avg_bin.begin(), avg_bin.end(), 0.0);
-      std::fill(errbin_sum.begin(), errbin_sum.end(), 0.0);
-      std::fill(errbin.begin(), errbin.end(), 0.0);
-      std::fill(sum_bin_sq.begin(), sum_bin_sq.end(), 0.0);
-      std::fill(avg_bin_sq.begin(), avg_bin_sq.end(), 0.0);
-      std::fill(errbin_sum_sq.begin(), errbin_sum_sq.end(), 0.0);
-      std::fill(errbin_sq.begin(), errbin_sq.end(), 0.0);
       std::fill(mag.begin(), mag.end(), 0.0);
       std::fill(newmag.begin(), newmag.end(), 0.0);
 
-      for(i=0; i < bin.size(); i++)
-	std::fill(bin[i].begin(), bin[i].end(), 0.0);
-
-      for(i=0; i < samples.size(); i++)
-	std::fill(samples[i].begin(), samples[i].end(), 0);
+      int i, j;   
       
       StuntDouble* sd;
       
@@ -387,7 +388,7 @@ namespace oopse {
       
       for ( i = 0; i < nbins_; i++) {
 	if ( samples[i][istep] > 0) {
-	  bin[i][istep] = 4.0 * sqrt(bin[i][istep] / (RealType)samples[i][istep]) / (RealType)nMolecules;
+	  bin[i][istep] = 4.0 * sqrt(bin[i][istep] / (RealType)samples[i][istep]) / (RealType)nBinsX_ / (RealType)nBinsY_;
 	}
       }    
     }
