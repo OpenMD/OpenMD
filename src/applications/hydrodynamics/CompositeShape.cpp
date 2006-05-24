@@ -43,48 +43,54 @@
 #include "utils/MemoryUtils.hpp"
 #include "applications/hydrodynamics/HydrodynamicsModel.hpp"
 namespace oopse {
-
-CompositeShape::~CompositeShape() {
+  
+  CompositeShape::~CompositeShape() {
     MemoryUtils::deletePointers(shapes_);
-}
-bool CompositeShape::isInterior(Vector3d pos) {
+  }
+  bool CompositeShape::isInterior(Vector3d pos) {
     bool result = false;
     std::vector<Shape*>::iterator iter;
     for (iter = shapes_.begin(); iter != shapes_.end(); ++ iter) {
-        if ((*iter)->isInterior(pos)) {
-            result = true;
-            break;
-        }
+      if ((*iter)->isInterior(pos)) {
+        result = true;
+        break;
+      }
     }
-
+    
     return result;
-}
-
-template<class Cont, class Predict>
-void swap_if(Cont& b1, Cont& b2, Predict predict) {
+  }
+  
+  template<class Cont, class Predict>
+  void swap_if(Cont& b1, Cont& b2, Predict predict) {
     unsigned int size = b1.size();
     assert(size == b2.size());
     for (unsigned int i = 0 ; i < size; ++i) {
-        if (predict(b1[i], b2[i]))
-            std::swap(b1[i], b2[i]);
+      if (predict(b1[i], b2[i]))
+        std::swap(b1[i], b2[i]);
     }
-
-}
-
-std::pair<Vector3d, Vector3d> CompositeShape::getBox() {
+    
+  }
+  
+  std::pair<Vector3d, Vector3d> CompositeShape::getBoundingBox() {
     std::vector<Shape*>::iterator iter = shapes_.begin();
-    std::pair<Vector3d, Vector3d>  boundary = (*iter)->getBox();
+    std::pair<Vector3d, Vector3d>  boundary = (*iter)->getBoundingBox();
     for (++iter; iter != shapes_.end(); ++iter) {
-        std::pair<Vector3d, Vector3d> currBoundary = (*iter)->getBox();
-            swap_if(boundary.first, currBoundary.first, std::greater<double>());
-            swap_if(boundary.second, currBoundary.second, std::less<double>());        
+      std::pair<Vector3d, Vector3d> currBoundary = (*iter)->getBoundingBox();
+      swap_if(boundary.first, currBoundary.first, std::greater<RealType>());
+      swap_if(boundary.second, currBoundary.second, std::less<RealType>());        
     }
-
+    
     return boundary;
-}
-
-bool CompositeShape::calcHydroProps(HydrodynamicsModel* model, double viscosity, double temperature) {
-    return model->calcHydroProps(this, viscosity, temperature);
-}
-
+  }
+  
+  HydroProps CompositeShape::getHydroProps(RealType viscosity, RealType temperature) {
+    HydroProps props;
+    props.center =V3Zero;
+    sprintf( painCave.errMsg,
+             "CompositeShape was asked to return an analytic HydroProps.\n");
+    painCave.severity = OOPSE_ERROR;
+    painCave.isFatal = 1;
+    simError();          
+    return props;
+  }   
 }

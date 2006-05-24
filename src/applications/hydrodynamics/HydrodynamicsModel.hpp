@@ -49,44 +49,45 @@
 #include "utils/HydroProps.hpp"
 #include "utils/OOPSEConstant.hpp"
 #include "utils/HydroProps.hpp"
-namespace oopse {
 
-struct BeadParam {
+namespace oopse {
+  
+  struct BeadParam {
     std::string atomName;
     Vector3d pos;
     double radius;
-};
+  };
+  
+  class Shape;
+  class Sphere;
+  class Ellipsoid;
+  class CompositeShape;
+  
+  class HydrodynamicsModel {
+  public:
+    HydrodynamicsModel(StuntDouble* sd, SimInfo* info) : sd_(sd), info_(info) {}
+    virtual ~HydrodynamicsModel() {}
 
-class Spheric;
-class Ellipsoid;
-class CompositeShape;
-
-class HydrodynamicsModel {
-    public:
-        HydrodynamicsModel(StuntDouble* sd, SimInfo* info) : sd_(sd), info_(info) {}
-        virtual ~HydrodynamicsModel() {}
-        virtual bool calcHydroProps(Spheric* spheric, double viscosity, double temperature);
-        virtual bool calcHydroProps(Ellipsoid* ellipsoid, double viscosity, double temperature);
-        virtual bool calcHydroProps(CompositeShape* compositexShape, double viscosity, double temperature);
-
-        virtual void init() {};
-        virtual void writeBeads(std::ostream& os) = 0;
-        void writeHydroProps(std::ostream& os);
-        HydroProps getHydroPropsAtCR() {return cr_;}
-        HydroProps getHydroPropsAtCD() {return cd_;}
-        
-        void setCR(const HydroProps cr) {cr_ = cr;}
-        void setCD(const HydroProps cd) { cd_ = cd;}
-        std::string getStuntDoubleName() { return sd_->getType();}
-    protected:
-        StuntDouble* sd_;
-        SimInfo* info_;
-    private:
-        HydroProps cr_;
-        HydroProps cd_;
-        std::vector<BeadParam> beads_;
-};
-
+    virtual bool calcHydroProps(Shape* shape, RealType viscosity, RealType temperature);
+    
+    virtual void init() {};
+    virtual void writeBeads(std::ostream& os) = 0;
+    void writeHydroProps(std::ostream& os);
+    HydroProps getHydroPropsAtCR() {return cr_;}
+    HydroProps getHydroPropsAtCD() {return cd_;}
+    
+    void setCR(const HydroProps cr) {cr_ = cr;}
+    void setCD(const HydroProps cd) { cd_ = cd;}
+    std::string getStuntDoubleName() { return sd_->getType();}
+  protected:
+    StuntDouble* sd_;
+    SimInfo* info_;
+  private:
+    HydroProps cr_;
+    HydroProps cd_;
+    std::vector<BeadParam> beads_;
+  };
+  
 }
 
 #endif

@@ -816,6 +816,11 @@ if test "$have_mpi_h" = 1; then
 fi
 
 AC_MSG_CHECKING([whether mpif.h is usable])
+AC_LANG_SAVE()
+AC_LANG(Fortran)
+ac_save_ext=$ac_ext
+ac_ext=F90
+ac_save_FCFLAGS=$FCFLAGS
 have_mpif_h=0
 rm -f conftest*
 cat >conftest.$ac_ext <<EOF
@@ -839,6 +844,9 @@ AC_SUBST(MPI_F90_INC)
 if test "$have_mpif_h" = 1; then
     AC_DEFINE(HAVE_MPIF_H, 1, [have mpif.h])
 fi
+FCFLAGS=$ac_save_FCFLAGS 
+ac_ext=$ac_save_ext
+AC_LANG_RESTORE()
 
 AC_LANG_PUSH(C)
 ac_save_LDFLAGS=$LDFLAGS

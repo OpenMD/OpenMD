@@ -64,6 +64,7 @@ struct SDShape{
     Shape* shape;
 };
 void registerHydrodynamicsModels();
+void writeHydroProps(std::ostream& os);
 
 int main(int argc, char* argv[]){
   //register force fields
@@ -181,10 +182,10 @@ int main(int argc, char* argv[]){
 
         //if beads option is turned on, skip the calculation
         if (!args_info.beads_flag) {
-            shape->calcHydroProps(model, viscosity, temperature);
-            model->writeHydroProps(outputDiff);
+          model->calcHydroProps(shape, viscosity, temperature);
+          model->writeHydroProps(outputDiff);
         }
-
+        
         delete model;
   }
 
@@ -200,4 +201,3 @@ void registerHydrodynamicsModels() {
     HydrodynamicsModelFactory::getInstance()->registerHydrodynamicsModel(new HydrodynamicsModelBuilder<AnalyticalModel>("AnalyticalModel"));
 
 }
-

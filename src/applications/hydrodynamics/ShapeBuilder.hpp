@@ -41,7 +41,7 @@
 
 #ifndef APPLICATION_HYDRODYNAMICS_SHAPEBUILDER_HPP 
 #define APPLICATION_HYDRODYNAMICS_SHAPEBUILDER_HPP 
-#include "applications/hydrodynamics/Shape.hpp"
+#include "hydrodynamics/Shape.hpp"
 #include "primitives/Molecule.hpp"
 #include "openbabel/mol.hpp"
 

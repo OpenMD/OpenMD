@@ -43,90 +43,90 @@
 #include "applications/hydrodynamics/ShapeBuilder.hpp"
 #include "brains/SimInfo.hpp"
 namespace oopse {
-
-RoughShell::RoughShell(StuntDouble* sd, SimInfo* info) : ApproximationModel(sd, info){
+  
+  RoughShell::RoughShell(StuntDouble* sd, SimInfo* info) : ApproximationModel(sd, info){
     shape_=ShapeBuilder::createShape(sd);
     Globals* simParams = info->getSimParams();
     if (simParams->haveBeadSize()) {
-        sigma_ = simParams->getBeadSize();
+      sigma_ = simParams->getBeadSize();
     }else {
-
+      
     }
-}
-
-struct BeadLattice {
+  }
+  
+  struct BeadLattice {
     Vector3d origin;
-    double radius;
+    RealType radius;
     bool interior;
-};
-
-struct ExteriorFunctor : public std::unary_function<BeadLattice, bool>{
-
+  };
+  
+  struct ExteriorFunctor : public std::unary_function<BeadLattice, bool>{
+    
     bool operator() (const BeadLattice& bead) {
-        return !bead.interior;
+      return !bead.interior;
     }
-
-};
-
-struct InteriorFunctor  : public std::unary_function<BeadLattice, bool>{
-
+    
+  };
+  
+  struct InteriorFunctor  : public std::unary_function<BeadLattice, bool>{
+    
     bool operator() (const BeadLattice& bead) {
-        return bead.interior;
+      return bead.interior;
     }
-
-};
-bool RoughShell::createBeads(std::vector<BeadParam>& beads) {
-    std::pair<Vector3d, Vector3d> boxBoundary = shape_->getBox();
-    double firstMin = std::min(std::min(boxBoundary.first[0], boxBoundary.first[1]), boxBoundary.first[2]);
-    double secondMax = std::max(std::max(boxBoundary.second[0], boxBoundary.second[1]), boxBoundary.second[2]);
-    double len = secondMax - firstMin;
+    
+  };
+  bool RoughShell::createBeads(std::vector<BeadParam>& beads) {
+    std::pair<Vector3d, Vector3d> boxBoundary = shape_->getBoundingBox();
+    RealType firstMin = std::min(std::min(boxBoundary.first[0], boxBoundary.first[1]), boxBoundary.first[2]);
+    RealType secondMax = std::max(std::max(boxBoundary.second[0], boxBoundary.second[1]), boxBoundary.second[2]);
+    RealType len = secondMax - firstMin;
     int numLattices = static_cast<int>(len/sigma_) + 2;
     Grid3D<BeadLattice>  grid(numLattices, numLattices, numLattices);
-
+    
     //fill beads
     for (int i = 0; i < numLattices; ++i) {
-        for (int j = 0; j < numLattices; ++j) {
-            for (int k = 0; k < numLattices; ++k) {
-                BeadLattice& currentBead = grid(i, j, k);
-                currentBead.origin = Vector3d((i-1)*sigma_ + boxBoundary.first[0], (j-1) *sigma_ + boxBoundary.first[1], (k-1)*sigma_+ boxBoundary.first[2]);
-                currentBead.radius = sigma_;
-                currentBead.interior = shape_->isInterior(grid(i, j, k).origin);                
-            }
+      for (int j = 0; j < numLattices; ++j) {
+        for (int k = 0; k < numLattices; ++k) {
+          BeadLattice& currentBead = grid(i, j, k);
+          currentBead.origin = Vector3d((i-1)*sigma_ + boxBoundary.first[0], (j-1) *sigma_ + boxBoundary.first[1], (k-1)*sigma_+ boxBoundary.first[2]);
+          currentBead.radius = sigma_;
+          currentBead.interior = shape_->isInterior(grid(i, j, k).origin);                
         }
+      }
     }
-
+    
     //remove embedded beads 
     for (int i = 0; i < numLattices; ++i) {
-        for (int j = 0; j < numLattices; ++j) {
-            for (int k = 0; k < numLattices; ++k) {
-                 std::vector<BeadLattice> neighborCells = grid.getAllNeighbors(i, j, k);
-                 //if one of its neighbor cells is exterior, current cell is on the surface
-
-                 if (grid(i, j, k).interior){
-
-                    bool allNeighBorIsInterior = true;
-                    for (std::vector<BeadLattice>::iterator l = neighborCells.begin(); l != neighborCells.end(); ++l) {
-                        if (!l->interior) {
-                            allNeighBorIsInterior = false;
-                            break;
-                        }
-                    }
-
-                    if (allNeighBorIsInterior)
-                        continue;
-
-                      BeadParam surfaceBead;
-                      surfaceBead.atomName = "H";
-                      surfaceBead.pos = grid(i, j, k).origin;
-                      surfaceBead.radius = grid(i, j, k).radius;
-                      beads.push_back(surfaceBead);                    
-
-                 }
+      for (int j = 0; j < numLattices; ++j) {
+        for (int k = 0; k < numLattices; ++k) {
+          std::vector<BeadLattice> neighborCells = grid.getAllNeighbors(i, j, k);
+          //if one of its neighbor cells is exterior, current cell is on the surface
+          
+          if (grid(i, j, k).interior){
+            
+            bool allNeighBorIsInterior = true;
+            for (std::vector<BeadLattice>::iterator l = neighborCells.begin(); l != neighborCells.end(); ++l) {
+              if (!l->interior) {
+                allNeighBorIsInterior = false;
+                break;
+              }
             }
+            
+            if (allNeighBorIsInterior)
+              continue;
+            
+            BeadParam surfaceBead;
+            surfaceBead.atomName = "H";
+            surfaceBead.pos = grid(i, j, k).origin;
+            surfaceBead.radius = grid(i, j, k).radius;
+            beads.push_back(surfaceBead);                    
+            
+          }
         }
+      }
     }
-     
+    
     return true;
-}
-
+  }
+  
 }

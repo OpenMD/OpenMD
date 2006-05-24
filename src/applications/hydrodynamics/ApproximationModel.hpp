@@ -50,27 +50,22 @@
 #include "applications/hydrodynamics/HydrodynamicsModel.hpp"
 namespace oopse {
 
-class Shape;
-class ApproximationModel :  public HydrodynamicsModel {
-    public:
-        ApproximationModel(StuntDouble* sd, SimInfo* info);
-
-        virtual bool calcHydroProps(Spheric* spheric, double viscosity, double temperature);
-        virtual bool calcHydroProps(Ellipsoid* ellipsoid, double viscosity, double temperature);
-        virtual bool calcHydroProps(CompositeShape* compositexShape, double viscosity, double temperature);
-        virtual void init();
-        virtual void writeBeads(std::ostream& os);
-    private:
-        bool internalCalcHydroProps(Shape* shape, double viscosity, double temperature);
-
-        
-        virtual bool createBeads(std::vector<BeadParam>& beads) = 0;
-
-        bool calcHydroPropsAtCR(std::vector<BeadParam>& beads, double viscosity, double temperature, HydroProps& cr);
-        bool calcHydroPropsAtCD(std::vector<BeadParam>& beads, double viscosity, double temperature, HydroProps& cd);
-        std::vector<BeadParam> beads_;
+  class Shape;
+  class ApproximationModel :  public HydrodynamicsModel {
+  public:
+    ApproximationModel(StuntDouble* sd, SimInfo* info);
+    
+    virtual bool calcHydroProps(Shape* shape, RealType viscosity, RealType temperature);
+    virtual void init();
+    virtual void writeBeads(std::ostream& os);
+  private:
+    virtual bool createBeads(std::vector<BeadParam>& beads) = 0;
+    
+    bool calcHydroPropsAtCR(std::vector<BeadParam>& beads, RealType viscosity, RealType temperature, HydroProps& cr);
+    bool calcHydroPropsAtCD(std::vector<BeadParam>& beads, RealType viscosity, RealType temperature, HydroProps& cd);
+    std::vector<BeadParam> beads_;
 };
-
+  
 
 }
 

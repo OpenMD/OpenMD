@@ -13027,6 +13027,16 @@ fi
 
 echo "$as_me:$LINENO: checking whether mpif.h is usable" >&5
 echo $ECHO_N "checking whether mpif.h is usable... $ECHO_C" >&6
+
+
+ac_ext=${FC_SRCEXT-f}
+ac_compile='$FC -c $FCFLAGS $FCFLAGS_SRCEXT conftest.$ac_ext >&5'
+ac_link='$FC -o conftest$ac_exeext $FCFLAGS $LDFLAGS $FCFLAGS_SRCEXT conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_fc_compiler_gnu
+
+ac_save_ext=$ac_ext
+ac_ext=F90
+ac_save_FCFLAGS=$FCFLAGS
 have_mpif_h=0
 rm -f conftest*
 cat >conftest.$ac_ext <<EOF
@@ -13056,6 +13066,14 @@ cat >>confdefs.h <<\_ACEOF
 _ACEOF
 
 fi
+FCFLAGS=$ac_save_FCFLAGS
+ac_ext=$ac_save_ext
+ac_ext=cc
+ac_cpp='$CXXCPP $CPPFLAGS'
+ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
+
 
 ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'

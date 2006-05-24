@@ -39,8 +39,8 @@
  * such damages.
  */
 #include "applications/hydrodynamics/ShapeBuilder.hpp"
-#include "applications/hydrodynamics/Spheric.hpp"
-#include "applications/hydrodynamics/Ellipsoid.hpp"
+#include "hydrodynamics/Sphere.hpp"
+#include "hydrodynamics/Ellipsoid.hpp"
 #include "applications/hydrodynamics/CompositeShape.hpp"
 namespace oopse {
   
@@ -66,7 +66,7 @@ namespace oopse {
         
         if (ljData != NULL) {
           LJParam ljParam = ljData->getData();
-          currShape = new Spheric(atom->getPos(), ljParam.sigma/2.0);
+          currShape = new Sphere(atom->getPos(), ljParam.sigma/2.0);
         } else {
           sprintf( painCave.errMsg,
                    "Can not cast GenericData to LJParam\n");
@@ -78,7 +78,7 @@ namespace oopse {
     } else {
       int obanum = etab.GetAtomicNum((atom->getType()).c_str());
       if (obanum != 0) {
-        currShape = new Spheric(atom->getPos(), etab.GetVdwRad(obanum));
+        currShape = new Sphere(atom->getPos(), etab.GetVdwRad(obanum));
       } else {
         sprintf( painCave.errMsg,
                  "Could not find atom type in default element.txt\n");
@@ -123,7 +123,7 @@ namespace oopse {
         
         if (ljData != NULL) {
           LJParam ljParam = ljData->getData();
-          currShape = new Spheric(datom->getPos(), ljParam.sigma/2.0);
+          currShape = new Sphere(datom->getPos(), ljParam.sigma/2.0);
         } else {
           sprintf( painCave.errMsg,
                    "Can not cast GenericData to LJParam\n");
@@ -134,7 +134,7 @@ namespace oopse {
       } else {
         int obanum = etab.GetAtomicNum((datom->getType()).c_str());
         if (obanum != 0) {
-          currShape = new Spheric(datom->getPos(), etab.GetVdwRad(obanum));
+          currShape = new Sphere(datom->getPos(), etab.GetVdwRad(obanum));
         } else {
           sprintf( painCave.errMsg,
                    "Could not find atom type in default element.txt\n");

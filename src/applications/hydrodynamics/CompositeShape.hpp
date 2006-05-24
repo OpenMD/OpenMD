@@ -41,28 +41,27 @@
 
 #ifndef APPLICATION_HYDRODYNAMICS_COMPOSITESHAPE_HPP
 #define APPLICATION_HYDRODYNAMICS_COMPOSITESHAPE_HPP
-#include "applications/hydrodynamics/Shape.hpp"
+#include "hydrodynamics/Shape.hpp"
 #include <vector>
 namespace oopse {
-/**
- * @class CompositexShape
- * Combine composite pattern and visitor pattern
- */ 
-class CompositeShape : public Shape {
-
-    public:
-        CompositeShape() {}
-        virtual ~CompositeShape();
-        virtual bool isInterior(Vector3d pos);
-        virtual std::pair<Vector3d, Vector3d> getBox();
-        virtual bool hasAnalyticalSolution() { return false;}
-       virtual bool calcHydroProps(HydrodynamicsModel* model, double viscosity, double temperature);
-        void addShape(Shape* s) {shapes_.push_back(s);}
-
-    private:
-
-        std::vector<Shape*> shapes_;        
-
+  /**
+   * @class CompositeShape
+   * Combine composite pattern and visitor pattern
+   */ 
+  class CompositeShape : public Shape {
+    
+  public:
+    CompositeShape() {}
+    virtual ~CompositeShape();
+    virtual bool isInterior(Vector3d pos);
+    virtual std::pair<Vector3d, Vector3d> getBoundingBox();
+    virtual bool hasAnalyticalSolution() { return false;}
+    virtual HydroProps getHydroProps(RealType viscosity, RealType temperature);
+    void addShape(Shape* s) {shapes_.push_back(s);}
+    
+  private:
+    
+    std::vector<Shape*> shapes_;      
 };
 
 }

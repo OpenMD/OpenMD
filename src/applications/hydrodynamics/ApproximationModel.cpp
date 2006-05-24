@@ -44,8 +44,8 @@
 #include "math/DynamicRectMatrix.hpp"
 #include "math/SquareMatrix3.hpp"
 #include "utils/OOPSEConstant.hpp"
-#include "applications/hydrodynamics/Spheric.hpp"
-#include "applications/hydrodynamics/Ellipsoid.hpp"
+#include "hydrodynamics/Sphere.hpp"
+#include "hydrodynamics/Ellipsoid.hpp"
 #include "applications/hydrodynamics/CompositeShape.hpp"
 #include "math/LU.hpp"
 #include "utils/simError.h"
@@ -57,32 +57,20 @@ namespace oopse {
  * Biophysical Journal, 75(6), 3044, 1999
  */
 
-ApproximationModel::ApproximationModel(StuntDouble* sd, SimInfo* info): HydrodynamicsModel(sd, info){
-
-}
-
-bool ApproximationModel::calcHydroProps(Spheric* spheric, double viscosity, double temperature) {
-    return internalCalcHydroProps(static_cast<Shape*>(spheric), viscosity, temperature);
-}
-
-bool ApproximationModel::calcHydroProps(Ellipsoid* ellipsoid, double viscosity, double temperature) {
-    return internalCalcHydroProps(static_cast<Shape*>(ellipsoid), viscosity, temperature);
-}
-bool ApproximationModel::calcHydroProps(CompositeShape* compositeShape, double viscosity, double temperature) {
-    return internalCalcHydroProps(static_cast<Shape*>(compositeShape), viscosity, temperature);
-}
-
-void ApproximationModel::init() {
+  ApproximationModel::ApproximationModel(StuntDouble* sd, SimInfo* info): HydrodynamicsModel(sd, info){    
+  }
+  
+  void ApproximationModel::init() {
     if (!createBeads(beads_)) {
       sprintf(painCave.errMsg, "ApproximationModel::init() : Can not create beads\n");
       painCave.isFatal = 1;
       simError();        
     }
-
-}
-
-bool ApproximationModel::internalCalcHydroProps(Shape* shape, double viscosity, double temperature) {
-
+    
+  }
+  
+  bool ApproximationModel::calcHydroProps(Shape* shape, double viscosity, double temperature) {
+    
     bool ret = true;
     HydroProps cr;
     HydroProps cd;
@@ -92,10 +80,10 @@ bool ApproximationModel::internalCalcHydroProps(Shape* shape, double viscosity, 
     setCD(cd);
     
     return true;    
-}
-
-bool ApproximationModel::calcHydroPropsAtCR(std::vector<BeadParam>& beads, double viscosity, double temperature, HydroProps& cr) {
-
+  }
+  
+  bool ApproximationModel::calcHydroPropsAtCR(std::vector<BeadParam>& beads, double viscosity, double temperature, HydroProps& cr) {
+    
     int nbeads = beads.size();
     DynamicRectMatrix<double> B(3*nbeads, 3*nbeads);
     DynamicRectMatrix<double> C(3*nbeads, 3*nbeads);
@@ -105,68 +93,68 @@ bool ApproximationModel::calcHydroPropsAtCR(std::vector<BeadParam>& beads, doubl
     I(2, 2) = 1.0;
     
     for (std::size_t i = 0; i < nbeads; ++i) {
-        for (std::size_t j = 0; j < nbeads; ++j) {
-            Mat3x3d Tij;
+      for (std::size_t j = 0; j < nbeads; ++j) {
+        Mat3x3d Tij;
             if (i != j ) {
-                Vector3d Rij = beads[i].pos - beads[j].pos;
-                double rij = Rij.length();
-                double rij2 = rij * rij;
-                double sumSigma2OverRij2 = ((beads[i].radius*beads[i].radius) + (beads[j].radius*beads[j].radius)) / rij2;                
-                Mat3x3d tmpMat;
-                tmpMat = outProduct(Rij, Rij) / rij2;
-                double constant = 8.0 * NumericConstant::PI * viscosity * rij;
-                Tij = ((1.0 + sumSigma2OverRij2/3.0) * I + (1.0 - sumSigma2OverRij2) * tmpMat ) / constant;
+              Vector3d Rij = beads[i].pos - beads[j].pos;
+              double rij = Rij.length();
+              double rij2 = rij * rij;
+              double sumSigma2OverRij2 = ((beads[i].radius*beads[i].radius) + (beads[j].radius*beads[j].radius)) / rij2;                
+              Mat3x3d tmpMat;
+              tmpMat = outProduct(Rij, Rij) / rij2;
+              double constant = 8.0 * NumericConstant::PI * viscosity * rij;
+              Tij = ((1.0 + sumSigma2OverRij2/3.0) * I + (1.0 - sumSigma2OverRij2) * tmpMat ) / constant;
             }else {
-                double constant = 1.0 / (6.0 * NumericConstant::PI * viscosity * beads[i].radius);
-                Tij(0, 0) = constant;
-                Tij(1, 1) = constant;
-                Tij(2, 2) = constant;
+              double constant = 1.0 / (6.0 * NumericConstant::PI * viscosity * beads[i].radius);
+              Tij(0, 0) = constant;
+              Tij(1, 1) = constant;
+              Tij(2, 2) = constant;
             }
             B.setSubMatrix(i*3, j*3, Tij);
-        }
+      }
     }
-
+    
     //invert B Matrix
     invertMatrix(B, C);
     
     //prepare U Matrix relative to arbitrary origin O(0.0, 0.0, 0.0)
     std::vector<Mat3x3d> U;
     for (int i = 0; i < nbeads; ++i) {
-        Mat3x3d currU;
-        currU.setupSkewMat(beads[i].pos);
-        U.push_back(currU);
+      Mat3x3d currU;
+      currU.setupSkewMat(beads[i].pos);
+      U.push_back(currU);
     }
     
     //calculate Xi matrix at arbitrary origin O
     Mat3x3d Xiott;
     Mat3x3d Xiorr;
     Mat3x3d Xiotr;
-
+    
     //calculate the total volume
-
+    
     double volume = 0.0;
     for (std::vector<BeadParam>::iterator iter = beads.begin(); iter != beads.end(); ++iter) {
-        volume += 4.0/3.0 * NumericConstant::PI * pow((*iter).radius,3);
+      volume += 4.0/3.0 * NumericConstant::PI * pow((*iter).radius,3);
     }
-        
+    
     for (std::size_t i = 0; i < nbeads; ++i) {
-        for (std::size_t j = 0; j < nbeads; ++j) {
-            Mat3x3d Cij;
-            C.getSubMatrix(i*3, j*3, Cij);
-            
-            Xiott += Cij;
-            Xiotr += U[i] * Cij;
-            //Xiorr += -U[i] * Cij * U[j] + (6 * viscosity * volume) * I;    
-	    Xiorr += -U[i] * Cij * U[j]; 
-        }
+      for (std::size_t j = 0; j < nbeads; ++j) {
+        Mat3x3d Cij;
+        C.getSubMatrix(i*3, j*3, Cij);
+        
+        Xiott += Cij;
+        Xiotr += U[i] * Cij;
+        //Xiorr += -U[i] * Cij * U[j] + (6 * viscosity * volume) * I;    
+        Xiorr += -U[i] * Cij * U[j]; 
+      }
     }
-
+    
     const double convertConstant = 6.023; //convert poise.angstrom to amu/fs
     Xiott *= convertConstant;
     Xiotr *= convertConstant;
     Xiorr *= convertConstant;
     
-
+    
     
     Mat3x3d tmp;
     Mat3x3d tmpInv;
@@ -257,9 +245,9 @@ bool ApproximationModel::calcHydroPropsAtCR(std::vector<BeadParam>& beads, doubl
 
     return true;
 }
-
-bool ApproximationModel::calcHydroPropsAtCD(std::vector<BeadParam>& beads, double viscosity, double temperature, HydroProps& cr) {
-
+  
+  bool ApproximationModel::calcHydroPropsAtCD(std::vector<BeadParam>& beads, double viscosity, double temperature, HydroProps& cr) {
+    
     int nbeads = beads.size();
     DynamicRectMatrix<double> B(3*nbeads, 3*nbeads);
     DynamicRectMatrix<double> C(3*nbeads, 3*nbeads);
@@ -269,36 +257,36 @@ bool ApproximationModel::calcHydroPropsAtCD(std::vector<BeadParam>& beads, doubl
     I(2, 2) = 1.0;
     
     for (std::size_t i = 0; i < nbeads; ++i) {
-        for (std::size_t j = 0; j < nbeads; ++j) {
-            Mat3x3d Tij;
-            if (i != j ) {
-                Vector3d Rij = beads[i].pos - beads[j].pos;
-                double rij = Rij.length();
-                double rij2 = rij * rij;
-                double sumSigma2OverRij2 = ((beads[i].radius*beads[i].radius) + (beads[j].radius*beads[j].radius)) / rij2;                
-                Mat3x3d tmpMat;
-                tmpMat = outProduct(Rij, Rij) / rij2;
-                double constant = 8.0 * NumericConstant::PI * viscosity * rij;
-                Tij = ((1.0 + sumSigma2OverRij2/3.0) * I + (1.0 - sumSigma2OverRij2) * tmpMat ) / constant;
-            }else {
-                double constant = 1.0 / (6.0 * NumericConstant::PI * viscosity * beads[i].radius);
-                Tij(0, 0) = constant;
-                Tij(1, 1) = constant;
-                Tij(2, 2) = constant;
-            }
-            B.setSubMatrix(i*3, j*3, Tij);
+      for (std::size_t j = 0; j < nbeads; ++j) {
+        Mat3x3d Tij;
+        if (i != j ) {
+          Vector3d Rij = beads[i].pos - beads[j].pos;
+          double rij = Rij.length();
+          double rij2 = rij * rij;
+          double sumSigma2OverRij2 = ((beads[i].radius*beads[i].radius) + (beads[j].radius*beads[j].radius)) / rij2;                
+          Mat3x3d tmpMat;
+          tmpMat = outProduct(Rij, Rij) / rij2;
+          double constant = 8.0 * NumericConstant::PI * viscosity * rij;
+          Tij = ((1.0 + sumSigma2OverRij2/3.0) * I + (1.0 - sumSigma2OverRij2) * tmpMat ) / constant;
+        }else {
+          double constant = 1.0 / (6.0 * NumericConstant::PI * viscosity * beads[i].radius);
+          Tij(0, 0) = constant;
+          Tij(1, 1) = constant;
+          Tij(2, 2) = constant;
         }
+        B.setSubMatrix(i*3, j*3, Tij);
+      }
     }
-
+    
     //invert B Matrix
     invertMatrix(B, C);
-
+    
     //prepare U Matrix relative to arbitrary origin O(0.0, 0.0, 0.0)
     std::vector<Mat3x3d> U;
     for (int i = 0; i < nbeads; ++i) {
-        Mat3x3d currU;
-        currU.setupSkewMat(beads[i].pos);
-        U.push_back(currU);
+      Mat3x3d currU;
+      currU.setupSkewMat(beads[i].pos);
+      U.push_back(currU);
     }
     
     //calculate Xi matrix at arbitrary origin O
@@ -310,32 +298,32 @@ bool ApproximationModel::calcHydroPropsAtCD(std::vector<BeadParam>& beads, doubl
 
     double volume = 0.0;
     for (std::vector<BeadParam>::iterator iter = beads.begin(); iter != beads.end(); ++iter) {
-        volume += 4.0/3.0 * NumericConstant::PI * pow((*iter).radius,3);
+      volume += 4.0/3.0 * NumericConstant::PI * pow((*iter).radius,3);
     }
-        
+    
     for (std::size_t i = 0; i < nbeads; ++i) {
-        for (std::size_t j = 0; j < nbeads; ++j) {
-            Mat3x3d Cij;
-            C.getSubMatrix(i*3, j*3, Cij);
+      for (std::size_t j = 0; j < nbeads; ++j) {
+        Mat3x3d Cij;
+        C.getSubMatrix(i*3, j*3, Cij);
             
-            Xitt += Cij;
-            Xitr += U[i] * Cij;
+        Xitt += Cij;
+        Xitr += U[i] * Cij;
             //Xirr += -U[i] * Cij * U[j] + (6 * viscosity * volume) * I;            
-	    Xirr += -U[i] * Cij * U[j];
-        }
+        Xirr += -U[i] * Cij * U[j];
+      }
     }
-
+    
     const double convertConstant = 6.023; //convert poise.angstrom to amu/fs
     Xitt *= convertConstant;
     Xitr *= convertConstant;
     Xirr *= convertConstant;
-
+    
     double kt = OOPSEConstant::kB * temperature;
-
+    
     Mat3x3d Dott; //translational diffusion tensor at arbitrary origin O
     Mat3x3d Dorr; //rotational diffusion tensor at arbitrary origin O
     Mat3x3d Dotr; //translation-rotation couplingl diffusion tensor at arbitrary origin O
-
+    
     const static Mat3x3d zeroMat(0.0);
     
     Mat3x3d XittInv(0.0);
@@ -446,20 +434,16 @@ bool ApproximationModel::calcHydroPropsAtCD(std::vector<BeadParam>& beads, doubl
     std::cout << Xidrr << std::endl;
 
     return true;
-      
-}
+    
+  }
 
-
-void ApproximationModel::writeBeads(std::ostream& os) {
+  void ApproximationModel::writeBeads(std::ostream& os) {
     std::vector<BeadParam>::iterator iter;
     os << beads_.size() << std::endl;
     os << "Generated by Hydro" << std::endl;
     for (iter = beads_.begin(); iter != beads_.end(); ++iter) {
-        os << iter->atomName << "\t" << iter->pos[0] << "\t" << iter->pos[1] << "\t" << iter->pos[2] << std::endl;
+      os << iter->atomName << "\t" << iter->pos[0] << "\t" << iter->pos[1] << "\t" << iter->pos[2] << std::endl;
     }
-
-}
-
-
-
+    
+  }    
 }

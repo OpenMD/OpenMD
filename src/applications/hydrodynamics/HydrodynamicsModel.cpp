@@ -39,124 +39,116 @@
  * such damages.
  */
 #include "applications/hydrodynamics/HydrodynamicsModel.hpp"
-#include "applications/hydrodynamics/Spheric.hpp"
-#include "applications/hydrodynamics/Ellipsoid.hpp"
+#include "hydrodynamics/Shape.hpp"
+#include "hydrodynamics/Sphere.hpp"
+#include "hydrodynamics/Ellipsoid.hpp"
 #include "applications/hydrodynamics/CompositeShape.hpp"
 
 namespace oopse {
-
-bool HydrodynamicsModel::calcHydroProps(Spheric* spheric, double viscosity, double temperature) {
+  
+  bool HydrodynamicsModel::calcHydroProps(Shape* shape, RealType viscosity, RealType temperature) {
     return false;
-}
-
-bool HydrodynamicsModel::calcHydroProps(Ellipsoid* ellipsoid, double viscosity, double temperature) {
-    return false;
-}
-
-bool HydrodynamicsModel::calcHydroProps(CompositeShape* compositexShape, double viscosity, double temperature) {
-    return false;
-}
-
-void HydrodynamicsModel::writeHydroProps(std::ostream& os) {
-
+  }
+  
+  void HydrodynamicsModel::writeHydroProps(std::ostream& os) {
+    
     
     os << sd_->getType() << "\t";
     
     //center of resistance
     os << cr_.center[0] <<  "\t" << cr_.center[1] <<  "\t" << cr_.center[2] <<  "\t"; 
-
+    
     //resistance tensor at center of resistance
     //translation
     os << cr_.Xi(0, 0) <<  "\t" << cr_.Xi(0, 1) <<  "\t" << cr_.Xi(0, 2) <<  "\t" 
-        << cr_.Xi(1, 0) <<  "\t" << cr_.Xi(1, 1) <<  "\t" << cr_.Xi(1, 2) <<  "\t" 
-        << cr_.Xi(2, 0) <<  "\t" << cr_.Xi(2, 1) <<  "\t" << cr_.Xi(2, 2) <<  "\t"; 
-
+       << cr_.Xi(1, 0) <<  "\t" << cr_.Xi(1, 1) <<  "\t" << cr_.Xi(1, 2) <<  "\t" 
+       << cr_.Xi(2, 0) <<  "\t" << cr_.Xi(2, 1) <<  "\t" << cr_.Xi(2, 2) <<  "\t"; 
+    
     //rotation-translation
     os << cr_.Xi(0, 3) <<  "\t" << cr_.Xi(0, 4) <<  "\t" << cr_.Xi(0, 5) <<  "\t" 
-        << cr_.Xi(1, 3) <<  "\t" << cr_.Xi(1, 4) <<  "\t" << cr_.Xi(1, 5) <<  "\t" 
-        << cr_.Xi(2, 3) <<  "\t" << cr_.Xi(2, 4) <<  "\t" << cr_.Xi(2, 5) <<  "\t";
-
+       << cr_.Xi(1, 3) <<  "\t" << cr_.Xi(1, 4) <<  "\t" << cr_.Xi(1, 5) <<  "\t" 
+       << cr_.Xi(2, 3) <<  "\t" << cr_.Xi(2, 4) <<  "\t" << cr_.Xi(2, 5) <<  "\t";
+    
     //translation-rotation
     os << cr_.Xi(3, 0) <<  "\t" << cr_.Xi(3, 1) <<  "\t" << cr_.Xi(3, 2) <<  "\t" 
-        << cr_.Xi(4, 0) <<  "\t" << cr_.Xi(4, 1) <<  "\t" << cr_.Xi(4, 2) <<  "\t" 
-        << cr_.Xi(5, 0) <<  "\t" << cr_.Xi(5, 1) <<  "\t" << cr_.Xi(5, 2) <<  "\t"; 
-
+       << cr_.Xi(4, 0) <<  "\t" << cr_.Xi(4, 1) <<  "\t" << cr_.Xi(4, 2) <<  "\t" 
+       << cr_.Xi(5, 0) <<  "\t" << cr_.Xi(5, 1) <<  "\t" << cr_.Xi(5, 2) <<  "\t"; 
+    
     //rotation
     os << cr_.Xi(3, 3) <<  "\t" << cr_.Xi(3, 4) <<  "\t" << cr_.Xi(3, 5) <<  "\t" 
-        << cr_.Xi(4, 3) <<  "\t" << cr_.Xi(4, 4) <<  "\t" << cr_.Xi(4, 5) <<  "\t" 
-        << cr_.Xi(5, 3) <<  "\t" << cr_.Xi(5, 4) <<  "\t" << cr_.Xi(5, 5) <<  "\t"; 
-
-
+       << cr_.Xi(4, 3) <<  "\t" << cr_.Xi(4, 4) <<  "\t" << cr_.Xi(4, 5) <<  "\t" 
+       << cr_.Xi(5, 3) <<  "\t" << cr_.Xi(5, 4) <<  "\t" << cr_.Xi(5, 5) <<  "\t"; 
+    
+    
     //diffusion tensor at center of resistance
     //translation
     os << cr_.D(0, 0) <<  "\t" << cr_.D(0, 1) <<  "\t" << cr_.D(0, 2) <<  "\t" 
-        << cr_.D(1, 0) <<  "\t" << cr_.D(1, 1) <<  "\t" << cr_.D(1, 2) <<  "\t" 
-        << cr_.D(2, 0) <<  "\t" << cr_.D(2, 1) <<  "\t" << cr_.D(2, 2) <<  "\t"; 
-
+       << cr_.D(1, 0) <<  "\t" << cr_.D(1, 1) <<  "\t" << cr_.D(1, 2) <<  "\t" 
+       << cr_.D(2, 0) <<  "\t" << cr_.D(2, 1) <<  "\t" << cr_.D(2, 2) <<  "\t"; 
+    
     //rotation-translation
     os << cr_.D(0, 3) <<  "\t" << cr_.D(0, 4) <<  "\t" << cr_.D(0, 5) <<  "\t" 
-        << cr_.D(1, 3) <<  "\t" << cr_.D(1, 4) <<  "\t" << cr_.D(1, 5) <<  "\t" 
-        << cr_.D(2, 3) <<  "\t" << cr_.D(2, 4) <<  "\t" << cr_.D(2, 5) <<  "\t"; 
-
+       << cr_.D(1, 3) <<  "\t" << cr_.D(1, 4) <<  "\t" << cr_.D(1, 5) <<  "\t" 
+       << cr_.D(2, 3) <<  "\t" << cr_.D(2, 4) <<  "\t" << cr_.D(2, 5) <<  "\t"; 
+    
     //translation-rotation
     os << cr_.D(3, 0) <<  "\t" << cr_.D(3, 1) <<  "\t" << cr_.D(3, 2) <<  "\t" 
-        << cr_.D(4, 0) <<  "\t" << cr_.D(4, 1) <<  "\t" << cr_.D(4, 2) <<  "\t" 
-        << cr_.D(5, 0) <<  "\t" << cr_.D(5, 1) <<  "\t" << cr_.D(5, 2) <<  "\t"; 
-
+       << cr_.D(4, 0) <<  "\t" << cr_.D(4, 1) <<  "\t" << cr_.D(4, 2) <<  "\t" 
+       << cr_.D(5, 0) <<  "\t" << cr_.D(5, 1) <<  "\t" << cr_.D(5, 2) <<  "\t"; 
+    
     //rotation
     os << cr_.D(3, 3) <<  "\t" << cr_.D(3, 4) <<  "\t" << cr_.D(3, 5) <<  "\t" 
-        << cr_.D(4, 3) <<  "\t" << cr_.D(4, 4) <<  "\t" << cr_.D(4, 5) <<  "\t" 
-        << cr_.D(5, 3) <<  "\t" << cr_.D(5, 4) <<  "\t" << cr_.D(5, 5) <<  "\t"; 
-        
+       << cr_.D(4, 3) <<  "\t" << cr_.D(4, 4) <<  "\t" << cr_.D(4, 5) <<  "\t" 
+       << cr_.D(5, 3) <<  "\t" << cr_.D(5, 4) <<  "\t" << cr_.D(5, 5) <<  "\t"; 
+    
     //---------------------------------------------------------------------
-
+    
     //center of diffusion
     os << cd_.center[0] <<  "\t" << cd_.center[1] <<  "\t" << cd_.center[2] <<  "\t"; 
-
+    
     //resistance tensor at center of diffusion
     //translation
     os << cd_.Xi(0, 0) <<  "\t" << cd_.Xi(0, 1) <<  "\t" << cd_.Xi(0, 2) <<  "\t" 
-        << cd_.Xi(1, 0) <<  "\t" << cd_.Xi(1, 1) <<  "\t" << cd_.Xi(1, 2) <<  "\t" 
-        << cd_.Xi(2, 0) <<  "\t" << cd_.Xi(2, 1) <<  "\t" << cd_.Xi(2, 2) <<  "\t"; 
-
+       << cd_.Xi(1, 0) <<  "\t" << cd_.Xi(1, 1) <<  "\t" << cd_.Xi(1, 2) <<  "\t" 
+       << cd_.Xi(2, 0) <<  "\t" << cd_.Xi(2, 1) <<  "\t" << cd_.Xi(2, 2) <<  "\t"; 
+    
     //rotation-translation
     os << cd_.Xi(0, 3) <<  "\t" << cd_.Xi(0, 4) <<  "\t" << cd_.Xi(0, 5) <<  "\t" 
-        << cd_.Xi(1, 3) <<  "\t" << cd_.Xi(1, 4) <<  "\t" << cd_.Xi(1, 5) <<  "\t" 
-        << cd_.Xi(2, 3) <<  "\t" << cd_.Xi(2, 4) <<  "\t" << cd_.Xi(2, 5) <<  "\t"; 
-
+       << cd_.Xi(1, 3) <<  "\t" << cd_.Xi(1, 4) <<  "\t" << cd_.Xi(1, 5) <<  "\t" 
+       << cd_.Xi(2, 3) <<  "\t" << cd_.Xi(2, 4) <<  "\t" << cd_.Xi(2, 5) <<  "\t"; 
+    
     //translation-rotation
     os << cd_.Xi(3, 0) <<  "\t" << cd_.Xi(3, 1) <<  "\t" << cd_.Xi(3, 2) <<  "\t" 
-        << cd_.Xi(4, 0) <<  "\t" << cd_.Xi(4, 1) <<  "\t" << cd_.Xi(4, 2) <<  "\t" 
-        << cd_.Xi(5, 0) <<  "\t" << cd_.Xi(5, 1) <<  "\t" << cd_.Xi(5, 2) <<  "\t"; 
-
+       << cd_.Xi(4, 0) <<  "\t" << cd_.Xi(4, 1) <<  "\t" << cd_.Xi(4, 2) <<  "\t" 
+       << cd_.Xi(5, 0) <<  "\t" << cd_.Xi(5, 1) <<  "\t" << cd_.Xi(5, 2) <<  "\t"; 
+    
     //rotation
     os << cd_.Xi(3, 3) <<  "\t" << cd_.Xi(3, 4) <<  "\t" << cd_.Xi(3, 5) <<  "\t" 
-        << cd_.Xi(4, 3) <<  "\t" << cd_.Xi(4, 4) <<  "\t" << cd_.Xi(4, 5) <<  "\t" 
-        << cd_.Xi(5, 3) <<  "\t" << cd_.Xi(5, 4) <<  "\t" << cd_.Xi(5, 5) <<  "\t"; 
-
-
+       << cd_.Xi(4, 3) <<  "\t" << cd_.Xi(4, 4) <<  "\t" << cd_.Xi(4, 5) <<  "\t" 
+       << cd_.Xi(5, 3) <<  "\t" << cd_.Xi(5, 4) <<  "\t" << cd_.Xi(5, 5) <<  "\t"; 
+    
+    
     //diffusion tensor at center of diffusion
     //translation
     os << cd_.D(0, 0) <<  "\t" << cd_.D(0, 1) <<  "\t" << cd_.D(0, 2) <<  "\t" 
-        << cd_.D(1, 0) <<  "\t" << cd_.D(1, 1) <<  "\t" << cd_.D(1, 2) <<  "\t" 
-        << cd_.D(2, 0) <<  "\t" << cd_.D(2, 1) <<  "\t" << cd_.D(2, 2) <<  "\t"; 
-
+       << cd_.D(1, 0) <<  "\t" << cd_.D(1, 1) <<  "\t" << cd_.D(1, 2) <<  "\t" 
+       << cd_.D(2, 0) <<  "\t" << cd_.D(2, 1) <<  "\t" << cd_.D(2, 2) <<  "\t"; 
+    
     //rotation-translation
     os << cd_.D(0, 3) <<  "\t" << cd_.D(0, 4) <<  "\t" << cd_.D(0, 5) <<  "\t" 
-        << cd_.D(1, 3) <<  "\t" << cd_.D(1, 4) <<  "\t" << cd_.D(1, 5) <<  "\t" 
-        << cd_.D(2, 3) <<  "\t" << cd_.D(2, 4) <<  "\t" << cd_.D(2, 5) <<  "\t"; 
-
+       << cd_.D(1, 3) <<  "\t" << cd_.D(1, 4) <<  "\t" << cd_.D(1, 5) <<  "\t" 
+       << cd_.D(2, 3) <<  "\t" << cd_.D(2, 4) <<  "\t" << cd_.D(2, 5) <<  "\t"; 
+    
     //translation-rotation
     os << cd_.D(3, 0) <<  "\t" << cd_.D(3, 1) <<  "\t" << cd_.D(3, 2) <<  "\t" 
-        << cd_.D(4, 0) <<  "\t" << cd_.D(4, 1) <<  "\t" << cd_.D(4, 2) <<  "\t" 
-        << cd_.D(5, 0) <<  "\t" << cd_.D(5, 1) <<  "\t" << cd_.D(5, 2) <<  "\t"; 
-
+       << cd_.D(4, 0) <<  "\t" << cd_.D(4, 1) <<  "\t" << cd_.D(4, 2) <<  "\t" 
+       << cd_.D(5, 0) <<  "\t" << cd_.D(5, 1) <<  "\t" << cd_.D(5, 2) <<  "\t"; 
+    
     //rotation
     os << cd_.D(3, 3) <<  "\t" << cd_.D(3, 4) <<  "\t" << cd_.D(3, 5) <<  "\t" 
-        << cd_.D(4, 3) <<  "\t" << cd_.D(4, 4) <<  "\t" << cd_.D(4, 5) <<  "\t" 
-        << cd_.D(5, 3) <<  "\t" << cd_.D(5, 4) <<  "\t" << cd_.D(5, 5) <<  "\n"; 
-
-
-}
-
+       << cd_.D(4, 3) <<  "\t" << cd_.D(4, 4) <<  "\t" << cd_.D(4, 5) <<  "\t" 
+       << cd_.D(5, 3) <<  "\t" << cd_.D(5, 4) <<  "\t" << cd_.D(5, 5) <<  "\n";    
+    
+  }
+  
 }

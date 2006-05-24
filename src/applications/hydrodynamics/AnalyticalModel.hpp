@@ -42,15 +42,13 @@
 #ifndef HYDRODYNAMICS_ANALYTICALMODEL_HPP
 #define HYDRODYNAMICS_ANALYTICALMODEL_HPP
 
-#include "hydrodynamics/HydrodynamicsModel.hpp"
+#include "applications/hydrodynamics/HydrodynamicsModel.hpp"
 namespace oopse {
   
   class AnalyticalModel : public HydrodynamicsModel {
   public:
     AnalyticalModel(StuntDouble* sd, SimInfo* info) : HydrodynamicsModel(sd, info) {}
-    virtual bool calcHydroProps(Sphere* sphere, double viscosity, double temperature);
-    virtual bool calcHydroProps(Ellipsoid* ellipsoid, double viscosity, double temperature);
-    virtual bool calcHydroProps(CompositeShape* compositeShape, double viscosity, double temperature);
+    virtual bool calcHydroProps(Shape* shape, double viscosity, double temperature);
     virtual void writeBeads(std::ostream& os);
   };  
 }
