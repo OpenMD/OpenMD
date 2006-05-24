@@ -123,15 +123,24 @@ namespace oopse {
         painCave.isFatal = 1;
         simError();  
       }      
-      std::map<std::string, HydroProp>::iterator iter = hydroPropMap.find(integrableObject->getType());
-      if (iter != hydroPropMap.end()) {
-        hydroProps_.push_back(iter->second);
-      } else {
-        sprintf( painCave.errMsg,
-                 "Can not find resistance tensor for atom [%s]\n", integrableObject->getType().c_str());
-        painCave.severity = OOPSE_ERROR;
-        painCave.isFatal = 1;
-        simError();  
+
+      for (mol = info->beginMolecule(i); mol != NULL; 
+           mol = info->nextMolecule(i)) {
+        for (integrableObject = mol->beginIntegrableObject(j); 
+             integrableObject != NULL;
+             integrableObject = mol->nextIntegrableObject(j)) {
+
+          std::map<std::string, HydroProp>::iterator iter = hydroPropMap.find(integrableObject->getType());
+          if (iter != hydroPropMap.end()) {
+            hydroProps_.push_back(iter->second);
+          } else {
+            sprintf( painCave.errMsg,
+                     "Can not find resistance tensor for atom [%s]\n", integrableObject->getType().c_str());
+            painCave.severity = OOPSE_ERROR;
+            painCave.isFatal = 1;
+            simError();  
+          }        
+        }
       }
     } else {
 
