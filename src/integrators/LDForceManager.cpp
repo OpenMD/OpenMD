@@ -325,14 +325,16 @@ namespace oopse {
     
     fdf = 0;
     for (mol = info_->beginMolecule(i); mol != NULL; mol = info_->nextMolecule(i)) {
-      
+
+      doLangevinForces = true;           
+      freezeMolecule = false;
+
       if (sphericalBoundaryConditions_) {
         
         Vector3d molPos = mol->getCom();
         RealType molRad = molPos.length();
         
         doLangevinForces = false;
-        freezeMolecule = false;
         
         if (molRad > langevinBufferRadius_) { 
           doLangevinForces = true;
