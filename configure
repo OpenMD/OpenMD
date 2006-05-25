@@ -13164,14 +13164,13 @@ fi
 fi
 $as_unset ac_cv_lib_mpich_MPI_Init
 if test x = x"$MPI_LIB"; then
-        # absolute insanity if profiling libraries are required to get mpich to work
         echo "$as_me:$LINENO: checking for MPI_Init in -lpmpich" >&5
 echo $ECHO_N "checking for MPI_Init in -lpmpich... $ECHO_C" >&6
 if test "${ac_cv_lib_pmpich_MPI_Init+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
   ac_check_lib_save_LIBS=$LIBS
-LIBS="-lpmpich "-lmpich -lpmpich -lmpich" $LIBS"
+LIBS="-lpmpich -lmpich -lpmpich -lmpich $LIBS"
 cat >conftest.$ac_ext <<_ACEOF
 /* confdefs.h.  */
 _ACEOF
@@ -13328,7 +13327,7 @@ if test "${ac_cv_lib_mpi_MPI_Init+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
   ac_check_lib_save_LIBS=$LIBS
-LIBS="-lmpi "-llam" $LIBS"
+LIBS="-lmpi -llam $LIBS"
 cat >conftest.$ac_ext <<_ACEOF
 /* confdefs.h.  */
 _ACEOF
