@@ -103,7 +103,9 @@ namespace oopse {
               Mat3x3d tmpMat;
               tmpMat = outProduct(Rij, Rij) / rij2;
               RealType constant = 8.0 * NumericConstant::PI * viscosity * rij;
-              Tij = ((1.0 + sumSigma2OverRij2/3.0) * I + (1.0 - sumSigma2OverRij2) * tmpMat ) / constant;
+	      RealType tmp1 = 1.0 + sumSigma2OverRij2/3.0;
+	      RealType tmp2 = 1.0 - sumSigma2OverRij2;
+              Tij = (tmp1 * I + tmp2 * tmpMat ) / constant;
             }else {
               RealType constant = 1.0 / (6.0 * NumericConstant::PI * viscosity * beads[i].radius);
               Tij(0, 0) = constant;
@@ -267,7 +269,9 @@ namespace oopse {
           Mat3x3d tmpMat;
           tmpMat = outProduct(Rij, Rij) / rij2;
           RealType constant = 8.0 * NumericConstant::PI * viscosity * rij;
-          Tij = ((1.0 + sumSigma2OverRij2/3.0) * I + (1.0 - sumSigma2OverRij2) * tmpMat ) / constant;
+          RealType tmp1 = 1.0 + sumSigma2OverRij2/3.0;
+	  RealType tmp2 = 1.0 - sumSigma2OverRij2;
+	  Tij = (tmp1 * I + tmp2 * tmpMat ) / constant;
         }else {
           RealType constant = 1.0 / (6.0 * NumericConstant::PI * viscosity * beads[i].radius);
           Tij(0, 0) = constant;
