@@ -13164,13 +13164,14 @@ fi
 fi
 $as_unset ac_cv_lib_mpich_MPI_Init
 if test x = x"$MPI_LIB"; then
-        echo "$as_me:$LINENO: checking for MPI_Init in -lmpich" >&5
-echo $ECHO_N "checking for MPI_Init in -lmpich... $ECHO_C" >&6
-if test "${ac_cv_lib_mpich_MPI_Init+set}" = set; then
+        # absolute insanity if profiling libraries are required to get mpich to work
+        echo "$as_me:$LINENO: checking for MPI_Init in -lpmpich" >&5
+echo $ECHO_N "checking for MPI_Init in -lpmpich... $ECHO_C" >&6
+if test "${ac_cv_lib_pmpich_MPI_Init+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
   ac_check_lib_save_LIBS=$LIBS
-LIBS="-lmpich "-lpmpich" $LIBS"
+LIBS="-lpmpich "-lmpich -lpmpich -lmpich" $LIBS"
 cat >conftest.$ac_ext <<_ACEOF
 /* confdefs.h.  */
 _ACEOF
@@ -13223,21 +13224,21 @@ if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
   ac_status=$?
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
   (exit $ac_status); }; }; then
-  ac_cv_lib_mpich_MPI_Init=yes
+  ac_cv_lib_pmpich_MPI_Init=yes
 else
   echo "$as_me: failed program was:" >&5
 sed 's/^/| /' conftest.$ac_ext >&5
 
-ac_cv_lib_mpich_MPI_Init=no
+ac_cv_lib_pmpich_MPI_Init=no
 fi
 rm -f conftest.err conftest.$ac_objext \
       conftest$ac_exeext conftest.$ac_ext
 LIBS=$ac_check_lib_save_LIBS
 fi
-echo "$as_me:$LINENO: result: $ac_cv_lib_mpich_MPI_Init" >&5
-echo "${ECHO_T}$ac_cv_lib_mpich_MPI_Init" >&6
-if test $ac_cv_lib_mpich_MPI_Init = yes; then
-  MPI_LIB="-lpmpich -lmpich"
+echo "$as_me:$LINENO: result: $ac_cv_lib_pmpich_MPI_Init" >&5
+echo "${ECHO_T}$ac_cv_lib_pmpich_MPI_Init" >&6
+if test $ac_cv_lib_pmpich_MPI_Init = yes; then
+  MPI_LIB="-lpmpich -lmpich -lpmpich -lmpich"
 fi
 
 fi
