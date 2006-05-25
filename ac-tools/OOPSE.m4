@@ -850,10 +850,15 @@ AC_LANG_RESTORE()
 
 AC_LANG_PUSH(C)
 ac_save_LDFLAGS=$LDFLAGS
-LDFLAGS="${LDFLAGS} -L${MPI_LIB_DIR} "
+LDFLAGS="-L${MPI_LIB_DIR} ${LDFLAGS} "
 
 if test x = x"$MPI_LIB"; then
         AC_CHECK_LIB(mpich, MPI_Init, [MPI_LIB="-lmpich"])
+fi
+$as_unset ac_cv_lib_mpich_MPI_Init
+if test x = x"$MPI_LIB"; then
+        AC_CHECK_LIB(mpich, MPI_Init, [MPI_LIB="-lpmpich -lmpich"], [],
+                     "-lpmpich")
 fi
 if test x = x"$MPI_LIB"; then
         AC_CHECK_LIB(mpi, MPI_Init, [MPI_LIB="-lmpi"])
@@ -863,12 +868,6 @@ if test x = x"$MPI_LIB"; then
         AC_CHECK_LIB(mpi, MPI_Init, [MPI_LIB="-lmpi -llam"], [],
                      "-llam")
 fi
-$as_unset ac_cv_lib_mpich_MPI_Init
-if test x = x"$MPI_LIB"; then
-        AC_CHECK_LIB(mpich, MPI_Init, [MPI_LIB="-lpmpich -lmpich"], [],
-                     "-lpmpich")
-fi
-
 $as_unset ac_cv_lib_mpi_MPI_Init
 if test x = x"$MPI_LIB"; then
 AC_CHECK_LIB(mpi, MPI_Init, [MPI_LIB="-lmpi -llam -lpthread"],[
