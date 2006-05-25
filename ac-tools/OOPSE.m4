@@ -857,9 +857,8 @@ if test x = x"$MPI_LIB"; then
 fi
 $as_unset ac_cv_lib_mpich_MPI_Init
 if test x = x"$MPI_LIB"; then
-        # absolute insanity if profiling libraries are required to get mpich to work
         AC_CHECK_LIB(pmpich, MPI_Init, [MPI_LIB="-lpmpich -lmpich -lpmpich -lmpich"], [],
-                     "-lmpich -lpmpich -lmpich")
+                     [-lmpich -lpmpich -lmpich])
 fi
 if test x = x"$MPI_LIB"; then
         AC_CHECK_LIB(mpi, MPI_Init, [MPI_LIB="-lmpi"])
@@ -867,7 +866,7 @@ fi
 $as_unset ac_cv_lib_mpi_MPI_Init
 if test x = x"$MPI_LIB"; then
         AC_CHECK_LIB(mpi, MPI_Init, [MPI_LIB="-lmpi -llam"], [],
-                     "-llam")
+                     [-llam])
 fi
 $as_unset ac_cv_lib_mpi_MPI_Init
 if test x = x"$MPI_LIB"; then
