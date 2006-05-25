@@ -55,7 +55,7 @@ namespace oopse {
   struct BeadParam {
     std::string atomName;
     Vector3d pos;
-    double radius;
+    RealType radius;
   };
   
   class Shape;

@@ -48,7 +48,7 @@ namespace oopse {
   class AnalyticalModel : public HydrodynamicsModel {
   public:
     AnalyticalModel(StuntDouble* sd, SimInfo* info) : HydrodynamicsModel(sd, info) {}
-    virtual bool calcHydroProps(Shape* shape, double viscosity, double temperature);
+    virtual bool calcHydroProps(Shape* shape, RealType viscosity, RealType temperature);
     virtual void writeBeads(std::ostream& os);
   };  
 }

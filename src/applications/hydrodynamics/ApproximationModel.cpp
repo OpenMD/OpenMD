@@ -69,7 +69,7 @@ namespace oopse {
     
   }
   
-  bool ApproximationModel::calcHydroProps(Shape* shape, double viscosity, double temperature) {
+  bool ApproximationModel::calcHydroProps(Shape* shape, RealType viscosity, RealType temperature) {
     
     bool ret = true;
     HydroProps cr;
@@ -82,11 +82,11 @@ namespace oopse {
     return true;    
   }
   
-  bool ApproximationModel::calcHydroPropsAtCR(std::vector<BeadParam>& beads, double viscosity, double temperature, HydroProps& cr) {
+  bool ApproximationModel::calcHydroPropsAtCR(std::vector<BeadParam>& beads, RealType viscosity, RealType temperature, HydroProps& cr) {
     
     int nbeads = beads.size();
-    DynamicRectMatrix<double> B(3*nbeads, 3*nbeads);
-    DynamicRectMatrix<double> C(3*nbeads, 3*nbeads);
+    DynamicRectMatrix<RealType> B(3*nbeads, 3*nbeads);
+    DynamicRectMatrix<RealType> C(3*nbeads, 3*nbeads);
     Mat3x3d I;
     I(0, 0) = 1.0;
     I(1, 1) = 1.0;
@@ -97,15 +97,15 @@ namespace oopse {
         Mat3x3d Tij;
             if (i != j ) {
               Vector3d Rij = beads[i].pos - beads[j].pos;
-              double rij = Rij.length();
-              double rij2 = rij * rij;
-              double sumSigma2OverRij2 = ((beads[i].radius*beads[i].radius) + (beads[j].radius*beads[j].radius)) / rij2;                
+              RealType rij = Rij.length();
+              RealType rij2 = rij * rij;
+              RealType sumSigma2OverRij2 = ((beads[i].radius*beads[i].radius) + (beads[j].radius*beads[j].radius)) / rij2;                
               Mat3x3d tmpMat;
               tmpMat = outProduct(Rij, Rij) / rij2;
-              double constant = 8.0 * NumericConstant::PI * viscosity * rij;
+              RealType constant = 8.0 * NumericConstant::PI * viscosity * rij;
               Tij = ((1.0 + sumSigma2OverRij2/3.0) * I + (1.0 - sumSigma2OverRij2) * tmpMat ) / constant;
             }else {
-              double constant = 1.0 / (6.0 * NumericConstant::PI * viscosity * beads[i].radius);
+              RealType constant = 1.0 / (6.0 * NumericConstant::PI * viscosity * beads[i].radius);
               Tij(0, 0) = constant;
               Tij(1, 1) = constant;
               Tij(2, 2) = constant;
@@ -132,7 +132,7 @@ namespace oopse {
     
     //calculate the total volume
     
-    double volume = 0.0;
+    RealType volume = 0.0;
     for (std::vector<BeadParam>::iterator iter = beads.begin(); iter != beads.end(); ++iter) {
       volume += 4.0/3.0 * NumericConstant::PI * pow((*iter).radius,3);
     }
@@ -149,7 +149,7 @@ namespace oopse {
       }
     }
     
-    const double convertConstant = 6.023; //convert poise.angstrom to amu/fs
+    const RealType convertConstant = 6.023; //convert poise.angstrom to amu/fs
     Xiott *= convertConstant;
     Xiotr *= convertConstant;
     Xiorr *= convertConstant;
@@ -185,8 +185,8 @@ namespace oopse {
     Xirrr = Xiorr - Uor * Xiott * Uor + Xiotr * Uor - Uor * Xiotr.transpose();
     
 
-    SquareMatrix<double,6> Xir6x6;
-    SquareMatrix<double,6> Dr6x6;
+    SquareMatrix<RealType,6> Xir6x6;
+    SquareMatrix<RealType,6> Dr6x6;
 
     Xir6x6.setSubMatrix(0, 0, Xirtt);
     Xir6x6.setSubMatrix(0, 3, Xirtr.transpose());
@@ -202,7 +202,7 @@ namespace oopse {
     Dr6x6.getSubMatrix(0, 3, Drrt);
     Dr6x6.getSubMatrix(3, 0, Drtr);
     Dr6x6.getSubMatrix(3, 3, Drrr);
-    double kt = OOPSEConstant::kB * temperature ;
+    RealType kt = OOPSEConstant::kB * temperature ;
     Drtt *= kt;
     Drrt *= kt;
     Drtr *= kt;
@@ -246,11 +246,11 @@ namespace oopse {
     return true;
 }
   
-  bool ApproximationModel::calcHydroPropsAtCD(std::vector<BeadParam>& beads, double viscosity, double temperature, HydroProps& cr) {
+  bool ApproximationModel::calcHydroPropsAtCD(std::vector<BeadParam>& beads, RealType viscosity, RealType temperature, HydroProps& cr) {
     
     int nbeads = beads.size();
-    DynamicRectMatrix<double> B(3*nbeads, 3*nbeads);
-    DynamicRectMatrix<double> C(3*nbeads, 3*nbeads);
+    DynamicRectMatrix<RealType> B(3*nbeads, 3*nbeads);
+    DynamicRectMatrix<RealType> C(3*nbeads, 3*nbeads);
     Mat3x3d I;
     I(0, 0) = 1.0;
     I(1, 1) = 1.0;
@@ -261,15 +261,15 @@ namespace oopse {
         Mat3x3d Tij;
         if (i != j ) {
           Vector3d Rij = beads[i].pos - beads[j].pos;
-          double rij = Rij.length();
-          double rij2 = rij * rij;
-          double sumSigma2OverRij2 = ((beads[i].radius*beads[i].radius) + (beads[j].radius*beads[j].radius)) / rij2;                
+          RealType rij = Rij.length();
+          RealType rij2 = rij * rij;
+          RealType sumSigma2OverRij2 = ((beads[i].radius*beads[i].radius) + (beads[j].radius*beads[j].radius)) / rij2;                
           Mat3x3d tmpMat;
           tmpMat = outProduct(Rij, Rij) / rij2;
-          double constant = 8.0 * NumericConstant::PI * viscosity * rij;
+          RealType constant = 8.0 * NumericConstant::PI * viscosity * rij;
           Tij = ((1.0 + sumSigma2OverRij2/3.0) * I + (1.0 - sumSigma2OverRij2) * tmpMat ) / constant;
         }else {
-          double constant = 1.0 / (6.0 * NumericConstant::PI * viscosity * beads[i].radius);
+          RealType constant = 1.0 / (6.0 * NumericConstant::PI * viscosity * beads[i].radius);
           Tij(0, 0) = constant;
           Tij(1, 1) = constant;
           Tij(2, 2) = constant;
@@ -296,7 +296,7 @@ namespace oopse {
 
     //calculate the total volume
 
-    double volume = 0.0;
+    RealType volume = 0.0;
     for (std::vector<BeadParam>::iterator iter = beads.begin(); iter != beads.end(); ++iter) {
       volume += 4.0/3.0 * NumericConstant::PI * pow((*iter).radius,3);
     }
@@ -313,12 +313,12 @@ namespace oopse {
       }
     }
     
-    const double convertConstant = 6.023; //convert poise.angstrom to amu/fs
+    const RealType convertConstant = 6.023; //convert poise.angstrom to amu/fs
     Xitt *= convertConstant;
     Xitr *= convertConstant;
     Xirr *= convertConstant;
     
-    double kt = OOPSEConstant::kB * temperature;
+    RealType kt = OOPSEConstant::kB * temperature;
     
     Mat3x3d Dott; //translational diffusion tensor at arbitrary origin O
     Mat3x3d Dorr; //rotational diffusion tensor at arbitrary origin O
@@ -377,12 +377,12 @@ namespace oopse {
     Ddrr = Dorr;
     Ddtr = Dotr + Dorr * Uod;
 
-    SquareMatrix<double, 6> Dd;
+    SquareMatrix<RealType, 6> Dd;
     Dd.setSubMatrix(0, 0, Ddtt);
     Dd.setSubMatrix(0, 3, Ddtr.transpose());
     Dd.setSubMatrix(3, 0, Ddtr);
     Dd.setSubMatrix(3, 3, Ddrr);    
-    SquareMatrix<double, 6> Xid;
+    SquareMatrix<RealType, 6> Xid;
     Ddtt *= kt;
     Ddtr *=kt;
     Ddrr *= kt;
