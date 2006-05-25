@@ -164,7 +164,7 @@ void Globals::validate() {
   CheckParameter(MinimizerLSMaxIter, isPositive());
   CheckParameter(ZconsGap, isPositive());
   CheckParameter(ZconsFixtime, isPositive());
-  CheckParameter(ThermodynamicIntegrationLambda, isPositive());
+  CheckParameter(ThermodynamicIntegrationLambda, isNonNegative());
   CheckParameter(ThermodynamicIntegrationK, isPositive());
   CheckParameter(ForceFieldVariant, isNotEmpty());
   CheckParameter(ForceFieldFileName, isNotEmpty());

@@ -20,45 +20,6 @@ molecule{
 }
 
 molecule{
-  name = "PAIR";
-  
-  atom[0]{
-    type = "Pchg+";
-    position(0.0, 1, 1.0);
-  }
-  atom[1]{
-    type = "Pchg+";
-    position(0.0, -1, 1.0);
-  }
-  atom[2]{
-    type = "Pchg-";
-    position(0.0, 0.0, -1.0);
-  }
-
-  
-  rigidBody[0]{ 
-    
-    members(0, 1, 2);
-  }
-
-  
-  cutoffGroup{
-    
-    members(0, 1, 2);
-  }
-}
-
-molecule{
-  name = "PDIP";
-  
-  atom[0]{
-    type = "PDIP";
-    position( 0.0, 0.0, 0.0 );
-    orientation( 0.0, 0.0, 0.0 );
-  }
-}
-
-molecule{
   name = "SSD_E";
   
   atom[0]{
@@ -196,6 +157,42 @@ molecule{
   
   atom[0]{
     type = "O_TIP5P";
+    position( 0.0, 0.0, -0.06556 );
+  }
+  atom[1]{
+    type = "H_TIP5P";
+    position( 0.0, 0.75695, 0.52032 );
+  }
+  atom[2]{
+    type = "H_TIP5P";
+    position( 0.0, -0.75695, 0.52032 );
+  }
+  atom[3]{
+    type = "EP_TIP5P";
+    position( 0.57154, 0.0, -0.46971 );
+  }
+  atom[4]{
+    type = "EP_TIP5P";
+    position( -0.57154, 0.0, -0.46971 );
+  }
+  
+  rigidBody[0]{
+    
+    members(0, 1, 2, 3, 4);
+  }
+
+  
+  cutoffGroup{
+    
+    members(0, 1, 2, 3, 4);
+  }
+}
+
+molecule{
+  name = "TIP5P-E";
+  
+  atom[0]{
+    type = "O_TIP5P-E";
     position( 0.0, 0.0, -0.06556 );
   }
   atom[1]{

@@ -189,6 +189,42 @@ molecule{
 }
 
 molecule{
+  name = "TIP5P-E";
+  
+  atom[0]{
+    type = "O_TIP5P-E";
+    position( 0.0, 0.0, -0.06556 );
+  }
+  atom[1]{
+    type = "H_TIP5P";
+    position( 0.0, 0.75695, 0.52032 );
+  }
+  atom[2]{
+    type = "H_TIP5P";
+    position( 0.0, -0.75695, 0.52032 );
+  }
+  atom[3]{
+    type = "EP_TIP5P";
+    position( 0.57154, 0.0, -0.46971 );
+  }
+  atom[4]{
+    type = "EP_TIP5P";
+    position( -0.57154, 0.0, -0.46971 );
+  }
+  
+  rigidBody[0]{
+    
+    members(0, 1, 2, 3, 4);
+  }
+
+  
+  cutoffGroup{
+    
+    members(0, 1, 2, 3, 4);
+  }
+}
+
+molecule{
   name = "SPCE";
   
   atom[0]{
