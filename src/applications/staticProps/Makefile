@@ -12,7 +12,8 @@ Source    = \
 	StaticPropsCmd.c \
 	StaticProps.cpp \
 	RhoZ.cpp \
-	Hxy.cpp
+	Hxy.cpp \
+        RippleOP.cpp
 	
 BuiltParallelExe = 0
 

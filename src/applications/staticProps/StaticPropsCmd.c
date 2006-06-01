@@ -62,6 +62,7 @@ void clear_given (struct gengetopt_args_info *args_info)
   args_info->theta_omega_given = 0 ;
   args_info->gxyz_given = 0 ;
   args_info->p2_given = 0 ;
+  args_info->rp2_given = 0 ;
   args_info->scd_given = 0 ;
   args_info->density_given = 0 ;
   args_info->slab_density_given = 0 ;
@@ -140,6 +141,7 @@ cmdline_parser_print_help (void)
   printf("%s\n","      --theta_omega             g(cos(theta), cos(omega))");
   printf("%s\n","      --gxyz                    g(x, y, z)");
   printf("%s\n","      --p2                      p2 order parameter (--sele1 and --sele2 must be \n                                  specified)");
+  printf("%s\n","      --rp2                     rp2 order parameter (--sele1 and --sele2 must \n                                  be specified)");
   printf("%s\n","      --scd                     scd order parameter(either --sele1, --sele2, \n                                  --sele3 are specified or --molname, --begin, \n                                  --end are specified)");
   printf("%s\n","      --density                 density plot (--sele1 must be specified)");
   printf("%s\n","      --slab_density            slab density (--sele1 must be specified)");
@@ -427,6 +429,9 @@ cmdline_parser_file_save(const char *filename, struct gengetopt_args_info *args_
   if (args_info->p2_given) {
     fprintf(outfile, "%s\n", "p2");
   }
+  if (args_info->rp2_given) {
+    fprintf(outfile, "%s\n", "rp2");
+  }
   if (args_info->scd_given) {
     fprintf(outfile, "%s\n", "scd");
   }
@@ -484,6 +489,7 @@ reset_group_staticProps(struct gengetopt_args_info *args_info)
   args_info->theta_omega_given = 0 ;
   args_info->gxyz_given = 0 ;
   args_info->p2_given = 0 ;
+  args_info->rp2_given = 0 ;
   args_info->scd_given = 0 ;
   args_info->density_given = 0 ;
   args_info->slab_density_given = 0 ;
@@ -599,6 +605,7 @@ cmdline_parser_internal (int argc, char * const *argv, struct gengetopt_args_inf
         { "theta_omega",	0, NULL, 0 },
         { "gxyz",	0, NULL, 0 },
         { "p2",	0, NULL, 0 },
+        { "rp2",	0, NULL, 0 },
         { "scd",	0, NULL, 0 },
         { "density",	0, NULL, 0 },
         { "slab_density",	0, NULL, 0 },
@@ -1035,6 +1042,23 @@ cmdline_parser_internal (int argc, char * const *argv, struct gengetopt_args_inf
               continue;
             local_args_info.p2_given = 1;
             args_info->p2_given = 1;
+            if (args_info->staticProps_group_counter && override)
+              reset_group_staticProps (args_info);
+            args_info->staticProps_group_counter += 1;
+            break;
+          }
+          /* rp2 order parameter (--sele1 and --sele2 must be specified).  */
+          else if (strcmp (long_options[option_index].name, "rp2") == 0)
+          {
+            if (local_args_info.rp2_given)
+              {
+                fprintf (stderr, "%s: `--rp2' option given more than once%s\n", argv[0], (additional_error ? additional_error : ""));
+                goto failure;
+              }
+            if (args_info->rp2_given && ! override)
+              continue;
+            local_args_info.rp2_given = 1;
+            args_info->rp2_given = 1;
             if (args_info->staticProps_group_counter && override)
               reset_group_staticProps (args_info);
             args_info->staticProps_group_counter += 1;

@@ -56,6 +56,7 @@
 #include "applications/staticProps/GofAngle2.hpp"
 #include "applications/staticProps/GofXyz.hpp"
 #include "applications/staticProps/P2OrderParameter.hpp"
+#include "applications/staticProps/RippleOP.hpp"
 #include "applications/staticProps/SCDOrderParameter.hpp"
 #include "applications/staticProps/DensityPlot.hpp"
 #include "applications/staticProps/RhoZ.hpp"
@@ -177,7 +178,9 @@ int main(int argc, char* argv[]){
     }
   } else if (args_info.p2_given) {
       analyser  = new P2OrderParameter(info, dumpFileName, sele1, sele2);
-  } else if (args_info.scd_given) {
+  }    else if (args_info.rp2_given){
+      analyser = new RippleOP(info, dumpFileName, sele1, sele2);
+}else if (args_info.scd_given) {
       if (batchMode) {
           analyser  = new SCDOrderParameter(info, dumpFileName, args_info.molname_arg, 
             args_info.begin_arg, args_info.end_arg);
