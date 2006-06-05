@@ -46,9 +46,8 @@
 #include "math/SquareMatrix3.hpp"
 #include "math/DynamicRectMatrix.hpp"
 #include "primitives/Molecule.hpp"
-#include "utils/HydroProps.hpp"
+#include "hydrodynamics/HydroProp.hpp"
 #include "utils/OOPSEConstant.hpp"
-#include "utils/HydroProps.hpp"
 
 namespace oopse {
   
@@ -73,18 +72,18 @@ namespace oopse {
     virtual void init() {};
     virtual void writeBeads(std::ostream& os) = 0;
     void writeHydroProps(std::ostream& os);
-    HydroProps getHydroPropsAtCR() {return cr_;}
-    HydroProps getHydroPropsAtCD() {return cd_;}
+    HydroProp* getHydroPropsAtCR() {return cr_;}
+    HydroProp* getHydroPropsAtCD() {return cd_;}
     
-    void setCR(const HydroProps cr) {cr_ = cr;}
-    void setCD(const HydroProps cd) { cd_ = cd;}
+    void setCR(HydroProp* cr) {cr_ = cr;}
+    void setCD(HydroProp* cd) {cd_ = cd;}
     std::string getStuntDoubleName() { return sd_->getType();}
   protected:
     StuntDouble* sd_;
     SimInfo* info_;
   private:
-    HydroProps cr_;
-    HydroProps cd_;
+    HydroProp* cr_;
+    HydroProp* cd_;
     std::vector<BeadParam> beads_;
   };
   

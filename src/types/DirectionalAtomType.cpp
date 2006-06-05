@@ -193,24 +193,24 @@ namespace oopse {
         painCave.isFatal = 1;
         simError();          
       }
-    }
+      }
 
-    //setup GayBerne type in fortran side
+      //setup GayBerne type in fortran side
       if (isGayBerne()) {
         data = getPropertyByName("GayBerne");
         if (data != NULL) {
             GayBerneParamGenericData* gayBerneData = dynamic_cast<GayBerneParamGenericData*>(data);
 
             if (gayBerneData != NULL) {
-                GayBerneParam gayBerneParam = gayBerneData->getData();
-
-                newGayBerneType(&atp.ident, 
-                                &gayBerneParam.GB_sigma, 
-                                &gayBerneParam.GB_l2b_ratio, 
-                                &gayBerneParam.GB_eps,
+              GayBerneParam gayBerneParam = gayBerneData->getData();
+              
+              newGayBerneType(&atp.ident, 
+                              &gayBerneParam.GB_d, 
+                                &gayBerneParam.GB_l, 
+                              &gayBerneParam.GB_eps,
 				&gayBerneParam.GB_eps_ratio, 
-                                &gayBerneParam.GB_mu, 
-                                &gayBerneParam.GB_nu, &isError);
+                                &gayBerneParam.GB_dw, 
+                                &isError);
 
                 if (isError != 0) {
                     sprintf( painCave.errMsg,

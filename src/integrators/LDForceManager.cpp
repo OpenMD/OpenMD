@@ -88,7 +88,7 @@ namespace oopse {
     }
 
     // Build the hydroProp map:
-    std::map<std::string, HydroProp> hydroPropMap;
+    std::map<std::string, HydroProp*> hydroPropMap;
 
     Molecule* mol;
     StuntDouble* integrableObject;
@@ -130,7 +130,7 @@ namespace oopse {
              integrableObject != NULL;
              integrableObject = mol->nextIntegrableObject(j)) {
 
-          std::map<std::string, HydroProp>::iterator iter = hydroPropMap.find(integrableObject->getType());
+          std::map<std::string, HydroProp*>::iterator iter = hydroPropMap.find(integrableObject->getType());
           if (iter != hydroPropMap.end()) {
             hydroProps_.push_back(iter->second);
           } else {
@@ -143,8 +143,8 @@ namespace oopse {
         }
       }
     } else {
-
-      std::map<std::string, HydroProp> hydroPropMap;
+      
+      std::map<std::string, HydroProp*> hydroPropMap;
       for (mol = info->beginMolecule(i); mol != NULL; 
            mol = info->nextMolecule(i)) {
         for (integrableObject = mol->beginIntegrableObject(j); 
@@ -164,8 +164,8 @@ namespace oopse {
                 if (gayBerneData != NULL) {  
                   GayBerneParam gayBerneParam = gayBerneData->getData();
                   currShape = new Ellipsoid(V3Zero, 
-                                            gayBerneParam.GB_sigma/2.0, 
-                                            gayBerneParam.GB_l2b_ratio*gayBerneParam.GB_sigma/2.0, 
+                                            gayBerneParam.GB_d / 2.0, 
+                                            gayBerneParam.GB_l / 2.0, 
                                             Mat3x3d::identity());
                 } else {
                   sprintf( painCave.errMsg,
@@ -213,37 +213,23 @@ namespace oopse {
               }
             }
           }
-          HydroProps currHydroProp = currShape->getHydroProps(simParams->getViscosity(),simParams->getTargetTemp());
-          std::map<std::string, HydroProp>::iterator iter = hydroPropMap.find(integrableObject->getType());
+          HydroProp* currHydroProp = currShape->getHydroProp(simParams->getViscosity(),simParams->getTargetTemp());
+          std::map<std::string, HydroProp*>::iterator iter = hydroPropMap.find(integrableObject->getType());
           if (iter != hydroPropMap.end()) 
             hydroProps_.push_back(iter->second);
           else {
-            HydroProp myProp;
-            myProp.cor = V3Zero;
-            for (int i1 = 0; i1 < 3; i1++) {
-              for (int j1 = 0; j1 < 3; j1++) {
-                myProp.Xirtt(i1,j1) = currHydroProp.Xi(i1,j1);
-                myProp.Xirrt(i1,j1) = currHydroProp.Xi(i1,j1+3);
-                myProp.Xirtr(i1,j1) = currHydroProp.Xi(i1+3,j1);
-                myProp.Xirrr(i1,j1) = currHydroProp.Xi(i1+3,j1+3);
-              }
-            }
-            CholeskyDecomposition(currHydroProp.Xi, myProp.S);
-            hydroPropMap.insert(std::map<std::string, HydroProp>::value_type(integrableObject->getType(), myProp));
-            hydroProps_.push_back(myProp);
+            currHydroProp->complete();
+            hydroPropMap.insert(std::map<std::string, HydroProp*>::value_type(integrableObject->getType(), currHydroProp));
+            hydroProps_.push_back(currHydroProp);
           }
         }
       }
     }
     variance_ = 2.0 * OOPSEConstant::kb*simParams->getTargetTemp()/simParams->getDt();
-  }
-  
-  
+  }  
 
-
-
-  std::map<std::string, HydroProp> LDForceManager::parseFrictionFile(const std::string& filename) {
-    std::map<std::string, HydroProp> props;
+  std::map<std::string, HydroProp*> LDForceManager::parseFrictionFile(const std::string& filename) {
+    std::map<std::string, HydroProp*> props;
     std::ifstream ifs(filename.c_str());
     if (ifs.is_open()) {
       
@@ -252,68 +238,13 @@ namespace oopse {
     const unsigned int BufferSize = 65535;
     char buffer[BufferSize];   
     while (ifs.getline(buffer, BufferSize)) {
-      StringTokenizer tokenizer(buffer);
-      HydroProp currProp;
-      if (tokenizer.countTokens() >= 40) {
-        std::string atomName = tokenizer.nextToken();
-        currProp.cor[0] = tokenizer.nextTokenAsDouble();
-        currProp.cor[1] = tokenizer.nextTokenAsDouble();
-        currProp.cor[2] = tokenizer.nextTokenAsDouble();
-        
-        currProp.Xirtt(0,0) = tokenizer.nextTokenAsDouble();
-        currProp.Xirtt(0,1) = tokenizer.nextTokenAsDouble();
-        currProp.Xirtt(0,2) = tokenizer.nextTokenAsDouble();
-        currProp.Xirtt(1,0) = tokenizer.nextTokenAsDouble();
-        currProp.Xirtt(1,1) = tokenizer.nextTokenAsDouble();
-        currProp.Xirtt(1,2) = tokenizer.nextTokenAsDouble();
-        currProp.Xirtt(2,0) = tokenizer.nextTokenAsDouble();
-        currProp.Xirtt(2,1) = tokenizer.nextTokenAsDouble();
-        currProp.Xirtt(2,2) = tokenizer.nextTokenAsDouble();
-        
-        currProp.Xirrt(0,0) = tokenizer.nextTokenAsDouble();
-        currProp.Xirrt(0,1) = tokenizer.nextTokenAsDouble();
-        currProp.Xirrt(0,2) = tokenizer.nextTokenAsDouble();
-        currProp.Xirrt(1,0) = tokenizer.nextTokenAsDouble();
-        currProp.Xirrt(1,1) = tokenizer.nextTokenAsDouble();
-        currProp.Xirrt(1,2) = tokenizer.nextTokenAsDouble();
-        currProp.Xirrt(2,0) = tokenizer.nextTokenAsDouble();
-        currProp.Xirrt(2,1) = tokenizer.nextTokenAsDouble();
-        currProp.Xirrt(2,2) = tokenizer.nextTokenAsDouble();
-        
-        currProp.Xirtr(0,0) = tokenizer.nextTokenAsDouble();
-        currProp.Xirtr(0,1) = tokenizer.nextTokenAsDouble();
-        currProp.Xirtr(0,2) = tokenizer.nextTokenAsDouble();
-        currProp.Xirtr(1,0) = tokenizer.nextTokenAsDouble();
-        currProp.Xirtr(1,1) = tokenizer.nextTokenAsDouble();
-        currProp.Xirtr(1,2) = tokenizer.nextTokenAsDouble();
-        currProp.Xirtr(2,0) = tokenizer.nextTokenAsDouble();
-        currProp.Xirtr(2,1) = tokenizer.nextTokenAsDouble();
-        currProp.Xirtr(2,2) = tokenizer.nextTokenAsDouble();
-        
-        currProp.Xirrr(0,0) = tokenizer.nextTokenAsDouble();
-        currProp.Xirrr(0,1) = tokenizer.nextTokenAsDouble();
-        currProp.Xirrr(0,2) = tokenizer.nextTokenAsDouble();
-        currProp.Xirrr(1,0) = tokenizer.nextTokenAsDouble();
-        currProp.Xirrr(1,1) = tokenizer.nextTokenAsDouble();
-        currProp.Xirrr(1,2) = tokenizer.nextTokenAsDouble();
-        currProp.Xirrr(2,0) = tokenizer.nextTokenAsDouble();
-        currProp.Xirrr(2,1) = tokenizer.nextTokenAsDouble();
-        currProp.Xirrr(2,2) = tokenizer.nextTokenAsDouble(); 
-        
-        SquareMatrix<RealType, 6> Xir;
-        Xir.setSubMatrix(0, 0, currProp.Xirtt);
-        Xir.setSubMatrix(0, 3, currProp.Xirrt);
-        Xir.setSubMatrix(3, 0, currProp.Xirtr);
-        Xir.setSubMatrix(3, 3, currProp.Xirrr);
-        CholeskyDecomposition(Xir, currProp.S);            
-        
-        props.insert(std::map<std::string, HydroProp>::value_type(atomName, currProp));
-      }
+      HydroProp* currProp = new HydroProp(buffer);
+      props.insert(std::map<std::string, HydroProp*>::value_type(currProp->getName(), currProp));
     }
-    
+
     return props;
   }
-  
+   
   void LDForceManager::postCalculation() {
     SimInfo::MoleculeIterator i;
     Molecule::IntegrableObjectIterator  j;
@@ -385,13 +316,13 @@ namespace oopse {
             //apply friction force and torque at center of resistance
             A = integrableObject->getA();
             Atrans = A.transpose();
-            Vector3d rcr = Atrans * hydroProps_[index].cor;  
+            Vector3d rcr = Atrans * hydroProps_[index]->getCOR();  
             Vector3d vcdLab = vel + cross(omega, rcr);
             Vector3d vcdBody = A* vcdLab;
-            Vector3d frictionForceBody = -(hydroProps_[index].Xirtt * vcdBody + hydroProps_[index].Xirrt * omega);
+            Vector3d frictionForceBody = -(hydroProps_[index]->getXitt() * vcdBody + hydroProps_[index]->getXirt() * omega);
             Vector3d frictionForceLab = Atrans*frictionForceBody;
             integrableObject->addFrc(frictionForceLab);
-            Vector3d frictionTorqueBody = - (hydroProps_[index].Xirtr * vcdBody + hydroProps_[index].Xirrr * omega);
+            Vector3d frictionTorqueBody = - (hydroProps_[index]->getXitr() * vcdBody + hydroProps_[index]->getXirr() * omega);
             Vector3d frictionTorqueLab = Atrans*frictionTorqueBody;
             integrableObject->addTrq(frictionTorqueLab+ cross(rcr, frictionForceLab));
             
@@ -406,7 +337,7 @@ namespace oopse {
             
           } else {
             //spherical atom
-            Vector3d frictionForce = -(hydroProps_[index].Xirtt *vel);     
+            Vector3d frictionForce = -(hydroProps_[index]->getXitt() * vel);
             Vector3d randomForce;
             Vector3d randomTorque;
             genRandomForceAndTorque(randomForce, randomTorque, index, variance_);
@@ -439,7 +370,7 @@ void LDForceManager::genRandomForceAndTorque(Vector3d& force, Vector3d& torque, 
     Z[5] = randNumGen_.randNorm(0, variance);
      
 
-    generalForce = hydroProps_[index].S*Z;
+    generalForce = hydroProps_[index]->getS()*Z;
     
     force[0] = generalForce[0];
     force[1] = generalForce[1];

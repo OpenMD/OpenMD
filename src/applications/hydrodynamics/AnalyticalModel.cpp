@@ -47,17 +47,17 @@ namespace oopse {
   
   bool AnalyticalModel::calcHydroProps(Shape* shape, RealType viscosity, RealType temperature) {
     
-    HydroProps props;
+    HydroProp* props;
     Sphere* sphere = dynamic_cast<Sphere*>(shape);        
     if (sphere != NULL) {
-      props = sphere->getHydroProps(viscosity, temperature);
+      props = sphere->getHydroProp(viscosity, temperature);
       setCR(props);
       setCD(props);
       return true;
     } else {
       Ellipsoid* ellipsoid = dynamic_cast<Ellipsoid*>(shape);        
       if (ellipsoid != NULL) {
-        props = ellipsoid->getHydroProps(viscosity, temperature); 
+        props = ellipsoid->getHydroProp(viscosity, temperature); 
         setCR(props);
         setCD(props);
         return true;

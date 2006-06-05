@@ -49,20 +49,15 @@
 namespace oopse {
   
   /**
-  * @class GayBerneAtomTypesSectionParser GayBerneAtomTypesSectionParser.hpp "io/GayBerneAtomTypesSectionParser.hpp"
-     */
+   * @class GayBerneAtomTypesSectionParser GayBerneAtomTypesSectionParser.hpp "io/GayBerneAtomTypesSectionParser.hpp"
+   */
   class GayBerneAtomTypesSectionParser : public SectionParser {
-public:
+  public:
     GayBerneAtomTypesSectionParser(ForceFieldOptions& options);
     
-private:
+  private:
     virtual void parseLine(ForceField& ff, const std::string& line, int lineNo);
-    ForceFieldOptions& options_;
-    
-    //???????????            void parseCharge(StringTokenizer& tokenizer, AtomType* atomType);
-    //?????????????      void parseDipole(StringTokenizer& tokenizer, DirectionalAtomType* dAtomType);
-    //????????????      void parseQuadruple(StringTokenizer& tokenizer, DirectionalAtomType* dAtomType);
-    //???????????????            void parseElectroBodyFrame(StringTokenizer& tokenizer, DirectionalAtomType* dAtomType);
+    ForceFieldOptions& options_;    
   };
   
   

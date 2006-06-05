@@ -43,7 +43,7 @@
 #define HYDRODYNAMICS_SHAPE_HPP
 #include <utility>
 #include "math/Vector3.hpp"
-#include "utils/HydroProps.hpp"
+#include "hydrodynamics/HydroProp.hpp"
 
 namespace oopse {
   
@@ -54,7 +54,7 @@ namespace oopse {
     virtual bool isInterior(Vector3d pos) = 0;
     virtual std::pair<Vector3d, Vector3d> getBoundingBox() = 0;
     virtual bool hasAnalyticalSolution() = 0;
-    virtual HydroProps getHydroProps(RealType viscosity, RealType temperature) = 0;
+    virtual HydroProp* getHydroProp(RealType viscosity, RealType temperature) = 0;
   };  
 }
 #endif

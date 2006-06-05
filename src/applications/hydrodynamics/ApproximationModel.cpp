@@ -72,8 +72,8 @@ namespace oopse {
   bool ApproximationModel::calcHydroProps(Shape* shape, RealType viscosity, RealType temperature) {
     
     bool ret = true;
-    HydroProps cr;
-    HydroProps cd;
+    HydroProp* cr;
+    HydroProp* cd;
     calcHydroPropsAtCR(beads_, viscosity, temperature, cr);
     //calcHydroPropsAtCD(beads_, viscosity, temperature, cd);
     setCR(cr);
@@ -82,7 +82,7 @@ namespace oopse {
     return true;    
   }
   
-  bool ApproximationModel::calcHydroPropsAtCR(std::vector<BeadParam>& beads, RealType viscosity, RealType temperature, HydroProps& cr) {
+  bool ApproximationModel::calcHydroPropsAtCR(std::vector<BeadParam>& beads, RealType viscosity, RealType temperature, HydroProp* cr) {
     
     int nbeads = beads.size();
     DynamicRectMatrix<RealType> B(3*nbeads, 3*nbeads);
@@ -213,16 +213,23 @@ namespace oopse {
     Xirtr *= OOPSEConstant::kb * temperature;
     Xirrr *= OOPSEConstant::kb * temperature;
     
+    Mat6x6d Xi, D;
 
-    cr.center = ror;
-    cr.Xi.setSubMatrix(0, 0, Xirtt);
-    cr.Xi.setSubMatrix(0, 3, Xirtr);
-    cr.Xi.setSubMatrix(3, 0, Xirtr);
-    cr.Xi.setSubMatrix(3, 3, Xirrr);
-    cr.D.setSubMatrix(0, 0, Drtt);
-    cr.D.setSubMatrix(0, 3, Drrt);
-    cr.D.setSubMatrix(3, 0, Drtr);
-    cr.D.setSubMatrix(3, 3, Drrr);    
+    cr->setCOR(ror);
+
+    Xi.setSubMatrix(0, 0, Xirtt);
+    Xi.setSubMatrix(0, 3, Xirtr);
+    Xi.setSubMatrix(3, 0, Xirtr);
+    Xi.setSubMatrix(3, 3, Xirrr);
+
+    cr->setXi(Xi);
+
+    D.setSubMatrix(0, 0, Drtt);
+    D.setSubMatrix(0, 3, Drrt);
+    D.setSubMatrix(3, 0, Drtr);
+    D.setSubMatrix(3, 3, Drrr);    
+
+    cr->setD(D);
     
     std::cout << "-----------------------------------------\n";
     std::cout << "center of resistance :" << std::endl;
@@ -248,7 +255,7 @@ namespace oopse {
     return true;
 }
   
-  bool ApproximationModel::calcHydroPropsAtCD(std::vector<BeadParam>& beads, RealType viscosity, RealType temperature, HydroProps& cr) {
+  bool ApproximationModel::calcHydroPropsAtCD(std::vector<BeadParam>& beads, RealType viscosity, RealType temperature, HydroProp* cr) {
     
     int nbeads = beads.size();
     DynamicRectMatrix<RealType> B(3*nbeads, 3*nbeads);
@@ -398,12 +405,18 @@ namespace oopse {
     //Xid /= OOPSEConstant::energyConvert;
     Xid *= OOPSEConstant::kb * temperature;
 
-    cr.center = rod;
-    cr.D.setSubMatrix(0, 0, Ddtt);
-    cr.D.setSubMatrix(0, 3, Ddtr);
-    cr.D.setSubMatrix(3, 0, Ddtr);
-    cr.D.setSubMatrix(3, 3, Ddrr);
-    cr.Xi = Xid;
+    Mat6x6d Xi, D;
+
+    cr->setCOR(rod);
+
+    cr->setXi(Xid);
+
+    D.setSubMatrix(0, 0, Ddtt);
+    D.setSubMatrix(0, 3, Ddtr);
+    D.setSubMatrix(3, 0, Ddtr);
+    D.setSubMatrix(3, 3, Ddrr);
+
+    cr->setD(D);
 
     std::cout << "viscosity = " << viscosity << std::endl;
     std::cout << "temperature = " << temperature << std::endl;

@@ -55,8 +55,10 @@ namespace oopse {
       DefineOptionalParameterWithDefaultValue(AngleUnitScaling, "AngleUnitScaling", 1.0);
       DefineOptionalParameterWithDefaultValue(TorsionAngleConvention, "TorsionAngleConvention", "180_is_trans");
       DefineOptionalParameterWithDefaultValue(vdw14scale, "vdW-14-scale", 0.0);
-      DefineOptionalParameterWithDefaultValue(electrostatic14scale, "electrostatic-14-scale", 0.0);
+      DefineOptionalParameterWithDefaultValue(electrostatic14scale, "electrostatic-14-scale", 0.0)
       DefineOptionalParameterWithDefaultValue(dielectric, "dielectric", 1.0);
+      DefineOptionalParameterWithDefaultValue(GayBerneMu, "GayBerneMu", 2.0);
+      DefineOptionalParameterWithDefaultValue(GayBerneNu, "GayBerneNu", 1.0);
     }
 
 
@@ -71,6 +73,8 @@ namespace oopse {
       fortranForceOptions.DistanceMixingRule = ARITHMETIC_MIXING_RULE;
     }else if(DistanceMix == "GEOMETRIC"){
       fortranForceOptions.DistanceMixingRule = GEOMETRIC_MIXING_RULE;
+    }else if(DistanceMix == "CUBIC"){
+      fortranForceOptions.DistanceMixingRule = CUBIC_MIXING_RULE;
     }else{
       fortranForceOptions.DistanceMixingRule = ARITHMETIC_MIXING_RULE;
     }
@@ -80,6 +84,8 @@ namespace oopse {
       fortranForceOptions.EnergyMixingRule = ARITHMETIC_MIXING_RULE;
     }else if(EnergyMix == "GEOMETRIC"){
       fortranForceOptions.EnergyMixingRule = GEOMETRIC_MIXING_RULE;
+    }else if(EnergyMix == "HHG"){
+      fortranForceOptions.EnergyMixingRule = HHG_MIXING_RULE;
     }else{
       fortranForceOptions.EnergyMixingRule = GEOMETRIC_MIXING_RULE;
     }

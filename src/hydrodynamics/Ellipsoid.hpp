@@ -53,7 +53,7 @@ namespace oopse {
     virtual std::pair<Vector3d, Vector3d> getBoundingBox();
     virtual bool hasAnalyticalSolution() {return true;}
     
-    virtual HydroProps getHydroProps(RealType viscosity, RealType temperature);
+    virtual HydroProp* getHydroProp(RealType viscosity, RealType temperature);
     
     
     RealType getRMajor() {return rMajor_;}

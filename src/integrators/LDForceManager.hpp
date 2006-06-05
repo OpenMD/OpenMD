@@ -53,16 +53,7 @@ namespace oopse {
     StuntDouble* sd;
     Shape* shape;
   };
-  
-  struct HydroProp{
-    Vector3d cor;
-    Mat3x3d Xirtt;
-    Mat3x3d Xirrt; //Xirrt == Xirtr
-    Mat3x3d Xirtr;
-    Mat3x3d Xirrr;
-    Mat6x6d S;
-  };
-  
+    
   /**
    * @class LDForceManager
    * Force manager for Lagevin Dynamics applying friction and random 
@@ -77,9 +68,9 @@ namespace oopse {
     virtual void postCalculation();
     
   private:
-    std::map<std::string, HydroProp> parseFrictionFile(const std::string& filename);    
+    std::map<std::string, HydroProp*> parseFrictionFile(const std::string& filename);    
     void genRandomForceAndTorque(Vector3d& force, Vector3d& torque, unsigned int index, RealType variance);
-    std::vector<HydroProp> hydroProps_;
+    std::vector<HydroProp*> hydroProps_;
     SeqRandNumGen randNumGen_;    
     RealType variance_;
     RealType langevinBufferRadius_;

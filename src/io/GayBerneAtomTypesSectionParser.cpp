@@ -55,8 +55,8 @@ namespace oopse {
 void GayBerneAtomTypesSectionParser::parseLine(ForceField& ff,const std::string& line, int lineNo){
     StringTokenizer tokenizer(line);
     int nTokens = tokenizer.countTokens();    
-    //in AtomTypeSection, a line at least contains 8 tokens
-    //atomTypeName and 6 different gayBerne parameters
+    //in AtomTypeSection, a line at least contains 6 tokens
+    //atomTypeName and 5 different gayBerne parameters
     if (nTokens < 1)  {
         sprintf(painCave.errMsg, "GayBerneAtomTypesSectionParser Error: Not enough tokens at line %d\n",
                 lineNo);
@@ -71,13 +71,11 @@ void GayBerneAtomTypesSectionParser::parseLine(ForceField& ff,const std::string&
             
             if (dAtomType != NULL) {
                 GayBerneParam gayBerne;
-                gayBerne.GB_sigma = tokenizer.nextTokenAsDouble();
-                gayBerne.GB_l2b_ratio = tokenizer.nextTokenAsDouble();  
+                gayBerne.GB_d = tokenizer.nextTokenAsDouble();
+                gayBerne.GB_l = tokenizer.nextTokenAsDouble();  
                 gayBerne.GB_eps = tokenizer.nextTokenAsDouble();
                 gayBerne.GB_eps_ratio = tokenizer.nextTokenAsDouble();
-                gayBerne.GB_mu = tokenizer.nextTokenAsDouble();
-                gayBerne.GB_nu = tokenizer.nextTokenAsDouble();
- 
+                gayBerne.GB_dw = tokenizer.nextTokenAsDouble();
                 
                 dAtomType->addProperty(new GayBerneParamGenericData("GayBerne", gayBerne));
                 dAtomType->setGayBerne();

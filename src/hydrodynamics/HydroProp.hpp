@@ -39,20 +39,50 @@
  * such damages.
  */
 
-#ifndef UTILS_HYDROPROPS_HPP
-#define UTILS_HYDROPROPS_HPP
-
+#ifndef HYDRODYNAMICS_HYDROPROP_HPP
+#define HYDRODYNAMICS_HYDROPROP_HPP
 #include "math/Vector3.hpp"
-#include "math/SquareMatrix.hpp"
-
+#include "math/SquareMatrix3.hpp"
 namespace oopse {
-  
-  struct HydroProps {
-    Vector3d center;
-    Mat6x6d Xi;
-    Mat6x6d D;
+
+  class HydroProp {
+
+  public:
+    HydroProp();
+    HydroProp(Vector3d cor, Mat6x6d Xi, Mat6x6d D);
+    HydroProp(const std::string frictionLine);
+    ~HydroProp() { } ;
+    void complete();
+    void setCOR(Vector3d cor) {cor_ = cor; hasCOR = true;}
+    void setXi(Mat6x6d Xi) {Xi_ = Xi; hasXi = true;}
+    void setD(Mat6x6d D) {D_ = D;}
+    void setName(std::string name) {name_ = name;}
+
+    Vector3d getCOR() {return cor_;}
+    Mat3x3d getXitt() {return Xitt_;}
+    Mat3x3d getXitr() {return Xitr_;}
+    Mat3x3d getXirt() {return Xirt_;}
+    Mat3x3d getXirr() {return Xirr_;}
+    Mat6x6d getS() {return S_;}
+    Mat6x6d getD() {return D_;}
+    Mat6x6d getXi() {return Xi_;}
+    std::string getName() {return name_;}    
+
+  private:
+    
+    std::string name_;
+    Vector3d cor_;
+    Mat6x6d Xi_;
+    Mat6x6d D_;
+    Mat3x3d Xitt_;
+    Mat3x3d Xirt_; //Xirrt == Xirtr
+    Mat3x3d Xitr_;
+    Mat3x3d Xirr_;
+    Mat6x6d S_;
+    bool hasCOR;
+    bool hasXi;
+
   };
-  
 }
 
 #endif

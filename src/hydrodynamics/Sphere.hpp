@@ -52,7 +52,7 @@ namespace oopse {
     virtual bool isInterior(Vector3d pos);
     virtual std::pair<Vector3d, Vector3d> getBoundingBox();
     virtual bool hasAnalyticalSolution() {return true;}    
-    virtual HydroProps getHydroProps(RealType viscosity, RealType temperature);
+    virtual HydroProp* getHydroProp(RealType viscosity, RealType temperature);
     
     RealType getRadius() {return radius_;}
     

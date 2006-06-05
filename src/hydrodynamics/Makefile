@@ -1,6 +1,7 @@
 Package = hydrodynamics
 
 Source    = \
+        HydroProp.cpp \
 	Sphere.cpp \
         Ellipsoid.cpp \
 

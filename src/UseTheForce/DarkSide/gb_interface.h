@@ -47,17 +47,19 @@
 #include "config.h"
 
 #define newGayBerneType FC_FUNC(newgbtype, NEWGBTYPE)
+#define completeGBFF FC_FUNC(completegbff, COMPLETEGBFF)
 #define destroyGayBerneTypes FC_FUNC(destroygbtypes, DESTROYGBTYPES)
 
 extern "C"{
   void newGayBerneType( int* ident,
-                        RealType* GB_sigma,
-                        RealType* GB_l2b_ratio,
+                        RealType* GB_d,
+                        RealType* GB_l,
                         RealType* GB_eps,
                         RealType* GB_eps_ratio,
-                        RealType* GB_mu,
-                        RealType* GB_nu,
+                        RealType* GB_dw,
                         int* status);
+
+  void completeGBFF( int* status);
 
   void destroyGayBerneTypes( void );
 

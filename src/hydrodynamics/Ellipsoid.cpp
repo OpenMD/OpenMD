@@ -76,7 +76,7 @@ namespace oopse {
     return boundary;
   }
   
-  HydroProps Ellipsoid::getHydroProps(RealType viscosity, RealType temperature) {
+  HydroProp* Ellipsoid::getHydroProp(RealType viscosity, RealType temperature) {
     
     RealType a = rMinor_;
     RealType b = rMajor_;
@@ -100,25 +100,27 @@ namespace oopse {
     RealType rotMajor = 32.0/3.0 * NumericConstant::PI * viscosity *(a2*a2 - b2*b2)/((2.0*a2-b2)*S-2.0*a);
     
     
-    HydroProps props;
+    Mat6x6d Xi, XiCopy, D;
     
-    props.Xi(0,0) = transMajor;
-    props.Xi(1,1) = transMajor;
-    props.Xi(2,2) = transMinor;
-    props.Xi(3,3) = rotMajor;
-    props.Xi(4,4) = rotMajor;
-    props.Xi(5,5) = rotMinor;
+    Xi(0,0) = transMajor;
+    Xi(1,1) = transMajor;
+    Xi(2,2) = transMinor;
+    Xi(3,3) = rotMajor;
+    Xi(4,4) = rotMajor;
+    Xi(5,5) = rotMinor;
     
     const RealType convertConstant = 6.023; //convert poise.angstrom to amu/fs
-    props.Xi *= convertConstant;    
+    Xi *= convertConstant;    
     
-    Mat6x6d XiCopy = props.Xi;
-    invertMatrix(XiCopy, props.D);
+    XiCopy = Xi;
+    invertMatrix(XiCopy, D);
     RealType kt = OOPSEConstant::kB * temperature;
-    props.D *= kt;
-    props.Xi *= OOPSEConstant::kb * temperature;
+    D *= kt;
+    Xi *= OOPSEConstant::kb * temperature;
    
-    return props;
+    HydroProp* hprop = new HydroProp(V3Zero, Xi, D);
+
+    return hprop;
 
   }  
 }

@@ -61,8 +61,8 @@ namespace oopse {
   private:
     virtual bool createBeads(std::vector<BeadParam>& beads) = 0;
     
-    bool calcHydroPropsAtCR(std::vector<BeadParam>& beads, RealType viscosity, RealType temperature, HydroProps& cr);
-    bool calcHydroPropsAtCD(std::vector<BeadParam>& beads, RealType viscosity, RealType temperature, HydroProps& cd);
+    bool calcHydroPropsAtCR(std::vector<BeadParam>& beads, RealType viscosity, RealType temperature, HydroProp* cr);
+    bool calcHydroPropsAtCD(std::vector<BeadParam>& beads, RealType viscosity, RealType temperature, HydroProp* cd);
     std::vector<BeadParam> beads_;
 };
   

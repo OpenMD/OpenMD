@@ -46,6 +46,7 @@ module gayberne
   use simulation
   use atype_module
   use vector_class
+  use linearalgebra
   use status
   use lj
 #ifdef IS_MPI
@@ -59,97 +60,224 @@ module gayberne
 #define __FORTRAN90
 #include "UseTheForce/DarkSide/fInteractionMap.h"
 
+  logical, save :: haveGBMap = .false.
+  logical, save :: haveMixingMap = .false.
+  real(kind=dp), save :: mu = 2.0_dp
+  real(kind=dp), save :: nu = 1.0_dp
+
+
   public :: newGBtype
+  public :: complete_GB_FF
   public :: do_gb_pair
-  public :: do_gb_lj_pair
   public :: getGayBerneCut
   public :: destroyGBtypes
 
   type :: GBtype
      integer          :: atid
-     real(kind = dp ) :: sigma
-     real(kind = dp ) :: l2b_ratio 
+     real(kind = dp ) :: d
+     real(kind = dp ) :: l
      real(kind = dp ) :: eps
      real(kind = dp ) :: eps_ratio 
-     real(kind = dp ) :: mu
-     real(kind = dp ) :: nu
-     real(kind = dp ) :: sigma_l
-     real(kind = dp ) :: eps_l 
+     real(kind = dp ) :: dw
+     logical          :: isLJ
   end type GBtype
-
+  
   type, private :: GBList
      integer               :: nGBtypes = 0
      integer               :: currentGBtype = 0
      type(GBtype), pointer :: GBtypes(:)      => null()
      integer, pointer      :: atidToGBtype(:) => null()
   end type GBList
-
+  
   type(GBList), save :: GBMap
-
+  
+  type :: GBMixParameters
+     real(kind=DP) :: sigma0
+     real(kind=DP) :: eps0
+     real(kind=DP) :: dw
+     real(kind=DP) :: x2
+     real(kind=DP) :: xa2
+     real(kind=DP) :: xai2
+     real(kind=DP) :: xp2
+     real(kind=DP) :: xpap2
+     real(kind=DP) :: xpapi2
+  end type GBMixParameters
+  
+  type(GBMixParameters), dimension(:,:), allocatable :: GBMixingMap
+  
 contains
-
-  subroutine newGBtype(c_ident, sigma, l2b_ratio, eps, eps_ratio, mu, nu, &
-       status)
+  
+  subroutine newGBtype(c_ident, d, l, eps, eps_ratio, dw, status)
     
     integer, intent(in) :: c_ident
-    real( kind = dp ), intent(in) :: sigma, l2b_ratio, eps, eps_ratio
-    real( kind = dp ), intent(in) :: mu, nu
+    real( kind = dp ), intent(in) :: d, l, eps, eps_ratio, dw
     integer, intent(out) :: status
-
-    integer :: nGBTypes, ntypes, myATID
+    
+    integer :: nGBTypes, nLJTypes, ntypes, myATID
     integer, pointer :: MatchList(:) => null()
     integer :: current, i
     status = 0
-
+    
     if (.not.associated(GBMap%GBtypes)) then
-                               
+       
        call getMatchingElementList(atypes, "is_GayBerne", .true., &
             nGBtypes, MatchList)
        
-       GBMap%nGBtypes = nGBtypes
-
-       allocate(GBMap%GBtypes(nGBtypes))
-
+       call getMatchingElementList(atypes, "is_LennardJones", .true., &
+            nLJTypes, MatchList)
+       
+       GBMap%nGBtypes = nGBtypes + nLJTypes
+       
+       allocate(GBMap%GBtypes(nGBtypes + nLJTypes))
+       
        ntypes = getSize(atypes)
        
-       allocate(GBMap%atidToGBtype(ntypes))
-       
-       !! initialize atidToGBtype to -1 so that we can use this
-       !! array to figure out which atom comes first in the GBLJ 
-       !! routine
-
-       do i = 1, ntypes
-          GBMap%atidToGBtype(i) = -1
-       enddo
-
+       allocate(GBMap%atidToGBtype(ntypes))       
     endif
-
+    
     GBMap%currentGBtype = GBMap%currentGBtype + 1
     current = GBMap%currentGBtype
-
+    
     myATID = getFirstMatchingElement(atypes, "c_ident", c_ident)
-    GBMap%atidToGBtype(myATID)        = current
-    GBMap%GBtypes(current)%atid       = myATID
-    GBMap%GBtypes(current)%sigma      = sigma
-    GBMap%GBtypes(current)%l2b_ratio  = l2b_ratio
-    GBMap%GBtypes(current)%eps        = eps
-    GBMap%GBtypes(current)%eps_ratio  = eps_ratio
-    GBMap%GBtypes(current)%mu         = mu
-    GBMap%GBtypes(current)%nu         = nu
-    GBMap%GBtypes(current)%sigma_l    = sigma*l2b_ratio
-    GBMap%GBtypes(current)%eps_l      = eps*eps_ratio
-
+    
+    GBMap%atidToGBtype(myATID)       = current
+    GBMap%GBtypes(current)%atid      = myATID
+    GBMap%GBtypes(current)%d         = d
+    GBMap%GBtypes(current)%l         = l
+    GBMap%GBtypes(current)%eps       = eps
+    GBMap%GBtypes(current)%eps_ratio = eps_ratio
+    GBMap%GBtypes(current)%dw        = dw
+    GBMap%GBtypes(current)%isLJ      = .false.
+    
     return
   end subroutine newGBtype
-
   
+  subroutine complete_GB_FF(status)
+    integer :: status
+    integer :: i, j, l, m, lm, function_type
+    real(kind=dp) :: thisDP, sigma
+    integer :: alloc_stat, iTheta, iPhi, nSteps, nAtypes, myATID, current
+    logical :: thisProperty
+    
+    status = 0
+    if (GBMap%currentGBtype == 0) then
+       call handleError("complete_GB_FF", "No members in GBMap")
+       status = -1
+       return
+    end if
+    
+    nAtypes = getSize(atypes)
+    
+    if (nAtypes == 0) then
+       status = -1
+       return
+    end if
+    
+    ! atypes comes from c side
+    do i = 1, nAtypes
+       
+       myATID = getFirstMatchingElement(atypes, 'c_ident', i)
+       call getElementProperty(atypes, myATID, "is_LennardJones", thisProperty)
+       
+       if (thisProperty) then
+          GBMap%currentGBtype = GBMap%currentGBtype + 1
+          current = GBMap%currentGBtype
+          
+          GBMap%atidToGBtype(myATID) = current
+          GBMap%GBtypes(current)%atid      = myATID       
+          GBMap%GBtypes(current)%isLJ      = .true.          
+          GBMap%GBtypes(current)%d         = getSigma(myATID)
+          GBMap%GBtypes(current)%l         = GBMap%GBtypes(current)%d
+          GBMap%GBtypes(current)%eps       = getEpsilon(myATID)
+          GBMap%GBtypes(current)%eps_ratio = 1.0_dp
+          GBMap%GBtypes(current)%dw        = 1.0_dp
+          
+       endif
+       
+    end do
+    
+    haveGBMap = .true.
+    
+  end subroutine complete_GB_FF
+
+  subroutine createGBMixingMap()
+    integer :: nGBtypes, i, j
+    real (kind = dp) :: d1, l1, e1, er1, dw1
+    real (kind = dp) :: d2, l2, e2, er2, dw2
+    real (kind = dp) :: er, ermu, xp, ap2
+
+    if (GBMap%currentGBtype == 0) then
+       call handleError("GB", "No members in GBMap")
+       return
+    end if
+    
+    nGBtypes = GBMap%nGBtypes
+
+    if (.not. allocated(GBMixingMap)) then
+       allocate(GBMixingMap(nGBtypes, nGBtypes))
+    endif
+
+    do i = 1, nGBtypes
+
+       d1 = GBMap%GBtypes(i)%d
+       l1 = GBMap%GBtypes(i)%l
+       e1 = GBMap%GBtypes(i)%eps
+       er1 = GBMap%GBtypes(i)%eps_ratio
+       dw1 = GBMap%GBtypes(i)%dw
+
+       do j = i, nGBtypes
+
+          d2 = GBMap%GBtypes(j)%d
+          l2 = GBMap%GBtypes(j)%l
+          e2 = GBMap%GBtypes(j)%eps
+          er2 = GBMap%GBtypes(j)%eps_ratio
+          dw2 = GBMap%GBtypes(j)%dw
+
+          GBMixingMap(i,j)%sigma0 = sqrt(d1*d1 + d2*d2)
+          GBMixingMap(i,j)%xa2 = (l1*l1 - d1*d1)/(l1*l1 + d2*d2)
+          GBMixingMap(i,j)%xai2 = (l2*l2 - d2*d2)/(l2*l2 + d1*d1)
+          GBMixingMap(i,j)%x2 = (l1*l1 - d1*d1) * (l2*l2 - d2*d2) / &
+               ((l2*l2 + d1*d1) * (l1*l1 + d2*d2))
+
+          ! assumed LB mixing rules for now:
+
+          GBMixingMap(i,j)%dw = 0.5_dp * (dw1 + dw2)
+          GBMixingMap(i,j)%eps0 = sqrt(e1 * e2)
+
+          er = sqrt(er1 * er2)
+          ermu = er**(1.0_dp / mu)
+          xp = (1.0_dp - ermu) / (1.0_dp + ermu)
+          ap2 = 1.0_dp / (1.0_dp + ermu)
+
+          GBMixingMap(i,j)%xp2 = xp*xp
+          GBMixingMap(i,j)%xpap2 = xp*ap2
+          GBMixingMap(i,j)%xpapi2 = xp/ap2
+          
+          if (i.ne.j) then
+             GBMixingMap(j,i)%sigma0 = GBMixingMap(i,j)%sigma0
+             GBMixingMap(j,i)%dw     = GBMixingMap(i,j)%dw    
+             GBMixingMap(j,i)%eps0   = GBMixingMap(i,j)%eps0  
+             GBMixingMap(j,i)%x2     = GBMixingMap(i,j)%x2    
+             GBMixingMap(j,i)%xa2    = GBMixingMap(i,j)%xa2   
+             GBMixingMap(j,i)%xai2   = GBMixingMap(i,j)%xai2  
+             GBMixingMap(j,i)%xp2    = GBMixingMap(i,j)%xp2   
+             GBMixingMap(j,i)%xpap2  = GBMixingMap(i,j)%xpap2 
+             GBMixingMap(j,i)%xpapi2 = GBMixingMap(i,j)%xpapi2
+          endif
+       enddo
+    enddo
+    haveMixingMap = .true.
+    
+  end subroutine createGBMixingMap
+  
+
   !! gay berne cutoff should be a parameter in globals, this is a temporary 
   !! work around - this should be fixed when gay berne is up and running
 
   function getGayBerneCut(atomID) result(cutValue)
     integer, intent(in) :: atomID 
     integer :: gbt1
-    real(kind=dp) :: cutValue, sigma, l2b_ratio
+    real(kind=dp) :: cutValue, l, d
 
     if (GBMap%currentGBtype == 0) then
        call handleError("GB", "No members in GBMap")
@@ -157,14 +285,14 @@ contains
     end if
 
     gbt1 = GBMap%atidToGBtype(atomID)
-    sigma = GBMap%GBtypes(gbt1)%sigma
-    l2b_ratio = GBMap%GBtypes(gbt1)%l2b_ratio
+    l = GBMap%GBtypes(gbt1)%l
+    d = GBMap%GBtypes(gbt1)%d   
+    cutValue = 2.5_dp*max(l,d)
 
-    cutValue = l2b_ratio*sigma*2.5_dp
   end function getGayBerneCut
 
   subroutine do_gb_pair(atom1, atom2, d, r, r2, sw, vpair, fpair, &
-       pot, A, f, t, do_pot)
+       pot, Amat, f, t, do_pot)
     
     integer, intent(in) :: atom1, atom2
     integer :: atid1, atid2, gbt1, gbt2, id1, id2
@@ -172,42 +300,22 @@ contains
     real (kind=dp), dimension(3), intent(in) :: d
     real (kind=dp), dimension(3), intent(inout) :: fpair
     real (kind=dp) :: pot, sw, vpair
-    real (kind=dp), dimension(9,nLocal) :: A
+    real (kind=dp), dimension(9,nLocal) :: Amat
     real (kind=dp), dimension(3,nLocal) :: f
     real (kind=dp), dimension(3,nLocal) :: t
     logical, intent(in) :: do_pot
-    real (kind = dp), dimension(3) :: ul1
-    real (kind = dp), dimension(3) :: ul2
+    real (kind = dp), dimension(3) :: ul1, ul2, rxu1, rxu2, uxu, rhat
 
-    real(kind=dp) :: sigma, l2b_ratio, epsilon, eps_ratio, mu, nu, sigma_l, eps_l
-    real(kind=dp) :: chi, chiprime, emu, s2
-    real(kind=dp) :: r4, rdotu1, rdotu2, u1dotu2, g, gp, gpi, gmu, gmum
-    real(kind=dp) :: curlyE, enu, enum, eps, dotsum, dotdiff, ds2, dd2
-    real(kind=dp) :: opXdot, omXdot, opXpdot, omXpdot, pref, gfact
-    real(kind=dp) :: BigR, Ri, Ri2, Ri6, Ri7, Ri12, Ri13, R126, R137
-    real(kind=dp) :: dru1dx, dru1dy, dru1dz
-    real(kind=dp) :: dru2dx, dru2dy, dru2dz
-    real(kind=dp) :: dBigRdx, dBigRdy, dBigRdz
-    real(kind=dp) :: dBigRdu1x, dBigRdu1y, dBigRdu1z
-    real(kind=dp) :: dBigRdu2x, dBigRdu2y, dBigRdu2z
-    real(kind=dp) :: dUdx, dUdy, dUdz
-    real(kind=dp) :: dUdu1x, dUdu1y, dUdu1z, dUdu2x, dUdu2y, dUdu2z
-    real(kind=dp) :: dcE, dcEdu1x, dcEdu1y, dcEdu1z, dcEdu2x, dcEdu2y, dcEdu2z
-    real(kind=dp) :: depsdu1x, depsdu1y, depsdu1z, depsdu2x, depsdu2y, depsdu2z
-    real(kind=dp) :: drdx, drdy, drdz
-    real(kind=dp) :: dgdx, dgdy, dgdz
-    real(kind=dp) :: dgdu1x, dgdu1y, dgdu1z, dgdu2x, dgdu2y, dgdu2z
-    real(kind=dp) :: dgpdx, dgpdy, dgpdz
-    real(kind=dp) :: dgpdu1x, dgpdu1y, dgpdu1z, dgpdu2x, dgpdu2y, dgpdu2z
-    real(kind=dp) :: line1a, line1bx, line1by, line1bz
-    real(kind=dp) :: line2a, line2bx, line2by, line2bz
-    real(kind=dp) :: line3a, line3b, line3, line3x, line3y, line3z
-    real(kind=dp) :: term1x, term1y, term1z, term1u1x, term1u1y, term1u1z
-    real(kind=dp) :: term1u2x, term1u2y, term1u2z
-    real(kind=dp) :: term2a, term2b, term2u1x, term2u1y, term2u1z
-    real(kind=dp) :: term2u2x, term2u2y, term2u2z
-    real(kind=dp) :: yick1, yick2, mess1, mess2
-    
+    real (kind = dp) :: sigma0, dw, eps0, x2, xa2, xai2, xp2, xpap2, xpapi2
+    real (kind = dp) :: e1, e2, eps, sigma, s3, s03, au, bu, a, b, g, g2
+    real (kind = dp) :: U, BigR, R3, R6, R7, R12, R13, H, Hp, fx, fy, fz
+    real (kind = dp) :: dUdr, dUda, dUdb, dUdg, pref1, pref2
+    logical :: i_is_lj, j_is_lj
+
+    if (.not.haveMixingMap) then
+       call createGBMixingMap()
+    endif
+
 #ifdef IS_MPI
     atid1 = atid_Row(atom1)
     atid2 = atid_Col(atom2)
@@ -217,29 +325,21 @@ contains
 #endif
 
     gbt1 = GBMap%atidToGBtype(atid1)
-    gbt2 = GBMap%atidToGBtype(atid2)
+    gbt2 = GBMap%atidToGBtype(atid2)    
 
-    if (gbt1 .eq. gbt2) then
-       sigma     = GBMap%GBtypes(gbt1)%sigma      
-       l2b_ratio = GBMap%GBtypes(gbt1)%l2b_ratio  
-       epsilon   = GBMap%GBtypes(gbt1)%eps        
-       eps_ratio = GBMap%GBtypes(gbt1)%eps_ratio  
-       mu        = GBMap%GBtypes(gbt1)%mu         
-       nu        = GBMap%GBtypes(gbt1)%nu         
-       sigma_l   = GBMap%GBtypes(gbt1)%sigma_l    
-       eps_l     = GBMap%GBtypes(gbt1)%eps_l      
-    else
-       call handleError("GB", "GB-pair was called with two different GB types!")
-    endif
+    i_is_LJ = GBMap%GBTypes(gbt1)%isLJ
+    j_is_LJ = GBMap%GBTypes(gbt2)%isLJ
 
-    s2 = (l2b_ratio)**2
-    emu = (eps_ratio)**(1.0d0/mu)
-
-    chi = (s2 - 1.0d0)/(s2 + 1.0d0)
-    chiprime = (1.0d0 - emu)/(1.0d0 + emu)
-
-    r4 = r2*r2
-
+    sigma0 = GBMixingMap(gbt1, gbt2)%sigma0
+    dw     = GBMixingMap(gbt1, gbt2)%dw    
+    eps0   = GBMixingMap(gbt1, gbt2)%eps0  
+    x2     = GBMixingMap(gbt1, gbt2)%x2    
+    xa2    = GBMixingMap(gbt1, gbt2)%xa2   
+    xai2   = GBMixingMap(gbt1, gbt2)%xai2  
+    xp2    = GBMixingMap(gbt1, gbt2)%xp2   
+    xpap2  = GBMixingMap(gbt1, gbt2)%xpap2 
+    xpapi2 = GBMixingMap(gbt1, gbt2)%xpapi2
+    
 #ifdef IS_MPI
     ul1(1) = A_Row(7,atom1)
     ul1(2) = A_Row(8,atom1)
@@ -249,260 +349,129 @@ contains
     ul2(2) = A_Col(8,atom2)
     ul2(3) = A_Col(9,atom2)
 #else
-    ul1(1) = A(7,atom1)
-    ul1(2) = A(8,atom1)
-    ul1(3) = A(9,atom1)
+    ul1(1) = Amat(7,atom1)
+    ul1(2) = Amat(8,atom1)
+    ul1(3) = Amat(9,atom1)
 
-    ul2(1) = A(7,atom2)
-    ul2(2) = A(8,atom2)
-    ul2(3) = A(9,atom2)
+    ul2(1) = Amat(7,atom2)
+    ul2(2) = Amat(8,atom2)
+    ul2(3) = Amat(9,atom2)
 #endif
     
-    dru1dx = ul1(1)
-    dru2dx = ul2(1)
-    dru1dy = ul1(2)
-    dru2dy = ul2(2)
-    dru1dz = ul1(3)
-    dru2dz = ul2(3)
-        
-    drdx = d(1) / r
-    drdy = d(2) / r
-    drdz = d(3) / r
-    
-    ! do some dot products:
-    ! NB the r in these dot products is the actual intermolecular vector,
-    ! and is not the unit vector in that direction.
-    
-    rdotu1 = d(1)*ul1(1) + d(2)*ul1(2) + d(3)*ul1(3)
-    rdotu2 = d(1)*ul2(1) + d(2)*ul2(2) + d(3)*ul2(3)
-    u1dotu2 = ul1(1)*ul2(1) + ul1(2)*ul2(2) +  ul1(3)*ul2(3)
+    if (i_is_LJ) then
+       a = 0.0_dp
+       ul1 = 0.0_dp
+    else
+       a = d(1)*ul1(1)   + d(2)*ul1(2)   + d(3)*ul1(3)
+    endif
 
-    ! This stuff is all for the calculation of g(Chi) and dgdx
-    ! Line numbers roughly follow the lines in equation A25 of Luckhurst 
-    !   et al. Liquid Crystals 8, 451-464 (1990).
-    ! We note however, that there are some major typos in that Appendix
-    ! of the Luckhurst paper, particularly in equations A23, A29 and A31
-    ! We have attempted to correct them below.
-    
-    dotsum = rdotu1+rdotu2
-    dotdiff = rdotu1-rdotu2
-    ds2 = dotsum*dotsum
-    dd2 = dotdiff*dotdiff
-  
-    opXdot = 1.0d0 + Chi*u1dotu2
-    omXdot = 1.0d0 - Chi*u1dotu2
-    opXpdot = 1.0d0 + ChiPrime*u1dotu2
-    omXpdot = 1.0d0 - ChiPrime*u1dotu2
-  
-    line1a = dotsum/opXdot
-    line1bx = dru1dx + dru2dx
-    line1by = dru1dy + dru2dy
-    line1bz = dru1dz + dru2dz
-    
-    line2a = dotdiff/omXdot
-    line2bx = dru1dx - dru2dx
-    line2by = dru1dy - dru2dy
-    line2bz = dru1dz - dru2dz
-    
-    term1x = -Chi*(line1a*line1bx + line2a*line2bx)/r2
-    term1y = -Chi*(line1a*line1by + line2a*line2by)/r2
-    term1z = -Chi*(line1a*line1bz + line2a*line2bz)/r2
-    
-    line3a = ds2/opXdot
-    line3b = dd2/omXdot
-    line3 = Chi*(line3a + line3b)/r4
-    line3x = d(1)*line3
-    line3y = d(2)*line3
-    line3z = d(3)*line3
-    
-    dgdx = term1x + line3x
-    dgdy = term1y + line3y
-    dgdz = term1z + line3z
+    if (j_is_LJ) then
+       b = 0.0_dp
+       ul2 = 0.0_dp
+    else       
+       b = d(1)*ul2(1)   + d(2)*ul2(2)   + d(3)*ul2(3)
+    endif
 
-    term1u1x = 2.0d0*(line1a+line2a)*d(1)
-    term1u1y = 2.0d0*(line1a+line2a)*d(2)
-    term1u1z = 2.0d0*(line1a+line2a)*d(3)
-    term1u2x = 2.0d0*(line1a-line2a)*d(1)
-    term1u2y = 2.0d0*(line1a-line2a)*d(2)
-    term1u2z = 2.0d0*(line1a-line2a)*d(3)
-    
-    term2a = -line3a/opXdot
-    term2b =  line3b/omXdot
-    
-    term2u1x = Chi*ul2(1)*(term2a + term2b)
-    term2u1y = Chi*ul2(2)*(term2a + term2b)
-    term2u1z = Chi*ul2(3)*(term2a + term2b)
-    term2u2x = Chi*ul1(1)*(term2a + term2b)
-    term2u2y = Chi*ul1(2)*(term2a + term2b)
-    term2u2z = Chi*ul1(3)*(term2a + term2b)
-    
-    pref = -Chi*0.5d0/r2
+    if (i_is_LJ.or.j_is_LJ) then
+       g = 0.0_dp
+    else
+       g = ul1(1)*ul2(1) + ul1(2)*ul2(2) + ul1(3)*ul2(3)
+    endif
 
-    dgdu1x = pref*(term1u1x+term2u1x)
-    dgdu1y = pref*(term1u1y+term2u1y)
-    dgdu1z = pref*(term1u1z+term2u1z)
-    dgdu2x = pref*(term1u2x+term2u2x)
-    dgdu2y = pref*(term1u2y+term2u2y)
-    dgdu2z = pref*(term1u2z+term2u2z)
+    au = a / r
+    bu = b / r
+    g2 = g*g
 
-    g = 1.0d0 - Chi*(line3a + line3b)/(2.0d0*r2)
-  
-    BigR = (r - sigma*(g**(-0.5d0)) + sigma)/sigma
-    Ri = 1.0d0/BigR
-    Ri2 = Ri*Ri
-    Ri6 = Ri2*Ri2*Ri2
-    Ri7 = Ri6*Ri
-    Ri12 = Ri6*Ri6
-    Ri13 = Ri6*Ri7
-
-    gfact = (g**(-1.5d0))*0.5d0
-
-    dBigRdx = drdx/sigma + dgdx*gfact
-    dBigRdy = drdy/sigma + dgdy*gfact
-    dBigRdz = drdz/sigma + dgdz*gfact
-
-    dBigRdu1x = dgdu1x*gfact
-    dBigRdu1y = dgdu1y*gfact
-    dBigRdu1z = dgdu1z*gfact
-    dBigRdu2x = dgdu2x*gfact
-    dBigRdu2y = dgdu2y*gfact
-    dBigRdu2z = dgdu2z*gfact
-
-    ! Now, we must do it again for g(ChiPrime) and dgpdx
-
-    line1a = dotsum/opXpdot
-    line2a = dotdiff/omXpdot
-    term1x = -ChiPrime*(line1a*line1bx + line2a*line2bx)/r2
-    term1y = -ChiPrime*(line1a*line1by + line2a*line2by)/r2
-    term1z = -ChiPrime*(line1a*line1bz + line2a*line2bz)/r2
-    line3a = ds2/opXpdot
-    line3b = dd2/omXpdot
-    line3 = ChiPrime*(line3a + line3b)/r4
-    line3x = d(1)*line3
-    line3y = d(2)*line3
-    line3z = d(3)*line3
+    H  = (xa2 * au + xai2 * bu - 2.0_dp*x2*au*bu*g)  / (1.0_dp - x2*g2)
+    Hp = (xpap2*au + xpapi2*bu - 2.0_dp*xp2*au*bu*g) / (1.0_dp - xp2*g2)
+    sigma = sigma0 / sqrt(1.0_dp - H)
+    e1 = 1.0_dp / sqrt(1.0_dp - x2*g2)
+    e2 = 1.0_dp - Hp
+    eps = eps0 * (e1**nu) * (e2**mu)
+    BigR = dw*sigma0 / (r - sigma + dw*sigma0)
     
-    dgpdx = term1x + line3x
-    dgpdy = term1y + line3y
-    dgpdz = term1z + line3z
-    
-    term1u1x = 2.00d0*(line1a+line2a)*d(1)
-    term1u1y = 2.00d0*(line1a+line2a)*d(2) 
-    term1u1z = 2.00d0*(line1a+line2a)*d(3) 
-    term1u2x = 2.0d0*(line1a-line2a)*d(1)
-    term1u2y = 2.0d0*(line1a-line2a)*d(2)
-    term1u2z = 2.0d0*(line1a-line2a)*d(3)
+    R3 = BigR*BigR*BigR
+    R6 = R3*R3
+    R7 = R6 * BigR
+    R12 = R6*R6
+    R13 = R6*R7
 
-    term2a = -line3a/opXpdot
-    term2b =  line3b/omXpdot
-    
-    term2u1x = ChiPrime*ul2(1)*(term2a + term2b)
-    term2u1y = ChiPrime*ul2(2)*(term2a + term2b)
-    term2u1z = ChiPrime*ul2(3)*(term2a + term2b)
-    term2u2x = ChiPrime*ul1(1)*(term2a + term2b)
-    term2u2y = ChiPrime*ul1(2)*(term2a + term2b)
-    term2u2z = ChiPrime*ul1(3)*(term2a + term2b)
-  
-    pref = -ChiPrime*0.5d0/r2
-    
-    dgpdu1x = pref*(term1u1x+term2u1x)
-    dgpdu1y = pref*(term1u1y+term2u1y)
-    dgpdu1z = pref*(term1u1z+term2u1z)
-    dgpdu2x = pref*(term1u2x+term2u2x)
-    dgpdu2y = pref*(term1u2y+term2u2y)
-    dgpdu2z = pref*(term1u2z+term2u2z)
-    
-    gp = 1.0d0 - ChiPrime*(line3a + line3b)/(2.0d0*r2)
-    gmu = gp**mu
-    gpi = 1.0d0 / gp
-    gmum = gmu*gpi
+    U = 4.0_dp * eps * (R12 - R6)
 
-    curlyE = 1.0d0/sqrt(1.0d0 - Chi*Chi*u1dotu2*u1dotu2)
-    dcE = (curlyE**3)*Chi*Chi*u1dotu2
+    s3 = sigma*sigma*sigma
+    s03 = sigma0*sigma0*sigma0
 
-    dcEdu1x = dcE*ul2(1)
-    dcEdu1y = dcE*ul2(2)
-    dcEdu1z = dcE*ul2(3)
-    dcEdu2x = dcE*ul1(1)
-    dcEdu2y = dcE*ul1(2)
-    dcEdu2z = dcE*ul1(3)
-    
-    enu = curlyE**nu
-    enum = enu/curlyE
-  
-    eps = epsilon*enu*gmu
+    pref1 = - 8.0_dp * eps * mu * (R12 - R6) / (e2 * r)
+    pref2 = 8.0_dp * eps * s3 * (6.0_dp*R13 - 3.0_dp*R7) / (dw*r*s03)
 
-    yick1 = epsilon*enu*mu*gmum
-    yick2 = epsilon*gmu*nu*enum
+    dUdr = - (pref1 * Hp + pref2 * (sigma0*sigma0*r/s3 - H))
+    
+    dUda = pref1 * (xpap2*au - xp2*bu*g) / (1.0_dp - xp2 * g2) &
+         + pref2 * (xa2 * au - x2 *bu*g) / (1.0_dp - x2 * g2)
+    
+    dUdb = pref1 * (xpapi2*bu - xp2*au*g) / (1.0_dp - xp2 * g2) &
+         + pref2 * (xai2 * bu - x2 *au*g) / (1.0_dp - x2 * g2)
 
-    depsdu1x = yick1*dgpdu1x + yick2*dcEdu1x
-    depsdu1y = yick1*dgpdu1y + yick2*dcEdu1y
-    depsdu1z = yick1*dgpdu1z + yick2*dcEdu1z
-    depsdu2x = yick1*dgpdu2x + yick2*dcEdu2x
-    depsdu2y = yick1*dgpdu2y + yick2*dcEdu2y
-    depsdu2z = yick1*dgpdu2z + yick2*dcEdu2z
-    
-    R126 = Ri12 - Ri6
-    R137 = 6.0d0*Ri7 - 12.0d0*Ri13
-    
-    mess1 = gmu*R137
-    mess2 = R126*mu*gmum
-    
-    dUdx = 4.0d0*epsilon*enu*(mess1*dBigRdx + mess2*dgpdx)*sw
-    dUdy = 4.0d0*epsilon*enu*(mess1*dBigRdy + mess2*dgpdy)*sw
-    dUdz = 4.0d0*epsilon*enu*(mess1*dBigRdz + mess2*dgpdz)*sw
-    
-    dUdu1x = 4.0d0*(R126*depsdu1x + eps*R137*dBigRdu1x)*sw
-    dUdu1y = 4.0d0*(R126*depsdu1y + eps*R137*dBigRdu1y)*sw
-    dUdu1z = 4.0d0*(R126*depsdu1z + eps*R137*dBigRdu1z)*sw
-    dUdu2x = 4.0d0*(R126*depsdu2x + eps*R137*dBigRdu2x)*sw
-    dUdu2y = 4.0d0*(R126*depsdu2y + eps*R137*dBigRdu2y)*sw
-    dUdu2z = 4.0d0*(R126*depsdu2z + eps*R137*dBigRdu2z)*sw
-       
+    dUdg = 4.0_dp * eps * nu * (R12 - R6) * x2 * g / (1.0_dp - x2*g2) &
+         + 8.0_dp * eps * mu * (R12 - R6) * (xp2*au*bu - Hp*xp2*g) / &
+         (1.0_dp - xp2 * g2) / e2 &
+         + 8.0_dp * eps * s3 * (3.0_dp * R7 - 6.0_dp * R13) * &
+         (x2 * au * bu - H * x2 * g) / (1.0_dp - x2 * g2) / (dw * s03)
+            
+    rhat = d / r
+
+    fx = -dUdr * rhat(1) - dUda * ul1(1) - dUdb * ul2(1)
+    fy = -dUdr * rhat(2) - dUda * ul1(2) - dUdb * ul2(2)
+    fx = -dUdr * rhat(3) - dUda * ul1(3) - dUdb * ul2(3)
+
+    rxu1 = cross_product(d, ul1)
+    rxu2 = cross_product(d, ul2)    
+    uxu = cross_product(ul1, ul2)
+           
 #ifdef IS_MPI
-    f_Row(1,atom1) = f_Row(1,atom1) + dUdx
-    f_Row(2,atom1) = f_Row(2,atom1) + dUdy
-    f_Row(3,atom1) = f_Row(3,atom1) + dUdz
+    f_Row(1,atom1) = f_Row(1,atom1) + fx
+    f_Row(2,atom1) = f_Row(2,atom1) + fy
+    f_Row(3,atom1) = f_Row(3,atom1) + fz
     
-    f_Col(1,atom2) = f_Col(1,atom2) - dUdx
-    f_Col(2,atom2) = f_Col(2,atom2) - dUdy
-    f_Col(3,atom2) = f_Col(3,atom2) - dUdz
+    f_Col(1,atom2) = f_Col(1,atom2) - fx
+    f_Col(2,atom2) = f_Col(2,atom2) - fy
+    f_Col(3,atom2) = f_Col(3,atom2) - fz
     
-    t_Row(1,atom1) = t_Row(1,atom1) + ul1(3)*dUdu1y - ul1(2)*dUdu1z 
-    t_Row(2,atom1) = t_Row(2,atom1) + ul1(1)*dUdu1z - ul1(3)*dUdu1x 
-    t_Row(3,atom1) = t_Row(3,atom1) + ul1(2)*dUdu1x - ul1(1)*dUdu1y 
-    
-    t_Col(1,atom2) = t_Col(1,atom2) + ul2(3)*dUdu2y - ul2(2)*dUdu2z
-    t_Col(2,atom2) = t_Col(2,atom2) + ul2(1)*dUdu2z - ul2(3)*dUdu2x 
-    t_Col(3,atom2) = t_Col(3,atom2) + ul2(2)*dUdu2x - ul2(1)*dUdu2y
+    t_Row(1,atom1) = t_Row(1,atom1) + dUda*rxu1(1) - dUdg*uxu(1)
+    t_Row(2,atom1) = t_Row(2,atom1) + dUda*rxu1(2) - dUdg*uxu(2)
+    t_Row(3,atom1) = t_Row(3,atom1) + dUda*rxu1(3) - dUdg*uxu(3)
+                                                                
+    t_Col(1,atom2) = t_Col(1,atom2) + dUdb*rxu2(1) + dUdg*uxu(1)
+    t_Col(2,atom2) = t_Col(2,atom2) + dUdb*rxu2(2) + dUdg*uxu(2)
+    t_Col(3,atom2) = t_Col(3,atom2) + dUdb*rxu2(3) + dUdg*uxu(3)
 #else
-    f(1,atom1) = f(1,atom1) + dUdx
-    f(2,atom1) = f(2,atom1) + dUdy
-    f(3,atom1) = f(3,atom1) + dUdz
+    f(1,atom1) = f(1,atom1) + fx
+    f(2,atom1) = f(2,atom1) + fy
+    f(3,atom1) = f(3,atom1) + fz
     
-    f(1,atom2) = f(1,atom2) - dUdx
-    f(2,atom2) = f(2,atom2) - dUdy
-    f(3,atom2) = f(3,atom2) - dUdz
+    f(1,atom2) = f(1,atom2) - fx
+    f(2,atom2) = f(2,atom2) - fy
+    f(3,atom2) = f(3,atom2) - fz
     
-    t(1,atom1) = t(1,atom1) + ul1(3)*dUdu1y - ul1(2)*dUdu1z 
-    t(2,atom1) = t(2,atom1) + ul1(1)*dUdu1z - ul1(3)*dUdu1x 
-    t(3,atom1) = t(3,atom1) + ul1(2)*dUdu1x - ul1(1)*dUdu1y 
-    
-    t(1,atom2) = t(1,atom2) + ul2(3)*dUdu2y - ul2(2)*dUdu2z
-    t(2,atom2) = t(2,atom2) + ul2(1)*dUdu2z - ul2(3)*dUdu2x 
-    t(3,atom2) = t(3,atom2) + ul2(2)*dUdu2x - ul2(1)*dUdu2y
+    t(1,atom1) = t(1,atom1) +  dUda*rxu1(1) - dUdg*uxu(1)
+    t(2,atom1) = t(2,atom1) +  dUda*rxu1(2) - dUdg*uxu(2)
+    t(3,atom1) = t(3,atom1) +  dUda*rxu1(3) - dUdg*uxu(3)
+                                                         
+    t(1,atom2) = t(1,atom2) +  dUdb*rxu2(1) + dUdg*uxu(1)
+    t(2,atom2) = t(2,atom2) +  dUdb*rxu2(2) + dUdg*uxu(2)
+    t(3,atom2) = t(3,atom2) +  dUdb*rxu2(3) + dUdg*uxu(3)
 #endif
    
     if (do_pot) then
 #ifdef IS_MPI 
-       pot_row(VDW_POT,atom1) = pot_row(VDW_POT,atom1) + 2.0d0*eps*R126*sw
-       pot_col(VDW_POT,atom2) = pot_col(VDW_POT,atom2) + 2.0d0*eps*R126*sw
+       pot_row(VDW_POT,atom1) = pot_row(VDW_POT,atom1) + 0.5d0*U*sw
+       pot_col(VDW_POT,atom2) = pot_col(VDW_POT,atom2) + 0.5d0*U*sw
 #else
-       pot = pot + 4.0*eps*R126*sw
+       pot = pot + U*sw
 #endif
     endif
     
-    vpair = vpair + 4.0*eps*R126
+    vpair = vpair + U*sw
 #ifdef IS_MPI
     id1 = AtomRowToGlobal(atom1)
     id2 = AtomColToGlobal(atom2)
@@ -513,258 +482,15 @@ contains
     
     if (molMembershipList(id1) .ne. molMembershipList(id2)) then
        
-       fpair(1) = fpair(1) + dUdx
-       fpair(2) = fpair(2) + dUdy
-       fpair(3) = fpair(3) + dUdz
+       fpair(1) = fpair(1) + fx
+       fpair(2) = fpair(2) + fy
+       fpair(3) = fpair(3) + fz
        
     endif
     
     return
   end subroutine do_gb_pair
-
-  subroutine do_gb_lj_pair(atom1, atom2, d, r, r2, rcut, sw, vpair, fpair, &
-       pot, A, f, t, do_pot)
-    
-    integer, intent(in) :: atom1, atom2
-    integer :: id1, id2
-    real (kind=dp), intent(inout) :: r, r2, rcut
-    real (kind=dp), dimension(3), intent(in) :: d
-    real (kind=dp), dimension(3), intent(inout) :: fpair
-    real (kind=dp) :: pot, sw, vpair
-    real (kind=dp), dimension(9,nLocal) :: A
-    real (kind=dp), dimension(3,nLocal) :: f
-    real (kind=dp), dimension(3,nLocal) :: t
-    logical, intent(in) :: do_pot
-    real (kind = dp), dimension(3) :: ul
-    
-    real(kind=dp) :: gb_sigma, gb_eps, gb_eps_ratio, gb_mu, gb_l2b_ratio
-    real(kind=dp) :: s0, l2, d2, lj2
-    real(kind=dp) :: eE, eS, eab, eabf, moom, mum1
-    real(kind=dp) :: dx, dy, dz, drdx, drdy, drdz, rdotu
-    real(kind=dp) :: mess, sab, dsabdct, depmudct
-    real(kind=dp) :: epmu, depmudx, depmudy, depmudz
-    real(kind=dp) :: depmudux, depmuduy, depmuduz
-    real(kind=dp) :: BigR, dBigRdx, dBigRdy, dBigRdz
-    real(kind=dp) :: dBigRdux, dBigRduy, dBigRduz
-    real(kind=dp) :: dUdx, dUdy, dUdz, dUdux, dUduy, dUduz, e0
-    real(kind=dp) :: Ri, Ri3, Ri6, Ri7, Ri12, Ri13, R126, R137, prefactor
-    real(kind=dp) :: chipoalphap2, chioalpha2, ec, epsnot
-    real(kind=dp) :: drdotudx, drdotudy, drdotudz    
-    real(kind=dp) :: drdotudux, drdotuduy, drdotuduz    
-    real(kind=dp) :: ljeps, ljsigma
-    integer :: ljt1, ljt2, atid1, atid2, gbt1, gbt2
-    logical :: gb_first
-    
-#ifdef IS_MPI
-    atid1 = atid_Row(atom1)
-    atid2 = atid_Col(atom2)
-#else
-    atid1 = atid(atom1)
-    atid2 = atid(atom2)
-#endif
-    
-    gbt1 = GBMap%atidToGBtype(atid1)
-    gbt2 = GBMap%atidToGBtype(atid2)
-    
-    if (gbt1 .eq. -1) then
-       gb_first = .false.
-       if (gbt2 .eq. -1) then
-          call handleError("GB", "GBLJ was called without a GB type.")
-       endif
-    else
-       gb_first = .true.
-       if (gbt2 .ne. -1) then
-          call handleError("GB", "GBLJ was called with two GB types (instead of one).")
-       endif
-    endif
-    
-    ri =1/r
-    
-    dx = d(1)
-    dy = d(2)
-    dz = d(3)
-    
-    drdx = dx *ri
-    drdy = dy *ri
-    drdz = dz *ri
-    
-    if(gb_first)then
-#ifdef IS_MPI
-       ul(1) = A_Row(7,atom1)
-       ul(2) = A_Row(8,atom1)
-       ul(3) = A_Row(9,atom1)
-#else
-       ul(1) = A(7,atom1)
-       ul(2) = A(8,atom1)
-       ul(3) = A(9,atom1)       
-#endif
-       gb_sigma     = GBMap%GBtypes(gbt1)%sigma      
-       gb_l2b_ratio = GBMap%GBtypes(gbt1)%l2b_ratio
-       gb_eps       = GBMap%GBtypes(gbt1)%eps        
-       gb_eps_ratio = GBMap%GBtypes(gbt1)%eps_ratio  
-       gb_mu        = GBMap%GBtypes(gbt1)%mu         
-
-       ljsigma = getSigma(atid2)
-       ljeps = getEpsilon(atid2)
-    else
-#ifdef IS_MPI
-       ul(1) = A_Col(7,atom2)
-       ul(2) = A_Col(8,atom2)
-       ul(3) = A_Col(9,atom2)
-#else
-       ul(1) = A(7,atom2)
-       ul(2) = A(8,atom2)
-       ul(3) = A(9,atom2)     
-#endif
-       gb_sigma     = GBMap%GBtypes(gbt2)%sigma      
-       gb_l2b_ratio = GBMap%GBtypes(gbt2)%l2b_ratio
-       gb_eps       = GBMap%GBtypes(gbt2)%eps        
-       gb_eps_ratio = GBMap%GBtypes(gbt2)%eps_ratio  
-       gb_mu        = GBMap%GBtypes(gbt2)%mu         
-
-       ljsigma = getSigma(atid1)
-       ljeps = getEpsilon(atid1)
-    endif  
- 
-    rdotu = (dx*ul(1)+dy*ul(2)+dz*ul(3))*ri
-   
-    drdotudx = ul(1)*ri-rdotu*dx*ri*ri
-    drdotudy = ul(2)*ri-rdotu*dy*ri*ri
-    drdotudz = ul(3)*ri-rdotu*dz*ri*ri
-    drdotudux = drdx
-    drdotuduy = drdy
-    drdotuduz = drdz
-
-    l2 = (gb_sigma*gb_l2b_ratio)**2
-    d2 = gb_sigma**2
-    lj2 = ljsigma**2
-    s0 = sqrt(d2 + lj2)
-
-    chioalpha2 = (l2 - d2)/(l2 + lj2)
-
-    eE = sqrt(gb_eps*gb_eps_ratio*ljeps)
-    eS = sqrt(gb_eps*ljeps)
-    moom =  1.0d0 / gb_mu
-    mum1 = gb_mu-1
-    chipoalphap2 = 1 - (eE/eS)**moom
-
-    !! mess matches cleaver (eq 20)
-    
-    mess = 1-rdotu*rdotu*chioalpha2
-    sab = 1.0d0/sqrt(mess)
-
-    dsabdct = s0*sab*sab*sab*rdotu*chioalpha2
-       
-    eab = 1-chipoalphap2*rdotu*rdotu
-    eabf = eS*(eab**gb_mu)
-
-    depmudct = -2*eS*chipoalphap2*gb_mu*rdotu*(eab**mum1)
-        
-    BigR = (r - sab*s0 + s0)/s0
-    dBigRdx = (drdx -dsabdct*drdotudx)/s0
-    dBigRdy = (drdy -dsabdct*drdotudy)/s0
-    dBigRdz = (drdz -dsabdct*drdotudz)/s0
-    dBigRdux = (-dsabdct*drdotudux)/s0
-    dBigRduy = (-dsabdct*drdotuduy)/s0
-    dBigRduz = (-dsabdct*drdotuduz)/s0
-    
-    depmudx = depmudct*drdotudx
-    depmudy = depmudct*drdotudy
-    depmudz = depmudct*drdotudz
-    depmudux = depmudct*drdotudux
-    depmuduy = depmudct*drdotuduy
-    depmuduz = depmudct*drdotuduz
-    
-    Ri = 1.0d0/BigR
-    Ri3 = Ri*Ri*Ri
-    Ri6 = Ri3*Ri3
-    Ri7 = Ri6*Ri
-    Ri12 = Ri6*Ri6
-    Ri13 = Ri6*Ri7
-    R126 = Ri12 - Ri6
-    R137 = 6.0d0*Ri7 - 12.0d0*Ri13
-    
-    prefactor = 4.0d0
-    
-    dUdx = prefactor*(eabf*R137*dBigRdx + R126*depmudx)*sw
-    dUdy = prefactor*(eabf*R137*dBigRdy + R126*depmudy)*sw
-    dUdz = prefactor*(eabf*R137*dBigRdz + R126*depmudz)*sw
-
-    dUdux = prefactor*(eabf*R137*dBigRdux + R126*depmudux)*sw
-    dUduy = prefactor*(eabf*R137*dBigRduy + R126*depmuduy)*sw
-    dUduz = prefactor*(eabf*R137*dBigRduz + R126*depmuduz)*sw
-    
-#ifdef IS_MPI
-    f_Row(1,atom1) = f_Row(1,atom1) + dUdx
-    f_Row(2,atom1) = f_Row(2,atom1) + dUdy
-    f_Row(3,atom1) = f_Row(3,atom1) + dUdz
-    
-    f_Col(1,atom2) = f_Col(1,atom2) - dUdx
-    f_Col(2,atom2) = f_Col(2,atom2) - dUdy
-    f_Col(3,atom2) = f_Col(3,atom2) - dUdz
-    
-    if (gb_first) then
-       t_Row(1,atom1) = t_Row(1,atom1) - ul(2)*dUduz + ul(3)*dUduy
-       t_Row(2,atom1) = t_Row(2,atom1) - ul(3)*dUdux + ul(1)*dUduz
-       t_Row(3,atom1) = t_Row(3,atom1) - ul(1)*dUduy + ul(2)*dUdux
-    else
-       t_Col(1,atom2) = t_Col(1,atom2) - ul(2)*dUduz + ul(3)*dUduy
-       t_Col(2,atom2) = t_Col(2,atom2) - ul(3)*dUdux + ul(1)*dUduz
-       t_Col(3,atom2) = t_Col(3,atom2) - ul(1)*dUduy + ul(2)*dUdux
-    endif
-#else    
-    f(1,atom1) = f(1,atom1) + dUdx
-    f(2,atom1) = f(2,atom1) + dUdy
-    f(3,atom1) = f(3,atom1) + dUdz
-    
-    f(1,atom2) = f(1,atom2) - dUdx
-    f(2,atom2) = f(2,atom2) - dUdy
-    f(3,atom2) = f(3,atom2) - dUdz
-    
-    ! torques are cross products:    
-
-    if (gb_first) then
-       t(1,atom1) = t(1,atom1) - ul(2)*dUduz + ul(3)*dUduy
-       t(2,atom1) = t(2,atom1) - ul(3)*dUdux + ul(1)*dUduz
-       t(3,atom1) = t(3,atom1) - ul(1)*dUduy + ul(2)*dUdux
-    else
-       t(1,atom2) = t(1,atom2) - ul(2)*dUduz + ul(3)*dUduy
-       t(2,atom2) = t(2,atom2) - ul(3)*dUdux + ul(1)*dUduz
-       t(3,atom2) = t(3,atom2) - ul(1)*dUduy + ul(2)*dUdux
-    endif
-
-#endif
-       
-    if (do_pot) then
-#ifdef IS_MPI 
-       pot_row(VDW_POT,atom1) = pot_row(VDW_POT,atom1) + 2.0d0*eabf*R126*sw
-       pot_col(VDW_POT,atom2) = pot_col(VDW_POT,atom2) + 2.0d0*eabf*R126*sw
-#else
-       pot = pot + prefactor*eabf*R126*sw
-#endif
-    endif
-    
-    vpair = vpair + 4.0*eabf*R126
-#ifdef IS_MPI
-    id1 = AtomRowToGlobal(atom1)
-    id2 = AtomColToGlobal(atom2)
-#else
-    id1 = atom1
-    id2 = atom2
-#endif
-    
-    If (Molmembershiplist(Id1) .Ne. Molmembershiplist(Id2)) Then
-       
-       Fpair(1) = Fpair(1) + Dudx
-       Fpair(2) = Fpair(2) + Dudy
-       Fpair(3) = Fpair(3) + Dudz
-       
-    Endif
-    
-    return
-    
-  end subroutine do_gb_lj_pair
-
+  
   subroutine destroyGBTypes()
 
     GBMap%nGBtypes = 0
@@ -779,6 +505,8 @@ contains
        deallocate(GBMap%atidToGBtype)
        GBMap%atidToGBtype => null()
     end if
+    
+    haveMixingMap = .false.
     
   end subroutine destroyGBTypes
 

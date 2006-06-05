@@ -83,9 +83,9 @@ namespace oopse {
     return boundary;
   }
   
-  HydroProps CompositeShape::getHydroProps(RealType viscosity, RealType temperature) {
-    HydroProps props;
-    props.center =V3Zero;
+  HydroProp* CompositeShape::getHydroProp(RealType viscosity, RealType temperature) {
+    HydroProp* props;
+    props->setCOR(V3Zero);
     sprintf( painCave.errMsg,
              "CompositeShape was asked to return an analytic HydroProps.\n");
     painCave.severity = OOPSE_ERROR;

@@ -96,6 +96,8 @@ namespace oopse {
 
   void DUFF::parse(const std::string& filename) {
     ifstrstream* ffStream;
+    bool hasGBtypes;
+
     ffStream = openForceFieldFile(filename);
 
     spMan_.parse(*ffStream, *this);
@@ -113,7 +115,18 @@ namespace oopse {
       at->complete();
     }
 
+    hasGBtypes = false;
+    for (at = atomTypeCont_.beginType(i); at != NULL; 
+         at = atomTypeCont_.nextType(i)) {
+      if (at->isGayBerne()) 
+        hasGBtypes = true;
+    }
+    
     int isError = 0;
+
+    if (hasGBtypes) {
+      completeGBFF(&isError);
+    }
 
     delete ffStream;
     

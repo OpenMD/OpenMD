@@ -69,27 +69,32 @@ namespace oopse {
     return boundary;
   }
   
-  HydroProps Sphere::getHydroProps(RealType viscosity, RealType temperature) {
-    HydroProps props;
-    props.center =V3Zero;
+  HydroProp* Sphere::getHydroProp(RealType viscosity, RealType temperature) {
+    
     RealType Xitt  = 6.0 * NumericConstant::PI * viscosity * radius_;
     RealType Xirr = 8.0 * NumericConstant::PI * viscosity * radius_ * radius_ * radius_;
-    props.Xi(0, 0) = Xitt;
-    props.Xi(1, 1) = Xitt;
-    props.Xi(2, 2) = Xitt;
-    props.Xi(3, 3) = Xirr;
-    props.Xi(4, 4) = Xirr;
-    props.Xi(5, 5) = Xirr;
+
+    Mat6x6d Xi, XiCopy, D;
+
+    Xi(0, 0) = Xitt;
+    Xi(1, 1) = Xitt;
+    Xi(2, 2) = Xitt;
+    Xi(3, 3) = Xirr;
+    Xi(4, 4) = Xirr;
+    Xi(5, 5) = Xirr;
     
     const RealType convertConstant = 6.023; //convert poise.angstrom to amu/fs
-    props.Xi *= convertConstant;
-    Mat6x6d XiCopy = props.Xi;
-    invertMatrix(XiCopy, props.D);
+    Xi *= convertConstant;
+    XiCopy = Xi;
+
+    invertMatrix(XiCopy, D);
     RealType kt = OOPSEConstant::kB * temperature;
-    props.D *= kt;
-    props.Xi *= OOPSEConstant::kb * temperature;
+    D *= kt;
+    Xi *= OOPSEConstant::kb * temperature;
+
+    HydroProp* hprop = new HydroProp(V3Zero, Xi, D);
     
-    return props;
+    return hprop;
   }
   
 }

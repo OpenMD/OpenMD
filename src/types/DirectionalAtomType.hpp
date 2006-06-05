@@ -99,12 +99,11 @@ struct StickyParam {
 };
 
 struct GayBerneParam{
-  RealType GB_sigma;
+  RealType GB_d;
+  RealType GB_l;
   RealType GB_eps;
-  RealType GB_mu;
-  RealType GB_nu;
   RealType GB_eps_ratio;
-  RealType GB_l2b_ratio;
+  RealType GB_dw;
 };
 
 typedef SimpleTypeData<StickyParam> StickyParamGenericData;

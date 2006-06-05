@@ -64,6 +64,8 @@ namespace oopse {
     DeclareParameter(vdw14scale, RealType);
     DeclareParameter(electrostatic14scale, RealType);
     DeclareParameter(dielectric, RealType);
+    DeclareParameter(GayBerneMu, RealType);
+    DeclareParameter(GayBerneNu, RealType);
     
   public:
     ForceFieldOptions();
@@ -72,9 +74,9 @@ namespace oopse {
     
     void validateOptions() {
       CheckParameter(vdWtype, isEqualIgnoreCase(std::string("Lennard-Jones")));
-      CheckParameter(DistanceMixingRule, isEqualIgnoreCase(std::string("arithmetic")) || isEqualIgnoreCase(std::string("geometric")));
+      CheckParameter(DistanceMixingRule, isEqualIgnoreCase(std::string("arithmetic")) || isEqualIgnoreCase(std::string("geometric")) || isEqualIgnoreCase(std::string("cubic")));
       CheckParameter(DistanceType, isEqualIgnoreCase(std::string("sigma")) || isEqualIgnoreCase(std::string("Rmin")));
-      CheckParameter(EnergyMixingRule, isEqualIgnoreCase(std::string("arithmetic")) || isEqualIgnoreCase(std::string("geometric")));
+      CheckParameter(EnergyMixingRule, isEqualIgnoreCase(std::string("arithmetic")) || isEqualIgnoreCase(std::string("geometric")) || isEqualIgnoreCase(std::string("hhg")));
       CheckParameter(TorsionAngleConvention, isEqualIgnoreCase(std::string("180 is trans")) || isEqualIgnoreCase(std::string("0 is trans")));
       CheckParameter(CutoffPolicy, isEqualIgnoreCase(std::string("MIX")) || isEqualIgnoreCase(std::string("MAX")) || isEqualIgnoreCase(std::string("TRADITIONAL")));
    }

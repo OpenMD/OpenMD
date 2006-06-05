@@ -102,7 +102,7 @@ namespace oopse {
         
         if (gayBerneData != NULL) {  
           GayBerneParam gayBerneParam = gayBerneData->getData();
-          currShape = new Ellipsoid(datom->getPos(), gayBerneParam.GB_sigma/2.0, gayBerneParam.GB_l2b_ratio*gayBerneParam.GB_sigma/2.0, datom->getA());
+          currShape = new Ellipsoid(datom->getPos(), gayBerneParam.GB_d/2.0, gayBerneParam.GB_l/2.0, datom->getA());
         } else {
           sprintf( painCave.errMsg,
                    "Can not cast GenericData to GayBerneParam\n");
