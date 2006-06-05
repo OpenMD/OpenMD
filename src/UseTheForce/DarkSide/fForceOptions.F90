@@ -47,89 +47,91 @@
 !!  PURPOSE:
 !!
 !! @author Charles F. Vardeman II 
-!! @version $Id: fForceOptions.F90,v 1.2 2005-12-07 19:46:56 chuckv Exp $
+!! @version $Id: fForceOptions.F90,v 1.3 2006-06-05 18:44:05 gezelter Exp $
 
 !! Handles Mixing options for Fortran.
 
-
-
 module  fForceOptions 
-   use definitions
-   implicit none
-   PRIVATE
-
+  use definitions
+  implicit none
+  PRIVATE
+  
 #define __FORTRAN90
 #include "UseTheForce/fForceOptions.h"
-
-type(ForceOptions), save :: fortranForceOptions
-logical, save :: haveForceOptions = .false.
-
-
-public :: ForceOptions
-public :: getVDW14Scale
-public :: getElectrostatic14Scale
-public :: getEnergyMixingRule
-public :: getDistanceMixingRule
-public :: usesGeometricDistanceMixing
-public :: usesGeometricEnergyMixing
-public :: setForceOptions
-
-
+  
+  type(ForceOptions), save :: fortranForceOptions
+  logical, save :: haveForceOptions = .false.
+  
+  
+  public :: ForceOptions
+  public :: getVDW14Scale
+  public :: getElectrostatic14Scale
+  public :: getGayBerneMu
+  public :: getGayBerneNu
+  public :: getEnergyMixingRule
+  public :: getDistanceMixingRule
+  public :: usesGeometricDistanceMixing
+  public :: usesGeometricEnergyMixing
+  public :: setForceOptions
+  
 contains
 
-subroutine setForceOptions(theseOptions)
-type(ForceOptions),intent(in) :: theseOptions
-fortranForceOptions = theseOptions
-haveForceOptions = .true.
-end subroutine setForceOptions
-
-
-function getVDW14Scale() result(thisScale)
-real(kind=dp) :: thisScale
-thisScale = fortranForceOptions%vdw14scale
-end function getVDW14Scale
-
-function getElectrostatic14Scale() result(thisScale)
-real(kind=dp) :: thisScale
-thisScale = fortranForceOptions%electrostatic14scale
-end function getElectrostatic14Scale
-
-
-function usesGeometricDistanceMixing() result(doesit)
-  logical :: doesit
-  doesit = .false.
-  if (.not.haveForceOptions) return
-  if (fortranForceOptions%DistanceMixingRule == GEOMETRIC_MIXING_RULE) then
-     doesit = .true.
-  endif
+  subroutine setForceOptions(theseOptions)
+    type(ForceOptions),intent(in) :: theseOptions
+    fortranForceOptions = theseOptions
+    haveForceOptions = .true.
+  end subroutine setForceOptions
+    
+  function getVDW14Scale() result(thisScale)
+    real(kind=dp) :: thisScale
+    thisScale = fortranForceOptions%vdw14scale
+  end function getVDW14Scale
   
-end function usesGeometricDistanceMixing
+  function getElectrostatic14Scale() result(thisScale)
+    real(kind=dp) :: thisScale
+    thisScale = fortranForceOptions%electrostatic14scale
+  end function getElectrostatic14Scale
+  
+  function getGayBerneMu() result(thisMu)
+    real(kind=dp) :: thisMu
+    thisMu = fortranForceOptions%GayBerneMu
+  end function getGayBerneMu
 
-
-function usesGeometricEnergyMixing() result(doesit)
-  logical :: doesit
-  doesit = .false.
-  if (.not.haveForceOptions) return
-  if (fortranForceOptions%EnergyMixingRule == GEOMETRIC_MIXING_RULE) then
-     doesit = .true.
-  endif
-end function usesGeometricEnergyMixing
-
-
-function getEnergyMixingRule() result(MixingRule)
-  integer :: MixingRule
-  MixingRule = 0
-  if (.not.haveForceOptions) return
-  MixingRule = fortranForceOptions%EnergyMixingRule
-end function getEnergyMixingRule
-
-function getDistanceMixingRule() result(MixingRule)
-  integer :: MixingRule
-  MixingRule = 0
-  if (.not.haveForceOptions) return
-  MixingRule = fortranForceOptions%DistanceMixingRule
-end function getDistanceMixingRule
-
-
-
+  function getGayBerneNu() result(thisNu)
+    real(kind=dp) :: thisNu
+    thisNu = fortranForceOptions%GayBerneNu
+  end function getGayBerneNu
+  
+  function usesGeometricDistanceMixing() result(doesit)
+    logical :: doesit
+    doesit = .false.
+    if (.not.haveForceOptions) return
+    if (fortranForceOptions%DistanceMixingRule == GEOMETRIC_MIXING_RULE) then
+       doesit = .true.
+    endif
+  end function usesGeometricDistanceMixing
+    
+  function usesGeometricEnergyMixing() result(doesit)
+    logical :: doesit
+    doesit = .false.
+    if (.not.haveForceOptions) return
+    if (fortranForceOptions%EnergyMixingRule == GEOMETRIC_MIXING_RULE) then
+       doesit = .true.
+    endif
+  end function usesGeometricEnergyMixing
+    
+  function getEnergyMixingRule() result(MixingRule)
+    integer :: MixingRule
+    MixingRule = 0
+    if (.not.haveForceOptions) return
+    MixingRule = fortranForceOptions%EnergyMixingRule
+  end function getEnergyMixingRule
+  
+  function getDistanceMixingRule() result(MixingRule)
+    integer :: MixingRule
+    MixingRule = 0
+    if (.not.haveForceOptions) return
+    MixingRule = fortranForceOptions%DistanceMixingRule
+  end function getDistanceMixingRule
+  
 end module fForceOptions

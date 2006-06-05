@@ -49,6 +49,7 @@ module gayberne
   use linearalgebra
   use status
   use lj
+  use fForceOptions
 #ifdef IS_MPI
   use mpiSimulation
 #endif
@@ -197,6 +198,10 @@ contains
     end do
     
     haveGBMap = .true.
+
+    mu = getGayBerneMu()
+    nu = getGayBerneNu()
+
     
   end subroutine complete_GB_FF
 
