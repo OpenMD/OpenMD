@@ -167,7 +167,7 @@ namespace oopse {
       RealType trace =  Q[0] + Q[1] + Q[2];
 
       if (fabs(trace) > oopse::epsilon) {
-	sprintf(painCave.errMsg, "MultipoleAtomTypesSectionParser Error: the trace of qudrupole moments is not zero at line %d\n",
+	sprintf(painCave.errMsg, "MultipoleAtomTypesSectionParser Error: the trace of quadrupole moments is not zero at line %d\n",
 		lineNo);
 	painCave.isFatal = 1;
 	simError();

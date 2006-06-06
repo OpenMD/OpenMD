@@ -542,7 +542,7 @@ namespace oopse {
       if (qlen < oopse::epsilon) { //check quaternion is not equal to 0 
          
         sprintf(painCave.errMsg, 
-                "DumpReader Error: initial quaternion error (q0^2 + q1^2 + q2^2 + q3^2 ~ 0\n"); 
+                "DumpReader Error: initial quaternion error (q0^2 + q1^2 + q2^2 + q3^2) ~ 0\n"); 
         painCave.isFatal = 1; 
         simError(); 
          
