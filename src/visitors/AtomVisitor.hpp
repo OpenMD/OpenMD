@@ -95,7 +95,7 @@ namespace oopse {
   public:
     LinearAtomVisitor(SimInfo* info) : BaseAtomVisitor(info) {
       visitorName = "LinearAtomVisitor";
-      linearAtomType.insert("linear");
+      linearAtomType.insert("GBlinear");
     }
 
     void addGayBerneAtomType(const std::string& atomType); 

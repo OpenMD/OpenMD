@@ -199,9 +199,6 @@ contains
     
     haveGBMap = .true.
 
-    mu = getGayBerneMu()
-    nu = getGayBerneNu()
-
     
   end subroutine complete_GB_FF
 
@@ -272,7 +269,8 @@ contains
        enddo
     enddo
     haveMixingMap = .true.
-    
+    mu = getGayBerneMu()
+    nu = getGayBerneNu()    
   end subroutine createGBMixingMap
   
 
@@ -407,6 +405,7 @@ contains
     s03 = sigma0*sigma0*sigma0
 
     pref1 = - 8.0_dp * eps * mu * (R12 - R6) / (e2 * r)
+
     pref2 = 8.0_dp * eps * s3 * (6.0_dp*R13 - 3.0_dp*R7) / (dw*r*s03)
 
     dUdr = - (pref1 * Hp + pref2 * (sigma0*sigma0*r/s3 - H))
@@ -420,19 +419,25 @@ contains
     dUdg = 4.0_dp * eps * nu * (R12 - R6) * x2 * g / (1.0_dp - x2*g2) &
          + 8.0_dp * eps * mu * (R12 - R6) * (xp2*au*bu - Hp*xp2*g) / &
          (1.0_dp - xp2 * g2) / e2 &
-         + 8.0_dp * eps * s3 * (3.0_dp * R7 - 6.0_dp * R13) * &
+         + 8.0_dp * eps * s3 * (3.0_dp * R7 - 6.0_dp * R13) * &  
          (x2 * au * bu - H * x2 * g) / (1.0_dp - x2 * g2) / (dw * s03)
             
     rhat = d / r
 
-    fx = -dUdr * rhat(1) - dUda * ul1(1) - dUdb * ul2(1)
-    fy = -dUdr * rhat(2) - dUda * ul1(2) - dUdb * ul2(2)
-    fx = -dUdr * rhat(3) - dUda * ul1(3) - dUdb * ul2(3)
+    fx = dUdr * rhat(1) + dUda * ul1(1) + dUdb * ul2(1)
+    fy = dUdr * rhat(2) + dUda * ul1(2) + dUdb * ul2(2)
+    fz = dUdr * rhat(3) + dUda * ul1(3) + dUdb * ul2(3)    
 
     rxu1 = cross_product(d, ul1)
     rxu2 = cross_product(d, ul2)    
     uxu = cross_product(ul1, ul2)
            
+!!$    write(*,*) 'rxu1 = ' , rxu1(1), rxu1(2), rxu1(3)
+!!$    write(*,*) 'rxu2 = ' , rxu2(1), rxu2(2), rxu2(3)
+!!$    write(*,*) 'uxu = ' , uxu(1), uxu(2), uxu(3)
+!!$    write(*,*) 'dUda = ', dUda, dudb, dudg
+
+
 #ifdef IS_MPI
     f_Row(1,atom1) = f_Row(1,atom1) + fx
     f_Row(2,atom1) = f_Row(2,atom1) + fy

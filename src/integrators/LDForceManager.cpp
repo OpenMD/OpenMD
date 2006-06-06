@@ -50,8 +50,9 @@ using namespace OpenBabel;
 namespace oopse {
 
   LDForceManager::LDForceManager(SimInfo* info) : ForceManager(info){
-    Globals* simParams = info->getSimParams();
-        
+    simParams = info->getSimParams();
+    veloMunge = new Velocitizer(info);
+
     sphericalBoundaryConditions_ = false;
     if (simParams->getUseSphericalBoundaryConditions()) {
       sphericalBoundaryConditions_ = true;
@@ -262,7 +263,8 @@ namespace oopse {
     bool doLangevinForces;
     bool freezeMolecule;
     int fdf;
-    
+
+
     fdf = 0;
     for (mol = info_->beginMolecule(i); mol != NULL; mol = info_->nextMolecule(i)) {
 
@@ -351,7 +353,12 @@ namespace oopse {
       }
     }    
     info_->setFdf(fdf);
-    
+
+    veloMunge->removeComDrift();
+    // Remove angular drift if we are not using periodic boundary conditions.
+    if(!simParams->getUsePeriodicBoundaryConditions()) 
+      veloMunge->removeAngularDrift();
+
     ForceManager::postCalculation();   
   }
 

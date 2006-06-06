@@ -46,6 +46,7 @@
 #include "primitives/Molecule.hpp"
 #include "math/SeqRandNumGen.hpp"
 #include "hydrodynamics/Shape.hpp"
+#include "integrators/Velocitizer.hpp"
 
 namespace oopse {
    
@@ -76,6 +77,8 @@ namespace oopse {
     RealType langevinBufferRadius_;
     RealType frozenBufferRadius_;
     bool sphericalBoundaryConditions_;
+    Globals* simParams;
+    Velocitizer* veloMunge;
   };
   
 } //end namespace oopse

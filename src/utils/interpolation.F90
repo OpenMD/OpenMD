@@ -46,7 +46,7 @@
 !!  PURPOSE: Generic Spline interpolation routines. 
 !!
 !! @author Charles F. Vardeman II 
-!! @version $Id: interpolation.F90,v 1.8 2006-05-17 15:37:15 gezelter Exp $
+!! @version $Id: interpolation.F90,v 1.9 2006-06-06 17:43:28 gezelter Exp $
 
 
 module interpolation
@@ -252,13 +252,25 @@ contains
 
     type(cubicSpline) :: this
     
-    if(associated(this%x)) then
-       deallocate(this%x)
-       this%x => null()
+    if(associated(this%d)) then
+       deallocate(this%d)
+       this%d => null()
     end if
     if(associated(this%c)) then
        deallocate(this%c)
        this%c => null()
+    end if
+    if(associated(this%b)) then
+       deallocate(this%b)
+       this%b => null()
+    end if
+    if(associated(this%y)) then
+       deallocate(this%y)
+       this%y => null()
+    end if
+    if(associated(this%x)) then
+       deallocate(this%x)
+       this%x => null()
     end if
     
     this%n = 0

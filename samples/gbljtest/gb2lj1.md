@@ -3,7 +3,7 @@
 
 
 component{
-  type = "linear";
+  type = "GBlinear";
   nMol = 2;
 }
 component{

@@ -7,7 +7,7 @@ component{
   nMol =1;
 }
 component{
-  type = "linear";
+  type = "GBlinear";
   nMol = 1;
 }
 

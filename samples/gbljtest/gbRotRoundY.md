@@ -7,14 +7,14 @@ component{
   nMol =1;
 }
 component{
-  type = "linear";
+  type = "GBlinear";
   nMol = 1;
 }
 
 
 initialConfig = "./gbRotRoundY.in";
 
-ensemble = NVT;
+ensemble = NVE;
 targetTemp = 1;
 tauThermostat = 1000;
 forceField = "DUFF";

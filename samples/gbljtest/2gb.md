@@ -3,7 +3,7 @@
 
 
 component{
-  type = "linear";
+  type = "GBlinear";
   nMol = 2;
 }
 
@@ -11,14 +11,14 @@ component{
 initialConfig = "./2gb.in";
 
 ensemble = NVT;
-targetTemp = 1;
-tauThermostat = 1000;
+targetTemp = 10;
+tauThermostat = 30;
 forceField = "DUFF";
 
 cutoffRadius = 20.0;
 switchingRadius = 18.0;
 dt = 1.0;
-runTime = 6e4;
+runTime = 1e5;
 useInitialTime = "false";
 useInitialExtendedSystemState = "false";
 

@@ -11,10 +11,10 @@ molecule{
   }
 }
 molecule{
-  name = "linear";
+  name = "GBlinear";
   
   atom[0]{
-     type="linear";
+     type="GBlinear";
      position( 0.0, 0.0, 0.0 );
      orientation(0.0,0.0,0.0);
   }

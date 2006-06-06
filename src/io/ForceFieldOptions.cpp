@@ -66,6 +66,10 @@ namespace oopse {
     
     fortranForceOptions.vdw14scale = this->getvdw14scale();
     fortranForceOptions.electrostatic14scale = this->getelectrostatic14scale();
+    fortranForceOptions.GayBerneMu = this->getGayBerneMu();
+    fortranForceOptions.GayBerneNu = this->getGayBerneNu();
+
+    std::cout << "GBM = " <<  fortranForceOptions.GayBerneMu << " GBN = " << fortranForceOptions.GayBerneNu  << std::endl;
 
     std::string DistanceMix = this->getDistanceMixingRule();
     toUpper(DistanceMix);
