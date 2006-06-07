@@ -11,6 +11,8 @@ initialConfig = "./ssd.in";
 ensemble = NVE;
 forceField = "DUFF";
 electrostaticSummationMethod = "none";
+electrostaticScreeningMethod = "undamped";
+dampingAlpha = 0.2;
 cutoffRadius = 9.0;
 switchingRadius = 7.65;
 
@@ -21,7 +23,7 @@ tauThermostat = 1e3;
 tauBarostat = 1e4;
 
 dt = 2.0;
-runTime = 1e2;
+runTime = 1e3;
 
 //tempSet = "true";
 //thermalTime = 200;

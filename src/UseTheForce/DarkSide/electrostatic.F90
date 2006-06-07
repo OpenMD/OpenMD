@@ -795,7 +795,7 @@ contains
              f4 = 0.4_dp*alpha2*f3*r2
           endif
           ri5damp = f1 + f3*one_third
-          ri7damp = ri5damp + f4
+          ri7damp = ri5damp + f4*one_third
 
           ri2 = riji * riji
           ri3 = ri2 * riji
@@ -917,14 +917,14 @@ contains
        endif
        
        if (j_is_Dipole) then
-!!$          if (screeningMethod .eq. DAMPED) then
-!!$             ! assemble the damping variables
-!!$             call lookupUniformSpline1d(f0spline, rij, f0, df0)
-!!$             f1 = -rij * df0 + f0
-!!$             f2 = -2.0_dp*alpha2*df0
-!!$             f3 = f2*r2*rij
-!!$             f4 = 0.4_dp*alpha2*f3*r2
-!!$          endif
+          if (screeningMethod .eq. DAMPED) then
+             ! assemble the damping variables
+             call lookupUniformSpline1d(f0spline, rij, f0, df0)
+             f1 = -rij * df0 + f0
+             f2 = -2.0_dp*alpha2*df0
+             f3 = f2*r2*rij
+             f4 = 0.4_dp*alpha2*f3*r2
+          endif
 
           ct_ij = uz_i(1)*uz_j(1) + uz_i(2)*uz_j(2) + uz_i(3)*uz_j(3)
           
@@ -981,56 +981,39 @@ contains
                    scale = 1.0_dp
                 endif
              endif
-             
-             sc2 = scale * scale
 
-             pot_term = (ct_ij - 3.0_dp * ct_i * ct_j * sc2)
-!!$             vterm = pref * ( ri3*pot_term*f1 + (ct_i * ct_j * sc2)*f2 )
+             ! precompute variables for convenience (and obfuscation 
+             ! unfortunatly)
+             sc2 = scale * scale
+             ri5damp = f1 + f3*one_third
+             ri7damp = 5.0_dp*(ri5damp + f4*one_third)    
+             prei3 = sw*pref*ri3
+             prei4 = 3.0_dp*sw*pref*ri4*scale
+             cti3 = 3.0_dp*ct_i*sc2*ri5damp
+             ctj3 = 3.0_dp*ct_j*sc2*ri5damp
+             ctidotj = ct_i * ct_j * sc2        
+
+             ! calculate the potential 
+             pot_term = (ct_ij*f1 - 3.0_dp*ctidotj*ri5damp)
              vterm = pref * ri3 * pot_term
              vpair = vpair + vterm
              epot = epot + sw*vterm
+
+             ! calculate derivatives for the forces and torques
+             dudx = dudx + prei4 * ( ctidotj*xhat*ri7damp - &
+                  (ct_i*uz_j(1) + ct_j*uz_i(1) + ct_ij*xhat)*ri5damp )
+             dudy = dudy + prei4 * ( ctidotj*yhat*ri7damp - &
+                  (ct_i*uz_j(2) + ct_j*uz_i(2) + ct_ij*yhat)*ri5damp )
+             dudz = dudz + prei4 * ( ctidotj*zhat*ri7damp - &
+                  (ct_i*uz_j(3) + ct_j*uz_i(3) + ct_ij*zhat)*ri5damp )
+
+             duduz_i(1) = duduz_i(1) + prei3 * ( uz_j(1)*f1 - ctj3*xhat )
+             duduz_i(2) = duduz_i(2) + prei3 * ( uz_j(2)*f1 - ctj3*yhat )
+             duduz_i(3) = duduz_i(3) + prei3 * ( uz_j(3)*f1 - ctj3*zhat )
              
-             ! precompute variables for convenience (and obfuscation 
-             ! unfortunatly)
-!!$             ri5damp = f1 + f3*one_third
-!!$             ri7damp = 5.0_dp*(ri5damp + f4)
-             prei3 = sw*pref*ri3
-             prei4 = 3.0_dp*sw*pref*ri4*scale
-!!$             cti3 = 3.0_dp*ct_i*sc2*ri5damp
-!!$             ctj3 = 3.0_dp*ct_j*sc2*ri5damp
-             cti3 = 3.0_dp*ct_i*sc2
-             ctj3 = 3.0_dp*ct_j*sc2
-             ctidotj = ct_i * ct_j * sc2
-
-             dudx = dudx + prei4 * ( 5.0_dp*ctidotj*xhat - &
-                  (ct_i*uz_j(1) + ct_j*uz_i(1) + ct_ij*xhat) )
-             dudy = dudy + prei4 * ( 5.0_dp*ctidotj*yhat - &
-                  (ct_i*uz_j(2) + ct_j*uz_i(2) + ct_ij*yhat) )
-             dudz = dudz + prei4 * ( 5.0_dp*ctidotj*zhat - &
-                  (ct_i*uz_j(3) + ct_j*uz_i(3) + ct_ij*zhat) )
-
-             duduz_i(1) = duduz_i(1) + prei3 * ( uz_j(1) - ctj3*xhat )
-             duduz_i(2) = duduz_i(2) + prei3 * ( uz_j(2) - ctj3*yhat )
-             duduz_i(3) = duduz_i(3) + prei3 * ( uz_j(3) - ctj3*zhat )
-             
-             duduz_j(1) = duduz_j(1) + prei3 * ( uz_i(1) - cti3*xhat )
-             duduz_j(2) = duduz_j(2) + prei3 * ( uz_i(2) - cti3*yhat )
-             duduz_j(3) = duduz_j(3) + prei3 * ( uz_i(3) - cti3*zhat )
-
-!!$             dudx = dudx + prei4 * ( ctidotj*xhat*ri7damp - &
-!!$                  (ct_i*uz_j(1) + ct_j*uz_i(1) + ct_ij*xhat)*ri5damp )
-!!$             dudy = dudy + prei4 * ( ctidotj*yhat*ri7damp - &
-!!$                  (ct_i*uz_j(2) + ct_j*uz_i(2) + ct_ij*yhat)*ri5damp )
-!!$             dudz = dudz + prei4 * ( ctidotj*zhat*ri7damp - &
-!!$                  (ct_i*uz_j(3) + ct_j*uz_i(3) + ct_ij*zhat)*ri5damp )
-!!$
-!!$             duduz_i(1) = duduz_i(1) + prei3 * ( uz_j(1)*f1 - ctj3*xhat )
-!!$             duduz_i(2) = duduz_i(2) + prei3 * ( uz_j(2)*f1 - ctj3*yhat )
-!!$             duduz_i(3) = duduz_i(3) + prei3 * ( uz_j(3)*f1 - ctj3*zhat )
-!!$             
-!!$             duduz_j(1) = duduz_j(1) + prei3 * ( uz_i(1)*f1 - cti3*xhat )
-!!$             duduz_j(2) = duduz_j(2) + prei3 * ( uz_i(2)*f1 - cti3*yhat )
-!!$             duduz_j(3) = duduz_j(3) + prei3 * ( uz_i(3)*f1 - cti3*zhat )
+             duduz_j(1) = duduz_j(1) + prei3 * ( uz_i(1)*f1 - cti3*xhat )
+             duduz_j(2) = duduz_j(2) + prei3 * ( uz_i(2)*f1 - cti3*yhat )
+             duduz_j(3) = duduz_j(3) + prei3 * ( uz_i(3)*f1 - cti3*zhat )
 
           endif
        endif
@@ -1047,7 +1030,7 @@ contains
              f4 = 0.4_dp*alpha2*f3*r2
           endif
           ri5damp = f1 + f3*one_third
-          ri7damp = ri5damp + f4
+          ri7damp = ri5damp + f4*one_third
 
           ri2 = riji * riji
           ri3 = ri2 * riji
