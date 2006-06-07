@@ -47,7 +47,7 @@
 !!
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: simParallel.F90,v 1.7 2006-05-17 19:54:27 gezelter Exp $, $Date: 2006-05-17 19:54:27 $, $Name: not supported by cvs2svn $, $Revision: 1.7 $
+!! @version $Id: simParallel.F90,v 1.8 2006-06-07 18:05:19 chrisfen Exp $, $Date: 2006-06-07 18:05:19 $, $Name: not supported by cvs2svn $, $Revision: 1.8 $
 
 module mpiSimulation  
   use definitions
@@ -210,7 +210,7 @@ contains
 
     !! copy c component plan to fortran   
     mpiSim = thisComponentPlan 
-    write(*,*) "Seting up simParallel"
+    write(*,*) "Setting up simParallel"
 
     call make_Force_Grid(mpiSim, localStatus)
     if (localStatus /= 0) then

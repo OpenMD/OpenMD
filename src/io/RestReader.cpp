@@ -644,15 +644,15 @@ namespace oopse {
 	// Get the Node number which has this atom
 	which_node = info_->getMolToProc(i);
 	
-	if (worldRank == masterNode) {
+	if (which_node == masterNode) {
 	  mol = info_->getMoleculeByGlobalIndex(i);
-	  
+
 	  if(mol == NULL) {
 	    strcpy(painCave.errMsg, "Molecule not found on node 0!");
 	    haveError = 1;
 	    simError();
 	  }
-	  
+
 	  for (integrableObject = mol->beginIntegrableObject(ii); 
 	       integrableObject != NULL; 
 	       integrableObject = mol->nextIntegrableObject(ii)){
