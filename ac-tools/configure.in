@@ -56,9 +56,9 @@ if test "$ok" = "yes"; then
 fi
 
 # Checks for programs.
-AC_PROG_CXX([icpc icc pgCC pathCC c++ xlc++ xlC g++ CC])
-AC_PROG_CC([icc pgcc pathcc cc xlc gcc])
-AC_PROG_FC([ifort ifc pgf95 pathf95 xlf95 lf95 epcf90 pathf90 xlf90 f95 f90 gfortran g95 fort], 95)
+AC_PROG_CXX([mpicxx icpc icc pathCC pgCC c++ xlc++ xlC g++ CC])
+AC_PROG_CC([mpicc icc pathcc pgcc cc xlc gcc])
+AC_PROG_FC([mpif90 ifort ifc pathf95 pgf95 xlf95 lf95 epcf90 pathf90 xlf90 f95 f90 gfortran g95 fort], 95)
 AC_PROG_CPP
 AC_PROG_EGREP
 AC_PROG_LN_S

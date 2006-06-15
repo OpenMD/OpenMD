@@ -796,11 +796,12 @@ MPI_INC_DIR="$MPI/include"
 AC_SUBST([MPI_LIB_DIR])
 AC_SUBST([MPI_INC_DIR])
 
+AC_LANG(C)
 AC_MSG_CHECKING([for mpi.h])
 have_mpi_h=0
 rm -f conftest*
-echo '#include <mpi.h>' > conftest.cc
-if ${CXX} -I${MPI_INC_DIR} -c conftest.cc 2>&1 ; then
+echo '#include <mpi.h>' > conftest.c
+if ${CC} -I${MPI_INC_DIR} -c conftest.c 2>&1 ; then
         AC_MSG_RESULT(yes)
         have_mpi_h=1
 else
