@@ -241,10 +241,36 @@ namespace oopse {
     AtomData* atomData;
     GenericData* data;
     bool haveAtomData;
-
+    AtomType* atomType;
     //if atom is not SSD atom, just skip it
-    if(!isLinearAtom(datom->getType()))
+    if(!isLinearAtom(datom->getType()) || !datom->getAtomType()->isGayBerne())
       return;
+
+    //setup GayBerne type in fortran side
+    data = datom->getAtomType()->getPropertyByName("GayBerne");
+    if (data != NULL) {
+       GayBerneParamGenericData* gayBerneData = dynamic_cast<GayBerneParamGenericData*>(data);
+
+       if (gayBerneData != NULL) {
+           GayBerneParam gayBerneParam = gayBerneData->getData();
+
+					  double halfLen = gayBerneParam.GB_sigma * gayBerneParam.GB_l2b_ratio/2.0;
+							c1[2] = -halfLen;
+              c2[2] = -halfLen /2;
+              c3[2] = halfLen/2;
+              c4[2] = halfLen;
+                
+            } 
+	    
+	      else {
+                    sprintf( painCave.errMsg,
+                           "Can not cast GenericData to GayBerneParam\n");
+                    painCave.severity = OOPSE_ERROR;
+                    painCave.isFatal = 1;
+                    simError();          
+        }            
+    } 
+
 
     data = datom->getPropertyByName("ATOMDATA");
     if(data != NULL){
@@ -509,8 +535,11 @@ namespace oopse {
       return;
 
     pos = datom->getPos();
-    u = datom->getElectroFrame().getColumn(2);
-
+    if (datom->getAtomType()->isGayBerne()) {
+        u = datom->getA().transpose()*V3Z;         
+    } else if (datom->getAtomType()->isMultipole()) {
+        u = datom->getElectroFrame().getColumn(2);
+    }
     atomData = new AtomData;
     atomData->setID("ATOMDATA");
     atomInfo = new AtomInfo;
