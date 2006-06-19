@@ -122,10 +122,10 @@ namespace oopse {
   
   
   void RestReader :: readIdealCrystal(){
-    
+        
     int i;
     unsigned int j;
-    
+
 #ifdef IS_MPI
     int done, which_node, which_atom; // loop counter
 #endif //is_mpi
@@ -260,6 +260,8 @@ namespace oopse {
         simError();
       }
 
+      MPI_Bcast(read_buffer, BUFFERSIZE, MPI_CHAR, masterNode, MPI_COMM_WORLD);
+
       for (i=0 ; i < info_->getNGlobalMolecules(); i++) {
         int which_node = info_->getMolToProc(i);
         
@@ -295,13 +297,14 @@ namespace oopse {
             parseIdealLine(read_buffer, integrableObject);
 	
           }
+
         } else {
           //molecule belongs to slave nodes
           
           MPI_Recv(&nCurObj, 1, MPI_INT, which_node,
                    TAKE_THIS_TAG_INT, MPI_COMM_WORLD, &istatus);
           
-          for(j=0; j < nCurObj; j++){
+          for(j = 0; j < nCurObj; j++){
             
             eof_test = fgets(read_buffer, sizeof(read_buffer), inIdealFile);
             if(eof_test == NULL){
@@ -320,10 +323,12 @@ namespace oopse {
         }
       }
     } else {
-      //actions taken at slave nodes
+      //actions taken at slave nodes 
+      MPI_Bcast(read_buffer, BUFFERSIZE, MPI_CHAR, masterNode, MPI_COMM_WORLD);
+
       for (i=0 ; i < info_->getNGlobalMolecules(); i++) {
-        int which_node = info_->getMolToProc(i);
-        
+        int which_node = info_->getMolToProc(i); 
+
         if(which_node == worldRank){
           //molecule with global index i belongs to this processor
           
@@ -363,8 +368,6 @@ namespace oopse {
   }
   
   char* RestReader::parseIdealLine(char* readLine, StuntDouble* sd){
-    
-    char *foo; // the pointer to the current string token
     
     RealType pos[3];        // position place holders
     RealType q[4];          // the quaternions
@@ -597,7 +600,8 @@ namespace oopse {
     int masterNode = 0;
     int myStatus; // 1 = wakeup & success; 0 = error; -1 = AllDone
     int haveError;
-    int index;    
+    int intObjIndex;    
+    int intObjIndexTransfer;    
 
     int nCurObj;
     RealType angleTranfer;
@@ -623,7 +627,7 @@ namespace oopse {
           tempZangs.push_back( atof(read_buffer) );
         eof_test = fgets(read_buffer, sizeof(read_buffer), inAngFile);
       }
-      
+
       // Check to see that the number of integrable objects in the
       // intial configuration file is the same as derived from the
       // meta-data file.
@@ -638,7 +642,6 @@ namespace oopse {
       
       // At this point, node 0 has a tempZangs vector completed, and 
       // everyone else has nada
-      index = 0;
       
       for (i=0 ; i < info_->getNGlobalMolecules(); i++) {
 	// Get the Node number which has this atom
@@ -656,24 +659,25 @@ namespace oopse {
 	  for (integrableObject = mol->beginIntegrableObject(ii); 
 	       integrableObject != NULL; 
 	       integrableObject = mol->nextIntegrableObject(ii)){
-	    
-	    integrableObject->setZangle(tempZangs[index]);
-	    index++;
+	    intObjIndex = integrableObject->getGlobalIndex();
+	    integrableObject->setZangle(tempZangs[intObjIndex]);
 	  }	
 	  
 	} else {
 	  // I am MASTER OF THE UNIVERSE, but I don't own this molecule
-	  
+	  // listen for the number of integrableObjects in the molecule
 	  MPI_Recv(&nCurObj, 1, MPI_INT, which_node,
 		   TAKE_THIS_TAG_INT, MPI_COMM_WORLD, &istatus);
 	  
-	  for(j=0; j < nCurObj; j++){	 	 
-	    angleTransfer = tempZangs[index];
+	  for(j=0; j < nCurObj; j++){	 	
+	    // listen for which integrableObject we need to send the value for
+	    MPI_Recv(&intObjIndexTransfer, 1, MPI_INT, which_node,
+		   TAKE_THIS_TAG_INT, MPI_COMM_WORLD, &istatus); 
+	    angleTransfer = tempZangs[intObjIndexTransfer];
+	    // send the value to the node so it can initialize the object
 	    MPI_Send(&angleTransfer, 1, MPI_REALTYPE, which_node, 
 		     TAKE_THIS_TAG_DOUBLE, MPI_COMM_WORLD);      	  
-	    index++;
 	  }
-	  
 	}
       }
     } else {
@@ -696,14 +700,18 @@ namespace oopse {
           }
 
           nCurObj = mol->getNIntegrableObjects();
-	
+	  // send the number of integrableObjects in the molecule
 	  MPI_Send(&nCurObj, 1, MPI_INT, 0,
 		   TAKE_THIS_TAG_INT, MPI_COMM_WORLD);
 	  
           for (integrableObject = mol->beginIntegrableObject(ii); 
                integrableObject != NULL; 
                integrableObject = mol->nextIntegrableObject(ii)){
-	    
+	    intObjIndexTransfer = integrableObject->getGlobalIndex();
+	    // send the global index of the integrableObject
+	    MPI_Send(&intObjIndexTransfer, 1, MPI_INT, 0,
+		     TAKE_THIS_TAG_INT, MPI_COMM_WORLD);
+	    // listen for the value we want to set locally
 	    MPI_Recv(&angleTransfer, 1, MPI_REALTYPE, 0,
 		     TAKE_THIS_TAG_DOUBLE, MPI_COMM_WORLD, &istatus);
 

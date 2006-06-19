@@ -51,10 +51,18 @@
 namespace oopse {
   RestWriter::RestWriter(SimInfo* info) : 
     info_(info) {
-    
-      //we use master - slave mode, only master node writes to disk
+
+    // only the master node writes to the disk
+#ifdef IS_MPI
+    if (worldRank == 0) {
+#endif // is_mpi
+
       outName = info_->getRestFileName();
+
+#ifdef IS_MPI
     }
+#endif // is_mpi
+  }
   
   RestWriter::~RestWriter() {}
   
@@ -69,7 +77,7 @@ namespace oopse {
     StuntDouble* integrableObject;
     SimInfo::MoleculeIterator mi;
     Molecule::IntegrableObjectIterator ii;
-    
+
 #ifdef IS_MPI
     if(worldRank == 0 ){
 #endif    
@@ -125,7 +133,7 @@ namespace oopse {
     int intObIndex;
     RealType zAngle;
    
-    if (masterNode == 0) {
+    if (worldRank == masterNode) {
       std::map<int, RealType> zAngData;
       for(int i = 0 ; i < nproc; ++i) {
         if (i == masterNode) {
@@ -136,20 +144,26 @@ namespace oopse {
                  integrableObject != NULL; 
                  integrableObject = mol->nextIntegrableObject(ii)) { 
               
-              intObIndex = integrableObject->getGlobalIndex() ;
+              intObIndex = integrableObject->getGlobalIndex();
+
               zAngle = integrableObject->getZangle();
               zAngData.insert(std::pair<int, RealType>(intObIndex, zAngle));
             }      
           }
-          
         } else {
-          for(int k = 0; k < nIntObjectsInProc[i]; ++k) {
-            MPI_Recv(&intObIndex, 1, MPI_INT, i, 0, MPI_COMM_WORLD,&ierr);
-            MPI_Recv(&zAngle, 1, MPI_REALTYPE, i, 0, MPI_COMM_WORLD,&ierr);
-            zAngData.insert(std::pair<int, RealType>(intObIndex, zAngle));
-          }
+          for (mol = info_->beginMolecule(mi); mol != NULL; 
+               mol = info_->nextMolecule(mi)) {
+            
+            for (integrableObject = mol->beginIntegrableObject(ii); 
+                 integrableObject != NULL; 
+                 integrableObject = mol->nextIntegrableObject(ii)) { 
+	      
+	      MPI_Recv(&intObIndex, 1, MPI_INT, i, 0, MPI_COMM_WORLD,&ierr);
+	      MPI_Recv(&zAngle, 1, MPI_REALTYPE, i, 0, MPI_COMM_WORLD,&ierr);
+	      zAngData.insert(std::pair<int, RealType>(intObIndex, zAngle));
+	    }
+	  }
         }
-        
       }
       
       finalOut
@@ -158,30 +172,35 @@ namespace oopse {
       
       std::map<int, RealType>::iterator l;
       for (l = zAngData.begin(); l != zAngData.end(); ++l) {
-        finalOut << l->second << "\n";
+        sprintf( tempBuffer,
+                 "%14.10lf\n",
+                 l->second);
+        strcpy( writeLine, tempBuffer );
+        
+        finalOut << writeLine;      
       }
+
+      finalOut.close();
       
     } else {
-      
-      for (mol = info_->beginMolecule(mi); mol != NULL; 
-           mol = info_->nextMolecule(mi)) {
-        
-        for (integrableObject = mol->beginIntegrableObject(ii); 
-             integrableObject != NULL; 
-             integrableObject = mol->nextIntegrableObject(ii)) { 
-          intObIndex = integrableObject->getGlobalIndex();            
-          zAngle = integrableObject->getZangle();
-          MPI_Send(&intObIndex, 1, MPI_INT, masterNode, 0, MPI_COMM_WORLD);
-          MPI_Send(&zAngle, 1, MPI_REALTYPE, masterNode, 0, MPI_COMM_WORLD);
-        }
+      for(int j = 1; j < nproc; ++j) {
+	for (mol = info_->beginMolecule(mi); mol != NULL; 
+	     mol = info_->nextMolecule(mi)) {
+	  
+	  for (integrableObject = mol->beginIntegrableObject(ii); 
+	       integrableObject != NULL; 
+	       integrableObject = mol->nextIntegrableObject(ii)) { 
+	    intObIndex = integrableObject->getGlobalIndex();            
+	    zAngle = integrableObject->getZangle();
+
+	    MPI_Send(&intObIndex, 1, MPI_INT, masterNode, 0, MPI_COMM_WORLD);
+	    MPI_Send(&zAngle, 1, MPI_REALTYPE, masterNode, 0, MPI_COMM_WORLD);
+	  }
+	}
       }
     }
+
 #endif
-    
-#ifdef IS_MPI
-    finalOut.close();
-#endif
-    
   }
   
 }
