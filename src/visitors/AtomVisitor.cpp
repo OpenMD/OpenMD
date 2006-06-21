@@ -254,8 +254,9 @@ namespace oopse {
        if (gayBerneData != NULL) {
            GayBerneParam gayBerneParam = gayBerneData->getData();
 
-					  double halfLen = gayBerneParam.GB_sigma * gayBerneParam.GB_l2b_ratio/2.0;
-							c1[2] = -halfLen;
+			  // double halfLen = gayBerneParam.GB_sigma * gayBerneParam.GB_l2b_ratio/2.0;
+			  double halfLen = gayBerneParam.GB_l/2.0;
+			  c1[2] = -halfLen;
               c2[2] = -halfLen /2;
               c3[2] = halfLen/2;
               c4[2] = halfLen;
