@@ -53,6 +53,8 @@
 #include "integrators/Integrator.hpp"
 #include "minimizers/MinimizerFactory.hpp"
 #include "minimizers/Minimizer.hpp"
+#include "restraints/ThermoIntegrationForceManager.hpp"
+
 using namespace oopse;
 
 int main(int argc,char* argv[]){
@@ -147,9 +149,11 @@ int main(int argc,char* argv[]){
     }
                 
     //Thermodynamic Integration Method
-    //ForceManager* fman = new ThermodynamicForceManager(info);
-    //myIntegrator->setForceManager(fman);
-
+    //set the force manager for thermodynamic integration if specified
+    if (simParams->getUseSolidThermInt() || simParams->getUseLiquidThermInt()){
+      ForceManager* fman = new ThermoIntegrationForceManager(info);
+      myIntegrator->setForceManager(fman);
+    }
 
     //Zconstraint-Method
     if (simParams->getNZconsStamps() > 0) {

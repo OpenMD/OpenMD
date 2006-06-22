@@ -38,60 +38,60 @@
  * University of Notre Dame has been advised of the possibility of
  * such damages.
  */
- 
-#include <algorithm>
-#include <iostream>
-#include <map>
 
-#include "primitives/Molecule.hpp"
 #include "io/RestWriter.hpp"
+#include "primitives/Molecule.hpp"
 #include "utils/simError.h"
+#include "io/basic_teebuf.hpp"
 
+#ifdef IS_MPI
+#include <mpi.h>
+#define TAKE_THIS_TAG_INT 1
+#define TAKE_THIS_TAG_REAL 2
+#endif //is_mpi
 
 namespace oopse {
   RestWriter::RestWriter(SimInfo* info) : 
-    info_(info) {
-
-    // only the master node writes to the disk
-#ifdef IS_MPI
-    if (worldRank == 0) {
-#endif // is_mpi
-
-      outName = info_->getRestFileName();
-
-#ifdef IS_MPI
-    }
-#endif // is_mpi
+    info_(info), outName_(info_->getRestFileName()) {
   }
   
   RestWriter::~RestWriter() {}
   
-  void RestWriter::writeZangle(){
+  void RestWriter::writeZAngFile() {
+    std::ostream* zangStream;
+    
+#ifdef IS_MPI
+    if (worldRank == 0) {
+#endif // is_mpi
+      
+      zangStream = new std::ofstream(outName_.c_str());
+      
+#ifdef IS_MPI
+    }
+#endif // is_mpi    
+    
+    writeZangle(*zangStream);
+    
+#ifdef IS_MPI
+    if (worldRank == 0) {
+#endif // is_mpi
+      delete zangStream;
+      
+#ifdef IS_MPI
+    }
+#endif // is_mpi  
+    
+  }
+
+  void RestWriter::writeZangle(std::ostream& finalOut){
     const int BUFFERSIZE = 2000;
     char tempBuffer[BUFFERSIZE];
     char writeLine[BUFFERSIZE];
-    
-    std::ofstream finalOut;
     
     Molecule* mol;
     StuntDouble* integrableObject;
     SimInfo::MoleculeIterator mi;
     Molecule::IntegrableObjectIterator ii;
-
-#ifdef IS_MPI
-    if(worldRank == 0 ){
-#endif    
-      finalOut.open( outName.c_str(), std::ios::out | std::ios::trunc );
-      if( !finalOut ){
-        sprintf( painCave.errMsg,
-                 "Could not open \"%s\" for zAngle output.\n",
-                 outName.c_str() );
-        painCave.isFatal = 1;
-        simError();
-      }
-#ifdef IS_MPI
-    }
-#endif // is_mpi
     
 #ifndef IS_MPI
     // first we do output for the single processor version
@@ -109,30 +109,25 @@ namespace oopse {
         sprintf( tempBuffer,
                  "%14.10lf\n",
                  integrableObject->getZangle());
-        strcpy( writeLine, tempBuffer );
-        
-        finalOut << writeLine;      
+        strcpy( writeLine, tempBuffer );    
+	
+	finalOut << writeLine;
+
       }
-      
     }
     
 #else
     int nproc;
     MPI_Comm_size(MPI_COMM_WORLD, &nproc);
     const int masterNode = 0;
-    int myNode = worldRank;
-    std::vector<int> tmpNIntObjects(nproc, 0);
-    std::vector<int> nIntObjectsInProc(nproc, 0);
-    tmpNIntObjects[myNode] = info_->getNGlobalIntegrableObjects();
-    
-    //do MPI_ALLREDUCE to exchange the total number of atoms, rigidbodies and cutoff groups
-    MPI_Allreduce(&tmpNIntObjects[0], &nIntObjectsInProc[0], nproc, MPI_INT,
-                  MPI_SUM, MPI_COMM_WORLD);
     
     MPI_Status ierr;
     int intObIndex;
+    int vecLength;
     RealType zAngle;
-   
+    std::vector<int> gIndex;
+    std::vector<RealType> zValues;
+
     if (worldRank == masterNode) {
       std::map<int, RealType> zAngData;
       for(int i = 0 ; i < nproc; ++i) {
@@ -151,27 +146,31 @@ namespace oopse {
             }      
           }
         } else {
-          for (mol = info_->beginMolecule(mi); mol != NULL; 
-               mol = info_->nextMolecule(mi)) {
-            
-            for (integrableObject = mol->beginIntegrableObject(ii); 
-                 integrableObject != NULL; 
-                 integrableObject = mol->nextIntegrableObject(ii)) { 
-	      
-	      MPI_Recv(&intObIndex, 1, MPI_INT, i, 0, MPI_COMM_WORLD,&ierr);
-	      MPI_Recv(&zAngle, 1, MPI_REALTYPE, i, 0, MPI_COMM_WORLD,&ierr);
-	      zAngData.insert(std::pair<int, RealType>(intObIndex, zAngle));
-	    }
+	  MPI_Recv(&vecLength, 1, MPI_INT, i, 
+		   TAKE_THIS_TAG_INT, MPI_COMM_WORLD, &ierr);
+	  // make sure the vectors are the right size for the incoming data
+	  gIndex.resize(vecLength);
+	  zValues.resize(vecLength);
+
+	  MPI_Recv(&gIndex[0], vecLength, MPI_INT, i, 
+		   TAKE_THIS_TAG_INT, MPI_COMM_WORLD, &ierr);
+	  MPI_Recv(&zValues[0], vecLength, MPI_REALTYPE, i, 
+		   TAKE_THIS_TAG_REAL, MPI_COMM_WORLD, &ierr);
+	  
+          for (int k = 0; k < vecLength; k++){
+	    zAngData.insert(std::pair<int, RealType>(gIndex[k], zValues[k]));
 	  }
+	  gIndex.clear();
+	  zValues.clear();
         }
       }
       
-      finalOut
-        << info_->getSnapshotManager()->getCurrentSnapshot()->getTime()
-        << " : omega values at this time\n";
+      finalOut << info_->getSnapshotManager()->getCurrentSnapshot()->getTime()
+	       << " : omega values at this time\n";
       
       std::map<int, RealType>::iterator l;
       for (l = zAngData.begin(); l != zAngData.end(); ++l) {
+
         sprintf( tempBuffer,
                  "%14.10lf\n",
                  l->second);
@@ -179,23 +178,40 @@ namespace oopse {
         
         finalOut << writeLine;      
       }
-
-      finalOut.close();
       
     } else {
+      // pack up and send the appropriate info to the master node
       for(int j = 1; j < nproc; ++j) {
-	for (mol = info_->beginMolecule(mi); mol != NULL; 
-	     mol = info_->nextMolecule(mi)) {
-	  
-	  for (integrableObject = mol->beginIntegrableObject(ii); 
-	       integrableObject != NULL; 
-	       integrableObject = mol->nextIntegrableObject(ii)) { 
-	    intObIndex = integrableObject->getGlobalIndex();            
-	    zAngle = integrableObject->getZangle();
+	if (worldRank == j) {
+	  for (mol = info_->beginMolecule(mi); mol != NULL; 
+	       mol = info_->nextMolecule(mi)) {
+	    
+	    for (integrableObject = mol->beginIntegrableObject(ii); 
+		 integrableObject != NULL; 
+		 integrableObject = mol->nextIntegrableObject(ii)) { 
+	      
+	      // build a vector of the indicies 
+	      intObIndex = integrableObject->getGlobalIndex();
+	      gIndex.push_back(intObIndex);
+	      	     
+	      // build a vector of the zAngle values
+	      zAngle = integrableObject->getZangle();
+	      zValues.push_back(zAngle);
 
-	    MPI_Send(&intObIndex, 1, MPI_INT, masterNode, 0, MPI_COMM_WORLD);
-	    MPI_Send(&zAngle, 1, MPI_REALTYPE, masterNode, 0, MPI_COMM_WORLD);
+	    }      
 	  }
+
+	  // let's send these vectors to the master node so that it
+	  // can sort them and write to the disk
+	  vecLength = gIndex.size();
+
+	  MPI_Send(&vecLength, 1, MPI_INT, masterNode, 
+		   TAKE_THIS_TAG_INT, MPI_COMM_WORLD);
+	  MPI_Send(&gIndex[0], vecLength, MPI_INT, masterNode, 
+		   TAKE_THIS_TAG_INT, MPI_COMM_WORLD);
+	  MPI_Send(&zValues[0], vecLength, MPI_REALTYPE, masterNode, 
+		   TAKE_THIS_TAG_REAL, MPI_COMM_WORLD);
+	
 	}
       }
     }

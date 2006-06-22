@@ -144,10 +144,6 @@ namespace oopse {
     tempTau = curSnapshot->statData.getTau();
     tempTau *= factor_;
     curSnapshot->statData.setTau(tempTau);
-
-//     sprintf(painCave.errMsg, "Before Calc_Restraint_Forces\n");
-//     painCave.isFatal = 0;
-//     simError();
   
     // do crystal restraint forces for thermodynamic integration
     if (simParam->getUseSolidThermInt()) {
@@ -158,10 +154,6 @@ namespace oopse {
       vHarm_ = restraint_->getVharm();
       curSnapshot->statData[Stats::VHARM] = vHarm_;
     }
-
-//     sprintf(painCave.errMsg, "After Calc_Restraint_Forces\n");
-//     painCave.isFatal = 0;
-//     simError();
     
   }
   

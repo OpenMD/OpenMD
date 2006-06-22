@@ -44,8 +44,9 @@
 #include "utils/simError.h"
 namespace oopse {
   Integrator::Integrator(SimInfo* info) 
-    : info_(info), forceMan_(NULL) , needPotential(false), needStress(false), needReset(false), velocitizer_(NULL),
-      needVelocityScaling(false), dumpWriter(NULL), statWriter(NULL), thermo(info),
+    : info_(info), forceMan_(NULL) , needPotential(false), needStress(false), 
+      needReset(false), velocitizer_(NULL), needVelocityScaling(false), 
+      dumpWriter(NULL), statWriter(NULL), thermo(info),
       currentSnapshot_(info->getSnapshotManager()->getCurrentSnapshot()) {
 
       simParams = info->getSimParams();
@@ -95,16 +96,9 @@ namespace oopse {
         resetTime = simParams->getResetTime();
       }
       
-      //create a default ForceManager
-      //if the subclass wants to use a different ForceManager, use setForceManager
+      // Create a default ForceManager: If the subclass wants to use 
+      // a different ForceManager, use setForceManager
       forceMan_ = new ForceManager(info);
-    
-      //set the force manager for thermodynamic integration if specified
-      if (simParams->getUseSolidThermInt() || simParams->getUseLiquidThermInt()){
-	ThermoIntegrationForceManager* thermoForce_ 
-	  = new ThermoIntegrationForceManager(info);
-	setForceManager(thermoForce_);
-      }
     
       // check for the temperature set flag (velocity scaling)      
       if (simParams->haveTempSet()) {
@@ -122,8 +116,8 @@ namespace oopse {
         }
       }
     
-      //create a default a velocitizer
-      //if the subclass want to using different velocitizer, use setVelocitizer
+      // Create a default a velocitizer: If the subclass wants to use 
+      // a different velocitizer, use setVelocitizer
       velocitizer_ = new Velocitizer(info);
     
     }

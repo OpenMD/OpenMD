@@ -67,19 +67,21 @@ namespace oopse {
     
     forceMan_->init();
     
-    // remove center of mass drift velocity (in case we passed in a configuration
-    // that was drifting
+    // remove center of mass drift velocity (in case we passed in a
+    // configuration that was drifting)
     velocitizer_->removeComDrift();
     
     // initialize the forces before the first step
     calcForce(true, true);
     
-    //execute constraint algorithm to make sure at the very beginning the system is constrained  
+    // execute the constraint algorithm to make sure that the system is
+    // constrained at the very beginning  
     if (info_->getNGlobalConstraints() > 0) {
       rattle->constraintA();
       calcForce(true, true);
-      rattle->constraintB();        
-      info_->getSnapshotManager()->advance();//copy the current snapshot to previous snapshot
+      rattle->constraintB();      
+      //copy the current snapshot to previous snapshot
+      info_->getSnapshotManager()->advance();
     }
     
     if (needVelocityScaling) {
@@ -89,14 +91,13 @@ namespace oopse {
     dumpWriter = createDumpWriter();
     
     statWriter = createStatWriter();
-    
+ 
+    dumpWriter->writeDumpAndEor();
+
     if (simParams->getUseSolidThermInt()) {
       restWriter = createRestWriter();
-      restWriter->writeZangle();
+      restWriter->writeZAngFile();
     }
-    
-    dumpWriter->writeDumpAndEor();
-    
     
     //save statistics, before writeStat,  we must save statistics
     thermo.saveStat();
@@ -150,23 +151,23 @@ namespace oopse {
   
     //increase time
     currentSnapshot_->increaseTime(dt);        
-  
+   
     if (needVelocityScaling) {
       if (currentSnapshot_->getTime() >= currThermal) {
 	velocitizer_->velocitize(targetScalingTemp);
 	currThermal += thermalTime;
       }
     }
-  
+
     if (currentSnapshot_->getTime() >= currSample) {
       dumpWriter->writeDumpAndEor();
-    
+
       if (simParams->getUseSolidThermInt())
-	restWriter->writeZangle();
+	restWriter->writeZAngFile();
     
       currSample += sampleTime;
     }
-  
+
     if (currentSnapshot_->getTime() >= currStatus) {
       //save statistics, before writeStat,  we must save statistics
       thermo.saveStat();
@@ -190,7 +191,7 @@ namespace oopse {
     dumpWriter->writeEor();
   
     if (simParams->getUseSolidThermInt()) {
-      restWriter->writeZangle();
+//       restWriter->writeZAngFile();
       delete restWriter;
       restWriter = NULL;
     }
@@ -231,7 +232,8 @@ namespace oopse {
       mask.set(Stats::VHARM);
     }
 
-    if (simParams->havePrintPressureTensor() && simParams->getPrintPressureTensor()){
+    if (simParams->havePrintPressureTensor() && 
+	simParams->getPrintPressureTensor()){
         mask.set(Stats::PRESSURE_TENSOR_X);
         mask.set(Stats::PRESSURE_TENSOR_Y);
         mask.set(Stats::PRESSURE_TENSOR_Z);

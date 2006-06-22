@@ -50,12 +50,20 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <algorithm>
+#include <vector>
+#include <map>
 
+#include "primitives/Atom.hpp"
 #include "brains/SimInfo.hpp"
-
-#ifdef IS_MPI
-#include <mpi.h>
-#endif
+#include "brains/Thermo.hpp"
+#include "primitives/StuntDouble.hpp"
 
 namespace oopse {
 
@@ -65,13 +73,13 @@ namespace oopse {
     RestWriter( SimInfo* info );
     ~RestWriter();
     
-    void writeZangle();
+    void writeZAngFile();
     
   private:
-      
+    void writeZangle(std::ostream& finalOut);
+
     SimInfo* info_;
-    std::string outName;
-    
+    std::string outName_;
   };
 
 }
