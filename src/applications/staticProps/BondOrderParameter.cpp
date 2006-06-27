@@ -39,7 +39,7 @@
  * such damages.
  */
 
-#include "applications/staticProps/P2OrderParameter.hpp"
+#include "applications/staticProps/BondOrderParameter.hpp"
 #include "utils/simError.h"
 #include "io/DumpReader.hpp"
 #include "primitives/Molecule.hpp"
@@ -47,10 +47,11 @@
 namespace oopse {
 
 
-P2OrderParameter::P2OrderParameter(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2)
+BondOrderParameter::BondOrderParameter(SimInfo* info, const std::string& filename, const std::string& sele1,
+ const std::string& sele2, double rCut, int lNumber)
   : StaticAnalyser(info, filename),
-    selectionScript1_(sele1), selectionScript2_(sele2), evaluator1_(info), evaluator2_(info), 
-    seleMan1_(info), seleMan2_(info){
+    selectionScript1_(sele1), evaluator1_(info), 
+    seleMan1_(info){
 
     setOutputName(getPrefix(filename) + ".p2");
         
@@ -67,30 +68,12 @@ P2OrderParameter::P2OrderParameter(SimInfo* info, const std::string& filename, c
         simError();  
     }
 
-    if (!evaluator2_.isDynamic()) {
-      seleMan2_.setSelectionSet(evaluator2_.evaluate());
-    }else {
-        sprintf( painCave.errMsg,
-                 "--sele2 must be static selection\n");
-        painCave.severity = OOPSE_ERROR;
-        painCave.isFatal = 1;
-        simError();  
-    }
-
-    if (seleMan1_.getSelectionCount() != seleMan2_.getSelectionCount() ) {
-        sprintf( painCave.errMsg,
-                 "The number of selected Stuntdoubles are not the same in --sele1 and sele2\n");
-        painCave.severity = OOPSE_ERROR;
-        painCave.isFatal = 1;
-        simError();  
-
-    }
 
   int i;
   int j;
   StuntDouble* sd1;
   StuntDouble* sd2;
-  for (sd1 = seleMan1_.beginSelected(i), sd2 = seleMan2_.beginSelected(j);
+  for (sd1 = seleMan1_.beginSelected(i), sd2 = seleMan1_.beginSelected(j);
      sd1 != NULL && sd2 != NULL;
      sd1 = seleMan1_.nextSelected(i), sd2 = seleMan2_.nextSelected(j)) {
 
@@ -100,7 +83,7 @@ P2OrderParameter::P2OrderParameter(SimInfo* info, const std::string& filename, c
     
   }
 
-void P2OrderParameter::process() {
+void BondOrderParameter::process() {
   Molecule* mol;
   RigidBody* rb;
   SimInfo::MoleculeIterator mi;
@@ -176,7 +159,7 @@ void P2OrderParameter::process() {
   
 }
 
-void P2OrderParameter::writeP2() {
+void BondOrderParameter::writeOrderParameter() {
 
     std::ofstream os(getOutputFileName().c_str());
     os << "#radial distribution function\n";

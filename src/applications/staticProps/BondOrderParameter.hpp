@@ -38,17 +38,19 @@
  * University of Notre Dame has been advised of the possibility of
  * such damages.
  */
-#ifndef APPLICATIONS_STATICPROPS_P2ORDERPARAMETER_HPP
-#define APPLICATIONS_STATICPROPS_P2ORDERPARAMETER_HPP
+#ifndef APPLICATIONS_STATICPROPS_BONDORDERPARAMETER_HPP
+#define APPLICATIONS_STATICPROPS_BONDORDERPARAMETER_HPP
 #include "selection/SelectionEvaluator.hpp"
 #include "selection/SelectionManager.hpp"
 #include "applications/staticProps/StaticAnalyser.hpp"
+#include "math/Vector3.hpp"
 
 namespace oopse {
 
-    class P2OrderParameter : public StaticAnalyser{
+    class BondOrderParameter : public StaticAnalyser{
         public:
-            P2OrderParameter(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2);
+            BondOrderParameter(SimInfo* info, const std::string& filename, const std::string& sele1,
+            	 const std::string& sele2, double rCut, int lNumber );
             virtual void process();
 
         private:
@@ -63,14 +65,15 @@ namespace oopse {
             Snapshot* currentSnapshot_;
 
             std::string selectionScript1_;
-            std::string selectionScript2_;
-            SelectionManager seleMan1_;
-            SelectionManager seleMan2_;       
+            SelectionManager seleMan1_;    
             SelectionEvaluator evaluator1_;
-            SelectionEvaluator evaluator2_;
+            
+            std::vector<Vector3d> neighbors_;
             std::vector<std::pair<StuntDouble*, StuntDouble*> > sdPairs_;  /**< each pair is used to define a vector, vector = first - second */
             std::vector<OrderParam> orderParams_;
             
+            double rCut_;
+            int lNumber_;
     };
 }
 
