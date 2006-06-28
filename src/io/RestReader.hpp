@@ -76,15 +76,12 @@ namespace oopse {
     
   private:
     char* parseIdealLine(char* readLine, StuntDouble* sd);
-    char *idealName;
-    FILE *inAngFile;
-    FILE *inIdealFile;
-    std::string inAngFileName;
-    std::string inIdealFileName;
-    bool isScanned;
-    
+    std::string angFile;
+    std::string idealName;
+    std::istream* inIdealFile;
+    std::istream* inAngFile;
+
     RealType angleTransfer;
-    std::vector<fpos_t*> framePos;
     SimInfo *info_;
   };
 

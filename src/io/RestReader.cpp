@@ -70,22 +70,21 @@ namespace oopse {
   RestReader::RestReader( SimInfo* info ) : info_(info){
     
     idealName = "idealCrystal.in";
-    
-    isScanned = false;
-    
+     
 #ifdef IS_MPI
     if (worldRank == 0) {
 #endif
-      
-      inIdealFile = fopen(idealName, "r");
-      if(inIdealFile == NULL){
+
+      inIdealFile = new std::ifstream(idealName.c_str()); 
+
+      if(inIdealFile->fail()){
         sprintf(painCave.errMsg,
-                "RestReader: Cannot open file: %s\n", idealName);
+                "RestReader: Cannot open file: %s\n", 
+		idealName.c_str());
         painCave.isFatal = 1;
         simError();
       }
       
-      inIdealFileName = idealName;
 #ifdef IS_MPI
     }
     strcpy( checkPointMsg, 
@@ -100,20 +99,14 @@ namespace oopse {
 #ifdef IS_MPI
     if (worldRank == 0) {
 #endif
-      int error;
-      error = fclose( inIdealFile );
-      
-      if( error ){
-        sprintf( painCave.errMsg,
-                 "Error closing %s\n", inIdealFileName.c_str());
-        simError();
-      }
-      
-      MemoryUtils::deletePointers(framePos);
-      
+
+      delete inIdealFile;
+      delete inAngFile;
+
 #ifdef IS_MPI
     }
-    strcpy( checkPointMsg, "Restraint file closed successfully." );
+    strcpy( checkPointMsg, 
+	    "File idealCrystal.in (and .zang0 if present) closed successfully." );
     MPIcheckPoint();
 #endif
     
@@ -123,18 +116,15 @@ namespace oopse {
   
   void RestReader :: readIdealCrystal(){
         
-    int i;
-    unsigned int j;
-
 #ifdef IS_MPI
-    int done, which_node, which_atom; // loop counter
+    int which_node;
+    int i, j;
 #endif //is_mpi
     
     const int BUFFERSIZE = 2000; // size of the read buffer
     int nTotObjs; // the number of atoms
     char read_buffer[BUFFERSIZE]; //the line buffer for reading
     
-    char *eof_test; // ptr to see when we reach the end of the file
     char *parseErr;
     
     std::vector<StuntDouble*> integrableObjects;
@@ -146,11 +136,12 @@ namespace oopse {
     
 #ifndef IS_MPI
     
-    eof_test = fgets(read_buffer, sizeof(read_buffer), inIdealFile);
-    if( eof_test == NULL ){
+    inIdealFile->getline(read_buffer, sizeof(read_buffer)); 
+
+    if( inIdealFile->eof() ){
       sprintf( painCave.errMsg,
                "RestraintReader error: error reading 1st line of \"%s\"\n",
-               inIdealFileName.c_str() );
+               idealName.c_str() );
       painCave.isFatal = 1;
       simError();
     }
@@ -161,17 +152,20 @@ namespace oopse {
       sprintf( painCave.errMsg,
                "RestraintReader error. %s nIntegrable, %d, "
                "does not match the meta-data file's nIntegrable, %d.\n",
-               inIdealFileName.c_str(), nTotObjs, 
+               idealName.c_str(), 
+	       nTotObjs, 
                info_->getNGlobalIntegrableObjects());
       painCave.isFatal = 1;
       simError();
     }
     
     // skip over the comment line
-    eof_test = fgets(read_buffer, sizeof(read_buffer), inIdealFile);
-    if(eof_test == NULL){
+    inIdealFile->getline(read_buffer, sizeof(read_buffer)); 
+
+    if( inIdealFile->eof() ){
       sprintf( painCave.errMsg,
-               "error in reading commment in %s\n", inIdealFileName.c_str());
+               "error in reading commment in %s\n", 
+	       idealName.c_str());
       painCave.isFatal = 1;
       simError();
     }
@@ -188,14 +182,15 @@ namespace oopse {
       for (integrableObject = mol->beginIntegrableObject(ii); 
            integrableObject != NULL; 
            integrableObject = mol->nextIntegrableObject(ii)) {    
-        
-        eof_test = fgets(read_buffer, sizeof(read_buffer), inIdealFile);
-        if(eof_test == NULL){
+
+	inIdealFile->getline(read_buffer, sizeof(read_buffer)); 
+
+        if( inIdealFile->eof() ){
           sprintf(painCave.errMsg,
                   "RestReader Error: error in reading file %s\n"
                   "natoms  = %d; index = %d\n"
                   "error reading the line from the file.\n",
-                  inIdealFileName.c_str(), nTotObjs, 
+                  idealName.c_str(), nTotObjs, 
                   integrableObject->getGlobalIndex() );
           painCave.isFatal = 1;
           simError();
@@ -217,7 +212,6 @@ namespace oopse {
     painCave.isEventLoop = 1;
     
     int masterNode = 0;
-    int myStatus; // 1 = wakeup & success; 0 = error; -1 = AllDone
     
     MPI_Status istatus;
     int nCurObj;
@@ -228,10 +222,11 @@ namespace oopse {
     haveError = 0;
 
     if (worldRank == masterNode) {
-      eof_test = fgets(read_buffer, sizeof(read_buffer), inIdealFile);
-      if( eof_test == NULL ){
+      inIdealFile->getline(read_buffer, sizeof(read_buffer)); 
+
+      if( inIdealFile->eof() ){
         sprintf( painCave.errMsg,
-                 "Error reading 1st line of %s \n ",inIdealFileName.c_str());
+                 "Error reading 1st line of %s \n ",idealName.c_str());
         painCave.isFatal = 1;
         simError();
       }
@@ -245,17 +240,18 @@ namespace oopse {
         sprintf( painCave.errMsg,
                  "RestraintReader Error. %s nIntegrable, %d, "
                  "does not match the meta-data file's nIntegrable, %d.\n",
-                 inIdealFileName.c_str(), nTotObjs, 
+                 idealName.c_str(), nTotObjs, 
                  info_->getNGlobalIntegrableObjects());
         painCave.isFatal = 1;
         simError();
       }
       
       // skip over the comment line
-      eof_test = fgets(read_buffer, sizeof(read_buffer), inIdealFile);
-      if(eof_test == NULL){
+      inIdealFile->getline(read_buffer, sizeof(read_buffer)); 
+
+      if( inIdealFile->eof() ){
         sprintf( painCave.errMsg,
-                 "error in reading commment in %s\n", inIdealFileName.c_str());
+                 "error in reading commment in %s\n", idealName.c_str());
         painCave.isFatal = 1;
         simError();
       }
@@ -263,7 +259,7 @@ namespace oopse {
       MPI_Bcast(read_buffer, BUFFERSIZE, MPI_CHAR, masterNode, MPI_COMM_WORLD);
 
       for (i=0 ; i < info_->getNGlobalMolecules(); i++) {
-        int which_node = info_->getMolToProc(i);
+        which_node = info_->getMolToProc(i);
         
         if(which_node == masterNode){
           //molecules belong to master node
@@ -282,14 +278,14 @@ namespace oopse {
                integrableObject != NULL; 
                integrableObject = mol->nextIntegrableObject(ii)){
             
-            eof_test = fgets(read_buffer, sizeof(read_buffer), inIdealFile);
+	    inIdealFile->getline(read_buffer, sizeof(read_buffer)); 
             
-            if(eof_test == NULL){
+            if( inIdealFile->eof() ){
               sprintf(painCave.errMsg,
                       "RestReader Error: error in reading file %s\n"
                       "natoms  = %d; index = %d\n"
                       "error reading the line from the file.\n",
-                      inIdealFileName.c_str(), nTotObjs, i );
+                      idealName.c_str(), nTotObjs, i );
               painCave.isFatal = 1;
               simError();
             }
@@ -305,14 +301,14 @@ namespace oopse {
                    TAKE_THIS_TAG_INT, MPI_COMM_WORLD, &istatus);
           
           for(j = 0; j < nCurObj; j++){
-            
-            eof_test = fgets(read_buffer, sizeof(read_buffer), inIdealFile);
-            if(eof_test == NULL){
+	    inIdealFile->getline(read_buffer, sizeof(read_buffer)); 
+
+            if( inIdealFile->eof() ){
               sprintf(painCave.errMsg,
                       "RestReader Error: error in reading file %s\n"
                       "natoms  = %d; index = %d\n"
                       "error reading the line from the file.\n",
-                      inIdealFileName.c_str(), nTotObjs, i );
+                      idealName.c_str(), nTotObjs, i );
               painCave.isFatal = 1;
               simError();
             }
@@ -394,7 +390,7 @@ namespace oopse {
       sprintf(painCave.errMsg,
               "RestReader Error: Atom type [%s] in %s does not "
               "match Atom Type [%s] in .md file.\n",
-              name.c_str(), inIdealFileName.c_str(), 
+              name.c_str(), idealName.c_str(), 
               sd->getType().c_str());
       painCave.isFatal = 1;
       simError();        
@@ -473,7 +469,6 @@ namespace oopse {
   void RestReader::readZangle(){
     
     int i;
-    unsigned int j;
     int isPresent;
     
     Molecule* mol;
@@ -482,39 +477,37 @@ namespace oopse {
     Molecule::IntegrableObjectIterator ii;
     
 #ifdef IS_MPI
-    int done, which_node, which_atom; // loop counter
-    int nProc;
+    int which_node;
     MPI_Status istatus;
 #endif //is_mpi
     
     const int BUFFERSIZE = 2000; // size of the read buffer
-    int nTotObjs; // the number of atoms
+    unsigned int nTotObjs; // the number of atoms
     char read_buffer[BUFFERSIZE]; //the line buffer for reading
-    
-    char *eof_test; // ptr to see when we reach the end of the file
-    char *parseErr;
     
     std::vector<StuntDouble*> vecParticles;
     std::vector<RealType> tempZangs;
       
-    inAngFileName = info_->getRestFileName();
+    angFile = info_->getRestFileName();
     
-    inAngFileName += "0";
+    angFile += "0";
     
     // open the omega value file for reading
 #ifdef IS_MPI
     if (worldRank == 0) {
 #endif
       isPresent = 1;
-      inAngFile = fopen(inAngFileName.c_str(), "r");
-      if(!inAngFile){
+      
+      inAngFile = new std::ifstream(angFile.c_str()); 
+      
+      if(inAngFile->fail()){
         sprintf(painCave.errMsg,
                 "Restraints Warning: %s file is not present\n"
                 "\tAll omega values will be initialized to zero. If the\n"
                 "\tsimulation is starting from the idealCrystal.in reference\n"
                 "\tconfiguration, this is the desired action. If this is not\n"
                 "\tthe case, the energy calculations will be incorrect.\n",
-                inAngFileName.c_str());
+                angFile.c_str());
         painCave.severity = OOPSE_WARNING;
         painCave.isFatal = 0;
         simError();   
@@ -532,6 +525,12 @@ namespace oopse {
       }
       
 #ifdef IS_MPI
+      if (!isPresent) {
+	// master node zeroes out its zAngles if .zang0 isn't present
+	zeroZangle();
+	return;
+      }
+
     }
     
     // listen to node 0 to see if we should exit this function
@@ -549,21 +548,26 @@ namespace oopse {
     
 #ifndef IS_MPI
     
-    eof_test = fgets(read_buffer, sizeof(read_buffer), inAngFile);
-    if( eof_test == NULL ){
+    // read the first line and die if there is a failure
+    inAngFile->getline(read_buffer, sizeof(read_buffer)); 
+
+    if( inAngFile->eof() ){
       sprintf( painCave.errMsg,
                "RestraintReader error: error reading 1st line of \"%s\"\n",
-               inAngFileName.c_str() );
+               angFile.c_str() );
       painCave.isFatal = 1;
       simError();
     }
+
+    // read the file and load the values into a vector
+    inAngFile->getline(read_buffer, sizeof(read_buffer)); 
     
-    eof_test = fgets(read_buffer, sizeof(read_buffer), inAngFile);
-    while ( eof_test != NULL ) {
+    while ( !inAngFile->eof() ) {
       // check for and ignore blank lines
       if ( read_buffer != NULL )
         tempZangs.push_back( atof(read_buffer) );
-      eof_test = fgets(read_buffer, sizeof(read_buffer), inAngFile);
+
+      inAngFile->getline(read_buffer, sizeof(read_buffer)); 
     }
     
     nTotObjs = info_->getNGlobalIntegrableObjects();
@@ -571,8 +575,10 @@ namespace oopse {
     if( nTotObjs != tempZangs.size() ){
       sprintf( painCave.errMsg,
                "RestraintReader zAngle reading error. %s nIntegrable, %d, "
-               "does not match the meta-data file's nIntegrable, %d.\n",
-               inAngFileName.c_str(), tempZangs.size(), nTotObjs );
+               "does not match the meta-data file's nIntegrable, %i.\n",
+               angFile.c_str(), 
+	       tempZangs.size(), 
+	       nTotObjs );
       painCave.isFatal = 1;
       simError();
     }
@@ -598,34 +604,38 @@ namespace oopse {
     painCave.isEventLoop = 1;
 
     int masterNode = 0;
-    int myStatus; // 1 = wakeup & success; 0 = error; -1 = AllDone
+
     int haveError;
     int intObjIndex;    
     int intObjIndexTransfer;    
 
+    int j;
     int nCurObj;
-    RealType angleTranfer;
+    RealType angleTransfer;
     
     nTotObjs = info_->getNGlobalIntegrableObjects();
     haveError = 0;
 
     if (worldRank == masterNode) {
       
-      eof_test = fgets(read_buffer, sizeof(read_buffer), inAngFile);
-      if( eof_test == NULL ){
+      inAngFile->getline(read_buffer, sizeof(read_buffer));
+
+      if( inAngFile->eof() ){
         sprintf( painCave.errMsg,
-                 "Error reading 1st line of %s \n ",inAngFileName.c_str());
+                 "Error reading 1st line of %s \n ",angFile.c_str());
         haveError = 1;
         simError();
       }
       
-      // let node 0 load the temporary angle vector
-      eof_test = fgets(read_buffer, sizeof(read_buffer), inAngFile);
-      while ( eof_test != NULL ) {
+      // let the master node read the file and load the temporary angle vector
+      inAngFile->getline(read_buffer, sizeof(read_buffer));
+
+      while ( !inAngFile->eof() ) {
         // check for and ignore blank lines
         if ( read_buffer != NULL )
           tempZangs.push_back( atof(read_buffer) );
-        eof_test = fgets(read_buffer, sizeof(read_buffer), inAngFile);
+
+	inAngFile->getline(read_buffer, sizeof(read_buffer));
       }
 
       // Check to see that the number of integrable objects in the
@@ -635,7 +645,9 @@ namespace oopse {
         sprintf( painCave.errMsg,
                  "RestraintReader zAngle reading Error. %s nIntegrable, %d, "
                  "does not match the meta-data file's nIntegrable, %d.\n",
-                 inAngFileName.c_str(), tempZangs.size(), nTotObjs);
+                 angFile.c_str(), 
+		 tempZangs.size(), 
+		 nTotObjs);
         haveError= 1;
         simError();
       }
@@ -683,7 +695,7 @@ namespace oopse {
     } else {
       // I am SLAVE TO THE MASTER
       for (i=0 ; i < info_->getNGlobalMolecules(); i++) {
-        int which_node = info_->getMolToProc(i);
+        which_node = info_->getMolToProc(i);
 
 	if (which_node == worldRank) {
 	  
@@ -725,17 +737,11 @@ namespace oopse {
   
   void RestReader :: zeroZangle(){
     
-    int i;
-    unsigned int j;
-    int nTotObjs; // the number of atoms
-    
     Molecule* mol;
     StuntDouble* integrableObject;
     SimInfo::MoleculeIterator mi;
     Molecule::IntegrableObjectIterator ii;
-    
-    std::vector<StuntDouble*> vecParticles;
-    
+     
 #ifndef IS_MPI
     // set all zAngles to 0.0
     for (mol = info_->beginMolecule(mi); mol != NULL; 
@@ -753,90 +759,39 @@ namespace oopse {
     // first thing first, suspend fatalities.
     painCave.isEventLoop = 1;
     
-    int masterNode = 0;
     int myStatus; // 1 = wakeup & success; 0 = error; -1 = AllDone
     int haveError;
     int which_node;
     
-    MPI_Status istatus;
-    
-    int nCurObj;
-    RealType angleTranfer;
-    
-    nTotObjs = info_->getNGlobalIntegrableObjects();
     haveError = 0;
-    if (worldRank == masterNode) {
 
-      for (i=0 ; i < info_->getNGlobalMolecules(); i++) {
-	// Get the Node number which has this atom
-	which_node = info_->getMolToProc(i);
+    for (int i=0 ; i < info_->getNGlobalMolecules(); i++) {
+
+      // Get the Node number which has this atom
+      which_node = info_->getMolToProc(i);
 	
-	// let's let node 0 pass out constant values to all the processors
-	if (worldRank == masterNode) {
-	  mol = info_->getMoleculeByGlobalIndex(i);
+      // each processor zeroes its own integrable objects
+      if (which_node == worldRank) {
+	mol = info_->getMoleculeByGlobalIndex(i);
+	
+	if(mol == NULL) {
+	  sprintf( painCave.errMsg, 
+		  "Molecule not found on node %i!",
+		  which_node );
+	  haveError = 1;
+	  simError();
+	}
+	
+	for (integrableObject = mol->beginIntegrableObject(ii); 
+	     integrableObject != NULL; 
+	     integrableObject = mol->nextIntegrableObject(ii)){
 	  
-	  if(mol == NULL) {
-	    strcpy(painCave.errMsg, "Molecule not found on node 0!");
-	    haveError = 1;
-	    simError();
-	  }
+	  integrableObject->setZangle( 0.0 );
 	  
-	  for (integrableObject = mol->beginIntegrableObject(ii); 
-	       integrableObject != NULL; 
-	       integrableObject = mol->nextIntegrableObject(ii)){
-	    
-	    integrableObject->setZangle( 0.0 );
-	    
-	  }
-	  
-	} else {
-	  // I am MASTER OF THE UNIVERSE, but I don't own this molecule
-	  
-	  MPI_Recv(&nCurObj, 1, MPI_INT, which_node,
-		   TAKE_THIS_TAG_INT, MPI_COMM_WORLD, &istatus);
-	  
-	  for(j=0; j < nCurObj; j++){	 	 
-	    angleTransfer = 0.0;
-	    MPI_Send(&angleTransfer, 1, MPI_REALTYPE, which_node, 
-		     TAKE_THIS_TAG_DOUBLE, MPI_COMM_WORLD);      	  
-	    
-	  }
 	}
       }
-    } else {
-      // I am SLAVE TO THE MASTER
-      for (i=0 ; i < info_->getNGlobalMolecules(); i++) {
-	int which_node = info_->getMolToProc(i);
-	
-	if (which_node == worldRank) {
-	  
-	  // BUT I OWN THIS MOLECULE!!!
-	  mol = info_->getMoleculeByGlobalIndex(i);
-	  
-	  if(mol == NULL) {
-	    sprintf(painCave.errMsg, 
-		    "RestReader Error: molecule not found on node %d\n", 
-		    worldRank);
-	    painCave.isFatal = 1;
-	    simError();
-	  }
-	  
-	  nCurObj = mol->getNIntegrableObjects();
-	  
-	  MPI_Send(&nCurObj, 1, MPI_INT, 0,
-		   TAKE_THIS_TAG_INT, MPI_COMM_WORLD);
-	  
-	  for (integrableObject = mol->beginIntegrableObject(ii); 
-               integrableObject != NULL; 
-               integrableObject = mol->nextIntegrableObject(ii)){
-	    
-            MPI_Recv(&angleTransfer, 1, MPI_REALTYPE, 0,
-                     TAKE_THIS_TAG_DOUBLE, MPI_COMM_WORLD, &istatus);
-            vecParticles[j]->setZangle(angleTransfer);
-          }	
-        }
-      }
     }
+ 
 #endif
   }
   

@@ -71,53 +71,55 @@ namespace oopse {
    
   DumpReader::DumpReader(SimInfo* info, const std::string& filename) 
     : info_(info), filename_(filename), isScanned_(false), nframes_(0) { 
-     
+    
 #ifdef IS_MPI 
-     
-      if (worldRank == 0) { 
-#endif 
-       
-      inFile_ = new std::ifstream(filename_.c_str()); 
-       
-	if (inFile_->fail()) { 
-	  sprintf(painCave.errMsg, "DumpReader: Cannot open file: %s\n", filename_.c_str()); 
-	  painCave.isFatal = 1; 
-	  simError(); 
-	} 
-       
-#ifdef IS_MPI 
-       
-      } 
-     
-      strcpy(checkPointMsg, "Dump file opened for reading successfully."); 
-      MPIcheckPoint(); 
-     
-#endif 
-     
-      return; 
-    } 
-   
-  DumpReader::~DumpReader() { 
-     
-#ifdef IS_MPI 
-     
+    
     if (worldRank == 0) { 
 #endif 
-       
-      delete inFile_; 
-       
+      
+      inFile_ = new std::ifstream(filename_.c_str()); 
+      
+      if (inFile_->fail()) { 
+	sprintf(painCave.errMsg, 
+		"DumpReader: Cannot open file: %s\n", 
+		filename_.c_str()); 
+	painCave.isFatal = 1; 
+	simError(); 
+      } 
+      
 #ifdef IS_MPI 
-       
+      
     } 
-     
-    strcpy(checkPointMsg, "Dump file closed successfully."); 
+    
+    strcpy(checkPointMsg, "Dump file opened for reading successfully."); 
     MPIcheckPoint(); 
-     
+    
 #endif 
-     
+    
     return; 
   } 
-   
+  
+  DumpReader::~DumpReader() { 
+    
+#ifdef IS_MPI 
+    
+    if (worldRank == 0) { 
+#endif 
+      
+      delete inFile_; 
+      
+#ifdef IS_MPI 
+      
+    } 
+    
+    strcpy(checkPointMsg, "Dump file closed successfully."); 
+    MPIcheckPoint(); 
+    
+#endif 
+    
+    return; 
+  } 
+  
   int DumpReader::getNFrames(void) { 
      
     if (!isScanned_) 
