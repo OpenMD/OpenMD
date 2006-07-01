@@ -234,8 +234,9 @@ contains
           e2 = GBMap%GBtypes(j)%eps
           er2 = GBMap%GBtypes(j)%eps_ratio
           dw2 = GBMap%GBtypes(j)%dw
-
-          GBMixingMap(i,j)%sigma0 = sqrt(d1*d1 + d2*d2)
+!	  write(*,*) 'd2 = ', d2,l2, d1,l2 
+!          GBMixingMap(i,j)%sigma0 = sqrt(d1*d1 + d2*d2)
+          GBMixingMap(i,j)%sigma0 = 0.5_dp*(d1 + d2)
           GBMixingMap(i,j)%xa2 = (l1*l1 - d1*d1)/(l1*l1 + d2*d2)
           GBMixingMap(i,j)%xai2 = (l2*l2 - d2*d2)/(l2*l2 + d1*d1)
           GBMixingMap(i,j)%x2 = (l1*l1 - d1*d1) * (l2*l2 - d2*d2) / &
@@ -310,7 +311,7 @@ contains
     real (kind = dp), dimension(3) :: ul1, ul2, rxu1, rxu2, uxu, rhat
 
     real (kind = dp) :: sigma0, dw, eps0, x2, xa2, xai2, xp2, xpap2, xpapi2
-    real (kind = dp) :: e1, e2, eps, sigma, s3, s03, au, bu, a, b, g, g2
+    real (kind = dp) :: e1, e2, eps, sigma, s3, s03, au2, bu2, au, bu, a, b, g, g2
     real (kind = dp) :: U, BigR, R3, R6, R7, R12, R13, H, Hp, fx, fy, fz
     real (kind = dp) :: dUdr, dUda, dUdb, dUdg, pref1, pref2
     logical :: i_is_lj, j_is_lj
@@ -380,13 +381,16 @@ contains
     else
        g = ul1(1)*ul2(1) + ul1(2)*ul2(2) + ul1(3)*ul2(3)
     endif
-
     au = a / r
     bu = b / r
+
+    au2 = au*au
+    bu2 = bu*bu
     g2 = g*g
 
-    H  = (xa2 * au + xai2 * bu - 2.0_dp*x2*au*bu*g)  / (1.0_dp - x2*g2)
-    Hp = (xpap2*au + xpapi2*bu - 2.0_dp*xp2*au*bu*g) / (1.0_dp - xp2*g2)
+
+    H  = (xa2 * au2 + xai2 * bu2 - 2.0_dp*x2*au*bu*g)  / (1.0_dp - x2*g2)
+    Hp = (xpap2*au2 + xpapi2*bu2 - 2.0_dp*xp2*au*bu*g) / (1.0_dp - xp2*g2)
     sigma = sigma0 / sqrt(1.0_dp - H)
     e1 = 1.0_dp / sqrt(1.0_dp - x2*g2)
     e2 = 1.0_dp - Hp
@@ -406,13 +410,14 @@ contains
 
     pref1 = - 8.0_dp * eps * mu * (R12 - R6) / (e2 * r)
 
+
     pref2 = 8.0_dp * eps * s3 * (6.0_dp*R13 - 3.0_dp*R7) / (dw*r*s03)
 
-    dUdr = - (pref1 * Hp + pref2 * (sigma0*sigma0*r/s3 - H))
+    dUdr = - (pref1 * Hp + pref2 * (sigma0*sigma0*r/s3 + H))
     
     dUda = pref1 * (xpap2*au - xp2*bu*g) / (1.0_dp - xp2 * g2) &
          + pref2 * (xa2 * au - x2 *bu*g) / (1.0_dp - x2 * g2)
-    
+
     dUdb = pref1 * (xpapi2*bu - xp2*au*g) / (1.0_dp - xp2 * g2) &
          + pref2 * (xai2 * bu - x2 *au*g) / (1.0_dp - x2 * g2)
 
@@ -421,6 +426,7 @@ contains
          (1.0_dp - xp2 * g2) / e2 &
          + 8.0_dp * eps * s3 * (3.0_dp * R7 - 6.0_dp * R13) * &  
          (x2 * au * bu - H * x2 * g) / (1.0_dp - x2 * g2) / (dw * s03)
+
             
     rhat = d / r
 
@@ -431,13 +437,22 @@ contains
     rxu1 = cross_product(d, ul1)
     rxu2 = cross_product(d, ul2)    
     uxu = cross_product(ul1, ul2)
-           
+    
+!!$    write(*,*) 'pref = ' , pref1, pref2
 !!$    write(*,*) 'rxu1 = ' , rxu1(1), rxu1(2), rxu1(3)
 !!$    write(*,*) 'rxu2 = ' , rxu2(1), rxu2(2), rxu2(3)
 !!$    write(*,*) 'uxu = ' , uxu(1), uxu(2), uxu(3)
-!!$    write(*,*) 'dUda = ', dUda, dudb, dudg
-
-
+!!$    write(*,*) 'dUda = ', dUda, dudb, dudg, dudr
+!!$    write(*,*) 'H = ', H,hp,sigma, e1, e2, BigR
+!!$    write(*,*) 'chi = ', xa2, xai2, x2 
+!!$    write(*,*) 'chip = ', xpap2, xpapi2, xp2
+!!$    write(*,*) 'eps = ', eps0, e1, e2, eps
+!!$    write(*,*) 'U =', U, pref1, pref2
+!!$    write(*,*) 'f =', fx, fy, fz
+!!$    write(*,*) 'au =', au, bu, g
+!!$    
+ 	 
+   
 #ifdef IS_MPI
     f_Row(1,atom1) = f_Row(1,atom1) + fx
     f_Row(2,atom1) = f_Row(2,atom1) + fy
