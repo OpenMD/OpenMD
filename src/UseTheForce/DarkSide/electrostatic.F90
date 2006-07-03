@@ -78,6 +78,11 @@ module electrostatic_module
 
   real(kind=dp), parameter :: zero = 0.0_dp
   
+  !! conversions for the simulation box dipole moment
+  real(kind=dp), parameter :: chargeToC = 1.60217733e-19_dp
+  real(kind=dp), parameter :: angstromToM = 1.0e-10_dp
+  real(kind=dp), parameter :: debyeToCm = 3.33564095198e-30_dp
+
   !! number of points for electrostatic splines 
   integer, parameter :: np = 100
 
@@ -149,7 +154,7 @@ module electrostatic_module
   public :: destroyElectrostaticTypes
   public :: self_self
   public :: rf_self_excludes
-
+  public :: accumulate_box_dipole
 
   type :: Electrostatic
      integer :: c_ident
@@ -1450,5 +1455,75 @@ contains
 
     return
   end subroutine rf_self_excludes
+
+  subroutine accumulate_box_dipole(atom1, eFrame, d, pChg, nChg, pChgPos, &
+       nChgPos, dipVec, pChgCount, nChgCount)
+    integer, intent(in) :: atom1
+    logical :: i_is_Charge
+    logical :: i_is_Dipole
+    integer :: atid1
+    integer :: pChgCount
+    integer :: nChgCount
+    real(kind=dp), intent(in), dimension(3) :: d
+    real(kind=dp), dimension(9,nLocal) :: eFrame
+    real(kind=dp) :: pChg
+    real(kind=dp) :: nChg
+    real(kind=dp), dimension(3) :: pChgPos
+    real(kind=dp), dimension(3) :: nChgPos
+    real(kind=dp), dimension(3) :: dipVec
+    real(kind=dp), dimension(3) :: uz_i
+    real(kind=dp), dimension(3) :: pos
+    real(kind=dp) :: q_i, mu_i
+    real(kind=dp) :: pref, preVal
+
+    if (.not.summationMethodChecked) then
+       call checkSummationMethod()
+    endif
+
+    ! this is a local only array, so we use the local atom type id's:
+    atid1 = atid(atom1)
+    i_is_Charge = ElectrostaticMap(atid1)%is_Charge
+    i_is_Dipole = ElectrostaticMap(atid1)%is_Dipole
+    
+    if (i_is_Charge) then
+       q_i = ElectrostaticMap(atid1)%charge
+       ! convert to the proper units
+       q_i = q_i * chargeToC
+       pos = d * angstromToM
+
+       if (q_i.le.0.0_dp) then
+          nChg = nChg - q_i
+          nChgPos(1) = nChgPos(1) + pos(1)
+          nChgPos(2) = nChgPos(2) + pos(2)
+          nChgPos(3) = nChgPos(3) + pos(3)
+          nChgCount = nChgCount + 1
+
+       else
+          pChg = pChg + q_i
+          pChgPos(1) = pChgPos(1) + pos(1)
+          pChgPos(2) = pChgPos(2) + pos(2)
+          pChgPos(3) = pChgPos(3) + pos(3)
+          pChgCount = pChgCount + 1
+
+       endif
+
+    endif
+    
+    if (i_is_Dipole) then
+       mu_i = ElectrostaticMap(atid1)%dipole_moment
+       uz_i(1) = eFrame(3,atom1)
+       uz_i(2) = eFrame(6,atom1)
+       uz_i(3) = eFrame(9,atom1)
+       ! convert to the proper units
+       mu_i = mu_i * debyeToCm
+
+       dipVec(1) = dipVec(1) + uz_i(1)*mu_i
+       dipVec(2) = dipVec(2) + uz_i(2)*mu_i
+       dipVec(3) = dipVec(3) + uz_i(3)*mu_i
+
+    endif
+   
+    return
+  end subroutine accumulate_box_dipole
 
 end module electrostatic_module

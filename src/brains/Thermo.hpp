@@ -65,10 +65,14 @@ namespace oopse {
     RealType getPressureX() { return getPressure(0); }
     RealType getPressureY() { return getPressure(1); }
     RealType getPressureZ() { return getPressure(2); }
-    
-    Mat3x3d getPressureTensor(); // gives the pressure  tensor in amu*fs^-2*Ang^-1
+
+    // gives the pressure tensor in amu*fs^-2*Ang^-1
+    Mat3x3d getPressureTensor(); 
     RealType getVolume();   // gives the volume in Ang^3 
-    
+
+    // accumulate and return the simulation box dipole moment in C*m
+    Vector3d getBoxDipole(); 
+
     void saveStat();
     
   private:

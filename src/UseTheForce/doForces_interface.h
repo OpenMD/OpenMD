@@ -47,6 +47,8 @@
 
 #define initFortranFF FC_FUNC(initfortranff, INITFORTRANFF)
 #define doForceLoop FC_FUNC(doforceloop, DOFORCELOOP)
+#define getAccumulatedBoxDipole FC_FUNC(getaccumulatedboxdipole, GETACCUMULATEDBOXDIPOLE)
+#define setAccumulateBoxDipole FC_FUNC(setaccumulateboxdipole, SETACCUMULATEBOXDIPOLE)
 #define setFortranElectrostaticMethod FC_FUNC(setfortranelectrostaticmethod, SETFORTRANELECTROSTATICMETHOD)
 #define notifyFortranCutoffPolicy FC_FUNC(notifyfortrancutoffpolicy, NOTIFYFORTRANCUTOFFPOLICY)
 #define notifyFortranSkinThickness FC_FUNC(notifyfortranskinthickness, NOTIFYFORTRANSKINTHICKNESS)
@@ -68,6 +70,10 @@ extern "C"{
                     short int* doPotentialCalc, 
                     short int* doStressCalc,
                     int* isError );
+
+  void getAccumulatedBoxDipole( RealType* boxDipole );
+
+  void setAccumulateBoxDipole();
 
   void setFortranElectrostaticMethod( int* electrostaticMethod );
 

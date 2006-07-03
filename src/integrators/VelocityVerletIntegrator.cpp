@@ -239,6 +239,12 @@ namespace oopse {
         mask.set(Stats::PRESSURE_TENSOR_Z);
     }
     
+    if (simParams->getAccumulateBoxDipole()) {
+      mask.set(Stats::BOX_DIPOLE_X);
+      mask.set(Stats::BOX_DIPOLE_Y);
+      mask.set(Stats::BOX_DIPOLE_Z);
+    }
+
      return new StatWriter(info_->getStatFileName(), mask);
   }
 

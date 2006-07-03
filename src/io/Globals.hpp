@@ -123,6 +123,7 @@ class Globals : public DataHolder {
   DeclareParameter(UseSphericalBoundaryConditions, bool);
   DeclareParameter(FrozenBufferRadius, RealType);
   DeclareParameter(LangevinBufferRadius, RealType);
+  DeclareParameter(AccumulateBoxDipole, bool);
   
   public:
     bool addComponent(Component* comp);

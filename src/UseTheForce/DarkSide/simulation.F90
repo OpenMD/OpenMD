@@ -114,6 +114,8 @@ module simulation
   public :: SimUsesFLARB
   public :: SimUsesRF
   public :: SimUsesSF
+  public :: SimUsesSP
+  public :: SimUsesBoxDipole
   public :: SimRequiresPrepairCalc
   public :: SimRequiresPostpairCalc
   public :: SimHasAtype
@@ -620,6 +622,16 @@ contains
           doesit = thisSim%SIM_uses_SF
         end function SimUsesSF
 
+        function SimUsesSP() result(doesit)
+          logical :: doesit
+          doesit = thisSim%SIM_uses_SP
+        end function SimUsesSP
+
+        function SimUsesBoxDipole() result(doesit)
+          logical :: doesit
+          doesit = thisSim%SIM_uses_BoxDipole
+        end function SimUsesBoxDipole
+
         function SimRequiresPrepairCalc() result(doesit)
           logical :: doesit
           doesit = thisSim%SIM_uses_EAM .or. thisSim%SIM_uses_SC &
@@ -628,7 +640,8 @@ contains
         
         function SimRequiresPostpairCalc() result(doesit)
           logical :: doesit
-          doesit = thisSim%SIM_uses_RF .or. thisSim%SIM_uses_SF
+          doesit = thisSim%SIM_uses_RF .or. thisSim%SIM_uses_SF &
+               .or. thisSim%SIM_uses_SP .or. thisSim%SIM_uses_BoxDipole
         end function SimRequiresPostpairCalc
 
         ! Function returns true if the simulation has this atype

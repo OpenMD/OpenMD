@@ -64,6 +64,7 @@ namespace oopse {
     int i;
     int j;
     int k;
+    RealType mass;
     RealType kinetic = 0.0;
     RealType kinetic_global = 0.0;
     
@@ -71,8 +72,8 @@ namespace oopse {
       for (integrableObject = mol->beginIntegrableObject(iiter); integrableObject != NULL; 
 	   integrableObject = mol->nextIntegrableObject(iiter)) {
         
-	RealType mass = integrableObject->getMass();
-	Vector3d vel = integrableObject->getVel();
+	mass = integrableObject->getMass();
+	vel = integrableObject->getVel();
         
 	kinetic += mass * (vel[0]*vel[0] + vel[1]*vel[1] + vel[2]*vel[2]);
         
@@ -177,8 +178,6 @@ namespace oopse {
     return pressure;
   }
 
-
-
   Mat3x3d Thermo::getPressureTensor() {
     // returns pressure tensor in units amu*fs^-2*Ang^-1
     // routine derived via viral theorem description in:
@@ -210,11 +209,12 @@ namespace oopse {
     RealType volume = this->getVolume();
     Snapshot* curSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
     Mat3x3d tau = curSnapshot->statData.getTau();
-
+    
     pressureTensor =  (p_global + OOPSEConstant::energyConvert* tau)/volume;
-
+    
     return pressureTensor;
   }
+
 
   void Thermo::saveStat(){
     Snapshot* currSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();

@@ -86,9 +86,12 @@ namespace oopse {
     Stats::title_[IMPROPER_POTENTIAL] = "Improper Potential";
     Stats::title_[VRAW] = "Raw Potential";
     Stats::title_[VHARM] = "Harmonic Potential";
-    Stats::title_[PRESSURE_TENSOR_X] = "presure tensor x";
-    Stats::title_[PRESSURE_TENSOR_Y] = "presure tensor y";
-    Stats::title_[PRESSURE_TENSOR_Z] = "presure tensor z";
+    Stats::title_[PRESSURE_TENSOR_X] = "pressure tensor x";
+    Stats::title_[PRESSURE_TENSOR_Y] = "pressure tensor y";
+    Stats::title_[PRESSURE_TENSOR_Z] = "pressure tensor z";
+    Stats::title_[BOX_DIPOLE_X] = "box dipole x";
+    Stats::title_[BOX_DIPOLE_Y] = "box dipole y";
+    Stats::title_[BOX_DIPOLE_Z] = "box dipole z";
 
     Stats::units_[TIME] = "fs";
     Stats::units_[TOTAL_ENERGY] = "kcal/mol";
@@ -113,6 +116,9 @@ namespace oopse {
     Stats::units_[PRESSURE_TENSOR_X] = "amu*fs^-2*Ang^-1";
     Stats::units_[PRESSURE_TENSOR_Y] = "amu*fs^-2*Ang^-1";
     Stats::units_[PRESSURE_TENSOR_Z] = "amu*fs^-2*Ang^-1";
+    Stats::units_[BOX_DIPOLE_X] = "C*m";
+    Stats::units_[BOX_DIPOLE_Y] = "C*m";
+    Stats::units_[BOX_DIPOLE_Z] = "C*m";
 
     Stats::statsMap.insert(StatsMapType::value_type("TIME", TIME));
     Stats::statsMap.insert(StatsMapType::value_type("TOTAL_ENERGY", TOTAL_ENERGY));
@@ -137,6 +143,9 @@ namespace oopse {
     Stats::statsMap.insert(StatsMapType::value_type("PRESSURE_TENSOR_X", PRESSURE_TENSOR_X));    
     Stats::statsMap.insert(StatsMapType::value_type("PRESSURE_TENSOR_Y", PRESSURE_TENSOR_Y));    
     Stats::statsMap.insert(StatsMapType::value_type("PRESSURE_TENSOR_Z", PRESSURE_TENSOR_Z));    
+    Stats::statsMap.insert(StatsMapType::value_type("BOX_DIPOLE_X", BOX_DIPOLE_X));    
+    Stats::statsMap.insert(StatsMapType::value_type("BOX_DIPOLE_Y", BOX_DIPOLE_Y));    
+    Stats::statsMap.insert(StatsMapType::value_type("BOX_DIPOLE_Z", BOX_DIPOLE_Z));    
   }
 
 }

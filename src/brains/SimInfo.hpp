@@ -372,6 +372,10 @@ namespace oopse{
       return fortranInitialized_;
     }
         
+    bool getCalcBoxDipole() {
+      return calcBoxDipole_;
+    }
+
     //below functions are just forward functions
     //To compose or to inherit is always a hot debate. In general, is-a relation need subclassing, in the
     //the other hand, has-a relation need composing.
@@ -450,6 +454,9 @@ namespace oopse{
 
     /** Figure out which polynomial type to use for the switching function */
     void setupSwitchingFunction();
+
+    /** Determine if we need to accumulate the simulation box dipole */
+    void setupAccumulateBoxDipole();
 
     /** Calculates the number of degress of freedom in the whole system */
     void calcNdf();
@@ -533,6 +540,8 @@ namespace oopse{
     RealType rlist_;      /**< neighbor list radius */
 
     bool fortranInitialized_; /**< flag indicate whether fortran side is initialized */
+
+    bool calcBoxDipole_; /**< flag to indicate whether or not we calculate the simulation box dipole moment */
 
 #ifdef IS_MPI
     //in Parallel version, we need MolToProc

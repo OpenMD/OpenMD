@@ -274,7 +274,7 @@ namespace oopse {
     //initialize data before passing to fortran
     RealType longRangePotential[LR_POT_TYPES];
     RealType lrPot = 0.0;
-    
+    Vector3d totalDipole;
     Mat3x3d tau;
     short int passedCalcPot = needPotential;
     short int passedCalcStress = needStress;
@@ -306,6 +306,15 @@ namespace oopse {
       lrPot += longRangePotential[i]; //Quick hack
     }
 
+    // grab the simulation box dipole moment if specified
+    if (info_->getCalcBoxDipole()){
+      getAccumulatedBoxDipole(totalDipole.getArrayPointer());
+
+      curSnapshot->statData[Stats::BOX_DIPOLE_X] = totalDipole(0);
+      curSnapshot->statData[Stats::BOX_DIPOLE_Y] = totalDipole(1);
+      curSnapshot->statData[Stats::BOX_DIPOLE_Z] = totalDipole(2);
+    }
+
     //store the tau and long range potential    
     curSnapshot->statData[Stats::LONG_RANGE_POTENTIAL] = lrPot;
     curSnapshot->statData[Stats::VANDERWAALS_POTENTIAL] = longRangePotential[VDW_POT];
@@ -326,7 +335,7 @@ namespace oopse {
       for (rb = mol->beginRigidBody(rbIter); rb != NULL; rb = mol->nextRigidBody(rbIter)) {
 	rb->calcForcesAndTorques();
       }
-    }
+    }    
 
   }
 

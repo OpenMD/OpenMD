@@ -86,6 +86,9 @@ namespace oopse {
       PRESSURE_TENSOR_X,
       PRESSURE_TENSOR_Y,
       PRESSURE_TENSOR_Z,  
+      BOX_DIPOLE_X,
+      BOX_DIPOLE_Y,
+      BOX_DIPOLE_Z,
       ENDINDEX  //internal use
     };
 

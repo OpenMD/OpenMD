@@ -45,7 +45,7 @@
 
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: doForces.F90,v 1.83 2006-06-05 18:24:45 gezelter Exp $, $Date: 2006-06-05 18:24:45 $, $Name: not supported by cvs2svn $, $Revision: 1.83 $
+!! @version $Id: doForces.F90,v 1.84 2006-07-03 13:18:43 chrisfen Exp $, $Date: 2006-07-03 13:18:43 $, $Name: not supported by cvs2svn $, $Revision: 1.84 $
 
 
 module doForces
@@ -89,6 +89,7 @@ module doForces
   logical, save :: haveElectrostaticSummationMethod = .false.
   logical, save :: haveCutoffPolicy = .false.
   logical, save :: VisitCutoffsAfterComputing = .false.
+  logical, save :: do_box_dipole = .false.
 
   logical, save :: FF_uses_DirectionalAtoms
   logical, save :: FF_uses_Dipoles
@@ -117,6 +118,8 @@ module doForces
   public :: setCutoffs
   public :: cWasLame
   public :: setElectrostaticMethod
+  public :: setBoxDipole
+  public :: getBoxDipole
   public :: setCutoffPolicy
   public :: setSkinThickness
   public :: do_force_loop
@@ -147,6 +150,7 @@ module doForces
   end type gtypeCutoffs
   type(gtypeCutoffs), dimension(:,:), allocatable :: gtypeCutoffMap
 
+  real(kind=dp), dimension(3) :: boxDipole
 
 contains
 
@@ -610,6 +614,20 @@ contains
      
    end subroutine setCutoffPolicy
    
+   subroutine setBoxDipole()
+
+     do_box_dipole = .true.
+    
+   end subroutine setBoxDipole
+
+   subroutine getBoxDipole( box_dipole )
+
+     real(kind=dp), intent(inout), dimension(3) :: box_dipole
+
+     box_dipole = boxDipole
+
+   end subroutine getBoxDipole
+
    subroutine setElectrostaticMethod( thisESM )
 
      integer, intent(in) :: thisESM
@@ -636,7 +654,7 @@ contains
      SIM_requires_prepair_calc = SimRequiresPrepairCalc()
      SIM_uses_PBC = SimUsesPBC()
      SIM_uses_SC = SimUsesSC()
-     
+
      haveSIMvariables = .true.
      
      return
@@ -810,7 +828,54 @@ contains
     integer :: loopStart, loopEnd, loop
     integer :: iHash
     integer :: i1
-  
+
+    !! the variables for the box dipole moment 
+#ifdef IS_MPI
+    integer :: pChgCount_local
+    integer :: nChgCount_local
+    real(kind=dp) :: pChg_local
+    real(kind=dp) :: nChg_local
+    real(kind=dp), dimension(3) :: pChgPos_local
+    real(kind=dp), dimension(3) :: nChgPos_local
+    real(kind=dp), dimension(3) :: dipVec_local
+#endif
+    integer :: pChgCount
+    integer :: nChgCount
+    real(kind=dp) :: pChg
+    real(kind=dp) :: nChg
+    real(kind=dp) :: chg_value
+    real(kind=dp), dimension(3) :: pChgPos
+    real(kind=dp), dimension(3) :: nChgPos
+    real(kind=dp), dimension(3) :: dipVec 
+    real(kind=dp), dimension(3) :: chgVec 
+
+    !! initialize box dipole variables
+    if (do_box_dipole) then
+#ifdef IS_MPI
+       pChg_local = 0.0_dp
+       nChg_local = 0.0_dp
+       pChgCount_local = 0
+       nChgCount_local = 0
+       do i=1, 3
+          pChgPos_local = 0.0_dp
+          nChgPos_local = 0.0_dp
+          dipVec_local = 0.0_dp
+       enddo
+#endif
+       pChg = 0.0_dp
+       nChg = 0.0_dp
+       pChgCount = 0
+       nChgCount = 0
+       chg_value = 0.0_dp
+       
+       do i=1, 3
+          pChgPos(i) = 0.0_dp
+          nChgPos(i) = 0.0_dp
+          dipVec(i) = 0.0_dp
+          chgVec(i) = 0.0_dp
+          boxDipole(i) = 0.0_dp
+       enddo
+    endif
 
     !! initialize local variables  
 
@@ -1194,18 +1259,28 @@ contains
                 endif
              enddo
           endif
+
+          if (do_box_dipole) then
+#ifdef IS_MPI
+             call accumulate_box_dipole(i, eFrame, q(:,i), pChg_local, &
+                  nChg_local, pChgPos_local, nChgPos_local, dipVec_local, &
+                  pChgCount_local, nChgCount_local)
+#else
+             call accumulate_box_dipole(i, eFrame, q(:,i), pChg, nChg, &
+                  pChgPos, nChgPos, dipVec, pChgCount, nChgCount)
+#endif
+          endif
        enddo
     endif
-    
+
 #ifdef IS_MPI
-    
     if (do_pot) then
 #ifdef SINGLE_PRECISION
        call mpi_allreduce(pot_local, pot, LR_POT_TYPES,mpi_real,mpi_sum, &
             mpi_comm_world,mpi_err)            
 #else
-       call mpi_allreduce(pot_local, pot, LR_POT_TYPES,mpi_double_precision,mpi_sum, &
-            mpi_comm_world,mpi_err)            
+       call mpi_allreduce(pot_local, pot, LR_POT_TYPES,mpi_double_precision, &
+            mpi_sum, mpi_comm_world,mpi_err)            
 #endif
     endif
     
@@ -1223,6 +1298,42 @@ contains
 #endif
     endif
     
+    if (do_box_dipole) then
+
+#ifdef SINGLE_PRECISION
+       call mpi_allreduce(pChg_local, pChg, 1, mpi_real, mpi_sum, &
+            mpi_comm_world, mpi_err)
+       call mpi_allreduce(nChg_local, nChg, 1, mpi_real, mpi_sum, &
+            mpi_comm_world, mpi_err)
+       call mpi_allreduce(pChgCount_local, pChgCount, 1, mpi_integer, mpi_sum,&
+            mpi_comm_world, mpi_err)
+       call mpi_allreduce(nChgCount_local, nChgCount, 1, mpi_integer, mpi_sum,&
+            mpi_comm_world, mpi_err)
+       call mpi_allreduce(pChgPos_local, pChgPos, 3, mpi_real, mpi_sum, &
+            mpi_comm_world, mpi_err)
+       call mpi_allreduce(nChgPos_local, nChgPos, 3, mpi_real, mpi_sum, &
+            mpi_comm_world, mpi_err)
+       call mpi_allreduce(dipVec_local, dipVec, 3, mpi_real, mpi_sum, &
+            mpi_comm_world, mpi_err)
+#else
+       call mpi_allreduce(pChg_local, pChg, 1, mpi_double_precision, mpi_sum, &
+            mpi_comm_world, mpi_err)
+       call mpi_allreduce(nChg_local, nChg, 1, mpi_double_precision, mpi_sum, &
+            mpi_comm_world, mpi_err)
+       call mpi_allreduce(pChgCount_local, pChgCount, 1, mpi_integer,&
+            mpi_sum, mpi_comm_world, mpi_err)
+       call mpi_allreduce(nChgCount_local, nChgCount, 1, mpi_integer,&
+            mpi_sum, mpi_comm_world, mpi_err)
+       call mpi_allreduce(pChgPos_local, pChgPos, 3, mpi_double_precision, &
+            mpi_sum, mpi_comm_world, mpi_err)
+       call mpi_allreduce(nChgPos_local, nChgPos, 3, mpi_double_precision, &
+            mpi_sum, mpi_comm_world, mpi_err)
+       call mpi_allreduce(dipVec_local, dipVec, 3, mpi_double_precision, &
+            mpi_sum, mpi_comm_world, mpi_err)
+#endif
+
+    endif
+
 #else
     
     if (do_stress) then
@@ -1231,7 +1342,38 @@ contains
     endif
     
 #endif
-    
+
+    if (do_box_dipole) then
+       ! first load the accumulated dipole moment (if dipoles were present)
+       boxDipole(1) = dipVec(1)
+       boxDipole(2) = dipVec(2)
+       boxDipole(3) = dipVec(3)
+
+       ! now include the dipole moment due to charges
+       ! use the lesser of the positive and negative charge totals
+       if (nChg .le. pChg) then
+          chg_value = nChg
+       else
+          chg_value = pChg
+       endif
+       
+       ! find the average positions
+       if (pChgCount .gt. 0 .and. nChgCount .gt. 0) then
+          pChgPos = pChgPos / pChgCount
+          nChgPos = nChgPos / nChgCount
+       endif
+
+       ! dipole is from the negative to the positive (physics notation)
+       chgVec(1) = pChgPos(1) - nChgPos(1)
+       chgVec(2) = pChgPos(2) - nChgPos(2)
+       chgVec(3) = pChgPos(3) - nChgPos(3)
+
+       boxDipole(1) = boxDipole(1) + chgVec(1) * chg_value
+       boxDipole(2) = boxDipole(2) + chgVec(2) * chg_value
+       boxDipole(3) = boxDipole(3) + chgVec(3) * chg_value
+
+    endif
+
   end subroutine do_force_loop
 
   subroutine do_pair(i, j, rijsq, d, sw, do_pot, &

@@ -61,9 +61,10 @@ namespace oopse {
       else{
 	tIntLambda_ = 1.0;
 	sprintf(painCave.errMsg,
-		"ThermoIntegration error: the transformation parameter (lambda) was\n"
-		"\tnot specified. OOPSE will use a default value of %f. To set\n"
-		"\tlambda, use the thermodynamicIntegrationLambda variable.\n",
+		"ThermoIntegration error: the transformation parameter\n"
+		"\t(lambda) was not specified. OOPSE will use a default\n"
+		"\tvalue of %f. To set lambda, use the \n"
+		"\tthermodynamicIntegrationLambda variable.\n",
 		tIntLambda_);
 	painCave.isFatal = 0;
 	simError();
@@ -75,9 +76,10 @@ namespace oopse {
       else{
 	tIntK_ = 1.0;
 	sprintf(painCave.errMsg,
-		"ThermoIntegration Warning: the tranformation parameter exponent\n"
-		"\t(k) was not specified. OOPSE will use a default value of %f.\n"
-		"\tTo set k, use the thermodynamicIntegrationK variable.\n",
+		"ThermoIntegration Warning: the tranformation parameter\n"
+		"\texponent (k) was not specified. OOPSE will use a default\n"
+		"\tvalue of %f. To set k, use the thermodynamicIntegrationK\n"
+		"\tvariable.\n",
 		tIntK_);
 	painCave.isFatal = 0;
 	simError();      

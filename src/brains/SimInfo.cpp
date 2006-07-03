@@ -89,7 +89,7 @@ namespace oopse {
     nGlobalIntegrableObjects_(0), nGlobalRigidBodies_(0),
     nAtoms_(0), nBonds_(0),  nBends_(0), nTorsions_(0), nRigidBodies_(0),
     nIntegrableObjects_(0),  nCutoffGroups_(0), nConstraints_(0),
-    sman_(NULL), fortranInitialized_(false) {
+    sman_(NULL), fortranInitialized_(false), calcBoxDipole_(false) {
 
       MoleculeStamp* molStamp;
       int nMolWithSameStamp;
@@ -602,6 +602,7 @@ namespace oopse {
     
     setupElectrostaticSummationMethod( isError );
     setupSwitchingFunction();
+    setupAccumulateBoxDipole();
 
     if(isError){
       sprintf( painCave.errMsg,
@@ -661,6 +662,8 @@ namespace oopse {
     int usePBC = simParams_->getUsePeriodicBoundaryConditions();
     int useRF;
     int useSF;
+    int useSP;
+    int useBoxDipole;
     std::string myMethod;
 
     // set the useRF logical
@@ -671,14 +674,18 @@ namespace oopse {
     if (simParams_->haveElectrostaticSummationMethod()) {
       std::string myMethod = simParams_->getElectrostaticSummationMethod();
       toUpper(myMethod);
-      if (myMethod == "REACTION_FIELD") {
+      if (myMethod == "REACTION_FIELD"){
         useRF=1;
-      } else {
-	if (myMethod == "SHIFTED_FORCE") {
-	  useSF = 1;
-	}
+      } else if (myMethod == "SHIFTED_FORCE"){
+	useSF = 1;
+      } else if (myMethod == "SHIFTED_POTENTIAL"){
+	useSP = 1;
       }
     }
+    
+    if (simParams_->haveAccumulateBoxDipole()) 
+      if (simParams_->getAccumulateBoxDipole())
+	useBoxDipole = 1;
 
     //loop over all of the atom types
     for (i = atomTypes.begin(); i != atomTypes.end(); ++i) {
@@ -749,7 +756,13 @@ namespace oopse {
     MPI_Allreduce(&temp, &useRF, 1, MPI_INT, MPI_LOR, MPI_COMM_WORLD);    
 
     temp = useSF;
-    MPI_Allreduce(&temp, &useSF, 1, MPI_INT, MPI_LOR, MPI_COMM_WORLD);    
+    MPI_Allreduce(&temp, &useSF, 1, MPI_INT, MPI_LOR, MPI_COMM_WORLD);   
+
+    temp = useSP;
+    MPI_Allreduce(&temp, &useSP, 1, MPI_INT, MPI_LOR, MPI_COMM_WORLD);
+
+    temp = useBoxDipole;
+    MPI_Allreduce(&temp, &useBoxDipole, 1, MPI_INT, MPI_LOR, MPI_COMM_WORLD); 
 
 #endif
 
@@ -768,6 +781,8 @@ namespace oopse {
     fInfo_.SIM_uses_FLARB = useFLARB;
     fInfo_.SIM_uses_RF = useRF;
     fInfo_.SIM_uses_SF = useSF;
+    fInfo_.SIM_uses_SP = useSP;
+    fInfo_.SIM_uses_BoxDipole = useBoxDipole;
 
     if( myMethod == "REACTION_FIELD") {
       
@@ -1158,6 +1173,17 @@ namespace oopse {
 
     // send switching function notification to switcheroo
     setFunctionType(&ft);
+
+  }
+
+  void SimInfo::setupAccumulateBoxDipole() {    
+
+    // we only call setAccumulateBoxDipole if the accumulateBoxDipole parameter is true
+    if ( simParams_->haveAccumulateBoxDipole() ) 
+      if ( simParams_->getAccumulateBoxDipole() ) {
+	setAccumulateBoxDipole();
+	calcBoxDipole_ = true;
+      }
 
   }
 
