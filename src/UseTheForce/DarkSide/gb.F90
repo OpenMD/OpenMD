@@ -381,16 +381,17 @@ contains
     else
        g = ul1(1)*ul2(1) + ul1(2)*ul2(2) + ul1(3)*ul2(3)
     endif
+
     au = a / r
     bu = b / r
 
-    au2 = au*au
-    bu2 = bu*bu
-    g2 = g*g
-
+    au2 = au * au
+    bu2 = bu * bu
+    g2 = g * g
 
     H  = (xa2 * au2 + xai2 * bu2 - 2.0_dp*x2*au*bu*g)  / (1.0_dp - x2*g2)
     Hp = (xpap2*au2 + xpapi2*bu2 - 2.0_dp*xp2*au*bu*g) / (1.0_dp - xp2*g2)
+
     sigma = sigma0 / sqrt(1.0_dp - H)
     e1 = 1.0_dp / sqrt(1.0_dp - x2*g2)
     e2 = 1.0_dp - Hp
@@ -409,7 +410,6 @@ contains
     s03 = sigma0*sigma0*sigma0
 
     pref1 = - 8.0_dp * eps * mu * (R12 - R6) / (e2 * r)
-
 
     pref2 = 8.0_dp * eps * s3 * (6.0_dp*R13 - 3.0_dp*R7) / (dw*r*s03)
 

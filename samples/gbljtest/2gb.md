@@ -11,7 +11,7 @@ component{
 initialConfig = "./2gb.in";
 
 ensemble = NVT;
-targetTemp = 10;
+targetTemp = 1;
 tauThermostat = 30;
 forceField = "DUFF";
 
