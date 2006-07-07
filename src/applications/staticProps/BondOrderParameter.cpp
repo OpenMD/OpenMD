@@ -39,11 +39,19 @@
  * such damages.
  */
 
+
+/* Creates orientational bond order parameters as outlined by
+ *     Bond-orientaional order in liquids and glasses, Steinhart,Nelson,Ronchetti
+ *     Phys Rev B, 28,784,1983
+ * 
+ */
+ 
 #include "applications/staticProps/BondOrderParameter.hpp"
 #include "utils/simError.h"
 #include "io/DumpReader.hpp"
 #include "primitives/Molecule.hpp"
 #include "utils/NumericConstant.hpp"
+#include "math/RealSphericalHarmonic.hpp"
 namespace oopse {
 
 
@@ -53,7 +61,7 @@ BondOrderParameter::BondOrderParameter(SimInfo* info, const std::string& filenam
     selectionScript1_(sele1), evaluator1_(info), 
     seleMan1_(info){
 
-    setOutputName(getPrefix(filename) + ".p2");
+    setOutputName(getPrefix(filename) + ".obo");
         
     evaluator1_.loadScriptString(sele1);
     evaluator2_.loadScriptString(sele2);
@@ -68,6 +76,10 @@ BondOrderParameter::BondOrderParameter(SimInfo* info, const std::string& filenam
         simError();  
     }
 
+/* Set up cutoff radius and type of order parameter we are calcuating*/
+	lNumber_ = lNumber;
+	rCut_ = rCut;
+	mSize_ = 2*lNumber_+1;
 
   int i;
   int j;
@@ -88,14 +100,25 @@ void BondOrderParameter::process() {
   RigidBody* rb;
   SimInfo::MoleculeIterator mi;
   Molecule::RigidBodyIterator rbIter;
+  RealType theta;
+  RealType phi;
+  RealType r;
+  RealType dist;
+  RealType* QBar_lm;
+  int nBonds;
+  RealSphericalHarmonic sphericalHarmonic;
+  
   
   DumpReader reader(info_, dumpFilename_);    
   int nFrames = reader.getNFrames();
 
+   /*Set the l for the spherical harmonic, it doesn't change*/
+	sphericalHarmonic.setL(lNumber_);
+
   for (int i = 0; i < nFrames; i += step_) {
     reader.readFrame(i);
     currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
-
+	nBonds = 0;
     
     for (mol = info_->beginMolecule(mi); mol != NULL; mol = info_->nextMolecule(mi)) {
         //change the positions of atoms which belong to the rigidbodies
@@ -105,59 +128,105 @@ void BondOrderParameter::process() {
         
     }      
 
-      Mat3x3d orderTensor(0.0);
+      /* Calculate "bonds" and build Q_lm(r) where Q_lm = Y_lm(theta(r),phi(r)) */
       for (std::vector<std::pair<StuntDouble*, StuntDouble*> >::iterator j = sdPairs_.begin(); j != sdPairs_.end(); ++j) {
           Vector3d vec = j->first->getPos() - j->second->getPos();
           currentSnapshot_->wrapVector(vec);
-          vec.normalize();
-          orderTensor +=outProduct(vec, vec);
+ /* The spherical harmonics are wrt any arbitray coordiate sysetm, 
+  * we choose standard spherical coordinates */
+  		r = sqrt(pow(vec.x(),2)+pow(vec.y(),2)+pow(vec.z(),2));
+  		
+  		/* Check to see if neighbor is in bond cuttoff*/
+  		if (r<rCut_){  		
+  	    theta = atan(vec.y()/vec.x());
+  	    phi = acos(vec.z()/r);
+  	    for(int m = -lNumber_; m <= lNumber_; m++){
+  	    	sphericalHarmonic.setM(m);
+  	    	QBar_lm(m) += sphericalHarmonic.getValueAt(theta,phi);
+  	    }
+  	    nBonds++;
+  		}  
       }
       
-      orderTensor /= sdPairs_.size();
-      orderTensor -= (RealType)(1.0/3.0) * Mat3x3d::identity();  
+     /*Normalize Qbar*/
+     for (int m = -lNumber_;m <= lNumber_; m++){
+      QBar_lm(m) = QBar_lm(m)/nBonds;	
+     }
       
-      Vector3d eigenvalues;
-      Mat3x3d eigenvectors;    
-      Mat3x3d::diagonalize(orderTensor, eigenvalues, eigenvectors);
-      
-      int which;
-      RealType maxEval = 0.0;
-      for(int k = 0; k< 3; k++){
-        if(fabs(eigenvalues[k]) > maxEval){
-          which = k;
-          maxEval = fabs(eigenvalues[k]);
-        }
-      }
-      RealType p2 = 1.5 * maxEval;
-      
-      //the eigen vector is already normalized in SquareMatrix3::diagonalize
-      Vector3d director = eigenvectors.getColumn(which);
-      if (director[0] < 0) {
-          director.negate();
-      }   
-
-      RealType angle = 0.0;
-      for (std::vector<std::pair<StuntDouble*, StuntDouble*> >::iterator j = sdPairs_.begin(); j != sdPairs_.end(); ++j) {
-          Vector3d vec = j->first->getPos() - j->second->getPos();
-          currentSnapshot_->wrapVector(vec);
-          vec.normalize();
-
-          angle += acos(dot(vec, director)) ;
-      }
-      angle = angle / (sdPairs_.size() * NumericConstant::PI) * 180.0;
-
-       OrderParam param;
-       param.p2 = p2;
-       param.director = director;
-       param.angle = angle;
-
-        orderParams_.push_back(param);       
     
   }
-
-  writeP2();
+  
+  /*Normalize by number of frames*/
+    for (int m = -lNumber_;m <= lNumber_; m++){
+      QBar_lm(m) = QBar_lm(m)/nFrames;	
+     }
+     
+     
+     
+     /* Find second order invariant Q_l*/
+     
+       for (int m = -lNumber_;m <= lNumber_; m++){
+     	 QSq_l += pow(QBar_lm(m),2);	
+     	}
+     Q_l = sqrt((4*NumericConstant::PI/lNumber_+1)*QSq_l);
+     
+     /* Find Third Order Invariant W_l*/
+     for (int m = -lNumber_;m<= lNumber_;m++){
+     	
+     	
+     }
+     
+     
+  writeOrderParameter();
   
 }
+
+void BondOrderParameter::initalizeHistogram() {
+    std::fill(histogram_.begin(), histogram_.end(), 0);
+  }
+
+ void BondOrderParameter::processHistogram() {
+
+    int nPairs = getNPairs();
+    RealType volume = info_->getSnapshotManager()->getCurrentSnapshot()->getVolume();
+    RealType pairDensity = nPairs /volume * 2.0;
+    RealType pairConstant = ( 4.0 * NumericConstant::PI * pairDensity ) / 3.0;
+
+    for(int i = 0 ; i < histogram_.size(); ++i){
+
+      RealType rLower = i * deltaR_;
+      RealType rUpper = rLower + deltaR_;
+      RealType volSlice = ( rUpper * rUpper * rUpper ) - ( rLower * rLower * rLower );
+      RealType nIdeal = volSlice * pairConstant;
+
+      avgGofr_[i] += histogram_[i] / nIdeal;    
+    }
+
+  }
+
+  void BondOrderParameter::collectHistogram(StuntDouble* sd1, StuntDouble* sd2) {
+
+    if (sd1 == sd2) {
+      return;
+    }
+    
+    Vector3d pos1 = sd1->getPos();
+    Vector3d pos2 = sd2->getPos();
+    Vector3d r12 = pos2 - pos1;
+    currentSnapshot_->wrapVector(r12);
+
+    RealType distance = r12.length();
+
+    if (distance < len_) {
+      int whichBin = distance / deltaR_;
+      histogram_[whichBin] += 2;
+    }
+  }
+
+
+
+
+
 
 void BondOrderParameter::writeOrderParameter() {
 

@@ -55,12 +55,11 @@ namespace oopse {
 
         private:
 
-            struct OrderParam{
-                RealType p2;
-                Vector3d director;
-                RealType angle;
-            };            
-            void writeP2();
+            
+            void writeOrderParameter();
+		    virtual void initalizeHistogram();
+    		virtual void collectHistogram(StuntDouble* sd1, StuntDouble* sd2);
+      		virtual void processHistogram();
 
             Snapshot* currentSnapshot_;
 
@@ -72,8 +71,9 @@ namespace oopse {
             std::vector<std::pair<StuntDouble*, StuntDouble*> > sdPairs_;  /**< each pair is used to define a vector, vector = first - second */
             std::vector<OrderParam> orderParams_;
             
-            double rCut_;
+            RealType rCut_;
             int lNumber_;
+            int mSize_;
     };
 }
 
