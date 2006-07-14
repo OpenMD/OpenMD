@@ -1137,101 +1137,89 @@ AC_DEFUN([ACX_CHECK_FFTW],
 # Handle user hints
 #
 [AC_ARG_WITH(fftw,
-                AC_HELP_STRING([--with-fftw=DIR],
-           [root directory path of fftw installation (defaults to /usr/local or /usr if not found in /usr/local)]dnl
+             AC_HELP_STRING([--with-fftw=DIR],
+             [root directory path of fftw installation (defaults to /usr/local or /usr if not found in /usr/local)]dnl
 		           ),
-		[fftw_dir="$withval"]dnl
+             [fftw_dir="$withval"]dnl
 		            ,dnl
-		[fftw_dir="not_set"]dnl
+	     [fftw_dir="not_set"]dnl
     )dnl
 
 if test "$fftw_dir" != "no"; then
-
-if test "$fftw_dir" != "not_set" ; then
-  if test -d "$fftw_dir"
-  then
-    FFTW_HOME="$fftw_dir"
-  else
-    AC_MSG_WARN([Sorry, $fftw_dir does not exist, checking usual places])
-  fi
-fi
-
-FFTW_HOME=/usr/local
-if test ! -f "${FFTW_HOME}/include/fftw3.h" -o -f "${FFTW_HOME}/include/fftw.h" -o  -f "${FFTW_HOME}/include/dfftw.h"
-then
+  if test "$fftw_dir" != "not_set" ; then
+    if test -d "$fftw_dir"; then
+      FFTW_HOME="$fftw_dir"
+    else
+      AC_MSG_WARN([Sorry, $fftw_dir does not exist, checking usual places])
+      FFTW_HOME=/usr/local
+      if test ! -f "${FFTW_HOME}/include/fftw3.h" -o -f "${FFTW_HOME}/include/fftw.h" -o  -f "${FFTW_HOME}/include/dfftw.h"; then
         FFTW_HOME=/usr
-fi
-
-#
-# Locate fftw, if wanted
-#
-if test -n "${FFTW_HOME}"
-then
-        FFTW_OLD_LDFLAGS=$LDFLAGS
-        FFTW_OLD_CPPFLAGS=$LDFLAGS
-        LDFLAGS="$LDFLAGS -L${FFTW_HOME}/lib"
-        CPPFLAGS="$CPPFLAGS -I${FFTW_HOME}/include"
-        AC_LANG_SAVE
-        AC_LANG_C
-        AC_CHECK_LIB(fftw3, fftw_execute, [fftw_cv_libfftw3=yes], [fftw_cv_libfftw3=no])
-        AC_CHECK_HEADER(fftw3.h, [fftw_cv_fftw3_h=yes], [fftw_cv_fftw3_h=no])
-        if test "$fftw_cv_libfftw3" = "no" -o "$fftw_cv_fftw3_h" = "no"
-        then
-                AC_CHECK_LIB(fftw, fftwnd_one, [fftw_cv_libfftw=yes], [fftw_cv_libfftw=no])
-                AC_CHECK_HEADER(fftw.h, [fftw_cv_fftw_h=yes], [fftw_cv_fftw_h=no])
-                if test "$fftw_cv_libfftw" = "no" -o "$fftw_cv_fftw_h" = "no"
-                then
-                        AC_CHECK_LIB(dfftw, fftwnd_one, [fftw_cv_libdfftw=yes], [fftw_cv_libdfftw=no])
-                        AC_CHECK_HEADER(dfftw.h, [fftw_cv_dfftw_h=yes], [fftw_cv_dfftw_h=no])
-                fi
-        fi                      
-        AC_LANG_RESTORE
-
-        if test "$fftw_cv_libfftw3" = "yes" -a "$fftw_cv_fftw3_h" = "yes"
-        then
-                AC_DEFINE(HAVE_FFTW3_H, 1, [have fftw3.h])
-                FFTW_INC_DIR="${FFTW_HOME}/include"
-                FFTW_LIB_DIR="${FFTW_HOME}/lib"
-                FFTW_LIBS="-lfftw3"
-        else
-        if test "$fftw_cv_libfftw" = "yes" -a "$fftw_cv_fftw_h" = "yes"
-        then
-                AC_DEFINE(HAVE_FFTW_H, 1, [have fftw.h])
-                FFTW_INC_DIR="${FFTW_HOME}/include"
-                FFTW_LIB_DIR="${FFTW_HOME}/lib"
-                FFTW_LIBS="-lfftw"
-        else
-        if test "$fftw_cv_libdfftw" = "yes" -a "$fftw_cv_dfftw_h" = "yes"
-        then
-                AC_DEFINE(HAVE_DFFTW_H, 1, [have dfftw.h])
-                FFTW_INC_DIR="${FFTW_HOME}/include"
-                FFTW_LIB_DIR="${FFTW_HOME}/lib"
-                FFTW_LIBS="-ldfftw"
-        else
-                AC_MSG_CHECKING(fftw in ${FFTW_HOME})
-                FFTW_INC_DIR=
-                FFTW_LIB_DIR=
-                FFTW_LIBS=
-                LDFLAGS="$FFTW_OLD_LDFLAGS"
-                CPPFLAGS="$FFTW_OLD_CPPFLAGS"
-                AC_MSG_RESULT(failed)
-	echo ""
-	echo "*********************************************************"
-        echo "* WARNING: Could not find a working FFTW installation   *"
-        echo "* If you need the staticProps program to be able to     *"
-        echo "* compute undulation spectra, be sure to specify a      *"
-	echo "* valid fftw installation with --with-fftw=DIR          *"
-        echo "*                                                       *"
-        echo "* OOPSE will still work without fftw installed.         *"
-	echo "*********************************************************"
-	echo ""
+      fi
+    fi
+    #
+    # Locate fftw, if wanted
+    #
+    if test -n "${FFTW_HOME}"; then
+      FFTW_OLD_LDFLAGS=$LDFLAGS
+      FFTW_OLD_CPPFLAGS=$LDFLAGS
+      LDFLAGS="$LDFLAGS -L${FFTW_HOME}/lib"
+      CPPFLAGS="$CPPFLAGS -I${FFTW_HOME}/include"
+      AC_LANG_SAVE
+      AC_LANG_C
+      AC_CHECK_LIB(fftw3, fftw_execute, [fftw_cv_libfftw3=yes], [fftw_cv_libfftw3=no])
+      AC_CHECK_HEADER(fftw3.h, [fftw_cv_fftw3_h=yes], [fftw_cv_fftw3_h=no])
+      if test "$fftw_cv_libfftw3" = "no" -o "$fftw_cv_fftw3_h" = "no"; then
+        AC_CHECK_LIB(fftw, fftwnd_one, [fftw_cv_libfftw=yes], [fftw_cv_libfftw=no])
+        AC_CHECK_HEADER(fftw.h, [fftw_cv_fftw_h=yes], [fftw_cv_fftw_h=no])
+        if test "$fftw_cv_libfftw" = "no" -o "$fftw_cv_fftw_h" = "no"; then
+          AC_CHECK_LIB(dfftw, fftwnd_one, [fftw_cv_libdfftw=yes], [fftw_cv_libdfftw=no])
+          AC_CHECK_HEADER(dfftw.h, [fftw_cv_dfftw_h=yes], [fftw_cv_dfftw_h=no])
         fi
+      fi                      
+      AC_LANG_RESTORE
+      if test "$fftw_cv_libfftw3" = "yes" -a "$fftw_cv_fftw3_h" = "yes"; then
+        AC_DEFINE(HAVE_FFTW3_H, 1, [have fftw3.h])
+        FFTW_INC_DIR="${FFTW_HOME}/include"
+        FFTW_LIB_DIR="${FFTW_HOME}/lib"
+        FFTW_LIBS="-lfftw3"
+      else
+        if test "$fftw_cv_libfftw" = "yes" -a "$fftw_cv_fftw_h" = "yes"; then
+          AC_DEFINE(HAVE_FFTW_H, 1, [have fftw.h])
+          FFTW_INC_DIR="${FFTW_HOME}/include"
+          FFTW_LIB_DIR="${FFTW_HOME}/lib"
+          FFTW_LIBS="-lfftw"
+        else
+          if test "$fftw_cv_libdfftw" = "yes" -a "$fftw_cv_dfftw_h" = "yes"; then
+            AC_DEFINE(HAVE_DFFTW_H, 1, [have dfftw.h])
+            FFTW_INC_DIR="${FFTW_HOME}/include"
+            FFTW_LIB_DIR="${FFTW_HOME}/lib"
+            FFTW_LIBS="-ldfftw"
+          else
+            AC_MSG_CHECKING(fftw in ${FFTW_HOME})
+            FFTW_INC_DIR=
+            FFTW_LIB_DIR=
+            FFTW_LIBS=
+            LDFLAGS="$FFTW_OLD_LDFLAGS"
+            CPPFLAGS="$FFTW_OLD_CPPFLAGS"
+            AC_MSG_RESULT(failed)
+	    echo ""
+	    echo "*********************************************************"
+            echo "* WARNING: Could not find a working FFTW installation   *"
+            echo "* If you need the staticProps program to be able to     *"
+            echo "* compute undulation spectra, be sure to specify a      *"
+	    echo "* valid fftw installation with --with-fftw=DIR          *"
+            echo "*                                                       *"
+            echo "* OOPSE will still work without fftw installed.         *"
+	    echo "*********************************************************"
+	    echo ""
+          fi
         fi
-        fi
-        AC_SUBST(FFTW_INC_DIR)
-        AC_SUBST(FFTW_LIB_DIR)
-        AC_SUBST(FFTW_LIBS)
-fi
+      fi
+      AC_SUBST(FFTW_INC_DIR)
+      AC_SUBST(FFTW_LIB_DIR)
+      AC_SUBST(FFTW_LIBS)
+    fi
+  fi
 fi
 ])
 

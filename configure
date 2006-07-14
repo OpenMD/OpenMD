@@ -6148,44 +6148,37 @@ if test "${with_fftw+set}" = set; then
   withval="$with_fftw"
   fftw_dir="$withval"
 else
-  		fftw_dir="not_set"
+  	     fftw_dir="not_set"
 fi;
 if test "$fftw_dir" != "no"; then
-
-if test "$fftw_dir" != "not_set" ; then
-  if test -d "$fftw_dir"
-  then
-    FFTW_HOME="$fftw_dir"
-  else
-    { echo "$as_me:$LINENO: WARNING: Sorry, $fftw_dir does not exist, checking usual places" >&5
+  if test "$fftw_dir" != "not_set" ; then
+    if test -d "$fftw_dir"; then
+      FFTW_HOME="$fftw_dir"
+    else
+      { echo "$as_me:$LINENO: WARNING: Sorry, $fftw_dir does not exist, checking usual places" >&5
 echo "$as_me: WARNING: Sorry, $fftw_dir does not exist, checking usual places" >&2;}
-  fi
-fi
-
-FFTW_HOME=/usr/local
-if test ! -f "${FFTW_HOME}/include/fftw3.h" -o -f "${FFTW_HOME}/include/fftw.h" -o  -f "${FFTW_HOME}/include/dfftw.h"
-then
+      FFTW_HOME=/usr/local
+      if test ! -f "${FFTW_HOME}/include/fftw3.h" -o -f "${FFTW_HOME}/include/fftw.h" -o  -f "${FFTW_HOME}/include/dfftw.h"; then
         FFTW_HOME=/usr
-fi
+      fi
+    fi
+    #
+    # Locate fftw, if wanted
+    #
+    if test -n "${FFTW_HOME}"; then
+      FFTW_OLD_LDFLAGS=$LDFLAGS
+      FFTW_OLD_CPPFLAGS=$LDFLAGS
+      LDFLAGS="$LDFLAGS -L${FFTW_HOME}/lib"
+      CPPFLAGS="$CPPFLAGS -I${FFTW_HOME}/include"
 
-#
-# Locate fftw, if wanted
-#
-if test -n "${FFTW_HOME}"
-then
-        FFTW_OLD_LDFLAGS=$LDFLAGS
-        FFTW_OLD_CPPFLAGS=$LDFLAGS
-        LDFLAGS="$LDFLAGS -L${FFTW_HOME}/lib"
-        CPPFLAGS="$CPPFLAGS -I${FFTW_HOME}/include"
 
-
-        ac_ext=c
+      ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
-        echo "$as_me:$LINENO: checking for fftw_execute in -lfftw3" >&5
+      echo "$as_me:$LINENO: checking for fftw_execute in -lfftw3" >&5
 echo $ECHO_N "checking for fftw_execute in -lfftw3... $ECHO_C" >&6
 if test "${ac_cv_lib_fftw3_fftw_execute+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
@@ -6263,7 +6256,7 @@ else
   fftw_cv_libfftw3=no
 fi
 
-        if test "${ac_cv_header_fftw3_h+set}" = set; then
+      if test "${ac_cv_header_fftw3_h+set}" = set; then
   echo "$as_me:$LINENO: checking for fftw3.h" >&5
 echo $ECHO_N "checking for fftw3.h... $ECHO_C" >&6
 if test "${ac_cv_header_fftw3_h+set}" = set; then
@@ -6407,9 +6400,8 @@ else
 fi
 
 
-        if test "$fftw_cv_libfftw3" = "no" -o "$fftw_cv_fftw3_h" = "no"
-        then
-                echo "$as_me:$LINENO: checking for fftwnd_one in -lfftw" >&5
+      if test "$fftw_cv_libfftw3" = "no" -o "$fftw_cv_fftw3_h" = "no"; then
+        echo "$as_me:$LINENO: checking for fftwnd_one in -lfftw" >&5
 echo $ECHO_N "checking for fftwnd_one in -lfftw... $ECHO_C" >&6
 if test "${ac_cv_lib_fftw_fftwnd_one+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
@@ -6487,7 +6479,7 @@ else
   fftw_cv_libfftw=no
 fi
 
-                if test "${ac_cv_header_fftw_h+set}" = set; then
+        if test "${ac_cv_header_fftw_h+set}" = set; then
   echo "$as_me:$LINENO: checking for fftw.h" >&5
 echo $ECHO_N "checking for fftw.h... $ECHO_C" >&6
 if test "${ac_cv_header_fftw_h+set}" = set; then
@@ -6631,9 +6623,8 @@ else
 fi
 
 
-                if test "$fftw_cv_libfftw" = "no" -o "$fftw_cv_fftw_h" = "no"
-                then
-                        echo "$as_me:$LINENO: checking for fftwnd_one in -ldfftw" >&5
+        if test "$fftw_cv_libfftw" = "no" -o "$fftw_cv_fftw_h" = "no"; then
+          echo "$as_me:$LINENO: checking for fftwnd_one in -ldfftw" >&5
 echo $ECHO_N "checking for fftwnd_one in -ldfftw... $ECHO_C" >&6
 if test "${ac_cv_lib_dfftw_fftwnd_one+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
@@ -6711,7 +6702,7 @@ else
   fftw_cv_libdfftw=no
 fi
 
-                        if test "${ac_cv_header_dfftw_h+set}" = set; then
+          if test "${ac_cv_header_dfftw_h+set}" = set; then
   echo "$as_me:$LINENO: checking for dfftw.h" >&5
 echo $ECHO_N "checking for dfftw.h... $ECHO_C" >&6
 if test "${ac_cv_header_dfftw_h+set}" = set; then
@@ -6855,74 +6846,71 @@ else
 fi
 
 
-                fi
         fi
-        ac_ext=c
+      fi
+      ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
-
-        if test "$fftw_cv_libfftw3" = "yes" -a "$fftw_cv_fftw3_h" = "yes"
-        then
+      if test "$fftw_cv_libfftw3" = "yes" -a "$fftw_cv_fftw3_h" = "yes"; then
 
 cat >>confdefs.h <<\_ACEOF
 #define HAVE_FFTW3_H 1
 _ACEOF
 
-                FFTW_INC_DIR="${FFTW_HOME}/include"
-                FFTW_LIB_DIR="${FFTW_HOME}/lib"
-                FFTW_LIBS="-lfftw3"
-        else
-        if test "$fftw_cv_libfftw" = "yes" -a "$fftw_cv_fftw_h" = "yes"
-        then
+        FFTW_INC_DIR="${FFTW_HOME}/include"
+        FFTW_LIB_DIR="${FFTW_HOME}/lib"
+        FFTW_LIBS="-lfftw3"
+      else
+        if test "$fftw_cv_libfftw" = "yes" -a "$fftw_cv_fftw_h" = "yes"; then
 
 cat >>confdefs.h <<\_ACEOF
 #define HAVE_FFTW_H 1
 _ACEOF
 
-                FFTW_INC_DIR="${FFTW_HOME}/include"
-                FFTW_LIB_DIR="${FFTW_HOME}/lib"
-                FFTW_LIBS="-lfftw"
+          FFTW_INC_DIR="${FFTW_HOME}/include"
+          FFTW_LIB_DIR="${FFTW_HOME}/lib"
+          FFTW_LIBS="-lfftw"
         else
-        if test "$fftw_cv_libdfftw" = "yes" -a "$fftw_cv_dfftw_h" = "yes"
-        then
+          if test "$fftw_cv_libdfftw" = "yes" -a "$fftw_cv_dfftw_h" = "yes"; then
 
 cat >>confdefs.h <<\_ACEOF
 #define HAVE_DFFTW_H 1
 _ACEOF
 
-                FFTW_INC_DIR="${FFTW_HOME}/include"
-                FFTW_LIB_DIR="${FFTW_HOME}/lib"
-                FFTW_LIBS="-ldfftw"
-        else
-                echo "$as_me:$LINENO: checking fftw in ${FFTW_HOME}" >&5
+            FFTW_INC_DIR="${FFTW_HOME}/include"
+            FFTW_LIB_DIR="${FFTW_HOME}/lib"
+            FFTW_LIBS="-ldfftw"
+          else
+            echo "$as_me:$LINENO: checking fftw in ${FFTW_HOME}" >&5
 echo $ECHO_N "checking fftw in ${FFTW_HOME}... $ECHO_C" >&6
-                FFTW_INC_DIR=
-                FFTW_LIB_DIR=
-                FFTW_LIBS=
-                LDFLAGS="$FFTW_OLD_LDFLAGS"
-                CPPFLAGS="$FFTW_OLD_CPPFLAGS"
-                echo "$as_me:$LINENO: result: failed" >&5
+            FFTW_INC_DIR=
+            FFTW_LIB_DIR=
+            FFTW_LIBS=
+            LDFLAGS="$FFTW_OLD_LDFLAGS"
+            CPPFLAGS="$FFTW_OLD_CPPFLAGS"
+            echo "$as_me:$LINENO: result: failed" >&5
 echo "${ECHO_T}failed" >&6
-	echo ""
-	echo "*********************************************************"
-        echo "* WARNING: Could not find a working FFTW installation   *"
-        echo "* If you need the staticProps program to be able to     *"
-        echo "* compute undulation spectra, be sure to specify a      *"
-	echo "* valid fftw installation with --with-fftw=DIR          *"
-        echo "*                                                       *"
-        echo "* OOPSE will still work without fftw installed.         *"
-	echo "*********************************************************"
-	echo ""
+	    echo ""
+	    echo "*********************************************************"
+            echo "* WARNING: Could not find a working FFTW installation   *"
+            echo "* If you need the staticProps program to be able to     *"
+            echo "* compute undulation spectra, be sure to specify a      *"
+	    echo "* valid fftw installation with --with-fftw=DIR          *"
+            echo "*                                                       *"
+            echo "* OOPSE will still work without fftw installed.         *"
+	    echo "*********************************************************"
+	    echo ""
+          fi
         fi
-        fi
-        fi
+      fi
 
 
 
-fi
+    fi
+  fi
 fi
 
 
