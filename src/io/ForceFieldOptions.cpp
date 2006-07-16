@@ -69,8 +69,6 @@ namespace oopse {
     fortranForceOptions.GayBerneMu = this->getGayBerneMu();
     fortranForceOptions.GayBerneNu = this->getGayBerneNu();
 
-    std::cout << "GBM = " <<  fortranForceOptions.GayBerneMu << " GBN = " << fortranForceOptions.GayBerneNu  << std::endl;
-
     std::string DistanceMix = this->getDistanceMixingRule();
     toUpper(DistanceMix);
     if(DistanceMix == "ARITHMETIC"){
