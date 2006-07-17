@@ -187,7 +187,7 @@ contains
           GBMap%atidToGBtype(myATID) = current
           GBMap%GBtypes(current)%atid      = myATID       
           GBMap%GBtypes(current)%isLJ      = .true.          
-          GBMap%GBtypes(current)%d         = getSigma(myATID)
+          GBMap%GBtypes(current)%d         = getSigma(myATID) / sqrt(2.0_dp)
           GBMap%GBtypes(current)%l         = GBMap%GBtypes(current)%d
           GBMap%GBtypes(current)%eps       = getEpsilon(myATID)
           GBMap%GBtypes(current)%eps_ratio = 1.0_dp
@@ -234,9 +234,11 @@ contains
           e2 = GBMap%GBtypes(j)%eps
           er2 = GBMap%GBtypes(j)%eps_ratio
           dw2 = GBMap%GBtypes(j)%dw
-!	  write(*,*) 'd2 = ', d2,l2, d1,l2 
-!          GBMixingMap(i,j)%sigma0 = sqrt(d1*d1 + d2*d2)
-          GBMixingMap(i,j)%sigma0 = 0.5_dp*(d1 + d2)
+
+!  Cleaver paper uses sqrt of squares to get sigma0 for
+!  mixed interactions.
+            
+          GBMixingMap(i,j)%sigma0 = sqrt(d1*d1 + d2*d2)
           GBMixingMap(i,j)%xa2 = (l1*l1 - d1*d1)/(l1*l1 + d2*d2)
           GBMixingMap(i,j)%xai2 = (l2*l2 - d2*d2)/(l2*l2 + d1*d1)
           GBMixingMap(i,j)%x2 = (l1*l1 - d1*d1) * (l2*l2 - d2*d2) / &
