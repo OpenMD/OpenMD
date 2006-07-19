@@ -82,9 +82,9 @@ namespace oopse {
   void SSDAtomVisitor::visit(DirectionalAtom *datom) {
     std::vector<AtomInfo*>atoms;
 
-    //we need to convert SSD into 4 differnet atoms
-    //one oxygen atom, two hydrogen atoms and one pseudo atom which is the center of the mass
-    //of the water with a dipole moment
+    //we need to convert SSD into 4 different atoms
+    //one oxygen atom, two hydrogen atoms and one pseudo atom which is the center of 
+    //the mass of the water with a dipole moment
     Vector3d h1(0.0, -0.75695, 0.5206);
     Vector3d h2(0.0, 0.75695, 0.5206);
     Vector3d ox(0.0, 0.0, -0.0654);
@@ -214,6 +214,149 @@ namespace oopse {
     return result;
   }
 
+
+  bool TREDAtomVisitor::isTREDAtom(const std::string&atomType) {
+    std::set<std::string>::iterator strIter;
+    strIter = tredAtomType.find(atomType);
+    return strIter != tredAtomType.end() ? true : false;
+  }
+
+  void TREDAtomVisitor::visit(DirectionalAtom *datom) {
+    std::vector<AtomInfo*>atoms;
+
+    // we need to convert a TRED into 4 different atoms:
+    // one oxygen atom, two hydrogen atoms, and one atom which is the center of 
+    // the mass of the water with a dipole moment
+    Vector3d h1(0.0, -0.75695, 0.5206);
+    Vector3d h2(0.0, 0.75695, 0.5206);
+    Vector3d ox(0.0, 0.0, -0.0654);
+    Vector3d u(0, 0, 1);
+    RotMat3x3d   rotMatrix;
+    RotMat3x3d   rotTrans;
+    AtomInfo *   atomInfo;
+    Vector3d     pos;
+    Vector3d     newVec;
+    Quat4d       q;
+    AtomData *   atomData;
+    GenericData *data;
+    bool         haveAtomData;
+
+    // if the atom is not a TRED atom, skip it
+    if (!isTREDAtom(datom->getType()))
+      return;
+
+    data = datom->getPropertyByName("ATOMDATA");
+
+    if (data != NULL) {
+      atomData = dynamic_cast<AtomData *>(data);
+
+      if (atomData == NULL) {
+	std::cerr << "can not get Atom Data from " << datom->getType() << std::endl;
+	atomData = new AtomData;
+	haveAtomData = false;
+      } else
+	haveAtomData = true;
+    } else {
+      atomData = new AtomData;
+      haveAtomData = false;
+    }
+
+    pos = datom->getPos();
+    q = datom->getQ();
+    rotMatrix = datom->getA();
+
+    // We need A^T to convert from body-fixed to space-fixed:
+    // transposeMat3(rotMatrix, rotTrans);
+    rotTrans = rotMatrix.transpose();
+
+    // center of mass of the water molecule
+    // matVecMul3(rotTrans, u, newVec);
+    newVec = rotTrans * u;
+
+    atomInfo = new AtomInfo;
+    atomInfo->atomTypeName = "TRED";
+    atomInfo->pos[0] = pos[0];
+    atomInfo->pos[1] = pos[1];
+    atomInfo->pos[2] = pos[2];
+    atomInfo->dipole[0] = newVec[0];
+    atomInfo->dipole[1] = newVec[1];
+    atomInfo->dipole[2] = newVec[2];
+
+    atomData->addAtomInfo(atomInfo);
+
+    // oxygen
+    // matVecMul3(rotTrans, ox, newVec);
+    newVec = rotTrans * ox;
+
+    atomInfo = new AtomInfo;
+    atomInfo->atomTypeName = "O";
+    atomInfo->pos[0] = pos[0] + newVec[0];
+    atomInfo->pos[1] = pos[1] + newVec[1];
+    atomInfo->pos[2] = pos[2] + newVec[2];
+    atomInfo->dipole[0] = 0.0;
+    atomInfo->dipole[1] = 0.0;
+    atomInfo->dipole[2] = 0.0;
+    atomData->addAtomInfo(atomInfo);
+
+    // hydrogen1
+    // matVecMul3(rotTrans, h1, newVec);
+    newVec = rotTrans * h1;
+    atomInfo = new AtomInfo;
+    atomInfo->atomTypeName = "H";
+    atomInfo->pos[0] = pos[0] + newVec[0];
+    atomInfo->pos[1] = pos[1] + newVec[1];
+    atomInfo->pos[2] = pos[2] + newVec[2];
+    atomInfo->dipole[0] = 0.0;
+    atomInfo->dipole[1] = 0.0;
+    atomInfo->dipole[2] = 0.0;
+    atomData->addAtomInfo(atomInfo);
+
+    // hydrogen2
+    // matVecMul3(rotTrans, h2, newVec);
+    newVec = rotTrans * h2;
+    atomInfo = new AtomInfo;
+    atomInfo->atomTypeName = "H";
+    atomInfo->pos[0] = pos[0] + newVec[0];
+    atomInfo->pos[1] = pos[1] + newVec[1];
+    atomInfo->pos[2] = pos[2] + newVec[2];
+    atomInfo->dipole[0] = 0.0;
+    atomInfo->dipole[1] = 0.0;
+    atomInfo->dipole[2] = 0.0;
+    atomData->addAtomInfo(atomInfo);
+
+    // add atom data into atom's property
+
+    if (!haveAtomData) {
+      atomData->setID("ATOMDATA");
+      datom->addProperty(atomData);
+    }
+
+    setVisited(datom);
+  }
+
+  const std::string TREDAtomVisitor::toString() {
+    char   buffer[65535];
+    std::string result;
+
+    sprintf(buffer,
+            "------------------------------------------------------------------\n");
+    result += buffer;
+
+    sprintf(buffer, "Visitor name: %s\n", visitorName.c_str());
+    result += buffer;
+
+    sprintf(buffer,
+            "Visitor Description: Convert the TRED atom into 4 different atoms\n");
+    result += buffer;
+
+    sprintf(buffer,
+            "------------------------------------------------------------------\n");
+    result += buffer;
+
+    return result;
+  }
+
+
   bool LinearAtomVisitor::isLinearAtom(const std::string& atomType){
     std::set<std::string>::iterator strIter;
     strIter = linearAtomType.find(atomType);
@@ -242,7 +385,7 @@ namespace oopse {
     GenericData* data;
     bool haveAtomData;
     AtomType* atomType;
-    //if atom is not SSD atom, just skip it
+    //if atom is not linear atom, just skip it
     if(!isLinearAtom(datom->getType()) || !datom->getAtomType()->isGayBerne())
       return;
 

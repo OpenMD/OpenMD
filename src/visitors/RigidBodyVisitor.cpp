@@ -40,287 +40,154 @@
  */
  
 #include "visitors/RigidBodyVisitor.hpp"
-
 #include "primitives/RigidBody.hpp"
 
 
 namespace oopse {
 
-
-
   void LipidHeadVisitor::visit(RigidBody* rb){
-
     Vector3d pos;
-
     Vector3d u(0, 0, 1);
-
     Vector3d newVec;
-
     GenericData* data;
-
     AtomData* atomData;
-
     AtomInfo* atomInfo;
-
     bool haveAtomData;
-
     RotMat3x3d rotMatrix;
 
-
-
     if(!canVisit(rb->getType()))
-
       return;
 
-
-
     pos = rb->getPos();
-
     rotMatrix = rb->getA();
-
     //matVecMul3(rotMatrix, u, newVec);
-
     newVec = rotMatrix * u;
-
-  
 
     data = rb->getPropertyByName("ATOMDATA");
 
     if(data != NULL){
-
-
-
       atomData = dynamic_cast<AtomData*>(data);  
-
+      
       if(atomData == NULL){
-
 	std::cerr << "can not get Atom Data from " << rb->getType() << std::endl;
-
+	
 	atomData = new AtomData; 
-
 	haveAtomData = false;      
-
-      }
-
-      else
-
+	
+      } else
 	haveAtomData = true;
-
-    }
-
-    else{
-
+      
+    } else {
       atomData = new AtomData;
-
       haveAtomData = false;
-
+      
     }
-
-
 
     atomInfo = new AtomInfo;
-
     atomInfo->atomTypeName = "X";
-
     atomInfo->pos[0] = pos[0];
-
     atomInfo->pos[1] = pos[1];
-
     atomInfo->pos[2] = pos[2];
-
     atomInfo->dipole[0] = newVec[0];
-
     atomInfo->dipole[1] = newVec[1];
-
     atomInfo->dipole[2] = newVec[2];
-
-
 
     atomData->addAtomInfo(atomInfo);
 
-
-
     if(!haveAtomData){
-
       atomData->setID("ATOMDATA");
-
       rb->addProperty(atomData);
-
     }
 
-    
-
   }
-
 
 
   void LipidHeadVisitor::addLipidHeadName(const std::string& name){
-
     lipidHeadName.insert(name);
 
-
-
   }
-
-
 
   bool LipidHeadVisitor::canVisit(const std::string& name){
-
     return lipidHeadName.find(name) != lipidHeadName.end() ? true : false;
 
-
-
   }
-
 
 
   const  std::string LipidHeadVisitor::toString(){
-
     char buffer[65535];
-
     std::string result;
-
     std::set<std::string>::iterator i;
 
-  
-
     sprintf(buffer ,"------------------------------------------------------------------\n");
-
     result += buffer;
-
-  
 
     sprintf(buffer ,"Visitor name: %s\n", visitorName.c_str());
-
     result += buffer;
-
-
 
     //print the ignore type list
-
     sprintf(buffer , "lipidHeadName list contains below types:\n");
-
     result += buffer;
-
-
 
     for(i = lipidHeadName.begin(); i != lipidHeadName.end(); ++i){
-
       sprintf(buffer ,"%s\t", i->c_str());
-
       result += buffer;
-
     }
 
-
-
     sprintf(buffer ,"\n");
-
     result += buffer;
-
-
 
     sprintf(buffer ,"------------------------------------------------------------------\n");
-
     result += buffer;
 
-
-
     return result;
-
-
 
   }
 
 
-
   void RBCOMVisitor::visit(RigidBody* rb){
-
     AtomData* atomData;
-
     AtomInfo* atomInfo;
-
     Vector3d pos;
 
-  
-
     pos = rb->getPos();
-
     atomInfo = new AtomInfo;
-
     atomInfo->atomTypeName = "X";
-
     atomInfo->pos[0] = pos[0];
-
     atomInfo->pos[1] = pos[1];
-
     atomInfo->pos[2] = pos[2];
-
     atomInfo->dipole[0] = 0;
-
     atomInfo->dipole[1] = 0;
-
     atomInfo->dipole[2] = 0;
 
-
-
     atomData = new AtomData; 
-
     atomData->setID("ATOMDATA");
-
     atomData->addAtomInfo(atomInfo);
-
-
 
     rb->addProperty(atomData);
 
   }
 
 
-
   const  std::string RBCOMVisitor::toString(){
-
     char buffer[65535];
-
     std::string result;
 
-  
-
     sprintf(buffer ,"------------------------------------------------------------------\n");
-
     result += buffer;
-
-  
 
     sprintf(buffer ,"Visitor name: %s\n", visitorName.c_str());
-
     result += buffer;
-
-
 
     //print the ignore type list
-
     sprintf(buffer , "Visitor Description: add a pseudo atom at the center of the mass of the rigidbody\n");
-
     result += buffer;
-
-
 
     sprintf(buffer ,"------------------------------------------------------------------\n");
-
     result += buffer;
-
-
 
     return result;
 
-
-
   }
-
-
-
-
 
 }//namespace oopse
 

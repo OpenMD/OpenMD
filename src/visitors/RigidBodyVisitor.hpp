@@ -64,7 +64,9 @@ namespace oopse {
   //LipidHeadVisitor  adds a pesudo atom into rigidbody which holds a dipole moment
   class LipidHeadVisitor : public BaseRigidBodyVisitor{
   public:
-    LipidHeadVisitor(SimInfo* info) : BaseRigidBodyVisitor(info){ visitorName = "LipidHeadVisitor";}
+    LipidHeadVisitor(SimInfo* info) : BaseRigidBodyVisitor(info){ 
+      visitorName = "LipidHeadVisitor";
+    }
 
     virtual void visit(Atom* atom) {}
     virtual void visit(DirectionalAtom* datom) {}

@@ -91,6 +91,23 @@ namespace oopse {
     std::set<std::string> ssdAtomType;   
   };
 
+  class TREDAtomVisitor : public BaseAtomVisitor{
+  public:
+    TREDAtomVisitor(SimInfo* info) : BaseAtomVisitor(info) {
+      visitorName = "TREDAtomVisitor";
+      tredAtomType.insert("TRED");
+    }
+
+    virtual void visit(Atom* atom) {}
+    virtual void visit(DirectionalAtom* datom);       
+    virtual void visit(RigidBody* rb) {}
+
+    virtual const std::string toString();
+  private:
+    inline bool isTREDAtom(const std::string& atomType);
+    std::set<std::string> tredAtomType;   
+  };
+
   class LinearAtomVisitor : public BaseAtomVisitor{
   public:
     LinearAtomVisitor(SimInfo* info) : BaseAtomVisitor(info) {
