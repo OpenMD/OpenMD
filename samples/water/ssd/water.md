@@ -60,6 +60,28 @@ molecule{
 }
 
 molecule{
+  name = "TRED";
+  
+  atom[0]{
+    type = "TRED";
+    position( 0.0, 0.0, 0.0 );
+    orientation( 0.0, 0.0, 0.0 );
+  }
+  atom[1]{
+    type = "EP_TRED";
+    position( 0.0, 0.0, 0.5 );
+  }
+
+  rigidBody[0]{
+    members(0, 1);
+  }
+
+  cutoffGroup{
+    members(0, 1);
+  }
+}
+
+molecule{
   name = "TIP3P";
   
   atom[0]{
