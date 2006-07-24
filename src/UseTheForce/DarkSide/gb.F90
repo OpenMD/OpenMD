@@ -227,7 +227,7 @@ contains
        er1 = GBMap%GBtypes(i)%eps_ratio
        dw1 = GBMap%GBtypes(i)%dw
 
-       do j = i, nGBtypes
+       do j = 1, nGBtypes
 
           d2 = GBMap%GBtypes(j)%d
           l2 = GBMap%GBtypes(j)%l
@@ -257,18 +257,6 @@ contains
           GBMixingMap(i,j)%xp2 = xp*xp
           GBMixingMap(i,j)%xpap2 = xp*ap2
           GBMixingMap(i,j)%xpapi2 = xp/ap2
-          
-          if (i.ne.j) then
-             GBMixingMap(j,i)%sigma0 = GBMixingMap(i,j)%sigma0
-             GBMixingMap(j,i)%dw     = GBMixingMap(i,j)%dw    
-             GBMixingMap(j,i)%eps0   = GBMixingMap(i,j)%eps0  
-             GBMixingMap(j,i)%x2     = GBMixingMap(i,j)%x2    
-             GBMixingMap(j,i)%xa2    = GBMixingMap(i,j)%xa2   
-             GBMixingMap(j,i)%xai2   = GBMixingMap(i,j)%xai2  
-             GBMixingMap(j,i)%xp2    = GBMixingMap(i,j)%xp2   
-             GBMixingMap(j,i)%xpap2  = GBMixingMap(i,j)%xpap2 
-             GBMixingMap(j,i)%xpapi2 = GBMixingMap(i,j)%xpapi2
-          endif
        enddo
     enddo
     haveMixingMap = .true.
@@ -293,7 +281,10 @@ contains
     gbt1 = GBMap%atidToGBtype(atomID)
     l = GBMap%GBtypes(gbt1)%l
     d = GBMap%GBtypes(gbt1)%d   
-    cutValue = 2.5_dp*max(l,d)
+
+    ! sigma is actually sqrt(2)*l  for prolate ellipsoids
+    
+    cutValue = 2.5_dp*sqrt(2.0_dp)*max(l,d)
 
   end function getGayBerneCut
 
