@@ -1,0 +1,91 @@
+#!@PERLINTERP@ -w
+
+# program that scales an OOPSE .in or .eor file to a new volume
+# written by Chris Fennell
+
+use Getopt::Std;
+
+# some variables to get things going
+$line1 = 1;
+$line2 = 0;
+
+# get our options
+getopts('hv', \%opts);
+
+# if we don't have a filename, drop to -h
+$opts{h} = 'true' if $#ARGV != 1;
+
+# our option output 
+if ($opts{h}){
+    print "affineScale: performs an affine transform on an OOPSE .in or .eor\n";
+    print "\tand writes to a new file named [file name].scale\n\n";
+    print "usage: average [-hv] [file name] [new volume (Ang^3)]\n\n";
+    print "  -h : show this message\n";
+    die   "  -v : more verbose output\n";
+}
+
+# set some variables to be used in the code
+$fileName = $ARGV[0];
+$newVolume = $ARGV[1];
+
+# some crazy input checking
+if ($newVolume =~ /^[0-9]/){
+} else {
+    die "\t[new volume] value ($newVolume) is not a valid number\n\tPlease choose a non-negative numeric value for [new volume]\n";
+}
+
+# split up the name to obtain an output filename
+@names = split('\.', $fileName);
+$names[$#names] = 'scale';
+$outName = join('.',@names);
+
+open(STATFILE, "./$fileName") || die "\tError: can't find file $fileName\n";
+open (SCALEFILE, ">./$outName") || die "\tError: can't open $outName";
+
+while (<STATFILE>){
+    if ($line1 == 1){
+        print SCALEFILE;
+        $line1 = 0;
+        $line2 = 1;
+
+    } elsif ($line2 == 1){
+        @line = split;
+        chop $line[9];
+        $oldVolume = $line[1]*$line[5]*$line[9];
+
+        $scale = ($newVolume/$oldVolume)**0.333333333333333;
+# scale the hmat vectors (only orthorhombic)
+        $line[1] *= $scale;
+        $line[5] *= $scale;
+        $line[9] *= $scale;
+        $volume = $line[1]*$line[5]*$line[9];
+
+        print SCALEFILE "$line[0]";
+        for ($i=1; $i<=$#line; $i++) {
+            print SCALEFILE "\t$line[$i]";
+            if ($i == 9) {print SCALEFILE ";";}
+        }
+        print SCALEFILE "\n";
+        $line2 = 0;
+
+    } else {
+        @line = split /\s+/;
+        $line[1] *= $scale;
+        $line[2] *= $scale;
+        $line[3] *= $scale;
+        print SCALEFILE "$line[0]";
+        for ($i=1; $i<=$#line; $i++) {
+            print SCALEFILE "\t$line[$i]";
+        }
+        print SCALEFILE "\n";
+    }
+}
+
+print "Affine transformed configuration written to $outName\n";
+
+if (defined($opts{v})){
+    print "New Volume   : $volume\n";
+    print "Old Volume   : $oldVolume\n";
+    print "Scale Factor : $scale\n";
+}
+
