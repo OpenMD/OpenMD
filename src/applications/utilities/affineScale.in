@@ -19,7 +19,7 @@ $opts{h} = 'true' if $#ARGV != 1;
 if ($opts{h}){
     print "affineScale: performs an affine transform on an OOPSE .in or .eor\n";
     print "\tand writes to a new file named [file name].scale\n\n";
-    print "usage: average [-hv] [file name] [new volume (Ang^3)]\n\n";
+    print "usage: affineScale [-hv] [file name] [new volume (Ang^3)]\n\n";
     print "  -h : show this message\n";
     die   "  -v : more verbose output\n";
 }
