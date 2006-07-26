@@ -67,7 +67,8 @@ Applications = \
 	applications/nanoRodBuilder \
 	applications/nanoparticleBuilder \
 	applications/atom2mdin \
-	applications/hydrodynamics
+	applications/hydrodynamics \
+	applications/utilities
 
 
 Samples = \
@@ -443,6 +444,12 @@ ifneq "$(words $(SampleFiles))" "0"
   MyInstallDir             = $(SampleSimDir)/$(MySample)
   InstallFiles             = $(SampleFiles)
   InstallCommand           = $(InstallData)
+endif
+
+ifneq "$(words $(ScriptFiles))" "0"
+  MyInstallDir             = $(InstallBinDir)
+  InstallFiles             = $(ScriptFiles)
+  InstallCommand           = $(InstallProgram)
 endif
 
 ifneq "$(words $(Main))" "0"
