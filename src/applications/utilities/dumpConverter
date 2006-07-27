@@ -19,8 +19,8 @@ Example:
 """
 
 __author__ = "Dan Gezelter (gezelter@nd.edu)"
-__version__ = "$Revision: 1.2 $"
-__date__ = "$Date: 2006-07-27 20:36:54 $"
+__version__ = "$Revision: 1.3 $"
+__date__ = "$Date: 2006-07-27 21:02:54 $"
 __copyright__ = "Copyright (c) 2006 by the University of Notre Dame"
 __license__ = "OOPSE"
 
@@ -104,7 +104,12 @@ def convertFiles(mdFileName, configFileName, outputFileName):
             vy = float(L[5])
             vz = float(L[6])
             sdFormat = 'pv'
-            if (len(L) == 14):
+            if (len(L) == 10):
+                sdFormat = 'pvf'
+                fx = float(L[7])
+                fy = float(L[8])
+                fz = float(L[9])
+            if (len(L) >= 14):
                 qw = float(L[7])
                 qx = float(L[8])
                 qy = float(L[9])
@@ -123,9 +128,14 @@ def convertFiles(mdFileName, configFileName, outputFileName):
                 tx = float(L[17])
                 ty = float(L[18])
                 tz = float(L[19])
-                sdFormat = 'pvqjft'
+                if (qw == 0.0 and qx == 0.0 and qy == 0.0 and qz == 0.0):
+                    sdFormat = 'pvf'
+                else:
+                    sdFormat = 'pvqjft'
             if (sdFormat == 'pv'):
                 outputFile.write("%d\t%s\t%18.10g\t%18.10g\t%18.10g\t%14.10g\t%14.10g\t%14.10g\n" % (whichSD-1, sdFormat, x, y, z, vx, vy, vz))
+            elif (sdFormat == 'pvf'):
+                outputFile.write("%d\t%s\t%18.10g\t%18.10g\t%18.10g\t%14.10g\t%14.10g\t%14.10g\t%14.10g\t%14.10g\t%14.10g\n" % (whichSD-1, sdFormat, x, y, z, vx, vy, vz, fx, fy, fz))
             elif (sdFormat == 'pvqj'):
                 outputFile.write("%d\t%s\t%18.10g\t%18.10g\t%18.10g\t%14.10g\t%14.10g\t%14.10g\t%14.10g\t%14.10g\t%14.10g\t%14.10g\t%14.10g\t%14.10g\t%14.10g\n" % (whichSD-1, sdFormat, x, y, z, vx, vy, vz, qw, qx, qy, qz, jx, jy, jz))
             elif (sdFormat == 'pvqjft'):
