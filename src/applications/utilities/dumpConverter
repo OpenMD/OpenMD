@@ -19,8 +19,8 @@ Example:
 """
 
 __author__ = "Dan Gezelter (gezelter@nd.edu)"
-__version__ = "$Revision: 1.1 $"
-__date__ = "$Date: 2006-07-27 19:05:16 $"
+__version__ = "$Revision: 1.2 $"
+__date__ = "$Date: 2006-07-27 20:36:54 $"
 __copyright__ = "Copyright (c) 2006 by the University of Notre Dame"
 __license__ = "OOPSE"
 
@@ -45,7 +45,8 @@ def convertFiles(mdFileName, configFileName, outputFileName):
     
     mdLines = mdFile.readlines()
     for l in mdLines:
-        outputFile.write(l)
+        if (l.find('initialConfig') == -1):
+            outputFile.write(l)
 
     outputFile.write("  </MetaData>\n")
     mdFile.close()
@@ -54,7 +55,6 @@ def convertFiles(mdFileName, configFileName, outputFileName):
     configFile = open(configFileName, 'r')
     for line in configFile.readlines():
         framePos = framePos + 1
-        print framePos
         if (framePos == 1):
             L = line.split()
             nStuntDoubles = int(L[0])
@@ -62,39 +62,36 @@ def convertFiles(mdFileName, configFileName, outputFileName):
             outputFile.write("  <Snapshot>\n")
             continue
         elif (framePos == 2):
-            L = line.split()
-            time = float(L[0].split(';')[0])
+            L = line.replace(';',' ').split()
+            time = float(L[0])
             outputFile.write("    <FrameData>\n");
-            outputFile.write("        Time: %g\n" % (time))
+            outputFile.write("        Time: %.10g\n" % (time))
             Hxx = float(L[1])
             Hxy = float(L[2])
-            Hxz = float(L[3].split(';')[0])
+            Hxz = float(L[3])
             Hyx = float(L[4])
             Hyy = float(L[5])
-            Hyz = float(L[6].split(';')[0])
+            Hyz = float(L[6])
             Hzx = float(L[7])
             Hzy = float(L[8])
-            Hzz = float(L[9].split(';')[0])
-            outputFile.write("        Hmat: {{ %g, %g, %g }, { %g, %g, %g }, { %g, %g, %g }}\n" % (Hxx, Hxy, Hxz, Hyx, Hyy, Hyz, Hzx, Hzy, Hzz))
-            chi = float(L[10])
-            if (L[11][-1] == ';'):
-                integChi = float(L[11].split(';')[0])
-            else:
+            Hzz = float(L[9])
+            outputFile.write("        Hmat: {{ %.10g, %.10g, %.10g }, { %.10g, %.10g, %.10g }, { %.10g, %.10g, %.10g }}\n" % (Hxx, Hxy, Hxz, Hyx, Hyy, Hyz, Hzx, Hzy, Hzz))
+            if (len(L) >= 12):
+                chi = float(L[10])
                 integChi = float(L[11])
-            outputFile.write("  Thermostat: %g , %g\n" % (chi, integChi))
-            if (L[12][0] == ';'):
-                Nxx = float(L[12].split(';')[1])
-            else:
+                outputFile.write("  Thermostat: %.10g , %.10g\n" % (chi, integChi))
+            if (len(L) >= 21):
                 Nxx = float(L[12])
-            Nxy = float(L[13])
-            Nxz = float(L[14].split(';')[0])
-            Nyx = float(L[15])
-            Nyy = float(L[16])
-            Nyz = float(L[17].split(';')[0])
-            Nzx = float(L[18])
-            Nzy = float(L[19])
-            Nzz = float(L[20].split(';')[0])
-            outputFile.write("    Barostat: {{ %g, %g, %g }, { %g, %g, %g }, { %g, %g, %g }}\n" % (Nxx, Nxy, Nxz, Nyx, Nyy, Nyz, Nzx, Nzy, Nzz))
+                Nxy = float(L[13])
+                Nxz = float(L[14])
+                Nyx = float(L[15])
+                Nyy = float(L[16])
+                Nyz = float(L[17])
+                Nzx = float(L[18])
+                Nzy = float(L[19])
+                Nzz = float(L[20])
+                outputFile.write("    Barostat: {{ %.10g, %.10g, %.10g }, { %.10g, %.10g, %.10g }, { %.10g, %.10g, %.10g }}\n" % (Nxx, Nxy, Nxz, Nyx, Nyy, Nyz, Nzx, Nzy, Nzz))
+            
             outputFile.write("    </FrameData>\n")
             outputFile.write("    <StuntDoubles>\n")
         else:
@@ -128,11 +125,11 @@ def convertFiles(mdFileName, configFileName, outputFileName):
                 tz = float(L[19])
                 sdFormat = 'pvqjft'
             if (sdFormat == 'pv'):
-                outputFile.write("%d\t%s\t%g\t%g\t%g\t%g\t%g\t%g\n" % (whichSD, sdFormat, x, y, z, vx, vy, vz))
+                outputFile.write("%d\t%s\t%18.10g\t%18.10g\t%18.10g\t%14.10g\t%14.10g\t%14.10g\n" % (whichSD-1, sdFormat, x, y, z, vx, vy, vz))
             elif (sdFormat == 'pvqj'):
-                outputFile.write("%d\t%s\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\n" % (whichSD, sdFormat, x, y, z, vx, vy, vz, qw, qx, qy, qz, jx, jy, jz))
+                outputFile.write("%d\t%s\t%18.10g\t%18.10g\t%18.10g\t%14.10g\t%14.10g\t%14.10g\t%14.10g\t%14.10g\t%14.10g\t%14.10g\t%14.10g\t%14.10g\t%14.10g\n" % (whichSD-1, sdFormat, x, y, z, vx, vy, vz, qw, qx, qy, qz, jx, jy, jz))
             elif (sdFormat == 'pvqjft'):
-                outputFile.write("%d\t%s\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\n" % (whichSD, sdFormat, x, y, z, vx, vy, vz, qw, qx, qy, qz, jx, jy, jz, fx, fy, fz, tx, ty, tz))
+                outputFile.write("%d\t%s\t%18.10g\t%18.10g\t%18.10g\t%14.10g\t%14.10g\t%14.10g\t%14.10g\t%14.10g\t%14.10g\t%14.10g\t%14.10g\t%14.10g\t%14.10g\t%14.10g\t%14.10g\t%14.10g\t%14.10g\t%14.10g\t%14.10g\n" % (whichSD-1, sdFormat, x, y, z, vx, vy, vz, qw, qx, qy, qz, jx, jy, jz, fx, fy, fz, tx, ty, tz))
         if (whichSD == nStuntDoubles):
             outputFile.write("    </StuntDoubles>\n")
             outputFile.write("  </Snapshot>\n")
