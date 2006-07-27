@@ -1,0 +1,188 @@
+#!/usr/bin/env python
+"""Dump File Converter
+
+Converts old-style OOPSE md and dump files into new-style
+combined files
+
+Usage: dumpConverter 
+
+Options:
+  -h, --help              show this help
+  -m, --meta-data=...     use specified meta-data (.md) file
+  -c, --config-file=...   use specified configuration (.in, .eor, .dump) file
+  -o, --output-file=...   use specified output (.oop) file
+
+
+Example:
+   dumpConverter -m Ar.md -c Ar.dump -o Ar.oop
+
+"""
+
+__author__ = "Dan Gezelter (gezelter@nd.edu)"
+__version__ = "$Revision: 1.1 $"
+__date__ = "$Date: 2006-07-27 19:05:16 $"
+__copyright__ = "Copyright (c) 2006 by the University of Notre Dame"
+__license__ = "OOPSE"
+
+import sys
+import getopt
+import string
+
+_haveMDFileName = 0
+_haveConfFileName = 0
+_haveOutputFileName = 0
+
+def usage():
+    print __doc__
+
+
+def convertFiles(mdFileName, configFileName, outputFileName):
+    mdFile = open(mdFileName, 'r')
+    outputFile = open(outputFileName, 'w')
+
+    outputFile.write("<OOPSE version=4>\n");
+    outputFile.write("  <MetaData>\n")
+    
+    mdLines = mdFile.readlines()
+    for l in mdLines:
+        outputFile.write(l)
+
+    outputFile.write("  </MetaData>\n")
+    mdFile.close()
+
+    framePos = 0
+    configFile = open(configFileName, 'r')
+    for line in configFile.readlines():
+        framePos = framePos + 1
+        print framePos
+        if (framePos == 1):
+            L = line.split()
+            nStuntDoubles = int(L[0])
+            whichSD = 0
+            outputFile.write("  <Snapshot>\n")
+            continue
+        elif (framePos == 2):
+            L = line.split()
+            time = float(L[0].split(';')[0])
+            outputFile.write("    <FrameData>\n");
+            outputFile.write("        Time: %g\n" % (time))
+            Hxx = float(L[1])
+            Hxy = float(L[2])
+            Hxz = float(L[3].split(';')[0])
+            Hyx = float(L[4])
+            Hyy = float(L[5])
+            Hyz = float(L[6].split(';')[0])
+            Hzx = float(L[7])
+            Hzy = float(L[8])
+            Hzz = float(L[9].split(';')[0])
+            outputFile.write("        Hmat: {{ %g, %g, %g }, { %g, %g, %g }, { %g, %g, %g }}\n" % (Hxx, Hxy, Hxz, Hyx, Hyy, Hyz, Hzx, Hzy, Hzz))
+            chi = float(L[10])
+            if (L[11][-1] == ';'):
+                integChi = float(L[11].split(';')[0])
+            else:
+                integChi = float(L[11])
+            outputFile.write("  Thermostat: %g , %g\n" % (chi, integChi))
+            if (L[12][0] == ';'):
+                Nxx = float(L[12].split(';')[1])
+            else:
+                Nxx = float(L[12])
+            Nxy = float(L[13])
+            Nxz = float(L[14].split(';')[0])
+            Nyx = float(L[15])
+            Nyy = float(L[16])
+            Nyz = float(L[17].split(';')[0])
+            Nzx = float(L[18])
+            Nzy = float(L[19])
+            Nzz = float(L[20].split(';')[0])
+            outputFile.write("    Barostat: {{ %g, %g, %g }, { %g, %g, %g }, { %g, %g, %g }}\n" % (Nxx, Nxy, Nxz, Nyx, Nyy, Nyz, Nzx, Nzy, Nzz))
+            outputFile.write("    </FrameData>\n")
+            outputFile.write("    <StuntDoubles>\n")
+        else:
+            whichSD = whichSD + 1
+            L = line.split()
+            x = float(L[1])
+            y = float(L[2])
+            z = float(L[3])
+            vx = float(L[4])
+            vy = float(L[5])
+            vz = float(L[6])
+            sdFormat = 'pv'
+            if (len(L) == 14):
+                qw = float(L[7])
+                qx = float(L[8])
+                qy = float(L[9])
+                qz = float(L[10])
+                jx = float(L[11])
+                jy = float(L[12])
+                jz = float(L[13])
+                if (qw == 0.0 and qx == 0.0 and qy == 0.0 and qz == 0.0):
+                    sdFormat = 'pv'
+                else:
+                    sdFormat = 'pvqj'
+            if (len(L) == 20):
+                fx = float(L[14])
+                fy = float(L[15])
+                fz = float(L[16])
+                tx = float(L[17])
+                ty = float(L[18])
+                tz = float(L[19])
+                sdFormat = 'pvqjft'
+            if (sdFormat == 'pv'):
+                outputFile.write("%d\t%s\t%g\t%g\t%g\t%g\t%g\t%g\n" % (whichSD, sdFormat, x, y, z, vx, vy, vz))
+            elif (sdFormat == 'pvqj'):
+                outputFile.write("%d\t%s\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\n" % (whichSD, sdFormat, x, y, z, vx, vy, vz, qw, qx, qy, qz, jx, jy, jz))
+            elif (sdFormat == 'pvqjft'):
+                outputFile.write("%d\t%s\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\n" % (whichSD, sdFormat, x, y, z, vx, vy, vz, qw, qx, qy, qz, jx, jy, jz, fx, fy, fz, tx, ty, tz))
+        if (whichSD == nStuntDoubles):
+            outputFile.write("    </StuntDoubles>\n")
+            outputFile.write("  </Snapshot>\n")
+            framePos = 0
+    
+
+    configFile.close()
+    outputFile.write("</OOPSE>\n")
+    outputFile.close()
+
+
+def main(argv):                         
+    try:                                
+        opts, args = getopt.getopt(argv, "hm:c:o:", ["help", "meta-data=", "config-file=", "output-file="]) 
+    except getopt.GetoptError:           
+        usage()                          
+        sys.exit(2)                     
+    for opt, arg in opts:                
+        if opt in ("-h", "--help"):      
+            usage()                     
+            sys.exit()                  
+        elif opt in ("-m", "--meta-data"): 
+            mdFileName = arg
+            global _haveMDFileName
+            _haveMDFileName = 1
+        elif opt in ("-c", "--config-file"): 
+            configFileName = arg
+            global _haveConfFileName
+            _haveConfFileName = 1
+        elif opt in ("-o", "--output-file"): 
+            outputFileName = arg
+            global _haveOutputFileName
+            _haveOutputFileName = 1
+    if (_haveMDFileName != 1):
+        usage() 
+        print "No meta-data file was specified"
+        sys.exit()
+    if (_haveConfFileName != 1):
+        usage()
+        print "No configuration file was specified"
+        sys.exit()
+    if (_haveOutputFileName != 1):
+        usage()
+        print "No output file was specified"
+        sys.exit()
+    convertFiles(mdFileName, configFileName, outputFileName);
+
+if __name__ == "__main__":
+    if len(sys.argv) == 1:
+        usage()
+        sys.exit()
+    main(sys.argv[1:])
+
