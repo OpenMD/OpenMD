@@ -1,12 +1,13 @@
 /**********************************************************************
-main.cpp - Main conversion program, command-line handling.
+atom2md.cpp - OpenBabel-based conversion program to OOPSE MD file, 
+              command-line handling.
 
 Copyright (C) 1998-2001 by OpenEye Scientific Software, Inc.
 Some portions Copyright (C) 2001-2005 by Geoffrey R. Hutchison
 Some portions Copyright (C) 2004-2005 by Chris Morley
 
-This file is part of the Open Babel project.
-For more information, see <http://openbabel.sourceforge.net/>
+This file is part of the OOPSE and Open Babel projects.
+For more information, see <http://oopse.org> and <http://openbabel.sourceforge.net/>
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -52,7 +53,7 @@ using namespace std;
 using namespace OpenBabel;
 using namespace oopse;
 void DoOption(const char* p, OBConversion& Conv, OBConversion::Option_type typ, 
-							int& arg, int argc, char *argv[]); 
+              int& arg, int argc, char *argv[]); 
 void usage();
 void help();
 
@@ -63,23 +64,23 @@ int main(int argc,char *argv[])
 {
   registerOBFormats();	
   OBConversion Conv(&cin, &cout); //default input and output are console 
-
-//  string GenOptions;
+  
+  //  string GenOptions;
   OBFormat* pInFormat = NULL;
   OBFormat* pOutFormat = NULL;
   vector<string> FileList, OutputFileList;
   string OutputFileName;
-//  obMessageLevel filterLevel = obWarning; // 2 out of 5
-
+  //  obMessageLevel filterLevel = obWarning; // 2 out of 5
+  
   // Parse commandline
   bool gotInType = false, gotOutType = false;
   bool UseSavedOptions = false;
-
+  
   char *oext;
   char *iext;
   string inputExt;
   string outputExt;
-
+  
   //Save name of program without its path (and .exe)
   string pn(argv[0]);
   unsigned int pos;
@@ -93,182 +94,184 @@ int main(int argc,char *argv[])
     program_name=argv[0];
   else
     program_name=argv[0]+pos+1;
-
-	const char* p;
-	int arg;
-	for (arg = 1; arg < argc; arg++)
-	{
-		if (argv[arg])
-		{
-			if (argv[arg][0] == '-')
-			{
-				switch (argv[arg][1])
-				{
-
-				case 'V':
-				{
-					cout << "Open Babel " << BABEL_VERSION << " -- " 
-				       << __DATE__ << " -- " << __TIME__ << endl;
-					exit(0);
-				}
-
-				case 'i':
-					gotInType = true;
-					iext = argv[arg] + 2;
-					if(!*iext)
-						iext = argv[++arg]; //space left after -i: use next argument
-
-					if (strncasecmp(iext, "MIME", 4) == 0)
-					{
-						// get the MIME type from the next argument
-						iext = argv[++arg];
-						pInFormat = Conv.FormatFromMIME(iext);
-					}
-					else
-					{
-						//The ID provided by the OBFormat class is used as the identifying file extension
-						pInFormat = Conv.FindFormat(iext);
-					}
-					if(pInFormat==NULL)
-					{
-						cerr << program_name << ": cannot read input format!" << endl;
-						usage();
-					}
-                                inputExt = iext;
-					break;
-					
-				case 'o':
-					gotOutType = true;
-					oext = argv[arg] + 2;
-					if(!*oext)
-						oext = argv[++arg]; //space left after -i: use next argument
-					
-					if (strncasecmp(oext, "MIME", 4) == 0)
-					{
-						// get the MIME type from the next argument
-						oext = argv[++arg];
-						pOutFormat = Conv.FormatFromMIME(oext);
-					}
-					else
-						pOutFormat = Conv.FindFormat(oext);
-
-					if(pOutFormat==NULL)
-					{
-						cerr << program_name << ": cannot write output format!" << endl;
-						usage();
-					}
-                                outputExt = oext;
-					break;				
-				
-				case '?':
-				case 'H':
-					if(isalnum(argv[arg][2]))
-					{
-						if(strncasecmp(argv[arg]+2,"all",3))
-						{
-							OBFormat* pFormat = Conv.FindFormat(argv[arg]+2);
-							if(pFormat)
-								{
-									cout << argv[arg]+2 << "  " << pFormat->Description() << endl;
-									if(strlen(pFormat->SpecificationURL()))
-							cout << "Specification at: " << pFormat->SpecificationURL() << endl;
-								}
-							else
-								cout << "Format type: " << argv[arg]+2 << " was not recognized" <<endl;
-						}
-						else
-						{
-							Formatpos pos;
-							OBFormat* pFormat;
-							const char* str=NULL;
-							while(OBConversion::GetNextFormat(pos,str,pFormat))
-								{
-									if((pFormat->Flags() & NOTWRITABLE) && (pFormat->Flags() & NOTREADABLE))
-										continue;
-									cout << str << endl;
-									const char* p = strchr(pFormat->Description(),'\n');
-									cout << p+1; //second line of description
-									if(strlen(pFormat->SpecificationURL()))
-							cout << "Specification at: " << pFormat->SpecificationURL();
-									cout << endl << endl;
-								}
-						}
-					}
-					else
-						help();
-						exit(0);					
-					
-					
-				default: //single character general option
-					p = argv[arg]+1;
-					DoOption(p,Conv,OBConversion::GENOPTIONS,arg,argc,argv);
-					break;
-				}
-			}
-			else 
-			{
-				//filenames
-				if(!gotOutType)
-					FileList.push_back(argv[arg]);
-				else
-					OutputFileName = argv[arg];
-			}
-		}
-	}
-    
+  
+  const char* p;
+  int arg;
+  for (arg = 1; arg < argc; arg++)
+    {
+      if (argv[arg])
+        {
+          if (argv[arg][0] == '-')
+            {
+              switch (argv[arg][1])
+                {
+                  
+                case 'V':
+                  {
+                    cout << "atom2md: part of OOPSE " << 
+                      OOPSE_VERSION_MAJOR << "." << OOPSE_VERSION_MINOR << "." << 
+                      OOPSE_VERSION_TINY << " and Open Babel " << BABEL_VERSION << " -- " 
+                         << __DATE__ << " -- " << __TIME__ << endl;
+                    exit(0);
+                  }
+                  
+                case 'i':
+                  gotInType = true;
+                  iext = argv[arg] + 2;
+                  if(!*iext)
+                    iext = argv[++arg]; //space left after -i: use next argument
+                  
+                  if (strncasecmp(iext, "MIME", 4) == 0)
+                    {
+                      // get the MIME type from the next argument
+                      iext = argv[++arg];
+                      pInFormat = Conv.FormatFromMIME(iext);
+                    }
+                  else
+                    {
+                      //The ID provided by the OBFormat class is used as the identifying file extension
+                      pInFormat = Conv.FindFormat(iext);
+                    }
+                  if(pInFormat==NULL)
+                    {
+                      cerr << program_name << ": cannot read input format!" << endl;
+                      usage();
+                    }
+                  inputExt = iext;
+                  break;
+                  
+                case 'o':
+                  gotOutType = true;
+                  oext = argv[arg] + 2;
+                  if(!*oext)
+                    oext = argv[++arg]; //space left after -i: use next argument
+                  
+                  if (strncasecmp(oext, "MIME", 4) == 0)
+                    {
+                      // get the MIME type from the next argument
+                      oext = argv[++arg];
+                      pOutFormat = Conv.FormatFromMIME(oext);
+                    }
+                  else
+                    pOutFormat = Conv.FindFormat(oext);
+                  
+                  if(pOutFormat==NULL)
+                    {
+                      cerr << program_name << ": cannot write output format!" << endl;
+                      usage();
+                    }
+                  outputExt = oext;
+                  break;				
+                  
+                case '?':
+                case 'H':
+                  if(isalnum(argv[arg][2]))
+                    {
+                      if(strncasecmp(argv[arg]+2,"all",3))
+                        {
+                          OBFormat* pFormat = Conv.FindFormat(argv[arg]+2);
+                          if(pFormat)
+                            {
+                              cout << argv[arg]+2 << "  " << pFormat->Description() << endl;
+                              if(strlen(pFormat->SpecificationURL()))
+                                cout << "Specification at: " << pFormat->SpecificationURL() << endl;
+                            }
+                          else
+                            cout << "Format type: " << argv[arg]+2 << " was not recognized" <<endl;
+                        }
+                      else
+                        {
+                          Formatpos pos;
+                          OBFormat* pFormat;
+                          const char* str=NULL;
+                          while(OBConversion::GetNextFormat(pos,str,pFormat))
+                            {
+                              if((pFormat->Flags() & NOTWRITABLE) && (pFormat->Flags() & NOTREADABLE))
+                                continue;
+                              cout << str << endl;
+                              const char* p = strchr(pFormat->Description(),'\n');
+                              cout << p+1; //second line of description
+                              if(strlen(pFormat->SpecificationURL()))
+                                cout << "Specification at: " << pFormat->SpecificationURL();
+                              cout << endl << endl;
+                            }
+                        }
+                    }
+                  else
+                    help();
+                  exit(0);					
+                  
+                  
+                default: //single character general option
+                  p = argv[arg]+1;
+                  DoOption(p,Conv,OBConversion::GENOPTIONS,arg,argc,argv);
+                  break;
+                }
+            }
+          else 
+            {
+              //filenames
+              if(!gotOutType)
+                FileList.push_back(argv[arg]);
+              else
+                OutputFileName = argv[arg];
+            }
+        }
+    }
+  
   //user didn't specify input and output format in commandline option
   //try to parse it from program name (pdb2mdin means input format is pdb, output format is mdin)
   string formatName(program_name);
   pos = formatName.find_first_of("2");
   if(pos!=string::npos) {
     if (!gotInType)
-    {
+      {
         string tmpExt = formatName.substr(0, pos);
         pInFormat = Conv.FindFormat(tmpExt.c_str());
- 	 if(pInFormat==NULL)
- 	 {
- 		cerr << program_name << ": cannot read input format!" << endl;
- 		usage();
- 	 } else 
-        {
+        if(pInFormat==NULL)
+          {
+            cerr << program_name << ": cannot read input format!" << endl;
+            usage();
+          } else 
+          {
             gotInType = true;
             inputExt = tmpExt;
- 	 }
-    }
-
+          }
+      }
+    
     if (!gotOutType)
-    {
+      {
         string tmpExt = formatName.substr(pos+1, string::npos);
         pOutFormat = Conv.FindFormat(tmpExt.c_str());
-   	 if(pOutFormat==NULL)
- 	 {
- 		cerr << program_name << ": cannot write output format!" << endl;
- 		usage();
- 	 }else {
-            gotOutType = true;
-            outputExt = tmpExt;
- 	 }
-    }
+        if(pOutFormat==NULL)
+          {
+            cerr << program_name << ": cannot write output format!" << endl;
+            usage();
+          }else {
+          gotOutType = true;
+          outputExt = tmpExt;
+        }
+      }
   }
-
-    if(FileList.empty())
+  
+  if(FileList.empty())
     {
-    	cerr << "No input file or format spec!" <<endl;
-    	usage();
+      cerr << "No input file or format spec!" <<endl;
+      usage();
     }
-
-   if (OutputFileName.empty())
-   {
-        pos = FileList.front().rfind(".");
-        if(pos==string::npos)
-            OutputFileName = FileList.front()+ "." + outputExt;
-        else
-            OutputFileName = FileList.front().substr(0, pos) + "." + outputExt;            
+  
+  if (OutputFileName.empty())
+    {
+      pos = FileList.front().rfind(".");
+      if(pos==string::npos)
+        OutputFileName = FileList.front()+ "." + outputExt;
+      else
+        OutputFileName = FileList.front().substr(0, pos) + "." + outputExt;            
     }
   
   Conv.SetInAndOutFormats(pInFormat,pOutFormat);
-
-
+  
+  
   // send info message to clog -- don't mess up cerr or cout for user programs
   int count = Conv.FullConvert(FileList, OutputFileName, OutputFileList);
   if ( count == 1 )
@@ -277,10 +280,10 @@ int main(int argc,char *argv[])
     clog << count << " molecules converted" << endl;
   
   if(OutputFileList.size()>1)
-  {
-    clog << OutputFileList.size() << " files output. The first is " << OutputFileList[0] <<endl;
-  }
-
+    {
+      clog << OutputFileList.size() << " files output. The first is " << OutputFileList[0] <<endl;
+    }
+  
 #ifdef _DEBUG
   //CM keep window open
   cout << "Press any key to finish" <<endl;
@@ -292,39 +295,41 @@ int main(int argc,char *argv[])
 
 void DoOption(const char* p, OBConversion& Conv, OBConversion::Option_type typ, int& arg, int argc, char *argv[]) 
 {
-	while(p && *p) //can have multiple single char options
-	{
-		char ch[2]="?";
-		*ch = *p++;
-		const char* txt=NULL;				
-		//Get the option text if needed
-		int nParams = Conv.GetOptionParams(ch, typ);
-		if(nParams)
-		{
-			if(*p)
-			{
-				txt = p; //use text immediately following the option letter
-				p=NULL; //no more single char options
-			}
-			else if(arg<argc-1)
-			{
-				txt = argv[++arg]; //use text from next arg
-				if(*txt=='-')
-				{
-					//...unless it is another option
-					cerr << "Option -" << ch << " takes a parameter" << endl;
-					exit(0);
-				}
-			}
-		}
-		Conv.AddOption(ch, typ, txt);
-	}
+  while(p && *p) //can have multiple single char options
+    {
+      char ch[2]="?";
+      *ch = *p++;
+      const char* txt=NULL;				
+      //Get the option text if needed
+      int nParams = Conv.GetOptionParams(ch, typ);
+      if(nParams)
+        {
+          if(*p)
+            {
+              txt = p; //use text immediately following the option letter
+              p=NULL; //no more single char options
+            }
+          else if(arg<argc-1)
+            {
+              txt = argv[++arg]; //use text from next arg
+              if(*txt=='-')
+                {
+                  //...unless it is another option
+                  cerr << "Option -" << ch << " takes a parameter" << endl;
+                  exit(0);
+                }
+            }
+        }
+      Conv.AddOption(ch, typ, txt);
+    }
 }
 
 void usage()
 {
-  cout << "Open Babel " << BABEL_VERSION << " -- " << __DATE__ << " -- "
-       << __TIME__ << endl;
+  cout << "atom2md: part of OOPSE " << 
+    OOPSE_VERSION_MAJOR << "." << OOPSE_VERSION_MINOR << "." << 
+    OOPSE_VERSION_TINY << " and Open Babel " << BABEL_VERSION << " -- " 
+       << __DATE__ << " -- " << __TIME__ << endl;
   cout << "Usage: " << program_name
        << " [-i<input-type>] <name> [-o<output-type>] <name>" << endl;
   cout << "Try  -H option for more information." << endl;
@@ -358,23 +363,23 @@ void help()
 
   
   OBFormat* pDefault = OBConversion::GetDefaultFormat();
-	if(pDefault)
-		cout << pDefault->TargetClassDescription();// some more options probably for OBMol
+  if(pDefault)
+    cout << pDefault->TargetClassDescription();// some more options probably for OBMol
   
-	OBFormat* pAPI= OBConversion::FindFormat("obapi");
-	if(pAPI)
-		cout << pAPI->Description();
-
-	cout << "The following file formats are recognized:" << endl;
+  OBFormat* pAPI= OBConversion::FindFormat("obapi");
+  if(pAPI)
+    cout << pAPI->Description();
+  
+  cout << "The following file formats are recognized:" << endl;
   Formatpos pos;
   OBFormat* pFormat;
   const char* str=NULL;
   while(OBConversion::GetNextFormat(pos,str,pFormat))
-  {
-		if((pFormat->Flags() & NOTWRITABLE) && (pFormat->Flags() & NOTREADABLE))
-			continue;
-		cout << "  " << str << endl;
-	}
+    {
+      if((pFormat->Flags() & NOTWRITABLE) && (pFormat->Flags() & NOTREADABLE))
+        continue;
+      cout << "  " << str << endl;
+    }
   cout << "\nSee further specific info and options using -H<format-type>, e.g. -Hpdb" << endl;
 }
 

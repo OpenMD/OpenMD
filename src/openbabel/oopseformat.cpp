@@ -79,7 +79,7 @@ bool OOPSEFormat::WriteMolecule(OBBase* pOb, OBConversion* pConv)
    	 return false;
     }
                 
-    WriteMDFile(mdMols, numMols, ofs);    
+    WriteMDFile(mdMols, numMols, ofs, *pmol, indices);
 
     for(vector<OBMol*>::iterator  i = mdMols.begin(); i != mdMols.end(); ++i) 
     {
@@ -87,9 +87,6 @@ bool OOPSEFormat::WriteMolecule(OBBase* pOb, OBConversion* pConv)
     }
 
     //    
-    WriteINFile(*pmol, *pConv->GetOutStream(), indices);
-
-
 
     return(true);
 }
@@ -124,8 +121,7 @@ struct SameAngle
   }
 };
 
-void OOPSEFormat::findAngles(OBMol& mol)
-{
+  void OOPSEFormat::findAngles(OBMol& mol) {
     /*
     //if already has data return
     if(mol.HasData(OBGenericDataType::AngleData))
@@ -164,137 +160,138 @@ void OOPSEFormat::findAngles(OBMol& mol)
         angles->SetData(angle);
     }
     */
-}
-OBMol* OOPSEFormat::createMolFromFragment(OBMol& mol, vector<int>& fragment)
-{
+  }
+
+  OBMol* OOPSEFormat::createMolFromFragment(OBMol& mol, vector<int>& fragment) {
+    
     OBMol* newMol = new OBMol();
     newMol->ReserveAtoms(fragment.size());
     newMol->BeginModify();
-    for(vector<int>::iterator i = fragment.begin(); i != fragment.end(); ++i)
-    {
-        OBAtom* newAtom = newMol->NewAtom();
-        *newAtom = *mol.GetAtom(*i);
+    for(vector<int>::iterator i = fragment.begin(); i != fragment.end(); ++i) {
+      OBAtom* newAtom = newMol->NewAtom();
+      *newAtom = *mol.GetAtom(*i);
     }
     newMol->EndModify();
     newMol->ConnectTheDots();
     findAngles(*newMol);
     newMol->FindTorsions();
     return newMol;
-}
-void OOPSEFormat::WriteMDFile(vector<OBMol*> mols, vector<int> numMols, ostream& os)
-{
-    std::string identLevel1("\t");
-    std::string identLevel2("\t\t");
+  }
+  
+  void OOPSEFormat::WriteMDFile(vector<OBMol*> mols, vector<int> numMols, ostream& os, OBMol& mol, vector<int>& indices) {
+    std::string indentLevel1("\t");
+    std::string indentLevel2("\t\t");
     std::string molPrefix("MolName");
+    unsigned int i;
     const int BUFFLEN = 1024;
     char buffer[BUFFLEN];
     
-    for(unsigned int i = 0; i < mols.size(); ++i)
-    {
-        OBMol* pmol = mols[i];
-        map<OBAtom*, int> atomMap;
-        os << "molecule {\n";
-        sprintf(buffer, "%d", i);
-        os << identLevel1 << "name = " << "\"" << molPrefix << buffer << "\"" << ";\n";
-
-        
-        //atom
-        int ai = 0;
-        FOR_ATOMS_OF_MOL(atom, *pmol ) {
-            os << identLevel1 << "atom[" << ai << "] {\n";
-            os << identLevel2 << "type = " << "\"" << etab.GetSymbol(atom->GetAtomicNum()) << "\"" << ";\n";
-            os << identLevel1 << "}\n";
-            atomMap[&(*atom)] = ai++;
-        }        
-        os << "\n";
-
-        //bond
-        FOR_BONDS_OF_MOL(bond, *pmol ) {
-            os << identLevel1 << "bond {\n";
-            os << identLevel2 << "members(" << atomMap[bond->GetBeginAtom()] <<  ", " << atomMap[bond->GetEndAtom()] << ");\n";
-            os << identLevel1 << "}\n";
-        }  
-        /*
-        //bend
-        OBGenericData* pGenericData = pmol->GetData(OBGenericDataType::AngleData);
-        OBAngleData* pAngleData = dynamic_cast<OBAngleData*>(pGenericData);
-        vector<OBAngle> angles = pAngleData->GetData();
-
-        os << identLevel1 << "nBends = " << angles.size() << ";\n";        
-        int bendIndex = 0;
-        for (vector<OBAngle>::iterator ti = angles.begin(); ti != angles.end(); ++ti)
-        {
-            triple<OBAtom*, OBAtom*, OBAtom*> bendAtoms = ti->getAtoms();
-            os << identLevel1 << "bend[" << bendIndex++ << "] {\n";
-            os << identLevel2 << "member(" << atomMap[bendAtoms.first] <<  ", " << atomMap[bendAtoms.second] << atomMap[bendAtoms.third] <<");\n";
-            os << identLevel1 << "}\n";            
-        }
-        
-        //torsion
-        pGenericData = pmol->GetData(OBGenericDataType::TorsionData);
-        OBTorsionData* pTorsionData = dynamic_cast<OBTorsionData*>(pGenericData);
-        vector<OBTorsion> torsions = pTorsionData->GetData();
-        vector<quad<OBAtom*,OBAtom*,OBAtom*,OBAtom*> > torsionArray;
-        for (vector<OBTorsion>::iterator ti = torsions.begin(); ti != torsions.end(); ++ti)
-        {
-            vector<quad<OBAtom*,OBAtom*,OBAtom*,OBAtom*> > tmpTorsions = ti->getTorsions();
-            torsionArray.insert(torsionArray.end(), tmpTorsions.begin(), tmpTorsions.end());            
-        }
-
-        os << identLevel1 << "nTorsions = " << torsionArray.size() << ";\n";
-        int torsionIndex = 0;
-        for (vector<quad<OBAtom*,OBAtom*,OBAtom*,OBAtom*> >::iterator ti = torsionArray.begin(); ti != torsionArray.end(); ++ti)
-        {
-            os << identLevel1 << "torsion[" << torsionIndex++ << "] {\n";
-            os << identLevel2 << "member(" << atomMap[ti->first] <<  ", " << atomMap[ti->second] <<", " << atomMap[ti->third] <<", " << atomMap[ti->forth] << ");\n";
-            os << identLevel1 << "}\n";          
-        }
-        */
-        os << "}\n";
-        os << "\n";
-
-    }
-
-    os << "\n";
-    os << "nComponents = " << mols.size() << ";\n";
     
-    for(unsigned int i =0; i < mols.size(); ++i)
-    {
-        os << "component{\n";
-        sprintf(buffer, "%d", i);
-        os << "type = " << molPrefix << buffer << ";\n";
-        os << "nMol = " << numMols[i]<< ";\n";
-        os << "}\n";
-    }
-}
-void OOPSEFormat::WriteINFile(OBMol& mol, ostream& ofs, vector<int>& indices)
-{
-    unsigned int i;
-    char buffer[BUFF_SIZE];
+    os << "<OOPSE version=4>" << endl;
+    os << "  <MetaData>" << endl;
     
-    sprintf(buffer,"%d", mol.NumAtoms());
-    ofs << buffer << endl;
-    //sprintf(buffer,"0;%f, 0, 0; 0, %15.7f, 0; 0, 0, %15.7f;", boxx, boxy, boxz);
-    sprintf(buffer, "0;%f, 0, 0; 0, %15.7f, 0; 0, 0, %15.7f;", 100.0, 100.0, 100.0);
-    ofs << buffer << endl;
+    for(i = 0; i < mols.size(); ++i) {
+      OBMol* pmol = mols[i];
+      map<OBAtom*, int> atomMap;
+      os << "molecule {\n";
+      sprintf(buffer, "%d", i);
+      os << indentLevel1 << "name = " << "\"" << molPrefix << buffer << "\"" << ";\n";
+      
+      
+      //atom
+      int ai = 0;
+      FOR_ATOMS_OF_MOL(atom, *pmol ) {
+        os << indentLevel1 << "atom[" << ai << "] {\n";
+        os << indentLevel2 << "type = " << "\"" << etab.GetSymbol(atom->GetAtomicNum()) << "\"" << ";\n";
+        os << indentLevel1 << "}\n";
+        atomMap[&(*atom)] = ai++;
+      }        
+      os << "\n";
+      
+      //bond
+      FOR_BONDS_OF_MOL(bond, *pmol ) {
+        os << indentLevel1 << "bond {\n";
+        os << indentLevel2 << "members(" << atomMap[bond->GetBeginAtom()] <<  ", " << atomMap[bond->GetEndAtom()] << ");\n";
+        os << indentLevel1 << "}\n";
+      }  
+      /*
+      //bend
+      OBGenericData* pGenericData = pmol->GetData(OBGenericDataType::AngleData);
+      OBAngleData* pAngleData = dynamic_cast<OBAngleData*>(pGenericData);
+      vector<OBAngle> angles = pAngleData->GetData();
+      
+      os << indentLevel1 << "nBends = " << angles.size() << ";\n";        
+      int bendIndex = 0;
+      for (vector<OBAngle>::iterator ti = angles.begin(); ti != angles.end(); ++ti)
+        {
+          triple<OBAtom*, OBAtom*, OBAtom*> bendAtoms = ti->getAtoms();
+          os << indentLevel1 << "bend[" << bendIndex++ << "] {\n";
+          os << indentLevel2 << "member(" << atomMap[bendAtoms.first] <<  ", " << atomMap[bendAtoms.second] << atomMap[bendAtoms.third] <<");\n";
+          os << indentLevel1 << "}\n";            
+        }
+      
+      //torsion
+      pGenericData = pmol->GetData(OBGenericDataType::TorsionData);
+      OBTorsionData* pTorsionData = dynamic_cast<OBTorsionData*>(pGenericData);
+      vector<OBTorsion> torsions = pTorsionData->GetData();
+      vector<quad<OBAtom*,OBAtom*,OBAtom*,OBAtom*> > torsionArray;
+      for (vector<OBTorsion>::iterator ti = torsions.begin(); ti != torsions.end(); ++ti)
+        {
+          vector<quad<OBAtom*,OBAtom*,OBAtom*,OBAtom*> > tmpTorsions = ti->getTorsions();
+          torsionArray.insert(torsionArray.end(), tmpTorsions.begin(), tmpTorsions.end());            
+        }
+      
+      os << indentLevel1 << "nTorsions = " << torsionArray.size() << ";\n";
+      int torsionIndex = 0;
+      for (vector<quad<OBAtom*,OBAtom*,OBAtom*,OBAtom*> >::iterator ti = torsionArray.begin(); ti != torsionArray.end(); ++ti)
+        {
+          os << indentLevel1 << "torsion[" << torsionIndex++ << "] {\n";
+          os << indentLevel2 << "member(" << atomMap[ti->first] <<  ", " << atomMap[ti->second] <<", " << atomMap[ti->third] <<", " << atomMap[ti->forth] << ");\n";
+          os << indentLevel1 << "}\n";          
+        }
+      */
+      os << "}" << endl;
+      os << endl;
+      
+    }
+    
+    os << endl;
+    os << "nComponents = " << mols.size() << ";" << endl;
+    
+    for(i=0; i < mols.size(); ++i) {      
+      os << "component{" << endl;
+      sprintf(buffer, "%d", i);
+      os << "type = " << molPrefix << buffer << ";\n";
+      os << "nMol = " << numMols[i]<< ";\n";
+      os << "}\n";
+    }
+    
+    os << "  </MetaData>" << endl;
+    os << "  <Snapshot>" << endl;
+    os << "    <FrameData>" << endl;
+    
+    sprintf(buffer, "        Time: %.10g", 0.0);
+    
+    os << buffer << endl;
+
+    sprintf(buffer, "        Hmat: {{ %.10g, %.10g, %.10g }, { %.10g, %.10g, %.10g }, { %.10g, %.10g, %.10g }}", 100.0, 0.0, 0.0, 0.0, 100.0, 0.0, 0.0, 0.0, 100.0);
+
+    os << buffer << endl;
+    os << "    </FrameData>" << endl;
+    os << "    <StuntDoubles>" << endl;
 
     OBAtom *atom;
     string str,str1;
     
-    for(vector<int>::iterator i = indices.begin();i != indices.end(); ++i)
-    {
-        atom = mol.GetAtom(*i);
-        sprintf(buffer,"%-10s%-15.5f%-15.5f%-15.5f%-15.5f%-15.5f%-15.5f%-15.5f%-15.5f%-15.5f%-15.5f%-15.5f%-15.5f%-15.5f",
-                etab.GetSymbol(atom->GetAtomicNum()),
-                atom->GetX(), atom->GetY(), atom->GetZ(),
-                0.0, 0.0, 0.0,
-                0.0, 0.0, 0.0, 0.0,
-                0.0, 0.0, 0.0
-                );
-        ofs << buffer << endl;
+    for(vector<int>::iterator i = indices.begin();i != indices.end(); ++i) {     
+      atom = mol.GetAtom(*i);
+      sprintf(buffer, "%d\tpv\t%18.10g\t%18.10g\t%18.10g\t%14.10g\t%14.10g\t%14.10g", *i - 1, atom->GetX(), atom->GetY(), atom->GetZ(), 0.0, 0.0, 0.0);
+      os << buffer << endl;
     }
-    
+    os << "    </StuntDoubles>" << endl;
+    os << "  </Snapshot>" << endl;
+    os << "</OOPSE>" << endl;
 }
-
+  
 } //namespace OpenBabel
 

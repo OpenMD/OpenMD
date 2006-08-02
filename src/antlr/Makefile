@@ -1,7 +1,6 @@
 Package = antlr
 
-Source    = \
-            ANTLRUtil.cpp \
+Source    = ANTLRUtil.cpp \
             ASTFactory.cpp\
             ASTNULLType.cpp\
             ASTRefCount.cpp\

@@ -69,13 +69,13 @@ namespace oopse{
   public:
             
     Snapshot(int nAtoms, int nRigidbodies) : atomData(nAtoms), rigidbodyData(nRigidbodies),
-					     currentTime_(0), orthoRhombic_(0), chi_(0.0), integralOfChiDt_(0.0), eta_(0.0), id_(-1) {
+					     currentTime_(0), orthoTolerance_(1e-6), orthoRhombic_(0), chi_(0.0), integralOfChiDt_(0.0), eta_(0.0), id_(-1) {
 
     }
 
     Snapshot(int nAtoms, int nRigidbodies, int storageLayout) 
       : atomData(nAtoms, storageLayout), rigidbodyData(nRigidbodies, storageLayout),
-	currentTime_(0), orthoRhombic_(0), chi_(0.0), integralOfChiDt_(0.0), eta_(0.0), id_(-1) {
+	currentTime_(0), orthoTolerance_(1e-6), orthoRhombic_(0), chi_(0.0), integralOfChiDt_(0.0), eta_(0.0), id_(-1) {
 
       }
             
@@ -154,6 +154,11 @@ namespace oopse{
       integralOfChiDt_ = integralOfChiDt;
     }
             
+
+    void setOrthoTolerance(RealType orthoTolerance) {
+      orthoTolerance_ = orthoTolerance;
+    }
+
     Mat3x3d getEta() {
       return eta_;
     }
@@ -171,6 +176,7 @@ namespace oopse{
 
     Mat3x3d hmat_;
     Mat3x3d invHmat_;
+    RealType orthoTolerance_;
     int orthoRhombic_;
 
     RealType chi_;

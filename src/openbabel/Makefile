@@ -1,7 +1,6 @@
 Package = openbabel
 
-Source    = \
-    obatom.cpp\
+Source    = obatom.cpp\
     base.cpp \
     bitvec.cpp\
     obbond.cpp\

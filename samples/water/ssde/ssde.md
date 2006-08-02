@@ -8,24 +8,24 @@ component{
 
 initialConfig = "./ssde.in";
 
-ensemble = NVE;
+ensemble = NVT;
 forceField = "DUFF";
 electrostaticSummationMethod = "none";
 cutoffRadius = 9.0;
 switchingRadius = 7.7;
 
-targetTemp = 300;
+targetTemp =2.0;
 targetPressure = 1.0;
 
 tauThermostat = 1e3;
 tauBarostat = 1e4;
 
 dt = 2.0;
-runTime = 3e3;
+runTime = 5e4;
 useInitialTime = "false";
 useInitialExtendedSystemState = "false";
 
 //tempSet = "true";
 //thermalTime = 10;
-sampleTime = 100;
-statusTime = 2;
+sampleTime = 1000;
+statusTime = 10;

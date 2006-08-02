@@ -30,42 +30,40 @@ GNU General Public License for more details.
 using namespace std;
 namespace OpenBabel
 {
-
-class OOPSEFormat : public OBMoleculeFormat
-{
-public:
-  //Register this format type ID
-  OOPSEFormat()
+  
+  class OOPSEFormat : public OBMoleculeFormat
   {
-    OBConversion::RegisterFormat("in", this, "chemical/x-in");
-  }
-
+  public:
+    //Register this format type ID
+    OOPSEFormat() {      
+      OBConversion::RegisterFormat("md", this, "chemical/x-md");
+    }
+    
   virtual const char* Description() //required
-  {
-    return
-      "oopse cartesian coordinates format\n";
-  };
-
-  virtual const char* SpecificationURL()
-  { return "http://www.oopse.org";}; //optional
-
-  virtual const char* GetMIMEType() 
-  { return "chemical/x-in"; };
-
-   virtual unsigned int Flags() { return WRITEONEONLY;}
-
-  //*** This section identical for most OBMol conversions ***
-  ////////////////////////////////////////////////////
-  /// The "API" interface functions
-  //virtual bool ReadMolecule(OBBase* pOb, OBConversion* pConv);
-  virtual bool WriteMolecule(OBBase* pOb, OBConversion* pConv);
+    {
+      return
+        "OOPSE combined meta-data / cartesian coordinates format\n";
+    };
+    
+    virtual const char* SpecificationURL()
+    { return "http://www.oopse.org";}; //optional
+    
+    virtual const char* GetMIMEType() 
+    { return "chemical/x-md"; };
+    
+    virtual unsigned int Flags() { return WRITEONEONLY;}
+    
+    //*** This section identical for most OBMol conversions ***
+    ////////////////////////////////////////////////////
+    /// The "API" interface functions
+    //virtual bool ReadMolecule(OBBase* pOb, OBConversion* pConv);
+    virtual bool WriteMolecule(OBBase* pOb, OBConversion* pConv);
 
   private:
-      bool AreSameFragments(OBMol& mol, vector<int>& frag1, vector<int>& frag2);
-      void findAngles(OBMol& mol);
-      OBMol* createMolFromFragment(OBMol& mol, vector<int>& fragment);
-      void WriteMDFile(vector<OBMol*> mols, vector<int> numMols, ostream& os);
-      void WriteINFile(OBMol& mol, ostream& ofs, vector<int>& indices);
-};
+    bool AreSameFragments(OBMol& mol, vector<int>& frag1, vector<int>& frag2);
+    void findAngles(OBMol& mol);
+    OBMol* createMolFromFragment(OBMol& mol, vector<int>& fragment);
+    void WriteMDFile(vector<OBMol*> mols, vector<int> numMols, ostream& os, OBMol& mol, vector<int>& indices);
+  };
 }
 #endif

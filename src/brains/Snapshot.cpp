@@ -54,7 +54,6 @@
 namespace oopse {
 
   void  Snapshot::setHmat(const Mat3x3d& m) {
-    const RealType orthoTolerance = NumericConstant::epsilon;
     hmat_ = m;
     invHmat_ = hmat_.inverse();
     
@@ -70,7 +69,7 @@ namespace oopse {
     RealType smallDiag = fabs(hmat_(0, 0));
     if(smallDiag > fabs(hmat_(1, 1))) smallDiag = fabs(hmat_(1, 1));
     if(smallDiag > fabs(hmat_(2, 2))) smallDiag = fabs(hmat_(2, 2));    
-    RealType tol = smallDiag * orthoTolerance;
+    RealType tol = smallDiag * orthoTolerance_;
 
     orthoRhombic_ = 1;
 
@@ -94,7 +93,7 @@ namespace oopse {
 		 "\tThis is usually a good thing, but if you want the\n"
 		 "\tNon-Orthorhombic computations, make the orthoBoxTolerance\n"
 		 "\tvariable ( currently set to %G ) smaller.\n",
-		 orthoTolerance);
+		 orthoTolerance_);
 	painCave.severity = OOPSE_INFO;
 	simError();
       }
@@ -106,7 +105,7 @@ namespace oopse {
 		 "\tNPTf integration. If you want to live on the edge with\n"
 		 "\tthe Orthorhombic computations, make the orthoBoxTolerance\n"
 		 "\tvariable ( currently set to %G ) larger.\n",
-		 orthoTolerance);
+		 orthoTolerance_);
 	painCave.severity = OOPSE_WARNING;
 	simError();
       }
