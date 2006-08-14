@@ -1070,6 +1070,12 @@ contains
 
     if (i_is_Quadrupole) then
        if (j_is_Charge) then
+          ! precompute some necessary variables
+          cx2 = cx_i * cx_i
+          cy2 = cy_i * cy_i
+          cz2 = cz_i * cz_i
+          pref = pre14 * q_j * one_third
+
           if (screeningMethod .eq. DAMPED) then
              ! assemble the damping variables
              call lookupUniformSpline1d(erfcSpline, rij, erfcVal, derfcVal)
@@ -1084,21 +1090,7 @@ contains
              c4 = 5.0_dp*c3*riji*riji
           endif
           
-          ! precompute some variables
-          cx2 = cx_i * cx_i
-          cy2 = cy_i * cy_i
-          cz2 = cz_i * cz_i
-          pref = pre14 * q_j * one_third
-
-          ! calculate the potential
-          pot_term = ( qxx_i * (cx2*c3 - c2ri) + qyy_i * (cy2*c3 - c2ri) + &
-               qzz_i * (cz2*c3 - c2ri) )
-
-          vterm = pref * pot_term
-          vpair = vpair + vterm
-          epot = epot + sw*vterm
- 
-          ! precompute variables for convenience
+          ! precompute some variables for convenience
           preSw = sw*pref
           c2ri = c2*riji
           c3ri = c3*riji
@@ -1109,6 +1101,14 @@ contains
           xhatc4 = xhat*c4rij
           yhatc4 = yhat*c4rij
           zhatc4 = zhat*c4rij
+
+          ! calculate the potential
+          pot_term = ( qxx_i * (cx2*c3 - c2ri) + qyy_i * (cy2*c3 - c2ri) + &
+               qzz_i * (cz2*c3 - c2ri) )
+
+          vterm = pref * pot_term
+          vpair = vpair + vterm
+          epot = epot + sw*vterm
 
           ! calculate the derivatives for the forces and torques
           dudx = dudx - preSw * ( &
