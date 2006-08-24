@@ -149,7 +149,7 @@ void Globals::validate() {
   CheckParameter(SwitchingRadius, isNonNegative());
   CheckParameter(Dielectric, isPositive());
   CheckParameter(ThermalTime,  isNonNegative());
-  CheckParameter(TargetPressure,  isPositive());
+  //  CheckParameter(TargetPressure,  isPositive());
   CheckParameter(TauThermostat, isPositive());
   CheckParameter(TauBarostat, isPositive());
   CheckParameter(ZconsTime, isPositive());
@@ -172,7 +172,7 @@ void Globals::validate() {
   CheckParameter(ThermIntDistSpringConst, isPositive());
   CheckParameter(ThermIntThetaSpringConst, isPositive());
   CheckParameter(ThermIntOmegaSpringConst, isPositive());
-  CheckParameter(SurfaceTension, isNonNegative());
+  //  CheckParameter(SurfaceTension, isNonNegative());
   CheckParameter(ElectrostaticSummationMethod, isEqualIgnoreCase("NONE") || isEqualIgnoreCase("SHIFTED_POTENTIAL") || isEqualIgnoreCase("SHIFTED_FORCE") || isEqualIgnoreCase("REACTION_FIELD"));
   CheckParameter(ElectrostaticScreeningMethod, isEqualIgnoreCase("UNDAMPED") || isEqualIgnoreCase("DAMPED")); 
   CheckParameter(CutoffPolicy, isEqualIgnoreCase("MIX") || isEqualIgnoreCase("MAX") || isEqualIgnoreCase("TRADITIONAL"));
