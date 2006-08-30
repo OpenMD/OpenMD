@@ -777,12 +777,10 @@ int startingIndex = 0;
   startingIndex += numIntegrableObjectsPerMol[i];
  }
 
- std::cerr << "nGIO = " << info->getNGlobalIntegrableObjects() << "\n";
  std::vector<StuntDouble*> IOIndexToIntegrableObject(info->getNGlobalIntegrableObjects(), (StuntDouble*)NULL);
  for (mol = info->beginMolecule(mi); mol != NULL; mol = info->nextMolecule(mi)) {
       int myGlobalIndex = mol->getGlobalIndex();
       int globalIO = startingIOIndexForMol[myGlobalIndex];
-      std::cerr << "myGlobalIndex = " << myGlobalIndex << " globalIO = " << globalIO << "\n";
       for (StuntDouble* integrableObject = mol->beginIntegrableObject(ioi); integrableObject != NULL;
            integrableObject = mol->nextIntegrableObject(ioi)) {
             integrableObject->setGlobalIntegrableObjectIndex(globalIO);

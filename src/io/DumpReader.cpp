@@ -276,7 +276,6 @@ namespace oopse {
       MPI_Bcast((void *)sendBuffer.c_str(), sendBufferSize, MPI_CHAR, masterNode, MPI_COMM_WORLD);     
       
       sstream.str(sendBuffer);
-      std::cerr << sendBuffer;
     } else {
       int sendBufferSize;
       MPI_Bcast(&sendBufferSize, 1, MPI_INT, masterNode, MPI_COMM_WORLD);     

@@ -194,7 +194,7 @@ namespace oopse {
     os << "    <FrameData>\n";
 
     RealType currentTime = s->getTime();
-    sprintf(buffer, "        Time: %.10g\n", time);
+    sprintf(buffer, "        Time: %.10g\n", currentTime);
     os << buffer;
 
     Mat3x3d hmat;
@@ -234,7 +234,7 @@ namespace oopse {
 
 #ifndef IS_MPI
     os << "  <Snapshot>\n";
-
+ 
     writeFrameProperties(os, info_->getSnapshotManager()->getCurrentSnapshot());
 
     os << "    <StuntDoubles>\n";
@@ -267,9 +267,10 @@ namespace oopse {
     if (worldRank == masterNode) {	
       os << "  <Snapshot>\n";	
       writeFrameProperties(os, info_->getSnapshotManager()->getCurrentSnapshot());
-      os << buffer;	
       os << "    <StuntDoubles>\n";
 	
+      os << buffer;
+
       int nProc;
       MPI_Comm_size(MPI_COMM_WORLD, &nProc);
       for (int i = 1; i < nProc; ++i) {
@@ -281,22 +282,20 @@ namespace oopse {
         MPI_Recv(&recvLength, 1, MPI_INT, i, 0, MPI_COMM_WORLD, &istatus);
         char* recvBuffer = new char[recvLength];
         if (recvBuffer == NULL) {
-			
         } else {
-          MPI_Recv(&recvBuffer, recvLength, MPI_CHAR, i, 0, MPI_COMM_WORLD, &istatus);
+          MPI_Recv(recvBuffer, recvLength, MPI_CHAR, i, 0, MPI_COMM_WORLD, &istatus);
           os << recvBuffer;
           delete recvBuffer;
         }
-	    
       }	
       os << "    </StuntDoubles>\n";
       
       os << "  </Snapshot>\n";
       os.flush();
     } else {
-      int sendBufferLength = buffer.size();
+      int sendBufferLength = buffer.size() + 1;
       MPI_Send(&sendBufferLength, 1, MPI_INT, masterNode, 0, MPI_COMM_WORLD);
-      MPI_Send((void *)buffer.c_str(), sendBufferLength, MPI_CHAR, masterNode, 0, MPI_COMM_WORLD);				
+      MPI_Send((void *)buffer.c_str(), sendBufferLength, MPI_CHAR, masterNode, 0, MPI_COMM_WORLD);
     }
 
 #endif // is_mpi
@@ -314,7 +313,7 @@ namespace oopse {
     Vector3d vel;
     pos = integrableObject->getPos();
     vel = integrableObject->getVel();		
-    sprintf(tempBuffer, "%18.10g\t%18.10g\t%18.10g\t%14.10g\t%14.10g\t%14.10g", 
+    sprintf(tempBuffer, "%18.10g %18.10g %18.10g %13e %13e %13e", 
             pos[0], pos[1], pos[2],
             vel[0], vel[1], vel[2]);		        
     line += tempBuffer;
@@ -325,7 +324,7 @@ namespace oopse {
       Vector3d ji;
       q = integrableObject->getQ();
       ji = integrableObject->getJ();
-      sprintf(tempBuffer, "\t%14.10g\t%14.10g\t%14.10g\t%14.10g\t%14.10g\t%14.10g\t%14.10g",
+      sprintf(tempBuffer, " %13e %13e %13e %13e %13e %13e %13e",
               q[0], q[1], q[2], q[3],
               ji[0], ji[1], ji[2]);
       line += tempBuffer;
@@ -338,13 +337,13 @@ namespace oopse {
       frc = integrableObject->getFrc();
       trq = integrableObject->getTrq();
               
-      sprintf(tempBuffer, "\t%14.10g\t%14.10g\t%14.10g\t%14.10g\t%14.10g\t%14.10g",
+      sprintf(tempBuffer, " %13e %13e %13e %13e %13e %13e",
               frc[0], frc[1], frc[2],
               trq[0], trq[1], trq[2]);
       line += tempBuffer;
     }
 	
-    sprintf(tempBuffer, "%d\t%s\t%s\n", index, type.c_str(), line.c_str());
+    sprintf(tempBuffer, "%10d %7s %s\n", index, type.c_str(), line.c_str());
     return std::string(tempBuffer);
   }
 
