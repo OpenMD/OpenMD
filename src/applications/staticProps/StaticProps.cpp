@@ -82,8 +82,6 @@ int main(int argc, char* argv[]){
   //get the dumpfile name and meta-data file name
   std::string dumpFileName = args_info.input_arg;
 
-  std::string mdFileName = dumpFileName.substr(0, dumpFileName.rfind(".")) + ".md";
-
     
   std::string sele1;
   std::string sele2;
@@ -147,7 +145,7 @@ int main(int argc, char* argv[]){
 
   //parse md file and set up the system
   SimCreator creator;
-  SimInfo* info = creator.createSim(mdFileName);
+  SimInfo* info = creator.createSim(dumpFileName);
 
   RealType maxLen;
   if (args_info.length_given) {

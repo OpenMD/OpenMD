@@ -285,7 +285,7 @@ struct SameAngle
     
     for(vector<int>::iterator i = indices.begin();i != indices.end(); ++i) {     
       atom = mol.GetAtom(*i);
-      sprintf(buffer, "%d\tpv\t%18.10g\t%18.10g\t%18.10g\t%14.10g\t%14.10g\t%14.10g", *i - 1, atom->GetX(), atom->GetY(), atom->GetZ(), 0.0, 0.0, 0.0);
+      sprintf(buffer, "%10d %7s %18.10g %18.10g %18.10g %13e %13e %13e", *i - 1, "pv", atom->GetX(), atom->GetY(), atom->GetZ(), 0.0, 0.0, 0.0);
       os << buffer << endl;
     }
     os << "    </StuntDoubles>" << endl;

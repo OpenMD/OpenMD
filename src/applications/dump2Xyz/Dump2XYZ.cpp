@@ -68,7 +68,6 @@ int main(int argc, char* argv[]){
   
   gengetopt_args_info args_info;
   std::string dumpFileName;
-  std::string mdFileName;
   std::string xyzFileName;
   
   //parse the command line option
@@ -84,9 +83,6 @@ int main(int argc, char* argv[]){
     exit(1);
   }
   
-  mdFileName = dumpFileName;
-  mdFileName = mdFileName.substr(0, mdFileName.rfind(".")) + ".md";
-
   if (args_info.output_given){
     xyzFileName = args_info.output_arg;
   } else {
@@ -96,10 +92,9 @@ int main(int argc, char* argv[]){
   
   //parse md file and set up the system
   SimCreator creator;
-  SimInfo* info = creator.createSim(mdFileName, false);
+  SimInfo* info = creator.createSim(dumpFileName, false);
   
-  
-  
+
   //create visitor list
   CompositeVisitor* compositeVisitor = new CompositeVisitor();
     
