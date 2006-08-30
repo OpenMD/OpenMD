@@ -73,6 +73,7 @@ namespace oopse{
   class SnapshotManager;
   class Molecule;
   class SelectionManager;
+  class StuntDouble;
   /**
    * @class SimInfo SimInfo.hpp "brains/SimInfo.hpp" 
    * @brief One of the heavy weight classes of OOPSE, SimInfo maintains a list of molecules.
@@ -320,11 +321,18 @@ namespace oopse{
     std::string getFinalConfigFileName() {
       return finalConfigFileName_;
     }
-        
+
     void setFinalConfigFileName(const std::string& fileName) {
       finalConfigFileName_ = fileName;
     }
 
+    std::string getRawMetaData() {
+      return rawMetaData_;
+    }
+    void setRawMetaData(const std::string& rawMetaData) {
+      rawMetaData_ = rawMetaData;
+    }
+        
     std::string getDumpFileName() {
       return dumpFileName_;
     }
@@ -529,6 +537,9 @@ namespace oopse{
      */        
     LocalIndexManager localIndexMan_;
 
+    // unparsed MetaData block for storing in Dump and EOR files:
+    std::string rawMetaData_;
+
     //file names
     std::string finalConfigFileName_;
     std::string dumpFileName_;
@@ -543,6 +554,25 @@ namespace oopse{
 
     bool calcBoxDipole_; /**< flag to indicate whether or not we calculate the simulation box dipole moment */
 
+    public:
+     /**
+      * return an integral objects by its global index. In MPI version, if the StuntDouble with specified
+      * global index does not belong to local processor, a NULL will be return.
+      */
+      StuntDouble* getIOIndexToIntegrableObject(int index);
+      void setIOIndexToIntegrableObject(const std::vector<StuntDouble*>& v);
+    private:
+      std::vector<StuntDouble*> IOIndexToIntegrableObject;
+  //public:
+    //void setStuntDoubleFromGlobalIndex(std::vector<StuntDouble*> v);
+    /**
+     * return a StuntDouble by its global index. In MPI version, if the StuntDouble with specified
+     * global index does not belong to local processor, a NULL will be return.
+     */
+    //StuntDouble* getStuntDoubleFromGlobalIndex(int index);
+  //private:
+    //std::vector<StuntDouble*> sdByGlobalIndex_;
+    
 #ifdef IS_MPI
     //in Parallel version, we need MolToProc
   public:
@@ -564,6 +594,8 @@ namespace oopse{
     void setMolToProcMap(const std::vector<int>& molToProcMap) {
       molToProcMap_ = molToProcMap;
     }
+
+    
         
   private:
 

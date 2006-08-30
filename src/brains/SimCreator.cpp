@@ -81,163 +81,253 @@
 
 namespace oopse {
   
-Globals* SimCreator::parseFile(const std::string mdFileName){
-        Globals* simParams = NULL;
-        try {
+  Globals* SimCreator::parseFile(std::istream& rawMetaDataStream, const std::string& filename, int startOfMetaDataBlock ){
+    Globals* simParams = NULL;
+    try {
 
-            // Create a preprocessor that preprocesses md file into an ostringstream
-            std::stringstream ppStream;
+      // Create a preprocessor that preprocesses md file into an ostringstream
+      std::stringstream ppStream;
 #ifdef IS_MPI            
-            int streamSize;
-            const int masterNode = 0;
-            int commStatus;
-            if (worldRank == masterNode) {
+      int streamSize;
+      const int masterNode = 0;
+      int commStatus;
+      if (worldRank == masterNode) {
 #endif 
                 
-                SimplePreprocessor preprocessor;
-                preprocessor.preprocess(mdFileName, ppStream);
+        SimplePreprocessor preprocessor;
+        preprocessor.preprocess(rawMetaDataStream, filename, startOfMetaDataBlock, ppStream);
                 
 #ifdef IS_MPI            
-                //brocasting the stream size
-                streamSize = ppStream.str().size() +1;
-                commStatus = MPI_Bcast(&streamSize, 1, MPI_LONG, masterNode, MPI_COMM_WORLD);                   
+        //brocasting the stream size
+        streamSize = ppStream.str().size() +1;
+        commStatus = MPI_Bcast(&streamSize, 1, MPI_LONG, masterNode, MPI_COMM_WORLD);                   
 
-                commStatus = MPI_Bcast(static_cast<void*>(const_cast<char*>(ppStream.str().c_str())), streamSize, MPI_CHAR, masterNode, MPI_COMM_WORLD); 
+        commStatus = MPI_Bcast(static_cast<void*>(const_cast<char*>(ppStream.str().c_str())), streamSize, MPI_CHAR, masterNode, MPI_COMM_WORLD); 
             
                 
-            } else {
-                //get stream size
-                commStatus = MPI_Bcast(&streamSize, 1, MPI_LONG, masterNode, MPI_COMM_WORLD);   
+      } else {
+        //get stream size
+        commStatus = MPI_Bcast(&streamSize, 1, MPI_LONG, masterNode, MPI_COMM_WORLD);   
                 
-                  char* buf = new char[streamSize];
-                  assert(buf);
+        char* buf = new char[streamSize];
+        assert(buf);
                 
-                  //receive file content
-                  commStatus = MPI_Bcast(buf, streamSize, MPI_CHAR, masterNode, MPI_COMM_WORLD); 
+        //receive file content
+        commStatus = MPI_Bcast(buf, streamSize, MPI_CHAR, masterNode, MPI_COMM_WORLD); 
                 
-                  ppStream.str(buf);
-                  delete buf;
+        ppStream.str(buf);
+        delete buf;
 
-            }
+      }
 #endif            
-            // Create a scanner that reads from the input stream
-            MDLexer lexer(ppStream);
-            lexer.setFilename(mdFileName);
-            lexer.initDeferredLineCount();
+      // Create a scanner that reads from the input stream
+      MDLexer lexer(ppStream);
+      lexer.setFilename(filename);
+      lexer.initDeferredLineCount();
     
-            // Create a parser that reads from the scanner
-            MDParser parser(lexer);
-            parser.setFilename(mdFileName);
+      // Create a parser that reads from the scanner
+      MDParser parser(lexer);
+      parser.setFilename(filename);
 
-            // Create an observer that synchorizes file name change
-            FilenameObserver observer;
-            observer.setLexer(&lexer);
-            observer.setParser(&parser);
-            lexer.setObserver(&observer);
+      // Create an observer that synchorizes file name change
+      FilenameObserver observer;
+      observer.setLexer(&lexer);
+      observer.setParser(&parser);
+      lexer.setObserver(&observer);
     
-	    antlr::ASTFactory factory;
-            parser.initializeASTFactory(factory);
-            parser.setASTFactory(&factory);
-            parser.mdfile();
+      antlr::ASTFactory factory;
+      parser.initializeASTFactory(factory);
+      parser.setASTFactory(&factory);
+      parser.mdfile();
 
-            // Create a tree parser that reads information into Globals
-            MDTreeParser treeParser;
-            treeParser.initializeASTFactory(factory);
-            treeParser.setASTFactory(&factory);
-             simParams = treeParser.walkTree(parser.getAST());
+      // Create a tree parser that reads information into Globals
+      MDTreeParser treeParser;
+      treeParser.initializeASTFactory(factory);
+      treeParser.setASTFactory(&factory);
+      simParams = treeParser.walkTree(parser.getAST());
 
-        }
+    }
 
       
-      catch(antlr::MismatchedCharException& e) {
-          sprintf(painCave.errMsg, 
-                  "parser exception: %s %s:%d:%d\n",
-                  e.getMessage().c_str(),e.getFilename().c_str(), e.getLine(), e.getColumn());
-          painCave.isFatal = 1;
-          simError();           
-      }
-      catch(antlr::MismatchedTokenException &e) {
-          sprintf(painCave.errMsg, 
-                  "parser exception: %s %s:%d:%d\n",
-                  e.getMessage().c_str(),e.getFilename().c_str(), e.getLine(), e.getColumn());
-          painCave.isFatal = 1;
-          simError();   
-      }
-      catch(antlr::NoViableAltForCharException &e) {
-          sprintf(painCave.errMsg, 
-                  "parser exception: %s %s:%d:%d\n",
-                  e.getMessage().c_str(),e.getFilename().c_str(), e.getLine(), e.getColumn());
-          painCave.isFatal = 1;
-          simError();   
-      }
-      catch(antlr::NoViableAltException &e) {
-          sprintf(painCave.errMsg, 
-                  "parser exception: %s %s:%d:%d\n",
-                  e.getMessage().c_str(),e.getFilename().c_str(), e.getLine(), e.getColumn());
-          painCave.isFatal = 1;
-          simError();   
-      }
+    catch(antlr::MismatchedCharException& e) {
+      sprintf(painCave.errMsg, 
+              "parser exception: %s %s:%d:%d\n",
+              e.getMessage().c_str(),e.getFilename().c_str(), e.getLine(), e.getColumn());
+      painCave.isFatal = 1;
+      simError();           
+    }
+    catch(antlr::MismatchedTokenException &e) {
+      sprintf(painCave.errMsg, 
+              "parser exception: %s %s:%d:%d\n",
+              e.getMessage().c_str(),e.getFilename().c_str(), e.getLine(), e.getColumn());
+      painCave.isFatal = 1;
+      simError();   
+    }
+    catch(antlr::NoViableAltForCharException &e) {
+      sprintf(painCave.errMsg, 
+              "parser exception: %s %s:%d:%d\n",
+              e.getMessage().c_str(),e.getFilename().c_str(), e.getLine(), e.getColumn());
+      painCave.isFatal = 1;
+      simError();   
+    }
+    catch(antlr::NoViableAltException &e) {
+      sprintf(painCave.errMsg, 
+              "parser exception: %s %s:%d:%d\n",
+              e.getMessage().c_str(),e.getFilename().c_str(), e.getLine(), e.getColumn());
+      painCave.isFatal = 1;
+      simError();   
+    }
       
-	catch(antlr::TokenStreamRecognitionException& e) {
-          sprintf(painCave.errMsg, 
-                  "parser exception: %s %s:%d:%d\n",
-                  e.getMessage().c_str(),e.getFilename().c_str(), e.getLine(), e.getColumn());
-          painCave.isFatal = 1;
-          simError();   
-	}
+    catch(antlr::TokenStreamRecognitionException& e) {
+      sprintf(painCave.errMsg, 
+              "parser exception: %s %s:%d:%d\n",
+              e.getMessage().c_str(),e.getFilename().c_str(), e.getLine(), e.getColumn());
+      painCave.isFatal = 1;
+      simError();   
+    }
 	
-	catch(antlr::TokenStreamIOException& e) {
-          sprintf(painCave.errMsg, 
-                  "parser exception: %s\n",
-                  e.getMessage().c_str());
-          painCave.isFatal = 1;
-          simError();
-	}
+    catch(antlr::TokenStreamIOException& e) {
+      sprintf(painCave.errMsg, 
+              "parser exception: %s\n",
+              e.getMessage().c_str());
+      painCave.isFatal = 1;
+      simError();
+    }
 	
-	catch(antlr::TokenStreamException& e) {
-          sprintf(painCave.errMsg, 
-                  "parser exception: %s\n",
-                  e.getMessage().c_str());
-          painCave.isFatal = 1;
-          simError();
-	}        
-       catch (antlr::RecognitionException& e) {
-          sprintf(painCave.errMsg, 
-                  "parser exception: %s %s:%d:%d\n",
-                  e.getMessage().c_str(),e.getFilename().c_str(), e.getLine(), e.getColumn());
-          painCave.isFatal = 1;
-          simError();          
-       }
-       catch (antlr::CharStreamException& e) {
-          sprintf(painCave.errMsg, 
-                  "parser exception: %s\n",
-                  e.getMessage().c_str());
-          painCave.isFatal = 1;
-          simError();        
-       }
-       catch (OOPSEException& e) {
-          sprintf(painCave.errMsg, 
-                  "%s\n",
-                  e.getMessage().c_str());
-          painCave.isFatal = 1;
-          simError();
-       }
-       catch (std::exception& e) {
-          sprintf(painCave.errMsg, 
-                  "parser exception: %s\n",
-                  e.what());
-          painCave.isFatal = 1;
-          simError();
-       }
+    catch(antlr::TokenStreamException& e) {
+      sprintf(painCave.errMsg, 
+              "parser exception: %s\n",
+              e.getMessage().c_str());
+      painCave.isFatal = 1;
+      simError();
+    }        
+    catch (antlr::RecognitionException& e) {
+      sprintf(painCave.errMsg, 
+              "parser exception: %s %s:%d:%d\n",
+              e.getMessage().c_str(),e.getFilename().c_str(), e.getLine(), e.getColumn());
+      painCave.isFatal = 1;
+      simError();          
+    }
+    catch (antlr::CharStreamException& e) {
+      sprintf(painCave.errMsg, 
+              "parser exception: %s\n",
+              e.getMessage().c_str());
+      painCave.isFatal = 1;
+      simError();        
+    }
+    catch (OOPSEException& e) {
+      sprintf(painCave.errMsg, 
+              "%s\n",
+              e.getMessage().c_str());
+      painCave.isFatal = 1;
+      simError();
+    }
+    catch (std::exception& e) {
+      sprintf(painCave.errMsg, 
+              "parser exception: %s\n",
+              e.what());
+      painCave.isFatal = 1;
+      simError();
+    }
 
-        return simParams;
+    return simParams;
   }
   
   SimInfo*  SimCreator::createSim(const std::string & mdFileName, 
                                   bool loadInitCoords) {
 
+    const int bufferSize = 65535;
+    char buffer[bufferSize];
+    int lineNo = 0;
+    std::string mdRawData;
+    int metaDataBlockStart = -1;
+    int metaDataBlockEnd = -1;
+    int i;
+    int mdOffset;
+
+#ifdef IS_MPI            
+    const int masterNode = 0;
+    if (worldRank == masterNode) {
+#endif 
+
+      std::ifstream mdFile_(mdFileName.c_str()); 
+      
+      if (mdFile_.fail()) { 
+        sprintf(painCave.errMsg, 
+                "SimCreator: Cannot open file: %s\n", 
+                mdFileName.c_str()); 
+        painCave.isFatal = 1; 
+        simError(); 
+      } 
+
+      mdFile_.getline(buffer, bufferSize);
+      ++lineNo;
+      std::string line = trimLeftCopy(buffer);
+      i = CaseInsensitiveFind(line, "<OOPSE");
+      if (i == string::npos) {
+        sprintf(painCave.errMsg, 
+                "SimCreator: File: %s is not an OOPSE file!\n", 
+                mdFileName.c_str()); 
+        painCave.isFatal = 1; 
+        simError(); 
+      }
+
+      //scan through the input stream and find MetaData tag        
+      while(mdFile_.getline(buffer, bufferSize)) {
+        ++lineNo;
+        
+        std::string line = trimLeftCopy(buffer);
+        if (metaDataBlockStart == -1) {
+          i = CaseInsensitiveFind(line, "<MetaData>");
+          if (i != string::npos) {
+            metaDataBlockStart = lineNo;
+            mdOffset = mdFile_.tellg();
+          }
+        } else {
+          i = CaseInsensitiveFind(line, "</MetaData>");
+          if (i != string::npos) {
+            metaDataBlockEnd = lineNo;
+          }
+        }
+      }
+
+      if (metaDataBlockStart == -1) {
+        sprintf(painCave.errMsg, 
+                "SimCreator: File: %s did not contain a <MetaData> tag!\n", 
+                mdFileName.c_str()); 
+        painCave.isFatal = 1; 
+        simError(); 
+      }
+      if (metaDataBlockEnd == -1) {
+        sprintf(painCave.errMsg, 
+                "SimCreator: File: %s did not contain a closed MetaData block!\n", 
+                mdFileName.c_str()); 
+        painCave.isFatal = 1; 
+        simError(); 
+      }
+        
+      mdFile_.clear();
+      mdFile_.seekg(0);
+      mdFile_.seekg(mdOffset);
+
+      mdRawData.clear();
+
+      for (int i = 0; i < metaDataBlockEnd - metaDataBlockStart - 1; ++i) {
+        mdFile_.getline(buffer, bufferSize);
+        mdRawData += buffer;
+        mdRawData += "\n";
+      }
+
+      mdFile_.close();
+
+#ifdef IS_MPI
+    }
+#endif
+
+    std::stringstream rawMetaDataStream(mdRawData);
+
     //parse meta-data file
-    Globals* simParams = parseFile(mdFileName);
+    Globals* simParams = parseFile(rawMetaDataStream, mdFileName, metaDataBlockStart+1);
     
     //create the force field
     ForceField * ff = ForceFieldFactory::getInstance()
@@ -278,6 +368,8 @@ Globals* SimCreator::parseFile(const std::string mdFileName){
     ff->setFortranForceOptions();
     //create SimInfo
     SimInfo * info = new SimInfo(ff, simParams);
+
+    info->setRawMetaData(mdRawData);
      
     //gather parameters (SimCreator only retrieves part of the
     //parameters)
@@ -316,7 +408,7 @@ Globals* SimCreator::parseFile(const std::string mdFileName){
     }
     
     if (loadInitCoords)
-      loadCoordinates(info);    
+      loadCoordinates(info, mdFileName);    
     
     return info;
   }
@@ -535,6 +627,7 @@ Globals* SimCreator::parseFile(const std::string mdFileName){
     Molecule::AtomIterator ai;
     Molecule::RigidBodyIterator ri;
     Molecule::CutoffGroupIterator ci;
+    Molecule::IntegrableObjectIterator  ioi;
     Molecule * mol;
     Atom * atom;
     RigidBody * rb;
@@ -543,7 +636,8 @@ Globals* SimCreator::parseFile(const std::string mdFileName){
     int beginRigidBodyIndex;
     int beginCutoffGroupIndex;
     int nGlobalAtoms = info->getNGlobalAtoms();
-    
+
+    /**@todo fixme */
 #ifndef IS_MPI
     
     beginAtomIndex = 0;
@@ -658,21 +752,55 @@ Globals* SimCreator::parseFile(const std::string mdFileName){
 #else
     info->setGlobalMolMembership(globalMolMembership);
 #endif
+
+    // nIOPerMol holds the number of integrable objects per molecule
+    // here the molecules are listed by their global indices.
+
+    std::vector<int> nIOPerMol(info->getNGlobalMolecules(), 0);
+    for (mol = info->beginMolecule(mi); mol != NULL; mol = info->nextMolecule(mi)) {
+      nIOPerMol[mol->getGlobalIndex()] = mol->getNIntegrableObjects();       
+    }
     
+#ifdef IS_MPI
+    std::vector<int> numIntegrableObjectsPerMol(info->getNGlobalMolecules(), 0);
+    MPI_Allreduce(&nIOPerMol[0], &numIntegrableObjectsPerMol[0], 
+                  info->getNGlobalMolecules(), MPI_INT, MPI_SUM, MPI_COMM_WORLD);
+#else
+    std::vector<int> numIntegrableObjectsPerMol = nIOPerMol;
+#endif    
+
+ std::vector<int> startingIOIndexForMol(info->getNGlobalMolecules());
+
+int startingIndex = 0;
+ for (int i = 0; i < info->getNGlobalMolecules(); i++) {
+  startingIOIndexForMol[i] = startingIndex;
+  startingIndex += numIntegrableObjectsPerMol[i];
+ }
+
+ std::cerr << "nGIO = " << info->getNGlobalIntegrableObjects() << "\n";
+ std::vector<StuntDouble*> IOIndexToIntegrableObject(info->getNGlobalIntegrableObjects(), (StuntDouble*)NULL);
+ for (mol = info->beginMolecule(mi); mol != NULL; mol = info->nextMolecule(mi)) {
+      int myGlobalIndex = mol->getGlobalIndex();
+      int globalIO = startingIOIndexForMol[myGlobalIndex];
+      std::cerr << "myGlobalIndex = " << myGlobalIndex << " globalIO = " << globalIO << "\n";
+      for (StuntDouble* integrableObject = mol->beginIntegrableObject(ioi); integrableObject != NULL;
+           integrableObject = mol->nextIntegrableObject(ioi)) {
+            integrableObject->setGlobalIntegrableObjectIndex(globalIO);
+            IOIndexToIntegrableObject[globalIO] = integrableObject;
+            globalIO++;
+      }
+    }
+
+  info->setIOIndexToIntegrableObject(IOIndexToIntegrableObject);
+  
   }
   
-  void SimCreator::loadCoordinates(SimInfo* info) {
+  void SimCreator::loadCoordinates(SimInfo* info, const std::string& mdFileName) {
     Globals* simParams;
     simParams = info->getSimParams();
     
-    if (!simParams->haveInitialConfig()) {
-      sprintf(painCave.errMsg,
-              "Cannot intialize a simulation without an initial configuration file.\n");
-      painCave.isFatal = 1;;
-      simError();
-    }
     
-    DumpReader reader(info, simParams->getInitialConfig());
+    DumpReader reader(info, mdFileName);
     int nframes = reader.getNFrames();
     
     if (nframes > 0) {
@@ -681,7 +809,7 @@ Globals* SimCreator::parseFile(const std::string mdFileName){
       //invalid initial coordinate file
       sprintf(painCave.errMsg, 
               "Initial configuration file %s should at least contain one frame\n",
-              simParams->getInitialConfig().c_str());
+              mdFileName.c_str());
       painCave.isFatal = 1;
       simError();
     }

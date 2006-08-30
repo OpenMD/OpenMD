@@ -1,6 +1,5 @@
 #ifndef __LJ_MD__
 #define __LJ_MD__
-
 molecule{
   name = "Ar";
   

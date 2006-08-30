@@ -128,6 +128,13 @@ namespace oopse{
       localIndex_ = index;
     }
 
+  int getGlobalIntegrableObjectIndex(){
+        return globalIntegrableObjectIndex_; 
+  }
+  void setGlobalIntegrableObjectIndex(int index) {
+     globalIntegrableObjectIndex_ = index;
+  }
+
     /**
      * Sets the Snapshot Manager of this stuntdouble
      */
@@ -932,6 +939,7 @@ namespace oopse{
 
         
     int globalIndex_;
+    int globalIntegrableObjectIndex_;
     int localIndex_;
 
 

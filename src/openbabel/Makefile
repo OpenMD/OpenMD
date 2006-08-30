@@ -36,11 +36,6 @@ Source    = obatom.cpp\
     pdbformat.cpp\
     tinkerformat.cpp\
     xyzformat.cpp\
-    amberformat.cpp\
-    fingerprintformat.cpp\
-    gromos96format.cpp\
-    povrayformat.cpp\
-    smilesformat.cpp\
     tinkerformat.cpp
 
 RmiSource =

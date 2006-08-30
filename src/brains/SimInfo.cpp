@@ -53,6 +53,7 @@
 #include "brains/SimInfo.hpp"
 #include "math/Vector3.hpp"
 #include "primitives/Molecule.hpp"
+#include "primitives/StuntDouble.hpp"
 #include "UseTheForce/fCutoffPolicy.h"
 #include "UseTheForce/DarkSide/fElectrostaticSummationMethod.h"
 #include "UseTheForce/DarkSide/fElectrostaticScreeningMethod.h"
@@ -1436,6 +1437,24 @@ namespace oopse {
       return angularMomentum;
    }
    
-   
+  StuntDouble* SimInfo::getIOIndexToIntegrableObject(int index) {
+    return IOIndexToIntegrableObject.at(index);
+  }
+  
+  void SimInfo::setIOIndexToIntegrableObject(const std::vector<StuntDouble*>& v) {
+    IOIndexToIntegrableObject= v;
+  }
+
+/*
+   void SimInfo::setStuntDoubleFromGlobalIndex(std::vector<StuntDouble*> v) {
+      assert( v.size() == nAtoms_ + nRigidBodies_);
+      sdByGlobalIndex_ = v;
+    }
+
+    StuntDouble* SimInfo::getStuntDoubleFromGlobalIndex(int index) {
+      //assert(index < nAtoms_ + nRigidBodies_);
+      return sdByGlobalIndex_.at(index);
+    }   
+*/   
 }//end namespace oopse
 

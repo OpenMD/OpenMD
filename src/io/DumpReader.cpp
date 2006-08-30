@@ -129,83 +129,83 @@ namespace oopse {
   } 
    
   void DumpReader::scanFile(void) { 
-    int i, j; 
-    int lineNum = 0; 
-    char readBuffer[maxBufferSize]; 
+    int lineNo = 0; 
+    std::streampos prevPos;
     std::streampos  currPos; 
-     
+    
 #ifdef IS_MPI 
-     
+    
     if (worldRank == 0) { 
 #endif // is_mpi 
-       
-      inFile_->seekg (0, std::ios::beg); 
-       
- 
-      currPos = inFile_->tellg(); 
-      inFile_->getline(readBuffer, sizeof(readBuffer)); 
-      lineNum++; 
-       
-      if (inFile_->eof()) { 
-        sprintf(painCave.errMsg, 
-                "DumpReader Error: File \"%s\" ended unexpectedly at line %d\n", 
-                filename_.c_str(), 
-                lineNum); 
-        painCave.isFatal = 1; 
-        simError(); 
-      } 
-       
-      while (!inFile_->eof()) { 
-        framePos_.push_back(currPos); 
-         
-        i = atoi(readBuffer); 
-         
-        inFile_->getline(readBuffer, sizeof(readBuffer)); 
-        lineNum++; 
-         
-        if (inFile_->eof()) { 
-          sprintf(painCave.errMsg, 
-                  "DumpReader Error: File \"%s\" ended unexpectedly at line %d\n", 
-                  filename_.c_str(), 
-                  lineNum); 
-          painCave.isFatal = 1; 
-          simError(); 
-        } 
-         
-        for(j = 0; j < i; j++) { 
-          inFile_->getline(readBuffer, sizeof(readBuffer)); 
-          lineNum++; 
-           
-          if (inFile_->eof()) { 
+      
+      currPos = inFile_->tellg();
+      prevPos = currPos;
+      bool foundOpenSnapshotTag = false;
+      bool foundClosedSnapshotTag = false;
+      while(inFile_->getline(buffer, bufferSize)) {
+        ++lineNo;
+        
+        std::string line = buffer;
+        currPos = inFile_->tellg(); 
+        if (line.find("<Snapshot>")!= std::string::npos) {
+          if (foundOpenSnapshotTag) {
             sprintf(painCave.errMsg, 
-                    "DumpReader Error: File \"%s\" ended unexpectedly at line %d," 
-                    " with atom %d\n", filename_.c_str(), 
-                    lineNum, 
-                    j); 
-             
+                    "DumpReader:<Snapshot> is multiply nested at line %d in %s \n", lineNo, 
+                    filename_.c_str()); 
+            painCave.isFatal = 1; 
+            simError();           
+          }
+          foundOpenSnapshotTag = true;
+          foundClosedSnapshotTag = false;
+          framePos_.push_back(prevPos);
+          
+        } else if (line.find("</Snapshot>") != std::string::npos){
+          if (!foundOpenSnapshotTag) {
+            sprintf(painCave.errMsg, 
+                    "DumpReader:</Snapshot> appears before <Snapshot> at line %d in %s \n", lineNo, 
+                    filename_.c_str()); 
             painCave.isFatal = 1; 
             simError(); 
-          } 
-        } 
-         
-        currPos = inFile_->tellg(); 
-        inFile_->getline(readBuffer, sizeof(readBuffer)); 
-        lineNum++; 
-      } 
- 
-      inFile_->seekg (0, std::ios::beg); 
-       
+          }
+          
+          if (foundClosedSnapshotTag) {
+            sprintf(painCave.errMsg, 
+                    "DumpReader:</Snapshot> appears multiply nested at line %d in %s \n", lineNo, 
+                    filename_.c_str()); 
+            painCave.isFatal = 1; 
+            simError(); 
+          }
+          foundClosedSnapshotTag = true;
+          foundOpenSnapshotTag = false;
+        }
+        prevPos = currPos;
+      }
+      
+      // only found <Snapshot> for the last frame means the file is corrupted, we should discard
+      // it and give a warning message
+      if (foundOpenSnapshotTag) {
+        sprintf(painCave.errMsg, 
+                "DumpReader: last frame in %s is invalid\n", filename_.c_str()); 
+        painCave.isFatal = 0; 
+        simError();       
+        framePos_.pop_back();
+      }
+      
       nframes_ = framePos_.size(); 
+      
+      if (nframes_ == 0) {
+        sprintf(painCave.errMsg, 
+                "DumpReader: %s does not contain a valid frame\n", filename_.c_str()); 
+        painCave.isFatal = 1; 
+        simError();      
+      }
 #ifdef IS_MPI 
     } 
      
     MPI_Bcast(&nframes_, 1, MPI_INT, 0, MPI_COMM_WORLD); 
-     
-    strcpy(checkPointMsg, "Successfully scanned DumpFile\n"); 
-    MPIcheckPoint(); 
-     
+    
 #endif // is_mpi 
-     
+    
     isScanned_ = true; 
   } 
    
@@ -242,391 +242,291 @@ namespace oopse {
     readSet(whichFrame); 
   } 
    
-  void DumpReader::readSet(int whichFrame) { 
-    int i; 
-    int nTotObjs;                  // the number of atoms 
-    char read_buffer[maxBufferSize];  //the line buffer for reading 
-    char * eof_test;               // ptr to see when we reach the end of the file 
-     
-    Molecule* mol; 
-    StuntDouble* integrableObject; 
-    SimInfo::MoleculeIterator mi; 
-    Molecule::IntegrableObjectIterator ii; 
-     
+  void DumpReader::readSet(int whichFrame) {     
+    std::string line;
+
 #ifndef IS_MPI 
+
     inFile_->clear();  
     inFile_->seekg(framePos_[whichFrame]); 
-         
-    if (!inFile_->getline(read_buffer, sizeof(read_buffer))) { 
-      sprintf(painCave.errMsg, 
-              "DumpReader error: error reading 1st line of \"%s\"\n", 
-              filename_.c_str()); 
-      painCave.isFatal = 1; 
-      simError(); 
-    } 
-     
-    nTotObjs = atoi(read_buffer); 
-     
-    if (nTotObjs != info_->getNGlobalIntegrableObjects()) { 
-      sprintf(painCave.errMsg, 
-              "DumpReader error. %s nIntegrable, %d, " 
-              "does not match the meta-data file's nIntegrable, %d.\n", 
-              filename_.c_str(), 
-              nTotObjs, 
-              info_->getNGlobalIntegrableObjects()); 
-       
-      painCave.isFatal = 1; 
-      simError(); 
-    } 
-     
-    //read the box mat from the comment line 
-     
-     
-    if (!inFile_->getline(read_buffer, sizeof(read_buffer))) { 
-      sprintf(painCave.errMsg, "DumpReader Error: error in reading commment in %s\n", 
-              filename_.c_str()); 
-      painCave.isFatal = 1; 
-      simError(); 
-    } 
-     
-    parseCommentLine(read_buffer, info_->getSnapshotManager()->getCurrentSnapshot()); 
-     
-    //parse dump lines 
-     
-    i = 0; 
-    for (mol = info_->beginMolecule(mi); mol != NULL; mol = info_->nextMolecule(mi)) { 
-       
-      for (integrableObject = mol->beginIntegrableObject(ii); integrableObject != NULL;  
-           integrableObject = mol->nextIntegrableObject(ii)) {            
-         
-         
-         
-        if (!inFile_->getline(read_buffer, sizeof(read_buffer))) { 
-          sprintf(painCave.errMsg, 
-                  "DumpReader Error: error in reading file %s\n" 
-                  "natoms  = %d; index = %d\n" 
-                  "error reading the line from the file.\n", 
-                  filename_.c_str(), 
-                  nTotObjs, 
-                  i); 
-           
-          painCave.isFatal = 1; 
-          simError(); 
-        } 
-         
-        parseDumpLine(read_buffer, integrableObject); 
-        i++; 
-      } 
-    } 
-     
-    // MPI Section of code.......... 
-     
-#else //IS_MPI 
-     
-    // first thing first, suspend fatalities. 
-    int masterNode = 0; 
-    int nCurObj; 
-    painCave.isEventLoop = 1; 
-     
-    int myStatus; // 1 = wakeup & success; 0 = error; -1 = AllDone 
-    int haveError; 
-     
-    MPI_Status istatus; 
-    int nitems; 
-     
-    nTotObjs = info_->getNGlobalIntegrableObjects(); 
-    haveError = 0; 
-     
-    if (worldRank == masterNode) { 
-      inFile_->clear();             
+
+    std::istream& inputStream = *inFile_;     
+
+#else 
+    int masterNode = 0;
+    std::stringstream sstream;
+    if (worldRank == masterNode) {
+      std::string sendBuffer;
+
+      inFile_->clear();  
       inFile_->seekg(framePos_[whichFrame]); 
-       
-      if (!inFile_->getline(read_buffer, sizeof(read_buffer))) { 
-        sprintf(painCave.errMsg, "DumpReader Error: Error reading 1st line of %s \n ", 
-                filename_.c_str()); 
-        painCave.isFatal = 1; 
-        simError(); 
-      } 
-       
-      nitems = atoi(read_buffer); 
-       
-      // Check to see that the number of integrable objects in the 
-      // intial configuration file is the same as derived from the 
-      // meta-data file. 
-       
-      if (nTotObjs != nitems) { 
-        sprintf(painCave.errMsg, 
-                "DumpReader Error. %s nIntegrable, %d, " 
-                "does not match the meta-data file's nIntegrable, %d.\n", 
-                filename_.c_str(), 
-                nTotObjs, 
-                info_->getNGlobalIntegrableObjects()); 
-         
-        painCave.isFatal = 1; 
-        simError(); 
-      } 
-       
-      //read the boxMat from the comment line 
-       
-       
-       
-      if (!inFile_->getline(read_buffer, sizeof(read_buffer))) { 
-        sprintf(painCave.errMsg, "DumpReader Error: error in reading commment in %s\n", 
-                filename_.c_str()); 
-        painCave.isFatal = 1; 
-        simError(); 
-      } 
-       
-      //Every single processor will parse the comment line by itself 
-      //By using this way, we might lose some efficiency, but if we want to add 
-      //more parameters into comment line, we only need to modify function 
-      //parseCommentLine 
-       
-      MPI_Bcast(read_buffer, maxBufferSize, MPI_CHAR, masterNode, MPI_COMM_WORLD); 
-      parseCommentLine(read_buffer, info_->getSnapshotManager()->getCurrentSnapshot()); 
-       
-      for(i = 0; i < info_->getNGlobalMolecules(); i++) { 
-        int which_node = info_->getMolToProc(i); 
-         
-        if (which_node == masterNode) { 
-          //molecules belong to master node 
-           
-          mol = info_->getMoleculeByGlobalIndex(i); 
-           
-          if (mol == NULL) { 
-            sprintf(painCave.errMsg, "DumpReader Error: Molecule not found on node %d!", worldRank); 
-            painCave.isFatal = 1; 
-            simError(); 
-          } 
-           
-          for (integrableObject = mol->beginIntegrableObject(ii); integrableObject != NULL;  
-               integrableObject = mol->nextIntegrableObject(ii)){ 
-             
-             
-             
-            if (!inFile_->getline(read_buffer, sizeof(read_buffer))) { 
-              sprintf(painCave.errMsg, 
-                      "DumpReader Error: error in reading file %s\n" 
-                      "natoms  = %d; index = %d\n" 
-                      "error reading the line from the file.\n", 
-                      filename_.c_str(), 
-                      nTotObjs, 
-                      i); 
-               
-              painCave.isFatal = 1; 
-              simError(); 
-            } 
-             
-            parseDumpLine(read_buffer, integrableObject); 
-          } 
-        } else { 
-          //molecule belongs to slave nodes 
-           
-          MPI_Recv(&nCurObj, 1, MPI_INT, which_node, TAKE_THIS_TAG_INT, 
-                   MPI_COMM_WORLD, &istatus); 
-           
-          for(int j = 0; j < nCurObj; j++) { 
-             
-             
-            if (!inFile_->getline(read_buffer, sizeof(read_buffer))) { 
-              sprintf(painCave.errMsg, 
-                      "DumpReader Error: error in reading file %s\n" 
-                      "natoms  = %d; index = %d\n" 
-                      "error reading the line from the file.\n", 
-                      filename_.c_str(), 
-                      nTotObjs, 
-                      i); 
-               
-              painCave.isFatal = 1; 
-              simError(); 
-            } 
-             
-            MPI_Send(read_buffer, maxBufferSize, MPI_CHAR, which_node, 
-                     TAKE_THIS_TAG_CHAR, MPI_COMM_WORLD); 
-          } 
-        } 
-      } 
-    } else { 
-      //actions taken at slave nodes 
-      MPI_Bcast(read_buffer, maxBufferSize, MPI_CHAR, masterNode, MPI_COMM_WORLD); 
-       
-      /**@todo*/ 
-      parseCommentLine(read_buffer, info_->getSnapshotManager()->getCurrentSnapshot()); 
-       
-      for(i = 0; i < info_->getNGlobalMolecules(); i++) { 
-        int which_node = info_->getMolToProc(i); 
-         
-        if (which_node == worldRank) { 
-          //molecule with global index i belongs to this processor 
-           
-          mol = info_->getMoleculeByGlobalIndex(i); 
-          if (mol == NULL) { 
-            sprintf(painCave.errMsg, "DumpReader Error: Molecule not found on node %d!", worldRank); 
-            painCave.isFatal = 1; 
-            simError(); 
-          } 
-           
-          nCurObj = mol->getNIntegrableObjects(); 
-           
-          MPI_Send(&nCurObj, 1, MPI_INT, masterNode, TAKE_THIS_TAG_INT, 
-                   MPI_COMM_WORLD); 
-           
-          for (integrableObject = mol->beginIntegrableObject(ii); integrableObject != NULL;  
-               integrableObject = mol->nextIntegrableObject(ii)){ 
-             
-            MPI_Recv(read_buffer, maxBufferSize, MPI_CHAR, masterNode, 
-                     TAKE_THIS_TAG_CHAR, MPI_COMM_WORLD, &istatus); 
-             
-            parseDumpLine(read_buffer, integrableObject); 
-          } 
-           
-        } 
-         
-      } 
-       
-    } 
-     
-#endif 
-     
-  } 
-   
-  void DumpReader::parseDumpLine(char *line, StuntDouble *integrableObject) { 
-     
-    Vector3d pos;  // position place holders 
-    Vector3d vel;  // velocity placeholders 
-    Quat4d q;    // the quaternions 
-    Vector3d ji;   // angular velocity placeholders; 
-    StringTokenizer tokenizer(line); 
-    int nTokens; 
-     
-    nTokens = tokenizer.countTokens(); 
-     
-    if (nTokens < 14) { 
+      
+      while (inFile_->getline(buffer, bufferSize)) {
+
+        line = buffer;
+        sendBuffer += line;
+        sendBuffer += '\n';
+        if (line.find("</Snapshot>") != std::string::npos) {
+          break;
+        }        
+      }
+
+      int sendBufferSize = sendBuffer.size();
+      MPI_Bcast(&sendBufferSize, 1, MPI_INT, masterNode, MPI_COMM_WORLD);     
+      MPI_Bcast((void *)sendBuffer.c_str(), sendBufferSize, MPI_CHAR, masterNode, MPI_COMM_WORLD);     
+      
+      sstream.str(sendBuffer);
+      std::cerr << sendBuffer;
+    } else {
+      int sendBufferSize;
+      MPI_Bcast(&sendBufferSize, 1, MPI_INT, masterNode, MPI_COMM_WORLD);     
+      char * recvBuffer = new char[sendBufferSize+1];
+      MPI_Bcast(recvBuffer, sendBufferSize, MPI_CHAR, masterNode, MPI_COMM_WORLD);     
+      sstream.str(recvBuffer);
+    }      
+
+    std::istream& inputStream = sstream;  
+#endif
+
+    inputStream.getline(buffer, bufferSize);
+
+    line = buffer;
+    if (line.find("<Snapshot>") == std::string::npos) {
       sprintf(painCave.errMsg, 
-              "DumpReader Error: Not enough Tokens.\n%s\n", line); 
+              "DumpReader Error: can not find <Snapshot>\n"); 
       painCave.isFatal = 1; 
       simError(); 
     } 
-     
-    std::string name = tokenizer.nextToken(); 
-     
-    if (name != integrableObject->getType()) { 
-       
+    
+    //read frameData
+    readFrameProperties(inputStream);
+
+    //read StuntDoubles
+    readStuntDoubles(inputStream);     
+
+    inputStream.getline(buffer, bufferSize);
+    line = buffer;
+    if (line.find("</Snapshot>") == std::string::npos) {
       sprintf(painCave.errMsg, 
-              "DumpReader Error: Atom type [%s] in %s does not match Atom Type [%s] in .md file.\n", 
-              name.c_str(), filename_.c_str(), integrableObject->getType().c_str()); 
+              "DumpReader Error: can not find </Snapshot>\n"); 
       painCave.isFatal = 1; 
-      simError();         
-    } 
-     
-    pos[0] = tokenizer.nextTokenAsDouble(); 
-    pos[1] = tokenizer.nextTokenAsDouble(); 
-    pos[2] = tokenizer.nextTokenAsDouble(); 
-    if (needPos_) { 
-      integrableObject->setPos(pos); 
-    } 
-     
-    vel[0] = tokenizer.nextTokenAsDouble(); 
-    vel[1] = tokenizer.nextTokenAsDouble(); 
-    vel[2] = tokenizer.nextTokenAsDouble(); 
-    if (needVel_) { 
-      integrableObject->setVel(vel); 
-    } 
-     
-    if (integrableObject->isDirectional()) { 
-       
-      q[0] = tokenizer.nextTokenAsDouble(); 
-      q[1] = tokenizer.nextTokenAsDouble(); 
-      q[2] = tokenizer.nextTokenAsDouble(); 
-      q[3] = tokenizer.nextTokenAsDouble(); 
-       
-      RealType qlen = q.length(); 
-      if (qlen < oopse::epsilon) { //check quaternion is not equal to 0 
-         
-        sprintf(painCave.errMsg, 
-                "DumpReader Error: initial quaternion error (q0^2 + q1^2 + q2^2 + q3^2) ~ 0\n"); 
-        painCave.isFatal = 1; 
-        simError(); 
-         
-      }  
-       
-      q.normalize(); 
-      if (needQuaternion_) {            
-        integrableObject->setQ(q); 
-      } 
-       
-      ji[0] = tokenizer.nextTokenAsDouble(); 
-      ji[1] = tokenizer.nextTokenAsDouble(); 
-      ji[2] = tokenizer.nextTokenAsDouble(); 
-      if (needAngMom_) { 
-        integrableObject->setJ(ji); 
-      } 
-    } 
-     
+      simError(); 
+    }        
+   
   } 
    
-   
-  void DumpReader::parseCommentLine(char* line, Snapshot* s) { 
-    RealType currTime; 
-    Mat3x3d hmat; 
-    RealType chi; 
-    RealType integralOfChiDt; 
-    Mat3x3d eta; 
-     
+  void DumpReader::parseDumpLine(const std::string& line) { 
+
+       
     StringTokenizer tokenizer(line); 
     int nTokens; 
      
     nTokens = tokenizer.countTokens(); 
      
-    //comment line should at least contain 10 tokens: current time(1 token) and  h-matrix(9 tokens) 
-    if (nTokens < 10) { 
+    if (nTokens < 2) { 
       sprintf(painCave.errMsg, 
-              "DumpReader Error: Not enough tokens in comment line: %s", line); 
+              "DumpReader Error: Not enough Tokens.\n%s\n", line.c_str()); 
       painCave.isFatal = 1; 
-      simError();    
+      simError(); 
     } 
-     
-    //read current time 
-    currTime = tokenizer.nextTokenAsDouble(); 
-    s->setTime(currTime); 
-     
-    //read h-matrix 
-    hmat(0, 0) = tokenizer.nextTokenAsDouble(); 
-    hmat(0, 1) = tokenizer.nextTokenAsDouble(); 
-    hmat(0, 2) = tokenizer.nextTokenAsDouble(); 
-    hmat(1, 0) = tokenizer.nextTokenAsDouble(); 
-    hmat(1, 1) = tokenizer.nextTokenAsDouble(); 
-    hmat(1, 2) = tokenizer.nextTokenAsDouble(); 
-    hmat(2, 0) = tokenizer.nextTokenAsDouble(); 
-    hmat(2, 1) = tokenizer.nextTokenAsDouble(); 
-    hmat(2, 2) = tokenizer.nextTokenAsDouble(); 
-    s->setHmat(hmat); 
-     
-    //read chi and integralOfChidt, they should apprear in pair 
-    if (tokenizer.countTokens() >= 2) { 
-      chi = tokenizer.nextTokenAsDouble(); 
-      integralOfChiDt = tokenizer.nextTokenAsDouble();             
-       
-      s->setChi(chi); 
-      s->setIntegralOfChiDt(integralOfChiDt); 
-    } 
-     
-    //read eta (eta is 3x3 matrix) 
-    if (tokenizer.countTokens() >= 9) { 
-      eta(0, 0) = tokenizer.nextTokenAsDouble(); 
-      eta(0, 1) = tokenizer.nextTokenAsDouble(); 
-      eta(0, 2) = tokenizer.nextTokenAsDouble(); 
-      eta(1, 0) = tokenizer.nextTokenAsDouble(); 
-      eta(1, 1) = tokenizer.nextTokenAsDouble(); 
-      eta(1, 2) = tokenizer.nextTokenAsDouble(); 
-      eta(2, 0) = tokenizer.nextTokenAsDouble(); 
-      eta(2, 1) = tokenizer.nextTokenAsDouble(); 
-      eta(2, 2) = tokenizer.nextTokenAsDouble();       
-       
-      s->setEta(eta); 
-    } 
-     
+
+    int index = tokenizer.nextTokenAsInt();
+ 
+    StuntDouble* integrableObject = info_->getIOIndexToIntegrableObject(index);
+
+    if (integrableObject == NULL) {
+      return;
+    }
+    std::string type = tokenizer.nextToken(); 
+    int size = type.size();
+    for(int i = 0; i < size; ++i) {
+      switch(type[i]) {
+        
+        case 'p': {
+            Vector3d pos;
+            pos[0] = tokenizer.nextTokenAsDouble(); 
+            pos[1] = tokenizer.nextTokenAsDouble(); 
+            pos[2] = tokenizer.nextTokenAsDouble(); 
+            if (needPos_) { 
+              integrableObject->setPos(pos); 
+            }             
+            break;
+        }
+        case 'v' : {
+            Vector3d vel;
+            vel[0] = tokenizer.nextTokenAsDouble(); 
+            vel[1] = tokenizer.nextTokenAsDouble(); 
+            vel[2] = tokenizer.nextTokenAsDouble(); 
+            if (needVel_) { 
+              integrableObject->setVel(vel); 
+            } 
+            break;
+        }
+
+        case 'q' : {
+           Quat4d q;
+           if (integrableObject->isDirectional()) { 
+              
+             q[0] = tokenizer.nextTokenAsDouble(); 
+             q[1] = tokenizer.nextTokenAsDouble(); 
+             q[2] = tokenizer.nextTokenAsDouble(); 
+             q[3] = tokenizer.nextTokenAsDouble(); 
+              
+             RealType qlen = q.length(); 
+             if (qlen < oopse::epsilon) { //check quaternion is not equal to 0 
+                
+               sprintf(painCave.errMsg, 
+                       "DumpReader Error: initial quaternion error (q0^2 + q1^2 + q2^2 + q3^2) ~ 0\n"); 
+               painCave.isFatal = 1; 
+               simError(); 
+                
+             }  
+              
+             q.normalize(); 
+             if (needQuaternion_) {            
+               integrableObject->setQ(q); 
+             }               
+           }            
+           break;
+        }  
+        case 'j' : {
+          Vector3d ji;
+          if (integrableObject->isDirectional()) {
+             ji[0] = tokenizer.nextTokenAsDouble(); 
+             ji[1] = tokenizer.nextTokenAsDouble(); 
+             ji[2] = tokenizer.nextTokenAsDouble(); 
+             if (needAngMom_) { 
+               integrableObject->setJ(ji); 
+             } 
+          }
+        }  
+        case 'f': {
+
+          Vector3d force;
+          force[0] = tokenizer.nextTokenAsDouble(); 
+          force[1] = tokenizer.nextTokenAsDouble(); 
+          force[2] = tokenizer.nextTokenAsDouble();           
+          integrableObject->setFrc(force); 
+          break;
+        }
+        case 't' : {
+
+           Vector3d torque;
+           torque[0] = tokenizer.nextTokenAsDouble(); 
+           torque[1] = tokenizer.nextTokenAsDouble(); 
+           torque[2] = tokenizer.nextTokenAsDouble();           
+           integrableObject->setTrq(torque);          
+           break;
+        }
+        default: {
+               sprintf(painCave.errMsg, 
+                       "DumpReader Error: %s is an unrecognized type\n", type.c_str()); 
+               painCave.isFatal = 1; 
+               simError(); 
+          break;   
+        }
+
+      }
+    }
      
   } 
+   
+
+  void  DumpReader::readStuntDoubles(std::istream& inputStream) {
+
+    inputStream.getline(buffer, bufferSize);
+    std::string line(buffer);
+    
+    if (line.find("<StuntDoubles>") == std::string::npos) {
+      sprintf(painCave.errMsg, 
+              "DumpReader Error: Missing <StuntDoubles>\n"); 
+      painCave.isFatal = 1; 
+      simError(); 
+    }
+
+    while(inputStream.getline(buffer, bufferSize)) {
+      line = buffer;
+      
+      if(line.find("</StuntDoubles>") != std::string::npos) {
+        break;
+      }
+
+      parseDumpLine(line);
+    }
+  
+  }
+
+  void DumpReader::readFrameProperties(std::istream& inputStream) {
+
+    Snapshot* s = info_->getSnapshotManager()->getCurrentSnapshot();
+    inputStream.getline(buffer, bufferSize);
+    std::string line(buffer);
+
+    if (line.find("<FrameData>") == std::string::npos) {
+      sprintf(painCave.errMsg, 
+              "DumpReader Error: Missing <FrameData>\n"); 
+      painCave.isFatal = 1; 
+      simError(); 
+    }
+
+    while(inputStream.getline(buffer, bufferSize)) {
+      line = buffer;
+      
+      if(line.find("</FrameData>") != std::string::npos) {
+        break;
+      }
+      
+      StringTokenizer tokenizer(line, " ;\t\n\r{}:,");
+      if (!tokenizer.hasMoreTokens()) {
+        sprintf(painCave.errMsg, 
+                "DumpReader Error: Not enough Tokens.\n%s\n", line.c_str()); 
+        painCave.isFatal = 1; 
+        simError();      
+      }
+
+      std::string propertyName = tokenizer.nextToken();
+      if (propertyName == "Time") {
+        RealType currTime = tokenizer.nextTokenAsDouble(); 
+        s->setTime(currTime); 
+      } else if (propertyName == "Hmat"){
+        Mat3x3d hmat;
+        hmat(0, 0) = tokenizer.nextTokenAsDouble(); 
+        hmat(0, 1) = tokenizer.nextTokenAsDouble(); 
+        hmat(0, 2) = tokenizer.nextTokenAsDouble(); 
+        hmat(1, 0) = tokenizer.nextTokenAsDouble(); 
+        hmat(1, 1) = tokenizer.nextTokenAsDouble(); 
+        hmat(1, 2) = tokenizer.nextTokenAsDouble(); 
+        hmat(2, 0) = tokenizer.nextTokenAsDouble(); 
+        hmat(2, 1) = tokenizer.nextTokenAsDouble(); 
+        hmat(2, 2) = tokenizer.nextTokenAsDouble(); 
+        s->setHmat(hmat);      
+      } else if (propertyName == "Thermostat") {
+        RealType chi = tokenizer.nextTokenAsDouble();
+        RealType integralOfChiDt = tokenizer.nextTokenAsDouble();
+        s->setChi(chi); 
+        s->setIntegralOfChiDt(integralOfChiDt);        
+     } else if (propertyName == "Barostat") {
+        Mat3x3d eta;
+        eta(0, 0) = tokenizer.nextTokenAsDouble(); 
+        eta(0, 1) = tokenizer.nextTokenAsDouble(); 
+        eta(0, 2) = tokenizer.nextTokenAsDouble(); 
+        eta(1, 0) = tokenizer.nextTokenAsDouble(); 
+        eta(1, 1) = tokenizer.nextTokenAsDouble(); 
+        eta(1, 2) = tokenizer.nextTokenAsDouble(); 
+        eta(2, 0) = tokenizer.nextTokenAsDouble(); 
+        eta(2, 1) = tokenizer.nextTokenAsDouble(); 
+        eta(2, 2) = tokenizer.nextTokenAsDouble(); 
+        s->setEta(eta); 
+      } else {
+        sprintf(painCave.errMsg, 
+                "DumpReader Error: %s is an invalid property in <FrameData>\n", propertyName.c_str()); 
+        painCave.isFatal = 0; 
+        simError();         
+      }
+      
+    }
+
+  }
+
    
 }//end namespace oopse 

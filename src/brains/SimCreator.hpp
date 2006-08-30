@@ -50,7 +50,7 @@
 #ifndef BRAINS_SIMCREATOR_HPP
 #define BRAINS_SIMCREATOR_HPP
 
-
+#include <iostream>
 #include "primitives/Molecule.hpp"
 #include "brains/SimInfo.hpp"
 #include "io/Globals.hpp"
@@ -82,7 +82,7 @@ namespace oopse {
      * @param mdfile
      * @return simParams
      */
-    Globals*  parseFile(const std::string mdFileName);
+    Globals*  parseFile(std::istream& rawMetaData, const std::string& mdFileName, int metaDataStartingLine);
 
 
     /** create the molecules belong to current processor*/
@@ -105,7 +105,7 @@ namespace oopse {
     void divideMolecules(SimInfo* info);
 
     /** Load initial coordinates */
-    void loadCoordinates(SimInfo* info);     
+    void loadCoordinates(SimInfo* info, const std::string& mdFileName);     
 
     std::string mdFileName_;  //save the meta-data file name which may be used later
   };

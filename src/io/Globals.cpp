@@ -57,7 +57,7 @@ Globals::Globals() {
   DefineOptionalParameter(Ensemble, "ensemble");
   DefineOptionalParameter(Dt, "dt");
   DefineOptionalParameter(RunTime, "runTime");
-  DefineOptionalParameter(InitialConfig, "initialConfig");
+  //DefineOptionalParameter(InitialConfig, "initialConfig");
   DefineOptionalParameter(FinalConfig, "finalConfig");
   DefineOptionalParameter(SampleTime, "sampleTime");
   DefineOptionalParameter(ResetTime, "resetTime");
@@ -124,6 +124,7 @@ Globals::Globals() {
 
     deprecatedKeywords_.insert("nComponents");
     deprecatedKeywords_.insert("nZconstraints");
+    deprecatedKeywords_.insert("initialConfig");
     
 }
 
@@ -140,7 +141,7 @@ void Globals::validate() {
   CheckParameter(Ensemble, isEqualIgnoreCase("NVE") || isEqualIgnoreCase("NVT") || isEqualIgnoreCase("NPTi") || isEqualIgnoreCase("NPTf") || isEqualIgnoreCase("NPTxyz") || isEqualIgnoreCase("NPAT")  || isEqualIgnoreCase("LANGEVINDYNAMICS") || isEqualIgnoreCase("LD") || isEqualIgnoreCase("NPRT") || isEqualIgnoreCase("NPGT"));
   CheckParameter(Dt, isPositive());
   CheckParameter(RunTime, isPositive());
-  CheckParameter(InitialConfig, isNotEmpty());
+  //CheckParameter(InitialConfig, isNotEmpty());
   CheckParameter(FinalConfig, isNotEmpty());
   CheckParameter(SampleTime, isNonNegative());
   CheckParameter(ResetTime, isNonNegative());

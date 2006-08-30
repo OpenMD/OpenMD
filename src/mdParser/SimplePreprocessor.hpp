@@ -60,33 +60,35 @@
 namespace oopse { 
 class SimplePreprocessor {
     public:
-        bool preprocess(const std::string& filename, ostream& os) {
+        bool preprocess(std::istream& myStream, const std::string& filename, int startingLine, ostream& os) {
             std::set<std::string> defineSet;
             std::stack<bool> ifStates;
 
             ifStates.push(true);
-            return doPreprocess(filename, os, defineSet, ifStates);
+            return doPreprocess(myStream, filename, startingLine, os, defineSet, ifStates);
         }
         
     private:
-        bool doPreprocess(const std::string& filename, ostream& os, std::set<std::string>& defineSet, std::stack<bool>& ifStates) {
-            std::ifstream input(filename.c_str());
-            if (!input.is_open()) {
-                std::stringstream ss;
-                ss << "Can not open " << filename << " for preprocessing\n";
-                
-                sprintf(painCave.errMsg,
-                        "Can not open (%s) for processing. \n"
-                        "\tPlease check md file name syntax.\n", filename.c_str());
-                
-                painCave.isFatal = 1;
-                simError();
-                
-                throw OOPSEException(ss.str());                
-            }
-            int lineNo =1;
+        bool doPreprocess(std::istream& myStream, const std::string& filename, int startingLine, ostream& os, std::set<std::string>& defineSet, std::stack<bool>& ifStates) {
+            //std::ifstream input(filename.c_str());
+            //if (!input.is_open()) {
+            //    std::stringstream ss;
+            //    ss << "Can not open " << filename << " for preprocessing\n";
+            //    
+            //    sprintf(painCave.errMsg,
+            //            "Can not open (%s) for processing. \n"
+            //            "\tPlease check md file name syntax.\n", filename.c_str());
+            //    
+            //    painCave.isFatal = 1;
+            //    simError();
+            //    
+            //    throw OOPSEException(ss.str());                
+            //}
+            int lineNo = startingLine;
             os << "#line " << lineNo << " \"" << filename << "\"\n";
-            while(input.getline(buffer, bufferSize)) {
+            const int bufferSize = 1024;
+            char buffer[bufferSize];
+            while(myStream.getline(buffer, bufferSize)) {
               ++lineNo;
               std::string line = trimLeftCopy(buffer);
               if (!line.empty() && line[0] == '#') {
@@ -108,7 +110,14 @@ class SimplePreprocessor {
                             SimplePreprocessor subPreprocessor;
                             std::string includeFilename = tokens[1];
                             includeFilename = includeFilename.substr(1, includeFilename.length() -2);
-                            bool ret = subPreprocessor.doPreprocess(includeFilename, os, defineSet, ifStates);
+                            std::ifstream includeStream(includeFilename.c_str());
+                            if (!includeStream.is_open()) {
+                                std::stringstream ss;
+                                ss << "Can not open " << filename << " for preprocessing\n";
+                                throw OOPSEException(ss.str()); 
+                            }
+                            
+                            bool ret = subPreprocessor.doPreprocess(includeStream, includeFilename, 1, os, defineSet, ifStates);
                             if (!ret) {
                                 std::cout << "Error in preprocessing\n";
                                 return false;
@@ -152,8 +161,6 @@ class SimplePreprocessor {
         }
     private:
         
-        const static int bufferSize = 1024;
-        char buffer[bufferSize];
 };
 
 }

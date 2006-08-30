@@ -38,7 +38,8 @@
  * University of Notre Dame has been advised of the possibility of
  * such damages.
  */
- 
+
+#include <algorithm> 
 #include "utils/StringUtils.hpp"
 
 namespace oopse {
@@ -231,6 +232,18 @@ bool isInteger(const std::string& str) {
     }
     
     return result;
+}
+
+bool CaseInsensitiveEquals(const char ch1, const char ch2) {
+  return std::toupper((unsigned char)ch1) == std::toupper((unsigned char)ch2);
+}
+
+size_t CaseInsensitiveFind(const std::string& str1, const std::string& str2) {
+  std::string::const_iterator pos = std::search(str1.begin(), str1.end(), str2.begin(), str2.end(), CaseInsensitiveEquals);
+  if (pos == str1.end())
+    return std::string::npos;
+  else
+    return pos - str1.begin();
 }
 
 }

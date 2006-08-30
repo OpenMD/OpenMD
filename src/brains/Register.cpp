@@ -68,13 +68,13 @@
 #include "lattice/LatticeCreator.hpp"
 #include "lattice/FCCLattice.hpp"
 
-#include "openbabel/amberformat.hpp"
-#include "openbabel/fingerprintformat.hpp"
-#include "openbabel/gromos96format.hpp"
+//#include "openbabel/amberformat.hpp"
+//#include "openbabel/fingerprintformat.hpp"
+//#include "openbabel/gromos96format.hpp"
 #include "openbabel/oopseformat.hpp"
 #include "openbabel/pdbformat.hpp"
-#include "openbabel/povrayformat.hpp"
-#include "openbabel/smilesformat.hpp"
+//#include "openbabel/povrayformat.hpp"
+//#include "openbabel/smilesformat.hpp"
 #include "openbabel/tinkerformat.hpp"
 #include "openbabel/xyzformat.hpp"
 
@@ -122,12 +122,12 @@ namespace oopse {
   }
 
   void registerOBFormats(){
-    static OpenBabel::AmberPrepFormat amberFormatInstance;
-    static OpenBabel::FingerprintFormat fingerprintFormatInstance;
+    //static OpenBabel::AmberPrepFormat amberFormatInstance;
+    //static OpenBabel::FingerprintFormat fingerprintFormatInstance;
     static OpenBabel::OOPSEFormat oopseFormatInstance;    
     static OpenBabel::PDBFormat pdbFormatInstance;
-    static OpenBabel::PovrayFormat povaryFormatInstance;
-    static OpenBabel::SMIFormat smilesFormatInstance;
+    //static OpenBabel::PovrayFormat povaryFormatInstance;
+    //static OpenBabel::SMIFormat smilesFormatInstance;
     static OpenBabel::TinkerFormat tinkerFormatInstance;
     static OpenBabel::XYZFormat xyzFormatInstance;    
   }

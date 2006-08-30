@@ -80,19 +80,12 @@ namespace oopse {
  
     void readSet(int whichFrame); 
  
-    void parseDumpLine(char *line, StuntDouble* integrableObject); 
+    void parseDumpLine(const std::string&); 
  
-    void parseCommentLine(char* line, Snapshot* s); 
- 
- 
-#ifdef IS_MPI 
- 
-    void anonymousNodeDie(void); 
-    void nodeZeroError(void); 
- 
-#endif                 
-    // the maximum length of a typical MPI package is 15k 
-    const static int maxBufferSize = 8192; 
+    void readFrameProperties(std::istream& inputStream);
+
+    void readStuntDoubles(std::istream& inputStream);
+                  
          
     SimInfo* info_; 
  
@@ -109,6 +102,9 @@ namespace oopse {
     bool needVel_; 
     bool needQuaternion_; 
     bool needAngMom_; 
+
+    const static int bufferSize = 4096;
+    char buffer[bufferSize];
   }; 
  
 }      //end namespace oopse 

@@ -102,6 +102,10 @@ namespace oopse {
    */
   int isEndLine(char *line);
 
+  bool CaseInsensitiveEquals(char ch1, char ch2);
+
+  size_t CaseInsensitiveFind(const std::string& str1, const std::string& str2);
+
 
   /**
    * Convert a variable to a string

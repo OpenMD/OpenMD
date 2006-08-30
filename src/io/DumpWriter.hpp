@@ -82,8 +82,10 @@ namespace oopse {
   private:  
         
     void writeFrame(std::ostream& os);
-    void writeCommentLine(std::ostream& os, Snapshot* s);
+    void writeFrameProperties(std::ostream& os, Snapshot* s);
+    std::string prepareDumpLine(StuntDouble* integrableObject);
     std::ostream* createOStream(const std::string& filename);
+    void writeClosing(std::ostream& os);
     
     SimInfo* info_;
     std::string filename_;

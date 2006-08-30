@@ -179,8 +179,8 @@ struct SameAngle
   }
   
   void OOPSEFormat::WriteMDFile(vector<OBMol*> mols, vector<int> numMols, ostream& os, OBMol& mol, vector<int>& indices) {
-    std::string indentLevel1("\t");
-    std::string indentLevel2("\t\t");
+    std::string indentLevel1("  ");
+    std::string indentLevel2("    ");
     std::string molPrefix("MolName");
     unsigned int i;
     const int BUFFLEN = 1024;
@@ -188,7 +188,7 @@ struct SameAngle
     
     
     os << "<OOPSE version=4>" << endl;
-    os << "  <MetaData>" << endl;
+    os << "  <MetaData>" << endl << endl;
     
     for(i = 0; i < mols.size(); ++i) {
       OBMol* pmol = mols[i];
@@ -256,14 +256,14 @@ struct SameAngle
     }
     
     os << endl;
-    os << "nComponents = " << mols.size() << ";" << endl;
+
     
     for(i=0; i < mols.size(); ++i) {      
       os << "component{" << endl;
       sprintf(buffer, "%d", i);
-      os << "type = " << molPrefix << buffer << ";\n";
-      os << "nMol = " << numMols[i]<< ";\n";
-      os << "}\n";
+      os << indentLevel1 << "type = " << molPrefix << buffer << ";" << endl;
+      os << indentLevel1 << "nMol = " << numMols[i]<< ";" << endl;
+      os << "}" << endl;
     }
     
     os << "  </MetaData>" << endl;
