@@ -89,19 +89,16 @@ int main(int argc, char* argv[]){
     exit(1);
   }
   
-  mdFileName = dumpFileName;
-  mdFileName = mdFileName.substr(0, mdFileName.rfind(".")) + ".md";
-
   if (args_info.output_given){
     prefix = args_info.output_arg;
   } else {
-    prefix = getPrefix(mdFileName);    
+    prefix = getPrefix(dumpFileName);    
   }
   std::string outputFilename = prefix + ".diff";
     
   //parse md file and set up the system
   SimCreator creator;
-  SimInfo* info = creator.createSim(mdFileName, true);
+  SimInfo* info = creator.createSim(dumpFileName, true);
     
   SimInfo::MoleculeIterator mi;
   Molecule* mol;
