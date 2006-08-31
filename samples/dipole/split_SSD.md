@@ -1,3 +1,5 @@
+<OOPSE version=4>
+  <MetaData>
 #include "splitDipole.md"
 #include "water.md"
 
@@ -12,7 +14,6 @@ component{
   nMol = 1;
 }
 
-initialConfig = "./split_SSD.in";
 
 
 ensemble = NVT;
@@ -38,3 +39,17 @@ sampleTime = 1e2;
 statusTime = 10;
 useInitialTime = "false";
 useInitialExtendedSystemState = "false";
+  </MetaData>
+  <Snapshot>
+    <FrameData>
+        Time: 100000
+        Hmat: {{ 59.7166, 0, 0 }, { 0, 59.7166, 0 }, { 0, 0, 59.7166 }}
+  Thermostat: 0.143595 , 14398.3
+    Barostat: {{ 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 }}
+    </FrameData>
+    <StuntDoubles>
+         0    pvqj           1.190942           0.027501          -0.023832 -0.000000e+00  0.000000e+00 -0.000000e+00  7.267000e-03  1.466900e-02 -1.820000e-04  9.998660e-01 -0.000000e+00  0.000000e+00  0.000000e+00
+         1    pvqj           4.295467          -0.008031           0.435229  0.000000e+00 -0.000000e+00  0.000000e+00  3.628000e-03  9.898270e-01  1.401060e-01  2.447900e-02 -0.000000e+00  0.000000e+00 -0.000000e+00
+    </StuntDoubles>
+  </Snapshot>
+</OOPSE>

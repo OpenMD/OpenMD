@@ -1,3 +1,5 @@
+<OOPSE version=4>
+  <MetaData>
 #include "water.md"
 
 
@@ -6,7 +8,6 @@ component{
   nMol = 2;
 }
 
-initialConfig = "./tap.in";
 
 
 ensemble = NVT;
@@ -31,3 +32,17 @@ sampleTime = 1e2;
 statusTime = 10;
 useInitialTime = "false";
 useInitialExtendedSystemState = "false";
+  </MetaData>
+  <Snapshot>
+    <FrameData>
+        Time: 10000
+        Hmat: {{ 59.7166, 0, 0 }, { 0, 59.7166, 0 }, { 0, 0, 59.7166 }}
+  Thermostat: 0.0208838 , 207.625
+    Barostat: {{ 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 }}
+    </FrameData>
+    <StuntDoubles>
+         0    pvqj           1.118261           0.030441           0.007695  0.000000e+00 -0.000000e+00 -0.000000e+00  6.682090e-01 -6.132790e-01 -3.089100e-01  2.862860e-01 -0.000000e+00 -0.000000e+00  0.000000e+00
+         1    pvqj           3.881739          -0.030441          -0.007695 -0.000000e+00  0.000000e+00 -0.000000e+00  6.207330e-01  3.413810e-01 -6.447840e-01  2.870600e-01 -0.000000e+00 -0.000000e+00 -0.000000e+00
+    </StuntDoubles>
+  </Snapshot>
+</OOPSE>

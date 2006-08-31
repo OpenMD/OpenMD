@@ -1,3 +1,5 @@
+<OOPSE version=4>
+  <MetaData>
 #include "splitDipole.md"
 
 
@@ -6,7 +8,6 @@ component{
   nMol = 2;
 }
 
-initialConfig = "./twoSplitDipole.in";
 
 
 ensemble = NVT;
@@ -32,3 +33,17 @@ sampleTime = 1e2;
 statusTime = 10;
 useInitialTime = "false";
 useInitialExtendedSystemState = "false";
+  </MetaData>
+  <Snapshot>
+    <FrameData>
+        Time: 100000
+        Hmat: {{ 59.7166, 0, 0 }, { 0, 59.7166, 0 }, { 0, 0, 59.7166 }}
+  Thermostat: 0.180892 , 17199.4
+    Barostat: {{ 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 }}
+    </FrameData>
+    <StuntDoubles>
+         0    pvqj          -0.899838            0.02164           0.474136  0.000000e+00  0.000000e+00  1.000000e-06  1.437000e-02 -2.267950e-01 -7.380000e-04  9.738360e-01 -2.600000e-05  1.004000e-03 -0.000000e+00
+         1    pvqj           7.899838           -0.02164          -0.474136 -0.000000e+00 -0.000000e+00 -1.000000e-06  2.057000e-03  5.045000e-02  1.571000e-03 -9.987230e-01 -0.000000e+00 -5.000000e-06  0.000000e+00
+    </StuntDoubles>
+  </Snapshot>
+</OOPSE>
