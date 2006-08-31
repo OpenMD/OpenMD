@@ -168,6 +168,7 @@ namespace oopse {
     MPI_Status ierr;
     int nproc;
     MPI_Comm_size(MPI_COMM_WORLD, &nproc);
+    vHarm_ = 0.0;
 
     // do the MPI crystal restraint forces for each processor
     if (simParam->getUseSolidThermInt()) {

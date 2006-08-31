@@ -191,7 +191,7 @@ namespace oopse {
     dumpWriter->writeEor();
   
     if (simParams->getUseSolidThermInt()) {
-//       restWriter->writeZAngFile();
+      restWriter->writeZAngFile();
       delete restWriter;
       restWriter = NULL;
     }
