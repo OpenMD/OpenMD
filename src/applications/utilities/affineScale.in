@@ -6,8 +6,9 @@
 use Getopt::Std;
 
 # some variables to get things going
-$line1 = 1;
-$line2 = 0;
+$startSnap = 0;
+$startFrame = 0;
+$startStunts = 0;
 
 # get our options
 getopts('hv', \%opts);
@@ -17,11 +18,11 @@ $opts{h} = 'true' if $#ARGV != 1;
 
 # our option output 
 if ($opts{h}){
-    print "affineScale: performs an affine transform on an OOPSE .in or .eor\n";
-    print "\tand writes to a new file named [file name].scale\n\n";
-    print "usage: affineScale [-hv] [file name] [new volume (Ang^3)]\n\n";
-    print "  -h : show this message\n";
-    die   "  -v : more verbose output\n";
+  print "affineScale: performs an affine transform on an OOPSE .in or .eor\n";
+  print "\tand writes to a new file named [file name].scale\n\n";
+  print "usage: affineScale [-hv] [file name] [new volume (Ang^3)]\n\n";
+  print "  -h : show this message\n";
+  die   "  -v : more verbose output\n";
 }
 
 # set some variables to be used in the code
@@ -31,7 +32,7 @@ $newVolume = $ARGV[1];
 # some crazy input checking
 if ($newVolume =~ /^[0-9]/){
 } else {
-    die "\t[new volume] value ($newVolume) is not a valid number\n\tPlease choose a non-negative numeric value for [new volume]\n";
+  die "\t[new volume] value ($newVolume) is not a valid number\n\tPlease choose a non-negative numeric value for [new volume]\n";
 }
 
 # split up the name to obtain an output filename
@@ -43,49 +44,67 @@ open(STATFILE, "./$fileName") || die "\tError: can't find file $fileName\n";
 open (SCALEFILE, ">./$outName") || die "\tError: can't open $outName";
 
 while (<STATFILE>){
-    if ($line1 == 1){
-        print SCALEFILE;
-        $line1 = 0;
-        $line2 = 1;
+  $startSnap = 0 if /\/Snapshot/;
+  $startFrame = 0 if /\/FrameData/;
+  $startStunts = 0 if /\/StuntDoubles/;
 
-    } elsif ($line2 == 1){
-        @line = split;
-        chop $line[9];
-        $oldVolume = $line[1]*$line[5]*$line[9];
-
-        $scale = ($newVolume/$oldVolume)**0.333333333333333;
-# scale the hmat vectors (only orthorhombic)
-        $line[1] *= $scale;
-        $line[5] *= $scale;
-        $line[9] *= $scale;
-        $volume = $line[1]*$line[5]*$line[9];
-
-        print SCALEFILE "$line[0]";
-        for ($i=1; $i<=$#line; $i++) {
-            print SCALEFILE "\t$line[$i]";
-            if ($i == 9) {print SCALEFILE ";";}
-        }
-        print SCALEFILE "\n";
-        $line2 = 0;
-
-    } else {
-        @line = split /\s+/;
-        $line[1] *= $scale;
-        $line[2] *= $scale;
-        $line[3] *= $scale;
-        print SCALEFILE "$line[0]";
-        for ($i=1; $i<=$#line; $i++) {
-            print SCALEFILE "\t$line[$i]";
-        }
-        print SCALEFILE "\n";
+  if ($startSnap == 1){
+    if ($startFrame == 1){
+      if (/Hmat/){
+	@line = split;
+	
+	chop $line[2];
+	chop $line[8];
+	$oldVolume = $line[2]*$line[8]*$line[14];
+	
+	$scale = ($newVolume/$oldVolume)**0.333333333333333;
+	# scale the hmat vectors (only orthorhombic)
+	$line[2] *= $scale;
+	$line[8] *= $scale;
+	$line[14] *= $scale;
+	$volume = $line[2]*$line[8]*$line[14];
+	
+	print SCALEFILE "\t$line[0]";
+	for ($i=1; $i<=$#line; $i++) {
+	  print SCALEFILE " $line[$i]";
+	  if ($i == 2 || $i == 8) {print SCALEFILE ",";}
+	}
+	print SCALEFILE "\n";
+      } else {
+	print SCALEFILE;
+      }
     }
+    if ($startStunts == 1){
+      @line = split;
+      $line[2] *= $scale;
+      $line[3] *= $scale;
+      $line[4] *= $scale;
+      print SCALEFILE "$line[0]\t$line[1]\t";
+      for ($i=2; $i<=$#line; $i++) {
+	print SCALEFILE "$line[$i] ";
+      }
+      print SCALEFILE "\n";
+    }
+    if ($startFrame == 0 && $startStunts == 0) {
+      print SCALEFILE;
+    }
+  } else {
+    print SCALEFILE;
+  }
+  $startSnap = 1 if /Snapshot/;
+  $startFrame = 1 if /FrameData/;
+  $startStunts = 1 if /StuntDoubles/;
+# check again since "/value" contains "value"
+  $startSnap = 0 if /\/Snapshot/;
+  $startFrame = 0 if /\/FrameData/;
+  $startStunts = 0 if /\/StuntDoubles/;
 }
 
 print "Affine transformed configuration written to $outName\n";
 
 if (defined($opts{v})){
-    print "New Volume   : $volume\n";
-    print "Old Volume   : $oldVolume\n";
-    print "Scale Factor : $scale\n";
+  print "New Volume   : $volume\n";
+  print "Old Volume   : $oldVolume\n";
+  print "Scale Factor : $scale\n";
 }
 
