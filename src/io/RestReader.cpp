@@ -671,7 +671,7 @@ namespace oopse {
 	  for (integrableObject = mol->beginIntegrableObject(ii); 
 	       integrableObject != NULL; 
 	       integrableObject = mol->nextIntegrableObject(ii)){
-	    intObjIndex = integrableObject->getGlobalIndex();
+	    intObjIndex = integrableObject->getGlobalIntegrableObjectIndex();
 	    integrableObject->setZangle(tempZangs[intObjIndex]);
 	  }	
 	  
@@ -719,7 +719,7 @@ namespace oopse {
           for (integrableObject = mol->beginIntegrableObject(ii); 
                integrableObject != NULL; 
                integrableObject = mol->nextIntegrableObject(ii)){
-	    intObjIndexTransfer = integrableObject->getGlobalIndex();
+	    intObjIndexTransfer = integrableObject->getGlobalIntegrableObjectIndex();
 	    // send the global index of the integrableObject
 	    MPI_Send(&intObjIndexTransfer, 1, MPI_INT, 0,
 		     TAKE_THIS_TAG_INT, MPI_COMM_WORLD);
@@ -741,7 +741,7 @@ namespace oopse {
     StuntDouble* integrableObject;
     SimInfo::MoleculeIterator mi;
     Molecule::IntegrableObjectIterator ii;
-     
+
 #ifndef IS_MPI
     // set all zAngles to 0.0
     for (mol = info_->beginMolecule(mi); mol != NULL; 

@@ -139,7 +139,7 @@ namespace oopse {
                  integrableObject != NULL; 
                  integrableObject = mol->nextIntegrableObject(ii)) { 
               
-              intObIndex = integrableObject->getGlobalIndex();
+              intObIndex = integrableObject->getGlobalIntegrableObjectIndex();
 
               zAngle = integrableObject->getZangle();
               zAngData.insert(std::pair<int, RealType>(intObIndex, zAngle));
@@ -191,7 +191,7 @@ namespace oopse {
 		 integrableObject = mol->nextIntegrableObject(ii)) { 
 	      
 	      // build a vector of the indicies 
-	      intObIndex = integrableObject->getGlobalIndex();
+	      intObIndex = integrableObject->getGlobalIntegrableObjectIndex();
 	      gIndex.push_back(intObIndex);
 	      	     
 	      // build a vector of the zAngle values
