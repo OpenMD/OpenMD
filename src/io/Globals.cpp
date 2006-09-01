@@ -138,7 +138,7 @@ void Globals::validate() {
 
   CheckParameter(ForceField, isNotEmpty());
   CheckParameter(TargetTemp, isPositive());
-  CheckParameter(Ensemble, isEqualIgnoreCase("NVE") || isEqualIgnoreCase("NVT") || isEqualIgnoreCase("NPTi") || isEqualIgnoreCase("NPTf") || isEqualIgnoreCase("NPTxyz") || isEqualIgnoreCase("NPAT")  || isEqualIgnoreCase("LANGEVINDYNAMICS") || isEqualIgnoreCase("LD") || isEqualIgnoreCase("NPRT") || isEqualIgnoreCase("NPGT"));
+  CheckParameter(Ensemble, isEqualIgnoreCase("NVE") || isEqualIgnoreCase("NVT") || isEqualIgnoreCase("NPTi") || isEqualIgnoreCase("NPTf") || isEqualIgnoreCase("NPTxyz") || isEqualIgnoreCase("NPAT")  || isEqualIgnoreCase("LANGEVINDYNAMICS") || isEqualIgnoreCase("LD") || isEqualIgnoreCase("NPRT") || isEqualIgnoreCase("NPGT") || isEqualIgnoreCase("NGammaT") || isEqualIgnoreCase("NGT"));
   CheckParameter(Dt, isPositive());
   CheckParameter(RunTime, isPositive());
   //CheckParameter(InitialConfig, isNotEmpty());

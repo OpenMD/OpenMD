@@ -14,6 +14,7 @@ Source    = \
 	NPTxyz.cpp \
 	NPAT.cpp \
 	NPrT.cpp \
+	NgammaT.cpp \
 	LDForceManager.cpp \
         LangevinDynamics.cpp	
 
