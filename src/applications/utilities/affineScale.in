@@ -1,7 +1,13 @@
 #!@PERLINTERP@ -w
 
 # program that scales an OOPSE .in or .eor file to a new volume
-# written by Chris Fennell
+
+# author    = "Chris Fennell 
+# version   = "$Revision: 1.4 $"
+# date      = "$Date: 2006-09-01 19:22:06 $"
+# copyright = "Copyright (c) 2006 by the University of Notre Dame"
+# license   = "OOPSE"
+
 
 use Getopt::Std;
 
