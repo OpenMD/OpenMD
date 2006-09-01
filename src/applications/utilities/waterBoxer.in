@@ -1,0 +1,289 @@
+#!@PERLINTERP@ -w
+
+# program that builds water boxes
+
+# author    = "Chris Fennell
+# version   = "$Revision: 1.1 $"
+# date      = "$Date: 2006-09-01 21:08:03 $"
+# copyright = "Copyright (c) 2006 by the University of Notre Dame"
+# license   = "OOPSE"
+
+use Getopt::Std;
+
+$tolerance = 1.0E-8;
+$mass = 2.99151E-23; # mass of H2O in grams
+$cm3ToAng3 = 1E24;   # convert cm^3 to angstroms^3
+$densityConvert = $mass*$cm3ToAng3;
+$lattice = 0;
+$nMol = 500;
+$density = 1.0;
+$doRandomize = 0;
+$cutoff = 12;
+$alpha = 0.2125;
+$alphaInt = 0.5125;
+$alphaSlope = 0.025;
+
+# get our options
+getopts('hrvd:l:n:w:');
+
+# if we don't have a filename, drop to -h
+$opt_h = 'true' if $#ARGV != 0;
+
+# our option output 
+if ($opt_h){
+    print "waterBoxer: builds water boxes\n\n";
+    print "usage: waterBoxer [-hv] [-d density] [-l lattice] [-n # waters]\n";
+    print "\t[-w water name] [file name]\n\n";
+    print "  -h : show this message\n";
+    print "  -r : randomize orientations\n";
+    print "  -v : verbose output\n\n";
+    print "  -d real    : density in g/cm^3\n";
+    print "                 (default: 1)\n";
+    print "  -l integer : 0 - face centered cubic, 1 - simple cubic\n";
+    print "                 (default: 0)\n";
+    print "  -n integer : # of water molecules\n";
+    print "                 (default: 500)\n";
+    print "  -w char    : name of the water stunt double\n";
+    print "                 (default: SPCE)\n";
+    print "Example:\n";
+    die   "   waterBoxer -d 0.997 -n 864 -w SSD_RF ssdrfWater.md\n";
+}
+
+# set some variables to be used in the code
+$fileName = $ARGV[0];
+if (defined($fileName)){
+} else {
+    $fileName = 'waterBox';
+}
+if ($opt_r){
+  $doRandomize = $opt_r;
+}
+if (defined($opt_w)){
+  $waterName = $opt_w;
+} else {
+  $waterName = 'SPCE';
+}
+
+if (defined($opt_d)){
+  if ($opt_d =~ /^[0-9]/) {
+    $density = $opt_d;
+  } else {
+    die "\t-d value ($opt_d) is not a valid number\n\tPlease choose a positive real # value\n";
+  }
+}
+if (defined($opt_l)){
+  if ($opt_l =~ /^[0-9]/) {
+    $lattice = $opt_l;
+    if ($lattice != 0 && $lattice != 1){
+      die "\t-l value ($opt_l) is not a valid number\n\tPlease choose 0 or 1\n";
+    }
+  } else {
+    die "\t-l value ($opt_l) is not a valid number\n\tPlease choose 0 or 1\n";
+  }
+}
+if (defined($opt_n)){
+  if ($opt_n =~ /^[0-9]/) {
+    $nMol = $opt_n;
+  } else { 
+    die "\t-n value ($opt_n) is not a valid number\n\tPlease choose a non-negative integer\n";
+  }
+}
+
+# open the file writer
+open(OUTFILE, ">./$fileName") || die "\tError: can't open file $fileName\n";
+
+# check to set magic lattice numbers
+if ($lattice == 0){
+  $crystalNumReal = ($nMol/4.0)**(1.0/3.0);
+  $crystalNum = int($crystalNumReal + $tolerance);
+  $remainder = $crystalNumReal - $crystalNum;
+  
+  # if crystalNumReal wasn't an integer, we bump the crystal to the next
+  # magic number
+  if ($remainder > $tolerance){
+    $crystalNum = $crystalNum + 1;
+    $newMol = 4 * $crystalNum**3;
+    print "WARNING: The number chosen ($nMol) failed to build a clean\n";
+    print "fcc lattice. The number of molecules has been increased to\n";
+    print "the next magic number ($newMol).\n";
+    $nMol = $newMol;
+  }
+} elsif ($lattice == 1){
+  $crystalNumReal = ($nMol/1.0)**(1.0/3.0);
+  $crystalNum = int($crystalNumReal);
+  $remainder = $crystalNumReal - $crystalNum;
+  
+  # again, if crystalNumReal wasn't an integer, we bump the crystal to the next
+  # magic number
+  if ($remainder > $tolerance){
+    $crystalNum = $crystalNum + 1;
+    $newMol = $crystalNum**3;
+    print "WARNING: The number chosen ($nMol) failed to build a clean\n";
+    print "simple cubic lattice. The number of molecules has been\n";
+    print "increased to the next magic number ($newMol).\n";
+    $nMol = $newMol;
+  }
+}
+
+# now we can start building the crystals
+$boxLength = ($nMol*$densityConvert/$density)**(1.0/3.0);
+$cellLength = $boxLength / $crystalNum;
+$cell2 = $cellLength*0.5;
+
+if ($lattice == 0) {
+# build the unit cell
+# molecule 0
+  $xCorr[0] = 0.0;
+  $yCorr[0] = 0.0;
+  $zCorr[0] = 0.0;
+# molecule 1
+  $xCorr[1] = 0.0;
+  $yCorr[1] = $cell2;
+  $zCorr[1] = $cell2;
+# molecule 2
+  $xCorr[2] = $cell2;
+  $yCorr[2] = $cell2;
+  $zCorr[2] = 0.0;
+# molecule 3
+  $xCorr[3] = $cell2;
+  $yCorr[3] = 0.0;
+  $zCorr[3] = $cell2;
+# assemble the lattice
+  $counter = 0;
+  for ($z = 0; $z < $crystalNum; $z++) {
+    for ($y = 0; $y < $crystalNum; $y++) {
+      for ($x = 0; $x < $crystalNum; $x++) {
+	for ($uc = 0; $uc < 4; $uc++) {
+	  $xCorr[$uc+$counter] = $xCorr[$uc] + $cellLength*$x;
+	  $yCorr[$uc+$counter] = $yCorr[$uc] + $cellLength*$y;
+	  $zCorr[$uc+$counter] = $zCorr[$uc] + $cellLength*$z;
+	}
+	$counter = $counter + 4;
+      }
+    }
+  }
+  
+} elsif ($lattice == 1) {
+# build the unit cell
+# molecule 0
+  $xCorr[0] = $cell2;
+  $yCorr[0] = $cell2;
+  $zCorr[0] = $cell2;
+#assemble the lattice
+  $counter = 0;
+  for ($z = 0; $z < $crystalNum; $z++) {
+    for ($y = 0; $y < $crystalNum; $y++) {
+      for ($x = 0; $x < $crystalNum; $x++) {
+	$xCorr[$counter] = $xCorr[0] + $cellLength*$x;
+	$yCorr[$counter] = $yCorr[0] + $cellLength*$y;
+	$zCorr[$counter] = $zCorr[0] + $cellLength*$z;
+	
+	$counter++;
+      }
+    }
+  }
+}
+
+writeOutFile();
+
+# this marks the end of the main program, below is subroutines
+
+sub acos {
+  my ($rad) = @_;
+  my $ret = atan2(sqrt(1 - $rad*$rad), $rad);
+  return $ret;
+}
+
+sub writeOutFile{
+  # write out the header
+  print OUTFILE "<OOPSE version=4>\n";
+  findCutoff();
+  findAlpha();
+  printMetaData();
+  printFrameData();
+  print OUTFILE "    <StuntDoubles>\n";
+  
+  # shift the box center to the origin and write out the coordinates
+  for ($i = 0; $i < $nMol; $i++) {
+    $xCorr[$i] -= 0.5*$boxLength;
+    $yCorr[$i] -= 0.5*$boxLength;
+    $zCorr[$i] -= 0.5*$boxLength;
+    
+    $q0 = 1.0;
+    $q1 = 0.0;
+    $q2 = 0.0;
+    $q3 = 0.0;
+    
+    if ($doRandomize == 1){
+      $cosTheta = 2.0*rand() - 1.0;
+      $theta = acos($cosTheta);
+      $phi = 2.0*3.14159265359*rand();
+      $psi = 2.0*3.14159265359*rand();
+      
+      $q0 = cos(0.5*$theta)*cos(0.5*($phi + $psi));
+      $q1 = sin(0.5*$theta)*cos(0.5*($phi - $psi));
+      $q2 = sin(0.5*$theta)*sin(0.5*($phi - $psi));
+      $q3 = cos(0.5*$theta)*sin(0.5*($phi + $psi));
+    }
+    
+    print OUTFILE "$i\tpq\t$xCorr[$i] $yCorr[$i] $zCorr[$i] ";
+    print OUTFILE "$q0 $q1 $q2 $q3\n";
+  }
+
+  print OUTFILE "    </StuntDoubles>\n  </Snapshot>\n</OOPSE>\n";
+}
+
+sub printMetaData {
+print OUTFILE"  <MetaData>
+#include \"water.md\"
+
+component{
+  type = \"$waterName\";
+  nMol = $nMol;
+}
+
+
+ensemble = NVE;
+forceField = \"DUFF\";
+electrostaticSummationMethod = \"shifted_force\";
+electrostaticScreeningMethod = \"damped\";
+dampingAlpha = $alpha;
+cutoffRadius = $cutoff;
+
+targetTemp = 300;
+targetPressure = 1.0;
+
+tauThermostat = 1e3;
+tauBarostat = 1e4;
+
+dt = 2.0;
+runTime = 1e3;
+
+tempSet = \"true\";
+thermalTime = 10;
+sampleTime = 100;
+statusTime = 2;
+  </MetaData>\n";
+}
+
+sub findCutoff{
+  $boxLength2 = 0.5*$boxLength;
+  if ($boxLength2 > $cutoff){
+    # the default is good
+  } else {
+    $cutoff = int($boxLength2);
+  }
+}
+
+sub findAlpha{
+  $alpha = $alphaInt - $cutoff*$alphaSlope;
+}
+
+sub printFrameData{
+print OUTFILE 
+"  <Snapshot>
+    <FrameData>
+        Time: 0
+        Hmat: {{ $boxLength, 0, 0 }, { 0, $boxLength, 0 }, { 0, 0, $boxLength }}
+    </FrameData>\n";
+}
