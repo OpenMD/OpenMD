@@ -14106,7 +14106,7 @@ fi
 
 
 
-                                                  ac_config_files="$ac_config_files make/Makefile src/utils/Makefile src/applications/nanoRodBuilder/Makefile src/applications/utilities/affineScale scripts/filepp"
+                                                            ac_config_files="$ac_config_files make/Makefile src/utils/Makefile src/applications/nanoRodBuilder/Makefile src/applications/utilities/affineScale src/applications/utilities/waterBoxer scripts/filepp"
 
 
 cat >confcache <<\_ACEOF
@@ -14641,6 +14641,7 @@ do
   "src/utils/Makefile" ) CONFIG_FILES="$CONFIG_FILES src/utils/Makefile" ;;
   "src/applications/nanoRodBuilder/Makefile" ) CONFIG_FILES="$CONFIG_FILES src/applications/nanoRodBuilder/Makefile" ;;
   "src/applications/utilities/affineScale" ) CONFIG_FILES="$CONFIG_FILES src/applications/utilities/affineScale" ;;
+  "src/applications/utilities/waterBoxer" ) CONFIG_FILES="$CONFIG_FILES src/applications/utilities/waterBoxer" ;;
   "scripts/filepp" ) CONFIG_FILES="$CONFIG_FILES scripts/filepp" ;;
   "src/getopt.h" ) CONFIG_LINKS="$CONFIG_LINKS src/getopt.h:src/utils/gnugetopt.h" ;;
   "src/config.h" ) CONFIG_HEADERS="$CONFIG_HEADERS src/config.h" ;;
@@ -15050,11 +15051,12 @@ s,@INSTALL@,$ac_INSTALL,;t t
 
   # Run the commands associated with the file.
   case $ac_file in
-    make/Makefile ) chmod 0755 scripts/* src/applications/utilities/affineScale ;;
-    src/utils/Makefile ) chmod 0755 scripts/* src/applications/utilities/affineScale ;;
-    src/applications/nanoRodBuilder/Makefile ) chmod 0755 scripts/* src/applications/utilities/affineScale ;;
-    src/applications/utilities/affineScale ) chmod 0755 scripts/* src/applications/utilities/affineScale ;;
-    scripts/filepp ) chmod 0755 scripts/* src/applications/utilities/affineScale ;;
+    make/Makefile ) chmod 0755 scripts/* ;;
+    src/utils/Makefile ) chmod 0755 scripts/* ;;
+    src/applications/nanoRodBuilder/Makefile ) chmod 0755 scripts/* ;;
+    src/applications/utilities/affineScale ) chmod 0755 scripts/* ;;
+    src/applications/utilities/waterBoxer ) chmod 0755 scripts/* ;;
+    scripts/filepp ) chmod 0755 scripts/* ;;
   esac
 done
 _ACEOF

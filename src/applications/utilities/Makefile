@@ -1,4 +1,5 @@
 ScriptFiles =  \
+	dumpConverter \
         affineScale \
         waterBoxer \
 
