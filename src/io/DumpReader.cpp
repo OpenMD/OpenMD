@@ -338,6 +338,7 @@ namespace oopse {
     }
     std::string type = tokenizer.nextToken(); 
     int size = type.size();
+
     for(int i = 0; i < size; ++i) {
       switch(type[i]) {
         
@@ -398,6 +399,7 @@ namespace oopse {
                integrableObject->setJ(ji); 
              } 
           }
+          break;
         }  
         case 'f': {
 

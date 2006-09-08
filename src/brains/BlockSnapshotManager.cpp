@@ -82,8 +82,8 @@ namespace oopse {
 
       snapshots_.insert(snapshots_.begin(), nframes_, static_cast<Snapshot*>(NULL));   
 
-      std::cout << "physmem = " << int(physMem) << "\trssMem =  "<< int(rssMem) << "\t availablePhysMem = " << int(avaliablePhysMem) <<std::endl;
-      std::cout << "nSnapshotPerBlock = " << nSnapshotPerBlock_ << "\t total block = " << nblocks << std::endl;
+      // std::cout << "physmem = " << int(physMem) << "\trssMem =  "<< int(rssMem) << "\t availablePhysMem = " << int(avaliablePhysMem) <<std::endl;
+      // std::cout << "nSnapshotPerBlock = " << nSnapshotPerBlock_ << "\t total block = " << nblocks << std::endl;
     
     }
 

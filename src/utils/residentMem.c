@@ -33,7 +33,7 @@ RealType residentMem () {
 #endif
 #endif
 
-  printf("doing %s\n", pscommand);
+  /* printf("doing %s\n", pscommand); */
 
   procresults = popen(pscommand, "r");
 
