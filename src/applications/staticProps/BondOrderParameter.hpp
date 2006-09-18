@@ -74,6 +74,9 @@ namespace oopse {
             RealType rCut_;
             int lNumber_;
             int mSize_;
+	    RealType* Q_l_;
+	    RealType* W_l_;
+	    RealType* WHat_l_;
     };
 }
 
