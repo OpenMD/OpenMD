@@ -48,6 +48,8 @@ void clear_given (struct gengetopt_args_info *args_info)
   args_info->nbins_y_given = 0 ;
   args_info->nanglebins_given = 0 ;
   args_info->length_given = 0 ;
+  args_info->LegendreL_given = 0 ;
+  args_info->rcut_given = 0 ;
   args_info->zoffset_given = 0 ;
   args_info->sele1_given = 0 ;
   args_info->sele2_given = 0 ;
@@ -56,6 +58,7 @@ void clear_given (struct gengetopt_args_info *args_info)
   args_info->molname_given = 0 ;
   args_info->begin_given = 0 ;
   args_info->end_given = 0 ;
+  args_info->bo_given = 0 ;
   args_info->gofr_given = 0 ;
   args_info->r_theta_given = 0 ;
   args_info->r_omega_given = 0 ;
@@ -88,6 +91,8 @@ void clear_args (struct gengetopt_args_info *args_info)
   args_info->nanglebins_arg = 50;
   args_info->nanglebins_orig = NULL;
   args_info->length_orig = NULL;
+  args_info->LegendreL_orig = NULL;
+  args_info->rcut_orig = NULL;
   args_info->zoffset_arg = 0;
   args_info->zoffset_orig = NULL;
   args_info->sele1_arg = NULL;
@@ -125,27 +130,30 @@ cmdline_parser_print_help (void)
   printf("%s\n","  -x, --nbins_x=INT             number of bins in x axis  (default=`100')");
   printf("%s\n","  -y, --nbins_y=INT             number of bins in y axis  (default=`100')");
   printf("%s\n","  -a, --nanglebins=INT          number of bins for cos(angle)  (default=`50')");
-  printf("%s\n","  -l, --length=DOUBLE           maximum length (Defaults to 1/2 smallest length \n                                  of first frame)");
+  printf("%s\n","      --length=DOUBLE           maximum length (Defaults to 1/2 smallest length \n                                  of first frame)");
+  printf("%s\n","  -l, --LegendreL=INT           Order of Legendre Polynomial (used for Bond \n                                  Order calculations)");
+  printf("%s\n","  -c, --rcut=DOUBLE             cutoff radius (rcut)");
   printf("%s\n","  -z, --zoffset=DOUBLE          Where to set the zero for the slab_density \n                                  calculation  (default=`0')");
   printf("%s\n","      --sele1=selection script  select the first stuntdouble set");
   printf("%s\n","      --sele2=selection script  select the second stuntdouble set");
   printf("%s\n","      --sele3=selection script  select the third stuntdouble set");
   printf("%s\n","      --refsele=selection script\n                                select reference (use and only use with --gxyz)");
   printf("%s\n","      --molname=STRING          molecule name");
-  printf("%s\n","      --begin=INT               begin interanl index");
+  printf("%s\n","      --begin=INT               begin internal index");
   printf("%s\n","      --end=INT                 end internal index");
   printf("%s\n","\n Group: staticProps\n   an option of this group is required");
-  printf("%s\n","      --gofr                    g(r)");
+  printf("%s\n","  -b, --bo                      bond order parameter (--rcut and --LegendreL \n                                  must be specified");
+  printf("%s\n","  -g, --gofr                    g(r)");
   printf("%s\n","      --r_theta                 g(r, cos(theta))");
   printf("%s\n","      --r_omega                 g(r, cos(omega))");
   printf("%s\n","      --theta_omega             g(cos(theta), cos(omega))");
   printf("%s\n","      --gxyz                    g(x, y, z)");
-  printf("%s\n","      --p2                      p2 order parameter (--sele1 and --sele2 must be \n                                  specified)");
+  printf("%s\n","  -p, --p2                      p2 order parameter (--sele1 and --sele2 must be \n                                  specified)");
   printf("%s\n","      --rp2                     rp2 order parameter (--sele1 and --sele2 must \n                                  be specified)");
-  printf("%s\n","      --scd                     scd order parameter(either --sele1, --sele2, \n                                  --sele3 are specified or --molname, --begin, \n                                  --end are specified)");
-  printf("%s\n","      --density                 density plot (--sele1 must be specified)");
-  printf("%s\n","      --slab_density            slab density (--sele1 must be specified)");
-  printf("%s\n","      --hxy                     hxy (--sele1 must be specified)");
+  printf("%s\n","  -s, --scd                     scd order parameter (either --sele1, --sele2, \n                                  --sele3 are specified or --molname, --begin, \n                                  --end are specified)");
+  printf("%s\n","  -d, --density                 density plot");
+  printf("%s\n","      --slab_density            slab density");
+  printf("%s\n","      --hxy                     hxy");
   
 }
 
@@ -209,6 +217,16 @@ cmdline_parser_release (struct gengetopt_args_info *args_info)
     {
       free (args_info->length_orig); /* free previous argument */
       args_info->length_orig = 0;
+    }
+  if (args_info->LegendreL_orig)
+    {
+      free (args_info->LegendreL_orig); /* free previous argument */
+      args_info->LegendreL_orig = 0;
+    }
+  if (args_info->rcut_orig)
+    {
+      free (args_info->rcut_orig); /* free previous argument */
+      args_info->rcut_orig = 0;
     }
   if (args_info->zoffset_orig)
     {
@@ -355,6 +373,20 @@ cmdline_parser_file_save(const char *filename, struct gengetopt_args_info *args_
       fprintf(outfile, "%s\n", "length");
     }
   }
+  if (args_info->LegendreL_given) {
+    if (args_info->LegendreL_orig) {
+      fprintf(outfile, "%s=\"%s\"\n", "LegendreL", args_info->LegendreL_orig);
+    } else {
+      fprintf(outfile, "%s\n", "LegendreL");
+    }
+  }
+  if (args_info->rcut_given) {
+    if (args_info->rcut_orig) {
+      fprintf(outfile, "%s=\"%s\"\n", "rcut", args_info->rcut_orig);
+    } else {
+      fprintf(outfile, "%s\n", "rcut");
+    }
+  }
   if (args_info->zoffset_given) {
     if (args_info->zoffset_orig) {
       fprintf(outfile, "%s=\"%s\"\n", "zoffset", args_info->zoffset_orig);
@@ -410,6 +442,9 @@ cmdline_parser_file_save(const char *filename, struct gengetopt_args_info *args_
     } else {
       fprintf(outfile, "%s\n", "end");
     }
+  }
+  if (args_info->bo_given) {
+    fprintf(outfile, "%s\n", "bo");
   }
   if (args_info->gofr_given) {
     fprintf(outfile, "%s\n", "gofr");
@@ -483,6 +518,7 @@ reset_group_staticProps(struct gengetopt_args_info *args_info)
   if (! args_info->staticProps_group_counter)
     return;
   
+  args_info->bo_given = 0 ;
   args_info->gofr_given = 0 ;
   args_info->r_theta_given = 0 ;
   args_info->r_omega_given = 0 ;
@@ -590,7 +626,9 @@ cmdline_parser_internal (int argc, char * const *argv, struct gengetopt_args_inf
         { "nbins_x",	1, NULL, 'x' },
         { "nbins_y",	1, NULL, 'y' },
         { "nanglebins",	1, NULL, 'a' },
-        { "length",	1, NULL, 'l' },
+        { "length",	1, NULL, 0 },
+        { "LegendreL",	1, NULL, 'l' },
+        { "rcut",	1, NULL, 'c' },
         { "zoffset",	1, NULL, 'z' },
         { "sele1",	1, NULL, 0 },
         { "sele2",	1, NULL, 0 },
@@ -599,22 +637,23 @@ cmdline_parser_internal (int argc, char * const *argv, struct gengetopt_args_inf
         { "molname",	1, NULL, 0 },
         { "begin",	1, NULL, 0 },
         { "end",	1, NULL, 0 },
-        { "gofr",	0, NULL, 0 },
+        { "bo",	0, NULL, 'b' },
+        { "gofr",	0, NULL, 'g' },
         { "r_theta",	0, NULL, 0 },
         { "r_omega",	0, NULL, 0 },
         { "theta_omega",	0, NULL, 0 },
         { "gxyz",	0, NULL, 0 },
-        { "p2",	0, NULL, 0 },
+        { "p2",	0, NULL, 'p' },
         { "rp2",	0, NULL, 0 },
-        { "scd",	0, NULL, 0 },
-        { "density",	0, NULL, 0 },
+        { "scd",	0, NULL, 's' },
+        { "density",	0, NULL, 'd' },
         { "slab_density",	0, NULL, 0 },
         { "hxy",	0, NULL, 0 },
         { NULL,	0, NULL, 0 }
       };
 
       stop_char = 0;
-      c = getopt_long (argc, argv, "hVi:o:n:r:x:y:a:l:z:", long_options, &option_index);
+      c = getopt_long (argc, argv, "hVi:o:n:r:x:y:a:l:c:z:bgpsd", long_options, &option_index);
 
       if (c == -1) break;	/* Exit from `while (1)' loop.  */
 
@@ -766,24 +805,44 @@ cmdline_parser_internal (int argc, char * const *argv, struct gengetopt_args_inf
           args_info->nanglebins_orig = gengetopt_strdup (optarg);
           break;
 
-        case 'l':	/* maximum length (Defaults to 1/2 smallest length of first frame).  */
-          if (local_args_info.length_given)
+        case 'l':	/* Order of Legendre Polynomial (used for Bond Order calculations).  */
+          if (local_args_info.LegendreL_given)
             {
-              fprintf (stderr, "%s: `--length' (`-l') option given more than once%s\n", argv[0], (additional_error ? additional_error : ""));
+              fprintf (stderr, "%s: `--LegendreL' (`-l') option given more than once%s\n", argv[0], (additional_error ? additional_error : ""));
               goto failure;
             }
-          if (args_info->length_given && ! override)
+          if (args_info->LegendreL_given && ! override)
             continue;
-          local_args_info.length_given = 1;
-          args_info->length_given = 1;
-          args_info->length_arg = strtod (optarg, &stop_char);
+          local_args_info.LegendreL_given = 1;
+          args_info->LegendreL_given = 1;
+          args_info->LegendreL_arg = strtol (optarg, &stop_char, 0);
           if (!(stop_char && *stop_char == '\0')) {
             fprintf(stderr, "%s: invalid numeric value: %s\n", argv[0], optarg);
             goto failure;
           }
-          if (args_info->length_orig)
-            free (args_info->length_orig); /* free previous string */
-          args_info->length_orig = gengetopt_strdup (optarg);
+          if (args_info->LegendreL_orig)
+            free (args_info->LegendreL_orig); /* free previous string */
+          args_info->LegendreL_orig = gengetopt_strdup (optarg);
+          break;
+
+        case 'c':	/* cutoff radius (rcut).  */
+          if (local_args_info.rcut_given)
+            {
+              fprintf (stderr, "%s: `--rcut' (`-c') option given more than once%s\n", argv[0], (additional_error ? additional_error : ""));
+              goto failure;
+            }
+          if (args_info->rcut_given && ! override)
+            continue;
+          local_args_info.rcut_given = 1;
+          args_info->rcut_given = 1;
+          args_info->rcut_arg = strtod (optarg, &stop_char);
+          if (!(stop_char && *stop_char == '\0')) {
+            fprintf(stderr, "%s: invalid numeric value: %s\n", argv[0], optarg);
+            goto failure;
+          }
+          if (args_info->rcut_orig)
+            free (args_info->rcut_orig); /* free previous string */
+          args_info->rcut_orig = gengetopt_strdup (optarg);
           break;
 
         case 'z':	/* Where to set the zero for the slab_density calculation.  */
@@ -806,10 +865,106 @@ cmdline_parser_internal (int argc, char * const *argv, struct gengetopt_args_inf
           args_info->zoffset_orig = gengetopt_strdup (optarg);
           break;
 
+        case 'b':	/* bond order parameter (--rcut and --LegendreL must be specified.  */
+          if (local_args_info.bo_given)
+            {
+              fprintf (stderr, "%s: `--bo' (`-b') option given more than once%s\n", argv[0], (additional_error ? additional_error : ""));
+              goto failure;
+            }
+          if (args_info->bo_given && ! override)
+            continue;
+          local_args_info.bo_given = 1;
+          args_info->bo_given = 1;
+          if (args_info->staticProps_group_counter && override)
+            reset_group_staticProps (args_info);
+          args_info->staticProps_group_counter += 1;
+          break;
+
+        case 'g':	/* g(r).  */
+          if (local_args_info.gofr_given)
+            {
+              fprintf (stderr, "%s: `--gofr' (`-g') option given more than once%s\n", argv[0], (additional_error ? additional_error : ""));
+              goto failure;
+            }
+          if (args_info->gofr_given && ! override)
+            continue;
+          local_args_info.gofr_given = 1;
+          args_info->gofr_given = 1;
+          if (args_info->staticProps_group_counter && override)
+            reset_group_staticProps (args_info);
+          args_info->staticProps_group_counter += 1;
+          break;
+
+        case 'p':	/* p2 order parameter (--sele1 and --sele2 must be specified).  */
+          if (local_args_info.p2_given)
+            {
+              fprintf (stderr, "%s: `--p2' (`-p') option given more than once%s\n", argv[0], (additional_error ? additional_error : ""));
+              goto failure;
+            }
+          if (args_info->p2_given && ! override)
+            continue;
+          local_args_info.p2_given = 1;
+          args_info->p2_given = 1;
+          if (args_info->staticProps_group_counter && override)
+            reset_group_staticProps (args_info);
+          args_info->staticProps_group_counter += 1;
+          break;
+
+        case 's':	/* scd order parameter (either --sele1, --sele2, --sele3 are specified or --molname, --begin, --end are specified).  */
+          if (local_args_info.scd_given)
+            {
+              fprintf (stderr, "%s: `--scd' (`-s') option given more than once%s\n", argv[0], (additional_error ? additional_error : ""));
+              goto failure;
+            }
+          if (args_info->scd_given && ! override)
+            continue;
+          local_args_info.scd_given = 1;
+          args_info->scd_given = 1;
+          if (args_info->staticProps_group_counter && override)
+            reset_group_staticProps (args_info);
+          args_info->staticProps_group_counter += 1;
+          break;
+
+        case 'd':	/* density plot.  */
+          if (local_args_info.density_given)
+            {
+              fprintf (stderr, "%s: `--density' (`-d') option given more than once%s\n", argv[0], (additional_error ? additional_error : ""));
+              goto failure;
+            }
+          if (args_info->density_given && ! override)
+            continue;
+          local_args_info.density_given = 1;
+          args_info->density_given = 1;
+          if (args_info->staticProps_group_counter && override)
+            reset_group_staticProps (args_info);
+          args_info->staticProps_group_counter += 1;
+          break;
+
 
         case 0:	/* Long option with no short option */
+          /* maximum length (Defaults to 1/2 smallest length of first frame).  */
+          if (strcmp (long_options[option_index].name, "length") == 0)
+          {
+            if (local_args_info.length_given)
+              {
+                fprintf (stderr, "%s: `--length' option given more than once%s\n", argv[0], (additional_error ? additional_error : ""));
+                goto failure;
+              }
+            if (args_info->length_given && ! override)
+              continue;
+            local_args_info.length_given = 1;
+            args_info->length_given = 1;
+            args_info->length_arg = strtod (optarg, &stop_char);
+            if (!(stop_char && *stop_char == '\0')) {
+              fprintf(stderr, "%s: invalid numeric value: %s\n", argv[0], optarg);
+              goto failure;
+            }
+            if (args_info->length_orig)
+              free (args_info->length_orig); /* free previous string */
+            args_info->length_orig = gengetopt_strdup (optarg);
+          }
           /* select the first stuntdouble set.  */
-          if (strcmp (long_options[option_index].name, "sele1") == 0)
+          else if (strcmp (long_options[option_index].name, "sele1") == 0)
           {
             if (local_args_info.sele1_given)
               {
@@ -903,7 +1058,7 @@ cmdline_parser_internal (int argc, char * const *argv, struct gengetopt_args_inf
               free (args_info->molname_orig); /* free previous string */
             args_info->molname_orig = gengetopt_strdup (optarg);
           }
-          /* begin interanl index.  */
+          /* begin internal index.  */
           else if (strcmp (long_options[option_index].name, "begin") == 0)
           {
             if (local_args_info.begin_given)
@@ -944,23 +1099,6 @@ cmdline_parser_internal (int argc, char * const *argv, struct gengetopt_args_inf
             if (args_info->end_orig)
               free (args_info->end_orig); /* free previous string */
             args_info->end_orig = gengetopt_strdup (optarg);
-          }
-          /* g(r).  */
-          else if (strcmp (long_options[option_index].name, "gofr") == 0)
-          {
-            if (local_args_info.gofr_given)
-              {
-                fprintf (stderr, "%s: `--gofr' option given more than once%s\n", argv[0], (additional_error ? additional_error : ""));
-                goto failure;
-              }
-            if (args_info->gofr_given && ! override)
-              continue;
-            local_args_info.gofr_given = 1;
-            args_info->gofr_given = 1;
-            if (args_info->staticProps_group_counter && override)
-              reset_group_staticProps (args_info);
-            args_info->staticProps_group_counter += 1;
-            break;
           }
           /* g(r, cos(theta)).  */
           else if (strcmp (long_options[option_index].name, "r_theta") == 0)
@@ -1030,23 +1168,6 @@ cmdline_parser_internal (int argc, char * const *argv, struct gengetopt_args_inf
             args_info->staticProps_group_counter += 1;
             break;
           }
-          /* p2 order parameter (--sele1 and --sele2 must be specified).  */
-          else if (strcmp (long_options[option_index].name, "p2") == 0)
-          {
-            if (local_args_info.p2_given)
-              {
-                fprintf (stderr, "%s: `--p2' option given more than once%s\n", argv[0], (additional_error ? additional_error : ""));
-                goto failure;
-              }
-            if (args_info->p2_given && ! override)
-              continue;
-            local_args_info.p2_given = 1;
-            args_info->p2_given = 1;
-            if (args_info->staticProps_group_counter && override)
-              reset_group_staticProps (args_info);
-            args_info->staticProps_group_counter += 1;
-            break;
-          }
           /* rp2 order parameter (--sele1 and --sele2 must be specified).  */
           else if (strcmp (long_options[option_index].name, "rp2") == 0)
           {
@@ -1064,41 +1185,7 @@ cmdline_parser_internal (int argc, char * const *argv, struct gengetopt_args_inf
             args_info->staticProps_group_counter += 1;
             break;
           }
-          /* scd order parameter(either --sele1, --sele2, --sele3 are specified or --molname, --begin, --end are specified).  */
-          else if (strcmp (long_options[option_index].name, "scd") == 0)
-          {
-            if (local_args_info.scd_given)
-              {
-                fprintf (stderr, "%s: `--scd' option given more than once%s\n", argv[0], (additional_error ? additional_error : ""));
-                goto failure;
-              }
-            if (args_info->scd_given && ! override)
-              continue;
-            local_args_info.scd_given = 1;
-            args_info->scd_given = 1;
-            if (args_info->staticProps_group_counter && override)
-              reset_group_staticProps (args_info);
-            args_info->staticProps_group_counter += 1;
-            break;
-          }
-          /* density plot (--sele1 must be specified).  */
-          else if (strcmp (long_options[option_index].name, "density") == 0)
-          {
-            if (local_args_info.density_given)
-              {
-                fprintf (stderr, "%s: `--density' option given more than once%s\n", argv[0], (additional_error ? additional_error : ""));
-                goto failure;
-              }
-            if (args_info->density_given && ! override)
-              continue;
-            local_args_info.density_given = 1;
-            args_info->density_given = 1;
-            if (args_info->staticProps_group_counter && override)
-              reset_group_staticProps (args_info);
-            args_info->staticProps_group_counter += 1;
-            break;
-          }
-          /* slab density (--sele1 must be specified).  */
+          /* slab density.  */
           else if (strcmp (long_options[option_index].name, "slab_density") == 0)
           {
             if (local_args_info.slab_density_given)
@@ -1115,7 +1202,7 @@ cmdline_parser_internal (int argc, char * const *argv, struct gengetopt_args_inf
             args_info->staticProps_group_counter += 1;
             break;
           }
-          /* hxy (--sele1 must be specified).  */
+          /* hxy.  */
           else if (strcmp (long_options[option_index].name, "hxy") == 0)
           {
             if (local_args_info.hxy_given)

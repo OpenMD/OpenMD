@@ -46,38 +46,42 @@
 #include "math/Vector3.hpp"
 
 namespace oopse {
+  
+  class BondOrderParameter : public StaticAnalyser{
+  public:
+    BondOrderParameter(SimInfo* info, const std::string& filename, 
+                       const std::string& sele, double rCut, int lNumber, int nbins);
 
-    class BondOrderParameter : public StaticAnalyser{
-        public:
-            BondOrderParameter(SimInfo* info, const std::string& filename, const std::string& sele1,
-            	 const std::string& sele2, double rCut, int lNumber );
-            virtual void process();
+    virtual ~BondOrderParameter();
+    virtual void process();
 
-        private:
-
+  private:
             
-            void writeOrderParameter();
-		    virtual void initalizeHistogram();
-    		virtual void collectHistogram(StuntDouble* sd1, StuntDouble* sd2);
-      		virtual void processHistogram();
+    void writeOrderParameter();
+    virtual void initalizeHistogram();
+    virtual void collectHistogram(RealType Q_l, RealType W_l_hat);
+    virtual void processHistogram();
 
-            Snapshot* currentSnapshot_;
+    Snapshot* currentSnapshot_;
 
-            std::string selectionScript1_;
-            SelectionManager seleMan1_;    
-            SelectionEvaluator evaluator1_;
+    std::string selectionScript_;
+    SelectionManager seleMan_;    
+    SelectionEvaluator evaluator_;           
             
-            std::vector<Vector3d> neighbors_;
-            std::vector<std::pair<StuntDouble*, StuntDouble*> > sdPairs_;  /**< each pair is used to define a vector, vector = first - second */
-            std::vector<OrderParam> orderParams_;
-            
-            RealType rCut_;
-            int lNumber_;
-            int mSize_;
-	    RealType* Q_l_;
-	    RealType* W_l_;
-	    RealType* WHat_l_;
-    };
+    RealType rCut_;
+    int lNumber_;
+    int mSize_;    
+
+    RealType MaxQ_;
+    RealType deltaQ_;
+
+    RealType MaxW_;
+    RealType deltaW_
+
+    std::vector<int> Q_histogram_;
+    std::vector<int> W_histogram_;
+
+  };
 }
 
 #endif

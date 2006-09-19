@@ -56,6 +56,7 @@
 #include "applications/staticProps/GofAngle2.hpp"
 #include "applications/staticProps/GofXyz.hpp"
 #include "applications/staticProps/P2OrderParameter.hpp"
+#include "applications/staticProps/BondOrderParameter.hpp"
 #include "applications/staticProps/RippleOP.hpp"
 #include "applications/staticProps/SCDOrderParameter.hpp"
 #include "applications/staticProps/DensityPlot.hpp"
@@ -78,67 +79,84 @@ int main(int argc, char* argv[]){
     exit(1) ;
   }
 
-
-  //get the dumpfile name and meta-data file name
+  //get the dumpfile name
   std::string dumpFileName = args_info.input_arg;
-
-    
   std::string sele1;
   std::string sele2;
+  bool userSpecifiedSelect1;
+  bool userSpecifiedSelect2;
+
+  // check the first selection argument, or set it to the environment
+  // variable, or failing that, set it to "select all"
 
   if (args_info.sele1_given) {
     sele1 = args_info.sele1_arg;
-  }else {
+  } else {
     char*  sele1Env= getenv("OOPSE_SELE1");
     if (sele1Env) {
       sele1 = sele1Env;
-    }else if (!args_info.scd_given) {
-      sprintf( painCave.errMsg,
-               "neither --sele1 option nor $OOPSE_SELE1 is set");
-      painCave.severity = OOPSE_ERROR;
-      painCave.isFatal = 1;
-      simError();
+    } else {
+      sele1 = "select all";
     }
   }
-    
+
+  // check the second selection argument, or set it to the environment
+  // variable, or failing that, set it to "select all"
+  
   if (args_info.sele2_given) {
     sele2 = args_info.sele2_arg;
-  }else {
+  } else {
     char* sele2Env = getenv("OOPSE_SELE2");
     if (sele2Env) {
       sele2 = sele2Env;            
-    } else if (args_info.density_given) { 
+    } else { 
       sele2 = "select all";
-    } else if(!args_info.scd_given && !args_info.density_given && !args_info.slab_density_given)  {
-      sprintf( painCave.errMsg,
-               "neither --sele2 option nor $OOPSE_SELE2 is set");
-      painCave.severity = OOPSE_ERROR;
-      painCave.isFatal = 1;
-      simError();        
     }
   }
+
+
+  // Problems if sele1 wasn't specified, but 
+// if (!args_info.scd_given) {
+//       sprintf( painCave.errMsg,
+//                "neither --sele1 option nor $OOPSE_SELE1 is set");
+//       painCave.severity = OOPSE_ERROR;
+//       painCave.isFatal = 1;
+//       simError();
+//     }
+//   }
+
+  // Problems if sele1 wasn't specified
+
+//     if(!args_info.scd_given && !args_info.density_given && !args_info.slab_density_given)  {
+//       sprintf( painCave.errMsg,
+//                "neither --sele2 option nor $OOPSE_SELE2 is set");
+//       painCave.severity = OOPSE_ERROR;
+//       painCave.isFatal = 1;
+//       simError();        
+//     }
+//   }
 
   bool batchMode;
   if (args_info.scd_given){
     if (args_info.sele1_given && args_info.sele2_given && args_info.sele3_given) {
-        batchMode = false;
+      batchMode = false;
     } else if (args_info.molname_given && args_info.begin_given && args_info.end_given) {
-        if (args_info.begin_arg < 0 || args_info.end_arg < 0 || args_info.begin_arg > args_info.end_arg-2) {
-            sprintf( painCave.errMsg,
-                     "below conditions are not satisfied:\n"
-                     "0 <= begin && 0<= end && begin <= end-2\n");
-            painCave.severity = OOPSE_ERROR;
-            painCave.isFatal = 1;
-            simError();                    
-        }
-        batchMode = true;        
-    } else{
+      if (args_info.begin_arg < 0 || args_info.end_arg < 0 || args_info.begin_arg > args_info.end_arg-2) {
         sprintf( painCave.errMsg,
-                 "either --sele1, --sele2, --sele3 are specified,"
-                 " or --molname, --begin, --end are specified\n");
+                 "below conditions are not satisfied:\n"
+                 "0 <= begin && 0<= end && begin <= end-2\n");
         painCave.severity = OOPSE_ERROR;
         painCave.isFatal = 1;
-        simError();        
+        simError();                    
+      }
+      batchMode = true;        
+    } else{
+      sprintf( painCave.errMsg,
+               "either --sele1, --sele2, --sele3 are specified,"
+               " or --molname, --begin, --end are specified\n");
+      painCave.severity = OOPSE_ERROR;
+      painCave.isFatal = 1;
+      simError();        
     
     }
   }
@@ -175,28 +193,40 @@ int main(int argc, char* argv[]){
       simError();  
     }
   } else if (args_info.p2_given) {
-      analyser  = new P2OrderParameter(info, dumpFileName, sele1, sele2);
-  }    else if (args_info.rp2_given){
-      analyser = new RippleOP(info, dumpFileName, sele1, sele2);
-}else if (args_info.scd_given) {
-      if (batchMode) {
-          analyser  = new SCDOrderParameter(info, dumpFileName, args_info.molname_arg, 
-            args_info.begin_arg, args_info.end_arg);
-      } else{
-          std::string sele3 = args_info.sele3_arg;
-          analyser  = new SCDOrderParameter(info, dumpFileName, sele1, sele2, sele3);
-      }
+    analyser  = new P2OrderParameter(info, dumpFileName, sele1, sele2);
+  } else if (args_info.rp2_given){
+    analyser = new RippleOP(info, dumpFileName, sele1, sele2);
+  } else if (args_info.bo_given){
+    if (args_info.rcut_given && args_info.LegendreL_given) {
+      analyser = new BondOrderParameter(info, dumpFileName, sele1, 
+                                        args_info.rcut_arg, 
+                                        args_info.LegendreL_arg);
+    } else {
+      sprintf( painCave.errMsg,
+               "Both the cutoff radius (rcut) and LegendreL must be specified when calculating Bond Order Parameters");
+      painCave.severity = OOPSE_ERROR;
+      painCave.isFatal = 1;
+      simError();
+    }
+  } else if (args_info.scd_given) {
+    if (batchMode) {
+      analyser  = new SCDOrderParameter(info, dumpFileName, args_info.molname_arg, 
+                                        args_info.begin_arg, args_info.end_arg);
+    } else{
+      std::string sele3 = args_info.sele3_arg;
+      analyser  = new SCDOrderParameter(info, dumpFileName, sele1, sele2, sele3);
+    }
   }else if (args_info.density_given) {
-      analyser= new DensityPlot(info, dumpFileName, sele1, sele2, maxLen, args_info.nrbins_arg);  
+    analyser= new DensityPlot(info, dumpFileName, sele1, sele2, maxLen, args_info.nrbins_arg);  
   } else if (args_info.slab_density_given) {
-      Mat3x3d hmat = info->getSnapshotManager()->getCurrentSnapshot()->getHmat();
-      analyser = new RhoZ(info, dumpFileName, sele1, hmat(2, 2), args_info.nrbins_arg);
+    Mat3x3d hmat = info->getSnapshotManager()->getCurrentSnapshot()->getHmat();
+    analyser = new RhoZ(info, dumpFileName, sele1, hmat(2, 2), args_info.nrbins_arg);
 #if defined(HAVE_FFTW_H) || defined(HAVE_DFFTW_H) || defined(HAVE_FFTW3_H)
   }else if (args_info.hxy_given) {
     analyser = new Hxy(info, dumpFileName, sele1, args_info.nbins_x_arg, args_info.nbins_y_arg, args_info.nrbins_arg);
 #endif
   }
-    
+  
   if (args_info.output_given) {
     analyser->setOutputName(args_info.output_arg);
   }

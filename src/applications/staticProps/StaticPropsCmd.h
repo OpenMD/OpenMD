@@ -40,6 +40,10 @@ struct gengetopt_args_info
   char * nanglebins_orig;	/* number of bins for cos(angle) original value given at command line.  */
   double length_arg;	/* maximum length (Defaults to 1/2 smallest length of first frame).  */
   char * length_orig;	/* maximum length (Defaults to 1/2 smallest length of first frame) original value given at command line.  */
+  int LegendreL_arg;	/* Order of Legendre Polynomial (used for Bond Order calculations).  */
+  char * LegendreL_orig;	/* Order of Legendre Polynomial (used for Bond Order calculations) original value given at command line.  */
+  double rcut_arg;	/* cutoff radius (rcut).  */
+  char * rcut_orig;	/* cutoff radius (rcut) original value given at command line.  */
   double zoffset_arg;	/* Where to set the zero for the slab_density calculation (default='0').  */
   char * zoffset_orig;	/* Where to set the zero for the slab_density calculation original value given at command line.  */
   char * sele1_arg;	/* select the first stuntdouble set.  */
@@ -52,8 +56,8 @@ struct gengetopt_args_info
   char * refsele_orig;	/* select reference (use and only use with --gxyz) original value given at command line.  */
   char * molname_arg;	/* molecule name.  */
   char * molname_orig;	/* molecule name original value given at command line.  */
-  int begin_arg;	/* begin interanl index.  */
-  char * begin_orig;	/* begin interanl index original value given at command line.  */
+  int begin_arg;	/* begin internal index.  */
+  char * begin_orig;	/* begin internal index original value given at command line.  */
   int end_arg;	/* end internal index.  */
   char * end_orig;	/* end internal index original value given at command line.  */
   
@@ -67,6 +71,8 @@ struct gengetopt_args_info
   int nbins_y_given ;	/* Whether nbins_y was given.  */
   int nanglebins_given ;	/* Whether nanglebins was given.  */
   int length_given ;	/* Whether length was given.  */
+  int LegendreL_given ;	/* Whether LegendreL was given.  */
+  int rcut_given ;	/* Whether rcut was given.  */
   int zoffset_given ;	/* Whether zoffset was given.  */
   int sele1_given ;	/* Whether sele1 was given.  */
   int sele2_given ;	/* Whether sele2 was given.  */
@@ -75,6 +81,7 @@ struct gengetopt_args_info
   int molname_given ;	/* Whether molname was given.  */
   int begin_given ;	/* Whether begin was given.  */
   int end_given ;	/* Whether end was given.  */
+  int bo_given ;	/* Whether bo was given.  */
   int gofr_given ;	/* Whether gofr was given.  */
   int r_theta_given ;	/* Whether r_theta was given.  */
   int r_omega_given ;	/* Whether r_omega was given.  */

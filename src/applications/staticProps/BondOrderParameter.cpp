@@ -45,7 +45,7 @@
  *     Phys Rev B, 28,784,1983
  * 
  */
-
+ 
 #include "applications/staticProps/BondOrderParameter.hpp"
 #include "utils/simError.h"
 #include "io/DumpReader.hpp"
@@ -55,179 +55,238 @@
 namespace oopse {
 
 
-  BondOrderParameter::BondOrderParameter(SimInfo* info, const std::string& filename, const std::string& sele1,
-					 const std::string& sele2, double rCut, int lNumber)
-    : StaticAnalyser(info, filename),
-      selectionScript1_(sele1), evaluator1_(info),
-      seleMan1_(info){
-
+  BondOrderParameter::BondOrderParameter(SimInfo* info, 
+                                         const std::string& filename, 
+                                         const std::string& sele,
+                                         double rCut, int lNumber, int nbins)
+    : StaticAnalyser(info, filename), selectionScript_(sele), 
+      evaluator_(info), seleMan_(info){
+    
     setOutputName(getPrefix(filename) + ".obo");
 
-    evaluator1_.loadScriptString(sele1);
-    evaluator2_.loadScriptString(sele2);
-
-    if (!evaluator1_.isDynamic()) {
-      seleMan1_.setSelectionSet(evaluator1_.evaluate());
-    }else {
-      sprintf( painCave.errMsg,
-	       "--sele1 must be static selection\n");
-      painCave.severity = OOPSE_ERROR;
-      painCave.isFatal = 1;
-      simError();
+    evaluator_.loadScriptString(sele);
+    if (!evaluator_.isDynamic()) {
+      seleMan_.setSelectionSet(evaluator_.evaluate());
     }
 
-    /* Set up cutoff radius and type of order parameter we are calcuating*/
+    // Set up cutoff radius and order of the Legendre Polynomial:
+
     lNumber_ = lNumber;
     rCut_ = rCut;
-    mSize_ = 2*lNumber_+1;
+    mSize_ = 2*lNumber_+1;    
 
-    int i;
-    int j;
-    StuntDouble* sd1;
-    StuntDouble* sd2;
-    for (sd1 = seleMan1_.beginSelected(i), sd2 = seleMan1_.beginSelected(j);
-	 sd1 != NULL && sd2 != NULL;
-	 sd1 = seleMan1_.nextSelected(i), sd2 = seleMan2_.nextSelected(j)) {
-      for (sd2 = seleMan1_.beginSelected(j),sd2
-	     sdPairs_.push_back(std::make_pair(sd1, sd2));
-	   }
+    // Set the l for the spherical harmonic, it doesn't change
+
+    sphericalHarmonic.setL(lNumber_);
+
+    delta_Q = 1.0 / nbins;
+    delta_W = 2.0 / nbins;
+
+    Q_histogram_.resize(nbins);
+    W_histogram_.resize(nbins);
+
+  }
+
+  void BondOrderParameter::initalizeHistogram() {
+    std::fill(Q_histogram_.begin(), Q_histogram_.end(), 0);
+    std::fill(W_histogram_.begin(), W_histogram_.end(), 0);
+  }
+
+  void BondOrderParameter::process() {
+    Molecule* mol;
+    Atom* atom;
+    RigidBody* rb;
+    SimInfo::MoleculeIterator mi;
+    Molecule::RigidBodyIterator rbIter;
+    Molecule::AtomIterator ai;
+    StuntDouble* sd;
+    RealType theta;
+    RealType phi;
+    RealType r;
+    RealType dist;
+    std::map<int, RealType> QBar_lm;
+    RealType QSq_l;
+    RealType Q_l;
+    int nBonds;
+    RealSphericalHarmonic sphericalHarmonic;
+    int i, j;
+  
+  
+    DumpReader reader(info_, dumpFilename_);    
+    int nFrames = reader.getNFrames();
 
 
+    for (int istep = 0; istep < nFrames; istep += step_) {
+      reader.readFrame(istep);
+      currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
+      
+      if (evaluator_.isDynamic()) {
+        seleMan_.setSelectionSet(evaluator_.evaluate());
+      }
+
+      // update the positions of atoms which belong to the rigidbodies
+
+      for (mol = info_->beginMolecule(mi); mol != NULL; 
+           mol = info_->nextMolecule(mi)) {
+        for (rb = mol->beginRigidBody(rbIter); rb != NULL; 
+             rb = mol->nextRigidBody(rbIter)) {
+          rb->updateAtoms();
+        }        
+      }      
+      
+      // outer loop is over the selected StuntDoubles:
+
+      for (sd = seleMan_.beginSelected(i); sd != NULL; 
+           sd = seleMan_.nextSelected(i)) {
+
+        // For this central atom, zero out nBonds and QBar_lm
+
+        nBonds = 0;
+       
+        for (int m = -lNumber_; m <= lNumber_; m++) {
+          QBar_lm[m] = 0.0;
+        }
+        
+        // inner loop is over all other atoms in the system:
+        
+        for (mol = info_->beginMolecule(mi); mol != NULL; 
+             mol = info_->nextMolecule(mi)) {
+          for (atom = mol->beginAtom(ai); atom != NULL; 
+               atom = mol->nextAtom(ai)) {
+
+
+            Vector3d vec = sd->getPos() - atom->getPos();       
+            currentSnapshot_->wrapVector(vec);
+            
+            // Calculate "bonds" and build Q_lm(r) where 
+            //      Q_lm = Y_lm(theta(r),phi(r))                
+            // The spherical harmonics are wrt any arbitrary coordinate
+            // system, we choose standard spherical coordinates 
+            
+            r = sqrt(pow(vec.x(),2)+pow(vec.y(),2)+pow(vec.z(),2));
+            
+            // Check to see if neighbor is in bond cutoff 
+            
+            if (r < rCut_) {  		
+              theta = atan2(vec.y(), vec.x());
+              phi = acos(vec.z()/r);
+              for(int m = -lNumber_; m <= lNumber_; m++){
+                sphericalHarmonic.setM(m);
+                QBar_lm[m] += sphericalHarmonic.getValueAt(theta,phi);
+              }
+              nBonds++;
+            }  
+          }
+        }
+        
+        // Normalize Qbar
+        for (int m = -lNumber_;m <= lNumber_; m++){
+          QBar_lm[m] /= nBonds;	
+        }
+
+        // Find second order invariant Q_l
+
+        QSq_l = 0.0;
+        for (int m = -lNumber_; m <= lNumber_; m++){
+          QSq_l += pow(QBar_lm[m], 2);	
+        }
+        Q_l = sqrt(QSq_l*(4.0 * NumericConstant::PI / (2.0*(RealType)lNumber_ + 1)));
+     
+        // Find Third Order Invariant W_l
+
+        // Make arrays for Wigner3jm
+        double* THRCOF = new double[mSize_];
+        // Variables for Wigner routine
+        double l_ = (double)lNumber_;
+        double m2Min, m2Max;
+        int error, m1, m2, m3;
+        
+        W_l_ = 0.0;
+        for (int m1 = -lNumber_; m1 <= lNumber_; m1++) {
+          // Zero work array
+          for (int ii = 0; ii < mSize_; ii+){
+            THRCOF[i] = 0.0;
+          }
+          // Get Wigner coefficients
+          Wigner3jm(&l_, &l_, &l_, &(double)m1, &m2Min, &m2Max, THRCOF, &mSize_, &error);
+          for (int m_index = 1; i < (int)(m2Max - m2Min-1.0); m_index++) {
+            m2 = floor(m2Min) + m_index - 1;
+            m3 = -m1-m2;
+            W_l_ += THRCOF[m_index]*QBar_lm[m1+lNumber_]*QBar_lm[m2+lNumber_]*QBar_lm[m3+lNumber_];
+          }
+        }
+
+        W_l_hat = W_l_ / pow(QSq_l, 1.5);
+
+        // accumulate histogram data for Q_l and W_l_hat:
+
+        collectHistogram(Q_l, W_l_hat);
+                
+      }
     }
-
-    void BondOrderParameter::process
-      () {
-      Molecule* mol;
-      RigidBody* rb;
-      SimInfo::MoleculeIterator mi;
-      Molecule::RigidBodyIterator rbIter;
-      RealType theta;
-      RealType phi;
-      RealType r;
-      RealType dist;
-      RealType* QBar_lm;
-      RealType QSq_l;
-      int nBonds;
-      int m, m_index;
-      RealSphericalHarmonic sphericalHarmonic;
-
-
-      DumpReader reader(info_, dumpFilename_);
-      int nFrames = reader.getNFrames();
-
-      /*Set the l for the spherical harmonic, it doesn't change*/
-      sphericalHarmonic.setL(lNumber_);
-
-      for (int i = 0; i < nFrames; i += step_) {
-	reader.readFrame(i);
-	currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
-	nBonds = 0;
-
-	for (mol = info_->beginMolecule(mi); mol != NULL; mol = info_->nextMolecule(mi)) {
-	  //change the positions of atoms which belong to the rigidbodies
-	  for (rb = mol->beginRigidBody(rbIter); rb != NULL; rb = mol->nextRigidBody(rbIter)) {
-	    rb->updateAtoms();
-	  }
-
-	}
-
-
-	/* Setup QBar */
-	QBar_lm = new double[mSize_];
-
-	/* Calculate "bonds" and build Q_lm(r) where Q_lm = Y_lm(theta(r),phi(r)) */
-	for (std::vector<std::pair<StuntDouble*, StuntDouble*> >::iterator j = sdPairs_.begin(); j != sdPairs_.end(); ++j) {
-	  Vector3d vec = j->first->getPos() - j->second->getPos();
-	  currentSnapshot_->wrapVector(vec);
-	  /* The spherical harmonics are wrt any arbitray coordiate sysetm,
-	   * we choose standard spherical coordinates */
-	  r = sqrt(pow(vec.x(),2)+pow(vec.y(),2)+pow(vec.z(),2));
-
-	  /* Check to see if neighbor is in bond cuttoff*/
-	  if (r<rCut_){
-	    theta = atan(vec.y()/vec.x());
-	    phi = acos(vec.z()/r);
-	    for(int m_index = 0; m_index < mSize_; m_index++){
-	      sphericalHarmonic.setM(m_index-lNumber_);
-	      QBar_lm(m_index) += sphericalHarmonic.getValueAt(theta,phi);
-	    }
-	    nBonds++;
-	  }
-	}
-
-	/*Normalize Qbar by number of Bonds*/
-	for ( int m_index = 0;m_index < mSize_; m_index++){
-	  QBar_lm(m_index) = QBar_lm(m_index)/nBonds;
-	}
-
-
-      }
-
-      /*Normalize by number of frames*/
-      for ( int m_index = 0;m_index < mSize_; m_index++){
-	QBar_lm(m_index) = QBar_lm(m_index)/nFrames;
-      }
-
-
-
-      /* Find second order invariant Q_l*/
-
-      for (int m_index = 0 ;m_index <= sizeM_; m++){
-	QSq_l += pow(QBar_lm(m),2);
-      }
-      Q_l_ = sqrt((4*NumericConstant::PI/lNumber_+1)*QSq_l);
-
-      /* Find Third Order Invariant W_l*/
-
-      /* Make arrays for Wigner3jm */
-      double* THRCOF = new double[mSize_];
-      /* Variables for Wigner routine */
-      double l_ = (double)lNumber_;
-      double m2Min;
-      double m2Max;
-      int error;
-      int m1;
-      int m2;
-      int m3;
-
-      for (int m1 = -lNumber_;m <= lNumber_;m1++){
-	/* Zero work array */
-	for (i=0; i<mSize_;i++){
-	  THRCOF[i] = 0.0;      
-	}
-	/* Get wigner coefficients */
-	Wigner3jm(&l_,&l_,&l_,&(double)m1,&m2Min,&m2Max&,THRCOF,&mSize_,&error);
-	for (m_index=1; i<(m2Max-M2Min-1.0);m_index++){
-	  m2 = floor(m2Min) + m_index - 1;
-	  m3 = -m1-m2;
-	  W_l_ += THRCOF(m_index)*QBar_lm(m1+lNumber_)*QBar_lm(m2+lNumber_)*QBar_lm(m3+lNumber_);
-	}
-      }
-
-
-      writeOrderParameter();
-
+    
+    // Normalize by number of frames
+    for (int m = -lNumber_; m <= lNumber_; m++){
+      QBar_lm[m] /=  nFrames;	
     }
+    
+     
+     
+     
+     
+    writeOrderParameter();
+    
+  }
 
+  
+  void BondOrderParameter::processHistogram() {
+    
+    int nPairs = getNPairs();
+    RealType volume = info_->getSnapshotManager()->getCurrentSnapshot()->getVolume();
+    RealType pairDensity = nPairs /volume * 2.0;
+    RealType pairConstant = ( 4.0 * NumericConstant::PI * pairDensity ) / 3.0;
 
-    void BondOrderParameter::writeOrderParameter() {
+    for(int i = 0 ; i < histogram_.size(); ++i){
 
-      std::ofstream os(getOutputFileName().c_str());
-      os << "#radial distribution function\n";
-      os<< "#selection1: (" << selectionScript1_ << ")\t";
-      os << "selection2: (" << selectionScript2_ << ")\n";
-      os << "#p2\tdirector_x\tdirector_y\tdiretor_z\tangle(degree)\n";
+      RealType rLower = i * deltaR_;
+      RealType rUpper = rLower + deltaR_;
+      RealType volSlice = ( rUpper * rUpper * rUpper ) - ( rLower * rLower * rLower );
+      RealType nIdeal = volSlice * pairConstant;
 
-      for (std::size_t i = 0; i < orderParams_.size(); ++i) {
-	os <<  orderParams_[i].p2 << "\t"
-	   <<  orderParams_[i].director[0] << "\t"
-	   <<  orderParams_[i].director[1] << "\t"
-	   <<  orderParams_[i].director[2] << "\t"
-	   <<  orderParams_[i].angle << "\n";
-
-      }
-
+      avgGofr_[i] += histogram_[i] / nIdeal;    
     }
 
   }
 
+  void BondOrderParameter::collectHistogram(RealType Q_l, RealType W_l_hat) {
+
+    if (Q_l < Max_Q) {
+      int whichBin = Q_l / deltaQ_;
+      Q_histogram_[whichBin] += 1;
+    }
+    if (W_l_hat < Max_W) {
+      int whichBin = W_l_hat / deltaW_;
+      W_histogram_[whichBin] += 1;
+    }
+  }
+  
+
+  void BondOrderParameter::writeOrderParameter() {
+
+    std::ofstream os(getOutputFileName().c_str());
+    os << "#Bond Order Parameter\n";
+    os << "#selection: (" << selectionScript_ << ")\n";
+
+    for (std::size_t i = 0; i < orderParams_.size(); ++i) {
+      os <<  orderParams_[i].p2 << "\t"
+         <<  orderParams_[i].director[0] << "\t"
+         <<  orderParams_[i].director[1] << "\t"
+         <<  orderParams_[i].director[2] << "\t"
+         <<  orderParams_[i].angle << "\n";
+
+    }
+  }
+
+
+
+}

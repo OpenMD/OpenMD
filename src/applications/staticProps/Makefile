@@ -13,7 +13,8 @@ Source    = \
 	StaticProps.cpp \
 	RhoZ.cpp \
 	Hxy.cpp \
-        RippleOP.cpp
+        RippleOP.cpp \
+	BondOrderParameter.cpp \
 	
 BuiltParallelExe = 0
 
