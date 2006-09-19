@@ -44,6 +44,7 @@
 #include "selection/SelectionManager.hpp"
 #include "applications/staticProps/StaticAnalyser.hpp"
 #include "math/Vector3.hpp"
+#include "math/Wigner3jm_interface.h"
 
 namespace oopse {
   
@@ -76,7 +77,7 @@ namespace oopse {
     RealType deltaQ_;
 
     RealType MaxW_;
-    RealType deltaW_
+    RealType deltaW_;
 
     std::vector<int> Q_histogram_;
     std::vector<int> W_histogram_;

@@ -75,12 +75,8 @@ namespace oopse {
     rCut_ = rCut;
     mSize_ = 2*lNumber_+1;    
 
-    // Set the l for the spherical harmonic, it doesn't change
-
-    sphericalHarmonic.setL(lNumber_);
-
-    delta_Q = 1.0 / nbins;
-    delta_W = 2.0 / nbins;
+    deltaQ_ = 1.0 / nbins;
+    deltaW_ = 2.0 / nbins;
 
     Q_histogram_.resize(nbins);
     W_histogram_.resize(nbins);
@@ -111,7 +107,10 @@ namespace oopse {
     RealSphericalHarmonic sphericalHarmonic;
     int i, j;
   
-  
+    // Set the l for the spherical harmonic, it doesn't change
+    sphericalHarmonic.setL(lNumber_);
+
+
     DumpReader reader(info_, dumpFilename_);    
     int nFrames = reader.getNFrames();
 
@@ -200,11 +199,13 @@ namespace oopse {
         double l_ = (double)lNumber_;
         double m2Min, m2Max;
         int error, m1, m2, m3;
-        
-        W_l_ = 0.0;
+
+        RealType W_l;
+        RealType W_l_hat;
+        W_l = 0.0;
         for (int m1 = -lNumber_; m1 <= lNumber_; m1++) {
           // Zero work array
-          for (int ii = 0; ii < mSize_; ii+){
+          for (int ii = 0; ii < mSize_; ii++){
             THRCOF[i] = 0.0;
           }
           // Get Wigner coefficients
@@ -212,11 +213,11 @@ namespace oopse {
           for (int m_index = 1; i < (int)(m2Max - m2Min-1.0); m_index++) {
             m2 = floor(m2Min) + m_index - 1;
             m3 = -m1-m2;
-            W_l_ += THRCOF[m_index]*QBar_lm[m1+lNumber_]*QBar_lm[m2+lNumber_]*QBar_lm[m3+lNumber_];
+            W_l += THRCOF[m_index]*QBar_lm[m1+lNumber_]*QBar_lm[m2+lNumber_]*QBar_lm[m3+lNumber_];
           }
         }
 
-        W_l_hat = W_l_ / pow(QSq_l, 1.5);
+        W_l_hat = W_l / pow(QSq_l, 1.5);
 
         // accumulate histogram data for Q_l and W_l_hat:
 
@@ -260,11 +261,11 @@ namespace oopse {
 
   void BondOrderParameter::collectHistogram(RealType Q_l, RealType W_l_hat) {
 
-    if (Q_l < Max_Q) {
+    if (Q_l < MaxQ_) {
       int whichBin = Q_l / deltaQ_;
       Q_histogram_[whichBin] += 1;
     }
-    if (W_l_hat < Max_W) {
+    if (W_l_hat < MaxW_) {
       int whichBin = W_l_hat / deltaW_;
       W_histogram_[whichBin] += 1;
     }
