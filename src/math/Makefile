@@ -4,6 +4,7 @@ Source    = \
 				ParallelRandNumGen.cpp \
                                 SeqRandNumGen.cpp \
 				RealSphericalHarmonic.cpp \
+				SphericalHarmonic.cpp \
 				ChebyshevPolynomials.cpp \
                                 LegendrePolynomial.cpp \
                                 linearAlgebra.F90 \

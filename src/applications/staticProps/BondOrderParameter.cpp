@@ -51,7 +51,7 @@
 #include "io/DumpReader.hpp"
 #include "primitives/Molecule.hpp"
 #include "utils/NumericConstant.hpp"
-#include "math/RealSphericalHarmonic.hpp"
+#include "math/SphericalHarmonic.hpp"
 
 namespace oopse {
 
@@ -108,15 +108,15 @@ namespace oopse {
     Molecule::RigidBodyIterator rbIter;
     Molecule::AtomIterator ai;
     StuntDouble* sd;
-    RealType theta;
+    RealType costheta;
     RealType phi;
     RealType r;
     RealType dist;
-    std::map<int, RealType> QBar_lm;
+    std::map<int, ComplexType> QBar_lm;
     RealType QSq_l;
     RealType Q_l;
     int nBonds;
-    RealSphericalHarmonic sphericalHarmonic;
+    SphericalHarmonic sphericalHarmonic;
     int i, j;
   
     // Set the l for the spherical harmonic, it doesn't change
@@ -180,18 +180,19 @@ namespace oopse {
             // Check to see if neighbor is in bond cutoff 
             
             if (r < rCut_) {  		
-              theta = atan2(vec.y(), vec.x());
-              phi = acos(vec.z()/r);
+              costheta = vec.z() / r;
+              phi = atan2(vec.y(), vec.x());
+              
               for(int m = -lNumber_; m <= lNumber_; m++){
                 sphericalHarmonic.setM(m);
-                QBar_lm[m] += sphericalHarmonic.getValueAt(theta,phi);
+                QBar_lm[m] += sphericalHarmonic.getValueAt(costheta,phi);
               }
               nBonds++;
             }  
           }
         }
         
-        // Normalize Qbar
+        // Normalize Qbar2
         for (int m = -lNumber_;m <= lNumber_; m++){
           QBar_lm[m] /= nBonds;	
         }
@@ -200,7 +201,7 @@ namespace oopse {
 
         QSq_l = 0.0;
         for (int m = -lNumber_; m <= lNumber_; m++){
-          QSq_l += pow(QBar_lm[m], 2);	
+          QSq_l += norm(QBar_lm[m]);
         }
         Q_l = sqrt(QSq_l*(4.0 * NumericConstant::PI / (2.0*(RealType)lNumber_ + 1)));
      
@@ -213,8 +214,8 @@ namespace oopse {
         double m1Pass, m2Min, m2Max;
         int error, m1, m2, m3;
 
-        RealType W_l;
-        RealType W_l_hat;
+        ComplexType W_l;
+        ComplexType W_l_hat;
         W_l = 0.0;
         for (int m1 = -lNumber_; m1 <= lNumber_; m1++) {
           // Zero work array
@@ -235,7 +236,7 @@ namespace oopse {
 
         // accumulate histogram data for Q_l and W_l_hat:
 
-        collectHistogram(Q_l, W_l_hat);
+        collectHistogram(Q_l, real(W_l_hat));
                 
       }
     }
