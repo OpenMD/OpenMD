@@ -107,9 +107,9 @@ namespace oopse {
 
     RealType halfBin = (nAngleBins_ - 1) * 0.5;
     int angleBin1 = halfBin * (cosAngle1 + 1.0);
-    int angleBin2 = halfBin * (cosAngle1 + 1.0);
+    int angleBin2 = halfBin * (cosAngle2 + 1.0);
 
-    ++histogram_[angleBin1][angleBin1];    
+    ++histogram_[angleBin1][angleBin2];    
     ++npairs_;
   }
 

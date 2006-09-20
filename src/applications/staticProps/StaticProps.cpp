@@ -175,16 +175,21 @@ int main(int argc, char* argv[]){
 
   StaticAnalyser* analyser;
   if (args_info.gofr_given){
-    analyser= new GofR(info, dumpFileName, sele1, sele2, maxLen, args_info.nrbins_arg);        
+    analyser= new GofR(info, dumpFileName, sele1, sele2, maxLen, 
+                       args_info.nbins_arg);        
   } else if (args_info.r_theta_given) {
-    analyser  = new GofRTheta(info, dumpFileName, sele1, sele2, maxLen, args_info.nrbins_arg, args_info.nanglebins_arg);
+    analyser  = new GofRTheta(info, dumpFileName, sele1, sele2, maxLen, 
+                              args_info.nbins_arg, args_info.nanglebins_arg);
   } else if (args_info.r_omega_given) {
-    analyser  = new GofROmega(info, dumpFileName, sele1, sele2, maxLen, args_info.nrbins_arg, args_info.nanglebins_arg);
+    analyser  = new GofROmega(info, dumpFileName, sele1, sele2, maxLen, 
+                              args_info.nbins_arg, args_info.nanglebins_arg);
   } else if (args_info.theta_omega_given) {
-    analyser  = new GofAngle2(info, dumpFileName, sele1, sele2, args_info.nanglebins_arg);
+    analyser  = new GofAngle2(info, dumpFileName, sele1, sele2, 
+                              args_info.nanglebins_arg);
   } else if (args_info.gxyz_given) {
     if (args_info.refsele_given) {
-      analyser= new GofXyz(info, dumpFileName, sele1, sele2,args_info.refsele_arg, maxLen, args_info.nrbins_arg);        
+      analyser= new GofXyz(info, dumpFileName, sele1, sele2,args_info.refsele_arg, 
+                           maxLen, args_info.nbins_arg);        
     } else {
       sprintf( painCave.errMsg,
                "--refsele must set when --gxyz is used");
@@ -200,7 +205,8 @@ int main(int argc, char* argv[]){
     if (args_info.rcut_given && args_info.LegendreL_given) {
       analyser = new BondOrderParameter(info, dumpFileName, sele1, 
                                         args_info.rcut_arg, 
-                                        args_info.LegendreL_arg);
+                                        args_info.LegendreL_arg,
+                                        args_info.nbins_arg);
     } else {
       sprintf( painCave.errMsg,
                "Both the cutoff radius (rcut) and LegendreL must be specified when calculating Bond Order Parameters");
@@ -217,13 +223,15 @@ int main(int argc, char* argv[]){
       analyser  = new SCDOrderParameter(info, dumpFileName, sele1, sele2, sele3);
     }
   }else if (args_info.density_given) {
-    analyser= new DensityPlot(info, dumpFileName, sele1, sele2, maxLen, args_info.nrbins_arg);  
+    analyser= new DensityPlot(info, dumpFileName, sele1, sele2, maxLen, 
+                              args_info.nbins_arg);  
   } else if (args_info.slab_density_given) {
     Mat3x3d hmat = info->getSnapshotManager()->getCurrentSnapshot()->getHmat();
-    analyser = new RhoZ(info, dumpFileName, sele1, hmat(2, 2), args_info.nrbins_arg);
+    analyser = new RhoZ(info, dumpFileName, sele1, hmat(2, 2), args_info.nbins_arg);
 #if defined(HAVE_FFTW_H) || defined(HAVE_DFFTW_H) || defined(HAVE_FFTW3_H)
   }else if (args_info.hxy_given) {
-    analyser = new Hxy(info, dumpFileName, sele1, args_info.nbins_x_arg, args_info.nbins_y_arg, args_info.nrbins_arg);
+    analyser = new Hxy(info, dumpFileName, sele1, args_info.nbins_x_arg, 
+                       args_info.nbins_y_arg, args_info.nbins_arg);
 #endif
   }
   

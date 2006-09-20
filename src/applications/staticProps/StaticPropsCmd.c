@@ -43,7 +43,7 @@ void clear_given (struct gengetopt_args_info *args_info)
   args_info->input_given = 0 ;
   args_info->output_given = 0 ;
   args_info->step_given = 0 ;
-  args_info->nrbins_given = 0 ;
+  args_info->nbins_given = 0 ;
   args_info->nbins_x_given = 0 ;
   args_info->nbins_y_given = 0 ;
   args_info->nanglebins_given = 0 ;
@@ -82,8 +82,8 @@ void clear_args (struct gengetopt_args_info *args_info)
   args_info->output_orig = NULL;
   args_info->step_arg = 1;
   args_info->step_orig = NULL;
-  args_info->nrbins_arg = 100;
-  args_info->nrbins_orig = NULL;
+  args_info->nbins_arg = 100;
+  args_info->nbins_orig = NULL;
   args_info->nbins_x_arg = 100;
   args_info->nbins_x_orig = NULL;
   args_info->nbins_y_arg = 100;
@@ -126,7 +126,7 @@ cmdline_parser_print_help (void)
   printf("%s\n","  -i, --input=filename          input dump file");
   printf("%s\n","  -o, --output=filename         output file name");
   printf("%s\n","  -n, --step=INT                process every n frame  (default=`1')");
-  printf("%s\n","  -r, --nrbins=INT              number of bins for distance  (default=`100')");
+  printf("%s\n","  -b, --nbins=INT               number of bins (general purpose)  \n                                  (default=`100')");
   printf("%s\n","  -x, --nbins_x=INT             number of bins in x axis  (default=`100')");
   printf("%s\n","  -y, --nbins_y=INT             number of bins in y axis  (default=`100')");
   printf("%s\n","  -a, --nanglebins=INT          number of bins for cos(angle)  (default=`50')");
@@ -142,7 +142,7 @@ cmdline_parser_print_help (void)
   printf("%s\n","      --begin=INT               begin internal index");
   printf("%s\n","      --end=INT                 end internal index");
   printf("%s\n","\n Group: staticProps\n   an option of this group is required");
-  printf("%s\n","  -b, --bo                      bond order parameter (--rcut and --LegendreL \n                                  must be specified");
+  printf("%s\n","      --bo                      bond order parameter (--rcut and --LegendreL \n                                  must be specified");
   printf("%s\n","  -g, --gofr                    g(r)");
   printf("%s\n","      --r_theta                 g(r, cos(theta))");
   printf("%s\n","      --r_omega                 g(r, cos(omega))");
@@ -193,10 +193,10 @@ cmdline_parser_release (struct gengetopt_args_info *args_info)
       free (args_info->step_orig); /* free previous argument */
       args_info->step_orig = 0;
     }
-  if (args_info->nrbins_orig)
+  if (args_info->nbins_orig)
     {
-      free (args_info->nrbins_orig); /* free previous argument */
-      args_info->nrbins_orig = 0;
+      free (args_info->nbins_orig); /* free previous argument */
+      args_info->nbins_orig = 0;
     }
   if (args_info->nbins_x_orig)
     {
@@ -338,11 +338,11 @@ cmdline_parser_file_save(const char *filename, struct gengetopt_args_info *args_
       fprintf(outfile, "%s\n", "step");
     }
   }
-  if (args_info->nrbins_given) {
-    if (args_info->nrbins_orig) {
-      fprintf(outfile, "%s=\"%s\"\n", "nrbins", args_info->nrbins_orig);
+  if (args_info->nbins_given) {
+    if (args_info->nbins_orig) {
+      fprintf(outfile, "%s=\"%s\"\n", "nbins", args_info->nbins_orig);
     } else {
-      fprintf(outfile, "%s\n", "nrbins");
+      fprintf(outfile, "%s\n", "nbins");
     }
   }
   if (args_info->nbins_x_given) {
@@ -622,7 +622,7 @@ cmdline_parser_internal (int argc, char * const *argv, struct gengetopt_args_inf
         { "input",	1, NULL, 'i' },
         { "output",	1, NULL, 'o' },
         { "step",	1, NULL, 'n' },
-        { "nrbins",	1, NULL, 'r' },
+        { "nbins",	1, NULL, 'b' },
         { "nbins_x",	1, NULL, 'x' },
         { "nbins_y",	1, NULL, 'y' },
         { "nanglebins",	1, NULL, 'a' },
@@ -637,7 +637,7 @@ cmdline_parser_internal (int argc, char * const *argv, struct gengetopt_args_inf
         { "molname",	1, NULL, 0 },
         { "begin",	1, NULL, 0 },
         { "end",	1, NULL, 0 },
-        { "bo",	0, NULL, 'b' },
+        { "bo",	0, NULL, 0 },
         { "gofr",	0, NULL, 'g' },
         { "r_theta",	0, NULL, 0 },
         { "r_omega",	0, NULL, 0 },
@@ -653,7 +653,7 @@ cmdline_parser_internal (int argc, char * const *argv, struct gengetopt_args_inf
       };
 
       stop_char = 0;
-      c = getopt_long (argc, argv, "hVi:o:n:r:x:y:a:l:c:z:bgpsd", long_options, &option_index);
+      c = getopt_long (argc, argv, "hVi:o:n:b:x:y:a:l:c:z:gpsd", long_options, &option_index);
 
       if (c == -1) break;	/* Exit from `while (1)' loop.  */
 
@@ -725,24 +725,24 @@ cmdline_parser_internal (int argc, char * const *argv, struct gengetopt_args_inf
           args_info->step_orig = gengetopt_strdup (optarg);
           break;
 
-        case 'r':	/* number of bins for distance.  */
-          if (local_args_info.nrbins_given)
+        case 'b':	/* number of bins (general purpose).  */
+          if (local_args_info.nbins_given)
             {
-              fprintf (stderr, "%s: `--nrbins' (`-r') option given more than once%s\n", argv[0], (additional_error ? additional_error : ""));
+              fprintf (stderr, "%s: `--nbins' (`-b') option given more than once%s\n", argv[0], (additional_error ? additional_error : ""));
               goto failure;
             }
-          if (args_info->nrbins_given && ! override)
+          if (args_info->nbins_given && ! override)
             continue;
-          local_args_info.nrbins_given = 1;
-          args_info->nrbins_given = 1;
-          args_info->nrbins_arg = strtol (optarg, &stop_char, 0);
+          local_args_info.nbins_given = 1;
+          args_info->nbins_given = 1;
+          args_info->nbins_arg = strtol (optarg, &stop_char, 0);
           if (!(stop_char && *stop_char == '\0')) {
             fprintf(stderr, "%s: invalid numeric value: %s\n", argv[0], optarg);
             goto failure;
           }
-          if (args_info->nrbins_orig)
-            free (args_info->nrbins_orig); /* free previous string */
-          args_info->nrbins_orig = gengetopt_strdup (optarg);
+          if (args_info->nbins_orig)
+            free (args_info->nbins_orig); /* free previous string */
+          args_info->nbins_orig = gengetopt_strdup (optarg);
           break;
 
         case 'x':	/* number of bins in x axis.  */
@@ -863,21 +863,6 @@ cmdline_parser_internal (int argc, char * const *argv, struct gengetopt_args_inf
           if (args_info->zoffset_orig)
             free (args_info->zoffset_orig); /* free previous string */
           args_info->zoffset_orig = gengetopt_strdup (optarg);
-          break;
-
-        case 'b':	/* bond order parameter (--rcut and --LegendreL must be specified.  */
-          if (local_args_info.bo_given)
-            {
-              fprintf (stderr, "%s: `--bo' (`-b') option given more than once%s\n", argv[0], (additional_error ? additional_error : ""));
-              goto failure;
-            }
-          if (args_info->bo_given && ! override)
-            continue;
-          local_args_info.bo_given = 1;
-          args_info->bo_given = 1;
-          if (args_info->staticProps_group_counter && override)
-            reset_group_staticProps (args_info);
-          args_info->staticProps_group_counter += 1;
           break;
 
         case 'g':	/* g(r).  */
@@ -1099,6 +1084,23 @@ cmdline_parser_internal (int argc, char * const *argv, struct gengetopt_args_inf
             if (args_info->end_orig)
               free (args_info->end_orig); /* free previous string */
             args_info->end_orig = gengetopt_strdup (optarg);
+          }
+          /* bond order parameter (--rcut and --LegendreL must be specified.  */
+          else if (strcmp (long_options[option_index].name, "bo") == 0)
+          {
+            if (local_args_info.bo_given)
+              {
+                fprintf (stderr, "%s: `--bo' option given more than once%s\n", argv[0], (additional_error ? additional_error : ""));
+                goto failure;
+              }
+            if (args_info->bo_given && ! override)
+              continue;
+            local_args_info.bo_given = 1;
+            args_info->bo_given = 1;
+            if (args_info->staticProps_group_counter && override)
+              reset_group_staticProps (args_info);
+            args_info->staticProps_group_counter += 1;
+            break;
           }
           /* g(r, cos(theta)).  */
           else if (strcmp (long_options[option_index].name, "r_theta") == 0)

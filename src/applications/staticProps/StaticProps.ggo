@@ -9,7 +9,7 @@ version "1.00"
 option	"input"		i	"input dump file"					string	typestr="filename" 	yes
 option	"output"	o	"output file name"					string	typestr="filename"	no
 option	"step"		n	"process every n frame"					int	default="1"		no
-option	"nrbins"    	r       "number of bins for distance"				int	default="100"		no
+option	"nbins"    	b       "number of bins (general purpose)"				int	default="100"		no
 option	"nbins_x"    	x       "number of bins in x axis"				int	default="100"		no
 option	"nbins_y"    	y       "number of bins in y axis"				int	default="100"		no
 option	"nanglebins"	a	"number of bins for cos(angle)"				int	default="50"		no 
@@ -25,7 +25,7 @@ option  "molname"       -       "molecule name" string       no
 option  "begin"         -       "begin internal index"                                 int                  no
 option  "end"           -       "end internal index"                                 int                  no
 defgroup "staticProps" groupdesc=" an option of this group is required" yes
-groupoption "bo"        b       "bond order parameter (--rcut and --LegendreL must be specified" group="staticProps"
+groupoption "bo"        -       "bond order parameter (--rcut and --LegendreL must be specified" group="staticProps"
 groupoption "gofr"      g       "g(r)" group="staticProps"
 groupoption "r_theta" 	-       "g(r, cos(theta))" group="staticProps"
 groupoption "r_omega" 	-       "g(r, cos(omega))" group="staticProps"

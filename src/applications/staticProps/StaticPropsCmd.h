@@ -30,8 +30,8 @@ struct gengetopt_args_info
   char * output_orig;	/* output file name original value given at command line.  */
   int step_arg;	/* process every n frame (default='1').  */
   char * step_orig;	/* process every n frame original value given at command line.  */
-  int nrbins_arg;	/* number of bins for distance (default='100').  */
-  char * nrbins_orig;	/* number of bins for distance original value given at command line.  */
+  int nbins_arg;	/* number of bins (general purpose) (default='100').  */
+  char * nbins_orig;	/* number of bins (general purpose) original value given at command line.  */
   int nbins_x_arg;	/* number of bins in x axis (default='100').  */
   char * nbins_x_orig;	/* number of bins in x axis original value given at command line.  */
   int nbins_y_arg;	/* number of bins in y axis (default='100').  */
@@ -66,7 +66,7 @@ struct gengetopt_args_info
   int input_given ;	/* Whether input was given.  */
   int output_given ;	/* Whether output was given.  */
   int step_given ;	/* Whether step was given.  */
-  int nrbins_given ;	/* Whether nrbins was given.  */
+  int nbins_given ;	/* Whether nbins was given.  */
   int nbins_x_given ;	/* Whether nbins_x was given.  */
   int nbins_y_given ;	/* Whether nbins_y was given.  */
   int nanglebins_given ;	/* Whether nanglebins was given.  */
