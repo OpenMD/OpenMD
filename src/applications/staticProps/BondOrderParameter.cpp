@@ -104,10 +104,12 @@ namespace oopse {
     Molecule* mol;
     Atom* atom;
     RigidBody* rb;
+    int myIndex;
     SimInfo::MoleculeIterator mi;
     Molecule::RigidBodyIterator rbIter;
     Molecule::AtomIterator ai;
     StuntDouble* sd;
+    Vector3d vec;
     RealType costheta;
     RealType phi;
     RealType r;
@@ -115,13 +117,20 @@ namespace oopse {
     std::map<int, ComplexType> QBar_lm;
     RealType QSq_l;
     RealType Q_l;
+    ComplexType W_l;
+    ComplexType W_l_hat;
     int nBonds;
     SphericalHarmonic sphericalHarmonic;
     int i, j;
-  
+    // Make arrays for Wigner3jm
+    double* THRCOF = new double[mSize_];
+    // Variables for Wigner routine
+    double l_ = (double)lNumber_;
+    double m1Pass, m2Min, m2Max;
+    int error, m1, m2, m3;
+
     // Set the l for the spherical harmonic, it doesn't change
     sphericalHarmonic.setL(lNumber_);
-
 
     DumpReader reader(info_, dumpFilename_);    
     int nFrames = reader.getNFrames();
@@ -151,6 +160,8 @@ namespace oopse {
       for (sd = seleMan_.beginSelected(i); sd != NULL; 
            sd = seleMan_.nextSelected(i)) {
 
+        myIndex = sd->getGlobalIndex();
+
         // For this central atom, zero out nBonds and QBar_lm
 
         nBonds = 0;
@@ -166,35 +177,38 @@ namespace oopse {
           for (atom = mol->beginAtom(ai); atom != NULL; 
                atom = mol->nextAtom(ai)) {
 
+            if (atom->getGlobalIndex() != myIndex) {
 
-            Vector3d vec = sd->getPos() - atom->getPos();       
-            currentSnapshot_->wrapVector(vec);
-            
-            // Calculate "bonds" and build Q_lm(r) where 
-            //      Q_lm = Y_lm(theta(r),phi(r))                
-            // The spherical harmonics are wrt any arbitrary coordinate
-            // system, we choose standard spherical coordinates 
-            
-            r = sqrt(pow(vec.x(),2)+pow(vec.y(),2)+pow(vec.z(),2));
-            
-            // Check to see if neighbor is in bond cutoff 
-            
-            if (r < rCut_) {  		
-              costheta = vec.z() / r;
-              phi = atan2(vec.y(), vec.x());
+              vec = sd->getPos() - atom->getPos();       
+              currentSnapshot_->wrapVector(vec);
               
-              for(int m = -lNumber_; m <= lNumber_; m++){
-                sphericalHarmonic.setM(m);
-                QBar_lm[m] += sphericalHarmonic.getValueAt(costheta,phi);
-              }
-              nBonds++;
-            }  
+              // Calculate "bonds" and build Q_lm(r) where 
+              //      Q_lm = Y_lm(theta(r),phi(r))                
+              // The spherical harmonics are wrt any arbitrary coordinate
+              // system, we choose standard spherical coordinates 
+              
+              r = vec.length();
+              
+              // Check to see if neighbor is in bond cutoff 
+              
+              if (r < rCut_) { 
+                costheta = vec.z() / r; 
+                phi = atan2(vec.y(), vec.x());
+                
+                for(int m = -lNumber_; m <= lNumber_; m++){
+                  sphericalHarmonic.setM(m);
+                  QBar_lm[m] += sphericalHarmonic.getValueAt(costheta,phi);
+                }
+                nBonds++;
+              }  
+            }
           }
         }
         
         // Normalize Qbar2
         for (int m = -lNumber_;m <= lNumber_; m++){
           QBar_lm[m] /= nBonds;	
+          std::cout << "m = " << m << " QBLM = " << QBar_lm[m] << "\n";
         }
 
         // Find second order invariant Q_l
@@ -203,19 +217,11 @@ namespace oopse {
         for (int m = -lNumber_; m <= lNumber_; m++){
           QSq_l += norm(QBar_lm[m]);
         }
+        std::cout << "qsq_l = " << QSq_l << "\n";
         Q_l = sqrt(QSq_l*(4.0 * NumericConstant::PI / (2.0*(RealType)lNumber_ + 1)));
-     
+
         // Find Third Order Invariant W_l
-
-        // Make arrays for Wigner3jm
-        double* THRCOF = new double[mSize_];
-        // Variables for Wigner routine
-        double l_ = (double)lNumber_;
-        double m1Pass, m2Min, m2Max;
-        int error, m1, m2, m3;
-
-        ComplexType W_l;
-        ComplexType W_l_hat;
+        
         W_l = 0.0;
         for (int m1 = -lNumber_; m1 <= lNumber_; m1++) {
           // Zero work array
@@ -225,17 +231,18 @@ namespace oopse {
           // Get Wigner coefficients
           m1Pass = (double)m1;
           Wigner3jm(&l_, &l_, &l_, &m1Pass, &m2Min, &m2Max, THRCOF, &mSize_, &error);
-          for (int m_index = 1; i < (int)(m2Max - m2Min-1.0); m_index++) {
+          for (int m_index = 1; m_index < (int)(m2Max - m2Min-1.0); m_index++) {
             m2 = floor(m2Min) + m_index - 1;
             m3 = -m1-m2;
             W_l += THRCOF[m_index]*QBar_lm[m1+lNumber_]*QBar_lm[m2+lNumber_]*QBar_lm[m3+lNumber_];
           }
         }
-
+        
         W_l_hat = W_l / pow(QSq_l, 1.5);
-
+        
         // accumulate histogram data for Q_l and W_l_hat:
 
+        std::cout << "Ql = " << Q_l << " Wl = " << W_l_hat << "\n";
         collectHistogram(Q_l, real(W_l_hat));
                 
       }

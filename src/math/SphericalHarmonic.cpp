@@ -52,66 +52,66 @@ SphericalHarmonic::SphericalHarmonic() {
 ComplexType SphericalHarmonic::getValueAt(RealType costheta, RealType phi) {
   
   RealType p;
-  ComplexType phase;
-  ComplexType I(0.0, 1.0);
   
   // associated Legendre polynomial
-  p = Legendre(L, M, costheta);
- 
-  phase = exp(I * (ComplexType)M * (ComplexType)phi);
-    
-  return coefficient * phase * (ComplexType)p;
+  p = Ptilde(L, M, costheta);
+  ComplexType phase(0.0, (RealType)M * phi);    
+
+  return exp(phase) * (ComplexType)p;
   
 }
+//
+// Routine to calculate the associated Legendre polynomials for m>=0
+//
+RealType SphericalHarmonic::LegendreP(int l,int m, RealType x) {
 
-//---------------------------------------------------------------------------//
-//
-// RealType LegendreP (int l, int m, RealType x);
-//
-// Computes the value of the associated Legendre polynomial P_lm (x)
-// of order l at a given point.
-//
-// Input:
-//   l  = degree of the polynomial  >= 0
-//   m  = parameter satisfying 0 <= m <= l,
-//   x  = point in which the computation is performed, range -1 <= x <= 1.
-// Returns:
-//   value of the polynomial in x
-//
-//---------------------------------------------------------------------------//
-RealType SphericalHarmonic::LegendreP (int l, int m, RealType x) {
-  // check parameters
-  if (m < 0 || m > l || fabs(x) > 1.0) {
-    printf("LegendreP got a bad argument: l = %d\tm = %d\tx = %lf\n", l, m, x);
+  RealType temp1, temp2, temp3, temp4, result;
+  RealType temp5;
+  int i, ll;
+  
+  if (fabs(x) > 1.0) {
+    printf("LegendreP: x out of range: l = %d\tm = %d\tx = %lf\n", l, m, x);
     return std::numeric_limits <RealType>:: quiet_NaN();
   }
   
-  RealType pmm = 1.0;
-  if (m > 0) {
-    RealType h = sqrt((1.0-x)*(1.0+x)),
-      f = 1.0;
-    for (int i = 1; i <= m; i++) {
-      pmm *= -f * h;
-      f += 2.0;
-    }
+  if (m>l) {
+    printf("LegendreP: m > l: l = %d\tm = %d\tx = %lf\n", l, m, x);
+    return std::numeric_limits <RealType>:: quiet_NaN();
   }
-  if (l == m)
-    return pmm;
-  else {
-    RealType pmmp1 = x * (2 * m + 1) * pmm;
-    if (l == (m+1))
-      return pmmp1;
-    else {
-      RealType pll = 0.0;
-      for (int ll = m+2; ll <= l; ll++) {
-        pll = (x * (2 * ll - 1) * pmmp1 - (ll + m - 1) * pmm) / (ll - m);
-        pmm = pmmp1;
-        pmmp1 = pll;
+    
+  if (m<0) { 
+    printf("LegendreP: m < 0: l = %d\tm = %d\tx = %lf\n", l, m, x);
+    return std::numeric_limits <RealType>:: quiet_NaN();
+  } else {
+    temp3=1.0;
+    
+    if (m>0) {
+      temp1=sqrt(1.0-pow(x,2));
+      temp5 = 1.0;
+      for (i=1;i<=m;++i) {
+        temp3 *= -temp5*temp1;
+        temp5 += 2.0;
       }
-      return pll;
+    }
+    if (l==m) {
+      result = temp3;
+    } else {
+      temp4=x*(2.*m+1.)*temp3;
+      if (l==(m+1)) {
+        result = temp4;
+      } else {
+        for (ll=(m+2);ll<=l;++ll) {
+          temp2 = (x*(2.*ll-1.)*temp4-(ll+m-1.)*temp3)/(RealType)(ll-m);
+          temp3=temp4;
+          temp4=temp2;
+        }
+        result = temp2;
+      }
     }
   }
+  return result;
 }
+
 
 //
 // Routine to calculate the associated Legendre polynomials for all m...
@@ -124,9 +124,24 @@ RealType SphericalHarmonic::Legendre(int l, int m, RealType x)  {
   } else if (m >= 0) {
     result = LegendreP(l,m,x);
   } else {
+    //result = mpow(-m)*LegendreP(l,-m,x);
     result = mpow(-m)*Fact(l+m)/Fact(l-m)*LegendreP(l, -m, x);
   }
   result *=mpow(m);
+  return result;
+}
+//
+// Routine to calculate the normalized associated Legendre polynomials...
+//
+RealType SphericalHarmonic::Ptilde(int l,int m, RealType x){
+
+  RealType result;
+  if (m>l || m<-l) {
+    result = 0.;
+  } else {
+    RealType y=(RealType)(2.*l+1.)*Fact(l-m)/Fact(l+m);
+    result = sqrt(y) * Legendre(l,m,x);
+  }
   return result;
 }
 //

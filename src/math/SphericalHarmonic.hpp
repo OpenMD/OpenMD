@@ -73,20 +73,18 @@ namespace oopse {
     void setM(int theM) { M = theM; };
     int getM() { return M; }
     
-    void setCoefficient(ComplexType co) {coefficient = co;}
-    ComplexType getCoefficient() {return coefficient;}
     ComplexType getValueAt(RealType costheta, RealType phi);
     
   protected:
     
     RealType LegendreP (int l, int m, RealType x);
     RealType Legendre (int l, int m, RealType x);
+    RealType Ptilde (int l, int m, RealType x);
     RealType mpow (int j);
     RealType Fact (int j);
     
     int L;
     int M;
-    ComplexType coefficient;
     
   };
 }
