@@ -218,7 +218,8 @@ namespace oopse {
           QSq_l += norm(QBar_lm[m]);
         }
         std::cout << "qsq_l = " << QSq_l << "\n";
-        Q_l = sqrt(QSq_l*(4.0 * NumericConstant::PI / (2.0*(RealType)lNumber_ + 1)));
+        Q_l = sqrt(QSq_l * 4.0 * NumericConstant::PI / 
+                   (2.0*(RealType)lNumber_ + 1.0));
 
         // Find Third Order Invariant W_l
         
@@ -234,7 +235,7 @@ namespace oopse {
           for (int m_index = 1; m_index < (int)(m2Max - m2Min-1.0); m_index++) {
             m2 = floor(m2Min) + m_index - 1;
             m3 = -m1-m2;
-            W_l += THRCOF[m_index]*QBar_lm[m1+lNumber_]*QBar_lm[m2+lNumber_]*QBar_lm[m3+lNumber_];
+            W_l += THRCOF[m_index]*QBar_lm[m1]*QBar_lm[m2]*QBar_lm[m3];
           }
         }
         
