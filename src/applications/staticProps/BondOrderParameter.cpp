@@ -76,7 +76,7 @@ namespace oopse {
     // Q can take values from 0 to 1
 
     MinQ_ = 0.0;
-    MaxQ_ = 1.0;
+    MaxQ_ = 3.0;
     deltaQ_ = (MaxQ_ - MinQ_) / nbins;
     Q_histogram_.resize(nbins);
 
@@ -114,7 +114,7 @@ namespace oopse {
     RealType phi;
     RealType r;
     RealType dist;
-    std::map<int, ComplexType> QBar_lm;
+    std::map<int,ComplexType> QBar_lm;
     RealType QSq_l;
     RealType Q_l;
     ComplexType W_l;
@@ -208,7 +208,6 @@ namespace oopse {
         // Normalize Qbar2
         for (int m = -lNumber_;m <= lNumber_; m++){
           QBar_lm[m] /= nBonds;	
-          std::cout << "m = " << m << " QBLM = " << QBar_lm[m] << "\n";
         }
 
         // Find second order invariant Q_l
@@ -217,7 +216,7 @@ namespace oopse {
         for (int m = -lNumber_; m <= lNumber_; m++){
           QSq_l += norm(QBar_lm[m]);
         }
-        std::cout << "qsq_l = " << QSq_l << "\n";
+
         Q_l = sqrt(QSq_l * 4.0 * NumericConstant::PI / 
                    (2.0*(RealType)lNumber_ + 1.0));
 
@@ -227,15 +226,19 @@ namespace oopse {
         for (int m1 = -lNumber_; m1 <= lNumber_; m1++) {
           // Zero work array
           for (int ii = 0; ii < mSize_; ii++){
-            THRCOF[i] = 0.0;
+            THRCOF[ii] = 0.0;
           }
           // Get Wigner coefficients
           m1Pass = (double)m1;
-          Wigner3jm(&l_, &l_, &l_, &m1Pass, &m2Min, &m2Max, THRCOF, &mSize_, &error);
-          for (int m_index = 1; m_index < (int)(m2Max - m2Min-1.0); m_index++) {
-            m2 = floor(m2Min) + m_index - 1;
+
+          Wigner3jm(&l_, &l_, &l_, 
+                    &m1Pass, &m2Min, &m2Max, 
+                    THRCOF, &mSize_, &error);
+
+          for (int mmm = 0; mmm < (int)(m2Max - m2Min); mmm++) {
+            m2 = (int)floor(m2Min) + mmm;
             m3 = -m1-m2;
-            W_l += THRCOF[m_index]*QBar_lm[m1]*QBar_lm[m2]*QBar_lm[m3];
+            W_l += THRCOF[mmm] * QBar_lm[m1] * QBar_lm[m2] * QBar_lm[m3];
           }
         }
         
@@ -302,7 +305,7 @@ namespace oopse {
       // Normalize by number of frames and write it out:
       for (int i = 0; i < Q_histogram_.size(); ++i) {
         RealType Qval = MinQ_ + (i + 0.5) * deltaQ_;
-        osq << Qval << "\t" << Q_histogram_[i] / frameCounter_ << "\n";
+        osq << Qval << "\t" << (RealType)Q_histogram_[i] / (RealType)Qcount_ << "\n";
       }
       
       osq.close();
@@ -328,7 +331,7 @@ namespace oopse {
       // Normalize by number of frames and write it out:
       for (int i = 0; i < W_histogram_.size(); ++i) {
         RealType Wval = MinW_ + (i + 0.5) * deltaW_;
-        osw << Wval << "\t" << W_histogram_[i] / frameCounter_ << "\n";
+        osw << Wval << "\t" << (RealType)W_histogram_[i] / (RealType)Wcount_ << "\n";
       }
       
       osw.close();
