@@ -601,6 +601,8 @@ namespace oopse {
     /** @deprecate */    
     int isError = 0;
     
+    setupCutoff();
+    
     setupElectrostaticSummationMethod( isError );
     setupSwitchingFunction();
     setupAccumulateBoxDipole();
@@ -611,9 +613,6 @@ namespace oopse {
       painCave.isFatal = 1;
       simError();
     }
-  
-    
-    setupCutoff();
 
     calcNdf();
     calcNdfRaw();
@@ -1074,9 +1073,8 @@ namespace oopse {
     int sm = UNDAMPED;
     RealType alphaVal;
     RealType dielectric;
-
+    
     errorOut = isError;
-    alphaVal = simParams_->getDampingAlpha();
     dielectric = simParams_->getDielectric();
 
     if (simParams_->haveElectrostaticSummationMethod()) {
@@ -1122,10 +1120,16 @@ namespace oopse {
 	if (myScreen == "DAMPED") {
 	  sm = DAMPED;
 	  if (!simParams_->haveDampingAlpha()) {
-	    //throw error
+	    // first set a cutoff dependent alpha value
+	    // we assume alpha depends linearly with rcut from 0 to 20.5 ang
+	    alphaVal = 0.5125 - rcut_* 0.025;
+	    // for values rcut > 20.5, alpha is zero
+	    if (alphaVal < 0) alphaVal = 0;
+
+	    // throw warning
 	    sprintf( painCave.errMsg,
 		     "SimInfo warning: dampingAlpha was not specified in the input file.\n"
-                     "\tA default value of %f (1/ang) will be used.\n", alphaVal);
+                     "\tA default value of %f (1/ang) will be used for the cutoff of\n\t%f (ang).\n", alphaVal, rcut_);
 	    painCave.isFatal = 0;
 	    simError();
 	  }

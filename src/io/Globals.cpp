@@ -113,7 +113,7 @@ Globals::Globals() {
   DefineOptionalParameterWithDefaultValue(ThermIntDistSpringConst, "thermIntDistSpringConst", 6.0);
   DefineOptionalParameterWithDefaultValue(ThermIntThetaSpringConst, "thermIntThetaSpringConst", 7.5);
   DefineOptionalParameterWithDefaultValue(ThermIntOmegaSpringConst, "thermIntOmegaSpringConst", 13.5);
-  DefineOptionalParameterWithDefaultValue(DampingAlpha, "dampingAlpha", 0.2);
+  DefineOptionalParameter(DampingAlpha, "dampingAlpha");
   DefineOptionalParameterWithDefaultValue(CompressDumpFile, "compressDumpFile", 0);
   DefineOptionalParameterWithDefaultValue(OutputForceVector, "outputForceVector", 0);
   DefineOptionalParameterWithDefaultValue(SkinThickness, "skinThickness", 1.0);
