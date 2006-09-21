@@ -72,32 +72,9 @@ namespace oopse {
     lNumber_ = lNumber;
     rCut_ = rCut;
     mSize_ = 2*lNumber_+1;    
-
-    // Q can take values from 0 to 1
-
-    MinQ_ = 0.0;
-    MaxQ_ = 3.0;
-    deltaQ_ = (MaxQ_ - MinQ_) / nbins;
-    Q_histogram_.resize(nbins);
-
-    // W_6 for icosahedral clusters is 11 / sqrt(4199) = 0.169754, so we'll
-    // use values for MinW_ and MaxW_ that are slightly larger than this:
-
-    MinW_ = -0.18;
-    MaxW_ = 0.18;
-    deltaW_ = (MaxW_ - MinW_) / nbins;
-    W_histogram_.resize(nbins);
-
   }
 
   BondOrderParameter::~BondOrderParameter() {
-    Q_histogram_.clear();
-    W_histogram_.clear();
-  }
-
-  void BondOrderParameter::initalizeHistogram() {
-    std::fill(Q_histogram_.begin(), Q_histogram_.end(), 0);
-    std::fill(W_histogram_.begin(), W_histogram_.end(), 0);
   }
 
   void BondOrderParameter::process() {
@@ -155,20 +132,18 @@ namespace oopse {
         }        
       }      
       
+      nBonds = 0;
+      
+      for (int m = -lNumber_; m <= lNumber_; m++) {
+        QBar_lm[m] = 0.0;
+      }
+      
       // outer loop is over the selected StuntDoubles:
 
       for (sd = seleMan_.beginSelected(i); sd != NULL; 
            sd = seleMan_.nextSelected(i)) {
 
         myIndex = sd->getGlobalIndex();
-
-        // For this central atom, zero out nBonds and QBar_lm
-
-        nBonds = 0;
-       
-        for (int m = -lNumber_; m <= lNumber_; m++) {
-          QBar_lm[m] = 0.0;
-        }
         
         // inner loop is over all other atoms in the system:
         
@@ -197,147 +172,75 @@ namespace oopse {
                 
                 for(int m = -lNumber_; m <= lNumber_; m++){
                   sphericalHarmonic.setM(m);
-                  QBar_lm[m] += sphericalHarmonic.getValueAt(costheta,phi);
+                  QBar_lm[m] += sphericalHarmonic.getValueAt(costheta, phi);
                 }
                 nBonds++;
               }  
             }
           }
         }
-        
-        // Normalize Qbar2
-        for (int m = -lNumber_;m <= lNumber_; m++){
-          QBar_lm[m] /= nBonds;	
-        }
+      }      
+    }
 
-        // Find second order invariant Q_l
-
-        QSq_l = 0.0;
-        for (int m = -lNumber_; m <= lNumber_; m++){
-          QSq_l += norm(QBar_lm[m]);
-        }
-
-        Q_l = sqrt(QSq_l * 4.0 * NumericConstant::PI / 
-                   (2.0*(RealType)lNumber_ + 1.0));
-
-        // Find Third Order Invariant W_l
-        
-        W_l = 0.0;
-        for (int m1 = -lNumber_; m1 <= lNumber_; m1++) {
-          // Zero work array
-          for (int ii = 0; ii < mSize_; ii++){
-            THRCOF[ii] = 0.0;
-          }
-          // Get Wigner coefficients
-          m1Pass = (double)m1;
-
-          Wigner3jm(&l_, &l_, &l_, 
-                    &m1Pass, &m2Min, &m2Max, 
-                    THRCOF, &mSize_, &error);
-
-          for (int mmm = 0; mmm < (int)(m2Max - m2Min); mmm++) {
-            m2 = (int)floor(m2Min) + mmm;
-            m3 = -m1-m2;
-            W_l += THRCOF[mmm] * QBar_lm[m1] * QBar_lm[m2] * QBar_lm[m3];
-          }
-        }
-        
-        W_l_hat = W_l / pow(QSq_l, 1.5);
-        
-        // accumulate histogram data for Q_l and W_l_hat:
-
-        std::cout << "Ql = " << Q_l << " Wl = " << W_l_hat << "\n";
-        collectHistogram(Q_l, real(W_l_hat));
-                
+    // Normalize Qbar2
+    for (int m = -lNumber_;m <= lNumber_; m++){
+      QBar_lm[m] /= nBonds;
+    }
+    
+    // Find second order invariant Q_l
+    
+    QSq_l = 0.0;
+    for (int m = -lNumber_; m <= lNumber_; m++){
+      QSq_l += norm(QBar_lm[m]);
+    }
+    
+    std::cout << "qsl = " << QSq_l << "\n";
+    Q_l = sqrt(QSq_l * 4.0 * NumericConstant::PI / (RealType)(2*lNumber_ + 1));
+    
+    // Find Third Order Invariant W_l
+    
+    W_l = 0.0;
+    for (int m1 = -lNumber_; m1 <= lNumber_; m1++) {
+      // Zero work array
+      for (int ii = 0; ii < mSize_; ii++){
+        THRCOF[ii] = 0.0;
+      }
+      // Get Wigner coefficients
+      m1Pass = (double)m1;
+      
+      Wigner3jm(&l_, &l_, &l_, 
+                &m1Pass, &m2Min, &m2Max, 
+                THRCOF, &mSize_, &error);
+      
+      for (int mmm = 0; mmm < (int)(m2Max - m2Min); mmm++) {
+        m2 = (int)floor(m2Min) + mmm;
+        m3 = -m1-m2;
+        W_l += THRCOF[mmm] * QBar_lm[m1] * QBar_lm[m2] * QBar_lm[m3];
       }
     }
     
-    writeOrderParameter();
+    W_l_hat = W_l / pow(QSq_l, 1.5);               
     
+    writeOrderParameter(Q_l, real(W_l_hat));    
   }
 
 
-  void BondOrderParameter::collectHistogram(RealType Q_l, RealType W_l_hat) {
+  void BondOrderParameter::writeOrderParameter(RealType ql, RealType Wlhat) {
 
-    if (Q_l >= MinQ_ && Q_l < MaxQ_) {
-      int qbin = (Q_l - MinQ_) / deltaQ_;
-      Q_histogram_[qbin] += 1;
-      Qcount_++;
-      sumQ_ += Q_l;
-      sumQ2_ += Q_l * Q_l;
-    } else {
-      sprintf( painCave.errMsg,
-               "Q_l value outside reasonable range\n");
-      painCave.severity = OOPSE_ERROR;
-      painCave.isFatal = 1;
-      simError();  
-    }
+    std::ofstream os(getOutputFileName().c_str());
 
-    if (W_l_hat >= MinW_ && W_l_hat < MaxW_) {
-      int wbin = (W_l_hat - MinW_) / deltaW_;
-      W_histogram_[wbin] += 1;
-      Wcount_++;
-      sumW_  += W_l_hat;
-      sumW2_ += W_l_hat*W_l_hat;
-    } else {
-      sprintf( painCave.errMsg,
-               "W_l_hat value outside reasonable range\n");
-      painCave.severity = OOPSE_ERROR;
-      painCave.isFatal = 1;
-      simError();  
-    }
-  }  
-
-  void BondOrderParameter::writeOrderParameter() {
-
-    std::ofstream osq((getOutputFileName() + "q").c_str());
-
-    if (osq.is_open()) {
-
-      RealType qAvg = sumQ_ / (RealType) Qcount_;
-      RealType qStdDev = sumQ2_ / (RealType) Qcount_ - qAvg*qAvg;
+    if (os.is_open()) {
       
-      osq << "# Bond Order Parameter Q_" << lNumber_ << "\n";
-      osq << "# selection: (" << selectionScript_ << ")\n";
-      osq << "# <Q_" << lNumber_ << ">: " << qAvg << "\n";
-      osq << "# std. dev.: " << qStdDev << "\n";
-      
-      // Normalize by number of frames and write it out:
-      for (int i = 0; i < Q_histogram_.size(); ++i) {
-        RealType Qval = MinQ_ + (i + 0.5) * deltaQ_;
-        osq << Qval << "\t" << (RealType)Q_histogram_[i] / (RealType)Qcount_ << "\n";
-      }
-      
-      osq.close();
+      os << "# Bond Order Parameters\n";
+      os << "# selection: (" << selectionScript_ << ")\n";
+      os << "# \n";
+      os << "# <Q_" << lNumber_ << ">: " << ql << "\n";
+      os << "# <W_" << lNumber_ << ">: " << Wlhat << "\n";
+      os.close();
+
     } else {
       sprintf(painCave.errMsg, "BondOrderParameter: unable to open %s\n", 
-              (getOutputFileName() + "q").c_str());
-      painCave.isFatal = 1;
-      simError();  
-    }
-
-    std::ofstream osw((getOutputFileName() + "w").c_str());
-
-    if (osw.is_open()) {
-
-      RealType wAvg = sumW_ / (RealType) Wcount_;
-      RealType wStdDev = sumW2_ / (RealType) Wcount_ - wAvg*wAvg;
-      
-      osw << "# Bond Order Parameter W_" << lNumber_ << "\n";
-      osw << "# selection: (" << selectionScript_ << ")\n";
-      osw << "# <W_" << lNumber_ << ">: " << wAvg << "\n";
-      osw << "# std. dev.: " << wStdDev << "\n";
-      
-      // Normalize by number of frames and write it out:
-      for (int i = 0; i < W_histogram_.size(); ++i) {
-        RealType Wval = MinW_ + (i + 0.5) * deltaW_;
-        osw << Wval << "\t" << (RealType)W_histogram_[i] / (RealType)Wcount_ << "\n";
-      }
-      
-      osw.close();
-    } else {
-      sprintf(painCave.errMsg, "BondOrderParameter: unable to open %s\n", 
-              (getOutputFileName() + "w").c_str());
+              getOutputFileName().c_str());
       painCave.isFatal = 1;
       simError();  
     }

@@ -58,9 +58,7 @@ namespace oopse {
 
   private:
             
-    void writeOrderParameter();
-    virtual void initalizeHistogram();
-    virtual void collectHistogram(RealType Q_l, RealType W_l_hat);
+    void writeOrderParameter(RealType ql, RealType wlhat);
 
     Snapshot* currentSnapshot_;
 
@@ -72,22 +70,6 @@ namespace oopse {
     int lNumber_;
     int mSize_;    
     int frameCounter_;
-
-    RealType MinQ_;
-    RealType MaxQ_;
-    RealType deltaQ_;
-    RealType sumQ_;
-    RealType sumQ2_;
-    int Qcount_;
-    std::vector<int> Q_histogram_;
-
-    RealType MinW_;
-    RealType MaxW_;
-    RealType deltaW_;
-    RealType sumW_;
-    RealType sumW2_;
-    int Wcount_;
-    std::vector<int> W_histogram_;
   };
 }
 
