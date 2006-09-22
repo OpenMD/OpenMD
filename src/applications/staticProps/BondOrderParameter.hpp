@@ -60,7 +60,7 @@ namespace oopse {
     
     void writeOrderParameter(RealType Q_l, RealType W_l_hat);
     virtual void initalizeHistogram();
-    virtual void collectHistogram(RealType q_l, RealType w_l);
+    virtual void collectHistogram(RealType q_l);
 
     Snapshot* currentSnapshot_;
 

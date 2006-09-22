@@ -290,7 +290,7 @@ namespace oopse {
       // Normalize by number of frames and write it out:
       for (int i = 0; i < Q_histogram_.size(); ++i) {
         RealType Qval = MinQ_ + (i + 0.5) * deltaQ_;
-        osq << Qval << "\t" << (RealType)Q_histogram_[i] / (RealType)Qcount_ << "\n";
+        os << Qval << "\t" << (RealType)Q_histogram_[i] / (RealType)Qcount_ << "\n";
       }
 
       os.close();
