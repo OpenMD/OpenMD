@@ -783,21 +783,6 @@ namespace oopse {
     fInfo_.SIM_uses_SF = useSF;
     fInfo_.SIM_uses_SP = useSP;
     fInfo_.SIM_uses_BoxDipole = useBoxDipole;
-
-    if( myMethod == "REACTION_FIELD") {
-      
-      if (simParams_->haveDielectric()) {
-	fInfo_.dielect = simParams_->getDielectric();
-      } else {
-	sprintf(painCave.errMsg,
-		"SimSetup Error: No Dielectric constant was set.\n"
-		"\tYou are trying to use Reaction Field without"
-		"\tsetting a dielectric constant!\n");
-	painCave.isFatal = 1;
-	simError();
-      }      
-    }
-
   }
 
   void SimInfo::setupFortranSim() {
@@ -1075,7 +1060,6 @@ namespace oopse {
     RealType dielectric;
     
     errorOut = isError;
-    dielectric = simParams_->getDielectric();
 
     if (simParams_->haveElectrostaticSummationMethod()) {
       std::string myMethod = simParams_->getElectrostaticSummationMethod();
@@ -1092,8 +1076,17 @@ namespace oopse {
 	    if (myMethod == "SHIFTED_FORCE") {            
 	      esm = SHIFTED_FORCE;
 	    } else {
-	      if (myMethod == "REACTION_FIELD") {	      
+	      if (myMethod == "REACTION_FIELD") {
 		esm = REACTION_FIELD;
+		dielectric = simParams_->getDielectric();
+		if (!simParams_->haveDielectric()) {
+		  // throw warning
+		  sprintf( painCave.errMsg,
+			   "SimInfo warning: dielectric was not specified in the input file\n\tfor the reaction field correction method.\n"
+			   "\tA default value of %f will be used for the dielectric.\n", dielectric);
+		  painCave.isFatal = 0;
+		  simError();
+		}
 	      } else {
 		// throw error        
 		sprintf( painCave.errMsg,

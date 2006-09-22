@@ -72,7 +72,6 @@ class Globals : public DataHolder {
   DeclareParameter(StatusTime, RealType);
   DeclareParameter(CutoffRadius, RealType);
   DeclareParameter(SwitchingRadius, RealType);
-  DeclareParameter(Dielectric, RealType);
   DeclareParameter(TempSet, bool);
   DeclareParameter(ThermalTime, RealType);
   DeclareParameter(UsePeriodicBoundaryConditions, bool);
@@ -111,6 +110,7 @@ class Globals : public DataHolder {
   DeclareParameter(ElectrostaticSummationMethod, std::string);
   DeclareParameter(ElectrostaticScreeningMethod, std::string);
   DeclareParameter(DampingAlpha, RealType);
+  DeclareParameter(Dielectric, RealType);
   DeclareParameter(CutoffPolicy, std::string);
   DeclareParameter(SwitchingFunctionType, std::string);
   DeclareParameter(CompressDumpFile, bool);

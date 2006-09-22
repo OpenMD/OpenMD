@@ -9,7 +9,6 @@
     RealType,int,char. 
 */
 typedef  struct{
-  RealType dielect;
   int SIM_uses_PBC;
   int SIM_uses_DirectionalAtoms;
   int SIM_uses_LennardJones;
@@ -37,8 +36,6 @@ typedef  struct{
   type, public :: simtype
     PRIVATE
     SEQUENCE
-    !! Dielectric Constant for reaction field
-    real ( kind = dp ) :: dielect = 0.0_dp
     !! Periodic Boundry Conditions
     logical :: SIM_uses_PBC
     logical :: SIM_uses_DirectionalAtoms

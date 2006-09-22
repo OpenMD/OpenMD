@@ -98,7 +98,6 @@ module simulation
   public :: getNlocal
   public :: setBox
   public :: checkBox
-  public :: getDielect
   public :: SimUsesPBC
 
   public :: SimUsesDirectionalAtoms
@@ -532,11 +531,6 @@ contains
           enddo        
           return     
         end subroutine checkBox
-
-        function getDielect() result(dielect)
-          real( kind = dp ) :: dielect
-          dielect = thisSim%dielect
-        end function getDielect
 
         function SimUsesPBC() result(doesit)
           logical :: doesit

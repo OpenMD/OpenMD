@@ -56,7 +56,6 @@ namespace oopse {
       DefineOptionalParameterWithDefaultValue(TorsionAngleConvention, "TorsionAngleConvention", "180_is_trans");
       DefineOptionalParameterWithDefaultValue(vdw14scale, "vdW-14-scale", 0.0);
       DefineOptionalParameterWithDefaultValue(electrostatic14scale, "electrostatic-14-scale", 0.0)
-      DefineOptionalParameterWithDefaultValue(dielectric, "dielectric", 1.0);
       DefineOptionalParameterWithDefaultValue(GayBerneMu, "GayBerneMu", 2.0);
       DefineOptionalParameterWithDefaultValue(GayBerneNu, "GayBerneNu", 1.0);
     }

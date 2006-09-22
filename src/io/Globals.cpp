@@ -64,7 +64,6 @@ Globals::Globals() {
   DefineOptionalParameter(StatusTime, "statusTime");
   DefineOptionalParameter(CutoffRadius, "cutoffRadius");
   DefineOptionalParameter(SwitchingRadius, "switchingRadius");
-  DefineOptionalParameter(Dielectric, "dielectric");
   DefineOptionalParameter(TempSet, "tempSet");
   DefineOptionalParameter(ThermalTime, "thermalTime");
   DefineOptionalParameter(TargetPressure, "targetPressure");
@@ -114,6 +113,7 @@ Globals::Globals() {
   DefineOptionalParameterWithDefaultValue(ThermIntThetaSpringConst, "thermIntThetaSpringConst", 7.5);
   DefineOptionalParameterWithDefaultValue(ThermIntOmegaSpringConst, "thermIntOmegaSpringConst", 13.5);
   DefineOptionalParameter(DampingAlpha, "dampingAlpha");
+  DefineOptionalParameterWithDefaultValue(Dielectric, "dielectric", 78.5);
   DefineOptionalParameterWithDefaultValue(CompressDumpFile, "compressDumpFile", 0);
   DefineOptionalParameterWithDefaultValue(OutputForceVector, "outputForceVector", 0);
   DefineOptionalParameterWithDefaultValue(SkinThickness, "skinThickness", 1.0);
