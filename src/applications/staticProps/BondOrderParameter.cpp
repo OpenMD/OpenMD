@@ -71,10 +71,33 @@ namespace oopse {
 
     lNumber_ = lNumber;
     rCut_ = rCut;
-    mSize_ = 2*lNumber_+1;    
+    mSize_ = 2*lNumber_+1;   
+
+    // Q can take values from 0 to 1
+
+    MinQ_ = 0.0;
+    MaxQ_ = 3.0;
+    deltaQ_ = (MaxQ_ - MinQ_) / nbins;
+    Q_histogram_.resize(nbins);
+
+    // W_6 for icosahedral clusters is 11 / sqrt(4199) = 0.169754, so we'll
+    // use values for MinW_ and MaxW_ that are slightly larger than this:
+
+    MinW_ = -0.18;
+    MaxW_ = 0.18;
+    deltaW_ = (MaxW_ - MinW_) / nbins;
+    W_histogram_.resize(nbins);
+
   }
 
   BondOrderParameter::~BondOrderParameter() {
+    Q_histogram_.clear();
+    W_histogram_.clear();
+  }
+
+  void BondOrderParameter::initalizeHistogram() {
+    std::fill(Q_histogram_.begin(), Q_histogram_.end(), 0);
+    std::fill(W_histogram_.begin(), W_histogram_.end(), 0);
   }
 
   void BondOrderParameter::process() {
@@ -91,12 +114,13 @@ namespace oopse {
     RealType phi;
     RealType r;
     RealType dist;
+    std::map<int,ComplexType> q_lm;
     std::map<int,ComplexType> QBar_lm;
     RealType QSq_l;
     RealType Q_l;
     ComplexType W_l;
     ComplexType W_l_hat;
-    int nBonds;
+    int nBonds, Nbonds;
     SphericalHarmonic sphericalHarmonic;
     int i, j;
     // Make arrays for Wigner3jm
@@ -130,20 +154,18 @@ namespace oopse {
              rb = mol->nextRigidBody(rbIter)) {
           rb->updateAtoms();
         }        
-      }      
-      
-      nBonds = 0;
-      
-      for (int m = -lNumber_; m <= lNumber_; m++) {
-        QBar_lm[m] = 0.0;
-      }
-      
+      }           
+            
       // outer loop is over the selected StuntDoubles:
 
       for (sd = seleMan_.beginSelected(i); sd != NULL; 
            sd = seleMan_.nextSelected(i)) {
 
         myIndex = sd->getGlobalIndex();
+        nBonds = 0;
+        for (int m = -lNumber_; m <= lNumber_; m++) {
+          q_lm[m] = 0.0;
+        }
         
         // inner loop is over all other atoms in the system:
         
@@ -172,19 +194,30 @@ namespace oopse {
                 
                 for(int m = -lNumber_; m <= lNumber_; m++){
                   sphericalHarmonic.setM(m);
-                  QBar_lm[m] += sphericalHarmonic.getValueAt(costheta, phi);
+                  q_lm[m] += sphericalHarmonic.getValueAt(costheta, phi);
                 }
                 nBonds++;
               }  
             }
           }
         }
-      }      
+        RealType ql = 0.0;
+        for(int m=-lNumber_; m<=lNumber_; m++) {          
+          ql += norm(QBar_lm[m]);
+        }        
+        ql *= 4.0*NumericConstant::PI/(RealType)(2*lNumber_+1);
+        collectHistogram(sqrt(ql)/(RealType)nBonds);
+
+        Nbonds += nBonds;
+        for (int m=-lNumber_; m<=lNumber_; m++) {
+          QBar_lm[m] += q_lm[m];
+        }
+      }
     }
 
     // Normalize Qbar2
     for (int m = -lNumber_;m <= lNumber_; m++){
-      QBar_lm[m] /= nBonds;
+      QBar_lm[m] /= Nbonds;
     }
     
     // Find second order invariant Q_l
@@ -224,6 +257,24 @@ namespace oopse {
     writeOrderParameter(Q_l, real(W_l_hat));    
   }
 
+  void BondOrderParameter::collectHistogram(RealType q_l) {
+
+    if (q_l >= MinQ_ && q_l < MaxQ_) {
+      int qbin = (q_l - MinQ_) / deltaQ_;
+      Q_histogram_[qbin] += 1;
+      Qcount_++;
+      sumQ_ += q_l;
+      sumQ2_ += q_l * q_l;
+    } else {
+      sprintf( painCave.errMsg,
+               "q_l value outside reasonable range\n");
+      painCave.severity = OOPSE_ERROR;
+      painCave.isFatal = 1;
+      simError();  
+    }
+
+  }  
+
 
   void BondOrderParameter::writeOrderParameter(RealType ql, RealType Wlhat) {
 
@@ -236,6 +287,12 @@ namespace oopse {
       os << "# \n";
       os << "# <Q_" << lNumber_ << ">: " << ql << "\n";
       os << "# <W_" << lNumber_ << ">: " << Wlhat << "\n";
+      // Normalize by number of frames and write it out:
+      for (int i = 0; i < Q_histogram_.size(); ++i) {
+        RealType Qval = MinQ_ + (i + 0.5) * deltaQ_;
+        osq << Qval << "\t" << (RealType)Q_histogram_[i] / (RealType)Qcount_ << "\n";
+      }
+
       os.close();
 
     } else {
