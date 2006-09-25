@@ -44,6 +44,7 @@
 #include "selection/SelectionManager.hpp"
 #include "applications/staticProps/StaticAnalyser.hpp"
 #include "math/Vector3.hpp"
+#include "math/SphericalHarmonic.hpp"
 #include "math/Wigner3jm_interface.h"
 
 namespace oopse {
@@ -51,16 +52,16 @@ namespace oopse {
   class BondOrderParameter : public StaticAnalyser{
   public:
     BondOrderParameter(SimInfo* info, const std::string& filename, 
-                       const std::string& sele, double rCut, int lNumber, int nbins);
+                       const std::string& sele, double rCut, int lMax, int nbins);
 
     virtual ~BondOrderParameter();
     virtual void process();
 
   private:
     
-    void writeOrderParameter(RealType Q_l, RealType W_l_hat);
+    void writeOrderParameter(std::vector<RealType> Q, std::vector<ComplexType> What);
     virtual void initalizeHistogram();
-    virtual void collectHistogram(RealType q_l);
+    virtual void collectHistogram(std::vector<RealType> q);
 
     Snapshot* currentSnapshot_;
 
@@ -69,25 +70,21 @@ namespace oopse {
     SelectionEvaluator evaluator_;           
             
     RealType rCut_;
-    int lNumber_;
-    int mSize_;    
+    int lMax_;
     int frameCounter_;
+    int nBins_;
 
     RealType MinQ_;
     RealType MaxQ_;
     RealType deltaQ_;
-    RealType sumQ_;
-    RealType sumQ2_;
-    int Qcount_;
-    std::vector<int> Q_histogram_;
+    std::vector<int> Qcount_;
+    std::map<std::pair<int,int>,int> Q_histogram_;
 
     RealType MinW_;
     RealType MaxW_;
     RealType deltaW_;
-    RealType sumW_;
-    RealType sumW2_;
-    int Wcount_;
-    std::vector<int> W_histogram_;
+    std::vector<int> Wcount_;
+    std::map<std::pair<int,int>,int> W_histogram_;
   };
 }
 

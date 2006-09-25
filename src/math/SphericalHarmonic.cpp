@@ -40,6 +40,7 @@
  */
  
 #include <stdio.h>
+#include <cmath>
 #include <limits>
 #include "math/SphericalHarmonic.hpp"
 #include "utils/simError.h"
@@ -140,7 +141,7 @@ RealType SphericalHarmonic::Ptilde(int l,int m, RealType x){
     result = 0.;
   } else {
     RealType y=(RealType)(2.*l+1.)*Fact(l-m)/Fact(l+m);
-    result = sqrt(y) * Legendre(l,m,x);
+    result = mpow(m) * sqrt(y) * Legendre(l,m,x) / sqrt(4.0*M_PI);
   }
   return result;
 }

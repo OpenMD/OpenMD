@@ -342,6 +342,7 @@ namespace oopse {
     }
     
     if (simParams->haveForceFieldFileName()) {
+      std::cout<< simParams->getForceFieldFileName() << "\n";
       ff->setForceFieldFileName(simParams->getForceFieldFileName());
     }
     

@@ -51,14 +51,13 @@
 #include "io/DumpReader.hpp"
 #include "primitives/Molecule.hpp"
 #include "utils/NumericConstant.hpp"
-#include "math/SphericalHarmonic.hpp"
 
 namespace oopse {
 
   BondOrderParameter::BondOrderParameter(SimInfo* info, 
                                          const std::string& filename, 
                                          const std::string& sele,
-                                         double rCut, int lNumber, int nbins) : StaticAnalyser(info, filename), selectionScript_(sele), evaluator_(info), seleMan_(info){
+                                         double rCut, int lMax, int nbins) : StaticAnalyser(info, filename), selectionScript_(sele), evaluator_(info), seleMan_(info){
     
     setOutputName(getPrefix(filename) + ".bo");
 
@@ -69,16 +68,17 @@ namespace oopse {
 
     // Set up cutoff radius and order of the Legendre Polynomial:
 
-    lNumber_ = lNumber;
+    lMax_ = lMax;
     rCut_ = rCut;
-    mSize_ = 2*lNumber_+1;   
+    nBins_ = nbins;
+    Qcount_.resize(lMax_+1);
+    Wcount_.resize(lMax_+1);
 
     // Q can take values from 0 to 1
 
     MinQ_ = 0.0;
-    MaxQ_ = 3.0;
+    MaxQ_ = 1.1;
     deltaQ_ = (MaxQ_ - MinQ_) / nbins;
-    Q_histogram_.resize(nbins);
 
     // W_6 for icosahedral clusters is 11 / sqrt(4199) = 0.169754, so we'll
     // use values for MinW_ and MaxW_ that are slightly larger than this:
@@ -86,8 +86,6 @@ namespace oopse {
     MinW_ = -0.18;
     MaxW_ = 0.18;
     deltaW_ = (MaxW_ - MinW_) / nbins;
-    W_histogram_.resize(nbins);
-
   }
 
   BondOrderParameter::~BondOrderParameter() {
@@ -96,8 +94,12 @@ namespace oopse {
   }
 
   void BondOrderParameter::initalizeHistogram() {
-    std::fill(Q_histogram_.begin(), Q_histogram_.end(), 0);
-    std::fill(W_histogram_.begin(), W_histogram_.end(), 0);
+    for (int bin = 0; bin < nBins_; bin++) {
+      for (int l = 0; l <= lMax_; l++) {
+        Q_histogram_[std::make_pair(bin,l)] = 0;
+        W_histogram_[std::make_pair(bin,l)] = 0;
+      }
+    }
   }
 
   void BondOrderParameter::process() {
@@ -114,28 +116,32 @@ namespace oopse {
     RealType phi;
     RealType r;
     RealType dist;
-    std::map<int,ComplexType> q_lm;
-    std::map<int,ComplexType> QBar_lm;
-    RealType QSq_l;
-    RealType Q_l;
-    ComplexType W_l;
-    ComplexType W_l_hat;
+    std::map<std::pair<int,int>,ComplexType> q;
+    std::vector<RealType> q_l;
+    std::map<std::pair<int,int>,ComplexType> QBar;
+    std::vector<RealType> Q2;
+    std::vector<RealType> Q;
+    std::vector<ComplexType> W;
+    std::vector<ComplexType> W_hat;
     int nBonds, Nbonds;
     SphericalHarmonic sphericalHarmonic;
     int i, j;
     // Make arrays for Wigner3jm
-    double* THRCOF = new double[mSize_];
+    double* THRCOF = new double[2*lMax_+1];
     // Variables for Wigner routine
-    double l_ = (double)lNumber_;
-    double m1Pass, m2Min, m2Max;
-    int error, m1, m2, m3;
-
-    // Set the l for the spherical harmonic, it doesn't change
-    sphericalHarmonic.setL(lNumber_);
+    double lPass, m1Pass, m2Min, m2Max;
+    int error, m1, m2, m3, mSize;
+    mSize = 2*lMax_+1;
 
     DumpReader reader(info_, dumpFilename_);    
     int nFrames = reader.getNFrames();
     frameCounter_ = 0;
+
+    q_l.resize(lMax_+1);
+    Q2.resize(lMax_+1);
+    Q.resize(lMax_+1);
+    W.resize(lMax_+1);
+    W_hat.resize(lMax_+1);
 
     for (int istep = 0; istep < nFrames; istep += step_) {
       reader.readFrame(istep);
@@ -163,8 +169,11 @@ namespace oopse {
 
         myIndex = sd->getGlobalIndex();
         nBonds = 0;
-        for (int m = -lNumber_; m <= lNumber_; m++) {
-          q_lm[m] = 0.0;
+        
+        for (int l = 0; l <= lMax_; l++) {
+          for (int m = -l; m <= l; m++) {
+            q[std::make_pair(l,m)] = 0.0;
+          }
         }
         
         // inner loop is over all other atoms in the system:
@@ -191,106 +200,132 @@ namespace oopse {
               if (r < rCut_) { 
                 costheta = vec.z() / r; 
                 phi = atan2(vec.y(), vec.x());
-                
-                for(int m = -lNumber_; m <= lNumber_; m++){
-                  sphericalHarmonic.setM(m);
-                  q_lm[m] += sphericalHarmonic.getValueAt(costheta, phi);
+
+                for (int l = 0; l <= lMax_; l++) {
+                  sphericalHarmonic.setL(l);
+                  for(int m = -l; m <= l; m++){
+                    sphericalHarmonic.setM(m);
+                    q[std::make_pair(l,m)] += sphericalHarmonic.getValueAt(costheta, phi);
+                  }
                 }
                 nBonds++;
               }  
             }
           }
         }
-        RealType ql = 0.0;
-        for(int m=-lNumber_; m<=lNumber_; m++) {          
-          ql += norm(QBar_lm[m]);
-        }        
-        ql *= 4.0*NumericConstant::PI/(RealType)(2*lNumber_+1);
-        collectHistogram(sqrt(ql)/(RealType)nBonds);
-
+        
+        
+        for (int l = 0; l <= lMax_; l++) {         
+          q_l[l] = 0.0;
+          for(int m = -l; m <= l; m++) { 
+            q_l[l] += norm(q[std::make_pair(l,m)]);
+          }     
+          q_l[l] *= 4.0*NumericConstant::PI/(RealType)(2*l + 1);
+          q_l[l] = sqrt(q_l[l])/(RealType)nBonds;
+        }
+        collectHistogram(q_l);
+        
         Nbonds += nBonds;
-        for (int m=-lNumber_; m<=lNumber_; m++) {
-          QBar_lm[m] += q_lm[m];
+        for (int l = 0; l <= lMax_;  l++) {
+          for (int m = -l; m <= l; m++) {
+            QBar[std::make_pair(l,m)] += q[std::make_pair(l,m)];
+          }
         }
       }
     }
-
+      
     // Normalize Qbar2
-    for (int m = -lNumber_;m <= lNumber_; m++){
-      QBar_lm[m] /= Nbonds;
+    for (int l = 0; l <= lMax_; l++) {
+      for (int m = -l; m <= l; m++){
+        QBar[std::make_pair(l,m)] /= Nbonds;
+      }
     }
     
     // Find second order invariant Q_l
     
-    QSq_l = 0.0;
-    for (int m = -lNumber_; m <= lNumber_; m++){
-      QSq_l += norm(QBar_lm[m]);
+    for (int l = 0; l <= lMax_; l++) {
+      Q2[l] = 0.0;
+      for (int m = -l; m <= l; m++){
+        Q2[l] += norm(QBar[std::make_pair(l,m)]);
+      }
+      Q[l] = sqrt(Q2[l] * 4.0 * NumericConstant::PI / (RealType)(2*l + 1));
     }
     
-    std::cout << "qsl = " << QSq_l << "\n";
-    Q_l = sqrt(QSq_l * 4.0 * NumericConstant::PI / (RealType)(2*lNumber_ + 1));
+
     
     // Find Third Order Invariant W_l
     
-    W_l = 0.0;
-    for (int m1 = -lNumber_; m1 <= lNumber_; m1++) {
-      // Zero work array
-      for (int ii = 0; ii < mSize_; ii++){
-        THRCOF[ii] = 0.0;
+    for (int l = 0; l <= lMax_; l++) {
+      W[l] = 0.0;
+      lPass = (double)l;
+      for (int m1 = -l; m1 <= l; m1++) {
+        // Zero work array
+        for (int ii = 0; ii < 2*l + 1; ii++){
+          THRCOF[ii] = 0.0;
+        }
+        // Get Wigner coefficients
+        m1Pass = (double)m1;
+        
+        Wigner3jm(&lPass, &lPass, &lPass, 
+                  &m1Pass, &m2Min, &m2Max, 
+                  THRCOF, &mSize, &error);
+        
+        for (int mmm = 0; mmm < (int)(m2Max - m2Min); mmm++) {
+          m2 = (int)floor(m2Min) + mmm;
+          m3 = -m1-m2;
+          W[l] += THRCOF[mmm] * 
+            QBar[std::make_pair(l,m1)] * 
+            QBar[std::make_pair(l,m2)] * 
+            QBar[std::make_pair(l,m3)];
+        }
       }
-      // Get Wigner coefficients
-      m1Pass = (double)m1;
       
-      Wigner3jm(&l_, &l_, &l_, 
-                &m1Pass, &m2Min, &m2Max, 
-                THRCOF, &mSize_, &error);
-      
-      for (int mmm = 0; mmm < (int)(m2Max - m2Min); mmm++) {
-        m2 = (int)floor(m2Min) + mmm;
-        m3 = -m1-m2;
-        W_l += THRCOF[mmm] * QBar_lm[m1] * QBar_lm[m2] * QBar_lm[m3];
-      }
+      W_hat[l] = W[l] / pow(Q2[l], 1.5);
     }
     
-    W_l_hat = W_l / pow(QSq_l, 1.5);               
-    
-    writeOrderParameter(Q_l, real(W_l_hat));    
+    writeOrderParameter(Q, W_hat);    
   }
 
-  void BondOrderParameter::collectHistogram(RealType q_l) {
+  void BondOrderParameter::collectHistogram(std::vector<RealType> q) {
 
-    if (q_l >= MinQ_ && q_l < MaxQ_) {
-      int qbin = (q_l - MinQ_) / deltaQ_;
-      Q_histogram_[qbin] += 1;
-      Qcount_++;
-      sumQ_ += q_l;
-      sumQ2_ += q_l * q_l;
-    } else {
-      sprintf( painCave.errMsg,
-               "q_l value outside reasonable range\n");
-      painCave.severity = OOPSE_ERROR;
-      painCave.isFatal = 1;
-      simError();  
+    for (int l = 0; l <= lMax_; l++) {
+      if (q[l] >= MinQ_ && q[l] < MaxQ_) {
+        int qbin = (q[l] - MinQ_) / deltaQ_;
+        Q_histogram_[std::make_pair(qbin,l)] += 1;
+        Qcount_[l]++;      
+      } else {
+        sprintf( painCave.errMsg,
+                 "q_l value outside reasonable range\n");
+        painCave.severity = OOPSE_ERROR;
+        painCave.isFatal = 1;
+        simError();  
+      }
     }
 
   }  
 
 
-  void BondOrderParameter::writeOrderParameter(RealType ql, RealType Wlhat) {
-
+  void BondOrderParameter::writeOrderParameter(std::vector<RealType> Q, std::vector<ComplexType> What) {
+    
     std::ofstream os(getOutputFileName().c_str());
-
+    
     if (os.is_open()) {
       
       os << "# Bond Order Parameters\n";
       os << "# selection: (" << selectionScript_ << ")\n";
-      os << "# \n";
-      os << "# <Q_" << lNumber_ << ">: " << ql << "\n";
-      os << "# <W_" << lNumber_ << ">: " << Wlhat << "\n";
+      for (int l = 0; l <= lMax_; l++) {
+        os << "# \n";
+        os << "# <Q_" << l << ">: " << Q[l] << "\n";
+        os << "# <W_" << l << ">: " << real(What[l]) << "\n";
+      }
       // Normalize by number of frames and write it out:
-      for (int i = 0; i < Q_histogram_.size(); ++i) {
-        RealType Qval = MinQ_ + (i + 0.5) * deltaQ_;
-        os << Qval << "\t" << (RealType)Q_histogram_[i] / (RealType)Qcount_ << "\n";
+      for (int i = 0; i < nBins_; ++i) {
+        RealType Qval = MinQ_ + (i + 0.5) * deltaQ_;               
+        os << Qval;
+        for (int l = 0; l <= lMax_; l++) {
+          os << "\t" << (RealType)Q_histogram_[std::make_pair(i,l)] / (RealType)Qcount_[l];
+        }
+        os << "\n";
       }
 
       os.close();
