@@ -37,7 +37,16 @@
  * arising out of the use of or inability to use software, even if the
  * University of Notre Dame has been advised of the possibility of
  * such damages.
+ *
+ *  BondOrderParameter.hpp
+ *  OOPSE-4
+ *
+ *  Created by J. Daniel Gezelter on 09/26/06
+ *  @author  J. Daniel Gezelter 
+ *  @version $Id: BondOrderParameter.hpp,v 1.14 2006-09-26 16:08:44 gezelter Exp $
+ *
  */
+
 #ifndef APPLICATIONS_STATICPROPS_BONDORDERPARAMETER_HPP
 #define APPLICATIONS_STATICPROPS_BONDORDERPARAMETER_HPP
 #include "selection/SelectionEvaluator.hpp"
@@ -48,23 +57,52 @@
 #include "math/Wigner3jm_interface.h"
 
 namespace oopse {
-  
+
+  /**
+   * @class BondOrderParameter
+   * @brief Bond Order Parameter
+   *
+   * Computes orientational bond order parameters as outlined in:
+   *
+   *   "Bond-orientaional order in liquids and glasses," by
+   *    P. J. Steinhart, D. R. Nelson, and M. Ronchetti, 
+   *    Phys. Rev. B, 28, 784 (1983).
+   *
+   * A somewhat more useful reference which has formulae for these order
+   * parameters for individual atoms is:
+   *
+   *   "Numerical calculation of the rate of crystal nucleation in a
+   *    Lennard-Jones system at moderate undercooling," by
+   *    Pieter Rein ten Wolde, Maria J. Ruiz-Montero, and Daan Frenkel,
+   *    J. Chem. Phys. 104, pp. 9932-9947 (1996).
+   *
+   * Note that this version uses a single cutoff radius to decide 
+   * membership in the list of neighbors, and does not have use a
+   * distance-dependent weighting as used in the second reference above.
+   *
+   * The selection script can be utilized to look at specific types of
+   * central atoms.  A dynamic selector can also be utilized.  By default, 
+   * this class computes the Q_{l} and \hat{W}_{l} parameters up to l = 12.
+   * The completed configurational averages of these values as
+   * well as the distributions of atomic q_{l} and \hat{w}_{l} values
+   * are then placed in .boq and .bow files.
+   */
   class BondOrderParameter : public StaticAnalyser{
   public:
     BondOrderParameter(SimInfo* info, const std::string& filename, 
                        const std::string& sele, double rCut, int nbins);
-
+    
     virtual ~BondOrderParameter();
     virtual void process();
-
-  private:
     
-    void writeOrderParameter(std::vector<RealType> Q, std::vector<ComplexType> What);
+  private:
     virtual void initalizeHistogram();
-    virtual void collectHistogram(std::vector<RealType> q, std::vector<ComplexType> what);
+    virtual void collectHistogram(std::vector<RealType> q, 
+                                  std::vector<ComplexType> what);    
+    void writeOrderParameter(std::vector<RealType> Q, 
+                             std::vector<ComplexType> What);
 
     Snapshot* currentSnapshot_;
-
     std::string selectionScript_;
     SelectionManager seleMan_;    
     SelectionEvaluator evaluator_;           

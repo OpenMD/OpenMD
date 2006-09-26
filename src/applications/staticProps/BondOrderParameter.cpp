@@ -37,13 +37,14 @@
  * arising out of the use of or inability to use software, even if the
  * University of Notre Dame has been advised of the possibility of
  * such damages.
- */
-
-
-/* Creates orientational bond order parameters as outlined by
- *     Bond-orientaional order in liquids and glasses, Steinhart,Nelson,Ronchetti
- *     Phys Rev B, 28,784,1983
- * 
+ *
+ *  BondOrderParameter.cpp
+ *  OOPSE-4
+ *
+ *  Created by J. Daniel Gezelter on 09/26/06.
+ *  @author  J. Daniel Gezelter
+ *  @version $Id: BondOrderParameter.cpp,v 1.18 2006-09-26 16:08:44 gezelter Exp $
+ *
  */
  
 #include "applications/staticProps/BondOrderParameter.hpp"
@@ -118,13 +119,23 @@ namespace oopse {
         }
       }
     }
+    delete [] THRCOF;
+    THRCOF = NULL;
   }
   
   BondOrderParameter::~BondOrderParameter() {
     Q_histogram_.clear();
     W_histogram_.clear();
+    for (int l = 0; l <= lMax_; l++) {
+      for (int m = -l; m <= l; m++) {
+        w3j[std::make_pair(l,m)].clear();
+      }
+    }
+    w3j.clear();
+    m2Min.clear();
+    m2Max.clear();
   }
-
+  
   void BondOrderParameter::initalizeHistogram() {
     for (int bin = 0; bin < nBins_; bin++) {
       for (int l = 0; l <= lMax_; l++) {
@@ -385,7 +396,8 @@ namespace oopse {
         RealType Qval = MinQ_ + (i + 0.5) * deltaQ_;               
         osq << Qval;
         for (int l = 0; l <= lMax_; l++) {
-          osq << "\t" << (RealType)Q_histogram_[std::make_pair(i,l)] / (RealType)Qcount_[l];
+          osq << "\t" << (RealType)Q_histogram_[std::make_pair(i,l)] / 
+            (RealType)Qcount_[l];
         }
         osq << "\n";
       }
@@ -413,7 +425,8 @@ namespace oopse {
         RealType Wval = MinW_ + (i + 0.5) * deltaW_;               
         osw << Wval;
         for (int l = 0; l <= lMax_; l++) {
-          osw << "\t" << (RealType)W_histogram_[std::make_pair(i,l)] / (RealType)Wcount_[l];
+          osw << "\t" << (RealType)W_histogram_[std::make_pair(i,l)] / 
+            (RealType)Wcount_[l];
         }
         osw << "\n";
       }
