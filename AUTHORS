@@ -1,10 +1,12 @@
-The following people are largely responsible for the creation of
-OOPSE.  
+OOPSE is the combined effort of a number of graduate students
+in the Gezelter lab at the University of Notre Dame.  The 
+principal authors of this code are:
 
-Teng Lin                   (tlin@nd.edu)
-Christopher J. Fennell     (cfennell@nd.edu)
+Dr. Teng Lin               (Now at: lin@schrodinger.com)
+Dr. Christopher J. Fennell (cfennell@nd.edu)
 Charles F. Vardeman II     (cvardema@nd.edu)
 Dr. Matthew A. Meineke     (mmeineke@maul.chem.nd.edu)
+Xiuquan Sun                (xsun@nd.edu)
 Kyle Daily                 (kdaily@nd.edu)
-Yang Zheng                 (yzheng1@nd.edu)
+Yang Zheng                 (Now at: sunnykansas@yahoo.com)
 Prof. J. Daniel Gezelter   (gezelter@nd.edu)

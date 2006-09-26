@@ -7,13 +7,15 @@ packages.  This includes atoms with orientational degrees of freedom
 (point dipoles, sticky atoms), as well as transition metals under the
 Embedded Atom Method (EAM) or Sutton-Chen (SC) potentials. 
 
-Simulations are started in OOPSE using two files: 
+Simulations are started in OOPSE using a single Molecular Dynamics (.md)
+file.   These files must start with the <OOPSE> tag and must 
+have two sections:
 
-  1) a C-based meta-data (.md) file, and 
+  1) a C-based <MetaData> section, and 
 
-  2) a modified XYZ format for initial coordinate and velocity information.
+  2) a <Snapshot> block for initial coordinate and velocity information.
 
-Detailed descriptions of the structures of these two files are 
+Detailed descriptions of the structures of these files are 
 available in the "doc" directory.  Sample simulations are 
 available in the "samples" directory. 
 
@@ -22,19 +24,16 @@ What you need to compile and use OOPSE:
  1) Good C, C++ and Fortran95 compilers.  We've built and tested OOPSE
     on the following architecture & compiler combinations:
 
-    Architecture                CC     CXX     F90    Notes
-    -------------------------   ----   -----   -----  ----------------------
-    ix86-pc-linux-gnu           icc    icpc    ifort  (Intel versions 7-9)
-    i386-apple-darwin8.6.1      icc    icpc    ifort  (Intel version 9.1)
-    powerpc-apple-darwin8.6.0   gcc    g++     xlf95  (GNU v.4 / IBM XL v. 8.1)
-    x86_64-unknown-linux-gnu    pgcc   pgCC    pgf95  (Portland Group v. 6.0)
-    sparc-sun-solaris2.10       cc     CC      f95    (Sun ONE Studio 10)
+    Architecture                CC     CXX     F90     Notes
+    -------------------------   ----   -----   -----   ----------------------
+    ix86-pc-linux-gnu           icc    icpc    ifort   (Intel versions 7-9)
+    i386-apple-darwin8.7.1      icc    icpc    ifort   (Intel version 9.1)
+    powerpc-apple-darwin8.7.0   gcc    g++     xlf95   (GNU v.4 / IBM XL v. 8.1)
+    x86_64-unknown-linux-gnu    gcc    g++     pathf95 (GNU v.4 / Pathscale 2.5)
+    sparc-sun-solaris2.10       cc     CC      f95     (Sun ONE Studio 10)
     
-    We've successfully compiled OOPSE with the Pathscale c, c++, and 
-    Fortran95 compilers on the  x86_64-unknown-linux-gnu architecture,
-    but a bug in the exception handling on these compilers causes
-    OOPSE to abort (rather than providing a useful error message) when
-    an error is found in the meta-data file.
+    We've also successfully compiled OOPSE with the Portland Group c, c++, 
+    and Fortran95 compilers on the  x86_64-unknown-linux-gnu architecture.
   
     OOPSE uses features of the Fortran 95 language. The fortran
     portions of our code will not compile if your compiler does not
@@ -42,10 +41,10 @@ What you need to compile and use OOPSE:
     compilers do support these features. None of the Fortran 77
     compilers can be used to compile OOPSE.
 
-    Compilers that are known to fail on OOPSE: g77, Gfortran, Older
-    Portland Group compilers (pgf77, pgf90).
+    Fortran compilers that are known to fail on OOPSE: g77, Gfortran, 
+    Older Portland Group compilers (pgf77, pgf90).
 
-    Compilers that are known to work on OOPSE: Intel's ifort,
+    Fortran compilers that are known to work on OOPSE: Intel's ifort,
     Pathscale's pathf95, IBM's xlf95, Portland's pgf95 (version 6 or
     higher), Sun's f95. There may be others that work also.
 
@@ -62,14 +61,13 @@ What you need to compile and use OOPSE:
  4) MPI is optional for the single processor version of OOPSE, 
     but is required if you want OOPSE to run in parallel. 
 
-    We like MPICH-1.2.*.  Other implementations might work, but we
-    haven't tried.  You can get MPICH here:
-    http://www-unix.mcs.anl.gov/mpi/mpich/
+    We like Open MPI.  Other implementations might work, but we
+    haven't tried.  You can get Open MPI here: http://www.open-mpi.org/
 
 INSTRUCTIONS
 
  1) Get, build, and test the required pieces above.
- 2) ./configure  (or ./configure --with-mpi=/usr/local/mpich)
+ 2) ./configure  (or ./configure --with-mpi=/usr/local/openmpi)
  3) make
  4) make install
 
