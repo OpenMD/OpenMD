@@ -48,7 +48,6 @@ void clear_given (struct gengetopt_args_info *args_info)
   args_info->nbins_y_given = 0 ;
   args_info->nanglebins_given = 0 ;
   args_info->length_given = 0 ;
-  args_info->LegendreL_given = 0 ;
   args_info->rcut_given = 0 ;
   args_info->zoffset_given = 0 ;
   args_info->sele1_given = 0 ;
@@ -91,7 +90,6 @@ void clear_args (struct gengetopt_args_info *args_info)
   args_info->nanglebins_arg = 50;
   args_info->nanglebins_orig = NULL;
   args_info->length_orig = NULL;
-  args_info->LegendreL_orig = NULL;
   args_info->rcut_orig = NULL;
   args_info->zoffset_arg = 0;
   args_info->zoffset_orig = NULL;
@@ -131,7 +129,6 @@ cmdline_parser_print_help (void)
   printf("%s\n","  -y, --nbins_y=INT             number of bins in y axis  (default=`100')");
   printf("%s\n","  -a, --nanglebins=INT          number of bins for cos(angle)  (default=`50')");
   printf("%s\n","      --length=DOUBLE           maximum length (Defaults to 1/2 smallest length \n                                  of first frame)");
-  printf("%s\n","  -l, --LegendreL=INT           Order of Legendre Polynomial (used for Bond \n                                  Order calculations)");
   printf("%s\n","  -c, --rcut=DOUBLE             cutoff radius (rcut)");
   printf("%s\n","  -z, --zoffset=DOUBLE          Where to set the zero for the slab_density \n                                  calculation  (default=`0')");
   printf("%s\n","      --sele1=selection script  select the first stuntdouble set");
@@ -142,7 +139,7 @@ cmdline_parser_print_help (void)
   printf("%s\n","      --begin=INT               begin internal index");
   printf("%s\n","      --end=INT                 end internal index");
   printf("%s\n","\n Group: staticProps\n   an option of this group is required");
-  printf("%s\n","      --bo                      bond order parameter (--rcut and --LegendreL \n                                  must be specified");
+  printf("%s\n","      --bo                      bond order parameter (--rcut must be specified");
   printf("%s\n","  -g, --gofr                    g(r)");
   printf("%s\n","      --r_theta                 g(r, cos(theta))");
   printf("%s\n","      --r_omega                 g(r, cos(omega))");
@@ -217,11 +214,6 @@ cmdline_parser_release (struct gengetopt_args_info *args_info)
     {
       free (args_info->length_orig); /* free previous argument */
       args_info->length_orig = 0;
-    }
-  if (args_info->LegendreL_orig)
-    {
-      free (args_info->LegendreL_orig); /* free previous argument */
-      args_info->LegendreL_orig = 0;
     }
   if (args_info->rcut_orig)
     {
@@ -371,13 +363,6 @@ cmdline_parser_file_save(const char *filename, struct gengetopt_args_info *args_
       fprintf(outfile, "%s=\"%s\"\n", "length", args_info->length_orig);
     } else {
       fprintf(outfile, "%s\n", "length");
-    }
-  }
-  if (args_info->LegendreL_given) {
-    if (args_info->LegendreL_orig) {
-      fprintf(outfile, "%s=\"%s\"\n", "LegendreL", args_info->LegendreL_orig);
-    } else {
-      fprintf(outfile, "%s\n", "LegendreL");
     }
   }
   if (args_info->rcut_given) {
@@ -627,7 +612,6 @@ cmdline_parser_internal (int argc, char * const *argv, struct gengetopt_args_inf
         { "nbins_y",	1, NULL, 'y' },
         { "nanglebins",	1, NULL, 'a' },
         { "length",	1, NULL, 0 },
-        { "LegendreL",	1, NULL, 'l' },
         { "rcut",	1, NULL, 'c' },
         { "zoffset",	1, NULL, 'z' },
         { "sele1",	1, NULL, 0 },
@@ -653,7 +637,7 @@ cmdline_parser_internal (int argc, char * const *argv, struct gengetopt_args_inf
       };
 
       stop_char = 0;
-      c = getopt_long (argc, argv, "hVi:o:n:b:x:y:a:l:c:z:gpsd", long_options, &option_index);
+      c = getopt_long (argc, argv, "hVi:o:n:b:x:y:a:c:z:gpsd", long_options, &option_index);
 
       if (c == -1) break;	/* Exit from `while (1)' loop.  */
 
@@ -803,26 +787,6 @@ cmdline_parser_internal (int argc, char * const *argv, struct gengetopt_args_inf
           if (args_info->nanglebins_orig)
             free (args_info->nanglebins_orig); /* free previous string */
           args_info->nanglebins_orig = gengetopt_strdup (optarg);
-          break;
-
-        case 'l':	/* Order of Legendre Polynomial (used for Bond Order calculations).  */
-          if (local_args_info.LegendreL_given)
-            {
-              fprintf (stderr, "%s: `--LegendreL' (`-l') option given more than once%s\n", argv[0], (additional_error ? additional_error : ""));
-              goto failure;
-            }
-          if (args_info->LegendreL_given && ! override)
-            continue;
-          local_args_info.LegendreL_given = 1;
-          args_info->LegendreL_given = 1;
-          args_info->LegendreL_arg = strtol (optarg, &stop_char, 0);
-          if (!(stop_char && *stop_char == '\0')) {
-            fprintf(stderr, "%s: invalid numeric value: %s\n", argv[0], optarg);
-            goto failure;
-          }
-          if (args_info->LegendreL_orig)
-            free (args_info->LegendreL_orig); /* free previous string */
-          args_info->LegendreL_orig = gengetopt_strdup (optarg);
           break;
 
         case 'c':	/* cutoff radius (rcut).  */
@@ -1085,7 +1049,7 @@ cmdline_parser_internal (int argc, char * const *argv, struct gengetopt_args_inf
               free (args_info->end_orig); /* free previous string */
             args_info->end_orig = gengetopt_strdup (optarg);
           }
-          /* bond order parameter (--rcut and --LegendreL must be specified.  */
+          /* bond order parameter (--rcut must be specified.  */
           else if (strcmp (long_options[option_index].name, "bo") == 0)
           {
             if (local_args_info.bo_given)

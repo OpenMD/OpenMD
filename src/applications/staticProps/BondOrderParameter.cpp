@@ -57,7 +57,7 @@ namespace oopse {
   BondOrderParameter::BondOrderParameter(SimInfo* info, 
                                          const std::string& filename, 
                                          const std::string& sele,
-                                         double rCut, int lMax, int nbins) : StaticAnalyser(info, filename), selectionScript_(sele), evaluator_(info), seleMan_(info){
+                                         double rCut, int nbins) : StaticAnalyser(info, filename), selectionScript_(sele), evaluator_(info), seleMan_(info){
     
     setOutputName(getPrefix(filename) + ".bo");
 
@@ -68,7 +68,6 @@ namespace oopse {
 
     // Set up cutoff radius and order of the Legendre Polynomial:
 
-    lMax_ = lMax;
     rCut_ = rCut;
     nBins_ = nbins;
     Qcount_.resize(lMax_+1);
@@ -83,8 +82,8 @@ namespace oopse {
     // W_6 for icosahedral clusters is 11 / sqrt(4199) = 0.169754, so we'll
     // use values for MinW_ and MaxW_ that are slightly larger than this:
 
-    MinW_ = -0.18;
-    MaxW_ = 0.18;
+    MinW_ = -0.25;
+    MaxW_ = 0.25;
     deltaW_ = (MaxW_ - MinW_) / nbins;
   }
 
@@ -118,6 +117,9 @@ namespace oopse {
     RealType dist;
     std::map<std::pair<int,int>,ComplexType> q;
     std::vector<RealType> q_l;
+    std::vector<RealType> q2;
+    std::vector<ComplexType> w;
+    std::vector<ComplexType> w_hat;
     std::map<std::pair<int,int>,ComplexType> QBar;
     std::vector<RealType> Q2;
     std::vector<RealType> Q;
@@ -138,6 +140,10 @@ namespace oopse {
     frameCounter_ = 0;
 
     q_l.resize(lMax_+1);
+    q2.resize(lMax_+1);
+    w.resize(lMax_+1);
+    w_hat.resize(lMax_+1);
+
     Q2.resize(lMax_+1);
     Q.resize(lMax_+1);
     W.resize(lMax_+1);
@@ -223,7 +229,49 @@ namespace oopse {
           q_l[l] *= 4.0*NumericConstant::PI/(RealType)(2*l + 1);
           q_l[l] = sqrt(q_l[l])/(RealType)nBonds;
         }
-        collectHistogram(q_l);
+
+        // Find second order invariant Q_l
+        
+        for (int l = 0; l <= lMax_; l++) {
+          q2[l] = 0.0;
+          for (int m = -l; m <= l; m++){
+            q2[l] += norm(q[std::make_pair(l,m)]);
+          }
+          q_l[l] = sqrt(q2[l] * 4.0 * NumericConstant::PI / 
+                        (RealType)(2*l + 1))/(RealType)nBonds;
+        }
+
+        // Find Third Order Invariant W_l
+    
+        for (int l = 0; l <= lMax_; l++) {
+          w[l] = 0.0;
+          lPass = (double)l;
+          for (int m1 = -l; m1 <= l; m1++) {
+            // Zero work array
+            for (int ii = 0; ii < 2*l + 1; ii++){
+              THRCOF[ii] = 0.0;
+            }
+            // Get Wigner coefficients
+            m1Pass = (double)m1;
+            
+            Wigner3jm(&lPass, &lPass, &lPass, 
+                      &m1Pass, &m2Min, &m2Max, 
+                      THRCOF, &mSize, &error);
+            
+            for (int mmm = 0; mmm < (int)(m2Max - m2Min); mmm++) {
+              m2 = (int)floor(m2Min) + mmm;
+              m3 = -m1-m2;
+              w[l] += THRCOF[mmm] * 
+                q[std::make_pair(l,m1)] * 
+                q[std::make_pair(l,m2)] * 
+                q[std::make_pair(l,m3)];
+            }
+          }
+          
+          w_hat[l] = w[l] / pow(q2[l], 1.5);
+        }
+
+        collectHistogram(q_l, w_hat);
         
         Nbonds += nBonds;
         for (int l = 0; l <= lMax_;  l++) {
@@ -250,8 +298,6 @@ namespace oopse {
       }
       Q[l] = sqrt(Q2[l] * 4.0 * NumericConstant::PI / (RealType)(2*l + 1));
     }
-    
-
     
     // Find Third Order Invariant W_l
     
@@ -286,7 +332,8 @@ namespace oopse {
     writeOrderParameter(Q, W_hat);    
   }
 
-  void BondOrderParameter::collectHistogram(std::vector<RealType> q) {
+  void BondOrderParameter::collectHistogram(std::vector<RealType> q, 
+                                            std::vector<ComplexType> what) {
 
     for (int l = 0; l <= lMax_; l++) {
       if (q[l] >= MinQ_ && q[l] < MaxQ_) {
@@ -302,39 +349,81 @@ namespace oopse {
       }
     }
 
+    for (int l = 0; l <= lMax_; l++) {
+      if (real(what[l]) >= MinW_ && real(what[l]) < MaxW_) {
+        int wbin = (real(what[l]) - MinW_) / deltaW_;
+        W_histogram_[std::make_pair(wbin,l)] += 1;
+        Wcount_[l]++;      
+      } else {
+        sprintf( painCave.errMsg,
+                 "Re[w_hat] value outside reasonable range\n");
+        painCave.severity = OOPSE_ERROR;
+        painCave.isFatal = 1;
+        simError();  
+      }
+    }
+
   }  
 
 
-  void BondOrderParameter::writeOrderParameter(std::vector<RealType> Q, std::vector<ComplexType> What) {
+  void BondOrderParameter::writeOrderParameter(std::vector<RealType> Q, 
+                                               std::vector<ComplexType> What) {
     
-    std::ofstream os(getOutputFileName().c_str());
-    
-    if (os.is_open()) {
+    std::ofstream osq((getOutputFileName() + "q").c_str());
+
+    if (osq.is_open()) {
       
-      os << "# Bond Order Parameters\n";
-      os << "# selection: (" << selectionScript_ << ")\n";
+      osq << "# Bond Order Parameters\n";
+      osq << "# selection: (" << selectionScript_ << ")\n";
+      osq << "# \n";
       for (int l = 0; l <= lMax_; l++) {
-        os << "# \n";
-        os << "# <Q_" << l << ">: " << Q[l] << "\n";
-        os << "# <W_" << l << ">: " << real(What[l]) << "\n";
+        osq << "# <Q_" << l << ">: " << Q[l] << "\n";
       }
       // Normalize by number of frames and write it out:
       for (int i = 0; i < nBins_; ++i) {
         RealType Qval = MinQ_ + (i + 0.5) * deltaQ_;               
-        os << Qval;
+        osq << Qval;
         for (int l = 0; l <= lMax_; l++) {
-          os << "\t" << (RealType)Q_histogram_[std::make_pair(i,l)] / (RealType)Qcount_[l];
+          osq << "\t" << (RealType)Q_histogram_[std::make_pair(i,l)] / (RealType)Qcount_[l];
         }
-        os << "\n";
+        osq << "\n";
       }
 
-      os.close();
+      osq.close();
 
     } else {
       sprintf(painCave.errMsg, "BondOrderParameter: unable to open %s\n", 
-              getOutputFileName().c_str());
+              (getOutputFileName() + "q").c_str());
       painCave.isFatal = 1;
       simError();  
     }
+
+    std::ofstream osw((getOutputFileName() + "w").c_str());
+
+    if (osw.is_open()) {
+      osw << "# Bond Order Parameters\n";
+      osw << "# selection: (" << selectionScript_ << ")\n";
+      osw << "# \n";
+      for (int l = 0; l <= lMax_; l++) {
+        osw << "# <W_" << l << ">: " << real(What[l]) << "\n";
+      }
+      // Normalize by number of frames and write it out:
+      for (int i = 0; i < nBins_; ++i) {
+        RealType Wval = MinW_ + (i + 0.5) * deltaW_;               
+        osw << Wval;
+        for (int l = 0; l <= lMax_; l++) {
+          osw << "\t" << (RealType)W_histogram_[std::make_pair(i,l)] / (RealType)Wcount_[l];
+        }
+        osw << "\n";
+      }
+
+      osw.close();
+    } else {
+      sprintf(painCave.errMsg, "BondOrderParameter: unable to open %s\n", 
+              (getOutputFileName() + "w").c_str());
+      painCave.isFatal = 1;
+      simError();  
+    }
+       
   }
 }

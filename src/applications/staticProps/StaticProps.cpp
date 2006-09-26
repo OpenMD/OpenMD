@@ -203,14 +203,13 @@ int main(int argc, char* argv[]){
   } else if (args_info.rp2_given){
     analyser = new RippleOP(info, dumpFileName, sele1, sele2);
   } else if (args_info.bo_given){
-    if (args_info.rcut_given && args_info.LegendreL_given) {
+    if (args_info.rcut_given) {
       analyser = new BondOrderParameter(info, dumpFileName, sele1, 
                                         args_info.rcut_arg, 
-                                        args_info.LegendreL_arg,
                                         args_info.nbins_arg);
     } else {
       sprintf( painCave.errMsg,
-               "Both the cutoff radius (rcut) and LegendreL must be specified when calculating Bond Order Parameters");
+               "A cutoff radius (rcut) must be specified when calculating Bond Order Parameters");
       painCave.severity = OOPSE_ERROR;
       painCave.isFatal = 1;
       simError();

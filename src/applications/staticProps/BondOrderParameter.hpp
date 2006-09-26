@@ -52,7 +52,7 @@ namespace oopse {
   class BondOrderParameter : public StaticAnalyser{
   public:
     BondOrderParameter(SimInfo* info, const std::string& filename, 
-                       const std::string& sele, double rCut, int lMax, int nbins);
+                       const std::string& sele, double rCut, int nbins);
 
     virtual ~BondOrderParameter();
     virtual void process();
@@ -61,7 +61,7 @@ namespace oopse {
     
     void writeOrderParameter(std::vector<RealType> Q, std::vector<ComplexType> What);
     virtual void initalizeHistogram();
-    virtual void collectHistogram(std::vector<RealType> q);
+    virtual void collectHistogram(std::vector<RealType> q, std::vector<ComplexType> what);
 
     Snapshot* currentSnapshot_;
 
@@ -70,7 +70,7 @@ namespace oopse {
     SelectionEvaluator evaluator_;           
             
     RealType rCut_;
-    int lMax_;
+    static const int lMax_ = 12;
     int frameCounter_;
     int nBins_;
 
