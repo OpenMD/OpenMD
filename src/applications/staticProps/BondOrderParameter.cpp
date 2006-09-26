@@ -85,8 +85,41 @@ namespace oopse {
     MinW_ = -0.25;
     MaxW_ = 0.25;
     deltaW_ = (MaxW_ - MinW_) / nbins;
-  }
 
+    // Make arrays for Wigner3jm
+    double* THRCOF = new double[2*lMax_+1];
+    // Variables for Wigner routine
+    double lPass, m1Pass, m2m, m2M;
+    int error, mSize;
+    mSize = 2*lMax_+1;
+
+    for (int l = 0; l <= lMax_; l++) {
+      lPass = (double)l;
+      for (int m1 = -l; m1 <= l; m1++) {
+        m1Pass = (double)m1;
+
+        std::pair<int,int> lm = std::make_pair(l, m1);
+        
+        // Zero work array
+        for (int ii = 0; ii < 2*l + 1; ii++){
+          THRCOF[ii] = 0.0;
+        }
+            
+        // Get Wigner coefficients
+        Wigner3jm(&lPass, &lPass, &lPass, 
+                  &m1Pass, &m2m, &m2M, 
+                  THRCOF, &mSize, &error);
+        
+        m2Min[lm] = (int)floor(m2m);
+        m2Max[lm] = (int)floor(m2M);
+        
+        for (int mmm = 0; mmm < (int)(m2M - m2m); mmm++) {
+          w3j[lm].push_back(THRCOF[mmm]);
+        }
+      }
+    }
+  }
+  
   BondOrderParameter::~BondOrderParameter() {
     Q_histogram_.clear();
     W_histogram_.clear();
@@ -128,12 +161,6 @@ namespace oopse {
     int nBonds, Nbonds;
     SphericalHarmonic sphericalHarmonic;
     int i, j;
-    // Make arrays for Wigner3jm
-    double* THRCOF = new double[2*lMax_+1];
-    // Variables for Wigner routine
-    double lPass, m1Pass, m2Min, m2Max;
-    int error, m1, m2, m3, mSize;
-    mSize = 2*lMax_+1;
 
     DumpReader reader(info_, dumpFilename_);    
     int nFrames = reader.getNFrames();
@@ -245,26 +272,13 @@ namespace oopse {
     
         for (int l = 0; l <= lMax_; l++) {
           w[l] = 0.0;
-          lPass = (double)l;
           for (int m1 = -l; m1 <= l; m1++) {
-            // Zero work array
-            for (int ii = 0; ii < 2*l + 1; ii++){
-              THRCOF[ii] = 0.0;
-            }
-            // Get Wigner coefficients
-            m1Pass = (double)m1;
-            
-            Wigner3jm(&lPass, &lPass, &lPass, 
-                      &m1Pass, &m2Min, &m2Max, 
-                      THRCOF, &mSize, &error);
-            
-            for (int mmm = 0; mmm < (int)(m2Max - m2Min); mmm++) {
-              m2 = (int)floor(m2Min) + mmm;
-              m3 = -m1-m2;
-              w[l] += THRCOF[mmm] * 
-                q[std::make_pair(l,m1)] * 
-                q[std::make_pair(l,m2)] * 
-                q[std::make_pair(l,m3)];
+            std::pair<int,int> lm = std::make_pair(l, m1);
+            for (int mmm = 0; mmm < (m2Max[lm] - m2Min[lm]); mmm++) {
+              int m2 = m2Min[lm] + mmm;
+              int m3 = -m1-m2;
+              w[l] += w3j[lm][mmm] * q[lm] * 
+                q[std::make_pair(l,m2)] *  q[std::make_pair(l,m3)];
             }
           }
           
@@ -303,26 +317,13 @@ namespace oopse {
     
     for (int l = 0; l <= lMax_; l++) {
       W[l] = 0.0;
-      lPass = (double)l;
       for (int m1 = -l; m1 <= l; m1++) {
-        // Zero work array
-        for (int ii = 0; ii < 2*l + 1; ii++){
-          THRCOF[ii] = 0.0;
-        }
-        // Get Wigner coefficients
-        m1Pass = (double)m1;
-        
-        Wigner3jm(&lPass, &lPass, &lPass, 
-                  &m1Pass, &m2Min, &m2Max, 
-                  THRCOF, &mSize, &error);
-        
-        for (int mmm = 0; mmm < (int)(m2Max - m2Min); mmm++) {
-          m2 = (int)floor(m2Min) + mmm;
-          m3 = -m1-m2;
-          W[l] += THRCOF[mmm] * 
-            QBar[std::make_pair(l,m1)] * 
-            QBar[std::make_pair(l,m2)] * 
-            QBar[std::make_pair(l,m3)];
+        std::pair<int,int> lm = std::make_pair(l, m1);
+        for (int mmm = 0; mmm < (m2Max[lm] - m2Min[lm]); mmm++) {
+          int m2 = m2Min[lm] + mmm;
+          int m3 = -m1-m2;
+          W[l] += w3j[lm][mmm] * QBar[lm] * 
+            QBar[std::make_pair(l,m2)] * QBar[std::make_pair(l,m3)];
         }
       }
       

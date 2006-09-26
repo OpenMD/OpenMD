@@ -73,7 +73,11 @@ namespace oopse {
     static const int lMax_ = 12;
     int frameCounter_;
     int nBins_;
-
+    
+    std::map<std::pair<int,int>,int> m2Min;
+    std::map<std::pair<int,int>,int> m2Max;
+    std::map<std::pair<int,int>,std::vector<RealType> > w3j;
+   
     RealType MinQ_;
     RealType MaxQ_;
     RealType deltaQ_;
