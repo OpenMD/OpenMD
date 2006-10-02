@@ -3,8 +3,8 @@
 # program that builds water boxes
 
 # author    = "Chris Fennell
-# version   = "$Revision: 1.3 $"
-# date      = "$Date: 2006-10-02 23:27:40 $"
+# version   = "$Revision: 1.4 $"
+# date      = "$Date: 2006-10-02 23:54:30 $"
 # copyright = "Copyright (c) 2006 by the University of Notre Dame"
 # license   = "OOPSE"
 
@@ -26,16 +26,16 @@ $invalidWater = 0;
 $waterCase = -1;
 
 # get our options
-getopts('hmrvd:l:n:w:');
+getopts('hmrvd:l:n:o:w:');
 
 # if we don't have a filename, drop to -h
-$opt_h = 'true' if $#ARGV != 0;
+$opt_h = 'true' if $#ARGV != -1;
 
 # our option output 
 if ($opt_h){
     print "waterBoxer: builds water boxes\n\n";
-    print "usage: waterBoxer [-hv] [-d density] [-l lattice] [-n # waters]\n";
-    print "\t[-w water name] [file name]\n\n";
+    print "usage: waterBoxer [-hmrv] [-d density] [-l lattice] [-n # waters]\n";
+    print "\t[-o file name] [-w water name] \n\n";
     print "  -h : show this message\n";
     print "  -m : print out a water.md file (file with all water models)\n";
     print "  -r : randomize orientations\n";
@@ -46,17 +46,19 @@ if ($opt_h){
     print "                 (default: 0)\n";
     print "  -n integer : # of water molecules\n";
     print "                 (default: 500)\n";
+    print "  -o char    : output file name\n";
+    print "                 (default: freshWater.md)\n";
     print "  -w char    : name of the water stunt double\n";
     print "                 (default: SPCE)\n";
     print "Example:\n";
-    die   "   waterBoxer -d 0.997 -n 864 -w SSD_RF ssdrfWater.md\n";
+    die   "   waterBoxer -d 0.997 -n 864 -w SSD_RF -o ssdrfWater.md\n";
 }
 
 # set some variables to be used in the code
-$fileName = $ARGV[0];
-if (defined($fileName)){
+if (defined($opt_o)){
+  $fileName = $opt_o;
 } else {
-    $fileName = 'waterBox';
+    $fileName = 'freshWater.md';
 }
 if ($opt_m){
   die "$fileName cannot be \"water.md\"\n\tPlease choose a different name\n" if $fileName eq 'water.md';
@@ -74,6 +76,11 @@ if (defined($opt_w)){
   $waterName = 'SPCE';
 }
 validateWater();
+if ($invalidWater == 1){
+  print "Warning: \'$waterName\' is not a recognized water model name.\n";
+  print "         Use the \'-m\' option to generate a \'water.md\' with the\n";
+  print "         recognized water model geometries.\n"; 
+}
 if (defined($opt_d)){
   if ($opt_d =~ /^[0-9]/) {
     $density = $opt_d;
@@ -195,9 +202,11 @@ if ($lattice == 0) {
 }
 
 writeOutFile();
+print "Water box \"$fileName\" generated.\n";
 
-if ($opt_m || $invalidWater){
+if ($opt_m){
   printWaterMD();
+  print "File \"water.md\" generated for inclusion in \"$fileName\"\n";
 }
 
 # this marks the end of the main program, below is subroutines
