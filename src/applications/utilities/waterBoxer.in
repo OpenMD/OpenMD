@@ -3,8 +3,8 @@
 # program that builds water boxes
 
 # author    = "Chris Fennell
-# version   = "$Revision: 1.2 $"
-# date      = "$Date: 2006-09-01 22:58:33 $"
+# version   = "$Revision: 1.3 $"
+# date      = "$Date: 2006-10-02 23:27:40 $"
 # copyright = "Copyright (c) 2006 by the University of Notre Dame"
 # license   = "OOPSE"
 
@@ -23,6 +23,7 @@ $alpha = 0.2125;
 $alphaInt = 0.5125;
 $alphaSlope = 0.025;
 $invalidWater = 0;
+$waterCase = -1;
 
 # get our options
 getopts('hmrvd:l:n:w:');
@@ -207,7 +208,7 @@ sub acos {
   return $ret;
 }
 
-sub writeOutFile{
+sub writeOutFile {
   # write out the header
   print OUTFILE "<OOPSE version=4>\n";
   findCutoff();
@@ -267,7 +268,6 @@ ensemble = NVE;
 forceField = \"DUFF\";
 electrostaticSummationMethod = \"shifted_force\";
 electrostaticScreeningMethod = \"damped\";
-dampingAlpha = $alpha;
 cutoffRadius = $cutoff;
 
 targetTemp = 300;
@@ -286,7 +286,7 @@ statusTime = 2;
   </MetaData>\n";
 }
 
-sub findCutoff{
+sub findCutoff {
   $boxLength2 = 0.5*$boxLength;
   if ($boxLength2 > $cutoff){
     # the default is good
@@ -295,11 +295,11 @@ sub findCutoff{
   }
 }
 
-sub findAlpha{
+sub findAlpha {
   $alpha = $alphaInt - $cutoff*$alphaSlope;
 }
 
-sub printFrameData{
+sub printFrameData {
 print OUTFILE 
 "  <Snapshot>
     <FrameData>
@@ -308,8 +308,9 @@ print OUTFILE
     </FrameData>\n";
 }
 
-sub printWaterMD{
+sub printWaterMD {
   open(WATERMD, ">./water.md") || die "\tError: can't open file water.md\n";
+  $waterFileHandle = 'WATERMD';
 
   print WATERMD "#ifndef _WATER_MD_\n#define _WATER_MD_\n";
   printCl();
@@ -330,7 +331,7 @@ sub printWaterMD{
   print WATERMD "\n\n#endif";
 }
 
-sub printCl{
+sub printCl {
   print $waterFileHandle "\n\nmolecule{
   name = \"Cl-\";
   
@@ -341,7 +342,7 @@ sub printCl{
 }"
 }
 
-sub printNa{
+sub printNa {
   print $waterFileHandle "\n\nmolecule{
   name = \"Na+\";
   
@@ -352,7 +353,7 @@ sub printNa{
 }"
 }
 
-sub printSSD_E{
+sub printSSD_E {
   print $waterFileHandle "\n\nmolecule{
   name = \"SSD_E\";
   
@@ -364,7 +365,7 @@ sub printSSD_E{
 }"
 }
 
-sub printSSD_RF{
+sub printSSD_RF {
   print $waterFileHandle "\n\nmolecule{
   name = \"SSD_RF\";
   
@@ -376,7 +377,7 @@ sub printSSD_RF{
 }"
 }
 
-sub printSSD{
+sub printSSD {
   print $waterFileHandle "\n\nmolecule{
   name = \"SSD\";
   
@@ -388,7 +389,7 @@ sub printSSD{
 }"
 }
 
-sub printSSD1{
+sub printSSD1 {
   print $waterFileHandle "\n\nmolecule{
   name = \"SSD1\";
   
@@ -400,7 +401,7 @@ sub printSSD1{
 }"
 }
 
-sub printTRED{
+sub printTRED {
   print $waterFileHandle "\n\nmolecule{
   name = \"TRED\";
   
@@ -424,7 +425,7 @@ sub printTRED{
 }"
 }
 
-sub printTIP3P{
+sub printTIP3P {
   print $waterFileHandle "\n\nmolecule{
   name = \"TIP3P\";
   
@@ -451,7 +452,7 @@ sub printTIP3P{
 }"
 }
 
-sub printTIP4P{
+sub printTIP4P {
   print $waterFileHandle "\n\nmolecule{
   name = \"TIP4P\";
   
@@ -482,7 +483,7 @@ sub printTIP4P{
 }"
 }
 
-sub printTIP4PEw{
+sub printTIP4PEw {
   print $waterFileHandle "\n\nmolecule{
   name = \"TIP4P-Ew\";
   
@@ -513,7 +514,7 @@ sub printTIP4PEw{
 }"
 }
 
-sub printTIP5P{
+sub printTIP5P {
   print $waterFileHandle "\n\nmolecule{
   name = \"TIP5P\";
   
@@ -548,7 +549,7 @@ sub printTIP5P{
 }"
 }
 
-sub printTIP5PE{
+sub printTIP5PE {
   print $waterFileHandle "\n\nmolecule{
   name = \"TIP5P-E\";
   
@@ -583,7 +584,7 @@ sub printTIP5PE{
 }"
 }
 
-sub printSPCE{
+sub printSPCE {
 print $waterFileHandle "\n\nmolecule{
   name = \"SPCE\";
   
@@ -610,7 +611,7 @@ print $waterFileHandle "\n\nmolecule{
 }"
 }
 
-sub printSPC{
+sub printSPC {
 print $waterFileHandle "\n\nmolecule{
   name = \"SPC\";
   
@@ -637,7 +638,7 @@ print $waterFileHandle "\n\nmolecule{
 }"
 }
 
-sub printDPD{
+sub printDPD {
   print $waterFileHandle "\n\nmolecule{
   name = \"DPD\";
   
@@ -649,7 +650,7 @@ sub printDPD{
 }
 
 
-sub printFakeWater{
+sub printFakeWater {
   print $waterFileHandle "\n\nmolecule{
   name = \"$waterName\";
   
@@ -661,7 +662,7 @@ sub printFakeWater{
 }
 
 
-sub validateWater{
+sub validateWater {
   if    ($waterName eq 'Cl-')      { $waterCase = 0;    }
   elsif ($waterName eq 'Na+')      { $waterCase = 1;    }
   elsif ($waterName eq 'SSD_E')    { $waterCase = 2;    }
@@ -679,7 +680,7 @@ sub validateWater{
   else                             { $invalidWater = 1; }
 }
 
-sub printWaterModel{
+sub printWaterModel {
   if    ($waterCase == 0)  { printCl();      }
   elsif ($waterCase == 1)  { printNa();      }
   elsif ($waterCase == 2)  { printSSD_E();   }
