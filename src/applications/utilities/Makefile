@@ -1,6 +1,7 @@
 ScriptFiles =  \
 	dumpConverter \
         affineScale \
+        solvator \
         waterBoxer \
 
 DEV_ROOT=../../..
