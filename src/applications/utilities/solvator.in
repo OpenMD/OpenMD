@@ -1,0 +1,287 @@
+#!@PERLINTERP@ -w
+
+# program that reads in a water box and solute xyz (or pdb), merges the two systems, and
+# deletes overlapping molecules
+
+# author    = "Chris Fennell
+# version   = "$Revision: 1.1 $"
+# date      = "$Date: 2006-10-03 22:38:50 $"
+# copyright = "Copyright (c) 2006 by the University of Notre Dame"
+# license   = "OOPSE"
+
+
+use Getopt::Std;
+
+$d2tolerance = 7.5625; #distance to start cutting
+$fileName = 'solvatedSystem.md';
+$startSnap = 0;
+$startFrame = 0;
+$startStunts = 0;
+$startMeta = 0;
+$soluteName = 'SOLUTE';
+$nSolvent = 0;
+
+# get our options
+getopts('fhd:i:n:o:p:x:');
+
+# if we don't have a filename, drop to -h
+$opt_h = 'true' if $#ARGV != -1;
+
+# our option output 
+if ($opt_h){
+  print "solvator: carves a solute void in an oopse water box\n\n";
+  print "usage: solvator [-fh] [-d distance tolerance] [-i file name (solvent)]";
+  print " [-n solute name] [-px file name (solute)] [-o file name (output)]\n\n";
+  print "  -f : include a flexible solute model description in the output file rather\n";
+  print "       than the rigid body solute model description\n";
+  print "  -h : show this message\n\n";
+  print "  -d real : overlap removal distance\n";
+  print "                 (default: 2.75 ang)\n";
+  print "  -i char : solvent input file (oopse .md file)\n";
+  print "  -n char : name for the solute\n";
+  print "                 (default: SOLUTE)\n";
+  print "  -o char : carved solvent output file (oopse .md format)\n";
+  print "                 (default: 'solvatedSystem.md')\n";
+  print "  -p char : solute input file (pdb)\n";
+  print "  -x char : solute input file (xyz)\n\n";
+  print "Example:\n";
+  die   "   solvator -i myWater.md -p mySolute.pdb -o mySystem.md\n";
+}
+
+# set some variables to be used in the code
+if (defined($opt_i)){
+  $solventName = $opt_i;
+} else {
+  die "Error: No solvent box specified\n       Please select a solvent box using the -i flag\n";
+}
+
+$soluteFileName = $opt_p if defined($opt_p);
+$soluteFileName = $opt_x if defined($opt_x);
+$fileName = $opt_o if defined($opt_o);
+
+if (defined($opt_p) || defined($opt_x)){
+} else {
+  die "Error: No solute file specifed\n       Please select a solute file with the -p or -x flags (pdb or xyz respectively)\n";
+}
+
+if (defined($opt_d)){
+  if ($opt_d =~ /^[0-9]/) {
+    $dval = $opt_d;
+    $d2tolerance = $dval*$dval;
+  } else {
+    die "Error: The '-d' value ($opt_d) is not a valid number\n       Please choose a positive real # value\n";
+  }
+}
+
+# open the file writer
+open(OUTFILE, ">./$fileName") || die "Error: can't open file $fileName\n";
+
+# open and read the pdb or xyz file and get solute coordinates
+open(SOLUTEFILE, "$soluteFileName") || die "Error: Can't open file $soluteFileName\n";
+
+if (defined($opt_x)){
+  $headerLines = 2;
+  while (<SOLUTEFILE>){
+    if ($headerLines > 0){
+      $headerLines--;
+    } else {
+      chomp;
+      @line = split;
+      push(@solute_names, $line[0]);
+      push(@solute_x, $line[1]);
+      push(@solute_y, $line[2]);
+      push(@solute_z, $line[3]);
+    }
+  }
+}
+if (defined($opt_p)){
+  while (<SOLUTEFILE>){
+    chomp;
+    @line = split;
+    if ($line[0] eq 'ATOM'){
+      push(@solute_names, $line[2]);
+      push(@solute_x, $line[5]);
+      push(@solute_y, $line[6]);
+      push(@solute_z, $line[7]);
+    }
+  }
+}
+
+# remap solute to the center of the box
+$xSol = 0;
+$ySol = 0;
+$zSol = 0;
+for ($i=0; $i<=$#solute_x; $i++){
+  $xSol += $solute_x[$i];
+  $ySol += $solute_y[$i];
+  $zSol += $solute_z[$i];
+}
+$xSol /= $#solute_x + 1;
+$ySol /= $#solute_y + 1;
+$zSol /= $#solute_z + 1;
+for ($i=0; $i<=$#solute_x; $i++){
+  $solute_x[$i] -= $xSol;
+  $solute_y[$i] -= $ySol;
+  $solute_z[$i] -= $zSol;
+}
+
+if ($opt_f){
+  $soluteCount = $#solute_x + 1;
+} else {
+  $soluteCount = 1;
+}
+
+$solventCount = $soluteCount;
+# okay, let's open the solvent box and write a carved file
+open(SOLVENT, "$solventName") || die "Error: Can't open file $solventName\n";
+
+
+while (<SOLVENT>){
+  $startSnap = 0 if /\/Snapshot/;
+  $startFrame = 0 if /\/FrameData/;
+  $startStunts = 0 if /\/StuntDoubles/;
+  $startMeta = 0 if /\/MetaData/;
+
+  # save the MetaData lines
+  push(@metaLines, $_) if $startMeta == 1;
+
+  if ($startSnap == 1){
+    # save the frame data
+    push(@frameData, $_) if $startFrame == 1;
+    if (/Hmat/){
+      @line = split;
+      $hxx = $line[2];
+      chop($hxx);
+      $hyy = $line[8];
+      chop($hyy);
+      $hzz = $line[14];
+    }
+    if ($startStunts == 1){
+      @line = split;
+
+      # wrap positions back into the box
+      $x_val = $line[2] - ($hxx*round($line[2]/$hxx));
+      $y_val = $line[3] - ($hyy*round($line[3]/$hyy));
+      $z_val = $line[4] - ($hzz*round($line[4]/$hzz));
+
+      $saveFlag = 1;
+      for($i=0; $i<=$#solute_x; $i++){
+	$diff_x = $x_val - $solute_x[$i];
+	$diff_y = $y_val - $solute_y[$i];
+	$diff_z = $z_val - $solute_z[$i];
+	$dist2 = $diff_x*$diff_x + $diff_y*$diff_y + $diff_z*$diff_z;
+	if ($dist2 < $d2tolerance) {
+	  $saveFlag = 0;
+	  last;
+	}
+      }
+      if ($saveFlag == 1){
+	$saveLine = "$solventCount\t$line[1]\t$line[2]";
+	for ($i = 3; $i <= $#line; $i++){
+	  $saveLine = join(' ', $saveLine, $line[$i]);
+	}
+	push(@goodSolventMolecules, $saveLine);
+	$solventCount++;
+      }
+    }
+  }
+  $startSnap = 1 if /Snapshot/;
+  $startFrame = 1 if /FrameData/;
+  $startStunts = 1 if /StuntDoubles/;
+  $startMeta = 1 if /MetaData/;
+  # check again since "/value" contains "value"
+  $startSnap = 0 if /\/Snapshot/;
+  $startFrame = 0 if /\/FrameData/;
+  $startStunts = 0 if /\/StuntDoubles/;
+  $startMeta = 0 if /\/MetaData/;
+}
+
+$nSolvent = $#goodSolventMolecules + 1;
+
+# write out the final file
+writeOutFile();
+print "The solvated system \"$fileName\" was generated.\n";
+
+
+sub writeOutFile {
+  # write out the header
+  print OUTFILE "<OOPSE version=4>\n";
+  printMetaData();
+  printFrameData();
+  print OUTFILE "    <StuntDoubles>\n";
+  # now print out the atoms
+  if (defined($opt_f)){
+    for ($i=0; $i<=$#solute_x; $i++){
+      print OUTFILE "$i\tp\t$solute_x[$i] $solute_y[$i] $solute_z[$i]\n";
+    }
+  } else {
+    print OUTFILE "0\tpq\t0.0 0.0 0.0 1.0 0.0 0.0 0.0\n";
+  }
+  for ($i=0; $i<=$#goodSolventMolecules; $i++) {
+    print OUTFILE "$goodSolventMolecules[$i]\n";
+  }
+  print OUTFILE "    </StuntDoubles>\n  </Snapshot>\n</OOPSE>\n";
+}
+
+sub printMetaData() {
+  print OUTFILE "  <MetaData>\n";
+
+  writeSoluteDescription();
+
+  for ($i = 0; $i<=$#metaLines; $i++) {
+    # reset the number of solvent molecules
+    if ($metaLines[$i] =~ /nMol/) {
+      $metaLines[$i] = "  nMol = $nSolvent;\n";
+    }
+
+    print OUTFILE "$metaLines[$i]";
+  }
+
+  print OUTFILE "  </MetaData>\n";
+}
+
+sub writeSoluteDescription {
+  # include a solute model description in the meta data region
+
+  print OUTFILE "\nmolecule{\n  name = \"$soluteName\";\n\n";
+
+  if (defined($opt_f)) {
+    # for flexible solutes
+    for ($i=0; $i<=$#solute_x; $i++){
+      print OUTFILE "  atom[$i]{\n    type = \"$solute_names[$i]\";\n  }\n";
+    }
+    print OUTFILE "}\n";
+  } else {
+    # the default is a rigid body solute
+    for ($i=0; $i<=$#solute_x; $i++){
+      print OUTFILE "  atom[$i]{\n    type = \"$solute_names[$i]\";\n    position($solute_x[$i], $solute_y[$i], $solute_z[$i]);\n  }\n";
+    }
+    print OUTFILE "\n  rigidBody[0]{\n    members(";
+    for ($i=0; $i<$#solute_x; $i++){
+      print OUTFILE "$i, ";
+    }
+    print OUTFILE "$#solute_x);\n  }\n}\n";
+  }
+
+  # now back to the metaData output
+  print OUTFILE "\ncomponent{
+  type = \"$soluteName\";
+  nMol = 1;
+}\n";
+
+  print "The solute model definition was included in '$fileName'.\n";
+}
+
+sub printFrameData {
+  print OUTFILE "  <Snapshot>\n    <FrameData>\n";
+
+  for($i = 0; $i<=$#frameData; $i++) {
+    print OUTFILE "$frameData[$i]";
+  }
+
+  print OUTFILE "    </FrameData>\n";
+}
+
+sub round {
+  return int( $_[0] + 0.5 * ($_[0] <=> 0) );
+}

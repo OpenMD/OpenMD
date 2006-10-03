@@ -3,8 +3,8 @@
 # program that builds water boxes
 
 # author    = "Chris Fennell
-# version   = "$Revision: 1.4 $"
-# date      = "$Date: 2006-10-02 23:54:30 $"
+# version   = "$Revision: 1.5 $"
+# date      = "$Date: 2006-10-03 22:38:50 $"
 # copyright = "Copyright (c) 2006 by the University of Notre Dame"
 # license   = "OOPSE"
 
@@ -24,12 +24,13 @@ $alphaInt = 0.5125;
 $alphaSlope = 0.025;
 $invalidWater = 0;
 $waterCase = -1;
+$nothingSelected = 1;
 
 # get our options
 getopts('hmrvd:l:n:o:w:');
 
-# if we don't have a filename, drop to -h
-$opt_h = 'true' if $#ARGV != -1;
+# just to test opt_h
+$opt_h = "true" if $#ARGV >= 0;
 
 # our option output 
 if ($opt_h){
@@ -49,7 +50,7 @@ if ($opt_h){
     print "  -o char    : output file name\n";
     print "                 (default: freshWater.md)\n";
     print "  -w char    : name of the water stunt double\n";
-    print "                 (default: SPCE)\n";
+    print "                 (default: SPCE)\n\n";
     print "Example:\n";
     die   "   waterBoxer -d 0.997 -n 864 -w SSD_RF -o ssdrfWater.md\n";
 }
@@ -57,21 +58,25 @@ if ($opt_h){
 # set some variables to be used in the code
 if (defined($opt_o)){
   $fileName = $opt_o;
+  $nothingSelected = 0;
 } else {
     $fileName = 'freshWater.md';
 }
 if ($opt_m){
-  die "$fileName cannot be \"water.md\"\n\tPlease choose a different name\n" if $fileName eq 'water.md';
+  die "Error: $fileName cannot be \"water.md\"\n       Please choose a different name\n" if $fileName eq 'water.md';
   $waterFileHandle = 'WATERMD';
+  $nothingSelected = 0;
 } else {
   $waterFileHandle = 'OUTFILE';
 }
 if ($opt_r){
   $doRandomize = $opt_r;
+  $nothingSelected = 0;
 }
 
 if (defined($opt_w)){
   $waterName = $opt_w;
+  $nothingSelected = 0;
 } else {
   $waterName = 'SPCE';
 }
@@ -79,35 +84,38 @@ validateWater();
 if ($invalidWater == 1){
   print "Warning: \'$waterName\' is not a recognized water model name.\n";
   print "         Use the \'-m\' option to generate a \'water.md\' with the\n";
-  print "         recognized water model geometries.\n"; 
+  print "         recognized water model geometries.\n\n"; 
 }
 if (defined($opt_d)){
+  $nothingSelected = 0;
   if ($opt_d =~ /^[0-9]/) {
     $density = $opt_d;
   } else {
-    die "\t-d value ($opt_d) is not a valid number\n\tPlease choose a positive real # value\n";
+    die "Error: the value for '-d' ($opt_d) is not a valid number\n       Please choose a positive real # value\n";
   }
 }
 if (defined($opt_l)){
+  $nothingSelected = 0;
   if ($opt_l =~ /^[0-9]/) {
     $lattice = $opt_l;
     if ($lattice != 0 && $lattice != 1){
-      die "\t-l value ($opt_l) is not a valid number\n\tPlease choose 0 or 1\n";
+      die "Error: the '-l' value ($opt_l) is not a valid number\n       Please choose 0 or 1\n";
     }
   } else {
-    die "\t-l value ($opt_l) is not a valid number\n\tPlease choose 0 or 1\n";
+    die "Error: the '-l' value ($opt_l) is not a valid number\n       Please choose 0 or 1\n";
   }
 }
 if (defined($opt_n)){
+  $nothingSelected = 0;
   if ($opt_n =~ /^[0-9]/) {
     $nMol = $opt_n;
   } else { 
-    die "\t-n value ($opt_n) is not a valid number\n\tPlease choose a non-negative integer\n";
+    die "Error: the '-n' value ($opt_n) is not a valid number\n       Please choose a non-negative integer\n";
   }
 }
 
 # open the file writer
-open(OUTFILE, ">./$fileName") || die "\tError: can't open file $fileName\n";
+open(OUTFILE, ">./$fileName") || die "Error: can't open file $fileName\n";
 
 # check to set magic lattice numbers
 if ($lattice == 0){
@@ -120,9 +128,8 @@ if ($lattice == 0){
   if ($remainder > $tolerance){
     $crystalNum = $crystalNum + 1;
     $newMol = 4 * $crystalNum**3;
-    print "WARNING: The number chosen ($nMol) failed to build a clean\n";
-    print "fcc lattice. The number of molecules has been increased to\n";
-    print "the next magic number ($newMol).\n";
+    print "Warning: The number chosen ($nMol) failed to build a clean fcc lattice.\n";
+    print "         The number of molecules has been increased to the next magic number ($newMol).\n\n";
     $nMol = $newMol;
   }
 } elsif ($lattice == 1){
@@ -135,9 +142,8 @@ if ($lattice == 0){
   if ($remainder > $tolerance){
     $crystalNum = $crystalNum + 1;
     $newMol = $crystalNum**3;
-    print "WARNING: The number chosen ($nMol) failed to build a clean\n";
-    print "simple cubic lattice. The number of molecules has been\n";
-    print "increased to the next magic number ($newMol).\n";
+    print "Warning: The number chosen ($nMol) failed to build a clean simple cubic lattice.\n";
+    print "         The number of molecules has been increased to the next magic number ($newMol).\n\n";
     $nMol = $newMol;
   }
 }
@@ -202,12 +208,17 @@ if ($lattice == 0) {
 }
 
 writeOutFile();
-print "Water box \"$fileName\" generated.\n";
+print "The water box \"$fileName\" was generated.\n";
 
 if ($opt_m){
   printWaterMD();
-  print "File \"water.md\" generated for inclusion in \"$fileName\"\n";
+  print "The file \"water.md\" was generated for inclusion in \"$fileName\"\n";
 }
+
+if ($nothingSelected == 1) {
+    print "(For help, use the \'-h\' option.)\n";
+}
+
 
 # this marks the end of the main program, below is subroutines
 
@@ -318,7 +329,7 @@ print OUTFILE
 }
 
 sub printWaterMD {
-  open(WATERMD, ">./water.md") || die "\tError: can't open file water.md\n";
+  open(WATERMD, ">./water.md") || die "Error: can't open file water.md\n";
   $waterFileHandle = 'WATERMD';
 
   print WATERMD "#ifndef _WATER_MD_\n#define _WATER_MD_\n";
