@@ -1,0 +1,134 @@
+#!/usr/bin/env python
+"""MD File Splitter
+
+Splits MD file frames into seperate md files
+
+Usage: mdSplit
+
+Options:
+  -h, --help              show this help
+  -m, --meta-data=...     use specified meta-data (.md) file
+  -s, --split-frame=...   split every n frames
+
+
+Example:
+   mdSplit -m Ar.md 
+
+"""
+
+__author__ = "Charles Vardeman (cvardema@nd.edu)"
+__version__ = "$Revision: 1.1 $"
+__date__ = "$Date: 2006-10-06 21:29:14 $"
+__copyright__ = "Copyright (c) 2006 by the University of Notre Dame"
+__license__ = "OOPSE"
+
+import sys
+import getopt
+import string
+import os
+
+
+_haveMDFileName = 0
+_haveSplitFrame = 0
+
+
+def usage():
+    print __doc__
+
+
+def splitFile(mdFileName,skipFrameNumber):
+    mdFile = open(mdFileName, 'r')
+   
+    outfilePrefix,ext = os.path.splitext(mdFileName)
+
+    
+    
+    metaDataFrame = []
+    haveMetaData = 0
+    haveMetaDataEnd = 0
+# Find OOPSE version info first
+    line = mdFile.readline()
+    while 1:
+        if '<OOPSE version=' in line:
+            OOPSEversion = line
+            break
+        line = mdFile.readline()
+
+# Rewind file and find start of MetaData block
+
+    mdFile.seek(0)
+    breakLoop = False
+    line = mdFile.readline()
+
+    while 1:
+        if '<MetaData>' in line:
+            while 2:
+                metaDataFrame.append(line)
+                line = mdFile.readline()
+                if '</MetaData>' in line:
+                    metaDataFrame.append(line)
+                    breakLoop = True
+                    break
+        if breakLoop:
+            break
+        line = mdFile.readline()
+
+
+    mdFile.seek(0)
+    framePos = 0
+    foundFrames = 0;
+    line = mdFile.readline()
+    while 1:
+        if '<Snapshot>' in line:
+            foundFrames += 1
+            division,remainder=divmod(foundFrames,int(skipFrameNumber))
+            if (remainder == 0):
+                outfilename = outfilePrefix + "_" +repr(foundFrames) + ext
+                outFile = open(outfilename,'w')
+                for metaline in metaDataFrame:
+                    outFile.write(metaline)
+                while not '</Snapshot>' in line:
+                    outFile.write(line)
+                    line = mdFile.readline()
+                outFile.write(line)
+                outFile.close()
+        line = mdFile.readline()
+        if not line: break
+ 
+    mdFile.close()
+
+
+def main(argv):                         
+    try:                                
+        opts, args = getopt.getopt(argv, "hm:s:", ["help", "meta-data=","split-frame", ""]) 
+    except getopt.GetoptError:           
+        usage()                          
+        sys.exit(2)                     
+    for opt, arg in opts:                
+        if opt in ("-h", "--help"):      
+            usage()                     
+            sys.exit()                  
+        elif opt in ("-m", "--meta-data"): 
+            mdFileName = arg
+            global _haveMDFileName
+            _haveMDFileName = 1
+        elif opt in ("-s", "--split-frame"): 
+            skipFrameNumber = arg
+            global _haveSplitFrame
+            _haveSplitFrame = 1
+    if (_haveMDFileName != 1):
+        usage() 
+        print "No meta-data file was specified"
+        sys.exit()
+    if (_haveSplitFrame != 1):
+        usage() 
+        print "Frames to split was not specified"
+        sys.exit()
+    splitFile(mdFileName,skipFrameNumber);
+
+if __name__ == "__main__":
+    if len(sys.argv) == 1:
+        usage()
+        sys.exit()
+    main(sys.argv[1:])
+
