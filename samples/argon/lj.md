@@ -9,6 +9,14 @@ molecule{
   }
 }
 molecule{
+  name = "Kr";
+  
+  atom[0]{
+     type="Kr";
+     position( 0.0, 0.0, 0.0 );
+  }
+}
+molecule{
   name = "Ne";
   
   atom[0]{

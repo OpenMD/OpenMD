@@ -42,7 +42,7 @@
  *
  *  Created by Charles F. Vardeman II on 10 Apr 2006.
  *  @author  Charles F. Vardeman II
- *  @version $Id: randomBuilder.cpp,v 1.2 2006-05-17 21:51:42 tim Exp $
+ *  @version $Id: randomBuilder.cpp,v 1.3 2006-10-09 22:16:44 gezelter Exp $
  *
  */
 
@@ -86,7 +86,6 @@ int main(int argc, char *argv []) {
   std::string inputFileName;
   std::string outPrefix;
   std::string outMdFileName;
-  std::string outInitFileName;
   Lattice *simpleLat;
   int* numMol;
   RealType latticeConstant;
@@ -160,7 +159,7 @@ int main(int argc, char *argv []) {
   Globals* simParams = oldInfo->getSimParams();
 
   int nComponents =simParams->getNComponents();
-  if (oldInfo->getNMoleculeStamp()>= 2) {
+  if (oldInfo->getNMoleculeStamp() > 2) {
     std::cerr << "can not build the system with more than two components"
 	      << std::endl;
     exit(1);
@@ -228,16 +227,7 @@ int main(int argc, char *argv []) {
   outMdFileName = outPrefix + ".md";
 
   //creat new .md file on fly which corrects the number of molecule     
-  createMdFile(inputFileName, outMdFileName, nComponents,numMol);
-
-
-
-  //determine the output file names  
-  if (args_info.output_given){
-    outInitFileName = args_info.output_arg;
-  }else{
-    outInitFileName = getPrefix(inputFileName.c_str()) + ".in";
-  }
+  createMdFile(inputFileName, outMdFileName, nComponents, numMol);
 
   //fill Hmat
   hmat(0, 0)= nx * latticeConstant;
@@ -267,57 +257,41 @@ int main(int argc, char *argv []) {
   /* Randomize position vector */
   std::random_shuffle(latticeSites.begin(), latticeSites.end());
 
-
   if (oldInfo != NULL)
     delete oldInfo;
-  
-  
+
   // We need to read in new siminfo object.	
-  //parse md file and set up the system
-  //SimCreator NewCreator;
+  // parse md file and set up the system
+
   SimCreator newCreator;
-  SimInfo* NewInfo = newCreator.createSim(outMdFileName, false);
+  SimInfo* newInfo = newCreator.createSim(outMdFileName, false);
   
   /* create Molocators */
-  locator = new MoLocator(NewInfo->getMoleculeStamp(0), NewInfo->getForceField());
+  locator = new MoLocator(newInfo->getMoleculeStamp(0), newInfo->getForceField());
   
   
   
   Molecule* mol;
   SimInfo::MoleculeIterator mi;
-  mol = NewInfo->beginMolecule(mi);
+  mol = newInfo->beginMolecule(mi);
   int l = 0;
-  for (mol = NewInfo->beginMolecule(mi); mol != NULL; mol = NewInfo->nextMolecule(mi)) {
+  for (mol = newInfo->beginMolecule(mi); mol != NULL; mol = newInfo->nextMolecule(mi)) {
     locator->placeMol(latticeSites[l], latticeOrt[l], mol);
     l++;
   }
 
-
-
   //create dumpwriter and write out the coordinates
-  oldInfo->setFinalConfigFileName(outInitFileName);
-  writer = new DumpWriter(oldInfo);
+  newInfo->setFinalConfigFileName(outMdFileName);
+  writer = new DumpWriter(newInfo);
 
   if (writer == NULL) {
     std::cerr << "error in creating DumpWriter" << std::endl;
     exit(1);
   }
 
-  writer->writeDump();
-  std::cout << "new initial configuration file: " << outInitFileName
-	    << " is generated." << std::endl;
-
-  //delete objects
-
-  //delete oldInfo and oldSimSetup
-  if (oldInfo != NULL)
-    delete oldInfo;
-
-  if (writer != NULL)
-    delete writer;
-    
-  delete simpleLat;
-
+  writer->writeEor();
+  std::cout << "new OOPSE MD file: " << outMdFileName
+	    << " has been generated." << std::endl;
   return 0;
 }
 
