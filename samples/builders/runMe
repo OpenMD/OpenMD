@@ -1,0 +1,22 @@
+#!/bin/sh
+#
+# This is a collection of sample commands that can be used to build
+# OOPSE 4 start files.  In OOPSE 4, the start files have a <MetaData>
+# block to give information about the kind of simulation being performed.
+# The start files also contain at least one <Snapshot> block which contains
+# information about the instantaneous configuration.  
+#
+# One of the difficult tasks in using any simulation program is figuring
+# out how to format the start file correctly.  OOPSE includes a set of
+# "builder" programs to make that process a bit less painful.
+#
+# Example 1:
+# Builds an FCC lattice from the <MetaData> block in three_component.md
+# uses 4 unit cells in each direction, a density of 1.0 g / cm^3, and
+# molFractions of 0.4, 0.4, and 0.2 for the three components.  Places
+# the output (which can be used to start an OOPSE job) in random_FCC.md
+#
+# Note that builders will rewrite the number of molecules in each component
+# to match the number of lattice sites.
+#
+../../bin/randomBuilder -o random_FCC.md --nx=4 --ny=4 --nz=4 --density=1.0 --molFraction=0.4 --molFraction=0.4 three_component.md
