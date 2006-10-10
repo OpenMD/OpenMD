@@ -11,6 +11,17 @@
 # "builder" programs to make that process a bit less painful.
 #
 # Example 1:
+# Builds an FCC lattice from the <MetaData> block in one_component.md
+# Uses 5 unit cells in each direction, a density of 1.0 g / cm^3, and
+# places the output (which can be used to start an OOPSE job) in 
+# FCC.md
+#
+# Note that builders will rewrite the number of molecules in each component
+# to match the number of lattice sites.
+#
+../../bin/simpleBuilder -o FCC.md --nx=5 --ny=5 --nz=5 --density=1.0 one_component.md
+#
+# Example 2:
 # Builds an FCC lattice from the <MetaData> block in three_component.md
 # uses 4 unit cells in each direction, a density of 1.0 g / cm^3, and
 # molFractions of 0.4, 0.4, and 0.2 for the three components.  Places

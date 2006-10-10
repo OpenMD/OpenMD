@@ -48,7 +48,6 @@ void clear_given (struct gengetopt_args_info *args_info)
   args_info->help_given = 0 ;
   args_info->version_given = 0 ;
   args_info->output_given = 0 ;
-  args_info->latticetype_given = 0 ;
   args_info->density_given = 0 ;
   args_info->nx_given = 0 ;
   args_info->ny_given = 0 ;
@@ -61,8 +60,6 @@ void clear_args (struct gengetopt_args_info *args_info)
 {
   args_info->output_arg = NULL;
   args_info->output_orig = NULL;
-  args_info->latticetype_arg = gengetopt_strdup ("fcc");
-  args_info->latticetype_orig = NULL;
   args_info->density_orig = NULL;
   args_info->nx_orig = NULL;
   args_info->ny_orig = NULL;
@@ -86,7 +83,6 @@ cmdline_parser_print_help (void)
   printf("%s\n","  -h, --help                Print help and exit");
   printf("%s\n","  -V, --version             Print version and exit");
   printf("%s\n","  -o, --output=STRING       Output file name");
-  printf("%s\n","      --latticetype=STRING  Lattice type string. Valid types are fcc,hcp,bcc \n                              and hcp-water.  (default=`fcc')");
   printf("%s\n","      --density=DOUBLE      density (g/cm^3)");
   printf("%s\n","      --nx=INT              number of unit cells in x");
   printf("%s\n","      --ny=INT              number of unit cells in y");
@@ -119,16 +115,6 @@ cmdline_parser_release (struct gengetopt_args_info *args_info)
     {
       free (args_info->output_orig); /* free previous argument */
       args_info->output_orig = 0;
-    }
-  if (args_info->latticetype_arg)
-    {
-      free (args_info->latticetype_arg); /* free previous argument */
-      args_info->latticetype_arg = 0;
-    }
-  if (args_info->latticetype_orig)
-    {
-      free (args_info->latticetype_orig); /* free previous argument */
-      args_info->latticetype_orig = 0;
     }
   if (args_info->density_orig)
     {
@@ -200,13 +186,6 @@ cmdline_parser_file_save(const char *filename, struct gengetopt_args_info *args_
       fprintf(outfile, "%s=\"%s\"\n", "output", args_info->output_orig);
     } else {
       fprintf(outfile, "%s\n", "output");
-    }
-  }
-  if (args_info->latticetype_given) {
-    if (args_info->latticetype_orig) {
-      fprintf(outfile, "%s=\"%s\"\n", "latticetype", args_info->latticetype_orig);
-    } else {
-      fprintf(outfile, "%s\n", "latticetype");
     }
   }
   if (args_info->density_given) {
@@ -420,7 +399,6 @@ cmdline_parser_internal (int argc, char * const *argv, struct gengetopt_args_inf
         { "help",	0, NULL, 'h' },
         { "version",	0, NULL, 'V' },
         { "output",	1, NULL, 'o' },
-        { "latticetype",	1, NULL, 0 },
         { "density",	1, NULL, 0 },
         { "nx",	1, NULL, 0 },
         { "ny",	1, NULL, 0 },
@@ -466,27 +444,8 @@ cmdline_parser_internal (int argc, char * const *argv, struct gengetopt_args_inf
 
 
         case 0:	/* Long option with no short option */
-          /* Lattice type string. Valid types are fcc,hcp,bcc and hcp-water..  */
-          if (strcmp (long_options[option_index].name, "latticetype") == 0)
-          {
-            if (local_args_info.latticetype_given)
-              {
-                fprintf (stderr, "%s: `--latticetype' option given more than once%s\n", argv[0], (additional_error ? additional_error : ""));
-                goto failure;
-              }
-            if (args_info->latticetype_given && ! override)
-              continue;
-            local_args_info.latticetype_given = 1;
-            args_info->latticetype_given = 1;
-            if (args_info->latticetype_arg)
-              free (args_info->latticetype_arg); /* free previous string */
-            args_info->latticetype_arg = gengetopt_strdup (optarg);
-            if (args_info->latticetype_orig)
-              free (args_info->latticetype_orig); /* free previous string */
-            args_info->latticetype_orig = gengetopt_strdup (optarg);
-          }
           /* density (g/cm^3).  */
-          else if (strcmp (long_options[option_index].name, "density") == 0)
+          if (strcmp (long_options[option_index].name, "density") == 0)
           {
             if (local_args_info.density_given)
               {

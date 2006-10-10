@@ -26,8 +26,6 @@ struct gengetopt_args_info
 {
   char * output_arg;	/* Output file name.  */
   char * output_orig;	/* Output file name original value given at command line.  */
-  char * latticetype_arg;	/* Lattice type string. Valid types are fcc,hcp,bcc and hcp-water. (default='fcc').  */
-  char * latticetype_orig;	/* Lattice type string. Valid types are fcc,hcp,bcc and hcp-water. original value given at command line.  */
   double density_arg;	/* density (g/cm^3).  */
   char * density_orig;	/* density (g/cm^3) original value given at command line.  */
   int nx_arg;	/* number of unit cells in x.  */
@@ -42,7 +40,6 @@ struct gengetopt_args_info
   int help_given ;	/* Whether help was given.  */
   int version_given ;	/* Whether version was given.  */
   int output_given ;	/* Whether output was given.  */
-  int latticetype_given ;	/* Whether latticetype was given.  */
   int density_given ;	/* Whether density was given.  */
   int nx_given ;	/* Whether nx was given.  */
   int ny_given ;	/* Whether ny was given.  */

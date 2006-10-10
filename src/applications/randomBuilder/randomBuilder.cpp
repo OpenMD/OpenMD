@@ -42,7 +42,7 @@
  *
  *  Created by Charles F. Vardeman II on 10 Apr 2006.
  *  @author  Charles F. Vardeman II
- *  @version $Id: randomBuilder.cpp,v 1.5 2006-10-10 14:52:20 gezelter Exp $
+ *  @version $Id: randomBuilder.cpp,v 1.6 2006-10-10 18:34:12 gezelter Exp $
  *
  */
 
@@ -105,7 +105,7 @@ int main(int argc, char *argv []) {
   density = args_info.density_arg;
 
   //get lattice type
-  latticeType = UpperCase(args_info.latticetype_arg);
+  latticeType = "FCC";
 
   simpleLat = LatticeFactory::getInstance()->createLattice(latticeType);
     

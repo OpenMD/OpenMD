@@ -62,37 +62,32 @@
 
 using namespace std;
 using namespace oopse;
-void createMdFile(const std::string&oldMdFileName, const std::string&newMdFileName,
-                  int numMol);
+
+void createMdFile(const std::string&oldMdFileName, 
+                  const std::string&newMdFileName,
+                  int nMol);
 
 int main(int argc, char *argv []) {
 
-  //register force fields
+  // register force fields
   registerForceFields();
   registerLattice();
     
   gengetopt_args_info args_info;
   std::string latticeType;
   std::string inputFileName;
-  std::string outPrefix;
-  std::string outMdFileName;
-  std::string outInitFileName;
+  std::string outputFileName;
   Lattice *simpleLat;
-  int numMol;
-  double latticeConstant;
-  std::vector<double> lc;
-  double mass;
-  const double rhoConvertConst = 1.661;
-  double density;
-  int nx,
-    ny,
-    nz;
+  RealType latticeConstant;
+  std::vector<RealType> lc;
+  const RealType rhoConvertConst = 1.661;
+  RealType density;
+  int nx, ny, nz;
   Mat3x3d hmat;
   MoLocator *locator;
   std::vector<Vector3d> latticePos;
   std::vector<Vector3d> latticeOrt;
-  int numMolPerCell;
-  int curMolIndex;
+  int nMolPerCell;
   DumpWriter *writer;
 
   // parse command line arguments
@@ -102,7 +97,7 @@ int main(int argc, char *argv []) {
   density = args_info.density_arg;
 
   //get lattice type
-  latticeType = UpperCase(args_info.latticetype_arg);
+  latticeType = "FCC";
 
   simpleLat = LatticeFactory::getInstance()->createLattice(latticeType);
     
@@ -112,98 +107,111 @@ int main(int argc, char *argv []) {
     painCave.isFatal = 1;
     simError();
   }
+  nMolPerCell = simpleLat->getNumSitesPerCell();
 
-  //get the number of unit cell
+  //get the number of unit cells in each direction:
+
   nx = args_info.nx_arg;
 
   if (nx <= 0) {
-    std::cerr << "The number of unit cell in h direction must be greater than 0" << std::endl;
-    exit(1);
+    sprintf(painCave.errMsg, "The number of unit cells in the x direction "
+            "must be greater than 0.");
+    painCave.isFatal = 1;
+    simError();
   }
 
   ny = args_info.ny_arg;
 
   if (ny <= 0) {
-    std::cerr << "The number of unit cell in l direction must be greater than 0" << std::endl;
-    exit(1);
+    sprintf(painCave.errMsg, "The number of unit cells in the y direction "
+            "must be greater than 0.");
+    painCave.isFatal = 1;
+    simError();
   }
 
   nz = args_info.nz_arg;
 
   if (nz <= 0) {
-    std::cerr << "The number of unit cell in k direction must be greater than 0" << std::endl;
-    exit(1);
+    sprintf(painCave.errMsg, "The number of unit cells in the z direction "
+            "must be greater than 0.");
+    painCave.isFatal = 1;
+    simError();
   }
+
+  int nSites = nMolPerCell * nx * ny * nz;
 
   //get input file name
   if (args_info.inputs_num)
     inputFileName = args_info.inputs[0];
   else {
-    std::cerr << "You must specify a input file name.\n" << std::endl;
-    cmdline_parser_print_help();
-    exit(1);
+    sprintf(painCave.errMsg, "No input .md file name was specified "
+            "on the command line");
+    painCave.isFatal = 1;
+    simError();
   }
 
   //parse md file and set up the system
+
   SimCreator oldCreator;
   SimInfo* oldInfo = oldCreator.createSim(inputFileName, false);
+  Globals* simParams = oldInfo->getSimParams();
 
-  if (oldInfo->getNMoleculeStamp()>= 2) {
-    std::cerr << "can not build the system with more than two components"
-	      << std::endl;
-    exit(1);
-  }
+  // Calculate lattice constant (in Angstroms)
 
-  //get mass of molecule. 
+  RealType avgMass = getMolMass(oldInfo->getMoleculeStamp(0),
+                                  oldInfo->getForceField());
 
-  mass = getMolMass(oldInfo->getMoleculeStamp(0), oldInfo->getForceField());
-
-  //creat lattice
-  simpleLat = LatticeFactory::getInstance()->createLattice(latticeType);
-
-  if (simpleLat == NULL) {
-    std::cerr << "Error in creating lattice" << std::endl;
-    exit(1);
-  }
-
-  numMolPerCell = simpleLat->getNumSitesPerCell();
-
-  //calculate lattice constant (in Angstrom)
-  latticeConstant = pow(rhoConvertConst * numMolPerCell * mass / density,
-			1.0 / 3.0);
-
-  //set lattice constant
+  latticeConstant = pow(rhoConvertConst * nMolPerCell * avgMass / density,
+			(RealType)(1.0 / 3.0));
+  
+  // Set the lattice constant
+  
   lc.push_back(latticeConstant);
   simpleLat->setLatticeConstant(lc);
 
-  //calculate the total number of molecules
-  numMol = nx * ny * nz * numMolPerCell;
+  // Calculate the lattice sites and fill the lattice vector.
 
-  if (oldInfo->getNGlobalMolecules() != numMol) {
-    outPrefix = getPrefix(inputFileName.c_str()) + "_" + latticeType;
-    outMdFileName = outPrefix + ".md";
+  // Get the standard orientations of the cell sites
 
-    //creat new .md file on fly which corrects the number of molecule     
-    createMdFile(inputFileName, outMdFileName, numMol);
-    std::cerr
-      << "SimpleBuilder Error: the number of molecule and the density are not matched"
-      << std::endl;
-    std::cerr << "A new .md file: " << outMdFileName
-	      << " is generated, use it to rerun the simpleBuilder" << std::endl;
-    exit(1);
+  latticeOrt = simpleLat->getLatticePointsOrt();
+
+  vector<Vector3d> sites;
+  vector<Vector3d> orientations;
+  
+  for(int i = 0; i < nx; i++) {
+    for(int j = 0; j < ny; j++) {
+      for(int k = 0; k < nz; k++) {
+
+	// Get the position of the cell sites
+        
+	simpleLat->getLatticePointsPos(latticePos, i, j, k);
+        
+	for(int l = 0; l < nMolPerCell; l++) {
+	  sites.push_back(latticePos[l]);
+          orientations.push_back(latticeOrt[l]);
+	}
+      }
+    }
   }
+  
+  outputFileName = args_info.output_arg;
+  
+  // create a new .md file on the fly which corrects the number of molecules
 
-  //determine the output file names  
-  if (args_info.output_given)
-    outInitFileName = args_info.output_arg;
-  else
-    outInitFileName = getPrefix(inputFileName.c_str()) + ".in";
-    
-  //creat Molocator
-  locator = new MoLocator(oldInfo->getMoleculeStamp(0), oldInfo->getForceField());
+  createMdFile(inputFileName, outputFileName, nSites);
 
-  //fill Hmat
-  hmat(0, 0)= nx * latticeConstant;
+  if (oldInfo != NULL)
+    delete oldInfo;
+
+  // We need to read in the new SimInfo object, then Parse the 
+  // md file and set up the system
+
+  SimCreator newCreator;
+  SimInfo* newInfo = newCreator.createSim(outputFileName, false);
+
+  // fill Hmat
+
+  hmat(0, 0) = nx * latticeConstant;
   hmat(0, 1) = 0.0;
   hmat(0, 2) = 0.0;
 
@@ -215,68 +223,46 @@ int main(int argc, char *argv []) {
   hmat(2, 1) = 0.0;
   hmat(2, 2) = nz * latticeConstant;
 
-  //set Hmat
-  oldInfo->getSnapshotManager()->getCurrentSnapshot()->setHmat(hmat);
+  // Set Hmat
 
-  //place the molecules
+  newInfo->getSnapshotManager()->getCurrentSnapshot()->setHmat(hmat);
 
-  curMolIndex = 0;
-
-  //get the orientation of the cell sites
-  //for the same type of molecule in same lattice, it will not change
-  latticeOrt = simpleLat->getLatticePointsOrt();
-
+  // place the molecules
+  
   Molecule* mol;
-  SimInfo::MoleculeIterator mi;
-  mol = oldInfo->beginMolecule(mi);
-  for(int i = 0; i < nx; i++) {
-    for(int j = 0; j < ny; j++) {
-      for(int k = 0; k < nz; k++) {
-
-	//get the position of the cell sites
-	simpleLat->getLatticePointsPos(latticePos, i, j, k);
-
-	for(int l = 0; l < numMolPerCell; l++) {
-	  if (mol != NULL) {
-	    locator->placeMol(latticePos[l], latticeOrt[l], mol);
-	  } else {
-	    std::cerr << std::endl;                    
-	  }
-	  mol = oldInfo->nextMolecule(mi);
-	}
-      }
-    }
+  locator = new MoLocator(newInfo->getMoleculeStamp(0), 
+                          newInfo->getForceField());
+  for (int n = 0; n < nSites; n++) {
+    mol = newInfo->getMoleculeByGlobalIndex(n);
+    locator->placeMol(sites[n], orientations[n], mol);
   }
+   
+  // Create DumpWriter and write out the coordinates
 
-  //create dumpwriter and write out the coordinates
-  oldInfo->setFinalConfigFileName(outInitFileName);
-  writer = new DumpWriter(oldInfo);
-
+  writer = new DumpWriter(newInfo, outputFileName);
+  
   if (writer == NULL) {
-    std::cerr << "error in creating DumpWriter" << std::endl;
-    exit(1);
+    sprintf(painCave.errMsg, "error in creating DumpWriter");
+    painCave.isFatal = 1;
+    simError();
   }
 
   writer->writeDump();
-  std::cout << "new initial configuration file: " << outInitFileName
-	    << " is generated." << std::endl;
 
-  //delete objects
+  // deleting the writer will put the closing at the end of the dump file.
 
-  //delete oldInfo and oldSimSetup
-  if (oldInfo != NULL)
-    delete oldInfo;
+  delete writer;
 
-  if (writer != NULL)
-    delete writer;
-    
-  delete simpleLat;
-
+  sprintf(painCave.errMsg, "A new OOPSE MD file called \"%s\" has been "
+          "generated.\n", outputFileName.c_str());
+  painCave.isFatal = 0;
+  simError();
   return 0;
 }
 
-void createMdFile(const std::string&oldMdFileName, const std::string&newMdFileName,
-                  int numMol) {
+void createMdFile(const std::string&oldMdFileName, 
+                  const std::string&newMdFileName,
+                  int nMol) {
   ifstream oldMdFile;
   ofstream newMdFile;
   const int MAXLEN = 65535;
@@ -292,7 +278,7 @@ void createMdFile(const std::string&oldMdFileName, const std::string&newMdFileNa
 
     //correct molecule number
     if (strstr(buffer, "nMol") != NULL) {
-      sprintf(buffer, "\t\tnMol = %d;", numMol);
+      sprintf(buffer, "\t\tnMol = %d;", nMol);
       newMdFile << buffer << std::endl;
     } else
       newMdFile << buffer << std::endl;
