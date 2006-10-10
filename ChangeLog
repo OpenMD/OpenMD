@@ -1,3 +1,667 @@
+2006-10-10 10:08  chrisfen
+
+	* src/applications/utilities/: affineScale, affineScale.in,
+	solvator, solvator.in, waterBoxer, waterBoxer.in: who needs .in
+	files for perl?  using env
+
+2006-10-09 22:44  gezelter
+
+	* src/: applications/randomBuilder/randomBuilder.cpp,
+	applications/randomBuilder/randomBuilder.ggo,
+	applications/randomBuilder/randomBuilderCmd.c,
+	applications/randomBuilder/randomBuilderCmd.h, utils/MoLocator.cpp:
+	fixing bugs in randomBuilder
+
+2006-10-09 18:16  gezelter
+
+	* samples/argon/lj.md,
+	src/applications/randomBuilder/randomBuilder.cpp,
+	src/applications/simpleBuilder/Makefile,
+	src/applications/simpleBuilder/randomBuilder.cpp,
+	src/applications/simpleBuilder/randomBuilder.ggo,
+	src/applications/simpleBuilder/randomBuilderCmd.c,
+	src/applications/simpleBuilder/randomBuilderCmd.h: Fixing the
+	builders to prepare for OOPSE-4 release
+
+2006-10-06 17:29  chuckv
+
+	* src/applications/utilities/mdSplit: Added utility to split dump
+	file frames into md files.
+
+2006-10-03 18:39  chrisfen
+
+	* src/applications/utilities/Makefile: forgot to adjust the
+	makefile
+
+2006-10-03 18:38  chrisfen
+
+	* src/applications/utilities/: solvator.in, waterBoxer.in: added
+	solvator and adjusted waterBoxer
+
+2006-10-02 19:54  chrisfen
+
+	* src/applications/utilities/waterBoxer.in: improvements to
+	waterBoxer
+
+2006-10-02 19:27  chrisfen
+
+	* src/applications/utilities/waterBoxer.in: fixed a bug in
+	waterBoxer for invalid water names
+
+2006-09-26 17:55  gezelter
+
+	* AUTHORS, README: Starting cleanup for 4.0 release
+
+2006-09-26 12:08  gezelter
+
+	* src/applications/staticProps/: BondOrderParameter.cpp,
+	BondOrderParameter.hpp: Cleaned up the code for BondOrderParameter
+	and added a bunch of comments.	Fixed a memory leak or ten.
+
+2006-09-26 10:33  gezelter
+
+	* src/applications/staticProps/: BondOrderParameter.cpp,
+	BondOrderParameter.hpp: Some efficiency fixes (now computes Wigner
+	3-j coefficients only once in the constructor).
+
+2006-09-25 21:30  gezelter
+
+	* src/applications/staticProps/: BondOrderParameter.cpp,
+	BondOrderParameter.hpp, StaticProps.cpp, StaticProps.ggo,
+	StaticPropsCmd.c, StaticPropsCmd.h: Mostly done with
+	BondOrderParameter.  Only a few performance tweaks remain
+
+2006-09-25 18:08  gezelter
+
+	* src/: applications/staticProps/BondOrderParameter.cpp,
+	applications/staticProps/BondOrderParameter.hpp,
+	applications/staticProps/StaticProps.cpp, brains/SimCreator.cpp,
+	math/SphericalHarmonic.cpp: fixing bond order parameter code
+
+2006-09-22 18:19  chrisfen
+
+	* src/: UseTheForce/DarkSide/simulation.F90, brains/SimInfo.cpp,
+	brains/fSimulation.h, io/ForceFieldOptions.cpp,
+	io/ForceFieldOptions.hpp, io/Globals.cpp, io/Globals.hpp: refined
+	the reaction field dielectric passing
+
+2006-09-21 21:41  gezelter
+
+	* src/applications/staticProps/: BondOrderParameter.cpp,
+	BondOrderParameter.hpp: bug fixes (still broken, however)
+
+2006-09-21 21:36  gezelter
+
+	* src/applications/staticProps/: BondOrderParameter.cpp,
+	BondOrderParameter.hpp: Following Rein ten Wolde article
+
+2006-09-21 17:47  gezelter
+
+	* src/applications/staticProps/: BondOrderParameter.cpp,
+	BondOrderParameter.hpp: more bug fixes
+
+2006-09-21 16:43  gezelter
+
+	* src/applications/staticProps/BondOrderParameter.cpp: more changes
+	to BOP and SH
+
+2006-09-21 14:25  chrisfen
+
+	* src/: UseTheForce/DarkSide/electrostatic.F90, brains/SimInfo.cpp,
+	io/Globals.cpp: fixed the half self term for wolf electrostatics
+	and OOPSE now chooses a cutoff radius dependent alpha for damped
+	electrostatics
+
+2006-09-21 14:04  gezelter
+
+	* src/applications/staticProps/BondOrderParameter.cpp: Fixed a bug
+	in Wl code in BondOrderParameter
+
+2006-09-21 10:45  gezelter
+
+	* src/: applications/staticProps/BondOrderParameter.cpp,
+	math/SphericalHarmonic.cpp, math/SphericalHarmonic.hpp: Bugfixes in
+	BondOrderParameter and SphericalHarmonic
+
+2006-09-20 18:16  gezelter
+
+	* src/: applications/staticProps/BondOrderParameter.cpp,
+	math/Makefile, math/SphericalHarmonic.cpp,
+	math/SphericalHarmonic.hpp: added SphericalHarmonics, fixed a few
+	problems with BondOrderParameter
+
+2006-09-20 16:13  gezelter
+
+	* src/applications/staticProps/: BondOrderParameter.cpp,
+	BondOrderParameter.hpp, GofAngle2.cpp, StaticProps.cpp,
+	StaticProps.ggo, StaticPropsCmd.c, StaticPropsCmd.h: fixed bugs
+	(mostly in BondOrderParameter)
+
+2006-09-19 17:20  gezelter
+
+	* src/applications/staticProps/: BondOrderParameter.cpp,
+	BondOrderParameter.hpp: Adding BondOrderParameter to StaticProps
+
+2006-09-19 17:14  gezelter
+
+	* src/applications/staticProps/: BondOrderParameter.cpp,
+	BondOrderParameter.hpp, Makefile, StaticProps.cpp, StaticProps.ggo,
+	StaticPropsCmd.c, StaticPropsCmd.h: Working on BondOrderParameter
+
+2006-09-18 17:31  chuckv
+
+	* src/applications/staticProps/: BondOrderParameter.cpp,
+	BondOrderParameter.hpp: Latest Version
+
+2006-09-08 12:13  gezelter
+
+	* src/: brains/BlockSnapshotManager.cpp, io/DumpReader.cpp,
+	utils/residentMem.c: fixed a DumpReader bug, took out extra
+	printing statements in residentMem and BlockSnapshotManager
+
+2006-09-04 09:37  gezelter
+
+	* configure, ac-tools/configure.in,
+	src/applications/utilities/Makefile: changing configure script to
+	process the new utilities
+
+2006-09-01 18:58  chrisfen
+
+	* src/applications/utilities/waterBoxer.in: added some features to
+	waterBoxer
+
+2006-09-01 17:08  chrisfen
+
+	* src/applications/utilities/: Makefile, affineScale.in,
+	waterBoxer.in: added the waterBoxer script
+
+2006-09-01 15:22  chrisfen
+
+	* src/applications/utilities/affineScale.in: added comment info
+
+2006-09-01 15:16  gezelter
+
+	* src/: applications/nanoparticleBuilder/nanoparticleBuilder.cpp,
+	brains/Register.cpp, integrators/Makefile, integrators/NgammaT.cpp,
+	integrators/NgammaT.hpp, io/Globals.cpp: adding NgammaT integrator
+
+2006-09-01 14:29  chrisfen
+
+	* src/applications/utilities/affineScale.in: modified affineScale
+	to work with the new OOPSE files
+
+2006-09-01 10:15  chrisfen
+
+	* src/io/: RestReader.cpp, RestWriter.cpp: fixed TI MPI bug
+
+2006-08-31 18:34  chrisfen
+
+	* src/: integrators/VelocityVerletIntegrator.cpp,
+	restraints/ThermoIntegrationForceManager.cpp: fixes to zang writing
+
+2006-08-31 16:12  chrisfen
+
+	* samples/alkane/butane.in, samples/alkane/butane.md,
+	samples/argon/500.in, samples/argon/500.md, samples/argon/ar864.in,
+	samples/argon/ar864.md, samples/argon/argonNVT.in,
+	samples/argon/argonNVT.md, samples/cutoff/GB-Ar-max.md,
+	samples/cutoff/GB-Ar-mix.md, samples/cutoff/GB-Ar-traditional.md,
+	samples/cutoff/cutoff_test.in, samples/cutoff/cutoff_test.md,
+	samples/cutoff/gb-ar.in, samples/cutoff/max.md,
+	samples/cutoff/mix.md, samples/cutoff/traditional.md,
+	samples/dipole/splitInWater.in, samples/dipole/splitInWater.md,
+	samples/dipole/split_SSD.in, samples/dipole/split_SSD.md,
+	samples/dipole/twoSplitDipole.in, samples/dipole/twoSplitDipole.md,
+	samples/gbljtest/2gb.in, samples/gbljtest/2gb.md,
+	samples/gbljtest/gb2lj1.in, samples/gbljtest/gb2lj1.md,
+	samples/gbljtest/gbRotRoundX.in, samples/gbljtest/gbRotRoundX.md,
+	samples/gbljtest/gbRotRoundY.in, samples/gbljtest/gbRotRoundY.md,
+	samples/gbljtest/gbRotRoundZ.in, samples/gbljtest/gbRotRoundZ.md,
+	samples/lipid/5x5.in, samples/lipid/5x5.md,
+	samples/metals/EAM/Au_bulk.in, samples/metals/EAM/Au_bulk_FBD.md,
+	samples/metals/EAM/Au_bulk_voter.md,
+	samples/metals/EAM/nanoparticle/Au-Core-Ag-Shell_Nanoparticle.in,
+	samples/metals/EAM/nanoparticle/Au-Core-Ag-Shell_Nanoparticle.md,
+	samples/metals/EAM/nanoparticle/Au_nanoparticle.in,
+	samples/metals/EAM/nanoparticle/Au_nanoparticle.md,
+	samples/metals/EAM/nanorod/Au_nanoparticle.in,
+	samples/metals/EAM/nanorod/Au_nanoparticle_FCC.md,
+	samples/metals/Sutton-Chen/Au_bulk.in,
+	samples/metals/Sutton-Chen/Au_bulk_QSC.md,
+	samples/metals/Sutton-Chen/Au_bulk_SC.md,
+	samples/minimizer/WATER.frc, samples/minimizer/ssdEM.in,
+	samples/minimizer/ssdEM.md, samples/minimizer/tip4p_two.md,
+	samples/thermoIntegration/liquid/ssde.in,
+	samples/thermoIntegration/liquid/ssde.md,
+	samples/thermoIntegration/solid/ssde.in,
+	samples/thermoIntegration/solid/ssde.md, samples/water/dimer/cl.in,
+	samples/water/dimer/cl.md, samples/water/dimer/mix.in,
+	samples/water/dimer/mix.md, samples/water/dimer/mix2.in,
+	samples/water/dimer/mix2.md, samples/water/dimer/ssd.in,
+	samples/water/dimer/ssd.md, samples/water/dimer/tap.in,
+	samples/water/dimer/tap.md, samples/water/dimer/two.in,
+	samples/water/dimer/two.md, samples/water/spce/spce.in,
+	samples/water/spce/spce.md, samples/water/ssd/ssd.in,
+	samples/water/ssd/ssd.md, samples/water/ssd-ion/ssd-ion.md,
+	samples/water/ssd-ion/ssdCl.in, samples/water/ssd-ion/ssdCl.md,
+	samples/water/ssde/ssde.in, samples/water/ssde/ssde.md,
+	samples/water/ssdrf/ssdrf.in, samples/water/ssdrf/ssdrf.md,
+	samples/water/tap/tap.in, samples/water/tap/tap.md,
+	samples/water/tip3p_ice/tp3.in, samples/water/tip3p_ice/tp3.md,
+	samples/water/tip4p/tp4.in, samples/water/tip4p/tp4.md,
+	samples/zcons/zconsFixed.in, samples/zcons/zconsFixed.md,
+	samples/zcons/zconsMoving.in, samples/zcons/zconsMoving.md,
+	src/restraints/ThermoIntegrationForceManager.cpp: converted samples
+	over to the OOPSE-4 file format
+	
+	Fixed an MPI bug in thermodynamic integration
+
+2006-08-30 17:13  gezelter
+
+	* src/applications/hydrodynamics/Hydro.cpp: removed extra file in
+	Hydro.cpp
+
+2006-08-30 17:04  gezelter
+
+	* src/: applications/dump2Xyz/Dump2XYZ.cpp,
+	applications/dynamicProps/DynamicProps.cpp,
+	applications/staticProps/StaticProps.cpp,
+	applications/utilities/dumpConverter, openbabel/oopseformat.cpp:
+	Changing utility programs to use the new file format
+
+2006-08-30 16:33  gezelter
+
+	* src/: brains/SimCreator.cpp, io/DumpReader.cpp,
+	io/DumpWriter.cpp: fixed some bugs in DumpWriter, eliminated some
+	extra printing of debugging information
+
+2006-08-30 14:42  tim
+
+	* configure, ac-tools/OOPSE.m4, forceFields/Au.u3.funcfl,
+	forceFields/Ni.u3.funcfl, samples/argon/lj.md,
+	src/brains/Register.cpp, src/brains/SimCreator.cpp,
+	src/brains/SimCreator.hpp, src/brains/SimInfo.cpp,
+	src/brains/SimInfo.hpp, src/io/DumpReader.cpp,
+	src/io/DumpReader.hpp, src/io/DumpWriter.cpp,
+	src/io/DumpWriter.hpp, src/io/Globals.cpp, src/io/Globals.hpp,
+	src/mdParser/SimplePreprocessor.hpp, src/openbabel/Makefile,
+	src/openbabel/oopseformat.cpp, src/primitives/StuntDouble.cpp,
+	src/primitives/StuntDouble.hpp, src/utils/StringUtils.cpp,
+	src/utils/StringUtils.hpp: Massive changes preparing for release of
+	OOPSE-4: The main difference is that the new MD file format (.md,
+	.dump, .eor) now contains meta-data information along with the
+	configuration information.
+
+2006-08-24 13:42  xsun
+
+	* src/io/Globals.cpp: change the globals.cpp to make sure we can
+	set targetPressure and surfaceTension to be negative.
+
+2006-08-14 16:32  chrisfen
+
+	* src/UseTheForce/DarkSide/electrostatic.F90: fixed an ordering
+	issue in quadrupole-charge interactions
+
+2006-08-02 15:40  gezelter
+
+	* make/Makefile.in, samples/water/ssde/ssde.md, src/config.h.in,
+	src/antlr/Makefile, src/applications/atom2md/atom2md.cpp,
+	src/brains/Snapshot.cpp, src/brains/Snapshot.hpp,
+	src/openbabel/Makefile, src/openbabel/oopseformat.cpp,
+	src/openbabel/oopseformat.hpp: starting change of file formats
+
+2006-08-02 14:06  gezelter
+
+	* src/applications/: atom2md/Makefile, atom2md/atom2md.cpp,
+	atom2mdin/Makefile, atom2mdin/atom2mdin.cpp: Changing atom2mdin
+	into atom2md to reflect new unified file format
+
+2006-07-27 17:02  chrisfen
+
+	* src/applications/utilities/dumpConverter: fixed a pvf bug
+
+2006-07-27 16:36  tim
+
+	* src/applications/utilities/dumpConverter: fixed dumpConverter
+	problems
+
+2006-07-27 15:05  gezelter
+
+	* src/applications/utilities/dumpConverter: added dumpConverter
+
+2006-07-26 17:45  gezelter
+
+	* make/Makefile.in: removed shapes sample
+
+2006-07-26 17:45  gezelter
+
+	* src/applications/utilities/affineScale.in: fixed a spelling bug
+
+2006-07-26 17:01  gezelter
+
+	* configure: added perl interpreter to affineScale script
+
+2006-07-26 17:01  gezelter
+
+	* ac-tools/configure.in: added perl substitution for affineScale
+	script
+
+2006-07-26 17:00  gezelter
+
+	* make/Makefile.in: added install target for scripts
+
+2006-07-26 17:00  gezelter
+
+	* src/applications/utilities/: Makefile, affineScale.in: Adding a
+	directory for scripts Adding affineScale script
+
+2006-07-24 10:51  xsun
+
+	* src/UseTheForce/DarkSide/gb.F90: fixed a getSigma bug
+
+2006-07-19 08:46  chrisfen
+
+	* samples/: thermoIntegration/liquid/water.md,
+	thermoIntegration/solid/water.md, water/dimer/water.md,
+	water/spce/water.md, water/ssd/water.md, water/ssd-ion/water.md,
+	water/ssde/water.md, water/ssdrf/water.md, water/tap/water.md,
+	water/tip3p_ice/water.md, water/tip4p/water.md: Added tred to
+	sample water.md files
+
+2006-07-19 08:35  chrisfen
+
+	* src/visitors/: AtomVisitor.cpp, AtomVisitor.hpp,
+	RigidBodyVisitor.cpp, RigidBodyVisitor.hpp: Added TRED water
+	visitor for Dump2XYZ visualization
+
+2006-07-19 08:33  chrisfen
+
+	* forceFields/DUFF2.frc: Added TRED parameters to forcefield
+
+2006-07-17 14:13  xsun
+
+	* src/UseTheForce/DarkSide/gb.F90: fixed d / sigma0 confusion
+
+2006-07-15 22:48  gezelter
+
+	* src/io/ForceFieldOptions.cpp: testing commit logger
+
+2006-07-15 22:46  gezelter
+
+	* src/io/ForceFieldOptions.cpp: removed printing of GBN and GBM
+	from previous debugging
+
+2006-07-14 10:47  xsun
+
+	* configure, ac-tools/OOPSE.m4: Fixed a bug in the fftw part of the
+	configure script.
+
+2006-07-07 15:44  gezelter
+
+	* configure, ac-tools/configure.in, samples/gbljtest/2gb.md,
+	src/UseTheForce/DarkSide/gb.F90: removed icc from C++ search lines,
+	did some formatting work on GB module, mucked around with a GB
+	example
+
+2006-07-07 10:18  chuckv
+
+	* src/applications/staticProps/: BondOrderParameter.cpp,
+	BondOrderParameter.hpp: Adding more changes to orientational bond
+	order parameter.
+
+2006-07-03 15:40  chuckv
+
+	* src/math/Wigner3jm.F90: Added utility function to winger3jm from
+	slatac.
+
+2006-07-03 10:06  chrisfen
+
+	* src/UseTheForce/DarkSide/mpole.F90: Added the multipole
+	interaction routine.  It doesn't work yet, so it's not included in
+	the build.
+
+2006-07-03 09:18  chrisfen
+
+	* src/: UseTheForce/doForces.F90,
+	UseTheForce/doForces_interface.F90,
+	UseTheForce/doForces_interface.h,
+	UseTheForce/DarkSide/electrostatic.F90,
+	UseTheForce/DarkSide/simulation.F90, brains/ForceManager.cpp,
+	brains/SimInfo.cpp, brains/SimInfo.hpp, brains/Stats.cpp,
+	brains/Stats.hpp, brains/Thermo.cpp, brains/Thermo.hpp,
+	brains/fSimulation.h, integrators/VelocityVerletIntegrator.cpp,
+	io/Globals.cpp, io/Globals.hpp,
+	restraints/ThermoIntegrationForceManager.cpp: Added simulation box
+	dipole moment accumulation for the purposes of calculating
+	dielectric constants
+
+2006-07-01 18:27  kdaily
+
+	* src/UseTheForce/DarkSide/gb.F90: fixed forces and torques for GB
+
+2006-06-28 10:35  chrisfen
+
+	* src/io/: DumpReader.cpp, RestReader.cpp, RestReader.hpp: more
+	efficient file reading for thermodynamic integration, and fixed
+	some formatting
+
+2006-06-27 12:36  chuckv
+
+	* src/applications/staticProps/: BondOrderParameter.cpp,
+	BondOrderParameter.hpp: Beginnings of a order parameter.
+
+2006-06-27 12:19  chuckv
+
+	* src/applications/staticProps/: BondOrderParameter.cpp,
+	BondOrderParameter.hpp: Adding code for bond orientational
+	parameters.
+
+2006-06-22 11:21  chrisfen
+
+	* src/: applications/oopse/oopse.cpp, integrators/Integrator.cpp,
+	integrators/VelocityVerletIntegrator.cpp, io/RestWriter.cpp,
+	io/RestWriter.hpp, restraints/ThermoIntegrationForceManager.cpp:
+	MPI thermodynamic integration works now.
+
+2006-06-21 14:28  chrisfen
+
+	* src/visitors/AtomVisitor.cpp: fixed a build problem... 
+	GB_12b_ratio no longer exists (replaced with BG_l).
+
+2006-06-19 13:55  chuckv
+
+	* src/math/: Makefile, Wigner3jm.F90, Wigner3jm_interface.h: Added
+	support for Winger3jm coefficients.
+
+2006-06-18 21:36  chrisfen
+
+	* src/: io/RestReader.cpp, io/RestWriter.cpp,
+	restraints/ThermoIntegrationForceManager.cpp: fixes for mpi
+	thermodynamic integration, close to fully working...
+
+2006-06-17 13:02  tim
+
+	* src/visitors/AtomVisitor.cpp: output the principle axis of GB
+
+2006-06-15 14:38  gezelter
+
+	* configure, ac-tools/OOPSE.m4, ac-tools/configure.in,
+	samples/water/tip4p/tp4.md: added mpi compilers, demoted pg
+	compilers after pathscale
+
+2006-06-09 14:26  chrisfen
+
+	* src/UseTheForce/DarkSide/electrostatic.F90: reformulated some of
+	the electrostatics
+
+2006-06-07 18:49  chrisfen
+
+	* samples/water/ssd/ssd.md,
+	src/UseTheForce/DarkSide/electrostatic.F90: damping now works for
+	charge-quadrupole and dipole-dipole
+
+2006-06-07 14:05  chrisfen
+
+	* src/: UseTheForce/DarkSide/simParallel.F90, io/RestReader.cpp:
+	Fixed a spelling error and a bug in MPI Thermodynamic Integration
+	on file read-in
+
+2006-06-06 14:26  chrisfen
+
+	* src/io/: DumpReader.cpp, MultipoleAtomTypesSectionParser.cpp:
+	fixed some typos
+
+2006-06-06 13:43  gezelter
+
+	* forceFields/DUFF2.frc, samples/gbljtest/2gb.in,
+	samples/gbljtest/2gb.md, samples/gbljtest/gb.md,
+	samples/gbljtest/gb2lj1.in, samples/gbljtest/gb2lj1.md,
+	samples/gbljtest/gbRotRoundX.in, samples/gbljtest/gbRotRoundX.md,
+	samples/gbljtest/gbRotRoundY.in, samples/gbljtest/gbRotRoundY.md,
+	samples/gbljtest/gbRotRoundZ.in, samples/gbljtest/gbRotRoundZ.md,
+	src/UseTheForce/DarkSide/gb.F90,
+	src/integrators/LDForceManager.cpp,
+	src/integrators/LDForceManager.hpp, src/io/ForceFieldOptions.cpp,
+	src/utils/interpolation.F90, src/visitors/AtomVisitor.hpp: testing
+	GB, removing CM drift in Langevin Dynamics, fixing a memory leak,
+	adding a visitor
+
+2006-06-05 14:44  gezelter
+
+	* src/UseTheForce/DarkSide/: fForceOptions.F90, gb.F90: Added
+	methods to access GB_mu and GB_nu from the force field options
+
+2006-06-05 14:24  gezelter
+
+	* forceFields/DUFF2.frc, src/UseTheForce/DUFF.cpp,
+	src/UseTheForce/doForces.F90, src/UseTheForce/fForceOptions.h,
+	src/UseTheForce/DarkSide/gb.F90,
+	src/UseTheForce/DarkSide/gb_interface.F90,
+	src/UseTheForce/DarkSide/gb_interface.h,
+	src/applications/hydrodynamics/AnalyticalModel.cpp,
+	src/applications/hydrodynamics/ApproximationModel.cpp,
+	src/applications/hydrodynamics/ApproximationModel.hpp,
+	src/applications/hydrodynamics/CompositeShape.cpp,
+	src/applications/hydrodynamics/CompositeShape.hpp,
+	src/applications/hydrodynamics/HydrodynamicsModel.cpp,
+	src/applications/hydrodynamics/HydrodynamicsModel.hpp,
+	src/applications/hydrodynamics/ShapeBuilder.cpp,
+	src/hydrodynamics/Ellipsoid.cpp, src/hydrodynamics/Ellipsoid.hpp,
+	src/hydrodynamics/HydroProp.cpp, src/hydrodynamics/HydroProp.hpp,
+	src/hydrodynamics/Makefile, src/hydrodynamics/Shape.hpp,
+	src/hydrodynamics/Sphere.cpp, src/hydrodynamics/Sphere.hpp,
+	src/integrators/LDForceManager.cpp,
+	src/integrators/LDForceManager.hpp, src/io/ForceFieldOptions.cpp,
+	src/io/ForceFieldOptions.hpp,
+	src/io/GayBerneAtomTypesSectionParser.cpp,
+	src/io/GayBerneAtomTypesSectionParser.hpp,
+	src/types/DirectionalAtomType.cpp,
+	src/types/DirectionalAtomType.hpp, src/utils/HydroProps.hpp:
+	Massive changes for GB code with multiple ellipsoid types (a la
+	Cleaver's paper).
+	
+	Also, changes in hydrodynamics code to make HydroProp a somewhat
+	smarter class (rather than just a struct).
+
+2006-06-01 14:06  xsun
+
+	* src/applications/staticProps/: Makefile, RippleOP.cpp,
+	RippleOP.hpp, StaticProps.cpp, StaticProps.ggo, StaticPropsCmd.c,
+	StaticPropsCmd.h: Add the RippleOP to calculate the orderparameter
+	of the ripples.
+
+2006-05-25 17:40  chrisfen
+
+	* forceFields/DUFF2.frc, samples/thermoIntegration/liquid/water.md,
+	samples/thermoIntegration/solid/water.md,
+	samples/water/dimer/water.md, samples/water/spce/water.md,
+	samples/water/ssd/water.md, samples/water/ssd-ion/water.md,
+	samples/water/ssde/water.md, samples/water/ssdrf/water.md,
+	samples/water/tap/water.md, samples/water/tip3p_ice/water.md,
+	samples/water/tip4p/water.md, src/io/Globals.cpp: Added TIP5P-E and
+	fixed a bug for Thermodynamic integration (you can now have a
+	lambda of 0)
+
+2006-05-25 13:02  tim
+
+	* src/applications/hydrodynamics/ApproximationModel.cpp: Fix a type
+	promotion problem
+
+2006-05-25 12:27  tim
+
+	* src/applications/hydrodynamics/: AnalyticalModel.hpp,
+	ApproximationModel.cpp, Hydro.cpp, HydrodynamicsModel.hpp: replace
+	double with RealType
+
+2006-05-25 11:27  gezelter
+
+	* configure: What?
+
+2006-05-25 11:24  gezelter
+
+	* ac-tools/OOPSE.m4: more changes
+
+2006-05-25 11:19  gezelter
+
+	* configure, ac-tools/OOPSE.m4: more changes for MPICH with
+	profiling libraries required
+
+2006-05-25 10:54  gezelter
+
+	* configure, ac-tools/OOPSE.m4: MPI stuff
+
+2006-05-24 14:31  gezelter
+
+	* configure, ac-tools/OOPSE.m4, src/config.h.in,
+	src/applications/hydrodynamics/AnalyticalModel.cpp,
+	src/applications/hydrodynamics/AnalyticalModel.hpp,
+	src/applications/hydrodynamics/ApproximationModel.cpp,
+	src/applications/hydrodynamics/ApproximationModel.hpp,
+	src/applications/hydrodynamics/CompositeShape.cpp,
+	src/applications/hydrodynamics/CompositeShape.hpp,
+	src/applications/hydrodynamics/Ellipsoid.cpp,
+	src/applications/hydrodynamics/Ellipsoid.hpp,
+	src/applications/hydrodynamics/Hydro.cpp,
+	src/applications/hydrodynamics/HydrodynamicsModel.cpp,
+	src/applications/hydrodynamics/HydrodynamicsModel.hpp,
+	src/applications/hydrodynamics/RoughShell.cpp,
+	src/applications/hydrodynamics/RoughShell.hpp,
+	src/applications/hydrodynamics/Shape.hpp,
+	src/applications/hydrodynamics/ShapeBuilder.cpp,
+	src/applications/hydrodynamics/ShapeBuilder.hpp,
+	src/applications/hydrodynamics/Spheric.cpp,
+	src/applications/hydrodynamics/Spheric.hpp: fixes for Hydrodynamics
+
+2006-05-24 12:18  tim
+
+	* src/integrators/LDForceManager.cpp: fix a bug in parsing
+	HydroProp file
+
+2006-05-24 11:24  gezelter
+
+	* src/integrators/LDForceManager.cpp: Fixed a bug when spherical
+	boundary conditions were off.
+
+2006-05-23 17:12  xsun
+
+	* src/applications/staticProps/Hxy.cpp: fixed an initialization bug
+	of Hxy.cpp.
+
+2006-05-23 14:46  tim
+
+	* src/applications/dump2Xyz/Dump2XYZ.cpp: wrapping back to PBC by
+	molecule instead of by individual atom
+
+2006-05-22 11:30  xsun
+
+	* src/applications/staticProps/: Hxy.cpp, Hxy.hpp, StaticProps.ggo,
+	StaticPropsCmd.c, StaticPropsCmd.h: fixed the bugs of Hxy.cpp.
+
+2006-05-19 17:26  chrisfen
+
+	* ChangeLog, src/io/DumpWriter.cpp: Last bug showed up in 2 places,
+	fixed the other one.
+
 2006-05-19 16:45  tim
 
 	* src/io/DumpWriter.cpp: Fix a bug of printing empty line in

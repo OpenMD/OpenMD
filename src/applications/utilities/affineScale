@@ -3,8 +3,8 @@
 # program that scales an OOPSE .in or .eor file to a new volume
 
 # author    = "Chris Fennell 
-# version   = "$Revision: 1.1 $"
-# date      = "$Date: 2006-10-10 14:08:10 $"
+# version   = "$Revision: 1.2 $"
+# date      = "$Date: 2006-10-10 14:36:02 $"
 # copyright = "Copyright (c) 2006 by the University of Notre Dame"
 # license   = "OOPSE"
 
