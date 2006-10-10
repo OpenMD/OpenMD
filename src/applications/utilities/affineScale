@@ -1,10 +1,10 @@
-#!@PERLINTERP@ -w
+#!/usr/bin/env perl
 
 # program that scales an OOPSE .in or .eor file to a new volume
 
 # author    = "Chris Fennell 
-# version   = "$Revision: 1.5 $"
-# date      = "$Date: 2006-09-01 21:08:03 $"
+# version   = "$Revision: 1.1 $"
+# date      = "$Date: 2006-10-10 14:08:10 $"
 # copyright = "Copyright (c) 2006 by the University of Notre Dame"
 # license   = "OOPSE"
 
