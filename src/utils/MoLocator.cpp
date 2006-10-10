@@ -58,6 +58,7 @@ namespace oopse {
   }
   
   void MoLocator::placeMol( const Vector3d& offset, const Vector3d& ort, Molecule* mol){
+
     Vector3d newCoor;
     Vector3d curRefCoor;  
     RotMat3x3d rotMat = latVec2RotMat(ort);
@@ -78,8 +79,8 @@ namespace oopse {
       
       newCoor = rotMat * refCoords[i];
       newCoor += offset;
-      
-      integrableObject->setPos( newCoor);
+     
+      integrableObject->setPos(newCoor);
       integrableObject->setVel(V3Zero);
       
       if(integrableObject->isDirectional()){

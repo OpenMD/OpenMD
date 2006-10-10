@@ -42,7 +42,7 @@
  *
  *  Created by Charles F. Vardeman II on 10 Apr 2006.
  *  @author  Charles F. Vardeman II
- *  @version $Id: randomBuilder.cpp,v 1.3 2006-10-09 22:16:44 gezelter Exp $
+ *  @version $Id: randomBuilder.cpp,v 1.4 2006-10-10 02:44:13 gezelter Exp $
  *
  */
 
@@ -73,19 +73,18 @@ using namespace oopse;
 
 void createMdFile(const std::string&oldMdFileName, 
                   const std::string&newMdFileName,
-                  int components,int* numMol);
+                  int components, int* numMol);
 
 int main(int argc, char *argv []) {
 
-  //register force fields
+  // register force fields
   registerForceFields();
   registerLattice();
     
   gengetopt_args_info args_info;
   std::string latticeType;
   std::string inputFileName;
-  std::string outPrefix;
-  std::string outMdFileName;
+  std::string outputFileName;
   Lattice *simpleLat;
   int* numMol;
   RealType latticeConstant;
@@ -93,9 +92,7 @@ int main(int argc, char *argv []) {
   RealType mass;
   const RealType rhoConvertConst = 1.661;
   RealType density;
-  int nx,
-    ny,
-    nz;
+  int nx, ny, nz;
   Mat3x3d hmat;
   MoLocator *locator;
   std::vector<Vector3d> latticePos;
@@ -122,115 +119,150 @@ int main(int argc, char *argv []) {
     simError();
   }
 
-  //get the number of unit cell
+  //get the number of unit cells in each direction:
+
   nx = args_info.nx_arg;
 
   if (nx <= 0) {
-    std::cerr << "The number of unit cell in h direction must be greater than 0" << std::endl;
-    exit(1);
+    sprintf(painCave.errMsg, "The number of unit cells in the x direction "
+            "must be greater than 0.");
+    painCave.isFatal = 1;
+    simError();
   }
 
   ny = args_info.ny_arg;
 
   if (ny <= 0) {
-    std::cerr << "The number of unit cell in l direction must be greater than 0" << std::endl;
-    exit(1);
+    sprintf(painCave.errMsg, "The number of unit cells in the y direction "
+            "must be greater than 0.");
+    painCave.isFatal = 1;
+    simError();
   }
 
   nz = args_info.nz_arg;
 
   if (nz <= 0) {
-    std::cerr << "The number of unit cell in k direction must be greater than 0" << std::endl;
-    exit(1);
+    sprintf(painCave.errMsg, "The number of unit cells in the z direction "
+            "must be greater than 0.");
+    painCave.isFatal = 1;
+    simError();
   }
 
   //get input file name
   if (args_info.inputs_num)
     inputFileName = args_info.inputs[0];
   else {
-    std::cerr << "You must specify a input file name.\n" << std::endl;
-    cmdline_parser_print_help();
-    exit(1);
+    sprintf(painCave.errMsg, "No input .md file name was specified "
+            "on the command line");
+    painCave.isFatal = 1;
+    simError();
   }
 
   //parse md file and set up the system
+
   SimCreator oldCreator;
   SimInfo* oldInfo = oldCreator.createSim(inputFileName, false);
   Globals* simParams = oldInfo->getSimParams();
 
   int nComponents =simParams->getNComponents();
   if (oldInfo->getNMoleculeStamp() > 2) {
-    std::cerr << "can not build the system with more than two components"
-	      << std::endl;
-    exit(1);
+    sprintf(painCave.errMsg, "randomBuilder can't yet build a system with "
+            "more than two components.");
+    painCave.isFatal = 1;
+    simError();
   }
 
   //get mass of molecule. 
 
   mass = getMolMass(oldInfo->getMoleculeStamp(0), oldInfo->getForceField());
 
-  //creat lattice
+  // Create the lattice
+
   simpleLat = LatticeFactory::getInstance()->createLattice(latticeType);
 
   if (simpleLat == NULL) {
-    std::cerr << "Error in creating lattice" << std::endl;
-    exit(1);
+    sprintf(painCave.errMsg, "Error in creating lattice.");
+    painCave.isFatal = 1;
+    simError();
   }
 
   numMolPerCell = simpleLat->getNumSitesPerCell();
 
-  //calculate lattice constant (in Angstrom)
+  // Calculate lattice constant (in Angstroms)
+
   latticeConstant = pow(rhoConvertConst * numMolPerCell * mass / density,
 			(RealType)(1.0 / 3.0));
 
-  //set lattice constant
+  // Set the lattice constant
+
   lc.push_back(latticeConstant);
   simpleLat->setLatticeConstant(lc);
 
-  //calculate the total number of molecules
+  // Calculate the total number of molecules
+
   int totMol = nx * ny * nz * numMolPerCell;
 
-  // Calculate the lattice sites and fill lattice vector.
-  vector<Vector3d> latticeSites;
+  // Calculate the lattice sites and fill the lattice vector.
+
+  // Get the standard orientations of the cell sites
+
+  latticeOrt = simpleLat->getLatticePointsOrt();
+
+  vector<Vector3d> sites;
+  vector<Vector3d> orientations;
   
   for(int i = 0; i < nx; i++) {
     for(int j = 0; j < ny; j++) {
       for(int k = 0; k < nz; k++) {
 
-	//get the position of the cell sites
+	// Get the position of the cell sites
+
 	simpleLat->getLatticePointsPos(latticePos, i, j, k);
 
 	for(int l = 0; l < numMolPerCell; l++) {
-	  latticeSites.push_back(latticePos[l]);
+	  sites.push_back(latticePos[l]);
+          orientations.push_back(latticeOrt[l]);
 	}
       }
     }
   }
 
-  int numSites = latticeSites.size();
+  int numSites = sites.size();
 
   numMol = new int[nComponents];
   if (nComponents != args_info.molFraction_given && nComponents != 1){
-    std::cerr << "Number of components does not equal molFraction occurances." << std::endl;
-    exit(1);
+    sprintf(painCave.errMsg, "There needs to be the same number of "
+            "molFraction arguments as there are components in the "
+            "<MetaData> block.");
+    painCave.isFatal = 1;
+    simError();
   }
   int totComponents = 0;
-  for (int i = 0;i<nComponents-1;i++){ /* Figure out Percent for each component */
+  for (int i = 0;i<nComponents-1;i++){
     numMol[i] = int((RealType)numSites * args_info.molFraction_arg[i]);
     std::cout<<numMol[i]<<std::endl;
     totComponents += numMol[i];
   }
   numMol[nComponents-1] = numSites - totComponents;
   
+  outputFileName = args_info.output_arg;
 
-  outPrefix = getPrefix(inputFileName.c_str()) + "_" + latticeType;
-  outMdFileName = outPrefix + ".md";
+  // create a new .md file on the fly which corrects the number of molecules
 
-  //creat new .md file on fly which corrects the number of molecule     
-  createMdFile(inputFileName, outMdFileName, nComponents, numMol);
+  createMdFile(inputFileName, outputFileName, nComponents, numMol);
 
-  //fill Hmat
-  hmat(0, 0)= nx * latticeConstant;
+  if (oldInfo != NULL)
+    delete oldInfo;
+
+  // We need to read in the new SimInfo object, then Parse the 
+  // md file and set up the system
+
+  SimCreator newCreator;
+  SimInfo* newInfo = newCreator.createSim(outputFileName, false);
+
+  // fill Hmat
+
+  hmat(0, 0) = nx * latticeConstant;
   hmat(0, 1) = 0.0;
   hmat(0, 2) = 0.0;
 
@@ -242,67 +274,65 @@ int main(int argc, char *argv []) {
   hmat(2, 1) = 0.0;
   hmat(2, 2) = nz * latticeConstant;
 
-  //set Hmat
-  oldInfo->getSnapshotManager()->getCurrentSnapshot()->setHmat(hmat);
+  // Set Hmat
 
-  //place the molecules
+  newInfo->getSnapshotManager()->getCurrentSnapshot()->setHmat(hmat);
+
+  // place the molecules
 
   curMolIndex = 0;
 
-  //get the orientation of the cell sites
-  //for the same type of molecule in same lattice, it will not change
-  latticeOrt = simpleLat->getLatticePointsOrt();
+  // Randomize a vector of ints:
 
- 
-  /* Randomize position vector */
-  std::random_shuffle(latticeSites.begin(), latticeSites.end());
+  vector<int> ids;
+  for (int i = 0; i < sites.size(); i++) ids.push_back(i);
+  std::random_shuffle(ids.begin(), ids.end());
 
-  if (oldInfo != NULL)
-    delete oldInfo;
-
-  // We need to read in new siminfo object.	
-  // parse md file and set up the system
-
-  SimCreator newCreator;
-  SimInfo* newInfo = newCreator.createSim(outMdFileName, false);
-  
-  /* create Molocators */
-  locator = new MoLocator(newInfo->getMoleculeStamp(0), newInfo->getForceField());
-  
-  
-  
   Molecule* mol;
-  SimInfo::MoleculeIterator mi;
-  mol = newInfo->beginMolecule(mi);
   int l = 0;
-  for (mol = newInfo->beginMolecule(mi); mol != NULL; mol = newInfo->nextMolecule(mi)) {
-    locator->placeMol(latticeSites[l], latticeOrt[l], mol);
-    l++;
+  for (int i = 0; i < nComponents; i++){
+    locator = new MoLocator(newInfo->getMoleculeStamp(i), 
+                            newInfo->getForceField());
+    for (int n = 0; n < numMol[i]; n++) {
+      mol = newInfo->getMoleculeByGlobalIndex(l);
+      locator->placeMol(sites[ids[l]], orientations[ids[l]], mol);
+      l++;
+    }
   }
+  
+  // Create DumpWriter and write out the coordinates
 
-  //create dumpwriter and write out the coordinates
-  newInfo->setFinalConfigFileName(outMdFileName);
-  writer = new DumpWriter(newInfo);
+  writer = new DumpWriter(newInfo, outputFileName);
 
   if (writer == NULL) {
-    std::cerr << "error in creating DumpWriter" << std::endl;
-    exit(1);
+    sprintf(painCave.errMsg, "error in creating DumpWriter");
+    painCave.isFatal = 1;
+    simError();
   }
 
-  writer->writeEor();
-  std::cout << "new OOPSE MD file: " << outMdFileName
-	    << " has been generated." << std::endl;
+  writer->writeDump();
+
+  // deleting the writer will put the closing at the end of the dump file.
+
+  delete writer;
+
+  sprintf(painCave.errMsg, "A new OOPSE MD file called \"%s\" has been "
+          "generated.", outputFileName.c_str());
+  painCave.isFatal = 0;
+  simError();
   return 0;
 }
 
-void createMdFile(const std::string&oldMdFileName, const std::string&newMdFileName,
-                  int components,int* numMol) {
+void createMdFile(const std::string&oldMdFileName, 
+                  const std::string&newMdFileName, 
+                  int components, int* numMol) {
   ifstream oldMdFile;
   ofstream newMdFile;
   const int MAXLEN = 65535;
   char buffer[MAXLEN];
   
   //create new .md file based on old .md file
+
   oldMdFile.open(oldMdFileName.c_str());
   newMdFile.open(newMdFileName.c_str());
   
@@ -314,7 +344,7 @@ void createMdFile(const std::string&oldMdFileName, const std::string&newMdFileNa
     //correct molecule number
     if (strstr(buffer, "nMol") != NULL) {
       if(i<components){
-	sprintf(buffer, "\tnMol = %i;", numMol[i]);				
+	sprintf(buffer, "\tnMol = %i;", numMol[i]);
 	newMdFile << buffer << std::endl;
 	i++;
       }
