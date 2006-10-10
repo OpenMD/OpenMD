@@ -42,7 +42,7 @@
  *
  *  Created by Charles F. Vardeman II on 10 Apr 2006.
  *  @author  Charles F. Vardeman II
- *  @version $Id: randomBuilder.cpp,v 1.4 2006-10-10 02:44:13 gezelter Exp $
+ *  @version $Id: randomBuilder.cpp,v 1.5 2006-10-10 14:52:20 gezelter Exp $
  *
  */
 
@@ -73,7 +73,7 @@ using namespace oopse;
 
 void createMdFile(const std::string&oldMdFileName, 
                   const std::string&newMdFileName,
-                  int components, int* numMol);
+                  std::vector<int> nMol);
 
 int main(int argc, char *argv []) {
 
@@ -86,10 +86,8 @@ int main(int argc, char *argv []) {
   std::string inputFileName;
   std::string outputFileName;
   Lattice *simpleLat;
-  int* numMol;
   RealType latticeConstant;
   std::vector<RealType> lc;
-  RealType mass;
   const RealType rhoConvertConst = 1.661;
   RealType density;
   int nx, ny, nz;
@@ -97,8 +95,7 @@ int main(int argc, char *argv []) {
   MoLocator *locator;
   std::vector<Vector3d> latticePos;
   std::vector<Vector3d> latticeOrt;
-  int numMolPerCell;
-  int curMolIndex;
+  int nMolPerCell;
   DumpWriter *writer;
 
   // parse command line arguments
@@ -118,6 +115,7 @@ int main(int argc, char *argv []) {
     painCave.isFatal = 1;
     simError();
   }
+  nMolPerCell = simpleLat->getNumSitesPerCell();
 
   //get the number of unit cells in each direction:
 
@@ -148,6 +146,8 @@ int main(int argc, char *argv []) {
     simError();
   }
 
+  int nSites = nMolPerCell * nx * ny * nz;
+
   //get input file name
   if (args_info.inputs_num)
     inputFileName = args_info.inputs[0];
@@ -164,44 +164,96 @@ int main(int argc, char *argv []) {
   SimInfo* oldInfo = oldCreator.createSim(inputFileName, false);
   Globals* simParams = oldInfo->getSimParams();
 
-  int nComponents =simParams->getNComponents();
-  if (oldInfo->getNMoleculeStamp() > 2) {
-    sprintf(painCave.errMsg, "randomBuilder can't yet build a system with "
-            "more than two components.");
-    painCave.isFatal = 1;
-    simError();
-  }
-
-  //get mass of molecule. 
-
-  mass = getMolMass(oldInfo->getMoleculeStamp(0), oldInfo->getForceField());
-
-  // Create the lattice
-
-  simpleLat = LatticeFactory::getInstance()->createLattice(latticeType);
-
-  if (simpleLat == NULL) {
-    sprintf(painCave.errMsg, "Error in creating lattice.");
-    painCave.isFatal = 1;
-    simError();
-  }
-
-  numMolPerCell = simpleLat->getNumSitesPerCell();
-
   // Calculate lattice constant (in Angstroms)
 
-  latticeConstant = pow(rhoConvertConst * numMolPerCell * mass / density,
+  std::vector<Component*> components = simParams->getComponents();
+  std::vector<RealType> molFractions;
+  std::vector<RealType> molecularMasses;
+  std::vector<int> nMol;
+  int nComponents = components.size();
+
+  if (nComponents == 1) {
+    molFractions.push_back(1.0);    
+  } else {
+    if (args_info.molFraction_given == nComponents) {
+      for (int i = 0; i < nComponents; i++) {
+        molFractions.push_back(args_info.molFraction_arg[i]);
+      }
+    } else if (args_info.molFraction_given == nComponents-1) {
+      RealType remainingFraction = 1.0;
+      for (int i = 0; i < nComponents-1; i++) {
+        molFractions.push_back(args_info.molFraction_arg[i]);
+        remainingFraction -= molFractions[i];
+      }
+      molFractions.push_back(remainingFraction);
+    } else {    
+      sprintf(painCave.errMsg, "randomBuilder can't figure out molFractions "
+              "for all of the components in the <MetaData> block.");
+      painCave.isFatal = 1;
+      simError();
+    }
+  }
+
+  // do some sanity checking:
+  
+  RealType totalFraction = 0.0;
+
+  for (int i = 0; i < nComponents; i++) {
+    if (molFractions.at(i) < 0.0) {
+      sprintf(painCave.errMsg, "One of the requested molFractions was"
+              " less than zero!");
+      painCave.isFatal = 1;
+      simError();
+    }
+    if (molFractions.at(i) > 1.0) {
+      sprintf(painCave.errMsg, "One of the requested molFractions was"
+              " greater than one!");
+      painCave.isFatal = 1;
+      simError();
+    }
+    totalFraction += molFractions.at(i);
+  }
+  if (abs(totalFraction - 1.0) > 1e-6) {
+    sprintf(painCave.errMsg, "The sum of molFractions was not close enough to 1.0");
+    painCave.isFatal = 1;
+    simError();
+  }
+
+  int remaining = nSites;
+  for (int i=0; i < nComponents-1; i++) {    
+    nMol.push_back(int((RealType)nSites * molFractions.at(i)));
+    remaining -= nMol.at(i);
+  }
+  nMol.push_back(remaining);
+
+  // recompute actual mol fractions and perform final sanity check:
+
+  int totalMolecules = 0;
+  RealType totalMass = 0.0;
+  for (int i=0; i < nComponents; i++) {
+    molFractions[i] = (RealType)(nMol.at(i))/(RealType)nSites;
+    totalMolecules += nMol.at(i);
+    molecularMasses.push_back(getMolMass(oldInfo->getMoleculeStamp(i),
+                                         oldInfo->getForceField()));
+    totalMass += (RealType)(nMol.at(i)) * molecularMasses.at(i);
+  }
+  RealType avgMass = totalMass / (RealType) totalMolecules;
+
+  if (totalMolecules != nSites) {
+    sprintf(painCave.errMsg, "Computed total number of molecules is not equal "
+            "to the number of lattice sites!");
+    painCave.isFatal = 1;
+    simError();
+  }
+     
+  latticeConstant = pow(rhoConvertConst * nMolPerCell * avgMass / density,
 			(RealType)(1.0 / 3.0));
-
+  
   // Set the lattice constant
-
+  
   lc.push_back(latticeConstant);
   simpleLat->setLatticeConstant(lc);
-
-  // Calculate the total number of molecules
-
-  int totMol = nx * ny * nz * numMolPerCell;
-
+  
   // Calculate the lattice sites and fill the lattice vector.
 
   // Get the standard orientations of the cell sites
@@ -219,37 +271,19 @@ int main(int argc, char *argv []) {
 
 	simpleLat->getLatticePointsPos(latticePos, i, j, k);
 
-	for(int l = 0; l < numMolPerCell; l++) {
+	for(int l = 0; l < nMolPerCell; l++) {
 	  sites.push_back(latticePos[l]);
           orientations.push_back(latticeOrt[l]);
 	}
       }
     }
   }
-
-  int numSites = sites.size();
-
-  numMol = new int[nComponents];
-  if (nComponents != args_info.molFraction_given && nComponents != 1){
-    sprintf(painCave.errMsg, "There needs to be the same number of "
-            "molFraction arguments as there are components in the "
-            "<MetaData> block.");
-    painCave.isFatal = 1;
-    simError();
-  }
-  int totComponents = 0;
-  for (int i = 0;i<nComponents-1;i++){
-    numMol[i] = int((RealType)numSites * args_info.molFraction_arg[i]);
-    std::cout<<numMol[i]<<std::endl;
-    totComponents += numMol[i];
-  }
-  numMol[nComponents-1] = numSites - totComponents;
   
   outputFileName = args_info.output_arg;
 
   // create a new .md file on the fly which corrects the number of molecules
 
-  createMdFile(inputFileName, outputFileName, nComponents, numMol);
+  createMdFile(inputFileName, outputFileName, nMol);
 
   if (oldInfo != NULL)
     delete oldInfo;
@@ -280,8 +314,6 @@ int main(int argc, char *argv []) {
 
   // place the molecules
 
-  curMolIndex = 0;
-
   // Randomize a vector of ints:
 
   vector<int> ids;
@@ -293,7 +325,7 @@ int main(int argc, char *argv []) {
   for (int i = 0; i < nComponents; i++){
     locator = new MoLocator(newInfo->getMoleculeStamp(i), 
                             newInfo->getForceField());
-    for (int n = 0; n < numMol[i]; n++) {
+    for (int n = 0; n < nMol.at(i); n++) {
       mol = newInfo->getMoleculeByGlobalIndex(l);
       locator->placeMol(sites[ids[l]], orientations[ids[l]], mol);
       l++;
@@ -317,7 +349,7 @@ int main(int argc, char *argv []) {
   delete writer;
 
   sprintf(painCave.errMsg, "A new OOPSE MD file called \"%s\" has been "
-          "generated.", outputFileName.c_str());
+          "generated.\n", outputFileName.c_str());
   painCave.isFatal = 0;
   simError();
   return 0;
@@ -325,7 +357,7 @@ int main(int argc, char *argv []) {
 
 void createMdFile(const std::string&oldMdFileName, 
                   const std::string&newMdFileName, 
-                  int components, int* numMol) {
+                  std::vector<int> nMol) {
   ifstream oldMdFile;
   ofstream newMdFile;
   const int MAXLEN = 65535;
@@ -343,8 +375,8 @@ void createMdFile(const std::string&oldMdFileName,
     
     //correct molecule number
     if (strstr(buffer, "nMol") != NULL) {
-      if(i<components){
-	sprintf(buffer, "\tnMol = %i;", numMol[i]);
+      if(i<nMol.size()){
+	sprintf(buffer, "\tnMol = %i;", nMol.at(i));
 	newMdFile << buffer << std::endl;
 	i++;
       }
