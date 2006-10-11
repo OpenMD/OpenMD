@@ -4,8 +4,8 @@
 # deletes overlapping molecules
 
 # author    = "Chris Fennell
-# version   = "$Revision: 1.1 $"
-# date      = "$Date: 2006-10-10 14:08:10 $"
+# version   = "$Revision: 1.2 $"
+# date      = "$Date: 2006-10-11 19:24:37 $"
 # copyright = "Copyright (c) 2006 by the University of Notre Dame"
 # license   = "OOPSE"
 
@@ -58,6 +58,7 @@ if (defined($opt_i)){
 $soluteFileName = $opt_p if defined($opt_p);
 $soluteFileName = $opt_x if defined($opt_x);
 $fileName = $opt_o if defined($opt_o);
+$soluteName = $opt_n if defined($opt_n);
 
 if (defined($opt_p) || defined($opt_x)){
 } else {
