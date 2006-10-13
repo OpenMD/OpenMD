@@ -67,7 +67,7 @@ using namespace std;
 using namespace oopse;
 void createMdFile(const std::string&oldMdFileName, 
                   const std::string&newMdFileName,
-                  int components,int* numMol);
+                  std::vector<int> numMol);
 
 int main(int argc, char *argv []) {
   
@@ -79,7 +79,7 @@ int main(int argc, char *argv []) {
   std::string latticeType;
   std::string inputFileName;
   std::string outPrefix;
-  std::string outMdFileName;
+  std::string outputFileName;
   std::string outInitFileName;
 
   
@@ -90,7 +90,8 @@ int main(int argc, char *argv []) {
   int nComponents;
   double latticeConstant;
   std::vector<double> lc;
-  double mass;											    
+  double mass;										
+
   const double rhoConvertConst = 1.661;
   double density;
   double particleRadius;
@@ -102,7 +103,7 @@ int main(int argc, char *argv []) {
   std::vector<Vector3d> latticeOrt;
   int numMolPerCell;
   int nShells; /* Number of shells in nanoparticle*/
-  int numSites;
+ 
   
   DumpWriter *writer;
   
@@ -113,15 +114,17 @@ int main(int argc, char *argv []) {
 	
 	
   /* get lattice type */
-  latticeType = UpperCase(args_info.latticetype_arg);
-    
+  latticeType = "FCC";
+
   /* get input file name */
   if (args_info.inputs_num)
     inputFileName = args_info.inputs[0];
   else {
-    std::cerr << "You must specify a input file name.\n" << std::endl;
+      sprintf(painCave.errMsg, "No input .md file name was specified"
+	      "on the command line");
+    painCave.isFatal = 1;
     cmdline_parser_print_help();
-    exit(1);
+    simError();
   }
   
   /* parse md file and set up the system */
@@ -129,88 +132,143 @@ int main(int argc, char *argv []) {
   SimInfo* oldInfo = oldCreator.createSim(inputFileName, false);
   
   
-  /*calculate lattice constant (in Angstrom)
-    latticeConstant = pow(rhoConvertConst * numMolPerCell * mass / density,
-    1.0 / 3.0);*/
-  
   latticeConstant = args_info.latticeCnst_arg;
   particleRadius = args_info.radius_arg;
   Globals* simParams = oldInfo->getSimParams();
   
-  /* Find out how many different components in this simualtion */
-  nComponents =simParams->getNComponents();
-  
-  /*determine the output file names*/
-  if (args_info.output_given){
-    outInitFileName = args_info.output_arg;
-  }else{
-    outInitFileName = getPrefix(inputFileName.c_str()) + ".in";
-  }
-   
-  std::cout <<"Before build shaped lattice. "<<std::endl;
-  
+       
   /* create Molocators */
   locator = new MoLocator(oldInfo->getMoleculeStamp(0), oldInfo->getForceField());
   
   /* Create nanoparticle */
   shapedLatticeSpherical nanoParticle(latticeConstant,latticeType,particleRadius);
   
-  std::cout <<"Before build getPoints. "<<std::endl;
   /* Build a lattice and get lattice points for this lattice constant */
-  vector<Vector3d> nanoParticleSites = nanoParticle.getPoints();
-  
+  vector<Vector3d> sites = nanoParticle.getPoints();
+  vector<Vector3d> orientations = nanoParticle.getPointsOrt();
+
+  std::cout <<"nSites: " << sites.size() << std::endl;
+
   /* Get number of lattice sites */
-  numSites = nanoParticleSites.size();
+  int nSites = sites.size();
  
-  //std::cout <<"numSites are %d "<<numSites<<std::endl;
-  // std::cout <<"nComponents are %d "<<nComponents<<std::endl;
-  numMol = new int[nComponents];
- 
+
+
+
+  std::vector<Component*> components = simParams->getComponents();
+  std::vector<RealType> molFractions;
+  std::vector<RealType> molecularMasses;
+  std::vector<int> nMol;
+  nComponents = components.size();
   
+
+
+ if (nComponents == 1) {
+    molFractions.push_back(1.0);    
+  } else {
+    if (args_info.molFraction_given == nComponents) {
+      for (int i = 0; i < nComponents; i++) {
+        molFractions.push_back(args_info.molFraction_arg[i]);
+      }
+    } else if (args_info.molFraction_given == nComponents-1) {
+      RealType remainingFraction = 1.0;
+      for (int i = 0; i < nComponents-1; i++) {
+        molFractions.push_back(args_info.molFraction_arg[i]);
+        remainingFraction -= molFractions[i];
+      }
+      molFractions.push_back(remainingFraction);
+    } else {    
+      sprintf(painCave.errMsg, "nanoparticleBuilder can't figure out molFractions "
+              "for all of the components in the <MetaData> block.");
+      painCave.isFatal = 1;
+      simError();
+    }
+  }
+
+ RealType totalFraction = 0.0;
+
+ /* Do some simple sanity checking*/
+
+
+
+  for (int i = 0; i < nComponents; i++) {
+    if (molFractions.at(i) < 0.0) {
+      sprintf(painCave.errMsg, "One of the requested molFractions was"
+              " less than zero!");
+      painCave.isFatal = 1;
+      simError();
+    }
+    if (molFractions.at(i) > 1.0) {
+      sprintf(painCave.errMsg, "One of the requested molFractions was"
+              " greater than one!");
+      painCave.isFatal = 1;
+      simError();
+    }
+    totalFraction += molFractions.at(i);
+  }
+  if (abs(totalFraction - 1.0) > 1e-6) {
+    sprintf(painCave.errMsg, "The sum of molFractions was not close enough to 1.0");
+    painCave.isFatal = 1;
+    simError();
+  }
+
+  int remaining = nSites;
+  for (int i=0; i < nComponents-1; i++) {    
+    nMol.push_back(int((RealType)nSites * molFractions.at(i)));
+    remaining -= nMol.at(i);
+  }
+  nMol.push_back(remaining);
+
+
+
+// recompute actual mol fractions and perform final sanity check:
+
+  int totalMolecules = 0;
+  RealType totalMass = 0.0;
+  for (int i=0; i < nComponents; i++) {
+    molFractions[i] = (RealType)(nMol.at(i))/(RealType)nSites;
+    totalMolecules += nMol.at(i);
+    molecularMasses.push_back(getMolMass(oldInfo->getMoleculeStamp(i),
+                                         oldInfo->getForceField()));
+    totalMass += (RealType)(nMol.at(i)) * molecularMasses.at(i);
+  }
+  RealType avgMass = totalMass / (RealType) totalMolecules;
+
+  if (totalMolecules != nSites) {
+    sprintf(painCave.errMsg, "Computed total number of molecules is not equal "
+            "to the number of lattice sites!");
+    painCave.isFatal = 1;
+    simError();
+  }
+     
+
+
+
+  vector<int> ids;
+  for (int i = 0; i < sites.size(); i++) ids.push_back(i);
   /* Random particle is the default case*/
   if (!args_info.ShellRadius_given){
-    std::cout << "Creating a random nanoparticle" << std::endl;
-    /* Check to see if we have enough components */
-    if (nComponents != args_info.molFraction_given && nComponents != 1){
-      std::cerr << "Number of components does not equal molFraction occurances." << std::endl;
-      exit(1);
-    }
-    /* Build the mole fractions and number of molecules of each type */   
-    int totComponents = 0;
-    for (int i = 0;i<nComponents-1;i++){ /* Figure out Percent for each component */
-      numMol[i] = int((double)numSites * args_info.molFraction_arg[i]);
-      std::cout<<numMol[i]<<std::endl;
-      totComponents += numMol[i];
-    }
-    numMol[nComponents-1] = numSites - totComponents;
-   
     /* do the iPod thing, Shuffle da vector */
-    std::random_shuffle(nanoParticleSites.begin(), nanoParticleSites.end());
+    std::random_shuffle(ids.begin(), ids.end());
   } else{ /*Handle core-shell with multiple components.*/
     std::cout << "Creating a core-shell nanoparticle." << std::endl;
     if (nComponents != args_info.ShellRadius_given + 1){
-      std::cerr << "Number of components does not equal ShellRadius occurances." << std::endl;
-      exit(1);
+      sprintf(painCave.errMsg, "Number of .md components "
+	      "does not match the number of shell radius specifications");
+      painCave.isFatal = 1;
+      simError();
     }   
     
   }
 
   
-  //get the orientation of the cell sites
-  //for the same type of molecule in same lattice, it will not change
-  latticeOrt = nanoParticle.getPointsOrt();
-  std::cout<<"Orientational vector Size: "<< std::endl;
-  std::cout<<latticeOrt.size()<< std::endl;
   
   
+  outputFileName = args_info.output_arg;
+ 
   
-  // needed for writing out new md file.
-  
-  outPrefix = getPrefix(inputFileName.c_str()) + "_" + latticeType;
-  outMdFileName = outPrefix + ".md";
-  
-  //creat new .md file on fly which corrects the number of molecule     
-  createMdFile(inputFileName, outMdFileName, nComponents,numMol);
+   //creat new .md file on fly which corrects the number of molecule     
+  createMdFile(inputFileName, outputFileName, nMol);
   
   if (oldInfo != NULL)
     delete oldInfo;
@@ -220,7 +278,7 @@ int main(int argc, char *argv []) {
   //parse md file and set up the system
   //SimCreator NewCreator;
   SimCreator newCreator;
-  SimInfo* NewInfo = newCreator.createSim(outMdFileName, false);
+  SimInfo* NewInfo = newCreator.createSim(outputFileName, false);
   
   
   // Place molecules
@@ -228,57 +286,63 @@ int main(int argc, char *argv []) {
   SimInfo::MoleculeIterator mi;
   mol = NewInfo->beginMolecule(mi);
   int l = 0;
-  for (mol = NewInfo->beginMolecule(mi); mol != NULL; mol = NewInfo->nextMolecule(mi)) {
-    locator->placeMol(nanoParticleSites[l], latticeOrt[l], mol);
-    l++;
+
+  for (int i = 0; i < nComponents; i++){
+    locator = new MoLocator(NewInfo->getMoleculeStamp(i), 
+                            NewInfo->getForceField());
+    for (int n = 0; n < nMol.at(i); n++) {
+      mol = NewInfo->getMoleculeByGlobalIndex(l);
+      locator->placeMol(sites[ids[l]], orientations[ids[l]], mol);
+      l++;
+    }
   }
- 
+  
+
   
   //fill Hmat
-  hmat(0, 0)=  latticeConstant;
+  hmat(0, 0)=  2.0*particleRadius;
   hmat(0, 1) = 0.0;
   hmat(0, 2) = 0.0;
   
   hmat(1, 0) = 0.0;
-  hmat(1, 1) =  latticeConstant;
+  hmat(1, 1) =  2.0*particleRadius;
   hmat(1, 2) = 0.0;
   
   hmat(2, 0) = 0.0;
   hmat(2, 1) = 0.0;
-  hmat(2, 2) =  latticeConstant;
+  hmat(2, 2) =  2.0*particleRadius;
   
   //set Hmat
   NewInfo->getSnapshotManager()->getCurrentSnapshot()->setHmat(hmat);
   
   
   //create dumpwriter and write out the coordinates
-  NewInfo->setFinalConfigFileName(outInitFileName);
-  writer = new DumpWriter(NewInfo);
+  writer = new DumpWriter(NewInfo,outputFileName);
   
   if (writer == NULL) {
-    std::cerr << "error in creating DumpWriter" << std::endl;
-    exit(1);
+    sprintf(painCave.errMsg, "Error in creating dumpwrite object ");
+      painCave.isFatal = 1;
+      simError();
   }
   
   writer->writeDump();
   std::cout << "new initial configuration file: " << outInitFileName
             << " is generated." << std::endl;
-  
-  //delete objects
-  
-  //delete oldInfo and oldSimSetup
-  
-  if (NewInfo != NULL)
-    delete NewInfo;
-  
-  if (writer != NULL)
-    delete writer;	
-  cmdline_parser_free(&args_info);
+ 
+
+  // deleting the writer will put the closing at the end of the dump file
+  delete writer;
+
+  // cleanup a by calling sim error.....
+  sprintf(painCave.errMsg, "A new OOPSE MD file called \"%s\" has been "
+          "generated.\n", outputFileName.c_str());
+  painCave.isFatal = 0;
+  simError();
   return 0;
 }
 
 void createMdFile(const std::string&oldMdFileName, const std::string&newMdFileName,
-                  int components,int* numMol) {
+                  std::vector<int> nMol) {
   ifstream oldMdFile;
   ofstream newMdFile;
   const int MAXLEN = 65535;
@@ -295,8 +359,8 @@ void createMdFile(const std::string&oldMdFileName, const std::string&newMdFileNa
     
     //correct molecule number
     if (strstr(buffer, "nMol") != NULL) {
-      if(i<components){
-	sprintf(buffer, "\tnMol = %i;", numMol[i]);				
+      if(i<nMol.size()){
+	sprintf(buffer, "\tnMol = %i;", nMol.at(i));				
 	newMdFile << buffer << std::endl;
 	i++;
       }

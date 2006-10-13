@@ -9,7 +9,7 @@ purpose "Builds spherical random or core-shell nanoparticles and outputs a xyz i
 # Options
 
 option "output"             o  "Output file name" string no
-option "latticetype"        - "Lattice type string. Valid types are fcc,hcp,bcc." string default="fcc" no
+#option "latticetype"        - "Lattice type string. Valid types are fcc,hcp,bcc." string default="fcc" no
 option "latticeCnst"        -  "Lattice spacing in Angstroms for cubic lattice." double yes
 option "radius"             -  "Nanoparticle radius in Angstroms" double yes
 option "ShellRadius"    -  "Radius from the center of the particle to start a new shell in multi-component core-shell particle. Specified for each component > 1 in md file." double no multiple
