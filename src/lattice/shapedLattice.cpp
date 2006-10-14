@@ -42,7 +42,7 @@
  *
  *  Created by Charles F. Vardeman II on 17 Feb 2006.
  *  @author  Charles F. Vardeman II
- *  @version $Id: shapedLattice.cpp,v 1.4 2006-05-17 21:51:42 tim Exp $
+ *  @version $Id: shapedLattice.cpp,v 1.5 2006-10-14 20:21:26 gezelter Exp $
  *
  */
 
@@ -53,65 +53,75 @@
 #include "lattice/LatticeFactory.hpp"
 
 namespace oopse{
-	shapedLattice::shapedLattice(RealType latticeConstant, 
+  shapedLattice::shapedLattice(RealType latticeConstant, 
                                std::string latticeType) {
-		latticeConstant_ = latticeConstant;
-		latticeType_ = latticeType;
-		registerLattice();
-		simpleLattice_ = LatticeFactory::getInstance()->createLattice(latticeType);
-		if (simpleLattice_ == NULL){
-			std::cerr << "shapedLattice:: Error creating lattice" << std::endl;
-			exit(1);
-		}
+    latticeConstant_ = latticeConstant;
+    latticeType_ = latticeType;
+    registerLattice();
+    simpleLattice_ = LatticeFactory::getInstance()->createLattice(latticeType);
+    if (simpleLattice_ == NULL){
+      std::cerr << "shapedLattice:: Error creating lattice" << std::endl;
+      exit(1);
+    }
 		
-		//Set the lattice constant
+    //Set the lattice constant
     std::vector<RealType> lc;
     lc.push_back(latticeConstant_);
-		simpleLattice_->setLatticeConstant(lc);
-	}
-	
-  
-  
+    simpleLattice_->setLatticeConstant(lc);
+    sitesComputed_ = false;
+  }
+    
   void shapedLattice::setGridDimension(Vector3d dimension){
     dimension_ = dimension;
-		// Find	number of unit cells in each direction
-		beginNx_ = -(int) ceil(0.5*dimension_[0]/latticeConstant_) ;
-		beginNy_ = -(int) ceil(0.5*dimension_[1]/latticeConstant_) ;
-		beginNz_ = -(int) ceil(0.5*dimension_[2]/latticeConstant_) ;    
+    // Find	number of unit cells in each direction
+    beginNx_ = -(int) ceil(0.5*dimension_[0]/latticeConstant_) ;
+    beginNy_ = -(int) ceil(0.5*dimension_[1]/latticeConstant_) ;
+    beginNz_ = -(int) ceil(0.5*dimension_[2]/latticeConstant_) ;    
     endNx_ = (int) ceil(0.5*dimension_[0]/latticeConstant_);
-		endNy_ = (int) ceil(0.5*dimension_[1]/latticeConstant_);
-		endNz_ = (int) ceil(0.5*dimension_[2]/latticeConstant_);    
+    endNy_ = (int) ceil(0.5*dimension_[1]/latticeConstant_);
+    endNz_ = (int) ceil(0.5*dimension_[2]/latticeConstant_);  
+    sitesComputed_ = false;  
   }
   
-  
-  
-    std::vector<Vector3d> shapedLattice::getPoints(){
-			std::vector<Vector3d> latticePos;
-			
-      
-      std::vector<Vector3d> pointsOrt =  simpleLattice_->getLatticePointsOrt();
-      int numMolPerCell = simpleLattice_->getNumSitesPerCell();	
-      for(int i = beginNx_; i < endNx_; i++) {     
-        for(int j = beginNy_; j < endNy_; j++) {       
-          for(int k = beginNz_; k < endNz_; k++) {
-            //get the position of the cell sites
-            simpleLattice_->getLatticePointsPos(latticePos, i, j, k);
-            
-            for(int l = 0; l < numMolPerCell; l++) {
-              
-              
-              if (isInterior(latticePos[l])){
-              	Vector3d myPoint = latticePos[l];
-                Vector3d myOrt = pointsOrt[l];
-                coords_.push_back(myPoint);
-                coordsOrt_.push_back(myOrt);
-              }
+  void shapedLattice::findSites(){
+
+    sites_.clear();
+    orientations_.clear();
+
+    std::vector<Vector3d> latticePos;			      
+    std::vector<Vector3d> pointsOrt =  simpleLattice_->getLatticePointsOrt();
+    int numMolPerCell = simpleLattice_->getNumSitesPerCell();	
+
+    for(int i = beginNx_; i < endNx_; i++) {     
+      for(int j = beginNy_; j < endNy_; j++) {       
+        for(int k = beginNz_; k < endNz_; k++) {
+          //get the position of the cell sites
+          simpleLattice_->getLatticePointsPos(latticePos, i, j, k);            
+          for(int l = 0; l < numMolPerCell; l++) {              
+            if (isInterior(latticePos[l])){
+              Vector3d myPoint = latticePos[l];
+              Vector3d myOrt = pointsOrt[l];
+              sites_.push_back(myPoint);
+              orientations_.push_back(myOrt);
             }
           }
         }
       }
-      
-      return coords_;
-      
-		}	
+    }
+    sitesComputed_ = true;
+  }
+
+  std::vector<Vector3d> shapedLattice::getSites() { 
+    if (!sitesComputed_) {
+      findSites();
+    } 
+    return sites_;
+  }
+
+  std::vector<Vector3d> shapedLattice::getOrientations() { 
+    if (!sitesComputed_) {
+      findSites();
+    } 
+    return orientations_;
+  }
 }

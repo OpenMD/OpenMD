@@ -44,7 +44,7 @@
  *
  *  Created by Charles F. Vardeman II on 3/15/06.
  *  @author  Charles F. Vardeman II 
- *  @version $Id: shapedLatticeSpherical.cpp,v 1.1 2006-03-22 20:57:09 chuckv Exp $
+ *  @version $Id: shapedLatticeSpherical.cpp,v 1.2 2006-10-14 20:21:26 gezelter Exp $
  *
  */
 
@@ -53,25 +53,25 @@
 
 using namespace std;
 namespace oopse {
-
-shapedLatticeSpherical::shapedLatticeSpherical(double latticeConstant,std::string latticeType, double radius):
-shapedLattice(latticeConstant, latticeType){
   
-  sphereRadius_= radius;
-  Vector3d dimension;
-  dimension[0]=2.0*radius;
-  dimension[1]=2.0*radius;
-  dimension[2]=2.0*radius;
-  setGridDimension(dimension);
-}
-/**
- * Determines whether a point lies with a sphere at origin 0
- *
- */
-
-bool shapedLatticeSpherical::isInterior(Vector3d point){
-  bool isIT=false;
-  if (point.length() <= sphereRadius_) isIT=true;
-  return isIT;
-}
+  shapedLatticeSpherical::shapedLatticeSpherical(RealType latticeConstant,
+                                                 std::string latticeType, 
+                                                 RealType radius) : shapedLattice(latticeConstant, latticeType){
+    
+    sphereRadius_= radius;
+    Vector3d dimension;
+    dimension[0]=2.0*radius;
+    dimension[1]=2.0*radius;
+    dimension[2]=2.0*radius;
+    setGridDimension(dimension);
+  }
+  /**
+   * Determines whether a point lies with a sphere at origin 0
+   *
+   */  
+  bool shapedLatticeSpherical::isInterior(Vector3d point){
+    bool isIT=false;
+    if (point.length() <= sphereRadius_) isIT=true;
+    return isIT;
+  }
 }

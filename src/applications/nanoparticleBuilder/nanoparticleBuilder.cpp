@@ -78,12 +78,8 @@ int main(int argc, char *argv []) {
   gengetopt_args_info args_info;
   std::string latticeType;
   std::string inputFileName;
-  std::string outPrefix;
   std::string outputFileName;
-  std::string outInitFileName;
 
-  
-  
   Lattice *simpleLat;
   MoLocator* locator;
   int* numMol;
@@ -91,12 +87,9 @@ int main(int argc, char *argv []) {
   double latticeConstant;
   std::vector<double> lc;
   double mass;										
-
   const double rhoConvertConst = 1.661;
   double density;
   double particleRadius;
-  
-  
 
   Mat3x3d hmat;
   std::vector<Vector3d> latticePos;
@@ -104,15 +97,12 @@ int main(int argc, char *argv []) {
   int numMolPerCell;
   int nShells; /* Number of shells in nanoparticle*/
  
-  
   DumpWriter *writer;
   
   // Parse Command Line Arguments
   if (cmdline_parser(argc, argv, &args_info) != 0)
     exit(1);
-  
-	
-	
+         
   /* get lattice type */
   latticeType = "FCC";
 
@@ -131,65 +121,54 @@ int main(int argc, char *argv []) {
   SimCreator oldCreator;
   SimInfo* oldInfo = oldCreator.createSim(inputFileName, false);
   
-  
   latticeConstant = args_info.latticeCnst_arg;
   particleRadius = args_info.radius_arg;
   Globals* simParams = oldInfo->getSimParams();
   
-       
-  /* create Molocators */
-  locator = new MoLocator(oldInfo->getMoleculeStamp(0), oldInfo->getForceField());
-  
   /* Create nanoparticle */
-  shapedLatticeSpherical nanoParticle(latticeConstant,latticeType,particleRadius);
+  shapedLatticeSpherical nanoParticle(latticeConstant, latticeType,
+                                      particleRadius);
   
   /* Build a lattice and get lattice points for this lattice constant */
-  vector<Vector3d> sites = nanoParticle.getPoints();
-  vector<Vector3d> orientations = nanoParticle.getPointsOrt();
+  vector<Vector3d> sites = nanoParticle.getSites();
+  vector<Vector3d> orientations = nanoParticle.getOrientations();
 
   std::cout <<"nSites: " << sites.size() << std::endl;
 
   /* Get number of lattice sites */
   int nSites = sites.size();
- 
-
-
 
   std::vector<Component*> components = simParams->getComponents();
   std::vector<RealType> molFractions;
   std::vector<RealType> molecularMasses;
   std::vector<int> nMol;
   nComponents = components.size();
-  
-
 
  if (nComponents == 1) {
     molFractions.push_back(1.0);    
   } else {
-    if (args_info.molFraction_given == nComponents) {
-      for (int i = 0; i < nComponents; i++) {
-        molFractions.push_back(args_info.molFraction_arg[i]);
-      }
+   if (args_info.molFraction_given == nComponents) {
+     for (int i = 0; i < nComponents; i++) {
+       molFractions.push_back(args_info.molFraction_arg[i]);
+     }
     } else if (args_info.molFraction_given == nComponents-1) {
-      RealType remainingFraction = 1.0;
-      for (int i = 0; i < nComponents-1; i++) {
-        molFractions.push_back(args_info.molFraction_arg[i]);
-        remainingFraction -= molFractions[i];
-      }
-      molFractions.push_back(remainingFraction);
-    } else {    
-      sprintf(painCave.errMsg, "nanoparticleBuilder can't figure out molFractions "
-              "for all of the components in the <MetaData> block.");
-      painCave.isFatal = 1;
-      simError();
-    }
-  }
-
+     RealType remainingFraction = 1.0;
+     for (int i = 0; i < nComponents-1; i++) {
+       molFractions.push_back(args_info.molFraction_arg[i]);
+       remainingFraction -= molFractions[i];
+     }
+     molFractions.push_back(remainingFraction);
+   } else {    
+     sprintf(painCave.errMsg, "nanoparticleBuilder can't figure out molFractions "
+             "for all of the components in the <MetaData> block.");
+     painCave.isFatal = 1;
+     simError();
+   }
+ }
+ 
  RealType totalFraction = 0.0;
-
+ 
  /* Do some simple sanity checking*/
-
-
 
   for (int i = 0; i < nComponents; i++) {
     if (molFractions.at(i) < 0.0) {
@@ -241,9 +220,6 @@ int main(int argc, char *argv []) {
     simError();
   }
      
-
-
-
   vector<int> ids;
   for (int i = 0; i < sites.size(); i++) ids.push_back(i);
   /* Random particle is the default case*/
@@ -317,7 +293,7 @@ int main(int argc, char *argv []) {
   
   
   //create dumpwriter and write out the coordinates
-  writer = new DumpWriter(NewInfo,outputFileName);
+  writer = new DumpWriter(NewInfo, outputFileName);
   
   if (writer == NULL) {
     sprintf(painCave.errMsg, "Error in creating dumpwrite object ");
@@ -326,11 +302,9 @@ int main(int argc, char *argv []) {
   }
   
   writer->writeDump();
-  std::cout << "new initial configuration file: " << outInitFileName
-            << " is generated." << std::endl;
- 
 
   // deleting the writer will put the closing at the end of the dump file
+
   delete writer;
 
   // cleanup a by calling sim error.....

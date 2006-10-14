@@ -44,7 +44,7 @@
  *
  *  Created by Charles F. Vardeman II on 3/15/06.
  *  @author  Charles F. Vardeman II 
- *  @version $Id: shapedLatticeSpherical.hpp,v 1.1 2006-03-22 20:57:09 chuckv Exp $
+ *  @version $Id: shapedLatticeSpherical.hpp,v 1.2 2006-10-14 20:21:26 gezelter Exp $
  *
  */
 #ifndef NANOPARTICLEBUILDER_SHAPEDLATTICESPHERICAL_HPP
@@ -54,15 +54,15 @@
 #include "math/Vector3.hpp"
 namespace oopse{
   /**
-  * Implements a spherical lattice
-  *
-  */
+   * Implements a spherical lattice
+   *
+   */
   class shapedLatticeSpherical: public shapedLattice{
-public:
-    shapedLatticeSpherical(double latticeConstant,std::string latticeType,double radius);
+  public:
+    shapedLatticeSpherical(double latticeConstant, std::string latticeType, double radius);
     virtual bool isInterior(Vector3d point);
-private:
-      double sphereRadius_;
+  private:
+    double sphereRadius_;
   };
 }
 
