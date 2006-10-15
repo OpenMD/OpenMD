@@ -17,8 +17,8 @@ Example:
 """
 
 __author__ = "Charles Vardeman (cvardema@nd.edu)"
-__version__ = "$Revision: 1.1 $"
-__date__ = "$Date: 2006-10-06 21:29:14 $"
+__version__ = "$Revision: 1.2 $"
+__date__ = "$Date: 2006-10-15 17:02:49 $"
 __copyright__ = "Copyright (c) 2006 by the University of Notre Dame"
 __license__ = "OOPSE"
 
@@ -85,16 +85,18 @@ def splitFile(mdFileName,skipFrameNumber):
             if (remainder == 0):
                 outfilename = outfilePrefix + "_" +repr(foundFrames) + ext
                 outFile = open(outfilename,'w')
+                outFile.write(oopseVersion)
                 for metaline in metaDataFrame:
                     outFile.write(metaline)
                 while not '</Snapshot>' in line:
                     outFile.write(line)
                     line = mdFile.readline()
                 outFile.write(line)
+                outFile.write("</OOPSE>">
                 outFile.close()
         line = mdFile.readline()
         if not line: break
- 
+    
     mdFile.close()
 
 
