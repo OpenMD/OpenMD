@@ -42,7 +42,7 @@
  *
  *  Created by Charles F. Vardeman II on 17 Feb 2006.
  *  @author  Charles F. Vardeman II
- *  @version $Id: shapedLattice.cpp,v 1.5 2006-10-14 20:21:26 gezelter Exp $
+ *  @version $Id: shapedLattice.cpp,v 1.6 2006-10-17 15:24:29 gezelter Exp $
  *
  */
 
@@ -80,6 +80,12 @@ namespace oopse{
     endNx_ = (int) ceil(0.5*dimension_[0]/latticeConstant_);
     endNy_ = (int) ceil(0.5*dimension_[1]/latticeConstant_);
     endNz_ = (int) ceil(0.5*dimension_[2]/latticeConstant_);  
+    sitesComputed_ = false;  
+  }
+
+  void shapedLattice::setOrigin(Vector3d origin){
+    origin_ = origin;
+    simpleLattice_->setOrigin(origin_);
     sitesComputed_ = false;  
   }
   

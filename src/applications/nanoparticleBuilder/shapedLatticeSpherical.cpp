@@ -44,7 +44,7 @@
  *
  *  Created by Charles F. Vardeman II on 3/15/06.
  *  @author  Charles F. Vardeman II 
- *  @version $Id: shapedLatticeSpherical.cpp,v 1.2 2006-10-14 20:21:26 gezelter Exp $
+ *  @version $Id: shapedLatticeSpherical.cpp,v 1.3 2006-10-17 15:24:29 gezelter Exp $
  *
  */
 
@@ -64,6 +64,11 @@ namespace oopse {
     dimension[1]=2.0*radius;
     dimension[2]=2.0*radius;
     setGridDimension(dimension);
+    Vector3d origin;
+    origin[0] = latticeConstant / 2.0;
+    origin[1] = latticeConstant / 2.0;
+    origin[2] = latticeConstant / 2.0;
+    setOrigin(origin);
   }
   /**
    * Determines whether a point lies with a sphere at origin 0
