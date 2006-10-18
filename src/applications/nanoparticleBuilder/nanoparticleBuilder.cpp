@@ -85,7 +85,7 @@ int main(int argc, char *argv []) {
   double latticeConstant;
   std::vector<double> lc;
 
-  double particleRadius;
+  RealType particleRadius;
 
   Mat3x3d hmat;
   std::vector<Vector3d> latticePos;
@@ -104,7 +104,7 @@ int main(int argc, char *argv []) {
   if (args_info.inputs_num)
     inputFileName = args_info.inputs[0];
   else {
-    sprintf(painCave.errMsg, "No input .md file name was specified"
+    sprintf(painCave.errMsg, "No input .md file name was specified "
             "on the command line");
     painCave.isFatal = 1;
     cmdline_parser_print_help();
@@ -115,7 +115,7 @@ int main(int argc, char *argv []) {
   SimCreator oldCreator;
   SimInfo* oldInfo = oldCreator.createSim(inputFileName, false);
   
-  latticeConstant = args_info.latticeCnst_arg;
+  latticeConstant = args_info.latticeConstant_arg;
   particleRadius = args_info.radius_arg;
   Globals* simParams = oldInfo->getSimParams();
   
@@ -126,11 +126,75 @@ int main(int argc, char *argv []) {
   /* Build a lattice and get lattice points for this lattice constant */
   vector<Vector3d> sites = nanoParticle.getSites();
   vector<Vector3d> orientations = nanoParticle.getOrientations();
+  std::vector<int> vacancyTargets;
+  vector<bool> isVacancy;
+  
+  Vector3d myLoc;
+  RealType myR;
+ 
+  for (int i = 0; i < sites.size(); i++) 
+    isVacancy.push_back(false);
 
-  std::cout <<"nSites: " << sites.size() << std::endl;
+  if (args_info.vacancyPercent_given) {
+    if (args_info.vacancyPercent_arg < 0.0 || args_info.vacancyPercent_arg > 100.0) {
+      sprintf(painCave.errMsg, "vacancyPercent was set to a non-sensical value.");
+      painCave.isFatal = 1;
+      simError();
+    } else {
+      RealType vF = args_info.vacancyPercent_arg / 100.0;
+      RealType vIR;
+      RealType vOR;
+      if (args_info.vacancyInnerRadius_given) {
+        vIR = args_info.vacancyInnerRadius_arg;
+      } else {
+        vIR = 0.0;
+      }
+      if (args_info.vacancyOuterRadius_given) {
+        vOR = args_info.vacancyOuterRadius_arg;
+      } else {
+        vOR = particleRadius;
+      }
+      if (vIR >= 0.0 && vOR <= particleRadius && vOR >= vIR) {
+        
+        for (int i = 0; i < sites.size(); i++) {
+          myLoc = sites[i];
+          myR = myLoc.length();
+          if (myR >= vIR && myR <= vOR) {
+            vacancyTargets.push_back(i);
+          }          
+        }
+        std::random_shuffle(vacancyTargets.begin(), vacancyTargets.end());
+        
+        int nTargets = vacancyTargets.size();
+        vacancyTargets.resize((int)(vF * nTargets));
+        
+                  
+        sprintf(painCave.errMsg, "Removing %d atoms from randomly-selected\n"
+                "\tsites between %lf and %lf.", vacancyTargets.size(), 
+                vIR, vOR); 
+        painCave.isFatal = 0;
+        simError();
+
+        isVacancy.clear();
+        for (int i = 0; i < sites.size(); i++) {
+          bool vac = false;
+          for (int j = 0; j < vacancyTargets.size(); j++) {
+            if (i == vacancyTargets[j]) vac = true;
+          }
+          isVacancy.push_back(vac);
+        }
+               
+      } else {
+        sprintf(painCave.errMsg, "Something is strange about the vacancy\n"
+                "\tinner or outer radii.  Check their values.");
+        painCave.isFatal = 1;
+        simError();
+      }
+    }
+  }
 
   /* Get number of lattice sites */
-  int nSites = sites.size();
+  int nSites = sites.size() - vacancyTargets.size();
 
   std::vector<Component*> components = simParams->getComponents();
   std::vector<RealType> molFractions;
@@ -140,8 +204,8 @@ int main(int argc, char *argv []) {
   std::map<int, int> componentFromSite;
   nComponents = components.size();
 
-  if (args_info.molFraction_given && args_info.ShellRadius_given) {
-    sprintf(painCave.errMsg, "Specify either molFraction or ShellRadius "
+  if (args_info.molFraction_given && args_info.shellRadius_given) {
+    sprintf(painCave.errMsg, "Specify either molFraction or shellRadius "
             "arguments, but not both!");
     painCave.isFatal = 1;
     simError();
@@ -168,25 +232,25 @@ int main(int argc, char *argv []) {
       painCave.isFatal = 1;
       simError();
     }
-  } else if ((int)args_info.ShellRadius_given) {
-    if ((int)args_info.ShellRadius_given == nComponents) {
+  } else if ((int)args_info.shellRadius_given) {
+    if ((int)args_info.shellRadius_given == nComponents) {
       for (int i = 0; i < nComponents; i++) {
-        shellRadii.push_back(args_info.ShellRadius_arg[i]);
+        shellRadii.push_back(args_info.shellRadius_arg[i]);
       }
-    } else if ((int)args_info.ShellRadius_given == nComponents-1) {
+    } else if ((int)args_info.shellRadius_given == nComponents-1) {
       for (int i = 0; i < nComponents-1; i++) {
-        shellRadii.push_back(args_info.ShellRadius_arg[i]);
+        shellRadii.push_back(args_info.shellRadius_arg[i]);
       }
       shellRadii.push_back(particleRadius);
     } else {    
-      sprintf(painCave.errMsg, "nanoparticleBuilder can't figure out the shell radii "
-              "for all of the components in the <MetaData> block.");
+      sprintf(painCave.errMsg, "nanoparticleBuilder can't figure out the\n"
+              "\tshell radii for all of the components in the <MetaData> block.");
       painCave.isFatal = 1;
       simError();
     }
   } else {
-    sprintf(painCave.errMsg, "You have a multi-component <MetaData> block, but have not "
-            "specified either molFraction or ShellRadius arguments.");
+    sprintf(painCave.errMsg, "You have a multi-component <MetaData> block,\n"
+            "\tbut have not specified either molFraction or shellRadius arguments.");
     painCave.isFatal = 1;
     simError();
   }
@@ -253,22 +317,24 @@ int main(int argc, char *argv []) {
       }
     }
   }
-           
-  vector<int> ids;
-  for (int i = 0; i < sites.size(); i++) ids.push_back(i);
-  /* Random particle is the default case*/
+
+  vector<int> ids;           
   if ((int)args_info.molFraction_given){
     sprintf(painCave.errMsg, "Creating a randomized spherical nanoparticle.");
     painCave.isFatal = 0;
     simError();
+    /* Random particle is the default case*/
+
+    for (int i = 0; i < sites.size(); i++) 
+      if (!isVacancy[i]) ids.push_back(i);
+    
     std::random_shuffle(ids.begin(), ids.end());
+    
   } else{ 
     sprintf(painCave.errMsg, "Creating a core-shell spherical nanoparticle.");
     painCave.isFatal = 0;
     simError();
 
-    Vector3d myLoc;
-    RealType myR;
     RealType smallestSoFar;
     int myComponent = -1;
     nMol.clear();
@@ -277,24 +343,24 @@ int main(int argc, char *argv []) {
     for (int i = 0; i < sites.size(); i++) {
       myLoc = sites[i];
       myR = myLoc.length();
-      smallestSoFar = particleRadius;
-     
-      for (int j = 0; j < nComponents; j++) {
-        if (myR <= shellRadii[j]) {
-          if (shellRadii[j] <= smallestSoFar) {
-            smallestSoFar = shellRadii[j];
-            myComponent = j;
+      smallestSoFar = particleRadius;      
+      if (!isVacancy[i]) {
+        for (int j = 0; j < nComponents; j++) {
+          if (myR <= shellRadii[j]) {
+            if (shellRadii[j] <= smallestSoFar) {
+              smallestSoFar = shellRadii[j];
+              myComponent = j;
+            }
           }
         }
+        componentFromSite[i] = myComponent;
+        nMol[myComponent]++;
       }
-      componentFromSite[i] = myComponent;
-      nMol[myComponent]++;
-    }
-  }   
+    }       
+  }
   
   outputFileName = args_info.output_arg;
- 
-  
+   
   //creat new .md file on fly which corrects the number of molecule     
   createMdFile(inputFileName, outputFileName, nMol);
   
@@ -308,18 +374,22 @@ int main(int argc, char *argv []) {
   Molecule* mol;
   SimInfo::MoleculeIterator mi;
   mol = NewInfo->beginMolecule(mi);
+
   int l = 0;
+  int whichSite = 0;
 
   for (int i = 0; i < nComponents; i++){
     locator = new MoLocator(NewInfo->getMoleculeStamp(i), 
                             NewInfo->getForceField());
-
-    if (args_info.ShellRadius_given) {
+    
+    if (!args_info.molFraction_given) {
       for (int n = 0; n < sites.size(); n++) {
-        if (componentFromSite[n] == i) {
-          mol = NewInfo->getMoleculeByGlobalIndex(l);
-          locator->placeMol(sites[n], orientations[n], mol);
-          l++;
+        if (!isVacancy[n]) {
+          if (componentFromSite[n] == i) {
+            mol = NewInfo->getMoleculeByGlobalIndex(l);
+            locator->placeMol(sites[n], orientations[n], mol);
+            l++;
+          }
         }
       }
     } else {
@@ -329,7 +399,7 @@ int main(int argc, char *argv []) {
         l++;
       }
     }
-  } 
+  }
   
   //fill Hmat
   hmat(0, 0)=  10.0*particleRadius;
@@ -352,7 +422,7 @@ int main(int argc, char *argv []) {
   writer = new DumpWriter(NewInfo, outputFileName);
   
   if (writer == NULL) {
-    sprintf(painCave.errMsg, "Error in creating dumpwrite object ");
+    sprintf(painCave.errMsg, "Error in creating dumpwriter object ");
     painCave.isFatal = 1;
     simError();
   }
@@ -382,16 +452,15 @@ void createMdFile(const std::string&oldMdFileName,
   //create new .md file based on old .md file
   oldMdFile.open(oldMdFileName.c_str());
   newMdFile.open(newMdFileName.c_str());
-  
   oldMdFile.getline(buffer, MAXLEN);
- 
+
   int i = 0;
   while (!oldMdFile.eof()) {
-    
+
     //correct molecule number
     if (strstr(buffer, "nMol") != NULL) {
       if(i<nMol.size()){
-	sprintf(buffer, "\tnMol = %i;", nMol.at(i));				
+	sprintf(buffer, "\tnMol = %i;", nMol.at(i));
 	newMdFile << buffer << std::endl;
 	i++;
       }
@@ -403,5 +472,14 @@ void createMdFile(const std::string&oldMdFileName,
   
   oldMdFile.close();
   newMdFile.close();
+
+  if (i != nMol.size()) {
+    sprintf(painCave.errMsg, "Couldn't replace the correct number of nMol\n"
+            "\tstatements in component blocks.  Make sure that all\n"
+            "\tcomponents in the template file have nMol=1");
+    painCave.isFatal = 1;
+    simError();
+  }
+    
 }
 

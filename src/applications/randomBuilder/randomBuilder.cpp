@@ -42,7 +42,7 @@
  *
  *  Created by Charles F. Vardeman II on 10 Apr 2006.
  *  @author  Charles F. Vardeman II
- *  @version $Id: randomBuilder.cpp,v 1.6 2006-10-10 18:34:12 gezelter Exp $
+ *  @version $Id: randomBuilder.cpp,v 1.7 2006-10-18 19:35:07 gezelter Exp $
  *
  */
 
@@ -388,5 +388,14 @@ void createMdFile(const std::string&oldMdFileName,
   
   oldMdFile.close();
   newMdFile.close();
+
+  if (i != nMol.size()) {
+    sprintf(painCave.errMsg, "Couldn't replace the correct number of nMol\n"
+            "\tstatements in component blocks.  Make sure that all\n"
+            "\tcomponents in the template file have nMol=1");
+    painCave.isFatal = 1;
+    simError();
+  }
+
 }
 
