@@ -31,3 +31,73 @@
 # to match the number of lattice sites.
 #
 ../../bin/randomBuilder -o random_FCC.md --nx=4 --ny=4 --nz=4 --density=1.0 --molFraction=0.4 --molFraction=0.4 three_component.md
+#
+# Example 3:
+# Builds a spherical nanoparticle (FCC) from the <MetaData> block in gold.md
+# using a particle radius of 30 Angstroms, and a lattice constant of 4.09
+# angstroms. Places the output (which can be used to start an OOPSE job) in 
+# gold_sphere.md 
+#
+# Note that builders will rewrite the number of molecules in each component
+# to match the number of lattice sites.
+#
+../../bin/nanoparticleBuilder -o gold_sphere.md --radius=30.0 --latticeConstant=4.09 gold.md
+#
+# Example 4:
+# Builds a random alloy spherical nanoparticle (FCC) from the <MetaData> 
+# block in bimetallic.md using a particle radius of 30 Angstroms, a 
+# lattice constant of 4.09 angstroms, and a mole fraction for the gold of 0.4.
+# Places the output (which can be used to start an OOPSE job) in 
+# Au_Ag_alloy.md 
+#
+# Note that builders will rewrite the number of molecules in each component
+# to match the number of lattice sites.
+#
+../../bin/nanoparticleBuilder -o Au_Ag_alloy.md --radius=30.0 --latticeConstant=4.09 --molFraction=0.4 bimetallic.md
+#
+# Example 5:
+# Builds a Au(core)-Ag(shell) spherical nanoparticle (FCC) from the <MetaData> 
+# block in bimetallic.md using a particle radius of 25 Angstroms, a 
+# lattice constant of 4.09 angstroms, and a core radius for the gold atoms 
+# of 12.5 angstroms. Places the output (which can be used to start an 
+# OOPSE job) in Au(core)-Ag(shell).md 
+#
+# Note that builders will rewrite the number of molecules in each component
+# to match the number of lattice sites.
+#
+../../bin/nanoparticleBuilder -o Au\(core\)-Ag\(shell\).md --radius=30.0 --latticeConstant=4.09 --shellRadius=12.5 bimetallic.md
+#
+# Example 6:
+# Reverses example 5 by building a Ag(core)-Au(shell) spherical nanoparticle.
+# Uses the same <MetaData> block from bimetallic.md, 
+# a particle radius of 25 Angstroms, a lattice constant of 4.09 angstroms, 
+# and a core radius for the silver atoms of 12.5 angstroms.  
+# Places the output (which can be used to start an OOPSE job) in 
+# Ag(core)-Au(shell).md 
+#
+# Note that the last radius in Example 5 was taken as the particle radius,
+# but since the components are reversed in this example, both are specified:
+# 
+#
+../../bin/nanoparticleBuilder -o Ag\(core\)-Au\(shell\).md --radius=30.0 --latticeConstant=4.09 --shellRadius=30.0,12.5 bimetallic.md
+#
+# Example 7:
+# Builds a Au(core)-Ag(shell) spherical nanoparticle (FCC) from the <MetaData> 
+# block in bimetallic.md using a particle radius of 25 Angstroms, a 
+# lattice constant of 4.09 angstroms, and a core radius for the gold atoms 
+# of 12.5 angstroms. Places the output (which can be used to start an 
+# OOPSE job) in Au(core)-Ag(shell).md 
+#
+# This example also introduces 70% vacancies in a 6 angstrom radial band
+# around the bimetallic interface:
+#
+../../bin/nanoparticleBuilder -o vacancy_interface.md --radius=20.0 --latticeConstant=4.09 --shellRadius=12.5 --vacancyPercent=70 --vacancyInnerRadius=9.5 --vacancyOuterRadius=15.5 bimetallic.md
+#
+# Example 8:
+# Builds a random alloy spherical nanoparticle with 30% vacancies using the
+# <MetaData> block in bimetallic.md, a particle radius of 30 Angstroms, a 
+# lattice constant of 4.09 angstroms, and a mole fraction for the gold of 0.4.
+# Places the output (which can be used to start an OOPSE job) in 
+# vacancy_alloy.md
+#
+../../bin/nanoparticleBuilder -o vacancy_alloy.md --radius=30.0 --latticeConstant=4.09 --molFraction=0.4 --vacancyPercent=80 bimetallic.md
