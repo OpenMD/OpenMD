@@ -45,34 +45,35 @@ namespace oopse {
 #include <string>
 #include "brains/SimInfo.hpp"
 
-class StaticAnalyser{
-    public:
-        StaticAnalyser(SimInfo* info, const std::string& filename) : info_(info), currentSnapshot_(NULL), dumpFilename_(filename), step_(1) {}
-        virtual ~StaticAnalyser() {}
-        virtual void process()=0;
+  class StaticAnalyser{
+  public:
+    StaticAnalyser(SimInfo* info, const std::string& filename) : info_(info), currentSnapshot_(NULL), dumpFilename_(filename), step_(1), usePeriodicBoundaryConditions_(info->getSimParams()->getUsePeriodicBoundaryConditions()) {}
+    virtual ~StaticAnalyser() {}
+    virtual void process()=0;
 
-        void setOutputName(const std::string& filename) {
-          outputFilename_ = filename;
-        }
+    void setOutputName(const std::string& filename) {
+      outputFilename_ = filename;
+    }
         
-        const std::string& getOutputFileName() const {
-          return outputFilename_;
-        }
+    const std::string& getOutputFileName() const {
+      return outputFilename_;
+    }
         
-        void setStep(int step) {
-          assert(step > 0);
-          step_ =step;    
-        }
+    void setStep(int step) {
+      assert(step > 0);
+      step_ =step;    
+    }
 
-        int getStep() { return step_;}
+    int getStep() { return step_;}
 
-    protected:
-        SimInfo* info_;
-        Snapshot* currentSnapshot_;
-        std::string dumpFilename_;        
-        std::string outputFilename_;
-        int step_;        
-};
+  protected:
+    SimInfo* info_;
+    Snapshot* currentSnapshot_;
+    std::string dumpFilename_;        
+    std::string outputFilename_;
+    int step_;
+    bool usePeriodicBoundaryConditions_;
+  };
 
 }
 #endif

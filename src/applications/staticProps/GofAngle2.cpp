@@ -93,7 +93,8 @@ namespace oopse {
     Vector3d pos1 = sd1->getPos();
     Vector3d pos2 = sd2->getPos();
     Vector3d r12 = pos1 - pos2;
-    currentSnapshot_->wrapVector(r12);
+    if (usePeriodicBoundaryConditions_) 
+      currentSnapshot_->wrapVector(r12);
     Vector3d dipole1 = sd1->getElectroFrame().getColumn(2);
     Vector3d dipole2 = sd2->getElectroFrame().getColumn(2);
     

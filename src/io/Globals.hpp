@@ -65,7 +65,6 @@ class Globals : public DataHolder {
   DeclareParameter(Ensemble, std::string);
   DeclareParameter(Dt, RealType);
   DeclareParameter(RunTime, RealType);
-  //DeclareParameter(InitialConfig, std::string);
   DeclareParameter(FinalConfig, std::string);
   DeclareParameter(SampleTime, RealType);
   DeclareParameter(ResetTime, RealType);

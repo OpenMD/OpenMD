@@ -44,7 +44,7 @@
  *
  *  Created by Charles F. Vardeman II on 11/26/05.
  *  @author  Charles F. Vardeman II 
- *  @version $Id: RhoZ.cpp,v 1.5 2006-05-17 21:51:42 tim Exp $
+ *  @version $Id: RhoZ.cpp,v 1.6 2006-10-18 21:58:47 gezelter Exp $
  *
  */
 
@@ -103,7 +103,8 @@ namespace oopse {
         //wrap the stuntdoubles into a cell      
         for (sd = seleMan_.beginSelected(i); sd != NULL; sd = seleMan_.nextSelected(i)) {
             Vector3d pos = sd->getPos();
-            currentSnapshot_->wrapVector(pos);
+            if (usePeriodicBoundaryConditions_)
+              currentSnapshot_->wrapVector(pos);
             sd->setPos(pos);
         }
 

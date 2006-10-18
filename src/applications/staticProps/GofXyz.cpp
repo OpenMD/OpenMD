@@ -106,7 +106,8 @@ namespace oopse {
       Vector3d r3 =sd3->getPos();
       Vector3d r1 = sd1->getPos();
       Vector3d v1 =  r3 - r1;
-      info_->getSnapshotManager()->getCurrentSnapshot()->wrapVector(v1);
+      if (usePeriodicBoundaryConditions_)
+        info_->getSnapshotManager()->getCurrentSnapshot()->wrapVector(v1);
       Vector3d zaxis = sd1->getElectroFrame().getColumn(2);
       Vector3d xaxis = cross(v1, zaxis);
       Vector3d yaxis = cross(zaxis, xaxis);
@@ -130,7 +131,8 @@ namespace oopse {
     Vector3d pos1 = sd1->getPos();
     Vector3d pos2 = sd2->getPos();
     Vector3d r12 = pos2 - pos1;
-    currentSnapshot_->wrapVector(r12);
+    if (usePeriodicBoundaryConditions_)
+      currentSnapshot_->wrapVector(r12);
 
     std::map<int, RotMat3x3d>::iterator i = rotMats_.find(sd1->getGlobalIndex());
     assert(i != rotMats_.end());

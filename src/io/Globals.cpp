@@ -57,7 +57,6 @@ Globals::Globals() {
   DefineOptionalParameter(Ensemble, "ensemble");
   DefineOptionalParameter(Dt, "dt");
   DefineOptionalParameter(RunTime, "runTime");
-  //DefineOptionalParameter(InitialConfig, "initialConfig");
   DefineOptionalParameter(FinalConfig, "finalConfig");
   DefineOptionalParameter(SampleTime, "sampleTime");
   DefineOptionalParameter(ResetTime, "resetTime");
@@ -88,13 +87,12 @@ Globals::Globals() {
   DefineOptionalParameter(ThermodynamicIntegrationK, "thermodynamicIntegrationK");
   DefineOptionalParameter(ForceFieldVariant, "forceFieldVariant");
   DefineOptionalParameter(ForceFieldFileName, "forceFieldFileName");
+  DefineOptionalParameter(DampingAlpha, "dampingAlpha");
   DefineOptionalParameter(ThermIntDistSpringConst, "thermIntDistSpringConst");
   DefineOptionalParameter(ThermIntThetaSpringConst, "thermIntThetaSpringConst");
   DefineOptionalParameter(ThermIntOmegaSpringConst, "thermIntOmegaSpringConst");
   DefineOptionalParameter(SurfaceTension, "surfaceTension");
   DefineOptionalParameter(PrintPressureTensor, "printPressureTensor");
-  DefineOptionalParameter(ElectrostaticSummationMethod, "electrostaticSummationMethod");
-  DefineOptionalParameter(ElectrostaticScreeningMethod, "electrostaticScreeningMethod");
   DefineOptionalParameter(CutoffPolicy, "cutoffPolicy");
   DefineOptionalParameter(SwitchingFunctionType, "switchingFunctionType");
   DefineOptionalParameter(HydroPropFile, "HydroPropFile");
@@ -112,7 +110,8 @@ Globals::Globals() {
   DefineOptionalParameterWithDefaultValue(ThermIntDistSpringConst, "thermIntDistSpringConst", 6.0);
   DefineOptionalParameterWithDefaultValue(ThermIntThetaSpringConst, "thermIntThetaSpringConst", 7.5);
   DefineOptionalParameterWithDefaultValue(ThermIntOmegaSpringConst, "thermIntOmegaSpringConst", 13.5);
-  DefineOptionalParameter(DampingAlpha, "dampingAlpha");
+  DefineOptionalParameterWithDefaultValue(ElectrostaticSummationMethod, "electrostaticSummationMethod", "SHIFTED_FORCE");
+  DefineOptionalParameterWithDefaultValue(ElectrostaticScreeningMethod, "electrostaticScreeningMethod", "DAMPED");
   DefineOptionalParameterWithDefaultValue(Dielectric, "dielectric", 78.5);
   DefineOptionalParameterWithDefaultValue(CompressDumpFile, "compressDumpFile", 0);
   DefineOptionalParameterWithDefaultValue(OutputForceVector, "outputForceVector", 0);
@@ -121,10 +120,9 @@ Globals::Globals() {
   DefineOptionalParameterWithDefaultValue(UseSphericalBoundaryConditions, "useSphericalBoundaryConditions", false);
   DefineOptionalParameterWithDefaultValue(AccumulateBoxDipole, "accumulateBoxDipole", false);
 
-
-    deprecatedKeywords_.insert("nComponents");
-    deprecatedKeywords_.insert("nZconstraints");
-    deprecatedKeywords_.insert("initialConfig");
+  deprecatedKeywords_.insert("nComponents");
+  deprecatedKeywords_.insert("nZconstraints");
+  deprecatedKeywords_.insert("initialConfig");
     
 }
 
@@ -141,7 +139,6 @@ void Globals::validate() {
   CheckParameter(Ensemble, isEqualIgnoreCase("NVE") || isEqualIgnoreCase("NVT") || isEqualIgnoreCase("NPTi") || isEqualIgnoreCase("NPTf") || isEqualIgnoreCase("NPTxyz") || isEqualIgnoreCase("NPAT")  || isEqualIgnoreCase("LANGEVINDYNAMICS") || isEqualIgnoreCase("LD") || isEqualIgnoreCase("NPRT") || isEqualIgnoreCase("NPGT") || isEqualIgnoreCase("NGammaT") || isEqualIgnoreCase("NGT"));
   CheckParameter(Dt, isPositive());
   CheckParameter(RunTime, isPositive());
-  //CheckParameter(InitialConfig, isNotEmpty());
   CheckParameter(FinalConfig, isNotEmpty());
   CheckParameter(SampleTime, isNonNegative());
   CheckParameter(ResetTime, isNonNegative());
@@ -150,7 +147,6 @@ void Globals::validate() {
   CheckParameter(SwitchingRadius, isNonNegative());
   CheckParameter(Dielectric, isPositive());
   CheckParameter(ThermalTime,  isNonNegative());
-  //  CheckParameter(TargetPressure,  isPositive());
   CheckParameter(TauThermostat, isPositive());
   CheckParameter(TauBarostat, isPositive());
   CheckParameter(ZconsTime, isPositive());
@@ -173,7 +169,6 @@ void Globals::validate() {
   CheckParameter(ThermIntDistSpringConst, isPositive());
   CheckParameter(ThermIntThetaSpringConst, isPositive());
   CheckParameter(ThermIntOmegaSpringConst, isPositive());
-  //  CheckParameter(SurfaceTension, isNonNegative());
   CheckParameter(ElectrostaticSummationMethod, isEqualIgnoreCase("NONE") || isEqualIgnoreCase("SHIFTED_POTENTIAL") || isEqualIgnoreCase("SHIFTED_FORCE") || isEqualIgnoreCase("REACTION_FIELD"));
   CheckParameter(ElectrostaticScreeningMethod, isEqualIgnoreCase("UNDAMPED") || isEqualIgnoreCase("DAMPED")); 
   CheckParameter(CutoffPolicy, isEqualIgnoreCase("MIX") || isEqualIgnoreCase("MAX") || isEqualIgnoreCase("TRADITIONAL"));

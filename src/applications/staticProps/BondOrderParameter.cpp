@@ -43,7 +43,7 @@
  *
  *  Created by J. Daniel Gezelter on 09/26/06.
  *  @author  J. Daniel Gezelter
- *  @version $Id: BondOrderParameter.cpp,v 1.18 2006-09-26 16:08:44 gezelter Exp $
+ *  @version $Id: BondOrderParameter.cpp,v 1.19 2006-10-18 21:58:47 gezelter Exp $
  *
  */
  
@@ -230,7 +230,9 @@ namespace oopse {
             if (atom->getGlobalIndex() != myIndex) {
 
               vec = sd->getPos() - atom->getPos();       
-              currentSnapshot_->wrapVector(vec);
+
+              if (usePeriodicBoundaryConditions_) 
+                currentSnapshot_->wrapVector(vec);
               
               // Calculate "bonds" and build Q_lm(r) where 
               //      Q_lm = Y_lm(theta(r),phi(r))                

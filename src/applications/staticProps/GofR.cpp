@@ -95,7 +95,8 @@ namespace oopse {
     Vector3d pos1 = sd1->getPos();
     Vector3d pos2 = sd2->getPos();
     Vector3d r12 = pos2 - pos1;
-    currentSnapshot_->wrapVector(r12);
+    if (usePeriodicBoundaryConditions_)
+      currentSnapshot_->wrapVector(r12);
 
     RealType distance = r12.length();
 

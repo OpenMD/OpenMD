@@ -669,13 +669,14 @@ namespace oopse {
     // set the useRF logical
     useRF = 0;
     useSF = 0;
+    useSP = 0;
 
 
     if (simParams_->haveElectrostaticSummationMethod()) {
       std::string myMethod = simParams_->getElectrostaticSummationMethod();
       toUpper(myMethod);
       if (myMethod == "REACTION_FIELD"){
-        useRF=1;
+        useRF = 1;
       } else if (myMethod == "SHIFTED_FORCE"){
 	useSF = 1;
       } else if (myMethod == "SHIFTED_POTENTIAL"){

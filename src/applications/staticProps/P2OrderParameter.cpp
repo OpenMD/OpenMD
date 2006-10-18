@@ -47,10 +47,10 @@
 namespace oopse {
 
 
-P2OrderParameter::P2OrderParameter(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2)
-  : StaticAnalyser(info, filename),
-    selectionScript1_(sele1), selectionScript2_(sele2), evaluator1_(info), evaluator2_(info), 
-    seleMan1_(info), seleMan2_(info){
+  P2OrderParameter::P2OrderParameter(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2)
+    : StaticAnalyser(info, filename),
+      selectionScript1_(sele1), selectionScript2_(sele2), evaluator1_(info), evaluator2_(info), 
+      seleMan1_(info), seleMan2_(info){
 
     setOutputName(getPrefix(filename) + ".p2");
         
@@ -60,74 +60,75 @@ P2OrderParameter::P2OrderParameter(SimInfo* info, const std::string& filename, c
     if (!evaluator1_.isDynamic()) {
       seleMan1_.setSelectionSet(evaluator1_.evaluate());
     }else {
-        sprintf( painCave.errMsg,
-                 "--sele1 must be static selection\n");
-        painCave.severity = OOPSE_ERROR;
-        painCave.isFatal = 1;
-        simError();  
+      sprintf( painCave.errMsg,
+               "--sele1 must be static selection\n");
+      painCave.severity = OOPSE_ERROR;
+      painCave.isFatal = 1;
+      simError();  
     }
 
     if (!evaluator2_.isDynamic()) {
       seleMan2_.setSelectionSet(evaluator2_.evaluate());
     }else {
-        sprintf( painCave.errMsg,
-                 "--sele2 must be static selection\n");
-        painCave.severity = OOPSE_ERROR;
-        painCave.isFatal = 1;
-        simError();  
+      sprintf( painCave.errMsg,
+               "--sele2 must be static selection\n");
+      painCave.severity = OOPSE_ERROR;
+      painCave.isFatal = 1;
+      simError();  
     }
 
     if (seleMan1_.getSelectionCount() != seleMan2_.getSelectionCount() ) {
-        sprintf( painCave.errMsg,
-                 "The number of selected Stuntdoubles are not the same in --sele1 and sele2\n");
-        painCave.severity = OOPSE_ERROR;
-        painCave.isFatal = 1;
-        simError();  
+      sprintf( painCave.errMsg,
+               "The number of selected Stuntdoubles are not the same in --sele1 and sele2\n");
+      painCave.severity = OOPSE_ERROR;
+      painCave.isFatal = 1;
+      simError();  
 
     }
 
-  int i;
-  int j;
-  StuntDouble* sd1;
-  StuntDouble* sd2;
-  for (sd1 = seleMan1_.beginSelected(i), sd2 = seleMan2_.beginSelected(j);
-     sd1 != NULL && sd2 != NULL;
-     sd1 = seleMan1_.nextSelected(i), sd2 = seleMan2_.nextSelected(j)) {
+    int i;
+    int j;
+    StuntDouble* sd1;
+    StuntDouble* sd2;
+    for (sd1 = seleMan1_.beginSelected(i), sd2 = seleMan2_.beginSelected(j);
+         sd1 != NULL && sd2 != NULL;
+         sd1 = seleMan1_.nextSelected(i), sd2 = seleMan2_.nextSelected(j)) {
 
-     sdPairs_.push_back(std::make_pair(sd1, sd2));
-  }
+      sdPairs_.push_back(std::make_pair(sd1, sd2));
+    }
 
     
   }
 
-void P2OrderParameter::process() {
-  Molecule* mol;
-  RigidBody* rb;
-  SimInfo::MoleculeIterator mi;
-  Molecule::RigidBodyIterator rbIter;
+  void P2OrderParameter::process() {
+    Molecule* mol;
+    RigidBody* rb;
+    SimInfo::MoleculeIterator mi;
+    Molecule::RigidBodyIterator rbIter;
   
-  DumpReader reader(info_, dumpFilename_);    
-  int nFrames = reader.getNFrames();
+    DumpReader reader(info_, dumpFilename_);    
+    int nFrames = reader.getNFrames();
 
-  for (int i = 0; i < nFrames; i += step_) {
-    reader.readFrame(i);
-    currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
+    for (int i = 0; i < nFrames; i += step_) {
+      reader.readFrame(i);
+      currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
 
     
-    for (mol = info_->beginMolecule(mi); mol != NULL; mol = info_->nextMolecule(mi)) {
+      for (mol = info_->beginMolecule(mi); mol != NULL; mol = info_->nextMolecule(mi)) {
         //change the positions of atoms which belong to the rigidbodies
         for (rb = mol->beginRigidBody(rbIter); rb != NULL; rb = mol->nextRigidBody(rbIter)) {
-            rb->updateAtoms();
+          rb->updateAtoms();
         }
         
-    }      
+      }      
 
       Mat3x3d orderTensor(0.0);
       for (std::vector<std::pair<StuntDouble*, StuntDouble*> >::iterator j = sdPairs_.begin(); j != sdPairs_.end(); ++j) {
-          Vector3d vec = j->first->getPos() - j->second->getPos();
+        Vector3d vec = j->first->getPos() - j->second->getPos();
+        if (usePeriodicBoundaryConditions_)
           currentSnapshot_->wrapVector(vec);
-          vec.normalize();
-          orderTensor +=outProduct(vec, vec);
+        vec.normalize();
+        orderTensor +=outProduct(vec, vec);
       }
       
       orderTensor /= sdPairs_.size();
@@ -150,33 +151,34 @@ void P2OrderParameter::process() {
       //the eigen vector is already normalized in SquareMatrix3::diagonalize
       Vector3d director = eigenvectors.getColumn(which);
       if (director[0] < 0) {
-          director.negate();
+        director.negate();
       }   
 
       RealType angle = 0.0;
       for (std::vector<std::pair<StuntDouble*, StuntDouble*> >::iterator j = sdPairs_.begin(); j != sdPairs_.end(); ++j) {
-          Vector3d vec = j->first->getPos() - j->second->getPos();
+        Vector3d vec = j->first->getPos() - j->second->getPos();
+        if (usePeriodicBoundaryConditions_)
           currentSnapshot_->wrapVector(vec);
-          vec.normalize();
+        vec.normalize();
 
-          angle += acos(dot(vec, director)) ;
+        angle += acos(dot(vec, director)) ;
       }
       angle = angle / (sdPairs_.size() * NumericConstant::PI) * 180.0;
 
-       OrderParam param;
-       param.p2 = p2;
-       param.director = director;
-       param.angle = angle;
+      OrderParam param;
+      param.p2 = p2;
+      param.director = director;
+      param.angle = angle;
 
-        orderParams_.push_back(param);       
+      orderParams_.push_back(param);       
     
+    }
+
+    writeP2();
+  
   }
 
-  writeP2();
-  
-}
-
-void P2OrderParameter::writeP2() {
+  void P2OrderParameter::writeP2() {
 
     std::ofstream os(getOutputFileName().c_str());
     os << "#radial distribution function\n";
@@ -185,15 +187,15 @@ void P2OrderParameter::writeP2() {
     os << "#p2\tdirector_x\tdirector_y\tdiretor_z\tangle(degree)\n";    
 
     for (std::size_t i = 0; i < orderParams_.size(); ++i) {
-        os <<  orderParams_[i].p2 << "\t"
-            <<  orderParams_[i].director[0] << "\t"
-            <<  orderParams_[i].director[1] << "\t"
-            <<  orderParams_[i].director[2] << "\t"
-            <<  orderParams_[i].angle << "\n";
+      os <<  orderParams_[i].p2 << "\t"
+         <<  orderParams_[i].director[0] << "\t"
+         <<  orderParams_[i].director[1] << "\t"
+         <<  orderParams_[i].director[2] << "\t"
+         <<  orderParams_[i].angle << "\n";
 
     }
 
-}
+  }
 
 }
 

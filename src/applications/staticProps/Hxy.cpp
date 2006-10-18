@@ -44,7 +44,7 @@
  *
  *  Created by Xiuquan Sun on 05/09/06.
  *  @author  Xiuquan Sun 
- *  @version $Id: Hxy.cpp,v 1.6 2006-05-23 21:12:45 xsun Exp $
+ *  @version $Id: Hxy.cpp,v 1.7 2006-10-18 21:58:47 gezelter Exp $
  *
  */
 
@@ -204,7 +204,8 @@ namespace oopse {
       //wrap the stuntdoubles into a cell     
       for (sd = seleMan_.beginSelected(i); sd != NULL; sd = seleMan_.nextSelected(i)) {
 	Vector3d pos = sd->getPos();
-	currentSnapshot_->wrapVector(pos);
+        if (usePeriodicBoundaryConditions_)
+          currentSnapshot_->wrapVector(pos);
 	sd->setPos(pos);
       } 
       

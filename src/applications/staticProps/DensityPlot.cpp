@@ -165,7 +165,8 @@ void DensityPlot::process() {
                 Vector3d tmp(pos);
                 RealType zdist =j * deltaR_ - halfLen_;
                 tmp[2] += zdist;
-                currentSnapshot_->wrapVector(tmp);
+                if (usePeriodicBoundaryConditions_) 
+                  currentSnapshot_->wrapVector(tmp);
 
                 RealType wrappedZdist = tmp.z() + halfLen_;
                 if (wrappedZdist < 0.0 || wrappedZdist > len_) {

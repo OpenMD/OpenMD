@@ -45,46 +45,47 @@
 #include "applications/staticProps/StaticAnalyser.hpp"
 #include "utils/Tuple.hpp"
 namespace oopse {
-    class SCDElem {
-        public:
-            SCDElem(SimInfo* info, const std::string& sele1, const std::string& sele2, const std::string& sele3);
+  class SCDElem {
+  public:
+    SCDElem(SimInfo* info, const std::string& sele1, const std::string& sele2, const std::string& sele3);
     
-            std::string getSelection1() const {return sele1_;}
-            std::string getSelection2() const {return sele2_;}
-            std::string getSelection3() const {return sele3_;}
-            RealType calcSCD(Snapshot* snapshot);
+    std::string getSelection1() const {return sele1_;}
+    std::string getSelection2() const {return sele2_;}
+    std::string getSelection3() const {return sele3_;}
+    RealType calcSCD(Snapshot* snapshot);
             
-        private:
+  private:
             
-            std::string sele1_;                
-            std::string sele2_;
-            std::string sele3_;
-
-            typedef tuple3<StuntDouble*, StuntDouble*, StuntDouble*> SDTuple3;
+    std::string sele1_;                
+    std::string sele2_;
+    std::string sele3_;
+    bool usePeriodicBoundaryConditions_;
+      
+    typedef tuple3<StuntDouble*, StuntDouble*, StuntDouble*> SDTuple3;
         
-            std::vector<SDTuple3> tuples_;
-    };
+    std::vector<SDTuple3> tuples_;
+  };
 
 
-    class SCDOrderParameter : public StaticAnalyser{
-        public:
-            SCDOrderParameter(SimInfo* info, const std::string& filename, 
-                const std::string& sele1, const std::string& sele2, const std::string& sele3);
+  class SCDOrderParameter : public StaticAnalyser{
+  public:
+    SCDOrderParameter(SimInfo* info, const std::string& filename, 
+                      const std::string& sele1, const std::string& sele2, const std::string& sele3);
 
-            SCDOrderParameter(SimInfo* info, const std::string& filename, 
-                const std::string& molname, int beginIndex, int endIndex);
-            virtual void process();
+    SCDOrderParameter(SimInfo* info, const std::string& filename, 
+                      const std::string& molname, int beginIndex, int endIndex);
+    virtual void process();
 
-        private:
-            void writeSCD();
+  private:
+    void writeSCD();
 
-            std::vector<SCDElem> scdElems_;
-            std::vector<RealType> scdParam_;
+    std::vector<SCDElem> scdElems_;
+    std::vector<RealType> scdParam_;
             
-            Snapshot* currentSnapshot_;
+    Snapshot* currentSnapshot_;
 
             
-    };
+  };
 }
 
 #endif
