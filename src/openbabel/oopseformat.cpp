@@ -185,6 +185,7 @@ struct SameAngle
     unsigned int i;
     const int BUFFLEN = 1024;
     char buffer[BUFFLEN];
+    string str, str1;
     
     
     os << "<OOPSE version=4>" << endl;
@@ -192,17 +193,28 @@ struct SameAngle
     
     for(i = 0; i < mols.size(); ++i) {
       OBMol* pmol = mols[i];
+
+      pmol->ConnectTheDots();
+      pmol->PerceiveBondOrders();
+      //pmol->FindSSSR();
+      //pmol->SetAromaticPerceived();
+      //pmol->Kekulize();
+
       map<OBAtom*, int> atomMap;
       os << "molecule {\n";
       sprintf(buffer, "%d", i);
       os << indentLevel1 << "name = " << "\"" << molPrefix << buffer << "\"" << ";\n";
-      
-      
+           
       //atom
       int ai = 0;
       FOR_ATOMS_OF_MOL(atom, *pmol ) {
+        str = atom->GetType();
+        ttab.SetFromType("INT");
+        ttab.SetToType("INT");
+        ttab.Translate(str1,str);
         os << indentLevel1 << "atom[" << ai << "] {\n";
-        os << indentLevel2 << "type = " << "\"" << etab.GetSymbol(atom->GetAtomicNum()) << "\"" << ";\n";
+        // os << indentLevel2 << "type = " << "\"" << etab.GetSymbol(atom->GetAtomicNum()) << "\"" << ";\n";
+        os << indentLevel2 << "type = " << "\"" << str1 << "\"" << ";\n";
         os << indentLevel1 << "}\n";
         atomMap[&(*atom)] = ai++;
       }        
@@ -281,7 +293,6 @@ struct SameAngle
     os << "    <StuntDoubles>" << endl;
 
     OBAtom *atom;
-    string str,str1;
     
     for(vector<int>::iterator i = indices.begin();i != indices.end(); ++i) {     
       atom = mol.GetAtom(*i);
