@@ -13,12 +13,51 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 ***********************************************************************/
 
-#include "amberformat.hpp"
+#include "mol.hpp"
+#include "obconversion.hpp"
+#include "obmolecformat.hpp"
 
 using namespace std;
 namespace OpenBabel
 {
 
+class AmberPrepFormat : public OBMoleculeFormat
+{
+public:
+    //Register this format type ID
+    AmberPrepFormat()
+    {
+        OBConversion::RegisterFormat("prep",this);
+    }
+
+  virtual const char* Description() //required
+  {
+    return
+      "Amber Prep format\n \
+       Read Options e.g. -as\n\
+        s  Output single bonds only\n\
+        b  Disable bonding entirely\n\n";
+  };
+
+  virtual const char* SpecificationURL()
+  {return "http://amber.scripps.edu/doc/prep.html";};
+
+    //Flags() can return be any the following combined by | or be omitted if none apply
+    // NOTREADABLE  READONEONLY  NOTWRITABLE  WRITEONEONLY
+    virtual unsigned int Flags()
+    {
+        return NOTWRITABLE;
+    };
+
+    ////////////////////////////////////////////////////
+    /// The "API" interface functions
+    virtual bool ReadMolecule(OBBase* pOb, OBConversion* pConv);
+};
+
+//Make an instance of the format class
+AmberPrepFormat theAmberPrepFormat;
+
+/////////////////////////////////////////////////////////////////
 bool AmberPrepFormat::ReadMolecule(OBBase* pOb, OBConversion* pConv)
 {
 

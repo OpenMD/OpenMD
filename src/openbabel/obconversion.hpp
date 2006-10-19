@@ -41,12 +41,11 @@ GNU General Public License for more details.
 #include <string>
 #include <vector>
 #include <map>
-#include <typeinfo>
 
-//#include "dlhandler.h"
+#include "dlhandler.hpp"
 
 // These macros are used in DLL builds. If they have not
-// been set in babelconfig.h, define them as nothing.
+// been set in config.h, define them as nothing.
 #ifndef OBCONV
 	#define OBCONV
 #endif
@@ -89,7 +88,7 @@ public:
 	/// Reads a single object.
 	/// Does not make a new object on the heap; 
 	/// can be used with a pointer to an chem object on the heap or the stack.
-	virtual bool ReadMolecule(OBBase* pOb, OBConversion* pConv)
+      virtual bool ReadMolecule(OBBase* /*pOb*/, OBConversion* /*pConv*/)
 		{ std::cerr << "Not a valid input format"; return false;}
 
 	/// @brief The "Convert" interface Read function.
@@ -97,7 +96,7 @@ public:
 	/// Possibly reads multiple new objects on the heap and subjects them 
 	/// to its DoTransformations() function, which may delete them again. 
 	/// Sends result to pConv->AddChemObject()
-	virtual bool ReadChemObject(OBConversion* pConv)
+      virtual bool ReadChemObject(OBConversion* /*pConv*/)
 		{ std::cerr << "Not a valid input format"; return false;}
 
 	/// @brief The "API" interface Write function.
@@ -106,7 +105,7 @@ public:
 	/// Does not delete the object; 
 	/// can be used with a pointer to an chem object on the heap or the stack.
 	/// Returns false on error.
-	virtual bool WriteMolecule(OBBase* pOb, OBConversion* pConv)
+      virtual bool WriteMolecule(OBBase* /*pOb*/, OBConversion* /*pConv*/)
 		{ std::cerr << "Not a valid output format"; return false;}
 
 	/// @brief The "Convert" interface Write function.
@@ -114,7 +113,7 @@ public:
 	/// Writes a single object
 	/// Deletes the object after writing 
 	/// Returns false on error
-	virtual bool WriteChemObject(OBConversion* pConv)
+      virtual bool WriteChemObject(OBConversion* /*pConv*/)
 		{ std::cerr << "Not a valid output format"; return false;}
 
 	/// @brief Information on this format. Printed out in response to -Hxxx option where xxx id the id of the format.
@@ -151,7 +150,7 @@ public:
 	/// @brief Skip past first n objects in input stream (or current one with n=0)
 
 	/// Returns 1 on success, -1 on error and 0 if not implemented 
-	virtual int SkipObjects(int n, OBConversion* pConv)
+      virtual int SkipObjects(int /*n*/, OBConversion* /*pConv*/)
 	{
 		return 0; //shows not implemented in the format class
 	};
@@ -380,6 +379,7 @@ protected:
 	bool		  MoreFilesToCome;
 	bool		  OneObjectOnly;
 	bool		  ReadyToInput;
+	bool              CheckedForGzip; ///< input stream was already checked if it is gzip-encoded
 	static int FormatFilesLoaded;
 	OBBase*		  pOb1;
 	std::streampos wInpos; ///<position in the input stream of the object being written

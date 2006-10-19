@@ -30,7 +30,7 @@ namespace OpenBabel
 /*! \class vector3
    \brief Represents a vector in the 3-dimensional real space.
 
-The vector3 class was designed to simplify operations with doubleing
+The vector3 class was designed to simplify operations with floating
 point coordinates. To this end many of the common operations have been
 overloaded for simplicity. Vector addition, subtraction, scalar
 multiplication, dot product, cross product, magnitude and a number of
@@ -142,7 +142,7 @@ OBAPI int operator!= ( const vector3& v1, const vector3& v2 )
 
   \warning If length() is very close to zero, but not == 0.0,
   this method may behave in unexpected ways and return almost
-  random results; details may depend on your particular doubleing
+  random results; details may depend on your particular floating
   point implementation. The use of this method is therefore
   highly discouraged, unless you are certain that length() is in
   a reasonable range, away from 0.0 (Stefan Kebekus)
@@ -192,7 +192,7 @@ OBAPI vector3 cross ( const vector3& v1, const vector3& v2 )
   length() of the two vectors is very close to 0.0, but not ==
   0.0, this method may behave in unexpected ways and return
   almost random results; details may depend on your particular
-  doubleing point implementation. The use of this method is
+  floating point implementation. The use of this method is
   therefore highly discouraged, unless you are certain that the
   length()es are in a reasonable range, away from 0.0 (Stefan
   Kebekus)
@@ -223,6 +223,17 @@ OBAPI double vectorAngle ( const vector3& v1, const vector3& v2 )
 
     return((RAD_TO_DEG * acos(dp)));
 }
+
+/*!  This function calculates the torsion angle of three vectors, represented
+  by four points A--B--C--D, i.e. B and C are vertexes, but none of A--B,
+  B--C, and C--D are colinear.  A "torsion angle" is the amount of "twist"
+  or torsion needed around the B--C axis to bring A--B into the same plane
+  as B--C--D.  The torsion is measured by "looking down" the vector B--C so
+  that B is superimposed on C, then noting how far you'd have to rotate
+  A--B to superimpose A over D.  Angles are + in the anticlockwise
+  direction.  The operation is symmetrical in that if you reverse the image
+  (look from C to B and rotate D over A), you get the same answer.
+*/
 
 OBAPI double CalcTorsionAngle(const vector3 &a, const vector3 &b,
                         const vector3 &c, const vector3 &d)

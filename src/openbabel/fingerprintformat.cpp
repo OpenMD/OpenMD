@@ -10,11 +10,52 @@ but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 ***********************************************************************/
-#include "fingerprintformat.hpp"
+#include "mol.hpp"
+#include "obconversion.hpp"
+#include "obmolecformat.hpp"
+#include "fingerprint.hpp"
+#include <vector>
+#include <string>
+#include <iomanip>
 
 using namespace std;
-namespace OpenBabel {
+namespace OpenBabel
+{
 
+/// \brief Constructs and displays fingerprints. For details see OBFingerprint class
+class FingerprintFormat : public OBMoleculeFormat
+{
+public:
+	//Register this format type ID
+	FingerprintFormat() {OBConversion::RegisterFormat("fpt",this);}
+
+	virtual const char* Description() //required
+	{ return
+"Fingerprint format\n \
+Constructs and displays fingerprints and (for multiple input objects)\n \
+the Tanimoto coefficient and whether a superstructure of the first object\n \
+Options e.g. -xfFP3 -xn128\n \
+ f<id> fingerprint type\n \
+ N# fold to specified number of bits, 32, 64, 128, etc.\n \
+ h  hex output when multiple molecules\n \
+ F  displays the available fingerprint types\n \
+";
+	};
+
+	virtual unsigned int Flags(){return NOTREADABLE;};
+	virtual bool WriteMolecule(OBBase* pOb, OBConversion* pConv);
+
+private:
+	vector<unsigned int> firstfp;
+	string firstname;
+	bool IsPossibleSubstructure(vector<unsigned int>Mol, vector<unsigned int>Frag);
+};
+
+////////////////////////////////////////////////////
+//Make an instance of the format class
+FingerprintFormat theFingerprintFormat;
+
+//*******************************************************************
 bool FingerprintFormat::WriteMolecule(OBBase* pOb, OBConversion* pConv)
 {
 	ostream &ofs = *pConv->GetOutStream();
@@ -69,7 +110,7 @@ bool FingerprintFormat::WriteMolecule(OBBase* pOb, OBConversion* pConv)
 
 	if(hexoutput)
 	{
-		int i, bitsset=0;
+        unsigned int i, bitsset=0;
 		for (i=0;i<fptvec.size();++i)
 		{
 			int wd = fptvec[i];
@@ -114,7 +155,7 @@ bool FingerprintFormat::WriteMolecule(OBBase* pOb, OBConversion* pConv)
 bool FingerprintFormat::IsPossibleSubstructure(vector<unsigned int>Mol, vector<unsigned int>Frag)
 {
 	//Returns false if Frag is definitely NOT a substructure of Mol
-	int i;
+    unsigned int i;
 	for (i=0;i<Mol.size();++i)
 		if((Mol[i] & Frag[i]) ^ Frag[i]) return false;
 	return true;

@@ -37,7 +37,7 @@ extern OBAtomTyper atomtyper;
 OBPhModel::OBPhModel()
 {
     _init = false;
-    STR_DEFINE(_dir, FRC_PATH);
+    STR_DEFINE(_dir, FRC_PATH );
     _envvar = "FORCE_PARAM_PATH";
     _filename = "phmodel.txt";
     _subdir = "data";

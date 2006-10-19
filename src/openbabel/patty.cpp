@@ -2,7 +2,7 @@
 patty.cpp - Programmable atom typer.
  
 Copyright (C) 1998-2001 by OpenEye Scientific Software, Inc.
-Some portions Copyright (C) 2001-2005 by Geoffrey R. Hutchison
+Some portions Copyright (C) 2001-2006 by Geoffrey R. Hutchison
  
 This file is part of the Open Babel project.
 For more information, see <http://openbabel.sourceforge.net/>
@@ -68,30 +68,30 @@ void patty::read_rules(const string &infile)
     vector<string> vs;
     char buffer[BUFF_SIZE];
     char tmp_str[BUFF_SIZE];
-    char patty_dir[BUFF_SIZE];
+    string patty_dir;
     OBSmartsPattern *sp;
 
     ifs.open(infile.c_str());
     ifsP= &ifs;
     if (!ifs)
     {
-        if (getenv("FORCE_PARAM_PATH") == NULL)
+        if (getenv("BABEL_DATADIR") == NULL)
         {
 #ifdef HAVE_SSTREAM
 	  stringstream errorMsg;
 #else
 	  strstream errorMsg;
 #endif
-	  errorMsg << "The FORCE_PARAM_PATH environment variable is not defined" << endl;
+	  errorMsg << "The BABEL_DATADIR environment variable is not defined" << endl;
           errorMsg << "Please define it so the program can find " << infile << endl;
 	  obErrorLog.ThrowError(__func__, errorMsg.str(), obWarning);
 	    //            exit(0);
         }
         else
-            strcpy(patty_dir,getenv("FORCE_PARAM_PATH"));
-        strcat(patty_dir,FILE_SEP_CHAR);
-        strcat(patty_dir,infile.c_str());
-        ifs1.open(patty_dir);
+            patty_dir = getenv("BABEL_DATADIR");
+        patty_dir += FILE_SEP_CHAR;
+        patty_dir += infile;
+        ifs1.open(patty_dir.c_str());
         ifsP= &ifs1;
         //     if (!ifs1)
         //    {
@@ -118,7 +118,8 @@ void patty::read_rules(const string &infile)
             tokenize(vs,buffer," \t\n");
             if (vs.size() >= 2)
             {
-                strcpy(tmp_str,vs[0].c_str());
+                strncpy(tmp_str,vs[0].c_str(), sizeof(tmp_str) - 1);
+		tmp_str[sizeof(tmp_str) - 1] = '\0';
                 sp = new OBSmartsPattern;
                 sp->Init(tmp_str);
                 _sp.push_back(sp);
@@ -145,7 +146,8 @@ void patty::assign_rules(std::vector<std::string> &rules)
             tokenize(vs,buffer," \t\n");
             if (vs.size() >= 2)
             {
-                strcpy(tmp_str,vs[0].c_str());
+                strncpy(tmp_str,vs[0].c_str(), sizeof(tmp_str) - 1);
+		tmp_str[sizeof(tmp_str) - 1] = '\0';
                 sp = new OBSmartsPattern;
                 sp->Init(tmp_str);
                 _sp.push_back(sp);

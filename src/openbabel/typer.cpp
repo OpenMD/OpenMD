@@ -2,7 +2,7 @@
 typer.cpp - Open Babel atom typer.
  
 Copyright (C) 1998-2001 by OpenEye Scientific Software, Inc.
-Some portions Copyright (C) 2001-2005 by Geoffrey R. Hutchison
+Some portions Copyright (C) 2001-2006 by Geoffrey R. Hutchison
  
 This file is part of the Open Babel project.
 For more information, see <http://openbabel.sourceforge.net/>
@@ -52,7 +52,7 @@ atom->GetHyb();
 OBAtomTyper::OBAtomTyper()
 {
     _init = false;
-    STR_DEFINE(_dir, FRC_PATH);
+    STR_DEFINE(_dir, FRC_PATH );
     _envvar = "FORCE_PARAM_PATH";
     _filename = "atomtyp.txt";
     _subdir = "data";
@@ -515,7 +515,7 @@ void OBAtomTyper::CorrectAromaticNitrogens(OBMol &mol)
 OBAromaticTyper::OBAromaticTyper()
 {
     _init = false;
-    STR_DEFINE(_dir, FRC_PATH);
+    STR_DEFINE(_dir, FRC_PATH );
     _envvar = "FORCE_PARAM_PATH";
     _filename = "aromatic.txt";
     _subdir = "data";
@@ -531,9 +531,13 @@ void OBAromaticTyper::ParseLine(const char *buffer)
         return;
     vector<string> vs;
     tokenize(vs,buffer);
-    if (!vs.empty() && vs.size() == 3)
+    if (vs.empty())
+      return;
+
+    if (vs.size() == 3)
     {
-        strcpy(temp_buffer,vs[0].c_str());
+        strncpy(temp_buffer,vs[0].c_str(), BUFF_SIZE - 1);
+	temp_buffer[BUFF_SIZE - 1] = '\0';
         sp = new OBSmartsPattern();
         if (sp->Init(temp_buffer))
         {
@@ -650,6 +654,15 @@ void OBAromaticTyper::AssignAromaticFlags(OBMol &mol)
     for (atom = mol.BeginAtom(i);atom;atom = mol.NextAtom(i))
         if (_root[atom->GetIdx()])
             CheckAromaticity(atom,20);
+
+    // cleanup -- check for ring bonds where both atoms are aromatic
+    // but for some reason the bond is not (e.g., between a fused system)
+    for (bond = mol.BeginBond(j);bond;bond = mol.NextBond(j))
+      {
+	if (bond->IsInRing() && (bond->GetBeginAtom())->IsAromatic() 
+	    && (bond->GetEndAtom())->IsAromatic())
+	  bond->SetAromatic();
+      }
 
     //for (atom = mol.BeginAtom(i);atom;atom = mol.NextAtom(i))
     //	  if (atom->IsAromatic())

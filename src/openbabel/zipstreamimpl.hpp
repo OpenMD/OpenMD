@@ -72,6 +72,7 @@ basic_zip_streambuf<charT, traits>::basic_zip_streambuf(ostream_reference ostrea
     _err=deflateInit2(&_zip_stream, level, Z_DEFLATED,
                       window_size, memory_level,
                       static_cast<int>(strategy));
+
     this->setp( &(_buffer[0]), &(_buffer[_buffer.size()-1]));
 }
 
@@ -122,7 +123,7 @@ basic_zip_streambuf<charT, traits>::overflow(int_type c)
     }
     if (zip_to_stream(this->pbase(), w))
     {
-        setp(this->pbase(), this->epptr() - 1);
+        this->setp(this->pbase(), this->epptr() - 1);
         return c;
     }
     else
@@ -173,7 +174,8 @@ std::streamsize basic_zip_streambuf<charT, traits>::flush(void)
     }
     while(_err == Z_OK);
 
-    _ostream.flush();
+    if(&_ostream)
+			_ostream.flush();
 
     return total_written_byte_size;
 }

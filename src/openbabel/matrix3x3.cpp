@@ -41,7 +41,7 @@ namespace OpenBabel
  Rotating points in space can be performed by a vector-matrix
  multiplication. The matrix3x3 class is designed as a helper to the
  vector3 class for rotating points in space. The rotation matrix may be
- initialised by passing in the array of doubleing point values, by
+ initialised by passing in the array of floating point values, by
  passing euler angles, or a rotation vector and angle of rotation about
  that vector. Once set, the matrix3x3 class can be used to rotate
  vectors by the overloaded multiplication operator. The following
@@ -102,7 +102,7 @@ void matrix3x3::SetupRotMat(double phi,double theta,double psi)
   generate the 0-matrix. If the length of the axis is close to
   zero, but not == 0.0, this method may behave in unexpected
   ways and return almost random results; details may depend on
-  your particular doubleing point implementation. The use of this
+  your particular floating point implementation. The use of this
   method is therefore highly discouraged, unless you are certain
   that the length is in a reasonable range, away from 0.0
   (Stefan Kebekus)
@@ -137,7 +137,7 @@ void matrix3x3::PlaneReflection(const vector3 &norm)
   generate the 0-matrix. If the length of the axis is close to
   zero, but not == 0.0, this method may behave in unexpected ways
   and return almost random results; details may depend on your
-  particular doubleing point implementation. The use of this method
+  particular floating point implementation. The use of this method
   is therefore highly discouraged, unless you are certain that the
   length is in a reasonable range, away from 0.0 (Stefan
   Kebekus)
@@ -177,12 +177,14 @@ void matrix3x3::RotAboutAxisByAngle(const vector3 &v,const double angle)
 #undef y
 #undef z
 
-void matrix3x3::SetColumn(int col, const vector3 &v)
+void matrix3x3::SetColumn(int col, const vector3 &v) throw(OBError)
 {
     if (col > 2)
     {
-        obErrorLog.ThrowError(__func__,
-                              "The method was called with col > 2.", obError);
+        OBError er("matrix3x3::SetColumn(int col, const vector3 &v)",
+                   "The method was called with col > 2.",
+                   "This is a programming error in your application.");
+        throw er;
     }
 
     ele[0][col] = v.x();
@@ -190,12 +192,14 @@ void matrix3x3::SetColumn(int col, const vector3 &v)
     ele[2][col] = v.z();
 }
 
-void matrix3x3::SetRow(int row, const vector3 &v)
+void matrix3x3::SetRow(int row, const vector3 &v) throw(OBError)
 {
     if (row > 2)
     {
-        obErrorLog.ThrowError(__func__,
-                              "The method was called with row > 2.", obError);
+        OBError er("matrix3x3::SetRow(int row, const vector3 &v)",
+                   "The method was called with row > 2.",
+                   "This is a programming error in your application.");
+        throw er;
     }
 
     ele[row][0] = v.x();
@@ -203,23 +207,27 @@ void matrix3x3::SetRow(int row, const vector3 &v)
     ele[row][2] = v.z();
 }
 
-vector3 matrix3x3::GetColumn(unsigned int col)
+vector3 matrix3x3::GetColumn(unsigned int col) const throw(OBError)
 {
     if (col > 2)
     {
-        obErrorLog.ThrowError(__func__,
-                              "The method was called with col > 2.", obError);
+        OBError er("matrix3x3::GetColumn(unsigned int col) const",
+                   "The method was called with col > 2.",
+                   "This is a programming error in your application.");
+        throw er;
     }
 
     return vector3(ele[0][col], ele[1][col], ele[2][col]);
 }
 
-vector3 matrix3x3::GetRow(unsigned int row)
+vector3 matrix3x3::GetRow(unsigned int row) const throw(OBError)
 {
     if (row > 2)
     {
-        obErrorLog.ThrowError(__func__,
-                              "The method was called with row > 2.", obError);
+        OBError er("matrix3x3::GetRow(unsigned int row) const",
+                   "The method was called with row > 2.",
+                   "This is a programming error in your application.");
+        throw er;
     }
 
     return vector3(ele[row][0], ele[row][1], ele[row][2]);
@@ -281,18 +289,20 @@ vector3 &vector3::operator *= (const matrix3x3 &m)
 	
   \warning If the determinant is close to zero, but not == 0.0,
   this method may behave in unexpected ways and return almost
-  random results; details may depend on your particular doubleing
+  random results; details may depend on your particular floating
   point implementation. The use of this method is therefore highly
   discouraged, unless you are certain that the determinant is in a
   reasonable range, away from 0.0 (Stefan Kebekus)
 */
-matrix3x3 matrix3x3::inverse(void)
+matrix3x3 matrix3x3::inverse(void) const throw(OBError)
 {
     double det = determinant();
     if (fabs(det) <= 1e-6)
     {
-        obErrorLog.ThrowError(__func__,
-                              "The method was called on a matrix with |determinant| <= 1e-6.", obError);
+        OBError er("matrix3x3::invert(void)",
+                   "The method was called on a matrix with |determinant| <= 1e-6.",
+                   "This is a runtime or a programming error in your application.");
+        throw er;
     }
 
     matrix3x3 inverse;
@@ -425,14 +435,16 @@ bool matrix3x3::isUnitMatrix(void) const
   \endcode
   
 */
-matrix3x3 matrix3x3::findEigenvectorsIfSymmetric(vector3 &eigenvals)
+matrix3x3 matrix3x3::findEigenvectorsIfSymmetric(vector3 &eigenvals) const throw(OBError)
 {
     matrix3x3 result;
 
     if (!isSymmetric())
     {
-        obErrorLog.ThrowError(__func__,
-                              "The method was called on a matrix that was not symmetric, i.e. where isSymetric() == false.", obError);
+        OBError er("matrix3x3::findEigenvectorsIfSymmetric(vector3 &eigenvals) const throw(OBError)",
+                   "The method was called on a matrix that was not symmetric, i.e. where isSymetric() == false.",
+                   "This is a runtime or a programming error in your application.");
+        throw er;
     }
 
     double d[3];

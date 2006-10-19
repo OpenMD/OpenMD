@@ -76,6 +76,9 @@ public:
     //! Constructor
     OBResidue(void);
     //! Copy constructor
+    //! \warning Currently does not copy all associated OBGenericData
+    //! This requires a (minor) API change, and will thus only be fixed in 2.1
+    //! or later releases.
     OBResidue(const OBResidue &);
     //! Destructor
     virtual ~OBResidue(void);
@@ -343,7 +346,10 @@ public:
     //! \return the coordinates as a double*
     double     *GetCoordinate()
     {
+      if (_c)
         return(&(*_c)[_cidx]);
+      else
+	return NULL;
     }
     //! \return the coordinates as a vector3 object
     vector3   &GetVector();
@@ -639,6 +645,10 @@ public:
     //@{
     bool IsAromatic() const;
     bool IsInRing() const;
+    //! Is the bond a rotatable bond?
+    //!  Currently, this function classifies any bond with at least one heavy
+    //!  atom, no sp-hybrid atoms (e.g., a triple bond somewhere) not in a ring
+    //!  as a potential rotor. No other bond typing is attempted.
     bool IsRotor();
     bool IsAmide();
     bool IsPrimaryAmide();
@@ -764,6 +774,9 @@ public:
     //! Constructor
     OBMol();
     //! Copy constructor
+    //! \warning Currently does not copy all associated OBGenericData
+    //! This requires a (minor) API change, and will thus only be fixed in 2.1
+    //! or later releases.
     OBMol(const OBMol &);
     //! Destructor
     virtual ~OBMol();
@@ -855,7 +868,7 @@ public:
     unsigned int NumHvyAtoms();
     //! \return the number of residues (i.e. OBResidue substituents)
     unsigned int NumResidues() const      { return(_residue.size()); }
-    //! \return the number of rotatble bonds
+    //! \return the number of rotatble bonds. See OBBond::IsRotor() for details
     unsigned int NumRotors();
     
     OBAtom      *GetAtom(int);

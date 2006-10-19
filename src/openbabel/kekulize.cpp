@@ -59,20 +59,19 @@ void OBMol::NewPerceiveKekuleBonds()
   OBBond *bond;
   std::vector<OBEdgeBase*>::iterator bi;
   std::vector<int> electron;
-  int BO;
-  int sume, orden, bestorden, bestatom;
+  int sume, orden, bestatom;
+  int bestorden = 99;
   // Init the kekulized bonds
   unsigned i;
-	for(i=0; i< NumBonds(); i++ ) {
-    bond = GetBond(i);
-    BO = bond->GetBO();
-    switch (BO)
+  FOR_BONDS_OF_MOL(bond, *this)
     {
-    case 1: bond->SetKSingle(); break;
-    case 2: bond->SetKDouble(); break;
-    case 3: bond->SetKTriple(); break;
+      switch (bond->GetBO())
+	{
+	case 1: bond->SetKSingle(); break;
+	case 2: bond->SetKDouble(); break;
+	case 3: bond->SetKTriple(); break;
+	}
     }
-  }
 
   // Find all the groups of aromatic cycle
   for(i=1; i<= NumAtoms(); i++ ) {
@@ -347,6 +346,12 @@ void OBMol::start_kekulize( std::vector <OBAtom*> &cycle, std::vector<int> &elec
     bond = GetBond(i);    
     // std::cout << "bond " << bond->GetBeginAtomIdx() << " " << bond->GetEndAtomIdx() << " ";
     if (bond->GetBO()==5 && bcurrentState[i] == DOUBLE) {
+      if ( (bond->GetBeginAtom())->IsSulfur()
+           && bond->GetEndAtom()->IsSulfur() ) {
+        // no double bonds between aromatic sulfur atoms -- PR#1504089
+        continue;
+      }
+
       bond->SetKDouble();
       bond->SetBO(2);
       //std::cout << "double\n";

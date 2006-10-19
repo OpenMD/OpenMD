@@ -154,7 +154,7 @@ class basic_unzip_streambuf :
 public:
     typedef std::basic_istream<charT,traits>& istream_reference;
     typedef unsigned char byte_type;
-    typedef charT          char_type;
+    typedef char          char_type;
     typedef byte_type* byte_buffer_type;
     typedef std::vector<byte_type> byte_vector_type;
     typedef std::vector<char_type> char_vector_type;

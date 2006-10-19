@@ -78,7 +78,7 @@ public:
 			return((double)andbits/(double)orbits);
 	};
 	
-	static const unsigned int bitsperint;// = 8 * sizeof(unsigned int);
+	static unsigned int Getbitsperint(){ return bitsperint; }
 
 private:
 	///Function object to set bits
@@ -100,7 +100,9 @@ protected:
 	///See Marshall Cline's C++ FAQ Lite document, www.parashift.com/c++-faq-lite/". 
 	static FPMapType& FPtsMap()
 	{
-		static FPMapType* fptm = new FPMapType;
+		static FPMapType* fptm = NULL;
+		if (!fptm)
+		  fptm = new FPMapType;
 		return *fptm;
 	};
 
@@ -113,6 +115,8 @@ protected:
 	
 private:
 	static OBFingerprint* _pDefault;
+	static const unsigned int bitsperint;// = 8 * sizeof(unsigned int);
+	static int rubbish;
 };
 
 
@@ -135,6 +139,9 @@ struct OBAPI FptIndex
 	FptIndexHeader header;
 	std::vector<unsigned int> fptdata;
 	std::vector<unsigned int> seekdata;
+	bool Read(std::istream* pIndexstream);
+	///\brief Returns pointer to FP used or NULL and an error message
+	OBFingerprint* CheckFP();
 };
 
 /// \brief Class to search fingerprint index files
@@ -172,8 +179,13 @@ class OBAPI FastSearchIndexer
 {
 //see end of cpp file for detailed documentation
 public:
+	///\brief Constructor with a new index
 	FastSearchIndexer(std::string& datafilename, std::ostream* os, std::string& fpid,
 			int FptBits=0);
+
+	///\brief Constructor using existing index
+	FastSearchIndexer(FptIndex* pindex, std::ostream* os);
+	
 	~FastSearchIndexer();
 
 	///\brief Called for each object
