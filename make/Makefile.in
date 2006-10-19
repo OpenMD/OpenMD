@@ -66,6 +66,7 @@ Applications = \
 	applications/randomBuilder \
 	applications/nanoRodBuilder \
 	applications/nanoparticleBuilder \
+	applications/velocitizer \
 	applications/atom2md \
 	applications/hydrodynamics \
 	applications/utilities

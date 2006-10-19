@@ -103,11 +103,8 @@ namespace oopse {
     Molecule::IntegrableObjectIterator j;
     Molecule * mol;
     StuntDouble * integrableObject;
-    
-    
-    
+        
     kebar = kb * temperature * info_->getNdfRaw() / (2.0 * info_->getNdf());
-    
     for( mol = info_->beginMolecule(i); mol != NULL;
 	 mol = info_->nextMolecule(i) ) {
       for( integrableObject = mol->beginIntegrableObject(j);
@@ -125,7 +122,6 @@ namespace oopse {
 	for( int k = 0; k < 3; k++ ) {
 	  aVel[k] = vbar * randNumGen_->randNorm(0.0, 1.0);
 	}
-	
 	integrableObject->setVel(aVel);
 	
 	if (integrableObject->isDirectional()) {
@@ -186,61 +182,60 @@ namespace oopse {
   }
   
    
-   void Velocitizer::removeAngularDrift() {
-      // Get the Center of Mass drift velocity.
+  void Velocitizer::removeAngularDrift() {
+    // Get the Center of Mass drift velocity.
       
-      Vector3d vdrift;
-      Vector3d com; 
+    Vector3d vdrift;
+    Vector3d com; 
       
-      info_->getComAll(com,vdrift);
+    info_->getComAll(com,vdrift);
          
-      Mat3x3d inertiaTensor;
-      Vector3d angularMomentum;
-      Vector3d omega;
+    Mat3x3d inertiaTensor;
+    Vector3d angularMomentum;
+    Vector3d omega;
       
       
       
-      info_->getInertiaTensor(inertiaTensor,angularMomentum);
-      // We now need the inverse of the inertia tensor.
-      /*      
-      std::cerr << "Angular Momentum before is "
-		<< angularMomentum <<  std::endl;
-      std::cerr << "Inertia Tensor before is "
-		<< inertiaTensor <<  std::endl;
-      */
+    info_->getInertiaTensor(inertiaTensor,angularMomentum);
+    // We now need the inverse of the inertia tensor.
+    /*
+    std::cerr << "Angular Momentum before is "
+              << angularMomentum <<  std::endl;
+    std::cerr << "Inertia Tensor before is "
+              << inertiaTensor <<  std::endl;
+    */  
+    inertiaTensor =inertiaTensor.inverse();
+    /*
+    std::cerr << "Inertia Tensor after inverse is "
+              << inertiaTensor <<  std::endl;
+    */
+    omega = inertiaTensor*angularMomentum;
       
-      inertiaTensor =inertiaTensor.inverse();
-      /*
-       std::cerr << "Inertia Tensor after inverse is "
-		<< inertiaTensor <<  std::endl;
-      */
-      omega = inertiaTensor*angularMomentum;
+    SimInfo::MoleculeIterator i;
+    Molecule::IntegrableObjectIterator j;
+    Molecule * mol;
+    StuntDouble * integrableObject;
+    Vector3d tempComPos;
       
-      SimInfo::MoleculeIterator i;
-      Molecule::IntegrableObjectIterator j;
-      Molecule * mol;
-      StuntDouble * integrableObject;
-      Vector3d tempComPos;
-      
-      //  Corrects for the center of mass angular drift.
-      // sums all the angular momentum and divides by total mass.
-      for( mol = info_->beginMolecule(i); mol != NULL;
-           mol = info_->nextMolecule(i) ) {
-         for( integrableObject = mol->beginIntegrableObject(j);
-              integrableObject != NULL;
-              integrableObject = mol->nextIntegrableObject(j) ) {
-            tempComPos = integrableObject->getPos()-com;
-            integrableObject->setVel((integrableObject->getVel() - vdrift)-cross(omega,tempComPos));
-         }
+    //  Corrects for the center of mass angular drift.
+    // sums all the angular momentum and divides by total mass.
+    for( mol = info_->beginMolecule(i); mol != NULL;
+         mol = info_->nextMolecule(i) ) {
+      for( integrableObject = mol->beginIntegrableObject(j);
+           integrableObject != NULL;
+           integrableObject = mol->nextIntegrableObject(j) ) {
+        tempComPos = integrableObject->getPos()-com;
+        integrableObject->setVel((integrableObject->getVel() - vdrift)-cross(omega,tempComPos));
       }
+    }
       
-      angularMomentum = info_->getAngularMomentum();
-      /*
-      std::cerr << "Angular Momentum after is "
-         << angularMomentum <<  std::endl;
-      */
+    angularMomentum = info_->getAngularMomentum();
+    /*
+    std::cerr << "Angular Momentum after is "
+              << angularMomentum <<  std::endl;
+    */
       
-   }
+  }
    
    
    

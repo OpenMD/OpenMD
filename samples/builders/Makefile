@@ -6,8 +6,13 @@ Main      =
 
 ScriptFiles = runMe
 
-SampleFiles = lj.md   \
-              three_component.md   \
+SampleFiles = bimetallic.md \
+		gold.md \
+		lj.md \
+		metals.md \
+		one_component.md \
+		three_component.md \
+
 
 
 DEV_ROOT=../..
