@@ -76,7 +76,7 @@
 #include "openbabel/pdbformat.hpp"
 //#include "openbabel/povrayformat.hpp"
 //#include "openbabel/smilesformat.hpp"
-#include "openbabel/tinkerformat.hpp"
+//#include "openbabel/tinkerformat.hpp"
 #include "openbabel/xyzformat.hpp"
 
 
@@ -131,7 +131,7 @@ namespace oopse {
     static OpenBabel::PDBFormat pdbFormatInstance;
     //static OpenBabel::PovrayFormat povaryFormatInstance;
     //static OpenBabel::SMIFormat smilesFormatInstance;
-    static OpenBabel::TinkerFormat tinkerFormatInstance;
+    //static OpenBabel::TinkerFormat tinkerFormatInstance;
     static OpenBabel::XYZFormat xyzFormatInstance;    
   }
   
