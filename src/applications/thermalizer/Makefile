@@ -1,14 +1,14 @@
-Package = applications/velocitizer
+Package = applications/thermalizer
 
 Source    = \
-	velocitizerCmd.c \
-	velocitizer.cpp \
+	thermalizerCmd.c \
+	thermalizer.cpp \
 	
 BuiltParallelExe = 0
 
 RmiSource =
 
-Main      = velocitizer
+Main      = thermalizer
 
 DEV_ROOT=../../..
 include $(DEV_ROOT)/make/Makefile

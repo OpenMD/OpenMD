@@ -2,7 +2,7 @@
 # for parsing command line arguments useing getopt and getoptlong.
 # gengetopt is available from:
 #  http://www.gnu.org/software/gengetopt/gengetopt.html
-package "velocitizer"
+package "thermalizer"
 version "1.0"
 purpose "Resamples the velocities for all the integrable objects in an OOPSE file from a Maxwell-Boltzmann distribution."
 

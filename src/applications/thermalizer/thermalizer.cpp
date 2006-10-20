@@ -40,7 +40,7 @@
  */
 
 /**
- * @file velocitizer.cpp
+ * @file thermalizer.cpp
  * @author Dan Gezelter
  * @date 09/20/2006
  * @version 1.0
@@ -55,7 +55,7 @@
 #include <map>
 #include <fstream>
 
-#include "applications/velocitizer/velocitizerCmd.h"
+#include "applications/thermalizer/thermalizerCmd.h"
 #include "integrators/Velocitizer.hpp"
 #include "brains/Register.hpp"
 #include "brains/SimInfo.hpp"
