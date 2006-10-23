@@ -13603,7 +13603,7 @@ ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ex
 ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
     save_CXXFLAGS="$CXXFLAGS"
-    CXXFLAGS="$CXXFLAGS -I$CGAL_INCLDIR -I$CGAL_INCLCONFDIR"
+    CXXFLAGS="$CXXFLAGS $CGAL_CXXFLAGS -I$CGAL_INCLDIR -I$CGAL_INCLCONFDIR"
     if test "${ac_cv_header_CGAL_Cartesian_h+set}" = set; then
   echo "$as_me:$LINENO: checking for CGAL/Cartesian.h" >&5
 echo $ECHO_N "checking for CGAL/Cartesian.h... $ECHO_C" >&6
@@ -13800,7 +13800,7 @@ echo "${ECHO_T}no" >&6
 
       CGAL_LIBS="$CGAL_LIBS -lm"
 
-      CGAL_CXXFLAGS="-ftemplate-depth-50"
+      CGAL_CXXFLAGS="-ftemplate-depth-50 $CGAL_CXXFLAGS"
 
       echo "$as_me:$LINENO: result: CGAL_USES_LEDA=     $CGAL_USES_LEDA" >&5
 echo "${ECHO_T}CGAL_USES_LEDA=     $CGAL_USES_LEDA" >&6
@@ -13830,7 +13830,7 @@ echo "${ECHO_T}CGAL_LIBS     =     $CGAL_LIBS" >&6
       echo "$as_me:$LINENO: checking for ::CGAL::Cartesian<int>::Point_2 in -lCGAL" >&5
 echo $ECHO_N "checking for ::CGAL::Cartesian<int>::Point_2 in -lCGAL... $ECHO_C" >&6
 save_CXXFLAGS_CHECK_CXX_LIB="$CXXFLAGS"
-CXXFLAGS="$CXXFLAGS -I$CGAL_INCLDIR -I$CGAL_INCLCONFDIR"
+CXXFLAGS="$CXXFLAGS $CGAL_CXXFLAGS -I$CGAL_INCLDIR -I$CGAL_INCLCONFDIR"
 save_LIBS_CHECK_CXX_LIB="$LIBS"
 LIBS="-lCGAL  $LIBS"
 cat >conftest.$ac_ext <<_ACEOF
@@ -14106,7 +14106,7 @@ fi
 
 
 
-                                                            ac_config_files="$ac_config_files make/Makefile src/utils/Makefile src/applications/nanoRodBuilder/Makefile scripts/filepp"
+                                        ac_config_files="$ac_config_files make/Makefile src/utils/Makefile src/applications/nanoRodBuilder/Makefile scripts/filepp"
 
 
 cat >confcache <<\_ACEOF

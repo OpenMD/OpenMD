@@ -81,8 +81,7 @@ int main(int argc, char *argv []) {
   std::string latticeType;
   std::string inputFileName;
   std::string outPrefix;
-  std::string outMdFileName;
-  std::string outInitFileName;
+  std::string outputFileName;
   std::string outGeomFileName;
   
   
@@ -103,6 +102,7 @@ int main(int argc, char *argv []) {
   std::vector<Vector3d> latticePos;
   std::vector<Vector3d> latticeOrt;
   int numMolPerCell;
+  int nComponents;
   DumpWriter *writer;
   
   // parse command line arguments
@@ -123,23 +123,27 @@ int main(int argc, char *argv []) {
   //get lattice type
   latticeType = UpperCase(args_info.latticetype_arg);
     
-  //get input file name
+  /* get input file name */
   if (args_info.inputs_num)
     inputFileName = args_info.inputs[0];
   else {
-    std::cerr << "You must specify a input file name.\n" << std::endl;
+    sprintf(painCave.errMsg, "No input .md file name was specified "
+            "on the command line");
+    painCave.isFatal = 1;
     cmdline_parser_print_help();
-    exit(1);
+    simError();
   }
-  
+
   //parse md file and set up the system
   SimCreator oldCreator;
   SimInfo* oldInfo = oldCreator.createSim(inputFileName, false);
-  
-  if (oldInfo->getNMoleculeStamp()> 1) {
-    std::cerr << "can not build nanorod with more than one components"
-              << std::endl;
-    exit(1);
+  Globals* simParams = oldInfo->getSimParams();
+
+  nComponents = simParams->getNComponents();
+  if (nComponents> 1) {
+    sprintf(painCave.errMsg, "Nanorods can only contain a single component ");
+    painCave.isFatal = 1;
+    simError();
   }
   
   //get mass of molecule. 
@@ -150,8 +154,9 @@ int main(int argc, char *argv []) {
   simpleLat = LatticeFactory::getInstance()->createLattice(latticeType);
   
   if (simpleLat == NULL) {
-    std::cerr << "Error in creating lattice" << std::endl;
-    exit(1);
+    sprintf(painCave.errMsg, "Error in creating lattice. ");
+    painCave.isFatal = 1;
+    simError();
   }
   
   numMolPerCell = simpleLat->getNumSitesPerCell();
@@ -170,10 +175,15 @@ int main(int argc, char *argv []) {
   
   
   //determine the output file names  
-  if (args_info.output_given)
-    outInitFileName = args_info.output_arg;
-  else
-    outInitFileName = getPrefix(inputFileName.c_str()) + ".in";
+  if (args_info.output_given){
+    outputFileName = args_info.output_arg;
+  }else{
+    sprintf(painCave.errMsg, "No output file name was specified "
+            "on the command line");
+    painCave.isFatal = 1;
+    cmdline_parser_print_help();
+    simError();
+  }
   
   
          
@@ -261,11 +271,11 @@ int main(int argc, char *argv []) {
   
   // needed for writing out new md file.
   
-  outPrefix = getPrefix(inputFileName.c_str()) + "_" + latticeType;
-  outMdFileName = outPrefix + ".md";
+
+
   
   //creat new .md file on fly which corrects the number of molecule     
-  createMdFile(inputFileName, outMdFileName, numMol);
+  createMdFile(inputFileName, outputFileName, numMol);
   
   if (oldInfo != NULL)
     delete oldInfo;
@@ -273,15 +283,14 @@ int main(int argc, char *argv []) {
   
   // We need to read in new siminfo object.	
   //parse md file and set up the system
-  //SimCreator NewCreator;
-  
-  SimInfo* NewInfo = oldCreator.createSim(outMdFileName, false);
+  SimCreator newCreator;
+  SimInfo* newInfo = newCreator.createSim(outputFileName, false);
   
   // This was so much fun the first time, lets do it again.
   
   Molecule* mol;
   SimInfo::MoleculeIterator mi;
-  mol = NewInfo->beginMolecule(mi);
+  mol = newInfo->beginMolecule(mi);
 
 
   for(int i = -nx; i < nx; i++) {
@@ -298,9 +307,11 @@ int main(int argc, char *argv []) {
                  if (mol != NULL) {
                     locator->placeMol(latticePos[l], latticeOrt[l], mol);
                  } else {
-                    std::cerr<<"Error in placing molecule " << std::endl;                    
+		   sprintf(painCave.errMsg, "Error in placing molecule onto lattice ");
+		   painCave.isFatal = 1;
+		   simError();
                  }
-                 mol = NewInfo->nextMolecule(mi);
+                 mol = newInfo->nextMolecule(mi);
 #ifdef HAVE_CGAL                
               }
 #endif              
@@ -325,28 +336,26 @@ int main(int argc, char *argv []) {
   hmat(2, 2) = nz * latticeConstant;
   
   //set Hmat
-  NewInfo->getSnapshotManager()->getCurrentSnapshot()->setHmat(hmat);
+  newInfo->getSnapshotManager()->getCurrentSnapshot()->setHmat(hmat);
   
   
   //create dumpwriter and write out the coordinates
-  NewInfo->setFinalConfigFileName(outInitFileName);
-  writer = new DumpWriter(NewInfo);
+  newInfo->setFinalConfigFileName(outputFileName);
+  writer = new DumpWriter(newInfo);
   
   if (writer == NULL) {
-    std::cerr << "error in creating DumpWriter" << std::endl;
-    exit(1);
+    sprintf(painCave.errMsg, "Error in creating DumpWrite object. ");
+    painCave.isFatal = 1;
+    simError();
   }
   
   writer->writeEor();
-  std::cout << "new initial configuration file: " << outInitFileName
+  std::cout << "new initial configuration file: " << outputFileName
             << " is generated." << std::endl;
   
   //delete objects
   
   //delete oldInfo and oldSimSetup
-  
-  if (NewInfo != NULL)
-    delete NewInfo;
   
   if (writer != NULL)
     delete writer;
@@ -382,5 +391,6 @@ void createMdFile(const std::string&oldMdFileName, const std::string&newMdFileNa
   
   oldMdFile.close();
   newMdFile.close();
+
 }
 

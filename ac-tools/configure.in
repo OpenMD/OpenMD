@@ -341,7 +341,7 @@ EOF
 
     AC_LANG_PUSH(C++)
     save_CXXFLAGS="$CXXFLAGS"
-    CXXFLAGS="$CXXFLAGS -I$CGAL_INCLDIR -I$CGAL_INCLCONFDIR"
+    CXXFLAGS="$CXXFLAGS $CGAL_CXXFLAGS -I$CGAL_INCLDIR -I$CGAL_INCLCONFDIR"
     AC_CHECK_HEADER(CGAL/Cartesian.h, cgal=yes, cgal=no)
     CXXFLAGS="$save_CXXFLAGS"
 
@@ -388,7 +388,7 @@ changequote([, ])dnl
 
       CGAL_LIBS="$CGAL_LIBS -lm"
 
-      CGAL_CXXFLAGS="-ftemplate-depth-50"
+      CGAL_CXXFLAGS="-ftemplate-depth-50 $CGAL_CXXFLAGS"
 
       AC_MSG_RESULT(CGAL_USES_LEDA=     $CGAL_USES_LEDA)
       AC_MSG_RESULT(CGAL_USES_GMP =     $CGAL_USES_GMP)
@@ -408,7 +408,7 @@ changequote([, ])dnl
       # if test "x$CGAL_USES_GMP" = xyes; then
       #   LIBS="-lgmp $LIBS $GMP_LIBDIR"
       # fi
-      AC_CHECK_CXX_LIB(CGAL, ::CGAL::Cartesian<int>::Point_2, [#include <CGAL/Cartesian.h>], [::CGAL::Cartesian<int>::Point_2 P], [cgal=yes], [cgal=no], -I$CGAL_INCLDIR -I$CGAL_INCLCONFDIR)
+      AC_CHECK_CXX_LIB(CGAL, ::CGAL::Cartesian<int>::Point_2, [#include <CGAL/Cartesian.h>], [::CGAL::Cartesian<int>::Point_2 P], [cgal=yes], [cgal=no], $CGAL_CXXFLAGS -I$CGAL_INCLDIR -I$CGAL_INCLCONFDIR)
       LIBS="$save_LIBS"
     fi
 
