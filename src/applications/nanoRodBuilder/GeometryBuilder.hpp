@@ -52,6 +52,7 @@
 #define APPLICATIONS_NANORODBUILDER_GEOMETRYBUILDER_HPP
 
 #include <string>
+#include "config.h"
 
 namespace oopse {
 	
