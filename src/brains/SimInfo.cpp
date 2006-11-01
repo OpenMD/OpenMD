@@ -1126,7 +1126,10 @@ namespace oopse {
                      "\tA default value of %f (1/ang) will be used for the cutoff of\n\t%f (ang).\n", alphaVal, rcut_);
 	    painCave.isFatal = 0;
 	    simError();
+	  } else {
+	    alphaVal = simParams_->getDampingAlpha();
 	  }
+	  
 	} else {
 	  // throw error        
 	  sprintf( painCave.errMsg,
