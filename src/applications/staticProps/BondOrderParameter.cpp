@@ -43,7 +43,7 @@
  *
  *  Created by J. Daniel Gezelter on 09/26/06.
  *  @author  J. Daniel Gezelter
- *  @version $Id: BondOrderParameter.cpp,v 1.19 2006-10-18 21:58:47 gezelter Exp $
+ *  @version $Id: BondOrderParameter.cpp,v 1.20 2006-11-03 22:02:55 gezelter Exp $
  *
  */
  
@@ -398,7 +398,7 @@ namespace oopse {
         RealType Qval = MinQ_ + (i + 0.5) * deltaQ_;               
         osq << Qval;
         for (int l = 0; l <= lMax_; l++) {
-          osq << "\t" << (RealType)Q_histogram_[std::make_pair(i,l)] / 
+          osq << "\t" << (RealType)Q_histogram_[std::make_pair(i,l)]*deltaQ_/ 
             (RealType)Qcount_[l];
         }
         osq << "\n";
@@ -420,14 +420,14 @@ namespace oopse {
       osw << "# selection: (" << selectionScript_ << ")\n";
       osw << "# \n";
       for (int l = 0; l <= lMax_; l++) {
-        osw << "# <W_" << l << ">: " << real(What[l]) << "\n";
+        osw << "# <W_" << l << ">: " << real(What[l]) << "\t" << imag(What[l]) << "\n";
       }
       // Normalize by number of frames and write it out:
       for (int i = 0; i < nBins_; ++i) {
         RealType Wval = MinW_ + (i + 0.5) * deltaW_;               
         osw << Wval;
         for (int l = 0; l <= lMax_; l++) {
-          osw << "\t" << (RealType)W_histogram_[std::make_pair(i,l)] / 
+          osw << "\t" << (RealType)W_histogram_[std::make_pair(i,l)]*deltaW_/ 
             (RealType)Wcount_[l];
         }
         osw << "\n";
