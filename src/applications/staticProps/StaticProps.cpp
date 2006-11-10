@@ -64,6 +64,7 @@
 #if defined(HAVE_FFTW_H) || defined(HAVE_DFFTW_H) || defined(HAVE_FFTW3_H)
 #include "applications/staticProps/Hxy.hpp"
 #endif
+#include "applications/staticProps/RhoR.hpp"
 
 using namespace oopse;
 
@@ -233,6 +234,16 @@ int main(int argc, char* argv[]){
     analyser = new Hxy(info, dumpFileName, sele1, args_info.nbins_x_arg, 
                        args_info.nbins_y_arg, args_info.nbins_arg);
 #endif
+  }else if (args_info.rho_r_given) {
+    if (args_info.radius_given){
+      analyser = new RhoR(info, dumpFileName, sele1, maxLen,args_info.nbins_arg,args_info.radius_arg);
+    }else{
+      sprintf( painCave.errMsg,
+               "A particle radius (radius) must be specified when calculating Rho(r)");
+      painCave.severity = OOPSE_ERROR;
+      painCave.isFatal = 1;
+      simError();
+    }
   }
   
   if (args_info.output_given) {
