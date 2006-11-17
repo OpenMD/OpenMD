@@ -106,7 +106,7 @@ namespace oopse {
 	
 	if (distance < len_) {
 	  int whichBin = distance / deltaR_;
-	  histogram_[whichBin] += 2;
+	  histogram_[whichBin] += 1;
 	}
 	
       }
