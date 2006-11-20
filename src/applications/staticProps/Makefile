@@ -15,7 +15,7 @@ Source    = \
 	Hxy.cpp \
         RippleOP.cpp \
 	BondOrderParameter.cpp \
-	RhoR.cpp \
+	RhoR.cpp 
 BuiltParallelExe = 0
 
 RmiSource =
