@@ -43,7 +43,7 @@
  *
  *  Created by J. Daniel Gezelter on 09/26/06.
  *  @author  J. Daniel Gezelter
- *  @version $Id: BondOrderParameter.cpp,v 1.20 2006-11-03 22:02:55 gezelter Exp $
+ *  @version $Id: BondOrderParameter.cpp,v 1.21 2006-11-21 20:44:54 gezelter Exp $
  *
  */
  
@@ -186,6 +186,7 @@ namespace oopse {
     Q.resize(lMax_+1);
     W.resize(lMax_+1);
     W_hat.resize(lMax_+1);
+    Nbonds = 0;
 
     for (int istep = 0; istep < nFrames; istep += step_) {
       reader.readFrame(istep);
@@ -261,26 +262,15 @@ namespace oopse {
         }
         
         
-        for (int l = 0; l <= lMax_; l++) {         
-          q_l[l] = 0.0;
-          for(int m = -l; m <= l; m++) { 
-            q_l[l] += norm(q[std::make_pair(l,m)]);
-          }     
-          q_l[l] *= 4.0*NumericConstant::PI/(RealType)(2*l + 1);
-          q_l[l] = sqrt(q_l[l])/(RealType)nBonds;
-        }
-
-        // Find second order invariant Q_l
-        
         for (int l = 0; l <= lMax_; l++) {
           q2[l] = 0.0;
           for (int m = -l; m <= l; m++){
+            q[std::make_pair(l,m)] /= (RealType)nBonds;            
             q2[l] += norm(q[std::make_pair(l,m)]);
           }
-          q_l[l] = sqrt(q2[l] * 4.0 * NumericConstant::PI / 
-                        (RealType)(2*l + 1))/(RealType)nBonds;
+          q_l[l] = sqrt(q2[l] * 4.0 * NumericConstant::PI / (RealType)(2*l + 1));
         }
-
+        
         // Find Third Order Invariant W_l
     
         for (int l = 0; l <= lMax_; l++) {
@@ -303,7 +293,7 @@ namespace oopse {
         Nbonds += nBonds;
         for (int l = 0; l <= lMax_;  l++) {
           for (int m = -l; m <= l; m++) {
-            QBar[std::make_pair(l,m)] += q[std::make_pair(l,m)];
+            QBar[std::make_pair(l,m)] += (RealType)nBonds*q[std::make_pair(l,m)];
           }
         }
       }
@@ -370,7 +360,7 @@ namespace oopse {
         Wcount_[l]++;      
       } else {
         sprintf( painCave.errMsg,
-                 "Re[w_hat] value outside reasonable range\n");
+                 "Re[w_hat] value (%lf) outside reasonable range\n", real(what[l]));
         painCave.severity = OOPSE_ERROR;
         painCave.isFatal = 1;
         simError();  
@@ -398,8 +388,8 @@ namespace oopse {
         RealType Qval = MinQ_ + (i + 0.5) * deltaQ_;               
         osq << Qval;
         for (int l = 0; l <= lMax_; l++) {
-          osq << "\t" << (RealType)Q_histogram_[std::make_pair(i,l)]*deltaQ_/ 
-            (RealType)Qcount_[l];
+
+          osq << "\t" << (RealType)Q_histogram_[std::make_pair(i,l)]/(RealType)Qcount_[l]/deltaQ_;
         }
         osq << "\n";
       }
@@ -427,8 +417,8 @@ namespace oopse {
         RealType Wval = MinW_ + (i + 0.5) * deltaW_;               
         osw << Wval;
         for (int l = 0; l <= lMax_; l++) {
-          osw << "\t" << (RealType)W_histogram_[std::make_pair(i,l)]*deltaW_/ 
-            (RealType)Wcount_[l];
+
+          osw << "\t" << (RealType)W_histogram_[std::make_pair(i,l)]/(RealType)Wcount_[l]/deltaW_;
         }
         osw << "\n";
       }
