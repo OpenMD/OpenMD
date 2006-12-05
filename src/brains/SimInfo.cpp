@@ -59,6 +59,7 @@
 #include "UseTheForce/DarkSide/fElectrostaticScreeningMethod.h"
 #include "UseTheForce/DarkSide/fSwitchingFunctionType.h"
 #include "UseTheForce/doForces_interface.h"
+#include "UseTheForce/DarkSide/neighborLists_interface.h"
 #include "UseTheForce/DarkSide/electrostatic_interface.h"
 #include "UseTheForce/DarkSide/switcheroo_interface.h"
 #include "utils/MemoryUtils.hpp"
@@ -66,6 +67,7 @@
 #include "selection/SelectionManager.hpp"
 #include "io/ForceFieldOptions.hpp"
 #include "UseTheForce/ForceField.hpp"
+
 
 #ifdef IS_MPI
 #include "UseTheForce/mpiComponentPlan.h"
@@ -868,6 +870,13 @@ namespace oopse {
 	     "succesfully sent the simulation information to fortran.\n");
     MPIcheckPoint();
 #endif // is_mpi
+
+    // Setup number of neighbors in neighbor list if present
+    if (simParams_->haveNeighborListNeighbors()) {
+      setNeighbors(simParams_->getNeighborListNeighbors());
+    }
+   
+
   }
 
 

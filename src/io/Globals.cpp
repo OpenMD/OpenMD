@@ -100,6 +100,12 @@ Globals::Globals() {
   DefineOptionalParameter(BeadSize, "beadSize");
   DefineOptionalParameter(FrozenBufferRadius, "frozenBufferRadius");
   DefineOptionalParameter(LangevinBufferRadius, "langevinBufferRadius");
+  DefineOptionalParameter(NeighborListNeighbors,"NeighborListNeighbors");
+  DefineOptionalParameter(TempDepViscosityA,"tempDepViscosityA");
+  DefineOptionalParameter(TempDepViscosityB,"tempDepViscosityB");
+  DefineOptionalParameter(TempDepViscosityC,"tempDepViscosityC");
+  DefineOptionalParameter(TempDepViscosityD,"tempDepViscosityD");
+
   
   DefineOptionalParameterWithDefaultValue(UsePeriodicBoundaryConditions, "usePeriodicBoundaryConditions", true);
   DefineOptionalParameterWithDefaultValue(UseInitalTime, "useInitialTime", false);
@@ -184,6 +190,8 @@ void Globals::validate() {
   CheckParameter(BeadSize, isPositive());
   CheckParameter(FrozenBufferRadius, isPositive());
   CheckParameter(LangevinBufferRadius, isPositive());
+  CheckParameter(NeighborListNeighbors, isPositive());
+
   for(std::vector<Component*>::iterator i = components_.begin(); i != components_.end(); ++i) {
     if (!(*i)->findMoleculeStamp(moleculeStamps_)) {
         std::ostringstream oss;

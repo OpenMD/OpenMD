@@ -48,7 +48,7 @@
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
 !! @author J. Daniel Gezelter
-!! @version $Id: neighborLists.F90,v 1.5 2006-05-17 19:54:26 gezelter Exp $, 
+!! @version $Id: neighborLists.F90,v 1.6 2006-12-05 00:17:24 chuckv Exp $, 
 
 module neighborLists
 
@@ -61,9 +61,9 @@ module neighborLists
   PRIVATE
 
   !--------------MODULE VARIABLES---------------------->
-  !! Parameter for size > # of long range particles neighbor list
-  !! should be.
-  integer, parameter :: listMultiplier = 80
+  !! Default Parameter for size > # of long range particles neighbor list
+  !! should be. It is listMultiplier x nGroups for size of list
+  integer, save :: listMultiplier = 80
   !! Maximum number of times we should reallocate neighbor list.
   integer, parameter :: maxAllocations = 10
   !! Number of times we have allocated the neighbor list.
@@ -77,11 +77,13 @@ module neighborLists
   real( kind = dp ), dimension(:,:), allocatable, save  :: q0
   !! Current list size
   integer, save :: listSize
+ 
   !--------------MODULE ACCESS-------------------------->
   public :: expandNeighborList
   public :: checkNeighborList
   public :: saveNeighborList
   public :: getNeighborListSize
+  public :: setNeighbors
 
 contains
 
@@ -278,5 +280,11 @@ contains
     integer :: returnListSize
     returnListSize = listSize
   end function getNeighborListSize
+
+
+  subroutine setNeighbors(nNeighbors)
+    integer, intent(in) :: nNeighbors
+    listMultiplier = nNeighbors
+  end subroutine setNeighbors
 
 end module neighborLists

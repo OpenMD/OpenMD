@@ -4,6 +4,7 @@ Source    = \
 	simParallel.F90 \
 	simParallel_interface.F90 \
 	neighborLists.F90 \
+	neighborLists_interface.F90 \
 	atype.F90 \
 	atype_interface.F90 \
 	force_globals.F90 \
