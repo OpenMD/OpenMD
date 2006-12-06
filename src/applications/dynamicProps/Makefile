@@ -9,7 +9,9 @@ Source    = \
             VCorrFunc.cpp \
             DynamicProps.cpp \
             DynamicPropsCmd.c \
-            LegendreCorrFunc.cpp
+            LegendreCorrFunc.cpp \
+	    SnapshotCentroid.cpp \
+	    RadialRCorrFunc.cpp
 
 BuiltParallelExe = 0
 
