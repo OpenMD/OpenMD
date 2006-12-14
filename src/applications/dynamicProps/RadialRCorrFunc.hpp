@@ -38,8 +38,8 @@
  * University of Notre Dame has been advised of the possibility of
  * such damages.
  */
-#ifndef APPLICATIONS_DYNAMICPROPS_RCORRFUNC_HPP
-#define APPLICATIONS_DYNAMICPROPS_RCORRFUNC_HPP
+#ifndef APPLICATIONS_DYNAMICPROPS_RADIALRCORRFUNC_HPP
+#define APPLICATIONS_DYNAMICPROPS_RADIALRCORRFUNC_HPP
 
 #include "applications/dynamicProps/ParticleTimeCorrFunc.hpp"
 #include "applications/dynamicProps/SnapshotCentroid.hpp"

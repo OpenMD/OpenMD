@@ -53,6 +53,7 @@
 #include "applications/dynamicProps/RCorrFunc.hpp"
 #include "applications/dynamicProps/VCorrFunc.hpp"
 #include "applications/dynamicProps/LegendreCorrFunc.hpp"
+#include "applications/dynamicProps/RadialRCorrFunc.hpp"
 
 
 using namespace oopse;
@@ -112,6 +113,8 @@ int main(int argc, char* argv[]){
     corrFunc = new DipoleCorrFunc(info, dumpFileName, sele1, sele2);
   } else if (args_info.rcorr_given) {
     corrFunc = new RCorrFunc(info, dumpFileName, sele1, sele2);
+  } else if (args_info.r_rcorr_given) {
+    corrFunc = new RadialRCorrFunc(info, dumpFileName, sele1, sele2);
   }
   else if (args_info.vcorr_given) {
     corrFunc = new VCorrFunc(info, dumpFileName, sele1, sele2); 
