@@ -1,6 +1,6 @@
 Package = math
 
-Source    = \
+MySource    = \
 				ParallelRandNumGen.cpp \
                                 SeqRandNumGen.cpp \
 				RealSphericalHarmonic.cpp \
@@ -9,6 +9,13 @@ Source    = \
                                 LegendrePolynomial.cpp \
                                 linearAlgebra.F90 \
                                 Wigner3jm.F90 
+USE_CGAL = yes
+
+ifeq "$(USE_CGAL)" "yes"
+   Source  = $(MySource) ConvexHull.cpp
+else
+   Source = $(MySource)
+endif
 
 RmiSource =
 
