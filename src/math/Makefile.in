@@ -9,7 +9,8 @@ MySource    = \
                                 LegendrePolynomial.cpp \
                                 linearAlgebra.F90 \
                                 Wigner3jm.F90 
-USE_CGAL = yes
+
+USE_CGAL = @USE_CGAL@
 
 ifeq "$(USE_CGAL)" "yes"
    Source  = $(MySource) ConvexHull.cpp
