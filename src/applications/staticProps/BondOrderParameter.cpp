@@ -43,7 +43,7 @@
  *
  *  Created by J. Daniel Gezelter on 09/26/06.
  *  @author  J. Daniel Gezelter
- *  @version $Id: BondOrderParameter.cpp,v 1.21 2006-11-21 20:44:54 gezelter Exp $
+ *  @version $Id: BondOrderParameter.cpp,v 1.22 2006-12-20 21:03:11 gezelter Exp $
  *
  */
  
@@ -83,8 +83,8 @@ namespace oopse {
     // W_6 for icosahedral clusters is 11 / sqrt(4199) = 0.169754, so we'll
     // use values for MinW_ and MaxW_ that are slightly larger than this:
 
-    MinW_ = -0.25;
-    MaxW_ = 0.25;
+    MinW_ = -1.1;
+    MaxW_ = 1.1;
     deltaW_ = (MaxW_ - MinW_) / nbins;
 
     // Make arrays for Wigner3jm
@@ -105,7 +105,7 @@ namespace oopse {
         for (int ii = 0; ii < 2*l + 1; ii++){
           THRCOF[ii] = 0.0;
         }
-            
+
         // Get Wigner coefficients
         Wigner3jm(&lPass, &lPass, &lPass, 
                   &m1Pass, &m2m, &m2M, 
@@ -114,7 +114,7 @@ namespace oopse {
         m2Min[lm] = (int)floor(m2m);
         m2Max[lm] = (int)floor(m2M);
         
-        for (int mmm = 0; mmm < (int)(m2M - m2m); mmm++) {
+        for (int mmm = 0; mmm <= (int)(m2M - m2m); mmm++) {
           w3j[lm].push_back(THRCOF[mmm]);
         }
       }
@@ -277,7 +277,7 @@ namespace oopse {
           w[l] = 0.0;
           for (int m1 = -l; m1 <= l; m1++) {
             std::pair<int,int> lm = std::make_pair(l, m1);
-            for (int mmm = 0; mmm < (m2Max[lm] - m2Min[lm]); mmm++) {
+            for (int mmm = 0; mmm <= (m2Max[lm] - m2Min[lm]); mmm++) {
               int m2 = m2Min[lm] + mmm;
               int m3 = -m1-m2;
               w[l] += w3j[lm][mmm] * q[lm] * 
@@ -322,7 +322,7 @@ namespace oopse {
       W[l] = 0.0;
       for (int m1 = -l; m1 <= l; m1++) {
         std::pair<int,int> lm = std::make_pair(l, m1);
-        for (int mmm = 0; mmm < (m2Max[lm] - m2Min[lm]); mmm++) {
+        for (int mmm = 0; mmm <= (m2Max[lm] - m2Min[lm]); mmm++) {
           int m2 = m2Min[lm] + mmm;
           int m3 = -m1-m2;
           W[l] += w3j[lm][mmm] * QBar[lm] * 
