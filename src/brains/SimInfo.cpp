@@ -1455,6 +1455,43 @@ namespace oopse {
     IOIndexToIntegrableObject= v;
   }
 
+  /* Returns the Volume of the simulation based on a ellipsoid with semi-axes 
+     based on the radius of gyration V=4/3*Pi*R_1*R_2*R_3
+     where R_i are related to the principle inertia moments R_i = sqrt(C*I_i/N), this reduces to 
+     V = 4/3*Pi*(C/N)^3/2*sqrt(det(I)). See S.E. Baltazar et. al. Comp. Mat. Sci. 37 (2006) 526-536.
+  */
+  void SimInfo::getGyrationalVolume(RealType &volume){
+    Mat3x3d intTensor;
+    RealType det;
+    Vector3d dummyAngMom; 
+    RealType sysconstants;
+    RealType geomCnst;
+
+    geomCnst = 3.0/2.0;
+    /* Get the inertial tensor and angular momentum for free*/
+    getInertiaTensor(intTensor,dummyAngMom);
+    
+    det = intTensor.determinant();
+    sysconstants = geomCnst/(RealType)nGlobalIntegrableObjects_;
+    volume = 4.0/3.0*NumericConstant::PI*pow(sysconstants,3.0/2.0)*sqrt(det);
+    return;
+  }
+
+  void SimInfo::getGyrationalVolume(RealType &volume, RealType &detI){
+    Mat3x3d intTensor;
+    Vector3d dummyAngMom; 
+    RealType sysconstants;
+    RealType geomCnst;
+
+    geomCnst = 3.0/2.0;
+    /* Get the inertial tensor and angular momentum for free*/
+    getInertiaTensor(intTensor,dummyAngMom);
+    
+    detI = intTensor.determinant();
+    sysconstants = geomCnst/(RealType)nGlobalIntegrableObjects_;
+    volume = 4.0/3.0*NumericConstant::PI*pow(sysconstants,3.0/2.0)*sqrt(detI);
+    return;
+  }
 /*
    void SimInfo::setStuntDoubleFromGlobalIndex(std::vector<StuntDouble*> v) {
       assert( v.size() == nAtoms_ + nRigidBodies_);

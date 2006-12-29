@@ -272,6 +272,10 @@ namespace oopse{
     /** Returns system angular momentum */
     Vector3d getAngularMomentum();
 
+    /** Returns volume of system as estimated by an ellipsoid defined by the radii of gyration*/
+    void getGyrationalVolume(RealType &vol);
+    /** Overloaded version of gyrational volume that also returns det(I) so dV/dr can be calculated*/
+    void getGyrationalVolume(RealType &vol, RealType &detI);
     /** main driver function to interact with fortran during the initialization and molecule migration */
     void update();
 
