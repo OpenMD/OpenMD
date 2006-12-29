@@ -67,16 +67,14 @@ namespace oopse {
       return blocks_.size();
     }
 
-    void needCOMprops(bool ncp) {
-      reader_->setNeedCOMprops(ncp);
-    }
-
     SnapshotBlock getSnapshotBlock(int block) {
       return blocks_.at(block);
     }
         
     int getNActiveBlocks();
-        
+
+    void needCOMprops(bool ncp);
+
 
     bool isBlockActive(int block) {
       return  findActiveBlock(block) != activeBlocks_.end() ? true : false;

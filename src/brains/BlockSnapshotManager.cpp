@@ -214,4 +214,8 @@ namespace oopse {
     return reader_->getNFrames();
   }
 
+  void BlockSnapshotManager::needCOMprops(bool ncp) {
+    reader_->setNeedCOMprops(ncp);
+  }
+
 }
