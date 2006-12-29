@@ -97,7 +97,7 @@ namespace oopse {
     int nTimeBins_;
     std::vector<RealType> histogram_;
     std::vector<int> count_;
-    std::vector<RealType> time_;
+     std::vector<RealType> time_;
         
     SimInfo* info_;
     int storageLayout_;

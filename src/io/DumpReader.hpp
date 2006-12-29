@@ -71,6 +71,9 @@ namespace oopse {
     /** Returns the number of frames in the dump file*/ 
     int getNFrames(); 
  
+    void setNeedCOMprops(bool ncp) {
+      needCOMprops_ = ncp;
+    }
          
     void readFrame(int whichFrame); 
  
@@ -84,8 +87,7 @@ namespace oopse {
  
     void readFrameProperties(std::istream& inputStream);
 
-    void readStuntDoubles(std::istream& inputStream);
-                  
+    void readStuntDoubles(std::istream& inputStream);                  
          
     SimInfo* info_; 
  
@@ -101,7 +103,8 @@ namespace oopse {
     bool needPos_; 
     bool needVel_; 
     bool needQuaternion_; 
-    bool needAngMom_; 
+    bool needAngMom_;
+    bool needCOMprops_;
 
     const static int bufferSize = 4096;
     char buffer[bufferSize];

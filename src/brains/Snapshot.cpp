@@ -155,5 +155,32 @@ namespace oopse {
 
   }
 
+  Vector3d Snapshot::getCOM() {
+    if( !hasCOM_ ) {
+      sprintf( painCave.errMsg, "COM was requested before COM was computed!\n");
+      painCave.severity = OOPSE_ERROR;
+      simError();
+    }
+    return COM_;
+  }
+  
+  Vector3d Snapshot::getCOMvel() {
+    if( !hasCOM_ ) {
+      sprintf( painCave.errMsg, "COMvel was requested before COM was computed!\n");
+      painCave.severity = OOPSE_ERROR;
+      simError();
+    }
+    return COMvel_;
+  }
+  
+  Vector3d Snapshot::getCOMw() {
+    if( !hasCOM_ ) {
+      sprintf( painCave.errMsg, "COMw was requested before COM was computed!\n");
+      painCave.severity = OOPSE_ERROR;
+      simError();
+    }
+    return COMw_;
+  }
+ 
 }
   

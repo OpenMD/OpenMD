@@ -122,7 +122,9 @@ namespace oopse{
 
     /** Wrapping the vector according to periodic boundary condition*/
     void wrapVector(Vector3d& v);
-
+    Vector3d getCOM();
+    Vector3d getCOMvel();
+    Vector3d getCOMw();
             
     RealType getTime() {
       return currentTime_;
@@ -166,7 +168,18 @@ namespace oopse{
     void setEta(const Mat3x3d& eta) {
       eta_ = eta;
     }
-            
+
+    bool hasCOM() {
+      return hasCOM_;
+    }
+
+    void setCOMprops(const Vector3d& COM, const Vector3d& COMvel, const Vector3d& COMw) {
+      COM_ = COM;
+      COMvel_ = COMvel;
+      COMw_ = COMw;
+      hasCOM_ = true;
+    }
+                  
     DataStorage atomData;
     DataStorage rigidbodyData;
     Stats statData;
@@ -182,6 +195,10 @@ namespace oopse{
     RealType chi_;
     RealType integralOfChiDt_;
     Mat3x3d eta_;
+    Vector3d COM_;
+    Vector3d COMvel_;
+    Vector3d COMw_;
+    bool hasCOM_;
             
     int id_; /**< identification number of the snapshot */
   };

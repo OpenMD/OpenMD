@@ -58,7 +58,7 @@ namespace oopse {
    * @class DataStorage
    * @warning do not try to insert element into (or ease element from) private member data 
    * of DataStorage directly.
-   * @todo DataStorage may need refactorying. Every std::vector can inherit from the same base class
+   * @todo DataStorage may need refactoring. Every std::vector can inherit from the same base class
    * which will make it easy to maintain
    */
   class DataStorage {
@@ -124,6 +124,7 @@ namespace oopse {
             
     RealType* internalGetArrayPointer(std::vector<RotMat3x3d>& v);
     RealType* internalGetArrayPointer(std::vector<RealType>& v);
+
             
     template<typename T>
     void internalResize(std::vector<T>& v, int newSize);

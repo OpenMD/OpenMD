@@ -260,7 +260,7 @@ namespace oopse {
 
     case dslTorque:
       return internalGetArrayPointer(torque);
-      break;  
+      break;
             
     default:
       //error message

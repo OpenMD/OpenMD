@@ -70,7 +70,7 @@
 namespace oopse { 
    
   DumpReader::DumpReader(SimInfo* info, const std::string& filename) 
-    : info_(info), filename_(filename), isScanned_(false), nframes_(0) { 
+    : info_(info), filename_(filename), isScanned_(false), nframes_(0), needCOMprops_(false) { 
     
 #ifdef IS_MPI 
     
@@ -240,6 +240,17 @@ namespace oopse {
     } 
      
     readSet(whichFrame); 
+
+    if (needCOMprops_) {
+      Snapshot* s = info_->getSnapshotManager()->getCurrentSnapshot();
+      Vector3d com;
+      Vector3d comvel;
+      Vector3d comw;
+      info_->getComAll(com, comvel);
+      comw = info_->getAngularMomentum();
+      s->setCOMprops(com, comvel, comw);      
+    }
+
   } 
    
   void DumpReader::readSet(int whichFrame) {     
