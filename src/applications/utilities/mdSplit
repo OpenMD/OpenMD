@@ -17,8 +17,8 @@ Example:
 """
 
 __author__ = "Charles Vardeman (cvardema@nd.edu)"
-__version__ = "$Revision: 1.4 $"
-__date__ = "$Date: 2006-10-15 18:02:29 $"
+__version__ = "$Revision: 1.5 $"
+__date__ = "$Date: 2007-01-02 20:12:34 $"
 __copyright__ = "Copyright (c) 2006 by the University of Notre Dame"
 __license__ = "OOPSE"
 
@@ -38,8 +38,10 @@ def usage():
 
 def splitFile(mdFileName,skipFrameNumber):
     mdFile = open(mdFileName, 'r')
+
+    (filepath, filename) = os.path.split(mdFileName)
    
-    outfilePrefix,ext = os.path.splitext(mdFileName)
+    (outfilePrefix,ext)  = os.path.splitext(filename)
 
     
     
