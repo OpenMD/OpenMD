@@ -17,8 +17,8 @@ Example:
 """
 
 __author__ = "Charles Vardeman (cvardema@nd.edu)"
-__version__ = "$Revision: 1.6 $"
-__date__ = "$Date: 2007-01-02 20:30:18 $"
+__version__ = "$Revision: 1.7 $"
+__date__ = "$Date: 2007-01-02 20:42:44 $"
 __copyright__ = "Copyright (c) 2006 by the University of Notre Dame"
 __license__ = "OOPSE"
 
@@ -85,7 +85,7 @@ def splitFile(mdFileName,skipFrameNumber):
             foundFrames += 1
             division,remainder=divmod(foundFrames,int(skipFrameNumber))
             if (remainder == 0):
-                outfilename = outfilePrefix + "_" + %04d repr(foundFrames) + ext
+		outfilename = outfilePrefix + "_" + "%04d" % foundFrames + ext
                 outFile = open(outfilename,'w')
                 outFile.write(OOPSEversion)
                 for metaline in metaDataFrame:
