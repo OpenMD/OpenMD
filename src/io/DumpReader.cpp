@@ -246,8 +246,14 @@ namespace oopse {
       Vector3d com;
       Vector3d comvel;
       Vector3d comw;
-      info_->getComAll(com, comvel);
-      comw = info_->getAngularMomentum();
+      if (needPos_ && needVel_){
+	info_->getComAll(com, comvel);
+	comw = info_->getAngularMomentum();
+      }else{
+	com = info_->getCom();
+	comvel = 0.0;
+	comw   = 0.0;
+      }
       s->setCOMprops(com, comvel, comw);      
     }
 

@@ -49,7 +49,9 @@ namespace oopse {
       setCorrFuncType("RadialRCorrFunc");
       setOutputName(getPrefix(dumpFilename_) + ".r_rcorr");
 
-
+// Turn on COM calculation in block snapshot
+      bool ncp = true;
+      bsMan_->needCOMprops(ncp);
     }
 
   RealType RadialRCorrFunc::calcCorrVal(int frame1, int frame2, StuntDouble* sd1, StuntDouble* sd2) {
@@ -60,13 +62,16 @@ namespace oopse {
 
     Vector3d r1 = sd1->getPos(frame1);
     Vector3d r2 = sd2->getPos(frame2);
-    Vector3d com1 = sd1->getCOM();
-    Vector3d com2 = sd2->getCOM();
+    Vector3d com1 = sd1->getCOM(frame1);
+    Vector3d com2 = sd2->getCOM(frame2);
 
     coord_t0 = r1 - com1;
     coord_t  = r2 - com2;
     
-    return (coord_t - coord_t0).lengthSquare();
+    r0 = sqrt(dot(coord_t0, coord_t0));
+    rt = sqrt(dot(coord_t,coord_t));
+
+    return pow(rt - r0,2);
   }
 
 }

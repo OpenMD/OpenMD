@@ -409,7 +409,57 @@ namespace oopse{
     void setJ(const Vector3d& angMom, int snapshotNo) {
       ((snapshotMan_->getSnapshot(snapshotNo))->*storage_).angularMomentum[localIndex_] = angMom;
     }
-         
+    
+    /**
+     * Returns system Center of Mass for stuntdouble frame from snapshot
+     *
+     */ 
+    Vector3d getCOM(){
+      return (snapshotMan_->getCurrentSnapshot())->getCOM();
+    }
+    
+    /**
+      * Returns system Center of Mass velocity for stuntdouble frame from snapshot
+     *
+     */ 
+    
+    Vector3d getCOMvel(){
+      return (snapshotMan_->getCurrentSnapshot())->getCOMvel();
+    }
+    
+    /**
+      * Returns system Center of Mass angular momentum for stuntdouble frame from snapshot
+     *
+     */ 
+    Vector3d getCOMw(){
+      return (snapshotMan_->getCurrentSnapshot())->getCOMw();
+    }
+    
+/**
+     * Returns system Center of Mass for stuntdouble frame from snapshot
+     *
+     */ 
+    Vector3d getCOM(int snapshotNo){
+      return (snapshotMan_->getSnapshot(snapshotNo))->getCOM();
+    }
+    
+    /**
+      * Returns system Center of Mass velocity for stuntdouble frame from snapshot
+     *
+     */ 
+    
+    Vector3d getCOMvel(int snapshotNo){
+      return (snapshotMan_->getSnapshot(snapshotNo))->getCOMvel();
+    }
+    
+    /**
+      * Returns system Center of Mass angular momentum for stuntdouble frame from snapshot
+     *
+     */ 
+    Vector3d getCOMw(int snapshotNo){
+      return (snapshotMan_->getSnapshot(snapshotNo))->getCOMw();
+    }
+
     /**
      * Returns the previous quaternion of this stuntdouble
      * @return the quaternion of this stuntdouble

@@ -57,6 +57,7 @@ namespace oopse {
     hmat_ = m;
     invHmat_ = hmat_.inverse();
     
+
     //prepare fortran Hmat 
     RealType fortranHmat[9];
     RealType fortranInvHmat[9];

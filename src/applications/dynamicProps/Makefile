@@ -10,7 +10,8 @@ Source    = \
             DynamicProps.cpp \
             DynamicPropsCmd.c \
             LegendreCorrFunc.cpp \
-	    RadialRCorrFunc.cpp
+	    RadialRCorrFunc.cpp \
+	    ThetaCorrFunc.cpp
 
 BuiltParallelExe = 0
 

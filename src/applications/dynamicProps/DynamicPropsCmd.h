@@ -47,7 +47,10 @@ struct gengetopt_args_info
   int dcorr_given ;	/* Whether dcorr was given.  */
   int lcorr_given ;	/* Whether lcorr was given.  */
   int r_rcorr_given ;	/* Whether r_rcorr was given.  */
+  int thetacorr_given ;	/* Whether thetacorr was given.  */
 
+  char **inputs ; /* unamed options */
+  unsigned inputs_num ; /* unamed options number */
   int dynamicProps_group_counter; /* counter for group dynamicProps */
 } ;
 
