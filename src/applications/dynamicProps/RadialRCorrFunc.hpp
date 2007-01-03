@@ -42,7 +42,7 @@
 #define APPLICATIONS_DYNAMICPROPS_RADIALRCORRFUNC_HPP
 
 #include "applications/dynamicProps/ParticleTimeCorrFunc.hpp"
-#include "applications/dynamicProps/SnapshotCentroid.hpp"
+
 
 namespace oopse {
 
@@ -53,7 +53,6 @@ namespace oopse {
   private:
     virtual RealType calcCorrVal(int frame1, int frame2, StuntDouble* sd1, StuntDouble* sd2);
 
-    SnapshotCentroid* frameCentroid_;
 
   };
 

@@ -49,7 +49,6 @@ namespace oopse {
       setCorrFuncType("RadialRCorrFunc");
       setOutputName(getPrefix(dumpFilename_) + ".r_rcorr");
 
-      frameCentroid_ = new SnapshotCentroid(info,filename);
 
     }
 
@@ -61,8 +60,8 @@ namespace oopse {
 
     Vector3d r1 = sd1->getPos(frame1);
     Vector3d r2 = sd2->getPos(frame2);
-    Vector3d com1 = frameCentroid_->getFrameCOM(frame1);
-    Vector3d com2 = frameCentroid_->getFrameCOM(frame2);
+    Vector3d com1 = sd1->getCOM();
+    Vector3d com2 = sd2->getCOM();
 
     coord_t0 = r1 - com1;
     coord_t  = r2 - com2;
