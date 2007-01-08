@@ -47,7 +47,7 @@
 !!
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: simParallel.F90,v 1.8 2006-06-07 18:05:19 chrisfen Exp $, $Date: 2006-06-07 18:05:19 $, $Name: not supported by cvs2svn $, $Revision: 1.8 $
+!! @version $Id: simParallel.F90,v 1.9 2007-01-08 21:29:50 chuckv Exp $, $Date: 2007-01-08 21:29:50 $, $Name: not supported by cvs2svn $, $Revision: 1.9 $
 
 module mpiSimulation  
   use definitions
@@ -448,7 +448,8 @@ contains
 
     call mpi_comm_split(mpi_comm_world,rowIndex,0,rowCommunicator,mpiErrors)
     if ( mpiErrors /= 0 ) then
-       write(default_error,*) "MPI comm split failed at row communicator"
+       write(errMsg, *) 'An error ',mpiErrors ,'occurred in splitting communicators'
+       call handleError("makeForceGrid", errMsg)
        status = -1 
        return
     endif
@@ -456,7 +457,8 @@ contains
     columnIndex = mod(myWorldRank,nColumns)
     call mpi_comm_split(mpi_comm_world,columnIndex,0,columnCommunicator,mpiErrors)
     if ( mpiErrors /= 0 ) then
-       write(default_error,*) "MPI comm split faild at columnCommunicator"
+       write(errMsg, *) "MPI comm split faild at columnCommunicator by error ",mpiErrors 
+       call handleError("makeForceGrid", errMsg)
        status = -1 
        return
     endif
@@ -584,6 +586,8 @@ contains
          this_plan%myPlanComm, mpi_err)
 
     if (mpi_err /= 0) then
+       write(errMsg, *) "mpi_allgatherv failed by error message ",mpi_err 
+       call handleError("gather_integer", errMsg)
        if (present(status)) status  = -1
     endif
 
@@ -618,6 +622,8 @@ contains
 #endif
 
     if (mpi_err /= 0) then
+       write(errMsg, *) "mpi_allgatherv failed by error message ",mpi_err 
+       call handleError("gather_double", errMsg)
        if (present(status)) status  = -1
     endif
 
@@ -656,6 +662,8 @@ contains
 #endif
 
     if (mpi_err /= 0) then
+       write(errMsg, *) "mpi_allgatherv failed by error message ",mpi_err 
+       call handleError("gather_double_2d", errMsg)
        if (present(status)) status = -1
     endif
 
@@ -687,6 +695,8 @@ contains
 #endif
 
     if (mpi_err /= 0) then
+       write(errMsg, *) "mpi_reduce_scatter failed by error message ",mpi_err 
+       call handleError("scatter_double", errMsg)
        if (present(status))  status = -1
     endif
 
@@ -717,6 +727,8 @@ contains
 #endif
 
     if (mpi_err /= 0) then
+       write(errMsg, *) "mpi_reduce_scatter failed by error message ",mpi_err 
+       call handleError("scatter_double_2d", errMsg)
        if (present(status)) status = -1
     endif
 
