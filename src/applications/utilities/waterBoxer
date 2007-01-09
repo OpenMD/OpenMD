@@ -3,8 +3,8 @@
 # program that builds water boxes
 
 # author    = "Chris Fennell
-# version   = "$Revision: 1.1 $"
-# date      = "$Date: 2006-10-10 14:08:10 $"
+# version   = "$Revision: 1.2 $"
+# date      = "$Date: 2007-01-09 03:42:14 $"
 # copyright = "Copyright (c) 2006 by the University of Notre Dame"
 # license   = "OOPSE"
 
@@ -27,7 +27,7 @@ $waterCase = -1;
 $nothingSelected = 1;
 
 # get our options
-getopts('hmrvd:l:n:o:w:');
+getopts('hmrvd:l:n:o:w:x:y:z:');
 
 # just to test opt_h
 $opt_h = "true" if $#ARGV >= 0;
@@ -50,7 +50,13 @@ if ($opt_h){
     print "  -o char    : output file name\n";
     print "                 (default: freshWater.md)\n";
     print "  -w char    : name of the water stunt double\n";
-    print "                 (default: SPCE)\n\n";
+    print "                 (default: SPCE)\n";
+    print "  -x real    : dimension of the box along the x direction\n";
+    print "  -y real    : dimension of the box along the y direction\n";
+    print "  -z real    : dimension of the box along the z direction\n\n";
+    print "Note: you can only use values of x, y, or z that are smaller\n";
+    print "      than the derived box length for a given density and\n";
+    print "      number of molecules.\n\n";
     print "Example:\n";
     die   "   waterBoxer -d 0.997 -n 864 -w SSD_RF -o ssdrfWater.md\n";
 }
@@ -74,6 +80,14 @@ if ($opt_r){
   $nothingSelected = 0;
 }
 
+if (defined($opt_d)){
+  $nothingSelected = 0;
+  if ($opt_d =~ /^[0-9]/) {
+    $density = $opt_d;
+  } else {
+    die "Error: the value for '-d' ($opt_d) is not a valid number\n       Please choose a positive real # value\n";
+  }
+}
 if (defined($opt_w)){
   $waterName = $opt_w;
   $nothingSelected = 0;
@@ -86,14 +100,11 @@ if ($invalidWater == 1){
   print "         Use the \'-m\' option to generate a \'water.md\' with the\n";
   print "         recognized water model geometries.\n\n"; 
 }
-if (defined($opt_d)){
-  $nothingSelected = 0;
-  if ($opt_d =~ /^[0-9]/) {
-    $density = $opt_d;
-  } else {
-    die "Error: the value for '-d' ($opt_d) is not a valid number\n       Please choose a positive real # value\n";
-  }
+if ($waterName eq 'DPD') {
+  # DPD waters are stand-ins for 4 water molecules
+  $density = $density * 0.25;
 }
+
 if (defined($opt_l)){
   $nothingSelected = 0;
   if ($opt_l =~ /^[0-9]/) {
@@ -113,6 +124,31 @@ if (defined($opt_n)){
     die "Error: the '-n' value ($opt_n) is not a valid number\n       Please choose a non-negative integer\n";
   }
 }
+if (defined($opt_x)){
+  $nothingSelected = 0;
+  if ($opt_x =~ /^[0-9]/) {
+    $boxx = $opt_x;
+  } else {
+    die "Error: the value for '-x' ($opt_x) is not a valid number\n       Please choose a positive real # value\n";
+  }
+}
+if (defined($opt_y)){
+  $nothingSelected = 0;
+  if ($opt_y =~ /^[0-9]/) {
+    $boxy = $opt_y;
+  } else {
+    die "Error: the value for '-y' ($opt_y) is not a valid number\n       Please choose a positive real # value\n";
+  }
+}
+if (defined($opt_z)){
+  $nothingSelected = 0;
+  if ($opt_z =~ /^[0-9]/) {
+    $boxz = $opt_z;
+  } else {
+    die "Error: the value for '-z' ($opt_z) is not a valid number\n       Please choose a positive real # value\n";
+  }
+}
+
 
 # open the file writer
 open(OUTFILE, ">./$fileName") || die "Error: can't open file $fileName\n";
@@ -151,7 +187,54 @@ if ($lattice == 0){
 # now we can start building the crystals
 $boxLength = ($nMol*$densityConvert/$density)**(1.0/3.0);
 $cellLength = $boxLength / $crystalNum;
-$cell2 = $cellLength*0.5;
+
+if ($boxx != 0) {
+  if ($boxLength < $boxx) {
+    print "Computed box length is smaller than requested x axis.  Use more\n";
+    die "molecules.";    
+  }
+} else {
+  $boxx = $boxLength;
+}
+if ($boxy != 0) {
+  if ($boxLength < $boxy) {
+    print "Computed box length is smaller than requested y axis.  Use more\n";
+    die "molecules.";    
+  }
+} else {
+  $boxy = $boxLength;
+}
+if ($boxz != 0) {
+  if ($boxLength < $boxz) {
+    print "Computed box length is smaller than requested z axis.  Use more\n";
+    die "molecules.";    
+  }
+} else {
+  $boxz = $boxLength;
+}
+
+$nx = int($boxx / $cellLength);
+$ny = int($boxy / $cellLength);
+$nz = int($boxz / $cellLength);
+
+if ($lattice == 0) {
+  $nMol = 4 * $nx * $ny * $nz;
+} else {
+  $nMol = $nx * $ny * $nz;
+}
+
+$newDensity = $nMol * $densityConvert / ($boxx*$boxy*$boxz);
+
+if (abs($newDensity-$density) > $tolerance) {
+  print "Resetting density to $newDensity to make chosen box sides work out\n";
+}
+$cellLengthX = $boxx/$nx;
+$cellLengthY = $boxy/$ny;
+$cellLengthZ = $boxz/$nz;
+
+$cell2X = $cellLengthX*0.5;
+$cell2Y = $cellLengthY*0.5;
+$cell2Z = $cellLengthZ*0.5;
 
 if ($lattice == 0) {
 # build the unit cell
@@ -161,25 +244,25 @@ if ($lattice == 0) {
   $zCorr[0] = 0.0;
 # molecule 1
   $xCorr[1] = 0.0;
-  $yCorr[1] = $cell2;
-  $zCorr[1] = $cell2;
+  $yCorr[1] = $cell2Y;
+  $zCorr[1] = $cell2Z;
 # molecule 2
-  $xCorr[2] = $cell2;
-  $yCorr[2] = $cell2;
+  $xCorr[2] = $cell2X;
+  $yCorr[2] = $cell2Y;
   $zCorr[2] = 0.0;
 # molecule 3
-  $xCorr[3] = $cell2;
+  $xCorr[3] = $cell2X;
   $yCorr[3] = 0.0;
-  $zCorr[3] = $cell2;
+  $zCorr[3] = $cell2Z;
 # assemble the lattice
   $counter = 0;
-  for ($z = 0; $z < $crystalNum; $z++) {
-    for ($y = 0; $y < $crystalNum; $y++) {
-      for ($x = 0; $x < $crystalNum; $x++) {
+  for ($z = 0; $z < $nx; $z++) {
+    for ($y = 0; $y < $ny; $y++) {
+      for ($x = 0; $x < $nz; $x++) {
 	for ($uc = 0; $uc < 4; $uc++) {
-	  $xCorr[$uc+$counter] = $xCorr[$uc] + $cellLength*$x;
-	  $yCorr[$uc+$counter] = $yCorr[$uc] + $cellLength*$y;
-	  $zCorr[$uc+$counter] = $zCorr[$uc] + $cellLength*$z;
+	  $xCorr[$uc+$counter] = $xCorr[$uc] + $cellLengthX*$x;
+	  $yCorr[$uc+$counter] = $yCorr[$uc] + $cellLengthY*$y;
+	  $zCorr[$uc+$counter] = $zCorr[$uc] + $cellLengthZ*$z;
 	}
 	$counter = $counter + 4;
       }
@@ -187,19 +270,19 @@ if ($lattice == 0) {
   }
   
 } elsif ($lattice == 1) {
-# build the unit cell
-# molecule 0
-  $xCorr[0] = $cell2;
-  $yCorr[0] = $cell2;
-  $zCorr[0] = $cell2;
+  # build the unit cell
+  # molecule 0
+  $xCorr[0] = $cell2X;
+  $yCorr[0] = $cell2Y;
+  $zCorr[0] = $cell2Z;
 #assemble the lattice
   $counter = 0;
-  for ($z = 0; $z < $crystalNum; $z++) {
-    for ($y = 0; $y < $crystalNum; $y++) {
-      for ($x = 0; $x < $crystalNum; $x++) {
-	$xCorr[$counter] = $xCorr[0] + $cellLength*$x;
-	$yCorr[$counter] = $yCorr[0] + $cellLength*$y;
-	$zCorr[$counter] = $zCorr[0] + $cellLength*$z;
+  for ($z = 0; $z < $nx; $z++) {
+    for ($y = 0; $y < $ny; $y++) {
+      for ($x = 0; $x < $nz; $x++) {
+	$xCorr[$counter] = $xCorr[0] + $cellLengthX*$x;
+	$yCorr[$counter] = $yCorr[0] + $cellLengthY*$y;
+	$zCorr[$counter] = $zCorr[0] + $cellLengthZ*$z;
 	
 	$counter++;
       }
@@ -239,9 +322,9 @@ sub writeOutFile {
   
   # shift the box center to the origin and write out the coordinates
   for ($i = 0; $i < $nMol; $i++) {
-    $xCorr[$i] -= 0.5*$boxLength;
-    $yCorr[$i] -= 0.5*$boxLength;
-    $zCorr[$i] -= 0.5*$boxLength;
+    $xCorr[$i] -= 0.5*$boxx;
+    $yCorr[$i] -= 0.5*$boxy;
+    $zCorr[$i] -= 0.5*$boxz;
     
     $q0 = 1.0;
     $q1 = 0.0;
@@ -307,7 +390,15 @@ statusTime = 2;
 }
 
 sub findCutoff {
-  $boxLength2 = 0.5*$boxLength;
+  if ($boxy < $boxx) {
+    $bm = $boxy;
+  } else {
+    $bm = $boxx;
+  } 
+  if ($boxz < $bm) {
+    $bm = $boxz;
+  }
+  $boxLength2 = 0.5*$bm;
   if ($boxLength2 > $cutoff){
     # the default is good
   } else {
@@ -324,7 +415,7 @@ print OUTFILE
 "  <Snapshot>
     <FrameData>
         Time: 0
-        Hmat: {{ $boxLength, 0, 0 }, { 0, $boxLength, 0 }, { 0, 0, $boxLength }}
+        Hmat: {{ $boxx, 0, 0 }, { 0, $boxy, 0 }, { 0, 0, $boxz }}
     </FrameData>\n";
 }
 
