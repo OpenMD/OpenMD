@@ -1,0 +1,249 @@
+#!/usr/bin/env perl
+
+# program that reads in a water box and solute (md), merges the two systems, 
+# and deletes overlapping molecules
+
+# author    = "Dan Gezelter"
+# version   = "$Revision: 1.1 $"
+# date      = "$Date: 2007-01-11 21:46:14 $"
+# copyright = "Copyright (c) 2007 by the University of Notre Dame"
+# license   = "OOPSE"
+
+
+use Getopt::Std;
+
+$d2tolerance = 7.5625; #distance to start cutting
+$fileName = 'solvatedSystem.md';
+$startSnap = 0;
+$startFrame = 0;
+$startStunts = 0;
+$startMeta = 0;
+$nSolvent = 0;
+
+# get our options
+getopts('hd:v:u:o:');
+
+# if we don't have a filename, drop to -h
+$opt_h = 'true' if $#ARGV != -1;
+
+# our option output 
+if ($opt_h){
+  print "solvator: carves a solute void in an oopse water box\n\n";
+  print "usage: solvator [-h] [-d distance tolerance] [-v file name (solvent)]";
+  print "  [-u file name (solute)] [-o file name (output)]\n\n";
+  print "  -h : show this message\n\n";
+  print "  -d real : overlap removal distance\n";
+  print "                 (default: 2.75 ang)\n";
+  print "  -u char : solute input file (oopse .md file)\n";
+  print "  -v char : solvent input file (oopse .md file)\n";
+  print "  -o char : carved solvent output file (oopse .md format)\n";
+  print "                 (default: 'solvatedSystem.md')\n";
+  print "Example:\n";
+  die   "   md-solvator -v freshWater.md -u mySolute.md -o mySystem.md\n";
+}
+
+# set some variables to be used in the code
+if (defined($opt_v)){
+  $solventName = $opt_v;
+} else {
+  die "Error: No solvent box specified\n       Please select a solvent box using the -v flag\n";
+}
+
+$soluteFileName = $opt_u if defined($opt_u);
+$fileName = $opt_o if defined($opt_o);
+
+if (!defined($opt_u)){
+  die "Error: No solute file specifed\n       Please select a solute file with the -u flag\n";
+}
+
+if (defined($opt_d)){
+  if ($opt_d =~ /^[0-9]/) {
+    $dval = $opt_d;
+    $d2tolerance = $dval*$dval;
+  } else {
+    die "Error: The '-d' value ($opt_d) is not a valid number\n       Please choose a positive real # value\n";
+  }
+}
+
+# open the file writer
+open(OUTFILE, ">./$fileName") || die "Error: can't open file $fileName\n";
+
+# open and read the pdb or xyz file and get solute coordinates
+open(SOLUTEFILE, "$soluteFileName") || die "Error: Can't open file $soluteFileName\n";
+
+
+while (<SOLUTEFILE>){
+  $startSnap = 0 if /\/Snapshot/;
+  $startFrame = 0 if /\/FrameData/;
+  $startStunts = 0 if /\/StuntDoubles/;
+  $startMeta = 0 if /\/MetaData/;
+
+  # save the MetaData lines
+  push(@soluteMetaLines, $_) if $startMeta == 1;
+
+  if ($startSnap == 1){
+    # save the frame data
+    push(@soluteFrameData, $_) if $startFrame == 1;
+    if (/Hmat/){
+      @line = split;
+      $soluteHxx = $line[2];
+      chop($soluteHxx);
+      $soluteHyy = $line[8];
+      chop($soluteHyy);
+      $soluteHzz = $line[14];
+    }
+    if ($startStunts == 1){
+      @line = split;
+      $x_val = $line[2] - ($soluteHxx*round($line[2]/$soluteHxx));
+      $y_val = $line[3] - ($soluteHyy*round($line[3]/$soluteHyy));
+      $z_val = $line[4] - ($soluteHzz*round($line[4]/$soluteHzz));
+
+      push(@solute_x, $x_val);
+      push(@solute_y, $y_val);
+      push(@solute_z, $z_val);
+      $saveLine = "";
+      for ($i = 0; $i <= $#line; $i++){
+        $saveLine = join(' ', $saveLine, $line[$i]);
+      }
+      push(@soluteStuntDoubles, $saveLine);
+      $soluteCount++;
+    }
+  }
+  $startSnap = 1 if /Snapshot/;
+  $startFrame = 1 if /FrameData/;
+  $startStunts = 1 if /StuntDoubles/;
+  $startMeta = 1 if /MetaData/;
+  # check again since "/value" contains "value"
+  $startSnap = 0 if /\/Snapshot/;
+  $startFrame = 0 if /\/FrameData/;
+  $startStunts = 0 if /\/StuntDoubles/;
+  $startMeta = 0 if /\/MetaData/;
+}
+
+$solventCount = $soluteCount;
+# okay, let's open the solvent box and write a carved file
+open(SOLVENT, "$solventName") || die "Error: Can't open file $solventName\n";
+
+
+while (<SOLVENT>){
+  $startSnap = 0 if /\/Snapshot/;
+  $startFrame = 0 if /\/FrameData/;
+  $startStunts = 0 if /\/StuntDoubles/;
+  $startMeta = 0 if /\/MetaData/;
+
+  # save the MetaData lines
+  push(@metaLines, $_) if $startMeta == 1;
+
+  if ($startSnap == 1){
+    # save the frame data
+    push(@frameData, $_) if $startFrame == 1;
+    if (/Hmat/){
+      @line = split;
+      $hxx = $line[2];
+      chop($hxx);
+      $hyy = $line[8];
+      chop($hyy);
+      $hzz = $line[14];
+    }
+    if ($startStunts == 1){
+      @line = split;
+
+      # wrap positions back into the box
+      $x_val = $line[2] - ($hxx*round($line[2]/$hxx));
+      $y_val = $line[3] - ($hyy*round($line[3]/$hyy));
+      $z_val = $line[4] - ($hzz*round($line[4]/$hzz));
+
+      $saveFlag = 1;
+      for($i=0; $i<=$#solute_x; $i++){
+	$diff_x = $x_val - $solute_x[$i];
+	$diff_y = $y_val - $solute_y[$i];
+	$diff_z = $z_val - $solute_z[$i];
+	$dist2 = $diff_x*$diff_x + $diff_y*$diff_y + $diff_z*$diff_z;
+	if ($dist2 < $d2tolerance) {
+	  $saveFlag = 0;
+	  last;
+	}
+      }
+      if ($saveFlag == 1){
+	$saveLine = "$solventCount\t$line[1]\t$line[2]";
+	for ($i = 3; $i <= $#line; $i++){
+	  $saveLine = join(' ', $saveLine, $line[$i]);
+	}
+	push(@goodSolventMolecules, $saveLine);
+	$solventCount++;
+      }
+    }
+  }
+  $startSnap = 1 if /Snapshot/;
+  $startFrame = 1 if /FrameData/;
+  $startStunts = 1 if /StuntDoubles/;
+  $startMeta = 1 if /MetaData/;
+  # check again since "/value" contains "value"
+  $startSnap = 0 if /\/Snapshot/;
+  $startFrame = 0 if /\/FrameData/;
+  $startStunts = 0 if /\/StuntDoubles/;
+  $startMeta = 0 if /\/MetaData/;
+}
+
+$nSolvent = $#goodSolventMolecules + 1;
+
+# write out the final file
+writeOutFile();
+print "The solvated system \"$fileName\" was generated.\n";
+
+
+sub writeOutFile {
+  # write out the header
+  print OUTFILE "<OOPSE version=4>\n";
+  printMetaData();
+  printFrameData();
+  print OUTFILE "    <StuntDoubles>\n";
+  # now print out the atoms
+  for ($i=0; $i<=$#solute_x; $i++){
+    print OUTFILE "$soluteStuntDoubles[$i]\n";
+  }
+  for ($i=0; $i<=$#goodSolventMolecules; $i++) {
+     print OUTFILE "$goodSolventMolecules[$i]\n";
+  }
+  print OUTFILE "    </StuntDoubles>\n  </Snapshot>\n</OOPSE>\n";
+}
+
+sub printMetaData() {
+  print OUTFILE "  <MetaData>\n";
+
+  writeSoluteDescription();
+
+  for ($i = 0; $i<=$#metaLines; $i++) {
+    # reset the number of solvent molecules
+    if ($metaLines[$i] =~ /nMol/) {
+      $metaLines[$i] = "  nMol = $nSolvent;\n";
+    }
+
+    print OUTFILE "$metaLines[$i]";
+  }
+
+  print OUTFILE "  </MetaData>\n";
+}
+
+sub writeSoluteDescription {
+  # include a solute model description in the meta data region
+
+  for ($i = 0; $i<=$#soluteMetaLines; $i++) {
+    print OUTFILE "$soluteMetaLines[$i]";
+  }
+  print "The solute model definition was included in '$fileName'.\n";
+}
+
+sub printFrameData {
+  print OUTFILE "  <Snapshot>\n    <FrameData>\n";
+
+  for($i = 0; $i<=$#frameData; $i++) {
+    print OUTFILE "$frameData[$i]";
+  }
+
+  print OUTFILE "    </FrameData>\n";
+}
+
+sub round {
+  return int( $_[0] + 0.5 * ($_[0] <=> 0) );
+}
