@@ -170,11 +170,18 @@ int main(int argc, char* argv[]){
     
   //create xyzVisitor
   XYZVisitor* xyzVisitor;
+
   if (args_info.selection_given) {
     xyzVisitor = new XYZVisitor(info, args_info.selection_arg);
   } else {
     xyzVisitor = new XYZVisitor(info);
   }
+
+  if(args_info.printPosOnly_flag){
+    bool posOnly = true;
+    xyzVisitor->setPosOnly(posOnly);
+  }
+
   compositeVisitor->addVisitor(xyzVisitor, 200);
   
   std::cout << compositeVisitor->toString();
