@@ -113,7 +113,7 @@ namespace oopse {
     
     void writeFrame(std::ostream& outStream);    
     void clear() {frame.clear();}
-    
+    void setPosOnly(bool posOnly){posOnly_ = posOnly;}
   protected:
     void internalVisit(StuntDouble* sd);
     bool isSelected(StuntDouble* sd);
@@ -123,7 +123,7 @@ namespace oopse {
     SelectionManager seleMan;
     SelectionEvaluator evaluator; 
     std::vector<std::string> frame;
-
+    bool posOnly_;
   };
 
 

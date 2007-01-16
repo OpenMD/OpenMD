@@ -235,7 +235,7 @@ namespace oopse {
       if (!evaluator.isDynamic()) {
         seleMan.setSelectionSet(evaluator.evaluate());
       }
-
+      posOnly_ = false;
     }
 
   XYZVisitor::XYZVisitor(SimInfo *info, const std::string& script) :
@@ -248,7 +248,7 @@ namespace oopse {
       if (!evaluator.isDynamic()) {
         seleMan.setSelectionSet(evaluator.evaluate());
       }
-          
+      posOnly_ = false;
     }
     
   void XYZVisitor::visit(Atom *atom) {
@@ -291,18 +291,31 @@ namespace oopse {
     } else
       return;
 
-    for( atomInfo = atomData->beginAtomInfo(i); atomInfo;
-	 atomInfo = atomData->nextAtomInfo(i) ) {
-      sprintf(buffer,
-	      "%s%15.8f%15.8f%15.8f%15.8f%15.8f%15.8f",
-	      atomInfo->atomTypeName.c_str(),
-	      atomInfo->pos[0],
-	      atomInfo->pos[1],
-	      atomInfo->pos[2],
-	      atomInfo->dipole[0],
-	      atomInfo->dipole[1],
-	      atomInfo->dipole[2]); 
-      frame.push_back(buffer);
+    if (posOnly_){
+      for( atomInfo = atomData->beginAtomInfo(i); atomInfo;
+	   atomInfo = atomData->nextAtomInfo(i) ) {
+	sprintf(buffer,
+		"%s%15.8f%15.8f%15.8f",
+		atomInfo->atomTypeName.c_str(),
+		atomInfo->pos[0],
+		atomInfo->pos[1],
+		atomInfo->pos[2]); 
+	frame.push_back(buffer);
+      }
+    }else{
+      for( atomInfo = atomData->beginAtomInfo(i); atomInfo;
+	   atomInfo = atomData->nextAtomInfo(i) ) {
+	sprintf(buffer,
+		"%s%15.8f%15.8f%15.8f%15.8f%15.8f%15.8f",
+		atomInfo->atomTypeName.c_str(),
+		atomInfo->pos[0],
+		atomInfo->pos[1],
+		atomInfo->pos[2],
+		atomInfo->dipole[0],
+		atomInfo->dipole[1],
+		atomInfo->dipole[2]); 
+	frame.push_back(buffer);
+      }
     }
   }
 
