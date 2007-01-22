@@ -4,8 +4,8 @@
 # and deletes overlapping molecules
 
 # author    = "Dan Gezelter"
-# version   = "$Revision: 1.1 $"
-# date      = "$Date: 2007-01-11 21:46:14 $"
+# version   = "$Revision: 1.2 $"
+# date      = "$Date: 2007-01-22 22:27:37 $"
 # copyright = "Copyright (c) 2007 by the University of Notre Dame"
 # license   = "OOPSE"
 
@@ -101,8 +101,8 @@ while (<SOLUTEFILE>){
       push(@solute_x, $x_val);
       push(@solute_y, $y_val);
       push(@solute_z, $z_val);
-      $saveLine = "";
-      for ($i = 0; $i <= $#line; $i++){
+      $saveLine = "$line[0]\t$line[1]\t$x_val\t$y_val\t$z_val";
+      for ($i = 5; $i <= $#line; $i++){
         $saveLine = join(' ', $saveLine, $line[$i]);
       }
       push(@soluteStuntDoubles, $saveLine);
