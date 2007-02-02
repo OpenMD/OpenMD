@@ -39,6 +39,7 @@
  * such damages.
  */
 #include <fstream> 
+#include <iostream>
 #include "integrators/LDForceManager.hpp"
 #include "math/CholeskyDecomposition.hpp"
 #include "utils/OOPSEConstant.hpp"
@@ -263,9 +264,11 @@ namespace oopse {
     bool doLangevinForces;
     bool freezeMolecule;
     int fdf;
-
+    int nIntegrated;
+    int nFrozen;
 
     fdf = 0;
+
     for (mol = info_->beginMolecule(i); mol != NULL; mol = info_->nextMolecule(i)) {
 
       doLangevinForces = true;           
@@ -275,7 +278,7 @@ namespace oopse {
         
         Vector3d molPos = mol->getCom();
         RealType molRad = molPos.length();
-        
+
         doLangevinForces = false;
         
         if (molRad > langevinBufferRadius_) { 
@@ -294,7 +297,7 @@ namespace oopse {
         if (freezeMolecule) 
           fdf += integrableObject->freeze();
         
-        if (doLangevinForces) {          
+        if (doLangevinForces) {  
           vel =integrableObject->getVel(); 
           if (integrableObject->isDirectional()){
             //calculate angular velocity in lab frame
@@ -352,8 +355,8 @@ namespace oopse {
     
       }
     }    
-    info_->setFdf(fdf);
 
+    info_->setFdf(fdf);
     veloMunge->removeComDrift();
     // Remove angular drift if we are not using periodic boundary conditions.
     if(!simParams->getUsePeriodicBoundaryConditions()) 
