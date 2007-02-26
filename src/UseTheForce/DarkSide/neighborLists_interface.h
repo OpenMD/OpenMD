@@ -42,7 +42,7 @@
  *
  *  Created by Charles F. Vardeman II on 04 Dec 2006.
  *  @author  Charles F. Vardeman II
- *  @version $Id: neighborLists_interface.h,v 1.1 2006-12-05 00:17:24 chuckv Exp $
+ *  @version $Id: neighborLists_interface.h,v 1.2 2007-02-26 04:45:42 chuckv Exp $
  *
  */
 
@@ -57,7 +57,7 @@
 #define setNeighbors FC_FUNC(setneighbors, SETNEIGHBORS)
 
 extern "C"{
-  void setNeighbors( int nNeighbors);
+  void setNeighbors( int* nNeighbors);
 }  
 #endif
 

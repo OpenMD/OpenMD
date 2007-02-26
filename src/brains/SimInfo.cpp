@@ -873,7 +873,8 @@ namespace oopse {
 
     // Setup number of neighbors in neighbor list if present
     if (simParams_->haveNeighborListNeighbors()) {
-      setNeighbors(simParams_->getNeighborListNeighbors());
+      int nlistNeighbors = simParams_->getNeighborListNeighbors();
+      setNeighbors(&nlistNeighbors);
     }
    
 
