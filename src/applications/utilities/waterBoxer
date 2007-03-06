@@ -3,8 +3,8 @@
 # program that builds water boxes
 
 # author    = "Chris Fennell
-# version   = "$Revision: 1.3 $"
-# date      = "$Date: 2007-01-22 22:27:37 $"
+# version   = "$Revision: 1.4 $"
+# date      = "$Date: 2007-03-06 00:01:51 $"
 # copyright = "Copyright (c) 2006 by the University of Notre Dame"
 # license   = "OOPSE"
 
@@ -170,7 +170,7 @@ if ($lattice == 0){
   }
 } elsif ($lattice == 1){
   $crystalNumReal = ($nMol/1.0)**(1.0/3.0);
-  $crystalNum = int($crystalNumReal);
+  $crystalNum = int($crystalNumReal + $tolerance);
   $remainder = $crystalNumReal - $crystalNum;
   
   # again, if crystalNumReal wasn't an integer, we bump the crystal to the next
