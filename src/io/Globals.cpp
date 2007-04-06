@@ -65,7 +65,7 @@ Globals::Globals() {
   DefineOptionalParameter(SwitchingRadius, "switchingRadius");
   DefineOptionalParameter(TempSet, "tempSet");
   DefineOptionalParameter(ThermalTime, "thermalTime");
-  DefineOptionalParameter(TargetPressure, "targetPressure");
+  DefineOptionalParameter(TargetPressure, "targetPressure");  
   DefineOptionalParameter(TauThermostat, "tauThermostat");
   DefineOptionalParameter(TauBarostat, "tauBarostat");
   DefineOptionalParameter(ZconsTime, "zconsTime");
@@ -108,6 +108,7 @@ Globals::Globals() {
 
   
   DefineOptionalParameterWithDefaultValue(UsePeriodicBoundaryConditions, "usePeriodicBoundaryConditions", true);
+  DefineOptionalParameterWithDefaultValue(UseAtomicVirial, "useAtomicVirial", true);
   DefineOptionalParameterWithDefaultValue(UseInitalTime, "useInitialTime", false);
   DefineOptionalParameterWithDefaultValue(UseIntialExtendedSystemState, "useInitialExtendedSystemState", false);
   DefineOptionalParameterWithDefaultValue(OrthoBoxTolerance, "orthoBoxTolerance", 1E-6);  

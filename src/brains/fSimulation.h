@@ -27,6 +27,7 @@ typedef  struct{
   int SIM_uses_SC;
   int SIM_uses_MEAM;
   int SIM_uses_BoxDipole;
+  int SIM_uses_AtomicVirial;
 } simtype;
 #endif /*__FSIMULATION*/
 #endif /*__C*/
@@ -55,6 +56,7 @@ typedef  struct{
     logical :: SIM_uses_SC
     logical :: SIM_uses_MEAM
     logical :: SIM_uses_BoxDipole
+    logical :: SIM_uses_AtomicVirial
   end type simtype
 
 #endif

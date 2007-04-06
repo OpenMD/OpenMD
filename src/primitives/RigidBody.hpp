@@ -110,11 +110,14 @@ namespace oopse{
 
     void addAtom(Atom* at, AtomStamp* ats);
 
-    /** calculate the reference coordinates */
+    /** calculates the reference coordinates */
     void calcRefCoords();
 
-    /** Convert Atomic forces and torques to total forces and torques */
+    /** Converts Atomic forces and torques to total forces and torques */
     void calcForcesAndTorques();
+
+    /** Converts Atomic forces and torques to total forces and torques and computes the rigid body contribution to the virial.  Returns the rigid body contribution to the virial as a 3x3 matrix. */
+    Mat3x3d calcForcesAndTorquesAndVirial();
 
     /** update the positions of atoms belong to this rigidbody */
     void updateAtoms();

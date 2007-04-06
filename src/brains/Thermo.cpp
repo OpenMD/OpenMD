@@ -209,7 +209,7 @@ namespace oopse {
     RealType volume = this->getVolume();
     Snapshot* curSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
     Mat3x3d tau = curSnapshot->statData.getTau();
-    
+
     pressureTensor =  (p_global + OOPSEConstant::energyConvert* tau)/volume;
     
     return pressureTensor;
@@ -228,9 +228,15 @@ namespace oopse {
     stat[Stats::VOLUME] = getVolume();      
 
     Mat3x3d tensor =getPressureTensor();
-    stat[Stats::PRESSURE_TENSOR_X] = tensor(0, 0);      
-    stat[Stats::PRESSURE_TENSOR_Y] = tensor(1, 1);      
-    stat[Stats::PRESSURE_TENSOR_Z] = tensor(2, 2);      
+    stat[Stats::PRESSURE_TENSOR_XX] = tensor(0, 0);      
+    stat[Stats::PRESSURE_TENSOR_XY] = tensor(0, 1);      
+    stat[Stats::PRESSURE_TENSOR_XZ] = tensor(0, 2);      
+    stat[Stats::PRESSURE_TENSOR_YX] = tensor(1, 0);      
+    stat[Stats::PRESSURE_TENSOR_YY] = tensor(1, 1);      
+    stat[Stats::PRESSURE_TENSOR_YZ] = tensor(1, 2);      
+    stat[Stats::PRESSURE_TENSOR_ZX] = tensor(2, 0);      
+    stat[Stats::PRESSURE_TENSOR_ZY] = tensor(2, 1);      
+    stat[Stats::PRESSURE_TENSOR_ZZ] = tensor(2, 2);      
 
 
     /**@todo need refactorying*/

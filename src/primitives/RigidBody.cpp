@@ -221,7 +221,7 @@ namespace oopse {
     Vector3d apos;
     Vector3d rpos;
     Vector3d frc(0.0);
-    Vector3d trq(0.0);
+    Vector3d trq(0.0);    
     Vector3d pos = this->getPos();
     for (int i = 0; i < atoms_.size(); i++) {
 
@@ -241,13 +241,56 @@ namespace oopse {
       if (atoms_[i]->isDirectional()) {
 	atrq = atoms_[i]->getTrq();
 	trq += atrq;
-      }
+      }      
+    }         
+    addFrc(frc);
+    addTrq(trq);    
+  }
+
+  Mat3x3d RigidBody::calcForcesAndTorquesAndVirial() {
+    Vector3d afrc;
+    Vector3d atrq;
+    Vector3d apos;
+    Vector3d rpos;
+    Vector3d frc(0.0);
+    Vector3d trq(0.0);    
+    Vector3d pos = this->getPos();
+    Mat3x3d tau_(0.0);
+
+    for (int i = 0; i < atoms_.size(); i++) {
+
+      afrc = atoms_[i]->getFrc();
+      apos = atoms_[i]->getPos();
+      rpos = apos - pos;
         
-    }
-    
+      frc += afrc;
+
+      trq[0] += rpos[1]*afrc[2] - rpos[2]*afrc[1];
+      trq[1] += rpos[2]*afrc[0] - rpos[0]*afrc[2];
+      trq[2] += rpos[0]*afrc[1] - rpos[1]*afrc[0];
+
+      // If the atom has a torque associated with it, then we also need to 
+      // migrate the torques onto the center of mass:
+
+      if (atoms_[i]->isDirectional()) {
+	atrq = atoms_[i]->getTrq();
+	trq += atrq;
+      }
+      
+      tau_(0,0) -= rpos[0]*afrc[0];
+      tau_(0,1) -= rpos[0]*afrc[1];
+      tau_(0,2) -= rpos[0]*afrc[2];
+      tau_(1,0) -= rpos[1]*afrc[0];
+      tau_(1,1) -= rpos[1]*afrc[1];
+      tau_(1,2) -= rpos[1]*afrc[2];
+      tau_(2,0) -= rpos[2]*afrc[0];
+      tau_(2,1) -= rpos[2]*afrc[1];
+      tau_(2,2) -= rpos[2]*afrc[2];
+      
+    }         
     addFrc(frc);
     addTrq(trq);
-    
+    return tau_;
   }
 
   void  RigidBody::updateAtoms() {

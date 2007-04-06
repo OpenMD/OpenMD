@@ -388,6 +388,10 @@ namespace oopse{
       return calcBoxDipole_;
     }
 
+    bool getUseAtomicVirial() {
+      return useAtomicVirial_;
+    }
+
     //below functions are just forward functions
     //To compose or to inherit is always a hot debate. In general, is-a relation need subclassing, in the
     //the other hand, has-a relation need composing.
@@ -554,9 +558,14 @@ namespace oopse{
     RealType rsw_;        /**< radius of switching function*/
     RealType rlist_;      /**< neighbor list radius */
 
-    bool fortranInitialized_; /**< flag indicate whether fortran side is initialized */
-
-    bool calcBoxDipole_; /**< flag to indicate whether or not we calculate the simulation box dipole moment */
+    bool fortranInitialized_; /**< flag indicate whether fortran side 
+                                 is initialized */
+    
+    bool calcBoxDipole_; /**< flag to indicate whether or not we calculate 
+                            the simulation box dipole moment */
+    
+    bool useAtomicVirial_; /**< flag to indicate whether or not we use 
+                              Atomic Virials to calculate the pressure */
 
     public:
      /**

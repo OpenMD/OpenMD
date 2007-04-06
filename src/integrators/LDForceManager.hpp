@@ -66,7 +66,7 @@ namespace oopse {
     LDForceManager(SimInfo * info);
     
   protected:
-    virtual void postCalculation();
+    virtual void postCalculation(bool needStress);
     
   private:
     std::map<std::string, HydroProp*> parseFrictionFile(const std::string& filename);    

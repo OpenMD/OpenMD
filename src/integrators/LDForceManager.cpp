@@ -247,7 +247,7 @@ namespace oopse {
     return props;
   }
    
-  void LDForceManager::postCalculation() {
+  void LDForceManager::postCalculation(bool needStress){
     SimInfo::MoleculeIterator i;
     Molecule::IntegrableObjectIterator  j;
     Molecule* mol;
@@ -362,7 +362,7 @@ namespace oopse {
     if(!simParams->getUsePeriodicBoundaryConditions()) 
       veloMunge->removeAngularDrift();
 
-    ForceManager::postCalculation();   
+    ForceManager::postCalculation(needStress);   
   }
 
 void LDForceManager::genRandomForceAndTorque(Vector3d& force, Vector3d& torque, unsigned int index, RealType variance) {
@@ -370,7 +370,6 @@ void LDForceManager::genRandomForceAndTorque(Vector3d& force, Vector3d& torque, 
 
     Vector<RealType, 6> Z;
     Vector<RealType, 6> generalForce;
-
         
     Z[0] = randNumGen_.randNorm(0, variance);
     Z[1] = randNumGen_.randNorm(0, variance);

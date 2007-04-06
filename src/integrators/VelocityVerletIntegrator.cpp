@@ -234,9 +234,15 @@ namespace oopse {
 
     if (simParams->havePrintPressureTensor() && 
 	simParams->getPrintPressureTensor()){
-        mask.set(Stats::PRESSURE_TENSOR_X);
-        mask.set(Stats::PRESSURE_TENSOR_Y);
-        mask.set(Stats::PRESSURE_TENSOR_Z);
+        mask.set(Stats::PRESSURE_TENSOR_XX);
+        mask.set(Stats::PRESSURE_TENSOR_XY);
+        mask.set(Stats::PRESSURE_TENSOR_XZ);
+        mask.set(Stats::PRESSURE_TENSOR_YX);
+        mask.set(Stats::PRESSURE_TENSOR_YY);
+        mask.set(Stats::PRESSURE_TENSOR_YZ);
+        mask.set(Stats::PRESSURE_TENSOR_ZX);
+        mask.set(Stats::PRESSURE_TENSOR_ZY);
+        mask.set(Stats::PRESSURE_TENSOR_ZZ);
     }
     
     if (simParams->getAccumulateBoxDipole()) {

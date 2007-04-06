@@ -43,7 +43,7 @@
 !! Calculates Long Range forces Lennard-Jones interactions.
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: LJ.F90,v 1.25 2006-05-17 15:37:14 gezelter Exp $, $Date: 2006-05-17 15:37:14 $, $Name: not supported by cvs2svn $, $Revision: 1.25 $
+!! @version $Id: LJ.F90,v 1.26 2007-04-06 21:53:42 gezelter Exp $, $Date: 2007-04-06 21:53:42 $, $Name: not supported by cvs2svn $, $Revision: 1.26 $
 
 
 module lj
@@ -318,7 +318,7 @@ contains
 
        if (shiftedPot) then
           rcos = rcut * sigmai
-          call getLJfunc(rcos, myPotC, myDerivC)
+          call getLJfunc(rcos, myPotC, myDerivC) 
        endif
        
     endif

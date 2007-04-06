@@ -45,7 +45,7 @@
 
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: doForces.F90,v 1.84 2006-07-03 13:18:43 chrisfen Exp $, $Date: 2006-07-03 13:18:43 $, $Name: not supported by cvs2svn $, $Revision: 1.84 $
+!! @version $Id: doForces.F90,v 1.85 2007-04-06 21:53:41 gezelter Exp $, $Date: 2007-04-06 21:53:41 $, $Name: not supported by cvs2svn $, $Revision: 1.85 $
 
 
 module doForces
@@ -106,6 +106,7 @@ module doForces
   logical, save :: SIM_requires_postpair_calc
   logical, save :: SIM_requires_prepair_calc
   logical, save :: SIM_uses_PBC
+  logical, save :: SIM_uses_AtomicVirial
 
   integer, save :: electrostaticSummationMethod
   integer, save :: cutoffPolicy = TRADITIONAL_CUTOFF_POLICY
@@ -613,7 +614,7 @@ contains
      haveGtypeCutoffMap = .false.
      
    end subroutine setCutoffPolicy
-   
+     
    subroutine setBoxDipole()
 
      do_box_dipole = .true.
@@ -654,6 +655,7 @@ contains
      SIM_requires_prepair_calc = SimRequiresPrepairCalc()
      SIM_uses_PBC = SimUsesPBC()
      SIM_uses_SC = SimUsesSC()
+     SIM_uses_AtomicVirial = SimUsesAtomicVirial()
 
      haveSIMvariables = .true.
      
@@ -813,11 +815,11 @@ contains
     integer :: istart, iend
     integer :: ia, jb, atom1, atom2
     integer :: nlist
-    real( kind = DP ) :: ratmsq, rgrpsq, rgrp, vpair, vij
+    real( kind = DP ) :: ratmsq, rgrpsq, rgrp, rag, vpair, vij
     real( kind = DP ) :: sw, dswdr, swderiv, mf
     real( kind = DP ) :: rVal
-    real(kind=dp),dimension(3) :: d_atm, d_grp, fpair, fij
-    real(kind=dp) :: rfpot, mu_i, virial
+    real(kind=dp),dimension(3) :: d_atm, d_grp, fpair, fij, fg, dag
+    real(kind=dp) :: rfpot, mu_i
     real(kind=dp):: rCut
     integer :: me_i, me_j, n_in_i, n_in_j
     logical :: is_dp_i
@@ -1086,6 +1088,9 @@ contains
                             fij(1) = fij(1) + fpair(1)
                             fij(2) = fij(2) + fpair(2)
                             fij(3) = fij(3) + fpair(3)
+                            if (do_stress.and.SIM_uses_AtomicVirial) then
+                               call add_stress_tensor(d_atm, fpair, tau)
+                            endif
                          endif
                       enddo inner
                    enddo
@@ -1100,33 +1105,65 @@ contains
                          do ia=groupStartRow(i), groupStartRow(i+1)-1
                             atom1=groupListRow(ia)
                             mf = mfactRow(atom1)
+                            ! fg is the force on atom ia due to cutoff group's
+                            ! presence in switching region
+                            fg = swderiv*d_grp*mf
 #ifdef IS_MPI
-                            f_Row(1,atom1) = f_Row(1,atom1) + swderiv*d_grp(1)*mf
-                            f_Row(2,atom1) = f_Row(2,atom1) + swderiv*d_grp(2)*mf
-                            f_Row(3,atom1) = f_Row(3,atom1) + swderiv*d_grp(3)*mf
+                            f_Row(1,atom1) = f_Row(1,atom1) + fg(1)
+                            f_Row(2,atom1) = f_Row(2,atom1) + fg(2)
+                            f_Row(3,atom1) = f_Row(3,atom1) + fg(3)
 #else
-                            f(1,atom1) = f(1,atom1) + swderiv*d_grp(1)*mf
-                            f(2,atom1) = f(2,atom1) + swderiv*d_grp(2)*mf
-                            f(3,atom1) = f(3,atom1) + swderiv*d_grp(3)*mf
+                            f(1,atom1) = f(1,atom1) + fg(1)
+                            f(2,atom1) = f(2,atom1) + fg(2)
+                            f(3,atom1) = f(3,atom1) + fg(3)
 #endif
+                            if (do_stress.and.SIM_uses_AtomicVirial) then
+                               ! find the distance between the atom and the center of
+                               ! the cutoff group:
+#ifdef IS_MPI
+                               call get_interatomic_vector(q_Row(:,atom1), &
+                                    q_group_Row(:,i), dag, rag)
+#else
+                               call get_interatomic_vector(q(:,atom1), &
+                                    q_group(:,i), dag, rag)
+#endif
+                               call add_stress_tensor(dag,fg,tau)
+                            endif
                          enddo
                          
                          do jb=groupStartCol(j), groupStartCol(j+1)-1
                             atom2=groupListCol(jb)
                             mf = mfactCol(atom2)
+                            ! fg is the force on atom jb due to cutoff group's
+                            ! presence in switching region
+                            fg = -swderiv*d_grp*mf
 #ifdef IS_MPI
-                            f_Col(1,atom2) = f_Col(1,atom2) - swderiv*d_grp(1)*mf
-                            f_Col(2,atom2) = f_Col(2,atom2) - swderiv*d_grp(2)*mf
-                            f_Col(3,atom2) = f_Col(3,atom2) - swderiv*d_grp(3)*mf
+                            f_Col(1,atom2) = f_Col(1,atom2) + fg(1)
+                            f_Col(2,atom2) = f_Col(2,atom2) + fg(2)
+                            f_Col(3,atom2) = f_Col(3,atom2) + fg(3)
 #else
-                            f(1,atom2) = f(1,atom2) - swderiv*d_grp(1)*mf
-                            f(2,atom2) = f(2,atom2) - swderiv*d_grp(2)*mf
-                            f(3,atom2) = f(3,atom2) - swderiv*d_grp(3)*mf
+                            f(1,atom2) = f(1,atom2) + fg(1)
+                            f(2,atom2) = f(2,atom2) + fg(2)
+                            f(3,atom2) = f(3,atom2) + fg(3)
 #endif
+                            if (do_stress.and.SIM_uses_AtomicVirial) then
+                               ! find the distance between the atom and the center of
+                               ! the cutoff group:
+#ifdef IS_MPI
+                               call get_interatomic_vector(q_Col(:,atom2), &
+                                    q_group_Col(:,j), dag, rag)
+#else
+                               call get_interatomic_vector(q(:,atom2), &
+                                    q_group(:,j), dag, rag)
+#endif
+                               call add_stress_tensor(dag,fg,tau)                               
+                            endif
+                            
                          enddo
                       endif
-
-                      if (do_stress) call add_stress_tensor(d_grp, fij)
+                      if (do_stress.and.(.not.SIM_uses_AtomicVirial)) then
+                         call add_stress_tensor(d_grp, fij, tau)
+                      endif
                    endif
                 endif
              endif
@@ -1283,21 +1320,7 @@ contains
             mpi_sum, mpi_comm_world,mpi_err)            
 #endif
     endif
-    
-    if (do_stress) then
-#ifdef SINGLE_PRECISION
-       call mpi_allreduce(tau_Temp, tau, 9,mpi_real,mpi_sum, &
-            mpi_comm_world,mpi_err)
-       call mpi_allreduce(virial_Temp, virial,1,mpi_real,mpi_sum, &
-            mpi_comm_world,mpi_err)
-#else
-       call mpi_allreduce(tau_Temp, tau, 9,mpi_double_precision,mpi_sum, &
-            mpi_comm_world,mpi_err)
-       call mpi_allreduce(virial_Temp, virial,1,mpi_double_precision,mpi_sum, &
-            mpi_comm_world,mpi_err)
-#endif
-    endif
-    
+        
     if (do_box_dipole) then
 
 #ifdef SINGLE_PRECISION
@@ -1332,13 +1355,6 @@ contains
             mpi_sum, mpi_comm_world, mpi_err)
 #endif
 
-    endif
-
-#else
-    
-    if (do_stress) then
-       tau = tau_Temp
-       virial = virial_Temp
     endif
     
 #endif
@@ -1621,8 +1637,6 @@ contains
        call clean_EAM()
     endif
 
-    tau_Temp = 0.0_dp
-    virial_Temp = 0.0_dp
   end subroutine zero_work_arrays
 
   function skipThisPair(atom1, atom2) result(skip_it)
@@ -1727,26 +1741,24 @@ contains
 
   !! This cleans componets of force arrays belonging only to fortran
 
-  subroutine add_stress_tensor(dpair, fpair)
+  subroutine add_stress_tensor(dpair, fpair, tau)
 
     real( kind = dp ), dimension(3), intent(in) :: dpair, fpair
+    real( kind = dp ), dimension(9), intent(inout) :: tau
 
     ! because the d vector is the rj - ri vector, and
     ! because fx, fy, fz are the force on atom i, we need a
     ! negative sign here:  
 
-    tau_Temp(1) = tau_Temp(1) - dpair(1) * fpair(1)
-    tau_Temp(2) = tau_Temp(2) - dpair(1) * fpair(2)
-    tau_Temp(3) = tau_Temp(3) - dpair(1) * fpair(3)
-    tau_Temp(4) = tau_Temp(4) - dpair(2) * fpair(1)
-    tau_Temp(5) = tau_Temp(5) - dpair(2) * fpair(2)
-    tau_Temp(6) = tau_Temp(6) - dpair(2) * fpair(3)
-    tau_Temp(7) = tau_Temp(7) - dpair(3) * fpair(1)
-    tau_Temp(8) = tau_Temp(8) - dpair(3) * fpair(2)
-    tau_Temp(9) = tau_Temp(9) - dpair(3) * fpair(3)
-
-    virial_Temp = virial_Temp + &
-         (tau_Temp(1) + tau_Temp(5) + tau_Temp(9))
+    tau(1) = tau(1) - dpair(1) * fpair(1)
+    tau(2) = tau(2) - dpair(1) * fpair(2)
+    tau(3) = tau(3) - dpair(1) * fpair(3)
+    tau(4) = tau(4) - dpair(2) * fpair(1)
+    tau(5) = tau(5) - dpair(2) * fpair(2)
+    tau(6) = tau(6) - dpair(2) * fpair(3)
+    tau(7) = tau(7) - dpair(3) * fpair(1)
+    tau(8) = tau(8) - dpair(3) * fpair(2)
+    tau(9) = tau(9) - dpair(3) * fpair(3)
 
   end subroutine add_stress_tensor
 

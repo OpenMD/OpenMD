@@ -75,6 +75,7 @@ class Globals : public DataHolder {
   DeclareParameter(ThermalTime, RealType);
   DeclareParameter(UsePeriodicBoundaryConditions, bool);
   DeclareParameter(TargetPressure, RealType);
+  DeclareParameter(UseAtomicVirial, bool);
   DeclareParameter(TauThermostat, RealType);
   DeclareParameter(TauBarostat, RealType);
   DeclareParameter(ZconsTime, RealType);

@@ -55,11 +55,14 @@
 namespace oopse {
   /**
    * @class ForceManager ForceManager.hpp "brains/ForceManager.hpp"
-   * ForceManager is responsible for calculating the short range interactions (c++) and
-   * long range interactions(fortran). If fortran side is not setup before the force calculation,
-   * call SimInfo's update function to settle it down. 
-   * @note the reason we delay fortran side's setup is that some applications (Dump2XYZ etc.) 
-   * may not need force calculation, why bother? 
+   * ForceManager is responsible for calculating the short range
+   * interactions (C++) and long range interactions (Fortran). If the
+   * Fortran side is not set up before the force calculation, call
+   * SimInfo's update function to settle it down.
+   *
+   * @note the reason we delay fortran side's setup is that some
+   * applications (Dump2XYZ etc.) may not need force calculation, so why
+   * bother?
    */
   class ForceManager {
 
@@ -68,8 +71,8 @@ namespace oopse {
         
     virtual ~ForceManager() {}
 
-    //public virtual function should be avoided
-    /**@todo need refactory */
+    // public virtual functions should be avoided
+    /**@todo needs refactoring */
     virtual void calcForces(bool needPotential, bool needStress);
 
     virtual void init() {}
@@ -81,12 +84,13 @@ namespace oopse {
 
     virtual void calcLongRangeInteraction(bool needPotential, bool needStress);
 
-    virtual void postCalculation();
+    virtual void postCalculation(bool needStress);
  
     SimInfo * info_;        
 
     std::map<Bend*, BendDataSet> bendDataSets;
     std::map<Torsion*, TorsionDataSet> torsionDataSets;
+    Mat3x3d tau;
     
   };
 

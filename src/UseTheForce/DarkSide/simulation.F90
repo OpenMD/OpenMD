@@ -99,6 +99,7 @@ module simulation
   public :: setBox
   public :: checkBox
   public :: SimUsesPBC
+  public :: SimUsesAtomicVirial
 
   public :: SimUsesDirectionalAtoms
   public :: SimUsesLennardJones
@@ -536,6 +537,11 @@ contains
           logical :: doesit
           doesit = thisSim%SIM_uses_PBC
         end function SimUsesPBC
+
+        function SimUsesAtomicVirial() result(doesit)
+          logical :: doesit
+          doesit = thisSim%SIM_uses_AtomicVirial
+        end function SimUsesAtomicVirial
 
         function SimUsesDirectionalAtoms() result(doesit)
           logical :: doesit

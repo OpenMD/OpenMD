@@ -92,7 +92,8 @@ namespace oopse {
     nGlobalIntegrableObjects_(0), nGlobalRigidBodies_(0),
     nAtoms_(0), nBonds_(0),  nBends_(0), nTorsions_(0), nRigidBodies_(0),
     nIntegrableObjects_(0),  nCutoffGroups_(0), nConstraints_(0),
-    sman_(NULL), fortranInitialized_(false), calcBoxDipole_(false) {
+    sman_(NULL), fortranInitialized_(false), calcBoxDipole_(false), 
+    useAtomicVirial_(true) {
 
       MoleculeStamp* molStamp;
       int nMolWithSameStamp;
@@ -666,6 +667,7 @@ namespace oopse {
     int useSF;
     int useSP;
     int useBoxDipole;
+
     std::string myMethod;
 
     // set the useRF logical
@@ -689,6 +691,8 @@ namespace oopse {
     if (simParams_->haveAccumulateBoxDipole()) 
       if (simParams_->getAccumulateBoxDipole())
 	useBoxDipole = 1;
+
+    useAtomicVirial_ = simParams_->getUseAtomicVirial();
 
     //loop over all of the atom types
     for (i = atomTypes.begin(); i != atomTypes.end(); ++i) {
@@ -767,6 +771,9 @@ namespace oopse {
     temp = useBoxDipole;
     MPI_Allreduce(&temp, &useBoxDipole, 1, MPI_INT, MPI_LOR, MPI_COMM_WORLD); 
 
+    temp = useAtomicVirial_;
+    MPI_Allreduce(&temp, &useAtomicVirial_, 1, MPI_INT, MPI_LOR, MPI_COMM_WORLD); 
+
 #endif
 
     fInfo_.SIM_uses_PBC = usePBC;    
@@ -786,6 +793,7 @@ namespace oopse {
     fInfo_.SIM_uses_SF = useSF;
     fInfo_.SIM_uses_SP = useSP;
     fInfo_.SIM_uses_BoxDipole = useBoxDipole;
+    fInfo_.SIM_uses_AtomicVirial = useAtomicVirial_;
   }
 
   void SimInfo::setupFortranSim() {
