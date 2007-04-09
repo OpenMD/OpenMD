@@ -45,7 +45,7 @@
 
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: doForces.F90,v 1.85 2007-04-06 21:53:41 gezelter Exp $, $Date: 2007-04-06 21:53:41 $, $Name: not supported by cvs2svn $, $Revision: 1.85 $
+!! @version $Id: doForces.F90,v 1.86 2007-04-09 18:24:00 gezelter Exp $, $Date: 2007-04-09 18:24:00 $, $Name: not supported by cvs2svn $, $Revision: 1.86 $
 
 
 module doForces
@@ -576,7 +576,7 @@ contains
         
         write(errMsg, *) &
              'cutoffRadius and switchingRadius are set to the same', newline &
-             // tab, 'value.  OOPSE will use shifted ', newline &
+             // tab, 'value.  OOPSE will use shifted force van der Waals', newline &
              // tab, 'potentials instead of switching functions.'
         
         call handleInfo("setCutoffs", errMsg)
@@ -1088,7 +1088,7 @@ contains
                             fij(1) = fij(1) + fpair(1)
                             fij(2) = fij(2) + fpair(2)
                             fij(3) = fij(3) + fpair(3)
-                            if (do_stress.and.SIM_uses_AtomicVirial) then
+                            if (do_stress) then
                                call add_stress_tensor(d_atm, fpair, tau)
                             endif
                          endif
@@ -1117,17 +1117,19 @@ contains
                             f(2,atom1) = f(2,atom1) + fg(2)
                             f(3,atom1) = f(3,atom1) + fg(3)
 #endif
-                            if (do_stress.and.SIM_uses_AtomicVirial) then
-                               ! find the distance between the atom and the center of
-                               ! the cutoff group:
+                            if (n_in_i .gt. 1) then
+                               if (do_stress.and.SIM_uses_AtomicVirial) then
+                                  ! find the distance between the atom and the center of
+                                  ! the cutoff group:
 #ifdef IS_MPI
-                               call get_interatomic_vector(q_Row(:,atom1), &
-                                    q_group_Row(:,i), dag, rag)
+                                  call get_interatomic_vector(q_Row(:,atom1), &
+                                       q_group_Row(:,i), dag, rag)
 #else
-                               call get_interatomic_vector(q(:,atom1), &
-                                    q_group(:,i), dag, rag)
+                                  call get_interatomic_vector(q(:,atom1), &
+                                       q_group(:,i), dag, rag)
 #endif
-                               call add_stress_tensor(dag,fg,tau)
+                                  call add_stress_tensor(dag,fg,tau)
+                               endif
                             endif
                          enddo
                          
@@ -1146,23 +1148,21 @@ contains
                             f(2,atom2) = f(2,atom2) + fg(2)
                             f(3,atom2) = f(3,atom2) + fg(3)
 #endif
-                            if (do_stress.and.SIM_uses_AtomicVirial) then
-                               ! find the distance between the atom and the center of
-                               ! the cutoff group:
+                            if (n_in_j .gt. 1) then
+                               if (do_stress.and.SIM_uses_AtomicVirial) then
+                                  ! find the distance between the atom and the center of
+                                  ! the cutoff group:
 #ifdef IS_MPI
-                               call get_interatomic_vector(q_Col(:,atom2), &
-                                    q_group_Col(:,j), dag, rag)
+                                  call get_interatomic_vector(q_Col(:,atom2), &
+                                       q_group_Col(:,j), dag, rag)
 #else
-                               call get_interatomic_vector(q(:,atom2), &
-                                    q_group(:,j), dag, rag)
+                                  call get_interatomic_vector(q(:,atom2), &
+                                       q_group(:,j), dag, rag)
 #endif
-                               call add_stress_tensor(dag,fg,tau)                               
-                            endif
-                            
+                                  call add_stress_tensor(dag,fg,tau)                               
+                               endif
+                            endif                            
                          enddo
-                      endif
-                      if (do_stress.and.(.not.SIM_uses_AtomicVirial)) then
-                         call add_stress_tensor(d_grp, fij, tau)
                       endif
                    endif
                 endif

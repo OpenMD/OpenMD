@@ -43,7 +43,7 @@
 !! Calculates Long Range forces Lennard-Jones interactions.
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: LJ.F90,v 1.26 2007-04-06 21:53:42 gezelter Exp $, $Date: 2007-04-06 21:53:42 $, $Name: not supported by cvs2svn $, $Revision: 1.26 $
+!! @version $Id: LJ.F90,v 1.27 2007-04-09 18:24:00 gezelter Exp $, $Date: 2007-04-09 18:24:00 $, $Name: not supported by cvs2svn $, $Revision: 1.27 $
 
 
 module lj
@@ -302,6 +302,7 @@ contains
 
     ros = rij * sigmai
     myPotC = 0.0_DP
+    myDerivC = 0.0_DP
 
     if (isSoftCore) then
 
@@ -323,9 +324,16 @@ contains
        
     endif
 
-    pot_temp = epsilon * (myPot - myPotC)
+    !! these are the shifted POTENTIAL variants.
+    ! pot_temp = epsilon * (myPot - myPotC)
+    ! dudr = sw * epsilon * myDeriv * sigmai
+
+    !! these are the shifted FORCE variants.
+
+    pot_temp = epsilon * (myPot - myPotC - myDerivC * (rij - rcut) * sigmai)
+    dudr = sw * epsilon * (myDeriv - myDerivC) * sigmai
+    
     vpair = vpair + pot_temp
-    dudr = sw * epsilon * myDeriv * sigmai
 
     drdx = d(1) / rij
     drdy = d(2) / rij
