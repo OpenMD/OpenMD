@@ -15,6 +15,7 @@ Source    = \
 	Hxy.cpp \
         RippleOP.cpp \
 	BondOrderParameter.cpp \
+	BOPofR.cpp \
 	RhoR.cpp 
 BuiltParallelExe = 0
 

@@ -57,6 +57,7 @@
 #include "applications/staticProps/GofXyz.hpp"
 #include "applications/staticProps/P2OrderParameter.hpp"
 #include "applications/staticProps/BondOrderParameter.hpp"
+#include "applications/staticProps/BOPofR.hpp"
 #include "applications/staticProps/RippleOP.hpp"
 #include "applications/staticProps/SCDOrderParameter.hpp"
 #include "applications/staticProps/DensityPlot.hpp"
@@ -208,6 +209,17 @@ int main(int argc, char* argv[]){
       analyser = new BondOrderParameter(info, dumpFileName, sele1, 
                                         args_info.rcut_arg, 
                                         args_info.nbins_arg);
+    } else {
+      sprintf( painCave.errMsg,
+               "A cutoff radius (rcut) must be specified when calculating Bond Order Parameters");
+      painCave.severity = OOPSE_ERROR;
+      painCave.isFatal = 1;
+      simError();
+    }
+  } else if (args_info.bor_given){
+    if (args_info.rcut_given) {
+      analyser = new BOPofR(info, dumpFileName, sele1, args_info.rcut_arg,
+			    args_info.nbins_arg, maxLen);
     } else {
       sprintf( painCave.errMsg,
                "A cutoff radius (rcut) must be specified when calculating Bond Order Parameters");
