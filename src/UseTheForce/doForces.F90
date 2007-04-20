@@ -45,7 +45,7 @@
 
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: doForces.F90,v 1.86 2007-04-09 18:24:00 gezelter Exp $, $Date: 2007-04-09 18:24:00 $, $Name: not supported by cvs2svn $, $Revision: 1.86 $
+!! @version $Id: doForces.F90,v 1.87 2007-04-20 18:15:46 chrisfen Exp $, $Date: 2007-04-20 18:15:46 $, $Name: not supported by cvs2svn $, $Revision: 1.87 $
 
 
 module doForces
@@ -113,7 +113,8 @@ module doForces
 
   real(kind=dp), save :: defaultRcut, defaultRsw, largestRcut
   real(kind=dp), save :: skinThickness
-  logical, save :: defaultDoShift
+  logical, save :: defaultDoShiftPot
+  logical, save :: defaultDoShiftFrc
 
   public :: init_FF
   public :: setCutoffs
@@ -562,31 +563,43 @@ contains
     haveGtypeCutoffMap = .true.
    end subroutine createGtypeCutoffMap
 
-   subroutine setCutoffs(defRcut, defRsw)
+   subroutine setCutoffs(defRcut, defRsw, defSP, defSF)
 
      real(kind=dp),intent(in) :: defRcut, defRsw
+     logical, intent(in) :: defSP, defSF
      character(len = statusMsgSize) :: errMsg
      integer :: localError
 
      defaultRcut = defRcut
      defaultRsw = defRsw
      
-     defaultDoShift = .false.
+     defaultDoShiftPot = defSP
+     defaultDoShiftFrc = defSF
+
      if (abs(defaultRcut-defaultRsw) .lt. 0.0001) then
-        
-        write(errMsg, *) &
-             'cutoffRadius and switchingRadius are set to the same', newline &
-             // tab, 'value.  OOPSE will use shifted force van der Waals', newline &
-             // tab, 'potentials instead of switching functions.'
-        
-        call handleInfo("setCutoffs", errMsg)
-        
-        defaultDoShift = .true.
-        
+        if (defaultDoShiftFrc) then
+           write(errMsg, *) &
+                'cutoffRadius and switchingRadius are set to the', newline &
+                // tab, 'same value.  OOPSE will use shifted force', newline &
+                // tab, 'potentials instead of switching functions.'
+           
+           call handleInfo("setCutoffs", errMsg)
+        else
+           write(errMsg, *) &
+                'cutoffRadius and switchingRadius are set to the', newline &
+                // tab, 'same value.  OOPSE will use shifted', newline &
+                // tab, 'potentials instead of switching functions.'
+           
+           call handleInfo("setCutoffs", errMsg)
+           
+           defaultDoShiftPot = .true.
+        endif
+                
      endif
      
      localError = 0
-     call setLJDefaultCutoff( defaultRcut, defaultDoShift )
+     call setLJDefaultCutoff( defaultRcut, defaultDoShiftPot, &
+          defaultDoShiftFrc )
      call setElectrostaticCutoffRadius( defaultRcut, defaultRsw )
      call setCutoffEAM( defaultRcut )
      call setCutoffSC( defaultRcut )

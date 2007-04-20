@@ -259,13 +259,10 @@ namespace oopse {
     Mat3x3d Atrans;
     Vector3d Tb;
     Vector3d ji;
-    RealType mass;
     unsigned int index = 0;
     bool doLangevinForces;
     bool freezeMolecule;
     int fdf;
-    int nIntegrated;
-    int nFrozen;
 
     fdf = 0;
 

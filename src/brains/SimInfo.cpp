@@ -955,6 +955,10 @@ namespace oopse {
     // Check the cutoff policy
     int cp =  TRADITIONAL_CUTOFF_POLICY; // Set to traditional by default
 
+    // Set LJ shifting bools to false
+    ljsp_ = false;
+    ljsf_ = false;
+
     std::string myPolicy;
     if (forceFieldOptions_.haveCutoffPolicy()){
       myPolicy = forceFieldOptions_.getCutoffPolicy();
@@ -1018,8 +1022,18 @@ namespace oopse {
 	  simError();
 	}
       }
-      
-      notifyFortranCutoffs(&rcut_, &rsw_);
+
+      if (simParams_->haveElectrostaticSummationMethod()) {
+	std::string myMethod = simParams_->getElectrostaticSummationMethod();
+	toUpper(myMethod);
+        
+	if (myMethod == "SHIFTED_POTENTIAL") {
+	  ljsp_ = true;
+	} else if (myMethod == "SHIFTED_FORCE") {
+	  ljsf_ = true;
+	}
+      }
+      notifyFortranCutoffs(&rcut_, &rsw_, &ljsp_, &ljsf_);
       
     } else {
       
@@ -1036,7 +1050,15 @@ namespace oopse {
         if (simParams_->haveElectrostaticSummationMethod()) {
           std::string myMethod = simParams_->getElectrostaticSummationMethod();
           toUpper(myMethod);
-          if (myMethod == "SHIFTED_POTENTIAL" || myMethod == "SHIFTED_FORCE") {
+      
+      // For the time being, we're tethering the LJ shifted behavior to the
+      // electrostaticSummationMethod keyword options
+	  if (myMethod == "SHIFTED_POTENTIAL") {
+	    ljsp_ = true;
+	  } else if (myMethod == "SHIFTED_FORCE") {
+	    ljsf_ = true;
+	  }
+	  if (myMethod == "SHIFTED_POTENTIAL" || myMethod == "SHIFTED_FORCE") {
             if (simParams_->haveSwitchingRadius()){
               sprintf(painCave.errMsg,
                       "SimInfo Warning: A value was set for the switchingRadius\n"
@@ -1059,7 +1081,9 @@ namespace oopse {
           simError();
           rsw_ = 0.85 * rcut_;
         }
-        notifyFortranCutoffs(&rcut_, &rsw_);
+
+        notifyFortranCutoffs(&rcut_, &rsw_, &ljsp_, &ljsf_);
+
       } else {
         // We didn't set rcut explicitly, and we don't have electrostatic atoms, so
         // We'll punt and let fortran figure out the cutoffs later.

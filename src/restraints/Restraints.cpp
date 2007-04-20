@@ -147,7 +147,6 @@ namespace oopse {
   }
   
   void Restraints::Calc_body_omegaVal(RealType zAngle){
-    RealType zRotator[3][3];
     RealType tempOmega;
     RealType wholeTwoPis;
     // Use the omega accumulated from the rotation propagation

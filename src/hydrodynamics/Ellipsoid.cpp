@@ -91,8 +91,8 @@ namespace oopse {
       S = 2.0/sqrt(b2 - a2) * atan(sqrt(b2-a2)/a);
     }
     
-    RealType P = 1.0/(a2 - b2) * (S - 2.0/a);
-    RealType Q = 0.5/(a2-b2) * (2.0*a/b2 - S);
+    //RealType P = 1.0/(a2 - b2) * (S - 2.0/a);
+    //RealType Q = 0.5/(a2-b2) * (2.0*a/b2 - S);
     
     RealType transMinor = 16.0 * NumericConstant::PI * viscosity * (a2 - b2) /((2.0*a2-b2)*S -2.0*a);
     RealType transMajor = 32.0 * NumericConstant::PI * viscosity * (a2 - b2) /((2.0*a2-3.0*b2)*S +2.0*a);

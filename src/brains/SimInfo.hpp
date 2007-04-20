@@ -558,6 +558,9 @@ namespace oopse{
     RealType rsw_;        /**< radius of switching function*/
     RealType rlist_;      /**< neighbor list radius */
 
+    bool ljsp_; /**< use shifted potential for LJ*/
+    bool ljsf_; /**< use shifted force for LJ*/
+
     bool fortranInitialized_; /**< flag indicate whether fortran side 
                                  is initialized */
     

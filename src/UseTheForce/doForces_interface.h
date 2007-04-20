@@ -82,7 +82,9 @@ extern "C"{
   void notifyFortranSkinThickness( RealType *skinThickness );
 
   void notifyFortranCutoffs( RealType *rCut,
-			     RealType *rSw );
+			     RealType *rSw,
+			     bool *ljsp,
+			     bool *ljsf);
 
   void notifyFortranYouAreOnYourOwn( );
 

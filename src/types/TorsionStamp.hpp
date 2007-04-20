@@ -56,7 +56,6 @@ class TorsionStamp : public DataHolder {
         std::vector<int> getMembers() {return members_;}
         void setMembers(const std::vector<int>& members) {
             members_ = members;
-            bool ret = false;
             if (members_.size() < 3 || members_.size() > 4) {
                 std::ostringstream oss;
                 oss << "members" << containerToString(members) << " is invalid" << std::endl;

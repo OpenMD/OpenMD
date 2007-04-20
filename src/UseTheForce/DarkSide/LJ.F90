@@ -43,7 +43,7 @@
 !! Calculates Long Range forces Lennard-Jones interactions.
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: LJ.F90,v 1.27 2007-04-09 18:24:00 gezelter Exp $, $Date: 2007-04-09 18:24:00 $, $Name: not supported by cvs2svn $, $Revision: 1.27 $
+!! @version $Id: LJ.F90,v 1.28 2007-04-20 18:15:47 chrisfen Exp $, $Date: 2007-04-20 18:15:47 $, $Name: not supported by cvs2svn $, $Revision: 1.28 $
 
 
 module lj
@@ -67,7 +67,8 @@ module lj
   logical, save :: haveMixingMap = .false.
 
   real(kind=DP), save :: defaultCutoff = 0.0_DP
-  logical, save :: defaultShift = .false.
+  logical, save :: defaultShiftPot = .false.
+  logical, save :: defaultShiftFrc = .false.
   logical, save :: haveDefaultCutoff = .false.
 
   type, private :: LJtype
@@ -94,6 +95,7 @@ module lj
      logical       :: rCutWasSet = .false.
      logical       :: shiftedPot
      logical       :: isSoftCore = .false.
+     logical       :: shiftedFrc
   end type MixParameters
 
   type(MixParameters), dimension(:,:), allocatable :: MixingMap
@@ -148,12 +150,15 @@ contains
     endif
   end subroutine newLJtype
 
-  subroutine setLJDefaultCutoff(thisRcut, shiftedPot)
+  subroutine setLJDefaultCutoff(thisRcut, shiftedPot, shiftedFrc)
     real(kind=dp), intent(in) :: thisRcut
     logical, intent(in) :: shiftedPot
+    logical, intent(in) :: shiftedFrc
     defaultCutoff = thisRcut
-    defaultShift = shiftedPot
+    defaultShiftPot = shiftedPot
+    defaultShiftFrc = shiftedFrc
     haveDefaultCutoff = .true.
+
     !we only want to build LJ Mixing map if LJ is being used.
     if(LJMap%nLJTypes /= 0) then
        call createMixingMap()
@@ -235,9 +240,11 @@ contains
           MixingMap(i,j)%sigmai = 1.0_DP  / (MixingMap(i,j)%sigma)
 
           if (haveDefaultCutoff) then
-             MixingMap(i,j)%shiftedPot = defaultShift
+             MixingMap(i,j)%shiftedPot = defaultShiftPot
+             MixingMap(i,j)%shiftedFrc = defaultShiftFrc
           else
-             MixingMap(i,j)%shiftedPot = defaultShift
+             MixingMap(i,j)%shiftedPot = defaultShiftPot
+             MixingMap(i,j)%shiftedFrc = defaultShiftFrc
           endif          
 
           if (i.ne.j) then
@@ -248,13 +255,14 @@ contains
              MixingMap(j,i)%rCutWasSet = MixingMap(i,j)%rCutWasSet
              MixingMap(j,i)%shiftedPot = MixingMap(i,j)%shiftedPot
              MixingMap(j,i)%isSoftCore = MixingMap(i,j)%isSoftCore
+             MixingMap(j,i)%shiftedFrc = MixingMap(i,j)%shiftedFrc
           endif
 
        enddo
     enddo
     
     haveMixingMap = .true.
-    
+
   end subroutine createMixingMap
           
   subroutine do_lj_pair(atom1, atom2, d, rij, r2, rcut, sw, vpair, fpair, &
@@ -276,7 +284,7 @@ contains
     real( kind = dp ) :: pot_temp, dudr
     real( kind = dp ) :: sigmai
     real( kind = dp ) :: epsilon
-    logical :: isSoftCore, shiftedPot
+    logical :: isSoftCore, shiftedPot, shiftedFrc
     integer :: id1, id2, localError
 
     if (.not.haveMixingMap) then
@@ -299,10 +307,9 @@ contains
     epsilon    = MixingMap(ljt1,ljt2)%epsilon
     isSoftCore = MixingMap(ljt1,ljt2)%isSoftCore
     shiftedPot = MixingMap(ljt1,ljt2)%shiftedPot
+    shiftedFrc = MixingMap(ljt1,ljt2)%shiftedFrc
 
     ros = rij * sigmai
-    myPotC = 0.0_DP
-    myDerivC = 0.0_DP
 
     if (isSoftCore) then
 
@@ -311,6 +318,14 @@ contains
        if (shiftedPot) then
           rcos = rcut * sigmai
           call getSoftFunc(rcos, myPotC, myDerivC)
+          myDerivC = 0.0_dp
+       elseif (shiftedFrc) then
+          rcos = rcut * sigmai
+          call getSoftFunc(rcos, myPotC, myDerivC)
+          myPotC = myPotC + myDerivC * (rij - rcut) * sigmai
+       else
+          myPotC = 0.0_dp
+          myDerivC = 0.0_dp
        endif
               
     else
@@ -320,20 +335,21 @@ contains
        if (shiftedPot) then
           rcos = rcut * sigmai
           call getLJfunc(rcos, myPotC, myDerivC) 
+          myDerivC = 0.0_dp
+       elseif (shiftedFrc) then
+          rcos = rcut * sigmai
+          call getLJfunc(rcos, myPotC, myDerivC)
+          myPotC = myPotC + myDerivC * (rij - rcut) * sigmai
+       else
+          myPotC = 0.0_dp
+          myDerivC = 0.0_dp
        endif
        
     endif
 
-    !! these are the shifted POTENTIAL variants.
-    ! pot_temp = epsilon * (myPot - myPotC)
-    ! dudr = sw * epsilon * myDeriv * sigmai
-
-    !! these are the shifted FORCE variants.
-
-    pot_temp = epsilon * (myPot - myPotC - myDerivC * (rij - rcut) * sigmai)
-    dudr = sw * epsilon * (myDeriv - myDerivC) * sigmai
-    
+    pot_temp = epsilon * (myPot - myPotC)
     vpair = vpair + pot_temp
+    dudr = sw * epsilon * (myDeriv - myDerivC) * sigmai
 
     drdx = d(1) / rij
     drdy = d(2) / rij
