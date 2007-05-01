@@ -15,6 +15,7 @@ legend:
   fcc.md = Face Centered Cubic structure
   sc.md  = Simple Cubic structure
   icosahedron.md  = Icosahedral cluster
+  surface_icosahedron.md = Half of a Icosahedral Cluster approximating a nanoparticle surface atom
   tet.md  = Tetrahedral cluster
 
 (Cu atoms are located at (0,0,0), and Au atoms
