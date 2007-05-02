@@ -45,7 +45,7 @@
 
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: doForces.F90,v 1.87 2007-04-20 18:15:46 chrisfen Exp $, $Date: 2007-04-20 18:15:46 $, $Name: not supported by cvs2svn $, $Revision: 1.87 $
+!! @version $Id: doForces.F90,v 1.88 2007-05-02 00:18:08 chrisfen Exp $, $Date: 2007-05-02 00:18:08 $, $Name: not supported by cvs2svn $, $Revision: 1.88 $
 
 
 module doForces
@@ -1111,9 +1111,15 @@ contains
                    if (loop .eq. PAIR_LOOP) then
                       if (in_switching_region) then
                          swderiv = vij*dswdr/rgrp
-                         fij(1) = fij(1) + swderiv*d_grp(1)
-                         fij(2) = fij(2) + swderiv*d_grp(2)
-                         fij(3) = fij(3) + swderiv*d_grp(3)
+                         fg = swderiv*d_grp
+ 
+                         fij(1) = fij(1) + fg(1)
+                         fij(2) = fij(2) + fg(2)
+                         fij(3) = fij(3) + fg(3)
+                         
+                         if ((n_in_i .eq. 1).and.(n_in_j .eq. 1)) then
+                            call add_stress_tensor(d_atm, fg, tau)
+                         endif  
                          
                          do ia=groupStartRow(i), groupStartRow(i+1)-1
                             atom1=groupListRow(ia)
