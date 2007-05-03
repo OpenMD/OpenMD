@@ -45,7 +45,7 @@
 
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: doForces.F90,v 1.88 2007-05-02 00:18:08 chrisfen Exp $, $Date: 2007-05-02 00:18:08 $, $Name: not supported by cvs2svn $, $Revision: 1.88 $
+!! @version $Id: doForces.F90,v 1.89 2007-05-03 15:52:08 chrisfen Exp $, $Date: 2007-05-03 15:52:08 $, $Name: not supported by cvs2svn $, $Revision: 1.89 $
 
 
 module doForces
@@ -1117,7 +1117,7 @@ contains
                          fij(2) = fij(2) + fg(2)
                          fij(3) = fij(3) + fg(3)
                          
-                         if ((n_in_i .eq. 1).and.(n_in_j .eq. 1)) then
+                         if (do_stress .and. (n_in_i .eq. 1).and.(n_in_j .eq. 1)) then
                             call add_stress_tensor(d_atm, fg, tau)
                          endif  
                          
