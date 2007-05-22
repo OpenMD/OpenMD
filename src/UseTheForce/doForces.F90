@@ -45,7 +45,7 @@
 
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: doForces.F90,v 1.89 2007-05-03 15:52:08 chrisfen Exp $, $Date: 2007-05-03 15:52:08 $, $Name: not supported by cvs2svn $, $Revision: 1.89 $
+!! @version $Id: doForces.F90,v 1.90 2007-05-22 19:30:27 chuckv Exp $, $Date: 2007-05-22 19:30:27 $, $Name: not supported by cvs2svn $, $Revision: 1.90 $
 
 
 module doForces
@@ -1205,7 +1205,11 @@ contains
        endif
 
        if (loop .eq. PREPAIR_LOOP) then
+#ifdef IS_MPI
+          call do_preforce(nlocal, pot_local)
+#else
           call do_preforce(nlocal, pot)
+#endif
        endif
 
     enddo
