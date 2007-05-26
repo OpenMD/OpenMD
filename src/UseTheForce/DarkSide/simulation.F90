@@ -528,6 +528,7 @@ contains
                      'the largest cutoff radius' // &
                      ' (rCut = ', DangerRcut, ')'
                 call handleError("checkBox", errMsg)
+				
              end if
           enddo        
           return     
