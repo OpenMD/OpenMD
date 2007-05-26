@@ -2,9 +2,9 @@
 // See Rafii-Tabar and Chen Phil. Mag. Letters. 63(1991), 217-224 for alloy formulation for SC varient
 
 begin Options
-      Name                  "SC"
-      DistanceMixingRule    "Geometric"
-      EnergyMixingRule      "Geometric"
+      Name                  SC
+      DistanceMixingRule    Geometric
+      EnergyMixingRule      Geometric
 //  energy unit are eV. Convert to kcal/mol
       EnergyUnitScaling     0.02306054
 end Options
