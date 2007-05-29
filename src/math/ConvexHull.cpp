@@ -40,12 +40,11 @@
  *
  *  ConvexHull.cpp
  *
- *  Purpose: To calculate convexhull, hull volume and radius
- *  using the CGAL library.
+ *  Purpose: To calculate convexhull, hull volume libqhull.
  *
  *  Created by Charles F. Vardeman II on 11 Dec 2006.
  *  @author  Charles F. Vardeman II
- *  @version $Id: ConvexHull.cpp,v 1.1 2006-12-14 19:32:32 chuckv Exp $
+ *  @version $Id: ConvexHull.cpp,v 1.2 2007-05-29 22:50:14 chuckv Exp $
  *
  */
 
@@ -53,68 +52,63 @@
 #include <iostream>
 #include <fstream>
 
+char options[] = "qhull Qt FA"; 
+int dim_ = 3;
 
 using namespace oopse;
 
-
+ConvexHull::ConvexHull(){}
 
 
 bool ConvexHull::genHull(std::vector<Vector3d> pos)
 {
+	FILE *outfile = stdout;
+	FILE *errfile = stderr;
+	facetT *facet;
+	int exitcode;
+	boolT ismalloc = False;
+	int curlong,totlong;
+	
+	int numpoints = pos.size();
+	
+	coordT points[numpoints][dim_];
+	
+	for (int i=0; i<numpoints; i++)
+	{
+     points[i][0] = pos[i][0];
+     points[i][1] = pos[i][1];
+     points[i][2] = pos[i][2];		
+	}
+   
 
-  std::vector<Point_3> points;
-  points.reserve(pos.size());
-  // Copy the positon vector into a points vector for cgal.
-  for (int i = 0; i < pos.size(); ++i)
-    {
-      Point_3 pt(pos[i][0],pos[i][1],pos[i][2]);
-      points.push_back(pt);
-    }
 
-  // compute convex hull
-  CGAL::convex_hull_3(points.begin(), points.end(), ch_object);
-  // Make sure hull is a polyhedron
-  if ( CGAL::assign(ch_polyhedron, ch_object) )
-    {
-      return true;
-    }
-  else
-    {
-      return false;
-    }
+	qh_initflags (options);
+    qh_init_B (points[0], numpoints, dim_, ismalloc);
+    qh_qhull();
+    qh_check_output();
+							
+							
+							
+    qh_getarea(qh facet_list);
+    volume_ = qh totvol;							
+	area_ = qh totarea;						
+							
+							
+							
+    qh_freeqhull(!qh_ALL);
+	qh_memfreeshort (&curlong, &totlong);
+	if (curlong || totlong)
+		fprintf (errfile, "qhull internal warning (main): did not free %d bytes of long memory (%d pieces)\n",
+				 totlong, curlong);
+	
+
+	return true;
 }
+
 
 RealType ConvexHull::getVolume()
 {
-	/*
-  std::list<Point> L;
-  L.push_front(Point(0,0,0));
-  L.push_front(Point(1,0,0));
-  L.push_front(Point(0,1,0));
-
-  Triangulation T(L.begin(), L.end());
-
-  int n = T.number_of_vertices();
-
-  // insertion from a vector :
-  std::vector<Point> V(3);
-  V[0] = Point(0,0,1);
-  V[1] = Point(1,1,1);
-  V[2] = Point(2,2,2);
-
-  n = n + T.insert(V.begin(), V.end());
-
-  assert( n == 6 );       // 6 points have been inserted
-  assert( T.is_valid() ); // checking validity of T
-
-  double sum_v = 0;
-  for(Triangulation::Cell_iterator c_it = T.cells_begin(); c_it != T.cells_end(); ++c_it)
-    {
-      sum_v += T.tetrahedron(c_it).volume();
-    }
-  std::cout << "sum_v " << sum_v << std::endl;
-*/
-	return 0.0;
+	return volume_;
 }
 
 void ConvexHull::geomviewHull(const std::string& geomFileName)
@@ -125,25 +119,6 @@ void ConvexHull::geomviewHull(const std::string& geomFileName)
   //create new .md file based on old .md file
   newGeomFile.open(geomFileName.c_str());
 
-  // Write polyhedron in Object File Format (OFF).
-  CGAL::set_ascii_mode( std::cout);
-  newGeomFile << "OFF" << std::endl << ch_polyhedron.size_of_vertices() << ' '
-  << ch_polyhedron.size_of_facets() << " 0" << std::endl;
-  std::copy( ch_polyhedron.points_begin(), ch_polyhedron.points_end(),
-             std::ostream_iterator<Point_3>( newGeomFile, "\n"));
-  for (  Facet_iterator i = ch_polyhedron.facets_begin(); i != ch_polyhedron.facets_end(); ++i)
-    {
-      Halfedge_facet_circulator j = i->facet_begin();
-      // Facets in polyhedral surfaces are at least triangles.
-      CGAL_assertion( CGAL::circulator_size(j) >= 3);
-      newGeomFile << CGAL::circulator_size(j) << ' ';
-      do
-        {
-          newGeomFile << ' ' << std::distance(ch_polyhedron.vertices_begin(), j->vertex());
-        }
-      while ( ++j != i->facet_begin());
-      newGeomFile << std::endl;
-    }
 
   newGeomFile.close();
 

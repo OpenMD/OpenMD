@@ -43,7 +43,7 @@
  *
  *  Created by J. Daniel Gezelter on 09/26/06
  *  @author  J. Daniel Gezelter 
- *  @version $Id: BOPofR.hpp,v 1.1 2007-04-11 23:27:20 chuckv Exp $
+ *  @version $Id: BOPofR.hpp,v 1.2 2007-05-29 22:50:14 chuckv Exp $
  *
  */
 
@@ -107,7 +107,7 @@ namespace oopse {
     SelectionEvaluator evaluator_;           
             
     RealType rCut_;
-    static const int lMax_ = 12;
+    static const int lMax_ = 6;
     int frameCounter_;
     int nBins_;
 	RealType len_;
@@ -117,9 +117,9 @@ namespace oopse {
     std::map<std::pair<int,int>,int> m2Max;
     std::map<std::pair<int,int>,std::vector<RealType> > w3j;
    
-    std::vector<std::vector<int> > RCount_;
-    std::vector<std::vector<RealType> > WofR_;
-    std::vector<std::vector<RealType> > QofR_;
+    std::vector<int> RCount_;
+    std::vector<int>  WofR_;
+    std::vector<int> QofR_;
   };
 }
 

@@ -312,7 +312,7 @@ ac_includes_default="\
 # include <unistd.h>
 #endif"
 
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os PROGNAME debug USE_SINGLE_PRECISION CXX CXXFLAGS LDFLAGS CPPFLAGS ac_ct_CXX EXEEXT OBJEXT CC CFLAGS ac_ct_CC FC FCFLAGS ac_ct_FC CPP EGREP LN_S SET_MAKE RANLIB ac_ct_RANLIB PERLINTERP PERL_SHEBANG INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA AR PS FCFLAGS_F90 FCFLAGS_SRCEXT PREPDEFFLAG FCLIBS FC_FUNC FC_FUNC_ MOD F90_WORK_FILES_ARG MODDIRFLAG F90MODINCSPEC F90_MODULE_NAMES ZLIB_INC_DIR ZLIB_LIB_DIR ZLIB FFTW_INC_DIR FFTW_LIB_DIR FFTW_LIBS LIBOBJS POW_LIB CXXCPP __func__ MPI_LIB_DIR MPI_INC_DIR MPI_F90_INC MPI_LIB MPI_F90_LIB USE_MPI USE_CGAL CGAL_INC_DIR CGAL_LIB_DIR CGAL_RLIB_DIR CGAL_DEFINES CGAL_CXXFLAGS CGAL_LIBS DOXYGEN DOT DOC enable_dot enable_html_docs enable_latex_docs BATEXT MKINSTALLDIRS OOPSE OOPSE_HOME SUBDIRS LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os PROGNAME debug USE_SINGLE_PRECISION CXX CXXFLAGS LDFLAGS CPPFLAGS ac_ct_CXX EXEEXT OBJEXT CC CFLAGS ac_ct_CC FC FCFLAGS ac_ct_FC CPP EGREP LN_S SET_MAKE RANLIB ac_ct_RANLIB PERLINTERP PERL_SHEBANG INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA AR PS FCFLAGS_F90 FCFLAGS_SRCEXT PREPDEFFLAG FCLIBS FC_FUNC FC_FUNC_ MOD F90_WORK_FILES_ARG MODDIRFLAG F90MODINCSPEC F90_MODULE_NAMES ZLIB_INC_DIR ZLIB_LIB_DIR ZLIB FFTW_INC_DIR FFTW_LIB_DIR FFTW_LIBS LIBOBJS POW_LIB CXXCPP __func__ MPI_LIB_DIR MPI_INC_DIR MPI_F90_INC MPI_LIB MPI_F90_LIB USE_MPI DOXYGEN DOT DOC enable_dot enable_html_docs enable_latex_docs BATEXT MKINSTALLDIRS OOPSE OOPSE_HOME SUBDIRS LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -888,7 +888,6 @@ Optional Packages:
   --with-fftw=DIR         root directory path of fftw installation (defaults
                           to /usr/local or /usr if not found in /usr/local)
   --with-mpi=<prefix>     compile with MPI installed in <prefix> [default=no]
-  --with-cgal-makefile=FILE  CGAL makefile that should be used
 
 Some influential environment variables:
   CXX         C++ compiler command
@@ -2809,7 +2808,7 @@ fi
 
 
 # Provide some information about the compiler.
-echo "$as_me:2812:" \
+echo "$as_me:2811:" \
      "checking for Fortran compiler version" >&5
 ac_compiler=`set X $ac_compile; echo $2`
 { (eval echo "$as_me:$LINENO: \"$ac_compiler --version </dev/null >&5\"") >&5
@@ -4057,7 +4056,7 @@ _ACEOF
 # flags.
 ac_save_FFLAGS=$FCFLAGS
 FCFLAGS="$FCFLAGS $ac_verb"
-(eval echo $as_me:4060: \"$ac_link\") >&5
+(eval echo $as_me:4059: \"$ac_link\") >&5
 ac_fc_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
 echo "$ac_fc_v_output" >&5
 FCFLAGS=$ac_save_FFLAGS
@@ -4135,7 +4134,7 @@ _ACEOF
 # flags.
 ac_save_FFLAGS=$FCFLAGS
 FCFLAGS="$FCFLAGS $ac_cv_prog_fc_v"
-(eval echo $as_me:4138: \"$ac_link\") >&5
+(eval echo $as_me:4137: \"$ac_link\") >&5
 ac_fc_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
 echo "$ac_fc_v_output" >&5
 FCFLAGS=$ac_save_FFLAGS
@@ -4871,7 +4870,7 @@ _ACEOF
 # flags.
 ac_save_FFLAGS=$FCFLAGS
 FCFLAGS="$FCFLAGS $ac_verb"
-(eval echo $as_me:4874: \"$ac_link\") >&5
+(eval echo $as_me:4873: \"$ac_link\") >&5
 ac_fc_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
 echo "$ac_fc_v_output" >&5
 FCFLAGS=$ac_save_FFLAGS
@@ -4949,7 +4948,7 @@ _ACEOF
 # flags.
 ac_save_FFLAGS=$FCFLAGS
 FCFLAGS="$FCFLAGS $ac_cv_prog_fc_v"
-(eval echo $as_me:4952: \"$ac_link\") >&5
+(eval echo $as_me:4951: \"$ac_link\") >&5
 ac_fc_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
 echo "$ac_fc_v_output" >&5
 FCFLAGS=$ac_save_FFLAGS
@@ -13499,459 +13498,6 @@ fi
 
 
 
-USE_CGAL=no
-cgal_makefile=auto
-
-# Check whether --with-cgal-makefile or --without-cgal-makefile was given.
-if test "${with_cgal_makefile+set}" = set; then
-  withval="$with_cgal_makefile"
-  cgal_makefile="$withval"
-fi;
-
-if test "x$cgal_makefile" != xno; then
-
-  if test "x$cgal_makefile" = xauto -a "x$CGAL_MAKEFILE" != x; then
-    cgal_makefile="$CGAL_MAKEFILE"
-  fi
-
-  echo "$as_me:$LINENO: checking for cgal_makefile: $cgal_makefile" >&5
-echo $ECHO_N "checking for cgal_makefile: $cgal_makefile... $ECHO_C" >&6
-
-  if test -f "$cgal_makefile"; then
-
-    cat >config.tmp.Makefile <<EOF
-include $cgal_makefile
-default:
-	@echo CGAL_OS_COMPILER=\"\${CGAL_OS_COMPILER}\" >config.tmp.cgalvariables
-	@echo CGAL_INCLDIR=\"\${CGAL_INCL_DIR}\" >>config.tmp.cgalvariables
-	@echo CGAL_INCLCONFDIR=\"\${CGAL_INCL_CONF_DIR}\" >>config.tmp.cgalvariables
-	@echo CGAL_LIBDIR=\"\${CGAL_LIB_DIR}/\${CGAL_OS_COMPILER}\" >>config.tmp.cgalvariables
-	@echo CGAL_RLIBDIR=\"\${CGAL_LIB_DIR}/\${CGAL_OS_COMPILER}\" >>config.tmp.cgalvariables
-	@echo CGAL_CXXFLAGS=\"\${CGAL_CXXFLAGS}\" >>config.tmp.cgalvariables
-	@echo GMP_INCLDIR=\"\${GMP_INCL_DIR}\" >>config.tmp.cgalvariables
-	@echo GMP_LIBDIR=\"\${GMP_LIB_DIR}\" >>config.tmp.cgalvariables
-	@echo GMP_RLIBDIR=\"\${GMP_LIB_DIR}\" >>config.tmp.cgalvariables
-	@echo LEDA_INCLDIR=\"\${LEDA_INCL_DIR}\" >>config.tmp.cgalvariables
-	@echo LEDA_LIBDIR=\"\${LEDA_LIB_DIR}\" >>config.tmp.cgalvariables
-	@echo LEDA_RLIBDIR=\"\${LEDA_LIB_DIR}\" >>config.tmp.cgalvariables
-EOF
-
-    make -s -f config.tmp.Makefile
-    . config.tmp.cgalvariables
-
-    rm -f config.tmp.Makefile config.tmp.cgalvariables
-
-    if test "x$CGAL_INCLDIR" = "x"; then
-      CGAL_INCLDIR=""
-    fi
-
-    if test "x$CGAL_LIBDIR" = "x"; then
-      CGAL_LIBDIR=""
-    fi
-
-    if test "x$CGAL_RLIBDIR" = "x"; then
-      CGAL_RLIBDIR=""
-    fi
-
-    if test "x$LEDA_INCLDIR" = "x"; then
-      LEDA_INCLDIR=""
-    fi
-
-    if test "x$LEDA_LIBDIR" = "x"; then
-      LEDA_LIBDIR=""
-    fi
-
-    if test "x$LEDA_RLIBDIR" = "x"; then
-      LEDA_RLIBDIR=""
-    fi
-
-    if test "x$GMP_INCLDIR" = "x"; then
-      GMP_INCLDIR=""
-    fi
-
-    if test "x$GMP_LIBDIR" = "x"; then
-      GMP_LIBDIR=""
-    fi
-
-    if test "x$GMP_RLIBDIR" = "x"; then
-      GMP_RLIBDIR=""
-    fi
-
-    echo "$as_me:$LINENO: result: CGAL_OS_COMPILER=   $CGAL_OS_COMPILER" >&5
-echo "${ECHO_T}CGAL_OS_COMPILER=   $CGAL_OS_COMPILER" >&6
-    echo "$as_me:$LINENO: result: CGAL_INCLDIR=       $CGAL_INCLDIR" >&5
-echo "${ECHO_T}CGAL_INCLDIR=       $CGAL_INCLDIR" >&6
-    echo "$as_me:$LINENO: result: CGAL_INCLCONFDIR=   $CGAL_INCLCONFDIR" >&5
-echo "${ECHO_T}CGAL_INCLCONFDIR=   $CGAL_INCLCONFDIR" >&6
-    echo "$as_me:$LINENO: result: CGAL_LIBDIR=        $CGAL_LIBDIR" >&5
-echo "${ECHO_T}CGAL_LIBDIR=        $CGAL_LIBDIR" >&6
-    echo "$as_me:$LINENO: result: CGAL_CXXFLAGS=      $CGAL_CXXFLAGS" >&5
-echo "${ECHO_T}CGAL_CXXFLAGS=      $CGAL_CXXFLAGS" >&6
-    echo "$as_me:$LINENO: result: LEDA_INCLDIR=       $LEDA_INCLDIR" >&5
-echo "${ECHO_T}LEDA_INCLDIR=       $LEDA_INCLDIR" >&6
-    echo "$as_me:$LINENO: result: LEDA_LIBDIR=        $LEDA_LIBDIR" >&5
-echo "${ECHO_T}LEDA_LIBDIR=        $LEDA_LIBDIR" >&6
-    echo "$as_me:$LINENO: result: GMP_INCLDIR=        $GMP_INCLDIR" >&5
-echo "${ECHO_T}GMP_INCLDIR=        $GMP_INCLDIR" >&6
-    echo "$as_me:$LINENO: result: GMP_LIBDIR=         $GMP_LIBDIR" >&5
-echo "${ECHO_T}GMP_LIBDIR=         $GMP_LIBDIR" >&6
-
-    ac_ext=cc
-ac_cpp='$CXXCPP $CPPFLAGS'
-ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
-ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
-ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
-
-    save_CXXFLAGS="$CXXFLAGS"
-    CXXFLAGS="$CXXFLAGS $CGAL_CXXFLAGS -I$CGAL_INCLDIR -I$CGAL_INCLCONFDIR"
-    if test "${ac_cv_header_CGAL_Cartesian_h+set}" = set; then
-  echo "$as_me:$LINENO: checking for CGAL/Cartesian.h" >&5
-echo $ECHO_N "checking for CGAL/Cartesian.h... $ECHO_C" >&6
-if test "${ac_cv_header_CGAL_Cartesian_h+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-fi
-echo "$as_me:$LINENO: result: $ac_cv_header_CGAL_Cartesian_h" >&5
-echo "${ECHO_T}$ac_cv_header_CGAL_Cartesian_h" >&6
-else
-  # Is the header compilable?
-echo "$as_me:$LINENO: checking CGAL/Cartesian.h usability" >&5
-echo $ECHO_N "checking CGAL/Cartesian.h usability... $ECHO_C" >&6
-cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-$ac_includes_default
-#include <CGAL/Cartesian.h>
-_ACEOF
-rm -f conftest.$ac_objext
-if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
-  (eval $ac_compile) 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } &&
-	 { ac_try='test -z "$ac_cxx_werror_flag"
-			 || test ! -s conftest.err'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; } &&
-	 { ac_try='test -s conftest.$ac_objext'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; }; then
-  ac_header_compiler=yes
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-ac_header_compiler=no
-fi
-rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
-echo "$as_me:$LINENO: result: $ac_header_compiler" >&5
-echo "${ECHO_T}$ac_header_compiler" >&6
-
-# Is the header present?
-echo "$as_me:$LINENO: checking CGAL/Cartesian.h presence" >&5
-echo $ECHO_N "checking CGAL/Cartesian.h presence... $ECHO_C" >&6
-cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-#include <CGAL/Cartesian.h>
-_ACEOF
-if { (eval echo "$as_me:$LINENO: \"$ac_cpp conftest.$ac_ext\"") >&5
-  (eval $ac_cpp conftest.$ac_ext) 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } >/dev/null; then
-  if test -s conftest.err; then
-    ac_cpp_err=$ac_cxx_preproc_warn_flag
-    ac_cpp_err=$ac_cpp_err$ac_cxx_werror_flag
-  else
-    ac_cpp_err=
-  fi
-else
-  ac_cpp_err=yes
-fi
-if test -z "$ac_cpp_err"; then
-  ac_header_preproc=yes
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-  ac_header_preproc=no
-fi
-rm -f conftest.err conftest.$ac_ext
-echo "$as_me:$LINENO: result: $ac_header_preproc" >&5
-echo "${ECHO_T}$ac_header_preproc" >&6
-
-# So?  What about this header?
-case $ac_header_compiler:$ac_header_preproc:$ac_cxx_preproc_warn_flag in
-  yes:no: )
-    { echo "$as_me:$LINENO: WARNING: CGAL/Cartesian.h: accepted by the compiler, rejected by the preprocessor!" >&5
-echo "$as_me: WARNING: CGAL/Cartesian.h: accepted by the compiler, rejected by the preprocessor!" >&2;}
-    { echo "$as_me:$LINENO: WARNING: CGAL/Cartesian.h: proceeding with the compiler's result" >&5
-echo "$as_me: WARNING: CGAL/Cartesian.h: proceeding with the compiler's result" >&2;}
-    ac_header_preproc=yes
-    ;;
-  no:yes:* )
-    { echo "$as_me:$LINENO: WARNING: CGAL/Cartesian.h: present but cannot be compiled" >&5
-echo "$as_me: WARNING: CGAL/Cartesian.h: present but cannot be compiled" >&2;}
-    { echo "$as_me:$LINENO: WARNING: CGAL/Cartesian.h:     check for missing prerequisite headers?" >&5
-echo "$as_me: WARNING: CGAL/Cartesian.h:     check for missing prerequisite headers?" >&2;}
-    { echo "$as_me:$LINENO: WARNING: CGAL/Cartesian.h: see the Autoconf documentation" >&5
-echo "$as_me: WARNING: CGAL/Cartesian.h: see the Autoconf documentation" >&2;}
-    { echo "$as_me:$LINENO: WARNING: CGAL/Cartesian.h:     section \"Present But Cannot Be Compiled\"" >&5
-echo "$as_me: WARNING: CGAL/Cartesian.h:     section \"Present But Cannot Be Compiled\"" >&2;}
-    { echo "$as_me:$LINENO: WARNING: CGAL/Cartesian.h: proceeding with the preprocessor's result" >&5
-echo "$as_me: WARNING: CGAL/Cartesian.h: proceeding with the preprocessor's result" >&2;}
-    { echo "$as_me:$LINENO: WARNING: CGAL/Cartesian.h: in the future, the compiler will take precedence" >&5
-echo "$as_me: WARNING: CGAL/Cartesian.h: in the future, the compiler will take precedence" >&2;}
-    (
-      cat <<\_ASBOX
-## ------------------------------ ##
-## Report this to gezelter@nd.edu ##
-## ------------------------------ ##
-_ASBOX
-    ) |
-      sed "s/^/$as_me: WARNING:     /" >&2
-    ;;
-esac
-echo "$as_me:$LINENO: checking for CGAL/Cartesian.h" >&5
-echo $ECHO_N "checking for CGAL/Cartesian.h... $ECHO_C" >&6
-if test "${ac_cv_header_CGAL_Cartesian_h+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  ac_cv_header_CGAL_Cartesian_h=$ac_header_preproc
-fi
-echo "$as_me:$LINENO: result: $ac_cv_header_CGAL_Cartesian_h" >&5
-echo "${ECHO_T}$ac_cv_header_CGAL_Cartesian_h" >&6
-
-fi
-if test $ac_cv_header_CGAL_Cartesian_h = yes; then
-  cgal=yes
-else
-  cgal=no
-fi
-
-
-    CXXFLAGS="$save_CXXFLAGS"
-
-    if test "x$cgal" = xyes; then
-      echo "$as_me:$LINENO: checking for CGAL version" >&5
-echo $ECHO_N "checking for CGAL version... $ECHO_C" >&6
-      LOCATION=${CGAL_INCLDIR}
-      LOCATION=${LOCATION:-/usr/include}
-      if test -f $LOCATION/CGAL/version.h; then
-        CGAL_VERSION=`grep '#define.*\<CGAL_VERSION\>.*' $LOCATION/CGAL/version.h | sed 's/[^0-9\.]*//g'`
-      else
-        CGAL_VERSION=`grep '#define.*\<CGAL_VERSION\>.*' $LOCATION/CGAL/config.h | sed 's/[^0-9\.]*//g'`
-      fi
-      if echo $CGAL_VERSION | grep -q "^[3456789]"; then
-        echo "$as_me:$LINENO: result: ($CGAL_VERSION) yes" >&5
-echo "${ECHO_T}($CGAL_VERSION) yes" >&6
-      else
-        echo "$as_me:$LINENO: result: ($CGAL_VERSION) no" >&5
-echo "${ECHO_T}($CGAL_VERSION) no" >&6
-        cgal=no
-      fi
-    fi
-
-    if test "x$cgal" = xyes; then
-      CGAL_LIBS="-lCGAL"
-      echo "$as_me:$LINENO: checking whether CGAL uses LEDA" >&5
-echo $ECHO_N "checking whether CGAL uses LEDA... $ECHO_C" >&6
-      if echo $CGAL_CXXFLAGS | grep -q -- -DCGAL_USE_LEDA; then
-        CGAL_USES_LEDA=yes
-        echo "$as_me:$LINENO: result: yes" >&5
-echo "${ECHO_T}yes" >&6
-        CGAL_DEFINES="-DCGAL_USE_LEDA -DLEDA_PREFIX"
-      else
-        echo "$as_me:$LINENO: result: no" >&5
-echo "${ECHO_T}no" >&6
-        CGAL_USES_LEDA=no
-      fi
-
-      echo "$as_me:$LINENO: checking whether CGAL uses GMP" >&5
-echo $ECHO_N "checking whether CGAL uses GMP... $ECHO_C" >&6
-      if echo $CGAL_CXXFLAGS | grep -q -- -DCGAL_USE_GMP; then
-        CGAL_USES_GMP=yes
-        echo "$as_me:$LINENO: result: yes" >&5
-echo "${ECHO_T}yes" >&6
-        CGAL_DEFINES="-DCGAL_USE_GMP $CGAL_DEFINES"
-      else
-        echo "$as_me:$LINENO: result: no" >&5
-echo "${ECHO_T}no" >&6
-        CGAL_USES_GMP=no
-      fi
-
-      CGAL_LIBS="$CGAL_LIBS -lm"
-
-      CGAL_CXXFLAGS="-ftemplate-depth-50 $CGAL_CXXFLAGS"
-
-      echo "$as_me:$LINENO: result: CGAL_USES_LEDA=     $CGAL_USES_LEDA" >&5
-echo "${ECHO_T}CGAL_USES_LEDA=     $CGAL_USES_LEDA" >&6
-      echo "$as_me:$LINENO: result: CGAL_USES_GMP =     $CGAL_USES_GMP" >&5
-echo "${ECHO_T}CGAL_USES_GMP =     $CGAL_USES_GMP" >&6
-      echo "$as_me:$LINENO: result: CGAL_INCLDIR  =     $CGAL_INCLDIR" >&5
-echo "${ECHO_T}CGAL_INCLDIR  =     $CGAL_INCLDIR" >&6
-      echo "$as_me:$LINENO: result: CGAL_LIBDIR   =     $CGAL_LIBDIR" >&5
-echo "${ECHO_T}CGAL_LIBDIR   =     $CGAL_LIBDIR" >&6
-      echo "$as_me:$LINENO: result: CGAL_DEFINES  =     $CGAL_DEFINES" >&5
-echo "${ECHO_T}CGAL_DEFINES  =     $CGAL_DEFINES" >&6
-      echo "$as_me:$LINENO: result: CGAL_CXXFLAGS =     $CGAL_CXXFLAGS" >&5
-echo "${ECHO_T}CGAL_CXXFLAGS =     $CGAL_CXXFLAGS" >&6
-      echo "$as_me:$LINENO: result: CGAL_LIBS     =     $CGAL_LIBS" >&5
-echo "${ECHO_T}CGAL_LIBS     =     $CGAL_LIBS" >&6
-    fi
-
-    if test "x$cgal" = xyes; then
-      save_LIBS="$LIBS"
-      LIBS="$LIBS -L$CGAL_LIBDIR"
-      if test "x$CGAL_USES_LEDA" = xyes; then
-        LIBS="-lL $LIBS -L$LEDA_LIBDIR"
-      fi
-      # if test "x$CGAL_USES_GMP" = xyes; then
-      #   LIBS="-lgmp $LIBS $GMP_LIBDIR"
-      # fi
-      echo "$as_me:$LINENO: checking for ::CGAL::Cartesian<int>::Point_2 in -lCGAL" >&5
-echo $ECHO_N "checking for ::CGAL::Cartesian<int>::Point_2 in -lCGAL... $ECHO_C" >&6
-save_CXXFLAGS_CHECK_CXX_LIB="$CXXFLAGS"
-CXXFLAGS="$CXXFLAGS $CGAL_CXXFLAGS -I$CGAL_INCLDIR -I$CGAL_INCLCONFDIR"
-save_LIBS_CHECK_CXX_LIB="$LIBS"
-LIBS="-lCGAL  $LIBS"
-cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-#include <CGAL/Cartesian.h>
-#ifdef FC_DUMMY_MAIN
-#ifndef FC_DUMMY_MAIN_EQ_F77
-#  ifdef __cplusplus
-     extern "C"
-#  endif
-   int FC_DUMMY_MAIN() { return 1; }
-#endif
-#endif
-int
-main ()
-{
-::CGAL::Cartesian<int>::Point_2 P
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext conftest$ac_exeext
-if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
-  (eval $ac_link) 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } &&
-	 { ac_try='test -z "$ac_cxx_werror_flag"
-			 || test ! -s conftest.err'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; } &&
-	 { ac_try='test -s conftest$ac_exeext'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; }; then
-  echo "$as_me:$LINENO: result: yes" >&5
-echo "${ECHO_T}yes" >&6
-cgal=yes
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-echo "$as_me:$LINENO: result: no" >&5
-echo "${ECHO_T}no" >&6
-cgal=no
-fi
-rm -f conftest.err conftest.$ac_objext \
-      conftest$ac_exeext conftest.$ac_ext
-CXXFLAGS="$save_CXXFLAGS_CHECK_CXX_LIB"
-LIBS="$save_LIBS_CHECK_CXX_LIB"
-      LIBS="$save_LIBS"
-    fi
-
-  fi
-  ac_ext=c
-ac_cpp='$CPP $CPPFLAGS'
-ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
-ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
-ac_compiler_gnu=$ac_cv_c_compiler_gnu
-
-
-fi
-
-if test "x$cgal" = xyes; then
-  USE_CGAL=yes
-
-cat >>confdefs.h <<\_ACEOF
-#define HAVE_CGAL 1
-_ACEOF
-
-
-cat >>confdefs.h <<_ACEOF
-#define CGAL_VERSION $CGAL_VERSION
-_ACEOF
-
-  if ! echo $CGAL_VERSION | grep -q "^3.0"; then
-    { echo "$as_me:$LINENO: WARNING: *****************************************************" >&5
-echo "$as_me: WARNING: *****************************************************" >&2;}
-    { echo "$as_me:$LINENO: WARNING: *** Warning: Your CGAL version is newer than the  ***" >&5
-echo "$as_me: WARNING: *** Warning: Your CGAL version is newer than the  ***" >&2;}
-    { echo "$as_me:$LINENO: WARNING: *** supported versions. It may still work though. ***" >&5
-echo "$as_me: WARNING: *** supported versions. It may still work though. ***" >&2;}
-    { echo "$as_me:$LINENO: WARNING: *****************************************************" >&5
-echo "$as_me: WARNING: *****************************************************" >&2;}
-  fi
-else
-   if test "x$cgal_makefile" != xno; then
-    echo "$as_me:$LINENO: result: No CGAL support. These are not the droids you want." >&5
-echo "${ECHO_T}No CGAL support. These are not the droids you want." >&6
-  fi
-  CGAL_INCLDIR=
-  CGAL_LIBDIR=
-  CGAL_RLIBDIR=
-  CGAL_DEFINES=
-  CGAL_CXXFLAGS=
-  CGAL_LIBS=
-fi
-
-
-CGAL_INC_DIR="${CGAL_INCLDIR} ${CGAL_INCLCONFDIR}"
-
-CGAL_LIB_DIR=${CGAL_LIBDIR}
-
-CGAL_RLIB_DIR=${CGAL_RLIBDIR}
-
-
-
-
-
 
 # Check whether --enable-doxygen or --disable-doxygen was given.
 if test "${enable_doxygen+set}" = set; then
@@ -14793,13 +14339,6 @@ s,@MPI_F90_INC@,$MPI_F90_INC,;t t
 s,@MPI_LIB@,$MPI_LIB,;t t
 s,@MPI_F90_LIB@,$MPI_F90_LIB,;t t
 s,@USE_MPI@,$USE_MPI,;t t
-s,@USE_CGAL@,$USE_CGAL,;t t
-s,@CGAL_INC_DIR@,$CGAL_INC_DIR,;t t
-s,@CGAL_LIB_DIR@,$CGAL_LIB_DIR,;t t
-s,@CGAL_RLIB_DIR@,$CGAL_RLIB_DIR,;t t
-s,@CGAL_DEFINES@,$CGAL_DEFINES,;t t
-s,@CGAL_CXXFLAGS@,$CGAL_CXXFLAGS,;t t
-s,@CGAL_LIBS@,$CGAL_LIBS,;t t
 s,@DOXYGEN@,$DOXYGEN,;t t
 s,@DOT@,$DOT,;t t
 s,@DOC@,$DOC,;t t

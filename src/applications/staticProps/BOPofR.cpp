@@ -43,7 +43,7 @@
  *
  *  Created by J. Daniel Gezelter on 09/26/06.
  *  @author  J. Daniel Gezelter
- *  @version $Id: BOPofR.cpp,v 1.1 2007-04-11 23:27:20 chuckv Exp $
+ *  @version $Id: BOPofR.cpp,v 1.2 2007-05-29 22:50:14 chuckv Exp $
  *
  */
  
@@ -76,6 +76,12 @@ namespace oopse {
     RCount_.resize(nBins_);
     WofR_.resize(nBins_);
     QofR_.resize(nBins_);
+
+	for (int i = 0; i < nBins_; i++){
+		RCount_[i] = 0;
+		WofR_[i] = 0;
+		QofR_[i] = 0;
+	}
 	
     // Make arrays for Wigner3jm
     double* THRCOF = new double[2*lMax_+1];
@@ -111,21 +117,7 @@ namespace oopse {
     }
 
     delete [] THRCOF;
-    THRCOF = NULL;
-	
-	
-    for (int bin = 0; bin < nBins_; bin++) {
-		QofR_[bin].resize(lMax_ + 1);
-		WofR_[bin].resize(lMax_ + 1 );
-		RCount_[bin].resize(lMax_ + 1);
-		
-		for (int l = 0; l <= lMax_; l++) {
-			QofR_[bin][l] = 0.0;
-			WofR_[bin][l] = 0.0;
-			RCount_[bin][l] = 1;
-		}
-		
-    }
+    THRCOF = NULL;	
 	
   }
   
@@ -155,16 +147,11 @@ namespace oopse {
 
   
   void BOPofR::initalizeHistogram() {
-    for (int bin = 0; bin < nBins_; bin++) {
-      QofR_[bin].resize(lMax_);
-      WofR_[bin].resize(lMax_);
-      RCount_[bin].resize(lMax_);
-      for (int l = 0; l <= lMax_; l++) {
-        QofR_[bin][l] = 0;
-        WofR_[bin][l] = 0;
-		RCount_[bin][l] = 0;
-      }
-    }
+ 	for (int i = 0; i < nBins_; i++){
+		RCount_[i] = 0;
+		WofR_[i] = 0;
+		QofR_[i] = 0;
+	}
   }
 
 
@@ -321,9 +308,9 @@ namespace oopse {
         }
 
         collectHistogram(q_l, w_hat, distCOM);
-        if(real(w_hat[6]) < -0.1){
-			std::cout << real(w_hat[6]) << pos << std::endl;
-		}
+		
+		printf( "%s  %18.10g %18.10g %18.10g %18.10g \n", sd->getType().c_str(),pos[0],pos[1],pos[2],real(w_hat[6]));
+
       }
     }
 	
@@ -336,14 +323,14 @@ namespace oopse {
     if ( distCOM < len_){
       // Figure out where this distance goes...
       int whichBin = distCOM / deltaR_;
-      
-      
-      for (int l = 0; l <= lMax_; l++) {
-	RCount_[whichBin][l]++;
-	QofR_[whichBin][l]=q[l];
-	WofR_[whichBin][l]=real(what[l]);
+      RCount_[whichBin]++;
+
+      if(real(what[6]) < -0.15){      				
+		WofR_[whichBin]++;
       }
-      
+	  if(q[6] > 0.5){
+      	QofR_[whichBin]++;
+	  }
     }  
 
   }
@@ -359,11 +346,13 @@ namespace oopse {
       for (int i = 0; i < nBins_; ++i) {
         RealType Rval = (i + 0.5) * deltaR_;               
         osq << Rval;
-        for (int l = 0; l <= lMax_; l++) {
-
-          osq << "\t" << (RealType)QofR_[i][l]/(RealType)RCount_[i][l];
-        }
-        osq << "\n";
+		if (RCount_[i] == 0){
+			osq << "\t" << 0;
+			osq << "\n";
+		}else{
+        	osq << "\t" << (RealType)QofR_[i]/(RealType)RCount_[i];        
+        	osq << "\n";
+		}
       }
 
       osq.close();
@@ -382,11 +371,13 @@ namespace oopse {
       for (int i = 0; i < nBins_; ++i) {
         RealType Rval = deltaR_ * (i + 0.5);               
         osw << Rval;
-        for (int l = 0; l <= lMax_; l++) {
-
-          osw << "\t" << (RealType)WofR_[i][l]/(RealType)RCount_[i][l];
-        }
-        osw << "\n";
+		if (RCount_[i] == 0){
+			osw << "\t" << 0;
+			osw << "\n";
+		}else{
+        	osw << "\t" << (RealType)WofR_[i]/(RealType)RCount_[i];
+        	osw << "\n";
+		}
       }
 
       osw.close();

@@ -45,7 +45,7 @@
  *
  *  Created by Charles F. Vardeman II on 11 Dec 2006.
  *  @author  Charles F. Vardeman II
- *  @version $Id: ConvexHull.hpp,v 1.1 2006-12-14 19:32:32 chuckv Exp $
+ *  @version $Id: ConvexHull.hpp,v 1.2 2007-05-29 22:50:14 chuckv Exp $
  *
  */
 
@@ -53,27 +53,22 @@
 #define MATH_CONVEXHULL_HPP_
 
 #include "math/Vector3.hpp"
-#include <CGAL/Homogeneous.h>
-#include <CGAL/Convex_hull_traits_3.h>
-#include <CGAL/Convex_hull_3.h>
 
-#include <CGAL/Polyhedron_3.h>
-#include <CGAL/copy_n.h>
-#include <CGAL/IO/Geomview_stream.h>
-#include <CGAL/IO/Polyhedron_geomview_ostream.h>
 #include <cassert>
 #include <vector>
+#include <string>
+extern "C"
+{
+#include <qhull/qhull.h>
+#include <qhull/mem.h>
+#include <qhull/qset.h>
+#include <qhull/geom.h>
+#include <qhull/merge.h>
+#include <qhull/poly.h>
+#include <qhull/io.h>
+#include <qhull/stat.h>
+}
 
-
-
-typedef CGAL::MP_Float RT;
-typedef CGAL::Homogeneous<RT>                     K;
-typedef CGAL::Convex_hull_traits_3<K>             Traits;
-typedef Traits::Polyhedron_3                      Polyhedron_3;
-typedef K::Point_3                                Point_3;
-typedef K::Segment_3                              Segment_3;
-typedef Polyhedron_3::Facet_iterator                   Facet_iterator;
-typedef Polyhedron_3::Halfedge_around_facet_circulator Halfedge_facet_circulator;
 
 
 namespace oopse
@@ -92,9 +87,8 @@ namespace oopse
       RealType getInscribedRadius();
       void geomviewHull(const std::string& geomFileName);
     private:
-
-      CGAL::Object  ch_object;
-      Polyhedron_3  ch_polyhedron;
+		
+		double volume_;
 
     }
   ;
