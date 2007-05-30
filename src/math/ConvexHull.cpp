@@ -44,7 +44,7 @@
  *
  *  Created by Charles F. Vardeman II on 11 Dec 2006.
  *  @author  Charles F. Vardeman II
- *  @version $Id: ConvexHull.cpp,v 1.3 2007-05-30 18:47:03 chuckv Exp $
+ *  @version $Id: ConvexHull.cpp,v 1.4 2007-05-30 19:51:07 chuckv Exp $
  *
  */
 
@@ -66,19 +66,19 @@ bool ConvexHull::genHull(std::vector<Vector3d> pos) {
   int curlong,totlong;
   
   int numpoints = pos.size();
-  
-  coordT points[numpoints][dim_];
-  
+ 
+  coordT* points;
+  points = (coordT*) malloc(sizeof(coordT) * (numpoints*dim_)); 
+
   for (int i=0; i<numpoints; i++) {
-    points[i][0] = pos[i][0];
-    points[i][1] = pos[i][1];
-    points[i][2] = pos[i][2];		
+    points[dim_ * i] = pos[i][0];
+    points[dim_ * i + 1] = pos[i][1];
+    points[dim_ * i + 2] = pos[i][2];		
   }
   
   
-  
   qh_initflags (const_cast<char *>(options_.c_str()));
-  qh_init_B (points[0], numpoints, dim_, ismalloc);
+  qh_init_B (points, numpoints, dim_, ismalloc);
   qh_qhull();
   qh_check_output();
   
