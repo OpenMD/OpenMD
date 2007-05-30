@@ -45,7 +45,7 @@
  *
  *  Created by Charles F. Vardeman II on 11 Dec 2006.
  *  @author  Charles F. Vardeman II
- *  @version $Id: ConvexHull.hpp,v 1.2 2007-05-29 22:50:14 chuckv Exp $
+ *  @version $Id: ConvexHull.hpp,v 1.3 2007-05-30 18:47:04 chuckv Exp $
  *
  */
 
@@ -59,42 +59,36 @@
 #include <string>
 extern "C"
 {
-#include <qhull/qhull.h>
-#include <qhull/mem.h>
-#include <qhull/qset.h>
-#include <qhull/geom.h>
-#include <qhull/merge.h>
-#include <qhull/poly.h>
-#include <qhull/io.h>
-#include <qhull/stat.h>
+#include "QuickHull/qhull.h"
+#include "QuickHull/mem.h"
+#include "QuickHull/qset.h"
+#include "QuickHull/geom.h"
+#include "QuickHull/merge.h"
+#include "QuickHull/poly.h"
+#include "QuickHull/io.h"
+#include "QuickHull/stat.h"
 }
 
 
 
-namespace oopse
-  {
-
-  class ConvexHull
-    {
-
-    public:
-      ConvexHull();
-      ~ConvexHull();
-      bool genHull(std::vector<Vector3d> pos);
-      std::vector<Vector3d> getHull();
-      RealType getVolume();
-      RealType getRadius();
-      RealType getInscribedRadius();
-      void geomviewHull(const std::string& geomFileName);
-    private:
-		
-		double volume_;
-
-    }
-  ;
-
-
+namespace oopse {
+  class ConvexHull {
+  public:
+    ConvexHull();
+    virtual ~ConvexHull() {}
+    bool genHull(std::vector<Vector3d> pos);
+    //std::vector<Vector3d> getHull();
+    RealType getVolume();
+    //RealType getRadius();
+    // RealType getInscribedRadius();
+    void geomviewHull(const std::string& geomFileName);
+  protected:
+    double volume_;
+    double area_;
+    int dim_;
+    const std::string options_;
+    
+  };
 }
-
 
 #endif /*MATH_CONVEXHULL_HPP_*/

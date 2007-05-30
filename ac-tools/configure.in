@@ -270,6 +270,6 @@ AC_SUBST(FCFLAGS)
 AC_SUBST(LDFLAGS)
 AC_SUBST(PREPDEFFLAG)
 AC_SUBST(F90_MODULE_NAMES)
-AC_CONFIG_FILES([make/Makefile src/utils/Makefile src/math/Makefile src/applications/nanoRodBuilder/Makefile scripts/filepp], [chmod 0755 scripts/*])
+AC_CONFIG_FILES([make/Makefile src/utils/Makefile scripts/filepp], [chmod 0755 scripts/*])
 
 AC_OUTPUT

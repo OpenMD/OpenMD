@@ -16,7 +16,8 @@ Source    = \
         RippleOP.cpp \
 	BondOrderParameter.cpp \
 	BOPofR.cpp \
-	RhoR.cpp 
+	RhoR.cpp \
+        NanoVolume.cpp
 BuiltParallelExe = 0
 
 RmiSource =

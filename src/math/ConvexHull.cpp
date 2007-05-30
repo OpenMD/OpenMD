@@ -44,83 +44,74 @@
  *
  *  Created by Charles F. Vardeman II on 11 Dec 2006.
  *  @author  Charles F. Vardeman II
- *  @version $Id: ConvexHull.cpp,v 1.2 2007-05-29 22:50:14 chuckv Exp $
+ *  @version $Id: ConvexHull.cpp,v 1.3 2007-05-30 18:47:03 chuckv Exp $
  *
  */
 
-#include "math/ConvexHull.hpp"
 #include <iostream>
 #include <fstream>
-
-char options[] = "qhull Qt FA"; 
-int dim_ = 3;
+#include "math/ConvexHull.hpp"
 
 using namespace oopse;
 
-ConvexHull::ConvexHull(){}
+ConvexHull::ConvexHull() : dim_(3), options_("qhull Qt FA") {
+}
 
-
-bool ConvexHull::genHull(std::vector<Vector3d> pos)
-{
-	FILE *outfile = stdout;
-	FILE *errfile = stderr;
-	facetT *facet;
-	int exitcode;
-	boolT ismalloc = False;
-	int curlong,totlong;
-	
-	int numpoints = pos.size();
-	
-	coordT points[numpoints][dim_];
-	
-	for (int i=0; i<numpoints; i++)
-	{
-     points[i][0] = pos[i][0];
-     points[i][1] = pos[i][1];
-     points[i][2] = pos[i][2];		
-	}
-   
-
-
-	qh_initflags (options);
-    qh_init_B (points[0], numpoints, dim_, ismalloc);
-    qh_qhull();
-    qh_check_output();
-							
-							
-							
-    qh_getarea(qh facet_list);
-    volume_ = qh totvol;							
-	area_ = qh totarea;						
-							
-							
-							
-    qh_freeqhull(!qh_ALL);
-	qh_memfreeshort (&curlong, &totlong);
-	if (curlong || totlong)
-		fprintf (errfile, "qhull internal warning (main): did not free %d bytes of long memory (%d pieces)\n",
-				 totlong, curlong);
-	
-
-	return true;
+bool ConvexHull::genHull(std::vector<Vector3d> pos) {
+  FILE *outfile = stdout;
+  FILE *errfile = stderr;
+  facetT *facet;
+  int exitcode;
+  boolT ismalloc = False;
+  int curlong,totlong;
+  
+  int numpoints = pos.size();
+  
+  coordT points[numpoints][dim_];
+  
+  for (int i=0; i<numpoints; i++) {
+    points[i][0] = pos[i][0];
+    points[i][1] = pos[i][1];
+    points[i][2] = pos[i][2];		
+  }
+  
+  
+  
+  qh_initflags (const_cast<char *>(options_.c_str()));
+  qh_init_B (points[0], numpoints, dim_, ismalloc);
+  qh_qhull();
+  qh_check_output();
+  
+  
+  
+  qh_getarea(qh facet_list);
+  volume_ = qh totvol;							
+  area_ = qh totarea;						
+  
+  
+  
+  qh_freeqhull(!qh_ALL);
+  qh_memfreeshort (&curlong, &totlong);
+  if (curlong || totlong)
+    fprintf (errfile, "qhull internal warning (main): did not free %d bytes of long memory (%d pieces)\n",
+	     totlong, curlong);
+  
+  
+  return true;
 }
 
 
-RealType ConvexHull::getVolume()
-{
-	return volume_;
+RealType ConvexHull::getVolume() {
+  return volume_;
 }
 
-void ConvexHull::geomviewHull(const std::string& geomFileName)
-{
-
+void ConvexHull::geomviewHull(const std::string& geomFileName) {
+  
   std::ofstream newGeomFile;
-
+  
   //create new .md file based on old .md file
   newGeomFile.open(geomFileName.c_str());
-
-
+  
+  
   newGeomFile.close();
-
-
 }

@@ -13652,7 +13652,7 @@ fi
 
 
 
-                                                  ac_config_files="$ac_config_files make/Makefile src/utils/Makefile src/math/Makefile src/applications/nanoRodBuilder/Makefile scripts/filepp"
+                              ac_config_files="$ac_config_files make/Makefile src/utils/Makefile scripts/filepp"
 
 
 cat >confcache <<\_ACEOF
@@ -14185,8 +14185,6 @@ do
   # Handling of arguments.
   "make/Makefile" ) CONFIG_FILES="$CONFIG_FILES make/Makefile" ;;
   "src/utils/Makefile" ) CONFIG_FILES="$CONFIG_FILES src/utils/Makefile" ;;
-  "src/math/Makefile" ) CONFIG_FILES="$CONFIG_FILES src/math/Makefile" ;;
-  "src/applications/nanoRodBuilder/Makefile" ) CONFIG_FILES="$CONFIG_FILES src/applications/nanoRodBuilder/Makefile" ;;
   "scripts/filepp" ) CONFIG_FILES="$CONFIG_FILES scripts/filepp" ;;
   "src/getopt.h" ) CONFIG_LINKS="$CONFIG_LINKS src/getopt.h:src/utils/gnugetopt.h" ;;
   "src/config.h" ) CONFIG_HEADERS="$CONFIG_HEADERS src/config.h" ;;
@@ -14591,8 +14589,6 @@ s,@INSTALL@,$ac_INSTALL,;t t
   case $ac_file in
     make/Makefile ) chmod 0755 scripts/* ;;
     src/utils/Makefile ) chmod 0755 scripts/* ;;
-    src/math/Makefile ) chmod 0755 scripts/* ;;
-    src/applications/nanoRodBuilder/Makefile ) chmod 0755 scripts/* ;;
     scripts/filepp ) chmod 0755 scripts/* ;;
   esac
 done
