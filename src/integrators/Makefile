@@ -16,6 +16,7 @@ Source    = \
 	NPrT.cpp \
 	NgammaT.cpp \
 	LDForceManager.cpp \
+	SMLDForceManager.cpp \
         LangevinDynamics.cpp	
 
 RmiSource =
