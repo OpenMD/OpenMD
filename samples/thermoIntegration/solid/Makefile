@@ -6,9 +6,7 @@ Main      =
 
 SampleFiles =  \
         ssde.md \
-        ssde.in \
         water.md \
-	idealCrystal.in\
 	ssde.zang0
 
 DEV_ROOT=../../..

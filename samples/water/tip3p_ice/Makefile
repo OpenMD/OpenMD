@@ -6,7 +6,6 @@ Main      =
 
 SampleFiles =  \
         tp3.md \
-        tp3.in \
         water.md
 
 

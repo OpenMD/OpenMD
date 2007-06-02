@@ -5,8 +5,6 @@ RmiSource =
 Main      = 
 
 SampleFiles = \
-	cutoff_test.in \
-	gb-ar.in \
 	GB-Ar-max.md \
 	GB-Ar-mix.md \
 	GB-Ar-traditional.md \

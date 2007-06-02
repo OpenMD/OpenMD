@@ -7,8 +7,7 @@ Main      =
 SampleFiles =  \
              Au_bulk_FBD.md \
              Au_bulk_voter.md \
-             metals.md \
-             Au_bulk.in
+             metals.md 
 
 
 DEV_ROOT=../../../

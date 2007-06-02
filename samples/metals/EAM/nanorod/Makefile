@@ -6,7 +6,6 @@ Main      =
 
 SampleFiles =  \
                Au_nanoparticle_FCC.md \
-               Au_nanoparticle.in \
                metals.md
 
 DEV_ROOT=../../../..

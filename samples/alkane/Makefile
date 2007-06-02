@@ -6,7 +6,6 @@ Main      =
 
 SampleFiles =  \
               butane.md \
-	      butane.in \
               alkanes.md
 
 

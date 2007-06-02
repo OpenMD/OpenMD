@@ -6,7 +6,6 @@ Main      =
 
 SampleFiles =  \
         ssdrf.md \
-        ssdrf.in \
         water.md
 
 DEV_ROOT=../../..

@@ -6,7 +6,6 @@ Main      =
 
 SampleFiles =  \
               5x5.md \
-	      5x5.in \
 	      lipid.md \
               water.md
 

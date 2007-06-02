@@ -4,11 +4,8 @@ RmiSource =
 
 Main      = 
 
-SampleFiles = 500.in   \
-              500.md   \
-              ar864.in \
+SampleFiles = 500.md   \
               ar864.md \
-              argonNVT.in \
               argonNVT.md
 
 

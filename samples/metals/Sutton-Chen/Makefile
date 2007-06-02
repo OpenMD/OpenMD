@@ -5,7 +5,6 @@ RmiSource =
 Main      = 
 
 SampleFiles =  \
-               Au_bulk.in \
                Au_bulk_SC.md \
                metals.md
 

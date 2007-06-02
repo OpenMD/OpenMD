@@ -6,7 +6,6 @@ Main      =
 
 SampleFiles =  \
         ssdCl.md \
-        ssdCl.in \
         water.md
 
 DEV_ROOT=../../..
