@@ -125,10 +125,7 @@ class Globals : public DataHolder {
   DeclareParameter(LangevinBufferRadius, RealType);
   DeclareParameter(AccumulateBoxDipole, bool);
   DeclareParameter(NeighborListNeighbors,int);
-  DeclareParameter(TempDepViscosityA,RealType);
-  DeclareParameter(TempDepViscosityB,RealType);
-  DeclareParameter(TempDepViscosityC,RealType);
-  DeclareParameter(TempDepViscosityD,RealType);
+ 
 
   public:
     bool addComponent(Component* comp);

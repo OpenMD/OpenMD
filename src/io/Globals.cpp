@@ -101,11 +101,7 @@ Globals::Globals() {
   DefineOptionalParameter(FrozenBufferRadius, "frozenBufferRadius");
   DefineOptionalParameter(LangevinBufferRadius, "langevinBufferRadius");
   DefineOptionalParameter(NeighborListNeighbors,"NeighborListNeighbors");
-  DefineOptionalParameter(TempDepViscosityA,"tempDepViscosityA");
-  DefineOptionalParameter(TempDepViscosityB,"tempDepViscosityB");
-  DefineOptionalParameter(TempDepViscosityC,"tempDepViscosityC");
-  DefineOptionalParameter(TempDepViscosityD,"tempDepViscosityD");
-
+  
   
   DefineOptionalParameterWithDefaultValue(UsePeriodicBoundaryConditions, "usePeriodicBoundaryConditions", true);
   DefineOptionalParameterWithDefaultValue(UseAtomicVirial, "useAtomicVirial", true);
