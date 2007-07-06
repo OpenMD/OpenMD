@@ -58,6 +58,7 @@ namespace oopse {
     DeclareParameter(EnergyMixingRule, std::string);
     DeclareParameter(CutoffPolicy, std::string);
     DeclareParameter(EnergyUnitScaling, RealType);
+    DeclareParameter(MetallicEnergyUnitScaling, RealType);
     DeclareParameter(DistanceUnitScaling, RealType);
     DeclareParameter(AngleUnitScaling, RealType);
     DeclareParameter(TorsionAngleConvention, std::string);

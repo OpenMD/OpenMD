@@ -15,7 +15,7 @@ Source    = \
 	ShapeAtomTypesSectionParser.cpp \
 	LennardJonesAtomTypesSectionParser.cpp\
 	SCAtomTypesSectionParser.cpp \
-	SpohrAtomTypesSectionParser.cpp \
+	MetalNonMetalInteractionsSectionParser.cpp \
   BondTypesSectionParser.cpp \
   BendTypesSectionParser.cpp \
 	Globals.cpp \

@@ -51,6 +51,7 @@ namespace oopse {
       DefineOptionalParameterWithDefaultValue(DistanceType, "DistanceType", "sigma");
       DefineOptionalParameterWithDefaultValue(EnergyMixingRule, "EnergyMixingRule", "geometric");
       DefineOptionalParameterWithDefaultValue(EnergyUnitScaling, "EnergyUnitScaling", 1.0);
+      DefineOptionalParameterWithDefaultValue(MetallicEnergyUnitScaling, "MetallicEnergyUnitScaling", 1.0);
       DefineOptionalParameterWithDefaultValue(DistanceUnitScaling, "DistanceUnitScaling", 1.0);
       DefineOptionalParameterWithDefaultValue(AngleUnitScaling, "AngleUnitScaling", 1.0);
       DefineOptionalParameterWithDefaultValue(TorsionAngleConvention, "TorsionAngleConvention", "180_is_trans");

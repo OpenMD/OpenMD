@@ -44,7 +44,7 @@
  *
  *  Created by Charles F. Vardeman II on 11/14/05.
  *  @author  Charles F. Vardeman II 
- *  @version $Id: SCAtomTypesSectionParser.cpp,v 1.4 2006-01-09 19:26:27 chuckv Exp $
+ *  @version $Id: SCAtomTypesSectionParser.cpp,v 1.5 2007-07-06 18:14:35 chuckv Exp $
  *
  */
 
@@ -83,7 +83,7 @@ namespace oopse {
         scParam.alpha = tokenizer.nextTokenAsDouble();
         
        
-	scParam.epsilon *= options_.getEnergyUnitScaling();
+	scParam.epsilon *= options_.getMetallicEnergyUnitScaling();
 	scParam.alpha   *= options_.getDistanceUnitScaling();
   
 
