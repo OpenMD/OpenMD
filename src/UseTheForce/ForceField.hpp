@@ -61,6 +61,7 @@
 #include "types/BondType.hpp"
 #include "types/BendType.hpp"
 #include "types/TorsionType.hpp"
+#include "types/NonBondedInteractionType.hpp"
 #include "UseTheForce/fForceOptions.h"
 namespace oopse {
 
@@ -76,6 +77,7 @@ namespace oopse {
     typedef TypeContainer<BondType, 2> BondTypeContainer;
     typedef TypeContainer<BendType, 3> BendTypeContainer;
     typedef TypeContainer<TorsionType, 4> TorsionTypeContainer;
+		typedef TypeContainer<NonBondedInteractionType, 2> NonBondedInteractionTypeContainer;
         
     ForceField(); 
 
@@ -97,7 +99,8 @@ namespace oopse {
                           const std::string &at3);
     TorsionType* getTorsionType(const std::string &at1, const std::string &at2,
                                 const std::string &at3, const std::string &at4);
-
+		NonBondedInteractionType* getNonBondedInteractionType(const std::string &at1, const std::string &at2);
+															
     BondType* getExactBondType(const std::string &at1, const std::string &at2);
     BendType* getExactBendType(const std::string &at1, const std::string &at2,
                                const std::string &at3);
@@ -105,6 +108,7 @@ namespace oopse {
                                      const std::string &at2,
                                      const std::string &at3, 
                                      const std::string &at4);
+		NonBondedInteractionType* getExactNonBondedInteractionType(const std::string &at1, const std::string &at2);
 
 
     //avoid make virtual function public
@@ -135,6 +139,9 @@ namespace oopse {
     bool addTorsionType(const std::string &at1, const std::string &at2,
 			const std::string &at3, const std::string &at4, TorsionType* torsionType);
 
+    bool addNonBondedInteractionType(const std::string &at1, const std::string &at2, 
+                     	NonBondedInteractionType* nbiType);
+
     ifstrstream* openForceFieldFile(const std::string& filename);
 
     ForceFieldOptions& getForceFieldOptions() {return forceFieldOptions_;}
@@ -146,6 +153,7 @@ namespace oopse {
     BondTypeContainer bondTypeCont_;
     BendTypeContainer bendTypeCont_;
     TorsionTypeContainer torsionTypeCont_;
+    NonBondedInteractionTypeContainer nonBondedInteractionTypeCont_;
     ForceFieldOptions forceFieldOptions_;
     
   private:  

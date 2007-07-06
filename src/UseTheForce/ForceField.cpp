@@ -131,6 +131,22 @@ namespace oopse {
 
   }
 
+  NonBondedInteractionType* ForceField::getNonBondedInteractionType(const std::string &at1, const std::string &at2) {
+    std::vector<std::string> keys;
+    keys.push_back(at1);
+    keys.push_back(at2);    
+
+    //try exact match first
+    NonBondedInteractionType* nbiType = nonBondedInteractionTypeCont_.find(keys);
+    if (nbiType) {
+      return nbiType;
+    } else {
+      //if no exact match found, try wild card match
+      return nonBondedInteractionTypeCont_.find(keys, wildCardAtomTypeName_);
+    }
+
+  }
+
   BondType* ForceField::getExactBondType(const std::string &at1, const std::string &at2){ 
     std::vector<std::string> keys;
     keys.push_back(at1);
@@ -156,6 +172,15 @@ namespace oopse {
     keys.push_back(at4);   
     return torsionTypeCont_.find(keys);
   }
+
+  NonBondedInteractionType* ForceField::getExactNonBondedInteractionType(const std::string &at1, const std::string &at2){ 
+    std::vector<std::string> keys;
+    keys.push_back(at1);
+    keys.push_back(at2);    
+    return nonBondedInteractionTypeCont_.find(keys);
+  }
+
+
   bool ForceField::addAtomType(const std::string &at, AtomType* atomType) {
     std::vector<std::string> keys;
     keys.push_back(at);
@@ -187,6 +212,14 @@ namespace oopse {
     keys.push_back(at3);    
     keys.push_back(at4);    
     return torsionTypeCont_.add(keys, torsionType);
+  }
+
+  bool ForceField::addNonBondedInteractionType(const std::string &at1, const std::string &at2, NonBondedInteractionType* nbiType) {
+    std::vector<std::string> keys;
+    keys.push_back(at1);
+    keys.push_back(at2);    
+    return nonBondedInteractionTypeCont_.add(keys, nbiType);
+
   }
 
   RealType ForceField::getRcutFromAtomType(AtomType* at) {
