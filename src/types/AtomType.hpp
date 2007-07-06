@@ -172,14 +172,6 @@ namespace oopse {
     }
     
     
-    bool isMEAM() {
-      return atp.is_MEAM;
-    }
-    
-    void setMEAM() {
-      atp.is_MEAM = 1;
-    }
-    
     
     //below functions are just forward functions
     /**
@@ -266,8 +258,6 @@ namespace oopse {
     RealType epsilon;
   };
   typedef SimpleTypeData<SCParam> SCParamGenericData;
-  
-  
   
   
 }
