@@ -73,6 +73,8 @@ namespace oopse {
     Stats::title_[TEMPERATURE] = "Temperature";
     Stats::title_[PRESSURE] = "Pressure";
     Stats::title_[VOLUME] = "Volume";
+    Stats::title_[HULLVOLUME] = "Hull Volume";
+    Stats::title_[GYRVOLUME] = "Gyrational Volume";
     Stats::title_[CONSERVED_QUANTITY] = "Conserved Quantity";             
     Stats::title_[TRANSLATIONAL_KINETIC] = "Translational Kinetic";
     Stats::title_[ROTATIONAL_KINETIC] = "Rotational Kinetic";
@@ -106,6 +108,8 @@ namespace oopse {
     Stats::units_[TEMPERATURE] = "K";
     Stats::units_[PRESSURE] = "atm";
     Stats::units_[VOLUME] = "A^3";
+    Stats::units_[HULLVOLUME] = "A^3";
+    Stats::units_[GYRVOLUME] = "A^3";
     Stats::units_[CONSERVED_QUANTITY] = "kcal/mol";             
     Stats::units_[TRANSLATIONAL_KINETIC] = "kcal/mol";
     Stats::units_[ROTATIONAL_KINETIC] = "kcal/mol";

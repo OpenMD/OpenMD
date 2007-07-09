@@ -64,6 +64,7 @@
 #include "UseTheForce/ForceFieldCreator.hpp"
 #include "UseTheForce/SHAPES_FF.hpp"
 #include "UseTheForce/SC_FF.hpp"
+#include "UseTheForce/MnM_FF.hpp"
 #include "UseTheForce/CLAYFF.hpp"
 #include "lattice/LatticeFactory.hpp"
 #include "lattice/LatticeCreator.hpp"
@@ -95,6 +96,9 @@ namespace oopse {
     ForceFieldFactory::getInstance()->registerForceField(new ForceFieldBuilder<SHAPES_FF>("SHAPES"));
     //Well if EAM worked... then Sutton-Chen should work like a CHARMM(Hopefully not).
     ForceFieldFactory::getInstance()->registerForceField(new ForceFieldBuilder<SC_FF>("SC"));
+		//Well if Sutton-Chen worked... then lets just mangle all of the forcefields together in MnM.
+		//That sounds like a good idea right......
+		ForceFieldFactory::getInstance()->registerForceField(new ForceFieldBuilder<MnM_FF>("MnM"));
     ForceFieldFactory::getInstance()->registerForceField(new ForceFieldBuilder<CLAYFF>("CLAY"));
   }
 

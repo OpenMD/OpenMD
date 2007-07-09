@@ -70,6 +70,8 @@ namespace oopse {
       TEMPERATURE,
       PRESSURE,
       VOLUME,
+			HULLVOLUME,
+			GYRVOLUME,
       CONSERVED_QUANTITY,             
       TRANSLATIONAL_KINETIC,
       ROTATIONAL_KINETIC,
