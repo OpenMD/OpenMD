@@ -9,7 +9,8 @@ Source    = \
 	EAM_FF.cpp \
 	SHAPES_FF.cpp \
 	SC_FF.cpp \
-	CLAYFF.cpp \
+	MnM_FF.cpp \
+	CLAYFF.cpp 
 
 Modules = \
 	doForces \
