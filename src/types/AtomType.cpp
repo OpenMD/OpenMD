@@ -75,7 +75,7 @@ namespace oopse {
     atp.is_Shape = 0;
     atp.is_FLARB = 0;  
     atp.is_SC = 0;
-    atp.is_MEAM = 0;
+    atp.is_MnM = 0;
   }
     
   void AtomType::makeFortranAtomType() {

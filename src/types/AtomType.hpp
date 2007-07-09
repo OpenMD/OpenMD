@@ -171,6 +171,13 @@ namespace oopse {
       atp.is_SC = 1;
     }
     
+		bool isMnM() {
+      return atp.is_MnM;
+    }
+    
+    void setMnM() {
+      atp.is_MnM = 1;
+    }
     
     
     //below functions are just forward functions
