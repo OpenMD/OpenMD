@@ -33,7 +33,7 @@ subroutine makeatype(atp, status)
   is_Shape = (atp%is_Shape .ne. 0)
   is_FLARB = (atp%is_FLARB .ne. 0)
   is_SC = (atp%is_SC .ne. 0)
-  is_Spohr = (atp%is_MnM .ne. 0)
+  is_MnM = (atp%is_MnM .ne. 0)
 
   call new_atype(ident, is_Directional, is_LennardJones, is_Electrostatic, &
        is_Charge, is_Dipole, is_Quadrupole, is_Sticky, is_StickyPower, &
