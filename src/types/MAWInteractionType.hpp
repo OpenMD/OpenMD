@@ -44,47 +44,59 @@
 
 #include "types/NonBondedInteractionType.hpp"
 
-namespace oopse
-{
-    /**
-     * @class MAWInteractionType 
-     *
-     * MAWInteractionType (Metal-Angular-Water) is one of the basic Metal-to-NonMetal interaction types.
-     * Formula is V = D0*exp(-beta0*(r-r0))*(exp(-beta0(r-r0)-2) + gamma*D0*(exp(-betaH*(r-r0))*(1+alpha*cos(theta))*sin(phi)^2
-     * The spherical coordinates are defined in the body-fixed frame of a rigid-body water molecule 
-     * (HO bonds are on the Y-Z plane) and the dipole vector of the water molecule points 
-     * along the Z-axis.  A metal atom's position is uniquely defined by a set of spherical 
-     * polar coordinates (r, theta, phi) in the body-fixed frame of each water molecule.
-     */
-    class MAWInteractionType : public NonBondedInteractionType {
-
-        public:
-
-        MAWInteractionType(RealType myD0, RealType myBeta0, RealType myR0,
-                           RealType myBetaH, RealType myGamma, RealType myAlpha)
-        {
-	        D0 = myD0;
-	        beta0 = myBeta0;
-	        r0 = myR0;
-	        betaH = myBetaH;
-	        gamma = myGamma;
-	        alpha = myAlpha;
-        }
-
-
+namespace oopse {
+  /**
+   * @class MAWInteractionType 
+   *
+   
+   * MAWInteractionType (Metal-Angular-Water) is one of the basic
+   * Metal-to-NonMetal interaction types.
+   *
+   * Formula is V = D0*exp(-beta0*(r-r0))*(exp(-beta0(r-r0)-2) +
+   *            gamma*D0*(exp(-betaH*(r-r0))*(1+alpha*cos(theta))*sin(phi)^2
+   *
+   * The spherical coordinates are defined in the body-fixed frame
+   * of a rigid-body water molecule (HO bonds are on the Y-Z plane)
+   * and the dipole vector of the water molecule points along the
+   * Z-axis.  A metal atom's position is uniquely defined by a set
+   * of spherical polar coordinates (r, theta, phi) in the
+   * body-fixed frame of each water molecule.
+   */
+  class MAWInteractionType : public NonBondedInteractionType {
     
-    virtual void tellFortran() {
+  public:
+    
+    MAWInteractionType(RealType myD0, RealType myBeta0, RealType myR0,
+		       RealType myBetaH, RealType myGamma, RealType myAlpha){
+      D0 = myD0;
+      beta0 = myBeta0;
+      r0 = myR0;
+      betaH = myBetaH;
+      gamma = myGamma;
+      alpha = myAlpha;
     }
-                
-  private:
     
-		RealType D0;
-		RealType beta0;
-		RealType r0;
-		RealType betaH;
-		RealType gamma;
-		RealType alpha;
+    virtual void tellFortran(int atid1, int atid2) {
+      mnmit.MNMInteractionType = MNM_MAW;
+      mnmit.metal_atid = atid1;
+      mnmit.nonmetal_atid = atid2;
+      mnmit.R0 = r0;
+      mnmit.D0 = D0;
+      mnmit.beta0 = beta0;
+      mnmit.betaH = betaH;
+      mnmit.alpha = alpha;
+      mnmit.gamma = gamma;
+      
+      addMNMInteraction(&mnmit);
+    }
     
+  private:    
+    RealType D0;
+    RealType beta0;
+    RealType r0;
+    RealType betaH;
+    RealType gamma;
+    RealType alpha;    
   };
 }
 #endif

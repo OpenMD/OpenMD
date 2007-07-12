@@ -48,27 +48,39 @@ namespace oopse {
   /**
    * @class RepulsiveMorseInteractionType 
    *
-   * RepulsiveMorseInteractionType is one of the basic Metal-to-NonMetal interaction types.
+   * RepulsiveMorseInteractionType is one of the basic
+   * Metal-to-NonMetal interaction types.
+   *
    * Formula is V = D0*exp(-2.0*beta0*(r-r0))
    */
   class RepulsiveMorseInteractionType : public NonBondedInteractionType {
     
   public:
-
-    RepulsiveMorseInteractionType(RealType myD0, RealType myBeta0, RealType myR0) {
+    
+    RepulsiveMorseInteractionType(RealType myD0, RealType myBeta0, 
+				  RealType myR0) {
       D0 = myD0;
-			beta0 = myBeta0;
-			r0 = myR0;
+      beta0 = myBeta0;
+      r0 = myR0;
     }
     
-    virtual void tellFortran() {
+    virtual void tellFortran(int atid1, int atid2) {
+      mnmit.MNMInteractionType = MNM_REPULSIVEMORSE;
+      mnmit.metal_atid = atid1;
+      mnmit.nonmetal_atid = atid2;
+      mnmit.R0 = r0;
+      mnmit.D0 = D0;
+      mnmit.beta0 = beta0;
+
+      addMNMInteraction(&mnmit);
     }
-                
+    
+    
   private:
     
-		RealType D0;
-		RealType beta0;
-		RealType r0;
+    RealType D0;
+    RealType beta0;
+    RealType r0;
     
   };
 }

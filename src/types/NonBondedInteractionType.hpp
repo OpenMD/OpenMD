@@ -38,37 +38,62 @@
  * University of Notre Dame has been advised of the possibility of
  * such damages.
  */
- 
+
 /**
  * @file NonBondedInteractionType.hpp
  * @author    gezelter
  * @date  07/04/2007
  * @version 1.0
- */ 
+ */
 
 #ifndef TYPES_NONBONDEDINTERACTIONTYPE_HPP
 #define TYPES_NONBONDEDINTERACTIONTYPE_HPP
 
+#define __C
+#include "UseTheForce/DarkSide/fMnMInteractions.h"
+#include "UseTheForce/DarkSide/MetalNonMetal_interface.h"
 
 namespace oopse {
   
   /**
-   * @class NonBondedInteractionType NonBondedInteractionType.hpp "types/NonBondedInteractionType.hpp"
-   * NonBondedInteractionType class is responsible for keeping track of parameters for some special
-   * non-bonded interactions.  No calculations are done by NonBondedInteractionTypes (at least not yet).
+   * @class NonBondedInteractionType NonBondedInteractionType.hpp "types/NonBondedInteractionType.hpp" 
+   *
+   * NonBondedInteractionType class is responsible for keeping track
+   * of parameters for some special non-bonded interactions.  No
+   * calculations are done by NonBondedInteractionTypes (at least not
+   * yet).
    */
   class NonBondedInteractionType {
   public:
-    NonBondedInteractionType() {}
-    virtual ~NonBondedInteractionType() {}
-
+    NonBondedInteractionType(){
+      /* set all of the values in case we pass down to fortran
+       * without setting some unimportant ones... 
+       */
+      mnmit.MNMInteractionType = 0;
+      mnmit.metal_atid = -1;
+      mnmit.nonmetal_atid = -1;
+      mnmit.R0 = 0.0;
+      mnmit.D0 = 0.0;
+      mnmit.beta0 = 0.0;
+      mnmit.betaH = 0.0;
+      mnmit.alpha = 0.0;
+      mnmit.gamma = 0.0;
+      mnmit.sigma = 0.0;
+      mnmit.epsilon = 0.0;
+    }
+    virtual ~NonBondedInteractionType(){}
     
-    virtual void tellFortran() {}
-
+    /**
+     * in metal-nonmetal interactions atid1 is always the metallic atom type.
+     */
+    virtual void tellFortran(int atid1, int atid2){}
+    
   protected:
-	
-  };    
-
-
+    MNMtype mnmit;
+    
+  };  
+  
+  
 } //end namespace oopse
-#endif //TYPES_NONBONDEDINTERACTIONTYPE_HPP    
+#endif //TYPES_NONBONDEDINTERACTIONTYPE_HPP
+

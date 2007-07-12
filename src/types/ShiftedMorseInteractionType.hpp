@@ -48,28 +48,37 @@ namespace oopse {
   /**
    * @class ShiftedMorseInteractionType 
    *
-   * ShiftedMorseInteractionType is one of the basic Metal-to-NonMetal interaction types.
+   * ShiftedMorseInteractionType is one of the basic Metal-to-NonMetal
+   * interaction types.
+   *
    * Formula is V = D0*exp(-beta0*(r-r0))*(exp(-beta0(r-r0)-2)
    */
   class ShiftedMorseInteractionType : public NonBondedInteractionType {
     
   public:
-
-    ShiftedMorseInteractionType( RealType myD0, RealType myBeta0, RealType myR0) {
+    
+    ShiftedMorseInteractionType( RealType myD0, RealType myBeta0, 
+				 RealType myR0) {
       D0 = myD0;
-			beta0 = myBeta0;
-			r0 = myR0;
+      beta0 = myBeta0;
+      r0 = myR0;
     }
     
-    virtual void tellFortran() {
+    virtual void tellFortran(int atid1, int atid2) {
+      mnmit.MNMInteractionType = MNM_SHIFTEDMORSE;
+      mnmit.metal_atid = atid1;
+      mnmit.nonmetal_atid = atid2;
+      mnmit.R0 = r0;
+      mnmit.D0 = D0;
+      mnmit.beta0 = beta0;
+
+      addMNMInteraction(&mnmit);
     }
-                
-  private:
     
-		RealType D0;
-		RealType beta0;
-		RealType r0;
-    
+  private:    
+    RealType D0;
+    RealType beta0;
+    RealType r0;    
   };
 }
 #endif

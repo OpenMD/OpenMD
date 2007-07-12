@@ -54,18 +54,26 @@ namespace oopse {
   class LennardJonesInteractionType : public NonBondedInteractionType {
     
   public:
-
+    
     LennardJonesInteractionType(RealType mySigma, RealType myEpsilon) {
       sigma = mySigma;
-			epsilon = myEpsilon;
+      epsilon = myEpsilon;
     }
     
-    virtual void tellFortran() {
+    virtual void tellFortran(int atid1, int atid2) {
+      mnmit.MNMInteractionType = MNM_REPULSIVEMORSE;
+      mnmit.metal_atid = atid1;
+      mnmit.nonmetal_atid = atid2;
+      mnmit.sigma = sigma;
+      mnmit.epsilon = epsilon;
+      
+      addMNMInteraction(&mnmit);
     }
-                
+    
+    
   private:
-		RealType sigma;
-		RealType epsilon;    
+    RealType sigma;
+    RealType epsilon;    
   };
 }
 #endif
