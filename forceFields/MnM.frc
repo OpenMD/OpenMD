@@ -76,6 +76,45 @@ CH       	0.0189          4.68
 C	  	0.101745452544	3.35
 end LennardJonesAtomTypes
 
+begin SCAtomTypes
+// Name  epsilon(eV)      c      m       n      alpha(angstroms)
+Ni      0.0073767       84.745  5.0     10.0    3.5157 
+Cu      0.0057921       84.843  5.0     10.0    3.6030
+Rh      0.0024612       305.499 5.0     13.0    3.7984
+Pd      0.0032864       148.205 6.0     12.0    3.8813
+Ag      0.0039450       96.524  6.0     11.0    4.0691
+Ir      0.0037674       224.815 6.0     13.0    3.8344  
+Pt      0.0097894       71.336  7.0     11.0    3.9163
+Au      0.0078052       53.581  8.0     11.0    4.0651
+end SCAtomTypes
+
+
+// Metal non-metal interactions.
+// Format: Metal Atom Type, Non-Metal Atom Type, Interaction Type, Interaction Parameters
+// Where interaction type can be: MAW, LennardJones or ShiftedMorse or RepulsiveMorse
+begin MetalNonMetalInteractions
+
+//MAW (Metal Angular Water section)
+// r0, D0 beta0 betaH gamma alpha
+Cu   SSD  MAW  2.5525 1.9850 1.1680  1.0500 0.2234 1.1250
+Au   SSD  MAW  2.8170 1.7850 1.2680  1.2500 0.2050 1.0250
+
+//LennardJones
+// sigma epsilon
+
+
+//Shifted Morse
+// r0 D0 beta0
+Au O_SPCE  3.70 0.0424 0.769
+
+//Repulsive Morse
+// r0 D0 beta0
+Au H_SPCE -1.00 0.00850 0.769
+
+
+end MetalNonMetalInteractions
+
+
 begin ChargeAtomTypes
 // Name 	charge
 O_TIP3P  	-0.834
@@ -261,15 +300,4 @@ CH	CH	CH	CH	Cubic		3.3254		-0.4215		-1.686		1.1661
 
 end TorsionTypes
 
-begin SCAtomTypes
-// Name  epsilon(eV)      c      m       n      alpha(angstroms)
-Ni      0.0073767       84.745  5.0     10.0    3.5157 
-Cu      0.0057921       84.843  5.0     10.0    3.6030
-Rh      0.0024612       305.499 5.0     13.0    3.7984
-Pd      0.0032864       148.205 6.0     12.0    3.8813
-Ag      0.0039450       96.524  6.0     11.0    4.0691
-Ir      0.0037674       224.815 6.0     13.0    3.8344  
-Pt      0.0097894       71.336  7.0     11.0    3.9163
-Au      0.0078052       53.581  8.0     11.0    4.0651
-end SCAtomTypes
 
