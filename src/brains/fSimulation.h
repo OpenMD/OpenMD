@@ -25,7 +25,7 @@ typedef  struct{
   int SIM_uses_SF;
   int SIM_uses_SP;
   int SIM_uses_SC;
-  int SIM_uses_MEAM;
+  int SIM_uses_MNM;
   int SIM_uses_BoxDipole;
   int SIM_uses_AtomicVirial;
 } simtype;
@@ -54,7 +54,7 @@ typedef  struct{
     logical :: SIM_uses_SF
     logical :: SIM_uses_SP
     logical :: SIM_uses_SC
-    logical :: SIM_uses_MEAM
+    logical :: SIM_uses_MNM
     logical :: SIM_uses_BoxDipole
     logical :: SIM_uses_AtomicVirial
   end type simtype
