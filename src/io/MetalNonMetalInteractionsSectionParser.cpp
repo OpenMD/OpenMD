@@ -110,6 +110,20 @@ namespace oopse {
 		}
 		break;
 
+		 case RepulsiveMorse :
+			if (nTokens < 3) {
+				sprintf(painCave.errMsg, "MetalNonMetalInteractionsSectionParser Error: Not enough tokens at line %d\n",
+					lineNo);
+				painCave.isFatal = 1;
+				simError();
+			} else {
+				RealType r0 = tokenizer.nextTokenAsDouble();
+				RealType D0 = tokenizer.nextTokenAsDouble();
+				RealType beta0 = tokenizer.nextTokenAsDouble();
+	      interactionType = new RepulsiveMorseInteractionType(D0, beta0, r0);
+			}
+			break;
+
     case LennardJones :
 		if (nTokens < 2) {
 			sprintf(painCave.errMsg, "MetalNonMetalInteractionsSectionParser Error: Not enough tokens at line %d\n",

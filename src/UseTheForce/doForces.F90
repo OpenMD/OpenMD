@@ -45,7 +45,7 @@
 
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: doForces.F90,v 1.90 2007-05-22 19:30:27 chuckv Exp $, $Date: 2007-05-22 19:30:27 $, $Name: not supported by cvs2svn $, $Revision: 1.90 $
+!! @version $Id: doForces.F90,v 1.91 2007-07-12 23:20:00 chuckv Exp $, $Date: 2007-07-12 23:20:00 $, $Name: not supported by cvs2svn $, $Revision: 1.91 $
 
 
 module doForces
@@ -62,6 +62,7 @@ module doForces
   use shapes
   use vector_class
   use eam
+  use MetalNonMetal
   use suttonchen
   use status
 #ifdef IS_MPI
@@ -96,13 +97,13 @@ module doForces
   logical, save :: FF_uses_GayBerne
   logical, save :: FF_uses_EAM
   logical, save :: FF_uses_SC
-  logical, save :: FF_uses_MEAM
+  logical, save :: FF_uses_MNM
  
 
   logical, save :: SIM_uses_DirectionalAtoms
   logical, save :: SIM_uses_EAM
   logical, save :: SIM_uses_SC
-  logical, save :: SIM_uses_MEAM
+  logical, save :: SIM_uses_MNM
   logical, save :: SIM_requires_postpair_calc
   logical, save :: SIM_requires_prepair_calc
   logical, save :: SIM_uses_PBC
@@ -170,7 +171,6 @@ contains
     logical :: i_is_EAM
     logical :: i_is_Shape
     logical :: i_is_SC
-    logical :: i_is_MEAM
     logical :: j_is_LJ
     logical :: j_is_Elect
     logical :: j_is_Sticky
@@ -179,7 +179,6 @@ contains
     logical :: j_is_EAM
     logical :: j_is_Shape
     logical :: j_is_SC
-    logical :: j_is_MEAM
     real(kind=dp) :: myRcut
 
     if (.not. associated(atypes)) then
@@ -217,7 +216,6 @@ contains
        call getElementProperty(atypes, i, "is_EAM", i_is_EAM)
        call getElementProperty(atypes, i, "is_Shape", i_is_Shape)
        call getElementProperty(atypes, i, "is_SC", i_is_SC)
-       call getElementProperty(atypes, i, "is_MEAM", i_is_MEAM)
 
        do j = i, nAtypes
 
@@ -232,7 +230,6 @@ contains
           call getElementProperty(atypes, j, "is_EAM", j_is_EAM)
           call getElementProperty(atypes, j, "is_Shape", j_is_Shape)
           call getElementProperty(atypes, j, "is_SC", j_is_SC)
-          call getElementProperty(atypes, j, "is_MEAM", j_is_MEAM)
 
           if (i_is_LJ .and. j_is_LJ) then
              iHash = ior(iHash, LJ_PAIR)            
@@ -261,6 +258,9 @@ contains
           if (i_is_GB .and. j_is_GB) iHash = ior(iHash, GAYBERNE_PAIR)
           if (i_is_GB .and. j_is_LJ) iHash = ior(iHash, GAYBERNE_LJ)
           if (i_is_LJ .and. j_is_GB) iHash = ior(iHash, GAYBERNE_LJ)
+	
+          if ((i_is_EAM.or.i_is_SC).and.(.not.(j_is_EAM.or.j_is_SC))) iHash = ior(iHash, MNM_PAIR)
+          if ((j_is_EAM.or.j_is_SC).and.(.not.(i_is_EAM.or.i_is_SC))) iHash = ior(iHash, MNM_PAIR)
 
           if (i_is_Shape .and. j_is_Shape) iHash = ior(iHash, SHAPE_PAIR)
           if (i_is_Shape .and. j_is_LJ) iHash = ior(iHash, SHAPE_LJ)
@@ -603,6 +603,8 @@ contains
      call setElectrostaticCutoffRadius( defaultRcut, defaultRsw )
      call setCutoffEAM( defaultRcut )
      call setCutoffSC( defaultRcut )
+     call setMnMDefaultCutoff( defaultRcut, defaultDoShiftPot, &
+          defaultDoShiftFrc )
      call set_switch(defaultRsw, defaultRcut)
      call setHmatDangerousRcutValue(defaultRcut)
          
@@ -1751,8 +1753,7 @@ contains
 
   function FF_RequiresPrepairCalc() result(doesit)
     logical :: doesit
-    doesit = FF_uses_EAM .or. FF_uses_SC &
-         .or. FF_uses_MEAM
+    doesit = FF_uses_EAM .or. FF_uses_SC
   end function FF_RequiresPrepairCalc
 
 #ifdef PROFILE

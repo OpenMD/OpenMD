@@ -120,7 +120,7 @@ module simulation
   public :: SimRequiresPostpairCalc
   public :: SimHasAtype
   public :: SimUsesSC
-  public :: SimUsesMEAM
+  public :: SimUsesMNM
   public :: setHmatDangerousRcutValue
 
 contains
@@ -597,10 +597,10 @@ contains
           doesit = thisSim%SIM_uses_SC
         end function SimUsesSC
 
-        function SimUsesMEAM() result(doesit)
+        function SimUsesMNM() result(doesit)
           logical :: doesit
-          doesit = thisSim%SIM_uses_MEAM
-        end function SimUsesMEAM
+          doesit = thisSim%SIM_uses_MNM
+        end function SimUsesMNM
 
 
         function SimUsesShapes() result(doesit)
@@ -635,8 +635,7 @@ contains
 
         function SimRequiresPrepairCalc() result(doesit)
           logical :: doesit
-          doesit = thisSim%SIM_uses_EAM .or. thisSim%SIM_uses_SC &
-               .or. thisSim%SIM_uses_MEAM
+          doesit = thisSim%SIM_uses_EAM .or. thisSim%SIM_uses_SC
         end function SimRequiresPrepairCalc
         
         function SimRequiresPostpairCalc() result(doesit)

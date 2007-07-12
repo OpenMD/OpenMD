@@ -13,7 +13,7 @@
 #define SHAPE_LJ           256
 #define FLARB_PAIR         512
 #define SC_PAIR            1024
-#define SPOHR_PAIR         2048
+#define MNM_PAIR           2048
 
 #define LR_POT_TYPES      4
 
@@ -39,7 +39,7 @@
   INTEGER, PARAMETER:: SHAPE_LJ           = 256
   INTEGER, PARAMETER:: FLARB_PAIR         = 512
   INTEGER ,PARAMETER:: SC_PAIR            = 1024
-  INTEGER ,PARAMETER:: SPOHR_PAIR         = 2048
+  INTEGER ,PARAMETER:: MNM_PAIR           = 2048
  
 
 

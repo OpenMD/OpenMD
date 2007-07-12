@@ -27,7 +27,9 @@ Source    = \
 	shapes.F90 \
 	shapes_interface.F90 \
 	suttonchen.F90 \
-	suttonchen_interface.F90
+	suttonchen_interface.F90 \
+	MetalNonMetal.F90 \
+	MetalNonMetal_interface.F90
 
 Modules = \
 	atype_module \
