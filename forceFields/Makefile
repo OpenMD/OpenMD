@@ -40,13 +40,12 @@ ForcefieldFiles = \
         atomtyp.txt \
         bondtyp.txt \
         element.txt \
-        extable.txt \
         isotope-small.txt \
         isotope.txt \
         patterns.txt \
         phmodel.txt \
         resdata.txt \
-        SMARTS_InteLigand_051110.txt \
+        SMARTS_InteLigand.txt \
         torlib.txt \
         types.txt 
 

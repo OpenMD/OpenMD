@@ -5,7 +5,7 @@ RmiSource =
 Main      = 
 
 SampleFiles =  \
-        ssdCl.md \
+        ssd-ion.md \
         water.md
 
 DEV_ROOT=../../..

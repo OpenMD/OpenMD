@@ -138,3 +138,143 @@ $(TargetDir)/mem.o : mem.c \
  ../../src/config.h \
  ../../src/QuickHull/mem.h \
 
+
+$(ParallelTargetDir)/user.o : user.c \
+ ../../src/QuickHull/qhull_a.h \
+ ../../src/config.h \
+ ../../src/QuickHull/qhull.h \
+ ../../src/QuickHull/user.h \
+ ../../src/QuickHull/mem.h \
+ ../../src/QuickHull/qset.h \
+ ../../src/QuickHull/geom.h \
+ ../../src/QuickHull/merge.h \
+ ../../src/QuickHull/poly.h \
+ ../../src/QuickHull/io.h \
+ ../../src/QuickHull/stat.h \
+
+$(ParallelTargetDir)/global.o : global.c \
+ ../../src/QuickHull/qhull_a.h \
+ ../../src/config.h \
+ ../../src/QuickHull/qhull.h \
+ ../../src/QuickHull/user.h \
+ ../../src/QuickHull/mem.h \
+ ../../src/QuickHull/qset.h \
+ ../../src/QuickHull/geom.h \
+ ../../src/QuickHull/merge.h \
+ ../../src/QuickHull/poly.h \
+ ../../src/QuickHull/io.h \
+ ../../src/QuickHull/stat.h \
+
+$(ParallelTargetDir)/stat.o : stat.c \
+ ../../src/QuickHull/qhull_a.h \
+ ../../src/config.h \
+ ../../src/QuickHull/qhull.h \
+ ../../src/QuickHull/user.h \
+ ../../src/QuickHull/mem.h \
+ ../../src/QuickHull/qset.h \
+ ../../src/QuickHull/geom.h \
+ ../../src/QuickHull/merge.h \
+ ../../src/QuickHull/poly.h \
+ ../../src/QuickHull/io.h \
+ ../../src/QuickHull/stat.h \
+
+$(ParallelTargetDir)/io.o : io.c \
+ ../../src/QuickHull/qhull_a.h \
+ ../../src/config.h \
+ ../../src/QuickHull/qhull.h \
+ ../../src/QuickHull/user.h \
+ ../../src/QuickHull/mem.h \
+ ../../src/QuickHull/qset.h \
+ ../../src/QuickHull/geom.h \
+ ../../src/QuickHull/merge.h \
+ ../../src/QuickHull/poly.h \
+ ../../src/QuickHull/io.h \
+ ../../src/QuickHull/stat.h \
+
+$(ParallelTargetDir)/geom2.o : geom2.c \
+ ../../src/QuickHull/qhull_a.h \
+ ../../src/config.h \
+ ../../src/QuickHull/qhull.h \
+ ../../src/QuickHull/user.h \
+ ../../src/QuickHull/mem.h \
+ ../../src/QuickHull/qset.h \
+ ../../src/QuickHull/geom.h \
+ ../../src/QuickHull/merge.h \
+ ../../src/QuickHull/poly.h \
+ ../../src/QuickHull/io.h \
+ ../../src/QuickHull/stat.h \
+
+$(ParallelTargetDir)/poly2.o : poly2.c \
+ ../../src/QuickHull/qhull_a.h \
+ ../../src/config.h \
+ ../../src/QuickHull/qhull.h \
+ ../../src/QuickHull/user.h \
+ ../../src/QuickHull/mem.h \
+ ../../src/QuickHull/qset.h \
+ ../../src/QuickHull/geom.h \
+ ../../src/QuickHull/merge.h \
+ ../../src/QuickHull/poly.h \
+ ../../src/QuickHull/io.h \
+ ../../src/QuickHull/stat.h \
+
+$(ParallelTargetDir)/merge.o : merge.c \
+ ../../src/QuickHull/qhull_a.h \
+ ../../src/config.h \
+ ../../src/QuickHull/qhull.h \
+ ../../src/QuickHull/user.h \
+ ../../src/QuickHull/mem.h \
+ ../../src/QuickHull/qset.h \
+ ../../src/QuickHull/geom.h \
+ ../../src/QuickHull/merge.h \
+ ../../src/QuickHull/poly.h \
+ ../../src/QuickHull/io.h \
+ ../../src/QuickHull/stat.h \
+
+$(ParallelTargetDir)/qhull.o : qhull.c \
+ ../../src/QuickHull/qhull_a.h \
+ ../../src/config.h \
+ ../../src/QuickHull/qhull.h \
+ ../../src/QuickHull/user.h \
+ ../../src/QuickHull/mem.h \
+ ../../src/QuickHull/qset.h \
+ ../../src/QuickHull/geom.h \
+ ../../src/QuickHull/merge.h \
+ ../../src/QuickHull/poly.h \
+ ../../src/QuickHull/io.h \
+ ../../src/QuickHull/stat.h \
+
+$(ParallelTargetDir)/geom.o : geom.c \
+ ../../src/QuickHull/qhull_a.h \
+ ../../src/config.h \
+ ../../src/QuickHull/qhull.h \
+ ../../src/QuickHull/user.h \
+ ../../src/QuickHull/mem.h \
+ ../../src/QuickHull/qset.h \
+ ../../src/QuickHull/geom.h \
+ ../../src/QuickHull/merge.h \
+ ../../src/QuickHull/poly.h \
+ ../../src/QuickHull/io.h \
+ ../../src/QuickHull/stat.h \
+
+$(ParallelTargetDir)/poly.o : poly.c \
+ ../../src/QuickHull/qhull_a.h \
+ ../../src/config.h \
+ ../../src/QuickHull/qhull.h \
+ ../../src/QuickHull/user.h \
+ ../../src/QuickHull/mem.h \
+ ../../src/QuickHull/qset.h \
+ ../../src/QuickHull/geom.h \
+ ../../src/QuickHull/merge.h \
+ ../../src/QuickHull/poly.h \
+ ../../src/QuickHull/io.h \
+ ../../src/QuickHull/stat.h \
+
+$(ParallelTargetDir)/qset.o : qset.c \
+ ../../src/config.h \
+ ../../src/QuickHull/qset.h \
+ ../../src/QuickHull/mem.h \
+
+$(ParallelTargetDir)/mem.o : mem.c \
+ ../../src/config.h \
+ ../../src/QuickHull/mem.h \
+
