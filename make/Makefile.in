@@ -115,8 +115,8 @@ Libraries = \
 	@ZLIB@ 
 
 OopseHome       = @OOPSE_HOME@
-ForceParamDir   = $(OopseHome)/share/forceFields
-SampleSimDir    = $(OopseHome)/share/samples
+ForceParamDir   = $(OopseHome)/forceFields
+SampleSimDir    = $(OopseHome)/samples
 InstallBinDir   = $(OopseHome)/bin
 DocDir          = $(OopseHome)/doc
 FrcDeclare      = -DFRC_PATH="$(ForceParamDir)"
@@ -448,6 +448,18 @@ ifneq "$(words $(ScriptFiles))" "0"
   MyInstallDir             = $(InstallBinDir)
   InstallFiles             = $(ScriptFiles)
   InstallCommand           = $(InstallProgram)
+endif
+
+ifneq "$(words $(DocFiles))" "0"
+  MyInstallDir             = $(InstallDocDir)
+  InstallFiles             = $(DocFiles)
+  InstallCommand           = $(InstallData)
+endif
+
+ifneq "$(words $(RootFiles))" "0"
+  MyInstallDir             = $(OopseHome)
+  InstallFiles             = $(RootFiles)
+  InstallCommand           = $(InstallData)
 endif
 
 ifneq "$(words $(Main))" "0"
