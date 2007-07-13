@@ -57,7 +57,7 @@ namespace oopse {
     
     // initialize to an error:
     atp.ident = -1;
-
+    
     // and mass_less:
     mass_ = 0.0;
     
@@ -75,13 +75,12 @@ namespace oopse {
     atp.is_Shape = 0;
     atp.is_FLARB = 0;  
     atp.is_SC = 0;
-    atp.is_MnM = 0;
   }
-    
+  
   void AtomType::makeFortranAtomType() {
     
     int status;
-
+    
     if (name_.empty()) {
       sprintf( painCave.errMsg,
                "Attempting to complete an AtomType without giving "
@@ -99,7 +98,7 @@ namespace oopse {
       painCave.isFatal = 1;
       simError();          
     }
- 
+    
     status = 0;
     
     makeAtype(&atp, &status);   
@@ -112,8 +111,8 @@ namespace oopse {
       simError();          
     }
   }
-
-
+  
+  
   void AtomType::complete() {
     int isError;
     GenericData* data;
@@ -123,13 +122,13 @@ namespace oopse {
       data = getPropertyByName("LennardJones");
       if (data != NULL) {
 	LJParamGenericData* ljData = dynamic_cast<LJParamGenericData*>(data);
-
+        
 	if (ljData != NULL) {
 	  LJParam ljParam = ljData->getData();
-                
-	  newLJtype(&atp.ident, &ljParam.sigma, &ljParam.epsilon, &ljParam.soft_pot, 
-              &isError);
-
+          
+	  newLJtype(&atp.ident, &ljParam.sigma, &ljParam.epsilon, 
+                    &ljParam.soft_pot, &isError);
+          
 	  if (isError != 0) {
 	    sprintf( painCave.errMsg,
 		     "Fortran rejected newLJtype\n");
@@ -137,7 +136,7 @@ namespace oopse {
 	    painCave.isFatal = 1;
 	    simError();          
 	  }
-                
+          
 	} else {
 	  sprintf( painCave.errMsg,
 		   "Can not cast GenericData to LJParam\n");
@@ -152,7 +151,7 @@ namespace oopse {
 	simError();          
       }
     }
-
+    
     if (isElectrostatic()) {
       newElectrostaticType(&atp, &isError);
       if (isError != 0) {
@@ -163,16 +162,16 @@ namespace oopse {
         simError();          
       }
     }
-      
+    
     if (isCharge()) {
       data = getPropertyByName("Charge");
       if (data != NULL) {
 	DoubleGenericData* doubleData= dynamic_cast<DoubleGenericData*>(data);
-
+        
 	if (doubleData != NULL) {
 	  RealType charge = doubleData->getData();
 	  setCharge(&atp.ident, &charge, &isError);
-                
+          
 	  if (isError != 0) {
 	    sprintf( painCave.errMsg,
 		     "Fortran rejected setCharge\n");
@@ -194,22 +193,22 @@ namespace oopse {
 	simError();          
       }
     }
-
+    
     if (isEAM()) {
       data = getPropertyByName("EAM");
       if (data != NULL) {
 	EAMParamGenericData* eamData = dynamic_cast<EAMParamGenericData*>(data);
-
+        
 	if (eamData != NULL) {
-
+          
 	  EAMParam eamParam = eamData->getData();
-                
-
-	  newEAMtype(&eamParam.latticeConstant, &eamParam.nrho, &eamParam.drho,  
-               &eamParam.nr, &eamParam.dr, &eamParam.rcut, &eamParam.rvals[0], 
-               &eamParam.rhovals[0], &eamParam.Frhovals[0], &atp.ident, 
-               &isError );
-
+          
+          
+	  newEAMtype(&eamParam.latticeConstant, &eamParam.nrho, 
+                     &eamParam.drho,  &eamParam.nr, &eamParam.dr, 
+                     &eamParam.rcut, &eamParam.rvals[0], &eamParam.rhovals[0], 
+                     &eamParam.Frhovals[0], &atp.ident, &isError );
+          
 	  if (isError != 0) {
 	    sprintf( painCave.errMsg,
 		     "Fortran rejected newEAMtype\n");
@@ -231,7 +230,7 @@ namespace oopse {
 	simError();          
       }
     }
-
+    
     
     if (isSC()) {
       data = getPropertyByName("SC");
@@ -241,11 +240,10 @@ namespace oopse {
         if (SCData != NULL) {
           
           SCParam scParam = SCData->getData();
-          
-          
+                    
           newSCtype(&atp.ident, &scParam.c, &scParam.m,  
-                     &scParam.n, &scParam.alpha, &scParam.epsilon, 
-                     &isError );
+                    &scParam.n, &scParam.alpha, &scParam.epsilon, 
+                    &isError );
           
           if (isError != 0) {
             sprintf( painCave.errMsg,
@@ -268,31 +266,28 @@ namespace oopse {
         simError();          
       }
     }
-    
-      
-    
   }
 
   void AtomType::addProperty(GenericData* genData) {
     properties_.addProperty(genData);  
   }
-
+  
   void AtomType::removeProperty(const std::string& propName) {
     properties_.removeProperty(propName);  
   }
-
+  
   void AtomType::clearProperties() {
     properties_.clearProperties(); 
   }
-
+  
   std::vector<std::string> AtomType::getPropertyNames() {
     return properties_.getPropertyNames();  
   }
-      
+  
   std::vector<GenericData*> AtomType::getProperties() { 
     return properties_.getProperties(); 
   }
-
+  
   GenericData* AtomType::getPropertyByName(const std::string& propName) {
     return properties_.getPropertyByName(propName); 
   }  

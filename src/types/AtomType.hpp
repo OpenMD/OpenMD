@@ -61,56 +61,56 @@ namespace oopse {
    */
   class AtomType {
   public:
-
+    
     AtomType();
-
+    
     virtual ~AtomType() { } ;
-
+    
     virtual void complete();
-
+    
     /**
      * Finishes off the AtomType by communicating the logical portions of the
      * structure to the Fortran atype module
      */
     void makeFortranAtomType();
-            
+    
     void setMass(RealType m) {
       mass_ = m;
     }
-
+    
     RealType getMass(void) {
       return mass_;
     }
-
+    
     void setIdent(int id) {
       atp.ident = id;
     }
-
+    
     int getIdent() {
       return atp.ident;
     }
-
+    
     void setName(const std::string&name) {
       name_ = name;
     }
-
+    
     std::string getName() {
       return name_;
     }
-
+    
     void setLennardJones() {
       atp.is_LennardJones = 1;
     }
-
+    
     bool isLennardJones() {
       return atp.is_LennardJones;
     }
-
-
+    
+    
     bool isElectrostatic() {
       return isCharge() || isMultipole();
     }
-
+    
     void setEAM() {
       atp.is_EAM = 1;
     }
@@ -169,16 +169,7 @@ namespace oopse {
     
     void setSC() {
       atp.is_SC = 1;
-    }
-    
-		bool isMnM() {
-      return atp.is_MnM;
-    }
-    
-    void setMnM() {
-      atp.is_MnM = 1;
-    }
-    
+    }        
     
     //below functions are just forward functions
     /**
@@ -213,36 +204,36 @@ namespace oopse {
     /**
      * Returns property 
      * @param propName name of property
-     * @return a pointer point to property with propName. If no property named propName
-     * exists, return NULL
+     * @return a pointer point to property with propName. If no
+     * property named propName exists, return NULL
      */      
     GenericData* getPropertyByName(const std::string& propName);
 
   protected:
-
+    
     AtomTypeProperties atp;
     RealType mass_;
     std::string name_;
 
   private:
-    //prevent copy construction and copy assignment, since property map contains
-    //pointers which can not be copied and managered safely, except make the generic data
-    //at PropertyMap as copy on write shared pointer
+    //prevent copy construction and copy assignment, since property
+    //map contains pointers which can not be copied and managered
+    //safely, except make the generic data at PropertyMap as copy on
+    //write shared pointer
     AtomType(const AtomType&);
     AtomType& operator=(const AtomType& atomType);
-
             
     PropertyMap properties_;
-             
+    
   };
-
+  
   struct LJParam {
     RealType epsilon;
     RealType sigma;
     int soft_pot;
   };
   typedef SimpleTypeData<LJParam> LJParamGenericData;
-
+  
   struct EAMParam {
     RealType latticeConstant;         
     int nrho;
@@ -254,7 +245,7 @@ namespace oopse {
     std::vector<RealType> rhovals;
     std::vector<RealType> Frhovals;    
   };
-
+  
   typedef SimpleTypeData<EAMParam> EAMParamGenericData;
   
   struct SCParam {
@@ -264,9 +255,7 @@ namespace oopse {
     RealType alpha;
     RealType epsilon;
   };
-  typedef SimpleTypeData<SCParam> SCParamGenericData;
-  
-  
+  typedef SimpleTypeData<SCParam> SCParamGenericData;   
 }
 
 #endif

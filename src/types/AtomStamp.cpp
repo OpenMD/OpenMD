@@ -38,7 +38,7 @@
  * University of Notre Dame has been advised of the possibility of
  * such damages.
  */
- 
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -47,44 +47,44 @@
 #include "types/AtomStamp.hpp"
 
 namespace oopse {
-AtomStamp::AtomStamp(int index) : havePos_(false), haveOrt_(false),  index_(index) {
+  AtomStamp::AtomStamp(int index) : havePos_(false), haveOrt_(false),  
+                                    index_(index) {
     DefineParameter(Type, "type");
-}
+  }
 
-bool AtomStamp::setPosition(const std::vector<RealType>& pos) {
+  bool AtomStamp::setPosition(const std::vector<RealType>& pos) {
     bool ret = false;
     if (pos.size() == 3) {
-        position_[0] = pos[0];
-        position_[1] = pos[1];
-        position_[2] = pos[2];
-        havePos_ = true;
+      position_[0] = pos[0];
+      position_[1] = pos[1];
+      position_[2] = pos[2];
+      havePos_ = true;
     }else {
-        std::ostringstream oss;
-        oss << "position" << containerToString(pos) << " is invalid" << std::endl;
-        throw OOPSEException(oss.str());    
+      std::ostringstream oss;
+      oss << "position" << containerToString(pos) << " is invalid" << std::endl;
+      throw OOPSEException(oss.str());    
     }
     return ret;
-}
-
-bool AtomStamp::setOrientation(const std::vector<RealType>& ort) {
+  }
+  
+  bool AtomStamp::setOrientation(const std::vector<RealType>& ort) {
     bool ret = false;
     if (ort.size() == 3) {
-        orientation_[0] = ort[0];
-        orientation_[1] = ort[1];
-        orientation_[2] = ort[2];
-        haveOrt_ = true;
+      orientation_[0] = ort[0];
+      orientation_[1] = ort[1];
+      orientation_[2] = ort[2];
+      haveOrt_ = true;
     }else {
-        std::ostringstream oss;
-        oss << "orientation" << containerToString(ort) << " is invalid" << std::endl;
-        throw OOPSEException(oss.str());    
+      std::ostringstream oss;
+      oss << "orientation" << containerToString(ort) << " is invalid" << std::endl;
+      throw OOPSEException(oss.str());    
     }
     
     return ret;
-}
-
-void AtomStamp::validate() {
+  }
+  
+  void AtomStamp::validate() {
     DataHolder::validate();
     CheckParameter(Type, isNotEmpty());
-}
-
+  }  
 }

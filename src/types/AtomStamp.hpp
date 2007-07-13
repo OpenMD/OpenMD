@@ -38,7 +38,7 @@
  * University of Notre Dame has been advised of the possibility of
  * such damages.
  */
- 
+
 #ifndef TYPES_ATOMSTAMP_HPP
 #define TYPES_ATOMSTAMP_HPP
 
@@ -47,57 +47,57 @@
 
 #include "types/DataHolder.hpp"
 namespace oopse {
-
-class AtomStamp  : public DataHolder {
+  
+  class AtomStamp  : public DataHolder {
     DeclareParameter(Type, std::string);
-    public:
-        AtomStamp(int index);
-    public:
-
-      bool setPosition(const std::vector<RealType>& pos);
-      bool setOrientation(const std::vector<RealType>& ort);
-      bool havePosition() { return havePos_; }
-      bool haveOrientation() { return haveOrt_; }      
-      RealType getPosX() { return position_[0]; }
-      RealType getPosY() { return position_[1]; }
-      RealType getPosZ() { return position_[2]; }
-      RealType getEulerPhi()   { return orientation_[0]; }
-      RealType getEulerTheta() { return orientation_[1]; }
-      RealType getEulerPsi()   { return orientation_[2]; }
-      int getIndex() { return index_;}
-      virtual void validate();
-      typedef std::set<int>::iterator AtomIter;
-      typedef std::vector<int>::iterator BondIter;
-      int getFirstBondedAtom(AtomIter& ai) {
-        ai = bondedAtoms_.begin();
-        return ai != bondedAtoms_.end() ? *ai : -1;
-      }
-      
-      int getNextBondedAtom(AtomIter& ai) {
-        ++ai;
-        return ai != bondedAtoms_.end() ? *ai : -1;
-      }
-      
+  public:
+    AtomStamp(int index);
+  public:
+    
+    bool setPosition(const std::vector<RealType>& pos);
+    bool setOrientation(const std::vector<RealType>& ort);
+    bool havePosition() { return havePos_; }
+    bool haveOrientation() { return haveOrt_; }      
+    RealType getPosX() { return position_[0]; }
+    RealType getPosY() { return position_[1]; }
+    RealType getPosZ() { return position_[2]; }
+    RealType getEulerPhi()   { return orientation_[0]; }
+    RealType getEulerTheta() { return orientation_[1]; }
+    RealType getEulerPsi()   { return orientation_[2]; }
+    int getIndex() { return index_;}
+    virtual void validate();
+    typedef std::set<int>::iterator AtomIter;
+    typedef std::vector<int>::iterator BondIter;
+    int getFirstBondedAtom(AtomIter& ai) {
+      ai = bondedAtoms_.begin();
+      return ai != bondedAtoms_.end() ? *ai : -1;
+    }
+    
+    int getNextBondedAtom(AtomIter& ai) {
+      ++ai;
+      return ai != bondedAtoms_.end() ? *ai : -1;
+    }
+    
       int getFirstBond(BondIter& bi) {
         bi = bonds_.begin();
         return bi != bonds_.end()? *bi: -1;
       }
-      int getNextBond(BondIter& bi) {
-        ++bi; 
-        return bi != bonds_.end()? *bi: -1;
-      }
-      
-      void addBond(int bondIndex) {bonds_.push_back(bondIndex);}
-      void addBondedAtom(int atomIndex) {bondedAtoms_.insert(atomIndex);}
-    private:
-        Vector3d position_;
-        Vector3d orientation_;
-        bool havePos_;
-        bool haveOrt_;
-        int index_;
-        std::vector<int> bonds_;
-        std::set<int> bondedAtoms_;
-};
-
+    int getNextBond(BondIter& bi) {
+      ++bi; 
+      return bi != bonds_.end()? *bi: -1;
+    }
+    
+    void addBond(int bondIndex) {bonds_.push_back(bondIndex);}
+    void addBondedAtom(int atomIndex) {bondedAtoms_.insert(atomIndex);}
+  private:
+    Vector3d position_;
+    Vector3d orientation_;
+    bool havePos_;
+    bool haveOrt_;
+    int index_;
+    std::vector<int> bonds_;
+    std::set<int> bondedAtoms_;
+  };
+  
 }
 #endif
