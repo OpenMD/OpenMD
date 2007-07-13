@@ -46,71 +46,71 @@
 #include "math/SquareMatrix3.hpp"
 
 namespace oopse {
-
-/**
- * @class DirectionalAtomType 
- *
- * DirectionalAtomType is what OOPSE looks to for unchanging data
- * about a directional atoms. 
- */
-class DirectionalAtomType : public AtomType {
-
-    public:
-
-        DirectionalAtomType() : AtomType() { atp.is_Directional = 1; }
-
-        Mat3x3d getI() {return I;}
-
-        void    setI(Mat3x3d theI) {I = theI;}
-
-        RotMat3x3d getElectroBodyFrame() {
-            return electroBodyFrame_;
-        }
-
-        void setElectroBodyFrame(const RotMat3x3d& electroBodyFrame) {
-            electroBodyFrame_ =electroBodyFrame;
-        }
-
-        void setDipole() { atp.is_Dipole = 1; }
-        void setSplitDipole() { atp.is_SplitDipole = 1; atp.is_Dipole=1;}
-        void setQuadrupole() { atp.is_Quadrupole = 1; }
-        void setGayBerne() { atp.is_GayBerne = 1; }
-        void setSticky() { atp.is_Sticky = 1; }
-	void setStickyPower() { atp.is_StickyPower = 1; }
-        void setShape() { atp.is_Shape = 1;}
-
-        virtual void complete();
-
-    private:
-
-        Mat3x3d I;
-        RotMat3x3d electroBodyFrame_;
-};
-
-
-struct StickyParam {
-  RealType w0;
-  RealType v0;
-  RealType v0p;
-  RealType rl;
-  RealType ru;
-  RealType rlp;
-  RealType rup;
-};
-
-struct GayBerneParam{
-  RealType GB_d;
-  RealType GB_l;
-  RealType GB_eps;
-  RealType GB_eps_ratio;
-  RealType GB_dw;
-};
-
-typedef SimpleTypeData<StickyParam> StickyParamGenericData;
-
-typedef SimpleTypeData<GayBerneParam> GayBerneParamGenericData;
-
-typedef SimpleTypeData<Vector3d> Vector3dGenericData;
+  
+  /**
+   * @class DirectionalAtomType 
+   *
+   * DirectionalAtomType is what OOPSE looks to for unchanging data
+   * about a directional atoms. 
+   */
+  class DirectionalAtomType : public AtomType {
+    
+  public:
+    
+    DirectionalAtomType() : AtomType() { atp.is_Directional = 1; }
+    
+    Mat3x3d getI() {return I;}
+    
+    void    setI(Mat3x3d theI) {I = theI;}
+    
+    RotMat3x3d getElectroBodyFrame() {
+      return electroBodyFrame_;
+    }
+    
+    void setElectroBodyFrame(const RotMat3x3d& electroBodyFrame) {
+      electroBodyFrame_ =electroBodyFrame;
+    }
+    
+    void setDipole() { atp.is_Dipole = 1; }
+    void setSplitDipole() { atp.is_SplitDipole = 1; atp.is_Dipole=1;}
+    void setQuadrupole() { atp.is_Quadrupole = 1; }
+    void setGayBerne() { atp.is_GayBerne = 1; }
+    void setSticky() { atp.is_Sticky = 1; }
+    void setStickyPower() { atp.is_StickyPower = 1; }
+    void setShape() { atp.is_Shape = 1;}
+    
+    virtual void complete();
+    
+  private:
+    
+    Mat3x3d I;
+    RotMat3x3d electroBodyFrame_;
+  };
+  
+  
+  struct StickyParam {
+    RealType w0;
+    RealType v0;
+    RealType v0p;
+    RealType rl;
+    RealType ru;
+    RealType rlp;
+    RealType rup;
+  };
+  
+  struct GayBerneParam{
+    RealType GB_d;
+    RealType GB_l;
+    RealType GB_eps;
+    RealType GB_eps_ratio;
+    RealType GB_dw;
+  };
+  
+  typedef SimpleTypeData<StickyParam> StickyParamGenericData;
+  
+  typedef SimpleTypeData<GayBerneParam> GayBerneParamGenericData;
+  
+  typedef SimpleTypeData<Vector3d> Vector3dGenericData;
   
 }
 #endif

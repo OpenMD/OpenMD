@@ -46,11 +46,11 @@
 
 #include "types/CutoffGroupStamp.hpp"
 namespace oopse {
-CutoffGroupStamp::CutoffGroupStamp() {
+  CutoffGroupStamp::CutoffGroupStamp() {
     deprecatedKeywords_.insert("nMembers");  
-}
-
-void CutoffGroupStamp::validate() {
+  }
+  
+  void CutoffGroupStamp::validate() {
     DataHolder::validate();
-}
+  }
 }

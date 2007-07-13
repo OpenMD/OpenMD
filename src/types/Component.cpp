@@ -46,29 +46,27 @@
 #include "types/Component.hpp"
 
 namespace oopse {
-Component::Component() : moleculeStamp_(NULL) {
+  Component::Component() : moleculeStamp_(NULL) {
     DefineParameter(Type, "type");
     DefineParameter(NMol, "nMol");
-}
-
-Component::~Component() {
-
-}
-
-void Component::validate() {
+  }
+  
+  Component::~Component() {    
+  }
+  
+  void Component::validate() {
     CheckParameter(Type, isNotEmpty());
     CheckParameter(NMol, isPositive());
-}
-
-bool Component::findMoleculeStamp(const std::map<std::string, MoleculeStamp*>& molStamps) {
+  }
+  
+  bool Component::findMoleculeStamp(const std::map<std::string, MoleculeStamp*>& molStamps) {
     bool ret = false;
     std::map<std::string, MoleculeStamp*>::const_iterator i;
     i = molStamps.find(getType());
     if (i != molStamps.end()) {
-        moleculeStamp_ = i->second;
-        ret = true;
-    }
-
+      moleculeStamp_ = i->second;
+      ret = true;
+    }    
     return ret;
-}
+  }
 }

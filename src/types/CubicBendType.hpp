@@ -57,45 +57,47 @@ namespace oopse {
    * @todo document
    */
   class CubicBendType : public BendType {
-
+    
   public:
 
-    CubicBendType(RealType theta, RealType k3, RealType k2, RealType k1, RealType k0)
-      : BendType(theta),k3_(k3), k2_(k2),  k1_(k1), k0_(k0){
-      }
-
+    CubicBendType(RealType theta, RealType k3, RealType k2, RealType k1, 
+                  RealType k0) : BendType(theta), k3_(k3), k2_(k2), k1_(k1), 
+                                 k0_(k0){
+    }
+    
     void setForceConstant(RealType k3, RealType k2, RealType k1, RealType k0) {
       k3_ = k3;
       k2_ = k2;
       k1_ = k1;
       k0_ = k0;
     }
-
-    void getForceConstant(RealType& k3, RealType& k2, RealType& k1, RealType& k0) {
+    
+    void getForceConstant(RealType& k3, RealType& k2, RealType& k1, 
+                          RealType& k0) {
       k3 = k3_;
-      k2  = k2_;
+      k2 = k2_;
       k1 = k1_;
       k0 = k0_;
     }
-
+    
     virtual void calcForce(RealType theta, RealType& V, RealType& dVdTheta) {
       RealType delta =  theta- theta0_;
       RealType delta2 = delta * delta;
       RealType delta3 = delta2 * delta;
-
+      
       V =k0_ + k1_ * delta + k2_*delta2 + k3_*delta3;
       dVdTheta = k1_ + 2.0*k2_ * delta + 3.0 * k3_*delta2;
     }
-        
+    
   private:
-
+    
     RealType k3_;
     RealType k2_;
     RealType k1_;
     RealType k0_;
-
+    
   };
-
+  
 }//end namespace oopse
 #endif //TYPES_CUBICBENDTYPE_HPP
 

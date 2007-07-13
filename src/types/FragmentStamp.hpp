@@ -42,14 +42,14 @@
 #define TYES_FRAGMENTSTAMP_HPP
 #include "types/DataHolder.hpp"
 namespace oopse {
-class FragmentStamp : public DataHolder {
+  class FragmentStamp : public DataHolder {
     DeclareParameter(Name, std::string);    
-    public:
-        FragmentStamp(int index);
-        virtual void validate();
-        int getIndex() {return index_;}
+  public:
+    FragmentStamp(int index);
+    virtual void validate();
+    int getIndex() {return index_;}
    private:
-        int index_;
-};
+    int index_;
+  };
 }
 #endif

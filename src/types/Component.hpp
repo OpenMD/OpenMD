@@ -44,19 +44,18 @@
 #include "types/DataHolder.hpp"
 #include "types/MoleculeStamp.hpp"
 namespace oopse {
-class Component : public DataHolder {
+  class Component : public DataHolder {
     DeclareParameter(Type, std::string);
     DeclareParameter(NMol, int);
-
-    public:
-        Component();
-        virtual ~Component();
-        virtual void validate();
-        MoleculeStamp* getMoleculeStamp() { return moleculeStamp_;}
-        bool findMoleculeStamp(const std::map<std::string, MoleculeStamp*>& molStamps); 
-    private:
-        MoleculeStamp* moleculeStamp_;
-};
+    
+  public:
+    Component();
+    virtual ~Component();
+    virtual void validate();
+    MoleculeStamp* getMoleculeStamp() { return moleculeStamp_;}
+    bool findMoleculeStamp(const std::map<std::string, MoleculeStamp*>& molStamps); 
+  private:
+    MoleculeStamp* moleculeStamp_;
+  };
 }
-
 #endif

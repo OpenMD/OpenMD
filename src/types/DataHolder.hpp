@@ -54,52 +54,55 @@
 #include "utils/OOPSEException.hpp"
 #include "utils/StringUtils.hpp"
 namespace oopse {
-
-class DataHolder {
-    public:
-        DataHolder() {}
-        virtual ~DataHolder() {}
-        
-        template<class T>
-        void assign(const std::string& keyword, T val) {
-             ParamMap::iterator i =parameters_.find(keyword);
-              if (i != parameters_.end()) {
-                   bool result = i->second->setData(val);
-                   if (!result ) {
-                     std::stringstream ss;
-              	  ss <<   "Error in parsing " << keyword << ": expected " << i->second->getParamType() <<"\n";
-                      throw OOPSEException(ss.str());
-                    }
-              }else if (deprecatedKeywords_.find(keyword) != deprecatedKeywords_.end()){
-                     std::cout << keyword << " has been deprecated in OOPSE 3.  Please update your .md file.\n";
-              }else {
-                     std::stringstream ss;
-                     ss << keyword << " is not a recognized keyword.\n";
-                     throw OOPSEException(ss.str());
-              }
-        }
-
-        virtual void validate() {
-          ParamMap::iterator i;
-          for (i = parameters_.begin(); i != parameters_.end(); ++i) {
-            if (!i->second->isOptional() && i->second->empty()) {
-                std::stringstream ss;
-                ss <<  i->second->getKeyword()  << " must be set.\n";
-                throw OOPSEException(ss.str());
-            }
-          }
-        }
+  
+  class DataHolder {
+  public:
+    DataHolder() {}
+    virtual ~DataHolder() {}
     
-    protected:
-        typedef std::map<std::string, ParameterBase*> ParamMap;
-        
-        ParamMap parameters_;        
-        std::set<std::string> deprecatedKeywords_;
-        
-    private:
-        DataHolder(const DataHolder&);
-        DataHolder& operator=(const DataHolder&);
-};
-
+    template<class T>
+    void assign(const std::string& keyword, T val) {
+      ParamMap::iterator i =parameters_.find(keyword);
+      if (i != parameters_.end()) {
+        bool result = i->second->setData(val);
+        if (!result ) {
+          std::stringstream ss;
+          ss <<   "Error in parsing " << keyword << ": expected " << 
+            i->second->getParamType() <<"\n";
+          throw OOPSEException(ss.str());
+        }
+      } else if (deprecatedKeywords_.find(keyword) != 
+                 deprecatedKeywords_.end()){
+        std::cout << keyword << 
+          " has been deprecated in OOPSE 3.  Please update your .md file.\n";
+      } else {
+        std::stringstream ss;
+        ss << keyword << " is not a recognized keyword.\n";
+        throw OOPSEException(ss.str());
+      }
+    }
+    
+    virtual void validate() {
+      ParamMap::iterator i;
+      for (i = parameters_.begin(); i != parameters_.end(); ++i) {
+        if (!i->second->isOptional() && i->second->empty()) {
+          std::stringstream ss;
+          ss <<  i->second->getKeyword()  << " must be set.\n";
+          throw OOPSEException(ss.str());
+        }
+      }
+    }
+    
+  protected:
+    typedef std::map<std::string, ParameterBase*> ParamMap;
+    
+    ParamMap parameters_;        
+    std::set<std::string> deprecatedKeywords_;
+    
+  private:
+    DataHolder(const DataHolder&);
+    DataHolder& operator=(const DataHolder&);
+  };
+  
 }
 #endif

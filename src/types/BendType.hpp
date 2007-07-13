@@ -58,20 +58,20 @@ namespace oopse {
   public:
     BendType(RealType theta) : theta0_(theta) {}
     virtual ~BendType() {}
-
+    
     virtual void calcForce(RealType theta, RealType& V, RealType& dVdTheta) = 0;   
-
+    
     RealType getTheta() {
       return theta0_;
     }
-        
+    
     void setTheta(RealType theta) {
       theta0_ = theta;
     }
-
+    
   protected:
     RealType theta0_;        
   };
-
+  
 } //end namespace oopse
 #endif //TYPES_BENDTYPE_HPP

@@ -56,20 +56,21 @@ namespace oopse {
   
   /**
    * @class FixedBondType FixedBondType.hpp "types/FixedBondType.hpp"
-   * FixedBondType class is responsible for calculating the force and energy of the bond
+   * FixedBondType class is responsible for calculating the force and
+   * energy of the bond
    */
   class FixedBondType  : public BondType{
   public:
     FixedBondType(RealType r0) : BondType(r0) {}
     virtual ~FixedBondType() {}
-
+    
     virtual void calcForce(RealType r, RealType& V, RealType& dVdr) {
       V = 0.0;
       dVdr = 0.0;
     }
-
+    
   };    
-
-
+  
+  
 } //end namespace oopse
 #endif //TYPES_FIXEDBONDTYPE_HPP    

@@ -58,28 +58,28 @@ namespace oopse {
    * @todo documentation
    */
   class HarmonicBendType : public BendType {
-
+    
   public:
-
-    HarmonicBendType(RealType theta, RealType k) : BendType(theta) , k_(k){
+    
+    HarmonicBendType(RealType theta, RealType k) : BendType(theta), k_(k) {
     }
-
+    
     void setForceConstant(RealType k) {k_ = k; }
-
+    
     RealType getForceConstant() {return k_;}
-
+    
     void calcForce(RealType theta, RealType& V, RealType& dVdr) {
       RealType delta = theta - theta0_;
-
+      
       V = 0.5 * k_ * delta * delta;
       dVdr = k_ * delta;
     }
-                
+    
   private:
     RealType k_;
-
+    
   };
-
+  
 }//end namespace oopse
 #endif //TYPES_HARMONICBENDTYPE_HPP
 

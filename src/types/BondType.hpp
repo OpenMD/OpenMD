@@ -53,21 +53,22 @@ namespace oopse {
   
   /**
    * @class BondType BondType.hpp "types/BondType.hpp"
-   * BondType class is responsible for calculating the force and energy of the bond
+   * BondType class is responsible for calculating the force and
+   * energy of the bond
    */
   class BondType {
   public:
     BondType(RealType myR0) : r0(myR0) {}
     virtual ~BondType() {}
-
+    
     virtual void calcForce(RealType r, RealType& V, RealType& dVdr) = 0;
     RealType getEquilibriumBondLength() {return r0;}
     void setEquilibriumBondLength(RealType myR0) { r0 = myR0; }
-
+    
   protected:        
     RealType r0; /**equilibrium bond length< */
   };    
-
-
+  
+  
 } //end namespace oopse
 #endif //TYPES_BONDTYPE_HPP    

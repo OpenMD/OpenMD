@@ -57,27 +57,28 @@ namespace oopse {
    * @todo document
    */
   class CubicTorsionType : public TorsionType {
-
+    
   public:
-
+    
     CubicTorsionType(RealType k3, RealType k2, RealType k1, RealType k0) 
       : k3_(k3), k2_(k2),  k1_(k1), k0_(k0){
-      }
-
+    }
+    
     void setForceConstant(RealType k3, RealType k2, RealType k1, RealType k0) {
       k3_ = k3;
       k2_ = k2;
       k1_ = k1;
       k0_ = k0;
     }
-
-    void getForceConstant(RealType& k3, RealType& k2, RealType& k1, RealType& k0) {
+    
+    void getForceConstant(RealType& k3, RealType& k2, RealType& k1, 
+                          RealType& k0) {
       k3 = k3_;
-      k2  = k2_;
+      k2 = k2_;
       k1 = k1_;
       k0 = k0_;
     }
-
+    
     virtual void calcForce(RealType cosPhi, RealType& V, RealType& dVdCosPhi){ 
       RealType cosPhi2 = cosPhi * cosPhi;
       RealType cosPhi3 = cosPhi2 * cosPhi;
@@ -85,16 +86,16 @@ namespace oopse {
       V =k0_ + k1_ * cosPhi + k2_*cosPhi2 + k3_*cosPhi3;
       dVdCosPhi = k1_ + 2.0*k2_ * cosPhi + 3.0 * k3_*cosPhi2;     
     }
-        
+    
   private:
-
+    
     RealType k3_;
     RealType k2_;
     RealType k1_;
     RealType k0_;
-
+    
   };
-
+  
 }//end namespace oopse
 #endif //TYPES_CUBICTORSIONTYPE_HPP
 

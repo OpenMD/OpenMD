@@ -56,7 +56,7 @@
 #include "types/TorsionType.hpp"
 #include "types/PolynomialTorsionType.hpp"
 namespace oopse {
-
+  
   struct CharmmTorsionParameter {
     RealType kchi;
     int n;
@@ -65,19 +65,23 @@ namespace oopse {
 
   class LessThanPeriodicityFunctor {
   public:
-    bool operator()(const CharmmTorsionParameter& p1, const CharmmTorsionParameter& p2) {
+    bool operator()(const CharmmTorsionParameter& p1, 
+                    const CharmmTorsionParameter& p2) {
       return p1.n < p2.n;
     }
   };
+
   /**
    * @class CharmmTorsionType CharmmTorsionType.hpp "types/CharmmTorsionType.hpp"
    */
   class CharmmTorsionType : public TorsionType{
   public:
     CharmmTorsionType(std::vector<CharmmTorsionParameter>& parameters);
-            
-    virtual void calcForce(RealType cosPhi, RealType& V, RealType& dVdCosPhi) { torsionType_->calcForce(cosPhi, V, dVdCosPhi);}
-
+    
+    virtual void calcForce(RealType cosPhi, RealType& V, RealType& dVdCosPhi){
+      torsionType_->calcForce(cosPhi, V, dVdCosPhi);
+    }
+    
   private:    
     PolynomialTorsionType* torsionType_;
   };

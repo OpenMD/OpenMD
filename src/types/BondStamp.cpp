@@ -44,6 +44,6 @@
 
 #include "types/BondStamp.hpp"
 namespace oopse {
-
-
+  
+  
 }

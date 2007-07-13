@@ -52,7 +52,7 @@
 #include "types/FragmentStamp.hpp"
 
 namespace oopse {
-class MoleculeStamp : public DataHolder {
+  class MoleculeStamp : public DataHolder {
     DeclareParameter(Name, std::string);
   public:
     MoleculeStamp();
@@ -65,7 +65,7 @@ class MoleculeStamp : public DataHolder {
     bool addRigidBodyStamp( RigidBodyStamp* rigidbody);
     bool addCutoffGroupStamp( CutoffGroupStamp* cutoffgroup);
     bool addFragmentStamp( FragmentStamp* fragment);
-  
+    
     int  getNAtoms() { return atomStamps_.size(); }
     int  getNBonds() { return bondStamps_.size(); }
     int  getNBends() { return bendStamps_.size(); }
@@ -82,14 +82,15 @@ class MoleculeStamp : public DataHolder {
     RigidBodyStamp* getRigidBodyStamp(int index) { return rigidBodyStamps_[index]; }
     CutoffGroupStamp* getCutoffGroupStamp(int index) { return cutoffGroupStamps_[index]; }
     FragmentStamp* getFragmentStamp(int index) { return fragmentStamps_[index]; }
-
+    
     bool isBondInSameRigidBody(BondStamp*bond);
     bool isAtomInRigidBody(int atomIndex);  
-    bool isAtomInRigidBody(int atomIndex, int& whichRigidBody, int& consAtomIndex);  
+    bool isAtomInRigidBody(int atomIndex, int& whichRigidBody, 
+                           int& consAtomIndex);  
     std::vector<std::pair<int, int> > getJointAtoms(int rb1, int rb2);
-  
+    
   private:
-
+    
     void fillBondInfo();
     void checkAtoms();
     void checkBonds();
@@ -106,16 +107,16 @@ class MoleculeStamp : public DataHolder {
     size_t size = cont.size();
     
     if (size >= index +1) {
-        if (cont[index]!= NULL) {
-            ret = false;
-        }else {
-            cont[index] = stamp;
-            ret = true;
-        }
-    } else {
-        cont.insert(cont.end(), index - cont.size() + 1, NULL);
+      if (cont[index]!= NULL) {
+        ret = false;
+      }else {
         cont[index] = stamp;
         ret = true;
+      }
+    } else {
+      cont.insert(cont.end(), index - cont.size() + 1, NULL);
+      cont[index] = stamp;
+      ret = true;
     }
     
     return ret;
@@ -130,7 +131,7 @@ class MoleculeStamp : public DataHolder {
     std::vector<FragmentStamp*> fragmentStamps_;
     std::vector<int> atom2Rigidbody;
     int nintegrable_;
-};
-
+  };
+  
 }
 #endif

@@ -45,35 +45,35 @@
 #include "types/DataHolder.hpp"
 #include "utils/Tuple.hpp"
 namespace oopse {
-
-class BendStamp : public DataHolder {
+  
+  class BendStamp : public DataHolder {
     DeclareParameter(GhostVectorSource, int);
-    public:
-
-        BendStamp();
-        virtual ~BendStamp();
-
-        int getMemberAt( int index ) {return members_.at(index);}
-        int getNMembers() {return members_.size();}
-        std::vector<int> getMembers() {return members_;}
-        void setMembers(const std::vector<int>& members) {            
-            members_ = members;
-            if (members_.size() < 2  || members_.size() >3) {
-                std::ostringstream oss;
-                oss << "members" << containerToString(members) << " is invalid" << std::endl;
-                throw OOPSEException(oss.str());
-            }
-        }
-        void setMembers(IntTuple3 tuple) {
-            members_.push_back(tuple.first);
-            members_.push_back(tuple.second);
-            members_.push_back(tuple.third);
-        }
-        virtual void validate();
-
-    private:
+  public:
     
-        std::vector<int> members_;
-};
+    BendStamp();
+    virtual ~BendStamp();
+    
+    int getMemberAt( int index ) {return members_.at(index);}
+    int getNMembers() {return members_.size();}
+    std::vector<int> getMembers() {return members_;}
+    void setMembers(const std::vector<int>& members) {            
+      members_ = members;
+      if (members_.size() < 2  || members_.size() >3) {
+        std::ostringstream oss;
+        oss << "members" << containerToString(members) << " is invalid" << std::endl;
+        throw OOPSEException(oss.str());
+      }
+    }
+    void setMembers(IntTuple3 tuple) {
+      members_.push_back(tuple.first);
+      members_.push_back(tuple.second);
+      members_.push_back(tuple.third);
+    }
+    virtual void validate();
+    
+  private:
+    
+    std::vector<int> members_;
+  };
 }
 #endif

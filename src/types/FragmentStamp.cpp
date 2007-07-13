@@ -40,11 +40,11 @@
  */
 #include "types/FragmentStamp.hpp"
 namespace oopse {
-FragmentStamp::FragmentStamp(int index) : index_(index){
+  FragmentStamp::FragmentStamp(int index) : index_(index){
     DefineParameter(Name, "name");
-}
-
-void FragmentStamp::validate() {
+  }
+  
+  void FragmentStamp::validate() {
     CheckParameter(Name, isNotEmpty());
-}
+  }
 }

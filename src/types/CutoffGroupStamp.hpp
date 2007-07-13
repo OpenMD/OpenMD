@@ -43,19 +43,19 @@
 #define TYPES_CUTOFFGROUPSTAMP_HPP
 #include "types/DataHolder.hpp"
 namespace oopse {
-class CutoffGroupStamp : public DataHolder {
-    public:
-        CutoffGroupStamp();
-        int getMemberAt(int index) {return members_[index];}
-        int getNMembers() {return members_.size();}
-        std::vector<int> getMembers() {return members_;}
-        bool setMembers(const std::vector<int>& members) {
-            members_ = members;
-            return true;
-        }
-        virtual void validate();
-    private:
-        std::vector<int> members_;
-};
+  class CutoffGroupStamp : public DataHolder {
+  public:
+    CutoffGroupStamp();
+    int getMemberAt(int index) {return members_[index];}
+    int getNMembers() {return members_.size();}
+    std::vector<int> getMembers() {return members_;}
+    bool setMembers(const std::vector<int>& members) {
+      members_ = members;
+      return true;
+    }
+    virtual void validate();
+  private:
+    std::vector<int> members_;
+  };
 }
 #endif

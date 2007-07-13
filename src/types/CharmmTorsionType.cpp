@@ -44,26 +44,28 @@
 #include "utils/NumericConstant.hpp"
 #include "math/ChebyshevPolynomials.hpp"
 namespace oopse {
-CharmmTorsionType::CharmmTorsionType(std::vector<CharmmTorsionParameter>& parameters) {
+  CharmmTorsionType::CharmmTorsionType(std::vector<CharmmTorsionParameter>& parameters) {
     std::vector<CharmmTorsionParameter>::iterator i;
-    i = std::max_element(parameters.begin(), parameters.end(), LessThanPeriodicityFunctor());
+    i = std::max_element(parameters.begin(), parameters.end(), 
+                         LessThanPeriodicityFunctor());
     if (i != parameters.end()) {
-        int maxPower = i->n;
-        ChebyshevT T(maxPower);
-        ChebyshevU U(maxPower);
+      int maxPower = i->n;
+      ChebyshevT T(maxPower);
+      ChebyshevU U(maxPower);
+      
+      // convert parameters of charmm type torsion into
+      // PolynomialTorsion's parameters
 
-        // convert parameters of charmm type torsion into PolynomialTorsion's parameters
-        DoublePolynomial finalPolynomial;
-        for (i = parameters.begin(); i != parameters.end(); ++i) {
-            DoublePolynomial cosTerm = T.getChebyshevPolynomial(i->n);
-            cosTerm *= cos(i->delta) * i->kchi;
-            DoublePolynomial sinTerm = U.getChebyshevPolynomial(i->n);
-            sinTerm *= -sin(i->delta) * i->kchi;
-            finalPolynomial = cosTerm + sinTerm;
-            finalPolynomial += i->kchi;
-        }
-        torsionType_->setPolynomial(finalPolynomial);
+      DoublePolynomial finalPolynomial;
+      for (i = parameters.begin(); i != parameters.end(); ++i) {
+        DoublePolynomial cosTerm = T.getChebyshevPolynomial(i->n);
+        cosTerm *= cos(i->delta) * i->kchi;
+        DoublePolynomial sinTerm = U.getChebyshevPolynomial(i->n);
+        sinTerm *= -sin(i->delta) * i->kchi;
+        finalPolynomial = cosTerm + sinTerm;
+        finalPolynomial += i->kchi;
+      }
+      torsionType_->setPolynomial(finalPolynomial);
     }
-}
-
+  }  
 } //end namespace oopse

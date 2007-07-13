@@ -44,19 +44,19 @@
 
 #include "types/BendStamp.hpp"
 namespace oopse {
-
-BendStamp::BendStamp() {
+  
+  BendStamp::BendStamp() {
     DefineOptionalParameter(GhostVectorSource, "ghostVectorSource");
-}
-
-BendStamp::~BendStamp() {
-
-}
-
-void BendStamp::validate() {
+  }
+  
+  BendStamp::~BendStamp() {
+    
+  }
+  
+  void BendStamp::validate() {
     DataHolder::validate();
     CheckParameter(GhostVectorSource, isNonNegative());    
-        
-}
-
+    
+  }
+  
 }

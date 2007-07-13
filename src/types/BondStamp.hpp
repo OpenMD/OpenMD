@@ -45,33 +45,32 @@
 #include "types/DataHolder.hpp"
 
 namespace oopse {
-class BondStamp : public DataHolder {
-
-    public:
-      void setMembers(std::vector<int> members) {
-        if (members.size() ==2) {
-            a = members[0];
-            b = members[1];
-            if (a < 0 || b < 0) {
-                std::ostringstream oss;
-                oss << "BondStamp Error: members" << containerToString(members) << " is invalid" << std::endl;
-                throw OOPSEException(oss.str());
-            }
-        } else {
-            std::ostringstream oss;
-            oss << "BondStamp Error: members" << containerToString(members) << " is invalid" << std::endl;
-            throw OOPSEException(oss.str());
+  class BondStamp : public DataHolder {
+    
+  public:
+    void setMembers(std::vector<int> members) {
+      if (members.size() ==2) {
+        a = members[0];
+        b = members[1];
+        if (a < 0 || b < 0) {
+          std::ostringstream oss;
+          oss << "BondStamp Error: members" << containerToString(members) << " is invalid" << std::endl;
+          throw OOPSEException(oss.str());
         }
-        
-
+      } else {
+        std::ostringstream oss;
+        oss << "BondStamp Error: members" << containerToString(members) << " is invalid" << std::endl;
+        throw OOPSEException(oss.str());
       }
       
-      int getA() {return a;} 
-      int getB() {return b;}
-    private:
-        int a;
-        int b;
-};
-
+      
+    }
+    
+    int getA() {return a;} 
+    int getB() {return b;}
+  private:
+    int a;
+    int b;
+  };  
 }
 #endif

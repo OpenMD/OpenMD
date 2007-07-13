@@ -54,18 +54,18 @@ namespace oopse {
   class HarmonicBondType : public BondType {
     
   public:
-
+    
     HarmonicBondType(RealType myR0, RealType myK) : BondType(myR0) {
       k = myK;
     }
     
     void setForceConstant(RealType myK) {k = myK; }
-
+    
     RealType getForceConstant() {return k;}
-
+    
     virtual void calcForce(RealType r, RealType& V, RealType& dVdr) {
       RealType dr;
-
+      
       dr = r - r0;
       
       V = 0.5 * k * dr * dr;

@@ -59,29 +59,29 @@ namespace oopse {
   class MorseBondType : public BondType {
     
   public:
-
+    
     MorseBondType( RealType myR0, RealType myD, RealType myBeta) 
       : BondType(myR0), De(myD), beta(myBeta) {
-      }
+    }
     
     void setWellDepth(RealType myD) { De = myD;}
-
+    
     void setBeta(RealType myBeta) { beta = myBeta; }
-
+    
     void setWellDepthAndForceConstant(RealType myD, RealType myK) {
       De = myD;
       beta = sqrt(myK/(2.0*De));
     }
-
+    
     RealType getWellDepth() {return De;}
-
+    
     RealType getBeta() {return beta;}
-
+    
     RealType getForceConstant() {return 2.0*De*beta*beta;}
-
+    
     virtual void calcForce(RealType r, RealType& V, RealType& dVdr) {
       RealType dr, eterm, eterm2;
-
+      
       dr = r - r0;
       eterm = exp(-beta*dr);
       eterm2 = eterm*eterm;
@@ -89,7 +89,7 @@ namespace oopse {
       V = De*(1 - 2.0*eterm  + eterm2);
       dVdr = 2.0 * De * beta * (eterm - eterm2);
     }
-                
+    
   private:
     
     RealType De;

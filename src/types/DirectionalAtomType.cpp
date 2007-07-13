@@ -45,16 +45,15 @@
 #include "UseTheForce/DarkSide/gb_interface.h"
 #include "utils/simError.h"
 namespace oopse {
-
+  
   void DirectionalAtomType::complete() {
-
-    //
+    
     AtomType::complete();
     
     int isError  = 0;
     GenericData* data;
-
-    //setup dipole atom  type in fortran side
+    
+    //setup dipole atom type in fortran side
     if (isDipole()) {
       data = getPropertyByName("Dipole");
       if (data != NULL) {
@@ -86,7 +85,7 @@ namespace oopse {
         simError();          
       }
     }
-
+    
     if (isSplitDipole()) {
       data = getPropertyByName("SplitDipoleDistance");
       if (data != NULL) {
@@ -124,7 +123,7 @@ namespace oopse {
       data = getPropertyByName("QuadrupoleMoments");
       if (data != NULL) {
         Vector3dGenericData* vector3dData= dynamic_cast<Vector3dGenericData*>(data);
-     
+        
         // Quadrupoles in OOPSE are set as the diagonal elements
         // of the diagonalized traceless quadrupole moment tensor.
         // The column vectors of the unitary matrix that diagonalizes 
@@ -161,15 +160,15 @@ namespace oopse {
     }
     
     //setup sticky atom type in fortran side
-      if (isSticky() || isStickyPower()) {
+    if (isSticky() || isStickyPower()) {
       data = getPropertyByName("Sticky");
       if (data != NULL) {
         StickyParamGenericData* stickyData = dynamic_cast<StickyParamGenericData*>(data);
-
+        
         if (stickyData != NULL) {
           StickyParam stickyParam = stickyData->getData();
-
-           newStickyType(&atp.ident,&stickyParam.w0, &stickyParam.v0, 
+          
+          newStickyType(&atp.ident,&stickyParam.w0, &stickyParam.v0, 
                         &stickyParam.v0p, &stickyParam.rl, &stickyParam.ru, 
                         &stickyParam.rlp, &stickyParam.rup, &isError);
           if (isError != 0) {
@@ -179,7 +178,7 @@ namespace oopse {
             painCave.isFatal = 1;
             simError();          
           }
-                
+          
         } else {
           sprintf( painCave.errMsg,
                    "Can not cast GenericData to StickyParam\n");
@@ -193,52 +192,49 @@ namespace oopse {
         painCave.isFatal = 1;
         simError();          
       }
-      }
-
-      //setup GayBerne type in fortran side
-      if (isGayBerne()) {
-        data = getPropertyByName("GayBerne");
-        if (data != NULL) {
-            GayBerneParamGenericData* gayBerneData = dynamic_cast<GayBerneParamGenericData*>(data);
-
-            if (gayBerneData != NULL) {
-              GayBerneParam gayBerneParam = gayBerneData->getData();
-              
-              newGayBerneType(&atp.ident, 
-                              &gayBerneParam.GB_d, 
-                                &gayBerneParam.GB_l, 
-                              &gayBerneParam.GB_eps,
-				&gayBerneParam.GB_eps_ratio, 
-                                &gayBerneParam.GB_dw, 
-                                &isError);
-
-                if (isError != 0) {
-                    sprintf( painCave.errMsg,
-                           "Fortran rejected newGayBerneType\n");
-                    painCave.severity = OOPSE_ERROR;
-                    painCave.isFatal = 1;
-                    simError();          
-                }
-                
-            } 
-	    
-	    else {
-                    sprintf( painCave.errMsg,
-                           "Can not cast GenericData to GayBerneParam\n");
-                    painCave.severity = OOPSE_ERROR;
-                    painCave.isFatal = 1;
-                    simError();          
-            }            
-        } 
-	else {
-	  sprintf( painCave.errMsg, "Can not find Parameters for GayBerne\n");
-	  painCave.severity = OOPSE_ERROR;
-	  painCave.isFatal = 1;
-	  simError();          
-        }
     }
-}
- 
-
-
+    
+    //setup GayBerne type in fortran side
+    if (isGayBerne()) {
+      data = getPropertyByName("GayBerne");
+      if (data != NULL) {
+        GayBerneParamGenericData* gayBerneData = dynamic_cast<GayBerneParamGenericData*>(data);
+        
+        if (gayBerneData != NULL) {
+          GayBerneParam gayBerneParam = gayBerneData->getData();
+          
+          newGayBerneType(&atp.ident, 
+                          &gayBerneParam.GB_d, 
+                          &gayBerneParam.GB_l, 
+                          &gayBerneParam.GB_eps,
+                          &gayBerneParam.GB_eps_ratio, 
+                          &gayBerneParam.GB_dw, 
+                          &isError);
+          
+          if (isError != 0) {
+            sprintf( painCave.errMsg,
+                     "Fortran rejected newGayBerneType\n");
+            painCave.severity = OOPSE_ERROR;
+            painCave.isFatal = 1;
+            simError();          
+          }
+          
+        } 
+	
+        else {
+          sprintf( painCave.errMsg,
+                   "Can not cast GenericData to GayBerneParam\n");
+          painCave.severity = OOPSE_ERROR;
+          painCave.isFatal = 1;
+          simError();          
+        }            
+      } 
+      else {
+        sprintf( painCave.errMsg, "Can not find Parameters for GayBerne\n");
+        painCave.severity = OOPSE_ERROR;
+        painCave.isFatal = 1;
+        simError();          
+      }
+    }
+  }
 } //end namespace oopse
