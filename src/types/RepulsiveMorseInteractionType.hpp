@@ -71,17 +71,14 @@ namespace oopse {
       mnmit.R0 = r0;
       mnmit.D0 = D0;
       mnmit.beta0 = beta0;
-
+      
       addMNMInteraction(&mnmit);
     }
-    
-    
-  private:
-    
+        
+  private:   
     RealType D0;
     RealType beta0;
-    RealType r0;
-    
+    RealType r0;    
   };
 }
 #endif

@@ -59,36 +59,37 @@ namespace oopse {
    * @todo documentation
    */
   class OplsTorsionType : public PolynomialTorsionType{
-
+    
   public:
-
-    OplsTorsionType(RealType v0, RealType v1, RealType v2, RealType v3) :  PolynomialTorsionType(){
-
+    
+    OplsTorsionType(RealType v0, RealType v1, RealType v2, RealType v3) :  
+      PolynomialTorsionType(){
+      
       //convert OPLS Torsion Type to Polynomial Torsion type
       RealType c0 = v0 + v2 + 0.5*(v1 + v3);
       RealType c1 = 0.5 *(3*v3- v1);
       RealType c2 = -v2;
       RealType c3 = -2.0* v3;
-
+      
       setCoefficient(0, c0);
       setCoefficient(1, c1);
       setCoefficient(2, c2);
       setCoefficient(3, c3);
     }
-        
+    
     friend std::ostream& operator <<(std::ostream& os, OplsTorsionType& ott);
-
+    
   private:
-        
+    
     RealType v0_;
     RealType v1_;
     RealType v2_;
     RealType v3_;
-        
+    
   };
-
+  
   std::ostream& operator <<(std::ostream& os, OplsTorsionType& ott) {
-
+    
     os << "This OplsTorsionType has below form:" << std::endl;
     os << ott.v0_ << " + " 
        << ott.v1_ << "/2*(1+cos(Omega))" << " + "
@@ -96,8 +97,8 @@ namespace oopse {
        << ott.v3_ << "/2*(1+cos(3*Omega))" << std::endl;
     return os;
   }
-
-
+  
+  
 } //end namespace oopse
 #endif //TYPES_POLYNOMIALBONDTYPE_HPP
 

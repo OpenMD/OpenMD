@@ -59,7 +59,7 @@ namespace oopse {
     virtual ~TorsionType() {}
     
     virtual void calcForce(RealType cosPhi, RealType& V, RealType& dVdCosPhi) = 0;
-
+    
   };
   
 } //end namespace oopse

@@ -44,17 +44,16 @@
 
 #include "types/TorsionStamp.hpp"
 namespace oopse {
-
-TorsionStamp::TorsionStamp() {
+  
+  TorsionStamp::TorsionStamp() {
     DefineOptionalParameter(GhostVectorSource, "ghostVectorSource");
-}
-
-TorsionStamp::~TorsionStamp() {
-
-}
-
-void TorsionStamp::validate() {
+  }
+  
+  TorsionStamp::~TorsionStamp() {    
+  }
+  
+  void TorsionStamp::validate() {
     DataHolder::validate();
     CheckParameter(GhostVectorSource, isNonNegative());    
-}
+  }
 }

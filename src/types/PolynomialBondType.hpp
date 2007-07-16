@@ -60,53 +60,55 @@ namespace oopse {
    * @todo documentation
    */
   class PolynomialBondType : public BondType{
-
+    
   public:
     PolynomialBondType(RealType r0) : BondType(r0) {}
-
+    
     void setCoefficient(int power, RealType coefficient) {
       polynomial_.setCoefficient(power, coefficient);
     }
-
+    
     RealType getCoefficient(int power) {
       return polynomial_.getCoefficient(power);
     }
-        
+    
     void calcForce(RealType r, RealType & V, RealType & dVdr) {
       RealType delta = r - r0;
       V = polynomial_.evaluate(delta);
       dVdr = polynomial_.evaluateDerivative(delta);
-
+      
     }
 
     friend std::ostream& operator <<(std::ostream& os, PolynomialBondType& pbt);
-        
+    
   private:
-        
+    
     DoublePolynomial polynomial_;
   };
-
+  
   std::ostream& operator <<(std::ostream& os, PolynomialBondType& pbt) {
     DoublePolynomial::const_iterator i;
-
+    
     i = pbt.polynomial_.begin();
     
     if (i == pbt.polynomial_.end()) {
       os << "This PolynomialBondType contains nothing" << std::endl;
       return os;
     }
-
+    
     os << "This PolynomialBondType contains below terms:" << std::endl;    
     
     while(true){
-      os << i->second << "*" << "(r - " << pbt.getEquilibriumBondLength() << ")" << "^" << i->first;
-
+      os << i->second << "*" << "(r - " << pbt.getEquilibriumBondLength() << 
+        ")" << "^" << i->first;
+      
       if (++i == pbt.polynomial_.end()) {
-	//if we reach the end of the polynomial pair, write out a newline and then escape the loop
+	// If we reach the end of the polynomial pair, write out a
+	// newline and then escape the loop        
 	os << std::endl;
 	break;
       } else {
-	//otherwise, write out a "+"
+	// otherwise, write out a "+"
 	os << " + ";
       }
     }

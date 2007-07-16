@@ -44,15 +44,15 @@
 
 #include "types/DataHolder.hpp"
 namespace oopse {
-class ZConsStamp : public DataHolder {
+  class ZConsStamp : public DataHolder {
     DeclareParameter(MolIndex, int);
     DeclareParameter(Zpos, RealType);
     DeclareParameter(Kratio, RealType);
     DeclareParameter(CantVel, RealType);
-    public:
-        ZConsStamp();
-        virtual ~ZConsStamp();
-        virtual void validate();
-};
+  public:
+    ZConsStamp();
+    virtual ~ZConsStamp();
+    virtual void validate();
+  };
 }
 #endif // __ZCONSTAMP_H__

@@ -54,7 +54,7 @@
 #include "types/BendType.hpp"
 
 namespace oopse {
-
+  
   /**
    * @class PolynomialBendType PolynomialBendType.hpp "types/PolynomialBendType.hpp"
    * @todo documentation
@@ -71,50 +71,49 @@ namespace oopse {
     RealType getCoefficient(int power) {
       return polynomial_.getCoefficient(power);
     }
-        
+    
     void calcForce(RealType theta, RealType & V, RealType & dVdr) {
       RealType delta = theta - theta0_;
       V = polynomial_.evaluate(delta);
       dVdr = polynomial_.evaluateDerivative(delta);
-
+      
     }
 
     friend std::ostream& operator <<(std::ostream& os, PolynomialBendType& pbt);
-        
+    
   private:
-        
+    
     DoublePolynomial polynomial_;
   };
-
+  
   std::ostream& operator <<(std::ostream& os, PolynomialBendType& pbt) {
     DoublePolynomial::const_iterator i;
-
+    
     i = pbt.polynomial_.begin();
     
     if (i == pbt.polynomial_.end()) {
       os << "This PolynomialBendType contains nothing" << std::endl;
       return os;
     }
-
+    
     os << "This PolynomialBendType contains below terms:" << std::endl;    
     
     while(true){
-      os << i->second << "*" << "(theta - " << pbt.getTheta() << ")" << "^" << i->first;
-
+      os << i->second << "*" << "(theta - " << pbt.getTheta() << ")" << 
+        "^" << i->first;
+      
       if (++i == pbt.polynomial_.end()) {
-	//if we reach the end of the polynomial pair, write out a newline and then escape the loop
+	// If we reach the end of the polynomial pair, write out a
+	// newline and then escape the loop
 	os << std::endl;
 	break;
       } else {
-	//otherwise, write out a "+"
+	// otherwise, write out a "+"
 	os << " + ";
       }
-    }
-    
+    }    
     return os;
-  }
-
-
+  } 
 } //end namespace oopse
 #endif //TYPES_POLYNOMIALBENDTYPE_HPP
 

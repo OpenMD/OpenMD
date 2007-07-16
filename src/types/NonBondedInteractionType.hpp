@@ -93,7 +93,6 @@ namespace oopse {
     
   };  
   
-  
 } //end namespace oopse
 #endif //TYPES_NONBONDEDINTERACTIONTYPE_HPP
 

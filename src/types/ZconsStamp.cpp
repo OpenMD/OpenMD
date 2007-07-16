@@ -38,26 +38,25 @@
  * University of Notre Dame has been advised of the possibility of
  * such damages.
  */
- 
+
 #include <stdio.h>
 #include <string.h>
 
 #include "types/ZconsStamp.hpp"
 
 namespace oopse {
-ZConsStamp::ZConsStamp() {
+  ZConsStamp::ZConsStamp() {
     DefineParameter(MolIndex, "molIndex");
     DefineOptionalParameter(Zpos, "zPos");
     DefineOptionalParameter(Kratio, "kRation");
     DefineOptionalParameter(CantVel, "cantVel");
-}
-
-ZConsStamp::~ZConsStamp() {
-
-}
-
-void ZConsStamp::validate() {
+  }
+  
+  ZConsStamp::~ZConsStamp() {    
+  }
+  
+  void ZConsStamp::validate() {
     DataHolder::validate();
     CheckParameter(MolIndex, isNonNegative());
- }
+  }
 }

@@ -38,34 +38,33 @@
  * University of Notre Dame has been advised of the possibility of
  * such damages.
  */
- 
+
 #ifndef TYPES_RIGIDBODYSTAMP_HPP
 #define TYPES_RIGIDBODYSTAMP_HPP
 
 #include "types/DataHolder.hpp"
 
 namespace oopse {
-
-class RigidBodyStamp : public DataHolder {
-    public:
-        RigidBodyStamp(int index);        
-        int getIndex() { return index_;}
- 
-        int getMemberAt( int index ) {return members_.at(index);}
-        int getNMembers() {return members_.size();}
-        std::vector<int> getMembers() {return members_;}
-
-        bool setMembers(const std::vector<int>& members) {
-            members_ = members;
-            return true;
-        }
-        
-        virtual void validate();
-
-    private:
-        int index_;        
-        std::vector<int> members_;
-
-};
+  
+  class RigidBodyStamp : public DataHolder {
+  public:
+    RigidBodyStamp(int index);        
+    int getIndex() { return index_;}
+    
+    int getMemberAt( int index ) {return members_.at(index);}
+    int getNMembers() {return members_.size();}
+    std::vector<int> getMembers() {return members_;}
+    
+    bool setMembers(const std::vector<int>& members) {
+      members_ = members;
+      return true;
+    }
+    
+    virtual void validate();
+    
+  private:
+    int index_;        
+    std::vector<int> members_;    
+  };
 }
 #endif

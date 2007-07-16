@@ -46,12 +46,12 @@
 
 #include "types/RigidBodyStamp.hpp"
 namespace oopse {
-
-RigidBodyStamp::RigidBodyStamp(int index) : index_(index){
+  
+  RigidBodyStamp::RigidBodyStamp(int index) : index_(index){
     deprecatedKeywords_.insert("nMembers");  
-}
-
-void RigidBodyStamp::validate() {
+  }
+  
+  void RigidBodyStamp::validate() {
     DataHolder::validate();
-}
+  }
 }

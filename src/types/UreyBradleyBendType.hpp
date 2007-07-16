@@ -58,39 +58,40 @@ namespace oopse {
    * @todo documentation
    */
   class UreyBradleyBendType : public HarmonicBendType {
-
+    
   public:
-
-    UreyBradleyBendType(RealType theta0, RealType ktheta, RealType s0, RealType kub)
-      : HarmonicBendType(theta0, ktheta), hbt_(HarmonicBondType(s0, kub)){
-      }
-
+    
+    UreyBradleyBendType(RealType theta0, RealType ktheta, RealType s0, 
+                        RealType kub) : HarmonicBendType(theta0, ktheta), 
+                                        hbt_(HarmonicBondType(s0, kub)){
+    }
+    
     RealType getUBForceConstant() {
       return hbt_.getForceConstant();
     }
-        
+    
     void setUBForceConstant(RealType kub) {
       hbt_.setForceConstant(kub);
     }
-
+    
     RealType getUBLength() {
       return hbt_.getEquilibriumBondLength();
     }
-
+    
     void setUBLength(RealType s) {
       hbt_.setEquilibriumBondLength(s);
     }
-
+    
     HarmonicBondType* getHarmonicBondType() {
       return &hbt_;
     }
                 
   private:
-        
+    
     RealType k_;
     HarmonicBondType hbt_;
   };
-
+  
 }//end namespace oopse
 #endif //TYPES_UREYBRADLEYBENDTYPE_HPP
 

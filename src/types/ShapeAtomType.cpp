@@ -10,10 +10,10 @@
  *    publication of scientific results based in part on use of the
  *    program.  An acceptable form of acknowledgement is citation of
  *    the article in which the program was described (Matthew
-                                                      *    A. Meineke, Charles F. Vardeman II, Teng Lin, Christopher
-                                                      *    J. Fennell and J. Daniel Gezelter, "OOPSE: An Object-Oriented
+ *    A. Meineke, Charles F. Vardeman II, Teng Lin, Christopher
+ *    J. Fennell and J. Daniel Gezelter, "OOPSE: An Object-Oriented
  *    Parallel Simulation Engine for Molecular Dynamics,"
-                                                      *    J. Comput. Chem. 26, pp. 252-271 (2005))
+ *    J. Comput. Chem. 26, pp. 252-271 (2005))
  *
  * 2. Redistributions of source code must retain the above copyright
  *    notice, this list of conditions and the following disclaimer.
@@ -64,7 +64,7 @@ namespace oopse {
     
     contactVal = 0.0;
     
-    for(contactIter = contactFuncs.begin();  contactIter != contactFuncs.end(); 
+    for(contactIter = contactFuncs.begin();  contactIter != contactFuncs.end();
         ++contactIter) 
       contactVal += (*contactIter)->getValueAt(costheta, phi);
     
@@ -109,7 +109,7 @@ namespace oopse {
     
     //setup dipole atom  type in fortran side
     if (isShape()) {
-       // vectors for shape transfer to fortran
+      // vectors for shape transfer to fortran
       std::vector<RealSphericalHarmonic*> tempSHVector;
       std::vector<int> contactL;
       std::vector<int> contactM;

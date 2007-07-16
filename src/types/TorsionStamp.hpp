@@ -44,36 +44,36 @@
 #include "types/DataHolder.hpp"
 #include "utils/Tuple.hpp"
 namespace oopse {
-class TorsionStamp : public DataHolder {
+  class TorsionStamp : public DataHolder {
     DeclareParameter(GhostVectorSource, int);
-    public:
-
-        TorsionStamp();
-        virtual ~TorsionStamp();
-        
-        int getMemberAt( int index ) {return members_.at(index);}
-        int getNMembers() {return members_.size();}
-        std::vector<int> getMembers() {return members_;}
-        void setMembers(const std::vector<int>& members) {
-            members_ = members;
-            if (members_.size() < 3 || members_.size() > 4) {
-                std::ostringstream oss;
-                oss << "members" << containerToString(members) << " is invalid" << std::endl;
-                throw OOPSEException(oss.str());
-            }
-        }        
-
-        void setMembers(IntTuple4 tuple) {
-            members_.push_back(tuple.first);
-            members_.push_back(tuple.second);
-            members_.push_back(tuple.third);
-            members_.push_back(tuple.fourth);            
-        }
-        virtual void validate();
-
-    private:
+  public:
     
-        std::vector<int> members_;
-};
+    TorsionStamp();
+    virtual ~TorsionStamp();
+    
+    int getMemberAt( int index ) {return members_.at(index);}
+    int getNMembers() {return members_.size();}
+    std::vector<int> getMembers() {return members_;}
+    void setMembers(const std::vector<int>& members) {
+      members_ = members;
+      if (members_.size() < 3 || members_.size() > 4) {
+        std::ostringstream oss;
+        oss << "members" << containerToString(members) << " is invalid" << 
+          std::endl;
+        throw OOPSEException(oss.str());
+      }
+    }        
+    
+    void setMembers(IntTuple4 tuple) {
+      members_.push_back(tuple.first);
+      members_.push_back(tuple.second);
+      members_.push_back(tuple.third);
+      members_.push_back(tuple.fourth);            
+    }
+    virtual void validate();
+    
+  private:   
+    std::vector<int> members_;
+  };
 }
 #endif

@@ -55,16 +55,14 @@
 #include "types/DirectionalAtomType.hpp"
 #include "utils/simError.h"
 
-namespace oopse {
-  
-  
+namespace oopse {   
   class ShapeAtomType : public DirectionalAtomType {
     
   public: 
     
     ShapeAtomType() : DirectionalAtomType() { atp.is_Shape = 1; }
     ~ShapeAtomType();
-        
+    
     std::vector<RealSphericalHarmonic*> getContactFuncs(void) {return contactFuncs;}
     std::vector<RealSphericalHarmonic*> getRangeFuncs(void) {return rangeFuncs;}
     std::vector<RealSphericalHarmonic*> getStrengthFuncs(void) {return strengthFuncs;}
@@ -107,7 +105,6 @@ namespace oopse {
     std::vector<RealSphericalHarmonic*> contactFuncs;  // The contact functions
     std::vector<RealSphericalHarmonic*> rangeFuncs;    // The range functions
     std::vector<RealSphericalHarmonic*> strengthFuncs; // The strength functions
-    
   }; 
 }
 #endif

@@ -53,46 +53,46 @@
 #include "types/TorsionType.hpp"
 
 namespace oopse {
-
+  
   /**
    * @class PolynomialTorsionType PolynomialTorsionType.hpp "types/PolynomialTorsionType.hpp"
    * @todo documentation
    */
   class PolynomialTorsionType : public TorsionType{
-
+    
   public:
     PolynomialTorsionType() {}
-
+    
     RealType getCoefficient(int power) {
       return polynomial_.getCoefficient(power);
     }
-
+    
     void addCoefficient(int power, RealType coefficient) {
       polynomial_.addCoefficient(power, coefficient);
     }
-
+    
     void setCoefficient(int power, RealType coefficient) {
       polynomial_.setCoefficient(power, coefficient);
     }
-
+    
     void setPolynomial(const DoublePolynomial& p) {
       polynomial_ = p;
     }
-        
+    
     virtual void calcForce(RealType cosPhi, RealType& V, RealType& dVdCosPhi) {
       V = polynomial_.evaluate(cosPhi);
       dVdCosPhi = polynomial_.evaluateDerivative(cosPhi); 
     }
-
+    
     friend std::ostream& operator <<(std::ostream& os, PolynomialTorsionType& pbt);
-        
+    
   private:
-        
+    
     DoublePolynomial polynomial_;
   };
-
+  
 /*  
-  std::ostream& operator <<(std::ostream& os, PolynomialTorsionType& ptt) {
+    std::ostream& operator <<(std::ostream& os, PolynomialTorsionType& ptt) {
     DoublePolynomial::const_iterator i;
 
     i = ptt.polynomial_.begin();
@@ -108,7 +108,8 @@ namespace oopse {
       os << i->second << "*" << "(cosPhi)" << "^" << i->first;
 
       if (++i == ptt.polynomial_.end()) {
-	//if we reach the end of the polynomial pair, write out a newline and then escape the loop
+	//if we reach the end of the polynomial pair, write out a
+	//newline and then escape the loop
 	os << std::endl;
 	break;
       } else {
