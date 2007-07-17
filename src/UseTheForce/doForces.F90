@@ -45,7 +45,7 @@
 
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: doForces.F90,v 1.91 2007-07-12 23:20:00 chuckv Exp $, $Date: 2007-07-12 23:20:00 $, $Name: not supported by cvs2svn $, $Revision: 1.91 $
+!! @version $Id: doForces.F90,v 1.92 2007-07-17 21:55:56 gezelter Exp $, $Date: 2007-07-17 21:55:56 $, $Name: not supported by cvs2svn $, $Revision: 1.92 $
 
 
 module doForces
@@ -1185,6 +1185,9 @@ contains
                             endif                            
                          enddo
                       endif
+                      !if (do_stress.and.(.not.SIM_uses_AtomicVirial)) then
+                      !   call add_stress_tensor(d_grp, fij, tau) 
+                      !endif
                    endif
                 endif
              endif
@@ -1508,6 +1511,11 @@ contains
             pot(METALLIC_POT), f, do_pot)
     endif
      
+    if ( iand(iHash, MNM_PAIR).ne.0 ) then       
+       call do_mnm_pair(i, j, d, r, rijsq, rcut, sw, vpair, fpair, &
+            pot(VDW_POT), A, f, t, do_pot)
+    endif
+
   end subroutine do_pair
 
   subroutine do_prepair(i, j, rijsq, d, sw, rcijsq, dc, rCut, &
