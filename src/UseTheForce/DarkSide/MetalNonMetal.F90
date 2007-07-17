@@ -42,7 +42,7 @@
 
 !! Calculates Metal-Non Metal interactions.
 !! @author Charles F. Vardeman II 
-!! @version $Id: MetalNonMetal.F90,v 1.1 2007-07-13 14:21:07 chuckv Exp $, $Date: 2007-07-13 14:21:07 $, $Name: not supported by cvs2svn $, $Revision: 1.1 $
+!! @version $Id: MetalNonMetal.F90,v 1.2 2007-07-17 18:54:47 chuckv Exp $, $Date: 2007-07-17 18:54:47 $, $Name: not supported by cvs2svn $, $Revision: 1.2 $
 
 
 module MetalNonMetal
@@ -105,10 +105,327 @@ module MetalNonMetal
   public :: addInteraction
   public :: deleteInteractions
   public :: MNMtype
-
+  public :: do_mnm_pair
 
 contains
 
+
+  subroutine do_mnm_pair(Atom1, Atom2, D, Rij, R2, Rcut, Sw, Vpair, Fpair, &
+       Pot, A, F,t, Do_pot)
+    integer, intent(inout) ::  atom1, atom2
+    integer :: atid1, atid2, ljt1, ljt2
+    real( kind = dp ), intent(inout) :: rij, r2, rcut
+    real( kind = dp ), intent(inout) :: pot, sw, vpair
+    real( kind = dp ), intent(inout), dimension(3,nLocal) :: f 
+    real (kind=dp),intent(inout), dimension(9,nLocal) :: A
+    real (kind=dp),intent(inout), dimension(3,nLocal) :: t   
+    real( kind = dp ), intent(inout), dimension(3) :: d
+    real( kind = dp ), intent(inout), dimension(3) :: fpair
+    logical, intent(inout) :: do_pot
+
+    integer :: interaction_id
+    integer :: interaction_type
+
+#ifdef IS_MPI
+    atid1 = atid_Row(atom1)
+    atid2 = atid_Col(atom2)
+#else
+    atid1 = atid(atom1)
+    atid2 = atid(atom2)
+#endif
+
+    interaction_id = MnMinteractionLookup(atid1, atid2)
+    interaction_type = MnM_Map%interactions(interaction_id)%interaction_type
+
+    select case (interaction_type)
+    case (MNM_LENNARDJONES)
+       call calc_mnm_lennardjones(Atom1, Atom2, D, Rij, R2, Rcut, Sw, Vpair, Fpair, &
+       Pot, F, Do_pot, interaction_id)
+    case(MNM_REPULSIVEMORSE, MNM_SHIFTEDMORSE)
+       call calc_mnm_morse(Atom1, Atom2, D, Rij, R2, Rcut, Sw, Vpair, Fpair, &
+       Pot, F, Do_pot, interaction_id,interaction_type)
+    case(MNM_MAW)
+       call calc_mnm_maw(Atom1, Atom2, D, Rij, R2, Rcut, Sw, Vpair, Fpair, &
+       Pot,A, F,t, Do_pot, interaction_id)
+    end select
+
+  end subroutine do_mnm_pair
+
+  subroutine calc_mnm_lennardjones(Atom1, Atom2, D, Rij, R2, Rcut, Sw, Vpair, Fpair, &
+       Pot, F, Do_pot, interaction_id)
+    
+    integer, intent(inout) ::  atom1, atom2
+    real( kind = dp ), intent(inout) :: rij, r2, rcut
+    real( kind = dp ), intent(inout) :: pot, sw, vpair
+    real( kind = dp ), intent(inout), dimension(3,nLocal) :: f    
+    real( kind = dp ), intent(inout), dimension(3) :: d
+    real( kind = dp ), intent(inout), dimension(3) :: fpair
+    logical, intent(inout) :: do_pot
+    integer, intent(in) :: interaction_id
+
+    ! local Variables
+    real( kind = dp ) :: drdx, drdy, drdz
+    real( kind = dp ) :: fx, fy, fz
+    real( kind = dp ) :: myPot, myPotC, myDeriv, myDerivC, ros, rcos
+    real( kind = dp ) :: pot_temp, dudr
+    real( kind = dp ) :: sigmai
+    real( kind = dp ) :: epsilon
+    logical :: isSoftCore, shiftedPot, shiftedFrc
+    integer :: id1, id2, localError
+
+
+    sigmai     = MnM_Map%interactions(interaction_id)%sigma
+    epsilon    = MnM_Map%interactions(interaction_id)%epsilon
+    shiftedPot = MnM_Map%interactions(interaction_id)%shiftedPot
+    shiftedFrc = MnM_Map%interactions(interaction_id)%shiftedFrc
+
+    ros = rij * sigmai
+
+
+    call getLJfunc(ros, myPot, myDeriv)
+    
+    if (shiftedPot) then
+       rcos = rcut * sigmai
+       call getLJfunc(rcos, myPotC, myDerivC) 
+       myDerivC = 0.0_dp
+    elseif (shiftedFrc) then
+       rcos = rcut * sigmai
+       call getLJfunc(rcos, myPotC, myDerivC)
+       myPotC = myPotC + myDerivC * (rij - rcut) * sigmai
+    else
+       myPotC = 0.0_dp
+       myDerivC = 0.0_dp
+    endif
+    
+ 
+
+    pot_temp = epsilon * (myPot - myPotC)
+    vpair = vpair + pot_temp
+    dudr = sw * epsilon * (myDeriv - myDerivC) * sigmai
+
+    drdx = d(1) / rij
+    drdy = d(2) / rij
+    drdz = d(3) / rij
+
+    fx = dudr * drdx
+    fy = dudr * drdy
+    fz = dudr * drdz
+
+#ifdef IS_MPI
+    if (do_pot) then
+       pot_Row(VDW_POT,atom1) = pot_Row(VDW_POT,atom1) + sw*pot_temp*0.5
+       pot_Col(VDW_POT,atom2) = pot_Col(VDW_POT,atom2) + sw*pot_temp*0.5
+    endif
+
+    f_Row(1,atom1) = f_Row(1,atom1) + fx 
+    f_Row(2,atom1) = f_Row(2,atom1) + fy
+    f_Row(3,atom1) = f_Row(3,atom1) + fz
+
+    f_Col(1,atom2) = f_Col(1,atom2) - fx 
+    f_Col(2,atom2) = f_Col(2,atom2) - fy
+    f_Col(3,atom2) = f_Col(3,atom2) - fz       
+
+#else
+    if (do_pot) pot = pot + sw*pot_temp
+
+    f(1,atom1) = f(1,atom1) + fx
+    f(2,atom1) = f(2,atom1) + fy
+    f(3,atom1) = f(3,atom1) + fz
+
+    f(1,atom2) = f(1,atom2) - fx
+    f(2,atom2) = f(2,atom2) - fy
+    f(3,atom2) = f(3,atom2) - fz
+#endif
+
+#ifdef IS_MPI
+    id1 = AtomRowToGlobal(atom1)
+    id2 = AtomColToGlobal(atom2)
+#else
+    id1 = atom1
+    id2 = atom2
+#endif
+
+    if (molMembershipList(id1) .ne. molMembershipList(id2)) then
+
+       fpair(1) = fpair(1) + fx
+       fpair(2) = fpair(2) + fy
+       fpair(3) = fpair(3) + fz
+
+    endif
+
+    return    
+
+
+  end subroutine calc_mnm_lennardjones
+
+
+
+
+
+
+  subroutine calc_mnm_morse(Atom1, Atom2, D, Rij, R2, Rcut, Sw, Vpair, Fpair, &
+       Pot, f, Do_pot, interaction_id, interaction_type)
+    integer, intent(inout) ::  atom1, atom2
+    real( kind = dp ), intent(inout) :: rij, r2, rcut
+    real( kind = dp ), intent(inout) :: pot, sw, vpair
+    real( kind = dp ), intent(inout), dimension(3,nLocal) :: f    
+    real( kind = dp ), intent(inout), dimension(3) :: d
+    real( kind = dp ), intent(inout), dimension(3) :: fpair
+    logical, intent(inout) :: do_pot
+    integer, intent(in) :: interaction_id, interaction_type
+
+    ! Local Variables
+    real(kind=dp) :: Beta0
+    real(kind=dp) :: R0
+    real(kind=dp) :: D0
+    real(kind=dp) :: expt
+    real(kind=dp) :: expt2
+    real(kind=dp) :: expfnc
+    real(kind=dp) :: expfnc2
+    real(kind=dp) :: D_expt
+    real(kind=dp) :: D_expt2
+    real(kind=dp) :: rcos
+    real(kind=dp) :: exptC
+    real(kind=dp) :: expt2C
+    real(kind=dp) :: expfncC
+    real(kind=dp) :: expfnc2C
+    real(kind=dp) :: D_expt2C
+    real(kind=dp) :: D_exptC
+    
+    real(kind=dp) :: myPot
+    real(kind=dp) :: myPotC
+    real(kind=dp) :: myDeriv
+    real(kind=dp) :: myDerivC
+    real(kind=dp) :: pot_temp
+    real(kind=dp) :: fx,fy,fz
+    real(kind=dp) :: drdx,drdy,drdz
+    real(kind=dp) :: dudr
+    integer :: id1,id2
+
+
+    D0     = MnM_Map%interactions(interaction_id)%D0
+    R0    = MnM_Map%interactions(interaction_id)%r0
+    Beta0 = MnM_Map%interactions(interaction_id)%Beta0
+!    shiftedFrc = MnM_Map%interactions(interaction_id)%shiftedFrc
+
+
+! V(r) = D_e exp(-a(r-re)(exp(-a(r-re))-2)
+
+    expt     = -R0*(rij-R0) 
+    expt2    = 2.0_dp*expt
+    expfnc   = exp(expt)
+    expfnc2  = exp(expt2)
+    D_expt   = D0*expt
+    D_expt2  = D0*expt2
+
+    rcos      = rcut*Beta0
+    exptC     = -R0*(rcos-R0) 
+    expt2C    = 2.0_dp*expt
+    expfncC   = exp(expt)
+    expfnc2C  = exp(expt2)
+    D_exptC   = D0*expt
+    D_expt2C  = D0*expt2
+
+    select case (interaction_type)
+
+
+    case (MNM_SHIFTEDMORSE)
+       
+       myPot  = D_expt  * (D_expt  - 2.0_dp)
+       myPotC = D_exptC * (D_exptC - 2.0_dp)
+
+       myDeriv   = -(D_expt2  - D_expt)  * (-2.0_dp + D_expt)
+       myDerivC  = -(D_expt2C - D_exptC) * (-2.0_dp + D_exptC)
+
+    case (MNM_REPULSIVEMORSE)
+
+       myPot  = D_expt2
+       myPotC = D_expt2C
+
+       myDeriv  = -2.0_dp * D_expt2
+       myDerivC = -2.0_dp * D_expt2C
+
+    end select
+ 
+    myPotC = myPotC + myDerivC*(rij - rcut)*Beta0
+
+    pot_temp = (myPot - myPotC)
+    vpair = vpair + pot_temp
+    dudr = sw * (myDeriv - myDerivC)
+
+    drdx = d(1) / rij
+    drdy = d(2) / rij
+    drdz = d(3) / rij
+
+    fx = dudr * drdx
+    fy = dudr * drdy
+    fz = dudr * drdz
+
+#ifdef IS_MPI
+    if (do_pot) then
+       pot_Row(VDW_POT,atom1) = pot_Row(VDW_POT,atom1) + sw*pot_temp*0.5
+       pot_Col(VDW_POT,atom2) = pot_Col(VDW_POT,atom2) + sw*pot_temp*0.5
+    endif
+
+    f_Row(1,atom1) = f_Row(1,atom1) + fx 
+    f_Row(2,atom1) = f_Row(2,atom1) + fy
+    f_Row(3,atom1) = f_Row(3,atom1) + fz
+
+    f_Col(1,atom2) = f_Col(1,atom2) - fx 
+    f_Col(2,atom2) = f_Col(2,atom2) - fy
+    f_Col(3,atom2) = f_Col(3,atom2) - fz       
+
+#else
+    if (do_pot) pot = pot + sw*pot_temp
+
+    f(1,atom1) = f(1,atom1) + fx
+    f(2,atom1) = f(2,atom1) + fy
+    f(3,atom1) = f(3,atom1) + fz
+
+    f(1,atom2) = f(1,atom2) - fx
+    f(2,atom2) = f(2,atom2) - fy
+    f(3,atom2) = f(3,atom2) - fz
+#endif
+
+#ifdef IS_MPI
+    id1 = AtomRowToGlobal(atom1)
+    id2 = AtomColToGlobal(atom2)
+#else
+    id1 = atom1
+    id2 = atom2
+#endif
+
+    if (molMembershipList(id1) .ne. molMembershipList(id2)) then
+
+       fpair(1) = fpair(1) + fx
+       fpair(2) = fpair(2) + fy
+       fpair(3) = fpair(3) + fz
+
+    endif
+
+    return    
+
+  end subroutine calc_mnm_morse
+
+
+  
+
+  subroutine calc_mnm_maw(Atom1, Atom2, D, Rij, R2, Rcut, Sw, Vpair, Fpair, &
+       Pot,A, F,t, Do_pot, interaction_id)
+    integer, intent(inout) ::  atom1, atom2
+    real( kind = dp ), intent(inout) :: rij, r2, rcut
+    real( kind = dp ), intent(inout) :: pot, sw, vpair
+    real( kind = dp ), intent(inout), dimension(3,nLocal) :: f    
+    real (kind=dp),intent(inout), dimension(9,nLocal) :: A
+    real (kind=dp),intent(inout), dimension(3,nLocal) :: t   
+
+    real( kind = dp ), intent(inout), dimension(3) :: d
+    real( kind = dp ), intent(inout), dimension(3) :: fpair
+    logical, intent(inout) :: do_pot
+
+    integer, intent(in) :: interaction_id
+
+  end subroutine calc_mnm_maw
 
 
   subroutine  setMnMDefaultCutoff(thisRcut, shiftedPot, shiftedFrc)
@@ -171,7 +488,7 @@ contains
        nt%alpha = myInteraction%alpha
        nt%gamma = myInteraction%gamma
     case default
-       write(*,*) 'unknown MnM interaction type!'
+       call handleError("MNM", "Unknown Interaction type")
     end select
     
     if (.not. associated(MnM_Map)) then
@@ -300,5 +617,50 @@ contains
     MnM_Map => MnMdestroy(MnM_Map)
     return
   end subroutine deleteInteractions
+
+
+  subroutine getLJfunc(r, myPot, myDeriv)
+
+    real(kind=dp), intent(in) :: r
+    real(kind=dp), intent(inout) :: myPot, myDeriv
+    real(kind=dp) :: ri, ri2, ri6, ri7, ri12, ri13
+    real(kind=dp) :: a, b, c, d, dx
+    integer :: j
+
+    ri = 1.0_DP / r
+    ri2 = ri*ri
+    ri6 = ri2*ri2*ri2
+    ri7 = ri6*ri
+    ri12 = ri6*ri6
+    ri13 = ri12*ri
+    
+    myPot = 4.0_DP * (ri12 - ri6)
+    myDeriv = 24.0_DP * (ri7 - 2.0_DP * ri13)
+    
+    return
+  end subroutine getLJfunc
+
+  subroutine getSoftFunc(r, myPot, myDeriv)
+    
+    real(kind=dp), intent(in) :: r
+    real(kind=dp), intent(inout) :: myPot, myDeriv
+    real(kind=dp) :: ri, ri2, ri6, ri7
+    real(kind=dp) :: a, b, c, d, dx
+    integer :: j
+    
+    ri = 1.0_DP / r    
+    ri2 = ri*ri
+    ri6 = ri2*ri2*ri2
+    ri7 = ri6*ri
+    myPot = 4.0_DP * (ri6)
+    myDeriv = - 24.0_DP * ri7 
+    
+    return
+  end subroutine getSoftFunc
+
+
+
+
+
 
 end module MetalNonMetal
