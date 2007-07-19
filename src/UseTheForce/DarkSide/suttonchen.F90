@@ -71,7 +71,7 @@ module suttonchen
   logical, save :: useGeometricDistanceMixing = .false.
   logical, save :: cleanArrays = .true.
   logical, save :: arraysAllocated = .false.
-
+  
 
   character(len = statusMsgSize) :: errMesg
   integer :: sc_err
@@ -171,6 +171,7 @@ contains
        allocate(SCList%SCTypes(nSCTypes))
        nAtypes = getSize(atypes)
        allocate(SCList%atidToSCType(nAtypes))
+       SCList%atidToSCType = -1
     end if
 
     SCList%currentSCType = SCList%currentSCType + 1
@@ -178,6 +179,7 @@ contains
 
     myATID =  getFirstMatchingElement(atypes, "c_ident", c_ident)
     SCList%atidToSCType(myATID) = current
+    
   
     SCList%SCTypes(current)%atid         = c_ident
     SCList%SCTypes(current)%alpha        = alpha
@@ -420,6 +422,8 @@ contains
 
     if (cleanArrays) call clean_SC()
     cleanArrays = .false.
+    
+    
 
 #ifdef IS_MPI
     Atid1 = Atid_row(Atom1)
@@ -459,6 +463,12 @@ contains
 
     !! Scatter the electron density from  pre-pair calculation back to 
     !! local atoms
+
+    
+    if (cleanArrays) call clean_SC()
+    cleanArrays = .false.
+    
+      
 #ifdef IS_MPI
     call scatter(rho_row,rho,plan_atom_row,sc_err)
     if (sc_err /= 0 ) then
@@ -478,11 +488,18 @@ contains
     !! Calculate F(rho) and derivative
     do atom = 1, nlocal
        Myid = SCList%atidtoSctype(Atid(atom))
-       frho(atom) = - SCList%SCTypes(Myid)%c * &
-            SCList%SCTypes(Myid)%epsilon * sqrt(rho(atom))
+       ! Myid is set to -1 for non SC atoms.
+       ! Punt if we are a non-SC atom type.
+       if (Myid == -1) then
+          frho(atom) = 0.0_dp
+          dfrhodrho(atom) = 0.0_dp
+       else
+          frho(atom) = - SCList%SCTypes(Myid)%c * &
+              SCList%SCTypes(Myid)%epsilon * sqrt(rho(atom))
 
-       dfrhodrho(atom) = 0.5_dp*frho(atom)/rho(atom)
-
+          dfrhodrho(atom) = 0.5_dp*frho(atom)/rho(atom)
+       end if
+       
        pot = pot + frho(atom)
     enddo
 

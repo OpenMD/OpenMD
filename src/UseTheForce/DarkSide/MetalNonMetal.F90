@@ -42,7 +42,7 @@
 
 !! Calculates Metal-Non Metal interactions.
 !! @author Charles F. Vardeman II 
-!! @version $Id: MetalNonMetal.F90,v 1.3 2007-07-17 21:55:57 gezelter Exp $, $Date: 2007-07-17 21:55:57 $, $Name: not supported by cvs2svn $, $Revision: 1.3 $
+!! @version $Id: MetalNonMetal.F90,v 1.4 2007-07-19 19:49:38 chuckv Exp $, $Date: 2007-07-19 19:49:38 $, $Name: not supported by cvs2svn $, $Revision: 1.4 $
 
 
 module MetalNonMetal
@@ -97,7 +97,7 @@ module MetalNonMetal
      type(MnMinteraction), pointer :: interactions(:) => null()
   end type MnMinteractionMap
 
-  type (MnMInteractionMap), pointer :: MnM_Map
+  type (MnMInteractionMap),pointer :: MnM_Map
 
   integer,  allocatable, dimension(:,:) :: MnMinteractionLookup
 
@@ -134,6 +134,11 @@ contains
     atid2 = atid(atom2)
 #endif
 
+    if(.not.haveInteractionLookup)  then
+      call createInteractionLookup(MnM_MAP)
+      haveInteractionLookup =.true.
+    end if
+    
     interaction_id = MnMinteractionLookup(atid1, atid2)
     interaction_type = MnM_Map%interactions(interaction_id)%interaction_type
 
@@ -431,6 +436,9 @@ contains
     integer :: atid1, atid2, id1, id2
     logical :: shiftedPot, shiftedFrc
     
+    
+    
+ 
 #ifdef IS_MPI
     atid1 = atid_Row(atom1)
     atid2 = atid_Col(atom2)
@@ -453,7 +461,7 @@ contains
 #else
     atid1 = atid(atom1)
     atid2 = atid(atom2)
-
+    
     if (atid2.eq.MnM_Map%interactions(interaction_id)%metal_atid) then
        ! rotate the inter-particle separation into the two different 
        ! body-fixed coordinate systems:
@@ -471,12 +479,14 @@ contains
 
 #endif
     
+    
     D0 = MnM_Map%interactions(interaction_id)%D0
     R0 = MnM_Map%interactions(interaction_id)%r0
     beta0 = MnM_Map%interactions(interaction_id)%beta0
     betaH = MnM_Map%interactions(interaction_id)%betaH
     alpha = MnM_Map%interactions(interaction_id)%alpha
     gamma = MnM_Map%interactions(interaction_id)%gamma
+    
 
     shiftedPot = MnM_Map%interactions(interaction_id)%shiftedPot
     shiftedFrc = MnM_Map%interactions(interaction_id)%shiftedFrc   
@@ -489,6 +499,8 @@ contains
     expfncH   = exp(exptH)
     expfncH2  = expfncH*expfncH
    
+   
+  
 !!$    if (shiftedPot .or. shiftedFrc) then
 !!$       exptC0     = -beta0*(rcut - R0) 
 !!$       expfncC0   = exp(exptC0)
@@ -508,7 +520,7 @@ contains
     x2 = x*x
     y2 = y*y
     z2 = z*z
-    
+    r3 = r2*rij
     ct = z / rij
     
     if (ct .gt. 1.0_dp) ct = 1.0_dp
@@ -520,7 +532,7 @@ contains
     dctdux = y / rij ! - (z * x2) / r3
     dctduy = -x / rij !- (z * y2) / r3
     dctduz = 0.0_dp ! z / rij - (z2 * z) / r3
-
+    
     ! this is an attempt to try to truncate the singularity when
     ! sin(theta) is near 0.0:
 
@@ -555,11 +567,12 @@ contains
     sp = y / proj
     dspdz = 0.0_dp
     dspduz = 0.0_dp
-
+    
 
     pot_temp = D0 * (expfnc02  - 2.0_dp * expfnc0) + &
          2.0_dp * gamma * D0 * expfncH2 * (1.0_dp + alpha*ct)*sp*sp
     vpair = vpair + pot_temp
+    
     if (do_pot) then
 #ifdef IS_MPI
        pot_row(VDW_POT,atom1) = pot_row(VDW_POT,atom1) + 0.5_dp*pot_temp*sw
@@ -579,14 +592,21 @@ contains
     ! derivative wrt sin(phi)
     dmawdsp = 4.0 * gamma * D0 * expfncH2 * (1.0_dp + alpha*ct)*sp
 
+    
     ! chain rule to put these back on x, y, z, ux, uy, uz
     dvdx = dmawdr * drdx + dmawdct * dctdx + dmawdsp * dspdx
     dvdy = dmawdr * drdy + dmawdct * dctdy + dmawdsp * dspdy
     dvdz = dmawdr * drdz + dmawdct * dctdz + dmawdsp * dspdz
+
+    
+ 
     
     dvdux = dmawdr * drdux + dmawdct * dctdux + dmawdsp * dspdux
     dvduy = dmawdr * drduy + dmawdct * dctduy + dmawdsp * dspduy
     dvduz = dmawdr * drduz + dmawdct * dctduz + dmawdsp * dspduz
+
+    
+    
 
     tx = (dvduy - dvduz) * sw
     ty = (dvduz - dvdux) * sw
@@ -730,10 +750,17 @@ contains
     type(MNMtype) :: myInteraction
     type(MnMinteraction) :: nt
     integer :: id
+  
+    
 
+ 
+    
     nt%interaction_type = myInteraction%MNMInteractionType
-    nt%metal_atid = myInteraction%metal_atid
-    nt%nonmetal_atid = myInteraction%nonmetal_atid
+    nt%metal_atid = &
+        getFirstMatchingElement(atypes, "c_ident", myInteraction%metal_atid)
+    nt%nonmetal_atid = &
+        getFirstMatchingElement(atypes, "c_ident", myInteraction%nonmetal_atid)
+    
     
     select case (nt%interaction_type)
     case (MNM_LENNARDJONES)
@@ -829,8 +856,8 @@ contains
 
   end function MnMinitialize
 
-  subroutine createInteractionLookup(this)
-    type(MnMinteractionMap), pointer :: this
+  subroutine createInteractionLookup(this) 
+    type (MnMInteractionMap),pointer :: this
     integer :: biggestAtid, i, metal_atid, nonmetal_atid, error
 
     biggestAtid=-1
@@ -841,7 +868,7 @@ contains
        if (metal_atid .gt. biggestAtid) biggestAtid = metal_atid
        if (nonmetal_atid .gt. biggestAtid) biggestAtid = nonmetal_atid
     enddo
-
+    
     allocate(MnMinteractionLookup(biggestAtid,biggestAtid), stat=error)
     if (error /= 0) write(*,*) 'Could not allocate MnMinteractionLookup'
 
