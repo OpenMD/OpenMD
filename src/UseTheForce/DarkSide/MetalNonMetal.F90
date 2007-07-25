@@ -42,7 +42,7 @@
 
 !! Calculates Metal-Non Metal interactions.
 !! @author Charles F. Vardeman II 
-!! @version $Id: MetalNonMetal.F90,v 1.4 2007-07-19 19:49:38 chuckv Exp $, $Date: 2007-07-19 19:49:38 $, $Name: not supported by cvs2svn $, $Revision: 1.4 $
+!! @version $Id: MetalNonMetal.F90,v 1.5 2007-07-25 19:35:57 chuckv Exp $, $Date: 2007-07-25 19:35:57 $, $Name: not supported by cvs2svn $, $Revision: 1.5 $
 
 
 module MetalNonMetal
@@ -525,13 +525,33 @@ contains
     
     if (ct .gt. 1.0_dp) ct = 1.0_dp
     if (ct .lt. -1.0_dp) ct = -1.0_dp
-    
+
+    ! These derivatives can be obtained by using 
+    ! cos(theta) = \hat{u} . \vec{r} / r
+    ! where \hat{u} is the body-fixed unit frame for the water molecule,
+    ! and \vec{r} is the vector to the metal atom.
+    !
+    ! the derivatives wrt \vec{r} are:
+    ! dcostheta/d\vec{r} = - costheta \vec{r} / r^2 + \hat{u} / r
+    ! the molecular frame for each water has u = {0, 0, 1}, so these:
+    ! 
+    ! dctdx = - x * z / r3 + ux / rij
+    ! dctdy = - y * z / r3 + uy / rij
+    ! dctdz = - z2 / r3 + uz / rij
+    ! 
+    ! become:
+    !
     dctdx = - z * x / r3
     dctdy = - z * y / r3
     dctdz = 1.0_dp / rij - z2 / r3
-    dctdux = y / rij ! - (z * x2) / r3
-    dctduy = -x / rij !- (z * y2) / r3
-    dctduz = 0.0_dp ! z / rij - (z2 * z) / r3
+
+    dctdux = x / rij
+    dctduy = y / rij
+    dctduz = z / rij
+
+   ! dctdux = y / rij ! - (z * x2) / r3
+   ! dctduy = -x / rij !- (z * y2) / r3
+   ! dctduz = 0.0_dp ! z / rij - (z2 * z) / r3
     
     ! this is an attempt to try to truncate the singularity when
     ! sin(theta) is near 0.0:
