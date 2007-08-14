@@ -69,12 +69,13 @@ void
 cmdline_parser_print_help (void)
 {
   cmdline_parser_print_version ();
+  printf("\n%s\n", "\n+----------------------------------------------------------------------+ \n|    ____  ____  ____  _____ ______  The OpenSource, Object-oriented   | \n|   / __ \\/ __ \\/ __ \\/ ___// ____/  Parallel Simulation Engine.       | \n|  / / / / / / / /_/ /\\__ \\/ __/                                       | \n| / /_/ / /_/ / ____/___/ / /___     Copyright 2004-2006 by the        | \n| \\____/\\____/_/    /____/_____/     University of Notre Dame.         | \n|                                                                      | \n|                                    http://www.oopse.org              |\n|                                                                      | \n| OOPSE is an OpenScience project.  All source code is available for   |\n| any use subject to only one condition:                               | \n|                                                                      |\n| Any published work resulting from the use of this code must cite the | \n| following paper:       M. A. Meineke, C. F. Vardeman II, T. Lin,     | \n|                        C. J. Fennell, and J. D. Gezelter,            | \n|                        J. Comput. Chem. 26, pp. 252-271 (2005).      | \n+----------------------------------------------------------------------+");
   printf("\nUsage: Hydro [OPTIONS]...\n\n");
   printf("%s\n","  -h, --help            Print help and exit");
   printf("%s\n","  -V, --version         Print version and exit");
-  printf("%s\n","  -i, --input=filename  input dump file");
+  printf("%s\n","  -i, --input=filename  input MetaData (md) file");
   printf("%s\n","  -o, --output=STRING   output file prefix  (default=`hydro')");
-  printf("%s\n","      --model=STRING    hydrodynamics model (support RoughShell and BeadModel)");
+  printf("%s\n","      --model=STRING    hydrodynamics model (supports RoughShell and BeadModel)");
   printf("%s\n","  -b, --beads           generate the beads only, hydrodynamics will be \n                          performed  (default=off)");
   
 }
@@ -268,7 +269,6 @@ cmdline_parser_internal (int argc, char * const *argv, struct gengetopt_args_inf
     cmdline_parser_init (args_info);
 
   cmdline_parser_init (&local_args_info);
-  printf("\n%s\n", "\n+----------------------------------------------------------------------+ \n|    ____  ____  ____  _____ ______  The OpenSource, Object-oriented   | \n|   / __ \\/ __ \\/ __ \\/ ___// ____/  Parallel Simulation Engine.       | \n|  / / / / / / / /_/ /\\__ \\/ __/                                       | \n| / /_/ / /_/ / ____/___/ / /___     Copyright 2004-2006 by the        | \n| \\____/\\____/_/    /____/_____/     University of Notre Dame.         | \n|                                                                      | \n|                                    http://www.oopse.org              |\n|                                                                      | \n| OOPSE is an OpenScience project.  All source code is available for   |\n| any use subject to only one condition:                               | \n|                                                                      |\n| Any published work resulting from the use of this code must cite the | \n| following paper:       M. A. Meineke, C. F. Vardeman II, T. Lin,     | \n|                        C. J. Fennell, and J. D. Gezelter,            | \n|                        J. Comput. Chem. 26, pp. 252-271 (2005).      | \n+----------------------------------------------------------------------+");
 
   optarg = 0;
   optind = 0;
@@ -307,7 +307,7 @@ cmdline_parser_internal (int argc, char * const *argv, struct gengetopt_args_inf
           cmdline_parser_free (&local_args_info);
           exit (EXIT_SUCCESS);
 
-        case 'i':	/* input dump file.  */
+        case 'i':	/* input MetaData (md) file.  */
           if (local_args_info.input_given)
             {
               fprintf (stderr, "%s: `--input' (`-i') option given more than once%s\n", argv[0], (additional_error ? additional_error : ""));
@@ -358,7 +358,7 @@ cmdline_parser_internal (int argc, char * const *argv, struct gengetopt_args_inf
 
 
         case 0:	/* Long option with no short option */
-          /* hydrodynamics model (support RoughShell and BeadModel).  */
+          /* hydrodynamics model (supports RoughShell and BeadModel).  */
           if (strcmp (long_options[option_index].name, "model") == 0)
           {
             if (local_args_info.model_given)
@@ -399,13 +399,12 @@ cmdline_parser_internal (int argc, char * const *argv, struct gengetopt_args_inf
   cmdline_parser_release (&local_args_info);
 
   if ( error )
-    goto failure;
+    return (EXIT_FAILURE);
 
   return 0;
 
 failure:
   
-  cmdline_parser_print_help ();
   cmdline_parser_release (&local_args_info);
   return (EXIT_FAILURE);
 }

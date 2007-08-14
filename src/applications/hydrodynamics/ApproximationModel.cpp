@@ -72,13 +72,12 @@ namespace oopse {
   bool ApproximationModel::calcHydroProps(Shape* shape, RealType viscosity, RealType temperature) {
     
     bool ret = true;
-    HydroProp* cr;
-    HydroProp* cd;
+    HydroProp* cr = new HydroProp();
+    HydroProp* cd = new HydroProp();
     calcHydroPropsAtCR(beads_, viscosity, temperature, cr);
-    //calcHydroPropsAtCD(beads_, viscosity, temperature, cd);
+    calcHydroPropsAtCD(beads_, viscosity, temperature, cd);
     setCR(cr);
     setCD(cd);
-    
     return true;    
   }
   
@@ -255,7 +254,7 @@ namespace oopse {
     return true;
 }
   
-  bool ApproximationModel::calcHydroPropsAtCD(std::vector<BeadParam>& beads, RealType viscosity, RealType temperature, HydroProp* cr) {
+  bool ApproximationModel::calcHydroPropsAtCD(std::vector<BeadParam>& beads, RealType viscosity, RealType temperature, HydroProp* cd) {
     
     int nbeads = beads.size();
     DynamicRectMatrix<RealType> B(3*nbeads, 3*nbeads);
@@ -407,16 +406,16 @@ namespace oopse {
 
     Mat6x6d Xi, D;
 
-    cr->setCOR(rod);
+    cd->setCOR(rod);
 
-    cr->setXi(Xid);
+    cd->setXi(Xid);
 
     D.setSubMatrix(0, 0, Ddtt);
     D.setSubMatrix(0, 3, Ddtr);
     D.setSubMatrix(3, 0, Ddtr);
     D.setSubMatrix(3, 3, Ddrr);
 
-    cr->setD(D);
+    cd->setD(D);
 
     std::cout << "viscosity = " << viscosity << std::endl;
     std::cout << "temperature = " << temperature << std::endl;

@@ -24,12 +24,12 @@ extern "C" {
 
 struct gengetopt_args_info
 {
-  char * input_arg;	/* input dump file.  */
-  char * input_orig;	/* input dump file original value given at command line.  */
+  char * input_arg;	/* input MetaData (md) file.  */
+  char * input_orig;	/* input MetaData (md) file original value given at command line.  */
   char * output_arg;	/* output file prefix (default='hydro').  */
   char * output_orig;	/* output file prefix original value given at command line.  */
-  char * model_arg;	/* hydrodynamics model (support RoughShell and BeadModel).  */
-  char * model_orig;	/* hydrodynamics model (support RoughShell and BeadModel) original value given at command line.  */
+  char * model_arg;	/* hydrodynamics model (supports RoughShell and BeadModel).  */
+  char * model_orig;	/* hydrodynamics model (supports RoughShell and BeadModel) original value given at command line.  */
   int beads_flag;	/* generate the beads only, hydrodynamics will be performed (default=off).  */
   
   int help_given ;	/* Whether help was given.  */
