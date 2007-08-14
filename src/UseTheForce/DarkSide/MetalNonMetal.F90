@@ -42,7 +42,7 @@
 
 !! Calculates Metal-Non Metal interactions.
 !! @author Charles F. Vardeman II 
-!! @version $Id: MetalNonMetal.F90,v 1.5 2007-07-25 19:35:57 chuckv Exp $, $Date: 2007-07-25 19:35:57 $, $Name: not supported by cvs2svn $, $Revision: 1.5 $
+!! @version $Id: MetalNonMetal.F90,v 1.6 2007-08-14 17:41:05 xsun Exp $, $Date: 2007-08-14 17:41:05 $, $Name: not supported by cvs2svn $, $Revision: 1.6 $
 
 
 module MetalNonMetal
@@ -97,7 +97,7 @@ module MetalNonMetal
      type(MnMinteraction), pointer :: interactions(:) => null()
   end type MnMinteractionMap
 
-  type (MnMInteractionMap),pointer :: MnM_Map
+  type (MnMInteractionMap), pointer :: MnM_Map
 
   integer,  allocatable, dimension(:,:) :: MnMinteractionLookup
 
@@ -740,16 +740,18 @@ contains
     defaultShiftPot = shiftedPot
     defaultShiftFrc = shiftedFrc
 
-    if(MnM_Map%interactionCount /= 0) then
-       nInteractions = MnM_Map%interactionCount
+    if (associated(MnM_Map)) then
+       if(MnM_Map%interactionCount /= 0) then
+          nInteractions = MnM_Map%interactionCount
 
-       do i = 1, nInteractions
-          MnM_Map%interactions(i)%shiftedPot = shiftedPot
-          MnM_Map%interactions(i)%shiftedFrc = shiftedFrc
-          MnM_Map%interactions(i)%rCut = thisRcut
-          MnM_Map%interactions(i)%rCutWasSet = .true.
-       enddo
-    end if
+          do i = 1, nInteractions
+             MnM_Map%interactions(i)%shiftedPot = shiftedPot
+             MnM_Map%interactions(i)%shiftedFrc = shiftedFrc
+             MnM_Map%interactions(i)%rCut = thisRcut
+             MnM_Map%interactions(i)%rCutWasSet = .true.
+          enddo
+       end if
+  end if
 
   end subroutine setMnMDefaultCutoff
 
