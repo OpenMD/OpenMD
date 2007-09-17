@@ -62,6 +62,8 @@
 #include "applications/staticProps/SCDOrderParameter.hpp"
 #include "applications/staticProps/DensityPlot.hpp"
 #include "applications/staticProps/RhoZ.hpp"
+#include "applications/staticProps/BondAngleDistribution.hpp"
+#include "applications/staticProps/NanoVolume.hpp"
 #if defined(HAVE_FFTW_H) || defined(HAVE_DFFTW_H) || defined(HAVE_FFTW3_H)
 #include "applications/staticProps/Hxy.hpp"
 #endif
@@ -227,6 +229,17 @@ int main(int argc, char* argv[]){
       painCave.isFatal = 1;
       simError();
     }
+  } else if (args_info.bad_given){
+    if (args_info.rcut_given) {
+      analyser = new BondAngleDistribution(info, dumpFileName, sele1, args_info.rcut_arg,
+			    args_info.nbins_arg);
+    } else {
+      sprintf( painCave.errMsg,
+               "A cutoff radius (rcut) must be specified when calculating Bond Angle Distributions");
+      painCave.severity = OOPSE_ERROR;
+      painCave.isFatal = 1;
+      simError();
+    }
   } else if (args_info.scd_given) {
     if (batchMode) {
       analyser  = new SCDOrderParameter(info, dumpFileName, args_info.molname_arg, 
@@ -256,6 +269,8 @@ int main(int argc, char* argv[]){
       painCave.isFatal = 1;
       simError();
     }
+	}else if (args_info.hullvol_given) {
+    analyser = new NanoVolume(info, dumpFileName, sele1);
   }
   
   if (args_info.output_given) {

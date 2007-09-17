@@ -82,6 +82,7 @@ struct gengetopt_args_info
   const char *radius_help; /* nanoparticle radius help description.  */
   const char *bo_help; /* bond order parameter (--rcut must be specified) help description.  */
   const char *bor_help; /* bond order parameter as a function of radius (--rcut must be specified) help description.  */
+  const char *bad_help; /* N(theta) bond angle density within (--rcut must be specified) help description.  */
   const char *gofr_help; /* g(r) help description.  */
   const char *r_theta_help; /* g(r, cos(theta)) help description.  */
   const char *r_omega_help; /* g(r, cos(omega)) help description.  */
@@ -94,6 +95,7 @@ struct gengetopt_args_info
   const char *slab_density_help; /* slab density help description.  */
   const char *hxy_help; /* hxy help description.  */
   const char *rho_r_help; /* rho of R help description.  */
+  const char *hullvol_help; /* hull volume of nanoparticle help description.  */
   
   int help_given ;	/* Whether help was given.  */
   int version_given ;	/* Whether version was given.  */
@@ -117,6 +119,7 @@ struct gengetopt_args_info
   int radius_given ;	/* Whether radius was given.  */
   int bo_given ;	/* Whether bo was given.  */
   int bor_given ;	/* Whether bor was given.  */
+  int bad_given ;	/* Whether bad was given.  */
   int gofr_given ;	/* Whether gofr was given.  */
   int r_theta_given ;	/* Whether r_theta was given.  */
   int r_omega_given ;	/* Whether r_omega was given.  */
@@ -129,6 +132,7 @@ struct gengetopt_args_info
   int slab_density_given ;	/* Whether slab_density was given.  */
   int hxy_given ;	/* Whether hxy was given.  */
   int rho_r_given ;	/* Whether rho_r was given.  */
+  int hullvol_given ;	/* Whether hullvol was given.  */
 
   char **inputs ; /* unamed options */
   unsigned inputs_num ; /* unamed options number */
