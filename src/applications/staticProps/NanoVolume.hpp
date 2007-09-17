@@ -45,14 +45,14 @@
  *
  *  Created by Charles F. Vardeman II on 14 Dec 2006.
  *  @author  Charles F. Vardeman II
- *  @version $Id: NanoVolume.hpp,v 1.1 2007-09-17 20:11:47 chuckv Exp $
+ *  @version $Id: NanoVolume.hpp,v 1.2 2007-09-17 20:15:27 chuckv Exp $
  *
  */
 #ifndef APPLICATIONS_STATICPROPS_NANOVOLUME_HPP_
 #define APPLICATIONS_STATICPROPS_NANOVOLUME_HPP_
 
 #include <vector>
-#include "math/vector3.hpp"
+#include "math/Vector3.hpp"
 #include "selection/SelectionEvaluator.hpp"
 #include "selection/SelectionManager.hpp"
 #include "applications/staticProps/StaticAnalyser.hpp"
