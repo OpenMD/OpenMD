@@ -39,29 +39,21 @@
  * such damages.
  */
 
-#include "applications/dynamicProps/LegendreCorrFunc.hpp"
-#include "math/LegendrePolynomial.hpp"
-#include "utils/simError.h"
+#include "applications/dynamicProps/DirectionalRCorrFunc.hpp"
 
 namespace oopse {
-  LegendreCorrFunc::LegendreCorrFunc(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2, int order)
-    : ParticleTimeCorrFunc(info, filename, sele1, sele2, DataStorage::dslAmat | DataStorage::dslElectroFrame){
+  DirectionalRCorrFunc::DirectionalRCorrFunc(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2)
+    : ParticleTimeCorrFunc(info, filename, sele1, sele2, DataStorage::dslPosition){
 
-      setCorrFuncType("Legendre Correlation Function");
-      setOutputName(getPrefix(dumpFilename_) + ".lcorr");
+      setCorrFuncType("DirectionalRCorrFunc");
+      setOutputName(getPrefix(dumpFilename_) + ".drcorr");
       histogram_.resize(nTimeBins_); 
       count_.resize(nTimeBins_);
       nSelected_ =   seleMan1_.getSelectionCount();  
-      std::cout << "sele1 = " << sele1 << "\n";
-      std::cout << "sele2 = " << sele2 << "\n";
-      std::cout << "nSelected = " << nSelected_ << "\n";
       assert(  nSelected_ == seleMan2_.getSelectionCount());
-
-      LegendrePolynomial polynomial(order);
-      legendre_ = polynomial.getLegendrePolynomial(order);
     }
 
-  void LegendreCorrFunc::correlateFrames(int frame1, int frame2) {
+  void DirectionalRCorrFunc::correlateFrames(int frame1, int frame2) {
     Snapshot* snapshot1 = bsMan_->getSnapshot(frame1);
     Snapshot* snapshot2 = bsMan_->getSnapshot(frame2);
     assert(snapshot1 && snapshot2);
@@ -78,8 +70,8 @@ namespace oopse {
     StuntDouble* sd2;
 
     for (sd1 = seleMan1_.beginSelected(i), sd2 = seleMan2_.beginSelected(j);
-         sd1 != NULL && sd2 != NULL;
-         sd1 = seleMan1_.nextSelected(i), sd2 = seleMan2_.nextSelected(j)) {
+	 sd1 != NULL && sd2 != NULL;
+	 sd1 = seleMan1_.nextSelected(i), sd2 = seleMan2_.nextSelected(j)) {
 
       Vector3d corrVals = calcCorrVals(frame1, frame2, sd1, sd2);
       histogram_[timeBin] += corrVals; 
@@ -87,7 +79,7 @@ namespace oopse {
     
   }
 
-  void LegendreCorrFunc::postCorrelate() {
+  void DirectionalRCorrFunc::postCorrelate() {
     for (int i =0 ; i < nTimeBins_; ++i) {
       if (count_[i] > 0) {
         histogram_[i] /= count_[i];
@@ -95,7 +87,7 @@ namespace oopse {
     }
   }
 
-  void LegendreCorrFunc::preCorrelate() {
+  void DirectionalRCorrFunc::preCorrelate() {
     // Fill the histogram with empty Vector3d:
     std::fill(histogram_.begin(), histogram_.end(), Vector3d(0.0));
     // count array set to zero
@@ -103,45 +95,26 @@ namespace oopse {
   }
 
 
+  Vector3d DirectionalRCorrFunc::calcCorrVals(int frame1, int frame2, StuntDouble* sd1, StuntDouble* sd2) {
+    Vector3d r1 = sd1->getPos(frame1);
+    Vector3d r2 = sd2->getPos(frame2);
+    Vector3d u1 = sd1->getA(frame1).getColumn(2);
 
-  Vector3d LegendreCorrFunc::calcCorrVals(int frame1, int frame2, StuntDouble* sd1,  StuntDouble* sd2) {
-    Vector3d v1x = sd1->getA(frame1).getColumn(0);
-    Vector3d v2x = sd2->getA(frame2).getColumn(0);
-    Vector3d v1y = sd1->getA(frame1).getColumn(1);
-    Vector3d v2y = sd2->getA(frame2).getColumn(1);
-    Vector3d v1z = sd1->getA(frame1).getColumn(2);
-    Vector3d v2z = sd2->getA(frame2).getColumn(2);
+    RealType rsq = (r2-r1).lengthSquare();
+    RealType rpar = dot( r2-r1, u1);
+    RealType rpar2 = rpar*rpar;
+    RealType rperp2 = rsq - rpar2;
 
-    RealType uxprod = legendre_.evaluate(dot(v1x, v2x)/(v1x.length()*v2x.length()));
-    RealType uyprod = legendre_.evaluate(dot(v1y, v2y)/(v1y.length()*v2y.length()));
-    RealType uzprod = legendre_.evaluate(dot(v1z, v2z)/(v1z.length()*v2z.length()));
-
-    return Vector3d(uxprod, uyprod, uzprod);
-
+    return Vector3d(rsq, rpar2, rperp2);
   }
 
-
-  void LegendreCorrFunc::validateSelection(const SelectionManager& seleMan) {
-    StuntDouble* sd;
-    int i;    
-    for (sd = seleMan1_.beginSelected(i); sd != NULL; sd = seleMan1_.nextSelected(i)) {
-      if (!sd->isDirectionalAtom()) {
-	sprintf(painCave.errMsg,
-                "LegendreCorrFunc::validateSelection Error: selected atoms are not Directional\n");
-	painCave.isFatal = 1;
-	simError();        
-      }
-    }
-    
-  }
-
-  void LegendreCorrFunc::writeCorrelate() {
+  void DirectionalRCorrFunc::writeCorrelate() {
     std::ofstream ofs(getOutputFileName().c_str());
 
     if (ofs.is_open()) {
 
       ofs << "#" << getCorrFuncType() << "\n";
-      ofs << "#time\tPn(costheta_x)\tPn(costheta_y)\tPn(costheta_z)\n";
+      ofs << "#time\tr2\trparallel\trperpendicular\n";
 
       for (int i = 0; i < nTimeBins_; ++i) {
         ofs << time_[i] << "\t" << 
@@ -152,10 +125,13 @@ namespace oopse {
             
     } else {
       sprintf(painCave.errMsg,
-              "LegendreCorrFunc::writeCorrelate Error: fail to open %s\n", getOutputFileName().c_str());
+              "DirectionalRCorrFunc::writeCorrelate Error: fail to open %s\n", getOutputFileName().c_str());
       painCave.isFatal = 1;
       simError();        
     }
+    
     ofs.close();    
   }
+
+
 }

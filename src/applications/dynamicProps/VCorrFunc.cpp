@@ -54,7 +54,8 @@ namespace oopse {
     Vector3d v1 =sd1->getVel(frame1);
     Vector3d v2 = sd2->getVel(frame2);
 
-    return dot(v1, v2)/dot(v1,v1);
+    //return dot(v1, v2)/dot(v1,v1);
+    return dot(v1, v2);
   }
 
 }

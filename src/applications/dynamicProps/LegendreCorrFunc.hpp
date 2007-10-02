@@ -42,6 +42,7 @@
 #define APPLICATIONS_DYNAMICPROPS_LEGENDRECORRFUNC_HPP
 
 #include "math/Polynomial.hpp"
+#include "math/Vector3.hpp"
 #include "applications/dynamicProps/ParticleTimeCorrFunc.hpp"
 namespace oopse {
 
@@ -50,11 +51,21 @@ namespace oopse {
     LegendreCorrFunc(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2, int order);   
 
   private:
-    virtual RealType calcCorrVal(int frame1, int frame2, StuntDouble* sd1,  StuntDouble* sd2);
+    virtual void correlateFrames(int frame1, int frame2);
+    virtual RealType calcCorrVal(int frame1, int frame2, StuntDouble* sd1,  StuntDouble* sd2) { return 0.0; }
+    virtual Vector3d calcCorrVals(int frame1, int frame2, StuntDouble* sd1, StuntDouble* sd2);
+    virtual void writeCorrelate();
 
     virtual void validateSelection(const SelectionManager& seleMan);
     int order_;
     DoublePolynomial legendre_;
+
+  protected:
+    virtual void preCorrelate();
+    virtual void postCorrelate();
+    std::vector<Vector3d > histogram_;
+    int nSelected_;
+
   };
 
 }

@@ -68,15 +68,15 @@ namespace oopse {
     
       if (nRigidBodies > 0 || hasDirectionalAtom) {
         storageLayout_ |= DataStorage::dslAmat;
+	if(storageLayout_ & DataStorage::dslVelocity) {
+	  storageLayout_ |= DataStorage::dslAngularMomentum;
+	}
+	if (storageLayout_ & DataStorage::dslForce) {
+	  storageLayout_ |= DataStorage::dslTorque;
+	}
       }
       if (hasMultipole) {
         storageLayout_ |= DataStorage::dslElectroFrame;
-        if (nRigidBodies > 0) { 
-	  storageLayout_ |= DataStorage::dslAngularMomentum;        
-        }
-      }
-      if(nRigidBodies > 0 && storageLayout_ & DataStorage::dslVelocity) {
-        storageLayout_ |= DataStorage::dslAngularMomentum;
       }
         
       bsMan_ = new BlockSnapshotManager(info, dumpFilename_, storageLayout_);
@@ -195,24 +195,28 @@ namespace oopse {
 
     /** @todo need improvement */    
     if (storageLayout_ & DataStorage::dslPosition) {
-      for (mol = info_->beginMolecule(mi); mol != NULL; mol = info_->nextMolecule(mi)) {
+      for (mol = info_->beginMolecule(mi); mol != NULL; 
+	   mol = info_->nextMolecule(mi)) {
 
 	//change the positions of atoms which belong to the rigidbodies
-	for (rb = mol->beginRigidBody(rbIter); rb != NULL; rb = mol->nextRigidBody(rbIter)) {
+	for (rb = mol->beginRigidBody(rbIter); rb != NULL; 
+	     rb = mol->nextRigidBody(rbIter)) {
 	  rb->updateAtoms(frame);
 	}
       }        
     }
 
     if (storageLayout_ & DataStorage::dslVelocity) {
-      for (mol = info_->beginMolecule(mi); mol != NULL; mol = info_->nextMolecule(mi)) {
-
+      for (mol = info_->beginMolecule(mi); mol != NULL; 
+	   mol = info_->nextMolecule(mi)) {
+	
 	//change the positions of atoms which belong to the rigidbodies
-	for (rb = mol->beginRigidBody(rbIter); rb != NULL; rb = mol->nextRigidBody(rbIter)) {
+	for (rb = mol->beginRigidBody(rbIter); rb != NULL; 
+	     rb = mol->nextRigidBody(rbIter)) {
 	  rb->updateAtomVel(frame);
 	}
       }
-        
+      
     }
     
   }

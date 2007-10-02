@@ -38,25 +38,30 @@
  * University of Notre Dame has been advised of the possibility of
  * such damages.
  */
-#ifndef APPLICATIONS_DYNAMICPROPS_PARTICLETIMECORRFUNC_HPP
-#define APPLICATIONS_DYNAMICPROPS_PARTICLETIMECORRFUNC_HPP
-
-#include "applications/dynamicProps/TimeCorrFunc.hpp"
+ 
+#include "applications/dynamicProps/FrameTimeCorrFunc.hpp"
 
 namespace oopse {
 
-  class ParticleTimeCorrFunc : public TimeCorrFunc {
-  public:
-    ParticleTimeCorrFunc(SimInfo* info, const std::string& filename, 
-			 const std::string& sele1, const std::string& sele2, int storageLayout);
-        
-  private:        
-    virtual void correlateFrames(int frame1, int frame2);
-    virtual RealType calcCorrVal(int frame1, int frame2, StuntDouble* sd1,  StuntDouble* sd2) = 0;
-        
-    int nSelected_;
-  };
+  FrameTimeCorrFunc::FrameTimeCorrFunc(SimInfo * info, const std::string & filename, 
+                                       const std :: string & sele1, 
+                                       const std :: string & sele2, int storageLayout) 
+    : TimeCorrFunc(info, filename, sele1, sele2, storageLayout){
+    }
+
+  void FrameTimeCorrFunc::correlateFrames(int frame1, int frame2) {
+    Snapshot* snapshot1 = bsMan_->getSnapshot(frame1);
+    Snapshot* snapshot2 = bsMan_->getSnapshot(frame2);
+    assert(snapshot1 && snapshot2);
+
+    RealType time1 = snapshot1->getTime();
+    RealType time2 = snapshot2->getTime();
+
+    int timeBin = int ((time2 - time1) /deltaTime_ + 0.5);
+
+    RealType corrVal = calcCorrVal(frame1, frame2);
+    histogram_[timeBin] += corrVal;    
+  }
 
 }
-#endif
 

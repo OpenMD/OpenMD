@@ -38,23 +38,28 @@
  * University of Notre Dame has been advised of the possibility of
  * such damages.
  */
-#ifndef APPLICATIONS_DYNAMICPROPS_PARTICLETIMECORRFUNC_HPP
-#define APPLICATIONS_DYNAMICPROPS_PARTICLETIMECORRFUNC_HPP
+#ifndef APPLICATIONS_DYNAMICPROPS_ACTIONCORRFUNC_HPP
+#define APPLICATIONS_DYNAMICPROPS_ACTIONCORRFUNC_HPP
 
-#include "applications/dynamicProps/TimeCorrFunc.hpp"
+#include "applications/dynamicProps/FrameTimeCorrFunc.hpp"
 
 namespace oopse {
 
-  class ParticleTimeCorrFunc : public TimeCorrFunc {
+  class ActionCorrFunc : public FrameTimeCorrFunc {
   public:
-    ParticleTimeCorrFunc(SimInfo* info, const std::string& filename, 
-			 const std::string& sele1, const std::string& sele2, int storageLayout);
+    ActionCorrFunc(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2);   
         
-  private:        
+  private:
     virtual void correlateFrames(int frame1, int frame2);
-    virtual RealType calcCorrVal(int frame1, int frame2, StuntDouble* sd1,  StuntDouble* sd2) = 0;
-        
-    int nSelected_;
+    virtual RealType calcCorrVal(int frame1, int frame2) { return 0.0; }
+    virtual void writeCorrelate();
+
+  protected:
+    virtual void preCorrelate();
+    virtual void postCorrelate();
+    std::vector<Mat3x3d > histogram_;
+    RealType avePress_;
+    RealType aveVol_;
   };
 
 }

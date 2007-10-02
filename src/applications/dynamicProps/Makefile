@@ -4,6 +4,7 @@ Source    = \
             TimeCorrFunc.cpp \
 	    CrossTimeCorrFunc.cpp \
 	    ParticleTimeCorrFunc.cpp \
+	    FrameTimeCorrFunc.cpp \
             DipoleCorrFunc.cpp \
             RCorrFunc.cpp \
             VCorrFunc.cpp \
@@ -11,7 +12,9 @@ Source    = \
             DynamicPropsCmd.c \
             LegendreCorrFunc.cpp \
 	    RadialRCorrFunc.cpp \
-	    ThetaCorrFunc.cpp
+            ActionCorrFunc.cpp \
+	    ThetaCorrFunc.cpp \
+            DirectionalRCorrFunc.cpp
 
 BuiltParallelExe = 0
 
