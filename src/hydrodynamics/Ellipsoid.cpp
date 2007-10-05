@@ -45,19 +45,29 @@
 
 namespace oopse {
   
-  Ellipsoid::Ellipsoid(Vector3d origin, RealType rMajor, RealType rMinor,Mat3x3d rotMat) 
-    : origin_(origin), rMajor_(rMajor), rMinor_(rMinor), rotMat_(rotMat) {
-    
+  Ellipsoid::Ellipsoid(Vector3d origin, RealType rAxial, RealType rEquatorial,
+		       Mat3x3d rotMat) : origin_(origin), rAxial_(rAxial), 
+					 rEquatorial_(rEquatorial), 
+					 rotMat_(rotMat) {
+    if (rAxial_ > rEquatorial_) {
+      rMajor_ = rAxial_;
+      rMinor_ = rEquatorial_;
+    } else {
+      rMajor_ = rEquatorial_;
+      rMinor_ = rAxial_;
+    }          
   }
+
   bool Ellipsoid::isInterior(Vector3d pos) {
     Vector3d r = pos - origin_;
     Vector3d rbody = rotMat_ * r;
-    RealType xovera = rbody[0]/rMajor_;
-    RealType yovera = rbody[1]/rMajor_;
-    RealType zoverb = rbody[2]/rMinor_;
+
+    RealType xoverb = rbody[0]/rEquatorial_;
+    RealType yoverb = rbody[1]/rEquatorial_;
+    RealType zovera = rbody[2]/rAxial_;
     
     bool result;
-    if (xovera*xovera + yovera*yovera + zoverb*zoverb < 1)
+    if (xoverb*xoverb + yoverb*yoverb + zovera*zovera < 1)
       result = true;
     else
       result = false;
@@ -69,54 +79,56 @@ namespace oopse {
     
     std::pair<Vector3d, Vector3d>  boundary;
     //make a cubic box
-    RealType rad  = rMajor_ > rMinor_ ? rMajor_ : rMinor_; 
+    RealType rad  = rAxial_ > rEquatorial_ ? rAxial_ : rEquatorial_; 
     Vector3d r(rad, rad, rad);
     boundary.first = origin_ - r;
     boundary.second = origin_ + r;
     return boundary;
   }
   
-  HydroProp* Ellipsoid::getHydroProp(RealType viscosity, RealType temperature) {
+  HydroProp* Ellipsoid::getHydroProp(RealType viscosity, 
+				     RealType temperature) {
     
-    RealType a = rMinor_;
-    RealType b = rMajor_;
+    RealType a = rAxial_;
+    RealType b = rEquatorial_;
     RealType a2 = a * a;
-    RealType b2 = b* b;
+    RealType b2 = b * b;
     
-    RealType p = a /b;
+    RealType p = a / b;
     RealType S;
-    if (p > 1.0) { //prolate
+    if (p > 1.0) {  
+      // Ellipsoid is prolate:
       S = 2.0/sqrt(a2 - b2) * log((a + sqrt(a2-b2))/b);
-    } else { //oblate
+    } else { 
+      // Ellipsoid is oblate:
       S = 2.0/sqrt(b2 - a2) * atan(sqrt(b2-a2)/a);
     }
     
-    //RealType P = 1.0/(a2 - b2) * (S - 2.0/a);
-    //RealType Q = 0.5/(a2-b2) * (2.0*a/b2 - S);
-    
-    RealType transMinor = 16.0 * NumericConstant::PI * viscosity * (a2 - b2) /((2.0*a2-b2)*S -2.0*a);
-    RealType transMajor = 32.0 * NumericConstant::PI * viscosity * (a2 - b2) /((2.0*a2-3.0*b2)*S +2.0*a);
-    RealType rotMinor = 32.0/3.0 * NumericConstant::PI * viscosity *(a2 - b2) * b2 /(2.0*a -b2*S);
-    RealType rotMajor = 32.0/3.0 * NumericConstant::PI * viscosity *(a2*a2 - b2*b2)/((2.0*a2-b2)*S-2.0*a);
+    RealType pi = NumericConstant::PI;
+    RealType XittA = 16.0 * pi * viscosity * (a2 - b2) /((2.0*a2-b2)*S -2.0*a);
+    RealType XittB = 32.0 * pi * viscosity * (a2 - b2) /((2.0*a2-3.0*b2)*S +2.0*a);
+    RealType XirrA = 32.0/3.0 * pi * viscosity *(a2 - b2) * b2 /(2.0*a -b2*S);
+    RealType XirrB = 32.0/3.0 * pi * viscosity *(a2*a2 - b2*b2)/((2.0*a2-b2)*S-2.0*a);
     
     
     Mat6x6d Xi, XiCopy, D;
     
-    Xi(0,0) = transMajor;
-    Xi(1,1) = transMajor;
-    Xi(2,2) = transMinor;
-    Xi(3,3) = rotMajor;
-    Xi(4,4) = rotMajor;
-    Xi(5,5) = rotMinor;
-    
-    const RealType convertConstant = 6.023; //convert poise.angstrom to amu/fs
+    Xi(0,0) = XittB;
+    Xi(1,1) = XittB;
+    Xi(2,2) = XittA;
+    Xi(3,3) = XirrB;
+    Xi(4,4) = XirrB;
+    Xi(5,5) = XirrA;
+
+    const RealType convertConstant = 1.439326479e4; // converts Poise angstroms
+                                                    // to kcal fs mol^-1 Angstrom^-1
+
     Xi *= convertConstant;    
     
     XiCopy = Xi;
     invertMatrix(XiCopy, D);
-    RealType kt = OOPSEConstant::kB * temperature;
+    RealType kt = OOPSEConstant::kb * temperature; // in kcal mol^-1
     D *= kt;
-    Xi *= OOPSEConstant::kb * temperature;
    
     HydroProp* hprop = new HydroProp(V3Zero, Xi, D);
 

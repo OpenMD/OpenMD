@@ -45,23 +45,40 @@
 #include "math/SquareMatrix3.hpp"
 namespace oopse {
   
-  /** @class Ellipsoid */
+  /** @class Ellipsoid 
+   *
+   * An ellipsoid in OOPSE is restricted to having two equal
+   * equatorial semi-axes.  OOPSE treats the "special" axis as the
+   * z-coordinate in the body fixed reference frame.  That is:
+   *
+   *   z^2 / a^2  +  (x^2 + y^2) / b^2   = 1
+   *
+   * If a >= b, the ellipsoid is a prolate spheroid, and if a < b, 
+   * the ellipsoid is oblate.  Ellipsoids are specified in the constructor 
+   * using an axial length (a), and a equatorial length (b).  A Vector3d 
+   * can be used to position the center of the ellipsoid, and a rotation 
+   * matrix can also be used to orient the ellipsoid to a preferred lab-fixed
+   * coordinate frame.
+   */
   class Ellipsoid : public Shape{
   public:
-    Ellipsoid(Vector3d origin, RealType rMajor, RealType rMinor, Mat3x3d rotMat);
+    Ellipsoid(Vector3d origin, RealType rAxial, RealType rEquatorial, Mat3x3d rotMat);
     virtual bool isInterior(Vector3d pos);
     virtual std::pair<Vector3d, Vector3d> getBoundingBox();
     virtual bool hasAnalyticalSolution() {return true;}
     
     virtual HydroProp* getHydroProp(RealType viscosity, RealType temperature);
     
-    
+    RealType getRAxial() {return rAxial_;}
+    RealType getREquatorial() {return rEquatorial_;}
     RealType getRMajor() {return rMajor_;}
     RealType getRMinor() {return rMinor_;}
     
   private:
     
     Vector3d origin_;
+    RealType rAxial_;
+    RealType rEquatorial_;
     RealType rMajor_;
     RealType rMinor_;
     Mat3x3d rotMat_;

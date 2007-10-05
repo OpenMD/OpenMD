@@ -45,6 +45,27 @@
 #include "math/SquareMatrix3.hpp"
 namespace oopse {
 
+  /**
+   * @class HydroProp HydroProp.hpp "hydrodynamics/HydroProp.hpp"
+   * Container for information about the hydrodynamic behavior of objects
+   * undergoing Langevin dynamics.
+   * @note the units for the center of resistance (a location) are in Angstroms
+   *
+   * @note the units of Xi, the resistance tensor are:
+   *    Xitt (Translation-translation) : kcal fs mol^-1 Angstroms^-2 
+   *    Xirt (Rotation-translation) : kcal fs mol^-1 Angstroms^-1 radians^-1 
+   *    Xitr (Translation-rotation) : kcal fs mol^-1 Angstroms^-1 radians^-1 
+   *    Xirr (Rotation-rotation) : kcal fs mol^-1 radians^-2 
+   *
+   * @note the units of D, the diffusion tensor are:
+   *    Dtt (Translation-translation) : Angstroms^2 fs^-1
+   *    Drt (Rotation-translation) :    Angstroms fs^-1
+   *    Dtr (Translation-rotation) :    Angstroms fs^-1
+   *    Drr (Rotation-rotation) :       fs^-1
+   *  
+   * @note after setting the value of Xi manually, the complete() function 
+   * should be called to perform the Cholesky Decomposition.
+   */
   class HydroProp {
 
   public:

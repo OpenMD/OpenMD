@@ -83,14 +83,14 @@ namespace oopse {
     Xi(4, 4) = Xirr;
     Xi(5, 5) = Xirr;
     
-    const RealType convertConstant = 6.023; //convert poise.angstrom to amu/fs
+    const RealType convertConstant = 1.439326479e4; //converts Poise angstroms
+                                                    // to kcal fs mol^-1 Angstrom^-1
     Xi *= convertConstant;
     XiCopy = Xi;
 
     invertMatrix(XiCopy, D);
-    RealType kt = OOPSEConstant::kB * temperature;
-    D *= kt;
-    Xi *= OOPSEConstant::kb * temperature;
+    RealType kt = OOPSEConstant::kb * temperature; // in kcal mol^-1
+    D *= kt;  // now in angstroms^2 fs^-1  (at least for Trans-trans)
 
     HydroProp* hprop = new HydroProp(V3Zero, Xi, D);
     
