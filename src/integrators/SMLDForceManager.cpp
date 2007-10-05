@@ -364,7 +364,8 @@ namespace oopse {
     }    
 
     info_->setFdf(fdf);
-    veloMunge->removeComDrift();
+    // commented out for testing one particle
+    // veloMunge->removeComDrift();
     // Remove angular drift if we are not using periodic boundary conditions.
     if(!simParams->getUsePeriodicBoundaryConditions()) 
       veloMunge->removeAngularDrift();
