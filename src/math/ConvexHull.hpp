@@ -40,12 +40,11 @@
  *
  *  ConvexHull.hpp
  *
- *  Purpose: To calculate convexhull, hull volume and radius
- *  using the CGAL library.
+ *  Purpose: To calculate convexhull, hull volume using the QuickHull algorithm provided by QHull.
  *
  *  Created by Charles F. Vardeman II on 11 Dec 2006.
  *  @author  Charles F. Vardeman II
- *  @version $Id: ConvexHull.hpp,v 1.3 2007-05-30 18:47:04 chuckv Exp $
+ *  @version $Id: ConvexHull.hpp,v 1.4 2007-11-22 16:39:45 chuckv Exp $
  *
  */
 
@@ -53,6 +52,7 @@
 #define MATH_CONVEXHULL_HPP_
 
 #include "math/Vector3.hpp"
+#include "config.h"
 
 #include <cassert>
 #include <vector>

@@ -45,7 +45,7 @@
  *
  *  Created by Charles F. Vardeman II on 14 Dec 2006.
  *  @author  Charles F. Vardeman II
- *  @version $Id: NanoVolume.cpp,v 1.1 2007-09-17 20:11:47 chuckv Exp $
+ *  @version $Id: NanoVolume.cpp,v 1.2 2007-11-22 16:39:44 chuckv Exp $
  *
  */
 
@@ -68,6 +68,8 @@ NanoVolume::NanoVolume(SimInfo* info,
   if (!evaluator_.isDynamic()) {
     seleMan_.setSelectionSet(evaluator_.evaluate());
   }
+  frameCounter_ = 0;
+  totalVolume_ = 0.0;
 }
 
 void NanoVolume::process() {
@@ -124,8 +126,8 @@ void NanoVolume::process() {
     }
     // Generate convex hull for this frame.
     hull->genHull(pos_);
-   // RealType hullVolume = hull->getVolume();
-		//std::cout <<"The volume for this hull is: "<< hullVolume << std::endl;
-		
+    totalVolume_ += hull->getVolume();		
   }
+  RealType avgVolume = totalVolume_/(RealType) frameCounter_;
+  std::cout << avgVolume << std::endl;
 }
