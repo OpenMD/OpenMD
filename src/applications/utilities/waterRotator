@@ -1,0 +1,503 @@
+#!/usr/bin/env python
+"""Water Quaternion Sampler
+
+Samples water orientations from a list of known good
+orientations
+
+Usage: waterRotator
+
+Options:
+  -h, --help              show this help
+  -m, --meta-data=...     use specified meta-data (.md) file
+  -o, --output-file=...   use specified output (.md) file
+
+
+Example:
+   waterRotator -m basal.md -o basal.new.md
+
+"""
+
+__author__ = "Dan Gezelter (gezelter@nd.edu)"
+__version__ = "$Revision: 1.1 $"
+__date__ = "$Date: 2007-11-26 19:23:36 $"
+__copyright__ = "Copyright (c) 2006 by the University of Notre Dame"
+__license__ = "OOPSE"
+
+import sys
+import getopt
+import string
+import math
+import random
+from sets import *
+#from Numeric import *
+
+_haveMDFileName = 0
+_haveOutputFileName = 0
+
+metaData = []
+frameData = []
+positions = []
+velocities = []
+quaternions = []
+angVels = []
+indices = []
+neighbors = []
+DonatingTo = []
+AcceptingFrom = []
+OldDonor = []
+Hmat = []
+BoxInv = []
+#Hmat = zeros([3,3],Float)
+#BoxInv = zeros([3],Float)
+H1vects = []
+H2vects = []
+DipoleVects = []
+allAcceptors = []
+availableneighbs = []
+surfaceSet = Set([-1])
+
+
+
+def usage():
+    print __doc__
+
+
+def readFile(mdFileName):
+    mdFile = open(mdFileName, 'r')        
+    # Find OOPSE version info first
+    line = mdFile.readline()
+    while 1:
+        if '<OOPSE version=' in line:
+            OOPSEversion = line
+            break
+        line = mdFile.readline()
+        
+        # Rewind file and find start of MetaData block
+        
+    mdFile.seek(0)
+    line = mdFile.readline()
+    print "reading MetaData"
+    while 1:
+        if '<MetaData>' in line:
+            while 2:
+                metaData.append(line)
+                line = mdFile.readline()
+                if '</MetaData>' in line:
+                    metaData.append(line)
+                    break
+            break
+        line = mdFile.readline()
+
+    mdFile.seek(0)
+    print "reading Snapshot"
+    line = mdFile.readline()
+    while 1:
+        if '<Snapshot>' in line:
+            line = mdFile.readline()
+            while 1:
+                print "reading FrameData"
+                if '<FrameData>' in line:
+                    while 2:
+                        frameData.append(line)
+                        if 'Hmat:' in line:
+                            L = line.split()
+                            Hxx = float(L[2].strip(','))
+                            Hxy = float(L[3].strip(','))
+                            Hxz = float(L[4].strip(','))
+                            Hyx = float(L[7].strip(','))
+                            Hyy = float(L[8].strip(','))
+                            Hyz = float(L[9].strip(','))
+                            Hzx = float(L[12].strip(','))
+                            Hzy = float(L[13].strip(','))
+                            Hzz = float(L[14].strip(','))
+                            Hmat.append([Hxx, Hxy, Hxz])
+                            Hmat.append([Hyx, Hyy, Hyz])
+                            Hmat.append([Hzx, Hzy, Hzz])
+                            print Hmat
+                            BoxInv.append(1.0/Hxx)
+                            BoxInv.append(1.0/Hyy)
+                            BoxInv.append(1.0/Hzz)
+                            print BoxInv
+                        line = mdFile.readline()
+                        if '</FrameData>' in line:
+                            frameData.append(line)
+                            break
+                    break
+
+            line = mdFile.readline()
+            while 1:
+                if '<StuntDoubles>' in line:
+                    line = mdFile.readline()
+                    while 2:
+                        L = line.split()
+                        myIndex = int(L[0])
+                        indices.append(myIndex)
+                        pvqj = L[1]
+                        x = float(L[2])
+                        y = float(L[3])
+                        z = float(L[4])
+                        positions.append([x, y, z])
+                        vx = float(L[5])
+                        vy = float(L[6])
+                        vz = float(L[7])
+                        velocities.append([vx, vy, vz])
+                        qw = float(L[8])
+                        qx = float(L[9])
+                        qy = float(L[10])
+                        qz = float(L[11])
+                        quaternions.append([qw, qx, qy, qz])
+                        jx = float(L[12])
+                        jy = float(L[13])
+                        jz = float(L[14])
+                        angVels.append([jx, jy, jz])
+                        line = mdFile.readline()
+                        if '</StuntDoubles>' in line:
+                            break
+                    break
+        line = mdFile.readline()
+        if not line: break
+    
+    mdFile.close()
+
+def writeFile(outputFileName):
+    outputFile = open(outputFileName, 'w')
+
+    outputFile.write("<OOPSE version=4>\n");
+    
+    for metaline in metaData:
+        outputFile.write(metaline)
+
+    outputFile.write("  <Snapshot>\n")
+
+    for frameline in frameData:
+        outputFile.write(frameline)
+        
+    outputFile.write("    <StuntDoubles>\n")
+
+    sdFormat = 'pvqj'
+    for i in range(len(indices)):
+
+        outputFile.write("%10d %7s %18.10g %18.10g %18.10g %13e %13e %13e %13e %13e %13e %13e %13e %13e %13e\n" % (indices[i], sdFormat, positions[i][0], positions[i][1], positions[i][2], velocities[i][0], velocities[i][1], velocities[i][2], quaternions[i][0], quaternions[i][1], quaternions[i][2], quaternions[i][3], angVels[i][0], angVels[i][1], angVels[i][2]))
+
+    outputFile.write("    </StuntDoubles>\n")
+    outputFile.write("  </Snapshot>\n")
+    outputFile.write("</OOPSE>\n")
+    outputFile.close()
+
+def roundMe(x):
+    if (x >= 0.0):
+        return math.floor(x + 0.5)
+    else:
+        return math.ceil(x - 0.5)
+
+def wrapVector(myVect):
+    scaled = [0.0, 0.0, 0.0]
+    for i in range(3):
+        scaled[i] = myVect[i] * BoxInv[i]
+        scaled[i] = scaled[i] - roundMe(scaled[i])
+        myVect[i] = scaled[i] * Hmat[i][i]
+    return myVect
+
+def dot(L1, L2):
+    myDot = 0.0
+    for i in range(len(L1)):
+        myDot = myDot + L1[i]*L2[i]
+    return myDot
+
+def normalize(L1):
+    L2 = []
+    myLength = math.sqrt(dot(L1, L1))
+    for i in range(len(L1)):
+        L2.append(L1[i] / myLength)
+    return L2
+
+def cross(L1, L2):
+    # don't call this with anything other than length 3 lists please
+    # or you'll be sorry
+    L3 = [0.0, 0.0, 0.0]
+    L3[0] = L1[1]*L2[2] - L1[2]*L2[1] 
+    L3[1] = L1[2]*L2[0] - L1[0]*L2[2]
+    L3[2] = L1[0]*L2[1] - L1[1]*L2[0]
+    return L3
+
+def f(x):
+    return x
+
+def findNeighbors():
+
+    for i in range(len(indices)):
+        neighbors.append(list())
+
+    
+    for i in range(len(indices)-1):
+        iPos = positions[i]
+        for j in range(i+1, len(indices)):
+            jPos = positions[j]
+
+            dpos = [jPos[0] - iPos[0], jPos[1]-iPos[1], jPos[2]-iPos[2]]
+            dpos = wrapVector(dpos)
+            dist2 = dot(dpos,dpos)
+            
+            if (dist2 < 9.0):
+                neighbors[i].append(j)
+                neighbors[j].append(i)
+
+            if (len(neighbors[i]) == 4):
+                break
+
+    surfaceCount = 0
+    for i in range(len(indices)):
+        if (len(neighbors[i]) == 3):
+            neighbors[i].append(-1)
+            surfaceCount = surfaceCount + 1
+
+    print "surfaceCount = %d" % surfaceCount
+
+def randomizeProtons():
+
+    # do 10 proton bucket brigades:
+    for i in range(10):
+        origPoint = random.randint(0,len(indices))
+        protonBucketBrigade(origPoint)
+
+    # check to make sure everyone has a happy proton set:
+
+    for j in range(len(indices)):
+        if (len(DonatingTo[j]) != 2):
+            # print "first round to fix molecule %d" % j
+            protonBucketBrigade(j)
+
+    # check to make sure everyone has a happy proton set:
+
+    for j in range(len(indices)):
+        if (len(DonatingTo[j]) != 2):
+            print "second round to fix molecule %d" % j
+            protonBucketBrigade(j)
+
+    for j in range(len(indices)):
+        if (len(DonatingTo[j]) != 2):
+            print "unfilled proton donor list for molecule %d" % j
+
+
+
+def protonBucketBrigade(origPoint):
+
+    for i in range(len(indices)):
+        DonatingTo.append(list())
+        AcceptingFrom.append(list())
+        OldDonor.append(list())
+
+    # print "randomizing Quaternions"
+    nIdeal = len(idealQuats)
+
+    donor = origPoint
+    # pick unreasonable start values (that don't match surface atom unreasonable values)
+    acceptor = -10
+    #oldDonor = -10
+    # print 'origPoint = %d' % (origPoint)
+
+    for i in range(50000):
+    #while (acceptor != origPoint):
+        myNeighbors = Set(neighbors[donor])
+             
+        # can't pick a proton choice from one of my current protons:
+        badChoices = Set(DonatingTo[donor]).union(Set(OldDonor[acceptor]))
+        # can't send a proton back to guy who sent one to me (no give-backs):
+        #badChoices.add(Set(OldDonor[acceptor]))
+        # can't send a proton to anyone who is already taking 2:
+        for j in myNeighbors.difference(surfaceSet):
+            if (len(AcceptingFrom[j]) == 2):
+                badChoices.add(j)
+                
+        nDonors = len(DonatingTo[donor])
+
+        if (nDonors <= 1):
+            acceptor = random.choice(list( myNeighbors.difference(badChoices) ) )
+            DonatingTo[donor].append(acceptor)
+            if (acceptor != -1):
+                AcceptingFrom[acceptor].append(donor)
+                OldDonor[acceptor].append(donor)
+        elif (nDonors == 2):
+            acceptor = random.choice(DonatingTo[donor])
+        else:
+            print "Whoah!  How'd we get here?"
+
+        #OldDonor = donor
+        donor = acceptor
+        if (acceptor == -1):
+            # surface atoms all have a -1 neighbor, but that's OK.  A proton
+            # is allowed to point out of the surface, but it does break the
+            # proton chain letter
+            # print "surface atom found, starting over from origPoint"
+            donor = origPoint
+            # break
+
+def computeQuats():
+
+    for i in range(len(indices)):
+        DonatingTo.append(list())
+        AcceptingFrom.append(list())
+        OldDonor.append(list())
+    # print "Computing Quaternions"
+    ux = [0.0, 0.0, 0.0]
+    uy = [0.0, 0.0, 0.0]
+    uz = [0.0, 0.0, 0.0]
+    RotMat = [ux, uy, uz]
+    totalDipole = [0.0, 0.0, 0.0]
+    for i in range(len(indices)):
+        # print "doing quats for molecule %d" % i
+        # print "Dlen = %d " % len(DonatingTo[i])
+        # print DonatingTo[i]
+        
+        
+        myPos = positions[i]
+
+        acceptor1 = DonatingTo[i][0]
+        if (acceptor1 == -1):
+            tempVec = [0.0, 0.0, 0.0]
+            for j in range(3):
+                thisNeighbor = neighbors[i][j]
+                npos = positions[thisNeighbor]
+                npos1 = [npos[0] - myPos[0], npos[1] - myPos[1], npos[2] - myPos[2]]
+                npos1 = wrapVector(npos1)
+                tempVec[0] = tempVec[0]  + npos1[0]
+                tempVec[1] = tempVec[1]  + npos1[1]
+                tempVec[2] = tempVec[2]  + npos1[2]                
+            dpos1 = [-tempVec[0]/3.0, -tempVec[1]/3.0, -tempVec[2]/3.0]
+            dpos1 = normalize(dpos1)
+        else:
+            a1pos = positions[acceptor1]
+            dpos1 = [a1pos[0] - myPos[0], a1pos[1] - myPos[1], a1pos[2] - myPos[2]]
+            dpos1 = wrapVector(dpos1)
+            dpos1 = normalize(dpos1)
+        
+        acceptor2 = DonatingTo[i][1]
+        if (acceptor2 == -1):
+            tempVec = [0.0, 0.0, 0.0]
+            for j in range(3):
+                thisNeighbor = neighbors[i][j]
+                npos = positions[thisNeighbor]
+                npos1 = [npos[0] - myPos[0], npos[1] - myPos[1], npos[2] - myPos[2]]
+                npos1 = wrapVector(npos1)
+                tempVec[0] = tempVec[0]  + npos1[0]
+                tempVec[1] = tempVec[1]  + npos1[1]
+                tempVec[2] = tempVec[2]  + npos1[2]                
+            dpos2 = [-tempVec[0]/3.0, -tempVec[1]/3.0, -tempVec[2]/3.0]
+            dpos2 = normalize(dpos2)
+        else:
+            a2pos = positions[acceptor2]
+            dpos2 = [a2pos[0] - myPos[0], a2pos[1] - myPos[1], a2pos[2] - myPos[2]]
+            dpos2 = wrapVector(dpos2)
+            dpos2 = normalize(dpos2)
+
+
+
+        
+
+        for j in range(3):
+            uz[j] = (dpos1[j] + dpos2[j])/2.0
+        uz = normalize(uz)
+        for j in range(3):
+            uy[j] = dpos2[j] - dpos1[j]
+        uy = normalize(uy)
+        ux = cross(uy, uz)
+        ux = normalize(ux)
+
+        q = [0.0, 0.0, 0.0, 0.0]
+
+        # RotMat to Quat code is out of OOPSE's SquareMatrix3.hpp code:
+
+        RotMat[0] = ux
+        RotMat[1] = uy
+        RotMat[2] = uz
+
+        t = RotMat[0][0] + RotMat[1][1] + RotMat[2][2] + 1.0
+        
+        if( t > 1e-6 ):
+            s = 0.5 / math.sqrt( t )
+            q[0] = 0.25 / s
+            q[1] = (RotMat[1][2] - RotMat[2][1]) * s
+            q[2] = (RotMat[2][0] - RotMat[0][2]) * s
+            q[3] = (RotMat[0][1] - RotMat[1][0]) * s
+        else:
+            ad1 = RotMat[0][0]
+            ad2 = RotMat[1][1]
+            ad3 = RotMat[2][2]
+
+            if( ad1 >= ad2 and ad1 >= ad3 ):
+                s = 0.5 / math.sqrt( 1.0 + RotMat[0][0] - RotMat[1][1] - RotMat[2][2] )
+                q[0] = (RotMat[1][2] - RotMat[2][1]) * s
+                q[1] = 0.25 / s
+                q[2] = (RotMat[0][1] + RotMat[1][0]) * s
+                q[3] = (RotMat[0][2] + RotMat[2][0]) * s
+            elif ( ad2 >= ad1 and ad2 >= ad3 ):
+                s = 0.5 / math.sqrt( 1.0 + RotMat[1][1] - RotMat[0][0] - RotMat[2][2] )
+                q[0] = (RotMat[2][0] - RotMat[0][2] ) * s
+                q[1] = (RotMat[0][1] + RotMat[1][0]) * s
+                q[2] = 0.25 / s
+                q[3] = (RotMat[1][2] + RotMat[2][1]) * s
+            else:
+                s = 0.5 / math.sqrt( 1.0 + RotMat[2][2] - RotMat[0][0] - RotMat[1][1] )
+                q[0] = (RotMat[0][1] - RotMat[1][0]) * s
+                q[1] = (RotMat[0][2] + RotMat[2][0]) * s
+                q[2] = (RotMat[1][2] + RotMat[2][1]) * s
+                q[3] = 0.25 / s
+
+        quaternions[i] = q
+        totalDipole = [totalDipole[0] + uz[0], totalDipole[1] + uz[1], totalDipole[2] + uz[2]]
+    totalDipole = [-totalDipole[0], -totalDipole[1], -totalDipole[2]]
+    print totalDipole
+    Dipole = math.sqrt(dot(totalDipole, totalDipole))
+    print 'Total Dipole Moment = %d' % Dipole
+    if (Dipole > 20 or Dipole < -20):
+        print "Bad Dipole, starting over"
+        for i in range(len(indices)):
+            del OldDonor[:]
+            del AcceptingFrom[:]
+            del DonatingTo[:]
+            # del badChoices[:]
+        randomizeProtons()
+        computeQuats()
+    else:
+        print "All Done!"
+        
+
+
+def main(argv):                         
+    try:                                
+        opts, args = getopt.getopt(argv, "hm:o:", ["help", "meta-data=", "output-file="]) 
+    except getopt.GetoptError:           
+        usage()                          
+        sys.exit(2)                     
+    for opt, arg in opts:                
+        if opt in ("-h", "--help"):      
+            usage()                     
+            sys.exit()                  
+        elif opt in ("-m", "--meta-data"): 
+            mdFileName = arg
+            global _haveMDFileName
+            _haveMDFileName = 1
+        elif opt in ("-o", "--output-file"): 
+            outputFileName = arg
+            global _haveOutputFileName
+            _haveOutputFileName = 1
+    if (_haveMDFileName != 1):
+        usage() 
+        print "No meta-data file was specified"
+        sys.exit()
+    if (_haveOutputFileName != 1):
+        usage()
+        print "No output file was specified"
+        sys.exit()
+    readFile(mdFileName)
+    # analyzeQuats()
+    findNeighbors()
+    randomizeProtons()
+    computeQuats()
+    writeFile(outputFileName)
+
+if __name__ == "__main__":
+    if len(sys.argv) == 1:
+        usage()
+        sys.exit()
+    main(sys.argv[1:])
