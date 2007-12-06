@@ -258,13 +258,13 @@ dnl check for CGAL library
 ACX_CGAL
 
 if test "$acx_cgal_found" == yes; then
-USE_CGAL=yes
-AC_DEFINE(HAVE_CGAL, 1, [Is defined if the CGAL library is available.])
-AC_SUBST(USE_CGAL)
-AC_SUBST(CGAL_CXXFLAGS)
-AC_SUBST(CGAL_LDFLAGS)
-AC_SUBST(CGAL_CPPFLAGS)
-AC_SUBST(CGAL_LIBS)
+	USE_CGAL=yes
+	AC_DEFINE(HAVE_CGAL, 1, [Is defined if the CGAL library is available.])
+	AC_SUBST(USE_CGAL)
+	AC_SUBST(CGAL_CXXFLAGS)
+	AC_SUBST(CGAL_LDFLAGS)
+	AC_SUBST(CGAL_CPPFLAGS)
+	AC_SUBST(CGAL_LIBS)
 fi
 
 
