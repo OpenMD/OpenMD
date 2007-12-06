@@ -45,7 +45,7 @@
  *
  *  Created by Charles F. Vardeman II on 14 Dec 2006.
  *  @author  Charles F. Vardeman II
- *  @version $Id: NanoVolume.cpp,v 1.4 2007-12-06 20:04:01 cpuglis Exp $
+ *  @version $Id: NanoVolume.cpp,v 1.5 2007-12-06 20:40:30 chuckv Exp $
  *
  */
 
@@ -73,7 +73,7 @@ NanoVolume::NanoVolume(SimInfo* info,
 }
 
 void NanoVolume::process() {
-#if defined(HAVE_CGAL)
+#if defined(HAVE_CGAL) || defined(HAVE_QHULL)
   Molecule* mol;
   Atom* atom;
   RigidBody* rb;
@@ -85,7 +85,12 @@ void NanoVolume::process() {
   Vector3d vec;
   int i,j;
 
+#ifdef HAVE_QHULL
   ConvexHull* hull = new ConvexHull();
+#endif
+#ifdef HAVE_CGAL
+  AlphaShape* hull = new AlphaShape();
+#endif
 
   DumpReader reader(info_, dumpFilename_);
   int nFrames = reader.getNFrames();
@@ -140,7 +145,7 @@ void NanoVolume::process() {
   }
   osq.close();
 #else
-  sprintf(painCave.errMsg, "NanoVolume: CGAL support was not compiled in!\n");
+  sprintf(painCave.errMsg, "NanoVolume: Neither CGAL nor qhull support was compiled in!\n");
   painCave.isFatal = 1;
   simError();  
 #endif

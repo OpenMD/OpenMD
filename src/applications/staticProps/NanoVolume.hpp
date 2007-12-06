@@ -45,18 +45,27 @@
  *
  *  Created by Charles F. Vardeman II on 14 Dec 2006.
  *  @author  Charles F. Vardeman II
- *  @version $Id: NanoVolume.hpp,v 1.3 2007-11-22 16:39:44 chuckv Exp $
+ *  @version $Id: NanoVolume.hpp,v 1.4 2007-12-06 20:40:30 chuckv Exp $
  *
  */
 #ifndef APPLICATIONS_STATICPROPS_NANOVOLUME_HPP_
 #define APPLICATIONS_STATICPROPS_NANOVOLUME_HPP_
-
 #include <vector>
+#include "config.h"
 #include "math/Vector3.hpp"
 #include "selection/SelectionEvaluator.hpp"
 #include "selection/SelectionManager.hpp"
 #include "applications/staticProps/StaticAnalyser.hpp"
 
+#if defined(HAVE_QHULL) || defined(HAVE_CGAL)
+#ifdef HAVE_QHULL
+#include "math/ConvexHull.hpp"
+#endif
+
+#ifdef HAVE_CGAL
+#include "math/AlphaShape.hpp"
+#endif
+#endif
 
 namespace oopse {
   class NanoVolume : public StaticAnalyser {
