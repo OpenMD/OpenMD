@@ -105,6 +105,7 @@ IncludeDirs = \
 LibraryDirs = \
 	@MPI_LIB_DIR@ \
 	@FFTW_LIB_DIR@ \
+	@CGAL_INC_DIR@ \
 	@ZLIB_LIB_DIR@ 
 
 Libraries = \
@@ -112,6 +113,7 @@ Libraries = \
 	@MPI_LIB@ \
 	@MPI_F90_LIB@ \
 	@FFTW_LIBS@ \
+	@CGAL_LIBS@ \
 	@ZLIB@ 
 
 OopseHome       = @OOPSE_HOME@
@@ -142,7 +144,6 @@ ParallelLinkOptions = \
 	@LDFLAGS@ \
 	@FCLIBS@ \
 	@CXXFLAGS@ 
-
 
 #---------------------------------------------------------------------------
 #
@@ -399,8 +400,8 @@ RmiOptions             = -d $(TargetDir) -classpath $(ClassPath) \
 			 -sourcepath $(SourceDir)
 COptions               = $(FrcDeclare) $(SingleDeclare) @CFLAGS@
 CParallelOptions       = $(FrcDeclare) $(SingleDeclare) $(ParallelDeclare) @CFLAGS@
-CppOptions             = $(FrcDeclare) $(SingleDeclare) @CXXFLAGS@ 
-CppParallelOptions     = $(FrcDeclare) $(SingleDeclare) $(ParallelDeclare) @CXXFLAGS@
+CppOptions             = $(FrcDeclare) $(SingleDeclare) @CXXFLAGS@ @CGAL_CPPFLAGS@
+CppParallelOptions     = $(FrcDeclare) $(SingleDeclare) $(ParallelDeclare) @CXXFLAGS@ @CGAL_CPPFLAGS@
 ifeq "$(UseSingle)" "yes"
 FortranOptions         =  @FCFLAGS@ @MODDIRFLAG@$(SourceDir) @MODDIRFLAG@$(TargetDir) @PREPDEFFLAG@$(SingleDeclare) @FCFLAGS_SRCEXT@
 FortranParallelOptions =  @FCFLAGS@ @MODDIRFLAG@$(SourceDir) @MODDIRFLAG@$(ParallelTargetDir) @PREPDEFFLAG@$(SingleDeclare) @PREPDEFFLAG@$(ParallelDeclare) @FCFLAGS_SRCEXT@ 
