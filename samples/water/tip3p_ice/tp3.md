@@ -16,20 +16,20 @@ dielectric = 80.0;
 cutoffRadius = 9.0;
 switchingRadius = 7.7;
 
-targetTemp = 200;
+targetTemp = 250
 targetPressure = 1.0;
 
-tauThermostat = 1e3;
+tauThermostat = 1e4;
 tauBarostat = 5e3;
 
 dt = 2.0;
-runTime = 1e4;
+runTime = 2e5;
 useInitialTime = "false";
 useInitialExtendedSystemState = "false";
 
 //tempSet = "true";
 //thermalTime = 10;
-sampleTime = 100;
+sampleTime = 1000;
 statusTime = 20;
   </MetaData>
   <Snapshot>

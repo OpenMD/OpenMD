@@ -1,15 +1,15 @@
 Package = math
 
 MySource    = \
-            ParallelRandNumGen.cpp \
-            SeqRandNumGen.cpp \
-            RealSphericalHarmonic.cpp \
-            SphericalHarmonic.cpp \
-            ChebyshevPolynomials.cpp \
-            LegendrePolynomial.cpp \
-            linearAlgebra.F90 \
-            Wigner3jm.F90 
-
+	ParallelRandNumGen.cpp \
+	SeqRandNumGen.cpp \
+	RealSphericalHarmonic.cpp \
+	SphericalHarmonic.cpp \
+	ChebyshevT.cpp \
+	ChebyshevU.cpp \
+	LegendrePolynomial.cpp \
+	linearAlgebra.F90 \
+	Wigner3jm.F90 
 
 USE_CGAL = @USE_CGAL@
 

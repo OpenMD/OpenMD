@@ -45,7 +45,7 @@
  *
  *  Created by Charles F. Vardeman II on 14 Dec 2006.
  *  @author  Charles F. Vardeman II
- *  @version $Id: NanoVolume.cpp,v 1.3 2007-12-06 19:52:11 chuckv Exp $
+ *  @version $Id: NanoVolume.cpp,v 1.4 2007-12-06 20:04:01 cpuglis Exp $
  *
  */
 
@@ -73,7 +73,7 @@ NanoVolume::NanoVolume(SimInfo* info,
 }
 
 void NanoVolume::process() {
-  
+#if defined(HAVE_CGAL)
   Molecule* mol;
   Atom* atom;
   RigidBody* rb;
@@ -139,5 +139,9 @@ void NanoVolume::process() {
 
   }
   osq.close();
-
+#else
+  sprintf(painCave.errMsg, "NanoVolume: CGAL support was not compiled in!\n");
+  painCave.isFatal = 1;
+  simError();  
+#endif
 }

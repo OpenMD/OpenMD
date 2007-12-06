@@ -65,7 +65,7 @@ namespace oopse {
     }
   }
 
-
+/*
   void ChebyshevT::GenerateFirstTwoTerms() {
     DoublePolynomial t0;
     t0.setCoefficient(0, 1.0);
@@ -85,5 +85,6 @@ namespace oopse {
     u1.setCoefficient(1, 2.0);
     polyList_.push_back(u1);   
   }
+*/
 
 } //end namespace oopse

@@ -55,6 +55,7 @@
 
 #include "types/TorsionType.hpp"
 #include "types/PolynomialTorsionType.hpp"
+
 namespace oopse {
   
   struct CharmmTorsionParameter {
@@ -66,7 +67,7 @@ namespace oopse {
   class LessThanPeriodicityFunctor {
   public:
     bool operator()(const CharmmTorsionParameter& p1, 
-                    const CharmmTorsionParameter& p2) {
+		    const CharmmTorsionParameter& p2) {
       return p1.n < p2.n;
     }
   };
@@ -74,16 +75,9 @@ namespace oopse {
   /**
    * @class CharmmTorsionType CharmmTorsionType.hpp "types/CharmmTorsionType.hpp"
    */
-  class CharmmTorsionType : public TorsionType{
+  class CharmmTorsionType : public PolynomialTorsionType {
   public:
-    CharmmTorsionType(std::vector<CharmmTorsionParameter>& parameters);
-    
-    virtual void calcForce(RealType cosPhi, RealType& V, RealType& dVdCosPhi){
-      torsionType_->calcForce(cosPhi, V, dVdCosPhi);
-    }
-    
-  private:    
-    PolynomialTorsionType* torsionType_;
+    CharmmTorsionType(std::vector<CharmmTorsionParameter>& parameters);    
   };
   
 } //end namespace oopse

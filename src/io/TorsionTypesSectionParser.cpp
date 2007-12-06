@@ -50,25 +50,24 @@
 namespace oopse {
 
   TorsionTypesSectionParser::TorsionTypesSectionParser(ForceFieldOptions& options) : options_(options){
+
     setSectionName("TorsionTypes");
-
-
-    stringToEnumMap_["GhostTorsion"] == ttGhostTorsion;
+    stringToEnumMap_["GhostTorsion"] = ttGhostTorsion;
     stringToEnumMap_["Cubic"] = ttCubic;
     stringToEnumMap_["Quartic"] = ttQuartic;
     stringToEnumMap_["Polynomial"] = ttPolynomial;
     stringToEnumMap_["Charmm"] =  ttCharmm;
-
   }
 
-  void TorsionTypesSectionParser::parseLine(ForceField& ff,const std::string& line, int lineNo){
+  void TorsionTypesSectionParser::parseLine(ForceField& ff,
+					    const std::string& line, 
+					    int lineNo){
     StringTokenizer tokenizer(line);
     TorsionType* torsionType = NULL;
-
+    
     int nTokens = tokenizer.countTokens();
 
     if (nTokens < 5) {
-
       return;
     }
     
@@ -133,7 +132,9 @@ namespace oopse {
 	int nPairs = nTokens / 2;
 	int power;
 	RealType coefficient;
-	PolynomialTorsionType* ptt = new PolynomialTorsionType();
+	torsionType = new PolynomialTorsionType();
+
+        PolynomialTorsionType* ptt = dynamic_cast<PolynomialTorsionType*>(torsionType); 
                 
 	for (int i = 0; i < nPairs; ++i) {
 	  power = tokenizer.nextTokenAsInt();
@@ -151,16 +152,16 @@ namespace oopse {
       } else {
 	int nSets = nTokens / 3;
   
-      std::vector<CharmmTorsionParameter> parameters;             
+        std::vector<CharmmTorsionParameter> parameters;             
 	for (int i = 0; i < nSets; ++i) {
-        CharmmTorsionParameter currParam;
+          CharmmTorsionParameter currParam;
 	  currParam.kchi = tokenizer.nextTokenAsDouble();
 	  currParam.n = tokenizer.nextTokenAsInt();
 	  currParam.delta = tokenizer.nextTokenAsDouble();
-        parameters.push_back(currParam);
+          parameters.push_back(currParam);
 	}
 
-	CharmmTorsionType* ctt = new CharmmTorsionType(parameters);
+	torsionType = new CharmmTorsionType(parameters);
 
       }
 
@@ -182,10 +183,10 @@ namespace oopse {
   TorsionTypesSectionParser::TorsionTypeEnum TorsionTypesSectionParser::getTorsionTypeEnum(const std::string& str) {
     std::map<std::string, TorsionTypeEnum>::iterator i;
     i = stringToEnumMap_.find(str);
-
+    
     return i == stringToEnumMap_.end() ? TorsionTypesSectionParser::ttUnknown : i->second;
   }
-
+  
 } //end namespace oopse
 
 

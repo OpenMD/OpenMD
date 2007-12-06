@@ -78,7 +78,8 @@ namespace oopse {
     return atomTypeCont_.find(keys);
   }
 
-  BondType* ForceField::getBondType(const std::string &at1, const std::string &at2) {
+  BondType* ForceField::getBondType(const std::string &at1, 
+				    const std::string &at2) {
     std::vector<std::string> keys;
     keys.push_back(at1);
     keys.push_back(at2);    
@@ -91,10 +92,10 @@ namespace oopse {
       //if no exact match found, try wild card match
       return bondTypeCont_.find(keys, wildCardAtomTypeName_);
     }
-
   }
 
-  BendType* ForceField::getBendType(const std::string &at1, const std::string &at2,
+  BendType* ForceField::getBendType(const std::string &at1, 
+				    const std::string &at2,
 				    const std::string &at3) {
     std::vector<std::string> keys;
     keys.push_back(at1);
@@ -111,8 +112,10 @@ namespace oopse {
     }
   }
 
-  TorsionType* ForceField::getTorsionType(const std::string &at1, const std::string &at2,
-					  const std::string &at3, const std::string &at4) {
+  TorsionType* ForceField::getTorsionType(const std::string &at1, 
+					  const std::string &at2,
+					  const std::string &at3, 
+					  const std::string &at4) {
     std::vector<std::string> keys;
     keys.push_back(at1);
     keys.push_back(at2);    
@@ -128,14 +131,13 @@ namespace oopse {
     }
     
     return torsionTypeCont_.find(keys, wildCardAtomTypeName_);
-
   }
 
   NonBondedInteractionType* ForceField::getNonBondedInteractionType(const std::string &at1, const std::string &at2) {
     std::vector<std::string> keys;
     keys.push_back(at1);
     keys.push_back(at2);    
-
+    
     //try exact match first
     NonBondedInteractionType* nbiType = nonBondedInteractionTypeCont_.find(keys);
     if (nbiType) {
@@ -143,18 +145,19 @@ namespace oopse {
     } else {
       //if no exact match found, try wild card match
       return nonBondedInteractionTypeCont_.find(keys, wildCardAtomTypeName_);
-    }
-
+    }    
   }
-
-  BondType* ForceField::getExactBondType(const std::string &at1, const std::string &at2){ 
+  
+  BondType* ForceField::getExactBondType(const std::string &at1, 
+					 const std::string &at2){ 
     std::vector<std::string> keys;
     keys.push_back(at1);
     keys.push_back(at2);    
     return bondTypeCont_.find(keys);
   }
-
-  BendType* ForceField::getExactBendType(const std::string &at1, const std::string &at2,
+  
+  BendType* ForceField::getExactBendType(const std::string &at1, 
+					 const std::string &at2,
 					 const std::string &at3){ 
     std::vector<std::string> keys;
     keys.push_back(at1);
@@ -162,9 +165,11 @@ namespace oopse {
     keys.push_back(at3);    
     return bendTypeCont_.find(keys);
   }
-
-  TorsionType* ForceField::getExactTorsionType(const std::string &at1, const std::string &at2,
-					       const std::string &at3, const std::string &at4){ 
+  
+  TorsionType* ForceField::getExactTorsionType(const std::string &at1, 
+					       const std::string &at2,
+					       const std::string &at3, 
+					       const std::string &at4){ 
     std::vector<std::string> keys;
     keys.push_back(at1);
     keys.push_back(at2);    
@@ -187,14 +192,14 @@ namespace oopse {
     return atomTypeCont_.add(keys, atomType);
   }
 
-  bool ForceField::addBondType(const std::string &at1, const std::string &at2, BondType* bondType) {
+  bool ForceField::addBondType(const std::string &at1, const std::string &at2,
+			       BondType* bondType) {
     std::vector<std::string> keys;
     keys.push_back(at1);
     keys.push_back(at2);    
-    return bondTypeCont_.add(keys, bondType);
-
+    return bondTypeCont_.add(keys, bondType);    
   }
-
+  
   bool ForceField::addBendType(const std::string &at1, const std::string &at2,
 			       const std::string &at3, BendType* bendType) {
     std::vector<std::string> keys;
@@ -203,9 +208,12 @@ namespace oopse {
     keys.push_back(at3);    
     return bendTypeCont_.add(keys, bendType);
   }
-
-  bool ForceField::addTorsionType(const std::string &at1, const std::string &at2,
-				  const std::string &at3, const std::string &at4, TorsionType* torsionType) {
+  
+  bool ForceField::addTorsionType(const std::string &at1, 
+				  const std::string &at2,
+				  const std::string &at3, 
+				  const std::string &at4, 
+				  TorsionType* torsionType) {
     std::vector<std::string> keys;
     keys.push_back(at1);
     keys.push_back(at2);    
@@ -214,30 +222,31 @@ namespace oopse {
     return torsionTypeCont_.add(keys, torsionType);
   }
 
-  bool ForceField::addNonBondedInteractionType(const std::string &at1, const std::string &at2, NonBondedInteractionType* nbiType) {
+  bool ForceField::addNonBondedInteractionType(const std::string &at1, 
+					       const std::string &at2, 
+					       NonBondedInteractionType* nbiType) {
     std::vector<std::string> keys;
     keys.push_back(at1);
     keys.push_back(at2);    
     return nonBondedInteractionTypeCont_.add(keys, nbiType);
-
   }
-
+  
   RealType ForceField::getRcutFromAtomType(AtomType* at) {
     /**@todo */
     GenericData* data;
     RealType rcut = 0.0;
-
+    
     if (at->isLennardJones()) {
       data = at->getPropertyByName("LennardJones");
       if (data != NULL) {
 	LJParamGenericData* ljData = dynamic_cast<LJParamGenericData*>(data);
-
+	
 	if (ljData != NULL) {
 	  LJParam ljParam = ljData->getData();
-
+	  
 	  //by default use 2.5*sigma as cutoff radius
 	  rcut = 2.5 * ljParam.sigma;
-                
+          
 	} else {
 	  sprintf( painCave.errMsg,
 		   "Can not cast GenericData to LJParam\n");
@@ -252,10 +261,9 @@ namespace oopse {
 	simError();          
       }
     }
-
     return rcut;    
   }
-
+  
 
   ifstrstream* ForceField::openForceFieldFile(const std::string& filename) {
     std::string forceFieldFilename(filename);
@@ -283,9 +291,7 @@ namespace oopse {
 	simError();
       }
     }  
-
     return ffStream;
-
   }
 
   void ForceField::setFortranForceOptions(){

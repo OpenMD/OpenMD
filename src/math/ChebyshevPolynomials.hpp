@@ -101,15 +101,15 @@ namespace oopse {
   protected:
 
     std::vector<DoublePolynomial> polyList_;
+    void GeneratePolynomials(int maxPower);
                 
   private:
         
-    void GeneratePolynomials(int maxPower);
     virtual void GenerateFirstTwoTerms() = 0;
         
     int maxPower_;
   };    
-
+/*
   /**
    * @class ChebyshevT
    * @todo document
@@ -133,7 +133,7 @@ namespace oopse {
   private:
     virtual void GenerateFirstTwoTerms();
   };
-
+*/
 
 } //end namespace oopse
 #endif //MATH_CHEBYSHEVPOLYNOMIALS_HPP

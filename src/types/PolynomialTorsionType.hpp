@@ -61,34 +61,33 @@ namespace oopse {
   class PolynomialTorsionType : public TorsionType{
     
   public:
-    PolynomialTorsionType() {}
+    PolynomialTorsionType() {polynomial_ = new DoublePolynomial(); }
     
     RealType getCoefficient(int power) {
-      return polynomial_.getCoefficient(power);
+      return polynomial_->getCoefficient(power);
     }
     
     void addCoefficient(int power, RealType coefficient) {
-      polynomial_.addCoefficient(power, coefficient);
+      polynomial_->addCoefficient(power, coefficient);
     }
     
     void setCoefficient(int power, RealType coefficient) {
-      polynomial_.setCoefficient(power, coefficient);
+      polynomial_->setCoefficient(power, coefficient);
     }
-    
-    void setPolynomial(const DoublePolynomial& p) {
-      polynomial_ = p;
+
+    void setPolynomial(DoublePolynomial& p) {
+      polynomial_ = &p;
     }
     
     virtual void calcForce(RealType cosPhi, RealType& V, RealType& dVdCosPhi) {
-      V = polynomial_.evaluate(cosPhi);
-      dVdCosPhi = polynomial_.evaluateDerivative(cosPhi); 
+      V = polynomial_->evaluate(cosPhi);
+      dVdCosPhi = polynomial_->evaluateDerivative(cosPhi); 
     }
-    
-    friend std::ostream& operator <<(std::ostream& os, PolynomialTorsionType& pbt);
-    
+
+    friend std::ostream& operator <<(std::ostream& os, 
+				     PolynomialTorsionType& pbt);
   private:
-    
-    DoublePolynomial polynomial_;
+    DoublePolynomial* polynomial_;
   };
   
 /*  
@@ -102,10 +101,10 @@ namespace oopse {
       return os;
     }
 
-    os << "This Polynomial contains below terms:" << std::endl;    
+     os << "This Polynomial contains below terms:" << std::endl;    
     
-    while(true){
-      os << i->second << "*" << "(cosPhi)" << "^" << i->first;
+     while(true){
+     os << i->second << "*" << "(cosPhi)" << "^" << i->first;
 
       if (++i == ptt.polynomial_.end()) {
 	//if we reach the end of the polynomial pair, write out a
@@ -118,11 +117,11 @@ namespace oopse {
       }
     }
     
-    os << std::endl;
-    return os;
-  }
+     os << std::endl;
+     return os;
+     }
+  */
 
-*/
 } //end namespace oopse
 #endif //TYPES_POLYNOMIALBONDTYPE_HPP
 
