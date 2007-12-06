@@ -34,6 +34,9 @@
 /* Is defined if the CGAL library is available. */
 #undef HAVE_CGAL
 
+/* Is defined if the qhull library is available. */
+#undef HAVE_QHULL
+
 /* Define to 1 if the system has the type `clock_t'. */
 #undef HAVE_CLOCK_T
 
