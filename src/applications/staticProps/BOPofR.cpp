@@ -43,7 +43,7 @@
  *
  *  Created by J. Daniel Gezelter on 09/26/06.
  *  @author  J. Daniel Gezelter
- *  @version $Id: BOPofR.cpp,v 1.2 2007-05-29 22:50:14 chuckv Exp $
+ *  @version $Id: BOPofR.cpp,v 1.3 2007-12-06 19:52:11 chuckv Exp $
  *
  */
  
@@ -309,7 +309,7 @@ namespace oopse {
 
         collectHistogram(q_l, w_hat, distCOM);
 		
-		printf( "%s  %18.10g %18.10g %18.10g %18.10g \n", sd->getType().c_str(),pos[0],pos[1],pos[2],real(w_hat[6]));
+//		printf( "%s  %18.10g %18.10g %18.10g %18.10g \n", sd->getType().c_str(),pos[0],pos[1],pos[2],real(w_hat[6]));
 
       }
     }

@@ -45,7 +45,7 @@
  *
  *  Created by Charles F. Vardeman II on 14 Dec 2006.
  *  @author  Charles F. Vardeman II
- *  @version $Id: NanoVolume.cpp,v 1.2 2007-11-22 16:39:44 chuckv Exp $
+ *  @version $Id: NanoVolume.cpp,v 1.3 2007-12-06 19:52:11 chuckv Exp $
  *
  */
 
@@ -62,7 +62,7 @@ NanoVolume::NanoVolume(SimInfo* info,
                        const std::string& filename,
                        const std::string& sele)
   : StaticAnalyser(info, filename), selectionScript_(sele), evaluator_(info), seleMan_(info) {
-  setOutputName(getPrefix(filename) + ".off");
+  setOutputName(getPrefix(filename) + ".avol");
   
   evaluator_.loadScriptString(sele);
   if (!evaluator_.isDynamic()) {
@@ -129,5 +129,15 @@ void NanoVolume::process() {
     totalVolume_ += hull->getVolume();		
   }
   RealType avgVolume = totalVolume_/(RealType) frameCounter_;
-  std::cout << avgVolume << std::endl;
+  //std::cout.precision(7);
+  //std::cout  << avgVolume << std::endl;
+
+  std::ofstream osq(getOutputFileName().c_str());
+  osq.precision(7);
+  if (osq.is_open()){
+      osq << avgVolume << std::endl;
+
+  }
+  osq.close();
+
 }
