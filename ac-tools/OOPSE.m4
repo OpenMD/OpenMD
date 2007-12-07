@@ -1175,6 +1175,7 @@ then
         if test "$qhull_cv_libqhull" = "yes" -a "$qhull_cv_qhull_h" = "yes"; then
                 AC_DEFINE(HAVE_QHULL_H, 1, [have qhull.h])
                 AC_DEFINE(HAVE_QHULL, 1, [have libqhull.a])
+                USE_QHULL=yes                
                 QHULL_INC_DIR="${QHULL_HOME}/include"
                 QHULL_LIB_DIR="${QHULL_HOME}/lib"
                 QHULL="-lqhull"
@@ -1183,6 +1184,7 @@ then
                 QHULL_INC_DIR=
                 QHULL_LIB_DIR=
                 QHULL=
+                USE_QHULL=no
                 LDFLAGS="$QHULL_OLD_LDFLAGS"
                 CFLAGS="$QHULL_OLD_CFLAGS"
                 AC_MSG_RESULT(failed)
@@ -1200,6 +1202,7 @@ then
         AC_SUBST(QHULL_INC_DIR)
         AC_SUBST(QHULL_LIB_DIR)
         AC_SUBST(QHULL)
+	AC_SUBST(USE_QHULL)
 fi
 fi
 ])

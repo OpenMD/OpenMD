@@ -256,17 +256,16 @@ AC_SUBST(USE_MPI)
 
 dnl check for CGAL library
 ACX_CGAL
-
+USE_CGAL=no
 if test "$acx_cgal_found" == yes; then
 	USE_CGAL=yes
 	AC_DEFINE(HAVE_CGAL, 1, [Is defined if the CGAL library is available.])
-	AC_SUBST(USE_CGAL)
 	AC_SUBST(CGAL_CXXFLAGS)
 	AC_SUBST(CGAL_LDFLAGS)
 	AC_SUBST(CGAL_CPPFLAGS)
 	AC_SUBST(CGAL_LIBS)
 fi
-
+AC_SUBST(USE_CGAL)
 
 
 BB_ENABLE_DOXYGEN

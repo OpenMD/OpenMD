@@ -312,7 +312,7 @@ ac_includes_default="\
 # include <unistd.h>
 #endif"
 
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os PROGNAME debug USE_SINGLE_PRECISION CXX CXXFLAGS LDFLAGS CPPFLAGS ac_ct_CXX EXEEXT OBJEXT CC CFLAGS ac_ct_CC FC FCFLAGS ac_ct_FC CPP EGREP LN_S SET_MAKE RANLIB ac_ct_RANLIB PERLINTERP PERL_SHEBANG INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA AR PS FCFLAGS_F90 FCFLAGS_SRCEXT PREPDEFFLAG FCLIBS FC_FUNC FC_FUNC_ MOD F90_WORK_FILES_ARG MODDIRFLAG F90MODINCSPEC F90_MODULE_NAMES ZLIB_INC_DIR ZLIB_LIB_DIR ZLIB FFTW_INC_DIR FFTW_LIB_DIR FFTW_LIBS QHULL_INC_DIR QHULL_LIB_DIR QHULL LIBOBJS POW_LIB CXXCPP __func__ MPI_LIB_DIR MPI_INC_DIR MPI_F90_INC MPI_LIB MPI_F90_LIB USE_MPI USE_CGAL CGAL_CXXFLAGS CGAL_LDFLAGS CGAL_CPPFLAGS CGAL_LIBS DOXYGEN DOT DOC enable_dot enable_html_docs enable_latex_docs BATEXT MKINSTALLDIRS OOPSE OOPSE_HOME SUBDIRS LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os PROGNAME debug USE_SINGLE_PRECISION CXX CXXFLAGS LDFLAGS CPPFLAGS ac_ct_CXX EXEEXT OBJEXT CC CFLAGS ac_ct_CC FC FCFLAGS ac_ct_FC CPP EGREP LN_S SET_MAKE RANLIB ac_ct_RANLIB PERLINTERP PERL_SHEBANG INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA AR PS FCFLAGS_F90 FCFLAGS_SRCEXT PREPDEFFLAG FCLIBS FC_FUNC FC_FUNC_ MOD F90_WORK_FILES_ARG MODDIRFLAG F90MODINCSPEC F90_MODULE_NAMES ZLIB_INC_DIR ZLIB_LIB_DIR ZLIB FFTW_INC_DIR FFTW_LIB_DIR FFTW_LIBS QHULL_INC_DIR QHULL_LIB_DIR QHULL USE_QHULL LIBOBJS POW_LIB CXXCPP __func__ MPI_LIB_DIR MPI_INC_DIR MPI_F90_INC MPI_LIB MPI_F90_LIB USE_MPI CGAL_CXXFLAGS CGAL_LDFLAGS CGAL_CPPFLAGS CGAL_LIBS USE_CGAL DOXYGEN DOT DOC enable_dot enable_html_docs enable_latex_docs BATEXT MKINSTALLDIRS OOPSE OOPSE_HOME SUBDIRS LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -7258,6 +7258,7 @@ cat >>confdefs.h <<\_ACEOF
 #define HAVE_QHULL 1
 _ACEOF
 
+                USE_QHULL=yes
                 QHULL_INC_DIR="${QHULL_HOME}/include"
                 QHULL_LIB_DIR="${QHULL_HOME}/lib"
                 QHULL="-lqhull"
@@ -7267,6 +7268,7 @@ echo $ECHO_N "checking qhull in ${QHULL_HOME}... $ECHO_C" >&6
                 QHULL_INC_DIR=
                 QHULL_LIB_DIR=
                 QHULL=
+                USE_QHULL=no
                 LDFLAGS="$QHULL_OLD_LDFLAGS"
                 CFLAGS="$QHULL_OLD_CFLAGS"
                 echo "$as_me:$LINENO: result: failed" >&5
@@ -7282,6 +7284,7 @@ echo "${ECHO_T}failed" >&6
 	        echo "*********************************************************"
 	        echo ""
         fi
+
 
 
 
@@ -14533,14 +14536,13 @@ else
 echo "${ECHO_T}no" >&6
 
 fi
-
+USE_CGAL=no
 if test "$acx_cgal_found" == yes; then
 	USE_CGAL=yes
 
 cat >>confdefs.h <<\_ACEOF
 #define HAVE_CGAL 1
 _ACEOF
-
 
 
 
@@ -15383,6 +15385,7 @@ s,@FFTW_LIBS@,$FFTW_LIBS,;t t
 s,@QHULL_INC_DIR@,$QHULL_INC_DIR,;t t
 s,@QHULL_LIB_DIR@,$QHULL_LIB_DIR,;t t
 s,@QHULL@,$QHULL,;t t
+s,@USE_QHULL@,$USE_QHULL,;t t
 s,@LIBOBJS@,$LIBOBJS,;t t
 s,@POW_LIB@,$POW_LIB,;t t
 s,@CXXCPP@,$CXXCPP,;t t
@@ -15393,11 +15396,11 @@ s,@MPI_F90_INC@,$MPI_F90_INC,;t t
 s,@MPI_LIB@,$MPI_LIB,;t t
 s,@MPI_F90_LIB@,$MPI_F90_LIB,;t t
 s,@USE_MPI@,$USE_MPI,;t t
-s,@USE_CGAL@,$USE_CGAL,;t t
 s,@CGAL_CXXFLAGS@,$CGAL_CXXFLAGS,;t t
 s,@CGAL_LDFLAGS@,$CGAL_LDFLAGS,;t t
 s,@CGAL_CPPFLAGS@,$CGAL_CPPFLAGS,;t t
 s,@CGAL_LIBS@,$CGAL_LIBS,;t t
+s,@USE_CGAL@,$USE_CGAL,;t t
 s,@DOXYGEN@,$DOXYGEN,;t t
 s,@DOT@,$DOT,;t t
 s,@DOC@,$DOC,;t t
