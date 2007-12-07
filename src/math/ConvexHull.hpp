@@ -44,7 +44,7 @@
  *
  *  Created by Charles F. Vardeman II on 11 Dec 2006.
  *  @author  Charles F. Vardeman II
- *  @version $Id: ConvexHull.hpp,v 1.4 2007-11-22 16:39:45 chuckv Exp $
+ *  @version $Id: ConvexHull.hpp,v 1.5 2007-12-07 00:00:05 chuckv Exp $
  *
  */
 
@@ -59,14 +59,14 @@
 #include <string>
 extern "C"
 {
-#include "QuickHull/qhull.h"
-#include "QuickHull/mem.h"
-#include "QuickHull/qset.h"
-#include "QuickHull/geom.h"
-#include "QuickHull/merge.h"
-#include "QuickHull/poly.h"
-#include "QuickHull/io.h"
-#include "QuickHull/stat.h"
+#include "qhull/qhull.h"
+#include "qhull/mem.h"
+#include "qhull/qset.h"
+#include "qhull/geom.h"
+#include "qhull/merge.h"
+#include "qhull/poly.h"
+#include "qhull/io.h"
+#include "qhull/stat.h"
 }
 
 

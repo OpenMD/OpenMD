@@ -312,7 +312,7 @@ ac_includes_default="\
 # include <unistd.h>
 #endif"
 
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os PROGNAME debug USE_SINGLE_PRECISION CXX CXXFLAGS LDFLAGS CPPFLAGS ac_ct_CXX EXEEXT OBJEXT CC CFLAGS ac_ct_CC FC FCFLAGS ac_ct_FC CPP EGREP LN_S SET_MAKE RANLIB ac_ct_RANLIB PERLINTERP PERL_SHEBANG INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA AR PS FCFLAGS_F90 FCFLAGS_SRCEXT PREPDEFFLAG FCLIBS FC_FUNC FC_FUNC_ MOD F90_WORK_FILES_ARG MODDIRFLAG F90MODINCSPEC F90_MODULE_NAMES ZLIB_INC_DIR ZLIB_LIB_DIR ZLIB FFTW_INC_DIR FFTW_LIB_DIR FFTW_LIBS LIBOBJS POW_LIB CXXCPP __func__ MPI_LIB_DIR MPI_INC_DIR MPI_F90_INC MPI_LIB MPI_F90_LIB USE_MPI USE_CGAL CGAL_CXXFLAGS CGAL_LDFLAGS CGAL_CPPFLAGS CGAL_LIBS DOXYGEN DOT DOC enable_dot enable_html_docs enable_latex_docs BATEXT MKINSTALLDIRS OOPSE OOPSE_HOME SUBDIRS LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os PROGNAME debug USE_SINGLE_PRECISION CXX CXXFLAGS LDFLAGS CPPFLAGS ac_ct_CXX EXEEXT OBJEXT CC CFLAGS ac_ct_CC FC FCFLAGS ac_ct_FC CPP EGREP LN_S SET_MAKE RANLIB ac_ct_RANLIB PERLINTERP PERL_SHEBANG INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA AR PS FCFLAGS_F90 FCFLAGS_SRCEXT PREPDEFFLAG FCLIBS FC_FUNC FC_FUNC_ MOD F90_WORK_FILES_ARG MODDIRFLAG F90MODINCSPEC F90_MODULE_NAMES ZLIB_INC_DIR ZLIB_LIB_DIR ZLIB FFTW_INC_DIR FFTW_LIB_DIR FFTW_LIBS QHULL_INC_DIR QHULL_LIB_DIR QHULL LIBOBJS POW_LIB CXXCPP __func__ MPI_LIB_DIR MPI_INC_DIR MPI_F90_INC MPI_LIB MPI_F90_LIB USE_MPI USE_CGAL CGAL_CXXFLAGS CGAL_LDFLAGS CGAL_CPPFLAGS CGAL_LIBS DOXYGEN DOT DOC enable_dot enable_html_docs enable_latex_docs BATEXT MKINSTALLDIRS OOPSE OOPSE_HOME SUBDIRS LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -887,6 +887,8 @@ Optional Packages:
                           to /usr/local or /usr if not found in /usr/local)
   --with-fftw=DIR         root directory path of fftw installation (defaults
                           to /usr/local or /usr if not found in /usr/local)
+  --with-qhull=DIR        root directory path of qhull installation (defaults
+                          to /usr/local or /usr if not found in /usr/local)
   --with-mpi=<prefix>     compile with MPI installed in <prefix> [default=no]
   --with-cgalmakefile=makefile
                           Use the following CGAL makefile
@@ -1428,6 +1430,8 @@ ac_configure="$SHELL $ac_aux_dir/configure" # This should be Cygnus configure.
 #
 #
 #
+
+
 
 
 
@@ -2868,7 +2872,7 @@ fi
 
 
 # Provide some information about the compiler.
-echo "$as_me:2871:" \
+echo "$as_me:2875:" \
      "checking for Fortran compiler version" >&5
 ac_compiler=`set X $ac_compile; echo $2`
 { (eval echo "$as_me:$LINENO: \"$ac_compiler --version </dev/null >&5\"") >&5
@@ -4116,7 +4120,7 @@ _ACEOF
 # flags.
 ac_save_FFLAGS=$FCFLAGS
 FCFLAGS="$FCFLAGS $ac_verb"
-(eval echo $as_me:4119: \"$ac_link\") >&5
+(eval echo $as_me:4123: \"$ac_link\") >&5
 ac_fc_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
 echo "$ac_fc_v_output" >&5
 FCFLAGS=$ac_save_FFLAGS
@@ -4194,7 +4198,7 @@ _ACEOF
 # flags.
 ac_save_FFLAGS=$FCFLAGS
 FCFLAGS="$FCFLAGS $ac_cv_prog_fc_v"
-(eval echo $as_me:4197: \"$ac_link\") >&5
+(eval echo $as_me:4201: \"$ac_link\") >&5
 ac_fc_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
 echo "$ac_fc_v_output" >&5
 FCFLAGS=$ac_save_FFLAGS
@@ -4930,7 +4934,7 @@ _ACEOF
 # flags.
 ac_save_FFLAGS=$FCFLAGS
 FCFLAGS="$FCFLAGS $ac_verb"
-(eval echo $as_me:4933: \"$ac_link\") >&5
+(eval echo $as_me:4937: \"$ac_link\") >&5
 ac_fc_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
 echo "$ac_fc_v_output" >&5
 FCFLAGS=$ac_save_FFLAGS
@@ -5008,7 +5012,7 @@ _ACEOF
 # flags.
 ac_save_FFLAGS=$FCFLAGS
 FCFLAGS="$FCFLAGS $ac_cv_prog_fc_v"
-(eval echo $as_me:5011: \"$ac_link\") >&5
+(eval echo $as_me:5015: \"$ac_link\") >&5
 ac_fc_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
 echo "$ac_fc_v_output" >&5
 FCFLAGS=$ac_save_FFLAGS
@@ -5902,24 +5906,22 @@ if test "$zlib_dir" != "not_set" ; then
   else
     { echo "$as_me:$LINENO: WARNING: Sorry, $zlib_dir does not exist, checking usual places" >&5
 echo "$as_me: WARNING: Sorry, $zlib_dir does not exist, checking usual places" >&2;}
+	ZLIB_HOME=/usr/local
+	if test ! -f "${ZLIB_HOME}/include/zlib.h"
+	then
+        	ZLIB_HOME=/usr
+	fi
   fi
 fi
-
-ZLIB_HOME=/usr/local
-if test ! -f "${ZLIB_HOME}/include/zlib.h"
-then
-        ZLIB_HOME=/usr
-fi
-
 #
 # Locate zlib, if wanted
 #
 if test -n "${ZLIB_HOME}"
 then
         ZLIB_OLD_LDFLAGS=$LDFLAGS
-        ZLIB_OLD_CPPFLAGS=$LDFLAGS
+        ZLIB_OLD_CFLAGS=$CFLAGS
         LDFLAGS="$LDFLAGS -L${ZLIB_HOME}/lib"
-        CPPFLAGS="$CPPFLAGS -I${ZLIB_HOME}/include"
+        CFLAGS="$CFLAGS -I${ZLIB_HOME}/include"
 
 
         ac_ext=c
@@ -6178,7 +6180,7 @@ echo $ECHO_N "checking zlib in ${ZLIB_HOME}... $ECHO_C" >&6
                 ZLIB_LIB_DIR=
                 ZLIB=
                 LDFLAGS="$ZLIB_OLD_LDFLAGS"
-                CPPFLAGS="$ZLIB_OLD_CPPFLAGS"
+                CFLAGS="$ZLIB_OLD_CFLAGS"
                 echo "$as_me:$LINENO: result: failed" >&5
 echo "${ECHO_T}failed" >&6
 	        echo ""
@@ -6226,9 +6228,9 @@ echo "$as_me: WARNING: Sorry, $fftw_dir does not exist, checking usual places" >
     #
     if test -n "${FFTW_HOME}"; then
       FFTW_OLD_LDFLAGS=$LDFLAGS
-      FFTW_OLD_CPPFLAGS=$LDFLAGS
+      FFTW_OLD_CFLAGS=$CFLAGS
       LDFLAGS="$LDFLAGS -L${FFTW_HOME}/lib"
-      CPPFLAGS="$CPPFLAGS -I${FFTW_HOME}/include"
+      CFLAGS="$CFLAGS -I${FFTW_HOME}/include"
 
 
       ac_ext=c
@@ -6949,7 +6951,7 @@ echo $ECHO_N "checking fftw in ${FFTW_HOME}... $ECHO_C" >&6
             FFTW_LIB_DIR=
             FFTW_LIBS=
             LDFLAGS="$FFTW_OLD_LDFLAGS"
-            CPPFLAGS="$FFTW_OLD_CPPFLAGS"
+            CFLAGS="$FFTW_OLD_CFLAGS"
             echo "$as_me:$LINENO: result: failed" >&5
 echo "${ECHO_T}failed" >&6
 	    echo ""
@@ -6972,6 +6974,319 @@ echo "${ECHO_T}failed" >&6
   fi
 fi
 
+#
+# Handle user hints
+#
+
+# Check whether --with-qhull or --without-qhull was given.
+if test "${with_qhull+set}" = set; then
+  withval="$with_qhull"
+  qhull_dir="$withval"
+else
+  		qhull_dir="not_set"
+fi;
+if test "$qhull_dir" != "no"; then
+
+if test "$qhull_dir" != "not_set" ; then
+  if test -d "$qhull_dir"
+  then
+    QHULL_HOME="$qhull_dir"
+  else
+    { echo "$as_me:$LINENO: WARNING: Sorry, $qhull_dir does not exist, checking usual places" >&5
+echo "$as_me: WARNING: Sorry, $qhull_dir does not exist, checking usual places" >&2;}
+	QHULL_HOME=/usr/local
+	if test ! -f "${QHULL_HOME}/include/qhull/qhull.h"
+	then
+		QHULL_HOME=/usr
+	fi
+  fi
+fi
+#
+# Locate qhull, if wanted
+#
+if test -n "${QHULL_HOME}"
+then
+        QHULL_OLD_LDFLAGS=$LDFLAGS
+        QHULL_OLD_CFLAGS=$CFLAGS
+        LDFLAGS="$LDFLAGS -L${QHULL_HOME}/lib"
+        CFLAGS="$CFLAGS -I${QHULL_HOME}/include"
+
+
+        ac_ext=c
+ac_cpp='$CPP $CPPFLAGS'
+ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
+
+        echo "$as_me:$LINENO: checking for qh_qhull in -lqhull" >&5
+echo $ECHO_N "checking for qh_qhull in -lqhull... $ECHO_C" >&6
+if test "${ac_cv_lib_qhull_qh_qhull+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lqhull  $LIBS"
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+/* Override any gcc2 internal prototype to avoid an error.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+/* We use char because int might match the return type of a gcc2
+   builtin and then its argument prototype would still apply.  */
+char qh_qhull ();
+#ifdef FC_DUMMY_MAIN
+#ifndef FC_DUMMY_MAIN_EQ_F77
+#  ifdef __cplusplus
+     extern "C"
+#  endif
+   int FC_DUMMY_MAIN() { return 1; }
+#endif
+#endif
+int
+main ()
+{
+qh_qhull ();
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+  (eval $ac_link) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_c_werror_flag"
+			 || test ! -s conftest.err'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest$ac_exeext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  ac_cv_lib_qhull_qh_qhull=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+ac_cv_lib_qhull_qh_qhull=no
+fi
+rm -f conftest.err conftest.$ac_objext \
+      conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+echo "$as_me:$LINENO: result: $ac_cv_lib_qhull_qh_qhull" >&5
+echo "${ECHO_T}$ac_cv_lib_qhull_qh_qhull" >&6
+if test $ac_cv_lib_qhull_qh_qhull = yes; then
+  qhull_cv_libqhull=yes
+else
+  qhull_cv_libqhull=no
+fi
+
+        if test "${ac_cv_header_qhull_qhull_h+set}" = set; then
+  echo "$as_me:$LINENO: checking for qhull/qhull.h" >&5
+echo $ECHO_N "checking for qhull/qhull.h... $ECHO_C" >&6
+if test "${ac_cv_header_qhull_qhull_h+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+fi
+echo "$as_me:$LINENO: result: $ac_cv_header_qhull_qhull_h" >&5
+echo "${ECHO_T}$ac_cv_header_qhull_qhull_h" >&6
+else
+  # Is the header compilable?
+echo "$as_me:$LINENO: checking qhull/qhull.h usability" >&5
+echo $ECHO_N "checking qhull/qhull.h usability... $ECHO_C" >&6
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+$ac_includes_default
+#include <qhull/qhull.h>
+_ACEOF
+rm -f conftest.$ac_objext
+if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
+  (eval $ac_compile) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_c_werror_flag"
+			 || test ! -s conftest.err'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest.$ac_objext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  ac_header_compiler=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+ac_header_compiler=no
+fi
+rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
+echo "$as_me:$LINENO: result: $ac_header_compiler" >&5
+echo "${ECHO_T}$ac_header_compiler" >&6
+
+# Is the header present?
+echo "$as_me:$LINENO: checking qhull/qhull.h presence" >&5
+echo $ECHO_N "checking qhull/qhull.h presence... $ECHO_C" >&6
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+#include <qhull/qhull.h>
+_ACEOF
+if { (eval echo "$as_me:$LINENO: \"$ac_cpp conftest.$ac_ext\"") >&5
+  (eval $ac_cpp conftest.$ac_ext) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } >/dev/null; then
+  if test -s conftest.err; then
+    ac_cpp_err=$ac_c_preproc_warn_flag
+    ac_cpp_err=$ac_cpp_err$ac_c_werror_flag
+  else
+    ac_cpp_err=
+  fi
+else
+  ac_cpp_err=yes
+fi
+if test -z "$ac_cpp_err"; then
+  ac_header_preproc=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+  ac_header_preproc=no
+fi
+rm -f conftest.err conftest.$ac_ext
+echo "$as_me:$LINENO: result: $ac_header_preproc" >&5
+echo "${ECHO_T}$ac_header_preproc" >&6
+
+# So?  What about this header?
+case $ac_header_compiler:$ac_header_preproc:$ac_c_preproc_warn_flag in
+  yes:no: )
+    { echo "$as_me:$LINENO: WARNING: qhull/qhull.h: accepted by the compiler, rejected by the preprocessor!" >&5
+echo "$as_me: WARNING: qhull/qhull.h: accepted by the compiler, rejected by the preprocessor!" >&2;}
+    { echo "$as_me:$LINENO: WARNING: qhull/qhull.h: proceeding with the compiler's result" >&5
+echo "$as_me: WARNING: qhull/qhull.h: proceeding with the compiler's result" >&2;}
+    ac_header_preproc=yes
+    ;;
+  no:yes:* )
+    { echo "$as_me:$LINENO: WARNING: qhull/qhull.h: present but cannot be compiled" >&5
+echo "$as_me: WARNING: qhull/qhull.h: present but cannot be compiled" >&2;}
+    { echo "$as_me:$LINENO: WARNING: qhull/qhull.h:     check for missing prerequisite headers?" >&5
+echo "$as_me: WARNING: qhull/qhull.h:     check for missing prerequisite headers?" >&2;}
+    { echo "$as_me:$LINENO: WARNING: qhull/qhull.h: see the Autoconf documentation" >&5
+echo "$as_me: WARNING: qhull/qhull.h: see the Autoconf documentation" >&2;}
+    { echo "$as_me:$LINENO: WARNING: qhull/qhull.h:     section \"Present But Cannot Be Compiled\"" >&5
+echo "$as_me: WARNING: qhull/qhull.h:     section \"Present But Cannot Be Compiled\"" >&2;}
+    { echo "$as_me:$LINENO: WARNING: qhull/qhull.h: proceeding with the preprocessor's result" >&5
+echo "$as_me: WARNING: qhull/qhull.h: proceeding with the preprocessor's result" >&2;}
+    { echo "$as_me:$LINENO: WARNING: qhull/qhull.h: in the future, the compiler will take precedence" >&5
+echo "$as_me: WARNING: qhull/qhull.h: in the future, the compiler will take precedence" >&2;}
+    (
+      cat <<\_ASBOX
+## ------------------------------ ##
+## Report this to gezelter@nd.edu ##
+## ------------------------------ ##
+_ASBOX
+    ) |
+      sed "s/^/$as_me: WARNING:     /" >&2
+    ;;
+esac
+echo "$as_me:$LINENO: checking for qhull/qhull.h" >&5
+echo $ECHO_N "checking for qhull/qhull.h... $ECHO_C" >&6
+if test "${ac_cv_header_qhull_qhull_h+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  ac_cv_header_qhull_qhull_h=$ac_header_preproc
+fi
+echo "$as_me:$LINENO: result: $ac_cv_header_qhull_qhull_h" >&5
+echo "${ECHO_T}$ac_cv_header_qhull_qhull_h" >&6
+
+fi
+if test $ac_cv_header_qhull_qhull_h = yes; then
+  qhull_cv_qhull_h=yes
+else
+  qhull_cv_qhull_h=no
+fi
+
+
+        ac_ext=c
+ac_cpp='$CPP $CPPFLAGS'
+ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
+
+
+        if test "$qhull_cv_libqhull" = "yes" -a "$qhull_cv_qhull_h" = "yes"; then
+
+cat >>confdefs.h <<\_ACEOF
+#define HAVE_QHULL_H 1
+_ACEOF
+
+
+cat >>confdefs.h <<\_ACEOF
+#define HAVE_QHULL 1
+_ACEOF
+
+                QHULL_INC_DIR="${QHULL_HOME}/include"
+                QHULL_LIB_DIR="${QHULL_HOME}/lib"
+                QHULL="-lqhull"
+        else
+                echo "$as_me:$LINENO: checking qhull in ${QHULL_HOME}" >&5
+echo $ECHO_N "checking qhull in ${QHULL_HOME}... $ECHO_C" >&6
+                QHULL_INC_DIR=
+                QHULL_LIB_DIR=
+                QHULL=
+                LDFLAGS="$QHULL_OLD_LDFLAGS"
+                CFLAGS="$QHULL_OLD_CFLAGS"
+                echo "$as_me:$LINENO: result: failed" >&5
+echo "${ECHO_T}failed" >&6
+	        echo ""
+	        echo "*********************************************************"
+                echo "* WARNING: Could not find a working qhull installation  *"
+                echo "* If you need OOPSE to be able to deal with convex      *"
+                echo "* hulls be sure to specify a valid qhull installation   *"
+	        echo "* with --with-qhull=DIR                                 *"
+                echo "*                                                       *"
+                echo "* OOPSE will still work without qhull installed.        *"
+	        echo "*********************************************************"
+	        echo ""
+        fi
+
+
+
+fi
+fi
 
 
 # Checks for header files.
@@ -14235,6 +14550,7 @@ fi
 
 
 
+
 # Check whether --enable-doxygen or --disable-doxygen was given.
 if test "${enable_doxygen+set}" = set; then
   enableval="$enable_doxygen"
@@ -14388,7 +14704,7 @@ fi
 
 
 
-                                                  ac_config_files="$ac_config_files make/Makefile src/utils/Makefile src/math/Makefile src/applications/staticProps/Makefile scripts/filepp"
+                                        ac_config_files="$ac_config_files make/Makefile src/utils/Makefile src/math/Makefile scripts/filepp"
 
 
 cat >confcache <<\_ACEOF
@@ -14922,7 +15238,6 @@ do
   "make/Makefile" ) CONFIG_FILES="$CONFIG_FILES make/Makefile" ;;
   "src/utils/Makefile" ) CONFIG_FILES="$CONFIG_FILES src/utils/Makefile" ;;
   "src/math/Makefile" ) CONFIG_FILES="$CONFIG_FILES src/math/Makefile" ;;
-  "src/applications/staticProps/Makefile" ) CONFIG_FILES="$CONFIG_FILES src/applications/staticProps/Makefile" ;;
   "scripts/filepp" ) CONFIG_FILES="$CONFIG_FILES scripts/filepp" ;;
   "src/getopt.h" ) CONFIG_LINKS="$CONFIG_LINKS src/getopt.h:src/utils/gnugetopt.h" ;;
   "src/config.h" ) CONFIG_HEADERS="$CONFIG_HEADERS src/config.h" ;;
@@ -15065,6 +15380,9 @@ s,@ZLIB@,$ZLIB,;t t
 s,@FFTW_INC_DIR@,$FFTW_INC_DIR,;t t
 s,@FFTW_LIB_DIR@,$FFTW_LIB_DIR,;t t
 s,@FFTW_LIBS@,$FFTW_LIBS,;t t
+s,@QHULL_INC_DIR@,$QHULL_INC_DIR,;t t
+s,@QHULL_LIB_DIR@,$QHULL_LIB_DIR,;t t
+s,@QHULL@,$QHULL,;t t
 s,@LIBOBJS@,$LIBOBJS,;t t
 s,@POW_LIB@,$POW_LIB,;t t
 s,@CXXCPP@,$CXXCPP,;t t
@@ -15333,7 +15651,6 @@ s,@INSTALL@,$ac_INSTALL,;t t
     make/Makefile ) chmod 0755 scripts/* ;;
     src/utils/Makefile ) chmod 0755 scripts/* ;;
     src/math/Makefile ) chmod 0755 scripts/* ;;
-    src/applications/staticProps/Makefile ) chmod 0755 scripts/* ;;
     scripts/filepp ) chmod 0755 scripts/* ;;
   esac
 done

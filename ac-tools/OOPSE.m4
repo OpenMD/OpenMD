@@ -1075,24 +1075,22 @@ if test "$zlib_dir" != "not_set" ; then
     ZLIB_HOME="$zlib_dir"
   else
     AC_MSG_WARN([Sorry, $zlib_dir does not exist, checking usual places])
+	ZLIB_HOME=/usr/local
+	if test ! -f "${ZLIB_HOME}/include/zlib.h"
+	then
+        	ZLIB_HOME=/usr
+	fi
   fi
 fi
-
-ZLIB_HOME=/usr/local
-if test ! -f "${ZLIB_HOME}/include/zlib.h"
-then
-        ZLIB_HOME=/usr
-fi
-
 #
 # Locate zlib, if wanted
 #
 if test -n "${ZLIB_HOME}"
 then
         ZLIB_OLD_LDFLAGS=$LDFLAGS
-        ZLIB_OLD_CPPFLAGS=$LDFLAGS
+        ZLIB_OLD_CFLAGS=$CFLAGS
         LDFLAGS="$LDFLAGS -L${ZLIB_HOME}/lib"
-        CPPFLAGS="$CPPFLAGS -I${ZLIB_HOME}/include"
+        CFLAGS="$CFLAGS -I${ZLIB_HOME}/include"
         AC_LANG_SAVE
         AC_LANG_C
         AC_CHECK_LIB(z, inflateEnd, [zlib_cv_libz=yes], [zlib_cv_libz=no])
@@ -1111,7 +1109,7 @@ then
                 ZLIB_LIB_DIR=
                 ZLIB=
                 LDFLAGS="$ZLIB_OLD_LDFLAGS"
-                CPPFLAGS="$ZLIB_OLD_CPPFLAGS"
+                CFLAGS="$ZLIB_OLD_CFLAGS"
                 AC_MSG_RESULT(failed)
 	        echo ""
 	        echo "*********************************************************"
@@ -1127,6 +1125,81 @@ then
         AC_SUBST(ZLIB_INC_DIR)
         AC_SUBST(ZLIB_LIB_DIR)
         AC_SUBST(ZLIB)
+fi
+fi
+])
+
+AC_DEFUN([ACX_CHECK_QHULL],
+#
+# Handle user hints
+#
+[AC_ARG_WITH(qhull,
+                AC_HELP_STRING([--with-qhull=DIR],
+           [root directory path of qhull installation (defaults to /usr/local or /usr if not found in /usr/local)]dnl
+		           ),
+		[qhull_dir="$withval"]dnl
+		            ,dnl
+		[qhull_dir="not_set"]dnl
+    )dnl
+
+if test "$qhull_dir" != "no"; then
+
+if test "$qhull_dir" != "not_set" ; then
+  if test -d "$qhull_dir"
+  then
+    QHULL_HOME="$qhull_dir"
+  else
+    AC_MSG_WARN([Sorry, $qhull_dir does not exist, checking usual places])
+	QHULL_HOME=/usr/local
+	if test ! -f "${QHULL_HOME}/include/qhull/qhull.h"
+	then
+		QHULL_HOME=/usr
+	fi
+  fi
+fi
+#
+# Locate qhull, if wanted
+#
+if test -n "${QHULL_HOME}"
+then
+        QHULL_OLD_LDFLAGS=$LDFLAGS
+        QHULL_OLD_CFLAGS=$CFLAGS
+        LDFLAGS="$LDFLAGS -L${QHULL_HOME}/lib"
+        CFLAGS="$CFLAGS -I${QHULL_HOME}/include"
+        AC_LANG_SAVE
+        AC_LANG_C
+        AC_CHECK_LIB(qhull, qh_qhull, [qhull_cv_libqhull=yes], [qhull_cv_libqhull=no])
+        AC_CHECK_HEADER(qhull/qhull.h, [qhull_cv_qhull_h=yes], [qhull_cv_qhull_h=no])
+        AC_LANG_RESTORE
+
+        if test "$qhull_cv_libqhull" = "yes" -a "$qhull_cv_qhull_h" = "yes"; then
+                AC_DEFINE(HAVE_QHULL_H, 1, [have qhull.h])
+                AC_DEFINE(HAVE_QHULL, 1, [have libqhull.a])
+                QHULL_INC_DIR="${QHULL_HOME}/include"
+                QHULL_LIB_DIR="${QHULL_HOME}/lib"
+                QHULL="-lqhull"
+        else
+                AC_MSG_CHECKING(qhull in ${QHULL_HOME})
+                QHULL_INC_DIR=
+                QHULL_LIB_DIR=
+                QHULL=
+                LDFLAGS="$QHULL_OLD_LDFLAGS"
+                CFLAGS="$QHULL_OLD_CFLAGS"
+                AC_MSG_RESULT(failed)
+	        echo ""
+	        echo "*********************************************************"
+                echo "* WARNING: Could not find a working qhull installation  *"
+                echo "* If you need OOPSE to be able to deal with convex      *"
+                echo "* hulls be sure to specify a valid qhull installation   *"
+	        echo "* with --with-qhull=DIR                                 *"
+                echo "*                                                       *"
+                echo "* OOPSE will still work without qhull installed.        *"
+	        echo "*********************************************************"
+	        echo ""
+        fi
+        AC_SUBST(QHULL_INC_DIR)
+        AC_SUBST(QHULL_LIB_DIR)
+        AC_SUBST(QHULL)
 fi
 fi
 ])
@@ -1161,9 +1234,9 @@ if test "$fftw_dir" != "no"; then
     #
     if test -n "${FFTW_HOME}"; then
       FFTW_OLD_LDFLAGS=$LDFLAGS
-      FFTW_OLD_CPPFLAGS=$LDFLAGS
+      FFTW_OLD_CFLAGS=$CFLAGS
       LDFLAGS="$LDFLAGS -L${FFTW_HOME}/lib"
-      CPPFLAGS="$CPPFLAGS -I${FFTW_HOME}/include"
+      CFLAGS="$CFLAGS -I${FFTW_HOME}/include"
       AC_LANG_SAVE
       AC_LANG_C
       AC_CHECK_LIB(fftw3, fftw_execute, [fftw_cv_libfftw3=yes], [fftw_cv_libfftw3=no])
@@ -1200,7 +1273,7 @@ if test "$fftw_dir" != "no"; then
             FFTW_LIB_DIR=
             FFTW_LIBS=
             LDFLAGS="$FFTW_OLD_LDFLAGS"
-            CPPFLAGS="$FFTW_OLD_CPPFLAGS"
+            CFLAGS="$FFTW_OLD_CFLAGS"
             AC_MSG_RESULT(failed)
 	    echo ""
 	    echo "*********************************************************"
