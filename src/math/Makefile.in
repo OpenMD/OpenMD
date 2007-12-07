@@ -17,14 +17,13 @@ USE_QHULL = @USE_QHULL@
 ifeq "$(USE_CGAL)" "yes"
 	Source  = $(MySource) AlphaShape.cpp
 else
+   ifeq "$(USE_QHULL)" "yes"
+	Source  = $(MySource) ConvexHull.cpp
+   else
 	Source = $(MySource) 
+   endif
 endif
 
-ifeq "$(USE_QHULL)" "yes"
-	Source  = $(MySource) ConvexHull.cpp
-else
-	Source = $(MySource) 
-endif
 
 RmiSource =
 
