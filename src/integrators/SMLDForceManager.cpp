@@ -54,7 +54,15 @@ See: Kohanoff et.al. CHEMPHYSCHEM,2005,6,1848-1852.
 #include "utils/OOPSEConstant.hpp"
 #include "hydrodynamics/Sphere.hpp"
 #include "hydrodynamics/Ellipsoid.hpp"
+#if defined(HAVE_QHULL) || defined(HAVE_CGAL)
+#ifdef HAVE_QHULL
 #include "math/ConvexHull.hpp"
+#endif
+
+#ifdef HAVE_CGAL
+#include "math/AlphaShape.hpp"
+#endif
+#endif
 #include "openbabel/mol.hpp"
 
 using namespace OpenBabel;
