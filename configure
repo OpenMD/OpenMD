@@ -12497,7 +12497,7 @@ if test "$ac_test_CFLAGS" != "set"; then
 
   # use default flags for gcc on all systems
   if test $ac_cv_prog_really_gcc = yes; then
-     CFLAGS="-O6 -fomit-frame-pointer -Wall -W -Wcast-qual -Wpointer-arith -Wcast-align -pedantic"
+     CFLAGS="-O6 -fomit-frame-pointer -Wall -W -Wcast-qual -Wpointer-arith -Wcast-align"
   fi
 
   # test for gcc-specific flags:
@@ -12954,7 +12954,7 @@ if test "$ac_test_CXXFLAGS" != "set"; then
 
   # use default flags for gcc on all systems
   if test $ac_cv_prog_really_gxx = yes; then
-     CXXFLAGS="-O6 -fomit-frame-pointer -Wall -W -Wcast-qual -Wpointer-arith -Wcast-align -pedantic"
+     CXXFLAGS="-O6 -fomit-frame-pointer -Wall -W -Wcast-qual -Wpointer-arith -Wcast-align"
   fi
 
   # test for gcc-specific flags:
