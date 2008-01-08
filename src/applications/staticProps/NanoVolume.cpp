@@ -45,12 +45,13 @@
  *
  *  Created by Charles F. Vardeman II on 14 Dec 2006.
  *  @author  Charles F. Vardeman II
- *  @version $Id: NanoVolume.cpp,v 1.5 2007-12-06 20:40:30 chuckv Exp $
+ *  @version $Id: NanoVolume.cpp,v 1.6 2008-01-08 19:36:28 chuckv Exp $
  *
  */
 
 #include "applications/staticProps/NanoVolume.hpp"
 #include "math/ConvexHull.hpp"
+#include "math/AlphaShape.hpp"
 #include "utils/simError.h"
 #include "io/DumpReader.hpp"
 #include "primitives/Molecule.hpp"
@@ -131,12 +132,12 @@ void NanoVolume::process() {
     }
     // Generate convex hull for this frame.
     hull->genHull(pos_);
-    totalVolume_ += hull->getVolume();		
+  //  totalVolume_ += hull->getVolume();		
   }
-  RealType avgVolume = totalVolume_/(RealType) frameCounter_;
+  //RealType avgVolume = totalVolume_/(RealType) frameCounter_;
   //std::cout.precision(7);
   //std::cout  << avgVolume << std::endl;
-
+/*
   std::ofstream osq(getOutputFileName().c_str());
   osq.precision(7);
   if (osq.is_open()){
@@ -144,9 +145,12 @@ void NanoVolume::process() {
 
   }
   osq.close();
+*/
 #else
   sprintf(painCave.errMsg, "NanoVolume: Neither CGAL nor qhull support was compiled in!\n");
   painCave.isFatal = 1;
   simError();  
+
 #endif
+
 }
