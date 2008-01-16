@@ -17,6 +17,9 @@ RmiSource =
 
 Main      = Hydro 
 
+ScriptFiles =  \
+        diffExplainer
+
 DEV_ROOT=../../..
 
 include $(DEV_ROOT)/make/Makefile

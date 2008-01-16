@@ -89,7 +89,7 @@ namespace oopse {
         for (int k = 0; k < numLattices; ++k) {
           BeadLattice& currentBead = grid(i, j, k);
           currentBead.origin = Vector3d((i-1)*sigma_ + boxBoundary.first[0], (j-1) *sigma_ + boxBoundary.first[1], (k-1)*sigma_+ boxBoundary.first[2]);
-          currentBead.radius = sigma_;
+          currentBead.radius = sigma_ / 2.0;
           currentBead.interior = shape_->isInterior(grid(i, j, k).origin);                
         }
       }

@@ -145,17 +145,20 @@ namespace oopse {
         
         Xiott += Cij;
         Xiotr += U[i] * Cij;
-        //Xiorr += -U[i] * Cij * U[j] + (6 * viscosity * volume) * I;    
+	// uncorrected here.  Volume correction is added after we assemble Xiorr
         Xiorr += -U[i] * Cij * U[j]; 
       }
     }
+
+    // add the volume correction
+    Xiorr += (6.0 * viscosity * volume) * I;    
     
-    const RealType convertConstant = 6.023; //convert poise.angstrom to amu/fs
+    const RealType convertConstant = 1.439326479e4; //converts Poise angstroms
+                                                    // to kcal fs mol^-1 Angstrom^-1
+
     Xiott *= convertConstant;
     Xiotr *= convertConstant;
     Xiorr *= convertConstant;
-    
-    
     
     Mat3x3d tmp;
     Mat3x3d tmpInv;
@@ -203,14 +206,14 @@ namespace oopse {
     Dr6x6.getSubMatrix(0, 3, Drrt);
     Dr6x6.getSubMatrix(3, 0, Drtr);
     Dr6x6.getSubMatrix(3, 3, Drrr);
-    RealType kt = OOPSEConstant::kB * temperature ;
+    RealType kt = OOPSEConstant::kb * temperature ; // in kcal mol^-1
     Drtt *= kt;
     Drrt *= kt;
     Drtr *= kt;
     Drrr *= kt;
-    Xirtt *= OOPSEConstant::kb * temperature;
-    Xirtr *= OOPSEConstant::kb * temperature;
-    Xirrr *= OOPSEConstant::kb * temperature;
+    //Xirtt *= OOPSEConstant::kb * temperature;
+    //Xirtr *= OOPSEConstant::kb * temperature;
+    //Xirrr *= OOPSEConstant::kb * temperature;
     
     Mat6x6d Xi, D;
 
@@ -318,17 +321,20 @@ namespace oopse {
             
         Xitt += Cij;
         Xitr += U[i] * Cij;
-            //Xirr += -U[i] * Cij * U[j] + (6 * viscosity * volume) * I;            
+	// uncorrected here.  Volume correction is added after we assemble Xiorr
         Xirr += -U[i] * Cij * U[j];
       }
     }
+    // add the volume correction here:
+    Xirr += (6.0 * viscosity * volume) * I;    
     
-    const RealType convertConstant = 6.023; //convert poise.angstrom to amu/fs
+    const RealType convertConstant = 1.439326479e4; //converts Poise angstroms
+                                                    // to kcal fs mol^-1 Angstrom^-1
     Xitt *= convertConstant;
     Xitr *= convertConstant;
     Xirr *= convertConstant;
     
-    RealType kt = OOPSEConstant::kB * temperature;
+    RealType kt = OOPSEConstant::kb * temperature; // in kcal mol^-1
     
     Mat3x3d Dott; //translational diffusion tensor at arbitrary origin O
     Mat3x3d Dorr; //rotational diffusion tensor at arbitrary origin O
@@ -422,11 +428,11 @@ namespace oopse {
     std::cout << "center of diffusion :" << std::endl;
     std::cout << rod << std::endl;
     std::cout << "diffusion tensor at center of diffusion " << std::endl;
-    std::cout << "translation(A^2/fs) :" << std::endl;
+    std::cout << "translation(A^2 / fs) :" << std::endl;
     std::cout << Ddtt << std::endl;
-    std::cout << "translation-rotation(A^3/fs):" << std::endl;
+    std::cout << "translation-rotation(A / fs):" << std::endl;
     std::cout << Ddtr << std::endl;
-    std::cout << "rotation(A^4/fs):" << std::endl;
+    std::cout << "rotation(fs^-1):" << std::endl;
     std::cout << Ddrr << std::endl;
 
     std::cout << "resistance tensor at center of diffusion " << std::endl;
@@ -442,11 +448,11 @@ namespace oopse {
     Xid.getSubMatrix(3, 3, Xidrr);
 
     std::cout << Xidtt << std::endl;
-    std::cout << "rotation-translation (kcal*fs*mol^-1*Ang^-3):" << std::endl;
+    std::cout << "rotation-translation (kcal*fs*mol^-1*Ang^-1):" << std::endl;
     std::cout << Xidrt << std::endl;
-    std::cout << "translation-rotation(kcal*fs*mol^-1*Ang^-3):" << std::endl;
+    std::cout << "translation-rotation(kcal*fs*mol^-1*Ang^-1):" << std::endl;
     std::cout << Xidtr << std::endl;
-    std::cout << "rotation(kcal*fs*mol^-1*Ang^-4):" << std::endl;
+    std::cout << "rotation(kcal*fs*mol^-1):" << std::endl;
     std::cout << Xidrr << std::endl;
 
     return true;

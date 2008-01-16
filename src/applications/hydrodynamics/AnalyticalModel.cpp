@@ -64,6 +64,10 @@ namespace oopse {
       } else {
         CompositeShape* composite = dynamic_cast<CompositeShape*>(shape);
         if (composite != NULL) {
+//           props = composite->getHydroProp(viscosity, temperature); 
+//           setCR(props);
+//           setCD(props);
+//           return true;
           return false;
         } else {
           sprintf( painCave.errMsg,

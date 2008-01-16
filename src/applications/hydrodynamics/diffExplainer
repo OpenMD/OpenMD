@@ -1,0 +1,146 @@
+#!/usr/bin/env python
+"""Computes predicted diffusion constants and rotational relaxation
+times from a diff file.  Explains the values in the diff file in
+terms of properties that can be calculated from a molecular dynamics
+simulation.
+
+Usage: diffExplainer
+
+Options:
+  -h, --help              show this help
+  -d, --diff-file=...     use specified diff file
+  -t, --temperature=...   temperature in Kelvin
+
+
+Example:
+   diffExplainer -d ellipsoid.diff -t 300
+
+"""
+
+__author__ = "Dan Gezelter (gezelter@nd.edu)"
+__version__ = "$Revision: 1.1 $"
+__date__ = "$Date: 2008-01-16 20:19:28 $"
+
+__copyright__ = "Copyright (c) 2008 by the University of Notre Dame"
+__license__ = "OOPSE"
+
+import sys
+import getopt
+import string
+import math
+
+_haveDiffFileName = 0
+_haveTemperature = 0
+
+def usage():
+    print __doc__
+
+def readDiffFile(diffFileName):
+    diffFile = open(diffFileName, 'r')
+
+    global DTTxx
+    global DTTyy
+    global DTTzz
+
+    global XiRRxx
+    global XiRRyy
+    global XiRRzz
+
+    global DRRxx
+    global DRRyy
+    global DRRzz
+     
+    line = diffFile.readline()
+    while 1:
+        L = line.split()
+        XiRRxx = float(L[31])
+        XiRRyy = float(L[35])
+        XiRRzz = float(L[39])
+	DTTxx = float(L[115])
+	DTTyy = float(L[119])
+	DTTzz = float(L[123])
+        DRRxx = float(L[142])
+        DRRyy = float(L[146])
+        DRRzz = float(L[150])              
+        line = diffFile.readline()
+        if not line: break
+        
+    diffFile.close()
+    
+def computeProperties(temperature):
+    
+    kb = 1.9872156E-3    
+    kt = kb * temperature
+
+    print
+    print "Translational Diffusion Constant (angstroms^2 fs^-1): %.3e" % ((DTTxx + DTTyy + DTTzz)/3.0)
+
+    Delta = math.sqrt(math.pow((DRRxx-DRRyy),2) +(DRRzz-DRRxx)*(DRRzz-DRRyy))
+    a = math.sqrt(3.0)*(DRRxx-DRRyy) 
+    b = (2.0*DRRzz - DRRxx - DRRyy + 2.0*Delta)
+    N = 2.0*math.sqrt(Delta)*math.sqrt(b)
+    Di = (DRRxx + DRRyy + DRRzz)/3.0
+    f1 = 6.0*Di + 2.0*Delta
+    f2 = 6.0*Di - 2.0*Delta
+    f3 = 3.0*(DRRxx + Di)
+    f4 = 3.0*(DRRyy + Di)
+    f5 = 3.0*(DRRzz + Di)
+
+    f0 = (f1 + f2 + f3 + f4 + f5)/5.0
+
+    print
+    print "l=2 Orientational correlation functions:"
+    print
+    print "In general only the C^2(0,0) correlation function relates to the lcorr"
+    print "computed via the DynamicProps correlation function routine."
+    print 
+    print "To get any of the specific correlation functions, multiply each amplitude"
+    print "by exp(-t/t_i) where t_i is the relevant decay time printed in the first row:"
+    print
+    print "decay times (fs):   %.3e   %.3e   %.3e   %.3e   %.3e"  % (1.0/f1, 1.0/f2, 1.0/f3, 1.0/f4, 1.0/f5 )
+    print
+    print "       C^2(0, 0):   %.3e   %.3e   %.3e   %.3e   %.3e"  % (pow(a/N,2), pow(b/N,2), 0, 0, 0 )
+    print "       C^2(1, 1):   %.3e   %.3e   %.3e   %.3e   %.3e"  % (0,0,0.5,0.5,0)
+    print "       C^2(1,-1):   %.3e   %.3e   %.3e   %.3e   %.3e"  % (0,0,-0.5,0.5,0)
+    print "       C^2(2, 2):   %.3e   %.3e   %.3e   %.3e   %.3e"  % (0.5*pow(b/N,2), 0.5*pow(a/N,2), 0, 0, 0.5)
+    print "       C^2(2,-2):   %.3e   %.3e   %.3e   %.3e   %.3e"  % (0.5*pow(b/N,2), 0.5*pow(a/N,2), 0, 0,-0.5)
+    print "       C^2(2, 0):   %.3e   %.3e   %.3e   %.3e   %.3e"  % (math.sqrt(2.0)*a*b/pow(N,2),-math.sqrt(2.0)*a*b/pow(N,2),0,0,0)
+    print
+    print 
+    print "average (or characteristic) relaxation time:\t%.3e" % (1.0/f0)
+
+def main(argv):                         
+    try:                                
+        opts, args = getopt.getopt(argv, "hd:t:", ["help", "diff-file=", "temperature="]) 
+    except getopt.GetoptError:           
+        usage()                          
+        sys.exit(2)                     
+    for opt, arg in opts:                
+        if opt in ("-h", "--help"):      
+            usage()                     
+            sys.exit()                  
+        elif opt in ("-d", "--diff-file"): 
+            diffFileName = arg
+            global _haveDiffFileName
+            _haveDiffFileName = 1
+        elif opt in ("-t", "--temperature"): 
+            temperature = float(arg)
+            global _haveTemperature
+            _haveTemperature = 1
+    if (_haveDiffFileName != 1):
+        usage() 
+        print "No diff file was specified"
+        sys.exit()
+    if (_haveTemperature != 1):
+        usage() 
+        print "No temperature was specified"
+        sys.exit()
+        
+    readDiffFile(diffFileName);
+    computeProperties(temperature);
+
+if __name__ == "__main__":
+    if len(sys.argv) == 1:
+        usage()
+        sys.exit()
+    main(sys.argv[1:])
