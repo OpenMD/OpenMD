@@ -44,7 +44,7 @@
  *
  *  Created by Charles F. Vardeman II on 11 Dec 2006.
  *  @author  Charles F. Vardeman II
- *  @version $Id: ConvexHull.hpp,v 1.5 2007-12-07 00:00:05 chuckv Exp $
+ *  @version $Id: ConvexHull.hpp,v 1.6 2008-01-21 21:50:29 chuckv Exp $
  *
  */
 
@@ -59,6 +59,7 @@
 #include <string>
 extern "C"
 {
+#if defined(HAVE_QHULL)
 #include "qhull/qhull.h"
 #include "qhull/mem.h"
 #include "qhull/qset.h"
@@ -67,6 +68,7 @@ extern "C"
 #include "qhull/poly.h"
 #include "qhull/io.h"
 #include "qhull/stat.h"
+#endif
 }
 
 
