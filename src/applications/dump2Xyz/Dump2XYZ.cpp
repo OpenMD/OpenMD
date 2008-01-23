@@ -117,6 +117,12 @@ int main(int argc, char* argv[]){
   GBLipidAtomVisitor* gbLipidVisitor = new GBLipidAtomVisitor(info);
   compositeVisitor->addVisitor(gbLipidVisitor, 740);
 
+  Ring5gbAtomVisitor* ring5Visitor = new Ring5gbAtomVisitor(info);
+  compositeVisitor->addVisitor(ring5Visitor, 730);
+
+  HeadAtomVisitor* headVisitor = new HeadAtomVisitor(info);
+  compositeVisitor->addVisitor(headVisitor, 720);
+
   //create default atom visitor
   DefaultAtomVisitor* defaultAtomVisitor = new DefaultAtomVisitor(info);
   compositeVisitor->addVisitor(defaultAtomVisitor, 700);
