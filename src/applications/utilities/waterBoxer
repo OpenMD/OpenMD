@@ -3,8 +3,8 @@
 # program that builds water boxes
 
 # author    = "Chris Fennell
-# version   = "$Revision: 1.4 $"
-# date      = "$Date: 2007-03-06 00:01:51 $"
+# version   = "$Revision: 1.5 $"
+# date      = "$Date: 2008-01-23 21:22:18 $"
 # copyright = "Copyright (c) 2006 by the University of Notre Dame"
 # license   = "OOPSE"
 
@@ -103,6 +103,10 @@ if ($invalidWater == 1){
 if ($waterName eq 'DPD') {
   # DPD waters are stand-ins for 4 water molecules
   $density = $density * 0.25;
+}
+if ($waterName eq 'CG2') {
+  # CG2 waters are stand-ins for 2 water molecules
+  $density = $density * 0.5;
 }
 
 if (defined($opt_l)){
@@ -439,6 +443,7 @@ sub printWaterMD {
   printSPCE();
   printSPC();
   printDPD();
+  printCG2();
   print WATERMD "\n\n#endif";
 }
 
@@ -760,6 +765,16 @@ sub printDPD {
 }"
 }
 
+sub printCG2 {
+  print $waterFileHandle "\n\nmolecule{
+  name = \"CG2\";
+  
+  atom[0]{
+    type = \"CG2\";
+    position(0.0, 0.0, 0.0);
+  }
+}"
+}
 
 sub printFakeWater {
   print $waterFileHandle "\n\nmolecule{
@@ -788,6 +803,7 @@ sub validateWater {
   elsif ($waterName eq 'SPCE')     { $waterCase = 11;   }
   elsif ($waterName eq 'SPC')      { $waterCase = 12;   }
   elsif ($waterName eq 'DPD')      { $waterCase = 13;   }
+  elsif ($waterName eq 'CG2')      { $waterCase = 14;   }
   else                             { $invalidWater = 1; }
 }
 
@@ -806,4 +822,5 @@ sub printWaterModel {
   elsif ($waterCase == 11) { printSPCE();    }
   elsif ($waterCase == 12) { printSPC();     }
   elsif ($waterCase == 13) { printDPD();     }
+  elsif ($waterCase == 14) { printCG2();     }
 }

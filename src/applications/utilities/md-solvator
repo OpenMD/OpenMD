@@ -4,8 +4,8 @@
 # and deletes overlapping molecules
 
 # author    = "Dan Gezelter"
-# version   = "$Revision: 1.2 $"
-# date      = "$Date: 2007-01-22 22:27:37 $"
+# version   = "$Revision: 1.3 $"
+# date      = "$Date: 2008-01-23 21:22:18 $"
 # copyright = "Copyright (c) 2007 by the University of Notre Dame"
 # license   = "OOPSE"
 
@@ -101,7 +101,7 @@ while (<SOLUTEFILE>){
       push(@solute_x, $x_val);
       push(@solute_y, $y_val);
       push(@solute_z, $z_val);
-      $saveLine = "$line[0]\t$line[1]\t$x_val\t$y_val\t$z_val";
+      $saveLine = "$line[0]\t$line[1]\t$x_val\t$y_val\t$z_val\t";
       for ($i = 5; $i <= $#line; $i++){
         $saveLine = join(' ', $saveLine, $line[$i]);
       }
@@ -109,6 +109,7 @@ while (<SOLUTEFILE>){
       $soluteCount++;
     }
   }
+
   $startSnap = 1 if /Snapshot/;
   $startFrame = 1 if /FrameData/;
   $startStunts = 1 if /StuntDoubles/;
@@ -165,8 +166,8 @@ while (<SOLVENT>){
 	}
       }
       if ($saveFlag == 1){
-	$saveLine = "$solventCount\t$line[1]\t$line[2]";
-	for ($i = 3; $i <= $#line; $i++){
+	$saveLine = "$solventCount\t$line[1]\t$x_val\t$y_val\t$z_val\t";
+	for ($i = 5; $i <= $#line; $i++){
 	  $saveLine = join(' ', $saveLine, $line[$i]);
 	}
 	push(@goodSolventMolecules, $saveLine);
