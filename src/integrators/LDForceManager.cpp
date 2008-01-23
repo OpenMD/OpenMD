@@ -297,77 +297,54 @@ namespace oopse {
           vel =integrableObject->getVel(); 
           mass = integrableObject->getMass();
           if (integrableObject->isDirectional()){
-            //calculate angular velocity in lab frame
             Mat3x3d I = integrableObject->getI();
             Vector3d angMom = integrableObject->getJ();
-            Vector3d omega;
+            A = integrableObject->getA();
+            Atrans = A.transpose();
+
+            Vector3d omegaBody;
             
             if (integrableObject->isLinear()) {
               int linearAxis = integrableObject->linearAxis();
               int l = (linearAxis +1 )%3;
               int m = (linearAxis +2 )%3;
-              omega[l] = angMom[l] /I(l, l);
-              omega[m] = angMom[m] /I(m, m);
+              omegaBody[l] = angMom[l] /I(l, l);
+              omegaBody[m] = angMom[m] /I(m, m);
               
             } else {
-              omega[0] = angMom[0] /I(0, 0);
-              omega[1] = angMom[1] /I(1, 1);
-              omega[2] = angMom[2] /I(2, 2);
+              omegaBody[0] = angMom[0] /I(0, 0);
+              omegaBody[1] = angMom[1] /I(1, 1);
+              omegaBody[2] = angMom[2] /I(2, 2);
             }
 
-            //std::cerr << "I = " << I(0,0) << "\t" << I(1,1) << "\t" << I(2,2) << "\n\n";
+            Vector3d omegaLab = Atrans * omegaBody;
 
-            //apply friction force and torque at center of resistance
-            A = integrableObject->getA();
-            Atrans = A.transpose();
-            //std::cerr << "A = " << integrableObject->getA() << "\n";
-            //std::cerr << "Atrans = " << A.transpose() << "\n\n";
-            Vector3d rcr = Atrans * hydroProps_[index]->getCOR();  
-            //std::cerr << "cor = " << hydroProps_[index]->getCOR() << "\n\n\n\n";
-            //std::cerr << "rcr = " << rcr << "\n\n";
-            Vector3d vcdLab = vel + cross(omega, rcr);
+            // apply friction force and torque at center of resistance
+
+            Vector3d rcrLab = Atrans * hydroProps_[index]->getCOR();  
+            Vector3d vcdLab = vel + cross(omegaLab, rcrLab);
         
-            //std::cerr << "velL = " << vel << "\n\n";
-            //std::cerr << "vcdL = " << vcdLab << "\n\n";
-            Vector3d vcdBody = A* vcdLab;
-            //std::cerr << "vcdB = " << vcdBody << "\n\n";
-            Vector3d frictionForceBody = -(hydroProps_[index]->getXitt() * vcdBody + hydroProps_[index]->getXirt() * omega);
+            Vector3d vcdBody = A * vcdLab;
+            Vector3d frictionForceBody = -(hydroProps_[index]->getXitt() * vcdBody + hydroProps_[index]->getXirt() * omegaBody);
 
-            //std::cerr << "xitt = " << hydroProps_[index]->getXitt() << "\n\n";
-            //std::cerr << "ffB = " << frictionForceBody << "\n\n";
-            Vector3d frictionForceLab = Atrans*frictionForceBody;
-            //std::cerr << "ffL = " << frictionForceLab << "\n\n";
-            //std::cerr << "frc = " << integrableObject->getFrc() << "\n\n"; 
+            Vector3d frictionForceLab = Atrans * frictionForceBody;
             integrableObject->addFrc(frictionForceLab);
-            //std::cerr << "frc = " << integrableObject->getFrc() << "\n\n"; 
-            //std::cerr << "ome = " << omega << "\n\n";
-            Vector3d frictionTorqueBody = - (hydroProps_[index]->getXitr() * vcdBody + hydroProps_[index]->getXirr() * omega);
-            //std::cerr << "ftB = " << frictionTorqueBody << "\n\n";
-            Vector3d frictionTorqueLab = Atrans*frictionTorqueBody;
-            //std::cerr << "ftL = " << frictionTorqueLab << "\n\n";
-            //std::cerr << "ftL2 = " << frictionTorqueLab+cross(rcr,frictionForceLab) << "\n\n";
-            //std::cerr << "trq = " << integrableObject->getTrq() << "\n\n"; 
-            integrableObject->addTrq(frictionTorqueLab+ cross(rcr, frictionForceLab));
-            //std::cerr << "trq = " << integrableObject->getTrq() << "\n\n"; 
+            Vector3d frictionTorqueBody = -(hydroProps_[index]->getXitr() * vcdBody + hydroProps_[index]->getXirr() * omegaBody);
+            Vector3d frictionTorqueLab = Atrans * frictionTorqueBody;
+            integrableObject->addTrq(frictionTorqueLab + cross(rcrLab, frictionForceLab));
 
             //apply random force and torque at center of resistance
             Vector3d randomForceBody;
             Vector3d randomTorqueBody;
             genRandomForceAndTorque(randomForceBody, randomTorqueBody, index, variance_);
-            //std::cerr << "rfB = " << randomForceBody << "\n\n";
-            //std::cerr << "rtB = " << randomTorqueBody << "\n\n";
-            Vector3d randomForceLab = Atrans*randomForceBody;
-            Vector3d randomTorqueLab = Atrans* randomTorqueBody;
+            Vector3d randomForceLab = Atrans * randomForceBody;
+            Vector3d randomTorqueLab = Atrans * randomTorqueBody;
             integrableObject->addFrc(randomForceLab);            
-            //std::cerr << "rfL = " << randomForceLab << "\n\n";
-            //std::cerr << "rtL = " << randomTorqueLab << "\n\n";
-            //std::cerr << "rtL2 = " << randomTorqueLab + cross(rcr, randomForceLab) << "\n\n";
-            integrableObject->addTrq(randomTorqueLab + cross(rcr, randomForceLab ));             
+            integrableObject->addTrq(randomTorqueLab + cross(rcrLab, randomForceLab ));             
             
           } else {
             //spherical atom
             Vector3d frictionForce = -(hydroProps_[index]->getXitt() * vel);
-            //std::cerr << "xitt = " << hydroProps_[index]->getXitt() << "\n\n";
             Vector3d randomForce;
             Vector3d randomTorque;
             genRandomForceAndTorque(randomForce, randomTorque, index, variance_);
@@ -399,14 +376,10 @@ void LDForceManager::genRandomForceAndTorque(Vector3d& force, Vector3d& torque, 
     Z[0] = randNumGen_.randNorm(0, variance);
     Z[1] = randNumGen_.randNorm(0, variance);
     Z[2] = randNumGen_.randNorm(0, variance);
-    //Z[3] = randNumGen_.randNorm(0, variance)*(2.0*M_PI);
-    //Z[4] = randNumGen_.randNorm(0, variance)*(2.0*M_PI);
-    //Z[5] = randNumGen_.randNorm(0, variance)*(2.0*M_PI);
     Z[3] = randNumGen_.randNorm(0, variance);
     Z[4] = randNumGen_.randNorm(0, variance);
     Z[5] = randNumGen_.randNorm(0, variance);
      
-
     generalForce = hydroProps_[index]->getS()*Z;
     
     force[0] = generalForce[0];

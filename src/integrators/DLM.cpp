@@ -109,15 +109,17 @@ namespace oopse {
 
     // use a small angle aproximation for sin and cosine
 
-    //angleSqr = angle * angle;
-    //angleSqrOver4 = angleSqr / 4.0;
-    //top = 1.0 - angleSqrOver4;
-    //bottom = 1.0 + angleSqrOver4;
+    angleSqr = angle * angle;
+    angleSqrOver4 = angleSqr / 4.0;
+    top = 1.0 - angleSqrOver4;
+    bottom = 1.0 + angleSqrOver4;
 
-    //cosAngle = top / bottom;
-    //sinAngle = angle / bottom;
-    cosAngle = cos(angle);
-    sinAngle = sin(angle);
+    cosAngle = top / bottom;
+    sinAngle = angle / bottom;
+
+    // or don't use the small angle approximation:
+    //cosAngle = cos(angle);
+    //sinAngle = sin(angle);
     rot(axes1, axes1) = cosAngle;
     rot(axes2, axes2) = cosAngle;
 
@@ -127,11 +129,27 @@ namespace oopse {
     // rotate the momentum acoording to: ji[] = rot[][] * ji[]
     ji = rot * ji;
 
-    // rotate the Rotation matrix acording to:
-    // A[][] = A[][] * transpose(rot[][])
-    // transpose(A[][]) = transpose(A[][]) * transpose(rot[][])
 
-    A = rot * A; //? A = A* rot.transpose();
+    // This code comes from converting an algorithm detailed in 
+    // J. Chem. Phys. 107 (15), pp. 5840-5851 by Dullweber, 
+    // Leimkuhler and McLachlan (DLM) for use in our code.
+    // In Appendix A, the DLM paper has the change to the rotation 
+    // matrix as: Q = Q * rot.transpose(), but our rotation matrix 
+    // A is actually equivalent to Q.transpose(). This fact can be 
+    // seen on page 5849 of the DLM paper where a lab frame 
+    // dipole \mu_i(t) is expressed in terms of a body-fixed
+    // reference orientation, \bar{\mu_i} and the rotation matrix, Q:
+    //  \mu_i(t) = Q * \bar{\mu_i}
+    // Our code computes lab frame vectors from body-fixed reference
+    // vectors using:
+    //   v_{lab} = A.transpose() * v_{body}
+    //  (See StuntDouble.hpp for confirmation of this fact).
+    //
+    // So, using the identity:
+    //  (A * B).transpose() = B.transpose() * A.transpose(),  we
+    // get the equivalent of Q = Q * rot.transpose() for our code to be:
+
+    A = rot * A;
   
   }
 
