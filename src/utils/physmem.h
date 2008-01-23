@@ -6,10 +6,10 @@ extern "C" {
 #endif
 
   /** Return the total amount of physical memory.  */
-  RealType physmem_total ();
+  double physmem_total (void);
 
   /** Return the amount of physical memory available.  */
-  RealType physmem_available ();
+  double physmem_available (void);
 
 #ifdef  __cplusplus
 }
