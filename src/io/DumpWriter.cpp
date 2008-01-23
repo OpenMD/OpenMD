@@ -240,14 +240,15 @@ namespace oopse {
     os << "    <StuntDoubles>\n";
     for (mol = info_->beginMolecule(mi); mol != NULL; mol = info_->nextMolecule(mi)) {
 
-      for (integrableObject = mol->beginIntegrableObject(ii); integrableObject != NULL; 
+      
+      for (integrableObject = mol->beginIntegrableObject(ii); integrableObject != NULL;  
            integrableObject = mol->nextIntegrableObject(ii)) { 	
-        os << prepareDumpLine(integrableObject);
-
+          os << prepareDumpLine(integrableObject);
+          
       }
     }    
     os << "    </StuntDoubles>\n";
-
+    
     os << "  </Snapshot>\n";
 
     os.flush();
@@ -255,10 +256,11 @@ namespace oopse {
     //every node prepares the dump lines for integrable objects belong to itself
     std::string buffer;
     for (mol = info_->beginMolecule(mi); mol != NULL; mol = info_->nextMolecule(mi)) {
-      
+
+
       for (integrableObject = mol->beginIntegrableObject(ii); integrableObject != NULL; 
            integrableObject = mol->nextIntegrableObject(ii)) { 	
-        buffer += prepareDumpLine(integrableObject);
+          buffer += prepareDumpLine(integrableObject);
       }
     }
     
