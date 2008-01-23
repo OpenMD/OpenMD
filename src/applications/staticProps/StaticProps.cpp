@@ -185,7 +185,7 @@ int main(int argc, char* argv[]){
                        args_info.nbins_arg);        
   } else if (args_info.gofz_given) {
     analyser= new GofZ(info, dumpFileName, sele1, sele2, maxLen, 
-                       args_info.nbins_arg);        
+                       args_info.nbins_arg);
   } else if (args_info.r_theta_given) {
     analyser  = new GofRTheta(info, dumpFileName, sele1, sele2, maxLen, 
                               args_info.nbins_arg, args_info.nanglebins_arg);
