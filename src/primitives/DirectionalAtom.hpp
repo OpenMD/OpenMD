@@ -60,19 +60,19 @@ namespace oopse{
      * @return the inertia tensor of this stuntdouble
      */ 
     virtual Mat3x3d getI();            
-
+    
     /**
      * Sets  the previous rotation matrix of this stuntdouble
      * @param a  new rotation matrix 
      */         
     virtual void setPrevA(const RotMat3x3d& a);
-           
+    
     /**
      * Sets  the current rotation matrix of this stuntdouble
      * @param a  new rotation matrix 
      */         
     virtual void setA(const RotMat3x3d& a);
-
+    
     /**
      * Sets  the rotation matrix of this stuntdouble in specified snapshot
      * @param a rotation matrix to be set 
@@ -80,26 +80,23 @@ namespace oopse{
      * @see #getA
      */         
     virtual void setA(const RotMat3x3d& a, int snapshotNo);
-
+    
     /** 
      * Left multiple rotation matrix by another rotation matrix 
      * @param m a rotation matrix
      */
     void rotateBy(const RotMat3x3d& m);
-            
-
+        
     /**
      * Returns the gradient of this stuntdouble
      * @return the gradient of this stuntdouble
      */ 
     virtual std::vector<RealType> getGrad();
-
+    
     virtual void accept(BaseVisitor* v);
-                
+    
   protected:
-    RotMat3x3d electroBodyFrame_;               /**< body fixed standard eletrostatic frame */
-  };
-
+    RotMat3x3d electroBodyFrame_; // body fixed standard eletrostatic frame
+  };  
 }//namepace oopse
-
 #endif //PRIMITIVES_DIRECTIONALATOM_HPP

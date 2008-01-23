@@ -49,21 +49,21 @@
 namespace oopse {
   class CutoffGroup {
   public:
-
+    
     CutoffGroup() {
       haveTotalMass = false;
       totalMass = 0.0;
     }
-
+    
     void addAtom(Atom *atom) {
       cutoffAtomList.push_back(atom);
     }
-
+    
     Atom *beginAtom(std::vector<Atom *>::iterator & i) {
       i = cutoffAtomList.begin();
       return i != cutoffAtomList.end() ? *i : NULL;
     }
-
+    
     Atom *nextAtom(std::vector<Atom *>::iterator & i) {
       i++;
       return i != cutoffAtomList.end() ? *i : NULL;
@@ -74,32 +74,32 @@ namespace oopse {
       std::vector<Atom *>::iterator i;
       Atom * atom;
       RealType mass;
-
+      
       if (!haveTotalMass) {
 	totalMass = 0;
-
+        
 	for(atom = beginAtom(i); atom != NULL; atom = nextAtom(i)) {
 	  mass = atom->getMass();
 	  totalMass += mass;
 	}
-
+        
 	haveTotalMass = true;
       }
-
+      
       return totalMass;
     }
-
+    
     void getCOM(Vector3d & com) {
       std::vector<Atom *>::iterator i;
       Atom * atom;
       Vector3d pos;
       RealType mass;
-
+      
       com[0] = 0;
       com[1] = 0;
       com[2] = 0;
       totalMass = getMass();
-
+      
       if (cutoffAtomList.size() == 1) {
 	com = beginAtom(i)->getPos();
       } else {
@@ -108,31 +108,29 @@ namespace oopse {
 	  pos = atom->getPos();
 	  com += pos * mass;
 	}
-
+        
 	com /= totalMass;
       }
     }
-
+    
     int getNumAtom() {
       return cutoffAtomList.size();
     }
-
+    
     int getGlobalIndex() {
       return globalIndex;
     }
-
+    
     void setGlobalIndex(int id) {
       this->globalIndex = id;
     }
-
+    
   private:
-
+    
     std::vector<Atom *>cutoffAtomList;
     bool haveTotalMass;
     RealType totalMass;
     int globalIndex;
-  };
-
-}      //end namespace oopse
-
+  };  
+} //end namespace oopse
 #endif //PRIMITIVES_CUTOFFGROUP_HPP  

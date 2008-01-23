@@ -56,23 +56,23 @@ namespace oopse{
   class Atom : public StuntDouble {
   public:
     Atom(AtomType* at);
-
+    
     virtual std::string getType() {return atomType_->getName();}
-        
+    
     /**
      * Returns the inertia tensor of this stuntdouble
      * @return the inertia tensor of this stuntdouble
      */ 
     virtual Mat3x3d getI();
-
+    
     /**
      * Returns the gradient of this stuntdouble
      * @return the inertia tensor of this stuntdouble
      */ 
     virtual std::vector<RealType> getGrad();
-
+    
     virtual void accept(BaseVisitor* v);
-
+    
     /** 
      * Returns the AtomType of this Atom.
      * @return the atom type of this atom
@@ -80,48 +80,48 @@ namespace oopse{
     AtomType* getAtomType() {
       return atomType_;
     }
-            
+    
     //forward  functions of AtomType class
-    bool    isCharge()  {
+    bool isCharge()  {
       return atomType_->isCharge(); 
     }
-            
-    bool    isDirectional() {
+    
+    bool isDirectional() {
       return atomType_->isDirectional(); 
     }
-
-    bool    isDipole()  { 
+    
+    bool isDipole()  { 
       return atomType_->isDipole(); 
     }
 
-    bool    isQudrapole()  { 
+    bool isQudrapole()  { 
       return atomType_->isQuadrupole(); 
     }
-            
-    bool    isMultipole()  { 
+    
+    bool isMultipole()  { 
       return atomType_->isMultipole(); 
     }
-            
-    bool    isGayBerne()  {
+    
+    bool isGayBerne()  {
       return atomType_->isGayBerne(); 
     }
             
-    bool    isSticky()  { 
+    bool isSticky()  { 
       return atomType_->isSticky(); 
     }
 
-    bool    isShape()  { 
+    bool isShape()  { 
       return atomType_->isShape(); 
     }            
-
+    
     int getIdent() {
       return atomType_->getIdent();
     }
-            
+    
   protected:
     AtomType* atomType_;
   };
-
+  
 }//namepace oopse
 
 #endif //PRIMITIVES_ATOM_HPP

@@ -38,31 +38,31 @@
  * University of Notre Dame has been advised of the possibility of
  * such damages.
  */
- 
+
 #include "primitives/Atom.hpp"
 namespace oopse {
-
-  Atom::Atom(AtomType* at) : StuntDouble(otAtom, &Snapshot::atomData) ,atomType_(at) {
+  
+  Atom::Atom(AtomType* at) : StuntDouble(otAtom, &Snapshot::atomData),
+                             atomType_(at) {
     mass_ = at->getMass();
   }
 
   Mat3x3d Atom::getI() {
     return Mat3x3d::identity();
   }    
-
+  
   std::vector<RealType> Atom::getGrad() {
     std::vector<RealType> grad(3);
     Vector3d force= getFrc();
-
+    
     grad[0] = -force[0];
     grad[1] = -force[1];
     grad[2] = -force[2];
     
     return grad;
   }    
-
+  
   void Atom::accept(BaseVisitor* v) {
     v->visit(this);
-  }    
-
+  }      
 }

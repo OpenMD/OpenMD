@@ -54,52 +54,51 @@
 #include "types/BondType.hpp"
 
 namespace oopse {
-
+  
   class Bond {
   public:
-    Bond(Atom* atom1, Atom* atom2, BondType* bt) : atom1_(atom1), atom2_(atom2), bondType_(bt) {}
+    Bond(Atom* atom1, Atom* atom2, BondType* bt) : atom1_(atom1), 
+                                                   atom2_(atom2), 
+                                                   bondType_(bt) {}
     virtual ~Bond() {}
     void calcForce() {
       RealType len;
       RealType dvdr;
       Vector3d r12;
       Vector3d force;
-
+      
       r12 = atom2_->getPos() - atom1_->getPos();
       len = r12.length();            
       bondType_->calcForce(len,  potential_, dvdr);
-
+      
       force = r12 * (-dvdr / len);
-            
+      
       atom1_->addFrc(-force);
       atom2_->addFrc(force);
     }
-        
+    
     RealType getPotential() {
       return potential_;
     }
-
+    
     Atom* getAtomA() {
       return atom1_;
     }
-
+    
     Atom* getAtomB() {
       return atom2_;
     }
-
+    
     BondType* getBondType() {
       return bondType_;
     }
-        
+    
   private:
     RealType potential_;
     Atom* atom1_;
     Atom* atom2_;        
     BondType* bondType_; /**< bond type */
-
+    
   };    
-
-
-
 } //end namespace oopse
 #endif //PRIMITIVES_BOND_HPP

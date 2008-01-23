@@ -54,17 +54,17 @@
 #include "primitives/DirectionalAtom.hpp"
 
 namespace oopse {
-
+  
   class GhostTorsion : public Torsion {
   public:
-
+    
     GhostTorsion(Atom *atom1, Atom *atom2,  DirectionalAtom* ghostAtom,
 		 TorsionType* tt);
-
+    
     virtual void calcForce(RealType& angle);
-        
+    
   };
-
+  
 } //end namespace oopse
 
 #endif //PRIMITIVES_GHOSTBEND_HPP

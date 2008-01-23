@@ -42,21 +42,22 @@
 #include "primitives/GhostTorsion.hpp"
 
 namespace oopse {
-
-  GhostTorsion::GhostTorsion(Atom *atom1, Atom *atom2,  DirectionalAtom* ghostAtom,
-			     TorsionType *tt) : Torsion(atom1, atom2, ghostAtom, ghostAtom, tt) {}
-
+  
+  GhostTorsion::GhostTorsion(Atom *atom1, Atom *atom2,  
+                             DirectionalAtom* ghostAtom, TorsionType *tt) 
+    : Torsion(atom1, atom2, ghostAtom, ghostAtom, tt) {}
+  
   void GhostTorsion::calcForce(RealType& angle) {
     DirectionalAtom* ghostAtom = static_cast<DirectionalAtom*>(atom3_);    
-
+    
     Vector3d pos1 = atom1_->getPos();
     Vector3d pos2 = atom2_->getPos();
     Vector3d pos3 = ghostAtom->getPos();
-
+    
     Vector3d r21 = pos1 - pos2;
     Vector3d r32 = pos2 - pos3;
     Vector3d r43 = ghostAtom->getElectroFrame().getColumn(2);
-
+    
     //  Calculate the cross products and distances
     Vector3d A = cross(r21, r32);
     RealType rA = A.length();
@@ -64,34 +65,33 @@ namespace oopse {
     RealType rB = B.length();
     Vector3d C = cross(r32, A);
     RealType rC = C.length();
-
+    
     A.normalize();
     B.normalize();
     C.normalize();
     
     //  Calculate the sin and cos
     RealType cos_phi = dot(A, B) ;
-
+    
     RealType dVdcosPhi;
     torsionType_->calcForce(cos_phi, potential_, dVdcosPhi);
-
+    
     Vector3d dcosdA = (cos_phi * A - B) /rA;
     Vector3d dcosdB = (cos_phi * B - A) /rB;
-
+    
     Vector3d f1 = dVdcosPhi * cross(r32, dcosdA);
     Vector3d f2 = dVdcosPhi * ( cross(r43, dcosdB) - cross(r21, dcosdA));
     Vector3d f3 = dVdcosPhi * cross(dcosdB, r32);
-
+    
     atom1_->addFrc(f1);
     atom2_->addFrc(f2 - f1);
-
+    
     ghostAtom->addFrc(-f2);
-
+    
     f3.negate();
     ghostAtom->addTrq(cross(r43, f3));    
-
+    
     angle = acos(cos_phi) /M_PI * 180.0;
   }
-
 }
 

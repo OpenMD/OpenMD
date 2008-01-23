@@ -49,51 +49,50 @@ namespace oopse {
     
     Vector3d pos1 = atom1_->getPos();
     Vector3d pos2 = ghostAtom->getPos();
-
+    
     Vector3d r12 = pos1 - pos2;
     RealType d12 = r12.length();
-
+    
     RealType d12inv = 1.0 / d12;
-
+    
     Vector3d r32 = ghostAtom->getElectroFrame().getColumn(2);
     RealType d32 = r32.length();
-
+    
     RealType d32inv = 1.0 / d32;
-
+    
     RealType cosTheta = dot(r12, r32) / (d12 * d32);
-
+    
     //check roundoff     
     if (cosTheta > 1.0) {
       cosTheta = 1.0;
     } else if (cosTheta < -1.0) {
       cosTheta = -1.0;
     }
-
+    
     RealType theta = acos(cosTheta);
-
+    
     RealType firstDerivative;
-
+    
     bendType_->calcForce(theta, firstDerivative, potential_);
-
+    
     RealType sinTheta = sqrt(1.0 - cosTheta * cosTheta);
-
+    
     if (fabs(sinTheta) < 1.0E-12) {
       sinTheta = 1.0E-12;
     }
-
+    
     RealType commonFactor1 = -firstDerivative / sinTheta * d12inv;
     RealType commonFactor2 = -firstDerivative / sinTheta * d32inv;
-
+    
     Vector3d force1 = commonFactor1*(r12*(d12inv*cosTheta) - r32*d32inv);
     Vector3d force3 = commonFactor2*(r32*(d32inv*cosTheta) - r12*d12inv);
     atom1_->addFrc(force1);
     ghostAtom->addFrc(-force1);
     /**@todo test correctness */
     ghostAtom->addTrq(cross(r32, force3) );
-
+    
     angle = theta /M_PI * 180.0;
-
-  }
-
+    
+  }  
 } //end namespace oopse
 

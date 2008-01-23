@@ -77,14 +77,14 @@ namespace oopse{
     typedef std::vector<Torsion*>::iterator TorsionIterator;
     typedef std::vector<RigidBody*>::iterator RigidBodyIterator;
     typedef std::vector<CutoffGroup*>::iterator CutoffGroupIterator;
-    typedef std::vector<StuntDouble*>::iterator IntegrableObjectIterator;        
+    typedef std::vector<StuntDouble*>::iterator IntegrableObjectIterator;
     typedef std::vector<ConstraintPair*>::iterator ConstraintPairIterator;
     typedef std::vector<ConstraintElem*>::iterator ConstraintElemIterator;
-        
-
+    
+    
     Molecule(int stampId, int globalIndex, const std::string& molName);
     virtual ~Molecule();
-
+    
     /**
      * Returns the global index of this molecule.
      * @return  the global index of this molecule 
@@ -92,21 +92,23 @@ namespace oopse{
     int getGlobalIndex() {
       return globalIndex_;
     }
-
+    
     /**
      * Returns the stamp id of this molecule
-     * @note Ideally, every molecule should keep a pointer of its molecule stamp instead of its
-     * stamp id. However, the pointer will become invalid, if the molecule migrate to other processor.
+     * @note Ideally, every molecule should keep a pointer of its
+     * molecule stamp instead of its stamp id. However, the pointer
+     * will become invalid, if the molecule migrate to other
+     * processor.
      */
     int getStampId() {
       return stampId_;
     }
-
+    
     /** Returns the name of the molecule */
     std::string getType() {
       return moleculeName_;
     }
-        
+    
     /**
      * Sets the global index of this molecule.
      * @param new global index to be set
@@ -114,186 +116,189 @@ namespace oopse{
     void setGlobalIndex(int index) {
       globalIndex_ = index;
     }
-
-        
+    
+    
     /** add an atom into this molecule */
     void addAtom(Atom* atom);
-
+    
     /** add a bond into this molecule */
     void addBond(Bond* bond);
-
+    
     /** add a bend into this molecule */
     void addBend(Bend* bend);
-
+    
     /** add a torsion into this molecule*/
     void addTorsion(Torsion* torsion);
-
+    
     /** add a rigidbody into this molecule */
     void addRigidBody(RigidBody *rb);
-
+    
     /** add a cutoff group into this molecule */
     void addCutoffGroup(CutoffGroup* cp);     
-
+    
     void addConstraintPair(ConstraintPair* consPair);
-        
+    
     void addConstraintElem(ConstraintElem* consElem);
-
+    
     /** */
     void complete();
-
+    
     /** Returns the total number of atoms in this molecule */
     unsigned int getNAtoms() {
       return atoms_.size();
     }
-
+    
     /** Returns the total number of bonds in this molecule */        
     unsigned int getNBonds(){
       return bonds_.size();
     }
-
+    
     /** Returns the total number of bends in this molecule */        
     unsigned int getNBends() {
       return bends_.size();
     }
-
+    
     /** Returns the total number of torsions in this molecule */        
     unsigned int getNTorsions() {
       return torsions_.size();
     }
-
+    
     /** Returns the total number of rigid bodies in this molecule */        
     unsigned int getNRigidBodies() {
       return rigidBodies_.size();
     }
-
+    
     /** Returns the total number of integrable objects in this molecule */
     unsigned int getNIntegrableObjects() {
       return integrableObjects_.size();
     }
-
+    
     /** Returns the total number of cutoff groups in this molecule */
     unsigned int getNCutoffGroups() {
       return cutoffGroups_.size();
     }
-
+    
     /** Returns the total number of constraints in this molecule */
     unsigned int getNConstraintPairs() {
       return constraintPairs_.size();
     }
-
+    
     Atom* getAtomAt(unsigned int i) {
       assert(i < atoms_.size());
       return atoms_[i];
     }
-
+    
     RigidBody* getRigidBodyAt(unsigned int i) {
       assert(i < rigidBodies_.size());
       return rigidBodies_[i];
     }
-        
+    
     Atom* beginAtom(std::vector<Atom*>::iterator& i) {
       i = atoms_.begin();
       return (i == atoms_.end()) ? NULL : *i;
     }
-
+    
     Atom* nextAtom(std::vector<Atom*>::iterator& i) {
       ++i;
       return (i == atoms_.end()) ? NULL : *i;    
     }
-
+    
     Bond* beginBond(std::vector<Bond*>::iterator& i) {
       i = bonds_.begin();
       return (i == bonds_.end()) ? NULL : *i;
     }
-
+    
     Bond* nextBond(std::vector<Bond*>::iterator& i) {
       ++i;
       return (i == bonds_.end()) ? NULL : *i;    
-
+      
     }
-
+    
     Bend* beginBend(std::vector<Bend*>::iterator& i) {
       i = bends_.begin();
       return (i == bends_.end()) ? NULL : *i;
     }
-
+    
     Bend* nextBend(std::vector<Bend*>::iterator& i) {
       ++i;
       return (i == bends_.end()) ? NULL : *i;    
     }
-
+    
     Torsion* beginTorsion(std::vector<Torsion*>::iterator& i) {
       i = torsions_.begin();
       return (i == torsions_.end()) ? NULL : *i;
     }
-
+    
     Torsion* nextTorsion(std::vector<Torsion*>::iterator& i) {
       ++i;
       return (i == torsions_.end()) ? NULL : *i;    
     }    
-
+    
     RigidBody* beginRigidBody(std::vector<RigidBody*>::iterator& i) {
       i = rigidBodies_.begin();
       return (i == rigidBodies_.end()) ? NULL : *i;
     }
-
+    
     RigidBody* nextRigidBody(std::vector<RigidBody*>::iterator& i) {
       ++i;
       return (i == rigidBodies_.end()) ? NULL : *i;    
     }
-
+    
     StuntDouble* beginIntegrableObject(std::vector<StuntDouble*>::iterator& i) {
       i = integrableObjects_.begin();
       return (i == integrableObjects_.end()) ? NULL : *i;
     }
-
+    
     StuntDouble* nextIntegrableObject(std::vector<StuntDouble*>::iterator& i) {
       ++i;
       return (i == integrableObjects_.end()) ? NULL : *i;    
     }    
-
+    
     CutoffGroup* beginCutoffGroup(std::vector<CutoffGroup*>::iterator& i) {
       i = cutoffGroups_.begin();
       return (i == cutoffGroups_.end()) ? NULL : *i;
     }
 
-    CutoffGroup* nextCutoffGroup(std::vector<CutoffGroup*>::iterator& i) {            
+    CutoffGroup* nextCutoffGroup(std::vector<CutoffGroup*>::iterator& i) {
       ++i;
       return (i == cutoffGroups_.end()) ? NULL : *i;    
     } 
-
+    
     ConstraintPair* beginConstraintPair(std::vector<ConstraintPair*>::iterator& i) {
       i = constraintPairs_.begin();
       return (i == constraintPairs_.end()) ? NULL : *i;
     }
-
+    
     ConstraintPair* nextConstraintPair(std::vector<ConstraintPair*>::iterator& i) {            
       ++i;
       return (i == constraintPairs_.end()) ? NULL : *i;    
     }         
-
+    
     ConstraintElem* beginConstraintElem(std::vector<ConstraintElem*>::iterator& i) {
       i = constraintElems_.begin();
       return (i == constraintElems_.end()) ? NULL : *i;
     }
-
+    
     ConstraintElem* nextConstraintElem(std::vector<ConstraintElem*>::iterator& i) {            
       ++i;
       return (i == constraintElems_.end()) ? NULL : *i;    
     }
-        
-    /** return the total potential energy of short range interaction of this molecule */
+    
+    /** 
+     * Returns the total potential energy of short range interaction
+     * of this molecule 
+     */    
     RealType getPotential();
-
+    
     /** get total mass of this molecule */        
     RealType getMass();
-
+    
     /** return the center of mass of this molecule */
     Vector3d getCom();
-
+    
     /** Moves the center of this molecule */
     void moveCom(const Vector3d& delta);
-
+    
     /** Returns the velocity of center of mass of this molecule */
     Vector3d getComVel();
 
@@ -302,11 +307,11 @@ namespace oopse{
     }
         
     friend std::ostream& operator <<(std::ostream& o, Molecule& mol);
-        
+    
   private:
-        
+    
     int globalIndex_;
-
+    
     std::vector<Atom*> atoms_;
     std::vector<Bond*> bonds_;
     std::vector<Bend*> bends_;

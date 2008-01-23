@@ -44,23 +44,23 @@
 #include "utils/simError.h"
 #include "utils/NumericConstant.hpp"
 namespace oopse {
-
-  RigidBody::RigidBody() : StuntDouble(otRigidBody, &Snapshot::rigidbodyData), inertiaTensor_(0.0){
-
+  
+  RigidBody::RigidBody() : StuntDouble(otRigidBody, &Snapshot::rigidbodyData),
+                           inertiaTensor_(0.0){    
   }
-
+  
   void RigidBody::setPrevA(const RotMat3x3d& a) {
     ((snapshotMan_->getPrevSnapshot())->*storage_).aMat[localIndex_] = a;
-
+    
     for (int i =0 ; i < atoms_.size(); ++i){
       if (atoms_[i]->isDirectional()) {
 	atoms_[i]->setPrevA(refOrients_[i].transpose() * a);
       }
     }
-
+    
   }
-
-      
+  
+  
   void RigidBody::setA(const RotMat3x3d& a) {
     ((snapshotMan_->getCurrentSnapshot())->*storage_).aMat[localIndex_] = a;
 
@@ -70,23 +70,24 @@ namespace oopse {
       }
     }
   }    
-    
+  
   void RigidBody::setA(const RotMat3x3d& a, int snapshotNo) {
     ((snapshotMan_->getSnapshot(snapshotNo))->*storage_).aMat[localIndex_] = a;
+    
     //((snapshotMan_->getSnapshot(snapshotNo))->*storage_).electroFrame[localIndex_] = a.transpose() * sU_;    
-
+    
     for (int i =0 ; i < atoms_.size(); ++i){
       if (atoms_[i]->isDirectional()) {
 	atoms_[i]->setA(refOrients_[i].transpose() * a, snapshotNo);
       }
     }
-
+    
   }   
-
+  
   Mat3x3d RigidBody::getI() {
     return inertiaTensor_;
   }    
-
+  
   std::vector<RealType> RigidBody::getGrad() {
     std::vector<RealType> grad(6, 0.0);
     Vector3d force;
@@ -97,49 +98,49 @@ namespace oopse {
     Vector3d ephi;
     Vector3d etheta;
     Vector3d epsi;
-
+    
     force = getFrc();
     torque =getTrq();
     myEuler = getA().toEulerAngles();
-
+    
     phi = myEuler[0];
     theta = myEuler[1];
     psi = myEuler[2];
-
+    
     cphi = cos(phi);
     sphi = sin(phi);
     ctheta = cos(theta);
     stheta = sin(theta);
-
+    
     // get unit vectors along the phi, theta and psi rotation axes
-
+    
     ephi[0] = 0.0;
     ephi[1] = 0.0;
     ephi[2] = 1.0;
-
+    
     etheta[0] = cphi;
     etheta[1] = sphi;
     etheta[2] = 0.0;
-
+    
     epsi[0] = stheta * cphi;
     epsi[1] = stheta * sphi;
     epsi[2] = ctheta;
-
+    
     //gradient is equal to -force
     for (int j = 0 ; j<3; j++)
       grad[j] = -force[j];
-
+    
     for (int j = 0; j < 3; j++ ) {
-
+      
       grad[3] += torque[j]*ephi[j];
       grad[4] += torque[j]*etheta[j];
       grad[5] += torque[j]*epsi[j];
-
+      
     }
     
     return grad;
   }    
-
+  
   void RigidBody::accept(BaseVisitor* v) {
     v->visit(this);
   }    
@@ -155,7 +156,7 @@ namespace oopse {
       refCOM += refCoords_[i]*mtmp;
     }
     refCOM /= mass_;
-
+    
     // Next, move the origin of the reference coordinate system to the COM:
     for (std::size_t i = 0; i < atoms_.size(); ++i) {
       refCoords_[i] -= refCOM;
@@ -172,7 +173,7 @@ namespace oopse {
       IAtom(1, 1) += mtmp * r2;
       IAtom(2, 2) += mtmp * r2;
       Itmp += IAtom;
-
+      
       //project the inertial moment of directional atoms into this rigid body
       if (atoms_[i]->isDirectional()) {
         Itmp += refOrients_[i].transpose() * atoms_[i]->getI() * refOrients_[i];
@@ -252,13 +253,14 @@ namespace oopse {
     Vector3d atrq;
     Vector3d apos;
     Vector3d rpos;
+    Vector3d dfrc;
     Vector3d frc(0.0);
     Vector3d trq(0.0);    
     Vector3d pos = this->getPos();
     Mat3x3d tau_(0.0);
 
     for (int i = 0; i < atoms_.size(); i++) {
-
+      
       afrc = atoms_[i]->getFrc();
       apos = atoms_[i]->getPos();
       rpos = apos - pos;
@@ -286,8 +288,8 @@ namespace oopse {
       tau_(2,0) -= rpos[2]*afrc[0];
       tau_(2,1) -= rpos[2]*afrc[1];
       tau_(2,2) -= rpos[2]*afrc[2];
-      
-    }         
+
+    }
     addFrc(frc);
     addTrq(trq);
     return tau_;

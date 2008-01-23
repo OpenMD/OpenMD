@@ -52,57 +52,54 @@
 #include "primitives/Atom.hpp"
 #include "types/BendType.hpp"
 namespace oopse {
-struct BendData {
+  struct BendData {
     RealType angle;
     RealType potential;
-};
-
-struct BendDataSet {
+  };
+  
+  struct BendDataSet {
     RealType deltaV;
     BendData prev;
     BendData curr;
-};
-
+  };
+  
   class Bend {
   public:
     Bend(Atom* atom1, Atom* atom2, Atom* atom3, BendType* bt)
       : atom1_(atom1), atom2_(atom2), atom3_(atom3), bendType_(bt) {}
-
+    
     virtual ~Bend() {}
     virtual void calcForce(RealType& angle);
-        
+    
     RealType getPotential() {
       return potential_;
     }
-
+    
     Atom* getAtomA() {
       return atom1_;
     }
-
+    
     Atom* getAtomB() {
       return atom2_;
     }
-
+    
     Atom* getAtomC() {
       return atom3_;
     }
-
+    
     BendType * getBendType() {
       return bendType_;
     }
-
+    
   protected:
-        
+    
     RealType potential_;
     Atom* atom1_;
     Atom* atom2_;
     Atom* atom3_;
     BendType* bendType_; /**< bend type */
-
+    
   };    
-
-
-
 } //end namespace oopse
 #endif //PRIMITIVES_BEND_HPP
 
