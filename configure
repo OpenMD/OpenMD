@@ -8508,18 +8508,18 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
         OPENBABEL_OLD_CPPFLAGS=$CPPFLAGS
         LDFLAGS="$LDFLAGS -L${OPENBABEL_HOME}/lib -lopenbabel"
         CPPFLAGS="$CPPFLAGS -I${OPENBABEL_HOME}/include/openbabel-2.0"
-        if test "${ac_cv_header_openbabel_2_0_openbabel_babelconfig_h+set}" = set; then
-  { echo "$as_me:$LINENO: checking for openbabel-2.0/openbabel/babelconfig.h" >&5
-echo $ECHO_N "checking for openbabel-2.0/openbabel/babelconfig.h... $ECHO_C" >&6; }
-if test "${ac_cv_header_openbabel_2_0_openbabel_babelconfig_h+set}" = set; then
+        if test "${ac_cv_header_openbabel_babelconfig_h+set}" = set; then
+  { echo "$as_me:$LINENO: checking for openbabel/babelconfig.h" >&5
+echo $ECHO_N "checking for openbabel/babelconfig.h... $ECHO_C" >&6; }
+if test "${ac_cv_header_openbabel_babelconfig_h+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 fi
-{ echo "$as_me:$LINENO: result: $ac_cv_header_openbabel_2_0_openbabel_babelconfig_h" >&5
-echo "${ECHO_T}$ac_cv_header_openbabel_2_0_openbabel_babelconfig_h" >&6; }
+{ echo "$as_me:$LINENO: result: $ac_cv_header_openbabel_babelconfig_h" >&5
+echo "${ECHO_T}$ac_cv_header_openbabel_babelconfig_h" >&6; }
 else
   # Is the header compilable?
-{ echo "$as_me:$LINENO: checking openbabel-2.0/openbabel/babelconfig.h usability" >&5
-echo $ECHO_N "checking openbabel-2.0/openbabel/babelconfig.h usability... $ECHO_C" >&6; }
+{ echo "$as_me:$LINENO: checking openbabel/babelconfig.h usability" >&5
+echo $ECHO_N "checking openbabel/babelconfig.h usability... $ECHO_C" >&6; }
 cat >conftest.$ac_ext <<_ACEOF
 /* confdefs.h.  */
 _ACEOF
@@ -8527,7 +8527,7 @@ cat confdefs.h >>conftest.$ac_ext
 cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
 $ac_includes_default
-#include <openbabel-2.0/openbabel/babelconfig.h>
+#include <openbabel/babelconfig.h>
 _ACEOF
 rm -f conftest.$ac_objext
 if { (ac_try="$ac_compile"
@@ -8559,15 +8559,15 @@ rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 echo "${ECHO_T}$ac_header_compiler" >&6; }
 
 # Is the header present?
-{ echo "$as_me:$LINENO: checking openbabel-2.0/openbabel/babelconfig.h presence" >&5
-echo $ECHO_N "checking openbabel-2.0/openbabel/babelconfig.h presence... $ECHO_C" >&6; }
+{ echo "$as_me:$LINENO: checking openbabel/babelconfig.h presence" >&5
+echo $ECHO_N "checking openbabel/babelconfig.h presence... $ECHO_C" >&6; }
 cat >conftest.$ac_ext <<_ACEOF
 /* confdefs.h.  */
 _ACEOF
 cat confdefs.h >>conftest.$ac_ext
 cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
-#include <openbabel-2.0/openbabel/babelconfig.h>
+#include <openbabel/babelconfig.h>
 _ACEOF
 if { (ac_try="$ac_cpp conftest.$ac_ext"
 case "(($ac_try" in
@@ -8600,25 +8600,25 @@ echo "${ECHO_T}$ac_header_preproc" >&6; }
 # So?  What about this header?
 case $ac_header_compiler:$ac_header_preproc:$ac_cxx_preproc_warn_flag in
   yes:no: )
-    { echo "$as_me:$LINENO: WARNING: openbabel-2.0/openbabel/babelconfig.h: accepted by the compiler, rejected by the preprocessor!" >&5
-echo "$as_me: WARNING: openbabel-2.0/openbabel/babelconfig.h: accepted by the compiler, rejected by the preprocessor!" >&2;}
-    { echo "$as_me:$LINENO: WARNING: openbabel-2.0/openbabel/babelconfig.h: proceeding with the compiler's result" >&5
-echo "$as_me: WARNING: openbabel-2.0/openbabel/babelconfig.h: proceeding with the compiler's result" >&2;}
+    { echo "$as_me:$LINENO: WARNING: openbabel/babelconfig.h: accepted by the compiler, rejected by the preprocessor!" >&5
+echo "$as_me: WARNING: openbabel/babelconfig.h: accepted by the compiler, rejected by the preprocessor!" >&2;}
+    { echo "$as_me:$LINENO: WARNING: openbabel/babelconfig.h: proceeding with the compiler's result" >&5
+echo "$as_me: WARNING: openbabel/babelconfig.h: proceeding with the compiler's result" >&2;}
     ac_header_preproc=yes
     ;;
   no:yes:* )
-    { echo "$as_me:$LINENO: WARNING: openbabel-2.0/openbabel/babelconfig.h: present but cannot be compiled" >&5
-echo "$as_me: WARNING: openbabel-2.0/openbabel/babelconfig.h: present but cannot be compiled" >&2;}
-    { echo "$as_me:$LINENO: WARNING: openbabel-2.0/openbabel/babelconfig.h:     check for missing prerequisite headers?" >&5
-echo "$as_me: WARNING: openbabel-2.0/openbabel/babelconfig.h:     check for missing prerequisite headers?" >&2;}
-    { echo "$as_me:$LINENO: WARNING: openbabel-2.0/openbabel/babelconfig.h: see the Autoconf documentation" >&5
-echo "$as_me: WARNING: openbabel-2.0/openbabel/babelconfig.h: see the Autoconf documentation" >&2;}
-    { echo "$as_me:$LINENO: WARNING: openbabel-2.0/openbabel/babelconfig.h:     section \"Present But Cannot Be Compiled\"" >&5
-echo "$as_me: WARNING: openbabel-2.0/openbabel/babelconfig.h:     section \"Present But Cannot Be Compiled\"" >&2;}
-    { echo "$as_me:$LINENO: WARNING: openbabel-2.0/openbabel/babelconfig.h: proceeding with the preprocessor's result" >&5
-echo "$as_me: WARNING: openbabel-2.0/openbabel/babelconfig.h: proceeding with the preprocessor's result" >&2;}
-    { echo "$as_me:$LINENO: WARNING: openbabel-2.0/openbabel/babelconfig.h: in the future, the compiler will take precedence" >&5
-echo "$as_me: WARNING: openbabel-2.0/openbabel/babelconfig.h: in the future, the compiler will take precedence" >&2;}
+    { echo "$as_me:$LINENO: WARNING: openbabel/babelconfig.h: present but cannot be compiled" >&5
+echo "$as_me: WARNING: openbabel/babelconfig.h: present but cannot be compiled" >&2;}
+    { echo "$as_me:$LINENO: WARNING: openbabel/babelconfig.h:     check for missing prerequisite headers?" >&5
+echo "$as_me: WARNING: openbabel/babelconfig.h:     check for missing prerequisite headers?" >&2;}
+    { echo "$as_me:$LINENO: WARNING: openbabel/babelconfig.h: see the Autoconf documentation" >&5
+echo "$as_me: WARNING: openbabel/babelconfig.h: see the Autoconf documentation" >&2;}
+    { echo "$as_me:$LINENO: WARNING: openbabel/babelconfig.h:     section \"Present But Cannot Be Compiled\"" >&5
+echo "$as_me: WARNING: openbabel/babelconfig.h:     section \"Present But Cannot Be Compiled\"" >&2;}
+    { echo "$as_me:$LINENO: WARNING: openbabel/babelconfig.h: proceeding with the preprocessor's result" >&5
+echo "$as_me: WARNING: openbabel/babelconfig.h: proceeding with the preprocessor's result" >&2;}
+    { echo "$as_me:$LINENO: WARNING: openbabel/babelconfig.h: in the future, the compiler will take precedence" >&5
+echo "$as_me: WARNING: openbabel/babelconfig.h: in the future, the compiler will take precedence" >&2;}
     ( cat <<\_ASBOX
 ## ------------------------------ ##
 ## Report this to gezelter@nd.edu ##
@@ -8627,36 +8627,36 @@ _ASBOX
      ) | sed "s/^/$as_me: WARNING:     /" >&2
     ;;
 esac
-{ echo "$as_me:$LINENO: checking for openbabel-2.0/openbabel/babelconfig.h" >&5
-echo $ECHO_N "checking for openbabel-2.0/openbabel/babelconfig.h... $ECHO_C" >&6; }
-if test "${ac_cv_header_openbabel_2_0_openbabel_babelconfig_h+set}" = set; then
+{ echo "$as_me:$LINENO: checking for openbabel/babelconfig.h" >&5
+echo $ECHO_N "checking for openbabel/babelconfig.h... $ECHO_C" >&6; }
+if test "${ac_cv_header_openbabel_babelconfig_h+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
-  ac_cv_header_openbabel_2_0_openbabel_babelconfig_h=$ac_header_preproc
+  ac_cv_header_openbabel_babelconfig_h=$ac_header_preproc
 fi
-{ echo "$as_me:$LINENO: result: $ac_cv_header_openbabel_2_0_openbabel_babelconfig_h" >&5
-echo "${ECHO_T}$ac_cv_header_openbabel_2_0_openbabel_babelconfig_h" >&6; }
+{ echo "$as_me:$LINENO: result: $ac_cv_header_openbabel_babelconfig_h" >&5
+echo "${ECHO_T}$ac_cv_header_openbabel_babelconfig_h" >&6; }
 
 fi
-if test $ac_cv_header_openbabel_2_0_openbabel_babelconfig_h = yes; then
+if test $ac_cv_header_openbabel_babelconfig_h = yes; then
   openbabel_cv_openbabel_h=yes
 else
   openbabel_cv_openbabel_h=no
 fi
 
 
-        if test "${ac_cv_header_openbabel_2_0_openbabel_obconversion_h+set}" = set; then
-  { echo "$as_me:$LINENO: checking for openbabel-2.0/openbabel/obconversion.h" >&5
-echo $ECHO_N "checking for openbabel-2.0/openbabel/obconversion.h... $ECHO_C" >&6; }
-if test "${ac_cv_header_openbabel_2_0_openbabel_obconversion_h+set}" = set; then
+        if test "${ac_cv_header_openbabel_obconversion_h+set}" = set; then
+  { echo "$as_me:$LINENO: checking for openbabel/obconversion.h" >&5
+echo $ECHO_N "checking for openbabel/obconversion.h... $ECHO_C" >&6; }
+if test "${ac_cv_header_openbabel_obconversion_h+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 fi
-{ echo "$as_me:$LINENO: result: $ac_cv_header_openbabel_2_0_openbabel_obconversion_h" >&5
-echo "${ECHO_T}$ac_cv_header_openbabel_2_0_openbabel_obconversion_h" >&6; }
+{ echo "$as_me:$LINENO: result: $ac_cv_header_openbabel_obconversion_h" >&5
+echo "${ECHO_T}$ac_cv_header_openbabel_obconversion_h" >&6; }
 else
   # Is the header compilable?
-{ echo "$as_me:$LINENO: checking openbabel-2.0/openbabel/obconversion.h usability" >&5
-echo $ECHO_N "checking openbabel-2.0/openbabel/obconversion.h usability... $ECHO_C" >&6; }
+{ echo "$as_me:$LINENO: checking openbabel/obconversion.h usability" >&5
+echo $ECHO_N "checking openbabel/obconversion.h usability... $ECHO_C" >&6; }
 cat >conftest.$ac_ext <<_ACEOF
 /* confdefs.h.  */
 _ACEOF
@@ -8664,7 +8664,7 @@ cat confdefs.h >>conftest.$ac_ext
 cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
 $ac_includes_default
-#include <openbabel-2.0/openbabel/obconversion.h>
+#include <openbabel/obconversion.h>
 _ACEOF
 rm -f conftest.$ac_objext
 if { (ac_try="$ac_compile"
@@ -8696,15 +8696,15 @@ rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 echo "${ECHO_T}$ac_header_compiler" >&6; }
 
 # Is the header present?
-{ echo "$as_me:$LINENO: checking openbabel-2.0/openbabel/obconversion.h presence" >&5
-echo $ECHO_N "checking openbabel-2.0/openbabel/obconversion.h presence... $ECHO_C" >&6; }
+{ echo "$as_me:$LINENO: checking openbabel/obconversion.h presence" >&5
+echo $ECHO_N "checking openbabel/obconversion.h presence... $ECHO_C" >&6; }
 cat >conftest.$ac_ext <<_ACEOF
 /* confdefs.h.  */
 _ACEOF
 cat confdefs.h >>conftest.$ac_ext
 cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
-#include <openbabel-2.0/openbabel/obconversion.h>
+#include <openbabel/obconversion.h>
 _ACEOF
 if { (ac_try="$ac_cpp conftest.$ac_ext"
 case "(($ac_try" in
@@ -8737,25 +8737,25 @@ echo "${ECHO_T}$ac_header_preproc" >&6; }
 # So?  What about this header?
 case $ac_header_compiler:$ac_header_preproc:$ac_cxx_preproc_warn_flag in
   yes:no: )
-    { echo "$as_me:$LINENO: WARNING: openbabel-2.0/openbabel/obconversion.h: accepted by the compiler, rejected by the preprocessor!" >&5
-echo "$as_me: WARNING: openbabel-2.0/openbabel/obconversion.h: accepted by the compiler, rejected by the preprocessor!" >&2;}
-    { echo "$as_me:$LINENO: WARNING: openbabel-2.0/openbabel/obconversion.h: proceeding with the compiler's result" >&5
-echo "$as_me: WARNING: openbabel-2.0/openbabel/obconversion.h: proceeding with the compiler's result" >&2;}
+    { echo "$as_me:$LINENO: WARNING: openbabel/obconversion.h: accepted by the compiler, rejected by the preprocessor!" >&5
+echo "$as_me: WARNING: openbabel/obconversion.h: accepted by the compiler, rejected by the preprocessor!" >&2;}
+    { echo "$as_me:$LINENO: WARNING: openbabel/obconversion.h: proceeding with the compiler's result" >&5
+echo "$as_me: WARNING: openbabel/obconversion.h: proceeding with the compiler's result" >&2;}
     ac_header_preproc=yes
     ;;
   no:yes:* )
-    { echo "$as_me:$LINENO: WARNING: openbabel-2.0/openbabel/obconversion.h: present but cannot be compiled" >&5
-echo "$as_me: WARNING: openbabel-2.0/openbabel/obconversion.h: present but cannot be compiled" >&2;}
-    { echo "$as_me:$LINENO: WARNING: openbabel-2.0/openbabel/obconversion.h:     check for missing prerequisite headers?" >&5
-echo "$as_me: WARNING: openbabel-2.0/openbabel/obconversion.h:     check for missing prerequisite headers?" >&2;}
-    { echo "$as_me:$LINENO: WARNING: openbabel-2.0/openbabel/obconversion.h: see the Autoconf documentation" >&5
-echo "$as_me: WARNING: openbabel-2.0/openbabel/obconversion.h: see the Autoconf documentation" >&2;}
-    { echo "$as_me:$LINENO: WARNING: openbabel-2.0/openbabel/obconversion.h:     section \"Present But Cannot Be Compiled\"" >&5
-echo "$as_me: WARNING: openbabel-2.0/openbabel/obconversion.h:     section \"Present But Cannot Be Compiled\"" >&2;}
-    { echo "$as_me:$LINENO: WARNING: openbabel-2.0/openbabel/obconversion.h: proceeding with the preprocessor's result" >&5
-echo "$as_me: WARNING: openbabel-2.0/openbabel/obconversion.h: proceeding with the preprocessor's result" >&2;}
-    { echo "$as_me:$LINENO: WARNING: openbabel-2.0/openbabel/obconversion.h: in the future, the compiler will take precedence" >&5
-echo "$as_me: WARNING: openbabel-2.0/openbabel/obconversion.h: in the future, the compiler will take precedence" >&2;}
+    { echo "$as_me:$LINENO: WARNING: openbabel/obconversion.h: present but cannot be compiled" >&5
+echo "$as_me: WARNING: openbabel/obconversion.h: present but cannot be compiled" >&2;}
+    { echo "$as_me:$LINENO: WARNING: openbabel/obconversion.h:     check for missing prerequisite headers?" >&5
+echo "$as_me: WARNING: openbabel/obconversion.h:     check for missing prerequisite headers?" >&2;}
+    { echo "$as_me:$LINENO: WARNING: openbabel/obconversion.h: see the Autoconf documentation" >&5
+echo "$as_me: WARNING: openbabel/obconversion.h: see the Autoconf documentation" >&2;}
+    { echo "$as_me:$LINENO: WARNING: openbabel/obconversion.h:     section \"Present But Cannot Be Compiled\"" >&5
+echo "$as_me: WARNING: openbabel/obconversion.h:     section \"Present But Cannot Be Compiled\"" >&2;}
+    { echo "$as_me:$LINENO: WARNING: openbabel/obconversion.h: proceeding with the preprocessor's result" >&5
+echo "$as_me: WARNING: openbabel/obconversion.h: proceeding with the preprocessor's result" >&2;}
+    { echo "$as_me:$LINENO: WARNING: openbabel/obconversion.h: in the future, the compiler will take precedence" >&5
+echo "$as_me: WARNING: openbabel/obconversion.h: in the future, the compiler will take precedence" >&2;}
     ( cat <<\_ASBOX
 ## ------------------------------ ##
 ## Report this to gezelter@nd.edu ##
@@ -8764,18 +8764,18 @@ _ASBOX
      ) | sed "s/^/$as_me: WARNING:     /" >&2
     ;;
 esac
-{ echo "$as_me:$LINENO: checking for openbabel-2.0/openbabel/obconversion.h" >&5
-echo $ECHO_N "checking for openbabel-2.0/openbabel/obconversion.h... $ECHO_C" >&6; }
-if test "${ac_cv_header_openbabel_2_0_openbabel_obconversion_h+set}" = set; then
+{ echo "$as_me:$LINENO: checking for openbabel/obconversion.h" >&5
+echo $ECHO_N "checking for openbabel/obconversion.h... $ECHO_C" >&6; }
+if test "${ac_cv_header_openbabel_obconversion_h+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
-  ac_cv_header_openbabel_2_0_openbabel_obconversion_h=$ac_header_preproc
+  ac_cv_header_openbabel_obconversion_h=$ac_header_preproc
 fi
-{ echo "$as_me:$LINENO: result: $ac_cv_header_openbabel_2_0_openbabel_obconversion_h" >&5
-echo "${ECHO_T}$ac_cv_header_openbabel_2_0_openbabel_obconversion_h" >&6; }
+{ echo "$as_me:$LINENO: result: $ac_cv_header_openbabel_obconversion_h" >&5
+echo "${ECHO_T}$ac_cv_header_openbabel_obconversion_h" >&6; }
 
 fi
-if test $ac_cv_header_openbabel_2_0_openbabel_obconversion_h = yes; then
+if test $ac_cv_header_openbabel_obconversion_h = yes; then
   openbabel_cv_obconversion_h=yes
 else
   openbabel_cv_obconversion_h=no

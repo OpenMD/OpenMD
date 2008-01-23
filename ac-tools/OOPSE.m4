@@ -1246,8 +1246,8 @@ then
         OPENBABEL_OLD_CPPFLAGS=$CPPFLAGS
         LDFLAGS="$LDFLAGS -L${OPENBABEL_HOME}/lib -lopenbabel"
         CPPFLAGS="$CPPFLAGS -I${OPENBABEL_HOME}/include/openbabel-2.0"
-        AC_CHECK_HEADER(openbabel-2.0/openbabel/babelconfig.h, [openbabel_cv_openbabel_h=yes], [openbabel_cv_openbabel_h=no])
-        AC_CHECK_HEADER(openbabel-2.0/openbabel/obconversion.h, [openbabel_cv_obconversion_h=yes], [openbabel_cv_obconversion_h=no])
+        AC_CHECK_HEADER(openbabel/babelconfig.h, [openbabel_cv_openbabel_h=yes], [openbabel_cv_openbabel_h=no])
+        AC_CHECK_HEADER(openbabel/obconversion.h, [openbabel_cv_obconversion_h=yes], [openbabel_cv_obconversion_h=no])
         AC_LINK_IFELSE([
              AC_LANG_PROGRAM(
                     [[
