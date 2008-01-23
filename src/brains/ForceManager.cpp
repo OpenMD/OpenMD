@@ -53,7 +53,7 @@
 #define __C
 #include "UseTheForce/DarkSide/fInteractionMap.h"
 #include "utils/simError.h"
-#include "primitives/Bend.hpp"
+#include "primitives/Bond.hpp"
 #include "primitives/Bend.hpp"
 namespace oopse {
 
@@ -251,18 +251,18 @@ namespace oopse {
       longRangePotential[i]=0.0; //Initialize array
     }
     
-    doForceLoop( pos,
-		 rc,
-		 A,
-		 electroFrame,
-		 frc,
-		 trq,
-		 tau.getArrayPointer(),
-		 longRangePotential, 
-		 &passedCalcPot,
-		 &passedCalcStress,
-		 &isError );
-
+    doForceLoop(pos,
+                rc,
+                A,
+                electroFrame,
+                frc,
+                trq,
+	        tau.getArrayPointer(),
+                longRangePotential, 
+                &passedCalcPot,
+                &passedCalcStress,
+                &isError );
+    
     if( isError ){
       sprintf( painCave.errMsg,
 	       "Error returned from the fortran force calculation.\n" );

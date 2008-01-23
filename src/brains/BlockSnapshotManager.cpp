@@ -58,19 +58,22 @@ namespace oopse {
       RealType physMem = physmem_total();
       RealType rssMem = residentMem();
       RealType avaliablePhysMem = physMem - rssMem;
+
     
       int bytesPerStuntDouble = DataStorage::getBytesPerStuntDouble(storageLayout);
 
       int bytesPerFrame = (nRigidBodies_ + nAtoms_) * bytesPerStuntDouble;
 
-      int frameCapacity = int (avaliablePhysMem / bytesPerFrame);
-    
-      nSnapshotPerBlock_ = frameCapacity /blockCapacity_ ;
+      // total number of frames that can fit in memory
+      RealType frameCapacity = avaliablePhysMem / bytesPerFrame;
+
+      // number of frames in each block given the need to hold multiple blocks 
+      // in memory at the same time:
+      nSnapshotPerBlock_ = int(frameCapacity) / blockCapacity_;
       reader_ = new DumpReader(info, filename);
       nframes_ = reader_->getNFrames();
-
       int nblocks = nframes_ / nSnapshotPerBlock_;
-      if (nframes_ % nSnapshotPerBlock_ != 0) {
+      if (nframes_ % int(nSnapshotPerBlock_) != 0) {
         ++nblocks;
       }  
     
@@ -82,8 +85,19 @@ namespace oopse {
 
       snapshots_.insert(snapshots_.begin(), nframes_, static_cast<Snapshot*>(NULL));   
 
-      // std::cout << "physmem = " << int(physMem) << "\trssMem =  "<< int(rssMem) << "\t availablePhysMem = " << int(avaliablePhysMem) <<std::endl;
-      // std::cout << "nSnapshotPerBlock = " << nSnapshotPerBlock_ << "\t total block = " << nblocks << std::endl;
+      std::cout << "-----------------------------------------------------"<<std::endl;
+      std::cout << "BlockSnapshotManager memory report:" << std::endl;
+      std::cout << "\n";
+      std::cout << " Physical Memory available:\t" << (unsigned long)physMem <<  " bytes" <<std::endl;
+      std::cout << "    Resident Memory in use:\t" << (unsigned long)rssMem << " bytes" <<std::endl;
+      std::cout << "Memory available for OOPSE:\t" << (unsigned long)avaliablePhysMem << " bytes" <<std::endl;
+      std::cout << "     Bytes per StuntDouble:\t" << (unsigned long)bytesPerStuntDouble <<std::endl;
+      std::cout << "           Bytes per Frame:\t" << (unsigned long)bytesPerFrame <<std::endl;
+      std::cout << "            Frame Capacity:\t" << (unsigned long)frameCapacity <<std::endl;
+      std::cout << "      Frames in trajectory:\t" << (unsigned long)nframes_ <<std::endl;
+      std::cout << "       Snapshots per Block:\t" << (unsigned long)nSnapshotPerBlock_ <<std::endl;
+      std::cout << "    Total number of Blocks:\t" << (unsigned long)nblocks << std::endl;
+      std::cout << "-----------------------------------------------------"<<std::endl;
     
     }
 
@@ -101,6 +115,12 @@ namespace oopse {
       }
     }
   }
+
+
+  // virtual Snapshot* BlockSnapshotManager::getSnapshot(int id) { 
+  //  currentSnapshot_ = snapshots[id]; 
+  //  return snapshots_[id]; 
+  //}
 
   int BlockSnapshotManager::getNActiveBlocks() {
 #ifdef __RWSTD   
@@ -206,7 +226,10 @@ namespace oopse {
     Snapshot* oldSnapshot = currentSnapshot_;
     currentSnapshot_ = snapshot;   
     reader_->readFrame(frame);
-    currentSnapshot_ = oldSnapshot;
+
+    // What was this for?  It doesn't make sense!
+    //currentSnapshot_ = oldSnapshot;
+
     return snapshot;
   }
 

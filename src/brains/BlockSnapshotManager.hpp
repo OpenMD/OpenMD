@@ -62,6 +62,7 @@ namespace oopse {
         
     virtual Snapshot* getSnapshot(int id) { return snapshots_[id]; }
 
+
     /** Returns number of snapshot blocks in this BlockSnapshotManager*/
     int getNBlocks() {
       return blocks_.size();
