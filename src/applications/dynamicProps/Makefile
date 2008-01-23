@@ -12,7 +12,6 @@ Source    = \
             DynamicPropsCmd.c \
             LegendreCorrFunc.cpp \
 	    RadialRCorrFunc.cpp \
-            ActionCorrFunc.cpp \
 	    ThetaCorrFunc.cpp \
             DirectionalRCorrFunc.cpp
 

@@ -70,8 +70,8 @@ namespace oopse {
     SelectionEvaluator evaluator1_;
     SelectionEvaluator evaluator2_;
     std::vector<std::pair<StuntDouble*, StuntDouble*> > sdPairs_;  /**< each pair is used to define a vector, vector = first - second */
-    std::vector<OrderParam> orderParamsHead_, orderParamsTail_;
-    OrderParam avgOPHead, errOPHead, avgOPTail, errOPTail;
+    std::vector<OrderParam> orderParamsHeadUpper_, orderParamsHeadLower_, orderParamsTail_;
+    OrderParam avgOPHeadUpper, avgOPHeadLower, errOPHeadUpper, errOPHeadLower, avgOPTail, errOPTail;
     
   };
 }

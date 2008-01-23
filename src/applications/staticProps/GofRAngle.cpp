@@ -50,9 +50,8 @@ namespace oopse {
 		       const std::string& sele2, RealType len, int nrbins, int nangleBins)
     : RadialDistrFunc(info, filename, sele1, sele2), len_(len), nRBins_(nrbins), nAngleBins_(nangleBins){
 
-      deltaR_ = len_ /nRBins_;             
-      deltaCosAngle_ = 2.0 / nAngleBins_;    
-
+      deltaR_ = len_ /(double) nRBins_;
+      deltaCosAngle_ = 2.0 / (double)nAngleBins_;    
       histogram_.resize(nRBins_);
       avgGofr_.resize(nRBins_);
       for (int i = 0 ; i < nRBins_; ++i) {
@@ -63,7 +62,6 @@ namespace oopse {
 
 
   void GofRAngle::preProcess() {
-
     for (int i = 0; i < avgGofr_.size(); ++i) {
       std::fill(avgGofr_[i].begin(), avgGofr_[i].end(), 0);
     }
@@ -71,13 +69,12 @@ namespace oopse {
 
   void GofRAngle::initalizeHistogram() {
     npairs_ = 0;
-    for (int i = 0; i < histogram_.size(); ++i)
+    for (int i = 0; i < histogram_.size(); ++i){
       std::fill(histogram_[i].begin(), histogram_[i].end(), 0);
+    }
   }
 
-
   void GofRAngle::processHistogram() {
-
     int nPairs = getNPairs();
     RealType volume = info_->getSnapshotManager()->getCurrentSnapshot()->getVolume();
     RealType pairDensity = nPairs /volume;
@@ -102,7 +99,6 @@ namespace oopse {
     if (sd1 == sd2) {
       return;
     }
-    
     Vector3d pos1 = sd1->getPos();
     Vector3d pos2 = sd2->getPos();
     Vector3d r12 = pos2 - pos1;
@@ -113,6 +109,7 @@ namespace oopse {
     int whichRBin = distance / deltaR_;
 
     if (distance <= len_) {
+
       RealType cosAngle = evaluateAngle(sd1, sd2);
       RealType halfBin = (nAngleBins_ - 1) * 0.5;
       int whichThetaBin = halfBin * (cosAngle + 1.0);
@@ -154,7 +151,7 @@ namespace oopse {
     Vector3d pos1 = sd1->getPos();
     Vector3d pos2 = sd2->getPos();
     Vector3d r12 = pos2 - pos1;
-    
+  
     if (usePeriodicBoundaryConditions_)
       currentSnapshot_->wrapVector(r12);
 

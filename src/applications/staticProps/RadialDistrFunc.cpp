@@ -131,7 +131,6 @@ namespace oopse {
       //stage 3 are completely overlapping
 
       if (evaluator1_.isDynamic() || evaluator2_.isDynamic()) {
-
 	common_ = seleMan1_ & seleMan2_;
 	sele1_minus_common_ = seleMan1_ - common_;
 	sele2_minus_common_ = seleMan2_ - common_;            
@@ -139,14 +138,12 @@ namespace oopse {
 	int nSelected2 = seleMan2_.getSelectionCount();
 	int nIntersect = common_.getSelectionCount();
             
-	nPairs_ = nSelected1 * nSelected2 - (nIntersect +1) * nIntersect/2;                      
+	nPairs_ = nSelected1 * nSelected2 - (nIntersect +1) * nIntersect/2;
       }
-
       processNonOverlapping(sele1_minus_common_, seleMan2_);
       processNonOverlapping(common_, sele2_minus_common_);        
       processOverlapping(common_);
-        
-        
+      
       processHistogram();
         
     }

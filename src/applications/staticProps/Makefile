@@ -4,6 +4,7 @@ Source    = \
         GofAngle2.cpp \
         GofRAngle.cpp \
         GofR.cpp  \
+        GofZ.cpp  \
         GofXyz.cpp \
         RadialDistrFunc.cpp \
 	P2OrderParameter.cpp \

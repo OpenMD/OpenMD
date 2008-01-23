@@ -52,6 +52,7 @@
 #include "applications/staticProps/StaticPropsCmd.h"
 #include "applications/staticProps/StaticAnalyser.hpp"
 #include "applications/staticProps/GofR.hpp"
+#include "applications/staticProps/GofZ.hpp"
 #include "applications/staticProps/GofRAngle.hpp"
 #include "applications/staticProps/GofAngle2.hpp"
 #include "applications/staticProps/GofXyz.hpp"
@@ -181,6 +182,9 @@ int main(int argc, char* argv[]){
   StaticAnalyser* analyser;
   if (args_info.gofr_given){
     analyser= new GofR(info, dumpFileName, sele1, sele2, maxLen, 
+                       args_info.nbins_arg);        
+  } else if (args_info.gofz_given) {
+    analyser= new GofZ(info, dumpFileName, sele1, sele2, maxLen, 
                        args_info.nbins_arg);        
   } else if (args_info.r_theta_given) {
     analyser  = new GofRTheta(info, dumpFileName, sele1, sele2, maxLen, 

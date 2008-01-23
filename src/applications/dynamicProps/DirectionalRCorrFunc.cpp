@@ -98,10 +98,16 @@ namespace oopse {
   Vector3d DirectionalRCorrFunc::calcCorrVals(int frame1, int frame2, StuntDouble* sd1, StuntDouble* sd2) {
     Vector3d r1 = sd1->getPos(frame1);
     Vector3d r2 = sd2->getPos(frame2);
-    Vector3d u1 = sd1->getA(frame1).getColumn(2);
+
+    // The lab frame vector corresponding to the body-fixed 
+    // z-axis is simply the second column of A.transpose()
+    // or, identically, the second row of A itself.
+  
+    Vector3d u1 = sd1->getA(frame1).getRow(2);
+    RealType u1l = u1.length();
 
     RealType rsq = (r2-r1).lengthSquare();
-    RealType rpar = dot( r2-r1, u1);
+    RealType rpar = dot( (r2-r1), u1)/u1l;
     RealType rpar2 = rpar*rpar;
     RealType rperp2 = rsq - rpar2;
 

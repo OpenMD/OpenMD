@@ -105,12 +105,19 @@ namespace oopse {
 
 
   Vector3d LegendreCorrFunc::calcCorrVals(int frame1, int frame2, StuntDouble* sd1,  StuntDouble* sd2) {
-    Vector3d v1x = sd1->getA(frame1).getColumn(0);
-    Vector3d v2x = sd2->getA(frame2).getColumn(0);
-    Vector3d v1y = sd1->getA(frame1).getColumn(1);
-    Vector3d v2y = sd2->getA(frame2).getColumn(1);
-    Vector3d v1z = sd1->getA(frame1).getColumn(2);
-    Vector3d v2z = sd2->getA(frame2).getColumn(2);
+    
+    // The lab frame vector corresponding to the body-fixed 
+    // z-axis is simply the second column of A.transpose()
+    // or, identically, the second row of A itself.
+    // Similar identites give the 0th and 1st rows of A for
+    // the lab vectors associated with body-fixed x- and y- axes.
+
+    Vector3d v1x = sd1->getA(frame1).getRow(0);
+    Vector3d v2x = sd2->getA(frame2).getRow(0);
+    Vector3d v1y = sd1->getA(frame1).getRow(1);
+    Vector3d v2y = sd2->getA(frame2).getRow(1);
+    Vector3d v1z = sd1->getA(frame1).getRow(2);
+    Vector3d v2z = sd2->getA(frame2).getRow(2);
 
     RealType uxprod = legendre_.evaluate(dot(v1x, v2x)/(v1x.length()*v2x.length()));
     RealType uyprod = legendre_.evaluate(dot(v1y, v2y)/(v1y.length()*v2y.length()));

@@ -84,6 +84,7 @@ struct gengetopt_args_info
   const char *bor_help; /* bond order parameter as a function of radius (--rcut must be specified) help description.  */
   const char *bad_help; /* N(theta) bond angle density within (--rcut must be specified) help description.  */
   const char *gofr_help; /* g(r) help description.  */
+  const char *gofz_help; /* g(z) help description.  */
   const char *r_theta_help; /* g(r, cos(theta)) help description.  */
   const char *r_omega_help; /* g(r, cos(omega)) help description.  */
   const char *theta_omega_help; /* g(cos(theta), cos(omega)) help description.  */
@@ -121,6 +122,7 @@ struct gengetopt_args_info
   int bor_given ;	/* Whether bor was given.  */
   int bad_given ;	/* Whether bad was given.  */
   int gofr_given ;	/* Whether gofr was given.  */
+  int gofz_given ;	/* Whether gofz was given.  */
   int r_theta_given ;	/* Whether r_theta was given.  */
   int r_omega_given ;	/* Whether r_omega was given.  */
   int theta_omega_given ;	/* Whether theta_omega was given.  */

@@ -63,8 +63,8 @@ namespace oopse {
 
     virtual void preProcess();
     virtual void initalizeHistogram();
-    virtual void collectHistogram(StuntDouble* sd1, StuntDouble* sd2);
     virtual void processHistogram();
+    virtual void collectHistogram(StuntDouble* sd1, StuntDouble* sd2);
 
     virtual RealType evaluateAngle(StuntDouble* sd1, StuntDouble* sd2) = 0;
 

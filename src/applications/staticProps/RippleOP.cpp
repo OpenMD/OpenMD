@@ -104,14 +104,23 @@ namespace oopse {
     RigidBody* rb;
     SimInfo::MoleculeIterator mi;
     Molecule::RigidBodyIterator rbIter;
+
+    StuntDouble* j1;
+    StuntDouble* j2;
+    StuntDouble* sd3;
   
     DumpReader reader(info_, dumpFilename_);    
     int nFrames = reader.getNFrames();
-    
+
     for (int i = 0; i < nFrames; i += step_) {
       reader.readFrame(i);
       currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
-      
+      int nMolecules = info_->getNGlobalMolecules();
+      int i1;
+      int nUpper=0;
+      int nLower=0;
+      int nTail=0;
+      RealType sumZ = 0.0;
       
       for (mol = info_->beginMolecule(mi); mol != NULL; mol = info_->nextMolecule(mi)) {
 	//change the positions of atoms which belong to the rigidbodies
@@ -119,85 +128,155 @@ namespace oopse {
 	  rb->updateAtoms();
 	}
       }      
-      
-      Mat3x3d orderTensorHead(0.0), orderTensorTail(0.0);
-      for (std::vector<std::pair<StuntDouble*, StuntDouble*> >::iterator j = sdPairs_.begin(); j != sdPairs_.end(); ++j) {
-	Vector3d vecHead = j->first->getElectroFrame().getColumn(2);
-	Vector3d vecTail = j->second->getA().getColumn(2);
-	orderTensorHead +=outProduct(vecHead, vecHead);
-	orderTensorTail +=outProduct(vecTail, vecTail);
+
+      for (sd3 = seleMan2_.beginSelected(i1); sd3 != NULL; sd3 = seleMan2_.nextSelected(i1)) {
+	Vector3d pos1 = sd3->getPos();
+        if (usePeriodicBoundaryConditions_)
+          currentSnapshot_->wrapVector(pos1);
+	sd3->setPos(pos1);
       }
-    
-      orderTensorHead /= sdPairs_.size();
-      orderTensorHead -= (RealType)(1.0/3.0) * Mat3x3d::identity();  
+
+      for (sd3 = seleMan2_.beginSelected(i1); sd3 != NULL; sd3 = seleMan2_.nextSelected(i1)) {
+	Vector3d pos1 = sd3->getPos();
+	sumZ += pos1.z();
+      }
+      RealType avgZ = sumZ / (RealType) nMolecules;
       
-      orderTensorTail /= sdPairs_.size();
+      Mat3x3d orderTensorHeadUpper(0.0), orderTensorTail(0.0), orderTensorHeadLower(0.0);
+      //      for (std::vector<std::pair<StuntDouble*, StuntDouble*> >::iterator j = sdPairs_.begin(); j != sdPairs_.end(); ++j) {
+      for (j1 = seleMan1_.beginSelected(i1); j1 != NULL; j1 = seleMan1_.nextSelected(i1)) {
+	Vector3d pos = j1->getPos();
+        if (usePeriodicBoundaryConditions_)
+          currentSnapshot_->wrapVector(pos);
+	Vector3d vecHeadUpper;
+	if (pos.z() >= avgZ){
+	  vecHeadUpper = j1->getElectroFrame().getColumn(2);
+	  nUpper++;
+	}
+	Vector3d vecHeadLower;
+	if (pos.z() <= avgZ){
+	  vecHeadLower = j1->getElectroFrame().getColumn(2);
+	  nLower++;
+	}
+	orderTensorHeadUpper +=outProduct(vecHeadUpper, vecHeadUpper);
+	orderTensorHeadLower +=outProduct(vecHeadLower, vecHeadLower);
+      }
+      for (j2 = seleMan2_.beginSelected(i1); j2 != NULL; j2 = seleMan2_.nextSelected(i1)) {
+        // The lab frame vector corresponding to the body-fixed 
+        // z-axis is simply the second column of A.transpose()
+        // or, identically, the second row of A itself.
+
+	Vector3d vecTail = j2->getA().getRow(2);
+	orderTensorTail +=outProduct(vecTail, vecTail);
+	nTail++;
+      }
+      
+      orderTensorHeadUpper /= (RealType) nUpper;
+      orderTensorHeadLower /= (RealType) nLower;
+      orderTensorHeadUpper -= (RealType)(1.0/3.0) * Mat3x3d::identity();  
+      orderTensorHeadLower -= (RealType)(1.0/3.0) * Mat3x3d::identity();  
+      
+      orderTensorTail /= (RealType) nTail;
       orderTensorTail -= (RealType)(1.0/3.0) * Mat3x3d::identity();  
       
-      Vector3d eigenvaluesHead, eigenvaluesTail;
-      Mat3x3d eigenvectorsHead, eigenvectorsTail;    
-      Mat3x3d::diagonalize(orderTensorHead, eigenvaluesHead, eigenvectorsHead);
+      Vector3d eigenvaluesHeadUpper, eigenvaluesHeadLower, eigenvaluesTail;
+      Mat3x3d eigenvectorsHeadUpper, eigenvectorsHeadLower, eigenvectorsTail;    
+      Mat3x3d::diagonalize(orderTensorHeadUpper, eigenvaluesHeadUpper, eigenvectorsHeadUpper);
+      Mat3x3d::diagonalize(orderTensorHeadLower, eigenvaluesHeadLower, eigenvectorsHeadLower);
       Mat3x3d::diagonalize(orderTensorTail, eigenvaluesTail, eigenvectorsTail);
       
-      int which;
-      RealType maxEval = 0.0;
+      int whichUpper, whichLower, whichTail;
+      RealType maxEvalUpper = 0.0;
+      RealType maxEvalLower = 0.0;
+      RealType maxEvalTail = 0.0;
       for(int k = 0; k< 3; k++){
-	if(fabs(eigenvaluesHead[k]) > maxEval){
-	  which = k;
-	  maxEval = fabs(eigenvaluesHead[k]);
+	if(fabs(eigenvaluesHeadUpper[k]) > maxEvalUpper){
+	  whichUpper = k;
+	  maxEvalUpper = fabs(eigenvaluesHeadUpper[k]);
 	}
       }
-      RealType p2Head = 1.5 * maxEval;
-      maxEval = 0.0;
+      RealType p2HeadUpper = 1.5 * maxEvalUpper;
       for(int k = 0; k< 3; k++){
-	if(fabs(eigenvaluesTail[k]) > maxEval){
-	  which = k;
-	  maxEval = fabs(eigenvaluesTail[k]);
+	if(fabs(eigenvaluesHeadLower[k]) > maxEvalLower){
+	  whichLower = k;
+	  maxEvalLower = fabs(eigenvaluesHeadLower[k]);
 	}
       }
-      RealType p2Tail = 1.5 * maxEval;
+      RealType p2HeadLower = 1.5 * maxEvalLower;
+      for(int k = 0; k< 3; k++){
+	if(fabs(eigenvaluesTail[k]) > maxEvalTail){
+	  whichTail = k;
+	  maxEvalTail = fabs(eigenvaluesTail[k]);
+	}
+      }
+      RealType p2Tail = 1.5 * maxEvalTail;
       
       //the eigen vector is already normalized in SquareMatrix3::diagonalize
-      Vector3d directorHead = eigenvectorsHead.getColumn(which);
-      if (directorHead[0] < 0) {
-	directorHead.negate();
+      Vector3d directorHeadUpper = eigenvectorsHeadUpper.getColumn(whichUpper);
+      if (directorHeadUpper[0] < 0) {
+	directorHeadUpper.negate();
       }
-      Vector3d directorTail = eigenvectorsTail.getColumn(which);
+      Vector3d directorHeadLower = eigenvectorsHeadLower.getColumn(whichLower);
+      if (directorHeadLower[0] < 0) {
+	directorHeadLower.negate();
+      }
+      Vector3d directorTail = eigenvectorsTail.getColumn(whichTail);
       if (directorTail[0] < 0) {
 	directorTail.negate();
       }   
 
-      OrderParam paramHead, paramTail;
-      paramHead.p2 = p2Head;
-      paramHead.director = directorHead;
+      OrderParam paramHeadUpper, paramHeadLower, paramTail;
+      paramHeadUpper.p2 = p2HeadUpper;
+      paramHeadUpper.director = directorHeadUpper;
+      paramHeadLower.p2 = p2HeadLower;
+      paramHeadLower.director = directorHeadLower;
       paramTail.p2 = p2Tail;
       paramTail.director = directorTail;
       
-      orderParamsHead_.push_back(paramHead);
+      orderParamsHeadUpper_.push_back(paramHeadUpper);
+      orderParamsHeadLower_.push_back(paramHeadLower);
       orderParamsTail_.push_back(paramTail);       
       
     }
 
-    OrderParam sumOPHead, errsumOPHead;
+    OrderParam sumOPHeadUpper, errsumOPHeadUpper;
+    OrderParam sumOPHeadLower, errsumOPHeadLower;
     OrderParam sumOPTail, errsumOPTail;
 
-    sumOPHead.p2 = 0.0;
-    errsumOPHead.p2 = 0.0;
-    for (std::size_t i = 0; i < orderParamsHead_.size(); ++i) {
-      sumOPHead.p2 += orderParamsHead_[i].p2;
-      sumOPHead.director[0] += orderParamsHead_[i].director[0];
-      sumOPHead.director[1] += orderParamsHead_[i].director[1];
-      sumOPHead.director[2] += orderParamsHead_[i].director[2];
+    sumOPHeadUpper.p2 = 0.0;
+    errsumOPHeadUpper.p2 = 0.0;
+    sumOPHeadLower.p2 = 0.0;
+    errsumOPHeadLower.p2 = 0.0;
+    for (std::size_t i = 0; i < orderParamsHeadUpper_.size(); ++i) {
+      sumOPHeadUpper.p2 += orderParamsHeadUpper_[i].p2;
+      sumOPHeadUpper.director[0] += orderParamsHeadUpper_[i].director[0];
+      sumOPHeadUpper.director[1] += orderParamsHeadUpper_[i].director[1];
+      sumOPHeadUpper.director[2] += orderParamsHeadUpper_[i].director[2];
     }
 
-    avgOPHead.p2 = sumOPHead.p2 / (RealType)orderParamsHead_.size();
-    avgOPHead.director[0] = sumOPHead.director[0] / (RealType)orderParamsHead_.size();
-    avgOPHead.director[1] = sumOPHead.director[1] / (RealType)orderParamsHead_.size();
-    avgOPHead.director[2] = sumOPHead.director[2] / (RealType)orderParamsHead_.size();
-    for (std::size_t i = 0; i < orderParamsHead_.size(); ++i) {
-      errsumOPHead.p2 += pow((orderParamsHead_[i].p2 - avgOPHead.p2), 2);
+    avgOPHeadUpper.p2 = sumOPHeadUpper.p2 / (RealType)orderParamsHeadUpper_.size();
+    avgOPHeadUpper.director[0] = sumOPHeadUpper.director[0] / (RealType)orderParamsHeadUpper_.size();
+    avgOPHeadUpper.director[1] = sumOPHeadUpper.director[1] / (RealType)orderParamsHeadUpper_.size();
+    avgOPHeadUpper.director[2] = sumOPHeadUpper.director[2] / (RealType)orderParamsHeadUpper_.size();
+    for (std::size_t i = 0; i < orderParamsHeadUpper_.size(); ++i) {
+      errsumOPHeadUpper.p2 += pow((orderParamsHeadUpper_[i].p2 - avgOPHeadUpper.p2), 2);
     }
-    errOPHead.p2 = sqrt(errsumOPHead.p2 / (RealType)orderParamsHead_.size());
+    errOPHeadUpper.p2 = sqrt(errsumOPHeadUpper.p2 / (RealType)orderParamsHeadUpper_.size());
+    for (std::size_t i = 0; i < orderParamsHeadLower_.size(); ++i) {
+      sumOPHeadLower.p2 += orderParamsHeadLower_[i].p2;
+      sumOPHeadLower.director[0] += orderParamsHeadLower_[i].director[0];
+      sumOPHeadLower.director[1] += orderParamsHeadLower_[i].director[1];
+      sumOPHeadLower.director[2] += orderParamsHeadLower_[i].director[2];
+    }
+
+    avgOPHeadLower.p2 = sumOPHeadLower.p2 / (RealType)orderParamsHeadLower_.size();
+    avgOPHeadLower.director[0] = sumOPHeadLower.director[0] / (RealType)orderParamsHeadLower_.size();
+    avgOPHeadLower.director[1] = sumOPHeadLower.director[1] / (RealType)orderParamsHeadLower_.size();
+    avgOPHeadLower.director[2] = sumOPHeadLower.director[2] / (RealType)orderParamsHeadLower_.size();
+    for (std::size_t i = 0; i < orderParamsHeadLower_.size(); ++i) {
+      errsumOPHeadLower.p2 += pow((orderParamsHeadLower_[i].p2 - avgOPHeadLower.p2), 2);
+    }
+    errOPHeadLower.p2 = sqrt(errsumOPHeadLower.p2 / (RealType)orderParamsHeadLower_.size());
 
     sumOPTail.p2 = 0.0;
     errsumOPTail.p2 = 0.0;
@@ -227,11 +306,17 @@ namespace oopse {
     os<< "#selection1: (" << selectionScript1_ << ")\n";
     os << "#p2\terror\tdirector_x\tdirector_y\tdiretor_z\n";    
     
-    os <<  avgOPHead.p2 << "\t"
-       <<  errOPHead.p2 << "\t"
-       <<  avgOPHead.director[0] << "\t"
-       <<  avgOPHead.director[1] << "\t"
-       <<  avgOPHead.director[2] << "\n";
+    os <<  avgOPHeadUpper.p2 << "\t"
+       <<  errOPHeadUpper.p2 << "\t"
+       <<  avgOPHeadUpper.director[0] << "\t"
+       <<  avgOPHeadUpper.director[1] << "\t"
+       <<  avgOPHeadUpper.director[2] << "\n";
+
+    os <<  avgOPHeadLower.p2 << "\t"
+       <<  errOPHeadLower.p2 << "\t"
+       <<  avgOPHeadLower.director[0] << "\t"
+       <<  avgOPHeadLower.director[1] << "\t"
+       <<  avgOPHeadLower.director[2] << "\n";
     
     os << "selection2: (" << selectionScript2_ << ")\n";
     os << "#p2\terror\tdirector_x\tdirector_y\tdiretor_z\n";

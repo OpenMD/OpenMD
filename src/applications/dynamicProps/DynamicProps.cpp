@@ -55,7 +55,6 @@
 #include "applications/dynamicProps/LegendreCorrFunc.hpp"
 #include "applications/dynamicProps/RadialRCorrFunc.hpp"
 #include "applications/dynamicProps/ThetaCorrFunc.hpp"
-#include "applications/dynamicProps/ActionCorrFunc.hpp"
 #include "applications/dynamicProps/DirectionalRCorrFunc.hpp"
 
 
@@ -120,8 +119,6 @@ int main(int argc, char* argv[]){
     corrFunc = new RadialRCorrFunc(info, dumpFileName, sele1, sele2);
   } else if (args_info.thetacorr_given) {
     corrFunc = new ThetaCorrFunc(info, dumpFileName, sele1, sele2);
-  } else if (args_info.actioncorr_given) {
-    corrFunc = new ActionCorrFunc(info, dumpFileName, sele1, sele2);
   } else if (args_info.drcorr_given) {
     corrFunc = new DirectionalRCorrFunc(info, dumpFileName, sele1, sele2);
   }

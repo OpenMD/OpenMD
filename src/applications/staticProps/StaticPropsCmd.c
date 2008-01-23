@@ -53,6 +53,7 @@ const char *gengetopt_args_info_help[] = {
   "      --bor                     bond order parameter as a function of radius \n                                  (--rcut must be specified)",
   "      --bad                     N(theta) bond angle density within (--rcut must \n                                  be specified)",
   "  -g, --gofr                    g(r)",
+  "      --gofz                    g(z)",
   "      --r_theta                 g(r, cos(theta))",
   "      --r_omega                 g(r, cos(omega))",
   "      --theta_omega             g(cos(theta), cos(omega))",
@@ -109,6 +110,7 @@ void clear_given (struct gengetopt_args_info *args_info)
   args_info->bor_given = 0 ;
   args_info->bad_given = 0 ;
   args_info->gofr_given = 0 ;
+  args_info->gofz_given = 0 ;
   args_info->r_theta_given = 0 ;
   args_info->r_omega_given = 0 ;
   args_info->theta_omega_given = 0 ;
@@ -188,18 +190,19 @@ void init_args_info(struct gengetopt_args_info *args_info)
   args_info->bor_help = gengetopt_args_info_help[21] ;
   args_info->bad_help = gengetopt_args_info_help[22] ;
   args_info->gofr_help = gengetopt_args_info_help[23] ;
-  args_info->r_theta_help = gengetopt_args_info_help[24] ;
-  args_info->r_omega_help = gengetopt_args_info_help[25] ;
-  args_info->theta_omega_help = gengetopt_args_info_help[26] ;
-  args_info->gxyz_help = gengetopt_args_info_help[27] ;
-  args_info->p2_help = gengetopt_args_info_help[28] ;
-  args_info->rp2_help = gengetopt_args_info_help[29] ;
-  args_info->scd_help = gengetopt_args_info_help[30] ;
-  args_info->density_help = gengetopt_args_info_help[31] ;
-  args_info->slab_density_help = gengetopt_args_info_help[32] ;
-  args_info->hxy_help = gengetopt_args_info_help[33] ;
-  args_info->rho_r_help = gengetopt_args_info_help[34] ;
-  args_info->hullvol_help = gengetopt_args_info_help[35] ;
+  args_info->gofz_help = gengetopt_args_info_help[24] ;
+  args_info->r_theta_help = gengetopt_args_info_help[25] ;
+  args_info->r_omega_help = gengetopt_args_info_help[26] ;
+  args_info->theta_omega_help = gengetopt_args_info_help[27] ;
+  args_info->gxyz_help = gengetopt_args_info_help[28] ;
+  args_info->p2_help = gengetopt_args_info_help[29] ;
+  args_info->rp2_help = gengetopt_args_info_help[30] ;
+  args_info->scd_help = gengetopt_args_info_help[31] ;
+  args_info->density_help = gengetopt_args_info_help[32] ;
+  args_info->slab_density_help = gengetopt_args_info_help[33] ;
+  args_info->hxy_help = gengetopt_args_info_help[34] ;
+  args_info->rho_r_help = gengetopt_args_info_help[35] ;
+  args_info->hullvol_help = gengetopt_args_info_help[36] ;
   
 }
 
@@ -536,6 +539,9 @@ cmdline_parser_file_save(const char *filename, struct gengetopt_args_info *args_
   if (args_info->gofr_given) {
     fprintf(outfile, "%s\n", "gofr");
   }
+  if (args_info->gofz_given) {
+    fprintf(outfile, "%s\n", "gofz");
+  }
   if (args_info->r_theta_given) {
     fprintf(outfile, "%s\n", "r_theta");
   }
@@ -615,6 +621,7 @@ reset_group_staticProps(struct gengetopt_args_info *args_info)
   args_info->bor_given = 0 ;
   args_info->bad_given = 0 ;
   args_info->gofr_given = 0 ;
+  args_info->gofz_given = 0 ;
   args_info->r_theta_given = 0 ;
   args_info->r_omega_given = 0 ;
   args_info->theta_omega_given = 0 ;
@@ -742,6 +749,7 @@ cmdline_parser_internal (int argc, char * const *argv, struct gengetopt_args_inf
         { "bor",	0, NULL, 0 },
         { "bad",	0, NULL, 0 },
         { "gofr",	0, NULL, 'g' },
+        { "gofz",	0, NULL, 0 },
         { "r_theta",	0, NULL, 0 },
         { "r_omega",	0, NULL, 0 },
         { "theta_omega",	0, NULL, 0 },
@@ -1237,6 +1245,23 @@ cmdline_parser_internal (int argc, char * const *argv, struct gengetopt_args_inf
               continue;
             local_args_info.bad_given = 1;
             args_info->bad_given = 1;
+            if (args_info->staticProps_group_counter && override)
+              reset_group_staticProps (args_info);
+            args_info->staticProps_group_counter += 1;
+            break;
+          }
+          /* g(z).  */
+          else if (strcmp (long_options[option_index].name, "gofz") == 0)
+          {
+            if (local_args_info.gofz_given)
+              {
+                fprintf (stderr, "%s: `--gofz' option given more than once%s\n", argv[0], (additional_error ? additional_error : ""));
+                goto failure;
+              }
+            if (args_info->gofz_given && ! override)
+              continue;
+            local_args_info.gofz_given = 1;
+            args_info->gofz_given = 1;
             if (args_info->staticProps_group_counter && override)
               reset_group_staticProps (args_info);
             args_info->staticProps_group_counter += 1;
