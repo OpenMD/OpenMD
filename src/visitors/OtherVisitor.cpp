@@ -294,17 +294,39 @@ namespace oopse {
     if (posOnly_){
       for( atomInfo = atomData->beginAtomInfo(i); atomInfo;
 	   atomInfo = atomData->nextAtomInfo(i) ) {
-	sprintf(buffer,
+        if (atomInfo->hasCharge) {
+	  sprintf(buffer,
+		"%s%15.8f%15.8f%15.8f%15.8f",
+		atomInfo->atomTypeName.c_str(),
+		atomInfo->pos[0],
+		atomInfo->pos[1],
+		atomInfo->pos[2],
+                atomInfo->charge); 
+        } else {
+	  sprintf(buffer,
 		"%s%15.8f%15.8f%15.8f",
 		atomInfo->atomTypeName.c_str(),
 		atomInfo->pos[0],
 		atomInfo->pos[1],
 		atomInfo->pos[2]); 
+        }
 	frame.push_back(buffer);
       }
     }else{
       for( atomInfo = atomData->beginAtomInfo(i); atomInfo;
 	   atomInfo = atomData->nextAtomInfo(i) ) {
+        if (atomInfo->hasCharge) {
+	sprintf(buffer,
+		"%s%15.8f%15.8f%15.8f%15.8f%15.8f%15.8f%15.8f",
+		atomInfo->atomTypeName.c_str(),
+		atomInfo->pos[0],
+		atomInfo->pos[1],
+		atomInfo->pos[2],
+                atomInfo->charge,
+		atomInfo->dipole[0],
+		atomInfo->dipole[1],
+		atomInfo->dipole[2]); 
+        } else {
 	sprintf(buffer,
 		"%s%15.8f%15.8f%15.8f%15.8f%15.8f%15.8f",
 		atomInfo->atomTypeName.c_str(),
@@ -314,6 +336,7 @@ namespace oopse {
 		atomInfo->dipole[0],
 		atomInfo->dipole[1],
 		atomInfo->dipole[2]); 
+        }
 	frame.push_back(buffer);
       }
     }

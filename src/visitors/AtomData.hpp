@@ -50,9 +50,14 @@
 namespace oopse {
 
   struct AtomInfo {
+    AtomInfo() : hasCharge(false), hasVector(false) {}
+
     std::string atomTypeName;
     Vector3d pos;
     Vector3d dipole;  
+    RealType charge;
+    bool hasCharge;
+    bool hasVector;
   };
 
   class AtomData : public GenericData{

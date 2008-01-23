@@ -143,6 +143,39 @@ namespace oopse {
     std::set<std::string> GBLipidAtomType;   
   };
 
+  class Ring5gbAtomVisitor : public BaseAtomVisitor{
+  public:
+    Ring5gbAtomVisitor(SimInfo* info) : BaseAtomVisitor(info) {
+      visitorName = "Ring5gbAtomVisitor";
+      Ring5gbAtomType.insert("Ring5GB");
+    }
+
+    virtual void visit(Atom* atom) {}
+    virtual void visit(DirectionalAtom* datom);       
+    virtual void visit(RigidBody* rb) {}
+
+    virtual const std::string toString();
+  private:
+    inline bool isRing5gbAtom(const std::string& atomType);
+    std::set<std::string> Ring5gbAtomType;   
+  };
+
+  class HeadAtomVisitor : public BaseAtomVisitor{
+  public:
+    HeadAtomVisitor(SimInfo* info) : BaseAtomVisitor(info) {
+      visitorName = "HeadAtomVisitor";
+      HeadAtomType.insert("HEAD");
+    }
+
+    virtual void visit(Atom* atom) {}
+    virtual void visit(DirectionalAtom* datom);       
+    virtual void visit(RigidBody* rb) {}
+
+    virtual const std::string toString();
+  private:
+    inline bool isHeadAtom(const std::string& atomType);
+    std::set<std::string> HeadAtomType;   
+  };
 
   class DefaultAtomVisitor : public BaseAtomVisitor{
   public:

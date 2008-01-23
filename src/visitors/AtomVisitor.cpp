@@ -523,15 +523,18 @@ namespace oopse {
   void GBLipidAtomVisitor::visit(DirectionalAtom* datom){
     std::vector<AtomInfo*> atoms;
     //we need to convert linear into 4 different atoms
-    Vector3d c1(0.0, 0.0, -6.25);
-    Vector3d c2(0.0, 0.0, -2.1);
-    Vector3d c3(0.0, 0.0,  2.1);
-    Vector3d c4(0.0, 0.0,  6.25);
+    //Vector3d c1(0.0, 0.0, -6.25);
+    //Vector3d c2(0.0, 0.0, -2.1);
+    //Vector3d c3(0.0, 0.0,  2.1);
+    //Vector3d c4(0.0, 0.0,  6.25);
+    Vector3d c1(0.0, 0.0, 0.0);
+    Vector3d c2(0.0, 0.0, 1.0);
     RotMat3x3d rotMatrix;
     RotMat3x3d rotTrans;
     AtomInfo* atomInfo;
     Vector3d pos;
     Vector3d newVec;
+    Vector3d dVec;
     Quat4d q;
     AtomData* atomData;
     GenericData* data;
@@ -539,6 +542,136 @@ namespace oopse {
 
     //if atom is not GBlipid atom, just skip it
     if(!isGBLipidAtom(datom->getType()))
+      return;
+
+    data = datom->getPropertyByName("ATOMDATA");
+    if(data != NULL){
+      atomData = dynamic_cast<AtomData*>(data);  
+      if(atomData == NULL){
+	std::cerr << "can not get Atom Data from " << datom->getType() << std::endl;
+	atomData = new AtomData; 
+	haveAtomData = false;      
+      } else {
+	haveAtomData = true;
+      }
+    } else {
+      atomData = new AtomData;
+      haveAtomData = false;
+    }
+   
+  
+    pos = datom->getPos();
+    q = datom->getQ();
+    rotMatrix = datom->getA();
+
+    // We need A^T to convert from body-fixed to space-fixed:  
+    rotTrans = rotMatrix.transpose();
+
+    newVec = rotTrans * c1;
+    dVec = rotTrans * c2;
+    atomInfo = new AtomInfo;
+    atomInfo->atomTypeName = "GB";
+    atomInfo->pos[0] = pos[0] + newVec[0];
+    atomInfo->pos[1] = pos[1] + newVec[1];
+    atomInfo->pos[2] = pos[2] + newVec[2];
+    atomInfo->dipole[0] = dVec[0];
+    atomInfo->dipole[1] = dVec[1];
+    atomInfo->dipole[2] = dVec[2];
+    atomInfo->hasVector = true;
+    atomInfo->charge = 3.0;
+    atomInfo->hasCharge = true;
+    atomData->addAtomInfo(atomInfo);
+
+    //newVec = rotTrans * c2;
+    //atomInfo = new AtomInfo;
+    //atomInfo->atomTypeName = "K";
+    //atomInfo->pos[0] = pos[0] + newVec[0];
+    //atomInfo->pos[1] = pos[1] + newVec[1];
+    //atomInfo->pos[2] = pos[2] + newVec[2];
+    //atomInfo->dipole[0] = 0.0;
+    //atomInfo->dipole[1] = 0.0;
+    //atomInfo->dipole[2] = 0.0;
+    //atomData->addAtomInfo(atomInfo);
+
+    //newVec = rotTrans * c3;
+    //atomInfo = new AtomInfo;
+    //atomInfo->atomTypeName = "K";
+    //atomInfo->pos[0] = pos[0] + newVec[0];
+    //atomInfo->pos[1] = pos[1] + newVec[1];
+    //atomInfo->pos[2] = pos[2] + newVec[2];
+    //atomInfo->dipole[0] = 0.0;
+    //atomInfo->dipole[1] = 0.0;
+    //atomInfo->dipole[2] = 0.0;
+    //atomData->addAtomInfo(atomInfo);
+
+    //newVec = rotTrans * c4;
+    //atomInfo = new AtomInfo;
+    //atomInfo->atomTypeName = "K";
+    //atomInfo->pos[0] = pos[0] + newVec[0];
+    //atomInfo->pos[1] = pos[1] + newVec[1];
+    //atomInfo->pos[2] = pos[2] + newVec[2];
+    //atomInfo->dipole[0] = 0.0;
+    //atomInfo->dipole[1] = 0.0;
+    //atomInfo->dipole[2] = 0.0;
+    //atomData->addAtomInfo(atomInfo);
+
+    //add atom data into atom's property
+
+    if(!haveAtomData){
+      atomData->setID("ATOMDATA");
+      datom->addProperty(atomData);
+    }
+
+    setVisited(datom);
+
+  }
+
+  const std::string GBLipidAtomVisitor::toString(){
+    char buffer[65535];
+    std::string result;
+  
+    sprintf(buffer ,"------------------------------------------------------------------\n");
+    result += buffer;
+
+    sprintf(buffer ,"Visitor name: %s\n", visitorName.c_str());
+    result += buffer;
+
+    sprintf(buffer , "Visitor Description: Convert GBlipid into 4 different K atoms\n");
+    result += buffer;
+
+    sprintf(buffer ,"------------------------------------------------------------------\n");
+    result += buffer;
+
+    return result;
+  }
+
+  bool Ring5gbAtomVisitor::isRing5gbAtom(const std::string& atomType){
+    std::set<std::string>::iterator strIter;
+    strIter = Ring5gbAtomType.find(atomType);
+
+    return strIter != Ring5gbAtomType.end() ? true : false;
+  }
+
+  void Ring5gbAtomVisitor::visit(DirectionalAtom* datom){
+    std::vector<AtomInfo*> atoms;
+    //we need to convert linear into 4 different atoms
+    Vector3d c1(0.0, 0.0, -5.5);
+    Vector3d c2(0.0, 0.0, -1.8);
+    Vector3d c3(0.0, 0.0,  1.8);
+    Vector3d c4(0.0, 0.0,  5.5);
+    RotMat3x3d rotMatrix;
+    RotMat3x3d rotTrans;
+    AtomInfo* atomInfo;
+    Vector3d pos;
+    Vector3d newVec;
+    Vector3d dVec;
+    Quat4d q;
+    AtomData* atomData;
+    GenericData* data;
+    bool haveAtomData;
+
+    //if atom is not Ring5GB atom, just skip it
+    if(!isRing5gbAtom(datom->getType()))
       return;
 
     data = datom->getPropertyByName("ATOMDATA");
@@ -619,7 +752,7 @@ namespace oopse {
 
   }
 
-  const std::string GBLipidAtomVisitor::toString(){
+  const std::string Ring5gbAtomVisitor::toString(){
     char buffer[65535];
     std::string result;
   
@@ -629,7 +762,7 @@ namespace oopse {
     sprintf(buffer ,"Visitor name: %s\n", visitorName.c_str());
     result += buffer;
 
-    sprintf(buffer , "Visitor Description: Convert GBlipid into 4 different K atoms\n");
+    sprintf(buffer , "Visitor Description: Convert Ring5GB into 4 different K atoms\n");
     result += buffer;
 
     sprintf(buffer ,"------------------------------------------------------------------\n");
@@ -637,6 +770,109 @@ namespace oopse {
 
     return result;
   }
+
+  bool HeadAtomVisitor::isHeadAtom(const std::string& atomType){
+    std::set<std::string>::iterator strIter;
+    strIter = HeadAtomType.find(atomType);
+
+    return strIter != HeadAtomType.end() ? true : false;
+  }
+
+  void HeadAtomVisitor::visit(DirectionalAtom* datom){
+    std::vector<AtomInfo*> atoms;
+    //we need to convert linear into 2 different atoms
+    Vector3d c1(0.0, 0.0, -1.5);
+    Vector3d c2(0.0, 0.0, 1.5);
+    RotMat3x3d rotMatrix;
+    RotMat3x3d rotTrans;
+    AtomInfo* atomInfo;
+    Vector3d pos;
+    Vector3d newVec;
+    Vector3d dVec;
+    Quat4d q;
+    AtomData* atomData;
+    GenericData* data;
+    bool haveAtomData;
+
+    //if atom is not Head atom, just skip it
+    if(!isHeadAtom(datom->getType()))
+      return;
+
+    data = datom->getPropertyByName("ATOMDATA");
+    if(data != NULL){
+      atomData = dynamic_cast<AtomData*>(data);  
+      if(atomData == NULL){
+	std::cerr << "can not get Atom Data from " << datom->getType() << std::endl;
+	atomData = new AtomData; 
+	haveAtomData = false;      
+      } else {
+	haveAtomData = true;
+      }
+    } else {
+      atomData = new AtomData;
+      haveAtomData = false;
+    }
+   
+  
+    pos = datom->getPos();
+    q = datom->getQ();
+    rotMatrix = datom->getA();
+
+    // We need A^T to convert from body-fixed to space-fixed:  
+    rotTrans = rotMatrix.transpose();
+
+    newVec = rotTrans * c1;
+    atomInfo = new AtomInfo;
+    atomInfo->atomTypeName = "C";
+    atomInfo->pos[0] = pos[0] + newVec[0];
+    atomInfo->pos[1] = pos[1] + newVec[1];
+    atomInfo->pos[2] = pos[2] + newVec[2];
+    atomInfo->dipole[0] = 0.0;
+    atomInfo->dipole[1] = 0.0;
+    atomInfo->dipole[2] = 0.0;
+    atomData->addAtomInfo(atomInfo);
+
+    newVec = rotTrans * c2;
+    atomInfo = new AtomInfo;
+    atomInfo->atomTypeName = "O";
+    atomInfo->pos[0] = pos[0] + newVec[0];
+    atomInfo->pos[1] = pos[1] + newVec[1];
+    atomInfo->pos[2] = pos[2] + newVec[2];
+    atomInfo->dipole[0] = 0.0;
+    atomInfo->dipole[1] = 0.0;
+    atomInfo->dipole[2] = 0.0;
+    atomData->addAtomInfo(atomInfo);
+
+    //add atom data into atom's property
+
+    if(!haveAtomData){
+      atomData->setID("ATOMDATA");
+      datom->addProperty(atomData);
+    }
+
+    setVisited(datom);
+
+  }
+
+  const std::string HeadAtomVisitor::toString(){
+    char buffer[65535];
+    std::string result;
+  
+    sprintf(buffer ,"------------------------------------------------------------------\n");
+    result += buffer;
+
+    sprintf(buffer ,"Visitor name: %s\n", visitorName.c_str());
+    result += buffer;
+
+    sprintf(buffer , "Visitor Description: Convert HEAD into C atom and O atom\n");
+    result += buffer;
+
+    sprintf(buffer ,"------------------------------------------------------------------\n");
+    result += buffer;
+
+    return result;
+  }
+
 
   //----------------------------------------------------------------------------//
 
