@@ -10,7 +10,7 @@ Source    = \
 	GhostBend.cpp \
 	Torsion.cpp \
 	GhostTorsion.cpp \
-        UreyBradleyBend.cpp
+        UreyBradleyBend.cpp \
 
 
 RmiSource =

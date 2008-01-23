@@ -16,6 +16,7 @@ MySource    = \
 	OOPSEBitSet.cpp \
 	MoLocator.cpp \
 	wildcards.cpp \
+	ElementsTable.cpp \
 	residentMem.c\
 	physmem.c
 

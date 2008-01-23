@@ -63,9 +63,8 @@ See: Kohanoff et.al. CHEMPHYSCHEM,2005,6,1848-1852.
 #include "math/AlphaShape.hpp"
 #endif
 #endif
-#include "openbabel/mol.hpp"
+#include "utils/ElementsTable.hpp"
 
-using namespace OpenBabel;
 namespace oopse {
 
   SMLDForceManager::SMLDForceManager(SimInfo* info) : ForceManager(info){
@@ -171,12 +170,12 @@ namespace oopse {
              integrableObject != NULL;
              integrableObject = mol->nextIntegrableObject(j)) {
           Shape* currShape = NULL;
-          if (integrableObject->isDirectionalAtom()) {
-            DirectionalAtom* dAtom = static_cast<DirectionalAtom*>(integrableObject);
-            AtomType* atomType = dAtom->getAtomType();
+
+          if (integrableObject->isAtom()){
+            Atom* atom = static_cast<Atom*>(integrableObject);
+            AtomType* atomType = atom->getAtomType();
             if (atomType->isGayBerne()) {
-              DirectionalAtomType* dAtomType = dynamic_cast<DirectionalAtomType*>(atomType);
-              
+              DirectionalAtomType* dAtomType = dynamic_cast<DirectionalAtomType*>(atomType);              
               GenericData* data = dAtomType->getPropertyByName("GayBerne");
               if (data != NULL) {
                 GayBerneParamGenericData* gayBerneData = dynamic_cast<GayBerneParamGenericData*>(data);
@@ -184,8 +183,8 @@ namespace oopse {
                 if (gayBerneData != NULL) {  
                   GayBerneParam gayBerneParam = gayBerneData->getData();
                   currShape = new Ellipsoid(V3Zero, 
-                                            gayBerneParam.GB_d / 2.0, 
                                             gayBerneParam.GB_l / 2.0, 
+                                            gayBerneParam.GB_d / 2.0, 
                                             Mat3x3d::identity());
                 } else {
                   sprintf( painCave.errMsg,
@@ -200,36 +199,33 @@ namespace oopse {
                 painCave.isFatal = 1;
                 simError();    
               }
-            }
-          } else {
-            Atom* atom = static_cast<Atom*>(integrableObject);
-            AtomType* atomType = atom->getAtomType();
-            if (atomType->isLennardJones()){
-              GenericData* data = atomType->getPropertyByName("LennardJones");
-              if (data != NULL) {
-                LJParamGenericData* ljData = dynamic_cast<LJParamGenericData*>(data);
-                
-                if (ljData != NULL) {
-                  LJParam ljParam = ljData->getData();
-                  currShape = new Sphere(atom->getPos(), ljParam.sigma/2.0);
+            } else {
+              if (atomType->isLennardJones()){
+                GenericData* data = atomType->getPropertyByName("LennardJones");
+                if (data != NULL) {
+                  LJParamGenericData* ljData = dynamic_cast<LJParamGenericData*>(data);
+                  if (ljData != NULL) {
+                    LJParam ljParam = ljData->getData();
+                    currShape = new Sphere(atom->getPos(), ljParam.sigma/2.0);
+                  } else {
+                    sprintf( painCave.errMsg,
+                             "Can not cast GenericData to LJParam\n");
+                    painCave.severity = OOPSE_ERROR;
+                    painCave.isFatal = 1;
+                    simError();          
+                  }       
+                }
+              } else {
+                int obanum = etab.GetAtomicNum((atom->getType()).c_str());
+                if (obanum != 0) {
+                  currShape = new Sphere(atom->getPos(), etab.GetVdwRad(obanum));
                 } else {
                   sprintf( painCave.errMsg,
-                           "Can not cast GenericData to LJParam\n");
+                           "Could not find atom type in default element.txt\n");
                   painCave.severity = OOPSE_ERROR;
                   painCave.isFatal = 1;
                   simError();          
-                }       
-              }
-            } else {
-              int obanum = etab.GetAtomicNum((atom->getType()).c_str());
-              if (obanum != 0) {
-                currShape = new Sphere(atom->getPos(), etab.GetVdwRad(obanum));
-              } else {
-                sprintf( painCave.errMsg,
-                         "Could not find atom type in default element.txt\n");
-                painCave.severity = OOPSE_ERROR;
-                painCave.isFatal = 1;
-                simError();          
+                }
               }
             }
           }
@@ -270,6 +266,7 @@ namespace oopse {
     Molecule::IntegrableObjectIterator  j;
     Molecule* mol;
     StuntDouble* integrableObject;
+    RealType mass;
     Vector3d vel;
     Vector3d pos;
     Vector3d frc;
@@ -281,6 +278,8 @@ namespace oopse {
     bool doLangevinForces;
     bool freezeMolecule;
     int fdf;
+
+
 
     fdf = 0;
 
@@ -314,6 +313,7 @@ namespace oopse {
         
         if (doLangevinForces) {  
           vel =integrableObject->getVel(); 
+          mass = integrableObject->getMass();
           if (integrableObject->isDirectional()){
             //calculate angular velocity in lab frame
             Mat3x3d I = integrableObject->getI();
@@ -332,32 +332,60 @@ namespace oopse {
               omega[1] = angMom[1] /I(1, 1);
               omega[2] = angMom[2] /I(2, 2);
             }
-            
+
+            //std::cerr << "I = " << I(0,0) << "\t" << I(1,1) << "\t" << I(2,2) << "\n\n";
+
             //apply friction force and torque at center of resistance
             A = integrableObject->getA();
             Atrans = A.transpose();
+            //std::cerr << "A = " << integrableObject->getA() << "\n";
+            //std::cerr << "Atrans = " << A.transpose() << "\n\n";
             Vector3d rcr = Atrans * hydroProps_[index]->getCOR();  
+            //std::cerr << "cor = " << hydroProps_[index]->getCOR() << "\n\n\n\n";
+            //std::cerr << "rcr = " << rcr << "\n\n";
             Vector3d vcdLab = vel + cross(omega, rcr);
+        
+            //std::cerr << "velL = " << vel << "\n\n";
+            //std::cerr << "vcdL = " << vcdLab << "\n\n";
             Vector3d vcdBody = A* vcdLab;
+            //std::cerr << "vcdB = " << vcdBody << "\n\n";
             Vector3d frictionForceBody = -(hydroProps_[index]->getXitt() * vcdBody + hydroProps_[index]->getXirt() * omega);
+
+            //std::cerr << "xitt = " << hydroProps_[index]->getXitt() << "\n\n";
+            //std::cerr << "ffB = " << frictionForceBody << "\n\n";
             Vector3d frictionForceLab = Atrans*frictionForceBody;
+            //std::cerr << "ffL = " << frictionForceLab << "\n\n";
+            //std::cerr << "frc = " << integrableObject->getFrc() << "\n\n"; 
             integrableObject->addFrc(frictionForceLab);
+            //std::cerr << "frc = " << integrableObject->getFrc() << "\n\n"; 
+            //std::cerr << "ome = " << omega << "\n\n";
             Vector3d frictionTorqueBody = - (hydroProps_[index]->getXitr() * vcdBody + hydroProps_[index]->getXirr() * omega);
+            //std::cerr << "ftB = " << frictionTorqueBody << "\n\n";
             Vector3d frictionTorqueLab = Atrans*frictionTorqueBody;
+            //std::cerr << "ftL = " << frictionTorqueLab << "\n\n";
+            //std::cerr << "ftL2 = " << frictionTorqueLab+cross(rcr,frictionForceLab) << "\n\n";
+            //std::cerr << "trq = " << integrableObject->getTrq() << "\n\n"; 
             integrableObject->addTrq(frictionTorqueLab+ cross(rcr, frictionForceLab));
-            
+            //std::cerr << "trq = " << integrableObject->getTrq() << "\n\n"; 
+
             //apply random force and torque at center of resistance
             Vector3d randomForceBody;
             Vector3d randomTorqueBody;
             genRandomForceAndTorque(randomForceBody, randomTorqueBody, index, variance_);
+            //std::cerr << "rfB = " << randomForceBody << "\n\n";
+            //std::cerr << "rtB = " << randomTorqueBody << "\n\n";
             Vector3d randomForceLab = Atrans*randomForceBody;
             Vector3d randomTorqueLab = Atrans* randomTorqueBody;
             integrableObject->addFrc(randomForceLab);            
+            //std::cerr << "rfL = " << randomForceLab << "\n\n";
+            //std::cerr << "rtL = " << randomTorqueLab << "\n\n";
+            //std::cerr << "rtL2 = " << randomTorqueLab + cross(rcr, randomForceLab) << "\n\n";
             integrableObject->addTrq(randomTorqueLab + cross(rcr, randomForceLab ));             
             
           } else {
             //spherical atom
             Vector3d frictionForce = -(hydroProps_[index]->getXitt() * vel);
+            //std::cerr << "xitt = " << hydroProps_[index]->getXitt() << "\n\n";
             Vector3d randomForce;
             Vector3d randomTorque;
             genRandomForceAndTorque(randomForce, randomTorque, index, variance_);
@@ -372,8 +400,7 @@ namespace oopse {
     }    
 
     info_->setFdf(fdf);
-    // commented out for testing one particle
-    // veloMunge->removeComDrift();
+    veloMunge->removeComDrift();
     // Remove angular drift if we are not using periodic boundary conditions.
     if(!simParams->getUsePeriodicBoundaryConditions()) 
       veloMunge->removeAngularDrift();
@@ -404,6 +431,6 @@ void SMLDForceManager::genRandomForceAndTorque(Vector3d& force, Vector3d& torque
     torque[1] = generalForce[4];
     torque[2] = generalForce[5];
     
-}
+} 
 
 }

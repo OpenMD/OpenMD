@@ -1,0 +1,25 @@
+Package = applications/atom2md
+
+MySource    = \
+	oopseformat.cpp \
+	obmolecformat.cpp \
+	atom2md.cpp \
+
+MyMain      =atom2md
+
+USE_OPENBABEL=@USE_OPENBABEL@
+
+ifeq "$(USE_OPENBABEL)" "yes"
+        Source  = $(MySource)
+	Main = $(MyMain)
+else
+        Source = 
+	Main = 
+endif
+
+BuiltParallelExe = 0
+
+RmiSource =
+
+DEV_ROOT=../../..
+include $(DEV_ROOT)/make/Makefile

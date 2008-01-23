@@ -45,9 +45,8 @@
 #include "utils/OOPSEConstant.hpp"
 #include "hydrodynamics/Sphere.hpp"
 #include "hydrodynamics/Ellipsoid.hpp"
-#include "openbabel/mol.hpp"
+#include "utils/ElementsTable.hpp"
 
-using namespace OpenBabel;
 namespace oopse {
 
   LDForceManager::LDForceManager(SimInfo* info) : ForceManager(info){

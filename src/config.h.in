@@ -1,8 +1,6 @@
 #define OOPSE_VERSION_MAJOR 4
 #define OOPSE_VERSION_MINOR 0
 #define OOPSE_VERSION_TINY  0
-/* The version of Open Babel */
-#define BABEL_VERSION "2.0.2"
 #define MK_STR(s) # s
 #define STR_DEFINE(t, s) t = MK_STR(s)
 /* The file extension used for shared modules */

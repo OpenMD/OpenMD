@@ -53,9 +53,9 @@ PackageLibs = \
 	restraints \
 	lattice \
 	hydrodynamics \
-	openbabel\
         antlr\
         mdParser
+
 #packages containing applications
 Applications = \
 	applications/oopse \
@@ -69,7 +69,6 @@ Applications = \
 	applications/atom2md \
 	applications/hydrodynamics \
 	applications/utilities
-
 
 Samples = \
 	samples/builders \
@@ -100,13 +99,14 @@ IncludeDirs = \
 	@MPI_INC_DIR@ \
 	@FFTW_INC_DIR@ \
 	@QHULL_INC_DIR@ \
+	@OPENBABEL_INC_DIR@ \
 	@ZLIB_INC_DIR@ 
 
 LibraryDirs = \
 	@MPI_LIB_DIR@ \
 	@FFTW_LIB_DIR@ \
 	@QHULL_LIB_DIR@ \
-	@CGAL_LIB_DIR@ \
+	@OPENBABEL_LIB_DIR@ \
 	@ZLIB_LIB_DIR@ 
 
 Libraries = \
@@ -115,7 +115,7 @@ Libraries = \
 	@MPI_F90_LIB@ \
 	@FFTW_LIBS@ \
 	@QHULL@ \
-	@CGAL_LIBS@ \
+	@OPENBABEL_LIB@ \
 	@ZLIB@ 
 
 OopseHome       = @OOPSE_HOME@
@@ -139,13 +139,16 @@ ModSuffix       = @MOD@
 LinkOptions = \
 	@LDFLAGS@ \
 	@FCLIBS@ \
-	@CXXFLAGS@  
+	@CXXFLAGS@  \
+	@CGAL_LIBS@
+
 
 
 ParallelLinkOptions = \
 	@LDFLAGS@ \
 	@FCLIBS@ \
-	@CXXFLAGS@ 
+	@CXXFLAGS@ \
+	@CGAL_LIBS@
 
 #---------------------------------------------------------------------------
 #

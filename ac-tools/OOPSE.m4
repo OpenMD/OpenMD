@@ -1207,6 +1207,103 @@ fi
 fi
 ])
 
+AC_DEFUN([ACX_CHECK_OPENBABEL],
+#
+# Handle user hints
+#
+[AC_ARG_WITH(openbabel,
+                AC_HELP_STRING([--with-openbabel=DIR],
+           [root directory path of openbabel-2.x installation (defaults to /usr/local or /usr if not found in /usr/local)]dnl
+		           ),
+		[openbabel_dir="$withval"]dnl
+		            ,dnl
+		[openbabel_dir="not_set"]dnl
+    )dnl
+
+if test "$openbabel_dir" != "no"; then
+
+if test "$openbabel_dir" != "not_set" ; then
+  if test -d "$openbabel_dir"
+  then
+    OPENBABEL_HOME="$openbabel_dir"
+  else
+    AC_MSG_WARN([Sorry, $openbabel_dir does not exist, checking usual places])
+	OPENBABEL_HOME=/usr/local
+	if test ! -f "${OPENBABEL_HOME}/include/openbabel-2.0/openbabel/babelconfig.h" -a -f "${OPENBABEL_HOME}/include/openbabel-2.0/openbabel/obconversion.h"
+	then
+		OPENBABEL_HOME=/usr
+	fi
+  fi
+fi
+#
+# Locate openbabel, if wanted
+#
+if test -n "${OPENBABEL_HOME}"
+then
+        AC_LANG_SAVE
+        AC_LANG_CPLUSPLUS
+        OPENBABEL_OLD_LDFLAGS=$LDFLAGS
+        OPENBABEL_OLD_CPPFLAGS=$CPPFLAGS
+        LDFLAGS="$LDFLAGS -L${OPENBABEL_HOME}/lib -lopenbabel"
+        CPPFLAGS="$CPPFLAGS -I${OPENBABEL_HOME}/include/openbabel-2.0"
+        AC_CHECK_HEADER(openbabel-2.0/openbabel/babelconfig.h, [openbabel_cv_openbabel_h=yes], [openbabel_cv_openbabel_h=no])
+        AC_CHECK_HEADER(openbabel-2.0/openbabel/obconversion.h, [openbabel_cv_obconversion_h=yes], [openbabel_cv_obconversion_h=no])
+        AC_LINK_IFELSE([
+             AC_LANG_PROGRAM(
+                    [[
+@%:@include <openbabel/babelconfig.h>
+@%:@include <openbabel/obconversion.h>
+using namespace std;
+using namespace OpenBabel;
+                    ]],
+                    [[
+OBConversion Conv(&cin, &cout);
+                    ]]
+                )],
+                [
+                openbabel_lib_found="yes"
+                AC_MSG_RESULT([found])
+                ],
+                [
+                openbabel_lib_found="no"
+                AC_MSG_RESULT([not found])
+                ]
+            )
+        AC_LANG_RESTORE
+        LDFLAGS="$OPENBABEL_OLD_LDFLAGS"
+        CPPFLAGS="$OPENBABEL_OLD_CPPFLAGS"
+
+        if test "$openbabel_lib_found" = "yes" -a "$openbabel_cv_openbabel_h" = "yes" -a "$openbabel_cv_obconversion_h" = "yes"; then
+                USE_OPENBABEL=yes                
+                OPENBABEL_INC_DIR="${OPENBABEL_HOME}/include/openbabel-2.0"
+                OPENBABEL_LIB_DIR="${OPENBABEL_HOME}/lib"
+                OPENBABEL_LIB="-lopenbabel"
+        else
+                AC_MSG_CHECKING(openbabel in ${OPENBABEL_HOME})
+                OPENBABEL_INC_DIR=
+                OPENBABEL_LIB_DIR=
+                OPENBABEL_LIB=
+                USE_OPENBABEL=no
+                AC_MSG_RESULT(failed)
+	        echo ""
+	        echo "*********************************************************"
+                echo "* WARNING: Could not find a working openbabel-2.x       *"
+                echo "* installation If you need OOPSE to be able to convert  *"
+                echo "* xyz or pdb files you need to specify a valid          *"
+	        echo "* openbabel-2.x installation with --with-openbabel=DIR  *"
+                echo "*                                                       *"
+                echo "* OOPSE will still work without openbabel installed.    *"
+	        echo "*********************************************************"
+	        echo ""
+        fi
+        AC_SUBST(OPENBABEL_INC_DIR)
+        AC_SUBST(OPENBABEL_LIB_DIR)
+        AC_SUBST(OPENBABEL_LIB)
+	AC_SUBST(USE_OPENBABEL)
+fi
+fi
+])
+
 
 AC_DEFUN([ACX_CHECK_FFTW],
 #

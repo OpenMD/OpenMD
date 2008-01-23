@@ -65,6 +65,8 @@ AC_PROG_EGREP
 AC_PROG_LN_S
 AC_PROG_MAKE_SET
 AC_PROG_RANLIB
+AC_PROG_YACC
+AC_PROG_LEX
 AX_SYS_PERLSHARPBANG
 AC_PROG_INSTALL
 case "x$INSTALL" in
@@ -147,6 +149,7 @@ AC_CHECK_LIB(m, asin, , exit)
 ACX_CHECK_ZLIB
 ACX_CHECK_FFTW
 ACX_CHECK_QHULL
+ACX_CHECK_OPENBABEL
 
 # Checks for header files.
 AC_HEADER_STDC
@@ -284,6 +287,6 @@ AC_SUBST(FCFLAGS)
 AC_SUBST(LDFLAGS)
 AC_SUBST(PREPDEFFLAG)
 AC_SUBST(F90_MODULE_NAMES)
-AC_CONFIG_FILES([make/Makefile src/utils/Makefile src/math/Makefile scripts/filepp], [chmod 0755 scripts/*])
+AC_CONFIG_FILES([make/Makefile src/utils/Makefile src/math/Makefile src/applications/atom2md/Makefile scripts/filepp], [chmod 0755 scripts/*])
 
 AC_OUTPUT
