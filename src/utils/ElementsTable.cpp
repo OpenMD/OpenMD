@@ -34,6 +34,7 @@ GNU General Public License for more details.
 #include <fstream>
 #include "utils/ElementsTable.hpp"
 #include "utils/simError.h"
+#include "io/basic_ifstrstream.hpp"
 
 #if !HAVE_STRNCASECMP
 extern "C" int strncasecmp(const char *s1, const char *s2, size_t n);
@@ -284,7 +285,7 @@ namespace oopse {
     init_ = true;
     
     std::string buffer, subbuffer;
-    std::ifstream ifs1, ifs2, ifs3, ifs4, *ifsP;
+    ifstrstream ifs1, ifs2, ifs3, ifs4, *ifsP;
     // First, look for an environment variable
     if (getenv(envvar_.c_str()) != NULL) {
       buffer = getenv(envvar_.c_str());
