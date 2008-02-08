@@ -4,6 +4,9 @@ Source    = \
 	mdProfile.cpp \
 	timing.F90 \
 
+ParallelSource = \
+	mdProfile.cpp
+
 RmiSource =
 
 Main      =

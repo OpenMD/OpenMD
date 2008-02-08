@@ -24,6 +24,8 @@ else
    endif
 endif
 
+ParallelSource = \
+	ParallelRandNumGen.cpp
 
 RmiSource =
 

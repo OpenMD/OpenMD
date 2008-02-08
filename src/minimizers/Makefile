@@ -8,6 +8,12 @@ Source    = \
 	PRCG.cpp \
 	SDMinimizer.cpp \
 
+ParallelSource = \
+	CGFamilyMinimizer.cpp \
+	Minimizer.cpp \
+	PRCG.cpp \
+	SDMinimizer.cpp 
+
 RmiSource =
 
 Main      =

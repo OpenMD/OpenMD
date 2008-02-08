@@ -4,6 +4,9 @@ Source    = \
         Rattle.cpp \
         ZconstraintForceManager.cpp	
 
+ParallelSource = \
+	ZconstraintForceManager.cpp
+
 RmiSource =
 
 Main      =

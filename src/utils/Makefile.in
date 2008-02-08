@@ -28,6 +28,12 @@ else
    Source = $(MySource)
 endif
 
+ParallelSource = \
+	ElementsTable.cpp \
+	fError.c \
+	simError.c \
+	oopseMPI.F90
+
 Modules = \
 	definitions \
 	oopseMPI \

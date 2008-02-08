@@ -19,6 +19,9 @@ Source    = \
 	SMLDForceManager.cpp \
         LangevinDynamics.cpp	
 
+ParallelSource = \
+	Velocitizer.cpp
+
 RmiSource =
 
 Main      =

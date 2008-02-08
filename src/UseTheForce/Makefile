@@ -12,6 +12,8 @@ Source    = \
 	MnM_FF.cpp \
 	CLAYFF.cpp 
 
+ParallelSource = doForces.F90
+
 Modules = \
 	doForces \
 	notifyCutoffs

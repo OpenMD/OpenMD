@@ -664,6 +664,22 @@ host_os
 PROGNAME
 debug
 USE_SINGLE_PRECISION
+ac_cc_set
+ac_cc_path
+ac_cxx_set
+ac_cxx_path
+ac_fc_set
+ac_fc_path
+acx_mpi_mpicc
+acx_mpi_mpicc_path
+acx_mpi_mpif90
+acx_mpi_mpif90_path
+acx_mpi_mpicxx
+acx_mpi_mpicxx_path
+MPI_CPPFLAGS
+MPI_LIBS
+MPI90_LIBS
+USE_MPI
 CXX
 CXXFLAGS
 LDFLAGS
@@ -724,12 +740,6 @@ USE_OPENBABEL
 LIBOBJS
 POW_LIB
 __func__
-MPI_LIB_DIR
-MPI_INC_DIR
-MPI_F90_INC
-MPI_LIB
-MPI_F90_LIB
-USE_MPI
 CGAL_MAKEFILE
 CGAL_CXXFLAGS
 CGAL_CPPFLAGS
@@ -1352,6 +1362,9 @@ Optional Features:
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
   --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
+  --with-mpi=auto|mpich|lam|openmpi|no
+                          Indicates which kind of MPI implementation to use
+                          [default=auto]
   --with-perl-shebang     override what perl thinks is the way for the kernel
                           to start it (seldom needed)
   --with-zlib=DIR         root directory path of zlib installation (defaults
@@ -1363,7 +1376,6 @@ Optional Packages:
   --with-openbabel=DIR    root directory path of openbabel-2.x installation
                           (defaults to /usr/local or /usr if not found in
                           /usr/local)
-  --with-mpi=<prefix>     compile with MPI installed in <prefix> [default=no]
   --with-cgalmakefile=makefile
                           Use the following CGAL makefile
 
@@ -2001,6 +2013,20 @@ ac_config_headers="$ac_config_headers src/config.h"
 
 
 
+# ACX_MPI_GET_PROG
+
+# ACX_DETECT_MPI_IMPLEMENTATION
+
+
+
+
+
+# ACX_MPI
+
+
+
+
+
 
 
 
@@ -2210,6 +2236,1028 @@ _ACEOF
 
 fi
 
+if test x"$CC" != x; then
+   for ac_prog in $CC
+do
+  # Extract the first word of "$ac_prog", so it can be a program name with args.
+set dummy $ac_prog; ac_word=$2
+{ echo "$as_me:$LINENO: checking for $ac_word" >&5
+echo $ECHO_N "checking for $ac_word... $ECHO_C" >&6; }
+if test "${ac_cv_prog_ac_cc_set+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  if test -n "$ac_cc_set"; then
+  ac_cv_prog_ac_cc_set="$ac_cc_set" # Let the user override the test.
+else
+as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+  for ac_exec_ext in '' $ac_executable_extensions; do
+  if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_test_x "$as_dir/$ac_word$ac_exec_ext"; }; then
+    ac_cv_prog_ac_cc_set="$ac_prog"
+    echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+done
+IFS=$as_save_IFS
+
+fi
+fi
+ac_cc_set=$ac_cv_prog_ac_cc_set
+if test -n "$ac_cc_set"; then
+  { echo "$as_me:$LINENO: result: $ac_cc_set" >&5
+echo "${ECHO_T}$ac_cc_set" >&6; }
+else
+  { echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6; }
+fi
+
+
+  test -n "$ac_cc_set" && break
+done
+test -n "$ac_cc_set" || ac_cc_set="no"
+
+   if test $ac_cc_set != no; then
+
+     # Extract the first word of "$ac_cc_set", so it can be a program name with args.
+set dummy $ac_cc_set; ac_word=$2
+{ echo "$as_me:$LINENO: checking for $ac_word" >&5
+echo $ECHO_N "checking for $ac_word... $ECHO_C" >&6; }
+if test "${ac_cv_path_ac_cc_path+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  case $ac_cc_path in
+  [\\/]* | ?:[\\/]*)
+  ac_cv_path_ac_cc_path="$ac_cc_path" # Let the user override the test with a path.
+  ;;
+  *)
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+  for ac_exec_ext in '' $ac_executable_extensions; do
+  if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_test_x "$as_dir/$ac_word$ac_exec_ext"; }; then
+    ac_cv_path_ac_cc_path="$as_dir/$ac_word$ac_exec_ext"
+    echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+done
+IFS=$as_save_IFS
+
+  test -z "$ac_cv_path_ac_cc_path" && ac_cv_path_ac_cc_path="no"
+  ;;
+esac
+fi
+ac_cc_path=$ac_cv_path_ac_cc_path
+if test -n "$ac_cc_path"; then
+  { echo "$as_me:$LINENO: result: $ac_cc_path" >&5
+echo "${ECHO_T}$ac_cc_path" >&6; }
+else
+  { echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6; }
+fi
+
+
+else
+
+     { { echo "$as_me:$LINENO: error: Specified C compiler $CC doesn't seem to exist!" >&5
+echo "$as_me: error: Specified C compiler $CC doesn't seem to exist!" >&2;}
+   { (exit 1); exit 1; }; }
+fi
+
+
+   if test $ac_cc_path != no; then
+
+     { echo "$as_me:$LINENO: Will attempt to use $CC as C compiler" >&5
+echo "$as_me: Will attempt to use $CC as C compiler" >&6;}
+else
+
+     { { echo "$as_me:$LINENO: error: Can't find path to user-specified C compiler $CC" >&5
+echo "$as_me: error: Can't find path to user-specified C compiler $CC" >&2;}
+   { (exit 1); exit 1; }; }
+fi
+
+fi
+
+if test x"$CXX" != x; then
+   for ac_prog in $CXX
+do
+  # Extract the first word of "$ac_prog", so it can be a program name with args.
+set dummy $ac_prog; ac_word=$2
+{ echo "$as_me:$LINENO: checking for $ac_word" >&5
+echo $ECHO_N "checking for $ac_word... $ECHO_C" >&6; }
+if test "${ac_cv_prog_ac_cxx_set+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  if test -n "$ac_cxx_set"; then
+  ac_cv_prog_ac_cxx_set="$ac_cxx_set" # Let the user override the test.
+else
+as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+  for ac_exec_ext in '' $ac_executable_extensions; do
+  if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_test_x "$as_dir/$ac_word$ac_exec_ext"; }; then
+    ac_cv_prog_ac_cxx_set="$ac_prog"
+    echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+done
+IFS=$as_save_IFS
+
+fi
+fi
+ac_cxx_set=$ac_cv_prog_ac_cxx_set
+if test -n "$ac_cxx_set"; then
+  { echo "$as_me:$LINENO: result: $ac_cxx_set" >&5
+echo "${ECHO_T}$ac_cxx_set" >&6; }
+else
+  { echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6; }
+fi
+
+
+  test -n "$ac_cxx_set" && break
+done
+test -n "$ac_cxx_set" || ac_cxx_set="no"
+
+   if test $ac_cxx_set != no; then
+
+     # Extract the first word of "$ac_cxx_set", so it can be a program name with args.
+set dummy $ac_cxx_set; ac_word=$2
+{ echo "$as_me:$LINENO: checking for $ac_word" >&5
+echo $ECHO_N "checking for $ac_word... $ECHO_C" >&6; }
+if test "${ac_cv_path_ac_cxx_path+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  case $ac_cxx_path in
+  [\\/]* | ?:[\\/]*)
+  ac_cv_path_ac_cxx_path="$ac_cxx_path" # Let the user override the test with a path.
+  ;;
+  *)
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+  for ac_exec_ext in '' $ac_executable_extensions; do
+  if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_test_x "$as_dir/$ac_word$ac_exec_ext"; }; then
+    ac_cv_path_ac_cxx_path="$as_dir/$ac_word$ac_exec_ext"
+    echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+done
+IFS=$as_save_IFS
+
+  test -z "$ac_cv_path_ac_cxx_path" && ac_cv_path_ac_cxx_path="no"
+  ;;
+esac
+fi
+ac_cxx_path=$ac_cv_path_ac_cxx_path
+if test -n "$ac_cxx_path"; then
+  { echo "$as_me:$LINENO: result: $ac_cxx_path" >&5
+echo "${ECHO_T}$ac_cxx_path" >&6; }
+else
+  { echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6; }
+fi
+
+
+else
+
+     { { echo "$as_me:$LINENO: error: Specified C++ compiler $CXX doesn't seem to exist!" >&5
+echo "$as_me: error: Specified C++ compiler $CXX doesn't seem to exist!" >&2;}
+   { (exit 1); exit 1; }; }
+fi
+
+
+   if test $ac_cxx_path != no; then
+
+     { echo "$as_me:$LINENO: Will attempt to use $CXX as C++ compiler" >&5
+echo "$as_me: Will attempt to use $CXX as C++ compiler" >&6;}
+else
+
+     { { echo "$as_me:$LINENO: error: Can't find path to user-specified C++ compiler $CXX" >&5
+echo "$as_me: error: Can't find path to user-specified C++ compiler $CXX" >&2;}
+   { (exit 1); exit 1; }; }
+fi
+
+fi
+
+if test x"$FC" != x; then
+   for ac_prog in $FC
+do
+  # Extract the first word of "$ac_prog", so it can be a program name with args.
+set dummy $ac_prog; ac_word=$2
+{ echo "$as_me:$LINENO: checking for $ac_word" >&5
+echo $ECHO_N "checking for $ac_word... $ECHO_C" >&6; }
+if test "${ac_cv_prog_ac_fc_set+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  if test -n "$ac_fc_set"; then
+  ac_cv_prog_ac_fc_set="$ac_fc_set" # Let the user override the test.
+else
+as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+  for ac_exec_ext in '' $ac_executable_extensions; do
+  if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_test_x "$as_dir/$ac_word$ac_exec_ext"; }; then
+    ac_cv_prog_ac_fc_set="$ac_prog"
+    echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+done
+IFS=$as_save_IFS
+
+fi
+fi
+ac_fc_set=$ac_cv_prog_ac_fc_set
+if test -n "$ac_fc_set"; then
+  { echo "$as_me:$LINENO: result: $ac_fc_set" >&5
+echo "${ECHO_T}$ac_fc_set" >&6; }
+else
+  { echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6; }
+fi
+
+
+  test -n "$ac_fc_set" && break
+done
+test -n "$ac_fc_set" || ac_fc_set="no"
+
+   if test $ac_fc_set != no; then
+
+     # Extract the first word of "$ac_fc_set", so it can be a program name with args.
+set dummy $ac_fc_set; ac_word=$2
+{ echo "$as_me:$LINENO: checking for $ac_word" >&5
+echo $ECHO_N "checking for $ac_word... $ECHO_C" >&6; }
+if test "${ac_cv_path_ac_fc_path+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  case $ac_fc_path in
+  [\\/]* | ?:[\\/]*)
+  ac_cv_path_ac_fc_path="$ac_fc_path" # Let the user override the test with a path.
+  ;;
+  *)
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+  for ac_exec_ext in '' $ac_executable_extensions; do
+  if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_test_x "$as_dir/$ac_word$ac_exec_ext"; }; then
+    ac_cv_path_ac_fc_path="$as_dir/$ac_word$ac_exec_ext"
+    echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+done
+IFS=$as_save_IFS
+
+  test -z "$ac_cv_path_ac_fc_path" && ac_cv_path_ac_fc_path="no"
+  ;;
+esac
+fi
+ac_fc_path=$ac_cv_path_ac_fc_path
+if test -n "$ac_fc_path"; then
+  { echo "$as_me:$LINENO: result: $ac_fc_path" >&5
+echo "${ECHO_T}$ac_fc_path" >&6; }
+else
+  { echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6; }
+fi
+
+
+else
+
+     { { echo "$as_me:$LINENO: error: Specified Fortran compiler $FC doesn't seem to exist!" >&5
+echo "$as_me: error: Specified Fortran compiler $FC doesn't seem to exist!" >&2;}
+   { (exit 1); exit 1; }; }
+fi
+
+
+   if test $ac_fc_path != no; then
+
+     { echo "$as_me:$LINENO: Will attempt to use $FC as Fortran compiler" >&5
+echo "$as_me: Will attempt to use $FC as Fortran compiler" >&6;}
+else
+
+     { { echo "$as_me:$LINENO: error: Can't find path to user-specified Fortran compiler $FC" >&5
+echo "$as_me: error: Can't find path to user-specified Fortran compiler $FC" >&2;}
+   { (exit 1); exit 1; }; }
+fi
+
+fi
+
+
+
+
+# Check whether --with-mpi was given.
+if test "${with_mpi+set}" = set; then
+  withval=$with_mpi;
+else
+  with_mpi="auto"
+fi
+
+if test "x$with_mpi" != "xno"; then
+
+
+for ac_prog in $CC openmpicc mpicc
+do
+  # Extract the first word of "$ac_prog", so it can be a program name with args.
+set dummy $ac_prog; ac_word=$2
+{ echo "$as_me:$LINENO: checking for $ac_word" >&5
+echo $ECHO_N "checking for $ac_word... $ECHO_C" >&6; }
+if test "${ac_cv_prog_acx_mpi_mpicc+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  if test -n "$acx_mpi_mpicc"; then
+  ac_cv_prog_acx_mpi_mpicc="$acx_mpi_mpicc" # Let the user override the test.
+else
+as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+  for ac_exec_ext in '' $ac_executable_extensions; do
+  if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_test_x "$as_dir/$ac_word$ac_exec_ext"; }; then
+    ac_cv_prog_acx_mpi_mpicc="$ac_prog"
+    echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+done
+IFS=$as_save_IFS
+
+fi
+fi
+acx_mpi_mpicc=$ac_cv_prog_acx_mpi_mpicc
+if test -n "$acx_mpi_mpicc"; then
+  { echo "$as_me:$LINENO: result: $acx_mpi_mpicc" >&5
+echo "${ECHO_T}$acx_mpi_mpicc" >&6; }
+else
+  { echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6; }
+fi
+
+
+  test -n "$acx_mpi_mpicc" && break
+done
+test -n "$acx_mpi_mpicc" || acx_mpi_mpicc="no"
+
+if test $acx_mpi_mpicc != no; then
+
+  # Extract the first word of "$acx_mpi_mpicc", so it can be a program name with args.
+set dummy $acx_mpi_mpicc; ac_word=$2
+{ echo "$as_me:$LINENO: checking for $ac_word" >&5
+echo $ECHO_N "checking for $ac_word... $ECHO_C" >&6; }
+if test "${ac_cv_path_acx_mpi_mpicc_path+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  case $acx_mpi_mpicc_path in
+  [\\/]* | ?:[\\/]*)
+  ac_cv_path_acx_mpi_mpicc_path="$acx_mpi_mpicc_path" # Let the user override the test with a path.
+  ;;
+  *)
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+  for ac_exec_ext in '' $ac_executable_extensions; do
+  if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_test_x "$as_dir/$ac_word$ac_exec_ext"; }; then
+    ac_cv_path_acx_mpi_mpicc_path="$as_dir/$ac_word$ac_exec_ext"
+    echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+done
+IFS=$as_save_IFS
+
+  test -z "$ac_cv_path_acx_mpi_mpicc_path" && ac_cv_path_acx_mpi_mpicc_path="no"
+  ;;
+esac
+fi
+acx_mpi_mpicc_path=$ac_cv_path_acx_mpi_mpicc_path
+if test -n "$acx_mpi_mpicc_path"; then
+  { echo "$as_me:$LINENO: result: $acx_mpi_mpicc_path" >&5
+echo "${ECHO_T}$acx_mpi_mpicc_path" >&6; }
+else
+  { echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6; }
+fi
+
+
+fi
+
+for ac_prog in $FC openmpif90 mpif90
+do
+  # Extract the first word of "$ac_prog", so it can be a program name with args.
+set dummy $ac_prog; ac_word=$2
+{ echo "$as_me:$LINENO: checking for $ac_word" >&5
+echo $ECHO_N "checking for $ac_word... $ECHO_C" >&6; }
+if test "${ac_cv_prog_acx_mpi_mpif90+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  if test -n "$acx_mpi_mpif90"; then
+  ac_cv_prog_acx_mpi_mpif90="$acx_mpi_mpif90" # Let the user override the test.
+else
+as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+  for ac_exec_ext in '' $ac_executable_extensions; do
+  if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_test_x "$as_dir/$ac_word$ac_exec_ext"; }; then
+    ac_cv_prog_acx_mpi_mpif90="$ac_prog"
+    echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+done
+IFS=$as_save_IFS
+
+fi
+fi
+acx_mpi_mpif90=$ac_cv_prog_acx_mpi_mpif90
+if test -n "$acx_mpi_mpif90"; then
+  { echo "$as_me:$LINENO: result: $acx_mpi_mpif90" >&5
+echo "${ECHO_T}$acx_mpi_mpif90" >&6; }
+else
+  { echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6; }
+fi
+
+
+  test -n "$acx_mpi_mpif90" && break
+done
+test -n "$acx_mpi_mpif90" || acx_mpi_mpif90="no"
+
+if test $acx_mpi_mpif90 != no; then
+
+  # Extract the first word of "$acx_mpi_mpif90", so it can be a program name with args.
+set dummy $acx_mpi_mpif90; ac_word=$2
+{ echo "$as_me:$LINENO: checking for $ac_word" >&5
+echo $ECHO_N "checking for $ac_word... $ECHO_C" >&6; }
+if test "${ac_cv_path_acx_mpi_mpif90_path+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  case $acx_mpi_mpif90_path in
+  [\\/]* | ?:[\\/]*)
+  ac_cv_path_acx_mpi_mpif90_path="$acx_mpi_mpif90_path" # Let the user override the test with a path.
+  ;;
+  *)
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+  for ac_exec_ext in '' $ac_executable_extensions; do
+  if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_test_x "$as_dir/$ac_word$ac_exec_ext"; }; then
+    ac_cv_path_acx_mpi_mpif90_path="$as_dir/$ac_word$ac_exec_ext"
+    echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+done
+IFS=$as_save_IFS
+
+  test -z "$ac_cv_path_acx_mpi_mpif90_path" && ac_cv_path_acx_mpi_mpif90_path="no"
+  ;;
+esac
+fi
+acx_mpi_mpif90_path=$ac_cv_path_acx_mpi_mpif90_path
+if test -n "$acx_mpi_mpif90_path"; then
+  { echo "$as_me:$LINENO: result: $acx_mpi_mpif90_path" >&5
+echo "${ECHO_T}$acx_mpi_mpif90_path" >&6; }
+else
+  { echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6; }
+fi
+
+
+fi
+
+for ac_prog in $CXX openmpicxx openmpiCC openmpic++ mpicxx mpiCC mpic++
+do
+  # Extract the first word of "$ac_prog", so it can be a program name with args.
+set dummy $ac_prog; ac_word=$2
+{ echo "$as_me:$LINENO: checking for $ac_word" >&5
+echo $ECHO_N "checking for $ac_word... $ECHO_C" >&6; }
+if test "${ac_cv_prog_acx_mpi_mpicxx+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  if test -n "$acx_mpi_mpicxx"; then
+  ac_cv_prog_acx_mpi_mpicxx="$acx_mpi_mpicxx" # Let the user override the test.
+else
+as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+  for ac_exec_ext in '' $ac_executable_extensions; do
+  if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_test_x "$as_dir/$ac_word$ac_exec_ext"; }; then
+    ac_cv_prog_acx_mpi_mpicxx="$ac_prog"
+    echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+done
+IFS=$as_save_IFS
+
+fi
+fi
+acx_mpi_mpicxx=$ac_cv_prog_acx_mpi_mpicxx
+if test -n "$acx_mpi_mpicxx"; then
+  { echo "$as_me:$LINENO: result: $acx_mpi_mpicxx" >&5
+echo "${ECHO_T}$acx_mpi_mpicxx" >&6; }
+else
+  { echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6; }
+fi
+
+
+  test -n "$acx_mpi_mpicxx" && break
+done
+test -n "$acx_mpi_mpicxx" || acx_mpi_mpicxx="no"
+
+if test $acx_mpi_mpicxx != no; then
+
+  # Extract the first word of "$acx_mpi_mpicxx", so it can be a program name with args.
+set dummy $acx_mpi_mpicxx; ac_word=$2
+{ echo "$as_me:$LINENO: checking for $ac_word" >&5
+echo $ECHO_N "checking for $ac_word... $ECHO_C" >&6; }
+if test "${ac_cv_path_acx_mpi_mpicxx_path+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  case $acx_mpi_mpicxx_path in
+  [\\/]* | ?:[\\/]*)
+  ac_cv_path_acx_mpi_mpicxx_path="$acx_mpi_mpicxx_path" # Let the user override the test with a path.
+  ;;
+  *)
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+  for ac_exec_ext in '' $ac_executable_extensions; do
+  if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_test_x "$as_dir/$ac_word$ac_exec_ext"; }; then
+    ac_cv_path_acx_mpi_mpicxx_path="$as_dir/$ac_word$ac_exec_ext"
+    echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+done
+IFS=$as_save_IFS
+
+  test -z "$ac_cv_path_acx_mpi_mpicxx_path" && ac_cv_path_acx_mpi_mpicxx_path="no"
+  ;;
+esac
+fi
+acx_mpi_mpicxx_path=$ac_cv_path_acx_mpi_mpicxx_path
+if test -n "$acx_mpi_mpicxx_path"; then
+  { echo "$as_me:$LINENO: result: $acx_mpi_mpicxx_path" >&5
+echo "${ECHO_T}$acx_mpi_mpicxx_path" >&6; }
+else
+  { echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6; }
+fi
+
+
+fi
+
+if test $acx_mpi_mpicc = no; then
+
+  if test $acx_mpi_mpicxx = no; then
+
+    acx_mpi_compiler=no
+
+else
+
+    acx_mpi_compiler=$acx_mpi_mpicxx
+    acx_mpi_compiler_path=$acx_mpi_mpicxx_path
+fi
+
+
+else
+
+  if test $acx_mpi_mpicxx = no; then
+
+    acx_mpi_compiler=$acx_mpi_mpicc
+    acx_mpi_compiler_path=$acx_mpi_mpicc_path
+
+else
+
+    { echo "$as_me:$LINENO: checking whether to use $acx_mpi_mpicc or $acx_mpi_mpicxx" >&5
+echo $ECHO_N "checking whether to use $acx_mpi_mpicc or $acx_mpi_mpicxx... $ECHO_C" >&6; }
+    ac_ext=cpp
+ac_cpp='$CXXCPP $CPPFLAGS'
+ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
+
+    cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+#include <mpi.h>
+
+int
+main ()
+{
+
+MPI_Finalize();
+
+  ;
+  return 0;
+}
+_ACEOF
+    if { (ac_try="$acx_mpi_mpicxx_path -c conftest.$ac_ext >&5"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+  (eval "$acx_mpi_mpicxx_path -c conftest.$ac_ext >&5") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+         test -z "$ac_cxx_werror_flag" ||
+         test ! -s conftest.err
+       } && test -s conftest.$ac_objext; then
+
+      acx_mpi_compiler=$acx_mpi_mpicxx
+      acx_mpi_compiler_path=$acx_mpi_mpicxx_path
+
+else
+
+      acx_mpi_compiler=$acx_mpi_mpicc
+      acx_mpi_compiler_path=$acx_mpi_mpicc_path
+fi
+
+    ac_ext=c
+ac_cpp='$CPP $CPPFLAGS'
+ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
+
+    { echo "$as_me:$LINENO: result: $acx_mpi_compiler" >&5
+echo "${ECHO_T}$acx_mpi_compiler" >&6; }
+fi
+
+fi
+
+{ echo "$as_me:$LINENO: checking whether mpif.h is usable" >&5
+echo $ECHO_N "checking whether mpif.h is usable... $ECHO_C" >&6; }
+ac_ext=${ac_fc_srcext-f}
+ac_compile='$FC -c $FCFLAGS $ac_fcflags_srcext conftest.$ac_ext >&5'
+ac_link='$FC -o conftest$ac_exeext $FCFLAGS $LDFLAGS $ac_fcflags_srcext conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_fc_compiler_gnu
+
+ac_save_ext=$ac_ext
+ac_ext=F90
+rm -f conftest*
+cat >conftest.$ac_ext <<EOF
+program main
+   include 'mpif.h'
+   call MPI_Init
+end
+EOF
+if $acx_mpi_mpif90_path -c conftest.$ac_ext > conftest.out 2>&1 ; then
+        acx_mpi_f90_compiler=yes
+        { echo "$as_me:$LINENO: result: yes" >&5
+echo "${ECHO_T}yes" >&6; }
+else
+        if test -s conftest.out ; then
+                cat conftest.out >> config.log
+        fi
+        acx_mpi_f90_compiler=no
+        { echo "$as_me:$LINENO: result: no! Check MPI fortran include paths" >&5
+echo "${ECHO_T}no! Check MPI fortran include paths" >&6; }
+fi
+rm -f conftest*
+ac_ext=$ac_save_ext
+ac_ext=c
+ac_cpp='$CPP $CPPFLAGS'
+ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
+
+if test $acx_mpi_compiler = no || test $acx_mpi_f90_compiler = no; then
+
+acx_cv_mpi_implementation=no
+else
+  { echo "$as_me:$LINENO: checking for the MPI implementation flavor" >&5
+echo $ECHO_N "checking for the MPI implementation flavor... $ECHO_C" >&6; }
+if test "${acx_cv_mpi_implementation+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  acx_cv_mpi_implementation=no
+if { (ac_try="grep -q LAM $acx_mpi_compiler_path"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+  (eval "grep -q LAM $acx_mpi_compiler_path") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; then
+
+  acx_cv_mpi_implementation=lammpi
+
+else
+
+  if { (ac_try="grep -q showme $acx_mpi_compiler_path"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+  (eval "grep -q showme $acx_mpi_compiler_path") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; then
+
+    acx_cv_mpi_implementation=openmpi
+
+else
+
+    if { (ac_try="grep -q MPICH $acx_mpi_compiler_path"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+  (eval "grep -q MPICH $acx_mpi_compiler_path") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; then
+
+      acx_cv_mpi_implementation=mpich
+
+else
+  acx_cv_mpi_implementation=$with_mpi
+fi
+
+fi
+
+fi
+
+fi
+{ echo "$as_me:$LINENO: result: $acx_cv_mpi_implementation" >&5
+echo "${ECHO_T}$acx_cv_mpi_implementation" >&6; }
+
+fi
+case $acx_cv_mpi_implementation in
+(lammpi)
+
+cat >>confdefs.h <<\_ACEOF
+#define MPI_IS_LAMMPI 1
+_ACEOF
+
+  ;;
+(openmpi)
+
+cat >>confdefs.h <<\_ACEOF
+#define MPI_IS_OPENMPI 1
+_ACEOF
+
+  ;;
+(mpich)
+
+cat >>confdefs.h <<\_ACEOF
+#define MPI_IS_MPICH 1
+_ACEOF
+
+  ;;
+esac
+if test $acx_cv_mpi_implementation = no; then
+
+acx_mpi_cflags=""
+acx_mpi_libs=""
+USE_MPI="no"
+        { echo "$as_me:$LINENO: WARNING: No suitable MPI implementation found. oopse_MPI will not be build." >&5
+echo "$as_me: WARNING: No suitable MPI implementation found. oopse_MPI will not be build." >&2;}
+else
+
+
+{ echo "$as_me:$LINENO: checking how to compile MPI-C code" >&5
+echo $ECHO_N "checking how to compile MPI-C code... $ECHO_C" >&6; }
+if test "${acx_mpi_cflags+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+
+case $acx_cv_mpi_implementation in
+  (lammpi)
+    cfo="--showme:compile"
+    ;;
+  (openmpi)
+    cfo="--showme:compile"
+    ;;
+  (mpich)
+    case "$acx_mpi_compiler_path" in
+      (*mpiCC)
+        sc_cv_cn="-CC="
+	;;
+      (*mpicxx)
+        sc_cv_cn="-cxx="
+        ;;
+      (*mpicc)
+        sc_cv_cn="-cc="
+	;;
+      (*)
+        sc_cv_cn=""
+	;;
+    esac
+    cfo="-compile_info $sc_cv_cn"
+    ;;
+esac
+echo "$as_me:$LINENO: mpi_pre_cflags=\"\`$acx_mpi_compiler_path $cfo || echo ' no'\`\"" >&5
+mpi_pre_cflags="`$acx_mpi_compiler_path $cfo 2>conftest.er1 || echo ' no'`"
+grep -v '^ *+' conftest.er1 >conftest.err
+rm -f conftest.er1
+cat conftest.err >&5
+echo "$as_me:$LINENO: mpi_pre_cflags = $mpi_pre_cflags" >&5
+case "$mpi_pre_cflags" in
+  (*no)
+    acx_mpi_cflags=no
+    acx_mpi_cflags="no"
+    ;;
+  (*)
+    acx_mpi_tmp_mode="normal"
+  acx_mpi_tmp_prefix=""
+  eval "acx_mpi_cflags=\"\""
+  for acx_mpi_tmp in $mpi_pre_cflags; do
+    case "$acx_mpi_tmp_mode" in
+      (normal)
+        case "$acx_mpi_tmp" in
+          (-I|-D)
+            acx_mpi_tmp_prefix="$acx_mpi_tmp"
+            acx_mpi_tmp_mode="accept"
+            ;;
+          (-I*|-D*)
+            eval "acx_mpi_cflags=\"`eval echo '${'\\acx_mpi_cflags'}'` \$acx_mpi_tmp\""
+            ;;
+          (-L|-l)
+            acx_mpi_tmp_mode="skip"
+            ;;
+          (*)
+            ;;
+        esac
+        ;;
+      (accept)
+        eval "acx_mpi_cflags=\"`eval echo '${'\\acx_mpi_cflags'}'` \$acx_mpi_tmp_prefix \$acx_mpi_tmp\""
+        ;;
+      (skip)
+        ;;
+    esac
+  done
+
+    ;;
+esac
+
+fi
+{ echo "$as_me:$LINENO: result: $acx_mpi_cflags" >&5
+echo "${ECHO_T}$acx_mpi_cflags" >&6; }
+
+
+{ echo "$as_me:$LINENO: checking how to link MPI-C code" >&5
+echo $ECHO_N "checking how to link MPI-C code... $ECHO_C" >&6; }
+if test "${acx_mpi_libs+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+
+case $acx_cv_mpi_implementation in
+  (lammpi)
+    lfo="--showme:compile --showme:link"
+    ;;
+  (openmpi)
+    lfo="--showme:link"
+    ;;
+  (mpich)
+    case "$acx_mpi_compiler_path" in
+      (*mpiCC)
+        sc_cv_cn="-CC="
+	;;
+      (*mpicxx)
+        sc_cv_cn="-cxx="
+        ;;
+      (*mpicc)
+        sc_cv_cn="-cc="
+	;;
+      (*)
+        sc_cv_cn=""
+	;;
+    esac
+    lfo="-link_info $sc_cv_cn"
+    ;;
+esac
+echo "$as_me:$LINENO: mpi_pre_libs=\"\`$acx_mpi_compiler_path $lfo || echo ' no'\`\"" >&5
+mpi_pre_libs="`$acx_mpi_compiler_path $lfo 2>conftest.er1 || echo ' no'`"
+grep -v '^ *+' conftest.er1 >conftest.err
+rm -f conftest.er1
+cat conftest.err >&5
+echo "$as_me:$LINENO: mpi_pre_libs = $mpi_pre_libs" >&5
+case "$mpi_pre_libs" in
+  (*no)
+    acx_mpi_libs=no
+    ;;
+  (*)
+    acx_mpi_libs="$mpi_pre_libs"
+    ;;
+esac
+
+fi
+{ echo "$as_me:$LINENO: result: $acx_mpi_libs" >&5
+echo "${ECHO_T}$acx_mpi_libs" >&6; }
+
+if test $acx_mpi_mpif90_path != no; then
+
+
+  { echo "$as_me:$LINENO: checking how to link MPI-Fortran code" >&5
+echo $ECHO_N "checking how to link MPI-Fortran code... $ECHO_C" >&6; }
+if test "${acx_mpi90_libs+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+
+    echo "$as_me:$LINENO: mpi_pre_libs=\"\`$acx_mpi_mpif90_path $lfo || echo \" no\"\`\"" >&5
+    mpi_pre_libs="`$acx_mpi_mpif90_path $lfo 2>conftest.er1 || echo " no"`"
+    grep -v '^ *+' conftest.er1 >conftest.err
+    rm -f conftest.er1
+    cat conftest.err >&5
+    echo "$as_me:$LINENO: mpi_pre_libs = $mpi_pre_libs" >&5
+    case "$mpi_pre_libs" in
+      (*no)
+        acx_mpi90_libs=no
+        ;;
+      (*)
+        acx_mpi90_libs="$mpi_pre_libs"
+        ;;
+    esac
+
+fi
+{ echo "$as_me:$LINENO: result: $acx_mpi90_libs" >&5
+echo "${ECHO_T}$acx_mpi90_libs" >&6; }
+
+
+fi
+
+if test "$acx_mpi_cflags" = no -o "$acx_mpi_libs" = no; then
+
+acx_mpi_cflags=""
+acx_mpi_libs=""
+USE_MPI="no"
+        { echo "$as_me:$LINENO: WARNING: No suitable MPI implementation found. oopse_MPI will not be build." >&5
+echo "$as_me: WARNING: No suitable MPI implementation found. oopse_MPI will not be build." >&2;}
+else
+
+MPI_CPPFLAGS=$acx_mpi_cflags
+
+MPI_LIBS=$acx_mpi_libs
+
+if test "$acx_mpi90_libs" != no; then
+  MPI90_LIBS=$acx_mpi90_libs
+
+fi
+
+USE_MPI="yes"
+fi
+
+
+fi
+
+
+fi
+
+
+
 # Checks for programs.
 ac_ext=cpp
 ac_cpp='$CXXCPP $CPPFLAGS'
@@ -2221,7 +3269,7 @@ if test -z "$CXX"; then
     CXX=$CCC
   else
     if test -n "$ac_tool_prefix"; then
-  for ac_prog in mpicxx icpc pathCC pgCC c++ xlc++ xlC g++ CC
+  for ac_prog in $CXX $ac_cv_prog_acx_mpi_mpicxx icpc pathCC pgCC c++ xlc++ xlC g++ CC
   do
     # Extract the first word of "$ac_tool_prefix$ac_prog", so it can be a program name with args.
 set dummy $ac_tool_prefix$ac_prog; ac_word=$2
@@ -2265,7 +3313,7 @@ fi
 fi
 if test -z "$CXX"; then
   ac_ct_CXX=$CXX
-  for ac_prog in mpicxx icpc pathCC pgCC c++ xlc++ xlC g++ CC
+  for ac_prog in $CXX $ac_cv_prog_acx_mpi_mpicxx icpc pathCC pgCC c++ xlc++ xlC g++ CC
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -2824,7 +3872,7 @@ ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 if test -n "$ac_tool_prefix"; then
-  for ac_prog in mpicc icc pathcc pgcc cc xlc gcc
+  for ac_prog in $CC $ac_cv_prog_acx_mpi_mpicc icc pathcc pgcc cc xlc gcc
   do
     # Extract the first word of "$ac_tool_prefix$ac_prog", so it can be a program name with args.
 set dummy $ac_tool_prefix$ac_prog; ac_word=$2
@@ -2868,7 +3916,7 @@ fi
 fi
 if test -z "$CC"; then
   ac_ct_CC=$CC
-  for ac_prog in mpicc icc pathcc pgcc cc xlc gcc
+  for ac_prog in $CC $ac_cv_prog_acx_mpi_mpicc icc pathcc pgcc cc xlc gcc
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -3303,7 +4351,7 @@ ac_compile='$FC -c $FCFLAGS $ac_fcflags_srcext conftest.$ac_ext >&5'
 ac_link='$FC -o conftest$ac_exeext $FCFLAGS $LDFLAGS $ac_fcflags_srcext conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_fc_compiler_gnu
 if test -n "$ac_tool_prefix"; then
-  for ac_prog in mpif90 ifort ifc pathf95 pgf95 xlf95 lf95 epcf90 pathf90 xlf90 f95 f90 gfortran g95 fort
+  for ac_prog in $FC $ac_cv_prog_acx_mpi_mpif90 ifort ifc pathf95 pgf95 xlf95 lf95 epcf90 pathf90 xlf90 f95 f90 gfortran g95 fort
   do
     # Extract the first word of "$ac_tool_prefix$ac_prog", so it can be a program name with args.
 set dummy $ac_tool_prefix$ac_prog; ac_word=$2
@@ -3347,7 +4395,7 @@ fi
 fi
 if test -z "$FC"; then
   ac_ct_FC=$FC
-  for ac_prog in mpif90 ifort ifc pathf95 pgf95 xlf95 lf95 epcf90 pathf90 xlf90 f95 f90 gfortran g95 fort
+  for ac_prog in $FC $ac_cv_prog_acx_mpi_mpif90 ifort ifc pathf95 pgf95 xlf95 lf95 epcf90 pathf90 xlf90 f95 f90 gfortran g95 fort
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -14990,528 +16038,6 @@ _ACEOF
 
 
 
-
-# Check whether --with-mpi was given.
-if test "${with_mpi+set}" = set; then
-  withval=$with_mpi; with_mpi=$withval
-else
-  with_mpi="no"
-fi
-
-
-case "x$with_mpi" in
-        xyes | "x")  USE_MPI=yes;;
-        xno) USE_MPI=no ;;
-        *) MPI="$with_mpi"; USE_MPI=yes ;;
-esac
-if test "$USE_MPI" = "yes" -a -z "$with_mpi"; then
-	MPI="/usr/local"
-fi
-if test "$USE_MPI" = "yes"; then
-
-
-# Set variables...
-MPI_LIB_DIR="$MPI/lib"
-MPI_INC_DIR="$MPI/include"
-
-
-
-ac_ext=c
-ac_cpp='$CPP $CPPFLAGS'
-ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
-ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
-ac_compiler_gnu=$ac_cv_c_compiler_gnu
-
-{ echo "$as_me:$LINENO: checking for mpi.h" >&5
-echo $ECHO_N "checking for mpi.h... $ECHO_C" >&6; }
-have_mpi_h=0
-rm -f conftest*
-echo '#include <mpi.h>' > conftest.c
-if ${CC} -I${MPI_INC_DIR} -c conftest.c 2>&1 ; then
-        { echo "$as_me:$LINENO: result: yes" >&5
-echo "${ECHO_T}yes" >&6; }
-        have_mpi_h=1
-else
-	if test -s conftest.out ; then
-		cat conftest.out >> config.log
-	fi
-        { echo "$as_me:$LINENO: result: no! Check MPI include paths" >&5
-echo "${ECHO_T}no! Check MPI include paths" >&6; }
-        USE_MPI="no"
-fi
-rm -f conftest*
-if test "$have_mpi_h" = 1; then
-
-cat >>confdefs.h <<\_ACEOF
-#define HAVE_MPI_H 1
-_ACEOF
-
-fi
-
-{ echo "$as_me:$LINENO: checking whether mpif.h is usable" >&5
-echo $ECHO_N "checking whether mpif.h is usable... $ECHO_C" >&6; }
-
-ac_ext=${ac_fc_srcext-f}
-ac_compile='$FC -c $FCFLAGS $ac_fcflags_srcext conftest.$ac_ext >&5'
-ac_link='$FC -o conftest$ac_exeext $FCFLAGS $LDFLAGS $ac_fcflags_srcext conftest.$ac_ext $LIBS >&5'
-ac_compiler_gnu=$ac_cv_fc_compiler_gnu
-
-ac_save_ext=$ac_ext
-ac_ext=F90
-ac_save_FCFLAGS=$FCFLAGS
-have_mpif_h=0
-rm -f conftest*
-cat >conftest.$ac_ext <<EOF
-program main
-   include 'mpif.h'
-end
-EOF
-if $FC -I$MPI_INC_DIR -c $FCFLAGS $FCFLAGS_SRCEXT conftest.$ac_ext > conftest.out 2>&1 ; then
-        { echo "$as_me:$LINENO: result: yes" >&5
-echo "${ECHO_T}yes" >&6; }
-        MPI_F90_INC="$MPI_INC_DIR"
-        have_mpif_h=1
-else
-        if test -s conftest.out ; then
-                cat conftest.out >> config.log
-        fi
-        { echo "$as_me:$LINENO: result: no! Check MPI include paths" >&5
-echo "${ECHO_T}no! Check MPI include paths" >&6; }
-        USE_MPI="no"
-fi
-rm -f conftest*
-
-if test "$have_mpif_h" = 1; then
-
-cat >>confdefs.h <<\_ACEOF
-#define HAVE_MPIF_H 1
-_ACEOF
-
-fi
-FCFLAGS=$ac_save_FCFLAGS
-ac_ext=$ac_save_ext
-ac_ext=c
-ac_cpp='$CPP $CPPFLAGS'
-ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
-ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
-ac_compiler_gnu=$ac_cv_c_compiler_gnu
-
-
-ac_ext=c
-ac_cpp='$CPP $CPPFLAGS'
-ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
-ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
-ac_compiler_gnu=$ac_cv_c_compiler_gnu
-
-ac_save_LDFLAGS=$LDFLAGS
-LDFLAGS="-L${MPI_LIB_DIR} ${LDFLAGS} "
-
-if test x = x"$MPI_LIB"; then
-        { echo "$as_me:$LINENO: checking for MPI_Init in -lmpich" >&5
-echo $ECHO_N "checking for MPI_Init in -lmpich... $ECHO_C" >&6; }
-if test "${ac_cv_lib_mpich_MPI_Init+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-lmpich  $LIBS"
-cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char MPI_Init ();
-#ifdef FC_DUMMY_MAIN
-#ifndef FC_DUMMY_MAIN_EQ_F77
-#  ifdef __cplusplus
-     extern "C"
-#  endif
-   int FC_DUMMY_MAIN() { return 1; }
-#endif
-#endif
-int
-main ()
-{
-return MPI_Init ();
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext conftest$ac_exeext
-if { (ac_try="$ac_link"
-case "(($ac_try" in
-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
-  *) ac_try_echo=$ac_try;;
-esac
-eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
-  (eval "$ac_link") 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } && {
-	 test -z "$ac_c_werror_flag" ||
-	 test ! -s conftest.err
-       } && test -s conftest$ac_exeext &&
-       $as_test_x conftest$ac_exeext; then
-  ac_cv_lib_mpich_MPI_Init=yes
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-	ac_cv_lib_mpich_MPI_Init=no
-fi
-
-rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
-      conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-{ echo "$as_me:$LINENO: result: $ac_cv_lib_mpich_MPI_Init" >&5
-echo "${ECHO_T}$ac_cv_lib_mpich_MPI_Init" >&6; }
-if test $ac_cv_lib_mpich_MPI_Init = yes; then
-  MPI_LIB="-lmpich"
-fi
-
-fi
-$as_unset ac_cv_lib_mpich_MPI_Init
-if test x = x"$MPI_LIB"; then
-        { echo "$as_me:$LINENO: checking for MPI_Init in -lpmpich" >&5
-echo $ECHO_N "checking for MPI_Init in -lpmpich... $ECHO_C" >&6; }
-if test "${ac_cv_lib_pmpich_MPI_Init+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-lpmpich -lmpich -lpmpich -lmpich $LIBS"
-cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char MPI_Init ();
-#ifdef FC_DUMMY_MAIN
-#ifndef FC_DUMMY_MAIN_EQ_F77
-#  ifdef __cplusplus
-     extern "C"
-#  endif
-   int FC_DUMMY_MAIN() { return 1; }
-#endif
-#endif
-int
-main ()
-{
-return MPI_Init ();
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext conftest$ac_exeext
-if { (ac_try="$ac_link"
-case "(($ac_try" in
-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
-  *) ac_try_echo=$ac_try;;
-esac
-eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
-  (eval "$ac_link") 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } && {
-	 test -z "$ac_c_werror_flag" ||
-	 test ! -s conftest.err
-       } && test -s conftest$ac_exeext &&
-       $as_test_x conftest$ac_exeext; then
-  ac_cv_lib_pmpich_MPI_Init=yes
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-	ac_cv_lib_pmpich_MPI_Init=no
-fi
-
-rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
-      conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-{ echo "$as_me:$LINENO: result: $ac_cv_lib_pmpich_MPI_Init" >&5
-echo "${ECHO_T}$ac_cv_lib_pmpich_MPI_Init" >&6; }
-if test $ac_cv_lib_pmpich_MPI_Init = yes; then
-  MPI_LIB="-lpmpich -lmpich -lpmpich -lmpich"
-fi
-
-fi
-if test x = x"$MPI_LIB"; then
-        { echo "$as_me:$LINENO: checking for MPI_Init in -lmpi" >&5
-echo $ECHO_N "checking for MPI_Init in -lmpi... $ECHO_C" >&6; }
-if test "${ac_cv_lib_mpi_MPI_Init+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-lmpi  $LIBS"
-cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char MPI_Init ();
-#ifdef FC_DUMMY_MAIN
-#ifndef FC_DUMMY_MAIN_EQ_F77
-#  ifdef __cplusplus
-     extern "C"
-#  endif
-   int FC_DUMMY_MAIN() { return 1; }
-#endif
-#endif
-int
-main ()
-{
-return MPI_Init ();
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext conftest$ac_exeext
-if { (ac_try="$ac_link"
-case "(($ac_try" in
-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
-  *) ac_try_echo=$ac_try;;
-esac
-eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
-  (eval "$ac_link") 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } && {
-	 test -z "$ac_c_werror_flag" ||
-	 test ! -s conftest.err
-       } && test -s conftest$ac_exeext &&
-       $as_test_x conftest$ac_exeext; then
-  ac_cv_lib_mpi_MPI_Init=yes
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-	ac_cv_lib_mpi_MPI_Init=no
-fi
-
-rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
-      conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-{ echo "$as_me:$LINENO: result: $ac_cv_lib_mpi_MPI_Init" >&5
-echo "${ECHO_T}$ac_cv_lib_mpi_MPI_Init" >&6; }
-if test $ac_cv_lib_mpi_MPI_Init = yes; then
-  MPI_LIB="-lmpi"
-fi
-
-fi
-$as_unset ac_cv_lib_mpi_MPI_Init
-if test x = x"$MPI_LIB"; then
-        { echo "$as_me:$LINENO: checking for MPI_Init in -lmpi" >&5
-echo $ECHO_N "checking for MPI_Init in -lmpi... $ECHO_C" >&6; }
-if test "${ac_cv_lib_mpi_MPI_Init+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-lmpi -llam $LIBS"
-cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char MPI_Init ();
-#ifdef FC_DUMMY_MAIN
-#ifndef FC_DUMMY_MAIN_EQ_F77
-#  ifdef __cplusplus
-     extern "C"
-#  endif
-   int FC_DUMMY_MAIN() { return 1; }
-#endif
-#endif
-int
-main ()
-{
-return MPI_Init ();
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext conftest$ac_exeext
-if { (ac_try="$ac_link"
-case "(($ac_try" in
-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
-  *) ac_try_echo=$ac_try;;
-esac
-eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
-  (eval "$ac_link") 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } && {
-	 test -z "$ac_c_werror_flag" ||
-	 test ! -s conftest.err
-       } && test -s conftest$ac_exeext &&
-       $as_test_x conftest$ac_exeext; then
-  ac_cv_lib_mpi_MPI_Init=yes
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-	ac_cv_lib_mpi_MPI_Init=no
-fi
-
-rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
-      conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-{ echo "$as_me:$LINENO: result: $ac_cv_lib_mpi_MPI_Init" >&5
-echo "${ECHO_T}$ac_cv_lib_mpi_MPI_Init" >&6; }
-if test $ac_cv_lib_mpi_MPI_Init = yes; then
-  MPI_LIB="-lmpi -llam"
-fi
-
-fi
-$as_unset ac_cv_lib_mpi_MPI_Init
-if test x = x"$MPI_LIB"; then
-{ echo "$as_me:$LINENO: checking for MPI_Init in -lmpi" >&5
-echo $ECHO_N "checking for MPI_Init in -lmpi... $ECHO_C" >&6; }
-if test "${ac_cv_lib_mpi_MPI_Init+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-lmpi -llam -lpthread $LIBS"
-cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char MPI_Init ();
-#ifdef FC_DUMMY_MAIN
-#ifndef FC_DUMMY_MAIN_EQ_F77
-#  ifdef __cplusplus
-     extern "C"
-#  endif
-   int FC_DUMMY_MAIN() { return 1; }
-#endif
-#endif
-int
-main ()
-{
-return MPI_Init ();
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext conftest$ac_exeext
-if { (ac_try="$ac_link"
-case "(($ac_try" in
-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
-  *) ac_try_echo=$ac_try;;
-esac
-eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
-  (eval "$ac_link") 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } && {
-	 test -z "$ac_c_werror_flag" ||
-	 test ! -s conftest.err
-       } && test -s conftest$ac_exeext &&
-       $as_test_x conftest$ac_exeext; then
-  ac_cv_lib_mpi_MPI_Init=yes
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-	ac_cv_lib_mpi_MPI_Init=no
-fi
-
-rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
-      conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-{ echo "$as_me:$LINENO: result: $ac_cv_lib_mpi_MPI_Init" >&5
-echo "${ECHO_T}$ac_cv_lib_mpi_MPI_Init" >&6; }
-if test $ac_cv_lib_mpi_MPI_Init = yes; then
-  MPI_LIB="-lmpi -llam -lpthread"
-else
-
-             { { echo "$as_me:$LINENO: error: Didn't find liblam, libmpi, or libmpich; check path for MPI package first..." >&5
-echo "$as_me: error: Didn't find liblam, libmpi, or libmpich; check path for MPI package first..." >&2;}
-   { (exit 1); exit 1; }; }
-             USE_MPI="no"
-
-fi
-
-fi
-
-
-
-{ echo "$as_me:$LINENO: checking for MPI Fortran library" >&5
-echo $ECHO_N "checking for MPI Fortran library... $ECHO_C" >&6; }
-MPI_F90_LIB=""
-if test -f "$MPI_LIB_DIR/libfmpich.a" ; then
-        MPI_F90_LIB="-lfmpich"
-elif test -f "$MPI_LIB_DIR/liblamf77mpi.a" ; then
-        MPI_F90_LIB="-llamf77mpi"
-else
-                        MPI_F90_LIB="  "
-fi
-{ echo "$as_me:$LINENO: result: found $MPI_F90_LIB" >&5
-echo "${ECHO_T}found $MPI_F90_LIB" >&6; }
-
-
-fi
-
-
-
 acx_cgal_found=no
 
 # Check whether --with-cgalmakefile was given.
@@ -15609,7 +16135,7 @@ eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
   cat conftest.err >&5
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
   (exit $ac_status); } && {
-	 test -z "$ac_c_werror_flag" ||
+	 test -z "$ac_cxx_werror_flag" ||
 	 test ! -s conftest.err
        } && test -s conftest.$ac_objext; then
   ac_header_compiler=yes
@@ -15648,7 +16174,7 @@ eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
   cat conftest.err >&5
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
   (exit $ac_status); } >/dev/null && {
-	 test -z "$ac_c_preproc_warn_flag$ac_c_werror_flag" ||
+	 test -z "$ac_cxx_preproc_warn_flag$ac_cxx_werror_flag" ||
 	 test ! -s conftest.err
        }; then
   ac_header_preproc=yes
@@ -15664,7 +16190,7 @@ rm -f conftest.err conftest.$ac_ext
 echo "${ECHO_T}$ac_header_preproc" >&6; }
 
 # So?  What about this header?
-case $ac_header_compiler:$ac_header_preproc:$ac_c_preproc_warn_flag in
+case $ac_header_compiler:$ac_header_preproc:$ac_cxx_preproc_warn_flag in
   yes:no: )
     { echo "$as_me:$LINENO: WARNING: CGAL/Exact_predicates_inexact_constructions_kernel.h: accepted by the compiler, rejected by the preprocessor!" >&5
 echo "$as_me: WARNING: CGAL/Exact_predicates_inexact_constructions_kernel.h: accepted by the compiler, rejected by the preprocessor!" >&2;}
@@ -15757,7 +16283,7 @@ eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
   cat conftest.err >&5
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
   (exit $ac_status); } && {
-	 test -z "$ac_c_werror_flag" ||
+	 test -z "$ac_cxx_werror_flag" ||
 	 test ! -s conftest.err
        } && test -s conftest$ac_exeext &&
        $as_test_x conftest$ac_exeext; then
@@ -15828,7 +16354,7 @@ eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
   cat conftest.err >&5
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
   (exit $ac_status); } && {
-	 test -z "$ac_c_werror_flag" ||
+	 test -z "$ac_cxx_werror_flag" ||
 	 test ! -s conftest.err
        } && test -s conftest$ac_exeext &&
        $as_test_x conftest$ac_exeext; then
@@ -15901,7 +16427,7 @@ eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
   cat conftest.err >&5
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
   (exit $ac_status); } && {
-	 test -z "$ac_c_werror_flag" ||
+	 test -z "$ac_cxx_werror_flag" ||
 	 test ! -s conftest.err
        } && test -s conftest$ac_exeext &&
        $as_test_x conftest$ac_exeext; then
@@ -15968,7 +16494,7 @@ eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
   cat conftest.err >&5
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
   (exit $ac_status); } && {
-	 test -z "$ac_c_werror_flag" ||
+	 test -z "$ac_cxx_werror_flag" ||
 	 test ! -s conftest.err
        } && test -s conftest$ac_exeext &&
        $as_test_x conftest$ac_exeext; then
@@ -16035,7 +16561,7 @@ eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
   cat conftest.err >&5
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
   (exit $ac_status); } && {
-	 test -z "$ac_c_werror_flag" ||
+	 test -z "$ac_cxx_werror_flag" ||
 	 test ! -s conftest.err
        } && test -s conftest$ac_exeext &&
        $as_test_x conftest$ac_exeext; then
@@ -16109,7 +16635,7 @@ eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
   cat conftest.err >&5
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
   (exit $ac_status); } && {
-	 test -z "$ac_c_werror_flag" ||
+	 test -z "$ac_cxx_werror_flag" ||
 	 test ! -s conftest.err
        } && test -s conftest$ac_exeext &&
        $as_test_x conftest$ac_exeext; then
@@ -17001,6 +17527,22 @@ host_os!$host_os$ac_delim
 PROGNAME!$PROGNAME$ac_delim
 debug!$debug$ac_delim
 USE_SINGLE_PRECISION!$USE_SINGLE_PRECISION$ac_delim
+ac_cc_set!$ac_cc_set$ac_delim
+ac_cc_path!$ac_cc_path$ac_delim
+ac_cxx_set!$ac_cxx_set$ac_delim
+ac_cxx_path!$ac_cxx_path$ac_delim
+ac_fc_set!$ac_fc_set$ac_delim
+ac_fc_path!$ac_fc_path$ac_delim
+acx_mpi_mpicc!$acx_mpi_mpicc$ac_delim
+acx_mpi_mpicc_path!$acx_mpi_mpicc_path$ac_delim
+acx_mpi_mpif90!$acx_mpi_mpif90$ac_delim
+acx_mpi_mpif90_path!$acx_mpi_mpif90_path$ac_delim
+acx_mpi_mpicxx!$acx_mpi_mpicxx$ac_delim
+acx_mpi_mpicxx_path!$acx_mpi_mpicxx_path$ac_delim
+MPI_CPPFLAGS!$MPI_CPPFLAGS$ac_delim
+MPI_LIBS!$MPI_LIBS$ac_delim
+MPI90_LIBS!$MPI90_LIBS$ac_delim
+USE_MPI!$USE_MPI$ac_delim
 CXX!$CXX$ac_delim
 CXXFLAGS!$CXXFLAGS$ac_delim
 LDFLAGS!$LDFLAGS$ac_delim
@@ -17034,22 +17576,6 @@ AR!$AR$ac_delim
 PS!$PS$ac_delim
 FCFLAGS_F90!$FCFLAGS_F90$ac_delim
 FCFLAGS_SRCEXT!$FCFLAGS_SRCEXT$ac_delim
-PREPDEFFLAG!$PREPDEFFLAG$ac_delim
-FCLIBS!$FCLIBS$ac_delim
-FC_FUNC!$FC_FUNC$ac_delim
-FC_FUNC_!$FC_FUNC_$ac_delim
-MOD!$MOD$ac_delim
-F90_WORK_FILES_ARG!$F90_WORK_FILES_ARG$ac_delim
-MODDIRFLAG!$MODDIRFLAG$ac_delim
-F90MODINCSPEC!$F90MODINCSPEC$ac_delim
-F90_MODULE_NAMES!$F90_MODULE_NAMES$ac_delim
-ZLIB_INC_DIR!$ZLIB_INC_DIR$ac_delim
-ZLIB_LIB_DIR!$ZLIB_LIB_DIR$ac_delim
-ZLIB!$ZLIB$ac_delim
-FFTW_INC_DIR!$FFTW_INC_DIR$ac_delim
-FFTW_LIB_DIR!$FFTW_LIB_DIR$ac_delim
-FFTW_LIBS!$FFTW_LIBS$ac_delim
-QHULL_INC_DIR!$QHULL_INC_DIR$ac_delim
 _ACEOF
 
   if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 97; then
@@ -17091,6 +17617,22 @@ _ACEOF
 ac_delim='%!_!# '
 for ac_last_try in false false false false false :; do
   cat >conf$$subs.sed <<_ACEOF
+PREPDEFFLAG!$PREPDEFFLAG$ac_delim
+FCLIBS!$FCLIBS$ac_delim
+FC_FUNC!$FC_FUNC$ac_delim
+FC_FUNC_!$FC_FUNC_$ac_delim
+MOD!$MOD$ac_delim
+F90_WORK_FILES_ARG!$F90_WORK_FILES_ARG$ac_delim
+MODDIRFLAG!$MODDIRFLAG$ac_delim
+F90MODINCSPEC!$F90MODINCSPEC$ac_delim
+F90_MODULE_NAMES!$F90_MODULE_NAMES$ac_delim
+ZLIB_INC_DIR!$ZLIB_INC_DIR$ac_delim
+ZLIB_LIB_DIR!$ZLIB_LIB_DIR$ac_delim
+ZLIB!$ZLIB$ac_delim
+FFTW_INC_DIR!$FFTW_INC_DIR$ac_delim
+FFTW_LIB_DIR!$FFTW_LIB_DIR$ac_delim
+FFTW_LIBS!$FFTW_LIBS$ac_delim
+QHULL_INC_DIR!$QHULL_INC_DIR$ac_delim
 QHULL_LIB_DIR!$QHULL_LIB_DIR$ac_delim
 QHULL!$QHULL$ac_delim
 USE_QHULL!$USE_QHULL$ac_delim
@@ -17102,12 +17644,6 @@ USE_OPENBABEL!$USE_OPENBABEL$ac_delim
 LIBOBJS!$LIBOBJS$ac_delim
 POW_LIB!$POW_LIB$ac_delim
 __func__!$__func__$ac_delim
-MPI_LIB_DIR!$MPI_LIB_DIR$ac_delim
-MPI_INC_DIR!$MPI_INC_DIR$ac_delim
-MPI_F90_INC!$MPI_F90_INC$ac_delim
-MPI_LIB!$MPI_LIB$ac_delim
-MPI_F90_LIB!$MPI_F90_LIB$ac_delim
-USE_MPI!$USE_MPI$ac_delim
 CGAL_MAKEFILE!$CGAL_MAKEFILE$ac_delim
 CGAL_CXXFLAGS!$CGAL_CXXFLAGS$ac_delim
 CGAL_CPPFLAGS!$CGAL_CPPFLAGS$ac_delim
@@ -17128,7 +17664,7 @@ SUBDIRS!$SUBDIRS$ac_delim
 LTLIBOBJS!$LTLIBOBJS$ac_delim
 _ACEOF
 
-  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 35; then
+  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 45; then
     break
   elif $ac_last_try; then
     { { echo "$as_me:$LINENO: error: could not make $CONFIG_STATUS" >&5

@@ -14,6 +14,12 @@ Source    = \
 	Register.cpp \
 	BlockSnapshotManager.cpp
 
+ParallelSource = \
+	ForceManager.cpp \
+	SimCreator.cpp \
+	SimInfo.cpp \
+	Thermo.cpp
+
 RmiSource =
 
 Main      =

@@ -31,6 +31,21 @@ Source    = \
 	MetalNonMetal.F90 \
 	MetalNonMetal_interface.F90
 
+ParallelSource = \
+	simParallel.F90 \
+	simParallel_interface.F90 \
+	neighborLists.F90 \
+	force_globals.F90 \
+	simulation.F90 \
+	electrostatic.F90 \
+	eam.F90 \
+	LJ.F90 \
+	gb.F90 \
+	stickky.F90 \
+	shapes.F90 \
+	suttonchen.F90 \
+	MetalNonMetal.F90
+
 Modules = \
 	atype_module \
 	eam \

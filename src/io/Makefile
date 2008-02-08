@@ -1,7 +1,7 @@
 Package = io
 
 Source    = \
-  AtomTypesSectionParser.cpp \
+	AtomTypesSectionParser.cpp \
 	DirectionalAtomTypesSectionParser.cpp \
 	SectionParser.cpp \
 	EAMAtomTypesSectionParser.cpp \
@@ -16,8 +16,8 @@ Source    = \
 	LennardJonesAtomTypesSectionParser.cpp\
 	SCAtomTypesSectionParser.cpp \
 	MetalNonMetalInteractionsSectionParser.cpp \
-  BondTypesSectionParser.cpp \
-  BendTypesSectionParser.cpp \
+	BondTypesSectionParser.cpp \
+	BendTypesSectionParser.cpp \
 	Globals.cpp \
 	DumpReader.cpp \
 	DumpWriter.cpp \
@@ -27,9 +27,17 @@ Source    = \
 	RestReader.cpp \
 	RestWriter.cpp \
 	gzstream.cpp\
-        ParamConstraint.cpp \
+	ParamConstraint.cpp \
 	OptionSectionParser.cpp \
 	ForceFieldOptions.cpp
+
+ParallelSource = \
+	DumpReader.cpp \
+	DumpWriter.cpp \
+	RestReader.cpp \
+	RestWriter.cpp \
+	StatWriter.cpp \
+	ZConsWriter.cpp
 
 RmiSource =
 

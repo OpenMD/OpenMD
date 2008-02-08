@@ -4,6 +4,9 @@ Source    = \
 	Restraints.cpp \
 	ThermoIntegrationForceManager.cpp
 
+ParallelSource = \
+	ThermoIntegrationForceManager.cpp
+
 RmiSource =
 
 Main      =
