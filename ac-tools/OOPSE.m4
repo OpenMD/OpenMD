@@ -1055,14 +1055,19 @@ fi
 #
 if test -n "${QHULL_HOME}"
 then
-        QHULL_OLD_LDFLAGS=$LDFLAGS
-        QHULL_OLD_CFLAGS=$CFLAGS
-        LDFLAGS="$LDFLAGS -L${QHULL_HOME}/lib"
-        CFLAGS="$CFLAGS -I${QHULL_HOME}/include"
         AC_LANG_SAVE
         AC_LANG_C
-        AC_CHECK_LIB(qhull, qh_qhull, [qhull_cv_libqhull=yes], [qhull_cv_libqhull=no])
+        QHULL_OLD_LDFLAGS=$LDFLAGS
+        QHULL_OLD_CFLAGS=$CFLAGS
+        QHULL_OLD_CPPFLAGS=$CPPFLAGS
+        LDFLAGS="$LDFLAGS -L${QHULL_HOME}/lib"
+        CFLAGS="$CFLAGS -I${QHULL_HOME}/include"
+        CPPFLAGS="$CPPFLAGS -I${QHULL_HOME}/include"
         AC_CHECK_HEADER(qhull/qhull.h, [qhull_cv_qhull_h=yes], [qhull_cv_qhull_h=no])
+        AC_CHECK_LIB(qhull, qh_qhull, [qhull_cv_libqhull=yes], [qhull_cv_libqhull=no])
+        LDFLAGS="$QHULL_OLD_LDFLAGS"
+        CFLAGS="$QHULL_OLD_CFLAGS"
+        CPPFLAGS="$QHULL_OLD_CPPFLAGS"
         AC_LANG_RESTORE
 
         if test "$qhull_cv_libqhull" = "yes" -a "$qhull_cv_qhull_h" = "yes"; then
@@ -1078,8 +1083,6 @@ then
                 QHULL_LIB_DIR=
                 QHULL=
                 USE_QHULL=no
-                LDFLAGS="$QHULL_OLD_LDFLAGS"
-                CFLAGS="$QHULL_OLD_CFLAGS"
                 AC_MSG_RESULT(failed)
 	        echo ""
 	        echo "*********************************************************"
