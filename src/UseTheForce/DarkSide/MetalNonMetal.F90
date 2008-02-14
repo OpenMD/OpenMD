@@ -42,7 +42,7 @@
 
 !! Calculates Metal-Non Metal interactions.
 !! @author Charles F. Vardeman II 
-!! @version $Id: MetalNonMetal.F90,v 1.6 2007-08-14 17:41:05 xsun Exp $, $Date: 2007-08-14 17:41:05 $, $Name: not supported by cvs2svn $, $Revision: 1.6 $
+!! @version $Id: MetalNonMetal.F90,v 1.7 2008-02-14 21:37:05 chuckv Exp $, $Date: 2008-02-14 21:37:05 $, $Name: not supported by cvs2svn $, $Revision: 1.7 $
 
 
 module MetalNonMetal
@@ -67,6 +67,11 @@ module MetalNonMetal
   logical, save :: haveInteractionLookup = .false.
 
   real(kind=DP), save :: defaultCutoff = 0.0_DP
+  
+  real(kind=DP), parameter :: sqrt3_2 = sqrt(3.0_dp)/2.0_dp
+  real(kind=DP), parameter :: threefourth = 3.0_dp/4.0_dp
+  real(kind=DP), parameter :: sqrt3_4 = sqrt(3.0_dp)/4.0_dp
+  
   logical, save :: defaultShiftPot = .false.
   logical, save :: defaultShiftFrc = .false.
   logical, save :: haveDefaultCutoff = .false.
@@ -426,12 +431,13 @@ contains
     real(kind = dp) :: D0, R0, beta0, betaH, alpha, gamma, pot_temp
     real(kind = dp) :: expt0, expfnc0, expfnc02
     real(kind = dp) :: exptH, expfncH, expfncH2
-    real(kind = dp) :: x, y, z, x2, y2, z2, r3, proj, proj3, st2
+    real(kind = dp) :: x, y, z, x2, y2, z2, r3, proj, proj3, st2,st,s2t
     real(kind = dp) :: drdx, drdy, drdz, drdux, drduy, drduz
-    real(kind = dp) :: ct, dctdx, dctdy, dctdz, dctdux, dctduy, dctduz
-    real(kind = dp) :: sp, dspdx, dspdy, dspdz, dspdux, dspduy, dspduz
+    real(kind = dp) :: ct,ct2,c2t, dctdx, dctdy, dctdz, dctdux, dctduy, dctduz
+    real(kind = dp) :: sp,c2p,sp2,dspdx, dspdy, dspdz, dspdux, dspduy, dspduz
     real(kind = dp) :: dvdx, dvdy, dvdz, dvdux, dvduy, dvduz
-    real(kind = dp) :: maw, dmawdr, dmawdct, dmawdsp
+    real(kind = dp) :: maw, dmawdr, dmawdct, dmawdsp, dmawdt, dmawdst
+    real(kind = dp) :: hpart, vmorse
     real(kind = dp) :: fx, fy, fz, tx, ty, tz, fxl, fyl, fzl
     integer :: atid1, atid2, id1, id2
     logical :: shiftedPot, shiftedFrc
@@ -522,6 +528,9 @@ contains
     z2 = z*z
     r3 = r2*rij
     ct = z / rij
+    ct2 = ct * ct
+    ! cos(2 theta)
+    c2t = 2.0_dp * ct2 - 1.0_dp
     
     if (ct .gt. 1.0_dp) ct = 1.0_dp
     if (ct .lt. -1.0_dp) ct = -1.0_dp
@@ -556,7 +565,9 @@ contains
     ! this is an attempt to try to truncate the singularity when
     ! sin(theta) is near 0.0:
 
-    st2 = 1.0_dp - ct*ct
+    st2 = 1.0_dp - ct2
+    
+    
     if (abs(st2) .lt. 1.0e-12_dp) then
        proj = sqrt(rij * 1.0e-12_dp)
 !!$       dcpdx = 1.0_dp / proj
@@ -588,9 +599,19 @@ contains
     dspdz = 0.0_dp
     dspduz = 0.0_dp
     
+    sp2 = sp * sp
+    c2p = 1.0_dp - 2.0_dp * sp2
 
-    pot_temp = D0 * (expfnc02  - 2.0_dp * expfnc0) + &
-         2.0_dp * gamma * D0 * expfncH2 * (1.0_dp + alpha*ct)*sp*sp
+
+  ! V(r) = D_e exp(-a(r-re)(exp(-a(r-re))-2)
+    vmorse =D0 * (expfnc02  - 2.0_dp * expfnc0)
+  ! angular modulation of morse part of potential to approximate a sp3 orbital
+  ! hpart = (sqrt(3.0)*cos(theta)/2.0 - 3.0*cos(2.0*phi)*sin^2(theta)/4.0);
+  
+    hpart = (sqrt3_2*ct - threefourth*c2p*st2)
+
+    pot_temp = vmorse* (1.0_dp - alpha*(1.0_dp + hpart)/2.0_dp)         
+         
     vpair = vpair + pot_temp
     
     if (do_pot) then
@@ -603,14 +624,19 @@ contains
     endif
 
     ! derivative wrt r
-    dmawdr = 2.0*D0*beta0*(expfnc0 - expfnc02) - &
-         4.0 * gamma * D0 * betaH * expfncH2 * (1.0_dp + alpha*ct)*sp*sp
+    dmawdr = 2.0_dp*D0*beta0*(expfnc0 - expfnc02) * &
+         (1.0_dp - alpha*(1.0_dp + hpart)/2.0_dp)
 
     ! derivative wrt cos(theta)
-    dmawdct = 2.0 * gamma * D0 * expfncH2 * alpha * sp * sp
-
-    ! derivative wrt sin(phi)
-    dmawdsp = 4.0 * gamma * D0 * expfncH2 * (1.0_dp + alpha*ct)*sp
+    !dmawdct = 2.0_dp * gamma * D0 * expfncH2 * alpha * sp * sp
+    dmawdct = -sqrt3_4*alpha*D0*vMorse
+    
+    ! derivative wrt sin(theta)
+    ! dmawdst = 2.0_dp * alpha * D0 * vMorse* c2t * st
+    dmawdst = 3.0_dp/4.0_dp*alpha*D0*vmorse*c2p*st
+    
+    ! derivative wrt cos(2*phi)
+    dmawdsp = 3.0_dp/4.0_dp * alpha * D0 * vmorse*st*st
 
     
     ! chain rule to put these back on x, y, z, ux, uy, uz

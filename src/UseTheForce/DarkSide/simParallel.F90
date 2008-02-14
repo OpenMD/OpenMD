@@ -47,7 +47,7 @@
 !!
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: simParallel.F90,v 1.10 2007-05-26 17:53:04 chuckv Exp $, $Date: 2007-05-26 17:53:04 $, $Name: not supported by cvs2svn $, $Revision: 1.10 $
+!! @version $Id: simParallel.F90,v 1.11 2008-02-14 21:37:05 chuckv Exp $, $Date: 2008-02-14 21:37:05 $, $Name: not supported by cvs2svn $, $Revision: 1.11 $
 
 module mpiSimulation  
   use definitions
@@ -56,7 +56,15 @@ module mpiSimulation
   use oopseMPI
   implicit none
   PRIVATE
+#endif
 
+
+  !! Include mpiComponentPlan type. mpiComponentPlan is a 
+  !! dual header file for both c and fortran.
+#define __FORTRAN90
+#include "UseTheForce/mpiComponentPlan.h"
+
+#ifdef IS_MPI
 
   !! PUBLIC  Subroutines contained in this module
   !! gather and scatter are a generic interface
@@ -112,10 +120,7 @@ module mpiSimulation
   real   :: commTimeInitial,commTimeFinal
 #endif
 
-  !! Include mpiComponentPlan type. mpiComponentPlan is a 
-  !! dual header file for both c and fortran.
-#define __FORTRAN90
-#include "UseTheForce/mpiComponentPlan.h"
+
 
 
   !! Tags used during force loop for parallel simulation

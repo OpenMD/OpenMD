@@ -1,4 +1,3 @@
-#ifdef IS_MPI
 subroutine setFsimParallel(thisComponentPlan, nAtomTags, atomTags, &
      nGroupTags, groupTags, status)
 
@@ -21,16 +20,3 @@ subroutine setFsimParallel(thisComponentPlan, nAtomTags, atomTags, &
 
 end subroutine setFsimParallel
 
-#else
-
-!! Dummy routine so that we don't have an empty compilation unit:
-
-subroutine setFsimParallel(status)
-
-  integer, intent(out) :: status
-  status = 0
-  return
-
-end subroutine setFsimParallel
-
-#endif
