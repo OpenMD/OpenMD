@@ -42,7 +42,7 @@
 
 !! Calculates Metal-Non Metal interactions.
 !! @author Charles F. Vardeman II 
-!! @version $Id: MetalNonMetal.F90,v 1.7 2008-02-14 21:37:05 chuckv Exp $, $Date: 2008-02-14 21:37:05 $, $Name: not supported by cvs2svn $, $Revision: 1.7 $
+!! @version $Id: MetalNonMetal.F90,v 1.8 2008-03-03 17:14:36 chuckv Exp $, $Date: 2008-03-03 17:14:36 $, $Name: not supported by cvs2svn $, $Revision: 1.8 $
 
 
 module MetalNonMetal
@@ -67,10 +67,6 @@ module MetalNonMetal
   logical, save :: haveInteractionLookup = .false.
 
   real(kind=DP), save :: defaultCutoff = 0.0_DP
-  
-  real(kind=DP), parameter :: sqrt3_2 = sqrt(3.0_dp)/2.0_dp
-  real(kind=DP), parameter :: threefourth = 3.0_dp/4.0_dp
-  real(kind=DP), parameter :: sqrt3_4 = sqrt(3.0_dp)/4.0_dp
   
   logical, save :: defaultShiftPot = .false.
   logical, save :: defaultShiftFrc = .false.
@@ -146,7 +142,9 @@ contains
     
     interaction_id = MnMinteractionLookup(atid1, atid2)
     interaction_type = MnM_Map%interactions(interaction_id)%interaction_type
+    
 
+    
     select case (interaction_type)
     case (MNM_LENNARDJONES)
        call calc_mnm_lennardjones(Atom1, Atom2, D, Rij, R2, Rcut, Sw, Vpair, &
@@ -157,6 +155,8 @@ contains
     case(MNM_MAW)
        call calc_mnm_maw(Atom1, Atom2, D, Rij, R2, Rcut, Sw, Vpair, Fpair, &
             Pot,A, F,t, Do_pot, interaction_id)
+    case default
+    call handleError("MetalNonMetal","Unknown interaction type")      
     end select
 
   end subroutine do_mnm_pair
@@ -428,7 +428,7 @@ contains
 
     integer, intent(in) :: interaction_id
 
-    real(kind = dp) :: D0, R0, beta0, betaH, alpha, gamma, pot_temp
+    real(kind = dp) :: D0, R0, beta0, alpha, pot_temp
     real(kind = dp) :: expt0, expfnc0, expfnc02
     real(kind = dp) :: exptH, expfncH, expfncH2
     real(kind = dp) :: x, y, z, x2, y2, z2, r3, proj, proj3, st2,st,s2t
@@ -436,8 +436,10 @@ contains
     real(kind = dp) :: ct,ct2,c2t, dctdx, dctdy, dctdz, dctdux, dctduy, dctduz
     real(kind = dp) :: sp,c2p,sp2,dspdx, dspdy, dspdz, dspdux, dspduy, dspduz
     real(kind = dp) :: dvdx, dvdy, dvdz, dvdux, dvduy, dvduz
-    real(kind = dp) :: maw, dmawdr, dmawdct, dmawdsp, dmawdt, dmawdst
-    real(kind = dp) :: hpart, vmorse
+    real(kind = dp) :: Vang, dVangdx, dVangdy, dVangdz, dVangdux, dVangduy, dVangduz
+    real(kind = dp) :: dVangdct, dVangdsp, dVmorsedr
+    real(kind = dp) :: Vmorse, dVmorsedx, dVmorsedy, dVmorsedz
+    real(kind = dp) :: dVmorsedux, dVmorseduy, dVmorseduz
     real(kind = dp) :: fx, fy, fz, tx, ty, tz, fxl, fyl, fzl
     integer :: atid1, atid2, id1, id2
     logical :: shiftedPot, shiftedFrc
@@ -488,10 +490,10 @@ contains
     
     D0 = MnM_Map%interactions(interaction_id)%D0
     R0 = MnM_Map%interactions(interaction_id)%r0
-    beta0 = MnM_Map%interactions(interaction_id)%beta0
-    betaH = MnM_Map%interactions(interaction_id)%betaH
+    beta0 = MnM_Map%interactions(interaction_id)%beta0    
     alpha = MnM_Map%interactions(interaction_id)%alpha
-    gamma = MnM_Map%interactions(interaction_id)%gamma
+    
+   
     
 
     shiftedPot = MnM_Map%interactions(interaction_id)%shiftedPot
@@ -501,9 +503,6 @@ contains
     expfnc0   = exp(expt0)
     expfnc02  = expfnc0*expfnc0
 
-    exptH     = -betaH*(rij - R0) 
-    expfncH   = exp(exptH)
-    expfncH2  = expfncH*expfncH
    
    
   
@@ -529,8 +528,6 @@ contains
     r3 = r2*rij
     ct = z / rij
     ct2 = ct * ct
-    ! cos(2 theta)
-    c2t = 2.0_dp * ct2 - 1.0_dp
     
     if (ct .gt. 1.0_dp) ct = 1.0_dp
     if (ct .lt. -1.0_dp) ct = -1.0_dp
@@ -553,27 +550,18 @@ contains
     dctdx = - z * x / r3
     dctdy = - z * y / r3
     dctdz = 1.0_dp / rij - z2 / r3
-
+    
     dctdux = x / rij
     dctduy = y / rij
     dctduz = z / rij
 
-   ! dctdux = y / rij ! - (z * x2) / r3
-   ! dctduy = -x / rij !- (z * y2) / r3
-   ! dctduz = 0.0_dp ! z / rij - (z2 * z) / r3
-    
     ! this is an attempt to try to truncate the singularity when
     ! sin(theta) is near 0.0:
 
     st2 = 1.0_dp - ct2
-    
-    
+  
     if (abs(st2) .lt. 1.0e-12_dp) then
        proj = sqrt(rij * 1.0e-12_dp)
-!!$       dcpdx = 1.0_dp / proj
-!!$       dcpdy = 0.0_dp
-!!$       dcpdux = x / proj
-!!$       dcpduy = 0.0_dp
        dspdx = 0.0_dp
        dspdy = 1.0_dp / proj
        dspdux = 0.0_dp
@@ -581,36 +569,27 @@ contains
     else
        proj = sqrt(x2 + y2)
        proj3 = proj*proj*proj
-!!$       dcpdx = 1.0_dp / proj - x2 / proj3
-!!$       dcpdy = - x * y / proj3
-!!$       dcpdux = x / proj - (x2 * x) / proj3
-!!$       dcpduy = - (x * y2) / proj3
        dspdx = - x * y / proj3
        dspdy = 1.0_dp / proj - y2 / proj3
        dspdux = - (y * x2) / proj3
        dspduy = y / proj - (y2 * y) / proj3
     endif
     
-!!$    cp = x / proj
-!!$    dcpdz = 0.0_dp
-!!$    dcpduz = 0.0_dp
-    
     sp = y / proj
     dspdz = 0.0_dp
     dspduz = 0.0_dp
-    
+
     sp2 = sp * sp
     c2p = 1.0_dp - 2.0_dp * sp2
 
-
   ! V(r) = D_e exp(-a(r-re)(exp(-a(r-re))-2)
-    vmorse =D0 * (expfnc02  - 2.0_dp * expfnc0)
+    Vmorse = D0 * (expfnc02  - 2.0_dp * expfnc0)
   ! angular modulation of morse part of potential to approximate a sp3 orbital
-  ! hpart = (sqrt(3.0)*cos(theta)/2.0 - 3.0*cos(2.0*phi)*sin^2(theta)/4.0);
+  ! Vang = 1 - alpha*(1/2 + sqrt(3.0)*cos(theta)/4.0 - 3.0*cos(2.0*phi)*sin^2(theta)/8.0)
   
-    hpart = (sqrt3_2*ct - threefourth*c2p*st2)
-
-    pot_temp = vmorse* (1.0_dp - alpha*(1.0_dp + hpart)/2.0_dp)         
+    Vang = 1.0_dp - alpha*(0.5_dp + sqrt(3.0_dp)*ct/4.0_dp - 3.0*c2p*st2/8.0_dp)
+    
+    pot_temp = Vmorse*Vang 
          
     vpair = vpair + pot_temp
     
@@ -623,36 +602,32 @@ contains
 #endif
     endif
 
-    ! derivative wrt r
-    dmawdr = 2.0_dp*D0*beta0*(expfnc0 - expfnc02) * &
-         (1.0_dp - alpha*(1.0_dp + hpart)/2.0_dp)
-
-    ! derivative wrt cos(theta)
-    !dmawdct = 2.0_dp * gamma * D0 * expfncH2 * alpha * sp * sp
-    dmawdct = -sqrt3_4*alpha*D0*vMorse
+    dVmorsedr = 2.0_dp*D0*beta0*(expfnc0 - expfnc02)
+    dVmorsedx = dVmorsedr * drdx
+    dVmorsedy = dVmorsedr * drdy
+    dVmorsedz = dVmorsedr * drdz
+    dVmorsedux = 0.0_dp
+    dVmorseduy = 0.0_dp
+    dVmorseduy = 0.0_dp
     
-    ! derivative wrt sin(theta)
-    ! dmawdst = 2.0_dp * alpha * D0 * vMorse* c2t * st
-    dmawdst = 3.0_dp/4.0_dp*alpha*D0*vmorse*c2p*st
+    dVangdct = -alpha * ( sqrt(3.0_dp) + 3*ct*c2p ) / 4.0_dp
+    dVangdsp = -3.0_dp * alpha * st2 * sp / 2.0_dp
     
-    ! derivative wrt cos(2*phi)
-    dmawdsp = 3.0_dp/4.0_dp * alpha * D0 * vmorse*st*st
-
-    
+    dVangdx = dVangdct * dctdx + dVangdsp * dspdx
+    dVangdy = dVangdct * dctdy + dVangdsp * dspdy
+    dVangdy = dVangdct * dctdy + dVangdsp * dspdy
+    dVangdux = dVangdct * dctdux + dVangdsp * dspdux
+    dVangduy = dVangdct * dctduy + dVangdsp * dspduy
+    dVangduy = dVangdct * dctduy + dVangdsp * dspduy
+        
     ! chain rule to put these back on x, y, z, ux, uy, uz
-    dvdx = dmawdr * drdx + dmawdct * dctdx + dmawdsp * dspdx
-    dvdy = dmawdr * drdy + dmawdct * dctdy + dmawdsp * dspdy
-    dvdz = dmawdr * drdz + dmawdct * dctdz + dmawdsp * dspdz
-
+    dvdx = Vang * dVmorsedx + Vmorse * dVangdx
+    dvdy = Vang * dVmorsedy + Vmorse * dVangdy
+    dvdz = Vang * dVmorsedz + Vmorse * dVangdz
     
- 
-    
-    dvdux = dmawdr * drdux + dmawdct * dctdux + dmawdsp * dspdux
-    dvduy = dmawdr * drduy + dmawdct * dctduy + dmawdsp * dspduy
-    dvduz = dmawdr * drduz + dmawdct * dctduz + dmawdsp * dspduz
-
-    
-    
+    dvdux = Vang * dVmorsedux + Vmorse * dVangdux
+    dvduy = Vang * dVmorseduy + Vmorse * dVangduy
+    dvduz = Vang * dVmorseduz + Vmorse * dVangduz
 
     tx = (dvduy - dvduz) * sw
     ty = (dvduz - dvdux) * sw
@@ -695,9 +670,9 @@ contains
 #endif
     ! Now, on to the forces:
 
-    fx = -dvdx * sw
-    fy = -dvdy * sw
-    fz = -dvdz * sw
+    fx = dvdx * sw
+    fy = dvdy * sw
+    fz = dvdz * sw
 
     ! rotate the terms back into the lab frame:
 
@@ -822,9 +797,7 @@ contains
        nt%R0 = myInteraction%R0
        nt%D0 = myInteraction%D0
        nt%beta0 = myInteraction%beta0
-       nt%betaH = myInteraction%betaH
        nt%alpha = myInteraction%alpha
-       nt%gamma = myInteraction%gamma
     case default
        call handleError("MNM", "Unknown Interaction type")
     end select

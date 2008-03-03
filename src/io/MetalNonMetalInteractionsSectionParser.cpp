@@ -55,7 +55,7 @@ namespace oopse {
     stringToEnumMap_["MAW"] =  MAW;                
     stringToEnumMap_["ShiftedMorse"] =  ShiftedMorse;                                
     stringToEnumMap_["LennardJones"] = LennardJones;
-    stringToEnumMap_["RepulsiveMorse"] = LennardJones;
+    stringToEnumMap_["RepulsiveMorse"] = RepulsiveMorse;
 
   }
 
@@ -73,26 +73,26 @@ namespace oopse {
     
     std::string at1 = tokenizer.nextToken();
     std::string at2 = tokenizer.nextToken();
-  	MetalNonMetalInteractionTypeEnum nbit = getMetalNonMetalInteractionTypeEnum(tokenizer.nextToken());
+    std::string itype = tokenizer.nextToken();
+
+  	MetalNonMetalInteractionTypeEnum nbit = getMetalNonMetalInteractionTypeEnum(itype);
     nTokens -= 3;
 		NonBondedInteractionType* interactionType;
-		
+    	
     //switch is a nightmare to maintain
     switch(nbit) {
     case MAW :
-		if (nTokens < 6) {
+		if (nTokens < 4) {
 			sprintf(painCave.errMsg, "MetalNonMetalInteractionsSectionParser Error: Not enough tokens at line %d\n",
 				lineNo);
 			painCave.isFatal = 1;
 			simError();
 		} else {
-			RealType r0 = tokenizer.nextTokenAsDouble();
-			RealType D0 = tokenizer.nextTokenAsDouble();
-			RealType beta0 = tokenizer.nextTokenAsDouble();
-			RealType betaH = tokenizer.nextTokenAsDouble();
-			RealType gamma = tokenizer.nextTokenAsDouble();
+			RealType r_e = tokenizer.nextTokenAsDouble();
+			RealType D_e = tokenizer.nextTokenAsDouble();
+			RealType beta = tokenizer.nextTokenAsDouble();
 			RealType alpha = tokenizer.nextTokenAsDouble();			
-      interactionType = new MAWInteractionType(D0, beta0, r0, betaH, gamma, alpha);
+      interactionType = new MAWInteractionType(D_e, beta, r_e, alpha);
 		}
 		break;
             

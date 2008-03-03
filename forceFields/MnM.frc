@@ -95,9 +95,10 @@ end SCAtomTypes
 begin MetalNonMetalInteractions
 
 //MAW (Metal Angular Water section)
-// r0, D0 beta0 betaH gamma alpha
-Cu   SSD  MAW  2.5525 1.9850 1.1680  1.0500 0.2234 1.1250
-Au   SSD  MAW  2.8170 1.7850 1.2680  1.2500 0.2050 1.0250
+// r_e, D_e beta alpha
+Cu   SSD_E  MAW  2.5525 1.9850 1.1680  1.1250
+//Au   SSD_E  MAW  2.8170 1.7850 1.2680  1.2500 0.2050 0.0
+Au   SSD_E  MAW  2.7510 2.95   1.101  0.750000
 
 //LennardJones
 // sigma epsilon
@@ -105,11 +106,11 @@ Au   SSD  MAW  2.8170 1.7850 1.2680  1.2500 0.2050 1.0250
 
 //Shifted Morse
 // r0 D0 beta0
-Au O_SPCE  3.70 0.0424 0.769
+Au	O_SPCE	ShiftedMorse	3.70 0.0424 0.769
 
 //Repulsive Morse
 // r0 D0 beta0
-Au H_SPCE -1.00 0.00850 0.769
+Au	H_SPCE	RepulsiveMorse	-1.00 0.00850 0.769
 
 
 end MetalNonMetalInteractions

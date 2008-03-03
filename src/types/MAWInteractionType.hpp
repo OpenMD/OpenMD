@@ -52,8 +52,8 @@ namespace oopse {
    * MAWInteractionType (Metal-Angular-Water) is one of the basic
    * Metal-to-NonMetal interaction types.
    *
-   * Formula is V = D0*exp(-beta0*(r-r0))*(exp(-beta0(r-r0)-2) +
-   *            gamma*D0*(exp(-betaH*(r-r0))*(1+alpha*cos(theta))*sin(phi)^2
+   * Formula is V =  D_e exp(-a(r-re)(exp(-a(r-re))-2) *
+   *                      (1 - alpha*(1/2 + sqrt(3.0)*cos(theta)/4.0 - 3.0*cos(2.0*phi)*sin^2(theta)/8.0))
    *
    * The spherical coordinates are defined in the body-fixed frame
    * of a rigid-body water molecule (HO bonds are on the Y-Z plane)
@@ -67,12 +67,10 @@ namespace oopse {
   public:
     
     MAWInteractionType(RealType myD0, RealType myBeta0, RealType myR0,
-		       RealType myBetaH, RealType myGamma, RealType myAlpha){
-      D0 = myD0;
-      beta0 = myBeta0;
-      r0 = myR0;
-      betaH = myBetaH;
-      gamma = myGamma;
+		        RealType myAlpha){
+      D_e = myD0;
+      beta = myBeta0;
+      r_e = myR0;
       alpha = myAlpha;
     }
     
@@ -80,22 +78,18 @@ namespace oopse {
       mnmit.MNMInteractionType = MNM_MAW;
       mnmit.metal_atid = atid1;
       mnmit.nonmetal_atid = atid2;
-      mnmit.R0 = r0;
-      mnmit.D0 = D0;
-      mnmit.beta0 = beta0;
-      mnmit.betaH = betaH;
+      mnmit.R0 = r_e;
+      mnmit.D0 = D_e;
+      mnmit.beta0 = beta;
       mnmit.alpha = alpha;
-      mnmit.gamma = gamma;
       
       addMNMInteraction(&mnmit);
     }
     
   private:    
-    RealType D0;
-    RealType beta0;
-    RealType r0;
-    RealType betaH;
-    RealType gamma;
+    RealType D_e;
+    RealType beta;
+    RealType r_e;
     RealType alpha;    
   };
 }
