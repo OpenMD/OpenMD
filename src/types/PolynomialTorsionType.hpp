@@ -61,33 +61,33 @@ namespace oopse {
   class PolynomialTorsionType : public TorsionType{
     
   public:
-    PolynomialTorsionType() {polynomial_ = new DoublePolynomial(); }
+    PolynomialTorsionType() { /* polynomial_ = new DoublePolynomial(); */ }
     
     RealType getCoefficient(int power) {
-      return polynomial_->getCoefficient(power);
+      return polynomial_.getCoefficient(power);
     }
     
     void addCoefficient(int power, RealType coefficient) {
-      polynomial_->addCoefficient(power, coefficient);
+      polynomial_.addCoefficient(power, coefficient);
     }
     
     void setCoefficient(int power, RealType coefficient) {
-      polynomial_->setCoefficient(power, coefficient);
+      polynomial_.setCoefficient(power, coefficient);
     }
 
-    void setPolynomial(DoublePolynomial& p) {
-      polynomial_ = &p;
+    void setPolynomial(DoublePolynomial p) {
+      polynomial_ = p;
     }
     
     virtual void calcForce(RealType cosPhi, RealType& V, RealType& dVdCosPhi) {
-      V = polynomial_->evaluate(cosPhi);
-      dVdCosPhi = polynomial_->evaluateDerivative(cosPhi); 
+      V = polynomial_.evaluate(cosPhi);
+      dVdCosPhi = polynomial_.evaluateDerivative(cosPhi); 
     }
 
     friend std::ostream& operator <<(std::ostream& os, 
 				     PolynomialTorsionType& pbt);
   private:
-    DoublePolynomial* polynomial_;
+    DoublePolynomial polynomial_;
   };
   
 /*  
