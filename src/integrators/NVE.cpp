@@ -135,7 +135,7 @@ namespace oopse {
 	// velocity half step
 	vel += (dt2 /mass * OOPSEConstant::energyConvert) * frc;
                 
-	integrableObject->setVel(vel);
+  integrableObject->setVel(vel);
 
 	if (integrableObject->isDirectional()){
 

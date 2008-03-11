@@ -42,7 +42,7 @@
 
 !! Calculates Metal-Non Metal interactions.
 !! @author Charles F. Vardeman II 
-!! @version $Id: MetalNonMetal.F90,v 1.8 2008-03-03 17:14:36 chuckv Exp $, $Date: 2008-03-03 17:14:36 $, $Name: not supported by cvs2svn $, $Revision: 1.8 $
+!! @version $Id: MetalNonMetal.F90,v 1.9 2008-03-11 21:06:54 chuckv Exp $, $Date: 2008-03-11 21:06:54 $, $Name: not supported by cvs2svn $, $Revision: 1.9 $
 
 
 module MetalNonMetal
@@ -431,22 +431,20 @@ contains
     real(kind = dp) :: D0, R0, beta0, alpha, pot_temp
     real(kind = dp) :: expt0, expfnc0, expfnc02
     real(kind = dp) :: exptH, expfncH, expfncH2
-    real(kind = dp) :: x, y, z, x2, y2, z2, r3, proj, proj3, st2,st,s2t
-    real(kind = dp) :: drdx, drdy, drdz, drdux, drduy, drduz
-    real(kind = dp) :: ct,ct2,c2t, dctdx, dctdy, dctdz, dctdux, dctduy, dctduz
-    real(kind = dp) :: sp,c2p,sp2,dspdx, dspdy, dspdz, dspdux, dspduy, dspduz
-    real(kind = dp) :: dvdx, dvdy, dvdz, dvdux, dvduy, dvduz
+    real(kind = dp) :: x, y, z, x2, y2, z2, r3, r4
+    real(kind = dp) :: drdx, drdy, drdz
+    real(kind = dp) :: dvdx, dvdy, dvdz
     real(kind = dp) :: Vang, dVangdx, dVangdy, dVangdz, dVangdux, dVangduy, dVangduz
-    real(kind = dp) :: dVangdct, dVangdsp, dVmorsedr
+    real(kind = dp) :: dVmorsedr
     real(kind = dp) :: Vmorse, dVmorsedx, dVmorsedy, dVmorsedz
-    real(kind = dp) :: dVmorsedux, dVmorseduy, dVmorseduz
     real(kind = dp) :: fx, fy, fz, tx, ty, tz, fxl, fyl, fzl
+    real(kind = dp), parameter :: tf = 3.0_dp/4.0_dp
+    real(kind = dp), parameter :: th = 3.0_dp/2.0_dp
+    real(kind = dp), parameter :: t8 = 3.0_dp/8.0_dp    
+    real(kind = dp), parameter :: stf = sqrt(3.0_dp)/4.0_dp
     integer :: atid1, atid2, id1, id2
     logical :: shiftedPot, shiftedFrc
     
-    
-    
- 
 #ifdef IS_MPI
     atid1 = atid_Row(atom1)
     atid2 = atid_Col(atom2)
@@ -486,25 +484,18 @@ contains
     endif
 
 #endif
-    
-    
+  
     D0 = MnM_Map%interactions(interaction_id)%D0
     R0 = MnM_Map%interactions(interaction_id)%r0
     beta0 = MnM_Map%interactions(interaction_id)%beta0    
     alpha = MnM_Map%interactions(interaction_id)%alpha
     
-   
-    
-
     shiftedPot = MnM_Map%interactions(interaction_id)%shiftedPot
     shiftedFrc = MnM_Map%interactions(interaction_id)%shiftedFrc   
     
     expt0     = -beta0*(rij - R0) 
     expfnc0   = exp(expt0)
     expfnc02  = expfnc0*expfnc0
-
-   
-   
   
 !!$    if (shiftedPot .or. shiftedFrc) then
 !!$       exptC0     = -beta0*(rcut - R0) 
@@ -515,79 +506,22 @@ contains
 !!$       expfncCH2  = expfncCH*expfncCH
 !!$    endif
 
-    drdx = -d(1) / rij
-    drdy = -d(2) / rij
-    drdz = -d(3) / rij
-    drdux = 0.0_dp
-    drduy = 0.0_dp
-    drduz = 0.0_dp
-
+    drdx = x / rij
+    drdy = y / rij
+    drdz = z / rij
+    
     x2 = x*x
     y2 = y*y
     z2 = z*z
     r3 = r2*rij
-    ct = z / rij
-    ct2 = ct * ct
-    
-    if (ct .gt. 1.0_dp) ct = 1.0_dp
-    if (ct .lt. -1.0_dp) ct = -1.0_dp
+    r4 = r2*r2
 
-    ! These derivatives can be obtained by using 
-    ! cos(theta) = \hat{u} . \vec{r} / r
-    ! where \hat{u} is the body-fixed unit frame for the water molecule,
-    ! and \vec{r} is the vector to the metal atom.
-    !
-    ! the derivatives wrt \vec{r} are:
-    ! dcostheta/d\vec{r} = - costheta \vec{r} / r^2 + \hat{u} / r
-    ! the molecular frame for each water has u = {0, 0, 1}, so these:
-    ! 
-    ! dctdx = - x * z / r3 + ux / rij
-    ! dctdy = - y * z / r3 + uy / rij
-    ! dctdz = - z2 / r3 + uz / rij
-    ! 
-    ! become:
-    !
-    dctdx = - z * x / r3
-    dctdy = - z * y / r3
-    dctdz = 1.0_dp / rij - z2 / r3
-    
-    dctdux = x / rij
-    dctduy = y / rij
-    dctduz = z / rij
-
-    ! this is an attempt to try to truncate the singularity when
-    ! sin(theta) is near 0.0:
-
-    st2 = 1.0_dp - ct2
-  
-    if (abs(st2) .lt. 1.0e-12_dp) then
-       proj = sqrt(rij * 1.0e-12_dp)
-       dspdx = 0.0_dp
-       dspdy = 1.0_dp / proj
-       dspdux = 0.0_dp
-       dspduy = y / proj
-    else
-       proj = sqrt(x2 + y2)
-       proj3 = proj*proj*proj
-       dspdx = - x * y / proj3
-       dspdy = 1.0_dp / proj - y2 / proj3
-       dspdux = - (y * x2) / proj3
-       dspduy = y / proj - (y2 * y) / proj3
-    endif
-    
-    sp = y / proj
-    dspdz = 0.0_dp
-    dspduz = 0.0_dp
-
-    sp2 = sp * sp
-    c2p = 1.0_dp - 2.0_dp * sp2
-
-  ! V(r) = D_e exp(-a(r-re)(exp(-a(r-re))-2)
     Vmorse = D0 * (expfnc02  - 2.0_dp * expfnc0)
+
   ! angular modulation of morse part of potential to approximate a sp3 orbital
   ! Vang = 1 - alpha*(1/2 + sqrt(3.0)*cos(theta)/4.0 - 3.0*cos(2.0*phi)*sin^2(theta)/8.0)
-  
-    Vang = 1.0_dp - alpha*(0.5_dp + sqrt(3.0_dp)*ct/4.0_dp - 3.0*c2p*st2/8.0_dp)
+    
+    Vang = 1.0_dp - alpha*(0.5_dp + stf*z/rij - t8*(x2-y2)/r2)
     
     pot_temp = Vmorse*Vang 
          
@@ -603,35 +537,32 @@ contains
     endif
 
     dVmorsedr = 2.0_dp*D0*beta0*(expfnc0 - expfnc02)
+
     dVmorsedx = dVmorsedr * drdx
     dVmorsedy = dVmorsedr * drdy
     dVmorsedz = dVmorsedr * drdz
-    dVmorsedux = 0.0_dp
-    dVmorseduy = 0.0_dp
-    dVmorseduy = 0.0_dp
+
+    dVangdx = -alpha*(-tf*x/r2     + tf*(x2-y2)*x/r4 - stf*z*x/r3) 
+    dVangdy = -alpha*( tf*y/r2     + tf*(x2-y2)*y/r4 - stf*z*y/r3) 
+    dVangdz = -alpha*(stf/rij + tf*(x2-y2)*z/r4 - stf*z2/r3) 
     
-    dVangdct = -alpha * ( sqrt(3.0_dp) + 3*ct*c2p ) / 4.0_dp
-    dVangdsp = -3.0_dp * alpha * st2 * sp / 2.0_dp
-    
-    dVangdx = dVangdct * dctdx + dVangdsp * dspdx
-    dVangdy = dVangdct * dctdy + dVangdsp * dspdy
-    dVangdy = dVangdct * dctdy + dVangdsp * dspdy
-    dVangdux = dVangdct * dctdux + dVangdsp * dspdux
-    dVangduy = dVangdct * dctduy + dVangdsp * dspduy
-    dVangduy = dVangdct * dctduy + dVangdsp * dspduy
-        
-    ! chain rule to put these back on x, y, z, ux, uy, uz
+    ! chain rule to put these back on x, y, z
     dvdx = Vang * dVmorsedx + Vmorse * dVangdx
     dvdy = Vang * dVmorsedy + Vmorse * dVangdy
     dvdz = Vang * dVmorsedz + Vmorse * dVangdz
     
-    dvdux = Vang * dVmorsedux + Vmorse * dVangdux
-    dvduy = Vang * dVmorseduy + Vmorse * dVangduy
-    dvduz = Vang * dVmorseduz + Vmorse * dVangduz
-
-    tx = (dvduy - dvduz) * sw
-    ty = (dvduz - dvdux) * sw
-    tz = (dvdux - dvduy) * sw
+    ! Torques for Vang using method of Price:
+    ! S. L. Price, A. J. Stone, and M. Alderton, Mol. Phys. 52, 987 (1984).
+    dVangdux = alpha * (tf * y * z / r2 - stf * y / rij ) 
+    dVangduy = alpha * (tf * x * z / r2 + stf * x / rij ) 
+    dVangduz = -th * alpha * x * y / r2
+    
+    ! do the torques first since they are easy:
+    ! remember that these are still in the body fixed axes    
+    
+    tx = Vmorse * dVangdux * sw
+    ty = Vmorse * dVangduy * sw
+    tz = Vmorse * dVangduz * sw
 
     ! go back to lab frame using transpose of rotation matrix:
 
@@ -668,7 +599,7 @@ contains
             a(9,atom2)*tz
     endif
 #endif
-    ! Now, on to the forces:
+    ! Now, on to the forces (still in body frame of water)
 
     fx = dvdx * sw
     fy = dvdy * sw

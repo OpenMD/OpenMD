@@ -873,7 +873,7 @@ namespace oopse {
       if (curIter == nextWriteIter) {
 	nextWriteIter += writeFrq;
 	calcF();
-	dumpWriter.writeDump();
+	dumpWriter.writeDumpAndEor();
 	statWriter.writeStat(curSnapshot->statData);
       }
 
