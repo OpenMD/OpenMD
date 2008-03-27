@@ -82,6 +82,7 @@ Samples = \
 	samples/metals/EAM/nanoparticle \
 	samples/metals/EAM/nanorod \
 	samples/metals/Sutton-Chen \
+	samples/metals/surfaces \
 	samples/minimizer \
 	samples/thermoIntegration/liquid \
 	samples/thermoIntegration/solid \
