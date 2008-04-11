@@ -42,7 +42,7 @@
 
 !! Calculates Metal-Non Metal interactions.
 !! @author Charles F. Vardeman II 
-!! @version $Id: MetalNonMetal.F90,v 1.9 2008-03-11 21:06:54 chuckv Exp $, $Date: 2008-03-11 21:06:54 $, $Name: not supported by cvs2svn $, $Revision: 1.9 $
+!! @version $Id: MetalNonMetal.F90,v 1.10 2008-04-11 16:21:34 chuckv Exp $, $Date: 2008-04-11 16:21:34 $, $Name: not supported by cvs2svn $, $Revision: 1.10 $
 
 
 module MetalNonMetal
@@ -613,9 +613,10 @@ contains
        fyl = a_Row(2,atom1)*fx + a_Row(5,atom1)*fy + a_Row(8,atom1)*fz
        fzl = a_Row(3,atom1)*fx + a_Row(6,atom1)*fy + a_Row(9,atom1)*fz
     else
-       fxl = a_Col(1,atom2)*fx + a_Col(4,atom2)*fy + a_Col(7,atom2)*fz
-       fyl = a_Col(2,atom2)*fx + a_Col(5,atom2)*fy + a_Col(8,atom2)*fz
-       fzl = a_Col(3,atom2)*fx + a_Col(6,atom2)*fy + a_Col(9,atom2)*fz
+	   ! negative sign because this is the vector from j to i:
+       fxl = -(a_Col(1,atom2)*fx + a_Col(4,atom2)*fy + a_Col(7,atom2)*fz)
+       fyl = -(a_Col(2,atom2)*fx + a_Col(5,atom2)*fy + a_Col(8,atom2)*fz)
+       fzl = -(a_Col(3,atom2)*fx + a_Col(6,atom2)*fy + a_Col(9,atom2)*fz)
     endif
     f_Row(1,atom1) = f_Row(1,atom1) + fxl
     f_Row(2,atom1) = f_Row(2,atom1) + fyl
@@ -630,9 +631,10 @@ contains
        fyl = a(2,atom1)*fx + a(5,atom1)*fy + a(8,atom1)*fz
        fzl = a(3,atom1)*fx + a(6,atom1)*fy + a(9,atom1)*fz
     else
-       fxl = a(1,atom2)*fx + a(4,atom2)*fy + a(7,atom2)*fz
-       fyl = a(2,atom2)*fx + a(5,atom2)*fy + a(8,atom2)*fz
-       fzl = a(3,atom2)*fx + a(6,atom2)*fy + a(9,atom2)*fz
+	   ! negative sign because this is the vector from j to i:
+       fxl = -(a(1,atom2)*fx + a(4,atom2)*fy + a(7,atom2)*fz)
+       fyl = -(a(2,atom2)*fx + a(5,atom2)*fy + a(8,atom2)*fz)
+       fzl = -(a(3,atom2)*fx + a(6,atom2)*fy + a(9,atom2)*fz)
     endif
     f(1,atom1) = f(1,atom1) + fxl
     f(2,atom1) = f(2,atom1) + fyl
