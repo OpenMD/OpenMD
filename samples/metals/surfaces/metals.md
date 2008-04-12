@@ -25,6 +25,7 @@ molecule{
      position( 0.0, 0.0, 0.0 );
   }
 }
+
 molecule{
   name = "Cu";
   
@@ -34,5 +35,21 @@ molecule{
   }
 }
 
+molecule{
+  name = "Ni";
+  
+  atom[0]{
+     type="Ni";
+     position( 0.0, 0.0, 0.0 );
+  }
+}
 
+molecule{
+  name = "Pd";
+  
+  atom[0]{
+     type="Pd";
+     position( 0.0, 0.0, 0.0 );
+  }
+}
 #endif
