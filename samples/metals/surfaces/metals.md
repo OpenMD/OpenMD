@@ -25,4 +25,14 @@ molecule{
      position( 0.0, 0.0, 0.0 );
   }
 }
+molecule{
+  name = "Cu";
+  
+  atom[0]{
+     type="Cu";
+     position( 0.0, 0.0, 0.0 );
+  }
+}
+
+
 #endif
