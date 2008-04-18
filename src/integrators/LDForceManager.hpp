@@ -65,6 +65,31 @@ namespace oopse {
   public:
     LDForceManager(SimInfo * info);
     
+    int getMaxIterationNumber() {
+      return maxIterNum_;
+    }
+        
+    void setMaxIterationNumber(int maxIter) {
+      maxIterNum_ = maxIter;
+    }
+
+    RealType getForceTolerance() {
+      return forceTolerance_;
+    }
+
+    void setForceTolerance(RealType tol) {
+      forceTolerance_ = tol;
+    }
+
+    RealType getDt2() {
+      return dt2_;
+    }
+
+    void setDt2(RealType dt2) {
+      dt2_ = dt2;
+    }
+
+
   protected:
     virtual void postCalculation(bool needStress);
     
@@ -79,6 +104,10 @@ namespace oopse {
     bool sphericalBoundaryConditions_;
     Globals* simParams;
     Velocitizer* veloMunge;
+    // convergence parameters:
+    int maxIterNum_;
+    RealType forceTolerance_;
+    RealType dt2_;
   };
   
 } //end namespace oopse

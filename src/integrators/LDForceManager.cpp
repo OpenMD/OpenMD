@@ -49,7 +49,7 @@
 
 namespace oopse {
 
-  LDForceManager::LDForceManager(SimInfo* info) : ForceManager(info){
+  LDForceManager::LDForceManager(SimInfo* info) : ForceManager(info), forceTolerance_(1e-6), maxIterNum_(4) {
     simParams = info->getSimParams();
     veloMunge = new Velocitizer(info);
 
@@ -117,9 +117,9 @@ namespace oopse {
         hydroPropMap = parseFrictionFile(simParams->getHydroPropFile());
       } else {               
         sprintf( painCave.errMsg,
-                 "HydroPropFile must be set to a file name if Langevin\n"
-                 "\tDynamics is specified for rigidBodies which contain more\n"
-                 "\tthan one atom.  To create a HydroPropFile, run \"Hydro\".\n");
+                 "HydroPropFile must be set to a file name if Langevin Dynamics\n"
+                 "\tis specified for rigidBodies which contain more than one atom\n"
+                 "\tTo create a HydroPropFile, run the \"Hydro\" program.\n");
         painCave.severity = OOPSE_ERROR;
         painCave.isFatal = 1;
         simError();  
@@ -198,9 +198,9 @@ namespace oopse {
                   }       
                 }
               } else {
-                int obanum = etab.GetAtomicNum((atom->getType()).c_str());
-                if (obanum != 0) {
-                  currShape = new Sphere(atom->getPos(), etab.GetVdwRad(obanum));
+                int aNum = etab.GetAtomicNum((atom->getType()).c_str());
+                if (aNum != 0) {
+                  currShape = new Sphere(atom->getPos(), etab.GetVdwRad(aNum));
                 } else {
                   sprintf( painCave.errMsg,
                            "Could not find atom type in default element.txt\n");
@@ -249,7 +249,6 @@ namespace oopse {
     Molecule* mol;
     StuntDouble* integrableObject;
     RealType mass;
-    Vector3d vel;
     Vector3d pos;
     Vector3d frc;
     Mat3x3d A;
@@ -260,8 +259,6 @@ namespace oopse {
     bool doLangevinForces;
     bool freezeMolecule;
     int fdf;
-
-
 
     fdf = 0;
 
@@ -294,46 +291,17 @@ namespace oopse {
           fdf += integrableObject->freeze();
         
         if (doLangevinForces) {  
-          vel =integrableObject->getVel(); 
           mass = integrableObject->getMass();
           if (integrableObject->isDirectional()){
-            Mat3x3d I = integrableObject->getI();
-            Vector3d angMom = integrableObject->getJ();
+
+            // preliminaries for directional objects:
+
             A = integrableObject->getA();
             Atrans = A.transpose();
-
-            Vector3d omegaBody;
-            
-            if (integrableObject->isLinear()) {
-              int linearAxis = integrableObject->linearAxis();
-              int l = (linearAxis +1 )%3;
-              int m = (linearAxis +2 )%3;
-              omegaBody[l] = angMom[l] /I(l, l);
-              omegaBody[m] = angMom[m] /I(m, m);
-              
-            } else {
-              omegaBody[0] = angMom[0] /I(0, 0);
-              omegaBody[1] = angMom[1] /I(1, 1);
-              omegaBody[2] = angMom[2] /I(2, 2);
-            }
-
-            Vector3d omegaLab = Atrans * omegaBody;
-
-            // apply friction force and torque at center of resistance
-
             Vector3d rcrLab = Atrans * hydroProps_[index]->getCOR();  
-            Vector3d vcdLab = vel + cross(omegaLab, rcrLab);
-        
-            Vector3d vcdBody = A * vcdLab;
-            Vector3d frictionForceBody = -(hydroProps_[index]->getXitt() * vcdBody + hydroProps_[index]->getXirt() * omegaBody);
-
-            Vector3d frictionForceLab = Atrans * frictionForceBody;
-            integrableObject->addFrc(frictionForceLab);
-            Vector3d frictionTorqueBody = -(hydroProps_[index]->getXitr() * vcdBody + hydroProps_[index]->getXirr() * omegaBody);
-            Vector3d frictionTorqueLab = Atrans * frictionTorqueBody;
-            integrableObject->addTrq(frictionTorqueLab + cross(rcrLab, frictionForceLab));
 
             //apply random force and torque at center of resistance
+
             Vector3d randomForceBody;
             Vector3d randomTorqueBody;
             genRandomForceAndTorque(randomForceBody, randomTorqueBody, index, variance_);
@@ -341,15 +309,135 @@ namespace oopse {
             Vector3d randomTorqueLab = Atrans * randomTorqueBody;
             integrableObject->addFrc(randomForceLab);            
             integrableObject->addTrq(randomTorqueLab + cross(rcrLab, randomForceLab ));             
+
+            Mat3x3d I = integrableObject->getI();
+            Vector3d omegaBody;
+
+            // What remains contains velocity explicitly, but the velocity required
+            // is at the full step: v(t + h), while we have initially the velocity
+            // at the half step: v(t + h/2).  We need to iterate to converge the
+            // friction force and friction torque vectors.
+
+            // this is the velocity at the half-step:
+            
+            Vector3d vel =integrableObject->getVel();
+            Vector3d angMom = integrableObject->getJ();
+
+            //estimate velocity at full-step using everything but friction forces:           
+
+            frc = integrableObject->getFrc();
+            Vector3d velStep = vel + (dt2_ /mass * OOPSEConstant::energyConvert) * frc;
+
+            Tb = integrableObject->lab2Body(integrableObject->getTrq());
+            Vector3d angMomStep = angMom + (dt2_ * OOPSEConstant::energyConvert) * Tb;                             
+
+            Vector3d omegaLab;
+            Vector3d vcdLab;
+            Vector3d vcdBody;
+            Vector3d frictionForceBody;
+            Vector3d frictionForceLab(0.0);
+            Vector3d oldFFL;  // used to test for convergence
+            Vector3d frictionTorqueBody(0.0);
+            Vector3d oldFTB;  // used to test for convergence
+            Vector3d frictionTorqueLab;
+            RealType fdot;
+            RealType tdot;
+
+            //iteration starts here:
+
+            for (int k = 0; k < maxIterNum_; k++) {
+                            
+              if (integrableObject->isLinear()) {
+                int linearAxis = integrableObject->linearAxis();
+                int l = (linearAxis +1 )%3;
+                int m = (linearAxis +2 )%3;
+                omegaBody[l] = angMomStep[l] /I(l, l);
+                omegaBody[m] = angMomStep[m] /I(m, m);
+                
+              } else {
+                omegaBody[0] = angMomStep[0] /I(0, 0);
+                omegaBody[1] = angMomStep[1] /I(1, 1);
+                omegaBody[2] = angMomStep[2] /I(2, 2);
+              }
+              
+              omegaLab = Atrans * omegaBody;
+              
+              // apply friction force and torque at center of resistance
+              
+              vcdLab = velStep + cross(omegaLab, rcrLab);       
+              vcdBody = A * vcdLab;
+              frictionForceBody = -(hydroProps_[index]->getXitt() * vcdBody + hydroProps_[index]->getXirt() * omegaBody);
+              oldFFL = frictionForceLab;
+              frictionForceLab = Atrans * frictionForceBody;
+              oldFTB = frictionTorqueBody;
+              frictionTorqueBody = -(hydroProps_[index]->getXitr() * vcdBody + hydroProps_[index]->getXirr() * omegaBody);
+              frictionTorqueLab = Atrans * frictionTorqueBody;
+              
+              // re-estimate velocities at full-step using friction forces:
+              
+              velStep = vel + (dt2_ / mass * OOPSEConstant::energyConvert) * (frc + frictionForceLab);
+              angMomStep = angMom + (dt2_ * OOPSEConstant::energyConvert) * (Tb + frictionTorqueBody);
+
+              // check for convergence (if the vectors have converged, fdot and tdot will both be 1.0):
+              
+              fdot = dot(frictionForceLab, oldFFL) / frictionForceLab.lengthSquare();
+              tdot = dot(frictionTorqueBody, oldFTB) / frictionTorqueBody.lengthSquare();
+              
+              if (fabs(1.0 - fdot) <= forceTolerance_ && fabs(1.0 - tdot) <= forceTolerance_)
+                break; // iteration ends here
+            }
+
+            integrableObject->addFrc(frictionForceLab);
+            integrableObject->addTrq(frictionTorqueLab + cross(rcrLab, frictionForceLab));
+
             
           } else {
             //spherical atom
-            Vector3d frictionForce = -(hydroProps_[index]->getXitt() * vel);
+
             Vector3d randomForce;
             Vector3d randomTorque;
             genRandomForceAndTorque(randomForce, randomTorque, index, variance_);
+            integrableObject->addFrc(randomForce);            
+
+            // What remains contains velocity explicitly, but the velocity required
+            // is at the full step: v(t + h), while we have initially the velocity
+            // at the half step: v(t + h/2).  We need to iterate to converge the
+            // friction force vector.
+
+            // this is the velocity at the half-step:
             
-            integrableObject->addFrc(frictionForce+randomForce);             
+            Vector3d vel =integrableObject->getVel();
+
+            //estimate velocity at full-step using everything but friction forces:           
+
+            frc = integrableObject->getFrc();
+            Vector3d velStep = vel + (dt2_ / mass * OOPSEConstant::energyConvert) * frc;
+
+            Vector3d frictionForce(0.0);
+            Vector3d oldFF;  // used to test for convergence
+            RealType fdot;
+
+            //iteration starts here:
+
+            for (int k = 0; k < maxIterNum_; k++) {
+
+              oldFF = frictionForce;                            
+              frictionForce = -hydroProps_[index]->getXitt() * velStep;
+
+              // re-estimate velocities at full-step using friction forces:
+              
+              velStep = vel + (dt2_ / mass * OOPSEConstant::energyConvert) * (frc + frictionForce);
+
+              // check for convergence (if the vector has converged, fdot will be 1.0):
+              
+              fdot = dot(frictionForce, oldFF) / frictionForce.lengthSquare();
+              
+              if (fabs(1.0 - fdot) <= forceTolerance_)
+                break; // iteration ends here
+            }
+
+            integrableObject->addFrc(frictionForce);
+
           }
         }
           
