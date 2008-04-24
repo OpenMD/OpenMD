@@ -60,7 +60,7 @@ namespace oopse {
       MAW,
       ShiftedMorse,
       LennardJones,
-			RepulsiveMorse,
+      RepulsiveMorse,
       Unknown
     };
             

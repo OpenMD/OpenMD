@@ -76,8 +76,8 @@ namespace oopse {
       mnmit.D0 = 0.0;
       mnmit.beta0 = 0.0;
       mnmit.betaH = 0.0;
-      mnmit.alpha = 0.0;
-      mnmit.gamma = 0.0;
+      mnmit.ca1 = 0.0;
+      mnmit.cb1 = 0.0;
       mnmit.sigma = 0.0;
       mnmit.epsilon = 0.0;
     }

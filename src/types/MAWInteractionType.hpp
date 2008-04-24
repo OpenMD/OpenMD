@@ -52,8 +52,9 @@ namespace oopse {
    * MAWInteractionType (Metal-Angular-Water) is one of the basic
    * Metal-to-NonMetal interaction types.
    *
-   * Formula is V =  D_e exp(-a(r-re)(exp(-a(r-re))-2) *
-   *                      (1 - alpha*(1/2 + sqrt(3.0)*cos(theta)/4.0 - 3.0*cos(2.0*phi)*sin^2(theta)/8.0))
+   * Formula is V =  D_e * exp(-a(r-re)) * (exp(-a(r-re)) - 2) *
+   *                      (1 + ca1*(1-sqrt(3)*cos(theta))^2 + 
+   *                           cb1*3*(sin(theta)*cos(phi))^2)
    *
    * The spherical coordinates are defined in the body-fixed frame
    * of a rigid-body water molecule (HO bonds are on the Y-Z plane)
@@ -67,11 +68,12 @@ namespace oopse {
   public:
     
     MAWInteractionType(RealType myD0, RealType myBeta0, RealType myR0,
-		        RealType myAlpha){
+                       RealType myCa1, RealType myCb1){
       D_e = myD0;
       beta = myBeta0;
       r_e = myR0;
-      alpha = myAlpha;
+      ca1 = myCa1;
+      cb1 = myCb1;
     }
     
     virtual void tellFortran(int atid1, int atid2) {
@@ -81,7 +83,8 @@ namespace oopse {
       mnmit.R0 = r_e;
       mnmit.D0 = D_e;
       mnmit.beta0 = beta;
-      mnmit.alpha = alpha;
+      mnmit.ca1 = ca1;
+      mnmit.cb1 = cb1;
       
       addMNMInteraction(&mnmit);
     }
@@ -90,7 +93,8 @@ namespace oopse {
     RealType D_e;
     RealType beta;
     RealType r_e;
-    RealType alpha;    
+    RealType ca1;    
+    RealType cb1;
   };
 }
 #endif

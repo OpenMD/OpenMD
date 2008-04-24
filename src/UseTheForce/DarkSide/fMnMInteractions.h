@@ -16,8 +16,8 @@ typedef  struct{
   RealType D0;
   RealType beta0;  
   RealType betaH;  
-  RealType alpha;  
-  RealType gamma;  
+  RealType ca1;  
+  RealType cb1;  
   RealType sigma;
   RealType epsilon;
 } MNMtype;
@@ -43,8 +43,8 @@ typedef  struct{
     real(kind=dp) :: D0
     real(kind=dp) :: beta0
     real(kind=dp) :: betaH
-    real(kind=dp) :: alpha
-    real(kind=dp) :: gamma
+    real(kind=dp) :: ca1
+    real(kind=dp) :: cb1
     real(kind=dp) :: sigma
     real(kind=dp) :: epsilon
   end type MNMtype

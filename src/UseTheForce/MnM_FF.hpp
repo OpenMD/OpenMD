@@ -68,8 +68,8 @@ namespace oopse {
   private:
     SectionParserManager spMan_;
     bool hasSCtypes_;
-		bool hasEAMtypes_;
-
+    bool hasEAMtypes_;
+    
   };
 
 } //end namespace oopse

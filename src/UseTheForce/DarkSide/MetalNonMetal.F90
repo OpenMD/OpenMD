@@ -42,7 +42,7 @@
 
 !! Calculates Metal-Non Metal interactions.
 !! @author Charles F. Vardeman II 
-!! @version $Id: MetalNonMetal.F90,v 1.10 2008-04-11 16:21:34 chuckv Exp $, $Date: 2008-04-11 16:21:34 $, $Name: not supported by cvs2svn $, $Revision: 1.10 $
+!! @version $Id: MetalNonMetal.F90,v 1.11 2008-04-24 21:04:27 gezelter Exp $, $Date: 2008-04-24 21:04:27 $, $Name: not supported by cvs2svn $, $Revision: 1.11 $
 
 
 module MetalNonMetal
@@ -80,8 +80,8 @@ module MetalNonMetal
      real(kind=dp) :: D0
      real(kind=dp) :: beta0
      real(kind=dp) :: betaH
-     real(kind=dp) :: alpha
-     real(kind=dp) :: gamma     
+     real(kind=dp) :: ca1
+     real(kind=dp) :: cb1
      real(kind=dp) :: sigma
      real(kind=dp) :: epsilon
      real(kind=dp) :: rCut = 0.0_dp
@@ -428,20 +428,21 @@ contains
 
     integer, intent(in) :: interaction_id
 
-    real(kind = dp) :: D0, R0, beta0, alpha, pot_temp
+    real(kind = dp) :: D0, R0, beta0, ca1, cb1, pot_temp
     real(kind = dp) :: expt0, expfnc0, expfnc02
     real(kind = dp) :: exptH, expfncH, expfncH2
     real(kind = dp) :: x, y, z, x2, y2, z2, r3, r4
     real(kind = dp) :: drdx, drdy, drdz
     real(kind = dp) :: dvdx, dvdy, dvdz
-    real(kind = dp) :: Vang, dVangdx, dVangdy, dVangdz, dVangdux, dVangduy, dVangduz
+    real(kind = dp) :: Vang, dVangdx, dVangdy, dVangdz
+    real(kind = dp) :: dVangdux, dVangduy, dVangduz
     real(kind = dp) :: dVmorsedr
     real(kind = dp) :: Vmorse, dVmorsedx, dVmorsedy, dVmorsedz
+    real(kind = dp) :: a1, b1, s
+    real(kind = dp) :: da1dx, da1dy, da1dz, da1dux, da1duy, da1duz
+    real(kind = dp) :: db1dx, db1dy, db1dz, db1dux, db1duy, db1duz
     real(kind = dp) :: fx, fy, fz, tx, ty, tz, fxl, fyl, fzl
-    real(kind = dp), parameter :: tf = 3.0_dp/4.0_dp
-    real(kind = dp), parameter :: th = 3.0_dp/2.0_dp
-    real(kind = dp), parameter :: t8 = 3.0_dp/8.0_dp    
-    real(kind = dp), parameter :: stf = sqrt(3.0_dp)/4.0_dp
+    real(kind = dp), parameter :: st = sqrt(3.0_dp)
     integer :: atid1, atid2, id1, id2
     logical :: shiftedPot, shiftedFrc
     
@@ -488,7 +489,8 @@ contains
     D0 = MnM_Map%interactions(interaction_id)%D0
     R0 = MnM_Map%interactions(interaction_id)%r0
     beta0 = MnM_Map%interactions(interaction_id)%beta0    
-    alpha = MnM_Map%interactions(interaction_id)%alpha
+    ca1 = MnM_Map%interactions(interaction_id)%ca1
+    cb1 = MnM_Map%interactions(interaction_id)%cb1
     
     shiftedPot = MnM_Map%interactions(interaction_id)%shiftedPot
     shiftedFrc = MnM_Map%interactions(interaction_id)%shiftedFrc   
@@ -518,10 +520,20 @@ contains
 
     Vmorse = D0 * (expfnc02  - 2.0_dp * expfnc0)
 
-  ! angular modulation of morse part of potential to approximate a sp3 orbital
-  ! Vang = 1 - alpha*(1/2 + sqrt(3.0)*cos(theta)/4.0 - 3.0*cos(2.0*phi)*sin^2(theta)/8.0)
-    
-    Vang = 1.0_dp - alpha*(0.5_dp + stf*z/rij - t8*(x2-y2)/r2)
+    ! angular modulation of morse part of potential to approximate 
+    ! the squares of the two HOMO lone pair orbitals in water:
+    !
+    ! s = 1 / (4 pi)
+    ! a1 = (s + pz)^2 = (1 - sqrt(3)*cos(theta))^2 / (4 pi)
+    ! b1 = px^2 = 3 * (sin(theta)*cos(phi))^2 / (4 pi)   
+
+    ! we'll leave out the 4 pi for now
+
+    s = 1.0_dp
+    a1 = (1.0_dp + st * z / rij )**2
+    b1 = 3.0_dp * (x2 - y2)/ r2
+
+    Vang = s + ca1 * a1 + cb1 * b1
     
     pot_temp = Vmorse*Vang 
          
@@ -541,10 +553,18 @@ contains
     dVmorsedx = dVmorsedr * drdx
     dVmorsedy = dVmorsedr * drdy
     dVmorsedz = dVmorsedr * drdz
+    
+    da1dx = 2.0_dp * st * x * z / r3 - 6.0_dp * x * z2 / r4
+    da1dy = 2.0_dp * st * y * z / r3 - 6.0_dp * y * z2 / r4
+    da1dz = 2.0_dp * st * (x2 + y2) * (st * z - rij ) / r4
 
-    dVangdx = -alpha*(-tf*x/r2     + tf*(x2-y2)*x/r4 - stf*z*x/r3) 
-    dVangdy = -alpha*( tf*y/r2     + tf*(x2-y2)*y/r4 - stf*z*y/r3) 
-    dVangdz = -alpha*(stf/rij + tf*(x2-y2)*z/r4 - stf*z2/r3) 
+    db1dx = 6.0_dp * x * z2 / r4
+    db1dy = 6.0_dp * y * z2 / r4
+    db1dz = -6.0_dp * (x2 + y2) * z / r4
+
+    dVangdx = ca1 * da1dx + cb1 * db1dx
+    dVangdy = ca1 * da1dy + cb1 * db1dy
+    dVangdz = ca1 * da1dz + cb1 * db1dz
     
     ! chain rule to put these back on x, y, z
     dvdx = Vang * dVmorsedx + Vmorse * dVangdx
@@ -553,9 +573,18 @@ contains
     
     ! Torques for Vang using method of Price:
     ! S. L. Price, A. J. Stone, and M. Alderton, Mol. Phys. 52, 987 (1984).
-    dVangdux = alpha * (tf * y * z / r2 - stf * y / rij ) 
-    dVangduy = alpha * (tf * x * z / r2 + stf * x / rij ) 
-    dVangduz = -th * alpha * x * y / r2
+
+    da1dux =   6.0_dp * y * z / r2 - 2.0_dp * st * y / rij
+    da1duy =  -6.0_dp * x * z / r2 + 2.0_dp * st * x / rij
+    da1duz =   0.0_dp
+
+    db1dux =   6.0_dp * y * z / r2
+    db1duy =   6.0_dp * x * z / r2
+    db1duz = -12.0_dp * y * x / r2
+
+    dVangdux = ca1 * da1dux + cb1 * db1dux
+    dVangduy = ca1 * da1duy + cb1 * db1duy
+    dVangduz = ca1 * da1duz + cb1 * db1duz
     
     ! do the torques first since they are easy:
     ! remember that these are still in the body fixed axes    
@@ -706,18 +735,13 @@ contains
     type(MNMtype) :: myInteraction
     type(MnMinteraction) :: nt
     integer :: id
-  
-    
-
  
-    
     nt%interaction_type = myInteraction%MNMInteractionType
     nt%metal_atid = &
         getFirstMatchingElement(atypes, "c_ident", myInteraction%metal_atid)
     nt%nonmetal_atid = &
         getFirstMatchingElement(atypes, "c_ident", myInteraction%nonmetal_atid)
-    
-    
+       
     select case (nt%interaction_type)
     case (MNM_LENNARDJONES)
        nt%sigma = myInteraction%sigma
@@ -730,7 +754,8 @@ contains
        nt%R0 = myInteraction%R0
        nt%D0 = myInteraction%D0
        nt%beta0 = myInteraction%beta0
-       nt%alpha = myInteraction%alpha
+       nt%ca1 = myInteraction%ca1
+       nt%cb1 = myInteraction%cb1
     case default
        call handleError("MNM", "Unknown Interaction type")
     end select
@@ -835,7 +860,6 @@ contains
     enddo
   end subroutine createInteractionLookup
     
-
   function MnMdestroy(this) result(null_this)
     logical :: done
     type(MnMinteractionMap), pointer :: this 
@@ -856,12 +880,10 @@ contains
     null_this => null()
   end function MnMdestroy
 
-
   subroutine deleteInteractions()    
     MnM_Map => MnMdestroy(MnM_Map)
     return
   end subroutine deleteInteractions
-
 
   subroutine getLJfunc(r, myPot, myDeriv)
 
@@ -901,10 +923,4 @@ contains
     
     return
   end subroutine getSoftFunc
-
-
-
-
-
-
 end module MetalNonMetal

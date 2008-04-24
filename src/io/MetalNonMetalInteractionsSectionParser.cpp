@@ -75,67 +75,68 @@ namespace oopse {
     std::string at2 = tokenizer.nextToken();
     std::string itype = tokenizer.nextToken();
 
-  	MetalNonMetalInteractionTypeEnum nbit = getMetalNonMetalInteractionTypeEnum(itype);
+    MetalNonMetalInteractionTypeEnum nbit = getMetalNonMetalInteractionTypeEnum(itype);
     nTokens -= 3;
-		NonBondedInteractionType* interactionType;
+    NonBondedInteractionType* interactionType;
     	
     //switch is a nightmare to maintain
     switch(nbit) {
     case MAW :
-		if (nTokens < 4) {
-			sprintf(painCave.errMsg, "MetalNonMetalInteractionsSectionParser Error: Not enough tokens at line %d\n",
-				lineNo);
-			painCave.isFatal = 1;
-			simError();
-		} else {
-			RealType r_e = tokenizer.nextTokenAsDouble();
-			RealType D_e = tokenizer.nextTokenAsDouble();
-			RealType beta = tokenizer.nextTokenAsDouble();
-			RealType alpha = tokenizer.nextTokenAsDouble();			
-      interactionType = new MAWInteractionType(D_e, beta, r_e, alpha);
-		}
-		break;
-            
+      if (nTokens < 5) {
+        sprintf(painCave.errMsg, "MetalNonMetalInteractionsSectionParser Error: Not enough tokens at line %d\n",
+                lineNo);
+        painCave.isFatal = 1;
+        simError();
+      } else {
+        RealType r_e = tokenizer.nextTokenAsDouble();
+        RealType D_e = tokenizer.nextTokenAsDouble();
+        RealType beta = tokenizer.nextTokenAsDouble();
+        RealType ca1 = tokenizer.nextTokenAsDouble();
+        RealType cb1 = tokenizer.nextTokenAsDouble();
+        interactionType = new MAWInteractionType(D_e, beta, r_e, ca1, cb1);
+      }
+      break;
+      
     case ShiftedMorse :
-		if (nTokens < 3) {
-			sprintf(painCave.errMsg, "MetalNonMetalInteractionsSectionParser Error: Not enough tokens at line %d\n",
-				lineNo);
-			painCave.isFatal = 1;
-			simError();
-		} else {
-			RealType r0 = tokenizer.nextTokenAsDouble();
-			RealType D0 = tokenizer.nextTokenAsDouble();
-			RealType beta0 = tokenizer.nextTokenAsDouble();
-      interactionType = new ShiftedMorseInteractionType(D0, beta0, r0);
-		}
-		break;
+      if (nTokens < 3) {
+        sprintf(painCave.errMsg, "MetalNonMetalInteractionsSectionParser Error: Not enough tokens at line %d\n",
+                lineNo);
+        painCave.isFatal = 1;
+        simError();
+      } else {
+        RealType r0 = tokenizer.nextTokenAsDouble();
+        RealType D0 = tokenizer.nextTokenAsDouble();
+        RealType beta0 = tokenizer.nextTokenAsDouble();
+        interactionType = new ShiftedMorseInteractionType(D0, beta0, r0);
+      }
+      break;
 
-		 case RepulsiveMorse :
-			if (nTokens < 3) {
-				sprintf(painCave.errMsg, "MetalNonMetalInteractionsSectionParser Error: Not enough tokens at line %d\n",
-					lineNo);
-				painCave.isFatal = 1;
-				simError();
-			} else {
-				RealType r0 = tokenizer.nextTokenAsDouble();
-				RealType D0 = tokenizer.nextTokenAsDouble();
-				RealType beta0 = tokenizer.nextTokenAsDouble();
-	      interactionType = new RepulsiveMorseInteractionType(D0, beta0, r0);
-			}
-			break;
+    case RepulsiveMorse :
+      if (nTokens < 3) {
+        sprintf(painCave.errMsg, "MetalNonMetalInteractionsSectionParser Error: Not enough tokens at line %d\n",
+                lineNo);
+        painCave.isFatal = 1;
+        simError();
+      } else {
+        RealType r0 = tokenizer.nextTokenAsDouble();
+        RealType D0 = tokenizer.nextTokenAsDouble();
+        RealType beta0 = tokenizer.nextTokenAsDouble();
+        interactionType = new RepulsiveMorseInteractionType(D0, beta0, r0);
+      }
+      break;
 
     case LennardJones :
-		if (nTokens < 2) {
-			sprintf(painCave.errMsg, "MetalNonMetalInteractionsSectionParser Error: Not enough tokens at line %d\n",
-				lineNo);
-			painCave.isFatal = 1;
-			simError();
-		} else {
-			RealType sigma = tokenizer.nextTokenAsDouble();
-			RealType epsilon = tokenizer.nextTokenAsDouble();
-      interactionType = new LennardJonesInteractionType(sigma, epsilon);
-		}
-		break;
+      if (nTokens < 2) {
+        sprintf(painCave.errMsg, "MetalNonMetalInteractionsSectionParser Error: Not enough tokens at line %d\n",
+                lineNo);
+        painCave.isFatal = 1;
+        simError();
+      } else {
+        RealType sigma = tokenizer.nextTokenAsDouble();
+        RealType epsilon = tokenizer.nextTokenAsDouble();
+        interactionType = new LennardJonesInteractionType(sigma, epsilon);
+      }
+      break;
 
     case Unknown :
     default:

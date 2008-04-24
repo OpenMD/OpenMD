@@ -64,181 +64,173 @@
 #include "UseTheForce/ForceFieldCreator.hpp"
 
 
-namespace oopse
-{
-
-MnM_FF::MnM_FF()
-{
-
-	//set default force field filename
-	setForceFieldFileName("MnM.frc");
-
-	//The order of adding section parsers is important.
-	//OptionSectionParser must come first to set options for other parsers
-	//DirectionalAtomTypesSectionParser should be added before
-	//AtomTypesSectionParser, and these two section parsers will actually
-	//create "real" AtomTypes (AtomTypesSectionParser will create AtomType and
-	//DirectionalAtomTypesSectionParser will create DirectionalAtomType, which
-	//is a subclass of AtomType and should come first). Other AtomTypes Section
-	//Parser will not create the "real" AtomType, they only add and set some
-	//attribute of the AtomType. Thus their order are not important.
-	//AtomTypesSectionParser should be added before other atom type section
-	//parsers. Make sure they are added after DirectionalAtomTypesSectionParser
-	//and AtomTypesSectionParser. The order of BondTypesSectionParser,
-	//BendTypesSectionParser and TorsionTypesSectionParser are not important.
-	spMan_.push_back(new OptionSectionParser(forceFieldOptions_));
-	spMan_.push_back(new DirectionalAtomTypesSectionParser(forceFieldOptions_));
-	spMan_.push_back(new AtomTypesSectionParser());
-	spMan_.push_back(new LennardJonesAtomTypesSectionParser(forceFieldOptions_));
-	spMan_.push_back(new ChargeAtomTypesSectionParser(forceFieldOptions_));
-	spMan_.push_back(new MultipoleAtomTypesSectionParser(forceFieldOptions_));
-	spMan_.push_back(new StickyAtomTypesSectionParser(forceFieldOptions_));
-	spMan_.push_back(new StickyPowerAtomTypesSectionParser(forceFieldOptions_));
-	spMan_.push_back(new GayBerneAtomTypesSectionParser(forceFieldOptions_));
-	spMan_.push_back(new BondTypesSectionParser(forceFieldOptions_));
-	spMan_.push_back(new BendTypesSectionParser(forceFieldOptions_));
-	spMan_.push_back(new MetalNonMetalInteractionsSectionParser(forceFieldOptions_));
-	spMan_.push_back(new SCAtomTypesSectionParser(forceFieldOptions_));
-	spMan_.push_back(new EAMAtomTypesSectionParser(forceFieldOptions_));
-	spMan_.push_back(new TorsionTypesSectionParser(forceFieldOptions_));
-
-}
-
-void MnM_FF::parse(const std::string& filename) {
-  ifstrstream* ffStream;
-  
-  
-  ffStream = openForceFieldFile(filename);
-  
-  spMan_.parse(*ffStream, *this);
-  
-  ForceField::AtomTypeContainer::MapTypeIterator i;
-  AtomType* at;
-  ForceField::AtomTypeContainer::MapTypeIterator j;
-  AtomType* at2;
-  ForceField::NonBondedInteractionTypeContainer::MapTypeIterator k;
-  NonBondedInteractionType* nbit;
-  
-  for (at = atomTypeCont_.beginType(i); at != NULL;
-       at = atomTypeCont_.nextType(i)) {
-    at->makeFortranAtomType();
-  }
-  
-  for (at = atomTypeCont_.beginType(i); at != NULL;
-       at = atomTypeCont_.nextType(i)) {
-    at->complete();
-  }
-  
-  hasSCtypes_ = false;
-  for (at = atomTypeCont_.beginType(i); at != NULL;
-       at = atomTypeCont_.nextType(i)) {
-    if (at->isSC())
-      hasSCtypes_ = true;
-  }
-
-  hasEAMtypes_ = false;
-  for (at = atomTypeCont_.beginType(i); at != NULL;
-       at = atomTypeCont_.nextType(i)) {
-    if (at->isEAM())
-      hasEAMtypes_ = true;
-  }
-  
-  if (hasEAMtypes_ && hasSCtypes_) {
-    sprintf(painCave.errMsg,
-	    "MnM_FF forcefield cannot use both EAM and Sutton-Chen at the same time\n");
-    painCave.severity = OOPSE_ERROR;
-    painCave.isFatal = 1;
-    simError();
-  }
-  
-  /* to handle metal-nonmetal interactions, first we loop over
-     all atom types: */ 
-  
-  for (at = atomTypeCont_.beginType(i); at != NULL;
-       at = atomTypeCont_.nextType(i)) {
+namespace oopse {
+   
+  MnM_FF::MnM_FF() {    
     
-    /* if we find a metallic atom, we need to compare against
-       all other atom types */ 
+    //set default force field filename
+    setForceFieldFileName("MnM.frc");
     
-    if (at->isEAM() || at->isSC()) {
+    //The order of adding section parsers is important.
+    //OptionSectionParser must come first to set options for other parsers
+    //DirectionalAtomTypesSectionParser should be added before
+    //AtomTypesSectionParser, and these two section parsers will actually
+    //create "real" AtomTypes (AtomTypesSectionParser will create AtomType and
+    //DirectionalAtomTypesSectionParser will create DirectionalAtomType, which
+    //is a subclass of AtomType and should come first). Other AtomTypes Section
+    //Parser will not create the "real" AtomType, they only add and set some
+    //attribute of the AtomType. Thus their order are not important.
+    //AtomTypesSectionParser should be added before other atom type section
+    //parsers. Make sure they are added after DirectionalAtomTypesSectionParser
+    //and AtomTypesSectionParser. The order of BondTypesSectionParser,
+    //BendTypesSectionParser and TorsionTypesSectionParser are not important.
+    spMan_.push_back(new OptionSectionParser(forceFieldOptions_));
+    spMan_.push_back(new DirectionalAtomTypesSectionParser(forceFieldOptions_));
+    spMan_.push_back(new AtomTypesSectionParser());
+    spMan_.push_back(new LennardJonesAtomTypesSectionParser(forceFieldOptions_));
+    spMan_.push_back(new ChargeAtomTypesSectionParser(forceFieldOptions_));
+    spMan_.push_back(new MultipoleAtomTypesSectionParser(forceFieldOptions_));
+    spMan_.push_back(new StickyAtomTypesSectionParser(forceFieldOptions_));
+    spMan_.push_back(new StickyPowerAtomTypesSectionParser(forceFieldOptions_));
+    spMan_.push_back(new GayBerneAtomTypesSectionParser(forceFieldOptions_));
+    spMan_.push_back(new BondTypesSectionParser(forceFieldOptions_));
+    spMan_.push_back(new BendTypesSectionParser(forceFieldOptions_));
+    spMan_.push_back(new MetalNonMetalInteractionsSectionParser(forceFieldOptions_));
+    spMan_.push_back(new SCAtomTypesSectionParser(forceFieldOptions_));
+    spMan_.push_back(new EAMAtomTypesSectionParser(forceFieldOptions_));
+    spMan_.push_back(new TorsionTypesSectionParser(forceFieldOptions_));
+    
+  }
+  
+  void MnM_FF::parse(const std::string& filename) {
+    ifstrstream* ffStream;
+        
+    ffStream = openForceFieldFile(filename);
+    
+    spMan_.parse(*ffStream, *this);
+    
+    ForceField::AtomTypeContainer::MapTypeIterator i;
+    AtomType* at;
+    ForceField::AtomTypeContainer::MapTypeIterator j;
+    AtomType* at2;
+    ForceField::NonBondedInteractionTypeContainer::MapTypeIterator k;
+    NonBondedInteractionType* nbit;
+    
+    for (at = atomTypeCont_.beginType(i); at != NULL;
+         at = atomTypeCont_.nextType(i)) {
+      at->makeFortranAtomType();
+    }
+    
+    for (at = atomTypeCont_.beginType(i); at != NULL;
+         at = atomTypeCont_.nextType(i)) {
+      at->complete();
+    }
+    
+    hasSCtypes_ = false;
+    for (at = atomTypeCont_.beginType(i); at != NULL;
+         at = atomTypeCont_.nextType(i)) {
+      if (at->isSC())
+        hasSCtypes_ = true;
+    }
+    
+    hasEAMtypes_ = false;
+    for (at = atomTypeCont_.beginType(i); at != NULL;
+         at = atomTypeCont_.nextType(i)) {
+      if (at->isEAM())
+        hasEAMtypes_ = true;
+    }
+    
+    if (hasEAMtypes_ && hasSCtypes_) {
+      sprintf(painCave.errMsg,
+              "MnM_FF forcefield cannot use both EAM and Sutton-Chen at the same time\n");
+      painCave.severity = OOPSE_ERROR;
+      painCave.isFatal = 1;
+      simError();
+    }
+    
+    /* to handle metal-nonmetal interactions, first we loop over
+       all atom types: */ 
+    
+    for (at = atomTypeCont_.beginType(i); at != NULL;
+         at = atomTypeCont_.nextType(i)) {
       
-      /* loop over all other atom types */
-      for (at2 = atomTypeCont_.beginType(j); at2 != NULL;
-	   at2 = atomTypeCont_.nextType(j)) {
-	
-	/* if the other partner is not a metallic type, we need to
-	   look for explicit non-bonded interactions */
-	if (!at2->isEAM() && !at2->isSC()) {
+      /* if we find a metallic atom, we need to compare against
+         all other atom types */ 
+      
+      if (at->isEAM() || at->isSC()) {
+        
+        /* loop over all other atom types */
+        for (at2 = atomTypeCont_.beginType(j); at2 != NULL;
+             at2 = atomTypeCont_.nextType(j)) {
+          
+          /* if the other partner is not a metallic type, we need to
+             look for explicit non-bonded interactions */
+          if (!at2->isEAM() && !at2->isSC()) {
 	  
-	  /* get the name and ident of the metallic atom type */
-	  std::string at1s = at->getName();
-	  int atid1 = at->getIdent();
+            /* get the name and ident of the metallic atom type */
+            std::string at1s = at->getName();
+            int atid1 = at->getIdent();
 	  
-	  /* get the name and ident of the nonmetallic atom type */
-	  std::string at2s = at2->getName();
-	  int atid2 = at2->getIdent();
+            /* get the name and ident of the nonmetallic atom type */
+            std::string at2s = at2->getName();
+            int atid2 = at2->getIdent();
 	  
-	  /* look for a match in the non-bonded interactions parsed
-	     from the force field file */ 
-	  nbit = getNonBondedInteractionType(at1s, at2s);
+            /* look for a match in the non-bonded interactions parsed
+               from the force field file */ 
+            nbit = getNonBondedInteractionType(at1s, at2s);
 	  
-	  /* if we found a match (even a partial match), punt to the
-	     interaction to poke our info down to fortran. */
-	  if (nbit != NULL)	nbit->tellFortran(atid1, atid2);
-	}			
+            /* if we found a match (even a partial match), punt to the
+               interaction to poke our info down to fortran. */
+            if (nbit != NULL)	nbit->tellFortran(atid1, atid2);
+          }			
+        }
       }
     }
+  
+    delete ffStream;
+  
   }
   
-  delete ffStream;
   
-}
-
-
-	RealType MnM_FF::getRcutFromAtomType(AtomType* at) {
-		RealType rcut = 0.0;
-		if (at->isEAM()) {
-			GenericData* data = at->getPropertyByName("EAM");
-			if (data != NULL) {
-				EAMParamGenericData* eamData = dynamic_cast<EAMParamGenericData*>(data);
-
-				if (eamData != NULL) {
-
-					EAMParam& eamParam = eamData->getData();
-					rcut =  eamParam.rcut;
-				}
-				else {
-					sprintf(painCave.errMsg,
-					        "Can not cast GenericData to EAMParam\n");
-					painCave.severity = OOPSE_ERROR;
-					painCave.isFatal = 1;
-					simError();
-				}
-			}
-			else {
-				sprintf(painCave.errMsg, "Can not find EAM Parameters\n");
-				painCave.severity = OOPSE_ERROR;
-				painCave.isFatal = 1;
-				simError();
-			}
-		}
-		else {
-			rcut = ForceField::getRcutFromAtomType(at);
-		}
-
-		return rcut;
-	}
-
-
-
-
-
-
-	MnM_FF::~MnM_FF() {
-		destroyLJTypes();
-		destroyStickyTypes();
-		if (hasEAMtypes_) destroyEAMTypes();
-		if (hasSCtypes_)  destroySCTypes();
-	}
+  RealType MnM_FF::getRcutFromAtomType(AtomType* at) {
+    RealType rcut = 0.0;
+    if (at->isEAM()) {
+      GenericData* data = at->getPropertyByName("EAM");
+      if (data != NULL) {
+        EAMParamGenericData* eamData = dynamic_cast<EAMParamGenericData*>(data);
+        
+        if (eamData != NULL) {
+          
+          EAMParam& eamParam = eamData->getData();
+          rcut =  eamParam.rcut;
+        }
+        else {
+          sprintf(painCave.errMsg,
+                  "Can not cast GenericData to EAMParam\n");
+          painCave.severity = OOPSE_ERROR;
+          painCave.isFatal = 1;
+          simError();
+        }
+      }
+      else {
+        sprintf(painCave.errMsg, "Can not find EAM Parameters\n");
+        painCave.severity = OOPSE_ERROR;
+        painCave.isFatal = 1;
+        simError();
+      }
+    }
+    else {
+      rcut = ForceField::getRcutFromAtomType(at);
+    }
+    
+    return rcut;
+  }
+     
+  MnM_FF::~MnM_FF() {
+    destroyLJTypes();
+    destroyStickyTypes();
+    if (hasEAMtypes_) destroyEAMTypes();
+    if (hasSCtypes_)  destroySCTypes();
+  }
 } //end namespace oopse
 
