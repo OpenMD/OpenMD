@@ -43,33 +43,29 @@
 #include <stdio.h>
 #include <string.h>
 #include "config.h"
-
 #ifdef  IS_MPI
 #include <mpi.h>
+#endif
 
 int nChecks;
-#endif 
 
 #include "utils/simError.h"
 
 errorStruct painCave;
 
-#ifdef IS_MPI
-
 char checkPointMsg[MAX_SIM_ERROR_MSG_LENGTH];
 int worldRank;
-
-#endif
-
 
 void initSimError( void ){
   painCave.errMsg[0] = '\0';
   painCave.isFatal = 0;
   painCave.severity = OOPSE_ERROR;
-#ifdef IS_MPI
   painCave.isEventLoop = 0;
   nChecks = 0;
+#ifdef IS_MPI
   MPI_Comm_rank( MPI_COMM_WORLD, &worldRank );
+#else
+  worldRank = 0;
 #endif
 }
 
@@ -125,30 +121,43 @@ int simError( void ) {
   return 1;  
 }
  
-  
-#ifdef IS_MPI
 
-void MPIcheckPoint( void ){
-  
+void errorCheckPoint( void ){
+    
   int myError = 0;
   int isError;
 
+#ifdef IS_MPI
   MPI_Allreduce( &myError, &isError, 1, MPI_INT, MPI_LOR, MPI_COMM_WORLD );
+#else
+  isError = myError;
+#endif
+
   if( isError ){
+
+#ifdef IS_MPI
     MPI_Finalize();
+#endif
+
     exit(0);
   }
 
 #ifdef CHECKPOINT_VERBOSE  
   nChecks++;
+
+#ifdef IS_MPI
   if( worldRank == 0 ){
+#endif
+
     fprintf(stderr,
 	    "Checkpoint #%d reached: %s\n",
 	    nChecks,
 	    checkPointMsg );
+#ifdef IS_MPI
   }
-#endif 
+#endif
 
+#endif 
 }
 
-#endif 
+

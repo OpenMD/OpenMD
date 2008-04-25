@@ -89,7 +89,7 @@ namespace oopse {
     }
     strcpy( checkPointMsg, 
             "File \"idealCrystal.in\" opened successfully for reading." );
-    MPIcheckPoint();
+    errorCheckPoint();
 #endif
 
     return;  
@@ -107,7 +107,7 @@ namespace oopse {
     }
     strcpy( checkPointMsg, 
 	    "File idealCrystal.in (and .zang0 if present) closed successfully." );
-    MPIcheckPoint();
+    errorCheckPoint();
 #endif
     
     return;
@@ -543,7 +543,7 @@ namespace oopse {
     }
     
     strcpy( checkPointMsg, "zAngle file opened successfully for reading." );
-    MPIcheckPoint();
+    errorCheckPoint();
 #endif
     
 #ifndef IS_MPI

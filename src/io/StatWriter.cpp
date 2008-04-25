@@ -91,7 +91,7 @@ namespace oopse {
 
     sprintf( checkPointMsg,
 	     "Sucessfully opened output file for stating.\n");
-    MPIcheckPoint();
+    errorCheckPoint();
 #endif // is_mpi
 
   }

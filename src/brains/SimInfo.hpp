@@ -589,7 +589,6 @@ namespace oopse{
   //private:
     //std::vector<StuntDouble*> sdByGlobalIndex_;
     
-#ifdef IS_MPI
     //in Parallel version, we need MolToProc
   public:
                 
@@ -610,21 +609,18 @@ namespace oopse{
     void setMolToProcMap(const std::vector<int>& molToProcMap) {
       molToProcMap_ = molToProcMap;
     }
-
-    
         
   private:
 
     void setupFortranParallel();
         
     /** 
-     * The size of molToProcMap_ is equal to total number of molecules in the system.
-     *  It maps a molecule to the processor on which it resides. it is filled by SimCreator once and only
-     * once.
+     * The size of molToProcMap_ is equal to total number of molecules
+     * in the system.  It maps a molecule to the processor on which it
+     * resides. it is filled by SimCreator once and only once.
      */        
     std::vector<int> molToProcMap_; 
 
-#endif
 
   };
 

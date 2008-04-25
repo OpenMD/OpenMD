@@ -591,7 +591,7 @@ namespace oopse {
     info->setMolToProcMap(molToProcMap);
     sprintf(checkPointMsg,
             "Successfully divided the molecules among the processors.\n");
-    MPIcheckPoint();
+    errorCheckPoint();
   }
   
 #endif

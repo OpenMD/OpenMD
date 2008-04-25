@@ -46,7 +46,9 @@
 
 #include "io/ZConsWriter.hpp"
 #include "utils/simError.h"
-
+#ifdef IS_MPI
+#include <mpi.h>
+#endif
 
 namespace oopse {
   ZConsWriter::ZConsWriter(SimInfo* info, const std::string& filename) : info_(info) {

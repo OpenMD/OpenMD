@@ -54,10 +54,6 @@
 #include "brains/SimInfo.hpp"
 #include "constraints/ZconsStruct.hpp"
 
-#ifdef IS_MPI
-#include <mpi.h>
-#endif
-
 namespace oopse {
 
   class ZConsWriter {

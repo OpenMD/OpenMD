@@ -42,19 +42,19 @@
 #include "math/ParallelRandNumGen.hpp"
 #ifdef IS_MPI
 #include <mpi.h>
+#endif
 
 namespace oopse {
 
-
-
   int ParallelRandNumGen::nCreatedRNG_ = 0;
 
-  ParallelRandNumGen::ParallelRandNumGen( const uint32& oneSeed) {
+  ParallelRandNumGen::ParallelRandNumGen(const uint32& oneSeed) {
 
     const int masterNode = 0;
     int seed = oneSeed;
+#ifdef IS_MPI
     MPI_Bcast(&seed, 1, MPI_UNSIGNED_LONG, masterNode, MPI_COMM_WORLD); 
-
+#endif
     if (seed != oneSeed) {
       sprintf(painCave.errMsg,
 	      "Using different seed to initialize ParallelRandNumGen.\n");
@@ -63,14 +63,20 @@ namespace oopse {
     }
 
     int nProcessors;
+#ifdef IS_MPI
     MPI_Comm_size(MPI_COMM_WORLD, &nProcessors);
     MPI_Comm_rank( MPI_COMM_WORLD, &myRank_);
-    //In order to generate independent random number stream, the actual seed used by random 
-    //number generator is the seed passed to the constructor plus the number of random number
-    //generators which are already created.     
+#else
+    nProcessors = 1;
+    myRank_ = 0;
+#endif
+    //In order to generate independent random number stream, the
+    //actual seed used by random number generator is the seed passed
+    //to the constructor plus the number of random number generators
+    //which are already created.
     int newSeed = oneSeed + nCreatedRNG_;
     mtRand_ = new MTRand(newSeed, nProcessors, myRank_);
-
+    
     ++nCreatedRNG_;
   }
 
@@ -79,11 +85,17 @@ namespace oopse {
     std::vector<uint32> bigSeed;
     const int masterNode = 0;
     int nProcessors;
+#ifdef IS_MPI
     MPI_Comm_size(MPI_COMM_WORLD, &nProcessors);
     MPI_Comm_rank( MPI_COMM_WORLD, &myRank_);
+#else
+    nProcessors = 1;
+    myRank_ = 0;
+#endif
     mtRand_ = new MTRand(nProcessors, myRank_);
 
-    seed();       /** @todo calling virtual function in constructor is not a good design */
+    seed();       /** @todo calling virtual function in constructor is
+                      not a good design */
   }
 
 
@@ -91,18 +103,19 @@ namespace oopse {
 
     const int masterNode = 0;
     int seed = oneSeed;
+#ifdef IS_MPI
     MPI_Bcast(&seed, 1, MPI_UNSIGNED_LONG, masterNode, MPI_COMM_WORLD); 
-
+#endif
     if (seed != oneSeed) {
       sprintf(painCave.errMsg,
 	      "Using different seed to initialize ParallelRandNumGen.\n");
       painCave.isFatal = 1;;
       simError();
     }
-
+    
     int newSeed = oneSeed +nCreatedRNG_;
     mtRand_->seed(newSeed);
-
+    
     ++nCreatedRNG_;
   }
         
@@ -111,17 +124,22 @@ namespace oopse {
     std::vector<uint32> bigSeed;
     int size;
     const int masterNode = 0;
+#ifdef IS_MPI
     if (worldRank == masterNode) {
+#endif
+
       bigSeed = mtRand_->generateSeeds();
       size = bigSeed.size();
+
+#ifdef IS_MPI
       MPI_Bcast(&size, 1, MPI_INT, masterNode, MPI_COMM_WORLD);        
       MPI_Bcast(&bigSeed[0], size, MPI_UNSIGNED_LONG, masterNode, MPI_COMM_WORLD); 
-
     }else {
       MPI_Bcast(&size, 1, MPI_INT, masterNode, MPI_COMM_WORLD);        
       bigSeed.resize(size);
       MPI_Bcast(&bigSeed[0], size, MPI_UNSIGNED_LONG, masterNode, MPI_COMM_WORLD); 
     }
+#endif
     
     if (bigSeed.size() == 1) {
       mtRand_->seed(bigSeed[0]);
@@ -130,9 +148,5 @@ namespace oopse {
     }
 
     ++nCreatedRNG_;
-  }    
-
-
+  }        
 }
-
-#endif 

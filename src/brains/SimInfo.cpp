@@ -156,11 +156,7 @@ namespace oopse {
 	                                        + nGlobalRigidBodies_;
   
       nGlobalMols_ = molStampIds_.size();
-
-#ifdef IS_MPI    
       molToProcMap_.resize(nGlobalMols_);
-#endif
-
     }
 
   SimInfo::~SimInfo() {
@@ -860,25 +856,26 @@ namespace oopse {
     int nGlobalExcludes = 0;
     int* globalExcludes = NULL; 
     int* excludeList = exclude_.getExcludeList();
-    setFortranSim( &fInfo_, &nGlobalAtoms_, &nAtoms_, &identArray[0], &nExclude, excludeList , 
-		   &nGlobalExcludes, globalExcludes, &molMembershipArray[0], 
-		   &mfact[0], &nCutoffGroups_, &fortranGlobalGroupMembership[0], &isError); 
-
+    setFortranSim( &fInfo_, &nGlobalAtoms_, &nAtoms_, &identArray[0], 
+                   &nExclude, excludeList , &nGlobalExcludes, globalExcludes, 
+                   &molMembershipArray[0], &mfact[0], &nCutoffGroups_, 
+                   &fortranGlobalGroupMembership[0], &isError); 
+    
     if( isError ){
-
+      
       sprintf( painCave.errMsg,
 	       "There was an error setting the simulation information in fortran.\n" );
       painCave.isFatal = 1;
       painCave.severity = OOPSE_ERROR;
       simError();
     }
-
-#ifdef IS_MPI
+    
+    
     sprintf( checkPointMsg,
 	     "succesfully sent the simulation information to fortran.\n");
-    MPIcheckPoint();
-#endif // is_mpi
-
+    
+    errorCheckPoint();
+    
     // Setup number of neighbors in neighbor list if present
     if (simParams_->haveNeighborListNeighbors()) {
       int nlistNeighbors = simParams_->getNeighborListNeighbors();
@@ -889,9 +886,8 @@ namespace oopse {
   }
 
 
-#ifdef IS_MPI
   void SimInfo::setupFortranParallel() {
-    
+#ifdef IS_MPI    
     //SimInfo is responsible for creating localToGlobalAtomIndex and localToGlobalGroupIndex
     std::vector<int> localToGlobalAtomIndex(getNAtoms(), 0);
     std::vector<int> localToGlobalCutoffGroupIndex;
@@ -941,12 +937,10 @@ namespace oopse {
     }
 
     sprintf(checkPointMsg, " mpiRefresh successful.\n");
-    MPIcheckPoint();
-
-
-  }
+    errorCheckPoint();
 
 #endif
+  }
 
   void SimInfo::setupCutoff() {           
     

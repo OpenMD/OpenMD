@@ -13,19 +13,14 @@ typedef struct{
   char errMsg[MAX_SIM_ERROR_MSG_LENGTH];
   int isFatal;
   int severity;
-#ifdef IS_MPI
   int isEventLoop;
-#endif 
 } errorStruct;
 
 extern errorStruct painCave;
 
-#ifdef IS_MPI
-
 extern char checkPointMsg[MAX_SIM_ERROR_MSG_LENGTH];
 
 extern int worldRank;
-#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -34,14 +29,9 @@ extern "C" {
   int simError( void ); 
 
   void initSimError( void ); 
+
+  void errorCheckPoint( void );
                              
-
-#ifdef IS_MPI
-  
-  void MPIcheckPoint( void );
-  
-#endif 
-
 #ifdef __cplusplus
 }
 #endif 
@@ -61,9 +51,7 @@ extern "C" {
     character(len = MAX_SIM_ERROR_MSG_LENGTH) :: errMsg
     logical :: isFatal
     integer :: severity
-#ifdef IS_MPI
     logical :: isEventLoop;
-#endif 
   end type errorStruct
 
   type (errorStruct), public, save :: painCave

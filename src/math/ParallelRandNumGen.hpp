@@ -46,38 +46,35 @@
 
 #include "utils/simError.h"
 #include "math/RandNumGen.hpp"
-#ifdef IS_MPI
 
 namespace oopse {
-
-
-
+  
   /**
    * @class ParallelRandNumGen a parallel random number generator
-   * @note use SeqRandNumGen if you want a non-parallel random number generator.
+   * @note use SeqRandNumGen if you want a non-parallel random number
+   * generator.
    */
   class ParallelRandNumGen : public RandNumGen{
   public:
     typedef unsigned long uint32; 
-        
+    
     ParallelRandNumGen( const uint32& oneSeed);
-
+    
     ParallelRandNumGen();
-	
+    
     virtual void seed( const uint32 oneSeed );
-	
+    
     virtual void seed();
-
+    
   private:
-        
+    
     ParallelRandNumGen(const ParallelRandNumGen&);
     ParallelRandNumGen& operator =(const ParallelRandNumGen&);
-
-    static int nCreatedRNG_; /**< number of created random number of generator*/
-    int myRank_; /**@todo Fixed Me */
+    
+    static int nCreatedRNG_; /**< number of random number 
+                                generators created */
+    int myRank_;
   };
-
+  
 }
-#endif
-
 #endif 

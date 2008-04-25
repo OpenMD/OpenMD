@@ -92,7 +92,7 @@ namespace oopse {
     } 
     
     strcpy(checkPointMsg, "Dump file opened for reading successfully."); 
-    MPIcheckPoint(); 
+    errorCheckPoint(); 
     
 #endif 
     
@@ -113,7 +113,7 @@ namespace oopse {
     } 
     
     strcpy(checkPointMsg, "Dump file closed successfully."); 
-    MPIcheckPoint(); 
+    errorCheckPoint(); 
     
 #endif 
     

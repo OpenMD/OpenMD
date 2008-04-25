@@ -102,12 +102,8 @@ int main(int argc,char* argv[]){
   }
 #endif
   
-#ifdef IS_MPI
   strcpy( checkPointMsg, "Successful number of arguments" );
-  MPIcheckPoint();
-#endif
-
-
+  errorCheckPoint();
 
   //register forcefields, integrators and minimizers
   registerAll();
@@ -175,10 +171,11 @@ int main(int argc,char* argv[]){
     
   delete info;
 
-#ifdef IS_MPI
-  strcpy( checkPointMsg, "Yoikes!  It worked!" );
-  MPIcheckPoint();
-  
+
+  strcpy( checkPointMsg, "Great googly moogly!  It worked!" );
+  errorCheckPoint();
+
+#ifdef IS_MPI  
   MPI_Finalize();
 #endif
 
