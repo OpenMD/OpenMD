@@ -11735,6 +11735,7 @@ case $debug in
 
 
 
+
 # Try to determine "good" native compiler flags if none specified on command
 # line
 
@@ -11743,7 +11744,7 @@ if test "$ac_test_FFLAGS" != "set"; then
   case "${host_cpu}-${host_os}" in
 
   *linux*) if test "$FC" = ifc -o "$FC" = ifort; then
-                    FCFLAGS="-O3 -ip -no-prec-div"
+                    FCFLAGS="-O2"
                 fi;;
    rs6000*-aix*)  if test "$FC" = xlf90 -o "$FC" = f90 -o "$FC" = xlf95; then
                     FCFLAGS="-O3 -qarch=pwrx -qtune=pwrx -qansialias -w"
@@ -11766,23 +11767,22 @@ if test "$ac_test_FFLAGS" != "set"; then
         	FCFLAGS="-qthreaded -O -qtune=auto -qarch=auto -qunroll=auto"
         fi
 	if test "$FC" = ifort; then
-        	FCFLAGS="-O3 -ip -no-prec-dev -mdynamic-no-pic"
+        	FCFLAGS="-O2"
+        fi
+        if test "$FC" = gfortran; then
+                FCFLAGS="-Os"
         fi;;
   esac
-
-  if test -n "$CPU_FLAGS"; then
-        FCFLAGS="$FCFLAGS $CPU_FLAGS"
-  fi
 
   if test -z "$FCFLAGS"; then
 	echo ""
 	echo "*********************************************************"
         echo "* WARNING: Don't know the best FCFLAGS for this system  *"
         echo "* Use  make FCFLAGS=..., or edit the top level Makefile *"
-	echo "* (otherwise, a default of FCFLAGS=-O3 will be used)    *"
+	echo "* (otherwise, a default of FCFLAGS=-O will be used)     *"
 	echo "*********************************************************"
 	echo ""
-        FCFLAGS="-O3"
+        FCFLAGS="-O"
   fi
 
 
@@ -11892,7 +11892,7 @@ if test "$ac_test_CFLAGS" != "set"; then
   case "${host_cpu}-${host_os}" in
 
   *linux*) if test "$CC" = icc; then
-                    CFLAGS="-O"
+                    CFLAGS="-O2"
                 fi;;
   sparc-solaris2*) if test "$CC" = cc; then
                     CFLAGS="-O -dalign"
@@ -11923,339 +11923,20 @@ if test "$ac_test_CFLAGS" != "set"; then
 		echo "*******************************************************"
         fi;;
    *darwin*)
-	if test "$CC" = xlc -o "$CC" = cc; then
+	if test "$CC" = xlc; then
         	CFLAGS="-qthreaded -O -qtune=auto -qarch=auto -qunroll=auto -qaltivec"
         fi
 	if test "$CC" = icc; then
-        	CFLAGS="-O3 -ip -no-prec-div -mdynamic-no-pic"
+        	CFLAGS="-O2"
+        fi
+        if test $ac_cv_prog_really_gcc = yes; then
+                CFLAGS="-Os"
         fi;;
   esac
 
   # use default flags for gcc on all systems
-  if test $ac_cv_prog_really_gcc = yes; then
-     CFLAGS="-O6 -fomit-frame-pointer -Wall -W -Wcast-qual -Wpointer-arith -Wcast-align"
-  fi
-
-  # test for gcc-specific flags:
-  if test $ac_cv_prog_really_gcc = yes; then
-    # -malign-double for x86 systems
-
-
-{ echo "$as_me:$LINENO: checking whether ${CC} accepts -malign-double" >&5
-echo $ECHO_N "checking whether ${CC} accepts -malign-double... $ECHO_C" >&6; }
-if test "${ac_align_double+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  echo 'void f(){}' > conftest.c
-if test -z "`${CC} -malign-double -c conftest.c 2>&1`"; then
-        ac_align_double=yes
-else
-        ac_align_double=no
-fi
-rm -f conftest*
-
-fi
-{ echo "$as_me:$LINENO: result: $ac_align_double" >&5
-echo "${ECHO_T}$ac_align_double" >&6; }
-if test "$ac_align_double" = yes; then
-        :
-        CFLAGS="$CFLAGS -malign-double"
-else
-        :
-
-fi
-
-    # -fstrict-aliasing for gcc-2.95+
-
-
-{ echo "$as_me:$LINENO: checking whether ${CC} accepts -fstrict-aliasing" >&5
-echo $ECHO_N "checking whether ${CC} accepts -fstrict-aliasing... $ECHO_C" >&6; }
-if test "${ac_fstrict_aliasing+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  echo 'void f(){}' > conftest.c
-if test -z "`${CC} -fstrict-aliasing -c conftest.c 2>&1`"; then
-        ac_fstrict_aliasing=yes
-else
-        ac_fstrict_aliasing=no
-fi
-rm -f conftest*
-
-fi
-{ echo "$as_me:$LINENO: result: $ac_fstrict_aliasing" >&5
-echo "${ECHO_T}$ac_fstrict_aliasing" >&6; }
-if test "$ac_fstrict_aliasing" = yes; then
-        :
-        CFLAGS="$CFLAGS -fstrict-aliasing"
-else
-        :
-
-fi
-
-  fi
-
-  CPU_FLAGS=""
-  if test $ac_cv_prog_really_gcc = yes; then
-	  	  case "${host_cpu}" in
-	  i586*)
-
-{ echo "$as_me:$LINENO: checking whether ${CC} accepts -mcpu=pentium" >&5
-echo $ECHO_N "checking whether ${CC} accepts -mcpu=pentium... $ECHO_C" >&6; }
-if test "${ac_cpu_pentium+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  echo 'void f(){}' > conftest.c
-if test -z "`${CC} -mcpu=pentium -c conftest.c 2>&1`"; then
-        ac_cpu_pentium=yes
-else
-        ac_cpu_pentium=no
-fi
-rm -f conftest*
-
-fi
-{ echo "$as_me:$LINENO: result: $ac_cpu_pentium" >&5
-echo "${ECHO_T}$ac_cpu_pentium" >&6; }
-if test "$ac_cpu_pentium" = yes; then
-        :
-        CPU_FLAGS=-mcpu=pentium
-else
-        :
-
-
-{ echo "$as_me:$LINENO: checking whether ${CC} accepts -mpentium" >&5
-echo $ECHO_N "checking whether ${CC} accepts -mpentium... $ECHO_C" >&6; }
-if test "${ac_pentium+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  echo 'void f(){}' > conftest.c
-if test -z "`${CC} -mpentium -c conftest.c 2>&1`"; then
-        ac_pentium=yes
-else
-        ac_pentium=no
-fi
-rm -f conftest*
-
-fi
-{ echo "$as_me:$LINENO: result: $ac_pentium" >&5
-echo "${ECHO_T}$ac_pentium" >&6; }
-if test "$ac_pentium" = yes; then
-        :
-        CPU_FLAGS=-mpentium
-else
-        :
-
-fi
-
-fi
-
-		  ;;
-	  i686*)
-
-{ echo "$as_me:$LINENO: checking whether ${CC} accepts -mcpu=pentiumpro" >&5
-echo $ECHO_N "checking whether ${CC} accepts -mcpu=pentiumpro... $ECHO_C" >&6; }
-if test "${ac_cpu_pentiumpro+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  echo 'void f(){}' > conftest.c
-if test -z "`${CC} -mcpu=pentiumpro -c conftest.c 2>&1`"; then
-        ac_cpu_pentiumpro=yes
-else
-        ac_cpu_pentiumpro=no
-fi
-rm -f conftest*
-
-fi
-{ echo "$as_me:$LINENO: result: $ac_cpu_pentiumpro" >&5
-echo "${ECHO_T}$ac_cpu_pentiumpro" >&6; }
-if test "$ac_cpu_pentiumpro" = yes; then
-        :
-        CPU_FLAGS=-mcpu=pentiumpro
-else
-        :
-
-
-{ echo "$as_me:$LINENO: checking whether ${CC} accepts -mpentiumpro" >&5
-echo $ECHO_N "checking whether ${CC} accepts -mpentiumpro... $ECHO_C" >&6; }
-if test "${ac_pentiumpro+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  echo 'void f(){}' > conftest.c
-if test -z "`${CC} -mpentiumpro -c conftest.c 2>&1`"; then
-        ac_pentiumpro=yes
-else
-        ac_pentiumpro=no
-fi
-rm -f conftest*
-
-fi
-{ echo "$as_me:$LINENO: result: $ac_pentiumpro" >&5
-echo "${ECHO_T}$ac_pentiumpro" >&6; }
-if test "$ac_pentiumpro" = yes; then
-        :
-        CPU_FLAGS=-mpentiumpro
-else
-        :
-
-fi
-
-fi
-
-		  ;;
-	  powerpc*)
-		cputype=`(grep cpu /proc/cpuinfo | head -1 | cut -d: -f2 | sed 's/ //g') 2> /dev/null`
-		is60x=`echo $cputype | egrep "^600-9e?$"`
-		if test -n "$is60x"; then
-
-
-{ echo "$as_me:$LINENO: checking whether ${CC} accepts -mcpu=$cputype" >&5
-echo $ECHO_N "checking whether ${CC} accepts -mcpu=$cputype... $ECHO_C" >&6; }
-if test "${ac_m_cpu_60x+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  echo 'void f(){}' > conftest.c
-if test -z "`${CC} -mcpu=$cputype -c conftest.c 2>&1`"; then
-        ac_m_cpu_60x=yes
-else
-        ac_m_cpu_60x=no
-fi
-rm -f conftest*
-
-fi
-{ echo "$as_me:$LINENO: result: $ac_m_cpu_60x" >&5
-echo "${ECHO_T}$ac_m_cpu_60x" >&6; }
-if test "$ac_m_cpu_60x" = yes; then
-        :
-        CPU_FLAGS=-mcpu=$cputype
-else
-        :
-
-fi
-
-		elif test "$cputype" = 750; then
-
-
-{ echo "$as_me:$LINENO: checking whether we are using gcc 2.95 or later" >&5
-echo $ECHO_N "checking whether we are using gcc 2.95 or later... $ECHO_C" >&6; }
-if test "${ac_cv_prog_gcc_2_95+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-
-cat > conftest.c <<EOF
-#ifdef __GNUC__ && !defined (__INTEL_COMPILER)
-#  if (__GNUC__ > 2) || (__GNUC__ == 2 && __GNUC_MINOR__ >= 95)
-     yes;
-#  endif
-#endif
-EOF
-if { ac_try='${CC-cc} -E conftest.c'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; } | egrep yes >/dev/null 2>&1; then
-  ac_cv_prog_gcc_2_95=yes
-else
-  ac_cv_prog_gcc_2_95=no
-fi
-
-fi
-{ echo "$as_me:$LINENO: result: $ac_cv_prog_gcc_2_95" >&5
-echo "${ECHO_T}$ac_cv_prog_gcc_2_95" >&6; }
-if test "$ac_cv_prog_gcc_2_95" = yes; then
-        :
-
-
-{ echo "$as_me:$LINENO: checking whether ${CC} accepts -mcpu=750" >&5
-echo $ECHO_N "checking whether ${CC} accepts -mcpu=750... $ECHO_C" >&6; }
-if test "${ac_m_cpu_750+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  echo 'void f(){}' > conftest.c
-if test -z "`${CC} -mcpu=750 -c conftest.c 2>&1`"; then
-        ac_m_cpu_750=yes
-else
-        ac_m_cpu_750=no
-fi
-rm -f conftest*
-
-fi
-{ echo "$as_me:$LINENO: result: $ac_m_cpu_750" >&5
-echo "${ECHO_T}$ac_m_cpu_750" >&6; }
-if test "$ac_m_cpu_750" = yes; then
-        :
-        CPU_FLAGS=-mcpu=750
-else
-        :
-
-fi
-
-else
-        :
-
-fi
-
-		fi
-		if test -z "$CPU_FLAGS"; then
-
-
-{ echo "$as_me:$LINENO: checking whether ${CC} accepts -mcpu=powerpc" >&5
-echo $ECHO_N "checking whether ${CC} accepts -mcpu=powerpc... $ECHO_C" >&6; }
-if test "${ac_m_cpu_powerpc+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  echo 'void f(){}' > conftest.c
-if test -z "`${CC} -mcpu=powerpc -c conftest.c 2>&1`"; then
-        ac_m_cpu_powerpc=yes
-else
-        ac_m_cpu_powerpc=no
-fi
-rm -f conftest*
-
-fi
-{ echo "$as_me:$LINENO: result: $ac_m_cpu_powerpc" >&5
-echo "${ECHO_T}$ac_m_cpu_powerpc" >&6; }
-if test "$ac_m_cpu_powerpc" = yes; then
-        :
-        CPU_FLAGS=-mcpu=powerpc
-else
-        :
-
-fi
-
-		fi
-		if test -z "$CPU_FLAGS"; then
-
-
-{ echo "$as_me:$LINENO: checking whether ${CC} accepts -mpowerpc" >&5
-echo $ECHO_N "checking whether ${CC} accepts -mpowerpc... $ECHO_C" >&6; }
-if test "${ac_m_powerpc+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  echo 'void f(){}' > conftest.c
-if test -z "`${CC} -mpowerpc -c conftest.c 2>&1`"; then
-        ac_m_powerpc=yes
-else
-        ac_m_powerpc=no
-fi
-rm -f conftest*
-
-fi
-{ echo "$as_me:$LINENO: result: $ac_m_powerpc" >&5
-echo "${ECHO_T}$ac_m_powerpc" >&6; }
-if test "$ac_m_powerpc" = yes; then
-        :
-        CPU_FLAGS=-mpowerpc
-else
-        :
-
-fi
-
-		fi
-	  esac
-  fi
-
-  if test -n "$CPU_FLAGS"; then
-        CFLAGS="$CFLAGS $CPU_FLAGS"
+  if test $ac_cv_prog_really_gcc = yes -a -z "$CFLAGS"; then
+     CFLAGS="-O2"
   fi
 
   if test -z "$CFLAGS"; then
@@ -12263,10 +11944,10 @@ fi
 	echo "********************************************************"
         echo "* WARNING: Don't know the best CFLAGS for this system  *"
         echo "* Use  make CFLAGS=..., or edit the top level Makefile *"
-	echo "* (otherwise, a default of CFLAGS=-O3 will be used)    *"
+	echo "* (otherwise, a default of CFLAGS=-O will be used)     *"
 	echo "********************************************************"
 	echo ""
-        CFLAGS="-O3"
+        CFLAGS="-O"
   fi
 
 
@@ -12358,7 +12039,7 @@ if test "$ac_test_CXXFLAGS" != "set"; then
   case "${host_cpu}-${host_os}" in
 
   *linux*) if test "$CXX" = icc -o "$CXX" = icpc; then
-                    CXXFLAGS="-O"
+                    CXXFLAGS="-O2"
                 fi;;
   sparc-solaris2*) if test "$CXX" = CC; then
                     CXXFLAGS="-features=extensions -O -dalign"
@@ -12384,335 +12065,16 @@ if test "$ac_test_CXXFLAGS" != "set"; then
         	CXXFLAGS="-qthreaded -O -qtune=auto -qarch=auto -qunroll=auto -qaltivec"
         fi
 	if test "$CXX" = icpc; then
-        	CXXFLAGS="-O3 -ip -no-prec-div -mdynamic-no-pic"
+        	CXXFLAGS="-O2"
+        fi
+        if test $ac_cv_prog_really_gxx = yes; then
+                CXXFLAGS="-Os"
         fi;;
   esac
 
   # use default flags for gcc on all systems
-  if test $ac_cv_prog_really_gxx = yes; then
-     CXXFLAGS="-O6 -fomit-frame-pointer -Wall -W -Wcast-qual -Wpointer-arith -Wcast-align"
-  fi
-
-  # test for gcc-specific flags:
-  if test $ac_cv_prog_really_gxx = yes; then
-    # -malign-double for x86 systems
-
-
-{ echo "$as_me:$LINENO: checking whether ${CXX} accepts -malign-double" >&5
-echo $ECHO_N "checking whether ${CXX} accepts -malign-double... $ECHO_C" >&6; }
-if test "${ac_align_double+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  echo 'void f(){}' > conftest.cpp
-if test -z "`${CXX} -malign-double -c conftest.cpp 2>&1`"; then
-        ac_align_double=yes
-else
-        ac_align_double=no
-fi
-rm -f conftest*
-
-fi
-{ echo "$as_me:$LINENO: result: $ac_align_double" >&5
-echo "${ECHO_T}$ac_align_double" >&6; }
-if test "$ac_align_double" = yes; then
-        :
-        CXXFLAGS="$CXXFLAGS -malign-double"
-else
-        :
-
-fi
-
-    # -fstrict-aliasing for gcc-2.95+
-
-
-{ echo "$as_me:$LINENO: checking whether ${CXX} accepts -fstrict-aliasing" >&5
-echo $ECHO_N "checking whether ${CXX} accepts -fstrict-aliasing... $ECHO_C" >&6; }
-if test "${ac_fstrict_aliasing+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  echo 'void f(){}' > conftest.cpp
-if test -z "`${CXX} -fstrict-aliasing -c conftest.cpp 2>&1`"; then
-        ac_fstrict_aliasing=yes
-else
-        ac_fstrict_aliasing=no
-fi
-rm -f conftest*
-
-fi
-{ echo "$as_me:$LINENO: result: $ac_fstrict_aliasing" >&5
-echo "${ECHO_T}$ac_fstrict_aliasing" >&6; }
-if test "$ac_fstrict_aliasing" = yes; then
-        :
-        CXXFLAGS="$CXXFLAGS -fstrict-aliasing"
-else
-        :
-
-fi
-
-  fi
-
-  CPU_FLAGS=""
-  if test $ac_cv_prog_really_gxx = yes; then
-	  	  case "${host_cpu}" in
-	  i586*)
-
-{ echo "$as_me:$LINENO: checking whether ${CXX} accepts -mcpu=pentium" >&5
-echo $ECHO_N "checking whether ${CXX} accepts -mcpu=pentium... $ECHO_C" >&6; }
-if test "${ac_cpu_pentium+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  echo 'void f(){}' > conftest.cpp
-if test -z "`${CXX} -mcpu=pentium -c conftest.cpp 2>&1`"; then
-        ac_cpu_pentium=yes
-else
-        ac_cpu_pentium=no
-fi
-rm -f conftest*
-
-fi
-{ echo "$as_me:$LINENO: result: $ac_cpu_pentium" >&5
-echo "${ECHO_T}$ac_cpu_pentium" >&6; }
-if test "$ac_cpu_pentium" = yes; then
-        :
-        CPU_FLAGS=-mcpu=pentium
-else
-        :
-
-
-{ echo "$as_me:$LINENO: checking whether ${CXX} accepts -mpentium" >&5
-echo $ECHO_N "checking whether ${CXX} accepts -mpentium... $ECHO_C" >&6; }
-if test "${ac_pentium+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  echo 'void f(){}' > conftest.cpp
-if test -z "`${CXX} -mpentium -c conftest.cpp 2>&1`"; then
-        ac_pentium=yes
-else
-        ac_pentium=no
-fi
-rm -f conftest*
-
-fi
-{ echo "$as_me:$LINENO: result: $ac_pentium" >&5
-echo "${ECHO_T}$ac_pentium" >&6; }
-if test "$ac_pentium" = yes; then
-        :
-        CPU_FLAGS=-mpentium
-else
-        :
-
-fi
-
-fi
-
-		  ;;
-	  i686*)
-
-{ echo "$as_me:$LINENO: checking whether ${CXX} accepts -mcpu=pentiumpro" >&5
-echo $ECHO_N "checking whether ${CXX} accepts -mcpu=pentiumpro... $ECHO_C" >&6; }
-if test "${ac_cpu_pentiumpro+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  echo 'void f(){}' > conftest.cpp
-if test -z "`${CXX} -mcpu=pentiumpro -c conftest.cpp 2>&1`"; then
-        ac_cpu_pentiumpro=yes
-else
-        ac_cpu_pentiumpro=no
-fi
-rm -f conftest*
-
-fi
-{ echo "$as_me:$LINENO: result: $ac_cpu_pentiumpro" >&5
-echo "${ECHO_T}$ac_cpu_pentiumpro" >&6; }
-if test "$ac_cpu_pentiumpro" = yes; then
-        :
-        CPU_FLAGS=-mcpu=pentiumpro
-else
-        :
-
-
-{ echo "$as_me:$LINENO: checking whether ${CXX} accepts -mpentiumpro" >&5
-echo $ECHO_N "checking whether ${CXX} accepts -mpentiumpro... $ECHO_C" >&6; }
-if test "${ac_pentiumpro+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  echo 'void f(){}' > conftest.cpp
-if test -z "`${CXX} -mpentiumpro -c conftest.cpp 2>&1`"; then
-        ac_pentiumpro=yes
-else
-        ac_pentiumpro=no
-fi
-rm -f conftest*
-
-fi
-{ echo "$as_me:$LINENO: result: $ac_pentiumpro" >&5
-echo "${ECHO_T}$ac_pentiumpro" >&6; }
-if test "$ac_pentiumpro" = yes; then
-        :
-        CPU_FLAGS=-mpentiumpro
-else
-        :
-
-fi
-
-fi
-
-		  ;;
-	  powerpc*)
-		cputype=`(grep cpu /proc/cpuinfo | head -1 | cut -d: -f2 | sed 's/ //g') 2> /dev/null`
-		is60x=`echo $cputype | egrep "^600-9e?$"`
-		if test -n "$is60x"; then
-
-
-{ echo "$as_me:$LINENO: checking whether ${CXX} accepts -mcpu=$cputype" >&5
-echo $ECHO_N "checking whether ${CXX} accepts -mcpu=$cputype... $ECHO_C" >&6; }
-if test "${ac_m_cpu_60x+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  echo 'void f(){}' > conftest.cpp
-if test -z "`${CXX} -mcpu=$cputype -c conftest.cpp 2>&1`"; then
-        ac_m_cpu_60x=yes
-else
-        ac_m_cpu_60x=no
-fi
-rm -f conftest*
-
-fi
-{ echo "$as_me:$LINENO: result: $ac_m_cpu_60x" >&5
-echo "${ECHO_T}$ac_m_cpu_60x" >&6; }
-if test "$ac_m_cpu_60x" = yes; then
-        :
-        CPU_FLAGS=-mcpu=$cputype
-else
-        :
-
-fi
-
-		elif test "$cputype" = 750; then
-
-
-{ echo "$as_me:$LINENO: checking whether we are using g++ 2.95 or later" >&5
-echo $ECHO_N "checking whether we are using g++ 2.95 or later... $ECHO_C" >&6; }
-if test "${ac_cv_prog_gxx_2_95+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-
-cat > conftest.cpp <<EOF
-#ifdef __GNUC__ && !defined (__INTEL_COMPILER)
-#  if (__GNUC__ > 2) || (__GNUC__ == 2 && __GNUC_MINOR__ >= 95)
-     yes;
-#  endif
-#endif
-EOF
-if { ac_try='${CXX-c++} -E conftest.cpp'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; } | egrep yes >/dev/null 2>&1; then
-  ac_cv_prog_gxx_2_95=yes
-else
-  ac_cv_prog_gxx_2_95=no
-fi
-
-fi
-{ echo "$as_me:$LINENO: result: $ac_cv_prog_gxx_2_95" >&5
-echo "${ECHO_T}$ac_cv_prog_gxx_2_95" >&6; }
-if test "$ac_cv_prog_gxx_2_95" = yes; then
-        :
-
-
-{ echo "$as_me:$LINENO: checking whether ${CXX} accepts -mcpu=750" >&5
-echo $ECHO_N "checking whether ${CXX} accepts -mcpu=750... $ECHO_C" >&6; }
-if test "${ac_m_cpu_750+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  echo 'void f(){}' > conftest.cpp
-if test -z "`${CXX} -mcpu=750 -c conftest.cpp 2>&1`"; then
-        ac_m_cpu_750=yes
-else
-        ac_m_cpu_750=no
-fi
-rm -f conftest*
-
-fi
-{ echo "$as_me:$LINENO: result: $ac_m_cpu_750" >&5
-echo "${ECHO_T}$ac_m_cpu_750" >&6; }
-if test "$ac_m_cpu_750" = yes; then
-        :
-        CPU_FLAGS=-mcpu=750
-else
-        :
-
-fi
-
-else
-        :
-
-fi
-
-		fi
-		if test -z "$CPU_FLAGS"; then
-
-
-{ echo "$as_me:$LINENO: checking whether ${CXX} accepts -mcpu=powerpc" >&5
-echo $ECHO_N "checking whether ${CXX} accepts -mcpu=powerpc... $ECHO_C" >&6; }
-if test "${ac_m_cpu_powerpc+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  echo 'void f(){}' > conftest.cpp
-if test -z "`${CXX} -mcpu=powerpc -c conftest.cpp 2>&1`"; then
-        ac_m_cpu_powerpc=yes
-else
-        ac_m_cpu_powerpc=no
-fi
-rm -f conftest*
-
-fi
-{ echo "$as_me:$LINENO: result: $ac_m_cpu_powerpc" >&5
-echo "${ECHO_T}$ac_m_cpu_powerpc" >&6; }
-if test "$ac_m_cpu_powerpc" = yes; then
-        :
-        CPU_FLAGS=-mcpu=powerpc
-else
-        :
-
-fi
-
-		fi
-		if test -z "$CPU_FLAGS"; then
-
-
-{ echo "$as_me:$LINENO: checking whether ${CXX} accepts -mpowerpc" >&5
-echo $ECHO_N "checking whether ${CXX} accepts -mpowerpc... $ECHO_C" >&6; }
-if test "${ac_m_powerpc+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  echo 'void f(){}' > conftest.cpp
-if test -z "`${CXX} -mpowerpc -c conftest.cpp 2>&1`"; then
-        ac_m_powerpc=yes
-else
-        ac_m_powerpc=no
-fi
-rm -f conftest*
-
-fi
-{ echo "$as_me:$LINENO: result: $ac_m_powerpc" >&5
-echo "${ECHO_T}$ac_m_powerpc" >&6; }
-if test "$ac_m_powerpc" = yes; then
-        :
-        CPU_FLAGS=-mpowerpc
-else
-        :
-
-fi
-
-		fi
-	  esac
-  fi
-
-  if test -n "$CPU_FLAGS"; then
-        CXXFLAGS="$CXXFLAGS $CPU_FLAGS"
+  if test $ac_cv_prog_really_gxx = yes -a -z "$CXXFLAGS"; then
+     CXXFLAGS="-O2"
   fi
 
   if test -z "$CXXFLAGS"; then
@@ -12720,10 +12082,10 @@ fi
 	echo "**********************************************************"
         echo "* WARNING: Don't know the best CXXFLAGS for this system  *"
         echo "* Use  make CXXFLAGS=..., or edit the top level Makefile *"
-	echo "* (otherwise, a default of CXXFLAGS=-O3 will be used)    *"
+	echo "* (otherwise, a default of CXXFLAGS=-O will be used)     *"
 	echo "**********************************************************"
 	echo ""
-        CXXFLAGS="-O3"
+        CXXFLAGS="-O"
   fi
 
 
