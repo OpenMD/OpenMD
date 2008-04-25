@@ -355,7 +355,7 @@ if test "$ac_test_CFLAGS" != "set"; then
   case "${host_cpu}-${host_os}" in
 
   *linux*) if test "$CC" = icc; then
-                    CFLAGS="-O"
+                    CFLAGS="-O2"
                 fi;;
   sparc-solaris2*) if test "$CC" = cc; then
                     CFLAGS="-O -dalign"
@@ -386,65 +386,20 @@ if test "$ac_test_CFLAGS" != "set"; then
 		echo "*******************************************************"
         fi;;
    *darwin*)
-	if test "$CC" = xlc -o "$CC" = cc; then
+	if test "$CC" = xlc; then
         	CFLAGS="-qthreaded -O -qtune=auto -qarch=auto -qunroll=auto -qaltivec"
         fi
 	if test "$CC" = icc; then
-        	CFLAGS="-O3 -ip -no-prec-div -mdynamic-no-pic"
+        	CFLAGS="-O2"
+        fi
+        if test $ac_cv_prog_really_gcc = yes; then
+                CFLAGS="-Os"
         fi;;
   esac
 
   # use default flags for gcc on all systems
-  if test $ac_cv_prog_really_gcc = yes; then
-     CFLAGS="-O6 -fomit-frame-pointer -Wall -W -Wcast-qual -Wpointer-arith -Wcast-align"
-  fi
-
-  # test for gcc-specific flags:
-  if test $ac_cv_prog_really_gcc = yes; then
-    # -malign-double for x86 systems
-    ACX_CHECK_CC_FLAGS(-malign-double,align_double, CFLAGS="$CFLAGS -malign-double")
-    # -fstrict-aliasing for gcc-2.95+
-    ACX_CHECK_CC_FLAGS(-fstrict-aliasing,fstrict_aliasing, CFLAGS="$CFLAGS -fstrict-aliasing")
-  fi
-
-  CPU_FLAGS=""
-  if test $ac_cv_prog_really_gcc = yes; then
-	  dnl try to guess correct CPU flags, at least for linux
-	  case "${host_cpu}" in
-	  i586*)  ACX_CHECK_CC_FLAGS(-mcpu=pentium,cpu_pentium,
-			[CPU_FLAGS=-mcpu=pentium],
-			[ACX_CHECK_CC_FLAGS(-mpentium,pentium,
-				[CPU_FLAGS=-mpentium])])
-		  ;;
-	  i686*)  ACX_CHECK_CC_FLAGS(-mcpu=pentiumpro,cpu_pentiumpro,
-			[CPU_FLAGS=-mcpu=pentiumpro],
-			[ACX_CHECK_CC_FLAGS(-mpentiumpro,pentiumpro,
-				[CPU_FLAGS=-mpentiumpro])])
-		  ;;
-	  powerpc*)
-		cputype=`(grep cpu /proc/cpuinfo | head -1 | cut -d: -f2 | sed 's/ //g') 2> /dev/null`
-		is60x=`echo $cputype | egrep "^60[0-9]e?$"`
-		if test -n "$is60x"; then
-			ACX_CHECK_CC_FLAGS(-mcpu=$cputype,m_cpu_60x,
-				CPU_FLAGS=-mcpu=$cputype)
-		elif test "$cputype" = 750; then
-                        ACX_PROG_GCC_VERSION(2,95,
-                                ACX_CHECK_CC_FLAGS(-mcpu=750,m_cpu_750,
-					CPU_FLAGS=-mcpu=750))
-		fi
-		if test -z "$CPU_FLAGS"; then
-		        ACX_CHECK_CC_FLAGS(-mcpu=powerpc,m_cpu_powerpc,
-				CPU_FLAGS=-mcpu=powerpc)
-		fi
-		if test -z "$CPU_FLAGS"; then
-			ACX_CHECK_CC_FLAGS(-mpowerpc,m_powerpc,
-				CPU_FLAGS=-mpowerpc)
-		fi
-	  esac
-  fi
-
-  if test -n "$CPU_FLAGS"; then
-        CFLAGS="$CFLAGS $CPU_FLAGS"
+  if test $ac_cv_prog_really_gcc = yes -a -z "$CFLAGS"; then
+     CFLAGS="-O2"
   fi
 
   if test -z "$CFLAGS"; then
@@ -452,10 +407,10 @@ if test "$ac_test_CFLAGS" != "set"; then
 	echo "********************************************************"
         echo "* WARNING: Don't know the best CFLAGS for this system  *"
         echo "* Use  make CFLAGS=..., or edit the top level Makefile *"
-	echo "* (otherwise, a default of CFLAGS=-O3 will be used)    *"
+	echo "* (otherwise, a default of CFLAGS=-O will be used)     *"
 	echo "********************************************************"
 	echo ""
-        CFLAGS="-O3"
+        CFLAGS="-O"
   fi
 
   ACX_CHECK_CC_FLAGS(${CFLAGS}, guessed_cflags, , [
@@ -486,7 +441,7 @@ if test "$ac_test_CXXFLAGS" != "set"; then
   case "${host_cpu}-${host_os}" in
 
   *linux*) if test "$CXX" = icc -o "$CXX" = icpc; then
-                    CXXFLAGS="-O"
+                    CXXFLAGS="-O2"
                 fi;;
   sparc-solaris2*) if test "$CXX" = CC; then
                     CXXFLAGS="-features=extensions -O -dalign"
@@ -512,61 +467,16 @@ if test "$ac_test_CXXFLAGS" != "set"; then
         	CXXFLAGS="-qthreaded -O -qtune=auto -qarch=auto -qunroll=auto -qaltivec"
         fi
 	if test "$CXX" = icpc; then
-        	CXXFLAGS="-O3 -ip -no-prec-div -mdynamic-no-pic"
+        	CXXFLAGS="-O2"
+        fi
+        if test $ac_cv_prog_really_gxx = yes; then
+                CXXFLAGS="-Os"
         fi;;
   esac
 
   # use default flags for gcc on all systems
-  if test $ac_cv_prog_really_gxx = yes; then
-     CXXFLAGS="-O6 -fomit-frame-pointer -Wall -W -Wcast-qual -Wpointer-arith -Wcast-align"
-  fi
-
-  # test for gcc-specific flags:
-  if test $ac_cv_prog_really_gxx = yes; then
-    # -malign-double for x86 systems
-    ACX_CHECK_CXX_FLAGS(-malign-double,align_double, CXXFLAGS="$CXXFLAGS -malign-double")
-    # -fstrict-aliasing for gcc-2.95+
-    ACX_CHECK_CXX_FLAGS(-fstrict-aliasing,fstrict_aliasing, CXXFLAGS="$CXXFLAGS -fstrict-aliasing")
-  fi
-
-  CPU_FLAGS=""
-  if test $ac_cv_prog_really_gxx = yes; then
-	  dnl try to guess correct CPU flags, at least for linux
-	  case "${host_cpu}" in
-	  i586*)  ACX_CHECK_CXX_FLAGS(-mcpu=pentium,cpu_pentium,
-			[CPU_FLAGS=-mcpu=pentium],
-			[ACX_CHECK_CXX_FLAGS(-mpentium,pentium,
-				[CPU_FLAGS=-mpentium])])
-		  ;;
-	  i686*)  ACX_CHECK_CXX_FLAGS(-mcpu=pentiumpro,cpu_pentiumpro,
-			[CPU_FLAGS=-mcpu=pentiumpro],
-			[ACX_CHECK_CXX_FLAGS(-mpentiumpro,pentiumpro,
-				[CPU_FLAGS=-mpentiumpro])])
-		  ;;
-	  powerpc*)
-		cputype=`(grep cpu /proc/cpuinfo | head -1 | cut -d: -f2 | sed 's/ //g') 2> /dev/null`
-		is60x=`echo $cputype | egrep "^60[0-9]e?$"`
-		if test -n "$is60x"; then
-			ACX_CHECK_CXX_FLAGS(-mcpu=$cputype,m_cpu_60x,
-				CPU_FLAGS=-mcpu=$cputype)
-		elif test "$cputype" = 750; then
-                        ACX_PROG_GXX_VERSION(2,95,
-                                ACX_CHECK_CXX_FLAGS(-mcpu=750,m_cpu_750,
-					CPU_FLAGS=-mcpu=750))
-		fi
-		if test -z "$CPU_FLAGS"; then
-		        ACX_CHECK_CXX_FLAGS(-mcpu=powerpc,m_cpu_powerpc,
-				CPU_FLAGS=-mcpu=powerpc)
-		fi
-		if test -z "$CPU_FLAGS"; then
-			ACX_CHECK_CXX_FLAGS(-mpowerpc,m_powerpc,
-				CPU_FLAGS=-mpowerpc)
-		fi
-	  esac
-  fi
-
-  if test -n "$CPU_FLAGS"; then
-        CXXFLAGS="$CXXFLAGS $CPU_FLAGS"
+  if test $ac_cv_prog_really_gxx = yes -a -z "$CXXFLAGS"; then
+     CXXFLAGS="-O2"
   fi
 
   if test -z "$CXXFLAGS"; then
@@ -574,10 +484,10 @@ if test "$ac_test_CXXFLAGS" != "set"; then
 	echo "**********************************************************"
         echo "* WARNING: Don't know the best CXXFLAGS for this system  *"
         echo "* Use  make CXXFLAGS=..., or edit the top level Makefile *"
-	echo "* (otherwise, a default of CXXFLAGS=-O3 will be used)    *"
+	echo "* (otherwise, a default of CXXFLAGS=-O will be used)     *"
 	echo "**********************************************************"
 	echo ""
-        CXXFLAGS="-O3"
+        CXXFLAGS="-O"
   fi
 
   ACX_CHECK_CXX_FLAGS(${CXXFLAGS}, guessed_cxxflags, , [
@@ -599,6 +509,7 @@ AC_DEFUN(ACX_PROG_FC_MAXOPT,
 AC_REQUIRE([AC_PROG_FC])
 AC_REQUIRE([AC_CANONICAL_HOST])
 
+
 # Try to determine "good" native compiler flags if none specified on command
 # line
 
@@ -607,7 +518,7 @@ if test "$ac_test_FFLAGS" != "set"; then
   case "${host_cpu}-${host_os}" in
 
   *linux*) if test "$FC" = ifc -o "$FC" = ifort; then
-                    FCFLAGS="-O3 -ip -no-prec-div"
+                    FCFLAGS="-O2"
                 fi;;
    rs6000*-aix*)  if test "$FC" = xlf90 -o "$FC" = f90 -o "$FC" = xlf95; then
                     FCFLAGS="-O3 -qarch=pwrx -qtune=pwrx -qansialias -w"
@@ -630,23 +541,22 @@ if test "$ac_test_FFLAGS" != "set"; then
         	FCFLAGS="-qthreaded -O -qtune=auto -qarch=auto -qunroll=auto"
         fi
 	if test "$FC" = ifort; then
-        	FCFLAGS="-O3 -ip -no-prec-dev -mdynamic-no-pic"
+        	FCFLAGS="-O2"
+        fi
+        if test "$FC" = gfortran; then
+                FCFLAGS="-Os"
         fi;;
   esac
-
-  if test -n "$CPU_FLAGS"; then
-        FCFLAGS="$FCFLAGS $CPU_FLAGS"
-  fi
 
   if test -z "$FCFLAGS"; then
 	echo ""
 	echo "*********************************************************"
         echo "* WARNING: Don't know the best FCFLAGS for this system  *"
         echo "* Use  make FCFLAGS=..., or edit the top level Makefile *"
-	echo "* (otherwise, a default of FCFLAGS=-O3 will be used)    *"
+	echo "* (otherwise, a default of FCFLAGS=-O will be used)     *"
 	echo "*********************************************************"
 	echo ""
-        FCFLAGS="-O3"
+        FCFLAGS="-O"
   fi
 
   ACX_CHECK_FC_FLAGS(${FCFLAGS}, guessed_f90flags, , [
