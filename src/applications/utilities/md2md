@@ -22,8 +22,8 @@ Example:
 """
 
 __author__ = "Dan Gezelter (gezelter@nd.edu)"
-__version__ = "$Revision: 1.1 $"
-__date__ = "$Date: 2008-02-13 16:44:14 $"
+__version__ = "$Revision: 1.2 $"
+__date__ = "$Date: 2008-05-14 20:49:17 $"
 __copyright__ = "Copyright (c) 2008 by the University of Notre Dame"
 __license__ = "OOPSE"
 
@@ -188,16 +188,21 @@ def writeFile(outputFileName):
     outputFile.write("    <StuntDoubles>\n")
     whichSD = 0
 
+    print repeatX, repeatY, repeatZ
+
     for i in range(len(indices)):
         for ii in range(repeatX):
             for jj in range(repeatY):
                 for kk in range(repeatZ):
-                    
-                    myP = p[i] + ii*Hmat[0] + jj*Hmat[1] + kk*Hmat[2]
+                   
+                    myP = [] 
+                    myP.append(p[i][0] + ii*Hmat[0][0] + jj*Hmat[1][0] + kk*Hmat[2][0])
+                    myP.append(p[i][1] + ii*Hmat[0][1] + jj*Hmat[1][1] + kk*Hmat[2][1])
+                    myP.append(p[i][2] + ii*Hmat[0][2] + jj*Hmat[1][2] + kk*Hmat[2][2])
 
                     if (pvqj[i] == 'pv'):
                         outputFile.write("%10d %7s %18.10g %18.10g %18.10g %14e %13e %13e\n" % (whichSD, pvqj[i], myP[0], myP[1], myP[2], v[i][0], v[i][1], v[i][2]))
-                    elif (sdFormat == 'pvqj'):
+                    elif (pvqj[i] == 'pvqj'):
                         outputFile.write("%10d %7s %18.10g %18.10g %18.10g %13e %13e %13e %13e %13e %13e %13e %13e %13e %13e\n" % (whichSD, pvqj[i], myP[0], myP[1], myP[2], v[i][0], v[i][1], v[i][2], q[i][0], q[i][1], q[i][2], q[i][3], j[i][0], j[i][1], j[i][2]))
                         
                     whichSD = whichSD + 1
@@ -267,11 +272,14 @@ def main(argv):
             outputFileName = arg
             global _haveOutputFileName
             _haveOutputFileName = 1
-        elif opt in ("-x", "--repeatX"): 
+        elif opt in ("-x", "--repeatX"):
+            global repeatX
             repeatX = int(arg)
         elif opt in ("-y", "--repeatY"): 
+            global repeatY
             repeatY = int(arg)
         elif opt in ("-z", "--repeatZ"): 
+            global repeatZ
             repeatZ = int(arg)
     if (_haveMDFileName != 1):
         usage() 
