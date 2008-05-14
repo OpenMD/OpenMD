@@ -522,11 +522,6 @@ namespace oopse {
 
   void GBLipidAtomVisitor::visit(DirectionalAtom* datom){
     std::vector<AtomInfo*> atoms;
-    //we need to convert linear into 4 different atoms
-    //Vector3d c1(0.0, 0.0, -6.25);
-    //Vector3d c2(0.0, 0.0, -2.1);
-    //Vector3d c3(0.0, 0.0,  2.1);
-    //Vector3d c4(0.0, 0.0,  6.25);
     Vector3d c1(0.0, 0.0, 0.0);
     Vector3d c2(0.0, 0.0, 1.0);
     RotMat3x3d rotMatrix;
@@ -582,39 +577,6 @@ namespace oopse {
     atomInfo->hasCharge = true;
     atomData->addAtomInfo(atomInfo);
 
-    //newVec = rotTrans * c2;
-    //atomInfo = new AtomInfo;
-    //atomInfo->atomTypeName = "K";
-    //atomInfo->pos[0] = pos[0] + newVec[0];
-    //atomInfo->pos[1] = pos[1] + newVec[1];
-    //atomInfo->pos[2] = pos[2] + newVec[2];
-    //atomInfo->dipole[0] = 0.0;
-    //atomInfo->dipole[1] = 0.0;
-    //atomInfo->dipole[2] = 0.0;
-    //atomData->addAtomInfo(atomInfo);
-
-    //newVec = rotTrans * c3;
-    //atomInfo = new AtomInfo;
-    //atomInfo->atomTypeName = "K";
-    //atomInfo->pos[0] = pos[0] + newVec[0];
-    //atomInfo->pos[1] = pos[1] + newVec[1];
-    //atomInfo->pos[2] = pos[2] + newVec[2];
-    //atomInfo->dipole[0] = 0.0;
-    //atomInfo->dipole[1] = 0.0;
-    //atomInfo->dipole[2] = 0.0;
-    //atomData->addAtomInfo(atomInfo);
-
-    //newVec = rotTrans * c4;
-    //atomInfo = new AtomInfo;
-    //atomInfo->atomTypeName = "K";
-    //atomInfo->pos[0] = pos[0] + newVec[0];
-    //atomInfo->pos[1] = pos[1] + newVec[1];
-    //atomInfo->pos[2] = pos[2] + newVec[2];
-    //atomInfo->dipole[0] = 0.0;
-    //atomInfo->dipole[1] = 0.0;
-    //atomInfo->dipole[2] = 0.0;
-    //atomData->addAtomInfo(atomInfo);
-
     //add atom data into atom's property
 
     if(!haveAtomData){
@@ -636,7 +598,7 @@ namespace oopse {
     sprintf(buffer ,"Visitor name: %s\n", visitorName.c_str());
     result += buffer;
 
-    sprintf(buffer , "Visitor Description: Convert GBlipid into 4 different K atoms\n");
+    sprintf(buffer , "Visitor Description: Convert GBlipid into xyz-formatted atom for use with xyz2pov\n");
     result += buffer;
 
     sprintf(buffer ,"------------------------------------------------------------------\n");
