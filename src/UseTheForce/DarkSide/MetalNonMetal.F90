@@ -42,7 +42,7 @@
 
 !! Calculates Metal-Non Metal interactions.
 !! @author Charles F. Vardeman II 
-!! @version $Id: MetalNonMetal.F90,v 1.11 2008-04-24 21:04:27 gezelter Exp $, $Date: 2008-04-24 21:04:27 $, $Name: not supported by cvs2svn $, $Revision: 1.11 $
+!! @version $Id: MetalNonMetal.F90,v 1.12 2008-05-14 14:31:48 chuckv Exp $, $Date: 2008-05-14 14:31:48 $, $Name: not supported by cvs2svn $, $Revision: 1.12 $
 
 
 module MetalNonMetal
@@ -524,14 +524,14 @@ contains
     ! the squares of the two HOMO lone pair orbitals in water:
     !
     ! s = 1 / (4 pi)
-    ! a1 = (s + pz)^2 = (1 - sqrt(3)*cos(theta))^2 / (4 pi)
+    ! a1 = (s - pz)^2 = (1 - sqrt(3)*cos(theta))^2 / (4 pi)
     ! b1 = px^2 = 3 * (sin(theta)*cos(phi))^2 / (4 pi)   
 
     ! we'll leave out the 4 pi for now
 
     s = 1.0_dp
-    a1 = (1.0_dp + st * z / rij )**2
-    b1 = 3.0_dp * (x2 - y2)/ r2
+    a1 = (1.0_dp - st * z / rij )**2
+    b1 = 3.0_dp * x2 / r2
 
     Vang = s + ca1 * a1 + cb1 * b1
     
@@ -558,9 +558,9 @@ contains
     da1dy = 2.0_dp * st * y * z / r3 - 6.0_dp * y * z2 / r4
     da1dz = 2.0_dp * st * (x2 + y2) * (st * z - rij ) / r4
 
-    db1dx = 6.0_dp * x * z2 / r4
-    db1dy = 6.0_dp * y * z2 / r4
-    db1dz = -6.0_dp * (x2 + y2) * z / r4
+    db1dx = 6.0_dp * x * (1.0_dp - x2 / r2) / r2
+    db1dy = -6.0_dp * x2 * y / r4
+    db1dz = -6.0_dp * x2 * z / r4
 
     dVangdx = ca1 * da1dx + cb1 * db1dx
     dVangdy = ca1 * da1dy + cb1 * db1dy
@@ -578,9 +578,9 @@ contains
     da1duy =  -6.0_dp * x * z / r2 + 2.0_dp * st * x / rij
     da1duz =   0.0_dp
 
-    db1dux =   6.0_dp * y * z / r2
+    db1dux =   0.0_dp
     db1duy =   6.0_dp * x * z / r2
-    db1duz = -12.0_dp * y * x / r2
+    db1duz =  -6.0_dp * y * x / r2
 
     dVangdux = ca1 * da1dux + cb1 * db1dux
     dVangduy = ca1 * da1duy + cb1 * db1duy

@@ -45,7 +45,7 @@
  *
  *  Created by Charles F. Vardeman II on 11 Dec 2006.
  *  @author  Charles F. Vardeman II
- *  @version $Id: AlphaShape.cpp,v 1.1 2007-12-07 00:48:47 chuckv Exp $
+ *  @version $Id: AlphaShape.cpp,v 1.2 2008-05-14 14:31:48 chuckv Exp $
  *
  */
 
@@ -54,12 +54,14 @@
 #include <iostream>
 #include <list>
 #include <fstream>
+#include <CGAL/IO/Geomview_stream.h>
 #include <CGAL/IO/alpha_shape_geomview_ostream_3.h>
 
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
 #include <CGAL/Delaunay_triangulation_3.h>
 #include <CGAL/Triangulation_hierarchy_3.h>
 #include <CGAL/Alpha_shape_3.h>
+#include <CGAL/Tetrahedron_3.h>
 
 
  struct K : CGAL::Exact_predicates_inexact_constructions_kernel {};
@@ -75,7 +77,11 @@
  typedef K::Point_3                                  Point;
  typedef Alpha_shape_3::Alpha_iterator               Alpha_iterator;
  typedef Alpha_shape_3::NT                           NT;
-
+ typedef Alpha_shape_3::Cell_handle          Cell_handle;
+ typedef Alpha_shape_3::Vertex_handle        Vertex_handle;
+ typedef Alpha_shape_3::Facet                Facet;
+ typedef Alpha_shape_3::Edge                 Edge;
+ typedef CGAL::Tetrahedron_3<K> Tetrahedron;
 
 
 
@@ -90,23 +96,63 @@ bool AlphaShape::genHull(std::vector<Vector3d> pos)
   Delaunay_hierarchy dt;
   //points.reserve(pos.size());
   // Copy the positon vector into a points vector for cgal.
-  for (int i = 0; i < pos.size(); ++i)
+  for (unsigned int i = 0; i < pos.size(); ++i)
     {
       Point pt(pos[i][0],pos[i][1],pos[i][2]);
       dt.insert(pt);
     }
 
   /* Generate Alpha Shape */
-
+  std::cout << "Generating alpha shape" << std::endl;
   Alpha_shape_3 ashape(dt);
   
-   
-  /*CGAL::Geomview_stream gv(CGAL::Bbox_3(0,0,0, 2, 2, 2));
+   /*
+  CGAL::Geomview_stream gv(CGAL::Bbox_3(0,0,0, 2, 2, 2));
   gv.set_line_width(4);
   gv.set_trace(false);
   gv.set_bg_color(CGAL::Color(0, 200, 200));
-  gv.clear();*/
-  std::cout << ashape;
+  gv.clear();
+  */
+    Alpha_shape_3::NT alpha_solid = ashape.find_alpha_solid();
+    Alpha_iterator opt = ashape.find_optimal_alpha(1);
+    std::cout << "Smallest alpha value to get a solid through data points is "
+    	    << alpha_solid << std::endl;
+    std::cout << "Optimal alpha value to get one connected component is "
+    	    <<  *opt    << std::endl;
+    ashape.set_alpha(*opt);
+    assert(ashape.number_of_solid_components() == 1);
+    std::list<Cell_handle>        cells;
+    std::list<Facet>              facets;
+    std::list<Edge>               edges;
+    std::list<Vertex_handle>      vertices;
+    
+    ashape.get_alpha_shape_cells(std::back_inserter(cells),
+    			  Alpha_shape_3::INTERIOR);
+    ashape.get_alpha_shape_facets(std::back_inserter(facets),
+    			  Alpha_shape_3::REGULAR);
+    ashape.get_alpha_shape_facets(std::back_inserter(facets),
+    			  Alpha_shape_3::SINGULAR);
+    ashape.get_alpha_shape_edges(std::back_inserter(edges),
+    			  Alpha_shape_3::SINGULAR);
+    ashape.get_alpha_shape_vertices(std::back_inserter(vertices),
+            Alpha_shape_3::REGULAR);			   
+    std::cout << " The 0-shape has : " << std::endl;
+    std::cout << cells.size() << " interior tetrahedra" << std::endl;
+    std::cout << facets.size() << " boundary facets" << std::endl;
+    std::cout << edges.size()  << " singular edges" << std::endl;
+    std::cout << vertices.size() << " singular vertices" << std::endl;
+  
+    RealType volume_;
+    std::list<Cell_handle>::iterator thiscell;
+    
+    for(Alpha_shape_3::Cell_iterator c_it = ashape.cells_begin(); c_it != ashape.cells_end(); ++c_it)
+      {
+        volume_ += ashape.tetrahedron(c_it).volume();
+      }
+  
+    //gv << (Delaunay) ashape;
+    //std::cout << ashape;
+    
 }
 
 RealType AlphaShape::getVolume()
