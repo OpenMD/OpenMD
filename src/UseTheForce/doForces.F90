@@ -45,7 +45,7 @@
 
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: doForces.F90,v 1.92 2007-07-17 21:55:56 gezelter Exp $, $Date: 2007-07-17 21:55:56 $, $Name: not supported by cvs2svn $, $Revision: 1.92 $
+!! @version $Id: doForces.F90,v 1.93 2008-05-27 16:39:05 chuckv Exp $, $Date: 2008-05-27 16:39:05 $, $Name: not supported by cvs2svn $, $Revision: 1.93 $
 
 
 module doForces
@@ -794,7 +794,7 @@ contains
 
   !! Does force loop over i,j pairs. Calls do_pair to calculates forces.
   !------------------------------------------------------------->
-  subroutine do_force_loop(q, q_group, A, eFrame, f, t, tau, pot, &
+  subroutine do_force_loop(q, q_group, A, eFrame, f, t, tau, pot, particle_pot,&
        do_pot_c, do_stress_c, error)
     !! Position array provided by C, dimensioned by getNlocal
     real ( kind = dp ), dimension(3, nLocal) :: q
@@ -812,6 +812,7 @@ contains
     !! Stress Tensor
     real( kind = dp), dimension(9) :: tau   
     real ( kind = dp ),dimension(LR_POT_TYPES) :: pot
+    real( kind = dp ), dimension(nLocal) :: particle_pot
     logical ( kind = 2) :: do_pot_c, do_stress_c
     logical :: do_pot
     logical :: do_stress
@@ -1094,10 +1095,14 @@ contains
                             call do_pair(atom1, atom2, ratmsq, d_atm, sw, &
                                  do_pot, eFrame, A, f, t, pot_local, vpair, &
                                  fpair, d_grp, rgrp, rCut)
+                            ! particle_pot will be accumulated from row & column
+                            ! arrays later
 #else
                             call do_pair(atom1, atom2, ratmsq, d_atm, sw, &
-                                 do_pot, eFrame, A, f, t, pot, vpair, fpair, &
-                                 d_grp, rgrp, rCut)
+                                 do_pot, eFrame, A, f, t, pot, vpair, &
+                                 fpair, d_grp, rgrp, rCut)
+                            particle_pot(atom1) = particle_pot(atom1) + vpair*sw
+                            particle_pot(atom2) = particle_pot(atom2) + vpair*sw
 #endif
                             vij = vij + vpair
                             fij(1) = fij(1) + fpair(1)
@@ -1266,14 +1271,25 @@ contains
                + pot_Temp(1:LR_POT_TYPES,i)
        enddo
 
+       do i = 1,LR_POT_TYPES
+          particle_pot(1:nlocal) = particle_pot(1:nlocal) + pot_Temp(i,1:nlocal)
+       enddo
+
        pot_Temp = 0.0_DP 
+
        do i = 1,LR_POT_TYPES
           call scatter(pot_Col(i,:), pot_Temp(i,:), plan_atom_col)
        end do
+
        do i = 1, nlocal
           pot_local(1:LR_POT_TYPES) = pot_local(1:LR_POT_TYPES)&
                + pot_Temp(1:LR_POT_TYPES,i)
        enddo
+
+       do i = 1,LR_POT_TYPES
+          particle_pot(1:nlocal) = particle_pot(1:nlocal) + pot_Temp(i,1:nlocal)
+       enddo
+
 
     endif
 #endif
@@ -1425,6 +1441,7 @@ contains
 
     real( kind = dp ) :: vpair, sw
     real( kind = dp ), dimension(LR_POT_TYPES) :: pot
+    real( kind = dp ), dimension(nLocal) :: particle_pot
     real( kind = dp ), dimension(3) :: fpair
     real( kind = dp ), dimension(nLocal)   :: mfact
     real( kind = dp ), dimension(9,nLocal) :: eFrame
@@ -1439,7 +1456,7 @@ contains
     real ( kind = dp ), intent(inout) :: d(3)
     real ( kind = dp ), intent(inout) :: d_grp(3)
     real ( kind = dp ), intent(inout) :: rCut 
-    real ( kind = dp ) :: r
+    real ( kind = dp ) :: r, pair_pot
     real ( kind = dp ) :: a_k, b_k, c_k, d_k, dx
     integer :: me_i, me_j
     integer :: k

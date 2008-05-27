@@ -72,12 +72,13 @@ namespace oopse {
       dslElectroFrame = 16,
       dslZAngle = 32,
       dslForce = 64, 
-      dslTorque = 128
+      dslTorque = 128,
+      dslParticlePot = 256
     };
 
 
     DataStorage();
-    DataStorage(int size, int storageLayout = 255);
+    DataStorage(int size, int storageLayout = 511);
     /** return the size of this DataStorage. */
     int getSize();
     /**
@@ -115,6 +116,7 @@ namespace oopse {
     std::vector<RealType> zAngle;              /** z -angle array */        
     std::vector<Vector3d> force;               /** force array */
     std::vector<Vector3d> torque;               /** torque array */
+    std::vector<RealType> particlePot;         /** pair potential arrray */
 
     static int getBytesPerStuntDouble(int layout);
 

@@ -60,7 +60,7 @@ namespace oopse {
 
   }
 
-  void StuntDouble::zeroForcesAndTorques() {
+  void StuntDouble::zeroForcesAndTorques() {    
     setFrc(V3Zero);
     setTrq(V3Zero);
   }

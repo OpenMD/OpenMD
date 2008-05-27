@@ -113,7 +113,7 @@ class SimplePreprocessor {
                             std::ifstream includeStream(includeFilename.c_str());
                             if (!includeStream.is_open()) {
                                 std::stringstream ss;
-                                ss << "Can not open " << filename << " for preprocessing\n";
+                                ss << "Can not open " << includeFilename << " for preprocessing\n";
                                 throw OOPSEException(ss.str()); 
                             }
                             

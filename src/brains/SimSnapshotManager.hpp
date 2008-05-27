@@ -64,7 +64,7 @@ namespace oopse{
    */
   class SimSnapshotManager : public SnapshotManager {
   public:
-    SimSnapshotManager(SimInfo* info, int storageLayout = 255);
+    SimSnapshotManager(SimInfo* info, int storageLayout = 511);
     ~SimSnapshotManager();
     virtual bool advance();
 

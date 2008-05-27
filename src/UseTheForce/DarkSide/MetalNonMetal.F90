@@ -42,7 +42,7 @@
 
 !! Calculates Metal-Non Metal interactions.
 !! @author Charles F. Vardeman II 
-!! @version $Id: MetalNonMetal.F90,v 1.12 2008-05-14 14:31:48 chuckv Exp $, $Date: 2008-05-14 14:31:48 $, $Name: not supported by cvs2svn $, $Revision: 1.12 $
+!! @version $Id: MetalNonMetal.F90,v 1.13 2008-05-27 16:39:05 chuckv Exp $, $Date: 2008-05-27 16:39:05 $, $Name: not supported by cvs2svn $, $Revision: 1.13 $
 
 
 module MetalNonMetal
@@ -522,19 +522,29 @@ contains
 
     ! angular modulation of morse part of potential to approximate 
     ! the squares of the two HOMO lone pair orbitals in water:
-    !
+    !********************** old form*************************
     ! s = 1 / (4 pi)
     ! a1 = (s - pz)^2 = (1 - sqrt(3)*cos(theta))^2 / (4 pi)
     ! b1 = px^2 = 3 * (sin(theta)*cos(phi))^2 / (4 pi)   
-
+    !********************** old form*************************
     ! we'll leave out the 4 pi for now
+    
+    ! new functional form just using the p orbitals.
+    ! Vmorse(r)*[a*p_x + b p_z + (1-a-b)]
+    ! which is 
+    ! Vmorse(r)*[a sin^2(theta) cos^2(phi) + b cos(theta) + (1-a-b)]
+    ! Vmorse(r)*[a*x2/r2 + b*z/r + (1-a-b)]
+
+
 
     s = 1.0_dp
-    a1 = (1.0_dp - st * z / rij )**2
-    b1 = 3.0_dp * x2 / r2
+!    a1 = (1.0_dp - st * z / rij )**2
+!    b1 = 3.0_dp * x2 / r2
 
-    Vang = s + ca1 * a1 + cb1 * b1
-    
+!    Vang = s + ca1 * a1 + cb1 * b1
+ 
+    Vang = ca1 * x2/r2 + cb1 * z/rij + (0.8_dp-ca1/3.0_dp)
+
     pot_temp = Vmorse*Vang 
          
     vpair = vpair + pot_temp
@@ -554,18 +564,22 @@ contains
     dVmorsedy = dVmorsedr * drdy
     dVmorsedz = dVmorsedr * drdz
     
-    da1dx = 2.0_dp * st * x * z / r3 - 6.0_dp * x * z2 / r4
-    da1dy = 2.0_dp * st * y * z / r3 - 6.0_dp * y * z2 / r4
-    da1dz = 2.0_dp * st * (x2 + y2) * (st * z - rij ) / r4
+    !da1dx = 2.0_dp * st * x * z / r3 - 6.0_dp * x * z2 / r4
+    !da1dy = 2.0_dp * st * y * z / r3 - 6.0_dp * y * z2 / r4
+    !da1dz = 2.0_dp * st * (x2 + y2) * (st * z - rij ) / r4
 
-    db1dx = 6.0_dp * x * (1.0_dp - x2 / r2) / r2
-    db1dy = -6.0_dp * x2 * y / r4
-    db1dz = -6.0_dp * x2 * z / r4
+    !db1dx = 6.0_dp * x * (1.0_dp - x2 / r2) / r2
+    !db1dy = -6.0_dp * x2 * y / r4
+    !db1dz = -6.0_dp * x2 * z / r4
 
-    dVangdx = ca1 * da1dx + cb1 * db1dx
-    dVangdy = ca1 * da1dy + cb1 * db1dy
-    dVangdz = ca1 * da1dz + cb1 * db1dz
+    !dVangdx = ca1 * da1dx + cb1 * db1dx
+    !dVangdy = ca1 * da1dy + cb1 * db1dy
+    !dVangdz = ca1 * da1dz + cb1 * db1dz
     
+    dVangdx = -2.0*ca1*x2*x/r4 + 2.0*ca1*x/r2 - cb1*x*z/r3
+    dVangdy = -2.0*ca1*x2*y/r4                - cb1*z*y/r3
+    dVangdz = -2.0*ca1*x2*z/r4 + cb1/rij      - cb1*z2 /r3
+
     ! chain rule to put these back on x, y, z
     dvdx = Vang * dVmorsedx + Vmorse * dVangdx
     dvdy = Vang * dVmorsedy + Vmorse * dVangdy
@@ -574,18 +588,22 @@ contains
     ! Torques for Vang using method of Price:
     ! S. L. Price, A. J. Stone, and M. Alderton, Mol. Phys. 52, 987 (1984).
 
-    da1dux =   6.0_dp * y * z / r2 - 2.0_dp * st * y / rij
-    da1duy =  -6.0_dp * x * z / r2 + 2.0_dp * st * x / rij
-    da1duz =   0.0_dp
+    !da1dux =   6.0_dp * y * z / r2 - 2.0_dp * st * y / rij
+    !da1duy =  -6.0_dp * x * z / r2 + 2.0_dp * st * x / rij
+    !da1duz =   0.0_dp
 
-    db1dux =   0.0_dp
-    db1duy =   6.0_dp * x * z / r2
-    db1duz =  -6.0_dp * y * x / r2
+    !db1dux =   0.0_dp
+    !db1duy =   6.0_dp * x * z / r2
+    !db1duz =  -6.0_dp * y * x / r2
 
-    dVangdux = ca1 * da1dux + cb1 * db1dux
-    dVangduy = ca1 * da1duy + cb1 * db1duy
-    dVangduz = ca1 * da1duz + cb1 * db1duz
+    !dVangdux = ca1 * da1dux + cb1 * db1dux
+    !dVangduy = ca1 * da1duy + cb1 * db1duy
+    !dVangduz = ca1 * da1duz + cb1 * db1duz
     
+    dVangdux = cb1*y/rij
+    dVangduy = 2.0*ca1*x*z/r2 - cb1*x/rij
+    dVangduz = -2.0*ca1*y*x/r2
+
     ! do the torques first since they are easy:
     ! remember that these are still in the body fixed axes    
     

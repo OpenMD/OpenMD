@@ -66,7 +66,8 @@ extern "C"{
                     RealType* forceArray,
                     RealType *torqueArray,
                     RealType* StressTensor, 
-                    RealType* potentialEnergy, 
+                    RealType* potentialEnergy,
+		    RealType* particlePotArray,
                     short int* doPotentialCalc, 
                     short int* doStressCalc,
                     int* isError );

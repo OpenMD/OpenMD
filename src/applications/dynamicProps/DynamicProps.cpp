@@ -56,6 +56,7 @@
 #include "applications/dynamicProps/RadialRCorrFunc.hpp"
 #include "applications/dynamicProps/ThetaCorrFunc.hpp"
 #include "applications/dynamicProps/DirectionalRCorrFunc.hpp"
+#include "applications/dynamicProps/EnergyCorrFunc.hpp"
 
 
 using namespace oopse;
@@ -121,9 +122,10 @@ int main(int argc, char* argv[]){
     corrFunc = new ThetaCorrFunc(info, dumpFileName, sele1, sele2);
   } else if (args_info.drcorr_given) {
     corrFunc = new DirectionalRCorrFunc(info, dumpFileName, sele1, sele2);
-  }
-  else if (args_info.vcorr_given) {
+  } else if (args_info.vcorr_given) {
     corrFunc = new VCorrFunc(info, dumpFileName, sele1, sele2); 
+  } else if (args_info.helfandEcorr_given){
+    corrFunc = new EnergyCorrFunc(info, dumpFileName, sele1, sele2);  
   } else if (args_info.lcorr_given) {
     int order;
     if (args_info.order_given)

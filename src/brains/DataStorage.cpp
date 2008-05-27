@@ -101,7 +101,11 @@ namespace oopse {
       //error
       std::cerr << "size does not match"<< std::endl;        
     }
-
+    if (storageLayout_ & dslParticlePot && particlePot.size() != size_) {
+      //error
+      std::cerr << "size does not match"<< std::endl;        
+    }
+    
     return size_;
 
   }
@@ -140,6 +144,10 @@ namespace oopse {
       internalResize(torque, newSize);
     }
 
+    if (storageLayout_ & dslParticlePot) {
+      internalResize(particlePot, newSize);
+    }
+
     size_ = newSize;
   }
 
@@ -174,6 +182,10 @@ namespace oopse {
 
     if (storageLayout_ & dslTorque) {
       torque.reserve(size);
+    }
+    
+    if (storageLayout_ & dslParticlePot) {
+      particlePot.reserve(size);
     }
 
   }
@@ -213,6 +225,10 @@ namespace oopse {
 
     if (storageLayout_ & dslTorque) {
       internalCopy(torque, source, num, target); 
+    }
+
+    if (storageLayout_ & dslParticlePot) {
+      internalCopy(particlePot, source, num, target); 
     }
     
 
@@ -260,6 +276,10 @@ namespace oopse {
 
     case dslTorque:
       return internalGetArrayPointer(torque);
+      break;
+
+    case dslParticlePot:
+      return internalGetArrayPointer(particlePot);
       break;
             
     default:
@@ -338,7 +358,7 @@ namespace oopse {
       bytes += sizeof(Vector3d);
     }
     if (layout & dslAmat) {
-      bytes += sizeof(Mat3x3d);    
+      bytes += sizeof(RotMat3x3d);    
     }
     if (layout & dslAngularMomentum) {
       bytes += sizeof(Vector3d);
@@ -347,13 +367,16 @@ namespace oopse {
       bytes += sizeof(Mat3x3d);
     }
     if (layout & dslZAngle) {
-      bytes += sizeof(Vector3d);
+      bytes += sizeof(RealType);
     }
     if (layout & dslForce) {
       bytes += sizeof(Vector3d);
     }
     if (layout & dslTorque) {
       bytes += sizeof(Vector3d);
+    }
+    if (layout & dslParticlePot) {
+      bytes += sizeof(RealType);
     }
     return bytes;
   }

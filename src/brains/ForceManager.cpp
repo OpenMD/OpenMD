@@ -83,18 +83,19 @@ namespace oopse {
     
     // forces are zeroed here, before any are accumulated.
     // NOTE: do not rezero the forces in Fortran.
-
+    
     for (mol = info_->beginMolecule(mi); mol != NULL; 
          mol = info_->nextMolecule(mi)) {
       for(atom = mol->beginAtom(ai); atom != NULL; atom = mol->nextAtom(ai)) {
 	atom->zeroForcesAndTorques();
       }
-      
+          
       //change the positions of atoms which belong to the rigidbodies
       for (rb = mol->beginRigidBody(rbIter); rb != NULL; 
            rb = mol->nextRigidBody(rbIter)) {
 	rb->zeroForcesAndTorques();
       }        
+          
     }
     
     // Zero out the stress tensor
@@ -201,6 +202,7 @@ namespace oopse {
     RealType* A;
     RealType* electroFrame;
     RealType* rc;
+    RealType* particlePot;
     
     //get current snapshot from SimInfo
     curSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
@@ -212,6 +214,7 @@ namespace oopse {
     trq = config->getArrayPointer(DataStorage::dslTorque);
     A   = config->getArrayPointer(DataStorage::dslAmat);
     electroFrame = config->getArrayPointer(DataStorage::dslElectroFrame);
+    particlePot = config->getArrayPointer(DataStorage::dslParticlePot);
 
     //calculate the center of mass of cutoff group
     SimInfo::MoleculeIterator mi;
@@ -259,7 +262,8 @@ namespace oopse {
                 trq,
 	        tau.getArrayPointer(),
                 longRangePotential, 
-                &passedCalcPot,
+                particlePot,
+		&passedCalcPot,
                 &passedCalcStress,
                 &isError );
     

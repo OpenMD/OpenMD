@@ -585,6 +585,8 @@ contains
 #endif
               
        pot_temp = vptmp - vcij
+
+       vpair = vpair + pot_temp
  
        fx = dudr * drdx
        fy = dudr * drdy

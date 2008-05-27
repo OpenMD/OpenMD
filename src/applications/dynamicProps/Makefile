@@ -13,6 +13,7 @@ Source    = \
             LegendreCorrFunc.cpp \
 	    RadialRCorrFunc.cpp \
 	    ThetaCorrFunc.cpp \
+	    EnergyCorrFunc.cpp \
             DirectionalRCorrFunc.cpp
 
 BuiltParallelExe = 0

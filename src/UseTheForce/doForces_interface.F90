@@ -10,7 +10,7 @@ subroutine initFortranFF(thisStat)
 
 end subroutine initFortranFF
 
-subroutine doForceloop(q, q_group, A, eFrame, f, t, tau, pot, &
+subroutine doForceloop(q, q_group, A, eFrame, f, t, tau, pot, particle_pot, &
      do_pot_c, do_stress_c, error)
 
   use definitions, ONLY: dp
@@ -36,10 +36,11 @@ subroutine doForceloop(q, q_group, A, eFrame, f, t, tau, pot, &
   !! Stress Tensor
   real( kind = dp), dimension(9) :: tau   
   real ( kind = dp ),dimension(LR_POT_TYPES) :: pot
+  real( kind = dp ), dimension(nLocal) :: particle_pot
   logical ( kind = 2) :: do_pot_c, do_stress_c
   integer :: error
 
-  call do_force_loop(q, q_group, A, eFrame, f, t, tau, pot, &
+  call do_force_loop(q, q_group, A, eFrame, f, t, tau, pot, particle_pot, &
        do_pot_c, do_stress_c, error)
 
 end subroutine doForceloop
