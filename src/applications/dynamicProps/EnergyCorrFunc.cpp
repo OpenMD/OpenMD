@@ -88,28 +88,28 @@ namespace oopse {
     int timeBin = int ((time2 - time1) /deltaTime_ + 0.5);
 
 
-    //std::cerr << "Correlating Frame" << std::endl; 
-    Vector3d G_t_frame1 = G_t_[frame1];
-    Vector3d G_t_frame2 = G_t_[frame2];
-    
-    
-    RealType diff_x = G_t_frame1.x()-G_t_frame2.x();
-    RealType diff_x_sq = diff_x * diff_x;
-    
-    RealType diff_y = G_t_frame1.y()-G_t_frame2.y();
-    RealType diff_y_sq = diff_y * diff_y;
-    
-    RealType diff_z = G_t_frame1.z()-G_t_frame2.z();
-    RealType diff_z_sq = diff_z*diff_z;
-        
-    
- 
-    
-    histogram_[timeBin][0] += diff_x_sq;
-    histogram_[timeBin][1] += diff_y_sq;
-    histogram_[timeBin][2] += diff_z_sq;
-    
-    count_[timeBin]++;
+    // //std::cerr << "Correlating Frame" << std::endl; 
+    //    Vector3d G_t_frame1 = G_t_[frame1];
+    //    Vector3d G_t_frame2 = G_t_[frame2];
+    //    
+    //    
+    //    RealType diff_x = G_t_frame1.x()-G_t_frame2.x();
+    //    RealType diff_x_sq = diff_x * diff_x;
+    //    
+    //    RealType diff_y = G_t_frame1.y()-G_t_frame2.y();
+    //    RealType diff_y_sq = diff_y * diff_y;
+    //    
+    //    RealType diff_z = G_t_frame1.z()-G_t_frame2.z();
+    //    RealType diff_z_sq = diff_z*diff_z;
+    //        
+    //    
+    // 
+    //    
+    //    histogram_[timeBin][0] += diff_x_sq;
+    //    histogram_[timeBin][1] += diff_y_sq;
+    //    histogram_[timeBin][2] += diff_z_sq;
+    //    
+    //    count_[timeBin]++;
   
   }
 
@@ -153,7 +153,7 @@ namespace oopse {
     // dump files can be enormous, so read them in block-by-block:
     int nblocks = bsMan_->getNBlocks();
     bool firsttime = true;
-    
+    int junkframe = 0;
     for (int i = 0; i < nblocks; ++i) {
       //std::cerr << "block = " << i << "\n";
       bsMan_->loadBlock(i);
@@ -168,7 +168,7 @@ namespace oopse {
         // to rigid bodies:
 
         updateFrame(j);        
-             
+
 
 	// do the forces:
               
@@ -184,7 +184,6 @@ namespace oopse {
             RealType kinetic = mass * (vel[0]*vel[0] + vel[1]*vel[1] + vel[2]*vel[2]);
             RealType eatom = (kinetic + atom->getParticlePot())/2.0;
             particleEnergies.push_back(eatom);
-            
             if(firsttime)
             {
               AvgE_a_.push_back(eatom);
@@ -197,62 +196,65 @@ namespace oopse {
         }
         firsttime = false;
         E_a_.push_back(particleEnergies);
-        
       }
+      
       bsMan_->unloadBlock(i);
     }
     
-    int nframes =  bsMan_->getNFrames();
-    for (int i = 0; i < AvgE_a_.size(); i++){
-      AvgE_a_[i] /= nframes;
-    }
-    
-    
-    
-    int frame = 0;
-    
-    // Do it again to compute G^(kappa)(t) for x,y,z
-    for (int i = 0; i < nblocks; ++i) {
-      //std::cerr << "block = " << i << "\n";           
-      bsMan_->loadBlock(i);
-      
-      assert(bsMan_->isBlockActive(i));      
-      SnapshotBlock block1 = bsMan_->getSnapshotBlock(i);
-      for (int j = block1.first; j < block1.second; ++j) {
-
-	// go snapshot-by-snapshot through this block:
-        Snapshot* snap = bsMan_->getSnapshot(j);
-        particleEnergies = E_a_[frame];
-    
-        int thisAtom = 0;
-        Vector3d G_t;
-        
-        for (mol = info_->beginMolecule(mi); mol != NULL; 
-          mol = info_->nextMolecule(mi)) {
-          for(atom = mol->beginAtom(ai); atom != NULL; atom = mol->nextAtom(ai)) {
-            
-            
-            Vector3d pos = atom->getPos();
-            
-            
-            
-            /* G_t[0] += pos.x()*(particleEnergies[thisAtom]-AvgE_a_[thisAtom]);
-            G_t[1] += pos.y()*(particleEnergies[thisAtom]-AvgE_a_[thisAtom]);
-            G_t[2] += pos.z()*(particleEnergies[thisAtom]-AvgE_a_[thisAtom]);
-            */
-            thisAtom++;                    
-          }
-        }
-        
-        
-        G_t_.push_back(G_t);
-        frame++;
-      }
-      
-      
-      
-      bsMan_->unloadBlock(i);
-    }
+      int nframes =  bsMan_->getNFrames();
+       for (int i = 0; i < AvgE_a_.size(); i++){
+         AvgE_a_[i] /= nframes;
+       }
+       
+       
+       
+       int frame = 0;
+       
+       // Do it again to compute G^(kappa)(t) for x,y,z
+       for (int i = 0; i < nblocks; ++i) {
+         //std::cerr << "block = " << i << "\n";           
+         bsMan_->loadBlock(i);
+         
+         assert(bsMan_->isBlockActive(i));      
+         SnapshotBlock block1 = bsMan_->getSnapshotBlock(i);
+         for (int j = block1.first; j < block1.second; ++j) {
+   
+   // go snapshot-by-snapshot through this block:
+           Snapshot* snap = bsMan_->getSnapshot(j);
+           
+           updateFrame(j);
+           particleEnergies = E_a_[frame];
+       
+           int thisAtom = 0;
+           Vector3d G_t;
+           
+           for (mol = info_->beginMolecule(mi); mol != NULL; 
+             mol = info_->nextMolecule(mi)) {
+             for(atom = mol->beginAtom(ai); atom != NULL; atom = mol->nextAtom(ai)) {
+               
+               
+               Vector3d pos = atom->getPos();
+               
+               
+               
+               G_t[0] += (particleEnergies[thisAtom]-AvgE_a_[thisAtom]);
+               G_t[1] += (particleEnergies[thisAtom]-AvgE_a_[thisAtom]);
+               G_t[2] += (particleEnergies[thisAtom]-AvgE_a_[thisAtom]);
+               
+               thisAtom++;                    
+             }
+           }
+           
+           
+           G_t_.push_back(G_t);
+           frame++;
+           std::cerr <<"Frame: " << frame <<"\t" << G_t << std::endl;
+         }
+         
+         
+         
+         bsMan_->unloadBlock(i);
+       }
     
     
     
