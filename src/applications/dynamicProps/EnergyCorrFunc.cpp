@@ -237,9 +237,9 @@ namespace oopse {
                
                
                
-               G_t[0] += (particleEnergies[thisAtom]-AvgE_a_[thisAtom]);
-               G_t[1] += (particleEnergies[thisAtom]-AvgE_a_[thisAtom]);
-               G_t[2] += (particleEnergies[thisAtom]-AvgE_a_[thisAtom]);
+               G_t[0] += pos.x()*(particleEnergies[thisAtom]-AvgE_a_[thisAtom]);
+               G_t[1] += pos.y()*(particleEnergies[thisAtom]-AvgE_a_[thisAtom]);
+               G_t[2] += pos.z()*(particleEnergies[thisAtom]-AvgE_a_[thisAtom]);
                
                thisAtom++;                    
              }
