@@ -263,7 +263,6 @@ namespace oopse {
     std::string line;
 
 #ifndef IS_MPI 
-
     inFile_->clear();  
     inFile_->seekg(framePos_[whichFrame]); 
 

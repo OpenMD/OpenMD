@@ -155,7 +155,6 @@ namespace oopse {
     bool firsttime = true;
     int junkframe = 0;
     for (int i = 0; i < nblocks; ++i) {
-      //std::cerr << "block = " << i << "\n";
       bsMan_->loadBlock(i);
       assert(bsMan_->isBlockActive(i));      
       SnapshotBlock block1 = bsMan_->getSnapshotBlock(i);
@@ -163,31 +162,31 @@ namespace oopse {
 
 	// go snapshot-by-snapshot through this block:
         Snapshot* snap = bsMan_->getSnapshot(j);
-       
+        
         // update the positions and velocities of the atoms belonging
         // to rigid bodies:
-
+        
         updateFrame(j);        
-
-
+        
 	// do the forces:
-              
-	      forceMan->calcForces(true, true); 
-  
+        
+        forceMan->calcForces(true, true); 
+        
         int index = 0;
-
+        
         for (mol = info_->beginMolecule(mi); mol != NULL; 
-          mol = info_->nextMolecule(mi)) {
+             mol = info_->nextMolecule(mi)) {
           for(atom = mol->beginAtom(ai); atom != NULL; atom = mol->nextAtom(ai)) {
             RealType mass = atom->getMass();
             Vector3d vel = atom->getVel();
-            RealType kinetic = mass * (vel[0]*vel[0] + vel[1]*vel[1] + vel[2]*vel[2]);
+            RealType kinetic = mass * (vel[0]*vel[0] + vel[1]*vel[1] + 
+                                       vel[2]*vel[2]);
             RealType eatom = (kinetic + atom->getParticlePot())/2.0;
             particleEnergies.push_back(eatom);
             if(firsttime)
-            {
-              AvgE_a_.push_back(eatom);
-            }else{
+              {
+                AvgE_a_.push_back(eatom);
+              } else {
               /* We assume the the number of atoms does not change.*/
               AvgE_a_[index] += eatom;
             }
@@ -201,64 +200,53 @@ namespace oopse {
       bsMan_->unloadBlock(i);
     }
     
-      int nframes =  bsMan_->getNFrames();
-       for (int i = 0; i < AvgE_a_.size(); i++){
-         AvgE_a_[i] /= nframes;
-       }
-       
-       
-       
-       int frame = 0;
-       
-       // Do it again to compute G^(kappa)(t) for x,y,z
-       for (int i = 0; i < nblocks; ++i) {
-         //std::cerr << "block = " << i << "\n";           
-         bsMan_->loadBlock(i);
-         
-         assert(bsMan_->isBlockActive(i));      
-         SnapshotBlock block1 = bsMan_->getSnapshotBlock(i);
-         for (int j = block1.first; j < block1.second; ++j) {
-   
-   // go snapshot-by-snapshot through this block:
-           Snapshot* snap = bsMan_->getSnapshot(j);
-           
-           updateFrame(j);
-           particleEnergies = E_a_[frame];
-       
-           int thisAtom = 0;
-           Vector3d G_t;
-           
-           for (mol = info_->beginMolecule(mi); mol != NULL; 
-             mol = info_->nextMolecule(mi)) {
-             for(atom = mol->beginAtom(ai); atom != NULL; atom = mol->nextAtom(ai)) {
-               
-               
-               Vector3d pos = atom->getPos();
-               
-               
-               
-               G_t[0] += pos.x()*(particleEnergies[thisAtom]-AvgE_a_[thisAtom]);
-               G_t[1] += pos.y()*(particleEnergies[thisAtom]-AvgE_a_[thisAtom]);
-               G_t[2] += pos.z()*(particleEnergies[thisAtom]-AvgE_a_[thisAtom]);
-               
-               thisAtom++;                    
-             }
-           }
-           
-           
-           G_t_.push_back(G_t);
-           frame++;
-           std::cerr <<"Frame: " << frame <<"\t" << G_t << std::endl;
-         }
-         
-         
-         
-         bsMan_->unloadBlock(i);
-       }
+    int nframes =  bsMan_->getNFrames();
+    for (int i = 0; i < AvgE_a_.size(); i++){
+      AvgE_a_[i] /= nframes;
+    }
     
+    int frame = 0;
     
-    
+    // Do it again to compute G^(kappa)(t) for x,y,z
+    for (int i = 0; i < nblocks; ++i) {
+      bsMan_->loadBlock(i);
+      assert(bsMan_->isBlockActive(i));      
+      SnapshotBlock block1 = bsMan_->getSnapshotBlock(i);
+      for (int j = block1.first; j < block1.second; ++j) {
 
+	// go snapshot-by-snapshot through this block:
+        Snapshot* snap = bsMan_->getSnapshot(j);
+        
+        // update the positions and velocities of the atoms belonging
+        // to rigid bodies:
+        
+        updateFrame(j);        
+
+        // this needs to be updated to the frame value:
+        particleEnergies = E_a_[j];
+        
+        int thisAtom = 0;
+        Vector3d G_t;
+        
+        for (mol = info_->beginMolecule(mi); mol != NULL; 
+             mol = info_->nextMolecule(mi)) {
+          for(atom = mol->beginAtom(ai); atom != NULL; atom = mol->nextAtom(ai)) {
+                        
+            Vector3d pos = atom->getPos();
+
+            G_t[0] += pos.x()*(particleEnergies[thisAtom]-AvgE_a_[thisAtom]);
+            G_t[1] += pos.y()*(particleEnergies[thisAtom]-AvgE_a_[thisAtom]);
+            G_t[2] += pos.z()*(particleEnergies[thisAtom]-AvgE_a_[thisAtom]);
+            
+            thisAtom++;                    
+          }
+        }
+
+        G_t_.push_back(G_t);
+        std::cerr <<"Frame: " << j <<"\t" << G_t << std::endl;
+      } 
+      bsMan_->unloadBlock(i);
+    }
   }   
 
 

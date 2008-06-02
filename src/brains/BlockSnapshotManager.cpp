@@ -116,11 +116,10 @@ namespace oopse {
     }
   }
 
-
-  // virtual Snapshot* BlockSnapshotManager::getSnapshot(int id) { 
-  //  currentSnapshot_ = snapshots[id]; 
-  //  return snapshots_[id]; 
-  //}
+   Snapshot* BlockSnapshotManager::getSnapshot(int id) { 
+    currentSnapshot_ = snapshots_[id]; 
+    return snapshots_[id]; 
+  }
 
   int BlockSnapshotManager::getNActiveBlocks() {
 #ifdef __RWSTD   

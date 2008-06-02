@@ -69,11 +69,11 @@ namespace oopse {
   protected:
     virtual void preCorrelate();
     virtual void postCorrelate();
-    std::vector< Vector3d > histogram_;
+    std::vector<Vector3d> histogram_;
     
-    std::vector<  std::vector< RealType > > E_a_;
-    std::vector< RealType > AvgE_a_;
-    std::vector< Vector3d > G_t_;
+    std::vector<std::vector<RealType> > E_a_;
+    std::vector<RealType> AvgE_a_;
+    std::vector<Vector3d> G_t_;
   };
 
 }

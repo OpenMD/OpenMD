@@ -76,7 +76,7 @@ int main(int argc,char* argv[]){
       "  |    ____  ____  ____  _____ ______  The OpenSource, Object-oriented   |\n" <<
       "  |   / __ \\/ __ \\/ __ \\/ ___// ____/  Parallel Simulation Engine.       |\n" <<
       "  |  / / / / / / / /_/ /\\__ \\/ __/                                       |\n" <<
-      "  | / /_/ / /_/ / ____/___/ / /___     Copyright 2004-2006 by the        |\n" <<
+      "  | / /_/ / /_/ / ____/___/ / /___     Copyright 2004-2008 by the        |\n" <<
       "  | \\____/\\____/_/    /____/_____/     University of Notre Dame.         |\n" <<
       "  |                                                                      |\n" <<
       "  |                     version " << 

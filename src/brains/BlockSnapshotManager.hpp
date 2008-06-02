@@ -60,7 +60,7 @@ namespace oopse {
     BlockSnapshotManager(SimInfo* info, const std::string& filename, int storageLayout, int blockCapacity = 2);
     ~BlockSnapshotManager();
         
-    virtual Snapshot* getSnapshot(int id) { return snapshots_[id]; }
+    virtual Snapshot* getSnapshot(int id);
 
 
     /** Returns number of snapshot blocks in this BlockSnapshotManager*/
