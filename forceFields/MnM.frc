@@ -17,7 +17,7 @@ CH2		14.03
 CH		13.02
 thCH3           15.04
 thCH2           14.03
-thS	        32.0655
+//thS	        32.0655
 SSD		18.0153		
 SSD1        	18.0153 
 SSD_E       	18.0153
@@ -79,7 +79,7 @@ CH       	0.0189          4.68
 C	  	0.101745452544	3.35
 thCH3           0.2146          3.76
 thCH2           0.1127          3.96
-thS             0.2504          4.45
+S             0.2504          4.45
 end LennardJonesAtomTypes
 
 begin SCAtomTypes
@@ -111,9 +111,9 @@ Au   SSD_E  MAW  2.68 0.6   1.33  0.95 -0.25
 
 //LennardJones
 // sigma epsilon
-Au thCH3 LennardJones 0.2146 3.54
-Au thCH2 LennardJones 0.1749 3.54
-Au thS   LennardJones 9.180  4.45
+Au thCH3 LennardJones 3.54 0.2146
+Au thCH2 LennardJones 3.54 0.1749 
+Au S   LennardJones   4.45 9.180
 
 //Shifted Morse
 // r0 D0 beta0

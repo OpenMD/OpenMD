@@ -42,7 +42,7 @@
 
 !! Calculates Metal-Non Metal interactions.
 !! @author Charles F. Vardeman II 
-!! @version $Id: MetalNonMetal.F90,v 1.13 2008-05-27 16:39:05 chuckv Exp $, $Date: 2008-05-27 16:39:05 $, $Name: not supported by cvs2svn $, $Revision: 1.13 $
+!! @version $Id: MetalNonMetal.F90,v 1.14 2008-06-05 15:53:58 chuckv Exp $, $Date: 2008-06-05 15:53:58 $, $Name: not supported by cvs2svn $, $Revision: 1.14 $
 
 
 module MetalNonMetal
@@ -143,9 +143,7 @@ contains
     interaction_id = MnMinteractionLookup(atid1, atid2)
     interaction_type = MnM_Map%interactions(interaction_id)%interaction_type
     
-
-    
-    select case (interaction_type)
+    select case (interaction_type)    
     case (MNM_LENNARDJONES)
        call calc_mnm_lennardjones(Atom1, Atom2, D, Rij, R2, Rcut, Sw, Vpair, &
             Fpair, Pot, F, Do_pot, interaction_id)
@@ -187,6 +185,9 @@ contains
     epsilon    = MnM_Map%interactions(interaction_id)%epsilon
     shiftedPot = MnM_Map%interactions(interaction_id)%shiftedPot
     shiftedFrc = MnM_Map%interactions(interaction_id)%shiftedFrc
+
+    write(*,*) "Values are: ",MnM_Map%interactions(interaction_id)%sigma , epsilon
+
 
     ros = rij * sigmai
 

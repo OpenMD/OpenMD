@@ -178,7 +178,7 @@ namespace oopse {
             /* look for a match in the non-bonded interactions parsed
                from the force field file */ 
             nbit = getNonBondedInteractionType(at1s, at2s);
-	  
+          
             /* if we found a match (even a partial match), punt to the
                interaction to poke our info down to fortran. */
             if (nbit != NULL)	nbit->tellFortran(atid1, atid2);
