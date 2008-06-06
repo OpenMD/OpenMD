@@ -73,12 +73,12 @@ O_TIP5P-E   	0.178           3.097
 O_SPCE    	0.15532         3.16549
 O_SPC     	0.15532         3.16549
 CH4       	0.279           3.73
-CH3       	0.185           3.75
-CH2       	0.0866          3.95
+//CH3       	0.185           3.75
+//CH2       	0.0866          3.95
 CH       	0.0189          4.68
 C	  	0.101745452544	3.35
-thCH3           0.2146          3.76
-thCH2           0.1127          3.96
+CH3           0.2146          3.76
+CH2           0.1127          3.96
 S             0.2504          4.45
 end LennardJonesAtomTypes
 
@@ -111,8 +111,8 @@ Au   SSD_E  MAW  2.68 0.6   1.33  0.95 -0.25
 
 //LennardJones
 // sigma epsilon
-Au thCH3 LennardJones 3.54 0.2146
-Au thCH2 LennardJones 3.54 0.1749 
+Au CH3 LennardJones 3.54 0.2146
+Au CH2 LennardJones 3.54 0.1749 
 Au S   LennardJones   4.45 9.180
 
 //Shifted Morse
@@ -204,6 +204,7 @@ CH3	    CH	Harmonic		1.526		260
 CH2	    CH2	Harmonic		1.526		260
 CH2	    CH	Harmonic		1.526		260
 CH	    CH	Harmonic		1.526		260
+S           CH2 Harmonic                1.526           260
 
 //Atom1	Atom2	Cubic		b0	K3	K2	K1	K0
 //V_Cubic = K3(b - b0)^3 + K2(b - b0)^2 + K1(b - b0) + K0
@@ -240,7 +241,7 @@ CH2	CH	CH2	Harmonic	112.0	117.68
 CH2	CH	CH	Harmonic	112.0	117.68
 CH	CH2	CH	Harmonic	114.0	117.68
 CH	CH	CH	Harmonic	112.0	117.68
-
+S       CH2     CH2     Harmonic        114.0   117.68
 
 
 //UreyBradley
@@ -292,7 +293,7 @@ CH2	CH	CH	CH	Cubic		3.3254		-0.4215		-1.686		1.1661
 CH	CH2	CH2	CH	Cubic		5.9602		-0.2568		-3.802		2.1586
 CH	CH2	CH	CH	Cubic		3.3254		-0.4215		-1.686		1.1661
 CH	CH	CH	CH	Cubic		3.3254		-0.4215		-1.686		1.1661
-
+S       CH2     CH2     CH2     Cubic           5.9602          -0.2568         -3.802          2.1586
 
 //Charmm
 //Atom1	Atom2	Atom3	Atom4	Charmm		Kchi		n		delta		[Kchi		n		delta]

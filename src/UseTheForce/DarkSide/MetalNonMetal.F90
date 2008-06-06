@@ -42,7 +42,7 @@
 
 !! Calculates Metal-Non Metal interactions.
 !! @author Charles F. Vardeman II 
-!! @version $Id: MetalNonMetal.F90,v 1.14 2008-06-05 15:53:58 chuckv Exp $, $Date: 2008-06-05 15:53:58 $, $Name: not supported by cvs2svn $, $Revision: 1.14 $
+!! @version $Id: MetalNonMetal.F90,v 1.15 2008-06-06 15:55:54 chuckv Exp $, $Date: 2008-06-06 15:55:54 $, $Name: not supported by cvs2svn $, $Revision: 1.15 $
 
 
 module MetalNonMetal
@@ -186,7 +186,7 @@ contains
     shiftedPot = MnM_Map%interactions(interaction_id)%shiftedPot
     shiftedFrc = MnM_Map%interactions(interaction_id)%shiftedFrc
 
-    write(*,*) "Values are: ",MnM_Map%interactions(interaction_id)%sigma , epsilon
+   
 
 
     ros = rij * sigmai

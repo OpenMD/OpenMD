@@ -135,7 +135,6 @@ namespace oopse {
         RealType sigma = tokenizer.nextTokenAsDouble();
         RealType epsilon = tokenizer.nextTokenAsDouble();
         interactionType = new LennardJonesInteractionType(sigma, epsilon);
-        std::cerr << "Interaction sigma, epsilon: " << sigma << "\t" << epsilon <<std::endl;
       }
       break;
 
