@@ -17,7 +17,7 @@ molecule{
   
   atom[0]{
     type = "S";
-    position( -0.626, 1.407, 0.0 );
+    position( -0.626, 1.709, 0.0 );
   }
 
   atom[1]{
@@ -80,6 +80,7 @@ molecule{
   torsion{
     members( 1, 2, 3, 4 );
   }
+   
 }
 
 #endif

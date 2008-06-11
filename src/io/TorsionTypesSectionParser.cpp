@@ -45,6 +45,7 @@
 #include "types/QuarticTorsionType.hpp"
 #include "types/PolynomialTorsionType.hpp"
 #include "types/CharmmTorsionType.hpp"
+#include "types/OplsTorsionType.hpp"
 #include "UseTheForce/ForceField.hpp"
 
 namespace oopse {
@@ -57,6 +58,7 @@ namespace oopse {
     stringToEnumMap_["Quartic"] = ttQuartic;
     stringToEnumMap_["Polynomial"] = ttPolynomial;
     stringToEnumMap_["Charmm"] =  ttCharmm;
+    stringToEnumMap_["Opls"] =  ttOpls;
   }
 
   void TorsionTypesSectionParser::parseLine(ForceField& ff,
@@ -163,6 +165,21 @@ namespace oopse {
 
 	torsionType = new CharmmTorsionType(parameters);
 
+      }
+
+      break;
+
+    case TorsionTypesSectionParser::ttOpls:
+            
+      if (nTokens < 4) {
+
+      } else {
+	RealType v0 = tokenizer.nextTokenAsDouble();
+	RealType v1 = tokenizer.nextTokenAsDouble();
+	RealType v2 = tokenizer.nextTokenAsDouble();
+	RealType v3 = tokenizer.nextTokenAsDouble();
+        
+	torsionType = new OplsTorsionType(v0, v1, v2, v3);
       }
 
       break;

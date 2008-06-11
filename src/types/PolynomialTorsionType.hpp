@@ -46,8 +46,8 @@
  * @version 1.0
  */ 
 
-#ifndef TYPES_POLYNOMIALBONDTYPE_HPP
-#define TYPES_POLYNOMIALBONDTYPE_HPP
+#ifndef TYPES_POLYNOMIALTORSIONTYPE_HPP
+#define TYPES_POLYNOMIALTORSIONTYPE_HPP
 
 #include "math/Polynomial.hpp"
 #include "types/TorsionType.hpp"
@@ -123,5 +123,5 @@ namespace oopse {
   */
 
 } //end namespace oopse
-#endif //TYPES_POLYNOMIALBONDTYPE_HPP
+#endif //TYPES_POLYNOMIALTORSIONTYPE_HPP
 

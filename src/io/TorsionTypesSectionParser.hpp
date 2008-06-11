@@ -64,6 +64,7 @@ namespace oopse {
       ttQuartic,
       ttPolynomial,
       ttCharmm,
+      ttOpls,
       ttUnknown
     };
 

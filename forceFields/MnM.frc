@@ -9,15 +9,41 @@ begin Options
 	  MetallicEnergyUnitScaling   23.0605423
 end Options
 
+
 begin AtomTypes    
 //Name		mass	 (amu)
 CH4		16.05		
 CH3		15.04		
 CH2		14.03		
 CH		13.02
-thCH3           15.04
-thCH2           14.03
-//thS	        32.0655
+// CH3 (sp3) thiol/sulfide/disulfide
+CH3S    15.04
+// CH2 (sp3) thiol/sulfide/disulfide
+CH2S    14.03
+//CH (sp3) all other/thiol
+CHS     13.02
+//C (sp3) all other/thiol
+CS      12.0107
+// sulfone
+SYZ     32.0655
+// O in sulfone
+OY
+// thiol S
+SH      32.0655
+//Thiol H
+HS      1.0079
+// Sulfoxide
+SZ  32.0655
+// Sulfur in disulfide
+SS  32.0655
+// Sulfur in aromatic (thiophene)
+SP  32.0655
+// sp2 carbon in thiophene
+CS   12.0107
+// Sulfur attached to gold
+SAu  228.9807
+
+//Water
 SSD		18.0153		
 SSD1        	18.0153 
 SSD_E       	18.0153
@@ -38,6 +64,8 @@ H_SPC		1.0079
 EP_TIP4P	0.0
 EP_TIP4P-Ew 	0.0
 EP_TIP5P	0.0
+
+//Standard Atoms
 C		12.0107
 S       32.0655	
 Ni      58.710
@@ -72,14 +100,19 @@ O_TIP5P   	0.16            3.12
 O_TIP5P-E   	0.178           3.097   
 O_SPCE    	0.15532         3.16549
 O_SPC     	0.15532         3.16549
-CH4       	0.279           3.73
-//CH3       	0.185           3.75
-//CH2       	0.0866          3.95
-CH       	0.0189          4.68
-C	  	0.101745452544	3.35
-CH3           0.2146          3.76
-CH2           0.1127          3.96
-S             0.2504          4.45
+// From TraPPE-UA JPCB, 109, 24100 and JCPB 102,2569
+CH4       	0.2941          3.73
+CH3       	0.1947          3.75
+CH2       	0.09140         3.95
+CH       	0.0987          4.68
+CS	     	0.0009935	    6.40
+CH3S       	0.1947          3.75
+CH2S       	0.09140         3.95
+CHS         0.0987          4.68
+S           0.3954          3.58
+SH          0.4610          3.62
+SS          0.3279          3.72
+SP          0.3576          3.60
 end LennardJonesAtomTypes
 
 begin SCAtomTypes
@@ -205,7 +238,7 @@ CH2	    CH2	Harmonic		1.526		260
 CH2	    CH	Harmonic		1.526		260
 CH	    CH	Harmonic		1.526		260
 // fix the Kb for the thiol below:
-S       CH2 Harmonic        1.82        260
+S       CH2 Harmonic        1.82        281
 
 //Atom1	Atom2	Cubic		b0	K3	K2	K1	K0
 //V_Cubic = K3(b - b0)^3 + K2(b - b0)^2 + K1(b - b0) + K0
@@ -271,94 +304,100 @@ begin TorsionTypes
 
 // All thiol torsions from Kautman and Klein (J. Phys. Chem. 1989, 91, 4994-5001)
 
-S	CH2	CH2	CH3	Polynomial	0	2.218	1	2.905	2	-3.136	3	-0.7313	4	6.272	5	-7.528
-S	CH2	CH2	CH2	Polynomial	0	2.218	1	2.905	2	-3.136	3	-0.7313	4	6.272	5	-7.528
-S	CH2	CH2	CH	Polynomial	0	2.218	1	2.905	2	-3.136	3	-0.7313	4	6.272	5	-7.528
-S	CH2	CH2	C	Polynomial	0	2.218	1	2.905	2	-3.136	3	-0.7313	4	6.272	5	-7.528
+//S	CH2	CH2	CH3	Polynomial	0	2.218	1	2.905	2	-3.136	3	-0.7313	4	6.272	5	-7.528
+//S	CH2	CH2	CH2	Polynomial	0	2.218	1	2.905	2	-3.136	3	-0.7313	4	6.272	5	-7.528
+//S	CH2	CH2	CH	Polynomial	0	2.218	1	2.905	2	-3.136	3	-0.7313	4	6.272	5	-7.528
+//S	CH2	CH2	C	Polynomial	0	2.218	1	2.905	2	-3.136	3	-0.7313	4	6.272	5	-7.528
 
 // All type 1 possibilities from Dubbeldam et al. (J. Phys. Chem. B 2004, 108, 12301-12313)
 
-CH3	CH2	CH2	CH3	Polynomial	0	2.3939	1	3.871	2	-0.7111	3	-3.864	4	1.4222	5	-3.111
-CH3	CH2	CH2	CH2	Polynomial	0	2.3939	1	3.871	2	-0.7111	3	-3.864	4	1.4222	5	-3.111
-CH3	CH2	CH2	CH	Polynomial	0	2.3939	1	3.871	2	-0.7111	3	-3.864	4	1.4222	5	-3.111
-CH3	CH2	CH2	C	Polynomial	0	2.3939	1	3.871	2	-0.7111	3	-3.864	4	1.4222	5	-3.111
-CH2	CH2	CH2	CH2	Polynomial	0	2.3939	1	3.871	2	-0.7111	3	-3.864	4	1.4222	5	-3.111
-CH2	CH2	CH2	CH	Polynomial	0	2.3939	1	3.871	2	-0.7111	3	-3.864	4	1.4222	5	-3.111
-CH2	CH2	CH2	C	Polynomial	0	2.3939	1	3.871	2	-0.7111	3	-3.864	4	1.4222	5	-3.111
-CH	CH2	CH2	CH	Polynomial	0	2.3939	1	3.871	2	-0.7111	3	-3.864	4	1.4222	5	-3.111
-CH	CH2	CH2	C	Polynomial	0	2.3939	1	3.871	2	-0.7111	3	-3.864	4	1.4222	5	-3.111
-C	CH2	CH2	C	Polynomial	0	2.3939	1	3.871	2	-0.7111	3	-3.864	4	1.4222	5	-3.111
+//CH3	CH2	CH2	CH3	Polynomial	0	2.3939	1	3.871	2	-0.7111	3	-3.864	4	1.4222	5	-3.111
+//CH3	CH2	CH2	CH2	Polynomial	0	2.3939	1	3.871	2	-0.7111	3	-3.864	4	1.4222	5	-3.111
+//CH3	CH2	CH2	CH	Polynomial	0	2.3939	1	3.871	2	-0.7111	3	-3.864	4	1.4222	5	-3.111
+//CH3	CH2	CH2	C	Polynomial	0	2.3939	1	3.871	2	-0.7111	3	-3.864	4	1.4222	5	-3.111
+//CH2	CH2	CH2	CH2	Polynomial	0	2.3939	1	3.871	2	-0.7111	3	-3.864	4	1.4222	5	-3.111
+//CH2	CH2	CH2	CH	Polynomial	0	2.3939	1	3.871	2	-0.7111	3	-3.864	4	1.4222	5	-3.111
+//CH2	CH2	CH2	C	Polynomial	0	2.3939	1	3.871	2	-0.7111	3	-3.864	4	1.4222	5	-3.111
+//CH	CH2	CH2	CH	Polynomial	0	2.3939	1	3.871	2	-0.7111	3	-3.864	4	1.4222	5	-3.111
+//CH	CH2	CH2	C	Polynomial	0	2.3939	1	3.871	2	-0.7111	3	-3.864	4	1.4222	5	-3.111
+//C	CH2	CH2	C	Polynomial	0	2.3939	1	3.871	2	-0.7111	3	-3.864	4	1.4222	5	-3.111
 
 // All type 2 possibilities:
 
-H	CH	CH2	CH3	Polynomial	0	2.7167  1	8.665   2	0.82669 3	-12.92  4	-1.653  5	3.2712
-H	CH	CH2	CH2	Polynomial	0	2.7161	1	8.665	2	0.82669 3	-12.92  4	-1.653  5	3.2712
-H	CH	CH2	CH	Polynomial	0	2.7161  1	8.665   2	0.82669 3	-12.92  4	-1.653  5	3.2712
-H	CH	CH2	C	Polynomial	0	2.7161  1	8.665   2	0.82669 3	-12.92  4	-1.653  5	3.2712
+//H	CH	CH2	CH3	Polynomial	0	2.7167  1	8.665   2	0.82669 3	-12.92  4	-1.653  5	3.2712
+//H	CH	CH2	CH2	Polynomial	0	2.7161	1	8.665	2	0.82669 3	-12.92  4	-1.653  5	3.2712
+//H	CH	CH2	CH	Polynomial	0	2.7161  1	8.665   2	0.82669 3	-12.92  4	-1.653  5	3.2712
+//H	CH	CH2	C	Polynomial	0	2.7161  1	8.665   2	0.82669 3	-12.92  4	-1.653  5	3.2712
 
 // All type 3 possibilities:
 
-CH3	C	CH2	CH3	Polynomial	0	2.5701  1	7.710   2	0	3	-10.29  4	0	5	0
-CH3	C	CH2	CH2	Polynomial	0	2.5701  1	7.710   2	0	3	-10.29	4	0	5	0
-CH3	C	CH2	CH	Polynomial	0	2.5701	1	7.710	2	0	3	-10.29	4	0	5	0
-CH3	C	CH2	C	Polynomial	0	2.5701	1	7.710	2	0	3	-10.29	4	0	5	0
-CH2	C	CH2	CH2	Polynomial	0	2.5701	1	7.710	2	0	3	-10.29	4	0	5	0
-CH2	C	CH2	CH	Polynomial	0	2.5701	1	7.710	2	0	3	-10.29	4	0	5	0
-CH2	C	CH2	C	Polynomial	0	2.5701	1	7.710	2	0	3	-10.29	4	0	5	0
-CH	C	CH2	CH	Polynomial	0	2.5701	1	7.710	2	0	3	-10.29	4	0	5	0
-CH	C	CH2	C	Polynomial	0	2.5701	1	7.710	2	0	3	-10.29	4	0	5	0
-C	C	CH2	C	Polynomial	0	2.5701	1	7.710	2	0	3	-10.29	4	0	5	0
+//CH3	C	CH2	CH3	Polynomial	0	2.5701  1	7.710   2	0	3	-10.29  4	0	5	0
+//CH3	C	CH2	CH2	Polynomial	0	2.5701  1	7.710   2	0	3	-10.29	4	0	5	0
+//CH3	C	CH2	CH	Polynomial	0	2.5701	1	7.710	2	0	3	-10.29	4	0	5	0
+//CH3	C	CH2	C	Polynomial	0	2.5701	1	7.710	2	0	3	-10.29	4	0	5	0
+//CH2	C	CH2	CH2	Polynomial	0	2.5701	1	7.710	2	0	3	-10.29	4	0	5	0
+//CH2	C	CH2	CH	Polynomial	0	2.5701	1	7.710	2	0	3	-10.29	4	0	5	0
+//CH2	C	CH2	C	Polynomial	0	2.5701	1	7.710	2	0	3	-10.29	4	0	5	0
+//CH	C	CH2	CH	Polynomial	0	2.5701	1	7.710	2	0	3	-10.29	4	0	5	0
+//CH	C	CH2	C	Polynomial	0	2.5701	1	7.710	2	0	3	-10.29	4	0	5	0
+//C	C	CH2	C	Polynomial	0	2.5701	1	7.710	2	0	3	-10.29	4	0	5	0
 
 // All type 4 possibilities:
 
-CH3	C	C	CH3	Polynomial	0	4.0652	1	12.20	2	0	3	-16.26	4	0	5	0
-CH3	C	C	CH2	Polynomial	0	4.0652	1	12.20	2	0	3	-16.26	4	0	5	0
-CH3	C	C	CH	Polynomial	0	4.0652	1	12.20	2	0	3	-16.26	4	0	5	0
-CH3	C	C	C	Polynomial	0	4.0652	1	12.20	2	0	3	-16.26	4	0	5	0
-CH2	C	C	CH2	Polynomial	0	4.0652	1	12.20	2	0	3	-16.26	4	0	5	0
-CH2	C	C	CH	Polynomial	0	4.0652	1	12.20	2	0	3	-16.26	4	0	5	0
-CH2	C	C	C	Polynomial	0	4.0652	1	12.20	2	0	3	-16.26	4	0	5	0
-CH	C	C	CH	Polynomial	0	4.0652	1	12.20	2	0	3	-16.26	4	0	5	0
-CH	C	C	C	Polynomial	0	4.0652	1	12.20	2	0	3	-16.26	4	0	5	0
-C	C	C	C	Polynomial	0	4.0652	1	12.20	2	0	3	-16.26	4	0	5	0
+//CH3	C	C	CH3	Polynomial	0	4.0652	1	12.20	2	0	3	-16.26	4	0	5	0
+//CH3	C	C	CH2	Polynomial	0	4.0652	1	12.20	2	0	3	-16.26	4	0	5	0
+//CH3	C	C	CH	Polynomial	0	4.0652	1	12.20	2	0	3	-16.26	4	0	5	0
+//CH3	C	C	C	Polynomial	0	4.0652	1	12.20	2	0	3	-16.26	4	0	5	0
+//CH2	C	C	CH2	Polynomial	0	4.0652	1	12.20	2	0	3	-16.26	4	0	5	0
+//CH2	C	C	CH	Polynomial	0	4.0652	1	12.20	2	0	3	-16.26	4	0	5	0
+//CH2	C	C	C	Polynomial	0	4.0652	1	12.20	2	0	3	-16.26	4	0	5	0
+//CH	C	C	CH	Polynomial	0	4.0652	1	12.20	2	0	3	-16.26	4	0	5	0
+//CH	C	C	C	Polynomial	0	4.0652	1	12.20	2	0	3	-16.26	4	0	5	0
+//C	C	C	C	Polynomial	0	4.0652	1	12.20	2	0	3	-16.26	4	0	5	0
 
 //All type 5 possibilities:
 
-CH3	C	CH	H	Polynomial	0	3.1301	1	9.390	2	0	3	-12.52	4	0	5	0
-CH2	C	CH	H	Polynomial	0	3.1301	1	9.390	2	0	3	-12.52	4	0	5	0
-CH	C	CH	H	Polynomial	0	3.1301	1	9.390	2	0	3	-12.52	4	0	5	0
-C	C	CH	H	Polynomial	0	3.1301	1	9.390	2	0	3	-12.52	4	0	5	0
+//CH3	C	CH	H	Polynomial	0	3.1301	1	9.390	2	0	3	-12.52	4	0	5	0
+//CH2	C	CH	H	Polynomial	0	3.1301	1	9.390	2	0	3	-12.52	4	0	5	0
+//CH	C	CH	H	Polynomial	0	3.1301	1	9.390	2	0	3	-12.52	4	0	5	0
+//C	C	CH	H	Polynomial	0	3.1301	1	9.390	2	0	3	-12.52	4	0	5	0
 
 //All type 6 possibilities:
 
-H	CH	CH	H	Polynomial	0	2.1706	1	5.609	2	-1.804	3	-5.976	4	3.6089	5	-3.6089
+//H	CH	CH	H	Polynomial	0	2.1706	1	5.609	2	-1.804	3	-5.976	4	3.6089	5	-3.6089
 
 //Cubic
 //Atom1	Atom2	Atom3	Atom4	Cubic		k3		k2		k1		k0  ( all are kcal/mol )
 //V_Cubic = k3(cos phi)^3 + k2(cos phi)^2 + k1(cos phi) + k0
 //Cubic Examples
-//CH3	CH2	CH2	CH3	Cubic		5.9602		-0.2568		-3.802		2.1586
-//CH3	CH2	CH	CH3	Cubic		3.3254		-0.4215		-1.686		1.1661
-//CH3	CH	CH	CH3	Cubic		3.3254		-0.4215		-1.686		1.1661
-//CH3	CH2	CH2	CH2	Cubic		5.9602		-0.2568		-3.802		2.1586
-//CH3	CH2	CH	CH2	Cubic		3.3254		-0.4215		-1.686		1.1661
-//CH3	CH	CH2	CH2	Cubic		3.3254		-0.4215		-1.686		1.1661
-//CH3	CH	CH	CH2	Cubic		3.3254		-0.4215		-1.686		1.1661
-//CH3	CH2	CH2	CH	Cubic		5.9602		-0.2568		-3.802		2.1586
-//CH3	CH2	CH	CH	Cubic		3.3254		-0.4215		-1.686		1.1661
-//CH3	CH	CH2	CH	Cubic		3.3254		-0.4215		-1.686		1.1661
-//CH3	CH	CH	CH	Cubic		3.3254		-0.4215		-1.686		1.1661
-//CH2	CH2	CH2	CH2	Cubic		5.9602		-0.2568		-3.802		2.1586
-//CH2	CH2	CH	CH2	Cubic		3.3254		-0.4215		-1.686		1.1661
-//CH2	CH	CH	CH2	Cubic		3.3254		-0.4215		-1.686		1.1661
-//CH2	CH2	CH2	CH	Cubic		5.9602		-0.2568		-3.802		2.1586
-//CH2	CH2	CH	CH	Cubic		3.3254		-0.4215		-1.686		1.1661
-//CH2	CH	CH2	CH	Cubic		3.3254		-0.4215		-1.686		1.1661
-//CH2	CH	CH	CH	Cubic		3.3254		-0.4215		-1.686		1.1661
-//CH	CH2	CH2	CH	Cubic		5.9602		-0.2568		-3.802		2.1586
-//CH	CH2	CH	CH	Cubic		3.3254		-0.4215		-1.686		1.1661
-//CH	CH	CH	CH	Cubic		3.3254		-0.4215		-1.686		1.1661
-//S   CH2 CH2 CH2   Cubic           5.9602          -0.2568         -3.802          2.1586
+CH3	CH2	CH2	CH3	Cubic		5.9602		-0.2568		-3.802		2.1586
+CH3	CH2	CH	CH3	Cubic		3.3254		-0.4215		-1.686		1.1661
+CH3	CH	CH	CH3	Cubic		3.3254		-0.4215		-1.686		1.1661
+CH3	CH2	CH2	CH2	Cubic		5.9602		-0.2568		-3.802		2.1586
+CH3	CH2	CH	CH2	Cubic		3.3254		-0.4215		-1.686		1.1661
+CH3	CH	CH2	CH2	Cubic		3.3254		-0.4215		-1.686		1.1661
+CH3	CH	CH	CH2	Cubic		3.3254		-0.4215		-1.686		1.1661
+CH3	CH2	CH2	CH	Cubic		5.9602		-0.2568		-3.802		2.1586
+CH3	CH2	CH	CH	Cubic		3.3254		-0.4215		-1.686		1.1661
+CH3	CH	CH2	CH	Cubic		3.3254		-0.4215		-1.686		1.1661
+CH3	CH	CH	CH	Cubic		3.3254		-0.4215		-1.686		1.1661
+CH2	CH2	CH2	CH2	Cubic		5.9602		-0.2568		-3.802		2.1586
+CH2	CH2	CH	CH2	Cubic		3.3254		-0.4215		-1.686		1.1661
+CH2	CH	CH	CH2	Cubic		3.3254		-0.4215		-1.686		1.1661
+CH2	CH2	CH2	CH	Cubic		5.9602		-0.2568		-3.802		2.1586
+CH2	CH2	CH	CH	Cubic		3.3254		-0.4215		-1.686		1.1661
+CH2	CH	CH2	CH	Cubic		3.3254		-0.4215		-1.686		1.1661
+CH2	CH	CH	CH	Cubic		3.3254		-0.4215		-1.686		1.1661
+CH	CH2	CH2	CH	Cubic		5.9602		-0.2568		-3.802		2.1586
+CH	CH2	CH	CH	Cubic		3.3254		-0.4215		-1.686		1.1661
+CH	CH	CH	CH	Cubic		3.3254		-0.4215		-1.686		1.1661
+S   CH2 CH2 CH2   Cubic           5.9602          -0.2568         -3.802          2.1586
+
+//Opls
+//Atom1	Atom2	Atom3	Atom4	Opls	v0	v1	v2	v3
+//V_Opls = v0 + v1 / 2 * [1 + cos(phi)] + v2 / 2 * [1 - cos(2*phi)] + v3 / 2 * [1 + cos(3*phi)]
+//units for v_n: kcal / mol
+
 
 //Charmm
 //Atom1	Atom2	Atom3	Atom4	Charmm		Kchi		n		delta		[Kchi		n		delta]

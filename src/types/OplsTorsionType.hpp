@@ -46,11 +46,10 @@
  * @version 1.0
  */ 
 
-#ifndef TYPES_POLYNOMIALBONDTYPE_HPP
-#define TYPES_POLYNOMIALBONDTYPE_HPP
+#ifndef TYPES_OPLSTORSIONTYPE_HPP
+#define TYPES_OPLSTORSIONTYPE_HPP
 
-#include "math/Polynomial.hpp"
-#include "types/TorsionType.hpp"
+#include "types/PolynomialTorsionType.hpp"
 
 namespace oopse {
 
@@ -100,6 +99,6 @@ namespace oopse {
   
   
 } //end namespace oopse
-#endif //TYPES_POLYNOMIALBONDTYPE_HPP
+#endif //TYPES_OPLSTORSIONTYPE_HPP
 
 
