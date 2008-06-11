@@ -46,6 +46,7 @@
 #include "types/PolynomialTorsionType.hpp"
 #include "types/CharmmTorsionType.hpp"
 #include "types/OplsTorsionType.hpp"
+#include "types/TrappeTorsionType.hpp"
 #include "UseTheForce/ForceField.hpp"
 
 namespace oopse {
@@ -59,6 +60,7 @@ namespace oopse {
     stringToEnumMap_["Polynomial"] = ttPolynomial;
     stringToEnumMap_["Charmm"] =  ttCharmm;
     stringToEnumMap_["Opls"] =  ttOpls;
+    stringToEnumMap_["Trappe"] =  ttTrappe;
   }
 
   void TorsionTypesSectionParser::parseLine(ForceField& ff,
@@ -171,15 +173,31 @@ namespace oopse {
 
     case TorsionTypesSectionParser::ttOpls:
             
-      if (nTokens < 4) {
+      if (nTokens < 3) {
 
       } else {
-	RealType v0 = tokenizer.nextTokenAsDouble();
 	RealType v1 = tokenizer.nextTokenAsDouble();
 	RealType v2 = tokenizer.nextTokenAsDouble();
 	RealType v3 = tokenizer.nextTokenAsDouble();
         
-	torsionType = new OplsTorsionType(v0, v1, v2, v3);
+	torsionType = new OplsTorsionType(v1, v2, v3);
+      }
+
+      break;
+            
+
+    case TorsionTypesSectionParser::ttTrappe:
+            
+      if (nTokens < 4) {
+
+      } else {
+
+	RealType c0 = tokenizer.nextTokenAsDouble();
+	RealType c1 = tokenizer.nextTokenAsDouble();
+	RealType c2 = tokenizer.nextTokenAsDouble();
+	RealType c3 = tokenizer.nextTokenAsDouble();
+        
+	torsionType = new TrappeTorsionType(c0, c1, c2, c3);
       }
 
       break;

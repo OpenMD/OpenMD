@@ -65,6 +65,7 @@ namespace oopse {
       ttPolynomial,
       ttCharmm,
       ttOpls,
+      ttTrappe,
       ttUnknown
     };
 

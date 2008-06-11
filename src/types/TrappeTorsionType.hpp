@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2008 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -40,81 +40,88 @@
  */
  
 /**
- * @file OplsTorsionType.hpp
- * @author    teng lin
- * @date  11/16/2004
+ * @file TrappeTorsionType.hpp
+ * @author    Dan Gezelter
+ * @date  06/11/2008
  * @version 1.0
  */ 
 
-#ifndef TYPES_OPLSTORSIONTYPE_HPP
-#define TYPES_OPLSTORSIONTYPE_HPP
+#ifndef TYPES_TRAPPETORSIONTYPE_HPP
+#define TYPES_TRAPPETORSIONTYPE_HPP
 
 #include "types/PolynomialTorsionType.hpp"
 
 namespace oopse {
 
   /**
-   * @class OplsTorsionType OplsTorsionType.hpp "types/OplsTorsionType.hpp"
+   * @class TrappeTorsionType TrappeTorsionType.hpp "types/TrappeTorsionType.hpp"
    * These torsion types are defined identically with functional form given
    * in the following paper:
    *
-   * "Development and Testing of the OPLS All-Atom Force Field on 
-   * Conformational Energetics and Properties of Organic Liquids,"  by
-   * William L. Jorgensen, David S. Maxwell, and Julian Tirado-Rives, 
-   * J. Am. Chem. Soc.; 1996; 118(45) pp 11225 - 11236;
-   * DOI: 10.1021/ja9621760
+   * "Transferable Potentials for Phase Equilibria. 1. United-Atom 
+   * Description of n-Alkanes," by
+   * Marcus G. Martin and J. Ilja Siepmann,
+   * J. Phys. Chem. B; 1998; 102(14) pp 2569 - 2577;
+   *
+   * Also listed as type A torsions on this page: 
+   *
+   *    http://siepmann6.chem.umn.edu/trappe/intro.php
    *
    * This torsion potential has the form:
    * 
-   *  Vtors = 0.5* (v1*(1+cos(phi)) + v2*(1-cos(2*phi)) + v3*(1+cos(3*phi)))
+   *  Vtors = c0 + c1*(1+cos(phi)) + c2*(1-cos(2*phi)) + c3*(1+cos(3*phi))
    *
    * Notes: 
    * 
-   * 1) OOPSE converts internally to a Polynomial torsion type because
-   *    all of the phase angles are zero in the OPLS paper.
-   * 2) Coefficients are assumed to be in kcal / mol, and be careful about
-   *    that factor of 1/2 when importing the coefficients!
+   * 1) This is very similar to the OplsTorsionType with coefficients
+   *    defined without the factor of 1/2, and an extra c0 term.
+   * 2) Coefficients are assumed to be in kcal / mol, although the papers
+   *    usually give the parameters in units of K.
    */
-  class OplsTorsionType : public PolynomialTorsionType{
+  class TrappeTorsionType : public PolynomialTorsionType{
     
   public:
     
-    OplsTorsionType(RealType v1, RealType v2, RealType v3) :  
-      PolynomialTorsionType(), v1_(v1), v2_(v2), v3_(v3) {
+    TrappeTorsionType(RealType c0, RealType c1, RealType c2, RealType c3) :  
+      PolynomialTorsionType(), c0_(c0), c1_(c1), c2_(c2), c3_(c3) {
+
+      //convert Trappe Torsion Type to Polynomial Torsion type
+
+      RealType b0 = c0 + c1 + 2.0 * c2 + c3;
+      RealType b1 = c1 - 3.0 * c3;
+      RealType b2 = -2.0 * c2;
+      RealType b3 = 4.0 * c3;
       
-      //convert OPLS Torsion Type to Polynomial Torsion type
-      RealType c0 = v2 + 0.5 * (v1 + v3);
-      RealType c1 = 0.5 * (v1 - 3.0 * v3);
-      RealType c2 = -v2;
-      RealType c3 = 2.0 * v3;
-      
-      setCoefficient(0, c0);
-      setCoefficient(1, c1);
-      setCoefficient(2, c2);
-      setCoefficient(3, c3);
+      setCoefficient(0, b0);
+      setCoefficient(1, b1);
+      setCoefficient(2, b2);
+      setCoefficient(3, b3);
+
     }
     
-    friend std::ostream& operator <<(std::ostream& os, OplsTorsionType& ott);
+    friend std::ostream& operator <<(std::ostream& os, TrappeTorsionType& ttt);
     
   private:
     
-    RealType v1_;
-    RealType v2_;
-    RealType v3_;
+    RealType c0_;
+    RealType c1_;
+    RealType c2_;
+    RealType c3_;
     
   };
   
-  std::ostream& operator <<(std::ostream& os, OplsTorsionType& ott) {
+  std::ostream& operator <<(std::ostream& os, TrappeTorsionType& ttt) {
     
-    os << "This OplsTorsionType has below form:" << std::endl;
-    os << ott.v1_ << "/2*(1+cos(phi))" << " + "
-       << ott.v2_ << "/2*(1-cos(2*phi))" << " + "
-       << ott.v3_ << "/2*(1+cos(3*phi))" << std::endl;
+    os << "This TrappeTorsionType has below form:" << std::endl;
+    os << ttt.c0_ << " + " 
+       << ttt.c1_ << "*(1+cos(phi))" << " + "
+       << ttt.c2_ << "*(1-cos(2*phi))" << " + "
+       << ttt.c3_ << "*(1+cos(3*phi))" << std::endl;
     return os;
   }
   
   
 } //end namespace oopse
-#endif //TYPES_OPLSTORSIONTYPE_HPP
+#endif //TYPES_TRAPPETORSIONTYPE_HPP
 
 

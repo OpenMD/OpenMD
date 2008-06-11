@@ -394,10 +394,14 @@ CH	CH	CH	CH	Cubic		3.3254		-0.4215		-1.686		1.1661
 S   CH2 CH2 CH2   Cubic           5.9602          -0.2568         -3.802          2.1586
 
 //Opls
-//Atom1	Atom2	Atom3	Atom4	Opls	v0	v1	v2	v3
-//V_Opls = v0 + v1 / 2 * [1 + cos(phi)] + v2 / 2 * [1 - cos(2*phi)] + v3 / 2 * [1 + cos(3*phi)]
+//Atom1	Atom2	Atom3	Atom4	Opls	v1	v2	v3
+//V_Opls = v1 / 2 * [1 + cos(phi)] + v2 / 2 * [1 - cos(2*phi)] + v3 / 2 * [1 + cos(3*phi)]
 //units for v_n: kcal / mol
 
+//Trappe
+//Atom1	Atom2	Atom3	Atom4	Trappe	c0	c1	c2	c3
+//V_Opls = c0 + c1 * [1 + cos(phi)] + c2 * [1 - cos(2*phi)] + c3 * [1 + cos(3*phi)]
+//units for c_n: kcal / mol
 
 //Charmm
 //Atom1	Atom2	Atom3	Atom4	Charmm		Kchi		n		delta		[Kchi		n		delta]
