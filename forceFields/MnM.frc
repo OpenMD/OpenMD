@@ -27,11 +27,13 @@ CS      12.0107
 // sulfone
 SYZ     32.0655
 // O in sulfone
-OY
+//OY
 // thiol S
 SH      32.0655
 //Thiol H
 HS      1.0079
+//Thiol S
+S      32.0655
 // Sulfoxide
 SZ  32.0655
 // Sulfur in disulfide
@@ -113,6 +115,7 @@ S           0.3954          3.58
 SH          0.4610          3.62
 SS          0.3279          3.72
 SP          0.3576          3.60
+// ---- End From TraPPE-UA
 end LennardJonesAtomTypes
 
 begin SCAtomTypes
@@ -238,7 +241,8 @@ CH2	    CH2	Harmonic		1.526		260
 CH2	    CH	Harmonic		1.526		260
 CH	    CH	Harmonic		1.526		260
 // fix the Kb for the thiol below:
-S       CH2 Harmonic        1.82        281
+S           CH2 Harmonic                1.82            281
+SH          CH2 Harmonic                1.82            281  
 
 //Atom1	Atom2	Cubic		b0	K3	K2	K1	K0
 //V_Cubic = K3(b - b0)^3 + K2(b - b0)^2 + K1(b - b0) + K0
@@ -263,19 +267,29 @@ begin BendTypes
 //Theta0: degrees
 //Harmonic examples
 //
-CH3	CH2	CH3	Harmonic	114.0	117.68
-CH3	CH2	CH2	Harmonic	114.0	117.68
-CH3	CH2	CH	Harmonic	114.0	117.68
-CH3	CH	CH3	Harmonic	112.0	117.68
-CH3	CH	CH2	Harmonic	112.0	117.68
-CH3	CH	CH	Harmonic	112.0	117.68
-CH2	CH2	CH2	Harmonic	114.0	117.68
-CH2	CH2	CH	Harmonic	114.0	117.68
+//CH3	CH2	CH3	Harmonic	114.0	117.68
+//CH3	CH2	CH2	Harmonic	114.0	117.68
+//CH3	CH2	CH	Harmonic	114.0	117.68
+//CH3	CH	CH3	Harmonic	112.0	117.68
+//CH3	CH	CH2	Harmonic	112.0	117.68
+//CH3	CH	CH	Harmonic	112.0	117.68
+//CH2	CH2	CH2	Harmonic	114.0	117.68
+//CH2	CH2	CH	Harmonic	114.0	117.68
 CH2	CH	CH2	Harmonic	112.0	117.68
 CH2	CH	CH	Harmonic	112.0	117.68
-CH	CH2	CH	Harmonic	114.0	117.68
+//CH	CH2	CH	Harmonic	114.0	117.68
 CH	CH	CH	Harmonic	112.0	117.68
-S   CH2 CH2 Harmonic    114.0   117.68
+
+//From Lubna et al.JPCB 109, 24100 (2005) TraPPE
+CH3     CH2     SH      Harmonic        96.0     67.220
+CH2     CH2     SH      Harmonic        96.0     67.220
+CH2     CH2     S       Harmonic        114.0    124.19
+CH3     CH2     S       Harmonic        114.0    124.19
+CH3     CH2     CH3     Harmonic        114.0    124.19
+CH3     CH2     CH2     Harmonic        114.0    124.19
+CH2     CH2     CH2     Harmonic        114.0    124.19
+CH3     CH2     CH      Harmonic        114.0    124.19
+
 
 
 //UreyBradley
@@ -370,18 +384,18 @@ begin TorsionTypes
 //Atom1	Atom2	Atom3	Atom4	Cubic		k3		k2		k1		k0  ( all are kcal/mol )
 //V_Cubic = k3(cos phi)^3 + k2(cos phi)^2 + k1(cos phi) + k0
 //Cubic Examples
-CH3	CH2	CH2	CH3	Cubic		5.9602		-0.2568		-3.802		2.1586
+//CH3	CH2	CH2	CH3	Cubic		5.9602		-0.2568		-3.802		2.1586
 CH3	CH2	CH	CH3	Cubic		3.3254		-0.4215		-1.686		1.1661
 CH3	CH	CH	CH3	Cubic		3.3254		-0.4215		-1.686		1.1661
-CH3	CH2	CH2	CH2	Cubic		5.9602		-0.2568		-3.802		2.1586
+//CH3	CH2	CH2	CH2	Cubic		5.9602		-0.2568		-3.802		2.1586
 CH3	CH2	CH	CH2	Cubic		3.3254		-0.4215		-1.686		1.1661
 CH3	CH	CH2	CH2	Cubic		3.3254		-0.4215		-1.686		1.1661
 CH3	CH	CH	CH2	Cubic		3.3254		-0.4215		-1.686		1.1661
-CH3	CH2	CH2	CH	Cubic		5.9602		-0.2568		-3.802		2.1586
+//CH3	CH2	CH2	CH	Cubic		5.9602		-0.2568		-3.802		2.1586
 CH3	CH2	CH	CH	Cubic		3.3254		-0.4215		-1.686		1.1661
 CH3	CH	CH2	CH	Cubic		3.3254		-0.4215		-1.686		1.1661
 CH3	CH	CH	CH	Cubic		3.3254		-0.4215		-1.686		1.1661
-CH2	CH2	CH2	CH2	Cubic		5.9602		-0.2568		-3.802		2.1586
+//CH2	CH2	CH2	CH2	Cubic		5.9602		-0.2568		-3.802		2.1586
 CH2	CH2	CH	CH2	Cubic		3.3254		-0.4215		-1.686		1.1661
 CH2	CH	CH	CH2	Cubic		3.3254		-0.4215		-1.686		1.1661
 CH2	CH2	CH2	CH	Cubic		5.9602		-0.2568		-3.802		2.1586
@@ -391,17 +405,42 @@ CH2	CH	CH	CH	Cubic		3.3254		-0.4215		-1.686		1.1661
 CH	CH2	CH2	CH	Cubic		5.9602		-0.2568		-3.802		2.1586
 CH	CH2	CH	CH	Cubic		3.3254		-0.4215		-1.686		1.1661
 CH	CH	CH	CH	Cubic		3.3254		-0.4215		-1.686		1.1661
-S   CH2 CH2 CH2   Cubic           5.9602          -0.2568         -3.802          2.1586
+//S   CH2 CH2 CH2   Cubic           5.9602          -0.2568         -3.802          2.1586
 
 //Opls
 //Atom1	Atom2	Atom3	Atom4	Opls	v1	v2	v3
 //V_Opls = v1 / 2 * [1 + cos(phi)] + v2 / 2 * [1 - cos(2*phi)] + v3 / 2 * [1 + cos(3*phi)]
 //units for v_n: kcal / mol
 
+
 //Trappe
 //Atom1	Atom2	Atom3	Atom4	Trappe	c0	c1	c2	c3
 //V_Opls = c0 + c1 * [1 + cos(phi)] + c2 * [1 - cos(2*phi)] + c3 * [1 + cos(3*phi)]
 //units for c_n: kcal / mol
+
+//From Martin et al. JPCB 120, 2569 (1998)
+CH3     CH2    CH2     CH3      Trappe    0.0         0.70544  -0.13549   1.5723
+CH3     CH2    CH2     CH2      Trappe    0.0         0.70544  -0.13549   1.5723  
+CH3     CH2    CH2     CH       Trappe    0.0         0.70544  -0.13549   1.5723  
+CH2     CH2    CH2     CH2      Trappe    0.0         0.70544  -0.13549   1.5723  
+
+
+//From Lubna et al.JPCB 109, 24100 (2005)
+CH3	CH2	CH2	SH	Trappe    0.10507    -0.10342   0.036680  0.60874     
+CH2     CH2     CH2     SH      Trappe    0.10507    -0.10342   0.036680  0.60874
+CH3     CH2     S       CH2     Trappe    0.0         0.73041  -0.53685   1.1557
+CH2     CH2     S       CH2     Trappe    0.0         0.73041  -0.53685   1.1557
+CH      CH2     S       CH2     Trappe    0.0         0.73041  -0.53685   1.1557
+CH2     S       S       CH2     Trappe    3.5049      0.79083  -4.3348    1.003932
+CH3     S       S       CH3     Trappe    3.5049      0.79083  -4.3348    1.003932
+CH3     CH2     CH      S       Trappe   -0.49886     0.85189  -0.22225   0.87680
+CH3     CH2     CH      S       Trappe   -0.49886     0.85189  -0.22225   0.87680
+CH2     CH2     CH      S       Trappe   -0.49886     0.85189  -0.22225   0.87680
+CH      CH2     CH      S       Trappe   -0.49886     0.85189  -0.22225   0.87680
+CH3     CH2     C       S	Trappe    0.0         0.0       0.0       0.91658
+CH2     CH2     C       S	Trappe	  0.0         0.0       0.0	  0.91658
+CH      CH2     C       S	Trappe	  0.0         0.0       0.0	  0.91658
+CH3     CG      S       H	Trappe	  0.0         0.0       0.0	  0.79480
 
 //Charmm
 //Atom1	Atom2	Atom3	Atom4	Charmm		Kchi		n		delta		[Kchi		n		delta]
@@ -418,6 +457,7 @@ S   CH2 CH2 CH2   Cubic           5.9602          -0.2568         -3.802        
 //Polynomial
 //Atom1	Atom2	Atom3	Atom4	Polynomial	i	Ki	[j	Kj] 
 //VPolynomial = Ki (cos phi)^i + ... + Kj (cos phi)^j
+
 
 end TorsionTypes
 
