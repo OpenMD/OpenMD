@@ -60,7 +60,9 @@ Modules = \
 	simulation \
 	sticky \
 	switcheroo \
-	suttonchen 
+	suttonchen \
+	MetalNonMetal \
+	gb
 
 RmiSource =
 
