@@ -44,7 +44,7 @@
  *
  *  Created by Charles F. Vardeman II on 11 Dec 2006.
  *  @author  Charles F. Vardeman II
- *  @version $Id: ConvexHull.cpp,v 1.6 2008-05-14 14:31:48 chuckv Exp $
+ *  @version $Id: ConvexHull.cpp,v 1.7 2008-06-18 17:03:30 chuckv Exp $
  *
  */
 
@@ -75,7 +75,7 @@ typedef double RT;
 typedef CGAL::Simple_cartesian<RT>                K;
 typedef CGAL::Convex_hull_traits_3<K>             Traits;
 typedef Traits::Polyhedron_3                      Polyhedron_3;
-typedef K::Point_3                                Point;
+typedef K::Point_3                                Point_3;
 
 
 ConvexHull::ConvexHull(){}
@@ -83,26 +83,37 @@ ConvexHull::ConvexHull(){}
 bool ConvexHull::genHull(std::vector<Vector3d> pos)
 {
   
-  std::vector<Point> points;	
+  std::vector<Point_3> points;	
   
   
   // Copy the positon vector into a points vector for cgal.
   for (int i = 0; i < pos.size(); ++i)
     {
-      Point pt(pos[i][0],pos[i][1],pos[i][2]);
+      Point_3 pt(pos[i][0],pos[i][1],pos[i][2]);
       points.push_back(pt);
     }
   
   // define object to hold convex hull
-  Polyhedron_3 ch_object_;
+  CGAL::Object ch_object_;
+  Polyhedron_3 polyhedron;
+
   // compute convex hull
+  std::cerr << "Creating hull" << std::endl;
   CGAL::convex_hull_3(points.begin(), points.end(), ch_object_);
-  
-  for (Polyhedron_3::Vertex_iterator v = ch_object_.vertices_begin(); ch_object_.vertices_end(); ++v){
+  std::cerr << "Done Creating hull" << std::endl;
+  std::vector<Point_3>::const_iterator p_it;
+
+  for (p_it = points.begin(); p_it != points.end(); p_it++)
+    {
+      std::cerr << (*p_it).x() << std::endl;
+    }
+
+  /*
+  for (Polyhedron_3::Vertex_iterator v = ch_object_.vertices_begin(); 
+       ch_object_.vertices_end(); ++v){
     std::cout<< v.point()<<std::endl;
   }
-  
-  
+  */
 }
 
 

@@ -11,6 +11,10 @@ MySource    = \
 	linearAlgebra.F90 \
 	Wigner3jm.F90 
 
+Modules= \
+	linearAlgebra
+
+
 USE_CGAL = @USE_CGAL@
 USE_QHULL = @USE_QHULL@
 
