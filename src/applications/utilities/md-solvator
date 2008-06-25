@@ -1,250 +1,407 @@
-#!/usr/bin/env perl
+#!/usr/bin/env python
+"""Ice Cube Solvator
 
-# program that reads in a water box and solute (md), merges the two systems, 
-# and deletes overlapping molecules
+Opens two md files, one with water in an ice structure,
+and one with water in a liquid phase.   Deletes any overlapping
+liquid molecules and merges the two md files.
 
-# author    = "Dan Gezelter"
-# version   = "$Revision: 1.3 $"
-# date      = "$Date: 2008-01-23 21:22:18 $"
-# copyright = "Copyright (c) 2007 by the University of Notre Dame"
-# license   = "OOPSE"
+Usage: waterRotator
 
-
-use Getopt::Std;
-
-$d2tolerance = 7.5625; #distance to start cutting
-$fileName = 'solvatedSystem.md';
-$startSnap = 0;
-$startFrame = 0;
-$startStunts = 0;
-$startMeta = 0;
-$nSolvent = 0;
-
-# get our options
-getopts('hd:v:u:o:');
-
-# if we don't have a filename, drop to -h
-$opt_h = 'true' if $#ARGV != -1;
-
-# our option output 
-if ($opt_h){
-  print "solvator: carves a solute void in an oopse water box\n\n";
-  print "usage: solvator [-h] [-d distance tolerance] [-v file name (solvent)]";
-  print "  [-u file name (solute)] [-o file name (output)]\n\n";
-  print "  -h : show this message\n\n";
-  print "  -d real : overlap removal distance\n";
-  print "                 (default: 2.75 ang)\n";
-  print "  -u char : solute input file (oopse .md file)\n";
-  print "  -v char : solvent input file (oopse .md file)\n";
-  print "  -o char : carved solvent output file (oopse .md format)\n";
-  print "                 (default: 'solvatedSystem.md')\n";
-  print "Example:\n";
-  die   "   md-solvator -v freshWater.md -u mySolute.md -o mySystem.md\n";
-}
-
-# set some variables to be used in the code
-if (defined($opt_v)){
-  $solventName = $opt_v;
-} else {
-  die "Error: No solvent box specified\n       Please select a solvent box using the -v flag\n";
-}
-
-$soluteFileName = $opt_u if defined($opt_u);
-$fileName = $opt_o if defined($opt_o);
-
-if (!defined($opt_u)){
-  die "Error: No solute file specifed\n       Please select a solute file with the -u flag\n";
-}
-
-if (defined($opt_d)){
-  if ($opt_d =~ /^[0-9]/) {
-    $dval = $opt_d;
-    $d2tolerance = $dval*$dval;
-  } else {
-    die "Error: The '-d' value ($opt_d) is not a valid number\n       Please choose a positive real # value\n";
-  }
-}
-
-# open the file writer
-open(OUTFILE, ">./$fileName") || die "Error: can't open file $fileName\n";
-
-# open and read the pdb or xyz file and get solute coordinates
-open(SOLUTEFILE, "$soluteFileName") || die "Error: Can't open file $soluteFileName\n";
+Options:
+  -h,  --help              show this help
+  -u,  --solute=...        use specified meta-data (.md) file as the solute
+  -v,  --solvent=...       use specified meta-data (.md) file as the solvent
+  -r,  --rcut=...          specify the cutoff radius for deleting solvent
+  -o,  --output-file=...   use specified output (.md) file
 
 
-while (<SOLUTEFILE>){
-  $startSnap = 0 if /\/Snapshot/;
-  $startFrame = 0 if /\/FrameData/;
-  $startStunts = 0 if /\/StuntDoubles/;
-  $startMeta = 0 if /\/MetaData/;
+Example:
+   iceCubeSolvator -u frosty.md -v tepid.md -r 4.0 -o lukewarm.md
 
-  # save the MetaData lines
-  push(@soluteMetaLines, $_) if $startMeta == 1;
+"""
 
-  if ($startSnap == 1){
-    # save the frame data
-    push(@soluteFrameData, $_) if $startFrame == 1;
-    if (/Hmat/){
-      @line = split;
-      $soluteHxx = $line[2];
-      chop($soluteHxx);
-      $soluteHyy = $line[8];
-      chop($soluteHyy);
-      $soluteHzz = $line[14];
-    }
-    if ($startStunts == 1){
-      @line = split;
-      $x_val = $line[2] - ($soluteHxx*round($line[2]/$soluteHxx));
-      $y_val = $line[3] - ($soluteHyy*round($line[3]/$soluteHyy));
-      $z_val = $line[4] - ($soluteHzz*round($line[4]/$soluteHzz));
+__author__ = "Dan Gezelter (gezelter@nd.edu)"
+__version__ = "$Revision: 1.4 $"
+__date__ = "$Date: 2008-06-25 18:22:08 $"
+__copyright__ = "Copyright (c) 2006 by the University of Notre Dame"
+__license__ = "OOPSE"
 
-      push(@solute_x, $x_val);
-      push(@solute_y, $y_val);
-      push(@solute_z, $z_val);
-      $saveLine = "$line[0]\t$line[1]\t$x_val\t$y_val\t$z_val\t";
-      for ($i = 5; $i <= $#line; $i++){
-        $saveLine = join(' ', $saveLine, $line[$i]);
-      }
-      push(@soluteStuntDoubles, $saveLine);
-      $soluteCount++;
-    }
-  }
+import sys
+import getopt
+import string
+import math
+import random
+from sets import *
+#from Numeric import *
 
-  $startSnap = 1 if /Snapshot/;
-  $startFrame = 1 if /FrameData/;
-  $startStunts = 1 if /StuntDoubles/;
-  $startMeta = 1 if /MetaData/;
-  # check again since "/value" contains "value"
-  $startSnap = 0 if /\/Snapshot/;
-  $startFrame = 0 if /\/FrameData/;
-  $startStunts = 0 if /\/StuntDoubles/;
-  $startMeta = 0 if /\/MetaData/;
-}
+_haveMDFileName1 = 0
+_haveMDFileName2 = 0
+_haveRcut = 0
+_haveOutputFileName = 0
 
-$solventCount = $soluteCount;
-# okay, let's open the solvent box and write a carved file
-open(SOLVENT, "$solventName") || die "Error: Can't open file $solventName\n";
+metaData1 = []
+frameData1 = []
+positions1 = []
+velocities1 = []
+quaternions1 = []
+angVels1 = []
+indices1 = []
+Hmat1 = []
+BoxInv1 = []
 
+metaData2 = []
+frameData2 = []
+positions2 = []
+velocities2 = []
+quaternions2 = []
+angVels2 = []
+indices2 = []
+Hmat2 = []
+BoxInv2 = []
 
-while (<SOLVENT>){
-  $startSnap = 0 if /\/Snapshot/;
-  $startFrame = 0 if /\/FrameData/;
-  $startStunts = 0 if /\/StuntDoubles/;
-  $startMeta = 0 if /\/MetaData/;
+keepers = []
 
-  # save the MetaData lines
-  push(@metaLines, $_) if $startMeta == 1;
+def usage():
+    print __doc__
 
-  if ($startSnap == 1){
-    # save the frame data
-    push(@frameData, $_) if $startFrame == 1;
-    if (/Hmat/){
-      @line = split;
-      $hxx = $line[2];
-      chop($hxx);
-      $hyy = $line[8];
-      chop($hyy);
-      $hzz = $line[14];
-    }
-    if ($startStunts == 1){
-      @line = split;
+def readFile1(mdFileName):
+    mdFile = open(mdFileName, 'r')        
+    # Find OOPSE version info first
+    line = mdFile.readline()
+    while 1:
+        if '<OOPSE version=' in line:
+            OOPSEversion = line
+            break
+        line = mdFile.readline()
+        
+        # Rewind file and find start of MetaData block
+        
+    mdFile.seek(0)
+    line = mdFile.readline()
+    print "reading MetaData"
+    while 1:
+        if '<MetaData>' in line:
+            while 2:
+                metaData1.append(line)
+                line = mdFile.readline()
+                if '</MetaData>' in line:
+                    metaData1.append(line)
+                    break
+            break
+        line = mdFile.readline()
 
-      # wrap positions back into the box
-      $x_val = $line[2] - ($hxx*round($line[2]/$hxx));
-      $y_val = $line[3] - ($hyy*round($line[3]/$hyy));
-      $z_val = $line[4] - ($hzz*round($line[4]/$hzz));
+    mdFile.seek(0)
+    print "reading Snapshot"
+    line = mdFile.readline()
+    while 1:
+        if '<Snapshot>' in line:
+            line = mdFile.readline()
+            while 1:
+                print "reading FrameData"
+                if '<FrameData>' in line:
+                    while 2:
+                        frameData1.append(line)
+                        if 'Hmat:' in line:
+                            L = line.split()
+                            Hxx = float(L[2].strip(','))
+                            Hxy = float(L[3].strip(','))
+                            Hxz = float(L[4].strip(','))
+                            Hyx = float(L[7].strip(','))
+                            Hyy = float(L[8].strip(','))
+                            Hyz = float(L[9].strip(','))
+                            Hzx = float(L[12].strip(','))
+                            Hzy = float(L[13].strip(','))
+                            Hzz = float(L[14].strip(','))
+                            Hmat1.append([Hxx, Hxy, Hxz])
+                            Hmat1.append([Hyx, Hyy, Hyz])
+                            Hmat1.append([Hzx, Hzy, Hzz])
+                            print Hmat1
+                            BoxInv1.append(1.0/Hxx)
+                            BoxInv1.append(1.0/Hyy)
+                            BoxInv1.append(1.0/Hzz)
+                            print BoxInv1
+                        line = mdFile.readline()
+                        if '</FrameData>' in line:
+                            frameData1.append(line)
+                            break
+                    break
 
-      $saveFlag = 1;
-      for($i=0; $i<=$#solute_x; $i++){
-	$diff_x = $x_val - $solute_x[$i];
-	$diff_y = $y_val - $solute_y[$i];
-	$diff_z = $z_val - $solute_z[$i];
-	$dist2 = $diff_x*$diff_x + $diff_y*$diff_y + $diff_z*$diff_z;
-	if ($dist2 < $d2tolerance) {
-	  $saveFlag = 0;
-	  last;
-	}
-      }
-      if ($saveFlag == 1){
-	$saveLine = "$solventCount\t$line[1]\t$x_val\t$y_val\t$z_val\t";
-	for ($i = 5; $i <= $#line; $i++){
-	  $saveLine = join(' ', $saveLine, $line[$i]);
-	}
-	push(@goodSolventMolecules, $saveLine);
-	$solventCount++;
-      }
-    }
-  }
-  $startSnap = 1 if /Snapshot/;
-  $startFrame = 1 if /FrameData/;
-  $startStunts = 1 if /StuntDoubles/;
-  $startMeta = 1 if /MetaData/;
-  # check again since "/value" contains "value"
-  $startSnap = 0 if /\/Snapshot/;
-  $startFrame = 0 if /\/FrameData/;
-  $startStunts = 0 if /\/StuntDoubles/;
-  $startMeta = 0 if /\/MetaData/;
-}
+            line = mdFile.readline()
+            while 1:
+                if '<StuntDoubles>' in line:
+                    line = mdFile.readline()
+                    while 2:
+                        L = line.split()
+                        myIndex = int(L[0])
+                        indices1.append(myIndex)
+                        pvqj1.append(L[1])
+                        x = float(L[2])
+                        y = float(L[3])
+                        z = float(L[4])
+                        positions1.append([x, y, z])
+                        vx = float(L[5])
+                        vy = float(L[6])
+                        vz = float(L[7])
+                        velocities1.append([vx, vy, vz])
+                        qw = float(L[8])
+                        qx = float(L[9])
+                        qy = float(L[10])
+                        qz = float(L[11])
+                        quaternions1.append([qw, qx, qy, qz])
+                        jx = float(L[12])
+                        jy = float(L[13])
+                        jz = float(L[14])
+                        angVels1.append([jx, jy, jz])
+                        line = mdFile.readline()
+                        if '</StuntDoubles>' in line:
+                            break
+                    break
+        line = mdFile.readline()
+        if not line: break
+    
+    mdFile.close()
 
-$nSolvent = $#goodSolventMolecules + 1;
+def readFile2(mdFileName):
+    mdFile = open(mdFileName, 'r')        
+    # Find OOPSE version info first
+    line = mdFile.readline()
+    while 1:
+        if '<OOPSE version=' in line:
+            OOPSEversion = line
+            break
+        line = mdFile.readline()
+        
+        # Rewind file and find start of MetaData block
+        
+    mdFile.seek(0)
+    line = mdFile.readline()
+    print "reading MetaData"
+    while 1:
+        if '<MetaData>' in line:
+            while 2:
+                metaData2.append(line)
+                line = mdFile.readline()
+                if '</MetaData>' in line:
+                    metaData2.append(line)
+                    break
+            break
+        line = mdFile.readline()
 
-# write out the final file
-writeOutFile();
-print "The solvated system \"$fileName\" was generated.\n";
+    mdFile.seek(0)
+    print "reading Snapshot"
+    line = mdFile.readline()
+    while 1:
+        if '<Snapshot>' in line:
+            line = mdFile.readline()
+            while 1:
+                print "reading FrameData"
+                if '<FrameData>' in line:
+                    while 2:
+                        frameData2.append(line)
+                        if 'Hmat:' in line:
+                            L = line.split()
+                            Hxx = float(L[2].strip(','))
+                            Hxy = float(L[3].strip(','))
+                            Hxz = float(L[4].strip(','))
+                            Hyx = float(L[7].strip(','))
+                            Hyy = float(L[8].strip(','))
+                            Hyz = float(L[9].strip(','))
+                            Hzx = float(L[12].strip(','))
+                            Hzy = float(L[13].strip(','))
+                            Hzz = float(L[14].strip(','))
+                            Hmat2.append([Hxx, Hxy, Hxz])
+                            Hmat2.append([Hyx, Hyy, Hyz])
+                            Hmat2.append([Hzx, Hzy, Hzz])
+                            print Hmat2
+                            BoxInv2.append(1.0/Hxx)
+                            BoxInv2.append(1.0/Hyy)
+                            BoxInv2.append(1.0/Hzz)
+                            print BoxInv2
+                        line = mdFile.readline()
+                        if '</FrameData>' in line:
+                            frameData2.append(line)
+                            break
+                    break
 
+            line = mdFile.readline()
+            while 1:
+                if '<StuntDoubles>' in line:
+                    line = mdFile.readline()
+                    while 2:
+                        L = line.split()
+                        myIndex = int(L[0])
+                        indices2.append(myIndex)
+                        pvqj2.append(L[1])
+                        x = float(L[2])
+                        y = float(L[3])
+                        z = float(L[4])
+                        positions2.append([x, y, z])
+                        vx = float(L[5])
+                        vy = float(L[6])
+                        vz = float(L[7])
+                        velocities2.append([vx, vy, vz])
+                        qw = float(L[8])
+                        qx = float(L[9])
+                        qy = float(L[10])
+                        qz = float(L[11])
+                        quaternions2.append([qw, qx, qy, qz])
+                        jx = float(L[12])
+                        jy = float(L[13])
+                        jz = float(L[14])
+                        angVels2.append([jx, jy, jz])
+                        line = mdFile.readline()
+                        if '</StuntDoubles>' in line:
+                            break
+                    break
+        line = mdFile.readline()
+        if not line: break
+    
+    mdFile.close()
 
-sub writeOutFile {
-  # write out the header
-  print OUTFILE "<OOPSE version=4>\n";
-  printMetaData();
-  printFrameData();
-  print OUTFILE "    <StuntDoubles>\n";
-  # now print out the atoms
-  for ($i=0; $i<=$#solute_x; $i++){
-    print OUTFILE "$soluteStuntDoubles[$i]\n";
-  }
-  for ($i=0; $i<=$#goodSolventMolecules; $i++) {
-     print OUTFILE "$goodSolventMolecules[$i]\n";
-  }
-  print OUTFILE "    </StuntDoubles>\n  </Snapshot>\n</OOPSE>\n";
-}
+def writeFile(outputFileName):
+    outputFile = open(outputFileName, 'w')
 
-sub printMetaData() {
-  print OUTFILE "  <MetaData>\n";
+    outputFile.write("<OOPSE version=4>\n");
+    
+    for metaline in metaData1:
+        outputFile.write(metaline)
 
-  writeSoluteDescription();
+    outputFile.write("  <Snapshot>\n")
 
-  for ($i = 0; $i<=$#metaLines; $i++) {
-    # reset the number of solvent molecules
-    if ($metaLines[$i] =~ /nMol/) {
-      $metaLines[$i] = "  nMol = $nSolvent;\n";
-    }
+    for frameline in frameData1:
+        outputFile.write(frameline)
+        
+    outputFile.write("    <StuntDoubles>\n")
 
-    print OUTFILE "$metaLines[$i]";
-  }
+    sdFormat = 'pvqj'
+    newIndex = 0
+    for i in range(len(indices1)):
+        
+        outputFile.write("%10d %7s %18.10g %18.10g %18.10g %13e %13e %13e %13e %13e %13e %13e %13e %13e %13e\n" % (newIndex, pvqj1[i], positions1[i][0], positions1[i][1], positions1[i][2], velocities1[i][0], velocities1[i][1], velocities1[i][2], quaternions1[i][0], quaternions1[i][1], quaternions1[i][2], quaternions1[i][3], angVels1[i][0], angVels1[i][1], angVels1[i][2]))
+        newIndex = newIndex + 1
 
-  print OUTFILE "  </MetaData>\n";
-}
+    outputFile.write("    </StuntDoubles>\n")
+    outputFile.write("  </Snapshot>\n")
+    outputFile.write("</OOPSE>\n")
+    outputFile.close()
+    
+def roundMe(x):
+    if (x >= 0.0):
+        return math.floor(x + 0.5)
+    else:
+        return math.ceil(x - 0.5)
 
-sub writeSoluteDescription {
-  # include a solute model description in the meta data region
+def wrapVector(myVect):
+    scaled = [0.0, 0.0, 0.0]
+    for i in range(3):
+        scaled[i] = myVect[i] * BoxInv1[i]
+        scaled[i] = scaled[i] - roundMe(scaled[i])
+        myVect[i] = scaled[i] * Hmat1[i][i]
+    return myVect
 
-  for ($i = 0; $i<=$#soluteMetaLines; $i++) {
-    print OUTFILE "$soluteMetaLines[$i]";
-  }
-  print "The solute model definition was included in '$fileName'.\n";
-}
+def dot(L1, L2):
+    myDot = 0.0
+    for i in range(len(L1)):
+        myDot = myDot + L1[i]*L2[i]
+    return myDot
 
-sub printFrameData {
-  print OUTFILE "  <Snapshot>\n    <FrameData>\n";
+def normalize(L1):
+    L2 = []
+    myLength = math.sqrt(dot(L1, L1))
+    for i in range(len(L1)):
+        L2.append(L1[i] / myLength)
+    return L2
 
-  for($i = 0; $i<=$#frameData; $i++) {
-    print OUTFILE "$frameData[$i]";
-  }
+def cross(L1, L2):
+    # don't call this with anything other than length 3 lists please
+    # or you'll be sorry
+    L3 = [0.0, 0.0, 0.0]
+    L3[0] = L1[1]*L2[2] - L1[2]*L2[1]
+    L3[1] = L1[2]*L2[0] - L1[0]*L2[2]
+    L3[2] = L1[0]*L2[1] - L1[1]*L2[0]
+    return L3
 
-  print OUTFILE "    </FrameData>\n";
-}
+def removeOverlaps(rcut):
 
-sub round {
-  return int( $_[0] + 0.5 * ($_[0] <=> 0) );
-}
+    rcut2 = rcut*rcut
+    for i in range(len(indices2)):
+        keepThisMolecule = 1
+
+        iPos = positions2[i]
+        
+        for j in range(len(indices1)):
+            jPos = positions1[j]
+            dpos = [jPos[0]-iPos[0], jPos[1]-iPos[1], jPos[2]-iPos[2]]
+            dpos = wrapVector(dpos)
+            dist2 = dot(dpos,dpos)
+
+            if (dist2 < rcut2):
+                keepThisMolecule = 0
+                break
+
+        keepers.append(keepThisMolecule)
+
+    for i in range(len(indices2)):
+        if (keepers[i] == 1):
+            positions1.append(positions2[i])
+            velocities1.append(velocities2[i])
+            quaternions1.append(quaternions2[i])
+            angVels1.append(angVels2[i])
+            indices1.append(indices2[i])
+
+def main(argv):                         
+    try:                                
+        opts, args = getopt.getopt(argv, "hu:v:r:o:", ["help", "solute=","solvent=", "rcut" "output-file="]) 
+    except getopt.GetoptError:           
+        usage()                          
+        sys.exit(2)                     
+    for opt, arg in opts:                
+        if opt in ("-h", "--help"):      
+            usage()                     
+            sys.exit()                  
+        elif opt in ("-u", "--solute"): 
+            mdFileName1 = arg
+            global _haveMDFileName1
+            _haveMDFileName1 = 1
+        elif opt in ("-v", "--solvent"): 
+            mdFileName2 = arg
+            global _haveMDFileName2
+            _haveMDFileName2 = 1
+        elif opt in ("-r", "--rcut"): 
+            rcut = float(arg)
+            global _haveRcut
+            _haveRcut = 1
+        elif opt in ("-o", "--output-file"): 
+            outputFileName = arg
+            global _haveOutputFileName
+            _haveOutputFileName = 1
+
+    if (_haveMDFileName1 != 1):
+        usage() 
+        print "No meta-data file was specified for the solute"
+        sys.exit()
+
+    if (_haveMDFileName2 != 1):
+        usage() 
+        print "No meta-data file was specified for the solvent"
+        sys.exit()
+
+    if (_haveOutputFileName != 1):
+        usage()
+        print "No output file was specified"
+        sys.exit()
+
+    if (_haveRcut != 1):
+        print "No cutoff radius was specified, using 4 angstroms"
+        rcut = 4.0
+
+    readFile1(mdFileName1)
+    readFile2(mdFileName2)
+    removeOverlaps(rcut)
+    writeFile(outputFileName)
+
+if __name__ == "__main__":
+    if len(sys.argv) == 1:
+        usage()
+        sys.exit()
+    main(sys.argv[1:])
