@@ -21,8 +21,8 @@ Example:
 """
 
 __author__ = "Dan Gezelter (gezelter@nd.edu)"
-__version__ = "$Revision: 1.6 $"
-__date__ = "$Date: 2008-06-26 14:48:51 $"
+__version__ = "$Revision: 1.7 $"
+__date__ = "$Date: 2008-06-26 15:50:22 $"
 __copyright__ = "Copyright (c) 2006 by the University of Notre Dame"
 __license__ = "OOPSE"
 
@@ -38,6 +38,8 @@ _haveMDFileName1 = 0
 _haveMDFileName2 = 0
 _haveRcut = 0
 _haveOutputFileName = 0
+_haveNSoluteAtoms = 1
+_haveNSolventAtoms = 1
 
 metaData1 = []
 frameData1 = []
@@ -342,7 +344,7 @@ def cross(L1, L2):
     L3[2] = L1[0]*L2[1] - L1[1]*L2[0]
     return L3
 
-def removeOverlaps(rcut,nSolventAtoms,nSoluteAtoms:
+def removeOverlaps(rcut,nSolventAtoms,nSoluteAtoms):
 
     rcut2 = rcut*rcut
     nextMol = 0
@@ -369,15 +371,16 @@ def removeOverlaps(rcut,nSolventAtoms,nSoluteAtoms:
     for i in range(0,len(indices2),nSolventAtoms):
         if (keepers[i] == 1):
             for j in range (i, i+nSolventAtoms):
-                positions1.append(positions2[j])
-                velocities1.append(velocities2[j])
-                quaternions1.append(quaternions2[j])
-                angVels1.append(angVels2[j])
-                indices1.append(indices2[j])
+                if (pvqj2[j] == 'pv'):
+                    positions1.append(positions2[j])
+                    velocities1.append(velocities2[j])
+                    quaternions1.append(quaternions2[j])
+                    angVels1.append(angVels2[j])
+                    indices1.append(indices2[j])
 
 def main(argv):                         
     try:                                
-        opts, args = getopt.getopt(argv, "hu:v:n:p:r:o:", ["help", "solute=","solvent=","nSoluteAtoms","nSoluteAtoms", "rcut" "output-file="]) 
+        opts, args = getopt.getopt(argv, "hu:v:n:p:r:o:", ["help", "solute=","solvent=","nSoluteAtoms=","nSolventAtoms=", "rcut=" "output-file="]) 
     except getopt.GetoptError:           
         usage()                          
         sys.exit(2)                     
@@ -394,11 +397,11 @@ def main(argv):
             global _haveMDFileName2
             _haveMDFileName2 = 1
         elif opt in ("-n", "--nSoluteAtoms"): 
-            nSoluteAtoms = arg
+            nSoluteAtoms = int(arg)
             global _haveNSoluteAtoms
             _haveNSoluteAtoms = 1
         elif opt in ("-p", "--nSolventAtoms"): 
-            mdFileName2 = arg
+            nSolventAtoms = int(arg)
             global _haveNSolventAtoms
             _haveNSolventAtoms = 1
         elif opt in ("-r", "--rcut"): 
