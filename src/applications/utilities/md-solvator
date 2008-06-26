@@ -21,8 +21,8 @@ Example:
 """
 
 __author__ = "Dan Gezelter (gezelter@nd.edu)"
-__version__ = "$Revision: 1.4 $"
-__date__ = "$Date: 2008-06-25 18:22:08 $"
+__version__ = "$Revision: 1.5 $"
+__date__ = "$Date: 2008-06-26 14:23:49 $"
 __copyright__ = "Copyright (c) 2006 by the University of Notre Dame"
 __license__ = "OOPSE"
 
@@ -48,6 +48,7 @@ angVels1 = []
 indices1 = []
 Hmat1 = []
 BoxInv1 = []
+pvqj1 = []
 
 metaData2 = []
 frameData2 = []
@@ -58,6 +59,7 @@ angVels2 = []
 indices2 = []
 Hmat2 = []
 BoxInv2 = []
+pvqj2 = []
 
 keepers = []
 
@@ -143,15 +145,20 @@ def readFile1(mdFileName):
                         vy = float(L[6])
                         vz = float(L[7])
                         velocities1.append([vx, vy, vz])
-                        qw = float(L[8])
-                        qx = float(L[9])
-                        qy = float(L[10])
-                        qz = float(L[11])
-                        quaternions1.append([qw, qx, qy, qz])
-                        jx = float(L[12])
-                        jy = float(L[13])
-                        jz = float(L[14])
-                        angVels1.append([jx, jy, jz])
+                        if 'pvqj' in L[1]:
+                            qw = float(L[8])
+                            qx = float(L[9])
+                            qy = float(L[10])
+                            qz = float(L[11])
+                            quaternions1.append([qw, qx, qy, qz])
+                            jx = float(L[12])
+                            jy = float(L[13])
+                            jz = float(L[14])
+                            angVels1.append([jx, jy, jz])
+                        else:
+                            quaternions1.append([0.0, 0.0, 0.0, 0.0])
+                            angVels1.append([0.0, 0.0, 0.0])
+
                         line = mdFile.readline()
                         if '</StuntDoubles>' in line:
                             break
@@ -240,15 +247,20 @@ def readFile2(mdFileName):
                         vy = float(L[6])
                         vz = float(L[7])
                         velocities2.append([vx, vy, vz])
-                        qw = float(L[8])
-                        qx = float(L[9])
-                        qy = float(L[10])
-                        qz = float(L[11])
-                        quaternions2.append([qw, qx, qy, qz])
-                        jx = float(L[12])
-                        jy = float(L[13])
-                        jz = float(L[14])
-                        angVels2.append([jx, jy, jz])
+                        if 'pvqj' in L[1]:
+                            qw = float(L[8])
+                            qx = float(L[9])
+                            qy = float(L[10])
+                            qz = float(L[11])
+                            quaternions2.append([qw, qx, qy, qz])
+                            jx = float(L[12])
+                            jy = float(L[13])
+                            jz = float(L[14])
+                            angVels2.append([jx, jy, jz])
+                        else:
+                            quaternions1.append([0.0, 0.0, 0.0, 0.0])
+                            angVels1.append([0.0, 0.0, 0.0])
+
                         line = mdFile.readline()
                         if '</StuntDoubles>' in line:
                             break
@@ -273,11 +285,14 @@ def writeFile(outputFileName):
         
     outputFile.write("    <StuntDoubles>\n")
 
-    sdFormat = 'pvqj'
+
     newIndex = 0
     for i in range(len(indices1)):
-        
-        outputFile.write("%10d %7s %18.10g %18.10g %18.10g %13e %13e %13e %13e %13e %13e %13e %13e %13e %13e\n" % (newIndex, pvqj1[i], positions1[i][0], positions1[i][1], positions1[i][2], velocities1[i][0], velocities1[i][1], velocities1[i][2], quaternions1[i][0], quaternions1[i][1], quaternions1[i][2], quaternions1[i][3], angVels1[i][0], angVels1[i][1], angVels1[i][2]))
+        if (pvqj[i] == 'pv'):
+            outputFile.write("%10d %7s %18.10g %18.10g %18.10g %14e %13e %13e\n" % (newIndex, pvqj1[i], positions1[i][0], positions1[i][1], positions1[i][2], velocities1[i][0], velocities1[i][1], velocities1[i][2]))
+        elif(pvqj[i] == 'pvqj'):
+            outputFile.write("%10d %7s %18.10g %18.10g %18.10g %13e %13e %13e %13e %13e %13e %13e %13e %13e %13e\n" % (newIndex, pvqj1[i], positions1[i][0], positions1[i][1], positions1[i][2], velocities1[i][0], velocities1[i][1], velocities1[i][2], quaternions1[i][0], quaternions1[i][1], quaternions1[i][2], quaternions1[i][3], angVels1[i][0], angVels1[i][1], angVels1[i][2]))
+
         newIndex = newIndex + 1
 
     outputFile.write("    </StuntDoubles>\n")
@@ -290,6 +305,12 @@ def roundMe(x):
         return math.floor(x + 0.5)
     else:
         return math.ceil(x - 0.5)
+
+def frange(start,stop,step=1.0):
+    while start < stop:
+        yield start
+        start += step
+
 
 def wrapVector(myVect):
     scaled = [0.0, 0.0, 0.0]
@@ -321,37 +342,42 @@ def cross(L1, L2):
     L3[2] = L1[0]*L2[1] - L1[1]*L2[0]
     return L3
 
-def removeOverlaps(rcut):
+def removeOverlaps(rcut,nSolventAtoms,nSoluteAtoms:
 
     rcut2 = rcut*rcut
-    for i in range(len(indices2)):
+    nextMol = 0
+
+
+    for i in range(0,len(indices2),nSolventAtoms):
         keepThisMolecule = 1
-
-        iPos = positions2[i]
+        for atom1 in range (i, (i+nSolventAtoms-1)):
+            iPos = positions2[atom1]
         
-        for j in range(len(indices1)):
-            jPos = positions1[j]
-            dpos = [jPos[0]-iPos[0], jPos[1]-iPos[1], jPos[2]-iPos[2]]
-            dpos = wrapVector(dpos)
-            dist2 = dot(dpos,dpos)
+            for j in range(0,len(indices1),nSoluteAtoms):
+                for atom2 in range (j, (j+nSoluteAtoms-1)):
+                    jPos = positions1[j]
+                    dpos = [jPos[0]-iPos[0], jPos[1]-iPos[1], jPos[2]-iPos[2]]
+                    dpos = wrapVector(dpos)
+                    dist2 = dot(dpos,dpos)
 
-            if (dist2 < rcut2):
-                keepThisMolecule = 0
-                break
-
+                    if (dist2 < rcut2):
+                        keepThisMolecule = 0
+                        break
+                    
         keepers.append(keepThisMolecule)
 
-    for i in range(len(indices2)):
+    for i in range(0,len(indices2),nSolventAtoms):
         if (keepers[i] == 1):
-            positions1.append(positions2[i])
-            velocities1.append(velocities2[i])
-            quaternions1.append(quaternions2[i])
-            angVels1.append(angVels2[i])
-            indices1.append(indices2[i])
+            for j in range (i, i+nSolventAtoms):
+                positions1.append(positions2[j])
+                velocities1.append(velocities2[j])
+                quaternions1.append(quaternions2[j])
+                angVels1.append(angVels2[j])
+                indices1.append(indices2[j])
 
 def main(argv):                         
     try:                                
-        opts, args = getopt.getopt(argv, "hu:v:r:o:", ["help", "solute=","solvent=", "rcut" "output-file="]) 
+        opts, args = getopt.getopt(argv, "hu:v:n:p:r:o:", ["help", "solute=","solvent=","nSoluteAtoms","nSoluteAtoms", "rcut" "output-file="]) 
     except getopt.GetoptError:           
         usage()                          
         sys.exit(2)                     
@@ -367,6 +393,14 @@ def main(argv):
             mdFileName2 = arg
             global _haveMDFileName2
             _haveMDFileName2 = 1
+        elif opt in ("-n", "--nSoluteAtoms"): 
+            nSoluteAtoms = arg
+            global _haveNSoluteAtoms
+            _haveNSoluteAtoms = 1
+        elif opt in ("-p", "--nSolventAtoms"): 
+            mdFileName2 = arg
+            global _haveNSolventAtoms
+            _haveNSolventAtoms = 1
         elif opt in ("-r", "--rcut"): 
             rcut = float(arg)
             global _haveRcut
@@ -395,9 +429,15 @@ def main(argv):
         print "No cutoff radius was specified, using 4 angstroms"
         rcut = 4.0
 
+    if (_haveNSoluteAtoms != 1):
+        nSoluteAtoms = 1
+
+    if (_haveNSolventAtoms != 1):
+        nSolventAtoms = 1
+
     readFile1(mdFileName1)
     readFile2(mdFileName2)
-    removeOverlaps(rcut)
+    removeOverlaps(rcut,nSolventAtoms,nSoluteAtoms)
     writeFile(outputFileName)
 
 if __name__ == "__main__":
