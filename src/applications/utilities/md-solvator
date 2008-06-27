@@ -21,8 +21,8 @@ Example:
 """
 
 __author__ = "Dan Gezelter (gezelter@nd.edu)"
-__version__ = "$Revision: 1.7 $"
-__date__ = "$Date: 2008-06-26 15:50:22 $"
+__version__ = "$Revision: 1.8 $"
+__date__ = "$Date: 2008-06-27 15:47:06 $"
 __copyright__ = "Copyright (c) 2006 by the University of Notre Dame"
 __license__ = "OOPSE"
 
@@ -65,6 +65,11 @@ pvqj2 = []
 
 keepers = []
 
+soluteTypeLine = str()
+solventTypeLine = str()
+soluteMolLine = str()
+nSolvents = 0
+
 def usage():
     print __doc__
 
@@ -82,12 +87,19 @@ def readFile1(mdFileName):
         
     mdFile.seek(0)
     line = mdFile.readline()
+
     print "reading MetaData"
     while 1:
         if '<MetaData>' in line:
             while 2:
                 metaData1.append(line)
                 line = mdFile.readline()
+                if 'type' in line:
+                    global soluteTypeLine
+                    soluteTypeLine = line
+                if 'nMol' in line:
+                    global soluteMolLine
+                    soluteMolLine = line
                 if '</MetaData>' in line:
                     metaData1.append(line)
                     break
@@ -186,8 +198,11 @@ def readFile2(mdFileName):
     line = mdFile.readline()
     print "reading MetaData"
     while 1:
-        if '<MetaData>' in line:
+        if '<MetaData>' in line:                            
             while 2:
+                if 'type' in line:
+                    global solventTypeLine
+                    solventTypeLine = line
                 metaData2.append(line)
                 line = mdFile.readline()
                 if '</MetaData>' in line:
@@ -275,11 +290,28 @@ def readFile2(mdFileName):
 def writeFile(outputFileName):
     outputFile = open(outputFileName, 'w')
 
-    outputFile.write("<OOPSE version=4>\n");
+    outputFile.write("<OOPSE version=4>\n")
     
-    for metaline in metaData1:
-        outputFile.write(metaline)
+#    for metaline in metaData1:
+#        outputFile.write(metaline)
+    outputFile.write("   <MetaData>\n")
+    outputFile.write("\n\n")
+    outputFile.write("#include \"thiols.md\"\n")
+    outputFile.write("#include \"metals.md\"\n")
+    outputFile.write("\n\n")
+    outputFile.write("component{\n")
+    outputFile.write(soluteTypeLine)
+    outputFile.write(soluteMolLine)
+    outputFile.write("}\n")
 
+    outputFile.write("component{\n")
+    outputFile.write(solventTypeLine)
+    outputFile.write("nMol = %d;" % (nSolvents))
+    outputFile.write("}\n")
+    outputFile.write("\n\n")
+    outputFile.write("forceField = \"MnM\";\n\n")
+    outputFile.write("\n\n")
+    outputFile.write("    </MetaData>\n")
     outputFile.write("  <Snapshot>\n")
 
     for frameline in frameData1:
@@ -290,9 +322,9 @@ def writeFile(outputFileName):
 
     newIndex = 0
     for i in range(len(indices1)):
-        if (pvqj[i] == 'pv'):
+        if (pvqj1[i] == 'pv'):
             outputFile.write("%10d %7s %18.10g %18.10g %18.10g %14e %13e %13e\n" % (newIndex, pvqj1[i], positions1[i][0], positions1[i][1], positions1[i][2], velocities1[i][0], velocities1[i][1], velocities1[i][2]))
-        elif(pvqj[i] == 'pvqj'):
+        elif(pvqj1[i] == 'pvqj'):
             outputFile.write("%10d %7s %18.10g %18.10g %18.10g %13e %13e %13e %13e %13e %13e %13e %13e %13e %13e\n" % (newIndex, pvqj1[i], positions1[i][0], positions1[i][1], positions1[i][2], velocities1[i][0], velocities1[i][1], velocities1[i][2], quaternions1[i][0], quaternions1[i][1], quaternions1[i][2], quaternions1[i][3], angVels1[i][0], angVels1[i][1], angVels1[i][2]))
 
         newIndex = newIndex + 1
@@ -349,7 +381,7 @@ def removeOverlaps(rcut,nSolventAtoms,nSoluteAtoms):
     rcut2 = rcut*rcut
     nextMol = 0
 
-
+    
     for i in range(0,len(indices2),nSolventAtoms):
         keepThisMolecule = 1
         for atom1 in range (i, (i+nSolventAtoms)):
@@ -361,23 +393,35 @@ def removeOverlaps(rcut,nSolventAtoms,nSoluteAtoms):
                     dpos = [jPos[0]-iPos[0], jPos[1]-iPos[1], jPos[2]-iPos[2]]
                     dpos = wrapVector(dpos)
                     dist2 = dot(dpos,dpos)
-
+                    
                     if (dist2 < rcut2):
                         keepThisMolecule = 0
-                        break
-                    
+ #                       break
+        
         keepers.append(keepThisMolecule)
 
-    for i in range(0,len(indices2),nSolventAtoms):
+    global nSolvents
+    myIndex = len(indices2) - 1
+    for i in range(0,len(keepers)):
+        
         if (keepers[i] == 1):
+            nSolvents = nSolvents + 1
             for j in range (i, i+nSolventAtoms):
+                indices1.append(myIndex)
+                pvqj1.append(pvqj2[j])
                 if (pvqj2[j] == 'pv'):
+                    positions1.append(positions2[j])
+                    velocities1.append(velocities2[j])
+                    quaternions1.append([0.0, 0.0, 0.0, 0.0])
+                    angVels1.append([0.0, 0.0, 0.0])
+                else:
                     positions1.append(positions2[j])
                     velocities1.append(velocities2[j])
                     quaternions1.append(quaternions2[j])
                     angVels1.append(angVels2[j])
-                    indices1.append(indices2[j])
-
+ #                   indices1.append(indices2[j])
+                myIndex = myIndex +1
+    
 def main(argv):                         
     try:                                
         opts, args = getopt.getopt(argv, "hu:v:n:p:r:o:", ["help", "solute=","solvent=","nSoluteAtoms=","nSolventAtoms=", "rcut=" "output-file="]) 
@@ -430,7 +474,7 @@ def main(argv):
 
     if (_haveRcut != 1):
         print "No cutoff radius was specified, using 4 angstroms"
-        rcut = 4.0
+        rcut =4.0
 
     if (_haveNSoluteAtoms != 1):
         nSoluteAtoms = 1
