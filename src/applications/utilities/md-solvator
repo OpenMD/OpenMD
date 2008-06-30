@@ -1,11 +1,11 @@
 #!/usr/bin/env python
-"""Ice Cube Solvator
+"""MD Solvator
 
-Opens two md files, one with water in an ice structure,
-and one with water in a liquid phase.   Deletes any overlapping
-liquid molecules and merges the two md files.
+Opens two md files, one with a solute structure and one with a solvent structure.
+Deletes any solvent molecules that overlap with solute molecules and produces a md file.
+The md file is bare and must be edited to run properly in oopse.
 
-Usage: waterRotator
+Usage: md-solvator
 
 Options:
   -h,  --help              show this help
@@ -13,17 +13,18 @@ Options:
   -v,  --solvent=...       use specified meta-data (.md) file as the solvent
   -r,  --rcut=...          specify the cutoff radius for deleting solvent
   -o,  --output-file=...   use specified output (.md) file
-
+  -n,  --nSoluteAtoms=...  Number of atoms in solute molecule, default is 1 atom.
+  -p,  --nSolventAtoms=... Number of atoms in solvent molecule, default is 1 atom. 
 
 Example:
-   iceCubeSolvator -u frosty.md -v tepid.md -r 4.0 -o lukewarm.md
+   md-solvator -u frosty.md -v tepid.md --nSoluteAtoms=3 --nSolventAtoms=3 -r 4.0 -o lukewarm.md
 
 """
 
-__author__ = "Dan Gezelter (gezelter@nd.edu)"
-__version__ = "$Revision: 1.8 $"
-__date__ = "$Date: 2008-06-27 15:47:06 $"
-__copyright__ = "Copyright (c) 2006 by the University of Notre Dame"
+__author__ = "Charles Vardeman (cvardema@nd.edu)"
+__version__ = "$Revision: 1.9 $"
+__date__ = "$Date: 2008-06-30 19:46:43 $"
+__copyright__ = "Copyright (c) 2008 by the University of Notre Dame"
 __license__ = "OOPSE"
 
 import sys
@@ -38,8 +39,8 @@ _haveMDFileName1 = 0
 _haveMDFileName2 = 0
 _haveRcut = 0
 _haveOutputFileName = 0
-_haveNSoluteAtoms = 1
-_haveNSolventAtoms = 1
+_haveNSoluteAtoms = 0
+_haveNSolventAtoms = 0
 
 metaData1 = []
 frameData1 = []
@@ -306,7 +307,7 @@ def writeFile(outputFileName):
 
     outputFile.write("component{\n")
     outputFile.write(solventTypeLine)
-    outputFile.write("nMol = %d;" % (nSolvents))
+    outputFile.write("nMol = %d;\n" % (nSolvents))
     outputFile.write("}\n")
     outputFile.write("\n\n")
     outputFile.write("forceField = \"MnM\";\n\n")
@@ -381,7 +382,7 @@ def removeOverlaps(rcut,nSolventAtoms,nSoluteAtoms):
     rcut2 = rcut*rcut
     nextMol = 0
 
-    
+
     for i in range(0,len(indices2),nSolventAtoms):
         keepThisMolecule = 1
         for atom1 in range (i, (i+nSolventAtoms)):
@@ -389,15 +390,17 @@ def removeOverlaps(rcut,nSolventAtoms,nSoluteAtoms):
         
             for j in range(0,len(indices1),nSoluteAtoms):
                 for atom2 in range (j, (j+nSoluteAtoms)):
-                    jPos = positions1[j]
+                    jPos = positions1[atom2]
                     dpos = [jPos[0]-iPos[0], jPos[1]-iPos[1], jPos[2]-iPos[2]]
                     dpos = wrapVector(dpos)
                     dist2 = dot(dpos,dpos)
                     
                     if (dist2 < rcut2):
                         keepThisMolecule = 0
- #                       break
-        
+                        
+           # if (keepThisMolecule == 0):
+           #     break
+
         keepers.append(keepThisMolecule)
 
     global nSolvents
@@ -440,7 +443,7 @@ def main(argv):
             mdFileName2 = arg
             global _haveMDFileName2
             _haveMDFileName2 = 1
-        elif opt in ("-n", "--nSoluteAtoms"): 
+        elif opt in ("-n", "--nSoluteAtoms"):
             nSoluteAtoms = int(arg)
             global _haveNSoluteAtoms
             _haveNSoluteAtoms = 1
@@ -477,9 +480,11 @@ def main(argv):
         rcut =4.0
 
     if (_haveNSoluteAtoms != 1):
+        print "Number of solute atoms was not specified. Using 1 atom."
         nSoluteAtoms = 1
 
     if (_haveNSolventAtoms != 1):
+        print "Number of solute atoms was not specified. Using 1 atom."
         nSolventAtoms = 1
 
     readFile1(mdFileName1)
