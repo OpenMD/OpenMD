@@ -44,7 +44,7 @@
  *
  *  Created by Charles F. Vardeman II on 11/26/05.
  *  @author  Charles F. Vardeman II 
- *  @version $Id: RhoZ.cpp,v 1.6 2006-10-18 21:58:47 gezelter Exp $
+ *  @version $Id: RhoZ.cpp,v 1.7 2008-06-30 17:53:42 gpuliti Exp $
  *
  */
 
@@ -58,82 +58,101 @@
 #include "primitives/Molecule.hpp"
 namespace oopse {
   
-  RhoZ::RhoZ(SimInfo* info, const std::string& filename, const std::string& sele, RealType len, int nrbins)
-    : StaticAnalyser(info, filename), selectionScript_(sele),  evaluator_(info), seleMan_(info), len_(len), nRBins_(nrbins){
+  RhoZ::RhoZ(SimInfo* info, const std::string& filename, const std::string& sele, int nzbins)
+    : StaticAnalyser(info, filename), selectionScript_(sele),  evaluator_(info), seleMan_(info), nZBins_(nzbins){
 
     evaluator_.loadScriptString(sele);
     if (!evaluator_.isDynamic()) {
       seleMan_.setSelectionSet(evaluator_.evaluate());
-    }
-      
+    }       
     
-    deltaR_ = len_ /(nRBins_);
-    
-    sliceSDLists_.resize(nRBins_);
-    density_.resize(nRBins_);
+    // fixed number of bins
+
+    sliceSDLists_.resize(nZBins_);
+    density_.resize(nZBins_);
     
     setOutputName(getPrefix(filename) + ".RhoZ");
   }
 
   void RhoZ::process() {
+    Molecule* mol;
+    RigidBody* rb;
+    StuntDouble* sd;
+    SimInfo::MoleculeIterator mi;
+    Molecule::RigidBodyIterator rbIter;
+
     DumpReader reader(info_, dumpFilename_);    
     int nFrames = reader.getNFrames();
     nProcessed_ = nFrames/step_;
 
     for (int istep = 0; istep < nFrames; istep += step_) {
+      reader.readFrame(istep);
+      currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
+
+      for (mol = info_->beginMolecule(mi); mol != NULL; mol = info_->nextMolecule(mi)) {
+        //change the positions of atoms which belong to the rigidbodies
+        for (rb = mol->beginRigidBody(rbIter); rb != NULL; rb = mol->nextRigidBody(rbIter)) {
+          rb->updateAtoms();
+        }
+      }
 
       int i;    
-      for (i=0; i < nRBins_; i++) {
+      for (i=0; i < nZBins_; i++) {
         sliceSDLists_[i].clear();
       }
 
-      StuntDouble* sd;
-      reader.readFrame(istep);
-      currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
+      RealType sliceVolume = currentSnapshot_->getVolume() /nZBins_;
+      Mat3x3d hmat = currentSnapshot_->getHmat();
+      zBox_.push_back(hmat(2,2));
       
-      RealType sliceVolume = currentSnapshot_->getVolume() /nRBins_;
-      //assume simulation box will never change
-      //Mat3x3d hmat = currentSnapshot_->getHmat();
-      RealType halfBoxZ_ = len_ / 2.0;      
-        
-        if (evaluator_.isDynamic()) {
-          seleMan_.setSelectionSet(evaluator_.evaluate());
-        }
+      RealType halfBoxZ_ = hmat(2,2) / 2.0;      
 
-        //wrap the stuntdoubles into a cell      
-        for (sd = seleMan_.beginSelected(i); sd != NULL; sd = seleMan_.nextSelected(i)) {
-            Vector3d pos = sd->getPos();
-            if (usePeriodicBoundaryConditions_)
-              currentSnapshot_->wrapVector(pos);
-            sd->setPos(pos);
-        }
+      if (evaluator_.isDynamic()) {
+        seleMan_.setSelectionSet(evaluator_.evaluate());
+      }
+      
+      //wrap the stuntdoubles into a cell      
+      for (sd = seleMan_.beginSelected(i); sd != NULL; sd = seleMan_.nextSelected(i)) {
+        Vector3d pos = sd->getPos();
+        if (usePeriodicBoundaryConditions_)
+          currentSnapshot_->wrapVector(pos);
+        sd->setPos(pos);
+      }
+      
+      //determine which atom belongs to which slice
+      for (sd = seleMan_.beginSelected(i); sd != NULL; sd = seleMan_.nextSelected(i)) {
+        Vector3d pos = sd->getPos();
+        // shift molecules by half a box to have bins start at 0
+        int binNo = int(nZBins_ * (halfBoxZ_ + pos.z()) / hmat(2,2));
+        sliceSDLists_[binNo].push_back(sd);
+      }
 
-        //determine which atom belongs to which slice
-        for (sd = seleMan_.beginSelected(i); sd != NULL; sd = seleMan_.nextSelected(i)) {
-           Vector3d pos = sd->getPos();
-           //int binNo = (pos.z() /deltaR_) - 1;
-           int binNo = (pos.z() + halfBoxZ_) /deltaR_   ;
-           //std::cout << "pos.z = " << pos.z() << " halfBoxZ_ = " << halfBoxZ_ << " deltaR_ = "  << deltaR_ << " binNo = " << binNo << "\n";
-           sliceSDLists_[binNo].push_back(sd);
+      //loop over the slices to calculate the densities
+      for (i = 0; i < nZBins_; i++) {
+        RealType totalMass = 0;
+        for (int k = 0; k < sliceSDLists_[i].size(); ++k) {
+          totalMass += sliceSDLists_[i][k]->getMass();
         }
-
-        //loop over the slices to calculate the densities
-        for (i = 0; i < nRBins_; i++) {
-            RealType totalMass = 0;
-            for (int k = 0; k < sliceSDLists_[i].size(); ++k) {
-                totalMass += sliceSDLists_[i][k]->getMass();
-            }
-            density_[i] += totalMass/sliceVolume;
-        }
+        density_[i] += totalMass/sliceVolume;
+      }
     }
-
+    
     writeDensity();
 
   }
-
- 
-    
+  
+  
+  
   void RhoZ::writeDensity() {
+
+    // compute average box length:
+    std::vector<RealType>::iterator j;
+    RealType zSum = 0.0;
+    for (j = zBox_.begin(); j != zBox_.end(); ++j) {
+      zSum += *j;       
+    }
+    RealType zAve = zSum / zBox_.size();
+
     std::ofstream rdfStream(outputFilename_.c_str());
     if (rdfStream.is_open()) {
       rdfStream << "#RhoZ\n";
@@ -141,8 +160,8 @@ namespace oopse {
       rdfStream << "#selection: (" << selectionScript_ << ")\n";
       rdfStream << "#z\tdensity\n";
       for (int i = 0; i < density_.size(); ++i) {
-        RealType r = deltaR_ * (i + 0.5);
-        rdfStream << r << "\t" << 1.660535*density_[i]/nProcessed_ << "\n";
+        RealType z = zAve * (i+0.5)/density_.size();
+        rdfStream << z << "\t" << 1.660535*density_[i]/nProcessed_ << "\n";
       }
       
     } else {

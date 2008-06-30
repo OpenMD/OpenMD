@@ -184,7 +184,7 @@ int main(int argc, char* argv[]){
     analyser= new GofR(info, dumpFileName, sele1, sele2, maxLen, 
                        args_info.nbins_arg);        
   } else if (args_info.gofz_given) {
-    analyser= new GofZ(info, dumpFileName, sele1, sele2, maxLen, 
+    analyser= new GofZ(info, dumpFileName, sele1, sele2, maxLen,
                        args_info.nbins_arg);
   } else if (args_info.r_theta_given) {
     analyser  = new GofRTheta(info, dumpFileName, sele1, sele2, maxLen, 
@@ -253,11 +253,10 @@ int main(int argc, char* argv[]){
       analyser  = new SCDOrderParameter(info, dumpFileName, sele1, sele2, sele3);
     }
   }else if (args_info.density_given) {
-    analyser= new DensityPlot(info, dumpFileName, sele1, sele2, maxLen, 
+    analyser= new DensityPlot(info, dumpFileName, sele1, sele2, maxLen,
                               args_info.nbins_arg);  
   } else if (args_info.slab_density_given) {
-    Mat3x3d hmat = info->getSnapshotManager()->getCurrentSnapshot()->getHmat();
-    analyser = new RhoZ(info, dumpFileName, sele1, hmat(2, 2), args_info.nbins_arg);
+    analyser = new RhoZ(info, dumpFileName, sele1, args_info.nbins_arg);
 #if defined(HAVE_FFTW_H) || defined(HAVE_DFFTW_H) || defined(HAVE_FFTW3_H)
   }else if (args_info.hxy_given) {
     analyser = new Hxy(info, dumpFileName, sele1, args_info.nbins_x_arg, 

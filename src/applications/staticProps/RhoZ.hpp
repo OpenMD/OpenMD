@@ -44,47 +44,48 @@
  *
  *  Created by Charles F. Vardeman II on 11/26/05.
  *  @author  Charles F. Vardeman II 
- *  @version $Id: RhoZ.hpp,v 1.4 2006-05-17 21:51:42 tim Exp $
+ *  @version $Id: RhoZ.hpp,v 1.5 2008-06-30 17:53:42 gpuliti Exp $
  *
  */
 #ifndef APPLICATIONS_STATICPROPS_RHOZ_HPP
 #define APPLICATIONS_STATICPROPS_RHOZ_HPP
 
-#include "applications/staticProps/RadialDistrFunc.hpp"
+#include <string>
+#include <vector>
+#include "selection/SelectionEvaluator.hpp"
+#include "selection/SelectionManager.hpp"
+#include "utils/NumericConstant.hpp"
+#include "applications/staticProps/StaticAnalyser.hpp"
+
 namespace oopse {
   
   class RhoZ : public StaticAnalyser {
     
-public:
-    RhoZ(SimInfo* info, const std::string& filename, const std::string& sele, RealType  len, int nrbins);
+  public:
+    RhoZ(SimInfo* info, const std::string& filename, const std::string& sele, int nzbins);
     
-    int getNRBins() {
-      return nRBins_; 
+    int getNZBins() {
+      return nZBins_; 
     }
     
-    RealType getLength() {
-      return len_;
-    }
-
     virtual void process();
     
-private:
+  private:
     
     virtual void writeDensity();
-
-
+    
+    
     Snapshot* currentSnapshot_;
-
+    
     int nProcessed_;
     std::string selectionScript_;
     SelectionEvaluator evaluator_;
     SelectionManager seleMan_;
     
-    RealType len_;
-    int nRBins_; 
-    RealType deltaR_;
+    int nZBins_; 
     
     std::vector<std::vector<StuntDouble*> > sliceSDLists_;
+    std::vector<RealType> zBox_;
     std::vector<RealType> density_;
   };
   
