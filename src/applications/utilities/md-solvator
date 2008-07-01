@@ -22,8 +22,8 @@ Example:
 """
 
 __author__ = "Charles Vardeman (cvardema@nd.edu)"
-__version__ = "$Revision: 1.9 $"
-__date__ = "$Date: 2008-06-30 19:46:43 $"
+__version__ = "$Revision: 1.10 $"
+__date__ = "$Date: 2008-07-01 18:05:41 $"
 __copyright__ = "Copyright (c) 2008 by the University of Notre Dame"
 __license__ = "OOPSE"
 
@@ -382,34 +382,35 @@ def removeOverlaps(rcut,nSolventAtoms,nSoluteAtoms):
     rcut2 = rcut*rcut
     nextMol = 0
 
-
     for i in range(0,len(indices2),nSolventAtoms):
         keepThisMolecule = 1
         for atom1 in range (i, (i+nSolventAtoms)):
-            iPos = positions2[atom1]
-        
-            for j in range(0,len(indices1),nSoluteAtoms):
-                for atom2 in range (j, (j+nSoluteAtoms)):
+            iPos = positions2[atom1]           
+            for j in range(0,len(indices1)):
+                for atom2 in range (j, (j+nSoluteAtoms), nSoluteAtoms):
                     jPos = positions1[atom2]
                     dpos = [jPos[0]-iPos[0], jPos[1]-iPos[1], jPos[2]-iPos[2]]
                     dpos = wrapVector(dpos)
                     dist2 = dot(dpos,dpos)
                     
+
                     if (dist2 < rcut2):
                         keepThisMolecule = 0
-                        
-           # if (keepThisMolecule == 0):
-           #     break
+                        break
+            if (keepThisMolecule == 0):
+                break
 
         keepers.append(keepThisMolecule)
 
+       
     global nSolvents
     myIndex = len(indices2) - 1
     for i in range(0,len(keepers)):
         
         if (keepers[i] == 1):
             nSolvents = nSolvents + 1
-            for j in range (i, i+nSolventAtoms):
+            atomStartIndex = i * nSolventAtoms
+            for j in range (atomStartIndex, (atomStartIndex+nSolventAtoms)):
                 indices1.append(myIndex)
                 pvqj1.append(pvqj2[j])
                 if (pvqj2[j] == 'pv'):
