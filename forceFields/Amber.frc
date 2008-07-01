@@ -1,0 +1,2613 @@
+// This is the forcefield file generated from amber99.prm
+//
+// The sections are divided into AtomTypes 
+//
+
+
+begin BaseAtomTypes
+//number		name		mass	 (amu)
+CT              12.01
+C               12.01
+CA              12.01
+CM              12.01
+CC              12.01
+CV              12.01
+CW              12.01
+CR              12.01
+CB              12.01
+C*              12.01
+CN              12.01
+CK              12.01
+CQ              12.01
+N               14.01
+NA              14.01
+NB              14.01
+NC              14.01
+N*              14.01
+N2              14.01
+N3              14.01
+OW              16.0
+OH              16.0
+OS              16.0
+O               16.0
+O2              16.0
+S               32.06
+SH              32.06
+P               30.97
+H               1.008
+HW              1.008
+HO              1.008
+HS              1.008
+HA              1.008
+HC              1.008
+H1              1.008
+H2              1.008
+H3		1.008
+HP		1.008
+H4		1.008
+H5		1.008
+Li+             6.940
+Na+             22.990
+K+              39.100
+Rb+             85.470
+Cs+             132.910
+Mg+             24.305
+Ca+             40.080
+Zn+             65.400
+Cl-             35.450
+end BaseAtomTypes
+
+
+begin AtomTypes
+//name		baseatomtype
+GLY-N                   N
+GLY-CA                  CT
+GLY-C                   C
+GLY-HN                  H
+GLY-O                   O
+GLY-HA                  H1
+ALA-N                   N
+ALA-CA                  CT
+ALA-C                   C
+ALA-HN                  H
+ALA-O                   O
+ALA-HA                  H1
+ALA-CB                  CT
+ALA-HB                  HC
+VAL-N                   N
+VAL-CA                  CT
+VAL-C                   C
+VAL-HN                  H
+VAL-O                   O
+VAL-HA                  H1
+VAL-CB                  CT
+VAL-HB                  HC
+VAL-CG1                 CT
+VAL-HG1                 HC
+VAL-CG2                 CT
+VAL-HG2                 HC
+LEU-N                   N
+LEU-CA                  CT
+LEU-C                   C
+LEU-HN                  H
+LEU-O                   O
+LEU-HA                  H1
+LEU-CB                  CT
+LEU-HB                  HC
+LEU-CG                  CT
+LEU-HG                  HC
+LEU-CD1                 CT
+LEU-HD1                 HC
+LEU-CD2                 CT
+LEU-HD2                 HC
+ILE-N                   N
+ILE-CA                  CT
+ILE-C                   C
+ILE-HN                  H
+ILE-O                   O
+ILE-HA                  H1
+ILE-CB                  CT
+ILE-HB                  HC
+ILE-CG1                 CT
+ILE-HG1                 HC
+ILE-CG2                 CT
+ILE-HG2                 HC
+ILE-CD                  CT
+ILE-HD                  HC
+SER-N                   N
+SER-CA                  CT
+SER-C                   C
+SER-HN                  H
+SER-O                   O
+SER-HA                  H1
+SER-CB                  CT
+SER-HB                  H1
+SER-OG                  OH
+SER-HG                  HO
+THR-N                   N
+THR-CA                  CT
+THR-C                   C
+THR-HN                  H
+THR-O                   O
+THR-HA                  H1
+THR-CB                  CT
+THR-HB                  H1
+THR-OG1                 OH
+THR-HG1                 HO
+THR-CG2                 CT
+THR-HG2                 HC
+CYS-N                   N
+CYS-CA                  CT
+CYS-C                   C
+CYS-HN                  H
+CYS-O                   O
+CYS-HA                  H1
+CYS-CB                  CT
+CYS-HB                  H1
+CYS-SG                  SH
+CYS-HG                  HS
+CYX-N                   N
+CYX-CA                  CT
+CYX-C                   C
+CYX-HN                  H
+CYX-O                   O
+CYX-HA                  H1
+CYX-CB                  CT
+CYX-HB                  H1
+CYX-SG                  S
+PRO-N                   N
+PRO-CA                  CT
+PRO-C                   C
+PRO-O                   O
+PRO-HA                  H1
+PRO-CB                  CT
+PRO-HB                  HC
+PRO-CG                  CT
+PRO-HG                  HC
+PRO-CD                  CT
+PRO-HD                  H1
+PHE-N                   N
+PHE-CA                  CT
+PHE-C                   C
+PHE-HN                  H
+PHE-O                   O
+PHE-HA                  H1
+PHE-CB                  CT
+PHE-HB                  HC
+PHE-CG                  CA
+PHE-CD                  CA
+PHE-HD                  HA
+PHE-CE                  CA
+PHE-HE                  HA
+PHE-CZ                  CA
+PHE-HZ                  HA
+TYR-N                   N
+TYR-CA                  CT
+TYR-C                   C
+TYR-HN                  H
+TYR-O                   O
+TYR-HA                  H1
+TYR-CB                  CT
+TYR-HB                  HC
+TYR-CG                  CA
+TYR-CD                  CA
+TYR-HD                  HA
+TYR-CE                  CA
+TYR-HE                  HA
+TYR-CZ                  CA
+TYR-OH                  OH
+TYR-HH                  HO
+TRP-N                   N
+TRP-CA                  CT
+TRP-C                   C
+TRP-HN                  H
+TRP-O                   O
+TRP-HA                  H1
+TRP-CB                  CT
+TRP-HB                  HC
+TRP-CG                  C*
+TRP-CD1                 CW
+TRP-HD1                 H4
+TRP-CD2                 CB
+TRP-NE1                 NA
+TRP-HE1                 H
+TRP-CE2                 CN
+TRP-CE3                 CA
+TRP-HE3                 HA
+TRP-CZ2                 CA
+TRP-HZ2                 HA
+TRP-CZ3                 CA
+TRP-HZ3                 HA
+TRP-CH2                 CA
+TRP-HH2                 HA
+HIS-N                   N
+HIS-CA                  CT
+HIS-C                   C
+HIS-HN                  H
+HIS-O                   O
+HIS-HA                  H1
+HIS-CB                  CT
+HIS-HB                  HC
+HIS-CG                  CC
+HIS-ND1                 NA
+HIS-HD1                 H
+HIS-CD2                 CW
+HIS-HD2                 H4
+HIS-CE1                 CR
+HIS-HE1                 H5
+HIS-NE2                 NA
+HIS-HE2                 H
+HID-N                   N
+HID-CA                  CT
+HID-C                   C
+HID-HN                  H
+HID-O                   O
+HID-HA                  H1
+HID-CB                  CT
+HID-HB                  HC
+HID-CG                  CC
+HID-ND1                 NA
+HID-HD1                 H
+HID-CD2                 CV
+HID-HD2                 H4
+HID-CE1                 CR
+HID-HE1                 H5
+HID-NE2                 NB
+HIE-N                   N
+HIE-CA                  CT
+HIE-C                   C
+HIE-HN                  H
+HIE-O                   O
+HIE-HA                  H1
+HIE-CB                  CT
+HIE-HB                  HC
+HIE-CG                  CC
+HIE-ND1                 NB
+HIE-CD2                 CW
+HIE-HD2                 H4
+HIE-CE1                 CR
+HIE-HE1                 H5
+HIE-NE2                 NA
+HIE-HE2                 H
+ASP-N                   N
+ASP-CA                  CT
+ASP-C                   C
+ASP-HN                  H
+ASP-O                   O
+ASP-HA                  H1
+ASP-CB                  CT
+ASP-HB                  HC
+ASP-CG                  C
+ASP-OD                  O2
+ASN-N                   N
+ASN-CA                  CT
+ASN-C                   C
+ASN-HN                  H
+ASN-O                   O
+ASN-HA                  H1
+ASN-CB                  CT
+ASN-HB                  HC
+ASN-CG                  C
+ASN-OD1                 O
+ASN-ND2                 N
+ASN-HD2                 H
+GLU-N                   N
+GLU-CA                  CT
+GLU-C                   C
+GLU-HN                  H
+GLU-O                   O
+GLU-HA                  H1
+GLU-CB                  CT
+GLU-HB                  HC
+GLU-CG                  CT
+GLU-HG                  HC
+GLU-CD                  C
+GLU-OE                  O2
+GLN-N                   N
+GLN-CA                  CT
+GLN-C                   C
+GLN-HN                  H
+GLN-O                   O
+GLN-HA                  H1
+GLN-CB                  CT
+GLN-HB                  HC
+GLN-CG                  CT
+GLN-HG                  HC
+GLN-CD                  C
+GLN-OE1                 O
+GLN-NE2                 N
+GLN-HE2                 H
+MET-N                   N
+MET-CA                  CT
+MET-C                   C
+MET-HN                  H
+MET-O                   O
+MET-HA                  H1
+MET-CB                  CT
+MET-HB                  HC
+MET-CG                  CT
+MET-HG                  H1
+MET-SD                  S
+MET-CE                  CT
+MET-HE                  H1
+LYS-N                   N
+LYS-CA                  CT
+LYS-C                   C
+LYS-HN                  H
+LYS-O                   O
+LYS-HA                  H1
+LYS-CB                  CT
+LYS-HB                  HC
+LYS-CG                  CT
+LYS-HG                  HC
+LYS-CD                  CT
+LYS-HD                  HC
+LYS-CE                  CT
+LYS-HE                  HP
+LYS-NZ                  N3
+LYS-HZ                  H
+ARG-N                   N
+ARG-CA                  CT
+ARG-C                   C
+ARG-HN                  H
+ARG-O                   O
+ARG-HA                  H1
+ARG-CB                  CT
+ARG-HB                  HC
+ARG-CG                  CT
+ARG-HG                  HC
+ARG-CD                  CT
+ARG-HD                  H1
+ARG-NE                  N2
+ARG-HE                  H
+ARG-CZ                  CA
+ARG-NH                  N2
+ARG-HH                  H
+ORN-N                   N
+ORN-CA                  CT
+ORN-C                   C
+ORN-HN                  H
+ORN-O                   O
+ORN-HA                  H1
+ORN-CB                  CT
+ORN-HB                  HC
+ORN-CG                  CT
+ORN-HG                  HC
+ORN-CD                  CT
+ORN-HD                  HP
+ORN-NE                  N3
+ORN-HE                  H
+MAA-N                   N
+MAA-CA                  CT
+MAA-C                   C
+MAA-HN                  H
+MAA-O                   O
+MAA-CB                  CT
+MAA-HB                  HC
+PCA-N                   N
+PCA-CA                  CT
+PCA-C                   C
+PCA-HN                  H
+PCA-O                   O
+PCA-HA                  H1
+PCA-CB                  CT
+PCA-HB                  HC
+PCA-CG                  CT
+PCA-HG                  HC
+PCA-CD                  C
+PCA-OE                  O
+FOR-C                   C
+FOR-H                   H
+FOR-O                   O
+ACE-CA                  CT
+ACE-HA                  HC
+ACE-C                   C
+ACE-O                   O
+C-Term                  N
+C-Term                  H
+N-MeAmide               N
+N-MeAmide               H
+N-MeAmide               CT
+N-MeAmide               H1
+NGLY-N                  N3
+NGLY-CA                 CT
+NGLY-C                  C
+NGLY-HN                 H
+NGLY-O                  O
+NGLY-HA                 H1
+NALA-N                  N3
+NALA-CA                 CT
+NALA-C                  C
+NALA-HN                 H
+NALA-O                  O
+NALA-HA                 H1
+NVAL-N                  N3
+NVAL-CA                 CT
+NVAL-C                  C
+NVAL-HN                 H
+NVAL-O                  O
+NVAL-HA                 H1
+NLEU-N                  N3
+NLEU-CA                 CT
+NLEU-C                  C
+NLEU-HN                 H
+NLEU-O                  O
+NLEU-HA                 H1
+NILE-N                  N3
+NILE-CA                 CT
+NILE-C                  C
+NILE-HN                 H
+NILE-O                  O
+NILE-HA                 H1
+NSER-N                  N3
+NSER-CA                 CT
+NSER-C                  C
+NSER-HN                 H
+NSER-O                  O
+NSER-HA                 H1
+NTHR-N                  N3
+NTHR-CA                 CT
+NTHR-C                  C
+NTHR-HN                 H
+NTHR-O                  O
+NTHR-HA                 H1
+NCYS-N                  N3
+NCYS-CA                 CT
+NCYS-C                  C
+NCYS-HN                 H
+NCYS-O                  O
+NCYS-HA                 H1
+NCYX-N                  N3
+NCYX-CA                 CT
+NCYX-C                  C
+NCYX-HN                 H
+NCYX-O                  O
+NCYX-HA                 H1
+NPRO-N                  N3
+NPRO-CA                 CT
+NPRO-C                  C
+NPRO-HN                 H
+NPRO-O                  O
+NPRO-HA                 H1
+NPRO-CD                 CT
+NPRO-HD                 HP
+NPHE-N                  N3
+NPHE-CA                 CT
+NPHE-C                  C
+NPHE-HN                 H
+NPHE-O                  O
+NPHE-HA                 H1
+NTYR-N                  N3
+NTYR-CA                 CT
+NTYR-C                  C
+NTYR-HN                 H
+NTYR-O                  O
+NTYR-HA                 H1
+NTRP-N                  N3
+NTRP-CA                 CT
+NTRP-C                  C
+NTRP-HN                 H
+NTRP-O                  O
+NTRP-HA                 H1
+NHIS-N                  N3
+NHIS-CA                 CT
+NHIS-C                  C
+NHIS-HN                 H
+NHIS-O                  O
+NHIS-HA                 H1
+NHID-N                  N3
+NHID-CA                 CT
+NHID-C                  C
+NHID-HN                 H
+NHID-O                  O
+NHID-HA                 H1
+NHIE-N                  N3
+NHIE-CA                 CT
+NHIE-C                  C
+NHIE-HN                 H
+NHIE-O                  O
+NHIE-HA                 H1
+NASP-N                  N3
+NASP-CA                 CT
+NASP-C                  C
+NASP-HN                 H
+NASP-O                  O
+NASP-HA                 H1
+NASN-N                  N3
+NASN-CA                 CT
+NASN-C                  C
+NASN-HN                 H
+NASN-O                  O
+NASN-HA                 H1
+NGLU-N                  N3
+NGLU-CA                 CT
+NGLU-C                  C
+NGLU-HN                 H
+NGLU-O                  O
+NGLU-HA                 H1
+NCLN-N                  N3
+NCLN-CA                 CT
+NCLN-C                  C
+NCLN-HN                 H
+NCLN-O                  O
+NCLN-HA                 H1
+NMET-N                  N3
+NMET-CA                 CT
+NMET-C                  C
+NMET-HN                 H
+NMET-O                  O
+NMET-HA                 H1
+NLYS-N                  N3
+NLYS-CA                 CT
+NLYS-C                  C
+NLYS-HN                 H
+NLYS-O                  O
+NLYS-HA                 H1
+NARG-N                  N3
+NARG-CA                 CT
+NARG-C                  C
+NARG-HN                 H
+NARG-O                  O
+NARG-HA                 H1
+NORN-N                  N3
+NORN-CA                 CT
+NORN-C                  C
+NORN-HN                 H
+NORN-O                  O
+NORN-HA                 H1
+NAIB-N                  N3
+NAIB-CA                 CT
+NAIB-C                  C
+NAIB-HN                 H
+NAIB-O                  O
+CGLY-N                  N
+CGLY-CA                 CT
+CGLY-C                  C
+CGLY-HN                 H
+CGLY-OXT                O2
+CGLY-HA                 H1
+CALA-N                  N
+CALA-CA                 CT
+CALA-C                  C
+CALA-HN                 H
+CALA-OXT                O2
+CALA-HA                 H1
+CVAL-N                  N
+CVAL-CA                 CT
+CVAL-C                  C
+CVAL-HN                 H
+CVAL-OXT                O2
+CVAL-HA                 H1
+CLEU-N                  N
+CLEU-CA                 CT
+CLEU-C                  C
+CLEU-HN                 H
+CLEU-OXT                O2
+CLEU-HA                 H1
+CILE-N                  N
+CILE-CA                 CT
+CILE-C                  C
+CILE-HN                 H
+CILE-OXT                O2
+CILE-HA                 H1
+CSER-N                  N
+CSER-CA                 CT
+CSER-C                  C
+CSER-HN                 H
+CSER-OXT                O2
+CSER-HA                 H1
+CTHR-N                  N
+CTHR-CA                 CT
+CTHR-C                  C
+CTHR-HN                 H
+CTHR-OXT                O2
+CTHR-HA                 H1
+CCYS-N                  N
+CCYS-CA                 CT
+CCYS-C                  C
+CCYS-HN                 H
+CCYS-OXT                O2
+CCYS-HA                 H1
+CCYX-N                  N
+CCYX-CA                 CT
+CCYX-C                  C
+CCYX-HN                 H
+CCYX-OXT                O2
+CCYX-HA                 H1
+CPRO-N                  N
+CPRO-CA                 CT
+CPRO-C                  C
+CPRO-OXT                O2
+CPRO-HA                 H1
+CPHE-N                  N
+CPHE-CA                 CT
+CPHE-C                  C
+CPHE-HN                 H
+CPHE-OXT                O2
+CPHE-HA                 H1
+CTYR-N                  N
+CTYR-CA                 CT
+CTYR-C                  C
+CTYR-HN                 H
+CTYR-OXT                O2
+CTYR-HA                 H1
+CTRP-N                  N
+CTRP-CA                 CT
+CTRP-C                  C
+CTRP-HN                 H
+CTRP-OXT                O2
+CTRP-HA                 H1
+CHIS-N                  N
+CHIS-CA                 CT
+CHIS-C                  C
+CHIS-HN                 H
+CHIS-OXT                O2
+CHIS-HA                 H1
+CHID-N                  N
+CHID-CA                 CT
+CHID-C                  C
+CHID-HN                 H
+CHID-OXT                O2
+CHID-HA                 H1
+CHIE-N                  N
+CHIE-CA                 CT
+CHIE-C                  C
+CHIE-HN                 H
+CHIE-OXT                O2
+CHIE-HA                 H1
+CASP-N                  N
+CASP-CA                 CT
+CASP-C                  C
+CASP-HN                 H
+CASP-OXT                O2
+CASP-HA                 H1
+CASN-N                  N
+CASN-CA                 CT
+CASN-C                  C
+CASN-HN                 H
+CASN-OXT                O2
+CASN-HA                 H1
+CGLU-N                  N
+CGLU-CA                 CT
+CGLU-C                  C
+CGLU-HN                 H
+CGLU-OXT                O2
+CGLU-HA                 H1
+CGLN-N                  N
+CGLN-CA                 CT
+CGLN-C                  C
+CGLN-HN                 H
+CGLN-OXT                O2
+CGLN-HA                 H1
+CMET-N                  N
+CMET-CA                 CT
+CMET-C                  C
+CMET-HN                 H
+CMET-OXT                O2
+CMET-HA                 H1
+CLYS-N                  N
+CLYS-CA                 CT
+CLYS-C                  C
+CLYS-HN                 H
+CLYS-OXT                O2
+CLYS-HA                 H1
+CARG-N                  N
+CARG-CA                 CT
+CARG-C                  C
+CARG-HN                 H
+CARG-OXT                O2
+CARG-HA                 H1
+CORN-N                  N
+CORN-CA                 CT
+CORN-C                  C
+CORN-HN                 H
+CORN-OXT                O2
+CORN-HA                 H1
+CAIB-N                  N
+CAIB-CA                 CT
+CAIB-C                  C
+CAIB-HN                 H
+CAIB-OXT                O2
+RA-O5'                  OS
+RA-C5'                  CT
+RA-H5'1                 H1
+RA-H5'2                 H1
+RA-C4'                  CT
+RA-H4'                  H1
+RA-O4'                  OS
+RA-C1'                  CT
+RA-H1'                  H2
+RA-C3'                  CT
+RA-H3'                  H1
+RA-C2'                  CT
+RA-H2'1                 H1
+RA-O2'                  OH
+RA-HO'2                 HO
+RA-O3'                  OS
+RA-N9                   N*
+RA-C4                   CB
+RA-C5                   CB
+RA-N7                   NB
+RA-C8                   CK
+RA-N3                   NC
+RA-C2                   CQ
+RA-N1                   NC
+RA-C6                   CA
+RA-H2                   H5
+RA-N6                   N2
+RA-H61                  H
+RA-H62                  H
+RA-H8                   H5
+RG-O5'                  OS
+RG-C5'                  CT
+RG-H5'1                 H1
+RG-H5'2                 H1
+RG-C4'                  CT
+RG-H4'                  H1
+RG-O4'                  OS
+RG-C1'                  CT
+RG-H1'                  H2
+RG-C3'                  CT
+RG-H3'                  H1
+RG-C2'                  CT
+RG-H2'1                 H1
+RG-O2'                  OH
+RG-HO'2                 HO
+RG-O3'                  OS
+RG-N9                   N*
+RG-C4                   CB
+RG-C5                   CB
+RG-N7                   NB
+RG-C8                   CK
+RG-N3                   NC
+RG-C2                   CA
+RG-N1                   NA
+RG-C6                   C
+RG-H1                   H
+RG-N2                   N2
+RG-H21                  H
+RG-H22                  H
+RG-O6                   O
+RG-H8                   H5
+RC-O5'                  OS
+RC-C5'                  CT
+RC-H5'1                 H1
+RC-H5'2                 H1
+RC-C4'                  CT
+RC-H4'                  H1
+RC-O4'                  OS
+RC-C1'                  CT
+RC-H1'                  H2
+RC-C3'                  CT
+RC-H3'                  H1
+RC-C2'                  CT
+RC-H2'1                 H1
+RC-O2'                  OH
+RC-HO'2                 HO
+RC-O3'                  OS
+RC-N1                   N*
+RC-C2                   C
+RC-N3                   NC
+RC-C4                   CA
+RC-C5                   CM
+RC-C6                   CM
+RC-O2                   O
+RC-N4                   N2
+RC-H41                  H
+RC-H42                  H
+RC-H5                   HA
+RC-H6                   H4
+RU-O5'                  OS
+RU-C5'                  CT
+RU-H5'1                 H1
+RU-H5'2                 H1
+RU-C4'                  CT
+RU-H4'                  H1
+RU-O4'                  OS
+RU-C1'                  CT
+RU-H1'                  H2
+RU-C3'                  CT
+RU-H3'                  H1
+RU-C2'                  CT
+RU-H2'1                 H1
+RU-O2'                  OH
+RU-HO'2                 HO
+RU-O3'                  OS
+RU-N1                   N*
+RU-C2                   C
+RU-N3                   NA
+RU-C4                   C
+RU-C5                   CM
+RU-C6                   CM
+RU-O2                   O
+RU-H3                   H
+RU-O4                   O
+RU-H5                   HA
+RU-H6                   H4
+DA-O5'                  OS
+DA-C5'                  CT
+DA-H5'1                 H1
+DA-H5'2                 H1
+DA-C4'                  CT
+DA-H4'                  H1
+DA-O4'                  OS
+DA-C1'                  CT
+DA-H1'                  H2
+DA-C3'                  CT
+DA-H3'                  H1
+DA-C2'                  CT
+DA-H2'1                 HC
+DA-H2'2                 HC
+DA-O3'                  OS
+DA-N9                   N*
+DA-C4                   CB
+DA-C5                   CB
+DA-N7                   NB
+DA-C8                   CK
+DA-N3                   NC
+DA-C2                   CQ
+DA-N1                   NC
+DA-C6                   CA
+DA-H2                   H5
+DA-N6                   N2
+DA-H61                  H
+DA-H62                  H
+DA-H8                   H5
+DG-O5'                  OS
+DG-C5'                  CT
+DG-H5'1                 H1
+DG-H5'2                 H1
+DG-C4'                  CT
+DG-H4'                  H1
+DG-O4'                  OS
+DG-C1'                  CT
+DG-H1'                  H2
+DG-C3'                  CT
+DG-H3'                  H1
+DG-C2'                  CT
+DG-H2'1                 HC
+DG-H2'2                 HC
+DG-O3'                  OS
+DG-N9                   N*
+DG-C4                   CB
+DG-C5                   CB
+DG-N7                   NB
+DG-C8                   CK
+DG-N3                   NC
+DG-C2                   CA
+DG-N1                   NA
+DG-C6                   C
+DG-H1                   H
+DG-N2                   N2
+DG-H21                  H
+DG-H22                  H
+DG-O6                   O
+DG-H8                   H5
+DC-O5'                  OS
+DC-C5'                  CT
+DC-H5'1                 H1
+DC-H5'2                 H1
+DC-C4'                  CT
+DC-H4'                  H1
+DC-O4'                  OS
+DC-C1'                  CT
+DC-H1'                  H2
+DC-C3'                  CT
+DC-H3'                  H1
+DC-C2'                  CT
+DC-H2'1                 HC
+DC-H2'2                 HC
+DC-O3'                  OS
+DC-N1                   N*
+DC-C2                   C
+DC-N3                   NC
+DC-C4                   CA
+DC-C5                   CM
+DC-C6                   CM
+DC-O2                   O
+DC-N4                   N2
+DC-H41                  H
+DC-H42                  H
+DC-H5                   HA
+DC-H6                   H4
+DT-O5'                  OS
+DT-C5'                  CT
+DT-H5'1                 H1
+DT-H5'2                 H1
+DT-C4'                  CT
+DT-H4'                  H1
+DT-O4'                  OS
+DT-C1'                  CT
+DT-H1'                  H2
+DT-C3'                  CT
+DT-H3'                  H1
+DT-C2'                  CT
+DT-H2'1                 HC
+DT-H2'2                 HC
+DT-O3'                  OS
+DT-N1                   N*
+DT-C2                   C
+DT-N3                   NA
+DT-C4                   C
+DT-C5                   CM
+DT-C6                   CM
+DT-O2                   O
+DT-H3                   H
+DT-O4                   O
+DT-C7                   CT
+DT-H7                   HC
+DT-H6                   H4
+R-Phosphodiester        P
+R-Phosphodiester        O2
+R5H-O5'                 OH
+R5H-H5T                 HO
+R5P-O5'                 OS
+R5P-P                   P
+R5P-OP                  O2
+R3H-O3'                 OH
+R3H-H3T                 HO
+R3P-O3'                 OS
+R3P-P                   P
+R3P-OP                  O2
+D-Phosphodiester        P
+D-Phosphodiester        O2
+D5H-O5'                 OH
+D5H-H5T                 HO
+D5P-O5'                 OS
+D5P-P                   P
+D5P-OP                  O2
+D3H-O3'                 OH
+D3H-H3T                 HO
+D3P-O3'                 OS
+D3P-P                   P
+D3P-OP                  O2
+TIP3P                   OW
+TIP3P                   HW
+Li+                     Li+
+Na+                     Na+
+K+                      K+
+Rb+                     Rb+
+Cs+                     Cs+
+Mg+2                    Mg+
+Ca+2                    Ca+
+Zn+2                    Zn+
+Cl-                     Cl-
+end AtomTypes
+
+
+begin ChargeAtomTypes
+//name			charge
+GLY-N                   -0.4157
+GLY-CA                  -0.0252
+GLY-C                   0.5973
+GLY-HN                  0.2719
+GLY-O                   -0.5679
+GLY-HA                  0.0698
+ALA-N                   -0.4157
+ALA-CA                  0.0337
+ALA-C                   0.5973
+ALA-HN                  0.2719
+ALA-O                   -0.5679
+ALA-HA                  0.0823
+ALA-CB                  -0.1825
+ALA-HB                  0.0603
+VAL-N                   -0.4157
+VAL-CA                  -0.0875
+VAL-C                   0.5973
+VAL-HN                  0.2719
+VAL-O                   -0.5679
+VAL-HA                  0.0969
+VAL-CB                  0.2985
+VAL-HB                  -0.0297
+VAL-CG1                 -0.3192
+VAL-HG1                 0.0791
+VAL-CG2                 -0.3192
+VAL-HG2                 0.0791
+LEU-N                   -0.4157
+LEU-CA                  -0.0518
+LEU-C                   0.5973
+LEU-HN                  0.2719
+LEU-O                   -0.5679
+LEU-HA                  0.0922
+LEU-CB                  -0.1102
+LEU-HB                  0.0457
+LEU-CG                  0.3531
+LEU-HG                  -0.0361
+LEU-CD1                 -0.4121
+LEU-HD1                 0.1000
+LEU-CD2                 -0.4121
+LEU-HD2                 0.1000
+ILE-N                   -0.4157
+ILE-CA                  -0.0597
+ILE-C                   0.5973
+ILE-HN                  0.2719
+ILE-O                   -0.5679
+ILE-HA                  0.0869
+ILE-CB                  0.1303
+ILE-HB                  0.0187
+ILE-CG1                 -0.0430
+ILE-HG1                 0.0236
+ILE-CG2                 -0.3204
+ILE-HG2                 0.0882
+ILE-CD                  -0.0660
+ILE-HD                  0.0186
+SER-N                   -0.4157
+SER-CA                  -0.0249
+SER-C                   0.5973
+SER-HN                  0.2719
+SER-O                   -0.5679
+SER-HA                  0.0843
+SER-CB                  0.2117
+SER-HB                  0.0352
+SER-OG                  -0.6546
+SER-HG                  0.4275
+THR-N                   -0.4157
+THR-CA                  -0.0389
+THR-C                   0.5973
+THR-HN                  0.2719
+THR-O                   -0.5679
+THR-HA                  0.1007
+THR-CB                  0.3654
+THR-HB                  0.0043
+THR-OG1                 -0.6761
+THR-HG1                 0.4102
+THR-CG2                 -0.2438
+THR-HG2                 0.0642
+CYS-N                   -0.4157
+CYS-CA                  0.0213
+CYS-C                   0.5973
+CYS-HN                  0.2719
+CYS-O                   -0.5679
+CYS-HA                  0.1124
+CYS-CB                  -0.1231
+CYS-HB                  0.1112
+CYS-SG                  -0.3119
+CYS-HG                  0.1933
+CYX-N                   -0.4157
+CYX-CA                  0.0429
+CYX-C                   0.5973
+CYX-HN                  0.2719
+CYX-O                   -0.5679
+CYX-HA                  0.0766
+CYX-CB                  -0.0790
+CYX-HB                  0.0910
+CYX-SG                  -0.1081
+PRO-N                   -0.2548
+PRO-CA                  -0.0266
+PRO-C                   0.5896
+PRO-O                   -0.5748
+PRO-HA                  0.0641
+PRO-CB                  -0.0070
+PRO-HB                  0.0253
+PRO-CG                  0.0189
+PRO-HG                  0.0213
+PRO-CD                  0.0192
+PRO-HD                  0.0391
+PHE-N                   -0.4157
+PHE-CA                  -0.0024
+PHE-C                   0.5973
+PHE-HN                  0.2719
+PHE-O                   -0.5679
+PHE-HA                  0.0978
+PHE-CB                  -0.0343
+PHE-HB                  0.0295
+PHE-CG                  0.0118
+PHE-CD                  -0.1256
+PHE-HD                  0.1330
+PHE-CE                  -0.1704
+PHE-HE                  0.1430
+PHE-CZ                  -0.1072
+PHE-HZ                  0.1297
+TYR-N                   -0.4157
+TYR-CA                  -0.0014
+TYR-C                   0.5973
+TYR-HN                  0.2719
+TYR-O                   -0.5679
+TYR-HA                  0.0876
+TYR-CB                  -0.0152
+TYR-HB                  0.0295
+TYR-CG                  -0.0011
+TYR-CD                  -0.1906
+TYR-HD                  0.1699
+TYR-CE                  -0.2341
+TYR-HE                  0.1656
+TYR-CZ                  0.3226
+TYR-OH                  -0.5579
+TYR-HH                  0.3992
+TRP-N                   -0.4157
+TRP-CA                  -0.0275
+TRP-C                   0.5973
+TRP-HN                  0.2719
+TRP-O                   -0.5679
+TRP-HA                  0.1123
+TRP-CB                  -0.0050
+TRP-HB                  0.0339
+TRP-CG                  -0.1415
+TRP-CD1                 -0.1638
+TRP-HD1                 0.2062
+TRP-CD2                 0.1243
+TRP-NE1                 -0.3418
+TRP-HE1                 0.3412
+TRP-CE2                 0.1380
+TRP-CE3                 -0.2387
+TRP-HE3                 0.1700
+TRP-CZ2                 -0.2601
+TRP-HZ2                 0.1572
+TRP-CZ3                 -0.1972
+TRP-HZ3                 0.1447
+TRP-CH2                 -0.1134
+TRP-HH2                 0.1417
+HIS-N                   -0.3479
+HIS-CA                  -0.1354
+HIS-C                   0.7341
+HIS-HN                  0.2747
+HIS-O                   -0.5894
+HIS-HA                  0.1212
+HIS-CB                  -0.0414
+HIS-HB                  0.0810
+HIS-CG                  -0.0012
+HIS-ND1                 -0.1513
+HIS-HD1                 0.3866
+HIS-CD2                 -0.1141
+HIS-HD2                 0.2317
+HIS-CE1                 -0.0170
+HIS-HE1                 0.2681
+HIS-NE2                 -0.1718
+HIS-HE2                 0.3911
+HID-N                   -0.4157
+HID-CA                  0.0188
+HID-C                   0.5973
+HID-HN                  0.2719
+HID-O                   -0.5679
+HID-HA                  0.0881
+HID-CB                  -0.0462
+HID-HB                  0.0402
+HID-CG                  -0.0266
+HID-ND1                 -0.3811
+HID-HD1                 0.3649
+HID-CD2                 0.1292
+HID-HD2                 0.1147
+HID-CE1                 0.2057
+HID-HE1                 0.1392
+HID-NE2                 -0.5727
+HIE-N                   -0.4157
+HIE-CA                  -0.0581
+HIE-C                   0.5973
+HIE-HN                  0.2719
+HIE-O                   -0.5679
+HIE-HA                  0.1360
+HIE-CB                  -0.0074
+HIE-HB                  0.0367
+HIE-CG                  0.1868
+HIE-ND1                 -0.5432
+HIE-CD2                 -0.2207
+HIE-HD2                 0.1862
+HIE-CE1                 0.1635
+HIE-HE1                 0.1435
+HIE-NE2                 -0.2795
+HIE-HE2                 0.3339
+ASP-N                   -0.5163
+ASP-CA                  0.0381
+ASP-C                   0.5366
+ASP-HN                  0.2936
+ASP-O                   -0.5819
+ASP-HA                  0.0880
+ASP-CB                  -0.0303
+ASP-HB                  -0.0122
+ASP-CG                  0.7994
+ASP-OD                  -0.8014
+ASN-N                   -0.4157
+ASN-CA                  0.0143
+ASN-C                   0.5973
+ASN-HN                  0.2719
+ASN-O                   -0.5679
+ASN-HA                  0.1048
+ASN-CB                  -0.2041
+ASN-HB                  0.0797
+ASN-CG                  0.7130
+ASN-OD1                 -0.5931
+ASN-ND2                 -0.9191
+ASN-HD2                 0.4196
+GLU-N                   -0.5163
+GLU-CA                  0.0397
+GLU-C                   0.5366
+GLU-HN                  0.2936
+GLU-O                   -0.5819
+GLU-HA                  0.1105
+GLU-CB                  0.0560
+GLU-HB                  -0.0173
+GLU-CG                  0.0136
+GLU-HG                  -0.0425
+GLU-CD                  0.8054
+GLU-OE                  -0.8188
+GLN-N                   -0.4157
+GLN-CA                  -0.0031
+GLN-C                   0.5973
+GLN-HN                  0.2719
+GLN-O                   -0.5679
+GLN-HA                  0.0850
+GLN-CB                  -0.0036
+GLN-HB                  0.0171
+GLN-CG                  -0.0645
+GLN-HG                  0.0352
+GLN-CD                  0.6951
+GLN-OE1                 -0.6086
+GLN-NE2                 -0.9407
+GLN-HE2                 0.4251
+MET-N                   -0.4157
+MET-CA                  -0.0237
+MET-C                   0.5973
+MET-HN                  0.2719
+MET-O                   -0.5679
+MET-HA                  0.0880
+MET-CB                  0.0342
+MET-HB                  0.0241
+MET-CG                  0.0018
+MET-HG                  0.0440
+MET-SD                  -0.2737
+MET-CE                  -0.0536
+MET-HE                  0.0684
+LYS-N                   -0.3479
+LYS-CA                  -0.2400
+LYS-C                   0.7341
+LYS-HN                  0.2747
+LYS-O                   -0.5894
+LYS-HA                  0.1426
+LYS-CB                  -0.0094
+LYS-HB                  0.0362
+LYS-CG                  0.0187
+LYS-HG                  0.0103
+LYS-CD                  -0.0479
+LYS-HD                  0.0621
+LYS-CE                  -0.0143
+LYS-HE                  0.1135
+LYS-NZ                  -0.3854
+LYS-HZ                  0.3400
+ARG-N                   -0.3479
+ARG-CA                  -0.2637
+ARG-C                   0.7341
+ARG-HN                  0.2747
+ARG-O                   -0.5894
+ARG-HA                  0.1560
+ARG-CB                  -0.0007
+ARG-HB                  0.0327
+ARG-CG                  0.0390
+ARG-HG                  0.0285
+ARG-CD                  0.0486
+ARG-HD                  0.0687
+ARG-NE                  -0.5295
+ARG-HE                  0.3456
+ARG-CZ                  0.8076
+ARG-NH                  -0.8627
+ARG-HH                  0.4478
+ORN-N                   -0.3479
+ORN-CA                  -0.2400
+ORN-C                   0.7341
+ORN-HN                  0.2747
+ORN-O                   -0.5894
+ORN-HA                  0.1426
+ORN-CB                  0.0099
+ORN-HB                  0.0362
+ORN-CG                  -0.0279
+ORN-HG                  0.0621
+ORN-CD                  -0.0143
+ORN-HD                  0.1135
+ORN-NE                  -0.3854
+ORN-HE                  0.3400
+MAA-N                   -0.4157
+MAA-CA                  0.1032
+MAA-C                   0.5973
+MAA-HN                  0.2719
+MAA-O                   -0.5679
+MAA-CB                  -0.2503
+MAA-HB                  0.0853
+PCA-N                   -0.4157
+PCA-CA                  -0.0371
+PCA-C                   0.5973
+PCA-HN                  0.2719
+PCA-O                   -0.5679
+PCA-HA                  0.0850
+PCA-CB                  -0.0036
+PCA-HB                  0.0171
+PCA-CG                  -0.0645
+PCA-HG                  0.0352
+PCA-CD                  0.6000
+PCA-OE                  -0.5700
+FOR-C                   0.5500
+FOR-H                   0.0000
+FOR-O                   -0.5500
+ACE-CA                  -0.3662
+ACE-HA                  0.1123
+ACE-C                   0.5972
+ACE-O                   -0.5679
+C-Term                  -0.8400
+C-Term                  0.4200
+N-MeAmide		-0.4157
+N-MeAmide		0.2719
+N-MeAmide		-0.1490
+N-MeAmide		0.0976
+NGLY-N                  0.2943
+NGLY-CA                 -0.0100
+NGLY-C                  0.6163
+NGLY-HN                 0.1642
+NGLY-O                  -0.5722
+NGLY-HA                 0.0895
+NALA-N                  0.1414
+NALA-CA                 0.1281
+NALA-C                  0.6163
+NALA-HN                 0.1997
+NALA-O                  -0.5722
+NALA-HA                 0.0889
+NVAL-N                  0.0577
+NVAL-CA                 0.0023
+NVAL-C                  0.6163
+NVAL-HN                 0.2272
+NVAL-O                  -0.5722
+NVAL-HA                 0.1093
+NLEU-N                  0.1010
+NLEU-CA                 0.0343
+NLEU-C                  0.6123
+NLEU-HN                 0.2148
+NLEU-O                  -0.5713
+NLEU-HA                 0.1053
+NILE-N                  0.0311
+NILE-CA                 0.0389
+NILE-C                  0.6123
+NILE-HN                 0.2329
+NILE-O                  -0.5713
+NILE-HA                 0.1031
+NSER-N                  0.1849
+NSER-CA                 0.0684
+NSER-C                  0.6163
+NSER-HN                 0.1898
+NSER-O                  -0.5722
+NSER-HA                 0.0782
+NTHR-N                  0.1812
+NTHR-CA                 0.0332
+NTHR-C                  0.6163
+NTHR-HN                 0.1934
+NTHR-O                  -0.5722
+NTHR-HA                 0.1087
+NCYS-N                  0.1325
+NCYS-CA                 0.0978
+NCYS-C                  0.6123
+NCYS-HN                 0.2023
+NCYS-O                  -0.5713
+NCYS-HA                 0.1411
+NCYX-N                  0.2096
+NCYX-CA                 0.1138
+NCYX-C                  0.6163
+NCYX-HN                 0.1815
+NCYX-O                  -0.5713
+NCYX-HA                 0.0922
+NPRO-N                  -0.2020
+NPRO-CA                 0.1589
+NPRO-C                  0.5260
+NPRO-HN                 0.3120
+NPRO-O                  -0.5000
+NPRO-HA                 0.1000
+NPRO-CD                 -0.0120
+NPRO-HD                 0.1000
+NPHE-N                  0.1737
+NPHE-CA                 0.0859
+NPHE-C                  0.6123
+NPHE-HN                 0.1921
+NPHE-O                  -0.5713
+NPHE-HA                 0.1041
+NTYR-N                  0.1940
+NTYR-CA                 0.0766
+NTYR-C                  0.6123
+NTYR-HN                 0.1873
+NTYR-O                  -0.5713
+NTYR-HA                 0.0983
+NTRP-N                  0.1913
+NTRP-CA                 0.0555
+NTRP-C                  0.6123
+NTRP-HN                 0.1888
+NTRP-O                  -0.5713
+NTRP-HA                 0.1162
+NHIS-N                  0.2560
+NHIS-CA                 0.0653
+NHIS-C                  0.7214
+NHIS-HN                 0.1704
+NHIS-O                  -0.6013
+NHIS-HA                 0.1047
+NHID-N                  0.1542
+NHID-CA                 0.1126
+NHID-C                  0.6123
+NHID-HN                 0.1963
+NHID-O                  -0.5713
+NHID-HA                 0.0958
+NHIE-N                  0.1472
+NHIE-CA                 0.0325
+NHIE-C                  0.6123
+NHIE-HN                 0.2016
+NHIE-O                  -0.5713
+NHIE-HA                 0.1380
+NASP-N                  0.0782
+NASP-CA                 0.0326
+NASP-C                  0.5621
+NASP-HN                 0.2200
+NASP-O                  -0.5889
+NASP-HA                 0.1141
+NASN-N                  0.1801
+NASN-CA                 0.0811
+NASN-C                  0.6163
+NASN-HN                 0.1921
+NASN-O                  -0.5722
+NASN-HA                 0.1231
+NGLU-N                  0.0017
+NGLU-CA                 0.0698
+NGLU-C                  0.5621
+NGLU-HN                 0.2391
+NGLU-O                  -0.5889
+NGLU-HA                 0.1202
+NCLN-N                  0.1493
+NCLN-CA                 0.0769
+NCLN-C                  0.6123
+NCLN-HN                 0.1996
+NCLN-O                  -0.5713
+NCLN-HA                 0.1015
+NMET-N                  0.1592
+NMET-CA                 0.0429
+NMET-C                  0.6123
+NMET-HN                 0.1984
+NMET-O                  -0.5713
+NMET-HA                 0.1116
+NLYS-N                  0.0966
+NLYS-CA                 -0.0101
+NLYS-C                  0.7214
+NLYS-HN                 0.2165
+NLYS-O                  -0.6013
+NLYS-HA                 0.1180
+NARG-N                  0.1305
+NARG-CA                 -0.0359
+NARG-C                  0.7214
+NARG-HN                 0.2083
+NARG-O                  -0.6013
+NARG-HA                 0.1242
+NORN-N                  0.0966
+NORN-CA                 -0.0101
+NORN-C                  0.7214
+NORN-HN                 0.2165
+NORN-O                  -0.6013
+NORN-HA                 0.1180
+NAIB-N                  0.1000
+NAIB-CA                 0.2447
+NAIB-C                  0.6163
+NAIB-HN                 0.2000
+NAIB-O                  -0.5722
+CGLY-N                  -0.3821
+CGLY-CA                 -0.2493
+CGLY-C                  0.7231
+CGLY-HN                 0.2681
+CGLY-OXT		-0.7855
+CGLY-HA                 0.1056
+CALA-N                  -0.3821
+CALA-CA                 -0.1532
+CALA-C                  0.7731
+CALA-HN                 0.2681
+CALA-OXT		-0.8055
+CALA-HA                 0.1067
+CVAL-N                  -0.3821
+CVAL-CA                 -0.3352
+CVAL-C                  0.8350
+CVAL-HN                 0.2681
+CVAL-OXT		-0.8173
+CVAL-HA                 0.1438
+CLEU-N                  -0.3821
+CLEU-CA                 -0.2874
+CLEU-C                  0.8326
+CLEU-HN                 0.2681
+CLEU-OXT		-0.8199
+CLEU-HA                 0.1346
+CILE-N                  -0.3821
+CILE-CA                 -0.3070
+CILE-C                  0.8343
+CILE-HN                 0.2681
+CILE-OXT		-0.8190
+CILE-HA                 0.1375
+CSER-N                  -0.3821
+CSER-CA                 -0.2563
+CSER-C                  0.8113
+CSER-HN                 0.2681
+CSER-OXT		-0.8132
+CSER-HA                 0.1304
+CTHR-N                  -0.3821
+CTHR-CA                 -0.2315
+CTHR-C                  0.7810
+CTHR-HN                 0.2681
+CTHR-OXT		-0.8044
+CTHR-HA                 0.1207
+CCYS-N                  -0.3821
+CCYS-CA                 -0.1598
+CCYS-C                  0.7497
+CCYS-HN                 0.2681
+CCYS-OXT		-0.7981
+CCYS-HA                 0.1396
+CCYX-N                  -0.3821
+CCYX-CA                 -0.1283
+CCYX-C                  0.7618
+CCYX-HN                 0.2681
+CCYX-OXT		-0.8041
+CCYX-HA                 0.0938
+CPRO-N                  -0.2802
+CPRO-CA                 -0.1236
+CPRO-C                  0.6631
+CPRO-OXT		-0.7697
+CPRO-HA                 0.0776
+CPHE-N                  -0.3821
+CPHE-CA                 -0.1756
+CPHE-C                  0.7660
+CPHE-HN                 0.2681
+CPHE-OXT		-0.8026
+CPHE-HA                 0.1098
+CTYR-N                  -0.3821
+CTYR-CA                 -0.1911
+CTYR-C                  0.7817
+CTYR-HN                 0.2681
+CTYR-OXT		-0.8070
+CTYR-HA                 0.1092
+CTRP-N                  -0.3821
+CTRP-CA                 -0.2064
+CTRP-C                  0.7658
+CTRP-HN                 0.2681
+CTRP-OXT		-0.8011
+CTRP-HA                 0.1272
+CHIS-N                  -0.3481
+CHIS-CA                 -0.1503
+CHIS-C                  0.8032
+CHIS-HN                 0.2764
+CHIS-OXT		-0.8177
+CHIS-HA                 0.1115
+CHID-N                  -0.3821
+CHID-CA                 -0.1618
+CHID-C                  0.7615
+CHID-HN                 0.2681
+CHID-OXT		-0.8016
+CHID-HA                 0.1100
+CHIE-N                  -0.3821
+CHIE-CA                 -0.2661
+CHIE-C                  0.7916
+CHIE-HN                 0.2681
+CHIE-OXT		-0.8065
+CHIE-HA                 0.1650
+CASP-N                  -0.5192
+CASP-CA                 -0.1810
+CASP-C                  0.7256
+CASP-HN                 0.3055
+CASP-OXT		-0.7887
+CASP-HA                 0.1046
+CASN-N                  -0.3821
+CASN-CA                 -0.1927
+CASN-C                  0.8050
+CASN-HN                 0.2681
+CASN-OXT		-0.8147
+CASN-HA                 0.1358
+CGLU-N                  -0.5192
+CGLU-CA                 -0.2000
+CGLU-C                  0.7420
+CGLU-HN                 0.3055
+CGLU-OXT		-0.7930
+CGLU-HA                 0.1399
+CGLN-N                  -0.3821
+CGLN-CA                 -0.2108
+CGLN-C                  0.7775
+CGLN-HN                 0.2681
+CGLN-OXT		-0.8042
+CGLN-HA                 0.1232
+CMET-N                  -0.3821
+CMET-CA                 -0.2441
+CMET-C                  0.8013
+CMET-HN                 0.2681
+CMET-OXT		-0.8105
+CMET-HA                 0.1277
+CLYS-N                  -0.3481
+CLYS-CA                 -0.2964
+CLYS-C                  0.8488
+CLYS-HN                 0.2764
+CLYS-OXT		-0.8252
+CLYS-HA                 0.1438
+CARG-N                  -0.3481
+CARG-CA                 -0.3117
+CARG-C                  0.8557
+CARG-HN                 0.2764
+CARG-OXT		-0.8266
+CARG-HA                 0.1447
+CORN-N                  -0.3481
+CORN-CA                 -0.2964
+CORN-C                  0.8488
+CORN-HN                 0.2764
+CORN-OXT		-0.8252
+CORN-HA                 0.1438
+CAIB-N                  -0.3821
+CAIB-CA                 -0.0572
+CAIB-C                  0.8000
+CAIB-HN                 0.2681
+CAIB-OXT		-0.8200
+RA-O5'                  -0.4989
+RA-C5'                  0.0558
+RA-H5'1                 0.0679
+RA-H5'2                 0.0679
+RA-C4'                  0.1065
+RA-H4'                  0.1174
+RA-O4'                  -0.3548
+RA-C1'                  0.0394
+RA-H1'                  0.2007
+RA-C3'                  0.2022
+RA-H3'                  0.0615
+RA-C2'                  0.0670
+RA-H2'1                 0.0972
+RA-O2'                  -0.6139
+RA-HO'2                 0.4186
+RA-O3'                  -0.5246
+RA-N9                   -0.0251
+RA-C4                   0.3053
+RA-C5                   0.0515
+RA-N7                   -0.6073
+RA-C8                   0.2006
+RA-N3                   -0.6997
+RA-C2                   0.5875
+RA-N1                   -0.7615
+RA-C6                   0.7009
+RA-H2                   0.0473
+RA-N6                   -0.9019
+RA-H61                  0.4115
+RA-H62                  0.4115
+RA-H8                   0.1553
+RG-O5'                  -0.4989
+RG-C5'                  0.0558
+RG-H5'1                 0.0679
+RG-H5'2                 0.0679
+RG-C4'                  0.1065
+RG-H4'                  0.1174
+RG-O4'                  -0.3548
+RG-C1'                  0.0191
+RG-H1'                  0.2006
+RG-C3'                  0.2022
+RG-H3'                  0.0615
+RG-C2'                  0.0670
+RG-H2'1                 0.0972
+RG-O2'                  -0.6139
+RG-HO'2                 0.4186
+RG-O3'                  -0.5246
+RG-N9                   0.0492
+RG-C4                   0.1222
+RG-C5                   0.1744
+RG-N7                   -0.5709
+RG-C8                   0.1374
+RG-N3                   -0.6323
+RG-C2                   0.7657
+RG-N1                   -0.4787
+RG-C6                   0.4770
+RG-H1                   0.3424
+RG-N2                   -0.9672
+RG-H21                  0.4364
+RG-H22                  0.4364
+RG-O6                   -0.5597
+RG-H8                   0.1640
+RC-O5'                  -0.4989
+RC-C5'                  0.0558
+RC-H5'1                 0.0679
+RC-H5'2                 0.0679
+RC-C4'                  0.1065
+RC-H4'                  0.1174
+RC-O4'                  -0.3548
+RC-C1'                  0.0066
+RC-H1'                  0.2029
+RC-C3'                  0.2022
+RC-H3'                  0.0615
+RC-C2'                  0.0670
+RC-H2'1                 0.0972
+RC-O2'                  -0.6139
+RC-HO'2                 0.4186
+RC-O3'                  -0.5246
+RC-N1                   -0.0484
+RC-C2                   0.7538
+RC-N3                   -0.7584
+RC-C4                   0.8185
+RC-C5                   -0.5215
+RC-C6                   0.0053
+RC-O2                   -0.6252
+RC-N4                   -0.9530
+RC-H41                  0.4234
+RC-H42                  0.4234
+RC-H5                   0.1928
+RC-H6                   0.1958
+RU-O5'                  -0.4989
+RU-C5'                  0.0558
+RU-H5'1                 0.0679
+RU-H5'2                 0.0679
+RU-C4'                  0.1065
+RU-H4'                  0.1174
+RU-O4'                  -0.3548
+RU-C1'                  0.0674
+RU-H1'                  0.1824
+RU-C3'                  0.2022
+RU-H3'                  0.0615
+RU-C2'                  0.0670
+RU-H2'1                 0.0972
+RU-O2'                  -0.6139
+RU-HO'2                 0.4186
+RU-O3'                  -0.5246
+RU-N1                   0.0418
+RU-C2                   0.4687
+RU-N3                   -0.3549
+RU-C4                   0.5952
+RU-C5                   -0.3635
+RU-C6                   -0.1126
+RU-O2                   -0.5477
+RU-H3                   0.3154
+RU-O4                   -0.5761
+RU-H5                   0.1811
+RU-H6                   0.2188
+DA-O5'                  -0.4954
+DA-C5'                  -0.0069
+DA-H5'1                 0.0754
+DA-H5'2                 0.0754
+DA-C4'                  0.1629
+DA-H4'                  0.1176
+DA-O4'                  -0.3691
+DA-C1'                  0.0431
+DA-H1'                  0.1838
+DA-C3'                  0.0713
+DA-H3'                  0.0985
+DA-C2'                  -0.0854
+DA-H2'1                 0.0718
+DA-H2'2                 0.0718
+DA-O3'                  -0.5232
+DA-N9                   -0.0268
+DA-C4                   0.3800
+DA-C5                   0.0725
+DA-N7                   -0.6175
+DA-C8                   0.1607
+DA-N3                   -0.7417
+DA-C2                   0.5716
+DA-N1                   -0.7624
+DA-C6                   0.6897
+DA-H2                   0.0598
+DA-N6                   -0.9123
+DA-H61                  0.4167
+DA-H62                  0.4167
+DA-H8                   0.1877
+DG-O5'                  -0.4954
+DG-C5'                  -0.0069
+DG-H5'1                 0.0754
+DG-H5'2                 0.0754
+DG-C4'                  0.1629
+DG-H4'                  0.1176
+DG-O4'                  -0.3691
+DG-C1'                  0.0358
+DG-H1'                  0.1746
+DG-C3'                  0.0713
+DG-H3'                  0.0985
+DG-C2'                  -0.0854
+DG-H2'1                 0.0718
+DG-H2'2                 0.0718
+DG-O3'                  -0.5232
+DG-N9                   0.0577
+DG-C4                   0.1814
+DG-C5                   0.1991
+DG-N7                   -0.5725
+DG-C8                   0.0736
+DG-N3                   -0.6636
+DG-C2                   0.7432
+DG-N1                   -0.5053
+DG-C6                   0.4918
+DG-H1                   0.3520
+DG-N2                   -0.9230
+DG-H21                  0.4235
+DG-H22                  0.4235
+DG-O6                   -0.5699
+DG-H8                   0.1997
+DC-O5'                  -0.4954
+DC-C5'                  -0.0069
+DC-H5'1                 0.0754
+DC-H5'2                 0.0754
+DC-C4'                  0.1629
+DC-H4'                  0.1176
+DC-O4'                  -0.3691
+DC-C1'                  -0.0116
+DC-H1'                  0.1963
+DC-C3'                  0.0713
+DC-H3'                  0.0985
+DC-C2'                  -0.0854
+DC-H2'1                 0.0718
+DC-H2'2                 0.0718
+DC-O3'                  -0.5232
+DC-N1                   -0.0339
+DC-C2                   0.7959
+DC-N3                   -0.7748
+DC-C4                   0.8439
+DC-C5                   -0.5222
+DC-C6                   -0.0183
+DC-O2                   -0.6548
+DC-N4                   -0.9773
+DC-H41                  0.4314
+DC-H42                  0.4314
+DC-H5                   0.1863
+DC-H6                   0.2293
+DT-O5'                  -0.4954
+DT-C5'                  -0.0069
+DT-H5'1                 0.0754
+DT-H5'2                 0.0754
+DT-C4'                  0.1629
+DT-H4'                  0.1176
+DT-O4'                  -0.3691
+DT-C1'                  0.0680
+DT-H1'                  0.1804
+DT-C3'                  0.0713
+DT-H3'                  0.0985
+DT-C2'                  -0.0854
+DT-H2'1                 0.0718
+DT-H2'2                 0.0718
+DT-O3'                  -0.5232
+DT-N1                   -0.0239
+DT-C2                   0.5677
+DT-N3                   -0.4340
+DT-C4                   0.5194
+DT-C5                   0.0025
+DT-C6                   -0.2209
+DT-O2                   -0.5881
+DT-H3                   0.3420
+DT-O4                   -0.5563
+DT-C7                   -0.2269
+DT-H7                   0.0770
+DT-H6                   0.2607
+R-Phosphodiester	1.1662
+R-Phosphodiester	-0.7760
+R5H-O5'                 -0.6223
+R5H-H5T                 0.4295
+R5P-O5'                 -0.6328
+R5P-P                   0.9000
+R5P-OP                  -0.8200
+R3H-O3'                 -0.6541
+R3H-H3T                 0.4376
+R3P-O3'                 -0.6565
+R3P-P                   0.9000
+R3P-OP                  -0.8200
+D-Phosphodiester	1.1659
+D-Phosphodiester	-0.7761
+D5H-O5'                 -0.6318
+D5H-H5T                 0.4422
+D5P-O5'                 -0.6296
+D5P-P                   0.9000
+D5P-OP                  -0.8200
+D3H-O3'                 -0.6549
+D3H-H3T                 0.4396
+D3P-O3'                 -0.6553
+D3P-P                   0.9000
+D3P-OP                  -0.8200
+TIP3P                   -0.834
+TIP3P                   0.417
+Li+                     1.000
+Na+                     1.000
+K+                      1.000
+Rb+                     1.000
+Cs+                     1.000
+Mg+2                    2.000
+Ca+2                    2.000
+Zn+2                    2.000
+Cl-                     -1.000
+end ChargeAtomTypes
+
+
+
+begin LennardJonesAtomTypes
+//name		epsilon		sigma
+CT		0.109400	3.399670
+C		0.086000	3.399670
+CA		0.086000	3.399670
+CM		0.086000	3.399670
+CC		0.086000	3.399670
+CV		0.086000	3.399670
+CW		0.086000	3.399670
+CR		0.086000	3.399670
+CB		0.086000	3.399670
+C*		0.086000	3.399670
+CN		0.086000	3.399670
+CK		0.086000	3.399670
+CQ		0.086000	3.399670
+N		0.170000	3.249999
+NA		0.170000	3.249999
+NB		0.170000	3.249999
+NC		0.170000	3.249999
+N*		0.170000	3.249999
+N2		0.170000	3.249999
+N3		0.170000	3.340870
+OW		0.152000	3.150752
+OH		0.210400	3.066473
+OS		0.170000	3.000012
+O		0.210000	2.959922
+O2		0.210000	2.959922
+S		0.250000	3.563595
+SH		0.250000	3.563595
+P		0.200000	3.741775
+H		0.015700	1.069078
+HW		0.000000	0.000178
+HO		0.000000	0.000178
+HS		0.015700	1.069078
+HA		0.015000	2.599642
+HC		0.015700	2.649533
+H1		0.015700	2.471353
+H2		0.015700	2.293173
+H3		0.015700	2.114994
+HP		0.015700	1.959977
+H4		0.015000	2.510553
+H5		0.015000	2.421463
+Li+     	0.018300	2.025904
+Na+     	0.002770	3.328398
+K+		0.000328	4.736018
+Rb+     	0.000170	5.266993
+Cs+     	0.000081	6.049202
+Mg+     	0.894700	1.412253
+Ca+     	0.459789	3.052397
+Zn+     	0.012500	1.959977
+Cl-     	0.100000	4.401040
+end LennardJonesAtomTypes
+
+
+begin BondTypes
+//Atom1	Atom2	Harmonic	b0		kb (kcal/mol)
+CT      CT      Harmonic        1.526000        310.000000
+CT      C       Harmonic        1.522000        317.000000
+CT      CA      Harmonic        1.510000        317.000000
+CT      CM      Harmonic        1.510000        317.000000
+CT      CC      Harmonic        1.504000        317.000000
+CT      C*      Harmonic        1.495000        317.000000
+CT      N       Harmonic        1.449000        337.000000
+CT      N*      Harmonic        1.475000        337.000000
+CT      N2      Harmonic        1.463000        337.000000
+CT      N3      Harmonic        1.471000        367.000000
+CT      OH      Harmonic        1.410000        320.000000
+CT      OS      Harmonic        1.410000        320.000000
+CT      S       Harmonic        1.810000        227.000000
+CT      SH      Harmonic        1.810000        237.000000
+CT      HC      Harmonic        1.090000        340.000000
+CT      H1      Harmonic        1.090000        340.000000
+CT      H2      Harmonic        1.090000        340.000000
+CT      H3      Harmonic        1.090000        340.000000
+CT      HP      Harmonic        1.090000        340.000000
+C       CA      Harmonic        1.409000        469.000000
+C       CM      Harmonic        1.444000        410.000000
+C       CB      Harmonic        1.419000        447.000000
+C       N       Harmonic        1.335000        490.000000
+C       NA      Harmonic        1.388000        418.000000
+C       NC      Harmonic        1.358000        457.000000
+C       N*      Harmonic        1.383000        424.000000
+C       O       Harmonic        1.229000        570.000000
+C       O2      Harmonic        1.250000        656.000000
+CA      CA      Harmonic        1.400000        469.000000
+CA      CM      Harmonic        1.433000        427.000000
+CA      CB      Harmonic        1.404000        469.000000
+CA      CN      Harmonic        1.400000        469.000000
+CA      NA      Harmonic        1.381000        427.000000
+CA      NC      Harmonic        1.339000        483.000000
+CA      N2      Harmonic        1.340000        481.000000
+CA      OH      Harmonic        1.364000        450.000000
+CA      HA      Harmonic        1.080000        367.000000
+CA      H4      Harmonic        1.080000        367.000000
+CM      CM      Harmonic        1.350000        549.000000
+CM      N*      Harmonic        1.365000        448.000000
+CM      HA      Harmonic        1.080000        367.000000
+CM      H4      Harmonic        1.080000        367.000000
+CM      H5      Harmonic        1.080000        367.000000
+CC      CV      Harmonic        1.375000        512.000000
+CC      CW      Harmonic        1.371000        518.000000
+CC      NA      Harmonic        1.385000        422.000000
+CC      NB      Harmonic        1.394000        410.000000
+CV      NB      Harmonic        1.394000        410.000000
+CV      H4      Harmonic        1.080000        367.000000
+CW      C*      Harmonic        1.352000        546.000000
+CW      NA      Harmonic        1.381000        427.000000
+CW      H4      Harmonic        1.080000        367.000000
+CR      NA      Harmonic        1.343000        477.000000
+CR      NB      Harmonic        1.335000        488.000000
+CR      H5      Harmonic        1.080000        367.000000
+CB      CB      Harmonic        1.370000        520.000000
+CB      C*      Harmonic        1.459000        388.000000
+CB      CN      Harmonic        1.419000        447.000000
+CB      NB      Harmonic        1.391000        414.000000
+CB      NC      Harmonic        1.354000        461.000000
+CB      N*      Harmonic        1.374000        436.000000
+C*      HC      Harmonic        1.080000        367.000000
+CN      NA      Harmonic        1.380000        428.000000
+CK      NB      Harmonic        1.304000        529.000000
+CK      N*      Harmonic        1.371000        440.000000
+CK      H5      Harmonic        1.080000        367.000000
+CQ      NC      Harmonic        1.324000        502.000000
+CQ      H5      Harmonic        1.080000        367.000000
+N       H       Harmonic        1.010000        434.000000
+NA      H       Harmonic        1.010000        434.000000
+N*      H       Harmonic        1.010000        434.000000
+N2      H       Harmonic        1.010000        434.000000
+N3      H       Harmonic        1.010000        434.000000
+OW      HW      Harmonic        0.957200        553.000000
+OH      P       Harmonic        1.610000        230.000000
+OH      HO      Harmonic        0.960000        553.000000
+OS      P       Harmonic        1.610000        230.000000
+OS      HO      Harmonic        0.960000        553.000000
+O2      P       Harmonic        1.480000        525.000000
+S       S       Harmonic        2.038000        166.000000
+SH      HS      Harmonic        1.336000        274.000000
+HW      HW      Harmonic        1.513600        553.000000
+end BondType
+
+
+begin BendTypes
+//Atom1	Atom2	Atom3	Harmonic	Theta		Ktheta
+CT      CT      CT      Harmonic        109.500000      80.000000
+CT      CT      C       Harmonic        111.100000      126.000000
+CT      CT      CA      Harmonic        114.000000      126.000000
+CT      CT      CC      Harmonic        113.100000      126.000000
+CT      CT      C*      Harmonic        115.600000      126.000000
+CT      CT      N       Harmonic        109.700000      160.000000
+CT      CT      N*      Harmonic        109.500000      100.000000
+CT      CT      N2      Harmonic        111.200000      160.000000
+CT      CT      N3      Harmonic        111.200000      160.000000
+CT      CT      OH      Harmonic        109.500000      100.000000
+CT      CT      OS      Harmonic        109.500000      100.000000
+CT      CT      S       Harmonic        114.700000      100.000000
+CT      CT      SH      Harmonic        108.600000      100.000000
+CT      CT      HC      Harmonic        109.500000      100.000000
+CT      CT      H1      Harmonic        109.500000      100.000000
+CT      CT      H2      Harmonic        109.500000      100.000000
+CT      CT      HP      Harmonic        109.500000      100.000000
+C       CT      N       Harmonic        110.100000      126.000000
+C       CT      N3      Harmonic        111.200000      160.000000
+C       CT      HC      Harmonic        109.500000      100.000000
+C       CT      H1      Harmonic        109.500000      100.000000
+C       CT      HP      Harmonic        109.500000      100.000000
+CA      CT      HC      Harmonic        109.500000      100.000000
+CM      CT      HC      Harmonic        109.500000      100.000000
+CC      CT      HC      Harmonic        109.500000      100.000000
+C*      CT      HC      Harmonic        109.500000      100.000000
+N       CT      H1      Harmonic        109.500000      100.000000
+N*      CT      OS      Harmonic        109.500000      100.000000
+N*      CT      H1      Harmonic        109.500000      100.000000
+N*      CT      H2      Harmonic        109.500000      100.000000
+N2      CT      H1      Harmonic        109.500000      100.000000
+N3      CT      H1      Harmonic        109.500000      100.000000
+N3      CT      HP      Harmonic        109.500000      100.000000
+OH      CT      H1      Harmonic        109.500000      100.000000
+OS      CT      H1      Harmonic        109.500000      100.000000
+OS      CT      H2      Harmonic        109.500000      100.000000
+S       CT      H1      Harmonic        109.500000      100.000000
+SH      CT      H1      Harmonic        109.500000      100.000000
+HC      CT      HC      Harmonic        109.500000      70.000000
+H1      CT      H1      Harmonic        109.500000      70.000000
+H2      CT      H2      Harmonic        109.500000      70.000000
+HP      CT      HP      Harmonic        109.500000      70.000000
+CT      C       N       Harmonic        116.600000      140.000000
+CT      C       O       Harmonic        120.400000      160.000000
+CT      C       O2      Harmonic        117.000000      140.000000
+CA      C       CA      Harmonic        120.000000      126.000000
+CM      C       NA      Harmonic        114.100000      140.000000
+CM      C       O       Harmonic        125.300000      160.000000
+CB      C       NA      Harmonic        111.300000      140.000000
+CB      C       O       Harmonic        128.800000      160.000000
+N       C       O       Harmonic        122.900000      160.000000
+NA      C       N*      Harmonic        115.400000      140.000000
+NA      C       O       Harmonic        120.600000      160.000000
+NC      C       N*      Harmonic        118.600000      140.000000
+NC      C       O       Harmonic        122.500000      160.000000
+N*      C       O       Harmonic        120.900000      160.000000
+O       C       O       Harmonic        126.000000      160.000000
+O2      C       O2      Harmonic        126.000000      160.000000
+CT      CA      CA      Harmonic        120.000000      140.000000
+C       CA      CA      Harmonic        120.000000      126.000000
+C       CA      HA      Harmonic        120.000000      100.000000
+CA      CA      CA      Harmonic        120.000000      126.000000
+CA      CA      CB      Harmonic        120.000000      126.000000
+CA      CA      CN      Harmonic        120.000000      126.000000
+CA      CA      OH      Harmonic        120.000000      140.000000
+CA      CA      HA      Harmonic        120.000000      100.000000
+CA      CA      H4      Harmonic        120.000000      100.000000
+CM      CA      NC      Harmonic        121.500000      140.000000
+CM      CA      N2      Harmonic        120.100000      140.000000
+CB      CA      NC      Harmonic        117.300000      140.000000
+CB      CA      N2      Harmonic        123.500000      140.000000
+CB      CA      HA      Harmonic        120.000000      100.000000
+CB      CA      H4      Harmonic        120.000000      100.000000
+CN      CA      HA      Harmonic        120.000000      100.000000
+NA      CA      NC      Harmonic        123.300000      140.000000
+NA      CA      N2      Harmonic        116.000000      140.000000
+NC      CA      N2      Harmonic        119.300000      140.000000
+N2      CA      N2      Harmonic        120.000000      140.000000
+CT      CM      C       Harmonic        119.700000      140.000000
+CT      CM      CM      Harmonic        119.700000      140.000000
+C       CM      CM      Harmonic        120.700000      126.000000
+C       CM      HA      Harmonic        119.700000      100.000000
+C       CM      H4      Harmonic        119.700000      100.000000
+CA      CM      CM      Harmonic        117.000000      126.000000
+CA      CM      HA      Harmonic        123.300000      100.000000
+CA      CM      H4      Harmonic        123.300000      100.000000
+CM      CM      N*      Harmonic        121.200000      140.000000
+CM      CM      HA      Harmonic        119.700000      100.000000
+CM      CM      H4      Harmonic        119.700000      100.000000
+N*      CM      H4      Harmonic        119.100000      100.000000
+CT      CC      CV      Harmonic        120.000000      140.000000
+CT      CC      CW      Harmonic        120.000000      140.000000
+CT      CC      NA      Harmonic        120.000000      140.000000
+CT      CC      NB      Harmonic        120.000000      140.000000
+CV      CC      NA      Harmonic        120.000000      140.000000
+CW      CC      NA      Harmonic        120.000000      140.000000
+CW      CC      NB      Harmonic        120.000000      140.000000
+CC      CV      NB      Harmonic        120.000000      140.000000
+CC      CV      H4      Harmonic        120.000000      100.000000
+NB      CV      H4      Harmonic        120.000000      100.000000
+CC      CW      NA      Harmonic        120.000000      140.000000
+CC      CW      H4      Harmonic        120.000000      100.000000
+C*      CW      NA      Harmonic        108.700000      140.000000
+C*      CW      H4      Harmonic        120.000000      100.000000
+NA      CW      H4      Harmonic        120.000000      100.000000
+NA      CR      NA      Harmonic        120.000000      140.000000
+NA      CR      NB      Harmonic        120.000000      140.000000
+NA      CR      H5      Harmonic        120.000000      100.000000
+NB      CR      H5      Harmonic        120.000000      100.000000
+C       CB      CB      Harmonic        119.200000      126.000000
+C       CB      NB      Harmonic        130.000000      140.000000
+CA      CB      CB      Harmonic        117.300000      126.000000
+CA      CB      C*      Harmonic        134.900000      126.000000
+CA      CB      CN      Harmonic        116.200000      126.000000
+CA      CB      NB      Harmonic        132.400000      140.000000
+CB      CB      NB      Harmonic        110.400000      140.000000
+CB      CB      NC      Harmonic        127.700000      140.000000
+CB      CB      N*      Harmonic        106.200000      140.000000
+C*      CB      CN      Harmonic        108.800000      126.000000
+NC      CB      N*      Harmonic        126.200000      140.000000
+CT      C*      CW      Harmonic        125.000000      140.000000
+CT      C*      CB      Harmonic        128.600000      140.000000
+CW      C*      CB      Harmonic        106.400000      126.000000
+CA      CN      CB      Harmonic        122.700000      126.000000
+CA      CN      NA      Harmonic        132.800000      140.000000
+CB      CN      NA      Harmonic        104.400000      140.000000
+NB      CK      N*      Harmonic        113.900000      140.000000
+NB      CK      H5      Harmonic        123.050000      100.000000
+N*      CK      H5      Harmonic        123.050000      100.000000
+NC      CQ      NC      Harmonic        129.100000      140.000000
+NC      CQ      H5      Harmonic        115.450000      100.000000
+CT      N       CT      Harmonic        118.000000      100.000000
+CT      N       C       Harmonic        121.900000      100.000000
+CT      N       H       Harmonic        118.040000      100.000000
+C       N       H       Harmonic        120.000000      100.000000
+H       N       H       Harmonic        120.000000      70.000000
+C       NA      C       Harmonic        126.400000      140.000000
+C       NA      CA      Harmonic        125.200000      140.000000
+C       NA      H       Harmonic        116.800000      100.000000
+CA      NA      H       Harmonic        118.000000      100.000000
+CC      NA      CR      Harmonic        120.000000      140.000000
+CC      NA      H       Harmonic        120.000000      100.000000
+CW      NA      CR      Harmonic        120.000000      140.000000
+CW      NA      CN      Harmonic        111.600000      140.000000
+CW      NA      H       Harmonic        120.000000      100.000000
+CR      NA      H       Harmonic        120.000000      100.000000
+CN      NA      H       Harmonic        123.100000      100.000000
+CC      NB      CR      Harmonic        117.000000      140.000000
+CV      NB      CR      Harmonic        117.000000      140.000000
+CB      NB      CK      Harmonic        103.800000      140.000000
+C       NC      CA      Harmonic        120.500000      140.000000
+CA      NC      CB      Harmonic        112.200000      140.000000
+CA      NC      CQ      Harmonic        118.600000      140.000000
+CB      NC      CQ      Harmonic        111.000000      140.000000
+CT      N*      C       Harmonic        117.600000      140.000000
+CT      N*      CM      Harmonic        121.200000      140.000000
+CT      N*      CB      Harmonic        125.800000      140.000000
+CT      N*      CK      Harmonic        128.800000      140.000000
+C       N*      CM      Harmonic        121.600000      140.000000
+C       N*      H       Harmonic        119.200000      100.000000
+CM      N*      H       Harmonic        121.200000      100.000000
+CB      N*      CK      Harmonic        105.400000      140.000000
+CB      N*      H       Harmonic        125.800000      100.000000
+CK      N*      H       Harmonic        128.800000      100.000000
+CT      N2      CA      Harmonic        123.200000      100.000000
+CT      N2      H       Harmonic        118.400000      100.000000
+CA      N2      H       Harmonic        120.000000      100.000000
+H       N2      H       Harmonic        120.000000      70.000000
+CT      N3      CT      Harmonic        109.500000      100.000000
+CT      N3      H       Harmonic        109.500000      100.000000
+H       N3      H       Harmonic        109.500000      70.000000
+HW      OW      HW      Harmonic        104.520000      200.000000
+CT      OH      HO      Harmonic        108.500000      110.000000
+CA      OH      HO      Harmonic        113.000000      100.000000
+P       OH      HO      Harmonic        108.500000      90.000000
+CT      OS      CT      Harmonic        109.500000      120.000000
+CT      OS      P       Harmonic        120.500000      200.000000
+P       OS      P       Harmonic        120.500000      200.000000
+CT      S       CT      Harmonic        98.900000       124.000000
+CT      S       S       Harmonic        103.700000      136.000000
+CT      SH      HS      Harmonic        96.000000       86.000000
+HS      SH      HS      Harmonic        92.070000       70.000000
+OH      P       OS      Harmonic        102.600000      90.000000
+OH      P       O2      Harmonic        108.230000      90.000000
+OS      P       OS      Harmonic        102.600000      90.000000
+OS      P       O2      Harmonic        108.230000      200.000000
+O2      P       O2      Harmonic        119.900000      280.000000
+OW      HW      HW      Harmonic        127.740000      0.000000
+end BendTypes
+
+
+begin TorsionTypes
+//Atom1	Atom2	Atom3	Atom4	Charmm	Kchi		n	delta		[Kchi		n		delta]
+CT      CT      CT      CT      Charmm  0.200000        1       180.000000	0.25		2		180		0.18		3		0
+CT      CT      CT      C       Charmm  0.156000        3       0.000000
+CT      CT      CT      N       Charmm  0.156000        3       0.000000
+CT      CT      CT      N*      Charmm  0.156000        3       0.000000
+CT      CT      CT      N2      Charmm  0.156000        3       0.000000
+CT      CT      CT      N3      Charmm  0.156000        3       0.000000
+CT      CT      CT      OH      Charmm  0.156000        3       0.000000
+CT      CT      CT      OS      Charmm  0.156000        3       0.000000
+CT      CT      CT      S       Charmm  0.156000        3       0.000000
+CT      CT      CT      HC      Charmm  0.160000        3       0.000000
+CT      CT      CT      H1      Charmm  0.156000        3       0.000000
+CT      CT      CT      H2      Charmm  0.156000        3       0.000000
+CT      CT      CT      HP      Charmm  0.156000        3       0.000000
+C       CT      CT      C       Charmm  0.156000        3       0.000000
+C       CT      CT      CA      Charmm  0.156000        3       0.000000
+C       CT      CT      CC      Charmm  0.156000        3       0.000000
+C       CT      CT      C*      Charmm  0.156000        3       0.000000
+C       CT      CT      N       Charmm  0.156000        3       0.000000
+C       CT      CT      N3      Charmm  0.156000        3       0.000000
+C       CT      CT      OH      Charmm  0.156000        3       0.000000
+C       CT      CT      S       Charmm  0.156000        3       0.000000
+C       CT      CT      SH      Charmm  0.156000        3       0.000000
+C       CT      CT      HC      Charmm  0.156000        3       0.000000
+C       CT      CT      H1      Charmm  0.156000        3       0.000000
+C       CT      CT      HP      Charmm  0.156000        3       0.000000
+CA      CT      CT      N       Charmm  0.156000        3       0.000000
+CA      CT      CT      N3      Charmm  0.156000        3       0.000000
+CA      CT      CT      H1      Charmm  0.156000        3       0.000000
+CA      CT      CT      HP      Charmm  0.156000        3       0.000000
+CC      CT      CT      N       Charmm  0.156000        3       0.000000
+CC      CT      CT      N3      Charmm  0.156000        3       0.000000
+CC      CT      CT      H1      Charmm  0.156000        3       0.000000
+CC      CT      CT      HP      Charmm  0.156000        3       0.000000
+C*      CT      CT      N       Charmm  0.156000        3       0.000000
+C*      CT      CT      N3      Charmm  0.156000        3       0.000000
+C*      CT      CT      H1      Charmm  0.156000        3       0.000000
+C*      CT      CT      HP      Charmm  0.156000        3       0.000000
+N       CT      CT      OH      Charmm  0.156000        3       0.000000
+N       CT      CT      S       Charmm  0.156000        3       0.000000
+N       CT      CT      SH      Charmm  0.156000        3       0.000000
+N       CT      CT      HC      Charmm  0.156000        3       0.000000
+N       CT      CT      H1      Charmm  0.156000        3       0.000000
+N*      CT      CT      OH      Charmm  0.156000        3       0.000000
+N*      CT      CT      HC      Charmm  0.156000        3       0.000000
+N*      CT      CT      H1      Charmm  0.156000        3       0.000000
+N2      CT      CT      HC      Charmm  0.156000        3       0.000000
+N3      CT      CT      OH      Charmm  0.156000        3       0.000000
+N3      CT      CT      S       Charmm  0.156000        3       0.000000
+N3      CT      CT      SH      Charmm  0.156000        3       0.000000
+N3      CT      CT      HC      Charmm  0.156000        3       0.000000
+N3      CT      CT      H1      Charmm  0.156000        3       0.000000
+OH      CT      CT      N*      Charmm  0.156000        3       0.000000
+OH      CT      CT      OH      Charmm  0.144000        3       0.000000		1.175		2		0
+OH      CT      CT      OS      Charmm  0.144000        3       0.000000		1.175		2		0
+OH      CT      CT      HC      Charmm  0.156000        3       0.000000		0.25		1		0
+OH      CT      CT      H1      Charmm  0.156000        3       0.000000
+OH      CT      CT      H2      Charmm  0.156000        3       0.000000
+OH      CT      CT      HP      Charmm  0.156000        3       0.000000
+OS      CT      CT      OS      Charmm  0.144000        3       0.000000		1.175		2		0
+OS      CT      CT      HC      Charmm  0.156000        3       0.000000		0.25		1		0
+OS      CT      CT      H1      Charmm  0.156000        3       0.000000
+S       CT      CT      HC      Charmm  0.156000        3       0.000000
+S       CT      CT      H1      Charmm  0.156000        3       0.000000
+S       CT      CT      HP      Charmm  0.156000        3       0.000000
+SH      CT      CT      H1      Charmm  0.156000        3       0.000000
+SH      CT      CT      HP      Charmm  0.156000        3       0.000000
+HC      CT      CT      HC      Charmm  0.150000        3       0.000000
+HC      CT      CT      H1      Charmm  0.156000        3       0.000000
+HC      CT      CT      H2      Charmm  0.156000        3       0.000000
+HC      CT      CT      HP      Charmm  0.156000        3       0.000000
+H1      CT      CT      H1      Charmm  0.156000        3       0.000000
+H1      CT      CT      H2      Charmm  0.156000        3       0.000000
+H1      CT      CT      HP      Charmm  0.156000        3       0.000000
+CT      CT      C       N       Charmm  0.070000        2       0.000000		0.1		4		0
+CT      CT      C       O       Charmm  0.000000        2       0.000000
+CT      CT      C       O2      Charmm  0.000000        2       0.000000
+N       CT      C       N       Charmm  1.700000        1       180.000000		2.0		2		180
+N       CT      C       O       Charmm  0.000000        2       0.000000
+N       CT      C       O2      Charmm  0.000000        2       0.000000
+N3      CT      C       N       Charmm  0.000000        2       0.000000
+N3      CT      C       O       Charmm  0.000000        2       0.000000
+N3      CT      C       O2      Charmm  0.000000        2       0.000000
+HC      CT      C       N       Charmm  0.000000        2       0.000000
+HC      CT      C       O       Charmm  0.800000        1       0.000000		0.08		3		180
+HC      CT      C       O2      Charmm  0.000000        2       0.000000
+H1      CT      C       N       Charmm  0.000000        2       0.000000
+H1      CT      C       O       Charmm  0.800000        1       0.000000		0.08		3		180
+H1      CT      C       O2      Charmm  0.000000        2       0.000000
+CT      CT      CA      CA      Charmm  0.000000        2       0.000000
+HC      CT      CA      CA      Charmm  0.000000        2       0.000000
+HC      CT      CM      C       Charmm  0.000000        3       0.000000
+HC      CT      CM      CM      Charmm  1.150000        1       0.000000		0.38		3		180
+CT      CT      CC      CV      Charmm  0.000000        2       0.000000
+CT      CT      CC      CW      Charmm  0.000000        2       0.000000
+CT      CT      CC      NA      Charmm  0.000000        2       0.000000
+CT      CT      CC      NB      Charmm  0.000000        2       0.000000
+HC      CT      CC      CV      Charmm  0.000000        2       0.000000
+HC      CT      CC      CW      Charmm  0.000000        2       0.000000
+HC      CT      CC      NA      Charmm  0.000000        2       0.000000
+HC      CT      CC      NB      Charmm  0.000000        2       0.000000
+CT      CT      C*      CW      Charmm  0.000000        2       0.000000
+CT      CT      C*      CB      Charmm  0.000000        2       0.000000
+HC      CT      C*      CW      Charmm  0.000000        2       0.000000
+HC      CT      C*      CB      Charmm  0.000000        2       0.000000
+CT      CT      N       CT      Charmm  0.000000        2       0.000000
+CT      CT      N       C       Charmm  0.530000        1       0.000000		0.15		3		180		0.5		4		180
+CT      CT      N       H       Charmm  0.000000        2       0.000000
+C       CT      N       CT      Charmm  0.000000        2       0.000000
+C       CT      N       C       Charmm  0.800000        1       0.000000		0.85		2		180
+C       CT      N       H       Charmm  0.000000        2       0.000000
+H1      CT      N       CT      Charmm  0.000000        2       0.000000
+H1      CT      N       C       Charmm  0.000000        2       0.000000
+H1      CT      N       H       Charmm  0.000000        2       0.000000
+CT      CT      N*      C       Charmm  0.000000        2       0.000000
+CT      CT      N*      CM      Charmm  0.000000        2       0.000000
+CT      CT      N*      CB      Charmm  0.000000        2       0.000000
+CT      CT      N*      CK      Charmm  0.000000        2       0.000000
+OS      CT      N*      C       Charmm  0.000000        2       0.000000
+OS      CT      N*      CM      Charmm  0.000000        2       180.000000		2.5		1		0
+OS      CT      N*      CB      Charmm  0.000000        2       0.000000
+OS      CT      N*      CK      Charmm  0.000000        2       180.000000		2.5		1		0
+H2      CT      N*      C       Charmm  0.000000        2       0.000000
+H2      CT      N*      CM      Charmm  0.000000        2       0.000000
+H2      CT      N*      CB      Charmm  0.000000        2       0.000000
+H2      CT      N*      CK      Charmm  0.000000        2       0.000000
+CT      CT      N2      CA      Charmm  0.000000        3       0.000000
+CT      CT      N2      H       Charmm  0.000000        3       0.000000
+H1      CT      N2      CA      Charmm  0.000000        3       0.000000
+H1      CT      N2      H       Charmm  0.000000        3       0.000000
+CT      CT      N3      CT      Charmm  0.156000        3       0.000000
+CT      CT      N3      H       Charmm  0.156000        3       0.000000
+C       CT      N3      CT      Charmm  0.156000        3       0.000000
+C       CT      N3      H       Charmm  0.156000        3       0.000000
+H1      CT      N3      CT      Charmm  0.156000        3       0.000000
+H1      CT      N3      H       Charmm  0.156000        3       0.000000
+HP      CT      N3      CT      Charmm  0.156000        3       0.000000
+HP      CT      N3      H       Charmm  0.156000        3       0.000000
+CT      CT      OH      HO      Charmm  0.025000        1       0.000000		0.16		3		0
+H1      CT      OH      HO      Charmm  0.167000        3       0.000000
+CT      CT      OS      CT      Charmm  0.383000        3       0.000000		0.1		2		180
+CT      CT      OS      C       Charmm  0.383000        3       0.000000		0.8		1		180
+CT      CT      OS      P       Charmm  0.383000        3       0.000000
+N*      CT      OS      CT      Charmm  0.383000        3       0.000000		0.65		2		0
+OS      CT      OS      CT      Charmm  1.350000        1       180.000000		0.85		3		180		0.1	3		0
+OS      CT      OS      CT      Charmm  0.850000        2       180.000000		0.1		3		0
+OS      CT      OS      CT      Charmm  0.850000        2       180.000000		0.1		3		0
+H1      CT      OS      CT      Charmm  0.383000        3       0.000000
+H1      CT      OS      P       Charmm  0.383000        3       0.000000
+H2      CT      OS      CT      Charmm  0.383000        3       0.000000
+CT      CT      S       CT      Charmm  0.333000        3       0.000000
+CT      CT      S       S       Charmm  0.333000        3       0.000000
+H1      CT      S       CT      Charmm  0.333000        3       0.000000
+H1      CT      S       S       Charmm  0.333000        3       0.000000
+CT      CT      SH      HS      Charmm  0.250000        3       0.000000
+H1      CT      SH      HS      Charmm  0.250000        3       0.000000
+NA      C       CM      CT      Charmm  2.175000        2       180.000000
+NA      C       CM      CM      Charmm  2.175000        2       180.000000
+NA      C       CM      HA      Charmm  2.175000        2       180.000000
+O       C       CM      CT      Charmm  2.175000        2       180.000000
+O       C       CM      CM      Charmm  2.175000        2       180.000000		0.3		3		0
+O       C       CM      HA      Charmm  2.175000        2       180.000000
+NA      C       CB      CB      Charmm  3.000000        2       180.000000
+NA      C       CB      NB      Charmm  3.000000        2       180.000000
+O       C       CB      CB      Charmm  3.000000        2       180.000000
+O       C       CB      NB      Charmm  3.000000        2       180.000000
+CT      C       N       CT      Charmm  2.500000        2       180.000000
+CT      C       N       H       Charmm  2.500000        2       180.000000
+O       C       N       CT      Charmm  2.500000        2       180.000000
+O       C       N       H       Charmm  2.000000        1       0.000000		2.5		2		180
+CM      C       NA      C       Charmm  1.350000        2       180.000000
+CM      C       NA      H       Charmm  1.350000        2       180.000000
+CB      C       NA      CA      Charmm  1.350000        2       180.000000
+CB      C       NA      H       Charmm  1.350000        2       180.000000
+N*      C       NA      C       Charmm  1.350000        2       180.000000
+N*      C       NA      H       Charmm  1.350000        2       180.000000
+O       C       NA      C       Charmm  1.350000        2       180.000000
+O       C       NA      CA      Charmm  1.350000        2       180.000000
+O       C       NA      H       Charmm  1.350000        2       180.000000
+N*      C       NC      CA      Charmm  4.000000        2       180.000000
+O       C       NC      CA      Charmm  4.000000        2       180.000000
+NA      C       N*      CT      Charmm  1.450000        2       180.000000
+NA      C       N*      CM      Charmm  1.450000        2       180.000000
+NC      C       N*      CT      Charmm  1.450000        2       180.000000
+NC      C       N*      CM      Charmm  1.450000        2       180.000000
+O       C       N*      CT      Charmm  1.450000        2       180.000000
+O       C       N*      CM      Charmm  1.450000        2       180.000000
+O       C       OH      HO      Charmm  1.900000        1       0.000000		2.3		2		180		
+O       C       OS      CT      Charmm  1.400000        1       180.000000		2.7		2		180
+CT      CA      CA      CA      Charmm  3.625000        2       180.000000
+CT      CA      CA      HA      Charmm  3.625000        2       180.000000
+CA      CA      CA      CA      Charmm  3.625000        2       180.000000
+CA      CA      CA      CB      Charmm  3.625000        2       180.000000
+CA      CA      CA      CN      Charmm  3.625000        2       180.000000
+CA      CA      CA      OH      Charmm  3.625000        2       180.000000
+CA      CA      CA      HA      Charmm  3.625000        2       180.000000
+CB      CA      CA      HA      Charmm  3.625000        2       180.000000
+CN      CA      CA      HA      Charmm  3.625000        2       180.000000
+OH      CA      CA      HA      Charmm  3.625000        2       180.000000
+HA      CA      CA      HA      Charmm  3.625000        2       180.000000
+NC      CA      CM      CM      Charmm  2.550000        2       180.000000
+NC      CA      CM      HA      Charmm  2.550000        2       180.000000
+N2      CA      CM      CM      Charmm  2.550000        2       180.000000
+N2      CA      CM      HA      Charmm  2.550000        2       180.000000
+CA      CA      CB      C*      Charmm  3.500000        2       180.000000
+CA      CA      CB      CN      Charmm  3.500000        2       180.000000
+NC      CA      CB      CB      Charmm  3.500000        2       180.000000
+NC      CA      CB      NB      Charmm  3.500000        2       180.000000
+N2      CA      CB      CB      Charmm  3.500000        2       180.000000
+N2      CA      CB      NB      Charmm  3.500000        2       180.000000
+HA      CA      CB      C*      Charmm  3.500000        2       180.000000
+HA      CA      CB      CN      Charmm  3.500000        2       180.000000
+CA      CA      CN      CB      Charmm  3.625000        2       180.000000
+CA      CA      CN      NA      Charmm  3.625000        2       180.000000
+HA      CA      CN      CB      Charmm  3.625000        2       180.000000
+HA      CA      CN      NA      Charmm  3.625000        2       180.000000
+NC      CA      NA      C       Charmm  1.500000        2       180.000000
+NC      CA      NA      H       Charmm  1.500000        2       180.000000
+N2      CA      NA      C       Charmm  1.500000        2       180.000000
+N2      CA      NA      H       Charmm  1.500000        2       180.000000
+CM      CA      NC      C       Charmm  4.800000        2       180.000000
+CB      CA      NC      CQ      Charmm  4.800000        2       180.000000
+NA      CA      NC      CB      Charmm  4.800000        2       180.000000
+N2      CA      NC      C       Charmm  4.800000        2       180.000000
+N2      CA      NC      CB      Charmm  4.800000        2       180.000000
+N2      CA      NC      CQ      Charmm  4.800000        2       180.000000
+CM      CA      N2      H       Charmm  2.400000        2       180.000000
+CB      CA      N2      H       Charmm  2.400000        2       180.000000
+NA      CA      N2      H       Charmm  2.400000        2       180.000000
+NC      CA      N2      H       Charmm  2.400000        2       180.000000
+N2      CA      N2      CT      Charmm  2.400000        2       180.000000
+N2      CA      N2      H       Charmm  2.400000        2       180.000000
+CA      CA      OH      HO      Charmm  0.900000        2       180.000000
+CT      CM      CM      CT      Charmm  1.900000        1       180.000000		6.65		2		180
+CT      CM      CM      N*      Charmm  6.650000        2       180.000000
+CT      CM      CM      H4      Charmm  6.650000        2       180.000000
+C       CM      CM      N*      Charmm  6.650000        2       180.000000
+C       CM      CM      H4      Charmm  6.650000        2       180.000000
+CA      CM      CM      N*      Charmm  6.650000        2       180.000000
+CA      CM      CM      H4      Charmm  6.650000        2       180.000000
+HA      CM      CM      N*      Charmm  6.650000        2       180.000000
+HA      CM      CM      H4      Charmm  6.650000        2       180.000000
+CM      CM      N*      CT      Charmm  1.850000        2       180.000000
+CM      CM      N*      C       Charmm  1.850000        2       180.000000
+H4      CM      N*      CT      Charmm  1.850000        2       180.000000
+H4      CM      N*      C       Charmm  1.850000        2       180.000000
+CT      CC      CV      NB      Charmm  5.150000        2       180.000000
+CT      CC      CV      H4      Charmm  5.150000        2       180.000000
+NA      CC      CV      NB      Charmm  5.150000        2       180.000000
+NA      CC      CV      H4      Charmm  5.150000        2       180.000000
+CT      CC      CW      NA      Charmm  5.375000        2       180.000000
+CT      CC      CW      H4      Charmm  5.375000        2       180.000000
+NA      CC      CW      NA      Charmm  5.375000        2       180.000000
+NA      CC      CW      H4      Charmm  5.375000        2       180.000000
+NB      CC      CW      NA      Charmm  5.375000        2       180.000000
+NB      CC      CW      H4      Charmm  5.375000        2       180.000000
+CT      CC      NA      CR      Charmm  1.400000        2       180.000000
+CT      CC      NA      H       Charmm  1.400000        2       180.000000
+CV      CC      NA      CR      Charmm  1.400000        2       180.000000
+CV      CC      NA      H       Charmm  1.400000        2       180.000000
+CW      CC      NA      CR      Charmm  1.400000        2       180.000000
+CW      CC      NA      H       Charmm  1.400000        2       180.000000
+CT      CC      NB      CR      Charmm  2.400000        2       180.000000
+CW      CC      NB      CR      Charmm  2.400000        2       180.000000
+CC      CV      NB      CR      Charmm  2.400000        2       180.000000
+H4      CV      NB      CR      Charmm  2.400000        2       180.000000
+NA      CW      C*      CT      Charmm  6.525000        2       180.000000
+NA      CW      C*      CB      Charmm  6.525000        2       180.000000
+H4      CW      C*      CT      Charmm  6.525000        2       180.000000
+H4      CW      C*      CB      Charmm  6.525000        2       180.000000
+CC      CW      NA      CR      Charmm  1.500000        2       180.000000
+CC      CW      NA      H       Charmm  1.500000        2       180.000000
+C*      CW      NA      CN      Charmm  1.500000        2       180.000000
+C*      CW      NA      H       Charmm  1.500000        2       180.000000
+H4      CW      NA      CR      Charmm  1.500000        2       180.000000
+H4      CW      NA      CN      Charmm  1.500000        2       180.000000
+H4      CW      NA      H       Charmm  1.500000        2       180.000000
+NA      CR      NA      CC      Charmm  2.325000        2       180.000000
+NA      CR      NA      CW      Charmm  2.325000        2       180.000000
+NA      CR      NA      H       Charmm  2.325000        2       180.000000
+NB      CR      NA      CC      Charmm  2.325000        2       180.000000
+NB      CR      NA      CW      Charmm  2.325000        2       180.000000
+NB      CR      NA      H       Charmm  2.325000        2       180.000000
+H5      CR      NA      CC      Charmm  2.325000        2       180.000000
+H5      CR      NA      CW      Charmm  2.325000        2       180.000000
+H5      CR      NA      H       Charmm  2.325000        2       180.000000
+NA      CR      NB      CC      Charmm  5.000000        2       180.000000
+NA      CR      NB      CV      Charmm  5.000000        2       180.000000
+H5      CR      NB      CC      Charmm  5.000000        2       180.000000
+H5      CR      NB      CV      Charmm  5.000000        2       180.000000
+C       CB      CB      NC      Charmm  5.450000        2       180.000000
+C       CB      CB      N*      Charmm  5.450000        2       180.000000
+CA      CB      CB      NC      Charmm  5.450000        2       180.000000
+CA      CB      CB      N*      Charmm  5.450000        2       180.000000
+NB      CB      CB      NC      Charmm  5.450000        2       180.000000
+NB      CB      CB      N*      Charmm  5.450000        2       180.000000
+CA      CB      C*      CT      Charmm  1.675000        2       180.000000
+CA      CB      C*      CW      Charmm  1.675000        2       180.000000
+CN      CB      C*      CT      Charmm  1.675000        2       180.000000
+CN      CB      C*      CW      Charmm  1.675000        2       180.000000
+CA      CB      CN      CA      Charmm  3.000000        2       180.000000
+CA      CB      CN      NA      Charmm  3.000000        2       180.000000
+C*      CB      CN      CA      Charmm  3.000000        2       180.000000
+C*      CB      CN      NA      Charmm  3.000000        2       180.000000
+C       CB      NB      CK      Charmm  2.550000        2       180.000000
+CA      CB      NB      CK      Charmm  2.550000        2       180.000000
+CB      CB      NB      CK      Charmm  2.550000        2       180.000000
+CB      CB      NC      CA      Charmm  4.150000        2       180.000000
+CB      CB      NC      CQ      Charmm  4.150000        2       180.000000
+N*      CB      NC      CA      Charmm  4.150000        2       180.000000
+N*      CB      NC      CQ      Charmm  4.150000        2       180.000000
+CB      CB      N*      CT      Charmm  1.650000        2       180.000000
+CB      CB      N*      CK      Charmm  1.650000        2       180.000000
+NC      CB      N*      CT      Charmm  1.650000        2       180.000000
+NC      CB      N*      CK      Charmm  1.650000        2       180.000000
+CA      CN      NA      CW      Charmm  1.525000        2       180.000000
+CA      CN      NA      H       Charmm  1.525000        2       180.000000
+CB      CN      NA      CW      Charmm  1.525000        2       180.000000
+CB      CN      NA      H       Charmm  1.525000        2       180.000000
+N*      CK      NB      CB      Charmm  10.000000       2       180.000000
+H5      CK      NB      CB      Charmm  10.000000       2       180.000000
+NB      CK      N*      CT      Charmm  1.700000        2       180.000000
+NB      CK      N*      CB      Charmm  1.700000        2       180.000000
+H5      CK      N*      CT      Charmm  1.700000        2       180.000000
+H5      CK      N*      CB      Charmm  1.700000        2       180.000000
+NC      CQ      NC      CA      Charmm  6.800000        2       180.000000
+NC      CQ      NC      CB      Charmm  6.800000        2       180.000000
+H5      CQ      NC      CA      Charmm  6.800000        2       180.000000
+H5      CQ      NC      CB      Charmm  6.800000        2       180.000000
+HO      OH      P       OS      Charmm  0.250000        3       0.000000
+HO      OH      P       O2      Charmm  0.250000        3       0.000000
+CT      OS      P       OH      Charmm  0.250000        3       0.000000		1.2		2		0
+CT      OS      P       OS      Charmm  0.250000        3       0.000000		1.2		2		0
+CT      OS      P       O2      Charmm  0.250000        3       0.000000
+CT      S       S       CT      Charmm  3.500000        2       0.000000		0.6		3		0
+end TorsionTypes
+
+
+begin Improper TorsionTypes
+CT      N       C       O       10.500000       2       180.000000
+CM      NA      C       O       10.500000       2       180.000000
+CB      NA      C       O       10.500000       2       180.000000
+N*      NA      C       O       10.500000       2       180.000000
+CT      O2      C       O2      10.500000       2       180.000000
+CA      CA      CA      CT      1.100000        2       180.000000
+CA      CA      CA      OH      1.100000        2       180.000000
+CA      CA      CA      HA      1.100000        2       180.000000
+CN      CA      CA      HA      1.100000        2       180.000000
+NC      CM      CA      N2      1.100000        2       180.000000
+CA      CB      CA      HA      1.100000        2       180.000000
+CB      NC      CA      N2      1.100000        2       180.000000
+NA      NC      CA      N2      1.100000        2       180.000000
+N2      N2      CA      N2      10.500000       2       180.000000
+CM      CA      CM      HA      1.100000        2       180.000000
+C       CM      CM      CT      1.100000        2       180.000000
+C       CM      CM      HA      1.100000        2       180.000000
+N*      CM      CM      H4      1.100000        2       180.000000
+NA      CV      CC      CT      1.100000        2       180.000000
+NA      CW      CC      CT      1.100000        2       180.000000
+NB      CW      CC      CT      1.100000        2       180.000000
+CC      NB      CV      H4      1.100000        2       180.000000
+CC      NA      CW      H4      1.100000        2       180.000000
+C*      NA      CW      H4      1.100000        2       180.000000
+NA      NA      CR      H5      1.100000        2       180.000000
+NB      NA      CR      H5      1.100000        2       180.000000
+NA      NB      CR      H5      1.100000        2       180.000000
+CW      CB      C*      CT      1.100000        2       180.000000
+NB      N*      CK      H5      1.100000        2       180.000000
+NC      NC      CQ      H5      1.100000        2       180.000000
+C       CT      N       CT      1.000000        2       180.000000
+C       CT      N       H       1.000000        2       180.000000
+C       H       N       H       1.000000        2       180.000000
+C       C       NA      H       1.000000        2       180.000000
+C       CA      NA      H       1.000000        2       180.000000
+CR      CW      NA      H       1.000000        2       180.000000
+CC      CR      NA      H       1.000000        2       180.000000
+CW      CN      NA      H       1.000000        2       180.000000
+CM      C       N*      CT      1.000000        2       180.000000
+CK      CB      N*      CT      1.000000        2       180.000000
+CT      CA      N2      H       1.000000        2       180.000000
+CA      H       N2      H       1.000000        2       180.000000
+end Improper TorsionTypes
+ 

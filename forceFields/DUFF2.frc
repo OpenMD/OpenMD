@@ -11,7 +11,7 @@ begin Options
       GayBerneNu             = 1.0
 end Options
 
-begin AtomTypes    
+begin BaseAtomTypes    
 //Name		mass	 (amu)
 CH4		16.05		
 CH3		15.04		
@@ -76,7 +76,7 @@ Pchg+		5.000
 Pchg-		5.000	
 PDIP		10.000	
 DPD		72.06112
-end AtomTypes
+end BaseAtomTypes
 
 begin DirectionalAtomTypes
 //Name		I_xx	I_yy	I_zz	(All moments in (amu*Ang^2)
