@@ -92,6 +92,25 @@ inline bool operator < (const tuple3<T1, T2, T3>& t1, const tuple3<T1, T2, T3>& 
              || (!(t2.first < t1.first) && !(t2.second < t2.second) && t1.third < t2.third);
 }
 
+
+inline bool operator < (const tuple3<int, int, std::vector<std::string> >& t1, const tuple3<int, int, std::vector<std::string> >& t2) {
+  
+  if (t1.first < t2.first)
+    return true;
+  else {
+    if (t1.first > t2.first) 
+      return false;
+    
+    if (t1.second < t2.second) 
+      return true;
+    else 
+      if (t1.second > t2.second) 
+	return false;
+    
+    return true;
+  }  
+}
+
 template<class T1, class T2, class T3, class T4>
 inline bool operator < (const tuple4<T1, T2, T3, T4>& t1, const tuple4<T1, T2, T3, T4>& t2) {
 

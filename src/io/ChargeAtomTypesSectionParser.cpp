@@ -67,7 +67,7 @@ namespace oopse {
 	RealType charge = tokenizer.nextTokenAsDouble();
 
 	atomType->addProperty(new DoubleGenericData("Charge", charge));
-	atomType->setCharge();
+	atomType->setIsCharge();
       } else {
 
 	sprintf(painCave.errMsg, "ChargeAtomTypesSectionParser Error: Can not find matched AtomType at line %d\n",

@@ -47,8 +47,10 @@
  * @version 1.0
  */
   
+#include <algorithm>
 #include "UseTheForce/ForceField.hpp"
 #include "utils/simError.h"
+#include "utils/Tuple.hpp"
 #include "UseTheForce/DarkSide/atype_interface.h"
 #include "UseTheForce/DarkSide/fForceOptions_interface.h"
 #include "UseTheForce/DarkSide/switcheroo_interface.h"
@@ -89,11 +91,66 @@ namespace oopse {
     if (bondType) {
       return bondType;
     } else {
-      //if no exact match found, try wild card match
-      return bondTypeCont_.find(keys, wildCardAtomTypeName_);
+      AtomType* atype1;
+      AtomType* atype2;
+      std::vector<std::string> at1key;
+      at1key.push_back(at1);
+      atype1 = atomTypeCont_.find(at1key);
+  
+      std::vector<std::string> at2key;
+      at2key.push_back(at2);
+      atype2 = atomTypeCont_.find(at2key);
+
+      // query atom types for their chains of responsibility
+      std::vector<AtomType*> at1Chain = atype1->allYourBase();
+      std::vector<AtomType*> at2Chain = atype2->allYourBase();
+
+      std::vector<AtomType*>::iterator i;
+      std::vector<AtomType*>::iterator j;
+
+      int ii = 0;
+      int jj = 0;
+      int bondTypeScore;
+
+      std::vector<std::pair<int, std::vector<std::string> > > foundBonds;
+
+      for (i = at1Chain.begin(); i != at1Chain.end(); i++) {
+	jj = 0;
+	for (j = at2Chain.begin(); j != at2Chain.end(); j++) {
+
+	  bondTypeScore = ii + jj;
+
+	  std::vector<std::string> myKeys;
+	  myKeys.push_back((*i)->getName());
+	  myKeys.push_back((*j)->getName());
+
+	  BondType* bondType = bondTypeCont_.find(myKeys);
+	  if (bondType) {
+	    foundBonds.push_back(std::make_pair(bondTypeScore, myKeys));
+	  }
+	  jj++;
+	}
+	ii++;
+      }
+
+      // sort the foundBonds by the score:
+
+      std::sort(foundBonds.begin(), foundBonds.end());
+      
+      int bestScore = foundBonds[0].first;
+      std::vector<std::string> theKeys = foundBonds[0].second;
+
+      std::cout << "best matching bond = " << theKeys[0] << "\t" << theKeys[1]  << "\t(score = "<< bestScore << ")\n";      
+      BondType* bestType = bondTypeCont_.find(theKeys);
+      if (bestType) 
+	return bestType;
+      else {
+	//if no exact match found, try wild card match
+	return bondTypeCont_.find(keys, wildCardAtomTypeName_);      
+      }
     }
   }
-
+  
   BendType* ForceField::getBendType(const std::string &at1, 
 				    const std::string &at2,
 				    const std::string &at3) {
@@ -107,10 +164,81 @@ namespace oopse {
     if (bendType) {
       return bendType;
     } else {
-      //if no exact match found, try wild card match
-      return bendTypeCont_.find(keys, wildCardAtomTypeName_);
+
+      AtomType* atype1;
+      AtomType* atype2;
+      AtomType* atype3;
+      std::vector<std::string> at1key;
+      at1key.push_back(at1);
+      atype1 = atomTypeCont_.find(at1key);
+  
+      std::vector<std::string> at2key;
+      at2key.push_back(at2);
+      atype2 = atomTypeCont_.find(at2key);
+
+      std::vector<std::string> at3key;
+      at3key.push_back(at3);
+      atype3 = atomTypeCont_.find(at3key);
+
+      // query atom types for their chains of responsibility
+      std::vector<AtomType*> at1Chain = atype1->allYourBase();
+      std::vector<AtomType*> at2Chain = atype2->allYourBase();
+      std::vector<AtomType*> at3Chain = atype3->allYourBase();
+
+      std::vector<AtomType*>::iterator i;
+      std::vector<AtomType*>::iterator j;
+      std::vector<AtomType*>::iterator k;
+
+      int ii = 0;
+      int jj = 0;
+      int kk = 0;
+      int IKscore;
+
+      std::vector<tuple3<int, int, std::vector<std::string> > > foundBends;
+
+      for (j = at2Chain.begin(); j != at2Chain.end(); j++) {
+	ii = 0;
+	for (i = at1Chain.begin(); i != at1Chain.end(); i++) {
+	  kk = 0;
+	  for (k = at3Chain.begin(); k != at3Chain.end(); k++) {
+	  
+	    IKscore = ii + kk;
+
+	    std::vector<std::string> myKeys;
+	    myKeys.push_back((*i)->getName());
+	    myKeys.push_back((*j)->getName());
+	    myKeys.push_back((*k)->getName());
+
+	    BendType* bendType = bendTypeCont_.find(myKeys);
+	    if (bendType) { 
+	      foundBends.push_back( make_tuple3(jj, IKscore, myKeys) );
+	    }
+	    kk++;
+	  }
+	  ii++;
+	}
+	jj++;
+      }
+      
+      std::sort(foundBends.begin(), foundBends.end());
+
+      int jscore = foundBends[0].first;
+      int ikscore = foundBends[0].second;
+      std::vector<std::string> theKeys = foundBends[0].third;
+
+      std::cout << "best matching bend = " << theKeys[0] << "\t" <<theKeys[1]  << "\t" << theKeys[2] << "\t(scores = "<< jscore << "\t" << ikscore << ")\n";      
+
+      BendType* bestType = bendTypeCont_.find(theKeys);  
+      if (bestType) 
+	return bestType;
+      else {
+      
+	//if no exact match found, try wild card match
+	return bendTypeCont_.find(keys, wildCardAtomTypeName_);      
+      }
     }
   }
+
 
   TorsionType* ForceField::getTorsionType(const std::string &at1, 
 					  const std::string &at2,
@@ -122,15 +250,100 @@ namespace oopse {
     keys.push_back(at3);    
     keys.push_back(at4);    
 
+
+    //try exact match first
     TorsionType* torsionType = torsionTypeCont_.find(keys);
     if (torsionType) {
       return torsionType;
     } else {
-      //if no exact match found, try wild card match
-      return torsionTypeCont_.find(keys, wildCardAtomTypeName_);
+
+      AtomType* atype1;
+      AtomType* atype2;
+      AtomType* atype3;
+      AtomType* atype4;
+      std::vector<std::string> at1key;
+      at1key.push_back(at1);
+      atype1 = atomTypeCont_.find(at1key);
+  
+      std::vector<std::string> at2key;
+      at2key.push_back(at2);
+      atype2 = atomTypeCont_.find(at2key);
+
+      std::vector<std::string> at3key;
+      at3key.push_back(at3);
+      atype3 = atomTypeCont_.find(at3key);
+
+      std::vector<std::string> at4key;
+      at4key.push_back(at4);
+      atype4 = atomTypeCont_.find(at4key);
+
+      // query atom types for their chains of responsibility
+      std::vector<AtomType*> at1Chain = atype1->allYourBase();
+      std::vector<AtomType*> at2Chain = atype2->allYourBase();
+      std::vector<AtomType*> at3Chain = atype3->allYourBase();
+      std::vector<AtomType*> at4Chain = atype4->allYourBase();
+
+      std::vector<AtomType*>::iterator i;
+      std::vector<AtomType*>::iterator j;
+      std::vector<AtomType*>::iterator k;
+      std::vector<AtomType*>::iterator l;
+
+      int ii = 0;
+      int jj = 0;
+      int kk = 0;
+      int ll = 0;
+      int ILscore;
+      int JKscore;
+
+      std::vector<tuple3<int, int, std::vector<std::string> > > foundTorsions;
+
+      for (j = at2Chain.begin(); j != at2Chain.end(); j++) {
+	kk = 0;
+	for (k = at3Chain.begin(); k != at3Chain.end(); k++) {
+	  ii = 0;	
+	  for (i = at1Chain.begin(); i != at1Chain.end(); i++) {
+	    ll = 0;
+	    for (l = at4Chain.begin(); l != at4Chain.end(); l++) {
+	  
+	      ILscore = ii + ll;
+	      JKscore = jj + kk;
+
+	      std::vector<std::string> myKeys;
+	      myKeys.push_back((*i)->getName());
+	      myKeys.push_back((*j)->getName());
+	      myKeys.push_back((*k)->getName());
+	      myKeys.push_back((*l)->getName());
+
+	      TorsionType* torsionType = torsionTypeCont_.find(myKeys);
+	      if (torsionType) { 
+		foundTorsions.push_back( make_tuple3(JKscore, ILscore, myKeys) );
+	      }
+	      ll++;
+	    }
+	    ii++;
+	  }
+	  kk++;
+	}
+	jj++;
+      }
+      
+      std::sort(foundTorsions.begin(), foundTorsions.end());
+
+      int jkscore = foundTorsions[0].first;
+      int ilscore = foundTorsions[0].second;
+      std::vector<std::string> theKeys = foundTorsions[0].third;
+
+      std::cout << "best matching torsion = " << theKeys[0] << "\t" <<theKeys[1]  << "\t" << theKeys[2] << "\t" << theKeys[3] << "\t(scores = "<< jkscore << "\t" << ilscore << ")\n";
+
+      
+      TorsionType* bestType = torsionTypeCont_.find(theKeys);
+      if (bestType) {
+	return bestType;
+      } else {
+	//if no exact match found, try wild card match
+	return torsionTypeCont_.find(keys, wildCardAtomTypeName_);
+      }
     }
-    
-    return torsionTypeCont_.find(keys, wildCardAtomTypeName_);
   }
 
   NonBondedInteractionType* ForceField::getNonBondedInteractionType(const std::string &at1, const std::string &at2) {

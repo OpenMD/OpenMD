@@ -2,6 +2,7 @@ Package = io
 
 Source    = \
 	AtomTypesSectionParser.cpp \
+	BaseAtomTypesSectionParser.cpp \
 	DirectionalAtomTypesSectionParser.cpp \
 	SectionParser.cpp \
 	EAMAtomTypesSectionParser.cpp \

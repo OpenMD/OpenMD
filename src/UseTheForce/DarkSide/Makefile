@@ -52,7 +52,7 @@ Modules = \
 	electrostatic_module \
 	force_globals \
 	fforceoptions \
-	gb_pair \
+	gayberne \
 	lj \
 	neighborLists \
 	shapes \

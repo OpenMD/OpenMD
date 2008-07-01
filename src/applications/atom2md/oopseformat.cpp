@@ -16,7 +16,12 @@ GNU General Public License for more details.
 
 #include <openbabel/babelconfig.h>
 #include <openbabel/obmolecformat.h>
+#include <openbabel/obiter.h>
+#include <openbabel/mol.h>
+#include <openbabel/chains.h>
 #include <fstream>
+
+#include "utils/StringUtils.hpp"
 
 using namespace std;
 namespace OpenBabel
@@ -55,7 +60,7 @@ namespace OpenBabel
 
   private:
     bool AreSameFragments(OBMol& mol, vector<int>& frag1, vector<int>& frag2);
-    void findAngles(OBMol& mol);
+    //void findAngles(OBMol& mol);
     OBMol* createMolFromFragment(OBMol& mol, vector<int>& fragment);
     void WriteMDFile(vector<OBMol*> mols, vector<int> numMols, ostream& os, OBMol& mol, vector<int>& indices);
   };
@@ -119,11 +124,12 @@ namespace OpenBabel
       }
     
     string OutputFileName = pConv->GetInFilename();
-    unsigned int pos = OutputFileName.rfind(".");
-    if(pos==string::npos)
-      OutputFileName += ".md";
-    else
+    size_t pos = OutputFileName.rfind(".");
+    if(pos!=string::npos)
       OutputFileName = OutputFileName.substr(0, pos) + ".md";       
+    else
+      OutputFileName += ".md";
+
     ofstream ofs(OutputFileName.c_str());
     if(!ofs)
       {
@@ -174,9 +180,10 @@ namespace OpenBabel
       return (t1.second == t2.second) && ( (t1.first == t2.first && t1.third == t2.third) || (t1.first == t2.third && t1.third == t2.first));
     }
   };
-  
-  void OOPSEFormat::findAngles(OBMol& mol) {
-    /*
+
+  /*  
+    void OOPSEFormat::findAngles(OBMol& mol) {
+
     //if already has data return
     if(mol.HasData(OBGenericDataType::AngleData))
     return;
@@ -213,12 +220,14 @@ namespace OpenBabel
         angle.SetAtoms(i->first, i->second, i->second);
         angles->SetData(angle);
     }
-    */
+
   }
+  */
   
   OBMol* OOPSEFormat::createMolFromFragment(OBMol& mol, vector<int>& fragment) {
     
     OBMol* newMol = new OBMol();
+    OBChainsParser* chainParser = new OBChainsParser();
     newMol->ReserveAtoms(fragment.size());
     newMol->BeginModify();
     for(vector<int>::iterator i = fragment.begin(); i != fragment.end(); ++i) {
@@ -227,8 +236,11 @@ namespace OpenBabel
     }
     newMol->EndModify();
     newMol->ConnectTheDots();
-    findAngles(*newMol);
+    newMol->PerceiveBondOrders();
+    newMol->FindAngles();
     newMol->FindTorsions();
+    //chainParser->PerceiveChains(*newMol, false);
+
     return newMol;
   }
   
@@ -236,20 +248,29 @@ namespace OpenBabel
     std::string indentLevel1("  ");
     std::string indentLevel2("    ");
     std::string molPrefix("MolName");
+    std::string resName;
     unsigned int i;
     const int BUFFLEN = 1024;
     char buffer[BUFFLEN];
     string str, str1;
+    OBAtom *a, *b, *c, *d;    
+    OBChainsParser* chainParser = new OBChainsParser();
+    OBResidue *r;
+    int resKey;
+    char type_name[10];
+    char *element_name;
+    int res_num;
     
-    
+    std::cerr << "yo\n";
     os << "<OOPSE version=4>" << endl;
     os << "  <MetaData>" << endl << endl;
     
     for(i = 0; i < mols.size(); ++i) {
       OBMol* pmol = mols[i];
-      
+      std::cerr << "yo1\n";
       pmol->ConnectTheDots();
       pmol->PerceiveBondOrders();
+      chainParser->PerceiveChains(*pmol, false);
       //pmol->FindSSSR();
       //pmol->SetAromaticPerceived();
       //pmol->Kekulize();
@@ -259,27 +280,146 @@ namespace OpenBabel
       sprintf(buffer, "%d", i);
       os << indentLevel1 << "name = " << "\"" << molPrefix << buffer << "\"" << ";\n";
       
+
       //atom
+      
       int ai = 0;
+      FOR_RESIDUES_OF_MOL(res, *pmol) {
+
+        std::cerr << "found residue" << res->GetName() << "\n";
+      }
+      
+//       FOR_RESIDUES_OF_MOL(res, *pmol) {
+	
+// 	resName = res->GetName();
+// 	resKey = res->GetResKey();
+
+	
+
+// 	std::cerr << "found residue " << resName << "\n";
+// 	std::cerr << "  num = " << res->GetNum() << "\n";
+// 	std::cerr << "  numAtoms = " << res->GetNumAtoms() << "\n";
+// 	std::cerr << "  num = " << res->GetNum() << "\n";
+// 	std::cerr << "  chain = " << res->GetChain() << "\n";
+// 	std::cerr << "  chainnum = " << res->GetChainNum() << "\n";
+// 	std::cerr << "  idx = " << res->GetIdx() << "\n";
+// 	std::cerr << "  key = " << res->GetResKey() << "\n";
+
+
+// 	FOR_ATOMS_OF_RESIDUE(atom, &*res) {
+// 	  str = atom->GetType();
+// 	  ttab.SetFromType("INT");
+// 	  ttab.SetToType("INT");
+// 	  ttab.Translate(str1,str);
+// 	  os << indentLevel1 << "atom[" << ai << "] {\n";
+// 	  os << indentLevel2 << "type = " << "\"" << resName << "-" << str1 << "\"" << ";\n";
+// 	  os << indentLevel1 << "}\n";
+// 	  atomMap[&(*atom)] = ai++;
+// 	}        
+// 	os << "\n";
+	
+//       }      
+
+      ai = 0;
       FOR_ATOMS_OF_MOL(atom, *pmol ) {
         str = atom->GetType();
-        ttab.SetFromType("INT");
-        ttab.SetToType("INT");
-        ttab.Translate(str1,str);
-        os << indentLevel1 << "atom[" << ai << "] {\n";
-        // os << indentLevel2 << "type = " << "\"" << etab.GetSymbol(atom->GetAtomicNum()) << "\"" << ";\n";
-        os << indentLevel2 << "type = " << "\"" << str1 << "\"" << ";\n";
-        os << indentLevel1 << "}\n";
+	r = atom->GetResidue();
+	
+	if (r == NULL) 
+	  resName = "NULL";
+	else 
+	  resName = r->GetName();
+		
+	if (resName.compare("NULL") ==0 || resName.compare("LIG") == 0 || resName.compare("UNK") == 0) {
+	  // Either couldn't find a residue at all or couldn't find a reasonable 
+	  // residue name to use.  We'll punt and use OpenBabel's internal atom typing:
+	  ttab.SetFromType("INT");
+	  ttab.SetToType("INT");
+	  ttab.Translate(str1,str);
+	} else {
+	  	
+
+	  if (resName.compare("HOH") == 0) {
+	    // HOH is a special residue name for water, and the standard atom types
+	    // are OW and HW, so just append W to the string for the atom type:
+	    ttab.SetFromType("INT");
+	    ttab.SetToType("XYZ");
+	    ttab.Translate(str1,str);
+	    str1 += "W";
+	  } else {
+
+	    std::cerr << "found residue " << resName << "\n";
+
+	    // If we know what residue we've got, the specific atom name can
+	    // be used to help specify partial charges. 
+
+	    str = r->GetAtomID(&*atom);
+	    size_t startpos = str.find_first_not_of(" ");
+	    size_t endpos = str.find_last_not_of(" ");
+	    str = str.substr( startpos, endpos-startpos+1 );
+	    str1 = resName + "-" + str;
+	  }
+
+	}
+
+//         os << indentLevel1 << "atom[" << ai << "] {\n";
+//         os << indentLevel2 << "type = " << "\"" << str1 << "\"" << ";\n";
+//         os << indentLevel1 << "}\n";
+        os << "atom[" << ai << "] { ";
+        os << "type = " << "\"" << str1 << "\"" << "; ";
+        os << "}\n";
         atomMap[&(*atom)] = ai++;
       }        
       os << "\n";
       
       //bond
       FOR_BONDS_OF_MOL(bond, *pmol ) {
-        os << indentLevel1 << "bond {\n";
-        os << indentLevel2 << "members(" << atomMap[bond->GetBeginAtom()] <<  ", " << atomMap[bond->GetEndAtom()] << ");\n";
-        os << indentLevel1 << "}\n";
-      }  
+//         os << indentLevel1 << "bond {\n";
+//         os << indentLevel2 << "members(" << atomMap[bond->GetBeginAtom()] <<  ", " << atomMap[bond->GetEndAtom()] << ");\n";
+//         os << indentLevel1 << "}\n";
+        os << "bond { ";
+        os << "members(" << atomMap[bond->GetBeginAtom()] <<  ", " << atomMap[bond->GetEndAtom()] << "); ";
+        os << "}\n";
+      } 
+
+      FOR_ANGLES_OF_MOL(angle, *pmol) {
+
+	// OpenBabel's getAtoms returns the 3 atom pointer for the
+	// angle with the vertex first.  These need to be reordered
+	// for vertex-second ordering for OOPSE.
+
+         b = pmol->GetAtom((*angle)[0] + 1);
+         a = pmol->GetAtom((*angle)[1] + 1);
+         c = pmol->GetAtom((*angle)[2] + 1);
+
+// 	 os << indentLevel1 << "bend {\n";
+// 	 os << indentLevel2 << "members(" << atomMap[a] <<  ", " << atomMap[b] << ", " << atomMap[c] << ");\n";
+// 	 os << indentLevel1 << "}\n";
+	 os << "bend { ";
+	 os << "members(" << atomMap[a] <<  ", " << atomMap[b] << ", " << atomMap[c] << "); ";
+	 os << "}\n";
+      } 
+
+      FOR_TORSIONS_OF_MOL(torsion, *pmol) {
+
+	// OpenBabel's getAtoms returns the 3 atom pointer for the
+	// angle with the vertex first.  These need to be reordered
+	// for vertex-second ordering for OOPSE.
+
+         a = pmol->GetAtom((*torsion)[0] + 1);
+         b = pmol->GetAtom((*torsion)[1] + 1);
+         c = pmol->GetAtom((*torsion)[2] + 1);
+         d = pmol->GetAtom((*torsion)[3] + 1);
+
+//         os << indentLevel1 << "torsion {\n";
+//         os << indentLevel2 << "members(" << atomMap[a] <<  ", " << atomMap[b] << ", " << atomMap[c] << ", " << atomMap[d] << ");\n";
+//         os << indentLevel1 << "}\n";
+
+        os << "torsion { ";
+        os << "members(" << atomMap[a] <<  ", " << atomMap[b] << ", " << atomMap[c] << ", " << atomMap[d] << "); ";
+        os << "}\n";
+      } 
+
       /*
       //bend
       OBGenericData* pGenericData = pmol->GetData(OBGenericDataType::AngleData);

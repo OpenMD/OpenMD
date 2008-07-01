@@ -54,7 +54,11 @@
 #include "UseTheForce/DarkSide/suttonchen_interface.h"
 namespace oopse {
   AtomType::AtomType(){
-    
+
+    // initially, all atom types are their own base types.
+    base_ = this;
+    hasBase_ = false;
+
     // initialize to an error:
     atp.ident = -1;
     
@@ -75,8 +79,51 @@ namespace oopse {
     atp.is_Shape = 0;
     atp.is_FLARB = 0;  
     atp.is_SC = 0;
+    myResponsibilities_["mass"] = false;
+    myResponsibilities_["LennardJones"] = false;
+    myResponsibilities_["Charge"] = false;
+    myResponsibilities_["EAM"] = false;
+    myResponsibilities_["SC"] = false;
+    myResponsibilities_["is_LennardJones"] = false;
+    myResponsibilities_["is_EAM"] = false;
+    myResponsibilities_["is_Charge"] = false;
+    myResponsibilities_["is_SC"] = false;
+    myResponsibilities_["is_FLARB"] = false;
   }
   
+  void AtomType::useBase(AtomType* base) {
+    hasBase_=true;
+    base_ = base;
+
+    AtomTypeProperties batp = base->getATP();
+
+    atp.is_Directional = atp.is_Directional || batp.is_Directional;
+
+    if (!myResponsibilities_["is_LennardJones"])
+      atp.is_LennardJones = batp.is_LennardJones;
+
+    if (!myResponsibilities_["is_Charge"])
+      atp.is_Charge = batp.is_Charge;
+
+    atp.is_Dipole = atp.is_Dipole || batp.is_Dipole;
+    atp.is_SplitDipole = atp.is_SplitDipole || batp.is_SplitDipole;
+    atp.is_Quadrupole = atp.is_Quadrupole || batp.is_Quadrupole;
+    atp.is_Sticky = atp.is_Sticky || batp.is_Sticky;
+    atp.is_StickyPower = atp.is_StickyPower || batp.is_StickyPower;
+    atp.is_GayBerne = atp.is_GayBerne || batp.is_GayBerne;
+
+    if (!myResponsibilities_["is_EAM"])
+      atp.is_EAM = batp.is_EAM;
+
+    atp.is_Shape = atp.is_Shape || batp.is_Shape;
+
+    if (!myResponsibilities_["is_FLARB"])
+      atp.is_FLARB = batp.is_FLARB;
+
+    if (!myResponsibilities_["is_SC"])
+      atp.is_SC = batp.is_SC;
+  }
+
   void AtomType::makeFortranAtomType() {
     
     int status;
@@ -269,15 +316,19 @@ namespace oopse {
   }
 
   void AtomType::addProperty(GenericData* genData) {
+    myResponsibilities_[genData->getID()] = true;
     properties_.addProperty(genData);  
   }
   
   void AtomType::removeProperty(const std::string& propName) {
     properties_.removeProperty(propName);  
+    myResponsibilities_[propName] = false;
   }
   
   void AtomType::clearProperties() {
-    properties_.clearProperties(); 
+    properties_.clearProperties();
+    // should loop through them to get rid of my responsibilities, but
+    // we'll punt for now.
   }
   
   std::vector<std::string> AtomType::getPropertyNames() {
@@ -289,6 +340,152 @@ namespace oopse {
   }
   
   GenericData* AtomType::getPropertyByName(const std::string& propName) {
-    return properties_.getPropertyByName(propName); 
+    if (hasBase_ && !myResponsibilities_[propName]){
+      return base_->getPropertyByName(propName);}
+    else
+      return properties_.getPropertyByName(propName); 
   }  
+
+  void AtomType::setMass(RealType m) {
+    myResponsibilities_["mass"] = true;
+    myValues_["mass"] = m;	
+  }
+  
+  RealType AtomType::getMass(void) {
+    if (hasBase_ && !myResponsibilities_["mass"]) 
+      return base_->getMass();
+    else
+      return myValues_["mass"];
+  }
+
+  void AtomType::setIdent(int id) {
+    atp.ident = id;
+  }
+
+  int AtomType::getIdent() {
+      return atp.ident;
+  }
+
+  void AtomType::setName(const std::string&name) {
+    name_ = name;
+  }
+
+  std::string AtomType::getName() {
+      return name_;
+  }
+
+  void AtomType::setLennardJones() {
+    myResponsibilities_["is_LennardJones"] = true;
+    atp.is_LennardJones = 1;
+  }
+  
+  bool AtomType::isLennardJones() {
+    if (hasBase_ && !myResponsibilities_["is_LennardJones"]) 
+      return base_->isLennardJones();
+    else
+      return atp.is_LennardJones;
+  }
+
+  bool AtomType::isElectrostatic() {
+    return isCharge() || isMultipole();
+  }
+
+  void AtomType::setEAM() {
+    myResponsibilities_["is_EAM"] = true;
+    atp.is_EAM = 1;
+  }
+  
+  bool AtomType::isEAM() {
+    if (hasBase_ && !myResponsibilities_["is_EAM"]) 
+      return base_->isEAM();
+    else
+      return atp.is_EAM;
+  }
+
+  void AtomType::setIsCharge() {
+    myResponsibilities_["is_Charge"] = true;
+    atp.is_Charge = 1;
+  }
+  
+  bool AtomType::isCharge() {
+    if (hasBase_ && !myResponsibilities_["is_Charge"]) 
+      return base_->isCharge();
+    else
+      return atp.is_Charge;
+  }
+
+  bool AtomType::isDirectional() {
+    return atp.is_Directional;
+  }
+
+  bool AtomType::isDipole() {
+    return atp.is_Dipole;
+  }
+
+  bool AtomType::isSplitDipole() {
+    return atp.is_SplitDipole;
+  }
+
+  bool AtomType::isQuadrupole() {
+    return atp.is_Quadrupole;
+  }
+
+  bool AtomType::isMultipole() {
+    return isDipole() || isQuadrupole();
+  }
+
+  bool AtomType::isGayBerne() {
+    return atp.is_GayBerne;
+  }
+
+  bool AtomType::isSticky() {
+    return atp.is_Sticky;
+  }
+
+  bool AtomType::isStickyPower() {
+    return atp.is_StickyPower;
+  }
+
+  bool AtomType::isShape() {
+    return atp.is_Shape;
+  }
+  
+  bool AtomType::isSC() {
+    if (hasBase_ && !myResponsibilities_["is_SC"]) 
+      return base_->isSC();
+    else
+      return atp.is_SC;
+  }
+
+  void AtomType::setSC() {
+    myResponsibilities_["is_SC"] = true;
+    atp.is_SC = 1;
+  }
+
+  bool AtomType::isFLARB() {
+    if (hasBase_ && !myResponsibilities_["is_FLARB"]) 
+      return base_->isFLARB();
+    else
+      return atp.is_FLARB;
+  }
+
+  void AtomType::setFLARB() {
+    myResponsibilities_["is_FLARB"] = true;
+    atp.is_FLARB = 1;
+  }
+
+
+  std::vector<AtomType* > AtomType::allYourBase() {   
+    std::vector<AtomType* > myChain;   
+
+    if(hasBase_){
+      myChain = base_->allYourBase();
+      myChain.insert(myChain.begin(), this);
+    } else {
+      myChain.push_back(this);
+    }
+    
+    return myChain;
+  }
+
 }

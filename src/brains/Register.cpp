@@ -66,6 +66,7 @@
 #include "UseTheForce/SC_FF.hpp"
 #include "UseTheForce/MnM_FF.hpp"
 #include "UseTheForce/CLAYFF.hpp"
+#include "UseTheForce/Amber_FF.hpp"
 #include "lattice/LatticeFactory.hpp"
 #include "lattice/LatticeCreator.hpp"
 #include "lattice/FCCLattice.hpp"
@@ -85,12 +86,13 @@ namespace oopse {
     ForceFieldFactory::getInstance()->registerForceField(new ForceFieldBuilder<SHAPES_FF>("SHAPES"));
     //Well if EAM worked... then Sutton-Chen should work like a CHARMM(Hopefully not).
     ForceFieldFactory::getInstance()->registerForceField(new ForceFieldBuilder<SC_FF>("SC"));
-		//Well if Sutton-Chen worked... then lets just mangle all of the forcefields together in MnM.
-		//That sounds like a good idea right......
-		ForceFieldFactory::getInstance()->registerForceField(new ForceFieldBuilder<MnM_FF>("MnM"));
+    //Well if Sutton-Chen worked... then lets just mangle all of the forcefields together in MnM.
+    //That sounds like a good idea right......
+    ForceFieldFactory::getInstance()->registerForceField(new ForceFieldBuilder<MnM_FF>("MnM"));
     ForceFieldFactory::getInstance()->registerForceField(new ForceFieldBuilder<CLAYFF>("CLAY"));
+    ForceFieldFactory::getInstance()->registerForceField(new ForceFieldBuilder<Amber_FF>("Amber"));
   }
-
+  
   void registerIntegrators() {
     IntegratorFactory::getInstance()->registerIntegrator(new IntegratorBuilder<NVE>("NVE"));
     IntegratorFactory::getInstance()->registerIntegrator(new IntegratorBuilder<NVT>("NVT"));

@@ -53,10 +53,12 @@
 #include "config.h"
 #include <string>
 #include <utility>
+#include <vector>
 
 #include "io/basic_ifstrstream.hpp"
 #include "io/ForceFieldOptions.hpp"
 #include "utils/TypeContainer.hpp"
+#include "utils/Tuple.hpp"
 #include "types/AtomType.hpp"
 #include "types/BondType.hpp"
 #include "types/BendType.hpp"
@@ -147,6 +149,8 @@ namespace oopse {
     ForceFieldOptions& getForceFieldOptions() {return forceFieldOptions_;}
 
     void setFortranForceOptions(void);
+
+ 
   protected:
 
     AtomTypeContainer atomTypeCont_;    
@@ -162,9 +166,9 @@ namespace oopse {
     std::string wildCardAtomTypeName_;
 
     std::string forceFieldFileName_;
-  };
 
- 
+
+  };
 }//end namespace oopse
 #endif
 

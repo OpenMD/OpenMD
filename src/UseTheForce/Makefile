@@ -10,6 +10,7 @@ Source    = \
 	SHAPES_FF.cpp \
 	SC_FF.cpp \
 	MnM_FF.cpp \
+	Amber_FF.cpp \
 	CLAYFF.cpp 
 
 ParallelSource = doForces.F90

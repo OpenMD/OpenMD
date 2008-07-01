@@ -60,11 +60,12 @@ namespace oopse {
    * an atom are not intended to be properties of an atom type
    */
   class AtomType {
-  public:
-    
+  public:    
     AtomType();
     
     virtual ~AtomType() { } ;
+
+    virtual void useBase(AtomType* base);
     
     virtual void complete();
     
@@ -73,104 +74,51 @@ namespace oopse {
      * structure to the Fortran atype module
      */
     void makeFortranAtomType();
-    
-    void setMass(RealType m) {
-      mass_ = m;
-    }
-    
-    RealType getMass(void) {
-      return mass_;
-    }
-    
-    void setIdent(int id) {
-      atp.ident = id;
-    }
-    
-    int getIdent() {
-      return atp.ident;
-    }
-    
-    void setName(const std::string&name) {
-      name_ = name;
-    }
-    
-    std::string getName() {
-      return name_;
-    }
-    
-    void setLennardJones() {
-      atp.is_LennardJones = 1;
-    }
-    
-    bool isLennardJones() {
-      return atp.is_LennardJones;
-    }
-    
-    
-    bool isElectrostatic() {
-      return isCharge() || isMultipole();
-    }
-    
-    void setEAM() {
-      atp.is_EAM = 1;
-    }
 
-    bool isEAM() {
-      return atp.is_EAM;
-    }
+    void setMass(RealType m);
+    RealType getMass();
 
-    void setCharge() {
-      atp.is_Charge = 1;
-    }
-
-    bool isCharge() {
-      return atp.is_Charge;
-    }
-
-    bool isDirectional() {
-      return atp.is_Directional;
-    }
-
-    bool isDipole() {
-      return atp.is_Dipole;
-    }
-
-    bool isSplitDipole() {
-      return atp.is_SplitDipole;
-    }
-
-    bool isQuadrupole() {
-      return atp.is_Quadrupole;
-    }
-            
-    bool isMultipole() {
-      return isDipole() || isQuadrupole();
-    }
-
-    bool isGayBerne() {
-      return atp.is_GayBerne;
-    }
-
-    bool isSticky() {
-      return atp.is_Sticky;
-    }
+    AtomTypeProperties getATP() { return atp; }
+        
+    void setIdent(int id);    
+    int getIdent();
     
-    bool isStickyPower() {
-      return atp.is_StickyPower;
-    }
-
-    bool isShape() {
-      return atp.is_Shape;
-    }
-
-    bool isSC() {
-      return atp.is_SC;
-    }
+    void setName(const std::string&name);
+    std::string getName();
     
-    void setSC() {
-      atp.is_SC = 1;
-    }        
+    void setLennardJones();    
+    bool isLennardJones();
     
+    bool isElectrostatic(); 
+    
+    void setEAM();
+    bool isEAM();
+
+    void setIsCharge();
+    bool isCharge();
+
+    bool isDirectional();
+
+    bool isDipole();
+    bool isSplitDipole();
+    bool isQuadrupole();
+    bool isMultipole();
+
+    bool isGayBerne();
+
+    bool isSticky();
+    bool isStickyPower();
+
+    bool isShape();
+
+    bool isSC();
+    void setSC(); 
+    
+    bool isFLARB();
+    void setFLARB(); 
+
+    std::vector<AtomType*> allYourBase();
+
     //below functions are just forward functions
     /**
      * Adds property into property map
@@ -210,20 +158,24 @@ namespace oopse {
     GenericData* getPropertyByName(const std::string& propName);
 
   protected:
-    
+
     AtomTypeProperties atp;
     RealType mass_;
     std::string name_;
+    bool hasBase_; // All your base are belong to us
+    AtomType* base_;
 
   private:
     //prevent copy construction and copy assignment, since property
-    //map contains pointers which can not be copied and managered
+    //map contains pointers which can not be copied and managed
     //safely, except make the generic data at PropertyMap as copy on
     //write shared pointer
     AtomType(const AtomType&);
     AtomType& operator=(const AtomType& atomType);
             
     PropertyMap properties_;
+    std::map< std::string, bool> myResponsibilities_;
+    std::map< std::string, RealType> myValues_;
     
   };
   

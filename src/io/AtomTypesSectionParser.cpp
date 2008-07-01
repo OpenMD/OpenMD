@@ -63,22 +63,32 @@ namespace oopse {
             
     } else {
 
-      std::string atomTypeName = tokenizer.nextToken();    
+      std::string atomTypeName = tokenizer.nextToken();   
+      std::string baseAtomTypeName = tokenizer.nextToken();
+
+      AtomType* baseAtomType = (AtomType*) (ff.getAtomType(baseAtomTypeName));
+
+      if (baseAtomType == NULL) {
+	sprintf(painCave.errMsg, "AtomTypesSectionParser Error: Could not find matching base atom type to %s at line %d\n",
+		baseAtomTypeName.c_str(), lineNo);
+	painCave.isFatal = 1;
+	simError();
+      }
+	
       AtomType* atomType = ff.getAtomType(atomTypeName);
 
       if (atomType == NULL) {
       	atomType = new AtomType();
+	atomType->useBase(baseAtomType);
       	int ident = ff.getNAtomType() + 1;
       	atomType->setIdent(ident); 
       	atomType->setName(atomTypeName);
       	ff.addAtomType(atomTypeName, atomType);
       }
         
-      RealType mass = tokenizer.nextTokenAsDouble();              
-      atomType->setMass(mass);
       if (tokenizer.hasMoreTokens()) {
-          RealType nelectron = tokenizer.nextTokenAsDouble();
-          atomType->addProperty(new DoubleGenericData("nelectron", nelectron));
+	RealType mass = tokenizer.nextTokenAsDouble();              
+	atomType->setMass(mass);
       }               
     }    
 

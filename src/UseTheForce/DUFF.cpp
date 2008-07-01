@@ -45,6 +45,7 @@
 #include "UseTheForce/DarkSide/sticky_interface.h"
 #include "UseTheForce/DarkSide/gb_interface.h"
 #include "UseTheForce/ForceFieldFactory.hpp"
+#include "io/BaseAtomTypesSectionParser.hpp"
 #include "io/DirectionalAtomTypesSectionParser.hpp"
 #include "io/AtomTypesSectionParser.hpp"
 #include "io/LennardJonesAtomTypesSectionParser.hpp"
@@ -81,6 +82,7 @@ namespace oopse {
     //BendTypesSectionParser and TorsionTypesSectionParser are not important.
     spMan_.push_back(new OptionSectionParser(forceFieldOptions_));    
     spMan_.push_back(new DirectionalAtomTypesSectionParser(forceFieldOptions_));
+    spMan_.push_back(new BaseAtomTypesSectionParser());
     spMan_.push_back(new AtomTypesSectionParser());
     spMan_.push_back(new LennardJonesAtomTypesSectionParser(forceFieldOptions_));
     spMan_.push_back(new ChargeAtomTypesSectionParser(forceFieldOptions_));
