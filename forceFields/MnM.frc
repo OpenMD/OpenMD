@@ -149,6 +149,7 @@ Au   SSD_E  MAW  2.68 0.6   1.33  0.95 -0.25
 // sigma epsilon
 Au CH3 LennardJones 3.54 0.2146
 Au CH2 LennardJones 3.54 0.1749 
+//Au SH   LennardJones   4.45 9.180
 Au S   LennardJones   4.45 9.180
 
 //Shifted Morse
@@ -428,6 +429,9 @@ CH2     CH2    CH2     CH2      Trappe    0.0         0.70544  -0.13549   1.5723
 //From Lubna et al.JPCB 109, 24100 (2005)
 CH3	CH2	CH2	SH	Trappe    0.10507    -0.10342   0.036680  0.60874     
 CH2     CH2     CH2     SH      Trappe    0.10507    -0.10342   0.036680  0.60874
+// Thiol attached to a metal surface.
+CH3	CH2	CH2	S	Trappe    0.10507    -0.10342   0.036680  0.60874     
+CH2     CH2     CH2     S       Trappe    0.10507    -0.10342   0.036680  0.60874
 CH3     CH2     S       CH2     Trappe    0.0         0.73041  -0.53685   1.1557
 CH2     CH2     S       CH2     Trappe    0.0         0.73041  -0.53685   1.1557
 CH      CH2     S       CH2     Trappe    0.0         0.73041  -0.53685   1.1557
