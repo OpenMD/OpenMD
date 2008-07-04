@@ -9,6 +9,7 @@ Source    = \
 	MoleculeStamp.cpp \
 	RigidBodyStamp.cpp \
 	TorsionStamp.cpp \
+	InversionStamp.cpp \
 	ZconsStamp.cpp \
 	AtomType.cpp \
 	DirectionalAtomType.cpp \

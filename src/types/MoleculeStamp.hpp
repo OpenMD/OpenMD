@@ -47,6 +47,7 @@
 #include "types/BondStamp.hpp"
 #include "types/BendStamp.hpp"
 #include "types/TorsionStamp.hpp"
+#include "types/InversionStamp.hpp"
 #include "types/RigidBodyStamp.hpp"
 #include "types/CutoffGroupStamp.hpp"
 #include "types/FragmentStamp.hpp"
@@ -62,6 +63,7 @@ namespace oopse {
     bool addBondStamp( BondStamp* bond);
     bool addBendStamp( BendStamp* bend);
     bool addTorsionStamp( TorsionStamp* torsion);  
+    bool addInversionStamp( InversionStamp* inversion);  
     bool addRigidBodyStamp( RigidBodyStamp* rigidbody);
     bool addCutoffGroupStamp( CutoffGroupStamp* cutoffgroup);
     bool addFragmentStamp( FragmentStamp* fragment);
@@ -70,6 +72,7 @@ namespace oopse {
     int  getNBonds() { return bondStamps_.size(); }
     int  getNBends() { return bendStamps_.size(); }
     int  getNTorsions() { return torsionStamps_.size(); }
+    int  getNInversions() { return inversionStamps_.size(); }
     int  getNRigidBodies() { return rigidBodyStamps_.size(); }
     int  getNCutoffGroups() { return cutoffGroupStamps_.size(); }  
     int getNIntegrable() { return nintegrable_;}
@@ -79,6 +82,7 @@ namespace oopse {
     BondStamp* getBondStamp(int index) { return bondStamps_[index]; }
     BendStamp* getBendStamp(int index) { return bendStamps_[index]; }
     TorsionStamp* getTorsionStamp(int index) { return torsionStamps_[index]; }
+    InversionStamp* getInversionStamp(int index) { return inversionStamps_[index]; }
     RigidBodyStamp* getRigidBodyStamp(int index) { return rigidBodyStamps_[index]; }
     CutoffGroupStamp* getCutoffGroupStamp(int index) { return cutoffGroupStamps_[index]; }
     FragmentStamp* getFragmentStamp(int index) { return fragmentStamps_[index]; }
@@ -96,6 +100,7 @@ namespace oopse {
     void checkBonds();
     void checkBends();
     void checkTorsions();
+    void checkInversions();
     void checkRigidBodies();
     void checkCutoffGroups();
     void checkFragments();
@@ -126,6 +131,7 @@ namespace oopse {
     std::vector<BondStamp*> bondStamps_;
     std::vector<BendStamp*> bendStamps_;
     std::vector<TorsionStamp*> torsionStamps_;
+    std::vector<InversionStamp*> inversionStamps_;
     std::vector<RigidBodyStamp*> rigidBodyStamps_;
     std::vector<CutoffGroupStamp*> cutoffGroupStamps_;
     std::vector<FragmentStamp*> fragmentStamps_;

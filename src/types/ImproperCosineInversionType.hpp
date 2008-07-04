@@ -38,110 +38,60 @@
  * University of Notre Dame has been advised of the possibility of
  * such damages.
  */
-  
+ 
 /**
- * @file Stats.hpp
- * @author tlin
- * @date 11/04/2004
- * @time 23:56am
+ * @file ImproperCosineInversionType.hpp
+ * @author Dan Gezelter
+ * @date  07/03/08
  * @version 1.0
- */
+ */ 
 
-#ifndef BRAINS_STATS_HPP
-#define BRAINS_STATS_HPP
+#ifndef TYPES_IMPROPERCOSINEINVERSIONTYPE_HPP
+#define TYPES_IMPROPERCOSINEINVERSIONTYPE_HPP
 
-#include <string>
-#include <map>
+#include "types/InversionType.hpp"
+#include "types/DataHolder.hpp"
 
-#include "math/SquareMatrix3.hpp"
 namespace oopse {
-
-  /**
-   * @class Stats Stats.hpp "brains/Stats.hpp"
-   */
-  class Stats{
-  public:
-    enum StatsIndex {
-      BEGININDEX = 0,  //internal use
-      TIME = BEGININDEX,            
-      TOTAL_ENERGY,
-      POTENTIAL_ENERGY,
-      KINETIC_ENERGY,
-      TEMPERATURE,
-      PRESSURE,
-      VOLUME,
-			HULLVOLUME,
-			GYRVOLUME,
-      CONSERVED_QUANTITY,             
-      TRANSLATIONAL_KINETIC,
-      ROTATIONAL_KINETIC,
-      LONG_RANGE_POTENTIAL,   
-      SHORT_RANGE_POTENTIAL,
-      VANDERWAALS_POTENTIAL,
-      ELECTROSTATIC_POTENTIAL,
-      BOND_POTENTIAL,
-      BEND_POTENTIAL,
-      DIHEDRAL_POTENTIAL,
-      INVERSION_POTENTIAL,
-      VRAW,
-      VHARM,
-      PRESSURE_TENSOR_XX,
-      PRESSURE_TENSOR_XY,
-      PRESSURE_TENSOR_XZ,
-      PRESSURE_TENSOR_YX,
-      PRESSURE_TENSOR_YY,
-      PRESSURE_TENSOR_YZ,
-      PRESSURE_TENSOR_ZX,
-      PRESSURE_TENSOR_ZY,
-      PRESSURE_TENSOR_ZZ,
-      BOX_DIPOLE_X,
-      BOX_DIPOLE_Y,
-      BOX_DIPOLE_Z,
-      ENDINDEX  //internal use
-    };
-
-    Stats();
-    const RealType& operator [](int index) const {
-      assert(index >=0 && index < ENDINDEX);
-      return data_[index];
-    }
-
-    RealType& operator [](int index){
-      assert(index >=0 && index < ENDINDEX);            
-      return data_[index];
-    }
-        
-    static std::string getTitle(int index) {
-      assert(index >=0 && index < ENDINDEX);
-      return title_[index];
-    }
-
-    static std::string getUnits(int index) {
-      assert(index >=0 && index < ENDINDEX);
-      return units_[index];
-    }
-
-    Mat3x3d getTau() {
-      return tau_;
-    }
-        
-    void setTau(const Mat3x3d& tau) {
-      tau_ = tau;
-    }
-
-    typedef std::map<std::string, Stats::StatsIndex> StatsMapType;
-    static  StatsMapType statsMap;
   
-  private:
-    static void init();
-    static bool isInit_;
-    RealType data_[ENDINDEX - BEGININDEX];
-    static std::string title_[ENDINDEX - BEGININDEX];
-    static std::string units_[ENDINDEX - BEGININDEX];
-    Mat3x3d tau_;
-  };
+  
+  /**
+   * @class ImproperCosineInversionType ImproperCosineInversionType.hpp "types/ImproperCosineInversionType.hpp"
+   */
+  class ImproperCosineInversionType : public InversionType {
+  public:
+    ImproperCosineInversionType(RealType kchi, int n, RealType delta) : 
+      kchi_(kchi), n_(n), delta_(delta) {
+      
+      if (n < 2 || n > 3) {
+	std::ostringstream oss;
+	oss << "ImproperCosineInversionType Error: n value " << n << 
+	  " is not supported (must be 2 or 3)." << std::endl;
+	throw OOPSEException(oss.str());
+      }
+    }
 
+
+    
+    virtual void calcForce(RealType cosPhi, RealType& V, RealType& dVdCosPhi){
+ 
+      // THIS NEEDS WORK
+
+      V = kchi_ * (n_*cosPhi + delta_);
+    }
+
+  private:
+    RealType kchi_;
+    int n_;
+    RealType delta_;
+
+
+  };
+  
+
+  
 
 
 } //end namespace oopse
-#endif //BRAINS_STATS_HPP
+#endif //TYPES_IMPROPERCOSINEINVERSIONTYPE_HPP
+

@@ -12,6 +12,7 @@ Source    = \
 	StickyAtomTypesSectionParser.cpp \
 	GayBerneAtomTypesSectionParser.cpp \
 	TorsionTypesSectionParser.cpp \
+	InversionTypesSectionParser.cpp \
 	StickyPowerAtomTypesSectionParser.cpp \
 	ShapeAtomTypesSectionParser.cpp \
 	LennardJonesAtomTypesSectionParser.cpp\

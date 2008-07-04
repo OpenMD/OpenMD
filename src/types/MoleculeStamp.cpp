@@ -72,6 +72,7 @@ namespace oopse {
     MemoryUtils::deletePointers(bondStamps_);
     MemoryUtils::deletePointers(bendStamps_);
     MemoryUtils::deletePointers(torsionStamps_);
+    MemoryUtils::deletePointers(inversionStamps_);
     MemoryUtils::deletePointers(rigidBodyStamps_);
     MemoryUtils::deletePointers(cutoffGroupStamps_);
     MemoryUtils::deletePointers(fragmentStamps_);    
@@ -101,6 +102,11 @@ namespace oopse {
   
   bool MoleculeStamp::addTorsionStamp( TorsionStamp* torsion) {
     torsionStamps_.push_back(torsion);
+    return true;
+  }
+
+  bool MoleculeStamp::addInversionStamp( InversionStamp* inversion) {
+    inversionStamps_.push_back(inversion);
     return true;
   }
   
@@ -151,6 +157,7 @@ namespace oopse {
     fillBondInfo();
     checkBends();
     checkTorsions();
+    checkInversions();
     checkRigidBodies();
     checkCutoffGroups();
     checkFragments();
@@ -515,6 +522,127 @@ namespace oopse {
       }    
     }
     
+  }
+
+  void MoleculeStamp::checkInversions() {
+    std::ostringstream oss;
+    
+    // first we automatically find the other three atoms that 
+    // are satellites of an inversion center:
+
+    for(int i = 0; i < getNInversions(); ++i) {
+      InversionStamp* inversionStamp = getInversionStamp(i);
+      int center = inversionStamp->getCenter();
+      std::vector<int> satellites;
+
+      for (int j = 0; j < getNBonds(); ++j) {
+	BondStamp* bondStamp = getBondStamp(j);
+	int a = bondStamp->getA();
+	int b = bondStamp->getB();
+      
+	if(a == center) {
+	  satellites.push_back(b);
+	}
+	if (b == center) {
+	  satellites.push_back(a);
+	}
+      }
+
+      if (satellites.size() == 3) {
+	std::sort(satellites.begin(), satellites.end());
+	inversionStamp->setSatellites(satellites);	
+      } else {
+	oss << "Error in Molecule " << getName() << ": found wrong number" << 
+	  " of bonds for inversion center " << center;
+        throw OOPSEException(oss.str());
+      }
+    }
+    
+    // then we do some sanity checking on the inversions:
+    
+    for(int i = 0; i < getNInversions(); ++i) {
+      InversionStamp* inversionStamp = getInversionStamp(i);
+
+      std::vector<int> inversionAtoms =  inversionStamp->getSatellites();
+      // add the central atom to the beginning of the list:
+      inversionAtoms.insert(inversionAtoms.begin(),inversionStamp->getCenter());
+
+      std::vector<int>::iterator j =std::find_if(inversionAtoms.begin(), 
+                                                 inversionAtoms.end(), 
+                                                 std::bind2nd(std::greater<int>(), 
+                                                              getNAtoms()-1));
+      std::vector<int>::iterator k =std::find_if(inversionAtoms.begin(), 
+                                                 inversionAtoms.end(), 
+                                                 std::bind2nd(std::less<int>(), 0));
+      
+      if (j != inversionAtoms.end() || k != inversionAtoms.end()) {
+        oss << "Error in Molecule " << getName() << ": atoms of inversion" << 
+          containerToString(inversionAtoms) << " have invalid indices\n"; 
+        throw OOPSEException(oss.str());
+      }
+
+
+      if (hasDuplicateElement(inversionAtoms)) {
+        oss << "Error in Molecule " << getName() << " : atoms of inversion" << 
+          containerToString(inversionAtoms) << " have duplicated indices\n";
+        throw OOPSEException(oss.str());            
+      }        
+    }
+    
+    for(int i = 0; i < getNInversions(); ++i) {
+      InversionStamp* inversionStamp = getInversionStamp(i);
+      std::vector<int> inversionAtoms =  inversionStamp->getSatellites();
+      inversionAtoms.insert(inversionAtoms.begin(),inversionStamp->getCenter());
+      std::vector<int> rigidSet(getNRigidBodies(), 0);
+      std::vector<int>::iterator j;
+      for( j = inversionAtoms.begin(); j != inversionAtoms.end(); ++j) {
+        int rigidbodyIndex = atom2Rigidbody[*j];
+        if (rigidbodyIndex >= 0) {
+          ++rigidSet[rigidbodyIndex];
+          if (rigidSet[rigidbodyIndex] > 1) {
+            oss << "Error in Molecule " << getName() << ": inversion" << 
+              containerToString(inversionAtoms) << "is invalid (more" <<
+	      " than one member atom is in the same rigid body)\n";
+            throw OOPSEException(oss.str());
+          }
+        }
+      }
+    }     
+    
+    std::set<IntTuple4> allInversions;
+    std::set<IntTuple4>::iterator iter;
+    for(int i = 0; i < getNInversions(); ++i) {
+      InversionStamp* inversionStamp= getInversionStamp(i);
+      int cent = inversionStamp->getCenter();
+      std::vector<int> inversion = inversionStamp->getSatellites();
+      
+      IntTuple4 inversionTuple(cent, inversion[0], inversion[1], inversion[2]);
+
+      // In OOPSE, the Central atom in an inversion comes first, and
+      // has a special position.  The other three atoms can come in
+      // random order, and should be sorted in increasing numerical
+      // order to check for duplicates.  This requires three pairwise
+      // swaps:
+
+      if (inversionTuple.third > inversionTuple.fourth) 
+	std::swap(inversionTuple.third, inversionTuple.fourth);
+
+      if (inversionTuple.second > inversionTuple.third) 
+	std::swap(inversionTuple.second, inversionTuple.third);
+
+      if (inversionTuple.third > inversionTuple.fourth) 
+	std::swap(inversionTuple.third, inversionTuple.fourth);
+
+      
+      iter = allInversions.find(inversionTuple);
+      if ( iter == allInversions.end()) {
+        allInversions.insert(inversionTuple);
+      } else {
+        oss << "Error in Molecule " << getName() << ": " << "Inversion" << 
+          containerToString(inversion)<< " appears multiple times\n";
+        throw OOPSEException(oss.str());
+      }
+    }
   }
   
   void MoleculeStamp::checkRigidBodies() {

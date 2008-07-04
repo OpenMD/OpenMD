@@ -85,7 +85,7 @@ namespace oopse {
     Stats::title_[BOND_POTENTIAL] = "Bond Potential";
     Stats::title_[BEND_POTENTIAL] = "Bend Potential";
     Stats::title_[DIHEDRAL_POTENTIAL] = "Dihedral Potential";
-    Stats::title_[IMPROPER_POTENTIAL] = "Improper Potential";
+    Stats::title_[INVERSION_POTENTIAL] = "Inversion Potential";
     Stats::title_[VRAW] = "Raw Potential";
     Stats::title_[VHARM] = "Harmonic Potential";
     Stats::title_[PRESSURE_TENSOR_XX] = "P_xx";
@@ -120,7 +120,7 @@ namespace oopse {
     Stats::units_[BOND_POTENTIAL] = "kcal/mol";
     Stats::units_[BEND_POTENTIAL] = "kcal/mol";
     Stats::units_[DIHEDRAL_POTENTIAL] = "kcal/mol";
-    Stats::units_[IMPROPER_POTENTIAL] = "kcal/mol";
+    Stats::units_[INVERSION_POTENTIAL] = "kcal/mol";
     Stats::units_[VRAW] = "kcal/mol";
     Stats::units_[VHARM] = "kcal/mol";
     Stats::units_[PRESSURE_TENSOR_XX] = "amu*fs^-2*Ang^-1";
@@ -153,7 +153,7 @@ namespace oopse {
     Stats::statsMap.insert(StatsMapType::value_type("BOND_POTENTIAL", BOND_POTENTIAL));
     Stats::statsMap.insert(StatsMapType::value_type("BEND_POTENTIAL", BEND_POTENTIAL));
     Stats::statsMap.insert(StatsMapType::value_type("DIHEDRAL_POTENTIAL", DIHEDRAL_POTENTIAL));
-    Stats::statsMap.insert(StatsMapType::value_type("IMPROPER_POTENTIAL", IMPROPER_POTENTIAL));
+    Stats::statsMap.insert(StatsMapType::value_type("INVERSION_POTENTIAL", INVERSION_POTENTIAL));
     Stats::statsMap.insert(StatsMapType::value_type("VRAW", VRAW));    
     Stats::statsMap.insert(StatsMapType::value_type("VHARM", VHARM));    
     Stats::statsMap.insert(StatsMapType::value_type("PRESSURE_TENSOR_XX", PRESSURE_TENSOR_XX));    

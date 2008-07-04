@@ -55,6 +55,8 @@
 #include "utils/simError.h"
 #include "primitives/Bond.hpp"
 #include "primitives/Bend.hpp"
+#include "primitives/Torsion.hpp"
+#include "primitives/Inversion.hpp"
 namespace oopse {
 
   void ForceManager::calcForces(bool needPotential, bool needStress) {
@@ -109,14 +111,17 @@ namespace oopse {
     Bond* bond;
     Bend* bend;
     Torsion* torsion;
+    Inversion* inversion;
     SimInfo::MoleculeIterator mi;
     Molecule::RigidBodyIterator rbIter;
     Molecule::BondIterator bondIter;;
     Molecule::BendIterator  bendIter;
     Molecule::TorsionIterator  torsionIter;
+    Molecule::InversionIterator  inversionIter;
     RealType bondPotential = 0.0;
     RealType bendPotential = 0.0;
     RealType torsionPotential = 0.0;
+    RealType inversionPotential = 0.0;
 
     //calculate short range interactions    
     for (mol = info_->beginMolecule(mi); mol != NULL; 
@@ -180,15 +185,40 @@ namespace oopse {
                                    i->second.prev.potential);
         }      
       }      
+
+      for (inversion = mol->beginInversion(inversionIter); 
+	   inversion != NULL; 
+           inversion = mol->nextInversion(inversionIter)) {
+        RealType angle;
+        inversion->calcForce(angle);
+        RealType currInversionPot = inversion->getPotential();
+        inversionPotential += inversion->getPotential();
+        std::map<Inversion*, InversionDataSet>::iterator i = inversionDataSets.find(inversion);
+        if (i == inversionDataSets.end()) {
+          InversionDataSet dataSet;
+          dataSet.prev.angle = dataSet.curr.angle = angle;
+          dataSet.prev.potential = dataSet.curr.potential = currInversionPot;
+          dataSet.deltaV = 0.0;
+          inversionDataSets.insert(std::map<Inversion*, InversionDataSet>::value_type(inversion, dataSet));
+        }else {
+          i->second.prev.angle = i->second.curr.angle;
+          i->second.prev.potential = i->second.curr.potential;
+          i->second.curr.angle = angle;
+          i->second.curr.potential = currInversionPot;
+          i->second.deltaV =  fabs(i->second.curr.potential -  
+                                   i->second.prev.potential);
+        }      
+      }      
     }
     
     RealType  shortRangePotential = bondPotential + bendPotential + 
-      torsionPotential;    
+      torsionPotential +  inversionPotential;    
     Snapshot* curSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
     curSnapshot->statData[Stats::SHORT_RANGE_POTENTIAL] = shortRangePotential;
     curSnapshot->statData[Stats::BOND_POTENTIAL] = bondPotential;
     curSnapshot->statData[Stats::BEND_POTENTIAL] = bendPotential;
     curSnapshot->statData[Stats::DIHEDRAL_POTENTIAL] = torsionPotential;
+    curSnapshot->statData[Stats::INVERSION_POTENTIAL] = inversionPotential;
     
   }
   

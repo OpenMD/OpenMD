@@ -63,6 +63,7 @@
 #include "types/BondType.hpp"
 #include "types/BendType.hpp"
 #include "types/TorsionType.hpp"
+#include "types/InversionType.hpp"
 #include "types/NonBondedInteractionType.hpp"
 #include "UseTheForce/fForceOptions.h"
 namespace oopse {
@@ -79,10 +80,11 @@ namespace oopse {
     typedef TypeContainer<BondType, 2> BondTypeContainer;
     typedef TypeContainer<BendType, 3> BendTypeContainer;
     typedef TypeContainer<TorsionType, 4> TorsionTypeContainer;
-		typedef TypeContainer<NonBondedInteractionType, 2> NonBondedInteractionTypeContainer;
-        
+    typedef TypeContainer<InversionType, 4> InversionTypeContainer;
+    typedef TypeContainer<NonBondedInteractionType, 2> NonBondedInteractionTypeContainer;
+    
     ForceField(); 
-
+    
     virtual ~ForceField();
 
     std::string getForceFieldFileName() {
@@ -101,8 +103,12 @@ namespace oopse {
                           const std::string &at3);
     TorsionType* getTorsionType(const std::string &at1, const std::string &at2,
                                 const std::string &at3, const std::string &at4);
-		NonBondedInteractionType* getNonBondedInteractionType(const std::string &at1, const std::string &at2);
-															
+    InversionType* getInversionType(const std::string &at1, 
+				    const std::string &at2,
+				    const std::string &at3, 
+				    const std::string &at4);
+    NonBondedInteractionType* getNonBondedInteractionType(const std::string &at1, const std::string &at2);
+    
     BondType* getExactBondType(const std::string &at1, const std::string &at2);
     BendType* getExactBendType(const std::string &at1, const std::string &at2,
                                const std::string &at3);
@@ -110,22 +116,25 @@ namespace oopse {
                                      const std::string &at2,
                                      const std::string &at3, 
                                      const std::string &at4);
-		NonBondedInteractionType* getExactNonBondedInteractionType(const std::string &at1, const std::string &at2);
-
-
+    InversionType* getExactInversionType(const std::string &at1, 
+					 const std::string &at2,
+					 const std::string &at3, 
+					 const std::string &at4);
+    NonBondedInteractionType* getExactNonBondedInteractionType(const std::string &at1, const std::string &at2);
+    
+    
     //avoid make virtual function public
     //Herb Sutter and Andrei Alexandrescu, C++ coding Standards, Addision-Wesley
     virtual RealType getRcutFromAtomType(AtomType* at);
-
+    
     std::string getWildCard() {
       return wildCardAtomTypeName_;
     }
-
+    
     void setWildCard(const std::string& wildCard) {
       wildCardAtomTypeName_ = wildCard;
     }
-
-
+    
     unsigned int getNAtomType() {
       return atomTypeCont_.size();
     }
@@ -139,13 +148,19 @@ namespace oopse {
 		     const std::string &at3, BendType* bendType);
 
     bool addTorsionType(const std::string &at1, const std::string &at2,
-			const std::string &at3, const std::string &at4, TorsionType* torsionType);
+			const std::string &at3, const std::string &at4, 
+			TorsionType* torsionType);
 
-    bool addNonBondedInteractionType(const std::string &at1, const std::string &at2, 
-                     	NonBondedInteractionType* nbiType);
-
+    bool addInversionType(const std::string &at1, const std::string &at2,
+			  const std::string &at3, const std::string &at4,
+			  InversionType* inversionType);
+    
+    bool addNonBondedInteractionType(const std::string &at1, 
+				     const std::string &at2, 
+				     NonBondedInteractionType* nbiType);
+    
     ifstrstream* openForceFieldFile(const std::string& filename);
-
+    
     ForceFieldOptions& getForceFieldOptions() {return forceFieldOptions_;}
 
     void setFortranForceOptions(void);
@@ -157,17 +172,17 @@ namespace oopse {
     BondTypeContainer bondTypeCont_;
     BendTypeContainer bendTypeCont_;
     TorsionTypeContainer torsionTypeCont_;
+    InversionTypeContainer inversionTypeCont_;
     NonBondedInteractionTypeContainer nonBondedInteractionTypeCont_;
     ForceFieldOptions forceFieldOptions_;
     
   private:  
     std::string ffPath_;
-
+    
     std::string wildCardAtomTypeName_;
-
-    std::string forceFieldFileName_;
-
-
+    
+    std::string forceFieldFileName_;    
+    
   };
 }//end namespace oopse
 #endif

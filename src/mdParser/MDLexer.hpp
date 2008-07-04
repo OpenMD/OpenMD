@@ -2,7 +2,7 @@
 #define INC_MDLexer_hpp_
 
 #include <antlr/config.hpp>
-/* $ANTLR 2.7.5 (20050406): "MDParser.g" -> "MDLexer.hpp"$ */
+/* $ANTLR 2.7.4: "MDParser.g" -> "MDLexer.hpp"$ */
 #include <antlr/CommonToken.hpp>
 #include <antlr/InputBuffer.hpp>
 #include <antlr/BitSet.hpp>
@@ -18,7 +18,7 @@
 #line 19 "MDLexer.hpp"
 class CUSTOM_API MDLexer : public ANTLR_USE_NAMESPACE(antlr)CharScanner, public MDTokenTypes
 {
-#line 171 "MDParser.g"
+#line 180 "MDParser.g"
 
 
 
@@ -102,6 +102,10 @@ private:
 	static const ANTLR_USE_NAMESPACE(antlr)BitSet _tokenSet_7;
 	static const unsigned long _tokenSet_8_data_[];
 	static const ANTLR_USE_NAMESPACE(antlr)BitSet _tokenSet_8;
+	static const unsigned long _tokenSet_9_data_[];
+	static const ANTLR_USE_NAMESPACE(antlr)BitSet _tokenSet_9;
+	static const unsigned long _tokenSet_10_data_[];
+	static const ANTLR_USE_NAMESPACE(antlr)BitSet _tokenSet_10;
 };
 
 #endif /*INC_MDLexer_hpp_*/

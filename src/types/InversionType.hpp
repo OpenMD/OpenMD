@@ -40,60 +40,27 @@
  */
  
 /**
- * @file ForceManager.hpp
- * @author tlin
- * @date 11/09/2004
- * @time 10:36am
+ * @file InversionType.hpp
+ * @author    tlin
+ * @date  11/01/2004
  * @version 1.0
- */
+ */ 
 
-#ifndef BRAINS_FORCEMANAGER_HPP
-#define BRAINS_FORCEMANAGER_HPP
-
-#include "brains/SimInfo.hpp"
-#include "primitives/Molecule.hpp"
+#ifndef TYPES_INVERSIONTYPE_HPP
+#define TYPES_INVERSIONTYPE_HPP
+#include "config.h"
 namespace oopse {
+  
   /**
-   * @class ForceManager ForceManager.hpp "brains/ForceManager.hpp"
-   * ForceManager is responsible for calculating the short range
-   * interactions (C++) and long range interactions (Fortran). If the
-   * Fortran side is not set up before the force calculation, call
-   * SimInfo's update function to settle it down.
-   *
-   * @note the reason we delay fortran side's setup is that some
-   * applications (Dump2XYZ etc.) may not need force calculation, so why
-   * bother?
+   * @class InversionType InversionType.hpp "types/InversionType.hpp"
    */
-  class ForceManager {
-
+  class InversionType{
   public:
-    ForceManager(SimInfo * info) : info_(info) {}
-        
-    virtual ~ForceManager() {}
-
-    // public virtual functions should be avoided
-    /**@todo needs refactoring */
-    virtual void calcForces(bool needPotential, bool needStress);
-
-    virtual void init() {}
-  protected:
-
-    virtual void preCalculation();
-        
-    virtual void calcShortRangeInteraction();
-
-    virtual void calcLongRangeInteraction(bool needPotential, bool needStress);
-
-    virtual void postCalculation(bool needStress);
- 
-    SimInfo * info_;        
-
-    std::map<Bend*, BendDataSet> bendDataSets;
-    std::map<Torsion*, TorsionDataSet> torsionDataSets;
-    std::map<Inversion*, InversionDataSet> inversionDataSets;
-    Mat3x3d tau;
+    virtual ~InversionType() {}
+    
+    virtual void calcForce(RealType cosPhi, RealType& V, RealType& dVdCosPhi) = 0;
     
   };
-
+  
 } //end namespace oopse
-#endif //BRAINS_FORCEMANAGER_HPP
+#endif //TYPES_INVERSIONTYPE_HPP

@@ -3,7 +3,7 @@
 
 #include <antlr/config.hpp>
 #include "MDTreeParserTokenTypes.hpp"
-/* $ANTLR 2.7.5 (20050406): "MDTreeParser.g" -> "MDTreeParser.hpp"$ */
+/* $ANTLR 2.7.4: "MDTreeParser.g" -> "MDTreeParser.hpp"$ */
 #include <antlr/TreeParser.hpp>
 
 #line 2 "MDTreeParser.g"
@@ -63,6 +63,7 @@ public:
 	public: void bondblock(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
 	public: void bendblock(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
 	public: void torsionblock(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
+	public: void inversionblock(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
 	public: void rigidbodyblock(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
 	public: void cutoffgroupblock(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
 	public: void fragmentblock(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
@@ -72,6 +73,7 @@ public:
 	public: vector<int>  inttuple(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
 	public: void bendstatement(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
 	public: void torsionstatement(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
+	public: void inversionstatement(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
 	public: void rigidbodystatement(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
 	public: void cutoffgroupstatement(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
 	public: void fragmentstatement(ANTLR_USE_NAMESPACE(antlr)RefAST _t);
@@ -88,10 +90,10 @@ protected:
 private:
 	static const char* tokenNames[];
 #ifndef NO_STATIC_CONSTS
-	static const int NUM_TOKENS = 51;
+	static const int NUM_TOKENS = 53;
 #else
 	enum {
-		NUM_TOKENS = 51
+		NUM_TOKENS = 53
 	};
 #endif
 	

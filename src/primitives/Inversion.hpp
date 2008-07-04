@@ -38,110 +38,78 @@
  * University of Notre Dame has been advised of the possibility of
  * such damages.
  */
-  
+ 
 /**
- * @file Stats.hpp
- * @author tlin
- * @date 11/04/2004
- * @time 23:56am
+ * @file Inversion.hpp
+ * @author    tlin
+ * @date  11/01/2004
  * @version 1.0
  */
 
-#ifndef BRAINS_STATS_HPP
-#define BRAINS_STATS_HPP
+#ifndef PRIMITIVES_INVERSION_HPP
+#define PRIMITIVES_INVERSION_HPP
 
-#include <string>
-#include <map>
+#include "primitives/Atom.hpp"
 
-#include "math/SquareMatrix3.hpp"
+#include "types/InversionType.hpp"
+
 namespace oopse {
-
-  /**
-   * @class Stats Stats.hpp "brains/Stats.hpp"
-   */
-  class Stats{
-  public:
-    enum StatsIndex {
-      BEGININDEX = 0,  //internal use
-      TIME = BEGININDEX,            
-      TOTAL_ENERGY,
-      POTENTIAL_ENERGY,
-      KINETIC_ENERGY,
-      TEMPERATURE,
-      PRESSURE,
-      VOLUME,
-			HULLVOLUME,
-			GYRVOLUME,
-      CONSERVED_QUANTITY,             
-      TRANSLATIONAL_KINETIC,
-      ROTATIONAL_KINETIC,
-      LONG_RANGE_POTENTIAL,   
-      SHORT_RANGE_POTENTIAL,
-      VANDERWAALS_POTENTIAL,
-      ELECTROSTATIC_POTENTIAL,
-      BOND_POTENTIAL,
-      BEND_POTENTIAL,
-      DIHEDRAL_POTENTIAL,
-      INVERSION_POTENTIAL,
-      VRAW,
-      VHARM,
-      PRESSURE_TENSOR_XX,
-      PRESSURE_TENSOR_XY,
-      PRESSURE_TENSOR_XZ,
-      PRESSURE_TENSOR_YX,
-      PRESSURE_TENSOR_YY,
-      PRESSURE_TENSOR_YZ,
-      PRESSURE_TENSOR_ZX,
-      PRESSURE_TENSOR_ZY,
-      PRESSURE_TENSOR_ZZ,
-      BOX_DIPOLE_X,
-      BOX_DIPOLE_Y,
-      BOX_DIPOLE_Z,
-      ENDINDEX  //internal use
-    };
-
-    Stats();
-    const RealType& operator [](int index) const {
-      assert(index >=0 && index < ENDINDEX);
-      return data_[index];
-    }
-
-    RealType& operator [](int index){
-      assert(index >=0 && index < ENDINDEX);            
-      return data_[index];
-    }
-        
-    static std::string getTitle(int index) {
-      assert(index >=0 && index < ENDINDEX);
-      return title_[index];
-    }
-
-    static std::string getUnits(int index) {
-      assert(index >=0 && index < ENDINDEX);
-      return units_[index];
-    }
-
-    Mat3x3d getTau() {
-      return tau_;
-    }
-        
-    void setTau(const Mat3x3d& tau) {
-      tau_ = tau;
-    }
-
-    typedef std::map<std::string, Stats::StatsIndex> StatsMapType;
-    static  StatsMapType statsMap;
-  
-  private:
-    static void init();
-    static bool isInit_;
-    RealType data_[ENDINDEX - BEGININDEX];
-    static std::string title_[ENDINDEX - BEGININDEX];
-    static std::string units_[ENDINDEX - BEGININDEX];
-    Mat3x3d tau_;
+  struct InversionData {
+    RealType angle;
+    RealType potential;
   };
 
+  struct InversionDataSet {
+    RealType deltaV;
+    InversionData prev;
+    InversionData curr;
+  };
 
+  
+  /**
+   * @class Inversion Inversion.hpp "primitives/Inversion.hpp"
+   */
+  class Inversion {
+  public:
+    Inversion(Atom* atom1, Atom* atom2, Atom* atom3, Atom* atom4, InversionType* it);
+    virtual ~Inversion() {}
+    virtual void calcForce(RealType& angle);
+        
+    RealType getPotential() {
+      return potential_;
+    }
 
-} //end namespace oopse
-#endif //BRAINS_STATS_HPP
+    Atom* getAtomA() {
+      return atom1_;
+    }
+
+    Atom* getAtomB() {
+      return atom2_;
+    }
+
+    Atom* getAtomC() {
+      return atom3_;
+    }
+
+    Atom* getAtomD() {
+      return atom4_;
+    }
+
+    InversionType * getInversionType() {
+      return inversionType_;
+    }
+        
+  protected:
+
+    Atom* atom1_;
+    Atom* atom2_;
+    Atom* atom3_;
+    Atom* atom4_;
+
+    InversionType* inversionType_;
+
+    RealType potential_;
+  };    
+
+}
+#endif //PRIMITIVES_INVERSION_HPP

@@ -346,6 +346,111 @@ namespace oopse {
     }
   }
 
+  InversionType* ForceField::getInversionType(const std::string &at1, 
+					      const std::string &at2,
+					      const std::string &at3, 
+					      const std::string &at4) {
+    std::vector<std::string> keys;
+    keys.push_back(at1);
+    keys.push_back(at2);    
+    keys.push_back(at3);    
+    keys.push_back(at4);    
+
+    //try exact match first
+    InversionType* inversionType = inversionTypeCont_.find(keys);
+    if (inversionType) {
+      return inversionType;
+    } else {
+      
+      AtomType* atype1;
+      AtomType* atype2;
+      AtomType* atype3;
+      AtomType* atype4;
+      std::vector<std::string> at1key;
+      at1key.push_back(at1);
+      atype1 = atomTypeCont_.find(at1key);
+      
+      std::vector<std::string> at2key;
+      at2key.push_back(at2);
+      atype2 = atomTypeCont_.find(at2key);
+      
+      std::vector<std::string> at3key;
+      at3key.push_back(at3);
+      atype3 = atomTypeCont_.find(at3key);
+      
+      std::vector<std::string> at4key;
+      at4key.push_back(at4);
+      atype4 = atomTypeCont_.find(at4key);
+
+      // query atom types for their chains of responsibility
+      std::vector<AtomType*> at1Chain = atype1->allYourBase();
+      std::vector<AtomType*> at2Chain = atype2->allYourBase();
+      std::vector<AtomType*> at3Chain = atype3->allYourBase();
+      std::vector<AtomType*> at4Chain = atype4->allYourBase();
+
+      std::vector<AtomType*>::iterator i;
+      std::vector<AtomType*>::iterator j;
+      std::vector<AtomType*>::iterator k;
+      std::vector<AtomType*>::iterator l;
+
+      int ii = 0;
+      int jj = 0;
+      int kk = 0;
+      int ll = 0;
+      int Iscore;
+      int JKLscore;
+      
+      std::vector<tuple3<int, int, std::vector<std::string> > > foundInversions;
+      
+      for (j = at2Chain.begin(); j != at2Chain.end(); j++) {
+	kk = 0;
+	for (k = at3Chain.begin(); k != at3Chain.end(); k++) {
+	  ii = 0;	
+	  for (i = at1Chain.begin(); i != at1Chain.end(); i++) {
+	    ll = 0;
+	    for (l = at4Chain.begin(); l != at4Chain.end(); l++) {
+	      
+	      Iscore = ii;
+	      JKLscore = jj + kk + ll;
+	      
+	      std::vector<std::string> myKeys;
+	      myKeys.push_back((*i)->getName());
+	      myKeys.push_back((*j)->getName());
+	      myKeys.push_back((*k)->getName());
+	      myKeys.push_back((*l)->getName());
+	      
+	      InversionType* inversionType = inversionTypeCont_.find(myKeys);
+	      if (inversionType) { 
+		foundInversions.push_back( make_tuple3(Iscore, JKLscore, myKeys) );
+	      }
+	      ll++;
+	    }
+	    ii++;
+	  }
+	  kk++;
+	}
+	jj++;
+      }
+      
+      std::sort(foundInversions.begin(), foundInversions.end());
+      
+      int iscore = foundInversions[0].first;
+      int jklscore = foundInversions[0].second;
+      std::vector<std::string> theKeys = foundInversions[0].third;
+      
+      std::cout << "best matching inversion = " << theKeys[0] << "\t" <<theKeys[1]  << "\t" << theKeys[2] << "\t" << theKeys[3] << "\t(scores = "<< iscore << "\t" << jklscore << ")\n";
+      
+      
+      InversionType* bestType = inversionTypeCont_.find(theKeys);
+      if (bestType) {
+	return bestType;
+      } else {
+	//if no exact match found, try wild card match
+	return inversionTypeCont_.find(keys, wildCardAtomTypeName_);
+      }
+    }
+  }
+  
   NonBondedInteractionType* ForceField::getNonBondedInteractionType(const std::string &at1, const std::string &at2) {
     std::vector<std::string> keys;
     keys.push_back(at1);
@@ -390,14 +495,26 @@ namespace oopse {
     keys.push_back(at4);   
     return torsionTypeCont_.find(keys);
   }
-
+  
+  InversionType* ForceField::getExactInversionType(const std::string &at1, 
+						   const std::string &at2,
+						   const std::string &at3, 
+						   const std::string &at4){ 
+    std::vector<std::string> keys;
+    keys.push_back(at1);
+    keys.push_back(at2);    
+    keys.push_back(at3);    
+    keys.push_back(at4);   
+    return inversionTypeCont_.find(keys);
+  }
+  
   NonBondedInteractionType* ForceField::getExactNonBondedInteractionType(const std::string &at1, const std::string &at2){ 
     std::vector<std::string> keys;
     keys.push_back(at1);
     keys.push_back(at2);    
     return nonBondedInteractionTypeCont_.find(keys);
   }
-
+  
 
   bool ForceField::addAtomType(const std::string &at, AtomType* atomType) {
     std::vector<std::string> keys;
@@ -435,6 +552,19 @@ namespace oopse {
     return torsionTypeCont_.add(keys, torsionType);
   }
 
+  bool ForceField::addInversionType(const std::string &at1, 
+				    const std::string &at2,
+				    const std::string &at3, 
+				    const std::string &at4, 
+				    InversionType* inversionType) {
+    std::vector<std::string> keys;
+    keys.push_back(at1);
+    keys.push_back(at2);    
+    keys.push_back(at3);    
+    keys.push_back(at4);    
+    return inversionTypeCont_.add(keys, inversionType);
+  }
+  
   bool ForceField::addNonBondedInteractionType(const std::string &at1, 
 					       const std::string &at2, 
 					       NonBondedInteractionType* nbiType) {

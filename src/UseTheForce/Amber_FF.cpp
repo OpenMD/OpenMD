@@ -50,6 +50,7 @@
 #include "io/BondTypesSectionParser.hpp"
 #include "io/BendTypesSectionParser.hpp"
 #include "io/TorsionTypesSectionParser.hpp"
+#include "io/InversionTypesSectionParser.hpp"
 #include "io/OptionSectionParser.hpp"
 #include "UseTheForce/ForceFieldCreator.hpp"
 
@@ -71,6 +72,7 @@ namespace oopse {
     spMan_.push_back(new BondTypesSectionParser(forceFieldOptions_));
     spMan_.push_back(new BendTypesSectionParser(forceFieldOptions_));
     spMan_.push_back(new TorsionTypesSectionParser(forceFieldOptions_));
+    spMan_.push_back(new InversionTypesSectionParser(forceFieldOptions_));
     
   }
 

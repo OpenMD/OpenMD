@@ -2,7 +2,7 @@
 #define INC_MDParser_hpp_
 
 #include <antlr/config.hpp>
-/* $ANTLR 2.7.5 (20050406): "MDParser.g" -> "MDParser.hpp"$ */
+/* $ANTLR 2.7.4: "MDParser.g" -> "MDParser.hpp"$ */
 #include <antlr/TokenStream.hpp>
 #include <antlr/TokenBuffer.hpp>
 #include "MDTokenTypes.hpp"
@@ -67,6 +67,8 @@ public:
 	public: void inttuple();
 	public: void bendstatement();
 	public: void torsionstatement();
+	public: void inversionblock();
+	public: void inversionstatement();
 	public: void rigidbodystatement();
 	public: void cutoffgroupstatement();
 	public: void fragmentstatement();
@@ -82,10 +84,10 @@ protected:
 private:
 	static const char* tokenNames[];
 #ifndef NO_STATIC_CONSTS
-	static const int NUM_TOKENS = 51;
+	static const int NUM_TOKENS = 53;
 #else
 	enum {
-		NUM_TOKENS = 51
+		NUM_TOKENS = 53
 	};
 #endif
 	
@@ -119,6 +121,8 @@ private:
 	static const ANTLR_USE_NAMESPACE(antlr)BitSet _tokenSet_13;
 	static const unsigned long _tokenSet_14_data_[];
 	static const ANTLR_USE_NAMESPACE(antlr)BitSet _tokenSet_14;
+	static const unsigned long _tokenSet_15_data_[];
+	static const ANTLR_USE_NAMESPACE(antlr)BitSet _tokenSet_15;
 };
 
 #endif /*INC_MDParser_hpp_*/

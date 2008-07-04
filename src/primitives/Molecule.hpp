@@ -58,6 +58,7 @@
 #include "primitives/Bond.hpp"
 #include "primitives/Bend.hpp"
 #include "primitives/Torsion.hpp"
+#include "primitives/Inversion.hpp"
 #include "primitives/CutoffGroup.hpp"
 
 namespace oopse{
@@ -75,6 +76,7 @@ namespace oopse{
     typedef std::vector<Bond*>::iterator BondIterator;
     typedef std::vector<Bend*>::iterator BendIterator;
     typedef std::vector<Torsion*>::iterator TorsionIterator;
+    typedef std::vector<Inversion*>::iterator InversionIterator;
     typedef std::vector<RigidBody*>::iterator RigidBodyIterator;
     typedef std::vector<CutoffGroup*>::iterator CutoffGroupIterator;
     typedef std::vector<StuntDouble*>::iterator IntegrableObjectIterator;
@@ -129,6 +131,9 @@ namespace oopse{
     
     /** add a torsion into this molecule*/
     void addTorsion(Torsion* torsion);
+
+    /** add an improper torsion into this molecule*/
+    void addInversion(Inversion* inversion);
     
     /** add a rigidbody into this molecule */
     void addRigidBody(RigidBody *rb);
@@ -161,6 +166,11 @@ namespace oopse{
     /** Returns the total number of torsions in this molecule */        
     unsigned int getNTorsions() {
       return torsions_.size();
+    }
+
+    /** Returns the total number of improper torsions in this molecule */
+    unsigned int getNInversions() {
+      return inversions_.size();
     }
     
     /** Returns the total number of rigid bodies in this molecule */        
@@ -232,6 +242,16 @@ namespace oopse{
     Torsion* nextTorsion(std::vector<Torsion*>::iterator& i) {
       ++i;
       return (i == torsions_.end()) ? NULL : *i;    
+    }    
+
+    Inversion* beginInversion(std::vector<Inversion*>::iterator& i) {
+      i = inversions_.begin();
+      return (i == inversions_.end()) ? NULL : *i;
+    }
+    
+    Inversion* nextInversion(std::vector<Inversion*>::iterator& i) {
+      ++i;
+      return (i == inversions_.end()) ? NULL : *i;    
     }    
     
     RigidBody* beginRigidBody(std::vector<RigidBody*>::iterator& i) {
@@ -316,6 +336,7 @@ namespace oopse{
     std::vector<Bond*> bonds_;
     std::vector<Bend*> bends_;
     std::vector<Torsion*> torsions_;
+    std::vector<Inversion*> inversions_;
     std::vector<RigidBody*> rigidBodies_;
     std::vector<StuntDouble*> integrableObjects_;
     std::vector<CutoffGroup*> cutoffGroups_;

@@ -39,61 +39,66 @@
  * such damages.
  */
  
-/**
- * @file ForceManager.hpp
- * @author tlin
- * @date 11/09/2004
- * @time 10:36am
- * @version 1.0
- */
+#ifndef IO_INVERSIONTYPESSECTIONPARSER_HPP
+#define IO_INVERSIONTYPESSECTIONPARSER_HPP
+#include <map>
+#include "io/SectionParser.hpp"
+#include "io/ForceFieldOptions.hpp"
 
-#ifndef BRAINS_FORCEMANAGER_HPP
-#define BRAINS_FORCEMANAGER_HPP
-
-#include "brains/SimInfo.hpp"
-#include "primitives/Molecule.hpp"
 namespace oopse {
+
   /**
-   * @class ForceManager ForceManager.hpp "brains/ForceManager.hpp"
-   * ForceManager is responsible for calculating the short range
-   * interactions (C++) and long range interactions (Fortran). If the
-   * Fortran side is not set up before the force calculation, call
-   * SimInfo's update function to settle it down.
-   *
-   * @note the reason we delay fortran side's setup is that some
-   * applications (Dump2XYZ etc.) may not need force calculation, so why
-   * bother?
+   * @class InversionTypesSectionParser InversionTypesSectionParser.hpp "io/InversionTypesSectionParser.hpp"
    */
-  class ForceManager {
-
+  class InversionTypesSectionParser : public SectionParser {
   public:
-    ForceManager(SimInfo * info) : info_(info) {}
-        
-    virtual ~ForceManager() {}
 
-    // public virtual functions should be avoided
-    /**@todo needs refactoring */
-    virtual void calcForces(bool needPotential, bool needStress);
+            
+    InversionTypesSectionParser(ForceFieldOptions& options);
+  private:
 
-    virtual void init() {}
-  protected:
 
-    virtual void preCalculation();
-        
-    virtual void calcShortRangeInteraction();
+    // Inversion types vary by force field:  In this description,
+    // I is the central atom, while J, K, and L are atoms directly 
+    // bonded to I (but not to each other):
 
-    virtual void calcLongRangeInteraction(bool needPotential, bool needStress);
+    // Amber uses a special bond (IL) as the hinge between the planes
+    // IJL and IKL (the central atom I & peripheral atom L are common
+    // in both planes).  It then applies a cosine series much like
+    // other torsional forms.
 
-    virtual void postCalculation(bool needStress);
- 
-    SimInfo * info_;        
+    // Gromacs & Charmm use an improper torsion that is harmonic
+    // in the angle between the IJK and JKL planes (Central atom is I, but
+    // this atom appears in only one of the plane definitions.
 
-    std::map<Bend*, BendDataSet> bendDataSets;
-    std::map<Torsion*, TorsionDataSet> torsionDataSets;
-    std::map<Inversion*, InversionDataSet> inversionDataSets;
-    Mat3x3d tau;
-    
+    // MM2 and Tripos use a planarity definition of the central atom (I)
+    // distance from the plane made by the other three atoms (JKL).
+
+    // The Dreiding force field uses a complicated umbrella inversion 
+    // form.
+
+
+    enum InversionTypeEnum{
+      itImproperCosine,
+      itImproperHarmonic,
+      itCentralAtomHeight,
+      itDreiding,
+      itUnknown
+    };
+
+    InversionTypeEnum getInversionTypeEnum(const std::string& str);
+            
+    void parseLine(ForceField& ff, const std::string& line, int lineNo);
+            
+    std::map<std::string, InversionTypeEnum> stringToEnumMap_;
+    ForceFieldOptions& options_;
   };
 
-} //end namespace oopse
-#endif //BRAINS_FORCEMANAGER_HPP
+
+} //namespace oopse
+
+#endif //IO_INVERSIONTYPESSECTIONPARSER_HPP
+
+
+
+

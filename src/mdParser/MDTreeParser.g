@@ -79,6 +79,7 @@ moleculestatement : assignment
                   | bondblock
                   | bendblock
                   | torsionblock
+                  | inversionblock
                   | rigidbodyblock
                   | cutoffgroupblock
                   | fragmentblock
@@ -164,6 +165,25 @@ torsionstatement
 }  
               : assignment
               | #(MEMBERS ivec=inttuple) {currTorsionStamp->setMembers(ivec);}
+              ;
+
+inversionblock  : #(INVERSION {InversionStamp* currInversionStamp = new InversionStamp(); blockStack.push(currInversionStamp);}
+                   (inversionstatement)*
+                    ENDBLOCK )  {
+                                  blockStack.top()->validate();
+                                  blockStack.pop(); 
+                                  MoleculeStamp* currMoleculeStamp = static_cast<MoleculeStamp*>(blockStack.top());
+                                  currMoleculeStamp->addInversionStamp(currInversionStamp); 
+                                }
+          ;
+
+inversionstatement
+{
+  int icent;
+  InversionStamp* currInversionStamp = static_cast<InversionStamp*>(blockStack.top());
+}  
+              : assignment
+              | #(CENTER icent=intConst) {currInversionStamp->setCenter(icent);}
               ;
 
 rigidbodyblock

@@ -39,61 +39,48 @@
  * such damages.
  */
  
-/**
- * @file ForceManager.hpp
- * @author tlin
- * @date 11/09/2004
- * @time 10:36am
- * @version 1.0
- */
-
-#ifndef BRAINS_FORCEMANAGER_HPP
-#define BRAINS_FORCEMANAGER_HPP
-
-#include "brains/SimInfo.hpp"
-#include "primitives/Molecule.hpp"
+#ifndef TYPES_INVERSIONSTAMP_HPP
+#define TYPES_INVERSIONSTAMP_HPP
+#include "types/DataHolder.hpp"
+#include "utils/Tuple.hpp"
 namespace oopse {
-  /**
-   * @class ForceManager ForceManager.hpp "brains/ForceManager.hpp"
-   * ForceManager is responsible for calculating the short range
-   * interactions (C++) and long range interactions (Fortran). If the
-   * Fortran side is not set up before the force calculation, call
-   * SimInfo's update function to settle it down.
-   *
-   * @note the reason we delay fortran side's setup is that some
-   * applications (Dump2XYZ etc.) may not need force calculation, so why
-   * bother?
-   */
-  class ForceManager {
-
+  class InversionStamp : public DataHolder {
+    DeclareParameter(GhostVectorSource, int);
   public:
-    ForceManager(SimInfo * info) : info_(info) {}
-        
-    virtual ~ForceManager() {}
-
-    // public virtual functions should be avoided
-    /**@todo needs refactoring */
-    virtual void calcForces(bool needPotential, bool needStress);
-
-    virtual void init() {}
-  protected:
-
-    virtual void preCalculation();
-        
-    virtual void calcShortRangeInteraction();
-
-    virtual void calcLongRangeInteraction(bool needPotential, bool needStress);
-
-    virtual void postCalculation(bool needStress);
- 
-    SimInfo * info_;        
-
-    std::map<Bend*, BendDataSet> bendDataSets;
-    std::map<Torsion*, TorsionDataSet> torsionDataSets;
-    std::map<Inversion*, InversionDataSet> inversionDataSets;
-    Mat3x3d tau;
     
+    InversionStamp();
+    virtual ~InversionStamp();
+    
+    int getCenter() {return center_;}
+    int getSatelliteAt( int index ) {return satellites_.at(index);}
+    int getNSatellites() {return satellites_.size();}
+    std::vector<int> getSatellites() {return satellites_;}
+    void setCenter(int center) { center_ = center; }
+    void addSatellite(int sat) {
+      if (satellites_.size() > 3) {
+        std::ostringstream oss;
+        oss << "Too many satellites in inversion to add another!" << std::endl;
+        throw OOPSEException(oss.str());
+      } else {
+	satellites_.push_back(sat);
+      }
+    }
+    void setSatellites(const std::vector<int> sats) {
+      if (sats.size() == 3) {
+	satellites_.push_back(sats.at(0));
+	satellites_.push_back(sats.at(1));
+	satellites_.push_back(sats.at(2));
+      } else {
+        std::ostringstream oss;
+        oss << "Incorrect number of satellites to add to inversion!" << std::endl;
+        throw OOPSEException(oss.str());
+      }
+    }
+    virtual void validate();
+    
+  private:
+    int center_;
+    std::vector<int> satellites_;
   };
-
-} //end namespace oopse
-#endif //BRAINS_FORCEMANAGER_HPP
+}
+#endif

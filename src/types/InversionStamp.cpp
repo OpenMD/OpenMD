@@ -39,61 +39,19 @@
  * such damages.
  */
  
-/**
- * @file ForceManager.hpp
- * @author tlin
- * @date 11/09/2004
- * @time 10:36am
- * @version 1.0
- */
+#include <stdlib.h>
+#include <string.h>
 
-#ifndef BRAINS_FORCEMANAGER_HPP
-#define BRAINS_FORCEMANAGER_HPP
-
-#include "brains/SimInfo.hpp"
-#include "primitives/Molecule.hpp"
+#include "types/InversionStamp.hpp"
 namespace oopse {
-  /**
-   * @class ForceManager ForceManager.hpp "brains/ForceManager.hpp"
-   * ForceManager is responsible for calculating the short range
-   * interactions (C++) and long range interactions (Fortran). If the
-   * Fortran side is not set up before the force calculation, call
-   * SimInfo's update function to settle it down.
-   *
-   * @note the reason we delay fortran side's setup is that some
-   * applications (Dump2XYZ etc.) may not need force calculation, so why
-   * bother?
-   */
-  class ForceManager {
-
-  public:
-    ForceManager(SimInfo * info) : info_(info) {}
-        
-    virtual ~ForceManager() {}
-
-    // public virtual functions should be avoided
-    /**@todo needs refactoring */
-    virtual void calcForces(bool needPotential, bool needStress);
-
-    virtual void init() {}
-  protected:
-
-    virtual void preCalculation();
-        
-    virtual void calcShortRangeInteraction();
-
-    virtual void calcLongRangeInteraction(bool needPotential, bool needStress);
-
-    virtual void postCalculation(bool needStress);
- 
-    SimInfo * info_;        
-
-    std::map<Bend*, BendDataSet> bendDataSets;
-    std::map<Torsion*, TorsionDataSet> torsionDataSets;
-    std::map<Inversion*, InversionDataSet> inversionDataSets;
-    Mat3x3d tau;
-    
-  };
-
-} //end namespace oopse
-#endif //BRAINS_FORCEMANAGER_HPP
+  
+  InversionStamp::InversionStamp() {
+  }
+  
+  InversionStamp::~InversionStamp() {    
+  }
+  
+  void InversionStamp::validate() {
+    DataHolder::validate();
+  }
+}

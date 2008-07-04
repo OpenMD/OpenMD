@@ -32,10 +32,12 @@ tokens
   BOND        = "bond";
   BEND        = "bend";
   TORSION     = "torsion";
+  INVERSION   = "inversion";
   RIGIDBODY   = "rigidBody";
   CUTOFFGROUP = "cutoffGroup";
   FRAGMENT    = "fragment";
   MEMBERS     = "members";
+  CENTER      = "center";
   POSITION    = "position";
   ORIENTATION = "orientation";
   ENDBLOCK;
@@ -107,6 +109,13 @@ torsionblock  : TORSION^ (LBRACKET! intConst! RBRACKET!)?  LCURLY!(torsionstatem
 
 torsionstatement  : assignment
               | MEMBERS^ LPAREN! inttuple RPAREN! SEMICOLON!
+              ;
+
+inversionblock  : INVERSION^ (LBRACKET! intConst! RBRACKET!)?  LCURLY!(inversionstatement)* RCURLY {#RCURLY->setType(ENDBLOCK);}
+          ;
+
+inversionstatement  : assignment
+              | CENTER^ LPAREN! intConst RPAREN! SEMICOLON!
               ;
 
 rigidbodyblock  : RIGIDBODY^  LBRACKET! intConst RBRACKET! LCURLY!(rigidbodystatement)* RCURLY {#RCURLY->setType(ENDBLOCK);}
