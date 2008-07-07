@@ -16,6 +16,10 @@ CH4		16.05
 CH3		15.04		
 CH2		14.03		
 CH		13.02
+// Aromatic CH as in benzene
+CHar             13.02
+//
+RCHar           12.0107
 // CH3 (sp3) thiol/sulfide/disulfide
 CH3S    15.04
 // CH2 (sp3) thiol/sulfide/disulfide
@@ -44,6 +48,7 @@ SP  32.0655
 CS   12.0107
 // Sulfur attached to gold
 SAu  228.9807
+
 
 //Water
 SSD		18.0153		
@@ -111,11 +116,16 @@ CS	     	0.0009935	    6.40
 CH3S       	0.1947          3.75
 CH2S       	0.09140         3.95
 CHS         0.0987          4.68
-S           0.3954          3.58
+// From CPC 177 2007 S-S distance on gold surfaces is 4.45
+S           0.3954          4.45
 SH          0.4610          3.62
 SS          0.3279          3.72
 SP          0.3576          3.60
+//From TraPPE-UA JPCB 104, 8008
+CHar         0.1003          3.695
+RCHar       0.04173         3.88
 // ---- End From TraPPE-UA
+
 end LennardJonesAtomTypes
 
 begin SCAtomTypes
@@ -149,8 +159,8 @@ Au   SSD_E  MAW  2.68 0.6   1.33  0.95 -0.25
 // sigma epsilon
 Au CH3 LennardJones 3.54 0.2146
 Au CH2 LennardJones 3.54 0.1749 
-//Au SH   LennardJones   4.45 9.180
-Au S   LennardJones   4.45 9.180
+//Au SH   LennardJones   2.40 8.465
+Au S   LennardJones    2.40 8.465
 
 //Shifted Morse
 // r0 D0 beta0
@@ -290,7 +300,6 @@ CH3     CH2     CH3     Harmonic        114.0    124.19
 CH3     CH2     CH2     Harmonic        114.0    124.19
 CH2     CH2     CH2     Harmonic        114.0    124.19
 CH3     CH2     CH      Harmonic        114.0    124.19
-
 
 
 //UreyBradley
@@ -445,6 +454,7 @@ CH3     CH2     C       S	Trappe    0.0         0.0       0.0       0.91658
 CH2     CH2     C       S	Trappe	  0.0         0.0       0.0	  0.91658
 CH      CH2     C       S	Trappe	  0.0         0.0       0.0	  0.91658
 CH3     CG      S       H	Trappe	  0.0         0.0       0.0	  0.79480
+//From TraPPE-UA JPCB 104, 8008
 
 //Charmm
 //Atom1	Atom2	Atom3	Atom4	Charmm		Kchi		n		delta		[Kchi		n		delta]
