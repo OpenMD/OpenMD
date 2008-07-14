@@ -1,8 +1,6 @@
-// This is the forcefield file generated from amber99.prm
-//
-// The sections are divided into AtomTypes 
-//
-
+begin Options
+      Name                   = "Amber"
+end Options
 
 begin BaseAtomTypes
 //number		name		mass	 (amu)
@@ -51,9 +49,9 @@ Na+             22.990
 K+              39.100
 Rb+             85.470
 Cs+             132.910
-Mg+             24.305
-Ca+             40.080
-Zn+             65.400
+Mg+2            24.305
+Ca+2            40.080
+Zn+2            65.400
 Cl-             35.450
 end BaseAtomTypes
 
@@ -403,12 +401,12 @@ ACE-CA                  CT
 ACE-HA                  HC
 ACE-C                   C
 ACE-O                   O
-C-Term                  N
-C-Term                  H
-N-MeAmide               N
-N-MeAmide               H
-N-MeAmide               CT
-N-MeAmide               H1
+C-Term-N                N
+C-Term-H                H
+N-MeAmide-N             N
+N-MeAmide-H             H
+N-MeAmide-C             CT
+N-MeAmide-H1            H1
 NGLY-N                  N3
 NGLY-CA                 CT
 NGLY-C                  C
@@ -937,8 +935,8 @@ DT-O4                   O
 DT-C7                   CT
 DT-H7                   HC
 DT-H6                   H4
-R-Phosphodiester        P
-R-Phosphodiester        O2
+R-Phosphodiester-P      P
+R-Phosphodiester-O      O2
 R5H-O5'                 OH
 R5H-H5T                 HO
 R5P-O5'                 OS
@@ -949,8 +947,8 @@ R3H-H3T                 HO
 R3P-O3'                 OS
 R3P-P                   P
 R3P-OP                  O2
-D-Phosphodiester        P
-D-Phosphodiester        O2
+D-Phosphodiester-P      P
+D-Phosphodiester-O      O2
 D5H-O5'                 OH
 D5H-H5T                 HO
 D5P-O5'                 OS
@@ -961,17 +959,8 @@ D3H-H3T                 HO
 D3P-O3'                 OS
 D3P-P                   P
 D3P-OP                  O2
-TIP3P                   OW
-TIP3P                   HW
-Li+                     Li+
-Na+                     Na+
-K+                      K+
-Rb+                     Rb+
-Cs+                     Cs+
-Mg+2                    Mg+
-Ca+2                    Ca+
-Zn+2                    Zn+
-Cl-                     Cl-
+TIP3P-O                 OW
+TIP3P-H                 HW
 end AtomTypes
 
 
@@ -1320,12 +1309,12 @@ ACE-CA                  -0.3662
 ACE-HA                  0.1123
 ACE-C                   0.5972
 ACE-O                   -0.5679
-C-Term                  -0.8400
-C-Term                  0.4200
-N-MeAmide		-0.4157
-N-MeAmide		0.2719
-N-MeAmide		-0.1490
-N-MeAmide		0.0976
+C-Term-N                -0.8400
+C-Term-H                 0.4200
+N-MeAmide-N		-0.4157
+N-MeAmide-H		0.2719
+N-MeAmide-C		-0.1490
+N-MeAmide-H1		0.0976
 NGLY-N                  0.2943
 NGLY-CA                 -0.0100
 NGLY-C                  0.6163
@@ -1854,8 +1843,8 @@ DT-O4                   -0.5563
 DT-C7                   -0.2269
 DT-H7                   0.0770
 DT-H6                   0.2607
-R-Phosphodiester	1.1662
-R-Phosphodiester	-0.7760
+R-Phosphodiester-P	1.1662
+R-Phosphodiester-O	-0.7760
 R5H-O5'                 -0.6223
 R5H-H5T                 0.4295
 R5P-O5'                 -0.6328
@@ -1866,8 +1855,8 @@ R3H-H3T                 0.4376
 R3P-O3'                 -0.6565
 R3P-P                   0.9000
 R3P-OP                  -0.8200
-D-Phosphodiester	1.1659
-D-Phosphodiester	-0.7761
+D-Phosphodiester-P	1.1659
+D-Phosphodiester-O	-0.7761
 D5H-O5'                 -0.6318
 D5H-H5T                 0.4422
 D5P-O5'                 -0.6296
@@ -1878,8 +1867,8 @@ D3H-H3T                 0.4396
 D3P-O3'                 -0.6553
 D3P-P                   0.9000
 D3P-OP                  -0.8200
-TIP3P                   -0.834
-TIP3P                   0.417
+TIP3P-O                -0.834
+TIP3P-H                 0.417
 Li+                     1.000
 Na+                     1.000
 K+                      1.000
@@ -1940,9 +1929,9 @@ Na+     	0.002770	3.328398
 K+		0.000328	4.736018
 Rb+     	0.000170	5.266993
 Cs+     	0.000081	6.049202
-Mg+     	0.894700	1.412253
-Ca+     	0.459789	3.052397
-Zn+     	0.012500	1.959977
+Mg+2     	0.894700	1.412253
+Ca+2     	0.459789	3.052397
+Zn+2     	0.012500	1.959977
 Cl-     	0.100000	4.401040
 end LennardJonesAtomTypes
 
@@ -2031,7 +2020,7 @@ O2      P       Harmonic        1.480000        525.000000
 S       S       Harmonic        2.038000        166.000000
 SH      HS      Harmonic        1.336000        274.000000
 HW      HW      Harmonic        1.513600        553.000000
-end BondType
+end BondTypes
 
 
 begin BendTypes
@@ -2566,48 +2555,48 @@ CT      S       S       CT      Charmm  3.500000        2       0.000000		0.6		3
 end TorsionTypes
 
 
-begin Improper TorsionTypes
-CT      N       C       O       10.500000       2       180.000000
-CM      NA      C       O       10.500000       2       180.000000
-CB      NA      C       O       10.500000       2       180.000000
-N*      NA      C       O       10.500000       2       180.000000
-CT      O2      C       O2      10.500000       2       180.000000
-CA      CA      CA      CT      1.100000        2       180.000000
-CA      CA      CA      OH      1.100000        2       180.000000
-CA      CA      CA      HA      1.100000        2       180.000000
-CN      CA      CA      HA      1.100000        2       180.000000
-NC      CM      CA      N2      1.100000        2       180.000000
-CA      CB      CA      HA      1.100000        2       180.000000
-CB      NC      CA      N2      1.100000        2       180.000000
-NA      NC      CA      N2      1.100000        2       180.000000
-N2      N2      CA      N2      10.500000       2       180.000000
-CM      CA      CM      HA      1.100000        2       180.000000
-C       CM      CM      CT      1.100000        2       180.000000
-C       CM      CM      HA      1.100000        2       180.000000
-N*      CM      CM      H4      1.100000        2       180.000000
-NA      CV      CC      CT      1.100000        2       180.000000
-NA      CW      CC      CT      1.100000        2       180.000000
-NB      CW      CC      CT      1.100000        2       180.000000
-CC      NB      CV      H4      1.100000        2       180.000000
-CC      NA      CW      H4      1.100000        2       180.000000
-C*      NA      CW      H4      1.100000        2       180.000000
-NA      NA      CR      H5      1.100000        2       180.000000
-NB      NA      CR      H5      1.100000        2       180.000000
-NA      NB      CR      H5      1.100000        2       180.000000
-CW      CB      C*      CT      1.100000        2       180.000000
-NB      N*      CK      H5      1.100000        2       180.000000
-NC      NC      CQ      H5      1.100000        2       180.000000
-C       CT      N       CT      1.000000        2       180.000000
-C       CT      N       H       1.000000        2       180.000000
-C       H       N       H       1.000000        2       180.000000
-C       C       NA      H       1.000000        2       180.000000
-C       CA      NA      H       1.000000        2       180.000000
-CR      CW      NA      H       1.000000        2       180.000000
-CC      CR      NA      H       1.000000        2       180.000000
-CW      CN      NA      H       1.000000        2       180.000000
-CM      C       N*      CT      1.000000        2       180.000000
-CK      CB      N*      CT      1.000000        2       180.000000
-CT      CA      N2      H       1.000000        2       180.000000
-CA      H       N2      H       1.000000        2       180.000000
-end Improper TorsionTypes
+begin InversionTypes
+CT      N       C       O       ImproperCosine	10.500000       2       180.000000
+CM      NA      C       O       ImproperCosine	10.500000       2       180.000000
+CB      NA      C       O       ImproperCosine	10.500000       2       180.000000
+N*      NA      C       O       ImproperCosine	10.500000       2       180.000000
+CT      O2      C       O2      ImproperCosine	10.500000       2       180.000000
+CA      CA      CA      CT      ImproperCosine	1.100000        2       180.000000
+CA      CA      CA      OH      ImproperCosine	1.100000        2       180.000000
+CA      CA      CA      HA      ImproperCosine	1.100000        2       180.000000
+CN      CA      CA      HA      ImproperCosine	1.100000        2       180.000000
+NC      CM      CA      N2      ImproperCosine	1.100000        2       180.000000
+CA      CB      CA      HA      ImproperCosine	1.100000        2       180.000000
+CB      NC      CA      N2      ImproperCosine	1.100000        2       180.000000
+NA      NC      CA      N2      ImproperCosine	1.100000        2       180.000000
+N2      N2      CA      N2      ImproperCosine	10.500000       2       180.000000
+CM      CA      CM      HA      ImproperCosine	1.100000        2       180.000000
+C       CM      CM      CT      ImproperCosine	1.100000        2       180.000000
+C       CM      CM      HA      ImproperCosine	1.100000        2       180.000000
+N*      CM      CM      H4      ImproperCosine	1.100000        2       180.000000
+NA      CV      CC      CT      ImproperCosine	1.100000        2       180.000000
+NA      CW      CC      CT      ImproperCosine	1.100000        2       180.000000
+NB      CW      CC      CT      ImproperCosine	1.100000        2       180.000000
+CC      NB      CV      H4      ImproperCosine	1.100000        2       180.000000
+CC      NA      CW      H4      ImproperCosine	1.100000        2       180.000000
+C*      NA      CW      H4      ImproperCosine	1.100000        2       180.000000
+NA      NA      CR      H5      ImproperCosine	1.100000        2       180.000000
+NB      NA      CR      H5      ImproperCosine	1.100000        2       180.000000
+NA      NB      CR      H5      ImproperCosine	1.100000        2       180.000000
+CW      CB      C*      CT      ImproperCosine	1.100000        2       180.000000
+NB      N*      CK      H5      ImproperCosine	1.100000        2       180.000000
+NC      NC      CQ      H5      ImproperCosine	1.100000        2       180.000000
+C       CT      N       CT      ImproperCosine	1.000000        2       180.000000
+C       CT      N       H       ImproperCosine	1.000000        2       180.000000
+C       H       N       H       ImproperCosine	1.000000        2       180.000000
+C       C       NA      H       ImproperCosine	1.000000        2       180.000000
+C       CA      NA      H       ImproperCosine	1.000000        2       180.000000
+CR      CW      NA      H       ImproperCosine	1.000000        2       180.000000
+CC      CR      NA      H       ImproperCosine	1.000000        2       180.000000
+CW      CN      NA      H       ImproperCosine	1.000000        2       180.000000
+CM      C       N*      CT      ImproperCosine	1.000000        2       180.000000
+CK      CB      N*      CT      ImproperCosine	1.000000        2       180.000000
+CT      CA      N2      H       ImproperCosine	1.000000        2       180.000000
+CA      H       N2      H       ImproperCosine	1.000000        2       180.000000
+end InversionTypes
  
