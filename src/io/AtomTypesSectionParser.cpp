@@ -84,6 +84,8 @@ namespace oopse {
       	atomType->setIdent(ident); 
       	atomType->setName(atomTypeName);
       	ff.addAtomType(atomTypeName, atomType);
+      } else {
+        std::cerr << "duplicate atom type: " << atomTypeName << " on line " << lineNo << "\n";
       }
         
       if (tokenizer.hasMoreTokens()) {

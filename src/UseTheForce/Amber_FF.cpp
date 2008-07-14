@@ -64,7 +64,6 @@ namespace oopse {
     //The order of adding section parsers is important.
 
     spMan_.push_back(new OptionSectionParser(forceFieldOptions_));    
-
     spMan_.push_back(new BaseAtomTypesSectionParser());
     spMan_.push_back(new AtomTypesSectionParser());
     spMan_.push_back(new LennardJonesAtomTypesSectionParser(forceFieldOptions_));
@@ -73,14 +72,12 @@ namespace oopse {
     spMan_.push_back(new BendTypesSectionParser(forceFieldOptions_));
     spMan_.push_back(new TorsionTypesSectionParser(forceFieldOptions_));
     spMan_.push_back(new InversionTypesSectionParser(forceFieldOptions_));
-    
   }
 
   void Amber_FF::parse(const std::string& filename) {
     ifstrstream* ffStream;
 
     ffStream = openForceFieldFile(filename);
-
     spMan_.parse(*ffStream, *this);
 
     ForceField::AtomTypeContainer::MapTypeIterator i;
@@ -88,14 +85,27 @@ namespace oopse {
 
     for (at = atomTypeCont_.beginType(i); at != NULL; 
          at = atomTypeCont_.nextType(i)) {
-      at->makeFortranAtomType();
+    
+      // useBase sets the responsibilities, and these have to be done 
+      // after the atomTypes and Base types have all been scanned:
+
+      std::vector<AtomType*> ayb = at->allYourBase();      
+      if (ayb.size() > 1) {
+        for (int j = ayb.size()-1; j > 0; j--) {
+          
+          ayb[j-1]->useBase(ayb[j]);
+
+        }
+      }
+
+      at->makeFortranAtomType();      
     }
 
     for (at = atomTypeCont_.beginType(i); at != NULL; 
          at = atomTypeCont_.nextType(i)) {
       at->complete();
     }    
-
+    
     delete ffStream;
     
   }

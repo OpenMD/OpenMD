@@ -40,46 +40,88 @@
  */
  
 /**
- * @file TorsionType.hpp
+ * @file PolynomialInversionType.hpp
  * @author teng lin
  * @date  11/16/2004
  * @version 1.0
  */ 
 
-#ifndef TYPES_IMPROPERCOSINEINVERSIONTYPE_HPP
-#define TYPES_IMPROPERCOSINEINVERSIONTYPE_HPP
-#include <algorithm>
-#include <cassert>
-#include <iostream>
-#include <vector>
+#ifndef TYPES_POLYNOMIALINVERSIONTYPE_HPP
+#define TYPES_POLYNOMIALINVERSIONTYPE_HPP
 
+#include "math/Polynomial.hpp"
 #include "types/InversionType.hpp"
-#include "types/PolynomialInversionType.hpp"
 
 namespace oopse {
   
-  struct ImproperCosineInversionParameter {
-    RealType kchi;
-    int n;
-    RealType delta;
-  };
-
-  class LessThanPeriodicityFunctor {
-  public:
-    bool operator()(const ImproperCosineInversionParameter& p1, 
-		    const ImproperCosineInversionParameter& p2) {
-      return p1.n < p2.n;
-    }
-  };
-
   /**
-   * @class ImproperCosineInversionType ImproperCosineInversionType.hpp "types/ImproperCosineInversionType.hpp"
+   * @class PolynomialInversionType PolynomialInversionType.hpp "types/PolynomialInversionType.hpp"
+   * @todo documentation
    */
-  class ImproperCosineInversionType : public PolynomialInversionType {
+  class PolynomialInversionType : public InversionType{
+    
   public:
-    ImproperCosineInversionType(std::vector<ImproperCosineInversionParameter>& parameters);    
+    PolynomialInversionType() { /* polynomial_ = new DoublePolynomial(); */ }
+    
+    RealType getCoefficient(int power) {
+      return polynomial_.getCoefficient(power);
+    }
+    
+    void addCoefficient(int power, RealType coefficient) {
+      polynomial_.addCoefficient(power, coefficient);
+    }
+    
+    void setCoefficient(int power, RealType coefficient) {
+      polynomial_.setCoefficient(power, coefficient);
+    }
+
+    void setPolynomial(DoublePolynomial p) {
+      polynomial_ = p;
+    }
+    
+    virtual void calcForce(RealType cosPhi, RealType& V, RealType& dVdCosPhi) {
+      V = polynomial_.evaluate(cosPhi);
+      dVdCosPhi = polynomial_.evaluateDerivative(cosPhi); 
+    }
+
+    friend std::ostream& operator <<(std::ostream& os, 
+				     PolynomialInversionType& pit);
+  private:
+    DoublePolynomial polynomial_;
   };
   
+/*  
+    std::ostream& operator <<(std::ostream& os, PolynomialInversionType& ptt) {
+    DoublePolynomial::const_iterator i;
+
+    i = ptt.polynomial_.begin();
+    
+    if (i == ptt.polynomial_.end()) {
+      os << "This Polynomial contains nothing" << std::endl;
+      return os;
+    }
+
+     os << "This Polynomial contains below terms:" << std::endl;    
+    
+     while(true){
+     os << i->second << "*" << "(cosPhi)" << "^" << i->first;
+
+      if (++i == ptt.polynomial_.end()) {
+	//if we reach the end of the polynomial pair, write out a
+	//newline and then escape the loop
+	os << std::endl;
+	break;
+      } else {
+	//otherwise, write out a "+"
+	os << " + ";
+      }
+    }
+    
+     os << std::endl;
+     return os;
+     }
+  */
+
 } //end namespace oopse
-#endif //TYPES_IMPROPERCOSINEINVERSIONTYPE_HPP
+#endif //TYPES_POLYNOMIALINVERSIONTYPE_HPP
 

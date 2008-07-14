@@ -76,6 +76,7 @@ moleculestatement : assignment
                   | bondblock
                   | bendblock
                   | torsionblock
+                  | inversionblock
                   | rigidbodyblock
                   | cutoffgroupblock
                   | fragmentblock

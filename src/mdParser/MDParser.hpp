@@ -2,7 +2,7 @@
 #define INC_MDParser_hpp_
 
 #include <antlr/config.hpp>
-/* $ANTLR 2.7.4: "MDParser.g" -> "MDParser.hpp"$ */
+/* $ANTLR 2.7.7 (20080702): "MDParser.g" -> "MDParser.hpp"$ */
 #include <antlr/TokenStream.hpp>
 #include <antlr/TokenBuffer.hpp>
 #include "MDTokenTypes.hpp"
@@ -58,6 +58,7 @@ public:
 	public: void bondblock();
 	public: void bendblock();
 	public: void torsionblock();
+	public: void inversionblock();
 	public: void rigidbodyblock();
 	public: void cutoffgroupblock();
 	public: void fragmentblock();
@@ -67,7 +68,6 @@ public:
 	public: void inttuple();
 	public: void bendstatement();
 	public: void torsionstatement();
-	public: void inversionblock();
 	public: void inversionstatement();
 	public: void rigidbodystatement();
 	public: void cutoffgroupstatement();

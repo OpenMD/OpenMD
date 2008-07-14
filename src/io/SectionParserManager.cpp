@@ -151,7 +151,7 @@ namespace oopse {
     SectionParserManager::iterator i;
     i = findSectionParser(sp->getSectionName());
     if (i != sectionParsers_.end()) {
-      std::cerr << sp->getSectionName() << " section parser is alway existed" 
+      std::cerr << sp->getSectionName() << " section parser already exists" 
       << std::endl;
       return;
     }
@@ -176,7 +176,7 @@ namespace oopse {
     SectionParserManager::iterator i;
     i = findSectionParser(sp->getSectionName());
     if (i != sectionParsers_.end()) {
-      std::cerr << sp->getSectionName() << " section parser is alway existed" 
+      std::cerr << sp->getSectionName() << " section parser already exists" 
       << std::endl;
       return;
     }
@@ -201,7 +201,7 @@ namespace oopse {
     SectionParserManager::iterator i;
     i = findSectionParser(sp->getSectionName());
     if (i != sectionParsers_.end()) {
-      std::cerr << sp->getSectionName() << " section parser is already existed" 
+      std::cerr << sp->getSectionName() << " section parser already exists" 
       << std::endl;
     }
 

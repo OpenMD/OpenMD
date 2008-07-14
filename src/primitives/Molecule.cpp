@@ -64,6 +64,7 @@ namespace oopse {
     MemoryUtils::deletePointers(bonds_);
     MemoryUtils::deletePointers(bends_);
     MemoryUtils::deletePointers(torsions_);
+    MemoryUtils::deletePointers(inversions_);
     MemoryUtils::deletePointers(rigidBodies_);
     MemoryUtils::deletePointers(cutoffGroups_);
     MemoryUtils::deletePointers(constraintPairs_);
@@ -95,6 +96,13 @@ namespace oopse {
     if (std::find(torsions_.begin(), torsions_.end(), torsion) == 
         torsions_.end()) {
       torsions_.push_back(torsion);
+    }
+  }
+
+  void Molecule::addInversion(Inversion* inversion) {
+    if (std::find(inversions_.begin(), inversions_.end(), inversion) == 
+        inversions_.end()) {
+      inversions_.push_back(inversion);
     }
   }
   
@@ -237,9 +245,11 @@ namespace oopse {
     Bond* bond;
     Bend* bend;
     Torsion* torsion;
+    Inversion* inversion;
     Molecule::BondIterator bondIter;;
     Molecule::BendIterator  bendIter;
     Molecule::TorsionIterator  torsionIter;
+    Molecule::InversionIterator  inversionIter;
 
     RealType potential = 0.0;
 
@@ -256,6 +266,11 @@ namespace oopse {
       potential += torsion->getPotential();
     }
     
+    for (inversion = beginInversion(inversionIter); torsion != NULL; 
+         inversion =  nextInversion(inversionIter)) {
+      potential += inversion->getPotential();
+    }
+    
     return potential;
     
   }
@@ -267,6 +282,7 @@ namespace oopse {
     o << mol.getNBonds() << " bonds" << std::endl;
     o << mol.getNBends() << " bends" << std::endl;
     o << mol.getNTorsions() << " torsions" << std::endl;
+    o << mol.getNInversions() << " inversions" << std::endl;
     o << mol.getNRigidBodies() << " rigid bodies" << std::endl;
     o << mol.getNIntegrableObjects() << "integrable objects" << std::endl;
     o << mol.getNCutoffGroups() << "cutoff groups" << std::endl;

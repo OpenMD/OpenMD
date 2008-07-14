@@ -81,6 +81,7 @@ namespace oopse {
     if (cos_phi > 1.0) cos_phi = 1.0;
     if (cos_phi < -1.0) cos_phi = -1.0; 
 
+
     RealType dVdcosPhi;
     inversionType_->calcForce(cos_phi, potential_, dVdcosPhi);
     Vector3d f1;

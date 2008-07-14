@@ -72,6 +72,11 @@ namespace oopse {
       	baseAtomType->setIdent(ident); 
       	baseAtomType->setName(baseAtomTypeName);
       	ff.addAtomType(baseAtomTypeName, baseAtomType);
+      } else {
+        sprintf(painCave.errMsg, "BaseAtomTypesSectionParser Error: Duplicate BaseAtomType at line %d\n",
+                lineNo);
+        painCave.isFatal = 1;
+        simError();
       }
         
       RealType mass = tokenizer.nextTokenAsDouble();              

@@ -64,8 +64,7 @@ namespace oopse {
     info(rhs), usingShake(false) {
 
       forceMan = new ForceManager(info);
-      paramSet= new MinimizerParameterSet(info),
-	calcDim();
+      paramSet= new MinimizerParameterSet(info), calcDim();
       curX = getCoor();
       curG.resize(ndim);
 

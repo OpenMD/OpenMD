@@ -48,6 +48,7 @@
 #include "types/OplsTorsionType.hpp"
 #include "types/TrappeTorsionType.hpp"
 #include "UseTheForce/ForceField.hpp"
+#include "utils/NumericConstant.hpp"
 
 namespace oopse {
 
@@ -161,7 +162,7 @@ namespace oopse {
           CharmmTorsionParameter currParam;
 	  currParam.kchi = tokenizer.nextTokenAsDouble();
 	  currParam.n = tokenizer.nextTokenAsInt();
-	  currParam.delta = tokenizer.nextTokenAsDouble();
+	  currParam.delta = tokenizer.nextTokenAsDouble() / 180.0 * NumericConstant::PI; //convert to rad
           parameters.push_back(currParam);
 	}
 

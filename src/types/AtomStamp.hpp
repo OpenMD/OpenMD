@@ -72,23 +72,21 @@ namespace oopse {
       ai = bondedAtoms_.begin();
       return ai != bondedAtoms_.end() ? *ai : -1;
     }
-    
     int getNextBondedAtom(AtomIter& ai) {
       ++ai;
       return ai != bondedAtoms_.end() ? *ai : -1;
     }
-    
-      int getFirstBond(BondIter& bi) {
-        bi = bonds_.begin();
-        return bi != bonds_.end()? *bi: -1;
-      }
+    int getFirstBond(BondIter& bi) {
+      bi = bonds_.begin();
+      return bi != bonds_.end()? *bi: -1;
+    }
     int getNextBond(BondIter& bi) {
       ++bi; 
       return bi != bonds_.end()? *bi: -1;
     }
-    
     void addBond(int bondIndex) {bonds_.push_back(bondIndex);}
     void addBondedAtom(int atomIndex) {bondedAtoms_.insert(atomIndex);}
+    int getBondCount() { return bonds_.size(); }
   private:
     Vector3d position_;
     Vector3d orientation_;

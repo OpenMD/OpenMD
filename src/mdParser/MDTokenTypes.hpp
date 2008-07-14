@@ -1,7 +1,7 @@
 #ifndef INC_MDTokenTypes_hpp_
 #define INC_MDTokenTypes_hpp_
 
-/* $ANTLR 2.7.4: "MDParser.g" -> "MDTokenTypes.hpp"$ */
+/* $ANTLR 2.7.7 (20080702): "MDParser.g" -> "MDTokenTypes.hpp"$ */
 
 #ifndef CUSTOM_API
 # define CUSTOM_API

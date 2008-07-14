@@ -43,7 +43,7 @@
 !! Calculates Long Range forces Lennard-Jones interactions.
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: LJ.F90,v 1.28 2007-04-20 18:15:47 chrisfen Exp $, $Date: 2007-04-20 18:15:47 $, $Name: not supported by cvs2svn $, $Revision: 1.28 $
+!! @version $Id: LJ.F90,v 1.29 2008-07-14 12:35:55 gezelter Exp $, $Date: 2008-07-14 12:35:55 $, $Name: not supported by cvs2svn $, $Revision: 1.29 $
 
 
 module lj
@@ -139,6 +139,7 @@ contains
     current = LJMap%currentLJtype
 
     myATID = getFirstMatchingElement(atypes, "c_ident", c_ident)
+
     LJMap%atidToLJtype(myATID)        = current
     LJMap%LJtypes(current)%atid       = myATID
     LJMap%LJtypes(current)%sigma      = sigma

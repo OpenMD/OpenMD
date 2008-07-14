@@ -38,48 +38,35 @@
  * University of Notre Dame has been advised of the possibility of
  * such damages.
  */
- 
-/**
- * @file TorsionType.hpp
- * @author teng lin
- * @date  11/16/2004
- * @version 1.0
- */ 
-
-#ifndef TYPES_IMPROPERCOSINEINVERSIONTYPE_HPP
-#define TYPES_IMPROPERCOSINEINVERSIONTYPE_HPP
 #include <algorithm>
-#include <cassert>
-#include <iostream>
-#include <vector>
-
-#include "types/InversionType.hpp"
-#include "types/PolynomialInversionType.hpp"
+#include <cmath> 
+#include "types/ImproperCosineInversionType.hpp"
+#include "utils/NumericConstant.hpp"
+#include "math/ChebyshevT.hpp"
+#include "math/ChebyshevU.hpp"
 
 namespace oopse {
-  
-  struct ImproperCosineInversionParameter {
-    RealType kchi;
-    int n;
-    RealType delta;
-  };
-
-  class LessThanPeriodicityFunctor {
-  public:
-    bool operator()(const ImproperCosineInversionParameter& p1, 
-		    const ImproperCosineInversionParameter& p2) {
-      return p1.n < p2.n;
+  ImproperCosineInversionType::ImproperCosineInversionType(std::vector<ImproperCosineInversionParameter>& parameters) {
+    std::vector<ImproperCosineInversionParameter>::iterator i;
+    i = std::max_element(parameters.begin(), parameters.end(), 
+			 LessThanPeriodicityFunctor());
+    if (i != parameters.end()) {
+      int maxPower = i->n;
+      ChebyshevT T(maxPower);
+      ChebyshevU U(maxPower);
+      
+      // convert parameters of impropercosine type inversion into 
+      // PolynomialInversion's parameters
+      DoublePolynomial finalPolynomial;
+      for (i = parameters.begin(); i != parameters.end(); ++i) {
+	DoublePolynomial cosTerm = T.getChebyshevPolynomial(i->n);
+	cosTerm *= cos(i->delta) * i->kchi;
+	DoublePolynomial sinTerm = U.getChebyshevPolynomial(i->n);
+	sinTerm *= -sin(i->delta) * i->kchi;
+	finalPolynomial = cosTerm + sinTerm;
+	finalPolynomial += i->kchi;
+      }
+      this->setPolynomial(finalPolynomial);
     }
-  };
-
-  /**
-   * @class ImproperCosineInversionType ImproperCosineInversionType.hpp "types/ImproperCosineInversionType.hpp"
-   */
-  class ImproperCosineInversionType : public PolynomialInversionType {
-  public:
-    ImproperCosineInversionType(std::vector<ImproperCosineInversionParameter>& parameters);    
-  };
-  
+  }
 } //end namespace oopse
-#endif //TYPES_IMPROPERCOSINEINVERSIONTYPE_HPP
-

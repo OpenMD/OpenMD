@@ -77,12 +77,12 @@ namespace oopse{
   /**
    * @class SimInfo SimInfo.hpp "brains/SimInfo.hpp" 
    * @brief One of the heavy weight classes of OOPSE, SimInfo maintains a list of molecules.
-   * The Molecule class maintains all of the concrete objects 
-   * (atoms, bond, bend, torsions, rigid bodies, cutoff groups, constrains).
-   * In both the  single and parallel versions,  atoms and
-   * rigid bodies have both global and local indices.  The local index is 
-   * not relevant to molecules or cutoff groups.
-   */
+    * The Molecule class maintains all of the concrete objects 
+    * (atoms, bond, bend, torsions, inversions, rigid bodies, cutoff groups, 
+    * constraints). In both the single and parallel versions, atoms and
+    * rigid bodies have both global and local indices.  The local index is 
+    * not relevant to molecules or cutoff groups.
+    */
   class SimInfo {
   public:
     typedef std::map<int, Molecule*>::iterator  MoleculeIterator;
@@ -171,6 +171,10 @@ namespace oopse{
       return nTorsions_;
     }
 
+    /** Returns the number of local torsions */        
+    unsigned int getNInversions() {
+      return nInversions_;
+    }
     /** Returns the number of local rigid bodies */        
     unsigned int getNRigidBodies() {
       return nRigidBodies_;
@@ -523,14 +527,15 @@ namespace oopse{
     std::vector<MoleculeStamp*> moleculeStamps_;      /**< molecule stamps array */        
         
     //number of local objects
-    int nAtoms_;                        /**< number of atoms in local processor */
-    int nBonds_;                        /**< number of bonds in local processor */
-    int nBends_;                        /**< number of bends in local processor */
-    int nTorsions_;                    /**< number of torsions in local processor */
-    int nRigidBodies_;              /**< number of rigid bodies in local processor */
-    int nIntegrableObjects_;    /**< number of integrable objects in local processor */
-    int nCutoffGroups_;             /**< number of cutoff groups in local processor */
-    int nConstraints_;              /**< number of constraints in local processors */
+    int nAtoms_;              /**< number of atoms in local processor */
+    int nBonds_;              /**< number of bonds in local processor */
+    int nBends_;              /**< number of bends in local processor */
+    int nTorsions_;           /**< number of torsions in local processor */
+    int nInversions_;         /**< number of inversions in local processor */
+    int nRigidBodies_;        /**< number of rigid bodies in local processor */
+    int nIntegrableObjects_;  /**< number of integrable objects in local processor */
+    int nCutoffGroups_;       /**< number of cutoff groups in local processor */
+    int nConstraints_;        /**< number of constraints in local processors */
 
     simtype fInfo_; /**< A dual struct shared by c++/fortran which indicates the atom types in simulation*/
     Exclude exclude_;      

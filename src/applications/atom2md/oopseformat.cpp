@@ -60,6 +60,11 @@ namespace OpenBabel
     OBMol* createMolFromFragment(OBMol& mol, vector<int>& fragment);
     void WriteMDFile(vector<OBMol*> mols, vector<int> numMols, ostream& os, 
                      OBMol& mol, vector<int>& indices);
+    void CalcBoundingBox(OBMol &mol,
+                         double &min_x, double &max_x,
+                         double &min_y, double &max_y,
+                         double &min_z, double &max_z);
+      
   };
   
   //Make an instance of the format class
@@ -195,8 +200,8 @@ namespace OpenBabel
     char type_name[10];
     char *element_name;
     int res_num;
-    OBChainsParser* chainParser = new OBChainsParser();
-
+    OBChainsParser* chainParser = new OBChainsParser();   
+    double min_x, max_x, min_y, max_y, min_z, max_z; /* Edges of bounding box */
     
     os << "<OOPSE version=4>" << endl;
     os << "  <MetaData>" << endl << endl;
@@ -275,35 +280,18 @@ namespace OpenBabel
           else
             os << "members(" << b2 <<  ", " << b1 << "); ";
           
-          os << "}\n";
+          os << "}" << endl;
         } 
         
-        os << "\n";
-
-        std::vector<int> possibleInversion;
-        FOR_ATOMS_OF_MOL(atom, *pmol) {
-          possibleInversion.clear();
-          
-          FOR_NBORS_OF_ATOM(nbor, &*atom) {
-            possibleInversion.push_back(atomMap[&(*nbor)]);           
-          }
-          
-          if (possibleInversion.size() == 3) {
-
-            os << "  inversion { ";
-            os << "center(" << atomMap[&(*atom)] << "); ";
-            os << "}\n";
-          }
-          
-        }
+        os << endl;
+       
         os << "}" << endl;
         os << endl;
       }
     }
     
     os << endl;
-    
-    
+        
     for(i=0; i < mols.size(); ++i) {
       OBMol* pmol = mols[i];      
       os << "component{" << endl;
@@ -324,10 +312,12 @@ namespace OpenBabel
     sprintf(buffer, "        Time: %.10g", 0.0);
     
     os << buffer << endl;
-    
 
-    // should really compute a bounding box here:
-    sprintf(buffer, "        Hmat: {{ %.10g, %.10g, %.10g }, { %.10g, %.10g, %.10g }, { %.10g, %.10g, %.10g }}", 100.0, 0.0, 0.0, 0.0, 100.0, 0.0, 0.0, 0.0, 100.0);
+    CalcBoundingBox(mol, min_x, max_x, min_y, max_y, min_z, max_z);
+
+    // still to do: should compute a bounding box here
+    sprintf(buffer, "        Hmat: {{ %.10g, %.10g, %.10g }, { %.10g, %.10g, %.10g }, { %.10g, %.10g, %.10g }}", 
+            max_x - min_x, 0.0, 0.0, 0.0, max_y - min_y, 0.0, 0.0, 0.0, max_z - min_z);
     
     os << buffer << endl;
     os << "    </FrameData>" << endl;
@@ -339,13 +329,55 @@ namespace OpenBabel
 
     for(vector<int>::iterator i = indices.begin();i != indices.end(); ++i) {     
       atom = mol.GetAtom(*i);
-      sprintf(buffer, "%10d %7s %18.10g %18.10g %18.10g %13e %13e %13e", *i - 1, "pv", atom->GetX(), atom->GetY(), atom->GetZ(), 0.0, 0.0, 0.0);
+      sprintf(buffer, "%10d %7s %18.10g %18.10g %18.10g %13e %13e %13e", *i - 1, 
+              "pv", atom->GetX(), atom->GetY(), atom->GetZ(), 0.0, 0.0, 0.0);
       os << buffer << endl;
     }
     os << "    </StuntDoubles>" << endl;
     os << "  </Snapshot>" << endl;
     os << "</OOPSE>" << endl;
   }
-  
+
+  void OOPSEFormat::CalcBoundingBox(OBMol &mol,
+                                    double &min_x, double &max_x,
+                                    double &min_y, double &max_y,
+                                    double &min_z, double &max_z
+                                    )
+  {
+    /* ---- Init bounding-box variables ---- */
+    min_x = (double) 0.0;
+    max_x = (double) 0.0;
+    min_y = (double) 0.0;
+    max_y = (double) 0.0;
+    min_z = (double) 0.0;
+    max_z = (double) 0.0;
+    
+    /* ---- Check all atoms ---- */
+    for(unsigned int i = 1; i <= mol.NumAtoms(); ++i)
+      {
+        
+        /* ---- Get a pointer to ith atom ---- */
+        OBAtom *atom = mol.GetAtom(i);
+        
+        /* ---- Check for minimal/maximal x-position ---- */
+        if (atom -> GetX() < min_x)
+          min_x = atom -> GetX();
+        if (atom -> GetX() > max_x)
+          max_x = atom -> GetX();
+        
+        /* ---- Check for minimal/maximal y-position ---- */
+        if (atom -> GetY() < min_y)
+          min_y = atom -> GetY();
+        if (atom -> GetY() > max_y)
+          max_y = atom -> GetY();
+        
+        /* ---- Check for minimal/maximal z-position ---- */
+        if (atom -> GetZ() < min_z)
+          min_z = atom -> GetZ();
+        if (atom -> GetZ() > max_z)
+          max_z = atom -> GetZ();
+        
+      }    
+  }
 } //namespace OpenBabel
 

@@ -38,6 +38,7 @@ Modules = \
 	definitions \
 	oopseMPI \
 	status \
+	interpolation \
 	Vector_class
 
 RmiSource =

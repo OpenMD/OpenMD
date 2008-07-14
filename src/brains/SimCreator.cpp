@@ -145,7 +145,6 @@ namespace oopse {
       treeParser.initializeASTFactory(factory);
       treeParser.setASTFactory(&factory);
       simParams = treeParser.walkTree(parser.getAST());
-
     }
 
       
@@ -330,9 +329,8 @@ namespace oopse {
     Globals* simParams = parseFile(rawMetaDataStream, mdFileName, metaDataBlockStart+1);
     
     //create the force field
-    ForceField * ff = ForceFieldFactory::getInstance()
-      ->createForceField(simParams->getForceField());
-    
+    ForceField * ff = ForceFieldFactory::getInstance()->createForceField(simParams->getForceField());
+
     if (ff == NULL) {
       sprintf(painCave.errMsg, 
               "ForceField Factory can not create %s force field\n",

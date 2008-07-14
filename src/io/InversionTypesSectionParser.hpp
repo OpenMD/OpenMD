@@ -98,7 +98,3 @@ namespace oopse {
 } //namespace oopse
 
 #endif //IO_INVERSIONTYPESSECTIONPARSER_HPP
-
-
-
-

@@ -46,11 +46,13 @@
 //#include "types/CentralAtomHeightInversionType.hpp"
 //#include "types/DreidingInversionType.hpp"
 #include "UseTheForce/ForceField.hpp"
+#include "utils/NumericConstant.hpp"
 
 namespace oopse {
   
   InversionTypesSectionParser::InversionTypesSectionParser(ForceFieldOptions& options) : options_(options){
     
+    setSectionName("InversionTypes");
     stringToEnumMap_["ImproperCosine"] = itImproperCosine;
     stringToEnumMap_["ImproperHarmonic"] = itImproperHarmonic;
     stringToEnumMap_["CentralAtomHeight"] = itCentralAtomHeight;
@@ -81,16 +83,26 @@ namespace oopse {
       
     case InversionTypesSectionParser::itImproperCosine :
 
-      if (nTokens < 3) {
+      if (nTokens < 3 || nTokens % 3 != 0) {
 
       } else {
-	  RealType kchi = tokenizer.nextTokenAsDouble();
-	  int n = tokenizer.nextTokenAsInt();
-	  RealType delta = tokenizer.nextTokenAsDouble();
-	  inversionType = new ImproperCosineInversionType(kchi, n, delta);
+        int nSets = nTokens / 3;
+  
+        std::vector<ImproperCosineInversionParameter> parameters;             
+        for (int i = 0; i < nSets; ++i) {
+          ImproperCosineInversionParameter currParam;
+          currParam.kchi = tokenizer.nextTokenAsDouble();
+          currParam.n = tokenizer.nextTokenAsInt();
+	  currParam.delta = tokenizer.nextTokenAsDouble() / 180.0 * NumericConstant::PI; //convert to rad
+          parameters.push_back(currParam);
+        }
+
+        inversionType = new ImproperCosineInversionType(parameters);
+
       }
 
       break;
+
       /*      
     case InversionTypesSectionParser::itImproperHarmonic :
       if (nTokens < 2) {

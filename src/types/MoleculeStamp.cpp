@@ -62,6 +62,7 @@ namespace oopse {
     deprecatedKeywords_.insert("nBonds");
     deprecatedKeywords_.insert("nBends");
     deprecatedKeywords_.insert("nTorsions");
+    deprecatedKeywords_.insert("nInversions");
     deprecatedKeywords_.insert("nRigidBodies");
     deprecatedKeywords_.insert("nCutoffGroups");
     
@@ -526,7 +527,7 @@ namespace oopse {
 
   void MoleculeStamp::checkInversions() {
     std::ostringstream oss;
-    
+
     // first we automatically find the other three atoms that 
     // are satellites of an inversion center:
 
@@ -558,6 +559,7 @@ namespace oopse {
       }
     }
     
+
     // then we do some sanity checking on the inversions:
     
     for(int i = 0; i < getNInversions(); ++i) {
@@ -589,10 +591,12 @@ namespace oopse {
       }        
     }
     
+
+
     for(int i = 0; i < getNInversions(); ++i) {
       InversionStamp* inversionStamp = getInversionStamp(i);
       std::vector<int> inversionAtoms =  inversionStamp->getSatellites();
-      inversionAtoms.insert(inversionAtoms.begin(),inversionStamp->getCenter());
+      inversionAtoms.push_back(inversionStamp->getCenter());
       std::vector<int> rigidSet(getNRigidBodies(), 0);
       std::vector<int>::iterator j;
       for( j = inversionAtoms.begin(); j != inversionAtoms.end(); ++j) {
@@ -600,15 +604,15 @@ namespace oopse {
         if (rigidbodyIndex >= 0) {
           ++rigidSet[rigidbodyIndex];
           if (rigidSet[rigidbodyIndex] > 1) {
-            oss << "Error in Molecule " << getName() << ": inversion" << 
-              containerToString(inversionAtoms) << "is invalid (more" <<
-	      " than one member atom is in the same rigid body)\n";
+            oss << "Error in Molecule " << getName() << ": inversion centered on atom " << 
+              inversionStamp->getCenter() << " has atoms that belong to same rigidbody " << 
+              rigidbodyIndex << "\n";  
             throw OOPSEException(oss.str());
           }
         }
       }
-    }     
-    
+    } 
+
     std::set<IntTuple4> allInversions;
     std::set<IntTuple4>::iterator iter;
     for(int i = 0; i < getNInversions(); ++i) {
@@ -641,6 +645,52 @@ namespace oopse {
         oss << "Error in Molecule " << getName() << ": " << "Inversion" << 
           containerToString(inversion)<< " appears multiple times\n";
         throw OOPSEException(oss.str());
+      }
+    }
+
+
+    // Next we automatically find the inversion centers that weren't
+    // explicitly created.  An inversion center is any atom that has
+    // exactly three bonds to it.  Not all inversion centers have
+    // potentials associated with them.    
+    
+    for (int i = 0; i < getNAtoms(); ++i) {
+      AtomStamp* ai = getAtomStamp(i);
+      if (ai->getBondCount() == 3) {
+        AtomStamp::AtomIter ai2;
+        std::vector<int> satellites;
+        for(int a = ai->getFirstBondedAtom(ai2);a != -1;
+            a = ai->getNextBondedAtom(ai2)) {
+          satellites.push_back(a);
+        }
+        if (satellites.size() == 3) {
+          int cent = ai->getIndex();
+          std::sort(satellites.begin(), satellites.end());
+          IntTuple4 newInversion(cent, satellites[0], satellites[1], satellites[2]);
+
+          if (newInversion.third > newInversion.fourth) 
+            std::swap(newInversion.third, newInversion.fourth);
+          
+          if (newInversion.second > newInversion.third) 
+            std::swap(newInversion.second, newInversion.third);
+          
+          if (newInversion.third > newInversion.fourth) 
+            std::swap(newInversion.third, newInversion.fourth);          
+
+          if (allInversions.find(newInversion) == allInversions.end() ) {
+            allInversions.insert(newInversion);
+            InversionStamp * newInversionStamp = new InversionStamp();
+            newInversionStamp->setCenter(cent);
+            newInversionStamp->setSatellites(satellites);
+            addInversionStamp(newInversionStamp);        
+          }            
+
+        } else {
+          oss << "Error in Molecule " << getName() << ": found bond mismatch" << 
+            " when detecting inversion centers.";
+          throw OOPSEException(oss.str());
+        }
+        
       }
     }
   }

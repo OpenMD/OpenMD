@@ -2,7 +2,7 @@
 #define INC_MDLexer_hpp_
 
 #include <antlr/config.hpp>
-/* $ANTLR 2.7.4: "MDParser.g" -> "MDLexer.hpp"$ */
+/* $ANTLR 2.7.7 (20080702): "MDParser.g" -> "MDLexer.hpp"$ */
 #include <antlr/CommonToken.hpp>
 #include <antlr/InputBuffer.hpp>
 #include <antlr/BitSet.hpp>
@@ -18,7 +18,7 @@
 #line 19 "MDLexer.hpp"
 class CUSTOM_API MDLexer : public ANTLR_USE_NAMESPACE(antlr)CharScanner, public MDTokenTypes
 {
-#line 180 "MDParser.g"
+#line 181 "MDParser.g"
 
 
 

@@ -61,9 +61,10 @@
 
 namespace oopse {
   
-  Molecule* MoleculeCreator::createMolecule(ForceField* ff, MoleculeStamp *molStamp,
-					    int stampId, int globalIndex, LocalIndexManager* localIndexMan) {
-
+  Molecule* MoleculeCreator::createMolecule(ForceField* ff, 
+                                            MoleculeStamp *molStamp,
+					    int stampId, int globalIndex, 
+                                            LocalIndexManager* localIndexMan) {
     Molecule* mol = new Molecule(stampId, globalIndex, molStamp->getName());
     
     //create atoms
@@ -83,10 +84,11 @@ namespace oopse {
 
     for (int i = 0; i < nRigidbodies; ++i) {
       currentRigidBodyStamp = molStamp->getRigidBodyStamp(i);
-      rb = createRigidBody(molStamp, mol, currentRigidBodyStamp, localIndexMan);
+      rb = createRigidBody(molStamp, mol, currentRigidBodyStamp, 
+                           localIndexMan);
       mol->addRigidBody(rb);
     }
-
+    
     //create bonds
     Bond* bond;
     BondStamp* currentBondStamp;
@@ -118,6 +120,18 @@ namespace oopse {
       mol->addTorsion(torsion);
     }
 
+    //create inversions
+    Inversion* inversion;
+    InversionStamp* currentInversionStamp;
+    int nInversions = molStamp->getNInversions();
+    for (int i = 0; i < nInversions; ++i) {
+      currentInversionStamp = molStamp->getInversionStamp(i);
+      inversion = createInversion(ff, mol, currentInversionStamp);
+      if (inversion != NULL ) {
+        mol->addInversion(inversion);
+      }
+    }
+
     //create cutoffGroups
     CutoffGroup* cutoffGroup;
     CutoffGroupStamp* currentCutoffGroupStamp;
@@ -141,16 +155,18 @@ namespace oopse {
     Molecule::CutoffGroupIterator ci;
     CutoffGroup* cg;
     
-    for (cg = mol->beginCutoffGroup(ci); cg != NULL; cg = mol->nextCutoffGroup(ci)) {
-
+    for (cg = mol->beginCutoffGroup(ci); cg != NULL; 
+         cg = mol->nextCutoffGroup(ci)) {
+      
       for(atom = cg->beginAtom(ai); atom != NULL; atom = cg->nextAtom(ai)) {
-           //erase the atoms belong to cutoff groups from freeAtoms vector
-           freeAtoms.erase(std::remove(freeAtoms.begin(), freeAtoms.end(), atom), freeAtoms.end());
-      }
-
+        //erase the atoms belong to cutoff groups from freeAtoms vector
+        freeAtoms.erase(std::remove(freeAtoms.begin(), freeAtoms.end(), atom),
+                        freeAtoms.end());
+      }      
     }       
     
-    //loop over the free atoms and then create one cutoff group for every single free atom
+    // loop over the free atoms and then create one cutoff group for
+    // every single free atom
     
     for (fai = freeAtoms.begin(); fai != freeAtoms.end(); ++fai) {
       cutoffGroup = createCutoffGroup(mol, *fai);
@@ -162,18 +178,19 @@ namespace oopse {
     
     //the construction of this molecule is finished
     mol->complete();
-
+    
     return mol;
   }    
 
 
-  Atom* MoleculeCreator::createAtom(ForceField* ff, Molecule* mol, AtomStamp* stamp, 
-				    LocalIndexManager* localIndexMan) {
+  Atom* MoleculeCreator::createAtom(ForceField* ff, Molecule* mol, 
+                                    AtomStamp* stamp,
+                                    LocalIndexManager* localIndexMan) {
     AtomType * atomType;
     Atom* atom;
 
     atomType =  ff->getAtomType(stamp->getType());
-
+    
     if (atomType == NULL) {
       sprintf(painCave.errMsg, "Can not find Matching Atom Type for[%s]",
 	      stamp->getType().c_str());
@@ -206,8 +223,9 @@ namespace oopse {
 
     return atom;
   }
-
-  RigidBody* MoleculeCreator::createRigidBody(MoleculeStamp *molStamp, Molecule* mol,
+  
+  RigidBody* MoleculeCreator::createRigidBody(MoleculeStamp *molStamp, 
+                                              Molecule* mol,
 					      RigidBodyStamp* rbStamp, 
 					      LocalIndexManager* localIndexMan) {
     Atom* atom;
@@ -218,14 +236,16 @@ namespace oopse {
     RigidBody* rb = new RigidBody();
     nAtoms = rbStamp->getNMembers();    
     for (int i = 0; i < nAtoms; ++i) {
-      //rbStamp->getMember(i) return the local index of current atom inside the molecule.
-      //It is not the same as local index of atom which is the index of atom at DataStorage class
+      //rbStamp->getMember(i) return the local index of current atom
+      //inside the molecule.  It is not the same as local index of
+      //atom which is the index of atom at DataStorage class
       atom = mol->getAtomAt(rbStamp->getMemberAt(i));
       atomStamp= molStamp->getAtomStamp(rbStamp->getMemberAt(i));    
       rb->addAtom(atom, atomStamp);
     }
 
-    //after all of the atoms are added, we need to calculate the reference coordinates
+    //after all of the atoms are added, we need to calculate the
+    //reference coordinates
     rb->calcRefCoords();
 
     //set the local index of this rigid body, global index will be set later
@@ -243,14 +263,15 @@ namespace oopse {
     return rb;
   }    
 
-  Bond* MoleculeCreator::createBond(ForceField* ff, Molecule* mol, BondStamp* stamp) {
+  Bond* MoleculeCreator::createBond(ForceField* ff, Molecule* mol, 
+                                    BondStamp* stamp) {
     BondType* bondType;
     Atom* atomA;
     Atom* atomB;
-
+    
     atomA = mol->getAtomAt(stamp->getA());
     atomB = mol->getAtomAt(stamp->getB());
-
+    
     assert( atomA && atomB);
     
     bondType = ff->getBondType(atomA->getType(), atomB->getType());
@@ -259,35 +280,38 @@ namespace oopse {
       sprintf(painCave.errMsg, "Can not find Matching Bond Type for[%s, %s]",
 	      atomA->getType().c_str(),
 	      atomB->getType().c_str());
-
+      
       painCave.isFatal = 1;
       simError();
     }
     return new Bond(atomA, atomB, bondType);    
   }    
-
-  Bend* MoleculeCreator::createBend(ForceField* ff, Molecule* mol, BendStamp* stamp) {
+  
+  Bend* MoleculeCreator::createBend(ForceField* ff, Molecule* mol, 
+                                    BendStamp* stamp) {
     Bend* bend = NULL; 
     std::vector<int> bendAtoms = stamp->getMembers(); 
     if (bendAtoms.size() == 3) {
       Atom* atomA = mol->getAtomAt(bendAtoms[0]);
       Atom* atomB = mol->getAtomAt(bendAtoms[1]);
       Atom* atomC = mol->getAtomAt(bendAtoms[2]);
-
+      
       assert( atomA && atomB && atomC);
-
-      BendType* bendType = ff->getBendType(atomA->getType().c_str(), atomB->getType().c_str(), atomC->getType().c_str());
-
+      
+      BendType* bendType = ff->getBendType(atomA->getType().c_str(), 
+                                           atomB->getType().c_str(), 
+                                           atomC->getType().c_str());
+      
       if (bendType == NULL) {
         sprintf(painCave.errMsg, "Can not find Matching Bend Type for[%s, %s, %s]",
                 atomA->getType().c_str(),
                 atomB->getType().c_str(),
                 atomC->getType().c_str());
-
+        
         painCave.isFatal = 1;
         simError();
       }
-
+      
       bend = new Bend(atomA, atomB, atomC, bendType);
     } else if ( bendAtoms.size() == 2 && stamp->haveGhostVectorSource()) {
       int ghostIndex = stamp->getGhostVectorSource();
@@ -311,15 +335,16 @@ namespace oopse {
 	painCave.isFatal = 1;
 	simError();
       }
-        
+      
       bend = new GhostBend(normalAtom, ghostAtom, bendType);       
-
+      
     } 
     
     return bend;
   }    
 
-  Torsion* MoleculeCreator::createTorsion(ForceField* ff, Molecule* mol, TorsionStamp* stamp) {
+  Torsion* MoleculeCreator::createTorsion(ForceField* ff, Molecule* mol, 
+                                          TorsionStamp* stamp) {
 
     Torsion* torsion = NULL;
     std::vector<int> torsionAtoms = stamp->getMembers();
@@ -336,8 +361,10 @@ namespace oopse {
 
       assert(atomA && atomB && atomC && atomD);
         
-      TorsionType* torsionType = ff->getTorsionType(atomA->getType(), atomB->getType(), 
-						    atomC->getType(), atomD->getType());
+      TorsionType* torsionType = ff->getTorsionType(atomA->getType(), 
+                                                    atomB->getType(), 
+						    atomC->getType(), 
+                                                    atomD->getType());
 
       if (torsionType == NULL) {
 	sprintf(painCave.errMsg, "Can not find Matching Torsion Type for[%s, %s, %s, %s]",
@@ -345,41 +372,83 @@ namespace oopse {
 		atomB->getType().c_str(),
 		atomC->getType().c_str(),
 		atomD->getType().c_str());
-
+        
 	painCave.isFatal = 1;
 	simError();
       }
-        
+      
       torsion = new Torsion(atomA, atomB, atomC, atomD, torsionType);       
     }
     else {
-
+      
       DirectionalAtom* dAtom = dynamic_cast<DirectionalAtom*>(mol->getAtomAt(stamp->getGhostVectorSource()));
       if (dAtom == NULL) {
 	sprintf(painCave.errMsg, "Can not cast Atom to DirectionalAtom");
 	painCave.isFatal = 1;
 	simError();
       }        
-
+      
       TorsionType* torsionType = ff->getTorsionType(atomA->getType(), atomB->getType(), 
 						    atomC->getType(), "GHOST");
-
+      
       if (torsionType == NULL) {
 	sprintf(painCave.errMsg, "Can not find Matching Torsion Type for[%s, %s, %s, %s]",
 		atomA->getType().c_str(),
 		atomB->getType().c_str(),
 		atomC->getType().c_str(),
 		"GHOST");
-
+        
 	painCave.isFatal = 1;
 	simError();
       }
-        
+      
       torsion = new GhostTorsion(atomA, atomB, dAtom, torsionType);               
     }
-
+    
     return torsion;
   }    
+
+  Inversion* MoleculeCreator::createInversion(ForceField* ff, Molecule* mol, 
+                                              InversionStamp* stamp) {
+    
+    Inversion* inversion = NULL;
+    int center = stamp->getCenter();
+    std::vector<int> satellites = stamp->getSatellites();
+    if (satellites.size() != 3) {
+	return inversion;
+    }
+
+    Atom* atomA = mol->getAtomAt(center);
+    Atom* atomB = mol->getAtomAt(satellites[0]);
+    Atom* atomC = mol->getAtomAt(satellites[1]);
+    Atom* atomD = mol->getAtomAt(satellites[2]);
+      
+    assert(atomA && atomB && atomC && atomD);
+    
+    InversionType* inversionType = ff->getInversionType(atomA->getType(), 
+                                                        atomB->getType(), 
+                                                        atomC->getType(), 
+                                                        atomD->getType());
+
+    if (inversionType == NULL) {
+      sprintf(painCave.errMsg, "No Matching Inversion Type for[%s, %s, %s, %s]\n"
+              "\t(May not be a problem: not all inversions are parametrized)\n",
+              atomA->getType().c_str(),
+              atomB->getType().c_str(),
+              atomC->getType().c_str(),
+              atomD->getType().c_str());
+      
+      painCave.isFatal = 0;
+      painCave.severity = OOPSE_INFO;
+      simError();
+      return NULL;
+    } else {
+      
+      inversion = new Inversion(atomA, atomB, atomC, atomD, inversionType);
+      return inversion;
+    }
+  }
+  
 
   CutoffGroup* MoleculeCreator::createCutoffGroup(Molecule* mol, CutoffGroupStamp* stamp) {
     int nAtoms;

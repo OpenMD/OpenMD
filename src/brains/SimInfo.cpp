@@ -90,10 +90,11 @@ namespace oopse {
     ndf_(0), fdf_local(0), ndfRaw_(0), ndfTrans_(0), nZconstraint_(0),
     nGlobalMols_(0), nGlobalAtoms_(0), nGlobalCutoffGroups_(0), 
     nGlobalIntegrableObjects_(0), nGlobalRigidBodies_(0),
-    nAtoms_(0), nBonds_(0),  nBends_(0), nTorsions_(0), nRigidBodies_(0),
-    nIntegrableObjects_(0),  nCutoffGroups_(0), nConstraints_(0),
-    sman_(NULL), fortranInitialized_(false), calcBoxDipole_(false), 
-    useAtomicVirial_(true) {
+    nAtoms_(0), nBonds_(0),  nBends_(0), nTorsions_(0), nInversions_(0), 
+    nRigidBodies_(0), nIntegrableObjects_(0), nCutoffGroups_(0), 
+    nConstraints_(0), sman_(NULL), fortranInitialized_(false), 
+    calcBoxDipole_(false), useAtomicVirial_(true) {
+
 
       MoleculeStamp* molStamp;
       int nMolWithSameStamp;
@@ -102,6 +103,7 @@ namespace oopse {
       CutoffGroupStamp* cgStamp;    
       RigidBodyStamp* rbStamp;
       int nRigidAtoms = 0;
+
       std::vector<Component*> components = simParams->getComponents();
       
       for (std::vector<Component*>::iterator i = components.begin(); i !=components.end(); ++i) {
@@ -194,6 +196,7 @@ namespace oopse {
       nBonds_ += mol->getNBonds();
       nBends_ += mol->getNBends();
       nTorsions_ += mol->getNTorsions();
+      nInversions_ += mol->getNInversions();
       nRigidBodies_ += mol->getNRigidBodies();
       nIntegrableObjects_ += mol->getNIntegrableObjects();
       nCutoffGroups_ += mol->getNCutoffGroups();
@@ -219,6 +222,7 @@ namespace oopse {
       nBonds_ -= mol->getNBonds();
       nBends_ -= mol->getNBends();
       nTorsions_ -= mol->getNTorsions();
+      nInversions_ -= mol->getNInversions();
       nRigidBodies_ -= mol->getNRigidBodies();
       nIntegrableObjects_ -= mol->getNIntegrableObjects();
       nCutoffGroups_ -= mol->getNCutoffGroups();
@@ -354,9 +358,11 @@ namespace oopse {
     std::vector<Bond*>::iterator bondIter;
     std::vector<Bend*>::iterator bendIter;
     std::vector<Torsion*>::iterator torsionIter;
+    std::vector<Inversion*>::iterator inversionIter;
     Bond* bond;
     Bend* bend;
     Torsion* torsion;
+    Inversion* inversion;
     int a;
     int b;
     int c;
@@ -449,6 +455,42 @@ namespace oopse {
       */
     }
 
+    for (inversion= mol->beginInversion(inversionIter); inversion != NULL; 
+         inversion = mol->nextInversion(inversionIter)) {
+      a = inversion->getAtomA()->getGlobalIndex();
+      b = inversion->getAtomB()->getGlobalIndex();        
+      c = inversion->getAtomC()->getGlobalIndex();        
+      d = inversion->getAtomD()->getGlobalIndex();        
+      std::set<int> rigidSetA = getRigidSet(a, atomGroups);
+      std::set<int> rigidSetB = getRigidSet(b, atomGroups);
+      std::set<int> rigidSetC = getRigidSet(c, atomGroups);
+      std::set<int> rigidSetD = getRigidSet(d, atomGroups);
+
+      exclude_.addPairs(rigidSetA, rigidSetB);
+      exclude_.addPairs(rigidSetA, rigidSetC);
+      exclude_.addPairs(rigidSetA, rigidSetD);
+      exclude_.addPairs(rigidSetB, rigidSetC);
+      exclude_.addPairs(rigidSetB, rigidSetD);
+      exclude_.addPairs(rigidSetC, rigidSetD);
+
+      /*
+      exclude_.addPairs(rigidSetA.begin(), rigidSetA.end(), rigidSetB.begin(), rigidSetB.end());
+      exclude_.addPairs(rigidSetA.begin(), rigidSetA.end(), rigidSetC.begin(), rigidSetC.end());
+      exclude_.addPairs(rigidSetA.begin(), rigidSetA.end(), rigidSetD.begin(), rigidSetD.end());
+      exclude_.addPairs(rigidSetB.begin(), rigidSetB.end(), rigidSetC.begin(), rigidSetC.end());
+      exclude_.addPairs(rigidSetB.begin(), rigidSetB.end(), rigidSetD.begin(), rigidSetD.end());
+      exclude_.addPairs(rigidSetC.begin(), rigidSetC.end(), rigidSetD.begin(), rigidSetD.end());
+         
+      
+      exclude_.addPair(a, b);
+      exclude_.addPair(a, c);
+      exclude_.addPair(a, d);
+      exclude_.addPair(b, c);
+      exclude_.addPair(b, d);
+      exclude_.addPair(c, d);        
+      */
+    }
+
     for (rb = mol->beginRigidBody(rbIter); rb != NULL; rb = mol->nextRigidBody(rbIter)) {
       std::vector<Atom*> atoms = rb->getAtoms();
       for (int i = 0; i < atoms.size() -1 ; ++i) {
@@ -466,9 +508,11 @@ namespace oopse {
     std::vector<Bond*>::iterator bondIter;
     std::vector<Bend*>::iterator bendIter;
     std::vector<Torsion*>::iterator torsionIter;
+    std::vector<Inversion*>::iterator inversionIter;
     Bond* bond;
     Bend* bend;
     Torsion* torsion;
+    Inversion* inversion;
     int a;
     int b;
     int c;
@@ -531,6 +575,42 @@ namespace oopse {
       b = torsion->getAtomB()->getGlobalIndex();        
       c = torsion->getAtomC()->getGlobalIndex();        
       d = torsion->getAtomD()->getGlobalIndex();        
+
+      std::set<int> rigidSetA = getRigidSet(a, atomGroups);
+      std::set<int> rigidSetB = getRigidSet(b, atomGroups);
+      std::set<int> rigidSetC = getRigidSet(c, atomGroups);
+      std::set<int> rigidSetD = getRigidSet(d, atomGroups);
+
+      exclude_.removePairs(rigidSetA, rigidSetB);
+      exclude_.removePairs(rigidSetA, rigidSetC);
+      exclude_.removePairs(rigidSetA, rigidSetD);
+      exclude_.removePairs(rigidSetB, rigidSetC);
+      exclude_.removePairs(rigidSetB, rigidSetD);
+      exclude_.removePairs(rigidSetC, rigidSetD);
+
+      /*
+      exclude_.removePairs(rigidSetA.begin(), rigidSetA.end(), rigidSetB.begin(), rigidSetB.end());
+      exclude_.removePairs(rigidSetA.begin(), rigidSetA.end(), rigidSetC.begin(), rigidSetC.end());
+      exclude_.removePairs(rigidSetA.begin(), rigidSetA.end(), rigidSetD.begin(), rigidSetD.end());
+      exclude_.removePairs(rigidSetB.begin(), rigidSetB.end(), rigidSetC.begin(), rigidSetC.end());
+      exclude_.removePairs(rigidSetB.begin(), rigidSetB.end(), rigidSetD.begin(), rigidSetD.end());
+      exclude_.removePairs(rigidSetC.begin(), rigidSetC.end(), rigidSetD.begin(), rigidSetD.end());
+
+      
+      exclude_.removePair(a, b);
+      exclude_.removePair(a, c);
+      exclude_.removePair(a, d);
+      exclude_.removePair(b, c);
+      exclude_.removePair(b, d);
+      exclude_.removePair(c, d);        
+      */
+    }
+
+    for (inversion= mol->beginInversion(inversionIter); inversion != NULL; inversion = mol->nextInversion(inversionIter)) {
+      a = inversion->getAtomA()->getGlobalIndex();
+      b = inversion->getAtomB()->getGlobalIndex();        
+      c = inversion->getAtomC()->getGlobalIndex();        
+      d = inversion->getAtomD()->getGlobalIndex();        
 
       std::set<int> rigidSetA = getRigidSet(a, atomGroups);
       std::set<int> rigidSetB = getRigidSet(b, atomGroups);

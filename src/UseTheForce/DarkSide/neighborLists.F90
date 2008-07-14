@@ -48,7 +48,7 @@
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
 !! @author J. Daniel Gezelter
-!! @version $Id: neighborLists.F90,v 1.6 2006-12-05 00:17:24 chuckv Exp $, 
+!! @version $Id: neighborLists.F90,v 1.7 2008-07-14 12:35:55 gezelter Exp $, 
 
 module neighborLists
 
@@ -102,7 +102,7 @@ contains
     !! If one is associated and one is not, something is wrong
     !! and return a error.
 
-#ifdef IS_MPI !! // MPI
+#ifdef IS_MPI
     if (.not. associated(point) .and. &
          .not. associated(list) ) then
        allocate(point(getNgroupsInRow(plan_group_row)+1),stat=alloc_error)
@@ -123,7 +123,7 @@ contains
        nAllocations = nAllocations + 1
        return
     end if
-#else !! // NONMPI
+#else
     if (.not. associated(point) .and. &
          .not. associated(list) ) then
        allocate(point(nGroups),stat=alloc_error)
@@ -144,7 +144,7 @@ contains
        nAllocations = nAllocations + 1
        return
     end if
-#endif !! //MPI
+#endif
 
     ! Expand the neighbor list
 
@@ -158,11 +158,11 @@ contains
        oldSize = size(list)
 
 
-#ifdef IS_MPI !! MPI
+#ifdef IS_MPI
        newSize = listMultiplier * getNgroupsInCol(plan_group_col) + oldSize
 #else
        newSize = listMultiplier * nGroups + oldSize
-#endif !! MPI
+#endif
 
 
 

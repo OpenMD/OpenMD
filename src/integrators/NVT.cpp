@@ -65,11 +65,11 @@ namespace oopse {
       targetTemp_ = simParams->getTargetTemp();
     }
 
-    // We must set tauThermostat_.
+    // We must set tauThermostat.
 
     if (!simParams->haveTauThermostat()) {
       sprintf(painCave.errMsg, "If you use the constant temperature\n"
-	      "\tintegrator, you must set tauThermostat_.\n");
+	      "\tintegrator, you must set tauThermostat.\n");
 
       painCave.severity = OOPSE_ERROR;
       painCave.isFatal = 1;

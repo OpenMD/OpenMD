@@ -15,7 +15,7 @@ class MDTreeParser extends TreeParser;
 
 options
 {
-        k = 3;
+        k = 1;
         importVocab = MD;
 }
 {

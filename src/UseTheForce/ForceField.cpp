@@ -124,6 +124,7 @@ namespace oopse {
 	  myKeys.push_back((*i)->getName());
 	  myKeys.push_back((*j)->getName());
 
+          std::cerr << "looking for " << myKeys[0] << " " << myKeys[1] << "\n";
 	  BondType* bondType = bondTypeCont_.find(myKeys);
 	  if (bondType) {
 	    foundBonds.push_back(std::make_pair(bondTypeScore, myKeys));
@@ -133,20 +134,21 @@ namespace oopse {
 	ii++;
       }
 
-      // sort the foundBonds by the score:
 
-      std::sort(foundBonds.begin(), foundBonds.end());
-      
-      int bestScore = foundBonds[0].first;
-      std::vector<std::string> theKeys = foundBonds[0].second;
-
-      std::cout << "best matching bond = " << theKeys[0] << "\t" << theKeys[1]  << "\t(score = "<< bestScore << ")\n";      
-      BondType* bestType = bondTypeCont_.find(theKeys);
-      if (bestType) 
-	return bestType;
-      else {
-	//if no exact match found, try wild card match
-	return bondTypeCont_.find(keys, wildCardAtomTypeName_);      
+      if (foundBonds.size() > 0) {
+        // sort the foundBonds by the score:
+        std::sort(foundBonds.begin(), foundBonds.end());
+     
+        int bestScore = foundBonds[0].first;
+        std::vector<std::string> theKeys = foundBonds[0].second;
+        
+        std::cout << "best matching bond = " << theKeys[0] << "\t" << theKeys[1]  << "\t(score = "<< bestScore << ")\n";      
+        BondType* bestType = bondTypeCont_.find(theKeys);
+        
+        return bestType;
+      } else {
+        //if no exact match found, try wild card match
+        return bondTypeCont_.find(keys, wildCardAtomTypeName_);      
       }
     }
   }
@@ -220,25 +222,22 @@ namespace oopse {
 	jj++;
       }
       
-      std::sort(foundBends.begin(), foundBends.end());
-
-      int jscore = foundBends[0].first;
-      int ikscore = foundBends[0].second;
-      std::vector<std::string> theKeys = foundBends[0].third;
-
-      std::cout << "best matching bend = " << theKeys[0] << "\t" <<theKeys[1]  << "\t" << theKeys[2] << "\t(scores = "<< jscore << "\t" << ikscore << ")\n";      
-
-      BendType* bestType = bendTypeCont_.find(theKeys);  
-      if (bestType) 
-	return bestType;
-      else {
-      
+      if (foundBends.size() > 0) {
+        std::sort(foundBends.begin(), foundBends.end());
+        int jscore = foundBends[0].first;
+        int ikscore = foundBends[0].second;
+        std::vector<std::string> theKeys = foundBends[0].third;
+        
+        std::cout << "best matching bend = " << theKeys[0] << "\t" <<theKeys[1]  << "\t" << theKeys[2] << "\t(scores = "<< jscore << "\t" << ikscore << ")\n";      
+        
+        BendType* bestType = bendTypeCont_.find(theKeys);  
+        return bestType;
+      } else {        
 	//if no exact match found, try wild card match
 	return bendTypeCont_.find(keys, wildCardAtomTypeName_);      
       }
     }
   }
-
 
   TorsionType* ForceField::getTorsionType(const std::string &at1, 
 					  const std::string &at2,
@@ -327,18 +326,16 @@ namespace oopse {
 	jj++;
       }
       
-      std::sort(foundTorsions.begin(), foundTorsions.end());
-
-      int jkscore = foundTorsions[0].first;
-      int ilscore = foundTorsions[0].second;
-      std::vector<std::string> theKeys = foundTorsions[0].third;
-
-      std::cout << "best matching torsion = " << theKeys[0] << "\t" <<theKeys[1]  << "\t" << theKeys[2] << "\t" << theKeys[3] << "\t(scores = "<< jkscore << "\t" << ilscore << ")\n";
-
-      
-      TorsionType* bestType = torsionTypeCont_.find(theKeys);
-      if (bestType) {
-	return bestType;
+      if (foundTorsions.size() > 0) {
+        std::sort(foundTorsions.begin(), foundTorsions.end());
+        int jkscore = foundTorsions[0].first;
+        int ilscore = foundTorsions[0].second;
+        std::vector<std::string> theKeys = foundTorsions[0].third;
+        
+        std::cout << "best matching torsion = " << theKeys[0] << "\t" <<theKeys[1]  << "\t" << theKeys[2] << "\t" << theKeys[3] << "\t(scores = "<< jkscore << "\t" << ilscore << ")\n";
+                
+        TorsionType* bestType = torsionTypeCont_.find(theKeys);
+        return bestType;
       } else {
 	//if no exact match found, try wild card match
 	return torsionTypeCont_.find(keys, wildCardAtomTypeName_);
@@ -431,19 +428,17 @@ namespace oopse {
 	}
 	jj++;
       }
-      
-      std::sort(foundInversions.begin(), foundInversions.end());
-      
-      int iscore = foundInversions[0].first;
-      int jklscore = foundInversions[0].second;
-      std::vector<std::string> theKeys = foundInversions[0].third;
-      
-      std::cout << "best matching inversion = " << theKeys[0] << "\t" <<theKeys[1]  << "\t" << theKeys[2] << "\t" << theKeys[3] << "\t(scores = "<< iscore << "\t" << jklscore << ")\n";
-      
-      
-      InversionType* bestType = inversionTypeCont_.find(theKeys);
-      if (bestType) {
-	return bestType;
+         
+      if (foundInversions.size() > 0) {
+        std::sort(foundInversions.begin(), foundInversions.end());
+        int iscore = foundInversions[0].first;
+        int jklscore = foundInversions[0].second;
+        std::vector<std::string> theKeys = foundInversions[0].third;
+        
+        std::cout << "best matching inversion = " << theKeys[0] << "\t" <<theKeys[1]  << "\t" << theKeys[2] << "\t" << theKeys[3] << "\t(scores = "<< iscore << "\t" << jklscore << ")\n";
+                
+        InversionType* bestType = inversionTypeCont_.find(theKeys);
+        return bestType;
       } else {
 	//if no exact match found, try wild card match
 	return inversionTypeCont_.find(keys, wildCardAtomTypeName_);

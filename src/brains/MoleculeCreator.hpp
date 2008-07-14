@@ -57,6 +57,7 @@
 #include "types/CutoffGroupStamp.hpp"
 #include "types/RigidBodyStamp.hpp"
 #include "types/TorsionStamp.hpp"
+#include "types/InversionStamp.hpp"
 #include "primitives/Molecule.hpp"
 namespace oopse {
 
@@ -67,21 +68,25 @@ namespace oopse {
   class MoleculeCreator {
   public:
     virtual Molecule* createMolecule(ForceField* ff, MoleculeStamp *molStamp,
-				     int stampId, int globalIndex,  LocalIndexManager* localIndexMan);
+				     int stampId, int globalIndex,  
+                                     LocalIndexManager* localIndexMan);
 
   protected:
         
     /** Create an atom by its stamp */
     virtual Atom* createAtom(ForceField* ff, Molecule* mol, AtomStamp* stamp, 
 			     LocalIndexManager* localIndexMan);
-
     virtual RigidBody* createRigidBody(MoleculeStamp *molStamp, Molecule* mol, 
-				       RigidBodyStamp* rbStamp,  LocalIndexManager* localIndexMan); 
-
+				       RigidBodyStamp* rbStamp,  
+                                       LocalIndexManager* localIndexMan); 
     virtual Bond* createBond(ForceField* ff, Molecule* mol, BondStamp* stamp);
     virtual Bend* createBend(ForceField* ff, Molecule* mol, BendStamp* stamp);
-    virtual Torsion* createTorsion(ForceField* ff, Molecule* mol, TorsionStamp* stamp);
-    virtual CutoffGroup* createCutoffGroup(Molecule* mol, CutoffGroupStamp* stamp);
+    virtual Torsion* createTorsion(ForceField* ff, Molecule* mol, 
+                                   TorsionStamp* stamp);
+    virtual Inversion* createInversion(ForceField* ff, Molecule* mol, 
+                                       InversionStamp* stamp);
+    virtual CutoffGroup* createCutoffGroup(Molecule* mol, 
+                                           CutoffGroupStamp* stamp);
     virtual CutoffGroup* createCutoffGroup(Molecule * mol, Atom* atom);
     virtual void createConstraintPair(Molecule* mol);     
     virtual void createConstraintElem(Molecule* mol);
