@@ -97,7 +97,6 @@ namespace oopse {
 
         }
       }
-
       at->makeFortranAtomType();      
     }
 

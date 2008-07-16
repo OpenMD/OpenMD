@@ -44,7 +44,7 @@
  *
  *  Created by Charles F. Vardeman II on 11/9/05.
  *  @author  Charles F. Vardeman II 
- *  @version $Id: SC_FF.cpp,v 1.9 2006-01-13 21:57:48 chuckv Exp $
+ *  @version $Id: SC_FF.cpp,v 1.10 2008-07-16 02:07:09 gezelter Exp $
  *
  */
 
@@ -54,18 +54,10 @@
 #include "UseTheForce/DarkSide/sticky_interface.h"
 #include "UseTheForce/DarkSide/suttonchen_interface.h"
 #include "UseTheForce/ForceFieldFactory.hpp"
-#include "io/DirectionalAtomTypesSectionParser.hpp"
-#include "io/AtomTypesSectionParser.hpp"
-#include "io/LennardJonesAtomTypesSectionParser.hpp"
-#include "io/ChargeAtomTypesSectionParser.hpp"
-#include "io/MultipoleAtomTypesSectionParser.hpp"
-#include "io/EAMAtomTypesSectionParser.hpp"
-#include "io/StickyAtomTypesSectionParser.hpp"
-#include "io/BondTypesSectionParser.hpp"
-#include "io/BendTypesSectionParser.hpp"
-#include "io/TorsionTypesSectionParser.hpp"
-#include "io/SCAtomTypesSectionParser.hpp"
 #include "io/OptionSectionParser.hpp"
+#include "io/BaseAtomTypesSectionParser.hpp"
+#include "io/AtomTypesSectionParser.hpp"
+#include "io/SCAtomTypesSectionParser.hpp"
 #include "UseTheForce/ForceFieldCreator.hpp"
 #include "utils/simError.h"
 namespace oopse {
@@ -87,6 +79,7 @@ namespace oopse {
     //The order of BondTypesSectionParser, BendTypesSectionParser and TorsionTypesSectionParser are
     //not important.
     spMan_.push_back(new OptionSectionParser(forceFieldOptions_));
+    spMan_.push_back(new BaseAtomTypesSectionParser());
     spMan_.push_back(new AtomTypesSectionParser());
     spMan_.push_back(new SCAtomTypesSectionParser(forceFieldOptions_));
     
@@ -104,6 +97,17 @@ namespace oopse {
     // Set forcefield options
     
     for (at = atomTypeCont_.beginType(i); at != NULL; at = atomTypeCont_.nextType(i)) {
+      // useBase sets the responsibilities, and these have to be done 
+      // after the atomTypes and Base types have all been scanned:
+
+      std::vector<AtomType*> ayb = at->allYourBase();      
+      if (ayb.size() > 1) {
+        for (int j = ayb.size()-1; j > 0; j--) {
+          
+          ayb[j-1]->useBase(ayb[j]);
+
+        }
+      }
       at->makeFortranAtomType();
     }
     

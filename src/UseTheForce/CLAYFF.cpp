@@ -43,6 +43,7 @@
 #include "UseTheForce/CLAYFF.hpp"
 #include "UseTheForce/DarkSide/lj_interface.h"
 #include "UseTheForce/ForceFieldFactory.hpp"
+#include "io/BaseAtomTypesSectionParser.hpp"
 #include "io/AtomTypesSectionParser.hpp"
 #include "io/LennardJonesAtomTypesSectionParser.hpp"
 #include "io/ChargeAtomTypesSectionParser.hpp"
@@ -59,6 +60,7 @@ namespace oopse {
     setForceFieldFileName("CLAYFF.frc");
 
     spMan_.push_back(new OptionSectionParser(forceFieldOptions_));    
+    spMan_.push_back(new BaseAtomTypesSectionParser());
     spMan_.push_back(new AtomTypesSectionParser());
     spMan_.push_back(new LennardJonesAtomTypesSectionParser(forceFieldOptions_));
     spMan_.push_back(new ChargeAtomTypesSectionParser(forceFieldOptions_));
@@ -78,6 +80,17 @@ namespace oopse {
 
     for (at = atomTypeCont_.beginType(i); at != NULL; 
          at = atomTypeCont_.nextType(i)) {
+      // useBase sets the responsibilities, and these have to be done 
+      // after the atomTypes and Base types have all been scanned:
+
+      std::vector<AtomType*> ayb = at->allYourBase();      
+      if (ayb.size() > 1) {
+        for (int j = ayb.size()-1; j > 0; j--) {
+          
+          ayb[j-1]->useBase(ayb[j]);
+
+        }
+      }
       at->makeFortranAtomType();
     }
 

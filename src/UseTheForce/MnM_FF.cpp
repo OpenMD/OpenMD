@@ -47,6 +47,7 @@
 #include "UseTheForce/DarkSide/suttonchen_interface.h"
 #include "UseTheForce/ForceFieldFactory.hpp"
 #include "io/DirectionalAtomTypesSectionParser.hpp"
+#include "io/BaseAtomTypesSectionParser.hpp"
 #include "io/AtomTypesSectionParser.hpp"
 #include "io/LennardJonesAtomTypesSectionParser.hpp"
 #include "io/ChargeAtomTypesSectionParser.hpp"
@@ -85,6 +86,7 @@ namespace oopse {
     //and AtomTypesSectionParser. The order of BondTypesSectionParser,
     //BendTypesSectionParser and TorsionTypesSectionParser are not important.
     spMan_.push_back(new OptionSectionParser(forceFieldOptions_));
+    spMan_.push_back(new BaseAtomTypesSectionParser());
     spMan_.push_back(new DirectionalAtomTypesSectionParser(forceFieldOptions_));
     spMan_.push_back(new AtomTypesSectionParser());
     spMan_.push_back(new LennardJonesAtomTypesSectionParser(forceFieldOptions_));
@@ -118,6 +120,17 @@ namespace oopse {
     
     for (at = atomTypeCont_.beginType(i); at != NULL;
          at = atomTypeCont_.nextType(i)) {
+      // useBase sets the responsibilities, and these have to be done 
+      // after the atomTypes and Base types have all been scanned:
+
+      std::vector<AtomType*> ayb = at->allYourBase();      
+      if (ayb.size() > 1) {
+        for (int j = ayb.size()-1; j > 0; j--) {
+          
+          ayb[j-1]->useBase(ayb[j]);
+
+        }
+      }
       at->makeFortranAtomType();
     }
     

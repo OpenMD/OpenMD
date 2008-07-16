@@ -47,7 +47,6 @@
 #include "UseTheForce/ForceFieldFactory.hpp"
 #include "io/BaseAtomTypesSectionParser.hpp"
 #include "io/DirectionalAtomTypesSectionParser.hpp"
-#include "io/BaseAtomTypesSectionParser.hpp"
 #include "io/AtomTypesSectionParser.hpp"
 #include "io/BaseAtomTypesSectionParser.hpp"
 #include "io/LennardJonesAtomTypesSectionParser.hpp"
@@ -111,6 +110,17 @@ namespace oopse {
 
     for (at = atomTypeCont_.beginType(i); at != NULL; 
          at = atomTypeCont_.nextType(i)) {
+      // useBase sets the responsibilities, and these have to be done 
+      // after the atomTypes and Base types have all been scanned:
+
+      std::vector<AtomType*> ayb = at->allYourBase();      
+      if (ayb.size() > 1) {
+        for (int j = ayb.size()-1; j > 0; j--) {
+          
+          ayb[j-1]->useBase(ayb[j]);
+
+        }
+      }
       at->makeFortranAtomType();
     }
 
