@@ -11,7 +11,7 @@ begin Options
 end Options
 
 
-begin AtomTypes
+begin BaseAtomTypes
 //Name        mass(amu)
 Ni	58.710
 Cu	63.550
@@ -21,7 +21,7 @@ Ag	107.8682
 Ir	192.217
 Pt	195.09
 Au	196.97
-end AtomTypes
+end BaseAtomTypes
 
 
 begin SCAtomTypes

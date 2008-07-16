@@ -9,7 +9,7 @@ begin Options
       EnergyUnitScaling     0.02306054
 end Options
 
-begin AtomTypes
+begin BaseAtomTypes
 //Name        mass(amu)
 Ni	58.710
 Cu	63.550
@@ -21,7 +21,7 @@ Pt	195.09
 Au	196.97
 Pb	207.2
 Al	26.981538
-end AtomTypes
+end BaseAtomTypes
 
 
 begin SCAtomTypes

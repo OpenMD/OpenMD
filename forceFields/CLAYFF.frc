@@ -45,7 +45,7 @@ begin Options
       dielectric             = 1.0
 end Options
 
-begin AtomTypes    
+begin BaseAtomTypes    
 //Name	mass	 (amu)
 h*	1.0079
 ho	1.0079
@@ -71,7 +71,7 @@ Cs	132.90545
 Ca	40.078
 Ba	137.327
 Cl	35.453
-end AtomTypes
+end BaseAtomTypes
 
 begin LennardJonesAtomTypes
 //Name	epsilon         R0

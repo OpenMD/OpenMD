@@ -10,7 +10,7 @@ begin Options
 end Options
 
 
-begin AtomTypes    
+begin BaseAtomTypes    
 //Name		mass	 (amu)
 CH4		16.05		
 CH3		15.04		
@@ -83,6 +83,9 @@ Ag      107.8682
 Ir      192.217
 Pt      195.09
 Au      196.97
+end BaseAtomTypes
+
+begin AtomTypes
 end AtomTypes
 
 begin DirectionalAtomTypes
