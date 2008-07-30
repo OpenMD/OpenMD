@@ -265,7 +265,6 @@ int main(int argc, char* argv[]){
     
   }//end for (int i = 0; i < nframes; i += args_info.frame_arg)
  
-  delete xyzVisitor; 
   xyzStream.close();
   delete prepareVisitor; 
   delete compositeVisitor;
