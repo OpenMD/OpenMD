@@ -51,6 +51,7 @@
 #define UTIL_STRINGTOKENIZER_HPP
 
 #include <string>
+#include <stdlib.h>
 #include <vector>
 #include "config.h"
 namespace oopse {

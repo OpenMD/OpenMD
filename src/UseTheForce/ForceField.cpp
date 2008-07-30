@@ -517,6 +517,12 @@ namespace oopse {
     return atomTypeCont_.add(keys, atomType);
   }
 
+  bool ForceField::replaceAtomType(const std::string &at, AtomType* atomType) {
+    std::vector<std::string> keys;
+    keys.push_back(at);
+    return atomTypeCont_.replace(keys, atomType);
+  }
+
   bool ForceField::addBondType(const std::string &at1, const std::string &at2,
 			       BondType* bondType) {
     std::vector<std::string> keys;

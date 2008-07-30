@@ -46,7 +46,7 @@
 #include "math/SquareMatrix3.hpp"
 
 namespace oopse {
-  
+ 
   /**
    * @class DirectionalAtomType 
    *
@@ -57,8 +57,12 @@ namespace oopse {
     
   public:
     
-    DirectionalAtomType() : AtomType() { atp.is_Directional = 1; }
-    
+    DirectionalAtomType();
+
+    void copyAllData(AtomType* at);
+
+    virtual ~DirectionalAtomType() { } ;
+
     Mat3x3d getI() {return I;}
     
     void    setI(Mat3x3d theI) {I = theI;}
@@ -71,13 +75,13 @@ namespace oopse {
       electroBodyFrame_ =electroBodyFrame;
     }
     
-    void setDipole() { atp.is_Dipole = 1; }
-    void setSplitDipole() { atp.is_SplitDipole = 1; atp.is_Dipole=1;}
-    void setQuadrupole() { atp.is_Quadrupole = 1; }
-    void setGayBerne() { atp.is_GayBerne = 1; }
-    void setSticky() { atp.is_Sticky = 1; }
-    void setStickyPower() { atp.is_StickyPower = 1; }
-    void setShape() { atp.is_Shape = 1;}
+    void setDipole();
+    void setSplitDipole();
+    void setQuadrupole();
+    void setGayBerne();
+    void setSticky();
+    void setStickyPower();
+    void setShape();
     
     virtual void complete();
     

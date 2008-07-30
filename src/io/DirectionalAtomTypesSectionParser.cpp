@@ -55,8 +55,8 @@ namespace oopse {
     StringTokenizer tokenizer(line);
     int nTokens = tokenizer.countTokens();    
 
-    //in AtomTypeSection, a line at least contains 2 tokens
-    //atomTypeName and mass
+    //in DirectionalAtomTypeSection, a line contains 4 tokens
+
     if (nTokens < 4)  {
       sprintf(painCave.errMsg, 
               "DirectionalAtomTypesSectionParser Error: Not enough tokens at line %d\n",
@@ -69,20 +69,28 @@ namespace oopse {
       std::string atomTypeName = tokenizer.nextToken();    
       AtomType* atomType = ff.getAtomType(atomTypeName);
       DirectionalAtomType* dAtomType;
+
       if (atomType == NULL) {
+        sprintf(painCave.errMsg,
+                "DirectionalAtomTypesSectionParser:: AtomType %s was not\n"
+                "\tdeclared in the BaseAtomTypes or AtomTypes before being\n"
+                "\tdeclared as a DirectionalAtomType!\n", 
+                atomTypeName.c_str());
+        painCave.isFatal = 1;
+        simError();
+      } else {       
+
         dAtomType = new DirectionalAtomType();
-        int ident = ff.getNAtomType() + 1;
-        dAtomType->setIdent(ident); 
-        dAtomType->setName(atomTypeName);
-        ff.addAtomType(atomTypeName, dAtomType);
-      } else {
-        dAtomType = dynamic_cast<DirectionalAtomType*>(atomType);
-        if (dAtomType == NULL) {
-          sprintf(painCave.errMsg,
-                  "DirectionalAtomTypesSectionParser:: Can not cast to DirectionalAtomType");
-          painCave.isFatal = 1;
-          simError();
+        dAtomType->copyAllData(atomType);
+        // now notify all of those atom types who had the original atom
+        // type as a base (i.e. our ZIGs) that they've got a new base
+        // type in town.  What you say !!  For great justice:
+        std::vector<AtomType*> ayz = atomType->allYourZIG();
+        std::vector<AtomType*>::iterator z;        
+        for (z=ayz.begin(); z!=ayz.end(); ++z) {
+          (*z)->useBase(dAtomType);
         }
+        ff.replaceAtomType(atomTypeName, dAtomType);                 
       }
       
       RealType Ixx = tokenizer.nextTokenAsDouble();

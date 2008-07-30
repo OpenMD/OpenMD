@@ -49,6 +49,7 @@
 #ifndef UTILS_STRINGUTILS_HPP
 #define UTILS_STRINGUTILS_HPP
 #include <string>
+#include <string.h>
 #include <iostream>
 #include <fstream>
 #include <sstream>

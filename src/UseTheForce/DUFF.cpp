@@ -68,23 +68,10 @@ namespace oopse {
     //set default force field filename
     setForceFieldFileName("DUFF2.frc");
 
-    //The order of adding section parsers is important.
-    //OptionSectionParser must come first to set options for other parsers
-    //DirectionalAtomTypesSectionParser should be added before 
-    //AtomTypesSectionParser, and these two section parsers will actually 
-    //create "real" AtomTypes (AtomTypesSectionParser will create AtomType and 
-    //DirectionalAtomTypesSectionParser will create DirectionalAtomType, which 
-    //is a subclass of AtomType and should come first). Other AtomTypes Section 
-    //Parser will not create the "real" AtomType, they only add and set some 
-    //attribute of the AtomType. Thus their order are not important. 
-    //AtomTypesSectionParser should be added before other atom type section 
-    //parsers. Make sure they are added after DirectionalAtomTypesSectionParser 
-    //and AtomTypesSectionParser. The order of BondTypesSectionParser, 
-    //BendTypesSectionParser and TorsionTypesSectionParser are not important.
     spMan_.push_back(new OptionSectionParser(forceFieldOptions_));    
-    spMan_.push_back(new DirectionalAtomTypesSectionParser(forceFieldOptions_));
     spMan_.push_back(new BaseAtomTypesSectionParser());
     spMan_.push_back(new AtomTypesSectionParser());
+    spMan_.push_back(new DirectionalAtomTypesSectionParser(forceFieldOptions_));
     spMan_.push_back(new LennardJonesAtomTypesSectionParser(forceFieldOptions_));
     spMan_.push_back(new ChargeAtomTypesSectionParser(forceFieldOptions_));
     spMan_.push_back(new MultipoleAtomTypesSectionParser(forceFieldOptions_));

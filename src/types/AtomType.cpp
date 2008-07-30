@@ -84,6 +84,7 @@ namespace oopse {
     myResponsibilities_["Charge"] = false;
     myResponsibilities_["EAM"] = false;
     myResponsibilities_["SC"] = false;
+    myResponsibilities_["is_Directional"] = false;
     myResponsibilities_["is_LennardJones"] = false;
     myResponsibilities_["is_EAM"] = false;
     myResponsibilities_["is_Charge"] = false;
@@ -94,10 +95,12 @@ namespace oopse {
   void AtomType::useBase(AtomType* base) {
     hasBase_=true;
     base_ = base;
+    base->addZig(this);
 
     AtomTypeProperties batp = base->getATP();
 
-    atp.is_Directional = atp.is_Directional || batp.is_Directional;
+    if (!myResponsibilities_["is_Directional"]) 
+      atp.is_Directional = batp.is_Directional;
 
     if (!myResponsibilities_["is_LennardJones"])
       atp.is_LennardJones = batp.is_LennardJones;
@@ -119,9 +122,41 @@ namespace oopse {
 
     if (!myResponsibilities_["is_FLARB"])
       atp.is_FLARB = batp.is_FLARB;
-
+    
     if (!myResponsibilities_["is_SC"])
       atp.is_SC = batp.is_SC;
+  }
+
+  void AtomType::copyAllData(AtomType* orig) {
+
+    // makes an exact replica of another atom type down to the
+    // atom ID and any base attachments it may have.  
+    // use with caution!
+    
+    hasBase_=orig->hasBase_;
+    base_ = orig->base_;
+    mass_ = orig->mass_;    
+    name_ = std::string(orig->name_);
+
+    atp = orig->atp;
+
+    std::map< std::string, bool>::iterator i;;
+    std::map< std::string, RealType>::iterator j;
+
+    for (i = orig->myResponsibilities_.begin(); i != orig->myResponsibilities_.end(); ++i) {
+      myResponsibilities_[(*i).first] = orig->myResponsibilities_[(*i).first];
+    }
+
+    for (j = orig->myValues_.begin(); j != orig->myValues_.end(); ++j) {
+      myValues_[(*j).first] = orig->myValues_[(*j).first];
+    }
+
+    std::vector< GenericData*> oprops = orig->getProperties();
+    std::vector< GenericData*>::iterator it;
+
+    for (it = oprops.begin(); it != oprops.end(); ++it) {      
+      addProperty(*it);
+    }
   }
 
   void AtomType::makeFortranAtomType() {
@@ -415,19 +450,31 @@ namespace oopse {
   }
 
   bool AtomType::isDirectional() {
-    return atp.is_Directional;
+    if (hasBase_ && !myResponsibilities_["is_Directional"]) 
+      return base_->isDirectional();
+    else
+      return atp.is_Directional;
   }
 
   bool AtomType::isDipole() {
-    return atp.is_Dipole;
+    if (hasBase_ && !myResponsibilities_["is_Dipole"]) 
+      return base_->isDipole();
+    else
+      return atp.is_Dipole;
   }
 
   bool AtomType::isSplitDipole() {
-    return atp.is_SplitDipole;
+    if (hasBase_ && !myResponsibilities_["is_SplitDipole"]) 
+      return base_->isSplitDipole();
+    else
+      return atp.is_SplitDipole;
   }
 
   bool AtomType::isQuadrupole() {
-    return atp.is_Quadrupole;
+    if (hasBase_ && !myResponsibilities_["is_Quadrupole"]) 
+      return base_->isQuadrupole();
+    else
+      return atp.is_Quadrupole;
   }
 
   bool AtomType::isMultipole() {
@@ -435,19 +482,31 @@ namespace oopse {
   }
 
   bool AtomType::isGayBerne() {
-    return atp.is_GayBerne;
+    if (hasBase_ && !myResponsibilities_["is_GayBerne"]) 
+      return base_->isGayBerne();
+    else
+      return atp.is_GayBerne;
   }
 
   bool AtomType::isSticky() {
-    return atp.is_Sticky;
+    if (hasBase_ && !myResponsibilities_["is_Sticky"]) 
+      return base_->isSticky();
+    else
+      return atp.is_Sticky;
   }
 
   bool AtomType::isStickyPower() {
-    return atp.is_StickyPower;
+    if (hasBase_ && !myResponsibilities_["is_StickyPower"]) 
+      return base_->isStickyPower();
+    else
+      return atp.is_StickyPower;
   }
 
   bool AtomType::isShape() {
-    return atp.is_Shape;
+    if (hasBase_ && !myResponsibilities_["is_Shape"]) 
+      return base_->isShape();
+    else
+      return atp.is_Shape;
   }
   
   bool AtomType::isSC() {

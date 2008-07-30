@@ -47,6 +47,8 @@
 #include "config.h"
 #include "utils/PropertyMap.hpp"
 
+
+
 #define __C
 #include "types/AtomTypeProperties.h"
 #include "UseTheForce/DarkSide/atype_interface.h"
@@ -66,6 +68,8 @@ namespace oopse {
     virtual ~AtomType() { } ;
 
     virtual void useBase(AtomType* base);
+
+    virtual void copyAllData(AtomType* orig);
     
     virtual void complete();
     
@@ -118,6 +122,8 @@ namespace oopse {
     void setFLARB(); 
 
     std::vector<AtomType*> allYourBase();
+    std::vector<AtomType*> allYourZIG() {return everyZIG;}
+    void addZig(AtomType* at) {everyZIG.push_back(at);}
 
     //below functions are just forward functions
     /**
@@ -158,12 +164,14 @@ namespace oopse {
     GenericData* getPropertyByName(const std::string& propName);
 
   protected:
-
     AtomTypeProperties atp;
     RealType mass_;
     std::string name_;
     bool hasBase_; // All your base are belong to us
     AtomType* base_;
+    std::vector< AtomType*> everyZIG;  // list of atom types which use us as a base
+    std::map< std::string, bool> myResponsibilities_;
+    std::map< std::string, RealType> myValues_;
 
   private:
     //prevent copy construction and copy assignment, since property
@@ -172,11 +180,7 @@ namespace oopse {
     //write shared pointer
     AtomType(const AtomType&);
     AtomType& operator=(const AtomType& atomType);
-            
     PropertyMap properties_;
-    std::map< std::string, bool> myResponsibilities_;
-    std::map< std::string, RealType> myValues_;
-    
   };
   
   struct LJParam {

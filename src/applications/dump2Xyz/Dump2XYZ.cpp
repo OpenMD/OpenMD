@@ -200,9 +200,7 @@ int main(int argc, char* argv[]){
   int nframes = dumpReader->getNFrames();
   
   
-  std::ofstream xyzStream;    
-  xyzStream .open(xyzFileName.c_str());
-  
+  std::ofstream xyzStream(xyzFileName.c_str());
   
   SimInfo::MoleculeIterator miter;
   Molecule::IntegrableObjectIterator  iiter;
@@ -266,11 +264,10 @@ int main(int argc, char* argv[]){
     xyzVisitor->clear();
     
   }//end for (int i = 0; i < nframes; i += args_info.frame_arg)
-  
+ 
+  delete xyzVisitor; 
   xyzStream.close();
-  
   delete prepareVisitor; 
   delete compositeVisitor;
   delete info;
-   
 }

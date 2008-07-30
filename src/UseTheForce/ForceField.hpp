@@ -141,6 +141,8 @@ namespace oopse {
         
     bool addAtomType(const std::string &at, AtomType* atomType);
 
+    bool replaceAtomType(const std::string &at, AtomType* atomType);
+
     bool addBondType(const std::string &at1, const std::string &at2, 
                      BondType* bondType);
 

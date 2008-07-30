@@ -44,7 +44,7 @@
  *
  *  Created by Charles F. Vardeman II on 11/9/05.
  *  @author  Charles F. Vardeman II 
- *  @version $Id: SC_FF.cpp,v 1.10 2008-07-16 02:07:09 gezelter Exp $
+ *  @version $Id: SC_FF.cpp,v 1.11 2008-07-30 18:11:18 gezelter Exp $
  *
  */
 
@@ -66,23 +66,10 @@ namespace oopse {
     
     //set default force field filename
     setForceFieldFileName("SuttonChen.frc");
-    
-    //the order of adding section parsers are important
-    //OptionSectionParser must come first to set options for other parsers
-    //DirectionalAtomTypesSectionParser should be added before AtomTypesSectionParser Since
-    //These two section parsers will actually create "real" AtomTypes (AtomTypesSectionParser will create
-    //AtomType and DirectionalAtomTypesSectionParser will creat DirectionalAtomType which is a subclass
-    //of AtomType, therefore it should come first). Other AtomTypes Section Parser will not create the 
-    //"real" AtomType, they only add and set some attribute of the AtomType. Thus their order are not
-    //important. AtomTypesSectionParser should be added before other atom type section parsers.
-    //Make sure they are added after DirectionalAtomTypesSectionParser and AtomTypesSectionParser. 
-    //The order of BondTypesSectionParser, BendTypesSectionParser and TorsionTypesSectionParser are
-    //not important.
     spMan_.push_back(new OptionSectionParser(forceFieldOptions_));
     spMan_.push_back(new BaseAtomTypesSectionParser());
     spMan_.push_back(new AtomTypesSectionParser());
     spMan_.push_back(new SCAtomTypesSectionParser(forceFieldOptions_));
-    
   }
   
   void SC_FF::parse(const std::string& filename) {

@@ -88,6 +88,20 @@ namespace oopse {
       return data_.insert(value_type(keys, std::make_pair(index_++,elem))).second;
     }
 
+    bool replace(KeyType& keys, ElemPtr elem) {
+      assert(keys.size() == SIZE);
+      assert(elem);     
+
+      MapTypeIterator i;
+      i = data_.find(keys);
+      if (i!=data_.end()) {
+        data_[keys] = std::make_pair((i->second).first, elem);
+        return true;
+      } else {
+        return data_.insert(value_type(keys, std::make_pair(index_++,elem))).second;
+      }      
+    }
+
     /** Exact Match */
     ElemPtr find(KeyType& keys) {
       assert(keys.size() == SIZE);

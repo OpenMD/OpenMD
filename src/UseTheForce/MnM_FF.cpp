@@ -87,8 +87,8 @@ namespace oopse {
     //BendTypesSectionParser and TorsionTypesSectionParser are not important.
     spMan_.push_back(new OptionSectionParser(forceFieldOptions_));
     spMan_.push_back(new BaseAtomTypesSectionParser());
-    spMan_.push_back(new DirectionalAtomTypesSectionParser(forceFieldOptions_));
     spMan_.push_back(new AtomTypesSectionParser());
+    spMan_.push_back(new DirectionalAtomTypesSectionParser(forceFieldOptions_));
     spMan_.push_back(new LennardJonesAtomTypesSectionParser(forceFieldOptions_));
     spMan_.push_back(new ChargeAtomTypesSectionParser(forceFieldOptions_));
     spMan_.push_back(new MultipoleAtomTypesSectionParser(forceFieldOptions_));
