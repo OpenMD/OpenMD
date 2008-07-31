@@ -42,7 +42,7 @@
 
 !! Calculates Metal-Non Metal interactions.
 !! @author Charles F. Vardeman II 
-!! @version $Id: MetalNonMetal.F90,v 1.15 2008-06-06 15:55:54 chuckv Exp $, $Date: 2008-06-06 15:55:54 $, $Name: not supported by cvs2svn $, $Revision: 1.15 $
+!! @version $Id: MetalNonMetal.F90,v 1.16 2008-07-31 18:40:21 gezelter Exp $, $Date: 2008-07-31 18:40:21 $, $Name: not supported by cvs2svn $, $Revision: 1.16 $
 
 
 module MetalNonMetal
@@ -760,7 +760,7 @@ contains
         getFirstMatchingElement(atypes, "c_ident", myInteraction%metal_atid)
     nt%nonmetal_atid = &
         getFirstMatchingElement(atypes, "c_ident", myInteraction%nonmetal_atid)
-       
+
     select case (nt%interaction_type)
     case (MNM_LENNARDJONES)
        nt%sigma = myInteraction%sigma

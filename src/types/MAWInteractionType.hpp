@@ -85,7 +85,6 @@ namespace oopse {
       mnmit.beta0 = beta;
       mnmit.ca1 = ca1;
       mnmit.cb1 = cb1;
-      
       addMNMInteraction(&mnmit);
     }
     
