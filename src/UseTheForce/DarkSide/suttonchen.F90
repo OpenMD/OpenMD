@@ -414,7 +414,7 @@ contains
     integer :: sc_err
     
     integer :: atid1,atid2 ! Global atid    
-    integer :: myid_atom1 ! EAM atid
+    integer :: myid_atom1 ! SC atid
     integer :: myid_atom2 
 
 
@@ -452,9 +452,10 @@ contains
 
 
   !! Calculate the rho_a for all local atoms
-  subroutine calc_sc_preforce_Frho(nlocal,pot)
+  subroutine calc_sc_preforce_Frho(nlocal, pot, particle_pot)
     integer :: nlocal
     real(kind=dp) :: pot
+    real(kind=dp), dimension(nlocal) :: particle_pot
     integer :: i,j
     integer :: atom
     integer :: atype1
@@ -501,25 +502,26 @@ contains
        end if
        
        pot = pot + frho(atom)
+       particle_pot(atom) = particle_pot(atom) + frho(atom)
     enddo
 
 #ifdef IS_MPI
     !! communicate f(rho) and derivatives back into row and column arrays
     call gather(frho,frho_row,plan_atom_row, sc_err)
     if (sc_err /=  0) then
-       call handleError("cal_eam_forces()","MPI gather frho_row failure")
+       call handleError("calc_sc_forces()","MPI gather frho_row failure")
     endif
     call gather(dfrhodrho,dfrhodrho_row,plan_atom_row, sc_err)
     if (sc_err /=  0) then
-       call handleError("cal_eam_forces()","MPI gather dfrhodrho_row failure")
+       call handleError("calc_sc_forces()","MPI gather dfrhodrho_row failure")
     endif
     call gather(frho,frho_col,plan_atom_col, sc_err)
     if (sc_err /=  0) then
-       call handleError("cal_eam_forces()","MPI gather frho_col failure")
+       call handleError("calc_sc_forces()","MPI gather frho_col failure")
     endif
     call gather(dfrhodrho,dfrhodrho_col,plan_atom_col, sc_err)
     if (sc_err /=  0) then
-       call handleError("cal_eam_forces()","MPI gather dfrhodrho_col failure")
+       call handleError("calc_sc_forces()","MPI gather dfrhodrho_col failure")
     endif
 #endif
     

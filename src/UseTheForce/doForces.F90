@@ -45,7 +45,7 @@
 
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: doForces.F90,v 1.93 2008-05-27 16:39:05 chuckv Exp $, $Date: 2008-05-27 16:39:05 $, $Name: not supported by cvs2svn $, $Revision: 1.93 $
+!! @version $Id: doForces.F90,v 1.94 2008-07-31 19:10:46 gezelter Exp $, $Date: 2008-07-31 19:10:46 $, $Name: not supported by cvs2svn $, $Revision: 1.94 $
 
 
 module doForces
@@ -794,7 +794,7 @@ contains
 
   !! Does force loop over i,j pairs. Calls do_pair to calculates forces.
   !------------------------------------------------------------->
-  subroutine do_force_loop(q, q_group, A, eFrame, f, t, tau, pot, particle_pot,&
+  subroutine do_force_loop(q, q_group, A, eFrame, f, t, tau, pot, particle_pot, &
        do_pot_c, do_stress_c, error)
     !! Position array provided by C, dimensioned by getNlocal
     real ( kind = dp ), dimension(3, nLocal) :: q
@@ -1216,9 +1216,9 @@ contains
 
        if (loop .eq. PREPAIR_LOOP) then
 #ifdef IS_MPI
-          call do_preforce(nlocal, pot_local)
+          call do_preforce(nlocal, pot_local, particle_pot)
 #else
-          call do_preforce(nlocal, pot)
+          call do_preforce(nlocal, pot, particle_pot)
 #endif
        endif
 
@@ -1576,15 +1576,16 @@ contains
   end subroutine do_prepair
 
 
-  subroutine do_preforce(nlocal,pot)
+  subroutine do_preforce(nlocal, pot, particle_pot)
     integer :: nlocal
     real( kind = dp ),dimension(LR_POT_TYPES) :: pot
+    real( kind = dp ),dimension(nlocal) :: particle_pot
 
     if (FF_uses_EAM .and. SIM_uses_EAM) then
-       call calc_EAM_preforce_Frho(nlocal,pot(METALLIC_POT))
+       call calc_EAM_preforce_Frho(nlocal, pot(METALLIC_POT), particle_pot)
     endif
     if (FF_uses_SC .and. SIM_uses_SC) then
-       call calc_SC_preforce_Frho(nlocal,pot(METALLIC_POT))
+       call calc_SC_preforce_Frho(nlocal, pot(METALLIC_POT), particle_pot)
     endif
   end subroutine do_preforce
 

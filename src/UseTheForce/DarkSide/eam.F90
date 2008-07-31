@@ -407,12 +407,13 @@ contains
 
 
   !! Calculate the functional F(rho) for all local atoms
-  subroutine calc_eam_preforce_Frho(nlocal, pot)
+  subroutine calc_eam_preforce_Frho(nlocal, pot, particle_pot)
     integer :: nlocal
     real(kind=dp) :: pot
     integer :: i, j
     integer :: atom
     real(kind=dp) :: U,U1
+    real( kind = dp ), dimension(nlocal) :: particle_pot
     integer :: atype1
     integer :: me, atid1
 
@@ -445,6 +446,7 @@ contains
        frho(atom) = u
        dfrhodrho(atom) = u1
        pot = pot + u
+       particle_pot(atom) = particle_pot(atom) + u
 
     enddo
 
