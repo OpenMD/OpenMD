@@ -87,7 +87,11 @@ namespace oopse {
       RealType c1 = 0.5 * (v1 - 3.0 * v3);
       RealType c2 = -v2;
       RealType c3 = 2.0 * v3;
-      
+      c0 = c0/2;
+      c1 = c1/2;
+      c2 = c2/2;
+      c3 = c3/2;
+      // I change the parameter to half to see if this is the problem.
       setCoefficient(0, c0);
       setCoefficient(1, c1);
       setCoefficient(2, c2);

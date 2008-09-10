@@ -45,6 +45,9 @@
 //#include "types/ImproperHarmonicInversionType.hpp"
 //#include "types/CentralAtomHeightInversionType.hpp"
 //#include "types/DreidingInversionType.hpp"
+#include "types/AmberImproperTorsionType.hpp"
+#include "types/PolynomialInversionType.hpp"
+//These two are added by me. Maybe it is wrong.
 #include "UseTheForce/ForceField.hpp"
 #include "utils/NumericConstant.hpp"
 
@@ -53,6 +56,7 @@ namespace oopse {
   InversionTypesSectionParser::InversionTypesSectionParser(ForceFieldOptions& options) : options_(options){
     
     setSectionName("InversionTypes");
+    stringToEnumMap_["AmberImproper"] = itAmberImproper;
     stringToEnumMap_["ImproperCosine"] = itImproperCosine;
     stringToEnumMap_["ImproperHarmonic"] = itImproperHarmonic;
     stringToEnumMap_["CentralAtomHeight"] = itCentralAtomHeight;
@@ -100,8 +104,22 @@ namespace oopse {
         inversionType = new ImproperCosineInversionType(parameters);
 
       }
+    break;
+
+    case InversionTypesSectionParser::itAmberImproper:
+            
+      if (nTokens < 1) {
+
+      } else {
+	RealType v2 = tokenizer.nextTokenAsDouble();
+        
+	inversionType = new AmberImproperTorsionType(v2);
+      }
 
       break;
+            
+
+
 
       /*      
     case InversionTypesSectionParser::itImproperHarmonic :

@@ -379,13 +379,12 @@ int main(int argc,char *argv[])
     {
       clog << messageSummary << endl;
     }
-  
+
 #ifdef _DEBUG
   //CM keep window open
   cout << "Press any key to finish" <<endl;
   getch();
 #endif
-  
   return 0;
 }
 

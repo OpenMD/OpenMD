@@ -43,6 +43,7 @@
 #include <mpi.h>
 #endif
 
+#include <fstream>
 #include "utils/simError.h"
 #include "utils/CaseConversion.hpp"
 #include "brains/Register.hpp"
@@ -57,8 +58,9 @@
 
 using namespace oopse;
 
+
 int main(int argc,char* argv[]){
-   
+  
   // first things first, all of the initializations
 
 #ifdef IS_MPI

@@ -40,6 +40,7 @@
  */
  
 #include "primitives/Inversion.hpp"
+#include "fstream"
 
 namespace oopse {
 
@@ -56,43 +57,54 @@ namespace oopse {
     // is treated as atom *3* in a standard torsion form:
 
     Vector3d pos1 = atom2_->getPos();
-    Vector3d pos2 = atom3_->getPos();
-    Vector3d pos3 = atom1_->getPos();
-    Vector3d pos4 = atom4_->getPos();
+    Vector3d pos2 = atom1_->getPos();
+    Vector3d pos3 = atom4_->getPos();
+    Vector3d pos4 = atom3_->getPos();
 
+   /*std::ofstream myfile;
+   myfile.open("Inversion", std::ios::app);       
+   myfile << atom1_->getType() << " - atom1; "
+              << atom2_->getType() << " - atom2; "
+              << atom3_->getType() << " - atom3; "
+              << atom4_->getType() << " - atom4; "
+              << std::endl;
+*/
     Vector3d r21 = pos1 - pos2;
     Vector3d r32 = pos2 - pos3;
-    Vector3d r43 = pos3 - pos4;
+    Vector3d r42 = pos2 - pos4;
 
     //  Calculate the cross products and distances
     Vector3d A = cross(r21, r32);
     RealType rA = A.length();
-    Vector3d B = cross(r32, r43);
+    Vector3d B = cross(r32, r42);
     RealType rB = B.length();
-    Vector3d C = cross(r32, A);
-    RealType rC = C.length();
+    //Vector3d C = cross(r23, A);
+    //RealType rC = C.length();
 
     A.normalize();
     B.normalize();
-    C.normalize();
+    //C.normalize();
     
     //  Calculate the sin and cos
     RealType cos_phi = dot(A, B) ;
-    if (cos_phi > 1.0) cos_phi = 1.0;
-    if (cos_phi < -1.0) cos_phi = -1.0; 
-
+    if (cos_phi > 1.0) {cos_phi = 1.0; std::cout << "!!!! cos_phi is bigger than 1.0" 
+                                                 << std::endl;}
+    if (cos_phi < -1.0) {cos_phi = -1.0; std::cout << "!!!! cos_phi is less than -1.0" 
+                                                   << std::endl;}
+    //std::cout << "We actually use this inversion!!!!" << std::endl;
 
     RealType dVdcosPhi;
+    //cos_phi = 2.0*cos_phi*cos_phi - 1.0;
     inversionType_->calcForce(cos_phi, potential_, dVdcosPhi);
-    Vector3d f1;
-    Vector3d f2;
-    Vector3d f3;
+    Vector3d f1 ;
+    Vector3d f2 ;
+    Vector3d f3 ;
 
     Vector3d dcosdA = (cos_phi * A - B) /rA;
     Vector3d dcosdB = (cos_phi * B - A) /rB;
 
     f1 = dVdcosPhi * cross(r32, dcosdA);
-    f2 = dVdcosPhi * ( cross(r43, dcosdB) - cross(r21, dcosdA));
+    f2 = dVdcosPhi * ( cross(r42, dcosdB) - cross(r21, dcosdA));
     f3 = dVdcosPhi * cross(dcosdB, r32);
 
     // In OOPSE's version of an improper torsion, the central atom
@@ -105,10 +117,11 @@ namespace oopse {
 
     // Confusing enough?  Good.
 
-    atom3_->addFrc(f1);
-    atom1_->addFrc(f2 - f1);
-    atom2_->addFrc(f3 - f2);
-    atom4_->addFrc(-f3);
+    atom2_->addFrc(f1);
+    atom1_->addFrc(f2 - f1 + f3);
+    atom4_->addFrc(-f2);
+    atom3_->addFrc(-f3);
+
     angle = acos(cos_phi) /M_PI * 180.0;
   }
 

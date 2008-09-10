@@ -19,6 +19,7 @@ GNU General Public License for more details.
 #include <openbabel/obiter.h>
 #include <openbabel/mol.h>
 #include <openbabel/chains.h>
+#include <openbabel/data.h>
 #include <fstream>
 
 #include "utils/StringUtils.hpp"
@@ -192,11 +193,11 @@ namespace OpenBabel
     unsigned int i;
     const int BUFFLEN = 1024;
     char buffer[BUFFLEN];
-    string str, str1;
+    string str, str1, str2, str3;
     OBAtom *a, *b, *c, *d;    
     bool molIsWater = false;
     OBResidue *r;
-    int resKey;
+    int resKey, myserial;
     char type_name[10];
     char *element_name;
     int res_num;
@@ -252,8 +253,99 @@ namespace OpenBabel
             
             // If we know what residue we've got, the specific atom name can
             // be used to help specify partial charges. 
+
+            //resdat.SetResName(resName);
             
+            // atom type from residue: 
             str = r->GetAtomID(&*atom);
+           
+	    // arginine has separate indices for chemically-identical
+	    // nitrogen atoms:
+	    if (resName.compare("ARG") == 0) {
+	      if (str.compare("NH1") == 0 || str.compare("NH2") == 0) {
+		str = "NH";
+	      }
+	    }
+	    if (resName.compare("VAL") == 0) {
+	      if (str.compare("CG1") == 0 || str.compare("CG2") == 0) {
+		str = "CG";
+	      }
+	    }
+	    if (resName.compare("LEU") == 0) {
+	      if (str.compare("CD1") == 0 || str.compare("CD2") == 0) {
+		str = "CD";
+	      }
+	    }
+	    if (resName.compare("ASP") == 0) {
+	      if (str.compare("OD1") == 0 || str.compare("OD2") == 0) {
+		str = "OD";
+	      }
+	    }
+	    if (resName.compare("GLU") == 0) {
+	      if (str.compare("OE1") == 0 || str.compare("OE2") == 0) {
+		str = "OE";
+	      }
+	    }
+	    if (resName.compare("TYR") == 0) {
+	      if (str.compare("CD1") == 0 || str.compare("CD2") == 0) {
+		str = "CD";
+	      }
+	      if (str.compare("CE1") == 0 || str.compare("CE2") == 0) {
+		str = "CE";
+	      }
+	    }
+	    
+
+            if ((&*atom)->IsHydrogen()) {
+               FOR_NBORS_OF_ATOM(nbr, *atom) {
+                 str2 = r->GetAtomID(&*nbr);
+                 size_t startpos = str2.find_first_not_of(" ");
+                 size_t endpos = str2.find_last_not_of(" ");
+                 if ((endpos - startpos) < 1) {
+                   // if the bonded atom type has only one character (i.e. N)
+                   // then the hydrogen will be labeled "HN" to show what
+                   // kind of proton it is:
+                   str3 = str2;
+                 } else {
+                   if (str2.compare("OH") == 0) {
+                      str3 = "O";
+                   } else {
+                     // When the bonded atom type is more specific, we drop
+                     // the first character:  i.e. H bonded to OG1 is HG1 type:
+                     str3 = str2.substr(startpos+1, endpos-startpos);
+                   }
+                 }
+                str = "H" + str3;
+               }
+	       // same problem with arginine NH atoms, but now for connected hydrogens
+	       if (resName.compare("ARG") == 0) {
+		 if (str.compare("HH1") == 0 || str.compare("HH2") == 0) {
+		   str = "HH";
+		 }
+	       }
+	       if (resName.compare("VAL") == 0) {
+		 if (str.compare("HG1") == 0 || str.compare("HG2") == 0) {
+		   str = "HG";
+		 }
+	       }
+	       if (resName.compare("LEU") == 0) {
+		 if (str.compare("HD1") == 0 || str.compare("HD2") == 0) {
+		   str = "HD";
+		 }
+	       }
+	       if (resName.compare("TYR") == 0) {
+		 if (str.compare("HD1") == 0 || str.compare("HD2") == 0) {
+		   str = "HD";
+		 }
+		 if (str.compare("HE1") == 0 || str.compare("HE2") == 0) {
+		   str = "HE";
+		 }
+	       }
+
+	    }
+
+            // atom type from residue table:
+            //resdat.LookupType(str, str2, hyb);
             size_t startpos = str.find_first_not_of(" ");
             size_t endpos = str.find_last_not_of(" ");
             str = str.substr( startpos, endpos-startpos+1 );

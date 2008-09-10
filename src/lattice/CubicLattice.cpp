@@ -38,7 +38,8 @@
  * University of Notre Dame has been advised of the possibility of
  * such damages.
  */
- 
+
+#include <cstdlib> 
 #include "lattice/CubicLattice.hpp"
 
 namespace oopse {

@@ -30,6 +30,7 @@ GNU General Public License for more details.
  */
 
 #include "config.h"
+#include <cstdlib>
 #include <string>
 #include <fstream>
 #include "utils/ElementsTable.hpp"

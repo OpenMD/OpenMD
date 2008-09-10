@@ -72,7 +72,7 @@ namespace oopse {
       bondType_->calcForce(len,  potential_, dvdr);
       
       force = r12 * (-dvdr / len);
-      
+
       atom1_->addFrc(-force);
       atom2_->addFrc(force);
     }

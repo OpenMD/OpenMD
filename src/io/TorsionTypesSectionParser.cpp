@@ -49,6 +49,7 @@
 #include "types/TrappeTorsionType.hpp"
 #include "UseTheForce/ForceField.hpp"
 #include "utils/NumericConstant.hpp"
+//#include <fstream>
 
 namespace oopse {
 
@@ -82,6 +83,7 @@ namespace oopse {
     std::string at4 = tokenizer.nextToken();
     TorsionTypeEnum tt = getTorsionTypeEnum(tokenizer.nextToken());
 
+    //std::cout << at1 << "-" << at2 << "-" << at3 << "-" << at4 << std::endl;
     nTokens -= 5;
 
     switch(tt) {

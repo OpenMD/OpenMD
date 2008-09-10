@@ -77,9 +77,9 @@ namespace oopse {
 
     RealType dVdcosPhi;
     torsionType_->calcForce(cos_phi, potential_, dVdcosPhi);
-    Vector3d f1;
-    Vector3d f2;
-    Vector3d f3;
+    Vector3d f1 ;
+    Vector3d f2 ;
+    Vector3d f3 ;
 
     Vector3d dcosdA = (cos_phi * A - B) /rA;
     Vector3d dcosdB = (cos_phi * B - A) /rB;

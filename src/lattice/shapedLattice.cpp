@@ -42,11 +42,11 @@
  *
  *  Created by Charles F. Vardeman II on 17 Feb 2006.
  *  @author  Charles F. Vardeman II
- *  @version $Id: shapedLattice.cpp,v 1.6 2006-10-17 15:24:29 gezelter Exp $
+ *  @version $Id: shapedLattice.cpp,v 1.7 2008-09-10 19:51:43 cli2 Exp $
  *
  */
 
-
+#include <cstdlib>
 #include "lattice/shapedLattice.hpp"
 #include "math/Vector3.hpp"
 #include "brains/Register.hpp"

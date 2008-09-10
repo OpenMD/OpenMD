@@ -446,7 +446,7 @@ namespace oopse {
       b = torsion->getAtomB()->getGlobalIndex();        
       c = torsion->getAtomC()->getGlobalIndex();        
       d = torsion->getAtomD()->getGlobalIndex();      
-  
+
       if (options_.havevdw12scale() || options_.haveelectrostatic12scale()) {
         oneTwoInteractions_.addPair(a, b);      
         oneTwoInteractions_.addPair(b, c);
@@ -950,14 +950,10 @@ namespace oopse {
     nOneThree = oneThreeInteractions_.getSize();
     nOneFour = oneFourInteractions_.getSize();
 
-    std::cerr << "exculdes:\n";
-    std::cerr << excludedInteractions_;
-    std::cerr << "\noneTwo:\n";
-    std::cerr << oneTwoInteractions_;
-    std::cerr << "\noneThree:\n";
-    std::cerr << oneThreeInteractions_;
-    std::cerr << "\noneFour:\n";
-    std::cerr << oneFourInteractions_;
+    std::cerr << "excludedInteractions contains: " << excludedInteractions_.getSize() << " pairs \n";
+    std::cerr << "oneTwoInteractions contains: " << oneTwoInteractions_.getSize() << " pairs \n";
+    std::cerr << "oneThreeInteractions contains: " << oneThreeInteractions_.getSize() << " pairs \n";
+    std::cerr << "oneFourInteractions contains: " << oneFourInteractions_.getSize() << " pairs \n";
 
     int* excludeList = excludedInteractions_.getPairList();
     int* oneTwoList = oneTwoInteractions_.getPairList();

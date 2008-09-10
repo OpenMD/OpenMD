@@ -49,6 +49,7 @@
 #ifndef TYPES_POLYNOMIALTORSIONTYPE_HPP
 #define TYPES_POLYNOMIALTORSIONTYPE_HPP
 
+#include <fstream>
 #include "math/Polynomial.hpp"
 #include "types/TorsionType.hpp"
 
@@ -84,14 +85,13 @@ namespace oopse {
       dVdCosPhi = polynomial_.evaluateDerivative(cosPhi); 
     }
 
-    friend std::ostream& operator <<(std::ostream& os, 
-				     PolynomialTorsionType& pbt);
+    //friend std::ostream& operator <<(std::ostream& os, PolynomialTorsionType ptt);
+    //friend std::ostream& operator <<(std::ostream& os, const PolynomialTorsionType& ptt);
   private:
     DoublePolynomial polynomial_;
-  };
+};
   
-/*  
-    std::ostream& operator <<(std::ostream& os, PolynomialTorsionType& ptt) {
+    /*std::ostream& operator<< (std::ostream& os, PolynomialTorsionType ptt) {
     DoublePolynomial::const_iterator i;
 
     i = ptt.polynomial_.begin();
@@ -119,8 +119,8 @@ namespace oopse {
     
      os << std::endl;
      return os;
-     }
-  */
+     }*/
+  
 
 } //end namespace oopse
 #endif //TYPES_POLYNOMIALTORSIONTYPE_HPP

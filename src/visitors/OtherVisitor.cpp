@@ -5,7 +5,6 @@
  * non-exclusive, royalty free, license to use, modify and
  * redistribute this software in source and binary code form, provided
  * that the following conditions are met:
- *
  * 1. Acknowledgement of the program authors must be made in any
  *    publication of scientific results based in part on use of the
  *    program.  An acceptable form of acknowledgement is citation of
@@ -291,24 +290,27 @@ namespace oopse {
     } else
       return;
 
+    AtomType* at = dynamic_cast<Atom *>(sd)->getAtomType();
+    std::string bn = baseTypeName(at);
+
     if (posOnly_){
       for( atomInfo = atomData->beginAtomInfo(i); atomInfo;
 	   atomInfo = atomData->nextAtomInfo(i) ) {
         if (atomInfo->hasCharge) {
 	  sprintf(buffer,
-		"%s%15.8f%15.8f%15.8f%15.8f",
-		atomInfo->atomTypeName.c_str(),
-		atomInfo->pos[0],
-		atomInfo->pos[1],
-		atomInfo->pos[2],
-                atomInfo->charge); 
+		  "%s%15.8f%15.8f%15.8f%15.8f",
+		  bn.c_str(),
+		  atomInfo->pos[0],
+		  atomInfo->pos[1],
+		  atomInfo->pos[2],
+		  atomInfo->charge); 
         } else {
 	  sprintf(buffer,
 		"%s%15.8f%15.8f%15.8f",
-		atomInfo->atomTypeName.c_str(),
-		atomInfo->pos[0],
-		atomInfo->pos[1],
-		atomInfo->pos[2]); 
+		  bn.c_str(),
+		  atomInfo->pos[0],
+		  atomInfo->pos[1],
+		  atomInfo->pos[2]); 
         }
 	frame.push_back(buffer);
       }
@@ -318,7 +320,7 @@ namespace oopse {
         if (atomInfo->hasCharge) {
 	sprintf(buffer,
 		"%s%15.8f%15.8f%15.8f%15.8f%15.8f%15.8f%15.8f",
-		atomInfo->atomTypeName.c_str(),
+		bn.c_str(),
 		atomInfo->pos[0],
 		atomInfo->pos[1],
 		atomInfo->pos[2],
@@ -329,7 +331,7 @@ namespace oopse {
         } else {
 	sprintf(buffer,
 		"%s%15.8f%15.8f%15.8f%15.8f%15.8f%15.8f",
-		atomInfo->atomTypeName.c_str(),
+		bn.c_str(),
 		atomInfo->pos[0],
 		atomInfo->pos[1],
 		atomInfo->pos[2],
@@ -371,6 +373,15 @@ namespace oopse {
 
     for( i = frame.begin(); i != frame.end(); ++i )
       outStream << *i << std::endl;
+  }
+
+  std::string XYZVisitor::trimmedName(const std::string&atomTypeName) {    
+    return atomTypeName.substr(0, atomTypeName.find('-'));
+  }
+
+  std::string XYZVisitor::baseTypeName(AtomType* at) {
+    std::vector<AtomType*> ayb = at->allYourBase();
+    return ayb[ayb.size()-1]->getName();
   }
 
   const std::string XYZVisitor::toString() {

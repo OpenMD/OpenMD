@@ -38,6 +38,7 @@
  * University of Notre Dame has been advised of the possibility of
  * such damages.
  */
+#include <fstream>
 #include <algorithm>
 #include <cmath> 
 #include "types/CharmmTorsionType.hpp"
@@ -45,7 +46,9 @@
 #include "math/ChebyshevT.hpp"
 #include "math/ChebyshevU.hpp"
 
+
 namespace oopse {
+
   CharmmTorsionType::CharmmTorsionType(std::vector<CharmmTorsionParameter>& parameters) {
     std::vector<CharmmTorsionParameter>::iterator i;
     i = std::max_element(parameters.begin(), parameters.end(), 
@@ -60,13 +63,21 @@ namespace oopse {
       DoublePolynomial finalPolynomial;
       for (i = parameters.begin(); i != parameters.end(); ++i) {
 	DoublePolynomial cosTerm = T.getChebyshevPolynomial(i->n);
-	cosTerm *= cos(i->delta) * i->kchi;
+	cosTerm.operator*=(cos(i->delta) * i->kchi * 0.5);
+
 	DoublePolynomial sinTerm = U.getChebyshevPolynomial(i->n);
-	sinTerm *= -sin(i->delta) * i->kchi;
-	finalPolynomial = cosTerm + sinTerm;
-	finalPolynomial += i->kchi;
+	sinTerm *= -sin(i->delta) * i->kchi * 0.5;
+
+	finalPolynomial += cosTerm + sinTerm;
+
+	finalPolynomial += (i->kchi * 0.5);
       }
-      this->setPolynomial(finalPolynomial);
+      this->setPolynomial(finalPolynomial);  
+
+      /*std::ofstream myfile;
+      myfile.open("MyParameters", std::ios::app);
+      myfile << "The Polynomial contains below terms:" << std::endl;*/    
+      
     }
   }
 } //end namespace oopse

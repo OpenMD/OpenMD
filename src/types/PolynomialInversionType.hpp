@@ -82,10 +82,11 @@ namespace oopse {
     virtual void calcForce(RealType cosPhi, RealType& V, RealType& dVdCosPhi) {
       V = polynomial_.evaluate(cosPhi);
       dVdCosPhi = polynomial_.evaluateDerivative(cosPhi); 
+      //std::cerr << "-------------------" << "\n";
+      // This is for test.
     }
 
-    friend std::ostream& operator <<(std::ostream& os, 
-				     PolynomialInversionType& pit);
+    //friend std::ostream& operator <<(std::ostream& os, PolynomialInversionType& pit);
   private:
     DoublePolynomial polynomial_;
   };

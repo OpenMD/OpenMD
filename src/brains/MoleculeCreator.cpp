@@ -365,7 +365,6 @@ namespace oopse {
                                                     atomB->getType(), 
 						    atomC->getType(), 
                                                     atomD->getType());
-
       if (torsionType == NULL) {
 	sprintf(painCave.errMsg, "Can not find Matching Torsion Type for[%s, %s, %s, %s]",
 		atomA->getType().c_str(),

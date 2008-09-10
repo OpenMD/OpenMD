@@ -82,6 +82,7 @@ namespace oopse {
       itImproperCosine,
       itImproperHarmonic,
       itCentralAtomHeight,
+      itAmberImproper,
       itDreiding,
       itUnknown
     };

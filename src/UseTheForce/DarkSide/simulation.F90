@@ -601,15 +601,6 @@ contains
           endif
        end do
     enddo
-    
-
-    do i = 1, nLocal
-       do j = 1, nTopoPairsForAtom(i)
-          
-          write(*,*) 'pair: ', i, ', ', toposForAtom(i,j), ' = ', topoDistance(i,j)
-       enddo
-    enddo
-
 
     call createSimHasAtype(alloc_stat)
     if (alloc_stat /= 0) then

@@ -129,7 +129,7 @@ namespace oopse {
      */
         
     void setCoefficient(int exponent, const ElemType& coefficient) {
-      polyPairMap_.insert(typename PolynomialPairMap::value_type(exponent, coefficient));
+      polyPairMap_[exponent] = coefficient;
     }
 
     /**
@@ -148,7 +148,6 @@ namespace oopse {
 	setCoefficient(exponent, coefficient);
       }
     }
-
 
     /**
      * Returns the coefficient associated with the given power for this Polynomial.
@@ -226,16 +225,33 @@ namespace oopse {
     PolynomialType& operator *= (const PolynomialType& p) {
     typename Polynomial<ElemType>::const_iterator i;
     typename Polynomial<ElemType>::const_iterator j;
-    
-    for (i = this->begin(); i !=this->end(); ++i) {
+    Polynomial<ElemType> p2(*this);
+   
+    polyPairMap_.clear();  // clear out old map
+    for (i = p2.begin(); i !=p2.end(); ++i) {
       for (j = p.begin(); j !=p.end(); ++j) {
 	this->addCoefficient( i->first + j->first, i->second * j->second);
       }
+    }
+    return *this;
+    }
+
+    //PolynomialType& operator *= (const ElemType v)
+    PolynomialType& operator *= (const ElemType v) {
+    typename Polynomial<ElemType>::const_iterator i;
+    //Polynomial<ElemType> result;
+
+    for (i = this->begin(); i != this->end(); ++i) {
+	this->setCoefficient( i->first, i->second*v);
     }
 
     return *this;
     }
 
+    PolynomialType& operator += (const ElemType v) {    
+    this->addCoefficient( 0, v);
+    return *this;
+    }
    
   private:
         
@@ -268,7 +284,7 @@ namespace oopse {
     Polynomial<ElemType> result;
     
     for (i = p.begin(); i !=p.end(); ++i) {
- 	result.addCoefficient( i->first , i->second * v);
+ 	result.setCoefficient( i->first , i->second * v);
     }
 
     return result;
@@ -280,7 +296,7 @@ namespace oopse {
     Polynomial<ElemType> result;
     
     for (i = p.begin(); i !=p.end(); ++i) {
- 	result.addCoefficient( i->first , i->second * v);
+ 	result.setCoefficient( i->first , i->second * v);
     }
 
     return result;
