@@ -263,7 +263,7 @@ namespace oopse {
       ++lineNo;
       std::string line = trimLeftCopy(buffer);
       i = CaseInsensitiveFind(line, "<OOPSE");
-      if (i == string::npos) {
+      if (static_cast<size_t>(i) == string::npos) {
         sprintf(painCave.errMsg, 
                 "SimCreator: File: %s is not an OOPSE file!\n", 
                 mdFileName.c_str()); 
@@ -393,16 +393,16 @@ namespace oopse {
     //responsibility to LocalIndexManager.
     setGlobalIndex(info);
     
-    //Although addExcludePairs is called inside SimInfo's addMolecule
+    //Although addInteractionPairs is called inside SimInfo's addMolecule
     //method, at that point atoms don't have the global index yet
     //(their global index are all initialized to -1).  Therefore we
-    //have to call addExcludePairs explicitly here. A way to work
+    //have to call addInteractionPairs explicitly here. A way to work
     //around is that we can determine the beginning global indices of
     //atoms before they get created.
     SimInfo::MoleculeIterator mi;
     Molecule* mol;
     for (mol= info->beginMolecule(mi); mol != NULL; mol = info->nextMolecule(mi)) {
-      info->addExcludePairs(mol);
+      info->addInteractionPairs(mol);
     }
     
     if (loadInitCoords)

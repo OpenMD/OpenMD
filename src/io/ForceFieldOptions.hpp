@@ -62,7 +62,11 @@ namespace oopse {
     DeclareParameter(DistanceUnitScaling, RealType);
     DeclareParameter(AngleUnitScaling, RealType);
     DeclareParameter(TorsionAngleConvention, std::string);
+    DeclareParameter(vdw12scale, RealType);
+    DeclareParameter(vdw13scale, RealType);
     DeclareParameter(vdw14scale, RealType);
+    DeclareParameter(electrostatic12scale, RealType);
+    DeclareParameter(electrostatic13scale, RealType);
     DeclareParameter(electrostatic14scale, RealType);
     DeclareParameter(GayBerneMu, RealType);
     DeclareParameter(GayBerneNu, RealType);

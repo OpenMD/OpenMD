@@ -54,7 +54,7 @@
 #include <utility>
 #include <vector>
 
-#include "brains/Exclude.hpp"
+#include "brains/PairList.hpp"
 #include "io/Globals.hpp"
 #include "math/Vector3.hpp"
 #include "math/SquareMatrix3.hpp"
@@ -370,7 +370,7 @@ namespace oopse{
      * @see #SimCreator::setGlobalIndex
      */  
     void setGlobalGroupMembership(const std::vector<int>& globalGroupMembership) {
-      assert(globalGroupMembership.size() == nGlobalAtoms_);
+      assert(globalGroupMembership.size() == static_cast<size_t>(nGlobalAtoms_));
       globalGroupMembership_ = globalGroupMembership;
     }
 
@@ -379,7 +379,7 @@ namespace oopse{
      * @see #SimCreator::setGlobalIndex
      */        
     void setGlobalMolMembership(const std::vector<int>& globalMolMembership) {
-      assert(globalMolMembership.size() == nGlobalAtoms_);
+      assert(globalMolMembership.size() == static_cast<size_t>(nGlobalAtoms_));
       globalMolMembership_ = globalMolMembership;
     }
 
@@ -437,15 +437,16 @@ namespace oopse{
     GenericData* getPropertyByName(const std::string& propName);
 
     /**
-     * add all exclude pairs of a molecule into exclude list.
+     * add all special interaction pairs (including excluded
+     * interactions) in a molecule into the appropriate lists.
      */
-    void addExcludePairs(Molecule* mol);
+    void addInteractionPairs(Molecule* mol);
 
     /**
-     * remove all exclude pairs which belong to a molecule from exclude list
+     * remove all special interaction pairs which belong to a molecule
+     * from the appropriate lists.
      */
-
-    void removeExcludePairs(Molecule* mol);
+    void removeInteractionPairs(Molecule* mol);
 
 
     /** Returns the unique atom types of local processor in an array */
@@ -538,7 +539,10 @@ namespace oopse{
     int nConstraints_;        /**< number of constraints in local processors */
 
     simtype fInfo_; /**< A dual struct shared by c++/fortran which indicates the atom types in simulation*/
-    Exclude exclude_;      
+    PairList excludedInteractions_;      
+    PairList oneTwoInteractions_;      
+    PairList oneThreeInteractions_;      
+    PairList oneFourInteractions_;      
     PropertyMap properties_;                  /**< Generic Property */
     SnapshotManager* sman_;               /**< SnapshotManager */
 

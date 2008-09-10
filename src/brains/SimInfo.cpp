@@ -202,8 +202,8 @@ namespace oopse {
       nCutoffGroups_ += mol->getNCutoffGroups();
       nConstraints_ += mol->getNConstraintPairs();
 
-      addExcludePairs(mol);
-        
+      addInteractionPairs(mol);
+  
       return true;
     } else {
       return false;
@@ -228,7 +228,7 @@ namespace oopse {
       nCutoffGroups_ -= mol->getNCutoffGroups();
       nConstraints_ -= mol->getNConstraintPairs();
 
-      removeExcludePairs(mol);
+      removeInteractionPairs(mol);
       molecules_.erase(mol->getGlobalIndex());
 
       delete mol;
@@ -354,7 +354,8 @@ namespace oopse {
  
   }
 
-  void SimInfo::addExcludePairs(Molecule* mol) {
+  void SimInfo::addInteractionPairs(Molecule* mol) {
+    ForceFieldOptions& options_ = forceField_->getForceFieldOptions();
     std::vector<Bond*>::iterator bondIter;
     std::vector<Bend*>::iterator bendIter;
     std::vector<Torsion*>::iterator torsionIter;
@@ -368,143 +369,154 @@ namespace oopse {
     int c;
     int d;
 
-    std::map<int, std::set<int> > atomGroups;
+    // atomGroups can be used to add special interaction maps between
+    // groups of atoms that are in two separate rigid bodies.
+    // However, most site-site interactions between two rigid bodies
+    // are probably not special, just the ones between the physically
+    // bonded atoms.  Interactions *within* a single rigid body should
+    // always be excluded.  These are done at the bottom of this
+    // function.
 
+    std::map<int, std::set<int> > atomGroups;
     Molecule::RigidBodyIterator rbIter;
     RigidBody* rb;
     Molecule::IntegrableObjectIterator ii;
     StuntDouble* integrableObject;
     
-    for (integrableObject = mol->beginIntegrableObject(ii); integrableObject != NULL;
-	   integrableObject = mol->nextIntegrableObject(ii)) {
-
+    for (integrableObject = mol->beginIntegrableObject(ii); 
+         integrableObject != NULL;
+         integrableObject = mol->nextIntegrableObject(ii)) {
+      
       if (integrableObject->isRigidBody()) {
-          rb = static_cast<RigidBody*>(integrableObject);
-          std::vector<Atom*> atoms = rb->getAtoms();
-          std::set<int> rigidAtoms;
-          for (int i = 0; i < atoms.size(); ++i) {
-            rigidAtoms.insert(atoms[i]->getGlobalIndex());
-          }
-          for (int i = 0; i < atoms.size(); ++i) {
-            atomGroups.insert(std::map<int, std::set<int> >::value_type(atoms[i]->getGlobalIndex(), rigidAtoms));
-          }      
+        rb = static_cast<RigidBody*>(integrableObject);
+        std::vector<Atom*> atoms = rb->getAtoms();
+        std::set<int> rigidAtoms;
+        for (int i = 0; i < static_cast<int>(atoms.size()); ++i) {
+          rigidAtoms.insert(atoms[i]->getGlobalIndex());
+        }
+        for (int i = 0; i < static_cast<int>(atoms.size()); ++i) {
+          atomGroups.insert(std::map<int, std::set<int> >::value_type(atoms[i]->getGlobalIndex(), rigidAtoms));
+        }      
       } else {
         std::set<int> oneAtomSet;
         oneAtomSet.insert(integrableObject->getGlobalIndex());
         atomGroups.insert(std::map<int, std::set<int> >::value_type(integrableObject->getGlobalIndex(), oneAtomSet));        
       }
     }  
+           
+    for (bond= mol->beginBond(bondIter); bond != NULL; 
+         bond = mol->nextBond(bondIter)) {
 
-    
-    
-    for (bond= mol->beginBond(bondIter); bond != NULL; bond = mol->nextBond(bondIter)) {
       a = bond->getAtomA()->getGlobalIndex();
-      b = bond->getAtomB()->getGlobalIndex();        
-      exclude_.addPair(a, b);
+      b = bond->getAtomB()->getGlobalIndex();   
+    
+      if (options_.havevdw12scale() || options_.haveelectrostatic12scale()) {
+        oneTwoInteractions_.addPair(a, b);
+      } else {
+        excludedInteractions_.addPair(a, b);
+      }
     }
 
-    for (bend= mol->beginBend(bendIter); bend != NULL; bend = mol->nextBend(bendIter)) {
+    for (bend= mol->beginBend(bendIter); bend != NULL; 
+         bend = mol->nextBend(bendIter)) {
+
       a = bend->getAtomA()->getGlobalIndex();
       b = bend->getAtomB()->getGlobalIndex();        
       c = bend->getAtomC()->getGlobalIndex();
-      std::set<int> rigidSetA = getRigidSet(a, atomGroups);
-      std::set<int> rigidSetB = getRigidSet(b, atomGroups);
-      std::set<int> rigidSetC = getRigidSet(c, atomGroups);
-
-      exclude_.addPairs(rigidSetA, rigidSetB);
-      exclude_.addPairs(rigidSetA, rigidSetC);
-      exclude_.addPairs(rigidSetB, rigidSetC);
       
-      //exclude_.addPair(a, b);
-      //exclude_.addPair(a, c);
-      //exclude_.addPair(b, c);        
+      if (options_.havevdw12scale() || options_.haveelectrostatic12scale()) {
+        oneTwoInteractions_.addPair(a, b);      
+        oneTwoInteractions_.addPair(b, c);
+      } else {
+        excludedInteractions_.addPair(a, b);
+        excludedInteractions_.addPair(b, c);
+      }
+
+      if (options_.havevdw13scale() || options_.haveelectrostatic13scale()) {
+        oneThreeInteractions_.addPair(a, c);      
+      } else {
+        excludedInteractions_.addPair(a, c);
+      }
     }
 
-    for (torsion= mol->beginTorsion(torsionIter); torsion != NULL; torsion = mol->nextTorsion(torsionIter)) {
+    for (torsion= mol->beginTorsion(torsionIter); torsion != NULL; 
+         torsion = mol->nextTorsion(torsionIter)) {
+
       a = torsion->getAtomA()->getGlobalIndex();
       b = torsion->getAtomB()->getGlobalIndex();        
       c = torsion->getAtomC()->getGlobalIndex();        
-      d = torsion->getAtomD()->getGlobalIndex();        
-      std::set<int> rigidSetA = getRigidSet(a, atomGroups);
-      std::set<int> rigidSetB = getRigidSet(b, atomGroups);
-      std::set<int> rigidSetC = getRigidSet(c, atomGroups);
-      std::set<int> rigidSetD = getRigidSet(d, atomGroups);
+      d = torsion->getAtomD()->getGlobalIndex();      
+  
+      if (options_.havevdw12scale() || options_.haveelectrostatic12scale()) {
+        oneTwoInteractions_.addPair(a, b);      
+        oneTwoInteractions_.addPair(b, c);
+        oneTwoInteractions_.addPair(c, d);
+      } else {
+        excludedInteractions_.addPair(a, b);
+        excludedInteractions_.addPair(b, c);
+        excludedInteractions_.addPair(c, d);
+      }
 
-      exclude_.addPairs(rigidSetA, rigidSetB);
-      exclude_.addPairs(rigidSetA, rigidSetC);
-      exclude_.addPairs(rigidSetA, rigidSetD);
-      exclude_.addPairs(rigidSetB, rigidSetC);
-      exclude_.addPairs(rigidSetB, rigidSetD);
-      exclude_.addPairs(rigidSetC, rigidSetD);
+      if (options_.havevdw13scale() || options_.haveelectrostatic13scale()) {
+        oneThreeInteractions_.addPair(a, c);      
+        oneThreeInteractions_.addPair(b, d);      
+      } else {
+        excludedInteractions_.addPair(a, c);
+        excludedInteractions_.addPair(b, d);
+      }
 
-      /*
-      exclude_.addPairs(rigidSetA.begin(), rigidSetA.end(), rigidSetB.begin(), rigidSetB.end());
-      exclude_.addPairs(rigidSetA.begin(), rigidSetA.end(), rigidSetC.begin(), rigidSetC.end());
-      exclude_.addPairs(rigidSetA.begin(), rigidSetA.end(), rigidSetD.begin(), rigidSetD.end());
-      exclude_.addPairs(rigidSetB.begin(), rigidSetB.end(), rigidSetC.begin(), rigidSetC.end());
-      exclude_.addPairs(rigidSetB.begin(), rigidSetB.end(), rigidSetD.begin(), rigidSetD.end());
-      exclude_.addPairs(rigidSetC.begin(), rigidSetC.end(), rigidSetD.begin(), rigidSetD.end());
-         
-      
-      exclude_.addPair(a, b);
-      exclude_.addPair(a, c);
-      exclude_.addPair(a, d);
-      exclude_.addPair(b, c);
-      exclude_.addPair(b, d);
-      exclude_.addPair(c, d);        
-      */
+      if (options_.havevdw14scale() || options_.haveelectrostatic14scale()) {
+        oneFourInteractions_.addPair(a, d);      
+      } else {
+        excludedInteractions_.addPair(a, d);
+      }
     }
 
     for (inversion= mol->beginInversion(inversionIter); inversion != NULL; 
          inversion = mol->nextInversion(inversionIter)) {
+
       a = inversion->getAtomA()->getGlobalIndex();
       b = inversion->getAtomB()->getGlobalIndex();        
       c = inversion->getAtomC()->getGlobalIndex();        
       d = inversion->getAtomD()->getGlobalIndex();        
-      std::set<int> rigidSetA = getRigidSet(a, atomGroups);
-      std::set<int> rigidSetB = getRigidSet(b, atomGroups);
-      std::set<int> rigidSetC = getRigidSet(c, atomGroups);
-      std::set<int> rigidSetD = getRigidSet(d, atomGroups);
 
-      exclude_.addPairs(rigidSetA, rigidSetB);
-      exclude_.addPairs(rigidSetA, rigidSetC);
-      exclude_.addPairs(rigidSetA, rigidSetD);
-      exclude_.addPairs(rigidSetB, rigidSetC);
-      exclude_.addPairs(rigidSetB, rigidSetD);
-      exclude_.addPairs(rigidSetC, rigidSetD);
+      if (options_.havevdw12scale() || options_.haveelectrostatic12scale()) {
+        oneTwoInteractions_.addPair(a, b);      
+        oneTwoInteractions_.addPair(a, c);
+        oneTwoInteractions_.addPair(a, d);
+      } else {
+        excludedInteractions_.addPair(a, b);
+        excludedInteractions_.addPair(a, c);
+        excludedInteractions_.addPair(a, d);
+      }
 
-      /*
-      exclude_.addPairs(rigidSetA.begin(), rigidSetA.end(), rigidSetB.begin(), rigidSetB.end());
-      exclude_.addPairs(rigidSetA.begin(), rigidSetA.end(), rigidSetC.begin(), rigidSetC.end());
-      exclude_.addPairs(rigidSetA.begin(), rigidSetA.end(), rigidSetD.begin(), rigidSetD.end());
-      exclude_.addPairs(rigidSetB.begin(), rigidSetB.end(), rigidSetC.begin(), rigidSetC.end());
-      exclude_.addPairs(rigidSetB.begin(), rigidSetB.end(), rigidSetD.begin(), rigidSetD.end());
-      exclude_.addPairs(rigidSetC.begin(), rigidSetC.end(), rigidSetD.begin(), rigidSetD.end());
-         
-      
-      exclude_.addPair(a, b);
-      exclude_.addPair(a, c);
-      exclude_.addPair(a, d);
-      exclude_.addPair(b, c);
-      exclude_.addPair(b, d);
-      exclude_.addPair(c, d);        
-      */
+      if (options_.havevdw13scale() || options_.haveelectrostatic13scale()) {
+        oneThreeInteractions_.addPair(b, c);     
+        oneThreeInteractions_.addPair(b, d);     
+        oneThreeInteractions_.addPair(c, d);      
+      } else {
+        excludedInteractions_.addPair(b, c);
+        excludedInteractions_.addPair(b, d);
+        excludedInteractions_.addPair(c, d);
+      }
     }
 
-    for (rb = mol->beginRigidBody(rbIter); rb != NULL; rb = mol->nextRigidBody(rbIter)) {
+    for (rb = mol->beginRigidBody(rbIter); rb != NULL; 
+         rb = mol->nextRigidBody(rbIter)) {
       std::vector<Atom*> atoms = rb->getAtoms();
-      for (int i = 0; i < atoms.size() -1 ; ++i) {
-	for (int j = i + 1; j < atoms.size(); ++j) {
+      for (int i = 0; i < static_cast<int>(atoms.size()) -1 ; ++i) {
+	for (int j = i + 1; j < static_cast<int>(atoms.size()); ++j) {
 	  a = atoms[i]->getGlobalIndex();
 	  b = atoms[j]->getGlobalIndex();
-	  exclude_.addPair(a, b);
+	  excludedInteractions_.addPair(a, b);
 	}
       }
     }        
 
   }
 
-  void SimInfo::removeExcludePairs(Molecule* mol) {
+  void SimInfo::removeInteractionPairs(Molecule* mol) {
+    ForceFieldOptions& options_ = forceField_->getForceFieldOptions();
     std::vector<Bond*>::iterator bondIter;
     std::vector<Bend*>::iterator bendIter;
     std::vector<Torsion*>::iterator torsionIter;
@@ -519,25 +531,25 @@ namespace oopse {
     int d;
 
     std::map<int, std::set<int> > atomGroups;
-
     Molecule::RigidBodyIterator rbIter;
     RigidBody* rb;
     Molecule::IntegrableObjectIterator ii;
     StuntDouble* integrableObject;
     
-    for (integrableObject = mol->beginIntegrableObject(ii); integrableObject != NULL;
-	   integrableObject = mol->nextIntegrableObject(ii)) {
-
+    for (integrableObject = mol->beginIntegrableObject(ii); 
+         integrableObject != NULL;
+         integrableObject = mol->nextIntegrableObject(ii)) {
+      
       if (integrableObject->isRigidBody()) {
-          rb = static_cast<RigidBody*>(integrableObject);
-          std::vector<Atom*> atoms = rb->getAtoms();
-          std::set<int> rigidAtoms;
-          for (int i = 0; i < atoms.size(); ++i) {
-            rigidAtoms.insert(atoms[i]->getGlobalIndex());
-          }
-          for (int i = 0; i < atoms.size(); ++i) {
-            atomGroups.insert(std::map<int, std::set<int> >::value_type(atoms[i]->getGlobalIndex(), rigidAtoms));
-          }      
+        rb = static_cast<RigidBody*>(integrableObject);
+        std::vector<Atom*> atoms = rb->getAtoms();
+        std::set<int> rigidAtoms;
+        for (int i = 0; i < static_cast<int>(atoms.size()); ++i) {
+          rigidAtoms.insert(atoms[i]->getGlobalIndex());
+        }
+        for (int i = 0; i < static_cast<int>(atoms.size()); ++i) {
+          atomGroups.insert(std::map<int, std::set<int> >::value_type(atoms[i]->getGlobalIndex(), rigidAtoms));
+        }      
       } else {
         std::set<int> oneAtomSet;
         oneAtomSet.insert(integrableObject->getGlobalIndex());
@@ -545,120 +557,121 @@ namespace oopse {
       }
     }  
 
-    
-    for (bond= mol->beginBond(bondIter); bond != NULL; bond = mol->nextBond(bondIter)) {
+    for (bond= mol->beginBond(bondIter); bond != NULL; 
+         bond = mol->nextBond(bondIter)) {
+      
       a = bond->getAtomA()->getGlobalIndex();
-      b = bond->getAtomB()->getGlobalIndex();        
-      exclude_.removePair(a, b);
+      b = bond->getAtomB()->getGlobalIndex();   
+    
+      if (options_.havevdw12scale() || options_.haveelectrostatic12scale()) {
+        oneTwoInteractions_.removePair(a, b);
+      } else {
+        excludedInteractions_.removePair(a, b);
+      }
     }
 
-    for (bend= mol->beginBend(bendIter); bend != NULL; bend = mol->nextBend(bendIter)) {
+    for (bend= mol->beginBend(bendIter); bend != NULL; 
+         bend = mol->nextBend(bendIter)) {
+
       a = bend->getAtomA()->getGlobalIndex();
       b = bend->getAtomB()->getGlobalIndex();        
       c = bend->getAtomC()->getGlobalIndex();
-
-      std::set<int> rigidSetA = getRigidSet(a, atomGroups);
-      std::set<int> rigidSetB = getRigidSet(b, atomGroups);
-      std::set<int> rigidSetC = getRigidSet(c, atomGroups);
-
-      exclude_.removePairs(rigidSetA, rigidSetB);
-      exclude_.removePairs(rigidSetA, rigidSetC);
-      exclude_.removePairs(rigidSetB, rigidSetC);
       
-      //exclude_.removePair(a, b);
-      //exclude_.removePair(a, c);
-      //exclude_.removePair(b, c);        
+      if (options_.havevdw12scale() || options_.haveelectrostatic12scale()) {
+        oneTwoInteractions_.removePair(a, b);      
+        oneTwoInteractions_.removePair(b, c);
+      } else {
+        excludedInteractions_.removePair(a, b);
+        excludedInteractions_.removePair(b, c);
+      }
+
+      if (options_.havevdw13scale() || options_.haveelectrostatic13scale()) {
+        oneThreeInteractions_.removePair(a, c);      
+      } else {
+        excludedInteractions_.removePair(a, c);
+      }
     }
 
-    for (torsion= mol->beginTorsion(torsionIter); torsion != NULL; torsion = mol->nextTorsion(torsionIter)) {
+    for (torsion= mol->beginTorsion(torsionIter); torsion != NULL; 
+         torsion = mol->nextTorsion(torsionIter)) {
+
       a = torsion->getAtomA()->getGlobalIndex();
       b = torsion->getAtomB()->getGlobalIndex();        
       c = torsion->getAtomC()->getGlobalIndex();        
-      d = torsion->getAtomD()->getGlobalIndex();        
+      d = torsion->getAtomD()->getGlobalIndex();      
+  
+      if (options_.havevdw12scale() || options_.haveelectrostatic12scale()) {
+        oneTwoInteractions_.removePair(a, b);      
+        oneTwoInteractions_.removePair(b, c);
+        oneTwoInteractions_.removePair(c, d);
+      } else {
+        excludedInteractions_.removePair(a, b);
+        excludedInteractions_.removePair(b, c);
+        excludedInteractions_.removePair(c, d);
+      }
 
-      std::set<int> rigidSetA = getRigidSet(a, atomGroups);
-      std::set<int> rigidSetB = getRigidSet(b, atomGroups);
-      std::set<int> rigidSetC = getRigidSet(c, atomGroups);
-      std::set<int> rigidSetD = getRigidSet(d, atomGroups);
+      if (options_.havevdw13scale() || options_.haveelectrostatic13scale()) {
+        oneThreeInteractions_.removePair(a, c);      
+        oneThreeInteractions_.removePair(b, d);      
+      } else {
+        excludedInteractions_.removePair(a, c);
+        excludedInteractions_.removePair(b, d);
+      }
 
-      exclude_.removePairs(rigidSetA, rigidSetB);
-      exclude_.removePairs(rigidSetA, rigidSetC);
-      exclude_.removePairs(rigidSetA, rigidSetD);
-      exclude_.removePairs(rigidSetB, rigidSetC);
-      exclude_.removePairs(rigidSetB, rigidSetD);
-      exclude_.removePairs(rigidSetC, rigidSetD);
-
-      /*
-      exclude_.removePairs(rigidSetA.begin(), rigidSetA.end(), rigidSetB.begin(), rigidSetB.end());
-      exclude_.removePairs(rigidSetA.begin(), rigidSetA.end(), rigidSetC.begin(), rigidSetC.end());
-      exclude_.removePairs(rigidSetA.begin(), rigidSetA.end(), rigidSetD.begin(), rigidSetD.end());
-      exclude_.removePairs(rigidSetB.begin(), rigidSetB.end(), rigidSetC.begin(), rigidSetC.end());
-      exclude_.removePairs(rigidSetB.begin(), rigidSetB.end(), rigidSetD.begin(), rigidSetD.end());
-      exclude_.removePairs(rigidSetC.begin(), rigidSetC.end(), rigidSetD.begin(), rigidSetD.end());
-
-      
-      exclude_.removePair(a, b);
-      exclude_.removePair(a, c);
-      exclude_.removePair(a, d);
-      exclude_.removePair(b, c);
-      exclude_.removePair(b, d);
-      exclude_.removePair(c, d);        
-      */
+      if (options_.havevdw14scale() || options_.haveelectrostatic14scale()) {
+        oneFourInteractions_.removePair(a, d);      
+      } else {
+        excludedInteractions_.removePair(a, d);
+      }
     }
 
-    for (inversion= mol->beginInversion(inversionIter); inversion != NULL; inversion = mol->nextInversion(inversionIter)) {
+    for (inversion= mol->beginInversion(inversionIter); inversion != NULL; 
+         inversion = mol->nextInversion(inversionIter)) {
+
       a = inversion->getAtomA()->getGlobalIndex();
       b = inversion->getAtomB()->getGlobalIndex();        
       c = inversion->getAtomC()->getGlobalIndex();        
       d = inversion->getAtomD()->getGlobalIndex();        
 
-      std::set<int> rigidSetA = getRigidSet(a, atomGroups);
-      std::set<int> rigidSetB = getRigidSet(b, atomGroups);
-      std::set<int> rigidSetC = getRigidSet(c, atomGroups);
-      std::set<int> rigidSetD = getRigidSet(d, atomGroups);
+      if (options_.havevdw12scale() || options_.haveelectrostatic12scale()) {
+        oneTwoInteractions_.removePair(a, b);      
+        oneTwoInteractions_.removePair(a, c);
+        oneTwoInteractions_.removePair(a, d);
+      } else {
+        excludedInteractions_.removePair(a, b);
+        excludedInteractions_.removePair(a, c);
+        excludedInteractions_.removePair(a, d);
+      }
 
-      exclude_.removePairs(rigidSetA, rigidSetB);
-      exclude_.removePairs(rigidSetA, rigidSetC);
-      exclude_.removePairs(rigidSetA, rigidSetD);
-      exclude_.removePairs(rigidSetB, rigidSetC);
-      exclude_.removePairs(rigidSetB, rigidSetD);
-      exclude_.removePairs(rigidSetC, rigidSetD);
-
-      /*
-      exclude_.removePairs(rigidSetA.begin(), rigidSetA.end(), rigidSetB.begin(), rigidSetB.end());
-      exclude_.removePairs(rigidSetA.begin(), rigidSetA.end(), rigidSetC.begin(), rigidSetC.end());
-      exclude_.removePairs(rigidSetA.begin(), rigidSetA.end(), rigidSetD.begin(), rigidSetD.end());
-      exclude_.removePairs(rigidSetB.begin(), rigidSetB.end(), rigidSetC.begin(), rigidSetC.end());
-      exclude_.removePairs(rigidSetB.begin(), rigidSetB.end(), rigidSetD.begin(), rigidSetD.end());
-      exclude_.removePairs(rigidSetC.begin(), rigidSetC.end(), rigidSetD.begin(), rigidSetD.end());
-
-      
-      exclude_.removePair(a, b);
-      exclude_.removePair(a, c);
-      exclude_.removePair(a, d);
-      exclude_.removePair(b, c);
-      exclude_.removePair(b, d);
-      exclude_.removePair(c, d);        
-      */
+      if (options_.havevdw13scale() || options_.haveelectrostatic13scale()) {
+        oneThreeInteractions_.removePair(b, c);     
+        oneThreeInteractions_.removePair(b, d);     
+        oneThreeInteractions_.removePair(c, d);      
+      } else {
+        excludedInteractions_.removePair(b, c);
+        excludedInteractions_.removePair(b, d);
+        excludedInteractions_.removePair(c, d);
+      }
     }
 
-    for (rb = mol->beginRigidBody(rbIter); rb != NULL; rb = mol->nextRigidBody(rbIter)) {
+    for (rb = mol->beginRigidBody(rbIter); rb != NULL; 
+         rb = mol->nextRigidBody(rbIter)) {
       std::vector<Atom*> atoms = rb->getAtoms();
-      for (int i = 0; i < atoms.size() -1 ; ++i) {
-	for (int j = i + 1; j < atoms.size(); ++j) {
+      for (int i = 0; i < static_cast<int>(atoms.size()) -1 ; ++i) {
+	for (int j = i + 1; j < static_cast<int>(atoms.size()); ++j) {
 	  a = atoms[i]->getGlobalIndex();
 	  b = atoms[j]->getGlobalIndex();
-	  exclude_.removePair(a, b);
+	  excludedInteractions_.removePair(a, b);
 	}
       }
     }        
-
+    
   }
-
-
+  
+  
   void SimInfo::addMoleculeStamp(MoleculeStamp* molStamp, int nmol) {
     int curStampId;
-
+    
     //index from 0
     curStampId = moleculeStamps_.size();
 
@@ -874,10 +887,9 @@ namespace oopse {
 
   void SimInfo::setupFortranSim() {
     int isError;
-    int nExclude;
+    int nExclude, nOneTwo, nOneThree, nOneFour;
     std::vector<int> fortranGlobalGroupMembership;
     
-    nExclude = exclude_.getSize();
     isError = 0;
 
     //globalGroupMembership_ is filled by SimCreator    
@@ -909,7 +921,6 @@ namespace oopse {
 	  else
 	    mfact.push_back( 1.0 );
 	}
-
       }       
     }
 
@@ -933,11 +944,31 @@ namespace oopse {
     }
     
     //setup fortran simulation
-    int nGlobalExcludes = 0;
-    int* globalExcludes = NULL; 
-    int* excludeList = exclude_.getExcludeList();
+
+    nExclude = excludedInteractions_.getSize();
+    nOneTwo = oneTwoInteractions_.getSize();
+    nOneThree = oneThreeInteractions_.getSize();
+    nOneFour = oneFourInteractions_.getSize();
+
+    std::cerr << "exculdes:\n";
+    std::cerr << excludedInteractions_;
+    std::cerr << "\noneTwo:\n";
+    std::cerr << oneTwoInteractions_;
+    std::cerr << "\noneThree:\n";
+    std::cerr << oneThreeInteractions_;
+    std::cerr << "\noneFour:\n";
+    std::cerr << oneFourInteractions_;
+
+    int* excludeList = excludedInteractions_.getPairList();
+    int* oneTwoList = oneTwoInteractions_.getPairList();
+    int* oneThreeList = oneThreeInteractions_.getPairList();
+    int* oneFourList = oneFourInteractions_.getPairList();
+
     setFortranSim( &fInfo_, &nGlobalAtoms_, &nAtoms_, &identArray[0], 
-                   &nExclude, excludeList , &nGlobalExcludes, globalExcludes, 
+                   &nExclude, excludeList, 
+                   &nOneTwo, oneTwoList,
+                   &nOneThree, oneThreeList,
+                   &nOneFour, oneFourList,
                    &molMembershipArray[0], &mfact[0], &nCutoffGroups_, 
                    &fortranGlobalGroupMembership[0], &isError); 
     

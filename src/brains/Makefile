@@ -1,7 +1,7 @@
 Package = brains
 
 Source    = \
-	Exclude.cpp \
+	PairList.cpp \
 	SimInfo.cpp \
         DataStorage.cpp \
         SimSnapshotManager.cpp \

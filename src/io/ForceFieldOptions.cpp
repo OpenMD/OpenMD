@@ -55,7 +55,11 @@ namespace oopse {
       DefineOptionalParameterWithDefaultValue(DistanceUnitScaling, "DistanceUnitScaling", 1.0);
       DefineOptionalParameterWithDefaultValue(AngleUnitScaling, "AngleUnitScaling", 1.0);
       DefineOptionalParameterWithDefaultValue(TorsionAngleConvention, "TorsionAngleConvention", "180_is_trans");
+      DefineOptionalParameterWithDefaultValue(vdw12scale, "vdW-12-scale", 0.0);
+      DefineOptionalParameterWithDefaultValue(vdw13scale, "vdW-13-scale", 0.0);
       DefineOptionalParameterWithDefaultValue(vdw14scale, "vdW-14-scale", 0.0);
+      DefineOptionalParameterWithDefaultValue(electrostatic12scale, "electrostatic-12-scale", 0.0)
+      DefineOptionalParameterWithDefaultValue(electrostatic13scale, "electrostatic-13-scale", 0.0)
       DefineOptionalParameterWithDefaultValue(electrostatic14scale, "electrostatic-14-scale", 0.0)
       DefineOptionalParameterWithDefaultValue(GayBerneMu, "GayBerneMu", 2.0);
       DefineOptionalParameterWithDefaultValue(GayBerneNu, "GayBerneNu", 1.0);
@@ -64,7 +68,11 @@ namespace oopse {
 
   void ForceFieldOptions::makeFortranOptions(ForceOptions& fortranForceOptions){
     
+    fortranForceOptions.vdw12scale = this->getvdw12scale();
+    fortranForceOptions.vdw13scale = this->getvdw13scale();
     fortranForceOptions.vdw14scale = this->getvdw14scale();
+    fortranForceOptions.electrostatic12scale = this->getelectrostatic12scale();
+    fortranForceOptions.electrostatic13scale = this->getelectrostatic13scale();
     fortranForceOptions.electrostatic14scale = this->getelectrostatic14scale();
     fortranForceOptions.GayBerneMu = this->getGayBerneMu();
     fortranForceOptions.GayBerneNu = this->getGayBerneNu();

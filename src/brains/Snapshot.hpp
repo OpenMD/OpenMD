@@ -208,9 +208,9 @@ namespace oopse{
     Vector3d COM_;
     Vector3d COMvel_;
     Vector3d COMw_;
+    int id_; /**< identification number of the snapshot */
     bool hasCOM_;
             
-    int id_; /**< identification number of the snapshot */
   };
 
   typedef DataStorage (Snapshot::*DataStoragePointer); 
