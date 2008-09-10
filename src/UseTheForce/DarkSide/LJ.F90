@@ -43,7 +43,7 @@
 !! Calculates Long Range forces Lennard-Jones interactions.
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: LJ.F90,v 1.29 2008-07-14 12:35:55 gezelter Exp $, $Date: 2008-07-14 12:35:55 $, $Name: not supported by cvs2svn $, $Revision: 1.29 $
+!! @version $Id: LJ.F90,v 1.30 2008-09-10 17:57:55 gezelter Exp $, $Date: 2008-09-10 17:57:55 $, $Name: not supported by cvs2svn $, $Revision: 1.30 $
 
 
 module lj
@@ -266,12 +266,12 @@ contains
 
   end subroutine createMixingMap
           
-  subroutine do_lj_pair(atom1, atom2, d, rij, r2, rcut, sw, vpair, fpair, &
-       pot, f, do_pot)
+  subroutine do_lj_pair(atom1, atom2, d, rij, r2, rcut, sw, vdwMult, &
+       vpair, fpair, pot, f, do_pot)
     
     integer, intent(in) ::  atom1, atom2
     integer :: atid1, atid2, ljt1, ljt2
-    real( kind = dp ), intent(in) :: rij, r2, rcut
+    real( kind = dp ), intent(in) :: rij, r2, rcut, vdwMult
     real( kind = dp ) :: pot, sw, vpair
     real( kind = dp ), dimension(3,nLocal) :: f    
     real( kind = dp ), intent(in), dimension(3) :: d
@@ -348,9 +348,9 @@ contains
        
     endif
 
-    pot_temp = epsilon * (myPot - myPotC)
+    pot_temp = vdwMult * epsilon * (myPot - myPotC)
     vpair = vpair + pot_temp
-    dudr = sw * epsilon * (myDeriv - myDerivC) * sigmai
+    dudr = sw * vdwMult * epsilon * (myDeriv - myDerivC) * sigmai
 
     drdx = d(1) / rij
     drdy = d(2) / rij

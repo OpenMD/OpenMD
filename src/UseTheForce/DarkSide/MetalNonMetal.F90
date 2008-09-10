@@ -42,7 +42,7 @@
 
 !! Calculates Metal-Non Metal interactions.
 !! @author Charles F. Vardeman II 
-!! @version $Id: MetalNonMetal.F90,v 1.16 2008-07-31 18:40:21 gezelter Exp $, $Date: 2008-07-31 18:40:21 $, $Name: not supported by cvs2svn $, $Revision: 1.16 $
+!! @version $Id: MetalNonMetal.F90,v 1.17 2008-09-10 17:57:55 gezelter Exp $, $Date: 2008-09-10 17:57:55 $, $Name: not supported by cvs2svn $, $Revision: 1.17 $
 
 
 module MetalNonMetal
@@ -111,11 +111,11 @@ module MetalNonMetal
 contains
 
 
-  subroutine do_mnm_pair(Atom1, Atom2, D, Rij, R2, Rcut, Sw, Vpair, Fpair, &
-       Pot, A, F,t, Do_pot)
+  subroutine do_mnm_pair(Atom1, Atom2, D, Rij, R2, Rcut, Sw, vdwMult, &
+       Vpair, Fpair, Pot, A, F,t, Do_pot)
     integer, intent(in) ::  atom1, atom2
     integer :: atid1, atid2, ljt1, ljt2
-    real( kind = dp ), intent(in) :: rij, r2, rcut
+    real( kind = dp ), intent(in) :: rij, r2, rcut, vdwMult
     real( kind = dp ) :: pot, sw, vpair
     real( kind = dp ), intent(inout), dimension(3,nLocal) :: f 
     real (kind=dp), intent(in), dimension(9,nLocal) :: A
@@ -145,25 +145,25 @@ contains
     
     select case (interaction_type)    
     case (MNM_LENNARDJONES)
-       call calc_mnm_lennardjones(Atom1, Atom2, D, Rij, R2, Rcut, Sw, Vpair, &
-            Fpair, Pot, F, Do_pot, interaction_id)
+       call calc_mnm_lennardjones(Atom1, Atom2, D, Rij, R2, Rcut, Sw, &
+            vdwMult, Vpair, Fpair, Pot, F, Do_pot, interaction_id)
     case(MNM_REPULSIVEMORSE, MNM_SHIFTEDMORSE)
-       call calc_mnm_morse(Atom1, Atom2, D, Rij, R2, Rcut, Sw, Vpair, Fpair, &
-            Pot, F, Do_pot, interaction_id, interaction_type)
+       call calc_mnm_morse(Atom1, Atom2, D, Rij, R2, Rcut, Sw, vdwMult, &
+            Vpair, Fpair, Pot, F, Do_pot, interaction_id, interaction_type)
     case(MNM_MAW)
-       call calc_mnm_maw(Atom1, Atom2, D, Rij, R2, Rcut, Sw, Vpair, Fpair, &
-            Pot,A, F,t, Do_pot, interaction_id)
+       call calc_mnm_maw(Atom1, Atom2, D, Rij, R2, Rcut, Sw, vdwMult, &
+            Vpair, Fpair, Pot,A, F,t, Do_pot, interaction_id)
     case default
     call handleError("MetalNonMetal","Unknown interaction type")      
     end select
 
   end subroutine do_mnm_pair
 
-  subroutine calc_mnm_lennardjones(Atom1, Atom2, D, Rij, R2, Rcut, Sw, Vpair, &
-    Fpair, Pot, F, Do_pot, interaction_id)
+  subroutine calc_mnm_lennardjones(Atom1, Atom2, D, Rij, R2, Rcut, Sw, &
+       vdwMult,Vpair, Fpair, Pot, F, Do_pot, interaction_id)
     
     integer, intent(in) ::  atom1, atom2
-    real( kind = dp ), intent(in) :: rij, r2, rcut
+    real( kind = dp ), intent(in) :: rij, r2, rcut, vdwMult
     real( kind = dp ) :: pot, sw, vpair
     real( kind = dp ), intent(inout), dimension(3,nLocal) :: f    
     real( kind = dp ), intent(in), dimension(3) :: d
@@ -206,9 +206,9 @@ contains
        myDerivC = 0.0_dp
     endif    
 
-    pot_temp = epsilon * (myPot - myPotC)
+    pot_temp = vdwMult * epsilon * (myPot - myPotC)
     vpair = vpair + pot_temp
-    dudr = sw * epsilon * (myDeriv - myDerivC) * sigmai
+    dudr = sw * vdwMult * epsilon * (myDeriv - myDerivC) * sigmai
 
     drdx = d(1) / rij
     drdy = d(2) / rij
@@ -262,10 +262,10 @@ contains
     return
   end subroutine calc_mnm_lennardjones
 
-  subroutine calc_mnm_morse(Atom1, Atom2, D, Rij, R2, Rcut, Sw, Vpair, Fpair, &
-       Pot, f, Do_pot, interaction_id, interaction_type)
+  subroutine calc_mnm_morse(Atom1, Atom2, D, Rij, R2, Rcut, Sw, vdwMult, &
+       Vpair, Fpair, Pot, f, Do_pot, interaction_id, interaction_type)
     integer, intent(in) ::  atom1, atom2
-    real( kind = dp ), intent(in) :: rij, r2, rcut
+    real( kind = dp ), intent(in) :: rij, r2, rcut, vdwMult
     real( kind = dp ) :: pot, sw, vpair
     real( kind = dp ), intent(inout), dimension(3,nLocal) :: f    
     real( kind = dp ), intent(in), dimension(3) :: d
@@ -357,9 +357,9 @@ contains
        endif
     end select
 
-    pot_temp = (myPot - myPotC)
+    pot_temp = vdwMult * (myPot - myPotC)
     vpair = vpair + pot_temp
-    dudr = sw * (myDeriv - myDerivC)
+    dudr = sw * vdwMult * (myDeriv - myDerivC)
 
     drdx = d(1) / rij
     drdy = d(2) / rij
@@ -414,10 +414,10 @@ contains
     return    
   end subroutine calc_mnm_morse
   
-  subroutine calc_mnm_maw(Atom1, Atom2, D, Rij, R2, Rcut, Sw, Vpair, Fpair, &
-       Pot, A, F,t, Do_pot, interaction_id)
+  subroutine calc_mnm_maw(Atom1, Atom2, D, Rij, R2, Rcut, Sw, vdwMult, &
+       Vpair, Fpair, Pot, A, F,t, Do_pot, interaction_id)
     integer, intent(in) ::  atom1, atom2
-    real( kind = dp ), intent(in) :: rij, r2, rcut
+    real( kind = dp ), intent(in) :: rij, r2, rcut, vdwMult
     real( kind = dp ) :: pot, sw, vpair
     real( kind = dp ), intent(inout), dimension(3,nLocal) :: f    
     real (kind=dp),intent(in), dimension(9,nLocal) :: A
@@ -546,7 +546,7 @@ contains
  
     Vang = ca1 * x2/r2 + cb1 * z/rij + (0.8_dp-ca1/3.0_dp)
 
-    pot_temp = Vmorse*Vang 
+    pot_temp = vdwMult * Vmorse*Vang 
          
     vpair = vpair + pot_temp
     
@@ -608,9 +608,9 @@ contains
     ! do the torques first since they are easy:
     ! remember that these are still in the body fixed axes    
     
-    tx = Vmorse * dVangdux * sw
-    ty = Vmorse * dVangduy * sw
-    tz = Vmorse * dVangduz * sw
+    tx = vdwMult * Vmorse * dVangdux * sw
+    ty = vdwMult * Vmorse * dVangduy * sw
+    tz = vdwMult * Vmorse * dVangduz * sw
 
     ! go back to lab frame using transpose of rotation matrix:
 
@@ -649,9 +649,9 @@ contains
 #endif
     ! Now, on to the forces (still in body frame of water)
 
-    fx = dvdx * sw
-    fy = dvdy * sw
-    fz = dvdz * sw
+    fx = vdwMult * dvdx * sw
+    fy = vdwMult * dvdy * sw
+    fz = vdwMult * dvdz * sw
 
     ! rotate the terms back into the lab frame:
 

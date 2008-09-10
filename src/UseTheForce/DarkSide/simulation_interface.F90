@@ -1,7 +1,7 @@
 subroutine setFortranSim(setThisSim, CnGlobal, CnLocal, c_idents, &
-     CnLocalExcludes, CexcludesLocal, CnGlobalExcludes, CexcludesGlobal, &
-     CmolMembership, Cmfact, CnGroups, CglobalGroupMembership, &
-     status)
+     CnExcludes, Cexcludes, CnOneTwo, ConeTwo, CnOneThree, ConeThree, &
+     CnOneFour, ConeFour, CmolMembership, Cmfact, CnGroups, &
+     CglobalGroupMembership, status)
   use definitions   
   use simulation
 
@@ -9,10 +9,18 @@ subroutine setFortranSim(setThisSim, CnGlobal, CnLocal, c_idents, &
   integer, intent(inout) :: CnGlobal, CnLocal
   integer, dimension(CnLocal),intent(inout) :: c_idents
 
-  integer :: CnLocalExcludes
-  integer, dimension(2,CnLocalExcludes), intent(inout) :: CexcludesLocal
-  integer :: CnGlobalExcludes
-  integer, dimension(CnGlobalExcludes), intent(inout) :: CexcludesGlobal
+  integer :: CnExcludes
+  integer, dimension(2,CnExcludes), intent(inout) :: Cexcludes
+
+  integer :: CnOneTwo
+  integer, dimension(2,CnOneTwo), intent(inout) :: ConeTwo
+
+  integer :: CnOneThree
+  integer, dimension(2,CnOneThree), intent(inout) :: ConeThree
+
+  integer :: CnOneFour
+  integer, dimension(2,CnOneFour), intent(inout) :: ConeFour
+
   integer, dimension(CnGlobal),intent(inout) :: CmolMembership 
   !!  Result status, success = 0, status = -1
   integer, intent(inout) :: status
@@ -23,9 +31,10 @@ subroutine setFortranSim(setThisSim, CnGlobal, CnLocal, c_idents, &
   integer, dimension(CnGlobal), intent(inout):: CglobalGroupMembership
 
   call SimulationSetup(setThisSim, CnGlobal, CnLocal, c_idents, &
-       CnLocalExcludes, CexcludesLocal, CnGlobalExcludes, CexcludesGlobal, &
-       CmolMembership, Cmfact, CnGroups, CglobalGroupMembership, &
-       status)
+       CnExcludes, Cexcludes, CnOneTwo, ConeTwo, CnOneThree, ConeThree, &
+       CnOneFour, ConeFour, CmolMembership, Cmfact, CnGroups, &
+       CglobalGroupMembership, status)
+
 end subroutine setFortranSim
 
 subroutine setFortranBox(cHmat, cHmatInv, cBoxIsOrthorhombic)

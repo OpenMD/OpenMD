@@ -45,11 +45,12 @@
 
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: doForces.F90,v 1.94 2008-07-31 19:10:46 gezelter Exp $, $Date: 2008-07-31 19:10:46 $, $Name: not supported by cvs2svn $, $Revision: 1.94 $
+!! @version $Id: doForces.F90,v 1.95 2008-09-10 17:57:55 gezelter Exp $, $Date: 2008-09-10 17:57:55 $, $Name: not supported by cvs2svn $, $Revision: 1.95 $
 
 
 module doForces
   use force_globals
+  use fForceOptions
   use simulation
   use definitions
   use atype_module
@@ -845,7 +846,7 @@ contains
     integer :: propPack_i, propPack_j
     integer :: loopStart, loopEnd, loop
     integer :: iHash
-    integer :: i1
+    integer :: i1, topoDist
 
     !! the variables for the box dipole moment 
 #ifdef IS_MPI
@@ -1078,8 +1079,10 @@ contains
                             call get_interatomic_vector(q(:,atom1), &
                                  q(:,atom2), d_atm, ratmsq)
 #endif
-                         endif
-                         
+                         endif                        
+
+                         topoDist = getTopoDistance(atom1, atom2)
+
                          if (loop .eq. PREPAIR_LOOP) then
 #ifdef IS_MPI                      
                             call do_prepair(atom1, atom2, ratmsq, d_atm, sw, &
@@ -1094,13 +1097,13 @@ contains
 #ifdef IS_MPI                      
                             call do_pair(atom1, atom2, ratmsq, d_atm, sw, &
                                  do_pot, eFrame, A, f, t, pot_local, vpair, &
-                                 fpair, d_grp, rgrp, rCut)
+                                 fpair, d_grp, rgrp, rCut, topoDist)
                             ! particle_pot will be accumulated from row & column
                             ! arrays later
 #else
                             call do_pair(atom1, atom2, ratmsq, d_atm, sw, &
                                  do_pot, eFrame, A, f, t, pot, vpair, &
-                                 fpair, d_grp, rgrp, rCut)
+                                 fpair, d_grp, rgrp, rCut, topoDist)
                             particle_pot(atom1) = particle_pot(atom1) + vpair*sw
                             particle_pot(atom2) = particle_pot(atom2) + vpair*sw
 #endif
@@ -1331,10 +1334,10 @@ contains
                    rVal = sqrt(ratmsq)
                    call get_switch(ratmsq, sw, dswdr, rVal,in_switching_region)
 #ifdef IS_MPI
-                   call rf_self_excludes(i, j, sw, eFrame, d_atm, rVal, &
+                   call rf_self_excludes(i, j, sw, 1.0_dp, eFrame, d_atm, rVal, &
                         vpair, pot_local(ELECTROSTATIC_POT), f, t, do_pot)
 #else
-                   call rf_self_excludes(i, j, sw, eFrame, d_atm, rVal, &
+                   call rf_self_excludes(i, j, sw, 1.0_dp, eFrame, d_atm, rVal, &
                         vpair, pot(ELECTROSTATIC_POT), f, t, do_pot)
 #endif
                 endif
@@ -1437,7 +1440,7 @@ contains
   end subroutine do_force_loop
 
   subroutine do_pair(i, j, rijsq, d, sw, do_pot, &
-       eFrame, A, f, t, pot, vpair, fpair, d_grp, r_grp, rCut)
+       eFrame, A, f, t, pot, vpair, fpair, d_grp, r_grp, rCut, topoDist)
 
     real( kind = dp ) :: vpair, sw
     real( kind = dp ), dimension(LR_POT_TYPES) :: pot
@@ -1456,7 +1459,8 @@ contains
     real ( kind = dp ), intent(inout) :: d(3)
     real ( kind = dp ), intent(inout) :: d_grp(3)
     real ( kind = dp ), intent(inout) :: rCut 
-    real ( kind = dp ) :: r, pair_pot
+    integer, intent(inout) :: topoDist
+    real ( kind = dp ) :: r, pair_pot, vdwMult, electroMult
     real ( kind = dp ) :: a_k, b_k, c_k, d_k, dx
     integer :: me_i, me_j
     integer :: k
@@ -1477,15 +1481,17 @@ contains
 #endif
 
     iHash = InteractionHash(me_i, me_j)
+    vdwMult = vdwScale(topoDist)
+    electroMult = electrostaticScale(topoDist)
     
     if ( iand(iHash, LJ_PAIR).ne.0 ) then
-       call do_lj_pair(i, j, d, r, rijsq, rcut, sw, vpair, fpair, &
+       call do_lj_pair(i, j, d, r, rijsq, rcut, sw, vdwMult, vpair, fpair, &
             pot(VDW_POT), f, do_pot)
     endif
     
     if ( iand(iHash, ELECTROSTATIC_PAIR).ne.0 ) then
-       call doElectrostaticPair(i, j, d, r, rijsq, rcut, sw, vpair, fpair, &
-            pot(ELECTROSTATIC_POT), eFrame, f, t, do_pot)
+       call doElectrostaticPair(i, j, d, r, rijsq, rcut, sw, electroMult, &
+            vpair, fpair, pot(ELECTROSTATIC_POT), eFrame, f, t, do_pot)
     endif
     
     if ( iand(iHash, STICKY_PAIR).ne.0 ) then
@@ -1499,12 +1505,12 @@ contains
     endif
     
     if ( iand(iHash, GAYBERNE_PAIR).ne.0 ) then
-       call do_gb_pair(i, j, d, r, rijsq, sw, vpair, fpair, &
+       call do_gb_pair(i, j, d, r, rijsq, sw, vdwMult, vpair, fpair, &
             pot(VDW_POT), A, f, t, do_pot)
     endif
     
     if ( iand(iHash, GAYBERNE_LJ).ne.0 ) then
-       call do_gb_pair(i, j, d, r, rijsq, sw, vpair, fpair, &
+       call do_gb_pair(i, j, d, r, rijsq, sw, vdwMult, vpair, fpair, &
             pot(VDW_POT), A, f, t, do_pot)
     endif
     
@@ -1529,8 +1535,13 @@ contains
     endif
      
     if ( iand(iHash, MNM_PAIR).ne.0 ) then       
-       call do_mnm_pair(i, j, d, r, rijsq, rcut, sw, vpair, fpair, &
+       call do_mnm_pair(i, j, d, r, rijsq, rcut, sw, vdwMult, vpair, fpair, &
             pot(VDW_POT), A, f, t, do_pot)
+    endif
+
+
+    if (topoDist .ne. 0) then
+       write(*,*) i, j, vpair, fpair(1), fpair(2), fpair(3)
     endif
 
   end subroutine do_pair
@@ -1709,30 +1720,7 @@ contains
 #ifdef IS_MPI
     !! in MPI, we have to look up the unique IDs for each atom
     unique_id_1 = AtomRowToGlobal(atom1)
-#else
-    !! in the normal loop, the atom numbers are unique
-    unique_id_1 = atom1
-#endif
-
-    !! We were called with only one atom, so just check the global exclude
-    !! list for this atom
-    if (.not. present(atom2)) then
-       do i = 1, nExcludes_global
-          if (excludesGlobal(i) == unique_id_1) then
-             skip_it = .true.
-             return
-          end if
-       end do
-       return 
-    end if
-
-#ifdef IS_MPI
     unique_id_2 = AtomColToGlobal(atom2)
-#else
-    unique_id_2 = atom2
-#endif
-
-#ifdef IS_MPI
     !! this situation should only arise in MPI simulations
     if (unique_id_1 == unique_id_2) then
        skip_it = .true.
@@ -1751,17 +1739,12 @@ contains
           return
        endif
     endif
+#else
+    !! in the normal loop, the atom numbers are unique
+    unique_id_1 = atom1
+    unique_id_2 = atom2
 #endif
-
-    !! the rest of these situations can happen in all simulations:
-    do i = 1, nExcludes_global       
-       if ((excludesGlobal(i) == unique_id_1) .or. &
-            (excludesGlobal(i) == unique_id_2)) then
-          skip_it = .true.
-          return
-       endif
-    enddo
-
+    
     do i = 1, nSkipsForAtom(atom1)
        if (skipsForAtom(atom1, i) .eq. unique_id_2) then
           skip_it = .true.
@@ -1771,6 +1754,33 @@ contains
 
     return
   end function skipThisPair
+
+  function getTopoDistance(atom1, atom2) result(topoDist)
+    integer, intent(in) :: atom1
+    integer, intent(in) :: atom2
+    integer :: topoDist
+    integer :: unique_id_2
+    integer :: i
+
+#ifdef IS_MPI
+    unique_id_2 = AtomColToGlobal(atom2)
+#else
+    unique_id_2 = atom2
+#endif
+
+    ! zero is default for unconnected (i.e. normal) pair interactions
+
+    topoDist = 0
+
+    do i = 1, nTopoPairsForAtom(atom1)
+       if (toposForAtom(atom1, i) .eq. unique_id_2) then
+          topoDist = topoDistance(atom1, i)
+          return
+       endif
+    end do
+
+    return
+  end function getTopoDistance
 
   function FF_UsesDirectionalAtoms() result(doesit)
     logical :: doesit

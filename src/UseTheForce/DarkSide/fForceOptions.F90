@@ -47,7 +47,7 @@
 !!  PURPOSE:
 !!
 !! @author Charles F. Vardeman II 
-!! @version $Id: fForceOptions.F90,v 1.3 2006-06-05 18:44:05 gezelter Exp $
+!! @version $Id: fForceOptions.F90,v 1.4 2008-09-10 17:57:55 gezelter Exp $
 
 !! Handles Mixing options for Fortran.
 
@@ -61,11 +61,13 @@ module  fForceOptions
   
   type(ForceOptions), save :: fortranForceOptions
   logical, save :: haveForceOptions = .false.
+  real(kind=dp), save, dimension(0:3) :: vdwScale
+  real(kind=dp), save, dimension(0:3) :: electrostaticScale
   
   
   public :: ForceOptions
-  public :: getVDW14Scale
-  public :: getElectrostatic14Scale
+  public :: vdwScale
+  public :: electrostaticScale
   public :: getGayBerneMu
   public :: getGayBerneNu
   public :: getEnergyMixingRule
@@ -80,18 +82,18 @@ contains
     type(ForceOptions),intent(in) :: theseOptions
     fortranForceOptions = theseOptions
     haveForceOptions = .true.
+    
+    vdwScale(0) = 1.0_dp     ! default is topologically unconnected
+    vdwScale(1) = theseOptions%vdw12scale
+    vdwScale(2) = theseOptions%vdw13scale
+    vdwScale(3) = theseOptions%vdw14scale
+
+    electrostaticScale(0) = 1.0_dp     ! default is topologically unconnected
+    electrostaticScale(1) = theseOptions%electrostatic12scale
+    electrostaticScale(2) = theseOptions%electrostatic13scale
+    electrostaticScale(3) = theseOptions%electrostatic14scale
   end subroutine setForceOptions
     
-  function getVDW14Scale() result(thisScale)
-    real(kind=dp) :: thisScale
-    thisScale = fortranForceOptions%vdw14scale
-  end function getVDW14Scale
-  
-  function getElectrostatic14Scale() result(thisScale)
-    real(kind=dp) :: thisScale
-    thisScale = fortranForceOptions%electrostatic14scale
-  end function getElectrostatic14Scale
-  
   function getGayBerneMu() result(thisMu)
     real(kind=dp) :: thisMu
     thisMu = fortranForceOptions%GayBerneMu

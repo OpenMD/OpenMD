@@ -507,14 +507,14 @@ contains
 
 
   subroutine doElectrostaticPair(atom1, atom2, d, rij, r2, rcut, sw, &
-       vpair, fpair, pot, eFrame, f, t, do_pot)
+       electroMult, vpair, fpair, pot, eFrame, f, t, do_pot)
 
     logical, intent(in) :: do_pot
 
     integer, intent(in) :: atom1, atom2
     integer :: localError
 
-    real(kind=dp), intent(in) :: rij, r2, sw, rcut
+    real(kind=dp), intent(in) :: rij, r2, sw, rcut, electroMult
     real(kind=dp), intent(in), dimension(3) :: d
     real(kind=dp), intent(inout) :: vpair
     real(kind=dp), intent(inout), dimension(3) :: fpair    
@@ -718,7 +718,7 @@ contains
              c2 = c1*riji
           endif
 
-          preVal = pre11 * q_i * q_j
+          preVal = electroMult * pre11 * q_i * q_j
 
           if (summationMethod .eq. SHIFTED_POTENTIAL) then
              vterm = preVal * (c1 - c1c)
@@ -731,7 +731,7 @@ contains
              dudr  = sw * preVal * (c2c - c2)
   
           elseif (summationMethod .eq. REACTION_FIELD) then
-             rfVal = preRF*rij*rij
+             rfVal = electroMult * preRF*rij*rij
              vterm = preVal * ( riji + rfVal )
              
              dudr  = sw * preVal * ( 2.0_dp*rfVal - riji )*riji
@@ -754,7 +754,7 @@ contains
 
        if (j_is_Dipole) then
           ! pref is used by all the possible methods
-          pref = pre12 * q_i * mu_j
+          pref = electroMult * pre12 * q_i * mu_j
           preSw = sw*pref
 
           if (summationMethod .eq. REACTION_FIELD) then
@@ -825,7 +825,7 @@ contains
           cx2 = cx_j * cx_j
           cy2 = cy_j * cy_j
           cz2 = cz_j * cz_j
-          pref =  pre14 * q_i * one_third
+          pref =  electroMult * pre14 * q_i * one_third
           
           if (screeningMethod .eq. DAMPED) then
              ! assemble the damping variables
@@ -894,7 +894,7 @@ contains
 
        if (j_is_Charge) then
           ! variables used by all the methods
-          pref = pre12 * q_j * mu_i                       
+          pref = electroMult * pre12 * q_j * mu_i                       
           preSw = sw*pref
 
           if (summationMethod .eq. REACTION_FIELD) then
@@ -965,7 +965,7 @@ contains
        if (j_is_Dipole) then
           ! variables used by all methods
           ct_ij = uz_i(1)*uz_j(1) + uz_i(2)*uz_j(2) + uz_i(3)*uz_j(3)
-          pref = pre22 * mu_i * mu_j
+          pref = electroMult * pre22 * mu_i * mu_j
           preSw = sw*pref
 
           if (summationMethod .eq. REACTION_FIELD) then
@@ -1074,7 +1074,7 @@ contains
           cx2 = cx_i * cx_i
           cy2 = cy_i * cy_i
           cz2 = cz_i * cz_i
-          pref = pre14 * q_j * one_third
+          pref = electroMult * pre14 * q_j * one_third
 
           if (screeningMethod .eq. DAMPED) then
              ! assemble the damping variables
@@ -1313,8 +1313,8 @@ contains
     return
   end subroutine self_self
 
-  subroutine rf_self_excludes(atom1, atom2, sw, eFrame, d, rij, vpair, myPot, &
-       f, t, do_pot)
+  subroutine rf_self_excludes(atom1, atom2, sw, electroMult, eFrame, d, &
+       rij, vpair, myPot, f, t, do_pot)
     logical, intent(in) :: do_pot
     integer, intent(in) :: atom1
     integer, intent(in) :: atom2
@@ -1323,7 +1323,7 @@ contains
     integer :: atid1
     integer :: atid2
     real(kind=dp), intent(in) :: rij
-    real(kind=dp), intent(in) :: sw
+    real(kind=dp), intent(in) :: sw, electroMult
     real(kind=dp), intent(in), dimension(3) :: d
     real(kind=dp), intent(inout) :: vpair
     real(kind=dp), dimension(9,nLocal) :: eFrame
@@ -1366,7 +1366,7 @@ contains
        q_i = ElectrostaticMap(atid1)%charge
        q_j = ElectrostaticMap(atid2)%charge
        
-       preVal = pre11 * q_i * q_j
+       preVal = electroMult * pre11 * q_i * q_j
        rfVal = preRF*rij*rij
        vterm = preVal * rfVal
        
@@ -1389,7 +1389,7 @@ contains
        ri2 = riji * riji
        ri3 = ri2 * riji
        
-       pref = pre12 * q_i * mu_j
+       pref = electroMult * pre12 * q_i * mu_j
        vterm = - pref * ct_j * ( ri2 - preRF2*rij )
        myPot = myPot + sw*vterm
        
@@ -1415,7 +1415,7 @@ contains
        ri2 = riji * riji
        ri3 = ri2 * riji
        
-       pref = pre12 * q_j * mu_i
+       pref = electroMult * pre12 * q_j * mu_i
        vterm = pref * ct_i * ( ri2 - preRF2*rij )
        myPot = myPot + sw*vterm
        

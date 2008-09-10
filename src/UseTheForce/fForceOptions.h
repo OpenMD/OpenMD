@@ -10,7 +10,11 @@
 typedef  struct{
   int DistanceMixingRule;
   int EnergyMixingRule;
+  RealType vdw12scale;
+  RealType vdw13scale;
   RealType vdw14scale;
+  RealType electrostatic12scale;  
+  RealType electrostatic13scale;  
   RealType electrostatic14scale;  
   RealType GayBerneMu;  
   RealType GayBerneNu;  
@@ -31,7 +35,11 @@ typedef  struct{
     SEQUENCE
     integer :: DistanceMixingRule
     integer :: EnergyMixingRule
+    real(kind=dp) :: vdw12scale
+    real(kind=dp) :: vdw13scale
     real(kind=dp) :: vdw14scale
+    real(kind=dp) :: electrostatic12scale
+    real(kind=dp) :: electrostatic13scale
     real(kind=dp) :: electrostatic14scale
     real(kind=dp) :: GayBerneMu
     real(kind=dp) :: GayBerneNu

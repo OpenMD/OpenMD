@@ -41,7 +41,7 @@ typedef  struct{
   INTEGER, PARAMETER:: MNM_MAW = 4
 
   ! dummy integer below is a workaround for
-  ! a bug in the intel compiler, which can't
+  ! a bug in the intel compiler, which does not 
   ! seem to pack structs the same way on C and
   ! fortran.
 
@@ -49,8 +49,8 @@ typedef  struct{
     SEQUENCE
     integer :: MNMInteractionType
     integer :: dummy
-    integer :: metal_atid;
-    integer :: nonmetal_atid;
+    integer :: metal_atid
+    integer :: nonmetal_atid
     real(kind=dp) :: R0
     real(kind=dp) :: D0
     real(kind=dp) :: beta0

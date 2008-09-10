@@ -68,10 +68,12 @@ module simulation
 
   integer, public, save :: nLocal, nGlobal
   integer, public, save :: nGroups, nGroupGlobal
-  integer, public, save :: nExcludes_Global = 0
-  integer, public, save :: nExcludes_Local = 0
-  integer, allocatable, dimension(:,:), public :: excludesLocal
-  integer, allocatable, dimension(:),   public :: excludesGlobal
+  integer, public, save :: nExcludes = 0
+  integer, public, save :: nOneTwo = 0
+  integer, public, save :: nOneThree = 0
+  integer, public, save :: nOneFour = 0
+
+  integer, allocatable, dimension(:,:), public :: excludes
   integer, allocatable, dimension(:),   public :: molMembershipList
   integer, allocatable, dimension(:),   public :: groupListRow
   integer, allocatable, dimension(:),   public :: groupStartRow
@@ -81,6 +83,9 @@ module simulation
   integer, allocatable, dimension(:),   public :: groupStartLocal
   integer, allocatable, dimension(:),   public :: nSkipsForAtom
   integer, allocatable, dimension(:,:), public :: skipsForAtom
+  integer, allocatable, dimension(:),   public :: nTopoPairsForAtom
+  integer, allocatable, dimension(:,:),   public :: toposForAtom
+  integer, allocatable, dimension(:,:),   public :: topoDistance
   real(kind=dp), allocatable, dimension(:), public :: mfactRow
   real(kind=dp), allocatable, dimension(:), public :: mfactCol
   real(kind=dp), allocatable, dimension(:), public :: mfactLocal
@@ -126,29 +131,34 @@ module simulation
 contains
 
   subroutine SimulationSetup(setThisSim, CnGlobal, CnLocal, c_idents, &
-       CnLocalExcludes, CexcludesLocal, CnGlobalExcludes, CexcludesGlobal, &
-       CmolMembership, Cmfact, CnGroups, CglobalGroupMembership, &
-       status)    
+       CnExcludes, Cexcludes, CnOneTwo, ConeTwo, CnOneThree, ConeThree, &
+       CnOneFour, ConeFour, CmolMembership, Cmfact, CnGroups, &
+       CglobalGroupMembership, status)    
 
     type (simtype) :: setThisSim
     integer, intent(inout) :: CnGlobal, CnLocal
     integer, dimension(CnLocal),intent(inout) :: c_idents
 
-    integer :: CnLocalExcludes
-    integer, dimension(2,CnLocalExcludes), intent(in) :: CexcludesLocal
-    integer :: CnGlobalExcludes
-    integer, dimension(CnGlobalExcludes), intent(in) :: CexcludesGlobal
+    integer :: CnExcludes
+    integer, dimension(2,CnExcludes), intent(in) :: Cexcludes
+    integer :: CnOneTwo
+    integer, dimension(2,CnOneTwo), intent(in) :: ConeTwo
+    integer :: CnOneThree
+    integer, dimension(2,CnOneThree), intent(in) :: ConeThree
+    integer :: CnOneFour
+    integer, dimension(2,CnOneFour), intent(in) :: ConeFour
+
     integer, dimension(CnGlobal),intent(in) :: CmolMembership 
     !!  Result status, success = 0, status = -1
     integer, intent(out) :: status
     integer :: i, j, me, thisStat, alloc_stat, myNode, id1, id2
-    integer :: ia
+    integer :: ia, jend
 
     !! mass factors used for molecular cutoffs
     real ( kind = dp ), dimension(CnLocal) :: Cmfact
     integer, intent(in):: CnGroups
     integer, dimension(CnGlobal), intent(in):: CglobalGroupMembership
-    integer :: maxSkipsForAtom, glPointer
+    integer :: maxSkipsForAtom, maxToposForAtom, glPointer
 
 #ifdef IS_MPI
     integer, allocatable, dimension(:) :: c_idents_Row
@@ -168,8 +178,7 @@ contains
 
     thisSim = setThisSim
 
-    nExcludes_Global = CnGlobalExcludes
-    nExcludes_Local = CnLocalExcludes
+    nExcludes = CnExcludes
 
     call InitializeForceGlobals(nLocal, thisStat)
     if (thisStat /= 0) then
@@ -269,14 +278,14 @@ contains
        status = -1
        return
     endif
-
+    
     glPointer = 1
-
+    
     do i = 1, nGroupsInRow 
-
+       
        gid = GroupRowToGlobal(i)
        groupStartRow(i) = glPointer       
-
+       
        do j = 1, nAtomsInRow
           aid = AtomRowToGlobal(j)
           if (CglobalGroupMembership(aid) .eq. gid) then
@@ -286,14 +295,14 @@ contains
        enddo
     enddo
     groupStartRow(nGroupsInRow+1) = nAtomsInRow + 1
-
+    
     glPointer = 1
-
+    
     do i = 1, nGroupsInCol
-
+       
        gid = GroupColToGlobal(i)
        groupStartCol(i) = glPointer       
-
+       
        do j = 1, nAtomsInCol
           aid = AtomColToGlobal(j)
           if (CglobalGroupMembership(aid) .eq. gid) then
@@ -371,18 +380,15 @@ contains
 
 #endif
 
-
     ! We build the local atid's for both mpi and nonmpi
     do i = 1, nLocal
-
        me = getFirstMatchingElement(atypes, "c_ident", c_idents(i))
        atid(i) = me
-
     enddo
 
-    do i = 1, nExcludes_Local
-       excludesLocal(1,i) = CexcludesLocal(1,i)
-       excludesLocal(2,i) = CexcludesLocal(2,i)
+    do i = 1, nExcludes
+       excludes(1,i) = Cexcludes(1,i)
+       excludes(2,i) = Cexcludes(2,i)
     enddo
 
 #ifdef IS_MPI
@@ -397,108 +403,240 @@ contains
     endif
 
     maxSkipsForAtom = 0
+
 #ifdef IS_MPI
-    do j = 1, nAtomsInRow
+    jend = nAtomsInRow
 #else
-       do j = 1, nLocal
+    jend = nLocal
 #endif
-          nSkipsForAtom(j) = 0
+    
+    do j = 1, jend
+       nSkipsForAtom(j) = 0
 #ifdef IS_MPI
-          id1 = AtomRowToGlobal(j)
+       id1 = AtomRowToGlobal(j)
 #else 
-          id1 = j
+       id1 = j
 #endif
-          do i = 1, nExcludes_Local
-             if (excludesLocal(1,i) .eq. id1 ) then
-                nSkipsForAtom(j) = nSkipsForAtom(j) + 1
-
-                if (nSkipsForAtom(j) .gt. maxSkipsForAtom) then
-                   maxSkipsForAtom = nSkipsForAtom(j)
-                endif
+       do i = 1, nExcludes
+          if (excludes(1,i) .eq. id1 ) then
+             nSkipsForAtom(j) = nSkipsForAtom(j) + 1
+             
+             if (nSkipsForAtom(j) .gt. maxSkipsForAtom) then
+                maxSkipsForAtom = nSkipsForAtom(j)
              endif
-             if (excludesLocal(2,i) .eq. id1 ) then
-                nSkipsForAtom(j) = nSkipsForAtom(j) + 1
-
-                if (nSkipsForAtom(j) .gt. maxSkipsForAtom) then
-                   maxSkipsForAtom = nSkipsForAtom(j)
-                endif
-             endif
-          end do
-       enddo
-
-#ifdef IS_MPI
-       allocate(skipsForAtom(nAtomsInRow, maxSkipsForAtom), stat=alloc_stat)
-#else
-       allocate(skipsForAtom(nLocal, maxSkipsForAtom), stat=alloc_stat)
-#endif
-       if (alloc_stat /= 0 ) then
-          write(*,*) 'Could not allocate skipsForAtom array'
-          return
-       endif
-
-#ifdef IS_MPI
-       do j = 1, nAtomsInRow
-#else
-          do j = 1, nLocal
-#endif
-             nSkipsForAtom(j) = 0
-#ifdef IS_MPI
-             id1 = AtomRowToGlobal(j)
-#else 
-             id1 = j
-#endif
-             do i = 1, nExcludes_Local
-                if (excludesLocal(1,i) .eq. id1 ) then
-                   nSkipsForAtom(j) = nSkipsForAtom(j) + 1
-                   ! exclude lists have global ID's so this line is 
-                   ! the same in MPI and non-MPI
-                   id2 = excludesLocal(2,i)
-                   skipsForAtom(j, nSkipsForAtom(j)) = id2
-                endif
-                if (excludesLocal(2, i) .eq. id1 ) then
-                   nSkipsForAtom(j) = nSkipsForAtom(j) + 1
-                   ! exclude lists have global ID's so this line is 
-                   ! the same in MPI and non-MPI
-                   id2 = excludesLocal(1,i)
-                   skipsForAtom(j, nSkipsForAtom(j)) = id2
-                endif
-             end do
-          enddo
-
-          do i = 1, nExcludes_Global
-             excludesGlobal(i) = CexcludesGlobal(i)
-          enddo
-
-          do i = 1, nGlobal
-             molMemberShipList(i) = CmolMembership(i)
-          enddo
-
-         call createSimHasAtype(alloc_stat)
-         if (alloc_stat /= 0) then
-            status = -1
-         end if
-         
-         if (status == 0) simulation_setup_complete = .true.
-
-        end subroutine SimulationSetup
-
-        subroutine setBox(cHmat, cHmatInv, cBoxIsOrthorhombic)
-          real(kind=dp), dimension(3,3) :: cHmat, cHmatInv
-          integer :: cBoxIsOrthorhombic
-          integer :: smallest, status
-
-          Hmat = cHmat
-          HmatInv = cHmatInv
-          if (cBoxIsOrthorhombic .eq. 0 ) then
-             boxIsOrthorhombic = .false.
-          else 
-             boxIsOrthorhombic = .true.
           endif
+          if (excludes(2,i) .eq. id1 ) then
+             nSkipsForAtom(j) = nSkipsForAtom(j) + 1
+             
+             if (nSkipsForAtom(j) .gt. maxSkipsForAtom) then
+                maxSkipsForAtom = nSkipsForAtom(j)
+             endif
+          endif
+       end do
+    enddo
+    
+#ifdef IS_MPI
+    allocate(skipsForAtom(nAtomsInRow, maxSkipsForAtom), stat=alloc_stat)
+#else
+    allocate(skipsForAtom(nLocal, maxSkipsForAtom), stat=alloc_stat)
+#endif
+    if (alloc_stat /= 0 ) then
+       write(*,*) 'Could not allocate skipsForAtom array'
+       return
+    endif
+    
+#ifdef IS_MPI
+    jend = nAtomsInRow
+#else
+    jend = nLocal
+#endif
+    do j = 1, jend
+       nSkipsForAtom(j) = 0
+#ifdef IS_MPI
+       id1 = AtomRowToGlobal(j)
+#else 
+       id1 = j
+#endif
+       do i = 1, nExcludes
+          if (excludes(1,i) .eq. id1 ) then
+             nSkipsForAtom(j) = nSkipsForAtom(j) + 1
+             ! exclude lists have global ID's so this line is 
+             ! the same in MPI and non-MPI
+             id2 = excludes(2,i)
+             skipsForAtom(j, nSkipsForAtom(j)) = id2
+          endif
+          if (excludes(2, i) .eq. id1 ) then
+             nSkipsForAtom(j) = nSkipsForAtom(j) + 1
+             ! exclude lists have global ID's so this line is 
+             ! the same in MPI and non-MPI
+             id2 = excludes(1,i)
+             skipsForAtom(j, nSkipsForAtom(j)) = id2
+          endif
+       end do
+    enddo
+           
+    do i = 1, nGlobal
+       molMemberShipList(i) = CmolMembership(i)
+    enddo
 
-          call checkBox()
-          return
-        end subroutine setBox
+#ifdef IS_MPI
+    allocate(nTopoPairsForAtom(nAtomsInRow), stat=alloc_stat)
+#else
+    allocate(nTopoPairsForAtom(nLocal), stat=alloc_stat)
+#endif
+    if (alloc_stat /= 0 ) then
+       thisStat = -1
+       write(*,*) 'Could not allocate nTopoPairsForAtom array'
+       return
+    endif
 
+#ifdef IS_MPI
+    jend = nAtomsInRow
+#else
+    jend = nLocal
+#endif
+    
+    do j = 1, jend
+       nTopoPairsForAtom(j) = 0
+#ifdef IS_MPI
+       id1 = AtomRowToGlobal(j)
+#else 
+       id1 = j
+#endif
+       do i = 1, CnOneTwo
+          if (ConeTwo(1,i) .eq. id1 ) then
+             nTopoPairsForAtom(j) = nTopoPairsForAtom(j) + 1
+          endif
+          if (ConeTwo(2,i) .eq. id1 ) then
+             nTopoPairsForAtom(j) = nTopoPairsForAtom(j) + 1
+          endif
+       end do
+
+       do i = 1, CnOneThree
+          if (ConeThree(1,i) .eq. id1 ) then
+             nTopoPairsForAtom(j) = nTopoPairsForAtom(j) + 1
+          endif
+          if (ConeThree(2,i) .eq. id1 ) then
+             nTopoPairsForAtom(j) = nTopoPairsForAtom(j) + 1
+          endif
+       end do
+
+       do i = 1, CnOneFour
+          if (ConeFour(1,i) .eq. id1 ) then
+             nTopoPairsForAtom(j) = nTopoPairsForAtom(j) + 1
+          endif
+          if (ConeFour(2,i) .eq. id1 ) then
+             nTopoPairsForAtom(j) = nTopoPairsForAtom(j) + 1
+          endif
+       end do
+    enddo
+    
+    maxToposForAtom = maxval(nTopoPairsForAtom)
+#ifdef IS_MPI
+    allocate(toposForAtom(nAtomsInRow, maxToposForAtom), stat=alloc_stat)
+    allocate(topoDistance(nAtomsInRow, maxToposForAtom), stat=alloc_stat)
+#else
+    allocate(toposForAtom(nLocal, maxToposForAtom), stat=alloc_stat)
+    allocate(topoDistance(nLocal, maxToposForAtom), stat=alloc_stat)
+#endif
+    if (alloc_stat /= 0 ) then
+       write(*,*) 'Could not allocate topoDistance array'
+       return
+    endif
+    
+#ifdef IS_MPI
+    jend = nAtomsInRow
+#else
+    jend = nLocal
+#endif
+    do j = 1, jend
+       nTopoPairsForAtom(j) = 0
+#ifdef IS_MPI
+       id1 = AtomRowToGlobal(j)
+#else 
+       id1 = j
+#endif
+       do i = 1, CnOneTwo
+          if (ConeTwo(1,i) .eq. id1 ) then
+             nTopoPairsForAtom(j) = nTopoPairsForAtom(j) + 1
+             id2 = ConeTwo(2,i)
+             toposForAtom(j, nTopoPairsForAtom(j)) = id2
+             topoDistance(j, nTopoPairsForAtom(j)) = 1
+          endif
+          if (ConeTwo(2, i) .eq. id1 ) then
+             nTopoPairsForAtom(j) = nTopoPairsForAtom(j) + 1
+             id2 = ConeTwo(1,i)
+             toposForAtom(j, nTopoPairsForAtom(j)) = id2
+             topoDistance(j, nTopoPairsForAtom(j)) = 1
+          endif
+       end do
+
+       do i = 1, CnOneThree
+          if (ConeThree(1,i) .eq. id1 ) then
+             nTopoPairsForAtom(j) = nTopoPairsForAtom(j) + 1
+             id2 = ConeThree(2,i)
+             toposForAtom(j, nTopoPairsForAtom(j)) = id2
+             topoDistance(j, nTopoPairsForAtom(j)) = 2
+          endif
+          if (ConeThree(2, i) .eq. id1 ) then
+             nTopoPairsForAtom(j) = nTopoPairsForAtom(j) + 1
+             id2 = ConeThree(1,i)
+             toposForAtom(j, nTopoPairsForAtom(j)) = id2
+             topoDistance(j, nTopoPairsForAtom(j)) = 2
+          endif
+       end do
+
+       do i = 1, CnOneFour
+          if (ConeFour(1,i) .eq. id1 ) then
+             nTopoPairsForAtom(j) = nTopoPairsForAtom(j) + 1
+             id2 = ConeFour(2,i)
+             toposForAtom(j, nTopoPairsForAtom(j)) = id2
+             topoDistance(j, nTopoPairsForAtom(j)) = 3
+          endif
+          if (ConeFour(2, i) .eq. id1 ) then
+             nTopoPairsForAtom(j) = nTopoPairsForAtom(j) + 1
+             id2 = ConeFour(1,i)
+             toposForAtom(j, nTopoPairsForAtom(j)) = id2
+             topoDistance(j, nTopoPairsForAtom(j)) = 3
+          endif
+       end do
+    enddo
+    
+
+    do i = 1, nLocal
+       do j = 1, nTopoPairsForAtom(i)
+          
+          write(*,*) 'pair: ', i, ', ', toposForAtom(i,j), ' = ', topoDistance(i,j)
+       enddo
+    enddo
+
+
+    call createSimHasAtype(alloc_stat)
+    if (alloc_stat /= 0) then
+       status = -1
+    end if
+    
+    if (status == 0) simulation_setup_complete = .true.
+    
+  end subroutine SimulationSetup
+
+  subroutine setBox(cHmat, cHmatInv, cBoxIsOrthorhombic)
+    real(kind=dp), dimension(3,3) :: cHmat, cHmatInv
+    integer :: cBoxIsOrthorhombic
+    integer :: smallest, status
+    
+    Hmat = cHmat
+    HmatInv = cHmatInv
+    if (cBoxIsOrthorhombic .eq. 0 ) then
+       boxIsOrthorhombic = .false.
+    else 
+       boxIsOrthorhombic = .true.
+    endif
+    
+    call checkBox()
+    return
+  end subroutine setBox
+  
         subroutine checkBox()
 
           integer :: i
@@ -703,13 +841,7 @@ contains
 
           call FreeSimGlobals()    
 
-          allocate(excludesLocal(2,nExcludes_Local), stat=alloc_stat)
-          if (alloc_stat /= 0 ) then
-             thisStat = -1
-             return
-          endif
-
-          allocate(excludesGlobal(nExcludes_Global), stat=alloc_stat)
+          allocate(excludes(2,nExcludes), stat=alloc_stat)
           if (alloc_stat /= 0 ) then
              thisStat = -1
              return
@@ -726,7 +858,11 @@ contains
         subroutine FreeSimGlobals()
 
           !We free in the opposite order in which we allocate in.
-
+          if (allocated(topoDistance)) deallocate(topoDistance)
+          if (allocated(toposForAtom)) deallocate(toposForAtom)
+          if (allocated(nTopoPairsForAtom)) deallocate(nTopoPairsForAtom)
+          if (allocated(skipsForAtom)) deallocate(skipsForAtom)
+          if (allocated(nSkipsForAtom)) deallocate(nSkipsForAtom)
           if (allocated(skipsForAtom)) deallocate(skipsForAtom)
           if (allocated(nSkipsForAtom)) deallocate(nSkipsForAtom)
           if (allocated(mfactLocal)) deallocate(mfactLocal)
@@ -736,9 +872,8 @@ contains
           if (allocated(groupListRow)) deallocate(groupListRow)    
           if (allocated(groupStartCol)) deallocate(groupStartCol)
           if (allocated(groupStartRow)) deallocate(groupStartRow)     
-          if (allocated(molMembershipList)) deallocate(molMembershipList)     
-          if (allocated(excludesGlobal)) deallocate(excludesGlobal)
-          if (allocated(excludesLocal)) deallocate(excludesLocal)
+          if (allocated(molMembershipList)) deallocate(molMembershipList)    
+          if (allocated(excludes)) deallocate(excludes)
 
         end subroutine FreeSimGlobals
 

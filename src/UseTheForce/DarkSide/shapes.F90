@@ -398,8 +398,8 @@ contains
 
   end function getShapeCut
 
-  subroutine do_shape_pair(atom1, atom2, d, rij, r2, sw, vpair, fpair, &
-       pot, A, f, t, do_pot)
+  subroutine do_shape_pair(atom1, atom2, d, rij, r2, sw, &
+       vpair, fpair, pot, A, f, t, do_pot)
 
     INTEGER, PARAMETER:: LMAX         = 64
     INTEGER, PARAMETER:: MMAX         = 64
