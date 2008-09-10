@@ -124,7 +124,6 @@ namespace oopse {
 	  myKeys.push_back((*i)->getName());
 	  myKeys.push_back((*j)->getName());
 
-          std::cerr << "looking for " << myKeys[0] << " " << myKeys[1] << "\n";
 	  BondType* bondType = bondTypeCont_.find(myKeys);
 	  if (bondType) {
 	    foundBonds.push_back(std::make_pair(bondTypeScore, myKeys));
@@ -142,7 +141,6 @@ namespace oopse {
         int bestScore = foundBonds[0].first;
         std::vector<std::string> theKeys = foundBonds[0].second;
         
-        std::cout << "best matching bond = " << theKeys[0] << "\t" << theKeys[1]  << "\t(score = "<< bestScore << ")\n";      
         BondType* bestType = bondTypeCont_.find(theKeys);
         
         return bestType;
@@ -226,9 +224,7 @@ namespace oopse {
         std::sort(foundBends.begin(), foundBends.end());
         int jscore = foundBends[0].first;
         int ikscore = foundBends[0].second;
-        std::vector<std::string> theKeys = foundBends[0].third;
-        
-        std::cout << "best matching bend = " << theKeys[0] << "\t" <<theKeys[1]  << "\t" << theKeys[2] << "\t(scores = "<< jscore << "\t" << ikscore << ")\n";      
+        std::vector<std::string> theKeys = foundBends[0].third;       
         
         BendType* bestType = bendTypeCont_.find(theKeys);  
         return bestType;
@@ -332,8 +328,6 @@ namespace oopse {
         int ilscore = foundTorsions[0].second;
         std::vector<std::string> theKeys = foundTorsions[0].third;
         
-        std::cout << "best matching torsion = " << theKeys[0] << "\t" <<theKeys[1]  << "\t" << theKeys[2] << "\t" << theKeys[3] << "\t(scores = "<< jkscore << "\t" << ilscore << ")\n";
-                
         TorsionType* bestType = torsionTypeCont_.find(theKeys);
         return bestType;
       } else {
@@ -435,8 +429,6 @@ namespace oopse {
         int jklscore = foundInversions[0].second;
         std::vector<std::string> theKeys = foundInversions[0].third;
         
-        std::cout << "best matching inversion = " << theKeys[0] << "\t" <<theKeys[1]  << "\t" << theKeys[2] << "\t" << theKeys[3] << "\t(scores = "<< iscore << "\t" << jklscore << ")\n";
-                
         InversionType* bestType = inversionTypeCont_.find(theKeys);
         return bestType;
       } else {

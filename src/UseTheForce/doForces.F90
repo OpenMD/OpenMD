@@ -45,7 +45,7 @@
 
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: doForces.F90,v 1.95 2008-09-10 17:57:55 gezelter Exp $, $Date: 2008-09-10 17:57:55 $, $Name: not supported by cvs2svn $, $Revision: 1.95 $
+!! @version $Id: doForces.F90,v 1.96 2008-09-10 19:40:06 cli2 Exp $, $Date: 2008-09-10 19:40:06 $, $Name: not supported by cvs2svn $, $Revision: 1.96 $
 
 
 module doForces
@@ -1481,9 +1481,10 @@ contains
 #endif
 
     iHash = InteractionHash(me_i, me_j)
+
     vdwMult = vdwScale(topoDist)
     electroMult = electrostaticScale(topoDist)
-    
+
     if ( iand(iHash, LJ_PAIR).ne.0 ) then
        call do_lj_pair(i, j, d, r, rijsq, rcut, sw, vdwMult, vpair, fpair, &
             pot(VDW_POT), f, do_pot)
@@ -1537,11 +1538,6 @@ contains
     if ( iand(iHash, MNM_PAIR).ne.0 ) then       
        call do_mnm_pair(i, j, d, r, rijsq, rcut, sw, vdwMult, vpair, fpair, &
             pot(VDW_POT), A, f, t, do_pot)
-    endif
-
-
-    if (topoDist .ne. 0) then
-       write(*,*) i, j, vpair, fpair(1), fpair(2), fpair(3)
     endif
 
   end subroutine do_pair

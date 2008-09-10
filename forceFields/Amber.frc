@@ -1,49 +1,17 @@
 begin Options
-      Name                   = "Amber"
+      Name                    "Amber"
+      vdW-14-scale            0.5         
+      electrostatic-14-scale  0.83333333333333333
 end Options
 
 begin BaseAtomTypes
 //number		name		mass	 (amu)
-CT              12.01
-C               12.01
-CA              12.01
-CM              12.01
-CC              12.01
-CV              12.01
-CW              12.01
-CR              12.01
-CB              12.01
-C*              12.01
-CN              12.01
-CK              12.01
-CQ              12.01
-N               14.01
-NA              14.01
-NB              14.01
-NC              14.01
-N*              14.01
-N2              14.01
-N3              14.01
-OW              16.0
-OH              16.0
-OS              16.0
-O               16.0
-O2              16.0
-S               32.06
-SH              32.06
-P               30.97
-H               1.008
-HW              1.008
-HO              1.008
-HS              1.008
-HA              1.008
-HC              1.008
-H1              1.008
-H2              1.008
-H3		1.008
-HP		1.008
-H4		1.008
-H5		1.008
+C		12.01
+N		14.01
+O		16.0
+S		32.06
+P		30.97
+H		1.008
 Li+             6.940
 Na+             22.990
 K+              39.100
@@ -58,6 +26,40 @@ end BaseAtomTypes
 
 begin AtomTypes
 //name		baseatomtype
+CT              C
+CA              C
+CM              C
+CC              C
+CV              C
+CW              C
+CR              C
+CB              C
+C*              C
+CN              C
+CK              C
+CQ              C
+NA              N
+NB              N
+NC              N
+N*              N
+N2              N
+N3              N
+OW              O
+OH              O
+OS              O
+O2              O
+SH              S
+HW              H
+HO              H
+HS              H
+HA              H
+HC              H
+H1              H
+H2              H
+H3		H
+HP		H
+H4		H
+H5		H
 GLY-N                   N
 GLY-CA                  CT
 GLY-C                   C
@@ -80,10 +82,8 @@ VAL-O                   O
 VAL-HA                  H1
 VAL-CB                  CT
 VAL-HB                  HC
-VAL-CG1                 CT
-VAL-HG1                 HC
-VAL-CG2                 CT
-VAL-HG2                 HC
+VAL-CG                  CT
+VAL-HG                  HC
 LEU-N                   N
 LEU-CA                  CT
 LEU-C                   C
@@ -94,10 +94,8 @@ LEU-CB                  CT
 LEU-HB                  HC
 LEU-CG                  CT
 LEU-HG                  HC
-LEU-CD1                 CT
-LEU-HD1                 HC
-LEU-CD2                 CT
-LEU-HD2                 HC
+LEU-CD                  CT
+LEU-HD                  HC
 ILE-N                   N
 ILE-CA                  CT
 ILE-C                   C
@@ -194,7 +192,7 @@ TYR-CE                  CA
 TYR-HE                  HA
 TYR-CZ                  CA
 TYR-OH                  OH
-TYR-HH                  HO
+TYR-HO                  HO
 TRP-N                   N
 TRP-CA                  CT
 TRP-C                   C
@@ -523,12 +521,20 @@ NGLU-C                  C
 NGLU-HN                 H
 NGLU-O                  O
 NGLU-HA                 H1
-NCLN-N                  N3
-NCLN-CA                 CT
-NCLN-C                  C
-NCLN-HN                 H
-NCLN-O                  O
-NCLN-HA                 H1
+NGLN-N                  N3
+NGLN-CA                 CT
+NGLN-C                  C
+NGLN-HN                 H
+NGLN-O                  O
+NGLN-HA                 H1
+NGLN-CB                 CT
+NGLN-HB                 HC
+NGLN-CG                 CT
+NGLN-HG                 HC
+NGLN-CD                 C
+NGLN-OE1                O
+NGLN-NE2                N
+NGLN-HE2                H
 NMET-N                  N3
 NMET-CA                 CT
 NMET-C                  C
@@ -616,7 +622,14 @@ CPRO-N                  N
 CPRO-CA                 CT
 CPRO-C                  C
 CPRO-OXT                O2
+CPRO-O                  O
 CPRO-HA                 H1
+CPRO-CB                 CT
+CPRO-HB                 HC
+CPRO-CG                 CT
+CPRO-HG                 HC
+CPRO-CD                 CT
+CPRO-HD                 H1
 CPHE-N                  N
 CPHE-CA                 CT
 CPHE-C                  C
@@ -988,10 +1001,8 @@ VAL-O                   -0.5679
 VAL-HA                  0.0969
 VAL-CB                  0.2985
 VAL-HB                  -0.0297
-VAL-CG1                 -0.3192
-VAL-HG1                 0.0791
-VAL-CG2                 -0.3192
-VAL-HG2                 0.0791
+VAL-CG                 -0.3192
+VAL-HG                   0.0791
 LEU-N                   -0.4157
 LEU-CA                  -0.0518
 LEU-C                   0.5973
@@ -1002,10 +1013,8 @@ LEU-CB                  -0.1102
 LEU-HB                  0.0457
 LEU-CG                  0.3531
 LEU-HG                  -0.0361
-LEU-CD1                 -0.4121
-LEU-HD1                 0.1000
-LEU-CD2                 -0.4121
-LEU-HD2                 0.1000
+LEU-CD                  -0.4121
+LEU-HD                  0.1000
 ILE-N                   -0.4157
 ILE-CA                  -0.0597
 ILE-C                   0.5973
@@ -1102,7 +1111,7 @@ TYR-CE                  -0.2341
 TYR-HE                  0.1656
 TYR-CZ                  0.3226
 TYR-OH                  -0.5579
-TYR-HH                  0.3992
+TYR-HO                  0.3992
 TRP-N                   -0.4157
 TRP-CA                  -0.0275
 TRP-C                   0.5973
@@ -1431,12 +1440,12 @@ NGLU-C                  0.5621
 NGLU-HN                 0.2391
 NGLU-O                  -0.5889
 NGLU-HA                 0.1202
-NCLN-N                  0.1493
-NCLN-CA                 0.0769
-NCLN-C                  0.6123
-NCLN-HN                 0.1996
-NCLN-O                  -0.5713
-NCLN-HA                 0.1015
+NGLN-N                  0.1493
+NGLN-CA                 0.0769
+NGLN-C                  0.6123
+NGLN-HN                 0.1996
+NGLN-O                  -0.5713
+NGLN-HA                 0.1015
 NMET-N                  0.1592
 NMET-CA                 0.0429
 NMET-C                  0.6123
@@ -2556,47 +2565,47 @@ end TorsionTypes
 
 
 begin InversionTypes
-CT      N       C       O       ImproperCosine	10.500000       2       180.000000
-CM      NA      C       O       ImproperCosine	10.500000       2       180.000000
-CB      NA      C       O       ImproperCosine	10.500000       2       180.000000
-N*      NA      C       O       ImproperCosine	10.500000       2       180.000000
-CT      O2      C       O2      ImproperCosine	10.500000       2       180.000000
-CA      CA      CA      CT      ImproperCosine	1.100000        2       180.000000
-CA      CA      CA      OH      ImproperCosine	1.100000        2       180.000000
-CA      CA      CA      HA      ImproperCosine	1.100000        2       180.000000
-CN      CA      CA      HA      ImproperCosine	1.100000        2       180.000000
-NC      CM      CA      N2      ImproperCosine	1.100000        2       180.000000
-CA      CB      CA      HA      ImproperCosine	1.100000        2       180.000000
-CB      NC      CA      N2      ImproperCosine	1.100000        2       180.000000
-NA      NC      CA      N2      ImproperCosine	1.100000        2       180.000000
-N2      N2      CA      N2      ImproperCosine	10.500000       2       180.000000
-CM      CA      CM      HA      ImproperCosine	1.100000        2       180.000000
-C       CM      CM      CT      ImproperCosine	1.100000        2       180.000000
-C       CM      CM      HA      ImproperCosine	1.100000        2       180.000000
-N*      CM      CM      H4      ImproperCosine	1.100000        2       180.000000
-NA      CV      CC      CT      ImproperCosine	1.100000        2       180.000000
-NA      CW      CC      CT      ImproperCosine	1.100000        2       180.000000
-NB      CW      CC      CT      ImproperCosine	1.100000        2       180.000000
-CC      NB      CV      H4      ImproperCosine	1.100000        2       180.000000
-CC      NA      CW      H4      ImproperCosine	1.100000        2       180.000000
-C*      NA      CW      H4      ImproperCosine	1.100000        2       180.000000
-NA      NA      CR      H5      ImproperCosine	1.100000        2       180.000000
-NB      NA      CR      H5      ImproperCosine	1.100000        2       180.000000
-NA      NB      CR      H5      ImproperCosine	1.100000        2       180.000000
-CW      CB      C*      CT      ImproperCosine	1.100000        2       180.000000
-NB      N*      CK      H5      ImproperCosine	1.100000        2       180.000000
-NC      NC      CQ      H5      ImproperCosine	1.100000        2       180.000000
-C       CT      N       CT      ImproperCosine	1.000000        2       180.000000
-C       CT      N       H       ImproperCosine	1.000000        2       180.000000
-C       H       N       H       ImproperCosine	1.000000        2       180.000000
-C       C       NA      H       ImproperCosine	1.000000        2       180.000000
-C       CA      NA      H       ImproperCosine	1.000000        2       180.000000
-CR      CW      NA      H       ImproperCosine	1.000000        2       180.000000
-CC      CR      NA      H       ImproperCosine	1.000000        2       180.000000
-CW      CN      NA      H       ImproperCosine	1.000000        2       180.000000
-CM      C       N*      CT      ImproperCosine	1.000000        2       180.000000
-CK      CB      N*      CT      ImproperCosine	1.000000        2       180.000000
-CT      CA      N2      H       ImproperCosine	1.000000        2       180.000000
-CA      H       N2      H       ImproperCosine	1.000000        2       180.000000
+C       CT      N       O       AmberImproper	10.500000
+C       CM      NA      O       AmberImproper	10.500000
+C       CB      NA      O       AmberImproper	10.500000
+C       N*      NA      O       AmberImproper	10.500000
+C       CT      O2      O2      AmberImproper	10.500000
+CA      CA      CA      CT      AmberImproper	1.100000 
+CA      CA      CA      OH      AmberImproper	1.100000 
+CA      CA      CA      HA      AmberImproper	1.100000 
+CA      CN      CA      HA      AmberImproper	1.100000 
+CA      NC      CM      N2      AmberImproper	1.100000 
+CA      CA      CB      HA      AmberImproper	1.100000 
+CA      CB      NC      N2      AmberImproper	1.100000 
+CA      NA      NC      N2      AmberImproper	1.100000 
+CA      N2      N2      N2      AmberImproper	10.500000
+CM      CM      CA      HA      AmberImproper	1.100000 
+CM      C       CM      CT      AmberImproper	1.100000 
+CM      C       CM      HA      AmberImproper	1.100000 
+CM      N*      CM      H4      AmberImproper	1.100000 
+CC      NA      CV      CT      AmberImproper	1.100000 
+CC      NA      CW      CT      AmberImproper	1.100000 
+CC      NB      CW      CT      AmberImproper	1.100000 
+CV      CC      NB      H4      AmberImproper	1.100000 
+CW      CC      NA      H4      AmberImproper	1.100000 
+CW      C*      NA      H4      AmberImproper	1.100000 
+CR      NA      NA      H5      AmberImproper	1.100000 
+CR      NB      NA      H5      AmberImproper	1.100000 
+CR      NA      NB      H5      AmberImproper	1.100000 
+C*      CW      CB      CT      AmberImproper	1.100000 
+CK      NB      N*      H5      AmberImproper	1.100000 
+CQ      NC      NC      H5      AmberImproper	1.100000 
+N       C       CT      CT      AmberImproper	1.000000 
+N       C       CT      H       AmberImproper	1.000000 
+N       C       H       H       AmberImproper	1.000000 
+NA      C       C       H       AmberImproper	1.000000 
+NA      C       CA      H       AmberImproper	1.000000 
+NA      CR      CW      H       AmberImproper	1.000000 
+NA      CC      CR      H       AmberImproper	1.000000 
+NA      CW      CN      H       AmberImproper	1.000000 
+N*      CM      C       CT      AmberImproper	1.000000 
+N*      CK      CB      CT      AmberImproper	1.000000 
+N2      CT      CA      H       AmberImproper	1.000000 
+N2      CA      H       H       AmberImproper	1.000000 
 end InversionTypes
  
