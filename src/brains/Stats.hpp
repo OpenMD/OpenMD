@@ -70,8 +70,8 @@ namespace oopse {
       TEMPERATURE,
       PRESSURE,
       VOLUME,
-			HULLVOLUME,
-			GYRVOLUME,
+      HULLVOLUME,
+      GYRVOLUME,
       CONSERVED_QUANTITY,             
       TRANSLATIONAL_KINETIC,
       ROTATIONAL_KINETIC,
@@ -97,6 +97,7 @@ namespace oopse {
       BOX_DIPOLE_X,
       BOX_DIPOLE_Y,
       BOX_DIPOLE_Z,
+      TAGGED_PAIR_DISTANCE,
       ENDINDEX  //internal use
     };
 

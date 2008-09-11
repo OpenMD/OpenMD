@@ -33,6 +33,7 @@ GNU General Public License for more details.
 #include <cstdlib>
 #include <string>
 #include <fstream>
+#include <cstdlib>
 #include "utils/ElementsTable.hpp"
 #include "utils/simError.h"
 #include "io/basic_ifstrstream.hpp"

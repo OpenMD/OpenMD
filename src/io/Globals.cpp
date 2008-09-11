@@ -93,6 +93,8 @@ Globals::Globals() {
   DefineOptionalParameter(ThermIntOmegaSpringConst, "thermIntOmegaSpringConst");
   DefineOptionalParameter(SurfaceTension, "surfaceTension");
   DefineOptionalParameter(PrintPressureTensor, "printPressureTensor");
+  DefineOptionalParameter(TaggedAtomPair, "taggedAtomPair");
+  DefineOptionalParameter(PrintTaggedPairDistance, "printTaggedPairDistance");
   DefineOptionalParameter(CutoffPolicy, "cutoffPolicy");
   DefineOptionalParameter(SwitchingFunctionType, "switchingFunctionType");
   DefineOptionalParameter(HydroPropFile, "HydroPropFile");

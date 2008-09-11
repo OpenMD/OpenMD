@@ -234,15 +234,15 @@ namespace oopse {
 
     if (simParams->havePrintPressureTensor() && 
 	simParams->getPrintPressureTensor()){
-        mask.set(Stats::PRESSURE_TENSOR_XX);
-        mask.set(Stats::PRESSURE_TENSOR_XY);
-        mask.set(Stats::PRESSURE_TENSOR_XZ);
-        mask.set(Stats::PRESSURE_TENSOR_YX);
-        mask.set(Stats::PRESSURE_TENSOR_YY);
-        mask.set(Stats::PRESSURE_TENSOR_YZ);
-        mask.set(Stats::PRESSURE_TENSOR_ZX);
-        mask.set(Stats::PRESSURE_TENSOR_ZY);
-        mask.set(Stats::PRESSURE_TENSOR_ZZ);
+      mask.set(Stats::PRESSURE_TENSOR_XX);
+      mask.set(Stats::PRESSURE_TENSOR_XY);
+      mask.set(Stats::PRESSURE_TENSOR_XZ);
+      mask.set(Stats::PRESSURE_TENSOR_YX);
+      mask.set(Stats::PRESSURE_TENSOR_YY);
+      mask.set(Stats::PRESSURE_TENSOR_YZ);
+      mask.set(Stats::PRESSURE_TENSOR_ZX);
+      mask.set(Stats::PRESSURE_TENSOR_ZY);
+      mask.set(Stats::PRESSURE_TENSOR_ZZ);
     }
     
     if (simParams->getAccumulateBoxDipole()) {
@@ -250,6 +250,13 @@ namespace oopse {
       mask.set(Stats::BOX_DIPOLE_Y);
       mask.set(Stats::BOX_DIPOLE_Z);
     }
+    
+    if (simParams->haveTaggedAtomPair() && simParams->havePrintTaggedPairDistance()) {
+      if (simParams->getPrintTaggedPairDistance()) {
+        mask.set(Stats::TAGGED_PAIR_DISTANCE);
+      }
+    }
+      
 
      return new StatWriter(info_->getStatFileName(), mask);
   }

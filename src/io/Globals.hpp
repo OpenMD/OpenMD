@@ -55,78 +55,82 @@
 #include "utils/ParameterManager.hpp"
 
 namespace oopse {
-class Globals : public DataHolder {
+  class Globals : public DataHolder {
   public:
+    typedef std::pair<int, int> intPair;
+
     Globals();
     virtual ~Globals();
     
-  DeclareParameter(ForceField, std::string);
-  DeclareParameter(TargetTemp, RealType);
-  DeclareParameter(Ensemble, std::string);
-  DeclareParameter(Dt, RealType);
-  DeclareParameter(RunTime, RealType);
-  DeclareParameter(FinalConfig, std::string);
-  DeclareParameter(SampleTime, RealType);
-  DeclareParameter(ResetTime, RealType);
-  DeclareParameter(StatusTime, RealType);
-  DeclareParameter(CutoffRadius, RealType);
-  DeclareParameter(SwitchingRadius, RealType);
-  DeclareParameter(TempSet, bool);
-  DeclareParameter(ThermalTime, RealType);
-  DeclareParameter(UsePeriodicBoundaryConditions, bool);
-  DeclareParameter(TargetPressure, RealType);
-  DeclareParameter(UseAtomicVirial, bool);
-  DeclareParameter(TauThermostat, RealType);
-  DeclareParameter(TauBarostat, RealType);
-  DeclareParameter(ZconsTime, RealType);
-  DeclareParameter(ZconsTol, RealType);
-  DeclareParameter(ZconsForcePolicy, std::string);
-  DeclareParameter(Seed, int);
-  DeclareParameter(UseInitalTime, bool);
-  DeclareParameter(UseIntialExtendedSystemState, bool);
-  DeclareParameter(OrthoBoxTolerance, RealType);
-  DeclareParameter(Minimizer, std::string);
-  DeclareParameter(MinimizerMaxIter, RealType);
-  DeclareParameter(MinimizerWriteFrq, int);
-  DeclareParameter(MinimizerStepSize, RealType);
-  DeclareParameter(MinimizerFTol, RealType);
-  DeclareParameter(MinimizerGTol, RealType);
-  DeclareParameter(MinimizerLSTol, RealType);
-  DeclareParameter(MinimizerLSMaxIter, int);
-  DeclareParameter(ZconsGap, RealType);
-  DeclareParameter(ZconsFixtime, RealType);
-  DeclareParameter(ZconsUsingSMD, bool);
-  DeclareParameter(UseSolidThermInt, bool);
-  DeclareParameter(UseLiquidThermInt, bool);
-  DeclareParameter(ThermodynamicIntegrationLambda, RealType);
-  DeclareParameter(ThermodynamicIntegrationK, RealType);
-  DeclareParameter(ForceFieldVariant, std::string);
-  DeclareParameter(ForceFieldFileName, std::string);
-  DeclareParameter(ThermIntDistSpringConst, RealType);
-  DeclareParameter(ThermIntThetaSpringConst, RealType);
-  DeclareParameter(ThermIntOmegaSpringConst, RealType);
-  DeclareParameter(SurfaceTension, RealType);
-  DeclareParameter(PrintPressureTensor, bool);
-  DeclareParameter(ElectrostaticSummationMethod, std::string);
-  DeclareParameter(ElectrostaticScreeningMethod, std::string);
-  DeclareParameter(DampingAlpha, RealType);
-  DeclareParameter(Dielectric, RealType);
-  DeclareParameter(CutoffPolicy, std::string);
-  DeclareParameter(SwitchingFunctionType, std::string);
-  DeclareParameter(CompressDumpFile, bool);
-  DeclareParameter(OutputForceVector, bool);
-  DeclareParameter(SkinThickness, RealType);
-  DeclareParameter(StatFileFormat, std::string);    
-  DeclareParameter(HydroPropFile, std::string);
-  DeclareParameter(Viscosity, RealType);
-  DeclareParameter(BeadSize, RealType);  
-  DeclareParameter(UseSphericalBoundaryConditions, bool);
-  DeclareParameter(FrozenBufferRadius, RealType);
-  DeclareParameter(LangevinBufferRadius, RealType);
-  DeclareParameter(AccumulateBoxDipole, bool);
-  DeclareParameter(NeighborListNeighbors,int);
- 
-
+    DeclareParameter(ForceField, std::string);
+    DeclareParameter(TargetTemp, RealType);
+    DeclareParameter(Ensemble, std::string);
+    DeclareParameter(Dt, RealType);
+    DeclareParameter(RunTime, RealType);
+    DeclareParameter(FinalConfig, std::string);
+    DeclareParameter(SampleTime, RealType);
+    DeclareParameter(ResetTime, RealType);
+    DeclareParameter(StatusTime, RealType);
+    DeclareParameter(CutoffRadius, RealType);
+    DeclareParameter(SwitchingRadius, RealType);
+    DeclareParameter(TempSet, bool);
+    DeclareParameter(ThermalTime, RealType);
+    DeclareParameter(UsePeriodicBoundaryConditions, bool);
+    DeclareParameter(TargetPressure, RealType);
+    DeclareParameter(UseAtomicVirial, bool);
+    DeclareParameter(TauThermostat, RealType);
+    DeclareParameter(TauBarostat, RealType);
+    DeclareParameter(ZconsTime, RealType);
+    DeclareParameter(ZconsTol, RealType);
+    DeclareParameter(ZconsForcePolicy, std::string);
+    DeclareParameter(Seed, int);
+    DeclareParameter(UseInitalTime, bool);
+    DeclareParameter(UseIntialExtendedSystemState, bool);
+    DeclareParameter(OrthoBoxTolerance, RealType);
+    DeclareParameter(Minimizer, std::string);
+    DeclareParameter(MinimizerMaxIter, RealType);
+    DeclareParameter(MinimizerWriteFrq, int);
+    DeclareParameter(MinimizerStepSize, RealType);
+    DeclareParameter(MinimizerFTol, RealType);
+    DeclareParameter(MinimizerGTol, RealType);
+    DeclareParameter(MinimizerLSTol, RealType);
+    DeclareParameter(MinimizerLSMaxIter, int);
+    DeclareParameter(ZconsGap, RealType);
+    DeclareParameter(ZconsFixtime, RealType);
+    DeclareParameter(ZconsUsingSMD, bool);
+    DeclareParameter(UseSolidThermInt, bool);
+    DeclareParameter(UseLiquidThermInt, bool);
+    DeclareParameter(ThermodynamicIntegrationLambda, RealType);
+    DeclareParameter(ThermodynamicIntegrationK, RealType);
+    DeclareParameter(ForceFieldVariant, std::string);
+    DeclareParameter(ForceFieldFileName, std::string);
+    DeclareParameter(ThermIntDistSpringConst, RealType);
+    DeclareParameter(ThermIntThetaSpringConst, RealType);
+    DeclareParameter(ThermIntOmegaSpringConst, RealType);
+    DeclareParameter(SurfaceTension, RealType);
+    DeclareParameter(PrintPressureTensor, bool);
+    DeclareParameter(TaggedAtomPair, intPair);
+    DeclareParameter(PrintTaggedPairDistance, bool);
+    DeclareParameter(ElectrostaticSummationMethod, std::string);
+    DeclareParameter(ElectrostaticScreeningMethod, std::string);
+    DeclareParameter(DampingAlpha, RealType);
+    DeclareParameter(Dielectric, RealType);
+    DeclareParameter(CutoffPolicy, std::string);
+    DeclareParameter(SwitchingFunctionType, std::string);
+    DeclareParameter(CompressDumpFile, bool);
+    DeclareParameter(OutputForceVector, bool);
+    DeclareParameter(SkinThickness, RealType);
+    DeclareParameter(StatFileFormat, std::string);    
+    DeclareParameter(HydroPropFile, std::string);
+    DeclareParameter(Viscosity, RealType);
+    DeclareParameter(BeadSize, RealType);  
+    DeclareParameter(UseSphericalBoundaryConditions, bool);
+    DeclareParameter(FrozenBufferRadius, RealType);
+    DeclareParameter(LangevinBufferRadius, RealType);
+    DeclareParameter(AccumulateBoxDipole, bool);
+    DeclareParameter(NeighborListNeighbors, int);
+    
+    
   public:
     bool addComponent(Component* comp);
     bool addZConsStamp(ZConsStamp* zcons);
@@ -134,17 +138,18 @@ class Globals : public DataHolder {
     int getNComponents() {return components_.size();}
     std::vector<Component*> getComponents() {return components_;}
     Component* getComponentAt(int index) {return components_.at(index);}    
-
+    
     int getNZconsStamps() {return zconstraints_.size();}
     std::vector<ZConsStamp*> getZconsStamps() {return zconstraints_;}
     ZConsStamp* getZconsStampAt(int index) {return zconstraints_.at(index);}    
-
+    
     virtual void validate();
   private:
     
     std::vector<Component*> components_;
     std::vector<ZConsStamp*> zconstraints_;    
     std::map<std::string, MoleculeStamp*> moleculeStamps_;
+    std::pair<int, int> taggedAtomPair_;
 
 };
 }

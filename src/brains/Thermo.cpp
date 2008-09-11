@@ -239,6 +239,60 @@ namespace oopse {
     stat[Stats::PRESSURE_TENSOR_ZZ] = tensor(2, 2);      
 
 
+    Globals* simParams = info_->getSimParams();
+
+    if (simParams->haveTaggedAtomPair() && 
+        simParams->havePrintTaggedPairDistance()) {
+      if ( simParams->getPrintTaggedPairDistance()) {
+        
+        std::pair<int, int> tap = simParams->getTaggedAtomPair();
+        Vector3d pos1, pos2, rab;
+
+#ifdef IS_MPI        
+
+        mol1 = info_.globalMolMembership_[tap.first];
+        mol2 = info_.globalMolMembership_[tap.second];
+        
+        int proc1 = info_->getMolToProc(mol1);
+        int proc2 = info_->getMolToProc(mol2);
+
+        if (proc1 == worldRank) {
+          RealType data[3];
+          StuntDouble* sd1 = info_->getIOIndexToIntegrableObject(tap.first);
+          pos1 = sd1->getPos();
+          data[0] = pos1.x();
+          data[1] = pos1.y();
+          data[2] = pos1.z();          
+          MPI_Bcast(data, 3, MPI_REALTYPE, proc1, MPI_COMM_WORLD);
+        } else {
+          MPI_Bcast(data, 3, MPI_REALTYPE, proc1, MPI_COMM_WORLD);
+          pos1 = Vector3d(data);
+        }
+          
+        if (proc2 == worldRank) {
+          RealType data[3];
+          StuntDouble* sd2 = info_->getIOIndexToIntegrableObject(tap.second);
+          pos2 = sd2->getPos();
+          data[0] = pos2.x();
+          data[1] = pos2.y();
+          data[2] = pos2.z();          
+          MPI_Bcast(data, 3, MPI_REALTYPE, proc2, MPI_COMM_WORLD);
+        } else {
+          MPI_Bcast(data, 3, MPI_REALTYPE, proc2, MPI_COMM_WORLD);
+          pos2 = Vector3d(data);
+        }
+#else
+        StuntDouble* at1 = info_->getIOIndexToIntegrableObject(tap.first);
+        StuntDouble* at2 = info_->getIOIndexToIntegrableObject(tap.second);
+        pos1 = at1->getPos();
+        pos2 = at2->getPos();
+#endif        
+        rab = pos2 - pos1;
+        currSnapshot->wrapVector(rab);
+        stat[Stats::TAGGED_PAIR_DISTANCE] =  rab.length();
+      }
+    }
+      
     /**@todo need refactorying*/
     //Conserved Quantity is set by integrator and time is set by setTime
     

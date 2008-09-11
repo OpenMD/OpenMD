@@ -384,7 +384,6 @@ namespace oopse {
     AtomData* atomData;
     GenericData* data;
     bool haveAtomData;
-    AtomType* atomType;
     //if atom is not linear atom, just skip it
     if(!isLinearAtom(datom->getType()) || !datom->getAtomType()->isGayBerne())
       return;

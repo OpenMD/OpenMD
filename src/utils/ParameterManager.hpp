@@ -44,7 +44,7 @@
  *
  *  Created by Charles F. Vardeman II on 11/16/05.
  *  @author  Charles F. Vardeman II 
- *  @version $Id: ParameterManager.hpp,v 1.3 2006-05-17 21:51:42 tim Exp $
+ *  @version $Id: ParameterManager.hpp,v 1.4 2008-09-11 19:40:59 gezelter Exp $
  *
  */
 
@@ -60,9 +60,9 @@
 #include "config.h"
 
 
+#include "utils/simError.h"
+#include "utils/StringTokenizer.hpp"
 #include "utils/CaseConversion.hpp"
-
-
 
 template<typename T> 
 struct ParameterTraits;
@@ -120,6 +120,33 @@ struct ParameterTraits<RealType>{
   static std::string getParamType() { return "RealType";}    
 };
 
+//Pair of ints
+template<>                     
+struct ParameterTraits<std::pair<int, int> >{
+  typedef std::pair<int, int>  RepType;
+  template<typename T> static bool    convert(T, RepType&){return false;} 
+  template<typename T> static RepType convert(T v)        {RepType tmp; convert(v,tmp);return tmp;} 
+  static bool convert(RepType v, RepType& r)            {r=v; return true;}
+  static bool convert(std::string v, RepType& r) { 
+    oopse::StringTokenizer tokenizer(v," ;,\t\n\r");
+    if (tokenizer.countTokens() == 2) {
+      int atom1 = tokenizer.nextTokenAsInt();
+      int atom2 = tokenizer.nextTokenAsInt();
+      r = std::make_pair(atom1, atom2);
+      return true;
+    } else {
+      sprintf(painCave.errMsg, 
+              "ParameterManager Error: "
+              "Not enough tokens to make pair!\n");
+      painCave.severity = OOPSE_ERROR;
+      painCave.isFatal = 1;
+      simError();    
+    }
+    return false;
+  }
+  static std::string getParamType() { return "std::pair<int, int>";}    
+};
+
 
 class ParameterBase {
 public:    
@@ -135,6 +162,7 @@ public:
   virtual bool setData(std::string) = 0;
   virtual bool setData(int) = 0;
   virtual bool setData(RealType) = 0;
+  virtual bool setData(std::pair<int, int>) = 0;
   virtual std::string getParamType() = 0;
 protected:
     std::string keyword_;
@@ -159,6 +187,10 @@ public:
   
   virtual bool setData(RealType dval) {
     return internalSetData<RealType>(dval);
+  }
+
+  virtual bool setData(std::pair<int, int> pval) {
+    return internalSetData<std::pair<int, int> >(pval);
   }
   
   virtual std::string getParamType() { return ParameterTraits<ParamType>::getParamType();}
