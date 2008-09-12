@@ -250,14 +250,14 @@ namespace oopse {
 
 #ifdef IS_MPI        
 
-        mol1 = info_.globalMolMembership_[tap.first];
-        mol2 = info_.globalMolMembership_[tap.second];
+	int mol1 = info_->getGlobalMolMembership(tap.first);
+	int mol2 = info_->getGlobalMolMembership(tap.second);
         
         int proc1 = info_->getMolToProc(mol1);
         int proc2 = info_->getMolToProc(mol2);
 
+	RealType data[3];
         if (proc1 == worldRank) {
-          RealType data[3];
           StuntDouble* sd1 = info_->getIOIndexToIntegrableObject(tap.first);
           pos1 = sd1->getPos();
           data[0] = pos1.x();
@@ -268,9 +268,9 @@ namespace oopse {
           MPI_Bcast(data, 3, MPI_REALTYPE, proc1, MPI_COMM_WORLD);
           pos1 = Vector3d(data);
         }
-          
+
+
         if (proc2 == worldRank) {
-          RealType data[3];
           StuntDouble* sd2 = info_->getIOIndexToIntegrableObject(tap.second);
           pos2 = sd2->getPos();
           data[0] = pos2.x();

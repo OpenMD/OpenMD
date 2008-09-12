@@ -50,7 +50,7 @@
 #include "brains/ForceManager.hpp"
 #include "primitives/Molecule.hpp"
 #include "UseTheForce/doForces_interface.h"
-#define __C
+#define __OOPSE_C
 #include "UseTheForce/DarkSide/fInteractionMap.h"
 #include "utils/simError.h"
 #include "primitives/Bond.hpp"

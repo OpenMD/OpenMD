@@ -64,7 +64,7 @@
 #include "utils/LocalIndexManager.hpp"
 
 //another nonsense macro declaration
-#define __C
+#define __OOPSE_C
 #include "brains/fSimulation.h"
 
 namespace oopse{
@@ -312,6 +312,10 @@ namespace oopse{
       i = molecules_.find(index);
 
       return i != molecules_.end() ? i->second : NULL;
+    }
+
+    int getGlobalMolMembership(int id){
+      return globalMolMembership_[id];
     }
 
     RealType getRcut() {
