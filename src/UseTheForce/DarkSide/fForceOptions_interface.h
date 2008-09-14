@@ -44,7 +44,7 @@
  *
  *  Created by Charles F. Vardeman II on 12/7/05.
  *  @author  Charles F. Vardeman II 
- *  @version $Id: fForceOptions_interface.h,v 1.3 2006-01-11 23:04:40 gezelter Exp $
+ *  @version $Id: fForceOptions_interface.h,v 1.4 2008-09-14 01:32:21 chuckv Exp $
  *
  */
 
@@ -53,7 +53,7 @@
 #ifndef USETHEFORCE_DARKSIDE_FFORCEOPTIONS_INTERFACE_H
 #define USETHEFORCE_DARKSIDE_FFORCEOPTIONS_INTERFACE_H
 
-#define __C
+#define __OOPSE_C
 
 #include "config.h"
 #include "UseTheForce/fForceOptions.h"

@@ -1,4 +1,4 @@
-#ifdef __C
+#ifdef __OOPSE_C
 #ifndef __FELECTROSTATICSUMMATIONMETHOD
 #define __FELECTROSTATICSUMMATIONMETHOD
 
@@ -13,7 +13,7 @@
 #define EWALD_SPME             8
 
 #endif
-#endif /*__C*/
+#endif /*__OOPSE_C*/
 
 #ifdef  __FORTRAN90
 

@@ -42,7 +42,7 @@
 #ifndef USETHEFORCE_DARKSIDE_ELECTROSTATIC_INTERFACE_H
 #define USETHEFORCE_DARKSIDE_ELECTROSTATIC_INTERFACE_H
 
-#define __C
+#define __OOPSE_C
 
 #include "config.h"
 #include "types/AtomTypeProperties.h"

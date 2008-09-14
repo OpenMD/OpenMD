@@ -16,7 +16,8 @@ Source    = \
 	NPrT.cpp \
 	NgammaT.cpp \
 	LDForceManager.cpp \
-	SMLDForceManager.cpp \
+	SMIPDForceManager.cpp \
+        SMIPDynamics.cpp \
         LangevinDynamics.cpp	
 
 ParallelSource = \

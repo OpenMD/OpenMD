@@ -29,6 +29,7 @@ GNU General Public License for more details.
  * @version 1.0
  */
 
+#include <iostream>
 #include "config.h"
 #include <cstdlib>
 #include <string>
@@ -98,6 +99,7 @@ namespace oopse {
                                  elNeg, ionize, elAffin, red, green, blue, 
                                  name);
       elements_.push_back(ele);
+
     }
   }
 
@@ -320,23 +322,23 @@ namespace oopse {
     if ((*ifsP)) {
       while(ifsP->getline(charBuffer,BUFF_SIZE))
         ParseLine(charBuffer);
-          
-    if (ifs1)
-      ifs1.close();
-    if (ifs2)
-      ifs2.close();
-    if (ifs3)
-      ifs3.close();
-    if (ifs4)
-      ifs4.close();
-    
-    if (GetSize() == 0) {
-      sprintf( painCave.errMsg,
-               "ElementsTable error.\n"
-               "\tCannot initialize database %s \n", filename_.c_str());
-      painCave.isFatal = 0;
-      simError();
-    }
+      
+      if (ifs1)
+	ifs1.close();
+      if (ifs2)
+	ifs2.close();
+      if (ifs3)
+	ifs3.close();
+      if (ifs4)
+	ifs4.close();
+      
+      if (GetSize() == 0) {
+	sprintf( painCave.errMsg,
+		 "ElementsTable error.\n"
+		 "\tCannot initialize database %s \n", filename_.c_str());
+	painCave.isFatal = 0;
+	simError();
+      }
     
     }
   

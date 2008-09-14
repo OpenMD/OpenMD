@@ -42,7 +42,7 @@
 #ifndef USETHEFORCE_DARKSIDE_SIMPARALLEL_INTERFACE_H
 #define USETHEFORCE_DARKSIDE_SIMPARALLEL_INTERFACE_H
 
-#define __C
+#define __OOPSE_C
 #include "config.h"
 
 #define setFsimParallel FC_FUNC(setfsimparallel, SETFSIMPARALLEL)

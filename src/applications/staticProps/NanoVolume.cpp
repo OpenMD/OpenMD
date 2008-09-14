@@ -45,13 +45,13 @@
  *
  *  Created by Charles F. Vardeman II on 14 Dec 2006.
  *  @author  Charles F. Vardeman II
- *  @version $Id: NanoVolume.cpp,v 1.6 2008-01-08 19:36:28 chuckv Exp $
+ *  @version $Id: NanoVolume.cpp,v 1.7 2008-09-14 01:32:23 chuckv Exp $
  *
  */
 
 #include "applications/staticProps/NanoVolume.hpp"
 #include "math/ConvexHull.hpp"
-#include "math/AlphaShape.hpp"
+//#include "math/AlphaShape.hpp"
 #include "utils/simError.h"
 #include "io/DumpReader.hpp"
 #include "primitives/Molecule.hpp"
@@ -87,17 +87,18 @@ void NanoVolume::process() {
   int i,j;
 
 #ifdef HAVE_QHULL
-  ConvexHull* hull = new ConvexHull();
+  ConvexHull* thishull = new ConvexHull();
 #endif
 #ifdef HAVE_CGAL
-  AlphaShape* hull = new AlphaShape();
+  //  AlphaShape* hull = new AlphaShape();
+  ConvexHull* thishull = new ConvexHull();
 #endif
 
   DumpReader reader(info_, dumpFilename_);
   int nFrames = reader.getNFrames();
   frameCounter_ = 0;
 
-  pos_.reserve(info_->getNGlobalAtoms());
+  theAtoms_.reserve(info_->getNGlobalAtoms());
 
   for (int istep = 0; istep < nFrames; istep += step_) {
     reader.readFrame(istep);
@@ -105,7 +106,7 @@ void NanoVolume::process() {
     currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
     
     // Clear pos vector between each frame.
-    pos_.clear();
+    theAtoms_.clear();
     
     if (evaluator_.isDynamic()) {
       seleMan_.setSelectionSet(evaluator_.evaluate());
@@ -122,16 +123,25 @@ void NanoVolume::process() {
     }
     
     // outer loop is over the selected StuntDoubles:
-    
+    /*
     for (sd = seleMan_.beginSelected(i); sd != NULL;
-	 sd = seleMan_.nextSelected(i)) {
+	    sd = seleMan_.nextSelected(i)) {
       
       pos_.push_back(sd->getPos());
       myIndex = sd->getGlobalIndex();
       
     }
+    */
+    for (mol = info_->beginMolecule(mi); mol != NULL; 
+                 mol = info_->nextMolecule(mi)) {
+              for (atom = mol->beginAtom(ai); atom != NULL; 
+                   atom = mol->nextAtom(ai)) {
+                     theAtoms_.push_back(atom);
+              }
+            }
+    
     // Generate convex hull for this frame.
-    hull->genHull(pos_);
+    thishull->computeHull(theAtoms_);
   //  totalVolume_ += hull->getVolume();		
   }
   //RealType avgVolume = totalVolume_/(RealType) frameCounter_;

@@ -1,4 +1,4 @@
-#ifdef __C
+#ifdef __OOPSE_C
 #ifndef USETHEFORCE_MPICOMPONENTPLAN_H
 #define USETHEFORCE_MPICOMPONENTPLAN_H
 
@@ -30,7 +30,7 @@ typedef struct{
 
 #endif /* __MPICOMPONENTPLAN_H__*/
 
-#endif /* __C*/
+#endif /* __OOPSE_C*/
 
 
 #ifdef __FORTRAN90

@@ -1,4 +1,4 @@
-#ifdef __C
+#ifdef __OOPSE_C
 #ifndef __FFORCEOPTIONS
 #define __FFORCEOPTIONS
 
@@ -22,7 +22,7 @@ typedef  struct{
 
 
 #endif
-#endif /*__C*/
+#endif /*__OOPSE_C*/
 
 #ifdef  __FORTRAN90
 

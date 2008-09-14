@@ -1,4 +1,4 @@
-#ifdef __C
+#ifdef __OOPSE_C
 #ifndef TYPES_ATOMTYPEPROPERTIES_H
 #define TYPES_ATOMTYPEPROPERTIES_H
 

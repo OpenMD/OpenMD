@@ -1,5 +1,4 @@
-/*
- * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
+/* Copyright (c) 2008 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -37,39 +36,44 @@
  * arising out of the use of or inability to use software, even if the
  * University of Notre Dame has been advised of the possibility of
  * such damages.
+ *
+ *
+ *  Hull.hpp
+ *
+ *  Purpose: Provide common interface for computing hulls in oopse.
+ *
+ *  Created by Charles F. Vardeman II on 27 July 2008.
+ *  @author  Charles F. Vardeman II
+ *  @version $Id: Hull.hpp,v 1.1 2008-09-14 01:32:25 chuckv Exp $
+ *
  */
- 
-#ifndef USETHEFORCE_DARKSIDE_SIMULATION_INTERFACE_H
-#define USETHEFORCE_DARKSIDE_SIMULATION_INTERFACE_H
 
-#define __OOPSE_C
-#include "brains/fSimulation.h"
+#ifndef MATH_HULL_HPP_
+#define MATH_HULL_HPP_
+
 #include "config.h"
+#include "math/Vector3.hpp"
+#include "math/Triangle.hpp"
+#include "primitives/StuntDouble.hpp"
 
-#define setFortranSim FC_FUNC(setfortransim, SETFORTRANSIM)
-#define setFortranBox FC_FUNC(setfortranbox, SETFORTRANBOX)
+#include <cassert>
+#include <vector>
+#include <string>
 
-extern "C"{
-  void setFortranSim( simtype* the_Info,
-                      int* nGlobal, 
-                      int* nLocal, 
-                      int* identArray,
-                      int* nExcludes,
-                      int* excludesArray,
-                      int* nOneTwo,
-                      int* oneTwoArray,
-                      int* nOneThree,
-                      int* oneThreeArray,
-                      int* nOneFour,
-                      int* oneFourArray,
-                      int* molMembershipArray,
-                      RealType* mfact,
-                      int* ngroup,
-                      int* globalGroupMembership,
-                      int* isError );
-  
-  void setFortranBox( RealType *Hmat,
-                      RealType *HmatI,
-                      int* orthoRhombic );
+
+
+namespace oopse {
+  class Hull {
+  public:
+    virtual ~Hull(){};
+    virtual void computeHull(std::vector<StuntDouble*> bodydoubles)=0;
+    virtual RealType getArea()=0; //Total area of Hull
+    virtual int getNs()=0;  //Number of Surface Atoms
+    virtual RealType getVolume()=0; //Total Volume inclosed by Hull
+    virtual std::vector< StuntDouble* > getSurfaceAtoms()=0; //Returns a list of surface atoms
+    virtual std::vector<Triangle* > getMesh()=0;
+    virtual void printHull(const std::string& geomFileName)=0;
+  };
 }
-#endif
+
+#endif /*MATH_HULL_HPP_*/

@@ -14,6 +14,7 @@ Options:
   -x, --repeatX=...       make the system repeat in the x direction
   -y, --repeatY=...       make the system repeat in the y direction
   -z, --repeatZ=...       make the system repeat in the z direction
+  -d, --depthFirst        write out the replicated system depth-first
 
 
 Example:
@@ -22,8 +23,8 @@ Example:
 """
 
 __author__ = "Dan Gezelter (gezelter@nd.edu)"
-__version__ = "$Revision: 1.2 $"
-__date__ = "$Date: 2008-05-14 20:49:17 $"
+__version__ = "$Revision: 1.3 $"
+__date__ = "$Date: 2008-09-14 01:32:23 $"
 __copyright__ = "Copyright (c) 2008 by the University of Notre Dame"
 __license__ = "OOPSE"
 
@@ -155,7 +156,7 @@ def readFile(mdFileName):
     
     mdFile.close()
 
-def writeFile(outputFileName):
+def writeFile(outputFileName,depthFirst):
     outputFile = open(outputFileName, 'w')
 
     outputFile.write("<OOPSE version=4>\n");
@@ -190,22 +191,45 @@ def writeFile(outputFileName):
 
     print repeatX, repeatY, repeatZ
 
-    for i in range(len(indices)):
+
+    if (depthFirst) :
+        whichSD = 0
+        for i in range(len(indices)):
+            for ii in range(repeatX):
+                for jj in range(repeatY):
+                    for kk in range(repeatZ):
+                        
+                        myP = [] 
+                        myP.append(p[i][0] + ii*Hmat[0][0] + jj*Hmat[1][0] + kk*Hmat[2][0])
+                        myP.append(p[i][1] + ii*Hmat[0][1] + jj*Hmat[1][1] + kk*Hmat[2][1])
+                        myP.append(p[i][2] + ii*Hmat[0][2] + jj*Hmat[1][2] + kk*Hmat[2][2])
+                        
+                        if (pvqj[i] == 'pv'):
+                            outputFile.write("%10d %7s %18.10g %18.10g %18.10g %14e %13e %13e\n" % (whichSD, pvqj[i], myP[0], myP[1], myP[2], v[i][0], v[i][1], v[i][2]))
+                        elif (pvqj[i] == 'pvqj'):
+                            outputFile.write("%10d %7s %18.10g %18.10g %18.10g %13e %13e %13e %13e %13e %13e %13e %13e %13e %13e\n" % (whichSD, pvqj[i], myP[0], myP[1], myP[2], v[i][0], v[i][1], v[i][2], q[i][0], q[i][1], q[i][2], q[i][3], j[i][0], j[i][1], j[i][2]))
+                        
+                        whichSD = whichSD + 1
+
+    else:
+        whichSD = 0
         for ii in range(repeatX):
             for jj in range(repeatY):
                 for kk in range(repeatZ):
-                   
-                    myP = [] 
-                    myP.append(p[i][0] + ii*Hmat[0][0] + jj*Hmat[1][0] + kk*Hmat[2][0])
-                    myP.append(p[i][1] + ii*Hmat[0][1] + jj*Hmat[1][1] + kk*Hmat[2][1])
-                    myP.append(p[i][2] + ii*Hmat[0][2] + jj*Hmat[1][2] + kk*Hmat[2][2])
-
-                    if (pvqj[i] == 'pv'):
-                        outputFile.write("%10d %7s %18.10g %18.10g %18.10g %14e %13e %13e\n" % (whichSD, pvqj[i], myP[0], myP[1], myP[2], v[i][0], v[i][1], v[i][2]))
-                    elif (pvqj[i] == 'pvqj'):
-                        outputFile.write("%10d %7s %18.10g %18.10g %18.10g %13e %13e %13e %13e %13e %13e %13e %13e %13e %13e\n" % (whichSD, pvqj[i], myP[0], myP[1], myP[2], v[i][0], v[i][1], v[i][2], q[i][0], q[i][1], q[i][2], q[i][3], j[i][0], j[i][1], j[i][2]))
+                    for i in range(len(indices)):
                         
-                    whichSD = whichSD + 1
+                        myP = [] 
+                        myP.append(p[i][0] + ii*Hmat[0][0] + jj*Hmat[1][0] + kk*Hmat[2][0])
+                        myP.append(p[i][1] + ii*Hmat[0][1] + jj*Hmat[1][1] + kk*Hmat[2][1])
+                        myP.append(p[i][2] + ii*Hmat[0][2] + jj*Hmat[1][2] + kk*Hmat[2][2])
+                        
+                        if (pvqj[i] == 'pv'):
+                            outputFile.write("%10d %7s %18.10g %18.10g %18.10g %14e %13e %13e\n" % (whichSD, pvqj[i], myP[0], myP[1], myP[2], v[i][0], v[i][1], v[i][2]))
+                        elif (pvqj[i] == 'pvqj'):
+                            outputFile.write("%10d %7s %18.10g %18.10g %18.10g %13e %13e %13e %13e %13e %13e %13e %13e %13e %13e\n" % (whichSD, pvqj[i], myP[0], myP[1], myP[2], v[i][0], v[i][1], v[i][2], q[i][0], q[i][1], q[i][2], q[i][3], j[i][0], j[i][1], j[i][2]))
+                        
+                        whichSD = whichSD + 1
+
 
     outputFile.write("    </StuntDoubles>\n")
     outputFile.write("  </Snapshot>\n")
@@ -255,8 +279,9 @@ def mapToBox():
 
 
 def main(argv):
+    depthFirst = 0
     try:                                
-        opts, args = getopt.getopt(argv, "hm:o:x:y:z:", ["help", "meta-data=", "output-file=", "repeatX=", "repeatY=", "repeatZ="]) 
+        opts, args = getopt.getopt(argv, "hm:o:x:y:z:d", ["help", "meta-data=", "output-file=", "repeatX=", "repeatY=", "repeatZ=","depthFirst"]) 
     except getopt.GetoptError:           
         usage()                          
         sys.exit(2)                     
@@ -281,6 +306,8 @@ def main(argv):
         elif opt in ("-z", "--repeatZ"): 
             global repeatZ
             repeatZ = int(arg)
+        elif opt in ("-d", "--depthFirst"):
+            depthFirst = 1
     if (_haveMDFileName != 1):
         usage() 
         print "No meta-data file was specified"
@@ -289,9 +316,10 @@ def main(argv):
         usage()
         print "No output file was specified"
         sys.exit()
+
     readFile(mdFileName)
     mapToBox()    
-    writeFile(outputFileName)
+    writeFile(outputFileName, depthFirst)
 
 if __name__ == "__main__":
     if len(sys.argv) == 1:

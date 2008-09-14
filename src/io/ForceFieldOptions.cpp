@@ -38,7 +38,7 @@
  * University of Notre Dame has been advised of the possibility of
  * such damages.
  */
-#define __C
+#define __OOPSE_C
 #include "io/ForceFieldOptions.hpp"
 
 namespace oopse {

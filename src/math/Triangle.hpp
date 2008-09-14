@@ -1,5 +1,4 @@
-/*
- * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
+/* Copyright (c) 2008 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -37,50 +36,92 @@
  * arising out of the use of or inability to use software, even if the
  * University of Notre Dame has been advised of the possibility of
  * such damages.
+ *
+ *
+ *  Triangle.hpp
+ *
+ *  Purpose: Provide facets from hull to oopse
+ *
+ *  Created by Charles F. Vardeman II on 29 July 2008.
+ *  @author  Charles F. Vardeman II
+ *  @version $Id: Triangle.hpp,v 1.1 2008-09-14 01:32:25 chuckv Exp $
+ *
  */
- 
-#ifndef INTEGRATOR_SMLDFORCEMANAGER_HPP
-#define INTEGRATOR_SMLDFORCEMANAGER_HPP
 
-#include "brains/ForceManager.hpp"
-#include "primitives/Molecule.hpp"
-#include "math/SeqRandNumGen.hpp"
-#include "hydrodynamics/Shape.hpp"
-#include "integrators/Velocitizer.hpp"
+
+#ifndef MATH_FACET_HPP
+#define MATH_FACET_HPP
+
+#include "math/Vector3.hpp"
+#include "config.h"
+#include "primitives/StuntDouble.hpp"
+
+#include <vector>
+
 
 namespace oopse {
-   
-  struct SDShape{
-    StuntDouble* sd;
-    Shape* shape;
-  };
-    
-  /**
-   * @class LDForceManager
-   * Force manager for Lagevin Dynamics applying friction and random 
-   * forces as well as torques.
+
+/**
+   * @class Triangle
+   *
+   * Triangle provides geometric data to oopse. Triangle includes
+   * information about the normal, centroid and the atoms
+   * that belong to this triangle.
    */
-  class SMLDForceManager : public ForceManager{
-    
+  class Triangle {
+
   public:
-    SMLDForceManager(SimInfo * info);
+    Triangle(){};
+    virtual ~Triangle() { };
+
+    void setNormal(Vector3d normal) {
+      normal_ = normal;
+    }
+
+    void addVertex(StuntDouble* thisSD){
+      vertexSD_.push_back(thisSD);
+    }
     
-  protected:
-    virtual void postCalculation(bool needStress);
+    std::vector<StuntDouble*> getVertices(){return vertexSD_;}
+
+    void setArea(RealType area) {
+      area_ = area;
+    }
     
+    Vector3d getNormal() { 
+      return normal_;
+    }
+    
+    RealType getArea() { 
+      return area_;
+    }
+
+    void setCentroid(Vector3d centroid) { 
+      centroid_ = centroid;
+    }
+
+    Vector3d getCentroid() { 
+      return centroid_;
+    }
+
   private:
-    std::map<std::string, HydroProp*> parseFrictionFile(const std::string& filename);    
-    void genRandomForceAndTorque(Vector3d& force, Vector3d& torque, unsigned int index, RealType variance);
-    std::vector<HydroProp*> hydroProps_;
-    SeqRandNumGen randNumGen_;    
-    RealType variance_;
-    RealType langevinBufferRadius_;
-    RealType frozenBufferRadius_;
-    bool sphericalBoundaryConditions_;
-    Globals* simParams;
-    Velocitizer* veloMunge;
-  };
-  
-} //end namespace oopse
-#endif //BRAINS_SMFORCEMANAGER_HPP
+    /* Local Indentity of vertex atoms in pos array*/
+    std::vector <StuntDouble*> vertexSD_;
+    Vector3d normal_;
+    Vector3d centroid_;
+    RealType area_;
+    
+  }; // End class Triangle
+    
+    
+
+} //End Namespace oopse
+
+
+
+#endif // MATH_FACET_HPP
+
+
+
+
 

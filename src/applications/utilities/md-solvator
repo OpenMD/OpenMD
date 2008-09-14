@@ -22,8 +22,8 @@ Example:
 """
 
 __author__ = "Charles Vardeman (cvardema@nd.edu)"
-__version__ = "$Revision: 1.10 $"
-__date__ = "$Date: 2008-07-01 18:05:41 $"
+__version__ = "$Revision: 1.11 $"
+__date__ = "$Date: 2008-09-14 01:32:23 $"
 __copyright__ = "Copyright (c) 2008 by the University of Notre Dame"
 __license__ = "OOPSE"
 
@@ -381,11 +381,12 @@ def removeOverlaps(rcut,nSolventAtoms,nSoluteAtoms):
 
     rcut2 = rcut*rcut
     nextMol = 0
-
+    print len(indices1),len(indices2)
     for i in range(0,len(indices2),nSolventAtoms):
         keepThisMolecule = 1
         for atom1 in range (i, (i+nSolventAtoms)):
-            iPos = positions2[atom1]           
+           
+            iPos = positions2[atom1]
             for j in range(0,len(indices1)):
                 for atom2 in range (j, (j+nSoluteAtoms), nSoluteAtoms):
                     jPos = positions1[atom2]

@@ -42,7 +42,7 @@
 #ifndef USETHEFORCE_DOFORCES_INTERFACE_H
 #define USETHEFORCE_DOFORCES_INTERFACE_H
 
-#define __C
+#define __OOPSE_C
 #include "config.h"
 
 #define initFortranFF FC_FUNC(initfortranff, INITFORTRANFF)

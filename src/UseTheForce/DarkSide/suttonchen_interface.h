@@ -44,13 +44,13 @@
  *
  *  Created by Charles F. Vardeman II on 11/10/05.
  *  @author  Charles F. Vardeman II 
- *  @version $Id: suttonchen_interface.h,v 1.5 2006-05-17 21:51:42 tim Exp $
+ *  @version $Id: suttonchen_interface.h,v 1.6 2008-09-14 01:32:22 chuckv Exp $
  *
  */
 #ifndef USETHEFORCE_DARKSIDE_SUTTONCHEN_INTERFACE_H
 #define USETHEFORCE_DARKSIDE_SUTTONCHEN_INTERFACE_H
 
-#define __C
+#define __OOPSE_C
 
 #include "config.h"
 

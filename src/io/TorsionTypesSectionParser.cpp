@@ -199,7 +199,6 @@ namespace oopse {
 	RealType c1 = tokenizer.nextTokenAsDouble();
 	RealType c2 = tokenizer.nextTokenAsDouble();
 	RealType c3 = tokenizer.nextTokenAsDouble();
-        
 	torsionType = new TrappeTorsionType(c0, c1, c2, c3);
       }
 

@@ -1,4 +1,4 @@
-#ifdef __C
+#ifdef __OOPSE_C
 #ifndef __FSWITCHINGFUNCTIONTYPE
 #define __FSWITCHINGFUNCTIONTYPE
 
@@ -6,7 +6,7 @@
 #define FIFTH_ORDER_POLY     2
 
 #endif
-#endif /*__C*/
+#endif /*__OOPSE_C*/
 
 #ifdef  __FORTRAN90
 

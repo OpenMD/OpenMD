@@ -19,7 +19,7 @@ USE_CGAL = @USE_CGAL@
 USE_QHULL = @USE_QHULL@
 
 ifeq "$(USE_CGAL)" "yes"
-	Source  = $(MySource) AlphaShape.cpp
+	Source  = $(MySource) ConvexHull.cpp
 else
    ifeq "$(USE_QHULL)" "yes"
 	Source  = $(MySource) ConvexHull.cpp

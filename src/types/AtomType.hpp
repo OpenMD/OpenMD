@@ -49,7 +49,7 @@
 
 
 
-#define __C
+#define __OOPSE_C
 #include "types/AtomTypeProperties.h"
 #include "UseTheForce/DarkSide/atype_interface.h"
 

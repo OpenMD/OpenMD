@@ -42,7 +42,7 @@
  *
  *  Created by Charles F. Vardeman II on 04 Dec 2006.
  *  @author  Charles F. Vardeman II
- *  @version $Id: neighborLists_interface.h,v 1.2 2007-02-26 04:45:42 chuckv Exp $
+ *  @version $Id: neighborLists_interface.h,v 1.3 2008-09-14 01:32:21 chuckv Exp $
  *
  */
 
@@ -50,7 +50,7 @@
 #ifndef USETHEFORCE_DARKSIDE_NEIGHBORLISTS_INTERFACE_H
 #define USETHEFORCE_DARKSIDE_NEIGHBORLISTS_INTERFACE_H
 
-#define __C
+#define __OOPSE_C
 
 #include "config.h"
  

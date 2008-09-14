@@ -21,7 +21,7 @@ forceField = "MnM";
 
 ensemble = "NVT";
 dt = 1.0;
-runTime = 1e3;
+runTime = 1e4;
 
 thermalTime = 400.0;
 sampleTime = 10.0;

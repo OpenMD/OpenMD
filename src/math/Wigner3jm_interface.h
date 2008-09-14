@@ -42,7 +42,7 @@
 #ifndef MATH_WIGNER3JM_INTERFACE_H
 #define MATH_WIGNER3JM_INTERFACE_H
 
-#define __C
+#define __OOPSE_C
 #include "config.h"
 
 #define Wigner3jm FC_FUNC(wigner3jm, WIGNER3jm)

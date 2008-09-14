@@ -1,4 +1,4 @@
-/* Copyright (c) 2006 The University of Notre Dame. All Rights Reserved.
+/* Copyright (c) 2008 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -44,7 +44,7 @@
  *
  *  Created by Charles F. Vardeman II on 11 Dec 2006.
  *  @author  Charles F. Vardeman II
- *  @version $Id: ConvexHull.hpp,v 1.9 2008-07-14 12:35:57 gezelter Exp $
+ *  @version $Id: ConvexHull.hpp,v 1.10 2008-09-14 01:32:25 chuckv Exp $
  *
  */
 
@@ -53,6 +53,8 @@
 
 #include "math/Vector3.hpp"
 #include "config.h"
+#include "math/hull.hpp"
+#include "math/Triangle.hpp"
 
 #include <cassert>
 #include <vector>
@@ -60,36 +62,59 @@
 extern "C"
 {
 #if defined(HAVE_QHULL)
-#include <qhull/qhull.h>
-#include <qhull/mem.h>
-#include <qhull/qset.h>
-#include <qhull/geom.h>
-#include <qhull/merge.h>
-#include <qhull/poly.h>
-#include <qhull/io.h>
-#include <qhull/stat.h>
+#include "qhull/qhull.h"
+#include "qhull/mem.h"
+#include "qhull/qset.h"
+#include "qhull/geom.h"
+#include "qhull/merge.h"
+#include "qhull/poly.h"
+#include "qhull/io.h"
+#include "qhull/stat.h"
 #endif
 }
-
+#ifdef IS_MPI
+#include <mpi.h>
+#endif
 
 
 namespace oopse {
-  class ConvexHull {
+  class ConvexHull : public Hull {
   public:
     ConvexHull();
-    virtual ~ConvexHull() {}
-    bool genHull(std::vector<Vector3d> pos);
-    //std::vector<Vector3d> getHull();
-    RealType getVolume();
-    //RealType getRadius();
-    // RealType getInscribedRadius();
-    void geomviewHull(const std::string& geomFileName);
+
+    virtual ~ConvexHull(){};
+    void computeHull(std::vector<StuntDouble*> bodydoubles);
+    RealType getArea(){return area_;} //Total area of Hull
+    int getNs(){return Ns_;}  //Number of Surface Atoms
+    RealType getVolume(){return volume_;} //Total Volume inclosed by Hull
+    std::vector< StuntDouble* > getSurfaceAtoms(){return surfaceSDs_;} //Returns a list of surface atoms
+    std::vector<Triangle* > getMesh(){return Triangles_;}
+    void printHull(const std::string& geomFileName);
   protected:
     double volume_;
     double area_;
     int dim_;
+    int Ns_;
+    std::vector< StuntDouble* > surfaceSDs_;
     const std::string options_;
-    
+    private:
+    std::vector<Triangle*> Triangles_;
+
+#ifdef IS_MPI
+    int* NstoProc_;
+    int* displs_;
+    int Nsglobal_;
+    int nproc_;
+    int myrank_;
+    struct surfacePt_{
+	double x,y,z;
+    };
+
+    MPI::Datatype surfacePtType;
+    std::vector<surfacePt_> surfacePtsLocal_;
+    std::vector<surfacePt_> surfacePtsGlobal_;
+#endif 
+
   };
 }
 

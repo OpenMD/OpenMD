@@ -49,7 +49,7 @@
 #ifndef TYPES_NONBONDEDINTERACTIONTYPE_HPP
 #define TYPES_NONBONDEDINTERACTIONTYPE_HPP
 
-#define __C
+#define __OOPSE_C
 #include "UseTheForce/DarkSide/fMnMInteractions.h"
 #include "UseTheForce/DarkSide/MetalNonMetal_interface.h"
 

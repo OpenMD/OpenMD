@@ -45,7 +45,7 @@
 #include "utils/ParameterManager.hpp"
 #include "utils/StringUtils.hpp"
 #include "io/ParamConstraint.hpp"
-#define __C
+#define __OOPSE_C
 #include "UseTheForce/fForceOptions.h"
 
 namespace oopse {

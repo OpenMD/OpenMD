@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2008 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -40,53 +40,57 @@
  */
 #include <fstream> 
 #include <iostream>
-#include "integrators/LDForceManager.hpp"
+#include "integrators/SMIPDForceManager.hpp"
 #include "math/CholeskyDecomposition.hpp"
 #include "utils/OOPSEConstant.hpp"
 #include "hydrodynamics/Sphere.hpp"
 #include "hydrodynamics/Ellipsoid.hpp"
 #include "utils/ElementsTable.hpp"
+#include "math/ConvexHull.hpp"
+#include "math/Triangle.hpp"
+
 
 namespace oopse {
 
-  LDForceManager::LDForceManager(SimInfo* info) : ForceManager(info), forceTolerance_(1e-6), maxIterNum_(4) {
+  SMIPDForceManager::SMIPDForceManager(SimInfo* info) : ForceManager(info), forceTolerance_(1e-6), maxIterNum_(4) {
     simParams = info->getSimParams();
     veloMunge = new Velocitizer(info);
-
-    sphericalBoundaryConditions_ = false;
-    if (simParams->getUseSphericalBoundaryConditions()) {
-      sphericalBoundaryConditions_ = true;
-      if (simParams->haveLangevinBufferRadius()) {
-        langevinBufferRadius_ = simParams->getLangevinBufferRadius();
-      } else {
-        sprintf( painCave.errMsg,
-                 "langevinBufferRadius must be specified " 
-                 "when useSphericalBoundaryConditions is turned on.\n");
-        painCave.severity = OOPSE_ERROR;
-        painCave.isFatal = 1;
-        simError();  
-      }
     
-      if (simParams->haveFrozenBufferRadius()) {
-        frozenBufferRadius_ = simParams->getFrozenBufferRadius();
-      } else {
-        sprintf( painCave.errMsg,
-                 "frozenBufferRadius must be specified " 
-                 "when useSphericalBoundaryConditions is turned on.\n");
-        painCave.severity = OOPSE_ERROR;
-        painCave.isFatal = 1;
-        simError();  
-      }
+    // Create Hull, Convex Hull for now, other options later.
+    surfaceMesh_ = new ConvexHull();
+    
+    
+    /* Check that the simulation has target pressure and target
+       temperature set*/
 
-      if (frozenBufferRadius_ < langevinBufferRadius_) {
-        sprintf( painCave.errMsg,
-                 "frozenBufferRadius has been set smaller than the " 
-                 "langevinBufferRadius.  This is probably an error.\n");
-        painCave.severity = OOPSE_WARNING;
-        painCave.isFatal = 0;
-        simError();  
-      }
+    if (!simParams->haveTargetTemp()) {
+      sprintf(painCave.errMsg, "You can't use the SMIPDynamics integrator without a targetTemp!\n");
+      painCave.isFatal = 1;
+      painCave.severity = OOPSE_ERROR;
+      simError();
+    } else {
+      targetTemp_ = simParams->getTargetTemp();
     }
+
+    if (!simParams->haveTargetPressure()) {
+      sprintf(painCave.errMsg, "SMIPDynamics error: You can't use the SMIPD integrator\n"
+	      "   without a targetPressure!\n");
+      
+      painCave.isFatal = 1;
+      simError();
+    } else {
+      targetPressure_ = simParams->getTargetPressure();
+    }
+
+   
+    if (simParams->getUsePeriodicBoundaryConditions()) {
+      sprintf(painCave.errMsg, "SMIPDynamics error: You can't use the SMIPD integrator\n"
+	      "   with periodic boundary conditions !\n");
+      
+      painCave.isFatal = 1;
+      simError();
+    } 
+
 
     // Build the hydroProp map:
     std::map<std::string, HydroProp*> hydroPropMap;
@@ -211,22 +215,6 @@ namespace oopse {
               }
             }
           }
-
-	  if (!simParams->haveTargetTemp()) {
-	    sprintf(painCave.errMsg, "You can't use LangevinDynamics without a targetTemp!\n");
-	    painCave.isFatal = 1;
-	    painCave.severity = OOPSE_ERROR;
-	    simError();
-	  }
-
-	  if (!simParams->haveViscosity()) {
-	    sprintf(painCave.errMsg, "You can't use LangevinDynamics without a viscosity!\n");
-	    painCave.isFatal = 1;
-	    painCave.severity = OOPSE_ERROR;
-	    simError();
-	  }
-
-
           HydroProp* currHydroProp = currShape->getHydroProp(simParams->getViscosity(),simParams->getTargetTemp());
           std::map<std::string, HydroProp*>::iterator iter = hydroPropMap.find(integrableObject->getType());
           if (iter != hydroPropMap.end()) 
@@ -239,10 +227,24 @@ namespace oopse {
         }
       }
     }
-    variance_ = 2.0 * OOPSEConstant::kb*simParams->getTargetTemp()/simParams->getDt();
+
+    /* Compute hull first time through to get the area of t=0*/
+
+    /* Build a vector of integrable objects to determine if the are surface atoms */
+    for (mol = info_->beginMolecule(i); mol != NULL; mol = info_->nextMolecule(i)) {          
+      for (integrableObject = mol->beginIntegrableObject(j); integrableObject != NULL;
+           integrableObject = mol->nextIntegrableObject(j)) {	
+	localSites_.push_back(integrableObject);
+      }
+    }
+
+    surfaceMesh_->computeHull(localSites_);
+    Area0_ = surfaceMesh_->getArea();
+ 
+
   }  
 
-  std::map<std::string, HydroProp*> LDForceManager::parseFrictionFile(const std::string& filename) {
+  std::map<std::string, HydroProp*> SMIPDForceManager::parseFrictionFile(const std::string& filename) {
     std::map<std::string, HydroProp*> props;
     std::ifstream ifs(filename.c_str());
     if (ifs.is_open()) {
@@ -259,7 +261,7 @@ namespace oopse {
     return props;
   }
    
-  void LDForceManager::postCalculation(bool needStress){
+  void SMIPDForceManager::postCalculation(bool needStress){
     SimInfo::MoleculeIterator i;
     Molecule::IntegrableObjectIterator  j;
     Molecule* mol;
@@ -272,41 +274,54 @@ namespace oopse {
     Vector3d Tb;
     Vector3d ji;
     unsigned int index = 0;
-    bool doLangevinForces;
-    bool freezeMolecule;
     int fdf;
-
+   
     fdf = 0;
+
+   
+    /*Compute surface Mesh*/
+    surfaceMesh_->computeHull(localSites_);
+
+    /* Get area and number of surface stunt doubles and compute new variance */
+    RealType area = surfaceMesh_->getArea();
+    RealType nSurfaceSDs = surfaceMesh_->getNs();
+    
+    std::cerr << "Surface Area is: " << area << " nSurfaceSDs is: " << nSurfaceSDs << std::endl;
+
+    /* Compute variance for random forces */
+    
+    variance_ = sqrt(2.0*NumericConstant::PI)*(targetPressure_*area/nSurfaceSDs);
+
+    /* Loop over the mesh faces and apply random force to each of the faces*/
+
+    std::vector<Triangle*> sMesh = surfaceMesh_->getMesh();
+    std::vector<Triangle*>::iterator face;
+    std::vector<StuntDouble*>::iterator vertex;
+    for (face = sMesh.begin(); face != sMesh.end(); ++face){
+     
+      Triangle* thisTriangle = *face;
+      std::vector<StuntDouble*> vertexSDs = thisTriangle->getVertices();
+
+      for (vertex = vertexSDs.begin(); vertex != vertexSDs.end(); ++vertex){
+         Vector3d randomForce;
+	 Vector3d randomTorque;
+	 genRandomForceAndTorque(randomForce, randomTorque, index, variance_);
+	 mass = integrableObject->getMass();
+
+	 integrableObject->addFrc(randomForce);           
+      }
+
+
+    }
+
+
 
     for (mol = info_->beginMolecule(i); mol != NULL; mol = info_->nextMolecule(i)) {
 
-      doLangevinForces = true;           
-      freezeMolecule = false;
-
-      if (sphericalBoundaryConditions_) {
-        
-        Vector3d molPos = mol->getCom();
-        RealType molRad = molPos.length();
-
-        doLangevinForces = false;
-        
-        if (molRad > langevinBufferRadius_) { 
-          doLangevinForces = true;
-          freezeMolecule = false;
-        }
-        if (molRad > frozenBufferRadius_) {
-          doLangevinForces = false;
-          freezeMolecule = true;
-        }
-      }
       
       for (integrableObject = mol->beginIntegrableObject(j); integrableObject != NULL;
            integrableObject = mol->nextIntegrableObject(j)) {
           
-        if (freezeMolecule) 
-          fdf += integrableObject->freeze();
-        
-        if (doLangevinForces) {  
           mass = integrableObject->getMass();
           if (integrableObject->isDirectional()){
 
@@ -454,8 +469,8 @@ namespace oopse {
 
             integrableObject->addFrc(frictionForce);
 
-          }
-        }
+          
+	  }
           
         ++index;
     
@@ -463,15 +478,15 @@ namespace oopse {
     }    
 
     info_->setFdf(fdf);
-    veloMunge->removeComDrift();
+    // veloMunge->removeComDrift();
     // Remove angular drift if we are not using periodic boundary conditions.
-    if(!simParams->getUsePeriodicBoundaryConditions()) 
-      veloMunge->removeAngularDrift();
+    //if(!simParams->getUsePeriodicBoundaryConditions()) 
+    //  veloMunge->removeAngularDrift();
 
     ForceManager::postCalculation(needStress);   
   }
 
-void LDForceManager::genRandomForceAndTorque(Vector3d& force, Vector3d& torque, unsigned int index, RealType variance) {
+void SMIPDForceManager::genRandomForceAndTorque(Vector3d& force, Vector3d& torque, unsigned int index, RealType variance) {
 
 
     Vector<RealType, 6> Z;
@@ -494,5 +509,39 @@ void LDForceManager::genRandomForceAndTorque(Vector3d& force, Vector3d& torque, 
     torque[2] = generalForce[5];
     
 } 
+  std::vector<RealType> SMIPDForceManager::genTriangleForces(int nTriangles, RealType variance) {
+
+    // zero fill the random vector before starting:
+    std::vector<RealType> gaussRand;
+    gaussRand.resize(nTriangles);
+    std::fill(gaussRand.begin(), gaussRand.end(), 0.0);
+
+
+#ifdef IS_MPI
+    if (worldRank == 0) {
+#endif
+      for (int i = 0; i < nTriangles; i++) {
+	gaussRand[i] = fabs(randNumGen_.randNorm(0.0, 1.0));     
+      }
+#ifdef IS_MPI
+    }
+#endif
+
+    // push these out to the other processors
+
+#ifdef IS_MPI
+    if (worldRank == 0) {
+      MPI_Bcast(&gaussRand[0], nTriangles, MPI_REAL, 0, MPI_COMM_WORLD);
+    } else {
+      MPI_Bcast(&gaussRand[0], nTriangles, MPI_REAL, 0, MPI_COMM_WORLD);
+    }
+#endif
+
+    for (int i = 0; i < nTriangles; i++) {
+      gaussRand[i] = gaussRand[i] * variance;
+    }
+
+    return gaussRand;
+  }
 
 }

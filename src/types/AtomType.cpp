@@ -46,7 +46,7 @@
 
 #include "types/AtomType.hpp"
 #include "utils/simError.h"
-#define __C
+#define __OOPSE_C
 #include "UseTheForce/DarkSide/atype_interface.h"
 #include "UseTheForce/DarkSide/lj_interface.h"
 #include "UseTheForce/DarkSide/eam_interface.h"
