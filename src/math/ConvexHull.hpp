@@ -44,7 +44,7 @@
  *
  *  Created by Charles F. Vardeman II on 11 Dec 2006.
  *  @author  Charles F. Vardeman II
- *  @version $Id: ConvexHull.hpp,v 1.10 2008-09-14 01:32:25 chuckv Exp $
+ *  @version $Id: ConvexHull.hpp,v 1.11 2008-09-17 00:45:42 chuckv Exp $
  *
  */
 
@@ -53,7 +53,7 @@
 
 #include "math/Vector3.hpp"
 #include "config.h"
-#include "math/hull.hpp"
+#include "math/Hull.hpp"
 #include "math/Triangle.hpp"
 
 #include <cassert>
