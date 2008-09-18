@@ -78,7 +78,6 @@ namespace oopse {
     RealType red, green, blue;
 
     // skip comment line (at the top)
-    
     if (line[0] != '#')  {
       sscanf(line,"%d %5s %lf %*f %lf %d %lf %lf %lf %lf %lf %lf %lf %255s",
              &num,
@@ -295,21 +294,28 @@ namespace oopse {
       buffer = getenv(envvar_.c_str());
       buffer += FILE_SEP_CHAR;
       
+
+
+
       if (!subdir_.empty()) {
         subbuffer = buffer;
         subbuffer += subdir_;
         subbuffer += FILE_SEP_CHAR;
       }
       
+
+      
       buffer += filename_;
       subbuffer += filename_;
+
       
       ifs1.open(subbuffer.c_str());
       ifsP= &ifs1;
-      if (!(*ifsP)) {
+      if (!(ifsP->is_open())) {
         ifs2.open(buffer.c_str());
         ifsP = &ifs2;
       }
+      
     } else {
       sprintf( painCave.errMsg,
                "ElementsTable error.\n"
@@ -322,7 +328,7 @@ namespace oopse {
     if ((*ifsP)) {
       while(ifsP->getline(charBuffer,BUFF_SIZE))
         ParseLine(charBuffer);
-      
+
       if (ifs1)
 	ifs1.close();
       if (ifs2)
