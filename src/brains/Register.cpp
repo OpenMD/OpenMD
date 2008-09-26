@@ -53,7 +53,9 @@
 #include "integrators/NPrT.hpp"
 #include "integrators/NgammaT.hpp"
 #include "integrators/LangevinDynamics.hpp"
+#if defined(HAVE_QHULL)
 #include "integrators/SMIPDynamics.hpp"
+#endif
 
 #include "minimizers/MinimizerFactory.hpp"
 #include "minimizers/MinimizerCreator.hpp"
@@ -107,7 +109,9 @@ namespace oopse {
     IntegratorFactory::getInstance()->registerIntegrator(new IntegratorBuilder<NgammaT>("NGAMMAT"));
     IntegratorFactory::getInstance()->registerIntegrator(new IntegratorBuilder<LangevinDynamics>("LANGEVINDYNAMICS"));
     IntegratorFactory::getInstance()->registerIntegrator(new IntegratorBuilder<LangevinDynamics>("LD"));
+#if defined(HAVE_QHULL)
     IntegratorFactory::getInstance()->registerIntegrator(new IntegratorBuilder<SMIPDynamics>("SMIPD"));
+#endif
   }
 
   void registerMinimizers() {

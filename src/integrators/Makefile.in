@@ -16,9 +16,21 @@ Source    = \
 	NPrT.cpp \
 	NgammaT.cpp \
 	LDForceManager.cpp \
-	SMIPDForceManager.cpp \
-        SMIPDynamics.cpp \
-        LangevinDynamics.cpp	
+        LangevinDynamics.cpp
+
+USE_CGAL = @USE_CGAL@
+USE_QHULL = @USE_QHULL@
+
+ifeq "$(USE_CGAL)" "yes"
+	Source  = $(MySource) SMIPDForceManager.cpp SMIPDynamics.cpp
+else
+   ifeq "$(USE_QHULL)" "yes"
+	Source  = $(MySource) SMIPDForceManager.cpp SMIPDynamics.cpp
+   else
+	Source = $(MySource) 
+   endif
+endif
+
 
 ParallelSource = \
 	Velocitizer.cpp
