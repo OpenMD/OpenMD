@@ -240,8 +240,8 @@ namespace oopse {
 
     surfaceMesh_->computeHull(localSites_);
     Area0_ = surfaceMesh_->getArea();
- 
-
+    //variance_ = 2.0 * OOPSEConstant::kb*simParams->getTargetTemp()/simParams->getDt();
+    
   }  
 
   std::map<std::string, HydroProp*> SMIPDForceManager::parseFrictionFile(const std::string& filename) {
@@ -277,45 +277,45 @@ namespace oopse {
     int fdf;
    
     fdf = 0;
-
-   
+  
     /*Compute surface Mesh*/
     surfaceMesh_->computeHull(localSites_);
 
     /* Get area and number of surface stunt doubles and compute new variance */
-    RealType area = surfaceMesh_->getArea();
-    RealType nSurfaceSDs = surfaceMesh_->getNs();
-    
-    std::cerr << "Surface Area is: " << area << " nSurfaceSDs is: " << nSurfaceSDs << std::endl;
+     //RealType area = surfaceMesh_->getArea();
+     //RealType nSurfaceSDs = surfaceMesh_->getNs();
+
+//    std::cerr << "Surface Area is: " << area << " nSurfaceSDs is: " << nSurfaceSDs << std::endl;
 
     /* Compute variance for random forces */
     
-    variance_ = sqrt(2.0*NumericConstant::PI)*(targetPressure_*area/nSurfaceSDs);
-
+//    variance_ = sqrt(2.0*NumericConstant::PI)*(targetPressure_*area/nSurfaceSDs);
+    
+//    std::vector<Triangle*> sMesh = surfaceMesh_->getMesh();
+//    std::vector<RealType>  randNums = genTriangleForces(sMesh.size(),variance_);
+  
     /* Loop over the mesh faces and apply random force to each of the faces*/
-
-    std::vector<Triangle*> sMesh = surfaceMesh_->getMesh();
-    std::vector<Triangle*>::iterator face;
-    std::vector<StuntDouble*>::iterator vertex;
+    
+    
+//    std::vector<Triangle*>::iterator face;
+//    std::vector<StuntDouble*>::iterator vertex;
+/*    
     for (face = sMesh.begin(); face != sMesh.end(); ++face){
      
       Triangle* thisTriangle = *face;
       std::vector<StuntDouble*> vertexSDs = thisTriangle->getVertices();
 
       for (vertex = vertexSDs.begin(); vertex != vertexSDs.end(); ++vertex){
-         Vector3d randomForce;
-	 Vector3d randomTorque;
-	 genRandomForceAndTorque(randomForce, randomTorque, index, variance_);
-	 mass = integrableObject->getMass();
+	    std::cout << (*vertex)->getPos() << std::endl;
+	 // mass = integrableObject->getMass();
 
-	 integrableObject->addFrc(randomForce);           
+	 //	 integrableObject->addFrc(randomForce);           
       }
 
 
     }
-
-
-
+  */ 
+    /*
     for (mol = info_->beginMolecule(i); mol != NULL; mol = info_->nextMolecule(i)) {
 
       
@@ -476,14 +476,14 @@ namespace oopse {
     
       }
     }    
-
-    info_->setFdf(fdf);
+    */
+    // info_->setFdf(fdf);
     // veloMunge->removeComDrift();
     // Remove angular drift if we are not using periodic boundary conditions.
     //if(!simParams->getUsePeriodicBoundaryConditions()) 
     //  veloMunge->removeAngularDrift();
 
-    ForceManager::postCalculation(needStress);   
+    //ForceManager::postCalculation(needStress);   
   }
 
 void SMIPDForceManager::genRandomForceAndTorque(Vector3d& force, Vector3d& torque, unsigned int index, RealType variance) {

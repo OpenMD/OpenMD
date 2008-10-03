@@ -1,6 +1,6 @@
 Package = integrators
 
-Source    = \
+MySource    = \
 	Integrator.cpp \
         IntegratorFactory.cpp \
 	Velocitizer.cpp \
