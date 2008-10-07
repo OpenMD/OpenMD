@@ -44,7 +44,7 @@
  *
  *  Created by Charles F. Vardeman II on 11 Dec 2006.
  *  @author  Charles F. Vardeman II
- *  @version $Id: ConvexHull.hpp,v 1.11 2008-09-17 00:45:42 chuckv Exp $
+ *  @version $Id: ConvexHull.hpp,v 1.12 2008-10-07 17:12:48 chuckv Exp $
  *
  */
 
@@ -95,8 +95,9 @@ namespace oopse {
     double area_;
     int dim_;
     int Ns_;
-    std::vector< StuntDouble* > surfaceSDs_;
+    std::vector<StuntDouble*> surfaceSDs_;
     const std::string options_;
+
     private:
     std::vector<Triangle*> Triangles_;
 

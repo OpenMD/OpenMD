@@ -1,4 +1,4 @@
-/* Copyright (c) 2006 The University of Notre Dame. All Rights Reserved.
+/* Copyright (c) 2008 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -44,7 +44,7 @@
  *
  *  Created by Charles F. Vardeman II on 11 Dec 2006.
  *  @author  Charles F. Vardeman II
- *  @version $Id: ConvexHull.cpp,v 1.8 2008-09-14 01:32:25 chuckv Exp $
+ *  @version $Id: ConvexHull.cpp,v 1.9 2008-10-07 17:12:48 chuckv Exp $
  *
  */
 
@@ -369,7 +369,7 @@ void ConvexHull::printHull(const std::string& geomFileName)
 #else
 #ifdef HAVE_QHULL
 /* Old options Qt Qu Qg QG0 FA */
-ConvexHull::ConvexHull() : Hull(), dim_(3), options_("qhull Qt  Qci Tcv Pp") {
+ConvexHull::ConvexHull() : Hull(), dim_(3), options_("qhull Qt  Qci Tcv Pp"), Ns_(200) {
   //If we are doing the mpi version, set up some vectors for data communication
 #ifdef IS_MPI
 
@@ -380,8 +380,8 @@ ConvexHull::ConvexHull() : Hull(), dim_(3), options_("qhull Qt  Qci Tcv Pp") {
  displs_   = new int[nproc_];
 
  // Create a surface point type in MPI to send
- surfacePtType = MPI::DOUBLE.Create_contiguous(3);
- surfacePtType.Commit();
+ //surfacePtType = MPI::DOUBLE.Create_contiguous(3);
+ // surfacePtType.Commit();
  
 
 #endif
@@ -413,7 +413,8 @@ void ConvexHull::computeHull(std::vector<StuntDouble*> bodydoubles)
   
   //pt_array = (coordT*) malloc(sizeof(coordT) * (numpoints * dim_));
 
-  double* ptArray = new double[numpoints * 3];
+//  double* ptArray = new double[numpoints * 3];
+  std::vector<double> ptArray(numpoints*3);
   std::vector<bool> isSurfaceID(numpoints); 
 
   // Copy the positon vector into a points vector for qhull.
@@ -435,10 +436,12 @@ void ConvexHull::computeHull(std::vector<StuntDouble*> bodydoubles)
   
   
   boolT ismalloc = False;
+  /* Clean up memory from previous convex hull calculations*/
   Triangles_.clear();
   surfaceSDs_.clear();
-  
-  if (qh_new_qhull(dim_, numpoints, ptArray, ismalloc,
+  surfaceSDs_.reserve(Ns_);
+
+  if (qh_new_qhull(dim_, numpoints, &ptArray[0], ismalloc,
    		    const_cast<char *>(options_.c_str()), NULL, stderr)) {
 
       sprintf(painCave.errMsg, "ConvexHull: Qhull failed to compute convex hull");
@@ -452,7 +455,9 @@ void ConvexHull::computeHull(std::vector<StuntDouble*> bodydoubles)
   std::vector<double> localPts;
   int localPtArraySize;
   
+ 
   std::fill(isSurfaceID.begin(),isSurfaceID.end(),false);
+ 
 
   FORALLfacets {
     
@@ -484,11 +489,13 @@ void ConvexHull::computeHull(std::vector<StuntDouble*> bodydoubles)
   int localPtArraySize = surfaceIDs.size() * 3;
   */
 
-  localPts.resize(localPtArraySize);
-  //  std::fill(localPts.begin(),globalPts.end(),0.0);
+  //localPts.resize(localPtArraySize);
+  //std::fill(localPts.begin(),localPts.end(),0.0);
 
 
   int idx = 0;
+  int nIsIts = 0;
+/*
   // Copy the surface points into an array.
   for(std::vector<bool>::iterator list_iter = isSurfaceID.begin(); 
       list_iter != isSurfaceID.end(); list_iter++)
@@ -499,35 +506,61 @@ void ConvexHull::computeHull(std::vector<StuntDouble*> bodydoubles)
 	localPts.push_back(ptArray[dim_ * idx + 1]); 
 	localPts.push_back(ptArray[dim_ * idx + 2]); 
 	localPtsMap.push_back(idx);
+	nIsIts++;
       } //Isit
       idx++;
     } //isSurfaceID
-  
+  */
+  FORALLvertices {
+    idx = qh_pointid(vertex->point);
+    localPts.push_back(ptArray[dim_ * idx]);     
+    localPts.push_back(ptArray[dim_ * idx + 1]); 
+    localPts.push_back(ptArray[dim_ * idx + 2]);
+    localPtsMap.push_back(idx); 
+  }
+
 
   localPtArraySize = localPts.size();
+
+ 
   MPI::COMM_WORLD.Allgather(&localPtArraySize,1,MPI::INT,&NstoProc_[0],1,MPI::INT);
 
+  Nsglobal_=0;
   for (int i = 0; i < nproc_; i++){
     Nsglobal_ += NstoProc_[i];
   }
+  
+ 
+  int nglobalPts = int(Nsglobal_/3);
+ 
 
   std::vector<double> globalPts;
   globalPts.resize(Nsglobal_);
-  isSurfaceID.resize(int(Nsglobal_/3));
+
+  isSurfaceID.resize(nglobalPts);
+
+
   std::fill(globalPts.begin(),globalPts.end(),0.0);
+ 
+  displs_[0] = 0;
   /* Build a displacements array */
   for (int i = 1; i < nproc_; i++){
     displs_[i] = displs_[i-1] + NstoProc_[i-1];
   }
   
+   
   int noffset = displs_[myrank_];
   /* gather the potential hull */
   
-  MPI::COMM_WORLD.Allgatherv(&localPts[0],localPtArraySize,MPI::DOUBLE,&globalPts[0],NstoProc_,displs_,MPI::DOUBLE);
+  MPI::COMM_WORLD.Allgatherv(&localPts[0],localPtArraySize,MPI::DOUBLE,&globalPts[0],&NstoProc_[0],&displs_[0],MPI::DOUBLE);
 
-
-
-
+  /*
+  if (myrank_ == 0){
+    for (i = 0; i < globalPts.size(); i++){
+      std::cout << globalPts[i] << std::endl;
+    }
+  }
+  */
   // Free previous hull
   qh_freeqhull(!qh_ALL);
   qh_memfreeshort(&curlong, &totlong);
@@ -535,11 +568,11 @@ void ConvexHull::computeHull(std::vector<StuntDouble*> bodydoubles)
     std::cerr << "qhull internal warning (main): did not free %d bytes of long memory (%d pieces) "
 	      << totlong << curlong << std::endl;
 
-  if (qh_new_qhull(dim_, numpoints, &globalPts[0], ismalloc,
+  if (qh_new_qhull(dim_, nglobalPts, &globalPts[0], ismalloc,
    		    const_cast<char *>(options_.c_str()), NULL, stderr)){
 
       sprintf(painCave.errMsg, "ConvexHull: Qhull failed to compute global convex hull");
-      painCave.isFatal = 0;
+      painCave.isFatal = 1;
       simError();
       
   } //qh_new_qhull
@@ -552,7 +585,7 @@ void ConvexHull::computeHull(std::vector<StuntDouble*> bodydoubles)
 
 
     unsigned int nf = qh num_facets;
-    
+     
     /* Build Surface SD list first */
 
     std::fill(isSurfaceID.begin(),isSurfaceID.end(),false);
@@ -562,7 +595,7 @@ void ConvexHull::computeHull(std::vector<StuntDouble*> bodydoubles)
       if (!facet->simplicial){
       // should never happen with Qt
 	sprintf(painCave.errMsg, "ConvexHull: non-simplicaial facet detected");
-	painCave.isFatal = 0;
+	painCave.isFatal = 1;
 	simError();
       } //simplicical
       
@@ -571,43 +604,43 @@ void ConvexHull::computeHull(std::vector<StuntDouble*> bodydoubles)
       face->setNormal(V3dNormal);
       //face->setCentroid(V3dCentroid);
       RealType faceArea = 0.5*V3dNormal.length();
-      face->setArea(faceArea);
+      //face->setArea(faceArea);
 
 
       vertices = qh_facet3vertex(facet);
       FOREACHvertex_(vertices){
 	id = qh_pointid(vertex->point);
-	face->addVertex(bodydoubles[id]);
-	if( !isSurfaceID[id] ){
-	  isSurfaceID[id] = true;
-	  surfaceSDs_.push_back(bodydoubles[id]);
-	} //IF isSurfaceID
-      } //Foreachvertex
+	int localindex = id;
+#ifdef IS_MPI
+	
+	if (id >= noffset/3 && id < (noffset + localPtArraySize)/3 ){
+	  localindex = localPtsMap[id-noffset/3];
+#endif
+	  face->addVertex(bodydoubles[localindex]);
+	  if( !isSurfaceID[id] ){
+	    isSurfaceID[id] = true;
+#ifdef IS_MPI	    
+	    
+#endif
+	    
+	    surfaceSDs_.push_back(bodydoubles[localindex]);
+	    
+	  } //IF isSurfaceID
 
+#ifdef IS_MPI
+	 
+	}else{
+	  face->addVertex(NULL);
+	  }
+#endif
+      } //Foreachvertex
 
       Triangles_.push_back(face);
       qh_settempfree(&vertices);      
       
     } //FORALLfacets
-		
 
-		
-		
-    /*
-  std::sort(surfaceIDs.begin(),surfaceIDs.end());
-  surfaceIDs.erase(std::unique(surfaceIDs.begin(), surfaceIDs.end()), surfaceIDs.end());
-  for(std::vector<int>::iterator list_iter = surfaceIDs.begin(); 
-      list_iter != surfaceIDs.end(); list_iter++)
-    {
-    int i = *list_iter;
-    surfaceSDs_.push_back(bodydoubles[i]);
-    }
-    */
-
-
-
-
-
+        		
 
   Ns_ = surfaceSDs_.size();
 
@@ -624,8 +657,7 @@ void ConvexHull::computeHull(std::vector<StuntDouble*> bodydoubles)
     std::cerr << "qhull internal warning (main): did not free %d bytes of long memory (%d pieces) "
 	      << totlong << curlong << std::endl;
   
-  
-  // free(pt_array);
+
   
 }
 

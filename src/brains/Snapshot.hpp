@@ -77,7 +77,7 @@ namespace oopse{
                                              chi_(0.0), 
                                              integralOfChiDt_(0.0), 
                                              eta_(0.0), id_(-1), 
-                                             hasCOM_(false) {
+                                             hasCOM_(false), hasVolume_(false), volume_(0.0) {
 
     }
 
@@ -85,7 +85,7 @@ namespace oopse{
       : atomData(nAtoms, storageLayout), 
         rigidbodyData(nRigidbodies, storageLayout),
 	currentTime_(0), orthoTolerance_(1e-6), orthoRhombic_(0), chi_(0.0), 
-        integralOfChiDt_(0.0), eta_(0.0), id_(-1), hasCOM_(false)  {
+        integralOfChiDt_(0.0), eta_(0.0), id_(-1), hasCOM_(false), hasVolume_(false),volume_(0.0)  {
 
       }
             
@@ -122,7 +122,16 @@ namespace oopse{
     void setHmat(const Mat3x3d& m);
             
     RealType getVolume() {
-      return hmat_.determinant();
+      if (hasVolume_){
+        return volume_;
+      }else{
+        return hmat_.determinant();
+      }
+    }
+
+    void setVolume(RealType volume){
+      hasVolume_=true;
+      volume_ = volume;
     }
 
     /** Returns the inverse H-Matrix */
@@ -201,6 +210,7 @@ namespace oopse{
     Mat3x3d invHmat_;
     RealType orthoTolerance_;
     int orthoRhombic_;
+    RealType volume_;
 
     RealType chi_;
     RealType integralOfChiDt_;
@@ -210,6 +220,7 @@ namespace oopse{
     Vector3d COMw_;
     int id_; /**< identification number of the snapshot */
     bool hasCOM_;
+    bool hasVolume_;
             
   };
 
