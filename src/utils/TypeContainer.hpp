@@ -71,6 +71,7 @@ namespace oopse {
     typedef typename std::map<KeyType, ValueType> MapType;
     typedef typename std::map<KeyType, ValueType>::iterator MapTypeIterator;
     typedef typename MapType::value_type value_type;
+    typedef typename std::vector<int> MutableValues;
 
     TypeContainer() : index_(0) {}
             
@@ -124,6 +125,31 @@ namespace oopse {
       }
                 
     }
+
+    ElemPtr permutedFindSkippingFirstElement(KeyType& keys) {
+      assert(keys.size() == SIZE);
+      MapTypeIterator i;
+      ValueType foundType;
+                
+      KeyType permutedKeys = keys;
+
+      // skip the first element:
+      KeyTypeIterator start;
+      start = permutedKeys.begin();
+      start++;
+
+      std::sort(start, permutedKeys.end());
+
+      do {
+	i = data_.find(permutedKeys);
+	if (i != data_.end()) {
+	  return (i->second).second;	  
+	}	
+      } while ( std::next_permutation(start, permutedKeys.end()) );
+
+      return NULL;                
+    }
+
 
     /**
      * @todo 

@@ -348,7 +348,7 @@ namespace oopse {
     keys.push_back(at4);    
 
     //try exact match first
-    InversionType* inversionType = inversionTypeCont_.find(keys);
+    InversionType* inversionType = inversionTypeCont_.permutedFindSkippingFirstElement(keys);
     if (inversionType) {
       return inversionType;
     } else {
@@ -410,7 +410,7 @@ namespace oopse {
 	      myKeys.push_back((*k)->getName());
 	      myKeys.push_back((*l)->getName());
 	      
-	      InversionType* inversionType = inversionTypeCont_.find(myKeys);
+	      InversionType* inversionType = inversionTypeCont_.permutedFindSkippingFirstElement(myKeys);
 	      if (inversionType) { 
 		foundInversions.push_back( make_tuple3(Iscore, JKLscore, myKeys) );
 	      }
@@ -429,7 +429,7 @@ namespace oopse {
         int jklscore = foundInversions[0].second;
         std::vector<std::string> theKeys = foundInversions[0].third;
         
-        InversionType* bestType = inversionTypeCont_.find(theKeys);
+        InversionType* bestType = inversionTypeCont_.permutedFindSkippingFirstElement(theKeys);
         return bestType;
       } else {
 	//if no exact match found, try wild card match

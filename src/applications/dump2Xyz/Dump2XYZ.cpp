@@ -127,10 +127,14 @@ int main(int argc, char* argv[]){
   DefaultAtomVisitor* defaultAtomVisitor = new DefaultAtomVisitor(info);
   compositeVisitor->addVisitor(defaultAtomVisitor, 700);
   
-  //create waterType visitor
-  if(args_info.watertype_flag){
-    WaterTypeVisitor* waterTypeVisitor = new WaterTypeVisitor;
-    compositeVisitor->addVisitor(waterTypeVisitor, 600);
+  // if we gave the -w option, we want to skip the waters:
+  std::cerr << "-w flag was set to:" << args_info.water_given << "\n";
+  if (!args_info.water_given) {
+    //create waterType visitor
+    if(args_info.watertype_flag){
+      WaterTypeVisitor* waterTypeVisitor = new WaterTypeVisitor;
+      compositeVisitor->addVisitor(waterTypeVisitor, 600);
+    }
   }
 
   if (args_info.basetype_flag) {

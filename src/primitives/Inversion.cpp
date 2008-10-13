@@ -57,9 +57,9 @@ namespace oopse {
     // is treated as atom *3* in a standard torsion form:
 
     Vector3d pos1 = atom2_->getPos();
-    Vector3d pos2 = atom1_->getPos();
-    Vector3d pos3 = atom4_->getPos();
-    Vector3d pos4 = atom3_->getPos();
+    Vector3d pos2 = atom3_->getPos();
+    Vector3d pos3 = atom1_->getPos();
+    Vector3d pos4 = atom4_->getPos();
 
    /*std::ofstream myfile;
    myfile.open("Inversion", std::ios::app);       
@@ -69,14 +69,14 @@ namespace oopse {
               << atom4_->getType() << " - atom4; "
               << std::endl;
 */
-    Vector3d r21 = pos1 - pos2;
-    Vector3d r32 = pos2 - pos3;
-    Vector3d r42 = pos2 - pos4;
+    Vector3d r31 = pos1 - pos3;
+    Vector3d r23 = pos3 - pos2;
+    Vector3d r43 = pos3 - pos4;
 
     //  Calculate the cross products and distances
-    Vector3d A = cross(r21, r32);
+    Vector3d A = cross(r31, r43);
     RealType rA = A.length();
-    Vector3d B = cross(r32, r42);
+    Vector3d B = cross(r43, r23);
     RealType rB = B.length();
     //Vector3d C = cross(r23, A);
     //RealType rC = C.length();
@@ -103,9 +103,9 @@ namespace oopse {
     Vector3d dcosdA = (cos_phi * A - B) /rA;
     Vector3d dcosdB = (cos_phi * B - A) /rB;
 
-    f1 = dVdcosPhi * cross(r32, dcosdA);
-    f2 = dVdcosPhi * ( cross(r42, dcosdB) - cross(r21, dcosdA));
-    f3 = dVdcosPhi * cross(dcosdB, r32);
+    f1 = dVdcosPhi * cross(r43, dcosdA);
+    f2 = dVdcosPhi * ( cross(r23, dcosdB) - cross(r31, dcosdA));
+    f3 = dVdcosPhi * cross(dcosdB, r43);
 
     // In OOPSE's version of an improper torsion, the central atom
     // comes first.  However, to get the planarity in a typical cosine
