@@ -45,7 +45,7 @@
  *
  *  Created by Charles F. Vardeman II on 14 Dec 2006.
  *  @author  Charles F. Vardeman II
- *  @version $Id: NanoVolume.cpp,v 1.7 2008-09-14 01:32:23 chuckv Exp $
+ *  @version $Id: NanoVolume.cpp,v 1.8 2008-10-15 18:26:01 chuckv Exp $
  *
  */
 
@@ -123,15 +123,16 @@ void NanoVolume::process() {
     }
     
     // outer loop is over the selected StuntDoubles:
-    /*
+    
     for (sd = seleMan_.beginSelected(i); sd != NULL;
 	    sd = seleMan_.nextSelected(i)) {
       
-      pos_.push_back(sd->getPos());
+     theAtoms_.push_back(sd);
       myIndex = sd->getGlobalIndex();
       
     }
-    */
+    
+    /*
     for (mol = info_->beginMolecule(mi); mol != NULL; 
                  mol = info_->nextMolecule(mi)) {
               for (atom = mol->beginAtom(ai); atom != NULL; 
@@ -139,7 +140,7 @@ void NanoVolume::process() {
                      theAtoms_.push_back(atom);
               }
             }
-    
+    */
     // Generate convex hull for this frame.
     thishull->computeHull(theAtoms_);
   //  totalVolume_ += hull->getVolume();		

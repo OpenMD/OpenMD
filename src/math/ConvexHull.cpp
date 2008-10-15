@@ -44,7 +44,7 @@
  *
  *  Created by Charles F. Vardeman II on 11 Dec 2006.
  *  @author  Charles F. Vardeman II
- *  @version $Id: ConvexHull.cpp,v 1.9 2008-10-07 17:12:48 chuckv Exp $
+ *  @version $Id: ConvexHull.cpp,v 1.10 2008-10-15 18:26:01 chuckv Exp $
  *
  */
 
@@ -369,7 +369,8 @@ void ConvexHull::printHull(const std::string& geomFileName)
 #else
 #ifdef HAVE_QHULL
 /* Old options Qt Qu Qg QG0 FA */
-ConvexHull::ConvexHull() : Hull(), dim_(3), options_("qhull Qt  Qci Tcv Pp"), Ns_(200) {
+/* More old opts Qc Qi Pp*/
+ConvexHull::ConvexHull() : Hull(), dim_(3), options_("qhull Qt Pp"), Ns_(200) {
   //If we are doing the mpi version, set up some vectors for data communication
 #ifdef IS_MPI
 
@@ -602,12 +603,19 @@ void ConvexHull::computeHull(std::vector<StuntDouble*> bodydoubles)
       Triangle* face = new Triangle();
       Vector3d  V3dNormal(facet->normal[0],facet->normal[1],facet->normal[2]);
       face->setNormal(V3dNormal);
-      //face->setCentroid(V3dCentroid);
+ 
+      
+
       RealType faceArea = 0.5*V3dNormal.length();
-      //face->setArea(faceArea);
+      face->setArea(faceArea);
 
 
       vertices = qh_facet3vertex(facet);
+      
+      coordT *center = qh_getcenter(vertices);
+      Vector3d V3dCentroid(center[0], center[1], center[2]);
+      face->setCentroid(V3dCentroid);
+
       FOREACHvertex_(vertices){
 	id = qh_pointid(vertex->point);
 	int localindex = id;
@@ -634,31 +642,46 @@ void ConvexHull::computeHull(std::vector<StuntDouble*> bodydoubles)
 	  }
 #endif
       } //Foreachvertex
+      /*
+      if (!SETempty_(facet->coplanarset)){
+	FOREACHpoint_(facet->coplanarset){
+	  id = qh_pointid(point);
+	  surfaceSDs_.push_back(bodydoubles[id]);
+	}
+      }
 
       Triangles_.push_back(face);
       qh_settempfree(&vertices);      
-      
+      */
     } //FORALLfacets
 
-        		
+    /*
+    std::cout << surfaceSDs_.size() << std::endl;
+    for (SD = surfaceSDs_.begin(); SD != surfaceSDs_.end(); ++SD){
+      Vector3d thisatom = (*SD)->getPos();
+      std::cout << "Au " << thisatom.x() << "  " << thisatom.y() << " " << thisatom.z() << std::endl;
+    }
+    */
 
-  Ns_ = surfaceSDs_.size();
 
 
-  qh_getarea(qh facet_list);
-  volume_ = qh totvol;
-  area_ = qh totarea;
-
-  
-
-  qh_freeqhull(!qh_ALL);
-  qh_memfreeshort(&curlong, &totlong);
-  if (curlong || totlong)
-    std::cerr << "qhull internal warning (main): did not free %d bytes of long memory (%d pieces) "
-	      << totlong << curlong << std::endl;
-  
-
-  
+    Ns_ = surfaceSDs_.size();
+    
+    
+    qh_getarea(qh facet_list);
+    volume_ = qh totvol;
+    area_ = qh totarea;
+    
+    
+    
+    qh_freeqhull(!qh_ALL);
+    qh_memfreeshort(&curlong, &totlong);
+    if (curlong || totlong)
+      std::cerr << "qhull internal warning (main): did not free %d bytes of long memory (%d pieces) "
+		<< totlong << curlong << std::endl;
+    
+    
+    
 }
 
 

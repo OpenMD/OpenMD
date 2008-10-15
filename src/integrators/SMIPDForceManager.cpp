@@ -290,7 +290,8 @@ namespace oopse {
 
      /* Compute variance for random forces */
     
-     variance_ = sqrt(2.0*NumericConstant::PI)*((targetPressure_/OOPSEConstant::pressureConvert)*area/nSurfaceSDs);
+     variance_ = sqrt(2.0*NumericConstant::PI)*((targetPressure_/OOPSEConstant::pressureConvert)*area/nSurfaceSDs)
+       /OOPSEConstant::energyConvert;
     
     std::vector<Triangle*> sMesh = surfaceMesh_->getMesh();
     std::vector<RealType>  randNums = genTriangleForces(sMesh.size(),variance_);
@@ -310,12 +311,19 @@ namespace oopse {
       Vector3d unitNormal = thisTriangle->getNormal();
       unitNormal.normalize();
       Vector3d randomForce = -randNums[thisNumber] * unitNormal;
-      
+      Vector3d centroid = thisTriangle->getCentroid();
+
       for (vertex = vertexSDs.begin(); vertex != vertexSDs.end(); ++vertex){
 
 	 // mass = integrableObject->getMass();
-
-		    (*vertex)->addFrc(randomForce/3.0);           
+	Vector3d vertexForce = randomForce/3.0;
+	(*vertex)->addFrc(vertexForce);
+	if (integrableObject->isDirectional()){
+	  Vector3d vertexPos = (*vertex)->getPos();
+	  Vector3d vertexCentroidVector = vertexPos - centroid;
+	  (*vertex)->addTrq(cross(vertexCentroidVector,vertexForce));
+	}
+           
       }
     } 
 

@@ -44,7 +44,7 @@
  *
  *  Created by Charles F. Vardeman II on 11 Dec 2006.
  *  @author  Charles F. Vardeman II
- *  @version $Id: ConvexHull.hpp,v 1.12 2008-10-07 17:12:48 chuckv Exp $
+ *  @version $Id: ConvexHull.hpp,v 1.13 2008-10-15 18:26:01 chuckv Exp $
  *
  */
 
@@ -62,14 +62,14 @@
 extern "C"
 {
 #if defined(HAVE_QHULL)
-#include "qhull/qhull.h"
-#include "qhull/mem.h"
-#include "qhull/qset.h"
-#include "qhull/geom.h"
-#include "qhull/merge.h"
-#include "qhull/poly.h"
-#include "qhull/io.h"
-#include "qhull/stat.h"
+#include <qhull/qhull.h>
+#include <qhull/mem.h>
+#include <qhull/qset.h>
+#include <qhull/geom.h>
+#include <qhull/merge.h>
+#include <qhull/poly.h>
+#include <qhull/io.h>
+#include <qhull/stat.h>
 #endif
 }
 #ifdef IS_MPI

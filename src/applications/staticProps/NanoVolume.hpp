@@ -45,7 +45,7 @@
  *
  *  Created by Charles F. Vardeman II on 14 Dec 2006.
  *  @author  Charles F. Vardeman II
- *  @version $Id: NanoVolume.hpp,v 1.5 2008-09-14 01:32:23 chuckv Exp $
+ *  @version $Id: NanoVolume.hpp,v 1.6 2008-10-15 18:26:01 chuckv Exp $
  *
  */
 #ifndef APPLICATIONS_STATICPROPS_NANOVOLUME_HPP_
@@ -78,7 +78,7 @@ namespace oopse {
     std::string selectionScript_;
     SelectionManager seleMan_;
     SelectionEvaluator evaluator_;
-    std::vector<Atom*> theAtoms_;
+    std::vector<StuntDouble*> theAtoms_;
     int frameCounter_;
     RealType totalVolume_;
     
