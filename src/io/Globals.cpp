@@ -103,6 +103,12 @@ Globals::Globals() {
   DefineOptionalParameter(FrozenBufferRadius, "frozenBufferRadius");
   DefineOptionalParameter(LangevinBufferRadius, "langevinBufferRadius");
   DefineOptionalParameter(NeighborListNeighbors,"NeighborListNeighbors");
+  DefineOptionalParameter(UseMultipleTemperatureMethod, "useMultipleTemperatureMethod");
+  DefineOptionalParameter(MTM_Ce, "MTM_Ce");
+  DefineOptionalParameter(MTM_G, "MTM_G");
+  DefineOptionalParameter(MTM_Io, "MTM_Io");
+  DefineOptionalParameter(MTM_Sigma, "MTM_Sigma");
+  DefineOptionalParameter(MTM_R, "MTM_R");
   
   
   DefineOptionalParameterWithDefaultValue(UsePeriodicBoundaryConditions, "usePeriodicBoundaryConditions", true);

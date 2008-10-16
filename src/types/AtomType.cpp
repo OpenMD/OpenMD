@@ -521,6 +521,10 @@ namespace oopse {
     atp.is_SC = 1;
   }
 
+  bool AtomType::isMetal() {
+    return isSC() || isEAM();
+  }
+
   bool AtomType::isFLARB() {
     if (hasBase_ && !myResponsibilities_["is_FLARB"]) 
       return base_->isFLARB();

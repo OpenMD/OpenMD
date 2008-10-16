@@ -114,6 +114,10 @@ namespace oopse{
       return atomType_->isShape(); 
     }            
     
+    bool isMetal() {
+      return atomType_->isMetal();
+    }
+
     int getIdent() {
       return atomType_->getIdent();
     }

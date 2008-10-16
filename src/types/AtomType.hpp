@@ -116,7 +116,8 @@ namespace oopse {
     bool isShape();
 
     bool isSC();
-    void setSC(); 
+    void setSC();
+    bool isMetal();
     
     bool isFLARB();
     void setFLARB(); 

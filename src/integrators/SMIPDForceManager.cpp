@@ -218,7 +218,7 @@ namespace oopse {
               }
             }
           }
-          HydroProp* currHydroProp = currShape->getHydroProp(1.0,simParams->getTargetTemp());
+          HydroProp* currHydroProp = currShape->getHydroProp(simParams->getViscosity(),simParams->getTargetTemp());
           std::map<std::string, HydroProp*>::iterator iter = hydroPropMap.find(integrableObject->getType());
           if (iter != hydroPropMap.end()) 
             hydroProps_.push_back(iter->second);
@@ -243,7 +243,7 @@ namespace oopse {
 
     surfaceMesh_->computeHull(localSites_);
     Area0_ = surfaceMesh_->getArea();
-    //variance_ = 2.0 * OOPSEConstant::kb*simParams->getTargetTemp()/simParams->getDt();
+    variance_ = 2.0 * OOPSEConstant::kb*simParams->getTargetTemp()/simParams->getDt();
     
   }  
 
@@ -290,11 +290,11 @@ namespace oopse {
 
      /* Compute variance for random forces */
     
-     variance_ = sqrt(2.0*NumericConstant::PI)*((targetPressure_/OOPSEConstant::pressureConvert)*area/nSurfaceSDs)
+     RealType TD_variance = sqrt(2.0*NumericConstant::PI)*((targetPressure_/OOPSEConstant::pressureConvert)*area/nSurfaceSDs)
        /OOPSEConstant::energyConvert;
     
     std::vector<Triangle*> sMesh = surfaceMesh_->getMesh();
-    std::vector<RealType>  randNums = genTriangleForces(sMesh.size(),variance_);
+    std::vector<RealType>  randNums = genTriangleForces(sMesh.size(),TD_variance);
     
     /* Loop over the mesh faces and apply random force to each of the faces*/
     
@@ -340,6 +340,16 @@ namespace oopse {
 	A = integrableObject->getA();
 	Atrans = A.transpose();
 	Vector3d rcrLab = Atrans * hydroProps_[index]->getCOR();  
+	//apply random force and torque at center of resistance
+
+	Vector3d randomForceBody;
+	Vector3d randomTorqueBody;
+	genRandomForceAndTorque(randomForceBody, randomTorqueBody, index, variance_);
+	Vector3d randomForceLab = Atrans * randomForceBody;
+	Vector3d randomTorqueLab = Atrans * randomTorqueBody;
+	integrableObject->addFrc(randomForceLab);            
+	integrableObject->addTrq(randomTorqueLab + cross(rcrLab, randomForceLab ));             
+	
 
         
 	Mat3x3d I = integrableObject->getI();
@@ -426,7 +436,11 @@ namespace oopse {
       } else {
 	//spherical atom
 
-	
+	Vector3d randomForce;
+	Vector3d randomTorque;
+	genRandomForceAndTorque(randomForce, randomTorque, index, variance_);
+	integrableObject->addFrc(randomForce);   
+         
 	// What remains contains velocity explicitly, but the velocity required
 	// is at the full step: v(t + h), while we have initially the velocity
 	// at the half step: v(t + h/2).  We need to iterate to converge the
@@ -535,5 +549,9 @@ namespace oopse {
 
     return gaussRand;
   }
+
+
+
+
 
 }

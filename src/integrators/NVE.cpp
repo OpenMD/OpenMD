@@ -135,7 +135,7 @@ namespace oopse {
 	// velocity half step
 	vel += (dt2 /mass * OOPSEConstant::energyConvert) * frc;
                 
-  integrableObject->setVel(vel);
+	integrableObject->setVel(vel);
 
 	if (integrableObject->isDirectional()){
 
@@ -163,7 +163,7 @@ namespace oopse {
 
 
   RealType NVE::calcConservedQuantity() {
-    return thermo.getTotalE();
+    return thermo.getTotalE() ;
   }
 
 } //end namespace oopse

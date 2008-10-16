@@ -129,7 +129,12 @@ namespace oopse {
     DeclareParameter(LangevinBufferRadius, RealType);
     DeclareParameter(AccumulateBoxDipole, bool);
     DeclareParameter(NeighborListNeighbors, int);
-    
+    DeclareParameter(UseMultipleTemperatureMethod, bool);
+    DeclareParameter(MTM_Ce, RealType);
+    DeclareParameter(MTM_G, RealType);
+    DeclareParameter(MTM_Io, RealType);
+    DeclareParameter(MTM_Sigma, RealType);    
+    DeclareParameter(MTM_R, RealType);    
     
   public:
     bool addComponent(Component* comp);
