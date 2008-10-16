@@ -109,7 +109,7 @@ namespace oopse {
      * @return the element symbol matching the atomic number passed
      * @param atomicnum the atomic number of the element
      */
-    char *GetSymbol(int atomicnum);
+    const char *GetSymbol(int atomicnum);
     /**
      * @return the van der Waals radius for this atomic number
      * @param atomicnum the atomic number of the element

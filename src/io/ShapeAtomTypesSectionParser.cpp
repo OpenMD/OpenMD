@@ -151,7 +151,7 @@ namespace oopse {
     
     
     // first parse the info. in the ShapeInfo section
-    findBegin( shapeStream, "ShapeInfo");
+    findBegin(shapeStream, "ShapeInfo");
     shapeStream.getline(buffer, bufferSize);
     
     // loop over the interior of the ShapeInfo section

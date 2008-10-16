@@ -84,7 +84,7 @@ namespace oopse {
    *
    * @return the line number of the block within the theStream
    */
-  int findBegin(std::istream &theStream, char* startText );
+  int findBegin(std::istream &theStream, const char* startText );
 
   /**
    * Counts the number of tokens on line which are delimited by the characters 

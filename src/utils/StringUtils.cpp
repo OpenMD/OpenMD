@@ -91,7 +91,7 @@ namespace oopse {
     return (str);
   }
 
-  int findBegin(std::istream &theStream, char* startText ){
+  int findBegin(std::istream &theStream, const char* startText ){
     const int MAXLEN = 1024;
     char readLine[MAXLEN];   
     int foundText = 0;

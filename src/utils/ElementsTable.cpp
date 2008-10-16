@@ -109,7 +109,7 @@ namespace oopse {
     return elements_.size();
   }
 
-  char *ElementsTable::GetSymbol(int atomicnum) {
+  const char *ElementsTable::GetSymbol(int atomicnum) {
     if (!init_)
       Init();
     

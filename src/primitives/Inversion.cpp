@@ -40,7 +40,6 @@
  */
  
 #include "primitives/Inversion.hpp"
-#include "fstream"
 
 namespace oopse {
 
