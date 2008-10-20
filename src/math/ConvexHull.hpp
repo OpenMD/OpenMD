@@ -44,7 +44,7 @@
  *
  *  Created by Charles F. Vardeman II on 11 Dec 2006.
  *  @author  Charles F. Vardeman II
- *  @version $Id: ConvexHull.hpp,v 1.13 2008-10-15 18:26:01 chuckv Exp $
+ *  @version $Id: ConvexHull.hpp,v 1.14 2008-10-20 19:36:32 chuckv Exp $
  *
  */
 
@@ -89,12 +89,14 @@ namespace oopse {
     RealType getVolume(){return volume_;} //Total Volume inclosed by Hull
     std::vector< StuntDouble* > getSurfaceAtoms(){return surfaceSDs_;} //Returns a list of surface atoms
     std::vector<Triangle* > getMesh(){return Triangles_;}
+    int getNMeshElements() {return nTriangles_;}
     void printHull(const std::string& geomFileName);
   protected:
     double volume_;
     double area_;
     int dim_;
     int Ns_;
+    int nTriangles_;
     std::vector<StuntDouble*> surfaceSDs_;
     const std::string options_;
 

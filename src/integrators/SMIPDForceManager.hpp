@@ -120,6 +120,7 @@ std::vector<RealType> genTriangleForces(int nTriangles, RealType variance);
     RealType targetPressure_; /* External Pressure */
     Hull* surfaceMesh_;
     RealType Area0_;
+    RealType gamma_0_;
     std::vector<StuntDouble*> localSites_;
   };
   

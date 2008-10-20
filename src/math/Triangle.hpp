@@ -44,7 +44,7 @@
  *
  *  Created by Charles F. Vardeman II on 29 July 2008.
  *  @author  Charles F. Vardeman II
- *  @version $Id: Triangle.hpp,v 1.1 2008-09-14 01:32:25 chuckv Exp $
+ *  @version $Id: Triangle.hpp,v 1.2 2008-10-20 19:36:32 chuckv Exp $
  *
  */
 
@@ -104,12 +104,22 @@ namespace oopse {
       return centroid_;
     }
 
+    Vector3d getFacetVelocity(){
+      return facetVelocity_;
+    }
+    
+    void setFacetVelocity(Vector3d facetVelocity){
+      facetVelocity_ = facetVelocity;
+    }
+
+
   private:
     /* Local Indentity of vertex atoms in pos array*/
     std::vector <StuntDouble*> vertexSD_;
     Vector3d normal_;
     Vector3d centroid_;
     RealType area_;
+    Vector3d facetVelocity_;
     
   }; // End class Triangle
     

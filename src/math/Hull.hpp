@@ -44,7 +44,7 @@
  *
  *  Created by Charles F. Vardeman II on 27 July 2008.
  *  @author  Charles F. Vardeman II
- *  @version $Id: Hull.hpp,v 1.1 2008-09-14 01:32:25 chuckv Exp $
+ *  @version $Id: Hull.hpp,v 1.2 2008-10-20 19:36:32 chuckv Exp $
  *
  */
 
@@ -69,6 +69,7 @@ namespace oopse {
     virtual void computeHull(std::vector<StuntDouble*> bodydoubles)=0;
     virtual RealType getArea()=0; //Total area of Hull
     virtual int getNs()=0;  //Number of Surface Atoms
+    virtual int getNMeshElements()=0; //Number of polygons in surface mesh
     virtual RealType getVolume()=0; //Total Volume inclosed by Hull
     virtual std::vector< StuntDouble* > getSurfaceAtoms()=0; //Returns a list of surface atoms
     virtual std::vector<Triangle* > getMesh()=0;

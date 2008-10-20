@@ -58,6 +58,7 @@ namespace oopse {
     
     // Create Hull, Convex Hull for now, other options later.
     surfaceMesh_ = new ConvexHull();
+
     
     
     /* Check that the simulation has target pressure and target
@@ -79,7 +80,7 @@ namespace oopse {
       painCave.isFatal = 1;
       simError();
     } else {
-      targetPressure_ = simParams->getTargetPressure();
+      targetPressure_ = simParams->getTargetPressure()/OOPSEConstant::pressureConvert;
     }
 
    
@@ -91,6 +92,20 @@ namespace oopse {
       simError();
     } 
 
+
+
+    
+
+    //Compute initial hull
+    /*
+    surfaceMesh_->computeHull(localSites_);
+    Area0_ = surfaceMesh_->getArea();
+    int nTriangles = surfaceMesh_->getNMeshElements();
+    //    variance_ = 2.0 * OOPSEConstant::kb*simParams->getTargetTemp()/simParams->getDt();
+    gamma_0_ = (NumericConstant::PI * targetPressure_* targetPressure_ * Area0_ * Area0_ * simParams->getDt()) /
+      (4.0 * nTriangles * nTriangles* OOPSEConstant::kb*simParams->getTargetTemp());
+    //RealType eta0 = gamma_0/
+    */
 
     // Build the hydroProp map:
     std::map<std::string, HydroProp*> hydroPropMap;
@@ -195,7 +210,7 @@ namespace oopse {
                   LJParamGenericData* ljData = dynamic_cast<LJParamGenericData*>(data);
                   if (ljData != NULL) {
                     LJParam ljParam = ljData->getData();
-                    currShape = new Sphere(atom->getPos(), ljParam.sigma/2.0);
+                    currShape = new Sphere(atom->getPos(), 2.0);
                   } else {
                     sprintf( painCave.errMsg,
                              "Can not cast GenericData to LJParam\n");
@@ -207,7 +222,7 @@ namespace oopse {
               } else {
                 int aNum = etab.GetAtomicNum((atom->getType()).c_str());
                 if (aNum != 0) {
-                  currShape = new Sphere(atom->getPos(), etab.GetVdwRad(aNum));
+                  currShape = new Sphere(atom->getPos(), 2.0);
                 } else {
                   sprintf( painCave.errMsg,
                            "Could not find atom type in default element.txt\n");
@@ -218,7 +233,7 @@ namespace oopse {
               }
             }
           }
-          HydroProp* currHydroProp = currShape->getHydroProp(simParams->getViscosity(),simParams->getTargetTemp());
+          HydroProp* currHydroProp = currShape->getHydroProp(1.0,simParams->getTargetTemp());
           std::map<std::string, HydroProp*>::iterator iter = hydroPropMap.find(integrableObject->getType());
           if (iter != hydroPropMap.end()) 
             hydroProps_.push_back(iter->second);
@@ -233,7 +248,7 @@ namespace oopse {
 
     /* Compute hull first time through to get the area of t=0*/
 
-    /* Build a vector of integrable objects to determine if the are surface atoms */
+    //Build a vector of integrable objects to determine if the are surface atoms 
     for (mol = info_->beginMolecule(i); mol != NULL; mol = info_->nextMolecule(i)) {          
       for (integrableObject = mol->beginIntegrableObject(j); integrableObject != NULL;
            integrableObject = mol->nextIntegrableObject(j)) {	
@@ -241,10 +256,7 @@ namespace oopse {
       }
     }
 
-    surfaceMesh_->computeHull(localSites_);
-    Area0_ = surfaceMesh_->getArea();
-    variance_ = 2.0 * OOPSEConstant::kb*simParams->getTargetTemp()/simParams->getDt();
-    
+
   }  
 
   std::map<std::string, HydroProp*> SMIPDForceManager::parseFrictionFile(const std::string& filename) {
@@ -288,14 +300,22 @@ namespace oopse {
      RealType area = surfaceMesh_->getArea();
      int nSurfaceSDs = surfaceMesh_->getNs();
 
-     /* Compute variance for random forces */
-    
-     RealType TD_variance = sqrt(2.0*NumericConstant::PI)*((targetPressure_/OOPSEConstant::pressureConvert)*area/nSurfaceSDs)
-       /OOPSEConstant::energyConvert;
     
     std::vector<Triangle*> sMesh = surfaceMesh_->getMesh();
-    std::vector<RealType>  randNums = genTriangleForces(sMesh.size(),TD_variance);
-    
+    int nTriangles = sMesh.size();
+
+
+
+     /* Compute variance for random forces */
+   
+    RealType sigma_t = sqrt(NumericConstant::PI/2.0)*((targetPressure_)*area/nTriangles)
+       /OOPSEConstant::energyConvert;
+
+    gamma_t_ = (NumericConstant::PI * targetPressure_* targetPressure_ * area * area * simParams->getDt()) /
+      (4.0 * nTriangles * nTriangles* OOPSEConstant::kB*simParams->getTargetTemp()) /OOPSEConstant::energyConvert;
+
+    std::vector<RealType>  randNums = genTriangleForces(nTriangles, sigma_t);
+
     /* Loop over the mesh faces and apply random force to each of the faces*/
     
     
@@ -313,22 +333,24 @@ namespace oopse {
       Vector3d randomForce = -randNums[thisNumber] * unitNormal;
       Vector3d centroid = thisTriangle->getCentroid();
 
+      Vector3d langevinForce = randomForce - gamma_t_*thisTriangle->getFacetVelocity();
+      
       for (vertex = vertexSDs.begin(); vertex != vertexSDs.end(); ++vertex){
-
-	 // mass = integrableObject->getMass();
-	Vector3d vertexForce = randomForce/3.0;
-	(*vertex)->addFrc(vertexForce);
-	if (integrableObject->isDirectional()){
-	  Vector3d vertexPos = (*vertex)->getPos();
-	  Vector3d vertexCentroidVector = vertexPos - centroid;
-	  (*vertex)->addTrq(cross(vertexCentroidVector,vertexForce));
-	}
-           
+	if ((*vertex) != NULL){
+	  // mass = integrableObject->getMass();
+	  Vector3d vertexForce = langevinForce/3.0;
+	  (*vertex)->addFrc(vertexForce);
+	  if (integrableObject->isDirectional()){
+	    Vector3d vertexPos = (*vertex)->getPos();
+	    Vector3d vertexCentroidVector = vertexPos - centroid;
+	    (*vertex)->addTrq(cross(vertexCentroidVector,vertexForce));
+	  }
+	}  
       }
     } 
 
     /* Now loop over all surface particles and apply the drag*/
-
+    /*
     std::vector<StuntDouble*> surfaceSDs = surfaceMesh_->getSurfaceAtoms();
     for (vertex = surfaceSDs.begin(); vertex != surfaceSDs.end(); ++vertex){
       integrableObject = *vertex;
@@ -341,17 +363,6 @@ namespace oopse {
 	Atrans = A.transpose();
 	Vector3d rcrLab = Atrans * hydroProps_[index]->getCOR();  
 	//apply random force and torque at center of resistance
-
-	Vector3d randomForceBody;
-	Vector3d randomTorqueBody;
-	genRandomForceAndTorque(randomForceBody, randomTorqueBody, index, variance_);
-	Vector3d randomForceLab = Atrans * randomForceBody;
-	Vector3d randomTorqueLab = Atrans * randomTorqueBody;
-	integrableObject->addFrc(randomForceLab);            
-	integrableObject->addTrq(randomTorqueLab + cross(rcrLab, randomForceLab ));             
-	
-
-        
 	Mat3x3d I = integrableObject->getI();
 	Vector3d omegaBody;
 	
@@ -434,13 +445,8 @@ namespace oopse {
 
             
       } else {
-	//spherical atom
+ 	//spherical atom
 
-	Vector3d randomForce;
-	Vector3d randomTorque;
-	genRandomForceAndTorque(randomForce, randomTorque, index, variance_);
-	integrableObject->addFrc(randomForce);   
-         
 	// What remains contains velocity explicitly, but the velocity required
 	// is at the full step: v(t + h), while we have initially the velocity
 	// at the half step: v(t + h/2).  We need to iterate to converge the
@@ -465,7 +471,7 @@ namespace oopse {
 	  
 	  oldFF = frictionForce;                            
 	  frictionForce = -hydroProps_[index]->getXitt() * velStep;
-	  
+	  //frictionForce = -gamma_t*velStep;
 	  // re-estimate velocities at full-step using friction forces:
           
 	  velStep = vel + (dt2_ / mass * OOPSEConstant::energyConvert) * (frc + frictionForce);
@@ -482,9 +488,10 @@ namespace oopse {
 	
         
       }
+  
       
-      
-    }
+  }
+    */
     Snapshot* currSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
     currSnapshot->setVolume(surfaceMesh_->getVolume());
     

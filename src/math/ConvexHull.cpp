@@ -44,7 +44,7 @@
  *
  *  Created by Charles F. Vardeman II on 11 Dec 2006.
  *  @author  Charles F. Vardeman II
- *  @version $Id: ConvexHull.cpp,v 1.10 2008-10-15 18:26:01 chuckv Exp $
+ *  @version $Id: ConvexHull.cpp,v 1.11 2008-10-20 19:36:32 chuckv Exp $
  *
  */
 
@@ -370,7 +370,7 @@ void ConvexHull::printHull(const std::string& geomFileName)
 #ifdef HAVE_QHULL
 /* Old options Qt Qu Qg QG0 FA */
 /* More old opts Qc Qi Pp*/
-ConvexHull::ConvexHull() : Hull(), dim_(3), options_("qhull Qt Pp"), Ns_(200) {
+ConvexHull::ConvexHull() : Hull(), dim_(3), options_("qhull Qt Pp"), Ns_(200), nTriangles_(0) {
   //If we are doing the mpi version, set up some vectors for data communication
 #ifdef IS_MPI
 
@@ -446,7 +446,7 @@ void ConvexHull::computeHull(std::vector<StuntDouble*> bodydoubles)
    		    const_cast<char *>(options_.c_str()), NULL, stderr)) {
 
       sprintf(painCave.errMsg, "ConvexHull: Qhull failed to compute convex hull");
-      painCave.isFatal = 0;
+      painCave.isFatal = 1;
       simError();
       
   } //qh_new_qhull
@@ -454,6 +454,7 @@ void ConvexHull::computeHull(std::vector<StuntDouble*> bodydoubles)
 
 #ifdef IS_MPI
   std::vector<double> localPts;
+  std::vector<double> localVel;
   int localPtArraySize;
   
  
@@ -465,7 +466,7 @@ void ConvexHull::computeHull(std::vector<StuntDouble*> bodydoubles)
     if (!facet->simplicial){
       // should never happen with Qt
       sprintf(painCave.errMsg, "ConvexHull: non-simplicaial facet detected");
-      painCave.isFatal = 0;
+      painCave.isFatal = 1;
       simError();
     }
     
@@ -517,6 +518,12 @@ void ConvexHull::computeHull(std::vector<StuntDouble*> bodydoubles)
     localPts.push_back(ptArray[dim_ * idx]);     
     localPts.push_back(ptArray[dim_ * idx + 1]); 
     localPts.push_back(ptArray[dim_ * idx + 2]);
+
+    Vector3d vel = bodydoubles[idx]->getVel();
+    localVel.push_back(vel.x());
+    localVel.push_back(vel.y());
+    localVel.push_back(vel.z());
+
     localPtsMap.push_back(idx); 
   }
 
@@ -535,8 +542,8 @@ void ConvexHull::computeHull(std::vector<StuntDouble*> bodydoubles)
   int nglobalPts = int(Nsglobal_/3);
  
 
-  std::vector<double> globalPts;
-  globalPts.resize(Nsglobal_);
+  std::vector<double> globalPts(Nsglobal_);
+  std::vector<double> globalVel(Nsglobal_);
 
   isSurfaceID.resize(nglobalPts);
 
@@ -554,6 +561,7 @@ void ConvexHull::computeHull(std::vector<StuntDouble*> bodydoubles)
   /* gather the potential hull */
   
   MPI::COMM_WORLD.Allgatherv(&localPts[0],localPtArraySize,MPI::DOUBLE,&globalPts[0],&NstoProc_[0],&displs_[0],MPI::DOUBLE);
+  MPI::COMM_WORLD.Allgatherv(&localVel[0],localPtArraySize,MPI::DOUBLE,&globalVel[0],&NstoProc_[0],&displs_[0],MPI::DOUBLE);
 
   /*
   if (myrank_ == 0){
@@ -615,14 +623,17 @@ void ConvexHull::computeHull(std::vector<StuntDouble*> bodydoubles)
       coordT *center = qh_getcenter(vertices);
       Vector3d V3dCentroid(center[0], center[1], center[2]);
       face->setCentroid(V3dCentroid);
-
+      Vector3d faceVel = V3Zero;
       FOREACHvertex_(vertices){
 	id = qh_pointid(vertex->point);
 	int localindex = id;
 #ifdef IS_MPI
-	
+	Vector3d velVector(globalVel[dim_ * id],globalVel[dim_ * id + 1], globalVel[dim_ * id + 1]);
+	faceVel = faceVel + velVector;
 	if (id >= noffset/3 && id < (noffset + localPtArraySize)/3 ){
 	  localindex = localPtsMap[id-noffset/3];
+#else
+	  faceVel = faceVel + bodydoubles[localindex]->getVel();
 #endif
 	  face->addVertex(bodydoubles[localindex]);
 	  if( !isSurfaceID[id] ){
@@ -649,10 +660,11 @@ void ConvexHull::computeHull(std::vector<StuntDouble*> bodydoubles)
 	  surfaceSDs_.push_back(bodydoubles[id]);
 	}
       }
-
+      */
+      face->setFacetVelocity(faceVel/3.0);
       Triangles_.push_back(face);
       qh_settempfree(&vertices);      
-      */
+
     } //FORALLfacets
 
     /*
@@ -666,7 +678,7 @@ void ConvexHull::computeHull(std::vector<StuntDouble*> bodydoubles)
 
 
     Ns_ = surfaceSDs_.size();
-    
+    nTriangles_ = Triangles_.size();
     
     qh_getarea(qh facet_list);
     volume_ = qh totvol;
