@@ -933,38 +933,39 @@ fi
 ])
 
 AC_DEFUN([ACX_CHECK_QHULL],
-#
+#       
 # Handle user hints
 #
 [AC_ARG_WITH(qhull,
-                AC_HELP_STRING([--with-qhull=DIR],
-           [root directory path of qhull installation (defaults to /usr/local or /usr if not found in /usr/local)]dnl
+             AC_HELP_STRING([--with-qhull=DIR],
+                            [root directory path of qhull installation (defaults to /usr/local or /usr if not found in /usr/local)]dnl
 		           ),
-		[qhull_dir="$withval"]dnl
-		            ,dnl
-		[qhull_dir="not_set"]dnl
-    )dnl
+             [qhull_dir="$withval"],
+             [qhull_dir="not_set"]dnl
+            )dnl
+
+QHULL_INC_DIR=
+QHULL_LIB_DIR=
+QHULL=
+USE_QHULL=no
 
 if test "$qhull_dir" != "no"; then
-
-if test "$qhull_dir" != "not_set" ; then
-  if test -d "$qhull_dir"
-  then
-    QHULL_HOME="$qhull_dir"
-  else
-    AC_MSG_WARN([Sorry, $qhull_dir does not exist, checking usual places])
-	QHULL_HOME=/usr/local
-	if test ! -f "${QHULL_HOME}/include/qhull/qhull.h"
-	then
-		QHULL_HOME=/usr
-	fi
-  fi
-fi
-#
-# Locate qhull, if wanted
-#
-if test -n "${QHULL_HOME}"
-then
+   if test "$qhull_dir" != "not_set" ; then
+     if test -d "$qhull_dir"; then
+       QHULL_HOME="$qhull_dir"
+     else
+       AC_MSG_WARN([Sorry, $qhull_dir does not exist, checking usual places])
+       QHULL_HOME=/usr/local
+       if test ! -f "${QHULL_HOME}/include/qhull/qhull.h"; then
+          QHULL_HOME=/usr
+       fi
+     fi
+   fi
+   #
+   # Locate qhull, if wanted
+   #
+   if test -n "${QHULL_HOME}"; then
+        AC_MSG_NOTICE([Checking for qhull in ${QHULL_HOME}])
         AC_LANG_SAVE
         AC_LANG_C
         QHULL_OLD_LDFLAGS=$LDFLAGS
@@ -981,36 +982,29 @@ then
         AC_LANG_RESTORE
 
         if test "$qhull_cv_libqhull" = "yes" -a "$qhull_cv_qhull_h" = "yes"; then
-                AC_DEFINE(HAVE_QHULL_H, 1, [have qhull.h])
-                AC_DEFINE(HAVE_QHULL, 1, [have libqhull.a])
-                USE_QHULL=yes                
-                QHULL_INC_DIR="${QHULL_HOME}/include"
-                QHULL_LIB_DIR="${QHULL_HOME}/lib"
-                QHULL="-lqhull"
+           AC_DEFINE(HAVE_QHULL_H, 1, [have qhull.h])
+           AC_DEFINE(HAVE_QHULL, 1, [have libqhull.a])
+           USE_QHULL=yes                
+           QHULL_INC_DIR="${QHULL_HOME}/include"
+           QHULL_LIB_DIR="${QHULL_HOME}/lib"
+           QHULL="-lqhull"
+           AC_MSG_RESULT([Working qhull found, will proceed.])
         else
-                AC_MSG_CHECKING(qhull in ${QHULL_HOME})
-                QHULL_INC_DIR=
-                QHULL_LIB_DIR=
-                QHULL=
-                USE_QHULL=no
-                AC_MSG_RESULT(failed)
-	        echo ""
-	        echo "*********************************************************"
-                echo "* WARNING: Could not find a working qhull installation  *"
-                echo "* If you need OOPSE to be able to deal with convex      *"
-                echo "* hulls be sure to specify a valid qhull installation   *"
-	        echo "* with --with-qhull=DIR                                 *"
-                echo "*                                                       *"
-                echo "* OOPSE will still work without qhull installed.        *"
-	        echo "*********************************************************"
-	        echo ""
+	   AC_MSG_WARN([])
+           AC_MSG_WARN([Could not find a working qhull installation])
+           AC_MSG_WARN([If you need OOPSE to be able to deal with convex    ])
+           AC_MSG_WARN([hulls be sure to specify a valid qhull installation ])
+	   AC_MSG_WARN([with --with-qhull=DIR                               ])
+           AC_MSG_WARN([])
+           AC_MSG_WARN([OOPSE will still work without qhull installed.      ])
+	   AC_MSG_WARN([])
         fi
-        AC_SUBST(QHULL_INC_DIR)
-        AC_SUBST(QHULL_LIB_DIR)
-        AC_SUBST(QHULL)
-	AC_SUBST(USE_QHULL)
+    fi
 fi
-fi
+AC_SUBST(QHULL_INC_DIR)
+AC_SUBST(QHULL_LIB_DIR)
+AC_SUBST(QHULL)
+AC_SUBST(USE_QHULL)
 ])
 
 AC_DEFUN([ACX_CHECK_OPENBABEL],
