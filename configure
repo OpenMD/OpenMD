@@ -8931,30 +8931,33 @@ fi
 if test "${with_qhull+set}" = set; then
   withval=$with_qhull; qhull_dir="$withval"
 else
-  		qhull_dir="not_set"
+  qhull_dir="not_set"
 fi
+
+QHULL_INC_DIR=
+QHULL_LIB_DIR=
+QHULL=
+USE_QHULL=no
 
 if test "$qhull_dir" != "no"; then
-
-if test "$qhull_dir" != "not_set" ; then
-  if test -d "$qhull_dir"
-  then
-    QHULL_HOME="$qhull_dir"
-  else
-    { $as_echo "$as_me:$LINENO: WARNING: Sorry, $qhull_dir does not exist, checking usual places" >&5
+   if test "$qhull_dir" != "not_set" ; then
+     if test -d "$qhull_dir"; then
+       QHULL_HOME="$qhull_dir"
+     else
+       { $as_echo "$as_me:$LINENO: WARNING: Sorry, $qhull_dir does not exist, checking usual places" >&5
 $as_echo "$as_me: WARNING: Sorry, $qhull_dir does not exist, checking usual places" >&2;}
-	QHULL_HOME=/usr/local
-	if test ! -f "${QHULL_HOME}/include/qhull/qhull.h"
-	then
-		QHULL_HOME=/usr
-	fi
-  fi
-fi
-#
-# Locate qhull, if wanted
-#
-if test -n "${QHULL_HOME}"
-then
+       QHULL_HOME=/usr/local
+       if test ! -f "${QHULL_HOME}/include/qhull/qhull.h"; then
+          QHULL_HOME=/usr
+       fi
+     fi
+   fi
+   #
+   # Locate qhull, if wanted
+   #
+   if test -n "${QHULL_HOME}"; then
+        { $as_echo "$as_me:$LINENO: Checking for qhull in ${QHULL_HOME}" >&5
+$as_echo "$as_me: Checking for qhull in ${QHULL_HOME}" >&6;}
 
         ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
@@ -9207,36 +9210,36 @@ cat >>confdefs.h <<\_ACEOF
 #define HAVE_QHULL 1
 _ACEOF
 
-                USE_QHULL=yes
-                QHULL_INC_DIR="${QHULL_HOME}/include"
-                QHULL_LIB_DIR="${QHULL_HOME}/lib"
-                QHULL="-lqhull"
+           USE_QHULL=yes
+           QHULL_INC_DIR="${QHULL_HOME}/include"
+           QHULL_LIB_DIR="${QHULL_HOME}/lib"
+           QHULL="-lqhull"
+           { $as_echo "$as_me:$LINENO: result: Working qhull found, will proceed." >&5
+$as_echo "Working qhull found, will proceed." >&6; }
         else
-                { $as_echo "$as_me:$LINENO: checking qhull in ${QHULL_HOME}" >&5
-$as_echo_n "checking qhull in ${QHULL_HOME}... " >&6; }
-                QHULL_INC_DIR=
-                QHULL_LIB_DIR=
-                QHULL=
-                USE_QHULL=no
-                { $as_echo "$as_me:$LINENO: result: failed" >&5
-$as_echo "failed" >&6; }
-	        echo ""
-	        echo "*********************************************************"
-                echo "* WARNING: Could not find a working qhull installation  *"
-                echo "* If you need OOPSE to be able to deal with convex      *"
-                echo "* hulls be sure to specify a valid qhull installation   *"
-	        echo "* with --with-qhull=DIR                                 *"
-                echo "*                                                       *"
-                echo "* OOPSE will still work without qhull installed.        *"
-	        echo "*********************************************************"
-	        echo ""
+	   { $as_echo "$as_me:$LINENO: WARNING: " >&5
+$as_echo "$as_me: WARNING: " >&2;}
+           { $as_echo "$as_me:$LINENO: WARNING: Could not find a working qhull installation" >&5
+$as_echo "$as_me: WARNING: Could not find a working qhull installation" >&2;}
+           { $as_echo "$as_me:$LINENO: WARNING: If you need OOPSE to be able to deal with convex    " >&5
+$as_echo "$as_me: WARNING: If you need OOPSE to be able to deal with convex    " >&2;}
+           { $as_echo "$as_me:$LINENO: WARNING: hulls be sure to specify a valid qhull installation " >&5
+$as_echo "$as_me: WARNING: hulls be sure to specify a valid qhull installation " >&2;}
+	   { $as_echo "$as_me:$LINENO: WARNING: with --with-qhull=DIR                               " >&5
+$as_echo "$as_me: WARNING: with --with-qhull=DIR                               " >&2;}
+           { $as_echo "$as_me:$LINENO: WARNING: " >&5
+$as_echo "$as_me: WARNING: " >&2;}
+           { $as_echo "$as_me:$LINENO: WARNING: OOPSE will still work without qhull installed.      " >&5
+$as_echo "$as_me: WARNING: OOPSE will still work without qhull installed.      " >&2;}
+	   { $as_echo "$as_me:$LINENO: WARNING: " >&5
+$as_echo "$as_me: WARNING: " >&2;}
         fi
-
-
-
-
+    fi
 fi
-fi
+
+
+
+
 
 
 ac_ext=cpp
