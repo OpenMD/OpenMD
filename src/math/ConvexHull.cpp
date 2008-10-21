@@ -44,7 +44,7 @@
  *
  *  Created by Charles F. Vardeman II on 11 Dec 2006.
  *  @author  Charles F. Vardeman II
- *  @version $Id: ConvexHull.cpp,v 1.11 2008-10-20 19:36:32 chuckv Exp $
+ *  @version $Id: ConvexHull.cpp,v 1.12 2008-10-21 16:44:00 chuckv Exp $
  *
  */
 
@@ -438,6 +438,7 @@ void ConvexHull::computeHull(std::vector<StuntDouble*> bodydoubles)
   
   boolT ismalloc = False;
   /* Clean up memory from previous convex hull calculations*/
+  
   Triangles_.clear();
   surfaceSDs_.clear();
   surfaceSDs_.reserve(Ns_);
@@ -608,21 +609,21 @@ void ConvexHull::computeHull(std::vector<StuntDouble*> bodydoubles)
 	simError();
       } //simplicical
       
-      Triangle* face = new Triangle();
+      Triangle face;
       Vector3d  V3dNormal(facet->normal[0],facet->normal[1],facet->normal[2]);
-      face->setNormal(V3dNormal);
+      face.setNormal(V3dNormal);
  
       
 
       RealType faceArea = 0.5*V3dNormal.length();
-      face->setArea(faceArea);
+      face.setArea(faceArea);
 
 
       vertices = qh_facet3vertex(facet);
       
       coordT *center = qh_getcenter(vertices);
       Vector3d V3dCentroid(center[0], center[1], center[2]);
-      face->setCentroid(V3dCentroid);
+      face.setCentroid(V3dCentroid);
       Vector3d faceVel = V3Zero;
       FOREACHvertex_(vertices){
 	id = qh_pointid(vertex->point);
@@ -635,7 +636,7 @@ void ConvexHull::computeHull(std::vector<StuntDouble*> bodydoubles)
 #else
 	  faceVel = faceVel + bodydoubles[localindex]->getVel();
 #endif
-	  face->addVertex(bodydoubles[localindex]);
+	  face.addVertex(bodydoubles[localindex]);
 	  if( !isSurfaceID[id] ){
 	    isSurfaceID[id] = true;
 #ifdef IS_MPI	    
@@ -649,7 +650,7 @@ void ConvexHull::computeHull(std::vector<StuntDouble*> bodydoubles)
 #ifdef IS_MPI
 	 
 	}else{
-	  face->addVertex(NULL);
+	  face.addVertex(NULL);
 	  }
 #endif
       } //Foreachvertex
@@ -661,7 +662,7 @@ void ConvexHull::computeHull(std::vector<StuntDouble*> bodydoubles)
 	}
       }
       */
-      face->setFacetVelocity(faceVel/3.0);
+      face.setFacetVelocity(faceVel/3.0);
       Triangles_.push_back(face);
       qh_settempfree(&vertices);      
 

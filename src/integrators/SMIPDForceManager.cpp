@@ -301,7 +301,7 @@ namespace oopse {
      int nSurfaceSDs = surfaceMesh_->getNs();
 
     
-    std::vector<Triangle*> sMesh = surfaceMesh_->getMesh();
+    std::vector<Triangle> sMesh = surfaceMesh_->getMesh();
     int nTriangles = sMesh.size();
 
 
@@ -319,21 +319,21 @@ namespace oopse {
     /* Loop over the mesh faces and apply random force to each of the faces*/
     
     
-    std::vector<Triangle*>::iterator face;
+    std::vector<Triangle>::iterator face;
     std::vector<StuntDouble*>::iterator vertex;
     int thisNumber = 0;
     for (face = sMesh.begin(); face != sMesh.end(); ++face){
      
-      Triangle* thisTriangle = *face;
-      std::vector<StuntDouble*> vertexSDs = thisTriangle->getVertices();
+      Triangle thisTriangle = *face;
+      std::vector<StuntDouble*> vertexSDs = thisTriangle.getVertices();
       
       /* Get Random Force */
-      Vector3d unitNormal = thisTriangle->getNormal();
+      Vector3d unitNormal = thisTriangle.getNormal();
       unitNormal.normalize();
       Vector3d randomForce = -randNums[thisNumber] * unitNormal;
-      Vector3d centroid = thisTriangle->getCentroid();
+      Vector3d centroid = thisTriangle.getCentroid();
 
-      Vector3d langevinForce = randomForce - gamma_t_*thisTriangle->getFacetVelocity();
+      Vector3d langevinForce = randomForce - gamma_t_*thisTriangle.getFacetVelocity();
       
       for (vertex = vertexSDs.begin(); vertex != vertexSDs.end(); ++vertex){
 	if ((*vertex) != NULL){

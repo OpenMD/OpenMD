@@ -44,7 +44,7 @@
  *
  *  Created by Charles F. Vardeman II on 27 July 2008.
  *  @author  Charles F. Vardeman II
- *  @version $Id: Hull.hpp,v 1.2 2008-10-20 19:36:32 chuckv Exp $
+ *  @version $Id: Hull.hpp,v 1.3 2008-10-21 16:44:00 chuckv Exp $
  *
  */
 
@@ -72,7 +72,7 @@ namespace oopse {
     virtual int getNMeshElements()=0; //Number of polygons in surface mesh
     virtual RealType getVolume()=0; //Total Volume inclosed by Hull
     virtual std::vector< StuntDouble* > getSurfaceAtoms()=0; //Returns a list of surface atoms
-    virtual std::vector<Triangle* > getMesh()=0;
+    virtual std::vector<Triangle > getMesh()=0;
     virtual void printHull(const std::string& geomFileName)=0;
   };
 }
