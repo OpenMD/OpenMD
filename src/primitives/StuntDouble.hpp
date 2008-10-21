@@ -763,6 +763,92 @@ namespace oopse{
     }       
 
 
+
+    /**
+     * Returns the previous particlePot of this stuntDouble
+     * @return the particlePot of this stuntDouble
+     */    
+    RealType getPrevParticlePot() {
+      return ((snapshotMan_->getPrevSnapshot())->*storage_).particlePot[localIndex_];
+    }
+       
+    /**
+     * Returns the current particlePot of this stuntDouble
+     * @return the particlePot of this stuntDouble
+     */    
+    RealType getParticlePot() {
+      return ((snapshotMan_->getCurrentSnapshot())->*storage_).particlePot[localIndex_];
+    }
+
+    /**
+     * Returns the particlePot of this stuntDouble in specified snapshot 
+     *
+     * @return the particlePot of this stuntDouble
+     * @param snapshotNo
+     */    
+    RealType getParticlePot(int snapshotNo) {
+      return ((snapshotMan_->getSnapshot(snapshotNo))->*storage_).particlePot[localIndex_];
+    }
+
+    /**
+     * Sets  the previous particlePot of this stuntDouble
+     *
+     * @param particlePot  new particlePot 
+     * @see #getParticlePot
+     */         
+    void setPrevParticlePot(const RealType& particlePot) {
+      ((snapshotMan_->getPrevSnapshot())->*storage_).particlePot[localIndex_] = particlePot;
+    }
+       
+    /**
+     * Sets  the current particlePot of this stuntDouble
+     * @param particlePot  new particlePot 
+     */         
+    void setParticlePot(const RealType& particlePot) {
+      ((snapshotMan_->getCurrentSnapshot())->*storage_).particlePot[localIndex_] = particlePot;
+    }
+
+    /**
+     * Sets  the particlePot of this stuntDouble in specified snapshot
+     *
+     * @param particlePot particlePot to be set 
+     * @param snapshotNo 
+     * @see #getParticlePot
+     */         
+    void setParticlePot(const RealType& particlePot, int snapshotNo) {
+      ((snapshotMan_->getSnapshot(snapshotNo))->*storage_).particlePot[localIndex_] = particlePot;
+    }
+
+    /**
+     * Adds particlePot into the previous particlePot of this stuntDouble
+     *
+     * @param particlePot  new particlePot 
+     * @see #getParticlePot
+     */         
+    void addPrevParticlePot(const RealType& particlePot) {
+      ((snapshotMan_->getPrevSnapshot())->*storage_).particlePot[localIndex_] += particlePot;
+    }
+       
+    /**
+     * Adds particlePot into the current particlePot of this stuntDouble
+     * @param particlePot  new particlePot 
+     */         
+    void addParticlePot(const RealType& particlePot) {
+      ((snapshotMan_->getCurrentSnapshot())->*storage_).particlePot[localIndex_] += particlePot;
+    }
+
+    /**
+     * Adds particlePot into the particlePot of this stuntDouble in specified snapshot
+     *
+     * @param particlePot particlePot to be add 
+     * @param snapshotNo 
+     * @see #getParticlePot
+     */         
+    void addParticlePot(const RealType& particlePot, int snapshotNo) {
+      ((snapshotMan_->getSnapshot(snapshotNo))->*storage_).particlePot[localIndex_] += particlePot;
+    }       
+
+
     /**
      * Returns the previous z-angle of this stuntDouble
      * @return the z-angle of this stuntDouble
@@ -922,58 +1008,6 @@ namespace oopse{
 
     Vector3d body2Lab(const Vector3d& v, int frame){
       return getA(frame).transpose() * v;
-    }
-
-    /**
-     * Returns the previous particle potential of this stuntDouble
-     * @return the particle potential of this stuntDouble
-     */    
-    RealType getPrevParticlePot() {
-      return ((snapshotMan_->getPrevSnapshot())->*storage_).particlePot[localIndex_];
-    }
-       
-    /**
-     * Returns the current particle potential of this stuntDouble
-     * @return the particle potential of this stuntDouble
-     */    
-    RealType getParticlePot() {
-      return ((snapshotMan_->getCurrentSnapshot())->*storage_).particlePot[localIndex_];
-    }
-
-    /**
-     * Returns the particle potential of this stuntDouble in specified snapshot 
-     * @return the particle potential of this stuntDouble
-     * @param snapshotNo
-     */    
-    RealType getParticlePot(int snapshotNo) {
-      return ((snapshotMan_->getSnapshot(snapshotNo))->*storage_).particlePot[localIndex_];
-    }
-
-    /**
-     * Sets  the previous particle potential of this stuntDouble
-     * @param po tnew particle potential 
-     * @see #getParticlePot
-     */         
-    void setPrevParticlePot(RealType pot) {
-      ((snapshotMan_->getPrevSnapshot())->*storage_).particlePot[localIndex_] = pot;
-    }
-       
-    /**
-     * Sets  the current velocity of this stuntDouble
-     * @param vel  new velocity 
-     */         
-    void setParticlePot(RealType pot) {
-      ((snapshotMan_->getCurrentSnapshot())->*storage_).particlePot[localIndex_] = pot;
-    }
-
-    /**
-     * Sets  the particle potential of this stuntDouble in specified snapshot
-     * @param pot potential to be set 
-     * @param snapshotNo 
-     * @see #getVel
-     */         
-    void setParticlePot(RealType pot, int snapshotNo) {
-      ((snapshotMan_->getSnapshot(snapshotNo))->*storage_).particlePot[localIndex_] = pot;
     }
 
     /**

@@ -77,6 +77,9 @@ module force_globals
   real( kind = dp ), allocatable, dimension(:,:), public :: rf_Row
   real( kind = dp ), allocatable, dimension(:,:), public :: rf_Col
   real( kind = dp ), allocatable, dimension(:,:), public :: rf_Temp
+  real( kind = dp ), allocatable, dimension(:),   public :: ppot_Row
+  real( kind = dp ), allocatable, dimension(:),   public :: ppot_Col
+  real( kind = dp ), allocatable, dimension(:),   public :: ppot_Temp
 
   integer, allocatable, dimension(:), public :: atid_Row
   integer, allocatable, dimension(:), public :: atid_Col
@@ -253,6 +256,24 @@ contains
        return
     endif
 
+    allocate(ppot_Row(ndim,nAtomsInRow),stat=alloc_stat)
+    if (alloc_stat /= 0 ) then
+       thisStat = -1
+       return
+    endif
+
+    allocate(ppot_Col(ndim,nAtomsInCol),stat=alloc_stat)
+    if (alloc_stat /= 0 ) then
+       thisStat = -1
+       return
+    endif
+
+    allocate(ppot_Temp(nlocal),stat=alloc_stat)
+    if (alloc_stat /= 0 ) then
+       thisStat = -1
+       return
+    endif
+
 #else
 
     allocate(atid(nlocal),stat=alloc_stat)
@@ -279,6 +300,9 @@ contains
 
     if (allocated(rf))         deallocate(rf)
 #ifdef IS_MPI
+    if (allocated(ppot_Temp))  deallocate(ppot_Temp)
+    if (allocated(ppot_Col))   deallocate(ppot_Col)
+    if (allocated(ppot_Row))   deallocate(ppot_Row)    
     if (allocated(rf_Temp))    deallocate(rf_Temp)
     if (allocated(rf_Col))     deallocate(rf_Col)
     if (allocated(rf_Row))     deallocate(rf_Row)    

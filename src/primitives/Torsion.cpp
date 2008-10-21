@@ -92,6 +92,12 @@ namespace oopse {
     atom2_->addFrc(f2 - f1);
     atom3_->addFrc(f3 - f2);
     atom4_->addFrc(-f3);
+
+    atom1_->addParticlePot(potential_);
+    atom2_->addParticlePot(potential_);
+    atom3_->addParticlePot(potential_);
+    atom4_->addParticlePot(potential_);
+
     angle = acos(cos_phi) /M_PI * 180.0;
   }
 

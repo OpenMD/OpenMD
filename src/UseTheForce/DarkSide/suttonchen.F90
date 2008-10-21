@@ -347,7 +347,6 @@ contains
        status = -1
     end if
 
-
     ! Now do column arrays
 
     if (allocated(frho_col)) deallocate(frho_col)
@@ -417,14 +416,11 @@ contains
     integer :: myid_atom1 ! SC atid
     integer :: myid_atom2 
 
-
     ! check to see if we need to be cleaned at the start of a force loop
 
     if (cleanArrays) call clean_SC()
     cleanArrays = .false.
     
-    
-
 #ifdef IS_MPI
     Atid1 = Atid_row(Atom1)
     Atid2 = Atid_col(Atom2)
@@ -529,12 +525,13 @@ contains
   end subroutine calc_sc_preforce_Frho  
   
   !! Does Sutton-Chen  pairwise Force calculation.  
-  subroutine do_sc_pair(atom1, atom2, d, rij, r2, rcut, sw, vpair, fpair, &
-       pot, f, do_pot)
+  subroutine do_sc_pair(atom1, atom2, d, rij, r2, rcut, sw, vpair, &
+       particle_pot, fpair, pot, f, do_pot)
     !Arguments    
     integer, intent(in) ::  atom1, atom2
     real( kind = dp ), intent(in) :: rij, r2, rcut
     real( kind = dp ) :: pot, sw, vpair
+    real( kind = dp ), dimension(nLocal) :: particle_pot
     real( kind = dp ), dimension(3,nLocal) :: f
     real( kind = dp ), intent(in), dimension(3) :: d
     real( kind = dp ), intent(inout), dimension(3) :: fpair
@@ -548,6 +545,7 @@ contains
     real( kind = dp ) :: Fx,Fy,Fz
     real( kind = dp ) :: pot_temp, vptmp
     real( kind = dp ) :: rcij, vcij
+    real( kind = dp ) :: fshift1, fshift2
     integer :: id1, id2
     integer  :: mytype_atom1
     integer  :: mytype_atom2
@@ -598,6 +596,29 @@ contains
        if (do_pot) then
           pot_Row(METALLIC_POT,atom1) = pot_Row(METALLIC_POT,atom1) + (pot_temp)*0.5
           pot_Col(METALLIC_POT,atom2) = pot_Col(METALLIC_POT,atom2) + (pot_temp)*0.5
+
+          ! particle_pot is the difference between the full potential 
+          ! and the full potential without the presence of a particular
+          ! particle (atom1).
+          !
+          ! This reduces the density at other particle locations, so
+          ! we need to recompute the density at atom2 assuming atom1
+          ! didn't contribute.  This then requires recomputing the
+          ! density functional for atom2 as well.
+          !
+          ! Most of the particle_pot heavy lifting comes from the
+          ! pair interaction, and will be handled by vpair.
+
+          fshift1 = -SCList%SCTypes(mytype_atom1)%c * &
+               SCList%SCTypes(mytype_atom1)%epsilon * &
+               sqrt(rho_row(atom1)-rhtmp)
+          fshift2 = -SCList%SCTypes(mytype_atom2)%c * &
+               SCList%SCTypes(mytype_atom2)%epsilon * &
+               sqrt(rho_col(atom2)-rhtmp)
+          
+          ppot_row(atom1) = ppot_row(atom1) - frho_row(atom2) + fshift2
+          ppot_col(atom2) = ppot_col(atom2) - frho_col(atom1) + fshift1
+
        end if
 
        f_Row(1,atom1) = f_Row(1,atom1) + fx
@@ -611,6 +632,16 @@ contains
 
        if(do_pot) then
           pot = pot + pot_temp
+          fshift1 = -SCList%SCTypes(mytype_atom1)%c * &
+               SCList%SCTypes(mytype_atom1)%epsilon * &
+               sqrt(rho(atom1)-rhtmp)
+          fshift2 = -SCList%SCTypes(mytype_atom2)%c * &
+               SCList%SCTypes(mytype_atom2)%epsilon * &
+               sqrt(rho(atom2)-rhtmp)
+          
+          particle_pot(atom1) = particle_pot(atom1) - frho(atom2) + fshift2
+          particle_pot(atom2) = particle_pot(atom2) - frho(atom1) + fshift1
+
        end if
 
        f(1,atom1) = f(1,atom1) + fx

@@ -60,14 +60,6 @@ namespace oopse {
     Vector3d pos3 = atom1_->getPos();
     Vector3d pos4 = atom4_->getPos();
 
-   /*std::ofstream myfile;
-   myfile.open("Inversion", std::ios::app);       
-   myfile << atom1_->getType() << " - atom1; "
-              << atom2_->getType() << " - atom2; "
-              << atom3_->getType() << " - atom3; "
-              << atom4_->getType() << " - atom4; "
-              << std::endl;
-*/
     Vector3d r31 = pos1 - pos3;
     Vector3d r23 = pos3 - pos2;
     Vector3d r43 = pos3 - pos4;
@@ -86,14 +78,10 @@ namespace oopse {
     
     //  Calculate the sin and cos
     RealType cos_phi = dot(A, B) ;
-    if (cos_phi > 1.0) {cos_phi = 1.0; std::cout << "!!!! cos_phi is bigger than 1.0" 
-                                                 << std::endl;}
-    if (cos_phi < -1.0) {cos_phi = -1.0; std::cout << "!!!! cos_phi is less than -1.0" 
-                                                   << std::endl;}
-    //std::cout << "We actually use this inversion!!!!" << std::endl;
+    if (cos_phi > 1.0) cos_phi = 1.0;
+    if (cos_phi < -1.0) cos_phi = -1.0;
 
     RealType dVdcosPhi;
-    //cos_phi = 2.0*cos_phi*cos_phi - 1.0;
     inversionType_->calcForce(cos_phi, potential_, dVdcosPhi);
     Vector3d f1 ;
     Vector3d f2 ;
@@ -120,6 +108,11 @@ namespace oopse {
     atom1_->addFrc(f2 - f1 + f3);
     atom4_->addFrc(-f2);
     atom3_->addFrc(-f3);
+
+    atom1_->addParticlePot(potential_);
+    atom2_->addParticlePot(potential_);
+    atom3_->addParticlePot(potential_);
+    atom4_->addParticlePot(potential_);
 
     angle = acos(cos_phi) /M_PI * 180.0;
   }

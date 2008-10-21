@@ -474,12 +474,13 @@ contains
   end subroutine calc_eam_preforce_Frho
   
   !! Does EAM pairwise Force calculation.  
-  subroutine do_eam_pair(atom1, atom2, d, rij, r2, sw, vpair, fpair, &
-       pot, f, do_pot)
+  subroutine do_eam_pair(atom1, atom2, d, rij, r2, sw, vpair, particle_pot, &
+       fpair, pot, f, do_pot)
     !Arguments    
     integer, intent(in) ::  atom1, atom2
     real( kind = dp ), intent(in) :: rij, r2
     real( kind = dp ) :: pot, sw, vpair
+    real( kind = dp ), dimension(nLocal) :: particle_pot
     real( kind = dp ), dimension(3,nLocal) :: f
     real( kind = dp ), intent(in), dimension(3) :: d
     real( kind = dp ), intent(inout), dimension(3) :: fpair
@@ -495,6 +496,7 @@ contains
     real( kind = dp ) :: drhoidr, drhojdr
     real( kind = dp ) :: Fx, Fy, Fz
     real( kind = dp ) :: r, phb
+    real( kind = dp ) :: fshift1, fshift2, u1, u2
 
     integer :: id1, id2
     integer  :: mytype_atom1
@@ -586,6 +588,29 @@ contains
 
 #ifdef IS_MPI
        if (do_pot) then
+          ! particle_pot is the difference between the full potential 
+          ! and the full potential without the presence of a particular
+          ! particle (atom1).
+          !
+          ! This reduces the density at other particle locations, so
+          ! we need to recompute the density at atom2 assuming atom1
+          ! didn't contribute.  This then requires recomputing the
+          ! density functional for atom2 as well.
+          !
+          ! Most of the particle_pot heavy lifting comes from the
+          ! pair interaction, and will be handled by vpair.
+
+          call lookupEAMSpline1d(EAMList%EAMParams(mytype_atom1)%F, &
+               rho_row(atom1)-rhb, &
+               fshift1, u1)
+          call lookupEAMSpline1d(EAMList%EAMParams(mytype_atom2)%F, &
+               rho_col(atom2)-rha, &
+               fshift2, u2)
+          
+          ppot_Row(atom1) = ppot_Row(atom1) - frho_row(atom2) + fshift2
+          ppot_Col(atom2) = ppot_Col(atom2) - frho_col(atom1) + fshift1
+
+
           pot_Row(METALLIC_POT,atom1) = pot_Row(METALLIC_POT,atom1) + phab*0.5
           pot_Col(METALLIC_POT,atom2) = pot_Col(METALLIC_POT,atom2) + phab*0.5
        end if
@@ -600,6 +625,28 @@ contains
 #else
 
        if(do_pot) then
+          ! particle_pot is the difference between the full potential 
+          ! and the full potential without the presence of a particular
+          ! particle (atom1).
+          !
+          ! This reduces the density at other particle locations, so
+          ! we need to recompute the density at atom2 assuming atom1
+          ! didn't contribute.  This then requires recomputing the
+          ! density functional for atom2 as well.
+          !
+          ! Most of the particle_pot heavy lifting comes from the
+          ! pair interaction, and will be handled by vpair.
+
+          call lookupEAMSpline1d(EAMList%EAMParams(mytype_atom1)%F, &
+               rho(atom1)-rhb, &
+               fshift1, u1)
+          call lookupEAMSpline1d(EAMList%EAMParams(mytype_atom2)%F, &
+               rho(atom2)-rha, &
+               fshift2, u2)
+          
+          particle_pot(atom1) = particle_pot(atom1) - frho(atom2) + fshift2
+          particle_pot(atom2) = particle_pot(atom2) - frho(atom1) + fshift1
+
           pot = pot + phab
        end if
 

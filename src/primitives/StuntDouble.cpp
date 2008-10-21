@@ -63,6 +63,7 @@ namespace oopse {
   void StuntDouble::zeroForcesAndTorques() {    
     setFrc(V3Zero);
     setTrq(V3Zero);
+    setParticlePot(0.0);
   }
   void StuntDouble::addProperty(GenericData* genData) {
     properties_.addProperty(genData);  

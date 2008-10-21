@@ -75,6 +75,9 @@ namespace oopse {
 
       atom1_->addFrc(-force);
       atom2_->addFrc(force);
+     
+      atom1_->addParticlePot(potential_);
+      atom2_->addParticlePot(potential_);
     }
     
     RealType getPotential() {

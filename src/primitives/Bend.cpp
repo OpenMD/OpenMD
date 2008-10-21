@@ -93,7 +93,11 @@ namespace oopse {
     atom1_->addFrc(force1);
     atom2_->addFrc(force2);
     atom3_->addFrc(force3);
-    
+
+    atom1_->addParticlePot(potential_);
+    atom2_->addParticlePot(potential_);
+    atom3_->addParticlePot(potential_);
+   
     angle = theta /M_PI * 180.0;
   }
 

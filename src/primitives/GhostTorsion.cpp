@@ -91,6 +91,10 @@ namespace oopse {
     f3.negate();
     ghostAtom->addTrq(cross(r43, f3));    
     
+    atom1_->addParticlePot(potential_);
+    atom2_->addParticlePot(potential_);
+    ghostAtom->addParticlePot(potential_);
+
     angle = acos(cos_phi) /M_PI * 180.0;
   }
 }

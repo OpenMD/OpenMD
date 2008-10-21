@@ -73,7 +73,7 @@ namespace oopse {
     
     RealType firstDerivative;
     
-    bendType_->calcForce(theta, firstDerivative, potential_);
+    bendType_->calcForce(theta, potential_, firstDerivative);
     
     RealType sinTheta = sqrt(1.0 - cosTheta * cosTheta);
     
@@ -89,8 +89,11 @@ namespace oopse {
     atom1_->addFrc(force1);
     ghostAtom->addFrc(-force1);
     /**@todo test correctness */
-    ghostAtom->addTrq(cross(r32, force3) );
-    
+    ghostAtom->addTrq(cross(r32, force3) );    
+
+    atom1_->addParticlePot(potential_);
+    ghostAtom->addParticlePot(potential_);
+
     angle = theta /M_PI * 180.0;
     
   }  

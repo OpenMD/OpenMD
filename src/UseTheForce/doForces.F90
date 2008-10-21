@@ -45,7 +45,7 @@
 
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: doForces.F90,v 1.96 2008-09-10 19:40:06 cli2 Exp $, $Date: 2008-09-10 19:40:06 $, $Name: not supported by cvs2svn $, $Revision: 1.96 $
+!! @version $Id: doForces.F90,v 1.97 2008-10-21 18:23:29 gezelter Exp $, $Date: 2008-10-21 18:23:29 $, $Name: not supported by cvs2svn $, $Revision: 1.97 $
 
 
 module doForces
@@ -1096,16 +1096,14 @@ contains
                          else
 #ifdef IS_MPI                      
                             call do_pair(atom1, atom2, ratmsq, d_atm, sw, &
-                                 do_pot, eFrame, A, f, t, pot_local, vpair, &
+                                 do_pot, eFrame, A, f, t, pot_local, particle_pot, vpair, &
                                  fpair, d_grp, rgrp, rCut, topoDist)
                             ! particle_pot will be accumulated from row & column
                             ! arrays later
 #else
                             call do_pair(atom1, atom2, ratmsq, d_atm, sw, &
-                                 do_pot, eFrame, A, f, t, pot, vpair, &
+                                 do_pot, eFrame, A, f, t, pot, particle_pot, vpair, &
                                  fpair, d_grp, rgrp, rCut, topoDist)
-                            particle_pot(atom1) = particle_pot(atom1) + vpair*sw
-                            particle_pot(atom2) = particle_pot(atom2) + vpair*sw
 #endif
                             vij = vij + vpair
                             fij(1) = fij(1) + fpair(1)
@@ -1292,6 +1290,20 @@ contains
        do i = 1,LR_POT_TYPES
           particle_pot(1:nlocal) = particle_pot(1:nlocal) + pot_Temp(i,1:nlocal)
        enddo
+       
+       ppot_Temp = 0.0_DP
+       
+       call scatter(ppot_Row(:), ppot_Temp(:), plan_atom_row)
+       do i = 1, nlocal
+          particle_pot(i) = particle_pot(i) + ppot_Temp(i)
+       enddo
+
+       ppot_Temp = 0.0_DP
+
+       call scatter(ppot_Col(:), ppot_Temp(:), plan_atom_col)
+       do i = 1, nlocal
+          particle_pot(i) = particle_pot(i) + ppot_Temp(i)
+       enddo
 
 
     endif
@@ -1440,7 +1452,8 @@ contains
   end subroutine do_force_loop
 
   subroutine do_pair(i, j, rijsq, d, sw, do_pot, &
-       eFrame, A, f, t, pot, vpair, fpair, d_grp, r_grp, rCut, topoDist)
+       eFrame, A, f, t, pot, particle_pot, vpair, &
+       fpair, d_grp, r_grp, rCut, topoDist)
 
     real( kind = dp ) :: vpair, sw
     real( kind = dp ), dimension(LR_POT_TYPES) :: pot
@@ -1516,8 +1529,8 @@ contains
     endif
     
     if ( iand(iHash, EAM_PAIR).ne.0 ) then       
-       call do_eam_pair(i, j, d, r, rijsq, sw, vpair, fpair, &
-            pot(METALLIC_POT), f, do_pot)
+       call do_eam_pair(i, j, d, r, rijsq, sw, vpair, particle_pot, &
+            fpair, pot(METALLIC_POT), f, do_pot)
     endif
     
     if ( iand(iHash, SHAPE_PAIR).ne.0 ) then       
@@ -1531,14 +1544,17 @@ contains
     endif
 
     if ( iand(iHash, SC_PAIR).ne.0 ) then       
-       call do_SC_pair(i, j, d, r, rijsq, rcut, sw, vpair, fpair, &
-            pot(METALLIC_POT), f, do_pot)
+       call do_SC_pair(i, j, d, r, rijsq, rcut, sw, vpair, particle_pot, &
+            fpair, pot(METALLIC_POT), f, do_pot)
     endif
      
     if ( iand(iHash, MNM_PAIR).ne.0 ) then       
        call do_mnm_pair(i, j, d, r, rijsq, rcut, sw, vdwMult, vpair, fpair, &
             pot(VDW_POT), A, f, t, do_pot)
     endif
+
+    particle_pot(i) = particle_pot(i) + vpair*sw
+    particle_pot(j) = particle_pot(j) + vpair*sw
 
   end subroutine do_pair
 
@@ -1688,6 +1704,7 @@ contains
     pot_Row = 0.0_dp
     pot_Col = 0.0_dp
     pot_Temp = 0.0_dp
+    ppot_Temp = 0.0_dp
 
 #endif
 

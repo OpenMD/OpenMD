@@ -54,6 +54,7 @@ namespace oopse {
   void UreyBradleyBend::calcForce(RealType& angle) {
     Bend::calcForce(angle);
     bond_->calcForce();
+    atom2_->addParticlePot(bond_->getPotential());
   }
 
 } //end namespace oopse
