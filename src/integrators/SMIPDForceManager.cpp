@@ -340,7 +340,8 @@ namespace oopse {
 	  // mass = integrableObject->getMass();
 	  Vector3d vertexForce = langevinForce/3.0;
 	  (*vertex)->addFrc(vertexForce);
-	  if (integrableObject->isDirectional()){
+
+	  if ((*vertex)->isDirectional()){
 	    Vector3d vertexPos = (*vertex)->getPos();
 	    Vector3d vertexCentroidVector = vertexPos - centroid;
 	    (*vertex)->addTrq(cross(vertexCentroidVector,vertexForce));
