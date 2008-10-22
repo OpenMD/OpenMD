@@ -256,13 +256,13 @@ contains
        return
     endif
 
-    allocate(ppot_Row(ndim,nAtomsInRow),stat=alloc_stat)
+    allocate(ppot_Row(nAtomsInRow),stat=alloc_stat)
     if (alloc_stat /= 0 ) then
        thisStat = -1
        return
     endif
 
-    allocate(ppot_Col(ndim,nAtomsInCol),stat=alloc_stat)
+    allocate(ppot_Col(nAtomsInCol),stat=alloc_stat)
     if (alloc_stat /= 0 ) then
        thisStat = -1
        return

@@ -763,6 +763,7 @@ namespace oopse {
     useRF = 0;
     useSF = 0;
     useSP = 0;
+    useBoxDipole = 0;
 
 
     if (simParams_->haveElectrostaticSummationMethod()) {
@@ -949,11 +950,6 @@ namespace oopse {
     nOneTwo = oneTwoInteractions_.getSize();
     nOneThree = oneThreeInteractions_.getSize();
     nOneFour = oneFourInteractions_.getSize();
-
-    std::cerr << "excludedInteractions contains: " << excludedInteractions_.getSize() << " pairs \n";
-    std::cerr << "oneTwoInteractions contains: " << oneTwoInteractions_.getSize() << " pairs \n";
-    std::cerr << "oneThreeInteractions contains: " << oneThreeInteractions_.getSize() << " pairs \n";
-    std::cerr << "oneFourInteractions contains: " << oneFourInteractions_.getSize() << " pairs \n";
 
     int* excludeList = excludedInteractions_.getPairList();
     int* oneTwoList = oneTwoInteractions_.getPairList();

@@ -287,7 +287,7 @@ namespace oopse {
         } else {
           MPI_Recv(recvBuffer, recvLength, MPI_CHAR, i, 0, MPI_COMM_WORLD, &istatus);
           os << recvBuffer;
-          delete recvBuffer;
+          delete [] recvBuffer;
         }
       }	
       os << "    </StuntDoubles>\n";

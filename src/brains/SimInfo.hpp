@@ -521,7 +521,7 @@ namespace oopse{
     std::vector<int> globalGroupMembership_; 
 
     /**
-     * the size of globalGroupMembership_  is nGlobalAtoms. Its index is  global index of an atom, and the
+     * the size of globalMolMembership_  is nGlobalAtoms. Its index is  global index of an atom, and the
      * corresponding content is the global index of molecule this atom belong to. 
      * It is filled by SimCreator once and only once, since it is never changed during the simulation.
      */

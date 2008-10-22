@@ -51,8 +51,10 @@
 #endif
 
 /* Remove me after testing*/
+/*
 #include <cstdio>
 #include <iostream>
+*/
 /*End remove me*/
 
 namespace oopse {
@@ -103,7 +105,7 @@ namespace oopse {
     Molecule::IntegrableObjectIterator j;
     Molecule * mol;
     StuntDouble * integrableObject;
-        
+
     kebar = kb * temperature * info_->getNdfRaw() / (2.0 * info_->getNdf());
     for( mol = info_->beginMolecule(i); mol != NULL;
 	 mol = info_->nextMolecule(i) ) {
@@ -203,7 +205,7 @@ namespace oopse {
               << angularMomentum <<  std::endl;
     std::cerr << "Inertia Tensor before is "
               << inertiaTensor <<  std::endl;
-    */  
+    */
     inertiaTensor =inertiaTensor.inverse();
     /*
     std::cerr << "Inertia Tensor after inverse is "
@@ -233,8 +235,7 @@ namespace oopse {
     /*
     std::cerr << "Angular Momentum after is "
               << angularMomentum <<  std::endl;
-    */
-      
+    */ 
   }
    
    

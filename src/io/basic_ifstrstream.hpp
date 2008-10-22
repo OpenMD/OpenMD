@@ -260,7 +260,7 @@ namespace oopse {
 	  //close the file and delete the buffer
 	  fin.close();      
 	  internalBuf_.str(fbuf);
-	  delete fbuf;
+	  delete [] fbuf;
 	}else{
 	  fileSize = FileNotExists;
 	  commStatus = MPI_Bcast(&fileSize, 1, MPI_LONG, masterNode, MPI_COMM_WORLD);   
@@ -299,7 +299,7 @@ namespace oopse {
 	  commStatus = MPI_Bcast(fbuf, fileSize + 1, MPI_CHAR, masterNode, MPI_COMM_WORLD); 
 
 	  internalBuf_.str(fbuf);
-	  delete fbuf;
+	  delete [] fbuf;
 
 	} else if (fileSize == FileNotExists ) {
 	  return false;

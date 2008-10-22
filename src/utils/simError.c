@@ -125,7 +125,7 @@ int simError( void ) {
 void errorCheckPoint( void ){
     
   int myError = 0;
-  int isError;
+  int isError = 0;
 
 #ifdef IS_MPI
   MPI_Allreduce( &myError, &isError, 1, MPI_INT, MPI_LOR, MPI_COMM_WORLD );

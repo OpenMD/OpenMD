@@ -296,8 +296,11 @@ namespace oopse {
       int sendBufferSize;
       MPI_Bcast(&sendBufferSize, 1, MPI_INT, masterNode, MPI_COMM_WORLD);     
       char * recvBuffer = new char[sendBufferSize+1];
+      assert(recvBuffer);
+      recvBuffer[sendBufferSize] = '\0';
       MPI_Bcast(recvBuffer, sendBufferSize, MPI_CHAR, masterNode, MPI_COMM_WORLD);     
       sstream.str(recvBuffer);
+      delete [] recvBuffer;
     }      
 
     std::istream& inputStream = sstream;  

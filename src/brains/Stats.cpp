@@ -145,6 +145,8 @@ namespace oopse {
     Stats::statsMap.insert(StatsMapType::value_type("TEMPERATURE", TEMPERATURE));
     Stats::statsMap.insert(StatsMapType::value_type("PRESSURE", PRESSURE));
     Stats::statsMap.insert(StatsMapType::value_type("VOLUME", VOLUME));
+    Stats::statsMap.insert(StatsMapType::value_type("HULLVOLUME", HULLVOLUME));
+    Stats::statsMap.insert(StatsMapType::value_type("GYRVOLUME", GYRVOLUME));
     Stats::statsMap.insert(StatsMapType::value_type("CONSERVED_QUANTITY", CONSERVED_QUANTITY));
     Stats::statsMap.insert(StatsMapType::value_type("TRANSLATIONAL_KINETIC", TRANSLATIONAL_KINETIC));
     Stats::statsMap.insert(StatsMapType::value_type("ROTATIONAL_KINETIC", ROTATIONAL_KINETIC));

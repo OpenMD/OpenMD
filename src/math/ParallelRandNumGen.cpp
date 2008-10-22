@@ -51,10 +51,12 @@ namespace oopse {
   ParallelRandNumGen::ParallelRandNumGen(const uint32& oneSeed) {
 
     const int masterNode = 0;
-    int seed = oneSeed;
+    unsigned long seed = oneSeed;
+
 #ifdef IS_MPI
     MPI_Bcast(&seed, 1, MPI_UNSIGNED_LONG, masterNode, MPI_COMM_WORLD); 
 #endif
+
     if (seed != oneSeed) {
       sprintf(painCave.errMsg,
 	      "Using different seed to initialize ParallelRandNumGen.\n");
@@ -64,7 +66,7 @@ namespace oopse {
 
     int nProcessors;
 #ifdef IS_MPI
-    MPI_Comm_size(MPI_COMM_WORLD, &nProcessors);
+    MPI_Comm_size( MPI_COMM_WORLD, &nProcessors);
     MPI_Comm_rank( MPI_COMM_WORLD, &myRank_);
 #else
     nProcessors = 1;
@@ -74,7 +76,7 @@ namespace oopse {
     //actual seed used by random number generator is the seed passed
     //to the constructor plus the number of random number generators
     //which are already created.
-    int newSeed = oneSeed + nCreatedRNG_;
+    unsigned long newSeed = oneSeed + nCreatedRNG_;
     mtRand_ = new MTRand(newSeed, nProcessors, myRank_);
     
     ++nCreatedRNG_;
@@ -86,7 +88,7 @@ namespace oopse {
     const int masterNode = 0;
     int nProcessors;
 #ifdef IS_MPI
-    MPI_Comm_size(MPI_COMM_WORLD, &nProcessors);
+    MPI_Comm_size( MPI_COMM_WORLD, &nProcessors);
     MPI_Comm_rank( MPI_COMM_WORLD, &myRank_);
 #else
     nProcessors = 1;
@@ -102,7 +104,7 @@ namespace oopse {
   void ParallelRandNumGen::seed( const uint32 oneSeed ) {
 
     const int masterNode = 0;
-    int seed = oneSeed;
+    unsigned long seed = oneSeed;
 #ifdef IS_MPI
     MPI_Bcast(&seed, 1, MPI_UNSIGNED_LONG, masterNode, MPI_COMM_WORLD); 
 #endif
@@ -113,7 +115,7 @@ namespace oopse {
       simError();
     }
     
-    int newSeed = oneSeed +nCreatedRNG_;
+    unsigned long newSeed = oneSeed +nCreatedRNG_;
     mtRand_->seed(newSeed);
     
     ++nCreatedRNG_;

@@ -83,34 +83,28 @@ namespace oopse {
 
     RealType time1 = snapshot1->getTime();
     RealType time2 = snapshot2->getTime();
-
        
     int timeBin = int ((time2 - time1) /deltaTime_ + 0.5);
 
-
-    // //std::cerr << "Correlating Frame" << std::endl; 
-    //    Vector3d G_t_frame1 = G_t_[frame1];
-    //    Vector3d G_t_frame2 = G_t_[frame2];
-    //    
-    //    
-    //    RealType diff_x = G_t_frame1.x()-G_t_frame2.x();
-    //    RealType diff_x_sq = diff_x * diff_x;
-    //    
-    //    RealType diff_y = G_t_frame1.y()-G_t_frame2.y();
-    //    RealType diff_y_sq = diff_y * diff_y;
-    //    
-    //    RealType diff_z = G_t_frame1.z()-G_t_frame2.z();
-    //    RealType diff_z_sq = diff_z*diff_z;
-    //        
-    //    
-    // 
-    //    
-    //    histogram_[timeBin][0] += diff_x_sq;
-    //    histogram_[timeBin][1] += diff_y_sq;
-    //    histogram_[timeBin][2] += diff_z_sq;
-    //    
-    //    count_[timeBin]++;
-  
+    Vector3d G_t_frame1 = G_t_[frame1];
+    Vector3d G_t_frame2 = G_t_[frame2];
+    
+    
+    RealType diff_x = G_t_frame1.x()-G_t_frame2.x();
+    RealType diff_x_sq = diff_x * diff_x;
+    
+    RealType diff_y = G_t_frame1.y()-G_t_frame2.y();
+    RealType diff_y_sq = diff_y * diff_y;
+    
+    RealType diff_z = G_t_frame1.z()-G_t_frame2.z();
+    RealType diff_z_sq = diff_z*diff_z;    
+    
+    histogram_[timeBin][0] += diff_x_sq;
+    histogram_[timeBin][1] += diff_y_sq;
+    histogram_[timeBin][2] += diff_z_sq;
+    
+    count_[timeBin]++;
+    
   }
 
   void EnergyCorrFunc::postCorrelate() {
@@ -120,8 +114,6 @@ namespace oopse {
       }
     }
   }
-
-
 
   void EnergyCorrFunc::preCorrelate() {
     // Fill the histogram with empty 3x3 matrices:
@@ -140,8 +132,7 @@ namespace oopse {
     ForceManager* forceMan = new ForceManager(info_);
 
     forceMan->init();
- 
-    
+
     // We'll need thermo to compute the pressures from the virial
     Thermo* thermo =  new Thermo(info_);
 
@@ -181,7 +172,8 @@ namespace oopse {
             Vector3d vel = atom->getVel();
             RealType kinetic = mass * (vel[0]*vel[0] + vel[1]*vel[1] + 
                                        vel[2]*vel[2]);
-            RealType eatom = (kinetic + atom->getParticlePot())/2.0;
+            RealType potential =  atom->getParticlePot();
+            RealType eatom = (kinetic + potential)/2.0;
             particleEnergies.push_back(eatom);
             if(firsttime)
               {
@@ -243,7 +235,7 @@ namespace oopse {
         }
 
         G_t_.push_back(G_t);
-        std::cerr <<"Frame: " << j <<"\t" << G_t << std::endl;
+        //std::cerr <<"Frame: " << j <<"\t" << G_t << std::endl;
       } 
       bsMan_->unloadBlock(i);
     }

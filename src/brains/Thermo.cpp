@@ -249,16 +249,21 @@ namespace oopse {
         Vector3d pos1, pos2, rab;
 
 #ifdef IS_MPI        
+        std::cerr << "tap = " << tap.first << "  " << tap.second << std::endl;
 
 	int mol1 = info_->getGlobalMolMembership(tap.first);
 	int mol2 = info_->getGlobalMolMembership(tap.second);
-        
+        std::cerr << "mols = " << mol1 << " " << mol2 << std::endl;
+
         int proc1 = info_->getMolToProc(mol1);
         int proc2 = info_->getMolToProc(mol2);
+
+        std::cerr << " procs = " << proc1 << " " <<proc2 <<std::endl;
 
 	RealType data[3];
         if (proc1 == worldRank) {
           StuntDouble* sd1 = info_->getIOIndexToIntegrableObject(tap.first);
+          std::cerr << " on proc " << proc1 << ", sd1 has global index= " << sd1->getGlobalIndex() << std::endl;
           pos1 = sd1->getPos();
           data[0] = pos1.x();
           data[1] = pos1.y();
@@ -272,6 +277,7 @@ namespace oopse {
 
         if (proc2 == worldRank) {
           StuntDouble* sd2 = info_->getIOIndexToIntegrableObject(tap.second);
+          std::cerr << " on proc " << proc2 << ", sd2 has global index= " << sd2->getGlobalIndex() << std::endl;
           pos2 = sd2->getPos();
           data[0] = pos2.x();
           data[1] = pos2.y();

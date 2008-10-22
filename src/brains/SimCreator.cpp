@@ -108,7 +108,7 @@ namespace oopse {
       } else {
         //get stream size
         commStatus = MPI_Bcast(&streamSize, 1, MPI_LONG, masterNode, MPI_COMM_WORLD);   
-                
+
         char* buf = new char[streamSize];
         assert(buf);
                 
@@ -116,7 +116,7 @@ namespace oopse {
         commStatus = MPI_Bcast(buf, streamSize, MPI_CHAR, masterNode, MPI_COMM_WORLD); 
                 
         ppStream.str(buf);
-        delete buf;
+        delete [] buf;
 
       }
 #endif            
@@ -722,7 +722,7 @@ namespace oopse {
     // to get the full globalGroupMembership array (We think).
     // This would be prettier if we could use MPI_IN_PLACE like the MPI-2
     // docs said we could.
-    std::vector<int> tmpGroupMembership(nGlobalAtoms, 0);
+    std::vector<int> tmpGroupMembership(info->getNGlobalAtoms(), 0);
     MPI_Allreduce(&globalGroupMembership[0], &tmpGroupMembership[0], nGlobalAtoms,
                   MPI_INT, MPI_SUM, MPI_COMM_WORLD);
     info->setGlobalGroupMembership(tmpGroupMembership);
@@ -734,14 +734,13 @@ namespace oopse {
     std::vector<int> globalMolMembership(info->getNGlobalAtoms(), 0);
     
     for(mol = info->beginMolecule(mi); mol != NULL; mol = info->nextMolecule(mi)) {
-      
       for(atom = mol->beginAtom(ai); atom != NULL; atom = mol->nextAtom(ai)) {
         globalMolMembership[atom->getGlobalIndex()] = mol->getGlobalIndex();
       }
     }
     
 #ifdef IS_MPI
-    std::vector<int> tmpMolMembership(nGlobalAtoms, 0);
+    std::vector<int> tmpMolMembership(info->getNGlobalAtoms(), 0);
     
     MPI_Allreduce(&globalMolMembership[0], &tmpMolMembership[0], nGlobalAtoms,
                   MPI_INT, MPI_SUM, MPI_COMM_WORLD);
@@ -767,28 +766,28 @@ namespace oopse {
     std::vector<int> numIntegrableObjectsPerMol = nIOPerMol;
 #endif    
 
- std::vector<int> startingIOIndexForMol(info->getNGlobalMolecules());
-
-int startingIndex = 0;
- for (int i = 0; i < info->getNGlobalMolecules(); i++) {
-  startingIOIndexForMol[i] = startingIndex;
-  startingIndex += numIntegrableObjectsPerMol[i];
- }
-
- std::vector<StuntDouble*> IOIndexToIntegrableObject(info->getNGlobalIntegrableObjects(), (StuntDouble*)NULL);
- for (mol = info->beginMolecule(mi); mol != NULL; mol = info->nextMolecule(mi)) {
+    std::vector<int> startingIOIndexForMol(info->getNGlobalMolecules());
+    
+    int startingIndex = 0;
+    for (int i = 0; i < info->getNGlobalMolecules(); i++) {
+      startingIOIndexForMol[i] = startingIndex;
+      startingIndex += numIntegrableObjectsPerMol[i];
+    }
+    
+    std::vector<StuntDouble*> IOIndexToIntegrableObject(info->getNGlobalIntegrableObjects(), (StuntDouble*)NULL);
+    for (mol = info->beginMolecule(mi); mol != NULL; mol = info->nextMolecule(mi)) {
       int myGlobalIndex = mol->getGlobalIndex();
       int globalIO = startingIOIndexForMol[myGlobalIndex];
       for (StuntDouble* integrableObject = mol->beginIntegrableObject(ioi); integrableObject != NULL;
            integrableObject = mol->nextIntegrableObject(ioi)) {
-            integrableObject->setGlobalIntegrableObjectIndex(globalIO);
-            IOIndexToIntegrableObject[globalIO] = integrableObject;
-            globalIO++;
+        integrableObject->setGlobalIntegrableObjectIndex(globalIO);
+        IOIndexToIntegrableObject[globalIO] = integrableObject;
+        globalIO++;
       }
     }
-
-  info->setIOIndexToIntegrableObject(IOIndexToIntegrableObject);
-  
+    
+    info->setIOIndexToIntegrableObject(IOIndexToIntegrableObject);
+    
   }
   
   void SimCreator::loadCoordinates(SimInfo* info, const std::string& mdFileName) {

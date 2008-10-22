@@ -50,8 +50,6 @@
 
 namespace oopse {
 
-
-
   /**
    * @class RandNumGen a random number generator class
    */
@@ -119,7 +117,6 @@ namespace oopse {
     virtual void seed()= 0;
 
   protected:
-        
     MTRand* mtRand_;
 
 

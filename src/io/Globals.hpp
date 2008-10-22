@@ -83,7 +83,7 @@ namespace oopse {
     DeclareParameter(ZconsTime, RealType);
     DeclareParameter(ZconsTol, RealType);
     DeclareParameter(ZconsForcePolicy, std::string);
-    DeclareParameter(Seed, int);
+    DeclareParameter(Seed, unsigned long int);
     DeclareParameter(UseInitalTime, bool);
     DeclareParameter(UseIntialExtendedSystemState, bool);
     DeclareParameter(OrthoBoxTolerance, RealType);

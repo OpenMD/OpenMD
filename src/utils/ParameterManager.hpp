@@ -44,7 +44,7 @@
  *
  *  Created by Charles F. Vardeman II on 11/16/05.
  *  @author  Charles F. Vardeman II 
- *  @version $Id: ParameterManager.hpp,v 1.4 2008-09-11 19:40:59 gezelter Exp $
+ *  @version $Id: ParameterManager.hpp,v 1.5 2008-10-22 20:01:49 gezelter Exp $
  *
  */
 
@@ -63,6 +63,7 @@
 #include "utils/simError.h"
 #include "utils/StringTokenizer.hpp"
 #include "utils/CaseConversion.hpp"
+
 
 template<typename T> 
 struct ParameterTraits;
@@ -109,6 +110,17 @@ struct ParameterTraits<int>{
   static std::string getParamType() { return "int";}  
 };
 
+//int   
+template<>
+struct ParameterTraits<unsigned long int>{
+  typedef unsigned long int RepType;
+  template<typename T> static bool    convert(T, RepType&){return false;} 
+  template<typename T> static RepType convert(T v)        {RepType tmp; convert(v,tmp);return tmp;} 
+  static bool convert(RepType v, RepType& r)            { r=v; return true;}
+  static bool convert(int v, RepType& r)                {r = static_cast<unsigned long int>(v); return true;}
+  static std::string getParamType() { return "unsigned long int";}  
+};
+
 //RealType
 template<>                     
 struct ParameterTraits<RealType>{
@@ -117,6 +129,7 @@ struct ParameterTraits<RealType>{
   template<typename T> static RepType convert(T v)        {RepType tmp; convert(v,tmp);return tmp;} 
   static bool convert(RepType v, RepType& r)            {r=v; return true;}
   static bool convert(int v, RepType& r)                {r = static_cast<RealType>(v); return true;}
+  static bool convert(unsigned long int v, RepType& r)  {r = static_cast<RealType>(v); return true;}
   static std::string getParamType() { return "RealType";}    
 };
 
@@ -161,11 +174,12 @@ public:
   bool empty() {return empty_;}
   virtual bool setData(std::string) = 0;
   virtual bool setData(int) = 0;
+  virtual bool setData(unsigned long int) = 0;
   virtual bool setData(RealType) = 0;
   virtual bool setData(std::pair<int, int>) = 0;
   virtual std::string getParamType() = 0;
 protected:
-    std::string keyword_;
+  std::string keyword_;
   bool optional_;
   bool defaultValue_;
   bool empty_;
@@ -181,8 +195,13 @@ public:
   virtual bool setData(std::string sval) {
     return internalSetData<std::string>(sval);
   }
+
   virtual bool setData(int ival) {
     return internalSetData<int>(ival);
+  }
+
+  virtual bool setData(unsigned long int lival) {
+    return internalSetData<unsigned long int>(lival);
   }
   
   virtual bool setData(RealType dval) {

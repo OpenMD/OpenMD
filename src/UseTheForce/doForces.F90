@@ -10,7 +10,7 @@
 !!    publication of scientific results based in part on use of the
 !!    program.  An acceptable form of acknowledgement is citation of
 !!    the article in which the program was described (Matthew
-!!    A. Meineke, Charles F. Vardeman II, Teng Lin, Christopher
+!!    A. Meineke, Charles F. Vardeman I, Teng Lin, Christopher
 !!    J. Fennell and J. Daniel Gezelter, "OOPSE: An Object-Oriented
 !!    Parallel Simulation Engine for Molecular Dynamics,"
 !!    J. Comput. Chem. 26, pp. 252-271 (2005))
@@ -45,7 +45,7 @@
 
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: doForces.F90,v 1.97 2008-10-21 18:23:29 gezelter Exp $, $Date: 2008-10-21 18:23:29 $, $Name: not supported by cvs2svn $, $Revision: 1.97 $
+!! @version $Id: doForces.F90,v 1.98 2008-10-22 20:01:48 gezelter Exp $, $Date: 2008-10-22 20:01:48 $, $Name: not supported by cvs2svn $, $Revision: 1.98 $
 
 
 module doForces
@@ -308,6 +308,7 @@ contains
     nAtypes = getSize(atypes)
 ! Set all of the initial cutoffs to zero.
     atypeMaxCutoff = 0.0_dp
+    biggestAtypeCutoff = 0.0_dp
     do i = 1, nAtypes
        if (SimHasAtype(i)) then     
           call getElementProperty(atypes, i, "is_LennardJones", i_is_LJ)
@@ -1480,6 +1481,11 @@ contains
 
     integer :: iHash
 
+!!$    write(*,*) i, j, rijsq, d(1), d(2), d(3), sw, do_pot
+!!$    write(*,*) particle_pot(1), vpair, fpair(1), fpair(2), fpair(3)
+!!$    write(*,*) rCut
+
+
     r = sqrt(rijsq)
     
     vpair = 0.0_dp
@@ -1552,9 +1558,9 @@ contains
        call do_mnm_pair(i, j, d, r, rijsq, rcut, sw, vdwMult, vpair, fpair, &
             pot(VDW_POT), A, f, t, do_pot)
     endif
-
-    particle_pot(i) = particle_pot(i) + vpair*sw
-    particle_pot(j) = particle_pot(j) + vpair*sw
+!!$
+!!$    particle_pot(i) = particle_pot(i) + vpair*sw
+!!$    particle_pot(j) = particle_pot(j) + vpair*sw
 
   end subroutine do_pair
 

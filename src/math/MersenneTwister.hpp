@@ -198,7 +198,7 @@ namespace oopse {
    * number in the stride sequence.  
    */
   inline MTRand::uint32 MTRand::randInt() {
- 
+
     std::vector<uint32> ranNums(nstrides_);
   
     for (int i = 0; i < nstrides_; ++i) {
