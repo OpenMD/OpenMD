@@ -35,36 +35,23 @@
 // Cl   aqueous chloride ion
 
 begin Options
-      Name                   = "CLAYFF"
-      vdWtype                = "Lennard-Jones"
-      DistanceMixingRule     = "Arithmetic"
-      DistanceType           = "Rmin"
-      EnergyMixingRule       = "Geometric"
-      vdW-14-scale           = 0.0
-      electrostatic-14-scale = 0.0
-      dielectric             = 1.0
+      Name                    "CLAYFF"
+      vdWtype                 Lennard-Jones
+      DistanceMixingRule      arithmetic
+      DistanceType            Rmin
+      EnergyMixingRule        Geometric
 end Options
 
-begin BaseAtomTypes    
-//Name	mass	 (amu)
-h*	1.0079
-ho	1.0079
-o*	15.9994
-oh	15.9994
-ob	15.9994
-obos	15.9994
-obts	15.9994
-obss	15.9994
-ohs	15.9994
-st	28.0855
-ao	26.981538
-at	26.981538
-mgo	24.3050
-mgh	24.3050
-cao	40.078
-cah	40.078
-feo	55.845
-lio	6.941
+begin BaseAtomTypes
+//Name 	mass (amu)
+H	1.0079
+O	15.9994
+Si	28.0855
+Al	26.981538
+Mg	24.3050
+Ca	40.078
+Fe	55.845
+Li	6.941
 Na	22.98977
 K	39.0983
 Cs	132.90545
@@ -72,6 +59,28 @@ Ca	40.078
 Ba	137.327
 Cl	35.453
 end BaseAtomTypes
+
+begin AtomTypes    
+//Name	baseatomtype
+h*	H
+ho	H
+o*	O
+oh	O
+ob	O
+obos	O
+obts	O
+obss	O
+ohs	O
+st	Si
+ao	Al
+at	Al
+mgo	Mg
+mgh	Mg
+cao	Ca
+cah	Ca
+feo	Fe
+lio	Li
+end AtomTypes
 
 begin LennardJonesAtomTypes
 //Name	epsilon         R0
