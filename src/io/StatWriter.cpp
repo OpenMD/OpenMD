@@ -137,7 +137,6 @@ namespace oopse {
 #endif // is_mpi
 
       statfile_.precision(8);
-
       for (int i =0; i < mask_.size(); ++i) {
 	if (mask_[i]) {
 	  statfile_ << "\t" << s[i];

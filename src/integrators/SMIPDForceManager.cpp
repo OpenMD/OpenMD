@@ -92,6 +92,12 @@ namespace oopse {
       simError();
     } 
 
+    if (!simParams->haveViscosity()) {
+      sprintf(painCave.errMsg, "You can't use SMIPDynamics without a viscosity!\n");
+      painCave.isFatal = 1;
+      painCave.severity = OOPSE_ERROR;
+      simError();
+    }
 
 
     
@@ -308,13 +314,10 @@ namespace oopse {
 
      /* Compute variance for random forces */
    
-    RealType sigma_t = sqrt(NumericConstant::PI/2.0)*((targetPressure_)*area/nTriangles)
-       /OOPSEConstant::energyConvert;
 
-    gamma_t_ = (NumericConstant::PI * targetPressure_* targetPressure_ * area * area * simParams->getDt()) /
-      (4.0 * nTriangles * nTriangles* OOPSEConstant::kB*simParams->getTargetTemp()) /OOPSEConstant::energyConvert;
 
-    std::vector<RealType>  randNums = genTriangleForces(nTriangles, sigma_t);
+
+    std::vector<RealType>  randNums = genTriangleForces(nTriangles, 1.0);
 
     /* Loop over the mesh faces and apply random force to each of the faces*/
     
@@ -326,15 +329,29 @@ namespace oopse {
      
       Triangle thisTriangle = *face;
       std::vector<StuntDouble*> vertexSDs = thisTriangle.getVertices();
-      
+      RealType thisArea = thisTriangle.getArea(); 
+      // RealType sigma_t = sqrt(NumericConstant::PI/2.0)*((targetPressure_)*thisArea) /OOPSEConstant::energyConvert;
+      // gamma_t_ = (NumericConstant::PI * targetPressure_* targetPressure_ * thisArea * thisArea * simParams->getDt()) /(4.0 * OOPSEConstant::kB*simParams->getTargetTemp());
+
       /* Get Random Force */
       Vector3d unitNormal = thisTriangle.getNormal();
       unitNormal.normalize();
-      Vector3d randomForce = -randNums[thisNumber] * unitNormal;
+      //Vector3d randomForce = -randNums[thisNumber] * sigma_t * unitNormal;
       Vector3d centroid = thisTriangle.getCentroid();
+      Vector3d facetVel = thisTriangle.getFacetVelocity();
+      RealType hydroLength = thisTriangle.getIncircleRadius()*2.0/3.14;
 
-      Vector3d langevinForce = randomForce - gamma_t_*thisTriangle.getFacetVelocity();
+      RealType f_normal = simParams->getViscosity()*hydroLength*1.439326479e4*OOPSEConstant::energyConvert;
+      RealType extPressure = -(targetPressure_ * thisArea);
+      RealType randomForce = randNums[thisNumber] * f_normal * OOPSEConstant::kb*simParams->getTargetTemp()/simParams->getDt();
+      RealType dragForce = -f_normal * dot(facetVel, unitNormal);      
+      Vector3d langevinForce = (extPressure + randomForce + dragForce) * unitNormal;
       
+      //      Vector3d dragForce = - gamma_t_ * dot(facetVel, unitNormal) * unitNormal / OOPSEConstant::energyConvert;
+      
+      //std::cout << "randomForce " << randomForce << " dragForce " << dragForce <<  " hydro  " << hydroLength << std::endl;
+
+
       for (vertex = vertexSDs.begin(); vertex != vertexSDs.end(); ++vertex){
 	if ((*vertex) != NULL){
 	  // mass = integrableObject->getMass();
@@ -342,6 +359,7 @@ namespace oopse {
 	  (*vertex)->addFrc(vertexForce);
 
 	  if ((*vertex)->isDirectional()){
+
 	    Vector3d vertexPos = (*vertex)->getPos();
 	    Vector3d vertexCentroidVector = vertexPos - centroid;
 	    (*vertex)->addTrq(cross(vertexCentroidVector,vertexForce));
@@ -494,8 +512,7 @@ namespace oopse {
   }
     */
     Snapshot* currSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
-    currSnapshot->setVolume(surfaceMesh_->getVolume());
-    
+    currSnapshot->setVolume(surfaceMesh_->getVolume());    
     ForceManager::postCalculation(needStress);   
   }
 
@@ -535,7 +552,8 @@ namespace oopse {
     if (worldRank == 0) {
 #endif
       for (int i = 0; i < nTriangles; i++) {
-	gaussRand[i] = fabs(randNumGen_.randNorm(0.0, 1.0));     
+	//gaussRand[i] = fabs(randNumGen_.randNorm(0.0, 1.0));     
+	gaussRand[i] = randNumGen_.randNorm(0.0, 1.0);     
       }
 #ifdef IS_MPI
     }
@@ -550,11 +568,11 @@ namespace oopse {
       MPI_Bcast(&gaussRand[0], nTriangles, MPI_REAL, 0, MPI_COMM_WORLD);
     }
 #endif
-
+   
     for (int i = 0; i < nTriangles; i++) {
       gaussRand[i] = gaussRand[i] * variance;
     }
-
+   
     return gaussRand;
   }
 

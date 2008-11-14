@@ -40,11 +40,11 @@
  *
  *  Triangle.hpp
  *
- *  Purpose: Provide facets from hull to oopse
+ *  Purpose: Provide basic triangle class for oopse. Hates Particle class.
  *
  *  Created by Charles F. Vardeman II on 29 July 2008.
  *  @author  Charles F. Vardeman II
- *  @version $Id: Triangle.hpp,v 1.2 2008-10-20 19:36:32 chuckv Exp $
+ *  @version $Id: Triangle.hpp,v 1.3 2008-11-14 15:44:34 chuckv Exp $
  *
  */
 
@@ -71,39 +71,60 @@ namespace oopse {
   class Triangle {
 
   public:
-    Triangle(){};
+    Triangle();
     virtual ~Triangle() { };
 
     void setNormal(Vector3d normal) {
       normal_ = normal;
+      HaveNormal_ = true;
     }
 
-    void addVertex(StuntDouble* thisSD){
+    void addVertices(Vector3d P1, Vector3d P2, Vector3d P3);
+
+    void addVertexSD(StuntDouble* thisSD){
       vertexSD_.push_back(thisSD);
     }
-    
+
     std::vector<StuntDouble*> getVertices(){return vertexSD_;}
 
     void setArea(RealType area) {
       area_ = area;
+      HaveArea_ = true;
     }
     
-    Vector3d getNormal() { 
-      return normal_;
+    Vector3d getNormal() {
+      if (HaveNormal_) {
+	return normal_;
+      } else {
+	return computeNormal();
+      }
     }
     
     RealType getArea() { 
-      return area_;
+      if(HaveArea_){
+	return area_;
+      }else{
+	return computeArea();
+      }
     }
+
+    RealType computeArea();
+    Vector3d computeNormal();
+    Vector3d computeCentroid();
 
     void setCentroid(Vector3d centroid) { 
       centroid_ = centroid;
+      HaveCentroid_ = true;
     }
 
-    Vector3d getCentroid() { 
-      return centroid_;
+    Vector3d getCentroid() {
+      if (HaveCentroid_) {
+	return centroid_;
+      } else {
+	return computeCentroid();
+      }
     }
-
+    
     Vector3d getFacetVelocity(){
       return facetVelocity_;
     }
@@ -112,14 +133,69 @@ namespace oopse {
       facetVelocity_ = facetVelocity;
     }
 
+    void setFacetMass(RealType mass){
+      mass_ = mass;
+    }
+
+    RealType getFacetMass(){
+      return mass_;
+    }
+
+    RealType a(){
+      return a_.length();
+    }
+
+    RealType b(){
+      return b_.length();
+    }
+
+    RealType c(){
+      return c_.length();
+    }
+
+    RealType getHydroLength() {
+      RealType a1 = a();
+      RealType b1 = b();
+      RealType c1 = c();
+      RealType t1 =  a1 + b1 + c1;
+      RealType t4 =  a1 + b1 - c1;
+
+      return 32.0 * c1 / log(t1*t1/t4/t4);
+    }
+
+
+    RealType getIncircleRadius() {
+      return 2.0 * getArea() / (a() + b() + c());
+    }
+
+    RealType getCircumcircleRadius() {
+      RealType a1 = a();
+      RealType b1 = b();
+      RealType c1 = c();
+      RealType t1 =  a1 + b1 + c1;
+      RealType t2 = -a1 + b1 + c1;
+      RealType t3 =  a1 - b1 + c1;
+      RealType t4 =  a1 + b1 - c1;
+      return a1 * b1 * c1 / sqrt(t1 * t2 * t3 * t4);
+    }
+      
+
 
   private:
     /* Local Indentity of vertex atoms in pos array*/
     std::vector <StuntDouble*> vertexSD_;
     Vector3d normal_;
     Vector3d centroid_;
+    Vector3d vertices_[3];
     RealType area_;
+    RealType mass_;
     Vector3d facetVelocity_;
+    //Length of triangle sides
+    Vector3d a_,b_,c_;
+    RealType alpha_,beta_,gamma_;
+    bool HaveArea_;
+    bool HaveNormal_;
+    bool HaveCentroid_;
     
   }; // End class Triangle
     

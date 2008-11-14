@@ -38,88 +38,52 @@
  * such damages.
  *
  *
- *  ConvexHull.hpp
+ *  Triangle.cpp
  *
- *  Purpose: To calculate convexhull, hull volume using the QuickHull algorithm provided by QHull.
+ *  Purpose: Provide basic triangle object for OOPSE
  *
- *  Created by Charles F. Vardeman II on 11 Dec 2006.
+ *  Created by Charles F. Vardeman II on 29 July 2008.
  *  @author  Charles F. Vardeman II
- *  @version $Id: ConvexHull.hpp,v 1.16 2008-11-14 15:44:34 chuckv Exp $
+ *  @version $Id: Triangle.cpp,v 1.1 2008-11-14 15:44:34 chuckv Exp $
  *
  */
 
-#ifndef MATH_CONVEXHULL_HPP_
-#define MATH_CONVEXHULL_HPP_
-
-#include "math/Vector3.hpp"
-#include "config.h"
-#include "math/Hull.hpp"
 #include "math/Triangle.hpp"
 
-#include <cassert>
-#include <vector>
-#include <string>
-extern "C"
-{
-#if defined(HAVE_QHULL)
-#include <qhull/qhull.h>
-#include <qhull/mem.h>
-#include <qhull/qset.h>
-#include <qhull/geom.h>
-#include <qhull/merge.h>
-#include <qhull/poly.h>
-#include <qhull/io.h>
-#include <qhull/stat.h>
-#endif
-}
-#ifdef IS_MPI
-#include <mpi.h>
-#endif
+using namespace oopse;
 
 
-namespace oopse {
-  class ConvexHull : public Hull {
-  public:
-    ConvexHull();
-
-    virtual ~ConvexHull(){};
-    void computeHull(std::vector<StuntDouble*> bodydoubles);
-    RealType getArea(){return area_;} //Total area of Hull
-    int getNs(){return Ns_;}  //Number of Surface Atoms
-    RealType getVolume(){return volume_;} //Total Volume inclosed by Hull
-    std::vector< StuntDouble* > getSurfaceAtoms(){return surfaceSDs_;} //Returns a list of surface atoms
-    std::vector<Triangle> getMesh(){return Triangles_;}
-    int getNMeshElements() {return nTriangles_;}
-    void printHull(const std::string& geomFileName);
-  protected:
-    double volume_;
-    double area_;
-    int dim_;
-    int Ns_;
-    int nTriangles_;
-    std::vector<StuntDouble*> surfaceSDs_;
-    const std::string options_;
-
-    private:
-    std::vector<Triangle> Triangles_;
-
-#ifdef IS_MPI
-    int* NstoProc_;
-    int* displs_;
-    int* vecdispls_;
-    int Nsglobal_;
-    int nproc_;
-    int myrank_;
-    struct surfacePt_{
-	double x,y,z;
-    };
-
-    MPI::Datatype surfacePtType;
-    std::vector<surfacePt_> surfacePtsLocal_;
-    std::vector<surfacePt_> surfacePtsGlobal_;
-#endif 
-
-  };
+Triangle::Triangle() : HaveNormal_(false), HaveCentroid_(false),HaveArea_(false), area_(0.0), normal_(V3Zero), 
+		       centroid_(V3Zero),facetVelocity_(V3Zero), mass_(0.0),
+		       a_(V3Zero),b_(V3Zero),c_(V3Zero){
 }
 
-#endif /*MATH_CONVEXHULL_HPP_*/
+void Triangle::addVertices(Vector3d P1, Vector3d P2, Vector3d P3){
+  vertices_[0] = P1;
+  vertices_[1] = P2;
+  vertices_[2] = P3;
+
+  // Compute some quantites like a,b,c
+  a_ = P1-P2;
+  b_ = P1-P3;
+  c_ = P1-P3;  
+}
+
+
+RealType Triangle::computeArea(){
+  HaveArea_ = true;
+  area_ = getNormal().length() * 0.5;
+  return area_;
+}
+
+Vector3d Triangle::computeNormal(){
+  HaveNormal_ = true;
+  normal_ = cross(a_,b_);
+  return normal_;
+}
+
+Vector3d Triangle::computeCentroid(){
+  HaveCentroid_ = true;
+  centroid_ = (vertices_[0] + vertices_[1] + vertices_[2])/3.0;
+  return centroid_;
+}

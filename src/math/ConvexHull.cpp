@@ -44,7 +44,7 @@
  *
  *  Created by Charles F. Vardeman II on 11 Dec 2006.
  *  @author  Charles F. Vardeman II
- *  @version $Id: ConvexHull.cpp,v 1.12 2008-10-21 16:44:00 chuckv Exp $
+ *  @version $Id: ConvexHull.cpp,v 1.13 2008-11-14 15:44:34 chuckv Exp $
  *
  */
 
@@ -149,8 +149,8 @@ ConvexHull::ConvexHull() : Hull(){
  nproc_ = MPI::COMM_WORLD.Get_size();
  myrank_ = MPI::COMM_WORLD.Get_rank();
  NstoProc_ = new int[nproc_];
- displs_   = new int[nproc_];
-
+ vecdispls_   = new int[nproc_];
+ displs_ = new int[nproc_];
  // Create a surface point type in MPI to send
  surfacePtType = MPI::DOUBLE.Create_contiguous(3);
  surfacePtType.Commit();
@@ -213,10 +213,10 @@ void ConvexHull::computeHull(std::vector<StuntDouble*> bodydoubles)
 
   /* Build a displacements array */
   for (int i = 1; i < nproc_; i++){
-    displs_[i] = displs_[i-1] + NstoProc_[i-1];
+    vecdispls_[i] = vecdispls_[i-1] + NstoProc_[i-1];
   }
   
-  int noffset = displs_[myrank_];
+  int noffset = vecdispls_[myrank_];
   /* gather the potential hull */
   
   
@@ -229,7 +229,7 @@ void ConvexHull::computeHull(std::vector<StuntDouble*> bodydoubles)
     surfacePtsLocal_.push_back(mpiSurfacePt);
   }
 
-  MPI::COMM_WORLD.Allgatherv(&surfacePtsLocal_[0],Ns_,surfacePtType,&surfacePtsGlobal_[0],NstoProc_,displs_,surfacePtType);
+  MPI::COMM_WORLD.Allgatherv(&surfacePtsLocal_[0],Ns_,surfacePtType,&surfacePtsGlobal_[0],NstoProc_,vecdispls_,surfacePtType);
   std::vector<surfacePt_>::iterator spt;
   std::vector<Enriched_Point_3> gblpoints;
 
@@ -378,7 +378,9 @@ ConvexHull::ConvexHull() : Hull(), dim_(3), options_("qhull Qt Pp"), Ns_(200), n
  nproc_ = MPI::COMM_WORLD.Get_size();
  myrank_ = MPI::COMM_WORLD.Get_rank();
  NstoProc_ = new int[nproc_];
- displs_   = new int[nproc_];
+ vecdispls_   = new int[nproc_];
+ vecNstoProc_ = new int[nproc_];
+ displs_ = new int[nproc_];
 
  // Create a surface point type in MPI to send
  //surfacePtType = MPI::DOUBLE.Create_contiguous(3);
@@ -456,6 +458,7 @@ void ConvexHull::computeHull(std::vector<StuntDouble*> bodydoubles)
 #ifdef IS_MPI
   std::vector<double> localPts;
   std::vector<double> localVel;
+  std::vector<double> localMass;
   int localPtArraySize;
   
  
@@ -486,34 +489,9 @@ void ConvexHull::computeHull(std::vector<StuntDouble*> bodydoubles)
 
  
 
-  /*
-  std::sort(surfaceIDs.begin(),surfaceIDs.end());
-  surfaceIDs.erase(std::unique(surfaceIDs.begin(), surfaceIDs.end()), surfaceIDs.end());
-  int localPtArraySize = surfaceIDs.size() * 3;
-  */
-
-  //localPts.resize(localPtArraySize);
-  //std::fill(localPts.begin(),localPts.end(),0.0);
-
 
   int idx = 0;
   int nIsIts = 0;
-/*
-  // Copy the surface points into an array.
-  for(std::vector<bool>::iterator list_iter = isSurfaceID.begin(); 
-      list_iter != isSurfaceID.end(); list_iter++)
-    {
-      bool isIt = *list_iter;
-      if (isIt){
-	localPts.push_back(ptArray[dim_ * idx]);     
-	localPts.push_back(ptArray[dim_ * idx + 1]); 
-	localPts.push_back(ptArray[dim_ * idx + 2]); 
-	localPtsMap.push_back(idx);
-	nIsIts++;
-      } //Isit
-      idx++;
-    } //isSurfaceID
-  */
   FORALLvertices {
     idx = qh_pointid(vertex->point);
     localPts.push_back(ptArray[dim_ * idx]);     
@@ -525,45 +503,57 @@ void ConvexHull::computeHull(std::vector<StuntDouble*> bodydoubles)
     localVel.push_back(vel.y());
     localVel.push_back(vel.z());
 
+    RealType bdmass = bodydoubles[idx]->getMass();
+    localMass.push_back(bdmass);
+
     localPtsMap.push_back(idx); 
+
+
   }
 
 
-  localPtArraySize = localPts.size();
+
+  localPtArraySize = int(localPts.size()/3.0);
 
  
   MPI::COMM_WORLD.Allgather(&localPtArraySize,1,MPI::INT,&NstoProc_[0],1,MPI::INT);
-
+  
   Nsglobal_=0;
   for (int i = 0; i < nproc_; i++){
     Nsglobal_ += NstoProc_[i];
+    vecNstoProc_[i] = NstoProc_[i]*3;
   }
   
  
-  int nglobalPts = int(Nsglobal_/3);
+  int nglobalPts = Nsglobal_*3;
  
 
-  std::vector<double> globalPts(Nsglobal_);
-  std::vector<double> globalVel(Nsglobal_);
+  std::vector<double> globalPts(nglobalPts);
+  std::vector<double> globalVel(nglobalPts);
+  std::vector<double> globalMass(Nsglobal_);
 
   isSurfaceID.resize(nglobalPts);
 
 
   std::fill(globalPts.begin(),globalPts.end(),0.0);
  
-  displs_[0] = 0;
+  vecdispls_[0] = 0;
   /* Build a displacements array */
+  for (int i = 1; i < nproc_; i++){
+    vecdispls_[i] = vecdispls_[i-1] + vecNstoProc_[i-1];
+  }
+  
+  displs_[0] = 0;
   for (int i = 1; i < nproc_; i++){
     displs_[i] = displs_[i-1] + NstoProc_[i-1];
   }
-  
    
-  int noffset = displs_[myrank_];
+  int noffset = vecdispls_[myrank_];
   /* gather the potential hull */
   
-  MPI::COMM_WORLD.Allgatherv(&localPts[0],localPtArraySize,MPI::DOUBLE,&globalPts[0],&NstoProc_[0],&displs_[0],MPI::DOUBLE);
-  MPI::COMM_WORLD.Allgatherv(&localVel[0],localPtArraySize,MPI::DOUBLE,&globalVel[0],&NstoProc_[0],&displs_[0],MPI::DOUBLE);
-
+  MPI::COMM_WORLD.Allgatherv(&localPts[0],localPtArraySize,MPI::DOUBLE,&globalPts[0],&vecNstoProc_[0],&vecdispls_[0],MPI::DOUBLE);
+  MPI::COMM_WORLD.Allgatherv(&localVel[0],localPtArraySize,MPI::DOUBLE,&globalVel[0],&vecNstoProc_[0],&vecdispls_[0],MPI::DOUBLE);
+  MPI::COMM_WORLD.Allgatherv(&localMass[0],localPtArraySize,MPI::DOUBLE,&globalMass[0],&NstoProc_[0],&displs_[0],MPI::DOUBLE);
   /*
   if (myrank_ == 0){
     for (i = 0; i < globalPts.size(); i++){
@@ -615,7 +605,8 @@ void ConvexHull::computeHull(std::vector<StuntDouble*> bodydoubles)
  
       
 
-      RealType faceArea = 0.5*V3dNormal.length();
+      //RealType faceArea = 0.5*V3dNormal.length();
+      RealType faceArea = qh_facetarea(facet);
       face.setArea(faceArea);
 
 
@@ -625,18 +616,27 @@ void ConvexHull::computeHull(std::vector<StuntDouble*> bodydoubles)
       Vector3d V3dCentroid(center[0], center[1], center[2]);
       face.setCentroid(V3dCentroid);
       Vector3d faceVel = V3Zero;
+      Vector3d p[3];
+      RealType faceMass = 0.0;
+      int ver = 0;
       FOREACHvertex_(vertices){
 	id = qh_pointid(vertex->point);
+	p[ver][0] = vertex->point[0];
+	p[ver][1] = vertex->point[1];
+	p[ver][2] = vertex->point[2];
 	int localindex = id;
 #ifdef IS_MPI
 	Vector3d velVector(globalVel[dim_ * id],globalVel[dim_ * id + 1], globalVel[dim_ * id + 1]);
+	
 	faceVel = faceVel + velVector;
+	faceMass = faceMass + globalMass[id];
 	if (id >= noffset/3 && id < (noffset + localPtArraySize)/3 ){
 	  localindex = localPtsMap[id-noffset/3];
 #else
 	  faceVel = faceVel + bodydoubles[localindex]->getVel();
+	  faceMass = faceMass + bodydoubles[localindex]->getMass();
 #endif
-	  face.addVertex(bodydoubles[localindex]);
+	  face.addVertexSD(bodydoubles[localindex]);
 	  if( !isSurfaceID[id] ){
 	    isSurfaceID[id] = true;
 #ifdef IS_MPI	    
@@ -650,9 +650,10 @@ void ConvexHull::computeHull(std::vector<StuntDouble*> bodydoubles)
 #ifdef IS_MPI
 	 
 	}else{
-	  face.addVertex(NULL);
+	  face.addVertexSD(NULL);
 	  }
 #endif
+	ver++;
       } //Foreachvertex
       /*
       if (!SETempty_(facet->coplanarset)){
@@ -662,6 +663,8 @@ void ConvexHull::computeHull(std::vector<StuntDouble*> bodydoubles)
 	}
       }
       */
+      face.addVertices(p[0],p[1],p[2]);
+      face.setFacetMass(faceMass);
       face.setFacetVelocity(faceVel/3.0);
       Triangles_.push_back(face);
       qh_settempfree(&vertices);      

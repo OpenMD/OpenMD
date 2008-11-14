@@ -19,10 +19,10 @@ USE_CGAL = @USE_CGAL@
 USE_QHULL = @USE_QHULL@
 
 ifeq "$(USE_CGAL)" "yes"
-	Source  = $(MySource) ConvexHull.cpp
+	Source  = $(MySource) ConvexHull.cpp Triangle.cpp
 else
    ifeq "$(USE_QHULL)" "yes"
-	Source  = $(MySource) ConvexHull.cpp
+	Source  = $(MySource) ConvexHull.cpp Triangle.cpp
    else
 	Source = $(MySource) 
    endif
