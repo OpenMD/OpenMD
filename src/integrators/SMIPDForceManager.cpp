@@ -341,9 +341,9 @@ namespace oopse {
       Vector3d facetVel = thisTriangle.getFacetVelocity();
       RealType hydroLength = thisTriangle.getIncircleRadius()*2.0/3.14;
 
-      RealType f_normal = simParams->getViscosity()*hydroLength*1.439326479e4*OOPSEConstant::energyConvert;
-      RealType extPressure = -(targetPressure_ * thisArea);
-      RealType randomForce = randNums[thisNumber] * f_normal * OOPSEConstant::kb*simParams->getTargetTemp()/simParams->getDt();
+      RealType f_normal = simParams->getViscosity()*hydroLength*1.439326479e4;
+      RealType extPressure = -(targetPressure_ * thisArea)/OOPSEConstant::energyConvert;
+      RealType randomForce = randNums[thisNumber] * sqrt(2.0 * f_normal * OOPSEConstant::kb*targetTemp_/simParams->getDt());
       RealType dragForce = -f_normal * dot(facetVel, unitNormal);      
       Vector3d langevinForce = (extPressure + randomForce + dragForce) * unitNormal;
       
