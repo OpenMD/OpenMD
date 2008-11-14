@@ -44,7 +44,7 @@
  *
  *  Created by Charles F. Vardeman II on 11 Dec 2006.
  *  @author  Charles F. Vardeman II
- *  @version $Id: ConvexHull.hpp,v 1.16 2008-11-14 15:44:34 chuckv Exp $
+ *  @version $Id: ConvexHull.hpp,v 1.17 2008-11-14 21:54:54 chuckv Exp $
  *
  */
 
@@ -105,6 +105,7 @@ namespace oopse {
 
 #ifdef IS_MPI
     int* NstoProc_;
+    int* vecNstoProc_;
     int* displs_;
     int* vecdispls_;
     int Nsglobal_;
