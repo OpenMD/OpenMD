@@ -171,7 +171,7 @@ namespace oopse {
             RealType mass = atom->getMass();
             Vector3d vel = atom->getVel();
             RealType kinetic = mass * (vel[0]*vel[0] + vel[1]*vel[1] + 
-                                       vel[2]*vel[2]);
+                                       vel[2]*vel[2]) / OOPSEConstant::energyConvert;
             RealType potential =  atom->getParticlePot();
             RealType eatom = (kinetic + potential)/2.0;
             particleEnergies.push_back(eatom);
