@@ -120,10 +120,7 @@ namespace oopse {
     Xi(4,4) = XirrB;
     Xi(5,5) = XirrA;
 
-    const RealType convertConstant = 1.439326479e4; // converts Poise angstroms
-                                                    // to kcal fs mol^-1 Angstrom^-1
-
-    Xi *= convertConstant;    
+    Xi *= OOPSEConstant::viscoConvert;    
     
     XiCopy = Xi;
     invertMatrix(XiCopy, D);

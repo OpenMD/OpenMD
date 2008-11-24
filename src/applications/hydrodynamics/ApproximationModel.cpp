@@ -153,12 +153,9 @@ namespace oopse {
     // add the volume correction
     Xiorr += (6.0 * viscosity * volume) * I;    
     
-    const RealType convertConstant = 1.439326479e4; //converts Poise angstroms
-                                                    // to kcal fs mol^-1 Angstrom^-1
-
-    Xiott *= convertConstant;
-    Xiotr *= convertConstant;
-    Xiorr *= convertConstant;
+    Xiott *= OOPSEConstant::viscoConvert;
+    Xiotr *= OOPSEConstant::viscoConvert;
+    Xiorr *= OOPSEConstant::viscoConvert;
     
     Mat3x3d tmp;
     Mat3x3d tmpInv;
@@ -328,11 +325,9 @@ namespace oopse {
     // add the volume correction here:
     Xirr += (6.0 * viscosity * volume) * I;    
     
-    const RealType convertConstant = 1.439326479e4; //converts Poise angstroms
-                                                    // to kcal fs mol^-1 Angstrom^-1
-    Xitt *= convertConstant;
-    Xitr *= convertConstant;
-    Xirr *= convertConstant;
+    Xitt *= OOPSEConstant::viscoConvert;
+    Xitr *= OOPSEConstant::viscoConvert;
+    Xirr *= OOPSEConstant::viscoConvert;
     
     RealType kt = OOPSEConstant::kb * temperature; // in kcal mol^-1
     
