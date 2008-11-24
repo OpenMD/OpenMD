@@ -343,13 +343,16 @@ namespace oopse {
 
       RealType f_normal = simParams->getViscosity()*hydroLength*1.439326479e4;
       RealType extPressure = -(targetPressure_ * thisArea)/OOPSEConstant::energyConvert;
-      RealType randomForce = randNums[thisNumber] * sqrt(2.0 * f_normal * OOPSEConstant::kb*targetTemp_/simParams->getDt());
-      RealType dragForce = -f_normal * dot(facetVel, unitNormal);      
+      RealType randomForce = randNums[thisNumber++] * sqrt(2.0 * f_normal * OOPSEConstant::kb*targetTemp_/simParams->getDt());
+
+      RealType dragForce = -f_normal * dot(facetVel, unitNormal);
+
+
       Vector3d langevinForce = (extPressure + randomForce + dragForce) * unitNormal;
       
       //      Vector3d dragForce = - gamma_t_ * dot(facetVel, unitNormal) * unitNormal / OOPSEConstant::energyConvert;
       
-      //std::cout << "randomForce " << randomForce << " dragForce " << dragForce <<  " hydro  " << hydroLength << std::endl;
+      // std::cout << " " << randomForce << " " << f_normal <<   std::endl;
 
 
       for (vertex = vertexSDs.begin(); vertex != vertexSDs.end(); ++vertex){
@@ -547,6 +550,7 @@ namespace oopse {
     gaussRand.resize(nTriangles);
     std::fill(gaussRand.begin(), gaussRand.end(), 0.0);
 
+    
 
 #ifdef IS_MPI
     if (worldRank == 0) {
