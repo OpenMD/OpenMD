@@ -69,34 +69,10 @@ namespace oopse {
   public:
     SMIPDForceManager(SimInfo * info);
     
-    int getMaxIterationNumber() {
-      return maxIterNum_;
-    }
-        
-    void setMaxIterationNumber(int maxIter) {
-      maxIterNum_ = maxIter;
-    }
-
-    RealType getForceTolerance() {
-      return forceTolerance_;
-    }
 
     RealType getGamma() {
       return gamma_t_;
     }
-
-    void setForceTolerance(RealType tol) {
-      forceTolerance_ = tol;
-    }
-
-    RealType getDt2() {
-      return dt2_;
-    }
-
-    void setDt2(RealType dt2) {
-      dt2_ = dt2;
-    }
-
 
   protected:
     virtual void postCalculation(bool needStress);
@@ -114,9 +90,11 @@ std::vector<RealType> genTriangleForces(int nTriangles, RealType variance);
     // convergence parameters:
     int maxIterNum_;
     RealType forceTolerance_;
-    RealType dt2_;
+    RealType dt_;
+
     RealType gamma_t_; /*Gamma at time t*/
     RealType targetTemp_;
+    RealType viscosity_;
     RealType targetPressure_; /* External Pressure */
     Hull* surfaceMesh_;
     RealType Area0_;
