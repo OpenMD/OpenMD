@@ -56,11 +56,6 @@ namespace oopse {
   
    SMIPDynamics::SMIPDynamics(SimInfo* info) : VelocityVerletIntegrator(info){
     setForceManager(new SMIPDForceManager(info));
-
-    // Langevin Dynamics Force Manager needs to know about the half-time step 
-    // size to get convergence on the friction forces:
-    dynamic_cast<SMIPDForceManager*>(forceMan_)->setDt2(dt2);
-
   }
   
   void SMIPDynamics::moveA(){

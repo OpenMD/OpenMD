@@ -45,18 +45,12 @@
 #include "brains/ForceManager.hpp"
 #include "primitives/Molecule.hpp"
 #include "math/SeqRandNumGen.hpp"
-#include "hydrodynamics/Shape.hpp"
 #include "integrators/Velocitizer.hpp"
 #include "math/Hull.hpp"
 #include "math/Triangle.hpp"
 
 namespace oopse {
    
-  struct SDShape{
-    StuntDouble* sd;
-    Shape* shape;
-  };
-    
   /**
    * @class SMIDForceManager
    * Force manager for Surface Mesh Implicit Pressure Dynamics
@@ -69,36 +63,23 @@ namespace oopse {
   public:
     SMIPDForceManager(SimInfo * info);
     
-
-    RealType getGamma() {
-      return gamma_t_;
-    }
-
   protected:
     virtual void postCalculation(bool needStress);
     
   private:
-    std::map<std::string, HydroProp*> parseFrictionFile(const std::string& filename);    
-    void genRandomForceAndTorque(Vector3d& force, Vector3d& torque, unsigned int index, RealType variance);
-std::vector<RealType> genTriangleForces(int nTriangles, RealType variance);
-    std::vector<HydroProp*> hydroProps_;
-    SeqRandNumGen randNumGen_;    
-    RealType variance_;
-    RealType langevinBufferRadius_;
-    Globals* simParams;
-    Velocitizer* veloMunge;
-    // convergence parameters:
-    int maxIterNum_;
-    RealType forceTolerance_;
-    RealType dt_;
+    std::vector<RealType> genTriangleForces(int nTriangles, RealType variance);
 
-    RealType gamma_t_; /*Gamma at time t*/
+    Globals* simParams;
+    SeqRandNumGen randNumGen_;    
+
+    RealType dt_;
     RealType targetTemp_;
+    RealType targetPressure_; 
     RealType viscosity_;
-    RealType targetPressure_; /* External Pressure */
+
+    RealType variance_;
+
     Hull* surfaceMesh_;
-    RealType Area0_;
-    RealType gamma_0_;
     std::vector<StuntDouble*> localSites_;
   };
   
