@@ -44,7 +44,7 @@
  *
  *  Created by Charles F. Vardeman II on 29 July 2008.
  *  @author  Charles F. Vardeman II
- *  @version $Id: Triangle.cpp,v 1.1 2008-11-14 15:44:34 chuckv Exp $
+ *  @version $Id: Triangle.cpp,v 1.2 2008-12-05 16:20:38 chuckv Exp $
  *
  */
 
@@ -66,7 +66,7 @@ void Triangle::addVertices(Vector3d P1, Vector3d P2, Vector3d P3){
   // Compute some quantites like a,b,c
   a_ = P1-P2;
   b_ = P1-P3;
-  c_ = P1-P3;  
+  c_ = P2-P3;  
 }
 
 

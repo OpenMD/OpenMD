@@ -44,7 +44,7 @@
  *
  *  Created by Charles F. Vardeman II on 29 July 2008.
  *  @author  Charles F. Vardeman II
- *  @version $Id: Triangle.hpp,v 1.3 2008-11-14 15:44:34 chuckv Exp $
+ *  @version $Id: Triangle.hpp,v 1.4 2008-12-05 16:20:39 chuckv Exp $
  *
  */
 
@@ -176,6 +176,7 @@ namespace oopse {
       RealType t2 = -a1 + b1 + c1;
       RealType t3 =  a1 - b1 + c1;
       RealType t4 =  a1 + b1 - c1;
+      RealType junk = t1*t2*t3*t4;
       return a1 * b1 * c1 / sqrt(t1 * t2 * t3 * t4);
     }
       
