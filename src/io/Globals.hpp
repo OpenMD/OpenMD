@@ -135,6 +135,10 @@ namespace oopse {
     DeclareParameter(MTM_Io, RealType);
     DeclareParameter(MTM_Sigma, RealType);    
     DeclareParameter(MTM_R, RealType);    
+    DeclareParameter(UseRNEMD, bool);
+    DeclareParameter(RNEMD_swapTime, RealType);
+    DeclareParameter(RNEMD_nBins, int);
+    DeclareParameter(RNEMD_swapType, std::string);
     
   public:
     bool addComponent(Component* comp);

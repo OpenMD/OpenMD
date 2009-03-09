@@ -110,6 +110,7 @@ Globals::Globals() {
   DefineOptionalParameter(MTM_Sigma, "MTM_Sigma");
   DefineOptionalParameter(MTM_R, "MTM_R");
   
+
   
   DefineOptionalParameterWithDefaultValue(UsePeriodicBoundaryConditions, "usePeriodicBoundaryConditions", true);
   DefineOptionalParameterWithDefaultValue(UseAtomicVirial, "useAtomicVirial", true);
@@ -130,6 +131,12 @@ Globals::Globals() {
   DefineOptionalParameterWithDefaultValue(StatFileFormat, "statFileFormat", "TIME|TOTAL_ENERGY|POTENTIAL_ENERGY|KINETIC_ENERGY|TEMPERATURE|PRESSURE|VOLUME|CONSERVED_QUANTITY");    
   DefineOptionalParameterWithDefaultValue(UseSphericalBoundaryConditions, "useSphericalBoundaryConditions", false);
   DefineOptionalParameterWithDefaultValue(AccumulateBoxDipole, "accumulateBoxDipole", false);
+
+  DefineOptionalParameterWithDefaultValue(UseRNEMD, "useRNEMD", false);
+  DefineOptionalParameterWithDefaultValue(RNEMD_swapTime, "RNEMD_swapTime", 100.0);
+  DefineOptionalParameterWithDefaultValue(RNEMD_nBins, "RNEMD_nBins", 15);
+  DefineOptionalParameterWithDefaultValue(RNEMD_swapType, "RNEMD_swapType", "Kinetic");
+  
 
   deprecatedKeywords_.insert("nComponents");
   deprecatedKeywords_.insert("nZconstraints");
@@ -196,6 +203,9 @@ void Globals::validate() {
   CheckParameter(FrozenBufferRadius, isPositive());
   CheckParameter(LangevinBufferRadius, isPositive());
   CheckParameter(NeighborListNeighbors, isPositive());
+  CheckParameter(RNEMD_swapTime, isPositive());
+  CheckParameter(RNEMD_nBins, isPositive());
+  CheckParameter(RNEMD_swapType, isEqualIgnoreCase("Kinetic") || isEqualIgnoreCase("Px") || isEqualIgnoreCase("Py") || isEqualIgnoreCase("Pz"));
 
   for(std::vector<Component*>::iterator i = components_.begin(); i != components_.end(); ++i) {
     if (!(*i)->findMoleculeStamp(moleculeStamps_)) {
