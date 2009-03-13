@@ -98,6 +98,7 @@ namespace oopse {
       BOX_DIPOLE_Y,
       BOX_DIPOLE_Z,
       TAGGED_PAIR_DISTANCE,
+      RNEMD_SWAP_TOTAL,
       ENDINDEX  //internal use
     };
 

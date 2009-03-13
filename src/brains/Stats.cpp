@@ -137,6 +137,7 @@ namespace oopse {
     Stats::units_[BOX_DIPOLE_Y] = "C*m";
     Stats::units_[BOX_DIPOLE_Z] = "C*m";
     Stats::units_[TAGGED_PAIR_DISTANCE] = "Ang";
+    Stats::units_[RNEMD_SWAP_TOTAL] = "Variable";
 
     Stats::statsMap.insert(StatsMapType::value_type("TIME", TIME));
     Stats::statsMap.insert(StatsMapType::value_type("TOTAL_ENERGY", TOTAL_ENERGY));
@@ -173,6 +174,7 @@ namespace oopse {
     Stats::statsMap.insert(StatsMapType::value_type("BOX_DIPOLE_Y", BOX_DIPOLE_Y));    
     Stats::statsMap.insert(StatsMapType::value_type("BOX_DIPOLE_Z", BOX_DIPOLE_Z));    
     Stats::statsMap.insert(StatsMapType::value_type("TAGGED_PAIR_DISTANCE", TAGGED_PAIR_DISTANCE));    
+    Stats::statsMap.insert(StatsMapType::value_type("RNEMD_SWAP_TOTAL", RNEMD_SWAP_TOTAL));    
   }
 
 }
