@@ -4,6 +4,7 @@ MySource    = \
 	Integrator.cpp \
         IntegratorFactory.cpp \
 	Velocitizer.cpp \
+	RNEMD.cpp \
 	VelocityVerletIntegrator.cpp \
 	DLM.cpp \
         NVE.cpp \

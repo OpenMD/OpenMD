@@ -38,85 +38,54 @@
  * University of Notre Dame has been advised of the possibility of
  * such damages.
  */
- 
-/**
- * @file VelocityVerletIntegrator.hpp
- * @author tlin
- * @date 11/08/2004
- * @time 13:25am
- * @version 1.0
- */
 
-#ifndef INTEGRATORS_VELOCITYVERLETINTEGRATOR_HPP
-#define INTEGRATORS_VELOCITYVERLETINTEGRATOR_HPP
+#include "integrators/RNEMD.hpp"
+#include "math/SquareMatrix3.hpp"
+#include "primitives/Molecule.hpp"
+#include "primitives/StuntDouble.hpp"
 
-#include "integrators/Integrator.hpp"
-#include "integrators/RotationAlgorithm.hpp"
-#include "constraints/Rattle.hpp"
+#ifndef IS_MPI
+#include "math/SeqRandNumGen.hpp"
+#else
+#include "math/ParallelRandNumGen.hpp"
+#endif
+
+/* Remove me after testing*/
+/*
+#include <cstdio>
+#include <iostream>
+*/
+/*End remove me*/
+
 namespace oopse {
-
-  /**
-   * @class VelocityVerletIntegrator VelocityVerletIntegrator.hpp "integrators/VelocityVerletIntegrator.hpp"
-   * @brief  Velocity-Verlet Family Integrator
-   * Template pattern is used in VelocityVerletIntegrator class. 
-   */
-  class VelocityVerletIntegrator : public Integrator {
-  public:
-    virtual ~VelocityVerletIntegrator();
-
-    void setRotationAlgorithm(RotationAlgorithm* algo) {
-      if (algo != rotAlgo && rotAlgo != NULL){            
-	delete rotAlgo;
-      }
-            
-      rotAlgo = algo;
-    }
-        
-  protected:
-
-    VelocityVerletIntegrator(SimInfo* info);
-
-    virtual void doIntegrate();
-
-    virtual void initialize();
-
-    virtual void preStep();
-        
-    virtual void integrateStep();        
-
-    virtual void postStep();
-
-    virtual void finalize();
-
-    virtual void resetIntegrator() {}
+  
+  RNEMD::RNEMD(SimInfo* info) : info_(info) {
     
-    RotationAlgorithm* rotAlgo;
-    Rattle* rattle;
-    RealType dt2;
-
-    RealType currSample;
-    RealType currStatus;
-    RealType currThermal;
-    RealType currReset;
-    RealType currRNEMD;
-        
-  private:
-        
-    virtual void calcForce(bool needPotential, bool needStress);    
-        
-    virtual void moveA() = 0;
-        
-    virtual void moveB() = 0;        
-
-    virtual RealType calcConservedQuantity() = 0;
-
-    virtual DumpWriter* createDumpWriter();
-
-    virtual StatWriter* createStatWriter();
-        
-    virtual RestWriter* createRestWriter();
-
-  };
-
-} //end namespace oopse
-#endif //INTEGRATORS_VELOCITYVERLETINTEGRATOR_HPP
+    int seedValue;
+    Globals * simParams = info->getSimParams();
+    
+#ifndef IS_MPI
+    if (simParams->haveSeed()) {
+      seedValue = simParams->getSeed();
+      randNumGen_ = new SeqRandNumGen(seedValue);
+    }else {
+      randNumGen_ = new SeqRandNumGen();
+    }    
+#else
+    if (simParams->haveSeed()) {
+      seedValue = simParams->getSeed();
+      randNumGen_ = new ParallelRandNumGen(seedValue);
+    }else {
+      randNumGen_ = new ParallelRandNumGen();
+    }    
+#endif 
+  }
+  
+  RNEMD::~RNEMD() {
+    delete randNumGen_;
+  }
+  
+  void RNEMD::doSwap() {
+    std::cerr << "in RNEMD!\n";   
+  }   
+}

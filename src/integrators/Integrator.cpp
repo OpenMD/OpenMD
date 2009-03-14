@@ -46,6 +46,7 @@ namespace oopse {
   Integrator::Integrator(SimInfo* info) 
     : info_(info), forceMan_(NULL) , needPotential(false), needStress(false), 
       needReset(false), velocitizer_(NULL), needVelocityScaling(false), 
+      rnemd_(NULL), useRNEMD(false),
       dumpWriter(NULL), statWriter(NULL), thermo(info),
       currentSnapshot_(info->getSnapshotManager()->getCurrentSnapshot()) {
 
@@ -116,6 +117,9 @@ namespace oopse {
         }
       }
     
+      // Create a default a velocitizer: If the subclass wants to use 
+      // a different velocitizer, use setVelocitizer
+      velocitizer_ = new Velocitizer(info);
       // Create a default a velocitizer: If the subclass wants to use 
       // a different velocitizer, use setVelocitizer
       velocitizer_ = new Velocitizer(info);

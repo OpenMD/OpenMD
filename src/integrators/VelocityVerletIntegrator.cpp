@@ -105,10 +105,13 @@ namespace oopse {
     statWriter->writeStat(currentSnapshot_->statData);
     
     currSample = sampleTime + currentSnapshot_->getTime();
-    currStatus =  statusTime + currentSnapshot_->getTime();;
+    currStatus =  statusTime + currentSnapshot_->getTime();
     currThermal = thermalTime + currentSnapshot_->getTime();
     if (needReset) {
       currReset = resetTime + currentSnapshot_->getTime();
+    }
+    if (simParams->getUseRNEMD()){
+      currRNEMD = RNEMD_swapTime + currentSnapshot_->getTime();
     }
     needPotential = false;
     needStress = false;       
@@ -158,32 +161,37 @@ namespace oopse {
 	currThermal += thermalTime;
       }
     }
-
+    if (useRNEMD) {
+      if (currentSnapshot_->getTime() >= currRNEMD) {
+	rnemd_->doSwap();
+	currRNEMD += RNEMD_swapTime;
+      }
+    }
+    
     if (currentSnapshot_->getTime() >= currSample) {
       dumpWriter->writeDumpAndEor();
-
+      
       if (simParams->getUseSolidThermInt())
 	restWriter->writeZAngFile();
-    
+      
       currSample += sampleTime;
     }
-
+    
     if (currentSnapshot_->getTime() >= currStatus) {
       //save statistics, before writeStat,  we must save statistics
       thermo.saveStat();
       saveConservedQuantity();
       statWriter->writeStat(currentSnapshot_->statData);
-    
+      
       needPotential = false;
       needStress = false;
       currStatus += statusTime;
     }
-
-      if (needReset && currentSnapshot_->getTime() >= currReset) {    
-        resetIntegrator();
-        currReset += resetTime;
-      }
-  
+    
+    if (needReset && currentSnapshot_->getTime() >= currReset) {    
+      resetIntegrator();
+      currReset += resetTime;
+    }        
   }
 
 
@@ -250,11 +258,15 @@ namespace oopse {
       mask.set(Stats::BOX_DIPOLE_Y);
       mask.set(Stats::BOX_DIPOLE_Z);
     }
-    
+   
     if (simParams->haveTaggedAtomPair() && simParams->havePrintTaggedPairDistance()) {
       if (simParams->getPrintTaggedPairDistance()) {
         mask.set(Stats::TAGGED_PAIR_DISTANCE);
       }
+    }
+
+    if (simParams->getUseRNEMD()) {
+      mask.set(Stats::RNEMD_SWAP_TOTAL);
     }
       
 

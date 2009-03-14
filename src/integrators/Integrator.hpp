@@ -56,6 +56,7 @@
 #include "io/StatWriter.hpp"
 #include "io/RestWriter.hpp"
 #include "integrators/Velocitizer.hpp"
+#include "integrators/RNEMD.hpp"
 
 namespace oopse {
 
@@ -92,6 +93,13 @@ namespace oopse {
       }
       velocitizer_  = velocitizer;
     }
+
+    void setRNEMD(RNEMD* rnemd) {
+      if (rnemd_ != rnemd && rnemd_  != NULL) {
+	delete rnemd_;
+      }
+      rnemd_  = rnemd;
+    }
         
   protected:
 
@@ -112,8 +120,11 @@ namespace oopse {
     bool needStress;
     bool needReset;    
     Velocitizer* velocitizer_;
+    RNEMD* rnemd_;
     bool needVelocityScaling;
     RealType targetScalingTemp;
+
+    bool useRNEMD;    
     
     DumpWriter* dumpWriter;
     StatWriter* statWriter;
@@ -125,6 +136,7 @@ namespace oopse {
     RealType statusTime;
     RealType thermalTime;
     RealType resetTime;
+    RealType RNEMD_swapTime;
     RealType dt;
 
     Snapshot* currentSnapshot_; //During the integration, the address of currentSnapshot Will not change

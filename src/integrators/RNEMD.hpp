@@ -40,83 +40,54 @@
  */
  
 /**
- * @file VelocityVerletIntegrator.hpp
- * @author tlin
- * @date 11/08/2004
- * @time 13:25am
+ * @file RNEMD.hpp
+ * @author gezelter
+ * @date 03/13/2009
+ * @time 15:56pm
  * @version 1.0
  */
 
-#ifndef INTEGRATORS_VELOCITYVERLETINTEGRATOR_HPP
-#define INTEGRATORS_VELOCITYVERLETINTEGRATOR_HPP
+#ifndef INTEGRATORS_RNEMD_HPP
+#define INTEGRATORS_RNEMD_HPP
+#include "brains/SimInfo.hpp"
+#include "math/RandNumGen.hpp"
 
-#include "integrators/Integrator.hpp"
-#include "integrators/RotationAlgorithm.hpp"
-#include "constraints/Rattle.hpp"
 namespace oopse {
 
   /**
-   * @class VelocityVerletIntegrator VelocityVerletIntegrator.hpp "integrators/VelocityVerletIntegrator.hpp"
-   * @brief  Velocity-Verlet Family Integrator
-   * Template pattern is used in VelocityVerletIntegrator class. 
+   * @class RNEMD RNEMD.hpp "integrators/RNEMD.hpp"
+   * @todo document
    */
-  class VelocityVerletIntegrator : public Integrator {
+  class RNEMD {
   public:
-    virtual ~VelocityVerletIntegrator();
-
-    void setRotationAlgorithm(RotationAlgorithm* algo) {
-      if (algo != rotAlgo && rotAlgo != NULL){            
-	delete rotAlgo;
-      }
-            
-      rotAlgo = algo;
-    }
+    RNEMD(SimInfo* info);
+    virtual ~RNEMD();
         
-  protected:
-
-    VelocityVerletIntegrator(SimInfo* info);
-
-    virtual void doIntegrate();
-
-    virtual void initialize();
-
-    virtual void preStep();
-        
-    virtual void integrateStep();        
-
-    virtual void postStep();
-
-    virtual void finalize();
-
-    virtual void resetIntegrator() {}
-    
-    RotationAlgorithm* rotAlgo;
-    Rattle* rattle;
-    RealType dt2;
-
-    RealType currSample;
-    RealType currStatus;
-    RealType currThermal;
-    RealType currReset;
-    RealType currRNEMD;
+    void doSwap();
+    void set_RNEMD_swapTime(RealType swapTime) { swapTime_ = swapTime; }
+    void set_RNEMD_swapType(const std::string &str);
+    void set_RNEMD_nBins(int nbins) { nBins_ = nbins; }
+    RealType get_RNEMD_exchange_total() { return exchangeSum_; }
+    void set_RNEMD_exchange_total(RealType et) {exchangeSum_ = et;}
         
   private:
         
-    virtual void calcForce(bool needPotential, bool needStress);    
-        
-    virtual void moveA() = 0;
-        
-    virtual void moveB() = 0;        
-
-    virtual RealType calcConservedQuantity() = 0;
-
-    virtual DumpWriter* createDumpWriter();
-
-    virtual StatWriter* createStatWriter();
-        
-    virtual RestWriter* createRestWriter();
+    enum RNEMDTypeEnum {
+      rnemdKinetic,
+      rnemdPx,
+      rnemdPy,
+      rnemdPz,
+      rnemdUnknown
+    };
+     
+    SimInfo* info_;
+    RandNumGen* randNumGen_;
+    int nBins_;   
+    RealType swapTime_;
+    RealType exchangeSum_;
+    RNEMDTypeEnum rnemdType_;
 
   };
 
-} //end namespace oopse
-#endif //INTEGRATORS_VELOCITYVERLETINTEGRATOR_HPP
+}
+#endif //INTEGRATORS_VELOCITIZER_HPP
