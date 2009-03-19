@@ -63,6 +63,23 @@ namespace oopse {
     
     int seedValue;
     Globals * simParams = info->getSimParams();
+
+    stringToEnumMap_["Kinetic"] = rnemdKinetic;
+    stringToEnumMap_["Px"] = rnemdPx;
+    stringToEnumMap_["Py"] = rnemdPy;
+    stringToEnumMap_["Pz"] = rnemdPz;
+    stringToEnumMap_["Unknown"] = rnemdUnknown;
+
+    const std::string st = simParams->getRNEMD_swapType();
+
+    std::map<std::string, RNEMDTypeEnum>::iterator i;
+    i = stringToEnumMap_.find(st);
+    rnemdType_  = (i == stringToEnumMap_.end()) ? RNEMD::rnemdUnknown : i->second;
+
+
+    set_RNEMD_swapTime(simParams->getRNEMD_swapTime());
+    set_RNEMD_nBins(simParams->getRNEMD_nBins());
+    exchangeSum_ = 0.0;
     
 #ifndef IS_MPI
     if (simParams->haveSeed()) {
@@ -84,8 +101,12 @@ namespace oopse {
   RNEMD::~RNEMD() {
     delete randNumGen_;
   }
-  
+
   void RNEMD::doSwap() {
     std::cerr << "in RNEMD!\n";   
+    std::cerr << "nBins = " << nBins_ << "\n";
+    std::cerr << "swapTime = " << swapTime_ << "\n";
+    std::cerr << "exchangeSum = " << exchangeSum_ << "\n";
+    std::cerr << "swapType = " << rnemdType_ << "\n";
   }   
 }

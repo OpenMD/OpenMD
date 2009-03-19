@@ -65,7 +65,6 @@ namespace oopse {
         
     void doSwap();
     void set_RNEMD_swapTime(RealType swapTime) { swapTime_ = swapTime; }
-    void set_RNEMD_swapType(const std::string &str);
     void set_RNEMD_nBins(int nbins) { nBins_ = nbins; }
     RealType get_RNEMD_exchange_total() { return exchangeSum_; }
     void set_RNEMD_exchange_total(RealType et) {exchangeSum_ = et;}
@@ -86,6 +85,8 @@ namespace oopse {
     RealType swapTime_;
     RealType exchangeSum_;
     RNEMDTypeEnum rnemdType_;
+    std::map<std::string, RNEMDTypeEnum> stringToEnumMap_;
+
 
   };
 
