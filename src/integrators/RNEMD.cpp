@@ -123,30 +123,38 @@ namespace oopse {
     Snapshot* currentSnap_ = info_->getSnapshotManager()->getCurrentSnapshot();
     Mat3x3d hmat = currentSnap_->getHmat();
 
+    std::cerr << "hmat = " << hmat << "\n";
+
     seleMan_.setSelectionSet(evaluator_.evaluate());
 
     std::cerr << "selectionCount = " << seleMan_.getSelectionCount() << "\n\n";
 
-    int i;
+    int selei;
     StuntDouble* sd;
-    int idx = sd->getLocalIndex();
+    int idx;
 
     std::vector<tuple3<RealType, int, StuntDouble* > > endSlice;
     std::vector<tuple3<RealType, int, StuntDouble* > > midSlice;
     
-    for (sd = seleMan_.beginSelected(i); sd != NULL; 
-         sd = seleMan_.nextSelected(i)) {
+    for (sd = seleMan_.beginSelected(selei); sd != NULL; 
+         sd = seleMan_.nextSelected(selei)) {
+
+      idx = sd->getLocalIndex();
 
       Vector3d pos = sd->getPos();
 
+      std::cerr << "idx = " << idx << "pos = " << pos << "\n";
       // wrap the stuntdouble's position back into the box:
 
       if (usePeriodicBoundaryConditions_)
         currentSnap_->wrapVector(pos);
+      std::cerr << "new pos.z = " << pos.z() << "\n";
 
       // which bin is this stuntdouble in?
 
       int binNo = int(nBins_ * (pos.z()) / hmat(2,2));
+
+      std::cerr << "bin = " << binNo << "\n";
 
       // if we're in bin 0 or the middleBin
       if (binNo == 0 || binNo == midBin) {
