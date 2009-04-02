@@ -51,6 +51,8 @@
 #define INTEGRATORS_RNEMD_HPP
 #include "brains/SimInfo.hpp"
 #include "math/RandNumGen.hpp"
+#include "selection/SelectionEvaluator.hpp"
+#include "selection/SelectionManager.hpp"
 
 namespace oopse {
 
@@ -68,9 +70,9 @@ namespace oopse {
     void set_RNEMD_nBins(int nbins) { nBins_ = nbins; }
     RealType get_RNEMD_exchange_total() { return exchangeSum_; }
     void set_RNEMD_exchange_total(RealType et) {exchangeSum_ = et;}
-        
+
   private:
-        
+
     enum RNEMDTypeEnum {
       rnemdKinetic,
       rnemdPx,
@@ -86,7 +88,10 @@ namespace oopse {
     RealType exchangeSum_;
     RNEMDTypeEnum rnemdType_;
     std::map<std::string, RNEMDTypeEnum> stringToEnumMap_;
-
+    std::string rnemdObjectSelection_;
+    SelectionManager seleMan_;
+    SelectionEvaluator evaluator_;
+    bool usePeriodicBoundaryConditions_;
 
   };
 

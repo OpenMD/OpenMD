@@ -139,6 +139,7 @@ namespace oopse {
     DeclareParameter(RNEMD_swapTime, RealType);
     DeclareParameter(RNEMD_nBins, int);
     DeclareParameter(RNEMD_swapType, std::string);
+    DeclareParameter(RNEMD_objectSelection, std::string);
     
   public:
     bool addComponent(Component* comp);
@@ -159,7 +160,6 @@ namespace oopse {
     std::vector<ZConsStamp*> zconstraints_;    
     std::map<std::string, MoleculeStamp*> moleculeStamps_;
     std::pair<int, int> taggedAtomPair_;
-
 };
 }
 #endif

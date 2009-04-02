@@ -59,7 +59,7 @@
 
 namespace oopse {
   
-  RNEMD::RNEMD(SimInfo* info) : info_(info) {
+  RNEMD::RNEMD(SimInfo* info) : info_(info), evaluator_(info), seleMan_(info) {
     
     int seedValue;
     Globals * simParams = info->getSimParams();
@@ -70,12 +70,17 @@ namespace oopse {
     stringToEnumMap_["Pz"] = rnemdPz;
     stringToEnumMap_["Unknown"] = rnemdUnknown;
 
+    rnemdObjectSelection_ = simParams->getRNEMD_objectSelection();
+
+    std::cerr << "calling  evaluator with " << rnemdObjectSelection_ << "\n";
+    evaluator_.loadScriptString(rnemdObjectSelection_);
+    std::cerr << "done";
+    
     const std::string st = simParams->getRNEMD_swapType();
 
     std::map<std::string, RNEMDTypeEnum>::iterator i;
     i = stringToEnumMap_.find(st);
     rnemdType_  = (i == stringToEnumMap_.end()) ? RNEMD::rnemdUnknown : i->second;
-
 
     set_RNEMD_swapTime(simParams->getRNEMD_swapTime());
     set_RNEMD_nBins(simParams->getRNEMD_nBins());
@@ -108,5 +113,23 @@ namespace oopse {
     std::cerr << "swapTime = " << swapTime_ << "\n";
     std::cerr << "exchangeSum = " << exchangeSum_ << "\n";
     std::cerr << "swapType = " << rnemdType_ << "\n";
+    std::cerr << "selection = " << rnemdObjectSelection_ << "\n";
+
+    seleMan_.setSelectionSet(evaluator_.evaluate());
+
+    std::cerr << "selectionCount = " << seleMan_.getSelectionCount() << "\n\n";
+
+    int i;
+    StuntDouble* sd;
+
+    for (sd = seleMan_.beginSelected(i); sd != NULL; sd = seleMan_.nextSelected(i)) {
+      Vector3d pos = sd->getPos();
+      //wrap the stuntdoubles into a cell      
+      if (usePeriodicBoundaryConditions_)
+        info_->getSnapshotManager()->getCurrentSnapshot()->wrapVector(pos);
+      int binNo = int(nBins_ * (pos.z()) / hmat(2,2));
+      sliceSDLists_[binNo].push_back(sd);
+    }
+
   }   
 }

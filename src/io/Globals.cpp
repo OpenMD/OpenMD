@@ -136,6 +136,7 @@ Globals::Globals() {
   DefineOptionalParameterWithDefaultValue(RNEMD_swapTime, "RNEMD_swapTime", 100.0);
   DefineOptionalParameterWithDefaultValue(RNEMD_nBins, "RNEMD_nBins", 15);
   DefineOptionalParameterWithDefaultValue(RNEMD_swapType, "RNEMD_swapType", "Kinetic");
+  DefineOptionalParameterWithDefaultValue(RNEMD_objectSelection, "RNEMD_objectSelection", "select all");
   
 
   deprecatedKeywords_.insert("nComponents");
