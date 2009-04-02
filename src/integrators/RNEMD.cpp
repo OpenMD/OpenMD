@@ -62,7 +62,7 @@
 
 namespace oopse {
   
-  RNEMD::RNEMD(SimInfo* info) : info_(info), evaluator_(info), seleMan_(info) {
+  RNEMD::RNEMD(SimInfo* info) : info_(info), evaluator_(info), seleMan_(info), usePeriodicBoundaryConditions_(info->getSimParams()->getUsePeriodicBoundaryConditions()) {
     
     int seedValue;
     Globals * simParams = info->getSimParams();
@@ -143,18 +143,17 @@ namespace oopse {
 
       Vector3d pos = sd->getPos();
 
-      std::cerr << "idx = " << idx << "pos = " << pos << "\n";
       // wrap the stuntdouble's position back into the box:
 
       if (usePeriodicBoundaryConditions_)
         currentSnap_->wrapVector(pos);
-      std::cerr << "new pos.z = " << pos.z() << "\n";
 
       // which bin is this stuntdouble in?
+      // wrapped positions are in the range [-0.5*hmat(2,2), +0.5*hmat(2,2)]
 
-      int binNo = int(nBins_ * (pos.z()) / hmat(2,2));
+      int binNo = midBin + int(nBins_ * (pos.z()) / hmat(2,2));
 
-      std::cerr << "bin = " << binNo << "\n";
+      std::cerr << "pos.z() = " << pos.z() << " bin = " << binNo << "\n";
 
       // if we're in bin 0 or the middleBin
       if (binNo == 0 || binNo == midBin) {
@@ -207,23 +206,23 @@ namespace oopse {
         if (binNo == midBin) 
           midSlice.push_back( make_tuple3(value, idx, sd));               
       }
-
-      // find smallest value in endSlice:
-      std::sort(endSlice.begin(), endSlice.end());     
-      RealType min_val = endSlice[0].first;
-      int min_idx = endSlice[0].second;
-      StuntDouble* min_sd = endSlice[0].third;
-
-      std::cerr << "smallest value = " << min_val << " idx = " << min_idx << "\n";
-
-      // find largest value in midSlice:
-      std::sort(midSlice.rbegin(), midSlice.rend());
-      RealType max_val = midSlice[0].first;
-      int max_idx = midSlice[0].second;
-      StuntDouble* max_sd = midSlice[0].third;
-
-      std::cerr << "largest value = " << max_val << " idx = " << max_idx << "\n";
-
     }
-  }   
-}
+    
+    // find smallest value in endSlice:
+    std::sort(endSlice.begin(), endSlice.end());     
+    RealType min_val = endSlice[0].first;
+    int min_idx = endSlice[0].second;
+    StuntDouble* min_sd = endSlice[0].third;
+    
+    std::cerr << "smallest value = " << min_val << " idx = " << min_idx << "\n";
+    
+    // find largest value in midSlice:
+    std::sort(midSlice.rbegin(), midSlice.rend());
+    RealType max_val = midSlice[0].first;
+    int max_idx = midSlice[0].second;
+    StuntDouble* max_sd = midSlice[0].third;
+    
+    std::cerr << "largest value = " << max_val << " idx = " << max_idx << "\n";
+    
+  }
+}   
