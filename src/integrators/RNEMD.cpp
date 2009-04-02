@@ -40,9 +40,12 @@
  */
 
 #include "integrators/RNEMD.hpp"
+#include "math/Vector3.hpp"
 #include "math/SquareMatrix3.hpp"
 #include "primitives/Molecule.hpp"
 #include "primitives/StuntDouble.hpp"
+#include "utils/OOPSEConstant.hpp"
+#include "utils/Tuple.hpp"
 
 #ifndef IS_MPI
 #include "math/SeqRandNumGen.hpp"
@@ -110,10 +113,15 @@ namespace oopse {
   void RNEMD::doSwap() {
     std::cerr << "in RNEMD!\n";   
     std::cerr << "nBins = " << nBins_ << "\n";
+    int midBin = nBins_ / 2;
+    std::cerr << "midBin = " << midBin << "\n";
     std::cerr << "swapTime = " << swapTime_ << "\n";
     std::cerr << "exchangeSum = " << exchangeSum_ << "\n";
     std::cerr << "swapType = " << rnemdType_ << "\n";
     std::cerr << "selection = " << rnemdObjectSelection_ << "\n";
+
+    Snapshot* currentSnap_ = info_->getSnapshotManager()->getCurrentSnapshot();
+    Mat3x3d hmat = currentSnap_->getHmat();
 
     seleMan_.setSelectionSet(evaluator_.evaluate());
 
@@ -121,15 +129,93 @@ namespace oopse {
 
     int i;
     StuntDouble* sd;
+    int idx = sd->getLocalIndex();
 
-    for (sd = seleMan_.beginSelected(i); sd != NULL; sd = seleMan_.nextSelected(i)) {
+    std::vector<tuple3<RealType, int, StuntDouble* > > endSlice;
+    std::vector<tuple3<RealType, int, StuntDouble* > > midSlice;
+    
+    for (sd = seleMan_.beginSelected(i); sd != NULL; 
+         sd = seleMan_.nextSelected(i)) {
+
       Vector3d pos = sd->getPos();
-      //wrap the stuntdoubles into a cell      
-      if (usePeriodicBoundaryConditions_)
-        info_->getSnapshotManager()->getCurrentSnapshot()->wrapVector(pos);
-      int binNo = int(nBins_ * (pos.z()) / hmat(2,2));
-      sliceSDLists_[binNo].push_back(sd);
-    }
 
+      // wrap the stuntdouble's position back into the box:
+
+      if (usePeriodicBoundaryConditions_)
+        currentSnap_->wrapVector(pos);
+
+      // which bin is this stuntdouble in?
+
+      int binNo = int(nBins_ * (pos.z()) / hmat(2,2));
+
+      // if we're in bin 0 or the middleBin
+      if (binNo == 0 || binNo == midBin) {
+        
+        RealType mass = sd->getMass();
+        Vector3d vel = sd->getVel();
+        RealType value;
+
+        switch(rnemdType_) {
+        case rnemdKinetic :
+          
+          value = mass * (vel[0]*vel[0] + vel[1]*vel[1] + 
+                          vel[2]*vel[2]);
+          
+          if (sd->isDirectional()) {
+            Vector3d angMom = sd->getJ();
+            Mat3x3d I = sd->getI();
+            
+            if (sd->isLinear()) {
+              int i = sd->linearAxis();
+              int j = (i + 1) % 3;
+              int k = (i + 2) % 3;
+              value += angMom[j] * angMom[j] / I(j, j) + 
+                angMom[k] * angMom[k] / I(k, k);
+            } else {                        
+              value += angMom[0]*angMom[0]/I(0, 0) 
+                + angMom[1]*angMom[1]/I(1, 1) 
+                + angMom[2]*angMom[2]/I(2, 2);
+            }
+          }
+          value = value * 0.5 / OOPSEConstant::energyConvert;
+          break;
+        case rnemdPx :
+          value = mass * vel[0];
+          break;
+        case rnemdPy :
+          value = mass * vel[1];
+          break;
+        case rnemdPz :
+          value = mass * vel[2];
+          break;
+        case rnemdUnknown : 
+        default :
+          break;
+        }
+        
+        if (binNo == 0)
+          endSlice.push_back( make_tuple3(value, idx, sd));
+        
+        if (binNo == midBin) 
+          midSlice.push_back( make_tuple3(value, idx, sd));               
+      }
+
+      // find smallest value in endSlice:
+      std::sort(endSlice.begin(), endSlice.end());     
+      RealType min_val = endSlice[0].first;
+      int min_idx = endSlice[0].second;
+      StuntDouble* min_sd = endSlice[0].third;
+
+      std::cerr << "smallest value = " << min_val << " idx = " << min_idx << "\n";
+
+      // find largest value in midSlice:
+      std::sort(midSlice.rbegin(), midSlice.rend());
+      RealType max_val = midSlice[0].first;
+      int max_idx = midSlice[0].second;
+      StuntDouble* max_sd = midSlice[0].third;
+
+      std::cerr << "largest value = " << max_val << " idx = " << max_idx << "\n";
+
+    }
   }   
 }

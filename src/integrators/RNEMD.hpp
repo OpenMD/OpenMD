@@ -92,7 +92,6 @@ namespace oopse {
     SelectionManager seleMan_;
     SelectionEvaluator evaluator_;
     bool usePeriodicBoundaryConditions_;
-
   };
 
 }
