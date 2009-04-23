@@ -1301,15 +1301,15 @@ contains
           chg1 = getCharge(atid1)
           
           if (screeningMethod .eq. DAMPED) then
-             mypot = mypot - 0.5_dp*(c1c + alphaPi) * chg1 * chg1 * pre11    
-             
+             mypot = mypot - 0.5_dp * c1c * chg1 * chg1 * pre11
           else             
-             mypot = mypot - 0.5_dp*(rcuti * chg1 * chg1) * pre11
-             
+             mypot = mypot - 0.5_dp * rcuti * chg1 * chg1 * pre11
           endif
        endif
     endif
     
+    
+
     return
   end subroutine self_self
 
