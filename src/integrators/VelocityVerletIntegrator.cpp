@@ -182,6 +182,8 @@ namespace oopse {
       thermo.saveStat();
       saveConservedQuantity();
       statWriter->writeStat(currentSnapshot_->statData);
+      if (simParams->getUseRNEMD())
+	rnemd_->getStatus();
       
       needPotential = false;
       needStress = false;

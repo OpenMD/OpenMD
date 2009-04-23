@@ -77,7 +77,7 @@ namespace oopse {
 
     std::cerr << "calling  evaluator with " << rnemdObjectSelection_ << "\n";
     evaluator_.loadScriptString(rnemdObjectSelection_);
-    std::cerr << "done";
+    std::cerr << "done\n";
     
     const std::string st = simParams->getRNEMD_swapType();
 
@@ -88,7 +88,9 @@ namespace oopse {
     set_RNEMD_swapTime(simParams->getRNEMD_swapTime());
     set_RNEMD_nBins(simParams->getRNEMD_nBins());
     exchangeSum_ = 0.0;
-    
+    counter_ = 0; //added by shenyu
+    //profile_.open("profile", std::ios::out);
+
 #ifndef IS_MPI
     if (simParams->haveSeed()) {
       seedValue = simParams->getSeed();
@@ -108,34 +110,39 @@ namespace oopse {
   
   RNEMD::~RNEMD() {
     delete randNumGen_;
+    //profile_.close();
   }
 
   void RNEMD::doSwap() {
-    std::cerr << "in RNEMD!\n";   
-    std::cerr << "nBins = " << nBins_ << "\n";
+    //std::cerr << "in RNEMD!\n";   
+    //std::cerr << "nBins = " << nBins_ << "\n";
     int midBin = nBins_ / 2;
-    std::cerr << "midBin = " << midBin << "\n";
-    std::cerr << "swapTime = " << swapTime_ << "\n";
-    std::cerr << "exchangeSum = " << exchangeSum_ << "\n";
-    std::cerr << "swapType = " << rnemdType_ << "\n";
-    std::cerr << "selection = " << rnemdObjectSelection_ << "\n";
+    //std::cerr << "midBin = " << midBin << "\n";
+    //std::cerr << "swapTime = " << swapTime_ << "\n";
+    //std::cerr << "swapType = " << rnemdType_ << "\n";
+    //std::cerr << "selection = " << rnemdObjectSelection_ << "\n";
 
     Snapshot* currentSnap_ = info_->getSnapshotManager()->getCurrentSnapshot();
     Mat3x3d hmat = currentSnap_->getHmat();
 
-    std::cerr << "hmat = " << hmat << "\n";
+    //std::cerr << "hmat = " << hmat << "\n";
 
     seleMan_.setSelectionSet(evaluator_.evaluate());
 
-    std::cerr << "selectionCount = " << seleMan_.getSelectionCount() << "\n\n";
+    //std::cerr << "selectionCount = " << seleMan_.getSelectionCount() << "\n\n";
 
     int selei;
     StuntDouble* sd;
     int idx;
 
-    std::vector<tuple3<RealType, int, StuntDouble* > > endSlice;
-    std::vector<tuple3<RealType, int, StuntDouble* > > midSlice;
-    
+    RealType min_val;
+    bool min_found = false;   
+    StuntDouble* min_sd;
+
+    RealType max_val;
+    bool max_found = false;
+    StuntDouble* max_sd;
+
     for (sd = seleMan_.beginSelected(selei); sd != NULL; 
          sd = seleMan_.nextSelected(selei)) {
 
@@ -153,7 +160,7 @@ namespace oopse {
 
       int binNo = midBin + int(nBins_ * (pos.z()) / hmat(2,2));
 
-      std::cerr << "pos.z() = " << pos.z() << " bin = " << binNo << "\n";
+      //std::cerr << "pos.z() = " << pos.z() << " bin = " << binNo << "\n";
 
       // if we're in bin 0 or the middleBin
       if (binNo == 0 || binNo == midBin) {
@@ -200,29 +207,195 @@ namespace oopse {
           break;
         }
         
-        if (binNo == 0)
-          endSlice.push_back( make_tuple3(value, idx, sd));
-        
-        if (binNo == midBin) 
-          midSlice.push_back( make_tuple3(value, idx, sd));               
+        if (binNo == 0) {
+	  if (!min_found) {
+	    min_val = value;
+	    min_sd = sd;
+	    min_found = true;
+	  } else {
+	    if (min_val > value) {
+	      min_val = value;
+	      min_sd = sd;
+	    }
+	  }
+	} else {
+	  if (!max_found) {
+	    max_val = value;
+	    max_sd = sd;
+	    max_found = true;
+	  } else {
+	    if (max_val < value) {
+	      max_val = value;
+	      max_sd = sd;
+	    }
+	  }	  
+	}
       }
     }
+    //std::cerr << "smallest value = " << min_val  << "\n";
+    //std::cerr << "largest value = " << max_val << "\n";
     
-    // find smallest value in endSlice:
-    std::sort(endSlice.begin(), endSlice.end());     
-    RealType min_val = endSlice[0].first;
-    int min_idx = endSlice[0].second;
-    StuntDouble* min_sd = endSlice[0].third;
-    
-    std::cerr << "smallest value = " << min_val << " idx = " << min_idx << "\n";
-    
-    // find largest value in midSlice:
-    std::sort(midSlice.rbegin(), midSlice.rend());
-    RealType max_val = midSlice[0].first;
-    int max_idx = midSlice[0].second;
-    StuntDouble* max_sd = midSlice[0].third;
-    
-    std::cerr << "largest value = " << max_val << " idx = " << max_idx << "\n";
-    
+    // missing:  swap information in parallel
+
+    if (max_found && min_found) {
+      if (min_val< max_val) {
+	Vector3d min_vel = min_sd->getVel();
+	Vector3d max_vel = max_sd->getVel();
+	RealType temp_vel;
+	switch(rnemdType_) {
+	case rnemdKinetic :
+	  min_sd->setVel(max_vel);
+	  max_sd->setVel(min_vel);                
+	  if (min_sd->isDirectional() && max_sd->isDirectional()) {
+	    Vector3d min_angMom = min_sd->getJ();
+	    Vector3d max_angMom = max_sd->getJ();
+	    min_sd->setJ(max_angMom);
+	    max_sd->setJ(min_angMom);
+	  }
+	  break;
+	case rnemdPx :
+	  temp_vel = min_vel.x();
+	  min_vel.x() = max_vel.x();
+	  max_vel.x() = temp_vel;
+	  min_sd->setVel(min_vel);
+	  max_sd->setVel(max_vel);
+	  break;
+	case rnemdPy :
+	  temp_vel = min_vel.y();
+	  min_vel.y() = max_vel.y();
+	  max_vel.y() = temp_vel;
+	  min_sd->setVel(min_vel);
+	  max_sd->setVel(max_vel);
+	  break;
+	case rnemdPz :
+	  temp_vel = min_vel.z();
+	  min_vel.z() = max_vel.z();
+	  max_vel.z() = temp_vel;
+	  min_sd->setVel(min_vel);
+	  max_sd->setVel(max_vel);
+	  break;
+	case rnemdUnknown : 
+	default :
+	  break;
+	}
+      exchangeSum_ += max_val - min_val;
+      } else {
+	std::cerr << "exchange NOT performed.\nmin_val > max_val.\n";
+      }
+    } else {
+      std::cerr << "exchange NOT performed.\none of the two slabs empty.\n";
+    }
+    std::cerr << "exchangeSum = " << exchangeSum_ << "\n";
   }
-}   
+
+  void RNEMD::getStatus() {
+    //std::cerr << "in RNEMD!\n";   
+    //std::cerr << "nBins = " << nBins_ << "\n";
+    int midBin = nBins_ / 2;
+    //std::cerr << "midBin = " << midBin << "\n";
+    //std::cerr << "swapTime = " << swapTime_ << "\n";
+    //std::cerr << "exchangeSum = " << exchangeSum_ << "\n";
+    //std::cerr << "swapType = " << rnemdType_ << "\n";
+    //std::cerr << "selection = " << rnemdObjectSelection_ << "\n";
+
+    Snapshot* currentSnap_ = info_->getSnapshotManager()->getCurrentSnapshot();
+    Mat3x3d hmat = currentSnap_->getHmat();
+
+    //std::cerr << "hmat = " << hmat << "\n";
+
+    seleMan_.setSelectionSet(evaluator_.evaluate());
+
+    //std::cerr << "selectionCount = " << seleMan_.getSelectionCount() << "\n\n";
+
+    int selei;
+    StuntDouble* sd;
+    int idx;
+    /*
+    RealType min_val;
+    bool min_found = false;   
+    StuntDouble* min_sd;
+
+    RealType max_val;
+    bool max_found = false;
+    StuntDouble* max_sd;
+    */
+    std::vector<RealType> valueHist;
+    std::vector<int> valueCount;
+    valueHist.resize(nBins_);
+    valueCount.resize(nBins_);
+    //do they initialize themselves to zero automatically?
+    for (sd = seleMan_.beginSelected(selei); sd != NULL; 
+         sd = seleMan_.nextSelected(selei)) {
+      
+      idx = sd->getLocalIndex();
+      
+      Vector3d pos = sd->getPos();
+
+      // wrap the stuntdouble's position back into the box:
+      
+      if (usePeriodicBoundaryConditions_)
+        currentSnap_->wrapVector(pos);
+      
+      // which bin is this stuntdouble in?
+      // wrapped positions are in the range [-0.5*hmat(2,2), +0.5*hmat(2,2)]
+      
+      int binNo = midBin + int(nBins_ * (pos.z()) / hmat(2,2));
+      
+      //std::cerr << "pos.z() = " << pos.z() << " bin = " << binNo << "\n";
+      
+      RealType mass = sd->getMass();
+      Vector3d vel = sd->getVel();
+      //std::cerr << "mass = " << mass << " vel = " << vel << "\n";
+      RealType value;
+
+      switch(rnemdType_) {
+      case rnemdKinetic :
+	
+	value = mass * (vel[0]*vel[0] + vel[1]*vel[1] + 
+			vel[2]*vel[2]);
+	
+	if (sd->isDirectional()) {
+	  Vector3d angMom = sd->getJ();
+	  Mat3x3d I = sd->getI();
+          
+	  if (sd->isLinear()) {
+	    int i = sd->linearAxis();
+	    int j = (i + 1) % 3;
+	    int k = (i + 2) % 3;
+	    value += angMom[j] * angMom[j] / I(j, j) + 
+	      angMom[k] * angMom[k] / I(k, k);
+	  } else {                        
+	    value += angMom[0]*angMom[0]/I(0, 0) 
+	      + angMom[1]*angMom[1]/I(1, 1) 
+	      + angMom[2]*angMom[2]/I(2, 2);
+	  }
+	}
+	//std::cerr <<"this value = " << value << "\n";
+	value = value * 0.5 / OOPSEConstant::energyConvert;
+	//std::cerr <<"this value = " << value << "\n";
+	break;
+      case rnemdPx :
+	value = mass * vel[0];
+	break;
+      case rnemdPy :
+	value = mass * vel[1];
+	break;
+      case rnemdPz :
+	value = mass * vel[2];
+	break;
+      case rnemdUnknown : 
+      default :
+	break;
+      }
+      //std::cerr << "bin = " << binNo << " value = " << value ;
+      valueHist[binNo] += value;
+      valueCount[binNo]++;
+      //std::cerr << " hist = " << valueHist[binNo] << " count = " << valueCount[binNo] << "\n";
+    }
+    
+    std::cout << counter_++;
+    for (int j = 0; j < nBins_; j++)
+      std::cout << "\t" << valueHist[j] / (RealType)valueCount[j];
+    std::cout << "\n";
+  }
+}

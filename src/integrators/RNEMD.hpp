@@ -66,6 +66,7 @@ namespace oopse {
     virtual ~RNEMD();
         
     void doSwap();
+    void getStatus();
     void set_RNEMD_swapTime(RealType swapTime) { swapTime_ = swapTime; }
     void set_RNEMD_nBins(int nbins) { nBins_ = nbins; }
     RealType get_RNEMD_exchange_total() { return exchangeSum_; }
@@ -92,6 +93,8 @@ namespace oopse {
     SelectionManager seleMan_;
     SelectionEvaluator evaluator_;
     bool usePeriodicBoundaryConditions_;
+    int counter_; //added by shenyu 
+    //std::ofstream profile_;
   };
 
 }
