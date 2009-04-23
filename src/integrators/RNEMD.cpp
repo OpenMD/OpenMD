@@ -158,7 +158,7 @@ namespace oopse {
       // which bin is this stuntdouble in?
       // wrapped positions are in the range [-0.5*hmat(2,2), +0.5*hmat(2,2)]
 
-      int binNo = midBin + int(nBins_ * (pos.z()) / hmat(2,2));
+      int binNo = int((nBins_-1) * (pos.z() + 0.5*hmat(2,2)) / hmat(2,2));
 
       //std::cerr << "pos.z() = " << pos.z() << " bin = " << binNo << "\n";
 
@@ -319,8 +319,9 @@ namespace oopse {
     bool max_found = false;
     StuntDouble* max_sd;
     */
-    std::vector<RealType> valueHist;
-    std::vector<int> valueCount;
+    std::vector<RealType> valueHist;  // keeps track of what's being averaged
+    std::vector<int> valueCount; // keeps track of the number of degrees of 
+                                 // freedom being averaged
     valueHist.resize(nBins_);
     valueCount.resize(nBins_);
     //do they initialize themselves to zero automatically?
@@ -339,7 +340,7 @@ namespace oopse {
       // which bin is this stuntdouble in?
       // wrapped positions are in the range [-0.5*hmat(2,2), +0.5*hmat(2,2)]
       
-      int binNo = midBin + int(nBins_ * (pos.z()) / hmat(2,2));
+      int binNo = int((nBins_-1) * (pos.z()+0.5*hmat(2,2)) / hmat(2,2));
       
       //std::cerr << "pos.z() = " << pos.z() << " bin = " << binNo << "\n";
       
@@ -354,6 +355,8 @@ namespace oopse {
 	value = mass * (vel[0]*vel[0] + vel[1]*vel[1] + 
 			vel[2]*vel[2]);
 	
+        valueCount[binNo] += 3;
+
 	if (sd->isDirectional()) {
 	  Vector3d angMom = sd->getJ();
 	  Mat3x3d I = sd->getI();
@@ -364,24 +367,33 @@ namespace oopse {
 	    int k = (i + 2) % 3;
 	    value += angMom[j] * angMom[j] / I(j, j) + 
 	      angMom[k] * angMom[k] / I(k, k);
+
+            valueCount[binNo] +=2;
+
 	  } else {                        
 	    value += angMom[0]*angMom[0]/I(0, 0) 
 	      + angMom[1]*angMom[1]/I(1, 1) 
 	      + angMom[2]*angMom[2]/I(2, 2);
+            valueCount[binNo] +=3;
+
 	  }
 	}
 	//std::cerr <<"this value = " << value << "\n";
-	value = value * 0.5 / OOPSEConstant::energyConvert;
+	value *= 0.5 / OOPSEConstant::energyConvert;  // get it in kcal / mol
+        value *= 2.0 / OOPSEConstant::kb;             // convert to temperature
 	//std::cerr <<"this value = " << value << "\n";
 	break;
       case rnemdPx :
 	value = mass * vel[0];
+        valueCount[binNo]++;
 	break;
       case rnemdPy :
 	value = mass * vel[1];
+        valueCount[binNo]++;
 	break;
       case rnemdPz :
 	value = mass * vel[2];
+        valueCount[binNo]++;
 	break;
       case rnemdUnknown : 
       default :
@@ -389,7 +401,6 @@ namespace oopse {
       }
       //std::cerr << "bin = " << binNo << " value = " << value ;
       valueHist[binNo] += value;
-      valueCount[binNo]++;
       //std::cerr << " hist = " << valueHist[binNo] << " count = " << valueCount[binNo] << "\n";
     }
     

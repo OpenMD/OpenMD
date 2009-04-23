@@ -129,7 +129,6 @@ namespace oopse {
     // rotate the momentum acoording to: ji[] = rot[][] * ji[]
     ji = rot * ji;
 
-
     // This code comes from converting an algorithm detailed in 
     // J. Chem. Phys. 107 (15), pp. 5840-5851 by Dullweber, 
     // Leimkuhler and McLachlan (DLM) for use in our code.
