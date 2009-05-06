@@ -1252,16 +1252,16 @@ contains
     if(allocated(ElectrostaticMap)) deallocate(ElectrostaticMap)
 
   end subroutine destroyElectrostaticTypes
-
-  subroutine self_self(atom1, eFrame, mypot, t, do_pot)
+       
+  subroutine self_self(atom1, eFrame, skch, mypot, t, do_pot)
     logical, intent(in) :: do_pot
     integer, intent(in) :: atom1
     integer :: atid1
     real(kind=dp), dimension(9,nLocal) :: eFrame
     real(kind=dp), dimension(3,nLocal) :: t
-    real(kind=dp) :: mu1, chg1
-    real(kind=dp) :: preVal, epot, mypot
-    real(kind=dp) :: eix, eiy, eiz
+    real(kind=dp) :: mu1, chg1, c1e
+    real(kind=dp) :: preVal, epot, mypot, skch
+    real(kind=dp) :: eix, eiy, eiz, self
 
     ! this is a local only array, so we use the local atom type id's:
     atid1 = atid(atom1)
@@ -1298,13 +1298,14 @@ contains
     elseif ( (summationMethod .eq. SHIFTED_FORCE) .or. &
          (summationMethod .eq. SHIFTED_POTENTIAL) ) then
        if (ElectrostaticMap(atid1)%is_Charge) then
-          chg1 = getCharge(atid1)
-          
+          chg1 = getCharge(atid1)         
           if (screeningMethod .eq. DAMPED) then
-             mypot = mypot - 0.5_dp * c1c * chg1 * chg1 * pre11
+             self = - 0.5_dp * (c1c+alphaPi) * chg1 * (chg1+skch) * pre11
           else             
-             mypot = mypot - 0.5_dp * rcuti * chg1 * chg1 * pre11
+             self = - 0.5_dp * rcuti * chg1 * (chg1+skch) * pre11
           endif
+
+          mypot = mypot + self
        endif
     endif
     

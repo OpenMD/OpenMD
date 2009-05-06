@@ -45,7 +45,7 @@
 
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: doForces.F90,v 1.98 2008-10-22 20:01:48 gezelter Exp $, $Date: 2008-10-22 20:01:48 $, $Name: not supported by cvs2svn $, $Revision: 1.98 $
+!! @version $Id: doForces.F90,v 1.99 2009-05-06 20:51:00 gezelter Exp $, $Date: 2009-05-06 20:51:00 $, $Name: not supported by cvs2svn $, $Revision: 1.99 $
 
 
 module doForces
@@ -868,6 +868,7 @@ contains
     real(kind=dp), dimension(3) :: nChgPos
     real(kind=dp), dimension(3) :: dipVec 
     real(kind=dp), dimension(3) :: chgVec 
+    real(kind=dp) :: skch
 
     !! initialize box dipole variables
     if (do_box_dipole) then
@@ -1323,11 +1324,20 @@ contains
           iHash = InteractionHash(me_i,me_i)
 
           if ( iand(iHash, ELECTROSTATIC_PAIR).ne.0 ) then
+
+             ! loop over the excludes to accumulate charge in the
+             ! cutoff sphere that we've left out of the normal pair loop
+             skch = 0.0_dp
+             do i1 = 1, nSkipsForAtom(i)
+                j = skipsForAtom(i, i1)
+                me_j = atid(j)
+                skch = skch + getCharge(me_j)
+             enddo
 #ifdef IS_MPI
-             call self_self(i, eFrame, pot_local(ELECTROSTATIC_POT), &
+             call self_self(i, eFrame, skch, pot_local(ELECTROSTATIC_POT), &
                   t, do_pot)
 #else
-             call self_self(i, eFrame, pot(ELECTROSTATIC_POT), &
+             call self_self(i, eFrame, skch, pot(ELECTROSTATIC_POT), &
                   t, do_pot)
 #endif
           endif
