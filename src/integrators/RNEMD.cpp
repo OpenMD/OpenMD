@@ -53,12 +53,6 @@
 #include "math/ParallelRandNumGen.hpp"
 #endif
 
-/* Remove me after testing*/
-/*
-#include <cstdio>
-#include <iostream>
-*/
-/*End remove me*/
 
 namespace oopse {
   
@@ -74,10 +68,30 @@ namespace oopse {
     stringToEnumMap_["Unknown"] = rnemdUnknown;
 
     rnemdObjectSelection_ = simParams->getRNEMD_objectSelection();
-
-    std::cerr << "calling  evaluator with " << rnemdObjectSelection_ << "\n";
     evaluator_.loadScriptString(rnemdObjectSelection_);
-    std::cerr << "done\n";
+    seleMan_.setSelectionSet(evaluator_.evaluate());
+
+
+    // do some sanity checking
+
+    int selectionCount = seleMan_.getSelectionCount();
+    int nIntegrable = info->getNGlobalIntegrableObjects();
+
+    if (selectionCount > nIntegrable) {
+      sprintf(painCave.errMsg, 
+              "RNEMD warning: The current RNEMD_objectSelection,\n"
+              "\t\t%s\n"
+              "\thas resulted in %d selected objects.  However,\n"
+              "\tthe total number of integrable objects in the system\n"
+              "\tis only %d.  This is almost certainly not what you want\n"
+              "\tto do.  A likely cause of this is forgetting the _RB_0\n"
+              "\tselector in the selection script!\n", 
+              rnemdObjectSelection_.c_str(), 
+              selectionCount, nIntegrable);
+      painCave.isFatal = 0;
+      simError();
+
+    }
     
     const std::string st = simParams->getRNEMD_swapType();
 
@@ -89,7 +103,6 @@ namespace oopse {
     set_RNEMD_nBins(simParams->getRNEMD_nBins());
     exchangeSum_ = 0.0;
     counter_ = 0; //added by shenyu
-    //profile_.open("profile", std::ios::out);
 
 #ifndef IS_MPI
     if (simParams->haveSeed()) {
@@ -110,26 +123,15 @@ namespace oopse {
   
   RNEMD::~RNEMD() {
     delete randNumGen_;
-    //profile_.close();
   }
 
   void RNEMD::doSwap() {
-    //std::cerr << "in RNEMD!\n";   
-    //std::cerr << "nBins = " << nBins_ << "\n";
     int midBin = nBins_ / 2;
-    //std::cerr << "midBin = " << midBin << "\n";
-    //std::cerr << "swapTime = " << swapTime_ << "\n";
-    //std::cerr << "swapType = " << rnemdType_ << "\n";
-    //std::cerr << "selection = " << rnemdObjectSelection_ << "\n";
 
     Snapshot* currentSnap_ = info_->getSnapshotManager()->getCurrentSnapshot();
     Mat3x3d hmat = currentSnap_->getHmat();
 
-    //std::cerr << "hmat = " << hmat << "\n";
-
     seleMan_.setSelectionSet(evaluator_.evaluate());
-
-    //std::cerr << "selectionCount = " << seleMan_.getSelectionCount() << "\n\n";
 
     int selei;
     StuntDouble* sd;
@@ -158,9 +160,8 @@ namespace oopse {
       // which bin is this stuntdouble in?
       // wrapped positions are in the range [-0.5*hmat(2,2), +0.5*hmat(2,2)]
 
-      int binNo = int((nBins_-1) * (pos.z() + 0.5*hmat(2,2)) / hmat(2,2));
+      int binNo = int(nBins_ * (pos.z() / hmat(2,2) + 0.5)) % nBins_;
 
-      //std::cerr << "pos.z() = " << pos.z() << " bin = " << binNo << "\n";
 
       // if we're in bin 0 or the middleBin
       if (binNo == 0 || binNo == midBin) {
@@ -174,7 +175,6 @@ namespace oopse {
           
           value = mass * (vel[0]*vel[0] + vel[1]*vel[1] + 
                           vel[2]*vel[2]);
-          
           if (sd->isDirectional()) {
             Vector3d angMom = sd->getJ();
             Mat3x3d I = sd->getI();
@@ -232,26 +232,27 @@ namespace oopse {
 	}
       }
     }
-    //std::cerr << "smallest value = " << min_val  << "\n";
-    //std::cerr << "largest value = " << max_val << "\n";
-    
+
     // missing:  swap information in parallel
 
     if (max_found && min_found) {
       if (min_val< max_val) {
+
 	Vector3d min_vel = min_sd->getVel();
 	Vector3d max_vel = max_sd->getVel();
 	RealType temp_vel;
+
 	switch(rnemdType_) {
 	case rnemdKinetic :
 	  min_sd->setVel(max_vel);
-	  max_sd->setVel(min_vel);                
+	  max_sd->setVel(min_vel);
+
 	  if (min_sd->isDirectional() && max_sd->isDirectional()) {
 	    Vector3d min_angMom = min_sd->getJ();
 	    Vector3d max_angMom = max_sd->getJ();
 	    min_sd->setJ(max_angMom);
 	    max_sd->setJ(min_angMom);
-	  }
+          }
 	  break;
 	case rnemdPx :
 	  temp_vel = min_vel.x();
@@ -285,40 +286,22 @@ namespace oopse {
     } else {
       std::cerr << "exchange NOT performed.\none of the two slabs empty.\n";
     }
-    std::cerr << "exchangeSum = " << exchangeSum_ << "\n";
   }
 
   void RNEMD::getStatus() {
-    //std::cerr << "in RNEMD!\n";   
-    //std::cerr << "nBins = " << nBins_ << "\n";
-    int midBin = nBins_ / 2;
-    //std::cerr << "midBin = " << midBin << "\n";
-    //std::cerr << "swapTime = " << swapTime_ << "\n";
-    //std::cerr << "exchangeSum = " << exchangeSum_ << "\n";
-    //std::cerr << "swapType = " << rnemdType_ << "\n";
-    //std::cerr << "selection = " << rnemdObjectSelection_ << "\n";
 
     Snapshot* currentSnap_ = info_->getSnapshotManager()->getCurrentSnapshot();
     Mat3x3d hmat = currentSnap_->getHmat();
+    Stats& stat = currentSnap_->statData;
 
-    //std::cerr << "hmat = " << hmat << "\n";
+    stat[Stats::RNEMD_SWAP_TOTAL] = exchangeSum_;
 
     seleMan_.setSelectionSet(evaluator_.evaluate());
-
-    //std::cerr << "selectionCount = " << seleMan_.getSelectionCount() << "\n\n";
 
     int selei;
     StuntDouble* sd;
     int idx;
-    /*
-    RealType min_val;
-    bool min_found = false;   
-    StuntDouble* min_sd;
 
-    RealType max_val;
-    bool max_found = false;
-    StuntDouble* max_sd;
-    */
     std::vector<RealType> valueHist;  // keeps track of what's being averaged
     std::vector<int> valueCount; // keeps track of the number of degrees of 
                                  // freedom being averaged
@@ -340,7 +323,7 @@ namespace oopse {
       // which bin is this stuntdouble in?
       // wrapped positions are in the range [-0.5*hmat(2,2), +0.5*hmat(2,2)]
       
-      int binNo = int((nBins_-1) * (pos.z()+0.5*hmat(2,2)) / hmat(2,2));
+      int binNo = int(nBins_ * (pos.z() / hmat(2,2) + 0.5)) % nBins_;
       
       //std::cerr << "pos.z() = " << pos.z() << " bin = " << binNo << "\n";
       
@@ -356,9 +339,11 @@ namespace oopse {
 			vel[2]*vel[2]);
 	
         valueCount[binNo] += 3;
-
+	//std::cerr <<"starting value = " << value << "\n";
 	if (sd->isDirectional()) {
+          //std::cerr << "angMom calculated.\n";
 	  Vector3d angMom = sd->getJ();
+          //std::cerr << "current angMom: " << angMom << "\n";
 	  Mat3x3d I = sd->getI();
           
 	  if (sd->isLinear()) {
@@ -370,7 +355,8 @@ namespace oopse {
 
             valueCount[binNo] +=2;
 
-	  } else {                        
+	  } else {
+            //std::cerr << "non-linear molecule.\n";
 	    value += angMom[0]*angMom[0]/I(0, 0) 
 	      + angMom[1]*angMom[1]/I(1, 1) 
 	      + angMom[2]*angMom[2]/I(2, 2);
@@ -378,10 +364,11 @@ namespace oopse {
 
 	  }
 	}
-	//std::cerr <<"this value = " << value << "\n";
-	value *= 0.5 / OOPSEConstant::energyConvert;  // get it in kcal / mol
-        value *= 2.0 / OOPSEConstant::kb;             // convert to temperature
-	//std::cerr <<"this value = " << value << "\n";
+	//std::cerr <<"total value = " << value << "\n";
+	//value *= 0.5 / OOPSEConstant::energyConvert;  // get it in kcal / mol
+        //value *= 2.0 / OOPSEConstant::kb;            // convert to temperature
+	value = value / OOPSEConstant::energyConvert / OOPSEConstant::kb;
+        //std::cerr <<"value = " << value << "\n";
 	break;
       case rnemdPx :
 	value = mass * vel[0];

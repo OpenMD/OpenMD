@@ -101,6 +101,7 @@ namespace oopse {
     Stats::title_[BOX_DIPOLE_Y] = "box dipole y";
     Stats::title_[BOX_DIPOLE_Z] = "box dipole z";
     Stats::title_[TAGGED_PAIR_DISTANCE] = "Tagged_Pair_Distance";
+    Stats::title_[RNEMD_SWAP_TOTAL] = "RNEMD_exchange_total";
     
     Stats::units_[TIME] = "fs";
     Stats::units_[TOTAL_ENERGY] = "kcal/mol";

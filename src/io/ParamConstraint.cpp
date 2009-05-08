@@ -42,37 +42,40 @@
 
 namespace oopse {
 
-NotEmptyConstraint isNotEmpty() {
+  NotEmptyConstraint isNotEmpty() {
     return NotEmptyConstraint();
-}
+  }
 
-ZeroConstraint isZero() {
+  ZeroConstraint isZero() {
     return ZeroConstraint();
-}
+  }
 
-
-ParamConstraintFacade<NonZeroConstraint> isNonZero() {
+  ParamConstraintFacade<NonZeroConstraint> isNonZero() {
     return ParamConstraintFacade<NonZeroConstraint>();
-}
+  }
 
-PositiveConstraint isPositive() {
+  PositiveConstraint isPositive() {
     return PositiveConstraint();
-}
+  }
 
-NonPositiveConstraint isNonPositive() {
+  NonPositiveConstraint isNonPositive() {
     return NonPositiveConstraint();
-}
+  }
 
-NegativeConstraint isNegative() {
+  NegativeConstraint isNegative() {
     return NegativeConstraint();
-}
+  }
 
-NonNegativeConstraint isNonNegative() {
+  NonNegativeConstraint isNonNegative() {
     return NonNegativeConstraint();
-}
+  }
 
-EqualIgnoreCaseConstraint isEqualIgnoreCase(std::string str) {
+  EqualIgnoreCaseConstraint isEqualIgnoreCase(std::string str) {
     return EqualIgnoreCaseConstraint(str);
-}
+  }
+
+  EvenConstraint isEven() {
+    return EvenConstraint();
+  }
 
 }

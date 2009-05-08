@@ -134,7 +134,7 @@ Globals::Globals() {
 
   DefineOptionalParameterWithDefaultValue(UseRNEMD, "useRNEMD", false);
   DefineOptionalParameterWithDefaultValue(RNEMD_swapTime, "RNEMD_swapTime", 100.0);
-  DefineOptionalParameterWithDefaultValue(RNEMD_nBins, "RNEMD_nBins", 15);
+  DefineOptionalParameterWithDefaultValue(RNEMD_nBins, "RNEMD_nBins", 16);
   DefineOptionalParameterWithDefaultValue(RNEMD_swapType, "RNEMD_swapType", "Kinetic");
   DefineOptionalParameterWithDefaultValue(RNEMD_objectSelection, "RNEMD_objectSelection", "select all");
   
@@ -205,7 +205,7 @@ void Globals::validate() {
   CheckParameter(LangevinBufferRadius, isPositive());
   CheckParameter(NeighborListNeighbors, isPositive());
   CheckParameter(RNEMD_swapTime, isPositive());
-  CheckParameter(RNEMD_nBins, isPositive());
+  CheckParameter(RNEMD_nBins, isPositive() && isEven());
   CheckParameter(RNEMD_swapType, isEqualIgnoreCase("Kinetic") || isEqualIgnoreCase("Px") || isEqualIgnoreCase("Py") || isEqualIgnoreCase("Pz"));
 
   for(std::vector<Component*>::iterator i = components_.begin(); i != components_.end(); ++i) {

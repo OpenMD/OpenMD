@@ -102,6 +102,9 @@ namespace oopse {
     //save statistics, before writeStat,  we must save statistics
     thermo.saveStat();
     saveConservedQuantity();
+    if (simParams->getUseRNEMD())
+      rnemd_->getStatus();
+
     statWriter->writeStat(currentSnapshot_->statData);
     
     currSample = sampleTime + currentSnapshot_->getTime();
@@ -181,9 +184,11 @@ namespace oopse {
       //save statistics, before writeStat,  we must save statistics
       thermo.saveStat();
       saveConservedQuantity();
-      statWriter->writeStat(currentSnapshot_->statData);
+
       if (simParams->getUseRNEMD())
 	rnemd_->getStatus();
+
+      statWriter->writeStat(currentSnapshot_->statData);
       
       needPotential = false;
       needStress = false;

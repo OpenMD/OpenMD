@@ -45,328 +45,339 @@
 #include "utils/CaseConversion.hpp"
 #include "utils/StringTokenizer.hpp"
 namespace oopse {
-/**
-  * This class allows to recognize constraint predicates, so that they can be combined using
-  * composition operators. Every constraint predicate must be derived from this class
-  */
-template<typename Derived>
-struct ParamConstraintFacade {
+  /**
+   * This class allows to recognize constraint predicates, so that they can be combined using
+   * composition operators. Every constraint predicate must be derived from this class
+   */
+  template<typename Derived>
+  struct ParamConstraintFacade {
     std::string getConstraintDescription() {return description_;}
-    protected:
-        std::string description_;
-};
+  protected:
+    std::string description_;
+  };
 
-struct NotEmptyConstraint : public ParamConstraintFacade<NotEmptyConstraint>{
-
+  struct NotEmptyConstraint : public ParamConstraintFacade<NotEmptyConstraint>{
+    
     NotEmptyConstraint() { description_= "nonempty";}
     bool operator()( const std::string data ) const {
-        return !data.empty();
+      return !data.empty();
     }
-};
+  };
 
-struct ZeroConstraint : public ParamConstraintFacade<ZeroConstraint>{
+  struct ZeroConstraint : public ParamConstraintFacade<ZeroConstraint>{
     
     ZeroConstraint() {this->description_ = "zero";}
     template<typename DataType>
     bool operator()( DataType data ) const {
-        return data == 0;
+      return data == 0;
     }
-};
+  };
 
-struct NonZeroConstraint : public ParamConstraintFacade<NonZeroConstraint>{
+  struct NonZeroConstraint : public ParamConstraintFacade<NonZeroConstraint>{
     NonZeroConstraint() {this->description_ = "nonzero";}
 
     template<typename DataType>
     bool operator()( DataType data ) const {
-        return data != 0;
+      return data != 0;
     }
-};
+  };
 
-struct PositiveConstraint : public ParamConstraintFacade<PositiveConstraint>{
+  struct PositiveConstraint : public ParamConstraintFacade<PositiveConstraint>{
     PositiveConstraint() {this->description_ = "positive";}
     template<typename DataType>
     bool operator()( DataType data ) const
     {
-        return data > 0;
+      return data > 0;
     }
-};
+  };
 
-struct NonPositiveConstraint : public ParamConstraintFacade<NonPositiveConstraint>{
+  struct NonPositiveConstraint : public ParamConstraintFacade<NonPositiveConstraint>{
     NonPositiveConstraint() {this->description_ = "nonpositive";}
     template<typename DataType>
     bool operator()( DataType data ) const
     {
-        return data <= 0;
+      return data <= 0;
     }
-};
+  };
 
-struct NegativeConstraint : public ParamConstraintFacade<NegativeConstraint>{
+  struct NegativeConstraint : public ParamConstraintFacade<NegativeConstraint>{
     NegativeConstraint() {this->description_ = "negative";}
     template<typename DataType>
     bool operator()( DataType data ) const
     {
-        return data < 0;
+      return data < 0;
     }
-};
+  };
 
-struct NonNegativeConstraint : public ParamConstraintFacade<NonNegativeConstraint>{
+  struct NonNegativeConstraint : public ParamConstraintFacade<NonNegativeConstraint>{
     NonNegativeConstraint() {this->description_ = "nonnegative";}
     template<typename DataType>
     bool operator()( DataType data ) const
     {
-        return data >= 0;
+      return data >= 0;
     }
-};
+  };
 
-template<typename T>
-struct LessThanConstraint : public ParamConstraintFacade<LessThanConstraint<T> > {
+
+  struct EvenConstraint : public ParamConstraintFacade<EvenConstraint>{
+    EvenConstraint() {this->description_ = "even";}
+    template<typename DataType>
+    bool operator()( DataType data ) const
+    {
+      return data % 2 == 0;
+    }
+  };
+
+  template<typename T>
+  struct LessThanConstraint : public ParamConstraintFacade<LessThanConstraint<T> > {
     
     LessThanConstraint(T rhs) : rhs_(rhs){
-        std::stringstream iss;
-        iss << "less than " << rhs;
-        this->description_ = iss.str();
+      std::stringstream iss;
+      iss << "less than " << rhs;
+      this->description_ = iss.str();
     }
     template<typename DataType>
     bool operator()( DataType data ) const {
-        return data < rhs_; 
+      return data < rhs_; 
     }
-    private:
-        T rhs_;        
-};
+  private:
+    T rhs_;        
+  };
 
-template<typename T>
-struct LessThanOrEqualToConstraint : public ParamConstraintFacade<LessThanOrEqualToConstraint<T> > {
+  template<typename T>
+  struct LessThanOrEqualToConstraint : public ParamConstraintFacade<LessThanOrEqualToConstraint<T> > {
     
     LessThanOrEqualToConstraint(T rhs) : rhs_(rhs) {
-        std::stringstream iss;
-        iss << "less than or equal to" << rhs;
-        this->description_ = iss.str();
+      std::stringstream iss;
+      iss << "less than or equal to" << rhs;
+      this->description_ = iss.str();
     }
     
     template<typename DataType>
     bool operator()( DataType data ) const {
-        return data <= rhs_; 
+      return data <= rhs_; 
     }
     
-    private:
-        T rhs_;        
-};
+  private:
+    T rhs_;        
+  };
 
-template<typename T>
-struct EqualConstraint : public ParamConstraintFacade<EqualConstraint<T> > {
+  template<typename T>
+  struct EqualConstraint : public ParamConstraintFacade<EqualConstraint<T> > {
     
     EqualConstraint(T rhs) : rhs_(rhs){
-        std::stringstream iss;
-        iss << "equal to" << rhs;
-        this->description_ = iss.str();
+      std::stringstream iss;
+      iss << "equal to" << rhs;
+      this->description_ = iss.str();
 
     }
     template<typename DataType>
     bool operator()( DataType data ) const {
-        return data == rhs_; 
+      return data == rhs_; 
     }
-    private:
-        T rhs_;        
-};
+  private:
+    T rhs_;        
+  };
 
-struct EqualIgnoreCaseConstraint : public ParamConstraintFacade<EqualIgnoreCaseConstraint> {
+  struct EqualIgnoreCaseConstraint : public ParamConstraintFacade<EqualIgnoreCaseConstraint> {
     
     EqualIgnoreCaseConstraint(std::string rhs) : rhs_(oopse::toUpperCopy(rhs)){
-        std::stringstream iss;
-        iss << "equal to (case insensitive) " << rhs;
-        this->description_ = iss.str();
+      std::stringstream iss;
+      iss << "equal to (case insensitive) " << rhs;
+      this->description_ = iss.str();
     }
     
     bool operator()( std::string data ) const {
-        return oopse::toUpperCopy(data) == rhs_; 
+      return oopse::toUpperCopy(data) == rhs_; 
     }
     
-    private:
-       std::string rhs_;        
-};
+  private:
+    std::string rhs_;        
+  };
 
-struct ContainsConstraint :  public ParamConstraintFacade<EqualIgnoreCaseConstraint> {
+  struct ContainsConstraint :  public ParamConstraintFacade<EqualIgnoreCaseConstraint> {
     ContainsConstraint(std::string rhs) : rhs_(oopse::toUpperCopy(rhs)){
-        std::stringstream iss;
-        iss << "contains " << rhs;
-        this->description_ = iss.str();
+      std::stringstream iss;
+      iss << "contains " << rhs;
+      this->description_ = iss.str();
     }
     
     bool operator()( std::string data ) const {
-        oopse::StringTokenizer tokenizer(oopse::toUpperCopy(data),  " ,;|\t\n\r");
-        while (tokenizer.hasMoreTokens()) {
-            if (tokenizer.nextToken() == rhs_) {
-                return true;
-            }
+      oopse::StringTokenizer tokenizer(oopse::toUpperCopy(data),  " ,;|\t\n\r");
+      while (tokenizer.hasMoreTokens()) {
+        if (tokenizer.nextToken() == rhs_) {
+          return true;
         }
+      }
         
-        return  false; 
+      return  false; 
     }
     
-    private:
-       std::string rhs_;        
+  private:
+    std::string rhs_;        
 
-};
+  };
 
-template<typename T>
-struct GreaterThanConstraint : public ParamConstraintFacade<GreaterThanConstraint<T> > {
+  template<typename T>
+  struct GreaterThanConstraint : public ParamConstraintFacade<GreaterThanConstraint<T> > {
     
     GreaterThanConstraint(T rhs) : rhs_(rhs){
-        std::stringstream iss;
-        iss << "greater than" << rhs;
-        this->description_ = iss.str();
+      std::stringstream iss;
+      iss << "greater than" << rhs;
+      this->description_ = iss.str();
     }
     template<typename DataType>
     bool operator()( DataType data ) const {
-        return data > rhs_; 
+      return data > rhs_; 
     }
-    private:
-        T rhs_;        
-};
+  private:
+    T rhs_;        
+  };
 
-template<typename T>
-struct GreaterThanOrEqualTo : public ParamConstraintFacade<GreaterThanOrEqualTo<T> > {
+  template<typename T>
+  struct GreaterThanOrEqualTo : public ParamConstraintFacade<GreaterThanOrEqualTo<T> > {
     
     GreaterThanOrEqualTo(T rhs) : rhs_(rhs){
-        std::stringstream iss;
-        iss << "greater than or equal to" << rhs;
-        this->description_ = iss.str();
+      std::stringstream iss;
+      iss << "greater than or equal to" << rhs;
+      this->description_ = iss.str();
     }
     template<typename DataType>
     bool operator()( DataType data ) const {
-        return data >= rhs_; 
+      return data >= rhs_; 
     }
-    private:
-        T rhs_;        
-};
+  private:
+    T rhs_;        
+  };
 
-// class_and composition predicate
-template<typename Cons1T, typename Cons2T>
-struct AndParamConstraint: public ParamConstraintFacade< AndParamConstraint<Cons1T,Cons2T> > {
-public:
+  // class_and composition predicate
+  template<typename Cons1T, typename Cons2T>
+  struct AndParamConstraint: public ParamConstraintFacade< AndParamConstraint<Cons1T,Cons2T> > {
+  public:
 
     AndParamConstraint( Cons1T cons1, Cons2T cons2 ) : cons1_(cons1), cons2_(cons2) {
-        std::stringstream iss;
-        iss << "(" << cons1_.getConstraintDescription() << " and " << cons2_.getConstraintDescription() << ")"; 
-        this->description_ = iss.str();        
+      std::stringstream iss;
+      iss << "(" << cons1_.getConstraintDescription() << " and " << cons2_.getConstraintDescription() << ")"; 
+      this->description_ = iss.str();        
     }
 
     template<typename DataType>
     bool operator()( DataType data ) const {
-        return cons1_(data) && cons2_(data);
+      return cons1_(data) && cons2_(data);
     }
 
-private:
+  private:
     Cons1T cons1_;
     Cons2T cons2_;
-};
+  };
 
 
 
-template<typename Cons1T, typename Cons2T>
-struct OrParamConstraint: public ParamConstraintFacade< OrParamConstraint<Cons1T,Cons2T> > {
-public:
+  template<typename Cons1T, typename Cons2T>
+  struct OrParamConstraint: public ParamConstraintFacade< OrParamConstraint<Cons1T,Cons2T> > {
+  public:
 
     OrParamConstraint( Cons1T cons1, Cons2T cons2 ) : cons1_(cons1), cons2_(cons2) {
-        std::stringstream iss;
-        iss << cons1_.getConstraintDescription() << " or " << cons2_.getConstraintDescription() << ""; 
-        this->description_ = iss.str(); 
-     }
+      std::stringstream iss;
+      iss << cons1_.getConstraintDescription() << " or " << cons2_.getConstraintDescription() << ""; 
+      this->description_ = iss.str(); 
+    }
 
     template<typename DataType>
     bool operator()( DataType data ) const {
-        return cons1_(data) || cons2_(data);
+      return cons1_(data) || cons2_(data);
     }
 
-private:
+  private:
     Cons1T cons1_;
     Cons2T cons2_;
-};
+  };
 
-template<typename ConsT>
-struct NotParamConstraint: public ParamConstraintFacade< NotParamConstraint<ConsT> > {
-public:
+  template<typename ConsT>
+  struct NotParamConstraint: public ParamConstraintFacade< NotParamConstraint<ConsT> > {
+  public:
 
 
     NotParamConstraint( ConsT cons) : cons_(cons) {
-        std::stringstream iss;
-        iss << "(not" << cons_.getConstraintDescription() << ")"; 
-        this->description_ = iss.str(); 
+      std::stringstream iss;
+      iss << "(not" << cons_.getConstraintDescription() << ")"; 
+      this->description_ = iss.str(); 
     }
 
     template<typename DataType>
     bool operator()( DataType data ) const {
-        return !cons_(data);
+      return !cons_(data);
     }
 
-private:
+  private:
     ConsT cons_;
-};    
+  };    
 
 
-template<typename Cons1T, typename Cons2T>
-inline AndParamConstraint<Cons1T, Cons2T>
-operator &&(const ParamConstraintFacade<Cons1T>& cons1,  const ParamConstraintFacade<Cons2T>& cons2 ) {    
+  template<typename Cons1T, typename Cons2T>
+  inline AndParamConstraint<Cons1T, Cons2T>
+  operator &&(const ParamConstraintFacade<Cons1T>& cons1,  const ParamConstraintFacade<Cons2T>& cons2 ) {    
 
     return AndParamConstraint<Cons1T,Cons2T>(
-        *static_cast<const Cons1T*>(&cons1), 
-        *static_cast<const Cons2T*>(&cons2) );
-}
+                                             *static_cast<const Cons1T*>(&cons1), 
+                                             *static_cast<const Cons2T*>(&cons2) );
+  }
 
-template<typename Cons1T, typename Cons2T>
-inline OrParamConstraint<Cons1T, Cons2T>
-operator ||( const ParamConstraintFacade<Cons1T>& cons1, const ParamConstraintFacade<Cons2T>& cons2 ) {    
+  template<typename Cons1T, typename Cons2T>
+  inline OrParamConstraint<Cons1T, Cons2T>
+  operator ||( const ParamConstraintFacade<Cons1T>& cons1, const ParamConstraintFacade<Cons2T>& cons2 ) {    
 
     return OrParamConstraint<Cons1T,Cons2T>(
-        *static_cast<const Cons1T*>(&cons1), 
-        *static_cast<const Cons2T*>(&cons2) );
-}
+                                            *static_cast<const Cons1T*>(&cons1), 
+                                            *static_cast<const Cons2T*>(&cons2) );
+  }
 
 
-template<typename ConsT>
-inline NotParamConstraint<ConsT>
-operator !( const ParamConstraintFacade<ConsT>& cons ) {
+  template<typename ConsT>
+  inline NotParamConstraint<ConsT>
+  operator !( const ParamConstraintFacade<ConsT>& cons ) {
 
     return NotParamConstraint<ConsT>(*static_cast<const ConsT*>(&cons)); 
-}
+  }
 
 
-NotEmptyConstraint isNotEmpty();
-ZeroConstraint isZero();
+  NotEmptyConstraint isNotEmpty();
+  ZeroConstraint isZero();
 
-ParamConstraintFacade<NonZeroConstraint> isNonZero();
-PositiveConstraint isPositive();
-NonPositiveConstraint isNonPositive();
+  ParamConstraintFacade<NonZeroConstraint> isNonZero();
+  PositiveConstraint isPositive();
+  NonPositiveConstraint isNonPositive();
 
-NegativeConstraint isNegative();
+  NegativeConstraint isNegative();
 
-NonNegativeConstraint isNonNegative();
+  NonNegativeConstraint isNonNegative();
+  EvenConstraint isEven();
 
-template<typename T>
-inline LessThanConstraint<T>isLessThan(T& v ) {
+  template<typename T>
+  inline LessThanConstraint<T>isLessThan(T& v ) {
     return LessThanConstraint<T>(v);
-}
+  }
 
-template<typename T>
-inline LessThanOrEqualToConstraint<T> isLessThanOrEqualTo(T& v ) {
+  template<typename T>
+  inline LessThanOrEqualToConstraint<T> isLessThanOrEqualTo(T& v ) {
     return ParamConstraintFacade<LessThanOrEqualToConstraint<T> >(v);
-}
+  }
 
-template<typename T>
-inline EqualConstraint<T> isEqual(T& v ) {
+  template<typename T>
+  inline EqualConstraint<T> isEqual(T& v ) {
     return EqualConstraint<T>(v);
-}
+  }
 
-template<typename T>
-inline GreaterThanConstraint<T> isGreaterThan(T& v ) {
+  template<typename T>
+  inline GreaterThanConstraint<T> isGreaterThan(T& v ) {
     return GreaterThanConstraint<T>(v);
-}
+  }
 
-template<typename T>
-inline GreaterThanOrEqualTo<T> isGreaterThanOrEqualTo(T& v ) {
+  template<typename T>
+  inline GreaterThanOrEqualTo<T> isGreaterThanOrEqualTo(T& v ) {
     return GreaterThanOrEqualTo<T>(v);
-}
+  }
 
-EqualIgnoreCaseConstraint isEqualIgnoreCase(std::string str);
+  EqualIgnoreCaseConstraint isEqualIgnoreCase(std::string str);
 }
 #endif
