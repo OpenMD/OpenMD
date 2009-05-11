@@ -96,16 +96,6 @@ namespace oopse {
         needReset = true;
         resetTime = simParams->getResetTime();
       }
-
-
-     if (simParams->haveUseRNEMD()) {
-        if (simParams->getUseRNEMD()) {
-           useRNEMD = simParams->getUseRNEMD();
-           if (simParams->haveRNEMD_swapTime()) {
-              RNEMD_swapTime = simParams->getRNEMD_swapTime();
-           } 
-         }
-      }
       
       // Create a default ForceManager: If the subclass wants to use 
       // a different ForceManager, use setForceManager
@@ -126,15 +116,23 @@ namespace oopse {
 
         }
       }
-    
+      
       // Create a default a velocitizer: If the subclass wants to use 
       // a different velocitizer, use setVelocitizer
       velocitizer_ = new Velocitizer(info);
-      // Create a default a RNEMD.
-      rnemd_ = new RNEMD(info);
-    
-    }
 
+      if (simParams->haveUseRNEMD()) {
+        if (simParams->getUseRNEMD()) {
+          // Create a default a RNEMD.
+          rnemd_ = new RNEMD(info);
+          useRNEMD = simParams->getUseRNEMD();
+          if (simParams->haveRNEMD_swapTime()) {
+            RNEMD_swapTime = simParams->getRNEMD_swapTime();
+          } 
+        }
+      }
+  }
+  
   Integrator::~Integrator(){
     delete forceMan_;
     delete velocitizer_;
