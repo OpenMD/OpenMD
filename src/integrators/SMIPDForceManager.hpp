@@ -45,7 +45,6 @@
 #include "brains/ForceManager.hpp"
 #include "primitives/Molecule.hpp"
 #include "integrators/Velocitizer.hpp"
-#include "hydrodynamics/Shape.hpp"
 #include "math/Hull.hpp"
 #include "math/Triangle.hpp"
 #include "math/SeqRandNumGen.hpp"
@@ -63,49 +62,18 @@ namespace oopse {
     
   public:
     SMIPDForceManager(SimInfo * info);
-
-    int getMaxIterationNumber() {
-      return maxIterNum_;
-    }
-        
-    void setMaxIterationNumber(int maxIter) {
-      maxIterNum_ = maxIter;
-    }
-
-    RealType getForceTolerance() {
-      return forceTolerance_;
-    }
-
-    void setForceTolerance(RealType tol) {
-      forceTolerance_ = tol;
-    }
-
-    RealType getDt2() {
-      return dt2_;
-    }
-
-    void setDt2(RealType dt2) {
-      dt2_ = dt2;
-    }
     
   protected:
     virtual void postCalculation(bool needStress);
     
   private:
-    std::map<std::string, HydroProp*> parseFrictionFile(const std::string& filename);    
-    void genRandomForceAndTorque(Vector3d& force, Vector3d& torque, unsigned int index, RealType variance);
-    std::vector<HydroProp*> hydroProps_;
+    std::vector<Vector3d> genTriangleForces(int nTriangles, RealType variance);
 
     Globals* simParams;
     SeqRandNumGen randNumGen_;    
     Velocitizer* veloMunge;
-    // convergence parameters:
-    int maxIterNum_;
-    RealType forceTolerance_;
-    RealType dt2_;
 
     RealType dt_;
-
     RealType targetTemp_;
     RealType targetPressure_; 
     RealType viscosity_;

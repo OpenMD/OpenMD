@@ -44,7 +44,7 @@
  *
  *  Created by Charles F. Vardeman II on 29 July 2008.
  *  @author  Charles F. Vardeman II
- *  @version $Id: Triangle.cpp,v 1.2 2008-12-05 16:20:38 chuckv Exp $
+ *  @version $Id: Triangle.cpp,v 1.3 2009-05-13 22:27:29 gezelter Exp $
  *
  */
 
@@ -53,9 +53,10 @@
 using namespace oopse;
 
 
-Triangle::Triangle() : HaveNormal_(false), HaveCentroid_(false),HaveArea_(false), area_(0.0), normal_(V3Zero), 
-		       centroid_(V3Zero),facetVelocity_(V3Zero), mass_(0.0),
-		       a_(V3Zero),b_(V3Zero),c_(V3Zero){
+Triangle::Triangle() : HaveNormal_(false), HaveCentroid_(false),
+                       HaveArea_(false), area_(0.0), normal_(V3Zero), 
+		       centroid_(V3Zero), facetVelocity_(V3Zero), mass_(0.0),
+		       a_(V3Zero), b_(V3Zero), c_(V3Zero){
 }
 
 void Triangle::addVertices(Vector3d P1, Vector3d P2, Vector3d P3){
@@ -86,4 +87,46 @@ Vector3d Triangle::computeCentroid(){
   HaveCentroid_ = true;
   centroid_ = (vertices_[0] + vertices_[1] + vertices_[2])/3.0;
   return centroid_;
+}
+
+
+Mat3x3d Triangle::computeHydrodynamicTensor(RealType viscosity) {
+  
+  Vector3d u0 = -a_;
+  Vector3d v0 = centroid_ - vertices_[0];
+  RealType s0 = 0.5*cross(u0,v0).length();
+  
+  Vector3d u1 = -c_;
+  Vector3d v1 = centroid_ - vertices_[1];
+  RealType s1 = 0.5*cross(u1,v1).length();
+  
+  Vector3d u2 = b_;
+  Vector3d v2 = centroid_ - vertices_[2];
+  RealType s2 = 0.5*cross(u2,v2).length();
+  
+  Mat3x3d H;
+  H = hydro_tensor(centroid_,centroid_,vertices_[1],vertices_[0],s0,viscosity)+
+    hydro_tensor(centroid_,centroid_,vertices_[1],vertices_[2],s1,viscosity)+
+    hydro_tensor(centroid_,centroid_,vertices_[2],vertices_[0],s2,viscosity);
+
+  return H.inverse();
+}
+
+Mat3x3d Triangle::hydro_tensor(
+                               const Vector3d& ri,
+                               const Vector3d& rj0,
+                               const Vector3d& rj1,
+                               const Vector3d& rj2,
+                               RealType s, RealType viscosity){
+  
+  Vector3d v2 = (rj0 + rj1 + rj2)/3.0;  // sub-centroid
+  Vector3d dr = ri - v2;                // real centroid to sub-centroid
+  RealType l2 = 1.0/dr.lengthSquare();  
+ 
+  Mat3x3d G;
+  G = (SquareMatrix3<RealType>::identity() + outProduct(dr,dr)*l2)*sqrt(l2);
+
+  G *= 0.125/3.14159285358979;
+  G *= s/viscosity;
+  return G;
 }

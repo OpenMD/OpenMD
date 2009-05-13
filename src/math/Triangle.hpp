@@ -44,7 +44,7 @@
  *
  *  Created by Charles F. Vardeman II on 29 July 2008.
  *  @author  Charles F. Vardeman II
- *  @version $Id: Triangle.hpp,v 1.4 2008-12-05 16:20:39 chuckv Exp $
+ *  @version $Id: Triangle.hpp,v 1.5 2009-05-13 22:27:29 gezelter Exp $
  *
  */
 
@@ -53,6 +53,7 @@
 #define MATH_FACET_HPP
 
 #include "math/Vector3.hpp"
+#include "math/SquareMatrix3.hpp"
 #include "config.h"
 #include "primitives/StuntDouble.hpp"
 
@@ -180,9 +181,12 @@ namespace oopse {
       return a1 * b1 * c1 / sqrt(t1 * t2 * t3 * t4);
     }
       
+    Mat3x3d computeHydrodynamicTensor(RealType viscosity);
 
 
   private:
+    Mat3x3d hydro_tensor(const Vector3d& ri, const Vector3d& rj0, const Vector3d& rj1, const Vector3d& rj2,RealType s, RealType viscosity);
+    
     /* Local Indentity of vertex atoms in pos array*/
     std::vector <StuntDouble*> vertexSD_;
     Vector3d normal_;
