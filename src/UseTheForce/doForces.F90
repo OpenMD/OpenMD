@@ -45,7 +45,7 @@
 
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: doForces.F90,v 1.99 2009-05-06 20:51:00 gezelter Exp $, $Date: 2009-05-06 20:51:00 $, $Name: not supported by cvs2svn $, $Revision: 1.99 $
+!! @version $Id: doForces.F90,v 1.100 2009-05-19 15:45:56 gezelter Exp $, $Date: 2009-05-19 15:45:56 $, $Name: not supported by cvs2svn $, $Revision: 1.100 $
 
 
 module doForces
@@ -839,7 +839,7 @@ contains
     real(kind=dp),dimension(3) :: d_atm, d_grp, fpair, fij, fg, dag
     real(kind=dp) :: rfpot, mu_i
     real(kind=dp):: rCut
-    integer :: me_i, me_j, n_in_i, n_in_j
+    integer :: me_i, me_j, n_in_i, n_in_j, iG, j1
     logical :: is_dp_i
     integer :: neighborListSize
     integer :: listerror, error
@@ -1328,9 +1328,18 @@ contains
              ! loop over the excludes to accumulate charge in the
              ! cutoff sphere that we've left out of the normal pair loop
              skch = 0.0_dp
+                          
+#ifdef IS_MPI
+             iG = AtomLocalToGlobal(i)
+             do i1 = 1, nSkipsForAtom(iG)
+                j = skipsForAtom(i, i1)
+                j1 = AtomColToGlobal(j)
+                me_j = atid_col(j1)
+#else
              do i1 = 1, nSkipsForAtom(i)
                 j = skipsForAtom(i, i1)
                 me_j = atid(j)
+#endif
                 skch = skch + getCharge(me_j)
              enddo
 #ifdef IS_MPI
