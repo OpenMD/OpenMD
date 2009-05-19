@@ -81,8 +81,10 @@ module simulation
   integer, allocatable, dimension(:),   public :: groupStartCol
   integer, allocatable, dimension(:),   public :: groupListLocal
   integer, allocatable, dimension(:),   public :: groupStartLocal
-  integer, allocatable, dimension(:),   public :: nSkipsForAtom
-  integer, allocatable, dimension(:,:), public :: skipsForAtom
+  integer, allocatable, dimension(:),   public :: nSkipsForLocalAtom
+  integer, allocatable, dimension(:,:), public :: skipsForLocalAtom
+  integer, allocatable, dimension(:),   public :: nSkipsForRowAtom
+  integer, allocatable, dimension(:,:), public :: skipsForRowAtom
   integer, allocatable, dimension(:),   public :: nTopoPairsForAtom
   integer, allocatable, dimension(:,:),   public :: toposForAtom
   integer, allocatable, dimension(:,:),   public :: topoDistance
@@ -158,7 +160,8 @@ contains
     real ( kind = dp ), dimension(CnLocal) :: Cmfact
     integer, intent(in):: CnGroups
     integer, dimension(CnGlobal), intent(in):: CglobalGroupMembership
-    integer :: maxSkipsForAtom, maxToposForAtom, glPointer
+    integer :: maxSkipsForLocalAtom, maxToposForAtom, glPointer
+    integer :: maxSkipsForRowAtom
 
 #ifdef IS_MPI
     integer, allocatable, dimension(:) :: c_idents_Row
@@ -392,85 +395,119 @@ contains
     enddo
 
 #ifdef IS_MPI
-    allocate(nSkipsForAtom(nAtomsInRow), stat=alloc_stat)
-#else
-    allocate(nSkipsForAtom(nLocal), stat=alloc_stat)
+    allocate(nSkipsForRowAtom(nAtomsInRow), stat=alloc_stat)
 #endif
+
+    allocate(nSkipsForLocalAtom(nLocal), stat=alloc_stat)
+    
     if (alloc_stat /= 0 ) then
        thisStat = -1
        write(*,*) 'Could not allocate nSkipsForAtom array'
        return
     endif
 
-    maxSkipsForAtom = 0
-
 #ifdef IS_MPI
-    jend = nAtomsInRow
-#else
-    jend = nLocal
-#endif
-    
-    do j = 1, jend
-       nSkipsForAtom(j) = 0
-#ifdef IS_MPI
+    maxSkipsForRowAtom = 0
+    do j = 1, nAtomsInRow
+       nSkipsForRowAtom(j) = 0
        id1 = AtomRowToGlobal(j)
-#else 
+       do i = 1, nExcludes
+          if (excludes(1,i) .eq. id1 ) then
+             nSkipsForRowAtom(j) = nSkipsForRowAtom(j) + 1             
+             if (nSkipsForRowAtom(j) .gt. maxSkipsForRowAtom) then
+                maxSkipsForRowAtom = nSkipsForRowAtom(j)
+             endif
+          endif
+          if (excludes(2,i) .eq. id1 ) then
+             nSkipsForRowAtom(j) = nSkipsForRowAtom(j) + 1             
+             if (nSkipsForRowAtom(j) .gt. maxSkipsForRowAtom) then
+                maxSkipsForRowAtom = nSkipsForRowAtom(j)
+             endif
+          endif
+       end do
+    enddo
+#endif
+    maxSkipsForLocalAtom = 0
+    do j = 1, nLocal
+       nSkipsForLocalAtom(j) = 0
+#ifdef IS_MPI
+       id1 = AtomLocalToGlobal(j)
+#else
        id1 = j
 #endif
        do i = 1, nExcludes
           if (excludes(1,i) .eq. id1 ) then
-             nSkipsForAtom(j) = nSkipsForAtom(j) + 1
-             
-             if (nSkipsForAtom(j) .gt. maxSkipsForAtom) then
-                maxSkipsForAtom = nSkipsForAtom(j)
+             nSkipsForLocalAtom(j) = nSkipsForLocalAtom(j) + 1             
+             if (nSkipsForLocalAtom(j) .gt. maxSkipsForLocalAtom) then
+                maxSkipsForLocalAtom = nSkipsForLocalAtom(j)
              endif
           endif
           if (excludes(2,i) .eq. id1 ) then
-             nSkipsForAtom(j) = nSkipsForAtom(j) + 1
-             
-             if (nSkipsForAtom(j) .gt. maxSkipsForAtom) then
-                maxSkipsForAtom = nSkipsForAtom(j)
+             nSkipsForLocalAtom(j) = nSkipsForLocalAtom(j) + 1             
+             if (nSkipsForLocalAtom(j) .gt. maxSkipsForLocalAtom) then
+                maxSkipsForLocalAtom = nSkipsForLocalAtom(j)
              endif
           endif
        end do
     enddo
     
 #ifdef IS_MPI
-    allocate(skipsForAtom(nAtomsInRow, maxSkipsForAtom), stat=alloc_stat)
-#else
-    allocate(skipsForAtom(nLocal, maxSkipsForAtom), stat=alloc_stat)
+    allocate(skipsForRowAtom(nAtomsInRow, maxSkipsForRowAtom), stat=alloc_stat)
 #endif
+    allocate(skipsForLocalAtom(nLocal, maxSkipsForLocalAtom), stat=alloc_stat)
+
     if (alloc_stat /= 0 ) then
-       write(*,*) 'Could not allocate skipsForAtom array'
+       write(*,*) 'Could not allocate skipsForAtom arrays'
        return
     endif
     
 #ifdef IS_MPI
-    jend = nAtomsInRow
-#else
-    jend = nLocal
-#endif
-    do j = 1, jend
-       nSkipsForAtom(j) = 0
-#ifdef IS_MPI
+    do j = 1, nAtomsInRow
+       nSkipsForRowAtom(j) = 0 
        id1 = AtomRowToGlobal(j)
-#else 
+       do i = 1, nExcludes
+          if (excludes(1,i) .eq. id1 ) then
+             nSkipsForRowAtom(j) = nSkipsForRowAtom(j) + 1
+             ! exclude lists have global ID's 
+             id2 = excludes(2,i)
+             skipsForRowAtom(j, nSkipsForRowAtom(j)) = id2
+          endif
+          if (excludes(2, i) .eq. id1 ) then
+             nSkipsForRowAtom(j) = nSkipsForRowAtom(j) + 1
+             ! exclude lists have global ID's 
+             id2 = excludes(1,i)
+             skipsForRowAtom(j, nSkipsForRowAtom(j)) = id2
+          endif
+       end do
+    enddo
+#endif
+    do j = 1, nLocal
+       nSkipsForLocalAtom(j) = 0 
+#ifdef IS_MPI
+       id1 = AtomLocalToGlobal(j)
+#else
        id1 = j
 #endif
        do i = 1, nExcludes
           if (excludes(1,i) .eq. id1 ) then
-             nSkipsForAtom(j) = nSkipsForAtom(j) + 1
-             ! exclude lists have global ID's so this line is 
-             ! the same in MPI and non-MPI
+             nSkipsForLocalAtom(j) = nSkipsForLocalAtom(j) + 1
+             ! exclude lists have global ID's
+#ifdef IS_MPI
+             id2 = AtomGlobalToLocal(excludes(2,i))
+#else
              id2 = excludes(2,i)
-             skipsForAtom(j, nSkipsForAtom(j)) = id2
+#endif
+             skipsForLocalAtom(j, nSkipsForLocalAtom(j)) = id2
           endif
           if (excludes(2, i) .eq. id1 ) then
-             nSkipsForAtom(j) = nSkipsForAtom(j) + 1
-             ! exclude lists have global ID's so this line is 
-             ! the same in MPI and non-MPI
+             nSkipsForLocalAtom(j) = nSkipsForLocalAtom(j) + 1
+             ! exclude lists have global ID's 
+#ifdef IS_MPI
+             id2 = AtomGlobalToLocal(excludes(1,i))
+#else
              id2 = excludes(1,i)
-             skipsForAtom(j, nSkipsForAtom(j)) = id2
+#endif
+             skipsForLocalAtom(j, nSkipsForLocalAtom(j)) = id2
           endif
        end do
     enddo
@@ -852,10 +889,10 @@ contains
           if (allocated(topoDistance)) deallocate(topoDistance)
           if (allocated(toposForAtom)) deallocate(toposForAtom)
           if (allocated(nTopoPairsForAtom)) deallocate(nTopoPairsForAtom)
-          if (allocated(skipsForAtom)) deallocate(skipsForAtom)
-          if (allocated(nSkipsForAtom)) deallocate(nSkipsForAtom)
-          if (allocated(skipsForAtom)) deallocate(skipsForAtom)
-          if (allocated(nSkipsForAtom)) deallocate(nSkipsForAtom)
+          if (allocated(skipsForLocalAtom)) deallocate(skipsForLocalAtom)
+          if (allocated(nSkipsForLocalAtom)) deallocate(nSkipsForLocalAtom)
+          if (allocated(skipsForRowAtom)) deallocate(skipsForRowAtom)
+          if (allocated(nSkipsForRowAtom)) deallocate(nSkipsForRowAtom)
           if (allocated(mfactLocal)) deallocate(mfactLocal)
           if (allocated(mfactCol)) deallocate(mfactCol)
           if (allocated(mfactRow)) deallocate(mfactRow)

@@ -45,7 +45,7 @@
 
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: doForces.F90,v 1.100 2009-05-19 15:45:56 gezelter Exp $, $Date: 2009-05-19 15:45:56 $, $Name: not supported by cvs2svn $, $Revision: 1.100 $
+!! @version $Id: doForces.F90,v 1.101 2009-05-19 20:21:59 gezelter Exp $, $Date: 2009-05-19 20:21:59 $, $Name: not supported by cvs2svn $, $Revision: 1.101 $
 
 
 module doForces
@@ -1316,7 +1316,7 @@ contains
           
           ! we loop only over the local atoms, so we don't need row and column
           ! lookups for the types
-          
+
           me_i = atid(i)
           
           ! is the atom electrostatic?  See if it would have an 
@@ -1329,19 +1329,12 @@ contains
              ! cutoff sphere that we've left out of the normal pair loop
              skch = 0.0_dp
                           
-#ifdef IS_MPI
-             iG = AtomLocalToGlobal(i)
-             do i1 = 1, nSkipsForAtom(iG)
-                j = skipsForAtom(i, i1)
-                j1 = AtomColToGlobal(j)
-                me_j = atid_col(j1)
-#else
-             do i1 = 1, nSkipsForAtom(i)
-                j = skipsForAtom(i, i1)
+             do i1 = 1, nSkipsForLocalAtom(i)                
+                j = skipsForLocalAtom(i, i1)                
                 me_j = atid(j)
-#endif
                 skch = skch + getCharge(me_j)
              enddo
+
 #ifdef IS_MPI
              call self_self(i, eFrame, skch, pot_local(ELECTROSTATIC_POT), &
                   t, do_pot)
@@ -1357,8 +1350,8 @@ contains
              ! loop over the excludes to accumulate RF stuff we've
              ! left out of the normal pair loop
              
-             do i1 = 1, nSkipsForAtom(i)
-                j = skipsForAtom(i, i1)
+             do i1 = 1, nSkipsForLocalAtom(i)
+                j = skipsForLocalAtom(i, i1)
                 
                 ! prevent overcounting of the skips
                 if (i.lt.j) then
@@ -1782,13 +1775,22 @@ contains
     unique_id_1 = atom1
     unique_id_2 = atom2
 #endif
-    
-    do i = 1, nSkipsForAtom(atom1)
-       if (skipsForAtom(atom1, i) .eq. unique_id_2) then
+
+#ifdef IS_MPI    
+    do i = 1, nSkipsForRowAtom(atom1)
+       if (skipsForRowAtom(atom1, i) .eq. unique_id_2) then
           skip_it = .true.
           return
        endif
     end do
+#else
+    do i = 1, nSkipsForLocalAtom(atom1)
+       if (skipsForLocalAtom(atom1, i) .eq. unique_id_2) then
+          skip_it = .true.
+          return
+       endif
+    end do
+#endif
 
     return
   end function skipThisPair

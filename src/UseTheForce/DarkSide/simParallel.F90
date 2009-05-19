@@ -42,12 +42,12 @@
 
 !! MPI support for long range forces using force decomposition 
 !! on a square grid of processors.
-!! Corresponds to mpiSimunation.cpp for C++
+!! Corresponds to mpiSimulation.cpp for C++
 !! mpi_module also contains a private interface for mpi f90 routines.
 !!
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: simParallel.F90,v 1.11 2008-02-14 21:37:05 chuckv Exp $, $Date: 2008-02-14 21:37:05 $, $Name: not supported by cvs2svn $, $Revision: 1.11 $
+!! @version $Id: simParallel.F90,v 1.12 2009-05-19 20:21:59 gezelter Exp $, $Date: 2009-05-19 20:21:59 $, $Name: not supported by cvs2svn $, $Revision: 1.12 $
 
 module mpiSimulation  
   use definitions
@@ -121,12 +121,11 @@ module mpiSimulation
 #endif
 
 
-
-
   !! Tags used during force loop for parallel simulation
   integer, public, allocatable, dimension(:) :: AtomLocalToGlobal
   integer, public, allocatable, dimension(:) :: AtomRowToGlobal
   integer, public, allocatable, dimension(:) :: AtomColToGlobal
+  integer, public, allocatable, dimension(:) :: AtomGlobalToLocal
   integer, public, allocatable, dimension(:) :: GroupLocalToGlobal
   integer, public, allocatable, dimension(:) :: GroupRowToGlobal
   integer, public, allocatable, dimension(:) :: GroupColToGlobal
@@ -746,6 +745,8 @@ contains
 
     integer :: nAtomsInCol
     integer :: nAtomsInRow
+    integer :: i, glob, nAtomTags, maxGlobal
+    
 
     status = 0
     ! allocate row arrays
@@ -803,6 +804,33 @@ contains
 
     call gather(tags, AtomRowToGlobal, plan_atom_row)
     call gather(tags, AtomColToGlobal, plan_atom_col)
+
+    nAtomTags = size(tags)
+    maxGlobal = -1
+    do i = 1, nAtomTags
+       if (tags(i).gt.maxGlobal) maxGlobal = tags(i)
+    enddo
+
+    if(.not. allocated(AtomGlobalToLocal)) then
+       allocate(AtomGlobalToLocal(maxGlobal),STAT=alloc_stat)
+       if (alloc_stat /= 0 ) then
+          status = -1 
+          return
+       endif
+    else
+       deallocate(AtomGlobalToLocal)
+       allocate(AtomGlobalToLocal(maxGlobal),STAT=alloc_stat)
+       if (alloc_stat /= 0 ) then
+          status = -1 
+          return
+       endif
+
+    endif
+
+    do i = 1, nAtomTags
+       glob = AtomLocalToGlobal(i)
+       AtomGlobalToLocal(glob) = i
+    enddo
 
   end subroutine setAtomTags
 
