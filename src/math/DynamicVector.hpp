@@ -126,7 +126,14 @@ namespace oopse {
         DynamicVector(_InputIterator first, _InputIterator last,
                const allocator_type& alloc = allocator_type())
         : std::vector<Real, Alloc>(first, last, alloc) {}
-            
+       
+    inline Real operator()(unsigned int i) const{
+      return (*this)[i];
+    }
+    
+    inline Real& operator()(unsigned int i){
+      return (*this)[i];
+    }     
     /**
      * Tests if this vetor is equal to other vector
      * @return true if equal, otherwise return false
@@ -300,6 +307,15 @@ namespace oopse {
     inline bool isNormalized() {
       return equal(lengthSquare(), 1.0);
     }           
+
+    template<class VectorType>
+    void getSubVector(unsigned int beginning, VectorType& v) {
+        assert(beginning + v.size() -1 <= this->size());
+
+        for (unsigned int i = 0; i < v.size(); ++i)
+             v(i) = (*this)[beginning+i];
+    }
+
     
   };
 

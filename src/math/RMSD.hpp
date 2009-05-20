@@ -71,18 +71,18 @@ namespace oopse {
      */
     RealType calculate_rmsd(std::vector<Vector3d> mov,
                             Vector3d mov_com,
-                            Vector3d mov_to_ref,
-                            RotMat3x3d U);
+                            Vector3d mov_to_ref);
     
-
     /* 
      * optimal_superposition()
      *
      *   Returns best-fit rotation matrix 
      */
-    RotMat3x3d optimal_superposition(std::vector<Vector3d> mov);
+    RotMat3x3d optimal_superposition(std::vector<Vector3d> mov,
+                            Vector3d mov_com,
+                            Vector3d mov_to_ref);
 
-
+    
   protected:
     std::vector<Vector3d> ref_;
     Vector3d ref_com;

@@ -314,6 +314,18 @@ namespace oopse {
     }
 
     /**
+     * Returns the sum of all elements of this vector.
+     * @return the sum of all elements of this vector
+     */
+    inline Real sum() {
+      Real tmp;
+      tmp = 0;
+      for (unsigned int i = 0; i < Dim; i++)
+	tmp += this->data_[i];
+      return tmp;  
+    }
+            
+    /**
      * Returns the length of this vector.
      * @return the length of this vector
      */
