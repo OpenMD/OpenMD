@@ -275,10 +275,14 @@
 typedef float RealType;
 #ifdef IS_MPI
 #define MPI_REALTYPE MPI_FLOAT
+#define REALTYPE FLOAT
+#define REALTYPE_INT FLOAT_INT
 #endif
 #else
 typedef double RealType;
 #ifdef IS_MPI
 #define MPI_REALTYPE MPI_DOUBLE
+#define REALTYPE DOUBLE
+#define REALTYPE_INT DOUBLE_INT
 #endif
 #endif
