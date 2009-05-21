@@ -53,6 +53,7 @@
 #include "math/ParallelRandNumGen.hpp"
 #endif
 
+#define HONKING_LARGE_VALUE 1.0e10
 
 namespace oopse {
   
@@ -102,7 +103,6 @@ namespace oopse {
     set_RNEMD_swapTime(simParams->getRNEMD_swapTime());
     set_RNEMD_nBins(simParams->getRNEMD_nBins());
     exchangeSum_ = 0.0;
-    counter_ = 0; //added by shenyu
 
 #ifndef IS_MPI
     if (simParams->haveSeed()) {
@@ -233,66 +233,220 @@ namespace oopse {
       }
     }
 
-    // missing:  swap information in parallel
+#ifdef IS_MPI
+    int nProc, worldRank;
+
+    nProc = MPI::COMM_WORLD.Get_size();
+    worldRank = MPI::COMM_WORLD.Get_rank();
+
+    bool my_min_found = min_found;
+    bool my_max_found = max_found;
+
+    // Even if we didn't find a minimum, did someone else?
+    MPI::COMM_WORLD.Allreduce(&my_min_found, &min_found, 
+                              1, MPI::BOOL, MPI::LAND);
+    
+    // Even if we didn't find a maximum, did someone else?
+    MPI::COMM_WORLD.Allreduce(&my_max_found, &max_found, 
+                              1, MPI::BOOL, MPI::LAND);
+    
+    struct {
+      RealType val;
+      int rank;
+    } max_vals, min_vals;
+    
+    if (min_found) {
+      if (my_min_found) 
+        min_vals.val = min_val;
+      else 
+        min_vals.val = HONKING_LARGE_VALUE;
+      
+      min_vals.rank = worldRank;    
+      
+      // Who had the minimum?
+      MPI::COMM_WORLD.Allreduce(&min_vals, &min_vals, 
+                                1, MPI::REALTYPE_INT, MPI::MINLOC);
+      min_val = min_vals.val;
+    }
+      
+    if (max_found) {
+      if (my_max_found) 
+        max_vals.val = max_val;
+      else 
+        max_vals.val = -HONKING_LARGE_VALUE;
+      
+      max_vals.rank = worldRank;    
+      
+      // Who had the maximum?
+      MPI::COMM_WORLD.Allreduce(&max_vals, &max_vals, 
+                                1, MPI::REALTYPE_INT, MPI::MAXLOC);
+      max_val = max_vals.val;
+    }
+#endif
 
     if (max_found && min_found) {
       if (min_val< max_val) {
 
-	Vector3d min_vel = min_sd->getVel();
-	Vector3d max_vel = max_sd->getVel();
-	RealType temp_vel;
-
-	switch(rnemdType_) {
-	case rnemdKinetic :
-	  min_sd->setVel(max_vel);
-	  max_sd->setVel(min_vel);
-
-	  if (min_sd->isDirectional() && max_sd->isDirectional()) {
-	    Vector3d min_angMom = min_sd->getJ();
-	    Vector3d max_angMom = max_sd->getJ();
-	    min_sd->setJ(max_angMom);
-	    max_sd->setJ(min_angMom);
+#ifdef IS_MPI       
+        if (max_vals.rank == worldRank && min_vals.rank == worldRank) {
+          // I have both maximum and minimum, so proceed like a single
+          // processor version:
+#endif
+          // objects to be swapped: velocity & angular velocity
+          Vector3d min_vel = min_sd->getVel();
+          Vector3d max_vel = max_sd->getVel();
+          RealType temp_vel;
+          
+          switch(rnemdType_) {
+          case rnemdKinetic :
+            min_sd->setVel(max_vel);
+            max_sd->setVel(min_vel);
+            if (min_sd->isDirectional() && max_sd->isDirectional()) {
+              Vector3d min_angMom = min_sd->getJ();
+              Vector3d max_angMom = max_sd->getJ();
+              min_sd->setJ(max_angMom);
+              max_sd->setJ(min_angMom);
+            }
+            break;
+          case rnemdPx :
+            temp_vel = min_vel.x();
+            min_vel.x() = max_vel.x();
+            max_vel.x() = temp_vel;
+            min_sd->setVel(min_vel);
+            max_sd->setVel(max_vel);
+            break;
+          case rnemdPy :
+            temp_vel = min_vel.y();
+            min_vel.y() = max_vel.y();
+            max_vel.y() = temp_vel;
+            min_sd->setVel(min_vel);
+            max_sd->setVel(max_vel);
+            break;
+          case rnemdPz :
+            temp_vel = min_vel.z();
+            min_vel.z() = max_vel.z();
+            max_vel.z() = temp_vel;
+            min_sd->setVel(min_vel);
+            max_sd->setVel(max_vel);
+            break;
+          case rnemdUnknown : 
+          default :
+            break;
           }
-	  break;
-	case rnemdPx :
-	  temp_vel = min_vel.x();
-	  min_vel.x() = max_vel.x();
-	  max_vel.x() = temp_vel;
-	  min_sd->setVel(min_vel);
-	  max_sd->setVel(max_vel);
-	  break;
-	case rnemdPy :
-	  temp_vel = min_vel.y();
-	  min_vel.y() = max_vel.y();
-	  max_vel.y() = temp_vel;
-	  min_sd->setVel(min_vel);
-	  max_sd->setVel(max_vel);
-	  break;
-	case rnemdPz :
-	  temp_vel = min_vel.z();
-	  min_vel.z() = max_vel.z();
-	  max_vel.z() = temp_vel;
-	  min_sd->setVel(min_vel);
-	  max_sd->setVel(max_vel);
-	  break;
-	case rnemdUnknown : 
-	default :
-	  break;
-	}
-      exchangeSum_ += max_val - min_val;
+#ifdef IS_MPI
+          // the rest of the cases only apply in parallel simulations:
+        } else if (max_vals.rank == worldRank) {
+          // I had the max, but not the minimum
+          
+          Vector3d min_vel;
+          Vector3d max_vel = max_sd->getVel();
+          MPI::Status status;
+
+          // point-to-point swap of the velocity vector
+          MPI::COMM_WORLD.Sendrecv(max_vel.getArrayPointer(), 3, MPI::REALTYPE,
+                                   min_vals.rank, 0, 
+                                   min_vel.getArrayPointer(), 3, MPI::REALTYPE,
+                                   min_vals.rank, 0, status);
+          
+          switch(rnemdType_) {
+          case rnemdKinetic :
+            max_sd->setVel(min_vel);
+            
+            if (max_sd->isDirectional()) {
+              Vector3d min_angMom;
+              Vector3d max_angMom = max_sd->getJ();
+
+              // point-to-point swap of the angular momentum vector
+              MPI::COMM_WORLD.Sendrecv(max_angMom.getArrayPointer(), 3, 
+                                       MPI::REALTYPE, min_vals.rank, 1, 
+                                       min_angMom.getArrayPointer(), 3, 
+                                       MPI::REALTYPE, min_vals.rank, 1, 
+                                       status);
+
+              max_sd->setJ(min_angMom);
+            }
+            break;
+          case rnemdPx :
+            max_vel.x() = min_vel.x();
+            max_sd->setVel(max_vel);
+            break;
+          case rnemdPy :
+            max_vel.y() = min_vel.y();
+            max_sd->setVel(max_vel);
+            break;
+          case rnemdPz :
+            max_vel.z() = min_vel.z();
+            max_sd->setVel(max_vel);
+            break;
+          case rnemdUnknown : 
+          default :
+            break;
+          }
+        } else if (min_vals.rank == worldRank) {
+          // I had the minimum but not the maximum:
+          
+          Vector3d max_vel;
+          Vector3d min_vel = min_sd->getVel();
+          MPI::Status status;
+          
+          // point-to-point swap of the velocity vector
+          MPI::COMM_WORLD.Sendrecv(min_vel.getArrayPointer(), 3, MPI::REALTYPE,
+                                   max_vals.rank, 0, 
+                                   max_vel.getArrayPointer(), 3, MPI::REALTYPE,
+                                   max_vals.rank, 0, status);
+          
+          switch(rnemdType_) {
+          case rnemdKinetic :
+            min_sd->setVel(max_vel);
+            
+            if (min_sd->isDirectional()) {
+              Vector3d min_angMom = min_sd->getJ();
+              Vector3d max_angMom;
+
+              // point-to-point swap of the angular momentum vector
+              MPI::COMM_WORLD.Sendrecv(min_angMom.getArrayPointer(), 3, 
+                                       MPI::REALTYPE, max_vals.rank, 1, 
+                                       max_angMom.getArrayPointer(), 3, 
+                                       MPI::REALTYPE, max_vals.rank, 1, 
+                                       status);
+
+              min_sd->setJ(max_angMom);
+            }
+            break;
+          case rnemdPx :
+            min_vel.x() = max_vel.x();
+            min_sd->setVel(min_vel);
+            break;
+          case rnemdPy :
+            min_vel.y() = max_vel.y();
+            min_sd->setVel(min_vel);
+            break;
+          case rnemdPz :
+            min_vel.z() = max_vel.z();
+            min_sd->setVel(min_vel);
+            break;
+          case rnemdUnknown : 
+          default :
+            break;
+          }
+        }
+#endif
+        exchangeSum_ += max_val - min_val;
       } else {
-	std::cerr << "exchange NOT performed.\nmin_val > max_val.\n";
+        std::cerr << "exchange NOT performed.\nmin_val > max_val.\n";
       }
     } else {
       std::cerr << "exchange NOT performed.\none of the two slabs empty.\n";
     }
+    
   }
-
+  
   void RNEMD::getStatus() {
 
     Snapshot* currentSnap_ = info_->getSnapshotManager()->getCurrentSnapshot();
     Mat3x3d hmat = currentSnap_->getHmat();
     Stats& stat = currentSnap_->statData;
+    RealType time = currentSnap_->getTime();
 
     stat[Stats::RNEMD_SWAP_TOTAL] = exchangeSum_;
 
@@ -302,12 +456,12 @@ namespace oopse {
     StuntDouble* sd;
     int idx;
 
-    std::vector<RealType> valueHist;  // keeps track of what's being averaged
-    std::vector<int> valueCount; // keeps track of the number of degrees of 
-                                 // freedom being averaged
-    valueHist.resize(nBins_);
-    valueCount.resize(nBins_);
-    //do they initialize themselves to zero automatically?
+    std::vector<RealType> valueHist(nBins_, 0.0); // keeps track of what's 
+                                                  // being averaged
+    std::vector<int> valueCount(nBins_, 0);       // keeps track of the 
+                                                  // number of degrees of 
+                                                  // freedom being averaged
+
     for (sd = seleMan_.beginSelected(selei); sd != NULL; 
          sd = seleMan_.nextSelected(selei)) {
       
@@ -323,13 +477,10 @@ namespace oopse {
       // which bin is this stuntdouble in?
       // wrapped positions are in the range [-0.5*hmat(2,2), +0.5*hmat(2,2)]
       
-      int binNo = int(nBins_ * (pos.z() / hmat(2,2) + 0.5)) % nBins_;
-      
-      //std::cerr << "pos.z() = " << pos.z() << " bin = " << binNo << "\n";
+      int binNo = int(nBins_ * (pos.z() / hmat(2,2) + 0.5)) % nBins_;     
       
       RealType mass = sd->getMass();
       Vector3d vel = sd->getVel();
-      //std::cerr << "mass = " << mass << " vel = " << vel << "\n";
       RealType value;
 
       switch(rnemdType_) {
@@ -339,11 +490,8 @@ namespace oopse {
 			vel[2]*vel[2]);
 	
         valueCount[binNo] += 3;
-	//std::cerr <<"starting value = " << value << "\n";
 	if (sd->isDirectional()) {
-          //std::cerr << "angMom calculated.\n";
 	  Vector3d angMom = sd->getJ();
-          //std::cerr << "current angMom: " << angMom << "\n";
 	  Mat3x3d I = sd->getI();
           
 	  if (sd->isLinear()) {
@@ -356,19 +504,14 @@ namespace oopse {
             valueCount[binNo] +=2;
 
 	  } else {
-            //std::cerr << "non-linear molecule.\n";
 	    value += angMom[0]*angMom[0]/I(0, 0) 
 	      + angMom[1]*angMom[1]/I(1, 1) 
 	      + angMom[2]*angMom[2]/I(2, 2);
             valueCount[binNo] +=3;
-
 	  }
 	}
-	//std::cerr <<"total value = " << value << "\n";
-	//value *= 0.5 / OOPSEConstant::energyConvert;  // get it in kcal / mol
-        //value *= 2.0 / OOPSEConstant::kb;            // convert to temperature
 	value = value / OOPSEConstant::energyConvert / OOPSEConstant::kb;
-        //std::cerr <<"value = " << value << "\n";
+
 	break;
       case rnemdPx :
 	value = mass * vel[0];
@@ -386,14 +529,31 @@ namespace oopse {
       default :
 	break;
       }
-      //std::cerr << "bin = " << binNo << " value = " << value ;
       valueHist[binNo] += value;
-      //std::cerr << " hist = " << valueHist[binNo] << " count = " << valueCount[binNo] << "\n";
     }
-    
-    std::cout << counter_++;
-    for (int j = 0; j < nBins_; j++)
-      std::cout << "\t" << valueHist[j] / (RealType)valueCount[j];
-    std::cout << "\n";
+
+#ifdef IS_MPI
+
+    // all processors have the same number of bins, and STL vectors pack their 
+    // arrays, so in theory, this should be safe:
+
+    MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &valueHist[0],
+                              nBins_, MPI::REALTYPE, MPI::SUM);
+    MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &valueCount[0],
+                              nBins_, MPI::INT, MPI::SUM);
+
+    // If we're the root node, should we print out the results
+    int worldRank = MPI::COMM_WORLD.Get_rank();
+    if (worldRank == 0) {
+#endif
+       
+      std::cout << time;
+      for (int j = 0; j < nBins_; j++)
+        std::cout << "\t" << valueHist[j] / (RealType)valueCount[j];
+      std::cout << "\n";
+      
+#ifdef IS_MPI
+    }
+#endif
   }
 }

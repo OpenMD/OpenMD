@@ -93,8 +93,7 @@ namespace oopse {
     SelectionManager seleMan_;
     SelectionEvaluator evaluator_;
     bool usePeriodicBoundaryConditions_;
-    int counter_; //added by shenyu 
-    //std::ofstream profile_;
+
   };
 
 }
