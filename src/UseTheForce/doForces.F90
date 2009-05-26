@@ -45,7 +45,7 @@
 
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: doForces.F90,v 1.101 2009-05-19 20:21:59 gezelter Exp $, $Date: 2009-05-19 20:21:59 $, $Name: not supported by cvs2svn $, $Revision: 1.101 $
+!! @version $Id: doForces.F90,v 1.102 2009-05-26 13:57:29 gezelter Exp $, $Date: 2009-05-26 13:57:29 $, $Name: not supported by cvs2svn $, $Revision: 1.102 $
 
 
 module doForces
@@ -846,7 +846,7 @@ contains
     integer :: localError
     integer :: propPack_i, propPack_j
     integer :: loopStart, loopEnd, loop
-    integer :: iHash
+    integer :: iHash, jHash
     integer :: i1, topoDist
 
     !! the variables for the box dipole moment 
@@ -1332,7 +1332,10 @@ contains
              do i1 = 1, nSkipsForLocalAtom(i)                
                 j = skipsForLocalAtom(i, i1)                
                 me_j = atid(j)
-                skch = skch + getCharge(me_j)
+                jHash = InteractionHash(me_i,me_j)
+                if ( iand(jHash, ELECTROSTATIC_PAIR).ne.0 ) then
+                   skch = skch + getCharge(me_j)
+                endif
              enddo
 
 #ifdef IS_MPI
