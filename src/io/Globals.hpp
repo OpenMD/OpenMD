@@ -140,6 +140,14 @@ namespace oopse {
     DeclareParameter(RNEMD_nBins, int);
     DeclareParameter(RNEMD_swapType, std::string);
     DeclareParameter(RNEMD_objectSelection, std::string);
+    DeclareParameter(UseRestraints, bool);
+    DeclareParameter(Restraint_objectSelection, std::string);
+    DeclareParameter(Restraint_type, std::string);
+    DeclareParameter(Restraint_file, std::string);
+    DeclareParameter(Restraint_DisplacementSpringConstant, RealType);
+    DeclareParameter(Restraint_RollSpringConstant, RealType);  // phi
+    DeclareParameter(Restraint_PitchSpringConstant, RealType); // theta
+    DeclareParameter(Restraint_YawSpringConstant, RealType);   // psi
     
   public:
     bool addComponent(Component* comp);

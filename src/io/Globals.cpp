@@ -137,6 +137,14 @@ Globals::Globals() {
   DefineOptionalParameterWithDefaultValue(RNEMD_nBins, "RNEMD_nBins", 16);
   DefineOptionalParameterWithDefaultValue(RNEMD_swapType, "RNEMD_swapType", "Kinetic");
   DefineOptionalParameterWithDefaultValue(RNEMD_objectSelection, "RNEMD_objectSelection", "select all");
+  DefineOptionalParameterWithDefaultValue(UseRestraints, "UseRestraints", false);
+  DefineOptionalParameterWithDefaultValue(Restraint_objectSelection, "Restraint_objectSelection", "select all");
+  DefineOptionalParameterWithDefaultValue(Restraint_type, "Restraint_type", "positional");
+  DefineOptionalParameterWithDefaultValue(Restraint_file, "Restraint_file", "idealCrystal.in");
+  DefineOptionalParameterWithDefaultValue(Restraint_DisplacementSpringConstant, "Restraint_DisplacementSpringConstant", 0.0);
+  DefineOptionalParameterWithDefaultValue(Restraint_RollSpringConstant, "Restraint_RollSpringConstant", 0.0);   // phi
+  DefineOptionalParameterWithDefaultValue(Restraint_PitchSpringConstant, "Restraint_PitchSpringConstant", 0.0); // theta
+  DefineOptionalParameterWithDefaultValue(Restraint_YawSpringConstant, "Restraint_YawSpringConstant", 0.0);     // psi
   
 
   deprecatedKeywords_.insert("nComponents");
@@ -207,6 +215,11 @@ void Globals::validate() {
   CheckParameter(RNEMD_swapTime, isPositive());
   CheckParameter(RNEMD_nBins, isPositive() && isEven());
   CheckParameter(RNEMD_swapType, isEqualIgnoreCase("Kinetic") || isEqualIgnoreCase("Px") || isEqualIgnoreCase("Py") || isEqualIgnoreCase("Pz"));
+  CheckParameter(Restraint_DisplacementSpringConstant, isNonNegative());
+  CheckParameter(Restraint_RollSpringConstant, isNonNegative());
+  CheckParameter(Restraint_PitchSpringConstant, isNonNegative());
+  CheckParameter(Restraint_YawSpringConstant, isNonNegative());
+  CheckParameter(Restraint_type, isEqualIgnoreCase("P") || isEqualIgnoreCase("O") || isEqualIgnoreCase("P+O") || isEqualIgnoreCase("RMSD_P") || isEqualIgnoreCase("RMSD_O") || isEqualIgnoreCase("RMSD_P+RMSD_O"));
 
   for(std::vector<Component*>::iterator i = components_.begin(); i != components_.end(); ++i) {
     if (!(*i)->findMoleculeStamp(moleculeStamps_)) {
