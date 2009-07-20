@@ -41,7 +41,6 @@
 #include <fstream> 
 #include <iostream>
 #include "integrators/SMIPDForceManager.hpp"
-#include "math/CholeskyDecomposition.hpp"
 #include "utils/OOPSEConstant.hpp"
 #include "math/ConvexHull.hpp"
 #include "math/Triangle.hpp"
@@ -51,6 +50,7 @@ namespace oopse {
   SMIPDForceManager::SMIPDForceManager(SimInfo* info) : ForceManager(info) {
 
     simParams = info->getSimParams();
+    thermo = new Thermo(info);
     veloMunge = new Velocitizer(info);
     
     // Create Hull, Convex Hull for now, other options later.
@@ -86,20 +86,31 @@ namespace oopse {
     if (simParams->getUsePeriodicBoundaryConditions()) {
       sprintf(painCave.errMsg, 
               "SMIPDynamics error: You can't use the SMIPD integrator\n"
-	      "   with periodic boundary conditions!\n");    
+              "   with periodic boundary conditions!\n");    
       painCave.isFatal = 1;
       simError();
     } 
     
-    if (!simParams->haveViscosity()) {
+    if (!simParams->haveThermalConductivity()) {
       sprintf(painCave.errMsg, 
               "SMIPDynamics error: You can't use the SMIPD integrator\n"
-	      "   without a viscosity!\n");
+	      "   without a thermalConductivity!\n");
       painCave.isFatal = 1;
       painCave.severity = OOPSE_ERROR;
       simError();
     }else{
-      viscosity_ = simParams->getViscosity();
+      thermalConductivity_ = simParams->getThermalConductivity();
+    }
+
+    if (!simParams->haveThermalLength()) {
+      sprintf(painCave.errMsg, 
+              "SMIPDynamics error: You can't use the SMIPD integrator\n"
+	      "   without a thermalLength!\n");
+      painCave.isFatal = 1;
+      painCave.severity = OOPSE_ERROR;
+      simError();
+    }else{
+      thermalLength_ = simParams->getThermalLength();
     }
     
     dt_ = simParams->getDt();
@@ -139,7 +150,9 @@ namespace oopse {
     int nTriangles = sMesh.size();
 
     // Generate all of the necessary random forces
-    std::vector<Vector3d>  randNums = genTriangleForces(nTriangles, variance_);
+    std::vector<RealType>  randNums = genTriangleForces(nTriangles, variance_);
+
+    RealType instaTemp = thermo->getTemperature();
 
     // Loop over the mesh faces and apply external pressure to each 
     // of the faces
@@ -155,19 +168,23 @@ namespace oopse {
       unitNormal.normalize();
       Vector3d centroid = thisTriangle.getCentroid();
       Vector3d facetVel = thisTriangle.getFacetVelocity();
+      RealType thisMass = thisTriangle.getFacetMass();
 
-      Mat3x3d hydroTensor = thisTriangle.computeHydrodynamicTensor(viscosity_);
+      // gamma is the drag coefficient normal to the face of the triangle      
+      RealType gamma = thermalConductivity_ * thisMass * thisArea  
+        / (2.0 * thermalLength_ * OOPSEConstant::kb);
+      
+      gamma *= fabs(1.0 - targetTemp_/instaTemp);      
+      
+      RealType extPressure = - (targetPressure_ * thisArea) / 
+        OOPSEConstant::energyConvert;
 
-      hydroTensor *= OOPSEConstant::viscoConvert;
-      Mat3x3d S;
-      CholeskyDecomposition(hydroTensor, S);
+      RealType randomForce = randNums[thisFacet++] * sqrt(gamma);
+      RealType dragForce = -gamma * dot(facetVel, unitNormal);
 
-      Vector3d extPressure = -unitNormal*(targetPressure_ * thisArea)/OOPSEConstant::energyConvert;      
-      Vector3d randomForce = S * randNums[thisFacet++]; 
-      Vector3d dragForce = -hydroTensor * facetVel;
-
-      Vector3d langevinForce = (extPressure + randomForce + dragForce);
-
+      Vector3d langevinForce = (extPressure + randomForce + dragForce) * 
+        unitNormal;
+      
       // Apply triangle force to stuntdouble vertices 
       for (vertex = vertexSDs.begin(); vertex != vertexSDs.end(); ++vertex){
 	if ((*vertex) != NULL){	
@@ -181,36 +198,30 @@ namespace oopse {
 	}  
       }
     } 
-        
+    
     veloMunge->removeComDrift();
     veloMunge->removeAngularDrift();
-
+    
     Snapshot* currSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
     currSnapshot->setVolume(surfaceMesh_->getVolume());    
     ForceManager::postCalculation(needStress);   
   }
-
   
-  std::vector<Vector3d> SMIPDForceManager::genTriangleForces(int nTriangles, 
+  
+  std::vector<RealType> SMIPDForceManager::genTriangleForces(int nTriangles, 
                                                              RealType variance)
   {
     
     // zero fill the random vector before starting:
-    std::vector<Vector3d> gaussRand;
+    std::vector<RealType> gaussRand;
     gaussRand.resize(nTriangles);
-    std::fill(gaussRand.begin(), gaussRand.end(), V3Zero);
+    std::fill(gaussRand.begin(), gaussRand.end(), 0.0);
     
 #ifdef IS_MPI
     if (worldRank == 0) {
 #endif
-      RealType rx, ry, rz;
       for (int i = 0; i < nTriangles; i++) {
-        rx = randNumGen_.randNorm(0.0, variance);
-        ry = randNumGen_.randNorm(0.0, variance);
-        rz = randNumGen_.randNorm(0.0, variance);
-	gaussRand[i][0] = rx;
-        gaussRand[i][1] = ry;
-        gaussRand[i][2] = rz;
+        gaussRand[i] = randNumGen_.randNorm(0.0, variance);
       }
 #ifdef IS_MPI
     }
@@ -220,9 +231,9 @@ namespace oopse {
     
 #ifdef IS_MPI
     if (worldRank == 0) {
-      MPI_Bcast(&gaussRand[0], nTriangles*3 , MPI_REALTYPE, 0, MPI_COMM_WORLD);
+      MPI::COMM_WORLD.Bcast(&gaussRand[0], nTriangles, MPI::REALTYPE, 0);
     } else {
-      MPI_Bcast(&gaussRand[0], nTriangles*3, MPI_REALTYPE, 0, MPI_COMM_WORLD);
+      MPI::COMM_WORLD.Bcast(&gaussRand[0], nTriangles, MPI::REALTYPE, 0);
     }
 #endif
     

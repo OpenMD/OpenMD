@@ -43,6 +43,7 @@
 #define INTEGRATOR_SMIPDFORCEMANAGER_HPP
 
 #include "brains/ForceManager.hpp"
+#include "brains/Thermo.hpp"
 #include "primitives/Molecule.hpp"
 #include "integrators/Velocitizer.hpp"
 #include "math/Hull.hpp"
@@ -67,16 +68,18 @@ namespace oopse {
     virtual void postCalculation(bool needStress);
     
   private:
-    std::vector<Vector3d> genTriangleForces(int nTriangles, RealType variance);
+    std::vector<RealType> genTriangleForces(int nTriangles, RealType variance);
 
     Globals* simParams;
+    Thermo* thermo;
     SeqRandNumGen randNumGen_;    
     Velocitizer* veloMunge;
 
     RealType dt_;
     RealType targetTemp_;
     RealType targetPressure_; 
-    RealType viscosity_;
+    RealType thermalConductivity_;
+    RealType thermalLength_;
 
     RealType variance_;
 
