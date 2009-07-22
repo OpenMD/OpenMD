@@ -63,7 +63,7 @@ namespace oopse {
     if (!simParams->haveTargetTemp()) {
       sprintf(painCave.errMsg, 
               "SMIPDynamics error: You can't use the SMIPD integrator\n"
-	      "   without a targetTemp!\n");      
+	      "   without a targetTemp (K)!\n");      
       painCave.isFatal = 1;
       painCave.severity = OOPSE_ERROR;
       simError();
@@ -74,7 +74,7 @@ namespace oopse {
     if (!simParams->haveTargetPressure()) {
       sprintf(painCave.errMsg, 
               "SMIPDynamics error: You can't use the SMIPD integrator\n"
-	      "   without a targetPressure!\n");      
+	      "   without a targetPressure (atm)!\n");      
       painCave.isFatal = 1;
       simError();
     } else {
@@ -94,18 +94,19 @@ namespace oopse {
     if (!simParams->haveThermalConductivity()) {
       sprintf(painCave.errMsg, 
               "SMIPDynamics error: You can't use the SMIPD integrator\n"
-	      "   without a thermalConductivity!\n");
+	      "   without a thermalConductivity (W m^-1 K^-1)!\n");
       painCave.isFatal = 1;
       painCave.severity = OOPSE_ERROR;
       simError();
     }else{
-      thermalConductivity_ = simParams->getThermalConductivity();
+      thermalConductivity_ = simParams->getThermalConductivity() * 
+        OOPSEConstant::thermalConductivityConvert;
     }
 
     if (!simParams->haveThermalLength()) {
       sprintf(painCave.errMsg, 
               "SMIPDynamics error: You can't use the SMIPD integrator\n"
-	      "   without a thermalLength!\n");
+	      "   without a thermalLength (Angstroms)!\n");
       painCave.isFatal = 1;
       painCave.severity = OOPSE_ERROR;
       simError();
@@ -172,7 +173,7 @@ namespace oopse {
 
       // gamma is the drag coefficient normal to the face of the triangle      
       RealType gamma = thermalConductivity_ * thisMass * thisArea  
-        / (2.0 * thermalLength_ * OOPSEConstant::kb);
+        / (2.0 * thermalLength_ * OOPSEConstant::kB);
       
       gamma *= fabs(1.0 - targetTemp_/instaTemp);      
       

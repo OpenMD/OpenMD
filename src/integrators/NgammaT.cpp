@@ -57,7 +57,7 @@ namespace oopse {
       painCave.isFatal = 1;
       simError();
     } else {
-      surfaceTension= simParams->getSurfaceTension()* OOPSEConstant::surfaceTensorConvert * OOPSEConstant::energyConvert;
+      surfaceTension= simParams->getSurfaceTension()* OOPSEConstant::surfaceTensionConvert * OOPSEConstant::energyConvert;
     }
 
   }

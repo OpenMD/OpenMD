@@ -49,8 +49,17 @@ namespace oopse {
     const RealType kB = 8.31451e-7;   // boltzmann constant amu*Ang^2*fs^-2/K
     const RealType energyConvert = 4.184E-4; // convert kcal/mol -> (amu A^2)/fs^2
     const RealType rotationalEnergyConvert = energyConvert*2.0*M_PI;
+    
     const RealType pressureConvert = 1.63882576e8; // converts amu*fs^-2*Ang^-1 -> atm
-    const RealType surfaceTensorConvert = 1.43936; // convert N/m to kcal/mol*Ang^-2
+
+    /* 
+     *  surfaceTensionConvert   
+     *    multiplies standard input file units of 
+     *      surfaceTension (Newton / meter)
+     *    returns values of
+     *      kcal mol^-1 Angstrom^-2
+     */
+    const RealType surfaceTensionConvert = 1.439326479; // convert N/m to kcal/mol*Ang^-2
     
     /* 
      *  viscoConvert   
@@ -60,6 +69,15 @@ namespace oopse {
      *      force in (kcal mol^-1 Angstrom^-1) 
      */
     const RealType viscoConvert = 1.439326479e4; 
+
+    /* 
+     *  thermalConductivityConvert   
+     *    multiplies standard input file units of 
+     *      themalConductivity (watts meter^-1 Kelvin^-1)  
+     *    returns values of:
+     *      kcal mol^-1 Angstrom^-1 fs^-1 Kelvin^-1
+     */
+    const RealType thermalConductivityConvert = 1.439326479e-5; 
   }
 }
 #endif 
