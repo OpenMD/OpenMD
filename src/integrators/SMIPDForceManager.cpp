@@ -50,7 +50,6 @@ namespace oopse {
   SMIPDForceManager::SMIPDForceManager(SimInfo* info) : ForceManager(info) {
 
     simParams = info->getSimParams();
-    thermo = new Thermo(info);
     veloMunge = new Velocitizer(info);
     
     // Create Hull, Convex Hull for now, other options later.
@@ -63,7 +62,7 @@ namespace oopse {
     if (!simParams->haveTargetTemp()) {
       sprintf(painCave.errMsg, 
               "SMIPDynamics error: You can't use the SMIPD integrator\n"
-	      "   without a targetTemp (K)!\n");      
+	      "\twithout a targetTemp (K)!\n");      
       painCave.isFatal = 1;
       painCave.severity = OOPSE_ERROR;
       simError();
@@ -74,7 +73,7 @@ namespace oopse {
     if (!simParams->haveTargetPressure()) {
       sprintf(painCave.errMsg, 
               "SMIPDynamics error: You can't use the SMIPD integrator\n"
-	      "   without a targetPressure (atm)!\n");      
+	      "\twithout a targetPressure (atm)!\n");      
       painCave.isFatal = 1;
       simError();
     } else {
@@ -86,7 +85,7 @@ namespace oopse {
     if (simParams->getUsePeriodicBoundaryConditions()) {
       sprintf(painCave.errMsg, 
               "SMIPDynamics error: You can't use the SMIPD integrator\n"
-              "   with periodic boundary conditions!\n");    
+              "\twith periodic boundary conditions!\n");    
       painCave.isFatal = 1;
       simError();
     } 
@@ -94,7 +93,7 @@ namespace oopse {
     if (!simParams->haveThermalConductivity()) {
       sprintf(painCave.errMsg, 
               "SMIPDynamics error: You can't use the SMIPD integrator\n"
-	      "   without a thermalConductivity (W m^-1 K^-1)!\n");
+	      "\twithout a thermalConductivity (W m^-1 K^-1)!\n");
       painCave.isFatal = 1;
       painCave.severity = OOPSE_ERROR;
       simError();
@@ -106,7 +105,7 @@ namespace oopse {
     if (!simParams->haveThermalLength()) {
       sprintf(painCave.errMsg, 
               "SMIPDynamics error: You can't use the SMIPD integrator\n"
-	      "   without a thermalLength (Angstroms)!\n");
+	      "\twithout a thermalLength (Angstroms)!\n");
       painCave.isFatal = 1;
       painCave.severity = OOPSE_ERROR;
       simError();
@@ -142,6 +141,7 @@ namespace oopse {
     StuntDouble* integrableObject;
   
     // Compute surface Mesh
+
     surfaceMesh_->computeHull(localSites_);
 
     // Get total area and number of surface stunt doubles
@@ -152,8 +152,6 @@ namespace oopse {
 
     // Generate all of the necessary random forces
     std::vector<RealType>  randNums = genTriangleForces(nTriangles, variance_);
-
-    RealType instaTemp = thermo->getTemperature();
 
     // Loop over the mesh faces and apply external pressure to each 
     // of the faces
@@ -172,10 +170,8 @@ namespace oopse {
       RealType thisMass = thisTriangle.getFacetMass();
 
       // gamma is the drag coefficient normal to the face of the triangle      
-      RealType gamma = thermalConductivity_ * thisMass * thisArea  
+      RealType gamma = thermalConductivity_ * thisMass * thisArea 
         / (2.0 * thermalLength_ * OOPSEConstant::kB);
-      
-      gamma *= fabs(1.0 - targetTemp_/instaTemp);      
       
       RealType extPressure = - (targetPressure_ * thisArea) / 
         OOPSEConstant::energyConvert;

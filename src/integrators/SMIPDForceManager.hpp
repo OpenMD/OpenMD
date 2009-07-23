@@ -71,7 +71,6 @@ namespace oopse {
     std::vector<RealType> genTriangleForces(int nTriangles, RealType variance);
 
     Globals* simParams;
-    Thermo* thermo;
     SeqRandNumGen randNumGen_;    
     Velocitizer* veloMunge;
 
