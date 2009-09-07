@@ -254,6 +254,15 @@ namespace oopse {
 	}
       }
       break;
+    case Token::x:
+      propertyValue = sd->getPos().x();
+      break;
+    case Token::y:
+      propertyValue = sd->getPos().y();
+      break;
+    case Token::z:
+      propertyValue = sd->getPos().z();
+      break;
     default:
       unrecognizedAtomProperty(property);
     }

@@ -1012,11 +1012,13 @@ namespace oopse{
 
     /**
      * <p>
-     * The purpose of the Visitor Pattern is to encapsulate an operation that you want to perform on
-     * the elements of a data structure. In this way, you can change the operation being performed 
-     * on a structure without the need of changing the classes of the elements that you are operating
-     * on. Using a Visitor pattern allows you to decouple the classes for the data structure and the 
-     * algorithms used upon them
+     * The purpose of the Visitor Pattern is to encapsulate an
+     * operation that you want to perform on the elements of a data
+     * structure. In this way, you can change the operation being
+     * performed on a structure without the need of changing the
+     * classes of the elements that you are operating on. Using a
+     * Visitor pattern allows you to decouple the classes for the data
+     * structure and the algorithms used upon them
      * </p>
      * @param v visitor
      */      

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2009 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -39,184 +39,90 @@
  * such damages.
  */
 
-#include "io/RestWriter.hpp"
-#include "primitives/Molecule.hpp"
-#include "utils/simError.h"
-#include "io/basic_teebuf.hpp"
 
+#include <iostream>
+
+#include "io/RestWriter.hpp"
+#include "utils/simError.h"
+#include "brains/SnapshotManager.hpp"
 #ifdef IS_MPI
 #include <mpi.h>
-#define TAKE_THIS_TAG_INT 1
-#define TAKE_THIS_TAG_REAL 2
-#endif //is_mpi
+#endif
 
 namespace oopse {
-  RestWriter::RestWriter(SimInfo* info) : 
-    info_(info), outName_(info_->getRestFileName()) {
+  RestWriter::RestWriter(SimInfo* info, const std::string& filename, 
+                         std::vector<Restraint*> restraints ) : 
+    info_(info){
+
+    //use master - slave mode, only master node writes to disk
+#ifdef IS_MPI
+    if(worldRank == 0){
+#endif
+      
+      output_.open(filename.c_str());
+      
+      if(!output_){
+        sprintf( painCave.errMsg,
+                 "Could not open %s for restraint output.\n", 
+                 filename.c_str());
+        painCave.isFatal = 1;
+        simError();
+      }
+
+      output_ << "#time\t";
+      
+      // TODO:  get Restraint info from slave nodes:
+      std::vector<Restraint*>::const_iterator resti;
+      for(resti=restraints.begin(); resti != restraints.end(); ++resti){
+        std::string myName = (*resti)->getRestraintName();
+        int myType = (*resti)->getRestraintType();
+        
+        output_ << myName << ":";
+        
+        if (myType & Restraint::rtDisplacement)
+          output_ << "\tPosition(angstroms)\tEnergy(kcal/mol)";
+        
+        if (myType & Restraint::rtTwist)
+          output_ << "\tTwistAngle(radians)\tEnergy(kcal/mol)";
+        
+        if (myType & Restraint::rtSwingX)
+          output_ << "\tSwingXAngle(radians)\tEnergy(kcal/mol)";
+        
+        if (myType & Restraint::rtSwingY)
+          output_ << "\tSwingYAngle(radians)\tEnergy(kcal/mol)";
+        
+      }
+      output_ << "\n";
+#ifdef IS_MPI
+    }
+#endif      
   }
   
-  RestWriter::~RestWriter() {}
-  
-  void RestWriter::writeZAngFile() {
-    std::ostream* zangStream;
-    
+  RestWriter::~RestWriter() {
 #ifdef IS_MPI
-    if (worldRank == 0) {
-#endif // is_mpi
-      
-      zangStream = new std::ofstream(outName_.c_str());
-      
-#ifdef IS_MPI
+    if(worldRank == 0 ){
+#endif  
+      output_.close();  
+#ifdef IS_MPI  
     }
-#endif // is_mpi    
-    
-    writeZangle(*zangStream);
-    
-#ifdef IS_MPI
-    if (worldRank == 0) {
-#endif // is_mpi
-      delete zangStream;
-      
-#ifdef IS_MPI
-    }
-#endif // is_mpi  
-    
-  }
-
-  void RestWriter::writeZangle(std::ostream& finalOut){
-    const int BUFFERSIZE = 2000;
-    char tempBuffer[BUFFERSIZE];
-    char writeLine[BUFFERSIZE];
-    
-    Molecule* mol;
-    StuntDouble* integrableObject;
-    SimInfo::MoleculeIterator mi;
-    Molecule::IntegrableObjectIterator ii;
-    
-#ifndef IS_MPI
-    // first we do output for the single processor version
-    finalOut
-      << info_->getSnapshotManager()->getCurrentSnapshot()->getTime()
-      << " : omega values at this time\n";
-    
-    for (mol = info_->beginMolecule(mi); mol != NULL; 
-         mol = info_->nextMolecule(mi)) {
-      
-      for (integrableObject = mol->beginIntegrableObject(ii); 
-           integrableObject != NULL; 
-           integrableObject = mol->nextIntegrableObject(ii)) {    
-        
-        sprintf( tempBuffer,
-                 "%14.10lf\n",
-                 integrableObject->getZangle());
-        strcpy( writeLine, tempBuffer );    
-	
-	finalOut << writeLine;
-
-      }
-    }
-    
-#else
-    int nproc;
-    MPI_Comm_size(MPI_COMM_WORLD, &nproc);
-    const int masterNode = 0;
-    
-    MPI_Status ierr;
-    int intObIndex;
-    int vecLength;
-    RealType zAngle;
-    std::vector<int> gIndex;
-    std::vector<RealType> zValues;
-
-    if (worldRank == masterNode) {
-      std::map<int, RealType> zAngData;
-      for(int i = 0 ; i < nproc; ++i) {
-        if (i == masterNode) {
-          for (mol = info_->beginMolecule(mi); mol != NULL; 
-               mol = info_->nextMolecule(mi)) {
-            
-            for (integrableObject = mol->beginIntegrableObject(ii); 
-                 integrableObject != NULL; 
-                 integrableObject = mol->nextIntegrableObject(ii)) { 
-              
-              intObIndex = integrableObject->getGlobalIntegrableObjectIndex();
-
-              zAngle = integrableObject->getZangle();
-              zAngData.insert(std::pair<int, RealType>(intObIndex, zAngle));
-            }      
-          }
-        } else {
-	  MPI_Recv(&vecLength, 1, MPI_INT, i, 
-		   TAKE_THIS_TAG_INT, MPI_COMM_WORLD, &ierr);
-	  // make sure the vectors are the right size for the incoming data
-	  gIndex.resize(vecLength);
-	  zValues.resize(vecLength);
-
-	  MPI_Recv(&gIndex[0], vecLength, MPI_INT, i, 
-		   TAKE_THIS_TAG_INT, MPI_COMM_WORLD, &ierr);
-	  MPI_Recv(&zValues[0], vecLength, MPI_REALTYPE, i, 
-		   TAKE_THIS_TAG_REAL, MPI_COMM_WORLD, &ierr);
-	  
-          for (int k = 0; k < vecLength; k++){
-	    zAngData.insert(std::pair<int, RealType>(gIndex[k], zValues[k]));
-	  }
-	  gIndex.clear();
-	  zValues.clear();
-        }
-      }
-      
-      finalOut << info_->getSnapshotManager()->getCurrentSnapshot()->getTime()
-	       << " : omega values at this time\n";
-      
-      std::map<int, RealType>::iterator l;
-      for (l = zAngData.begin(); l != zAngData.end(); ++l) {
-
-        sprintf( tempBuffer,
-                 "%14.10lf\n",
-                 l->second);
-        strcpy( writeLine, tempBuffer );
-        
-        finalOut << writeLine;      
-      }
-      
-    } else {
-      // pack up and send the appropriate info to the master node
-      for(int j = 1; j < nproc; ++j) {
-	if (worldRank == j) {
-	  for (mol = info_->beginMolecule(mi); mol != NULL; 
-	       mol = info_->nextMolecule(mi)) {
-	    
-	    for (integrableObject = mol->beginIntegrableObject(ii); 
-		 integrableObject != NULL; 
-		 integrableObject = mol->nextIntegrableObject(ii)) { 
-	      
-	      // build a vector of the indicies 
-	      intObIndex = integrableObject->getGlobalIntegrableObjectIndex();
-	      gIndex.push_back(intObIndex);
-	      	     
-	      // build a vector of the zAngle values
-	      zAngle = integrableObject->getZangle();
-	      zValues.push_back(zAngle);
-
-	    }      
-	  }
-
-	  // let's send these vectors to the master node so that it
-	  // can sort them and write to the disk
-	  vecLength = gIndex.size();
-
-	  MPI_Send(&vecLength, 1, MPI_INT, masterNode, 
-		   TAKE_THIS_TAG_INT, MPI_COMM_WORLD);
-	  MPI_Send(&gIndex[0], vecLength, MPI_INT, masterNode, 
-		   TAKE_THIS_TAG_INT, MPI_COMM_WORLD);
-	  MPI_Send(&zValues[0], vecLength, MPI_REALTYPE, masterNode, 
-		   TAKE_THIS_TAG_REAL, MPI_COMM_WORLD);
-	
-	}
-      }
-    }
-
 #endif
   }
   
-}
+  void RestWriter::writeRest(std::vector<std::map<int, Restraint::RealPair> > restInfo){
+      
+    
+    output_ << info_->getSnapshotManager()->getCurrentSnapshot()->getTime();
+        
+    // output some information about the molecules
+    std::vector<std::map<int, Restraint::RealPair> >::const_iterator i;
+    std::map<int, Restraint::RealPair>::const_iterator j;
+    for( i = restInfo.begin(); i != restInfo.end(); ++i){
+      for(j = (*i).begin(); j != (*i).end(); ++j){                
+        output_ << "\t" << (j->second).first << "\t" << (j->second).second;
+      }
+      output_ << std::endl;
+    }
+  }
+  
+}// end oopse
+  

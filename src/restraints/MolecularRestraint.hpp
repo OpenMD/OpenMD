@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2009 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -38,25 +38,55 @@
  * University of Notre Dame has been advised of the possibility of
  * such damages.
  */
+ 
+#ifndef RESTRAINTS_MOLECULARRESTRAINT_HPP
+#define RESTRAINTS_MOLECULARRESTRAINT_HPP
 
-#include <stdio.h>
-#include <string.h>
-
-#include "types/ZconsStamp.hpp"
+#include <vector>
+#include "restraints/Restraint.hpp"
+#include "math/Vector3.hpp"
 
 namespace oopse {
-  ZConsStamp::ZConsStamp() {
-    DefineParameter(MolIndex, "molIndex");
-    DefineOptionalParameter(Zpos, "zPos");
-    DefineOptionalParameter(Kratio, "kRatio");
-    DefineOptionalParameter(CantVel, "cantVel");
-  }
-  
-  ZConsStamp::~ZConsStamp() {    
-  }
-  
-  void ZConsStamp::validate() {
-    DataHolder::validate();
-    CheckParameter(MolIndex, isNonNegative());
-  }
+  /**
+   * @class MolecularRestraint 
+   *
+   * MolecularRestraint is the restraint (both positional and
+   * orientational) for the configuration of a flexible Molecule
+   * relative to some reference structure for the same Molecule.  The
+   * angles that define the deflection away from the reference
+   * structure are the Euler angles taken from the rotation matrix
+   * that gives the lowest root mean square deviation (RMSD), while
+   * the displacement of the molecule is simply the displacement of
+   * the center of mass relative to the reference structure.
+   */
+  class MolecularRestraint : public Restraint {
+    
+  public:
+    
+    MolecularRestraint() : Restraint()  { }
+    
+    void setReferenceStructure(std::vector<Vector3d> ref, Vector3d refCom) {
+      ref_ = ref;
+      refCom_ = refCom;     
+
+      std::vector<Vector3d>::iterator i;
+       
+      for (i = ref_.begin(); i != ref_.end(); ++i) {
+        (*i) = (*i) - refCom_;
+      }
+      
+      forces_.clear();
+      forces_.resize(ref_.size());
+    }
+    
+    void calcForce(std::vector<Vector3d> struc, Vector3d molCom);
+    
+    std::vector<Vector3d> getRestraintForces() { return forces_; }
+                
+  private:    
+    std::vector<Vector3d> ref_;
+    std::vector<Vector3d> forces_;
+    Vector3d refCom_;
+  };
 }
+#endif

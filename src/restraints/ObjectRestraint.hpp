@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2009 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -38,66 +38,53 @@
  * University of Notre Dame has been advised of the possibility of
  * such damages.
  */
+ 
+#ifndef RESTRAINTS_OBJECTRESTRAINT_HPP
+#define RESTRAINTS_OBJECTRESTRAINT_HPP
 
-#ifndef _RESTRAINTS_H_
-#define _RESTRAINTS_H_
-
-#include <stdlib.h>
-#include <vector>
-#include "primitives/Atom.hpp"
-#include "brains/SimInfo.hpp"
-#include "io/RestReader.hpp"
-#include "math/SquareMatrix3.hpp"
+#include "restraints/Restraint.hpp"
 #include "math/Vector3.hpp"
+#include "math/SquareMatrix3.hpp"
 
 namespace oopse {
-  
-  class Restraints{
+  /**
+   * @class ObjectRestraint 
+   *
+   * ObjectRestraint is the basic harmonic restraint for the 
+   * degrees of freedom of a StuntDouble 
+   *
+   * In the ideal structure:
+   * 
+   * k_[twist,swing] are the two spring constants of the restraining 
+   * potential
+   */
+  class ObjectRestraint : public Restraint {
     
   public:
-    Restraints(SimInfo * info, RealType lambdaVal, RealType lambdaExp);
-    ~Restraints();
     
-    void Calc_rVal(Vector3d &position, RealType refPosition[3]);
-    void Calc_body_thetaVal(RotMat3x3d &matrix, RealType refUnit[3]);
-    void Calc_body_omegaVal(RealType zAngle);
-    RealType Calc_Restraint_Forces();
-    RealType getVharm() { return harmPotent; }
+    ObjectRestraint() : Restraint() { }
+
+    void setReferenceStructure(Vector3d refPos) {
+      refPos_ = refPos;
+    }
+  
+    void setReferenceStructure(Vector3d refPos, RotMat3x3d refA) {
+      refPos_ = refPos;
+      refA_ = refA;
+    }
     
-  private:
-    SimInfo * info_;
-    RestReader* restRead_;
-    
-    char moleculeName[15];
-    
-    int i, j;
-    
-    RealType scaleLam;
-    RealType delRx, delRy, delRz;
-    RealType theta, omega;
-    RealType vProj0[3];
-    RealType vProjDist;
-    RealType uTx, uTy, uTz, vTx, vTy, vTz;
-    RealType ub0x, ub0y, ub0z, vb0x, vb0y, vb0z;
-    RealType kTheta, kOmega, kDist;
-    RealType restraintFrc[3];
-    RealType restraintTrq[3];
-    RealType normalize;
-    RealType dVdrx, dVdry, dVdrz;
-    RealType dVdux, dVduy, dVduz;
-    RealType dVdvx, dVdvy, dVdvz;
-    RealType harmPotent;
-    RealType lambdaValue;
-    RealType lambdaK;
-    
-    char *token;
-    char fileName[200];
-    char angleName[200];
-    char inLine[1000];
-    char inValue[200];
-    char springName[200];
+    void calcForce(Vector3d struc);
+    void calcForce(Vector3d struc, RotMat3x3d A);    
+
+    Vector3d getRestraintForce() { return force_; }
+    Vector3d getRestraintTorque() { return torque_; }
+                    
+  private:    
+    Vector3d refPos_;
+    RotMat3x3d refA_;
+
+    Vector3d force_;
+    Vector3d torque_;
   };
-
-} // end namespace oopse
-
+}
 #endif

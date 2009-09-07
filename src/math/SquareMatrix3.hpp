@@ -244,10 +244,10 @@ namespace oopse {
      * @return the euler angles in a vector 
      * @exception invalid rotation matrix
      * We use so-called "x-convention", which is the most common definition. 
-     * In this convention, the rotation given by Euler angles (phi, theta, psi), where the first 
-     * rotation is by an angle phi about the z-axis, the second is by an angle  
-     * theta (0 <= theta <= 180)about the x-axis, and thethird is by an angle psi about the
-     * z-axis (again). 
+     * In this convention, the rotation given by Euler angles (phi, theta, 
+     * psi), where the first rotation is by an angle phi about the z-axis, 
+     * the second is by an angle theta (0 <= theta <= 180) about the x-axis, 
+     * and the third is by an angle psi about the z-axis (again). 
      */            
     Vector3<Real> toEulerAngles() {
       Vector3<Real> myEuler;
@@ -263,15 +263,17 @@ namespace oopse {
       ctheta = this->data_[2][2]; 
       stheta = sqrt(1.0 - ctheta * ctheta);
 
-      // when sin(theta) is close to 0, we need to consider singularity
-      // In this case, we can assign an arbitary value to phi (or psi), and then determine 
-      // the psi (or phi) or vice-versa. We'll assume that phi always gets the rotation, and psi is 0
-      // in cases of singularity.  
+      // when sin(theta) is close to 0, we need to consider
+      // singularity In this case, we can assign an arbitary value to
+      // phi (or psi), and then determine the psi (or phi) or
+      // vice-versa. We'll assume that phi always gets the rotation,
+      // and psi is 0 in cases of singularity.
       // we use atan2 instead of atan, since atan2 will give us -Pi to Pi. 
-      // Since 0 <= theta <= 180, sin(theta) will be always non-negative. Therefore, it never
-      // change the sign of both of the parameters passed to atan2.
+      // Since 0 <= theta <= 180, sin(theta) will be always
+      // non-negative. Therefore, it will never change the sign of both of
+      // the parameters passed to atan2.
 
-      if (fabs(stheta) <= oopse::epsilon){
+      if (fabs(stheta) < 1e-6){
 	psi = 0.0;
 	phi = atan2(-this->data_[1][0], this->data_[0][0]);  
       }
@@ -283,10 +285,10 @@ namespace oopse {
 
       //wrap phi and psi, make sure they are in the range from 0 to 2*Pi
       if (phi < 0)
-	phi += M_PI;
+	phi += 2.0 * M_PI;
 
       if (psi < 0)
-	psi += M_PI;
+	psi += 2.0 * M_PI;
 
       myEuler[0] = phi;
       myEuler[1] = theta;

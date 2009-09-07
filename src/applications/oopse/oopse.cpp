@@ -50,6 +50,7 @@
 #include "brains/SimCreator.hpp"
 #include "brains/SimInfo.hpp"
 #include "constraints/ZconstraintForceManager.hpp"
+#include "restraints/RestraintForceManager.hpp"
 #include "integrators/IntegratorFactory.hpp"
 #include "integrators/Integrator.hpp"
 #include "minimizers/MinimizerFactory.hpp"
@@ -148,8 +149,14 @@ int main(int argc,char* argv[]){
                 
     //Thermodynamic Integration Method
     //set the force manager for thermodynamic integration if specified
-    if (simParams->getUseSolidThermInt() || simParams->getUseLiquidThermInt()){
+    if (simParams->getUseThermodynamicIntegration()){
       ForceManager* fman = new ThermoIntegrationForceManager(info);
+      myIntegrator->setForceManager(fman);
+    }
+
+    // Restraints
+    if (simParams->getUseRestraints() && !simParams->getUseThermodynamicIntegration()) {
+      ForceManager* fman = new RestraintForceManager(info);
       myIntegrator->setForceManager(fman);
     }
 
@@ -168,8 +175,6 @@ int main(int argc,char* argv[]){
     painCave.isFatal = 1;
     simError();
   }
-
-
     
   delete info;
 

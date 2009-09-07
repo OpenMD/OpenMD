@@ -88,9 +88,6 @@ Globals::Globals() {
   DefineOptionalParameter(ForceFieldVariant, "forceFieldVariant");
   DefineOptionalParameter(ForceFieldFileName, "forceFieldFileName");
   DefineOptionalParameter(DampingAlpha, "dampingAlpha");
-  DefineOptionalParameter(ThermIntDistSpringConst, "thermIntDistSpringConst");
-  DefineOptionalParameter(ThermIntThetaSpringConst, "thermIntThetaSpringConst");
-  DefineOptionalParameter(ThermIntOmegaSpringConst, "thermIntOmegaSpringConst");
   DefineOptionalParameter(SurfaceTension, "surfaceTension");
   DefineOptionalParameter(PrintPressureTensor, "printPressureTensor");
   DefineOptionalParameter(TaggedAtomPair, "taggedAtomPair");
@@ -119,11 +116,6 @@ Globals::Globals() {
   DefineOptionalParameterWithDefaultValue(UseInitalTime, "useInitialTime", false);
   DefineOptionalParameterWithDefaultValue(UseIntialExtendedSystemState, "useInitialExtendedSystemState", false);
   DefineOptionalParameterWithDefaultValue(OrthoBoxTolerance, "orthoBoxTolerance", 1E-6);  
-  DefineOptionalParameterWithDefaultValue(UseSolidThermInt, "useSolidThermInt", false);
-  DefineOptionalParameterWithDefaultValue(UseLiquidThermInt, "useLiquidThermInt", false);
-  DefineOptionalParameterWithDefaultValue(ThermIntDistSpringConst, "thermIntDistSpringConst", 6.0);
-  DefineOptionalParameterWithDefaultValue(ThermIntThetaSpringConst, "thermIntThetaSpringConst", 7.5);
-  DefineOptionalParameterWithDefaultValue(ThermIntOmegaSpringConst, "thermIntOmegaSpringConst", 13.5);
   DefineOptionalParameterWithDefaultValue(ElectrostaticSummationMethod, "electrostaticSummationMethod", "SHIFTED_FORCE");
   DefineOptionalParameterWithDefaultValue(ElectrostaticScreeningMethod, "electrostaticScreeningMethod", "DAMPED");
   DefineOptionalParameterWithDefaultValue(Dielectric, "dielectric", 78.5);
@@ -139,25 +131,26 @@ Globals::Globals() {
   DefineOptionalParameterWithDefaultValue(RNEMD_nBins, "RNEMD_nBins", 16);
   DefineOptionalParameterWithDefaultValue(RNEMD_swapType, "RNEMD_swapType", "Kinetic");
   DefineOptionalParameterWithDefaultValue(RNEMD_objectSelection, "RNEMD_objectSelection", "select all");
-  DefineOptionalParameterWithDefaultValue(UseRestraints, "UseRestraints", false);
-  DefineOptionalParameterWithDefaultValue(Restraint_objectSelection, "Restraint_objectSelection", "select all");
-  DefineOptionalParameterWithDefaultValue(Restraint_type, "Restraint_type", "positional");
+  DefineOptionalParameterWithDefaultValue(UseRestraints, "useRestraints", false);
   DefineOptionalParameterWithDefaultValue(Restraint_file, "Restraint_file", "idealCrystal.in");
-  DefineOptionalParameterWithDefaultValue(Restraint_DisplacementSpringConstant, "Restraint_DisplacementSpringConstant", 0.0);
-  DefineOptionalParameterWithDefaultValue(Restraint_RollSpringConstant, "Restraint_RollSpringConstant", 0.0);   // phi
-  DefineOptionalParameterWithDefaultValue(Restraint_PitchSpringConstant, "Restraint_PitchSpringConstant", 0.0); // theta
-  DefineOptionalParameterWithDefaultValue(Restraint_YawSpringConstant, "Restraint_YawSpringConstant", 0.0);     // psi
-  
+  DefineOptionalParameterWithDefaultValue(UseThermodynamicIntegration, "useThermodynamicIntegration", false);
+
 
   deprecatedKeywords_.insert("nComponents");
   deprecatedKeywords_.insert("nZconstraints");
   deprecatedKeywords_.insert("initialConfig");
+  deprecatedKeywords_.insert("thermIntDistSpringConst");
+  deprecatedKeywords_.insert("thermIntThetaSpringConst");
+  deprecatedKeywords_.insert("thermIntOmegaSpringConst");
+  deprecatedKeywords_.insert("useSolidThermInt");  
+  deprecatedKeywords_.insert("useLiquidThermInt");
     
 }
 
 Globals::~Globals() {
     MemoryUtils::deletePointers(components_);
     MemoryUtils::deletePointers(zconstraints_);
+    MemoryUtils::deletePointers(restraints_);
 }
 
 void Globals::validate() {
@@ -195,18 +188,12 @@ void Globals::validate() {
   CheckParameter(ThermodynamicIntegrationK, isPositive());
   CheckParameter(ForceFieldVariant, isNotEmpty());
   CheckParameter(ForceFieldFileName, isNotEmpty());
-  CheckParameter(ThermIntDistSpringConst, isPositive());
-  CheckParameter(ThermIntThetaSpringConst, isPositive());
-  CheckParameter(ThermIntOmegaSpringConst, isPositive());
   CheckParameter(ElectrostaticSummationMethod, isEqualIgnoreCase("NONE") || isEqualIgnoreCase("SHIFTED_POTENTIAL") || isEqualIgnoreCase("SHIFTED_FORCE") || isEqualIgnoreCase("REACTION_FIELD"));
   CheckParameter(ElectrostaticScreeningMethod, isEqualIgnoreCase("UNDAMPED") || isEqualIgnoreCase("DAMPED")); 
   CheckParameter(CutoffPolicy, isEqualIgnoreCase("MIX") || isEqualIgnoreCase("MAX") || isEqualIgnoreCase("TRADITIONAL"));
   CheckParameter(SwitchingFunctionType, isEqualIgnoreCase("CUBIC") || isEqualIgnoreCase("FIFTH_ORDER_POLYNOMIAL"));
   //CheckParameter(StatFileFormat,);     
   CheckParameter(OrthoBoxTolerance, isPositive());  
-  CheckParameter(ThermIntDistSpringConst, isPositive());
-  CheckParameter(ThermIntThetaSpringConst, isPositive());
-  CheckParameter(ThermIntOmegaSpringConst, isPositive());
   CheckParameter(DampingAlpha,isNonNegative());
   CheckParameter(SkinThickness, isPositive());
   CheckParameter(Viscosity, isNonNegative());
@@ -219,11 +206,6 @@ void Globals::validate() {
   CheckParameter(RNEMD_swapTime, isPositive());
   CheckParameter(RNEMD_nBins, isPositive() && isEven());
   CheckParameter(RNEMD_swapType, isEqualIgnoreCase("Kinetic") || isEqualIgnoreCase("Px") || isEqualIgnoreCase("Py") || isEqualIgnoreCase("Pz"));
-  CheckParameter(Restraint_DisplacementSpringConstant, isNonNegative());
-  CheckParameter(Restraint_RollSpringConstant, isNonNegative());
-  CheckParameter(Restraint_PitchSpringConstant, isNonNegative());
-  CheckParameter(Restraint_YawSpringConstant, isNonNegative());
-  CheckParameter(Restraint_type, isEqualIgnoreCase("P") || isEqualIgnoreCase("O") || isEqualIgnoreCase("P+O") || isEqualIgnoreCase("RMSD_P") || isEqualIgnoreCase("RMSD_O") || isEqualIgnoreCase("RMSD_P+RMSD_O"));
 
   for(std::vector<Component*>::iterator i = components_.begin(); i != components_.end(); ++i) {
     if (!(*i)->findMoleculeStamp(moleculeStamps_)) {
@@ -241,6 +223,11 @@ bool Globals::addComponent(Component* comp) {
 
 bool Globals::addZConsStamp(ZConsStamp* zcons) {
     zconstraints_.push_back(zcons);
+    return true;
+}
+
+bool Globals::addRestraintStamp(RestraintStamp* rest) {
+    restraints_.push_back(rest);
     return true;
 }
 

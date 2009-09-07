@@ -41,15 +41,12 @@
  
 #ifndef RESTRAINTS_THERMOINTEGRATIONFORCEMANAGER_HPP
 #define RESTRAINTS_THERMOINTEGRATIONFORCEMANAGER_HPP
-#include <list>
-#include <string>
-#include <vector>
-#include "brains/ForceManager.hpp"
-#include "restraints/Restraints.hpp"
+
+#include "restraints/RestraintForceManager.hpp"
 
 namespace oopse {
   
-  class ThermoIntegrationForceManager : public ForceManager {
+  class ThermoIntegrationForceManager : public RestraintForceManager {
     
   public:
     ThermoIntegrationForceManager(SimInfo* info);
@@ -59,7 +56,6 @@ namespace oopse {
     
   private:
     Globals* simParam;
-    Restraints* restraint_;
     Snapshot* currSnapshot_;
 
     RealType tIntLambda_;

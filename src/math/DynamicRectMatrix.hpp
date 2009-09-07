@@ -66,7 +66,12 @@ namespace oopse {
     typedef DynamicRectMatrix<Real> SelfType;
             
     /** default constructor */
-    DynamicRectMatrix(){}
+    DynamicRectMatrix(){
+      nrow_ = 0;
+      ncol_ = 0;
+      data_ = NULL;
+    }
+
     DynamicRectMatrix(int nrow, int ncol) {
       allocate(nrow, ncol);
 

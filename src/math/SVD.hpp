@@ -42,7 +42,6 @@ namespace JAMA
     
     
     SVD (const DynamicRectMatrix<Real> &Arg) {
-            
       m = Arg.getNRow();
       n = Arg.getNCol();
       int nu = min(m,n);
@@ -52,8 +51,9 @@ namespace JAMA
       DynamicVector<Real> e(n);
       DynamicVector<Real> work(m);
       DynamicRectMatrix<Real> A(Arg);
-      int wantu = 1;  					/* boolean */
-      int wantv = 1;  					/* boolean */
+
+      int wantu = 1;	/* boolean */
+      int wantv = 1;	/* boolean */
       int i=0, j=0, k=0;
       
       // Reduce A to bidiagonal form, storing the diagonal elements
@@ -61,6 +61,7 @@ namespace JAMA
       
       int nct = min(m-1,n);
       int nrt = max(0,min(n-2,m));
+
       for (k = 0; k < max(nct,nrt); k++) {
 	if (k < nct) {
 	  

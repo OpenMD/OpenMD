@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2009 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -38,25 +38,27 @@
  * University of Notre Dame has been advised of the possibility of
  * such damages.
  */
+ 
+#ifndef TYPES_RESTRAINTSTAMP_HPP
+#define TYPES_RESTRAINTSTAMP_HPP
 
-#include <stdio.h>
-#include <string.h>
-
-#include "types/ZconsStamp.hpp"
-
+#include "types/DataHolder.hpp"
 namespace oopse {
-  ZConsStamp::ZConsStamp() {
-    DefineParameter(MolIndex, "molIndex");
-    DefineOptionalParameter(Zpos, "zPos");
-    DefineOptionalParameter(Kratio, "kRatio");
-    DefineOptionalParameter(CantVel, "cantVel");
-  }
-  
-  ZConsStamp::~ZConsStamp() {    
-  }
-  
-  void ZConsStamp::validate() {
-    DataHolder::validate();
-    CheckParameter(MolIndex, isNonNegative());
-  }
+  class RestraintStamp : public DataHolder {
+    DeclareParameter(Type, std::string);
+    DeclareParameter(ObjectSelection, std::string);
+    DeclareParameter(MolIndex, int);
+    DeclareParameter(DisplacementSpringConstant, RealType);
+    DeclareParameter(TwistSpringConstant, RealType);
+    DeclareParameter(SwingXSpringConstant, RealType);
+    DeclareParameter(SwingYSpringConstant, RealType);
+    DeclareParameter(RestrainedTwistAngle, RealType);
+    DeclareParameter(RestrainedSwingXAngle, RealType);
+    DeclareParameter(RestrainedSwingYAngle, RealType);
+  public:
+    RestraintStamp();
+    virtual ~RestraintStamp();
+    virtual void validate();
+  };
 }
+#endif

@@ -76,6 +76,9 @@ namespace oopse {
     tokenMap_.insert(TokenMapType::value_type(".", Token(Token::dot, std::string("."))));
     tokenMap_.insert(TokenMapType::value_type("mass", Token(Token::mass, std::string("mass"))));
     tokenMap_.insert(TokenMapType::value_type("charge", Token(Token::charge, std::string("charge"))));
+    tokenMap_.insert(TokenMapType::value_type("x", Token(Token::x, std::string("x"))));
+    tokenMap_.insert(TokenMapType::value_type("y", Token(Token::y, std::string("y"))));
+    tokenMap_.insert(TokenMapType::value_type("z", Token(Token::z, std::string("z"))));
     tokenMap_.insert(TokenMapType::value_type("to", Token(Token::to, std::string("to"))));
     
     tokenMap_.insert(TokenMapType::value_type("all", Token(Token::all, std::string("all"))));

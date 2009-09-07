@@ -39,67 +39,53 @@
  * such damages.
  */
  
-#include <cmath>
+
 #include "restraints/ThermoIntegrationForceManager.hpp"
-#include "integrators/Integrator.hpp"
-#include "math/SquareMatrix3.hpp"
-#include "primitives/Molecule.hpp"
-#include "utils/simError.h"
-#include "utils/OOPSEConstant.hpp"
-#include "utils/StringUtils.hpp"
 
 #ifdef IS_MPI
 #include <mpi.h>
-#define TAKE_THIS_TAG_REAL 2
-#endif //is_mpi
+#endif
 
 namespace oopse {
   
   ThermoIntegrationForceManager::ThermoIntegrationForceManager(SimInfo* info): 
-    ForceManager(info){
-      currSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
-      simParam = info_->getSimParams();
+    RestraintForceManager(info){
+    currSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
+    simParam = info_->getSimParams();
     
-      if (simParam->haveThermodynamicIntegrationLambda()){
-	tIntLambda_ = simParam->getThermodynamicIntegrationLambda();
-      }
-      else{
-	tIntLambda_ = 1.0;
-	sprintf(painCave.errMsg,
-		"ThermoIntegration error: the transformation parameter\n"
-		"\t(lambda) was not specified. OOPSE will use a default\n"
-		"\tvalue of %f. To set lambda, use the \n"
-		"\tthermodynamicIntegrationLambda variable.\n",
-		tIntLambda_);
-	painCave.isFatal = 0;
-	simError();
-      }
-    
-      if (simParam->haveThermodynamicIntegrationK()){
-	tIntK_ = simParam->getThermodynamicIntegrationK();
-      }
-      else{
-	tIntK_ = 1.0;
-	sprintf(painCave.errMsg,
-		"ThermoIntegration Warning: the tranformation parameter\n"
-		"\texponent (k) was not specified. OOPSE will use a default\n"
-		"\tvalue of %f. To set k, use the thermodynamicIntegrationK\n"
-		"\tvariable.\n",
-		tIntK_);
-	painCave.isFatal = 0;
-	simError();      
-      }
-    
-      if (simParam->getUseSolidThermInt()) {
-	// build a restraint object
-	restraint_ =  new Restraints(info_, tIntLambda_, tIntK_);
-      
-      }
-    
-      // build the scaling factor used to modulate the forces and torques
-      factor_ = pow(tIntLambda_, tIntK_);
-
+    if (simParam->haveThermodynamicIntegrationLambda()){
+      tIntLambda_ = simParam->getThermodynamicIntegrationLambda();
     }
+    else{
+      tIntLambda_ = 1.0;
+      sprintf(painCave.errMsg,
+              "ThermoIntegration error: the transformation parameter\n"
+              "\t(lambda) was not specified. OOPSE will use a default\n"
+              "\tvalue of %f. To set lambda, use the \n"
+              "\tthermodynamicIntegrationLambda variable.\n",
+              tIntLambda_);
+      painCave.isFatal = 0;
+      simError();
+    }
+    
+    if (simParam->haveThermodynamicIntegrationK()){
+      tIntK_ = simParam->getThermodynamicIntegrationK();
+    }
+    else{
+      tIntK_ = 1.0;
+      sprintf(painCave.errMsg,
+              "ThermoIntegration Warning: the tranformation parameter\n"
+              "\texponent (k) was not specified. OOPSE will use a default\n"
+              "\tvalue of %f. To set k, use the thermodynamicIntegrationK\n"
+              "\tvariable.\n",
+              tIntK_);
+      painCave.isFatal = 0;
+      simError();      
+    }
+    
+    // build the scaling factor used to modulate the forces and torques
+    factor_ = pow(tIntLambda_, tIntK_);
+  }
   
   ThermoIntegrationForceManager::~ThermoIntegrationForceManager(){
   }
@@ -138,7 +124,7 @@ namespace oopse {
         }
       }
     }
-  
+    
     // set vraw to be the unmodulated potential
     lrPot_ = curSnapshot->statData[Stats::LONG_RANGE_POTENTIAL];
     curSnapshot->statData[Stats::VRAW] = lrPot_;
@@ -151,64 +137,32 @@ namespace oopse {
     tempTau = curSnapshot->statData.getTau();
     tempTau *= factor_;
     curSnapshot->statData.setTau(tempTau);
-#ifndef IS_MPI
-    // do the single processor crystal restraint forces for 
-    // thermodynamic integration
-    if (simParam->getUseSolidThermInt()) {
-      
-      lrPot_ += restraint_->Calc_Restraint_Forces();
-      curSnapshot->statData[Stats::LONG_RANGE_POTENTIAL] = lrPot_;
-      
-      vHarm_ = restraint_->getVharm();
-      curSnapshot->statData[Stats::VHARM] = vHarm_;
+
+    // now, on to the applied restraining potentials (if needed):
+    RealType restPot_local = 0.0;
+    RealType vHarm_local = 0.0;
+    
+    if (simParam->getUseRestraints()) {
+      // do restraints from RestraintForceManager:
+      //restPot_local = doRestraints(1.0 - factor_);     
+      restPot_local = doRestraints(1.0 - factor_);      
+      vHarm_local = getUnscaledPotential();
     }
+      
+#ifdef IS_MPI
+    RealType restPot;
+    MPI::COMM_WORLD.Allreduce(&restPot_local, &restPot, 1, 
+                              MPI::REALTYPE, MPI::SUM);
+    MPI::COMM_WORLD.Allreduce(&vHarm_local, &vHarm_, 1, 
+                              MPI::REALTYPE, MPI::SUM);         
+    lrPot_ += restPot;
 #else
-    double tempLRPot = 0.0;
-    double tempVHarm = 0.0;
-    MPI_Status ierr;
-    int nproc;
-    MPI_Comm_size(MPI_COMM_WORLD, &nproc);
-    vHarm_ = 0.0;
+    lrPot_ += restPot_local;
+    vHarm_ = vHarm_local;
+#endif
 
-    // do the MPI crystal restraint forces for each processor
-    if (simParam->getUseSolidThermInt()) {
-      tempLRPot = restraint_->Calc_Restraint_Forces();
-      tempVHarm = restraint_->getVharm();
-    }
-
-    // master receives and accumulates the restraint info
-    if (worldRank == 0) {
-      for(int i = 0 ; i < nproc; ++i) {
-	if (i == worldRank) {
-	  lrPot_ += tempLRPot;
-	  vHarm_ += tempVHarm;
-	} else {
-	  MPI_Recv(&tempLRPot, 1, MPI_REALTYPE, i, 
-		   TAKE_THIS_TAG_REAL, MPI_COMM_WORLD, &ierr);
-	  MPI_Recv(&tempVHarm, 1, MPI_REALTYPE, i, 
-		   TAKE_THIS_TAG_REAL, MPI_COMM_WORLD, &ierr);
-	  lrPot_ += tempLRPot;
-	  vHarm_ += tempVHarm;
-	}
-      }
-
-      // give the final values to stats
-      curSnapshot->statData[Stats::LONG_RANGE_POTENTIAL] = lrPot_;
-      curSnapshot->statData[Stats::VHARM] = vHarm_;
-
-    } else {
-      // pack up and send the appropriate info to the master node
-      for(int j = 1; j < nproc; ++j) {
-     	if (worldRank == j) {
-
-	  MPI_Send(&tempLRPot, 1, MPI_REALTYPE, 0, 
-		   TAKE_THIS_TAG_REAL, MPI_COMM_WORLD);
-	  MPI_Send(&tempVHarm, 1, MPI_REALTYPE, 0, 
-		   TAKE_THIS_TAG_REAL, MPI_COMM_WORLD);
-	}
-      }
-    }
-#endif //is_mpi
-  }
-  
+    // give the final values to stats
+    curSnapshot->statData[Stats::LONG_RANGE_POTENTIAL] = lrPot_;
+    curSnapshot->statData[Stats::VHARM] = vHarm_;
+  }  
 }

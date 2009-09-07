@@ -54,7 +54,6 @@
 #include "restraints/ThermoIntegrationForceManager.hpp"
 #include "io/DumpWriter.hpp"
 #include "io/StatWriter.hpp"
-#include "io/RestWriter.hpp"
 #include "integrators/Velocitizer.hpp"
 #include "integrators/RNEMD.hpp"
 
@@ -81,6 +80,7 @@ namespace oopse {
     }
 
     void setForceManager(ForceManager* forceMan) {
+
       if (forceMan_ != forceMan && forceMan_  != NULL) {
 	delete forceMan_;
       }
@@ -128,7 +128,6 @@ namespace oopse {
     
     DumpWriter* dumpWriter;
     StatWriter* statWriter;
-    RestWriter* restWriter;
     Thermo thermo;
 
     RealType runTime;

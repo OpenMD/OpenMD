@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2009 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -50,36 +50,25 @@
 #include <iostream>
 #include <fstream>
 #include <string>
-#include <string.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <algorithm>
-#include <vector>
 #include <map>
+#include <vector>
 
-#include "primitives/Atom.hpp"
 #include "brains/SimInfo.hpp"
-#include "brains/Thermo.hpp"
-#include "primitives/StuntDouble.hpp"
+#include "restraints/Restraint.hpp"
 
 namespace oopse {
 
   class RestWriter{
     
   public:
-    RestWriter( SimInfo* info );
+    RestWriter(SimInfo* info, const std::string& filename, std::vector<Restraint*> restraints);
     ~RestWriter();
-    
-    void writeZAngFile();
-    
-  private:
-    void writeZangle(std::ostream& finalOut);
 
+    void writeRest(std::vector<std::map<int, Restraint::RealPair> > restInfo);
+    
+  private:    
     SimInfo* info_;
-    std::string outName_;
+    std::ofstream output_;
   };
 
 }

@@ -94,11 +94,6 @@ namespace oopse {
  
     dumpWriter->writeDumpAndEor();
 
-    if (simParams->getUseSolidThermInt()) {
-      restWriter = createRestWriter();
-      restWriter->writeZAngFile();
-    }
-    
     //save statistics, before writeStat,  we must save statistics
     thermo.saveStat();
     saveConservedQuantity();
@@ -174,9 +169,6 @@ namespace oopse {
     if (currentSnapshot_->getTime() >= currSample) {
       dumpWriter->writeDumpAndEor();
       
-      if (simParams->getUseSolidThermInt())
-	restWriter->writeZAngFile();
-      
       currSample += sampleTime;
     }
     
@@ -204,12 +196,6 @@ namespace oopse {
 
   void VelocityVerletIntegrator::finalize() {
     dumpWriter->writeEor();
-  
-    if (simParams->getUseSolidThermInt()) {
-      restWriter->writeZAngFile();
-      delete restWriter;
-      restWriter = NULL;
-    }
   
     delete dumpWriter;
     delete statWriter;
@@ -240,10 +226,17 @@ namespace oopse {
 
     std::string statFileFormatString = simParams->getStatFileFormat();
     StatsBitSet mask = parseStatFileFormat(statFileFormatString);
-    
-    // if solidThermInt is true, add extra information to the statfile
-    if (simParams->getUseSolidThermInt()){
+   
+    // if we're doing a thermodynamic integration, we'll want the raw
+    // potential as well as the full potential:
+
+ 
+    if (simParams->getUseThermodynamicIntegration()) 
       mask.set(Stats::VRAW);
+
+    // if we've got restraints turned on, we'll also want a report of the
+    // total harmonic restraints
+    if (simParams->getUseRestraints()){
       mask.set(Stats::VHARM);
     }
 
@@ -278,10 +271,6 @@ namespace oopse {
       
 
      return new StatWriter(info_->getStatFileName(), mask);
-  }
-
-  RestWriter* VelocityVerletIntegrator::createRestWriter(){
-    return new RestWriter(info_);
   }
 
 

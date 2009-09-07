@@ -11,6 +11,7 @@ Source    = \
 	TorsionStamp.cpp \
 	InversionStamp.cpp \
 	ZconsStamp.cpp \
+	RestraintStamp.cpp \
 	AtomType.cpp \
 	DirectionalAtomType.cpp \
 	ShapeAtomType.cpp \

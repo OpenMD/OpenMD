@@ -37,7 +37,6 @@ ParallelSource = \
 	DumpReader.cpp \
 	DumpWriter.cpp \
 	RestReader.cpp \
-	RestWriter.cpp \
 	StatWriter.cpp \
 	ZConsWriter.cpp
 

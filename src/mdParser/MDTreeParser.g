@@ -38,6 +38,7 @@ statement : assignment
           | componentblock
           | moleculeblock
           | zconstraintblock
+          | restraintblock
           ;
 
 
@@ -67,6 +68,11 @@ componentblock  : #(COMPONENT  {Component* currComponet = new Component(); block
 zconstraintblock  : #(ZCONSTRAINT {ZConsStamp* currZConsStamp = new ZConsStamp(); blockStack.push(currZConsStamp);}
                         (assignment)* 
                          ENDBLOCK ) {blockStack.top()->validate();blockStack.pop(); currConf->addZConsStamp(currZConsStamp);}
+                  ;
+
+restraintblock  : #(RESTRAINT {RestraintStamp* currRestraintStamp = new RestraintStamp(); blockStack.push(currRestraintStamp);}
+                        (assignment)* 
+                         ENDBLOCK ) {blockStack.top()->validate();blockStack.pop(); currConf->addRestraintStamp(currRestraintStamp);}
                   ;
   
 moleculeblock : #(MOLECULE {MoleculeStamp* currMoleculeStamp = new MoleculeStamp(); blockStack.push(currMoleculeStamp);}

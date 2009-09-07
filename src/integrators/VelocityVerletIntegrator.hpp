@@ -113,8 +113,6 @@ namespace oopse {
     virtual DumpWriter* createDumpWriter();
 
     virtual StatWriter* createStatWriter();
-        
-    virtual RestWriter* createRestWriter();
 
   };
 

@@ -275,6 +275,33 @@ namespace oopse {
     
   }
   
+  void Molecule::addProperty(GenericData* genData) {
+    properties_.addProperty(genData);  
+  }
+
+  void Molecule::removeProperty(const std::string& propName) {
+    properties_.removeProperty(propName);  
+  }
+
+  void Molecule::clearProperties() {
+    properties_.clearProperties(); 
+  }
+
+  std::vector<std::string> Molecule::getPropertyNames() {
+    return properties_.getPropertyNames();  
+  }
+      
+  std::vector<GenericData*> Molecule::getProperties() { 
+    return properties_.getProperties(); 
+  }
+
+  GenericData* Molecule::getPropertyByName(const std::string& propName) {
+    return properties_.getPropertyByName(propName); 
+  }
+
+
+
+
   std::ostream& operator <<(std::ostream& o, Molecule& mol) {
     o << std::endl;
     o << "Molecule " << mol.getGlobalIndex() << "has: " << std::endl;

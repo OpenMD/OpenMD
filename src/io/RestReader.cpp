@@ -1,798 +1,321 @@
-/*
- * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
- *
- * The University of Notre Dame grants you ("Licensee") a
- * non-exclusive, royalty free, license to use, modify and
- * redistribute this software in source and binary code form, provided
- * that the following conditions are met:
- *
- * 1. Acknowledgement of the program authors must be made in any
- *    publication of scientific results based in part on use of the
- *    program.  An acceptable form of acknowledgement is citation of
- *    the article in which the program was described (Matthew
- *    A. Meineke, Charles F. Vardeman II, Teng Lin, Christopher
- *    J. Fennell and J. Daniel Gezelter, "OOPSE: An Object-Oriented
- *    Parallel Simulation Engine for Molecular Dynamics,"
- *    J. Comput. Chem. 26, pp. 252-271 (2005))
- *
- * 2. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- *
- * 3. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the
- *    distribution.
- *
- * This software is provided "AS IS," without a warranty of any
- * kind. All express or implied conditions, representations and
- * warranties, including any implied warranty of merchantability,
- * fitness for a particular purpose or non-infringement, are hereby
- * excluded.  The University of Notre Dame and its licensors shall not
- * be liable for any damages suffered by licensee as a result of
- * using, modifying or distributing the software or its
- * derivatives. In no event will the University of Notre Dame or its
- * licensors be liable for any lost revenue, profit or data, or for
- * direct, indirect, special, consequential, incidental or punitive
- * damages, however caused and regardless of the theory of liability,
- * arising out of the use of or inability to use software, even if the
- * University of Notre Dame has been advised of the possibility of
- * such damages.
- */
-
-#define _LARGEFILE_SOURCE64
-#define _FILE_OFFSET_BITS 64
-
-#include <sys/types.h>
-#include <sys/stat.h>
-
-#include <iostream>
-#include <math.h>
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
-#include "primitives/Molecule.hpp"
-#include "utils/MemoryUtils.hpp"
-#include "utils/StringTokenizer.hpp"
+/* 
+ * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved. 
+ * 
+ * The University of Notre Dame grants you ("Licensee") a 
+ * non-exclusive, royalty free, license to use, modify and 
+ * redistribute this software in source and binary code form, provided 
+ * that the following conditions are met: 
+ * 
+ * 1. Acknowledgement of the program authors must be made in any 
+ *    publication of scientific results based in part on use of the 
+ *    program.  An acceptable form of acknowledgement is citation of 
+ *    the article in which the program was described (Matthew 
+ *    A. Meineke, Charles F. Vardeman II, Teng Lin, Christopher 
+ *    J. Fennell and J. Daniel Gezelter, "OOPSE: An Object-Oriented 
+ *    Parallel Simulation Engine for Molecular Dynamics," 
+ *    J. Comput. Chem. 26, pp. 252-271 (2005)) 
+ * 
+ * 2. Redistributions of source code must retain the above copyright 
+ *    notice, this list of conditions and the following disclaimer. 
+ * 
+ * 3. Redistributions in binary form must reproduce the above copyright 
+ *    notice, this list of conditions and the following disclaimer in the 
+ *    documentation and/or other materials provided with the 
+ *    distribution. 
+ * 
+ * This software is provided "AS IS," without a warranty of any 
+ * kind. All express or implied conditions, representations and 
+ * warranties, including any implied warranty of merchantability, 
+ * fitness for a particular purpose or non-infringement, are hereby 
+ * excluded.  The University of Notre Dame and its licensors shall not 
+ * be liable for any damages suffered by licensee as a result of 
+ * using, modifying or distributing the software or its 
+ * derivatives. In no event will the University of Notre Dame or its 
+ * licensors be liable for any lost revenue, profit or data, or for 
+ * direct, indirect, special, consequential, incidental or punitive 
+ * damages, however caused and regardless of the theory of liability, 
+ * arising out of the use of or inability to use software, even if the 
+ * University of Notre Dame has been advised of the possibility of 
+ * such damages. 
+ */ 
+  
+#include "io/DumpReader.hpp" 
 #include "io/RestReader.hpp"
-#include "utils/simError.h"
+#include "primitives/Molecule.hpp"
+#include "restraints/ObjectRestraint.hpp"
+#include "restraints/MolecularRestraint.hpp"
 
-#ifdef IS_MPI
-#include <mpi.h>
-#define TAKE_THIS_TAG_CHAR 0
-#define TAKE_THIS_TAG_INT 1
-#define TAKE_THIS_TAG_DOUBLE 2
-#endif // is_mpi
+namespace oopse { 
+      
+  void RestReader::readReferenceStructure() {
 
-namespace oopse {
-  
-  RestReader::RestReader( SimInfo* info ) : info_(info){
-    
-    idealName = "idealCrystal.in";
+    // some of this comes directly from DumpReader.
+
+    if (!isScanned_) 
+      scanFile(); 
+         
+    int storageLayout = info_->getSnapshotManager()->getStorageLayout(); 
      
-#ifdef IS_MPI
-    if (worldRank == 0) {
-#endif
-
-      inIdealFile = new std::ifstream(idealName.c_str()); 
-
-      if(inIdealFile->fail()){
-        sprintf(painCave.errMsg,
-                "RestReader: Cannot open file: %s\n", 
-		idealName.c_str());
-        painCave.isFatal = 1;
-        simError();
-      }
-      
-#ifdef IS_MPI
-    }
-    strcpy( checkPointMsg, 
-            "File \"idealCrystal.in\" opened successfully for reading." );
-    errorCheckPoint();
-#endif
-
-    return;  
-  }
-  
-  RestReader :: ~RestReader( ){
-#ifdef IS_MPI
-    if (worldRank == 0) {
-#endif
-
-      delete inIdealFile;
-      delete inAngFile;
-
-#ifdef IS_MPI
-    }
-    strcpy( checkPointMsg, 
-	    "File idealCrystal.in (and .zang0 if present) closed successfully." );
-    errorCheckPoint();
-#endif
-    
-    return;
-  }
-  
-  
-  void RestReader :: readIdealCrystal(){
-        
-#ifdef IS_MPI
-    int which_node;
-    int i, j;
-#endif //is_mpi
-    
-    const int BUFFERSIZE = 2000; // size of the read buffer
-    int nTotObjs; // the number of atoms
-    char read_buffer[BUFFERSIZE]; //the line buffer for reading
-    
-    char *parseErr;
-    
-    std::vector<StuntDouble*> integrableObjects;
-    
-    Molecule* mol;
-    StuntDouble* integrableObject;
-    SimInfo::MoleculeIterator mi;
-    Molecule::IntegrableObjectIterator ii;
-    
-#ifndef IS_MPI
-    
-    inIdealFile->getline(read_buffer, sizeof(read_buffer)); 
-
-    if( inIdealFile->eof() ){
-      sprintf( painCave.errMsg,
-               "RestraintReader error: error reading 1st line of \"%s\"\n",
-               idealName.c_str() );
-      painCave.isFatal = 1;
-      simError();
-    }
-    
-    nTotObjs = atoi( read_buffer );
-    
-    if( nTotObjs != info_->getNGlobalIntegrableObjects() ){
-      sprintf( painCave.errMsg,
-               "RestraintReader error. %s nIntegrable, %d, "
-               "does not match the meta-data file's nIntegrable, %d.\n",
-               idealName.c_str(), 
-	       nTotObjs, 
-               info_->getNGlobalIntegrableObjects());
-      painCave.isFatal = 1;
-      simError();
-    }
-    
-    // skip over the comment line
-    inIdealFile->getline(read_buffer, sizeof(read_buffer)); 
-
-    if( inIdealFile->eof() ){
-      sprintf( painCave.errMsg,
-               "error in reading commment in %s\n", 
-	       idealName.c_str());
-      painCave.isFatal = 1;
-      simError();
-    }
-    
-    // parse the ideal crystal lines
-    /*
-     * Note: we assume that there is a one-to-one correspondence between
-     * integrable objects and lines in the idealCrystal.in file.  Thermodynamic
-     * integration is only supported for simple rigid bodies. 
-     */
-    for (mol = info_->beginMolecule(mi); mol != NULL; 
-         mol = info_->nextMolecule(mi)) {
-      
-      for (integrableObject = mol->beginIntegrableObject(ii); 
-           integrableObject != NULL; 
-           integrableObject = mol->nextIntegrableObject(ii)) {    
-
-	inIdealFile->getline(read_buffer, sizeof(read_buffer)); 
-
-        if( inIdealFile->eof() ){
-          sprintf(painCave.errMsg,
-                  "RestReader Error: error in reading file %s\n"
-                  "natoms  = %d; index = %d\n"
-                  "error reading the line from the file.\n",
-                  idealName.c_str(), nTotObjs, 
-                  integrableObject->getGlobalIndex() );
-          painCave.isFatal = 1;
-          simError();
-        }
-        
-        parseErr = parseIdealLine( read_buffer, integrableObject);
-        if( parseErr != NULL ){
-          strcpy( painCave.errMsg, parseErr );
-          painCave.isFatal = 1;
-          simError();
-        }
-      }
-    }
-    
-    // MPI Section of code..........
-#else //IS_MPI
-    
-    // first thing first, suspend fatalities.
-    painCave.isEventLoop = 1;
-    
-    int masterNode = 0;
-    
-    MPI_Status istatus;
-    int nCurObj;
-    int nitems;
-    int haveError;
-
-    nTotObjs = info_->getNGlobalIntegrableObjects();
-    haveError = 0;
-
-    if (worldRank == masterNode) {
-      inIdealFile->getline(read_buffer, sizeof(read_buffer)); 
-
-      if( inIdealFile->eof() ){
-        sprintf( painCave.errMsg,
-                 "Error reading 1st line of %s \n ",idealName.c_str());
-        painCave.isFatal = 1;
-        simError();
-      }
-      
-      nitems = atoi( read_buffer );
-      
-      // Check to see that the number of integrable objects in the
-      // intial configuration file is the same as derived from the
-      // meta-data file.
-      if( nTotObjs != nitems){
-        sprintf( painCave.errMsg,
-                 "RestraintReader Error. %s nIntegrable, %d, "
-                 "does not match the meta-data file's nIntegrable, %d.\n",
-                 idealName.c_str(), nTotObjs, 
-                 info_->getNGlobalIntegrableObjects());
-        painCave.isFatal = 1;
-        simError();
-      }
-      
-      // skip over the comment line
-      inIdealFile->getline(read_buffer, sizeof(read_buffer)); 
-
-      if( inIdealFile->eof() ){
-        sprintf( painCave.errMsg,
-                 "error in reading commment in %s\n", idealName.c_str());
-        painCave.isFatal = 1;
-        simError();
-      }
-
-      MPI_Bcast(read_buffer, BUFFERSIZE, MPI_CHAR, masterNode, MPI_COMM_WORLD);
-
-      for (i=0 ; i < info_->getNGlobalMolecules(); i++) {
-        which_node = info_->getMolToProc(i);
-        
-        if(which_node == masterNode){
-          //molecules belong to master node
-          
-          mol = info_->getMoleculeByGlobalIndex(i);
-          
-          if(mol == NULL) {
-	    sprintf(painCave.errMsg, 
-		    "RestReader Error: Molecule not found on node %d!\n",
-		    worldRank);
-            painCave.isFatal = 1;
-            simError();
-          }
-          
-          for (integrableObject = mol->beginIntegrableObject(ii); 
-               integrableObject != NULL; 
-               integrableObject = mol->nextIntegrableObject(ii)){
-            
-	    inIdealFile->getline(read_buffer, sizeof(read_buffer)); 
-            
-            if( inIdealFile->eof() ){
-              sprintf(painCave.errMsg,
-                      "RestReader Error: error in reading file %s\n"
-                      "natoms  = %d; index = %d\n"
-                      "error reading the line from the file.\n",
-                      idealName.c_str(), nTotObjs, i );
-              painCave.isFatal = 1;
-              simError();
-            }
-	
-            parseIdealLine(read_buffer, integrableObject);
-	
-          }
-
-        } else {
-          //molecule belongs to slave nodes
-          
-          MPI_Recv(&nCurObj, 1, MPI_INT, which_node,
-                   TAKE_THIS_TAG_INT, MPI_COMM_WORLD, &istatus);
-          
-          for(j = 0; j < nCurObj; j++){
-	    inIdealFile->getline(read_buffer, sizeof(read_buffer)); 
-
-            if( inIdealFile->eof() ){
-              sprintf(painCave.errMsg,
-                      "RestReader Error: error in reading file %s\n"
-                      "natoms  = %d; index = %d\n"
-                      "error reading the line from the file.\n",
-                      idealName.c_str(), nTotObjs, i );
-              painCave.isFatal = 1;
-              simError();
-            }
-            
-	    MPI_Send(read_buffer, BUFFERSIZE, MPI_CHAR, which_node,
-                     TAKE_THIS_TAG_CHAR, MPI_COMM_WORLD);
-          }
-        }
-      }
+    if (storageLayout & DataStorage::dslPosition) { 
+      needPos_ = true; 
     } else {
-      //actions taken at slave nodes 
-      MPI_Bcast(read_buffer, BUFFERSIZE, MPI_CHAR, masterNode, MPI_COMM_WORLD);
-
-      for (i=0 ; i < info_->getNGlobalMolecules(); i++) {
-        int which_node = info_->getMolToProc(i); 
-
-        if(which_node == worldRank){
-          //molecule with global index i belongs to this processor
-          
-          mol = info_->getMoleculeByGlobalIndex(i);
-          
-          if(mol == NULL) {
-            sprintf(painCave.errMsg, 
-                    "RestReader Error: molecule not found on node %d\n", 
-                    worldRank);
-            painCave.isFatal = 1;
-            simError();
-          }
-          
-          nCurObj = mol->getNIntegrableObjects();
-          
-          MPI_Send(&nCurObj, 1, MPI_INT, masterNode,
-                   TAKE_THIS_TAG_INT, MPI_COMM_WORLD);
-          
-          for (integrableObject = mol->beginIntegrableObject(ii); 
-               integrableObject != NULL; 
-               integrableObject = mol->nextIntegrableObject(ii)){
-            
-            MPI_Recv(read_buffer, BUFFERSIZE, MPI_CHAR, masterNode,
-                     TAKE_THIS_TAG_CHAR, MPI_COMM_WORLD, &istatus);
-            
-            parseErr = parseIdealLine(read_buffer, integrableObject);
-            
-            if( parseErr != NULL ){
-              strcpy( painCave.errMsg, parseErr );
-              simError();
-            }
-          }
-        }
-      }
-    }
-#endif
-  }
-  
-  char* RestReader::parseIdealLine(char* readLine, StuntDouble* sd){
-    
-    RealType pos[3];        // position place holders
-    RealType q[4];          // the quaternions
-    RealType RfromQ[3][3];  // the rotation matrix 
-    RealType normalize;     // to normalize the reference unit vector
-    RealType uX, uY, uZ;    // reference unit vector place holders
-    RealType uselessToken;
-    StringTokenizer tokenizer(readLine);
-    int nTokens;
-    
-    nTokens = tokenizer.countTokens();
-
-    if (nTokens < 14) {
-      sprintf(painCave.errMsg,
-              "RestReader Error: Not enough Tokens.\n");
-      painCave.isFatal = 1;
-      simError();
-    }
-    
-    std::string name = tokenizer.nextToken();
-
-    if (name != sd->getType()) {
-      
-      sprintf(painCave.errMsg,
-              "RestReader Error: Atom type [%s] in %s does not "
-              "match Atom Type [%s] in .md file.\n",
-              name.c_str(), idealName.c_str(), 
-              sd->getType().c_str());
-      painCave.isFatal = 1;
-      simError();        
-    }
-    
-    pos[0] = tokenizer.nextTokenAsDouble();
-    pos[1] = tokenizer.nextTokenAsDouble();
-    pos[2] = tokenizer.nextTokenAsDouble();
-
-    // store the positions in the stuntdouble as generic data doubles
-    DoubleGenericData* refPosX = new DoubleGenericData();
-    refPosX->setID("refPosX");
-    refPosX->setData(pos[0]);
-    sd->addProperty(refPosX);
-
-    DoubleGenericData* refPosY = new DoubleGenericData();
-    refPosY->setID("refPosY");
-    refPosY->setData(pos[1]);
-    sd->addProperty(refPosY);
-    
-    DoubleGenericData* refPosZ = new DoubleGenericData();
-    refPosZ->setID("refPosZ");
-    refPosZ->setData(pos[2]);
-    sd->addProperty(refPosZ);
-
-    // we don't need the velocities
-    uselessToken = tokenizer.nextTokenAsDouble();
-    uselessToken = tokenizer.nextTokenAsDouble();
-    uselessToken = tokenizer.nextTokenAsDouble();
-    
-    if (sd->isDirectional()) {
-      
-      q[0] = tokenizer.nextTokenAsDouble();
-      q[1] = tokenizer.nextTokenAsDouble();
-      q[2] = tokenizer.nextTokenAsDouble();
-      q[3] = tokenizer.nextTokenAsDouble();
-      
-      // now build the rotation matrix and find the unit vectors
-      RfromQ[0][0] = q[0]*q[0] + q[1]*q[1] - q[2]*q[2] - q[3]*q[3];
-      RfromQ[0][1] = 2*(q[1]*q[2] + q[0]*q[3]);
-      RfromQ[0][2] = 2*(q[1]*q[3] - q[0]*q[2]);
-      RfromQ[1][0] = 2*(q[1]*q[2] - q[0]*q[3]);
-      RfromQ[1][1] = q[0]*q[0] - q[1]*q[1] + q[2]*q[2] - q[3]*q[3];
-      RfromQ[1][2] = 2*(q[2]*q[3] + q[0]*q[1]);
-      RfromQ[2][0] = 2*(q[1]*q[3] + q[0]*q[2]);
-      RfromQ[2][1] = 2*(q[2]*q[3] - q[0]*q[1]);
-      RfromQ[2][2] = q[0]*q[0] - q[1]*q[1] - q[2]*q[2] + q[3]*q[3];
-      
-      normalize = sqrt(RfromQ[2][0]*RfromQ[2][0] + RfromQ[2][1]*RfromQ[2][1] 
-                       + RfromQ[2][2]*RfromQ[2][2]);
-      uX = RfromQ[2][0]/normalize;
-      uY = RfromQ[2][1]/normalize;
-      uZ = RfromQ[2][2]/normalize;
-      
-      // store reference unit vectors as generic data in the stuntdouble
-      DoubleGenericData* refVectorX = new DoubleGenericData();
-      refVectorX->setID("refVectorX");
-      refVectorX->setData(uX);
-      sd->addProperty(refVectorX);
-      
-      DoubleGenericData* refVectorY = new DoubleGenericData();
-      refVectorY->setID("refVectorY");
-      refVectorY->setData(uY);
-      sd->addProperty(refVectorY);
-      
-      DoubleGenericData* refVectorZ = new DoubleGenericData();
-      refVectorZ->setID("refVectorZ");
-      refVectorZ->setData(uZ);
-      sd->addProperty(refVectorZ);
-    }
-    
-    // we don't need the angular velocities, so let's exit the line
-    return NULL;
-  }
-  
-  void RestReader::readZangle(){
-    
-    int i;
-    int isPresent;
-    
-    Molecule* mol;
-    StuntDouble* integrableObject;
-    SimInfo::MoleculeIterator mi;
-    Molecule::IntegrableObjectIterator ii;
-    
-#ifdef IS_MPI
-    int which_node;
-    MPI_Status istatus;
-#endif //is_mpi
-    
-    const int BUFFERSIZE = 2000; // size of the read buffer
-    unsigned int nTotObjs; // the number of atoms
-    char read_buffer[BUFFERSIZE]; //the line buffer for reading
-    
-    std::vector<StuntDouble*> vecParticles;
-    std::vector<RealType> tempZangs;
-      
-    angFile = info_->getRestFileName();
-    
-    angFile += "0";
-    
-    // open the omega value file for reading
-#ifdef IS_MPI
-    if (worldRank == 0) {
-#endif
-      isPresent = 1;
-      
-      inAngFile = new std::ifstream(angFile.c_str()); 
-      
-      if(inAngFile->fail()){
-        sprintf(painCave.errMsg,
-                "Restraints Warning: %s file is not present\n"
-                "\tAll omega values will be initialized to zero. If the\n"
-                "\tsimulation is starting from the idealCrystal.in reference\n"
-                "\tconfiguration, this is the desired action. If this is not\n"
-                "\tthe case, the energy calculations will be incorrect.\n",
-                angFile.c_str());
-        painCave.severity = OOPSE_WARNING;
-        painCave.isFatal = 0;
-        simError();   
-        isPresent = 0;
-      }
-      
-#ifdef IS_MPI
-      // let the other nodes know the status of the file search
-      MPI_Bcast(&isPresent, 1, MPI_INT, 0, MPI_COMM_WORLD);
-#endif // is_mpi
-      
-      if (!isPresent) {
-        zeroZangle();
-        return;
-      }
-      
-#ifdef IS_MPI
-      if (!isPresent) {
-	// master node zeroes out its zAngles if .zang0 isn't present
-	zeroZangle();
-	return;
-      }
-
-    }
-    
-    // listen to node 0 to see if we should exit this function
-    if (worldRank != 0) {
-      MPI_Bcast(&isPresent, 1, MPI_INT, 0, MPI_COMM_WORLD);
-      if (!isPresent) {
-        zeroZangle();
-        return;
-      }
-    }
-    
-    strcpy( checkPointMsg, "zAngle file opened successfully for reading." );
-    errorCheckPoint();
-#endif
-    
-#ifndef IS_MPI
-    
-    // read the first line and die if there is a failure
-    inAngFile->getline(read_buffer, sizeof(read_buffer)); 
-
-    if( inAngFile->eof() ){
-      sprintf( painCave.errMsg,
-               "RestraintReader error: error reading 1st line of \"%s\"\n",
-               angFile.c_str() );
-      painCave.isFatal = 1;
-      simError();
-    }
-
-    // read the file and load the values into a vector
-    inAngFile->getline(read_buffer, sizeof(read_buffer)); 
-    
-    while ( !inAngFile->eof() ) {
-      // check for and ignore blank lines
-      if ( read_buffer != NULL )
-        tempZangs.push_back( atof(read_buffer) );
-
-      inAngFile->getline(read_buffer, sizeof(read_buffer)); 
-    }
-    
-    nTotObjs = info_->getNGlobalIntegrableObjects();
-    
-    if( nTotObjs != tempZangs.size() ){
-      sprintf( painCave.errMsg,
-               "RestraintReader zAngle reading error. %s nIntegrable, %d, "
-               "does not match the meta-data file's nIntegrable, %i.\n",
-               angFile.c_str(), 
-	       tempZangs.size(), 
-	       nTotObjs );
-      painCave.isFatal = 1;
-      simError();
-    }
-    
-    // load the zAngles into the integrable objects
-    i = 0;
-    for (mol = info_->beginMolecule(mi); mol != NULL; 
-         mol = info_->nextMolecule(mi)) {
-      
-      for (integrableObject = mol->beginIntegrableObject(ii); 
-           integrableObject != NULL; 
-           integrableObject = mol->nextIntegrableObject(ii)) {    
-        
-        integrableObject->setZangle(tempZangs[i]);
-        i++;
-      }
-    }
-    
-    // MPI Section of code..........
-#else //IS_MPI
-    
-    // first thing first, suspend fatalities.
-    painCave.isEventLoop = 1;
-
-    int masterNode = 0;
-
-    int haveError;
-    int intObjIndex;    
-    int intObjIndexTransfer;    
-
-    int j;
-    int nCurObj;
-    RealType angleTransfer;
-    
-    nTotObjs = info_->getNGlobalIntegrableObjects();
-    haveError = 0;
-
-    if (worldRank == masterNode) {
-      
-      inAngFile->getline(read_buffer, sizeof(read_buffer));
-
-      if( inAngFile->eof() ){
-        sprintf( painCave.errMsg,
-                 "Error reading 1st line of %s \n ",angFile.c_str());
-        haveError = 1;
-        simError();
-      }
-      
-      // let the master node read the file and load the temporary angle vector
-      inAngFile->getline(read_buffer, sizeof(read_buffer));
-
-      while ( !inAngFile->eof() ) {
-        // check for and ignore blank lines
-        if ( read_buffer != NULL )
-          tempZangs.push_back( atof(read_buffer) );
-
-	inAngFile->getline(read_buffer, sizeof(read_buffer));
-      }
-
-      // Check to see that the number of integrable objects in the
-      // intial configuration file is the same as derived from the
-      // meta-data file.
-      if( nTotObjs != tempZangs.size() ){
-        sprintf( painCave.errMsg,
-                 "RestraintReader zAngle reading Error. %s nIntegrable, %d, "
-                 "does not match the meta-data file's nIntegrable, %d.\n",
-                 angFile.c_str(), 
-		 tempZangs.size(), 
-		 nTotObjs);
-        haveError= 1;
-        simError();
-      }
-      
-      // At this point, node 0 has a tempZangs vector completed, and 
-      // everyone else has nada
-      
-      for (i=0 ; i < info_->getNGlobalMolecules(); i++) {
-	// Get the Node number which has this atom
-	which_node = info_->getMolToProc(i);
-	
-	if (which_node == masterNode) {
-	  mol = info_->getMoleculeByGlobalIndex(i);
-
-	  if(mol == NULL) {
-	    strcpy(painCave.errMsg, "Molecule not found on node 0!");
-	    haveError = 1;
-	    simError();
-	  }
-
-	  for (integrableObject = mol->beginIntegrableObject(ii); 
-	       integrableObject != NULL; 
-	       integrableObject = mol->nextIntegrableObject(ii)){
-	    intObjIndex = integrableObject->getGlobalIntegrableObjectIndex();
-	    integrableObject->setZangle(tempZangs[intObjIndex]);
-	  }	
-	  
-	} else {
-	  // I am MASTER OF THE UNIVERSE, but I don't own this molecule
-	  // listen for the number of integrableObjects in the molecule
-	  MPI_Recv(&nCurObj, 1, MPI_INT, which_node,
-		   TAKE_THIS_TAG_INT, MPI_COMM_WORLD, &istatus);
-	  
-	  for(j=0; j < nCurObj; j++){	 	
-	    // listen for which integrableObject we need to send the value for
-	    MPI_Recv(&intObjIndexTransfer, 1, MPI_INT, which_node,
-		   TAKE_THIS_TAG_INT, MPI_COMM_WORLD, &istatus); 
-	    angleTransfer = tempZangs[intObjIndexTransfer];
-	    // send the value to the node so it can initialize the object
-	    MPI_Send(&angleTransfer, 1, MPI_REALTYPE, which_node, 
-		     TAKE_THIS_TAG_DOUBLE, MPI_COMM_WORLD);      	  
-	  }
-	}
-      }
-    } else {
-      // I am SLAVE TO THE MASTER
-      for (i=0 ; i < info_->getNGlobalMolecules(); i++) {
-        which_node = info_->getMolToProc(i);
-
-	if (which_node == worldRank) {
-	  
-	  // BUT I OWN THIS MOLECULE!!!
-	  
-	  mol = info_->getMoleculeByGlobalIndex(i);
-
-          if(mol == NULL) {
-            sprintf(painCave.errMsg, 
-                    "RestReader Error: molecule not found on node %d\n", 
-                    worldRank);
-            painCave.isFatal = 1;
-            simError();
-          }
-
-          nCurObj = mol->getNIntegrableObjects();
-	  // send the number of integrableObjects in the molecule
-	  MPI_Send(&nCurObj, 1, MPI_INT, 0,
-		   TAKE_THIS_TAG_INT, MPI_COMM_WORLD);
-	  
-          for (integrableObject = mol->beginIntegrableObject(ii); 
-               integrableObject != NULL; 
-               integrableObject = mol->nextIntegrableObject(ii)){
-	    intObjIndexTransfer = integrableObject->getGlobalIntegrableObjectIndex();
-	    // send the global index of the integrableObject
-	    MPI_Send(&intObjIndexTransfer, 1, MPI_INT, 0,
-		     TAKE_THIS_TAG_INT, MPI_COMM_WORLD);
-	    // listen for the value we want to set locally
-	    MPI_Recv(&angleTransfer, 1, MPI_REALTYPE, 0,
-		     TAKE_THIS_TAG_DOUBLE, MPI_COMM_WORLD, &istatus);
-
-	    integrableObject->setZangle(angleTransfer);
-	  }	
-	}
-      }
+      needPos_ = false; 
     } 
-#endif
-  }
-  
-  void RestReader :: zeroZangle(){
+     
+    needVel_ = false;
+     
+    if (storageLayout & DataStorage::dslAmat || storageLayout & DataStorage::dslElectroFrame) { 
+      needQuaternion_ = true; 
+    } else { 
+      needQuaternion_ = false; 
+    } 
+
+    needAngMom_ = false;
+
+    // We need temporary storage to keep track of all StuntDouble positions
+    // in case some of the restraints are molecular (i.e. if they use
+    // multiple SD positions to determine restrained orientations or positions:
+
+    all_pos_.clear();
+    all_pos_.resize(info_->getNGlobalIntegrableObjects() );
+
+
+    // Restraint files are just standard dump files, but with the reference
+    // structure stored in the first frame (frame 0).
+    // RestReader overloads readSet and explicitly handles all of the
+    // ObjectRestraints in that method:
+
+    readSet(0); 
     
+    // all ObjectRestraints have been handled, now we have to worry about
+    // molecular restraints:
+
+    SimInfo::MoleculeIterator i;
+    Molecule::IntegrableObjectIterator j;
     Molecule* mol;
-    StuntDouble* integrableObject;
-    SimInfo::MoleculeIterator mi;
-    Molecule::IntegrableObjectIterator ii;
+    StuntDouble* sd;
 
-#ifndef IS_MPI
-    // set all zAngles to 0.0
-    for (mol = info_->beginMolecule(mi); mol != NULL; 
-         mol = info_->nextMolecule(mi)) 
+    // no need to worry about parallel molecules, as molecules are not
+    // split across processor boundaries.  Just loop over all molecules
+    // we know about:
+
+    for (mol = info_->beginMolecule(i); mol != NULL; 
+         mol = info_->nextMolecule(i)) {          
+
+      // is this molecule restrained?    
+      GenericData* data = mol->getPropertyByName("Restraint");
       
-      for (integrableObject = mol->beginIntegrableObject(ii); 
-           integrableObject != NULL; 
-           integrableObject = mol->nextIntegrableObject(ii))    
-        integrableObject->setZangle( 0.0 );
-    
-    
-    // MPI Section of code..........
-#else //IS_MPI
-    
-    // first thing first, suspend fatalities.
-    painCave.isEventLoop = 1;
-    
-    int myStatus; // 1 = wakeup & success; 0 = error; -1 = AllDone
-    int haveError;
-    int which_node;
-    
-    haveError = 0;
+      if (data != NULL) {
 
-    for (int i=0 ; i < info_->getNGlobalMolecules(); i++) {
+        // make sure we can reinterpret the generic data as restraint data:
 
-      // Get the Node number which has this atom
-      which_node = info_->getMolToProc(i);
-	
-      // each processor zeroes its own integrable objects
-      if (which_node == worldRank) {
-	mol = info_->getMoleculeByGlobalIndex(i);
-	
-	if(mol == NULL) {
-	  sprintf( painCave.errMsg, 
-		  "Molecule not found on node %i!",
-		  which_node );
-	  haveError = 1;
-	  simError();
-	}
-	
-	for (integrableObject = mol->beginIntegrableObject(ii); 
-	     integrableObject != NULL; 
-	     integrableObject = mol->nextIntegrableObject(ii)){
-	  
-	  integrableObject->setZangle( 0.0 );
-	  
-	}
+        RestraintData* restData= dynamic_cast<RestraintData*>(data);        
+
+        if (restData != NULL) {
+
+          // make sure we can reinterpet the restraint data as a
+          // pointer to a MolecularRestraint:
+
+          MolecularRestraint* mRest = dynamic_cast<MolecularRestraint*>(restData->getData());
+
+          if (mRest != NULL) {          
+
+            // now we need to pack the stunt doubles for the reference
+            // structure:
+
+            std::vector<Vector3d> ref;
+            int count = 0;
+            RealType mass, mTot;
+            Vector3d COM(0.0);
+            
+            mTot = 0.0;
+            
+            // loop over the stunt doubles in this molecule in the order we
+            // will be looping them in the restraint code:
+            
+            for (sd = mol->beginIntegrableObject(j); sd != NULL; 
+                 sd = mol->nextIntegrableObject(j)) {
+              
+              // push back the reference positions of the stunt
+              // doubles from the *globally* sorted array of
+              // positions:
+              
+              ref.push_back( all_pos_[sd->getGlobalIndex()] );
+              
+              mass = sd->getMass();
+              
+              COM = COM + mass * ref[count];
+              mTot = mTot + mass;
+              count = count + 1;
+            }
+            
+            COM /= mTot;
+
+            mRest->setReferenceStructure(ref, COM);         
+
+          }
+        }
       }
     }
- 
-#endif
   }
-  
-} // end namespace oopse
+
+   
+   
+  void RestReader::parseDumpLine(const std::string& line) {        
+    StringTokenizer tokenizer(line); 
+    int nTokens; 
+     
+    nTokens = tokenizer.countTokens(); 
+     
+    if (nTokens < 2) { 
+      sprintf(painCave.errMsg, 
+              "DumpReader Error: Not enough Tokens.\n%s\n", line.c_str()); 
+      painCave.isFatal = 1; 
+      simError(); 
+    } 
+
+    int index = tokenizer.nextTokenAsInt();
+ 
+    StuntDouble* integrableObject = info_->getIOIndexToIntegrableObject(index);
+
+    if (integrableObject == NULL) {
+      return;
+    }   
+
+    std::string type = tokenizer.nextToken(); 
+    int size = type.size();
+    Vector3d pos;
+    Vector3d vel;
+    Quat4d q;
+    Vector3d ji;
+    Vector3d force;
+    Vector3d torque;
+          
+    for(int i = 0; i < size; ++i) {
+      switch(type[i]) {
+        
+        case 'p': {
+            pos[0] = tokenizer.nextTokenAsDouble(); 
+            pos[1] = tokenizer.nextTokenAsDouble(); 
+            pos[2] = tokenizer.nextTokenAsDouble(); 
+            break;
+        }
+        case 'v' : {
+            vel[0] = tokenizer.nextTokenAsDouble(); 
+            vel[1] = tokenizer.nextTokenAsDouble(); 
+            vel[2] = tokenizer.nextTokenAsDouble(); 
+            break;
+        }
+
+        case 'q' : {
+           if (integrableObject->isDirectional()) { 
+              
+             q[0] = tokenizer.nextTokenAsDouble(); 
+             q[1] = tokenizer.nextTokenAsDouble(); 
+             q[2] = tokenizer.nextTokenAsDouble(); 
+             q[3] = tokenizer.nextTokenAsDouble(); 
+              
+             RealType qlen = q.length(); 
+             if (qlen < oopse::epsilon) { //check quaternion is not equal to 0 
+                
+               sprintf(painCave.errMsg, 
+                       "DumpReader Error: initial quaternion error (q0^2 + q1^2 + q2^2 + q3^2) ~ 0\n"); 
+               painCave.isFatal = 1; 
+               simError(); 
+                
+             }  
+              
+             q.normalize(); 
+           }            
+           break;
+        }  
+        case 'j' : {
+          if (integrableObject->isDirectional()) {
+             ji[0] = tokenizer.nextTokenAsDouble(); 
+             ji[1] = tokenizer.nextTokenAsDouble(); 
+             ji[2] = tokenizer.nextTokenAsDouble(); 
+          }
+          break;
+        }  
+        case 'f': {
+          force[0] = tokenizer.nextTokenAsDouble(); 
+          force[1] = tokenizer.nextTokenAsDouble(); 
+          force[2] = tokenizer.nextTokenAsDouble();           
+
+          break;
+        }
+        case 't' : {
+           torque[0] = tokenizer.nextTokenAsDouble(); 
+           torque[1] = tokenizer.nextTokenAsDouble(); 
+           torque[2] = tokenizer.nextTokenAsDouble();           
+
+           break;
+        }
+        default: {
+               sprintf(painCave.errMsg, 
+                       "DumpReader Error: %s is an unrecognized type\n", type.c_str()); 
+               painCave.isFatal = 1; 
+               simError(); 
+          break;   
+        }
+          
+      }
+    }
+     
+    // keep the position in case we need it for a molecular restraint:
+    
+    all_pos_[index] = pos;
+
+    // is this io restrained?    
+    GenericData* data = integrableObject->getPropertyByName("Restraint");
+    ObjectRestraint* oRest;
+
+    if (data != NULL) {
+      // make sure we can reinterpret the generic data as restraint data:
+      RestraintData* restData= dynamic_cast<RestraintData*>(data);        
+      if (restData != NULL) {
+        // make sure we can reinterpet the restraint data as a pointer to
+        // an ObjectRestraint:
+        oRest = dynamic_cast<ObjectRestraint*>(restData->getData());
+        if (oRest != NULL) {          
+          if (integrableObject->isDirectional()) {
+            oRest->setReferenceStructure(pos, q.toRotationMatrix3());
+          } else {                           
+            oRest->setReferenceStructure(pos);
+          }
+        }
+      }
+    }
+
+  }
+   
+
+
+  void RestReader::readFrameProperties(std::istream& inputStream) {
+    inputStream.getline(buffer, bufferSize);
+    std::string line(buffer);
+
+    if (line.find("<FrameData>") == std::string::npos) {
+      sprintf(painCave.errMsg, 
+              "DumpReader Error: Missing <FrameData>\n"); 
+      painCave.isFatal = 1; 
+      simError(); 
+    }
+
+    // restraints don't care about frame data (unless we need to wrap
+    // coordinates, but we'll worry about that later), so 
+    // we'll just scan ahead until the end of the frame data:
+
+    while(inputStream.getline(buffer, bufferSize)) {
+      line = buffer;
+      
+      if(line.find("</FrameData>") != std::string::npos) {
+        break;
+      }
+      
+    }
+
+  }
+
+   
+}//end namespace oopse 

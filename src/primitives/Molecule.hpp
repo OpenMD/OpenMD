@@ -60,6 +60,7 @@
 #include "primitives/Torsion.hpp"
 #include "primitives/Inversion.hpp"
 #include "primitives/CutoffGroup.hpp"
+#include "utils/PropertyMap.hpp"
 
 namespace oopse{
 
@@ -303,7 +304,7 @@ namespace oopse{
       ++i;
       return (i == constraintElems_.end()) ? NULL : *i;    
     }
-    
+        
     /** 
      * Returns the total potential energy of short range interaction
      * of this molecule 
@@ -327,6 +328,44 @@ namespace oopse{
     }
         
     friend std::ostream& operator <<(std::ostream& o, Molecule& mol);
+
+    //below functions are just forward functions
+    /**
+     * Adds property into property map
+     * @param genData GenericData to be added into PropertyMap
+     */
+    void addProperty(GenericData* genData);
+
+    /**
+     * Removes property from PropertyMap by name
+     * @param propName the name of property to be removed
+     */
+    void removeProperty(const std::string& propName);
+
+    /**
+     * clear all of the properties
+     */
+    void clearProperties();
+
+    /**
+     * Returns all names of properties
+     * @return all names of properties
+     */
+    std::vector<std::string> getPropertyNames();
+
+    /**
+     * Returns all of the properties in PropertyMap
+     * @return all of the properties in PropertyMap
+     */      
+    std::vector<GenericData*> getProperties();
+
+    /**
+     * Returns property 
+     * @param propName name of property
+     * @return a pointer point to property with propName. If no property named propName
+     * exists, return NULL
+     */      
+    GenericData* getPropertyByName(const std::string& propName);
     
   private:
     
@@ -344,6 +383,8 @@ namespace oopse{
     std::vector<ConstraintElem*> constraintElems_;
     int stampId_;
     std::string moleculeName_;
+    PropertyMap properties_;
+
   };
 
 } //namespace oopse

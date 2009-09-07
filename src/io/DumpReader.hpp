@@ -66,7 +66,7 @@ namespace oopse {
     DumpReader(SimInfo* info, const std::string & filename); 
     //DumpReader(SimInfo * info, istream & is); 
  
-    ~DumpReader(); 
+    virtual ~DumpReader(); 
  
     /** Returns the number of frames in the dump file*/ 
     int getNFrames(); 
@@ -75,17 +75,17 @@ namespace oopse {
       needCOMprops_ = ncp;
     }
          
-    void readFrame(int whichFrame); 
+    virtual void readFrame(int whichFrame); 
  
-  private: 
+  protected: 
  
     void scanFile(); 
  
     void readSet(int whichFrame); 
  
-    void parseDumpLine(const std::string&); 
+    virtual void parseDumpLine(const std::string&); 
  
-    void readFrameProperties(std::istream& inputStream);
+    virtual void readFrameProperties(std::istream& inputStream);
 
     void readStuntDoubles(std::istream& inputStream);                  
          

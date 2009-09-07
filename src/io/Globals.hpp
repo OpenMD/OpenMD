@@ -51,6 +51,7 @@
 
 #include "types/Component.hpp"
 #include "types/ZconsStamp.hpp"
+#include "types/RestraintStamp.hpp"
 #include "types/MoleculeStamp.hpp"
 #include "utils/ParameterManager.hpp"
 
@@ -98,15 +99,11 @@ namespace oopse {
     DeclareParameter(ZconsGap, RealType);
     DeclareParameter(ZconsFixtime, RealType);
     DeclareParameter(ZconsUsingSMD, bool);
-    DeclareParameter(UseSolidThermInt, bool);
-    DeclareParameter(UseLiquidThermInt, bool);
+    DeclareParameter(UseThermodynamicIntegration, bool);
     DeclareParameter(ThermodynamicIntegrationLambda, RealType);
     DeclareParameter(ThermodynamicIntegrationK, RealType);
     DeclareParameter(ForceFieldVariant, std::string);
     DeclareParameter(ForceFieldFileName, std::string);
-    DeclareParameter(ThermIntDistSpringConst, RealType);
-    DeclareParameter(ThermIntThetaSpringConst, RealType);
-    DeclareParameter(ThermIntOmegaSpringConst, RealType);
     DeclareParameter(SurfaceTension, RealType);
     DeclareParameter(PrintPressureTensor, bool);
     DeclareParameter(TaggedAtomPair, intPair);
@@ -143,17 +140,13 @@ namespace oopse {
     DeclareParameter(RNEMD_swapType, std::string);
     DeclareParameter(RNEMD_objectSelection, std::string);
     DeclareParameter(UseRestraints, bool);
-    DeclareParameter(Restraint_objectSelection, std::string);
-    DeclareParameter(Restraint_type, std::string);
     DeclareParameter(Restraint_file, std::string);
-    DeclareParameter(Restraint_DisplacementSpringConstant, RealType);
-    DeclareParameter(Restraint_RollSpringConstant, RealType);  // phi
-    DeclareParameter(Restraint_PitchSpringConstant, RealType); // theta
-    DeclareParameter(Restraint_YawSpringConstant, RealType);   // psi
+
     
   public:
     bool addComponent(Component* comp);
     bool addZConsStamp(ZConsStamp* zcons);
+    bool addRestraintStamp(RestraintStamp* rest);
     bool addMoleculeStamp(MoleculeStamp* molStamp);
     int getNComponents() {return components_.size();}
     std::vector<Component*> getComponents() {return components_;}
@@ -162,12 +155,19 @@ namespace oopse {
     int getNZconsStamps() {return zconstraints_.size();}
     std::vector<ZConsStamp*> getZconsStamps() {return zconstraints_;}
     ZConsStamp* getZconsStampAt(int index) {return zconstraints_.at(index);}    
+
+    int getNRestraintStamps() {return restraints_.size();}
+    std::vector<RestraintStamp*> getRestraintStamps() {return restraints_;}
+    RestraintStamp* getRestraintStampAt(int index) {return restraints_.at(index);}    
+
+    //std::string getRestraint_file(){
     
     virtual void validate();
   private:
     
     std::vector<Component*> components_;
     std::vector<ZConsStamp*> zconstraints_;    
+    std::vector<RestraintStamp*> restraints_;    
     std::map<std::string, MoleculeStamp*> moleculeStamps_;
     std::pair<int, int> taggedAtomPair_;
 };

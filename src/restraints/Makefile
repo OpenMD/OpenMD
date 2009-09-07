@@ -1,10 +1,13 @@
 Package = restraints
 
 Source    = \
-	Restraints.cpp \
+	ObjectRestraint.cpp \
+	MolecularRestraint.cpp \
+	RestraintForceManager.cpp \
 	ThermoIntegrationForceManager.cpp
 
 ParallelSource = \
+	RestraintForceManager.cpp \
 	ThermoIntegrationForceManager.cpp
 
 RmiSource =

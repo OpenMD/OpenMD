@@ -42,21 +42,34 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "types/ZconsStamp.hpp"
+#include "types/RestraintStamp.hpp"
 
 namespace oopse {
-  ZConsStamp::ZConsStamp() {
-    DefineParameter(MolIndex, "molIndex");
-    DefineOptionalParameter(Zpos, "zPos");
-    DefineOptionalParameter(Kratio, "kRatio");
-    DefineOptionalParameter(CantVel, "cantVel");
+  RestraintStamp::RestraintStamp() {
+    DefineParameter(Type, "restraintType");
+
+    DefineOptionalParameter(MolIndex, "molIndex");
+    DefineOptionalParameter(ObjectSelection, "objectSelection");
+    DefineOptionalParameter(DisplacementSpringConstant, "displacementSpringConstant");
+    DefineOptionalParameter(TwistSpringConstant, "twistSpringConstant");
+    DefineOptionalParameter(SwingXSpringConstant, "swingXSpringConstant");
+    DefineOptionalParameter(SwingYSpringConstant, "swingYSpringConstant");
+
+    DefineOptionalParameter(RestrainedTwistAngle, "restrainedTwistAngle");
+    DefineOptionalParameter(RestrainedSwingXAngle, "restrainedSwingXAngle");
+    DefineOptionalParameter(RestrainedSwingYAngle, "restrainedSwingYAngle");
   }
   
-  ZConsStamp::~ZConsStamp() {    
+  RestraintStamp::~RestraintStamp() {    
   }
   
-  void ZConsStamp::validate() {
+  void RestraintStamp::validate() {
     DataHolder::validate();
-    CheckParameter(MolIndex, isNonNegative());
+    CheckParameter(Type, isEqualIgnoreCase("Object") || isEqualIgnoreCase("Molecular"));
+    CheckParameter(DisplacementSpringConstant, isNonNegative());
+    CheckParameter(TwistSpringConstant, isNonNegative());
+    CheckParameter(SwingXSpringConstant, isNonNegative());
+    CheckParameter(SwingYSpringConstant, isNonNegative());    
+    // CheckParameter(MolIndex, isNonNegative());
   }
 }

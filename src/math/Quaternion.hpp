@@ -49,8 +49,10 @@
 #ifndef MATH_QUATERNION_HPP
 #define MATH_QUATERNION_HPP
 
-#include "math/Vector.hpp"
+#include "math/Vector3.hpp"
 #include "math/SquareMatrix.hpp"
+#define ISZERO(a,eps) ( (a)>-(eps) && (a)<(eps) )
+const RealType tiny=1.0e-6;     
 
 namespace oopse{
 
@@ -64,6 +66,7 @@ namespace oopse{
    */
   template<typename Real>
   class Quaternion : public Vector<Real, 4> {
+
   public:
     Quaternion() : Vector<Real, 4>() {}
 
@@ -78,18 +81,18 @@ namespace oopse{
     /** Constructs and initializes a Quaternion from a  Vector<Real,4> */     
     Quaternion(const Vector<Real,4>& v) 
       : Vector<Real, 4>(v){
-      }
+    }
 
     /** copy assignment */
     Quaternion& operator =(const Vector<Real, 4>& v){
       if (this == & v)
 	return *this;
-
+      
       Vector<Real, 4>::operator=(v);
-                
+      
       return *this;
     }
-
+    
     /**
      * Returns the value of the first element of this quaternion.
      * @return the value of the first element of this quaternion
@@ -242,17 +245,302 @@ namespace oopse{
      * Returns the conjugate quaternion of this quaternion
      * @return the conjugate quaternion of this quaternion
      */
-    Quaternion<Real> conjugate() {
+    Quaternion<Real> conjugate() const {
       return Quaternion<Real>(w(), -x(), -y(), -z());            
     }
 
+
+    /**
+       return rotation angle from -PI to PI 
+    */
+    inline Real get_rotation_angle() const{
+      if( w < (Real)0.0 )
+        return 2.0*atan2(-sqrt( x()*x() + y()*y() + z()*z() ), -w() );
+      else
+        return 2.0*atan2( sqrt( x()*x() + y()*y() + z()*z() ),  w() );
+    }
+
+    /**
+       create a unit quaternion from axis angle representation
+    */
+    Quaternion<Real> fromAxisAngle(const Vector3<Real>& axis, 
+                                   const Real& angle){
+      Vector3<Real> v(axis);
+      v.normalize();
+      Real half_angle = angle*0.5;
+      Real sin_a = sin(half_angle);
+      *this = Quaternion<Real>(cos(half_angle), 
+                               v.x()*sin_a, 
+                               v.y()*sin_a, 
+                               v.z()*sin_a);
+    }
+    
+    /**
+       convert a quaternion to axis angle representation, 
+       preserve the axis direction and angle from -PI to +PI
+    */
+    void toAxisAngle(Vector3<Real>& axis, Real& angle)const {
+      Real vl = sqrt( x()*x() + y()*y() + z()*z() );
+      if( vl > tiny ) {
+        Real ivl = 1.0/vl;
+        axis.x() = x() * ivl;
+        axis.y() = y() * ivl;
+        axis.z() = z() * ivl;
+
+        if( w() < 0 )
+          angle = 2.0*atan2(-vl, -w()); //-PI,0 
+        else
+          angle = 2.0*atan2( vl,  w()); //0,PI 
+      } else {
+        axis = Vector3<Real>(0.0,0.0,0.0);
+        angle = 0.0;
+      }
+    }
+
+    /**
+       shortest arc quaternion rotate one vector to another by shortest path.
+       create rotation from -> to, for any length vectors.
+    */
+    Quaternion<Real> fromShortestArc(const Vector3d& from, 
+                                     const Vector3d& to ) {
+      
+      Vector3d c( cross(from,to) );
+      *this = Quaternion<Real>(dot(from,to), 
+                               c.x(), 
+                               c.y(),
+                               c.z());
+
+      this->normalize();    // if "from" or "to" not unit, normalize quat
+      w += 1.0f;            // reducing angle to halfangle
+      if( w <= 1e-6 ) {     // angle close to PI
+        if( ( from.z()*from.z() ) > ( from.x()*from.x() ) ) {
+          this->data_[0] =  w;    
+          this->data_[1] =  0.0;       //cross(from , Vector3d(1,0,0))
+          this->data_[2] =  from.z();
+          this->data_[3] = -from.y();
+        } else {
+          this->data_[0] =  w;
+          this->data_[1] =  from.y();  //cross(from, Vector3d(0,0,1))
+          this->data_[2] = -from.x();
+          this->data_[3] =  0.0;
+        }
+      }
+      this->normalize(); 
+    }
+
+    Real ComputeTwist(const Quaternion& q) {
+      return  (Real)2.0 * atan2(q.z(), q.w());
+    }
+
+    void RemoveTwist(Quaternion& q) {
+      Real t = ComputeTwist(q);
+      Quaternion rt = fromAxisAngle(V3Z, t);
+      
+      q *= rt.inverse();
+    }
+
+    void getTwistSwingAxisAngle(Real& twistAngle, Real& swingAngle, 
+                                Vector3<Real>& swingAxis) {
+      
+      twistAngle = (Real)2.0 * atan2(z(), w());
+      Quaternion rt, rs;
+      rt.fromAxisAngle(V3Z, twistAngle);
+      rs = *this * rt.inverse();
+      
+      Real vl = sqrt( rs.x()*rs.x() + rs.y()*rs.y() + rs.z()*rs.z() );
+      if( vl > tiny ) {
+        Real ivl = 1.0 / vl;
+        swingAxis.x() = rs.x() * ivl;
+        swingAxis.y() = rs.y() * ivl;
+        swingAxis.z() = rs.z() * ivl;
+
+        if( rs.w() < 0.0 )
+          swingAngle = 2.0*atan2(-vl, -rs.w()); //-PI,0 
+        else
+          swingAngle = 2.0*atan2( vl,  rs.w()); //0,PI 
+      } else {
+        swingAxis = Vector3<Real>(1.0,0.0,0.0);
+        swingAngle = 0.0;
+      }           
+    }
+
+
+    Vector3<Real> rotate(const Vector3<Real>& v) {
+
+      Quaternion<Real> q(v.x() * w() + v.z() * y() - v.y() * z(),
+                         v.y() * w() + v.x() * z() - v.z() * x(),
+                         v.z() * w() + v.y() * x() - v.x() * y(),
+                         v.x() * x() + v.y() * y() + v.z() * z());
+
+      return Vector3<Real>(w()*q.x() + x()*q.w() + y()*q.z() - z()*q.y(),
+                           w()*q.y() + y()*q.w() + z()*q.x() - x()*q.z(),
+                           w()*q.z() + z()*q.w() + x()*q.y() - y()*q.x())*
+        ( 1.0/this->lengthSquare() );      
+    }   
+
+    Quaternion<Real>& align (const Vector3<Real>& V1,
+                             const Vector3<Real>& V2) {
+
+      // If V1 and V2 are not parallel, the axis of rotation is the unit-length
+      // vector U = Cross(V1,V2)/Length(Cross(V1,V2)).  The angle of rotation,
+      // A, is the angle between V1 and V2.  The quaternion for the rotation is
+      // q = cos(A/2) + sin(A/2)*(ux*i+uy*j+uz*k) where U = (ux,uy,uz).
+      //
+      // (1) Rather than extract A = acos(Dot(V1,V2)), multiply by 1/2, then
+      //     compute sin(A/2) and cos(A/2), we reduce the computational costs
+      //     by computing the bisector B = (V1+V2)/Length(V1+V2), so cos(A/2) =
+      //     Dot(V1,B).
+      //
+      // (2) The rotation axis is U = Cross(V1,B)/Length(Cross(V1,B)), but
+      //     Length(Cross(V1,B)) = Length(V1)*Length(B)*sin(A/2) = sin(A/2), in
+      //     which case sin(A/2)*(ux*i+uy*j+uz*k) = (cx*i+cy*j+cz*k) where
+      //     C = Cross(V1,B).
+      //
+      // If V1 = V2, then B = V1, cos(A/2) = 1, and U = (0,0,0).  If V1 = -V2,
+      // then B = 0.  This can happen even if V1 is approximately -V2 using
+      // floating point arithmetic, since Vector3::Normalize checks for
+      // closeness to zero and returns the zero vector accordingly.  The test
+      // for exactly zero is usually not recommend for floating point
+      // arithmetic, but the implementation of Vector3::Normalize guarantees
+      // the comparison is robust.  In this case, the A = pi and any axis
+      // perpendicular to V1 may be used as the rotation axis.
+
+      Vector3<Real> Bisector = V1 + V2;
+      Bisector.normalize();
+
+      Real CosHalfAngle = dot(V1,Bisector);
+
+      this->data_[0] = CosHalfAngle;
+
+      if (CosHalfAngle != (Real)0.0) {
+        Vector3<Real> Cross = cross(V1, Bisector);
+        this->data_[1] = Cross.x();
+        this->data_[2] = Cross.y();
+        this->data_[3] = Cross.z();
+      } else {
+        Real InvLength;
+        if (fabs(V1[0]) >= fabs(V1[1])) {
+          // V1.x or V1.z is the largest magnitude component
+          InvLength = (Real)1.0/sqrt(V1[0]*V1[0] + V1[2]*V1[2]);
+
+          this->data_[1] = -V1[2]*InvLength;
+          this->data_[2] = (Real)0.0;
+          this->data_[3] = +V1[0]*InvLength;
+        } else {
+          // V1.y or V1.z is the largest magnitude component
+          InvLength = (Real)1.0 / sqrt(V1[1]*V1[1] + V1[2]*V1[2]);
+          
+          this->data_[1] = (Real)0.0;
+          this->data_[2] = +V1[2]*InvLength;
+          this->data_[3] = -V1[1]*InvLength;
+        }
+      }
+      return *this;
+    }
+
+    void toTwistSwing ( Real& tw, Real& sx, Real& sy ) {
+      
+      // First test if the swing is in the singularity:
+
+      if ( ISZERO(z(),tiny) && ISZERO(w(),tiny) ) { sx=sy=M_PI; tw=0; return; }
+
+      // Decompose into twist-swing by solving the equation:
+      //
+      //                       Qtwist(t*2) * Qswing(s*2) = q
+      //
+      // note: (x,y) is the normalized swing axis (x*x+y*y=1)
+      //
+      //          ( Ct 0 0 St ) * ( Cs xSs ySs 0 ) = ( qw qx qy qz )
+      //  ( CtCs  xSsCt-yStSs  xStSs+ySsCt  StCs ) = ( qw qx qy qz )      (1)
+      // From (1): CtCs / StCs = qw/qz => Ct/St = qw/qz => tan(t) = qz/qw (2)
+      //
+      // The swing rotation/2 s comes from:
+      //
+      // From (1): (CtCs)^2 + (StCs)^2 = qw^2 + qz^2 =>  
+      //                                       Cs = sqrt ( qw^2 + qz^2 ) (3)
+      //
+      // From (1): (xSsCt-yStSs)^2 + (xStSs+ySsCt)^2 = qx^2 + qy^2 => 
+      //                                       Ss = sqrt ( qx^2 + qy^2 ) (4)
+      // From (1):  |SsCt -StSs| |x| = |qx|
+      //            |StSs +SsCt| |y|   |qy|                              (5)
+
+      Real qw, qx, qy, qz;
+      
+      if ( w()<0 ) {
+        qw=-w(); 
+        qx=-x(); 
+        qy=-y(); 
+        qz=-z();
+      } else {
+        qw=w(); 
+        qx=x(); 
+        qy=y(); 
+        qz=z();
+      }
+      
+      Real t = atan2 ( qz, qw ); // from (2)
+      Real s = atan2( sqrt(qx*qx+qy*qy), sqrt(qz*qz+qw*qw) ); // from (3)
+                                                              // and (4)
+
+      Real x=0.0, y=0.0, sins=sin(s);
+
+      if ( !ISZERO(sins,tiny) ) {
+        Real sint = sin(t);
+        Real cost = cos(t);
+        
+        // by solving the linear system in (5):
+        y = (-qx*sint + qy*cost)/sins;
+        x = ( qx*cost + qy*sint)/sins;
+      }
+
+      tw = (Real)2.0*t;
+      sx = (Real)2.0*x*s;
+      sy = (Real)2.0*y*s;
+    }
+
+    void toSwingTwist(Real& sx, Real& sy, Real& tw ) {
+
+      // Decompose q into swing-twist using a similar development as
+      // in function toTwistSwing
+
+      if ( ISZERO(z(),tiny) && ISZERO(w(),tiny) ) { sx=sy=M_PI; tw=0; }
+      
+      Real qw, qx, qy, qz;
+      if ( w() < 0 ){
+        qw=-w(); 
+        qx=-x(); 
+        qy=-y(); 
+        qz=-z();
+      } else {
+        qw=w(); 
+        qx=x(); 
+        qy=y(); 
+        qz=z(); 
+      }
+
+      // Get the twist t:
+      Real t = 2.0 * atan2(qz,qw);
+      
+      Real bet = atan2( sqrt(qx*qx+qy*qy), sqrt(qz*qz+qw*qw) );
+      Real gam = t/2.0;
+      Real sinc = ISZERO(bet,tiny)? 1.0 : sin(bet)/bet;
+      Real singam = sin(gam);
+      Real cosgam = cos(gam);
+
+      sx = Real( (2.0/sinc) * (cosgam*qx - singam*qy) );
+      sy = Real( (2.0/sinc) * (singam*qx + cosgam*qy) );
+      tw = Real( t );
+    }
+      
+    
+    
     /**
      * Returns the corresponding rotation matrix (3x3)
      * @return a 3x3 rotation matrix
      */
     SquareMatrix<Real, 3> toRotationMatrix3() {
       SquareMatrix<Real, 3> rotMat3;
-
+      
       Real w2;
       Real x2;
       Real y2;

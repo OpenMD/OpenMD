@@ -28,6 +28,7 @@ tokens
   COMPONENT   = "component";
   MOLECULE    = "molecule";
   ZCONSTRAINT = "zconstraint";
+  RESTRAINT   = "restraint";
   ATOM        = "atom";
   BOND        = "bond";
   BEND        = "bend";
@@ -51,6 +52,7 @@ statement : assignment
           | componentblock
           | moleculeblock
           | zconstraintblock
+          | restraintblock
           ;
             
 assignment  : ID ASSIGNEQUAL^ constant SEMICOLON!
@@ -66,6 +68,9 @@ componentblock  : COMPONENT^ LCURLY! (assignment)* RCURLY {#RCURLY->setType(ENDB
                 ;
     
 zconstraintblock  : ZCONSTRAINT^ LCURLY! (assignment)* RCURLY {#RCURLY->setType(ENDBLOCK);}
+                  ;
+
+restraintblock  : RESTRAINT^ LCURLY! (assignment)* RCURLY {#RCURLY->setType(ENDBLOCK);}
                   ;
   
 moleculeblock : MOLECULE^ LCURLY! (moleculestatement)*  RCURLY {#RCURLY->setType(ENDBLOCK);}
