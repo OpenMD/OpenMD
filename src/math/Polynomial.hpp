@@ -316,7 +316,7 @@ namespace oopse {
       
       std::vector<complex<Real> > roots;
       for (int i = 0; i < rank; i++) {
-        roots.push_back(complex(reals(i), imags(i)));
+        roots.push_back(complex<Real>(reals(i), imags(i)));
       }
 
       return roots;
@@ -633,8 +633,8 @@ namespace oopse {
     Polynomial<Real> p();
     
     typename Polynomial<Real>::const_iterator i;
-    ExponentType exponent;
-    CoefficientType coefficient;
+    int exponent;
+    Real coefficient;
     
     for (i =  p1.begin(); i  != p1.end(); ++i) {
       exponent = i->first;
