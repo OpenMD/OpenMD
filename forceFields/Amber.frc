@@ -21,6 +21,7 @@ Mg+2            24.305
 Ca+2            40.080
 Zn+2            65.400
 Cl-             35.450
+EP		0.0
 end BaseAtomTypes
 
 
@@ -974,6 +975,22 @@ D3P-P                   P
 D3P-OP                  O2
 TIP3P-O                 OW
 TIP3P-H                 HW
+O_TIP3P                 OW         
+O_TIP4P         	OW
+O_TIP4P-Ew		OW
+O_TIP5P			OW
+O_TIP5P-E		OW
+O_SPCE			OW       
+O_SPC          		OW 
+H_TIP3P        		HW
+H_TIP4P       		HW
+H_TIP4P-Ew    		HW
+H_TIP5P       		HW
+H_SPCE        		HW
+H_SPC         		HW
+EP_TIP4P        	EP
+EP_TIP4P-Ew    		EP 
+EP_TIP5P        	EP
 end AtomTypes
 
 
@@ -1878,6 +1895,18 @@ D3P-P                   0.9000
 D3P-OP                  -0.8200
 TIP3P-O                -0.834
 TIP3P-H                 0.417
+O_TIP3P		-0.834
+O_SPCE          -0.8476
+O_SPC           -0.82
+H_TIP3P         0.417
+H_TIP4P         0.520
+H_TIP4P-Ew      0.52422
+H_TIP5P         0.241
+H_SPCE          0.4238
+H_SPC           0.42
+EP_TIP4P        -1.040
+EP_TIP4P-Ew     -1.04844
+EP_TIP5P        -0.241
 Li+                     1.000
 Na+                     1.000
 K+                      1.000
@@ -1914,6 +1943,13 @@ N*		0.170000	3.249999
 N2		0.170000	3.249999
 N3		0.170000	3.340870
 OW		0.152000	3.150752
+O_TIP3P         0.1521          3.15061 
+O_TIP4P         0.1550          3.15365 
+O_TIP4P-Ew      0.16275         3.16435
+O_TIP5P         0.16            3.12   
+O_TIP5P-E       0.178           3.097   
+O_SPCE          0.15532         3.16549
+O_SPC           0.15532         3.16549
 OH		0.210400	3.066473
 OS		0.170000	3.000012
 O		0.210000	2.959922
