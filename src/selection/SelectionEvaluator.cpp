@@ -45,24 +45,31 @@
 #include "primitives/DirectionalAtom.hpp"
 #include "primitives/RigidBody.hpp"
 #include "primitives/Molecule.hpp"
+#include "io/basic_ifstrstream.hpp"
 
 namespace oopse {
 
 
   SelectionEvaluator::SelectionEvaluator(SimInfo* si) 
-    : info(si), nameFinder(info), distanceFinder(info), indexFinder(info), isLoaded_(false){
-    
-      nStuntDouble = info->getNGlobalAtoms() + info->getNRigidBodies();
+    : info(si), nameFinder(info), distanceFinder(info), indexFinder(info), 
+      isLoaded_(false){    
+      nStuntDouble = info->getNGlobalAtoms() + info->getNGlobalRigidBodies();
     }            
 
-  bool SelectionEvaluator::loadScript(const std::string& filename, const std::string& script) {
+  bool SelectionEvaluator::loadScript(const std::string& filename, 
+                                      const std::string& script) {
     clearDefinitionsAndLoadPredefined();
     this->filename = filename;
     this->script = script;
     if (! compiler.compile(filename, script)) {
       error = true;
       errorMessage = compiler.getErrorMessage();
-      std::cerr << "SelectionCompiler Error: " << errorMessage << std::endl;
+
+      sprintf( painCave.errMsg,
+               "SelectionCompiler Error: %s\n", errorMessage.c_str());
+      painCave.severity = OOPSE_ERROR;
+      painCave.isFatal = 1;
+      simError();
       return false;
     }
 
@@ -100,12 +107,12 @@ namespace oopse {
     return loadScriptFileInternal(filename);
   }
 
-  bool SelectionEvaluator::loadScriptFileInternal(const  std::string & filename) {
-    std::ifstream ifs(filename.c_str());
+  bool SelectionEvaluator::loadScriptFileInternal(const std::string & filename) {
+    ifstrstream ifs(filename.c_str());
     if (!ifs.is_open()) {
       return false;
     }
-
+    
     const int bufferSize = 65535;
     char buffer[bufferSize];
     std::string script;
@@ -114,7 +121,7 @@ namespace oopse {
     }
     return loadScript(filename, script);
   }
-
+  
   void SelectionEvaluator::instructionDispatchLoop(OOPSEBitSet& bs){
     
     while ( pc < aatoken.size()) {
@@ -136,10 +143,11 @@ namespace oopse {
 
   }
 
-  OOPSEBitSet SelectionEvaluator::expression(const std::vector<Token>& code, int pcStart) {
+  OOPSEBitSet SelectionEvaluator::expression(const std::vector<Token>& code, 
+                                             int pcStart) {
     OOPSEBitSet bs;
-    std::stack<OOPSEBitSet> stack;
-    
+    std::stack<OOPSEBitSet> stack; 
+   
     for (int pc = pcStart; pc < code.size(); ++pc) {
       Token instruction = code[pc];
 
@@ -171,7 +179,6 @@ namespace oopse {
         stack.top().flip();
         break;
       case Token::within:
-
         withinInstruction(instruction, stack.top());
         break;
 	//case Token::selected:
@@ -220,22 +227,26 @@ namespace oopse {
     Atom* atom;
     Molecule::RigidBodyIterator rbIter;
     RigidBody* rb;
-    
-    for (mol = info->beginMolecule(mi); mol != NULL; mol = info->nextMolecule(mi)) {
+
+    for (mol = info->beginMolecule(mi); mol != NULL; 
+         mol = info->nextMolecule(mi)) {
 
       for(atom = mol->beginAtom(ai); atom != NULL; atom = mol->nextAtom(ai)) {
 	compareProperty(atom, bs, property, comparator, comparisonValue);
       }
-        
-      for (rb = mol->beginRigidBody(rbIter); rb != NULL; rb = mol->nextRigidBody(rbIter)) {
-	compareProperty(rb, bs, property, comparator, comparisonValue);
-      }        
+     
+      for (rb = mol->beginRigidBody(rbIter); rb != NULL; 
+           rb = mol->nextRigidBody(rbIter)) {
+     	compareProperty(rb, bs, property, comparator, comparisonValue);
+      }
     }
 
     return bs;
   }
 
-  void SelectionEvaluator::compareProperty(StuntDouble* sd, OOPSEBitSet& bs, int property, int comparator, float comparisonValue) {
+  void SelectionEvaluator::compareProperty(StuntDouble* sd, OOPSEBitSet& bs, 
+                                           int property, int comparator, 
+                                           float comparisonValue) {
     RealType propertyValue = 0.0;
     switch (property) {
     case Token::mass:
@@ -290,10 +301,11 @@ namespace oopse {
     }
     if (match)
       bs.setBitOn(sd->getGlobalIndex());
-
+    
   }
 
-  void SelectionEvaluator::withinInstruction(const Token& instruction, OOPSEBitSet& bs){
+  void SelectionEvaluator::withinInstruction(const Token& instruction, 
+                                             OOPSEBitSet& bs){
     
     boost::any withinSpec = instruction.value;
     float distance;
@@ -308,19 +320,20 @@ namespace oopse {
     
     bs = distanceFinder.find(bs, distance);            
   }
-
+  
   void SelectionEvaluator::define() {
     assert(statement.size() >= 3);
-
+    
     std::string variable = boost::any_cast<std::string>(statement[1].value);
-
-    variables.insert(VariablesType::value_type(variable, expression(statement, 2)));
+    
+    variables.insert(VariablesType::value_type(variable, 
+                                               expression(statement, 2)));
   }
-
+  
 
   /** @todo */
   void SelectionEvaluator::predefine(const std::string& script) {
-
+    
     if (compiler.compile("#predefine", script)) {
       std::vector<std::vector<Token> > aatoken = compiler.getAatokenCompiled();
       if (aatoken.size() != 1) {
@@ -331,31 +344,30 @@ namespace oopse {
       std::vector<Token> statement = aatoken[0];
       if (statement.size() > 2) {
 	int tok = statement[1].tok;
-	if (tok == Token::identifier || (tok & Token::predefinedset) == Token::predefinedset) {
+	if (tok == Token::identifier || 
+            (tok & Token::predefinedset) == Token::predefinedset) {
 	  std::string variable = boost::any_cast<std::string>(statement[1].value);
 	  variables.insert(VariablesType::value_type(variable, statement));
-
+          
 	} else {
 	  evalError("invalid variable name:" + script);
 	}
       }else {
 	evalError("bad predefinition length:" + script);
-      }
-
+      }      
         
     } else {
       evalError("predefined set compile error:" + script +
 		"\ncompile error:" + compiler.getErrorMessage());
     }
-
   }
 
   void SelectionEvaluator::select(OOPSEBitSet& bs){
     bs = expression(statement, 1);
   }
-
+  
   OOPSEBitSet SelectionEvaluator::lookupValue(const std::string& variable){
-
+    
     OOPSEBitSet bs(nStuntDouble);
     std::map<std::string, boost::any>::iterator i = variables.find(variable);
     
@@ -370,14 +382,12 @@ namespace oopse {
     } else {
       unrecognizedIdentifier(variable);
     }
-
+    
     return bs;
   }
-
-  OOPSEBitSet SelectionEvaluator::nameInstruction(const std::string& name){
-    
-    return nameFinder.match(name);
-
+  
+  OOPSEBitSet SelectionEvaluator::nameInstruction(const std::string& name){    
+    return nameFinder.match(name);    
   }    
 
   bool SelectionEvaluator::containDynamicToken(const std::vector<Token>& tokens){
@@ -387,7 +397,7 @@ namespace oopse {
 	return true;
       }
     }
-
+    
     return false;
   }    
 

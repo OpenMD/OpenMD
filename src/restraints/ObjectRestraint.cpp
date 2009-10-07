@@ -48,10 +48,13 @@ namespace oopse {
     pot_ = 0.0;
     
     if (restType_ & rtDisplacement) {
-      Vector3d del = struc - refPos_;  
+      Vector3d del = struc - refPos_;
+      RealType r = del.length();  
       Vector3d frc = -kDisp_ * del;
-      pot_ += 0.5 * kDisp_ * del.lengthSquare();
+      RealType p = 0.5 * kDisp_ * del.lengthSquare();
+      pot_ += p;
       force_ = frc * scaleFactor_;
+      restInfo_[rtDisplacement] = std::make_pair(r,p);
     }
   }
     
@@ -107,8 +110,6 @@ namespace oopse {
         restInfo_[rtSwingY] = std::make_pair(swingY, p);
       }
 
-      std::cerr << "sw = " << swingAngle << " tw = " << twistAngle << "\n";
-      std::cerr << "tbod = " << tBody << "\n";
       Vector3d tLab = A.transpose() * tBody;      
       torque_ = tLab * scaleFactor_;      
     }

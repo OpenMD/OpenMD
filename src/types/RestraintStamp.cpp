@@ -58,6 +58,7 @@ namespace oopse {
     DefineOptionalParameter(RestrainedTwistAngle, "restrainedTwistAngle");
     DefineOptionalParameter(RestrainedSwingXAngle, "restrainedSwingXAngle");
     DefineOptionalParameter(RestrainedSwingYAngle, "restrainedSwingYAngle");
+    DefineOptionalParameterWithDefaultValue(Print, "print", true);
   }
   
   RestraintStamp::~RestraintStamp() {    

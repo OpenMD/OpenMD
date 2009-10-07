@@ -47,6 +47,8 @@
 
 #include "selection/SelectionToken.hpp"
 #include "selection/TokenMap.hpp"
+#include "brains/SimInfo.hpp"
+
 namespace oopse {
 
 
@@ -148,7 +150,13 @@ namespace oopse {
     bool isNameValid(const std::string& name);
 
     bool compileError(const std::string& errorMsg) {
-      std::cerr << "SelectionCompiler Error: " << errorMsg << std::endl;
+
+      sprintf( painCave.errMsg,
+               "SelectionCompiler Error: %s\n", errorMsg.c_str());
+      painCave.severity = OOPSE_ERROR;
+      painCave.isFatal = 1;
+      simError();
+
       error = true;
       this->errorMessage = errorMsg;
       return false;

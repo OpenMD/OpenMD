@@ -43,7 +43,8 @@
 #include "utils/StringUtils.hpp"
 namespace oopse {
 
-  bool SelectionCompiler::compile(const std::string& filename, const std::string& script) {
+  bool SelectionCompiler::compile(const std::string& filename, 
+                                  const std::string& script) {
 
     this->filename = filename;
     this->script = script;

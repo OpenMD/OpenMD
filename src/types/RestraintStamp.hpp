@@ -55,6 +55,7 @@ namespace oopse {
     DeclareParameter(RestrainedTwistAngle, RealType);
     DeclareParameter(RestrainedSwingXAngle, RealType);
     DeclareParameter(RestrainedSwingYAngle, RealType);
+    DeclareParameter(Print, bool);
   public:
     RestraintStamp();
     virtual ~RestraintStamp();

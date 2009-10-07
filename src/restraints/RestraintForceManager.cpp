@@ -78,8 +78,8 @@ namespace oopse {
       restTime_ = simParam->getStatusTime();
     } else {
       sprintf(painCave.errMsg,
-              "Restraint warning: If you use restraints without setting\n",
-              "\tstatusTime, no restraint data will be written to the rest\n",
+              "Restraint warning: If you use restraints without setting\n"
+              "\tstatusTime, no restraint data will be written to the rest\n"
               "\tfile.\n");
       painCave.isFatal = 0;
       simError();
@@ -148,6 +148,9 @@ namespace oopse {
         if (stamp[i]->haveRestrainedSwingXAngle()) {
           rest->setRestrainedSwingXAngle(stamp[i]->getRestrainedSwingXAngle() * M_PI/180.0);
         }
+        if (stamp[i]->havePrint()) {
+          rest->setPrintRestraint(stamp[i]->getPrint());
+        }
 
         restraints_.push_back(rest);
         mol->addProperty(new RestraintData("Restraint", rest));
@@ -170,7 +173,7 @@ namespace oopse {
 
         SelectionEvaluator evaluator(info);
         SelectionManager seleMan(info);
-        
+                
         evaluator.loadScriptString(objectSelection);
         seleMan.setSelectionSet(evaluator.evaluate());        
         int selectionCount = seleMan.getSelectionCount();
@@ -211,7 +214,11 @@ namespace oopse {
           }
           if (stamp[i]->haveRestrainedSwingYAngle()) {
             rest->setRestrainedSwingYAngle(stamp[i]->getRestrainedSwingYAngle());
-          }         
+          }     
+          if (stamp[i]->havePrint()) {
+            rest->setPrintRestraint(stamp[i]->getPrint());
+          }
+    
           restraints_.push_back(rest);
           sd->addProperty(new RestraintData("Restraint", rest));
           restrainedObjs_.push_back(sd);                    
@@ -357,7 +364,10 @@ namespace oopse {
       unscaledPotential_ += mRest->getUnscaledPotential();
 
       restInfo = mRest->getRestraintInfo();
-      restInfo_.push_back(restInfo);
+
+      // only collect data on restraints that we're going to print:
+      if (mRest->getPrintRestraint()) 
+        restInfo_.push_back(restInfo);
     }
 
     for(ro=restrainedObjs_.begin(); ro != restrainedObjs_.end(); ++ro){
@@ -418,7 +428,10 @@ namespace oopse {
       unscaledPotential_ += oRest->getUnscaledPotential();
 
       restInfo = oRest->getRestraintInfo();
-      restInfo_.push_back(restInfo);
+
+      // only collect data on restraints that we're going to print:
+      if (oRest->getPrintRestraint()) 
+        restInfo_.push_back(restInfo);
     }
 
     return unscaledPotential_ * scalingFactor;

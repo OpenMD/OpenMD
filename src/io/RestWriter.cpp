@@ -74,23 +74,26 @@ namespace oopse {
       // TODO:  get Restraint info from slave nodes:
       std::vector<Restraint*>::const_iterator resti;
       for(resti=restraints.begin(); resti != restraints.end(); ++resti){
-        std::string myName = (*resti)->getRestraintName();
-        int myType = (*resti)->getRestraintType();
-        
-        output_ << myName << ":";
-        
-        if (myType & Restraint::rtDisplacement)
-          output_ << "\tPosition(angstroms)\tEnergy(kcal/mol)";
-        
-        if (myType & Restraint::rtTwist)
-          output_ << "\tTwistAngle(radians)\tEnergy(kcal/mol)";
-        
-        if (myType & Restraint::rtSwingX)
-          output_ << "\tSwingXAngle(radians)\tEnergy(kcal/mol)";
-        
-        if (myType & Restraint::rtSwingY)
-          output_ << "\tSwingYAngle(radians)\tEnergy(kcal/mol)";
-        
+
+        if ((*resti)->getPrintRestraint()) {
+          std::string myName = (*resti)->getRestraintName();
+          int myType = (*resti)->getRestraintType();
+          
+          output_ << myName << ":";
+          
+          if (myType & Restraint::rtDisplacement)
+            output_ << "\tPosition(angstroms)\tEnergy(kcal/mol)";
+          
+          if (myType & Restraint::rtTwist)
+            output_ << "\tTwistAngle(radians)\tEnergy(kcal/mol)";
+          
+          if (myType & Restraint::rtSwingX)
+            output_ << "\tSwingXAngle(radians)\tEnergy(kcal/mol)";
+          
+          if (myType & Restraint::rtSwingY)
+            output_ << "\tSwingYAngle(radians)\tEnergy(kcal/mol)";
+          
+        }
       }
       output_ << "\n";
 #ifdef IS_MPI

@@ -137,6 +137,10 @@ namespace oopse {
       restInfo_[rtSwingY] = std::make_pair(0.0, 0.0);
     }
     
+    void setPrintRestraint(bool printRest) {
+      printRest_ = printRest;
+    }
+
     RealType getDisplacementForceConstant() { return kDisp_; }
     RealType getTwistForceConstant() { return kTwist_; }
     RealType getSwingXForceConstant() { return kSwingX_; }
@@ -144,7 +148,8 @@ namespace oopse {
     RealType getRestrainedTwistAngle() { return twist0_; }
     RealType getRestrainedSwingXAngle() { return swingX0_; }
     RealType getRestrainedSwingYAngle() { return swingY0_; }
-    std::map<int, RealPair> getRestraintInfo() { return restInfo_; }
+    std::map<int, RealPair> getRestraintInfo() { return restInfo_; } 
+    bool getPrintRestraint() { return printRest_; }
 
   protected:
 
@@ -157,6 +162,7 @@ namespace oopse {
     RealType twist0_;
     RealType swingX0_;
     RealType swingY0_;
+    bool printRest_;
     
     int restType_;
     std::string restName_;

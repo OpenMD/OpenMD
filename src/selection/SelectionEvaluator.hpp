@@ -68,7 +68,6 @@ namespace oopse {
 
     SelectionEvaluator(SimInfo* info);
 
-
     bool loadScriptString(const std::string& script);
     bool loadScriptFile(const std::string& filename);
         
@@ -132,7 +131,11 @@ namespace oopse {
     OOPSEBitSet lookupValue(const std::string& variable);
         
     void evalError(const std::string& message) {
-      std::cerr << "SelectionEvaulator Error: " << message <<  std::endl; 
+      sprintf( painCave.errMsg,
+               "SelectionEvaluator Error: %s\n", message.c_str());
+      painCave.severity = OOPSE_ERROR;
+      painCave.isFatal = 1;
+      simError();
     }
 
     void unrecognizedCommand(const Token& token) {
@@ -188,7 +191,7 @@ namespace oopse {
     NameFinder nameFinder;
     DistanceFinder distanceFinder;
     IndexFinder indexFinder;
-    int nStuntDouble;   //natoms + nrigidbodies
+    int nStuntDouble;   //nGLOBALatoms + nGLOBALrigidbodies
 
     typedef std::map<std::string, boost::any > VariablesType;
     VariablesType variables;
