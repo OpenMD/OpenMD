@@ -1,4 +1,4 @@
-/* Copyright (c) 2008 The University of Notre Dame. All Rights Reserved.
+/* Copyright (c) 2008, 2009 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -44,7 +44,7 @@
  *
  *  Created by Charles F. Vardeman II on 11 Dec 2006.
  *  @author  Charles F. Vardeman II
- *  @version $Id: ConvexHull.cpp,v 1.13 2008-11-14 15:44:34 chuckv Exp $
+ *  @version $Id: ConvexHull.cpp,v 1.14 2009-10-12 20:11:29 chuckv Exp $
  *
  */
 
@@ -297,7 +297,6 @@ void ConvexHull::computeHull(std::vector<StuntDouble*> bodydoubles)
 
   }
   
-  std::cout << "Number of surface atoms is: " << Ns_ << std::endl;
   
 
  
@@ -503,18 +502,16 @@ void ConvexHull::computeHull(std::vector<StuntDouble*> bodydoubles)
     localVel.push_back(vel.y());
     localVel.push_back(vel.z());
 
+
     RealType bdmass = bodydoubles[idx]->getMass();
     localMass.push_back(bdmass);
 
     localPtsMap.push_back(idx); 
 
-
   }
 
 
-
   localPtArraySize = int(localPts.size()/3.0);
-
  
   MPI::COMM_WORLD.Allgather(&localPtArraySize,1,MPI::INT,&NstoProc_[0],1,MPI::INT);
   
@@ -532,6 +529,8 @@ void ConvexHull::computeHull(std::vector<StuntDouble*> bodydoubles)
   std::vector<double> globalVel(nglobalPts);
   std::vector<double> globalMass(Nsglobal_);
 
+
+  
   isSurfaceID.resize(nglobalPts);
 
 
@@ -551,16 +550,21 @@ void ConvexHull::computeHull(std::vector<StuntDouble*> bodydoubles)
   int noffset = vecdispls_[myrank_];
   /* gather the potential hull */
   
-  MPI::COMM_WORLD.Allgatherv(&localPts[0],localPtArraySize,MPI::DOUBLE,&globalPts[0],&vecNstoProc_[0],&vecdispls_[0],MPI::DOUBLE);
-  MPI::COMM_WORLD.Allgatherv(&localVel[0],localPtArraySize,MPI::DOUBLE,&globalVel[0],&vecNstoProc_[0],&vecdispls_[0],MPI::DOUBLE);
+  MPI::COMM_WORLD.Allgatherv(&localPts[0],localPtArraySize*3,MPI::DOUBLE,&globalPts[0],&vecNstoProc_[0],&vecdispls_[0],MPI::DOUBLE);
+  MPI::COMM_WORLD.Allgatherv(&localVel[0],localPtArraySize*3,MPI::DOUBLE,&globalVel[0],&vecNstoProc_[0],&vecdispls_[0],MPI::DOUBLE);
   MPI::COMM_WORLD.Allgatherv(&localMass[0],localPtArraySize,MPI::DOUBLE,&globalMass[0],&NstoProc_[0],&displs_[0],MPI::DOUBLE);
+
   /*
+  int tmpidx = 0;
+  
   if (myrank_ == 0){
-    for (i = 0; i < globalPts.size(); i++){
-      std::cout << globalPts[i] << std::endl;
+    for (i = 0; i < nglobalPts-3; i++){      
+      std::cout << "Au   " << globalPts[tmpidx] << "  " << globalPts[tmpidx+1] << "  " << globalPts[tmpidx +2] << std::endl;
+      tmpidx = tmpidx + 3;
     }
   }
   */
+  
   // Free previous hull
   qh_freeqhull(!qh_ALL);
   qh_memfreeshort(&curlong, &totlong);
@@ -568,7 +572,7 @@ void ConvexHull::computeHull(std::vector<StuntDouble*> bodydoubles)
     std::cerr << "qhull internal warning (main): did not free %d bytes of long memory (%d pieces) "
 	      << totlong << curlong << std::endl;
 
-  if (qh_new_qhull(dim_, nglobalPts, &globalPts[0], ismalloc,
+  if (qh_new_qhull(dim_, Nsglobal_, &globalPts[0], ismalloc,
    		    const_cast<char *>(options_.c_str()), NULL, stderr)){
 
       sprintf(painCave.errMsg, "ConvexHull: Qhull failed to compute global convex hull");
@@ -671,7 +675,7 @@ void ConvexHull::computeHull(std::vector<StuntDouble*> bodydoubles)
 
     } //FORALLfacets
 
-    /*
+    /*    
     std::cout << surfaceSDs_.size() << std::endl;
     for (SD = surfaceSDs_.begin(); SD != surfaceSDs_.end(); ++SD){
       Vector3d thisatom = (*SD)->getPos();
