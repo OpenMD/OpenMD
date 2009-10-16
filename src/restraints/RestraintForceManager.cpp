@@ -109,15 +109,44 @@ namespace oopse {
           molIndex = stamp[i]->getMolIndex();
         }
         
+        if (molIndex < 0) {
+          sprintf(painCave.errMsg,
+                  "Restraint Error: A molecular restraint was specified\n"
+                  "\twith a molIndex that was less than 0\n");
+          painCave.isFatal = 1;
+          simError();      
+        }
+        if (molIndex >= info_->getNGlobalMolecules()) {
+          sprintf(painCave.errMsg,
+                  "Restraint Error: A molecular restraint was specified with\n"
+                  "\ta molIndex that was greater than the total number of molecules\n");
+          painCave.isFatal = 1;
+          simError();      
+        }
+       
         Molecule* mol = info_->getMoleculeByGlobalIndex(molIndex);
         
         if (mol == NULL) {
-          sprintf(painCave.errMsg,
-                  "Restraint Error: A molecular restraint was specified, but\n"
-                  "\tno molecule was found with global index %d.\n",
-                  molIndex);
-          painCave.isFatal = 1;
-          simError();      
+#ifdef IS_MPI
+          // getMoleculeByGlobalIndex returns a NULL in parallel if
+          // this proc doesn't have the molecule.  Do a quick check to
+          // make sure another processor is supposed to have it.
+         
+          int myrank = MPI::COMM_WORLD.Get_rank();
+          if (info_->getMolToProc(molIndex) == myrank) {
+            // If we were supposed to have it but got a null, then freak out.
+#endif
+
+            sprintf(painCave.errMsg,
+                    "Restraint Error: A molecular restraint was specified, but\n"
+                    "\tno molecule was found with global index %d.\n",
+                    molIndex);
+            painCave.isFatal = 1;
+            simError();     
+
+#ifdef IS_MPI
+          }
+#endif
         }
         
         MolecularRestraint* rest = new MolecularRestraint();
