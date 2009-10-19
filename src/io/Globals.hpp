@@ -135,13 +135,14 @@ namespace oopse {
     DeclareParameter(MTM_Sigma, RealType);    
     DeclareParameter(MTM_R, RealType);    
     DeclareParameter(UseRNEMD, bool);
-    DeclareParameter(RNEMD_swapTime, RealType);
+    DeclareParameter(RNEMD_exchangeTime, RealType);
     DeclareParameter(RNEMD_nBins, int);
-    DeclareParameter(RNEMD_swapType, std::string);
+    DeclareParameter(RNEMD_logWidth, int);
+    DeclareParameter(RNEMD_exchangeType, std::string);
     DeclareParameter(RNEMD_objectSelection, std::string);
+    DeclareParameter(RNEMD_targetFlux, RealType);
     DeclareParameter(UseRestraints, bool);
     DeclareParameter(Restraint_file, std::string);
-
     
   public:
     bool addComponent(Component* comp);
@@ -173,4 +174,3 @@ namespace oopse {
 };
 }
 #endif
-

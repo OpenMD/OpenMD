@@ -127,9 +127,11 @@ Globals::Globals() {
   DefineOptionalParameterWithDefaultValue(AccumulateBoxDipole, "accumulateBoxDipole", false);
 
   DefineOptionalParameterWithDefaultValue(UseRNEMD, "useRNEMD", false);
-  DefineOptionalParameterWithDefaultValue(RNEMD_swapTime, "RNEMD_swapTime", 100.0);
+  DefineOptionalParameterWithDefaultValue(RNEMD_exchangeTime, "RNEMD_exchangeTime", 100.0);
   DefineOptionalParameterWithDefaultValue(RNEMD_nBins, "RNEMD_nBins", 16);
-  DefineOptionalParameterWithDefaultValue(RNEMD_swapType, "RNEMD_swapType", "Kinetic");
+  DefineOptionalParameterWithDefaultValue(RNEMD_logWidth, "RNEMD_logWidth", 16);
+  DefineOptionalParameterWithDefaultValue(RNEMD_exchangeType, "RNEMD_exchangeType", "KineticScale");
+  DefineOptionalParameterWithDefaultValue(RNEMD_targetFlux, "RNEMD_targetFlux", 0.0);
   DefineOptionalParameterWithDefaultValue(RNEMD_objectSelection, "RNEMD_objectSelection", "select all");
   DefineOptionalParameterWithDefaultValue(UseRestraints, "useRestraints", false);
   DefineOptionalParameterWithDefaultValue(Restraint_file, "Restraint_file", "idealCrystal.in");
@@ -203,9 +205,10 @@ void Globals::validate() {
   CheckParameter(FrozenBufferRadius, isPositive());
   CheckParameter(LangevinBufferRadius, isPositive());
   CheckParameter(NeighborListNeighbors, isPositive());
-  CheckParameter(RNEMD_swapTime, isPositive());
+  CheckParameter(RNEMD_exchangeTime, isPositive());
   CheckParameter(RNEMD_nBins, isPositive() && isEven());
-  CheckParameter(RNEMD_swapType, isEqualIgnoreCase("Kinetic") || isEqualIgnoreCase("Px") || isEqualIgnoreCase("Py") || isEqualIgnoreCase("Pz"));
+  CheckParameter(RNEMD_exchangeType, isEqualIgnoreCase("KineticSwap") || isEqualIgnoreCase("KineticScale") || isEqualIgnoreCase("Px") || isEqualIgnoreCase("Py") || isEqualIgnoreCase("Pz") || isEqualIgnoreCase("PxScale") || isEqualIgnoreCase("PyScale") || isEqualIgnoreCase("PzScale"));
+  CheckParameter(RNEMD_targetFlux, isNonNegative());
 
   for(std::vector<Component*>::iterator i = components_.begin(); i != components_.end(); ++i) {
     if (!(*i)->findMoleculeStamp(moleculeStamps_)) {
@@ -215,7 +218,7 @@ void Globals::validate() {
     }
   }
 }
-    
+  
 bool Globals::addComponent(Component* comp) {
     components_.push_back(comp);
     return true;
