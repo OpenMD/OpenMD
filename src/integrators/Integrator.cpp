@@ -126,8 +126,8 @@ namespace oopse {
           // Create a default a RNEMD.
           rnemd_ = new RNEMD(info);
           useRNEMD = simParams->getUseRNEMD();
-          if (simParams->haveRNEMD_swapTime()) {
-            RNEMD_swapTime = simParams->getRNEMD_swapTime();
+          if (simParams->haveRNEMD_exchangeTime()) {
+            RNEMD_exchangeTime = simParams->getRNEMD_exchangeTime();
           } 
         }
       }

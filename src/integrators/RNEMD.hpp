@@ -53,6 +53,7 @@
 #include "math/RandNumGen.hpp"
 #include "selection/SelectionEvaluator.hpp"
 #include "selection/SelectionManager.hpp"
+#include <iostream>
 
 namespace oopse {
 
@@ -64,37 +65,59 @@ namespace oopse {
   public:
     RNEMD(SimInfo* info);
     virtual ~RNEMD();
-        
+    
+    void doRNEMD();
     void doSwap();
+    void doScale();
+    void collectData();
+    void getStarted();
     void getStatus();
-    void set_RNEMD_swapTime(RealType swapTime) { swapTime_ = swapTime; }
+    void set_RNEMD_exchange_time(RealType exchangeTime) {
+      exchangeTime_ = exchangeTime;
+    }
     void set_RNEMD_nBins(int nbins) { nBins_ = nbins; }
     RealType get_RNEMD_exchange_total() { return exchangeSum_; }
-    void set_RNEMD_exchange_total(RealType et) {exchangeSum_ = et;}
+    void set_RNEMD_exchange_total(RealType et) { exchangeSum_ = et; }
+    void set_RNEMD_target_flux(RealType targetFlux) {targetFlux_ = targetFlux;}
 
   private:
 
     enum RNEMDTypeEnum {
-      rnemdKinetic,
+      rnemdKineticSwap,
+      rnemdKineticScale,
+      rnemdPxScale,
+      rnemdPyScale,
+      rnemdPzScale,
       rnemdPx,
       rnemdPy,
       rnemdPz,
       rnemdUnknown
     };
-     
+    
     SimInfo* info_;
     RandNumGen* randNumGen_;
-    int nBins_;   
-    RealType swapTime_;
-    RealType exchangeSum_;
-    RNEMDTypeEnum rnemdType_;
     std::map<std::string, RNEMDTypeEnum> stringToEnumMap_;
+    RNEMDTypeEnum rnemdType_;
     std::string rnemdObjectSelection_;
-    SelectionManager seleMan_;
     SelectionEvaluator evaluator_;
+    SelectionManager seleMan_;
     bool usePeriodicBoundaryConditions_;
-
+    int nBins_;
+    int midBin_;
+    int rnemdLogWidth_;
+    RealType exchangeTime_;
+    RealType targetFlux_;
+    RealType exchangeSum_;
+    int failTrialCount_;
+    int failRootCount_;
+    std::ofstream rnemdLog_;
+    // keeps track of what's being averaged
+    std::vector<RealType> valueHist_;
+    std::vector<int> valueCount_;
+    // keeps track of the number of degrees of freedom being averaged
+    std::vector<RealType> xTempHist_, yTempHist_, zTempHist_;
+    std::ofstream xTempLog_, yTempLog_, zTempLog_;
   };
 
 }
-#endif //INTEGRATORS_VELOCITIZER_HPP
+#endif //INTEGRATORS_RNEMD_HPP

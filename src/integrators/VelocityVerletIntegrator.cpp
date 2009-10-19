@@ -98,7 +98,7 @@ namespace oopse {
     thermo.saveStat();
     saveConservedQuantity();
     if (simParams->getUseRNEMD())
-      rnemd_->getStatus();
+      rnemd_->getStarted();
 
     statWriter->writeStat(currentSnapshot_->statData);
     
@@ -109,7 +109,7 @@ namespace oopse {
       currReset = resetTime + currentSnapshot_->getTime();
     }
     if (simParams->getUseRNEMD()){
-      currRNEMD = RNEMD_swapTime + currentSnapshot_->getTime();
+      currRNEMD = RNEMD_exchangeTime + currentSnapshot_->getTime();
     }
     needPotential = false;
     needStress = false;       
@@ -160,9 +160,10 @@ namespace oopse {
       }
     }
     if (useRNEMD) {
+      rnemd_->collectData();
       if (currentSnapshot_->getTime() >= currRNEMD) {
-	rnemd_->doSwap();
-	currRNEMD += RNEMD_swapTime;
+	rnemd_->doRNEMD();
+	currRNEMD += RNEMD_exchangeTime;
       }
     }
     
@@ -177,8 +178,9 @@ namespace oopse {
       thermo.saveStat();
       saveConservedQuantity();
 
-      if (simParams->getUseRNEMD())
+      if (simParams->getUseRNEMD()) {
 	rnemd_->getStatus();
+      }
 
       statWriter->writeStat(currentSnapshot_->statData);
       
@@ -266,11 +268,11 @@ namespace oopse {
     }
 
     if (simParams->getUseRNEMD()) {
-      mask.set(Stats::RNEMD_SWAP_TOTAL);
+      mask.set(Stats::RNEMD_EXCHANGE_TOTAL);
     }
-      
+    
 
-     return new StatWriter(info_->getStatFileName(), mask);
+    return new StatWriter(info_->getStatFileName(), mask);
   }
 
 

@@ -88,19 +88,19 @@ namespace oopse {
     }
 
     void setVelocitizer(Velocitizer* velocitizer) {
-      if (velocitizer_ != velocitizer && velocitizer_  != NULL) {
+      if (velocitizer_ != velocitizer && velocitizer_ != NULL) {
 	delete velocitizer_;
       }
-      velocitizer_  = velocitizer;
+      velocitizer_ = velocitizer;
     }
 
     void setRNEMD(RNEMD* rnemd) {
       if (rnemd_ != rnemd && rnemd_  != NULL) {
 	delete rnemd_;
       }
-      rnemd_  = rnemd;
+      rnemd_ = rnemd;
     }
-        
+    
   protected:
 
     Integrator(SimInfo* info);
@@ -135,7 +135,7 @@ namespace oopse {
     RealType statusTime;
     RealType thermalTime;
     RealType resetTime;
-    RealType RNEMD_swapTime;
+    RealType RNEMD_exchangeTime;
     RealType dt;
 
     Snapshot* currentSnapshot_; //During the integration, the address of currentSnapshot Will not change
