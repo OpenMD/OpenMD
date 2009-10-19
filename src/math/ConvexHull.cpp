@@ -44,7 +44,7 @@
  *
  *  Created by Charles F. Vardeman II on 11 Dec 2006.
  *  @author  Charles F. Vardeman II
- *  @version $Id: ConvexHull.cpp,v 1.14 2009-10-12 20:11:29 chuckv Exp $
+ *  @version $Id: ConvexHull.cpp,v 1.15 2009-10-19 17:44:18 chuckv Exp $
  *
  */
 
@@ -547,7 +547,7 @@ void ConvexHull::computeHull(std::vector<StuntDouble*> bodydoubles)
     displs_[i] = displs_[i-1] + NstoProc_[i-1];
   }
    
-  int noffset = vecdispls_[myrank_];
+  int noffset = displs_[myrank_];
   /* gather the potential hull */
   
   MPI::COMM_WORLD.Allgatherv(&localPts[0],localPtArraySize*3,MPI::DOUBLE,&globalPts[0],&vecNstoProc_[0],&vecdispls_[0],MPI::DOUBLE);
@@ -589,11 +589,11 @@ void ConvexHull::computeHull(std::vector<StuntDouble*> bodydoubles)
 
 
     unsigned int nf = qh num_facets;
-     
+    
     /* Build Surface SD list first */
 
     std::fill(isSurfaceID.begin(),isSurfaceID.end(),false);
-
+    int numvers = 0;
     FORALLfacets {
       
       if (!facet->simplicial){
@@ -630,12 +630,13 @@ void ConvexHull::computeHull(std::vector<StuntDouble*> bodydoubles)
 	p[ver][2] = vertex->point[2];
 	int localindex = id;
 #ifdef IS_MPI
-	Vector3d velVector(globalVel[dim_ * id],globalVel[dim_ * id + 1], globalVel[dim_ * id + 1]);
+	Vector3d velVector(globalVel[dim_ * id],globalVel[dim_ * id + 1], globalVel[dim_ * id + 2]);
 	
 	faceVel = faceVel + velVector;
 	faceMass = faceMass + globalMass[id];
-	if (id >= noffset/3 && id < (noffset + localPtArraySize)/3 ){
-	  localindex = localPtsMap[id-noffset/3];
+	if (id >= noffset && id < (noffset + localPtArraySize) ){
+          
+	  localindex = localPtsMap[id-noffset];
 #else
 	  faceVel = faceVel + bodydoubles[localindex]->getVel();
 	  faceMass = faceMass + bodydoubles[localindex]->getMass();
@@ -648,6 +649,7 @@ void ConvexHull::computeHull(std::vector<StuntDouble*> bodydoubles)
 #endif
 	    
 	    surfaceSDs_.push_back(bodydoubles[localindex]);
+            //   std::cout <<"This ID is: " << bodydoubles[localindex]->getGlobalIndex() << std::endl; 
 	    
 	  } //IF isSurfaceID
 
@@ -657,6 +659,7 @@ void ConvexHull::computeHull(std::vector<StuntDouble*> bodydoubles)
 	  face.addVertexSD(NULL);
 	  }
 #endif
+        numvers++;
 	ver++;
       } //Foreachvertex
       /*
@@ -682,7 +685,6 @@ void ConvexHull::computeHull(std::vector<StuntDouble*> bodydoubles)
       std::cout << "Au " << thisatom.x() << "  " << thisatom.y() << " " << thisatom.z() << std::endl;
     }
     */
-
 
 
     Ns_ = surfaceSDs_.size();
