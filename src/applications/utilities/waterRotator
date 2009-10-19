@@ -18,8 +18,8 @@ Example:
 """
 
 __author__ = "Dan Gezelter (gezelter@nd.edu)"
-__version__ = "$Revision: 1.1 $"
-__date__ = "$Date: 2007-11-26 19:23:36 $"
+__version__ = "$Revision: 1.2 $"
+__date__ = "$Date: 2009-10-19 14:29:14 $"
 __copyright__ = "Copyright (c) 2006 by the University of Notre Dame"
 __license__ = "OOPSE"
 
@@ -28,8 +28,6 @@ import getopt
 import string
 import math
 import random
-from sets import *
-#from Numeric import *
 
 _haveMDFileName = 0
 _haveOutputFileName = 0
@@ -54,7 +52,7 @@ H2vects = []
 DipoleVects = []
 allAcceptors = []
 availableneighbs = []
-surfaceSet = Set([-1])
+surfaceSet = set([-1])
 
 
 
@@ -247,7 +245,7 @@ def findNeighbors():
 
     surfaceCount = 0
     for i in range(len(indices)):
-        if (len(neighbors[i]) == 3):
+        if (len(neighbors[i]) < 4):
             neighbors[i].append(-1)
             surfaceCount = surfaceCount + 1
 
@@ -287,23 +285,19 @@ def protonBucketBrigade(origPoint):
         AcceptingFrom.append(list())
         OldDonor.append(list())
 
-    # print "randomizing Quaternions"
-    nIdeal = len(idealQuats)
-
     donor = origPoint
-    # pick unreasonable start values (that don't match surface atom unreasonable values)
+    # pick unreasonable start values (that don't match surface atom
+    # unreasonable values)
     acceptor = -10
-    #oldDonor = -10
-    # print 'origPoint = %d' % (origPoint)
 
     for i in range(50000):
     #while (acceptor != origPoint):
-        myNeighbors = Set(neighbors[donor])
+        myNeighbors = set(neighbors[donor])
              
         # can't pick a proton choice from one of my current protons:
-        badChoices = Set(DonatingTo[donor]).union(Set(OldDonor[acceptor]))
+        badChoices = set(DonatingTo[donor]).union(set(OldDonor[acceptor]))
         # can't send a proton back to guy who sent one to me (no give-backs):
-        #badChoices.add(Set(OldDonor[acceptor]))
+        #badChoices.add(set(OldDonor[acceptor]))
         # can't send a proton to anyone who is already taking 2:
         for j in myNeighbors.difference(surfaceSet):
             if (len(AcceptingFrom[j]) == 2):
@@ -312,8 +306,14 @@ def protonBucketBrigade(origPoint):
         nDonors = len(DonatingTo[donor])
 
         if (nDonors <= 1):
-            acceptor = random.choice(list( myNeighbors.difference(badChoices) ) )
+
+            if (len(myNeighbors.difference(badChoices)) != 0):
+                acceptor = random.choice(list(myNeighbors.difference(badChoices)))
+            else:
+                acceptor = -1
+
             DonatingTo[donor].append(acceptor)
+
             if (acceptor != -1):
                 AcceptingFrom[acceptor].append(donor)
                 OldDonor[acceptor].append(donor)
@@ -322,7 +322,6 @@ def protonBucketBrigade(origPoint):
         else:
             print "Whoah!  How'd we get here?"
 
-        #OldDonor = donor
         donor = acceptor
         if (acceptor == -1):
             # surface atoms all have a -1 neighbor, but that's OK.  A proton
@@ -353,46 +352,72 @@ def computeQuats():
         myPos = positions[i]
 
         acceptor1 = DonatingTo[i][0]
-        if (acceptor1 == -1):
-            tempVec = [0.0, 0.0, 0.0]
-            for j in range(3):
-                thisNeighbor = neighbors[i][j]
-                npos = positions[thisNeighbor]
-                npos1 = [npos[0] - myPos[0], npos[1] - myPos[1], npos[2] - myPos[2]]
-                npos1 = wrapVector(npos1)
-                tempVec[0] = tempVec[0]  + npos1[0]
-                tempVec[1] = tempVec[1]  + npos1[1]
-                tempVec[2] = tempVec[2]  + npos1[2]                
-            dpos1 = [-tempVec[0]/3.0, -tempVec[1]/3.0, -tempVec[2]/3.0]
-            dpos1 = normalize(dpos1)
-        else:
-            a1pos = positions[acceptor1]
-            dpos1 = [a1pos[0] - myPos[0], a1pos[1] - myPos[1], a1pos[2] - myPos[2]]
-            dpos1 = wrapVector(dpos1)
-            dpos1 = normalize(dpos1)
-        
         acceptor2 = DonatingTo[i][1]
-        if (acceptor2 == -1):
-            tempVec = [0.0, 0.0, 0.0]
-            for j in range(3):
-                thisNeighbor = neighbors[i][j]
-                npos = positions[thisNeighbor]
-                npos1 = [npos[0] - myPos[0], npos[1] - myPos[1], npos[2] - myPos[2]]
-                npos1 = wrapVector(npos1)
-                tempVec[0] = tempVec[0]  + npos1[0]
-                tempVec[1] = tempVec[1]  + npos1[1]
-                tempVec[2] = tempVec[2]  + npos1[2]                
-            dpos2 = [-tempVec[0]/3.0, -tempVec[1]/3.0, -tempVec[2]/3.0]
-            dpos2 = normalize(dpos2)
+        if (acceptor1 == -1 and acceptor2 == -1):
+            donor1 = AcceptingFrom[i][0]            
+            donor2 = AcceptingFrom[i][1]
+            npos = positions[donor1]
+            apos1 = [npos[0] - myPos[0], npos[1] - myPos[1], npos[2] - myPos[2]]
+            apos1 = wrapVector(apos1)
+            npos = positions[donor2]
+            apos2 = [npos[0] - myPos[0], npos[1] - myPos[1], npos[2] - myPos[2]]
+            apos2 = wrapVector(apos2)
+            tempX = [0.0, 0.0, 0.0]
+            tempY = [0.0, 0.0, 0.0]
+            tempZ = [0.0, 0.0, 0.0]
+            tempZ[0] = 0.5*(apos1[0] + apos2[0])
+            tempZ[1] = 0.5*(apos1[1] + apos2[1])
+            tempZ[2] = 0.5*(apos1[2] + apos2[2])
+            tempX[0] = (apos2[0] - apos1[0])
+            tempX[1] = (apos2[1] - apos1[1])
+            tempX[2] = (apos2[2] - apos1[2])
+            tempZ = normalize(tempZ)
+            tempX = normalize(tempX)
+            tempY = cross(tempX, tempZ)
+            dpos1[0] = tempZ[0] - 0.5*tempY[0]
+            dpos1[1] = tempZ[1] - 0.5*tempY[1]
+            dpos1[2] = tempZ[2] - 0.5*tempY[2]
+            dpos2[0] = tempZ[0] + 0.5*tempY[0]
+            dpos2[1] = tempZ[1] + 0.5*tempY[1]
+            dpos2[2] = tempZ[2] + 0.5*tempY[2]
+            
         else:
-            a2pos = positions[acceptor2]
-            dpos2 = [a2pos[0] - myPos[0], a2pos[1] - myPos[1], a2pos[2] - myPos[2]]
-            dpos2 = wrapVector(dpos2)
-            dpos2 = normalize(dpos2)
-
-
-
+            if (acceptor1 == -1):
+                tempVec = [0.0, 0.0, 0.0]
+                for j in range(3):
+                    thisNeighbor = neighbors[i][j]
+                    npos = positions[thisNeighbor]
+                    npos1 = [npos[0] - myPos[0], npos[1] - myPos[1], npos[2] - myPos[2]]
+                    npos1 = wrapVector(npos1)
+                    tempVec[0] = tempVec[0]  + npos1[0]
+                    tempVec[1] = tempVec[1]  + npos1[1]
+                    tempVec[2] = tempVec[2]  + npos1[2]                
+                dpos1 = [-tempVec[0]/3.0, -tempVec[1]/3.0, -tempVec[2]/3.0]
+                dpos1 = normalize(dpos1)
+            else:
+                a1pos = positions[acceptor1]
+                dpos1 = [a1pos[0] - myPos[0], a1pos[1] - myPos[1], a1pos[2] - myPos[2]]
+                dpos1 = wrapVector(dpos1)
+                dpos1 = normalize(dpos1)
         
+
+            if (acceptor2 == -1):
+                tempVec = [0.0, 0.0, 0.0]
+                for j in range(3):
+                    thisNeighbor = neighbors[i][j]
+                    npos = positions[thisNeighbor]
+                    npos1 = [npos[0] - myPos[0], npos[1] - myPos[1], npos[2] - myPos[2]]
+                    npos1 = wrapVector(npos1)
+                    tempVec[0] = tempVec[0]  + npos1[0]
+                    tempVec[1] = tempVec[1]  + npos1[1]
+                    tempVec[2] = tempVec[2]  + npos1[2]                
+                dpos2 = [-tempVec[0]/3.0, -tempVec[1]/3.0, -tempVec[2]/3.0]
+                dpos2 = normalize(dpos2)
+            else:
+                a2pos = positions[acceptor2]
+                dpos2 = [a2pos[0] - myPos[0], a2pos[1] - myPos[1], a2pos[2] - myPos[2]]
+                dpos2 = wrapVector(dpos2)
+                dpos2 = normalize(dpos2)        
 
         for j in range(3):
             uz[j] = (dpos1[j] + dpos2[j])/2.0
@@ -449,7 +474,7 @@ def computeQuats():
     print totalDipole
     Dipole = math.sqrt(dot(totalDipole, totalDipole))
     print 'Total Dipole Moment = %d' % Dipole
-    if (Dipole > 20 or Dipole < -20):
+    if (Dipole > 40 or Dipole < -40):
         print "Bad Dipole, starting over"
         for i in range(len(indices)):
             del OldDonor[:]
