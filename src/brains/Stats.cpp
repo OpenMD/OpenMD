@@ -101,7 +101,7 @@ namespace oopse {
     Stats::title_[BOX_DIPOLE_Y] = "box dipole y";
     Stats::title_[BOX_DIPOLE_Z] = "box dipole z";
     Stats::title_[TAGGED_PAIR_DISTANCE] = "Tagged_Pair_Distance";
-    Stats::title_[RNEMD_SWAP_TOTAL] = "RNEMD_exchange_total";
+    Stats::title_[RNEMD_EXCHANGE_TOTAL] = "RNEMD_exchange_total";
     
     Stats::units_[TIME] = "fs";
     Stats::units_[TOTAL_ENERGY] = "kcal/mol";
@@ -138,7 +138,7 @@ namespace oopse {
     Stats::units_[BOX_DIPOLE_Y] = "C*m";
     Stats::units_[BOX_DIPOLE_Z] = "C*m";
     Stats::units_[TAGGED_PAIR_DISTANCE] = "Ang";
-    Stats::units_[RNEMD_SWAP_TOTAL] = "Variable";
+    Stats::units_[RNEMD_EXCHANGE_TOTAL] = "Variable";
 
     Stats::statsMap.insert(StatsMapType::value_type("TIME", TIME));
     Stats::statsMap.insert(StatsMapType::value_type("TOTAL_ENERGY", TOTAL_ENERGY));
@@ -175,7 +175,7 @@ namespace oopse {
     Stats::statsMap.insert(StatsMapType::value_type("BOX_DIPOLE_Y", BOX_DIPOLE_Y));    
     Stats::statsMap.insert(StatsMapType::value_type("BOX_DIPOLE_Z", BOX_DIPOLE_Z));    
     Stats::statsMap.insert(StatsMapType::value_type("TAGGED_PAIR_DISTANCE", TAGGED_PAIR_DISTANCE));    
-    Stats::statsMap.insert(StatsMapType::value_type("RNEMD_SWAP_TOTAL", RNEMD_SWAP_TOTAL));    
+    Stats::statsMap.insert(StatsMapType::value_type("RNEMD_EXCHANGE_TOTAL", RNEMD_EXCHANGE_TOTAL));    
   }
 
 }
