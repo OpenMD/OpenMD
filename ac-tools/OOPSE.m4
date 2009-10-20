@@ -154,16 +154,16 @@ fi
 AC_DEFUN(ACX_CHECK_CC_FLAGS,
 [
 AC_REQUIRE([AC_PROG_CC])
-AC_CACHE_CHECK(whether ${CC} accepts $1, ac_$2,
+AC_CACHE_CHECK(whether ${CC} accepts $1, ac_cv_$2,
 [echo 'void f(){}' > conftest.c
 if test -z "`${CC} $1 -c conftest.c 2>&1`"; then
-        ac_$2=yes
+        ac_cv_$2=yes
 else
-        ac_$2=no
+        ac_cv_$2=no
 fi
 rm -f conftest*
 ])
-if test "$ac_$2" = yes; then
+if test "$ac_cv_$2" = yes; then
         :
         $3
 else
@@ -175,16 +175,16 @@ fi
 AC_DEFUN(ACX_CHECK_CXX_FLAGS,
 [
 AC_REQUIRE([AC_PROG_CXX])
-AC_CACHE_CHECK(whether ${CXX} accepts $1, ac_$2,
+AC_CACHE_CHECK(whether ${CXX} accepts $1, ac_cv_$2,
 [echo 'void f(){}' > conftest.cpp
 if test -z "`${CXX} $1 -c conftest.cpp 2>&1`"; then
-        ac_$2=yes
+        ac_cv_$2=yes
 else
-        ac_$2=no
+        ac_cv_$2=no
 fi
 rm -f conftest*
 ])
-if test "$ac_$2" = yes; then
+if test "$ac_cv_$2" = yes; then
         :
         $3
 else
@@ -200,7 +200,7 @@ dnl     Check for optimizer flags the Fortran compiler can use.
 dnl
 AC_DEFUN(ACX_CHECK_FC_FLAGS,
 [
-AC_CACHE_CHECK(whether ${FC} accepts $1, ac_$2,
+AC_CACHE_CHECK(whether ${FC} accepts $1, ac_cv_$2,
 [
 AC_LANG_SAVE
 AC_LANG(Fortran)
@@ -208,14 +208,14 @@ echo 'program main' > conftest.$ac_ext
 echo 'end program main' >> conftest.$ac_ext
 ac_compile='${FC} -c $1 $FCFLAGS $FCFLAGS_SRCEXT conftest.$ac_ext 1>&AC_FD_CC'
 if AC_TRY_EVAL(ac_compile); then
-        ac_$2=yes
+        ac_cv_$2=yes
 else
-        ac_$2=no
+        ac_cv_$2=no
 fi
 rm -f conftest*
 AC_LANG_RESTORE()
 ])
-if test "$ac_$2" = yes; then
+if test "$ac_cv_$2" = yes; then
         :
         $3
 else
@@ -413,7 +413,7 @@ if test "$ac_test_CFLAGS" != "set"; then
         CFLAGS="-O"
   fi
 
-  ACX_CHECK_CC_FLAGS(${CFLAGS}, guessed_cflags, , [
+  ACX_CHECK_CC_FLAGS(${CFLAGS}, ac_cv_guessed_cflags, , [
 	echo ""
         echo "********************************************************"
         echo "* WARNING: The guessed CFLAGS don't seem to work with  *"
@@ -490,7 +490,7 @@ if test "$ac_test_CXXFLAGS" != "set"; then
         CXXFLAGS="-O"
   fi
 
-  ACX_CHECK_CXX_FLAGS(${CXXFLAGS}, guessed_cxxflags, , [
+  ACX_CHECK_CXX_FLAGS(${CXXFLAGS}, ac_cv_guessed_cxxflags, , [
 	echo ""
         echo "**********************************************************"
         echo "* WARNING: The guessed CXXFLAGS don't seem to work with  *"
@@ -559,7 +559,7 @@ if test "$ac_test_FFLAGS" != "set"; then
         FCFLAGS="-O"
   fi
 
-  ACX_CHECK_FC_FLAGS(${FCFLAGS}, guessed_f90flags, , [
+  ACX_CHECK_FC_FLAGS(${FCFLAGS}, ac_cv_guessed_f90flags, , [
 	echo ""
         echo "**********************************************************"
         echo "* WARNING: The guessed FCFLAGS don't seem to work with  *"

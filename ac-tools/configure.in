@@ -9,7 +9,7 @@ builtin(include, ac-tools/OOPSE.m4)
 builtin(include, ac-tools/AC_CXX_HAVE_STL.m4)
 builtin(include, ac-tools/AC_CXX_NAMESPACES.m4)
 builtin(include, ac-tools/AC_CXX_STD.m4)
-builtin(include, ac-tools/ACX_MPI.m4)
+builtin(include, ac-tools/ax_mpi.m4)
 builtin(include, ac-tools/CGAL.m4)
 
 # who am i
@@ -64,7 +64,9 @@ if test x"$CC" != x; then
      AC_ERROR([Specified C compiler $CC doesn't seem to exist!])])
 
    AS_IF([test AS_VAR_GET([ac_cc_path]) != no],[
-     AC_MSG_NOTICE([Will attempt to use $CC as C compiler])],[
+     AC_MSG_NOTICE([Will attempt to use $CC as C compiler])
+     MPICC=$CC
+   ],[
      AC_ERROR([Can't find path to user-specified C compiler $CC])])
 fi
 
@@ -75,7 +77,9 @@ if test x"$CXX" != x; then
      AC_ERROR([Specified C++ compiler $CXX doesn't seem to exist!])])
 
    AS_IF([test AS_VAR_GET([ac_cxx_path]) != no],[
-     AC_MSG_NOTICE([Will attempt to use $CXX as C++ compiler])],[
+     AC_MSG_NOTICE([Will attempt to use $CXX as C++ compiler])
+     MPICXX=$CXX
+    ],[
      AC_ERROR([Can't find path to user-specified C++ compiler $CXX])])
 fi
 
@@ -86,21 +90,41 @@ if test x"$FC" != x; then
      AC_ERROR([Specified Fortran compiler $FC doesn't seem to exist!])])
 
    AS_IF([test AS_VAR_GET([ac_fc_path]) != no],[
-     AC_MSG_NOTICE([Will attempt to use $FC as Fortran compiler])],[
+     AC_MSG_NOTICE([Will attempt to use $FC as Fortran compiler])
+     MPIFC=$FC
+   ],[
      AC_ERROR([Can't find path to user-specified Fortran compiler $FC])])
 fi
 
 
 dnl do MPI checks
-ACX_MPI([USE_MPI="yes"],
-        [USE_MPI="no"
-        AC_MSG_WARN([No suitable MPI implementation found. oopse_MPI will not be build.])])
+AC_LANG([C++])
+AX_MPI([USE_MPI="yes"],
+       [USE_MPI="no"
+       AC_MSG_WARN([No suitable C++ MPI implementation found. oopse_MPI will not be built.])])
+AS_IF([test AS_VAR_GET([USE_MPI]) != no],[
+AC_LANG([C])
+AX_MPI([USE_MPI="yes"],
+       [USE_MPI="no"
+       AC_MSG_WARN([No suitable C MPI implementation found. oopse_MPI will not be built.])])
+])
+AS_IF([test AS_VAR_GET([USE_MPI]) != no],[
+AC_LANG([Fortran])
+AX_MPI([USE_MPI="yes"],
+       [USE_MPI="no"
+       AC_MSG_WARN([No suitable Fortran MPI implementation found. oopse_MPI will not be built.])])
+])
+AS_IF([test AS_VAR_GET([USE_MPI]) != no],[
+        CXX=$MPICXX
+        CC=$MPICC
+        FC=$MPIFC
+])
 AC_SUBST(USE_MPI)
 
 # Checks for programs.
-AC_PROG_CXX([$CXX $ac_cv_prog_acx_mpi_mpicxx icpc pathCC pgCC c++ xlc++ xlC g++ CC])
-AC_PROG_CC([$CC $ac_cv_prog_acx_mpi_mpicc icc pathcc pgcc cc xlc gcc])
-AC_PROG_FC([$FC $ac_cv_prog_acx_mpi_mpif90 ifort ifc pathf95 pgf95 xlf95 lf95 epcf90 pathf90 xlf90 f95 f90 gfortran g95 fort], 95)
+AC_PROG_CXX([$CXX icpc pathCC pgCC c++ xlc++ xlC g++ CC])
+AC_PROG_CC([$CC icc pathcc pgcc cc xlc gcc])
+AC_PROG_FC([$FC ifort ifc pathf95 pgf95 xlf95 lf95 epcf90 pathf90 xlf90 f95 f90 gfortran g95 fort], 95)
 AC_PROG_CPP
 AC_PROG_EGREP
 AC_PROG_LN_S
