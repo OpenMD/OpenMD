@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2008, 2009 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -146,7 +146,6 @@ namespace oopse {
 
     // Get total area and number of surface stunt doubles
     RealType area = surfaceMesh_->getArea();
-    int nSurfaceSDs = surfaceMesh_->getNs();
     std::vector<Triangle> sMesh = surfaceMesh_->getMesh();
     int nTriangles = sMesh.size();
 
@@ -182,16 +181,12 @@ namespace oopse {
       Vector3d langevinForce = (extPressure + randomForce + dragForce) * 
         unitNormal;
       
-      // Apply triangle force to stuntdouble vertices 
+      // Apply triangle force to stuntdouble vertices
       for (vertex = vertexSDs.begin(); vertex != vertexSDs.end(); ++vertex){
-	if ((*vertex) != NULL){	
+	if ((*vertex) != NULL){
 	  Vector3d vertexForce = langevinForce / 3.0;
+          //          std::cout << "Adding force: " << facetVel << " to global id: " << (*vertex)->getGlobalIndex() << std::endl; 
 	  (*vertex)->addFrc(vertexForce);	   
-	  if ((*vertex)->isDirectional()){	    
-	    Vector3d vertexPos = (*vertex)->getPos();
-	    Vector3d vertexCentroidVector = vertexPos - centroid;
-	    (*vertex)->addTrq(cross(vertexCentroidVector,vertexForce));
-	  }
 	}  
       }
     } 
