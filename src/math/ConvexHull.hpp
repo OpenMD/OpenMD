@@ -1,4 +1,4 @@
-/* Copyright (c) 2008 The University of Notre Dame. All Rights Reserved.
+/* Copyright (c) 2008, 2009 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -44,7 +44,7 @@
  *
  *  Created by Charles F. Vardeman II on 11 Dec 2006.
  *  @author  Charles F. Vardeman II
- *  @version $Id: ConvexHull.hpp,v 1.17 2008-11-14 21:54:54 chuckv Exp $
+ *  @version $Id: ConvexHull.hpp,v 1.18 2009-10-20 20:05:28 chuckv Exp $
  *
  */
 
@@ -59,68 +59,34 @@
 #include <cassert>
 #include <vector>
 #include <string>
-extern "C"
-{
-#if defined(HAVE_QHULL)
-#include <qhull/qhull.h>
-#include <qhull/mem.h>
-#include <qhull/qset.h>
-#include <qhull/geom.h>
-#include <qhull/merge.h>
-#include <qhull/poly.h>
-#include <qhull/io.h>
-#include <qhull/stat.h>
-#endif
-}
-#ifdef IS_MPI
-#include <mpi.h>
-#endif
 
 
 namespace oopse {
   class ConvexHull : public Hull {
   public:
-    ConvexHull();
 
+    ConvexHull();    
     virtual ~ConvexHull(){};
-    void computeHull(std::vector<StuntDouble*> bodydoubles);
-    RealType getArea(){return area_;} //Total area of Hull
-    int getNs(){return Ns_;}  //Number of Surface Atoms
-    RealType getVolume(){return volume_;} //Total Volume inclosed by Hull
-    std::vector< StuntDouble* > getSurfaceAtoms(){return surfaceSDs_;} //Returns a list of surface atoms
+
+    void computeHull( std::vector<StuntDouble*> bodydoubles );
+
+    /* Total area of Hull*/
+    RealType getArea(){return area_;}
+
+    /* Total Volume enclosed by Hull */
+    RealType getVolume(){ return volume_; } 
+
     std::vector<Triangle> getMesh(){return Triangles_;}
-    int getNMeshElements() {return nTriangles_;}
     void printHull(const std::string& geomFileName);
+
   protected:
-    double volume_;
-    double area_;
+    RealType volume_;
+    RealType area_;
     int dim_;
-    int Ns_;
-    int nTriangles_;
-    std::vector<StuntDouble*> surfaceSDs_;
     const std::string options_;
-
-    private:
+    
+  private:
     std::vector<Triangle> Triangles_;
-
-#ifdef IS_MPI
-    int* NstoProc_;
-    int* vecNstoProc_;
-    int* displs_;
-    int* vecdispls_;
-    int Nsglobal_;
-    int nproc_;
-    int myrank_;
-    struct surfacePt_{
-	double x,y,z;
-    };
-
-    MPI::Datatype surfacePtType;
-    std::vector<surfacePt_> surfacePtsLocal_;
-    std::vector<surfacePt_> surfacePtsGlobal_;
-#endif 
-
   };
 }
-
 #endif /*MATH_CONVEXHULL_HPP_*/

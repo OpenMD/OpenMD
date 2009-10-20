@@ -1,4 +1,4 @@
-/* Copyright (c) 2008 The University of Notre Dame. All Rights Reserved.
+/* Copyright (c) 2008, 2009 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -44,7 +44,7 @@
  *
  *  Created by Charles F. Vardeman II on 27 July 2008.
  *  @author  Charles F. Vardeman II
- *  @version $Id: Hull.hpp,v 1.3 2008-10-21 16:44:00 chuckv Exp $
+ *  @version $Id: Hull.hpp,v 1.4 2009-10-20 20:05:28 chuckv Exp $
  *
  */
 
@@ -68,10 +68,7 @@ namespace oopse {
     virtual ~Hull(){};
     virtual void computeHull(std::vector<StuntDouble*> bodydoubles)=0;
     virtual RealType getArea()=0; //Total area of Hull
-    virtual int getNs()=0;  //Number of Surface Atoms
-    virtual int getNMeshElements()=0; //Number of polygons in surface mesh
     virtual RealType getVolume()=0; //Total Volume inclosed by Hull
-    virtual std::vector< StuntDouble* > getSurfaceAtoms()=0; //Returns a list of surface atoms
     virtual std::vector<Triangle > getMesh()=0;
     virtual void printHull(const std::string& geomFileName)=0;
   };
