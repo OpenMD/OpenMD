@@ -44,7 +44,7 @@
  *
  *  Created by Charles F. Vardeman II on 11 Dec 2006.
  *  @author  Charles F. Vardeman II
- *  @version $Id: ConvexHull.cpp,v 1.16 2009-10-20 20:05:28 chuckv Exp $
+ *  @version $Id: ConvexHull.cpp,v 1.17 2009-10-20 20:36:56 gezelter Exp $
  *
  */
 
@@ -155,11 +155,14 @@ void ConvexHull::computeHull(std::vector<StuntDouble*> bodydoubles) {
     masses.push_back(sd->getMass());
   }
 
+
+
   MPI::COMM_WORLD.Allgather(&localHullSites, 1, MPI::INT, &hullSitesOnProc[0],
                             1, MPI::INT);
 
   int globalHullSites = 0;
-  for (int iproc = 0; i < nproc; iproc++){
+  for (int iproc = 0; iproc < nproc; iproc++){
+    std::cerr << "iproc = " << iproc << " sites = " << hullSitesOnProc[iproc] << "\n";
     globalHullSites += hullSitesOnProc[iproc];
     coordsOnProc[iproc] = dim_ * hullSitesOnProc[iproc];
   }
@@ -167,7 +170,7 @@ void ConvexHull::computeHull(std::vector<StuntDouble*> bodydoubles) {
   displacements[0] = 0;
   vectorDisplacements[0] = 0;
   
-  for (int iproc = 1; i < nproc; iproc++){
+  for (int iproc = 1; iproc < nproc; iproc++){
     displacements[iproc] = displacements[iproc-1] + hullSitesOnProc[iproc-1];
     vectorDisplacements[iproc] = vectorDisplacements[iproc-1] + coordsOnProc[iproc-1]; 
   }
