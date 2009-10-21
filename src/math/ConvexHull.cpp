@@ -44,7 +44,7 @@
  *
  *  Created by Charles F. Vardeman II on 11 Dec 2006.
  *  @author  Charles F. Vardeman II
- *  @version $Id: ConvexHull.cpp,v 1.18 2009-10-21 02:49:43 gezelter Exp $
+ *  @version $Id: ConvexHull.cpp,v 1.19 2009-10-21 15:48:12 gezelter Exp $
  *
  */
 
@@ -94,8 +94,7 @@ void ConvexHull::computeHull(std::vector<StuntDouble*> bodydoubles) {
   setT *vertices;
   int curlong, totlong;
   
-  std::vector<double> ptArray(numpoints*3);
-  std::vector<bool> isSurfaceID(numpoints); 
+  std::vector<double> ptArray(numpoints*dim_);
 
   // Copy the positon vector into a points vector for qhull.
   std::vector<StuntDouble*>::iterator SD;
@@ -134,13 +133,16 @@ void ConvexHull::computeHull(std::vector<StuntDouble*> bodydoubles) {
 
   std::vector<double> coords;
   std::vector<double> vels;
-  std::vector<int> objectIDs;
+  std::vector<int> indexMap;
   std::vector<double> masses;
 
   FORALLvertices{
     localHullSites++;
     
     int idx = qh_pointid(vertex->point);
+
+    indexMap.push_back(idx);
+
     coords.push_back(ptArray[dim_  * idx]);
     coords.push_back(ptArray[dim_  * idx + 1]);
     coords.push_back(ptArray[dim_  * idx + 2]);
@@ -154,8 +156,6 @@ void ConvexHull::computeHull(std::vector<StuntDouble*> bodydoubles) {
 
     masses.push_back(sd->getMass());
   }
-
-
 
   MPI::COMM_WORLD.Allgather(&localHullSites, 1, MPI::INT, &hullSitesOnProc[0],
                             1, MPI::INT);
@@ -252,7 +252,7 @@ void ConvexHull::computeHull(std::vector<StuntDouble*> bodydoubles) {
       int localID = id - displacements[myrank];
 
       if (localID >= 0 && localID < hullSitesOnProc[myrank])
-        face.addVertexSD(bodydoubles[localID]);
+        face.addVertexSD(bodydoubles[indexMap[localID]]);
       
 #else
       vel = bodydoubles[id]->getVel();
