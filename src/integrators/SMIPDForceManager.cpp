@@ -141,7 +141,6 @@ namespace oopse {
     StuntDouble* integrableObject;
   
     // Compute surface Mesh
-
     surfaceMesh_->computeHull(localSites_);
 
     // Get total area and number of surface stunt doubles
@@ -158,7 +157,6 @@ namespace oopse {
     std::vector<StuntDouble*>::iterator vertex;
     int thisFacet = 0;
     for (face = sMesh.begin(); face != sMesh.end(); ++face){
-     
       Triangle thisTriangle = *face;
       std::vector<StuntDouble*> vertexSDs = thisTriangle.getVertices();
       RealType thisArea = thisTriangle.getArea(); 
@@ -171,10 +169,9 @@ namespace oopse {
       // gamma is the drag coefficient normal to the face of the triangle      
       RealType gamma = thermalConductivity_ * thisMass * thisArea 
         / (2.0 * thermalLength_ * OOPSEConstant::kB);
-      
+
       RealType extPressure = - (targetPressure_ * thisArea) / 
         OOPSEConstant::energyConvert;
-
       RealType randomForce = randNums[thisFacet++] * sqrt(gamma);
       RealType dragForce = -gamma * dot(facetVel, unitNormal);
 
@@ -185,7 +182,6 @@ namespace oopse {
       for (vertex = vertexSDs.begin(); vertex != vertexSDs.end(); ++vertex){
 	if ((*vertex) != NULL){
 	  Vector3d vertexForce = langevinForce / 3.0;
-          //          std::cout << "Adding force: " << facetVel << " to global id: " << (*vertex)->getGlobalIndex() << std::endl; 
 	  (*vertex)->addFrc(vertexForce);	   
 	}  
       }

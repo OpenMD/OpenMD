@@ -44,7 +44,7 @@
  *
  *  Created by Charles F. Vardeman II on 11 Dec 2006.
  *  @author  Charles F. Vardeman II
- *  @version $Id: ConvexHull.cpp,v 1.17 2009-10-20 20:36:56 gezelter Exp $
+ *  @version $Id: ConvexHull.cpp,v 1.18 2009-10-21 02:49:43 gezelter Exp $
  *
  */
 
@@ -162,7 +162,6 @@ void ConvexHull::computeHull(std::vector<StuntDouble*> bodydoubles) {
 
   int globalHullSites = 0;
   for (int iproc = 0; iproc < nproc; iproc++){
-    std::cerr << "iproc = " << iproc << " sites = " << hullSitesOnProc[iproc] << "\n";
     globalHullSites += hullSitesOnProc[iproc];
     coordsOnProc[iproc] = dim_ * hullSitesOnProc[iproc];
   }
@@ -175,22 +174,23 @@ void ConvexHull::computeHull(std::vector<StuntDouble*> bodydoubles) {
     vectorDisplacements[iproc] = vectorDisplacements[iproc-1] + coordsOnProc[iproc-1]; 
   }
 
-  std::vector<double> globalCoords(dim_*globalHullSites);
-  std::vector<double> globalVels(dim_*globalHullSites);
+  std::vector<double> globalCoords(dim_ * globalHullSites);
+  std::vector<double> globalVels(dim_ * globalHullSites);
   std::vector<double> globalMasses(globalHullSites);
+
   int count = coordsOnProc[myrank];
   
-  MPI::COMM_WORLD.Allgatherv(&coords[0], count, MPI::DOUBLE,
-                             &globalCoords[0], &coordsOnProc[0], &vectorDisplacements[0],
+  MPI::COMM_WORLD.Allgatherv(&coords[0], count, MPI::DOUBLE, &globalCoords[0],
+                             &coordsOnProc[0], &vectorDisplacements[0], 
                              MPI::DOUBLE);
 
-  MPI::COMM_WORLD.Allgatherv(&vels[0], count, MPI::DOUBLE,
-                             &globalVels[0], &coordsOnProc[0], &vectorDisplacements[0],
+  MPI::COMM_WORLD.Allgatherv(&vels[0], count, MPI::DOUBLE, &globalVels[0], 
+                             &coordsOnProc[0], &vectorDisplacements[0],
                              MPI::DOUBLE);
 
   MPI::COMM_WORLD.Allgatherv(&masses[0], localHullSites, MPI::DOUBLE,
-                             &globalMasses[0], &hullSitesOnProc[0], &displacements[0],
-                             MPI::DOUBLE);
+                             &globalMasses[0], &hullSitesOnProc[0], 
+                             &displacements[0], MPI::DOUBLE);
 
   // Free previous hull
   qh_freeqhull(!qh_ALL);
@@ -228,6 +228,7 @@ void ConvexHull::computeHull(std::vector<StuntDouble*> bodydoubles) {
     Vector3d faceVel = V3Zero;
     Vector3d p[3];
     RealType faceMass = 0.0;
+
     int ver = 0;
 
     FOREACHvertex_(vertices){
@@ -245,12 +246,14 @@ void ConvexHull::computeHull(std::vector<StuntDouble*> bodydoubles) {
                      globalVels[dim_ * id + 2]);
       mass = globalMasses[id];
 
-      // localID will be between 0 and hullSitesOnProc[myrank] if we own this guy.
+      // localID will be between 0 and hullSitesOnProc[myrank] if we
+      // own this guy.
+
       int localID = id - displacements[myrank];
-      if (id >= 0 && id < hullSitesOnProc[myrank])
+
+      if (localID >= 0 && localID < hullSitesOnProc[myrank])
         face.addVertexSD(bodydoubles[localID]);
-      else
-        face.addVertexSD(NULL);
+      
 #else
       vel = bodydoubles[id]->getVel();
       mass = bodydoubles[id]->getMass();
@@ -287,8 +290,6 @@ void ConvexHull::computeHull(std::vector<StuntDouble*> bodydoubles) {
     std::cerr << "qhull internal warning (main): did not free %d bytes of long memory (%d pieces) "
               << totlong << curlong << std::endl;    
 }
-
-
 
 void ConvexHull::printHull(const std::string& geomFileName) {
   FILE *newGeomFile;
