@@ -137,16 +137,14 @@ ModSuffix       = @MOD@
 LinkOptions = \
 	@LDFLAGS@ \
 	@FCLIBS@ \
-	@CXXFLAGS@  \
-	@CGAL_LIBS@
+	@CXXFLAGS@ 
 
 
 
 ParallelLinkOptions = \
 	@LDFLAGS@ \
 	@FCLIBS@ \
-	@CXXFLAGS@ \
-	@CGAL_LIBS@
+	@CXXFLAGS@
 
 #---------------------------------------------------------------------------
 #
@@ -403,8 +401,8 @@ RmiOptions             = -d $(TargetDir) -classpath $(ClassPath) \
 			 -sourcepath $(SourceDir)
 COptions               = $(FrcDeclare) $(SingleDeclare) @CFLAGS@
 CParallelOptions       = $(FrcDeclare) $(SingleDeclare) $(ParallelDeclare) @CFLAGS@
-CppOptions             = $(FrcDeclare) $(SingleDeclare) @CXXFLAGS@ @CGAL_CPPFLAGS@
-CppParallelOptions     = $(FrcDeclare) $(SingleDeclare) $(ParallelDeclare) @CXXFLAGS@ @CGAL_CPPFLAGS@
+CppOptions             = $(FrcDeclare) $(SingleDeclare) @CXXFLAGS@
+CppParallelOptions     = $(FrcDeclare) $(SingleDeclare) $(ParallelDeclare) @CXXFLAGS@
 ifeq "$(UseSingle)" "yes"
 FortranOptions         =  @FCFLAGS@ @MODDIRFLAG@$(SourceDir) @MODDIRFLAG@$(TargetDir) @PREPDEFFLAG@$(SingleDeclare) @FCFLAGS_SRCEXT@
 FortranParallelOptions =  @FCFLAGS@ @MODDIRFLAG@$(SourceDir) @MODDIRFLAG@$(ParallelTargetDir) @PREPDEFFLAG@$(SingleDeclare) @PREPDEFFLAG@$(ParallelDeclare) @FCFLAGS_SRCEXT@ 

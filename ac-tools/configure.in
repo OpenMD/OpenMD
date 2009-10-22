@@ -10,7 +10,6 @@ builtin(include, ac-tools/AC_CXX_HAVE_STL.m4)
 builtin(include, ac-tools/AC_CXX_NAMESPACES.m4)
 builtin(include, ac-tools/AC_CXX_STD.m4)
 builtin(include, ac-tools/ax_mpi.m4)
-builtin(include, ac-tools/CGAL.m4)
 
 # who am i
 AC_CANONICAL_HOST
@@ -253,20 +252,6 @@ case $debug in
    ACX_PROG_CXX_MAXOPT
      ;;
 esac
-
-dnl check for CGAL library
-ACX_CGAL
-USE_CGAL=no
-if test "$acx_cgal_found" == yes; then
-	USE_CGAL=yes
-	AC_DEFINE(HAVE_CGAL, 1, [Is defined if the CGAL library is available.])
-	AC_SUBST(CGAL_CXXFLAGS)
-	AC_SUBST(CGAL_LDFLAGS)
-	AC_SUBST(CGAL_CPPFLAGS)
-	AC_SUBST(CGAL_LIBS)
-fi
-AC_SUBST(USE_CGAL)
-
 
 BB_ENABLE_DOXYGEN
 
