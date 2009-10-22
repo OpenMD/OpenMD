@@ -44,7 +44,7 @@
  *
  *  Created by Charles F. Vardeman II on 11 Dec 2006.
  *  @author  Charles F. Vardeman II
- *  @version $Id: ConvexHull.cpp,v 1.19 2009-10-21 15:48:12 gezelter Exp $
+ *  @version $Id: ConvexHull.cpp,v 1.20 2009-10-22 19:43:10 gezelter Exp $
  *
  */
 
@@ -76,9 +76,6 @@ extern "C"
 #include <qhull/io.h>
 #include <qhull/stat.h>
 }
-
-/* Old options Qt Qu Qg QG0 FA */
-/* More old opts Qc Qi Pp*/
 
 ConvexHull::ConvexHull() : Hull(), dim_(3), options_("qhull Qt Pp") {
 }
@@ -126,10 +123,11 @@ void ConvexHull::computeHull(std::vector<StuntDouble*> bodydoubles) {
   int nproc = MPI::COMM_WORLD.Get_size();
   int myrank = MPI::COMM_WORLD.Get_rank();
   int localHullSites = 0;
-  int* hullSitesOnProc = new int[nproc];
-  int* coordsOnProc = new int[nproc];
-  int* displacements = new int[nproc];
-  int* vectorDisplacements = new int[nproc];
+
+  std::vector<int> hullSitesOnProc(nproc, 0);
+  std::vector<int> coordsOnProc(nproc, 0);
+  std::vector<int> displacements(nproc, 0);
+  std::vector<int> vectorDisplacements(nproc, 0);
 
   std::vector<double> coords;
   std::vector<double> vels;
@@ -277,13 +275,6 @@ void ConvexHull::computeHull(std::vector<StuntDouble*> bodydoubles) {
   volume_ = qh totvol;
   area_ = qh totarea;
 
-#ifdef IS_MPI
-  delete [] hullSitesOnProc;
-  delete [] coordsOnProc;
-  delete [] displacements;
-  delete [] vectorDisplacements;
-#endif
-  
   qh_freeqhull(!qh_ALL);
   qh_memfreeshort(&curlong, &totlong);
   if (curlong || totlong)
@@ -292,6 +283,10 @@ void ConvexHull::computeHull(std::vector<StuntDouble*> bodydoubles) {
 }
 
 void ConvexHull::printHull(const std::string& geomFileName) {
+
+#ifdef IS_MPI
+  if (worldRank == 0)  {
+#endif
   FILE *newGeomFile;
   
   //create new .md file based on old .md file
@@ -301,5 +296,8 @@ void ConvexHull::printHull(const std::string& geomFileName) {
     qh_printfacets(newGeomFile, qh PRINTout[i], qh facet_list, NULL, !qh_ALL);
   
   fclose(newGeomFile);
+#ifdef IS_MPI
+  }
+#endif
 }
 #endif //QHULL
