@@ -9,9 +9,6 @@
 /* Is defined if OOPSE should be compiled with single precision arithmetic. */
 #undef SINGLE_PRECISION
 
-/* The CGAL version number. */
-#undef CGAL_VERSION
-
 /* Define to dummy `main' function (if any) required to link to the Fortran
    libraries. */
 #undef FC_DUMMY_MAIN
@@ -28,9 +25,6 @@
 
 /* define if fstream::open() accepts third parameter. */
 #undef FSTREAM_OPEN_PROT
-
-/* Is defined if the CGAL library is available. */
-#undef HAVE_CGAL
 
 /* Is defined if the qhull library is available. */
 #undef HAVE_QHULL

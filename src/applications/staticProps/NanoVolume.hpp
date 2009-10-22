@@ -40,12 +40,9 @@
  *
  *  NanoVolume.hpp
  *
- *  Purpose: To calculate convexhull, hull volume and radius
- *  using the CGAL library.
- *
  *  Created by Charles F. Vardeman II on 14 Dec 2006.
  *  @author  Charles F. Vardeman II
- *  @version $Id: NanoVolume.hpp,v 1.6 2008-10-15 18:26:01 chuckv Exp $
+ *  @version $Id: NanoVolume.hpp,v 1.7 2009-10-22 14:19:26 gezelter Exp $
  *
  */
 #ifndef APPLICATIONS_STATICPROPS_NANOVOLUME_HPP_
@@ -57,14 +54,8 @@
 #include "selection/SelectionManager.hpp"
 #include "applications/staticProps/StaticAnalyser.hpp"
 
-#if defined(HAVE_QHULL) || defined(HAVE_CGAL)
 #ifdef HAVE_QHULL
 #include "math/ConvexHull.hpp"
-#endif
-
-#ifdef HAVE_CGAL
-#include "math/AlphaShape.hpp"
-#endif
 #endif
 
 namespace oopse {

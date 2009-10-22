@@ -40,18 +40,14 @@
  *
  *  NanoVolume.cpp
  *
- *  Purpose: To calculate convexhull, hull volume and radius
- *  using the CGAL library.
- *
  *  Created by Charles F. Vardeman II on 14 Dec 2006.
  *  @author  Charles F. Vardeman II
- *  @version $Id: NanoVolume.cpp,v 1.8 2008-10-15 18:26:01 chuckv Exp $
+ *  @version $Id: NanoVolume.cpp,v 1.9 2009-10-22 14:19:26 gezelter Exp $
  *
  */
 
 #include "applications/staticProps/NanoVolume.hpp"
 #include "math/ConvexHull.hpp"
-//#include "math/AlphaShape.hpp"
 #include "utils/simError.h"
 #include "io/DumpReader.hpp"
 #include "primitives/Molecule.hpp"
@@ -74,7 +70,7 @@ NanoVolume::NanoVolume(SimInfo* info,
 }
 
 void NanoVolume::process() {
-#if defined(HAVE_CGAL) || defined(HAVE_QHULL)
+#if defined(HAVE_QHULL)
   Molecule* mol;
   Atom* atom;
   RigidBody* rb;
@@ -87,10 +83,6 @@ void NanoVolume::process() {
   int i,j;
 
 #ifdef HAVE_QHULL
-  ConvexHull* thishull = new ConvexHull();
-#endif
-#ifdef HAVE_CGAL
-  //  AlphaShape* hull = new AlphaShape();
   ConvexHull* thishull = new ConvexHull();
 #endif
 
@@ -158,7 +150,7 @@ void NanoVolume::process() {
   osq.close();
 */
 #else
-  sprintf(painCave.errMsg, "NanoVolume: Neither CGAL nor qhull support was compiled in!\n");
+  sprintf(painCave.errMsg, "NanoVolume: qhull support was not compiled in!\n");
   painCave.isFatal = 1;
   simError();  
 
