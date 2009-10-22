@@ -1,116 +1,354 @@
-#!/usr/bin/env perl
+#!/usr/bin/env python
+"""MetaData affine scaling transform
 
-# program that scales an OOPSE .in or .eor file to a new volume
+Takes a MetaData file and scales both the periodic box and the
+coordinates of all StuntDoubles in the system by the same amount.
 
-# author    = "Chris Fennell 
-# version   = "$Revision: 1.2 $"
-# date      = "$Date: 2006-10-10 14:36:02 $"
-# copyright = "Copyright (c) 2006 by the University of Notre Dame"
-# license   = "OOPSE"
+You can either specify a new volume scaling for isotropic scaling,
+or specify one (or more) of the coordinates for non-isotropic scaling.
 
+Usage: affineScale
 
-use Getopt::Std;
+Options:
+  -h,  --help             show this help
+  -m,  --meta-data=...    use specified meta-data (.md, .eor) file
+  -o,  --output-file=...  use specified output file
+  -x,  --newX=...         scale the system to a new x dimension
+  -y,  --newY=...         scale the system to a new y dimension
+  -z,  --newZ=...         scale the system to a new z dimension
+  -v,  --newV=...         scale the system to a new volume
 
-# some variables to get things going
-$startSnap = 0;
-$startFrame = 0;
-$startStunts = 0;
+Example:
+  affineScale -m lipidSystem.md -o scaledSystem.md -v 77000.0
 
-# get our options
-getopts('hv', \%opts);
+"""
 
-# if we don't have a filename, drop to -h
-$opts{h} = 'true' if $#ARGV != 1;
+__author__ = "Dan Gezelter (gezelter@nd.edu)"
+__version__ = "$Revision: 1.3 $"
+__date__ = "$Date: 2009-10-22 19:12:14 $"
+__copyright__ = "Copyright (c) 2009 by the University of Notre Dame"
+__license__ = "OpenMD"
 
-# our option output 
-if ($opts{h}){
-  print "affineScale: performs an affine transform on an OOPSE .in or .eor\n";
-  print "\tand writes to a new file named [file name].scale\n\n";
-  print "usage: affineScale [-hv] [file name] [new volume (Ang^3)]\n\n";
-  print "  -h : show this message\n";
-  die   "  -v : more verbose output\n";
-}
+import sys
+import getopt
+import string
+import math
+import random
+from sets import *
 
-# set some variables to be used in the code
-$fileName = $ARGV[0];
-$newVolume = $ARGV[1];
+metaData = []
+frameData = []
+indices = []
+pvqj = []
+p = []
+v = []
+q = []
+j = []
+Hmat = []
+BoxInv = []
 
-# some crazy input checking
-if ($newVolume =~ /^[0-9]/){
-} else {
-  die "\t[new volume] value ($newVolume) is not a valid number\n\tPlease choose a non-negative numeric value for [new volume]\n";
-}
+def usage():
+    print __doc__
 
-# split up the name to obtain an output filename
-@names = split('\.', $fileName);
-$names[$#names] = 'scale';
-$outName = join('.',@names);
+def readFile(mdFileName):
+    mdFile = open(mdFileName, 'r')        
+    # Find OOPSE version info first
+    line = mdFile.readline()
+    while 1:
+        if '<OOPSE version=' in line:
+            OOPSEversion = line
+            break
+        line = mdFile.readline()
+        
+        # Rewind file and find start of MetaData block
+        
+    mdFile.seek(0)
+    line = mdFile.readline()
+    print "reading MetaData"
+    while 1:
+        if '<MetaData>' in line:
+            while 2:
+                metaData.append(line)
+                line = mdFile.readline()
+                if '</MetaData>' in line:
+                    metaData.append(line)
+                    break
+            break
+        line = mdFile.readline()
 
-open(STATFILE, "./$fileName") || die "\tError: can't find file $fileName\n";
-open (SCALEFILE, ">./$outName") || die "\tError: can't open $outName";
+    mdFile.seek(0)
+    print "reading Snapshot"
+    line = mdFile.readline()
+    while 1:
+        if '<Snapshot>' in line:
+            line = mdFile.readline()
+            while 1:
+                print "reading FrameData"
+                if '<FrameData>' in line:
+                    while 2:
+                        frameData.append(line)
+                        if 'Hmat:' in line:
+                            L = line.split()
+                            Hxx = float(L[2].strip(','))
+                            Hxy = float(L[3].strip(','))
+                            Hxz = float(L[4].strip(','))
+                            Hyx = float(L[7].strip(','))
+                            Hyy = float(L[8].strip(','))
+                            Hyz = float(L[9].strip(','))
+                            Hzx = float(L[12].strip(','))
+                            Hzy = float(L[13].strip(','))
+                            Hzz = float(L[14].strip(','))
+                            Hmat.append([Hxx, Hxy, Hxz])
+                            Hmat.append([Hyx, Hyy, Hyz])
+                            Hmat.append([Hzx, Hzy, Hzz])
+                            BoxInv.append(1.0/Hxx)
+                            BoxInv.append(1.0/Hyy)
+                            BoxInv.append(1.0/Hzz)
+                        line = mdFile.readline()
+                        if '</FrameData>' in line:
+                            frameData.append(line)
+                            break
+                    break
 
-while (<STATFILE>){
-  $startSnap = 0 if /\/Snapshot/;
-  $startFrame = 0 if /\/FrameData/;
-  $startStunts = 0 if /\/StuntDoubles/;
+            line = mdFile.readline()
+            while 1:
+                if '<StuntDoubles>' in line:
+                    line = mdFile.readline()
+                    while 2:
+                        L = line.split()
+                        myIndex = int(L[0])
+                        indices.append(myIndex)
+                        pvqj.append(L[1])
+                        x = float(L[2])
+                        y = float(L[3])
+                        z = float(L[4])
+                        p.append([x, y, z])
+                        vx = float(L[5])
+                        vy = float(L[6])
+                        vz = float(L[7])
+                        v.append([vx, vy, vz])
+                        if 'pvqj' in L[1]:
+                            qw = float(L[8])
+                            qx = float(L[9])
+                            qy = float(L[10])
+                            qz = float(L[11])
+                            q.append([qw, qx, qy, qz])
+                            jx = float(L[12])
+                            jy = float(L[13])
+                            jz = float(L[14])
+                            j.append([jx, jy, jz])
+                        else:
+                            q.append([0.0, 0.0, 0.0, 0.0])
+                            j.append([0.0, 0.0, 0.0])
+                                               
+                        line = mdFile.readline()
+                        if '</StuntDoubles>' in line:
+                            break
+                    break
+        line = mdFile.readline()
+        if not line: break
+    
+    mdFile.close()
 
-  if ($startSnap == 1){
-    if ($startFrame == 1){
-      if (/Hmat/){
-	@line = split;
-	
-	chop $line[2];
-	chop $line[8];
-	$oldVolume = $line[2]*$line[8]*$line[14];
-	
-	$scale = ($newVolume/$oldVolume)**0.333333333333333;
-	# scale the hmat vectors (only orthorhombic)
-	$line[2] *= $scale;
-	$line[8] *= $scale;
-	$line[14] *= $scale;
-	$volume = $line[2]*$line[8]*$line[14];
-	
-	print SCALEFILE "\t$line[0]";
-	for ($i=1; $i<=$#line; $i++) {
-	  print SCALEFILE " $line[$i]";
-	  if ($i == 2 || $i == 8) {print SCALEFILE ",";}
-	}
-	print SCALEFILE "\n";
-      } else {
-	print SCALEFILE;
-      }
-    }
-    if ($startStunts == 1){
-      @line = split;
-      $line[2] *= $scale;
-      $line[3] *= $scale;
-      $line[4] *= $scale;
-      print SCALEFILE "$line[0]\t$line[1]\t";
-      for ($i=2; $i<=$#line; $i++) {
-	print SCALEFILE "$line[$i] ";
-      }
-      print SCALEFILE "\n";
-    }
-    if ($startFrame == 0 && $startStunts == 0) {
-      print SCALEFILE;
-    }
-  } else {
-    print SCALEFILE;
-  }
-  $startSnap = 1 if /Snapshot/;
-  $startFrame = 1 if /FrameData/;
-  $startStunts = 1 if /StuntDoubles/;
-# check again since "/value" contains "value"
-  $startSnap = 0 if /\/Snapshot/;
-  $startFrame = 0 if /\/FrameData/;
-  $startStunts = 0 if /\/StuntDoubles/;
-}
+def writeFile(outputFileName,repeatX,repeatY,repeatZ):
+    outputFile = open(outputFileName, 'w')
 
-print "Affine transformed configuration written to $outName\n";
+    outputFile.write("<OOPSE version=4>\n");
 
-if (defined($opts{v})){
-  print "New Volume   : $volume\n";
-  print "Old Volume   : $oldVolume\n";
-  print "Scale Factor : $scale\n";
-}
+    print "writing MetaData"
+    for metaline in metaData:
+        if 'nMol' in metaline:
+            metasplit = metaline.split()
+            nMol = float(metasplit[2].strip(';'))
+            newNmol = nMol * repeatX * repeatY * repeatZ
+            outputFile.write('  nMol = %10d;\n' % (newNmol))
+        else:
+            outputFile.write(metaline)
 
+    print "writing Snapshot"
+    outputFile.write("  <Snapshot>\n")
+
+    print "writing FrameData"
+    for frameline in frameData:
+        if 'Hmat:' in frameline:
+            myH = []
+            myH.append([repeatX * Hmat[0][0], repeatX * Hmat[0][1], repeatX * Hmat[0][2]])
+            myH.append([repeatY * Hmat[1][0], repeatY * Hmat[1][1], repeatY * Hmat[1][2]])
+            myH.append([repeatZ * Hmat[2][0], repeatZ * Hmat[2][1], repeatZ * Hmat[2][2]])
+            outputFile.write("        Hmat: {{ %.10g, %.10g, %.10g }, { %.10g, %.10g, %.10g }, { %.10g, %.10g, %.10g }}\n" % (myH[0][0], myH[0][1], myH[0][2], myH[1][0], myH[1][1], myH[1][2], myH[2][0], myH[2][1], myH[2][2]))
+        else:
+            outputFile.write(frameline)
+
+    print "writing StuntDoubles"
+    outputFile.write("    <StuntDoubles>\n")
+
+    print repeatX, repeatY, repeatZ
+
+    deco = [ (index, i) for i, index in enumerate(indices) ]
+    deco.sort()
+    whichSD = 0
+    for index in range(len(deco)):
+        (index,i) = deco[index]
+        print i
+        for ii in range(repeatX):
+            for jj in range(repeatY):
+                for kk in range(repeatZ):                    
+                    myP = [] 
+                    myP.append(p[i][0] + ii*Hmat[0][0] + jj*Hmat[1][0] + kk*Hmat[2][0])
+                    myP.append(p[i][1] + ii*Hmat[0][1] + jj*Hmat[1][1] + kk*Hmat[2][1])
+                    myP.append(p[i][2] + ii*Hmat[0][2] + jj*Hmat[1][2] + kk*Hmat[2][2])
+                        
+                    if (pvqj[i] == 'pv'):
+                        outputFile.write("%10d %7s %18.10g %18.10g %18.10g %14e %13e %13e\n" % (whichSD, pvqj[i], myP[0], myP[1], myP[2], v[i][0], v[i][1], v[i][2]))
+                    elif (pvqj[i] == 'pvqj'):
+                        outputFile.write("%10d %7s %18.10g %18.10g %18.10g %13e %13e %13e %13e %13e %13e %13e %13e %13e %13e\n" % (whichSD, pvqj[i], myP[0], myP[1], myP[2], v[i][0], v[i][1], v[i][2], q[i][0], q[i][1], q[i][2], q[i][3], j[i][0], j[i][1], j[i][2]))
+                    whichSD = whichSD + 1
+
+    outputFile.write("    </StuntDoubles>\n")
+    outputFile.write("  </Snapshot>\n")
+    outputFile.write("</OOPSE>\n")
+    outputFile.close()
+
+def roundMe(x):
+    if (x >= 0.0):
+        return math.floor(x + 0.5)
+    else:
+        return math.ceil(x - 0.5)
+
+def wrapVector(myVect):
+    scaled = [0.0, 0.0, 0.0]
+    for i in range(3):
+        scaled[i] = myVect[i] * BoxInv[i]
+        scaled[i] = scaled[i] - roundMe(scaled[i])
+        myVect[i] = scaled[i] * Hmat[i][i]
+    return myVect
+
+def dot(L1, L2):
+    myDot = 0.0
+    for i in range(len(L1)):
+        myDot = myDot + L1[i]*L2[i]
+    return myDot
+
+def normalize(L1):
+    L2 = []
+    myLength = math.sqrt(dot(L1, L1))
+    for i in range(len(L1)):
+        L2.append(L1[i] / myLength)
+    return L2
+
+def cross(L1, L2):
+    # don't call this with anything other than length 3 lists please
+    # or you'll be sorry
+    L3 = [0.0, 0.0, 0.0]
+    L3[0] = L1[1]*L2[2] - L1[2]*L2[1] 
+    L3[1] = L1[2]*L2[0] - L1[0]*L2[2]
+    L3[2] = L1[0]*L2[1] - L1[1]*L2[0]
+    return L3
+
+def mapToBox():
+    for i in range(len(indices)):
+        dpos = []
+        dpos.append(p[i][0])
+        dpos.append(p[i][1])
+        dpos.append(p[i][2])
+        p[i] = wrapVector(dpos)
+
+def scaleBox(scaleX, scaleY, scaleZ):
+    for i in range(3):
+        Hmat[0][i] = scaleX * Hmat[0][i]
+    for i in range(3):
+        Hmat[1][i] = scaleY * Hmat[1][i]
+    for i in range(3):
+        Hmat[2][i] = scaleZ * Hmat[2][i]
+    for i in range(3):            
+        BoxInv[i] = 1.0/Hmat[i][i]
+
+def scaleCoordinates(scaleX, scaleY, scaleZ):
+    for i in range(len(indices)):
+        p[i][0] = p[i][0]*scaleX
+        p[i][1] = p[i][1]*scaleY
+        p[i][2] = p[i][2]*scaleZ
+
+def main(argv):
+    _haveMDFileName = 0
+    _haveOutputFileName = 0
+    try:                                
+        opts, args = getopt.getopt(argv, "hm:o:x:y:z:v:", ["help", "meta-data=", "output-file=", "newX=", "newY=", "newZ=","newV="]) 
+    except getopt.GetoptError:           
+        usage()                          
+        sys.exit(2)                     
+    doV = 0
+    doX = 0
+    doY = 0
+    doZ = 0
+    for opt, arg in opts:                
+        if opt in ("-h", "--help"):      
+            usage()                     
+            sys.exit()                  
+        elif opt in ("-m", "--meta-data"): 
+            mdFileName = arg
+            _haveMDFileName = 1
+        elif opt in ("-o", "--output-file"): 
+            outputFileName = arg
+            _haveOutputFileName = 1
+        if opt in ("-x", "--newX"):
+            newX = float(arg)
+            doX = 1
+        elif opt in ("-y", "--newY"): 
+            newY = float(arg)
+            doY = 1
+        elif opt in ("-z", "--newZ"): 
+            newZ = float(arg)
+            doZ = 1
+        elif opt in ("-v", "--newV"):        
+            newV = float(arg)
+            doV = 1
+
+    if (_haveMDFileName != 1):
+        usage() 
+        print "No meta-data file was specified"
+        sys.exit()
+    if (_haveOutputFileName != 1):
+        usage()
+        print "No output file was specified"
+        sys.exit()
+
+    if not (doV or doX or doY or doZ):
+        usage()
+        print "no scaling options given.  Nothing to do!"
+        sys.exit()
+
+    if doV and (doX or doY or doZ):
+        usage()
+        print "-v is mutually exclusive with any of the -x, -y, and -z options"
+        sys.exit()
+
+    readFile(mdFileName)
+
+    scaleX = 1.0
+    scaleY = 1.0
+    scaleZ = 1.0    
+
+    if doX:
+        scaleX = newX / Hmat[0][0]
+    if doY:
+        scaleY = newY / Hmat[1][1]
+    if doZ:
+        scaleZ = newZ / Hmat[2][2]
+
+    if doV:
+        oldV = Hmat[0][0] * Hmat[1][1] * Hmat[2][2]
+        scaleX = pow(newV/oldV, 1.0/3.0)
+        scaleY = scaleX
+        scaleZ = scaleX
+
+    mapToBox()
+    scaleBox(scaleX, scaleY, scaleZ)
+    scaleCoordinates(scaleX, scaleY, scaleZ)
+    writeFile(outputFileName, 1, 1, 1)
+
+if __name__ == "__main__":
+    if len(sys.argv) == 1:
+        usage()
+        sys.exit()
+    main(sys.argv[1:])

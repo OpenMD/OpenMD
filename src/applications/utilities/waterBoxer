@@ -3,8 +3,8 @@
 # program that builds water boxes
 
 # author    = "Chris Fennell
-# version   = "$Revision: 1.5 $"
-# date      = "$Date: 2008-01-23 21:22:18 $"
+# version   = "$Revision: 1.6 $"
+# date      = "$Date: 2009-10-22 19:12:14 $"
 # copyright = "Copyright (c) 2006 by the University of Notre Dame"
 # license   = "OOPSE"
 
@@ -535,9 +535,6 @@ sub printTRED {
     members(0, 1);
   }
 
-  cutoffGroup{
-    members(0, 1);
-  }
 }"
 }
 
@@ -562,9 +559,6 @@ sub printTIP3P {
     members(0, 1, 2);
   }
 
-  cutoffGroup{
-    members(0, 1, 2);
-  }
 }"
 }
 
@@ -593,9 +587,6 @@ sub printTIP4P {
     members(0, 1, 2, 3);
   }
 
-  cutoffGroup{
-    members(0, 1, 2, 3);
-  }
 }"
 }
 
@@ -624,9 +615,6 @@ sub printTIP4PEw {
     members(0, 1, 2, 3);
   }
 
-  cutoffGroup{
-    members(0, 1, 2, 3);
-  }
 }"
 }
 
@@ -659,9 +647,6 @@ sub printTIP5P {
     members(0, 1, 2, 3, 4);
   }
 
-  cutoffGroup{
-    members(0, 1, 2, 3, 4);
-  }
 }"
 }
 
@@ -694,9 +679,6 @@ sub printTIP5PE {
     members(0, 1, 2, 3, 4);
   }
 
-  cutoffGroup{
-    members(0, 1, 2, 3, 4);
-  }
 }"
 }
 
@@ -721,9 +703,6 @@ print $waterFileHandle "\n\nmolecule{
     members(0, 1, 2);
   }
 
-  cutoffGroup{
-    members(0, 1, 2);
-  }
 }"
 }
 
@@ -748,9 +727,6 @@ print $waterFileHandle "\n\nmolecule{
     members(0, 1, 2);
   }
 
-  cutoffGroup{
-    members(0, 1, 2);
-  }
 }"
 }
 
