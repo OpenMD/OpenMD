@@ -84,8 +84,8 @@ extern "C"{
 
   void notifyFortranCutoffs( RealType *rCut,
 			     RealType *rSw,
-			     bool *ljsp,
-			     bool *ljsf);
+			     int *ljsp,
+			     int *ljsf);
 
   void notifyFortranYouAreOnYourOwn( );
 

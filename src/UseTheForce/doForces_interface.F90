@@ -98,7 +98,7 @@ subroutine notifyFortranCutoffs(this_rcut, this_rsw, this_sp, this_sf)
   use definitions, ONLY : dp
 
   real(kind=dp), intent(in) :: this_rcut, this_rsw
-  logical, intent(in) :: this_sp, this_sf
+  integer, intent(in) :: this_sp, this_sf
 
   call setCutoffs(this_rcut, this_rsw, this_sp, this_sf)
 

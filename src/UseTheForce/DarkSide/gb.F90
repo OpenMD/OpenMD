@@ -50,9 +50,6 @@ module gayberne
   use status
   use lj
   use fForceOptions
-#ifdef IS_MPI
-  use mpiSimulation
-#endif
   
   implicit none
 
@@ -288,18 +285,18 @@ contains
 
   end function getGayBerneCut
 
-  subroutine do_gb_pair(atom1, atom2, d, r, r2, sw, vdwMult, vpair, fpair, &
-       pot, Amat, f, t, do_pot)
+  subroutine do_gb_pair(atom1, atom2, atid1, atid2, d, r, r2, sw, vdwMult, vpair, fpair, &
+       pot, A1, A2, f1, t1, t2, do_pot)
     
-    integer, intent(in) :: atom1, atom2
-    integer :: atid1, atid2, gbt1, gbt2, id1, id2
+    integer, intent(in) :: atom1, atom2, atid1, atid2
+    integer :: gbt1, gbt2, id1, id2
     real (kind=dp), intent(inout) :: r, r2, vdwMult
     real (kind=dp), dimension(3), intent(in) :: d
     real (kind=dp), dimension(3), intent(inout) :: fpair
     real (kind=dp) :: pot, sw, vpair
-    real (kind=dp), dimension(9,nLocal) :: Amat
-    real (kind=dp), dimension(3,nLocal) :: f
-    real (kind=dp), dimension(3,nLocal) :: t
+    real (kind=dp), dimension(9) :: A1, A2
+    real (kind=dp), dimension(3) :: f1
+    real (kind=dp), dimension(3) :: t1, t2
     logical, intent(in) :: do_pot
     real (kind = dp), dimension(3) :: ul1, ul2, rxu1, rxu2, uxu, rhat
 
@@ -312,14 +309,6 @@ contains
     if (.not.haveMixingMap) then
        call createGBMixingMap()
     endif
-
-#ifdef IS_MPI
-    atid1 = atid_Row(atom1)
-    atid2 = atid_Col(atom2)
-#else
-    atid1 = atid(atom1)
-    atid2 = atid(atom2)
-#endif
 
     gbt1 = GBMap%atidToGBtype(atid1)
     gbt2 = GBMap%atidToGBtype(atid2)    
@@ -337,23 +326,13 @@ contains
     xpap2  = GBMixingMap(gbt1, gbt2)%xpap2 
     xpapi2 = GBMixingMap(gbt1, gbt2)%xpapi2
     
-#ifdef IS_MPI
-    ul1(1) = A_Row(7,atom1)
-    ul1(2) = A_Row(8,atom1)
-    ul1(3) = A_Row(9,atom1)
+    ul1(1) = A1(7)
+    ul1(2) = A1(8)
+    ul1(3) = A1(9)
 
-    ul2(1) = A_Col(7,atom2)
-    ul2(2) = A_Col(8,atom2)
-    ul2(3) = A_Col(9,atom2)
-#else
-    ul1(1) = Amat(7,atom1)
-    ul1(2) = Amat(8,atom1)
-    ul1(3) = Amat(9,atom1)
-
-    ul2(1) = Amat(7,atom2)
-    ul2(2) = Amat(8,atom2)
-    ul2(3) = Amat(9,atom2)
-#endif
+    ul2(1) = A2(7)
+    ul2(2) = A2(8)
+    ul2(3) = A2(9)
     
     if (i_is_LJ) then
        a = 0.0_dp
@@ -444,67 +423,22 @@ contains
 !!$    write(*,*) 'f =', fx, fy, fz
 !!$    write(*,*) 'au =', au, bu, g
 !!$    
- 	 
-   
-#ifdef IS_MPI
-    f_Row(1,atom1) = f_Row(1,atom1) + fx
-    f_Row(2,atom1) = f_Row(2,atom1) + fy
-    f_Row(3,atom1) = f_Row(3,atom1) + fz
+
+    pot = pot + U*sw
     
-    f_Col(1,atom2) = f_Col(1,atom2) - fx
-    f_Col(2,atom2) = f_Col(2,atom2) - fy
-    f_Col(3,atom2) = f_Col(3,atom2) - fz
-    
-    t_Row(1,atom1) = t_Row(1,atom1) + dUda*rxu1(1) - dUdg*uxu(1)
-    t_Row(2,atom1) = t_Row(2,atom1) + dUda*rxu1(2) - dUdg*uxu(2)
-    t_Row(3,atom1) = t_Row(3,atom1) + dUda*rxu1(3) - dUdg*uxu(3)
-                                                                
-    t_Col(1,atom2) = t_Col(1,atom2) + dUdb*rxu2(1) + dUdg*uxu(1)
-    t_Col(2,atom2) = t_Col(2,atom2) + dUdb*rxu2(2) + dUdg*uxu(2)
-    t_Col(3,atom2) = t_Col(3,atom2) + dUdb*rxu2(3) + dUdg*uxu(3)
-#else
-    f(1,atom1) = f(1,atom1) + fx
-    f(2,atom1) = f(2,atom1) + fy
-    f(3,atom1) = f(3,atom1) + fz
-    
-    f(1,atom2) = f(1,atom2) - fx
-    f(2,atom2) = f(2,atom2) - fy
-    f(3,atom2) = f(3,atom2) - fz
-    
-    t(1,atom1) = t(1,atom1) +  dUda*rxu1(1) - dUdg*uxu(1)
-    t(2,atom1) = t(2,atom1) +  dUda*rxu1(2) - dUdg*uxu(2)
-    t(3,atom1) = t(3,atom1) +  dUda*rxu1(3) - dUdg*uxu(3)
-                                                         
-    t(1,atom2) = t(1,atom2) +  dUdb*rxu2(1) + dUdg*uxu(1)
-    t(2,atom2) = t(2,atom2) +  dUdb*rxu2(2) + dUdg*uxu(2)
-    t(3,atom2) = t(3,atom2) +  dUdb*rxu2(3) + dUdg*uxu(3)
-#endif
-   
-    if (do_pot) then
-#ifdef IS_MPI 
-       pot_row(VDW_POT,atom1) = pot_row(VDW_POT,atom1) + 0.5d0*U*sw
-       pot_col(VDW_POT,atom2) = pot_col(VDW_POT,atom2) + 0.5d0*U*sw
-#else
-       pot = pot + U*sw
-#endif
-    endif
-    
+    f1(1) = f1(1) + fx
+    f1(2) = f1(2) + fy
+    f1(3) = f1(3) + fz
+
+    t1(1) = t1(1) + dUda*rxu1(1) - dUdg*uxu(1)
+    t1(2) = t1(2) + dUda*rxu1(2) - dUdg*uxu(2)
+    t1(3) = t1(3) + dUda*rxu1(3) - dUdg*uxu(3)
+                                                    
+    t2(1) = t2(1) + dUdb*rxu2(1) + dUdg*uxu(1)
+    t2(2) = t2(2) + dUdb*rxu2(2) + dUdg*uxu(2)
+    t2(3) = t2(3) + dUdb*rxu2(3) + dUdg*uxu(3)
+       
     vpair = vpair + U*sw
-#ifdef IS_MPI
-    id1 = AtomRowToGlobal(atom1)
-    id2 = AtomColToGlobal(atom2)
-#else
-    id1 = atom1
-    id2 = atom2
-#endif
-    
-    if (molMembershipList(id1) .ne. molMembershipList(id2)) then
-       
-       fpair(1) = fpair(1) + fx
-       fpair(2) = fpair(2) + fy
-       fpair(3) = fpair(3) + fz
-       
-    endif
     
     return
   end subroutine do_gb_pair

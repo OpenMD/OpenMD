@@ -50,7 +50,7 @@
 !! @author Matthew Meineke
 !! @author Christopher Fennell
 !! @author J. Daniel Gezelter
-!! @version $Id: sticky.F90,v 1.20 2006-05-17 15:37:15 gezelter Exp $, $Date: 2006-05-17 15:37:15 $, $Name: not supported by cvs2svn $, $Revision: 1.20 $
+!! @version $Id: sticky.F90,v 1.21 2009-10-23 18:41:09 gezelter Exp $, $Date: 2009-10-23 18:41:09 $, $Name: not supported by cvs2svn $, $Revision: 1.21 $
 
 module sticky
 
@@ -61,9 +61,6 @@ module sticky
   use simulation
   use status
   use interpolation
-#ifdef IS_MPI
-  use mpiSimulation
-#endif
   implicit none
 
   PRIVATE
@@ -185,8 +182,8 @@ contains
     cutValue = StickyMap(atomID)%rbig
   end function getStickyPowerCut
 
-  subroutine do_sticky_pair(atom1, atom2, d, rij, r2, sw, vpair, fpair, &
-       pot, A, f, t, do_pot)
+  subroutine do_sticky_pair(atom1, atom2, me1, me2, d, rij, r2, sw, vpair, fpair, &
+       pot, A1, A2, f1, t1, t2, do_pot)
 
     !! This routine does only the sticky portion of the SSD potential
     !! [Chandra and Ichiye, J. Chem. Phys. 111, 2701 (1999)].
@@ -197,14 +194,14 @@ contains
 
     !! i and j are pointers to the two SSD atoms
 
-    integer, intent(in) :: atom1, atom2
+    integer, intent(in) :: atom1, atom2, me1, me2
     real (kind=dp), intent(inout) :: rij, r2
     real (kind=dp), dimension(3), intent(in) :: d
     real (kind=dp), dimension(3), intent(inout) :: fpair
     real (kind=dp) :: pot, vpair, sw
-    real (kind=dp), dimension(9,nLocal) :: A
-    real (kind=dp), dimension(3,nLocal) :: f
-    real (kind=dp), dimension(3,nLocal) :: t
+    real (kind=dp), dimension(9) :: A1, A2
+    real (kind=dp), dimension(3) :: f1
+    real (kind=dp), dimension(3) :: t1, t2
     logical, intent(in) :: do_pot
 
     real (kind=dp) :: xi, yi, zi, xj, yj, zj, xi2, yi2, zi2, xj2, yj2, zj2
@@ -224,16 +221,8 @@ contains
     real (kind=dp) :: radcomxi, radcomyi, radcomzi
     real (kind=dp) :: radcomxj, radcomyj, radcomzj
     integer :: id1, id2
-    integer :: me1, me2
-    real (kind=dp) :: w0, v0, v0p, rl, ru, rlp, rup, rbig, dx
 
-#ifdef IS_MPI
-    me1 = atid_Row(atom1)
-    me2 = atid_Col(atom2)
-#else
-    me1 = atid(atom1)
-    me2 = atid(atom2)
-#endif
+    real (kind=dp) :: w0, v0, v0p, rl, ru, rlp, rup, rbig, dx
 
     if (me1.eq.me2) then
        w0  = StickyMap(me1)%w0 
@@ -268,33 +257,18 @@ contains
        drdy = d(2) / rij
        drdz = d(3) / rij
 
-#ifdef IS_MPI
        ! rotate the inter-particle separation into the two different 
        ! body-fixed coordinate systems:
 
-       xi = A_row(1,atom1)*d(1) + A_row(2,atom1)*d(2) + A_row(3,atom1)*d(3)
-       yi = A_row(4,atom1)*d(1) + A_row(5,atom1)*d(2) + A_row(6,atom1)*d(3)
-       zi = A_row(7,atom1)*d(1) + A_row(8,atom1)*d(2) + A_row(9,atom1)*d(3)
+       xi = A1(1)*d(1) + A1(2)*d(2) + A1(3)*d(3)
+       yi = A1(4)*d(1) + A1(5)*d(2) + A1(6)*d(3)
+       zi = A1(7)*d(1) + A1(8)*d(2) + A1(9)*d(3)
 
        ! negative sign because this is the vector from j to i:
 
-       xj = -(A_Col(1,atom2)*d(1) + A_Col(2,atom2)*d(2) + A_Col(3,atom2)*d(3))
-       yj = -(A_Col(4,atom2)*d(1) + A_Col(5,atom2)*d(2) + A_Col(6,atom2)*d(3))
-       zj = -(A_Col(7,atom2)*d(1) + A_Col(8,atom2)*d(2) + A_Col(9,atom2)*d(3))
-#else
-       ! rotate the inter-particle separation into the two different 
-       ! body-fixed coordinate systems:
-
-       xi = a(1,atom1)*d(1) + a(2,atom1)*d(2) + a(3,atom1)*d(3)
-       yi = a(4,atom1)*d(1) + a(5,atom1)*d(2) + a(6,atom1)*d(3)
-       zi = a(7,atom1)*d(1) + a(8,atom1)*d(2) + a(9,atom1)*d(3)
-
-       ! negative sign because this is the vector from j to i:
-
-       xj = -(a(1,atom2)*d(1) + a(2,atom2)*d(2) + a(3,atom2)*d(3))
-       yj = -(a(4,atom2)*d(1) + a(5,atom2)*d(2) + a(6,atom2)*d(3))
-       zj = -(a(7,atom2)*d(1) + a(8,atom2)*d(2) + a(9,atom2)*d(3))
-#endif
+       xj = -(A2(1)*d(1) + A2(2)*d(2) + A2(3)*d(3))
+       yj = -(A2(4)*d(1) + A2(5)*d(2) + A2(6)*d(3))
+       zj = -(A2(7)*d(1) + A2(8)*d(2) + A2(9)*d(3))
 
        xi2 = xi*xi
        yi2 = yi*yi
@@ -303,7 +277,6 @@ contains
        xj2 = xj*xj
        yj2 = yj*yj
        zj2 = zj*zj
-
 
        ! calculate the switching info. from the splines
        if (me1.eq.me2) then
@@ -361,14 +334,8 @@ contains
        wp = wip + wjp
 
        vpair = vpair + 0.5_dp*(v0*s*w + v0p*sp*wp)
-       if (do_pot) then
-#ifdef IS_MPI 
-          pot_row(HB_POT,atom1) = pot_row(HB_POT,atom1) + 0.25_dp*(v0*s*w + v0p*sp*wp)*sw
-          pot_col(HB_POT,atom2) = pot_col(HB_POT,atom2) + 0.25_dp*(v0*s*w + v0p*sp*wp)*sw
-#else
-          pot = pot + 0.5_dp*(v0*s*w + v0p*sp*wp)*sw
-#endif  
-       endif
+
+       pot = pot + 0.5_dp*(v0*s*w + v0p*sp*wp)*sw
 
        dwidx =   4.0_dp*xi*zi/r3  - 6.0_dp*xi*zi*(xi2-yi2)/r5
        dwidy = - 4.0_dp*yi*zi/r3  - 6.0_dp*yi*zi*(xi2-yi2)/r5
@@ -418,29 +385,14 @@ contains
 
        ! go back to lab frame using transpose of rotation matrix:
 
-#ifdef IS_MPI
-       t_Row(1,atom1) = t_Row(1,atom1) + a_Row(1,atom1)*txi + &
-            a_Row(4,atom1)*tyi + a_Row(7,atom1)*tzi
-       t_Row(2,atom1) = t_Row(2,atom1) + a_Row(2,atom1)*txi + &
-            a_Row(5,atom1)*tyi + a_Row(8,atom1)*tzi
-       t_Row(3,atom1) = t_Row(3,atom1) + a_Row(3,atom1)*txi + &
-            a_Row(6,atom1)*tyi + a_Row(9,atom1)*tzi
+       t1(1) = t1(1) + a1(1)*txi + a1(4)*tyi + a1(7)*tzi
+       t1(2) = t1(2) + a1(2)*txi + a1(5)*tyi + a1(8)*tzi
+       t1(3) = t1(3) + a1(3)*txi + a1(6)*tyi + a1(9)*tzi
 
-       t_Col(1,atom2) = t_Col(1,atom2) + a_Col(1,atom2)*txj + &
-            a_Col(4,atom2)*tyj + a_Col(7,atom2)*tzj
-       t_Col(2,atom2) = t_Col(2,atom2) + a_Col(2,atom2)*txj + &
-            a_Col(5,atom2)*tyj + a_Col(8,atom2)*tzj
-       t_Col(3,atom2) = t_Col(3,atom2) + a_Col(3,atom2)*txj + &
-            a_Col(6,atom2)*tyj + a_Col(9,atom2)*tzj
-#else
-       t(1,atom1) = t(1,atom1) + a(1,atom1)*txi + a(4,atom1)*tyi + a(7,atom1)*tzi
-       t(2,atom1) = t(2,atom1) + a(2,atom1)*txi + a(5,atom1)*tyi + a(8,atom1)*tzi
-       t(3,atom1) = t(3,atom1) + a(3,atom1)*txi + a(6,atom1)*tyi + a(9,atom1)*tzi
+       t2(1) = t2(1) + a2(1)*txj + a2(4)*tyj + a2(7)*tzj
+       t2(2) = t2(2) + a2(2)*txj + a2(5)*tyj + a2(8)*tzj
+       t2(3) = t2(3) + a2(3)*txj + a2(6)*tyj + a2(9)*tzj
 
-       t(1,atom2) = t(1,atom2) + a(1,atom2)*txj + a(4,atom2)*tyj + a(7,atom2)*tzj
-       t(2,atom2) = t(2,atom2) + a(2,atom2)*txj + a(5,atom2)*tyj + a(8,atom2)*tzj
-       t(3,atom2) = t(3,atom2) + a(3,atom2)*txj + a(6,atom2)*tyj + a(9,atom2)*tzj
-#endif    
        ! Now, on to the forces:
 
        ! first rotate the i terms back into the lab frame:
@@ -453,47 +405,13 @@ contains
        radcomyj = (v0*s*dwjdy+v0p*sp*dwjpdy)*sw
        radcomzj = (v0*s*dwjdz+v0p*sp*dwjpdz)*sw
 
-#ifdef IS_MPI    
-       fxii = a_Row(1,atom1)*(radcomxi) + &
-            a_Row(4,atom1)*(radcomyi) + &
-            a_Row(7,atom1)*(radcomzi)
-       fyii = a_Row(2,atom1)*(radcomxi) + &
-            a_Row(5,atom1)*(radcomyi) + &
-            a_Row(8,atom1)*(radcomzi)
-       fzii = a_Row(3,atom1)*(radcomxi) + &
-            a_Row(6,atom1)*(radcomyi) + &
-            a_Row(9,atom1)*(radcomzi)
+       fxii = a1(1)*(radcomxi) + a1(4)*(radcomyi) + a1(7)*(radcomzi)
+       fyii = a1(2)*(radcomxi) + a1(5)*(radcomyi) + a1(8)*(radcomzi)
+       fzii = a1(3)*(radcomxi) + a1(6)*(radcomyi) + a1(9)*(radcomzi)
 
-       fxjj = a_Col(1,atom2)*(radcomxj) + &
-            a_Col(4,atom2)*(radcomyj) + &
-            a_Col(7,atom2)*(radcomzj)
-       fyjj = a_Col(2,atom2)*(radcomxj) + &
-            a_Col(5,atom2)*(radcomyj) + &
-            a_Col(8,atom2)*(radcomzj)
-       fzjj = a_Col(3,atom2)*(radcomxj)+ &
-            a_Col(6,atom2)*(radcomyj) + &
-            a_Col(9,atom2)*(radcomzj)
-#else
-       fxii = a(1,atom1)*(radcomxi) + &
-            a(4,atom1)*(radcomyi) + &
-            a(7,atom1)*(radcomzi)
-       fyii = a(2,atom1)*(radcomxi) + &
-            a(5,atom1)*(radcomyi) + &
-            a(8,atom1)*(radcomzi)
-       fzii = a(3,atom1)*(radcomxi) + &
-            a(6,atom1)*(radcomyi) + &
-            a(9,atom1)*(radcomzi)
-
-       fxjj = a(1,atom2)*(radcomxj) + &
-            a(4,atom2)*(radcomyj) + &
-            a(7,atom2)*(radcomzj)
-       fyjj = a(2,atom2)*(radcomxj) + &
-            a(5,atom2)*(radcomyj) + &
-            a(8,atom2)*(radcomzj)
-       fzjj = a(3,atom2)*(radcomxj)+ &
-            a(6,atom2)*(radcomyj) + &
-            a(9,atom2)*(radcomzj)
-#endif
+       fxjj = a2(1)*(radcomxj) + a2(4)*(radcomyj) + a2(7)*(radcomzj)
+       fyjj = a2(2)*(radcomxj) + a2(5)*(radcomyj) + a2(8)*(radcomzj)
+       fzjj = a2(3)*(radcomxj) + a2(6)*(radcomyj) + a2(9)*(radcomzj)
 
        fxij = -fxii
        fyij = -fyii
@@ -509,39 +427,10 @@ contains
        fyradial = 0.5_dp*(v0*dsdr*drdy*w + v0p*dspdr*drdy*wp + fyii + fyji)
        fzradial = 0.5_dp*(v0*dsdr*drdz*w + v0p*dspdr*drdz*wp + fzii + fzji)
 
-#ifdef IS_MPI
-       f_Row(1,atom1) = f_Row(1,atom1) + fxradial
-       f_Row(2,atom1) = f_Row(2,atom1) + fyradial
-       f_Row(3,atom1) = f_Row(3,atom1) + fzradial
+       f1(1) = f1(1) + fxradial
+       f1(2) = f1(2) + fyradial
+       f1(3) = f1(3) + fzradial
 
-       f_Col(1,atom2) = f_Col(1,atom2) - fxradial
-       f_Col(2,atom2) = f_Col(2,atom2) - fyradial
-       f_Col(3,atom2) = f_Col(3,atom2) - fzradial
-#else
-       f(1,atom1) = f(1,atom1) + fxradial
-       f(2,atom1) = f(2,atom1) + fyradial
-       f(3,atom1) = f(3,atom1) + fzradial
-
-       f(1,atom2) = f(1,atom2) - fxradial
-       f(2,atom2) = f(2,atom2) - fyradial
-       f(3,atom2) = f(3,atom2) - fzradial
-#endif
-
-#ifdef IS_MPI
-       id1 = AtomRowToGlobal(atom1)
-       id2 = AtomColToGlobal(atom2)
-#else
-       id1 = atom1
-       id2 = atom2
-#endif
-
-       if (molMembershipList(id1) .ne. molMembershipList(id2)) then
-
-          fpair(1) = fpair(1) + fxradial
-          fpair(2) = fpair(2) + fyradial
-          fpair(3) = fpair(3) + fzradial
-
-       endif
     endif
   end subroutine do_sticky_pair
 
@@ -586,10 +475,8 @@ contains
     if(allocated(StickyMap)) deallocate(StickyMap)
   end subroutine destroyStickyTypes
   
-  subroutine do_sticky_power_pair(atom1, atom2, d, rij, r2, sw, vpair, fpair, &
-       pot, A, f, t, do_pot)
-    !! We assume that the rotation matrices have already been calculated
-    !! and placed in the A array.
+  subroutine do_sticky_power_pair(atom1, atom2, me1, me2, d, rij, r2, sw, vpair, fpair, &
+       pot, A1, A2, f1, t1, t2, do_pot)
     
     !! i and j are pointers to the two SSD atoms
     
@@ -598,9 +485,9 @@ contains
     real (kind=dp), dimension(3), intent(in) :: d
     real (kind=dp), dimension(3), intent(inout) :: fpair
     real (kind=dp) :: pot, vpair, sw
-    real (kind=dp), dimension(9,nLocal) :: A
-    real (kind=dp), dimension(3,nLocal) :: f
-    real (kind=dp), dimension(3,nLocal) :: t
+    real (kind=dp), dimension(9) :: A1, A2
+    real (kind=dp), dimension(3) :: f1
+    real (kind=dp), dimension(3) :: t1, t2
     logical, intent(in) :: do_pot
 
     real (kind=dp) :: xi, yi, zi, xj, yj, zj, xi2, yi2, zi2, xj2, yj2, zj2
@@ -627,14 +514,6 @@ contains
        call handleError("sticky", "no StickyMap was present before first call of do_sticky_power_pair!")
        return
     end if
-
-#ifdef IS_MPI
-    me1 = atid_Row(atom1)
-    me2 = atid_Col(atom2)
-#else
-    me1 = atid(atom1)
-    me2 = atid(atom2)
-#endif
  
     if (me1.eq.me2) then
        w0  = StickyMap(me1)%w0 
@@ -674,33 +553,18 @@ contains
        drdy = d(2) * rI
        drdz = d(3) * rI
 
-#ifdef IS_MPI
        ! rotate the inter-particle separation into the two different 
        ! body-fixed coordinate systems:
 
-       xi = A_row(1,atom1)*d(1) + A_row(2,atom1)*d(2) + A_row(3,atom1)*d(3)
-       yi = A_row(4,atom1)*d(1) + A_row(5,atom1)*d(2) + A_row(6,atom1)*d(3)
-       zi = A_row(7,atom1)*d(1) + A_row(8,atom1)*d(2) + A_row(9,atom1)*d(3)
+       xi = A1(1)*d(1) + A1(2)*d(2) + A1(3)*d(3)
+       yi = A1(4)*d(1) + A1(5)*d(2) + A1(6)*d(3)
+       zi = A1(7)*d(1) + A1(8)*d(2) + A1(9)*d(3)
 
        ! negative sign because this is the vector from j to i:
 
-       xj = -(A_Col(1,atom2)*d(1) + A_Col(2,atom2)*d(2) + A_Col(3,atom2)*d(3))
-       yj = -(A_Col(4,atom2)*d(1) + A_Col(5,atom2)*d(2) + A_Col(6,atom2)*d(3))
-       zj = -(A_Col(7,atom2)*d(1) + A_Col(8,atom2)*d(2) + A_Col(9,atom2)*d(3))
-#else
-       ! rotate the inter-particle separation into the two different 
-       ! body-fixed coordinate systems:
-
-       xi = a(1,atom1)*d(1) + a(2,atom1)*d(2) + a(3,atom1)*d(3)
-       yi = a(4,atom1)*d(1) + a(5,atom1)*d(2) + a(6,atom1)*d(3)
-       zi = a(7,atom1)*d(1) + a(8,atom1)*d(2) + a(9,atom1)*d(3)
-
-       ! negative sign because this is the vector from j to i:
-
-       xj = -(a(1,atom2)*d(1) + a(2,atom2)*d(2) + a(3,atom2)*d(3))
-       yj = -(a(4,atom2)*d(1) + a(5,atom2)*d(2) + a(6,atom2)*d(3))
-       zj = -(a(7,atom2)*d(1) + a(8,atom2)*d(2) + a(9,atom2)*d(3))
-#endif
+       xj = -(A2(1)*d(1) + A2(2)*d(2) + A2(3)*d(3))
+       yj = -(A2(4)*d(1) + A2(5)*d(2) + A2(6)*d(3))
+       zj = -(A2(7)*d(1) + A2(8)*d(2) + A2(9)*d(3))
 
        xi2 = xi*xi
        yi2 = yi*yi
@@ -737,14 +601,7 @@ contains
 
        vpair = vpair + 0.5_dp*(v0*s*w)
        
-       if (do_pot) then
-#ifdef IS_MPI 
-         pot_row(HB_POT,atom1) = pot_row(HB_POT,atom1) + 0.25_dp*(v0*s*w)*sw
-         pot_col(HB_POT,atom2) = pot_col(HB_POT,atom2) + 0.25_dp*(v0*s*w)*sw
-#else
-         pot = pot + 0.5_dp*(v0*s*w)*sw
-#endif  
-       endif
+       pot = pot + 0.5_dp*(v0*s*w)*sw
 
        dwidx = ( 4.0_dp*xi*zi*rI3 - 6.0_dp*xi*zi*(xi2-yi2)*rI5 )
        dwidy = ( -4.0_dp*yi*zi*rI3 - 6.0_dp*yi*zi*(xi2-yi2)*rI5 )
@@ -791,29 +648,14 @@ contains
  
        ! go back to lab frame using transpose of rotation matrix:
 
-#ifdef IS_MPI
-       t_Row(1,atom1) = t_Row(1,atom1) + a_Row(1,atom1)*txi + &
-            a_Row(4,atom1)*tyi + a_Row(7,atom1)*tzi
-       t_Row(2,atom1) = t_Row(2,atom1) + a_Row(2,atom1)*txi + &
-            a_Row(5,atom1)*tyi + a_Row(8,atom1)*tzi
-       t_Row(3,atom1) = t_Row(3,atom1) + a_Row(3,atom1)*txi + &
-            a_Row(6,atom1)*tyi + a_Row(9,atom1)*tzi
+       t1(1) = t1(1) + a1(1)*txi + a1(4)*tyi + a1(7)*tzi
+       t1(2) = t1(2) + a1(2)*txi + a1(5)*tyi + a1(8)*tzi
+       t1(3) = t1(3) + a1(3)*txi + a1(6)*tyi + a1(9)*tzi
 
-       t_Col(1,atom2) = t_Col(1,atom2) + a_Col(1,atom2)*txj + &
-            a_Col(4,atom2)*tyj + a_Col(7,atom2)*tzj
-       t_Col(2,atom2) = t_Col(2,atom2) + a_Col(2,atom2)*txj + &
-            a_Col(5,atom2)*tyj + a_Col(8,atom2)*tzj
-       t_Col(3,atom2) = t_Col(3,atom2) + a_Col(3,atom2)*txj + &
-            a_Col(6,atom2)*tyj + a_Col(9,atom2)*tzj
-#else
-       t(1,atom1) = t(1,atom1) + a(1,atom1)*txi + a(4,atom1)*tyi + a(7,atom1)*tzi
-       t(2,atom1) = t(2,atom1) + a(2,atom1)*txi + a(5,atom1)*tyi + a(8,atom1)*tzi
-       t(3,atom1) = t(3,atom1) + a(3,atom1)*txi + a(6,atom1)*tyi + a(9,atom1)*tzi
+       t2(1) = t2(1) + a2(1)*txj + a2(4)*tyj + a2(7)*tzj
+       t2(2) = t2(2) + a2(2)*txj + a2(5)*tyj + a2(8)*tzj
+       t2(3) = t2(3) + a2(3)*txj + a2(6)*tyj + a2(9)*tzj
 
-       t(1,atom2) = t(1,atom2) + a(1,atom2)*txj + a(4,atom2)*tyj + a(7,atom2)*tzj
-       t(2,atom2) = t(2,atom2) + a(2,atom2)*txj + a(5,atom2)*tyj + a(8,atom2)*tzj
-       t(3,atom2) = t(3,atom2) + a(3,atom2)*txj + a(6,atom2)*tyj + a(9,atom2)*tzj
-#endif    
        ! Now, on to the forces:
 
        ! first rotate the i terms back into the lab frame:
@@ -826,47 +668,13 @@ contains
        radcomyj = (v0*s*dwjdy)*sw
        radcomzj = (v0*s*dwjdz)*sw
 
-#ifdef IS_MPI    
-       fxii = a_Row(1,atom1)*(radcomxi) + &
-            a_Row(4,atom1)*(radcomyi) + &
-            a_Row(7,atom1)*(radcomzi)
-       fyii = a_Row(2,atom1)*(radcomxi) + &
-            a_Row(5,atom1)*(radcomyi) + &
-            a_Row(8,atom1)*(radcomzi)
-       fzii = a_Row(3,atom1)*(radcomxi) + &
-            a_Row(6,atom1)*(radcomyi) + &
-            a_Row(9,atom1)*(radcomzi)
+       fxii = a1(1)*(radcomxi) + a1(4)*(radcomyi) + a1(7)*(radcomzi)
+       fyii = a1(2)*(radcomxi) + a1(5)*(radcomyi) + a1(8)*(radcomzi)
+       fzii = a1(3)*(radcomxi) + a1(6)*(radcomyi) + a1(9)*(radcomzi)
 
-       fxjj = a_Col(1,atom2)*(radcomxj) + &
-            a_Col(4,atom2)*(radcomyj) + &
-            a_Col(7,atom2)*(radcomzj)
-       fyjj = a_Col(2,atom2)*(radcomxj) + &
-            a_Col(5,atom2)*(radcomyj) + &
-            a_Col(8,atom2)*(radcomzj)
-       fzjj = a_Col(3,atom2)*(radcomxj)+ &
-            a_Col(6,atom2)*(radcomyj) + &
-            a_Col(9,atom2)*(radcomzj)
-#else
-       fxii = a(1,atom1)*(radcomxi) + &
-            a(4,atom1)*(radcomyi) + &
-            a(7,atom1)*(radcomzi)
-       fyii = a(2,atom1)*(radcomxi) + &
-            a(5,atom1)*(radcomyi) + &
-            a(8,atom1)*(radcomzi)
-       fzii = a(3,atom1)*(radcomxi) + &
-            a(6,atom1)*(radcomyi) + &
-            a(9,atom1)*(radcomzi)
-
-       fxjj = a(1,atom2)*(radcomxj) + &
-            a(4,atom2)*(radcomyj) + &
-            a(7,atom2)*(radcomzj)
-       fyjj = a(2,atom2)*(radcomxj) + &
-            a(5,atom2)*(radcomyj) + &
-            a(8,atom2)*(radcomzj)
-       fzjj = a(3,atom2)*(radcomxj)+ &
-            a(6,atom2)*(radcomyj) + &
-            a(9,atom2)*(radcomzj)
-#endif
+       fxjj = a2(1)*(radcomxj) + a2(4)*(radcomyj) + a2(7)*(radcomzj)
+       fyjj = a2(2)*(radcomxj) + a2(5)*(radcomyj) + a2(8)*(radcomzj)
+       fzjj = a2(3)*(radcomxj) + a2(6)*(radcomyj) + a2(9)*(radcomzj)
 
        fxij = -fxii
        fyij = -fyii
@@ -882,39 +690,10 @@ contains
        fyradial = 0.5_dp*(v0*dsdr*w*drdy + fyii + fyji)
        fzradial = 0.5_dp*(v0*dsdr*w*drdz + fzii + fzji)
 
-#ifdef IS_MPI
-       f_Row(1,atom1) = f_Row(1,atom1) + fxradial
-       f_Row(2,atom1) = f_Row(2,atom1) + fyradial
-       f_Row(3,atom1) = f_Row(3,atom1) + fzradial
+       f1(1) = f1(1) + fxradial
+       f1(2) = f1(2) + fyradial
+       f1(3) = f1(3) + fzradial
 
-       f_Col(1,atom2) = f_Col(1,atom2) - fxradial
-       f_Col(2,atom2) = f_Col(2,atom2) - fyradial
-       f_Col(3,atom2) = f_Col(3,atom2) - fzradial
-#else
-       f(1,atom1) = f(1,atom1) + fxradial
-       f(2,atom1) = f(2,atom1) + fyradial
-       f(3,atom1) = f(3,atom1) + fzradial
-
-       f(1,atom2) = f(1,atom2) - fxradial
-       f(2,atom2) = f(2,atom2) - fyradial
-       f(3,atom2) = f(3,atom2) - fzradial
-#endif
-
-#ifdef IS_MPI
-       id1 = AtomRowToGlobal(atom1)
-       id2 = AtomColToGlobal(atom2)
-#else
-       id1 = atom1
-       id2 = atom2
-#endif
-
-       if (molMembershipList(id1) .ne. molMembershipList(id2)) then
-
-          fpair(1) = fpair(1) + fxradial
-          fpair(2) = fpair(2) + fyradial
-          fpair(3) = fpair(3) + fzradial
-
-       endif
     endif
   end subroutine do_sticky_power_pair
 

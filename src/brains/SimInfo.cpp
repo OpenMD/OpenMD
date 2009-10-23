@@ -1053,8 +1053,8 @@ namespace oopse {
     int cp =  TRADITIONAL_CUTOFF_POLICY; // Set to traditional by default
 
     // Set LJ shifting bools to false
-    ljsp_ = false;
-    ljsf_ = false;
+    ljsp_ = 0;
+    ljsf_ = 0;
 
     std::string myPolicy;
     if (forceFieldOptions_.haveCutoffPolicy()){
@@ -1125,11 +1125,12 @@ namespace oopse {
 	toUpper(myMethod);
         
 	if (myMethod == "SHIFTED_POTENTIAL") {
-	  ljsp_ = true;
+	  ljsp_ = 1;
 	} else if (myMethod == "SHIFTED_FORCE") {
-	  ljsf_ = true;
+	  ljsf_ = 1;
 	}
       }
+
       notifyFortranCutoffs(&rcut_, &rsw_, &ljsp_, &ljsf_);
       
     } else {
@@ -1151,9 +1152,9 @@ namespace oopse {
       // For the time being, we're tethering the LJ shifted behavior to the
       // electrostaticSummationMethod keyword options
 	  if (myMethod == "SHIFTED_POTENTIAL") {
-	    ljsp_ = true;
+	    ljsp_ = 1;
 	  } else if (myMethod == "SHIFTED_FORCE") {
-	    ljsf_ = true;
+	    ljsf_ = 1;
 	  }
 	  if (myMethod == "SHIFTED_POTENTIAL" || myMethod == "SHIFTED_FORCE") {
             if (simParams_->haveSwitchingRadius()){

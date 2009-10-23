@@ -43,7 +43,7 @@
 !! Calculates Long Range forces Lennard-Jones interactions.
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: LJ.F90,v 1.30 2008-09-10 17:57:55 gezelter Exp $, $Date: 2008-09-10 17:57:55 $, $Name: not supported by cvs2svn $, $Revision: 1.30 $
+!! @version $Id: LJ.F90,v 1.31 2009-10-23 18:41:08 gezelter Exp $, $Date: 2009-10-23 18:41:08 $, $Name: not supported by cvs2svn $, $Revision: 1.31 $
 
 
 module lj
@@ -53,9 +53,6 @@ module lj
   use simulation
   use status
   use fForceOptions
-#ifdef IS_MPI
-  use mpiSimulation
-#endif
   use force_globals
 
   implicit none
@@ -266,14 +263,14 @@ contains
 
   end subroutine createMixingMap
           
-  subroutine do_lj_pair(atom1, atom2, d, rij, r2, rcut, sw, vdwMult, &
-       vpair, fpair, pot, f, do_pot)
+  subroutine do_lj_pair(atom1, atom2, atid1, atid2, d, rij, r2, rcut, sw, vdwMult, &
+       vpair, fpair, pot, f1, do_pot)
     
-    integer, intent(in) ::  atom1, atom2
-    integer :: atid1, atid2, ljt1, ljt2
+    integer, intent(in) ::  atom1, atom2, atid1, atid2
+    integer :: ljt1, ljt2
     real( kind = dp ), intent(in) :: rij, r2, rcut, vdwMult
     real( kind = dp ) :: pot, sw, vpair
-    real( kind = dp ), dimension(3,nLocal) :: f    
+    real( kind = dp ), intent(inout), dimension(3) :: f1
     real( kind = dp ), intent(in), dimension(3) :: d
     real( kind = dp ), intent(inout), dimension(3) :: fpair
     logical, intent(in) :: do_pot
@@ -291,15 +288,6 @@ contains
     if (.not.haveMixingMap) then
        call createMixingMap()
     endif
-
-    ! Look up the correct parameters in the mixing matrix
-#ifdef IS_MPI
-    atid1 = atid_Row(atom1)
-    atid2 = atid_Col(atom2)
-#else
-    atid1 = atid(atom1)
-    atid2 = atid(atom2)
-#endif
 
     ljt1 = LJMap%atidToLJtype(atid1)
     ljt2 = LJMap%atidToLJtype(atid2)
@@ -359,48 +347,12 @@ contains
     fx = dudr * drdx
     fy = dudr * drdy
     fz = dudr * drdz
+    
+    pot = pot + sw*pot_temp
 
-#ifdef IS_MPI
-    if (do_pot) then
-       pot_Row(VDW_POT,atom1) = pot_Row(VDW_POT,atom1) + sw*pot_temp*0.5
-       pot_Col(VDW_POT,atom2) = pot_Col(VDW_POT,atom2) + sw*pot_temp*0.5
-    endif
-
-    f_Row(1,atom1) = f_Row(1,atom1) + fx 
-    f_Row(2,atom1) = f_Row(2,atom1) + fy
-    f_Row(3,atom1) = f_Row(3,atom1) + fz
-
-    f_Col(1,atom2) = f_Col(1,atom2) - fx 
-    f_Col(2,atom2) = f_Col(2,atom2) - fy
-    f_Col(3,atom2) = f_Col(3,atom2) - fz       
-
-#else
-    if (do_pot) pot = pot + sw*pot_temp
-
-    f(1,atom1) = f(1,atom1) + fx
-    f(2,atom1) = f(2,atom1) + fy
-    f(3,atom1) = f(3,atom1) + fz
-
-    f(1,atom2) = f(1,atom2) - fx
-    f(2,atom2) = f(2,atom2) - fy
-    f(3,atom2) = f(3,atom2) - fz
-#endif
-
-#ifdef IS_MPI
-    id1 = AtomRowToGlobal(atom1)
-    id2 = AtomColToGlobal(atom2)
-#else
-    id1 = atom1
-    id2 = atom2
-#endif
-
-    if (molMembershipList(id1) .ne. molMembershipList(id2)) then
-
-       fpair(1) = fpair(1) + fx
-       fpair(2) = fpair(2) + fy
-       fpair(3) = fpair(3) + fz
-
-    endif
+    f1(1) = fx
+    f1(2) = fy
+    f1(3) = fz
 
     return    
 

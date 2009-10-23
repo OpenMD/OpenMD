@@ -42,7 +42,7 @@
 
 !! Calculates Metal-Non Metal interactions.
 !! @author Charles F. Vardeman II 
-!! @version $Id: MetalNonMetal.F90,v 1.17 2008-09-10 17:57:55 gezelter Exp $, $Date: 2008-09-10 17:57:55 $, $Name: not supported by cvs2svn $, $Revision: 1.17 $
+!! @version $Id: MetalNonMetal.F90,v 1.18 2009-10-23 18:41:08 gezelter Exp $, $Date: 2009-10-23 18:41:08 $, $Name: not supported by cvs2svn $, $Revision: 1.18 $
 
 
 module MetalNonMetal
@@ -52,9 +52,6 @@ module MetalNonMetal
   use simulation
   use status
   use fForceOptions
-#ifdef IS_MPI
-  use mpiSimulation
-#endif
   use force_globals
 
   implicit none
@@ -111,29 +108,21 @@ module MetalNonMetal
 contains
 
 
-  subroutine do_mnm_pair(Atom1, Atom2, D, Rij, R2, Rcut, Sw, vdwMult, &
-       Vpair, Fpair, Pot, A, F,t, Do_pot)
-    integer, intent(in) ::  atom1, atom2
-    integer :: atid1, atid2, ljt1, ljt2
+  subroutine do_mnm_pair(Atom1, Atom2, atid1, atid2, D, Rij, R2, Rcut, Sw, vdwMult, &
+       Vpair, Fpair, Pot, A1, A2, f1, t1, t2, Do_pot)
+    integer, intent(in) ::  atom1, atom2, atid1, atid2
+    integer :: ljt1, ljt2
     real( kind = dp ), intent(in) :: rij, r2, rcut, vdwMult
     real( kind = dp ) :: pot, sw, vpair
-    real( kind = dp ), intent(inout), dimension(3,nLocal) :: f 
-    real (kind=dp), intent(in), dimension(9,nLocal) :: A
-    real (kind=dp), intent(inout), dimension(3,nLocal) :: t   
+    real( kind = dp ), intent(inout), dimension(3) :: f1 
+    real (kind=dp), intent(inout), dimension(9) :: A1, A2
+    real (kind=dp), intent(inout), dimension(3) :: t1, t2
     real( kind = dp ), intent(in), dimension(3) :: d
     real( kind = dp ), intent(inout), dimension(3) :: fpair
     logical, intent(in) :: do_pot
 
     integer :: interaction_id
     integer :: interaction_type
-
-#ifdef IS_MPI
-    atid1 = atid_Row(atom1)
-    atid2 = atid_Col(atom2)
-#else
-    atid1 = atid(atom1)
-    atid2 = atid(atom2)
-#endif
 
     if(.not.haveInteractionLookup)  then
       call createInteractionLookup(MnM_MAP)
@@ -146,13 +135,13 @@ contains
     select case (interaction_type)    
     case (MNM_LENNARDJONES)
        call calc_mnm_lennardjones(Atom1, Atom2, D, Rij, R2, Rcut, Sw, &
-            vdwMult, Vpair, Fpair, Pot, F, Do_pot, interaction_id)
+            vdwMult, Vpair, Fpair, Pot, f1, Do_pot, interaction_id)
     case(MNM_REPULSIVEMORSE, MNM_SHIFTEDMORSE)
        call calc_mnm_morse(Atom1, Atom2, D, Rij, R2, Rcut, Sw, vdwMult, &
-            Vpair, Fpair, Pot, F, Do_pot, interaction_id, interaction_type)
+            Vpair, Fpair, Pot, f1, Do_pot, interaction_id, interaction_type)
     case(MNM_MAW)
-       call calc_mnm_maw(Atom1, Atom2, D, Rij, R2, Rcut, Sw, vdwMult, &
-            Vpair, Fpair, Pot,A, F,t, Do_pot, interaction_id)
+       call calc_mnm_maw(Atom1, Atom2, atid1, atid2, D, Rij, R2, Rcut, Sw, vdwMult, &
+            Vpair, Fpair, Pot, A1, A2, f1, t1, t2, Do_pot, interaction_id)
     case default
     call handleError("MetalNonMetal","Unknown interaction type")      
     end select
@@ -160,12 +149,12 @@ contains
   end subroutine do_mnm_pair
 
   subroutine calc_mnm_lennardjones(Atom1, Atom2, D, Rij, R2, Rcut, Sw, &
-       vdwMult,Vpair, Fpair, Pot, F, Do_pot, interaction_id)
+       vdwMult,Vpair, Fpair, Pot, f1, Do_pot, interaction_id)
     
     integer, intent(in) ::  atom1, atom2
     real( kind = dp ), intent(in) :: rij, r2, rcut, vdwMult
     real( kind = dp ) :: pot, sw, vpair
-    real( kind = dp ), intent(inout), dimension(3,nLocal) :: f    
+    real( kind = dp ), intent(inout), dimension(3) :: f1
     real( kind = dp ), intent(in), dimension(3) :: d
     real( kind = dp ), intent(inout), dimension(3) :: fpair
     logical, intent(in) :: do_pot
@@ -185,9 +174,6 @@ contains
     epsilon    = MnM_Map%interactions(interaction_id)%epsilon
     shiftedPot = MnM_Map%interactions(interaction_id)%shiftedPot
     shiftedFrc = MnM_Map%interactions(interaction_id)%shiftedFrc
-
-   
-
 
     ros = rij * sigmai
 
@@ -218,56 +204,20 @@ contains
     fy = dudr * drdy
     fz = dudr * drdz
     
-#ifdef IS_MPI
-    if (do_pot) then
-       pot_Row(VDW_POT,atom1) = pot_Row(VDW_POT,atom1) + sw*pot_temp*0.5
-       pot_Col(VDW_POT,atom2) = pot_Col(VDW_POT,atom2) + sw*pot_temp*0.5
-    endif
-    
-    f_Row(1,atom1) = f_Row(1,atom1) + fx 
-    f_Row(2,atom1) = f_Row(2,atom1) + fy
-    f_Row(3,atom1) = f_Row(3,atom1) + fz
-    
-    f_Col(1,atom2) = f_Col(1,atom2) - fx 
-    f_Col(2,atom2) = f_Col(2,atom2) - fy
-    f_Col(3,atom2) = f_Col(3,atom2) - fz       
-    
-#else
-    if (do_pot) pot = pot + sw*pot_temp
-    
-    f(1,atom1) = f(1,atom1) + fx
-    f(2,atom1) = f(2,atom1) + fy
-    f(3,atom1) = f(3,atom1) + fz
-    
-    f(1,atom2) = f(1,atom2) - fx
-    f(2,atom2) = f(2,atom2) - fy
-    f(3,atom2) = f(3,atom2) - fz
-#endif
+    pot = pot + sw*pot_temp
+    f1(1) = f1(1) + fx 
+    f1(2) = f1(2) + fy
+    f1(3) = f1(3) + fz
 
-#ifdef IS_MPI
-    id1 = AtomRowToGlobal(atom1)
-    id2 = AtomColToGlobal(atom2)
-#else
-    id1 = atom1
-    id2 = atom2
-#endif
-    
-    if (molMembershipList(id1) .ne. molMembershipList(id2)) then
-       
-       fpair(1) = fpair(1) + fx
-       fpair(2) = fpair(2) + fy
-       fpair(3) = fpair(3) + fz
-       
-    endif
     return
   end subroutine calc_mnm_lennardjones
 
   subroutine calc_mnm_morse(Atom1, Atom2, D, Rij, R2, Rcut, Sw, vdwMult, &
-       Vpair, Fpair, Pot, f, Do_pot, interaction_id, interaction_type)
+       Vpair, Fpair, Pot, f1, Do_pot, interaction_id, interaction_type)
     integer, intent(in) ::  atom1, atom2
     real( kind = dp ), intent(in) :: rij, r2, rcut, vdwMult
     real( kind = dp ) :: pot, sw, vpair
-    real( kind = dp ), intent(inout), dimension(3,nLocal) :: f    
+    real( kind = dp ), intent(inout), dimension(3) :: f1
     real( kind = dp ), intent(in), dimension(3) :: d
     real( kind = dp ), intent(inout), dimension(3) :: fpair
     logical, intent(in) :: do_pot
@@ -369,59 +319,23 @@ contains
     fy = dudr * drdy
     fz = dudr * drdz
 
-#ifdef IS_MPI
-    if (do_pot) then
-       pot_Row(VDW_POT,atom1) = pot_Row(VDW_POT,atom1) + sw*pot_temp*0.5
-       pot_Col(VDW_POT,atom2) = pot_Col(VDW_POT,atom2) + sw*pot_temp*0.5
-    endif
+    pot = pot + sw*pot_temp
 
-    f_Row(1,atom1) = f_Row(1,atom1) + fx 
-    f_Row(2,atom1) = f_Row(2,atom1) + fy
-    f_Row(3,atom1) = f_Row(3,atom1) + fz
-
-    f_Col(1,atom2) = f_Col(1,atom2) - fx 
-    f_Col(2,atom2) = f_Col(2,atom2) - fy
-    f_Col(3,atom2) = f_Col(3,atom2) - fz       
-
-#else
-    if (do_pot) pot = pot + sw*pot_temp
-
-    f(1,atom1) = f(1,atom1) + fx
-    f(2,atom1) = f(2,atom1) + fy
-    f(3,atom1) = f(3,atom1) + fz
-
-    f(1,atom2) = f(1,atom2) - fx
-    f(2,atom2) = f(2,atom2) - fy
-    f(3,atom2) = f(3,atom2) - fz
-#endif
-
-#ifdef IS_MPI
-    id1 = AtomRowToGlobal(atom1)
-    id2 = AtomColToGlobal(atom2)
-#else
-    id1 = atom1
-    id2 = atom2
-#endif
-
-    if (molMembershipList(id1) .ne. molMembershipList(id2)) then
-
-       fpair(1) = fpair(1) + fx
-       fpair(2) = fpair(2) + fy
-       fpair(3) = fpair(3) + fz
-
-    endif
+    f1(1) = f1(1) + fx
+    f1(2) = f1(2) + fy
+    f1(3) = f1(3) + fz
 
     return    
   end subroutine calc_mnm_morse
   
-  subroutine calc_mnm_maw(Atom1, Atom2, D, Rij, R2, Rcut, Sw, vdwMult, &
-       Vpair, Fpair, Pot, A, F,t, Do_pot, interaction_id)
+  subroutine calc_mnm_maw(Atom1, Atom2, atid1, atid2, D, Rij, R2, Rcut, Sw, vdwMult, &
+       Vpair, Fpair, Pot, A1, A2, f1, t1, t2, Do_pot, interaction_id)
     integer, intent(in) ::  atom1, atom2
     real( kind = dp ), intent(in) :: rij, r2, rcut, vdwMult
     real( kind = dp ) :: pot, sw, vpair
-    real( kind = dp ), intent(inout), dimension(3,nLocal) :: f    
-    real (kind=dp),intent(in), dimension(9,nLocal) :: A
-    real (kind=dp),intent(inout), dimension(3,nLocal) :: t   
+    real( kind = dp ), intent(inout), dimension(3) :: f1  
+    real (kind=dp),intent(in), dimension(9) :: A1, A2
+    real (kind=dp),intent(inout), dimension(3) :: t1, t2
 
     real( kind = dp ), intent(in), dimension(3) :: d
     real( kind = dp ), intent(inout), dimension(3) :: fpair
@@ -439,54 +353,29 @@ contains
     real(kind = dp) :: dVangdux, dVangduy, dVangduz
     real(kind = dp) :: dVmorsedr
     real(kind = dp) :: Vmorse, dVmorsedx, dVmorsedy, dVmorsedz
-    real(kind = dp) :: a1, b1, s
+    real(kind = dp) :: ta1, b1, s
     real(kind = dp) :: da1dx, da1dy, da1dz, da1dux, da1duy, da1duz
     real(kind = dp) :: db1dx, db1dy, db1dz, db1dux, db1duy, db1duz
     real(kind = dp) :: fx, fy, fz, tx, ty, tz, fxl, fyl, fzl
     real(kind = dp), parameter :: st = sqrt(3.0_dp)
     integer :: atid1, atid2, id1, id2
     logical :: shiftedPot, shiftedFrc
-    
-#ifdef IS_MPI
-    atid1 = atid_Row(atom1)
-    atid2 = atid_Col(atom2)
-
-    if (atid2.eq.MnM_Map%interactions(interaction_id)%metal_atid) then
-       ! rotate the inter-particle separation into the two different 
-       ! body-fixed coordinate systems:
-
-       x = A_row(1,atom1)*d(1) + A_row(2,atom1)*d(2) + A_row(3,atom1)*d(3)
-       y = A_row(4,atom1)*d(1) + A_row(5,atom1)*d(2) + A_row(6,atom1)*d(3)
-       z = A_row(7,atom1)*d(1) + A_row(8,atom1)*d(2) + A_row(9,atom1)*d(3)
-    else
-       ! negative sign because this is the vector from j to i:
-       
-       x = -(A_Col(1,atom2)*d(1) + A_Col(2,atom2)*d(2) + A_Col(3,atom2)*d(3))
-       y = -(A_Col(4,atom2)*d(1) + A_Col(5,atom2)*d(2) + A_Col(6,atom2)*d(3))
-       z = -(A_Col(7,atom2)*d(1) + A_Col(8,atom2)*d(2) + A_Col(9,atom2)*d(3))
-    endif
-       
-#else
-    atid1 = atid(atom1)
-    atid2 = atid(atom2)
-    
+   
     if (atid2.eq.MnM_Map%interactions(interaction_id)%metal_atid) then
        ! rotate the inter-particle separation into the two different 
        ! body-fixed coordinate systems:
        
-       x = a(1,atom1)*d(1) + a(2,atom1)*d(2) + a(3,atom1)*d(3)
-       y = a(4,atom1)*d(1) + a(5,atom1)*d(2) + a(6,atom1)*d(3)
-       z = a(7,atom1)*d(1) + a(8,atom1)*d(2) + a(9,atom1)*d(3)
+       x = A1(1)*d(1) + A1(2)*d(2) + A1(3)*d(3)
+       y = A1(4)*d(1) + A1(5)*d(2) + A1(6)*d(3)
+       z = A1(7)*d(1) + A1(8)*d(2) + A1(9)*d(3)
     else
        ! negative sign because this is the vector from j to i:
-
-       x = -(a(1,atom2)*d(1) + a(2,atom2)*d(2) + a(3,atom2)*d(3))
-       y = -(a(4,atom2)*d(1) + a(5,atom2)*d(2) + a(6,atom2)*d(3))
-       z = -(a(7,atom2)*d(1) + a(8,atom2)*d(2) + a(9,atom2)*d(3))
+       
+       x = -(A2(1)*d(1) + A2(2)*d(2) + A2(3)*d(3))
+       y = -(A2(4)*d(1) + A2(5)*d(2) + A2(6)*d(3))
+       z = -(A2(7)*d(1) + A2(8)*d(2) + A2(9)*d(3))
     endif
-
-#endif
-  
+      
     D0 = MnM_Map%interactions(interaction_id)%D0
     R0 = MnM_Map%interactions(interaction_id)%r0
     beta0 = MnM_Map%interactions(interaction_id)%beta0    
@@ -525,7 +414,7 @@ contains
     ! the squares of the two HOMO lone pair orbitals in water:
     !********************** old form*************************
     ! s = 1 / (4 pi)
-    ! a1 = (s - pz)^2 = (1 - sqrt(3)*cos(theta))^2 / (4 pi)
+    ! ta1 = (s - pz)^2 = (1 - sqrt(3)*cos(theta))^2 / (4 pi)
     ! b1 = px^2 = 3 * (sin(theta)*cos(phi))^2 / (4 pi)   
     !********************** old form*************************
     ! we'll leave out the 4 pi for now
@@ -539,26 +428,18 @@ contains
 
 
     s = 1.0_dp
-!    a1 = (1.0_dp - st * z / rij )**2
+!    ta1 = (1.0_dp - st * z / rij )**2
 !    b1 = 3.0_dp * x2 / r2
 
-!    Vang = s + ca1 * a1 + cb1 * b1
+!    Vang = s + ca1 * ta1 + cb1 * b1
  
     Vang = ca1 * x2/r2 + cb1 * z/rij + (0.8_dp-ca1/3.0_dp)
 
     pot_temp = vdwMult * Vmorse*Vang 
          
     vpair = vpair + pot_temp
+    pot = pot + pot_temp*sw
     
-    if (do_pot) then
-#ifdef IS_MPI
-       pot_row(VDW_POT,atom1) = pot_row(VDW_POT,atom1) + 0.5_dp*pot_temp*sw
-       pot_col(VDW_POT,atom2) = pot_col(VDW_POT,atom2) + 0.5_dp*pot_temp*sw
-#else
-       pot = pot + pot_temp*sw
-#endif
-    endif
-
     dVmorsedr = 2.0_dp*D0*beta0*(expfnc0 - expfnc02)
 
     dVmorsedx = dVmorsedr * drdx
@@ -614,39 +495,16 @@ contains
 
     ! go back to lab frame using transpose of rotation matrix:
 
-#ifdef IS_MPI
     if (atid2.eq.MnM_Map%interactions(interaction_id)%metal_atid) then
-       t_Row(1,atom1) = t_Row(1,atom1) + a_Row(1,atom1)*tx + &
-            a_Row(4,atom1)*ty + a_Row(7,atom1)*tz
-       t_Row(2,atom1) = t_Row(2,atom1) + a_Row(2,atom1)*tx + &
-            a_Row(5,atom1)*ty + a_Row(8,atom1)*tz
-       t_Row(3,atom1) = t_Row(3,atom1) + a_Row(3,atom1)*tx + &
-            a_Row(6,atom1)*ty + a_Row(9,atom1)*tz
+       t1(1) = t1(1) + a1(1)*tx + a1(4)*ty + a1(7)*tz
+       t1(2) = t1(2) + a1(2)*tx + a1(5)*ty + a1(8)*tz
+       t1(3) = t1(3) + a1(3)*tx + a1(6)*ty + a1(9)*tz
     else
-       t_Col(1,atom2) = t_Col(1,atom2) + a_Col(1,atom2)*tx + &
-            a_Col(4,atom2)*ty + a_Col(7,atom2)*tz
-       t_Col(2,atom2) = t_Col(2,atom2) + a_Col(2,atom2)*tx + &
-            a_Col(5,atom2)*ty + a_Col(8,atom2)*tz
-       t_Col(3,atom2) = t_Col(3,atom2) + a_Col(3,atom2)*tx + &
-            a_Col(6,atom2)*ty + a_Col(9,atom2)*tz
+       t2(1) = t2(1) + a2(1)*tx + a2(4)*ty + a2(7)*tz
+       t2(2) = t2(2) + a2(2)*tx + a2(5)*ty + a2(8)*tz
+       t2(3) = t2(3) + a2(3)*tx + a2(6)*ty + a2(9)*tz
     endif
-#else
-    if (atid2.eq.MnM_Map%interactions(interaction_id)%metal_atid) then
-       t(1,atom1) = t(1,atom1) + a(1,atom1)*tx + a(4,atom1)*ty + &
-            a(7,atom1)*tz
-       t(2,atom1) = t(2,atom1) + a(2,atom1)*tx + a(5,atom1)*ty + &
-            a(8,atom1)*tz
-       t(3,atom1) = t(3,atom1) + a(3,atom1)*tx + a(6,atom1)*ty + &
-            a(9,atom1)*tz       
-    else
-       t(1,atom2) = t(1,atom2) + a(1,atom2)*tx + a(4,atom2)*ty + &
-            a(7,atom2)*tz
-       t(2,atom2) = t(2,atom2) + a(2,atom2)*tx + a(5,atom2)*ty + &
-            a(8,atom2)*tz
-       t(3,atom2) = t(3,atom2) + a(3,atom2)*tx + a(6,atom2)*ty + &
-            a(9,atom2)*tz
-    endif
-#endif
+
     ! Now, on to the forces (still in body frame of water)
 
     fx = vdwMult * dvdx * sw
@@ -655,60 +513,21 @@ contains
 
     ! rotate the terms back into the lab frame:
 
-#ifdef IS_MPI
     if (atid2.eq.MnM_Map%interactions(interaction_id)%metal_atid) then
-       fxl = a_Row(1,atom1)*fx + a_Row(4,atom1)*fy + a_Row(7,atom1)*fz
-       fyl = a_Row(2,atom1)*fx + a_Row(5,atom1)*fy + a_Row(8,atom1)*fz
-       fzl = a_Row(3,atom1)*fx + a_Row(6,atom1)*fy + a_Row(9,atom1)*fz
+       fxl = a1(1)*fx + a1(4)*fy + a1(7)*fz
+       fyl = a1(2)*fx + a1(5)*fy + a1(8)*fz
+       fzl = a1(3)*fx + a1(6)*fy + a1(9)*fz
     else
-	   ! negative sign because this is the vector from j to i:
-       fxl = -(a_Col(1,atom2)*fx + a_Col(4,atom2)*fy + a_Col(7,atom2)*fz)
-       fyl = -(a_Col(2,atom2)*fx + a_Col(5,atom2)*fy + a_Col(8,atom2)*fz)
-       fzl = -(a_Col(3,atom2)*fx + a_Col(6,atom2)*fy + a_Col(9,atom2)*fz)
+       ! negative sign because this is the vector from j to i:
+       fxl = -(a2(1)*fx + a2(4)*fy + a2(7)*fz)
+       fyl = -(a2(2)*fx + a2(5)*fy + a2(8)*fz)
+       fzl = -(a2(3)*fx + a2(6)*fy + a2(9)*fz)
     endif
-    f_Row(1,atom1) = f_Row(1,atom1) + fxl
-    f_Row(2,atom1) = f_Row(2,atom1) + fyl
-    f_Row(3,atom1) = f_Row(3,atom1) + fzl
-    
-    f_Col(1,atom2) = f_Col(1,atom2) - fxl
-    f_Col(2,atom2) = f_Col(2,atom2) - fyl
-    f_Col(3,atom2) = f_Col(3,atom2) - fzl
-#else
-    if (atid2.eq.MnM_Map%interactions(interaction_id)%metal_atid) then
-       fxl = a(1,atom1)*fx + a(4,atom1)*fy + a(7,atom1)*fz
-       fyl = a(2,atom1)*fx + a(5,atom1)*fy + a(8,atom1)*fz
-       fzl = a(3,atom1)*fx + a(6,atom1)*fy + a(9,atom1)*fz
-    else
-	   ! negative sign because this is the vector from j to i:
-       fxl = -(a(1,atom2)*fx + a(4,atom2)*fy + a(7,atom2)*fz)
-       fyl = -(a(2,atom2)*fx + a(5,atom2)*fy + a(8,atom2)*fz)
-       fzl = -(a(3,atom2)*fx + a(6,atom2)*fy + a(9,atom2)*fz)
-    endif
-    f(1,atom1) = f(1,atom1) + fxl
-    f(2,atom1) = f(2,atom1) + fyl
-    f(3,atom1) = f(3,atom1) + fzl
 
-    f(1,atom2) = f(1,atom2) - fxl
-    f(2,atom2) = f(2,atom2) - fyl
-    f(3,atom2) = f(3,atom2) - fzl       
-#endif
+    f1(1) = f1(1) + fxl
+    f1(2) = f1(2) + fyl
+    f1(3) = f1(3) + fzl
 
-#ifdef IS_MPI
-    id1 = AtomRowToGlobal(atom1)
-    id2 = AtomColToGlobal(atom2)
-#else
-    id1 = atom1
-    id2 = atom2
-#endif
-    
-    if (molMembershipList(id1) .ne. molMembershipList(id2)) then
-       
-       fpair(1) = fpair(1) + fxl
-       fpair(2) = fpair(2) + fyl
-       fpair(3) = fpair(3) + fzl
-       
-    endif
-    
     return
   end subroutine calc_mnm_maw
 

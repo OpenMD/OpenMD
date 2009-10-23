@@ -45,7 +45,7 @@
 
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: doForces.F90,v 1.102 2009-05-26 13:57:29 gezelter Exp $, $Date: 2009-05-26 13:57:29 $, $Name: not supported by cvs2svn $, $Revision: 1.102 $
+!! @version $Id: doForces.F90,v 1.103 2009-10-23 18:41:08 gezelter Exp $, $Date: 2009-10-23 18:41:08 $, $Name: not supported by cvs2svn $, $Revision: 1.103 $
 
 
 module doForces
@@ -568,15 +568,23 @@ contains
    subroutine setCutoffs(defRcut, defRsw, defSP, defSF)
 
      real(kind=dp),intent(in) :: defRcut, defRsw
-     logical, intent(in) :: defSP, defSF
+     integer, intent(in) :: defSP, defSF
      character(len = statusMsgSize) :: errMsg
      integer :: localError
 
      defaultRcut = defRcut
      defaultRsw = defRsw
-     
-     defaultDoShiftPot = defSP
-     defaultDoShiftFrc = defSF
+    
+     if (defSP .ne. 0) then  
+        defaultDoShiftPot = .true.
+     else
+        defaultDoShiftPot = .false.
+     endif
+     if (defSF .ne. 0) then  
+        defaultDoShiftFrc = .true.
+     else
+        defaultDoShiftFrc = .false.
+     endif
 
      if (abs(defaultRcut-defaultRsw) .lt. 0.0001) then
         if (defaultDoShiftFrc) then
@@ -1491,7 +1499,11 @@ contains
     integer, intent(inout) :: topoDist
     real ( kind = dp ) :: r, pair_pot, vdwMult, electroMult
     real ( kind = dp ) :: a_k, b_k, c_k, d_k, dx
-    integer :: me_i, me_j
+
+    real( kind = dp), dimension(3) :: f1, t1, t2
+    real( kind = dp), dimension(9) :: A1, A2, eF1, eF2
+    real( kind = dp) :: p_vdw, p_elect, p_hb, p_met
+    integer :: atid_i, atid_j, id1, id2, idx
     integer :: k
 
     integer :: iHash
@@ -1500,79 +1512,151 @@ contains
 !!$    write(*,*) particle_pot(1), vpair, fpair(1), fpair(2), fpair(3)
 !!$    write(*,*) rCut
 
-
     r = sqrt(rijsq)
     
     vpair = 0.0_dp
     fpair(1:3) = 0.0_dp
 
+    p_vdw = 0.0
+    p_elect = 0.0
+    p_hb = 0.0
+    p_met = 0.0
+
+    f1(1:3) = 0.0
+    t1(1:3) = 0.0
+    t2(1:3) = 0.0
+
 #ifdef IS_MPI
-    me_i = atid_row(i)
-    me_j = atid_col(j)
+    atid_i = atid_row(i)
+    atid_j = atid_col(j)
+
+    do idx = 1, 9
+       A1(idx) = A_Row(idx, i)
+       A2(idx) = A_Col(idx, j)
+       eF1(idx) = eFrame_Row(idx, i)
+       eF2(idx) = eFrame_Col(idx, j)
+    enddo
+       
 #else
-    me_i = atid(i)
-    me_j = atid(j)
+    atid_i = atid(i)
+    atid_j = atid(j)
+    do idx = 1, 9
+       A1(idx) = A(idx, i)
+       A2(idx) = A(idx, j)
+       eF1(idx) = eFrame(idx, i)
+       eF2(idx) = eFrame(idx, j)       
+    enddo
+
 #endif
 
-    iHash = InteractionHash(me_i, me_j)
+    iHash = InteractionHash(atid_i, atid_j)
 
     vdwMult = vdwScale(topoDist)
     electroMult = electrostaticScale(topoDist)
 
     if ( iand(iHash, LJ_PAIR).ne.0 ) then
-       call do_lj_pair(i, j, d, r, rijsq, rcut, sw, vdwMult, vpair, fpair, &
-            pot(VDW_POT), f, do_pot)
+       call do_lj_pair(i, j, atid_i, atid_j, d, r, rijsq, rcut, sw, vdwMult, vpair, fpair, &
+            p_vdw, f1, do_pot)
     endif
     
     if ( iand(iHash, ELECTROSTATIC_PAIR).ne.0 ) then
-       call doElectrostaticPair(i, j, d, r, rijsq, rcut, sw, electroMult, &
-            vpair, fpair, pot(ELECTROSTATIC_POT), eFrame, f, t, do_pot)
+       call doElectrostaticPair(i, j, atid_i, atid_j, d, r, rijsq, rcut, sw, electroMult, &
+            vpair, fpair, p_elect, eF1, eF2, f1, t1, t2, do_pot)
     endif
     
     if ( iand(iHash, STICKY_PAIR).ne.0 ) then
-       call do_sticky_pair(i, j, d, r, rijsq, sw, vpair, fpair, &
-            pot(HB_POT), A, f, t, do_pot)
+       call do_sticky_pair(i, j, atid_i, atid_j, d, r, rijsq, sw, vpair, fpair, &
+            p_hb, A1, A2, f1, t1, t2, do_pot)
     endif
     
     if ( iand(iHash, STICKYPOWER_PAIR).ne.0 ) then
-       call do_sticky_power_pair(i, j, d, r, rijsq, sw, vpair, fpair, &
-            pot(HB_POT), A, f, t, do_pot)
+       call do_sticky_power_pair(i, j, atid_i, atid_j, d, r, rijsq, sw, vpair, fpair, &
+            p_hb, A1, A2, f1, t1, t2, do_pot)
     endif
     
     if ( iand(iHash, GAYBERNE_PAIR).ne.0 ) then
-       call do_gb_pair(i, j, d, r, rijsq, sw, vdwMult, vpair, fpair, &
-            pot(VDW_POT), A, f, t, do_pot)
+       call do_gb_pair(i, j, atid_i, atid_j, d, r, rijsq, sw, vdwMult, vpair, fpair, &
+            p_vdw, A1, A2, f1, t1, t2, do_pot)
     endif
     
     if ( iand(iHash, GAYBERNE_LJ).ne.0 ) then
-       call do_gb_pair(i, j, d, r, rijsq, sw, vdwMult, vpair, fpair, &
-            pot(VDW_POT), A, f, t, do_pot)
+       call do_gb_pair(i, j, atid_i, atid_j, d, r, rijsq, sw, vdwMult, vpair, fpair, &
+            p_vdw, A1, A2, f1, t1, t2, do_pot)
     endif
     
     if ( iand(iHash, EAM_PAIR).ne.0 ) then       
-       call do_eam_pair(i, j, d, r, rijsq, sw, vpair, particle_pot, &
-            fpair, pot(METALLIC_POT), f, do_pot)
+       call do_eam_pair(i, j, atid_i, atid_j, d, r, rijsq, sw, vpair, particle_pot, &
+            fpair, p_met, f1, do_pot)
     endif
     
     if ( iand(iHash, SHAPE_PAIR).ne.0 ) then       
-       call do_shape_pair(i, j, d, r, rijsq, sw, vpair, fpair, &
-            pot(VDW_POT), A, f, t, do_pot)
+       call do_shape_pair(i, j, atid_i, atid_j, d, r, rijsq, sw, vpair, fpair, &
+            p_vdw, A1, A2, f1, t1, t2, do_pot)
     endif
     
     if ( iand(iHash, SHAPE_LJ).ne.0 ) then       
-       call do_shape_pair(i, j, d, r, rijsq, sw, vpair, fpair, &
-            pot(VDW_POT), A, f, t, do_pot)
+       call do_shape_pair(i, j, atid_i, atid_j, d, r, rijsq, sw, vpair, fpair, &
+            p_vdw, A1, A2, f1, t1, t2, do_pot)
     endif
 
     if ( iand(iHash, SC_PAIR).ne.0 ) then       
-       call do_SC_pair(i, j, d, r, rijsq, rcut, sw, vpair, particle_pot, &
-            fpair, pot(METALLIC_POT), f, do_pot)
+       call do_SC_pair(i, j, atid_i, atid_j, d, r, rijsq, rcut, sw, vpair, particle_pot, &
+            fpair, p_met, f1, do_pot)
     endif
      
     if ( iand(iHash, MNM_PAIR).ne.0 ) then       
-       call do_mnm_pair(i, j, d, r, rijsq, rcut, sw, vdwMult, vpair, fpair, &
-            pot(VDW_POT), A, f, t, do_pot)
+       call do_mnm_pair(i, j, atid_i, atid_j, d, r, rijsq, rcut, sw, vdwMult, vpair, fpair, &
+            p_vdw, A1, A2, f1, t1, t2, do_pot)
     endif
+
+
+#ifdef IS_MPI
+    id1 = AtomRowToGlobal(i)
+    id2 = AtomColToGlobal(j)
+
+    pot_row(VDW_POT,i) = pot_row(VDW_POT,i) + 0.5*p_vdw
+    pot_col(VDW_POT,j) = pot_col(VDW_POT,j) + 0.5*p_vdw
+    pot_row(ELECTROSTATIC_POT,i) = pot_row(ELECTROSTATIC_POT,i) + 0.5*p_elect
+    pot_col(ELECTROSTATIC_POT,j) = pot_col(ELECTROSTATIC_POT,j) + 0.5*p_elect
+    pot_row(HB_POT,i) = pot_row(HB_POT,i) + 0.5*p_hb
+    pot_col(HB_POT,j) = pot_col(HB_POT,j) + 0.5*p_hb
+    pot_Row(METALLIC_POT,i) = pot_Row(METALLIC_POT,i) + 0.5*p_met
+    pot_Col(METALLIC_POT,j) = pot_Col(METALLIC_POT,j) + 0.5*p_met
+
+    do idx = 1, 3
+       f_Row(idx,i) = f_Row(idx,i) + f1(idx)
+       f_Col(idx,j) = f_Col(idx,j) - f1(idx)
+    
+       t_Row(idx,i) = t_Row(idx,i) + t1(idx)
+       t_Col(idx,j) = t_Col(idx,j) + t2(idx)
+    enddo
+#else
+    id1 = i
+    id2 = j
+
+    pot(VDW_POT) = pot(VDW_POT) + p_vdw
+    pot(ELECTROSTATIC_POT) = pot(ELECTROSTATIC_POT) + p_elect
+    pot(HB_POT) = pot(HB_POT) + p_hb
+    pot(METALLIC_POT) = pot(METALLIC_POT) + p_met
+
+    do idx = 1, 3
+       f(idx,i) = f(idx,i) + f1(idx)
+       f(idx,j) = f(idx,j) - f1(idx)
+
+       t(idx,i) = t(idx,i) + t1(idx)
+       t(idx,j) = t(idx,j) + t2(idx)
+    enddo
+#endif
+    
+    if (molMembershipList(id1) .ne. molMembershipList(id2)) then
+       
+       fpair(1) = fpair(1) + f1(1)
+       fpair(2) = fpair(2) + f1(2)
+       fpair(3) = fpair(3) + f1(3)
+       
+    endif
+
+
 !!$
 !!$    particle_pot(i) = particle_pot(i) + vpair*sw
 !!$    particle_pot(j) = particle_pot(j) + vpair*sw
@@ -1595,26 +1679,26 @@ contains
     real ( kind = dp )                :: r, rc
     real ( kind = dp ), intent(inout) :: d(3), dc(3)
 
-    integer :: me_i, me_j, iHash
+    integer :: atid_i, atid_j, iHash
 
     r = sqrt(rijsq)
     
 #ifdef IS_MPI   
-    me_i = atid_row(i)
-    me_j = atid_col(j)   
+    atid_i = atid_row(i)
+    atid_j = atid_col(j)   
 #else   
-    me_i = atid(i)
-    me_j = atid(j)   
+    atid_i = atid(i)
+    atid_j = atid(j)   
 #endif
 
-    iHash = InteractionHash(me_i, me_j)
+    iHash = InteractionHash(atid_i, atid_j)
 
     if ( iand(iHash, EAM_PAIR).ne.0 ) then       
-            call calc_EAM_prepair_rho(i, j, d, r, rijsq)
+            call calc_EAM_prepair_rho(i, j, atid_i, atid_j, d, r, rijsq)
     endif
 
     if ( iand(iHash, SC_PAIR).ne.0 ) then       
-            call calc_SC_prepair_rho(i, j, d, r, rijsq, rcut )
+            call calc_SC_prepair_rho(i, j, atid_i, atid_j, d, r, rijsq, rcut )
     endif
     
   end subroutine do_prepair

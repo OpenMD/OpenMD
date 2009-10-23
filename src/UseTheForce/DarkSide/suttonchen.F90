@@ -398,8 +398,8 @@ contains
   end subroutine clean_SC
 
   !! Calculates rho_r
-  subroutine calc_sc_prepair_rho(atom1, atom2, d, r, rijsq, rcut)
-    integer :: atom1,atom2
+  subroutine calc_sc_prepair_rho(atom1, atom2, atid1, atid2, d, r, rijsq, rcut)
+    integer :: atom1, atom2, atid1, atid2
     real(kind = dp), dimension(3) :: d
     real(kind = dp), intent(inout)               :: r
     real(kind = dp), intent(inout)               :: rijsq, rcut
@@ -412,7 +412,6 @@ contains
     real( kind = dp) :: drho
     integer :: sc_err
     
-    integer :: atid1,atid2 ! Global atid    
     integer :: myid_atom1 ! SC atid
     integer :: myid_atom2 
 
@@ -421,14 +420,6 @@ contains
     if (cleanArrays) call clean_SC()
     cleanArrays = .false.
     
-#ifdef IS_MPI
-    Atid1 = Atid_row(Atom1)
-    Atid2 = Atid_col(Atom2)
-#else
-    Atid1 = Atid(Atom1)
-    Atid2 = Atid(Atom2)
-#endif
-
     Myid_atom1 = SCList%atidtoSCtype(Atid1)
     Myid_atom2 = SCList%atidtoSCtype(Atid2)
     
@@ -525,14 +516,14 @@ contains
   end subroutine calc_sc_preforce_Frho  
   
   !! Does Sutton-Chen  pairwise Force calculation.  
-  subroutine do_sc_pair(atom1, atom2, d, rij, r2, rcut, sw, vpair, &
-       particle_pot, fpair, pot, f, do_pot)
+  subroutine do_sc_pair(atom1, atom2, atid1, atid2, d, rij, r2, rcut, sw, vpair, &
+       particle_pot, fpair, pot, f1, do_pot)
     !Arguments    
     integer, intent(in) ::  atom1, atom2
     real( kind = dp ), intent(in) :: rij, r2, rcut
     real( kind = dp ) :: pot, sw, vpair
     real( kind = dp ), dimension(nLocal) :: particle_pot
-    real( kind = dp ), dimension(3,nLocal) :: f
+    real( kind = dp ), dimension(3) :: f1
     real( kind = dp ), intent(in), dimension(3) :: d
     real( kind = dp ), intent(inout), dimension(3) :: fpair
 
@@ -553,31 +544,23 @@ contains
     !Local Variables
     
     cleanArrays = .true.
-
-#ifdef IS_MPI
-       atid1 = atid_row(atom1)
-       atid2 = atid_col(atom2)
-#else
-       atid1 = atid(atom1)
-       atid2 = atid(atom2)
-#endif
-
-       mytype_atom1 = SCList%atidToSCType(atid1)
-       mytype_atom2 = SCList%atidTOSCType(atid2)
-
-       drdx = d(1)/rij
-       drdy = d(2)/rij
-       drdz = d(3)/rij
-                 
-       rcij = MixingMap(mytype_atom1,mytype_atom2)%rCut
-       vcij = MixingMap(mytype_atom1,mytype_atom2)%vCut
-       
-       call lookupUniformSpline1d(MixingMap(mytype_atom1, mytype_atom2)%phi, &
-            rij, rhtmp, drhodr)
-
-       call lookupUniformSpline1d(MixingMap(mytype_atom1, mytype_atom2)%V, &
-            rij, vptmp, dvpdr)
-       
+    
+    mytype_atom1 = SCList%atidToSCType(atid1)
+    mytype_atom2 = SCList%atidTOSCType(atid2)
+    
+    drdx = d(1)/rij
+    drdy = d(2)/rij
+    drdz = d(3)/rij
+    
+    rcij = MixingMap(mytype_atom1,mytype_atom2)%rCut
+    vcij = MixingMap(mytype_atom1,mytype_atom2)%vCut
+    
+    call lookupUniformSpline1d(MixingMap(mytype_atom1, mytype_atom2)%phi, &
+         rij, rhtmp, drhodr)
+    
+    call lookupUniformSpline1d(MixingMap(mytype_atom1, mytype_atom2)%V, &
+         rij, vptmp, dvpdr)
+    
 #ifdef IS_MPI
        dudr = drhodr*(dfrhodrho_row(atom1) + dfrhodrho_col(atom2)) + dvpdr
 #else
@@ -594,8 +577,6 @@ contains
 
 #ifdef IS_MPI
        if (do_pot) then
-          pot_Row(METALLIC_POT,atom1) = pot_Row(METALLIC_POT,atom1) + (pot_temp)*0.5
-          pot_Col(METALLIC_POT,atom2) = pot_Col(METALLIC_POT,atom2) + (pot_temp)*0.5
 
           ! particle_pot is the difference between the full potential 
           ! and the full potential without the presence of a particular
@@ -621,17 +602,11 @@ contains
 
        end if
 
-       f_Row(1,atom1) = f_Row(1,atom1) + fx
-       f_Row(2,atom1) = f_Row(2,atom1) + fy
-       f_Row(3,atom1) = f_Row(3,atom1) + fz
 
-       f_Col(1,atom2) = f_Col(1,atom2) - fx
-       f_Col(2,atom2) = f_Col(2,atom2) - fy
-       f_Col(3,atom2) = f_Col(3,atom2) - fz
 #else
 
        if(do_pot) then
-          pot = pot + pot_temp
+
           fshift1 = -SCList%SCTypes(mytype_atom1)%c * &
                SCList%SCTypes(mytype_atom1)%epsilon * &
                sqrt(rho(atom1)-rhtmp)
@@ -641,33 +616,15 @@ contains
           
           particle_pot(atom1) = particle_pot(atom1) - frho(atom2) + fshift2
           particle_pot(atom2) = particle_pot(atom2) - frho(atom1) + fshift1
-
+          
        end if
-
-       f(1,atom1) = f(1,atom1) + fx
-       f(2,atom1) = f(2,atom1) + fy
-       f(3,atom1) = f(3,atom1) + fz
-
-       f(1,atom2) = f(1,atom2) - fx
-       f(2,atom2) = f(2,atom2) - fy
-       f(3,atom2) = f(3,atom2) - fz
-#endif
-
        
-#ifdef IS_MPI
-       id1 = AtomRowToGlobal(atom1)
-       id2 = AtomColToGlobal(atom2)
-#else
-       id1 = atom1
-       id2 = atom2
 #endif
+       pot = pot + pot_temp
+              
+       f1(1) = f1(1) + fx
+       f1(2) = f1(2) + fy
+       f1(3) = f1(3) + fz
 
-       if (molMembershipList(id1) .ne. molMembershipList(id2)) then
-
-          fpair(1) = fpair(1) + fx
-          fpair(2) = fpair(2) + fy
-          fpair(3) = fpair(3) + fz
-
-       endif
   end subroutine do_sc_pair
 end module suttonchen

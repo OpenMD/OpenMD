@@ -352,8 +352,8 @@ contains
   end subroutine deallocate_EAMType
 
   !! Calculates rho_r
-  subroutine calc_eam_prepair_rho(atom1,atom2,d,r,rijsq)
-    integer :: atom1, atom2
+  subroutine calc_eam_prepair_rho(atom1,atom2,Atid1,Atid2,d,r,rijsq)
+    integer :: atom1, atom2, Atid1, Atid2
     real(kind = dp), dimension(3) :: d
     real(kind = dp), intent(inout)               :: r
     real(kind = dp), intent(inout)               :: rijsq
@@ -362,26 +362,17 @@ contains
     ! value of electron density rho do to atom j at atom i
     real(kind = dp) :: rho_j_at_i
     integer :: eam_err
-    
-    integer :: atid1, atid2 ! Global atid    
+   
     integer :: myid_atom1 ! EAM atid
     integer :: myid_atom2 
 
     ! check to see if we need to be cleaned at the start of a force loop
 
-#ifdef IS_MPI
-    Atid1 = Atid_row(Atom1)
-    Atid2 = Atid_col(Atom2)
-#else
-    Atid1 = Atid(Atom1)
-    Atid2 = Atid(Atom2)
-#endif
-
     Myid_atom1 = Eamlist%atidtoeamtype(Atid1)
     Myid_atom2 = Eamlist%atidtoeamtype(Atid2)
-
+    
     if (r.lt.EAMList%EAMParams(myid_atom1)%eam_rcut) then
-
+       
        call lookupEAMSpline(EAMList%EAMParams(myid_atom1)%rho, r, &
             rho_i_at_j)
 
@@ -474,14 +465,14 @@ contains
   end subroutine calc_eam_preforce_Frho
   
   !! Does EAM pairwise Force calculation.  
-  subroutine do_eam_pair(atom1, atom2, d, rij, r2, sw, vpair, particle_pot, &
-       fpair, pot, f, do_pot)
+  subroutine do_eam_pair(atom1, atom2, atid1, atid2, d, rij, r2, sw, vpair, particle_pot, &
+       fpair, pot, f1, do_pot)
     !Arguments    
-    integer, intent(in) ::  atom1, atom2
+    integer, intent(in) ::  atom1, atom2, atid1, atid2
     real( kind = dp ), intent(in) :: rij, r2
     real( kind = dp ) :: pot, sw, vpair
     real( kind = dp ), dimension(nLocal) :: particle_pot
-    real( kind = dp ), dimension(3,nLocal) :: f
+    real( kind = dp ), dimension(3) :: f1
     real( kind = dp ), intent(in), dimension(3) :: d
     real( kind = dp ), intent(inout), dimension(3) :: fpair
 
@@ -501,20 +492,11 @@ contains
     integer :: id1, id2
     integer  :: mytype_atom1
     integer  :: mytype_atom2
-    integer  :: atid1, atid2
 
     phab = 0.0E0_DP
     dvpdr = 0.0E0_DP
 
     if (rij .lt. EAM_rcut) then
-
-#ifdef IS_MPI
-       atid1 = atid_row(atom1)
-       atid2 = atid_col(atom2)
-#else
-       atid1 = atid(atom1)
-       atid2 = atid(atom2)
-#endif
 
        mytype_atom1 = EAMList%atidToEAMType(atid1)
        mytype_atom2 = EAMList%atidTOEAMType(atid2)
@@ -610,18 +592,8 @@ contains
           ppot_Row(atom1) = ppot_Row(atom1) - frho_row(atom2) + fshift2
           ppot_Col(atom2) = ppot_Col(atom2) - frho_col(atom1) + fshift1
 
-
-          pot_Row(METALLIC_POT,atom1) = pot_Row(METALLIC_POT,atom1) + phab*0.5
-          pot_Col(METALLIC_POT,atom2) = pot_Col(METALLIC_POT,atom2) + phab*0.5
        end if
 
-       f_Row(1,atom1) = f_Row(1,atom1) + fx
-       f_Row(2,atom1) = f_Row(2,atom1) + fy
-       f_Row(3,atom1) = f_Row(3,atom1) + fz
-
-       f_Col(1,atom2) = f_Col(1,atom2) - fx
-       f_Col(2,atom2) = f_Col(2,atom2) - fy
-       f_Col(3,atom2) = f_Col(3,atom2) - fz
 #else
 
        if(do_pot) then
@@ -647,35 +619,18 @@ contains
           particle_pot(atom1) = particle_pot(atom1) - frho(atom2) + fshift2
           particle_pot(atom2) = particle_pot(atom2) - frho(atom1) + fshift1
 
-          pot = pot + phab
        end if
 
-       f(1,atom1) = f(1,atom1) + fx
-       f(2,atom1) = f(2,atom1) + fy
-       f(3,atom1) = f(3,atom1) + fz
-
-       f(1,atom2) = f(1,atom2) - fx
-       f(2,atom2) = f(2,atom2) - fy
-       f(3,atom2) = f(3,atom2) - fz
 #endif
+
+       pot = pot + phab
+
+       f1(1) = f1(1) + fx
+       f1(2) = f1(2) + fy
+       f1(3) = f1(3) + fz
 
        vpair = vpair + phab
 
-#ifdef IS_MPI
-       id1 = AtomRowToGlobal(atom1)
-       id2 = AtomColToGlobal(atom2)
-#else
-       id1 = atom1
-       id2 = atom2
-#endif
-
-       if (molMembershipList(id1) .ne. molMembershipList(id2)) then
-
-          fpair(1) = fpair(1) + fx
-          fpair(2) = fpair(2) + fy
-          fpair(3) = fpair(3) + fz
-
-       endif
     endif
   end subroutine do_eam_pair
 

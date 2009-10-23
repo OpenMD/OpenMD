@@ -48,9 +48,6 @@ module electrostatic_module
   use simulation
   use status
   use interpolation
-#ifdef IS_MPI
-  use mpiSimulation
-#endif
   implicit none
 
   PRIVATE
@@ -506,12 +503,12 @@ contains
   end subroutine checkSummationMethod
 
 
-  subroutine doElectrostaticPair(atom1, atom2, d, rij, r2, rcut, sw, &
-       electroMult, vpair, fpair, pot, eFrame, f, t, do_pot)
+  subroutine doElectrostaticPair(atom1, atom2, me1, me2, d, rij, r2, rcut, sw, &
+       electroMult, vpair, fpair, pot, eF1, eF2, f1, t1, t2, do_pot)
 
     logical, intent(in) :: do_pot
 
-    integer, intent(in) :: atom1, atom2
+    integer, intent(in) :: atom1, atom2, me1, me2
     integer :: localError
 
     real(kind=dp), intent(in) :: rij, r2, sw, rcut, electroMult
@@ -520,10 +517,10 @@ contains
     real(kind=dp), intent(inout), dimension(3) :: fpair    
 
     real( kind = dp ) :: pot
-    real( kind = dp ), dimension(9,nLocal) :: eFrame
-    real( kind = dp ), dimension(3,nLocal) :: f
+    real( kind = dp ), dimension(9) :: eF1, eF2  ! eFrame = electroFrame
+    real( kind = dp ), dimension(3) :: f1
     real( kind = dp ), dimension(3,nLocal) :: felec
-    real( kind = dp ), dimension(3,nLocal) :: t
+    real( kind = dp ), dimension(3) :: t1, t2
 
     real (kind = dp), dimension(3) :: ux_i, uy_i, uz_i
     real (kind = dp), dimension(3) :: ux_j, uy_j, uz_j
@@ -533,7 +530,7 @@ contains
     logical :: i_is_Charge, i_is_Dipole, i_is_SplitDipole, i_is_Quadrupole
     logical :: j_is_Charge, j_is_Dipole, j_is_SplitDipole, j_is_Quadrupole
     logical :: i_is_Tap, j_is_Tap
-    integer :: me1, me2, id1, id2
+    integer :: id1, id2
     real (kind=dp) :: q_i, q_j, mu_i, mu_j, d_i, d_j
     real (kind=dp) :: qxx_i, qyy_i, qzz_i
     real (kind=dp) :: qxx_j, qyy_j, qzz_j
@@ -558,14 +555,6 @@ contains
     if (.not.summationMethodChecked) then
        call checkSummationMethod()
     endif
-
-#ifdef IS_MPI
-    me1 = atid_Row(atom1)
-    me2 = atid_Col(atom2)
-#else
-    me1 = atid(atom1)
-    me2 = atid(atom2)
-#endif
 
     !! some variables we'll need independent of electrostatic type:
 
@@ -594,15 +583,11 @@ contains
 
     if (i_is_Dipole) then
        mu_i = ElectrostaticMap(me1)%dipole_moment
-#ifdef IS_MPI
-       uz_i(1) = eFrame_Row(3,atom1)
-       uz_i(2) = eFrame_Row(6,atom1)
-       uz_i(3) = eFrame_Row(9,atom1)
-#else
-       uz_i(1) = eFrame(3,atom1)
-       uz_i(2) = eFrame(6,atom1)
-       uz_i(3) = eFrame(9,atom1)
-#endif
+
+       uz_i(1) = eF1(3)
+       uz_i(2) = eF1(6)
+       uz_i(3) = eF1(9)
+
        ct_i = uz_i(1)*xhat + uz_i(2)*yhat + uz_i(3)*zhat
 
        if (i_is_SplitDipole) then
@@ -615,27 +600,17 @@ contains
        qxx_i = ElectrostaticMap(me1)%quadrupole_moments(1)
        qyy_i = ElectrostaticMap(me1)%quadrupole_moments(2)
        qzz_i = ElectrostaticMap(me1)%quadrupole_moments(3)
-#ifdef IS_MPI
-       ux_i(1) = eFrame_Row(1,atom1)
-       ux_i(2) = eFrame_Row(4,atom1)
-       ux_i(3) = eFrame_Row(7,atom1)
-       uy_i(1) = eFrame_Row(2,atom1)
-       uy_i(2) = eFrame_Row(5,atom1)
-       uy_i(3) = eFrame_Row(8,atom1)
-       uz_i(1) = eFrame_Row(3,atom1)
-       uz_i(2) = eFrame_Row(6,atom1)
-       uz_i(3) = eFrame_Row(9,atom1)
-#else
-       ux_i(1) = eFrame(1,atom1)
-       ux_i(2) = eFrame(4,atom1)
-       ux_i(3) = eFrame(7,atom1)
-       uy_i(1) = eFrame(2,atom1)
-       uy_i(2) = eFrame(5,atom1)
-       uy_i(3) = eFrame(8,atom1)
-       uz_i(1) = eFrame(3,atom1)
-       uz_i(2) = eFrame(6,atom1)
-       uz_i(3) = eFrame(9,atom1)
-#endif
+
+       ux_i(1) = eF1(1)
+       ux_i(2) = eF1(4)
+       ux_i(3) = eF1(7)
+       uy_i(1) = eF1(2)
+       uy_i(2) = eF1(5)
+       uy_i(3) = eF1(8)
+       uz_i(1) = eF1(3)
+       uz_i(2) = eF1(6)
+       uz_i(3) = eF1(9)
+
        cx_i = ux_i(1)*xhat + ux_i(2)*yhat + ux_i(3)*zhat
        cy_i = uy_i(1)*xhat + uy_i(2)*yhat + uy_i(3)*zhat
        cz_i = uz_i(1)*xhat + uz_i(2)*yhat + uz_i(3)*zhat
@@ -650,15 +625,11 @@ contains
 
     if (j_is_Dipole) then
        mu_j = ElectrostaticMap(me2)%dipole_moment
-#ifdef IS_MPI
-       uz_j(1) = eFrame_Col(3,atom2)
-       uz_j(2) = eFrame_Col(6,atom2)
-       uz_j(3) = eFrame_Col(9,atom2)
-#else
-       uz_j(1) = eFrame(3,atom2)
-       uz_j(2) = eFrame(6,atom2)
-       uz_j(3) = eFrame(9,atom2)
-#endif
+
+       uz_j(1) = eF2(3)
+       uz_j(2) = eF2(6)
+       uz_j(3) = eF2(9)
+
        ct_j = uz_j(1)*xhat + uz_j(2)*yhat + uz_j(3)*zhat
 
        if (j_is_SplitDipole) then
@@ -671,27 +642,17 @@ contains
        qxx_j = ElectrostaticMap(me2)%quadrupole_moments(1)
        qyy_j = ElectrostaticMap(me2)%quadrupole_moments(2)
        qzz_j = ElectrostaticMap(me2)%quadrupole_moments(3)
-#ifdef IS_MPI
-       ux_j(1) = eFrame_Col(1,atom2)
-       ux_j(2) = eFrame_Col(4,atom2)
-       ux_j(3) = eFrame_Col(7,atom2)
-       uy_j(1) = eFrame_Col(2,atom2)
-       uy_j(2) = eFrame_Col(5,atom2)
-       uy_j(3) = eFrame_Col(8,atom2)
-       uz_j(1) = eFrame_Col(3,atom2)
-       uz_j(2) = eFrame_Col(6,atom2)
-       uz_j(3) = eFrame_Col(9,atom2)
-#else
-       ux_j(1) = eFrame(1,atom2)
-       ux_j(2) = eFrame(4,atom2)
-       ux_j(3) = eFrame(7,atom2)
-       uy_j(1) = eFrame(2,atom2)
-       uy_j(2) = eFrame(5,atom2)
-       uy_j(3) = eFrame(8,atom2)
-       uz_j(1) = eFrame(3,atom2)
-       uz_j(2) = eFrame(6,atom2)
-       uz_j(3) = eFrame(9,atom2)
-#endif
+
+       ux_j(1) = eF2(1)
+       ux_j(2) = eF2(4)
+       ux_j(3) = eF2(7)
+       uy_j(1) = eF2(2)
+       uy_j(2) = eF2(5)
+       uy_j(3) = eF2(8)
+       uz_j(1) = eF2(3)
+       uz_j(2) = eF2(6)
+       uz_j(3) = eF2(9)
+
        cx_j = ux_j(1)*xhat + ux_j(2)*yhat + ux_j(3)*zhat
        cy_j = uy_j(1)*xhat + uy_j(2)*yhat + uy_j(3)*zhat
        cz_j = uz_j(1)*xhat + uz_j(2)*yhat + uz_j(3)*zhat
@@ -1138,110 +1099,40 @@ contains
        endif
     endif
 
+    pot = pot + epot
 
-    if (do_pot) then
-#ifdef IS_MPI 
-       pot_row(ELECTROSTATIC_POT,atom1) = pot_row(ELECTROSTATIC_POT,atom1) + 0.5_dp*epot
-       pot_col(ELECTROSTATIC_POT,atom2) = pot_col(ELECTROSTATIC_POT,atom2) + 0.5_dp*epot
-#else
-       pot = pot + epot
-#endif
-    endif
-
-#ifdef IS_MPI
-    f_Row(1,atom1) = f_Row(1,atom1) + dudx
-    f_Row(2,atom1) = f_Row(2,atom1) + dudy
-    f_Row(3,atom1) = f_Row(3,atom1) + dudz
-
-    f_Col(1,atom2) = f_Col(1,atom2) - dudx
-    f_Col(2,atom2) = f_Col(2,atom2) - dudy
-    f_Col(3,atom2) = f_Col(3,atom2) - dudz
+    f1(1) = f1(1) + dudx
+    f1(2) = f1(2) + dudy
+    f1(3) = f1(3) + dudz
 
     if (i_is_Dipole .or. i_is_Quadrupole) then
-       t_Row(1,atom1)=t_Row(1,atom1) - uz_i(2)*duduz_i(3) + uz_i(3)*duduz_i(2)
-       t_Row(2,atom1)=t_Row(2,atom1) - uz_i(3)*duduz_i(1) + uz_i(1)*duduz_i(3)
-       t_Row(3,atom1)=t_Row(3,atom1) - uz_i(1)*duduz_i(2) + uz_i(2)*duduz_i(1)
+       t1(1) = t1(1) - uz_i(2)*duduz_i(3) + uz_i(3)*duduz_i(2)
+       t1(2) = t1(2) - uz_i(3)*duduz_i(1) + uz_i(1)*duduz_i(3)
+       t1(3) = t1(3) - uz_i(1)*duduz_i(2) + uz_i(2)*duduz_i(1)
     endif
     if (i_is_Quadrupole) then
-       t_Row(1,atom1)=t_Row(1,atom1) - ux_i(2)*dudux_i(3) + ux_i(3)*dudux_i(2)
-       t_Row(2,atom1)=t_Row(2,atom1) - ux_i(3)*dudux_i(1) + ux_i(1)*dudux_i(3)
-       t_Row(3,atom1)=t_Row(3,atom1) - ux_i(1)*dudux_i(2) + ux_i(2)*dudux_i(1)
+       t1(1) = t1(1) - ux_i(2)*dudux_i(3) + ux_i(3)*dudux_i(2)
+       t1(2) = t1(2) - ux_i(3)*dudux_i(1) + ux_i(1)*dudux_i(3)
+       t1(3) = t1(3) - ux_i(1)*dudux_i(2) + ux_i(2)*dudux_i(1)
 
-       t_Row(1,atom1)=t_Row(1,atom1) - uy_i(2)*duduy_i(3) + uy_i(3)*duduy_i(2)
-       t_Row(2,atom1)=t_Row(2,atom1) - uy_i(3)*duduy_i(1) + uy_i(1)*duduy_i(3)
-       t_Row(3,atom1)=t_Row(3,atom1) - uy_i(1)*duduy_i(2) + uy_i(2)*duduy_i(1)
+       t1(1) = t1(1) - uy_i(2)*duduy_i(3) + uy_i(3)*duduy_i(2)
+       t1(2) = t1(2) - uy_i(3)*duduy_i(1) + uy_i(1)*duduy_i(3)
+       t1(3) = t1(3) - uy_i(1)*duduy_i(2) + uy_i(2)*duduy_i(1)
     endif
 
     if (j_is_Dipole .or. j_is_Quadrupole) then
-       t_Col(1,atom2)=t_Col(1,atom2) - uz_j(2)*duduz_j(3) + uz_j(3)*duduz_j(2)
-       t_Col(2,atom2)=t_Col(2,atom2) - uz_j(3)*duduz_j(1) + uz_j(1)*duduz_j(3)
-       t_Col(3,atom2)=t_Col(3,atom2) - uz_j(1)*duduz_j(2) + uz_j(2)*duduz_j(1)
+       t2(1) = t2(1) - uz_j(2)*duduz_j(3) + uz_j(3)*duduz_j(2)
+       t2(2) = t2(2) - uz_j(3)*duduz_j(1) + uz_j(1)*duduz_j(3)
+       t2(3) = t2(3) - uz_j(1)*duduz_j(2) + uz_j(2)*duduz_j(1)
     endif
     if (j_is_Quadrupole) then
-       t_Col(1,atom2)=t_Col(1,atom2) - ux_j(2)*dudux_j(3) + ux_j(3)*dudux_j(2)
-       t_Col(2,atom2)=t_Col(2,atom2) - ux_j(3)*dudux_j(1) + ux_j(1)*dudux_j(3)
-       t_Col(3,atom2)=t_Col(3,atom2) - ux_j(1)*dudux_j(2) + ux_j(2)*dudux_j(1)
+       t2(1) = t2(1) - ux_j(2)*dudux_j(3) + ux_j(3)*dudux_j(2)
+       t2(2) = t2(2) - ux_j(3)*dudux_j(1) + ux_j(1)*dudux_j(3)
+       t2(3) = t2(3) - ux_j(1)*dudux_j(2) + ux_j(2)*dudux_j(1)
 
-       t_Col(1,atom2)=t_Col(1,atom2) - uy_j(2)*duduy_j(3) + uy_j(3)*duduy_j(2)
-       t_Col(2,atom2)=t_Col(2,atom2) - uy_j(3)*duduy_j(1) + uy_j(1)*duduy_j(3)
-       t_Col(3,atom2)=t_Col(3,atom2) - uy_j(1)*duduy_j(2) + uy_j(2)*duduy_j(1)
-    endif
-
-#else
-    f(1,atom1) = f(1,atom1) + dudx
-    f(2,atom1) = f(2,atom1) + dudy
-    f(3,atom1) = f(3,atom1) + dudz
-
-    f(1,atom2) = f(1,atom2) - dudx
-    f(2,atom2) = f(2,atom2) - dudy
-    f(3,atom2) = f(3,atom2) - dudz
-
-    if (i_is_Dipole .or. i_is_Quadrupole) then
-       t(1,atom1)=t(1,atom1) - uz_i(2)*duduz_i(3) + uz_i(3)*duduz_i(2)
-       t(2,atom1)=t(2,atom1) - uz_i(3)*duduz_i(1) + uz_i(1)*duduz_i(3)
-       t(3,atom1)=t(3,atom1) - uz_i(1)*duduz_i(2) + uz_i(2)*duduz_i(1)
-    endif
-    if (i_is_Quadrupole) then
-       t(1,atom1)=t(1,atom1) - ux_i(2)*dudux_i(3) + ux_i(3)*dudux_i(2)
-       t(2,atom1)=t(2,atom1) - ux_i(3)*dudux_i(1) + ux_i(1)*dudux_i(3)
-       t(3,atom1)=t(3,atom1) - ux_i(1)*dudux_i(2) + ux_i(2)*dudux_i(1)
-
-       t(1,atom1)=t(1,atom1) - uy_i(2)*duduy_i(3) + uy_i(3)*duduy_i(2)
-       t(2,atom1)=t(2,atom1) - uy_i(3)*duduy_i(1) + uy_i(1)*duduy_i(3)
-       t(3,atom1)=t(3,atom1) - uy_i(1)*duduy_i(2) + uy_i(2)*duduy_i(1)
-    endif
-
-    if (j_is_Dipole .or. j_is_Quadrupole) then
-       t(1,atom2)=t(1,atom2) - uz_j(2)*duduz_j(3) + uz_j(3)*duduz_j(2)
-       t(2,atom2)=t(2,atom2) - uz_j(3)*duduz_j(1) + uz_j(1)*duduz_j(3)
-       t(3,atom2)=t(3,atom2) - uz_j(1)*duduz_j(2) + uz_j(2)*duduz_j(1)
-    endif
-    if (j_is_Quadrupole) then
-       t(1,atom2)=t(1,atom2) - ux_j(2)*dudux_j(3) + ux_j(3)*dudux_j(2)
-       t(2,atom2)=t(2,atom2) - ux_j(3)*dudux_j(1) + ux_j(1)*dudux_j(3)
-       t(3,atom2)=t(3,atom2) - ux_j(1)*dudux_j(2) + ux_j(2)*dudux_j(1)
-
-       t(1,atom2)=t(1,atom2) - uy_j(2)*duduy_j(3) + uy_j(3)*duduy_j(2)
-       t(2,atom2)=t(2,atom2) - uy_j(3)*duduy_j(1) + uy_j(1)*duduy_j(3)
-       t(3,atom2)=t(3,atom2) - uy_j(1)*duduy_j(2) + uy_j(2)*duduy_j(1)
-    endif
-
-#endif
-
-#ifdef IS_MPI
-    id1 = AtomRowToGlobal(atom1)
-    id2 = AtomColToGlobal(atom2)
-#else
-    id1 = atom1
-    id2 = atom2
-#endif
-
-    if (molMembershipList(id1) .ne. molMembershipList(id2)) then
-
-       fpair(1) = fpair(1) + dudx
-       fpair(2) = fpair(2) + dudy
-       fpair(3) = fpair(3) + dudz
-
+       t2(1) = t2(1) - uy_j(2)*duduy_j(3) + uy_j(3)*duduy_j(2)
+       t2(2) = t2(2) - uy_j(3)*duduy_j(1) + uy_j(1)*duduy_j(3)
+       t2(3) = t2(3) - uy_j(1)*duduy_j(2) + uy_j(2)*duduy_j(1)
     endif
 
     return

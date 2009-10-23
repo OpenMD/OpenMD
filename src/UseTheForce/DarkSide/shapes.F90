@@ -49,9 +49,6 @@ module shapes
   use simulation
   use status
   use lj
-#ifdef IS_MPI
-  use mpiSimulation
-#endif
   implicit none
 
   PRIVATE
@@ -398,24 +395,24 @@ contains
 
   end function getShapeCut
 
-  subroutine do_shape_pair(atom1, atom2, d, rij, r2, sw, &
-       vpair, fpair, pot, A, f, t, do_pot)
+  subroutine do_shape_pair(atom1, atom2, atid1, atid2, d, rij, r2, sw, &
+       vpair, fpair, pot, A1, A2, f1, t1, t2, do_pot)
 
     INTEGER, PARAMETER:: LMAX         = 64
     INTEGER, PARAMETER:: MMAX         = 64
 
-    integer, intent(in) :: atom1, atom2
+    integer, intent(in) :: atom1, atom2, atid1, atid2
     real (kind=dp), intent(inout) :: rij, r2
     real (kind=dp), dimension(3), intent(in) :: d
     real (kind=dp), dimension(3), intent(inout) :: fpair
     real (kind=dp) :: pot, vpair, sw, dswdr
-    real (kind=dp), dimension(9,nLocal) :: A
-    real (kind=dp), dimension(3,nLocal) :: f
-    real (kind=dp), dimension(3,nLocal) :: t
+    real (kind=dp), dimension(9) :: A1, A2
+    real (kind=dp), dimension(3) :: f1
+    real (kind=dp), dimension(3) :: t1, t2
     logical, intent(in) :: do_pot
 
     real (kind=dp) :: r3, r5, rt2, rt3, rt5, rt6, rt11, rt12, rt126
-    integer :: atid1, atid2, st1, st2
+    integer :: st1, st2
     integer :: l, m, lm, id1, id2, localError, function_type
     real (kind=dp) :: sigma_i, s_i, eps_i, sigma_j, s_j, eps_j
     real (kind=dp) :: coeff
@@ -529,15 +526,6 @@ contains
     drduyj = 0.0_dp
     drduzj = 0.0_dp
 
-    ! find the atom type id (atid) for each atom:
-#ifdef IS_MPI
-    atid1 = atid_Row(atom1)
-    atid2 = atid_Col(atom2)
-#else
-    atid1 = atid(atom1)
-    atid2 = atid(atom2)
-#endif
-
     ! use the atid to find the shape type (st) for each atom:
     st1 = ShapeMap%atidToShape(atid1)
     st2 = ShapeMap%atidToShape(atid2)
@@ -568,24 +556,14 @@ contains
        depsiduy = 0.0_dp
        depsiduz = 0.0_dp
     else
-
-#ifdef IS_MPI
+       
        ! rotate the inter-particle separation into the two different
        ! body-fixed coordinate systems:
 
-       xi = A_row(1,atom1)*d(1) + A_row(2,atom1)*d(2) + A_row(3,atom1)*d(3)
-       yi = A_row(4,atom1)*d(1) + A_row(5,atom1)*d(2) + A_row(6,atom1)*d(3)
-       zi = A_row(7,atom1)*d(1) + A_row(8,atom1)*d(2) + A_row(9,atom1)*d(3)
-
-#else
-       ! rotate the inter-particle separation into the two different
-       ! body-fixed coordinate systems:
-
-       xi = a(1,atom1)*d(1) + a(2,atom1)*d(2) + a(3,atom1)*d(3)
-       yi = a(4,atom1)*d(1) + a(5,atom1)*d(2) + a(6,atom1)*d(3)
-       zi = a(7,atom1)*d(1) + a(8,atom1)*d(2) + a(9,atom1)*d(3)
-
-#endif
+       xi = A1(1)*d(1) + A1(2)*d(2) + A1(3)*d(3)
+       yi = A1(4)*d(1) + A1(5)*d(2) + A1(6)*d(3)
+       zi = A1(7)*d(1) + A1(8)*d(2) + A1(9)*d(3)
+       
        xihat = xi / rij
        yihat = yi / rij
        zihat = zi / rij
@@ -826,23 +804,13 @@ contains
        depsjduz = 0.0_dp
     else
 
-#ifdef IS_MPI
        ! rotate the inter-particle separation into the two different
        ! body-fixed coordinate systems:
        ! negative sign because this is the vector from j to i:
-
-       xj = -(A_Col(1,atom2)*d(1) + A_Col(2,atom2)*d(2) + A_Col(3,atom2)*d(3))
-       yj = -(A_Col(4,atom2)*d(1) + A_Col(5,atom2)*d(2) + A_Col(6,atom2)*d(3))
-       zj = -(A_Col(7,atom2)*d(1) + A_Col(8,atom2)*d(2) + A_Col(9,atom2)*d(3))
-#else
-       ! rotate the inter-particle separation into the two different
-       ! body-fixed coordinate systems:
-       ! negative sign because this is the vector from j to i:
-
-       xj = -(a(1,atom2)*d(1) + a(2,atom2)*d(2) + a(3,atom2)*d(3))
-       yj = -(a(4,atom2)*d(1) + a(5,atom2)*d(2) + a(6,atom2)*d(3))
-       zj = -(a(7,atom2)*d(1) + a(8,atom2)*d(2) + a(9,atom2)*d(3))
-#endif
+       
+       xj = -(A2(1)*d(1) + A2(2)*d(2) + A2(3)*d(3))
+       yj = -(A2(4)*d(1) + A2(5)*d(2) + A2(6)*d(3))
+       zj = -(A2(7)*d(1) + A2(8)*d(2) + A2(9)*d(3))
 
        xjhat = xj / rij
        yjhat = yj / rij
@@ -1150,14 +1118,8 @@ contains
     pot_temp = 4.0_dp * eps * rt126
 
     vpair = vpair + pot_temp
-    if (do_pot) then
-#ifdef IS_MPI
-       pot_row(VDW_POT,atom1) = pot_row(VDW_POT,atom1) + 0.5_dp*pot_temp*sw
-       pot_col(VDW_POT,atom2) = pot_col(VDW_POT,atom2) + 0.5_dp*pot_temp*sw
-#else
-       pot = pot + pot_temp*sw
-#endif
-    endif
+
+    pot = pot + pot_temp*sw
 
 !!$    write(*,*) 'drtdu, depsdu = ', drtduxi, depsduxi
 
@@ -1207,30 +1169,14 @@ contains
 
     ! go back to lab frame using transpose of rotation matrix:
 
-#ifdef IS_MPI
-    t_Row(1,atom1) = t_Row(1,atom1) + a_Row(1,atom1)*txi + &
-         a_Row(4,atom1)*tyi + a_Row(7,atom1)*tzi
-    t_Row(2,atom1) = t_Row(2,atom1) + a_Row(2,atom1)*txi + &
-         a_Row(5,atom1)*tyi + a_Row(8,atom1)*tzi
-    t_Row(3,atom1) = t_Row(3,atom1) + a_Row(3,atom1)*txi + &
-         a_Row(6,atom1)*tyi + a_Row(9,atom1)*tzi
+    t1(1) = t1(1) + a1(1)*txi + a1(4)*tyi + a1(7)*tzi
+    t1(2) = t1(2) + a1(2)*txi + a1(5)*tyi + a1(8)*tzi
+    t1(3) = t1(3) + a1(3)*txi + a1(6)*tyi + a1(9)*tzi
 
-    t_Col(1,atom2) = t_Col(1,atom2) + a_Col(1,atom2)*txj + &
-         a_Col(4,atom2)*tyj + a_Col(7,atom2)*tzj
-    t_Col(2,atom2) = t_Col(2,atom2) + a_Col(2,atom2)*txj + &
-         a_Col(5,atom2)*tyj + a_Col(8,atom2)*tzj
-    t_Col(3,atom2) = t_Col(3,atom2) + a_Col(3,atom2)*txj + &
-         a_Col(6,atom2)*tyj + a_Col(9,atom2)*tzj
-#else
-    t(1,atom1) = t(1,atom1) + a(1,atom1)*txi + a(4,atom1)*tyi + a(7,atom1)*tzi
-    t(2,atom1) = t(2,atom1) + a(2,atom1)*txi + a(5,atom1)*tyi + a(8,atom1)*tzi
-    t(3,atom1) = t(3,atom1) + a(3,atom1)*txi + a(6,atom1)*tyi + a(9,atom1)*tzi
+    t2(1) = t2(1) + a2(1)*txj + a2(4)*tyj + a2(7)*tzj
+    t2(2) = t2(2) + a2(2)*txj + a2(5)*tyj + a2(8)*tzj
+    t2(3) = t2(3) + a2(3)*txj + a2(6)*tyj + a2(9)*tzj
 
-    t(1,atom2) = t(1,atom2) + a(1,atom2)*txj + a(4,atom2)*tyj + a(7,atom2)*tzj
-    t(2,atom2) = t(2,atom2) + a(2,atom2)*txj + a(5,atom2)*tyj + a(8,atom2)*tzj
-    t(3,atom2) = t(3,atom2) + a(3,atom2)*txj + a(6,atom2)*tyj + a(9,atom2)*tzj
-
-#endif
     ! Now, on to the forces:
 
     ! first rotate the i terms back into the lab frame:
@@ -1243,24 +1189,13 @@ contains
     fyj = -dvdyj * sw
     fzj = -dvdzj * sw
 
+    fxii = a1(1)*fxi + a1(4)*fyi + a1(7)*fzi
+    fyii = a1(2)*fxi + a1(5)*fyi + a1(8)*fzi
+    fzii = a1(3)*fxi + a1(6)*fyi + a1(9)*fzi
 
-#ifdef IS_MPI
-    fxii = a_Row(1,atom1)*fxi + a_Row(4,atom1)*fyi + a_Row(7,atom1)*fzi
-    fyii = a_Row(2,atom1)*fxi + a_Row(5,atom1)*fyi + a_Row(8,atom1)*fzi
-    fzii = a_Row(3,atom1)*fxi + a_Row(6,atom1)*fyi + a_Row(9,atom1)*fzi
-
-    fxjj = a_Col(1,atom2)*fxj + a_Col(4,atom2)*fyj + a_Col(7,atom2)*fzj
-    fyjj = a_Col(2,atom2)*fxj + a_Col(5,atom2)*fyj + a_Col(8,atom2)*fzj
-    fzjj = a_Col(3,atom2)*fxj + a_Col(6,atom2)*fyj + a_Col(9,atom2)*fzj
-#else
-    fxii = a(1,atom1)*fxi + a(4,atom1)*fyi + a(7,atom1)*fzi
-    fyii = a(2,atom1)*fxi + a(5,atom1)*fyi + a(8,atom1)*fzi
-    fzii = a(3,atom1)*fxi + a(6,atom1)*fyi + a(9,atom1)*fzi
-
-    fxjj = a(1,atom2)*fxj + a(4,atom2)*fyj + a(7,atom2)*fzj
-    fyjj = a(2,atom2)*fxj + a(5,atom2)*fyj + a(8,atom2)*fzj
-    fzjj = a(3,atom2)*fxj + a(6,atom2)*fyj + a(9,atom2)*fzj
-#endif
+    fxjj = a2(1)*fxj + a2(4)*fyj + a2(7)*fzj
+    fyjj = a2(2)*fxj + a2(5)*fyj + a2(8)*fzj
+    fzjj = a2(3)*fxj + a2(6)*fyj + a2(9)*fzj
 
     fxij = -fxii
     fyij = -fyii
@@ -1274,39 +1209,10 @@ contains
     fyradial = (fyii + fyji)
     fzradial = (fzii + fzji)
 !!$    write(*,*) fxradial, ' is fxrad; ', fyradial, ' is fyrad; ', fzradial, 'is fzrad'
-#ifdef IS_MPI
-    f_Row(1,atom1) = f_Row(1,atom1) + fxradial
-    f_Row(2,atom1) = f_Row(2,atom1) + fyradial
-    f_Row(3,atom1) = f_Row(3,atom1) + fzradial
 
-    f_Col(1,atom2) = f_Col(1,atom2) - fxradial
-    f_Col(2,atom2) = f_Col(2,atom2) - fyradial
-    f_Col(3,atom2) = f_Col(3,atom2) - fzradial
-#else
-    f(1,atom1) = f(1,atom1) + fxradial
-    f(2,atom1) = f(2,atom1) + fyradial
-    f(3,atom1) = f(3,atom1) + fzradial
-
-    f(1,atom2) = f(1,atom2) - fxradial
-    f(2,atom2) = f(2,atom2) - fyradial
-    f(3,atom2) = f(3,atom2) - fzradial
-#endif
-
-#ifdef IS_MPI
-    id1 = AtomRowToGlobal(atom1)
-    id2 = AtomColToGlobal(atom2)
-#else
-    id1 = atom1
-    id2 = atom2
-#endif
-
-    if (molMembershipList(id1) .ne. molMembershipList(id2)) then
-
-       fpair(1) = fpair(1) + fxradial
-       fpair(2) = fpair(2) + fyradial
-       fpair(3) = fpair(3) + fzradial
-
-    endif
+    f1(1) = f1(1) + fxradial
+    f1(2) = f1(2) + fxradial
+    f1(3) = f1(3) + fxradial
 
   end subroutine do_shape_pair
 
