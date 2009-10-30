@@ -1,5 +1,5 @@
 !!
-!! Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
+!! Copyright (c) 2005, 2009 The University of Notre Dame. All Rights Reserved.
 !!
 !! The University of Notre Dame grants you ("Licensee") a
 !! non-exclusive, royalty free, license to use, modify and
@@ -52,9 +52,6 @@ module suttonchen
   use vector_class
   use fForceOptions
   use interpolation
-#ifdef IS_MPI
-  use mpiSimulation
-#endif
   implicit none
   PRIVATE
 #define __FORTRAN90
@@ -90,22 +87,6 @@ module suttonchen
   end type SCtype
   
 
-  !! Arrays for derivatives used in force calculation
-  real( kind = dp), dimension(:), allocatable :: rho
-  real( kind = dp), dimension(:), allocatable :: frho
-  real( kind = dp), dimension(:), allocatable :: dfrhodrho
-  
-  !! Arrays for MPI storage
-#ifdef IS_MPI
-  real( kind = dp),save, dimension(:), allocatable :: dfrhodrho_col
-  real( kind = dp),save, dimension(:), allocatable :: dfrhodrho_row
-  real( kind = dp),save, dimension(:), allocatable :: frho_row
-  real( kind = dp),save, dimension(:), allocatable :: frho_col
-  real( kind = dp),save, dimension(:), allocatable :: rho_row
-  real( kind = dp),save, dimension(:), allocatable :: rho_col
-  real( kind = dp),save, dimension(:), allocatable :: rho_tmp
-#endif
-
   type, private :: SCTypeList
      integer           :: nSCTypes = 0
      integer           :: currentSCtype = 0     
@@ -134,7 +115,6 @@ module suttonchen
   public :: newSCtype
   public :: calc_SC_prepair_rho
   public :: calc_SC_preforce_Frho
-  public :: clean_SC
   public :: destroySCtypes
   public :: getSCCut
  ! public :: setSCDefaultCutoff
@@ -286,128 +266,23 @@ contains
   end subroutine createMixingMap
   
 
-  !! routine checks to see if array is allocated, deallocates array if allocated
-  !! and then creates the array to the required size
-  subroutine allocateSC()
-    integer :: status
-
-#ifdef IS_MPI
-    integer :: nAtomsInRow
-    integer :: nAtomsInCol
-#endif
-    integer :: alloc_stat
-
-    
-    status = 0
-#ifdef IS_MPI
-    nAtomsInRow = getNatomsInRow(plan_atom_row)
-    nAtomsInCol = getNatomsInCol(plan_atom_col)
-#endif
-
-    if (allocated(frho)) deallocate(frho)
-    allocate(frho(nlocal),stat=alloc_stat)
-    if (alloc_stat /= 0) then
-       status = -1
-    end if
-
-    if (allocated(rho)) deallocate(rho)
-    allocate(rho(nlocal),stat=alloc_stat)
-    if (alloc_stat /= 0) then 
-       status = -1
-    end if
-
-    if (allocated(dfrhodrho)) deallocate(dfrhodrho)
-    allocate(dfrhodrho(nlocal),stat=alloc_stat)
-    if (alloc_stat /= 0) then 
-       status = -1
-    end if
-
-#ifdef IS_MPI
-
-    if (allocated(rho_tmp)) deallocate(rho_tmp)
-    allocate(rho_tmp(nlocal),stat=alloc_stat)
-    if (alloc_stat /= 0) then 
-       status = -1
-    end if
-
-
-    if (allocated(frho_row)) deallocate(frho_row)
-    allocate(frho_row(nAtomsInRow),stat=alloc_stat)
-    if (alloc_stat /= 0) then 
-       status = -1
-    end if
-    if (allocated(rho_row)) deallocate(rho_row)
-    allocate(rho_row(nAtomsInRow),stat=alloc_stat)
-    if (alloc_stat /= 0) then 
-       status = -1
-    end if
-    if (allocated(dfrhodrho_row)) deallocate(dfrhodrho_row)
-    allocate(dfrhodrho_row(nAtomsInRow),stat=alloc_stat)
-    if (alloc_stat /= 0) then 
-       status = -1
-    end if
-
-    ! Now do column arrays
-
-    if (allocated(frho_col)) deallocate(frho_col)
-    allocate(frho_col(nAtomsInCol),stat=alloc_stat)
-    if (alloc_stat /= 0) then 
-       status = -1
-    end if
-    if (allocated(rho_col)) deallocate(rho_col)
-    allocate(rho_col(nAtomsInCol),stat=alloc_stat)
-    if (alloc_stat /= 0) then 
-       status = -1
-    end if
-    if (allocated(dfrhodrho_col)) deallocate(dfrhodrho_col)
-    allocate(dfrhodrho_col(nAtomsInCol),stat=alloc_stat)
-    if (alloc_stat /= 0) then 
-       status = -1
-    end if
-
-#endif
-    if (status == -1) then
-       call handleError("SuttonChen:allocateSC","Error in allocating SC arrays")
-    end if
-    arraysAllocated = .true.
-  end subroutine allocateSC
 
   subroutine setCutoffSC(rcut)
     real(kind=dp) :: rcut
     SC_rcut = rcut
   end subroutine setCutoffSC
   
-  !! This array allocates module arrays if needed and builds mixing map.
-  subroutine clean_SC()
-    if (.not.arraysAllocated) call allocateSC()
-    if (.not.haveMixingMap) call createMixingMap()
-    ! clean non-IS_MPI first
-    frho = 0.0_dp
-    rho  = 0.0_dp
-    dfrhodrho = 0.0_dp
-    ! clean MPI if needed
-#ifdef IS_MPI
-    frho_row = 0.0_dp
-    frho_col = 0.0_dp
-    rho_row  = 0.0_dp
-    rho_col  = 0.0_dp
-    rho_tmp  = 0.0_dp
-    dfrhodrho_row = 0.0_dp
-    dfrhodrho_col = 0.0_dp
-#endif
-  end subroutine clean_SC
 
   !! Calculates rho_r
-  subroutine calc_sc_prepair_rho(atom1, atom2, atid1, atid2, d, r, rijsq, rcut)
+  subroutine calc_sc_prepair_rho(atom1, atom2, atid1, atid2, d, r, rijsq, rho_i_at_j, rho_j_at_i, rcut)
     integer :: atom1, atom2, atid1, atid2
     real(kind = dp), dimension(3) :: d
     real(kind = dp), intent(inout)               :: r
     real(kind = dp), intent(inout)               :: rijsq, rcut
     ! value of electron density rho do to atom i at atom j
-    real(kind = dp) :: rho_i_at_j
+    real(kind = dp), intent(inout) :: rho_i_at_j
     ! value of electron density rho do to atom j at atom i
-    real(kind = dp) :: rho_j_at_i
-
+    real(kind = dp), intent(inout) :: rho_j_at_i
     ! we don't use the derivatives, dummy variables
     real( kind = dp) :: drho
     integer :: sc_err
@@ -417,8 +292,8 @@ contains
 
     ! check to see if we need to be cleaned at the start of a force loop
 
-    if (cleanArrays) call clean_SC()
-    cleanArrays = .false.
+    if (.not.haveMixingMap) call createMixingMap()
+    haveMixingMap = .true.
     
     Myid_atom1 = SCList%atidtoSCtype(Atid1)
     Myid_atom2 = SCList%atidtoSCtype(Atid2)
@@ -426,15 +301,7 @@ contains
     call lookupUniformSpline(MixingMap(myid_atom1,myid_atom2)%phi, r, &
          rho_i_at_j)
     rho_j_at_i = rho_i_at_j
-
-#ifdef  IS_MPI
-    rho_col(atom2) = rho_col(atom2) + rho_i_at_j
-    rho_row(atom1) = rho_row(atom1) + rho_j_at_i
-#else
-    rho(atom2) = rho(atom2) + rho_i_at_j
-    rho(atom1) = rho(atom1) + rho_j_at_i
-#endif
-    
+       
   end subroutine calc_sc_prepair_rho
 
 
@@ -448,30 +315,6 @@ contains
     integer :: atype1
     integer :: atid1
     integer :: myid
-
-    !! Scatter the electron density from  pre-pair calculation back to 
-    !! local atoms
-
-    
-    if (cleanArrays) call clean_SC()
-    cleanArrays = .false.
-    
-      
-#ifdef IS_MPI
-    call scatter(rho_row,rho,plan_atom_row,sc_err)
-    if (sc_err /= 0 ) then
-       write(errMsg,*) " Error scattering rho_row into rho"
-       call handleError(RoutineName,errMesg)
-    endif
-    call scatter(rho_col,rho_tmp,plan_atom_col,sc_err)
-    if (sc_err /= 0 ) then
-       write(errMsg,*) " Error scattering rho_col into rho"
-       call handleError(RoutineName,errMesg)
-
-    endif
-
-    rho(1:nlocal) = rho(1:nlocal) + rho_tmp(1:nlocal)
-#endif
     
     !! Calculate F(rho) and derivative
     do atom = 1, nlocal
@@ -487,46 +330,25 @@ contains
 
           dfrhodrho(atom) = 0.5_dp*frho(atom)/rho(atom)
        end if
-       
        pot = pot + frho(atom)
        particle_pot(atom) = particle_pot(atom) + frho(atom)
     enddo
 
-#ifdef IS_MPI
-    !! communicate f(rho) and derivatives back into row and column arrays
-    call gather(frho,frho_row,plan_atom_row, sc_err)
-    if (sc_err /=  0) then
-       call handleError("calc_sc_forces()","MPI gather frho_row failure")
-    endif
-    call gather(dfrhodrho,dfrhodrho_row,plan_atom_row, sc_err)
-    if (sc_err /=  0) then
-       call handleError("calc_sc_forces()","MPI gather dfrhodrho_row failure")
-    endif
-    call gather(frho,frho_col,plan_atom_col, sc_err)
-    if (sc_err /=  0) then
-       call handleError("calc_sc_forces()","MPI gather frho_col failure")
-    endif
-    call gather(dfrhodrho,dfrhodrho_col,plan_atom_col, sc_err)
-    if (sc_err /=  0) then
-       call handleError("calc_sc_forces()","MPI gather dfrhodrho_col failure")
-    endif
-#endif
-    
-    
   end subroutine calc_sc_preforce_Frho  
   
   !! Does Sutton-Chen  pairwise Force calculation.  
   subroutine do_sc_pair(atom1, atom2, atid1, atid2, d, rij, r2, rcut, sw, vpair, &
-       particle_pot, fpair, pot, f1, do_pot)
+        fpair, pot, f1, rho_i, rho_j, dfrhodrho_i, dfrhodrho_j, fshift_i, fshift_j, do_pot)
     !Arguments    
     integer, intent(in) ::  atom1, atom2
     real( kind = dp ), intent(in) :: rij, r2, rcut
     real( kind = dp ) :: pot, sw, vpair
-    real( kind = dp ), dimension(nLocal) :: particle_pot
     real( kind = dp ), dimension(3) :: f1
     real( kind = dp ), intent(in), dimension(3) :: d
     real( kind = dp ), intent(inout), dimension(3) :: fpair
-
+    real( kind = dp ), intent(inout) :: dfrhodrho_i, dfrhodrho_j 
+    real( kind = dp ), intent(inout) :: rho_i, rho_j 
+    real( kind = dp ), intent(inout):: fshift_i, fshift_j
     logical, intent(in) :: do_pot
 
     real( kind = dp ) :: drdx, drdy, drdz
@@ -536,14 +358,12 @@ contains
     real( kind = dp ) :: Fx,Fy,Fz
     real( kind = dp ) :: pot_temp, vptmp
     real( kind = dp ) :: rcij, vcij
-    real( kind = dp ) :: fshift1, fshift2
     integer :: id1, id2
     integer  :: mytype_atom1
     integer  :: mytype_atom2
     integer  :: atid1, atid2
     !Local Variables
     
-    cleanArrays = .true.
     
     mytype_atom1 = SCList%atidToSCType(atid1)
     mytype_atom2 = SCList%atidTOSCType(atid2)
@@ -560,71 +380,45 @@ contains
     
     call lookupUniformSpline1d(MixingMap(mytype_atom1, mytype_atom2)%V, &
          rij, vptmp, dvpdr)
+
+    dudr = drhodr*(dfrhodrho_i + dfrhodrho_j) + dvpdr
+
+    pot_temp = vptmp - vcij
     
-#ifdef IS_MPI
-       dudr = drhodr*(dfrhodrho_row(atom1) + dfrhodrho_col(atom2)) + dvpdr
-#else
-       dudr = drhodr*(dfrhodrho(atom1)+ dfrhodrho(atom2)) + dvpdr
-#endif
-              
-       pot_temp = vptmp - vcij
-
-       vpair = vpair + pot_temp
+    vpair = vpair + pot_temp
  
-       fx = dudr * drdx
-       fy = dudr * drdy
-       fz = dudr * drdz
+    fx = dudr * drdx
+    fy = dudr * drdy
+    fz = dudr * drdz
 
-#ifdef IS_MPI
-       if (do_pot) then
+    if (do_pot) then
 
-          ! particle_pot is the difference between the full potential 
-          ! and the full potential without the presence of a particular
-          ! particle (atom1).
-          !
-          ! This reduces the density at other particle locations, so
-          ! we need to recompute the density at atom2 assuming atom1
-          ! didn't contribute.  This then requires recomputing the
-          ! density functional for atom2 as well.
-          !
-          ! Most of the particle_pot heavy lifting comes from the
-          ! pair interaction, and will be handled by vpair.
-
-          fshift1 = -SCList%SCTypes(mytype_atom1)%c * &
-               SCList%SCTypes(mytype_atom1)%epsilon * &
-               sqrt(rho_row(atom1)-rhtmp)
-          fshift2 = -SCList%SCTypes(mytype_atom2)%c * &
-               SCList%SCTypes(mytype_atom2)%epsilon * &
-               sqrt(rho_col(atom2)-rhtmp)
-          
-          ppot_row(atom1) = ppot_row(atom1) - frho_row(atom2) + fshift2
-          ppot_col(atom2) = ppot_col(atom2) - frho_col(atom1) + fshift1
-
-       end if
-
-
-#else
-
-       if(do_pot) then
-
-          fshift1 = -SCList%SCTypes(mytype_atom1)%c * &
-               SCList%SCTypes(mytype_atom1)%epsilon * &
-               sqrt(rho(atom1)-rhtmp)
-          fshift2 = -SCList%SCTypes(mytype_atom2)%c * &
-               SCList%SCTypes(mytype_atom2)%epsilon * &
-               sqrt(rho(atom2)-rhtmp)
-          
-          particle_pot(atom1) = particle_pot(atom1) - frho(atom2) + fshift2
-          particle_pot(atom2) = particle_pot(atom2) - frho(atom1) + fshift1
-          
-       end if
+       ! particle_pot is the difference between the full potential 
+       ! and the full potential without the presence of a particular
+       ! particle (atom1).
+       !
+       ! This reduces the density at other particle locations, so
+       ! we need to recompute the density at atom2 assuming atom1
+       ! didn't contribute.  This then requires recomputing the
+       ! density functional for atom2 as well.
+       !
+       ! Most of the particle_pot heavy lifting comes from the
+       ! pair interaction, and will be handled by vpair.
        
-#endif
-       pot = pot + pot_temp
-              
-       f1(1) = f1(1) + fx
-       f1(2) = f1(2) + fy
-       f1(3) = f1(3) + fz
+       fshift_i = -SCList%SCTypes(mytype_atom1)%c * &
+            SCList%SCTypes(mytype_atom1)%epsilon * &
+            sqrt(rho_i-rhtmp)
+       fshift_j = -SCList%SCTypes(mytype_atom2)%c * &
+            SCList%SCTypes(mytype_atom2)%epsilon * &
+            sqrt(rho_j-rhtmp)     
+    end if
+
+
+    pot = pot + pot_temp
+    
+    f1(1) = f1(1) + fx
+    f1(2) = f1(2) + fy
+    f1(3) = f1(3) + fz
 
   end subroutine do_sc_pair
 end module suttonchen

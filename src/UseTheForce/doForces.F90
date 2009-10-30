@@ -1,5 +1,5 @@
 !!
-!! Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
+!! Copyright (c) 2005, 2009 The University of Notre Dame. All Rights Reserved.
 !!
 !! The University of Notre Dame grants you ("Licensee") a
 !! non-exclusive, royalty free, license to use, modify and
@@ -45,7 +45,7 @@
 
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: doForces.F90,v 1.103 2009-10-23 18:41:08 gezelter Exp $, $Date: 2009-10-23 18:41:08 $, $Name: not supported by cvs2svn $, $Revision: 1.103 $
+!! @version $Id: doForces.F90,v 1.104 2009-10-30 16:38:48 chuckv Exp $, $Date: 2009-10-30 16:38:48 $, $Name: not supported by cvs2svn $, $Revision: 1.104 $
 
 
 module doForces
@@ -778,15 +778,6 @@ contains
 
     haveSaneForceField = .true.
 
-    if (FF_uses_EAM) then
-       call init_EAM_FF(my_status) 
-       if (my_status /= 0) then
-          write(default_error, *) "init_EAM_FF returned a bad status"
-          thisStat = -1
-          haveSaneForceField = .false.
-          return
-       end if
-    endif
 
     if (.not. haveNeighborList) then
        !! Create neighbor lists
@@ -1502,6 +1493,9 @@ contains
 
     real( kind = dp), dimension(3) :: f1, t1, t2
     real( kind = dp), dimension(9) :: A1, A2, eF1, eF2
+    real( kind = dp) :: dfrhodrho_i, dfrhodrho_j
+    real( kind = dp) :: rho_i, rho_j
+    real( kind = dp) :: fshift_i, fshift_j 
     real( kind = dp) :: p_vdw, p_elect, p_hb, p_met
     integer :: atid_i, atid_j, id1, id2, idx
     integer :: k
@@ -1549,8 +1543,24 @@ contains
 
 #endif
 
+    
     iHash = InteractionHash(atid_i, atid_j)
 
+!! For the metallic potentials, we need to pass dF[rho]/drho since the pair calculation routines no longer are aware of parallel.
+    if ( (iand(iHash, EAM_PAIR).ne.0) .or. (iand(iHash, SC_PAIR).ne.0)  ) then       
+#ifdef IS_MPI
+       dfrhodrho_i = dfrhodrho_row(i)
+       dfrhodrho_j = dfrhodrho_col(j)
+       rho_i = rho_row(i)
+       rho_j = rho_col(j)
+#else
+       dfrhodrho_i = dfrhodrho(i)
+       dfrhodrho_j = dfrhodrho(j)
+       rho_i = rho(i)
+       rho_j = rho(j)
+#endif
+    end if
+    
     vdwMult = vdwScale(topoDist)
     electroMult = electrostaticScale(topoDist)
 
@@ -1585,8 +1595,8 @@ contains
     endif
     
     if ( iand(iHash, EAM_PAIR).ne.0 ) then       
-       call do_eam_pair(i, j, atid_i, atid_j, d, r, rijsq, sw, vpair, particle_pot, &
-            fpair, p_met, f1, do_pot)
+       call do_eam_pair(i, j, atid_i, atid_j, d, r, rijsq, sw, vpair, &
+            fpair, p_met, f1, rho_i, rho_j, dfrhodrho_i, dfrhodrho_j,fshift_i,fshift_j, do_pot)
     endif
     
     if ( iand(iHash, SHAPE_PAIR).ne.0 ) then       
@@ -1600,8 +1610,8 @@ contains
     endif
 
     if ( iand(iHash, SC_PAIR).ne.0 ) then       
-       call do_SC_pair(i, j, atid_i, atid_j, d, r, rijsq, rcut, sw, vpair, particle_pot, &
-            fpair, p_met, f1, do_pot)
+       call do_SC_pair(i, j, atid_i, atid_j, d, r, rijsq, rcut, sw, vpair, &
+            fpair, p_met, f1, rho_i, rho_j, dfrhodrho_i, dfrhodrho_j, fshift_i, fshift_j, do_pot)
     endif
      
     if ( iand(iHash, MNM_PAIR).ne.0 ) then       
@@ -1630,6 +1640,23 @@ contains
        t_Row(idx,i) = t_Row(idx,i) + t1(idx)
        t_Col(idx,j) = t_Col(idx,j) + t2(idx)
     enddo
+       ! particle_pot is the difference between the full potential 
+       ! and the full potential without the presence of a particular
+       ! particle (atom1).
+       !
+       ! This reduces the density at other particle locations, so
+       ! we need to recompute the density at atom2 assuming atom1
+       ! didn't contribute.  This then requires recomputing the
+       ! density functional for atom2 as well.
+       !
+       ! Most of the particle_pot heavy lifting comes from the
+       ! pair interaction, and will be handled by vpair. Parallel version.
+       
+    if ( (iand(iHash, EAM_PAIR).ne.0) .or. (iand(iHash, SC_PAIR).ne.0)  ) then       
+       ppot_row(i) = ppot_row(i) - frho_row(j) + fshift_j
+       ppot_col(j) = ppot_col(j) - frho_col(i) + fshift_i
+    end if
+    
 #else
     id1 = i
     id2 = j
@@ -1646,6 +1673,24 @@ contains
        t(idx,i) = t(idx,i) + t1(idx)
        t(idx,j) = t(idx,j) + t2(idx)
     enddo
+       ! particle_pot is the difference between the full potential 
+       ! and the full potential without the presence of a particular
+       ! particle (atom1).
+       !
+       ! This reduces the density at other particle locations, so
+       ! we need to recompute the density at atom2 assuming atom1
+       ! didn't contribute.  This then requires recomputing the
+       ! density functional for atom2 as well.
+       !
+       ! Most of the particle_pot heavy lifting comes from the
+       ! pair interaction, and will be handled by vpair. NonParallel version.
+       
+    if ( (iand(iHash, EAM_PAIR).ne.0) .or. (iand(iHash, SC_PAIR).ne.0)  ) then       
+       particle_pot(i) = particle_pot(i) - frho(j) + fshift_j
+       particle_pot(j) = particle_pot(j) - frho(i) + fshift_i
+    end if
+
+
 #endif
     
     if (molMembershipList(id1) .ne. molMembershipList(id2)) then
@@ -1678,7 +1723,7 @@ contains
     real ( kind = dp ), intent(inout)    :: rijsq, rcijsq, rCut
     real ( kind = dp )                :: r, rc
     real ( kind = dp ), intent(inout) :: d(3), dc(3)
-
+    real ( kind = dp ), rho_i_at_j, rho_j_at_i
     integer :: atid_i, atid_j, iHash
 
     r = sqrt(rijsq)
@@ -1690,16 +1735,32 @@ contains
     atid_i = atid(i)
     atid_j = atid(j)   
 #endif
-
+    rho_i_at_j = 0.0_dp
+    rho_j_at_i = 0.0_dp
+    
     iHash = InteractionHash(atid_i, atid_j)
 
     if ( iand(iHash, EAM_PAIR).ne.0 ) then       
-            call calc_EAM_prepair_rho(i, j, atid_i, atid_j, d, r, rijsq)
+            call calc_EAM_prepair_rho(i, j, atid_i, atid_j, d, r, rho_i_at_j, rho_j_at_i, rijsq)
     endif
 
     if ( iand(iHash, SC_PAIR).ne.0 ) then       
-            call calc_SC_prepair_rho(i, j, atid_i, atid_j, d, r, rijsq, rcut )
+            call calc_SC_prepair_rho(i, j, atid_i, atid_j, d, r, rijsq, rho_i_at_j, rho_j_at_i, rcut )
     endif
+
+
+
+    if ( iand(iHash, EAM_PAIR).ne.0 .or. iand(iHash, SC_PAIR).ne.0  ) then       
+#ifdef IS_MPI
+       rho_col(j) = rho_col(j) + rho_i_at_j
+       rho_row(i) = rho_row(i) + rho_j_at_i
+#else
+       rho(j) = rho(j) + rho_i_at_j
+       rho(i) = rho(i) + rho_j_at_i
+#endif       
+    endif
+    
+    
     
   end subroutine do_prepair
 
@@ -1708,13 +1769,54 @@ contains
     integer :: nlocal
     real( kind = dp ),dimension(LR_POT_TYPES) :: pot
     real( kind = dp ),dimension(nlocal) :: particle_pot
+    integer :: sc_err = 0
 
+#ifdef IS_MPI
+    if ((FF_uses_EAM .and. SIM_uses_EAM) .or. (FF_uses_EAM .and. SIM_uses_EAM)) then
+       call scatter(rho_row,rho,plan_atom_row,sc_err)
+       if (sc_err /= 0 ) then
+          call handleError("do_preforce()", "Error scattering rho_row into rho")
+       endif
+       call scatter(rho_col,rho_tmp,plan_atom_col,sc_err)
+       if (sc_err /= 0 ) then
+          call handleError("do_preforce()", "Error scattering rho_col into rho")          
+       endif
+       rho(1:nlocal) = rho(1:nlocal) + rho_tmp(1:nlocal)
+    end if
+#endif
+
+
+    
     if (FF_uses_EAM .and. SIM_uses_EAM) then
        call calc_EAM_preforce_Frho(nlocal, pot(METALLIC_POT), particle_pot)
     endif
     if (FF_uses_SC .and. SIM_uses_SC) then
        call calc_SC_preforce_Frho(nlocal, pot(METALLIC_POT), particle_pot)
     endif
+
+#ifdef IS_MPI
+    if ((FF_uses_EAM .and. SIM_uses_EAM) .or. (FF_uses_EAM .and. SIM_uses_EAM)) then
+    !! communicate f(rho) and derivatives back into row and column arrays
+       call gather(frho,frho_row,plan_atom_row, sc_err)
+       if (sc_err /=  0) then
+          call handleError("do_preforce()","MPI gather frho_row failure")
+       endif
+       call gather(dfrhodrho,dfrhodrho_row,plan_atom_row, sc_err)
+       if (sc_err /=  0) then
+          call handleError("do_preforce()","MPI gather dfrhodrho_row failure")
+       endif
+       call gather(frho,frho_col,plan_atom_col, sc_err)
+       if (sc_err /=  0) then
+          call handleError("do_preforce()","MPI gather frho_col failure")
+       endif
+       call gather(dfrhodrho,dfrhodrho_col,plan_atom_col, sc_err)
+       if (sc_err /=  0) then
+          call handleError("do_preforce()","MPI gather dfrhodrho_col failure")
+       endif
+    end if
+#endif
+
+
   end subroutine do_preforce
 
 
@@ -1811,11 +1913,18 @@ contains
     pot_Temp = 0.0_dp
     ppot_Temp = 0.0_dp
 
+    frho_row = 0.0_dp
+    frho_col = 0.0_dp
+    rho_row  = 0.0_dp
+    rho_col  = 0.0_dp
+    rho_tmp  = 0.0_dp
+    dfrhodrho_row = 0.0_dp
+    dfrhodrho_col = 0.0_dp
+    
 #endif
-
-    if (FF_uses_EAM .and. SIM_uses_EAM) then
-       call clean_EAM()
-    endif
+    rho = 0.0_dp
+    frho = 0.0_dp
+    dfrhodrho = 0.0_dp
 
   end subroutine zero_work_arrays
 

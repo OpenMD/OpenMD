@@ -1,5 +1,5 @@
 !!
-!! Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
+!! Copyright (c) 2005, 2009 The University of Notre Dame. All Rights Reserved.
 !!
 !! The University of Notre Dame grants you ("Licensee") a
 !! non-exclusive, royalty free, license to use, modify and
@@ -81,6 +81,18 @@ module force_globals
   real( kind = dp ), allocatable, dimension(:),   public :: ppot_Col
   real( kind = dp ), allocatable, dimension(:),   public :: ppot_Temp
 
+
+  !! Arrays for MPI storage with metallic potentials
+  real( kind = dp),save, dimension(:), allocatable, public :: dfrhodrho_col
+  real( kind = dp),save, dimension(:), allocatable, public :: dfrhodrho_row
+  real( kind = dp),save, dimension(:), allocatable, public :: frho_row
+  real( kind = dp),save, dimension(:), allocatable, public :: frho_col
+  real( kind = dp),save, dimension(:), allocatable, public :: rho_row
+  real( kind = dp),save, dimension(:), allocatable, public :: rho_col
+  real( kind = dp),save, dimension(:), allocatable, public :: rho_tmp
+
+
+
   integer, allocatable, dimension(:), public :: atid_Row
   integer, allocatable, dimension(:), public :: atid_Col
 #endif
@@ -91,6 +103,12 @@ module force_globals
   real(kind = dp), dimension(9), public :: tau_Temp = 0.0_dp
   real(kind = dp), public :: virial_Temp = 0.0_dp
 
+!! Metal potentials
+  real( kind = dp), dimension(:), allocatable, public :: frho
+  real( kind = dp), dimension(:), allocatable, public :: rho
+  real( kind = dp), dimension(:), allocatable, public :: dfrhodrho
+
+  
   public :: InitializeForceGlobals
 
 contains
@@ -274,6 +292,47 @@ contains
        return
     endif
 
+!! Array allocation for metallic potentials
+    allocate(rho_tmp(nlocal),stat=alloc_stat)
+    if (alloc_stat /= 0) then 
+       thisStat = -1
+       return
+    end if
+
+    allocate(frho_row(nAtomsInRow),stat=alloc_stat)
+    if (alloc_stat /= 0) then 
+       thisStat = -1
+       return
+    end if
+    allocate(rho_row(nAtomsInRow),stat=alloc_stat)
+    if (alloc_stat /= 0) then 
+       thisStat = -1
+       return
+    end if
+    allocate(dfrhodrho_row(nAtomsInRow),stat=alloc_stat)
+    if (alloc_stat /= 0) then 
+       thisStat = -1
+       return
+    end if
+
+    ! Now do column arrays
+
+    allocate(frho_col(nAtomsInCol),stat=alloc_stat)
+    if (alloc_stat /= 0) then 
+       thisStat = -1
+       return
+    end if
+    allocate(rho_col(nAtomsInCol),stat=alloc_stat)
+    if (alloc_stat /= 0) then 
+       thisStat = -1
+       return
+    end if
+    allocate(dfrhodrho_col(nAtomsInCol),stat=alloc_stat)
+    if (alloc_stat /= 0) then 
+       thisStat = -1
+       return
+    end if
+    
 #else
 
     allocate(atid(nlocal),stat=alloc_stat)
@@ -281,9 +340,26 @@ contains
        thisStat = -1
        return
     end if
-
 #endif
 
+    allocate(frho(nlocal),stat=alloc_stat)
+    if (alloc_stat /= 0 ) then
+       thisStat = -1
+       return
+    end if
+    allocate(rho(nlocal),stat=alloc_stat)
+    if (alloc_stat /= 0 ) then
+       thisStat = -1
+       return
+    end if
+    allocate(dfrhodrho(nlocal),stat=alloc_stat)
+    if (alloc_stat /= 0 ) then
+       thisStat = -1
+       return
+    end if
+
+
+    
     allocate(rf(ndim,nlocal),stat=alloc_stat)
     if (alloc_stat /= 0 ) then
        thisStat = -1
@@ -298,36 +374,50 @@ contains
 
     !We free in the opposite order in which we allocate in.
 
-    if (allocated(rf))         deallocate(rf)
+    if (allocated(rf))           deallocate(rf)
 #ifdef IS_MPI
-    if (allocated(ppot_Temp))  deallocate(ppot_Temp)
-    if (allocated(ppot_Col))   deallocate(ppot_Col)
-    if (allocated(ppot_Row))   deallocate(ppot_Row)    
-    if (allocated(rf_Temp))    deallocate(rf_Temp)
-    if (allocated(rf_Col))     deallocate(rf_Col)
-    if (allocated(rf_Row))     deallocate(rf_Row)    
-    if (allocated(atid_Col))   deallocate(atid_Col)
-    if (allocated(atid_Row))   deallocate(atid_Row)
-    if (allocated(atid))       deallocate(atid)
-    if (allocated(t_Temp))     deallocate(t_Temp)
-    if (allocated(t_Col))      deallocate(t_Col)
-    if (allocated(t_Row))      deallocate(t_Row)
-    if (allocated(f_Temp))     deallocate(f_Temp)
-    if (allocated(f_Col))      deallocate(f_Col)
-    if (allocated(f_Row))      deallocate(f_Row)
-    if (allocated(pot_Temp))   deallocate(pot_Temp)
-    if (allocated(pot_Col))    deallocate(pot_Col)
-    if (allocated(pot_Row))    deallocate(pot_Row)
-    if (allocated(A_Col))      deallocate(A_Col)
-    if (allocated(A_Row))      deallocate(A_Row)
-    if (allocated(eFrame_Col))  deallocate(eFrame_Col)
-    if (allocated(eFrame_Row))  deallocate(eFrame_Row)
-    if (allocated(q_group_Col)) deallocate(q_group_Col)
-    if (allocated(q_group_Row)) deallocate(q_group_Row)    
-    if (allocated(q_Col))       deallocate(q_Col)
-    if (allocated(q_Row))       deallocate(q_Row)    
+    if (allocated(ppot_Temp))     deallocate(ppot_Temp)
+    if (allocated(ppot_Col))      deallocate(ppot_Col)
+    if (allocated(ppot_Row))      deallocate(ppot_Row)    
+    if (allocated(rf_Temp))       deallocate(rf_Temp)
+    if (allocated(rf_Col))        deallocate(rf_Col)
+    if (allocated(rf_Row))        deallocate(rf_Row)    
+    if (allocated(atid_Col))      deallocate(atid_Col)
+    if (allocated(atid_Row))      deallocate(atid_Row)
+    if (allocated(atid))          deallocate(atid)
+    if (allocated(t_Temp))        deallocate(t_Temp)
+    if (allocated(t_Col))         deallocate(t_Col)
+    if (allocated(t_Row))         deallocate(t_Row)
+    if (allocated(f_Temp))        deallocate(f_Temp)
+    if (allocated(f_Col))         deallocate(f_Col)
+    if (allocated(f_Row))         deallocate(f_Row)
+    if (allocated(pot_Temp))      deallocate(pot_Temp)
+    if (allocated(pot_Col))       deallocate(pot_Col)
+    if (allocated(pot_Row))       deallocate(pot_Row)
+    if (allocated(A_Col))         deallocate(A_Col)
+    if (allocated(A_Row))         deallocate(A_Row)
+    if (allocated(eFrame_Col))    deallocate(eFrame_Col)
+    if (allocated(eFrame_Row))    deallocate(eFrame_Row)
+    if (allocated(q_group_Col))   deallocate(q_group_Col)
+    if (allocated(q_group_Row))   deallocate(q_group_Row)    
+    if (allocated(q_Col))         deallocate(q_Col)
+    if (allocated(q_Row))         deallocate(q_Row)    
+
+    if (allocated(rho_tmp))       deallocate(rho_tmp)    
+    if (allocated(frho_row))      deallocate(frho_row)    
+    if (allocated(rho_row))       deallocate(rho_row)    
+    if (allocated(dfrhodrho_row)) deallocate(dfrhodrho_row)    
+    if (allocated(frho_col))      deallocate(frho_col)    
+    if (allocated(rho_col))       deallocate(rho_col)    
+    if (allocated(dfrhodrho_col)) deallocate(dfrhodrho_col)    
+
+    
 #else    
     if (allocated(atid))       deallocate(atid)    
+    if (allocated(rho))        deallocate(rho)    
+    if (allocated(frho))       deallocate(frho)    
+    if (allocated(dfrhodrho))  deallocate(dfrhodrho)    
+
 #endif
 
   end subroutine FreeForceGlobals

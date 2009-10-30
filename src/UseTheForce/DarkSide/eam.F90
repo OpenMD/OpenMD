@@ -1,5 +1,5 @@
 !!
-!! Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
+!! Copyright (c) 2005, 2009 The University of Notre Dame. All Rights Reserved.
 !!
 !! The University of Notre Dame grants you ("Licensee") a
 !! non-exclusive, royalty free, license to use, modify and
@@ -38,7 +38,6 @@
 !! University of Notre Dame has been advised of the possibility of
 !! such damages.
 !!
-
 module eam
   use definitions
   use simulation
@@ -47,9 +46,6 @@ module eam
   use atype_module
   use vector_class
   use interpolation
-#ifdef IS_MPI
-  use mpiSimulation
-#endif
   implicit none
   PRIVATE
 #define __FORTRAN90
@@ -79,21 +75,6 @@ module eam
      type(cubicSpline) :: phi
   end type EAMtype
 
-  !! Arrays for derivatives used in force calculation
-  real( kind = dp), dimension(:), allocatable :: frho
-  real( kind = dp), dimension(:), allocatable :: rho
-  real( kind = dp), dimension(:), allocatable :: dfrhodrho
-
-  !! Arrays for MPI storage
-#ifdef IS_MPI
-  real( kind = dp),save, dimension(:), allocatable :: dfrhodrho_col
-  real( kind = dp),save, dimension(:), allocatable :: dfrhodrho_row
-  real( kind = dp),save, dimension(:), allocatable :: frho_row
-  real( kind = dp),save, dimension(:), allocatable :: frho_col
-  real( kind = dp),save, dimension(:), allocatable :: rho_row
-  real( kind = dp),save, dimension(:), allocatable :: rho_col
-  real( kind = dp),save, dimension(:), allocatable :: rho_tmp
-#endif
 
   type, private :: EAMTypeList
      integer           :: n_eam_types = 0
@@ -108,13 +89,11 @@ module eam
   !! standard eam stuff  
 
 
-  public :: init_EAM_FF
   public :: setCutoffEAM
   public :: do_eam_pair
   public :: newEAMtype
   public :: calc_eam_prepair_rho
   public :: calc_eam_preforce_Frho
-  public :: clean_EAM
   public :: destroyEAMTypes
   public :: getEAMCut
   public :: lookupEAMSpline
@@ -219,127 +198,12 @@ contains
     cutValue = EAMList%EAMParams(eamID)%eam_rcut
   end function getEAMCut
 
-  subroutine init_EAM_FF(status)
-    integer :: status
-    integer :: i,j
-    real(kind=dp) :: current_rcut_max
-#ifdef IS_MPI
-    integer :: nAtomsInRow
-    integer :: nAtomsInCol
-#endif
-    integer :: alloc_stat
-    integer :: number_r, number_rho
-
-    status = 0
-    if (EAMList%currentAddition == 0) then
-       call handleError("init_EAM_FF","No members in EAMList")
-       status = -1
-       return
-    end if
-    
-    !! Allocate arrays for force calculation
-    
-#ifdef IS_MPI
-    nAtomsInRow = getNatomsInRow(plan_atom_row)
-    nAtomsInCol = getNatomsInCol(plan_atom_col)
-#endif
-
-    if (allocated(frho)) deallocate(frho)
-    allocate(frho(nlocal),stat=alloc_stat)
-    if (alloc_stat /= 0) then 
-       status = -1
-       return
-    end if
-
-    if (allocated(rho)) deallocate(rho)
-    allocate(rho(nlocal),stat=alloc_stat)
-    if (alloc_stat /= 0) then 
-       status = -1
-       return
-    end if
-
-    if (allocated(dfrhodrho)) deallocate(dfrhodrho)
-    allocate(dfrhodrho(nlocal),stat=alloc_stat)
-    if (alloc_stat /= 0) then 
-       status = -1
-       return
-    end if
-
-#ifdef IS_MPI
-
-    if (allocated(rho_tmp)) deallocate(rho_tmp)
-    allocate(rho_tmp(nlocal),stat=alloc_stat)
-    if (alloc_stat /= 0) then 
-       status = -1
-       return
-    end if
-
-    if (allocated(frho_row)) deallocate(frho_row)
-    allocate(frho_row(nAtomsInRow),stat=alloc_stat)
-    if (alloc_stat /= 0) then 
-       status = -1
-       return
-    end if
-    if (allocated(rho_row)) deallocate(rho_row)
-    allocate(rho_row(nAtomsInRow),stat=alloc_stat)
-    if (alloc_stat /= 0) then 
-       status = -1
-       return
-    end if
-    if (allocated(dfrhodrho_row)) deallocate(dfrhodrho_row)
-    allocate(dfrhodrho_row(nAtomsInRow),stat=alloc_stat)
-    if (alloc_stat /= 0) then 
-       status = -1
-       return
-    end if
-
-    ! Now do column arrays
-
-    if (allocated(frho_col)) deallocate(frho_col)
-    allocate(frho_col(nAtomsInCol),stat=alloc_stat)
-    if (alloc_stat /= 0) then 
-       status = -1
-       return
-    end if
-    if (allocated(rho_col)) deallocate(rho_col)
-    allocate(rho_col(nAtomsInCol),stat=alloc_stat)
-    if (alloc_stat /= 0) then 
-       status = -1
-       return
-    end if
-    if (allocated(dfrhodrho_col)) deallocate(dfrhodrho_col)
-    allocate(dfrhodrho_col(nAtomsInCol),stat=alloc_stat)
-    if (alloc_stat /= 0) then 
-       status = -1
-       return
-    end if
-
-#endif
-
-  end subroutine init_EAM_FF
 
   subroutine setCutoffEAM(rcut)
     real(kind=dp) :: rcut
     EAM_rcut = rcut
   end subroutine setCutoffEAM
 
-  subroutine clean_EAM()
-
-    ! clean non-IS_MPI first
-    frho = 0.0_dp
-    rho  = 0.0_dp
-    dfrhodrho = 0.0_dp
-    ! clean MPI if needed
-#ifdef IS_MPI
-    frho_row = 0.0_dp
-    frho_col = 0.0_dp
-    rho_row  = 0.0_dp
-    rho_col  = 0.0_dp
-    rho_tmp  = 0.0_dp
-    dfrhodrho_row = 0.0_dp
-    dfrhodrho_col = 0.0_dp
-#endif
-  end subroutine clean_EAM
 
   subroutine deallocate_EAMType(thisEAMType)
     type (EAMtype), pointer :: thisEAMType
@@ -352,15 +216,15 @@ contains
   end subroutine deallocate_EAMType
 
   !! Calculates rho_r
-  subroutine calc_eam_prepair_rho(atom1,atom2,Atid1,Atid2,d,r,rijsq)
+  subroutine calc_eam_prepair_rho(atom1,atom2,Atid1,Atid2,d,r,rho_i_at_j, rho_j_at_i, rijsq)
     integer :: atom1, atom2, Atid1, Atid2
     real(kind = dp), dimension(3) :: d
     real(kind = dp), intent(inout)               :: r
     real(kind = dp), intent(inout)               :: rijsq
     ! value of electron density rho do to atom i at atom j
-    real(kind = dp) :: rho_i_at_j
+    real(kind = dp), intent(inout) :: rho_i_at_j
     ! value of electron density rho do to atom j at atom i
-    real(kind = dp) :: rho_j_at_i
+    real(kind = dp), intent(inout) :: rho_j_at_i
     integer :: eam_err
    
     integer :: myid_atom1 ! EAM atid
@@ -376,23 +240,8 @@ contains
        call lookupEAMSpline(EAMList%EAMParams(myid_atom1)%rho, r, &
             rho_i_at_j)
 
-#ifdef  IS_MPI
-       rho_col(atom2) = rho_col(atom2) + rho_i_at_j
-#else
-       rho(atom2) = rho(atom2) + rho_i_at_j
-#endif
-    endif
-
-    if (r.lt.EAMList%EAMParams(myid_atom2)%eam_rcut) then
-
        call lookupEAMSpline(EAMList%EAMParams(myid_atom2)%rho, r, &
             rho_j_at_i)
-
-#ifdef  IS_MPI
-       rho_row(atom1) = rho_row(atom1) + rho_j_at_i
-#else
-       rho(atom1) = rho(atom1) + rho_j_at_i
-#endif
     endif
   end subroutine calc_eam_prepair_rho
 
@@ -408,24 +257,7 @@ contains
     integer :: atype1
     integer :: me, atid1
 
-    cleanme = .true.
-    !! Scatter the electron density from  pre-pair calculation back to 
-    !! local atoms
-#ifdef IS_MPI
-    call scatter(rho_row,rho,plan_atom_row,eam_err)
-    if (eam_err /= 0 ) then
-       write(errMsg,*) " Error scattering rho_row into rho"
-       call handleError(RoutineName,errMesg)
-    endif
-    call scatter(rho_col,rho_tmp,plan_atom_col,eam_err)
-    if (eam_err /= 0 ) then
-       write(errMsg,*) " Error scattering rho_col into rho"
-       call handleError(RoutineName,errMesg)
-    endif
-
-    rho(1:nlocal) = rho(1:nlocal) + rho_tmp(1:nlocal)
-#endif
-
+!    cleanme = .true.
     !! Calculate F(rho) and derivative 
     do atom = 1, nlocal
        atid1 = atid(atom)
@@ -441,40 +273,21 @@ contains
 
     enddo
 
-#ifdef IS_MPI
-    !! communicate f(rho) and derivatives back into row and column arrays
-    call gather(frho,frho_row,plan_atom_row, eam_err)
-    if (eam_err /=  0) then
-       call handleError("cal_eam_forces()","MPI gather frho_row failure")
-    endif
-    call gather(dfrhodrho,dfrhodrho_row,plan_atom_row, eam_err)
-    if (eam_err /=  0) then
-       call handleError("cal_eam_forces()","MPI gather dfrhodrho_row failure")
-    endif
-    call gather(frho,frho_col,plan_atom_col, eam_err)
-    if (eam_err /=  0) then
-       call handleError("cal_eam_forces()","MPI gather frho_col failure")
-    endif
-    call gather(dfrhodrho,dfrhodrho_col,plan_atom_col, eam_err)
-    if (eam_err /=  0) then
-       call handleError("cal_eam_forces()","MPI gather dfrhodrho_col failure")
-    endif
-#endif
-
-
   end subroutine calc_eam_preforce_Frho
   
   !! Does EAM pairwise Force calculation.  
-  subroutine do_eam_pair(atom1, atom2, atid1, atid2, d, rij, r2, sw, vpair, particle_pot, &
-       fpair, pot, f1, do_pot)
+  subroutine do_eam_pair(atom1, atom2, atid1, atid2, d, rij, r2, sw, vpair, &
+       fpair, pot, f1, rho_i, rho_j, dfrhodrho_i, dfrhodrho_j,fshift_i,fshift_j, do_pot)
     !Arguments    
     integer, intent(in) ::  atom1, atom2, atid1, atid2
     real( kind = dp ), intent(in) :: rij, r2
     real( kind = dp ) :: pot, sw, vpair
-    real( kind = dp ), dimension(nLocal) :: particle_pot
     real( kind = dp ), dimension(3) :: f1
     real( kind = dp ), intent(in), dimension(3) :: d
     real( kind = dp ), intent(inout), dimension(3) :: fpair
+    real( kind = dp ), intent(inout) :: dfrhodrho_i, dfrhodrho_j
+    real( kind = dp ), intent(inout) :: rho_i, rho_j
+    real( kind = dp ), intent(inout):: fshift_i, fshift_j
 
     logical, intent(in) :: do_pot
 
@@ -487,7 +300,7 @@ contains
     real( kind = dp ) :: drhoidr, drhojdr
     real( kind = dp ) :: Fx, Fy, Fz
     real( kind = dp ) :: r, phb
-    real( kind = dp ) :: fshift1, fshift2, u1, u2
+    real( kind = dp ) :: u1, u2
 
     integer :: id1, id2
     integer  :: mytype_atom1
@@ -554,21 +367,14 @@ contains
        drhoidr = drha
        drhojdr = drhb
 
-#ifdef IS_MPI
-       dudr = drhojdr*dfrhodrho_row(atom1)+drhoidr*dfrhodrho_col(atom2) &
-            + dvpdr
+       dudr = drhojdr*dfrhodrho_i + drhoidr*dfrhodrho_i + dvpdr 
 
-#else
-       dudr = drhojdr*dfrhodrho(atom1)+drhoidr*dfrhodrho(atom2) &
-            + dvpdr
-#endif
 
        fx = dudr * drdx
        fy = dudr * drdy
        fz = dudr * drdz
 
 
-#ifdef IS_MPI
        if (do_pot) then
           ! particle_pot is the difference between the full potential 
           ! and the full potential without the presence of a particular
@@ -583,45 +389,14 @@ contains
           ! pair interaction, and will be handled by vpair.
 
           call lookupEAMSpline1d(EAMList%EAMParams(mytype_atom1)%F, &
-               rho_row(atom1)-rhb, &
-               fshift1, u1)
+               rho_i-rhb, &
+               fshift_i, u1)
           call lookupEAMSpline1d(EAMList%EAMParams(mytype_atom2)%F, &
-               rho_col(atom2)-rha, &
-               fshift2, u2)
+               rho_j-rha, &
+               fshift_j, u2)
           
-          ppot_Row(atom1) = ppot_Row(atom1) - frho_row(atom2) + fshift2
-          ppot_Col(atom2) = ppot_Col(atom2) - frho_col(atom1) + fshift1
 
        end if
-
-#else
-
-       if(do_pot) then
-          ! particle_pot is the difference between the full potential 
-          ! and the full potential without the presence of a particular
-          ! particle (atom1).
-          !
-          ! This reduces the density at other particle locations, so
-          ! we need to recompute the density at atom2 assuming atom1
-          ! didn't contribute.  This then requires recomputing the
-          ! density functional for atom2 as well.
-          !
-          ! Most of the particle_pot heavy lifting comes from the
-          ! pair interaction, and will be handled by vpair.
-
-          call lookupEAMSpline1d(EAMList%EAMParams(mytype_atom1)%F, &
-               rho(atom1)-rhb, &
-               fshift1, u1)
-          call lookupEAMSpline1d(EAMList%EAMParams(mytype_atom2)%F, &
-               rho(atom2)-rha, &
-               fshift2, u2)
-          
-          particle_pot(atom1) = particle_pot(atom1) - frho(atom2) + fshift2
-          particle_pot(atom2) = particle_pot(atom2) - frho(atom1) + fshift1
-
-       end if
-
-#endif
 
        pot = pot + phab
 

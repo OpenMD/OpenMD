@@ -42,7 +42,7 @@
 
 !! Calculates Metal-Non Metal interactions.
 !! @author Charles F. Vardeman II 
-!! @version $Id: MetalNonMetal.F90,v 1.18 2009-10-23 18:41:08 gezelter Exp $, $Date: 2009-10-23 18:41:08 $, $Name: not supported by cvs2svn $, $Revision: 1.18 $
+!! @version $Id: MetalNonMetal.F90,v 1.19 2009-10-30 16:38:48 chuckv Exp $, $Date: 2009-10-30 16:38:48 $, $Name: not supported by cvs2svn $, $Revision: 1.19 $
 
 
 module MetalNonMetal
@@ -357,7 +357,8 @@ contains
     real(kind = dp) :: da1dx, da1dy, da1dz, da1dux, da1duy, da1duz
     real(kind = dp) :: db1dx, db1dy, db1dz, db1dux, db1duy, db1duz
     real(kind = dp) :: fx, fy, fz, tx, ty, tz, fxl, fyl, fzl
-    real(kind = dp), parameter :: st = sqrt(3.0_dp)
+!    real(kind = dp), parameter :: st = sqrt(3.0_dp)
+    real(kind = dp), parameter :: st = 1.732050807568877
     integer :: atid1, atid2, id1, id2
     logical :: shiftedPot, shiftedFrc
    
