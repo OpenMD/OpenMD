@@ -45,7 +45,7 @@
 
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: doForces.F90,v 1.104 2009-10-30 16:38:48 chuckv Exp $, $Date: 2009-10-30 16:38:48 $, $Name: not supported by cvs2svn $, $Revision: 1.104 $
+!! @version $Id: doForces.F90,v 1.105 2009-11-13 20:18:11 chuckv Exp $, $Date: 2009-11-13 20:18:11 $, $Name: not supported by cvs2svn $, $Revision: 1.105 $
 
 
 module doForces
@@ -1723,7 +1723,7 @@ contains
     real ( kind = dp ), intent(inout)    :: rijsq, rcijsq, rCut
     real ( kind = dp )                :: r, rc
     real ( kind = dp ), intent(inout) :: d(3), dc(3)
-    real ( kind = dp ), rho_i_at_j, rho_j_at_i
+    real ( kind = dp ) :: rho_i_at_j, rho_j_at_i
     integer :: atid_i, atid_j, iHash
 
     r = sqrt(rijsq)
@@ -1772,7 +1772,7 @@ contains
     integer :: sc_err = 0
 
 #ifdef IS_MPI
-    if ((FF_uses_EAM .and. SIM_uses_EAM) .or. (FF_uses_EAM .and. SIM_uses_EAM)) then
+    if ((FF_uses_EAM .and. SIM_uses_EAM) .or. (FF_uses_SC .and. SIM_uses_SC)) then
        call scatter(rho_row,rho,plan_atom_row,sc_err)
        if (sc_err /= 0 ) then
           call handleError("do_preforce()", "Error scattering rho_row into rho")
@@ -1795,7 +1795,7 @@ contains
     endif
 
 #ifdef IS_MPI
-    if ((FF_uses_EAM .and. SIM_uses_EAM) .or. (FF_uses_EAM .and. SIM_uses_EAM)) then
+    if ((FF_uses_EAM .and. SIM_uses_EAM) .or. (FF_uses_SC .and. SIM_uses_SC)) then
     !! communicate f(rho) and derivatives back into row and column arrays
        call gather(frho,frho_row,plan_atom_row, sc_err)
        if (sc_err /=  0) then
