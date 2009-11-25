@@ -1,3 +1,24 @@
+#ifndef _WATER_MD_
+#define _WATER_MD_
+
+molecule{
+  name = "Cl-";
+  
+  atom[0]{
+    type = "Cl-";
+    position(0.0, 0.0, 0.0);
+  }
+}
+
+molecule{
+  name = "Na+";
+  
+  atom[0]{
+    type = "Na+";
+    position(0.0, 0.0, 0.0);
+  }
+}
+
 molecule{
   name = "SSD_E";
   
@@ -39,6 +60,24 @@ molecule{
 }
 
 molecule{
+  name = "TRED";
+  
+  atom[0]{
+    type = "TRED";
+    position( 0.0, 0.0, 0.0 );
+    orientation( 0.0, 0.0, 0.0 );
+  }
+  atom[1]{
+    type = "EP_TRED";
+    position( 0.0, 0.0, 0.5 );
+  }
+
+  rigidBody[0]{
+    members(0, 1);
+  }
+}
+
+molecule{
   name = "TIP3P";
   
   atom[0]{
@@ -53,19 +92,10 @@ molecule{
     type = "H_TIP3P";
     position( 0.0, -0.75695, 0.52032 );
   }
-
   
-  rigidBody[0]{ 
-    
+  rigidBody[0]{     
     members(0, 1, 2);
-  }
-
-  
-  cutoffGroup{
-    
-    members(0, 1, 2);
-  }
-
+  }  
 }
 
 molecule{
@@ -88,17 +118,34 @@ molecule{
     position( 0.0, 0.0, 0.08444 );
   }
   
-  rigidBody[0]{
-    
+  rigidBody[0]{    
     members(0, 1, 2, 3);
-  }
+  }  
+}
 
+molecule{
+  name = "TIP4P-Ew";
   
-  cutoffGroup{
-    
+  atom[0]{
+    type = "O_TIP4P-Ew";
+    position( 0.0, 0.0, -0.06556 );
+  }
+  atom[1]{
+    type = "H_TIP4P-Ew";
+    position( 0.0, 0.75695, 0.52032 );
+  }
+  atom[2]{
+    type = "H_TIP4P-Ew";
+    position( 0.0, -0.75695, 0.52032 );
+  }
+  atom[3]{
+    type = "EP_TIP4P-Ew";
+    position( 0.0, 0.0, 0.05944 );
+  }
+  
+  rigidBody[0]{    
     members(0, 1, 2, 3);
   }
-
 }
 
 molecule{
@@ -126,16 +173,37 @@ molecule{
   }
   
   rigidBody[0]{
-    
     members(0, 1, 2, 3, 4);
   }
+}
 
+molecule{
+  name = "TIP5P-E";
   
-  cutoffGroup{
-    
+  atom[0]{
+    type = "O_TIP5P-E";
+    position( 0.0, 0.0, -0.06556 );
+  }
+  atom[1]{
+    type = "H_TIP5P";
+    position( 0.0, 0.75695, 0.52032 );
+  }
+  atom[2]{
+    type = "H_TIP5P";
+    position( 0.0, -0.75695, 0.52032 );
+  }
+  atom[3]{
+    type = "EP_TIP5P";
+    position( 0.57154, 0.0, -0.46971 );
+  }
+  atom[4]{
+    type = "EP_TIP5P";
+    position( -0.57154, 0.0, -0.46971 );
+  }
+  
+  rigidBody[0]{    
     members(0, 1, 2, 3, 4);
   }
-
 }
 
 molecule{
@@ -154,17 +222,30 @@ molecule{
     position( 0.0, -0.81649, 0.51275 );
   }
   
-  rigidBody[0]{
-    
+  rigidBody[0]{    
     members(0, 1, 2);
   }
+}
 
+molecule{
+  name = "SPC";
   
-  cutoffGroup{
-    
+  atom[0]{
+    type = "O_SPC";
+    position( 0.0, 0.0, -0.06461 );
+  }
+  atom[1]{
+    type = "H_SPC";
+    position( 0.0, 0.81649, 0.51275 );
+  }
+  atom[2]{
+    type = "H_SPC";
+    position( 0.0, -0.81649, 0.51275 );
+  }
+  
+  rigidBody[0]{    
     members(0, 1, 2);
   }
-
 }
 
 molecule{
@@ -176,22 +257,4 @@ molecule{
   }
 }
 
-molecule{
-  name = "OFAKE";
-  
-  atom[0]{
-    type = "O_TIP3P";
-    position( 0.0, 0.0, -0.06556 );
-  }
-}
-
-molecule{
-  name = "HFAKE";
-  
-  atom[0]{
-    type = "H_FAKE";
-    position( 0.0, 0.0, -0.06556 );
-  }
-}
-
-
+#endif

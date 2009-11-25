@@ -75,10 +75,6 @@ molecule{
   rigidBody[0]{
     members(0, 1);
   }
-
-  cutoffGroup{
-    members(0, 1);
-  }
 }
 
 molecule{
@@ -96,18 +92,10 @@ molecule{
     type = "H_TIP3P";
     position( 0.0, -0.75695, 0.52032 );
   }
-
   
-  rigidBody[0]{ 
-    
+  rigidBody[0]{     
     members(0, 1, 2);
-  }
-
-  
-  cutoffGroup{
-    
-    members(0, 1, 2);
-  }
+  }  
 }
 
 molecule{
@@ -130,16 +118,9 @@ molecule{
     position( 0.0, 0.0, 0.08444 );
   }
   
-  rigidBody[0]{
-    
+  rigidBody[0]{    
     members(0, 1, 2, 3);
-  }
-
-  
-  cutoffGroup{
-    
-    members(0, 1, 2, 3);
-  }
+  }  
 }
 
 molecule{
@@ -162,14 +143,7 @@ molecule{
     position( 0.0, 0.0, 0.05944 );
   }
   
-  rigidBody[0]{
-    
-    members(0, 1, 2, 3);
-  }
-
-  
-  cutoffGroup{
-    
+  rigidBody[0]{    
     members(0, 1, 2, 3);
   }
 }
@@ -199,13 +173,6 @@ molecule{
   }
   
   rigidBody[0]{
-    
-    members(0, 1, 2, 3, 4);
-  }
-
-  
-  cutoffGroup{
-    
     members(0, 1, 2, 3, 4);
   }
 }
@@ -234,14 +201,7 @@ molecule{
     position( -0.57154, 0.0, -0.46971 );
   }
   
-  rigidBody[0]{
-    
-    members(0, 1, 2, 3, 4);
-  }
-
-  
-  cutoffGroup{
-    
+  rigidBody[0]{    
     members(0, 1, 2, 3, 4);
   }
 }
@@ -250,26 +210,19 @@ molecule{
   name = "SPCE";
   
   atom[0]{
-    type = "O";
+    type = "O_SPCE";
     position( 0.0, 0.0, -0.06461 );
   }
   atom[1]{
-    type = "H";
+    type = "H_SPCE";
     position( 0.0, 0.81649, 0.51275 );
   }
   atom[2]{
-    type = "H";
+    type = "H_SPCE";
     position( 0.0, -0.81649, 0.51275 );
   }
   
-  rigidBody[0]{
-    
-    members(0, 1, 2);
-  }
-
-  
-  cutoffGroup{
-    
+  rigidBody[0]{    
     members(0, 1, 2);
   }
 }
@@ -290,14 +243,7 @@ molecule{
     position( 0.0, -0.81649, 0.51275 );
   }
   
-  rigidBody[0]{
-    
-    members(0, 1, 2);
-  }
-
-  
-  cutoffGroup{
-    
+  rigidBody[0]{    
     members(0, 1, 2);
   }
 }
