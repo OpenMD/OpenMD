@@ -1,4 +1,4 @@
-<OOPSE version=4>
+<OpenMD version=1>
   <MetaData>
 
 #include "water.md"
@@ -3099,4 +3099,4 @@ electrostaticScreeningMethod = "damped";
       3023    pvqj        10.93905576       -5.767555594        -13.5200058 -5.697990e-03  2.582607e-04  2.312964e-03  7.961729e-01  4.296623e-01 -2.135596e-01 -3.686343e-01  4.902278e-03  5.959249e-03  9.848068e-03
     </StuntDoubles>
   </Snapshot>
-</OOPSE>
+</OpenMD>

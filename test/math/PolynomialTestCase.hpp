@@ -4,7 +4,7 @@
 #include <cppunit/extensions/HelperMacros.h>
 #include "math/Polynomial.hpp"
  
-using namespace oopse;
+using namespace OpenMD;
 
 class PolynomialTestCase : public CPPUNIT_NS::TestFixture {
     CPPUNIT_TEST_SUITE( PolynomialTestCase );

@@ -1,4 +1,4 @@
-! This is the forcefield file for all water models supported by OOPSE.
+! This is the forcefield file for all water models supported by OpenMD.
 !
 
 #AtomTypes

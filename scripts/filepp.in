@@ -21,8 +21,8 @@
 #  Filename     :  $RCSfile: filepp.in,v $
 #  Author       :  $Author: gezelter $
 #  Maintainer   :  Darren Miller: darren@cabaret.demon.co.uk
-#  File version :  $Revision: 1.1 $
-#  Last changed :  $Date: 2005-04-14 21:41:56 $
+#  File version :  $Revision: 1.2 $
+#  Last changed :  $Date: 2009-11-25 20:01:56 $
 #  Description  :  Main program
 #  Licence      :  GNU copyleft
 #
@@ -40,7 +40,6 @@ use strict "vars";
 my $VERSION = '1.7.1';
 
 # list of paths to search for modules, normal Perl list + module dir
-#push(@INC, "/home/maul/gezelter/tim/code/OOPSE-2.0/scripts/filepp-1.7.1/modules/f90dpend/");
 
 # index of keywords supported and functions to deal with them
 my %Keywords = (

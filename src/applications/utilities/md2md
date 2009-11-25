@@ -24,10 +24,10 @@ Example:
 """
 
 __author__ = "Dan Gezelter (gezelter@nd.edu)"
-__version__ = "$Revision: 1.4 $"
-__date__ = "$Date: 2009-10-22 19:12:14 $"
+__version__ = "$Revision: 1.5 $"
+__date__ = "$Date: 2009-11-25 20:01:59 $"
 __copyright__ = "Copyright (c) 2009 by the University of Notre Dame"
-__license__ = "OOPSE"
+__license__ = "OpenMD"
 
 import sys
 import getopt
@@ -52,11 +52,11 @@ def usage():
 
 def readFile(mdFileName):
     mdFile = open(mdFileName, 'r')        
-    # Find OOPSE version info first
+    # Find OpenMD version info first
     line = mdFile.readline()
     while 1:
-        if '<OOPSE version=' in line:
-            OOPSEversion = line
+        if '<OOPSE version=' in line or '<OpenMD version=' in line:
+            OpenMDversion = line
             break
         line = mdFile.readline()
         
@@ -153,7 +153,7 @@ def readFile(mdFileName):
 def writeFile(outputFileName,repeatX,repeatY,repeatZ):
     outputFile = open(outputFileName, 'w')
 
-    outputFile.write("<OOPSE version=4>\n");
+    outputFile.write("<OpenMD version=1>\n");
 
     print "writing MetaData"
     for metaline in metaData:
@@ -187,12 +187,12 @@ def writeFile(outputFileName,repeatX,repeatY,repeatZ):
     deco = [ (index, i) for i, index in enumerate(indices) ]
     deco.sort()
     whichSD = 0
-    for index in range(len(deco)):
-        (index,i) = deco[index]
-        print i
-        for ii in range(repeatX):
-            for jj in range(repeatY):
-                for kk in range(repeatZ):                    
+    for ii in range(repeatX):
+        for jj in range(repeatY):
+            for kk in range(repeatZ):
+                for index in range(len(deco)):
+                    (index,i) = deco[index]
+                    print i
                     myP = [] 
                     myP.append(p[i][0] + ii*Hmat[0][0] + jj*Hmat[1][0] + kk*Hmat[2][0])
                     myP.append(p[i][1] + ii*Hmat[0][1] + jj*Hmat[1][1] + kk*Hmat[2][1])
@@ -206,7 +206,7 @@ def writeFile(outputFileName,repeatX,repeatY,repeatZ):
 
     outputFile.write("    </StuntDoubles>\n")
     outputFile.write("  </Snapshot>\n")
-    outputFile.write("</OOPSE>\n")
+    outputFile.write("</OpenMD>\n")
     outputFile.close()
 
 def roundMe(x):

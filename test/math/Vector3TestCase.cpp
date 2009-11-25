@@ -38,9 +38,9 @@ void Vector3TestCase::tearDown(){
 void Vector3TestCase::testConstructors(){
     double b[] = {2.9, 3.2, 1.2};
     Vector3d v(b);
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(v.x(), 2.9, oopse::epsilon);
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(v.y(), 3.2, oopse::epsilon);
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(v.z(), 1.2, oopse::epsilon);    
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(v.x(), 2.9, OpenMD::NumericConstant::epsilon);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(v.y(), 3.2, OpenMD::NumericConstant::epsilon);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(v.z(), 1.2, OpenMD::NumericConstant::epsilon);    
 }
 
 void Vector3TestCase::testArithmetic(){
@@ -85,17 +85,17 @@ void Vector3TestCase::testOperators(){
 
 void Vector3TestCase::testAccessEntries(){
 
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(v1.z(), 3.0, oopse::epsilon);
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(v2.x(), 4.0, oopse::epsilon);
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(v3.y(), 10.0, oopse::epsilon);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(v1.z(), 3.0, OpenMD::NumericConstant::epsilon);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(v2.x(), 4.0, OpenMD::NumericConstant::epsilon);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(v3.y(), 10.0, OpenMD::NumericConstant::epsilon);
 
     Vector3d tmp;
     tmp.x() = 78.01;
     tmp.y() = 21.0;
     tmp.z() =133.12;
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(tmp.x(), 78.01, oopse::epsilon);
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(tmp.y(), 21.0, oopse::epsilon);
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(tmp.z(), 133.12, oopse::epsilon);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(tmp.x(), 78.01, OpenMD::NumericConstant::epsilon);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(tmp.y(), 21.0, OpenMD::NumericConstant::epsilon);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(tmp.z(), 133.12, OpenMD::NumericConstant::epsilon);
 
 }
 

@@ -4,7 +4,7 @@
 #include <cppunit/extensions/HelperMacros.h>
 #include "brains/DataStorage.hpp"
  #include <vector>
-using namespace oopse;
+using namespace OpenMD;
 
 class DataStorageTestCase : public CPPUNIT_NS::TestFixture {
     CPPUNIT_TEST_SUITE( DataStorageTestCase );

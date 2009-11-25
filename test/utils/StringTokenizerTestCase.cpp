@@ -23,7 +23,7 @@ void StringTokenizerTestCase::testStringTokenizer(){
     CPPUNIT_ASSERT(token2 == "World");
 
     //test reading and converting tokens to other data type
-    std::string str2 = "1991.2\t129\t1e2 1 OOPSE\n";
+    std::string str2 = "1991.2\t129\t1e2 1 OpenMD\n";
     StringTokenizer tokenizer2(str2);
 
     CPPUNIT_ASSERT(tokenizer2.countTokens() == 5);
@@ -38,7 +38,7 @@ void StringTokenizerTestCase::testStringTokenizer(){
     CPPUNIT_ASSERT(intVal == 129);
     CPPUNIT_ASSERT_DOUBLES_EQUAL(doubleVal, 100, 0.0001);
     CPPUNIT_ASSERT(boolVal);
-    CPPUNIT_ASSERT(stringVal == "OOPSE");
+    CPPUNIT_ASSERT(stringVal == "OpenMD");
 
     CPPUNIT_ASSERT(!tokenizer2.hasMoreTokens());
 
@@ -64,7 +64,7 @@ void StringTokenizerTestCase::testStringTokenizer(){
     CPPUNIT_ASSERT(tokenizer4.nextToken() == " ");
     CPPUNIT_ASSERT(tokenizer4.nextToken() == "1");
     CPPUNIT_ASSERT(tokenizer4.nextToken() == " ");
-    CPPUNIT_ASSERT(tokenizer4.nextToken() == "OOPSE");
+    CPPUNIT_ASSERT(tokenizer4.nextToken() == "OpenMD");
     CPPUNIT_ASSERT(tokenizer4.nextToken() == "\n");
         
 }

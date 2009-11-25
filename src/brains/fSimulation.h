@@ -1,4 +1,4 @@
-#ifdef __OOPSE_C
+#ifdef __OPENMD_C
 
 #ifndef __FSIMULATION
 
@@ -30,7 +30,7 @@ typedef  struct{
   int SIM_uses_AtomicVirial;
 } simtype;
 #endif /*__FSIMULATION*/
-#endif /*__OOPSE_C*/
+#endif /*__OPENMD_C*/
 
 #ifdef  __FORTRAN90
 

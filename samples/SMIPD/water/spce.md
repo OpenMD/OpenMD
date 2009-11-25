@@ -1,4 +1,4 @@
-<OOPSE version=4>
+<OpenMD version=1>
   <MetaData>
 #include "water.md"
 
@@ -303,4 +303,4 @@ HydroPropFile = "spce.diff";
        255    pvqj           8.583312           4.261343           7.407898  9.390000e-04  5.715000e-03 -4.780000e-03  3.312200e-01  1.893820e-01  4.819520e-01  7.887650e-01  2.582300e-02 -1.007600e-02  3.249300e-02
     </StuntDoubles>
   </Snapshot>
-</OOPSE>
+</OpenMD>

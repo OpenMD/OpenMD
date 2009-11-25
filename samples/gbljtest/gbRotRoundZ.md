@@ -1,4 +1,4 @@
-<OOPSE version=4>
+<OpenMD version=1>
   <MetaData>
 #include "gb.md"
 #include "lj.md"
@@ -41,4 +41,4 @@ statusTime = 100;
          1    pvqj                  5                  0                  1  0.000000e+00  0.000000e+00  0.000000e+00  1.000000e+00  0.000000e+00  0.000000e+00  0.000000e+00  0.000000e+00  0.000000e+00  0.000000e+00
     </StuntDoubles>
   </Snapshot>
-</OOPSE>
+</OpenMD>

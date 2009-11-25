@@ -1,12 +1,14 @@
-OOPSE is the combined effort of a number of graduate students
+OpenMD is the combined effort of a number of graduate students
 in the Gezelter lab at the University of Notre Dame.  The 
 principal authors of this code are:
 
-Dr. Teng Lin               (Now at: lin@schrodinger.com)
-Dr. Christopher J. Fennell (cfennell@nd.edu)
-Charles F. Vardeman II     (cvardema@nd.edu)
-Dr. Matthew A. Meineke     (mmeineke@maul.chem.nd.edu)
-Xiuquan Sun                (xsun@nd.edu)
-Kyle Daily                 (kdaily@nd.edu)
-Yang Zheng                 (Now at: sunnykansas@yahoo.com)
-Prof. J. Daniel Gezelter   (gezelter@nd.edu)
+Prof. J. Daniel Gezelter   <gezelter@nd.edu>
+Dr. Charles F. Vardeman II <cvardema@nd.edu>
+Shenyu Kuang               <skuang@nd.edu>
+Chunlei Li                 <cli2@nd.edu>
+Dr. Teng Lin               Now at: <lin@schrodinger.com>
+Dr. Christopher J. Fennell Now at: <cfennell@maxwell.compbio.ucsf.edu>
+Dr. Matthew A. Meineke     <mmeineke@maul.chem.nd.edu>
+Dr. Xiuquan Sun            Now at: <Xiuquan.Sun@pnl.gov>
+Kyle Daily                 Now at: <kdaily@gmail.com>
+Yang Zheng                 Now at: <sunnykansas@yahoo.com>

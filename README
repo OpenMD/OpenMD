@@ -1,14 +1,19 @@
-OOPSE
+OpenMD
 
-OOPSE is an open-source Object-Oriented Parallel Simulation Engine.
-It is primarily used to perform molecular dynamics simulations on
-"strange" atom types that are not normally handled by other simulation
-packages.  This includes atoms with orientational degrees of freedom
-(point dipoles, sticky atoms), as well as transition metals under the
-Embedded Atom Method (EAM) or Sutton-Chen (SC) potentials. 
+OpenMD is an open source molecular dynamics engine which is capable of
+efficiently simulating liquids, proteins, nanoparticles, interfaces,
+and other complex systems using atom types with orientational degrees
+of freedom (e.g. "sticky" atoms, point dipoles, and coarse-grained
+assemblies). Proteins, zeolites, lipids, transition metals (bulk, flat
+interfaces, and nanoparticles) have all been simulated using force
+fields included with the code. OpenMD works on parallel computers
+using the Message Passing Interface (MPI), and comes with a number of
+analysis and utility programs that are easy to use and modify. An
+OpenMD simulation is specified using a very simple meta-data language
+that is easy to learn.
 
-Simulations are started in OOPSE using a single Molecular Dynamics (.md)
-file.   These files must start with the <OOPSE> tag and must 
+Simulations are started in OpenMD using a single Molecular Dynamics (.md)
+file.   These files must start with the <OpenMD> tag and must 
 have two sections:
 
   1) a C-based <MetaData> section, and 
@@ -19,33 +24,28 @@ Detailed descriptions of the structures of these files are
 available in the "doc" directory.  Sample simulations are 
 available in the "samples" directory. 
 
-What you need to compile and use OOPSE:
+What you need to compile and use OpenMD:
 
- 1) Good C, C++ and Fortran95 compilers.  We've built and tested OOPSE
+ 1) Good C, C++ and Fortran95 compilers.  We've built and tested OpenMD
     on the following architecture & compiler combinations:
 
     Architecture                CC     CXX     F90     Notes
     -------------------------   ----   -----   -----   ----------------------
-    ix86-pc-linux-gnu           icc    icpc    ifort   (Intel versions 7-9)
-    i386-apple-darwin8.7.1      icc    icpc    ifort   (Intel version 9.1)
-    powerpc-apple-darwin8.7.0   gcc    g++     xlf95   (GNU v.4 / IBM XL v. 8.1)
-    x86_64-unknown-linux-gnu    gcc    g++     pathf95 (GNU v.4 / Pathscale 2.5)
-    sparc-sun-solaris2.10       cc     CC      f95     (Sun ONE Studio 10)
-    
-    We've also successfully compiled OOPSE with the Portland Group c, c++, 
-    and Fortran95 compilers on the  x86_64-unknown-linux-gnu architecture.
-  
-    OOPSE uses features of the Fortran 95 language. The fortran
+    ix86-pc-linux-gnu           icc    icpc    ifort	(Intel v. 10)
+    i686-apple-darwin10.0.0     gcc    g++     gfortran	(GNU v.4.3)
+    i686-apple-darwin10.0.0     icc    icpc    ifort	(Intel v. 11)
+    x86_64-unknown-linux-gnu    gcc    g++     pathf95	(Pathscale 3.2)
+
+    OpenMD uses features of the Fortran 95 language. The fortran
     portions of our code will not compile if your compiler does not
     support these particular features. Some (but not all) Fortran 90
-    compilers do support these features. None of the Fortran 77
-    compilers can be used to compile OOPSE.
+    compilers do support these features.
 
-    Fortran compilers that are known to fail on OOPSE: g77, Gfortran, 
-    Older Portland Group compilers (pgf77, pgf90).
+    Compilers that are known to fail on OpenMD: g77, older versions of
+    gfortran, older Portland Group compilers (pgf77, pgf90).
 
-    Fortran compilers that are known to work on OOPSE: Intel's ifort,
-    Pathscale's pathf95, IBM's xlf95, Portland's pgf95 (version 6 or
+    Compilers that are known to work on OpenMD: Intel's ifort,
+    Pathscale's pathf95, IBM's xlf95, Portland-F¢s pgf95 (version 6 or-A
     higher), Sun's f95. There may be others that work also.
 
  2) GNU make (also known as gmake).  Regular make won't work.  
@@ -56,18 +56,17 @@ What you need to compile and use OOPSE:
  3) Perl.  Compilation dependencies in Fortran95 are somewhat
     complicated, so the build process uses a perl script called
     filepp to do this job.  You need perl for filepp, so you
-    need perl to build OOPSE.
+    need perl to build OpenMD.
 
- 4) MPI is optional for the single processor version of OOPSE, 
-    but is required if you want OOPSE to run in parallel. 
-
-    We like Open MPI.  Other implementations might work, but we
-    haven't tried.  You can get Open MPI here: http://www.open-mpi.org/
+ 4) MPI-2 is optional for the single processor version of OpenMD, but
+    is required if you want OpenMD to run in parallel. We like
+    OpenMPI. Other implementations of MPI-2 might work, but we haven-F¢t-A
+    tried.   You can get Open MPI here: http://www.open-mpi.org/
 
 INSTRUCTIONS
 
  1) Get, build, and test the required pieces above.
- 2) ./configure  (or ./configure --with-mpi=/usr/local/openmpi)
+ 2) ./configure  
  3) make
  4) make install
 

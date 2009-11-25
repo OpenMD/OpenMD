@@ -263,13 +263,6 @@ molecule{
   }
   
   rigidBody[0]{
-    
-    members(0, 1, 2);
-  }
-
-  
-  cutoffGroup{
-    
     members(0, 1, 2);
   }
 }

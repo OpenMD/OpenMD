@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """Dump File Converter
 
-Converts old-style OOPSE md and dump files into new-style
+Converts old-style OOPSE md and dump files into new OpenMD style
 combined files
 
 Usage: dumpConverter 
@@ -10,19 +10,19 @@ Options:
   -h, --help              show this help
   -m, --meta-data=...     use specified meta-data (.md) file
   -c, --config-file=...   use specified configuration (.in, .eor, .dump) file
-  -o, --output-file=...   use specified output (.oop) file
+  -o, --output-file=...   use specified output (.opmd) file
 
 
 Example:
-   dumpConverter -m Ar.md -c Ar.dump -o Ar.oop
+   dumpConverter -m Ar.md -c Ar.dump -o Ar.opmd
 
 """
 
 __author__ = "Dan Gezelter (gezelter@nd.edu)"
-__version__ = "$Revision: 1.4 $"
-__date__ = "$Date: 2006-08-30 21:04:04 $"
+__version__ = "$Revision: 1.5 $"
+__date__ = "$Date: 2009-11-25 20:01:59 $"
 __copyright__ = "Copyright (c) 2006 by the University of Notre Dame"
-__license__ = "OOPSE"
+__license__ = "OpenMD"
 
 import sys
 import getopt
@@ -40,7 +40,7 @@ def convertFiles(mdFileName, configFileName, outputFileName):
     mdFile = open(mdFileName, 'r')
     outputFile = open(outputFileName, 'w')
 
-    outputFile.write("<OOPSE version=4>\n");
+    outputFile.write("<OpenMD version=1>\n");
     outputFile.write("  <MetaData>\n")
     
     mdLines = mdFile.readlines()
@@ -147,7 +147,7 @@ def convertFiles(mdFileName, configFileName, outputFileName):
     
 
     configFile.close()
-    outputFile.write("</OOPSE>\n")
+    outputFile.write("</OpenMD>\n")
     outputFile.close()
 
 

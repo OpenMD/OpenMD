@@ -38,7 +38,7 @@
 #include "config.h"
 #include "math/SquareMatrix3.hpp"
 
-namespace oopse {
+namespace OpenMD {
 
   class RMSD{
   public:

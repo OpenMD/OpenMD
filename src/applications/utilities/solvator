@@ -4,10 +4,10 @@
 # deletes overlapping molecules
 
 # author    = "Chris Fennell
-# version   = "$Revision: 1.2 $"
-# date      = "$Date: 2006-10-11 19:24:37 $"
+# version   = "$Revision: 1.3 $"
+# date      = "$Date: 2009-11-25 20:01:59 $"
 # copyright = "Copyright (c) 2006 by the University of Notre Dame"
-# license   = "OOPSE"
+# license   = "OpenMD"
 
 
 use Getopt::Std;
@@ -29,7 +29,7 @@ $opt_h = 'true' if $#ARGV != -1;
 
 # our option output 
 if ($opt_h){
-  print "solvator: carves a solute void in an oopse water box\n\n";
+  print "solvator: carves a solute void in an OpenMD water box\n\n";
   print "usage: solvator [-fh] [-d distance tolerance] [-i file name (solvent)]";
   print " [-n solute name] [-px file name (solute)] [-o file name (output)]\n\n";
   print "  -f : include a flexible solute model description in the output file rather\n";
@@ -37,10 +37,10 @@ if ($opt_h){
   print "  -h : show this message\n\n";
   print "  -d real : overlap removal distance\n";
   print "                 (default: 2.75 ang)\n";
-  print "  -i char : solvent input file (oopse .md file)\n";
+  print "  -i char : solvent input file (OpenMD .md file)\n";
   print "  -n char : name for the solute\n";
   print "                 (default: SOLUTE)\n";
-  print "  -o char : carved solvent output file (oopse .md format)\n";
+  print "  -o char : carved solvent output file (OpenMD .md format)\n";
   print "                 (default: 'solvatedSystem.md')\n";
   print "  -p char : solute input file (pdb)\n";
   print "  -x char : solute input file (xyz)\n\n";
@@ -206,7 +206,7 @@ print "The solvated system \"$fileName\" was generated.\n";
 
 sub writeOutFile {
   # write out the header
-  print OUTFILE "<OOPSE version=4>\n";
+  print OUTFILE "<OpenMD version=1>\n";
   printMetaData();
   printFrameData();
   print OUTFILE "    <StuntDoubles>\n";
@@ -221,7 +221,7 @@ sub writeOutFile {
   for ($i=0; $i<=$#goodSolventMolecules; $i++) {
     print OUTFILE "$goodSolventMolecules[$i]\n";
   }
-  print OUTFILE "    </StuntDoubles>\n  </Snapshot>\n</OOPSE>\n";
+  print OUTFILE "    </StuntDoubles>\n  </Snapshot>\n</OpenMD>\n";
 }
 
 sub printMetaData() {

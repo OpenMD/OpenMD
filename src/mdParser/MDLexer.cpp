@@ -708,7 +708,7 @@ void MDLexer::mLineDirective(bool _createToken) {
 	n=_returnToken;
 	if ( inputState->guessing==0 ) {
 #line 275 "MDParser.g"
-		setLine(oopse::lexi_cast<int>(n->getText()) - 1);
+		setLine(OpenMD::lexi_cast<int>(n->getText()) - 1);
 #line 713 "MDLexer.cpp"
 	}
 	{ // ( ... )+

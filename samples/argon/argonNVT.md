@@ -1,4 +1,4 @@
-<OOPSE version=4>
+<OpenMD version=1>
   <MetaData>
 #include "lj.md"
 
@@ -16,13 +16,17 @@ targetTemp = 119.8;
 ensemble = "NVT";
 tauThermostat = 1e3;
 dt = 1.0;
-runTime = 1e5;
+runTime = 1;
 
 sampleTime = 100;
-statusTime = 10;
+statusTime = 1;
 
 thermalTime = 100.0;
 tempSet = "false";
+
+cutoffRadius  = 8.0;
+switchingRadius = 8.0;
+
   </MetaData>
   <Snapshot>
     <FrameData>
@@ -140,4 +144,4 @@ tempSet = "false";
        107      pv          14.409635          12.403795          13.931267  -2.499000e-03  1.285000e-03  1.700000e-04
     </StuntDoubles>
   </Snapshot>
-</OOPSE>
+</OpenMD>

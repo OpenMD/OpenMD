@@ -6,19 +6,10 @@
  * redistribute this software in source and binary code form, provided
  * that the following conditions are met:
  *
- * 1. Acknowledgement of the program authors must be made in any
- *    publication of scientific results based in part on use of the
- *    program.  An acceptable form of acknowledgement is citation of
- *    the article in which the program was described (Matthew
- *    A. Meineke, Charles F. Vardeman II, Teng Lin, Christopher
- *    J. Fennell and J. Daniel Gezelter, "OOPSE: An Object-Oriented
- *    Parallel Simulation Engine for Molecular Dynamics,"
- *    J. Comput. Chem. 26, pp. 252-271 (2005))
- *
- * 2. Redistributions of source code must retain the above copyright
+ * 1. Redistributions of source code must retain the above copyright
  *    notice, this list of conditions and the following disclaimer.
  *
- * 3. Redistributions in binary form must reproduce the above copyright
+ * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in the
  *    documentation and/or other materials provided with the
  *    distribution.
@@ -37,13 +28,22 @@
  * arising out of the use of or inability to use software, even if the
  * University of Notre Dame has been advised of the possibility of
  * such damages.
+ *
+ * SUPPORT OPEN SCIENCE!  If you use OpenMD or its source code in your
+ * research, please cite the appropriate papers when you publish your
+ * work.  Good starting points are:
+ *                                                                      
+ * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
+ * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
+ * [4]  Vardeman & Gezelter, in progress (2009).                        
  */
 #include <algorithm>
 #include <math.h>
 #include "primitives/RigidBody.hpp"
 #include "utils/simError.h"
 #include "utils/NumericConstant.hpp"
-namespace oopse {
+namespace OpenMD {
   
   RigidBody::RigidBody() : StuntDouble(otRigidBody, &Snapshot::rigidbodyData),
                            inertiaTensor_(0.0){    
@@ -193,7 +193,7 @@ namespace oopse {
         
     int nLinearAxis = 0;
     for (int i = 0; i < 3; i++) {    
-      if (fabs(evals[i]) < oopse::epsilon) {
+      if (fabs(evals[i]) < OpenMD::epsilon) {
 	linear_ = true;
 	linearAxis_ = i;
 	++ nLinearAxis;
@@ -203,7 +203,7 @@ namespace oopse {
     if (nLinearAxis > 1) {
       sprintf( painCave.errMsg,
 	       "RigidBody error.\n"
-	       "\tOOPSE found more than one axis in this rigid body with a vanishing \n"
+	       "\tOpenMD found more than one axis in this rigid body with a vanishing \n"
 	       "\tmoment of inertia.  This can happen in one of three ways:\n"
 	       "\t 1) Only one atom was specified, or \n"
 	       "\t 2) All atoms were specified at the same location, or\n"

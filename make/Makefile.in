@@ -58,7 +58,7 @@ PackageLibs = \
 
 #packages containing applications
 Applications = \
-	applications/oopse \
+	applications/openmd \
 	applications/dump2Xyz \
 	applications/staticProps \
 	applications/dynamicProps \
@@ -116,11 +116,11 @@ Libraries = \
 	@OPENBABEL_LIB@ \
 	@ZLIB@ 
 
-OopseHome       = @OOPSE_HOME@
-ForceParamDir   = $(OopseHome)/forceFields
-SampleSimDir    = $(OopseHome)/samples
-InstallBinDir   = $(OopseHome)/bin
-DocDir          = $(OopseHome)/doc
+OpenMDHome       = @OPENMD_HOME@
+ForceParamDir   = $(OpenMDHome)/forceFields
+SampleSimDir    = $(OpenMDHome)/samples
+InstallBinDir   = $(OpenMDHome)/bin
+DocDir          = $(OpenMDHome)/doc
 FrcDeclare      = -DFRC_PATH="$(ForceParamDir)"
 F90Declare      = -D__FORTRAN90
 UseSingle       = @USE_SINGLE_PRECISION@
@@ -161,8 +161,8 @@ MainMakefile      = $(MakeDir)/Makefile
 BinDir            = $(DEV_ROOT)/bin
 DocsDir           = $(DEV_ROOT)/docs
 CurrentDir        = $(CURDIR)
-CombinedStaticLib = $(LibDir)/libOOPSE.a
-CombinedParallelStaticLib = $(LibDir)/libOOPSE_MPI.a
+CombinedStaticLib = $(LibDir)/libopenmd.a
+CombinedParallelStaticLib = $(LibDir)/libopenmd_MPI.a
 
 ifdef Source
 #get the relative path of current package to source directory
@@ -331,10 +331,10 @@ ifneq  "$(words $(ObjectFiles) $(ParallelObjectFiles))" "0"
       ParallelExecutable     = $(BinDir)/$(Main)_MPI
     endif
   else
-    SharedLibrary          = $(LibDir)/lib$(subst /,,$(patsubst %,oopse_%,$(Package)))_UP.so
-    StaticLibrary          = $(LibDir)/lib$(subst /,,$(patsubst %,oopse_%,$(Package)))_UP.a
-    ParallelSharedLibrary  = $(LibDir)/lib$(subst /,,$(patsubst %,oopse_%,$(Package)))_MPI.so
-    ParallelStaticLibrary  = $(LibDir)/lib$(subst /,,$(patsubst %,oopse_%,$(Package)))_MPI.a
+    SharedLibrary          = $(LibDir)/lib$(subst /,,$(patsubst %,openmd_%,$(Package)))_UP.so
+    StaticLibrary          = $(LibDir)/lib$(subst /,,$(patsubst %,openmd_%,$(Package)))_UP.a
+    ParallelSharedLibrary  = $(LibDir)/lib$(subst /,,$(patsubst %,openmd_%,$(Package)))_MPI.so
+    ParallelStaticLibrary  = $(LibDir)/lib$(subst /,,$(patsubst %,openmd_%,$(Package)))_MPI.a
   endif
 endif
 
@@ -345,8 +345,8 @@ ClassPath        = $(JRE)$(X)$(TargetDir)$(X)$(ThirdPartyJars)
 JavaPackageNames = $(subst /,.,$(JavaPackages))
 IncludePath      = -I$(SourceDir) $(IncludeDirs:%=-I%)
 LibDirs          = -L$(LibDir)    $(LibraryDirs:%=-L%)
-LocalLibs        = $(subst /,,$(patsubst %, oopse_%_UP, $(PackageLibs)))
-ParallelLocalLibs= $(subst /,,$(patsubst %, oopse_%_MPI, $(PackageLibs))) 
+LocalLibs        = $(subst /,,$(patsubst %, openmd_%_UP, $(PackageLibs)))
+ParallelLocalLibs= $(subst /,,$(patsubst %, openmd_%_MPI, $(PackageLibs))) 
 LibList          = $(LocalLibs:%=-l%) $(Libraries)
 LibNames         = $(LocalLibs:%=$(LibDir)/lib%.a)
 ParallelLibList  = $(ParallelLocalLibs:%=-l%) $(Libraries)
@@ -459,7 +459,7 @@ ifneq "$(words $(DocFiles))" "0"
 endif
 
 ifneq "$(words $(RootFiles))" "0"
-  MyInstallDir             = $(OopseHome)
+  MyInstallDir             = $(OpenMDHome)
   InstallFiles             = $(RootFiles)
   InstallCommand           = $(InstallData)
 endif
@@ -689,7 +689,7 @@ $(PackageTargetDir)/%_Skel.class : $(PackageTargetDir)/%.class
 	$(MAKE) $(MakeOptions) $(PackageTargetDir)/$@
 
 document :
-	$(Print) Generate Documentation for OOPSE-2.0
+	$(Print) Generate Documentation for OpenMD
 	@cd $(DEV_ROOT)/src	
 	$(Doxygen) $(DEV_ROOT)/make/Doxyfile
 

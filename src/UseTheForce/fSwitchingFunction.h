@@ -1,4 +1,4 @@
-#ifdef __OOPSE_C
+#ifdef __OPENMD_C
 #ifndef __FSWITCHINGFUNCTION
 #define __FSWITCHINGFUNCTION
 
@@ -9,7 +9,7 @@
 #define SPLINE_SEGMENTS      101
 
 #endif
-#endif /*__OOPSE_C*/
+#endif /*__OPENMD_C*/
 
 #ifdef  __FORTRAN90
 

@@ -1,4 +1,4 @@
-<OOPSE version=4>
+<OpenMD version=1>
   <MetaData>
 #include "water.md"
 
@@ -31,4 +31,4 @@ switchingRadius = 9.0;
          1    pvqj            -2.2274             -2.572                  0 -0.000000e+00 -0.000000e+00  0.000000e+00  3.998900e-01  7.681700e-01 -4.435100e-01 -2.308700e-01 -4.500000e-05 -7.000000e-06 -7.000000e-06
     </StuntDoubles>
   </Snapshot>
-</OOPSE>
+</OpenMD>

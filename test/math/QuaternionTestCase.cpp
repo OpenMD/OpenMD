@@ -121,10 +121,10 @@ void QuaternionTestCase::testOperators(){
 }
 
 void QuaternionTestCase::testAccessEntries(){
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(q1.w(), 1.0, oopse::epsilon);
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(q2.x(), 0.6, oopse::epsilon);
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(q3.y(), 0.5, oopse::epsilon);
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(q4.z(), -0.8, oopse::epsilon);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(q1.w(), 1.0, OpenMD::NumericConstants::epsilon);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(q2.x(), 0.6, OpenMD::NumericConstants::epsilon);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(q3.y(), 0.5, OpenMD::NumericConstants::epsilon);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(q4.z(), -0.8, OpenMD::NumericConstants::epsilon);
 
     Quat4d tmp;
 

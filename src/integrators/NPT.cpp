@@ -6,19 +6,10 @@
  * redistribute this software in source and binary code form, provided
  * that the following conditions are met:
  *
- * 1. Acknowledgement of the program authors must be made in any
- *    publication of scientific results based in part on use of the
- *    program.  An acceptable form of acknowledgement is citation of
- *    the article in which the program was described (Matthew
- *    A. Meineke, Charles F. Vardeman II, Teng Lin, Christopher
- *    J. Fennell and J. Daniel Gezelter, "OOPSE: An Object-Oriented
- *    Parallel Simulation Engine for Molecular Dynamics,"
- *    J. Comput. Chem. 26, pp. 252-271 (2005))
- *
- * 2. Redistributions of source code must retain the above copyright
+ * 1. Redistributions of source code must retain the above copyright
  *    notice, this list of conditions and the following disclaimer.
  *
- * 3. Redistributions in binary form must reproduce the above copyright
+ * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in the
  *    documentation and/or other materials provided with the
  *    distribution.
@@ -37,6 +28,15 @@
  * arising out of the use of or inability to use software, even if the
  * University of Notre Dame has been advised of the possibility of
  * such damages.
+ *
+ * SUPPORT OPEN SCIENCE!  If you use OpenMD or its source code in your
+ * research, please cite the appropriate papers when you publish your
+ * work.  Good starting points are:
+ *                                                                      
+ * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
+ * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
+ * [4]  Vardeman & Gezelter, in progress (2009).                        
  */
  
 #include <math.h>
@@ -46,7 +46,7 @@
 #include "integrators/NPT.hpp"
 #include "math/SquareMatrix3.hpp"
 #include "primitives/Molecule.hpp"
-#include "utils/OOPSEConstant.hpp"
+#include "utils/PhysicalConstants.hpp"
 #include "utils/simError.h"
 
 // Basic isotropic thermostating and barostating via the Melchionna
@@ -59,7 +59,7 @@
 //
 //    Hoover, W. G., 1986, Phys. Rev. A, 34, 2499.
 
-namespace oopse {
+namespace OpenMD {
 
   NPT::NPT(SimInfo* info) :
     VelocityVerletIntegrator(info), chiTolerance(1e-6), etaTolerance(1e-6), maxIterNum_(4) {
@@ -76,7 +76,7 @@ namespace oopse {
       if (!simParams->haveTargetTemp()) {
         sprintf(painCave.errMsg, "You can't use the NVT integrator without a targetTemp!\n");
         painCave.isFatal = 1;
-        painCave.severity = OOPSE_ERROR;
+        painCave.severity = OPENMD_ERROR;
         simError();
       } else {
         targetTemp = simParams->getTargetTemp();
@@ -87,7 +87,7 @@ namespace oopse {
         sprintf(painCave.errMsg, "If you use the constant temperature\n"
 		"\tintegrator, you must set tauThermostat.\n");
 
-        painCave.severity = OOPSE_ERROR;
+        painCave.severity = OPENMD_ERROR;
         painCave.isFatal = 1;
         simError();
       } else {
@@ -107,7 +107,7 @@ namespace oopse {
       if (!simParams->haveTauBarostat()) {
         sprintf(painCave.errMsg,
                 "If you use the NPT integrator, you must set tauBarostat.\n");
-        painCave.severity = OOPSE_ERROR;
+        painCave.severity = OPENMD_ERROR;
         painCave.isFatal = 1;
         simError();
       } else {
@@ -150,7 +150,7 @@ namespace oopse {
     
     instaTemp =thermo.getTemperature();
     press = thermo.getPressureTensor();
-    instaPress = OOPSEConstant::pressureConvert* (press(0, 0) + press(1, 1) + press(2, 2)) / 3.0;
+    instaPress = PhysicalConstants::pressureConvert* (press(0, 0) + press(1, 1) + press(2, 2)) / 3.0;
     instaVol =thermo.getVolume();
 
     Vector3d  COM = info_->getCom();
@@ -171,8 +171,8 @@ namespace oopse {
 	getVelScaleA(sc, vel);
 
 	// velocity half step  (use chi from previous step here):
-	//vel[j] += dt2 * ((frc[j] / mass) * OOPSEConstant::energyConvert - sc[j]);
-	vel += dt2*OOPSEConstant::energyConvert/mass* frc - dt2*sc;
+	//vel[j] += dt2 * ((frc[j] / mass) * PhysicalConstants::energyConvert - sc[j]);
+	vel += dt2*PhysicalConstants::energyConvert/mass* frc - dt2*sc;
 	integrableObject->setVel(vel);
 
 	if (integrableObject->isDirectional()) {
@@ -185,8 +185,8 @@ namespace oopse {
 
 	  ji = integrableObject->getJ();
 
-	  //ji[j] += dt2 * (Tb[j] * OOPSEConstant::energyConvert - ji[j]*chi);
-	  ji += dt2*OOPSEConstant::energyConvert * Tb - dt2*chi* ji;
+	  //ji[j] += dt2 * (Tb[j] * PhysicalConstants::energyConvert - ji[j]*chi);
+	  ji += dt2*PhysicalConstants::energyConvert * Tb - dt2*chi* ji;
                 
 	  rotAlgo->rotate(integrableObject, ji, dt);
 
@@ -306,16 +306,16 @@ namespace oopse {
 	  getVelScaleB(sc, index);
 
 	  // velocity half step
-	  //vel[j] = oldVel[3 * i + j] + dt2 *((frc[j] / mass) * OOPSEConstant::energyConvert - sc[j]);
-	  vel = oldVel[index] + dt2*OOPSEConstant::energyConvert/mass* frc - dt2*sc;
+	  //vel[j] = oldVel[3 * i + j] + dt2 *((frc[j] / mass) * PhysicalConstants::energyConvert - sc[j]);
+	  vel = oldVel[index] + dt2*PhysicalConstants::energyConvert/mass* frc - dt2*sc;
 	  integrableObject->setVel(vel);
 
 	  if (integrableObject->isDirectional()) {
 	    // get and convert the torque to body frame
 	    Tb = integrableObject->lab2Body(integrableObject->getTrq());
 
-	    //ji[j] = oldJi[3*i + j] + dt2 * (Tb[j] * OOPSEConstant::energyConvert - oldJi[3*i+j]*chi);
-	    ji = oldJi[index] + dt2*OOPSEConstant::energyConvert*Tb - dt2*chi*oldJi[index];
+	    //ji[j] = oldJi[3*i + j] + dt2 * (Tb[j] * PhysicalConstants::energyConvert - oldJi[3*i+j]*chi);
+	    ji = oldJi[index] + dt2*PhysicalConstants::energyConvert*Tb - dt2*chi*oldJi[index];
 	    integrableObject->setJ(ji);
 	  }
 

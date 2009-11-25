@@ -1,7 +1,7 @@
 Package = applications/atom2md
 
 MySource    = \
-	oopseformat.cpp \
+	openmdformat.cpp \
 	obmolecformat.cpp \
 	atom2md.cpp \
 

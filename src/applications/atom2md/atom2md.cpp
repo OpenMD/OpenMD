@@ -1,5 +1,5 @@
 /**********************************************************************
-atom2md.cpp - OpenBabel-based conversion program to OOPSE MD file, 
+atom2md.cpp - OpenBabel-based conversion program to OpenMD MD file, 
               command-line handling.
 
 Copyright (C) 1998-2001 by OpenEye Scientific Software, Inc.
@@ -7,8 +7,8 @@ Some portions Copyright (C) 2001-2006 by Geoffrey R. Hutchison
 Some portions Copyright (C) 2004-2006 by Chris Morley
 Some portions Copyright (C) 2008 by J. Daniel Gezelter
 
-This file is part of both the OOPSE and Open Babel projects.
-For more information, see <http://oopse.org> and <http://openbabel.sourceforge.net/>
+This file is part of both the OpenMD and Open Babel projects.
+For more information, see <http://openmd.net> and <http://openbabel.sourceforge.net/>
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -103,9 +103,9 @@ int main(int argc,char *argv[])
 
                 case 'V':
                   {
-                    cout << program_name << ": part of OOPSE " << 
-                      OOPSE_VERSION_MAJOR << "." << OOPSE_VERSION_MINOR << 
-                      "." << OOPSE_VERSION_TINY << 
+                    cout << program_name << ": part of OpenMD " << 
+                      OPENMD_VERSION_MAJOR << "." << OPENMD_VERSION_MINOR << 
+                      "." << OPENMD_VERSION_TINY << 
                       " and Open Babel " << BABEL_VERSION << " -- " 
                          << __DATE__ << " -- " << __TIME__ << endl;
                     exit(0);
@@ -422,9 +422,9 @@ void DoOption(const char* p, OBConversion& Conv,
 
 void usage()
 {
-  cout << program_name << ": part of OOPSE " << 
-    OOPSE_VERSION_MAJOR << "." << OOPSE_VERSION_MINOR << "." << 
-    OOPSE_VERSION_TINY << " and OpenBabel " << BABEL_VERSION << " -- " 
+  cout << program_name << ": part of OpenMD " << 
+    OPENMD_VERSION_MAJOR << "." << OPENMD_VERSION_MINOR << "." << 
+    OPENMD_VERSION_TINY << " and OpenBabel " << BABEL_VERSION << " -- " 
        << __DATE__ << " -- " << __TIME__ << endl;
   cout << "Usage: " << program_name
        << " [-i<input-type>] <name> [-o<output-type>] <name>" << endl;

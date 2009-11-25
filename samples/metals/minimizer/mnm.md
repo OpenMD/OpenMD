@@ -1,4 +1,4 @@
-<OOPSE version=4>
+<OpenMD version=1>
   <MetaData>
 #include "water.md"
 #include "metals.md"
@@ -45,4 +45,4 @@ statusTime = 10;
          1      pv       -5.173054631       -4.490862284        2.929414839  1.366366e-04  8.755717e-05 -8.531764e-05
     </StuntDoubles>
   </Snapshot>
-</OOPSE>
+</OpenMD>

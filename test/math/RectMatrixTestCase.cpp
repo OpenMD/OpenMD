@@ -250,7 +250,7 @@ void RectMatrixTestCase::testDiv() {
 }
 
 void RectMatrixTestCase::testAccessEntries(){
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(m1(1, 0), 3.0, oopse::epsilon);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(m1(1, 0), 3.0, OpenMD::NumericConstant::epsilon);
 }
 
 void RectMatrixTestCase::testRowColOperations() {
@@ -260,9 +260,9 @@ void RectMatrixTestCase::testRowColOperations() {
     
     //test getRow
     row = e.getRow(0);
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(row[0], 2.0, oopse::epsilon);
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(row[1], 4.0, oopse::epsilon);
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(row[2], 1.0, oopse::epsilon);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(row[0], 2.0, OpenMD::NumericConstant::epsilon);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(row[1], 4.0, OpenMD::NumericConstant::epsilon);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(row[2], 1.0, OpenMD::NumericConstant::epsilon);
     //test setRow
     row[0] = 2.0;    
     row[1] = 4.0;    
@@ -280,9 +280,9 @@ void RectMatrixTestCase::testRowColOperations() {
     
     //test getCol
     col = e.getColumn(1);
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(col[0], 4.0, oopse::epsilon);    
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(col[1], 0.0, oopse::epsilon);
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(col[2], 6.0, oopse::epsilon);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(col[0], 4.0, OpenMD::NumericConstant::epsilon);    
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(col[1], 0.0, OpenMD::NumericConstant::epsilon);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(col[2], 6.0, OpenMD::NumericConstant::epsilon);
     //test setCol
     col[0] = 2.0;    
     col[1] = 0.0;    
@@ -349,9 +349,9 @@ void RectMatrixTestCase::testOtherMemberFunctions(){
 
     double tmp[4];
     m4.getArray(tmp);
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(tmp[0], -1.0, oopse::epsilon);    
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(tmp[1], -1.0, oopse::epsilon);
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(tmp[2], -3.0, oopse::epsilon);    
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(tmp[3], -1.0, oopse::epsilon);    
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(tmp[0], -1.0, OpenMD::NumericConstant::epsilon);    
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(tmp[1], -1.0, OpenMD::NumericConstant::epsilon);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(tmp[2], -3.0, OpenMD::NumericConstant::epsilon);    
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(tmp[3], -1.0, OpenMD::NumericConstant::epsilon);    
     
 }

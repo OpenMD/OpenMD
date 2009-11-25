@@ -3,7 +3,7 @@
 
 Opens two md files, one with a solute structure and one with a solvent structure.
 Deletes any solvent molecules that overlap with solute molecules and produces a md file.
-The md file is bare and must be edited to run properly in oopse.
+The md file is bare and must be edited to run properly in OpenMD.
 
 Usage: md-solvator
 
@@ -22,10 +22,10 @@ Example:
 """
 
 __author__ = "Charles Vardeman (cvardema@nd.edu)"
-__version__ = "$Revision: 1.11 $"
-__date__ = "$Date: 2008-09-14 01:32:23 $"
+__version__ = "$Revision: 1.12 $"
+__date__ = "$Date: 2009-11-25 20:01:59 $"
 __copyright__ = "Copyright (c) 2008 by the University of Notre Dame"
-__license__ = "OOPSE"
+__license__ = "OpenMD"
 
 import sys
 import getopt
@@ -76,11 +76,11 @@ def usage():
 
 def readFile1(mdFileName):
     mdFile = open(mdFileName, 'r')        
-    # Find OOPSE version info first
+    # Find OpenMD version info first
     line = mdFile.readline()
     while 1:
-        if '<OOPSE version=' in line:
-            OOPSEversion = line
+        if '<OpenMD version=' in line or '<OOPSE version=' in line:
+            OpenMDversion = line
             break
         line = mdFile.readline()
         
@@ -185,11 +185,11 @@ def readFile1(mdFileName):
 
 def readFile2(mdFileName):
     mdFile = open(mdFileName, 'r')        
-    # Find OOPSE version info first
+    # Find OpenMD version info first
     line = mdFile.readline()
     while 1:
-        if '<OOPSE version=' in line:
-            OOPSEversion = line
+        if '<OpenMD version=' in line or '<OOPSE version=':
+            OpenMDversion = line
             break
         line = mdFile.readline()
         
@@ -291,7 +291,7 @@ def readFile2(mdFileName):
 def writeFile(outputFileName):
     outputFile = open(outputFileName, 'w')
 
-    outputFile.write("<OOPSE version=4>\n")
+    outputFile.write("<OpenMD version=1>\n")
     
 #    for metaline in metaData1:
 #        outputFile.write(metaline)
@@ -332,7 +332,7 @@ def writeFile(outputFileName):
 
     outputFile.write("    </StuntDoubles>\n")
     outputFile.write("  </Snapshot>\n")
-    outputFile.write("</OOPSE>\n")
+    outputFile.write("</OpenMD>\n")
     outputFile.close()
     
 def roundMe(x):

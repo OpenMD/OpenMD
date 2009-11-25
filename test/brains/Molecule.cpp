@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2000-2004  Object Oriented Parallel Simulation Engine (OOPSE) project
+ * Copyright (C) 2000-2009  The Open Molecular Dynamics Engine (OpenMD) project
  * 
- * Contact: oopse@oopse.org
+ * Contact: gezelter@openscience.org
  * 
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public License
@@ -33,7 +33,7 @@
 #include "primitives/Molecule.hpp"
 #include <algorithm>
 
-namespace oopse {
+namespace OpenMD {
 
 Molecule::~Molecule() {
 
@@ -304,4 +304,4 @@ std::ostream& operator <<(std::ostream& o, const Molecule& mol) {
     return o;
 }
 
-}//end namespace oopse
+}//end namespace OpenMD

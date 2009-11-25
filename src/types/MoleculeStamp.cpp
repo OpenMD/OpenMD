@@ -6,19 +6,10 @@
  * redistribute this software in source and binary code form, provided
  * that the following conditions are met:
  *
- * 1. Acknowledgement of the program authors must be made in any
- *    publication of scientific results based in part on use of the
- *    program.  An acceptable form of acknowledgement is citation of
- *    the article in which the program was described (Matthew
- *    A. Meineke, Charles F. Vardeman II, Teng Lin, Christopher
- *    J. Fennell and J. Daniel Gezelter, "OOPSE: An Object-Oriented
- *    Parallel Simulation Engine for Molecular Dynamics,"
- *    J. Comput. Chem. 26, pp. 252-271 (2005))
- *
- * 2. Redistributions of source code must retain the above copyright
+ * 1. Redistributions of source code must retain the above copyright
  *    notice, this list of conditions and the following disclaimer.
  *
- * 3. Redistributions in binary form must reproduce the above copyright
+ * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in the
  *    documentation and/or other materials provided with the
  *    distribution.
@@ -37,6 +28,15 @@
  * arising out of the use of or inability to use software, even if the
  * University of Notre Dame has been advised of the possibility of
  * such damages.
+ *
+ * SUPPORT OPEN SCIENCE!  If you use OpenMD or its source code in your
+ * research, please cite the appropriate papers when you publish your
+ * work.  Good starting points are:
+ *                                                                      
+ * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
+ * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
+ * [4]  Vardeman & Gezelter, in progress (2009).                        
  */
 #include <algorithm>
 #include <functional> 
@@ -45,7 +45,7 @@
 #include "types/MoleculeStamp.hpp"
 #include "utils/Tuple.hpp"
 #include "utils/MemoryUtils.hpp"
-namespace oopse {
+namespace OpenMD {
   
   template<class ContainerType>
   bool hasDuplicateElement(const ContainerType& cont) {
@@ -85,7 +85,7 @@ namespace oopse {
       std::ostringstream oss;
       oss<< "Error in Molecule " << getName()  << 
         ": multiple atoms have the same indices"<< atom->getIndex() <<"\n";
-      throw OOPSEException(oss.str());
+      throw OpenMDException(oss.str());
     }
     return ret;
     
@@ -118,7 +118,7 @@ namespace oopse {
       oss << "Error in Molecule " << getName()  << 
         ": multiple rigidbodies have the same indices: " << 
         rigidbody->getIndex() <<"\n";
-      throw OOPSEException(oss.str());
+      throw OpenMDException(oss.str());
     }
     return ret;
   }
@@ -180,7 +180,7 @@ namespace oopse {
       std::ostringstream oss;
       oss << "Error in Molecule " << getName() << ": atom[" << 
         ai - atomStamps_.begin()<< "] is missing\n";
-      throw OOPSEException(oss.str());
+      throw OpenMDException(oss.str());
     }
     
   }
@@ -197,7 +197,7 @@ namespace oopse {
         
         oss << "Error in Molecule " << getName() <<  ": bond(" << 
           bondStamp->getA() << ", " << bondStamp->getB() << ") is invalid\n";
-        throw OOPSEException(oss.str());
+        throw OpenMDException(oss.str());
       }
     }
     
@@ -217,7 +217,7 @@ namespace oopse {
         
         oss << "Error in Molecule " << getName() << ": " << "bond(" <<
           iter->first << ", "<< iter->second << ") appears multiple times\n";
-        throw OOPSEException(oss.str());
+        throw OpenMDException(oss.str());
       } else {
         allBonds.insert(bondPair);
       }
@@ -232,7 +232,7 @@ namespace oopse {
           bondStamp->getA() << ", " << bondStamp->getB() << 
           ") belong to same rigidbody " << 
           atom2Rigidbody[bondStamp->getA()] << "\n";
-        throw OOPSEException(oss.str());
+        throw OpenMDException(oss.str());
       }
     }    
   }
@@ -255,13 +255,13 @@ namespace oopse {
         
         oss << "Error in Molecule " << getName() << " : atoms of bend" << 
           containerToString(bendAtoms) << " have invalid indices\n";
-        throw OOPSEException(oss.str());
+        throw OpenMDException(oss.str());
       }
       
       if (hasDuplicateElement(bendAtoms)) {
         oss << "Error in Molecule " << getName() << " : atoms of bend" << 
           containerToString(bendAtoms) << " have duplicated indices\n";    
-        throw OOPSEException(oss.str());            
+        throw OpenMDException(oss.str());            
       }
       
       if (bendAtoms.size() == 2 ) {
@@ -269,7 +269,7 @@ namespace oopse {
           
           oss << "Error in Molecule " << getName() << 
             ": ghostVectorSouce is missing\n";
-          throw OOPSEException(oss.str());
+          throw OpenMDException(oss.str());
         }else{
           int ghostIndex = bendStamp->getGhostVectorSource();
           if (ghostIndex < getNAtoms()) {
@@ -278,24 +278,24 @@ namespace oopse {
               
               oss <<  "Error in Molecule " << getName() << 
                 ": ghostVectorSouce "<< ghostIndex<<"is invalid\n"; 
-              throw OOPSEException(oss.str());
+              throw OpenMDException(oss.str());
             }
             if (!getAtomStamp(ghostIndex)->haveOrientation()) {
               
               oss <<  "Error in Molecule " << getName() << 
                 ": ghost atom must be a directioanl atom\n"; 
-              throw OOPSEException(oss.str());
+              throw OpenMDException(oss.str());
             }
           } else {
             oss << "Error in Molecule " << getName() <<  
               ": ghostVectorSource " << ghostIndex<< "  is invalid\n";
-            throw OOPSEException(oss.str());
+            throw OpenMDException(oss.str());
           }
         }
       } else if (bendAtoms.size() == 3 && bendStamp->haveGhostVectorSource()) {
         oss <<  "Error in Molecule " << getName() << 
           ": normal bend should not have ghostVectorSouce\n"; 
-        throw OOPSEException(oss.str());
+        throw OpenMDException(oss.str());
       }
     }
     
@@ -312,7 +312,7 @@ namespace oopse {
             oss << "Error in Molecule " << getName() << ": bend" << 
               containerToString(bendAtoms) << " belong to same rigidbody " << 
               rigidbodyIndex << "\n";  
-            throw OOPSEException(oss.str());
+            throw OpenMDException(oss.str());
           }
         }
       }
@@ -358,7 +358,7 @@ namespace oopse {
       if ( iter != allBends.end()) {
         oss << "Error in Molecule " << getName() << ": " << "Bend" << 
           containerToString(bend)<< " appears multiple times\n";
-        throw OOPSEException(oss.str());
+        throw OpenMDException(oss.str());
       } else {
         allBends.insert(bendTuple);
       }
@@ -428,12 +428,12 @@ namespace oopse {
       if (j != torsionAtoms.end() || k != torsionAtoms.end()) {
         oss << "Error in Molecule " << getName() << ": atoms of torsion" << 
           containerToString(torsionAtoms) << " have invalid indices\n"; 
-        throw OOPSEException(oss.str());
+        throw OpenMDException(oss.str());
       }
       if (hasDuplicateElement(torsionAtoms)) {
         oss << "Error in Molecule " << getName() << " : atoms of torsion" << 
           containerToString(torsionAtoms) << " have duplicated indices\n";    
-        throw OOPSEException(oss.str());            
+        throw OpenMDException(oss.str());            
       }        
     }
     
@@ -449,7 +449,7 @@ namespace oopse {
           if (rigidSet[rigidbodyIndex] > 1) {
             oss << "Error in Molecule " << getName() << ": torsion" << 
               containerToString(torsionAtoms) << "is invalid\n";           
-            throw OOPSEException(oss.str());
+            throw OpenMDException(oss.str());
           }
         }
       }
@@ -481,7 +481,7 @@ namespace oopse {
       } else {
         oss << "Error in Molecule " << getName() << ": " << "Torsion" << 
           containerToString(torsion)<< " appears multiple times\n";
-        throw OOPSEException(oss.str());
+        throw OpenMDException(oss.str());
       }
     }
     
@@ -555,7 +555,7 @@ namespace oopse {
       } else {
 	oss << "Error in Molecule " << getName() << ": found wrong number" << 
 	  " of bonds for inversion center " << center;
-        throw OOPSEException(oss.str());
+        throw OpenMDException(oss.str());
       }
     }
     
@@ -580,14 +580,14 @@ namespace oopse {
       if (j != inversionAtoms.end() || k != inversionAtoms.end()) {
         oss << "Error in Molecule " << getName() << ": atoms of inversion" << 
           containerToString(inversionAtoms) << " have invalid indices\n"; 
-        throw OOPSEException(oss.str());
+        throw OpenMDException(oss.str());
       }
 
 
       if (hasDuplicateElement(inversionAtoms)) {
         oss << "Error in Molecule " << getName() << " : atoms of inversion" << 
           containerToString(inversionAtoms) << " have duplicated indices\n";
-        throw OOPSEException(oss.str());            
+        throw OpenMDException(oss.str());            
       }        
     }
     
@@ -607,7 +607,7 @@ namespace oopse {
             oss << "Error in Molecule " << getName() << ": inversion centered on atom " << 
               inversionStamp->getCenter() << " has atoms that belong to same rigidbody " << 
               rigidbodyIndex << "\n";  
-            throw OOPSEException(oss.str());
+            throw OpenMDException(oss.str());
           }
         }
       }
@@ -622,7 +622,7 @@ namespace oopse {
       
       IntTuple4 inversionTuple(cent, inversion[0], inversion[1], inversion[2]);
 
-      // In OOPSE, the Central atom in an inversion comes first, and
+      // In OpenMD, the Central atom in an inversion comes first, and
       // has a special position.  The other three atoms can come in
       // random order, and should be sorted in increasing numerical
       // order to check for duplicates.  This requires three pairwise
@@ -644,7 +644,7 @@ namespace oopse {
       } else {
         oss << "Error in Molecule " << getName() << ": " << "Inversion" << 
           containerToString(inversion)<< " appears multiple times\n";
-        throw OOPSEException(oss.str());
+        throw OpenMDException(oss.str());
       }
     }
 
@@ -688,7 +688,7 @@ namespace oopse {
         } else {
           oss << "Error in Molecule " << getName() << ": found bond mismatch" << 
             " when detecting inversion centers.";
-          throw OOPSEException(oss.str());
+          throw OpenMDException(oss.str());
         }
         
       }
@@ -703,7 +703,7 @@ namespace oopse {
     if (ri != rigidBodyStamps_.end()) {
       oss << "Error in Molecule " << getName() << ":rigidBody[" <<  
         ri - rigidBodyStamps_.begin()<< "] is missing\n";
-      throw OOPSEException(oss.str());
+      throw OpenMDException(oss.str());
     }
     
     for (int i = 0; i < getNRigidBodies(); ++i) {
@@ -715,7 +715,7 @@ namespace oopse {
                                                               getNAtoms()-1));
       if (j != rigidAtoms.end()) {
         oss << "Error in Molecule " << getName();
-        throw OOPSEException(oss.str());
+        throw OpenMDException(oss.str());
       }      
     }    
   }
@@ -732,7 +732,7 @@ namespace oopse {
         std::ostringstream oss;
         oss << "Error in Molecule " << getName() << ": cutoffGroup" << 
           " is out of range\n"; 
-        throw OOPSEException(oss.str());
+        throw OpenMDException(oss.str());
       }
     }    
   }
@@ -746,7 +746,7 @@ namespace oopse {
       std::ostringstream oss;
       oss << "Error in Molecule " << getName() << ":fragment[" <<  
         fi - fragmentStamps_.begin()<< "] is missing\n";
-      throw OOPSEException(oss.str());
+      throw OpenMDException(oss.str());
     }
     
   }

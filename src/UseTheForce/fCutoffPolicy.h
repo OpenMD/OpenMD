@@ -1,4 +1,4 @@
-#ifdef __OOPSE_C
+#ifdef __OPENMD_C
 #ifndef __FCUTOFFPOLICY
 #define __FCUTOFFPOLICY
 
@@ -7,7 +7,7 @@
 #define MAX_CUTOFF_POLICY          3
 
 #endif
-#endif /*__OOPSE_C*/
+#endif /*__OPENMD_C*/
 
 #ifdef  __FORTRAN90
 

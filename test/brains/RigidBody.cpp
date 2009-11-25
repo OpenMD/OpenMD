@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2000-2004  Object Oriented Parallel Simulation Engine (OOPSE) project
+ * Copyright (C) 2000-2009  The Open Molecular Dynamics Engine (OpenMD) project
  * 
- * Contact: oopse@oopse.org
+ * Contact: gezelter@openscience.org
  * 
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public License
@@ -25,7 +25,7 @@
 
 #include "primitives/RigidBody.hpp"
 
-namespace oopse {
+namespace OpenMD {
 
 RigidBody::RigidBody() : StuntDouble(otRigidBody, &Snapshot::rigidbodyData){
 
@@ -221,7 +221,7 @@ void  RigidBody::calcRefCoords() {
   if (n_linear_coords > 1) {
           sprintf( painCave.errMsg,
                "RigidBody error.\n"
-               "\tOOPSE found more than one axis in this rigid body with a vanishing \n"
+               "\tOpenMD found more than one axis in this rigid body with a vanishing \n"
                "\tmoment of inertia.  This can happen in one of three ways:\n"
                "\t 1) Only one atom was specified, or \n"
                "\t 2) All atoms were specified at the same location, or\n"

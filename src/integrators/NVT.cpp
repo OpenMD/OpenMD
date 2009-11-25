@@ -6,19 +6,10 @@
  * redistribute this software in source and binary code form, provided
  * that the following conditions are met:
  *
- * 1. Acknowledgement of the program authors must be made in any
- *    publication of scientific results based in part on use of the
- *    program.  An acceptable form of acknowledgement is citation of
- *    the article in which the program was described (Matthew
- *    A. Meineke, Charles F. Vardeman II, Teng Lin, Christopher
- *    J. Fennell and J. Daniel Gezelter, "OOPSE: An Object-Oriented
- *    Parallel Simulation Engine for Molecular Dynamics,"
- *    J. Comput. Chem. 26, pp. 252-271 (2005))
- *
- * 2. Redistributions of source code must retain the above copyright
+ * 1. Redistributions of source code must retain the above copyright
  *    notice, this list of conditions and the following disclaimer.
  *
- * 3. Redistributions in binary form must reproduce the above copyright
+ * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in the
  *    documentation and/or other materials provided with the
  *    distribution.
@@ -37,14 +28,23 @@
  * arising out of the use of or inability to use software, even if the
  * University of Notre Dame has been advised of the possibility of
  * such damages.
+ *
+ * SUPPORT OPEN SCIENCE!  If you use OpenMD or its source code in your
+ * research, please cite the appropriate papers when you publish your
+ * work.  Good starting points are:
+ *                                                                      
+ * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
+ * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
+ * [4]  Vardeman & Gezelter, in progress (2009).                        
  */
  
 #include "integrators/NVT.hpp"
 #include "primitives/Molecule.hpp"
 #include "utils/simError.h"
-#include "utils/OOPSEConstant.hpp"
+#include "utils/PhysicalConstants.hpp"
 
-namespace oopse {
+namespace OpenMD {
 
   NVT::NVT(SimInfo* info) : VelocityVerletIntegrator(info), chiTolerance_ (1e-6), maxIterNum_(4) {
 
@@ -59,7 +59,7 @@ namespace oopse {
     if (!simParams->haveTargetTemp()) {
       sprintf(painCave.errMsg, "You can't use the NVT integrator without a targetTemp_!\n");
       painCave.isFatal = 1;
-      painCave.severity = OOPSE_ERROR;
+      painCave.severity = OPENMD_ERROR;
       simError();
     } else {
       targetTemp_ = simParams->getTargetTemp();
@@ -71,7 +71,7 @@ namespace oopse {
       sprintf(painCave.errMsg, "If you use the constant temperature\n"
 	      "\tintegrator, you must set tauThermostat.\n");
 
-      painCave.severity = OOPSE_ERROR;
+      painCave.severity = OPENMD_ERROR;
       painCave.isFatal = 1;
       simError();
     } else {
@@ -115,8 +115,8 @@ namespace oopse {
         mass = integrableObject->getMass();
 
         // velocity half step  (use chi from previous step here):
-        //vel[j] += dt2 * ((frc[j] / mass ) * OOPSEConstant::energyConvert - vel[j]*chi);
-        vel += dt2 *OOPSEConstant::energyConvert/mass*frc - dt2*chi*vel;
+        //vel[j] += dt2 * ((frc[j] / mass ) * PhysicalConstants::energyConvert - vel[j]*chi);
+        vel += dt2 *PhysicalConstants::energyConvert/mass*frc - dt2*chi*vel;
         
         // position whole step
         //pos[j] += dt * vel[j];
@@ -134,8 +134,8 @@ namespace oopse {
 
 	  ji = integrableObject->getJ();
 
-	  //ji[j] += dt2 * (Tb[j] * OOPSEConstant::energyConvert - ji[j]*chi);
-	  ji += dt2*OOPSEConstant::energyConvert*Tb - dt2*chi *ji;
+	  //ji[j] += dt2 * (Tb[j] * PhysicalConstants::energyConvert - ji[j]*chi);
+	  ji += dt2*PhysicalConstants::energyConvert*Tb - dt2*chi *ji;
 	  rotAlgo->rotate(integrableObject, ji, dt);
 
 	  integrableObject->setJ(ji);
@@ -211,8 +211,8 @@ namespace oopse {
 
 	  // velocity half step
 	  //for(j = 0; j < 3; j++)
-	  //    vel[j] = oldVel_[3*i+j] + dt2 * ((frc[j] / mass ) * OOPSEConstant::energyConvert - oldVel_[3*i + j]*chi);
-	  vel = oldVel_[index] + dt2/mass*OOPSEConstant::energyConvert * frc - dt2*chi*oldVel_[index];
+	  //    vel[j] = oldVel_[3*i+j] + dt2 * ((frc[j] / mass ) * PhysicalConstants::energyConvert - oldVel_[3*i + j]*chi);
+	  vel = oldVel_[index] + dt2/mass*PhysicalConstants::energyConvert * frc - dt2*chi*oldVel_[index];
             
 	  integrableObject->setVel(vel);
 
@@ -223,8 +223,8 @@ namespace oopse {
 	    Tb =  integrableObject->lab2Body(integrableObject->getTrq());
 
 	    //for(j = 0; j < 3; j++)
-	    //    ji[j] = oldJi_[3*i + j] + dt2 * (Tb[j] * OOPSEConstant::energyConvert - oldJi_[3*i+j]*chi);
-	    ji = oldJi_[index] + dt2*OOPSEConstant::energyConvert*Tb - dt2*chi *oldJi_[index];
+	    //    ji[j] = oldJi_[3*i + j] + dt2 * (Tb[j] * PhysicalConstants::energyConvert - oldJi_[3*i+j]*chi);
+	    ji = oldJi_[index] + dt2*PhysicalConstants::energyConvert*Tb - dt2*chi *oldJi_[index];
 
 	    integrableObject->setJ(ji);
 	  }
@@ -263,13 +263,13 @@ namespace oopse {
     RealType thermostat_kinetic;
     RealType thermostat_potential;
     
-    fkBT = info_->getNdf() *OOPSEConstant::kB *targetTemp_;
+    fkBT = info_->getNdf() *PhysicalConstants::kB *targetTemp_;
 
     Energy = thermo.getTotalE();
 
-    thermostat_kinetic = fkBT * tauThermostat_ * tauThermostat_ * chi * chi / (2.0 * OOPSEConstant::energyConvert);
+    thermostat_kinetic = fkBT * tauThermostat_ * tauThermostat_ * chi * chi / (2.0 * PhysicalConstants::energyConvert);
 
-    thermostat_potential = fkBT * integralOfChidt / OOPSEConstant::energyConvert;
+    thermostat_potential = fkBT * integralOfChidt / PhysicalConstants::energyConvert;
 
     conservedQuantity = Energy + thermostat_kinetic + thermostat_potential;
 
@@ -277,4 +277,4 @@ namespace oopse {
   }
 
 
-}//end namespace oopse
+}//end namespace OpenMD

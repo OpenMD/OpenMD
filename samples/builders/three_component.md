@@ -1,4 +1,4 @@
-<OOPSE version=4>
+<OpenMD version=1>
   <MetaData>
 #include "lj.md"
 
@@ -32,4 +32,4 @@ statusTime = 1;
 thermalTime = 1000.0;
 tempSet = "true";
   </MetaData>
-</OOPSE>
+</OpenMD>

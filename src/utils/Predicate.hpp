@@ -18,7 +18,7 @@
 #  define USE_FACET(Type, loc) std::use_facet< Type >(loc)
 #endif
 
-namespace oopse {
+namespace OpenMD {
 
 template<typename Derived>
 struct PredFacade{};

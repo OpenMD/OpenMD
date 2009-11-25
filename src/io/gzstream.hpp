@@ -18,8 +18,8 @@
 // ============================================================================
 //
 // File          : gzstream.h
-// Revision      : $Revision: 1.1 $
-// Revision_date : $Date: 2005-09-20 21:22:38 $
+// Revision      : $Revision: 1.2 $
+// Revision_date : $Date: 2009-11-25 20:02:01 $
 // Author(s)     : Deepak Bandyopadhyay, Lutz Kettner
 // 
 // Standard streambuf implementation following Nicolai Josuttis, "The 
@@ -34,7 +34,7 @@
 #include <fstream>
 #include <zlib.h>
 
-namespace oopse {
+namespace OpenMD {
 
 
 // ----------------------------------------------------------------------------

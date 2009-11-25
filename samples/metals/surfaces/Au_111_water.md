@@ -1,4 +1,4 @@
-<OOPSE version=4>
+<OpenMD version=1>
   <MetaData>
 #include "metals.md"
 #include "water.md"
@@ -653,4 +653,4 @@ switchingRadius = 6.0;
        600      pv        7.504273132       -13.00941652        35.46463126  7.459805e-05 -3.163064e-04 -2.533803e-04
     </StuntDoubles>
   </Snapshot>
-</OOPSE>
+</OpenMD>

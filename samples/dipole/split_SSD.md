@@ -1,4 +1,4 @@
-<OOPSE version=4>
+<OpenMD version=1>
   <MetaData>
 #include "splitDipole.md"
 #include "water.md"
@@ -52,4 +52,4 @@ useInitialExtendedSystemState = "false";
          1    pvqj           4.295467          -0.008031           0.435229  0.000000e+00 -0.000000e+00  0.000000e+00  3.628000e-03  9.898270e-01  1.401060e-01  2.447900e-02 -0.000000e+00  0.000000e+00 -0.000000e+00
     </StuntDoubles>
   </Snapshot>
-</OOPSE>
+</OpenMD>

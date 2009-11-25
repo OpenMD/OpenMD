@@ -6,19 +6,10 @@
  * redistribute this software in source and binary code form, provided
  * that the following conditions are met:
  *
- * 1. Acknowledgement of the program authors must be made in any
- *    publication of scientific results based in part on use of the
- *    program.  An acceptable form of acknowledgement is citation of
- *    the article in which the program was described (Matthew
- *    A. Meineke, Charles F. Vardeman II, Teng Lin, Christopher
- *    J. Fennell and J. Daniel Gezelter, "OOPSE: An Object-Oriented
- *    Parallel Simulation Engine for Molecular Dynamics,"
- *    J. Comput. Chem. 26, pp. 252-271 (2005))
- *
- * 2. Redistributions of source code must retain the above copyright
+ * 1. Redistributions of source code must retain the above copyright
  *    notice, this list of conditions and the following disclaimer.
  *
- * 3. Redistributions in binary form must reproduce the above copyright
+ * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in the
  *    documentation and/or other materials provided with the
  *    distribution.
@@ -38,13 +29,18 @@
  * University of Notre Dame has been advised of the possibility of
  * such damages.
  *
- *
- *  SC_FF.cpp
- *  OOPSE-2.0
+ * SUPPORT OPEN SCIENCE!  If you use OpenMD or its source code in your
+ * research, please cite the appropriate papers when you publish your
+ * work.  Good starting points are:
+ *                                                                      
+ * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
+ * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
+ * [4]  Vardeman & Gezelter, in progress (2009).                        
  *
  *  Created by Charles F. Vardeman II on 11/9/05.
  *  @author  Charles F. Vardeman II 
- *  @version $Id: SC_FF.cpp,v 1.11 2008-07-30 18:11:18 gezelter Exp $
+ *  @version $Id: SC_FF.cpp,v 1.12 2009-11-25 20:01:57 gezelter Exp $
  *
  */
 
@@ -60,7 +56,7 @@
 #include "io/SCAtomTypesSectionParser.hpp"
 #include "UseTheForce/ForceFieldCreator.hpp"
 #include "utils/simError.h"
-namespace oopse {
+namespace OpenMD {
   
   SC_FF::SC_FF(){
     
@@ -112,5 +108,5 @@ namespace oopse {
     // we try to create a second SC force field.
     destroySCTypes();
   }
-} //end namespace oopse
+} //end namespace OpenMD
 

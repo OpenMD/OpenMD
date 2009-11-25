@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2000-2004  Object Oriented Parallel Simulation Engine (OOPSE) project
+ * Copyright (C) 2000-2009  The Open Molecular Dynamics Engine (OpenMD) project
  * 
- * Contact: oopse@oopse.org
+ * Contact: gezelter@openscience.org
  * 
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public License
@@ -32,7 +32,7 @@
 
 #include "primitives/StuntDouble.hpp"
 
-namespace oopse {
+namespace OpenMD {
 
 StuntDouble::StuntDouble(ObjectType objType, DataStoragePointer storage) : 
     objType_(objType), storage_(storage),    

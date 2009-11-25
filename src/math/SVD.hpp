@@ -8,7 +8,7 @@
 #include <cmath>
 // for abs() below
 
-using namespace oopse;
+using namespace OpenMD;
 using namespace std;
 
 namespace JAMA

@@ -4,7 +4,7 @@
 #  http://www.gnu.org/software/gengetopt/gengetopt.html
 package "nanoparticleBuilder"
 version "1.0"
-purpose "Builds spherical random or core-shell nanoparticles and outputs an OOPSE startup file"
+purpose "Builds spherical random or core-shell nanoparticles and outputs an OpenMD startup file"
 
 # Options
 

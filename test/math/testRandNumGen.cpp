@@ -10,7 +10,7 @@
 #include <mpi.h>
 #include "math/ParallelRandNumGen.hpp"
 #endif
-using namespace oopse;
+using namespace OpenMD;
 using namespace std;
 
 void testUniform(){

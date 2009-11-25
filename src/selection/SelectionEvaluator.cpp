@@ -6,19 +6,10 @@
  * redistribute this software in source and binary code form, provided
  * that the following conditions are met:
  *
- * 1. Acknowledgement of the program authors must be made in any
- *    publication of scientific results based in part on use of the
- *    program.  An acceptable form of acknowledgement is citation of
- *    the article in which the program was described (Matthew
- *    A. Meineke, Charles F. Vardeman II, Teng Lin, Christopher
- *    J. Fennell and J. Daniel Gezelter, "OOPSE: An Object-Oriented
- *    Parallel Simulation Engine for Molecular Dynamics,"
- *    J. Comput. Chem. 26, pp. 252-271 (2005))
- *
- * 2. Redistributions of source code must retain the above copyright
+ * 1. Redistributions of source code must retain the above copyright
  *    notice, this list of conditions and the following disclaimer.
  *
- * 3. Redistributions in binary form must reproduce the above copyright
+ * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in the
  *    documentation and/or other materials provided with the
  *    distribution.
@@ -37,6 +28,15 @@
  * arising out of the use of or inability to use software, even if the
  * University of Notre Dame has been advised of the possibility of
  * such damages.
+ *
+ * SUPPORT OPEN SCIENCE!  If you use OpenMD or its source code in your
+ * research, please cite the appropriate papers when you publish your
+ * work.  Good starting points are:
+ *                                                                      
+ * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
+ * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
+ * [4]  Vardeman & Gezelter, in progress (2009).                        
  */
 
 #include <stack>
@@ -47,7 +47,7 @@
 #include "primitives/Molecule.hpp"
 #include "io/basic_ifstrstream.hpp"
 
-namespace oopse {
+namespace OpenMD {
 
 
   SelectionEvaluator::SelectionEvaluator(SimInfo* si) 
@@ -67,7 +67,7 @@ namespace oopse {
 
       sprintf( painCave.errMsg,
                "SelectionCompiler Error: %s\n", errorMessage.c_str());
-      painCave.severity = OOPSE_ERROR;
+      painCave.severity = OPENMD_ERROR;
       painCave.isFatal = 1;
       simError();
       return false;
@@ -122,7 +122,7 @@ namespace oopse {
     return loadScript(filename, script);
   }
   
-  void SelectionEvaluator::instructionDispatchLoop(OOPSEBitSet& bs){
+  void SelectionEvaluator::instructionDispatchLoop(OpenMDBitSet& bs){
     
     while ( pc < aatoken.size()) {
       statement = aatoken[pc++];
@@ -143,10 +143,10 @@ namespace oopse {
 
   }
 
-  OOPSEBitSet SelectionEvaluator::expression(const std::vector<Token>& code, 
+  OpenMDBitSet SelectionEvaluator::expression(const std::vector<Token>& code, 
                                              int pcStart) {
-    OOPSEBitSet bs;
-    std::stack<OOPSEBitSet> stack; 
+    OpenMDBitSet bs;
+    std::stack<OpenMDBitSet> stack; 
    
     for (int pc = pcStart; pc < code.size(); ++pc) {
       Token instruction = code[pc];
@@ -157,12 +157,12 @@ namespace oopse {
       case Token::expressionEnd:
         break;
       case Token::all:
-        bs = OOPSEBitSet(nStuntDouble);
+        bs = OpenMDBitSet(nStuntDouble);
         bs.setAll();
         stack.push(bs);            
         break;
       case Token::none:
-        bs = OOPSEBitSet(nStuntDouble);
+        bs = OpenMDBitSet(nStuntDouble);
         stack.push(bs);            
         break;
       case Token::opOr:
@@ -213,12 +213,12 @@ namespace oopse {
 
 
 
-  OOPSEBitSet SelectionEvaluator::comparatorInstruction(const Token& instruction) {
+  OpenMDBitSet SelectionEvaluator::comparatorInstruction(const Token& instruction) {
     int comparator = instruction.tok;
     int property = instruction.intValue;
     float comparisonValue = boost::any_cast<float>(instruction.value);
     float propertyValue;
-    OOPSEBitSet bs(nStuntDouble);
+    OpenMDBitSet bs(nStuntDouble);
     bs.clearAll();
     
     SimInfo::MoleculeIterator mi;
@@ -244,7 +244,7 @@ namespace oopse {
     return bs;
   }
 
-  void SelectionEvaluator::compareProperty(StuntDouble* sd, OOPSEBitSet& bs, 
+  void SelectionEvaluator::compareProperty(StuntDouble* sd, OpenMDBitSet& bs, 
                                            int property, int comparator, 
                                            float comparisonValue) {
     RealType propertyValue = 0.0;
@@ -305,7 +305,7 @@ namespace oopse {
   }
 
   void SelectionEvaluator::withinInstruction(const Token& instruction, 
-                                             OOPSEBitSet& bs){
+                                             OpenMDBitSet& bs){
     
     boost::any withinSpec = instruction.value;
     float distance;
@@ -362,18 +362,18 @@ namespace oopse {
     }
   }
 
-  void SelectionEvaluator::select(OOPSEBitSet& bs){
+  void SelectionEvaluator::select(OpenMDBitSet& bs){
     bs = expression(statement, 1);
   }
   
-  OOPSEBitSet SelectionEvaluator::lookupValue(const std::string& variable){
+  OpenMDBitSet SelectionEvaluator::lookupValue(const std::string& variable){
     
-    OOPSEBitSet bs(nStuntDouble);
+    OpenMDBitSet bs(nStuntDouble);
     std::map<std::string, boost::any>::iterator i = variables.find(variable);
     
     if (i != variables.end()) {
-      if (i->second.type() == typeid(OOPSEBitSet)) {
-	return boost::any_cast<OOPSEBitSet>(i->second);
+      if (i->second.type() == typeid(OpenMDBitSet)) {
+	return boost::any_cast<OpenMDBitSet>(i->second);
       } else if (i->second.type() ==  typeid(std::vector<Token>)){
 	bs = expression(boost::any_cast<std::vector<Token> >(i->second), 2);
 	i->second =  bs; /**@todo fixme */
@@ -386,7 +386,7 @@ namespace oopse {
     return bs;
   }
   
-  OOPSEBitSet SelectionEvaluator::nameInstruction(const std::string& name){    
+  OpenMDBitSet SelectionEvaluator::nameInstruction(const std::string& name){    
     return nameFinder.match(name);    
   }    
 
@@ -407,8 +407,8 @@ namespace oopse {
     //predefine();
   }
 
-  OOPSEBitSet SelectionEvaluator::evaluate() {
-    OOPSEBitSet bs(nStuntDouble);
+  OpenMDBitSet SelectionEvaluator::evaluate() {
+    OpenMDBitSet bs(nStuntDouble);
     if (isLoaded_) {
       pc = 0;
       instructionDispatchLoop(bs);
@@ -417,8 +417,8 @@ namespace oopse {
     return bs;
   }
 
-  OOPSEBitSet SelectionEvaluator::indexInstruction(const boost::any& value) {
-    OOPSEBitSet bs(nStuntDouble);
+  OpenMDBitSet SelectionEvaluator::indexInstruction(const boost::any& value) {
+    OpenMDBitSet bs(nStuntDouble);
 
     if (value.type() == typeid(int)) {
       int index = boost::any_cast<int>(value);
@@ -455,7 +455,7 @@ namespace oopse {
 	} else {
 	  sprintf( painCave.errMsg,
 		   "Can not cast GenericData to DoubleGenericData\n");
-	  painCave.severity = OOPSE_ERROR;
+	  painCave.severity = OPENMD_ERROR;
 	  painCave.isFatal = 1;
 	  simError();          
 	}

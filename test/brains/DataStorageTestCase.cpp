@@ -42,13 +42,13 @@ void DataStorageTestCase::testDataStorage() {
     double* pforce = ds2.getArrayPointer(DataStorage::dslForce);
 
     pamat[9] = 2.0993;
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(ds2.aMat[1](0,0), 2.0993, oopse::epsilon);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(ds2.aMat[1](0,0), 2.0993, OpenMD::NumericConstant::epsilon);
 
     pzangle[9743] = 8464353.129574;
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(ds2.zAngle[9743], 8464353.129574, oopse::epsilon);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(ds2.zAngle[9743], 8464353.129574, OpenMD::NumericConstant::epsilon);
 
     pforce[12] = 345546.3413263;
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(ds2.force[4][0], 345546.3413263, oopse::epsilon);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(ds2.force[4][0], 345546.3413263, OpenMD::NumericConstant::epsilon);
 
     //test copy
     ds2.zAngle[0] = 7.0;
@@ -84,36 +84,36 @@ void DataStorageTestCase::testDataStorage() {
 
     ds2.copy(0, 2, 10);
 
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(ds2.zAngle[10], 7.0, oopse::epsilon);
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(ds2.zAngle[11], 3.5, oopse::epsilon);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(ds2.zAngle[10], 7.0, OpenMD::NumericConstant::epsilon);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(ds2.zAngle[11], 3.5, OpenMD::NumericConstant::epsilon);
 
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(ds2.force[10][0], 6.0, oopse::epsilon);
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(ds2.force[10][1], 7.0, oopse::epsilon);
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(ds2.force[10][2], 8.0, oopse::epsilon);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(ds2.force[10][0], 6.0, OpenMD::NumericConstant::epsilon);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(ds2.force[10][1], 7.0, OpenMD::NumericConstant::epsilon);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(ds2.force[10][2], 8.0, OpenMD::NumericConstant::epsilon);
 
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(ds2.force[11][0], 9.0, oopse::epsilon);
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(ds2.force[11][1], 10.0, oopse::epsilon);
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(ds2.force[11][2], 11.0, oopse::epsilon);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(ds2.force[11][0], 9.0, OpenMD::NumericConstant::epsilon);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(ds2.force[11][1], 10.0, OpenMD::NumericConstant::epsilon);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(ds2.force[11][2], 11.0, OpenMD::NumericConstant::epsilon);
 
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(ds2.aMat[10](0, 0), 1.0, oopse::epsilon);
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(ds2.aMat[10](0, 1), 2.0, oopse::epsilon);
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(ds2.aMat[10](0, 2), 3.0, oopse::epsilon);
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(ds2.aMat[10](1, 0), 4.0, oopse::epsilon);
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(ds2.aMat[10](1, 1) , 5.0, oopse::epsilon);
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(ds2.aMat[10](1, 2), 6.0, oopse::epsilon);
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(ds2.aMat[10](2, 0), 7.0, oopse::epsilon);
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(ds2.aMat[10](2, 1), 8.0, oopse::epsilon);
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(ds2.aMat[10](2, 2), 9.0, oopse::epsilon);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(ds2.aMat[10](0, 0), 1.0, OpenMD::NumericConstant::epsilon);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(ds2.aMat[10](0, 1), 2.0, OpenMD::NumericConstant::epsilon);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(ds2.aMat[10](0, 2), 3.0, OpenMD::NumericConstant::epsilon);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(ds2.aMat[10](1, 0), 4.0, OpenMD::NumericConstant::epsilon);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(ds2.aMat[10](1, 1) , 5.0, OpenMD::NumericConstant::epsilon);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(ds2.aMat[10](1, 2), 6.0, OpenMD::NumericConstant::epsilon);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(ds2.aMat[10](2, 0), 7.0, OpenMD::NumericConstant::epsilon);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(ds2.aMat[10](2, 1), 8.0, OpenMD::NumericConstant::epsilon);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(ds2.aMat[10](2, 2), 9.0, OpenMD::NumericConstant::epsilon);
 
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(ds2.aMat[11](0, 0), 11.0, oopse::epsilon);
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(ds2.aMat[11](0, 1), 12.0, oopse::epsilon);
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(ds2.aMat[11](0, 2), 13.0, oopse::epsilon);
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(ds2.aMat[11](1, 0), 14.0, oopse::epsilon);
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(ds2.aMat[11](1, 1) , 15.0, oopse::epsilon);
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(ds2.aMat[11](1, 2), 16.0, oopse::epsilon);
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(ds2.aMat[11](2, 0), 17.0, oopse::epsilon);
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(ds2.aMat[11](2, 1), 18.0, oopse::epsilon);
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(ds2.aMat[11](2, 2), 19.0, oopse::epsilon);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(ds2.aMat[11](0, 0), 11.0, OpenMD::NumericConstant::epsilon);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(ds2.aMat[11](0, 1), 12.0, OpenMD::NumericConstant::epsilon);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(ds2.aMat[11](0, 2), 13.0, OpenMD::NumericConstant::epsilon);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(ds2.aMat[11](1, 0), 14.0, OpenMD::NumericConstant::epsilon);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(ds2.aMat[11](1, 1) , 15.0, OpenMD::NumericConstant::epsilon);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(ds2.aMat[11](1, 2), 16.0, OpenMD::NumericConstant::epsilon);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(ds2.aMat[11](2, 0), 17.0, OpenMD::NumericConstant::epsilon);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(ds2.aMat[11](2, 1), 18.0, OpenMD::NumericConstant::epsilon);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(ds2.aMat[11](2, 2), 19.0, OpenMD::NumericConstant::epsilon);
 
     
 }

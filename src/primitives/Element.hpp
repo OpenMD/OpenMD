@@ -1,7 +1,7 @@
 /**********************************************************************
 
 This basic Element data-holding class was originally taken from the data.h 
-file in OpenBabel. The code has been modified to match the OOPSE coding style.
+file in OpenBabel. The code has been modified to match the OpenMD coding style.
 
 We have retained the OpenBabel copyright and GPL license on this class:  
 
@@ -34,7 +34,7 @@ GNU General Public License for more details.
 #include <string.h>
 #include "config.h"
 
-namespace oopse{
+namespace OpenMD{
   class Element {
   public:
     Element()    {}

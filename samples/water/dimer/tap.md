@@ -1,4 +1,4 @@
-<OOPSE version=4>
+<OpenMD version=1>
   <MetaData>
 #include "water.md"
 
@@ -45,4 +45,4 @@ useInitialExtendedSystemState = "false";
          1    pvqj           3.881739          -0.030441          -0.007695 -0.000000e+00  0.000000e+00 -0.000000e+00  6.207330e-01  3.413810e-01 -6.447840e-01  2.870600e-01 -0.000000e+00 -0.000000e+00 -0.000000e+00
     </StuntDoubles>
   </Snapshot>
-</OOPSE>
+</OpenMD>

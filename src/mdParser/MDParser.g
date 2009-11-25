@@ -272,7 +272,7 @@ LineDirective
   }
     ("line")?  // this would be for if the directive started "#line"
     (Space)+
-    n:Decimal { setLine(oopse::lexi_cast<int>(n->getText()) - 1); } 
+    n:Decimal { setLine(OpenMD::lexi_cast<int>(n->getText()) - 1); } 
     (Space)+
     (sl:StringLiteral) {std::string filename = sl->getText().substr(1,sl->getText().length()-2); observer->notify(filename);} 
     ((Space)+ Decimal)* // To support cpp flags (GNU)

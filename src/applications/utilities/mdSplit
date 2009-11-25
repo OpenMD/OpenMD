@@ -17,10 +17,10 @@ Example:
 """
 
 __author__ = "Charles Vardeman (cvardema@nd.edu)"
-__version__ = "$Revision: 1.7 $"
-__date__ = "$Date: 2007-01-02 20:42:44 $"
+__version__ = "$Revision: 1.8 $"
+__date__ = "$Date: 2009-11-25 20:01:59 $"
 __copyright__ = "Copyright (c) 2006 by the University of Notre Dame"
-__license__ = "OOPSE"
+__license__ = "OpenMD"
 
 import sys
 import getopt
@@ -48,11 +48,11 @@ def splitFile(mdFileName,skipFrameNumber):
     metaDataFrame = []
     haveMetaData = 0
     haveMetaDataEnd = 0
-# Find OOPSE version info first
+# Find OpenMD version info first
     line = mdFile.readline()
     while 1:
-        if '<OOPSE version=' in line:
-            OOPSEversion = line
+        if '<OOPSE version=' in line or '<OpenMD version=' in line:
+            OpenMDversion = line
             break
         line = mdFile.readline()
 
@@ -87,14 +87,14 @@ def splitFile(mdFileName,skipFrameNumber):
             if (remainder == 0):
 		outfilename = outfilePrefix + "_" + "%04d" % foundFrames + ext
                 outFile = open(outfilename,'w')
-                outFile.write(OOPSEversion)
+                outFile.write(OpenMDversion)
                 for metaline in metaDataFrame:
                     outFile.write(metaline)
                 while not '</Snapshot>' in line:
                     outFile.write(line)
                     line = mdFile.readline()
                 outFile.write(line)
-                outFile.write("</OOPSE>")
+                outFile.write("</OpenMD>")
                 outFile.close()
         line = mdFile.readline()
         if not line: break

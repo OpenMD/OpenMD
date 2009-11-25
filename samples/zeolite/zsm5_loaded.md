@@ -1,4 +1,4 @@
-<OOPSE version=4>
+<OpenMD version=1>
   <MetaData>
 
 molecule{
@@ -681,4 +681,4 @@ switchingRadius = 10.0;
        611    pvqj        5.609849363        7.266479174        11.22882353  9.720195e-04 -1.323554e-03 -5.607156e-04  6.429278e-01  3.561058e-01 -1.574207e-03  6.781077e-01  1.254474e-02 -5.915196e-03  1.628829e-02
     </StuntDoubles>
   </Snapshot>
-</OOPSE>
+</OpenMD>

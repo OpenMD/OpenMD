@@ -92,7 +92,7 @@ void SquareMatrix3TestCase::testOtherMemberFunctions() {
     m2(2,0) = 0.0;
     m2(2,1) = -1.0;
     m2(2,2) = 1.0; 
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(m2.determinant(), -46.0, oopse::epsilon);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(m2.determinant(), -46.0, OpenMD::NumericConstant::epsilon);
 }
 void SquareMatrix3TestCase::testTransformation(){
 

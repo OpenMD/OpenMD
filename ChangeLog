@@ -468,7 +468,7 @@
 	src/applications/simpleBuilder/randomBuilder.ggo,
 	src/applications/simpleBuilder/randomBuilderCmd.c,
 	src/applications/simpleBuilder/randomBuilderCmd.h: Fixing the
-	builders to prepare for OOPSE-4 release
+	builders to prepare for OpenMD release
 
 2006-10-06 14:29  chuckv
 
@@ -699,7 +699,7 @@
 	samples/zcons/zconsFixed.in, samples/zcons/zconsFixed.md,
 	samples/zcons/zconsMoving.in, samples/zcons/zconsMoving.md,
 	src/restraints/ThermoIntegrationForceManager.cpp: converted samples
-	over to the OOPSE-4 file format
+	over to the OpenMD file format
 	
 	Fixed an MPI bug in thermodynamic integration
 
@@ -735,7 +735,7 @@
 	src/openbabel/oopseformat.cpp, src/primitives/StuntDouble.cpp,
 	src/primitives/StuntDouble.hpp, src/utils/StringUtils.cpp,
 	src/utils/StringUtils.hpp: Massive changes preparing for release of
-	OOPSE-4: The main difference is that the new MD file format (.md,
+	OpenMD: The main difference is that the new MD file format (.md,
 	.dump, .eor) now contains meta-data information along with the
 	configuration information.
 

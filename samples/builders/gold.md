@@ -1,4 +1,4 @@
-<OOPSE version=4>
+<OpenMD version=1>
   <MetaData>
 #include "metals.md"
 
@@ -21,4 +21,4 @@ sampleTime = 50.0;
 thermalTime = 100.0;
 tempSet = "false";
   </MetaData>
-</OOPSE>
+</OpenMD>

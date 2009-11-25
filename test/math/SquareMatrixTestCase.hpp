@@ -4,7 +4,7 @@
 #include <cppunit/extensions/HelperMacros.h>
 #include "math/SquareMatrix.hpp"
 
-using namespace oopse;
+using namespace OpenMD;
 
 typedef SquareMatrix<double, 3> SMat3x3;
 

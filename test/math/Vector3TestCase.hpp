@@ -4,7 +4,7 @@
 #include <cppunit/extensions/HelperMacros.h>
 #include "math/Vector3.hpp"
  
-using namespace oopse;
+using namespace OpenMD;
 
 class Vector3TestCase : public CPPUNIT_NS::TestFixture {
     CPPUNIT_TEST_SUITE( Vector3TestCase );

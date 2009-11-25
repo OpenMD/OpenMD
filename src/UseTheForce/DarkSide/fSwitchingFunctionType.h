@@ -1,4 +1,4 @@
-#ifdef __OOPSE_C
+#ifdef __OPENMD_C
 #ifndef __FSWITCHINGFUNCTIONTYPE
 #define __FSWITCHINGFUNCTIONTYPE
 
@@ -6,7 +6,7 @@
 #define FIFTH_ORDER_POLY     2
 
 #endif
-#endif /*__OOPSE_C*/
+#endif /*__OPENMD_C*/
 
 #ifdef  __FORTRAN90
 

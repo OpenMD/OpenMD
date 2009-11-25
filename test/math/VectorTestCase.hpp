@@ -4,7 +4,7 @@
 #include <cppunit/extensions/HelperMacros.h>
 #include "math/Vector.hpp"
  
-using namespace oopse;
+using namespace OpenMD;
 
 typedef Vector<double, 4> Vec4;
 

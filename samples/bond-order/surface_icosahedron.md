@@ -1,4 +1,4 @@
-<OOPSE version=4>
+<OpenMD version=1>
   <MetaData>
 #include "metals.md"
 
@@ -52,4 +52,4 @@ tempSet = "false";
          6      pv      0        0        -4.08000552744279                0                          0       0
     </StuntDoubles>
   </Snapshot>
-</OOPSE>
+</OpenMD>

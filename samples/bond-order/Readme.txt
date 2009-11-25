@@ -6,7 +6,7 @@ correct values are being computed.  The central atom in each
 cluster is a copper atom, so the proper way to run the tests would
 be a command like:
 
-  $(OOPSE_HOME)/bin/StaticProps --bo -i bcc.md --rcut=9 --sele1="select Cu"
+  $(OPENMD_HOME)/bin/StaticProps --bo -i bcc.md --rcut=9 --sele1="select Cu"
 
 legend:
 

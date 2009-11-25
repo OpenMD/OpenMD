@@ -4,7 +4,7 @@
 #  http://www.gnu.org/software/gengetopt/gengetopt.html
 package "thermalizer"
 version "1.0"
-purpose "Resamples the velocities for all the integrable objects in an OOPSE file from a Maxwell-Boltzmann distribution."
+purpose "Resamples the velocities for all the integrable objects in an OpenMD file from a Maxwell-Boltzmann distribution."
 
 # Options
 

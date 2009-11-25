@@ -28,11 +28,11 @@ using namespace std;
 namespace OpenBabel
 {
   
-  class OOPSEFormat : public OBMoleculeFormat
+  class OpenMDFormat : public OBMoleculeFormat
   {
   public:
     //Register this format type ID
-    OOPSEFormat() 
+    OpenMDFormat() 
     {      
       OBConversion::RegisterFormat("md",this);
     }
@@ -40,11 +40,11 @@ namespace OpenBabel
     virtual const char* Description() //required
     {
       return
-        "OOPSE combined meta-data / cartesian coordinates format\nNo comments yet\n";
+        "OpenMD combined meta-data / cartesian coordinates format\nNo comments yet\n";
     };
     
     virtual const char* SpecificationURL()
-    {return "http://www.oopse.org";}; //optional
+    {return "http://www.openmd.net";}; //optional
     
     virtual const char* GetMIMEType() 
     {return "chemical/x-md"; };
@@ -69,9 +69,9 @@ namespace OpenBabel
   };
   
   //Make an instance of the format class
-  OOPSEFormat theOOPSEFormat;
+  OpenMDFormat theOpenMDFormat;
  
-  bool OOPSEFormat::WriteMolecule(OBBase* pOb, OBConversion* pConv) {
+  bool OpenMDFormat::WriteMolecule(OBBase* pOb, OBConversion* pConv) {
     OBMol* pmol = dynamic_cast<OBMol*>(pOb);
     if(pmol==NULL)
       return false;
@@ -137,7 +137,7 @@ namespace OpenBabel
     return(true);
   }
   
-  bool OOPSEFormat::AreSameFragments(OBMol& mol, vector<int>& frag1, 
+  bool OpenMDFormat::AreSameFragments(OBMol& mol, vector<int>& frag1, 
                                      vector<int>& frag2) {
     if (frag1.size() != frag2.size())
       return false;
@@ -166,7 +166,7 @@ namespace OpenBabel
   };
 
 
-  OBMol* OOPSEFormat::createMolFromFragment(OBMol& mol, 
+  OBMol* OpenMDFormat::createMolFromFragment(OBMol& mol, 
                                             vector<int>& fragment) {
     
     OBMol* newMol = new OBMol();
@@ -184,7 +184,7 @@ namespace OpenBabel
     return newMol;
   }
   
-  void OOPSEFormat::WriteMDFile(vector<OBMol*> mols, vector<int> numMols, 
+  void OpenMDFormat::WriteMDFile(vector<OBMol*> mols, vector<int> numMols, 
                                 ostream& os, OBMol& mol, 
                                 vector<int>& indices) {
     
@@ -204,7 +204,7 @@ namespace OpenBabel
     OBChainsParser* chainParser = new OBChainsParser();   
     double min_x, max_x, min_y, max_y, min_z, max_z; /* Edges of bounding box */
     
-    os << "<OOPSE version=4>" << endl;
+    os << "<OpenMD version=1>" << endl;
     os << "  <MetaData>" << endl << endl;
     
     for(i = 0; i < mols.size(); ++i) {
@@ -427,10 +427,10 @@ namespace OpenBabel
     }
     os << "    </StuntDoubles>" << endl;
     os << "  </Snapshot>" << endl;
-    os << "</OOPSE>" << endl;
+    os << "</OpenMD>" << endl;
   }
 
-  void OOPSEFormat::CalcBoundingBox(OBMol &mol,
+  void OpenMDFormat::CalcBoundingBox(OBMol &mol,
                                     double &min_x, double &max_x,
                                     double &min_y, double &max_y,
                                     double &min_z, double &max_z

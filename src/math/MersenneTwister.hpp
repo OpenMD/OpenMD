@@ -67,7 +67,7 @@
 #include <time.h>
 #include <math.h>
 #include <vector>
-namespace oopse {
+namespace OpenMD {
 
   class MTRand {
     // Data

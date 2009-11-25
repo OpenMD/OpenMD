@@ -1,4 +1,4 @@
-#ifdef __OOPSE_C
+#ifdef __OPENMD_C
 #ifndef __FMNMINTERACTIONS
 #define __FMNMINTERACTIONS
 
@@ -30,7 +30,7 @@ typedef  struct{
 
 
 #endif
-#endif /*__OOPSE_C*/
+#endif /*__OPENMD_C*/
 
 #ifdef  __FORTRAN90
 

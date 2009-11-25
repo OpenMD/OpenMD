@@ -7,7 +7,7 @@
 // Registers the fixture into the 'registry'
 
 using namespace std;
-using namespace oopse;
+using namespace OpenMD;
 CPPUNIT_TEST_SUITE_REGISTRATION( ZipstreamTeseCase );
 
 #include "zipstream.hpp"

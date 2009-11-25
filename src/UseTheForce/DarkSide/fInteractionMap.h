@@ -1,4 +1,4 @@
-#ifdef __OOPSE_C
+#ifdef __OPENMD_C
 #ifndef __FINTERACTIONMAP
 #define __FINTERACTIONMAP
 
@@ -24,7 +24,7 @@
 
 
 #endif
-#endif /*__OOPSE_C*/
+#endif /*__OPENMD_C*/
 
 #ifdef  __FORTRAN90
 

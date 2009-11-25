@@ -917,11 +917,11 @@ then
 	        echo ""
 	        echo "*********************************************************"
                 echo "* WARNING: Could not find a working zlib installation   *"
-                echo "* If you need OOPSE to be able to deal with compressed  *"
+                echo "* If you need OpenMD to be able to deal with compressed *"
                 echo "* trajectory dump files be sure to specify a valid zlib *"
 	        echo "* installation with --with-zlib=DIR                     *"
                 echo "*                                                       *"
-                echo "* OOPSE will still work without zlib installed.         *"
+                echo "* OpenMD will still work without zlib installed.        *"
 	        echo "*********************************************************"
 	        echo ""
         fi
@@ -992,11 +992,11 @@ if test "$qhull_dir" != "no"; then
         else
 	   AC_MSG_WARN([])
            AC_MSG_WARN([Could not find a working qhull installation])
-           AC_MSG_WARN([If you need OOPSE to be able to deal with convex    ])
+           AC_MSG_WARN([If you need OpenMD to be able to deal with convex    ])
            AC_MSG_WARN([hulls be sure to specify a valid qhull installation ])
 	   AC_MSG_WARN([with --with-qhull=DIR                               ])
            AC_MSG_WARN([])
-           AC_MSG_WARN([OOPSE will still work without qhull installed.      ])
+           AC_MSG_WARN([OpenMD will still work without qhull installed.      ])
 	   AC_MSG_WARN([])
         fi
     fi
@@ -1088,11 +1088,11 @@ OBConversion Conv(&cin, &cout);
 	        echo ""
 	        echo "*********************************************************"
                 echo "* WARNING: Could not find a working openbabel-2.x       *"
-                echo "* installation If you need OOPSE to be able to convert  *"
+                echo "* installation If you need OpenMD to be able to convert *"
                 echo "* xyz or pdb files you need to specify a valid          *"
 	        echo "* openbabel-2.x installation with --with-openbabel=DIR  *"
                 echo "*                                                       *"
-                echo "* OOPSE will still work without openbabel installed.    *"
+                echo "* OpenMD will still work without openbabel installed.   *"
 	        echo "*********************************************************"
 	        echo ""
         fi
@@ -1182,7 +1182,7 @@ if test "$fftw_dir" != "no"; then
             echo "* compute undulation spectra, be sure to specify a      *"
 	    echo "* valid fftw installation with --with-fftw=DIR          *"
             echo "*                                                       *"
-            echo "* OOPSE will still work without fftw installed.         *"
+            echo "* OpenMD will still work without fftw installed.        *"
 	    echo "*********************************************************"
 	    echo ""
           fi

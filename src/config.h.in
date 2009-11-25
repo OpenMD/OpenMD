@@ -1,12 +1,12 @@
-#define OOPSE_VERSION_MAJOR 4
-#define OOPSE_VERSION_MINOR 0
-#define OOPSE_VERSION_TINY  0
+#define OPENMD_VERSION_MAJOR 1
+#define OPENMD_VERSION_MINOR 0
+#define OPENMD_VERSION_TINY  0
 #define MK_STR(s) # s
 #define STR_DEFINE(t, s) t = MK_STR(s)
 /* The file extension used for shared modules */
 #undef MODULE_EXTENSION
 
-/* Is defined if OOPSE should be compiled with single precision arithmetic. */
+/* Is defined if OpenMD should be compiled with single precision arithmetic. */
 #undef SINGLE_PRECISION
 
 /* Define to dummy `main' function (if any) required to link to the Fortran

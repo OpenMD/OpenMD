@@ -30,11 +30,11 @@ Example:
 """
 
 __author__ = "Dan Gezelter (gezelter@nd.edu)"
-__version__ = "$Revision: 1.1 $"
-__date__ = "$Date: 2008-01-23 21:22:18 $"
+__version__ = "$Revision: 1.2 $"
+__date__ = "$Date: 2009-11-25 20:01:59 $"
 
 __copyright__ = "Copyright (c) 2007 by the University of Notre Dame"
-__license__ = "OOPSE"
+__license__ = "OpenMD"
 
 import sys
 import getopt
@@ -83,7 +83,7 @@ def readStatFile(statFileName):
         time.append(float(L[0]))
         temperature.append(float(L[4]))
         #
-        # OOPSE prints out pressure in units of atm.
+        # OpenMD prints out pressure in units of atm.
         #
         pressure.append(float(L[5]))
         volume.append(float(L[6]))
@@ -91,7 +91,7 @@ def readStatFile(statFileName):
         if doShear:
             if (len(L) > 16):
                 #
-                # OOPSE prints out the pressure tensor in units of amu*fs^-2*Ang^-1
+                # OpenMD prints out the pressure tensor in units of amu*fs^-2*Ang^-1
                 #
                 Pxx.append(float(L[8]))
                 Pyy.append(float(L[12]))
@@ -110,8 +110,8 @@ def readStatFile(statFileName):
                 print "pressure tensor in columns 9-17 of the .stat file"
                 print
                 print "You may need to set the statFileFormat string"
-                print "explicitly in your .md file when running OOPSE."
-                print "Consult the OOPSE documentation for more details."
+                print "explicitly in your .md file when running OpenMD."
+                print "Consult the OpenMD documentation for more details."
                 sys.exit()
                 
         line = statFile.readline()

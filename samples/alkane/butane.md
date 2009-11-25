@@ -1,4 +1,4 @@
-<OOPSE version=4>
+<OpenMD version=1>
   <MetaData>
 #include "alkanes.md"
 
@@ -150,4 +150,4 @@ sampleTime = 10.0;
        127      pv          11.520992          16.028228          22.847751   5.829000e-03  1.137000e-03  1.950000e-03
     </StuntDoubles>
   </Snapshot>
-</OOPSE>
+</OpenMD>

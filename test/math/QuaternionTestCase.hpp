@@ -4,7 +4,7 @@
 #include <cppunit/extensions/HelperMacros.h>
 #include "math/Quaternion.hpp"
  
-using namespace oopse;
+using namespace OpenMD;
 
 typedef Vector<double, 4> Vec4;
 class QuaternionTestCase : public CPPUNIT_NS::TestFixture {

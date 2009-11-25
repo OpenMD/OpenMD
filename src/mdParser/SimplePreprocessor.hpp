@@ -6,19 +6,10 @@
  * redistribute this software in source and binary code form, provided
  * that the following conditions are met:
  *
- * 1. Acknowledgement of the program authors must be made in any
- *    publication of scientific results based in part on use of the
- *    program.  An acceptable form of acknowledgement is citation of
- *    the article in which the program was described (Matthew
- *    A. Meineke, Charles F. Vardeman II, Teng Lin, Christopher
- *    J. Fennell and J. Daniel Gezelter, "OOPSE: An Object-Oriented
- *    Parallel Simulation Engine for Molecular Dynamics,"
- *    J. Comput. Chem. 26, pp. 252-271 (2005))
- *
- * 2. Redistributions of source code must retain the above copyright
+ * 1. Redistributions of source code must retain the above copyright
  *    notice, this list of conditions and the following disclaimer.
  *
- * 3. Redistributions in binary form must reproduce the above copyright
+ * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in the
  *    documentation and/or other materials provided with the
  *    distribution.
@@ -37,6 +28,15 @@
  * arising out of the use of or inability to use software, even if the
  * University of Notre Dame has been advised of the possibility of
  * such damages.
+ *
+ * SUPPORT OPEN SCIENCE!  If you use OpenMD or its source code in your
+ * research, please cite the appropriate papers when you publish your
+ * work.  Good starting points are:
+ *                                                                      
+ * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
+ * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
+ * [4]  Vardeman & Gezelter, in progress (2009).                        
  */
 
 #ifndef MDPARSER_SIMPLEPREPROCESSOR_HPP
@@ -47,7 +47,7 @@
 #include <sstream>
 #include "utils/StringTokenizer.hpp"
 #include "utils/Trim.hpp"
-#include "utils/OOPSEException.hpp"
+#include "utils/OpenMDException.hpp"
 #include "utils/simError.h"
 
 
@@ -57,7 +57,7 @@
  * @note only supports #include #ifdef, #ifndef, #endif, #define and #undef, c-like multiple line
  *  comment is not supported, macro substitute is not supported.
  */
-namespace oopse { 
+namespace OpenMD { 
 class SimplePreprocessor {
     public:
         bool preprocess(std::istream& myStream, const std::string& filename, int startingLine, ostream& os) {
@@ -82,7 +82,7 @@ class SimplePreprocessor {
             //    painCave.isFatal = 1;
             //    simError();
             //    
-            //    throw OOPSEException(ss.str());                
+            //    throw OpenMDException(ss.str());                
             //}
             int lineNo = startingLine;
             os << "#line " << lineNo << " \"" << filename << "\"\n";
@@ -114,7 +114,7 @@ class SimplePreprocessor {
                             if (!includeStream.is_open()) {
                                 std::stringstream ss;
                                 ss << "Can not open " << includeFilename << " for preprocessing\n";
-                                throw OOPSEException(ss.str()); 
+                                throw OpenMDException(ss.str()); 
                             }
                             
                             bool ret = subPreprocessor.doPreprocess(includeStream, includeFilename, 1, os, defineSet, ifStates);

@@ -3,10 +3,10 @@
 # program that builds water boxes
 
 # author    = "Chris Fennell
-# version   = "$Revision: 1.6 $"
-# date      = "$Date: 2009-10-22 19:12:14 $"
+# version   = "$Revision: 1.7 $"
+# date      = "$Date: 2009-11-25 20:01:59 $"
 # copyright = "Copyright (c) 2006 by the University of Notre Dame"
-# license   = "OOPSE"
+# license   = "OpenMD"
 
 use Getopt::Std;
 
@@ -317,7 +317,7 @@ sub acos {
 
 sub writeOutFile {
   # write out the header
-  print OUTFILE "<OOPSE version=4>\n";
+  print OUTFILE "<OpenMD version=1>\n";
   findCutoff();
   findAlpha();
   printMetaData();
@@ -351,7 +351,7 @@ sub writeOutFile {
     print OUTFILE "$q0 $q1 $q2 $q3\n";
   }
 
-  print OUTFILE "    </StuntDoubles>\n  </Snapshot>\n</OOPSE>\n";
+  print OUTFILE "    </StuntDoubles>\n  </Snapshot>\n</OpenMD>\n";
 }
 
 sub printMetaData {

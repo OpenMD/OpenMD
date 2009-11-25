@@ -5,9 +5,9 @@
 #include "math/RectMatrix.hpp"
 
 /**
- * @namespace oopse
+ * @namespace OpenMD
  */
-using namespace oopse;
+using namespace OpenMD;
 
 typedef RectMatrix<double, 2, 2> RMat2x2;
 typedef RectMatrix<double, 2, 3> RMat2x3;

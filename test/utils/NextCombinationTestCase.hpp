@@ -4,7 +4,7 @@
 #include <cppunit/extensions/HelperMacros.h>
 #include "utils/next_combination.hpp"
 #include "utils/Utility.hpp"
-using namespace oopse;
+using namespace OpenMD;
 
 class NextCombinationTestCase : public CPPUNIT_NS::TestFixture {
     CPPUNIT_TEST_SUITE( NextCombinationTestCase );

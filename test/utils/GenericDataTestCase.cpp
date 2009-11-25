@@ -8,10 +8,10 @@ void GenericDataTestCase::testGenericData(){
     //test constructor
     GenericData gd1;
     
-    GenericData gd2("OOPSE_Generic");
+    GenericData gd2("OpenMD_Generic");
 
     CPPUNIT_ASSERT( gd1.getID() == "UndefinedGenericData");
-    CPPUNIT_ASSERT( gd2.getID() == "OOPSE_Generic");
+    CPPUNIT_ASSERT( gd2.getID() == "OpenMD_Generic");
 
     gd1.setID("Dummy");
     CPPUNIT_ASSERT( gd1.getID() == "Dummy");

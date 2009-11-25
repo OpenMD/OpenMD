@@ -1,4 +1,4 @@
-<OOPSE version=4>
+<OpenMD version=1>
   <MetaData>
 #include "lj.md"
 
@@ -895,4 +895,4 @@ statusTime = 1;
        863      pv           3.293249          -8.781485          -12.88307  -9.150000e-04  5.330000e-04 -2.000000e-06
     </StuntDoubles>
   </Snapshot>
-</OOPSE>
+</OpenMD>

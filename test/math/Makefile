@@ -17,8 +17,8 @@ Source = MainTest.cpp \
 DEV_ROOT               = ../..
 UseMPI                 = no 
 ParallelDeclare        = -DIS_MPI
-CppCompiler            = icpc7 -g
-Linker                 = icpc7 -g
+CppCompiler            = icpc -g
+Linker                 = icpc -g
 Delete                 = /bin/rm -rf
 MakeDepend             = makedepend
 
@@ -28,7 +28,7 @@ MPINumProc             = -np 2
 CppOptions             = 
 CppParallelOptions     = $(ParallelDeclare)
 
-OOPSESrcDir              = $(DEV_ROOT)/src
+OpenMDSrcDir             = $(DEV_ROOT)/src
 SourceDir                = $(DEV_ROOT)/test
 Package                  = $(subst $(shell cd $(SourceDir); pwd)/,,$(shell pwd))
 PackageSourceDir         = $(SourceDir)/$(Package)
@@ -41,7 +41,7 @@ IncludeDirs = \
         /home/maul/gezelter/tim/include \
 	/usr/local/include \
 	/usr/local/mpich/include \
-        $(OOPSESrcDir)
+        $(OpenMDSrcDir)
 
 IncludePath      = -I$(SourceDir) $(IncludeDirs:%=-I%)
 

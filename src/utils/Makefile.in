@@ -6,14 +6,14 @@ MySource    = \
 	interpolation.F90 \
 	fError.c \
 	PropertyMap.cpp \
-	oopseMPI.F90 \
+	OpenMDMPI.F90 \
 	simError.c \
 	StringUtils.cpp \
 	vector_class.F90 \
         StringTokenizer.cpp \
 	Utility.cpp \
 	Trim.cpp \
-	OOPSEBitSet.cpp \
+	OpenMDBitSet.cpp \
 	MoLocator.cpp \
 	wildcards.cpp \
 	ElementsTable.cpp \
@@ -32,11 +32,11 @@ ParallelSource = \
 	ElementsTable.cpp \
 	fError.c \
 	simError.c \
-	oopseMPI.F90
+	OpenMDMPI.F90
 
 Modules = \
 	definitions \
-	oopseMPI \
+	OpenMDMPI \
 	status \
 	interpolation \
 	Vector_class

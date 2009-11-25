@@ -6,19 +6,10 @@
  * redistribute this software in source and binary code form, provided
  * that the following conditions are met:
  *
- * 1. Acknowledgement of the program authors must be made in any
- *    publication of scientific results based in part on use of the
- *    program.  An acceptable form of acknowledgement is citation of
- *    the article in which the program was described (Matthew
- *    A. Meineke, Charles F. Vardeman II, Teng Lin, Christopher
- *    J. Fennell and J. Daniel Gezelter, "OOPSE: An Object-Oriented
- *    Parallel Simulation Engine for Molecular Dynamics,"
- *    J. Comput. Chem. 26, pp. 252-271 (2005))
- *
- * 2. Redistributions of source code must retain the above copyright
+ * 1. Redistributions of source code must retain the above copyright
  *    notice, this list of conditions and the following disclaimer.
  *
- * 3. Redistributions in binary form must reproduce the above copyright
+ * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in the
  *    documentation and/or other materials provided with the
  *    distribution.
@@ -37,6 +28,15 @@
  * arising out of the use of or inability to use software, even if the
  * University of Notre Dame has been advised of the possibility of
  * such damages.
+ *
+ * SUPPORT OPEN SCIENCE!  If you use OpenMD or its source code in your
+ * research, please cite the appropriate papers when you publish your
+ * work.  Good starting points are:
+ *                                                                      
+ * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
+ * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
+ * [4]  Vardeman & Gezelter, in progress (2009).                        
  */
   
 /**
@@ -51,7 +51,7 @@
 #include "utils/NumericConstant.hpp"
 #include "utils/simError.h"
 #include "utils/Utility.hpp"
-namespace oopse {
+namespace OpenMD {
 
   void  Snapshot::setHmat(const Mat3x3d& m) {
     hmat_ = m;
@@ -89,25 +89,25 @@ namespace oopse {
 
       if( orthoRhombic_ ) {
 	sprintf( painCave.errMsg,
-		 "OOPSE is switching from the default Non-Orthorhombic\n"
+		 "OpenMD is switching from the default Non-Orthorhombic\n"
 		 "\tto the faster Orthorhombic periodic boundary computations.\n"
 		 "\tThis is usually a good thing, but if you want the\n"
 		 "\tNon-Orthorhombic computations, make the orthoBoxTolerance\n"
 		 "\tvariable ( currently set to %G ) smaller.\n",
 		 orthoTolerance_);
-	painCave.severity = OOPSE_INFO;
+	painCave.severity = OPENMD_INFO;
 	simError();
       }
       else {
 	sprintf( painCave.errMsg,
-		 "OOPSE is switching from the faster Orthorhombic to the more\n"
+		 "OpenMD is switching from the faster Orthorhombic to the more\n"
 		 "\tflexible Non-Orthorhombic periodic boundary computations.\n"
 		 "\tThis is usually because the box has deformed under\n"
 		 "\tNPTf integration. If you want to live on the edge with\n"
 		 "\tthe Orthorhombic computations, make the orthoBoxTolerance\n"
 		 "\tvariable ( currently set to %G ) larger.\n",
 		 orthoTolerance_);
-	painCave.severity = OOPSE_WARNING;
+	painCave.severity = OPENMD_WARNING;
 	simError();
       }
     }    
@@ -159,7 +159,7 @@ namespace oopse {
   Vector3d Snapshot::getCOM() {
     if( !hasCOM_ ) {
       sprintf( painCave.errMsg, "COM was requested before COM was computed!\n");
-      painCave.severity = OOPSE_ERROR;
+      painCave.severity = OPENMD_ERROR;
       simError();
     }
     return COM_;
@@ -168,7 +168,7 @@ namespace oopse {
   Vector3d Snapshot::getCOMvel() {
     if( !hasCOM_ ) {
       sprintf( painCave.errMsg, "COMvel was requested before COM was computed!\n");
-      painCave.severity = OOPSE_ERROR;
+      painCave.severity = OPENMD_ERROR;
       simError();
     }
     return COMvel_;
@@ -177,7 +177,7 @@ namespace oopse {
   Vector3d Snapshot::getCOMw() {
     if( !hasCOM_ ) {
       sprintf( painCave.errMsg, "COMw was requested before COM was computed!\n");
-      painCave.severity = OOPSE_ERROR;
+      painCave.severity = OPENMD_ERROR;
       simError();
     }
     return COMw_;

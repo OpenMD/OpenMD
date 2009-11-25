@@ -6,19 +6,10 @@
  * redistribute this software in source and binary code form, provided
  * that the following conditions are met:
  *
- * 1. Acknowledgement of the program authors must be made in any
- *    publication of scientific results based in part on use of the
- *    program.  An acceptable form of acknowledgement is citation of
- *    the article in which the program was described (Matthew
- *    A. Meineke, Charles F. Vardeman II, Teng Lin, Christopher
- *    J. Fennell and J. Daniel Gezelter, "OOPSE: An Object-Oriented
- *    Parallel Simulation Engine for Molecular Dynamics,"
- *    J. Comput. Chem. 26, pp. 252-271 (2005))
- *
- * 2. Redistributions of source code must retain the above copyright
+ * 1. Redistributions of source code must retain the above copyright
  *    notice, this list of conditions and the following disclaimer.
  *
- * 3. Redistributions in binary form must reproduce the above copyright
+ * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in the
  *    documentation and/or other materials provided with the
  *    distribution.
@@ -37,6 +28,15 @@
  * arising out of the use of or inability to use software, even if the
  * University of Notre Dame has been advised of the possibility of
  * such damages.
+ *
+ * SUPPORT OPEN SCIENCE!  If you use OpenMD or its source code in your
+ * research, please cite the appropriate papers when you publish your
+ * work.  Good starting points are:
+ *                                                                      
+ * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
+ * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
+ * [4]  Vardeman & Gezelter, in progress (2009).                        
  */
  
 #include "UseTheForce/ForceField.hpp"
@@ -50,7 +50,7 @@
 #include "utils/simError.h"
 #include "utils/CaseConversion.hpp"
 
-namespace oopse {
+namespace OpenMD {
   
   ShapeAtomTypesSectionParser::ShapeAtomTypesSectionParser(ForceFieldOptions& options) : options_(options) {
     setSectionName("ShapeAtomTypes");
@@ -78,7 +78,7 @@ namespace oopse {
         if (sAtomType == NULL) {
           sprintf(painCave.errMsg,
                   "ShapeAtomTypesSectionParser:: Can't cast to ShapeAtomType");
-          painCave.severity = OOPSE_ERROR;
+          painCave.severity = OPENMD_ERROR;
           painCave.isFatal = 1;
           simError();
         }
@@ -92,7 +92,7 @@ namespace oopse {
               "ShapesAtomTypesSectionParser Error: "
               "Not enough tokens at line %d\n",
               lineNo);
-      painCave.severity = OOPSE_ERROR;
+      painCave.severity = OPENMD_ERROR;
       painCave.isFatal = 1;
       simError();    
     }
@@ -143,7 +143,7 @@ namespace oopse {
                  "\tHave you tried setting the FORCE_PARAM_PATH environment "
                  "variable?\n",
                  shapeFileName.c_str() );
-        painCave.severity = OOPSE_ERROR;
+        painCave.severity = OPENMD_ERROR;
         painCave.isFatal = 1;
         simError();
       }
@@ -168,7 +168,7 @@ namespace oopse {
                     "ShapesAtomTypesSectionParser Error: Not enough "
                     "information on a ShapeInfo line in file: %s\n", 
                     shapeFileName.c_str() );
-            painCave.severity = OOPSE_ERROR;
+            painCave.severity = OPENMD_ERROR;
             painCave.isFatal = 1;
             simError();  
           } else {
@@ -202,7 +202,7 @@ namespace oopse {
                      "ShapesAtomTypesSectionParser Error: Not enough "
                      "information on a ContactFunctions line in file: %s\n", 
                      shapeFileName.c_str() );
-            painCave.severity = OOPSE_ERROR;
+            painCave.severity = OPENMD_ERROR;
             painCave.isFatal = 1;
             simError();
           } else {
@@ -246,7 +246,7 @@ namespace oopse {
                      "ShapesAtomTypesSectionParser Error: Not enough "
                      "information on a RangeFunctions line in file: %s\n", 
                      shapeFileName.c_str() );
-            painCave.severity = OOPSE_ERROR;
+            painCave.severity = OPENMD_ERROR;
             painCave.isFatal = 1;
             simError();
           } else {
@@ -290,7 +290,7 @@ namespace oopse {
                      "ShapesAtomTypesSectionParser Error: Not enough "
                      "information on a StrengthFunctions line in file: %s\n", 
                      shapeFileName.c_str() );
-            painCave.severity = OOPSE_ERROR;
+            painCave.severity = OPENMD_ERROR;
             painCave.isFatal = 1;
             simError();
           } else {
@@ -318,5 +318,5 @@ namespace oopse {
         
   //  delete shapeStream;
   }
-} //end namespace oopse
+} //end namespace OpenMD
 

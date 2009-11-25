@@ -6,19 +6,10 @@
  * redistribute this software in source and binary code form, provided
  * that the following conditions are met:
  *
- * 1. Acknowledgement of the program authors must be made in any
- *    publication of scientific results based in part on use of the
- *    program.  An acceptable form of acknowledgement is citation of
- *    the article in which the program was described (Matthew
- *    A. Meineke, Charles F. Vardeman II, Teng Lin, Christopher
- *    J. Fennell and J. Daniel Gezelter, "OOPSE: An Object-Oriented
- *    Parallel Simulation Engine for Molecular Dynamics,"
- *    J. Comput. Chem. 26, pp. 252-271 (2005))
- *
- * 2. Redistributions of source code must retain the above copyright
+ * 1. Redistributions of source code must retain the above copyright
  *    notice, this list of conditions and the following disclaimer.
  *
- * 3. Redistributions in binary form must reproduce the above copyright
+ * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in the
  *    documentation and/or other materials provided with the
  *    distribution.
@@ -37,6 +28,15 @@
  * arising out of the use of or inability to use software, even if the
  * University of Notre Dame has been advised of the possibility of
  * such damages.
+ *
+ * SUPPORT OPEN SCIENCE!  If you use OpenMD or its source code in your
+ * research, please cite the appropriate papers when you publish your
+ * work.  Good starting points are:
+ *                                                                      
+ * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
+ * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
+ * [4]  Vardeman & Gezelter, in progress (2009).                        
  */
  
 #ifndef IO_PARAMCONSTRAINT_HPP
@@ -44,7 +44,7 @@
 #include <sstream>
 #include "utils/CaseConversion.hpp"
 #include "utils/StringTokenizer.hpp"
-namespace oopse {
+namespace OpenMD {
   /**
    * This class allows to recognize constraint predicates, so that they can be combined using
    * composition operators. Every constraint predicate must be derived from this class
@@ -181,14 +181,14 @@ namespace oopse {
 
   struct EqualIgnoreCaseConstraint : public ParamConstraintFacade<EqualIgnoreCaseConstraint> {
     
-    EqualIgnoreCaseConstraint(std::string rhs) : rhs_(oopse::toUpperCopy(rhs)){
+    EqualIgnoreCaseConstraint(std::string rhs) : rhs_(OpenMD::toUpperCopy(rhs)){
       std::stringstream iss;
       iss << "equal to (case insensitive) " << rhs;
       this->description_ = iss.str();
     }
     
     bool operator()( std::string data ) const {
-      return oopse::toUpperCopy(data) == rhs_; 
+      return OpenMD::toUpperCopy(data) == rhs_; 
     }
     
   private:
@@ -196,14 +196,14 @@ namespace oopse {
   };
 
   struct ContainsConstraint :  public ParamConstraintFacade<EqualIgnoreCaseConstraint> {
-    ContainsConstraint(std::string rhs) : rhs_(oopse::toUpperCopy(rhs)){
+    ContainsConstraint(std::string rhs) : rhs_(OpenMD::toUpperCopy(rhs)){
       std::stringstream iss;
       iss << "contains " << rhs;
       this->description_ = iss.str();
     }
     
     bool operator()( std::string data ) const {
-      oopse::StringTokenizer tokenizer(oopse::toUpperCopy(data),  " ,;|\t\n\r");
+      OpenMD::StringTokenizer tokenizer(OpenMD::toUpperCopy(data),  " ,;|\t\n\r");
       while (tokenizer.hasMoreTokens()) {
         if (tokenizer.nextToken() == rhs_) {
           return true;

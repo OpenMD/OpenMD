@@ -6,19 +6,10 @@
  * redistribute this software in source and binary code form, provided
  * that the following conditions are met:
  *
- * 1. Acknowledgement of the program authors must be made in any
- *    publication of scientific results based in part on use of the
- *    program.  An acceptable form of acknowledgement is citation of
- *    the article in which the program was described (Matthew
- *    A. Meineke, Charles F. Vardeman II, Teng Lin, Christopher
- *    J. Fennell and J. Daniel Gezelter, "OOPSE: An Object-Oriented
- *    Parallel Simulation Engine for Molecular Dynamics,"
- *    J. Comput. Chem. 26, pp. 252-271 (2005))
- *
- * 2. Redistributions of source code must retain the above copyright
+ * 1. Redistributions of source code must retain the above copyright
  *    notice, this list of conditions and the following disclaimer.
  *
- * 3. Redistributions in binary form must reproduce the above copyright
+ * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in the
  *    documentation and/or other materials provided with the
  *    distribution.
@@ -37,15 +28,24 @@
  * arising out of the use of or inability to use software, even if the
  * University of Notre Dame has been advised of the possibility of
  * such damages.
+ *
+ * SUPPORT OPEN SCIENCE!  If you use OpenMD or its source code in your
+ * research, please cite the appropriate papers when you publish your
+ * work.  Good starting points are:
+ *                                                                      
+ * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
+ * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
+ * [4]  Vardeman & Gezelter, in progress (2009).                        
  */
 #include <fstream> 
 #include <iostream>
 #include "integrators/SMIPDForceManager.hpp"
-#include "utils/OOPSEConstant.hpp"
+#include "utils/PhysicalConstants.hpp"
 #include "math/ConvexHull.hpp"
 #include "math/Triangle.hpp"
 
-namespace oopse {
+namespace OpenMD {
 
   SMIPDForceManager::SMIPDForceManager(SimInfo* info) : ForceManager(info) {
 
@@ -64,7 +64,7 @@ namespace oopse {
               "SMIPDynamics error: You can't use the SMIPD integrator\n"
 	      "\twithout a targetTemp (K)!\n");      
       painCave.isFatal = 1;
-      painCave.severity = OOPSE_ERROR;
+      painCave.severity = OPENMD_ERROR;
       simError();
     } else {
       targetTemp_ = simParams->getTargetTemp();
@@ -79,7 +79,7 @@ namespace oopse {
     } else {
       // Convert pressure from atm -> amu/(fs^2*Ang)
       targetPressure_ = simParams->getTargetPressure() / 
-        OOPSEConstant::pressureConvert;
+        PhysicalConstants::pressureConvert;
     }
    
     if (simParams->getUsePeriodicBoundaryConditions()) {
@@ -95,11 +95,11 @@ namespace oopse {
               "SMIPDynamics error: You can't use the SMIPD integrator\n"
 	      "\twithout a thermalConductivity (W m^-1 K^-1)!\n");
       painCave.isFatal = 1;
-      painCave.severity = OOPSE_ERROR;
+      painCave.severity = OPENMD_ERROR;
       simError();
     }else{
       thermalConductivity_ = simParams->getThermalConductivity() * 
-        OOPSEConstant::thermalConductivityConvert;
+        PhysicalConstants::thermalConductivityConvert;
     }
 
     if (!simParams->haveThermalLength()) {
@@ -107,7 +107,7 @@ namespace oopse {
               "SMIPDynamics error: You can't use the SMIPD integrator\n"
 	      "\twithout a thermalLength (Angstroms)!\n");
       painCave.isFatal = 1;
-      painCave.severity = OOPSE_ERROR;
+      painCave.severity = OPENMD_ERROR;
       simError();
     }else{
       thermalLength_ = simParams->getThermalLength();
@@ -115,7 +115,7 @@ namespace oopse {
     
     dt_ = simParams->getDt();
   
-    variance_ = 2.0 * OOPSEConstant::kb * targetTemp_ / dt_;
+    variance_ = 2.0 * PhysicalConstants::kb * targetTemp_ / dt_;
 
     // Build a vector of integrable objects to determine if the are
     // surface atoms
@@ -165,13 +165,14 @@ namespace oopse {
       Vector3d centroid = thisTriangle.getCentroid();
       Vector3d facetVel = thisTriangle.getFacetVelocity();
       RealType thisMass = thisTriangle.getFacetMass();
+      //      Mat3x3d hydroTens = thisTriangle.computeHydrodynamicTensor(viscosity);
 
       // gamma is the drag coefficient normal to the face of the triangle      
       RealType gamma = thermalConductivity_ * thisMass * thisArea 
-        / (2.0 * thermalLength_ * OOPSEConstant::kB);
+        / (2.0 * thermalLength_ * PhysicalConstants::kB);
 
       RealType extPressure = - (targetPressure_ * thisArea) / 
-        OOPSEConstant::energyConvert;
+        PhysicalConstants::energyConvert;
       RealType randomForce = randNums[thisFacet++] * sqrt(gamma);
       RealType dragForce = -gamma * dot(facetVel, unitNormal);
 

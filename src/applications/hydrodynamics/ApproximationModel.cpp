@@ -6,19 +6,10 @@
  * redistribute this software in source and binary code form, provided
  * that the following conditions are met:
  *
- * 1. Acknowledgement of the program authors must be made in any
- *    publication of scientific results based in part on use of the
- *    program.  An acceptable form of acknowledgement is citation of
- *    the article in which the program was described (Matthew
- *    A. Meineke, Charles F. Vardeman II, Teng Lin, Christopher
- *    J. Fennell and J. Daniel Gezelter, "OOPSE: An Object-Oriented
- *    Parallel Simulation Engine for Molecular Dynamics,"
- *    J. Comput. Chem. 26, pp. 252-271 (2005))
- *
- * 2. Redistributions of source code must retain the above copyright
+ * 1. Redistributions of source code must retain the above copyright
  *    notice, this list of conditions and the following disclaimer.
  *
- * 3. Redistributions in binary form must reproduce the above copyright
+ * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in the
  *    documentation and/or other materials provided with the
  *    distribution.
@@ -37,19 +28,28 @@
  * arising out of the use of or inability to use software, even if the
  * University of Notre Dame has been advised of the possibility of
  * such damages.
+ *
+ * SUPPORT OPEN SCIENCE!  If you use OpenMD or its source code in your
+ * research, please cite the appropriate papers when you publish your
+ * work.  Good starting points are:
+ *                                                                      
+ * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
+ * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
+ * [4]  Vardeman & Gezelter, in progress (2009).                        
  */
 
 #include "applications/hydrodynamics/ApproximationModel.hpp" 
 #include "math/LU.hpp"
 #include "math/DynamicRectMatrix.hpp"
 #include "math/SquareMatrix3.hpp"
-#include "utils/OOPSEConstant.hpp"
+#include "utils/PhysicalConstants.hpp"
 #include "hydrodynamics/Sphere.hpp"
 #include "hydrodynamics/Ellipsoid.hpp"
 #include "applications/hydrodynamics/CompositeShape.hpp"
 #include "math/LU.hpp"
 #include "utils/simError.h"
-namespace oopse {
+namespace OpenMD {
 /**
  * Reference:
  * Beatriz Carrasco and Jose Gracia de la Torre, Hydrodynamic Properties of Rigid Particles:
@@ -153,9 +153,9 @@ namespace oopse {
     // add the volume correction
     Xiorr += (6.0 * viscosity * volume) * I;    
     
-    Xiott *= OOPSEConstant::viscoConvert;
-    Xiotr *= OOPSEConstant::viscoConvert;
-    Xiorr *= OOPSEConstant::viscoConvert;
+    Xiott *= PhysicalConstants::viscoConvert;
+    Xiotr *= PhysicalConstants::viscoConvert;
+    Xiorr *= PhysicalConstants::viscoConvert;
     
     Mat3x3d tmp;
     Mat3x3d tmpInv;
@@ -203,14 +203,14 @@ namespace oopse {
     Dr6x6.getSubMatrix(0, 3, Drrt);
     Dr6x6.getSubMatrix(3, 0, Drtr);
     Dr6x6.getSubMatrix(3, 3, Drrr);
-    RealType kt = OOPSEConstant::kb * temperature ; // in kcal mol^-1
+    RealType kt = PhysicalConstants::kb * temperature ; // in kcal mol^-1
     Drtt *= kt;
     Drrt *= kt;
     Drtr *= kt;
     Drrr *= kt;
-    //Xirtt *= OOPSEConstant::kb * temperature;
-    //Xirtr *= OOPSEConstant::kb * temperature;
-    //Xirrr *= OOPSEConstant::kb * temperature;
+    //Xirtt *= PhysicalConstants::kb * temperature;
+    //Xirtr *= PhysicalConstants::kb * temperature;
+    //Xirrr *= PhysicalConstants::kb * temperature;
     
     Mat6x6d Xi, D;
 
@@ -325,11 +325,11 @@ namespace oopse {
     // add the volume correction here:
     Xirr += (6.0 * viscosity * volume) * I;    
     
-    Xitt *= OOPSEConstant::viscoConvert;
-    Xitr *= OOPSEConstant::viscoConvert;
-    Xirr *= OOPSEConstant::viscoConvert;
+    Xitt *= PhysicalConstants::viscoConvert;
+    Xitr *= PhysicalConstants::viscoConvert;
+    Xirr *= PhysicalConstants::viscoConvert;
     
-    RealType kt = OOPSEConstant::kb * temperature; // in kcal mol^-1
+    RealType kt = PhysicalConstants::kb * temperature; // in kcal mol^-1
     
     Mat3x3d Dott; //translational diffusion tensor at arbitrary origin O
     Mat3x3d Dorr; //rotational diffusion tensor at arbitrary origin O
@@ -402,8 +402,8 @@ namespace oopse {
 
 
     //Xidtt in units of kcal*fs*mol^-1*Ang^-2
-    //Xid /= OOPSEConstant::energyConvert;
-    Xid *= OOPSEConstant::kb * temperature;
+    //Xid /= PhysicalConstants::energyConvert;
+    Xid *= PhysicalConstants::kb * temperature;
 
     Mat6x6d Xi, D;
 

@@ -6,19 +6,10 @@
 !! redistribute this software in source and binary code form, provided
 !! that the following conditions are met:
 !!
-!! 1. Acknowledgement of the program authors must be made in any
-!!    publication of scientific results based in part on use of the
-!!    program.  An acceptable form of acknowledgement is citation of
-!!    the article in which the program was described (Matthew
-!!    A. Meineke, Charles F. Vardeman I, Teng Lin, Christopher
-!!    J. Fennell and J. Daniel Gezelter, "OOPSE: An Object-Oriented
-!!    Parallel Simulation Engine for Molecular Dynamics,"
-!!    J. Comput. Chem. 26, pp. 252-271 (2005))
-!!
-!! 2. Redistributions of source code must retain the above copyright
+!! 1. Redistributions of source code must retain the above copyright
 !!    notice, this list of conditions and the following disclaimer.
 !!
-!! 3. Redistributions in binary form must reproduce the above copyright
+!! 2. Redistributions in binary form must reproduce the above copyright
 !!    notice, this list of conditions and the following disclaimer in the
 !!    documentation and/or other materials provided with the
 !!    distribution.
@@ -38,6 +29,15 @@
 !! University of Notre Dame has been advised of the possibility of
 !! such damages.
 !!
+!! SUPPORT OPEN SCIENCE!  If you use OpenMD or its source code in your
+!! research, please cite the appropriate papers when you publish your
+!! work.  Good starting points are:
+!!                                                                      
+!! [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
+!! [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
+!! [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
+!! [4]  Vardeman & Gezelter, in progress (2009).
+!!
 
 !! doForces.F90
 !! module doForces
@@ -45,7 +45,7 @@
 
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: doForces.F90,v 1.105 2009-11-13 20:18:11 chuckv Exp $, $Date: 2009-11-13 20:18:11 $, $Name: not supported by cvs2svn $, $Revision: 1.105 $
+!! @version $Id: doForces.F90,v 1.106 2009-11-25 20:01:57 gezelter Exp $, $Date: 2009-11-25 20:01:57 $, $Name: not supported by cvs2svn $, $Revision: 1.106 $
 
 
 module doForces
@@ -590,14 +590,14 @@ contains
         if (defaultDoShiftFrc) then
            write(errMsg, *) &
                 'cutoffRadius and switchingRadius are set to the', newline &
-                // tab, 'same value.  OOPSE will use shifted force', newline &
+                // tab, 'same value.  OpenMD will use shifted force', newline &
                 // tab, 'potentials instead of switching functions.'
            
            call handleInfo("setCutoffs", errMsg)
         else
            write(errMsg, *) &
                 'cutoffRadius and switchingRadius are set to the', newline &
-                // tab, 'same value.  OOPSE will use shifted', newline &
+                // tab, 'same value.  OpenMD will use shifted', newline &
                 // tab, 'potentials instead of switching functions.'
            
            call handleInfo("setCutoffs", errMsg)
@@ -1546,7 +1546,9 @@ contains
     
     iHash = InteractionHash(atid_i, atid_j)
 
-!! For the metallic potentials, we need to pass dF[rho]/drho since the pair calculation routines no longer are aware of parallel.
+    !! For the metallic potentials, we need to pass dF[rho]/drho since
+    !! the pair calculation routines no longer are aware of parallel.
+
     if ( (iand(iHash, EAM_PAIR).ne.0) .or. (iand(iHash, SC_PAIR).ne.0)  ) then       
 #ifdef IS_MPI
        dfrhodrho_i = dfrhodrho_row(i)
@@ -1652,7 +1654,7 @@ contains
        ! Most of the particle_pot heavy lifting comes from the
        ! pair interaction, and will be handled by vpair. Parallel version.
        
-    if ( (iand(iHash, EAM_PAIR).ne.0) .or. (iand(iHash, SC_PAIR).ne.0)  ) then       
+    if ( (iand(iHash, EAM_PAIR).ne.0) .or. (iand(iHash, SC_PAIR).ne.0)  ) then
        ppot_row(i) = ppot_row(i) - frho_row(j) + fshift_j
        ppot_col(j) = ppot_col(j) - frho_col(i) + fshift_i
     end if
@@ -1684,8 +1686,8 @@ contains
        !
        ! Most of the particle_pot heavy lifting comes from the
        ! pair interaction, and will be handled by vpair. NonParallel version.
-       
-    if ( (iand(iHash, EAM_PAIR).ne.0) .or. (iand(iHash, SC_PAIR).ne.0)  ) then       
+
+    if ( (iand(iHash, EAM_PAIR).ne.0) .or. (iand(iHash, SC_PAIR).ne.0)  ) then
        particle_pot(i) = particle_pot(i) - frho(j) + fshift_j
        particle_pot(j) = particle_pot(j) - frho(i) + fshift_i
     end if
@@ -1710,14 +1712,14 @@ contains
 
   subroutine do_prepair(i, j, rijsq, d, sw, rcijsq, dc, rCut, &
        do_pot, do_stress, eFrame, A, f, t, pot)
-
+    
     real( kind = dp ) :: sw
     real( kind = dp ), dimension(LR_POT_TYPES) :: pot
     real( kind = dp ), dimension(9,nLocal) :: eFrame
     real (kind=dp), dimension(9,nLocal) :: A
     real (kind=dp), dimension(3,nLocal) :: f
     real (kind=dp), dimension(3,nLocal) :: t
-
+    
     logical, intent(inout) :: do_pot, do_stress
     integer, intent(in) :: i, j
     real ( kind = dp ), intent(inout)    :: rijsq, rcijsq, rCut
@@ -1725,7 +1727,7 @@ contains
     real ( kind = dp ), intent(inout) :: d(3), dc(3)
     real ( kind = dp ) :: rho_i_at_j, rho_j_at_i
     integer :: atid_i, atid_j, iHash
-
+    
     r = sqrt(rijsq)
     
 #ifdef IS_MPI   
@@ -1741,16 +1743,14 @@ contains
     iHash = InteractionHash(atid_i, atid_j)
 
     if ( iand(iHash, EAM_PAIR).ne.0 ) then       
-            call calc_EAM_prepair_rho(i, j, atid_i, atid_j, d, r, rho_i_at_j, rho_j_at_i, rijsq)
+       call calc_EAM_prepair_rho(i, j, atid_i, atid_j, d, r, rho_i_at_j, rho_j_at_i, rijsq)
     endif
-
+    
     if ( iand(iHash, SC_PAIR).ne.0 ) then       
-            call calc_SC_prepair_rho(i, j, atid_i, atid_j, d, r, rijsq, rho_i_at_j, rho_j_at_i, rcut )
+       call calc_SC_prepair_rho(i, j, atid_i, atid_j, d, r, rijsq, rho_i_at_j, rho_j_at_i, rcut)
     endif
 
-
-
-    if ( iand(iHash, EAM_PAIR).ne.0 .or. iand(iHash, SC_PAIR).ne.0  ) then       
+    if ( iand(iHash, EAM_PAIR).ne.0 .or. iand(iHash, SC_PAIR).ne.0  ) then 
 #ifdef IS_MPI
        rho_col(j) = rho_col(j) + rho_i_at_j
        rho_row(i) = rho_row(i) + rho_j_at_i
@@ -1759,8 +1759,6 @@ contains
        rho(i) = rho(i) + rho_j_at_i
 #endif       
     endif
-    
-    
     
   end subroutine do_prepair
 
@@ -1815,7 +1813,6 @@ contains
        endif
     end if
 #endif
-
 
   end subroutine do_preforce
 

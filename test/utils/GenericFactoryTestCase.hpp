@@ -5,7 +5,7 @@
 #include <cppunit/extensions/HelperMacros.h>
 #include "utils/GenericFactory.hpp"
 
-using namespace oopse;
+using namespace OpenMD;
 
 
 class Shape {

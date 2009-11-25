@@ -1,7 +1,7 @@
 /**********************************************************************
 
 This basic Periodic Table class was originally taken from the data.cpp
-file in OpenBabel. The code has been modified to match the OOPSE coding style.
+file in OpenBabel. The code has been modified to match the OpenMD coding style.
 
 We have retained the OpenBabel copyright and GPL license on this class:  
 
@@ -53,7 +53,7 @@ extern "C" int strncasecmp(const char *s1, const char *s2, size_t n);
 #define BUFF_SIZE 32768
 #endif
 
-namespace oopse {
+namespace OpenMD {
 
   ElementsTable etab;
 

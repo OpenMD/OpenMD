@@ -4,7 +4,7 @@ header
 #include "io/Globals.hpp"
 #include "utils/StringUtils.hpp"
 using namespace std;
-using namespace oopse;
+using namespace OpenMD;
 }
 options
   {

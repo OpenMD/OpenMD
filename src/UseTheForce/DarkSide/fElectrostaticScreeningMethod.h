@@ -1,4 +1,4 @@
-#ifdef __OOPSE_C
+#ifdef __OPENMD_C
 #ifndef __FELECTROSTATICSCREENINGMETHOD
 #define __FELECTROSTATICSCREENINGMETHOD
 
@@ -6,7 +6,7 @@
 #define DAMPED             2
 
 #endif
-#endif /*__OOPSE_C*/
+#endif /*__OPENMD_C*/
 
 #ifdef  __FORTRAN90
 

@@ -4,7 +4,7 @@
 #include <cppunit/extensions/HelperMacros.h>
 #include "brains/SnapshotManager.hpp"
  
-using namespace oopse;
+using namespace OpenMD;
 
 class SnapshotManagerTestCase : public CPPUNIT_NS::TestFixture {
     CPPUNIT_TEST_SUITE( SnapshotManagerTestCase );

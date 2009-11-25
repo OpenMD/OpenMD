@@ -6,19 +6,10 @@
  * redistribute this software in source and binary code form, provided
  * that the following conditions are met:
  *
- * 1. Acknowledgement of the program authors must be made in any
- *    publication of scientific results based in part on use of the
- *    program.  An acceptable form of acknowledgement is citation of
- *    the article in which the program was described (Matthew
- *    A. Meineke, Charles F. Vardeman II, Teng Lin, Christopher
- *    J. Fennell and J. Daniel Gezelter, "OOPSE: An Object-Oriented
- *    Parallel Simulation Engine for Molecular Dynamics,"
- *    J. Comput. Chem. 26, pp. 252-271 (2005))
- *
- * 2. Redistributions of source code must retain the above copyright
+ * 1. Redistributions of source code must retain the above copyright
  *    notice, this list of conditions and the following disclaimer.
  *
- * 3. Redistributions in binary form must reproduce the above copyright
+ * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in the
  *    documentation and/or other materials provided with the
  *    distribution.
@@ -37,14 +28,23 @@
  * arising out of the use of or inability to use software, even if the
  * University of Notre Dame has been advised of the possibility of
  * such damages.
+ *
+ * SUPPORT OPEN SCIENCE!  If you use OpenMD or its source code in your
+ * research, please cite the appropriate papers when you publish your
+ * work.  Good starting points are:
+ *                                                                      
+ * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
+ * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
+ * [4]  Vardeman & Gezelter, in progress (2009).                        
  */
 
 #ifndef SELECTION_SELECTIONMANAGER_HPP
 #define SELECTION_SELECTIONMANAGER_HPP
 
-#include "utils/OOPSEBitSet.hpp"
+#include "utils/OpenMDBitSet.hpp"
 #include "primitives/StuntDouble.hpp"
-namespace oopse {
+namespace OpenMD {
 
   class SimInfo;
   /**
@@ -59,7 +59,7 @@ namespace oopse {
       bsSelection_.setBitOn(sd->getGlobalIndex());
     }
         
-    void addSelectionSet(const OOPSEBitSet& bs) {
+    void addSelectionSet(const OpenMDBitSet& bs) {
       bsSelection_ |= bs;
     }
 
@@ -68,7 +68,7 @@ namespace oopse {
       bsSelection_.setBitOn(sd->getGlobalIndex());
     }
         
-    void setSelectionSet(const OOPSEBitSet& bs) {
+    void setSelectionSet(const OpenMDBitSet& bs) {
       bsSelection_ = bs;           
     }
 
@@ -104,7 +104,7 @@ namespace oopse {
       return bsSelection_.countBits();
     }
 
-    OOPSEBitSet getSelectionSet() {
+    OpenMDBitSet getSelectionSet() {
       return bsSelection_;
     }
 
@@ -142,7 +142,7 @@ namespace oopse {
         
   private:
     SimInfo* info_;
-    OOPSEBitSet bsSelection_;
+    OpenMDBitSet bsSelection_;
     std::vector<StuntDouble*> stuntdoubles_;
   };
 

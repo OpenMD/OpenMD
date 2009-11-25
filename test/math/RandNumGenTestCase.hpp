@@ -1,5 +1,5 @@
-#ifndef TEST_OOPSERANDNUMGENTESTCASE_HPP
-#define TEST_OOPSERANDNUMGENTESTCASE_HPP
+#ifndef TEST_RANDNUMGENTESTCASE_HPP
+#define TEST_RANDNUMGENTESTCASE_HPP
 
 #include <cppunit/extensions/HelperMacros.h>
 #include "math/ParallelRandNumGen.hpp"
@@ -26,7 +26,4 @@ class RandNumGenTestCase : public CPPUNIT_NS::TestFixture {
 };
 
 
-#endif //TEST_POLYNOMIALTESTCASE_HPP
-
-
-
+#endif

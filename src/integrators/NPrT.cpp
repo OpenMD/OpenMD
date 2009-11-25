@@ -6,19 +6,10 @@
  * redistribute this software in source and binary code form, provided
  * that the following conditions are met:
  *
- * 1. Acknowledgement of the program authors must be made in any
- *    publication of scientific results based in part on use of the
- *    program.  An acceptable form of acknowledgement is citation of
- *    the article in which the program was described (Matthew
- *    A. Meineke, Charles F. Vardeman II, Teng Lin, Christopher
- *    J. Fennell and J. Daniel Gezelter, "OOPSE: An Object-Oriented
- *    Parallel Simulation Engine for Molecular Dynamics,"
- *    J. Comput. Chem. 26, pp. 252-271 (2005))
- *
- * 2. Redistributions of source code must retain the above copyright
+ * 1. Redistributions of source code must retain the above copyright
  *    notice, this list of conditions and the following disclaimer.
  *
- * 3. Redistributions in binary form must reproduce the above copyright
+ * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in the
  *    documentation and/or other materials provided with the
  *    distribution.
@@ -37,6 +28,15 @@
  * arising out of the use of or inability to use software, even if the
  * University of Notre Dame has been advised of the possibility of
  * such damages.
+ *
+ * SUPPORT OPEN SCIENCE!  If you use OpenMD or its source code in your
+ * research, please cite the appropriate papers when you publish your
+ * work.  Good starting points are:
+ *                                                                      
+ * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
+ * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
+ * [4]  Vardeman & Gezelter, in progress (2009).                        
  */
  
 #include "brains/SimInfo.hpp"
@@ -44,20 +44,20 @@
 #include "integrators/IntegratorCreator.hpp"
 #include "integrators/NPrT.hpp"
 #include "primitives/Molecule.hpp"
-#include "utils/OOPSEConstant.hpp"
+#include "utils/PhysicalConstants.hpp"
 #include "utils/simError.h"
 
-namespace oopse {
+namespace OpenMD {
   NPrT::NPrT(SimInfo* info) : NPT(info) {
     Globals* simParams = info_->getSimParams();
     if (!simParams->haveSurfaceTension()) {
       sprintf(painCave.errMsg,
               "If you use the NPT integrator, you must set tauBarostat.\n");
-      painCave.severity = OOPSE_ERROR;
+      painCave.severity = OPENMD_ERROR;
       painCave.isFatal = 1;
       simError();
     } else {
-      surfaceTension= simParams->getSurfaceTension()* OOPSEConstant::surfaceTensionConvert * OOPSEConstant::energyConvert;
+      surfaceTension= simParams->getSurfaceTension()* PhysicalConstants::surfaceTensionConvert * PhysicalConstants::energyConvert;
     }
 
   }
@@ -65,11 +65,11 @@ namespace oopse {
     Mat3x3d hmat = currentSnapshot_->getHmat();
     RealType hz = hmat(2, 2);
     RealType Axy = hmat(0,0) * hmat(1, 1);
-    RealType sx = -hz * (press(0, 0) - targetPressure/OOPSEConstant::pressureConvert);
-    RealType sy = -hz * (press(1, 1) - targetPressure/OOPSEConstant::pressureConvert);
+    RealType sx = -hz * (press(0, 0) - targetPressure/PhysicalConstants::pressureConvert);
+    RealType sy = -hz * (press(1, 1) - targetPressure/PhysicalConstants::pressureConvert);
     eta(0,0) -= dt2* Axy * (sx - surfaceTension) / (NkBT*tb2);
     eta(1,1) -= dt2* Axy * (sy - surfaceTension) / (NkBT*tb2);
-    eta(2,2) += dt2 *  instaVol * (press(2, 2) - targetPressure/OOPSEConstant::pressureConvert) / (NkBT*tb2);
+    eta(2,2) += dt2 *  instaVol * (press(2, 2) - targetPressure/PhysicalConstants::pressureConvert) / (NkBT*tb2);
     oldEta = eta;  
   }
 
@@ -78,12 +78,12 @@ namespace oopse {
     RealType hz = hmat(2, 2);
     RealType Axy = hmat(0,0) * hmat(1, 1);
     prevEta = eta;
-    RealType sx = -hz * (press(0, 0) - targetPressure/OOPSEConstant::pressureConvert);
-    RealType sy = -hz * (press(1, 1) - targetPressure/OOPSEConstant::pressureConvert);
+    RealType sx = -hz * (press(0, 0) - targetPressure/PhysicalConstants::pressureConvert);
+    RealType sy = -hz * (press(1, 1) - targetPressure/PhysicalConstants::pressureConvert);
     eta(0,0) = oldEta(0, 0) - dt2 * Axy * (sx -surfaceTension) / (NkBT*tb2);
     eta(1,1) = oldEta(1, 1) - dt2 * Axy * (sy -surfaceTension) / (NkBT*tb2);
     eta(2,2) = oldEta(2, 2) + dt2 *  instaVol *
-	    (press(2, 2) - targetPressure/OOPSEConstant::pressureConvert) / (NkBT*tb2);
+	    (press(2, 2) - targetPressure/PhysicalConstants::pressureConvert) / (NkBT*tb2);
   }
 
   void NPrT::calcVelScale(){
@@ -149,33 +149,33 @@ namespace oopse {
     // We need NkBT a lot, so just set it here: This is the RAW number
     // of integrableObjects, so no subtraction or addition of constraints or
     // orientational degrees of freedom:
-    NkBT = info_->getNGlobalIntegrableObjects()*OOPSEConstant::kB *targetTemp;
+    NkBT = info_->getNGlobalIntegrableObjects()*PhysicalConstants::kB *targetTemp;
 
     // fkBT is used because the thermostat operates on more degrees of freedom
     // than the barostat (when there are particles with orientational degrees
     // of freedom).  
-    fkBT = info_->getNdf()*OOPSEConstant::kB *targetTemp;    
+    fkBT = info_->getNdf()*PhysicalConstants::kB *targetTemp;    
     
 
     RealType totalEnergy = thermo.getTotalE();
 
-    RealType thermostat_kinetic = fkBT * tt2 * chi * chi /(2.0 * OOPSEConstant::energyConvert);
+    RealType thermostat_kinetic = fkBT * tt2 * chi * chi /(2.0 * PhysicalConstants::energyConvert);
 
-    RealType thermostat_potential = fkBT* integralOfChidt / OOPSEConstant::energyConvert;
+    RealType thermostat_potential = fkBT* integralOfChidt / PhysicalConstants::energyConvert;
 
     SquareMatrix<RealType, 3> tmp = eta.transpose() * eta;
     RealType trEta = tmp.trace();
     
-    RealType barostat_kinetic = NkBT * tb2 * trEta /(2.0 * OOPSEConstant::energyConvert);
+    RealType barostat_kinetic = NkBT * tb2 * trEta /(2.0 * PhysicalConstants::energyConvert);
 
-    RealType barostat_potential = (targetPressure * thermo.getVolume() / OOPSEConstant::pressureConvert) /OOPSEConstant::energyConvert;
+    RealType barostat_potential = (targetPressure * thermo.getVolume() / PhysicalConstants::pressureConvert) /PhysicalConstants::energyConvert;
 
     Mat3x3d hmat = currentSnapshot_->getHmat();
     RealType hz = hmat(2, 2);
     RealType area = hmat(0,0) * hmat(1, 1);
 
     RealType conservedQuantity = totalEnergy + thermostat_kinetic + thermostat_potential +
-      barostat_kinetic + barostat_potential - surfaceTension * area/ OOPSEConstant::energyConvert;
+      barostat_kinetic + barostat_potential - surfaceTension * area/ PhysicalConstants::energyConvert;
 
     return conservedQuantity;
 

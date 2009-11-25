@@ -4,7 +4,7 @@
 #include <cppunit/extensions/HelperMacros.h>
 #include "math/SquareMatrix3.hpp"
  
-using namespace oopse;
+using namespace OpenMD;
 
 class SquareMatrix3TestCase : public CPPUNIT_NS::TestFixture {
     CPPUNIT_TEST_SUITE( SquareMatrix3TestCase );

@@ -12,7 +12,7 @@
 #include "io/Globals.hpp"
 #include "utils/StringUtils.hpp"
 using namespace std;
-using namespace oopse;
+using namespace OpenMD;
 
 #line 18 "MDTreeParser.hpp"
 class CUSTOM_API MDTreeParser : public ANTLR_USE_NAMESPACE(antlr)TreeParser, public MDTreeParserTokenTypes

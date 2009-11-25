@@ -1,4 +1,4 @@
-<OOPSE version=4>
+<OpenMD version=1>
   <MetaData>
 
 molecule{
@@ -8053,4 +8053,4 @@ statFileFormat = "TIME|TOTAL_ENERGY|POTENTIAL_ENERGY|KINETIC_ENERGY|TEMPERATURE|
          7999 pv    53.67500        53.67500        53.67500     0 0 0
     </StuntDoubles>
   </Snapshot>
-</OOPSE>
+</OpenMD>

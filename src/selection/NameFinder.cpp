@@ -6,19 +6,10 @@
  * redistribute this software in source and binary code form, provided
  * that the following conditions are met:
  *
- * 1. Acknowledgement of the program authors must be made in any
- *    publication of scientific results based in part on use of the
- *    program.  An acceptable form of acknowledgement is citation of
- *    the article in which the program was described (Matthew
- *    A. Meineke, Charles F. Vardeman II, Teng Lin, Christopher
- *    J. Fennell and J. Daniel Gezelter, "OOPSE: An Object-Oriented
- *    Parallel Simulation Engine for Molecular Dynamics,"
- *    J. Comput. Chem. 26, pp. 252-271 (2005))
- *
- * 2. Redistributions of source code must retain the above copyright
+ * 1. Redistributions of source code must retain the above copyright
  *    notice, this list of conditions and the following disclaimer.
  *
- * 3. Redistributions in binary form must reproduce the above copyright
+ * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in the
  *    documentation and/or other materials provided with the
  *    distribution.
@@ -37,13 +28,22 @@
  * arising out of the use of or inability to use software, even if the
  * University of Notre Dame has been advised of the possibility of
  * such damages.
+ *
+ * SUPPORT OPEN SCIENCE!  If you use OpenMD or its source code in your
+ * research, please cite the appropriate papers when you publish your
+ * work.  Good starting points are:
+ *                                                                      
+ * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
+ * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
+ * [4]  Vardeman & Gezelter, in progress (2009).                        
  */
 #include "selection/NameFinder.hpp"
 #include "utils/wildcards.hpp"
 #include "utils/StringTokenizer.hpp"
 #include "primitives/Molecule.hpp"
 #include "utils/StringUtils.hpp"
-namespace oopse {
+namespace OpenMD {
 
   TreeNode::~TreeNode(){
     std::map<std::string, TreeNode*>::iterator i;
@@ -127,8 +127,8 @@ namespace oopse {
     return node;
   }
 
-  OOPSEBitSet NameFinder::match(const std::string& name){
-    OOPSEBitSet bs(nStuntDouble_);
+  OpenMDBitSet NameFinder::match(const std::string& name){
+    OpenMDBitSet bs(nStuntDouble_);
   
     StringTokenizer tokenizer(name, ".");
 
@@ -173,7 +173,7 @@ namespace oopse {
     return bs; 
   }
 
-  void NameFinder::matchMolecule(const std::string& molName, OOPSEBitSet& bs) {
+  void NameFinder::matchMolecule(const std::string& molName, OpenMDBitSet& bs) {
     std::vector<TreeNode*> molNodes = getMatchedChildren(root_, molName);            
     std::vector<TreeNode*>::iterator i;
     for( i = molNodes.begin(); i != molNodes.end(); ++i ) {
@@ -181,7 +181,7 @@ namespace oopse {
     }    
   }
 
-  void NameFinder::matchStuntDouble(const std::string& molName, const std::string& sdName, OOPSEBitSet& bs){
+  void NameFinder::matchStuntDouble(const std::string& molName, const std::string& sdName, OpenMDBitSet& bs){
     std::vector<TreeNode*> molNodes = getMatchedChildren(root_, molName);            
     std::vector<TreeNode*>::iterator i;
     for( i = molNodes.begin(); i != molNodes.end(); ++i ) {
@@ -194,7 +194,7 @@ namespace oopse {
 
   }
 
-  void NameFinder::matchRigidAtoms(const std::string& molName, const std::string& rbName, const std::string& rbAtomName, OOPSEBitSet& bs){
+  void NameFinder::matchRigidAtoms(const std::string& molName, const std::string& rbName, const std::string& rbAtomName, OpenMDBitSet& bs){
     std::vector<TreeNode*> molNodes = getMatchedChildren(root_, molName);            
     std::vector<TreeNode*>::iterator i;
     for( i = molNodes.begin(); i != molNodes.end(); ++i ) {
@@ -229,7 +229,7 @@ namespace oopse {
   }
 
 
-  void NameFinder::matchInternalIndex(const std::string& name, int internalIndex, OOPSEBitSet& bs){
+  void NameFinder::matchInternalIndex(const std::string& name, int internalIndex, OpenMDBitSet& bs){
 
     std::map<std::string, TreeNode*>::iterator foundIter;
     SimInfo::MoleculeIterator mi;

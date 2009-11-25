@@ -1,4 +1,4 @@
-<OOPSE version=4>
+<OpenMD version=1>
   <MetaData>
 
 #include "water.md"
@@ -7069,4 +7069,4 @@ statusTime = 10;
       2337    pvqj       -20.80570199       -21.46228246        40.89146926  0.000000e+00  0.000000e+00  0.000000e+00  7.063478e-01  3.275323e-02  3.814927e-01  5.953682e-01  0.000000e+00  0.000000e+00  0.000000e+00
     </StuntDoubles>
   </Snapshot>
-</OOPSE>
+</OpenMD>

@@ -3,7 +3,7 @@
 // Registers the fixture into the 'registry'
 CPPUNIT_TEST_SUITE_REGISTRATION( RandNumGenTestCase );
 
-using namespace oopse;
+using namespace OpenMD;
 
 void RandNumGenTestCase::testUniform(){
     MTRand randNumGen(823645754);

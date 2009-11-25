@@ -21,7 +21,7 @@ MPINumProc             = -np 2
 CppOptions             = 
 CppParallelOptions     = $(ParallelDeclare)
 
-OOPSESrcDir              = $(DEV_ROOT)/src
+OpenMDSrcDir             = $(DEV_ROOT)/src
 SourceDir                = $(DEV_ROOT)/test
 Package                  = $(subst $(shell cd $(SourceDir); pwd)/,,$(shell pwd))
 PackageSourceDir         = $(SourceDir)/$(Package)
@@ -34,7 +34,7 @@ IncludeDirs = \
         /home/maul/gezelter/tim/cppunit/include \
 	/usr/local/include \
 	/usr/local/mpich/include \
-        $(OOPSESrcDir)
+        $(OpenMDSrcDir)
 
 IncludePath      = -I$(SourceDir) $(IncludeDirs:%=-I%)
 
@@ -52,7 +52,7 @@ Libraries = \
 	-lsprng \
 	-lmpich \
 	-lfmpich \
-	-lOOPSE \
+	-lopenmd \
 
 
 #LinkOptions = \

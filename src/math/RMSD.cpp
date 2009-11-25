@@ -1,7 +1,7 @@
 #include "math/RMSD.hpp"
 #include "math/SVD.hpp"
 
-using namespace oopse;
+using namespace OpenMD;
 using namespace JAMA;
 
 RealType RMSD::calculate_rmsd(std::vector<Vector3d> mov,

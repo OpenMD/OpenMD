@@ -6,19 +6,10 @@
  * redistribute this software in source and binary code form, provided
  * that the following conditions are met:
  *
- * 1. Acknowledgement of the program authors must be made in any
- *    publication of scientific results based in part on use of the
- *    program.  An acceptable form of acknowledgement is citation of
- *    the article in which the program was described (Matthew
- *    A. Meineke, Charles F. Vardeman II, Teng Lin, Christopher
- *    J. Fennell and J. Daniel Gezelter, "OOPSE: An Object-Oriented
- *    Parallel Simulation Engine for Molecular Dynamics,"
- *    J. Comput. Chem. 26, pp. 252-271 (2005))
- *
- * 2. Redistributions of source code must retain the above copyright
+ * 1. Redistributions of source code must retain the above copyright
  *    notice, this list of conditions and the following disclaimer.
  *
- * 3. Redistributions in binary form must reproduce the above copyright
+ * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in the
  *    documentation and/or other materials provided with the
  *    distribution.
@@ -37,6 +28,15 @@
  * arising out of the use of or inability to use software, even if the
  * University of Notre Dame has been advised of the possibility of
  * such damages.
+ *
+ * SUPPORT OPEN SCIENCE!  If you use OpenMD or its source code in your
+ * research, please cite the appropriate papers when you publish your
+ * work.  Good starting points are:
+ *                                                                      
+ * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
+ * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
+ * [4]  Vardeman & Gezelter, in progress (2009).                        
  */
  
 #include "brains/SimInfo.hpp"
@@ -44,14 +44,14 @@
 #include "integrators/IntegratorCreator.hpp"
 #include "integrators/NPAT.hpp"
 #include "primitives/Molecule.hpp"
-#include "utils/OOPSEConstant.hpp"
+#include "utils/PhysicalConstants.hpp"
 #include "utils/simError.h"
 
-namespace oopse {
+namespace OpenMD {
   
   void NPAT::evolveEtaA() {
 
-    eta(2,2) += dt2 *  instaVol * (press(2, 2) - targetPressure/OOPSEConstant::pressureConvert) / (NkBT*tb2);
+    eta(2,2) += dt2 *  instaVol * (press(2, 2) - targetPressure/PhysicalConstants::pressureConvert) / (NkBT*tb2);
     oldEta = eta;  
   }
 
@@ -59,7 +59,7 @@ namespace oopse {
 
     prevEta = eta;
     eta(2,2) = oldEta(2, 2) + dt2 *  instaVol *
-	    (press(2, 2) - targetPressure/OOPSEConstant::pressureConvert) / (NkBT*tb2);
+	    (press(2, 2) - targetPressure/PhysicalConstants::pressureConvert) / (NkBT*tb2);
   }
 
   void NPAT::calcVelScale(){
@@ -131,12 +131,12 @@ namespace oopse {
     // We need NkBT a lot, so just set it here: This is the RAW number
     // of integrableObjects, so no subtraction or addition of constraints or
     // orientational degrees of freedom:
-    NkBT = info_->getNGlobalIntegrableObjects()*OOPSEConstant::kB *targetTemp;
+    NkBT = info_->getNGlobalIntegrableObjects()*PhysicalConstants::kB *targetTemp;
 
     // fkBT is used because the thermostat operates on more degrees of freedom
     // than the barostat (when there are particles with orientational degrees
     // of freedom).  
-    fkBT = info_->getNdf()*OOPSEConstant::kB *targetTemp;    
+    fkBT = info_->getNdf()*PhysicalConstants::kB *targetTemp;    
     
     RealType conservedQuantity;
     RealType totalEnergy;
@@ -148,16 +148,16 @@ namespace oopse {
 
     totalEnergy = thermo.getTotalE();
 
-    thermostat_kinetic = fkBT * tt2 * chi * chi /(2.0 * OOPSEConstant::energyConvert);
+    thermostat_kinetic = fkBT * tt2 * chi * chi /(2.0 * PhysicalConstants::energyConvert);
 
-    thermostat_potential = fkBT* integralOfChidt / OOPSEConstant::energyConvert;
+    thermostat_potential = fkBT* integralOfChidt / PhysicalConstants::energyConvert;
 
     SquareMatrix<RealType, 3> tmp = eta.transpose() * eta;
     trEta = tmp.trace();
     
-    barostat_kinetic = NkBT * tb2 * trEta /(2.0 * OOPSEConstant::energyConvert);
+    barostat_kinetic = NkBT * tb2 * trEta /(2.0 * PhysicalConstants::energyConvert);
 
-    barostat_potential = (targetPressure * thermo.getVolume() / OOPSEConstant::pressureConvert) /OOPSEConstant::energyConvert;
+    barostat_potential = (targetPressure * thermo.getVolume() / PhysicalConstants::pressureConvert) /PhysicalConstants::energyConvert;
 
     conservedQuantity = totalEnergy + thermostat_kinetic + thermostat_potential +
       barostat_kinetic + barostat_potential;

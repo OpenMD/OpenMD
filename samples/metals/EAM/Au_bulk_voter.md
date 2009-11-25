@@ -1,4 +1,4 @@
-<OOPSE version=4>
+<OpenMD version=1>
   <MetaData>
 #include "metals.md"
 
@@ -1410,4 +1410,4 @@ tauBarostat = 5E3;
       1371      pv          14.814939           7.593382          16.037594   8.900000e-05  8.490000e-04  1.353000e-03
     </StuntDoubles>
   </Snapshot>
-</OOPSE>
+</OpenMD>

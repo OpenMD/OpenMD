@@ -6,19 +6,10 @@
  * redistribute this software in source and binary code form, provided
  * that the following conditions are met:
  *
- * 1. Acknowledgement of the program authors must be made in any
- *    publication of scientific results based in part on use of the
- *    program.  An acceptable form of acknowledgement is citation of
- *    the article in which the program was described (Matthew
- *    A. Meineke, Charles F. Vardeman II, Teng Lin, Christopher
- *    J. Fennell and J. Daniel Gezelter, "OOPSE: An Object-Oriented
- *    Parallel Simulation Engine for Molecular Dynamics,"
- *    J. Comput. Chem. 26, pp. 252-271 (2005))
- *
- * 2. Redistributions of source code must retain the above copyright
+ * 1. Redistributions of source code must retain the above copyright
  *    notice, this list of conditions and the following disclaimer.
  *
- * 3. Redistributions in binary form must reproduce the above copyright
+ * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in the
  *    documentation and/or other materials provided with the
  *    distribution.
@@ -37,17 +28,26 @@
  * arising out of the use of or inability to use software, even if the
  * University of Notre Dame has been advised of the possibility of
  * such damages.
+ *
+ * SUPPORT OPEN SCIENCE!  If you use OpenMD or its source code in your
+ * research, please cite the appropriate papers when you publish your
+ * work.  Good starting points are:
+ *                                                                      
+ * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
+ * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
+ * [4]  Vardeman & Gezelter, in progress (2009).                        
  */
 #include <fstream> 
 #include <iostream>
 #include "integrators/LDForceManager.hpp"
 #include "math/CholeskyDecomposition.hpp"
-#include "utils/OOPSEConstant.hpp"
+#include "utils/PhysicalConstants.hpp"
 #include "hydrodynamics/Sphere.hpp"
 #include "hydrodynamics/Ellipsoid.hpp"
 #include "utils/ElementsTable.hpp"
 
-namespace oopse {
+namespace OpenMD {
 
   LDForceManager::LDForceManager(SimInfo* info) : ForceManager(info), forceTolerance_(1e-6), maxIterNum_(4) {
     simParams = info->getSimParams();
@@ -62,7 +62,7 @@ namespace oopse {
         sprintf( painCave.errMsg,
                  "langevinBufferRadius must be specified " 
                  "when useSphericalBoundaryConditions is turned on.\n");
-        painCave.severity = OOPSE_ERROR;
+        painCave.severity = OPENMD_ERROR;
         painCave.isFatal = 1;
         simError();  
       }
@@ -73,7 +73,7 @@ namespace oopse {
         sprintf( painCave.errMsg,
                  "frozenBufferRadius must be specified " 
                  "when useSphericalBoundaryConditions is turned on.\n");
-        painCave.severity = OOPSE_ERROR;
+        painCave.severity = OPENMD_ERROR;
         painCave.isFatal = 1;
         simError();  
       }
@@ -82,7 +82,7 @@ namespace oopse {
         sprintf( painCave.errMsg,
                  "frozenBufferRadius has been set smaller than the " 
                  "langevinBufferRadius.  This is probably an error.\n");
-        painCave.severity = OOPSE_WARNING;
+        painCave.severity = OPENMD_WARNING;
         painCave.isFatal = 0;
         simError();  
       }
@@ -120,7 +120,7 @@ namespace oopse {
                  "HydroPropFile must be set to a file name if Langevin Dynamics\n"
                  "\tis specified for rigidBodies which contain more than one atom\n"
                  "\tTo create a HydroPropFile, run the \"Hydro\" program.\n");
-        painCave.severity = OOPSE_ERROR;
+        painCave.severity = OPENMD_ERROR;
         painCave.isFatal = 1;
         simError();  
       }      
@@ -137,7 +137,7 @@ namespace oopse {
           } else {
             sprintf( painCave.errMsg,
                      "Can not find resistance tensor for atom [%s]\n", integrableObject->getType().c_str());
-            painCave.severity = OOPSE_ERROR;
+            painCave.severity = OPENMD_ERROR;
             painCave.isFatal = 1;
             simError();  
           }        
@@ -171,13 +171,13 @@ namespace oopse {
                 } else {
                   sprintf( painCave.errMsg,
                            "Can not cast GenericData to GayBerneParam\n");
-                  painCave.severity = OOPSE_ERROR;
+                  painCave.severity = OPENMD_ERROR;
                   painCave.isFatal = 1;
                   simError();   
                 }
               } else {
                 sprintf( painCave.errMsg, "Can not find Parameters for GayBerne\n");
-                painCave.severity = OOPSE_ERROR;
+                painCave.severity = OPENMD_ERROR;
                 painCave.isFatal = 1;
                 simError();    
               }
@@ -192,7 +192,7 @@ namespace oopse {
                   } else {
                     sprintf( painCave.errMsg,
                              "Can not cast GenericData to LJParam\n");
-                    painCave.severity = OOPSE_ERROR;
+                    painCave.severity = OPENMD_ERROR;
                     painCave.isFatal = 1;
                     simError();          
                   }       
@@ -204,7 +204,7 @@ namespace oopse {
                 } else {
                   sprintf( painCave.errMsg,
                            "Could not find atom type in default element.txt\n");
-                  painCave.severity = OOPSE_ERROR;
+                  painCave.severity = OPENMD_ERROR;
                   painCave.isFatal = 1;
                   simError();          
                 }
@@ -215,14 +215,14 @@ namespace oopse {
 	  if (!simParams->haveTargetTemp()) {
 	    sprintf(painCave.errMsg, "You can't use LangevinDynamics without a targetTemp!\n");
 	    painCave.isFatal = 1;
-	    painCave.severity = OOPSE_ERROR;
+	    painCave.severity = OPENMD_ERROR;
 	    simError();
 	  }
 
 	  if (!simParams->haveViscosity()) {
 	    sprintf(painCave.errMsg, "You can't use LangevinDynamics without a viscosity!\n");
 	    painCave.isFatal = 1;
-	    painCave.severity = OOPSE_ERROR;
+	    painCave.severity = OPENMD_ERROR;
 	    simError();
 	  }
 
@@ -239,7 +239,7 @@ namespace oopse {
         }
       }
     }
-    variance_ = 2.0 * OOPSEConstant::kb*simParams->getTargetTemp()/simParams->getDt();
+    variance_ = 2.0 * PhysicalConstants::kb*simParams->getTargetTemp()/simParams->getDt();
   }  
 
   std::map<std::string, HydroProp*> LDForceManager::parseFrictionFile(const std::string& filename) {
@@ -342,10 +342,10 @@ namespace oopse {
             //estimate velocity at full-step using everything but friction forces:           
 
             frc = integrableObject->getFrc();
-            Vector3d velStep = vel + (dt2_ /mass * OOPSEConstant::energyConvert) * frc;
+            Vector3d velStep = vel + (dt2_ /mass * PhysicalConstants::energyConvert) * frc;
 
             Tb = integrableObject->lab2Body(integrableObject->getTrq());
-            Vector3d angMomStep = angMom + (dt2_ * OOPSEConstant::energyConvert) * Tb;                             
+            Vector3d angMomStep = angMom + (dt2_ * PhysicalConstants::energyConvert) * Tb;                             
 
             Vector3d omegaLab;
             Vector3d vcdLab;
@@ -391,8 +391,8 @@ namespace oopse {
               
               // re-estimate velocities at full-step using friction forces:
               
-              velStep = vel + (dt2_ / mass * OOPSEConstant::energyConvert) * (frc + frictionForceLab);
-              angMomStep = angMom + (dt2_ * OOPSEConstant::energyConvert) * (Tb + frictionTorqueBody);
+              velStep = vel + (dt2_ / mass * PhysicalConstants::energyConvert) * (frc + frictionForceLab);
+              angMomStep = angMom + (dt2_ * PhysicalConstants::energyConvert) * (Tb + frictionTorqueBody);
 
               // check for convergence (if the vectors have converged, fdot and tdot will both be 1.0):
               
@@ -427,7 +427,7 @@ namespace oopse {
             //estimate velocity at full-step using everything but friction forces:           
 
             frc = integrableObject->getFrc();
-            Vector3d velStep = vel + (dt2_ / mass * OOPSEConstant::energyConvert) * frc;
+            Vector3d velStep = vel + (dt2_ / mass * PhysicalConstants::energyConvert) * frc;
 
             Vector3d frictionForce(0.0);
             Vector3d oldFF;  // used to test for convergence
@@ -442,7 +442,7 @@ namespace oopse {
 
               // re-estimate velocities at full-step using friction forces:
               
-              velStep = vel + (dt2_ / mass * OOPSEConstant::energyConvert) * (frc + frictionForce);
+              velStep = vel + (dt2_ / mass * PhysicalConstants::energyConvert) * (frc + frictionForce);
 
               // check for convergence (if the vector has converged, fdot will be 1.0):
               

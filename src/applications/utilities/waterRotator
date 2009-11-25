@@ -18,10 +18,10 @@ Example:
 """
 
 __author__ = "Dan Gezelter (gezelter@nd.edu)"
-__version__ = "$Revision: 1.2 $"
-__date__ = "$Date: 2009-10-19 14:29:14 $"
+__version__ = "$Revision: 1.3 $"
+__date__ = "$Date: 2009-11-25 20:01:59 $"
 __copyright__ = "Copyright (c) 2006 by the University of Notre Dame"
-__license__ = "OOPSE"
+__license__ = "OpenMD"
 
 import sys
 import getopt
@@ -62,11 +62,11 @@ def usage():
 
 def readFile(mdFileName):
     mdFile = open(mdFileName, 'r')        
-    # Find OOPSE version info first
+    # Find OpenMD version info first
     line = mdFile.readline()
     while 1:
-        if '<OOPSE version=' in line:
-            OOPSEversion = line
+        if '<OOPSE version=' in line or '<OpenMD version=' in line:
+            OpenMDversion = line
             break
         line = mdFile.readline()
         
@@ -160,7 +160,7 @@ def readFile(mdFileName):
 def writeFile(outputFileName):
     outputFile = open(outputFileName, 'w')
 
-    outputFile.write("<OOPSE version=4>\n");
+    outputFile.write("<OpenMD version=1>\n");
     
     for metaline in metaData:
         outputFile.write(metaline)
@@ -179,7 +179,7 @@ def writeFile(outputFileName):
 
     outputFile.write("    </StuntDoubles>\n")
     outputFile.write("  </Snapshot>\n")
-    outputFile.write("</OOPSE>\n")
+    outputFile.write("</OpenMD>\n")
     outputFile.close()
 
 def roundMe(x):
@@ -430,7 +430,7 @@ def computeQuats():
 
         q = [0.0, 0.0, 0.0, 0.0]
 
-        # RotMat to Quat code is out of OOPSE's SquareMatrix3.hpp code:
+        # RotMat to Quat code is out of OpenMD's SquareMatrix3.hpp code:
 
         RotMat[0] = ux
         RotMat[1] = uy
