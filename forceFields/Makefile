@@ -1,11 +1,5 @@
 Package = forceFields
 
-Source    = \
-
-RmiSource =
-
-Main      = 
-
 ForcefieldFiles = \
         CLAYFF.frc \
         DUFF2.frc \
@@ -36,18 +30,7 @@ ForcefieldFiles = \
         Pt.u3.funcfl \
         Pt.u6.funcfl \
         Pt.VC.funcfl \
-        aromatic.txt \
-        atomtyp.txt \
-        bondtyp.txt \
-        element.txt \
-        isotope-small.txt \
-        isotope.txt \
-        patterns.txt \
-        phmodel.txt \
-        resdata.txt \
-        SMARTS_InteLigand.txt \
-        torlib.txt \
-        types.txt 
+        element.txt 
 
 DEV_ROOT=..
 include $(DEV_ROOT)/make/Makefile

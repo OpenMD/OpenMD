@@ -3343,6 +3343,8 @@ fi
 fi
 
 
+save_LIBS_CHECK_CXX_LIB="$LIBS"
+
 ac_ext=cpp
 ac_cpp='$CXXCPP $CPPFLAGS'
 ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
@@ -6656,7 +6658,7 @@ case "x$INSTALL" in
    x/*) ;;
    *) INSTALL=`pwd`/ac-tools/"shtool install -c" ;
 esac
-MKINSTALLDIRS=`pwd`/ac-tools/"shtool mkdir -p -f"
+MKINSTALLDIRS=`pwd`/ac-tools/"shtool mkdir -p -f -m 755"
 # Extract the first word of "ar", so it can be a program name with args.
 set dummy ar; ac_word=$2
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5

@@ -97,6 +97,8 @@ fi
 
 
 dnl do MPI checks
+save_LIBS_CHECK_CXX_LIB="$LIBS"
+
 AC_LANG([C++])
 AX_MPI([USE_MPI="yes"],
        [USE_MPI="no"
@@ -135,7 +137,7 @@ case "x$INSTALL" in
    x/*) ;;
    *) INSTALL=`pwd`/ac-tools/"shtool install -c" ;
 esac
-MKINSTALLDIRS=`pwd`/ac-tools/"shtool mkdir -p -f"
+MKINSTALLDIRS=`pwd`/ac-tools/"shtool mkdir -p -f -m 755"
 AC_CHECK_PROG(AR, ar, ar, NONE)
 if test "$AR" = "NONE"; then
   AC_CACHE_SAVE

@@ -120,7 +120,7 @@ OpenMDHome       = @OPENMD_HOME@
 ForceParamDir   = $(OpenMDHome)/forceFields
 SampleSimDir    = $(OpenMDHome)/samples
 InstallBinDir   = $(OpenMDHome)/bin
-DocDir          = $(OpenMDHome)/doc
+InstallDocDir   = $(OpenMDHome)/doc
 FrcDeclare      = -DFRC_PATH="$(ForceParamDir)"
 F90Declare      = -D__FORTRAN90
 UseSingle       = @USE_SINGLE_PRECISION@
@@ -159,7 +159,7 @@ LibDir            = $(DEV_ROOT)/lib
 MakeDir           = $(DEV_ROOT)/make
 MainMakefile      = $(MakeDir)/Makefile
 BinDir            = $(DEV_ROOT)/bin
-DocsDir           = $(DEV_ROOT)/docs
+DocDir            = $(DEV_ROOT)/doc
 CurrentDir        = $(CURDIR)
 CombinedStaticLib = $(LibDir)/libopenmd.a
 CombinedParallelStaticLib = $(LibDir)/libopenmd_MPI.a
@@ -371,7 +371,7 @@ EGREP                  = @EGREP@
 InstallProgram         = @INSTALL_PROGRAM@
 InstallScript          = @INSTALL_SCRIPT@
 InstallData            = @INSTALL_DATA@
-MkDir                  = @MKINSTALLDIRS@
+MkDir                  = @MKINSTALLDIRS@ -m 655
 Delete                 = rm -f
 StaticArchiver         = @AR@
 DynamicArchiver        = @CC@
@@ -414,7 +414,7 @@ JavaCompilerOptions    = -d $(TargetDir) -classpath $(ClassPath) \
 			 -sourcepath $(SourceDir) -deprecation
 JavaRunOptions         = -classpath $(ClassPath) 
 PurifyOptions          = 
-JavadocOptions         = -d $(DocsDir) \
+JavadocOptions         = -d $(DocDir) \
 			 -sourcepath $(SourceDir) \
 			 -classpath $(ClassPath) \
 			 -author \
@@ -484,13 +484,13 @@ ifneq "$(words $(ForcefieldFiles))" "0"
   InstallCommand           = $(InstallData)
 endif
 
-ifneq "$(words $(InstallFiles))" "0"
+ifeq "$(words $(InstallFiles))" "0"
   InstallList            =
 else
-  InstallList            = $(patsubst %,$(DEV_ROOT)/%,$(Samples)) $(DEV_ROOT)/forceFields $(patsubst %, $(SourceDir)/%,$(Applications)) 
+  InstallList            = $(patsubst %,$(DEV_ROOT)/%,$(Samples)) $(DEV_ROOT)/forceFields $(DocDir) $(DEV_ROOT) $(patsubst %, $(SourceDir)/%,$(Applications)) 
 endif
 
-InstallListLoop          = $(patsubst %,$(SourceDir)/%/.install,$(PackageList))  $(patsubst %,%/.install,$(InstallList)) 
+InstallListLoop          = $(patsubst %,$(SourceDir)/%/.install,$(PackageList))  $(patsubst %,%/.install,$(InstallList))
 
 
 
