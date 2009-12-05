@@ -76,7 +76,7 @@ namespace OpenMD {
       RealType tw, swingX, swingY;
       
       quat.getTwistSwingAxisAngle(twistAngle, swingAngle, swingAxis);
-      quat.toSwingTwist(tw, swingX, swingY);
+      quat.toSwingTwist(swingX, swingY, tw);
       
       RealType dVdtwist, dVdswingX, dVdswingY;
       RealType dTwist, dSwingX, dSwingY;

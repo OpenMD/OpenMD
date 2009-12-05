@@ -56,48 +56,14 @@ if test "$ok" = "yes"; then
         AC_SUBST(USE_SINGLE_PRECISION)
 fi
 
-if test x"$CC" != x; then
-   AC_CHECK_PROGS(ac_cc_set,[$CC],[no])
-   AS_IF([test AS_VAR_GET([ac_cc_set]) != no],[
-     AC_PATH_PROG(ac_cc_path,[$ac_cc_set],[no])],[
-     AC_ERROR([Specified C compiler $CC doesn't seem to exist!])])
+AC_PROG_CXX([$CXX icpc pathCC pgCC c++ xlc++ xlC g++ CC])
+AC_PROG_CC([$CC icc pathcc pgcc cc xlc gcc])
+AC_PROG_FC([$FC ifort ifc pathf95 pgf95 xlf95 lf95 epcf90 pathf90 xlf90 f95 f90 gfortran g95 fort], 95)
 
-   AS_IF([test AS_VAR_GET([ac_cc_path]) != no],[
-     AC_MSG_NOTICE([Will attempt to use $CC as C compiler])
-     MPICC=$CC
-   ],[
-     AC_ERROR([Can't find path to user-specified C compiler $CC])])
-fi
-
-if test x"$CXX" != x; then
-   AC_CHECK_PROGS(ac_cxx_set,[$CXX],[no])
-   AS_IF([test AS_VAR_GET([ac_cxx_set]) != no],[
-     AC_PATH_PROG(ac_cxx_path,[$ac_cxx_set],[no])],[
-     AC_ERROR([Specified C++ compiler $CXX doesn't seem to exist!])])
-
-   AS_IF([test AS_VAR_GET([ac_cxx_path]) != no],[
-     AC_MSG_NOTICE([Will attempt to use $CXX as C++ compiler])
-     MPICXX=$CXX
-    ],[
-     AC_ERROR([Can't find path to user-specified C++ compiler $CXX])])
-fi
-
-if test x"$FC" != x; then
-   AC_CHECK_PROGS(ac_fc_set,[$FC],[no])
-   AS_IF([test AS_VAR_GET([ac_fc_set]) != no],[
-     AC_PATH_PROG(ac_fc_path,[$ac_fc_set],[no])],[
-     AC_ERROR([Specified Fortran compiler $FC doesn't seem to exist!])])
-
-   AS_IF([test AS_VAR_GET([ac_fc_path]) != no],[
-     AC_MSG_NOTICE([Will attempt to use $FC as Fortran compiler])
-     MPIFC=$FC
-   ],[
-     AC_ERROR([Can't find path to user-specified Fortran compiler $FC])])
-fi
-
-
-dnl do MPI checks
-save_LIBS_CHECK_CXX_LIB="$LIBS"
+save_CXX=$CXX
+save_CC=$CC
+save_FC=$FC
+save_LIBS=$LIBS
 
 AC_LANG([C++])
 AX_MPI([USE_MPI="yes"],
@@ -119,13 +85,17 @@ AS_IF([test AS_VAR_GET([USE_MPI]) != no],[
         CXX=$MPICXX
         CC=$MPICC
         FC=$MPIFC
-])
+        LIBS="$MPILIBS $LIBS"
+],[
+        CXX=$save_CXX
+        CC=$save_CC
+        FC=$save_FC
+        LIBS=$save_LIBS
+]
+)
 AC_SUBST(USE_MPI)
 
 # Checks for programs.
-AC_PROG_CXX([$CXX icpc pathCC pgCC c++ xlc++ xlC g++ CC])
-AC_PROG_CC([$CC icc pathcc pgcc cc xlc gcc])
-AC_PROG_FC([$FC ifort ifc pathf95 pgf95 xlf95 lf95 epcf90 pathf90 xlf90 f95 f90 gfortran g95 fort], 95)
 AC_PROG_CPP
 AC_PROG_EGREP
 AC_PROG_LN_S

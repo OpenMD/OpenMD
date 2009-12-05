@@ -1,11 +1,5 @@
 Package = doc
 
-Source    = \
-
-RmiSource =
-
-Main      = 
-
 DocFiles = \
         OpenMDmanual.pdf
 

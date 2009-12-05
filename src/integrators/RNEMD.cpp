@@ -154,7 +154,7 @@ namespace OpenMD {
     midBin_ = nBins_ / 2;
     if (simParams->haveRNEMD_logWidth()) {
       rnemdLogWidth_ = simParams->getRNEMD_logWidth();
-      if (rnemdLogWidth_ != nBins_ || rnemdLogWidth_ != midBin_ + 1) {
+      if (rnemdLogWidth_ != nBins_ && rnemdLogWidth_ != midBin_ + 1) {
         std::cerr << "WARNING! RNEMD_logWidth has abnormal value!\n";
         std::cerr << "Automaically set back to default.\n";
         rnemdLogWidth_ = nBins_;
@@ -194,11 +194,11 @@ namespace OpenMD {
   
   RNEMD::~RNEMD() {
     delete randNumGen_;
- 
-    std::cerr << "total fail trials: " << failTrialCount_ << "\n";
+    
 #ifdef IS_MPI
     if (worldRank == 0) {
 #endif
+      std::cerr << "total fail trials: " << failTrialCount_ << "\n";
       rnemdLog_.close();
       if (rnemdType_ == rnemdKineticScale || rnemdType_ == rnemdPxScale || rnemdType_ == rnemdPyScale)
         std::cerr<< "total root-checking warnings: " << failRootCount_ << "\n";
@@ -642,7 +642,7 @@ namespace OpenMD {
       a001 = Kcx * px * px;
     */
 
-      //scale all three dimensions, let x = y
+      //scale all three dimensions, let c_x = c_y
       a000 = Kcx + Kcy;
       a110 = Kcz;
       c0 = targetFlux_ - Kcx - Kcy - Kcz;
@@ -678,6 +678,17 @@ namespace OpenMD {
          + Khy * (fastpow(c * py - py - 1.0, 2) - 1.0);
       break;
     case rnemdPzScale ://we don't really do this, do we?
+      c = 1 - targetFlux_ / Pcz;
+      a000 = Kcx;
+      a110 = Kcy;
+      c0 = Kcz * c * c - Kcx - Kcy - Kcz;
+      a001 = px * px * Khx;
+      a111 = py * py * Khy;
+      b01 = -2.0 * Khx * px * (1.0 + px);
+      b11 = -2.0 * Khy * py * (1.0 + py);
+      c1 = Khx * px * (2.0 + px) + Khy * py * (2.0 + py)
+        + Khz * (fastpow(c * pz - pz - 1.0, 2) - 1.0);
+      break;      
     default :
       break;
     }
@@ -721,7 +732,10 @@ namespace OpenMD {
       r2 = *ri;
       //check if FindRealRoots() give the right answer
       if ( fabs(u0 + r2 * (u1 + r2 * (u2 + r2 * (u3 + r2 * u4)))) > 1e-6 ) {
-        std::cerr << "WARNING! eq solvers might have mistakes!\n";
+        sprintf(painCave.errMsg, 
+                "RNEMD Warning: polynomial solve seems to have an error!");
+        painCave.isFatal = 0;
+        simError();
         failRootCount_++;
       }
       //might not be useful w/o rescaling coefficients
@@ -797,6 +811,10 @@ namespace OpenMD {
           z = bestPair.second;
           break;
         case rnemdPzScale :
+          x = bestPair.first;
+          y = bestPair.second;
+          z = c;
+          break;          
         default :
           break;
         }
@@ -823,7 +841,7 @@ namespace OpenMD {
       exchangeSum_ += targetFlux_;
       //we may want to check whether the exchange has been successful
     } else {
-      std::cerr << "exchange NOT performed!\n";
+      std::cerr << "exchange NOT performed!\n";//MPI incompatible
       failTrialCount_++;
     }
 
@@ -965,7 +983,7 @@ namespace OpenMD {
 
     stat[Stats::RNEMD_EXCHANGE_TOTAL] = exchangeSum_;
     //or to be more meaningful, define another item as exchangeSum_ / time
-
+    int j;
 
 #ifdef IS_MPI
 
@@ -976,44 +994,52 @@ namespace OpenMD {
                               rnemdLogWidth_, MPI::REALTYPE, MPI::SUM);
     MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &valueCount_[0],
                               rnemdLogWidth_, MPI::INT, MPI::SUM);
-
+    if (rnemdType_ == rnemdPx || rnemdType_ == rnemdPxScale) {
+      MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &xTempHist_[0],
+                                rnemdLogWidth_, MPI::REALTYPE, MPI::SUM);
+      MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &yTempHist_[0],
+                                rnemdLogWidth_, MPI::REALTYPE, MPI::SUM);
+      MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &zTempHist_[0],
+                                rnemdLogWidth_, MPI::REALTYPE, MPI::SUM);
+    }
     // If we're the root node, should we print out the results
     int worldRank = MPI::COMM_WORLD.Get_rank();
     if (worldRank == 0) {
 #endif
-      int j;
       rnemdLog_ << time;
       for (j = 0; j < rnemdLogWidth_; j++) {
         rnemdLog_ << "\t" << valueHist_[j] / (RealType)valueCount_[j];
-        valueHist_[j] = 0.0;
       }
       rnemdLog_ << "\n";
       if (rnemdType_ == rnemdPx || rnemdType_ == rnemdPxScale ) {
         xTempLog_ << time;      
         for (j = 0; j < rnemdLogWidth_; j++) {
           xTempLog_ << "\t" << xTempHist_[j] / (RealType)valueCount_[j];
-          xTempHist_[j] = 0.0;
         }
         xTempLog_ << "\n";
         yTempLog_ << time;
         for (j = 0; j < rnemdLogWidth_; j++) {
           yTempLog_ << "\t" << yTempHist_[j] / (RealType)valueCount_[j];
-          yTempHist_[j] = 0.0;
         }
         yTempLog_ << "\n";
         zTempLog_ << time;
         for (j = 0; j < rnemdLogWidth_; j++) {
           zTempLog_ << "\t" << zTempHist_[j] / (RealType)valueCount_[j];
-          zTempHist_[j] = 0.0;
         }
         zTempLog_ << "\n";
       }
-      for (j = 0; j < rnemdLogWidth_; j++) valueCount_[j] = 0;
 #ifdef IS_MPI
-    }    
+    }
 #endif
-
-      
+    for (j = 0; j < rnemdLogWidth_; j++) {
+      valueCount_[j] = 0;
+      valueHist_[j] = 0.0;
+    }
+    if (rnemdType_ == rnemdPx || rnemdType_ == rnemdPxScale)
+      for (j = 0; j < rnemdLogWidth_; j++) {
+        xTempHist_[j] = 0.0;
+        yTempHist_[j] = 0.0;
+        zTempHist_[j] = 0.0;
+      }
   }
-
 }

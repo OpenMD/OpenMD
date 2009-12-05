@@ -160,11 +160,11 @@ namespace OpenMD {
       }
     }
     if (useRNEMD) {
-      rnemd_->collectData();
       if (currentSnapshot_->getTime() >= currRNEMD) {
 	rnemd_->doRNEMD();
 	currRNEMD += RNEMD_exchangeTime;
       }
+      rnemd_->collectData();
     }
     
     if (currentSnapshot_->getTime() >= currSample) {

@@ -353,6 +353,7 @@ namespace OpenBabel
           }       
           os << "  atom[" << ai << "] { ";
           os << "type = " << "\"" << str1 << "\"" << "; ";
+          os << "position( " << atom->GetX() << ", " << atom->GetY() << ", " << atom->GetZ() << ");";
           os << "}\n";
           atomMap[&(*atom)] = ai++;
         }        
