@@ -1,10 +1,11 @@
 DEV_ROOT=.
 
+Package = Root
+
 RootFiles =  \
 	AUTHORS \
 	LICENSE \
-	README \
-	ChangeLog
+	README
 
 -include make/Makefile
 

@@ -4,14 +4,13 @@ RmiSource =
 
 Main      = 
 
-ScriptFiles = runMe
-
-SampleFiles = bimetallic.md \
-		gold.md \
-		lj.md \
-		metals.md \
-		one_component.md \
-		three_component.md \
+SampleFiles = runMe \
+	bimetallic.md \
+	gold.md \
+	lj.md \
+	metals.md \
+	one_component.md \
+	three_component.md \
 
 
 

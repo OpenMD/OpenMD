@@ -427,7 +427,7 @@ JavadocOptions         = -d $(DocDir) \
 			 -doctitle $(JavadocDocTitle) \
 			 -header $(JavadocHeader) \
 			 -bottom $(JavadocFooter)
-WordCountOptions       = --lines
+WordCountOptions       = -l
 
 Empty                  =
 Space                  = $(Empty) $(Empty)
@@ -487,7 +487,7 @@ endif
 ifeq "$(words $(InstallFiles))" "0"
   InstallList            =
 else
-  InstallList            = $(patsubst %,$(DEV_ROOT)/%,$(Samples)) $(DEV_ROOT)/forceFields $(DocDir) $(DEV_ROOT) $(patsubst %, $(SourceDir)/%,$(Applications)) 
+  InstallList            = $(patsubst %,$(DEV_ROOT)/%,$(Samples)) $(DEV_ROOT)/forceFields $(DocDir) $(patsubst %, $(SourceDir)/%,$(Applications)) $(DEV_ROOT)
 endif
 
 InstallListLoop          = $(patsubst %,$(SourceDir)/%/.install,$(PackageList))  $(patsubst %,%/.install,$(InstallList))
@@ -866,6 +866,9 @@ jarsign : $(JarFile)
 %.install :
 	@$(MAKE) $(MakeOptions) -C $(subst .install,,$@) _installall 	
 
+.install :
+	@$(MAKE) $(MakeOptions) _installall 	
+
 install : $(InstallListLoop)
 	$(Print) Done Install
 
@@ -902,9 +905,9 @@ statistics : $(PackageListLoop)
 #
 #pure : $(Executable).pure
 
-#make cvslog
-cvslog:
-	$(DEV_ROOT)/scripts/cvs2cl
+#make ChangeLog
+ChangeLog:
+	$(DEV_ROOT)/scripts/svn2cl
 
 # Execute
 _runexe :
