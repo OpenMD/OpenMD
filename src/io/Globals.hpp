@@ -121,8 +121,6 @@ namespace OpenMD {
     DeclareParameter(HydroPropFile, std::string);
     DeclareParameter(Viscosity, RealType);
     DeclareParameter(BeadSize, RealType);  
-    DeclareParameter(ThermalConductivity, RealType);
-    DeclareParameter(ThermalLength, RealType);
     DeclareParameter(UseSphericalBoundaryConditions, bool);
     DeclareParameter(FrozenBufferRadius, RealType);
     DeclareParameter(LangevinBufferRadius, RealType);

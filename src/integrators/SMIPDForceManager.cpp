@@ -44,6 +44,7 @@
 #include "utils/PhysicalConstants.hpp"
 #include "math/ConvexHull.hpp"
 #include "math/Triangle.hpp"
+#include "math/CholeskyDecomposition.hpp"
 
 namespace OpenMD {
 
@@ -90,27 +91,15 @@ namespace OpenMD {
       simError();
     } 
     
-    if (!simParams->haveThermalConductivity()) {
+    if (!simParams->haveViscosity()) {
       sprintf(painCave.errMsg, 
               "SMIPDynamics error: You can't use the SMIPD integrator\n"
-	      "\twithout a thermalConductivity (W m^-1 K^-1)!\n");
+	      "\twithout a viscosity!\n");
       painCave.isFatal = 1;
       painCave.severity = OPENMD_ERROR;
       simError();
     }else{
-      thermalConductivity_ = simParams->getThermalConductivity() * 
-        PhysicalConstants::thermalConductivityConvert;
-    }
-
-    if (!simParams->haveThermalLength()) {
-      sprintf(painCave.errMsg, 
-              "SMIPDynamics error: You can't use the SMIPD integrator\n"
-	      "\twithout a thermalLength (Angstroms)!\n");
-      painCave.isFatal = 1;
-      painCave.severity = OPENMD_ERROR;
-      simError();
-    }else{
-      thermalLength_ = simParams->getThermalLength();
+      viscosity_ = simParams->getViscosity();
     }
     
     dt_ = simParams->getDt();
@@ -149,7 +138,7 @@ namespace OpenMD {
     int nTriangles = sMesh.size();
 
     // Generate all of the necessary random forces
-    std::vector<RealType>  randNums = genTriangleForces(nTriangles, variance_);
+    std::vector<Vector3d>  randNums = genTriangleForces(nTriangles, variance_);
 
     // Loop over the mesh faces and apply external pressure to each 
     // of the faces
@@ -165,19 +154,19 @@ namespace OpenMD {
       Vector3d centroid = thisTriangle.getCentroid();
       Vector3d facetVel = thisTriangle.getFacetVelocity();
       RealType thisMass = thisTriangle.getFacetMass();
-      //      Mat3x3d hydroTens = thisTriangle.computeHydrodynamicTensor(viscosity);
-
-      // gamma is the drag coefficient normal to the face of the triangle      
-      RealType gamma = thermalConductivity_ * thisMass * thisArea 
-        / (2.0 * thermalLength_ * PhysicalConstants::kB);
-
-      RealType extPressure = - (targetPressure_ * thisArea) / 
+      Mat3x3d hydroTensor = thisTriangle.computeHydrodynamicTensor(viscosity_);
+      
+      hydroTensor *= PhysicalConstants::viscoConvert;
+      Mat3x3d S;
+      CholeskyDecomposition(hydroTensor, S);
+      
+      Vector3d extPressure = -unitNormal * (targetPressure_ * thisArea) /
         PhysicalConstants::energyConvert;
-      RealType randomForce = randNums[thisFacet++] * sqrt(gamma);
-      RealType dragForce = -gamma * dot(facetVel, unitNormal);
 
-      Vector3d langevinForce = (extPressure + randomForce + dragForce) * 
-        unitNormal;
+      Vector3d randomForce = S * randNums[thisFacet++];
+      Vector3d dragForce = -hydroTensor * facetVel;
+
+      Vector3d langevinForce = (extPressure + randomForce + dragForce);
       
       // Apply triangle force to stuntdouble vertices
       for (vertex = vertexSDs.begin(); vertex != vertexSDs.end(); ++vertex){
@@ -197,20 +186,22 @@ namespace OpenMD {
   }
   
   
-  std::vector<RealType> SMIPDForceManager::genTriangleForces(int nTriangles, 
+  std::vector<Vector3d> SMIPDForceManager::genTriangleForces(int nTriangles, 
                                                              RealType variance)
   {
     
     // zero fill the random vector before starting:
-    std::vector<RealType> gaussRand;
+    std::vector<Vector3d> gaussRand;
     gaussRand.resize(nTriangles);
-    std::fill(gaussRand.begin(), gaussRand.end(), 0.0);
+    std::fill(gaussRand.begin(), gaussRand.end(), V3Zero);
     
 #ifdef IS_MPI
     if (worldRank == 0) {
 #endif
       for (int i = 0; i < nTriangles; i++) {
-        gaussRand[i] = randNumGen_.randNorm(0.0, variance);
+        gaussRand[i][0] = randNumGen_.randNorm(0.0, variance);
+        gaussRand[i][1] = randNumGen_.randNorm(0.0, variance);
+        gaussRand[i][2] = randNumGen_.randNorm(0.0, variance);
       }
 #ifdef IS_MPI
     }
@@ -220,9 +211,9 @@ namespace OpenMD {
     
 #ifdef IS_MPI
     if (worldRank == 0) {
-      MPI::COMM_WORLD.Bcast(&gaussRand[0], nTriangles, MPI::REALTYPE, 0);
+      MPI::COMM_WORLD.Bcast(&gaussRand[0], nTriangles*3, MPI::REALTYPE, 0);
     } else {
-      MPI::COMM_WORLD.Bcast(&gaussRand[0], nTriangles, MPI::REALTYPE, 0);
+      MPI::COMM_WORLD.Bcast(&gaussRand[0], nTriangles*3, MPI::REALTYPE, 0);
     }
 #endif
     

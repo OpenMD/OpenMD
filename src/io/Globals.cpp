@@ -99,8 +99,6 @@ Globals::Globals() {
   DefineOptionalParameter(BeadSize, "beadSize");
   DefineOptionalParameter(FrozenBufferRadius, "frozenBufferRadius");
   DefineOptionalParameter(LangevinBufferRadius, "langevinBufferRadius");
-  DefineOptionalParameter(ThermalConductivity, "thermalConductivity");
-  DefineOptionalParameter(ThermalLength, "thermalLength");
   DefineOptionalParameter(NeighborListNeighbors,"NeighborListNeighbors");
   DefineOptionalParameter(UseMultipleTemperatureMethod, "useMultipleTemperatureMethod");
   DefineOptionalParameter(MTM_Ce, "MTM_Ce");
@@ -199,8 +197,6 @@ void Globals::validate() {
   CheckParameter(DampingAlpha,isNonNegative());
   CheckParameter(SkinThickness, isPositive());
   CheckParameter(Viscosity, isNonNegative());
-  CheckParameter(ThermalConductivity, isNonNegative());
-  CheckParameter(ThermalLength, isNonNegative());
   CheckParameter(BeadSize, isPositive());
   CheckParameter(FrozenBufferRadius, isPositive());
   CheckParameter(LangevinBufferRadius, isPositive());

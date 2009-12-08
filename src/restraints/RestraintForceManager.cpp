@@ -149,6 +149,14 @@ namespace OpenMD {
 #endif
         }
         
+
+#ifdef IS_MPI
+        // only handle this molecular restraint if this processor owns the
+        // molecule
+        int myrank = MPI::COMM_WORLD.Get_rank();
+        if (info_->getMolToProc(molIndex) == myrank) {
+#endif
+
         MolecularRestraint* rest = new MolecularRestraint();
 
         std::string restPre("mol_");
@@ -184,7 +192,9 @@ namespace OpenMD {
         restraints_.push_back(rest);
         mol->addProperty(new RestraintData("Restraint", rest));
         restrainedMols_.push_back(mol);
-        
+#ifdef IS_MPI
+        }
+#endif        
       } else if (myType.compare("OBJECT") == 0) {
         
         std::string objectSelection;

@@ -68,7 +68,7 @@ namespace OpenMD {
     virtual void postCalculation(bool needStress);
     
   private:
-    std::vector<RealType> genTriangleForces(int nTriangles, RealType variance);
+    std::vector<Vector3d> genTriangleForces(int nTriangles, RealType variance);
 
     Globals* simParams;
     SeqRandNumGen randNumGen_;    
@@ -77,8 +77,7 @@ namespace OpenMD {
     RealType dt_;
     RealType targetTemp_;
     RealType targetPressure_; 
-    RealType thermalConductivity_;
-    RealType thermalLength_;
+    RealType viscosity_;
 
     RealType variance_;
 

@@ -211,7 +211,7 @@ namespace OpenBabel
       OBMol* pmol = mols[i];
       map<OBAtom*, int> atomMap;
 
-      chainParser->PerceiveChains(*pmol, false);
+      //chainParser->PerceiveChains(*pmol, false);
       molIsWater = false;
       FOR_RESIDUES_OF_MOL(residue, *pmol) {
         std::cerr << "residue = " << residue->GetName() << "\n";
