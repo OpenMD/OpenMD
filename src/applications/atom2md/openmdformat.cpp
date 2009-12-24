@@ -1,8 +1,8 @@
 /**********************************************************************
 Copyright (C) 2000 by OpenEye Scientific Software, Inc.
-Some portions Copyright (C) 2001-2005 by Geoffrey R. Hutchison
+Some portions Copyright (C) 2001-2006 by Geoffrey R. Hutchison
 Some portions Copyright (C) 2004 by Chris Morley
-Some portions Copyright (C) 2008 by J. Daniel Gezelter
+Some portions Copyright (C) 2008-2009 by J. Daniel Gezelter
  
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -40,7 +40,8 @@ namespace OpenBabel
     virtual const char* Description() //required
     {
       return
-        "OpenMD combined meta-data / cartesian coordinates format\nNo comments yet\n";
+        "OpenMD combined meta-data / cartesian coordinates format\n\
+        No comments yet\n";
     };
     
     virtual const char* SpecificationURL()

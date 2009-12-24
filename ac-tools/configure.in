@@ -66,6 +66,8 @@ save_FC=$FC
 save_LIBS=$LIBS
 
 AC_LANG([C++])
+AC_CHECK_LIB(c, dlopen, LIBDL="", [AC_CHECK_LIB(dl, dlopen, LIBDL="-ldl")])
+AC_SUBST(LIBDL)
 AX_MPI([USE_MPI="yes"],
        [USE_MPI="no"
        AC_MSG_WARN([No suitable C++ MPI implementation found. openmd_MPI will not be built.])])

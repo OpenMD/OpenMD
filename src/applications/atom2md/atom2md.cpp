@@ -1,11 +1,11 @@
 /**********************************************************************
-atom2md.cpp - OpenBabel-based conversion program to OpenMD MD file, 
+atom2md.cpp - OpenBabel-based conversion program to OpenMD file, 
               command-line handling.
 
 Copyright (C) 1998-2001 by OpenEye Scientific Software, Inc.
 Some portions Copyright (C) 2001-2006 by Geoffrey R. Hutchison
 Some portions Copyright (C) 2004-2006 by Chris Morley
-Some portions Copyright (C) 2008 by J. Daniel Gezelter
+Some portions Copyright (C) 2008-2009 by J. Daniel Gezelter
 
 This file is part of both the OpenMD and Open Babel projects.
 For more information, see <http://openmd.net> and <http://openbabel.sourceforge.net/>
@@ -38,20 +38,21 @@ GNU General Public License for more details.
 #if HAVE_CONIO_H
 	#include <conio.h>
 #endif
-#include <cstdlib>
 
 #if !HAVE_STRNCASECMP
 extern "C" int strncasecmp(const char *s1, const char *s2, size_t n);
 #endif
 
 #include <openbabel/obconversion.h>
+#include <openbabel/plugin.h>
+#include <cstdlib>
+#include <cstring>
 
 using namespace std;
 using namespace OpenBabel;
 
-void DoOption(const char* p, OBConversion& Conv, 
-              OBConversion::Option_type typ, int& arg, int argc, 
-              char *argv[]); 
+void DoOption(const char* p, OBConversion& Conv, OBConversion::Option_type typ,
+	      int& arg, int argc, char *argv[]); 
 void usage();
 void help();
 
@@ -71,8 +72,10 @@ int main(int argc,char *argv[])
   bool gotInType = false, gotOutType = false;
   bool SplitOrBatch=false;
 
-  char *oext;
-  char *iext;
+  char *oext = NULL;
+  char *iext = NULL;
+
+  // for use with command name to type conversion
   string inputExt;
   string outputExt;
 
@@ -115,8 +118,7 @@ int main(int argc,char *argv[])
                   gotInType = true;
                   iext = argv[arg] + 2;
                   if(!*iext)
-                    iext = argv[++arg]; // space left after -i: use next 
-                                        // argument
+                    iext = argv[++arg]; //space left after -i: use next argument
 
                   if (strncasecmp(iext, "MIME", 4) == 0)
                     {
@@ -126,14 +128,12 @@ int main(int argc,char *argv[])
                     }
                   else
                     {
-                      // The ID provided by the OBFormat class is used as the 
-                      // identifying file extension
+                      //The ID provided by the OBFormat class is used as the identifying file extension
                       pInFormat = Conv.FindFormat(iext);
                     }
                   if(pInFormat==NULL)
                     {
-                      cerr << program_name << ": cannot read input format!" 
-                           << endl;
+                      cerr << program_name << ": cannot read input format!" << endl;
                       usage();
                     }
                   break;
@@ -142,8 +142,7 @@ int main(int argc,char *argv[])
                   gotOutType = true;
                   oext = argv[arg] + 2;
                   if(!*oext)
-                    oext = argv[++arg]; // space left after -i: use next 
-                                        // argument
+                    oext = argv[++arg]; //space left after -i: use next argument
 					
                   if (strncasecmp(oext, "MIME", 4) == 0)
                     {
@@ -156,13 +155,12 @@ int main(int argc,char *argv[])
 
                   if(pOutFormat==NULL)
                     {
-                      cerr << program_name << ": cannot write output format!" 
-                           << endl;
+                      cerr << program_name << ": cannot write output format!" << endl;
                       usage();
                     }
                   break;
-                  
-                case 'F':
+
+                /*case 'F':
                   if(!Conv.SetOutFormat("fpt"))
                     cout << "FingerprintFormat needs to be loaded" << endl;
                   else
@@ -171,44 +169,45 @@ int main(int argc,char *argv[])
                       Conv.Write(NULL);
                     }
                   return 0;
-                  
+                  */
+                case 'L': //display a list of plugin type or classes
+                  {
+                    const char* param=NULL;
+                    if(argc>arg+1)
+                      param = argv[arg+2];
+                    OBPlugin::List(argv[arg+1], param);
+                    return 0;
+                  }
                 case '?':
                 case 'H':
-                  if(isalnum(argv[arg][2]))
+                  if(isalnum(argv[arg][2]) || arg==argc-2)
                     {
                       if(strncasecmp(argv[arg]+2,"all",3))
                         {
-                          OBFormat* pFormat = Conv.FindFormat(argv[arg]+2);
+                          const char* pID= (arg==argc-2) ? argv[arg+1] : argv[arg]+2;
+                          OBFormat* pFormat = Conv.FindFormat(pID);
                           if(pFormat)
                             {
-                              cout << argv[arg]+2 << "  " << pFormat->Description() << endl;
+                              cout << pID << "  " << pFormat->Description() << endl;
+                              if(pFormat->Flags() & NOTWRITABLE)
+                                cout << " This format is Read-only" << endl;
+                              if(pFormat->Flags() & NOTREADABLE)
+                                cout << " This format is Write-only" << endl;
+
                               if(strlen(pFormat->SpecificationURL()))
                                 cout << "Specification at: " << pFormat->SpecificationURL() << endl;
                             }
                           else
-                            cout << "Format type: " << argv[arg]+2 << " was not recognized" <<endl;
+                            cout << "Format type: " << pID << " was not recognized" <<endl;
                         }
                       else
                         {
-                          Formatpos pos;
-                          OBFormat* pFormat;
-                          const char* str=NULL;
-                          while(OBConversion::GetNextFormat(pos,str,pFormat))
-                            {
-                              if((pFormat->Flags() & NOTWRITABLE) && (pFormat->Flags() & NOTREADABLE))
-                                continue;
-                              cout << str << endl;
-                              const char* p = strchr(pFormat->Description(),'\n');
-                              cout << p+1; //second line of description
-                              if(strlen(pFormat->SpecificationURL()))
-                                cout << "Specification at: " << pFormat->SpecificationURL();
-                              cout << endl << endl;
-                            }
+                          OBPlugin::List("formats","verbose");
                         }
                     }
                   else
                     help();
-                  exit(0);
+                  return 0;
 					
                 case '-': //long option --name text
                   {
@@ -277,8 +276,8 @@ int main(int argc,char *argv[])
     }
   
   // user didn't specify input and output format in commandline option
-  // try to parse it from program name (pdb2mdin means input format is pdb, 
-  // output format is mdin)
+  // try to parse it from program name (pdb2md means input format is pdb, 
+  // output format is md)
 
   string formatName(program_name);
   pos = formatName.find_first_of("2");
@@ -311,7 +310,27 @@ int main(int argc,char *argv[])
           outputExt = tmpExt;
         }
       }
-  }
+  } 
+
+  if(!gotOutType) //the last file is the output
+    {
+      if(FileList.empty())
+        {
+          cerr << "No output file or format spec!" << endl;
+          usage();
+        }
+      OutputFileName = FileList.back();
+      FileList.pop_back();
+    }
+
+#ifdef _WIN32
+  //Expand wildcards in input filenames and add to FileList
+  vector<string> tempFileList(FileList);
+  FileList.clear();
+  vector<string>::iterator itr;
+  for(itr=tempFileList.begin();itr!=tempFileList.end();++itr)
+    DLHandler::findFiles (FileList, *itr);
+#endif
   
   if (!gotInType)
     {
@@ -321,8 +340,8 @@ int main(int argc,char *argv[])
           usage();
         }
     }
-  
-  if (!gotOutType) 
+
+  if (!gotOutType)
     {
       pOutFormat = Conv.FormatFromExt(OutputFileName.c_str());
       if(pOutFormat==NULL)
@@ -332,15 +351,25 @@ int main(int argc,char *argv[])
         }
     }
   
-  Conv.SetInAndOutFormats(pInFormat, pOutFormat);
-  
+    if(!Conv.SetInFormat(pInFormat))
+    {
+      cerr << "Invalid input format" << endl;
+      usage();
+    }
+    if(!Conv.SetOutFormat(pOutFormat))
+    {
+      cerr << "Invalid output format" << endl;
+      usage();
+    }
+
   if(SplitOrBatch)
     {
       //Put * into output file name before extension (or ext.gz)
       if(OutputFileName.empty())
         {
           OutputFileName = "*.";
-          OutputFileName += oext;
+          if (oext != NULL)
+            OutputFileName += oext;
         }
       else
         {
@@ -357,23 +386,14 @@ int main(int argc,char *argv[])
     }
 
   int count = Conv.FullConvert(FileList, OutputFileName, OutputFileList);
-  
-  // send info message to clog -- don't mess up cerr or cout for user programs
-  //Get the last word on the first line of the description which should
-  //be "molecules", "reactions", etc and remove the s if only one object converted 
-  std::string objectname(pOutFormat->TargetClassDescription());
-  pos = objectname.find('\n');
-  if(count==1) --pos;
-  objectname.erase(pos);
-  pos = objectname.rfind(' ');
-  if(pos==std::string::npos)
-    pos=0;
-  std::clog << count << objectname.substr(pos) << " converted" << endl;
+ 
+  Conv.ReportNumberConverted(count);
+
   if(OutputFileList.size()>1)
     {
       clog << OutputFileList.size() << " files output. The first is " << OutputFileList[0] <<endl;
     }
-  
+
   std::string messageSummary = obErrorLog.GetMessageSummary();
   if (messageSummary.size())
     {
@@ -385,6 +405,7 @@ int main(int argc,char *argv[])
   cout << "Press any key to finish" <<endl;
   getch();
 #endif
+  
   return 0;
 }
 
@@ -429,13 +450,12 @@ void usage()
   cout << "Usage: " << program_name
        << " [-i<input-type>] <name> [-o<output-type>] <name>" << endl;
   cout << "Try  -H option for more information." << endl;
-/*  
+ 
 #ifdef _DEBUG
   //CM keep window open
   cout << "Press any key to finish" <<endl;
   getch();
 #endif
-*/  
   exit (0);
 }
 

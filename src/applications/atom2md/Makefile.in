@@ -2,10 +2,13 @@ Package = applications/atom2md
 
 MySource    = \
 	openmdformat.cpp \
-	obmolecformat.cpp \
 	atom2md.cpp \
 
 MyMain      =atom2md
+
+LinkTargets = \
+	xyz2md \
+	pdb2md
 
 USE_OPENBABEL=@USE_OPENBABEL@
 
