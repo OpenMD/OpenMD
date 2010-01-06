@@ -40,6 +40,7 @@
  */
 #include <algorithm> 
 #include <stack>
+#include <cstdio>
 #include "io/SectionParserManager.hpp"
 #include "utils/Trim.hpp"
 #include "utils/simError.h"

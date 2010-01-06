@@ -41,6 +41,7 @@
 
 #include "types/ShapeAtomType.hpp"
 #include "UseTheForce/DarkSide/shapes_interface.h"
+#include <cstdio>
 
 namespace OpenMD {
   

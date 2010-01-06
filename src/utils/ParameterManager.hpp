@@ -50,6 +50,7 @@
 #define UTILS_PARAMETERMANAGER_HPP
 
 #include <iostream>
+#include <cstdio>
 
 #include <stdlib.h>
 #include <vector>

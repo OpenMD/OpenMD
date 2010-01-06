@@ -38,7 +38,8 @@
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
  * [4]  Vardeman & Gezelter, in progress (2009).                        
  */
- 
+
+#include <cstdio> 
 #include "types/DirectionalAtomType.hpp"
 #include "UseTheForce/DarkSide/electrostatic_interface.h"
 #include "UseTheForce/DarkSide/sticky_interface.h"

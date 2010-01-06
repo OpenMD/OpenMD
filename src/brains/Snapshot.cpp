@@ -51,6 +51,8 @@
 #include "utils/NumericConstant.hpp"
 #include "utils/simError.h"
 #include "utils/Utility.hpp"
+#include <cstdio>
+
 namespace OpenMD {
 
   void  Snapshot::setHmat(const Mat3x3d& m) {
