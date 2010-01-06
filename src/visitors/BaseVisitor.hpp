@@ -43,6 +43,7 @@
 #define VISITORS_BASEVISITOR_HPP
 #include <iostream>
 #include <string>
+#include <cstdio>
 
 namespace OpenMD {
     
