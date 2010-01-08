@@ -18,7 +18,7 @@ Modules= \
 USE_QHULL = @USE_QHULL@
 
 ifeq "$(USE_QHULL)" "yes"
-	Source  = $(MySource) ConvexHull.cpp Triangle.cpp
+	Source  = $(MySource) ConvexHull.cpp AlphaHull.cpp Triangle.cpp
 else
 	Source = $(MySource) 
 endif

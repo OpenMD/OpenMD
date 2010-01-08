@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008, 2009 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2008, 2009, 2010 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -43,20 +43,45 @@
 #include "integrators/SMIPDForceManager.hpp"
 #include "utils/PhysicalConstants.hpp"
 #include "math/ConvexHull.hpp"
+#include "math/AlphaHull.hpp"
 #include "math/Triangle.hpp"
 #include "math/CholeskyDecomposition.hpp"
 
 namespace OpenMD {
 
   SMIPDForceManager::SMIPDForceManager(SimInfo* info) : ForceManager(info) {
-
+    
     simParams = info->getSimParams();
     veloMunge = new Velocitizer(info);
     
     // Create Hull, Convex Hull for now, other options later.
     
-    surfaceMesh_ = new ConvexHull();
+    stringToEnumMap_["ConvexHull"] = hullConvex;
+    stringToEnumMap_["AlphaShape"] = hullAlphaShape;
+    stringToEnumMap_["Unknown"] = hullUnknown;
     
+    const std::string ht = simParams->getHULL_Method();
+    
+    
+    
+    std::map<std::string, HullTypeEnum>::iterator iter;
+    iter = stringToEnumMap_.find(ht);
+    hullType_ = (iter == stringToEnumMap_.end()) ? SMIPDForceManager::hullUnknown : iter->second;
+    if (hullType_ == hullUnknown) {
+      std::cerr << "WARNING! Hull Type Unknown!\n";
+    }
+    
+    switch(hullType_) {
+    case hullConvex :
+      surfaceMesh_ = new ConvexHull();
+      break;
+    case hullAlphaShape :
+      surfaceMesh_ = new AlphaHull(simParams->getAlpha());
+      break;
+    case hullUnknown :
+    default :
+      break;
+    }
     /* Check that the simulation has target pressure and target
        temperature set */
     

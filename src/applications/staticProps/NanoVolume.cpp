@@ -1,4 +1,4 @@
-/* Copyright (c) 2006 The University of Notre Dame. All Rights Reserved.
+/* Copyright (c) 2006, 2009, 2010 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -48,6 +48,7 @@
 
 #include "applications/staticProps/NanoVolume.hpp"
 #include "math/ConvexHull.hpp"
+#include "math/AlphaHull.hpp"
 #include "utils/simError.h"
 #include "io/DumpReader.hpp"
 #include "primitives/Molecule.hpp"
@@ -83,7 +84,8 @@ void NanoVolume::process() {
   int i,j;
 
 #ifdef HAVE_QHULL
-  ConvexHull* thishull = new ConvexHull();
+  // ConvexHull* thishull = new ConvexHull();
+  AlphaHull* thishull = new AlphaHull(2.0);
 #endif
 
   DumpReader reader(info_, dumpFilename_);

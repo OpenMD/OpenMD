@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2005, 2010 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -106,7 +106,7 @@ Globals::Globals() {
   DefineOptionalParameter(MTM_Io, "MTM_Io");
   DefineOptionalParameter(MTM_Sigma, "MTM_Sigma");
   DefineOptionalParameter(MTM_R, "MTM_R");
-  
+  DefineOptionalParameter(Alpha, "alpha");
 
   
   DefineOptionalParameterWithDefaultValue(UsePeriodicBoundaryConditions, "usePeriodicBoundaryConditions", true);
@@ -134,6 +134,7 @@ Globals::Globals() {
   DefineOptionalParameterWithDefaultValue(UseRestraints, "useRestraints", false);
   DefineOptionalParameterWithDefaultValue(Restraint_file, "Restraint_file", "idealCrystal.in");
   DefineOptionalParameterWithDefaultValue(UseThermodynamicIntegration, "useThermodynamicIntegration", false);
+  DefineOptionalParameterWithDefaultValue(HULL_Method,"HULL_Method","Convex");
 
 
   deprecatedKeywords_.insert("nComponents");
@@ -205,7 +206,10 @@ void Globals::validate() {
   CheckParameter(RNEMD_nBins, isPositive() && isEven());
   CheckParameter(RNEMD_exchangeType, isEqualIgnoreCase("KineticSwap") || isEqualIgnoreCase("KineticScale") || isEqualIgnoreCase("Px") || isEqualIgnoreCase("Py") || isEqualIgnoreCase("Pz") || isEqualIgnoreCase("PxScale") || isEqualIgnoreCase("PyScale") || isEqualIgnoreCase("PzScale"));
   CheckParameter(RNEMD_targetFlux, isNonNegative());
+  CheckParameter(HULL_Method, isEqualIgnoreCase("Convex") || isEqualIgnoreCase("AlphaShape")); 
+  CheckParameter(Alpha, isPositive()); 
 
+  
   for(std::vector<Component*>::iterator i = components_.begin(); i != components_.end(); ++i) {
     if (!(*i)->findMoleculeStamp(moleculeStamps_)) {
         std::ostringstream oss;

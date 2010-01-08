@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2005, 2009 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -99,6 +99,7 @@ namespace OpenMD {
       BOX_DIPOLE_Z,
       TAGGED_PAIR_DISTANCE,
       RNEMD_EXCHANGE_TOTAL,
+      SHADOWH,
       ENDINDEX  //internal use
     };
 

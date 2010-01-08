@@ -19,9 +19,7 @@ cutoffRadius = 9.0;
 
 targetTemp = 5.0;
 targetPressure = 1.0;
-//viscosity = 0.0089;
-thermalConductivity = 0.58;
-thermalLength = 5;
+viscosity = 0.0089;
 tauThermostat = 1e3;
 tauBarostat = 1e4;
 

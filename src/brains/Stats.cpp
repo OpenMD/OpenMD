@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2005, 2009 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -88,6 +88,7 @@ namespace OpenMD {
     Stats::title_[INVERSION_POTENTIAL] = "Inversion Potential";
     Stats::title_[VRAW] = "Raw Potential";
     Stats::title_[VHARM] = "Harmonic Potential";
+    Stats::title_[SHADOWH] = "Shadow Hamiltonian";
     Stats::title_[PRESSURE_TENSOR_XX] = "P_xx";
     Stats::title_[PRESSURE_TENSOR_XY] = "P_xy";
     Stats::title_[PRESSURE_TENSOR_XZ] = "P_xz";
@@ -125,6 +126,7 @@ namespace OpenMD {
     Stats::units_[INVERSION_POTENTIAL] = "kcal/mol";
     Stats::units_[VRAW] = "kcal/mol";
     Stats::units_[VHARM] = "kcal/mol";
+    Stats::units_[SHADOWH] = "kcal/mol";
     Stats::units_[PRESSURE_TENSOR_XX] = "amu*fs^-2*Ang^-1";
     Stats::units_[PRESSURE_TENSOR_XY] = "amu*fs^-2*Ang^-1";
     Stats::units_[PRESSURE_TENSOR_XZ] = "amu*fs^-2*Ang^-1";
@@ -176,6 +178,7 @@ namespace OpenMD {
     Stats::statsMap.insert(StatsMapType::value_type("BOX_DIPOLE_Z", BOX_DIPOLE_Z));    
     Stats::statsMap.insert(StatsMapType::value_type("TAGGED_PAIR_DISTANCE", TAGGED_PAIR_DISTANCE));    
     Stats::statsMap.insert(StatsMapType::value_type("RNEMD_EXCHANGE_TOTAL", RNEMD_EXCHANGE_TOTAL));    
+    Stats::statsMap.insert(StatsMapType::value_type("SHADOWH", SHADOWH));    
   }
 
 }

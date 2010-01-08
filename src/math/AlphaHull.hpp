@@ -1,5 +1,4 @@
-/*
- * Copyright (c) 2008, 2010 The University of Notre Dame. All Rights Reserved.
+/* Copyright (c) 2008, 2009 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -37,65 +36,58 @@
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
  * [4]  Vardeman & Gezelter, in progress (2009).                        
+ *
+ *
+ *  AlphaHull.hpp
+ *
+ *  Purpose: To calculate alphahull, hull volume using the QuickHull algorithm provided by QHull.
+ *
+ *  Created by Charles F. Vardeman II on 16 Dec 2009.
+ *  @author  Charles F. Vardeman II
+ *  @version $Id: ConvexHull.hpp,v 1.19 2009-11-25 20:02:01 gezelter Exp $
+ *
  */
- 
-#ifndef INTEGRATOR_SMIPDFORCEMANAGER_HPP
-#define INTEGRATOR_SMIPDFORCEMANAGER_HPP
 
-#include "brains/ForceManager.hpp"
-#include "brains/Thermo.hpp"
-#include "primitives/Molecule.hpp"
-#include "integrators/Velocitizer.hpp"
+#ifndef MATH_ALPHAHULL_HPP_
+#define MATH_ALPHAHULL_HPP_
+
+#include "math/Vector3.hpp"
+#include "config.h"
 #include "math/Hull.hpp"
 #include "math/Triangle.hpp"
-#include "math/SeqRandNumGen.hpp"
+
+#include <cassert>
+#include <vector>
+#include <string>
+
 
 namespace OpenMD {
-   
-  /**
-   * @class SMIDForceManager
-   * Force manager for Surface Mesh Implicit Pressure Dynamics
-   * applying friction and random forces as well as torques. 
-   * Stochasitc force is determined by area of surface triangles 
-   * on the convex hull. See: Kohanoff et al. CHEMPHYSCHEM 2005, 6, 1848-1852.
-   */
-  class SMIPDForceManager : public ForceManager{
-    
+  class AlphaHull : public Hull {
   public:
-    SMIPDForceManager(SimInfo * info);
-    
+
+    AlphaHull(double alpha);    
+    virtual ~AlphaHull(){};
+
+    void computeHull( std::vector<StuntDouble*> bodydoubles );
+
+    /* Total area of Hull*/
+    RealType getArea(){return area_;}
+
+    /* Total Volume enclosed by Hull */
+    RealType getVolume(){ return volume_; } 
+
+    std::vector<Triangle> getMesh(){return Triangles_;}
+    void printHull(const std::string& geomFileName);
+
   protected:
-    virtual void postCalculation(bool needStress);
+    RealType volume_;
+    RealType area_;
+    int dim_;
+    double alpha_;
+    const std::string options_;
     
   private:
-    std::vector<Vector3d> genTriangleForces(int nTriangles, RealType variance);
-
-    Globals* simParams;
-    SeqRandNumGen randNumGen_;    
-    Velocitizer* veloMunge;
-
-    RealType dt_;
-    RealType targetTemp_;
-    RealType targetPressure_; 
-    RealType viscosity_;
-
-    RealType variance_;
-
-  enum HullTypeEnum {
-      hullConvex,
-      hullAlphaShape,
-      hullUnknown
-    };
-    
-    std::map<std::string, HullTypeEnum> stringToEnumMap_;
-    HullTypeEnum hullType_;
-
-
-    
-    Hull* surfaceMesh_;
-    std::vector<StuntDouble*> localSites_;
+    std::vector<Triangle> Triangles_;
   };
-  
-} //end namespace OpenMD
-#endif //SIMPD_FORCEMANAGER
-
+}
+#endif /*MATH_CONVEXHULL_HPP_*/
