@@ -11,6 +11,9 @@ ForcefieldFiles = \
         SuttonChen.QSC.frc \
         SuttonChen.SC.frc \
         WATER.frc \
+	Amber.frc \
+	Amber.99.frc \
+	MnM.frc \
         Ag.u3.funcfl \
         Ag.u6.funcfl \
         Ag.VC.funcfl \

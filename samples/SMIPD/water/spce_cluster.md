@@ -10,18 +10,17 @@ component{
 
 
 ensemble = "SMIPD";
-forceField = "DUFF";
+forceField = "Amber";
 electrostaticSummationMethod = "shifted_force";
 electrostaticScreeningMethod = "undamped";
 dielectric = 80.0;
-dampingAlpha = 0.20;
+dampingAlpha = 0.18;
 cutoffRadius = 9.0;
+switchingRadius=9.0;
 
 targetTemp = 5.0;
 targetPressure = 1.0;
 viscosity = 0.0089;
-tauThermostat = 1e3;
-tauBarostat = 1e4;
 
 dt = 1.0 ;
 runTime = 500;
@@ -29,8 +28,6 @@ useInitialTime = "false";
 useInitialExtendedSystemState = "false";
 usePeriodicBoundaryConditions = "false";
 
-//tempSet = "true";
-//thermalTime = 10;
 sampleTime = 20;
 statusTime = 5;
 

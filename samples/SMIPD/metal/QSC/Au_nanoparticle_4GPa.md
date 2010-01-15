@@ -11,7 +11,7 @@ component{
 
 forceField = "SC";
 forceFieldFileName = "SuttonChen.QSC.frc";
-targetTemp = 300.0;
+targetTemp = 100.0;
 targetPressure = 39476.93;
 
 ensemble = "SMIPD";
