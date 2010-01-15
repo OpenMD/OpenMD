@@ -1,4 +1,4 @@
-/* Copyright (c) 2008, 2009 The University of Notre Dame. All Rights Reserved.
+/* Copyright (c) 2008, 2009, 2010 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -90,6 +90,7 @@ void ConvexHull::computeHull(std::vector<StuntDouble*> bodydoubles) {
   facetT *facet;
   setT *vertices;
   int curlong, totlong;
+  pointT *intPoint;
   
   std::vector<double> ptArray(numpoints*dim_);
 
@@ -207,12 +208,13 @@ void ConvexHull::computeHull(std::vector<StuntDouble*> bodydoubles) {
   } //qh_new_qhull
 
 #endif
-
+  intPoint = qh interior_point;
+  RealType calcvol = 0.0;
   FORALLfacets {  
     Triangle face;
-
+    //Qhull sets the unit normal in facet->normal
     Vector3d V3dNormal(facet->normal[0], facet->normal[1], facet->normal[2]);
-    face.setNormal(V3dNormal);
+    face.setUnitNormal(V3dNormal);
     
     RealType faceArea = qh_facetarea(facet);
     face.setArea(faceArea);
@@ -266,6 +268,15 @@ void ConvexHull::computeHull(std::vector<StuntDouble*> bodydoubles) {
     face.addVertices(p[0], p[1], p[2]);
     face.setFacetMass(faceMass);
     face.setFacetVelocity(faceVel/3.0);
+    /*
+    RealType comparea = face.computeArea();
+    realT calcarea = qh_facetarea (facet);
+    Vector3d V3dCompNorm = -face.computeUnitNormal();
+    RealType thisOffset = ((0.0-p[0][0])*V3dCompNorm[0] + (0.0-p[0][1])*V3dCompNorm[1] + (0.0-p[0][2])*V3dCompNorm[2]);
+    RealType dist = facet->offset + intPoint[0]*V3dNormal[0] + intPoint[1]*V3dNormal[1] + intPoint[2]*V3dNormal[2];
+    std::cout << "facet offset and computed offset: " << facet->offset << "  " << thisOffset <<  std::endl;
+    calcvol +=  -dist*comparea/qh hull_dim;
+    */
     Triangles_.push_back(face);
     qh_settempfree(&vertices);      
 
@@ -274,7 +285,7 @@ void ConvexHull::computeHull(std::vector<StuntDouble*> bodydoubles) {
   qh_getarea(qh facet_list);
   volume_ = qh totvol;
   area_ = qh totarea;
-
+  //  std::cout << "My volume is: " << calcvol << " qhull volume is:" << volume_ << std::endl; 
   qh_freeqhull(!qh_ALL);
   qh_memfreeshort(&curlong, &totlong);
   if (curlong || totlong)

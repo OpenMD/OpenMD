@@ -56,7 +56,7 @@ namespace OpenMD {
     
     // Create Hull, Convex Hull for now, other options later.
     
-    stringToEnumMap_["ConvexHull"] = hullConvex;
+    stringToEnumMap_["Convex"] = hullConvex;
     stringToEnumMap_["AlphaShape"] = hullAlphaShape;
     stringToEnumMap_["Unknown"] = hullUnknown;
     
@@ -174,8 +174,8 @@ namespace OpenMD {
       Triangle thisTriangle = *face;
       std::vector<StuntDouble*> vertexSDs = thisTriangle.getVertices();
       RealType thisArea = thisTriangle.getArea(); 
-      Vector3d unitNormal = thisTriangle.getNormal();
-      unitNormal.normalize();
+      Vector3d unitNormal = thisTriangle.getUnitNormal();
+      //unitNormal.normalize();
       Vector3d centroid = thisTriangle.getCentroid();
       Vector3d facetVel = thisTriangle.getFacetVelocity();
       RealType thisMass = thisTriangle.getFacetMass();

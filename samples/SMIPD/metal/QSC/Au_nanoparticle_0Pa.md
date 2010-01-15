@@ -16,11 +16,14 @@ targetPressure = 0;
 
 ensemble = "SMIPD";
 //ensemble = "LangevinDynamics";
-dt = 4.0;
-runTime = 50000;
+dt = 1.0;
+runTime = 100;
 viscosity = 0.0089;
-statusTime = 10.0;
+statusTime = 1.0;
 sampleTime = 1000.0;
+
+HULL_Method="AlphaShape";
+alpha=2.0;
 
 usePeriodicBoundaryConditions = "false";
 

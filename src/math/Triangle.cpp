@@ -1,4 +1,4 @@
-/* Copyright (c) 2008 The University of Notre Dame. All Rights Reserved.
+/* Copyright (c) 2008, 2010 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -53,7 +53,7 @@
 using namespace OpenMD;
 
 
-Triangle::Triangle() : HaveNormal_(false), HaveCentroid_(false),
+Triangle::Triangle() : HaveNormal_(false), HaveUnitNormal_(false), HaveCentroid_(false),
                        HaveArea_(false), area_(0.0), normal_(V3Zero), 
 		       centroid_(V3Zero), facetVelocity_(V3Zero), mass_(0.0),
 		       a_(V3Zero), b_(V3Zero), c_(V3Zero){
@@ -76,11 +76,18 @@ RealType Triangle::computeArea(){
   area_ = getNormal().length() * 0.5;
   return area_;
 }
-
+// This should return the normal for our calculations.
 Vector3d Triangle::computeNormal(){
   HaveNormal_ = true;
   normal_ = cross(a_,b_);
   return normal_;
+}
+// This should return the normal for our calculations.
+Vector3d Triangle::computeUnitNormal(){
+  HaveUnitNormal_ = true;
+  unitnormal_ = cross(a_,b_);
+  unitnormal_.normalize();
+  return unitnormal_;
 }
 
 Vector3d Triangle::computeCentroid(){

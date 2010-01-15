@@ -84,8 +84,8 @@ void NanoVolume::process() {
   int i,j;
 
 #ifdef HAVE_QHULL
-  // ConvexHull* thishull = new ConvexHull();
-  AlphaHull* thishull = new AlphaHull(2.0);
+   //ConvexHull* thishull = new ConvexHull();
+   AlphaHull* thishull = new AlphaHull(2.0);
 #endif
 
   DumpReader reader(info_, dumpFilename_);

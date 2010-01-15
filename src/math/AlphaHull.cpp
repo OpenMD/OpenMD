@@ -79,7 +79,7 @@ extern "C"
 }
 double calculate_circumradius(pointT* p0,pointT* p1,pointT* p2, int dim);
 
-AlphaHull::AlphaHull(double alpha) : Hull(), dim_(3), alpha_(alpha), options_("qhull d QJ Tcv ") {
+AlphaHull::AlphaHull(double alpha) : Hull(), dim_(3), alpha_(alpha), options_("qhull d QJ Tcv Pp") {
 }
 
 void AlphaHull::computeHull(std::vector<StuntDouble*> bodydoubles) { 
@@ -91,8 +91,9 @@ void AlphaHull::computeHull(std::vector<StuntDouble*> bodydoubles) {
   
   vertexT *vertex, **vertexp;
   facetT *facet, *neighbor;
-  setT *vertices;
+  setT *vertices, *verticestop, *verticesbottom;
   int curlong, totlong;
+  pointT *interiorPoint;
   
   std::vector<double> ptArray(numpoints*dim_);
 
@@ -243,6 +244,7 @@ void AlphaHull::computeHull(std::vector<StuntDouble*> bodydoubles) {
   qh visit_id++;
   int numFacets=0;
   std::vector<std::vector <int> > facetlist;
+  interiorPoint = qh interior_point;
   FORALLfacet_(qh facet_list) {
     numFacets++;
     if (!facet->upperdelaunay) {
@@ -307,6 +309,8 @@ void AlphaHull::computeHull(std::vector<StuntDouble*> bodydoubles) {
   //assert(numFacets== qh num_facets);
   
   //Filter the triangles (only the ones on the boundary of the alpha complex) and build the mesh
+
+
   
   ridgeT *ridge, **ridgep;
   FOREACHridge_(set) {
@@ -319,18 +323,16 @@ void AlphaHull::computeHull(std::vector<StuntDouble*> bodydoubles) {
       // Vector3d V3dNormal(facet->normal[0], facet->normal[1], facet->normal[2]);
       //face.setNormal(V3dNormal);
       
-      // RealType faceArea = qh_facetarea(facet);
-      //face.setArea(faceArea);
       
-      //vertices = qh_facet3vertex(facet);
-      
-      //coordT *center = qh_getcenter(vertices);
+      //coordT *center = qh_getcenter(ridge->vertices);
+      //std::cout << "Centers are " << center[0] << "  " <<center[1] << "  " << center[2] << std::endl;
       //Vector3d V3dCentroid(center[0], center[1], center[2]);
       //face.setCentroid(V3dCentroid);
+
       
-      //Vector3d faceVel = V3Zero;
+      Vector3d faceVel = V3Zero;
       Vector3d p[3];
-      //RealType faceMass = 0.0;
+      RealType faceMass = 0.0;
       
       int ver = 0;
       std::vector<int> virtexlist;
@@ -343,15 +345,37 @@ void AlphaHull::computeHull(std::vector<StuntDouble*> bodydoubles) {
         RealType mass;
         ver++;
         virtexlist.push_back(id);
-      }
-      facetlist.push_back(virtexlist);
+        // std::cout << "Ridge: " << ridgesCount << " Vertex " << id << std::endl; 
 
+        vel = bodydoubles[id]->getVel();
+        mass = bodydoubles[id]->getMass();
+        face.addVertexSD(bodydoubles[id]);
+
+
+        faceVel = faceVel + vel;
+        faceMass = faceMass + mass;
+      } //FOREACH Vertex 
+      facetlist.push_back(virtexlist);
+      face.addVertices(p[0],p[1],p[2]);
+      face.setFacetMass(faceMass);
+      face.setFacetVelocity(faceVel/3.0);
+      
+      RealType area = face.getArea();
+      area_ += area;
+      Vector3d normal = face.getUnitNormal();
+      RealType offset =  ((0.0-p[0][0])*normal[0] + (0.0-p[0][1])*normal[1] + (0.0-p[0][2])*normal[2]);
+      RealType dist =  normal[0] * interiorPoint[0] + normal[1]*interiorPoint[1] + normal[2]*interiorPoint[2];
+      std::cout << "Dist and normal and area are: " << normal << std::endl;
+      volume_ += dist *area/qh hull_dim;
+      
+      Triangles_.push_back(face);
     }
   }
-  		
+
+  std::cout << "Volume is: " << volume_ << std::endl; 
 
 //assert(pm.cm.fn == ridgesCount);
-
+/*
   std::cout <<"OFF"<<std::endl; 
   std::cout << bodydoubles.size() << "  " << facetlist.size() << "  " << 3*facetlist.size() << std::endl; 
   for (SD =bodydoubles.begin(); SD != bodydoubles.end(); ++SD){
@@ -370,7 +394,7 @@ void AlphaHull::computeHull(std::vector<StuntDouble*> bodydoubles) {
     }
     std::cout << std::endl; 
   }
-
+*/
 
 
 
@@ -438,9 +462,9 @@ void AlphaHull::computeHull(std::vector<StuntDouble*> bodydoubles) {
 
   } //FORALLfacets
 */
-  qh_getarea(qh facet_list);
-  volume_ = qh totvol;
-  area_ = qh totarea;
+  // qh_getarea(qh facet_list);
+  //volume_ = qh totvol;
+  // area_ = qh totarea;
 
   qh_freeqhull(!qh_ALL);
   qh_memfreeshort(&curlong, &totlong);

@@ -1,4 +1,4 @@
-/* Copyright (c) 2008 The University of Notre Dame. All Rights Reserved.
+/* Copyright (c) 2008, 2010 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -79,6 +79,10 @@ namespace OpenMD {
       normal_ = normal;
       HaveNormal_ = true;
     }
+    void setUnitNormal(Vector3d normal) {
+      unitnormal_ = normal;
+      HaveUnitNormal_ = true;
+    }
 
     void addVertices(Vector3d P1, Vector3d P2, Vector3d P3);
 
@@ -100,6 +104,13 @@ namespace OpenMD {
 	return computeNormal();
       }
     }
+   Vector3d getUnitNormal() {
+      if (HaveUnitNormal_) {
+	return unitnormal_;
+      } else {
+	return computeUnitNormal();
+      }
+    }
     
     RealType getArea() { 
       if(HaveArea_){
@@ -112,6 +123,7 @@ namespace OpenMD {
     RealType computeArea();
     Vector3d computeNormal();
     Vector3d computeCentroid();
+    Vector3d computeUnitNormal();
 
     void setCentroid(Vector3d centroid) { 
       centroid_ = centroid;
@@ -190,9 +202,10 @@ namespace OpenMD {
     /* Local Indentity of vertex atoms in pos array*/
     std::vector <StuntDouble*> vertexSD_;
     Vector3d normal_;
+    Vector3d unitnormal_;
     Vector3d centroid_;
     Vector3d vertices_[3];
-    RealType area_;
+    RealType area_;    
     RealType mass_;
     Vector3d facetVelocity_;
     //Length of triangle sides
@@ -200,6 +213,7 @@ namespace OpenMD {
     RealType alpha_,beta_,gamma_;
     bool HaveArea_;
     bool HaveNormal_;
+    bool HaveUnitNormal_;
     bool HaveCentroid_;
     
   }; // End class Triangle
