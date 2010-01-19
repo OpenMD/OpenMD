@@ -4,11 +4,10 @@ RmiSource =
 
 Main      = 
 
-SampleFiles =  \
-        spce.md \
-        water.md
+SampleFiles = NaCl.md \
+              README.txt   
 
 
-DEV_ROOT=../../..
+DEV_ROOT=../..
 include $(DEV_ROOT)/make/Makefile
 

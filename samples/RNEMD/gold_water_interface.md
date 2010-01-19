@@ -38,6 +38,13 @@ dampingAlpha = 0.18;
 electrostaticSummationMethod = "shifted_force";
 electrostaticScreeningMethod = "damped";
 
+useRNEMD = "true";
+RNEMD_objectSelection = "select SPCE_RB_0 or Au";
+RNEMD_exchangeTime = 200;
+RNEMD_exchangeType = "KineticScale";
+RNEMD_nBins = 10;
+RNEMD_targetFlux = -1.0e-5;
+
   </MetaData>
   <Snapshot>
     <FrameData>

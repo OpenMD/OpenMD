@@ -95,7 +95,13 @@ Samples = \
 	samples/water/ssd-ion \
 	samples/water/tip3p_ice \
 	samples/water/tip4p \
-	samples/zcons 
+	samples/zcons  \
+	samples/bond-order \
+	samples/Madelung \
+	samples/RNEMD \
+	samples/SMIPD \
+	samples/zeolite
+
 
 IncludeDirs = \
 	@FFTW_INC_DIR@ \
