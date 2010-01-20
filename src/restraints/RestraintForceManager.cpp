@@ -89,6 +89,8 @@ namespace OpenMD {
     int nRestraintStamps = simParam->getNRestraintStamps();
     std::vector<RestraintStamp*> stamp = simParam->getRestraintStamps();
 
+    std::vector<int> stuntDoubleIndex;
+
     for (int i = 0; i < nRestraintStamps; i++){
 
       std::string myType = toUpperCopy(stamp[i]->getType());
@@ -134,6 +136,7 @@ namespace OpenMD {
          
           int myrank = MPI::COMM_WORLD.Get_rank();
           if (info_->getMolToProc(molIndex) == myrank) {
+         
             // If we were supposed to have it but got a null, then freak out.
 #endif
 
@@ -155,6 +158,7 @@ namespace OpenMD {
         // molecule
         int myrank = MPI::COMM_WORLD.Get_rank();
         if (info_->getMolToProc(molIndex) == myrank) {
+
 #endif
 
         MolecularRestraint* rest = new MolecularRestraint();
@@ -230,7 +234,8 @@ namespace OpenMD {
 
         for (sd = seleMan.beginSelected(selei); sd != NULL; 
              sd = seleMan.nextSelected(selei)) {
-          
+          stuntDoubleIndex.push_back(sd->getGlobalIntegrableObjectIndex());
+
           ObjectRestraint* rest = new ObjectRestraint();
           
           if (stamp[i]->haveDisplacementSpringConstant()) {
@@ -270,16 +275,14 @@ namespace OpenMD {
     // are times when it won't use restraints at all, so only open the
     // restraint file if we are actually using restraints:
 
-    if (simParam->getUseRestraints()) {
+    if (simParam->getUseRestraints()) { 
       std::string refFile = simParam->getRestraint_file();
-      RestReader* rr = new RestReader(info, refFile);
-
+      RestReader* rr = new RestReader(info, refFile, stuntDoubleIndex);
       rr->readReferenceStructure();
     }
 
     restOutput_ = getPrefix(info_->getFinalConfigFileName()) + ".rest";
     restOut = new RestWriter(info_, restOutput_.c_str(), restraints_);
-    
     if(!restOut){
       sprintf(painCave.errMsg, "Restraint error: Failed to create RestWriter\n");
       painCave.isFatal = 1;
@@ -384,7 +387,7 @@ namespace OpenMD {
       std::vector<Vector3d> forces;
       
       for(sd = (*rm)->beginIntegrableObject(ioi); sd != NULL; 
-          sd = (*rm)->nextIntegrableObject(ioi)) {        
+          sd = (*rm)->nextIntegrableObject(ioi)) {
         struc.push_back(sd->getPos());
       }
 

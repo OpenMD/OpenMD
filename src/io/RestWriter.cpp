@@ -40,6 +40,8 @@
  */
 
 
+#include <string>
+#include <sstream>
 #include <iostream>
 
 #include "io/RestWriter.hpp"
@@ -53,14 +55,14 @@ namespace OpenMD {
   RestWriter::RestWriter(SimInfo* info, const std::string& filename, 
                          std::vector<Restraint*> restraints ) : 
     info_(info){
-
-    //use master - slave mode, only master node writes to disk
+    createRestFile_ = true;
+    
 #ifdef IS_MPI
     if(worldRank == 0){
 #endif
-      
-      output_.open(filename.c_str());
-      
+  
+      output_ = new std::ofstream(filename.c_str());
+ 
       if(!output_){
         sprintf( painCave.errMsg,
                  "Could not open %s for restraint output.\n", 
@@ -69,63 +71,206 @@ namespace OpenMD {
         simError();
       }
 
-      output_ << "#time\t";
-      
-      // TODO:  get Restraint info from slave nodes:
-      std::vector<Restraint*>::const_iterator resti;
-      for(resti=restraints.begin(); resti != restraints.end(); ++resti){
+#ifdef IS_MPI
+    }
+#endif // is_mpi
 
-        if ((*resti)->getPrintRestraint()) {
-          std::string myName = (*resti)->getRestraintName();
-          int myType = (*resti)->getRestraintType();
-          
-          output_ << myName << ":";
-          
-          if (myType & Restraint::rtDisplacement)
-            output_ << "\tPosition(angstroms)\tEnergy(kcal/mol)";
-          
-          if (myType & Restraint::rtTwist)
-            output_ << "\tTwistAngle(radians)\tEnergy(kcal/mol)";
-          
-          if (myType & Restraint::rtSwingX)
-            output_ << "\tSwingXAngle(radians)\tEnergy(kcal/mol)";
-          
-          if (myType & Restraint::rtSwingY)
-            output_ << "\tSwingYAngle(radians)\tEnergy(kcal/mol)";
-          
-        }
-      }
-      output_ << "\n";
+
 #ifdef IS_MPI
-    }
-#endif      
-  }
-  
-  RestWriter::~RestWriter() {
-#ifdef IS_MPI
-    if(worldRank == 0 ){
-#endif  
-      output_.close();  
-#ifdef IS_MPI  
-    }
+    MPI_Status istatus;
 #endif
-  }
-  
-  void RestWriter::writeRest(std::vector<std::map<int, Restraint::RealPair> > restInfo){
-      
     
-    output_ << info_->getSnapshotManager()->getCurrentSnapshot()->getTime();
+#ifndef IS_MPI
+         
+    (*output_) << "#time\t";
+
+    std::vector<Restraint*>::const_iterator resti;
+
+    for(resti=restraints.begin(); resti != restraints.end(); ++resti){
+      if ((*resti)->getPrintRestraint()) {
         
+        std::string myName = (*resti)->getRestraintName();
+        int myType = (*resti)->getRestraintType();
+        
+        (*output_) << myName << ":";
+        
+        if (myType & Restraint::rtDisplacement)
+          (*output_) << "\tPosition(angstroms)\tEnergy(kcal/mol)";
+        
+        if (myType & Restraint::rtTwist)
+          (*output_) << "\tTwistAngle(radians)\tEnergy(kcal/mol)";
+        
+        if (myType & Restraint::rtSwingX)
+          (*output_) << "\tSwingXAngle(radians)\tEnergy(kcal/mol)";
+          
+        if (myType & Restraint::rtSwingY)
+          (*output_) << "\tSwingYAngle(radians)\tEnergy(kcal/mol)";
+      }
+    }
+
+    (*output_) << "\n";
+    (*output_).flush();
+    
+#else
+    
+    std::string buffer;
+
+    std::vector<Restraint*>::const_iterator resti;
+
+    for(resti=restraints.begin(); resti != restraints.end(); ++resti){
+      if ((*resti)->getPrintRestraint()) {
+        
+        std::string myName = (*resti)->getRestraintName();
+        int myType = (*resti)->getRestraintType();
+
+        buffer += (myName + ":");
+        
+        if (myType & Restraint::rtDisplacement)
+          buffer += "\tPosition(angstroms)\tEnergy(kcal/mol)";
+        
+        if (myType & Restraint::rtTwist)
+          buffer += "\tTwistAngle(radians)\tEnergy(kcal/mol)";
+        
+        if (myType & Restraint::rtSwingX)
+          buffer += "\tSwingXAngle(radians)\tEnergy(kcal/mol)";
+        
+        if (myType & Restraint::rtSwingY)
+          buffer += "\tSwingYAngle(radians)\tEnergy(kcal/mol)";
+        
+        buffer += "\n";
+      }
+    }
+    
+    const int masterNode = 0;
+    
+    if (worldRank == masterNode) {
+      (*output_) << "#time\t";
+      (*output_) << buffer;
+      
+      int nProc;
+      MPI_Comm_size(MPI_COMM_WORLD, &nProc);
+      for (int i = 1; i < nProc; ++i) {
+        
+        // receive the length of the string buffer that was
+        // prepared by processor i
+        
+        int recvLength;
+        MPI_Recv(&recvLength, 1, MPI_INT, i, 0, MPI_COMM_WORLD, &istatus);
+        char* recvBuffer = new char[recvLength];
+        if (recvBuffer == NULL) {
+        } else {
+          MPI_Recv(recvBuffer, recvLength, MPI_CHAR, i, 0, MPI_COMM_WORLD, 
+                   &istatus);
+          (*output_) << recvBuffer;
+          delete [] recvBuffer;
+        }
+      }	
+      (*output_).flush();
+    } else {
+      int sendBufferLength = buffer.size() + 1;
+      MPI_Send(&sendBufferLength, 1, MPI_INT, masterNode, 0, MPI_COMM_WORLD);
+      MPI_Send((void *)buffer.c_str(), sendBufferLength, MPI_CHAR, masterNode,
+               0, MPI_COMM_WORLD);
+    }
+    
+#endif // is_mpi    
+    
+  }    
+  
+  void RestWriter::writeRest(std::vector<std::map<int, Restraint::RealPair> > restInfo) {
+    
+#ifdef IS_MPI
+    MPI_Status istatus;
+#endif
+    
+#ifndef IS_MPI
+    (*output_) << info_->getSnapshotManager()->getCurrentSnapshot()->getTime();
+    
     // output some information about the molecules
     std::vector<std::map<int, Restraint::RealPair> >::const_iterator i;
     std::map<int, Restraint::RealPair>::const_iterator j;
+    
     for( i = restInfo.begin(); i != restInfo.end(); ++i){
       for(j = (*i).begin(); j != (*i).end(); ++j){                
-        output_ << "\t" << (j->second).first << "\t" << (j->second).second;
+        (*output_) << "\t" << (j->second).first << "\t" << (j->second).second;
       }
-      output_ << std::endl;
+      (*output_) << std::endl;
     }
+    (*output_).flush();
+#else
+    std::string buffer, first, second;
+    std::stringstream ss;
+    
+    std::vector<std::map<int, Restraint::RealPair> >::const_iterator i;
+    std::map<int, Restraint::RealPair>::const_iterator j;
+    
+    for( i = restInfo.begin(); i != restInfo.end(); ++i){
+      for(j = (*i).begin(); j != (*i).end(); ++j){
+        ss.clear(); 
+        ss << (j->second).first;
+        ss >> first;
+        ss.clear();
+        ss << (j->second).second;
+        ss >> second;
+        buffer += ("\t" + first + "\t" + second);       
+      }
+      buffer += "\n";     
+    }
+    
+    const int masterNode = 0;
+    
+    if (worldRank == masterNode) {
+      (*output_) << info_->getSnapshotManager()->getCurrentSnapshot()->getTime();
+      (*output_) << buffer;
+      
+      int nProc;
+      MPI_Comm_size(MPI_COMM_WORLD, &nProc);
+      for (int i = 1; i < nProc; ++i) {
+        
+        // receive the length of the string buffer that was
+        // prepared by processor i
+        
+        int recvLength;
+        MPI_Recv(&recvLength, 1, MPI_INT, i, 0, MPI_COMM_WORLD, &istatus);
+        char* recvBuffer = new char[recvLength];
+        if (recvBuffer == NULL) {
+        } else {
+          MPI_Recv(recvBuffer, recvLength, MPI_CHAR, i, 0, MPI_COMM_WORLD, 
+                   &istatus);
+          (*output_) << recvBuffer;
+          
+          delete [] recvBuffer;
+        }
+      }	
+      (*output_).flush();
+    } else {
+      int sendBufferLength = buffer.size() + 1;
+      MPI_Send(&sendBufferLength, 1, MPI_INT, masterNode, 0, MPI_COMM_WORLD);
+      MPI_Send((void *)buffer.c_str(), sendBufferLength, MPI_CHAR, masterNode,
+               0, MPI_COMM_WORLD);
+    }
+#endif // is_mpi
+  }
+  
+  
+  RestWriter::~RestWriter() {
+    
+#ifdef IS_MPI
+    
+    if (worldRank == 0) {
+#endif // is_mpi
+      if (createRestFile_){
+        writeClosing(*output_);
+        delete output_;
+      }
+#ifdef IS_MPI 
+    }
+#endif // is_mpi
+  }
+  
+  void RestWriter::writeClosing(std::ostream& os) {
+    os.flush();
   }
   
 }// end namespace OpenMD
-  
+

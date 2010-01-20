@@ -1,5 +1,5 @@
 /* 
- * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved. 
+ * Copyright (c) 2009 The University of Notre Dame. All Rights Reserved. 
  * 
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -38,55 +38,163 @@
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
  * [4]  Vardeman & Gezelter, in progress (2009).                        
  */ 
-  
-#include "io/DumpReader.hpp" 
-#include "io/RestReader.hpp"
-#include "primitives/Molecule.hpp"
+
+ 
+#include <sys/types.h> 
+#include <sys/stat.h> 
+ 
+#include <math.h> 
+#include <string>
+#include <sstream>
+#include <iostream> 
+#include <stdio.h> 
+#include <stdlib.h> 
+#include <string.h> 
+ 
+#include "io/RestReader.hpp" 
+#include "primitives/Molecule.hpp" 
+#include "utils/simError.h" 
+#include "utils/MemoryUtils.hpp" 
+#include "utils/StringTokenizer.hpp"
 #include "restraints/ObjectRestraint.hpp"
-#include "restraints/MolecularRestraint.hpp"
+#include "restraints/MolecularRestraint.hpp" 
+ 
+#ifdef IS_MPI 
+ 
+#include <mpi.h> 
+#endif
 
 namespace OpenMD { 
+
+  void RestReader::scanFile(){
+    int lineNo = 0; 
+    std::streampos prevPos;
+    std::streampos  currPos;
+    
+#ifdef IS_MPI 
+    
+    if (worldRank == 0) { 
+#endif // is_mpi 
+
+      inFile_->clear();
+      currPos = inFile_->tellg();
+      prevPos = currPos;
       
-  void RestReader::readReferenceStructure() {
+      bool foundOpenSnapshotTag = false;
+      
+      while(!foundOpenSnapshotTag && inFile_->getline(buffer, bufferSize)) {
+        ++lineNo;
+        
+        std::string line = buffer;
+        currPos = inFile_->tellg(); 
+        if (line.find("<Snapshot>")!= std::string::npos) {
+          foundOpenSnapshotTag = true;
+          framePos_ = prevPos;
+        }
+        prevPos = currPos;
+      }
+      
+#ifdef IS_MPI 
+    }
+    MPI_Bcast(&framePos_, 1, MPI_INT, 0, MPI_COMM_WORLD); 
+#endif // is_mpi 
+  } 
 
-    // some of this comes directly from DumpReader.
 
-    if (!isScanned_) 
-      scanFile(); 
-         
-    int storageLayout = info_->getSnapshotManager()->getStorageLayout(); 
-     
-    if (storageLayout & DataStorage::dslPosition) { 
-      needPos_ = true; 
+  void RestReader::readSet(){
+    std::string line;
+    
+#ifndef IS_MPI
+    
+    inFile_->clear();
+    inFile_->seekg(framePos_);
+    
+    std::istream& inputStream = *inFile_;
+#else
+    
+    int masterNode = 0;
+    std::stringstream sstream;
+    if (worldRank == masterNode) {
+      std::string sendBuffer;
+      
+      inFile_->clear();  
+      inFile_->seekg(framePos_); 
+      
+      while (inFile_->getline(buffer, bufferSize)) {
+        
+        line = buffer;
+        sendBuffer += line;
+        sendBuffer += '\n';
+        if (line.find("</Snapshot>") != std::string::npos) {
+          break;
+        }        
+      }
+      
+      int sendBufferSize = sendBuffer.size();
+      MPI_Bcast(&sendBufferSize, 1, MPI_INT, masterNode, MPI_COMM_WORLD);     
+      MPI_Bcast((void *)sendBuffer.c_str(), sendBufferSize, MPI_CHAR, masterNode, MPI_COMM_WORLD);     
+      
+      sstream.str(sendBuffer);
     } else {
-      needPos_ = false; 
-    } 
-     
-    needVel_ = false;
-     
-    if (storageLayout & DataStorage::dslAmat || storageLayout & DataStorage::dslElectroFrame) { 
-      needQuaternion_ = true; 
-    } else { 
-      needQuaternion_ = false; 
-    } 
+      int sendBufferSize;
+      MPI_Bcast(&sendBufferSize, 1, MPI_INT, masterNode, MPI_COMM_WORLD);     
+      char * recvBuffer = new char[sendBufferSize+1];
+      assert(recvBuffer);
+      recvBuffer[sendBufferSize] = '\0';
+      MPI_Bcast(recvBuffer, sendBufferSize, MPI_CHAR, masterNode, MPI_COMM_WORLD);     
+      sstream.str(recvBuffer);
+      delete [] recvBuffer;
+    }      
+    
+    std::istream& inputStream = sstream;  
+#endif
+    
+    inputStream.getline(buffer, bufferSize);
 
-    needAngMom_ = false;
+    line = buffer;
+    if (line.find("<Snapshot>") == std::string::npos) {
+      sprintf(painCave.errMsg, 
+              "RestReader Error: can not find <Snapshot>\n"); 
+      painCave.isFatal = 1; 
+      simError(); 
+    } 
+    
+    //read frameData
+    readFrameProperties(inputStream);
+    
+    //read StuntDoubles
+    readStuntDoubles(inputStream);
+    
+    inputStream.getline(buffer, bufferSize);
+    line = buffer;
+    if (line.find("</Snapshot>") == std::string::npos) {
+      sprintf(painCave.errMsg, 
+              "RestReader Error: can not find </Snapshot>\n"); 
+      painCave.isFatal = 1; 
+      simError(); 
+    }            
+  }
+    
+  void RestReader::readReferenceStructure() {
 
     // We need temporary storage to keep track of all StuntDouble positions
     // in case some of the restraints are molecular (i.e. if they use
     // multiple SD positions to determine restrained orientations or positions:
 
     all_pos_.clear();
-    all_pos_.resize(info_->getNGlobalIntegrableObjects() );
-
-
+    all_pos_.resize(info_->getNGlobalIntegrableObjects()) ;
+    
     // Restraint files are just standard dump files, but with the reference
     // structure stored in the first frame (frame 0).
     // RestReader overloads readSet and explicitly handles all of the
     // ObjectRestraints in that method:
 
-    readSet(0); 
-    
+    scanFile();
+
+
+    readSet();
+
+
     // all ObjectRestraints have been handled, now we have to worry about
     // molecular restraints:
 
@@ -94,35 +202,35 @@ namespace OpenMD {
     Molecule::IntegrableObjectIterator j;
     Molecule* mol;
     StuntDouble* sd;
-
+    
     // no need to worry about parallel molecules, as molecules are not
     // split across processor boundaries.  Just loop over all molecules
     // we know about:
-
+    
     for (mol = info_->beginMolecule(i); mol != NULL; 
          mol = info_->nextMolecule(i)) {          
-
+      
       // is this molecule restrained?    
       GenericData* data = mol->getPropertyByName("Restraint");
       
       if (data != NULL) {
-
+        
         // make sure we can reinterpret the generic data as restraint data:
-
+        
         RestraintData* restData= dynamic_cast<RestraintData*>(data);        
-
+        
         if (restData != NULL) {
-
+          
           // make sure we can reinterpet the restraint data as a
           // pointer to a MolecularRestraint:
-
+          
           MolecularRestraint* mRest = dynamic_cast<MolecularRestraint*>(restData->getData());
-
+          
           if (mRest != NULL) {          
-
+            
             // now we need to pack the stunt doubles for the reference
             // structure:
-
+            
             std::vector<Vector3d> ref;
             int count = 0;
             RealType mass, mTot;
@@ -140,19 +248,14 @@ namespace OpenMD {
               // doubles from the *globally* sorted array of
               // positions:
               
-              ref.push_back( all_pos_[sd->getGlobalIndex()] );
-              
-              mass = sd->getMass();
-              
+              ref.push_back( all_pos_[sd->getGlobalIntegrableObjectIndex()] );
+              mass = sd->getMass();              
               COM = COM + mass * ref[count];
               mTot = mTot + mass;
               count = count + 1;
             }
-            
             COM /= mTot;
-
             mRest->setReferenceStructure(ref, COM);         
-
           }
         }
       }
@@ -162,6 +265,7 @@ namespace OpenMD {
    
    
   void RestReader::parseDumpLine(const std::string& line) {        
+
     StringTokenizer tokenizer(line); 
     int nTokens; 
      
@@ -169,135 +273,129 @@ namespace OpenMD {
      
     if (nTokens < 2) { 
       sprintf(painCave.errMsg, 
-              "DumpReader Error: Not enough Tokens.\n%s\n", line.c_str()); 
+              "RestReader Error: Not enough Tokens.\n%s\n", line.c_str()); 
       painCave.isFatal = 1; 
       simError(); 
     } 
 
     int index = tokenizer.nextTokenAsInt();
- 
-    StuntDouble* integrableObject = info_->getIOIndexToIntegrableObject(index);
 
-    if (integrableObject == NULL) {
-      return;
-    }   
-
-    std::string type = tokenizer.nextToken(); 
-    int size = type.size();
-    Vector3d pos;
-    Vector3d vel;
-    Quat4d q;
-    Vector3d ji;
-    Vector3d force;
-    Vector3d torque;
-          
-    for(int i = 0; i < size; ++i) {
-      switch(type[i]) {
+  
+    if (index < 1116){
+      std::string type = tokenizer.nextToken(); 
+      
+      Vector3d pos;
+      
+      pos[0] = tokenizer.nextTokenAsDouble(); 
+      pos[1] = tokenizer.nextTokenAsDouble(); 
+      pos[2] = tokenizer.nextTokenAsDouble();
+      
+      all_pos_[index] = pos;
+    }else{
+      
+      bool exist = false;
+      int indexCount = 0;
+      
+      while ( (!exist) && (indexCount < stuntDoubleIndex_.size())){
+        if (index == stuntDoubleIndex_[indexCount])
+          exist = true;
+        indexCount++;
+      }
+      
+      StuntDouble* integrableObject;
+      
+      if (exist){
         
-        case 'p': {
-            pos[0] = tokenizer.nextTokenAsDouble(); 
-            pos[1] = tokenizer.nextTokenAsDouble(); 
-            pos[2] = tokenizer.nextTokenAsDouble(); 
-            break;
-        }
-        case 'v' : {
-            vel[0] = tokenizer.nextTokenAsDouble(); 
-            vel[1] = tokenizer.nextTokenAsDouble(); 
-            vel[2] = tokenizer.nextTokenAsDouble(); 
-            break;
-        }
-
-        case 'q' : {
-           if (integrableObject->isDirectional()) { 
-              
-             q[0] = tokenizer.nextTokenAsDouble(); 
-             q[1] = tokenizer.nextTokenAsDouble(); 
-             q[2] = tokenizer.nextTokenAsDouble(); 
-             q[3] = tokenizer.nextTokenAsDouble(); 
-              
-             RealType qlen = q.length(); 
-             if (qlen < OpenMD::epsilon) { //check quaternion is not equal to 0 
-                
-               sprintf(painCave.errMsg, 
-                       "DumpReader Error: initial quaternion error (q0^2 + q1^2 + q2^2 + q3^2) ~ 0\n"); 
-               painCave.isFatal = 1; 
-               simError(); 
-                
-             }  
-              
-             q.normalize(); 
-           }            
-           break;
-        }  
-        case 'j' : {
-          if (integrableObject->isDirectional()) {
-             ji[0] = tokenizer.nextTokenAsDouble(); 
-             ji[1] = tokenizer.nextTokenAsDouble(); 
-             ji[2] = tokenizer.nextTokenAsDouble(); 
-          }
-          break;
-        }  
-        case 'f': {
-          force[0] = tokenizer.nextTokenAsDouble(); 
-          force[1] = tokenizer.nextTokenAsDouble(); 
-          force[2] = tokenizer.nextTokenAsDouble();           
-
-          break;
-        }
-        case 't' : {
-           torque[0] = tokenizer.nextTokenAsDouble(); 
-           torque[1] = tokenizer.nextTokenAsDouble(); 
-           torque[2] = tokenizer.nextTokenAsDouble();           
-
-           break;
-        }
-        default: {
-               sprintf(painCave.errMsg, 
-                       "DumpReader Error: %s is an unrecognized type\n", type.c_str()); 
-               painCave.isFatal = 1; 
-               simError(); 
-          break;   
-        }
+        integrableObject = info_->getIOIndexToIntegrableObject(index);
+        
+        int compareindex = integrableObject->getGlobalIntegrableObjectIndex();
+        
+        if (integrableObject == NULL) {
+          return;
+        }   
+        
+        std::string type = tokenizer.nextToken(); 
+        
+        Vector3d pos;
+        
+        pos[0] = tokenizer.nextTokenAsDouble(); 
+        pos[1] = tokenizer.nextTokenAsDouble(); 
+        pos[2] = tokenizer.nextTokenAsDouble(); 
+        
+        Vector3d vel;
+        vel[0] = tokenizer.nextTokenAsDouble(); 
+        vel[1] = tokenizer.nextTokenAsDouble(); 
+        vel[2] = tokenizer.nextTokenAsDouble(); 
+        
+        
+        Quat4d q;
+        if (integrableObject->isDirectional()) { 
           
-      }
-    }
-     
-    // keep the position in case we need it for a molecular restraint:
-    
-    all_pos_[index] = pos;
-
-    // is this io restrained?    
-    GenericData* data = integrableObject->getPropertyByName("Restraint");
-    ObjectRestraint* oRest;
-
-    if (data != NULL) {
-      // make sure we can reinterpret the generic data as restraint data:
-      RestraintData* restData= dynamic_cast<RestraintData*>(data);        
-      if (restData != NULL) {
-        // make sure we can reinterpet the restraint data as a pointer to
-        // an ObjectRestraint:
-        oRest = dynamic_cast<ObjectRestraint*>(restData->getData());
-        if (oRest != NULL) {          
-          if (integrableObject->isDirectional()) {
-            oRest->setReferenceStructure(pos, q.toRotationMatrix3());
-          } else {                           
-            oRest->setReferenceStructure(pos);
+          q[0] = tokenizer.nextTokenAsDouble(); 
+          q[1] = tokenizer.nextTokenAsDouble(); 
+          q[2] = tokenizer.nextTokenAsDouble(); 
+          q[3] = tokenizer.nextTokenAsDouble(); 
+        }  
+        // keep the position in case we need it for a molecular restraint:
+        
+        all_pos_[index] = pos;
+        
+        // is this io restrained?
+        GenericData* data = integrableObject->getPropertyByName("Restraint");
+        ObjectRestraint* oRest;
+        
+        if (data != NULL) {
+          // make sure we can reinterpret the generic data as restraint data:
+          RestraintData* restData= dynamic_cast<RestraintData*>(data);        
+          if (restData != NULL) {
+            // make sure we can reinterpet the restraint data as a pointer to
+            // an ObjectRestraint:
+            oRest = dynamic_cast<ObjectRestraint*>(restData->getData());
+            if (oRest != NULL) {          
+              if (integrableObject->isDirectional()) {
+                oRest->setReferenceStructure(pos, q.toRotationMatrix3());
+              } else {                           
+                oRest->setReferenceStructure(pos);
+              }
+            }
           }
         }
       }
     }
-
   }
-   
+  
+  void  RestReader::readStuntDoubles(std::istream& inputStream) {
+    
+    inputStream.getline(buffer, bufferSize);
+    std::string line(buffer);
+    
+    if (line.find("<StuntDoubles>") == std::string::npos) {
+      sprintf(painCave.errMsg, 
+              "RestReader Error: Missing <StuntDoubles>\n"); 
+      painCave.isFatal = 1; 
+      simError(); 
+    }
+    
+    while(inputStream.getline(buffer, bufferSize)) {
+      line = buffer;
+      
+      if(line.find("</StuntDoubles>") != std::string::npos) {
+        break;
+      }
+      
+      parseDumpLine(line);
+    }
+    
+  }
 
-
+  
   void RestReader::readFrameProperties(std::istream& inputStream) {
     inputStream.getline(buffer, bufferSize);
     std::string line(buffer);
 
     if (line.find("<FrameData>") == std::string::npos) {
       sprintf(painCave.errMsg, 
-              "DumpReader Error: Missing <FrameData>\n"); 
+              "RestReader Error: Missing <FrameData>\n"); 
       painCave.isFatal = 1; 
       simError(); 
     }
@@ -314,7 +412,7 @@ namespace OpenMD {
       }
       
     }
-
+    
   }
 
    

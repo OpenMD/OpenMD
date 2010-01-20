@@ -72,6 +72,11 @@ namespace OpenMD {
       refPos_ = refPos;
       refA_ = refA;
     }
+
+    Vector3d getReferenceStructure(){
+      return refPos_;
+    }
+
     
     void calcForce(Vector3d struc);
     void calcForce(Vector3d struc, RotMat3x3d A);    

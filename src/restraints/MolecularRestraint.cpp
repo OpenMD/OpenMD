@@ -48,6 +48,7 @@
 
 namespace OpenMD {
 
+
   void MolecularRestraint::calcForce(std::vector<Vector3d> struc, 
                                      Vector3d molCom){
 
@@ -141,15 +142,8 @@ namespace OpenMD {
 
       Quat4d quat = A.toQuaternion();  
 
-      quat.getTwistSwingAxisAngle(twistAngle, swingAngle, swingAxis);
-
       RealType tw, sx, sy, ttw, swingX, swingY;
-      quat.toTwistSwing(tw, sx, sy);
-      quat.toSwingTwist(swingX, swingY, ttw);
-
-      // std::cerr << eularAngles << "\t[" << twistAngle << "," << swingAngle << 
-      // "]\t[" << tw << "," << sx << "," << sy << "]\t[" << ttw <<
-      // "," << ssx << "," << ssy << "]" << std::endl;
+      quat.toSwingTwist(swingX, swingY, twistAngle);
 
       RealType dVdtwist, dVdswing, dVdswingX, dVdswingY;
       RealType dTwist, dSwing, dSwingX, dSwingY;

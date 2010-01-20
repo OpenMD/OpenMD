@@ -73,7 +73,6 @@ namespace OpenMD {
     RealType restTime_;
     RestWriter* restOut;
     Snapshot* currSnapshot_;
-
   };
 
 }

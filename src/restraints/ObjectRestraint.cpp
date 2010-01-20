@@ -46,13 +46,12 @@ namespace OpenMD {
   void ObjectRestraint::calcForce(Vector3d struc) {
 
     pot_ = 0.0;
-    
     if (restType_ & rtDisplacement) {
       Vector3d del = struc - refPos_;
-      RealType r = del.length();  
+      RealType r = del.length();
       Vector3d frc = -kDisp_ * del;
       RealType p = 0.5 * kDisp_ * del.lengthSquare();
-      pot_ += p;
+      pot_ = p;
       force_ = frc * scaleFactor_;
       restInfo_[rtDisplacement] = std::make_pair(r,p);
     }
@@ -73,11 +72,11 @@ namespace OpenMD {
 
       RealType twistAngle, swingAngle;
       Vector3d swingAxis;
-      RealType tw, swingX, swingY;
+      RealType swingX, swingY;
       
-      quat.getTwistSwingAxisAngle(twistAngle, swingAngle, swingAxis);
-      quat.toSwingTwist(swingX, swingY, tw);
-      
+      quat.toSwingTwist(swingX, swingY, twistAngle);
+
+
       RealType dVdtwist, dVdswingX, dVdswingY;
       RealType dTwist, dSwingX, dSwingY;
       RealType p;

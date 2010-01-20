@@ -65,10 +65,13 @@ namespace OpenMD {
     ~RestWriter();
 
     void writeRest(std::vector<std::map<int, Restraint::RealPair> > restInfo);
+
+    void writeClosing(std::ostream& os);
     
   private:    
     SimInfo* info_;
-    std::ofstream output_;
+    std::ostream *output_;
+    bool createRestFile_;
   };
 
 }

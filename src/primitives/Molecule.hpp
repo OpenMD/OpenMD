@@ -87,7 +87,7 @@ namespace OpenMD{
     
     Molecule(int stampId, int globalIndex, const std::string& molName);
     virtual ~Molecule();
-    
+
     /**
      * Returns the global index of this molecule.
      * @return  the global index of this molecule 

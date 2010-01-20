@@ -46,22 +46,86 @@
 #ifndef IO_RESTREADER_HPP 
 #define IO_RESTREADER_HPP 
  
-#include "io/DumpReader.hpp"
+#include <cstdio>
+#include <string>
+#include "brains/SimInfo.hpp"
+#include "primitives/StuntDouble.hpp"
 
 namespace OpenMD { 
  
   /** 
    * @class RestReader RestReader.hpp "io/RestReader.hpp" 
    */ 
-  class RestReader : public DumpReader { 
+  class RestReader { 
   public: 
-    RestReader(SimInfo* info, const std::string &filename) : DumpReader(info, filename){}
-    void readReferenceStructure();
+    RestReader(SimInfo* info, const std::string &filename, 
+                           std::vector<int> stuntDoubleIndex) 
+      : info_(info), filename_(filename){
+      stuntDoubleIndex_ = stuntDoubleIndex;
+#ifdef IS_MPI 
+      
+      if (worldRank == 0) { 
+#endif 
+        
+        inFile_ = new std::ifstream(filename_.c_str()); 
+        
+        if (inFile_->fail()) { 
+          sprintf(painCave.errMsg, 
+                  "RestReader: Cannot open file: %s\n", 
+                  filename_.c_str()); 
+          painCave.isFatal = 1; 
+          simError(); 
+        } 
+        
+#ifdef IS_MPI 
+        
+      } 
+      
+      strcpy(checkPointMsg, "Reference file opened for reading successfully."); 
+      errorCheckPoint(); 
+      
+#endif 
+      
+      return;
+    }
+
+    void readReferenceStructure(void);
+
+    ~RestReader(){
+#ifdef IS_MPI
+      if (worldRank == 0){
+#endif 
+        
+        delete inFile_;
+        
+#ifdef IS_MPI       
+      } 
+      
+      strcpy(checkPointMsg, "Reference file closed successfully."); 
+      errorCheckPoint();
+#endif
+    }
+    
   protected: 
-    virtual void parseDumpLine(const std::string&);  
-    virtual void readFrameProperties(std::istream& inputStream);
+    void parseDumpLine(const std::string& line);
+    void readStuntDoubles(std::istream& inpuStream);
+    void readFrameProperties(std::istream& inputStream);
+    void scanFile(void);
+    void readSet(void);
   private: 
+
+    SimInfo* info_;
+
     std::vector<Vector3d> all_pos_;
+    std::vector<int> stuntDoubleIndex_;
+
+    std::istream* inFile_;
+    std::string filename_;
+
+    std::streampos framePos_;
+
+    const static int bufferSize = 4096;
+    char buffer[bufferSize];
   };
  
 }      //end namespace OpenMD 
