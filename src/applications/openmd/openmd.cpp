@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2010 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -36,7 +36,7 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4]  Vardeman & Gezelter, in progress (2009).                        
+ * [4]  Vardeman & Gezelter, in progress (2010).                        
  */
  
 #ifdef IS_MPI
@@ -80,7 +80,7 @@ int main(int argc,char* argv[]){
       "  |   / __ \\____  ___  ____   /  |/  // __ \\  The Open Molecular Dynamics |\n"<<
       "  |  / / / / __ \\/ _ \\/ __ \\ / /|_/ // / / /  Engine (formerly OOPSE).    |\n"<<
       "  | / /_/ / /_/ /  __/ / / // /  / // /_/ /                               |\n"<<
-      "  | \\____/ .___/\\___/_/ /_//_/  /_//_____/    Copyright 2004-2009 by the  |\n"<<
+      "  | \\____/ .___/\\___/_/ /_//_/  /_//_____/    Copyright 2004-2010 by the  |\n"<<
       "  |     /_/                                   University of Notre Dame.   |\n"<<
       "  |                                                                       |\n"<<
       "  |                   version " << 
@@ -97,7 +97,7 @@ int main(int argc,char* argv[]){
       "  | [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).              |\n"<<
       "  | [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).           |\n"<<
       "  | [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).           |\n"<<
-      "  | [4]  Vardeman & Gezelter, in progress (2009).                         |\n"<<
+      "  | [4]  Vardeman & Gezelter, in progress (2010).                         |\n"<<
       "  +-----------------------------------------------------------------------+\n"<<
       "\n";
     
