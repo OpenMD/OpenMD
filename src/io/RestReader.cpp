@@ -55,7 +55,7 @@
 #include "primitives/Molecule.hpp" 
 #include "utils/simError.h" 
 #include "utils/MemoryUtils.hpp" 
-#include "utils/StringTokenizer.hpp"
+#include "utils/StringTokenizer.hpp"the
 #include "restraints/ObjectRestraint.hpp"
 #include "restraints/MolecularRestraint.hpp" 
  
@@ -191,7 +191,6 @@ namespace OpenMD {
 
     scanFile();
 
-
     readSet();
 
 
@@ -280,83 +279,107 @@ namespace OpenMD {
 
     int index = tokenizer.nextTokenAsInt();
 
+    StuntDouble* integrableObject = info_->getIOIndexToIntegrableObject(index);
+
+    if (integrableObject == NULL) {
+      return;
+    }
   
-    if (index < 1116){
-      std::string type = tokenizer.nextToken(); 
-      
-      Vector3d pos;
-      
-      pos[0] = tokenizer.nextTokenAsDouble(); 
-      pos[1] = tokenizer.nextTokenAsDouble(); 
-      pos[2] = tokenizer.nextTokenAsDouble();
-      
-      all_pos_[index] = pos;
-    }else{
-      
-      bool exist = false;
-      int indexCount = 0;
-      
-      while ( (!exist) && (indexCount < stuntDoubleIndex_.size())){
-        if (index == stuntDoubleIndex_[indexCount])
-          exist = true;
-        indexCount++;
-      }
-      
-      StuntDouble* integrableObject;
-      
-      if (exist){
-        
-        integrableObject = info_->getIOIndexToIntegrableObject(index);
-        
-        int compareindex = integrableObject->getGlobalIntegrableObjectIndex();
-        
-        if (integrableObject == NULL) {
-          return;
-        }   
-        
-        std::string type = tokenizer.nextToken(); 
-        
-        Vector3d pos;
-        
+    std::string type = tokenizer.nextToken(); 
+    int size = type.size();
+    
+    Vector3d pos;
+    Quat4d q;
+
+    for(int i = 0; i < size; ++i) {
+      switch(type[i]) {
+
+      case 'p': {
         pos[0] = tokenizer.nextTokenAsDouble(); 
         pos[1] = tokenizer.nextTokenAsDouble(); 
         pos[2] = tokenizer.nextTokenAsDouble(); 
-        
+        break;
+      }
+      case 'v' : {
         Vector3d vel;
         vel[0] = tokenizer.nextTokenAsDouble(); 
         vel[1] = tokenizer.nextTokenAsDouble(); 
         vel[2] = tokenizer.nextTokenAsDouble(); 
-        
-        
-        Quat4d q;
+        break;
+      }
+
+      case 'q' : {
         if (integrableObject->isDirectional()) { 
           
           q[0] = tokenizer.nextTokenAsDouble(); 
           q[1] = tokenizer.nextTokenAsDouble(); 
           q[2] = tokenizer.nextTokenAsDouble(); 
           q[3] = tokenizer.nextTokenAsDouble(); 
-        }  
-        // keep the position in case we need it for a molecular restraint:
+          
+          RealType qlen = q.length(); 
+          if (qlen < OpenMD::epsilon) { //check quaternion is not equal to 0 
+            
+            sprintf(painCave.errMsg, 
+                    "RestReader Error: initial quaternion error (q0^2 + q1^2 + q2^2 + q3^2) ~ 0\n"); 
+            painCave.isFatal = 1; 
+            simError();             
+          }  
+              
+          q.normalize(); 
+        }          
+        break;
+      }  
+      case 'j' : {
+        Vector3d ji;
+        if (integrableObject->isDirectional()) {
+          ji[0] = tokenizer.nextTokenAsDouble(); 
+          ji[1] = tokenizer.nextTokenAsDouble(); 
+          ji[2] = tokenizer.nextTokenAsDouble(); 
+        }
+        break;
+      }  
+      case 'f': {        
+        Vector3d force;
+        force[0] = tokenizer.nextTokenAsDouble(); 
+        force[1] = tokenizer.nextTokenAsDouble(); 
+        force[2] = tokenizer.nextTokenAsDouble();           
+        break;
+      }
+      case 't' : {        
+        Vector3d torque;
+        torque[0] = tokenizer.nextTokenAsDouble(); 
+        torque[1] = tokenizer.nextTokenAsDouble(); 
+        torque[2] = tokenizer.nextTokenAsDouble();           
+        break;
+      }
+      default: {
+        sprintf(painCave.errMsg, 
+                "RestReader Error: %s is an unrecognized type\n", type.c_str()); 
+        painCave.isFatal = 1; 
+        simError();     
+        break;   
+      }
+      }
+      // keep the position in case we need it for a molecular restraint:
+
+      all_pos_[index] = pos;      
         
-        all_pos_[index] = pos;
-        
-        // is this io restrained?
-        GenericData* data = integrableObject->getPropertyByName("Restraint");
-        ObjectRestraint* oRest;
-        
-        if (data != NULL) {
-          // make sure we can reinterpret the generic data as restraint data:
-          RestraintData* restData= dynamic_cast<RestraintData*>(data);        
-          if (restData != NULL) {
-            // make sure we can reinterpet the restraint data as a pointer to
+      // is this io restrained?
+      GenericData* data = integrableObject->getPropertyByName("Restraint");
+      ObjectRestraint* oRest;
+      
+      if (data != NULL) {
+        // make sure we can reinterpret the generic data as restraint data:
+        RestraintData* restData= dynamic_cast<RestraintData*>(data);        
+        if (restData != NULL) {
+          // make sure we can reinterpet the restraint data as a pointer to
             // an ObjectRestraint:
-            oRest = dynamic_cast<ObjectRestraint*>(restData->getData());
-            if (oRest != NULL) {          
-              if (integrableObject->isDirectional()) {
-                oRest->setReferenceStructure(pos, q.toRotationMatrix3());
-              } else {                           
-                oRest->setReferenceStructure(pos);
-              }
+          oRest = dynamic_cast<ObjectRestraint*>(restData->getData());
+          if (oRest != NULL) {          
+            if (integrableObject->isDirectional()) {
+              oRest->setReferenceStructure(pos, q.toRotationMatrix3());
+            } else {                           
+              oRest->setReferenceStructure(pos);
             }
           }
         }
