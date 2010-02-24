@@ -236,7 +236,6 @@ void ConvexHull::computeHull(std::vector<StuntDouble*> bodydoubles) {
       p[ver][0] = vertex->point[0];
       p[ver][1] = vertex->point[1];
       p[ver][2] = vertex->point[2];
-      
       Vector3d vel;
       RealType mass;
 
@@ -251,13 +250,18 @@ void ConvexHull::computeHull(std::vector<StuntDouble*> bodydoubles) {
 
       int localID = id - displacements[myrank];
 
-      if (localID >= 0 && localID < hullSitesOnProc[myrank])
+
+      if (localID >= 0 && localID < hullSitesOnProc[myrank]){
         face.addVertexSD(bodydoubles[indexMap[localID]]);
-      
+      }else{
+        face.addVertexSD(NULL);
+      }
 #else
       vel = bodydoubles[id]->getVel();
       mass = bodydoubles[id]->getMass();
       face.addVertexSD(bodydoubles[id]);      
+
+
 #endif
 	
       faceVel = faceVel + vel;
