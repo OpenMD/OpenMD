@@ -1,4 +1,4 @@
-/* Copyright (c) 2008, 2009, 2010 The University of Notre Dame. All Rights Reserved.
+/* Copyright (c) 2010 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -105,12 +105,14 @@ void ConvexHull::computeHull(std::vector<StuntDouble*> bodydoubles) {
     i++;
   }
   
+  /* Clean up memory from previous convex hull calculations */
   boolT ismalloc = False;
-  /* Clean up memory from previous convex hull calculations*/
   
+  /* compute the hull for our local points (or all the points for single
+     processor versions) */
   if (qh_new_qhull(dim_, numpoints, &ptArray[0], ismalloc,
                    const_cast<char *>(options_.c_str()), NULL, stderr)) {
-
+    
     sprintf(painCave.errMsg, "ConvexHull: Qhull failed to compute convex hull");
     painCave.isFatal = 1;
     simError();
@@ -194,9 +196,13 @@ void ConvexHull::computeHull(std::vector<StuntDouble*> bodydoubles) {
   // Free previous hull
   qh_freeqhull(!qh_ALL);
   qh_memfreeshort(&curlong, &totlong);
-  if (curlong || totlong)
-    std::cerr << "qhull internal warning (main): did not free %d bytes of long memory (%d pieces) "
-	      << totlong << curlong << std::endl;
+  if (curlong || totlong) {
+    sprintf(painCave.errMsg, "ConvexHull: qhull internal warning:\n"
+            "\tdid not free %d bytes of long memory (%d pieces)", 
+            totlong, curlong);
+    painCave.isFatal = 1;
+    simError();
+  }
   
   if (qh_new_qhull(dim_, globalHullSites, &globalCoords[0], ismalloc,
                    const_cast<char *>(options_.c_str()), NULL, stderr)){
@@ -260,10 +266,7 @@ void ConvexHull::computeHull(std::vector<StuntDouble*> bodydoubles) {
       vel = bodydoubles[id]->getVel();
       mass = bodydoubles[id]->getMass();
       face.addVertexSD(bodydoubles[id]);      
-
-
-#endif
-	
+#endif	
       faceVel = faceVel + vel;
       faceMass = faceMass + mass;
       ver++;      
@@ -292,9 +295,13 @@ void ConvexHull::computeHull(std::vector<StuntDouble*> bodydoubles) {
   //  std::cout << "My volume is: " << calcvol << " qhull volume is:" << volume_ << std::endl; 
   qh_freeqhull(!qh_ALL);
   qh_memfreeshort(&curlong, &totlong);
-  if (curlong || totlong)
-    std::cerr << "qhull internal warning (main): did not free %d bytes of long memory (%d pieces) "
-              << totlong << curlong << std::endl;    
+  if (curlong || totlong) {
+    sprintf(painCave.errMsg, "ConvexHull: qhull internal warning:\n"
+            "\tdid not free %d bytes of long memory (%d pieces)", 
+            totlong, curlong);
+    painCave.isFatal = 1;
+    simError();
+  }
 }
 
 void ConvexHull::printHull(const std::string& geomFileName) {
