@@ -50,6 +50,7 @@
 #include "integrators/VelocityVerletIntegrator.hpp"
 #include "integrators/DLM.hpp"
 #include "utils/StringUtils.hpp"
+#include "utils/ProgressBar.hpp"
 
 namespace OpenMD {
   VelocityVerletIntegrator::VelocityVerletIntegrator(SimInfo *info) : Integrator(info), rotAlgo(NULL) { 
@@ -94,6 +95,8 @@ namespace OpenMD {
  
     dumpWriter->writeDumpAndEor();
 
+    progressBar = new ProgressBar();
+
     //save statistics, before writeStat,  we must save statistics
     thermo.saveStat();
     saveConservedQuantity();
@@ -115,7 +118,7 @@ namespace OpenMD {
     needStress = false;       
     
   }
-
+ 
   void VelocityVerletIntegrator::doIntegrate() {
   
   
@@ -128,7 +131,7 @@ namespace OpenMD {
       integrateStep();
     
       postStep();
-    
+      
     }
   
     finalize();
@@ -183,7 +186,10 @@ namespace OpenMD {
       }
 
       statWriter->writeStat(currentSnapshot_->statData);
-      
+
+      progressBar->setStatus(currentSnapshot_->getTime(), runTime);
+      progressBar->update();
+
       needPotential = false;
       needStress = false;
       currStatus += statusTime;

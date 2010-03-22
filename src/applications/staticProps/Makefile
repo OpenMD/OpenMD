@@ -19,6 +19,7 @@ Source    = \
 	BOPofR.cpp \
 	RhoR.cpp \
 	BondAngleDistribution.cpp \
+	pAngle.cpp \
 	NanoVolume.cpp
 BuiltParallelExe = 0
 

@@ -105,6 +105,7 @@ struct gengetopt_args_info
   const char *scd_help; /**< @brief scd order parameter (either --sele1, --sele2, --sele3 are specified or --molname, --begin, --end are specified) help description.  */
   const char *density_help; /**< @brief density plot help description.  */
   const char *slab_density_help; /**< @brief slab density help description.  */
+  const char *p_angle_help; /**< @brief p(cos(theta)) help description.  */
   const char *hxy_help; /**< @brief hxy help description.  */
   const char *rho_r_help; /**< @brief rho of R help description.  */
   const char *hullvol_help; /**< @brief hull volume of nanoparticle help description.  */
@@ -144,10 +145,13 @@ struct gengetopt_args_info
   unsigned int scd_given ;	/**< @brief Whether scd was given.  */
   unsigned int density_given ;	/**< @brief Whether density was given.  */
   unsigned int slab_density_given ;	/**< @brief Whether slab_density was given.  */
+  unsigned int p_angle_given ;	/**< @brief Whether p_angle was given.  */
   unsigned int hxy_given ;	/**< @brief Whether hxy was given.  */
   unsigned int rho_r_given ;	/**< @brief Whether rho_r was given.  */
   unsigned int hullvol_given ;	/**< @brief Whether hullvol was given.  */
 
+  char **inputs ; /**< @brief unamed options (options without names) */
+  unsigned inputs_num ; /**< @brief unamed options number */
   int staticProps_group_counter; /**< @brief Counter for group staticProps */
 } ;
 

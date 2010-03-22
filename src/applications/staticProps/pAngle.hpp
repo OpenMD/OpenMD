@@ -36,88 +36,52 @@
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
- * [4]  Vardeman & Gezelter, in progress (2009).                        
+ * [4]  Vardeman & Gezelter, in progress (2009).                     
+ *
  */
- 
-/**
- * @file VelocityVerletIntegrator.hpp
- * @author tlin
- * @date 11/08/2004
- * @time 13:25am
- * @version 1.0
- */
+#ifndef APPLICATIONS_STATICPROPS_PANGLE_HPP
+#define APPLICATIONS_STATICPROPS_PANGLE_HPP
 
-#ifndef INTEGRATORS_VELOCITYVERLETINTEGRATOR_HPP
-#define INTEGRATORS_VELOCITYVERLETINTEGRATOR_HPP
+#include <string>
+#include <vector>
+#include "selection/SelectionEvaluator.hpp"
+#include "selection/SelectionManager.hpp"
+#include "utils/NumericConstant.hpp"
+#include "applications/staticProps/StaticAnalyser.hpp"
 
-#include "integrators/Integrator.hpp"
-#include "integrators/RotationAlgorithm.hpp"
-#include "constraints/Rattle.hpp"
-#include "utils/ProgressBar.hpp"
 namespace OpenMD {
-
-  /**
-   * @class VelocityVerletIntegrator VelocityVerletIntegrator.hpp "integrators/VelocityVerletIntegrator.hpp"
-   * @brief  Velocity-Verlet Family Integrator
-   * Template pattern is used in VelocityVerletIntegrator class. 
-   */
-  class VelocityVerletIntegrator : public Integrator {
-  public:
-    virtual ~VelocityVerletIntegrator();
-
-    void setRotationAlgorithm(RotationAlgorithm* algo) {
-      if (algo != rotAlgo && rotAlgo != NULL){            
-	delete rotAlgo;
-      }
-            
-      rotAlgo = algo;
-    }
-        
-  protected:
-
-    VelocityVerletIntegrator(SimInfo* info);
-
-    virtual void doIntegrate();
-
-    virtual void initialize();
-
-    virtual void preStep();
-        
-    virtual void integrateStep();        
-
-    virtual void postStep();
-
-    virtual void finalize();
-
-    virtual void resetIntegrator() {}
+  
+  class pAngle : public StaticAnalyser {
     
-    RotationAlgorithm* rotAlgo;
-    Rattle* rattle;
-    RealType dt2;
-
-    RealType currSample;
-    RealType currStatus;
-    RealType currThermal;
-    RealType currReset;
-    RealType currRNEMD;
-        
+  public:
+    pAngle(SimInfo* info, const std::string& filename, const std::string& sele, int nzbins);
+    
+    int getNThetaBins() {
+      return nThetaBins_; 
+    }
+    
+    virtual void process();
+    
   private:
+    
+    void processHistogram();
+    void writeProbs();
         
-    virtual void calcForce(bool needPotential, bool needStress);    
-        
-    virtual void moveA() = 0;
-        
-    virtual void moveB() = 0;        
-
-    virtual RealType calcConservedQuantity() = 0;
-
-    virtual DumpWriter* createDumpWriter();
-
-    virtual StatWriter* createStatWriter();
-
-    ProgressBar* progressBar;
-
+    Snapshot* currentSnapshot_;
+    
+    int nProcessed_;
+    std::string selectionScript_;
+    SelectionEvaluator evaluator_;
+    SelectionManager seleMan_;
+    
+    int nThetaBins_; 
+    
+    std::vector<int> count_;
+    std::vector<RealType> histogram_;
   };
+  
+}
+#endif
 
-} //end namespace OpenMD
-#endif //INTEGRATORS_VELOCITYVERLETINTEGRATOR_HPP
+
+

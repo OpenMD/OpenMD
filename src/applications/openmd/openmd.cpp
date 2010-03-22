@@ -35,7 +35,7 @@
  *                                                                      
  * [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).             
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
- * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
+ * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
  * [4]  Vardeman & Gezelter, in progress (2010).                        
  */
  
@@ -96,7 +96,7 @@ int main(int argc,char* argv[]){
       "  |                                                                       |\n"<<
       "  | [1]  Meineke, et al., J. Comp. Chem. 26, 252-271 (2005).              |\n"<<
       "  | [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).           |\n"<<
-      "  | [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).           |\n"<<
+      "  | [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          |\n"<<
       "  | [4]  Vardeman & Gezelter, in progress (2010).                         |\n"<<
       "  +-----------------------------------------------------------------------+\n"<<
       "\n";

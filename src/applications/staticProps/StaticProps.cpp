@@ -63,6 +63,7 @@
 #include "applications/staticProps/SCDOrderParameter.hpp"
 #include "applications/staticProps/DensityPlot.hpp"
 #include "applications/staticProps/RhoZ.hpp"
+#include "applications/staticProps/pAngle.hpp"
 #include "applications/staticProps/BondAngleDistribution.hpp"
 #include "applications/staticProps/NanoVolume.hpp"
 #if defined(HAVE_FFTW_H) || defined(HAVE_DFFTW_H) || defined(HAVE_FFTW3_H)
@@ -257,6 +258,8 @@ int main(int argc, char* argv[]){
                               args_info.nbins_arg);  
   } else if (args_info.slab_density_given) {
     analyser = new RhoZ(info, dumpFileName, sele1, args_info.nbins_arg);
+  } else if (args_info.p_angle_given) {
+    analyser = new pAngle(info, dumpFileName, sele1, args_info.nbins_arg);
 #if defined(HAVE_FFTW_H) || defined(HAVE_DFFTW_H) || defined(HAVE_FFTW3_H)
   }else if (args_info.hxy_given) {
     analyser = new Hxy(info, dumpFileName, sele1, args_info.nbins_x_arg, 
