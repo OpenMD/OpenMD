@@ -51,7 +51,8 @@ namespace OpenMD {
 
 
   SelectionEvaluator::SelectionEvaluator(SimInfo* si) 
-    : info(si), nameFinder(info), distanceFinder(info), indexFinder(info), 
+    : info(si), nameFinder(info), distanceFinder(info), hullFinder(info),
+      indexFinder(info), 
       isLoaded_(false){    
       nStuntDouble = info->getNGlobalAtoms() + info->getNGlobalRigidBodies();
     }            
@@ -180,6 +181,9 @@ namespace OpenMD {
         break;
       case Token::within:
         withinInstruction(instruction, stack.top());
+        break;
+      case Token::hull:
+        stack.push(hull());
         break;
 	//case Token::selected:
 	//  stack.push(getSelectionSet());
@@ -439,6 +443,16 @@ namespace OpenMD {
 
     return bs;
   }
+
+
+  OpenMDBitSet SelectionEvaluator::hull() {
+    OpenMDBitSet bs(nStuntDouble);
+    
+    bs = hullFinder.findHull();
+    
+    return bs;
+  }
+
 
 
   RealType SelectionEvaluator::getCharge(Atom* atom) {

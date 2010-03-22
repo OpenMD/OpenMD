@@ -52,6 +52,7 @@
 #include "selection/SelectionCompiler.hpp"
 #include "selection/NameFinder.hpp"
 #include "selection/DistanceFinder.hpp"
+#include "selection/HullFinder.hpp"
 #include "selection/IndexFinder.hpp"
 #include "utils/OpenMDBitSet.hpp"
 #include "primitives/StuntDouble.hpp"
@@ -129,6 +130,8 @@ namespace OpenMD {
     OpenMDBitSet expression(const std::vector<Token>& tokens, int pc);
 
     OpenMDBitSet lookupValue(const std::string& variable);
+
+    OpenMDBitSet hull();
         
     void evalError(const std::string& message) {
       sprintf( painCave.errMsg,
@@ -190,6 +193,7 @@ namespace OpenMD {
     SimInfo* info;
     NameFinder nameFinder;
     DistanceFinder distanceFinder;
+    HullFinder hullFinder;
     IndexFinder indexFinder;
     int nStuntDouble;   //nGLOBALatoms + nGLOBALrigidbodies
 
