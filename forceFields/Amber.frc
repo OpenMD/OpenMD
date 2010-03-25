@@ -2258,6 +2258,7 @@ OS      P       OS      Harmonic        102.600000      90.000000
 OS      P       O2      Harmonic        108.230000      200.000000
 O2      P       O2      Harmonic        119.900000      280.000000
 OW      HW      HW      Harmonic        127.740000      0.000000
+C       OH      HO      Harmonic        113.00          50.00000
 end BendTypes
 
 
@@ -2597,6 +2598,7 @@ CT      OS      P       OH      Charmm  0.250000        3       0.000000		1.2		2
 CT      OS      P       OS      Charmm  0.250000        3       0.000000		1.2		2		0
 CT      OS      P       O2      Charmm  0.250000        3       0.000000
 CT      S       S       CT      Charmm  3.500000        2       0.000000		0.6		3		0
+CT	C	OH	HO	Charmm	2.30000000	2	180.0 
 end TorsionTypes
 
 
@@ -2643,5 +2645,6 @@ N*      CM      C       CT      AmberImproper	1.000000
 N*      CK      CB      CT      AmberImproper	1.000000 
 N2      CT      CA      H       AmberImproper	1.000000 
 N2      CA      H       H       AmberImproper	1.000000 
+C	CT	OH	O2	AmberImproper	10.5
 end InversionTypes
  
