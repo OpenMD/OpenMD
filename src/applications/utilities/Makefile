@@ -3,6 +3,8 @@ ScriptFiles =  \
         affineScale \
         solvator \
         waterBoxer \
+	md2md \
+	md-solvator \
 	stat2visco
 
 DEV_ROOT=../../..
