@@ -18,10 +18,8 @@ $lattice = 0;
 $nMol = 500;
 $density = 1.0;
 $doRandomize = 0;
-$cutoff = 12;
-$alpha = 0.2125;
-$alphaInt = 0.5125;
-$alphaSlope = 0.025;
+$cutoff = 9;
+$alpha = 0.18;
 $invalidWater = 0;
 $waterCase = -1;
 $nothingSelected = 1;
@@ -319,7 +317,6 @@ sub writeOutFile {
   # write out the header
   print OUTFILE "<OpenMD version=1>\n";
   findCutoff();
-  findAlpha();
   printMetaData();
   printFrameData();
   print OUTFILE "    <StuntDoubles>\n";
@@ -376,6 +373,8 @@ forceField = \"DUFF\";
 electrostaticSummationMethod = \"shifted_force\";
 electrostaticScreeningMethod = \"damped\";
 cutoffRadius = $cutoff;
+switchingRadius = $cutoff;
+dampingAlpha = $alpha;
 
 targetTemp = 300;
 targetPressure = 1.0;
@@ -408,10 +407,6 @@ sub findCutoff {
   } else {
     $cutoff = int($boxLength2);
   }
-}
-
-sub findAlpha {
-  $alpha = $alphaInt - $cutoff*$alphaSlope;
 }
 
 sub printFrameData {
