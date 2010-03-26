@@ -1595,12 +1595,7 @@ contains
        call do_gb_pair(i, j, atid_i, atid_j, d, r, rijsq, sw, vdwMult, vpair, fpair, &
             p_vdw, A1, A2, f1, t1, t2, do_pot)
     endif
-    
-    if ( iand(iHash, EAM_PAIR).ne.0 ) then       
-       call do_eam_pair(i, j, atid_i, atid_j, d, r, rijsq, sw, vpair, &
-            fpair, p_met, f1, rho_i, rho_j, dfrhodrho_i, dfrhodrho_j,fshift_i,fshift_j, do_pot)
-    endif
-    
+        
     if ( iand(iHash, SHAPE_PAIR).ne.0 ) then       
        call do_shape_pair(i, j, atid_i, atid_j, d, r, rijsq, sw, vpair, fpair, &
             p_vdw, A1, A2, f1, t1, t2, do_pot)
@@ -1611,8 +1606,13 @@ contains
             p_vdw, A1, A2, f1, t1, t2, do_pot)
     endif
 
+    if ( iand(iHash, EAM_PAIR).ne.0 ) then       
+       call do_eam_pair(i, j, atid_i, atid_j, d, r, rijsq, sw, vpair, &
+            fpair, p_met, f1, rho_i, rho_j, dfrhodrho_i, dfrhodrho_j, fshift_i,fshift_j, do_pot)
+    endif
+
     if ( iand(iHash, SC_PAIR).ne.0 ) then       
-       call do_SC_pair(i, j, atid_i, atid_j, d, r, rijsq, rcut, sw, vpair, &
+       call do_SC_pair(i, j, atid_i, atid_j, d, r, rijsq, sw, vpair, &
             fpair, p_met, f1, rho_i, rho_j, dfrhodrho_i, dfrhodrho_j, fshift_i, fshift_j, do_pot)
     endif
      
@@ -1743,11 +1743,11 @@ contains
     iHash = InteractionHash(atid_i, atid_j)
 
     if ( iand(iHash, EAM_PAIR).ne.0 ) then       
-       call calc_EAM_prepair_rho(i, j, atid_i, atid_j, d, r, rho_i_at_j, rho_j_at_i, rijsq)
+       call calc_EAM_prepair_rho(i, j, atid_i, atid_j, d, r, rijsq, rho_i_at_j, rho_j_at_i)
     endif
     
     if ( iand(iHash, SC_PAIR).ne.0 ) then       
-       call calc_SC_prepair_rho(i, j, atid_i, atid_j, d, r, rijsq, rho_i_at_j, rho_j_at_i, rcut)
+       call calc_SC_prepair_rho(i, j, atid_i, atid_j, d, r, rijsq, rho_i_at_j, rho_j_at_i)
     endif
 
     if ( iand(iHash, EAM_PAIR).ne.0 .or. iand(iHash, SC_PAIR).ne.0  ) then 

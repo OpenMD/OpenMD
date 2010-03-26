@@ -216,7 +216,7 @@ contains
   end subroutine deallocate_EAMType
 
   !! Calculates rho_r
-  subroutine calc_eam_prepair_rho(atom1,atom2,Atid1,Atid2,d,r,rho_i_at_j, rho_j_at_i, rijsq)
+  subroutine calc_eam_prepair_rho(atom1, atom2, atid1, atid2, d, r, rijsq, rho_i_at_j, rho_j_at_i)
     integer :: atom1, atom2, Atid1, Atid2
     real(kind = dp), dimension(3) :: d
     real(kind = dp), intent(inout)               :: r
@@ -277,7 +277,8 @@ contains
   
   !! Does EAM pairwise Force calculation.  
   subroutine do_eam_pair(atom1, atom2, atid1, atid2, d, rij, r2, sw, vpair, &
-       fpair, pot, f1, rho_i, rho_j, dfrhodrho_i, dfrhodrho_j,fshift_i,fshift_j, do_pot)
+       fpair, pot, f1, rho_i, rho_j, dfrhodrho_i, dfrhodrho_j, &
+       fshift_i, fshift_j, do_pot)
     !Arguments    
     integer, intent(in) ::  atom1, atom2, atid1, atid2
     real( kind = dp ), intent(in) :: rij, r2
@@ -367,7 +368,7 @@ contains
        drhoidr = drha
        drhojdr = drhb
 
-       dudr = drhojdr*dfrhodrho_i + drhoidr*dfrhodrho_i + dvpdr 
+       dudr = drhojdr*dfrhodrho_i + drhoidr*dfrhodrho_j + dvpdr 
 
 
        fx = dudr * drdx

@@ -274,11 +274,11 @@ contains
   
 
   !! Calculates rho_r
-  subroutine calc_sc_prepair_rho(atom1, atom2, atid1, atid2, d, r, rijsq, rho_i_at_j, rho_j_at_i, rcut)
+  subroutine calc_sc_prepair_rho(atom1, atom2, atid1, atid2, d, r, rijsq, rho_i_at_j, rho_j_at_i)
     integer :: atom1, atom2, atid1, atid2
     real(kind = dp), dimension(3) :: d
     real(kind = dp), intent(inout)               :: r
-    real(kind = dp), intent(inout)               :: rijsq, rcut
+    real(kind = dp), intent(inout)               :: rijsq
     ! value of electron density rho do to atom i at atom j
     real(kind = dp), intent(inout) :: rho_i_at_j
     ! value of electron density rho do to atom j at atom i
@@ -337,11 +337,12 @@ contains
   end subroutine calc_sc_preforce_Frho  
   
   !! Does Sutton-Chen  pairwise Force calculation.  
-  subroutine do_sc_pair(atom1, atom2, atid1, atid2, d, rij, r2, rcut, sw, vpair, &
-        fpair, pot, f1, rho_i, rho_j, dfrhodrho_i, dfrhodrho_j, fshift_i, fshift_j, do_pot)
+  subroutine do_sc_pair(atom1, atom2, atid1, atid2, d, rij, r2, sw, vpair, &
+        fpair, pot, f1, rho_i, rho_j, dfrhodrho_i, dfrhodrho_j, &
+        fshift_i, fshift_j, do_pot)
     !Arguments    
-    integer, intent(in) ::  atom1, atom2
-    real( kind = dp ), intent(in) :: rij, r2, rcut
+    integer, intent(in) ::  atom1, atom2, atid1, atid2
+    real( kind = dp ), intent(in) :: rij, r2
     real( kind = dp ) :: pot, sw, vpair
     real( kind = dp ), dimension(3) :: f1
     real( kind = dp ), intent(in), dimension(3) :: d
@@ -349,6 +350,7 @@ contains
     real( kind = dp ), intent(inout) :: dfrhodrho_i, dfrhodrho_j 
     real( kind = dp ), intent(inout) :: rho_i, rho_j 
     real( kind = dp ), intent(inout):: fshift_i, fshift_j
+
     logical, intent(in) :: do_pot
 
     real( kind = dp ) :: drdx, drdy, drdz
@@ -358,13 +360,11 @@ contains
     real( kind = dp ) :: Fx,Fy,Fz
     real( kind = dp ) :: pot_temp, vptmp
     real( kind = dp ) :: rcij, vcij
+
     integer :: id1, id2
     integer  :: mytype_atom1
     integer  :: mytype_atom2
-    integer  :: atid1, atid2
-    !Local Variables
-    
-    
+       
     mytype_atom1 = SCList%atidToSCType(atid1)
     mytype_atom2 = SCList%atidTOSCType(atid2)
     
