@@ -76,9 +76,9 @@ namespace OpenMD {
 #endif
 #ifndef IS_MPI
     // get the window width:
-    struct ttysize ts; 
-    ioctl(0, TIOCGWINSZ, &ts);
-    width = ts.ts_cols;
+    struct winsize w;
+    ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
+    width = w.ws_col;
 #endif   
 
     // We'll use:
