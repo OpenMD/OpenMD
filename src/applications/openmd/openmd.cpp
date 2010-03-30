@@ -84,7 +84,7 @@ int main(int argc,char* argv[]){
       "  |     /_/                                   University of Notre Dame.   |\n"<<
       "  |                                                                       |\n"<<
       "  |                   version " << 
-      OPENMD_VERSION_MAJOR << "." << OPENMD_VERSION_MINOR << "." << OPENMD_VERSION_TINY << 
+      OPENMD_VERSION_MAJOR << "." << OPENMD_VERSION_MINOR << " Rev:" << __get_svn_version() << 
       "           http://www.openmd.net       |\n"<<
       "  |                                                                       |\n"<<
       "  | OpenMD is an OpenScience project.  All source code is available for   |\n"<<
@@ -192,4 +192,19 @@ int main(int argc,char* argv[]){
 #endif
 
   return 0 ;
+}
+
+extern "C" {
+  
+  char svnVersionString[1024];
+  char* __get_svn_version(){
+    int howMuchToCopy=0;
+    char *theVersion="$Revision$";
+    howMuchToCopy=strlen(theVersion+11) - 2;
+    assert(howMuchToCopy>0);
+    memcpy(svnVersionString,  theVersion+11, howMuchToCopy);
+    svnVersionString[howMuchToCopy] = '\0';
+    return svnVersionString;
+  }
+  
 }
