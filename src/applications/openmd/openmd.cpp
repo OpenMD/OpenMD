@@ -37,6 +37,7 @@
  * [2]  Fennell & Gezelter, J. Chem. Phys. 124, 234104 (2006).          
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 234107 (2008).          
  * [4]  Vardeman & Gezelter, in progress (2010).                        
+ * $Revision$
  */
  
 #ifdef IS_MPI
