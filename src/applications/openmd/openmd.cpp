@@ -59,6 +59,7 @@
 
 using namespace OpenMD;
 
+char* __get_svn_version();
 
 int main(int argc,char* argv[]){
   
@@ -83,9 +84,9 @@ int main(int argc,char* argv[]){
       "  | \\____/ .___/\\___/_/ /_//_/  /_//_____/    Copyright 2004-2010 by the  |\n"<<
       "  |     /_/                                   University of Notre Dame.   |\n"<<
       "  |                                                                       |\n"<<
-      "  |                   version " << 
-      OPENMD_VERSION_MAJOR << "." << OPENMD_VERSION_MINOR << " Rev:" << __get_svn_version() << 
-      "           http://www.openmd.net       |\n"<<
+      "  |            version " << 
+      OPENMD_VERSION_MAJOR << "." << OPENMD_VERSION_MINOR << "  Revision:" << __get_svn_version() << 
+      "     http://www.openmd.net       |\n"<<
       "  |                                                                       |\n"<<
       "  | OpenMD is an OpenScience project.  All source code is available for   |\n"<<
       "  | any use whatsoever under a BSD-style license.                         |\n"<<
@@ -194,17 +195,13 @@ int main(int argc,char* argv[]){
   return 0 ;
 }
 
-extern "C" {
-  
   char svnVersionString[1024];
   char* __get_svn_version(){
     int howMuchToCopy=0;
-    char *theVersion="$Revision$";
+    const char *theVersion="$Revision$";
     howMuchToCopy=strlen(theVersion+11) - 2;
     assert(howMuchToCopy>0);
     memcpy(svnVersionString,  theVersion+11, howMuchToCopy);
     svnVersionString[howMuchToCopy] = '\0';
     return svnVersionString;
   }
-  
-}
