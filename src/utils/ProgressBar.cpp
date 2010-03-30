@@ -42,6 +42,8 @@
 #include <string>
 #include <sstream>
 #include <sys/ioctl.h>
+#define _POSIX_SOURCE
+#include <unistd.h>
 #ifdef IS_MPI
 #include <mpi.h>
 #endif //is_mpi
@@ -74,61 +76,63 @@ namespace OpenMD {
 #ifdef IS_MPI
     if (MPI::COMM_WORLD.Get_rank() == 0) {
 #endif
-#ifndef IS_MPI
-    // get the window width:
-    struct winsize w;
-    ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
-    width = w.ws_col;
-#endif   
 
-    // We'll use:
-    // 31 characters for the completion estimate, 
-    //  6 for the % complete, 
-    //  2 characters for the open and closing brackets.
+      // only do the progress bar if we are actually running in a tty:
+      if (isatty(fileno(stdout))) {        
+        // get the window width:
+        struct winsize w;
+        ioctl(fileno(stdout), TIOCGWINSZ, &w);
+        width = w.ws_col;
 
-    int avail = width - 31 - 6 - 2;
+        // We'll use:
+        // 31 characters for the completion estimate, 
+        //  6 for the % complete, 
+        //  2 characters for the open and closing brackets.
+        
+        int avail = width - 31 - 6 - 2;
+        
+        ++iteration_;
+        
+        if (maximum_ > 0.0) {
 
-    ++iteration_;
-    
-    if (maximum_ > 0.0) {
-      // we know the maximum, so
-      // draw a progress bar
-      
-      RealType percent = value_ * 100.0 / maximum_;
-      int hashes = int(percent * avail / 100.0);
-      std::string progressbar;
-      progressbar.assign(hashes, '#');
-
-      // add the spinner to the end of the progress bar:
-      progressbar += progressSpinner_[iteration_ & 3];
-
-      // compute the best estimate of the ending time:
-      time_t current_ = time(NULL);
-      time_t end_ = start_ + (current_ - start_) * (100.0/percent);
-      struct tm * ender = localtime(&end_);
-      char buffer[24];
-      strftime(buffer, 24, "%a %b %d @ %I:%M %p", ender);
-
-      std::stringstream fmt;
-      fmt << "\r%3d%% [%-" << avail << "s] Estimate: %s";
-      std::string st = fmt.str();
-
-      printf(st.c_str(), int(percent),
-             progressbar.c_str(),
-             buffer);
-
-    } else {
-      // we don't know the maximum, so we can't draw a progress bar
-      int center = (iteration_ % 48) + 1; // 50 spaces, minus 2
-      std::string before;
-      std::string after;
-      before.assign(std::max(center - 2, 0), ' ');
-      after.assign(std::min(center + 2, 50), ' ');
-      
-      printf("\r[%s###%s]            ",
-             before.c_str(), after.c_str());
-    }
-    fflush(stdout);
+          // we know the maximum, so draw a progress bar
+          
+          RealType percent = value_ * 100.0 / maximum_;
+          int hashes = int(percent * avail / 100.0);
+          std::string progressbar;
+          progressbar.assign(hashes, '#');
+          
+          // add the spinner to the end of the progress bar:
+          progressbar += progressSpinner_[iteration_ & 3];
+          
+          // compute the best estimate of the ending time:
+          time_t current_ = time(NULL);
+          time_t end_ = start_ + (current_ - start_) * (100.0/percent);
+          struct tm * ender = localtime(&end_);
+          char buffer[24];
+          strftime(buffer, 24, "%a %b %d @ %I:%M %p", ender);
+          
+          std::stringstream fmt;
+          fmt << "\r%3d%% [%-" << avail << "s] Estimate: %s";
+          std::string st = fmt.str();
+          
+          printf(st.c_str(), int(percent),
+                 progressbar.c_str(),
+                 buffer);
+          
+        } else {
+          // we don't know the maximum, so we can't draw a progress bar
+          int center = (iteration_ % 48) + 1; // 50 spaces, minus 2
+          std::string before;
+          std::string after;
+          before.assign(std::max(center - 2, 0), ' ');
+          after.assign(std::min(center + 2, 50), ' ');
+          
+          printf("\r[%s###%s]            ",
+                 before.c_str(), after.c_str());
+        }
+        fflush(stdout);
+      }
 #ifdef IS_MPI
     }
 #endif
