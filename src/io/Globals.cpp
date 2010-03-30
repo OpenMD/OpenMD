@@ -74,7 +74,7 @@ Globals::Globals() {
   DefineOptionalParameter(Seed, "seed");
   DefineOptionalParameter(Minimizer, "minimizer");
   DefineOptionalParameter(MinimizerMaxIter,"minimizerMaxIter");
-  DefineOptionalParameter(MinimizerWriteFrq, "minimizerWriteFrq");
+  DefineOptionalParameter(MinimizerWriteFreq, "minimizerWriteFreq");
   DefineOptionalParameter(MinimizerStepSize, "minimizerStepSize");
   DefineOptionalParameter(MinimizerFTol, "minimizerFTol");
   DefineOptionalParameter(MinimizerGTol, "minimizerGTol");
@@ -177,7 +177,7 @@ void Globals::validate() {
   CheckParameter(Seed, isPositive());
   CheckParameter(Minimizer, isEqualIgnoreCase("SD") || isEqualIgnoreCase("CG"));
   CheckParameter(MinimizerMaxIter, isPositive());
-  CheckParameter(MinimizerWriteFrq, isPositive());
+  CheckParameter(MinimizerWriteFreq, isPositive());
   CheckParameter(MinimizerStepSize, isPositive());
   CheckParameter(MinimizerFTol, isPositive());
   CheckParameter(MinimizerGTol, isPositive());

@@ -90,7 +90,7 @@ namespace OpenMD {
     DeclareParameter(OrthoBoxTolerance, RealType);
     DeclareParameter(Minimizer, std::string);
     DeclareParameter(MinimizerMaxIter, RealType);
-    DeclareParameter(MinimizerWriteFrq, int);
+    DeclareParameter(MinimizerWriteFreq, int);
     DeclareParameter(MinimizerStepSize, RealType);
     DeclareParameter(MinimizerFTol, RealType);
     DeclareParameter(MinimizerGTol, RealType);
