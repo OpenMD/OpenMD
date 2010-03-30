@@ -118,8 +118,12 @@ namespace OpenMD {
     ephi[1] = 0.0;
     ephi[2] = 1.0;
     
-    etheta[0] = -sphi;
-    etheta[1] =  cphi;
+    //etheta[0] = -sphi;
+    //etheta[1] =  cphi;
+    //etheta[2] =  0.0;
+    
+    etheta[0] = cphi;
+    etheta[1] = sphi;
     etheta[2] =  0.0;
     
     epsi[0] = stheta * cphi;
