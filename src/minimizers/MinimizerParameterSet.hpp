@@ -109,12 +109,12 @@ namespace OpenMD {
       return lsMaxIteration;
     }
 
-    void setWriteFrq(int frq) {
-      writeFrq = frq;
+    void setWriteFreq(int freq) {
+      writeFreq = freq;
     }
 
-    int getWriteFrq() {
-      return writeFrq;
+    int getWriteFreq() {
+      return writeFreq;
     }
 
   protected:
@@ -133,7 +133,7 @@ namespace OpenMD {
 
     RealType lsTol;
 
-    int writeFrq;
+    int writeFreq;
 
     const RealType  defaultTolerance;
 

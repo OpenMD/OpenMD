@@ -60,12 +60,12 @@ namespace OpenMD {
       setMaxIteration(globals->getMinimizerMaxIter());
     }
 
-    if (globals->haveMinimizerWriteFrq()){
+    if (globals->haveMinimizerWriteFreq()){
       setMaxIteration(globals->getMinimizerMaxIter());
     }
 
-    if (globals->haveMinimizerWriteFrq()){
-      setWriteFrq(globals->getMinimizerWriteFrq());
+    if (globals->haveMinimizerWriteFreq()){
+      setWriteFreq(globals->getMinimizerWriteFreq());
     }
     
     if (globals->haveMinimizerStepSize()){
@@ -88,7 +88,7 @@ namespace OpenMD {
     stepTol = defaultTolerance;
     fTol = defaultTolerance;
     gTol = defaultTolerance;
-    writeFrq = maxIteration;
+    writeFreq = maxIteration;
     lsMaxIteration = 50;
     lsTol = defaultTolerance;
   }

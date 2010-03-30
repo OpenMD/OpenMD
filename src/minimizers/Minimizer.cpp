@@ -829,7 +829,7 @@ namespace OpenMD {
     int convgStatus;
     int stepStatus;
     int maxIter;
-    int writeFrq;
+    int writeFreq;
     int nextWriteIter;
     Snapshot* curSnapshot =info->getSnapshotManager()->getCurrentSnapshot();
     DumpWriter dumpWriter(info);     
@@ -840,9 +840,9 @@ namespace OpenMD {
 
     init();
 
-    writeFrq = paramSet->getWriteFrq();
+    writeFreq = paramSet->getWriteFreq();
 
-    nextWriteIter = writeFrq;
+    nextWriteIter = writeFreq;
 
     maxIter = paramSet->getMaxIteration();
 
@@ -870,7 +870,7 @@ namespace OpenMD {
       curSnapshot->increaseTime(1);    
         
       if (curIter == nextWriteIter) {
-	nextWriteIter += writeFrq;
+	nextWriteIter += writeFreq;
 	calcF();
 	dumpWriter.writeDumpAndEor();
 	statWriter.writeStat(curSnapshot->statData);
