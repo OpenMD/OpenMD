@@ -79,8 +79,7 @@ namespace OpenMD {
 #endif
       
       // only do the progress bar if we are actually running in a tty:
-      if (isatty(fileno(stdout))) {  
-      
+      if (isatty(fileno(stdout))  && (getenv("SGE_TASK_ID")==NULL)) {     
         // get the window width:
         struct winsize w;
         ioctl(fileno(stdout), TIOCGWINSZ, &w);
