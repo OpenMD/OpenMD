@@ -40,6 +40,7 @@
  */
 
 #include <iostream>
+#include <cstdlib>
 #include <sys/ioctl.h>
 #ifdef IS_MPI
 #include <mpi.h>
