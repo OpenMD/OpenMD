@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2005, 2010 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -76,7 +76,14 @@ namespace OpenMD {
     Snapshot* currSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
     OpenMDBitSet bsResult(nStuntDoubles_);
     assert(bsResult.size() == bs.size());
-    
+   
+    for (int j = 0; j < stuntdoubles_.size(); ++j) {
+      if (stuntdoubles_[j]->isRigidBody()) {
+        RigidBody* rb = static_cast<RigidBody*>(stuntdoubles_[j]);
+        rb->updateAtoms();
+      }
+    }
+   
     for (int i = bs.firstOnBit(); i != -1; i = bs.nextOnBit(i)) {
       center = stuntdoubles_[i];
       centerPos = center->getPos();
