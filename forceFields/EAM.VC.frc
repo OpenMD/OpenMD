@@ -6,10 +6,11 @@
 begin BaseAtomTypes
 Au	196.97
 Ag	107.87
-Cu	63.550
-Ni	58.710
+Cu	 63.55
+Ni	 58.71
 Pd	106.40
 Pt	195.09
+Al	 26.98
 end BaseAtomTypes
 
 begin EAMAtomTypes
@@ -19,4 +20,5 @@ Cu	Cu.VC.funcfl
 Ni	Ni.VC.funcfl
 Pd	Pd.VC.funcfl
 Pt	Pt.VC.funcfl
+Al	Al.VC.funcfl
 end EAMAtomTypes
