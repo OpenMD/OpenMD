@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2005, 2010 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -139,7 +139,17 @@ namespace OpenMD {
       statfile_.precision(8);
       for (int i =0; i < mask_.size(); ++i) {
 	if (mask_[i]) {
-	  statfile_ << "\t" << s[i];
+          if (! std::isinf(s[i]) && ! std::isnan(s[i])){
+              statfile_ << "\t" << s[i];
+          }
+          else{
+            sprintf( painCave.errMsg,
+                     "Statwriter detected a numerical error writing: %s ",
+                     Stats::getTitle(i).c_str());
+            painCave.isFatal = 1;
+            simError();
+          }
+          
 	}
       }
       statfile_ << std::endl;
@@ -148,6 +158,7 @@ namespace OpenMD {
 
 #ifdef IS_MPI
     }
+    errorCheckPoint();
 #endif // is_mpi
   }
 
