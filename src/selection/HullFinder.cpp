@@ -81,8 +81,18 @@ namespace OpenMD {
 	stuntdoubles_[rb->getGlobalIndex()] = rb;
       }
         
-    }    
-    surfaceMesh_ = new ConvexHull();    
+    }
+#ifdef HAVE_QHULL
+    surfaceMesh_ = new ConvexHull();
+#else
+    sprintf( painCave.errMsg,
+             "Hullfinder error: Hull calculation not possible without libqhull.\n",
+              "Please rebuild with Qhull");
+      painCave.severity = OPENMD_ERROR;
+      painCave.isFatal = 1;
+      simError();
+
+#endif
   }
 
   OpenMDBitSet HullFinder::findHull() {
