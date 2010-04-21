@@ -45,6 +45,8 @@
 #include "io/StatWriter.hpp"
 #include "utils/simError.h"
 
+using namespace std;
+
 namespace OpenMD {
   StatsBitSet parseStatFileFormat(const std::string& format) {
     StringTokenizer tokenizer(format, " ,;|\t\n\r");
@@ -139,17 +141,16 @@ namespace OpenMD {
       statfile_.precision(8);
       for (int i =0; i < mask_.size(); ++i) {
 	if (mask_[i]) {
-          if (! std::isinf(s[i]) && ! std::isnan(s[i])){
-              statfile_ << "\t" << s[i];
+          if (! isinf(s[i]) && ! isnan(s[i])){
+            statfile_ << "\t" << s[i];
           }
           else{
             sprintf( painCave.errMsg,
-                     "Statwriter detected a numerical error writing: %s ",
+                     "StatWriter detected a numerical error writing: %s ",
                      Stats::getTitle(i).c_str());
             painCave.isFatal = 1;
             simError();
-          }
-          
+          }          
 	}
       }
       statfile_ << std::endl;

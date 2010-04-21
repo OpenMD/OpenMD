@@ -46,10 +46,12 @@
 #include "io/gzstream.hpp"
 #include "io/Globals.hpp"
 
+
 #ifdef IS_MPI
 #include <mpi.h>
 #endif //is_mpi
 
+using namespace std;
 namespace OpenMD {
 
   DumpWriter::DumpWriter(SimInfo* info) 
@@ -194,11 +196,31 @@ namespace OpenMD {
     os << "    <FrameData>\n";
 
     RealType currentTime = s->getTime();
+
+    if (isinf(currentTime) || isnan(currentTime)) {      
+      sprintf( painCave.errMsg,
+               "DumpWriter detected a numerical error writing the time");      
+      painCave.isFatal = 1;
+      simError();
+    }
+    
     sprintf(buffer, "        Time: %.10g\n", currentTime);
     os << buffer;
 
     Mat3x3d hmat;
     hmat = s->getHmat();
+
+    for (unsigned int i = 0; i < 3; i++) {
+      for (unsigned int j = 0; j < 3; j++) {
+        if (isinf(hmat(i,j)) || isnan(hmat(i,j))) {      
+          sprintf( painCave.errMsg,
+                   "DumpWriter detected a numerical error writing the box");
+          painCave.isFatal = 1;
+          simError();
+        }        
+      }
+    }
+    
     sprintf(buffer, "        Hmat: {{ %.10g, %.10g, %.10g }, { %.10g, %.10g, %.10g }, { %.10g, %.10g, %.10g }}\n", 
             hmat(0, 0), hmat(1, 0), hmat(2, 0), 
             hmat(0, 1), hmat(1, 1), hmat(2, 1),
@@ -207,11 +229,30 @@ namespace OpenMD {
 
     RealType chi = s->getChi();
     RealType integralOfChiDt = s->getIntegralOfChiDt();
+    if (isinf(chi) || isnan(chi) || 
+        isinf(integralOfChiDt) || isnan(integralOfChiDt)) {      
+      sprintf( painCave.errMsg,
+               "DumpWriter detected a numerical error writing the thermostat");
+      painCave.isFatal = 1;
+      simError();
+    }
     sprintf(buffer, "  Thermostat: %.10g , %.10g\n", chi, integralOfChiDt);
     os << buffer;
 
     Mat3x3d eta;
     eta = s->getEta();
+
+    for (unsigned int i = 0; i < 3; i++) {
+      for (unsigned int j = 0; j < 3; j++) {
+        if (isinf(eta(i,j)) || isnan(eta(i,j))) {      
+          sprintf( painCave.errMsg,
+                   "DumpWriter detected a numerical error writing the barostat");
+          painCave.isFatal = 1;
+          simError();
+        }        
+      }
+    }
+
     sprintf(buffer, "    Barostat: {{ %.10g, %.10g, %.10g }, { %.10g, %.10g, %.10g }, { %.10g, %.10g, %.10g }}\n",
             eta(0, 0), eta(1, 0), eta(2, 0), 
             eta(0, 1), eta(1, 1), eta(2, 1),
@@ -314,7 +355,29 @@ namespace OpenMD {
     Vector3d pos;
     Vector3d vel;
     pos = integrableObject->getPos();
+
+    if (isinf(pos[0]) || isnan(pos[0]) || 
+        isinf(pos[1]) || isnan(pos[1]) || 
+        isinf(pos[2]) || isnan(pos[2]) ) {      
+      sprintf( painCave.errMsg,
+               "DumpWriter detected a numerical error writing the position"
+               " for object %d", index);      
+      painCave.isFatal = 1;
+      simError();
+    }
+
     vel = integrableObject->getVel();		
+
+    if (isinf(vel[0]) || isnan(vel[0]) || 
+        isinf(vel[1]) || isnan(vel[1]) || 
+        isinf(vel[2]) || isnan(vel[2]) ) {      
+      sprintf( painCave.errMsg,
+               "DumpWriter detected a numerical error writing the velocity"
+               " for object %d", index);      
+      painCave.isFatal = 1;
+      simError();
+    }
+
     sprintf(tempBuffer, "%18.10g %18.10g %18.10g %13e %13e %13e", 
             pos[0], pos[1], pos[2],
             vel[0], vel[1], vel[2]);		        
@@ -325,7 +388,30 @@ namespace OpenMD {
       Quat4d q;
       Vector3d ji;
       q = integrableObject->getQ();
+
+      if (isinf(q[0]) || isnan(q[0]) || 
+          isinf(q[1]) || isnan(q[1]) || 
+          isinf(q[2]) || isnan(q[2]) || 
+          isinf(q[3]) || isnan(q[3]) ) {      
+        sprintf( painCave.errMsg,
+                 "DumpWriter detected a numerical error writing the quaternion"
+                 " for object %d", index);      
+        painCave.isFatal = 1;
+        simError();
+      }
+
       ji = integrableObject->getJ();
+
+      if (isinf(ji[0]) || isnan(ji[0]) || 
+          isinf(ji[1]) || isnan(ji[1]) || 
+          isinf(ji[2]) || isnan(ji[2]) ) {      
+        sprintf( painCave.errMsg,
+                 "DumpWriter detected a numerical error writing the angular"
+                 " momentum for object %d", index);      
+        painCave.isFatal = 1;
+        simError();
+      }
+
       sprintf(tempBuffer, " %13e %13e %13e %13e %13e %13e %13e",
               q[0], q[1], q[2], q[3],
               ji[0], ji[1], ji[2]);
@@ -333,18 +419,46 @@ namespace OpenMD {
     }
 
     if (needForceVector_) {
-      type += "ft";
+      type += "f";
       Vector3d frc;
-      Vector3d trq;
+
       frc = integrableObject->getFrc();
-      trq = integrableObject->getTrq();
-              
-      sprintf(tempBuffer, " %13e %13e %13e %13e %13e %13e",
-              frc[0], frc[1], frc[2],
-              trq[0], trq[1], trq[2]);
+
+      if (isinf(frc[0]) || isnan(frc[0]) || 
+          isinf(frc[1]) || isnan(frc[1]) || 
+          isinf(frc[2]) || isnan(frc[2]) ) {      
+        sprintf( painCave.errMsg,
+                 "DumpWriter detected a numerical error writing the force"
+                 " for object %d", index);      
+        painCave.isFatal = 1;
+        simError();
+      }
+      sprintf(tempBuffer, " %13e %13e %13e",
+              frc[0], frc[1], frc[2]);
       line += tempBuffer;
+      
+      if (integrableObject->isDirectional()) {
+        type += "t";
+        Vector3d trq;
+        
+        trq = integrableObject->getTrq();
+        
+        if (isinf(trq[0]) || isnan(trq[0]) || 
+            isinf(trq[1]) || isnan(trq[1]) || 
+            isinf(trq[2]) || isnan(trq[2]) ) {      
+          sprintf( painCave.errMsg,
+                   "DumpWriter detected a numerical error writing the torque"
+                   " for object %d", index);      
+          painCave.isFatal = 1;
+          simError();
+        }
+        
+        sprintf(tempBuffer, " %13e %13e %13e",
+                trq[0], trq[1], trq[2]);
+        line += tempBuffer;
+      }      
     }
-	
+    
     sprintf(tempBuffer, "%10d %7s %s\n", index, type.c_str(), line.c_str());
     return std::string(tempBuffer);
   }
