@@ -84,14 +84,6 @@ namespace OpenMD {
     }
 #ifdef HAVE_QHULL
     surfaceMesh_ = new ConvexHull();
-#else
-    sprintf( painCave.errMsg,
-             "Hullfinder error: Hull calculation not possible without libqhull.\n",
-              "Please rebuild with Qhull");
-      painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
-      simError();
-
 #endif
   }
 
@@ -99,8 +91,17 @@ namespace OpenMD {
     StuntDouble* sd;
     Snapshot* currSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
     OpenMDBitSet bsResult(nStuntDoubles_);
-
+#ifdef HAVE_QHULL
     surfaceMesh_->computeHull(localSites_);
+#else
+    sprintf( painCave.errMsg,
+             "Hullfinder error: Hull calculation not possible without libqhull.\n",
+              "Please rebuild with Qhull");
+      painCave.severity = OPENMD_ERROR;
+      painCave.isFatal = 1;
+      simError();
+#endif
+    
     std::vector<Triangle> sMesh = surfaceMesh_->getMesh();
     int nTriangles = sMesh.size();
     // Loop over the mesh faces
