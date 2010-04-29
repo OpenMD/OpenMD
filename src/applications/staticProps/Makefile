@@ -3,6 +3,7 @@ Package = applications/staticProps
 Source    = \
         GofAngle2.cpp \
         GofRAngle.cpp \
+        GofRZ.cpp \
         GofR.cpp  \
         GofZ.cpp  \
         GofXyz.cpp \

@@ -12,6 +12,7 @@ option	"step"		n	"process every n frame"					int	default="1"		no
 option	"nbins"    	b       "number of bins (general purpose)"				int	default="100"		no
 option	"nbins_x"    	x       "number of bins in x axis"				int	default="100"		no
 option	"nbins_y"    	y       "number of bins in y axis"				int	default="100"		no
+option	"nbins_z"    	-       "number of bins in z axis"				int	default="100"		no
 option	"nanglebins"	a	"number of bins for cos(angle)"				int	default="50"		no 
 option	"length"	-	"maximum length (Defaults to 1/2 smallest length of first frame)"	double	no  
 option  "rcut"          c       "cutoff radius (rcut)"                                  double                          no
@@ -33,6 +34,7 @@ groupoption "gofr"      g       "g(r)" group="staticProps"
 groupoption "gofz"      -       "g(z)" group="staticProps"
 groupoption "r_theta" 	-       "g(r, cos(theta))" group="staticProps"
 groupoption "r_omega" 	-       "g(r, cos(omega))" group="staticProps"
+groupoption "r_z"       -       "g(r, z)" group="staticProps"
 groupoption "theta_omega" -     "g(cos(theta), cos(omega))" group="staticProps"
 groupoption "gxyz"	-       "g(x, y, z)" group="staticProps"
 groupoption "p2"        p       "p2 order parameter (--sele1 and --sele2 must be specified)" group="staticProps"

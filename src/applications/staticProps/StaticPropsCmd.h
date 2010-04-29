@@ -52,6 +52,9 @@ struct gengetopt_args_info
   int nbins_y_arg;	/**< @brief number of bins in y axis (default='100').  */
   char * nbins_y_orig;	/**< @brief number of bins in y axis original value given at command line.  */
   const char *nbins_y_help; /**< @brief number of bins in y axis help description.  */
+  int nbins_z_arg;	/**< @brief number of bins in z axis (default='100').  */
+  char * nbins_z_orig;	/**< @brief number of bins in z axis original value given at command line.  */
+  const char *nbins_z_help; /**< @brief number of bins in z axis help description.  */
   int nanglebins_arg;	/**< @brief number of bins for cos(angle) (default='50').  */
   char * nanglebins_orig;	/**< @brief number of bins for cos(angle) original value given at command line.  */
   const char *nanglebins_help; /**< @brief number of bins for cos(angle) help description.  */
@@ -98,6 +101,7 @@ struct gengetopt_args_info
   const char *gofz_help; /**< @brief g(z) help description.  */
   const char *r_theta_help; /**< @brief g(r, cos(theta)) help description.  */
   const char *r_omega_help; /**< @brief g(r, cos(omega)) help description.  */
+  const char *r_z_help; /**< @brief g(r, z) help description.  */
   const char *theta_omega_help; /**< @brief g(cos(theta), cos(omega)) help description.  */
   const char *gxyz_help; /**< @brief g(x, y, z) help description.  */
   const char *p2_help; /**< @brief p2 order parameter (--sele1 and --sele2 must be specified) help description.  */
@@ -118,6 +122,7 @@ struct gengetopt_args_info
   unsigned int nbins_given ;	/**< @brief Whether nbins was given.  */
   unsigned int nbins_x_given ;	/**< @brief Whether nbins_x was given.  */
   unsigned int nbins_y_given ;	/**< @brief Whether nbins_y was given.  */
+  unsigned int nbins_z_given ;	/**< @brief Whether nbins_z was given.  */
   unsigned int nanglebins_given ;	/**< @brief Whether nanglebins was given.  */
   unsigned int length_given ;	/**< @brief Whether length was given.  */
   unsigned int rcut_given ;	/**< @brief Whether rcut was given.  */
@@ -138,6 +143,7 @@ struct gengetopt_args_info
   unsigned int gofz_given ;	/**< @brief Whether gofz was given.  */
   unsigned int r_theta_given ;	/**< @brief Whether r_theta was given.  */
   unsigned int r_omega_given ;	/**< @brief Whether r_omega was given.  */
+  unsigned int r_z_given ;	/**< @brief Whether r_z was given.  */
   unsigned int theta_omega_given ;	/**< @brief Whether theta_omega was given.  */
   unsigned int gxyz_given ;	/**< @brief Whether gxyz was given.  */
   unsigned int p2_given ;	/**< @brief Whether p2 was given.  */
