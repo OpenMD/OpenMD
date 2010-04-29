@@ -50,6 +50,8 @@ namespace OpenMD {
 		       const std::string& sele2, RealType len, int nrbins, int nZBins)
     : RadialDistrFunc(info, filename, sele1, sele2), len_(len), nRBins_(nrbins), nZBins_(nZBins){
 
+      setOutputName(getPrefix(filename) + ".gofrz");
+
       deltaR_ = len_ / (double) nRBins_;
       deltaZ_ = len_ / (double)nZBins_;    
       histogram_.resize(nRBins_);
