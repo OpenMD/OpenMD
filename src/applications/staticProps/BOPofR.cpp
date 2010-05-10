@@ -40,7 +40,7 @@
  *
  *  Created by J. Daniel Gezelter on 09/26/06.
  *  @author  J. Daniel Gezelter
- *  @version $Id: BOPofR.cpp,v 1.4 2009-11-25 20:01:58 gezelter Exp $
+ *  @version $Id$
  *
  */
  

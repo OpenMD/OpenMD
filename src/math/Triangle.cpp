@@ -44,7 +44,7 @@
  *
  *  Created by Charles F. Vardeman II on 29 July 2008.
  *  @author  Charles F. Vardeman II
- *  @version $Id: Triangle.cpp,v 1.4 2009-11-25 20:02:01 gezelter Exp $
+ *  @version $Id$
  *
  */
 

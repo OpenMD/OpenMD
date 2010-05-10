@@ -40,7 +40,7 @@
  *
  *  Created by Charles F. Vardeman II on 11/9/05.
  *  @author  Charles F. Vardeman II 
- *  @version $Id: SC_FF.hpp,v 1.4 2009-11-25 20:01:57 gezelter Exp $
+ *  @version $Id$
  *
  */
 #ifndef USETHEFORCE_SC_FF_HPP

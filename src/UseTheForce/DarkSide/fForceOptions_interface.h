@@ -40,7 +40,7 @@
 *
  *  Created by Charles F. Vardeman II on 12/7/05.
  *  @author  Charles F. Vardeman II 
- *  @version $Id: fForceOptions_interface.h,v 1.5 2009-11-25 20:01:57 gezelter Exp $
+ *  @version $Id$
  *
  */
 

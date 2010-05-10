@@ -3,8 +3,8 @@
 # program that builds water boxes
 
 # author    = "Chris Fennell
-# version   = "$Revision: 1.7 $"
-# date      = "$Date: 2009-11-25 20:01:59 $"
+# version   = "$Revision$"
+# date      = "$Date$"
 # copyright = "Copyright (c) 2006 by the University of Notre Dame"
 # license   = "OpenMD"
 

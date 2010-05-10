@@ -46,7 +46,7 @@
 !!  PURPOSE: Generic Spline interpolation routines. 
 !!
 !! @author Charles F. Vardeman II 
-!! @version $Id: interpolation.F90,v 1.10 2009-11-25 20:02:05 gezelter Exp $
+!! @version $Id$
 
 
 module interpolation

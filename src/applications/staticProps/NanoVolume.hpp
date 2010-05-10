@@ -42,7 +42,7 @@
  *
  *  Created by Charles F. Vardeman II on 14 Dec 2006.
  *  @author  Charles F. Vardeman II
- *  @version $Id: NanoVolume.hpp,v 1.8 2009-11-25 20:01:59 gezelter Exp $
+ *  @version $Id$
  *
  */
 #ifndef APPLICATIONS_STATICPROPS_NANOVOLUME_HPP_

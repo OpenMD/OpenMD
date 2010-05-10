@@ -40,7 +40,7 @@
  *
  *  Created by Charles F. Vardeman II on 11/26/05.
  *  @author  Charles F. Vardeman II 
- *  @version $Id: RhoZ.cpp,v 1.8 2009-11-25 20:01:59 gezelter Exp $
+ *  @version $Id$
  *
  */
 

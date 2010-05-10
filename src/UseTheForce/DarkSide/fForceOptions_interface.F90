@@ -43,7 +43,7 @@
 !!  PURPOSE:
 !!
 !! @author Charles F. Vardeman II 
-!! @version $Id: fForceOptions_interface.F90,v 1.3 2009-11-25 20:01:57 gezelter Exp $
+!! @version $Id$
 
 
 

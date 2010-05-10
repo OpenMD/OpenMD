@@ -2,7 +2,7 @@
  * Project led by Terence Parr at http://www.jGuru.com
  * Software rights: http://www.antlr.org/license.html
  *
- * $Id: CharBuffer.cpp,v 1.1 2005-12-02 15:38:02 tim Exp $
+ * $Id$
  */
 
 #include "antlr/CharBuffer.hpp"

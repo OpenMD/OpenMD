@@ -42,7 +42,7 @@
  *
  *  Created by Charles F. Vardeman II on 17 Feb 2006.
  *  @author  Charles F. Vardeman II
- *  @version $Id: shapedLattice.cpp,v 1.8 2009-11-25 20:02:01 gezelter Exp $
+ *  @version $Id$
  *
  */
 

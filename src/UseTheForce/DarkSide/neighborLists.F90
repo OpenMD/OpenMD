@@ -48,7 +48,7 @@
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
 !! @author J. Daniel Gezelter
-!! @version $Id: neighborLists.F90,v 1.8 2009-11-25 20:01:57 gezelter Exp $, 
+!! @version $Id$, 
 
 module neighborLists
 

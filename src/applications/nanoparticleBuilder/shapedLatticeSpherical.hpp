@@ -40,7 +40,7 @@
  *
  *  Created by Charles F. Vardeman II on 3/15/06.
  *  @author  Charles F. Vardeman II 
- *  @version $Id: shapedLatticeSpherical.hpp,v 1.3 2009-11-25 20:01:58 gezelter Exp $
+ *  @version $Id$
  *
  */
 #ifndef NANOPARTICLEBUILDER_SHAPEDLATTICESPHERICAL_HPP

@@ -61,8 +61,7 @@ namespace OpenMD {
     tempPath = getenv("FORCE_PARAM_PATH");
 
     if (tempPath == NULL) {
-      //convert a macro from compiler to a string in c++
-      STR_DEFINE(ffPath_, FRC_PATH );
+      ffPath_ = "ORNULL(FRC_PATH)";
     } else {
       ffPath_ = tempPath;
     }

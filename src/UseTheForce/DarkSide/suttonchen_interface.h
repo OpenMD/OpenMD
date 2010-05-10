@@ -40,7 +40,7 @@
  *
  *  Created by Charles F. Vardeman II on 11/10/05.
  *  @author  Charles F. Vardeman II 
- *  @version $Id: suttonchen_interface.h,v 1.7 2009-11-25 20:01:57 gezelter Exp $
+ *  @version $Id$
  *
  */
 #ifndef USETHEFORCE_DARKSIDE_SUTTONCHEN_INTERFACE_H

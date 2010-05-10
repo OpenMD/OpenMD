@@ -42,7 +42,7 @@
 
 !! Calculates Metal-Non Metal interactions.
 !! @author Charles F. Vardeman II 
-!! @version $Id: MetalNonMetal.F90,v 1.20 2009-11-25 20:01:57 gezelter Exp $, $Date: 2009-11-25 20:01:57 $, $Name: not supported by cvs2svn $, $Revision: 1.20 $
+!! @version $Id$, $Date$, $Name: not supported by cvs2svn $, $Revision$
 
 
 module MetalNonMetal

@@ -59,7 +59,7 @@ namespace OpenMD {
 
   ElementsTable::ElementsTable() {
     init_ = false;
-    STR_DEFINE(dir_, FRC_PATH );
+    dir_ = std::string("TO_STRING(FRC_PATH)");
     envvar_ = "FORCE_PARAM_PATH";
     filename_ = "element.txt";
   }

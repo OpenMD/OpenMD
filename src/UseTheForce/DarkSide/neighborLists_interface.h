@@ -42,7 +42,7 @@
  *
  *  Created by Charles F. Vardeman II on 04 Dec 2006.
  *  @author  Charles F. Vardeman II
- *  @version $Id: neighborLists_interface.h,v 1.4 2009-11-25 20:01:57 gezelter Exp $
+ *  @version $Id$
  *
  */
 

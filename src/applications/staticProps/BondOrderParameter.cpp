@@ -40,7 +40,7 @@
  *
  *  Created by J. Daniel Gezelter on 09/26/06.
  *  @author  J. Daniel Gezelter
- *  @version $Id: BondOrderParameter.cpp,v 1.23 2009-11-25 20:01:59 gezelter Exp $
+ *  @version $Id$
  *
  */
  

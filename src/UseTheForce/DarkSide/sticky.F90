@@ -50,7 +50,7 @@
 !! @author Matthew Meineke
 !! @author Christopher Fennell
 !! @author J. Daniel Gezelter
-!! @version $Id: sticky.F90,v 1.22 2009-11-25 20:01:57 gezelter Exp $, $Date: 2009-11-25 20:01:57 $, $Name: not supported by cvs2svn $, $Revision: 1.22 $
+!! @version $Id$, $Date$, $Name: not supported by cvs2svn $, $Revision$
 
 module sticky
 

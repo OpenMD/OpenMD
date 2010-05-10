@@ -46,7 +46,7 @@
 !!  PURPOSE: Provides C++ interface for neighborLists.F90
 !!
 !! @author Charles F. Vardeman II 
-!! @version $Id: neighborLists_interface.F90,v 1.2 2009-11-25 20:01:57 gezelter Exp $
+!! @version $Id$
 
 subroutine setNeighbors(nNeighbors)
   use neighborlists, ONLY : module_setNeighbors => setNeighbors

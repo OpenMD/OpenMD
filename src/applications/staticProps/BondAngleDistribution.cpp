@@ -40,7 +40,7 @@
  *
  *  Created by J. Daniel Gezelter on 07/27/07.
  *  @author  J. Daniel Gezelter
- *  @version $Id: BondAngleDistribution.cpp,v 1.2 2009-11-25 20:01:59 gezelter Exp $
+ *  @version $Id$
  *
  */
  

@@ -42,7 +42,7 @@
  *
  *  Created by Charles F. Vardeman II on 11/16/05.
  *  @author  Charles F. Vardeman II 
- *  @version $Id: ParameterManager.hpp,v 1.6 2009-11-25 20:02:04 gezelter Exp $
+ *  @version $Id$
  *
  */
 

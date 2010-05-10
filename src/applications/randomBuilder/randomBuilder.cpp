@@ -42,7 +42,7 @@
  *
  *  Created by Charles F. Vardeman II on 10 Apr 2006.
  *  @author  Charles F. Vardeman II
- *  @version $Id: randomBuilder.cpp,v 1.8 2009-11-25 20:01:58 gezelter Exp $
+ *  @version $Id$
  *
  */
 

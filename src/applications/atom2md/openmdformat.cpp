@@ -129,6 +129,8 @@ namespace OpenBabel
         return false;
     }
     
+
+
     WriteMDFile(mdMols, numMols, ofs, *pmol, indices);
     
     for(vector<OBMol*>::iterator  i = mdMols.begin(); i != mdMols.end(); ++i) {
@@ -171,6 +173,9 @@ namespace OpenBabel
                                             vector<int>& fragment) {
     
     OBMol* newMol = new OBMol();
+    OBChainsParser* chainParser = new OBChainsParser();   
+    bool molIsWater = false;
+
     newMol->ReserveAtoms(fragment.size());
     newMol->BeginModify();
     for(vector<int>::iterator i = fragment.begin(); i != fragment.end(); ++i) {
@@ -212,10 +217,10 @@ namespace OpenBabel
       OBMol* pmol = mols[i];
       map<OBAtom*, int> atomMap;
 
+
       //chainParser->PerceiveChains(*pmol, false);
       molIsWater = false;
       FOR_RESIDUES_OF_MOL(residue, *pmol) {
-        std::cerr << "residue = " << residue->GetName() << "\n";
         if (residue->GetName().compare("HOH") == 0) {
           molIsWater = true;
         }
@@ -351,7 +356,7 @@ namespace OpenBabel
             size_t endpos = str.find_last_not_of(" ");
             str = str.substr( startpos, endpos-startpos+1 );
             str1 = resName + "-" + str;
-          }       
+          }      
           os << "  atom[" << ai << "] { ";
           os << "type = " << "\"" << str1 << "\"" << "; ";
           os << "position( " << (&*atom)->GetX() << ", " << (&*atom)->GetY() << ", " << (&*atom)->GetZ() << ");";
@@ -390,7 +395,7 @@ namespace OpenBabel
       OBMol* pmol = mols[i];      
       os << "component{" << endl;
       if (std::string(pmol->GetTitle()).compare("HOH") == 0) {
-        os << "  type = " << "HOH" << ";" << endl;
+        os << "  type = " << "\"HOH\"" << "; // change to appropriate water model" << endl;
       } else {
         sprintf(buffer, "%d", i);
         os << "  type = " << molPrefix << buffer << ";" << endl;
@@ -416,12 +421,11 @@ namespace OpenBabel
     os << buffer << endl;
     os << "    </FrameData>" << endl;
     os << "    <StuntDoubles>" << endl;
-    
+        
     OBAtom *atom;
-    
-    // still to do: intercept waters and recompute pvqj lines
-
+         
     for(vector<int>::iterator i = indices.begin();i != indices.end(); ++i) {     
+      
       atom = mol.GetAtom(*i);
       sprintf(buffer, "%10d %7s %18.10g %18.10g %18.10g %13e %13e %13e", *i - 1, 
               "pv", atom->GetX(), atom->GetY(), atom->GetZ(), 0.0, 0.0, 0.0);

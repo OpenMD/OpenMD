@@ -95,8 +95,8 @@ namespace OpenMD {
     surfaceMesh_->computeHull(localSites_);
 #else
     sprintf( painCave.errMsg,
-             "Hullfinder error: Hull calculation not possible without libqhull.\n",
-              "Please rebuild with Qhull");
+             "HullFinder error: Hull calculation is not possible without libqhull.\n",
+             "Please rebuild OpenMD with qhull enabled.");
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal = 1;
       simError();

@@ -5,7 +5,7 @@
  * Project led by Terence Parr at http://www.jGuru.com
  * Software rights: http://www.antlr.org/license.html
  *
- * $Id: config.hpp,v 1.2 2005-12-15 14:48:26 gezelter Exp $
+ * $Id$
  */
 
 /*

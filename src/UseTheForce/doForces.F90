@@ -45,7 +45,7 @@
 
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: doForces.F90,v 1.106 2009-11-25 20:01:57 gezelter Exp $, $Date: 2009-11-25 20:01:57 $, $Name: not supported by cvs2svn $, $Revision: 1.106 $
+!! @version $Id$, $Date$, $Name: not supported by cvs2svn $, $Revision$
 
 
 module doForces

@@ -43,7 +43,7 @@
 !!  PURPOSE:
 !!
 !! @author Charles F. Vardeman II 
-!! @version $Id: fForceOptions.F90,v 1.5 2009-11-25 20:01:57 gezelter Exp $
+!! @version $Id$
 
 !! Handles Mixing options for Fortran.
 

@@ -60,7 +60,7 @@
 !! @author J. Daniel Gezelter
 !! @author Charles F. Vardeman II
 !! @author Matthew Meineke
-!! @version $Id: vector_class.F90,v 1.8 2009-11-25 20:02:05 gezelter Exp $, $Date: 2009-11-25 20:02:05 $, $Name: not supported by cvs2svn $, $Revision: 1.8 $
+!! @version $Id$, $Date$, $Name: not supported by cvs2svn $, $Revision$
 
 module Vector_class
 

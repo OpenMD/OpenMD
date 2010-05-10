@@ -44,7 +44,7 @@
  *
  *  Created by Charles F. Vardeman II on 11 Dec 2006.
  *  @author  Charles F. Vardeman II
- *  @version $Id: ConvexHull.hpp,v 1.19 2009-11-25 20:02:01 gezelter Exp $
+ *  @version $Id$
  *
  */
 

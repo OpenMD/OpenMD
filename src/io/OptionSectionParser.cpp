@@ -40,7 +40,7 @@
  *
  *  Created by Charles F. Vardeman II on 11/15/05.
  *  @author  Charles F. Vardeman II 
- *  @version $Id: OptionSectionParser.cpp,v 1.4 2009-11-25 20:02:00 gezelter Exp $
+ *  @version $Id$
  *
  */
 

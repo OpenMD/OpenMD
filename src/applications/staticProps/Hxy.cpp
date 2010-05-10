@@ -41,7 +41,7 @@
  *
  *  Created by Xiuquan Sun on 05/09/06.
  *  @author  Xiuquan Sun 
- *  @version $Id: Hxy.cpp,v 1.8 2009-11-25 20:01:59 gezelter Exp $
+ *  @version $Id$
  *
  */
 
