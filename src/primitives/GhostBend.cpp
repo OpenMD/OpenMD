@@ -54,8 +54,8 @@ namespace OpenMD {
     RealType d12 = r12.length();
     
     RealType d12inv = 1.0 / d12;
-    
-    Vector3d r32 = ghostAtom->getElectroFrame().getColumn(2);
+   
+    Vector3d r32 = ghostAtom->getA().getColumn(2);
     RealType d32 = r32.length();
     
     RealType d32inv = 1.0 / d32;

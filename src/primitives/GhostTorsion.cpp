@@ -56,7 +56,7 @@ namespace OpenMD {
     
     Vector3d r21 = pos1 - pos2;
     Vector3d r32 = pos2 - pos3;
-    Vector3d r43 = ghostAtom->getElectroFrame().getColumn(2);
+    Vector3d r43 = ghostAtom->getA().getColumn(2);
     
     //  Calculate the cross products and distances
     Vector3d A = cross(r21, r32);
