@@ -53,42 +53,52 @@ namespace OpenMD {
       setOutputName(getPrefix(filename) + ".gofrz");
 
       deltaR_ = len_ / (double) nRBins_;
-      deltaZ_ = len_ / (double)nZBins_;    
+      deltaZ_ = 86.52361692 / (double)nZBins_;    // for solvated_NVT.md4
+
       histogram_.resize(nRBins_);
       avgGofr_.resize(nRBins_);
       for (int i = 0 ; i < nRBins_; ++i) {
-        histogram_[i].resize(nZBins_);
-        avgGofr_[i].resize(nZBins_);
+        histogram_[i].resize(nRBins_);
+        avgGofr_[i].resize(nRBins_);
+        for (int j = 0 ; j < nZBins_; ++j) {
+        histogram_[i][j].resize(nZBins_);
+        avgGofr_[i][j].resize(nZBins_);
       }
     }
-
-
+ 
+  }
   void GofRZ::preProcess() {
-    for (int i = 0; i < avgGofr_.size(); ++i) {
-      std::fill(avgGofr_[i].begin(), avgGofr_[i].end(), 0);
+    for (int i = 0; i < avgGofr_[i].size(); ++i) {
+      avgGofr_[i].resize(nRBins_);
+      for (int j = 0; j < avgGofr_[i][j].size(); ++j) {
+      std::fill(avgGofr_[i][j].begin(), avgGofr_[i][j].end(), 0);
+      }
     }
   }
 
   void GofRZ::initalizeHistogram() {
     npairs_ = 0;
-    for (int i = 0; i < histogram_.size(); ++i){
-      std::fill(histogram_[i].begin(), histogram_[i].end(), 0);
+    for (int i = 0; i < histogram_[i].size(); ++i){
+      histogram_[i].resize(nRBins_);
+      for (int j = 0; j < histogram_[i][j].size(); ++j){
+      std::fill(histogram_[i][j].begin(), histogram_[i][j].end(), 0);
+      }
     }
   }
   
   void GofRZ::processHistogram() {
     int nPairs = getNPairs();
     RealType volume = info_->getSnapshotManager()->getCurrentSnapshot()->getVolume();
-    RealType pairDensity = nPairs / volume;
+    RealType pairDensity = nPairs / volume * 2.0;
 
-    for(int i = 0 ; i < histogram_.size(); ++i){
+    for(int i = 0 ; i < histogram_[i].size(); ++i){
 
       RealType rLower = i * deltaR_;
       RealType rUpper = rLower + deltaR_;
       RealType volSlice = NumericConstant::PI * deltaZ_ * (( rUpper * rUpper ) - ( rLower * rLower ));
       RealType nIdeal = volSlice * pairDensity;
 
-      for (int j = 0; j < histogram_[i].size(); ++j){
+      for (int j = 0; j < histogram_[i][j].size(); ++j){
 	avgGofr_[i][j] += histogram_[i][j] / nIdeal;    
       }
     }
@@ -112,10 +122,11 @@ namespace OpenMD {
 
     if (distance <= len_) {
      
-      RealType Z = abs(r12.z());
+      RealType Z = fabs(r12.z());
 
-      if (Z <= len_) {
+      if (Z <= 86.52361692) {
         int whichZBin = Z / deltaZ_;
+
         ++histogram_[whichRBin][whichZBin];        
         ++npairs_;
       }
@@ -129,11 +140,11 @@ namespace OpenMD {
       rdfStream << "#selection1: (" << selectionScript1_ << ")\t";
       rdfStream << "selection2: (" << selectionScript2_ << ")\n";
       rdfStream << "#nRBins = " << nRBins_ << "\t maxLen = " << len_ << "deltaR = " << deltaR_ <<"\n";
-      rdfStream << "#nZBins =" << nZBins_ << "deltaZ = " << deltaZ_ << "\n";
-      for (int i = 0; i < avgGofr_.size(); ++i) {
+      rdfStream << "#nZBins =" << nZBins_ << "\t deltaZ = " << deltaZ_ << "\n";
+      for (int i = 0; i < avgGofr_[i].size(); ++i) {
 	RealType r = deltaR_ * (i + 0.5);
 
-	for(int j = 0; j < avgGofr_[i].size(); ++j) {
+	for(int j = 0; j < avgGofr_[i][j].size(); ++j) {
           RealType z = deltaZ_ * (j + 0.5);
 	  rdfStream << avgGofr_[i][j]/nProcessed_ << "\t";
 	}

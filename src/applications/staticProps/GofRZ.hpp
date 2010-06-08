@@ -69,6 +69,7 @@ namespace OpenMD {
     virtual void writeRdf();
 
     RealType len_;
+    RealType zLen_;
     int nRBins_;
     RealType deltaR_;
     int nZBins_;
