@@ -58,12 +58,15 @@ struct gengetopt_args_info
   int nanglebins_arg;	/**< @brief number of bins for cos(angle) (default='50').  */
   char * nanglebins_orig;	/**< @brief number of bins for cos(angle) original value given at command line.  */
   const char *nanglebins_help; /**< @brief number of bins for cos(angle) help description.  */
-  double length_arg;	/**< @brief maximum length (Defaults to 1/2 smallest length of first frame).  */
-  char * length_orig;	/**< @brief maximum length (Defaults to 1/2 smallest length of first frame) original value given at command line.  */
-  const char *length_help; /**< @brief maximum length (Defaults to 1/2 smallest length of first frame) help description.  */
   double rcut_arg;	/**< @brief cutoff radius (rcut).  */
   char * rcut_orig;	/**< @brief cutoff radius (rcut) original value given at command line.  */
   const char *rcut_help; /**< @brief cutoff radius (rcut) help description.  */
+  double length_arg;	/**< @brief maximum length (Defaults to 1/2 smallest length of first frame).  */
+  char * length_orig;	/**< @brief maximum length (Defaults to 1/2 smallest length of first frame) original value given at command line.  */
+  const char *length_help; /**< @brief maximum length (Defaults to 1/2 smallest length of first frame) help description.  */
+  double zlength_arg;	/**< @brief maximum length (Defaults to 1/2 smallest length of first frame).  */
+  char * zlength_orig;	/**< @brief maximum length (Defaults to 1/2 smallest length of first frame) original value given at command line.  */
+  const char *zlength_help; /**< @brief maximum length (Defaults to 1/2 smallest length of first frame) help description.  */
   double zoffset_arg;	/**< @brief Where to set the zero for the slab_density calculation (default='0').  */
   char * zoffset_orig;	/**< @brief Where to set the zero for the slab_density calculation original value given at command line.  */
   const char *zoffset_help; /**< @brief Where to set the zero for the slab_density calculation help description.  */
@@ -124,8 +127,9 @@ struct gengetopt_args_info
   unsigned int nbins_y_given ;	/**< @brief Whether nbins_y was given.  */
   unsigned int nbins_z_given ;	/**< @brief Whether nbins_z was given.  */
   unsigned int nanglebins_given ;	/**< @brief Whether nanglebins was given.  */
-  unsigned int length_given ;	/**< @brief Whether length was given.  */
   unsigned int rcut_given ;	/**< @brief Whether rcut was given.  */
+  unsigned int length_given ;	/**< @brief Whether length was given.  */
+  unsigned int zlength_given ;	/**< @brief Whether zlength was given.  */
   unsigned int zoffset_given ;	/**< @brief Whether zoffset was given.  */
   unsigned int sele1_given ;	/**< @brief Whether sele1 was given.  */
   unsigned int sele2_given ;	/**< @brief Whether sele2 was given.  */
@@ -156,8 +160,6 @@ struct gengetopt_args_info
   unsigned int rho_r_given ;	/**< @brief Whether rho_r was given.  */
   unsigned int hullvol_given ;	/**< @brief Whether hullvol was given.  */
 
-  char **inputs ; /**< @brief unamed options (options without names) */
-  unsigned inputs_num ; /**< @brief unamed options number */
   int staticProps_group_counter; /**< @brief Counter for group staticProps */
 } ;
 

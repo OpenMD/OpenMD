@@ -44,41 +44,41 @@
 #include "applications/staticProps/RadialDistrFunc.hpp"
 namespace OpenMD {
 
-  class GofRZ : public RadialDistrFunc {
+    class GofRZ : public RadialDistrFunc {
     
-  public:
-    GofRZ(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2, RealType len, int nrbins, int nZBins);
+    public:
+	GofRZ(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2, RealType len, RealType zlen, int nrbins, int nZBins);
 
-    int getNRBins() {
-      return nRBins_; 
-    }
+	int getNRBins() {
+	    return nRBins_; 
+	}
     
-    RealType getLength() {
-      return len_;
-    }
+	RealType getLength() {
+	    return len_;
+	}
 
-    int getNZBins() {return nZBins_;}
+	int getNZBins() {return nZBins_;}
         
-  private:
+    private:
 
-    virtual void preProcess();
-    virtual void initalizeHistogram();
-    virtual void processHistogram();
-    virtual void collectHistogram(StuntDouble* sd1, StuntDouble* sd2);
+	virtual void preProcess();
+	virtual void initalizeHistogram();
+	virtual void processHistogram();
+	virtual void collectHistogram(StuntDouble* sd1, StuntDouble* sd2);
 
-    virtual void writeRdf();
+	virtual void writeRdf();
 
-    RealType len_;
-    RealType zLen_;
-    int nRBins_;
-    RealType deltaR_;
-    int nZBins_;
-    RealType deltaZ_;
+	RealType len_;
+	RealType zLen_;
+	int nRBins_;
+	RealType deltaR_;
+	int nZBins_;
+	RealType deltaZ_;
         
-    std::vector<std::vector<int> > histogram_;
-    std::vector<std::vector<RealType> > avgGofr_;
-    int npairs_;
-  };
+	std::vector<std::vector<int> > histogram_;
+	std::vector<std::vector<RealType> > avgGofr_;
+	int npairs_;
+    };
 }
 #endif
 

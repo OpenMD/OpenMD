@@ -14,8 +14,9 @@ option	"nbins_x"    	x       "number of bins in x axis"				int	default="100"		no
 option	"nbins_y"    	y       "number of bins in y axis"				int	default="100"		no
 option	"nbins_z"    	-       "number of bins in z axis"				int	default="100"		no
 option	"nanglebins"	a	"number of bins for cos(angle)"				int	default="50"		no 
-option	"length"	-	"maximum length (Defaults to 1/2 smallest length of first frame)"	double	no  
 option  "rcut"          c       "cutoff radius (rcut)"                                  double                          no
+option	"length"	-	"maximum length (Defaults to 1/2 smallest length of first frame)"	double	no  
+option	"zlength"	-	"maximum length (Defaults to 1/2 smallest length of first frame)"	double	no  
 option  "zoffset"       z       "Where to set the zero for the slab_density calculation"        double  default="0"     no
 option	"sele1"		-	"select the first stuntdouble set"	string	typestr="selection script"	no
 option  "sele2"         -       "select the second stuntdouble set" string  typestr="selection script"      no
