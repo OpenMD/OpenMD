@@ -10,6 +10,7 @@ Cu	63.550
 Ni	58.710
 Pd	106.40
 Pt	195.09
+Al      26.98
 end BaseAtomTypes
 
 begin EAMAtomTypes
