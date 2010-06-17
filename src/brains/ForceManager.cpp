@@ -145,6 +145,7 @@ namespace OpenMD {
         RealType angle;
         bend->calcForce(angle);
         RealType currBendPot = bend->getPotential();          
+         
         bendPotential += bend->getPotential();
         std::map<Bend*, BendDataSet>::iterator i = bendDataSets.find(bend);
         if (i == bendDataSets.end()) {

@@ -39,7 +39,7 @@
 !! [4]  Vardeman & Gezelter, in progress (2009).
 !!
 
-!! Impliments Sutton-Chen Metallic Potential
+!! Implements Sutton-Chen Metallic Potential
 !! See A.P.SUTTON and J.CHEN,PHIL MAG LETT 61,139-146,1990
 
 
@@ -56,10 +56,10 @@ module suttonchen
   PRIVATE
 #define __FORTRAN90
 #include "UseTheForce/DarkSide/fInteractionMap.h"
-
+  
   !! number of points for the spline approximations
   INTEGER, PARAMETER :: np = 3000
-
+  
   logical, save :: SC_FF_initialized = .false.
   integer, save :: SC_Mixing_Policy
   real(kind = dp), save :: SC_rcut
@@ -72,7 +72,7 @@ module suttonchen
 
   character(len = statusMsgSize) :: errMesg
   integer :: sc_err
-
+  
   character(len = 200) :: errMsg
   character(len=*), parameter :: RoutineName =  "Sutton-Chen MODULE"
   
@@ -86,16 +86,16 @@ module suttonchen
      real(kind=dp) :: sc_rcut
   end type SCtype
   
-
+  
   type, private :: SCTypeList
      integer           :: nSCTypes = 0
      integer           :: currentSCtype = 0     
      type (SCtype), pointer :: SCtypes(:) => null()
      integer, pointer       :: atidToSCtype(:) => null()
   end type SCTypeList
-
+  
   type (SCTypeList), save :: SCList
-
+  
   type:: MixParameters
      real(kind=DP) :: alpha
      real(kind=DP) :: epsilon
@@ -107,9 +107,9 @@ module suttonchen
      type(cubicSpline) :: V
      type(cubicSpline) :: phi
   end type MixParameters
-
+  
   type(MixParameters), dimension(:,:), allocatable :: MixingMap
-
+  
   public :: setCutoffSC
   public :: do_SC_pair
   public :: newSCtype
@@ -117,33 +117,32 @@ module suttonchen
   public :: calc_SC_preforce_Frho
   public :: destroySCtypes
   public :: getSCCut
- ! public :: setSCDefaultCutoff
- ! public :: setSCUniformCutoff
- 
-
+  ! public :: setSCDefaultCutoff
+  ! public :: setSCUniformCutoff
+  
+  
 contains
-
-
+  
+  
   subroutine newSCtype(c_ident,c,m,n,alpha,epsilon,status)
-    real (kind = dp )                      :: c ! Density Scaling
-    real (kind = dp )                      :: m ! Density Exponent
-    real (kind = dp )                      :: n ! Pair Potential Exponent
-    real (kind = dp )                      :: alpha ! Length Scaling
-    real (kind = dp )                      :: epsilon ! Energy Scaling
-    integer                                :: c_ident
-    integer                                :: status
-    integer                                :: nAtypes,nSCTypes,myATID
-    integer                                :: maxVals
-    integer                                :: alloc_stat
-    integer                                :: current
-    integer,pointer                        :: Matchlist(:) => null()
-
+    real (kind = dp ) :: c ! Density Scaling
+    real (kind = dp ) :: m ! Density Exponent
+    real (kind = dp ) :: n ! Pair Potential Exponent
+    real (kind = dp ) :: alpha ! Length Scaling
+    real (kind = dp ) :: epsilon ! Energy Scaling
+    integer           :: c_ident
+    integer           :: status
+    integer           :: nAtypes,nSCTypes,myATID
+    integer           :: maxVals
+    integer           :: alloc_stat
+    integer           :: current
+    integer,pointer   :: Matchlist(:) => null()
+    
     status = 0
-
-
+    
+    
     !! Assume that atypes has already been set and get the total number of types in atypes
-
-
+    
     ! check to see if this is the first time into 
     if (.not.associated(SCList%SCTypes)) then
        call getMatchingElementList(atypes, "is_SC", .true., nSCtypes, MatchList)
@@ -153,14 +152,14 @@ contains
        allocate(SCList%atidToSCType(nAtypes))
        SCList%atidToSCType = -1
     end if
-
+    
     SCList%currentSCType = SCList%currentSCType + 1
     current = SCList%currentSCType
-
+    
     myATID =  getFirstMatchingElement(atypes, "c_ident", c_ident)
     SCList%atidToSCType(myATID) = current
     
-  
+    
     SCList%SCTypes(current)%atid         = c_ident
     SCList%SCTypes(current)%alpha        = alpha
     SCList%SCTypes(current)%c            = c
@@ -168,7 +167,7 @@ contains
     SCList%SCTypes(current)%n            = n
     SCList%SCTypes(current)%epsilon      = epsilon
   end subroutine newSCtype
-
+  
   
   subroutine destroySCTypes()
     if (associated(SCList%SCtypes)) then
@@ -179,12 +178,12 @@ contains
        deallocate(SCList%atidToSCtype)
        SCList%atidToSCtype=>null()
     end if
-! Reset Capacity
+    ! Reset Capacity
     SCList%nSCTypes = 0
     SCList%currentSCtype=0
-
+    
   end subroutine destroySCTypes
-
+  
   function getSCCut(atomID) result(cutValue)
     integer, intent(in) :: atomID
     integer :: scID
@@ -193,40 +192,40 @@ contains
     scID = SCList%atidToSCType(atomID)
     cutValue = 2.0_dp * SCList%SCTypes(scID)%alpha
   end function getSCCut
-
+  
   subroutine createMixingMap()
     integer :: nSCtypes, i, j, k
     real ( kind = dp ) :: e1, e2, m1, m2, alpha1, alpha2, n1, n2
     real ( kind = dp ) :: epsilon, m, n, alpha, rCut, vCut, dr, r
     real ( kind = dp ), dimension(np) :: rvals, vvals, phivals
-
+    
     if (SCList%currentSCtype == 0) then
        call handleError("SuttonChen", "No members in SCMap")
        return
     end if
-
+    
     nSCtypes = SCList%nSCtypes
-
+    
     if (.not. allocated(MixingMap)) then
        allocate(MixingMap(nSCtypes, nSCtypes))
     endif
     useGeometricDistanceMixing = usesGeometricDistanceMixing()
     do i = 1, nSCtypes
-
+       
        e1 = SCList%SCtypes(i)%epsilon
        m1 = SCList%SCtypes(i)%m
        n1 = SCList%SCtypes(i)%n
        alpha1 = SCList%SCtypes(i)%alpha
-
+       
        do j = 1, nSCtypes
           
           e2 = SCList%SCtypes(j)%epsilon
           m2 = SCList%SCtypes(j)%m
           n2 = SCList%SCtypes(j)%n
           alpha2 = SCList%SCtypes(j)%alpha
-
+          
           if (useGeometricDistanceMixing) then
-             alpha = sqrt(alpha1 * alpha2) !SC formulation
+             alpha = sqrt(alpha1 * alpha2) ! SC formulation
           else
              alpha = 0.5_dp * (alpha1 + alpha2) ! Goddard formulation
           endif
@@ -234,24 +233,24 @@ contains
           epsilon = sqrt(e1 * e2)
           m = 0.5_dp*(m1+m2)
           n = 0.5_dp*(n1+n2)
-
+          
           dr = (rCut) / dble(np-1)
           rvals(1) = 0.0_dp
           vvals(1) = 0.0_dp
           phivals(1) = 0.0_dp
-
+          
           do k = 2, np
              r = dble(k-1)*dr
              rvals(k) = r
              vvals(k) = epsilon*((alpha/r)**n)
              phivals(k) = (alpha/r)**m
           enddo
-
+          
           vCut = epsilon*((alpha/rCut)**n)
-
+          
           call newSpline(MixingMap(i,j)%V, rvals, vvals, .true.)
           call newSpline(MixingMap(i,j)%phi, rvals, phivals, .true.)
-
+          
           MixingMap(i,j)%epsilon = epsilon
           MixingMap(i,j)%m = m
           MixingMap(i,j)%n = n
@@ -266,13 +265,13 @@ contains
   end subroutine createMixingMap
   
 
-
+  
   subroutine setCutoffSC(rcut)
     real(kind=dp) :: rcut
     SC_rcut = rcut
   end subroutine setCutoffSC
   
-
+  
   !! Calculates rho_r
   subroutine calc_sc_prepair_rho(atom1, atom2, atid1, atid2, d, r, rijsq, rho_i_at_j, rho_j_at_i)
     integer :: atom1, atom2, atid1, atid2
@@ -289,9 +288,9 @@ contains
     
     integer :: myid_atom1 ! SC atid
     integer :: myid_atom2 
-
+    
     ! check to see if we need to be cleaned at the start of a force loop
-
+    
     if (.not.haveMixingMap) call createMixingMap()
     haveMixingMap = .true.
     
@@ -303,8 +302,8 @@ contains
     rho_j_at_i = rho_i_at_j
        
   end subroutine calc_sc_prepair_rho
-
-
+  
+  
   !! Calculate the rho_a for all local atoms
   subroutine calc_sc_preforce_Frho(nlocal, pot, particle_pot)
     integer :: nlocal
@@ -326,20 +325,20 @@ contains
           dfrhodrho(atom) = 0.0_dp
        else
           frho(atom) = - SCList%SCTypes(Myid)%c * &
-              SCList%SCTypes(Myid)%epsilon * sqrt(rho(atom))
-
+               SCList%SCTypes(Myid)%epsilon * sqrt(rho(atom))
+          
           dfrhodrho(atom) = 0.5_dp*frho(atom)/rho(atom)
        end if
        pot = pot + frho(atom)
        particle_pot(atom) = particle_pot(atom) + frho(atom)
     enddo
-
-  end subroutine calc_sc_preforce_Frho  
+    
+  end subroutine calc_sc_preforce_Frho
   
   !! Does Sutton-Chen  pairwise Force calculation.  
   subroutine do_sc_pair(atom1, atom2, atid1, atid2, d, rij, r2, sw, vpair, &
-        fpair, pot, f1, rho_i, rho_j, dfrhodrho_i, dfrhodrho_j, &
-        fshift_i, fshift_j, do_pot)
+       fpair, pot, f1, rho_i, rho_j, dfrhodrho_i, dfrhodrho_j, &
+       fshift_i, fshift_j, do_pot)
     !Arguments    
     integer, intent(in) ::  atom1, atom2, atid1, atid2
     real( kind = dp ), intent(in) :: rij, r2
@@ -350,9 +349,9 @@ contains
     real( kind = dp ), intent(inout) :: dfrhodrho_i, dfrhodrho_j 
     real( kind = dp ), intent(inout) :: rho_i, rho_j 
     real( kind = dp ), intent(inout):: fshift_i, fshift_j
-
+    
     logical, intent(in) :: do_pot
-
+    
     real( kind = dp ) :: drdx, drdy, drdz
     real( kind = dp ) :: dvpdr
     real( kind = dp ) :: rhtmp, drhodr
@@ -360,11 +359,11 @@ contains
     real( kind = dp ) :: Fx,Fy,Fz
     real( kind = dp ) :: pot_temp, vptmp
     real( kind = dp ) :: rcij, vcij
-
+    
     integer :: id1, id2
     integer  :: mytype_atom1
     integer  :: mytype_atom2
-       
+    
     mytype_atom1 = SCList%atidToSCType(atid1)
     mytype_atom2 = SCList%atidTOSCType(atid2)
     
@@ -380,19 +379,19 @@ contains
     
     call lookupUniformSpline1d(MixingMap(mytype_atom1, mytype_atom2)%V, &
          rij, vptmp, dvpdr)
-
+    
     dudr = drhodr*(dfrhodrho_i + dfrhodrho_j) + dvpdr
 
     pot_temp = vptmp - vcij
     
     vpair = vpair + pot_temp
- 
+    
     fx = dudr * drdx
     fy = dudr * drdy
     fz = dudr * drdz
-
+    
     if (do_pot) then
-
+       
        ! particle_pot is the difference between the full potential 
        ! and the full potential without the presence of a particular
        ! particle (atom1).
@@ -412,13 +411,13 @@ contains
             SCList%SCTypes(mytype_atom2)%epsilon * &
             sqrt(rho_j-rhtmp)     
     end if
-
-
+    
+    
     pot = pot + pot_temp
     
     f1(1) = f1(1) + fx
     f1(2) = f1(2) + fy
     f1(3) = f1(3) + fz
-
+    
   end subroutine do_sc_pair
 end module suttonchen
