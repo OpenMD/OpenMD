@@ -341,7 +341,7 @@ namespace OpenMD {
      
     nTokens = tokenizer.countTokens(); 
      
-    if (nTokens < 2) { 
+    if (nTokens < 2) {  
       sprintf(painCave.errMsg, 
               "DumpReader Error: Not enough Tokens.\n%s\n", line.c_str()); 
       painCave.isFatal = 1; 
@@ -357,6 +357,34 @@ namespace OpenMD {
     }
     std::string type = tokenizer.nextToken(); 
     int size = type.size();
+
+    size_t found;
+    
+    if (needPos_) {
+      found = type.find("p");      
+      if (found == std::string::npos) {
+        sprintf(painCave.errMsg, 
+                "DumpReader Error: StuntDouble %d has no Position\n"
+                "\tField (\"p\") specified.\n%s\n", index, 
+                line.c_str());  
+        painCave.isFatal = 1; 
+        simError(); 
+      }
+    }
+    
+    if (integrableObject->isDirectional()) {
+      if (needQuaternion_) {
+        found = type.find("q");      
+        if (found == std::string::npos) {
+          sprintf(painCave.errMsg, 
+                  "DumpReader Error: Directional StuntDouble %d has no\n"
+                  "\tQuaternion Field (\"q\") specified.\n%s\n", index, 
+                  line.c_str());  
+          painCave.isFatal = 1; 
+          simError(); 
+        }
+      }      
+    }
 
     for(int i = 0; i < size; ++i) {
       switch(type[i]) {
