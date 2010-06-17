@@ -63,27 +63,32 @@ namespace OpenMD {
     RealType rA = A.length();
     Vector3d B = cross(r32, r43);
     RealType rB = B.length();
-    Vector3d C = cross(r32, A);
-    RealType rC = C.length();
 
+    /* 
+       If either of the two cross product vectors is tiny, that means
+       the three atoms involved are colinear, and the torsion angle is
+       going to be undefined.  The easiest check for this problem is
+       to use the product of the two lengths.
+    */
+    if (rA * rB < OpenMD::epsilon) return;
+    
     A.normalize();
-    B.normalize();
-    C.normalize();
+    B.normalize();  
     
     //  Calculate the sin and cos
     RealType cos_phi = dot(A, B) ;
     if (cos_phi > 1.0) cos_phi = 1.0;
     if (cos_phi < -1.0) cos_phi = -1.0; 
-
+    
     RealType dVdcosPhi;
     torsionType_->calcForce(cos_phi, potential_, dVdcosPhi);
     Vector3d f1 ;
     Vector3d f2 ;
     Vector3d f3 ;
-
+    
     Vector3d dcosdA = (cos_phi * A - B) /rA;
     Vector3d dcosdB = (cos_phi * B - A) /rB;
-
+    
     f1 = dVdcosPhi * cross(r32, dcosdA);
     f2 = dVdcosPhi * ( cross(r43, dcosdB) - cross(r21, dcosdA));
     f3 = dVdcosPhi * cross(dcosdB, r32);
@@ -92,13 +97,12 @@ namespace OpenMD {
     atom2_->addFrc(f2 - f1);
     atom3_->addFrc(f3 - f2);
     atom4_->addFrc(-f3);
-
+    
     atom1_->addParticlePot(potential_);
     atom2_->addParticlePot(potential_);
     atom3_->addParticlePot(potential_);
     atom4_->addParticlePot(potential_);
-
-    angle = acos(cos_phi) /M_PI * 180.0;
-  }
-
+    
+    angle = acos(cos_phi) /M_PI * 180.0;    
+  }  
 }

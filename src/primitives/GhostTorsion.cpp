@@ -63,12 +63,17 @@ namespace OpenMD {
     RealType rA = A.length();
     Vector3d B = cross(r32, r43);
     RealType rB = B.length();
-    Vector3d C = cross(r32, A);
-    RealType rC = C.length();
+
+    /* 
+       If either of the two cross product vectors is tiny, that means
+       the three atoms involved are colinear, and the torsion angle is
+       going to be undefined.  The easiest check for this problem is
+       to use the product of the two lengths.
+    */
+    if (rA * rB < OpenMD::epsilon) return;
     
     A.normalize();
     B.normalize();
-    C.normalize();
     
     //  Calculate the sin and cos
     RealType cos_phi = dot(A, B) ;
