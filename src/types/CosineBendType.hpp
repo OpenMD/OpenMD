@@ -39,45 +39,54 @@
  * [4]  Vardeman & Gezelter, in progress (2009).                        
  */
  
-#ifndef IO_BENDTYPESSECTIONPARSER_HPP
-#define IO_BENDTYPESSECTIONPARSER_HPP
-#include <map>
-#include "io/SectionParser.hpp"
-#include "io/ForceFieldOptions.hpp"
+/**
+ * @file CosineBendType.hpp
+ * @author    gezelter
+ * @date  06/18/2010
+ * @version 1.0
+ */ 
+ 
+#ifndef TYPES_COSINEBENDTYPE_HPP
+#define TYPES_COSINEBENDTYPE_HPP
+
+#include "types/BendType.hpp"
+
 namespace OpenMD {
-
   /**
-   * @class BendTypesSectionParser BendTypesSectionParser.hpp "io/BendTypesSectionParser.hpp"
+   * @class CosineBendType 
+   *
+   * A simple harmonic bend using the cosine of the angle instead of
+   * the angle itself: 
+   * Vbend = (\cos(\theta) - \cos(\theta_0))^2
    */
-  class BendTypesSectionParser : public SectionParser {
+  class CosineBendType : public BendType {
+    
   public:
-    BendTypesSectionParser(ForceFieldOptions& options);
-            
+    
+    CosineBendType(RealType theta, RealType k) : BendType(theta), k_(k) {
+      c0_ = cos(theta);
+    }
+    
+    void setForceConstant(RealType k) {k_ = k; }
+    
+    RealType getForceConstant() {return k_;}
+    
+    void calcForce(RealType theta, RealType& V, RealType& dVdtheta) {
+
+      RealType ct = cos(theta);
+      RealType st = sin(theta);
+      RealType delta = ct - c0_;
+      
+      V = 0.5 * k_ * delta * delta;
+      dVdtheta = k_ * delta * st;
+    }
+    
   private:
-
-    enum BendTypeEnum{
-      btHarmonic,
-      btGhostBend,
-      btUreyBradley,
-      btCubic,
-      btQuartic,
-      btPolynomial,
-      btCosine,
-      btUnknown
-    };
-            
-    void parseLine(ForceField& ff, const std::string& line, int lineNo);
-
-    BendTypeEnum getBendTypeEnum(const std::string& str);  
-
-    std::map<std::string, BendTypeEnum> stringToEnumMap_;  
-    ForceFieldOptions& options_;
+    RealType k_;
+    RealType c0_;
+    
   };
-
-
-} //namespace OpenMD
-
-#endif //IO_BENDTYPESSECTIONPARSER_HPP
-
-
+  
+}//end namespace OpenMD
+#endif //TYPES_COSINEBENDTYPE_HPP
 

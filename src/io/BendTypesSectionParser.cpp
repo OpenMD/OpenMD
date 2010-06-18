@@ -45,6 +45,7 @@
 #include "types/CubicBendType.hpp"
 #include "types/QuarticBendType.hpp"
 #include "types/PolynomialBendType.hpp"
+#include "types/CosineBendType.hpp"
 #include "UseTheForce/ForceField.hpp"
 #include "utils/NumericConstant.hpp"
 #include "utils/simError.h"
@@ -59,6 +60,7 @@ namespace OpenMD {
     stringToEnumMap_["Cubic"] = btCubic;
     stringToEnumMap_["Quartic"] = btQuartic;
     stringToEnumMap_["Polynomial"] = btPolynomial;    
+    stringToEnumMap_["Cosine"] = btCosine;    
   }
 
   void BendTypesSectionParser::parseLine(ForceField& ff,const std::string& line, int lineNo){
@@ -179,6 +181,20 @@ namespace OpenMD {
 	}
       }
             
+      break;
+
+    case btCosine :
+            
+      if (nTokens < 1) {
+	sprintf(painCave.errMsg, "BendTypesSectionParser Error: Not enough tokens at line %d\n",
+		lineNo);
+	painCave.isFatal = 1;
+	simError();
+      } else {
+
+	RealType ktheta = tokenizer.nextTokenAsDouble();
+	bendType = new CosineBendType(theta0, ktheta);
+      }
       break;
 
     case btUnknown :
