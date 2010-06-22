@@ -43,7 +43,7 @@
  * @file CosineBendType.hpp
  * @author    gezelter
  * @date  06/18/2010
- * @version 1.0
+ * @version 1.1
  */ 
  
 #ifndef TYPES_COSINEBENDTYPE_HPP
