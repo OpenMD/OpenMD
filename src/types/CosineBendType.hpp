@@ -78,6 +78,7 @@ namespace OpenMD {
       RealType delta = ct - c0_;
       
       V = 0.5 * k_ * delta * delta;
+
       dVdtheta = k_ * delta * st;
     }
     
