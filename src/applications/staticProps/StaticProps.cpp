@@ -57,6 +57,7 @@
 #include "applications/staticProps/GofRAngle.hpp"
 #include "applications/staticProps/GofAngle2.hpp"
 #include "applications/staticProps/GofXyz.hpp"
+#include "applications/staticProps/TwoDGofR.hpp"
 #include "applications/staticProps/P2OrderParameter.hpp"
 #include "applications/staticProps/BondOrderParameter.hpp"
 #include "applications/staticProps/BOPofR.hpp"
@@ -216,6 +217,17 @@ int main(int argc, char* argv[]){
 	    painCave.isFatal = 1;
 	    simError();  
 	}
+    } else if (args_info.twodgofr_given){
+      if (args_info.dz_given) {
+	analyser= new TwoDGofR(info, dumpFileName, sele1, sele2, maxLen, 
+                               args_info.dz_arg, args_info.nbins_arg);        
+      } else {
+        sprintf( painCave.errMsg,
+                 "A slab width (dz) must be specified when calculating TwoDGofR");
+        painCave.severity = OPENMD_ERROR;
+        painCave.isFatal = 1;
+        simError();
+      }
     } else if (args_info.p2_given) {
 	analyser  = new P2OrderParameter(info, dumpFileName, sele1, sele2);
     } else if (args_info.rp2_given){

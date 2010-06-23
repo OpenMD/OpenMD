@@ -61,6 +61,9 @@ struct gengetopt_args_info
   double rcut_arg;	/**< @brief cutoff radius (rcut).  */
   char * rcut_orig;	/**< @brief cutoff radius (rcut) original value given at command line.  */
   const char *rcut_help; /**< @brief cutoff radius (rcut) help description.  */
+  double dz_arg;	/**< @brief slab width (dz).  */
+  char * dz_orig;	/**< @brief slab width (dz) original value given at command line.  */
+  const char *dz_help; /**< @brief slab width (dz) help description.  */
   double length_arg;	/**< @brief maximum length (Defaults to 1/2 smallest length of first frame).  */
   char * length_orig;	/**< @brief maximum length (Defaults to 1/2 smallest length of first frame) original value given at command line.  */
   const char *length_help; /**< @brief maximum length (Defaults to 1/2 smallest length of first frame) help description.  */
@@ -107,6 +110,7 @@ struct gengetopt_args_info
   const char *r_z_help; /**< @brief g(r, z) help description.  */
   const char *theta_omega_help; /**< @brief g(cos(theta), cos(omega)) help description.  */
   const char *gxyz_help; /**< @brief g(x, y, z) help description.  */
+  const char *twodgofr_help; /**< @brief 2D g(r) (Slab width --dz must be specified) help description.  */
   const char *p2_help; /**< @brief p2 order parameter (--sele1 and --sele2 must be specified) help description.  */
   const char *rp2_help; /**< @brief rp2 order parameter (--sele1 and --sele2 must be specified) help description.  */
   const char *scd_help; /**< @brief scd order parameter (either --sele1, --sele2, --sele3 are specified or --molname, --begin, --end are specified) help description.  */
@@ -128,6 +132,7 @@ struct gengetopt_args_info
   unsigned int nbins_z_given ;	/**< @brief Whether nbins_z was given.  */
   unsigned int nanglebins_given ;	/**< @brief Whether nanglebins was given.  */
   unsigned int rcut_given ;	/**< @brief Whether rcut was given.  */
+  unsigned int dz_given ;	/**< @brief Whether dz was given.  */
   unsigned int length_given ;	/**< @brief Whether length was given.  */
   unsigned int zlength_given ;	/**< @brief Whether zlength was given.  */
   unsigned int zoffset_given ;	/**< @brief Whether zoffset was given.  */
@@ -150,6 +155,7 @@ struct gengetopt_args_info
   unsigned int r_z_given ;	/**< @brief Whether r_z was given.  */
   unsigned int theta_omega_given ;	/**< @brief Whether theta_omega was given.  */
   unsigned int gxyz_given ;	/**< @brief Whether gxyz was given.  */
+  unsigned int twodgofr_given ;	/**< @brief Whether twodgofr was given.  */
   unsigned int p2_given ;	/**< @brief Whether p2 was given.  */
   unsigned int rp2_given ;	/**< @brief Whether rp2 was given.  */
   unsigned int scd_given ;	/**< @brief Whether scd was given.  */
@@ -160,6 +166,8 @@ struct gengetopt_args_info
   unsigned int rho_r_given ;	/**< @brief Whether rho_r was given.  */
   unsigned int hullvol_given ;	/**< @brief Whether hullvol was given.  */
 
+  char **inputs ; /**< @brief unamed options (options without names) */
+  unsigned inputs_num ; /**< @brief unamed options number */
   int staticProps_group_counter; /**< @brief Counter for group staticProps */
 } ;
 

@@ -15,6 +15,7 @@ option	"nbins_y"    	y       "number of bins in y axis"				int	default="100"		no
 option	"nbins_z"    	-       "number of bins in z axis"				int	default="100"		no
 option	"nanglebins"	a	"number of bins for cos(angle)"				int	default="50"		no 
 option  "rcut"          c       "cutoff radius (rcut)"                                  double                          no
+option  "dz"            -       "slab width (dz)"                                       double                          no
 option	"length"	-	"maximum length (Defaults to 1/2 smallest length of first frame)"	double	no  
 option	"zlength"	-	"maximum length (Defaults to 1/2 smallest length of first frame)"	double	no  
 option  "zoffset"       z       "Where to set the zero for the slab_density calculation"        double  default="0"     no
@@ -38,6 +39,7 @@ groupoption "r_omega" 	-       "g(r, cos(omega))" group="staticProps"
 groupoption "r_z"       -       "g(r, z)" group="staticProps"
 groupoption "theta_omega" -     "g(cos(theta), cos(omega))" group="staticProps"
 groupoption "gxyz"	-       "g(x, y, z)" group="staticProps"
+groupoption "twodgofr"  -       "2D g(r) (Slab width --dz must be specified)" group="staticProps"
 groupoption "p2"        p       "p2 order parameter (--sele1 and --sele2 must be specified)" group="staticProps"
 groupoption "rp2"       -       "rp2 order parameter (--sele1 and --sele2 must be specified)" group="staticProps"
 groupoption "scd"       s       "scd order parameter (either --sele1, --sele2, --sele3 are specified or --molname, --begin, --end are specified)" group="staticProps"

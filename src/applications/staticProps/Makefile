@@ -7,6 +7,7 @@ Source    = \
         GofR.cpp  \
         GofZ.cpp  \
         GofXyz.cpp \
+        TwoDGofR.cpp \
         RadialDistrFunc.cpp \
 	P2OrderParameter.cpp \
 	SCDOrderParameter.cpp \
