@@ -2,6 +2,7 @@ Package = visitors
 
 Source    = \
 	AtomVisitor.cpp \
+	ReplacementVisitor.cpp \
 	CompositeVisitor.cpp \
 	OtherVisitor.cpp \
 	RigidBodyVisitor.cpp \

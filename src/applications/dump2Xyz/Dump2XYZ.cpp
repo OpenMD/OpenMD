@@ -50,6 +50,7 @@
 #include "io/DumpReader.hpp"
 #include "utils/simError.h"
 #include "visitors/AtomVisitor.hpp"
+#include "visitors/ReplacementVisitor.hpp"
 #include "visitors/CompositeVisitor.hpp"
 #include "visitors/RigidBodyVisitor.hpp"
 #include "visitors/OtherVisitor.hpp"
@@ -94,10 +95,9 @@ int main(int argc, char* argv[]){
   SimCreator creator;
   SimInfo* info = creator.createSim(dumpFileName, false);
   
-
   //create visitor list
   CompositeVisitor* compositeVisitor = new CompositeVisitor();
-    
+  
   //create RigidBody Visitor
   if(args_info.rigidbody_flag){
     RBCOMVisitor* rbCOMVisitor = new RBCOMVisitor(info);
@@ -108,39 +108,23 @@ int main(int argc, char* argv[]){
   SSDAtomVisitor* ssdVisitor = new SSDAtomVisitor(info);
   compositeVisitor->addVisitor(ssdVisitor, 800);
   
-  LinearAtomVisitor* linearVisitor = new LinearAtomVisitor(info);
-  compositeVisitor->addVisitor(linearVisitor, 750);
-  if (args_info.gb_given) {
-    linearVisitor->addGayBerneAtomType(args_info.gb_arg);
-  }
-  
-  GBLipidAtomVisitor* gbLipidVisitor = new GBLipidAtomVisitor(info);
-  compositeVisitor->addVisitor(gbLipidVisitor, 740);
-
-  Ring5gbAtomVisitor* ring5Visitor = new Ring5gbAtomVisitor(info);
-  compositeVisitor->addVisitor(ring5Visitor, 730);
-
-  HeadAtomVisitor* headVisitor = new HeadAtomVisitor(info);
-  compositeVisitor->addVisitor(headVisitor, 720);
-
   //create default atom visitor
   DefaultAtomVisitor* defaultAtomVisitor = new DefaultAtomVisitor(info);
   compositeVisitor->addVisitor(defaultAtomVisitor, 700);
   
   // if we gave the -w option, we want to skip the waters:
-  std::cerr << "-w flag was set to:" << args_info.water_given << "\n";
   if (!args_info.water_given) {
     //create waterType visitor
     if(args_info.watertype_flag){
       WaterTypeVisitor* waterTypeVisitor = new WaterTypeVisitor;
       compositeVisitor->addVisitor(waterTypeVisitor, 600);
     }
-  }
-
+  } 
+  
   if (args_info.basetype_flag) {
-      AtomNameVisitor* atomNameVisitor = new AtomNameVisitor(info);
-      compositeVisitor->addVisitor(atomNameVisitor, 550);
-
+    AtomNameVisitor* atomNameVisitor = new AtomNameVisitor(info);
+    compositeVisitor->addVisitor(atomNameVisitor, 550);    
+    std::cout << compositeVisitor->toString();
   }
   
   //create ZconsVisitor
@@ -192,9 +176,7 @@ int main(int argc, char* argv[]){
     xyzVisitor->setPosOnly(posOnly);
   }
 
-  compositeVisitor->addVisitor(xyzVisitor, 200);
-  
-  std::cout << compositeVisitor->toString();
+  compositeVisitor->addVisitor(xyzVisitor, 200); 
   
   //create prepareVisitor
   PrepareVisitor* prepareVisitor = new PrepareVisitor();

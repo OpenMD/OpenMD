@@ -120,7 +120,6 @@ namespace OpenMD {
 
   private:  
     std::string trimmedName(const std::string& atomType);
-    std::string baseTypeName(AtomType* at);
 
     SimInfo* info;
     SelectionManager seleMan;

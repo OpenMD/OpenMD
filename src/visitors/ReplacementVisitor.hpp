@@ -39,44 +39,64 @@
  * [4]  Vardeman & Gezelter, in progress (2009).                        
  */
  
-#ifndef VISITORS_BASEATOMVISITOR_HPP
-#define VISITORS_BASEATOMVISITOR_HPP
+#ifndef VISITORS_REPLACEMENTVISITOR_HPP
+#define VISITORS_REPLACEMENTVISITOR_HPP
 
 #include <set>
 
-#include "visitors/BaseVisitor.hpp"
-#include "visitors/AtomData.hpp"
+#include "visitors/AtomVisitor.hpp"
 
 namespace OpenMD {
 
   /**
-   * @class BaseAtomVisitor
-   * @todo document
+   * @class ReplacementVisitor
+   *
+   * Replaces an atomic object with a collection atomic sites.  These
+   * sites are specified with reference location to the object, as well as 
+   * a name.
    */
-  class BaseAtomVisitor : public BaseVisitor{
+  class ReplacementVisitor : public BaseAtomVisitor{
   public:
-    virtual void visit(Atom* atom) {}
-    virtual void visit(DirectionalAtom* datom) {}
-    virtual void visit(RigidBody* rb);
-    void setVisited(Atom* atom);
-    bool isVisited(Atom* atom);
+    ReplacementVisitor(SimInfo* info) : BaseAtomVisitor(info) {
+      visitorName = "ReplacementVisitor";   
+      sites_ = new AtomData; 
+    }
+    ~ReplacementVisitor();
     
-  protected:
-    BaseAtomVisitor(SimInfo* info) : BaseVisitor() {}    
-    SimInfo* info;
-  };
+    void visit(Atom* atom) {}
+    void visit(DirectionalAtom* datom);       
+    void visit(RigidBody* rb) {}
+    
+    const std::string toString();
 
-  class DefaultAtomVisitor : public BaseAtomVisitor{
+    void addReplacedAtomName(const std::string& repName);
+    void addSite(const std::string& name, const Vector3d refPos);
+    void addSite(const std::string& name, const Vector3d refPos, const Vector3d refVec);
+  private:
+    inline bool isReplacedAtom(const std::string& atomType);
+    std::set<std::string> myTypes_;
+    AtomData* sites_;
+  };
+  
+  class SSDAtomVisitor : public ReplacementVisitor{
   public:
-    DefaultAtomVisitor(SimInfo* info) : BaseAtomVisitor(info) { visitorName = "DefaultAtomVisitor";}
-    
-    virtual void visit(Atom* atom);   
-    virtual void visit(DirectionalAtom* datom);    
-    virtual void visit(RigidBody* rb) {}
-    
-    virtual const std::string toString();
-    
-  };
+    SSDAtomVisitor(SimInfo* info) : ReplacementVisitor(info) {
+      visitorName = "SSDAtomVisitor";
 
+      /// these are the atom names we can replace with a fixed structure
+      addReplacedAtomName("SSD");
+      addReplacedAtomName("SSD_E");
+      addReplacedAtomName("SSD_RF");
+      addReplacedAtomName("SSD1");
+      addReplacedAtomName("TAP");
+      addReplacedAtomName("TRED");
+
+      // this is the reference structure we'll use for the replacement:
+      addSite("H", Vector3d(0.0, -0.75695, 0.5206));
+      addSite("H", Vector3d(0.0,  0.75695, 0.5206));
+      addSite("O", Vector3d(0.0,  0.0,    -0.0654));
+      addSite("X", Vector3d(0.0,  0.0,     0.0   ), Vector3d(0,0,1));
+    }
+  };  
 }//namespace OpenMD
 #endif

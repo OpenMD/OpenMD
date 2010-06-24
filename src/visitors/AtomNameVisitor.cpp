@@ -43,23 +43,18 @@
 #include "visitors/AtomNameVisitor.hpp"
 #include "utils/Trim.hpp"
 #include "utils/StringTokenizer.hpp"
+#include "brains/SimInfo.hpp"
 
 
 namespace OpenMD {
-AtomNameVisitor::AtomNameVisitor(SimInfo* info) : BaseVisitor(), info_(info) {
+  AtomNameVisitor::AtomNameVisitor(SimInfo* info) : BaseVisitor(), 
+                                                    info_(info) {
     visitorName = "AtomNameVisitor";
-    std::stringstream ss(defaultAtomTypeTable);
-    readAtomTypes(ss);
-}
-
-AtomNameVisitor::AtomNameVisitor(SimInfo* info, const std::string& atomTypeFile) : BaseVisitor(), info_(info) {
-    visitorName = "AtomNameVisitor";
-    std::ifstream ifs(atomTypeFile.c_str());
-    readAtomTypes(ifs);
-}
-
-
-void AtomNameVisitor::visitAtom(Atom* atom) {
+    ff_ = info_->getForceField();
+  }
+  
+  
+  void AtomNameVisitor::visitAtom(Atom* atom) {
     AtomData* atomData;
     GenericData* data;    
     bool haveAtomData;
@@ -78,75 +73,53 @@ void AtomNameVisitor::visitAtom(Atom* atom) {
       atomData = new AtomData;
       haveAtomData = false;
     }
-
-    std::vector<AtomInfo*>::iterator i;
-    for (AtomInfo* atomInfo = atomData->beginAtomInfo(i); atomInfo != NULL; atomInfo = atomData->nextAtomInfo(i)) {
-        atomInfo->atomTypeName = getBaseAtomTypeName(atomInfo->atomTypeName);        
-    }
     
-}
-
-void AtomNameVisitor::visit(RigidBody* rb) {
-    std::vector<Atom*>::iterator i;
-
-  for (Atom* atom = rb->beginAtom(i); atom != NULL; atom = rb->nextAtom(i)) {
-    visit(atom);
-  }
-}
-
-
-void AtomNameVisitor::readAtomTypes(std::istream& is) {
-    const int bufferSize = 65535;
-    char buffer[bufferSize];
-    std::string line;
-    while(is.getline(buffer, bufferSize)) {
-      line = trimLeftCopy(buffer);
-      //a line begins with "//" is comment
-      // let's also call lines starting with # and ! as comments
-     if ( line.empty() || 
-                  (line.size() >= 2 && line[0] == '/' && line[1] == '/') ||
-                  (line.size() >= 1 && line[0] == '#') || 
-                  (line.size() >= 1 && line[0] == '!') ) {
-        continue;
-      } else {
-        StringTokenizer tokenizer(line);
-        if (tokenizer.countTokens() >= 2) {
-            std::string atomName = tokenizer.nextToken();
-            std::string baseAtomName = tokenizer.nextToken();
-            atomNames_.insert(MapType::value_type(atomName, baseAtomName));
-        }
-      }
+    std::vector<AtomInfo*>::iterator i;
+    for (AtomInfo* atomInfo = atomData->beginAtomInfo(i); 
+         atomInfo != NULL; 
+         atomInfo = atomData->nextAtomInfo(i)) {
+      
+      // query the force field for the AtomType associated with this
+      // atomTypeName:
+      AtomType* at = ff_->getAtomType(atomInfo->atomTypeName);
+      // get the chain of base types for this atom type:
+      std::vector<AtomType*> ayb = at->allYourBase();
+      // use the last type in the chain of base types for the name:
+      std::string bn = ayb[ayb.size()-1]->getName();
+      
+      atomInfo->atomTypeName = bn;      
     }
-
-}
-
-std::string AtomNameVisitor::getBaseAtomTypeName(const std::string& atomTypeName) {
-    MapType::iterator i;
-    i = atomNames_.find(atomTypeName);
-    return i != atomNames_.end() ? i->second : atomTypeName;
-}
-
-
-const std::string AtomNameVisitor::toString() {
+  }
+  
+  void AtomNameVisitor::visit(RigidBody* rb) {
+    std::vector<Atom*>::iterator i;
+    
+    for (Atom* atom = rb->beginAtom(i); atom != NULL; atom = rb->nextAtom(i)) {
+      visit(atom);
+    }
+  }
+  
+  
+  const std::string AtomNameVisitor::toString() {
     char   buffer[65535];
     std::string result;
-
+    
     sprintf(buffer,
             "------------------------------------------------------------------\n");
     result += buffer;
-
+    
     sprintf(buffer, "Visitor name: %s\n", visitorName.c_str());
     result += buffer;
-
+    
     sprintf(buffer,
             "Visitor Description: print base atom types\n");
     result += buffer;
-
+    
     sprintf(buffer,
             "------------------------------------------------------------------\n");
     result += buffer;
-
+    
     return result;
-}
-
+  }
+  
 }

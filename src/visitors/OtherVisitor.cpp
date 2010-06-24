@@ -291,16 +291,13 @@ namespace OpenMD {
     } else
       return;
 
-    AtomType* at = dynamic_cast<Atom *>(sd)->getAtomType();
-    std::string bn = baseTypeName(at);
-
     if (posOnly_){
       for( atomInfo = atomData->beginAtomInfo(i); atomInfo;
 	   atomInfo = atomData->nextAtomInfo(i) ) {
         if (atomInfo->hasCharge) {
 	  sprintf(buffer,
 		  "%s%15.8f%15.8f%15.8f%15.8f",
-		  bn.c_str(),
+		  atomInfo->atomTypeName.c_str(),
 		  atomInfo->pos[0],
 		  atomInfo->pos[1],
 		  atomInfo->pos[2],
@@ -308,7 +305,7 @@ namespace OpenMD {
         } else {
 	  sprintf(buffer,
 		"%s%15.8f%15.8f%15.8f",
-		  bn.c_str(),
+		  atomInfo->atomTypeName.c_str(),
 		  atomInfo->pos[0],
 		  atomInfo->pos[1],
 		  atomInfo->pos[2]); 
@@ -321,7 +318,7 @@ namespace OpenMD {
         if (atomInfo->hasCharge) {
 	sprintf(buffer,
 		"%s%15.8f%15.8f%15.8f%15.8f%15.8f%15.8f%15.8f",
-		bn.c_str(),
+		atomInfo->atomTypeName.c_str(),
 		atomInfo->pos[0],
 		atomInfo->pos[1],
 		atomInfo->pos[2],
@@ -332,7 +329,7 @@ namespace OpenMD {
         } else {
 	sprintf(buffer,
 		"%s%15.8f%15.8f%15.8f%15.8f%15.8f%15.8f",
-		bn.c_str(),
+		atomInfo->atomTypeName.c_str(),	
 		atomInfo->pos[0],
 		atomInfo->pos[1],
 		atomInfo->pos[2],
@@ -378,11 +375,6 @@ namespace OpenMD {
 
   std::string XYZVisitor::trimmedName(const std::string&atomTypeName) {    
     return atomTypeName.substr(0, atomTypeName.find('-'));
-  }
-
-  std::string XYZVisitor::baseTypeName(AtomType* at) {
-    std::vector<AtomType*> ayb = at->allYourBase();
-    return ayb[ayb.size()-1]->getName();
   }
 
   const std::string XYZVisitor::toString() {
