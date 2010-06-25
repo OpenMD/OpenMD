@@ -47,6 +47,7 @@
 #include "brains/Register.hpp"
 #include "brains/SimCreator.hpp"
 #include "brains/SimInfo.hpp"
+#include "brains/ForceManager.hpp"
 #include "io/DumpReader.hpp"
 #include "utils/simError.h"
 #include "visitors/AtomVisitor.hpp"
@@ -70,6 +71,10 @@ int main(int argc, char* argv[]){
   gengetopt_args_info args_info;
   std::string dumpFileName;
   std::string xyzFileName;
+  bool printVel;
+  bool printFrc;
+  bool printVec;
+  bool printChrg;
   
   //parse the command line option
   if (cmdline_parser (argc, argv, &args_info) != 0) {
@@ -94,6 +99,7 @@ int main(int argc, char* argv[]){
   //parse md file and set up the system
   SimCreator creator;
   SimInfo* info = creator.createSim(dumpFileName, false);
+  ForceManager* forceMan = new ForceManager(info);
   
   //create visitor list
   CompositeVisitor* compositeVisitor = new CompositeVisitor();
@@ -147,21 +153,30 @@ int main(int argc, char* argv[]){
   //}
 
   //create replicate visitor
-  if(args_info.repeatX_given > 0 || args_info.repeatY_given > 0 ||args_info.repeatY_given > 0){
-    Vector3i replicateOpt(args_info.repeatX_arg, args_info.repeatY_arg, args_info.repeatZ_arg);
-    ReplicateVisitor* replicateVisitor = new ReplicateVisitor(info, replicateOpt);
+  if(args_info.repeatX_given > 0 || 
+     args_info.repeatY_given > 0 || 
+     args_info.repeatY_given > 0) {
+    Vector3i replicateOpt(args_info.repeatX_arg, 
+                          args_info.repeatY_arg, 
+                          args_info.repeatZ_arg);
+    ReplicateVisitor* replicateVisitor = new ReplicateVisitor(info, 
+                                                              replicateOpt);
     compositeVisitor->addVisitor(replicateVisitor, 300);
   }
 
 
   //create rotation visitor
   if (args_info.refsele_given&& args_info.originsele_given) {
-    compositeVisitor->addVisitor(new LipidTransVisitor(info, args_info.originsele_arg, args_info.refsele_arg), 250); 
+    compositeVisitor->addVisitor(new LipidTransVisitor(info, 
+                                                       args_info.originsele_arg, 
+                                                       args_info.refsele_arg),
+                                 250); 
   } else if (args_info.refsele_given || args_info.originsele_given) {
-    std::cerr << "Both of --refsele and --originsele should appear by pair" << std::endl;
+    std::cerr << "Both of --refsele and --originsele should appear by pair" 
+              << std::endl;
     exit(1);
   }
-    
+  
   //create xyzVisitor
   XYZVisitor* xyzVisitor;
 
@@ -171,11 +186,23 @@ int main(int argc, char* argv[]){
     xyzVisitor = new XYZVisitor(info);
   }
 
-  if(args_info.printPosOnly_flag){
-    bool posOnly = true;
-    xyzVisitor->setPosOnly(posOnly);
+  if(args_info.velocities_flag){
+    printVel = true;
+    xyzVisitor->doVelocities(printVel);
   }
-
+  if(args_info.forces_flag){
+    printFrc = true;
+    xyzVisitor->doForces(printFrc);
+  }
+  if(args_info.vectors_flag){
+    printVec = true;
+    xyzVisitor->doVectors(printVec);
+  }
+  if(args_info.charges_flag){
+    printChrg = true;
+    xyzVisitor->doCharges(printChrg);
+  }
+  
   compositeVisitor->addVisitor(xyzVisitor, 200); 
   
   //create prepareVisitor
@@ -184,7 +211,6 @@ int main(int argc, char* argv[]){
   //open dump file
   DumpReader* dumpReader = new DumpReader(info, dumpFileName);
   int nframes = dumpReader->getNFrames();
-  
   
   std::ofstream xyzStream(xyzFileName.c_str());
   
@@ -202,33 +228,42 @@ int main(int argc, char* argv[]){
        
   for (int i = 0; i < nframes; i += args_info.frame_arg){
     dumpReader->readFrame(i);
-
+    
+    if (printFrc) forceMan->calcForces(true, false);
+    
     //wrapping the molecule
     if(args_info.periodicBox_flag) {
       currentSnapshot = info->getSnapshotManager()->getCurrentSnapshot();    
-      for (mol = info->beginMolecule(miter); mol != NULL; mol = info->nextMolecule(miter)) {
+      for (mol = info->beginMolecule(miter); mol != NULL; 
+           mol = info->nextMolecule(miter)) {
           molCom = mol->getCom();
           newMolCom = molCom;
           currentSnapshot->wrapVector(newMolCom);
           displacement = newMolCom - molCom;
-        for (integrableObject = mol->beginIntegrableObject(iiter); integrableObject != NULL;
+        for (integrableObject = mol->beginIntegrableObject(iiter); 
+             integrableObject != NULL;
              integrableObject = mol->nextIntegrableObject(iiter)) {  
           integrableObject->setPos(integrableObject->getPos() + displacement);
         }
       }    
     }
     //update atoms of rigidbody
-    for (mol = info->beginMolecule(miter); mol != NULL; mol = info->nextMolecule(miter)) {
+    for (mol = info->beginMolecule(miter); mol != NULL; 
+         mol = info->nextMolecule(miter)) {
       
       //change the positions of atoms which belong to the rigidbodies
-      for (rb = mol->beginRigidBody(rbIter); rb != NULL; rb = mol->nextRigidBody(rbIter)) {
+      for (rb = mol->beginRigidBody(rbIter); rb != NULL; 
+           rb = mol->nextRigidBody(rbIter)) {
         rb->updateAtoms();
+        if (printVel) rb->updateAtomVel();
       }
     }
     
     //prepare visit
-    for (mol = info->beginMolecule(miter); mol != NULL; mol = info->nextMolecule(miter)) {
-      for (integrableObject = mol->beginIntegrableObject(iiter); integrableObject != NULL;
+    for (mol = info->beginMolecule(miter); mol != NULL; 
+         mol = info->nextMolecule(miter)) {
+      for (integrableObject = mol->beginIntegrableObject(iiter); 
+           integrableObject != NULL;
            integrableObject = mol->nextIntegrableObject(iiter)) {
         integrableObject->accept(prepareVisitor);
       }
@@ -239,8 +274,10 @@ int main(int argc, char* argv[]){
 
 
     //visit stuntdouble
-    for (mol = info->beginMolecule(miter); mol != NULL; mol = info->nextMolecule(miter)) {
-      for (integrableObject = mol->beginIntegrableObject(iiter); integrableObject != NULL;
+    for (mol = info->beginMolecule(miter); mol != NULL; 
+         mol = info->nextMolecule(miter)) {
+      for (integrableObject = mol->beginIntegrableObject(iiter); 
+           integrableObject != NULL;
            integrableObject = mol->nextIntegrableObject(iiter)) {
         integrableObject->accept(compositeVisitor);
       }

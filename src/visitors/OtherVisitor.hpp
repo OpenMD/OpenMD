@@ -113,7 +113,12 @@ namespace OpenMD {
     
     void writeFrame(std::ostream& outStream);    
     void clear() {frame.clear();}
-    void setPosOnly(bool posOnly){posOnly_ = posOnly;}
+    void doPositions(bool pos) {doPositions_  = pos;}
+    void doVelocities(bool vel){doVelocities_ = vel;}
+    void doForces(bool frc)    {doForces_     = frc;}
+    void doVectors(bool vec)   {doVectors_    = vec;}
+    void doCharges(bool chg)   {doCharges_    = chg;}
+
   protected:
     void internalVisit(StuntDouble* sd);
     bool isSelected(StuntDouble* sd);
@@ -125,7 +130,11 @@ namespace OpenMD {
     SelectionManager seleMan;
     SelectionEvaluator evaluator; 
     std::vector<std::string> frame;
-    bool posOnly_;
+    bool doPositions_;
+    bool doVelocities_;
+    bool doForces_;
+    bool doVectors_;
+    bool doCharges_;
   };
 
 

@@ -127,7 +127,7 @@ namespace OpenMD {
       Vector3d tmp= atomInfo->pos - origin_;
       currSnapshot->wrapVector(tmp);
       atomInfo->pos = rotMat_ * tmp;;
-      atomInfo->dipole = rotMat_ * atomInfo->dipole;
+      atomInfo->vec = rotMat_ * atomInfo->vec;
     }
   }
 

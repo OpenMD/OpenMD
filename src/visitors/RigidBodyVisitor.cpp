@@ -88,9 +88,9 @@ namespace OpenMD {
     atomInfo->pos[0] = pos[0];
     atomInfo->pos[1] = pos[1];
     atomInfo->pos[2] = pos[2];
-    atomInfo->dipole[0] = newVec[0];
-    atomInfo->dipole[1] = newVec[1];
-    atomInfo->dipole[2] = newVec[2];
+    atomInfo->vec[0] = newVec[0];
+    atomInfo->vec[1] = newVec[1];
+    atomInfo->vec[2] = newVec[2];
 
     atomData->addAtomInfo(atomInfo);
 
@@ -155,9 +155,9 @@ namespace OpenMD {
     atomInfo->pos[0] = pos[0];
     atomInfo->pos[1] = pos[1];
     atomInfo->pos[2] = pos[2];
-    atomInfo->dipole[0] = 0;
-    atomInfo->dipole[1] = 0;
-    atomInfo->dipole[2] = 0;
+    atomInfo->vec[0] = 0;
+    atomInfo->vec[1] = 0;
+    atomInfo->vec[2] = 0;
 
     atomData = new AtomData; 
     atomData->setID("ATOMDATA");

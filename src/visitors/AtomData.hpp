@@ -50,14 +50,20 @@
 namespace OpenMD {
 
   struct AtomInfo {
-    AtomInfo() : hasCharge(false), hasVector(false) {}
-
+    AtomInfo() : hasCharge(false), hasVector(false), hasVelocity(false), 
+                 hasForce(false), pos(V3Zero), vec(V3Zero), vel(V3Zero),
+                 frc(V3Zero), charge(0.0) {}
+    
     std::string atomTypeName;
     Vector3d pos;
-    Vector3d dipole;  
+    Vector3d vec;  
+    Vector3d vel;  
+    Vector3d frc;  
     RealType charge;
     bool hasCharge;
     bool hasVector;
+    bool hasVelocity;
+    bool hasForce;
   };
 
   class AtomData : public GenericData{

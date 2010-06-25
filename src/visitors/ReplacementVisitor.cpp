@@ -74,7 +74,7 @@ namespace OpenMD {
     AtomInfo* atomInfo = new AtomInfo();
     atomInfo->atomTypeName = name;
     atomInfo->pos = refPos;
-    atomInfo->dipole = refVec;
+    atomInfo->vec = refVec;
     atomInfo->hasVector = true;
     sites_->addAtomInfo(atomInfo);
   }
@@ -82,12 +82,18 @@ namespace OpenMD {
   void ReplacementVisitor::visit(DirectionalAtom *datom) {
     std::vector<AtomInfo*>atoms;
     
-    RotMat3x3d   rotMatrix;
-    RotMat3x3d   rotTrans;
-    AtomInfo *   atomInfo;
+    RotMat3x3d   A;
+    RotMat3x3d   Atrans;
+    Mat3x3d      I;
     Vector3d     pos;
+    Vector3d     vel;
+    Vector3d     frc;
+    Vector3d     trq;
+    Vector3d     j;
+    Mat3x3d      skewMat;
+
     Vector3d     newVec;
-    Quat4d       q;
+    AtomInfo *   atomInfo;
     AtomData *   atomData;
     GenericData *data;
     bool         haveAtomData;
@@ -111,14 +117,28 @@ namespace OpenMD {
       atomData = new AtomData;
       haveAtomData = false;
     }
-    
-    
+        
     pos = datom->getPos();
-    q = datom->getQ();
-    rotMatrix = datom->getA();
+    vel = datom->getVel();
+    frc = datom->getFrc();
+    trq = datom->getTrq();
+    j   = datom->getJ();
+    I   = datom->getI();
+    A   = datom->getA();
+    skewMat(0, 0) =  0;
+    skewMat(0, 1) =  j[2] / I(2, 2);
+    skewMat(0, 2) = -j[1] / I(1, 1);    
+    skewMat(1, 0) = -j[2] / I(2, 2);
+    skewMat(1, 1) =  0;
+    skewMat(1, 2) =  j[0] / I(0, 0);    
+    skewMat(2, 0) =  j[1] / I(1, 1);
+    skewMat(2, 1) = -j[0] / I(0, 0);
+    skewMat(2, 2) =  0;
+
+    Mat3x3d mat = (A * skewMat).transpose();
     
     // We need A^T to convert from body-fixed to space-fixed:
-    rotTrans = rotMatrix.transpose();
+    Atrans = A.transpose();
     
     AtomInfo* siteInfo;
     std::vector<AtomInfo*>::iterator iter;
@@ -126,19 +146,22 @@ namespace OpenMD {
     for( siteInfo = sites_->beginAtomInfo(iter); siteInfo; 
          siteInfo = sites_->nextAtomInfo(iter) ) {
 
-      newVec = rotTrans * siteInfo->pos;    
+      newVec = Atrans * siteInfo->pos;    
       
       atomInfo = new AtomInfo;
       atomInfo->atomTypeName = siteInfo->atomTypeName;
       atomInfo->pos = pos + newVec;
       
       if (siteInfo->hasVector) {
-        newVec = rotTrans * siteInfo->dipole;
-        atomInfo->dipole = newVec;
+        newVec = Atrans * siteInfo->vec;
+        atomInfo->vec = newVec;
       } else {
-        atomInfo->dipole = V3Zero;
+        atomInfo->vec = V3Zero;
       }
-      
+
+      atomInfo->vel = vel + mat * siteInfo->pos;
+      atomInfo->hasVelocity = true;
+            
       atomData->addAtomInfo(atomInfo);
     }
     if (!haveAtomData) {

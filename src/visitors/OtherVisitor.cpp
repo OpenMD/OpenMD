@@ -223,33 +223,37 @@ namespace OpenMD {
     return result;
   }
 
-  //----------------------------------------------------------------------------//
+  //------------------------------------------------------------------------//
 
-  XYZVisitor::XYZVisitor(SimInfo *info) :
-    BaseVisitor(), seleMan(info), evaluator(info){
-      this->info = info;
-      visitorName = "XYZVisitor";
-
-      evaluator.loadScriptString("select all");
-
-      if (!evaluator.isDynamic()) {
-        seleMan.setSelectionSet(evaluator.evaluate());
-      }
-      posOnly_ = false;
+  XYZVisitor::XYZVisitor(SimInfo *info) : BaseVisitor(), seleMan(info), 
+                                          evaluator(info), doPositions_(true),
+                                          doVelocities_(false), 
+                                          doForces_(false), doVectors_(false),
+                                          doCharges_(false) {
+    this->info = info;
+    visitorName = "XYZVisitor";
+    
+    evaluator.loadScriptString("select all");
+    
+    if (!evaluator.isDynamic()) {
+      seleMan.setSelectionSet(evaluator.evaluate());
     }
-
+  }
+  
   XYZVisitor::XYZVisitor(SimInfo *info, const std::string& script) :
-    BaseVisitor(), seleMan(info), evaluator(info) {
-      this->info = info;
-      visitorName = "XYZVisitor";
-
-      evaluator.loadScriptString(script);
-
-      if (!evaluator.isDynamic()) {
-        seleMan.setSelectionSet(evaluator.evaluate());
-      }
-      posOnly_ = false;
+    BaseVisitor(), seleMan(info), evaluator(info), doPositions_(true),
+    doVelocities_(false), doForces_(false), doVectors_(false),
+    doCharges_(false) {
+    
+    this->info = info;
+    visitorName = "XYZVisitor";
+    
+    evaluator.loadScriptString(script);
+    
+    if (!evaluator.isDynamic()) {
+      seleMan.setSelectionSet(evaluator.evaluate());
     }
+  }
     
   void XYZVisitor::visit(Atom *atom) {
     if (isSelected(atom))
@@ -260,86 +264,70 @@ namespace OpenMD {
     if (isSelected(datom))
       internalVisit(datom);
   }
-
+  
   void XYZVisitor::visit(RigidBody *rb) {
     if (isSelected(rb))
       internalVisit(rb);
   }
-
+  
   void XYZVisitor::update() {
     //if dynamic, we need to re-evaluate the selection
     if (evaluator.isDynamic()) {
       seleMan.setSelectionSet(evaluator.evaluate());
     }
   }
-
+  
   void XYZVisitor::internalVisit(StuntDouble *sd) {
     GenericData *                     data;
     AtomData *                        atomData;
     AtomInfo *                        atomInfo;
     std::vector<AtomInfo *>::iterator i;
     char                              buffer[1024];
-
+    
     //if there is not atom data, just skip it
     data = sd->getPropertyByName("ATOMDATA");
-
+    
     if (data != NULL) {
       atomData = dynamic_cast<AtomData *>(data);
-
+      
       if (atomData == NULL)
 	return;
     } else
       return;
 
-    if (posOnly_){
-      for( atomInfo = atomData->beginAtomInfo(i); atomInfo;
-	   atomInfo = atomData->nextAtomInfo(i) ) {
-        if (atomInfo->hasCharge) {
-	  sprintf(buffer,
-		  "%s%15.8f%15.8f%15.8f%15.8f",
-		  atomInfo->atomTypeName.c_str(),
-		  atomInfo->pos[0],
-		  atomInfo->pos[1],
-		  atomInfo->pos[2],
-		  atomInfo->charge); 
-        } else {
-	  sprintf(buffer,
-		"%s%15.8f%15.8f%15.8f",
-		  atomInfo->atomTypeName.c_str(),
-		  atomInfo->pos[0],
-		  atomInfo->pos[1],
-		  atomInfo->pos[2]); 
-        }
-	frame.push_back(buffer);
+    for( atomInfo = atomData->beginAtomInfo(i); atomInfo;
+         atomInfo = atomData->nextAtomInfo(i) ) {
+     
+      std::string line;
+      sprintf(buffer, "%s", atomInfo->atomTypeName.c_str());
+      line += buffer;
+      
+      if (doPositions_){
+        sprintf(buffer, "%15.8f%15.8f%15.8f", atomInfo->pos[0], 
+                atomInfo->pos[1], atomInfo->pos[2]);
+        line += buffer;
+      }      
+      if (doCharges_ && atomInfo->hasCharge) {
+        sprintf(buffer, "%15.8f", atomInfo->charge);
+        line += buffer;
       }
-    }else{
-      for( atomInfo = atomData->beginAtomInfo(i); atomInfo;
-	   atomInfo = atomData->nextAtomInfo(i) ) {
-        if (atomInfo->hasCharge) {
-	sprintf(buffer,
-		"%s%15.8f%15.8f%15.8f%15.8f%15.8f%15.8f%15.8f",
-		atomInfo->atomTypeName.c_str(),
-		atomInfo->pos[0],
-		atomInfo->pos[1],
-		atomInfo->pos[2],
-                atomInfo->charge,
-		atomInfo->dipole[0],
-		atomInfo->dipole[1],
-		atomInfo->dipole[2]); 
-        } else {
-	sprintf(buffer,
-		"%s%15.8f%15.8f%15.8f%15.8f%15.8f%15.8f",
-		atomInfo->atomTypeName.c_str(),	
-		atomInfo->pos[0],
-		atomInfo->pos[1],
-		atomInfo->pos[2],
-		atomInfo->dipole[0],
-		atomInfo->dipole[1],
-		atomInfo->dipole[2]); 
-        }
-	frame.push_back(buffer);
+      if (doVectors_ && atomInfo->hasVector) {
+        sprintf(buffer, "%15.8f%15.8f%15.8f", atomInfo->vec[0], 
+                atomInfo->vec[1], atomInfo->vec[2]);
+        line += buffer;
       }
-    }
+      if (doVelocities_ && atomInfo->hasVelocity) {
+        sprintf(buffer, "%15.8f%15.8f%15.8f", atomInfo->vel[0], 
+                atomInfo->vel[1], atomInfo->vel[2]);
+        line += buffer;
+      }
+      if (doForces_ && atomInfo->hasForce) {
+        sprintf(buffer, "%15.8f%15.8f%15.8f", atomInfo->frc[0], 
+                atomInfo->frc[1], atomInfo->frc[2]);
+        line += buffer;
+      }      
+      frame.push_back(line);
+    }    
   }
 
   bool XYZVisitor::isSelected(StuntDouble *sd) {
@@ -349,13 +337,13 @@ namespace OpenMD {
   void XYZVisitor::writeFrame(std::ostream &outStream) {
     std::vector<std::string>::iterator i;
     char buffer[1024];
-
+    
     if (frame.size() == 0)
       std::cerr << "Current Frame does not contain any atoms" << std::endl;
-
+    
     //total number of atoms  
     outStream << frame.size() << std::endl;
-
+    
     //write comment line
     Snapshot* currSnapshot = info->getSnapshotManager()->getCurrentSnapshot();
     Mat3x3d box = currSnapshot->getHmat();
@@ -366,28 +354,28 @@ namespace OpenMD {
             box(0, 0), box(0, 1), box(0, 2),
             box(1, 0), box(1, 1), box(1, 2),
             box(2, 0), box(2, 1), box(2, 2));
-
+    
     outStream << buffer << std::endl;
-
+    
     for( i = frame.begin(); i != frame.end(); ++i )
       outStream << *i << std::endl;
   }
-
+  
   std::string XYZVisitor::trimmedName(const std::string&atomTypeName) {    
     return atomTypeName.substr(0, atomTypeName.find('-'));
   }
-
+  
   const std::string XYZVisitor::toString() {
     char        buffer[65535];
     std::string result;
-
+    
     sprintf(buffer,
             "------------------------------------------------------------------\n");
     result += buffer;
-
+    
     sprintf(buffer, "Visitor name: %s\n", visitorName.c_str());
     result += buffer;
-
+    
     sprintf(buffer,
             "Visitor Description: assemble the atom data and output xyz file\n");
     result += buffer;
@@ -395,23 +383,23 @@ namespace OpenMD {
     sprintf(buffer,
             "------------------------------------------------------------------\n");
     result += buffer;
-
+    
     return result;
   }
-
+  
   //----------------------------------------------------------------------------//
-
+  
   void PrepareVisitor::internalVisit(Atom *atom) {
     GenericData *data;
     AtomData *   atomData;
-
+    
     //if visited property is  existed, remove it
     data = atom->getPropertyByName("VISITED");
-
+    
     if (data != NULL) {
       atom->removeProperty("VISITED");
     }
-
+    
     //remove atomdata
     data = atom->getPropertyByName("ATOMDATA");
 
@@ -480,8 +468,11 @@ namespace OpenMD {
     visitorName = "WaterTypeVisitor";
     waterTypeList.insert("TIP3P_RB_0");
     waterTypeList.insert("TIP4P_RB_0");
+    waterTypeList.insert("TIP4P-Ew_RB_0");
     waterTypeList.insert("TIP5P_RB_0");
+    waterTypeList.insert("TIP5P-E_RB_0");
     waterTypeList.insert("SPCE_RB_0");
+    waterTypeList.insert("SPC_RB_0");
   }
 
   void WaterTypeVisitor::visit(RigidBody *rb) {
@@ -494,22 +485,22 @@ namespace OpenMD {
     std::vector<AtomInfo *>::iterator i;
 
     rbName = rb->getType();
-
+    
     if (waterTypeList.find(rbName) != waterTypeList.end()) {
       myAtoms = rb->getAtoms();
 
       for( atomIter = myAtoms.begin(); atomIter != myAtoms.end();
 	   ++atomIter ) {
 	data = (*atomIter)->getPropertyByName("ATOMDATA");
-
+        
 	if (data != NULL) {
 	  atomData = dynamic_cast<AtomData *>(data);
-
+          
 	  if (atomData == NULL)
 	    continue;
 	} else
 	  continue;
-
+        
 	for( atomInfo = atomData->beginAtomInfo(i); atomInfo;
 	     atomInfo = atomData->nextAtomInfo(i) ) {
 	  atomInfo->atomTypeName = trimmedName(atomInfo->atomTypeName);

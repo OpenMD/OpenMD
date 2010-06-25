@@ -79,7 +79,11 @@ namespace OpenMD {
     AtomData *atomData;
     AtomInfo *atomInfo;
     Vector3d  pos;
-    
+    Vector3d  vel;
+    Vector3d  frc;
+    Vector3d  u;
+    RealType  c;
+
     if (isVisited(atom))
       return;
     
@@ -89,13 +93,23 @@ namespace OpenMD {
     atomData->setID("ATOMDATA");
     
     pos = atom->getPos();
+    vel = atom->getVel();
+    frc = atom->getFrc();
     atomInfo->atomTypeName = atom->getType();
     atomInfo->pos[0] = pos[0];
     atomInfo->pos[1] = pos[1];
     atomInfo->pos[2] = pos[2];
-    atomInfo->dipole[0] = 0.0;
-    atomInfo->dipole[1] = 0.0;
-    atomInfo->dipole[2] = 0.0;
+    atomInfo->vel[0] = vel[0];
+    atomInfo->vel[1] = vel[1];
+    atomInfo->vel[2] = vel[2];
+    atomInfo->hasVelocity = true;
+    atomInfo->frc[0] = frc[0];
+    atomInfo->frc[1] = frc[1];
+    atomInfo->frc[2] = frc[2];
+    atomInfo->hasForce = true;
+    atomInfo->vec[0] = 0.0;
+    atomInfo->vec[1] = 0.0;
+    atomInfo->vec[2] = 0.0;
     
     atomData->addAtomInfo(atomInfo);
     
@@ -108,12 +122,17 @@ namespace OpenMD {
     AtomData *atomData;
     AtomInfo *atomInfo;
     Vector3d  pos;
+    Vector3d  vel;
+    Vector3d  frc;
     Vector3d  u;
+    RealType  c;
 
     if (isVisited(datom))
       return;
-
+    
     pos = datom->getPos();
+    vel = datom->getVel();
+    frc = datom->getFrc();
     if (datom->getAtomType()->isGayBerne()) {
         u = datom->getA().transpose()*V3Z;         
     } else if (datom->getAtomType()->isMultipole()) {
@@ -127,9 +146,18 @@ namespace OpenMD {
     atomInfo->pos[0] = pos[0];
     atomInfo->pos[1] = pos[1];
     atomInfo->pos[2] = pos[2];
-    atomInfo->dipole[0] = u[0];
-    atomInfo->dipole[1] = u[1];
-    atomInfo->dipole[2] = u[2];
+    atomInfo->vel[0] = vel[0];
+    atomInfo->vel[1] = vel[1];
+    atomInfo->vel[2] = vel[2];
+    atomInfo->hasVelocity = true;
+    atomInfo->frc[0] = frc[0];
+    atomInfo->frc[1] = frc[1];
+    atomInfo->frc[2] = frc[2];
+    atomInfo->hasForce = true;
+    atomInfo->vec[0] = u[0];
+    atomInfo->vec[1] = u[1];
+    atomInfo->vec[2] = u[2];
+    atomInfo->hasVector = true;
 
     atomData->addAtomInfo(atomInfo);
 
