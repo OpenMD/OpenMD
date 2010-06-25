@@ -120,11 +120,11 @@ namespace OpenMD {
         
     pos = datom->getPos();
     vel = datom->getVel();
-    frc = datom->getFrc();
-    trq = datom->getTrq();
+
     j   = datom->getJ();
     I   = datom->getI();
     A   = datom->getA();
+
     skewMat(0, 0) =  0;
     skewMat(0, 1) =  j[2] / I(2, 2);
     skewMat(0, 2) = -j[1] / I(1, 1);    
@@ -134,7 +134,6 @@ namespace OpenMD {
     skewMat(2, 0) =  j[1] / I(1, 1);
     skewMat(2, 1) = -j[0] / I(0, 0);
     skewMat(2, 2) =  0;
-
     Mat3x3d mat = (A * skewMat).transpose();
     
     // We need A^T to convert from body-fixed to space-fixed:
