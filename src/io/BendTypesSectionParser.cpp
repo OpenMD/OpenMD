@@ -151,7 +151,6 @@ namespace OpenMD {
 	simError();
       } else {
 
-	theta0 = tokenizer.nextTokenAsDouble();
 	RealType k4 = tokenizer.nextTokenAsDouble();
 	RealType k3 = tokenizer.nextTokenAsDouble();
 	RealType k2 = tokenizer.nextTokenAsDouble();

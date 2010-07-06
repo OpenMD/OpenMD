@@ -49,19 +49,20 @@ namespace OpenMD {
     
     Vector3d pos1 = atom1_->getPos();
     Vector3d pos2 = ghostAtom->getPos();
+
+    Vector3d r21 = pos1 - pos2;   
+    RealType d21 = r21.length();
     
-    Vector3d r12 = pos1 - pos2;
-    RealType d12 = r12.length();
-    
-    RealType d12inv = 1.0 / d12;
+    RealType d21inv = 1.0 / d21;
    
-    Vector3d r32 = ghostAtom->getA().getColumn(2);
-    RealType d32 = r32.length();
+    // we need the transpose of A to get the lab fixed vector:
+    Vector3d r23 = ghostAtom->getA().transpose().getColumn(2);
+    RealType d23 = r23.length();
     
-    RealType d32inv = 1.0 / d32;
+    RealType d23inv = 1.0 / d23;
     
-    RealType cosTheta = dot(r12, r32) / (d12 * d32);
-    
+    RealType cosTheta = dot(r21, r23) / (d21 * d23);
+
     //check roundoff     
     if (cosTheta > 1.0) {
       cosTheta = 1.0;
@@ -70,32 +71,35 @@ namespace OpenMD {
     }
     
     RealType theta = acos(cosTheta);
+
+    RealType dVdTheta;
     
-    RealType firstDerivative;
-    
-    bendType_->calcForce(theta, potential_, firstDerivative);
+    bendType_->calcForce(theta, potential_, dVdTheta);
     
     RealType sinTheta = sqrt(1.0 - cosTheta * cosTheta);
     
-    if (fabs(sinTheta) < 1.0E-12) {
-      sinTheta = 1.0E-12;
+    if (fabs(sinTheta) < 1.0E-6) {
+      sinTheta = 1.0E-6;
     }
     
-    RealType commonFactor1 = -firstDerivative / sinTheta * d12inv;
-    RealType commonFactor2 = -firstDerivative / sinTheta * d32inv;
+    RealType commonFactor1 = dVdTheta / sinTheta * d21inv;
+    RealType commonFactor2 = dVdTheta / sinTheta * d23inv;
     
-    Vector3d force1 = commonFactor1*(r12*(d12inv*cosTheta) - r32*d32inv);
-    Vector3d force3 = commonFactor2*(r32*(d32inv*cosTheta) - r12*d12inv);
+    Vector3d force1 = commonFactor1 * (r23 * d23inv - r21*d21inv*cosTheta);
+    Vector3d force3 = commonFactor2 * (r21 * d21inv - r23*d23inv*cosTheta);
+
+    // Total force in current bend is zero
+
     atom1_->addFrc(force1);
     ghostAtom->addFrc(-force1);
-    /**@todo test correctness */
-    ghostAtom->addTrq(cross(r32, force3) );    
+
+    ghostAtom->addTrq( cross(r23, force3) );    
 
     atom1_->addParticlePot(potential_);
     ghostAtom->addParticlePot(potential_);
 
     angle = theta /M_PI * 180.0;
-    
+   
   }  
 } //end namespace OpenMD
 
