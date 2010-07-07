@@ -73,6 +73,8 @@ int main(int argc,char* argv[]){
   std::string revision;
   //convert a macro from compiler to a string in c++
   STR_DEFINE(revision, SVN_REV );
+  if (revision.empty()) revision.assign("release");
+
   revision.resize(8,' ');
 
 #ifdef IS_MPI
