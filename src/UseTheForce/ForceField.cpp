@@ -57,11 +57,13 @@
 namespace OpenMD {
 
   ForceField::ForceField() { 
+
     char* tempPath; 
     tempPath = getenv("FORCE_PARAM_PATH");
-
+    
     if (tempPath == NULL) {
-      ffPath_ = "ORNULL(FRC_PATH)";
+      //convert a macro from compiler to a string in c++
+      STR_DEFINE(ffPath_, FRC_PATH );
     } else {
       ffPath_ = tempPath;
     }
