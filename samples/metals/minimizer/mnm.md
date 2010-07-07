@@ -14,7 +14,7 @@ component{
 
 //minimizer = CG;
 //minimizerMaxIter = 5000;
-//minimizerWriteFrq = 1;
+//minimizerWriteFreq = 1;
 //minimizerStepSize = 0.1;
 
 ensemble = NVT;

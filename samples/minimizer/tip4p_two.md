@@ -11,8 +11,8 @@ component{
 
 minimizer = CG;
 minimizerMaxIter = 5000;
-minimizerWriteFrq = 1;
-minimizerStepSize = 0.0001;
+minimizerWriteFreq = 10;
+minimizerStepSize = 0.05;
 
 forceField = "DUFF";
 electrostaticSummationMethod = "none";

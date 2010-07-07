@@ -59,8 +59,6 @@
 
 using namespace OpenMD;
 
-char* __get_svn_version();
-
 int main(int argc,char* argv[]){
   
   // first things first, all of the initializations
@@ -71,7 +69,12 @@ int main(int argc,char* argv[]){
    
   initSimError();           // the error handler
   srand48( 1337 );          // the random number generator.
-  
+
+  std::string revision;
+  //convert a macro from compiler to a string in c++
+  STR_DEFINE(revision, SVN_REV );
+  revision.resize(8,' ');
+
 #ifdef IS_MPI
   if( worldRank == 0 ){
 #endif
@@ -84,8 +87,8 @@ int main(int argc,char* argv[]){
       "  | \\____/ .___/\\___/_/ /_//_/  /_//_____/    Copyright 2004-2010 by the  |\n"<<
       "  |     /_/                                   University of Notre Dame.   |\n"<<
       "  |                                                                       |\n"<<
-      "  |            version " << 
-      OPENMD_VERSION_MAJOR << "." << OPENMD_VERSION_MINOR << "  Revision:" << __get_svn_version() << 
+      "  |        version " << 
+      OPENMD_VERSION_MAJOR << "." << OPENMD_VERSION_MINOR << "  Revision:" << revision << 
       "     http://www.openmd.net       |\n"<<
       "  |                                                                       |\n"<<
       "  | OpenMD is an OpenScience project.  All source code is available for   |\n"<<
@@ -194,14 +197,3 @@ int main(int argc,char* argv[]){
 
   return 0 ;
 }
-
-  char svnVersionString[1024];
-  char* __get_svn_version(){
-    int howMuchToCopy=0;
-    const char *theVersion="$Revision$";
-    howMuchToCopy=strlen(theVersion+11) - 2;
-    assert(howMuchToCopy>0);
-    memcpy(svnVersionString,  theVersion+11, howMuchToCopy);
-    svnVersionString[howMuchToCopy] = '\0';
-    return svnVersionString;
-  }

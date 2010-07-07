@@ -127,6 +127,7 @@ ForceParamDir   = $(OpenMDHome)/forceFields
 SampleSimDir    = $(OpenMDHome)/samples
 InstallBinDir   = $(OpenMDHome)/bin
 InstallDocDir   = $(OpenMDHome)/doc
+SvnDeclare     :=-DSVN_REV="$(shell svnversion -n . | sed -e "s/.*://" -e "s/\([0-9]*\).*/\1/" | grep "[0-9]")"
 FrcDeclare      = -DFRC_PATH="$(ForceParamDir)"
 F90Declare      = -D__FORTRAN90
 UseSingle       = @USE_SINGLE_PRECISION@
@@ -405,10 +406,10 @@ JavaArchiverOptions    =
 JniOptions             =
 RmiOptions             = -d $(TargetDir) -classpath $(ClassPath) \
 			 -sourcepath $(SourceDir)
-COptions               = $(FrcDeclare) $(SingleDeclare) @CFLAGS@
-CParallelOptions       = $(FrcDeclare) $(SingleDeclare) $(ParallelDeclare) @CFLAGS@
-CppOptions             = $(FrcDeclare) $(SingleDeclare) @CXXFLAGS@
-CppParallelOptions     = $(FrcDeclare) $(SingleDeclare) $(ParallelDeclare) @CXXFLAGS@
+COptions               = $(SvnDeclare) $(FrcDeclare) $(SingleDeclare) @CFLAGS@
+CParallelOptions       = $(SvnDeclare) $(FrcDeclare) $(SingleDeclare) $(ParallelDeclare) @CFLAGS@
+CppOptions             = $(SvnDeclare) $(FrcDeclare) $(SingleDeclare) @CXXFLAGS@
+CppParallelOptions     = $(SvnDeclare) $(FrcDeclare) $(SingleDeclare) $(ParallelDeclare) @CXXFLAGS@
 ifeq "$(UseSingle)" "yes"
 FortranOptions         =  @FCFLAGS@ @MODDIRFLAG@$(SourceDir) @MODDIRFLAG@$(TargetDir) @PREPDEFFLAG@$(SingleDeclare) @FCFLAGS_SRCEXT@
 FortranParallelOptions =  @FCFLAGS@ @MODDIRFLAG@$(SourceDir) @MODDIRFLAG@$(ParallelTargetDir) @PREPDEFFLAG@$(SingleDeclare) @PREPDEFFLAG@$(ParallelDeclare) @FCFLAGS_SRCEXT@ 
