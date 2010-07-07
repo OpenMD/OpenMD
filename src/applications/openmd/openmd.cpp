@@ -70,12 +70,17 @@ int main(int argc,char* argv[]){
   initSimError();           // the error handler
   srand48( 1337 );          // the random number generator.
 
-  std::string revision;
+  std::string svnrev;
   //convert a macro from compiler to a string in c++
-  STR_DEFINE(revision, SVN_REV );
-  if (revision.empty()) revision.assign("release");
+  STR_DEFINE(svnrev, SVN_REV );
 
-  revision.resize(8,' ');
+  std::string revision;
+
+  if (!svnrev.empty()) {
+     revision.assign("  Revision: " + svnrev);
+  }
+
+  revision.resize(19,' ');
 
 #ifdef IS_MPI
   if( worldRank == 0 ){
@@ -90,7 +95,7 @@ int main(int argc,char* argv[]){
       "  |     /_/                                   University of Notre Dame.   |\n"<<
       "  |                                                                       |\n"<<
       "  |        version " << 
-      OPENMD_VERSION_MAJOR << "." << OPENMD_VERSION_MINOR << "  Revision:" << revision << 
+      OPENMD_VERSION_MAJOR << "." << OPENMD_VERSION_MINOR << revision << 
       "     http://www.openmd.net       |\n"<<
       "  |                                                                       |\n"<<
       "  | OpenMD is an OpenScience project.  All source code is available for   |\n"<<
