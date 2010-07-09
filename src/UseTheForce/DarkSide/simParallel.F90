@@ -963,6 +963,6 @@ contains
 
 #endif
 
-#endif // is_mpi
+#endif
 end module mpiSimulation
 

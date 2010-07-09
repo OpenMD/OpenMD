@@ -73,13 +73,13 @@ namespace OpenMD {
     velocitizer_->removeComDrift();
     
     // initialize the forces before the first step
-    calcForce(true, true);
+    calcForce();
     
     // execute the constraint algorithm to make sure that the system is
     // constrained at the very beginning  
     if (info_->getNGlobalConstraints() > 0) {
       rattle->constraintA();
-      calcForce(true, true);
+      calcForce();
       rattle->constraintB();      
       //copy the current snapshot to previous snapshot
       info_->getSnapshotManager()->advance();
@@ -216,14 +216,13 @@ namespace OpenMD {
   void VelocityVerletIntegrator::integrateStep() { 
   
     moveA();
-    calcForce(needPotential, needStress);
+    calcForce();
     moveB();
   }
 
 
-  void VelocityVerletIntegrator::calcForce(bool needPotential,
-					   bool needStress) { 
-    forceMan_->calcForces(needPotential, needStress);
+  void VelocityVerletIntegrator::calcForce() { 
+    forceMan_->calcForces();
   }
 
   DumpWriter* VelocityVerletIntegrator::createDumpWriter() {

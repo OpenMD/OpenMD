@@ -54,7 +54,7 @@ namespace OpenMD {
     ZconstraintForceManager(SimInfo* info);
     ~ZconstraintForceManager();
         
-    virtual void calcForces(bool needPotential, bool needStress);
+    virtual void calcForces();
 
     RealType getZConsTime() { return zconsTime_; }
     std::string getZConsOutput() { return zconsOutput_; }    

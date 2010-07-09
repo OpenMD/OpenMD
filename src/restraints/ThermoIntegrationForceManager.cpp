@@ -90,8 +90,7 @@ namespace OpenMD {
   ThermoIntegrationForceManager::~ThermoIntegrationForceManager(){
   }
   
-  void ThermoIntegrationForceManager::calcForces(bool needPotential, 
-                                                 bool needStress){
+  void ThermoIntegrationForceManager::calcForces(){
     Snapshot* curSnapshot;
     SimInfo::MoleculeIterator mi;
     Molecule* mol;
@@ -102,7 +101,7 @@ namespace OpenMD {
     Mat3x3d tempTau;
     
     // perform the standard calcForces first
-    ForceManager::calcForces(needPotential, needStress);
+    ForceManager::calcForces();
     
     curSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
 

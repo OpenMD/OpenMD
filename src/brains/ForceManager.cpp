@@ -59,7 +59,7 @@
 #include "primitives/Inversion.hpp"
 namespace OpenMD {
 
-  void ForceManager::calcForces(bool needPotential, bool needStress) {
+  void ForceManager::calcForces() {
     
     if (!info_->isFortranInitialized()) {
       info_->update();
@@ -69,9 +69,9 @@ namespace OpenMD {
     
     calcShortRangeInteraction();
 
-    calcLongRangeInteraction(needPotential, needStress);
+    calcLongRangeInteraction();
 
-    postCalculation(needStress);
+    postCalculation();
     
   }
   
@@ -223,8 +223,7 @@ namespace OpenMD {
     
   }
   
-  void ForceManager::calcLongRangeInteraction(bool needPotential, 
-                                              bool needStress) {
+  void ForceManager::calcLongRangeInteraction() {
     Snapshot* curSnapshot;
     DataStorage* config;
     RealType* frc;
@@ -277,8 +276,6 @@ namespace OpenMD {
     RealType longRangePotential[LR_POT_TYPES];
     RealType lrPot = 0.0;
     Vector3d totalDipole;
-    short int passedCalcPot = needPotential;
-    short int passedCalcStress = needStress;
     int isError = 0;
 
     for (int i=0; i<LR_POT_TYPES;i++){
@@ -294,8 +291,6 @@ namespace OpenMD {
 	        tau.getArrayPointer(),
                 longRangePotential, 
                 particlePot,
-		&passedCalcPot,
-                &passedCalcStress,
                 &isError );
     
     if( isError ){
@@ -324,7 +319,7 @@ namespace OpenMD {
   }
 
   
-  void ForceManager::postCalculation(bool needStress) {
+  void ForceManager::postCalculation() {
     SimInfo::MoleculeIterator mi;
     Molecule* mol;
     Molecule::RigidBodyIterator rbIter;
@@ -337,23 +332,17 @@ namespace OpenMD {
          mol = info_->nextMolecule(mi)) {
       for (rb = mol->beginRigidBody(rbIter); rb != NULL; 
            rb = mol->nextRigidBody(rbIter)) { 
-        if (needStress) {          
-          Mat3x3d rbTau = rb->calcForcesAndTorquesAndVirial();
-          tau += rbTau;
-        } else{
-          rb->calcForcesAndTorques();
-        }
+        Mat3x3d rbTau = rb->calcForcesAndTorquesAndVirial();
+        tau += rbTau;
       }
     }
-
-    if (needStress) {
+    
 #ifdef IS_MPI
-      Mat3x3d tmpTau(tau);
-      MPI_Allreduce(tmpTau.getArrayPointer(), tau.getArrayPointer(), 
-                    9, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
+    Mat3x3d tmpTau(tau);
+    MPI_Allreduce(tmpTau.getArrayPointer(), tau.getArrayPointer(), 
+                  9, MPI_REALTYPE, MPI_SUM, MPI_COMM_WORLD);
 #endif
-      curSnapshot->statData.setTau(tau);
-    } 
+    curSnapshot->statData.setTau(tau);
   }
 
 } //end namespace OpenMD

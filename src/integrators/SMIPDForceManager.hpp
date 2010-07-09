@@ -65,7 +65,7 @@ namespace OpenMD {
     SMIPDForceManager(SimInfo * info);
     
   protected:
-    virtual void postCalculation(bool needStress);
+    virtual void postCalculation();
     
   private:
     std::vector<Vector3d> genTriangleForces(int nTriangles, RealType variance);

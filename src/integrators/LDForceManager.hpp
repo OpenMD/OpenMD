@@ -91,7 +91,7 @@ namespace OpenMD {
 
 
   protected:
-    virtual void postCalculation(bool needStress);
+    virtual void postCalculation();
     
   private:
     std::map<std::string, HydroProp*> parseFrictionFile(const std::string& filename);    

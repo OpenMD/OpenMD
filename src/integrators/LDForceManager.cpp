@@ -259,7 +259,7 @@ namespace OpenMD {
     return props;
   }
    
-  void LDForceManager::postCalculation(bool needStress){
+  void LDForceManager::postCalculation(){
     SimInfo::MoleculeIterator i;
     Molecule::IntegrableObjectIterator  j;
     Molecule* mol;
@@ -468,7 +468,7 @@ namespace OpenMD {
     if(!simParams->getUsePeriodicBoundaryConditions()) 
       veloMunge->removeAngularDrift();
 
-    ForceManager::postCalculation(needStress);   
+    ForceManager::postCalculation();   
   }
 
 void LDForceManager::genRandomForceAndTorque(Vector3d& force, Vector3d& torque, unsigned int index, RealType variance) {

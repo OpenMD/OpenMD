@@ -103,7 +103,7 @@ namespace OpenMD {
         
   private:
         
-    virtual void calcForce(bool needPotential, bool needStress);    
+    virtual void calcForce();    
         
     virtual void moveA() = 0;
         

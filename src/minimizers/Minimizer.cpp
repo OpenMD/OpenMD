@@ -902,7 +902,7 @@ namespace OpenMD {
 
 
   RealType Minimizer::calcPotential() {
-    forceMan->calcForces(true, false);
+    forceMan->calcForces();
 
     Snapshot* curSnapshot = info->getSnapshotManager()->getCurrentSnapshot();
     RealType potential_local = curSnapshot->statData[Stats::LONG_RANGE_POTENTIAL] + 

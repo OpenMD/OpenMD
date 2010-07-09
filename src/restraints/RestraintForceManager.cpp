@@ -305,9 +305,9 @@ namespace OpenMD {
     currRestTime_ = currSnapshot_->getTime();
   }
 
-  void RestraintForceManager::calcForces(bool needPotential, bool needStress){
+  void RestraintForceManager::calcForces(){
 
-    ForceManager::calcForces(needPotential, needStress);    
+    ForceManager::calcForces();    
     RealType restPot_local, restPot;
 
     restPot_local = doRestraints(1.0);

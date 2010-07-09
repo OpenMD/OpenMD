@@ -148,7 +148,7 @@ namespace OpenMD {
     }   
   }  
    
-  void SMIPDForceManager::postCalculation(bool needStress){
+  void SMIPDForceManager::postCalculation(){
     SimInfo::MoleculeIterator i;
     Molecule::IntegrableObjectIterator  j;
     Molecule* mol;
@@ -207,7 +207,7 @@ namespace OpenMD {
     
     Snapshot* currSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
     currSnapshot->setVolume(surfaceMesh_->getVolume());    
-    ForceManager::postCalculation(needStress);   
+    ForceManager::postCalculation();   
   }
   
   

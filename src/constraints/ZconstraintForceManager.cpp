@@ -240,8 +240,8 @@ namespace OpenMD {
     currZconsTime_ = currSnapshot_->getTime();
   }
 
-  void ZconstraintForceManager::calcForces(bool needPotential, bool needStress){
-    ForceManager::calcForces(needPotential, needStress);
+  void ZconstraintForceManager::calcForces(){
+    ForceManager::calcForces();
     
     if (usingZconsGap_){
       updateZPos();

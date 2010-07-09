@@ -273,8 +273,8 @@ contains
   
   
   !! Calculates rho_r
-  subroutine calc_sc_prepair_rho(atom1, atom2, atid1, atid2, d, r, rijsq, rho_i_at_j, rho_j_at_i)
-    integer :: atom1, atom2, atid1, atid2
+  subroutine calc_sc_prepair_rho(atid1, atid2, d, r, rijsq, rho_i_at_j, rho_j_at_i)
+    integer :: atid1, atid2
     real(kind = dp), dimension(3) :: d
     real(kind = dp), intent(inout)               :: r
     real(kind = dp), intent(inout)               :: rijsq
@@ -336,11 +336,11 @@ contains
   end subroutine calc_sc_preforce_Frho
   
   !! Does Sutton-Chen  pairwise Force calculation.  
-  subroutine do_sc_pair(atom1, atom2, atid1, atid2, d, rij, r2, sw, vpair, &
+  subroutine do_sc_pair(atid1, atid2, d, rij, r2, sw, vpair, &
        fpair, pot, f1, rho_i, rho_j, dfrhodrho_i, dfrhodrho_j, &
-       fshift_i, fshift_j, do_pot)
+       fshift_i, fshift_j)
     !Arguments    
-    integer, intent(in) ::  atom1, atom2, atid1, atid2
+    integer, intent(in) ::  atid1, atid2
     real( kind = dp ), intent(in) :: rij, r2
     real( kind = dp ) :: pot, sw, vpair
     real( kind = dp ), dimension(3) :: f1
@@ -348,9 +348,7 @@ contains
     real( kind = dp ), intent(inout), dimension(3) :: fpair
     real( kind = dp ), intent(inout) :: dfrhodrho_i, dfrhodrho_j 
     real( kind = dp ), intent(inout) :: rho_i, rho_j 
-    real( kind = dp ), intent(inout):: fshift_i, fshift_j
-    
-    logical, intent(in) :: do_pot
+    real( kind = dp ), intent(inout):: fshift_i, fshift_j   
     
     real( kind = dp ) :: drdx, drdy, drdz
     real( kind = dp ) :: dvpdr
@@ -389,29 +387,23 @@ contains
     fx = dudr * drdx
     fy = dudr * drdy
     fz = dudr * drdz
+        
+    ! particle_pot is the difference between the full potential 
+    ! and the full potential without the presence of a particular
+    ! particle (atom1).
+    !
+    ! This reduces the density at other particle locations, so
+    ! we need to recompute the density at atom2 assuming atom1
+    ! didn't contribute.  This then requires recomputing the
+    ! density functional for atom2 as well.
+    !
+    ! Most of the particle_pot heavy lifting comes from the
+    ! pair interaction, and will be handled by vpair.
     
-    if (do_pot) then
-       
-       ! particle_pot is the difference between the full potential 
-       ! and the full potential without the presence of a particular
-       ! particle (atom1).
-       !
-       ! This reduces the density at other particle locations, so
-       ! we need to recompute the density at atom2 assuming atom1
-       ! didn't contribute.  This then requires recomputing the
-       ! density functional for atom2 as well.
-       !
-       ! Most of the particle_pot heavy lifting comes from the
-       ! pair interaction, and will be handled by vpair.
-       
-       fshift_i = -SCList%SCTypes(mytype_atom1)%c * &
-            SCList%SCTypes(mytype_atom1)%epsilon * &
-            sqrt(rho_i-rhtmp)
-       fshift_j = -SCList%SCTypes(mytype_atom2)%c * &
-            SCList%SCTypes(mytype_atom2)%epsilon * &
-            sqrt(rho_j-rhtmp)     
-    end if
-    
+    fshift_i = -SCList%SCTypes(mytype_atom1)%c * &
+         SCList%SCTypes(mytype_atom1)%epsilon * sqrt(rho_i-rhtmp)
+    fshift_j = -SCList%SCTypes(mytype_atom2)%c * &
+         SCList%SCTypes(mytype_atom2)%epsilon * sqrt(rho_j-rhtmp)         
     
     pot = pot + pot_temp
     

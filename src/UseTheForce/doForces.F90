@@ -796,7 +796,7 @@ contains
   !! Does force loop over i,j pairs. Calls do_pair to calculates forces.
   !------------------------------------------------------------->
   subroutine do_force_loop(q, q_group, A, eFrame, f, t, tau, pot, particle_pot, &
-       do_pot_c, do_stress_c, error)
+       error)
     !! Position array provided by C, dimensioned by getNlocal
     real ( kind = dp ), dimension(3, nLocal) :: q
     !! molecular center-of-mass position array
@@ -814,9 +814,7 @@ contains
     real( kind = dp), dimension(9) :: tau   
     real ( kind = dp ),dimension(LR_POT_TYPES) :: pot
     real( kind = dp ), dimension(nLocal) :: particle_pot
-    logical ( kind = 2) :: do_pot_c, do_stress_c
-    logical :: do_pot
-    logical :: do_stress
+
     logical :: in_switching_region
 #ifdef IS_MPI 
     real( kind = DP ), dimension(LR_POT_TYPES) :: pot_local
@@ -916,9 +914,6 @@ contains
        return
     end if
     call zero_work_arrays()
-
-    do_pot = do_pot_c
-    do_stress = do_stress_c
 
     ! Gather all information needed by all force loops:
 
@@ -1087,32 +1082,30 @@ contains
                          if (loop .eq. PREPAIR_LOOP) then
 #ifdef IS_MPI                      
                             call do_prepair(atom1, atom2, ratmsq, d_atm, sw, &
-                                 rgrpsq, d_grp, rCut, do_pot, do_stress, &
+                                 rgrpsq, d_grp, rCut, &
                                  eFrame, A, f, t, pot_local)
 #else
                             call do_prepair(atom1, atom2, ratmsq, d_atm, sw, &
-                                 rgrpsq, d_grp, rCut, do_pot, do_stress, &
+                                 rgrpsq, d_grp, rCut, &
                                  eFrame, A, f, t, pot)
 #endif                                               
                          else
 #ifdef IS_MPI                      
                             call do_pair(atom1, atom2, ratmsq, d_atm, sw, &
-                                 do_pot, eFrame, A, f, t, pot_local, particle_pot, vpair, &
+                                 eFrame, A, f, t, pot_local, particle_pot, vpair, &
                                  fpair, d_grp, rgrp, rCut, topoDist)
                             ! particle_pot will be accumulated from row & column
                             ! arrays later
 #else
                             call do_pair(atom1, atom2, ratmsq, d_atm, sw, &
-                                 do_pot, eFrame, A, f, t, pot, particle_pot, vpair, &
+                                 eFrame, A, f, t, pot, particle_pot, vpair, &
                                  fpair, d_grp, rgrp, rCut, topoDist)
 #endif
                             vij = vij + vpair
                             fij(1) = fij(1) + fpair(1)
                             fij(2) = fij(2) + fpair(2)
                             fij(3) = fij(3) + fpair(3)
-                            if (do_stress) then
-                               call add_stress_tensor(d_atm, fpair, tau)
-                            endif
+                            call add_stress_tensor(d_atm, fpair, tau)
                          endif
                       enddo inner
                    enddo
@@ -1126,9 +1119,9 @@ contains
                          fij(2) = fij(2) + fg(2)
                          fij(3) = fij(3) + fg(3)
                          
-                         if (do_stress .and. (n_in_i .eq. 1).and.(n_in_j .eq. 1)) then
+                         if ((n_in_i .eq. 1).and.(n_in_j .eq. 1)) then
                             call add_stress_tensor(d_atm, fg, tau)
-                         endif  
+                         endif
                          
                          do ia=groupStartRow(i), groupStartRow(i+1)-1
                             atom1=groupListRow(ia)
@@ -1146,9 +1139,9 @@ contains
                             f(3,atom1) = f(3,atom1) + fg(3)
 #endif
                             if (n_in_i .gt. 1) then
-                               if (do_stress.and.SIM_uses_AtomicVirial) then
-                                  ! find the distance between the atom and the center of
-                                  ! the cutoff group:
+                               if (SIM_uses_AtomicVirial) then
+                                  ! find the distance between the atom
+                                  ! and the center of the cutoff group:
 #ifdef IS_MPI
                                   call get_interatomic_vector(q_Row(:,atom1), &
                                        q_group_Row(:,i), dag, rag)
@@ -1177,9 +1170,9 @@ contains
                             f(3,atom2) = f(3,atom2) + fg(3)
 #endif
                             if (n_in_j .gt. 1) then
-                               if (do_stress.and.SIM_uses_AtomicVirial) then
-                                  ! find the distance between the atom and the center of
-                                  ! the cutoff group:
+                               if (SIM_uses_AtomicVirial) then
+                                  ! find the distance between the atom
+                                  ! and the center of the cutoff group:
 #ifdef IS_MPI
                                   call get_interatomic_vector(q_Col(:,atom2), &
                                        q_group_Col(:,j), dag, rag)
@@ -1187,12 +1180,12 @@ contains
                                   call get_interatomic_vector(q(:,atom2), &
                                        q_group(:,j), dag, rag)
 #endif
-                                  call add_stress_tensor(dag,fg,tau)                               
+                                  call add_stress_tensor(dag,fg,tau)
                                endif
-                            endif                            
+                            endif
                          enddo
                       endif
-                      !if (do_stress.and.(.not.SIM_uses_AtomicVirial)) then
+                      !if (.not.SIM_uses_AtomicVirial) then
                       !   call add_stress_tensor(d_grp, fij, tau) 
                       !endif
                    endif
@@ -1261,53 +1254,50 @@ contains
        end do
     endif
 
-    if (do_pot) then
-       ! scatter/gather pot_row into the members of my column
-       do i = 1,LR_POT_TYPES
-          call scatter(pot_Row(i,:), pot_Temp(i,:), plan_atom_row)
-       end do
-       ! scatter/gather pot_local into all other procs
-       ! add resultant to get total pot
-       do i = 1, nlocal
-          pot_local(1:LR_POT_TYPES) = pot_local(1:LR_POT_TYPES) &
-               + pot_Temp(1:LR_POT_TYPES,i)
-       enddo
-
-       do i = 1,LR_POT_TYPES
-          particle_pot(1:nlocal) = particle_pot(1:nlocal) + pot_Temp(i,1:nlocal)
-       enddo
-
-       pot_Temp = 0.0_DP 
-
-       do i = 1,LR_POT_TYPES
-          call scatter(pot_Col(i,:), pot_Temp(i,:), plan_atom_col)
-       end do
-
-       do i = 1, nlocal
-          pot_local(1:LR_POT_TYPES) = pot_local(1:LR_POT_TYPES)&
-               + pot_Temp(1:LR_POT_TYPES,i)
-       enddo
-
-       do i = 1,LR_POT_TYPES
-          particle_pot(1:nlocal) = particle_pot(1:nlocal) + pot_Temp(i,1:nlocal)
-       enddo
-       
-       ppot_Temp = 0.0_DP
-       
-       call scatter(ppot_Row(:), ppot_Temp(:), plan_atom_row)
-       do i = 1, nlocal
-          particle_pot(i) = particle_pot(i) + ppot_Temp(i)
-       enddo
-
-       ppot_Temp = 0.0_DP
-
-       call scatter(ppot_Col(:), ppot_Temp(:), plan_atom_col)
-       do i = 1, nlocal
-          particle_pot(i) = particle_pot(i) + ppot_Temp(i)
-       enddo
-
-
-    endif
+    ! scatter/gather pot_row into the members of my column
+    do i = 1,LR_POT_TYPES
+       call scatter(pot_Row(i,:), pot_Temp(i,:), plan_atom_row)
+    end do
+    ! scatter/gather pot_local into all other procs
+    ! add resultant to get total pot
+    do i = 1, nlocal
+       pot_local(1:LR_POT_TYPES) = pot_local(1:LR_POT_TYPES) &
+            + pot_Temp(1:LR_POT_TYPES,i)
+    enddo
+    
+    do i = 1,LR_POT_TYPES
+       particle_pot(1:nlocal) = particle_pot(1:nlocal) + pot_Temp(i,1:nlocal)
+    enddo
+    
+    pot_Temp = 0.0_DP 
+    
+    do i = 1,LR_POT_TYPES
+       call scatter(pot_Col(i,:), pot_Temp(i,:), plan_atom_col)
+    end do
+    
+    do i = 1, nlocal
+       pot_local(1:LR_POT_TYPES) = pot_local(1:LR_POT_TYPES)&
+            + pot_Temp(1:LR_POT_TYPES,i)
+    enddo
+    
+    do i = 1,LR_POT_TYPES
+       particle_pot(1:nlocal) = particle_pot(1:nlocal) + pot_Temp(i,1:nlocal)
+    enddo
+    
+    ppot_Temp = 0.0_DP
+    
+    call scatter(ppot_Row(:), ppot_Temp(:), plan_atom_row)
+    do i = 1, nlocal
+       particle_pot(i) = particle_pot(i) + ppot_Temp(i)
+    enddo
+    
+    ppot_Temp = 0.0_DP
+    
+    call scatter(ppot_Col(:), ppot_Temp(:), plan_atom_col)
+    do i = 1, nlocal
+       particle_pot(i) = particle_pot(i) + ppot_Temp(i)
+    enddo
+   
 #endif
 
     if (SIM_requires_postpair_calc) then
@@ -1338,11 +1328,9 @@ contains
              enddo
 
 #ifdef IS_MPI
-             call self_self(i, eFrame, skch, pot_local(ELECTROSTATIC_POT), &
-                  t, do_pot)
+             call self_self(i, eFrame, skch, pot_local(ELECTROSTATIC_POT), t)
 #else
-             call self_self(i, eFrame, skch, pot(ELECTROSTATIC_POT), &
-                  t, do_pot)
+             call self_self(i, eFrame, skch, pot(ELECTROSTATIC_POT), t)
 #endif
           endif
   
@@ -1362,10 +1350,10 @@ contains
                    call get_switch(ratmsq, sw, dswdr, rVal,in_switching_region)
 #ifdef IS_MPI
                    call rf_self_excludes(i, j, sw, 1.0_dp, eFrame, d_atm, rVal, &
-                        vpair, pot_local(ELECTROSTATIC_POT), f, t, do_pot)
+                        vpair, pot_local(ELECTROSTATIC_POT), f, t)
 #else
                    call rf_self_excludes(i, j, sw, 1.0_dp, eFrame, d_atm, rVal, &
-                        vpair, pot(ELECTROSTATIC_POT), f, t, do_pot)
+                        vpair, pot(ELECTROSTATIC_POT), f, t)
 #endif
                 endif
              enddo
@@ -1385,15 +1373,13 @@ contains
     endif
 
 #ifdef IS_MPI
-    if (do_pot) then
 #ifdef SINGLE_PRECISION
-       call mpi_allreduce(pot_local, pot, LR_POT_TYPES,mpi_real,mpi_sum, &
-            mpi_comm_world,mpi_err)            
+    call mpi_allreduce(pot_local, pot, LR_POT_TYPES,mpi_real,mpi_sum, &
+         mpi_comm_world,mpi_err)            
 #else
-       call mpi_allreduce(pot_local, pot, LR_POT_TYPES,mpi_double_precision, &
-            mpi_sum, mpi_comm_world,mpi_err)            
+    call mpi_allreduce(pot_local, pot, LR_POT_TYPES,mpi_double_precision, &
+         mpi_sum, mpi_comm_world,mpi_err)            
 #endif
-    endif
         
     if (do_box_dipole) then
 
@@ -1466,7 +1452,7 @@ contains
 
   end subroutine do_force_loop
 
-  subroutine do_pair(i, j, rijsq, d, sw, do_pot, &
+  subroutine do_pair(i, j, rijsq, d, sw, &
        eFrame, A, f, t, pot, particle_pot, vpair, &
        fpair, d_grp, r_grp, rCut, topoDist)
 
@@ -1480,7 +1466,6 @@ contains
     real( kind = dp ), dimension(3,nLocal) :: f
     real( kind = dp ), dimension(3,nLocal) :: t
 
-    logical, intent(inout) :: do_pot
     integer, intent(in) :: i, j
     real ( kind = dp ), intent(inout) :: rijsq
     real ( kind = dp ), intent(inout) :: r_grp
@@ -1501,10 +1486,6 @@ contains
     integer :: k
 
     integer :: iHash
-
-!!$    write(*,*) i, j, rijsq, d(1), d(2), d(3), sw, do_pot
-!!$    write(*,*) particle_pot(1), vpair, fpair(1), fpair(2), fpair(3)
-!!$    write(*,*) rCut
 
     r = sqrt(rijsq)
     
@@ -1567,58 +1548,58 @@ contains
     electroMult = electrostaticScale(topoDist)
 
     if ( iand(iHash, LJ_PAIR).ne.0 ) then
-       call do_lj_pair(i, j, atid_i, atid_j, d, r, rijsq, rcut, sw, vdwMult, vpair, fpair, &
-            p_vdw, f1, do_pot)
+       call do_lj_pair(atid_i, atid_j, d, r, rijsq, rcut, sw, vdwMult, vpair, fpair, &
+            p_vdw, f1)
     endif
     
     if ( iand(iHash, ELECTROSTATIC_PAIR).ne.0 ) then
-       call doElectrostaticPair(i, j, atid_i, atid_j, d, r, rijsq, rcut, sw, electroMult, &
-            vpair, fpair, p_elect, eF1, eF2, f1, t1, t2, do_pot)
+       call doElectrostaticPair(atid_i, atid_j, d, r, rijsq, rcut, sw, electroMult, &
+            vpair, fpair, p_elect, eF1, eF2, f1, t1, t2)
     endif
     
     if ( iand(iHash, STICKY_PAIR).ne.0 ) then
-       call do_sticky_pair(i, j, atid_i, atid_j, d, r, rijsq, sw, vpair, fpair, &
-            p_hb, A1, A2, f1, t1, t2, do_pot)
+       call do_sticky_pair(atid_i, atid_j, d, r, rijsq, sw, vpair, fpair, &
+            p_hb, A1, A2, f1, t1, t2)
     endif
     
     if ( iand(iHash, STICKYPOWER_PAIR).ne.0 ) then
-       call do_sticky_power_pair(i, j, atid_i, atid_j, d, r, rijsq, sw, vpair, fpair, &
-            p_hb, A1, A2, f1, t1, t2, do_pot)
+       call do_sticky_power_pair(atid_i, atid_j, d, r, rijsq, sw, vpair, fpair, &
+            p_hb, A1, A2, f1, t1, t2)
     endif
     
     if ( iand(iHash, GAYBERNE_PAIR).ne.0 ) then
-       call do_gb_pair(i, j, atid_i, atid_j, d, r, rijsq, sw, vdwMult, vpair, fpair, &
-            p_vdw, A1, A2, f1, t1, t2, do_pot)
+       call do_gb_pair(atid_i, atid_j, d, r, rijsq, sw, vdwMult, vpair, fpair, &
+            p_vdw, A1, A2, f1, t1, t2)
     endif
     
     if ( iand(iHash, GAYBERNE_LJ).ne.0 ) then
-       call do_gb_pair(i, j, atid_i, atid_j, d, r, rijsq, sw, vdwMult, vpair, fpair, &
-            p_vdw, A1, A2, f1, t1, t2, do_pot)
+       call do_gb_pair(atid_i, atid_j, d, r, rijsq, sw, vdwMult, vpair, fpair, &
+            p_vdw, A1, A2, f1, t1, t2)
     endif
         
     if ( iand(iHash, SHAPE_PAIR).ne.0 ) then       
-       call do_shape_pair(i, j, atid_i, atid_j, d, r, rijsq, sw, vpair, fpair, &
-            p_vdw, A1, A2, f1, t1, t2, do_pot)
+       call do_shape_pair(atid_i, atid_j, d, r, rijsq, sw, vpair, fpair, &
+            p_vdw, A1, A2, f1, t1, t2)
     endif
     
     if ( iand(iHash, SHAPE_LJ).ne.0 ) then       
-       call do_shape_pair(i, j, atid_i, atid_j, d, r, rijsq, sw, vpair, fpair, &
-            p_vdw, A1, A2, f1, t1, t2, do_pot)
+       call do_shape_pair(atid_i, atid_j, d, r, rijsq, sw, vpair, fpair, &
+            p_vdw, A1, A2, f1, t1, t2)
     endif
 
     if ( iand(iHash, EAM_PAIR).ne.0 ) then       
-       call do_eam_pair(i, j, atid_i, atid_j, d, r, rijsq, sw, vpair, &
-            fpair, p_met, f1, rho_i, rho_j, dfrhodrho_i, dfrhodrho_j, fshift_i,fshift_j, do_pot)
+       call do_eam_pair(atid_i, atid_j, d, r, rijsq, sw, vpair, &
+            fpair, p_met, f1, rho_i, rho_j, dfrhodrho_i, dfrhodrho_j, fshift_i,fshift_j)
     endif
 
     if ( iand(iHash, SC_PAIR).ne.0 ) then       
-       call do_SC_pair(i, j, atid_i, atid_j, d, r, rijsq, sw, vpair, &
-            fpair, p_met, f1, rho_i, rho_j, dfrhodrho_i, dfrhodrho_j, fshift_i, fshift_j, do_pot)
+       call do_SC_pair(atid_i, atid_j, d, r, rijsq, sw, vpair, &
+            fpair, p_met, f1, rho_i, rho_j, dfrhodrho_i, dfrhodrho_j, fshift_i, fshift_j)
     endif
      
     if ( iand(iHash, MNM_PAIR).ne.0 ) then       
-       call do_mnm_pair(i, j, atid_i, atid_j, d, r, rijsq, rcut, sw, vdwMult, vpair, fpair, &
-            p_vdw, A1, A2, f1, t1, t2, do_pot)
+       call do_mnm_pair(atid_i, atid_j, d, r, rijsq, rcut, sw, vdwMult, vpair, fpair, &
+            p_vdw, A1, A2, f1, t1, t2)
     endif
 
 
@@ -1711,7 +1692,7 @@ contains
   end subroutine do_pair
 
   subroutine do_prepair(i, j, rijsq, d, sw, rcijsq, dc, rCut, &
-       do_pot, do_stress, eFrame, A, f, t, pot)
+       eFrame, A, f, t, pot)
     
     real( kind = dp ) :: sw
     real( kind = dp ), dimension(LR_POT_TYPES) :: pot
@@ -1720,7 +1701,6 @@ contains
     real (kind=dp), dimension(3,nLocal) :: f
     real (kind=dp), dimension(3,nLocal) :: t
     
-    logical, intent(inout) :: do_pot, do_stress
     integer, intent(in) :: i, j
     real ( kind = dp ), intent(inout)    :: rijsq, rcijsq, rCut
     real ( kind = dp )                :: r, rc
@@ -1743,11 +1723,11 @@ contains
     iHash = InteractionHash(atid_i, atid_j)
 
     if ( iand(iHash, EAM_PAIR).ne.0 ) then       
-       call calc_EAM_prepair_rho(i, j, atid_i, atid_j, d, r, rijsq, rho_i_at_j, rho_j_at_i)
+       call calc_EAM_prepair_rho(atid_i, atid_j, d, r, rijsq, rho_i_at_j, rho_j_at_i)
     endif
     
     if ( iand(iHash, SC_PAIR).ne.0 ) then       
-       call calc_SC_prepair_rho(i, j, atid_i, atid_j, d, r, rijsq, rho_i_at_j, rho_j_at_i)
+       call calc_SC_prepair_rho(atid_i, atid_j, d, r, rijsq, rho_i_at_j, rho_j_at_i)
     endif
 
     if ( iand(iHash, EAM_PAIR).ne.0 .or. iand(iHash, SC_PAIR).ne.0  ) then 

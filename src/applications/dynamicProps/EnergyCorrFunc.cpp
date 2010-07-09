@@ -161,7 +161,7 @@ namespace OpenMD {
         
 	// do the forces:
         
-        forceMan->calcForces(true, true); 
+        forceMan->calcForces(); 
         
         int index = 0;
         

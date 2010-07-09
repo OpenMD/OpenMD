@@ -68,8 +68,6 @@ extern "C"{
                     RealType* StressTensor, 
                     RealType* potentialEnergy,
 		    RealType* particlePotArray,
-                    short int* doPotentialCalc, 
-                    short int* doStressCalc,
                     int* isError );
 
   void getAccumulatedBoxDipole( RealType* boxDipole );

@@ -182,8 +182,8 @@ contains
     cutValue = StickyMap(atomID)%rbig
   end function getStickyPowerCut
 
-  subroutine do_sticky_pair(atom1, atom2, me1, me2, d, rij, r2, sw, vpair, fpair, &
-       pot, A1, A2, f1, t1, t2, do_pot)
+  subroutine do_sticky_pair(me1, me2, d, rij, r2, sw, vpair, fpair, &
+       pot, A1, A2, f1, t1, t2)
 
     !! This routine does only the sticky portion of the SSD potential
     !! [Chandra and Ichiye, J. Chem. Phys. 111, 2701 (1999)].
@@ -194,7 +194,7 @@ contains
 
     !! i and j are pointers to the two SSD atoms
 
-    integer, intent(in) :: atom1, atom2, me1, me2
+    integer, intent(in) :: me1, me2
     real (kind=dp), intent(inout) :: rij, r2
     real (kind=dp), dimension(3), intent(in) :: d
     real (kind=dp), dimension(3), intent(inout) :: fpair
@@ -202,7 +202,6 @@ contains
     real (kind=dp), dimension(9) :: A1, A2
     real (kind=dp), dimension(3) :: f1
     real (kind=dp), dimension(3) :: t1, t2
-    logical, intent(in) :: do_pot
 
     real (kind=dp) :: xi, yi, zi, xj, yj, zj, xi2, yi2, zi2, xj2, yj2, zj2
     real (kind=dp) :: r3, r5, r6, s, sp, dsdr, dspdr
@@ -475,12 +474,11 @@ contains
     if(allocated(StickyMap)) deallocate(StickyMap)
   end subroutine destroyStickyTypes
   
-  subroutine do_sticky_power_pair(atom1, atom2, me1, me2, d, rij, r2, sw, vpair, fpair, &
-       pot, A1, A2, f1, t1, t2, do_pot)
+  subroutine do_sticky_power_pair(me1, me2, d, rij, r2, sw, vpair, fpair, &
+       pot, A1, A2, f1, t1, t2)
     
     !! i and j are pointers to the two SSD atoms
     
-    integer, intent(in) :: atom1, atom2
     real (kind=dp), intent(inout) :: rij, r2
     real (kind=dp), dimension(3), intent(in) :: d
     real (kind=dp), dimension(3), intent(inout) :: fpair
@@ -488,7 +486,7 @@ contains
     real (kind=dp), dimension(9) :: A1, A2
     real (kind=dp), dimension(3) :: f1
     real (kind=dp), dimension(3) :: t1, t2
-    logical, intent(in) :: do_pot
+
 
     real (kind=dp) :: xi, yi, zi, xj, yj, zj, xi2, yi2, zi2, xj2, yj2, zj2
     real (kind=dp) :: xihat, yihat, zihat, xjhat, yjhat, zjhat

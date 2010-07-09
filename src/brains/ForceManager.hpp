@@ -73,7 +73,7 @@ namespace OpenMD {
 
     // public virtual functions should be avoided
     /**@todo needs refactoring */
-    virtual void calcForces(bool needPotential, bool needStress);
+    virtual void calcForces();
 
     virtual void init() {}
   protected:
@@ -82,9 +82,9 @@ namespace OpenMD {
         
     virtual void calcShortRangeInteraction();
 
-    virtual void calcLongRangeInteraction(bool needPotential, bool needStress);
+    virtual void calcLongRangeInteraction();
 
-    virtual void postCalculation(bool needStress);
+    virtual void postCalculation();
  
     SimInfo * info_;        
 

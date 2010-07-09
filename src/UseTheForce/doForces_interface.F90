@@ -11,12 +11,12 @@ subroutine initFortranFF(thisStat)
 end subroutine initFortranFF
 
 subroutine doForceloop(q, q_group, A, eFrame, f, t, tau, pot, particle_pot, &
-     do_pot_c, do_stress_c, error)
-
+     error)
+  
   use definitions, ONLY: dp
   use simulation
   use doForces, ONLY: do_force_loop
-
+  
 #define __FORTRAN90
 #include "UseTheForce/DarkSide/fInteractionMap.h"
 
@@ -37,12 +37,11 @@ subroutine doForceloop(q, q_group, A, eFrame, f, t, tau, pot, particle_pot, &
   real( kind = dp), dimension(9) :: tau   
   real ( kind = dp ),dimension(LR_POT_TYPES) :: pot
   real( kind = dp ), dimension(nLocal) :: particle_pot
-  logical ( kind = 2) :: do_pot_c, do_stress_c
   integer :: error
 
   call do_force_loop(q, q_group, A, eFrame, f, t, tau, pot, particle_pot, &
-       do_pot_c, do_stress_c, error)
-
+       error)
+  
 end subroutine doForceloop
 
 subroutine getAccumulatedBoxDipole( box_dipole )

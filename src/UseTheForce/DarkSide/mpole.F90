@@ -1,5 +1,5 @@
 subroutine doMultipolePair(atom1, atom2, d, rij, r2, rcut, sw, &
-     vpair, fpair, pot, eFrame, f, t, do_pot)
+     vpair, fpair, pot, eFrame, f, t)
 
   !***************************************************************
   ! doMultipolePair evaluates the potential, forces, and torques 
@@ -15,8 +15,6 @@ subroutine doMultipolePair(atom1, atom2, d, rij, r2, rcut, sw, &
   ! W. Smith, CCP5 Newsletter, 46, pp. 18-30 (1998).
   !
   !**************************************************************
-
-  logical, intent(in) :: do_pot
 
   integer, intent(in) :: atom1, atom2
   real(kind=dp), intent(in) :: rij, r2, sw, rcut
@@ -356,17 +354,15 @@ subroutine doMultipolePair(atom1, atom2, d, rij, r2, rcut, sw, &
        + gl(8) + gl(9)) + bn(4)*(gl(4) + gl(6)) + bn(5)*gl(5)
 
   vpair = vpair + epot
-
-  if (do_pot) then
+  
 #ifdef IS_MPI
-     pot_row(ELECTROSTATIC_POT,atom1) = pot_row(ELECTROSTATIC_POT,atom1) + &
-          0.5_dp*epot*sw
-     pot_col(ELECTROSTATIC_POT,atom2) = pot_col(ELECTROSTATIC_POT,atom2) + &
-          0.5_dp*epot*sw
+  pot_row(ELECTROSTATIC_POT,atom1) = pot_row(ELECTROSTATIC_POT,atom1) + &
+       0.5_dp*epot*sw
+  pot_col(ELECTROSTATIC_POT,atom2) = pot_col(ELECTROSTATIC_POT,atom2) + &
+       0.5_dp*epot*sw
 #else
-     pot = pot + epot*sw
+  pot = pot + epot*sw
 #endif
-  endif
 
   !
   ! CALCULATE FORCE AND TORQUE COEFFICIENTS

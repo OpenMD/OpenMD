@@ -395,13 +395,13 @@ contains
 
   end function getShapeCut
 
-  subroutine do_shape_pair(atom1, atom2, atid1, atid2, d, rij, r2, sw, &
-       vpair, fpair, pot, A1, A2, f1, t1, t2, do_pot)
+  subroutine do_shape_pair(atid1, atid2, d, rij, r2, sw, &
+       vpair, fpair, pot, A1, A2, f1, t1, t2)
 
     INTEGER, PARAMETER:: LMAX         = 64
     INTEGER, PARAMETER:: MMAX         = 64
 
-    integer, intent(in) :: atom1, atom2, atid1, atid2
+    integer, intent(in) :: atid1, atid2
     real (kind=dp), intent(inout) :: rij, r2
     real (kind=dp), dimension(3), intent(in) :: d
     real (kind=dp), dimension(3), intent(inout) :: fpair
@@ -409,7 +409,6 @@ contains
     real (kind=dp), dimension(9) :: A1, A2
     real (kind=dp), dimension(3) :: f1
     real (kind=dp), dimension(3) :: t1, t2
-    logical, intent(in) :: do_pot
 
     real (kind=dp) :: r3, r5, rt2, rt3, rt5, rt6, rt11, rt12, rt126
     integer :: st1, st2
@@ -528,9 +527,7 @@ contains
 
     ! use the atid to find the shape type (st) for each atom:
     st1 = ShapeMap%atidToShape(atid1)
-    st2 = ShapeMap%atidToShape(atid2)
-    
-!    write(*,*) atom1, atom2, atid1, atid2, st1, st2, ShapeMap%Shapes(st1)%isLJ, ShapeMap%Shapes(st2)%isLJ
+    st2 = ShapeMap%atidToShape(atid2)   
 
     if (ShapeMap%Shapes(st1)%isLJ) then
 

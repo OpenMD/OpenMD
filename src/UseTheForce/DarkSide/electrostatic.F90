@@ -503,12 +503,10 @@ contains
   end subroutine checkSummationMethod
 
 
-  subroutine doElectrostaticPair(atom1, atom2, me1, me2, d, rij, r2, rcut, sw, &
-       electroMult, vpair, fpair, pot, eF1, eF2, f1, t1, t2, do_pot)
+  subroutine doElectrostaticPair(me1, me2, d, rij, r2, rcut, sw, &
+       electroMult, vpair, fpair, pot, eF1, eF2, f1, t1, t2)
 
-    logical, intent(in) :: do_pot
-
-    integer, intent(in) :: atom1, atom2, me1, me2
+    integer, intent(in) :: me1, me2
     integer :: localError
 
     real(kind=dp), intent(in) :: rij, r2, sw, rcut, electroMult
@@ -1144,8 +1142,7 @@ contains
 
   end subroutine destroyElectrostaticTypes
        
-  subroutine self_self(atom1, eFrame, skch, mypot, t, do_pot)
-    logical, intent(in) :: do_pot
+  subroutine self_self(atom1, eFrame, skch, mypot, t)
     integer, intent(in) :: atom1
     integer :: atid1
     real(kind=dp), dimension(9,nLocal) :: eFrame
@@ -1206,8 +1203,7 @@ contains
   end subroutine self_self
 
   subroutine rf_self_excludes(atom1, atom2, sw, electroMult, eFrame, d, &
-       rij, vpair, myPot, f, t, do_pot)
-    logical, intent(in) :: do_pot
+       rij, vpair, myPot, f, t)
     integer, intent(in) :: atom1
     integer, intent(in) :: atom2
     logical :: i_is_Charge, j_is_Charge

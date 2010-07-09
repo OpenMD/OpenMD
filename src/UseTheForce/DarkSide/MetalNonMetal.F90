@@ -108,9 +108,9 @@ module MetalNonMetal
 contains
 
 
-  subroutine do_mnm_pair(Atom1, Atom2, atid1, atid2, D, Rij, R2, Rcut, Sw, vdwMult, &
-       Vpair, Fpair, Pot, A1, A2, f1, t1, t2, Do_pot)
-    integer, intent(in) ::  atom1, atom2, atid1, atid2
+  subroutine do_mnm_pair(atid1, atid2, D, Rij, R2, Rcut, Sw, vdwMult, &
+       Vpair, Fpair, Pot, A1, A2, f1, t1, t2)
+    integer, intent(in) ::  atid1, atid2
     integer :: ljt1, ljt2
     real( kind = dp ), intent(in) :: rij, r2, rcut, vdwMult
     real( kind = dp ) :: pot, sw, vpair
@@ -119,7 +119,6 @@ contains
     real (kind=dp), intent(inout), dimension(3) :: t1, t2
     real( kind = dp ), intent(in), dimension(3) :: d
     real( kind = dp ), intent(inout), dimension(3) :: fpair
-    logical, intent(in) :: do_pot
 
     integer :: interaction_id
     integer :: interaction_type
@@ -134,30 +133,28 @@ contains
     
     select case (interaction_type)    
     case (MNM_LENNARDJONES)
-       call calc_mnm_lennardjones(Atom1, Atom2, D, Rij, R2, Rcut, Sw, &
-            vdwMult, Vpair, Fpair, Pot, f1, Do_pot, interaction_id)
+       call calc_mnm_lennardjones(D, Rij, R2, Rcut, Sw, &
+            vdwMult, Vpair, Fpair, Pot, f1, interaction_id)
     case(MNM_REPULSIVEMORSE, MNM_SHIFTEDMORSE)
-       call calc_mnm_morse(Atom1, Atom2, D, Rij, R2, Rcut, Sw, vdwMult, &
-            Vpair, Fpair, Pot, f1, Do_pot, interaction_id, interaction_type)
+       call calc_mnm_morse(D, Rij, R2, Rcut, Sw, vdwMult, &
+            Vpair, Fpair, Pot, f1, interaction_id, interaction_type)
     case(MNM_MAW)
-       call calc_mnm_maw(Atom1, Atom2, atid1, atid2, D, Rij, R2, Rcut, Sw, vdwMult, &
-            Vpair, Fpair, Pot, A1, A2, f1, t1, t2, Do_pot, interaction_id)
+       call calc_mnm_maw(atid1, atid2, D, Rij, R2, Rcut, Sw, vdwMult, &
+            Vpair, Fpair, Pot, A1, A2, f1, t1, t2, interaction_id)
     case default
     call handleError("MetalNonMetal","Unknown interaction type")      
     end select
 
   end subroutine do_mnm_pair
 
-  subroutine calc_mnm_lennardjones(Atom1, Atom2, D, Rij, R2, Rcut, Sw, &
-       vdwMult,Vpair, Fpair, Pot, f1, Do_pot, interaction_id)
+  subroutine calc_mnm_lennardjones(D, Rij, R2, Rcut, Sw, &
+       vdwMult,Vpair, Fpair, Pot, f1, interaction_id)
     
-    integer, intent(in) ::  atom1, atom2
     real( kind = dp ), intent(in) :: rij, r2, rcut, vdwMult
     real( kind = dp ) :: pot, sw, vpair
     real( kind = dp ), intent(inout), dimension(3) :: f1
     real( kind = dp ), intent(in), dimension(3) :: d
     real( kind = dp ), intent(inout), dimension(3) :: fpair
-    logical, intent(in) :: do_pot
     integer, intent(in) :: interaction_id
 
     ! local Variables
@@ -212,15 +209,13 @@ contains
     return
   end subroutine calc_mnm_lennardjones
 
-  subroutine calc_mnm_morse(Atom1, Atom2, D, Rij, R2, Rcut, Sw, vdwMult, &
-       Vpair, Fpair, Pot, f1, Do_pot, interaction_id, interaction_type)
-    integer, intent(in) ::  atom1, atom2
+  subroutine calc_mnm_morse(D, Rij, R2, Rcut, Sw, vdwMult, &
+       Vpair, Fpair, Pot, f1, interaction_id, interaction_type)
     real( kind = dp ), intent(in) :: rij, r2, rcut, vdwMult
     real( kind = dp ) :: pot, sw, vpair
     real( kind = dp ), intent(inout), dimension(3) :: f1
     real( kind = dp ), intent(in), dimension(3) :: d
     real( kind = dp ), intent(inout), dimension(3) :: fpair
-    logical, intent(in) :: do_pot
     integer, intent(in) :: interaction_id, interaction_type
     logical :: shiftedPot, shiftedFrc
 
@@ -328,9 +323,8 @@ contains
     return    
   end subroutine calc_mnm_morse
   
-  subroutine calc_mnm_maw(Atom1, Atom2, atid1, atid2, D, Rij, R2, Rcut, Sw, vdwMult, &
-       Vpair, Fpair, Pot, A1, A2, f1, t1, t2, Do_pot, interaction_id)
-    integer, intent(in) ::  atom1, atom2
+  subroutine calc_mnm_maw(atid1, atid2, D, Rij, R2, Rcut, Sw, vdwMult, &
+       Vpair, Fpair, Pot, A1, A2, f1, t1, t2, interaction_id)
     real( kind = dp ), intent(in) :: rij, r2, rcut, vdwMult
     real( kind = dp ) :: pot, sw, vpair
     real( kind = dp ), intent(inout), dimension(3) :: f1  
@@ -339,7 +333,6 @@ contains
 
     real( kind = dp ), intent(in), dimension(3) :: d
     real( kind = dp ), intent(inout), dimension(3) :: fpair
-    logical, intent(in) :: do_pot
 
     integer, intent(in) :: interaction_id
 

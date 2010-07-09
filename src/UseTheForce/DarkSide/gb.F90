@@ -285,10 +285,10 @@ contains
 
   end function getGayBerneCut
 
-  subroutine do_gb_pair(atom1, atom2, atid1, atid2, d, r, r2, sw, vdwMult, vpair, fpair, &
-       pot, A1, A2, f1, t1, t2, do_pot)
+  subroutine do_gb_pair(atid1, atid2, d, r, r2, sw, vdwMult, vpair, fpair, &
+       pot, A1, A2, f1, t1, t2)
     
-    integer, intent(in) :: atom1, atom2, atid1, atid2
+    integer, intent(in) :: atid1, atid2
     integer :: gbt1, gbt2, id1, id2
     real (kind=dp), intent(inout) :: r, r2, vdwMult
     real (kind=dp), dimension(3), intent(in) :: d
@@ -297,7 +297,6 @@ contains
     real (kind=dp), dimension(9) :: A1, A2
     real (kind=dp), dimension(3) :: f1
     real (kind=dp), dimension(3) :: t1, t2
-    logical, intent(in) :: do_pot
     real (kind = dp), dimension(3) :: ul1, ul2, rxu1, rxu2, uxu, rhat
 
     real (kind = dp) :: sigma0, dw, eps0, x2, xa2, xai2, xp2, xpap2, xpapi2

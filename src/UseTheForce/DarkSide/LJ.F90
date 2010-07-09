@@ -263,17 +263,17 @@ contains
 
   end subroutine createMixingMap
           
-  subroutine do_lj_pair(atom1, atom2, atid1, atid2, d, rij, r2, rcut, sw, vdwMult, &
-       vpair, fpair, pot, f1, do_pot)
+  subroutine do_lj_pair(atid1, atid2, d, rij, r2, rcut, sw, vdwMult, &
+       vpair, fpair, pot, f1)
     
-    integer, intent(in) ::  atom1, atom2, atid1, atid2
+    integer, intent(in) ::  atid1, atid2
     integer :: ljt1, ljt2
     real( kind = dp ), intent(in) :: rij, r2, rcut, vdwMult
     real( kind = dp ) :: pot, sw, vpair
     real( kind = dp ), intent(inout), dimension(3) :: f1
     real( kind = dp ), intent(in), dimension(3) :: d
     real( kind = dp ), intent(inout), dimension(3) :: fpair
-    logical, intent(in) :: do_pot
+
 
     ! local Variables
     real( kind = dp ) :: drdx, drdy, drdz

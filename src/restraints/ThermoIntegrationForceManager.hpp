@@ -52,7 +52,7 @@ namespace OpenMD {
     ThermoIntegrationForceManager(SimInfo* info);
     ~ThermoIntegrationForceManager();
     
-    virtual void calcForces(bool needPotential, bool needStress);
+    virtual void calcForces();
     
   private:
     Globals* simParam;

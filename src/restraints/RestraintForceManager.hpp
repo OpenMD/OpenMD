@@ -55,7 +55,7 @@ namespace OpenMD {
     ~RestraintForceManager();
 
     virtual void init();
-    virtual void calcForces(bool needPotential, bool needStress);
+    virtual void calcForces();
 
     RealType doRestraints(RealType scalingFactor);
     RealType getUnscaledPotential() { return unscaledPotential_; }

@@ -229,7 +229,7 @@ int main(int argc, char* argv[]){
   for (int i = 0; i < nframes; i += args_info.frame_arg){
     dumpReader->readFrame(i);
     
-    if (printFrc) forceMan->calcForces(true, false);
+    if (printFrc) forceMan->calcForces();
     
     //wrapping the molecule
     if(args_info.periodicBox_flag) {
