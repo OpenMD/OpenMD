@@ -109,7 +109,7 @@ contains
 
 
   subroutine do_mnm_pair(atid1, atid2, D, Rij, R2, Rcut, Sw, vdwMult, &
-       Vpair, Fpair, Pot, A1, A2, f1, t1, t2)
+       Vpair, Pot, A1, A2, f1, t1, t2)
     integer, intent(in) ::  atid1, atid2
     integer :: ljt1, ljt2
     real( kind = dp ), intent(in) :: rij, r2, rcut, vdwMult
@@ -118,7 +118,6 @@ contains
     real (kind=dp), intent(inout), dimension(9) :: A1, A2
     real (kind=dp), intent(inout), dimension(3) :: t1, t2
     real( kind = dp ), intent(in), dimension(3) :: d
-    real( kind = dp ), intent(inout), dimension(3) :: fpair
 
     integer :: interaction_id
     integer :: interaction_type
@@ -134,13 +133,13 @@ contains
     select case (interaction_type)    
     case (MNM_LENNARDJONES)
        call calc_mnm_lennardjones(D, Rij, R2, Rcut, Sw, &
-            vdwMult, Vpair, Fpair, Pot, f1, interaction_id)
+            vdwMult, Vpair, Pot, f1, interaction_id)
     case(MNM_REPULSIVEMORSE, MNM_SHIFTEDMORSE)
        call calc_mnm_morse(D, Rij, R2, Rcut, Sw, vdwMult, &
-            Vpair, Fpair, Pot, f1, interaction_id, interaction_type)
+            Vpair, Pot, f1, interaction_id, interaction_type)
     case(MNM_MAW)
        call calc_mnm_maw(atid1, atid2, D, Rij, R2, Rcut, Sw, vdwMult, &
-            Vpair, Fpair, Pot, A1, A2, f1, t1, t2, interaction_id)
+            Vpair, Pot, A1, A2, f1, t1, t2, interaction_id)
     case default
     call handleError("MetalNonMetal","Unknown interaction type")      
     end select
@@ -148,13 +147,12 @@ contains
   end subroutine do_mnm_pair
 
   subroutine calc_mnm_lennardjones(D, Rij, R2, Rcut, Sw, &
-       vdwMult,Vpair, Fpair, Pot, f1, interaction_id)
+       vdwMult,Vpair, Pot, f1, interaction_id)
     
     real( kind = dp ), intent(in) :: rij, r2, rcut, vdwMult
     real( kind = dp ) :: pot, sw, vpair
     real( kind = dp ), intent(inout), dimension(3) :: f1
     real( kind = dp ), intent(in), dimension(3) :: d
-    real( kind = dp ), intent(inout), dimension(3) :: fpair
     integer, intent(in) :: interaction_id
 
     ! local Variables
@@ -210,12 +208,11 @@ contains
   end subroutine calc_mnm_lennardjones
 
   subroutine calc_mnm_morse(D, Rij, R2, Rcut, Sw, vdwMult, &
-       Vpair, Fpair, Pot, f1, interaction_id, interaction_type)
+       Vpair, Pot, f1, interaction_id, interaction_type)
     real( kind = dp ), intent(in) :: rij, r2, rcut, vdwMult
     real( kind = dp ) :: pot, sw, vpair
     real( kind = dp ), intent(inout), dimension(3) :: f1
     real( kind = dp ), intent(in), dimension(3) :: d
-    real( kind = dp ), intent(inout), dimension(3) :: fpair
     integer, intent(in) :: interaction_id, interaction_type
     logical :: shiftedPot, shiftedFrc
 
@@ -324,7 +321,7 @@ contains
   end subroutine calc_mnm_morse
   
   subroutine calc_mnm_maw(atid1, atid2, D, Rij, R2, Rcut, Sw, vdwMult, &
-       Vpair, Fpair, Pot, A1, A2, f1, t1, t2, interaction_id)
+       Vpair, Pot, A1, A2, f1, t1, t2, interaction_id)
     real( kind = dp ), intent(in) :: rij, r2, rcut, vdwMult
     real( kind = dp ) :: pot, sw, vpair
     real( kind = dp ), intent(inout), dimension(3) :: f1  
@@ -332,7 +329,6 @@ contains
     real (kind=dp),intent(inout), dimension(3) :: t1, t2
 
     real( kind = dp ), intent(in), dimension(3) :: d
-    real( kind = dp ), intent(inout), dimension(3) :: fpair
 
     integer, intent(in) :: interaction_id
 

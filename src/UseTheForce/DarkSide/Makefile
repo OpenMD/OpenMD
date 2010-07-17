@@ -18,8 +18,6 @@ Source    = \
 	electrostatic_interface.F90 \
 	eam.F90 \
 	eam_interface.F90 \
-	LJ.F90 \
-	lj_interface.F90 \
 	gb.F90 \
 	gb_interface.F90 \
 	sticky.F90 \
@@ -39,7 +37,6 @@ ParallelSource = \
 	simulation.F90 \
 	electrostatic.F90 \
 	eam.F90 \
-	LJ.F90 \
 	gb.F90 \
 	stickky.F90 \
 	shapes.F90 \
@@ -53,7 +50,6 @@ Modules = \
 	force_globals \
 	fforceoptions \
 	gayberne \
-	lj \
 	neighborLists \
 	shapes \
 	mpiSimulation \

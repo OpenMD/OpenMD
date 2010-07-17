@@ -48,12 +48,13 @@ module gayberne
   use vector_class
   use linearalgebra
   use status
-  use lj
   use fForceOptions
-  
+
   implicit none
 
   private
+  real(kind=dp), external :: getSigma
+  real(kind=dp), external :: getEpsilon
 
 #define __FORTRAN90
 #include "UseTheForce/DarkSide/fInteractionMap.h"
@@ -62,8 +63,7 @@ module gayberne
   logical, save :: haveMixingMap = .false.
   real(kind=dp), save :: mu = 2.0_dp
   real(kind=dp), save :: nu = 1.0_dp
-
-
+     
   public :: newGBtype
   public :: complete_GB_FF
   public :: do_gb_pair
@@ -102,7 +102,7 @@ module gayberne
   end type GBMixParameters
   
   type(GBMixParameters), dimension(:,:), allocatable :: GBMixingMap
-  
+
 contains
   
   subroutine newGBtype(c_ident, d, l, eps, eps_ratio, dw, status)
@@ -285,14 +285,13 @@ contains
 
   end function getGayBerneCut
 
-  subroutine do_gb_pair(atid1, atid2, d, r, r2, sw, vdwMult, vpair, fpair, &
+  subroutine do_gb_pair(atid1, atid2, d, r, r2, sw, vdwMult, vpair,  &
        pot, A1, A2, f1, t1, t2)
     
     integer, intent(in) :: atid1, atid2
     integer :: gbt1, gbt2, id1, id2
     real (kind=dp), intent(inout) :: r, r2, vdwMult
     real (kind=dp), dimension(3), intent(in) :: d
-    real (kind=dp), dimension(3), intent(inout) :: fpair
     real (kind=dp) :: pot, sw, vpair
     real (kind=dp), dimension(9) :: A1, A2
     real (kind=dp), dimension(3) :: f1

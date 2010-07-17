@@ -38,72 +38,74 @@
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
  * [4]  Vardeman & Gezelter, in progress (2009).                        
  */
+ 
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <iostream>
 
-
-#include "UseTheForce/CLAYFF.hpp"
-#include "UseTheForce/ForceFieldFactory.hpp"
-#include "io/BaseAtomTypesSectionParser.hpp"
-#include "io/AtomTypesSectionParser.hpp"
-#include "io/LennardJonesAtomTypesSectionParser.hpp"
-#include "io/ChargeAtomTypesSectionParser.hpp"
-#include "io/BondTypesSectionParser.hpp"
-#include "io/BendTypesSectionParser.hpp"
-#include "io/OptionSectionParser.hpp"
-#include "UseTheForce/ForceFieldCreator.hpp"
+#include "types/NonBondedInteractionType.hpp"
+#include "utils/simError.h"
 
 namespace OpenMD {
-    
-  CLAYFF::CLAYFF(){
 
-    //set default force field filename
-    setForceFieldFileName("CLAYFF.frc");
-
-    spMan_.push_back(new OptionSectionParser(forceFieldOptions_));    
-    spMan_.push_back(new BaseAtomTypesSectionParser());
-    spMan_.push_back(new AtomTypesSectionParser());
-    spMan_.push_back(new LennardJonesAtomTypesSectionParser(forceFieldOptions_));
-    spMan_.push_back(new ChargeAtomTypesSectionParser(forceFieldOptions_));
-    spMan_.push_back(new BondTypesSectionParser(forceFieldOptions_));
-    spMan_.push_back(new BendTypesSectionParser(forceFieldOptions_));
-    
+  void NonBondedInteractionType::setAtomTypes(std::pair<AtomType*, AtomType*> ats) { 
+    atomTypes_=ats; 
   }
 
-  void CLAYFF::parse(const std::string& filename) {
-    ifstrstream* ffStream;
-    ffStream = openForceFieldFile(filename);
-
-    spMan_.parse(*ffStream, *this);
-
-    ForceField::AtomTypeContainer::MapTypeIterator i;
-    AtomType* at;
-
-    for (at = atomTypeCont_.beginType(i); at != NULL; 
-         at = atomTypeCont_.nextType(i)) {
-      // useBase sets the responsibilities, and these have to be done 
-      // after the atomTypes and Base types have all been scanned:
-
-      std::vector<AtomType*> ayb = at->allYourBase();      
-      if (ayb.size() > 1) {
-        for (int j = ayb.size()-1; j > 0; j--) {
-          
-          ayb[j-1]->useBase(ayb[j]);
-
-        }
-      }
-      at->makeFortranAtomType();
-    }
-
-    for (at = atomTypeCont_.beginType(i); at != NULL; 
-         at = atomTypeCont_.nextType(i)) {
-      at->complete();
-    }
-
-    int isError = 0;
-
-    delete ffStream;
-    
+  std::pair<AtomType*, AtomType*> NonBondedInteractionType::getAtomTypes() {
+    return atomTypes_;
   }
-
-  CLAYFF::~CLAYFF(){
+   
+  void NonBondedInteractionType::addProperty(GenericData* genData) {
+    properties_.addProperty(genData);  
   }
-} //end namespace OpenMD
+  
+  void NonBondedInteractionType::removeProperty(const std::string& propName) {
+    properties_.removeProperty(propName);  
+  }
+  
+  void NonBondedInteractionType::clearProperties() {
+    properties_.clearProperties();
+  }
+  
+  std::vector<std::string> NonBondedInteractionType::getPropertyNames() {
+    return properties_.getPropertyNames();  
+  }
+  
+  std::vector<GenericData*> NonBondedInteractionType::getProperties() { 
+    return properties_.getProperties(); 
+  }
+  
+  GenericData* NonBondedInteractionType::getPropertyByName(const std::string& propName) {
+      return properties_.getPropertyByName(propName); 
+  }  
+  
+  void NonBondedInteractionType::setLennardJones() {
+    nbitp.is_LennardJones = 1;
+  }
+  
+  bool NonBondedInteractionType::isLennardJones() {
+    return nbitp.is_LennardJones;
+  }
+  
+  void NonBondedInteractionType::setEAM() {
+    nbitp.is_EAM = 1;
+  }
+  
+  bool NonBondedInteractionType::isEAM() {
+    return nbitp.is_EAM;
+  }
+  
+  bool NonBondedInteractionType::isSC() {
+    return nbitp.is_SC;
+  }
+  
+  void NonBondedInteractionType::setSC() {
+    nbitp.is_SC = 1;
+  }
+  
+  bool NonBondedInteractionType::isMetal() {
+    return isSC() || isEAM();
+  }  
+}

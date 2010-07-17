@@ -67,7 +67,7 @@ namespace OpenMD {
   class ForceManager {
 
   public:
-    ForceManager(SimInfo * info) : info_(info) {}
+    ForceManager(SimInfo * info) : info_(info), NBforcesInitialized_(false) {}
         
     virtual ~ForceManager() {}
 
@@ -92,6 +92,8 @@ namespace OpenMD {
     std::map<Torsion*, TorsionDataSet> torsionDataSets;
     std::map<Inversion*, InversionDataSet> inversionDataSets;
     Mat3x3d tau;
+
+    bool NBforcesInitialized_;
     
   };
 

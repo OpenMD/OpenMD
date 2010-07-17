@@ -41,7 +41,6 @@
 
 
 #include "UseTheForce/DUFF.hpp"
-#include "UseTheForce/DarkSide/lj_interface.h"
 #include "UseTheForce/DarkSide/sticky_interface.h"
 #include "UseTheForce/DarkSide/gb_interface.h"
 #include "UseTheForce/ForceFieldFactory.hpp"
@@ -134,7 +133,6 @@ namespace OpenMD {
   }
 
   DUFF::~DUFF(){
-    destroyLJTypes();
     destroyStickyTypes();
     destroyGayBerneTypes();
   }

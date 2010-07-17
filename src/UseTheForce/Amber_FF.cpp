@@ -41,7 +41,6 @@
 
 
 #include "UseTheForce/Amber_FF.hpp"
-#include "UseTheForce/DarkSide/lj_interface.h"
 #include "UseTheForce/ForceFieldFactory.hpp"
 #include "io/BaseAtomTypesSectionParser.hpp"
 #include "io/AtomTypesSectionParser.hpp"
@@ -110,6 +109,5 @@ namespace OpenMD {
   }
 
   Amber_FF::~Amber_FF(){
-    destroyLJTypes();
   }
 } //end namespace OpenMD

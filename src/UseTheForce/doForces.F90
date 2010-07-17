@@ -56,7 +56,6 @@ module doForces
   use atype_module
   use switcheroo
   use neighborLists  
-  use lj
   use sticky
   use electrostatic_module
   use gayberne
@@ -66,12 +65,16 @@ module doForces
   use MetalNonMetal
   use suttonchen
   use status
+
 #ifdef IS_MPI
   use mpiSimulation
 #endif
 
   implicit none
   PRIVATE
+
+  real(kind=dp), external :: getSigma
+  real(kind=dp), external :: getEpsilon
 
 #define __FORTRAN90
 #include "UseTheForce/fCutoffPolicy.h"
@@ -155,7 +158,7 @@ module doForces
   type(gtypeCutoffs), dimension(:,:), allocatable :: gtypeCutoffMap
 
   real(kind=dp), dimension(3) :: boxDipole
-
+   
 contains
 
   subroutine createInteractionHash()
@@ -1548,57 +1551,57 @@ contains
     electroMult = electrostaticScale(topoDist)
 
     if ( iand(iHash, LJ_PAIR).ne.0 ) then
-       call do_lj_pair(atid_i, atid_j, d, r, rijsq, rcut, sw, vdwMult, vpair, fpair, &
+       call do_lj_pair(atid_i, atid_j, d, r, rijsq, rcut, sw, vdwMult, vpair, &
             p_vdw, f1)
     endif
     
     if ( iand(iHash, ELECTROSTATIC_PAIR).ne.0 ) then
        call doElectrostaticPair(atid_i, atid_j, d, r, rijsq, rcut, sw, electroMult, &
-            vpair, fpair, p_elect, eF1, eF2, f1, t1, t2)
+            vpair, p_elect, eF1, eF2, f1, t1, t2)
     endif
     
     if ( iand(iHash, STICKY_PAIR).ne.0 ) then
-       call do_sticky_pair(atid_i, atid_j, d, r, rijsq, sw, vpair, fpair, &
+       call do_sticky_pair(atid_i, atid_j, d, r, rijsq, sw, vpair, &
             p_hb, A1, A2, f1, t1, t2)
     endif
     
     if ( iand(iHash, STICKYPOWER_PAIR).ne.0 ) then
-       call do_sticky_power_pair(atid_i, atid_j, d, r, rijsq, sw, vpair, fpair, &
+       call do_sticky_power_pair(atid_i, atid_j, d, r, rijsq, sw, vpair, &
             p_hb, A1, A2, f1, t1, t2)
     endif
     
     if ( iand(iHash, GAYBERNE_PAIR).ne.0 ) then
-       call do_gb_pair(atid_i, atid_j, d, r, rijsq, sw, vdwMult, vpair, fpair, &
+       call do_gb_pair(atid_i, atid_j, d, r, rijsq, sw, vdwMult, vpair, &
             p_vdw, A1, A2, f1, t1, t2)
     endif
     
     if ( iand(iHash, GAYBERNE_LJ).ne.0 ) then
-       call do_gb_pair(atid_i, atid_j, d, r, rijsq, sw, vdwMult, vpair, fpair, &
+       call do_gb_pair(atid_i, atid_j, d, r, rijsq, sw, vdwMult, vpair, &
             p_vdw, A1, A2, f1, t1, t2)
     endif
         
     if ( iand(iHash, SHAPE_PAIR).ne.0 ) then       
-       call do_shape_pair(atid_i, atid_j, d, r, rijsq, sw, vpair, fpair, &
+       call do_shape_pair(atid_i, atid_j, d, r, rijsq, sw, vpair, &
             p_vdw, A1, A2, f1, t1, t2)
     endif
     
     if ( iand(iHash, SHAPE_LJ).ne.0 ) then       
-       call do_shape_pair(atid_i, atid_j, d, r, rijsq, sw, vpair, fpair, &
+       call do_shape_pair(atid_i, atid_j, d, r, rijsq, sw, vpair, &
             p_vdw, A1, A2, f1, t1, t2)
     endif
 
     if ( iand(iHash, EAM_PAIR).ne.0 ) then       
        call do_eam_pair(atid_i, atid_j, d, r, rijsq, sw, vpair, &
-            fpair, p_met, f1, rho_i, rho_j, dfrhodrho_i, dfrhodrho_j, fshift_i,fshift_j)
+            p_met, f1, rho_i, rho_j, dfrhodrho_i, dfrhodrho_j, fshift_i,fshift_j)
     endif
 
     if ( iand(iHash, SC_PAIR).ne.0 ) then       
        call do_SC_pair(atid_i, atid_j, d, r, rijsq, sw, vpair, &
-            fpair, p_met, f1, rho_i, rho_j, dfrhodrho_i, dfrhodrho_j, fshift_i, fshift_j)
+            p_met, f1, rho_i, rho_j, dfrhodrho_i, dfrhodrho_j, fshift_i, fshift_j)
     endif
      
     if ( iand(iHash, MNM_PAIR).ne.0 ) then       
-       call do_mnm_pair(atid_i, atid_j, d, r, rijsq, rcut, sw, vdwMult, vpair, fpair, &
+       call do_mnm_pair(atid_i, atid_j, d, r, rijsq, rcut, sw, vdwMult, vpair, &
             p_vdw, A1, A2, f1, t1, t2)
     endif
 

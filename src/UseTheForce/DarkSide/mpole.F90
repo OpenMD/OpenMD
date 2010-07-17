@@ -1,5 +1,5 @@
 subroutine doMultipolePair(atom1, atom2, d, rij, r2, rcut, sw, &
-     vpair, fpair, pot, eFrame, f, t)
+     vpair, pot, eFrame, f, t)
 
   !***************************************************************
   ! doMultipolePair evaluates the potential, forces, and torques 
@@ -20,7 +20,6 @@ subroutine doMultipolePair(atom1, atom2, d, rij, r2, rcut, sw, &
   real(kind=dp), intent(in) :: rij, r2, sw, rcut
   real(kind=dp), intent(in), dimension(3) :: d
   real(kind=dp), intent(inout) :: vpair
-  real(kind=dp), intent(inout), dimension(3) :: fpair
 
   real( kind = dp ) :: pot
   real( kind = dp ), dimension(9,nLocal) :: eFrame
@@ -462,9 +461,9 @@ subroutine doMultipolePair(atom1, atom2, d, rij, r2, rcut, sw, &
 
   if (molMembershipList(id1) .ne. molMembershipList(id2)) then
 
-     fpair(1) = fpair(1) + ftm(1)
-     fpair(2) = fpair(2) + ftm(2)
-     fpair(3) = fpair(3) + ftm(3)
+     f1(1) = f1(1) + ftm(1)
+     f1(2) = f1(2) + ftm(2)
+     f1(3) = f1(3) + ftm(3)
 
   endif
 

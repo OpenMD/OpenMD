@@ -182,7 +182,7 @@ contains
     cutValue = StickyMap(atomID)%rbig
   end function getStickyPowerCut
 
-  subroutine do_sticky_pair(me1, me2, d, rij, r2, sw, vpair, fpair, &
+  subroutine do_sticky_pair(me1, me2, d, rij, r2, sw, vpair, &
        pot, A1, A2, f1, t1, t2)
 
     !! This routine does only the sticky portion of the SSD potential
@@ -197,7 +197,6 @@ contains
     integer, intent(in) :: me1, me2
     real (kind=dp), intent(inout) :: rij, r2
     real (kind=dp), dimension(3), intent(in) :: d
-    real (kind=dp), dimension(3), intent(inout) :: fpair
     real (kind=dp) :: pot, vpair, sw
     real (kind=dp), dimension(9) :: A1, A2
     real (kind=dp), dimension(3) :: f1
@@ -474,14 +473,13 @@ contains
     if(allocated(StickyMap)) deallocate(StickyMap)
   end subroutine destroyStickyTypes
   
-  subroutine do_sticky_power_pair(me1, me2, d, rij, r2, sw, vpair, fpair, &
+  subroutine do_sticky_power_pair(me1, me2, d, rij, r2, sw, vpair, &
        pot, A1, A2, f1, t1, t2)
     
     !! i and j are pointers to the two SSD atoms
     
     real (kind=dp), intent(inout) :: rij, r2
     real (kind=dp), dimension(3), intent(in) :: d
-    real (kind=dp), dimension(3), intent(inout) :: fpair
     real (kind=dp) :: pot, vpair, sw
     real (kind=dp), dimension(9) :: A1, A2
     real (kind=dp), dimension(3) :: f1

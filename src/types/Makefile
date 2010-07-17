@@ -17,6 +17,7 @@ Source    = \
 	ShapeAtomType.cpp \
 	CharmmTorsionType.cpp \
  	ImproperCosineInversionType.cpp \
+	NonBondedInteractionType.cpp \
 	FragmentStamp.cpp
 
 RmiSource =

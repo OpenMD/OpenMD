@@ -41,7 +41,6 @@
 
 
 #include "UseTheForce/MnM_FF.hpp"
-#include "UseTheForce/DarkSide/lj_interface.h"
 #include "UseTheForce/DarkSide/sticky_interface.h"
 #include "UseTheForce/DarkSide/eam_interface.h"
 #include "UseTheForce/DarkSide/suttonchen_interface.h"
@@ -240,7 +239,6 @@ namespace OpenMD {
   }
      
   MnM_FF::~MnM_FF() {
-    destroyLJTypes();
     destroyStickyTypes();
     if (hasEAMtypes_) destroyEAMTypes();
     if (hasSCtypes_)  destroySCTypes();

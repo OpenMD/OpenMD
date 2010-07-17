@@ -574,8 +574,7 @@ namespace OpenMD{
     int ljsp_; /**< use shifted potential for LJ*/
     int ljsf_; /**< use shifted force for LJ*/
 
-    bool fortranInitialized_; /**< flag indicate whether fortran side 
-                                 is initialized */
+    bool fortranInitialized_; /** flag to indicate whether the fortran side is initialized */
     
     bool calcBoxDipole_; /**< flag to indicate whether or not we calculate 
                             the simulation box dipole moment */

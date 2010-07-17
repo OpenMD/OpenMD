@@ -48,8 +48,10 @@ module shapes
   use vector_class
   use simulation
   use status
-  use lj
   implicit none
+
+  real(kind=dp), external :: getSigma
+  real(kind=dp), external :: getEpsilon
 
   PRIVATE
 #define __FORTRAN90
@@ -396,7 +398,7 @@ contains
   end function getShapeCut
 
   subroutine do_shape_pair(atid1, atid2, d, rij, r2, sw, &
-       vpair, fpair, pot, A1, A2, f1, t1, t2)
+       vpair, pot, A1, A2, f1, t1, t2)
 
     INTEGER, PARAMETER:: LMAX         = 64
     INTEGER, PARAMETER:: MMAX         = 64
@@ -404,7 +406,6 @@ contains
     integer, intent(in) :: atid1, atid2
     real (kind=dp), intent(inout) :: rij, r2
     real (kind=dp), dimension(3), intent(in) :: d
-    real (kind=dp), dimension(3), intent(inout) :: fpair
     real (kind=dp) :: pot, vpair, sw, dswdr
     real (kind=dp), dimension(9) :: A1, A2
     real (kind=dp), dimension(3) :: f1

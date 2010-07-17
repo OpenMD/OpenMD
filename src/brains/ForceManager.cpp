@@ -57,6 +57,8 @@
 #include "primitives/Bend.hpp"
 #include "primitives/Torsion.hpp"
 #include "primitives/Inversion.hpp"
+#include "nonbonded/LJ.hpp"
+
 namespace OpenMD {
 
   void ForceManager::calcForces() {
@@ -65,6 +67,11 @@ namespace OpenMD {
       info_->update();
     }
     
+    if (!NBforcesInitialized_) {
+      LJ* lj = new LJ(info_->getForceField());
+      lj->initialize();
+    }
+
     preCalculation();
     
     calcShortRangeInteraction();

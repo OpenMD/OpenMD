@@ -48,10 +48,10 @@
 #include "utils/simError.h"
 #define __OPENMD_C
 #include "UseTheForce/DarkSide/atype_interface.h"
-#include "UseTheForce/DarkSide/lj_interface.h"
 #include "UseTheForce/DarkSide/eam_interface.h"
 #include "UseTheForce/DarkSide/electrostatic_interface.h"
 #include "UseTheForce/DarkSide/suttonchen_interface.h"
+
 namespace OpenMD {
   AtomType::AtomType(){
 
@@ -199,40 +199,7 @@ namespace OpenMD {
     int isError;
     GenericData* data;
     
-    //notify a new LJtype atom type is created
-    if (isLennardJones()) {
-      data = getPropertyByName("LennardJones");
-      if (data != NULL) {
-	LJParamGenericData* ljData = dynamic_cast<LJParamGenericData*>(data);
-        
-	if (ljData != NULL) {
-	  LJParam ljParam = ljData->getData();
-          
-	  newLJtype(&atp.ident, &ljParam.sigma, &ljParam.epsilon, 
-                    &ljParam.soft_pot, &isError);
-          
-	  if (isError != 0) {
-	    sprintf( painCave.errMsg,
-		     "Fortran rejected newLJtype\n");
-	    painCave.severity = OPENMD_ERROR;
-	    painCave.isFatal = 1;
-	    simError();          
-	  }
-          
-	} else {
-	  sprintf( painCave.errMsg,
-		   "Can not cast GenericData to LJParam\n");
-	  painCave.severity = OPENMD_ERROR;
-	  painCave.isFatal = 1;
-	  simError();          
-	}            
-      } else {
-	sprintf( painCave.errMsg, "Can not find Parameters for LennardJones\n");
-	painCave.severity = OPENMD_ERROR;
-	painCave.isFatal = 1;
-	simError();          
-      }
-    }
+    //notify a new LJtype atom type is created (MOVED to ForceField)
     
     if (isElectrostatic()) {
       newElectrostaticType(&atp, &isError);

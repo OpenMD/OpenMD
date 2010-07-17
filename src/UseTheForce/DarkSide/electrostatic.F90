@@ -504,7 +504,7 @@ contains
 
 
   subroutine doElectrostaticPair(me1, me2, d, rij, r2, rcut, sw, &
-       electroMult, vpair, fpair, pot, eF1, eF2, f1, t1, t2)
+       electroMult, vpair, pot, eF1, eF2, f1, t1, t2)
 
     integer, intent(in) :: me1, me2
     integer :: localError
@@ -512,7 +512,6 @@ contains
     real(kind=dp), intent(in) :: rij, r2, sw, rcut, electroMult
     real(kind=dp), intent(in), dimension(3) :: d
     real(kind=dp), intent(inout) :: vpair
-    real(kind=dp), intent(inout), dimension(3) :: fpair    
 
     real( kind = dp ) :: pot
     real( kind = dp ), dimension(9) :: eF1, eF2  ! eFrame = electroFrame

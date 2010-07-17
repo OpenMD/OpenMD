@@ -337,7 +337,7 @@ contains
   
   !! Does Sutton-Chen  pairwise Force calculation.  
   subroutine do_sc_pair(atid1, atid2, d, rij, r2, sw, vpair, &
-       fpair, pot, f1, rho_i, rho_j, dfrhodrho_i, dfrhodrho_j, &
+       pot, f1, rho_i, rho_j, dfrhodrho_i, dfrhodrho_j, &
        fshift_i, fshift_j)
     !Arguments    
     integer, intent(in) ::  atid1, atid2
@@ -345,7 +345,6 @@ contains
     real( kind = dp ) :: pot, sw, vpair
     real( kind = dp ), dimension(3) :: f1
     real( kind = dp ), intent(in), dimension(3) :: d
-    real( kind = dp ), intent(inout), dimension(3) :: fpair
     real( kind = dp ), intent(inout) :: dfrhodrho_i, dfrhodrho_j 
     real( kind = dp ), intent(inout) :: rho_i, rho_j 
     real( kind = dp ), intent(inout):: fshift_i, fshift_j   

@@ -41,7 +41,6 @@
  
 #include "UseTheForce/EAM_FF.hpp"
 #include "UseTheForce/DarkSide/eam_interface.h"
-#include "UseTheForce/DarkSide/lj_interface.h"
 #include "UseTheForce/DarkSide/sticky_interface.h"
 #include "UseTheForce/ForceFieldFactory.hpp"
 #include "io/BaseAtomTypesSectionParser.hpp"
