@@ -42,18 +42,19 @@ PackageLibs = \
 	math \
 	types \
 	primitives \
+	nonbonded \
 	UseTheForce/DarkSide \
 	UseTheForce \
 	brains \
 	io \
-	integrators\
+	integrators \
 	constraints \
 	minimizers \
 	selection \
 	restraints \
 	lattice \
 	hydrodynamics \
-        antlr\
+        antlr \
         mdParser
 
 #packages containing applications
