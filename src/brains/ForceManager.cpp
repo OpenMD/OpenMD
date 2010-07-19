@@ -62,21 +62,16 @@ namespace OpenMD {
   
   ForceManager::ForceManager(SimInfo * info) : info_(info), 
                                                NBforcesInitialized_(false) {
-    std::cerr << __PRETTY_FUNCTION__ << "\n"; 
-    lj_ = new LJ(info_->getForceField());
+    lj_ = LJ::Instance();
+    lj_->setForceField(info_->getForceField());
   }
  
   void ForceManager::calcForces() {
     
-    std::cerr << __PRETTY_FUNCTION__ << "\n";
     if (!info_->isFortranInitialized()) {
       info_->update();
     }
     
-    if (!NBforcesInitialized_) {
-      lj_->initialize();    
-    } 
-
     preCalculation();
     
     calcShortRangeInteraction();

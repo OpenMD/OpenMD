@@ -76,7 +76,7 @@ namespace OpenMD {
     // public virtual functions should be avoided
     /**@todo needs refactoring */
     virtual void calcForces();
-    virtual void init();
+    virtual void init() {};
 
   protected:
 
@@ -86,13 +86,13 @@ namespace OpenMD {
     virtual void postCalculation();
  
     SimInfo * info_;        
-    LJ* lj_;
     std::map<Bend*, BendDataSet> bendDataSets;
     std::map<Torsion*, TorsionDataSet> torsionDataSets;
     std::map<Inversion*, InversionDataSet> inversionDataSets;
     Mat3x3d tau;
 
     bool NBforcesInitialized_;
+    LJ* lj_;
     
   };
 
