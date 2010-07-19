@@ -285,9 +285,10 @@ namespace OpenMD {
     }    
   }
  
-  void LJ::calcForce(AtomType* at1, AtomType* at2, Vector3d d, RealType rij, 
-                     RealType r2, RealType rcut, RealType sw, RealType vdwMult,
-                     RealType vpair, RealType pot, Vector3d f1) {
+  void LJ::calcForce(AtomType* at1, AtomType* at2, Vector3d d, 
+                     RealType rij, RealType r2, RealType rcut, RealType sw, 
+                     RealType vdwMult, RealType &vpair, RealType &pot, 
+                     Vector3d &f1) {
 
     if (!initialized_) initialize();
     
@@ -347,22 +348,29 @@ namespace OpenMD {
     
     calcForce(atype1, atype2, disp, *rij, *r2, *rcut, *sw, *vdwMult, *vpair, 
               *pot, frc);
+      
+    f1[0] = frc.x();
+    f1[1] = frc.y();
+    f1[2] = frc.z();
+    
     return;    
   }
   
-  void LJ::getLJfunc(const RealType r, RealType pot, RealType deriv) {
+  void LJ::getLJfunc(RealType r, RealType &pot, RealType &deriv) {
+
     RealType ri = 1.0 / r;
     RealType ri2 = ri * ri;
     RealType ri6 = ri2 * ri2 * ri2;
     RealType ri7 = ri6 * ri;
     RealType ri12 = ri6 * ri6;
     RealType ri13 = ri12 * ri;
-
+    
     pot = 4.0 * (ri12 - ri6);
     deriv = 24.0 * (ri7 - 2.0 * ri13);
+
     return;
   }
-
+  
 
   void LJ::setLJDefaultCutoff(RealType *thisRcut, int *sP, int *sF) {
     shiftedPot_ = (bool)(*sP);
