@@ -65,6 +65,7 @@ module doForces
   use MetalNonMetal
   use suttonchen
   use status
+  use ISO_C_BINDING
 
 #ifdef IS_MPI
   use mpiSimulation
@@ -73,9 +74,48 @@ module doForces
   implicit none
   PRIVATE
 
-  real(kind=dp), external :: getSigma
-  real(kind=dp), external :: getEpsilon
-
+  interface
+     function getSigma(atid) 
+       import :: c_int
+       import :: c_double
+       integer(c_int), intent(in) :: atid
+       real(c_double) :: getSigma
+     end function getSigma
+     function getEpsilon(atid)
+       import :: c_int
+       import :: c_double
+       integer(c_int), intent(in) :: atid
+       real(c_double) :: getEpsilon
+     end function getEpsilon
+     subroutine do_lj_pair(atid1, atid2, d, rij, r2, rcut, sw, vdwMult, &
+          vpair, pot, f1)
+       import :: c_int
+       import :: c_double
+       integer(c_int), intent(in) ::  atid1, atid2
+       real(c_double), intent(in) :: rij, r2, rcut, vdwMult, sw
+       real(c_double), intent(in), dimension(3) :: d
+       real(c_double), intent(inout) :: pot, vpair
+       real(c_double), intent(inout), dimension(3) :: f1
+     end subroutine do_lj_pair
+  end interface
+  interface
+     function getSigmaFunc() bind(c,name="getSigma")
+       import :: c_funptr
+       type(c_funptr) :: getSigmaFunc
+     end function getSigmaFunc
+     function getEpsilonFunc() bind(c,name="getEpsilon")
+       import :: c_funptr
+       type(c_funptr) :: getEpsilonFunc
+     end function getEpsilonFunc
+     function getLJPfunc() bind(c,name="LJ_do_pair")
+       import :: c_funptr
+       type(c_funptr) :: getLJPfunc
+     end function getLJPfunc
+  end interface
+  
+  type (c_funptr) :: gsfunptr, gefunptr, dljpsubptr
+  procedure(func), pointer :: getSigma, getEpsilon, do_lj_pair
+  
 #define __FORTRAN90
 #include "UseTheForce/fCutoffPolicy.h"
 #include "UseTheForce/DarkSide/fInteractionMap.h"
@@ -327,7 +367,7 @@ contains
              atypeMaxCutoff(i) = defaultRcut
           else
              if (i_is_LJ) then           
-                thisRcut = getSigma(i) * 2.5_dp
+                thisRcut = getSigma(i)  * 2.5_dp
                 if (thisRCut .gt. atypeMaxCutoff(i)) atypeMaxCutoff(i) = thisRCut
              endif
              if (i_is_Elect) then
@@ -792,6 +832,15 @@ contains
        endif
        haveNeighborList = .true.
     endif
+
+    ! get the C-side pointers
+    gsfunptr = getSigmaFunc()
+    gefunptr = getEpsilonFunc()
+    dljpsubptr = getLJPfunc()
+    ! attach to fortran
+    call c_f_procpointer(gsfunptr, getSigma)
+    call c_f_procpointer(gefunptr, getEpsilon)  
+    call c_f_procpointer(dljpsubptr, do_lj_pair)
 
   end subroutine init_FF
 

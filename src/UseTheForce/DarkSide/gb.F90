@@ -53,8 +53,8 @@ module gayberne
   implicit none
 
   private
-  real(kind=dp), external :: getSigma
-  real(kind=dp), external :: getEpsilon
+  !real(kind=dp), external :: getSigma
+  !real(kind=dp), external :: getEpsilon
 
 #define __FORTRAN90
 #include "UseTheForce/DarkSide/fInteractionMap.h"
@@ -184,9 +184,11 @@ contains
           GBMap%atidToGBtype(myATID) = current
           GBMap%GBtypes(current)%atid      = myATID       
           GBMap%GBtypes(current)%isLJ      = .true.          
-          GBMap%GBtypes(current)%d         = getSigma(myATID) / sqrt(2.0_dp)
+          !GBMap%GBtypes(current)%d         = getSigma(myATID) / sqrt(2.0_dp)
+          GBMap%GBtypes(current)%d         = 1.0 / sqrt(2.0_dp)
           GBMap%GBtypes(current)%l         = GBMap%GBtypes(current)%d
-          GBMap%GBtypes(current)%eps       = getEpsilon(myATID)
+          !GBMap%GBtypes(current)%eps       = getEpsilon(myATID)
+          GBMap%GBtypes(current)%eps       = 0.0
           GBMap%GBtypes(current)%eps_ratio = 1.0_dp
           GBMap%GBtypes(current)%dw        = 1.0_dp
           

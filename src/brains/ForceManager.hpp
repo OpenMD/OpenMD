@@ -52,6 +52,8 @@
 
 #include "brains/SimInfo.hpp"
 #include "primitives/Molecule.hpp"
+#include "nonbonded/LJ.hpp"
+
 namespace OpenMD {
   /**
    * @class ForceManager ForceManager.hpp "brains/ForceManager.hpp"
@@ -67,27 +69,24 @@ namespace OpenMD {
   class ForceManager {
 
   public:
-    ForceManager(SimInfo * info) : info_(info), NBforcesInitialized_(false) {}
-        
+    
+    ForceManager(SimInfo * info);                          
     virtual ~ForceManager() {}
 
     // public virtual functions should be avoided
     /**@todo needs refactoring */
     virtual void calcForces();
+    virtual void init();
 
-    virtual void init() {}
   protected:
 
-    virtual void preCalculation();
-        
+    virtual void preCalculation();        
     virtual void calcShortRangeInteraction();
-
     virtual void calcLongRangeInteraction();
-
     virtual void postCalculation();
  
     SimInfo * info_;        
-
+    LJ* lj_;
     std::map<Bend*, BendDataSet> bendDataSets;
     std::map<Torsion*, TorsionDataSet> torsionDataSets;
     std::map<Inversion*, InversionDataSet> inversionDataSets;

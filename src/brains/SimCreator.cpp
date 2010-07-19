@@ -234,7 +234,7 @@ namespace OpenMD {
   
   SimInfo*  SimCreator::createSim(const std::string & mdFileName, 
                                   bool loadInitCoords) {
-
+    
     const int bufferSize = 65535;
     char buffer[bufferSize];
     int lineNo = 0;

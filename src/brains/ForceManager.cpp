@@ -57,20 +57,25 @@
 #include "primitives/Bend.hpp"
 #include "primitives/Torsion.hpp"
 #include "primitives/Inversion.hpp"
-#include "nonbonded/LJ.hpp"
 
 namespace OpenMD {
-
+  
+  ForceManager::ForceManager(SimInfo * info) : info_(info), 
+                                               NBforcesInitialized_(false) {
+    std::cerr << __PRETTY_FUNCTION__ << "\n"; 
+    lj_ = new LJ(info_->getForceField());
+  }
+ 
   void ForceManager::calcForces() {
     
+    std::cerr << __PRETTY_FUNCTION__ << "\n";
     if (!info_->isFortranInitialized()) {
       info_->update();
     }
     
     if (!NBforcesInitialized_) {
-      LJ* lj = new LJ(info_->getForceField());
-      lj->initialize();
-    }
+      lj_->initialize();    
+    } 
 
     preCalculation();
     
