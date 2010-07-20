@@ -107,6 +107,7 @@ namespace OpenMD {
   }
 
   RealType LJ::getSigma(int atid) { 
+    if (!initialized_) initialize();
     std::map<int, AtomType*> :: const_iterator it;
     it = LJMap.find(atid);
     if (it == LJMap.end()) {
@@ -142,6 +143,7 @@ namespace OpenMD {
   }
 
   RealType LJ::getEpsilon(int atid) {    
+    if (!initialized_) initialize();
     std::map<int, AtomType*> :: const_iterator it;
     it = LJMap.find(atid);
     if (it == LJMap.end()) {
@@ -228,7 +230,8 @@ namespace OpenMD {
 
     // add it to the map:
     AtomTypeProperties atp = atomType->getATP();    
-    std::pair<std::map<int,AtomType*>::iterator,bool> ret;
+
+    std::pair<std::map<int,AtomType*>::iterator,bool> ret;    
     ret = LJMap.insert( std::pair<int, AtomType*>(atp.ident, atomType) );
     if (ret.second == false) {
       sprintf( painCave.errMsg,
@@ -305,6 +308,7 @@ namespace OpenMD {
     RealType sigmai = mixer.sigmai;
     RealType epsilon = mixer.epsilon;
     
+
     ros = rij * sigmai;
 
     getLJfunc(ros, myPot, myDeriv);
@@ -331,6 +335,9 @@ namespace OpenMD {
     f1 = d * dudr / rij;
 
     return;
+
+
+
   }
 
   void LJ::do_lj_pair(int *atid1, int *atid2, RealType *d, RealType *rij, 
@@ -352,7 +359,7 @@ namespace OpenMD {
     f1[0] = frc.x();
     f1[1] = frc.y();
     f1[2] = frc.z();
-    
+
     return;    
   }
   

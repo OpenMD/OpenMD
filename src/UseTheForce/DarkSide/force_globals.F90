@@ -95,9 +95,12 @@ module force_globals
 
   integer, allocatable, dimension(:), public :: atid_Row
   integer, allocatable, dimension(:), public :: atid_Col
+  integer, allocatable, dimension(:), public :: c_idents_Row
+  integer, allocatable, dimension(:), public :: c_idents_Col
 #endif
 
   integer, allocatable, dimension(:), public :: atid
+  integer, allocatable, dimension(:), public :: c_idents_local
 
   real( kind = dp ), allocatable, dimension(:,:), public :: rf
   real(kind = dp), dimension(9), public :: tau_Temp = 0.0_dp
@@ -243,6 +246,12 @@ contains
        return
     endif
 
+    allocate(c_idents_local(nlocal),stat=alloc_stat)
+    if (alloc_stat /= 0 ) then
+       thisStat = -1
+       return
+    endif
+
 
     allocate(atid_Row(nAtomsInRow),stat=alloc_stat)
     if (alloc_stat /= 0 ) then
@@ -251,6 +260,18 @@ contains
     endif
 
     allocate(atid_Col(nAtomsInCol),stat=alloc_stat)
+    if (alloc_stat /= 0 ) then
+       thisStat = -1
+       return
+    endif
+
+    allocate(c_idents_Row(nAtomsInRow),stat=alloc_stat)
+    if (alloc_stat /= 0 ) then
+       thisStat = -1
+       return
+    endif
+
+    allocate(c_idents_Col(nAtomsInCol),stat=alloc_stat)
     if (alloc_stat /= 0 ) then
        thisStat = -1
        return
@@ -340,6 +361,12 @@ contains
        thisStat = -1
        return
     end if
+
+    allocate(c_idents_local(nlocal),stat=alloc_stat)
+    if (alloc_stat /= 0 ) then
+       thisStat = -1
+       return
+    end if
 #endif
 
     allocate(frho(nlocal),stat=alloc_stat)
@@ -385,6 +412,10 @@ contains
     if (allocated(atid_Col))      deallocate(atid_Col)
     if (allocated(atid_Row))      deallocate(atid_Row)
     if (allocated(atid))          deallocate(atid)
+
+    if (allocated(c_idents_Col))  deallocate(c_idents_Col)
+    if (allocated(c_idents_Row))  deallocate(c_idents_Row)
+    if (allocated(c_idents_local)) deallocate(c_idents_local)
     if (allocated(t_Temp))        deallocate(t_Temp)
     if (allocated(t_Col))         deallocate(t_Col)
     if (allocated(t_Row))         deallocate(t_Row)
@@ -414,6 +445,7 @@ contains
     
 #else    
     if (allocated(atid))       deallocate(atid)    
+    if (allocated(c_idents_local))   deallocate(c_idents_local)    
     if (allocated(rho))        deallocate(rho)    
     if (allocated(frho))       deallocate(frho)    
     if (allocated(dfrhodrho))  deallocate(dfrhodrho)    

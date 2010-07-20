@@ -72,7 +72,7 @@ namespace OpenMD {
 
   ForceField::~ForceField() {
     deleteAtypes();
-    deleteSwitch();
+    deleteSwitch();   
   }
 
   AtomType* ForceField::getAtomType(const std::string &at) {

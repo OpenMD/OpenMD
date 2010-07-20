@@ -139,7 +139,7 @@ contains
 
     type (simtype) :: setThisSim
     integer, intent(inout) :: CnGlobal, CnLocal
-    integer, dimension(CnLocal),intent(inout) :: c_idents
+    integer, dimension(CnLocal), intent(inout) :: c_idents
 
     integer :: CnExcludes
     integer, dimension(2,CnExcludes), intent(in) :: Cexcludes
@@ -210,18 +210,6 @@ contains
     nGroupsInCol = getNgroupsInCol(plan_group_col)
     mynode = getMyNode()
 
-    allocate(c_idents_Row(nAtomsInRow),stat=alloc_stat)
-    if (alloc_stat /= 0 ) then
-       status = -1
-       return
-    endif
-
-    allocate(c_idents_Col(nAtomsInCol),stat=alloc_stat)
-    if (alloc_stat /= 0 ) then
-       status = -1
-       return
-    endif
-
     call gather(c_idents, c_idents_Row, plan_atom_row)
     call gather(c_idents, c_idents_Col, plan_atom_col)
 
@@ -234,14 +222,6 @@ contains
        me = getFirstMatchingElement(atypes, "c_ident", c_idents_Col(i))
        atid_Col(i) = me
     enddo
-
-    !! free temporary ident arrays
-    if (allocated(c_idents_Col)) then
-       deallocate(c_idents_Col)
-    end if
-    if (allocated(c_idents_Row)) then
-       deallocate(c_idents_Row)
-    endif
 
 #endif
 
@@ -387,6 +367,7 @@ contains
     do i = 1, nLocal
        me = getFirstMatchingElement(atypes, "c_ident", c_idents(i))
        atid(i) = me
+       c_idents_local(i) = c_idents(i)
     enddo
 
     do i = 1, nExcludes

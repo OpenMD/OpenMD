@@ -74,48 +74,6 @@ module doForces
   implicit none
   PRIVATE
 
-!!$  interface
-!!$     function getSigma(atid) 
-!!$       import :: c_int
-!!$       import :: c_double
-!!$       integer(c_int), intent(in) :: atid
-!!$       real(c_double) :: getSigma
-!!$     end function getSigma
-!!$     function getEpsilon(atid)
-!!$       import :: c_int
-!!$       import :: c_double
-!!$       integer(c_int), intent(in) :: atid
-!!$       real(c_double) :: getEpsilon
-!!$     end function getEpsilon
-!!$     subroutine do_lj_pair(atid1, atid2, d, rij, r2, rcut, sw, vdwMult, &
-!!$          vpair, pot, f1)
-!!$       import :: c_int
-!!$       import :: c_double
-!!$       integer(c_int), intent(in) ::  atid1, atid2
-!!$       real(c_double), intent(in) :: rij, r2, rcut, vdwMult, sw
-!!$       real(c_double), intent(in), dimension(3) :: d
-!!$       real(c_double), intent(inout) :: pot, vpair
-!!$       real(c_double), intent(inout), dimension(3) :: f1
-!!$     end subroutine do_lj_pair
-!!$  end interface
-!!$  interface
-!!$     function getSigmaFunc() bind(c,name="getSigma")
-!!$       import :: c_funptr
-!!$       type(c_funptr) :: getSigmaFunc
-!!$     end function getSigmaFunc
-!!$     function getEpsilonFunc() bind(c,name="getEpsilon")
-!!$       import :: c_funptr
-!!$       type(c_funptr) :: getEpsilonFunc
-!!$     end function getEpsilonFunc
-!!$     function getLJPfunc() bind(c,name="LJ_do_pair")
-!!$       import :: c_funptr
-!!$       type(c_funptr) :: getLJPfunc
-!!$     end function getLJPfunc
-!!$  end interface
-!!$  
-!!$  type (c_funptr) :: gsfunptr, gefunptr, dljpsubptr
-!!$  procedure(func), pointer :: getSigma, getEpsilon, do_lj_pair
-
   real(kind=dp), external :: getSigma
   real(kind=dp), external :: getEpsilon
   
@@ -836,15 +794,6 @@ contains
        haveNeighborList = .true.
     endif
 
-!!$    ! get the C-side pointers
-!!$    gsfunptr = getSigmaFunc()
-!!$    gefunptr = getEpsilonFunc()
-!!$    dljpsubptr = getLJPfunc()
-!!$    ! attach to fortran
-!!$    call c_f_procpointer(gsfunptr, getSigma)
-!!$    call c_f_procpointer(gefunptr, getEpsilon)  
-!!$    call c_f_procpointer(dljpsubptr, do_lj_pair)
-
   end subroutine init_FF
 
 
@@ -1539,6 +1488,7 @@ contains
     real( kind = dp) :: p_vdw, p_elect, p_hb, p_met
     integer :: atid_i, atid_j, id1, id2, idx
     integer :: k
+    integer :: c_ident_i, c_ident_j
 
     integer :: iHash
 
@@ -1559,6 +1509,8 @@ contains
 #ifdef IS_MPI
     atid_i = atid_row(i)
     atid_j = atid_col(j)
+    c_ident_i = c_idents_row(i)
+    c_ident_j = c_idents_col(j)
 
     do idx = 1, 9
        A1(idx) = A_Row(idx, i)
@@ -1570,6 +1522,9 @@ contains
 #else
     atid_i = atid(i)
     atid_j = atid(j)
+    c_ident_i = c_idents_local(i)
+    c_ident_j = c_idents_local(j)
+
     do idx = 1, 9
        A1(idx) = A(idx, i)
        A2(idx) = A(idx, j)
@@ -1603,8 +1558,9 @@ contains
     electroMult = electrostaticScale(topoDist)
 
     if ( iand(iHash, LJ_PAIR).ne.0 ) then
-       call do_lj_pair(atid_i, atid_j, d, r, rijsq, rcut, sw, vdwMult, vpair, &
-            p_vdw, f1)
+       ! this now calls a c routine so use c_idents instead of atids
+       call do_lj_pair(c_ident_i, c_ident_j, d, r, rijsq, rcut, sw, vdwMult, &
+            vpair, p_vdw, f1)
     endif
     
     if ( iand(iHash, ELECTROSTATIC_PAIR).ne.0 ) then
