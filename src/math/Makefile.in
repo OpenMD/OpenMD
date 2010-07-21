@@ -9,6 +9,7 @@ MySource    = \
 	ChebyshevU.cpp \
 	LegendrePolynomial.cpp \
 	RMSD.cpp \
+	CubicSpline.cpp \
 	linearAlgebra.F90 \
 	Wigner3jm.F90 
 
