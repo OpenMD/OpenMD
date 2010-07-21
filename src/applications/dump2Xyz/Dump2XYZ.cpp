@@ -113,6 +113,14 @@ int main(int argc, char* argv[]){
   //create SSD atom visitor
   SSDAtomVisitor* ssdVisitor = new SSDAtomVisitor(info);
   compositeVisitor->addVisitor(ssdVisitor, 800);
+
+  //create GBtail atom visitor
+  GBtailVisitor* gbtVisitor = new GBtailVisitor(info);
+  compositeVisitor->addVisitor(gbtVisitor, 790);
+
+  //create GBhead atom visitor
+  GBheadVisitor* gbhVisitor = new GBheadVisitor(info);
+  compositeVisitor->addVisitor(gbhVisitor, 789);
   
   //create default atom visitor
   DefaultAtomVisitor* defaultAtomVisitor = new DefaultAtomVisitor(info);
