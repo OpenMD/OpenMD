@@ -72,8 +72,9 @@ namespace OpenMD {
     static void setLJDefaultCutoff(RealType *thisRcut, int *sP, int *sF);
 
   private:
+    virtual ~LJ() { }
     // singleton pattern, prevent reconstruction
-    LJ() {};
+    LJ() { }
     LJ(LJ const &) {};
     LJ& operator=(LJ const&) {};
     static LJ* _instance;

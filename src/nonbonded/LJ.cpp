@@ -166,23 +166,23 @@ namespace OpenMD {
   }
 
   void LJ::initialize() {    
-    ForceField::AtomTypeContainer atomTypes = forceField_->getAtomTypes();
+    ForceField::AtomTypeContainer* atomTypes = forceField_->getAtomTypes();
     ForceField::AtomTypeContainer::MapTypeIterator i;
     AtomType* at;
 
-    for (at = atomTypes.beginType(i); at != NULL; 
-         at = atomTypes.nextType(i)) {
+    for (at = atomTypes->beginType(i); at != NULL; 
+         at = atomTypes->nextType(i)) {
       
       if (at->isLennardJones())
         addType(at);
     }
 
-    ForceField::NonBondedInteractionTypeContainer nbiTypes = forceField_->getNonBondedInteractionTypes();
+    ForceField::NonBondedInteractionTypeContainer* nbiTypes = forceField_->getNonBondedInteractionTypes();
     ForceField::NonBondedInteractionTypeContainer::MapTypeIterator j;
     NonBondedInteractionType* nbt;
 
-    for (nbt = nbiTypes.beginType(j); nbt != NULL; 
-         nbt = nbiTypes.nextType(j)) {
+    for (nbt = nbiTypes->beginType(j); nbt != NULL; 
+         nbt = nbiTypes->nextType(j)) {
       
       if (nbt->isLennardJones()) {
         
@@ -335,8 +335,6 @@ namespace OpenMD {
     f1 = d * dudr / rij;
 
     return;
-
-
 
   }
 

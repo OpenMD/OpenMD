@@ -139,12 +139,12 @@ namespace OpenMD {
       return atomTypeCont_.size();
     }
 
-    AtomTypeContainer getAtomTypes() {
-      return atomTypeCont_;
+    AtomTypeContainer* getAtomTypes() {
+      return &atomTypeCont_;
     }
     
-    NonBondedInteractionTypeContainer getNonBondedInteractionTypes() {
-      return nonBondedInteractionTypeCont_;
+    NonBondedInteractionTypeContainer* getNonBondedInteractionTypes() {
+      return &nonBondedInteractionTypeCont_;
     }
         
     bool addAtomType(const std::string &at, AtomType* atomType);
