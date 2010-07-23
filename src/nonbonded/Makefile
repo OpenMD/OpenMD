@@ -1,6 +1,8 @@
 Package = nonbonded
 
-Source    = LJ.cpp 
+Source    = LJ.cpp \
+	EAM.cpp
+	
 
 
 RmiSource =
