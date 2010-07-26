@@ -61,7 +61,6 @@ module doForces
   use gayberne
   use shapes
   use vector_class
-  use eam
   use MetalNonMetal
   use suttonchen
   use status
@@ -76,6 +75,7 @@ module doForces
 
   real(kind=dp), external :: getSigma
   real(kind=dp), external :: getEpsilon
+  real(kind=dp), external :: getEAMcut
   
 #define __FORTRAN90
 #include "UseTheForce/fCutoffPolicy.h"
@@ -301,6 +301,7 @@ contains
     integer :: nGroupTypesRow,nGroupTypesCol
     real(kind=dp):: thisSigma, bigSigma, thisRcut, tradRcut, tol
     real(kind=dp) :: biggestAtypeCutoff
+    integer :: c_ident_i
 
     if (.not. haveInteractionHash) then 
        call createInteractionHash()      
@@ -323,12 +324,13 @@ contains
           call getElementProperty(atypes, i, "is_EAM", i_is_EAM)
           call getElementProperty(atypes, i, "is_Shape", i_is_Shape)
           call getElementProperty(atypes, i, "is_SC", i_is_SC)
+          call getElementProperty(atypes, i, "c_ident", c_ident_i)
  
           if (haveDefaultCutoffs) then
              atypeMaxCutoff(i) = defaultRcut
           else
              if (i_is_LJ) then           
-                thisRcut = getSigma(i)  * 2.5_dp
+                thisRcut = getSigma(c_ident_i)  * 2.5_dp
                 if (thisRCut .gt. atypeMaxCutoff(i)) atypeMaxCutoff(i) = thisRCut
              endif
              if (i_is_Elect) then
@@ -348,7 +350,7 @@ contains
                 if (thisRCut .gt. atypeMaxCutoff(i)) atypeMaxCutoff(i) = thisRCut
              endif
              if (i_is_EAM) then
-                thisRcut = getEAMCut(i)
+                thisRcut = getEAMCut(c_ident_i)
                 if (thisRCut .gt. atypeMaxCutoff(i)) atypeMaxCutoff(i) = thisRCut
              endif
              if (i_is_Shape) then
@@ -1599,7 +1601,7 @@ contains
     endif
 
     if ( iand(iHash, EAM_PAIR).ne.0 ) then       
-       call do_eam_pair(atid_i, atid_j, d, r, rijsq, sw, vpair, &
+       call do_eam_pair(c_ident_i, c_ident_j, d, r, rijsq, sw, vpair, &
             p_met, f1, rho_i, rho_j, dfrhodrho_i, dfrhodrho_j, fshift_i,fshift_j)
     endif
 
@@ -1717,16 +1719,20 @@ contains
     real ( kind = dp )                :: r, rc
     real ( kind = dp ), intent(inout) :: d(3), dc(3)
     real ( kind = dp ) :: rho_i_at_j, rho_j_at_i
-    integer :: atid_i, atid_j, iHash
+    integer :: atid_i, atid_j, iHash, c_ident_i, c_ident_j
     
     r = sqrt(rijsq)
     
 #ifdef IS_MPI   
     atid_i = atid_row(i)
     atid_j = atid_col(j)   
+    c_ident_i = c_idents_row(i)
+    c_ident_j = c_idents_col(j)    
 #else   
     atid_i = atid(i)
     atid_j = atid(j)   
+    c_ident_i = c_idents_local(i)
+    c_ident_j = c_idents_local(j)    
 #endif
     rho_i_at_j = 0.0_dp
     rho_j_at_i = 0.0_dp
@@ -1734,7 +1740,7 @@ contains
     iHash = InteractionHash(atid_i, atid_j)
 
     if ( iand(iHash, EAM_PAIR).ne.0 ) then       
-       call calc_EAM_prepair_rho(atid_i, atid_j, d, r, rijsq, rho_i_at_j, rho_j_at_i)
+       call calc_EAM_prepair_rho(c_ident_i, c_ident_j, r, rho_i_at_j, rho_j_at_i)
     endif
     
     if ( iand(iHash, SC_PAIR).ne.0 ) then       
@@ -1759,6 +1765,7 @@ contains
     real( kind = dp ),dimension(LR_POT_TYPES) :: pot
     real( kind = dp ),dimension(nlocal) :: particle_pot
     integer :: sc_err = 0
+    integer :: atid1, atom, c_ident1
 
 #ifdef IS_MPI
     if ((FF_uses_EAM .and. SIM_uses_EAM) .or. (FF_uses_SC .and. SIM_uses_SC)) then
@@ -1773,14 +1780,27 @@ contains
        rho(1:nlocal) = rho(1:nlocal) + rho_tmp(1:nlocal)
     end if
 #endif
-
-
     
     if (FF_uses_EAM .and. SIM_uses_EAM) then
-       call calc_EAM_preforce_Frho(nlocal, pot(METALLIC_POT), particle_pot)
+
+       do atom = 1, nlocal
+          c_ident1 = c_idents_local(atom)
+
+          call calc_EAM_preforce_Frho(c_ident1, rho(atom), frho(atom), dfrhodrho(atom))
+          pot(METALLIC_POT) = pot(METALLIC_POT) + frho(atom)
+          particle_pot(atom) = particle_pot(atom) + frho(atom)
+       end do
+
     endif
     if (FF_uses_SC .and. SIM_uses_SC) then
-       call calc_SC_preforce_Frho(nlocal, pot(METALLIC_POT), particle_pot)
+
+       do atom = 1, nlocal
+          atid1 = atid(atom)
+          call calc_SC_preforce_Frho(atid1, rho(atom), frho(atom), dfrhodrho(atom))
+          pot(METALLIC_POT) = pot(METALLIC_POT) + frho(atom)
+          particle_pot(atom) = particle_pot(atom) + frho(atom)
+       end do
+
     endif
 
 #ifdef IS_MPI

@@ -302,36 +302,27 @@ contains
     rho_j_at_i = rho_i_at_j
        
   end subroutine calc_sc_prepair_rho
-  
-  
+    
   !! Calculate the rho_a for all local atoms
-  subroutine calc_sc_preforce_Frho(nlocal, pot, particle_pot)
-    integer :: nlocal
-    real(kind=dp) :: pot
-    real(kind=dp), dimension(nlocal) :: particle_pot
-    integer :: i,j
-    integer :: atom
-    integer :: atype1
-    integer :: atid1
-    integer :: myid
+  subroutine calc_sc_preforce_Frho(atid, rho, frho, dfrhodrho)
+    real(kind=dp) :: rho, frho, dfrhodrho
+    real(kind=dp) :: u, u1
+    integer :: atid, myid
     
     !! Calculate F(rho) and derivative
-    do atom = 1, nlocal
-       Myid = SCList%atidtoSctype(Atid(atom))
-       ! Myid is set to -1 for non SC atoms.
-       ! Punt if we are a non-SC atom type.
-       if (Myid == -1) then
-          frho(atom) = 0.0_dp
-          dfrhodrho(atom) = 0.0_dp
-       else
-          frho(atom) = - SCList%SCTypes(Myid)%c * &
-               SCList%SCTypes(Myid)%epsilon * sqrt(rho(atom))
+    
+    Myid = SCList%atidtoSctype(atid)
+    ! Myid is set to -1 for non SC atoms.
+    ! Punt if we are a non-SC atom type.
+    if (Myid == -1) then
+       frho = 0.0_dp
+       dfrhodrho = 0.0_dp
+    else
+       frho = - SCList%SCTypes(Myid)%c * &
+            SCList%SCTypes(Myid)%epsilon * sqrt(rho)
           
-          dfrhodrho(atom) = 0.5_dp*frho(atom)/rho(atom)
-       end if
-       pot = pot + frho(atom)
-       particle_pot(atom) = particle_pot(atom) + frho(atom)
-    enddo
+       dfrhodrho = 0.5_dp*frho/rho
+    end if
     
   end subroutine calc_sc_preforce_Frho
   

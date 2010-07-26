@@ -198,9 +198,9 @@ namespace OpenMD {
     int nr;
     RealType dr;
     RealType rcut;
-    std::vector<RealType> rvals; 
-    std::vector<RealType> rhovals;
-    std::vector<RealType> Frhovals;    
+    std::vector<RealType> Z;   // Z(r) 
+    std::vector<RealType> rho; // rho(r)
+    std::vector<RealType> F;   // F[rho] 
   };
   
   typedef SimpleTypeData<EAMParam> EAMParamGenericData;

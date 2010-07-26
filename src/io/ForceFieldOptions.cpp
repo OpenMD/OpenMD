@@ -63,6 +63,7 @@ namespace OpenMD {
       DefineOptionalParameterWithDefaultValue(electrostatic14scale, "electrostatic-14-scale", 0.0)
       DefineOptionalParameterWithDefaultValue(GayBerneMu, "GayBerneMu", 2.0);
       DefineOptionalParameterWithDefaultValue(GayBerneNu, "GayBerneNu", 1.0);
+      DefineOptionalParameterWithDefaultValue(EAMMixingMethod, "EAMMixingMethod", "Johnson");
     }
 
 

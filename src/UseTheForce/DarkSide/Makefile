@@ -16,8 +16,6 @@ Source    = \
 	simulation_interface.F90 \
 	electrostatic.F90 \
 	electrostatic_interface.F90 \
-	eam.F90 \
-	eam_interface.F90 \
 	gb.F90 \
 	gb_interface.F90 \
 	sticky.F90 \
@@ -36,7 +34,6 @@ ParallelSource = \
 	force_globals.F90 \
 	simulation.F90 \
 	electrostatic.F90 \
-	eam.F90 \
 	gb.F90 \
 	stickky.F90 \
 	shapes.F90 \
@@ -45,7 +42,6 @@ ParallelSource = \
 
 Modules = \
 	atype_module \
-	eam \
 	electrostatic_module \
 	force_globals \
 	fforceoptions \

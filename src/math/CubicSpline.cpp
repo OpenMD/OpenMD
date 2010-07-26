@@ -86,8 +86,6 @@ void CubicSpline::generate() {
   // make sure the sizes match
   
   n = data.size();  
-  x.resize(n);
-  y.resize(n);
   b.resize(n);
   c.resize(n);
   d.resize(n);
@@ -103,13 +101,6 @@ void CubicSpline::generate() {
   // sort if necessary
   
   if (!sorted) sort(data.begin(), data.end());  
-  
-  // Copy spline data out to separate arrays:
-  
-  for (int i = 0; i < n; i++) {
-    x[i] = data[i].first;
-    y[i] = data[i].second;
-  }
   
   // Calculate coefficients for the tridiagonal system: store
   // sub-diagonal in B, diagonal in D, difference quotient in C.  

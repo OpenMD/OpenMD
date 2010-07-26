@@ -40,7 +40,6 @@
  */
  
 #include "UseTheForce/EAM_FF.hpp"
-#include "UseTheForce/DarkSide/eam_interface.h"
 #include "UseTheForce/DarkSide/sticky_interface.h"
 #include "UseTheForce/ForceFieldFactory.hpp"
 #include "io/BaseAtomTypesSectionParser.hpp"
@@ -127,9 +126,4 @@ namespace OpenMD {
     return rcut;    
   }
 
-  EAM_FF::~EAM_FF(){
-    // We need to clean up the fortran side so we don't have bad things happen if
-    // we try to create a second EAM force field.
-    destroyEAMTypes();
-  }
 } //end namespace OpenMD

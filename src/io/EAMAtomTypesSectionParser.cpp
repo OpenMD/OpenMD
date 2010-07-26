@@ -131,9 +131,9 @@ namespace OpenMD {
       }
     } 
     
-    parseEAMArray(*ppfStream, eamParam.Frhovals, eamParam.nrho);    
-    parseEAMArray(*ppfStream, eamParam.rvals, eamParam.nr);
-    parseEAMArray(*ppfStream, eamParam.rhovals, eamParam.nr);
+    parseEAMArray(*ppfStream, eamParam.F,   eamParam.nrho);    
+    parseEAMArray(*ppfStream, eamParam.Z,   eamParam.nr);
+    parseEAMArray(*ppfStream, eamParam.rho, eamParam.nr);
     
     atomType->addProperty(new EAMParamGenericData("EAM", eamParam));
 

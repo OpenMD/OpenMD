@@ -45,15 +45,19 @@
 #include <cmath>
 #include "nonbonded/EAM.hpp"
 #include "utils/simError.h"
+#include "types/NonBondedInteractionType.hpp"
 
 
 namespace OpenMD {
 
   bool EAM::initialized_ = false;
+  RealType EAM::eamRcut_ = 0.0;
+  EAMMixingMethod EAM::mixMeth_ = eamJohnson;
   ForceField* EAM::forceField_ = NULL;
   std::map<int, AtomType*> EAM::EAMlist;
   std::map<AtomType*, EAMAtomData> EAM::EAMMap;
   std::map<std::pair<AtomType*, AtomType*>, EAMInteractionData> EAM::MixingMap;
+
   
   EAM* EAM::_instance = NULL;
 
@@ -112,6 +116,11 @@ namespace OpenMD {
     CubicSpline* cs = new CubicSpline();
     cs->addPoints(rvals, eamParam.Z);
     return cs;
+  }
+
+  RealType EAM::getRcut(AtomType* atomType) {    
+    EAMParam eamParam = getEAMParam(atomType);
+    return eamParam.rcut;
   }
 
   CubicSpline* EAM::getRho(AtomType* atomType) {    
@@ -190,8 +199,8 @@ namespace OpenMD {
   void EAM::initialize() { 
 
     // set up the mixing method:
-    ForceFieldOptions ffo = forceField_->getForceFieldOptions();
-    string EAMMixMeth = toUpperCopy(ffo.getEAMMixingMethod());
+    ForceFieldOptions& fopts = forceField_->getForceFieldOptions();
+    string EAMMixMeth = toUpperCopy(fopts.getEAMMixingMethod());
 
     if (EAMMixMeth == "JOHNSON") 
       mixMeth_ = eamJohnson;    
@@ -247,9 +256,9 @@ namespace OpenMD {
           simError();          
         }
         
-        EAMMix eamParam = eamData->getData();
+        EAMMixingParam eamParam = eamData->getData();
 
-        vector<RealType> phiAB = eamParam.phiAB;
+        vector<RealType> phiAB = eamParam.phi;
         RealType dr = eamParam.dr;
         int nr = eamParam.nr;
 
@@ -264,7 +273,7 @@ namespace OpenMD {
   void EAM::addType(AtomType* atomType){
 
     EAMAtomData eamAtomData;
-
+    
     eamAtomData.rho = getRho(atomType);
     eamAtomData.F = getF(atomType);
     eamAtomData.Z = getZ(atomType);
@@ -288,10 +297,10 @@ namespace OpenMD {
     
     // Now, iterate over all known types and add to the mixing map:
     
-    std::map<int, AtomType*>::iterator it;
+    std::map<AtomType*, EAMAtomData>::iterator it;
     for( it = EAMMap.begin(); it != EAMMap.end(); ++it) {
       
-      AtomType* atype2 = (*it).second;
+      AtomType* atype2 = (*it).first;
 
       EAMInteractionData mixer;
       mixer.phi = getPhi(atomType, atype2);
@@ -319,9 +328,9 @@ namespace OpenMD {
 
     EAMInteractionData mixer;
     CubicSpline* cs = new CubicSpline();
-    vector<RealType> rvals;
+    vector<RealType> rVals;
 
-    for (int i = 0; i < nr; i++) rvals.push_back(i * dr);
+    for (int i = 0; i < nr; i++) rVals.push_back(i * dr);
 
     cs->addPoints(rVals, phiVals);
     mixer.phi = cs;
@@ -338,12 +347,11 @@ namespace OpenMD {
     return;
   }
 
-  void EAM::calcDensity(AtomType* at1, AtomType* at2, Vector3d d, 
-                        RealType rij, RealType r2, RealType rho_i_at_j,
-                        RealType rho_j_at_i) {
-
+  void EAM::calcDensity(AtomType* at1, AtomType* at2, const RealType rij, 
+                        RealType &rho_i_at_j, RealType &rho_j_at_i) {
+    
     if (!initialized_) initialize();
-
+    
     EAMAtomData data1 = EAMMap[at1];
     EAMAtomData data2 = EAMMap[at2];
 
@@ -352,8 +360,8 @@ namespace OpenMD {
     return;
   }
 
-  void EAM::calcFunctional(AtomType* at1, RealType rho, RealType frho,
-                           RealType dfrhodrho) {
+  void EAM::calcFunctional(AtomType* at1, RealType rho, RealType &frho,
+                           RealType &dfrhodrho) {
 
     if (!initialized_) initialize();
 
@@ -370,8 +378,9 @@ namespace OpenMD {
   void EAM::calcForce(AtomType* at1, AtomType* at2, Vector3d d, 
                       RealType rij, RealType r2, RealType sw, 
                       RealType &vpair, RealType &pot, Vector3d &f1,
-                      RealType rho1, RealType rho2, RealType dfrho1,
-                      RealType dfrho2, RealType fshift1, RealType fshift2) {
+                      RealType rho_i, RealType rho_j, 
+                      RealType dfrhodrho_i, RealType dfrhodrho_j, 
+                      RealType &fshift_i, RealType &fshift_j) {
 
     if (!initialized_) initialize();
     
@@ -483,17 +492,15 @@ namespace OpenMD {
   }
 
 
-  void EAM::calc_eam_prepair_rho(int *atid1, int *atid2, RealType *d, 
-                                 RealType *rij, RealType *r2, 
+  void EAM::calc_eam_prepair_rho(int *atid1, int *atid2, RealType *rij,
                                  RealType* rho_i_at_j, RealType* rho_j_at_i){
-    if (!initialized_) initialize();
 
+    if (!initialized_) initialize();
+    
     AtomType* atype1 = EAMlist[*atid1];
     AtomType* atype2 = EAMlist[*atid2];
     
-    Vector3d disp(d[0], d[1], d[2]);
-
-    calcDensity(atype1, atype2, disp, *rij, *r2, *rho_i_at_j, *rho_j_at_i);
+    calcDensity(atype1, atype2, *rij, *rho_i_at_j, *rho_j_at_i);
 
     return;    
   }
@@ -509,6 +516,14 @@ namespace OpenMD {
     
     return;    
   }
+  RealType EAM::getEAMcut(int *atid1) {
+
+    if (!initialized_) initialize();
+    
+    AtomType* atype1 = EAMlist[*atid1];   
+       
+    return getRcut(atype1);
+  }
 
   void EAM::do_eam_pair(int *atid1, int *atid2, RealType *d, RealType *rij, 
                         RealType *r2, RealType *sw, RealType *vpair, 
@@ -518,8 +533,8 @@ namespace OpenMD {
 
     if (!initialized_) initialize();
     
-    AtomType* atype1 = EAMMap[*atid1];
-    AtomType* atype2 = EAMMap[*atid2];
+    AtomType* atype1 = EAMlist[*atid1];
+    AtomType* atype2 = EAMlist[*atid2];
     
     Vector3d disp(d[0], d[1], d[2]);
     Vector3d frc(f1[0], f1[1], f1[2]);
@@ -535,7 +550,7 @@ namespace OpenMD {
   }
   
   void EAM::setCutoffEAM(RealType *thisRcut) {
-    eamRcut_ = thisRcut;
+    eamRcut_ = *thisRcut;
   }
 }
 
@@ -545,38 +560,40 @@ extern "C" {
 #define fortranCalcFunctional FC_FUNC(calc_eam_preforce_frho, CALC_EAM_PREFORCE_FRHO)
 #define fortranCalcForce FC_FUNC(do_eam_pair, DO_EAM_PAIR)
 #define fortranSetCutoffEAM FC_FUNC(setcutoffeam, SETCUTOFFEAM)
+#define fortranGetEAMcut FC_FUNC(geteamcut, GETEAMCUT)
+
   
-  RealType fortranCalcDensity(int *atid1, int *atid2, RealType *d, 
-                              RealType *rij, RealType *r2, 
-                              RealType *rho_i_at_j, RealType *rho_j_at_i) {
-
-    return OpenMD::EAM::Instance()->calc_eam_prepair_rho(*atid1, *atid2, *d, 
-                                                         *rij, *r2, 
-                                                         *rho_i_at_j,  
-                                                         *rho_j_at_i);
+  void fortranCalcDensity(int *atid1, int *atid2, RealType *rij, 
+                          RealType *rho_i_at_j, RealType *rho_j_at_i) {
+    
+    return OpenMD::EAM::Instance()->calc_eam_prepair_rho(atid1, atid2, rij, 
+                                                         rho_i_at_j,  
+                                                         rho_j_at_i);
   }
-  RealType fortranCalcFunctional(int *atid1, RealType *rho, RealType *frho,
-                                 RealType *dfrhodrho) {  
-
-    return OpenMD::EAM::Instance()->calc_eam_preforce_Frho(*atid1, 
-                                                           *rho, 
-                                                           *frho,
-                                                           *dfrhodrho);
-
+  void fortranCalcFunctional(int *atid1, RealType *rho, RealType *frho,
+                             RealType *dfrhodrho) {  
+    
+    return OpenMD::EAM::Instance()->calc_eam_preforce_Frho(atid1, rho, frho,
+                                                           dfrhodrho);
+    
   }
-  void fortranSetEAMCutoff(RealType *rcut) {
+  void fortranSetCutoffEAM(RealType *rcut) {
     return OpenMD::EAM::Instance()->setCutoffEAM(rcut);
   }
-  void fortranDoEAMPair(int *atid1, int *atid2, RealType *d, RealType *rij, 
+  void fortranCalcForce(int *atid1, int *atid2, RealType *d, RealType *rij, 
                         RealType *r2, RealType *sw, RealType *vpair, 
                         RealType *pot, RealType *f1, RealType *rho1,
                         RealType *rho2, RealType *dfrho1, RealType *dfrho2,
                         RealType *fshift1, RealType *fshift2){
     
-    return OpenMD::EAM::Instance()->do_eam_pair(*atid1, *atid2, *d, *rij, 
-                                                *r2, *sw,  *vpair, 
-                                                *pot, *f1,  *rho1,
-                                                *rho2,  *dfrho1,  *dfrho2,
-                                                *fshift1,  *fshift2);
+    return OpenMD::EAM::Instance()->do_eam_pair(atid1, atid2, d, rij, 
+                                                r2, sw, vpair, 
+                                                pot, f1, rho1,
+                                                rho2, dfrho1, dfrho2,
+                                                fshift1,  fshift2);
   }
+  RealType fortranGetEAMcut(int* atid) {
+    return OpenMD::EAM::Instance()->getEAMcut(atid);
+  }
+
 }

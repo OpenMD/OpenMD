@@ -70,6 +70,7 @@ namespace OpenMD {
     DeclareParameter(electrostatic14scale, RealType);
     DeclareParameter(GayBerneMu, RealType);
     DeclareParameter(GayBerneNu, RealType);
+    DeclareParameter(EAMMixingMethod, std::string);
     
   public:
     ForceFieldOptions();
@@ -83,6 +84,7 @@ namespace OpenMD {
       CheckParameter(EnergyMixingRule, isEqualIgnoreCase(std::string("arithmetic")) || isEqualIgnoreCase(std::string("geometric")) || isEqualIgnoreCase(std::string("hhg")));
       CheckParameter(TorsionAngleConvention, isEqualIgnoreCase(std::string("180 is trans")) || isEqualIgnoreCase(std::string("0 is trans")));
       CheckParameter(CutoffPolicy, isEqualIgnoreCase(std::string("MIX")) || isEqualIgnoreCase(std::string("MAX")) || isEqualIgnoreCase(std::string("TRADITIONAL")));
+      CheckParameter(EAMMixingMethod, isEqualIgnoreCase(std::string("JOHNSON")) || isEqualIgnoreCase(std::string("DAW")));
    }
     
     bool setData(const std::string& keyword, const std::string& value) {

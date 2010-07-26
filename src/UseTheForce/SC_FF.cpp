@@ -45,7 +45,6 @@
  */
 
 #include "UseTheForce/SC_FF.hpp"
-#include "UseTheForce/DarkSide/eam_interface.h"
 #include "UseTheForce/DarkSide/sticky_interface.h"
 #include "UseTheForce/DarkSide/suttonchen_interface.h"
 #include "UseTheForce/ForceFieldFactory.hpp"

@@ -159,6 +159,15 @@ namespace OpenMD {
     PropertyMap properties_;
     
   };  
+
+  struct EAMMixingParam {
+    int nr;
+    RealType dr;
+    std::vector<RealType> phi; // phi(r)
+  };
+  
+  typedef SimpleTypeData<EAMMixingParam> EAMMixingData;
+
   
 } //end namespace OpenMD
 #endif //TYPES_NONBONDEDINTERACTIONTYPE_HPP

@@ -50,14 +50,14 @@
 namespace OpenMD {
 
   struct EAMAtomData {
-    CubicSpline rho;
-    CubicSpline F;
-    CubicSpline Z;
+    CubicSpline* rho;
+    CubicSpline* F;
+    CubicSpline* Z;
     RealType rcut;
   };
   
   struct EAMInteractionData {
-    CubicSpline phi;
+    CubicSpline* phi;
     bool explicitlySet;
   };
   
@@ -76,17 +76,18 @@ namespace OpenMD {
     static void addType(AtomType* atomType);
     static void addExplicitInteraction(AtomType* atype1, AtomType* atype2, RealType dr, int nr, std::vector<RealType> phiAB);
     
-    static void calcDensity(AtomType* at1, AtomType* at2, const Vector3d d, const RealType rij, const RealType r2, RealType rho_i_at_j, RealType rho_j_at_i);
+    static void calcDensity(AtomType* at1, AtomType* at2, const RealType rij, RealType &rho_i_at_j, RealType &rho_j_at_i);
 
-    static void calcFunctional(AtomType* at1, const RealType rho, RealType frho, RealType* dfrhodrho);
+    static void calcFunctional(AtomType* at1, const RealType rho, RealType &frho, RealType &dfrhodrho);
 
-    static void calcForce(AtomType* at1, AtomType* at2, const Vector3d d, const RealType rij, const RealType r2, const RealType sw, RealType &vpair, RealType &pot, Vector3d &f1, const RealType rho1, const RealType rho2, const RealType dfrho1, const RealType dfrho2, RealType fshift1, RealType fshift2);
+    static void calcForce(AtomType* at1, AtomType* at2, const Vector3d d, const RealType rij, const RealType r2, const RealType sw, RealType &vpair, RealType &pot, Vector3d &f1, const RealType rho1, const RealType rho2, const RealType dfrho1, const RealType dfrho2, RealType &fshift1, RealType &fshift2);
                           
     // Fortran support routines; 
-    static void calc_eam_prepair_rho(int *atid1, int *atid2, RealType *d, RealType *rij, RealType *r2, RealType* rho_i_at_j, RealType* rho_j_at_i);
+    static void calc_eam_prepair_rho(int *atid1, int *atid2, RealType *rij,  RealType* rho_i_at_j, RealType* rho_j_at_i);
     static void calc_eam_preforce_Frho(int *atid1, RealType* rho, RealType* frho, RealType* dfrhodrho);
     static void do_eam_pair(int *atid1, int *atid2, RealType *d, RealType *rij, RealType *r2,  RealType *sw, RealType *vpair, RealType *pot, RealType *f1, RealType* rho1, RealType* rho2, RealType* dfrho1, RealType* dfrho2, RealType* fshift1, RealType* fshift2);
     static void setCutoffEAM(RealType *thisRcut);
+    static RealType getEAMcut(int *atid1);
 
   private:
     virtual ~EAM() { }
@@ -96,11 +97,12 @@ namespace OpenMD {
     EAM& operator=(EAM const&) {};
     static EAM* _instance;
   
-    EAMParam getEAMParam(AtomType* atomType);
-    CubicSpline* getZ(AtomType* atomType);
-    CubicSpline* getRho(AtomType* atomType);
-    CubicSpline* getF(AtomType* atomType);
-    CubicSpline* getPhi(AtomType* atomType1, AtomType* atomType2);
+    static EAMParam getEAMParam(AtomType* atomType);
+    static CubicSpline* getZ(AtomType* atomType);
+    static CubicSpline* getRho(AtomType* atomType);
+    static CubicSpline* getF(AtomType* atomType);
+    static RealType getRcut(AtomType* atomType);
+    static CubicSpline* getPhi(AtomType* atomType1, AtomType* atomType2);
     
     static bool initialized_;
     static std::map<int, AtomType*> EAMlist;

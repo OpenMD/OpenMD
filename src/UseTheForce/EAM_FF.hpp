@@ -66,7 +66,7 @@ namespace OpenMD {
 
     virtual RealType getRcutFromAtomType(AtomType* at);
 
-    ~EAM_FF();
+    ~EAM_FF() {};
   private:
     SectionParserManager spMan_;
 

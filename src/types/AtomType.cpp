@@ -48,7 +48,6 @@
 #include "utils/simError.h"
 #define __OPENMD_C
 #include "UseTheForce/DarkSide/atype_interface.h"
-#include "UseTheForce/DarkSide/eam_interface.h"
 #include "UseTheForce/DarkSide/electrostatic_interface.h"
 #include "UseTheForce/DarkSide/suttonchen_interface.h"
 
@@ -242,45 +241,7 @@ namespace OpenMD {
 	simError();          
       }
     }
-    
-    if (isEAM()) {
-      data = getPropertyByName("EAM");
-      if (data != NULL) {
-	EAMParamGenericData* eamData = dynamic_cast<EAMParamGenericData*>(data);
         
-	if (eamData != NULL) {
-          
-	  EAMParam eamParam = eamData->getData();
-          
-          
-	  newEAMtype(&eamParam.latticeConstant, &eamParam.nrho, 
-                     &eamParam.drho,  &eamParam.nr, &eamParam.dr, 
-                     &eamParam.rcut, &eamParam.rvals[0], &eamParam.rhovals[0], 
-                     &eamParam.Frhovals[0], &atp.ident, &isError );
-          
-	  if (isError != 0) {
-	    sprintf( painCave.errMsg,
-		     "Fortran rejected newEAMtype\n");
-	    painCave.severity = OPENMD_ERROR;
-	    painCave.isFatal = 1;
-	    simError();          
-	  }
-	} else {
-	  sprintf( painCave.errMsg,
-		   "Can not cast GenericData to EAMParam\n");
-	  painCave.severity = OPENMD_ERROR;
-	  painCave.isFatal = 1;
-	  simError();          
-	}
-      } else {
-	sprintf( painCave.errMsg, "Can not find EAM Parameters\n");
-	painCave.severity = OPENMD_ERROR;
-	painCave.isFatal = 1;
-	simError();          
-      }
-    }
-    
-    
     if (isSC()) {
       data = getPropertyByName("SC");
       if (data != NULL) {
