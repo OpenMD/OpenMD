@@ -54,9 +54,9 @@ namespace OpenMD {
   RealType EAM::eamRcut_ = 0.0;
   EAMMixingMethod EAM::mixMeth_ = eamJohnson;
   ForceField* EAM::forceField_ = NULL;
-  std::map<int, AtomType*> EAM::EAMlist;
-  std::map<AtomType*, EAMAtomData> EAM::EAMMap;
-  std::map<std::pair<AtomType*, AtomType*>, EAMInteractionData> EAM::MixingMap;
+  map<int, AtomType*> EAM::EAMlist;
+  map<AtomType*, EAMAtomData> EAM::EAMMap;
+  map<pair<AtomType*, AtomType*>, EAMInteractionData> EAM::MixingMap;
 
   
   EAM* EAM::_instance = NULL;
@@ -161,17 +161,24 @@ namespace OpenMD {
 
     // make the r grid:
 
-    // set rcut to be the smaller of the two atomic rcuts
 
-    RealType rcut = eamParam1.rcut < eamParam2.rcut ? 
-      eamParam1.rcut : eamParam2.rcut; 
+    // we need phi out to the largest value we'll encounter in the radial space;
+    
+    RealType rmax = 0.0;
+    rmax = max(rmax, eamParam1.rcut);
+    rmax = max(rmax, eamParam1.nr * eamParam1.dr);
+
+    rmax = max(rmax, eamParam2.rcut);
+    rmax = max(rmax, eamParam2.nr * eamParam2.dr);
 
     // use the smallest dr (finest grid) to build our grid:
 
-    RealType dr = eamParam1.dr < eamParam2.dr ? eamParam1.dr : eamParam2.dr;
-    int nr = int(rcut/dr);
+    RealType dr = min(eamParam1.dr, eamParam2.dr); 
+
+    int nr = int(rmax/dr + 0.5);
+
     vector<RealType> rvals;
-    for (int i = 0; i < nr; i++) rvals.push_back(i*dr);
+    for (int i = 0; i < nr; i++) rvals.push_back(RealType(i*dr));
 
     // construct the pair potential:
 
@@ -184,10 +191,15 @@ namespace OpenMD {
 
     for (int i = 1; i < rvals.size(); i++ ) {
       r = rvals[i];
-      zi = z1->getValueAt(r); 
-      zj = z2->getValueAt(r);
+
+      // only use z(r) if we're inside this atoms cutoff radius, otherwise, we'll use zero for the charge.
+      // This effectively means that our phi grid goes out beyond the cutoff of the pair potential
+
+      zi = r <= eamParam1.rcut ? z1->getValueAt(r) : 0.0;
+      zj = r <= eamParam2.rcut ? z2->getValueAt(r) : 0.0;
 
       phi = 331.999296 * (zi * zj) / r;
+
       phivals.push_back(phi);
     }
       
@@ -200,7 +212,7 @@ namespace OpenMD {
 
     // set up the mixing method:
     ForceFieldOptions& fopts = forceField_->getForceFieldOptions();
-    std::string EAMMixMeth = fopts.getEAMMixingMethod();
+    string EAMMixMeth = fopts.getEAMMixingMethod();
     toUpper(EAMMixMeth);
    
     if (EAMMixMeth == "JOHNSON") 
@@ -232,7 +244,7 @@ namespace OpenMD {
       
       if (nbt->isEAM()) {
         
-        std::pair<AtomType*, AtomType*> atypes = nbt->getAtomTypes();
+        pair<AtomType*, AtomType*> atypes = nbt->getAtomTypes();
         
         GenericData* data = nbt->getPropertyByName("EAM");
         if (data == NULL) {
@@ -283,8 +295,8 @@ namespace OpenMD {
     // add it to the map:
     AtomTypeProperties atp = atomType->getATP();    
 
-    std::pair<std::map<int,AtomType*>::iterator,bool> ret;    
-    ret = EAMlist.insert( std::pair<int, AtomType*>(atp.ident, atomType) );
+    pair<map<int,AtomType*>::iterator,bool> ret;    
+    ret = EAMlist.insert( pair<int, AtomType*>(atp.ident, atomType) );
     if (ret.second == false) {
       sprintf( painCave.errMsg,
                "EAM already had a previous entry with ident %d\n",
@@ -298,7 +310,7 @@ namespace OpenMD {
     
     // Now, iterate over all known types and add to the mixing map:
     
-    std::map<AtomType*, EAMAtomData>::iterator it;
+    map<AtomType*, EAMAtomData>::iterator it;
     for( it = EAMMap.begin(); it != EAMMap.end(); ++it) {
       
       AtomType* atype2 = (*it).first;
@@ -307,9 +319,9 @@ namespace OpenMD {
       mixer.phi = getPhi(atomType, atype2);
       mixer.explicitlySet = false;
 
-      std::pair<AtomType*, AtomType*> key1, key2;
-      key1 = std::make_pair(atomType, atype2);
-      key2 = std::make_pair(atype2, atomType);
+      pair<AtomType*, AtomType*> key1, key2;
+      key1 = make_pair(atomType, atype2);
+      key2 = make_pair(atype2, atomType);
       
       MixingMap[key1] = mixer;
       if (key2 != key1) {
@@ -337,9 +349,9 @@ namespace OpenMD {
     mixer.phi = cs;
     mixer.explicitlySet = true;
 
-    std::pair<AtomType*, AtomType*> key1, key2;
-    key1 = std::make_pair(atype1, atype2);
-    key2 = std::make_pair(atype2, atype1);
+    pair<AtomType*, AtomType*> key1, key2;
+    key1 = make_pair(atype1, atype2);
+    key2 = make_pair(atype2, atype1);
     
     MixingMap[key1] = mixer;
     if (key2 != key1) {
@@ -384,7 +396,7 @@ namespace OpenMD {
                       RealType &fshift_i, RealType &fshift_j) {
 
     if (!initialized_) initialize();
-    
+
     pair<RealType, RealType> res;
     
     if (rij < eamRcut_) {
@@ -443,7 +455,6 @@ namespace OpenMD {
         break;
 
       case eamDaw:
-                
         res = MixingMap[make_pair(at1,at2)].phi->getValueAndDerivativeAt(rij);
         phab = res.first;
         dvpdr = res.second;
