@@ -101,8 +101,6 @@ namespace OpenMD {
     }else{
       fortranForceOptions.EnergyMixingRule = GEOMETRIC_MIXING_RULE;
     }
-
-
   }
 
 }

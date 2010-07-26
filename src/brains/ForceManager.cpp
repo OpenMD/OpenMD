@@ -64,6 +64,9 @@ namespace OpenMD {
                                                NBforcesInitialized_(false) {
     lj_ = LJ::Instance();
     lj_->setForceField(info_->getForceField());
+
+    eam_ = EAM::Instance();
+    eam_->setForceField(info_->getForceField());
   }
  
   void ForceManager::calcForces() {

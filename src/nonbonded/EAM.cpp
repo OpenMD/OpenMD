@@ -200,8 +200,9 @@ namespace OpenMD {
 
     // set up the mixing method:
     ForceFieldOptions& fopts = forceField_->getForceFieldOptions();
-    string EAMMixMeth = toUpperCopy(fopts.getEAMMixingMethod());
-
+    std::string EAMMixMeth = fopts.getEAMMixingMethod();
+    toUpper(EAMMixMeth);
+   
     if (EAMMixMeth == "JOHNSON") 
       mixMeth_ = eamJohnson;    
     else if (EAMMixMeth == "DAW")

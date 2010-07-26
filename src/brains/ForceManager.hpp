@@ -53,6 +53,7 @@
 #include "brains/SimInfo.hpp"
 #include "primitives/Molecule.hpp"
 #include "nonbonded/LJ.hpp"
+#include "nonbonded/EAM.hpp"
 
 namespace OpenMD {
   /**
@@ -93,6 +94,7 @@ namespace OpenMD {
 
     bool NBforcesInitialized_;
     LJ* lj_;
+    EAM* eam_;
     
   };
 
