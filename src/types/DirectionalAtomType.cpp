@@ -43,7 +43,6 @@
 #include "types/DirectionalAtomType.hpp"
 #include "UseTheForce/DarkSide/electrostatic_interface.h"
 #include "UseTheForce/DarkSide/sticky_interface.h"
-#include "UseTheForce/DarkSide/gb_interface.h"
 #include "utils/simError.h"
 namespace OpenMD {
   
@@ -223,7 +222,7 @@ namespace OpenMD {
                         &stickyParam.rlp, &stickyParam.rup, &isError);
           if (isError != 0) {
             sprintf( painCave.errMsg,
-                     "Fortran rejected newLJtype\n");
+                     "Fortran rejected newStickytype\n");
             painCave.severity = OPENMD_ERROR;
             painCave.isFatal = 1;
             simError();          
@@ -242,49 +241,6 @@ namespace OpenMD {
         painCave.isFatal = 1;
         simError();          
       }
-    }
-    
-    //setup GayBerne type in fortran side
-    if (isGayBerne()) {
-      data = getPropertyByName("GayBerne");
-      if (data != NULL) {
-        GayBerneParamGenericData* gayBerneData = dynamic_cast<GayBerneParamGenericData*>(data);
-        
-        if (gayBerneData != NULL) {
-          GayBerneParam gayBerneParam = gayBerneData->getData();
-          
-          newGayBerneType(&atp.ident, 
-                          &gayBerneParam.GB_d, 
-                          &gayBerneParam.GB_l, 
-                          &gayBerneParam.GB_eps,
-                          &gayBerneParam.GB_eps_ratio, 
-                          &gayBerneParam.GB_dw, 
-                          &isError);
-          
-          if (isError != 0) {
-            sprintf( painCave.errMsg,
-                     "Fortran rejected newGayBerneType\n");
-            painCave.severity = OPENMD_ERROR;
-            painCave.isFatal = 1;
-            simError();          
-          }
-          
-        } 
-	
-        else {
-          sprintf( painCave.errMsg,
-                   "Can not cast GenericData to GayBerneParam\n");
-          painCave.severity = OPENMD_ERROR;
-          painCave.isFatal = 1;
-          simError();          
-        }            
-      } 
-      else {
-        sprintf( painCave.errMsg, "Can not find Parameters for GayBerne\n");
-        painCave.severity = OPENMD_ERROR;
-        painCave.isFatal = 1;
-        simError();          
-      }
-    }
+    }    
   }
 } //end namespace OpenMD

@@ -1,6 +1,7 @@
 Package = nonbonded
 
 Source    = LJ.cpp \
+	GB.cpp \
 	EAM.cpp
 	
 

@@ -16,8 +16,6 @@ Source    = \
 	simulation_interface.F90 \
 	electrostatic.F90 \
 	electrostatic_interface.F90 \
-	gb.F90 \
-	gb_interface.F90 \
 	sticky.F90 \
 	sticky_interface.F90 \
 	shapes.F90 \
@@ -34,7 +32,6 @@ ParallelSource = \
 	force_globals.F90 \
 	simulation.F90 \
 	electrostatic.F90 \
-	gb.F90 \
 	stickky.F90 \
 	shapes.F90 \
 	suttonchen.F90 \
@@ -54,7 +51,6 @@ Modules = \
 	switcheroo \
 	suttonchen \
 	MetalNonMetal \
-	gb
 
 RmiSource =
 

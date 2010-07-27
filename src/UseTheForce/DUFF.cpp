@@ -42,7 +42,6 @@
 
 #include "UseTheForce/DUFF.hpp"
 #include "UseTheForce/DarkSide/sticky_interface.h"
-#include "UseTheForce/DarkSide/gb_interface.h"
 #include "UseTheForce/ForceFieldFactory.hpp"
 #include "io/BaseAtomTypesSectionParser.hpp"
 #include "io/DirectionalAtomTypesSectionParser.hpp"
@@ -85,7 +84,6 @@ namespace OpenMD {
 
   void DUFF::parse(const std::string& filename) {
     ifstrstream* ffStream;
-    bool hasGBtypes;
 
     ffStream = openForceFieldFile(filename);
 
@@ -115,25 +113,12 @@ namespace OpenMD {
       at->complete();
     }
 
-    hasGBtypes = false;
-    for (at = atomTypeCont_.beginType(i); at != NULL; 
-         at = atomTypeCont_.nextType(i)) {
-      if (at->isGayBerne()) 
-        hasGBtypes = true;
-    }
-    
     int isError = 0;
 
-    if (hasGBtypes) {
-      completeGBFF(&isError);
-    }
-
     delete ffStream;
-    
   }
 
   DUFF::~DUFF(){
     destroyStickyTypes();
-    destroyGayBerneTypes();
   }
 } //end namespace OpenMD

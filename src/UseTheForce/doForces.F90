@@ -58,7 +58,6 @@ module doForces
   use neighborLists  
   use sticky
   use electrostatic_module
-  use gayberne
   use shapes
   use vector_class
   use MetalNonMetal
@@ -76,6 +75,7 @@ module doForces
   real(kind=dp), external :: getSigma
   real(kind=dp), external :: getEpsilon
   real(kind=dp), external :: getEAMcut
+  real(kind=dp), external :: getGayBerneCut
   
 #define __FORTRAN90
 #include "UseTheForce/fCutoffPolicy.h"
@@ -1581,12 +1581,12 @@ contains
     endif
     
     if ( iand(iHash, GAYBERNE_PAIR).ne.0 ) then
-       call do_gb_pair(atid_i, atid_j, d, r, rijsq, sw, vdwMult, vpair, &
+       call do_gb_pair(c_ident_i, c_ident_j, d, r, rijsq, sw, vdwMult, vpair, &
             p_vdw, A1, A2, f1, t1, t2)
     endif
     
     if ( iand(iHash, GAYBERNE_LJ).ne.0 ) then
-       call do_gb_pair(atid_i, atid_j, d, r, rijsq, sw, vdwMult, vpair, &
+       call do_gb_pair(c_ident_i, c_ident_j, d, r, rijsq, sw, vdwMult, vpair, &
             p_vdw, A1, A2, f1, t1, t2)
     endif
         

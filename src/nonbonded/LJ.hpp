@@ -64,7 +64,9 @@ namespace OpenMD {
     static void addType(AtomType* atomType);
     static void addExplicitInteraction(AtomType* atype1, AtomType* atype2, RealType sigma, RealType epsilon);
     static void calcForce(AtomType* at1, AtomType* at2, const Vector3d d, const RealType rij, const RealType r2, const RealType rcut, const RealType sw, const RealType vdwMult, RealType &vpair, RealType &pot, Vector3d &f1);
-
+    static RealType getSigma(AtomType* atomType);
+    static RealType getEpsilon(AtomType* atomType);
+    
     // Fortran support routines;
     static RealType getSigma(int atid);
     static RealType getEpsilon(int atid);
@@ -80,9 +82,6 @@ namespace OpenMD {
     static LJ* _instance;
   
     static LJParam  getLJParam(AtomType* atomType);
-    static RealType getSigma(AtomType* atomType);
-    static RealType getEpsilon(AtomType* atomType);
-    
     static RealType getSigma(AtomType* atomType1, AtomType* atomType2);
     static RealType getEpsilon(AtomType* atomType1, AtomType* atomType2);
     

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2009 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -39,29 +39,66 @@
  * [4]  Vardeman & Gezelter, in progress (2009).                        
  */
  
-#ifndef USETHEFORCE_DARKSIDE_GB_INTERFACE_H
-#define USETHEFORCE_DARKSIDE_GB_INTERFACE_H
+#ifndef NONBONDED_GB_HPP
+#define NONBONDED_GB_HPP
 
-#define __OPENMD_C
+#include "types/DirectionalAtomType.hpp"
+#include "UseTheForce/ForceField.hpp"
+#include "math/SquareMatrix3.hpp"
 
-#include "config.h"
+using namespace std;
+namespace OpenMD {
 
-#define newGayBerneType FC_FUNC(newgbtype, NEWGBTYPE)
-#define completeGBFF FC_FUNC(completegbff, COMPLETEGBFF)
-#define destroyGayBerneTypes FC_FUNC(destroygbtypes, DESTROYGBTYPES)
+  struct GBInteractionData {
+    RealType sigma0;
+    RealType eps0;
+    RealType dw;
+    RealType x2;
+    RealType xa2;
+    RealType xai2;
+    RealType xp2;
+    RealType xpap2;
+    RealType xpapi2;
+  };
 
-extern "C"{
-  void newGayBerneType( int* ident,
-                        RealType* GB_d,
-                        RealType* GB_l,
-                        RealType* GB_eps,
-                        RealType* GB_eps_ratio,
-                        RealType* GB_dw,
-                        int* status);
+  class GB {
+    
+  public:    
+    static GB* Instance();
+    static void setForceField(ForceField *ff) {forceField_ = ff;};
+    static void initialize();
+    static void addType(AtomType* atomType);
 
-  void completeGBFF( int* status);
+    static void calcForce(AtomType* at1, AtomType* at2, const Vector3d d, const RealType rij, const RealType r2, const RealType sw, const RealType vdwMult, RealType &vpair, RealType &pot, const RotMat3x3d A1, const RotMat3x3d A2, Vector3d &f1, Vector3d &t1, Vector3d &t2);
 
-  void destroyGayBerneTypes( void );
+    // Fortran support routines;
+    static RealType getGayBerneCut(int atid);
+    static void do_gb_pair(int *atid1, int *atid2, RealType *d, RealType *rij, RealType *r2, RealType *sw, RealType *vdwMult, RealType *vpair, RealType *pot, RealType *A1, RealType *A2, RealType *f1, RealType *t1, RealType *t2);
+    
+  private:
+    virtual ~GB() { }
+    // singleton pattern, prevent reconstruction
+    GB() { }
+    GB(GB const &) {};
+    GB& operator=(GB const&) {};
+    static GB* _instance;
+  
+    static GayBerneParam  getGayBerneParam(AtomType* atomType);
+    static RealType getD(AtomType* atomType);
+    static RealType getL(AtomType* atomType);
+    static RealType getEps(AtomType* atomType);
+    static RealType getEpsRatio(AtomType* atomType);
+    static RealType getDw(AtomType* atomType);       
 
+    static bool initialized_;
+    static map<int, AtomType*> GBMap;
+    static map<pair<AtomType*, AtomType*>, GBInteractionData> MixingMap;
+    static ForceField* forceField_;
+    static RealType mu_;
+    static RealType nu_;
+    
+  };
 }
+
+                               
 #endif

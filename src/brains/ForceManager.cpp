@@ -65,6 +65,9 @@ namespace OpenMD {
     lj_ = LJ::Instance();
     lj_->setForceField(info_->getForceField());
 
+    gb_ = GB::Instance();
+    gb_->setForceField(info_->getForceField());
+
     eam_ = EAM::Instance();
     eam_->setForceField(info_->getForceField());
   }
