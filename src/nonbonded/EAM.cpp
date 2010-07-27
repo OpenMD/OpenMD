@@ -111,7 +111,7 @@ namespace OpenMD {
     RealType dr = eamParam.dr;
     vector<RealType> rvals;
     
-    for (int i = 0; i < nr; i++) rvals.push_back(i * dr);
+    for (int i = 0; i < nr; i++) rvals.push_back(RealType(i) * dr);
       
     CubicSpline* cs = new CubicSpline();
     cs->addPoints(rvals, eamParam.Z);
@@ -129,7 +129,7 @@ namespace OpenMD {
     RealType dr = eamParam.dr;
     vector<RealType> rvals;
     
-    for (int i = 0; i < nr; i++) rvals.push_back(i * dr);
+    for (int i = 0; i < nr; i++) rvals.push_back(RealType(i) * dr);
       
     CubicSpline* cs = new CubicSpline();
     cs->addPoints(rvals, eamParam.rho);
@@ -144,12 +144,12 @@ namespace OpenMD {
     vector<RealType> scaledF;
     
     for (int i = 0; i < nrho; i++) {
-      rhovals.push_back(i * drho);
+      rhovals.push_back(RealType(i) * drho);
       scaledF.push_back( eamParam.F[i] * 23.06054 );
     }
       
     CubicSpline* cs = new CubicSpline();
-    cs->addPoints(rhovals, eamParam.F);
+    cs->addPoints(rhovals, scaledF);
     return cs;
   }
   
