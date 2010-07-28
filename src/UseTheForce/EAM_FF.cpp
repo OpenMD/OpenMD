@@ -40,7 +40,6 @@
  */
  
 #include "UseTheForce/EAM_FF.hpp"
-#include "UseTheForce/DarkSide/sticky_interface.h"
 #include "UseTheForce/ForceFieldFactory.hpp"
 #include "io/BaseAtomTypesSectionParser.hpp"
 #include "io/AtomTypesSectionParser.hpp"

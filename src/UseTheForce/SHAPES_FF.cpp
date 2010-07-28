@@ -40,7 +40,6 @@
  */
  
 #include "UseTheForce/DarkSide/shapes_interface.h"
-#include "UseTheForce/DarkSide/sticky_interface.h"
 #include "UseTheForce/ForceFieldFactory.hpp"
 #include "io/OptionSectionParser.hpp"
 #include "io/DirectionalAtomTypesSectionParser.hpp"

@@ -56,7 +56,6 @@ module doForces
   use atype_module
   use switcheroo
   use neighborLists  
-  use sticky
   use electrostatic_module
   use shapes
   use vector_class
@@ -76,6 +75,7 @@ module doForces
   real(kind=dp), external :: getEpsilon
   real(kind=dp), external :: getEAMcut
   real(kind=dp), external :: getGayBerneCut
+  real(kind=dp), external :: getStickyCut
   
 #define __FORTRAN90
 #include "UseTheForce/fCutoffPolicy.h"
@@ -338,15 +338,15 @@ contains
                 if (thisRCut .gt. atypeMaxCutoff(i)) atypeMaxCutoff(i) = thisRCut
              endif
              if (i_is_Sticky) then
-                thisRcut = getStickyCut(i)
+                thisRcut = getStickyCut(c_ident_i)
                 if (thisRCut .gt. atypeMaxCutoff(i)) atypeMaxCutoff(i) = thisRCut
              endif
              if (i_is_StickyP) then
-                thisRcut = getStickyPowerCut(i)
+                thisRcut = getStickyCut(i)
                 if (thisRCut .gt. atypeMaxCutoff(i)) atypeMaxCutoff(i) = thisRCut
              endif
              if (i_is_GB) then
-                thisRcut = getGayBerneCut(i)
+                thisRcut = getGayBerneCut(c_ident_i)
                 if (thisRCut .gt. atypeMaxCutoff(i)) atypeMaxCutoff(i) = thisRCut
              endif
              if (i_is_EAM) then
@@ -1571,12 +1571,13 @@ contains
     endif
     
     if ( iand(iHash, STICKY_PAIR).ne.0 ) then
-       call do_sticky_pair(atid_i, atid_j, d, r, rijsq, sw, vpair, &
+       call do_sticky_pair(c_ident_i, c_ident_j, d, r, rijsq, sw, vpair, &
             p_hb, A1, A2, f1, t1, t2)
     endif
     
     if ( iand(iHash, STICKYPOWER_PAIR).ne.0 ) then
-       call do_sticky_power_pair(atid_i, atid_j, d, r, rijsq, sw, vpair, &
+       ! C++ sticky module now handles all sticky and sticky power interactions
+       call do_sticky_pair(c_ident_i, c_ident_j, d, r, rijsq, sw, vpair, &
             p_hb, A1, A2, f1, t1, t2)
     endif
     

@@ -54,6 +54,7 @@
 #include "primitives/Molecule.hpp"
 #include "nonbonded/LJ.hpp"
 #include "nonbonded/GB.hpp"
+#include "nonbonded/Sticky.hpp"
 #include "nonbonded/EAM.hpp"
 
 namespace OpenMD {
@@ -96,6 +97,7 @@ namespace OpenMD {
     bool NBforcesInitialized_;
     LJ* lj_;
     GB* gb_;
+    Sticky* sticky_;
     EAM* eam_;
     
   };

@@ -62,7 +62,7 @@ namespace OpenMD {
   public:
     DUFF();
     virtual void parse(const std::string& filename);
-    ~DUFF();
+    ~DUFF() {};
 
   private:
     SectionParserManager spMan_;

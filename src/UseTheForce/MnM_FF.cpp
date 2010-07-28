@@ -41,7 +41,6 @@
 
 
 #include "UseTheForce/MnM_FF.hpp"
-#include "UseTheForce/DarkSide/sticky_interface.h"
 #include "UseTheForce/DarkSide/suttonchen_interface.h"
 #include "UseTheForce/ForceFieldFactory.hpp"
 #include "io/DirectionalAtomTypesSectionParser.hpp"
@@ -238,7 +237,6 @@ namespace OpenMD {
   }
      
   MnM_FF::~MnM_FF() {
-    destroyStickyTypes();
     if (hasSCtypes_)  destroySCTypes();
   }
 } //end namespace OpenMD

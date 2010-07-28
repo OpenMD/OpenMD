@@ -68,6 +68,9 @@ namespace OpenMD {
     gb_ = GB::Instance();
     gb_->setForceField(info_->getForceField());
 
+    sticky_ = Sticky::Instance();
+    sticky_->setForceField(info_->getForceField());
+
     eam_ = EAM::Instance();
     eam_->setForceField(info_->getForceField());
   }

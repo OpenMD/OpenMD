@@ -41,7 +41,6 @@
 
 
 #include "UseTheForce/DUFF.hpp"
-#include "UseTheForce/DarkSide/sticky_interface.h"
 #include "UseTheForce/ForceFieldFactory.hpp"
 #include "io/BaseAtomTypesSectionParser.hpp"
 #include "io/DirectionalAtomTypesSectionParser.hpp"
@@ -118,7 +117,4 @@ namespace OpenMD {
     delete ffStream;
   }
 
-  DUFF::~DUFF(){
-    destroyStickyTypes();
-  }
 } //end namespace OpenMD

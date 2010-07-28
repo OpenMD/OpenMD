@@ -106,6 +106,10 @@ namespace OpenMD {
   }
 
   void GB::initialize() {    
+
+    ForceFieldOptions& fopts = forceField_->getForceFieldOptions();
+    mu_ = fopts.getGayBerneMu();
+    nu_ = fopts.getGayBerneNu();
     ForceField::AtomTypeContainer* atomTypes = forceField_->getAtomTypes();
     ForceField::AtomTypeContainer::MapTypeIterator i;
     AtomType* at;
@@ -282,8 +286,8 @@ namespace OpenMD {
     RealType xpap2  = mixer.xpap2; 
     RealType xpapi2 = mixer.xpapi2;
 
-    Vector3d ul1 = A1.getColumn(2);
-    Vector3d ul2 = A2.getColumn(2);
+    Vector3d ul1 = A1.getRow(2);
+    Vector3d ul2 = A2.getRow(2);
 
     RealType a, b, g;
 
@@ -391,7 +395,7 @@ namespace OpenMD {
     // will disappear, as will the transpose below:
 
     calcForce(atype1, atype2, disp, *r, *r2, *sw, *vdwMult, *vpair, *pot, 
-              Ai.transpose(), Aj.transpose(), frc, trq1, trq1);
+              Ai, Aj, frc, trq1, trq1);
       
     f1[0] = frc.x();
     f1[1] = frc.y();

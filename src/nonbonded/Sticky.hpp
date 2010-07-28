@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2009 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -39,26 +39,61 @@
  * [4]  Vardeman & Gezelter, in progress (2009).                        
  */
  
-#ifndef USETHEFORCE_DARKSIDE_STICKY_INTERFACE_H
-#define USETHEFORCE_DARKSIDE_STICKY_INTERFACE_H
+#ifndef NONBONDED_STICKY_HPP
+#define NONBONDED_STICKY_HPP
 
-#define __OPENMD_C
-#include "config.h"
+#include "types/DirectionalAtomType.hpp"
+#include "UseTheForce/ForceField.hpp"
+#include "math/SquareMatrix3.hpp"
+#include "math/CubicSpline.hpp"
 
-#define newStickyType FC_FUNC(newstickytype, NEWSTICKYTYPE)
-#define destroyStickyTypes FC_FUNC(destroystickytypes,DESTROYSTICKYTYPES)
-extern "C" {
+using namespace std;
+namespace OpenMD {
+
+  struct StickyInteractionData {
+    RealType rl;
+    RealType ru;
+    RealType rlp;
+    RealType rup;
+    RealType rbig;
+    RealType w0;
+    RealType v0;
+    RealType v0p;
+    CubicSpline* s;
+    CubicSpline* sp;
+    bool isPower;
+  };
+
+  class Sticky {
+    
+  public:    
+    static Sticky* Instance();
+    static void setForceField(ForceField *ff) {forceField_ = ff;};
+    static void initialize();
+    static void addType(AtomType* atomType);
+    
+    static void calcForce(AtomType* at1, AtomType* at2, const Vector3d d, const RealType rij, const RealType r2, const RealType sw, RealType &vpair, RealType &pot, const RotMat3x3d A1, const RotMat3x3d A2, Vector3d &f1, Vector3d &t1, Vector3d &t2);
+    
+    // Fortran support routines;
+    static RealType getStickyCut(int atid);
+    static void do_sticky_pair(int *atid1, int *atid2, RealType *d, RealType *rij, RealType *r2, RealType *sw, RealType *vpair, RealType *pot, RealType *A1, RealType *A2, RealType *f1, RealType *t1, RealType *t2);
+    
+  private:
+    virtual ~Sticky() { }
+    // singleton pattern, prevent reconstruction
+    Sticky() { }
+    Sticky(Sticky const &) {};
+    Sticky& operator=(Sticky const&) {};
+    static Sticky* _instance;
   
-  void newStickyType( int* c_ident, 
-                      RealType* sticky_w0, 
-                      RealType* sticky_v0,
-                      RealType* sticky_v0p,
-                      RealType* sticky_rl,
-                      RealType* sticky_ru,
-                      RealType* sticky_rlp,
-                      RealType* sticky_rup,
-                      int* isError );
-  void destroyStickyTypes();
+    static StickyParam  getStickyParam(AtomType* atomType);
+
+    static bool initialized_;
+    static map<int, AtomType*> StickyMap;
+    static map<pair<AtomType*, AtomType*>, StickyInteractionData> MixingMap;
+    static ForceField* forceField_;    
+  };
 }
 
+                               
 #endif

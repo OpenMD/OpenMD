@@ -16,8 +16,6 @@ Source    = \
 	simulation_interface.F90 \
 	electrostatic.F90 \
 	electrostatic_interface.F90 \
-	sticky.F90 \
-	sticky_interface.F90 \
 	shapes.F90 \
 	shapes_interface.F90 \
 	suttonchen.F90 \
@@ -47,7 +45,6 @@ Modules = \
 	shapes \
 	mpiSimulation \
 	simulation \
-	sticky \
 	switcheroo \
 	suttonchen \
 	MetalNonMetal \

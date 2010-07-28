@@ -64,13 +64,8 @@ module  fForceOptions
   public :: ForceOptions
   public :: vdwScale
   public :: electrostaticScale
-  public :: getGayBerneMu
-  public :: getGayBerneNu
-  public :: getEnergyMixingRule
-  public :: getDistanceMixingRule
-  public :: usesGeometricDistanceMixing
-  public :: usesGeometricEnergyMixing
   public :: setForceOptions
+  public :: usesGeometricDistanceMixing
   
 contains
 
@@ -89,17 +84,7 @@ contains
     electrostaticScale(2) = theseOptions%electrostatic13scale
     electrostaticScale(3) = theseOptions%electrostatic14scale
   end subroutine setForceOptions
-    
-  function getGayBerneMu() result(thisMu)
-    real(kind=dp) :: thisMu
-    thisMu = fortranForceOptions%GayBerneMu
-  end function getGayBerneMu
 
-  function getGayBerneNu() result(thisNu)
-    real(kind=dp) :: thisNu
-    thisNu = fortranForceOptions%GayBerneNu
-  end function getGayBerneNu
-  
   function usesGeometricDistanceMixing() result(doesit)
     logical :: doesit
     doesit = .false.
@@ -108,28 +93,6 @@ contains
        doesit = .true.
     endif
   end function usesGeometricDistanceMixing
+
     
-  function usesGeometricEnergyMixing() result(doesit)
-    logical :: doesit
-    doesit = .false.
-    if (.not.haveForceOptions) return
-    if (fortranForceOptions%EnergyMixingRule == GEOMETRIC_MIXING_RULE) then
-       doesit = .true.
-    endif
-  end function usesGeometricEnergyMixing
-    
-  function getEnergyMixingRule() result(MixingRule)
-    integer :: MixingRule
-    MixingRule = 0
-    if (.not.haveForceOptions) return
-    MixingRule = fortranForceOptions%EnergyMixingRule
-  end function getEnergyMixingRule
-  
-  function getDistanceMixingRule() result(MixingRule)
-    integer :: MixingRule
-    MixingRule = 0
-    if (.not.haveForceOptions) return
-    MixingRule = fortranForceOptions%DistanceMixingRule
-  end function getDistanceMixingRule
-  
 end module fForceOptions
