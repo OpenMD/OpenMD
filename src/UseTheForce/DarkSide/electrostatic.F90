@@ -419,7 +419,7 @@ contains
     end if
 
     if (.not.ElectrostaticMap(atid)%is_Charge) then
-       call handleError("electrostatic", "getCharge was called for an atom type that isn't a charge!")
+       c = 0.0_dp
        return
     endif
 

@@ -1307,7 +1307,7 @@ contains
           ! lookups for the types
 
           me_i = atid(i)
-          
+
           ! is the atom electrostatic?  See if it would have an 
           ! electrostatic interaction with itself
           iHash = InteractionHash(me_i,me_i)
