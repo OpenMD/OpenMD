@@ -613,11 +613,11 @@ USE_OPENBABEL
 OPENBABEL_LIB
 OPENBABEL_LIB_DIR
 OPENBABEL_INC_DIR
-CXXCPP
 USE_QHULL
 QHULL
 QHULL_LIB_DIR
 QHULL_INC_DIR
+CXXCPP
 FFTW_LIBS
 FFTW_LIB_DIR
 FFTW_INC_DIR
@@ -7763,160 +7763,6 @@ $as_echo "failed" >&6; }
   fi
 fi
 
-#
-# Handle user hints
-#
-
-# Check whether --with-qhull was given.
-if test "${with_qhull+set}" = set; then :
-  withval=$with_qhull; qhull_dir="$withval"
-else
-  qhull_dir="not_set"
-fi
-
-QHULL_INC_DIR=
-QHULL_LIB_DIR=
-QHULL=
-USE_QHULL=no
-
-if test "$qhull_dir" != "no"; then
-   if test "$qhull_dir" != "not_set" ; then
-     if test -d "$qhull_dir"; then
-       QHULL_HOME="$qhull_dir"
-     else
-       { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Sorry, $qhull_dir does not exist, checking usual places" >&5
-$as_echo "$as_me: WARNING: Sorry, $qhull_dir does not exist, checking usual places" >&2;}
-       QHULL_HOME=/usr/local
-       if test ! -f "${QHULL_HOME}/include/qhull/qhull.h"; then
-          QHULL_HOME=/usr
-       fi
-     fi
-   fi
-   #
-   # Locate qhull, if wanted
-   #
-   if test -n "${QHULL_HOME}"; then
-        { $as_echo "$as_me:${as_lineno-$LINENO}: Checking for qhull in ${QHULL_HOME}" >&5
-$as_echo "$as_me: Checking for qhull in ${QHULL_HOME}" >&6;}
-
-        ac_ext=c
-ac_cpp='$CPP $CPPFLAGS'
-ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
-ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
-ac_compiler_gnu=$ac_cv_c_compiler_gnu
-
-        QHULL_OLD_LDFLAGS=$LDFLAGS
-        QHULL_OLD_CFLAGS=$CFLAGS
-        QHULL_OLD_CPPFLAGS=$CPPFLAGS
-        LDFLAGS="$LDFLAGS -L${QHULL_HOME}/lib"
-        CFLAGS="$CFLAGS -I${QHULL_HOME}/include"
-        CPPFLAGS="$CPPFLAGS -I${QHULL_HOME}/include"
-        ac_fn_c_check_header_mongrel "$LINENO" "qhull/qhull.h" "ac_cv_header_qhull_qhull_h" "$ac_includes_default"
-if test "x$ac_cv_header_qhull_qhull_h" = x""yes; then :
-  qhull_cv_qhull_h=yes
-else
-  qhull_cv_qhull_h=no
-fi
-
-
-        { $as_echo "$as_me:${as_lineno-$LINENO}: checking for qh_qhull in -lqhull" >&5
-$as_echo_n "checking for qh_qhull in -lqhull... " >&6; }
-if test "${ac_cv_lib_qhull_qh_qhull+set}" = set; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-lqhull  $LIBS"
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char qh_qhull ();
-#ifdef FC_DUMMY_MAIN
-#ifndef FC_DUMMY_MAIN_EQ_F77
-#  ifdef __cplusplus
-     extern "C"
-#  endif
-   int FC_DUMMY_MAIN() { return 1; }
-#endif
-#endif
-int
-main ()
-{
-return qh_qhull ();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_lib_qhull_qh_qhull=yes
-else
-  ac_cv_lib_qhull_qh_qhull=no
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_qhull_qh_qhull" >&5
-$as_echo "$ac_cv_lib_qhull_qh_qhull" >&6; }
-if test "x$ac_cv_lib_qhull_qh_qhull" = x""yes; then :
-  qhull_cv_libqhull=yes
-else
-  qhull_cv_libqhull=no
-fi
-
-        LDFLAGS="$QHULL_OLD_LDFLAGS"
-        CFLAGS="$QHULL_OLD_CFLAGS"
-        CPPFLAGS="$QHULL_OLD_CPPFLAGS"
-        ac_ext=c
-ac_cpp='$CPP $CPPFLAGS'
-ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
-ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
-ac_compiler_gnu=$ac_cv_c_compiler_gnu
-
-
-        if test "$qhull_cv_libqhull" = "yes" -a "$qhull_cv_qhull_h" = "yes"; then
-
-$as_echo "#define HAVE_QHULL_H 1" >>confdefs.h
-
-
-$as_echo "#define HAVE_QHULL 1" >>confdefs.h
-
-           USE_QHULL=yes
-           QHULL_INC_DIR="${QHULL_HOME}/include"
-           QHULL_LIB_DIR="${QHULL_HOME}/lib"
-           QHULL="-lqhull"
-           { $as_echo "$as_me:${as_lineno-$LINENO}: result: Working qhull found, will proceed." >&5
-$as_echo "Working qhull found, will proceed." >&6; }
-        else
-	   { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: " >&5
-$as_echo "$as_me: WARNING: " >&2;}
-           { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Could not find a working qhull installation" >&5
-$as_echo "$as_me: WARNING: Could not find a working qhull installation" >&2;}
-           { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: If you need OpenMD to be able to deal with convex    " >&5
-$as_echo "$as_me: WARNING: If you need OpenMD to be able to deal with convex    " >&2;}
-           { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: hulls be sure to specify a valid qhull installation " >&5
-$as_echo "$as_me: WARNING: hulls be sure to specify a valid qhull installation " >&2;}
-	   { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: with --with-qhull=DIR                               " >&5
-$as_echo "$as_me: WARNING: with --with-qhull=DIR                               " >&2;}
-           { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: " >&5
-$as_echo "$as_me: WARNING: " >&2;}
-           { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: OpenMD will still work without qhull installed.      " >&5
-$as_echo "$as_me: WARNING: OpenMD will still work without qhull installed.      " >&2;}
-	   { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: " >&5
-$as_echo "$as_me: WARNING: " >&2;}
-        fi
-    fi
-fi
-
-
-
-
-
 ac_ext=cpp
 ac_cpp='$CXXCPP $CPPFLAGS'
 ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
@@ -8049,6 +7895,160 @@ ac_cpp='$CXXCPP $CPPFLAGS'
 ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
+
+
+#
+# Handle user hints
+#
+
+# Check whether --with-qhull was given.
+if test "${with_qhull+set}" = set; then :
+  withval=$with_qhull; qhull_dir="$withval"
+else
+  qhull_dir="not_set"
+fi
+
+QHULL_INC_DIR=
+QHULL_LIB_DIR=
+QHULL=
+USE_QHULL=no
+
+if test "$qhull_dir" != "no"; then
+   if test "$qhull_dir" != "not_set" ; then
+     if test -d "$qhull_dir"; then
+       QHULL_HOME="$qhull_dir"
+     else
+       { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Sorry, $qhull_dir does not exist, checking usual places" >&5
+$as_echo "$as_me: WARNING: Sorry, $qhull_dir does not exist, checking usual places" >&2;}
+       QHULL_HOME=/usr/local
+       if test ! -f "${QHULL_HOME}/include/qhull/qhull.h"; then
+          QHULL_HOME=/usr
+       fi
+     fi
+   fi
+   #
+   # Locate qhull, if wanted
+   #
+   if test -n "${QHULL_HOME}"; then
+        { $as_echo "$as_me:${as_lineno-$LINENO}: Checking for qhull in ${QHULL_HOME}" >&5
+$as_echo "$as_me: Checking for qhull in ${QHULL_HOME}" >&6;}
+
+        ac_ext=cpp
+ac_cpp='$CXXCPP $CPPFLAGS'
+ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
+
+        QHULL_OLD_LDFLAGS=$LDFLAGS
+        QHULL_OLD_CXXFLAGS=$CXXFLAGS
+        QHULL_OLD_CPPFLAGS=$CPPFLAGS
+        LDFLAGS="$LDFLAGS -L${QHULL_HOME}/lib"
+        CXXFLAGS="$CXXFLAGS -I${QHULL_HOME}/include"
+        CPPFLAGS="$CPPFLAGS -I${QHULL_HOME}/include"
+        ac_fn_cxx_check_header_mongrel "$LINENO" "qhull/qhull.h" "ac_cv_header_qhull_qhull_h" "$ac_includes_default"
+if test "x$ac_cv_header_qhull_qhull_h" = x""yes; then :
+  qhull_cv_qhull_h=yes
+else
+  qhull_cv_qhull_h=no
+fi
+
+
+        { $as_echo "$as_me:${as_lineno-$LINENO}: checking for qh_qhull in -lqhull" >&5
+$as_echo_n "checking for qh_qhull in -lqhull... " >&6; }
+if test "${ac_cv_lib_qhull_qh_qhull+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lqhull  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char qh_qhull ();
+#ifdef FC_DUMMY_MAIN
+#ifndef FC_DUMMY_MAIN_EQ_F77
+#  ifdef __cplusplus
+     extern "C"
+#  endif
+   int FC_DUMMY_MAIN() { return 1; }
+#endif
+#endif
+int
+main ()
+{
+return qh_qhull ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_cxx_try_link "$LINENO"; then :
+  ac_cv_lib_qhull_qh_qhull=yes
+else
+  ac_cv_lib_qhull_qh_qhull=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_qhull_qh_qhull" >&5
+$as_echo "$ac_cv_lib_qhull_qh_qhull" >&6; }
+if test "x$ac_cv_lib_qhull_qh_qhull" = x""yes; then :
+  qhull_cv_libqhull=yes
+else
+  qhull_cv_libqhull=no
+fi
+
+        LDFLAGS="$QHULL_OLD_LDFLAGS"
+        CXXFLAGS="$QHULL_OLD_CXXFLAGS"
+        CPPFLAGS="$QHULL_OLD_CPPFLAGS"
+        ac_ext=c
+ac_cpp='$CPP $CPPFLAGS'
+ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
+
+
+        if test "$qhull_cv_libqhull" = "yes" -a "$qhull_cv_qhull_h" = "yes"; then
+
+$as_echo "#define HAVE_QHULL_H 1" >>confdefs.h
+
+
+$as_echo "#define HAVE_QHULL 1" >>confdefs.h
+
+           USE_QHULL=yes
+           QHULL_INC_DIR="${QHULL_HOME}/include"
+           QHULL_LIB_DIR="${QHULL_HOME}/lib"
+           QHULL="-lqhull"
+           { $as_echo "$as_me:${as_lineno-$LINENO}: result: Working qhull found, will proceed." >&5
+$as_echo "Working qhull found, will proceed." >&6; }
+        else
+	   { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: " >&5
+$as_echo "$as_me: WARNING: " >&2;}
+           { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Could not find a working qhull installation" >&5
+$as_echo "$as_me: WARNING: Could not find a working qhull installation" >&2;}
+           { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: If you need OpenMD to be able to deal with convex    " >&5
+$as_echo "$as_me: WARNING: If you need OpenMD to be able to deal with convex    " >&2;}
+           { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: hulls be sure to specify a valid qhull installation " >&5
+$as_echo "$as_me: WARNING: hulls be sure to specify a valid qhull installation " >&2;}
+	   { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: with --with-qhull=DIR                               " >&5
+$as_echo "$as_me: WARNING: with --with-qhull=DIR                               " >&2;}
+           { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: " >&5
+$as_echo "$as_me: WARNING: " >&2;}
+           { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: OpenMD will still work without qhull installed.      " >&5
+$as_echo "$as_me: WARNING: OpenMD will still work without qhull installed.      " >&2;}
+	   { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: " >&5
+$as_echo "$as_me: WARNING: " >&2;}
+        fi
+    fi
+fi
+
+
+
 
 
 #

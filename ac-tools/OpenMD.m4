@@ -967,17 +967,17 @@ if test "$qhull_dir" != "no"; then
    if test -n "${QHULL_HOME}"; then
         AC_MSG_NOTICE([Checking for qhull in ${QHULL_HOME}])
         AC_LANG_SAVE
-        AC_LANG_C
+        AC_LANG(C++)
         QHULL_OLD_LDFLAGS=$LDFLAGS
-        QHULL_OLD_CFLAGS=$CFLAGS
+        QHULL_OLD_CXXFLAGS=$CXXFLAGS
         QHULL_OLD_CPPFLAGS=$CPPFLAGS
         LDFLAGS="$LDFLAGS -L${QHULL_HOME}/lib"
-        CFLAGS="$CFLAGS -I${QHULL_HOME}/include"
+        CXXFLAGS="$CXXFLAGS -I${QHULL_HOME}/include"
         CPPFLAGS="$CPPFLAGS -I${QHULL_HOME}/include"
         AC_CHECK_HEADER(qhull/qhull.h, [qhull_cv_qhull_h=yes], [qhull_cv_qhull_h=no])
         AC_CHECK_LIB(qhull, qh_qhull, [qhull_cv_libqhull=yes], [qhull_cv_libqhull=no])
         LDFLAGS="$QHULL_OLD_LDFLAGS"
-        CFLAGS="$QHULL_OLD_CFLAGS"
+        CXXFLAGS="$QHULL_OLD_CXXFLAGS"
         CPPFLAGS="$QHULL_OLD_CPPFLAGS"
         AC_LANG_RESTORE
 
