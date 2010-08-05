@@ -79,7 +79,7 @@ namespace OpenMD {
       
       V = 0.5 * k_ * delta * delta;
 
-      dVdtheta = k_ * delta * st;
+      dVdtheta = - k_ * delta * st;
     }
     
   private:
