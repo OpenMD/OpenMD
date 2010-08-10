@@ -18,8 +18,6 @@ Source    = \
 	electrostatic_interface.F90 \
 	shapes.F90 \
 	shapes_interface.F90 \
-	suttonchen.F90 \
-	suttonchen_interface.F90 \
 	MetalNonMetal.F90 \
 	MetalNonMetal_interface.F90
 
@@ -32,7 +30,6 @@ ParallelSource = \
 	electrostatic.F90 \
 	stickky.F90 \
 	shapes.F90 \
-	suttonchen.F90 \
 	MetalNonMetal.F90
 
 Modules = \
@@ -46,7 +43,6 @@ Modules = \
 	mpiSimulation \
 	simulation \
 	switcheroo \
-	suttonchen \
 	MetalNonMetal \
 
 RmiSource =

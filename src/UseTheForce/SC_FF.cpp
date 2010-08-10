@@ -45,7 +45,6 @@
  */
 
 #include "UseTheForce/SC_FF.hpp"
-#include "UseTheForce/DarkSide/suttonchen_interface.h"
 #include "UseTheForce/ForceFieldFactory.hpp"
 #include "io/OptionSectionParser.hpp"
 #include "io/BaseAtomTypesSectionParser.hpp"
@@ -97,13 +96,6 @@ namespace OpenMD {
     }
     
     delete ffStream;
-  }
-  
-    
-  SC_FF::~SC_FF(){
-    // We need to clean up the fortran side so we don't have bad things happen if
-    // we try to create a second SC force field.
-    destroySCTypes();
   }
 } //end namespace OpenMD
 

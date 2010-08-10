@@ -41,7 +41,6 @@
 
 
 #include "UseTheForce/MnM_FF.hpp"
-#include "UseTheForce/DarkSide/suttonchen_interface.h"
 #include "UseTheForce/ForceFieldFactory.hpp"
 #include "io/DirectionalAtomTypesSectionParser.hpp"
 #include "io/BaseAtomTypesSectionParser.hpp"
@@ -234,10 +233,6 @@ namespace OpenMD {
     }
     
     return rcut;
-  }
-     
-  MnM_FF::~MnM_FF() {
-    if (hasSCtypes_)  destroySCTypes();
   }
 } //end namespace OpenMD
 

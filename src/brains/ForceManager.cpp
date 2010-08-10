@@ -73,6 +73,9 @@ namespace OpenMD {
 
     eam_ = EAM::Instance();
     eam_->setForceField(info_->getForceField());
+
+    sc_ = SC::Instance();
+    sc_->setForceField(info_->getForceField());
   }
  
   void ForceManager::calcForces() {

@@ -56,6 +56,7 @@
 #include "nonbonded/GB.hpp"
 #include "nonbonded/Sticky.hpp"
 #include "nonbonded/EAM.hpp"
+#include "nonbonded/SC.hpp"
 
 namespace OpenMD {
   /**
@@ -99,6 +100,7 @@ namespace OpenMD {
     GB* gb_;
     Sticky* sticky_;
     EAM* eam_;
+    SC* sc_;
     
   };
 

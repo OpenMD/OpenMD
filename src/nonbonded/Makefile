@@ -3,7 +3,8 @@ Package = nonbonded
 Source    = LJ.cpp \
 	GB.cpp \
 	Sticky.cpp \
-	EAM.cpp
+	EAM.cpp \
+	SC.cpp
 	
 
 

@@ -49,7 +49,6 @@
 #define __OPENMD_C
 #include "UseTheForce/DarkSide/atype_interface.h"
 #include "UseTheForce/DarkSide/electrostatic_interface.h"
-#include "UseTheForce/DarkSide/suttonchen_interface.h"
 
 namespace OpenMD {
   AtomType::AtomType(){
@@ -196,9 +195,7 @@ namespace OpenMD {
   
   void AtomType::complete() {
     int isError;
-    GenericData* data;
-    
-    //notify a new LJtype atom type is created (MOVED to ForceField)
+    GenericData* data;   
     
     if (isElectrostatic()) {
       newElectrostaticType(&atp, &isError);
@@ -240,42 +237,7 @@ namespace OpenMD {
 	painCave.isFatal = 1;
 	simError();          
       }
-    }
-        
-    if (isSC()) {
-      data = getPropertyByName("SC");
-      if (data != NULL) {
-        SCParamGenericData* SCData = dynamic_cast<SCParamGenericData*>(data);
-        
-        if (SCData != NULL) {
-          
-          SCParam scParam = SCData->getData();
-                    
-          newSCtype(&atp.ident, &scParam.c, &scParam.m,  
-                    &scParam.n, &scParam.alpha, &scParam.epsilon, 
-                    &isError );
-          
-          if (isError != 0) {
-            sprintf( painCave.errMsg,
-                     "Fortran rejected newSCtype\n");
-            painCave.severity = OPENMD_ERROR;
-            painCave.isFatal = 1;
-            simError();          
-          }
-        } else {
-          sprintf( painCave.errMsg,
-                   "Can not cast GenericData to SCParam\n");
-          painCave.severity = OPENMD_ERROR;
-          painCave.isFatal = 1;
-          simError();          
-        }
-      } else {
-        sprintf( painCave.errMsg, "Can not find SC Parameters\n");
-        painCave.severity = OPENMD_ERROR;
-        painCave.isFatal = 1;
-        simError();          
-      }
-    }
+    }        
   }
 
   void AtomType::addProperty(GenericData* genData) {

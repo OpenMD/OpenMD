@@ -60,7 +60,6 @@ module doForces
   use shapes
   use vector_class
   use MetalNonMetal
-  use suttonchen
   use status
   use ISO_C_BINDING
 
@@ -76,6 +75,8 @@ module doForces
   real(kind=dp), external :: getEAMcut
   real(kind=dp), external :: getGayBerneCut
   real(kind=dp), external :: getStickyCut
+  real(kind=dp), external :: getSCCut
+
   
 #define __FORTRAN90
 #include "UseTheForce/fCutoffPolicy.h"
@@ -342,7 +343,7 @@ contains
                 if (thisRCut .gt. atypeMaxCutoff(i)) atypeMaxCutoff(i) = thisRCut
              endif
              if (i_is_StickyP) then
-                thisRcut = getStickyCut(i)
+                thisRcut = getStickyCut(c_ident_i)
                 if (thisRCut .gt. atypeMaxCutoff(i)) atypeMaxCutoff(i) = thisRCut
              endif
              if (i_is_GB) then
@@ -358,7 +359,7 @@ contains
                 if (thisRCut .gt. atypeMaxCutoff(i)) atypeMaxCutoff(i) = thisRCut
              endif
              if (i_is_SC) then
-                thisRcut = getSCCut(i)
+                thisRcut = getSCCut(c_ident_i)
                 if (thisRCut .gt. atypeMaxCutoff(i)) atypeMaxCutoff(i) = thisRCut
              endif
           endif
@@ -1602,13 +1603,13 @@ contains
     endif
 
     if ( iand(iHash, EAM_PAIR).ne.0 ) then       
-       call do_eam_pair(c_ident_i, c_ident_j, d, r, rijsq, sw, vpair, &
-            p_met, f1, rho_i, rho_j, dfrhodrho_i, dfrhodrho_j, fshift_i,fshift_j)
+       call do_eam_pair(c_ident_i, c_ident_j, d, r, rijsq, sw, vpair, p_met, &
+            f1, rho_i, rho_j, dfrhodrho_i, dfrhodrho_j, fshift_i, fshift_j)
     endif
 
     if ( iand(iHash, SC_PAIR).ne.0 ) then       
-       call do_SC_pair(atid_i, atid_j, d, r, rijsq, sw, vpair, &
-            p_met, f1, rho_i, rho_j, dfrhodrho_i, dfrhodrho_j, fshift_i, fshift_j)
+       call do_SC_pair(c_ident_i, c_ident_j, d, r, rijsq, sw, vpair, p_met, &
+            f1, rho_i, rho_j, dfrhodrho_i, dfrhodrho_j, fshift_i, fshift_j)
     endif
      
     if ( iand(iHash, MNM_PAIR).ne.0 ) then       
@@ -1745,7 +1746,7 @@ contains
     endif
     
     if ( iand(iHash, SC_PAIR).ne.0 ) then       
-       call calc_SC_prepair_rho(atid_i, atid_j, d, r, rijsq, rho_i_at_j, rho_j_at_i)
+       call calc_SC_prepair_rho(c_ident_i, c_ident_j, r, rho_i_at_j, rho_j_at_i)
     endif
 
     if ( iand(iHash, EAM_PAIR).ne.0 .or. iand(iHash, SC_PAIR).ne.0  ) then 
@@ -1767,9 +1768,10 @@ contains
     real( kind = dp ),dimension(nlocal) :: particle_pot
     integer :: sc_err = 0
     integer :: atid1, atom, c_ident1
-
-#ifdef IS_MPI
+    
     if ((FF_uses_EAM .and. SIM_uses_EAM) .or. (FF_uses_SC .and. SIM_uses_SC)) then
+       
+#ifdef IS_MPI
        call scatter(rho_row,rho,plan_atom_row,sc_err)
        if (sc_err /= 0 ) then
           call handleError("do_preforce()", "Error scattering rho_row into rho")
@@ -1779,33 +1781,26 @@ contains
           call handleError("do_preforce()", "Error scattering rho_col into rho")          
        endif
        rho(1:nlocal) = rho(1:nlocal) + rho_tmp(1:nlocal)
-    end if
 #endif
-    
-    if (FF_uses_EAM .and. SIM_uses_EAM) then
+       
 
        do atom = 1, nlocal
           c_ident1 = c_idents_local(atom)
+          
+          if (FF_uses_EAM .and. SIM_uses_EAM) then
+          
+             call calc_EAM_preforce_Frho(c_ident1, rho(atom), frho(atom), dfrhodrho(atom))
 
-          call calc_EAM_preforce_Frho(c_ident1, rho(atom), frho(atom), dfrhodrho(atom))
+          else if (FF_uses_SC .and. SIM_uses_SC) then
+             
+             call calc_SC_preforce_Frho(c_ident1, rho(atom), frho(atom), dfrhodrho(atom))
+          endif
+
           pot(METALLIC_POT) = pot(METALLIC_POT) + frho(atom)
           particle_pot(atom) = particle_pot(atom) + frho(atom)
        end do
-
-    endif
-    if (FF_uses_SC .and. SIM_uses_SC) then
-
-       do atom = 1, nlocal
-          atid1 = atid(atom)
-          call calc_SC_preforce_Frho(atid1, rho(atom), frho(atom), dfrhodrho(atom))
-          pot(METALLIC_POT) = pot(METALLIC_POT) + frho(atom)
-          particle_pot(atom) = particle_pot(atom) + frho(atom)
-       end do
-
-    endif
 
 #ifdef IS_MPI
-    if ((FF_uses_EAM .and. SIM_uses_EAM) .or. (FF_uses_SC .and. SIM_uses_SC)) then
     !! communicate f(rho) and derivatives back into row and column arrays
        call gather(frho,frho_row,plan_atom_row, sc_err)
        if (sc_err /=  0) then
@@ -1823,9 +1818,9 @@ contains
        if (sc_err /=  0) then
           call handleError("do_preforce()","MPI gather dfrhodrho_col failure")
        endif
-    end if
 #endif
-
+       
+    end if
   end subroutine do_preforce
 
 

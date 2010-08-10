@@ -61,7 +61,7 @@ public:
     SC_FF();
     virtual void parse(const std::string& filename);
 
-    ~SC_FF();
+    ~SC_FF() {};
 private:
       SectionParserManager spMan_;
   };

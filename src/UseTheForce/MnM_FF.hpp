@@ -63,7 +63,7 @@ namespace OpenMD {
     MnM_FF();
     virtual void parse(const std::string& filename);
 		virtual RealType getRcutFromAtomType(AtomType* at);
-    ~MnM_FF();
+    ~MnM_FF() {};
 
   private:
     SectionParserManager spMan_;
