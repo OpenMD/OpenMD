@@ -22,16 +22,25 @@
 
 \*******************************************************************/
 
+#include "utils/FileLocation.hpp"
 
-
-
-#include "utils/Exception.hpp"
+#include <iostream>
 
 using namespace std;
 using namespace OpenMD;
 
-unsigned int Exception::causePrintLevel = 10;
+ostream &OpenMD::operator<<(ostream &stream, const FileLocation &fl) {
+  if (!fl.isEmpty()) {
+    stream << fl.filename;
+    if (fl.line >= 0) {
+      stream << ':' << fl.line;
 
-#ifdef HAVE_STACK_TRACE
-bool Exception::enableStackTraces = false;
-#endif
+      if (fl.col >= 0) stream << ':' << fl.col;
+    }
+
+    stream << ':' << fl.function;
+  }
+
+  return stream;
+}
+

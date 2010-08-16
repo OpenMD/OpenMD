@@ -12,7 +12,7 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
              GNU General Public License for more details.
 
-   You should have received a copy of the GNU General Public License
+  You should have received a copy of the GNU General Public License
      along with this program; if not, write to the Free Software
       Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
                            02111-1307, USA.
@@ -22,16 +22,40 @@
 
 \*******************************************************************/
 
+#ifndef UTILS_COUNTER_H
+#define UTILS_COUNTER_H
 
+namespace OpenMD {
+  /** 
+   * This class is used by SmartPointer to count
+   * pointer references.
+   */
+  class Counter {
+    long count;
 
+  public:
+    Counter(const Counter &counter) : count(counter.count) {}
+    Counter(const long initialCount) : count(initialCount) {}
+    Counter() : count(0) {}
 
-#include "utils/Exception.hpp"
+    /** 
+     * Increment.
+     */
+    void inc() {count++;}
 
-using namespace std;
-using namespace OpenMD;
+    /** 
+     * Decrement.
+     * 
+     * @return true if count != 0, false otherwise
+     */  
+    bool dec() {count--; return count != 0;}
 
-unsigned int Exception::causePrintLevel = 10;
-
-#ifdef HAVE_STACK_TRACE
-bool Exception::enableStackTraces = false;
+    /** 
+     * Get the current count.
+     * 
+     * @return The count.
+     */
+    long getCount() const {return count;}
+  };
+}
 #endif

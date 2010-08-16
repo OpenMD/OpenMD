@@ -1,12 +1,12 @@
-#include <protomol/base/Report.h>
+#include "utils/Report.hpp"
 
 #include <iomanip>
 
-#include <protomol/base/SystemUtilities.h>
+#include "utils/SystemUtilities.hpp"
 
 using namespace std;
 
-namespace ProtoMol {
+namespace OpenMD {
 //____ Report
   namespace Report {
     MyStreamer &debug::operator()(MyStreamer &stream) const {
@@ -313,7 +313,7 @@ namespace ProtoMol {
       stream.myAllNodes = true;
       stream.myAllNodesSerial = true;
       stream << flush;
-      protomolStartSerial(false);
+      openMDStartSerial(false);
       return stream;
     }
 
@@ -321,7 +321,7 @@ namespace ProtoMol {
       stream.myAllNodes = true;
       stream.myAllSlavesSerial = true;
       stream << flush;
-      protomolStartSerial(true);
+      openMDStartSerial(true);
       return stream;
     }
 
@@ -331,15 +331,15 @@ namespace ProtoMol {
         stream.mySilentHint = max(stream.mySilentHint - 1, 0);
       if (stream.myQuit)
         if (!stream.myAllNodesSerial || !stream.myAllSlavesSerial)
-          protomolExit();
+          openMDExit();
         else
-          protomolAbort();
+          openMDAbort();
       else if (stream.myAbort)
-        protomolAbort();
+	openMDAbort();
       else if (stream.myAllNodesSerial)
-        protomolEndSerial(false);
+        openMDEndSerial(false);
       else if (stream.myAllSlavesSerial)
-        protomolEndSerial(true);
+        openMDEndSerial(true);
       stream.myAllSlavesSerial = false;
       stream.myAllNodesSerial = false;
       stream.myAllNodes = false;

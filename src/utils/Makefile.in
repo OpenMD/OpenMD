@@ -8,6 +8,10 @@ MySource    = \
 	PropertyMap.cpp \
 	OpenMDMPI.F90 \
 	simError.c \
+	FileLocation.cpp \
+	SystemUtilities.cpp \
+	Exception.cpp \
+	Report.cpp \
 	StringUtils.cpp \
 	vector_class.F90 \
         StringTokenizer.cpp \
