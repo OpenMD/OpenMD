@@ -22,17 +22,17 @@
 
 \*******************************************************************/
 
-#include <protomol/debug/Pipe.h>
+#include "debug/Pipe.hpp"
 
-#include <protomol/base/Exception.h>
-#include <protomol/base/Zap.h>
+#include "utils/Exception.hpp"
+#include "utils/Zap.hpp"
 
 #include <stdio.h>
 #include <unistd.h>
 #include <ext/stdio_filebuf.h> // NOTE: This only works in GCC 3.2 and newer
 
 using namespace std;
-using namespace ProtoMol;
+using namespace OpenMD;
 
 Pipe::Pipe() :
   outStream(0), inStream(0) {

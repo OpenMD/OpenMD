@@ -22,12 +22,12 @@
 
 \*******************************************************************/
 
-#include <protomol/base/Exception.h>
+#include "utils/Exception.hpp"
 
 #ifdef HAVE_DEBUGGER
-#include <protomol/debug/Debugger.h>
-#include <protomol/debug/Process.h>
-#include <protomol/type/String.h>
+#include "debug/Debugger.hpp"
+#include "debug/Process.hpp"
+//#include "type/String.h"
 
 #include <sys/time.h>
 #include <sys/resource.h>
@@ -42,7 +42,7 @@
 #include <sstream>
 
 using namespace std;
-using namespace ProtoMol;
+using namespace OpenMD;
 
 string Debugger::executableName;
 int Debugger::numTraces = 0;

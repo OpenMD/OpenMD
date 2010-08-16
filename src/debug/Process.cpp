@@ -21,13 +21,13 @@
                    jcofflan@users.sourceforge.net
 
 \*******************************************************************/
-#include <protomol/debug/Process.h>
+#include "debug/Process.hpp"
 
-#include <protomol/base/Exception.h>
-#include <protomol/debug/Debugger.h>
-#include <protomol/debug/Pipe.h>
-#include <protomol/type/String.h>
-#include <protomol/base/Zap.h>
+#include "utils/Exception.hpp"
+#include "debug/Debugger.hpp"
+#include "debug/Pipe.hpp"
+#include "utils/StringUtils.hpp"
+#include "utils/Zap.hpp"
 
 #include <stdio.h>
 #include <unistd.h>
@@ -39,7 +39,7 @@
 #include <string>
 
 using namespace std;
-using namespace ProtoMol;
+using namespace OpenMD;
 
 void PipeProcessFunctor::child() {
   if (direction == Process::TO_CHILD) {
@@ -228,7 +228,7 @@ void Process::kill(int sig) {
   ASSERT_OR_THROW("Process not running!", running);
 
   if (::kill(pid, sig) != 0)
-    THROW(string("Failed to kill process ") + String(pid) + ":" +
+    THROW(string("Failed to kill process ") + string(toString(pid)) + ":" +
       strerror(errno));
 }
 
@@ -240,7 +240,7 @@ int Process::wait(int options) {
 
   if (retVal == -1) {
     running = false;
-    THROW(string("Failed to wait on process ") + String(pid) + ":" +
+    THROW(string("Failed to wait on process ") + string(toString(pid)) + ":" +
       strerror(errno));
   }
 
