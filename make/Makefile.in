@@ -38,6 +38,7 @@ IS_UNIX=1
 #packages containing libraries
 PackageLibs = \
 	utils \
+	debug \
 	visitors \
 	math \
 	types \

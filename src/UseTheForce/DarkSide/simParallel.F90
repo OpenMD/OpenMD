@@ -63,6 +63,7 @@ module mpiSimulation
   !! dual header file for both c and fortran.
 #define __FORTRAN90
 #include "UseTheForce/mpiComponentPlan.h"
+public :: setupSimParallel
 
 #ifdef IS_MPI
 
@@ -963,6 +964,26 @@ contains
 
 #endif
 
+#else
+contains
+  subroutine setupSimParallel(thisComponentPlan, nAtomTags, atomTags, &
+       nGroupTags, groupTags, status)
+  !! Passed Arguments
+    !! mpiComponentPlan struct from C
+    type (mpiComponentPlan), intent(inout) :: thisComponentPlan
+    !! Number of tags passed
+    integer, intent(in) :: nAtomTags, nGroupTags
+    !! Result status, 0 = normal, -1 = error
+    integer, intent(out) :: status
+    integer :: localStatus
+    !! Global reference tag for local particles
+    integer, dimension(nAtomTags), intent(inout) :: atomTags
+    integer, dimension(nGroupTags), intent(inout) :: groupTags
+   
+  end subroutine setupSimParallel
+
 #endif
+
+
 end module mpiSimulation
 

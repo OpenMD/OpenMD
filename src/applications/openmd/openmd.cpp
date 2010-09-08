@@ -56,6 +56,8 @@
 #include "minimizers/MinimizerFactory.hpp"
 #include "minimizers/Minimizer.hpp"
 #include "restraints/ThermoIntegrationForceManager.hpp"
+#include "utils/Report.hpp"
+#include "utils/Exception.hpp"
 
 using namespace OpenMD;
 
@@ -137,7 +139,8 @@ int main(int argc,char* argv[]){
     painCave.isFatal = 1;
     simError();        
   }
-    
+  
+
   if (simParams->haveMinimizer()) {
     //create minimizer
     Minimizer* myMinimizer = MinimizerFactory::getInstance()->createMinimizer(toUpperCopy(simParams->getMinimizer()), info);
