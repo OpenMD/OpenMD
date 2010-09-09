@@ -7,7 +7,7 @@ set (DYNAMICPROPSSOURCE ../src/applications/dynamicProps/TimeCorrFunc.cpp  ../sr
  ../src/applications/dynamicProps/ThetaCorrFunc.cpp  ../src/applications/dynamicProps/EnergyCorrFunc.cpp  ../src/applications/dynamicProps/DirectionalRCorrFunc.cpp)
 
 
-set (HYDROSOURCE  ../src/applications/hydrodynamics/AnalyticalModel.cpp ../src/applications/hydrodynamics/ApproximationModel.cpp ../src/applications/hydrodynamics/BeadModel.cpp ../src/applications/hydrodynamics/HydrodynamicsModel.cpp ../src/applications/hydrodynamics/RoughShell.cpp ../src/applications/hydrodynamics/CompositeShape.cpp ../src/applications/hydrodynamics/Hydro.cpp ../src/applications/hydrodynamics/HydroCmd.c ../src/applications/hydrodynamics/ShapeBuilder.cpp ../src/applications/hydrodynamics/Hydrodynamicsmodelfactory.cpp)
+set (HYDROSOURCE  ../src/applications/hydrodynamics/AnalyticalModel.cpp ../src/applications/hydrodynamics/ApproximationModel.cpp ../src/applications/hydrodynamics/BeadModel.cpp ../src/applications/hydrodynamics/HydrodynamicsModel.cpp ../src/applications/hydrodynamics/RoughShell.cpp ../src/applications/hydrodynamics/CompositeShape.cpp ../src/applications/hydrodynamics/Hydro.cpp ../src/applications/hydrodynamics/HydroCmd.c ../src/applications/hydrodynamics/ShapeBuilder.cpp ../src/applications/hydrodynamics/HydrodynamicsModelFactory.cpp)
 
 set (STATICPROPSSOURCE  ../src/applications/staticProps/GofAngle2.cpp ../src/applications/staticProps/GofRAngle.cpp ../src/applications/staticProps/GofRZ.cpp ../src/applications/staticProps/GofR.cpp
 ../src/applications/staticProps/GofZ.cpp  
