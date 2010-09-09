@@ -4,42 +4,26 @@
 #  OPENBABEL2_FOUND - system has OpenBabel2
 #  OPENBABEL2_INCLUDE_DIR - the OpenBabel2 include directory
 #  OPENBABEL2_LIBRARIES - Link these to use OpenBabel2
+# Copyright (C) 2006, 2009 Pino Toscano, <pino@kde.org>
 # Copyright (c) 2006, 2007 Carsten Niehaus, <cniehaus@gmx.de>
 # Copyright (C) 2008 Marcus D. Hanwell <marcus@cryos.org>
 # Redistribution and use is allowed according to the terms of the BSD license.
 # For details see the accompanying COPYING-CMAKE-SCRIPTS file.
-
-include (MacroEnsureVersion)
 
 if (OPENBABEL2_INCLUDE_DIR AND OPENBABEL2_LIBRARIES AND OPENBABEL2_VERSION_MET)
   # in cache already
   set(OPENBABEL2_FOUND TRUE)
 
 else (OPENBABEL2_INCLUDE_DIR AND OPENBABEL2_LIBRARIES AND OPENBABEL2_VERSION_MET)
-  if(EMBED_OPENBABEL)
-    # Building a super-package, rely on the embedded paths
-    set(OPENBABEL2_VERSION_MET TRUE)
-    set(OPENBABEL2_INCLUDE_DIR ${super_SOURCE_DIR}/openbabel/include ${super_BINARY_DIR}/openbabel/include)
-    # This is a kludge -- need to ask Marcus how to handle it better
-    find_library(OPENBABEL2_LIBRARIES NAMES openbabel openbabel-2
-      PATHS
-      ${_obLinkDir}
-      ${GNUWIN32_DIR}/lib
-      $ENV{OPENBABEL2_LIBRARIES}
-    )
-  else(EMBED_OPENBABEL)
-  # Typical case -- find an installed OpenBabel
   if(NOT WIN32)
 
     # Use the newer PkgConfig stuff
     find_package(PkgConfig REQUIRED)
-    pkg_check_modules(OPENBABEL2 openbabel-2.0>=2.2.2)
+    pkg_check_modules(PC_OPENBABEL2 openbabel-2.0>=2.2.0)
 
-    # Maintain backwards compatibility with previous version of module
-    if(OPENBABEL2_FOUND STREQUAL "1")
+    if(PC_OPENBABEL2_FOUND)
       set(OPENBABEL2_VERSION_MET TRUE)
-      set(OPENBABEL2_INCLUDE_DIR ${OPENBABEL2_INCLUDE_DIRS})
-    endif(OPENBABEL2_FOUND STREQUAL "1")
+    endif(PC_OPENBABEL2_FOUND)
 
   else(NOT WIN32)
     set(OPENBABEL2_VERSION_MET TRUE)
@@ -47,28 +31,23 @@ else (OPENBABEL2_INCLUDE_DIR AND OPENBABEL2_LIBRARIES AND OPENBABEL2_VERSION_MET
 
   if(OPENBABEL2_VERSION_MET)
 
-    if(WIN32)
-      if(NOT OPENBABEL2_INCLUDE_DIR)
-        find_path(OPENBABEL2_INCLUDE_DIR openbabel-2.0/openbabel/obconversion.h
-          PATHS
-          ${_obIncDir}
-          ${GNUWIN32_DIR}/include
-          $ENV{OPENBABEL2_INCLUDE_DIR}
-        )
-        if(OPENBABEL2_INCLUDE_DIR)
-          set(OPENBABEL2_INCLUDE_DIR ${OPENBABEL2_INCLUDE_DIR}/openbabel-2.0)
-        endif(OPENBABEL2_INCLUDE_DIR)
-      endif(NOT OPENBABEL2_INCLUDE_DIR)
-    endif(WIN32)
+    find_path(OPENBABEL2_INCLUDE_DIR openbabel/obconversion.h
+      PATHS
+      ${PC_OPENBABEL2_INCLUDEDIR}
+      ${PC_OPENBABEL2_INCLUDE_DIRS}
+      ${GNUWIN32_DIR}/include
+      $ENV{OPENBABEL2_INCLUDE_DIR}
+      PATH_SUFFIXES openbabel-2.0
+    )
 
     find_library(OPENBABEL2_LIBRARIES NAMES openbabel openbabel-2
       PATHS
-      ${_obLinkDir}
+      ${PC_OPENBABEL2_LIBDIR}
+      ${PC_OPENBABEL2_LIBRARY_DIRS}
       ${GNUWIN32_DIR}/lib
       $ENV{OPENBABEL2_LIBRARIES}
     )
   endif(OPENBABEL2_VERSION_MET)
-  endif(EMBED_OPENBABEL)
 
   if(OPENBABEL2_INCLUDE_DIR AND OPENBABEL2_LIBRARIES AND OPENBABEL2_VERSION_MET)
     set(OPENBABEL2_FOUND TRUE)
@@ -97,7 +76,7 @@ if(OPENBABEL2_EXECUTABLE)
 else(OPENBABEL2_EXECUTABLE)
   find_program(OPENBABEL2_EXECUTABLE NAMES babel
     PATHS
-    [HKEY_CURRENT_USER\\SOFTWARE\\OpenBabel\ 2.2.2]
+    [HKEY_CURRENT_USER\\SOFTWARE\\OpenBabel\ 2.2.0]
     $ENV{OPENBABEL2_EXECUTABLE}
   )
 
@@ -111,10 +90,3 @@ else(OPENBABEL2_EXECUTABLE)
 
 endif(OPENBABEL2_EXECUTABLE)
 
-# Test if we are using trunk
-if(NOT OPENBABEL_IS_NEWER_THAN_2_2_99)
-  macro_ensure_version("2.2.99" "${OPENBABEL2_VERSION}" OPENBABEL_IS_NEWER_THAN_2_2_99)
-endif(NOT OPENBABEL_IS_NEWER_THAN_2_2_99)
-if (OPENBABEL_IS_NEWER_THAN_2_2_99)
-   add_definitions(-DOPENBABEL_IS_NEWER_THAN_2_2_99)
-endif(OPENBABEL_IS_NEWER_THAN_2_2_99)
