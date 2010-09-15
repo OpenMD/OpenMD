@@ -54,7 +54,7 @@
 #include "io/BondTypesSectionParser.hpp"
 #include "io/BendTypesSectionParser.hpp"
 #include "io/TorsionTypesSectionParser.hpp"
-#include "io/MetalNonMetalInteractionsSectionParser.hpp"
+#include "io/NonBondedInteractionsSectionParser.hpp"
 #include "io/EAMAtomTypesSectionParser.hpp"
 #include "io/SCAtomTypesSectionParser.hpp"
 #include "io/OptionSectionParser.hpp"
@@ -93,7 +93,7 @@ namespace OpenMD {
     spMan_.push_back(new GayBerneAtomTypesSectionParser(forceFieldOptions_));
     spMan_.push_back(new BondTypesSectionParser(forceFieldOptions_));
     spMan_.push_back(new BendTypesSectionParser(forceFieldOptions_));
-    spMan_.push_back(new MetalNonMetalInteractionsSectionParser(forceFieldOptions_));
+    spMan_.push_back(new NonBondedInteractionsSectionParser(forceFieldOptions_));
     spMan_.push_back(new SCAtomTypesSectionParser(forceFieldOptions_));
     spMan_.push_back(new EAMAtomTypesSectionParser(forceFieldOptions_));
     spMan_.push_back(new TorsionTypesSectionParser(forceFieldOptions_));

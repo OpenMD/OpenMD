@@ -2,6 +2,7 @@ Package = nonbonded
 
 Source    = LJ.cpp \
 	GB.cpp \
+	Morse.cpp \
 	Sticky.cpp \
 	EAM.cpp \
 	SC.cpp

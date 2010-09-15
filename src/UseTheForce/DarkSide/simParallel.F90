@@ -71,7 +71,6 @@ public :: setupSimParallel
   !! gather and scatter are a generic interface
   !! to gather and scatter routines
   public :: gather, scatter
-  public :: setupSimParallel
   public :: replanSimParallel
   public :: getNatomsInCol
   public :: getNatomsInRow

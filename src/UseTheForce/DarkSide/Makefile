@@ -28,7 +28,6 @@ ParallelSource = \
 	force_globals.F90 \
 	simulation.F90 \
 	electrostatic.F90 \
-	stickky.F90 \
 	shapes.F90 \
 	MetalNonMetal.F90
 
@@ -37,7 +36,6 @@ Modules = \
 	electrostatic_module \
 	force_globals \
 	fforceoptions \
-	gayberne \
 	neighborLists \
 	shapes \
 	mpiSimulation \

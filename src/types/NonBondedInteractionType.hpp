@@ -58,6 +58,7 @@ namespace OpenMD {
 
   typedef  struct{
     int is_LennardJones;
+    int is_Morse;
     int is_EAM;
     int is_SC;
   } NonBondedInteractionTypeProperties;
@@ -96,6 +97,8 @@ namespace OpenMD {
 
     void setLennardJones();    
     bool isLennardJones();
+    void setMorse();    
+    bool isMorse();
     void setEAM();
     bool isEAM();
     bool isSC();
@@ -165,9 +168,17 @@ namespace OpenMD {
     RealType dr;
     std::vector<RealType> phi; // phi(r)
   };
-  
+
   typedef SimpleTypeData<EAMMixingParam> EAMMixingData;
 
+  struct MorseParam {
+    RealType De;
+    RealType Re;
+    RealType beta;
+    std::string interactionType;
+  };
+  
+  typedef SimpleTypeData<MorseParam> MorseData;
   
 } //end namespace OpenMD
 #endif //TYPES_NONBONDEDINTERACTIONTYPE_HPP

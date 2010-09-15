@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2009 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -39,42 +39,46 @@
  * [4]  Vardeman & Gezelter, in progress (2009).                        
  */
  
-#ifndef IO_METALNONMETALINTERACTIONSSECTIONPARSER_HPP
-#define IO_METALNONMETALINTERACTIONSSECTIONPARSER_HPP
-#include <map>
-#include "io/SectionParser.hpp"
-#include "io/ForceFieldOptions.hpp"
+#ifndef NONBONDED_SHAPES_HPP
+#define NONBONDED_SHAPES_HPP
 
+#include "types/ShapeAtomType.hpp"
+#include "UseTheForce/ForceField.hpp"
+#include "math/SquareMatrix3.hpp"
+
+using namespace std;
 namespace OpenMD {
 
-  /**
-   * @class MetalNonMetalInteractionsSectionParser MetalNonMetalInteractionsSectionParser.hpp "io/MetalNonMetalInteractionsSectionParser.hpp"
-   */
-  class MetalNonMetalInteractionsSectionParser : public SectionParser {
-  public:
-    MetalNonMetalInteractionsSectionParser(ForceFieldOptions& options);
-            
+  class SHAPES {
+    
+  public:    
+    static SHAPES* Instance();
+    static void setForceField(ForceField *ff) {forceField_ = ff;};
+    static void initialize();
+    static void addType(AtomType* atomType);
+
+    static void calcForce(AtomType* at1, AtomType* at2, const Vector3d d, const RealType rij, const RealType r2, const RealType sw, RealType &vpair, RealType &pot, const RotMat3x3d A1, const RotMat3x3d A2, Vector3d &f1, Vector3d &t1, Vector3d &t2);
+
+    // Fortran support routines;
+    static RealType getShapeCut(int atid);
+    static void do_shape_pair(int *atid1, int *atid2, RealType *d, RealType *rij, RealType *r2, RealType *sw, RealType *vpair, RealType *pot, RealType *A1, RealType *A2, RealType *f1, RealType *t1, RealType *t2);
+    
   private:
-
-    enum MetalNonMetalInteractionTypeEnum{
-      MAW,
-      ShiftedMorse,
-      LennardJones,
-      RepulsiveMorse,
-      Unknown
-    };
-            
-    void parseLine(ForceField& ff, const std::string& line, int lineNo);
+    virtual ~SHAPES() { }
+    // singleton pattern, prevent reconstruction
+    SHAPES() { }
+    SHAPES(SHAPES const &) {};
+    SHAPES& operator=(SHAPES const&) {};
+    static SHAPES* _instance;
   
-    MetalNonMetalInteractionTypeEnum getMetalNonMetalInteractionTypeEnum(const std::string& str);  
-
-    std::map<std::string, MetalNonMetalInteractionTypeEnum> stringToEnumMap_;   
-    ForceFieldOptions& options_;
+    static bool initialized_;
+    static map<int, AtomType*> ShapesMap;
+    static map<pair<AtomType*, AtomType*>, SHAPESInteractionData> MixingMap;
+    static ForceField* forceField_;
+    static int lMax_;
+    static int mMax_;
   };
+}
 
-
-} //namespace OpenMD
-
-#endif //IO_METALNONMETALINTERACTIONSSECTIONPARSER_HPP
-
-
+                               
+#endif

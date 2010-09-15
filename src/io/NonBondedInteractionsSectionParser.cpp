@@ -39,7 +39,7 @@
  * [4]  Vardeman & Gezelter, in progress (2009).                        
  */
  
-#include "io/MetalNonMetalInteractionsSectionParser.hpp"
+#include "io/NonBondedInteractionsSectionParser.hpp"
 #include "types/AtomType.hpp"
 #include "types/ShiftedMorseInteractionType.hpp"
 #include "types/MAWInteractionType.hpp"
@@ -49,23 +49,23 @@
 #include "utils/simError.h"
 namespace OpenMD {
 
-  MetalNonMetalInteractionsSectionParser::MetalNonMetalInteractionsSectionParser(ForceFieldOptions& options) : options_(options){
-    setSectionName("MetalNonMetalInteractions");
-
+  NonBondedInteractionsSectionParser::NonBondedInteractionsSectionParser(ForceFieldOptions& options) : options_(options){
+    setSectionName("NonBondedInteractions");
+    
     stringToEnumMap_["MAW"] =  MAW;                
     stringToEnumMap_["ShiftedMorse"] =  ShiftedMorse;                                
     stringToEnumMap_["LennardJones"] = LennardJones;
     stringToEnumMap_["RepulsiveMorse"] = RepulsiveMorse;
-
+    
   }
-
-  void MetalNonMetalInteractionsSectionParser::parseLine(ForceField& ff,const std::string& line, int lineNo){
+  
+  void NonBondedInteractionsSectionParser::parseLine(ForceField& ff,const std::string& line, int lineNo){
     StringTokenizer tokenizer(line);
     NonBondedInteractionType* nbiType = NULL;
     int nTokens = tokenizer.countTokens();
-
+    
     if (nTokens < 3) {
-      sprintf(painCave.errMsg, "MetalNonMetalInteractionsSectionParser Error: Not enough tokens at line %d\n",
+      sprintf(painCave.errMsg, "NonBondedInteractionsSectionParser Error: Not enough tokens at line %d\n",
 	      lineNo);
       painCave.isFatal = 1;
       simError();
@@ -74,16 +74,16 @@ namespace OpenMD {
     std::string at1 = tokenizer.nextToken();
     std::string at2 = tokenizer.nextToken();
     std::string itype = tokenizer.nextToken();
-
-    MetalNonMetalInteractionTypeEnum nbit = getMetalNonMetalInteractionTypeEnum(itype);
+    
+    NonBondedInteractionTypeEnum nbit = getNonBondedInteractionTypeEnum(itype);
     nTokens -= 3;
     NonBondedInteractionType* interactionType;
-    	
+    
     //switch is a nightmare to maintain
     switch(nbit) {
     case MAW :
       if (nTokens < 5) {
-        sprintf(painCave.errMsg, "MetalNonMetalInteractionsSectionParser Error: Not enough tokens at line %d\n",
+        sprintf(painCave.errMsg, "NonBondedInteractionsSectionParser Error: Not enough tokens at line %d\n",
                 lineNo);
         painCave.isFatal = 1;
         simError();
@@ -99,7 +99,7 @@ namespace OpenMD {
       
     case ShiftedMorse :
       if (nTokens < 3) {
-        sprintf(painCave.errMsg, "MetalNonMetalInteractionsSectionParser Error: Not enough tokens at line %d\n",
+        sprintf(painCave.errMsg, "NonBondedInteractionsSectionParser Error: Not enough tokens at line %d\n",
                 lineNo);
         painCave.isFatal = 1;
         simError();
@@ -110,10 +110,10 @@ namespace OpenMD {
         interactionType = new ShiftedMorseInteractionType(D0, beta0, r0);
       }
       break;
-
+      
     case RepulsiveMorse :
       if (nTokens < 3) {
-        sprintf(painCave.errMsg, "MetalNonMetalInteractionsSectionParser Error: Not enough tokens at line %d\n",
+        sprintf(painCave.errMsg, "NonBondedInteractionsSectionParser Error: Not enough tokens at line %d\n",
                 lineNo);
         painCave.isFatal = 1;
         simError();
@@ -124,10 +124,10 @@ namespace OpenMD {
         interactionType = new RepulsiveMorseInteractionType(D0, beta0, r0);
       }
       break;
-
+      
     case LennardJones :
       if (nTokens < 2) {
-        sprintf(painCave.errMsg, "MetalNonMetalInteractionsSectionParser Error: Not enough tokens at line %d\n",
+        sprintf(painCave.errMsg, "NonBondedInteractionsSectionParser Error: Not enough tokens at line %d\n",
                 lineNo);
         painCave.isFatal = 1;
         simError();
@@ -137,30 +137,30 @@ namespace OpenMD {
         interactionType = new LennardJonesInteractionType(sigma, epsilon);
       }
       break;
-
+      
     case Unknown :
     default:
-      sprintf(painCave.errMsg, "MetalNonMetalInteractionsSectionParser Error: Unknown Interaction Type at line %d\n",
+      sprintf(painCave.errMsg, "NonBondedInteractionsSectionParser Error: Unknown Interaction Type at line %d\n",
 	      lineNo);
       painCave.isFatal = 1;
       simError();
-
+      
       break;
             
     }
-
+    
     if (interactionType != NULL) {
       ff.addNonBondedInteractionType(at1, at2, interactionType);
     }
-
+    
   }
-
-  MetalNonMetalInteractionsSectionParser::MetalNonMetalInteractionTypeEnum MetalNonMetalInteractionsSectionParser::getMetalNonMetalInteractionTypeEnum(const std::string& str) {
-    std::map<std::string, MetalNonMetalInteractionTypeEnum>::iterator i;
+  
+  NonBondedInteractionsSectionParser::NonBondedInteractionTypeEnum NonBondedInteractionsSectionParser::getNonBondedInteractionTypeEnum(const std::string& str) {
+    std::map<std::string, NonBondedInteractionTypeEnum>::iterator i;
     i = stringToEnumMap_.find(str);
-
+    
     return i == stringToEnumMap_.end() ? Unknown : i->second;
   }
-
+  
 } //end namespace OpenMD
 
