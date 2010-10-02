@@ -50,23 +50,8 @@
 
 namespace OpenMD {
 
-  bool EAM::initialized_ = false;
-  RealType EAM::eamRcut_ = 0.0;
-  EAMMixingMethod EAM::mixMeth_ = eamJohnson;
-  ForceField* EAM::forceField_ = NULL;
-  map<int, AtomType*> EAM::EAMlist;
-  map<AtomType*, EAMAtomData> EAM::EAMMap;
-  map<pair<AtomType*, AtomType*>, EAMInteractionData> EAM::MixingMap;
-
-  
-  EAM* EAM::_instance = NULL;
-
-  EAM* EAM::Instance() {
-    if (!_instance) {
-      _instance = new EAM();
-    }
-    return _instance;
-  }
+  EAM::EAM() : name_("EAM"), initialized_(false), forceField_(NULL), 
+               mixMeth_(eamJohnson), eamRcut_(0.0) {}
   
   EAMParam EAM::getEAMParam(AtomType* atomType) {
     
@@ -192,8 +177,10 @@ namespace OpenMD {
     for (int i = 1; i < rvals.size(); i++ ) {
       r = rvals[i];
 
-      // only use z(r) if we're inside this atoms cutoff radius, otherwise, we'll use zero for the charge.
-      // This effectively means that our phi grid goes out beyond the cutoff of the pair potential
+      // only use z(r) if we're inside this atom's cutoff radius,
+      // otherwise, we'll use zero for the charge.  This effectively
+      // means that our phi grid goes out beyond the cutoff of the
+      // pair potential
 
       zi = r <= eamParam1.rcut ? z1->getValueAt(r) : 0.0;
       zj = r <= eamParam2.rcut ? z2->getValueAt(r) : 0.0;
@@ -360,49 +347,46 @@ namespace OpenMD {
     return;
   }
 
-  void EAM::calcDensity(AtomType* at1, AtomType* at2, const RealType rij, 
-                        RealType &rho_i_at_j, RealType &rho_j_at_i) {
+  void EAM::calcDensity(DensityData ddat) {
     
     if (!initialized_) initialize();
     
-    EAMAtomData data1 = EAMMap[at1];
-    EAMAtomData data2 = EAMMap[at2];
+    EAMAtomData data1 = EAMMap[ddat.atype1];
+    EAMAtomData data2 = EAMMap[ddat.atype2];
 
-    if (rij < data1.rcut) rho_i_at_j = data1.rho->getValueAt(rij);
-    if (rij < data2.rcut) rho_j_at_i = data2.rho->getValueAt(rij);
+    if (ddat.rij < data1.rcut) 
+      ddat.rho_i_at_j = data1.rho->getValueAt(ddat.rij);
+
+    if (ddat.rij < data2.rcut) 
+      ddat.rho_j_at_i = data2.rho->getValueAt(ddat.rij);
+
     return;
   }
 
-  void EAM::calcFunctional(AtomType* at1, RealType rho, RealType &frho,
-                           RealType &dfrhodrho) {
+  void EAM::calcFunctional(FunctionalData fdat) {
 
     if (!initialized_) initialize();
 
-    EAMAtomData data1 = EAMMap[at1];
+    EAMAtomData data1 = EAMMap[fdat.atype];
         
-    pair<RealType, RealType> result = data1.F->getValueAndDerivativeAt(rho);
+    pair<RealType, RealType> result = data1.F->getValueAndDerivativeAt(fdat.rho);
 
-    frho = result.first;
-    dfrhodrho = result.second;
+    fdat.frho = result.first;
+    fdat.dfrhodrho = result.second;
     return;
   }
 
  
-  void EAM::calcForce(AtomType* at1, AtomType* at2, Vector3d d, 
-                      RealType rij, RealType r2, RealType sw, 
-                      RealType &vpair, RealType &pot, Vector3d &f1,
-                      RealType rho_i, RealType rho_j, 
-                      RealType dfrhodrho_i, RealType dfrhodrho_j, 
-                      RealType &fshift_i, RealType &fshift_j) {
+  void EAM::calcForce(InteractionData idat) {
 
     if (!initialized_) initialize();
 
     pair<RealType, RealType> res;
     
-    if (rij < eamRcut_) {
+    if (idat.rij < eamRcut_) {
 
-      EAMAtomData data1 = EAMMap[at1];
-      EAMAtomData data2 = EAMMap[at2];
+      EAMAtomData data1 = EAMMap[idat.atype1];
+      EAMAtomData data2 = EAMMap[idat.atype2];
 
       // get type-specific cutoff radii
 
@@ -414,22 +398,22 @@ namespace OpenMD {
       RealType phab, dvpdr;
       RealType drhoidr, drhojdr, dudr;
       
-      if (rij < rci) {
-        res = data1.rho->getValueAndDerivativeAt(rij);
+      if (idat.rij < rci) {
+        res = data1.rho->getValueAndDerivativeAt(idat.rij);
         rha = res.first;
         drha = res.second;
 
-        res = MixingMap[make_pair(at1, at1)].phi->getValueAndDerivativeAt(rij);
+        res = MixingMap[make_pair(idat.atype1, idat.atype1)].phi->getValueAndDerivativeAt(idat.rij);
         pha = res.first;
         dpha = res.second;
       }
 
-      if (rij < rcj) {
-        res = data2.rho->getValueAndDerivativeAt(rij);
+      if (idat.rij < rcj) {
+        res = data2.rho->getValueAndDerivativeAt(idat.rij);
         rhb = res.first;
         drhb = res.second;
 
-        res = MixingMap[make_pair(at2, at2)].phi->getValueAndDerivativeAt(rij);
+        res = MixingMap[make_pair(idat.atype2, idat.atype2)].phi->getValueAndDerivativeAt(idat.rij);
         phb = res.first;
         dphb = res.second;
       }
@@ -440,13 +424,13 @@ namespace OpenMD {
       switch(mixMeth_) {
       case eamJohnson:
        
-        if (rij < rci) {
+        if (idat.rij < rci) {
           phab = phab + 0.5 * (rhb / rha) * pha;
           dvpdr = dvpdr + 0.5*((rhb/rha)*dpha + 
                                pha*((drhb/rha) - (rhb*drha/rha/rha)));
         }
 
-        if (rij < rcj) {
+        if (idat.rij < rcj) {
           phab = phab + 0.5 * (rha / rhb) * phb;
           dvpdr = dvpdr + 0.5 * ((rha/rhb)*dphb + 
                                  phb*((drha/rhb) - (rha*drhb/rhb/rhb)));
@@ -455,7 +439,7 @@ namespace OpenMD {
         break;
 
       case eamDaw:
-        res = MixingMap[make_pair(at1,at2)].phi->getValueAndDerivativeAt(rij);
+        res = MixingMap[make_pair(idat.atype1,idat.atype2)].phi->getValueAndDerivativeAt(idat.rij);
         phab = res.first;
         dvpdr = res.second;
 
@@ -475,9 +459,9 @@ namespace OpenMD {
       drhoidr = drha;
       drhojdr = drhb;
 
-      dudr = drhojdr*dfrhodrho_i + drhoidr*dfrhodrho_j + dvpdr; 
+      dudr = drhojdr*idat.dfrho1 + drhoidr*idat.dfrho2 + dvpdr; 
 
-      f1 = d * dudr / rij;
+      idat.f1 = idat.d * dudr / idat.rij;
         
       // particle_pot is the difference between the full potential 
       // and the full potential without the presence of a particular
@@ -491,121 +475,16 @@ namespace OpenMD {
       // Most of the particle_pot heavy lifting comes from the
       // pair interaction, and will be handled by vpair.
      
-      fshift_i = data1.F->getValueAt( rho_i - rhb );
-      fshift_j = data1.F->getValueAt( rho_j - rha );
+      idat.fshift1 = data1.F->getValueAt( idat.rho1 - rhb );
+      idat.fshift2 = data1.F->getValueAt( idat.rho2 - rha );
 
-      pot += phab;
+      idat.pot += phab;
 
-      vpair += phab;
+      idat.vpair += phab;
     }
 
     return;
     
   }
-
-
-  void EAM::calc_eam_prepair_rho(int *atid1, int *atid2, RealType *rij,
-                                 RealType* rho_i_at_j, RealType* rho_j_at_i){
-
-    if (!initialized_) initialize();
-    
-    AtomType* atype1 = EAMlist[*atid1];
-    AtomType* atype2 = EAMlist[*atid2];
-    
-    calcDensity(atype1, atype2, *rij, *rho_i_at_j, *rho_j_at_i);
-
-    return;    
-  }
-
-  void EAM::calc_eam_preforce_Frho(int *atid1, RealType *rho, RealType *frho,
-                                   RealType *dfrhodrho) {
-
-    if (!initialized_) initialize();
-
-    AtomType* atype1 = EAMlist[*atid1];   
-
-    calcFunctional(atype1, *rho, *frho, *dfrhodrho);
-    
-    return;    
-  }
-  RealType EAM::getEAMcut(int *atid1) {
-
-    if (!initialized_) initialize();
-    
-    AtomType* atype1 = EAMlist[*atid1];   
-       
-    return getRcut(atype1);
-  }
-
-  void EAM::do_eam_pair(int *atid1, int *atid2, RealType *d, RealType *rij, 
-                        RealType *r2, RealType *sw, RealType *vpair, 
-                        RealType *pot, RealType *f1, RealType *rho1,
-                        RealType *rho2, RealType *dfrho1, RealType *dfrho2,
-                        RealType *fshift1, RealType *fshift2) {
-
-    if (!initialized_) initialize();
-    
-    AtomType* atype1 = EAMlist[*atid1];
-    AtomType* atype2 = EAMlist[*atid2];
-    
-    Vector3d disp(d[0], d[1], d[2]);
-    Vector3d frc(f1[0], f1[1], f1[2]);
-    
-    calcForce(atype1, atype2, disp, *rij, *r2, *sw, *vpair,  *pot, frc,
-              *rho1, *rho2, *dfrho1, *dfrho2, *fshift1, *fshift2);
-      
-    f1[0] = frc.x();
-    f1[1] = frc.y();
-    f1[2] = frc.z();
-
-    return;    
-  }
-  
-  void EAM::setCutoffEAM(RealType *thisRcut) {
-    eamRcut_ = *thisRcut;
-  }
 }
 
-extern "C" {
-  
-#define fortranCalcDensity FC_FUNC(calc_eam_prepair_rho, CALC_EAM_PREPAIR_RHO)
-#define fortranCalcFunctional FC_FUNC(calc_eam_preforce_frho, CALC_EAM_PREFORCE_FRHO)
-#define fortranCalcForce FC_FUNC(do_eam_pair, DO_EAM_PAIR)
-#define fortranSetCutoffEAM FC_FUNC(setcutoffeam, SETCUTOFFEAM)
-#define fortranGetEAMcut FC_FUNC(geteamcut, GETEAMCUT)
-
-  
-  void fortranCalcDensity(int *atid1, int *atid2, RealType *rij, 
-                          RealType *rho_i_at_j, RealType *rho_j_at_i) {
-    
-    return OpenMD::EAM::Instance()->calc_eam_prepair_rho(atid1, atid2, rij, 
-                                                         rho_i_at_j,  
-                                                         rho_j_at_i);
-  }
-  void fortranCalcFunctional(int *atid1, RealType *rho, RealType *frho,
-                             RealType *dfrhodrho) {  
-    
-    return OpenMD::EAM::Instance()->calc_eam_preforce_Frho(atid1, rho, frho,
-                                                           dfrhodrho);
-    
-  }
-  void fortranSetCutoffEAM(RealType *rcut) {
-    return OpenMD::EAM::Instance()->setCutoffEAM(rcut);
-  }
-  void fortranCalcForce(int *atid1, int *atid2, RealType *d, RealType *rij, 
-                        RealType *r2, RealType *sw, RealType *vpair, 
-                        RealType *pot, RealType *f1, RealType *rho1,
-                        RealType *rho2, RealType *dfrho1, RealType *dfrho2,
-                        RealType *fshift1, RealType *fshift2){
-    
-    return OpenMD::EAM::Instance()->do_eam_pair(atid1, atid2, d, rij, 
-                                                r2, sw, vpair, 
-                                                pot, f1, rho1,
-                                                rho2, dfrho1, dfrho2,
-                                                fshift1,  fshift2);
-  }
-  RealType fortranGetEAMcut(int* atid) {
-    return OpenMD::EAM::Instance()->getEAMcut(atid);
-  }
-
-}

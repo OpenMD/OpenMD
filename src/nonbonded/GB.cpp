@@ -44,28 +44,13 @@
 
 #include <cmath>
 #include "nonbonded/GB.hpp"
-#include "nonbonded/LJ.hpp"
 #include "utils/simError.h"
 
 using namespace std;
 namespace OpenMD {
 
-  bool GB::initialized_ = false;
-  RealType GB::mu_ = 2.0;
-  RealType GB::nu_ = 1.0;
-  ForceField* GB::forceField_ = NULL;
-  map<int, AtomType*> GB::GBMap;
-  map<pair<AtomType*, AtomType*>, GBInteractionData> GB::MixingMap;
+  GB::GB() : name_("GB"), initialized_(false), mu_(2.0), nu_(1.0), forceField_(NULL) {}
   
-  GB* GB::_instance = NULL;
-
-  GB* GB::Instance() {
-    if (!_instance) {
-      _instance = new GB();
-    }
-    return _instance;
-  }
-
   GayBerneParam GB::getGayBerneParam(AtomType* atomType) {
     
     // Do sanity checking on the AtomType we were passed before
@@ -105,8 +90,53 @@ namespace OpenMD {
     return gbData->getData();
   }
 
+  LJParam GB::getLJParam(AtomType* atomType) {
+    
+    // Do sanity checking on the AtomType we were passed before
+    // building any data structures:
+    if (!atomType->isLennardJones()) {
+      sprintf( painCave.errMsg,
+               "GB::getLJParam was passed an atomType (%s) that does not\n"
+               "\tappear to be a Lennard-Jones atom.\n",
+               atomType->getName().c_str());
+      painCave.severity = OPENMD_ERROR;
+      painCave.isFatal = 1;
+      simError();
+    }
+    
+    GenericData* data = atomType->getPropertyByName("LennardJones");
+    if (data == NULL) {
+      sprintf( painCave.errMsg, "GB::getLJParam could not find Lennard-Jones\n"
+               "\tparameters for atomType %s.\n", atomType->getName().c_str());
+      painCave.severity = OPENMD_ERROR;
+      painCave.isFatal = 1;
+      simError(); 
+    }
+    
+    LJParamGenericData* ljData = dynamic_cast<LJParamGenericData*>(data);
+    if (ljData == NULL) {
+      sprintf( painCave.errMsg,
+               "GB::getLJParam could not convert GenericData to LJParam for\n"
+               "\tatom type %s\n", atomType->getName().c_str());
+      painCave.severity = OPENMD_ERROR;
+      painCave.isFatal = 1;
+      simError();          
+    }
+    
+    return ljData->getData();
+  }
+  
+  RealType GB::getLJEpsilon(AtomType* atomType) {    
+    LJParam ljParam = getLJParam(atomType);
+    return ljParam.epsilon;
+  }
+  RealType GB::getLJSigma(AtomType* atomType) {    
+    LJParam ljParam = getLJParam(atomType);
+    return ljParam.sigma;
+  }
+  
   void GB::initialize() {    
-
+    
     ForceFieldOptions& fopts = forceField_->getForceFieldOptions();
     mu_ = fopts.getGayBerneMu();
     nu_ = fopts.getGayBerneNu();
@@ -152,8 +182,8 @@ namespace OpenMD {
       er1 = gb1.GB_eps_ratio;
       dw1 = gb1.GB_dw;
     } else if (atomType->isLennardJones()) {
-      d1 = LJ::Instance()->getSigma(atomType) / sqrt(2.0);
-      e1 = LJ::Instance()->getEpsilon(atomType);
+      d1 = getLJSigma(atomType) / sqrt(2.0);
+      e1 = getLJEpsilon(atomType);
       l1 = d1;
       er1 = 1.0;
       dw1 = 1.0;      
@@ -185,8 +215,8 @@ namespace OpenMD {
         er2 = gb2.GB_eps_ratio;
         dw2 = gb2.GB_dw;
       } else if (atype2->isLennardJones()) {
-        d2 = LJ::Instance()->getSigma(atype2) / sqrt(2.0);
-        e2 = LJ::Instance()->getEpsilon(atype2);
+        d2 = getLJSigma(atype2) / sqrt(2.0);
+        e2 = getLJEpsilon(atype2);
         l2 = d2;
         er2 = 1.0;
         dw2 = 1.0;
@@ -232,48 +262,12 @@ namespace OpenMD {
       }
     }      
   }
-  
-
-  RealType GB::getGayBerneCut(int atid) { 
-    if (!initialized_) initialize();
-    std::map<int, AtomType*> :: const_iterator it;
-    it = GBMap.find(atid);
-    if (it == GBMap.end()) {
-      sprintf( painCave.errMsg,
-               "GB::getGayBerneCut could not find atid %d in GBMap\n",
-               (atid));
-      painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
-      simError();          
-    }
-
-    AtomType* atype = it->second;
-
-    RealType gbCut;
-    
-    if (atype->isGayBerne()) {
-      GayBerneParam gb = getGayBerneParam(atype);
-
-      // sigma is actually sqrt(2) * l for prolate ellipsoids
-      gbCut = 2.5 * sqrt(2.0) * max(gb.GB_l, gb.GB_d);
-
-    } else if (atype->isLennardJones()) {
-      gbCut = 2.5 * LJ::Instance()->getSigma(atype);
-    }
-    
-    return gbCut;
-  }
-
- 
-  void GB::calcForce(AtomType* at1, AtomType* at2, Vector3d d, 
-                     RealType r, RealType r2, RealType sw, 
-                     RealType vdwMult, RealType &vpair, RealType &pot, 
-                     RotMat3x3d A1, RotMat3x3d A2, Vector3d &f1,
-                     Vector3d &t1, Vector3d &t2) {
+   
+  void GB::calcForce(InteractionData idat) {
 
     if (!initialized_) initialize();
     
-    pair<AtomType*, AtomType*> key = make_pair(at1, at2);
+    pair<AtomType*, AtomType*> key = make_pair(idat.atype1, idat.atype2);
     GBInteractionData mixer = MixingMap[key];
 
     RealType sigma0 = mixer.sigma0;
@@ -286,26 +280,26 @@ namespace OpenMD {
     RealType xpap2  = mixer.xpap2; 
     RealType xpapi2 = mixer.xpapi2;
 
-    Vector3d ul1 = A1.getRow(2);
-    Vector3d ul2 = A2.getRow(2);
+    Vector3d ul1 = idat.A1.getRow(2);
+    Vector3d ul2 = idat.A2.getRow(2);
 
     RealType a, b, g;
 
-    bool i_is_LJ = at1->isLennardJones();
-    bool j_is_LJ = at2->isLennardJones();
+    bool i_is_LJ = idat.atype1->isLennardJones();
+    bool j_is_LJ = idat.atype2->isLennardJones();
 
     if (i_is_LJ) {
       a = 0.0;
       ul1 = V3Zero;
     } else {
-      a = dot(d, ul1);
+      a = dot(idat.d, ul1);
     }
 
     if (j_is_LJ) {
       b = 0.0;
       ul2 = V3Zero;
     } else {
-      b = dot(d, ul2);
+      b = dot(idat.d, ul2);
     }
 
     if (i_is_LJ || j_is_LJ) 
@@ -313,8 +307,8 @@ namespace OpenMD {
     else
       g = dot(ul1, ul2);
 
-    RealType au = a / r;
-    RealType bu = b / r;
+    RealType au = a / idat.rij;
+    RealType bu = b / idat.rij;
     
     RealType au2 = au * au;
     RealType bu2 = bu * bu;
@@ -327,7 +321,7 @@ namespace OpenMD {
     RealType e1 = 1.0 / sqrt(1.0 - x2*g2);
     RealType e2 = 1.0 - Hp;
     RealType eps = eps0 * pow(e1,nu_) * pow(e2,mu_);
-    RealType BigR = dw*sigma0 / (r - sigma + dw*sigma0);
+    RealType BigR = dw*sigma0 / (idat.rij - sigma + dw*sigma0);
     
     RealType R3 = BigR*BigR*BigR;
     RealType R6 = R3*R3;
@@ -335,16 +329,16 @@ namespace OpenMD {
     RealType R12 = R6*R6;
     RealType R13 = R6*R7;
 
-    RealType U = vdwMult * 4.0 * eps * (R12 - R6);
+    RealType U = idat.vdwMult * 4.0 * eps * (R12 - R6);
 
     RealType s3 = sigma*sigma*sigma;
     RealType s03 = sigma0*sigma0*sigma0;
 
-    RealType pref1 = - vdwMult * 8.0 * eps * mu_ * (R12 - R6) / (e2 * r);
+    RealType pref1 = - idat.vdwMult * 8.0 * eps * mu_ * (R12 - R6) / (e2 * idat.rij);
 
-    RealType pref2 = vdwMult * 8.0 * eps * s3 * (6.0*R13 - 3.0*R7) /(dw*r*s03);
+    RealType pref2 = idat.vdwMult * 8.0 * eps * s3 * (6.0*R13 - 3.0*R7) /(dw*idat.rij*s03);
 
-    RealType dUdr = - (pref1 * Hp + pref2 * (sigma0*sigma0*r/s3 + H));
+    RealType dUdr = - (pref1 * Hp + pref2 * (sigma0*sigma0*idat.rij/s3 + H));
     
     RealType dUda = pref1 * (xpap2*au - xp2*bu*g) / (1.0 - xp2 * g2) 
       + pref2 * (xa2 * au - x2 *bu*g) / (1.0 - x2 * g2);
@@ -358,77 +352,19 @@ namespace OpenMD {
       (x2 * au * bu - H * x2 * g) / (1.0 - x2 * g2) / (dw * s03);
     
 
-    Vector3d rhat = d / r;   
-    Vector3d rxu1 = cross(d, ul1);
-    Vector3d rxu2 = cross(d, ul2);
+    Vector3d rhat = idat.d / idat.rij;   
+    Vector3d rxu1 = cross(idat.d, ul1);
+    Vector3d rxu2 = cross(idat.d, ul2);
     Vector3d uxu = cross(ul1, ul2);
     
-    pot += U*sw;
-    f1 += dUdr * rhat + dUda * ul1 + dUdb * ul2;    
-    t1 += dUda * rxu1 - dUdg * uxu;
-    t2 += dUdb * rxu2 - dUdg * uxu;
-    vpair += U*sw;
+    idat.pot += U*idat.sw;
+    idat.f1 += dUdr * rhat + dUda * ul1 + dUdb * ul2;    
+    idat.t1 += dUda * rxu1 - dUdg * uxu;
+    idat.t2 += dUdb * rxu2 - dUdg * uxu;
+    idat.vpair += U*idat.sw;
 
     return;
 
   }
-
-  void GB::do_gb_pair(int *atid1, int *atid2, RealType *d, RealType *r, 
-                      RealType *r2, RealType *sw, RealType *vdwMult,
-                      RealType *vpair, RealType *pot, RealType *A1,
-                      RealType *A2, RealType *f1, RealType *t1, RealType *t2) {
-    
-    if (!initialized_) initialize();
-    
-    AtomType* atype1 = GBMap[*atid1];
-    AtomType* atype2 = GBMap[*atid2];
-    
-    Vector3d disp(d);
-    Vector3d frc(f1);
-    Vector3d trq1(t1);
-    Vector3d trq2(t2);
-    RotMat3x3d Ai(A1);
-    RotMat3x3d Aj(A2);
-   
-    // Fortran has the opposite matrix ordering from c++, so we'll use 
-    // transpose here.  When we finish the conversion to C++, this wrapper 
-    // will disappear, as will the transpose below:
-
-    calcForce(atype1, atype2, disp, *r, *r2, *sw, *vdwMult, *vpair, *pot, 
-              Ai, Aj, frc, trq1, trq1);
-      
-    f1[0] = frc.x();
-    f1[1] = frc.y();
-    f1[2] = frc.z();
-
-    t1[0] = trq1.x();
-    t1[1] = trq1.y();
-    t1[2] = trq1.z();
-
-    t2[0] = trq2.x();
-    t2[1] = trq2.y();
-    t2[2] = trq2.z();
-
-    return;    
-  }
 }
 
-extern "C" {
-  
-#define fortranGetGayBerneCut FC_FUNC(getgaybernecut, GETGAYBERNECUT)
-#define fortranDoGBPair FC_FUNC(do_gb_pair, DO_GB_PAIR)
-  
-  RealType fortranGetGayBerneCut(int* atid) {
-    return OpenMD::GB::Instance()->getGayBerneCut(*atid);
-  }
-
-  void fortranDoGBPair(int *atid1, int *atid2, RealType *d, RealType *r, 
-                       RealType *r2, RealType *sw, RealType *vdwMult, 
-                       RealType *vpair, RealType *pot, RealType *A1, 
-                       RealType *A2, RealType *f1, RealType *t1, RealType *t2){
-    
-    return OpenMD::GB::Instance()->do_gb_pair(atid1, atid2, d, r, r2, sw,
-                                              vdwMult, vpair, pot, A1, A2, f1,
-                                              t1, t2);
-  }
-}

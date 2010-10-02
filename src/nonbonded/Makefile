@@ -5,10 +5,10 @@ Source    = LJ.cpp \
 	Morse.cpp \
 	Sticky.cpp \
 	EAM.cpp \
-	SC.cpp
+	SC.cpp \
+	Electrostatic.cpp \
+	InteractionManager.cpp
 	
-
-
 RmiSource =
 
 Main      =

@@ -46,24 +46,10 @@
 #include "nonbonded/LJ.hpp"
 #include "utils/simError.h"
 
-
 namespace OpenMD {
 
-  bool LJ::initialized_ = false;
-  bool LJ::shiftedPot_ = false;
-  bool LJ::shiftedFrc_ = false;
-  ForceField* LJ::forceField_ = NULL;
-  std::map<int, AtomType*> LJ::LJMap;
-  std::map<std::pair<AtomType*, AtomType*>, LJInteractionData> LJ::MixingMap;
-  
-  LJ* LJ::_instance = NULL;
-
-  LJ* LJ::Instance() {
-    if (!_instance) {
-      _instance = new LJ();
-    }
-    return _instance;
-  }
+  LJ::LJ() : name_("LJ"), initialized_(false), shiftedPot_(false), 
+             shiftedFrc_(false), forceField_(NULL) {}
 
   LJParam LJ::getLJParam(AtomType* atomType) {
     
@@ -106,29 +92,12 @@ namespace OpenMD {
     return ljParam.sigma;
   }
 
-  RealType LJ::getSigma(int atid) { 
-    if (!initialized_) initialize();
-    std::map<int, AtomType*> :: const_iterator it;
-    it = LJMap.find(atid);
-    if (it == LJMap.end()) {
-      sprintf( painCave.errMsg,
-               "LJ::getSigma could not find atid %d in LJMap\n",
-               (atid));
-      painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
-      simError();          
-    }
-    AtomType* atype = it->second;
-
-    return getSigma(atype);    
-  }
-
   RealType LJ::getSigma(AtomType* atomType1, AtomType* atomType2) {    
     RealType sigma1 = getSigma(atomType1);
     RealType sigma2 = getSigma(atomType2);
     
     ForceFieldOptions& fopts = forceField_->getForceFieldOptions();
-    std::string DistanceMix = fopts.getDistanceMixingRule();
+    string DistanceMix = fopts.getDistanceMixingRule();
     toUpper(DistanceMix);
 
     if (DistanceMix == "GEOMETRIC") 
@@ -140,23 +109,6 @@ namespace OpenMD {
   RealType LJ::getEpsilon(AtomType* atomType) {    
     LJParam ljParam = getLJParam(atomType);
     return ljParam.epsilon;
-  }
-
-  RealType LJ::getEpsilon(int atid) {    
-    if (!initialized_) initialize();
-    std::map<int, AtomType*> :: const_iterator it;
-    it = LJMap.find(atid);
-    if (it == LJMap.end()) {
-      sprintf( painCave.errMsg,
-               "LJ::getEpsilon could not find atid %d in LJMap\n",
-               (atid));
-      painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
-      simError();          
-    }
-    AtomType* atype = it->second;
-
-    return getEpsilon(atype);    
   }
 
   RealType LJ::getEpsilon(AtomType* atomType1, AtomType* atomType2) {    
@@ -186,7 +138,7 @@ namespace OpenMD {
       
       if (nbt->isLennardJones()) {
         
-        std::pair<AtomType*, AtomType*> atypes = nbt->getAtomTypes();
+        pair<AtomType*, AtomType*> atypes = nbt->getAtomTypes();
         
         GenericData* data = nbt->getPropertyByName("LennardJones");
         if (data == NULL) {
@@ -227,12 +179,12 @@ namespace OpenMD {
   void LJ::addType(AtomType* atomType){
     RealType sigma1 = getSigma(atomType);
     RealType epsilon1 = getEpsilon(atomType);
-
+    
     // add it to the map:
     AtomTypeProperties atp = atomType->getATP();    
 
-    std::pair<std::map<int,AtomType*>::iterator,bool> ret;    
-    ret = LJMap.insert( std::pair<int, AtomType*>(atp.ident, atomType) );
+    pair<map<int,AtomType*>::iterator,bool> ret;    
+    ret = LJMap.insert( pair<int, AtomType*>(atp.ident, atomType) );
     if (ret.second == false) {
       sprintf( painCave.errMsg,
                "LJ already had a previous entry with ident %d\n",
@@ -288,11 +240,8 @@ namespace OpenMD {
     }    
   }
  
-  void LJ::calcForce(AtomType* at1, AtomType* at2, Vector3d d, 
-                     RealType rij, RealType r2, RealType rcut, RealType sw, 
-                     RealType vdwMult, RealType &vpair, RealType &pot, 
-                     Vector3d &f1) {
-
+  void LJ::calcForce(InteractionData idat) {
+    
     if (!initialized_) initialize();
     
     RealType ros;
@@ -302,63 +251,42 @@ namespace OpenMD {
     RealType myDeriv = 0.0;
     RealType myDerivC = 0.0;
 
-    std::pair<AtomType*, AtomType*> key = std::make_pair(at1, at2);
+    std::pair<AtomType*, AtomType*> key = std::make_pair(idat.atype1, 
+                                                         idat.atype2);
     LJInteractionData mixer = MixingMap[key];
 
     RealType sigmai = mixer.sigmai;
     RealType epsilon = mixer.epsilon;
     
 
-    ros = rij * sigmai;
+    ros = idat.rij * sigmai;
 
     getLJfunc(ros, myPot, myDeriv);
 
     if (shiftedPot_) {
-      rcos = rcut * sigmai;
+      rcos = idat.rcut * sigmai;
       getLJfunc(rcos, myPotC, myDerivC);
       myDerivC = 0.0;
     } else if (LJ::shiftedFrc_) {
-      rcos = rcut * sigmai;
+      rcos = idat.rcut * sigmai;
       getLJfunc(rcos, myPotC, myDerivC);
-      myPotC = myPotC + myDerivC * (rij - rcut) * sigmai;
+      myPotC = myPotC + myDerivC * (idat.rij - idat.rcut) * sigmai;
     } else {
       myPotC = 0.0;
       myDerivC = 0.0;
     }
 
-    RealType pot_temp = vdwMult * epsilon * (myPot - myPotC);
-    vpair += pot_temp;
+    RealType pot_temp = idat.vdwMult * epsilon * (myPot - myPotC);
+    idat.vpair += pot_temp;
 
-    RealType dudr = sw * vdwMult * epsilon * (myDeriv - myDerivC)*sigmai;
+    RealType dudr = idat.sw * idat.vdwMult * epsilon * (myDeriv - 
+                                                        myDerivC)*sigmai;
     
-    pot += sw * pot_temp;
-    f1 = d * dudr / rij;
+    idat.pot += idat.sw * pot_temp;
+    idat.f1 = idat.d * dudr / idat.rij;
 
     return;
 
-  }
-
-  void LJ::do_lj_pair(int *atid1, int *atid2, RealType *d, RealType *rij, 
-                      RealType *r2, RealType *rcut, RealType *sw, 
-                      RealType *vdwMult,
-                      RealType *vpair, RealType *pot, RealType *f1) {
-
-    if (!initialized_) initialize();
-    
-    AtomType* atype1 = LJMap[*atid1];
-    AtomType* atype2 = LJMap[*atid2];
-    
-    Vector3d disp(d[0], d[1], d[2]);
-    Vector3d frc(f1[0], f1[1], f1[2]);
-    
-    calcForce(atype1, atype2, disp, *rij, *r2, *rcut, *sw, *vdwMult, *vpair, 
-              *pot, frc);
-      
-    f1[0] = frc.x();
-    f1[1] = frc.y();
-    f1[2] = frc.z();
-
-    return;    
   }
   
   void LJ::getLJfunc(RealType r, RealType &pot, RealType &deriv) {
@@ -377,35 +305,4 @@ namespace OpenMD {
   }
   
 
-  void LJ::setLJDefaultCutoff(RealType *thisRcut, int *sP, int *sF) {
-    shiftedPot_ = (bool)(*sP);
-    shiftedFrc_ = (bool)(*sF);
-  }
-}
-
-extern "C" {
-  
-#define fortranGetSigma FC_FUNC(getsigma, GETSIGMA)
-#define fortranGetEpsilon FC_FUNC(getepsilon, GETEPSILON)
-#define fortranSetLJCutoff FC_FUNC(setljdefaultcutoff, SETLJDEFAULTCUTOFF)
-#define fortranDoLJPair FC_FUNC(do_lj_pair, DO_LJ_PAIR)
-  
-  RealType fortranGetSigma(int* atid) {
-    return OpenMD::LJ::Instance()->getSigma(*atid);
-  }
-  RealType fortranGetEpsilon(int* atid) {  
-    return OpenMD::LJ::Instance()->getEpsilon(*atid);
-  }
-  void fortranSetLJCutoff(RealType *rcut, int *shiftedPot, int *shiftedFrc) {
-    return OpenMD::LJ::Instance()->setLJDefaultCutoff(rcut, shiftedPot, 
-                                                      shiftedFrc);
-  }
-  void fortranDoLJPair(int *atid1, int *atid2, RealType *d, RealType *rij, 
-                       RealType *r2, RealType *rcut, RealType *sw, 
-                       RealType *vdwMult, RealType* vpair, RealType* pot, 
-                       RealType *f1){
-    
-    return OpenMD::LJ::Instance()->do_lj_pair(atid1, atid2, d, rij, r2, rcut,
-                                              sw, vdwMult, vpair, pot, f1);
-  }
 }

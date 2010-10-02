@@ -42,6 +42,7 @@
 #ifndef NONBONDED_MORSE_HPP
 #define NONBONDED_MORSE_HPP
 
+#include "nonbonded/NonBondedInteraction.hpp"
 #include "types/AtomType.hpp"
 #include "UseTheForce/ForceField.hpp"
 #include "math/Vector3.hpp"
@@ -61,38 +62,24 @@ namespace OpenMD {
     MorseInteractionType interactionType;
   };
 
-  class Morse {
+  class Morse : public VanDerWaalsInteraction {
     
   public:    
-    static Morse* Instance();
-    static void setForceField(ForceField *ff) {forceField_ = ff;};
-    static void initialize();
-    static void addExplicitInteraction(AtomType* atype1, AtomType* atype2, RealType De, RealType Re, RealType beta, MorseInteractionType mit);
-    static void calcForce(AtomType* at1, AtomType* at2, const Vector3d d, const RealType rij, const RealType r2, const RealType rcut, const RealType sw, const RealType vdwMult, RealType &vpair, RealType &pot, Vector3d &f1);
-    
-    // Fortran support routines;
-    static void do_morse_pair(int *atid1, int *atid2, RealType *d, RealType *rij, RealType *r2, RealType *rcut, RealType *sw, RealType *vdwMult, RealType *vpair, RealType *pot, RealType *f1);
-    static void setMorseDefaultCutoff(RealType *thisRcut, int *sP, int *sF);
+    Morse();
+    void setForceField(ForceField *ff) {forceField_ = ff;};
+    void addExplicitInteraction(AtomType* atype1, AtomType* atype2, RealType De, RealType Re, RealType beta, MorseInteractionType mit);
+    virtual void calcForce(InteractionData idat);
+    virtual string getName() {return name_;}
 
   private:
-    virtual ~Morse() { }
-    // singleton pattern, prevent reconstruction
-    Morse() { }
-    Morse(Morse const &) {};
-    Morse& operator=(Morse const&) {};
-    static Morse* _instance;      
-
-    static bool initialized_;
-    // MorseMap will be used for providing access from Fortran.
-    // All of the C++ native classes should use AtomType*, but the
-    // fortran calls use int, so we need to look these up first before
-    // we can do anything else;
-    static map<int, AtomType*> MorseMap;
-    static map<pair<AtomType*, AtomType*>, MorseInteractionData> MixingMap;
-    static bool shiftedPot_;
-    static bool shiftedFrc_;
-    static ForceField* forceField_;    
-    static map<string, MorseInteractionType> stringToEnumMap_;
+    void initialize();
+    bool initialized_;
+    map<pair<AtomType*, AtomType*>, MorseInteractionData> MixingMap;
+    bool shiftedPot_;
+    bool shiftedFrc_;
+    ForceField* forceField_;    
+    map<string, MorseInteractionType> stringToEnumMap_;
+    string name_;
 
   };
 }

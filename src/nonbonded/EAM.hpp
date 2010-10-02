@@ -42,6 +42,7 @@
 #ifndef NONBONDED_EAM_HPP
 #define NONBONDED_EAM_HPP
 
+#include "nonbonded/NonBondedInteraction.hpp"
 #include "types/AtomType.hpp"
 #include "UseTheForce/ForceField.hpp"
 #include "math/Vector3.hpp"
@@ -67,50 +68,35 @@ namespace OpenMD {
     eamUnknown
   };
   
-  class EAM {
+  class EAM : public MetallicInteraction {
     
   public:    
-    static EAM* Instance();
-    static void setForceField(ForceField *ff) {forceField_ = ff;};
-    static void initialize();
-    static void addType(AtomType* atomType);
-    static void addExplicitInteraction(AtomType* atype1, AtomType* atype2, RealType dr, int nr, std::vector<RealType> phiAB);
-    
-    static void calcDensity(AtomType* at1, AtomType* at2, const RealType rij, RealType &rho_i_at_j, RealType &rho_j_at_i);
-
-    static void calcFunctional(AtomType* at1, const RealType rho, RealType &frho, RealType &dfrhodrho);
-
-    static void calcForce(AtomType* at1, AtomType* at2, const Vector3d d, const RealType rij, const RealType r2, const RealType sw, RealType &vpair, RealType &pot, Vector3d &f1, const RealType rho1, const RealType rho2, const RealType dfrho1, const RealType dfrho2, RealType &fshift1, RealType &fshift2);
-                          
-    // Fortran support routines; 
-    static void calc_eam_prepair_rho(int *atid1, int *atid2, RealType *rij,  RealType* rho_i_at_j, RealType* rho_j_at_i);
-    static void calc_eam_preforce_Frho(int *atid1, RealType* rho, RealType* frho, RealType* dfrhodrho);
-    static void do_eam_pair(int *atid1, int *atid2, RealType *d, RealType *rij, RealType *r2,  RealType *sw, RealType *vpair, RealType *pot, RealType *f1, RealType* rho1, RealType* rho2, RealType* dfrho1, RealType* dfrho2, RealType* fshift1, RealType* fshift2);
-    static void setCutoffEAM(RealType *thisRcut);
-    static RealType getEAMcut(int *atid1);
+    EAM();
+    void setForceField(ForceField *ff) {forceField_ = ff;};
+    void addType(AtomType* atomType);
+    void addExplicitInteraction(AtomType* atype1, AtomType* atype2, RealType dr, int nr, std::vector<RealType> phiAB);
+    void calcDensity(DensityData ddat);
+    void calcFunctional(FunctionalData fdat);
+    void calcForce(InteractionData idat);
+    virtual string getName() { return name_; }
 
   private:
-    virtual ~EAM() { }
-    // singleton pattern, prevent reconstruction
-    EAM() { }
-    EAM(EAM const &) {};
-    EAM& operator=(EAM const&) {};
-    static EAM* _instance;
-  
-    static EAMParam getEAMParam(AtomType* atomType);
-    static CubicSpline* getZ(AtomType* atomType);
-    static CubicSpline* getRho(AtomType* atomType);
-    static CubicSpline* getF(AtomType* atomType);
-    static RealType getRcut(AtomType* atomType);
-    static CubicSpline* getPhi(AtomType* atomType1, AtomType* atomType2);
+    void initialize();  
+    EAMParam getEAMParam(AtomType* atomType);
+    CubicSpline* getZ(AtomType* atomType);
+    CubicSpline* getRho(AtomType* atomType);
+    CubicSpline* getF(AtomType* atomType);
+    RealType getRcut(AtomType* atomType);
+    CubicSpline* getPhi(AtomType* atomType1, AtomType* atomType2);
     
-    static bool initialized_;
-    static std::map<int, AtomType*> EAMlist;
-    static std::map<AtomType*, EAMAtomData> EAMMap;
-    static std::map<std::pair<AtomType*, AtomType*>, EAMInteractionData> MixingMap;
-    static ForceField* forceField_;
-    static RealType eamRcut_;
-    static EAMMixingMethod mixMeth_;    
+    bool initialized_;
+    std::map<int, AtomType*> EAMlist;
+    std::map<AtomType*, EAMAtomData> EAMMap;
+    std::map<std::pair<AtomType*, AtomType*>, EAMInteractionData> MixingMap;
+    ForceField* forceField_;
+    RealType eamRcut_;
+    EAMMixingMethod mixMeth_;    
+    string name_;
     
   };
 }

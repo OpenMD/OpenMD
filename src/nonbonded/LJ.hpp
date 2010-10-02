@@ -42,10 +42,12 @@
 #ifndef NONBONDED_LJ_HPP
 #define NONBONDED_LJ_HPP
 
+#include "nonbonded/NonBondedInteraction.hpp"
 #include "types/AtomType.hpp"
 #include "UseTheForce/ForceField.hpp"
 #include "math/Vector3.hpp"
 
+using namespace std;
 namespace OpenMD {
 
   struct LJInteractionData {
@@ -55,49 +57,34 @@ namespace OpenMD {
     bool explicitlySet;
   };
 
-  class LJ {
+  class LJ : public VanDerWaalsInteraction {
     
   public:    
-    static LJ* Instance();
-    static void setForceField(ForceField *ff) {forceField_ = ff;};
-    static void initialize();
-    static void addType(AtomType* atomType);
-    static void addExplicitInteraction(AtomType* atype1, AtomType* atype2, RealType sigma, RealType epsilon);
-    static void calcForce(AtomType* at1, AtomType* at2, const Vector3d d, const RealType rij, const RealType r2, const RealType rcut, const RealType sw, const RealType vdwMult, RealType &vpair, RealType &pot, Vector3d &f1);
-    static RealType getSigma(AtomType* atomType);
-    static RealType getEpsilon(AtomType* atomType);
-    
-    // Fortran support routines;
-    static RealType getSigma(int atid);
-    static RealType getEpsilon(int atid);
-    static void do_lj_pair(int *atid1, int *atid2, RealType *d, RealType *rij, RealType *r2, RealType *rcut, RealType *sw, RealType *vdwMult, RealType *vpair, RealType *pot, RealType *f1);
-    static void setLJDefaultCutoff(RealType *thisRcut, int *sP, int *sF);
-
+    LJ();
+    void setForceField(ForceField *ff) {forceField_ = ff;};
+    void addType(AtomType* atomType);
+    void addExplicitInteraction(AtomType* atype1, AtomType* atype2, RealType sigma, RealType epsilon);
+    RealType getSigma(AtomType* atomType);
+    RealType getEpsilon(AtomType* atomType);
+    virtual void calcForce(InteractionData idat);
+    virtual string getName() {return name_;}
+            
   private:
-    virtual ~LJ() { }
-    // singleton pattern, prevent reconstruction
-    LJ() { }
-    LJ(LJ const &) {};
-    LJ& operator=(LJ const&) {};
-    static LJ* _instance;
-  
-    static LJParam  getLJParam(AtomType* atomType);
-    static RealType getSigma(AtomType* atomType1, AtomType* atomType2);
-    static RealType getEpsilon(AtomType* atomType1, AtomType* atomType2);
+    void initialize();
+    LJParam  getLJParam(AtomType* atomType);
+    RealType getSigma(AtomType* atomType1, AtomType* atomType2);
+    RealType getEpsilon(AtomType* atomType1, AtomType* atomType2);
     
-    static void getLJfunc(const RealType r, RealType &pot, RealType &deriv);
+    void getLJfunc(const RealType r, RealType &pot, RealType &deriv);
+    
+    bool initialized_;
 
-    static bool initialized_;
-    // LJMap will be used for providing access from Fortran.
-    // All of the C++ native classes should use AtomType*, but the
-    // fortran calls use int, so we need to look these up first before
-    // we can do anything else;
-    static std::map<int, AtomType*> LJMap;
-    static std::map<std::pair<AtomType*, AtomType*>, LJInteractionData> MixingMap;
-    static bool shiftedPot_;
-    static bool shiftedFrc_;
-    static ForceField* forceField_;
-    
+    map<int, AtomType*> LJMap;
+    map<pair<AtomType*, AtomType*>, LJInteractionData> MixingMap;
+    bool shiftedPot_;
+    bool shiftedFrc_;
+    ForceField* forceField_;
+    string name_;
   };
 }
 

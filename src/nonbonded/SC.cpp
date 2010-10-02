@@ -49,22 +49,9 @@
 
 namespace OpenMD {
 
-  bool SC::initialized_ = false;
-  RealType SC::scRcut_ = 0.0;
-  int SC::np_ = 3000;
-  ForceField* SC::forceField_ = NULL;
-  map<int, AtomType*> SC::SClist;
-  map<AtomType*, SCAtomData> SC::SCMap;
-  map<pair<AtomType*, AtomType*>, SCInteractionData> SC::MixingMap;
-  
-  SC* SC::_instance = NULL;
 
-  SC* SC::Instance() {
-    if (!_instance) {
-      _instance = new SC();
-    }
-    return _instance;
-  }
+  SC::SC() : name_("SC"), initialized_(false), forceField_(NULL), 
+             scRcut_(0.0), np_(3000) {}
   
   SCParam SC::getSCParam(AtomType* atomType) {
     
@@ -315,191 +302,87 @@ namespace OpenMD {
     return;
   }
 
-  void SC::calcDensity(AtomType* at1, AtomType* at2, const RealType rij, 
-                        RealType &rho_i_at_j, RealType &rho_j_at_i) {
+  void SC::calcDensity(DensityData ddat) {
     
     if (!initialized_) initialize();
     
-    SCInteractionData mixer = MixingMap[make_pair(at1, at2)];
-
-    rho_i_at_j = mixer.phi->getValueAt(rij);
-    rho_j_at_i = rho_i_at_j;
-
-    return;
-  }
-
-  void SC::calcFunctional(AtomType* at1, RealType rho, RealType &frho,
-                          RealType &dfrhodrho) {
-
-    if (!initialized_) initialize();
-
-    SCAtomData data1 = SCMap[at1];
-    
-    frho = - data1.c * data1.epsilon * sqrt(rho);
-    dfrhodrho = 0.5 * frho / rho;
-    
-    return;
-  }
-
- 
-  void SC::calcForce(AtomType* at1, AtomType* at2, Vector3d d, 
-                     RealType rij, RealType r2, RealType sw, 
-                     RealType &vpair, RealType &pot, Vector3d &f1,
-                     RealType rho_i, RealType rho_j, 
-                     RealType dfrhodrho_i, RealType dfrhodrho_j, 
-                     RealType &fshift_i, RealType &fshift_j) {
-    
-    if (!initialized_) initialize();
-    
-    SCAtomData data1 = SCMap[at1];
-    SCAtomData data2 = SCMap[at1];
-
-    SCInteractionData mixer = MixingMap[make_pair(at1, at2)];
+    SCInteractionData mixer = MixingMap[make_pair(ddat.atype1, ddat.atype2)];
 
     RealType rcij = mixer.rCut;
-    RealType vcij = mixer.vCut;
 
-    pair<RealType, RealType> res;
+    if (ddat.rij < rcij) {
+      ddat.rho_i_at_j = mixer.phi->getValueAt(ddat.rij);
+      ddat.rho_j_at_i = ddat.rho_i_at_j;
+    } else {
+      ddat.rho_i_at_j = 0.0;
+      ddat.rho_j_at_i = 0.0;
+    }
 
-    res = mixer.phi->getValueAndDerivativeAt(rij);
-    RealType rhtmp = res.first;
-    RealType drhodr = res.second;
-
-    res = mixer.V->getValueAndDerivativeAt(rij);
-    RealType vptmp = res.first;
-    RealType dvpdr = res.second;
-
-    RealType pot_temp = vptmp - vcij;
-    vpair += pot_temp;
-
-    RealType dudr = drhodr * (dfrhodrho_i + dfrhodrho_j) + dvpdr;
-
-    f1 += d * dudr / rij;
-        
-    // particle_pot is the difference between the full potential 
-    // and the full potential without the presence of a particular
-    // particle (atom1).
-    //
-    // This reduces the density at other particle locations, so
-    // we need to recompute the density at atom2 assuming atom1
-    // didn't contribute.  This then requires recomputing the
-    // density functional for atom2 as well.
-    //
-    // Most of the particle_pot heavy lifting comes from the
-    // pair interaction, and will be handled by vpair.
-    
-    fshift_i = - data1.c * data1.epsilon * sqrt(rho_i - rhtmp);
-    fshift_j = - data2.c * data2.epsilon * sqrt(rho_j - rhtmp);
-    
-    pot += pot_temp;
-
-    return;    
+    return;
   }
 
+  void SC::calcFunctional(FunctionalData fdat) {
 
-  void SC::calc_sc_prepair_rho(int *atid1, int *atid2, RealType *rij,
-                               RealType* rho_i_at_j, RealType* rho_j_at_i){
-    
     if (!initialized_) initialize();
+
+    SCAtomData data1 = SCMap[fdat.atype];
     
-    AtomType* atype1 = SClist[*atid1];
-    AtomType* atype2 = SClist[*atid2];
+    fdat.frho = - data1.c * data1.epsilon * sqrt(fdat.rho);
+    fdat.dfrhodrho = 0.5 * fdat.frho / fdat.rho;
     
-    calcDensity(atype1, atype2, *rij, *rho_i_at_j, *rho_j_at_i);
-    
-    return;    
+    return;
   }
   
-  void SC::calc_sc_preforce_Frho(int *atid1, RealType *rho, RealType *frho,
-                                 RealType *dfrhodrho) {
+ 
+  void SC::calcForce(InteractionData idat) {
     
     if (!initialized_) initialize();
     
-    AtomType* atype1 = SClist[*atid1];   
+    SCAtomData data1 = SCMap[idat.atype1];
+    SCAtomData data2 = SCMap[idat.atype2];
 
-    calcFunctional(atype1, *rho, *frho, *dfrhodrho);
-    
-    return;    
-  }
-  
-  RealType SC::getSCcut(int *atid1) {
+    SCInteractionData mixer = MixingMap[make_pair(idat.atype1, idat.atype2)];
 
-    if (!initialized_) initialize();
-    
-    AtomType* atype1 = SClist[*atid1];   
-       
-    return 2.0 * getAlpha(atype1);
-  }
+    RealType rcij = mixer.rCut;
 
-  void SC::do_sc_pair(int *atid1, int *atid2, RealType *d, RealType *rij, 
-                        RealType *r2, RealType *sw, RealType *vpair, 
-                        RealType *pot, RealType *f1, RealType *rho1,
-                        RealType *rho2, RealType *dfrho1, RealType *dfrho2,
-                        RealType *fshift1, RealType *fshift2) {
-
-    if (!initialized_) initialize();
-    
-    AtomType* atype1 = SClist[*atid1];
-    AtomType* atype2 = SClist[*atid2];
-    
-    Vector3d disp(d[0], d[1], d[2]);
-    Vector3d frc(f1[0], f1[1], f1[2]);
-    
-    calcForce(atype1, atype2, disp, *rij, *r2, *sw, *vpair,  *pot, frc,
-              *rho1, *rho2, *dfrho1, *dfrho2, *fshift1, *fshift2);
+    if (idat.rij < rcij) {
+      RealType vcij = mixer.vCut;
       
-    f1[0] = frc.x();
-    f1[1] = frc.y();
-    f1[2] = frc.z();
-
+      pair<RealType, RealType> res;
+      
+      res = mixer.phi->getValueAndDerivativeAt(idat.rij);
+      RealType rhtmp = res.first;
+      RealType drhodr = res.second;
+      
+      res = mixer.V->getValueAndDerivativeAt(idat.rij);
+      RealType vptmp = res.first;
+      RealType dvpdr = res.second;
+      
+      RealType pot_temp = vptmp - vcij;
+      idat.vpair += pot_temp;
+      
+      RealType dudr = drhodr * (idat.dfrho1 + idat.dfrho2) + dvpdr;
+      
+      idat.f1 += idat.d * dudr / idat.rij;
+        
+      // particle_pot is the difference between the full potential 
+      // and the full potential without the presence of a particular
+      // particle (atom1).
+      //
+      // This reduces the density at other particle locations, so
+      // we need to recompute the density at atom2 assuming atom1
+      // didn't contribute.  This then requires recomputing the
+      // density functional for atom2 as well.
+      //
+      // Most of the particle_pot heavy lifting comes from the
+      // pair interaction, and will be handled by vpair.
+      
+      idat.fshift1 = - data1.c * data1.epsilon * sqrt(idat.rho1 - rhtmp);
+      idat.fshift2 = - data2.c * data2.epsilon * sqrt(idat.rho2 - rhtmp);
+      
+      idat.pot += pot_temp;
+    }
+      
     return;    
   }
-  
-  void SC::setCutoffSC(RealType *thisRcut) {
-    scRcut_ = *thisRcut;
-  }
-}
-
-extern "C" {
-  
-#define fortranCalcDensity FC_FUNC(calc_sc_prepair_rho, CALC_SC_PREPAIR_RHO)
-#define fortranCalcFunctional FC_FUNC(calc_sc_preforce_frho, CALC_SC_PREFORCE_FRHO)
-#define fortranCalcForce FC_FUNC(do_sc_pair, DO_SC_PAIR)
-#define fortranSetCutoffSC FC_FUNC(setcutoffsc, SETCUTOFFSC)
-#define fortranGetSCcut FC_FUNC(getsccut, GETSCCUT)
-  
-  
-  void fortranCalcDensity(int *atid1, int *atid2, RealType *rij, 
-                          RealType *rho_i_at_j, RealType *rho_j_at_i) {
-    
-    return OpenMD::SC::Instance()->calc_sc_prepair_rho(atid1, atid2, rij, 
-                                                       rho_i_at_j,  
-                                                       rho_j_at_i);
-  }
-  void fortranCalcFunctional(int *atid1, RealType *rho, RealType *frho,
-                             RealType *dfrhodrho) {  
-    
-    return OpenMD::SC::Instance()->calc_sc_preforce_Frho(atid1, rho, frho,
-                                                         dfrhodrho);
-    
-  }
-  void fortranSetCutoffSC(RealType *rcut) {
-    return OpenMD::SC::Instance()->setCutoffSC(rcut);
-  }
-  void fortranCalcForce(int *atid1, int *atid2, RealType *d, RealType *rij, 
-                        RealType *r2, RealType *sw, RealType *vpair, 
-                        RealType *pot, RealType *f1, RealType *rho1,
-                        RealType *rho2, RealType *dfrho1, RealType *dfrho2,
-                        RealType *fshift1, RealType *fshift2){
-    
-    return OpenMD::SC::Instance()->do_sc_pair(atid1, atid2, d, rij, 
-                                              r2, sw, vpair, 
-                                              pot, f1, rho1,
-                                              rho2, dfrho1, dfrho2,
-                                              fshift1,  fshift2);
-  }
-  RealType fortranGetSCcut(int* atid) {
-    return OpenMD::SC::Instance()->getSCcut(atid);
-  }
-  
 }

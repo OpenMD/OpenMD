@@ -51,23 +51,9 @@ using namespace std;
 
 namespace OpenMD {
 
-  bool Morse::initialized_ = false;
-  bool Morse::shiftedPot_ = false;
-  bool Morse::shiftedFrc_ = false;
-  ForceField* Morse::forceField_ = NULL;
-  map<int, AtomType*> Morse::MorseMap;
-  map<pair<AtomType*, AtomType*>, MorseInteractionData> Morse::MixingMap;
-  map<string, MorseInteractionType> Morse::stringToEnumMap_;
+  Morse::Morse() : name_("Morse"), initialized_(false), forceField_(NULL), 
+                   shiftedPot_(false), shiftedFrc_(false) {}
   
-  Morse* Morse::_instance = NULL;
-
-  Morse* Morse::Instance() {
-    if (!_instance) {
-      _instance = new Morse();
-    }
-    return _instance;
-  }
-
   void Morse::initialize() {    
 
     stringToEnumMap_["shiftedMorse"] = shiftedMorse;
@@ -140,12 +126,6 @@ namespace OpenMD {
                                      RealType De, RealType Re, RealType beta, 
                                      MorseInteractionType mit) {
 
-    AtomTypeProperties atp = atype1->getATP();    
-    MorseMap.insert( pair<int, AtomType*>(atp.ident, atype1) );
-
-    atp = atype2->getATP();    
-    MorseMap.insert( pair<int, AtomType*>(atp.ident, atype2) );
-
     MorseInteractionData mixer;
     mixer.De = De;
     mixer.Re = Re;
@@ -162,10 +142,7 @@ namespace OpenMD {
     }    
   }
   
-  void Morse::calcForce(AtomType* at1, AtomType* at2, Vector3d d, 
-                        RealType r, RealType r2, RealType rcut, RealType sw, 
-                        RealType vdwMult, RealType &vpair, RealType &pot, 
-                        Vector3d &f1) {
+  void Morse::calcForce(InteractionData idat) {
 
     if (!initialized_) initialize();
     
@@ -174,7 +151,7 @@ namespace OpenMD {
     RealType myDeriv = 0.0;
     RealType myDerivC = 0.0;
 
-    pair<AtomType*, AtomType*> key = make_pair(at1, at2);
+    pair<AtomType*, AtomType*> key = make_pair(idat.atype1, idat.atype2);
     MorseInteractionData mixer = MixingMap[key];
 
     RealType De = mixer.De;
@@ -184,7 +161,7 @@ namespace OpenMD {
    
     // V(r) = D_e exp(-a(r-re)(exp(-a(r-re))-2)
     
-    RealType expt     = -beta*(r - Re);
+    RealType expt     = -beta*(idat.rij - Re);
     RealType expfnc   = exp(expt);
     RealType expfnc2  = expfnc*expfnc;
 
@@ -193,7 +170,7 @@ namespace OpenMD {
     RealType expfnc2C = 0.0;
 
     if (Morse::shiftedPot_ || Morse::shiftedFrc_) {
-      exptC     = -beta*(rcut - Re);
+      exptC     = -beta*(idat.rcut - Re);
       expfncC   = exp(exptC);
       expfnc2C  = expfncC*expfncC;
     }
@@ -211,7 +188,7 @@ namespace OpenMD {
       } else if (Morse::shiftedFrc_) {
         myPotC = De * (expfnc2C - 2.0 * expfncC);
         myDerivC  = 2.0 * De * beta * (expfnc2C - expfnc2C);
-        myPotC += myDerivC * (r - rcut);
+        myPotC += myDerivC * (idat.rij - idat.rcut);
       } else {
         myPotC = 0.0;
         myDerivC = 0.0;
@@ -230,7 +207,7 @@ namespace OpenMD {
       } else if (Morse::shiftedFrc_) {
         myPotC = De * expfnc2C;
         myDerivC = -2.0 * De * beta * expfnc2C;
-        myPotC += myDerivC * (r - rcut);
+        myPotC += myDerivC * (idat.rij - idat.rcut);
       } else {
         myPotC = 0.0;
         myDerivC = 0.0;
@@ -240,63 +217,17 @@ namespace OpenMD {
     }
     }
 
-    RealType pot_temp = vdwMult * (myPot - myPotC);
-    vpair += pot_temp;
+    RealType pot_temp = idat.vdwMult * (myPot - myPotC);
+    idat.vpair += pot_temp;
 
-    RealType dudr = sw * vdwMult * (myDeriv - myDerivC);
+    RealType dudr = idat.sw * idat.vdwMult * (myDeriv - myDerivC);
     
-    pot += sw * pot_temp;
-    f1 = d * dudr / r;
+    idat.pot += idat.sw * pot_temp;
+    idat.f1 = idat.d * dudr / idat.rij;
 
     return;
 
   }
-
-  void Morse::do_morse_pair(int *atid1, int *atid2, RealType *d, 
-                            RealType *rij, RealType *r2, RealType *rcut, 
-                            RealType *sw, RealType *vdwMult,
-                            RealType *vpair, RealType *pot, RealType *f1) {
-
-    if (!initialized_) initialize();
     
-    AtomType* atype1 = MorseMap[*atid1];
-    AtomType* atype2 = MorseMap[*atid2];
-    
-    Vector3d disp(d[0], d[1], d[2]);
-    Vector3d frc(f1[0], f1[1], f1[2]);
-    
-    calcForce(atype1, atype2, disp, *rij, *r2, *rcut, *sw, *vdwMult, *vpair, 
-              *pot, frc);
-      
-    f1[0] = frc.x();
-    f1[1] = frc.y();
-    f1[2] = frc.z();
-
-    return;    
-  }
-    
-  void Morse::setMorseDefaultCutoff(RealType *thisRcut, int *sP, int *sF) {
-    shiftedPot_ = (bool)(*sP);
-    shiftedFrc_ = (bool)(*sF);
-  }
 }
 
-extern "C" {
-  
-#define fortranSetMorseCutoff FC_FUNC(setmorsedefaultcutoff, SETMORSEDEFAULTCUTOFF)
-#define fortranDoMorsePair FC_FUNC(do_morse_pair, DO_MORSE_PAIR)
-  
-  void fortranSetMorseCutoff(RealType *rcut, int *shiftedPot, int *shiftedFrc) {
-    return OpenMD::Morse::Instance()->setMorseDefaultCutoff(rcut, shiftedPot, 
-                                                            shiftedFrc);
-  }
-  void fortranDoMorsePair(int *atid1, int *atid2, RealType *d, RealType *rij, 
-                          RealType *r2, RealType *rcut, RealType *sw, 
-                          RealType *vdwMult, RealType* vpair, RealType* pot, 
-                          RealType *f1){
-    
-    return OpenMD::Morse::Instance()->do_morse_pair(atid1, atid2, d, rij, r2, 
-                                                    rcut, sw, vdwMult, vpair, 
-                                                    pot, f1);
-  }
-}

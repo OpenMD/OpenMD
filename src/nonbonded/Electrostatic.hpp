@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2009 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
@@ -39,70 +39,118 @@
  * [4]  Vardeman & Gezelter, in progress (2009).                        
  */
  
-#ifndef NONBONDED_SC_HPP
-#define NONBONDED_SC_HPP
+#ifndef NONBONDED_ELECTROSTATIC_HPP
+#define NONBONDED_ELECTROSTATIC_HPP
 
 #include "nonbonded/NonBondedInteraction.hpp"
+#include "types/AtomType.hpp"
 #include "UseTheForce/ForceField.hpp"
+#include "math/SquareMatrix3.hpp"
 #include "math/CubicSpline.hpp"
 
 namespace OpenMD {
 
-  struct SCAtomData {
-    RealType c;
-    RealType m;
-    RealType n;
-    RealType alpha;
-    RealType epsilon;
-    RealType rCut;
+  struct ElectrostaticAtomData {
+    bool is_Charge;
+    bool is_Dipole;
+    bool is_SplitDipole;
+    bool is_Quadrupole;
+    RealType charge;
+    RealType dipole_moment;
+    RealType split_dipole_distance;
+    Vector3d quadrupole_moments;
   };
   
-  struct SCInteractionData {
-    RealType alpha;
-    RealType epsilon;
-    RealType m;
-    RealType n;
-    RealType rCut;
-    RealType vCut;
-    CubicSpline* V;
-    CubicSpline* phi;
-    bool explicitlySet;
+  enum ElectrostaticSummationMethod{
+    NONE,
+    SWITCHING_FUNCTION,
+    SHIFTED_POTENTIAL,
+    SHIFTED_FORCE,
+    REACTION_FIELD,
+    EWALD_FULL,  /**< Ewald methods aren't supported yet */
+    EWALD_PME,   /**< Ewald methods aren't supported yet */
+    EWALD_SPME   /**< Ewald methods aren't supported yet */
   };
-    
-  class SC : public MetallicInteraction {
+
+  enum ElectrostaticScreeningMethod{
+    UNDAMPED,
+    DAMPED
+  };
+  
+  class Electrostatic : public ElectrostaticInteraction {
     
   public:    
-    SC();
+    Electrostatic();
     void setForceField(ForceField *ff) {forceField_ = ff;};
     void addType(AtomType* atomType);
-    void addExplicitInteraction(AtomType* atype1, AtomType* atype2, RealType epsilon, RealType m, RealType n, RealType alpha);
-    void calcDensity(DensityData ddat);
-    void calcFunctional(FunctionalData fdat);
     void calcForce(InteractionData idat);
+    void calcSkipCorrection(SkipCorrectionData skdat);
+    void calcSelfCorrection(SelfCorrectionData scdat);
     virtual string getName() {return name_;}
-   
+
+    void setElectrostaticCutoffRadius( RealType theECR, RealType theRSW );
+    void setElectrostaticSummationMethod( ElectrostaticSummationMethod esm );
+    void setElectrostaticScreeningMethod( ElectrostaticScreeningMethod sm );
+    void setDampingAlpha( RealType alpha );
+    void setReactionFieldDielectric( RealType dielectric );
+
   private:
     void initialize();
-    SCParam getSCParam(AtomType* atomType);
-    RealType getC(AtomType* atomType);
-    RealType getM(AtomType* atomType);
-    RealType getN(AtomType* atomType);
-    RealType getAlpha(AtomType* atomType);
-    RealType getEpsilon(AtomType* atomType);
-    RealType getAlpha(AtomType* atomType1, AtomType* atomType2);
-    RealType getEpsilon(AtomType* atomType1, AtomType* atomType2);
-    RealType getM(AtomType* atomType1, AtomType* atomType2);
-    RealType getN(AtomType* atomType1, AtomType* atomType2);
-    
     string name_;
     bool initialized_;
-    map<int, AtomType*> SClist;
-    map<AtomType*, SCAtomData> SCMap;
-    map<pair<AtomType*, AtomType*>, SCInteractionData> MixingMap;
+    bool haveDefaultCutoff_;
+    bool haveDampingAlpha_;
+    bool haveDielectric_;
+    bool haveElectroSpline_;
+    std::map<int, AtomType*> ElectrostaticList;
+    std::map<AtomType*, ElectrostaticAtomData> ElectrostaticMap;
     ForceField* forceField_;
-    RealType scRcut_;
+    RealType defaultCutoff_;
+    RealType defaultCutoff2_;
+    RealType pre11_;
+    RealType pre12_;
+    RealType pre22_;
+    RealType pre14_;
+    RealType chargeToC_;
+    RealType angstromToM_;
+    RealType debyeToCm_;
     int np_;
-    
+    ElectrostaticSummationMethod summationMethod_;    
+    ElectrostaticScreeningMethod screeningMethod_;
+    RealType dampingAlpha_;
+    RealType alpha2_;
+    RealType alpha4_;
+    RealType alpha6_;
+    RealType alpha8_;
+    RealType dielectric_;
+    RealType constEXP_;
+    RealType rcuti_;
+    RealType rcuti2_;
+    RealType rcuti3_;
+    RealType rcuti4_;
+    RealType alphaPi_;
+    RealType invRootPi_;
+    RealType rrf_;
+    RealType rt_;
+    RealType rrfsq_;
+    RealType preRF_;
+    RealType preRF2_;
+    RealType erfcVal_;
+    RealType derfcVal_;
+    CubicSpline* erfcSpline_;
+    RealType c1_;
+    RealType c2_;
+    RealType c3_;
+    RealType c4_;
+    RealType c5_;
+    RealType c6_;
+    RealType c1c_;
+    RealType c2c_;
+    RealType c3c_;
+    RealType c4c_;
+    RealType c5c_;
+    RealType c6c_;
+    RealType one_third_;    
   };
 }
 

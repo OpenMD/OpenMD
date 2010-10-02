@@ -50,22 +50,14 @@
 using namespace std;
 namespace OpenMD {
   
-  bool SHAPES::initialized_ = false;
-  int SHAPES::lMax_ = 64;
-  int SHAPES::mMax_ = 64;
-  ForceField* SHAPES::forceField_ = NULL;
-  map<int, AtomType*> SHAPES::ShapesMap;
-  map<pair<AtomType*, AtomType*>, SHAPESInteractionData> SHAPES::MixingMap;
-  
-  SHAPES* SHAPES::_instance = NULL;
 
-  SHAPES* SHAPES::Instance() {
-    if (!_instance) {
-      _instance = new SHAPES();
-    }
-    return _instance;
+  SHAPES::SHAPES() {
+    initialized_ = false;
+    lMax_ = 64;
+    mMax_ = 64;
+    forceField_ = NULL;
   }
-
+  
   void SHAPES::initialize() {    
     
     ForceFieldOptions& fopts = forceField_->getForceFieldOptions();
@@ -75,21 +67,21 @@ namespace OpenMD {
 
     // SHAPES handles all of the SHAPES-SHAPES interactions as well as
     // SHAPES-LJ cross interactions:
-
+    
     for (at = atomTypes->beginType(i); at != NULL;
          at = atomTypes->nextType(i)) {
       
       if (at->isShape() || at->isLennardJones())
         addType(at);
     }
-   
+    
     initialized_ = true;
   }
-      
+  
   void SHAPES::addType(AtomType* atomType){
     // add it to the map:
     AtomTypeProperties atp = atomType->getATP();    
-
+    
     pair<map<int,AtomType*>::iterator,bool> ret;    
     ret = ShapesMap.insert( pair<int, AtomType*>(atp.ident, atomType) );
     if (ret.second == false) {
@@ -111,20 +103,20 @@ namespace OpenMD {
         simError();
       } 
       ShapesMap.insert( pair<int, ShapeAtomType*>(atp.ident, sAtomType) );
-
+      
     } else if (atomType->isLennardJones()) {
-      d1 = LJ::Instance()->getSigma(atomType) / sqrt(2.0);
-      e1 = LJ::Instance()->getEpsilon(atomType);
+      d1 = getLJSigma(atomType) / sqrt(2.0);
+      e1 = getLJEpsilon(atomType);
     } else {
       sprintf( painCave.errMsg,
                "SHAPES::addType was passed an atomType (%s) that does not\n"
-               "\tappear to be a Gay-Berne or Lennard-Jones atom.\n",
+               "\tappear to be a SHAPES or Lennard-Jones atom.\n",
                atomType->getName().c_str());
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal = 1;
       simError();
     }
-      
+    
 
     // Now, iterate over all known types and add to the mixing map:
     
@@ -143,8 +135,8 @@ namespace OpenMD {
         er2 = gb2.SHAPES_eps_ratio;
         dw2 = gb2.SHAPES_dw;
       } else if (atype2->isLennardJones()) {
-        d2 = LJ::Instance()->getSigma(atype2) / sqrt(2.0);
-        e2 = LJ::Instance()->getEpsilon(atype2);
+        d2 = getLJSigma(atype2) / sqrt(2.0);
+        e2 = getLJEpsilon(atype2);
         l2 = d2;
         er2 = 1.0;
         dw2 = 1.0;
@@ -191,6 +183,51 @@ namespace OpenMD {
     }      
   }
   
+
+  LJParam SHAPES::getLJParam(AtomType* atomType) {
+    
+    // Do sanity checking on the AtomType we were passed before
+    // building any data structures:
+    if (!atomType->isLennardJones()) {
+      sprintf( painCave.errMsg,
+               "SHAPES::getLJParam was passed an atomType (%s) that does not\n"
+               "\tappear to be a Lennard-Jones atom.\n",
+               atomType->getName().c_str());
+      painCave.severity = OPENMD_ERROR;
+      painCave.isFatal = 1;
+      simError();
+    }
+    
+    GenericData* data = atomType->getPropertyByName("LennardJones");
+    if (data == NULL) {
+      sprintf( painCave.errMsg, "SHAPES::getLJParam could not find Lennard-Jones\n"
+               "\tparameters for atomType %s.\n", atomType->getName().c_str());
+      painCave.severity = OPENMD_ERROR;
+      painCave.isFatal = 1;
+      simError(); 
+    }
+    
+    LJParamGenericData* ljData = dynamic_cast<LJParamGenericData*>(data);
+    if (ljData == NULL) {
+      sprintf( painCave.errMsg,
+               "SHAPES::getLJParam could not convert GenericData to LJParam for\n"
+               "\tatom type %s\n", atomType->getName().c_str());
+      painCave.severity = OPENMD_ERROR;
+      painCave.isFatal = 1;
+      simError();          
+    }
+    
+    return ljData->getData();
+  }
+  
+  RealType SHAPES::getLJEpsilon(AtomType* atomType) {    
+    LJParam ljParam = getLJParam(atomType);
+    return ljParam.epsilon;
+  }
+  RealType SHAPES::getLJSigma(AtomType* atomType) {    
+    LJParam ljParam = getLJParam(atomType);
+    return ljParam.sigma;
+  }
 
   RealType SHAPES::getGayBerneCut(int atid) { 
     if (!initialized_) initialize();

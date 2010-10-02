@@ -42,6 +42,7 @@
 #ifndef NONBONDED_GB_HPP
 #define NONBONDED_GB_HPP
 
+#include "nonbonded/NonBondedInteraction.hpp"
 #include "types/DirectionalAtomType.hpp"
 #include "UseTheForce/ForceField.hpp"
 #include "math/SquareMatrix3.hpp"
@@ -61,41 +62,34 @@ namespace OpenMD {
     RealType xpapi2;
   };
 
-  class GB {
+  class GB : public VanDerWaalsInteraction {
     
   public:    
-    static GB* Instance();
-    static void setForceField(ForceField *ff) {forceField_ = ff;};
-    static void initialize();
-    static void addType(AtomType* atomType);
-
-    static void calcForce(AtomType* at1, AtomType* at2, const Vector3d d, const RealType rij, const RealType r2, const RealType sw, const RealType vdwMult, RealType &vpair, RealType &pot, const RotMat3x3d A1, const RotMat3x3d A2, Vector3d &f1, Vector3d &t1, Vector3d &t2);
-
-    // Fortran support routines;
-    static RealType getGayBerneCut(int atid);
-    static void do_gb_pair(int *atid1, int *atid2, RealType *d, RealType *rij, RealType *r2, RealType *sw, RealType *vdwMult, RealType *vpair, RealType *pot, RealType *A1, RealType *A2, RealType *f1, RealType *t1, RealType *t2);
+    GB();
+    void setForceField(ForceField *ff) {forceField_ = ff;};
+    void addType(AtomType* atomType);
+    virtual void calcForce(InteractionData idat);
+    virtual string getName() {return name_;}
     
   private:
-    virtual ~GB() { }
-    // singleton pattern, prevent reconstruction
-    GB() { }
-    GB(GB const &) {};
-    GB& operator=(GB const&) {};
-    static GB* _instance;
-  
-    static GayBerneParam  getGayBerneParam(AtomType* atomType);
-    static RealType getD(AtomType* atomType);
-    static RealType getL(AtomType* atomType);
-    static RealType getEps(AtomType* atomType);
-    static RealType getEpsRatio(AtomType* atomType);
-    static RealType getDw(AtomType* atomType);       
+    void initialize();
+    GayBerneParam  getGayBerneParam(AtomType* atomType);
+    RealType getD(AtomType* atomType);
+    RealType getL(AtomType* atomType);
+    RealType getEps(AtomType* atomType);
+    RealType getEpsRatio(AtomType* atomType);
+    RealType getDw(AtomType* atomType);
+    LJParam  getLJParam(AtomType* atomType);
+    RealType getLJSigma(AtomType* atomType);
+    RealType getLJEpsilon(AtomType* atomType);
 
-    static bool initialized_;
-    static map<int, AtomType*> GBMap;
-    static map<pair<AtomType*, AtomType*>, GBInteractionData> MixingMap;
-    static ForceField* forceField_;
-    static RealType mu_;
-    static RealType nu_;
+    bool initialized_;
+    string name_;
+    map<int, AtomType*> GBMap;
+    map<pair<AtomType*, AtomType*>, GBInteractionData> MixingMap;
+    ForceField* forceField_;
+    RealType mu_;
+    RealType nu_;
     
   };
 }

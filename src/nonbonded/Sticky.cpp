@@ -49,20 +49,8 @@
 
 using namespace std;
 namespace OpenMD {
-
-  bool Sticky::initialized_ = false;
-  ForceField* Sticky::forceField_ = NULL;
-  map<int, AtomType*> Sticky::StickyMap;
-  map<pair<AtomType*, AtomType*>, StickyInteractionData> Sticky::MixingMap;
   
-  Sticky* Sticky::_instance = NULL;
-  
-  Sticky* Sticky::Instance() {
-    if (!_instance) {
-      _instance = new Sticky();
-    }
-    return _instance;
-  }
+  Sticky::Sticky() : name_("Sticky"), initialized_(false), forceField_(NULL) {}
   
   StickyParam Sticky::getStickyParam(AtomType* atomType) {
     
@@ -189,40 +177,20 @@ namespace OpenMD {
     }
   }
 
-  RealType Sticky::getStickyCut(int atid) { 
-    if (!initialized_) initialize();
-    std::map<int, AtomType*> :: const_iterator it;
-    it = StickyMap.find(atid);
-    if (it == StickyMap.end()) {
-      sprintf( painCave.errMsg,
-               "Sticky::getStickyCut could not find atid %d in StickyMap\n",
-               (atid));
-      painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
-      simError();          
-    }
-
-    AtomType* atype = it->second;
-    return MixingMap[make_pair(atype, atype)].rbig;
-  }
-
- 
-  void Sticky::calcForce(AtomType* at1, AtomType* at2, Vector3d d, 
-                         RealType rij, RealType r2, RealType sw, 
-                         RealType &vpair, RealType &pot, 
-                         RotMat3x3d A1, RotMat3x3d A2, Vector3d &f1,
-                         Vector3d &t1, Vector3d &t2) {
-
-    // This routine does only the sticky portion of the SSD potential
-    // [Chandra and Ichiye, J. Chem. Phys. 111, 2701 (1999)].
-    // The Lennard-Jones and dipolar interaction must be handled separately.
-    
-    // We assume that the rotation matrices have already been calculated
-    // and placed in the A array.
-    
+  /**
+   * This function does the sticky portion of the SSD potential
+   * [Chandra and Ichiye, Journal of Chemical Physics 111, 2701
+   * (1999)].  The Lennard-Jones and dipolar interaction must be
+   * handled separately.  We assume that the rotation matrices have
+   * already been calculated and placed in the A1 & A2 entries in the
+   * idat structure.
+   */
+  
+  void Sticky::calcForce(InteractionData idat) {
+   
     if (!initialized_) initialize();
     
-    pair<AtomType*, AtomType*> key = make_pair(at1, at2);
+    pair<AtomType*, AtomType*> key = make_pair(idat.atype1, idat.atype2);
     StickyInteractionData mixer = MixingMap[key];
 
     RealType w0  = mixer.w0;
@@ -235,22 +203,22 @@ namespace OpenMD {
     RealType rbig = mixer.rbig;
     bool isPower = mixer.isPower;
 
-    if (rij <= rbig) {
+    if (idat.rij <= rbig) {
 
-      RealType r3 = r2 * rij;
-      RealType r5 = r3 * r2;
+      RealType r3 = idat.r2 * idat.rij;
+      RealType r5 = r3 * idat.r2;
            
-      RotMat3x3d A1trans = A1.transpose();
-      RotMat3x3d A2trans = A2.transpose();
+      RotMat3x3d A1trans = idat.A1.transpose();
+      RotMat3x3d A2trans = idat.A2.transpose();
 
       // rotate the inter-particle separation into the two different
       // body-fixed coordinate systems:
 
-      Vector3d ri = A1 * d;
+      Vector3d ri = idat.A1 * idat.d;
 
       // negative sign because this is the vector from j to i:
 
-      Vector3d rj = -A2 * d;
+      Vector3d rj = - idat.A2 * idat.d;
 
       RealType xi = ri.x();
       RealType yi = ri.y();
@@ -275,27 +243,27 @@ namespace OpenMD {
       RealType sp = 0.0;
       RealType dspdr = 0.0;
 
-      if (rij < ru) {
-        if (rij < rl) {
+      if (idat.rij < ru) {
+        if (idat.rij < rl) {
           s = 1.0;
           dsdr = 0.0;
         } else {          
           // we are in the switching region 
 
-          pair<RealType, RealType> res = mixer.s->getValueAndDerivativeAt(rij);
+          pair<RealType, RealType> res = mixer.s->getValueAndDerivativeAt(idat.rij);
           s = res.first;
           dsdr = res.second;
         }
       }
 
-      if (rij < rup) {
-        if (rij < rlp) {
+      if (idat.rij < rup) {
+        if (idat.rij < rlp) {
           sp = 1.0;
           dspdr = 0.0;
         } else {
           // we are in the switching region 
 
-          pair<RealType, RealType> res =mixer.sp->getValueAndDerivativeAt(rij);
+          pair<RealType, RealType> res =mixer.sp->getValueAndDerivativeAt(idat.rij);
           sp = res.first;
           dspdr = res.second;
         }
@@ -306,11 +274,11 @@ namespace OpenMD {
       RealType w = wi+wj;
 
 
-      RealType zif = zi/rij - 0.6;
-      RealType zis = zi/rij + 0.8;
+      RealType zif = zi/idat.rij - 0.6;
+      RealType zis = zi/idat.rij + 0.8;
 
-      RealType zjf = zj/rij - 0.6;
-      RealType zjs = zj/rij + 0.8;
+      RealType zjf = zj/idat.rij - 0.6;
+      RealType zjs = zj/idat.rij + 0.8;
 
       RealType wip = zif*zif*zis*zis - w0;
       RealType wjp = zjf*zjf*zjs*zjs - w0;
@@ -329,11 +297,11 @@ namespace OpenMD {
 
       Vector3d dwip(-2.0*xi*zi*uglyi/r3, 
                     -2.0*yi*zi*uglyi/r3,
-                    2.0*(1.0/rij - zi2/r3)*uglyi);
+                    2.0*(1.0/idat.rij - zi2/r3)*uglyi);
 
       Vector3d dwjp(-2.0*xj*zj*uglyj/r3,
                     -2.0*yj*zj*uglyj/r3,
-                    2.0*(1.0/rij - zj2/r3)*uglyj);
+                    2.0*(1.0/idat.rij - zj2/r3)*uglyj);
 
       Vector3d dwidu(4.0*(yi*zi2 + 0.5*yi*(xi2-yi2))/r3,
                      4.0*(xi*zi2 - 0.5*xi*(xi2-yi2))/r3,
@@ -343,12 +311,12 @@ namespace OpenMD {
                      4.0*(xj*zj2 - 0.5*xj*(xj2-yj2))/r3,
                      - 8.0*xj*yj*zj/r3);
       
-      Vector3d dwipdu(2.0*yi*uglyi/rij,
-                      -2.0*xi*uglyi/rij,
+      Vector3d dwipdu(2.0*yi*uglyi/idat.rij,
+                      -2.0*xi*uglyi/idat.rij,
                       0.0);
 
-      Vector3d dwjpdu(2.0*yj*uglyj/rij,
-                      -2.0*xj*uglyj/rij,
+      Vector3d dwjpdu(2.0*yj*uglyj/idat.rij,
+                      -2.0*xj*uglyj/idat.rij,
                       0.0);
 
       if (isPower) {
@@ -371,93 +339,38 @@ namespace OpenMD {
         dspdr = 0.0;
       }
 
-      vpair += 0.5*(v0*s*w + v0p*sp*wp);
-      pot += 0.5*(v0*s*w + v0p*sp*wp)*sw;
+      idat.vpair += 0.5*(v0*s*w + v0p*sp*wp);
+      idat.pot += 0.5*(v0*s*w + v0p*sp*wp)*idat.sw;
 
       // do the torques first since they are easy:
       // remember that these are still in the body-fixed axes
 
-      Vector3d ti = 0.5*sw*(v0*s*dwidu + v0p*sp*dwipdu);
-      Vector3d tj = 0.5*sw*(v0*s*dwjdu + v0p*sp*dwjpdu);
+      Vector3d ti = 0.5*idat.sw*(v0*s*dwidu + v0p*sp*dwipdu);
+      Vector3d tj = 0.5*idat.sw*(v0*s*dwjdu + v0p*sp*dwjpdu);
 
       // go back to lab frame using transpose of rotation matrix:
 
-      t1 += A1trans * ti;
-      t2 += A2trans * tj;
+      idat.t1 += A1trans * ti;
+      idat.t2 += A2trans * tj;
 
       // Now, on to the forces:
 
       // first rotate the i terms back into the lab frame:
 
-      Vector3d radcomi = (v0 * s * dwi + v0p * sp * dwip) * sw;
-      Vector3d radcomj = (v0 * s * dwj + v0p * sp * dwjp) * sw;
+      Vector3d radcomi = (v0 * s * dwi + v0p * sp * dwip) * idat.sw;
+      Vector3d radcomj = (v0 * s * dwj + v0p * sp * dwjp) * idat.sw;
 
       Vector3d fii = A1trans * radcomi;
       Vector3d fjj = A2trans * radcomj;
       
       // now assemble these with the radial-only terms:
       
-      f1 += 0.5 * ((v0*dsdr*w + v0p*dspdr*wp) * d / rij + fii - fjj);
+      idat.f1 += 0.5 * ((v0*dsdr*w + v0p*dspdr*wp) * idat.d / 
+                        idat.rij + fii - fjj);
 
     }
       
     return;
     
-  }
-
-  void Sticky::do_sticky_pair(int *atid1, int *atid2, RealType *d, 
-                              RealType *r, RealType *r2, RealType *sw, 
-                              RealType *vpair, RealType *pot, RealType *A1, 
-                              RealType *A2, RealType *f1, 
-                              RealType *t1, RealType *t2) {
-    
-    if (!initialized_) initialize();
-    
-    AtomType* atype1 = StickyMap[*atid1];
-    AtomType* atype2 = StickyMap[*atid2];
-    
-    Vector3d disp(d);
-    Vector3d frc(f1);
-    Vector3d trq1(t1);
-    Vector3d trq2(t2);
-    RotMat3x3d Ai(A1);
-    RotMat3x3d Aj(A2);
-   
-    calcForce(atype1, atype2, disp, *r, *r2, *sw, *vpair, *pot, 
-              Ai, Aj, frc, trq1, trq2);
-      
-    f1[0] = frc.x();
-    f1[1] = frc.y();
-    f1[2] = frc.z();
-
-    t1[0] = trq1.x();
-    t1[1] = trq1.y();
-    t1[2] = trq1.z();
-
-    t2[0] = trq2.x();
-    t2[1] = trq2.y();
-    t2[2] = trq2.z();
-
-    return;    
-  }
-}
-
-extern "C" {
-  
-#define fortranGetStickyCut FC_FUNC(getstickycut, GETSTICKYCUT)
-#define fortranDoStickyPair FC_FUNC(do_sticky_pair, DO_STICKY_PAIR)
-  
-  RealType fortranGetStickyCut(int* atid) {
-    return OpenMD::Sticky::Instance()->getStickyCut(*atid);
-  }
-
-  void fortranDoStickyPair(int *atid1, int *atid2, RealType *d, RealType *r, 
-                       RealType *r2, RealType *sw, RealType *vpair, RealType *pot, 
-                       RealType *A1, RealType *A2, RealType *f1, 
-                       RealType *t1, RealType *t2){
-    
-    return OpenMD::Sticky::Instance()->do_sticky_pair(atid1, atid2, d, r, r2, 
-                                                      sw, vpair, pot, A1, A2, 
-                                                      f1, t1, t2);
   }
 }
