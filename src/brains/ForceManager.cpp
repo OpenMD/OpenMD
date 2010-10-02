@@ -62,20 +62,6 @@ namespace OpenMD {
   
   ForceManager::ForceManager(SimInfo * info) : info_(info), 
                                                NBforcesInitialized_(false) {
-    lj_ = LJ::Instance();
-    lj_->setForceField(info_->getForceField());
-
-    gb_ = GB::Instance();
-    gb_->setForceField(info_->getForceField());
-
-    sticky_ = Sticky::Instance();
-    sticky_->setForceField(info_->getForceField());
-
-    eam_ = EAM::Instance();
-    eam_->setForceField(info_->getForceField());
-
-    sc_ = SC::Instance();
-    sc_->setForceField(info_->getForceField());
   }
  
   void ForceManager::calcForces() {
@@ -294,7 +280,6 @@ namespace OpenMD {
     //initialize data before passing to fortran
     RealType longRangePotential[LR_POT_TYPES];
     RealType lrPot = 0.0;
-    Vector3d totalDipole;
     int isError = 0;
 
     for (int i=0; i<LR_POT_TYPES;i++){
@@ -321,16 +306,7 @@ namespace OpenMD {
     for (int i=0; i<LR_POT_TYPES;i++){
       lrPot += longRangePotential[i]; //Quick hack
     }
-    
-    // grab the simulation box dipole moment if specified
-    if (info_->getCalcBoxDipole()){
-      getAccumulatedBoxDipole(totalDipole.getArrayPointer());
-      
-      curSnapshot->statData[Stats::BOX_DIPOLE_X] = totalDipole(0);
-      curSnapshot->statData[Stats::BOX_DIPOLE_Y] = totalDipole(1);
-      curSnapshot->statData[Stats::BOX_DIPOLE_Z] = totalDipole(2);
-    }
-    
+        
     //store the tau and long range potential    
     curSnapshot->statData[Stats::LONG_RANGE_POTENTIAL] = lrPot;
     curSnapshot->statData[Stats::VANDERWAALS_POTENTIAL] = longRangePotential[VDW_POT];

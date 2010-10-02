@@ -56,7 +56,6 @@ module doForces
   use atype_module
   use switcheroo
   use neighborLists  
-  use electrostatic_module
   use shapes
   use vector_class
   use MetalNonMetal
@@ -89,14 +88,12 @@ module doForces
   logical, save :: haveNeighborList = .false.
   logical, save :: haveSIMvariables = .false.
   logical, save :: haveSaneForceField = .false.
-  logical, save :: haveInteractionHash = .false.
   logical, save :: haveGtypeCutoffMap = .false.
   logical, save :: haveDefaultCutoffs = .false.
   logical, save :: haveSkinThickness = .false.
   logical, save :: haveElectrostaticSummationMethod = .false.
   logical, save :: haveCutoffPolicy = .false.
   logical, save :: VisitCutoffsAfterComputing = .false.
-  logical, save :: do_box_dipole = .false.
 
   logical, save :: FF_uses_DirectionalAtoms
   logical, save :: FF_uses_Dipoles
@@ -127,8 +124,6 @@ module doForces
   public :: setCutoffs
   public :: cWasLame
   public :: setElectrostaticMethod
-  public :: setBoxDipole
-  public :: getBoxDipole
   public :: setCutoffPolicy
   public :: setSkinThickness
   public :: do_force_loop
@@ -141,8 +136,6 @@ module doForces
 #endif
   
   !! Variables for cutoff mapping and interaction mapping
-  ! Bit hash to determine pair-pair interactions.
-  integer, dimension(:,:), allocatable :: InteractionHash
   real(kind=dp), dimension(:), allocatable :: atypeMaxCutoff
   real(kind=dp), dimension(:), allocatable, target :: groupMaxCutoffRow
   real(kind=dp), dimension(:), pointer :: groupMaxCutoffCol
@@ -158,130 +151,8 @@ module doForces
      real(kind=dp) :: rlistsq
   end type gtypeCutoffs
   type(gtypeCutoffs), dimension(:,:), allocatable :: gtypeCutoffMap
-
-  real(kind=dp), dimension(3) :: boxDipole
    
 contains
-
-  subroutine createInteractionHash()
-    integer :: nAtypes
-    integer :: i
-    integer :: j
-    integer :: iHash
-    !! Test Types
-    logical :: i_is_LJ
-    logical :: i_is_Elect
-    logical :: i_is_Sticky
-    logical :: i_is_StickyP
-    logical :: i_is_GB
-    logical :: i_is_EAM
-    logical :: i_is_Shape
-    logical :: i_is_SC
-    logical :: j_is_LJ
-    logical :: j_is_Elect
-    logical :: j_is_Sticky
-    logical :: j_is_StickyP
-    logical :: j_is_GB
-    logical :: j_is_EAM
-    logical :: j_is_Shape
-    logical :: j_is_SC
-    real(kind=dp) :: myRcut
-
-    if (.not. associated(atypes)) then
-       call handleError("doForces", "atypes was not present before call of createInteractionHash!")
-       return
-    endif
-    
-    nAtypes = getSize(atypes)
-    
-    if (nAtypes == 0) then
-       call handleError("doForces", "nAtypes was zero during call of createInteractionHash!")
-       return
-    end if
-
-    if (.not. allocated(InteractionHash)) then
-       allocate(InteractionHash(nAtypes,nAtypes))
-    else
-       deallocate(InteractionHash)
-       allocate(InteractionHash(nAtypes,nAtypes))
-    endif
-
-    if (.not. allocated(atypeMaxCutoff)) then
-       allocate(atypeMaxCutoff(nAtypes))
-    else
-       deallocate(atypeMaxCutoff)
-       allocate(atypeMaxCutoff(nAtypes))
-    endif
-        
-    do i = 1, nAtypes
-       call getElementProperty(atypes, i, "is_LennardJones", i_is_LJ)
-       call getElementProperty(atypes, i, "is_Electrostatic", i_is_Elect)
-       call getElementProperty(atypes, i, "is_Sticky", i_is_Sticky)
-       call getElementProperty(atypes, i, "is_StickyPower", i_is_StickyP)
-       call getElementProperty(atypes, i, "is_GayBerne", i_is_GB)
-       call getElementProperty(atypes, i, "is_EAM", i_is_EAM)
-       call getElementProperty(atypes, i, "is_Shape", i_is_Shape)
-       call getElementProperty(atypes, i, "is_SC", i_is_SC)
-
-       do j = i, nAtypes
-
-          iHash = 0
-          myRcut = 0.0_dp
-
-          call getElementProperty(atypes, j, "is_LennardJones", j_is_LJ)
-          call getElementProperty(atypes, j, "is_Electrostatic", j_is_Elect)
-          call getElementProperty(atypes, j, "is_Sticky", j_is_Sticky)
-          call getElementProperty(atypes, j, "is_StickyPower", j_is_StickyP)
-          call getElementProperty(atypes, j, "is_GayBerne", j_is_GB)
-          call getElementProperty(atypes, j, "is_EAM", j_is_EAM)
-          call getElementProperty(atypes, j, "is_Shape", j_is_Shape)
-          call getElementProperty(atypes, j, "is_SC", j_is_SC)
-
-          if (i_is_LJ .and. j_is_LJ) then
-             iHash = ior(iHash, LJ_PAIR)            
-          endif
-          
-          if (i_is_Elect .and. j_is_Elect) then
-             iHash = ior(iHash, ELECTROSTATIC_PAIR)
-          endif
-          
-          if (i_is_Sticky .and. j_is_Sticky) then
-             iHash = ior(iHash, STICKY_PAIR)
-          endif
-
-          if (i_is_StickyP .and. j_is_StickyP) then
-             iHash = ior(iHash, STICKYPOWER_PAIR)
-          endif
-
-          if (i_is_EAM .and. j_is_EAM) then
-             iHash = ior(iHash, EAM_PAIR)
-          endif
-
-          if (i_is_SC .and. j_is_SC) then
-             iHash = ior(iHash, SC_PAIR)
-          endif
-
-          if (i_is_GB .and. j_is_GB) iHash = ior(iHash, GAYBERNE_PAIR)
-          if (i_is_GB .and. j_is_LJ) iHash = ior(iHash, GAYBERNE_LJ)
-          if (i_is_LJ .and. j_is_GB) iHash = ior(iHash, GAYBERNE_LJ)
-	
-          if ((i_is_EAM.or.i_is_SC).and.(.not.(j_is_EAM.or.j_is_SC))) iHash = ior(iHash, MNM_PAIR)
-          if ((j_is_EAM.or.j_is_SC).and.(.not.(i_is_EAM.or.i_is_SC))) iHash = ior(iHash, MNM_PAIR)
-
-          if (i_is_Shape .and. j_is_Shape) iHash = ior(iHash, SHAPE_PAIR)
-          if (i_is_Shape .and. j_is_LJ) iHash = ior(iHash, SHAPE_LJ)
-          if (i_is_LJ .and. j_is_Shape) iHash = ior(iHash, SHAPE_LJ)
-
-
-          InteractionHash(i,j) = iHash
-          InteractionHash(j,i) = iHash
-
-       end do
-
-    end do
-
-    haveInteractionHash = .true.
-  end subroutine createInteractionHash
 
   subroutine createGtypeCutoffMap()
 
@@ -304,9 +175,6 @@ contains
     real(kind=dp) :: biggestAtypeCutoff
     integer :: c_ident_i
 
-    if (.not. haveInteractionHash) then 
-       call createInteractionHash()      
-    endif
 #ifdef IS_MPI
     nGroupsInRow = getNgroupsInRow(plan_group_row)
     nGroupsInCol = getNgroupsInCol(plan_group_col)
@@ -647,19 +515,6 @@ contains
      
    end subroutine setCutoffPolicy
      
-   subroutine setBoxDipole()
-
-     do_box_dipole = .true.
-    
-   end subroutine setBoxDipole
-
-   subroutine getBoxDipole( box_dipole )
-
-     real(kind=dp), intent(inout), dimension(3) :: box_dipole
-
-     box_dipole = boxDipole
-
-   end subroutine getBoxDipole
 
    subroutine setElectrostaticMethod( thisESM )
 
@@ -699,10 +554,6 @@ contains
     integer :: myStatus
 
     error = 0
-
-    if (.not. haveInteractionHash) then       
-       call createInteractionHash()       
-    endif
 
     if (.not. haveGtypeCutoffMap) then        
        call createGtypeCutoffMap()       
@@ -850,57 +701,9 @@ contains
     integer :: localError
     integer :: propPack_i, propPack_j
     integer :: loopStart, loopEnd, loop
-    integer :: iHash, jHash
     integer :: i1, topoDist
 
-    !! the variables for the box dipole moment 
-#ifdef IS_MPI
-    integer :: pChgCount_local
-    integer :: nChgCount_local
-    real(kind=dp) :: pChg_local
-    real(kind=dp) :: nChg_local
-    real(kind=dp), dimension(3) :: pChgPos_local
-    real(kind=dp), dimension(3) :: nChgPos_local
-    real(kind=dp), dimension(3) :: dipVec_local
-#endif
-    integer :: pChgCount
-    integer :: nChgCount
-    real(kind=dp) :: pChg
-    real(kind=dp) :: nChg
-    real(kind=dp) :: chg_value
-    real(kind=dp), dimension(3) :: pChgPos
-    real(kind=dp), dimension(3) :: nChgPos
-    real(kind=dp), dimension(3) :: dipVec 
-    real(kind=dp), dimension(3) :: chgVec 
     real(kind=dp) :: skch
-
-    !! initialize box dipole variables
-    if (do_box_dipole) then
-#ifdef IS_MPI
-       pChg_local = 0.0_dp
-       nChg_local = 0.0_dp
-       pChgCount_local = 0
-       nChgCount_local = 0
-       do i=1, 3
-          pChgPos_local = 0.0_dp
-          nChgPos_local = 0.0_dp
-          dipVec_local = 0.0_dp
-       enddo
-#endif
-       pChg = 0.0_dp
-       nChg = 0.0_dp
-       pChgCount = 0
-       nChgCount = 0
-       chg_value = 0.0_dp
-       
-       do i=1, 3
-          pChgPos(i) = 0.0_dp
-          nChgPos(i) = 0.0_dp
-          dipVec(i) = 0.0_dp
-          chgVec(i) = 0.0_dp
-          boxDipole(i) = 0.0_dp
-       enddo
-    endif
 
     !! initialize local variables  
 
@@ -1365,17 +1168,6 @@ contains
                 endif
              enddo
           endif
-
-          if (do_box_dipole) then
-#ifdef IS_MPI
-             call accumulate_box_dipole(i, eFrame, q(:,i), pChg_local, &
-                  nChg_local, pChgPos_local, nChgPos_local, dipVec_local, &
-                  pChgCount_local, nChgCount_local)
-#else
-             call accumulate_box_dipole(i, eFrame, q(:,i), pChg, nChg, &
-                  pChgPos, nChgPos, dipVec, pChgCount, nChgCount)
-#endif
-          endif
        enddo
     endif
 
@@ -1387,75 +1179,7 @@ contains
     call mpi_allreduce(pot_local, pot, LR_POT_TYPES,mpi_double_precision, &
          mpi_sum, mpi_comm_world,mpi_err)            
 #endif
-        
-    if (do_box_dipole) then
-
-#ifdef SINGLE_PRECISION
-       call mpi_allreduce(pChg_local, pChg, 1, mpi_real, mpi_sum, &
-            mpi_comm_world, mpi_err)
-       call mpi_allreduce(nChg_local, nChg, 1, mpi_real, mpi_sum, &
-            mpi_comm_world, mpi_err)
-       call mpi_allreduce(pChgCount_local, pChgCount, 1, mpi_integer, mpi_sum,&
-            mpi_comm_world, mpi_err)
-       call mpi_allreduce(nChgCount_local, nChgCount, 1, mpi_integer, mpi_sum,&
-            mpi_comm_world, mpi_err)
-       call mpi_allreduce(pChgPos_local, pChgPos, 3, mpi_real, mpi_sum, &
-            mpi_comm_world, mpi_err)
-       call mpi_allreduce(nChgPos_local, nChgPos, 3, mpi_real, mpi_sum, &
-            mpi_comm_world, mpi_err)
-       call mpi_allreduce(dipVec_local, dipVec, 3, mpi_real, mpi_sum, &
-            mpi_comm_world, mpi_err)
-#else
-       call mpi_allreduce(pChg_local, pChg, 1, mpi_double_precision, mpi_sum, &
-            mpi_comm_world, mpi_err)
-       call mpi_allreduce(nChg_local, nChg, 1, mpi_double_precision, mpi_sum, &
-            mpi_comm_world, mpi_err)
-       call mpi_allreduce(pChgCount_local, pChgCount, 1, mpi_integer,&
-            mpi_sum, mpi_comm_world, mpi_err)
-       call mpi_allreduce(nChgCount_local, nChgCount, 1, mpi_integer,&
-            mpi_sum, mpi_comm_world, mpi_err)
-       call mpi_allreduce(pChgPos_local, pChgPos, 3, mpi_double_precision, &
-            mpi_sum, mpi_comm_world, mpi_err)
-       call mpi_allreduce(nChgPos_local, nChgPos, 3, mpi_double_precision, &
-            mpi_sum, mpi_comm_world, mpi_err)
-       call mpi_allreduce(dipVec_local, dipVec, 3, mpi_double_precision, &
-            mpi_sum, mpi_comm_world, mpi_err)
 #endif
-
-    endif
-    
-#endif
-
-    if (do_box_dipole) then
-       ! first load the accumulated dipole moment (if dipoles were present)
-       boxDipole(1) = dipVec(1)
-       boxDipole(2) = dipVec(2)
-       boxDipole(3) = dipVec(3)
-
-       ! now include the dipole moment due to charges
-       ! use the lesser of the positive and negative charge totals
-       if (nChg .le. pChg) then
-          chg_value = nChg
-       else
-          chg_value = pChg
-       endif
-       
-       ! find the average positions
-       if (pChgCount .gt. 0 .and. nChgCount .gt. 0) then
-          pChgPos = pChgPos / pChgCount
-          nChgPos = nChgPos / nChgCount
-       endif
-
-       ! dipole is from the negative to the positive (physics notation)
-       chgVec(1) = pChgPos(1) - nChgPos(1)
-       chgVec(2) = pChgPos(2) - nChgPos(2)
-       chgVec(3) = pChgPos(3) - nChgPos(3)
-
-       boxDipole(1) = boxDipole(1) + chgVec(1) * chg_value
-       boxDipole(2) = boxDipole(2) + chgVec(2) * chg_value
-       boxDipole(3) = boxDipole(3) + chgVec(3) * chg_value
-
-    endif
 
   end subroutine do_force_loop
 
@@ -1464,7 +1188,7 @@ contains
        fpair, d_grp, r_grp, rCut, topoDist)
 
     real( kind = dp ) :: vpair, sw
-    real( kind = dp ), dimension(LR_POT_TYPES) :: pot
+    real( kind = dp ), dimension(LR_POT_TYPES) :: pot, pairpot
     real( kind = dp ), dimension(nLocal) :: particle_pot
     real( kind = dp ), dimension(3) :: fpair
     real( kind = dp ), dimension(nLocal)   :: mfact
@@ -1488,8 +1212,7 @@ contains
     real( kind = dp) :: dfrhodrho_i, dfrhodrho_j
     real( kind = dp) :: rho_i, rho_j
     real( kind = dp) :: fshift_i, fshift_j 
-    real( kind = dp) :: p_vdw, p_elect, p_hb, p_met
-    integer :: atid_i, atid_j, id1, id2, idx
+    integer :: id1, id2, idx
     integer :: k
     integer :: c_ident_i, c_ident_j
 
@@ -1510,8 +1233,6 @@ contains
     t2(1:3) = 0.0
 
 #ifdef IS_MPI
-    atid_i = atid_row(i)
-    atid_j = atid_col(j)
     c_ident_i = c_idents_row(i)
     c_ident_j = c_idents_col(j)
 
@@ -1521,10 +1242,13 @@ contains
        eF1(idx) = eFrame_Row(idx, i)
        eF2(idx) = eFrame_Col(idx, j)
     enddo
+
+    dfrhodrho_i = dfrhodrho_row(i)
+    dfrhodrho_j = dfrhodrho_col(j)
+    rho_i = rho_row(i)
+    rho_j = rho_col(j)
        
 #else
-    atid_i = atid(i)
-    atid_j = atid(j)
     c_ident_i = c_idents_local(i)
     c_ident_j = c_idents_local(j)
 
@@ -1535,101 +1259,33 @@ contains
        eF2(idx) = eFrame(idx, j)       
     enddo
 
-#endif
-
+    dfrhodrho_i = dfrhodrho(i)
+    dfrhodrho_j = dfrhodrho(j)
+    rho_i = rho(i)
+    rho_j = rho(j)
     
-    iHash = InteractionHash(atid_i, atid_j)
-
-    !! For the metallic potentials, we need to pass dF[rho]/drho since
-    !! the pair calculation routines no longer are aware of parallel.
-
-    if ( (iand(iHash, EAM_PAIR).ne.0) .or. (iand(iHash, SC_PAIR).ne.0)  ) then       
-#ifdef IS_MPI
-       dfrhodrho_i = dfrhodrho_row(i)
-       dfrhodrho_j = dfrhodrho_col(j)
-       rho_i = rho_row(i)
-       rho_j = rho_col(j)
-#else
-       dfrhodrho_i = dfrhodrho(i)
-       dfrhodrho_j = dfrhodrho(j)
-       rho_i = rho(i)
-       rho_j = rho(j)
 #endif
-    end if
     
     vdwMult = vdwScale(topoDist)
     electroMult = electrostaticScale(topoDist)
 
-    if ( iand(iHash, LJ_PAIR).ne.0 ) then
-       ! this now calls a c routine so use c_idents instead of atids
-       call do_lj_pair(c_ident_i, c_ident_j, d, r, rijsq, rcut, sw, vdwMult, &
-            vpair, p_vdw, f1)
-    endif
+    call doPairInteraction(c_ident_i, c_ident_j, d, r, rijsq, sw, vpair, &
+         vdwMult, electroMult, A1, A2, eF1, eF2,  &
+         pairpot, f1, t1, t2, &
+         rho_i, rho_j, dfrhodrho_i, dfrhodrho_j, fshift_i, fshift_j)
     
-    if ( iand(iHash, ELECTROSTATIC_PAIR).ne.0 ) then
-       call doElectrostaticPair(atid_i, atid_j, d, r, rijsq, rcut, sw, electroMult, &
-            vpair, p_elect, eF1, eF2, f1, t1, t2)
-    endif
-    
-    if ( iand(iHash, STICKY_PAIR).ne.0 ) then
-       call do_sticky_pair(c_ident_i, c_ident_j, d, r, rijsq, sw, vpair, &
-            p_hb, A1, A2, f1, t1, t2)
-    endif
-    
-    if ( iand(iHash, STICKYPOWER_PAIR).ne.0 ) then
-       ! C++ sticky module now handles all sticky and sticky power interactions
-       call do_sticky_pair(c_ident_i, c_ident_j, d, r, rijsq, sw, vpair, &
-            p_hb, A1, A2, f1, t1, t2)
-    endif
-    
-    if ( iand(iHash, GAYBERNE_PAIR).ne.0 ) then
-       call do_gb_pair(c_ident_i, c_ident_j, d, r, rijsq, sw, vdwMult, vpair, &
-            p_vdw, A1, A2, f1, t1, t2)
-    endif
-    
-    if ( iand(iHash, GAYBERNE_LJ).ne.0 ) then
-       call do_gb_pair(c_ident_i, c_ident_j, d, r, rijsq, sw, vdwMult, vpair, &
-            p_vdw, A1, A2, f1, t1, t2)
-    endif
-        
-    if ( iand(iHash, SHAPE_PAIR).ne.0 ) then       
-       call do_shape_pair(atid_i, atid_j, d, r, rijsq, sw, vpair, &
-            p_vdw, A1, A2, f1, t1, t2)
-    endif
-    
-    if ( iand(iHash, SHAPE_LJ).ne.0 ) then       
-       call do_shape_pair(atid_i, atid_j, d, r, rijsq, sw, vpair, &
-            p_vdw, A1, A2, f1, t1, t2)
-    endif
-
-    if ( iand(iHash, EAM_PAIR).ne.0 ) then       
-       call do_eam_pair(c_ident_i, c_ident_j, d, r, rijsq, sw, vpair, p_met, &
-            f1, rho_i, rho_j, dfrhodrho_i, dfrhodrho_j, fshift_i, fshift_j)
-    endif
-
-    if ( iand(iHash, SC_PAIR).ne.0 ) then       
-       call do_SC_pair(c_ident_i, c_ident_j, d, r, rijsq, sw, vpair, p_met, &
-            f1, rho_i, rho_j, dfrhodrho_i, dfrhodrho_j, fshift_i, fshift_j)
-    endif
-     
-    if ( iand(iHash, MNM_PAIR).ne.0 ) then       
-       call do_mnm_pair(atid_i, atid_j, d, r, rijsq, rcut, sw, vdwMult, vpair, &
-            p_vdw, A1, A2, f1, t1, t2)
-    endif
-
-
 #ifdef IS_MPI
     id1 = AtomRowToGlobal(i)
     id2 = AtomColToGlobal(j)
 
-    pot_row(VDW_POT,i) = pot_row(VDW_POT,i) + 0.5*p_vdw
-    pot_col(VDW_POT,j) = pot_col(VDW_POT,j) + 0.5*p_vdw
-    pot_row(ELECTROSTATIC_POT,i) = pot_row(ELECTROSTATIC_POT,i) + 0.5*p_elect
-    pot_col(ELECTROSTATIC_POT,j) = pot_col(ELECTROSTATIC_POT,j) + 0.5*p_elect
-    pot_row(HB_POT,i) = pot_row(HB_POT,i) + 0.5*p_hb
-    pot_col(HB_POT,j) = pot_col(HB_POT,j) + 0.5*p_hb
-    pot_Row(METALLIC_POT,i) = pot_Row(METALLIC_POT,i) + 0.5*p_met
-    pot_Col(METALLIC_POT,j) = pot_Col(METALLIC_POT,j) + 0.5*p_met
+    pot_row(VDW_POT,i) = pot_row(VDW_POT,i) + 0.5*pairpot(VDW_POT)
+    pot_col(VDW_POT,j) = pot_col(VDW_POT,j) + 0.5*pairpot(VDW_POT)
+    pot_row(ELECTROSTATIC_POT,i) = pot_row(ELECTROSTATIC_POT,i) + 0.5*pairpot(ELECTROSTATIC_POT)
+    pot_col(ELECTROSTATIC_POT,j) = pot_col(ELECTROSTATIC_POT,j) + 0.5*pairpot(ELECTROSTATIC_POT)
+    pot_row(HB_POT,i) = pot_row(HB_POT,i) + 0.5*pairpot(HB_POT)
+    pot_col(HB_POT,j) = pot_col(HB_POT,j) + 0.5*pairpot(HB_POT)
+    pot_Row(METALLIC_POT,i) = pot_Row(METALLIC_POT,i) + 0.5*pairpot(METALLIC_POT)
+    pot_Col(METALLIC_POT,j) = pot_Col(METALLIC_POT,j) + 0.5*p(METALLIC_POT)
 
     do idx = 1, 3
        f_Row(idx,i) = f_Row(idx,i) + f1(idx)
@@ -1659,10 +1315,10 @@ contains
     id1 = i
     id2 = j
 
-    pot(VDW_POT) = pot(VDW_POT) + p_vdw
-    pot(ELECTROSTATIC_POT) = pot(ELECTROSTATIC_POT) + p_elect
-    pot(HB_POT) = pot(HB_POT) + p_hb
-    pot(METALLIC_POT) = pot(METALLIC_POT) + p_met
+    pot(VDW_POT) = pot(VDW_POT) + pairpot(VDW_POT)
+    pot(ELECTROSTATIC_POT) = pot(ELECTROSTATIC_POT) + pairpot(ELECTROSTATIC_POT)
+    pot(HB_POT) = pot(HB_POT) + pairpot(HB_POT)
+    pot(METALLIC_POT) = pot(METALLIC_POT) + pairpot(METALLIC_POT)
 
     do idx = 1, 3
        f(idx,i) = f(idx,i) + f1(idx)
@@ -1698,12 +1354,6 @@ contains
        fpair(3) = fpair(3) + f1(3)
        
     endif
-
-
-!!$
-!!$    particle_pot(i) = particle_pot(i) + vpair*sw
-!!$    particle_pot(j) = particle_pot(j) + vpair*sw
-
   end subroutine do_pair
 
   subroutine do_prepair(i, j, rijsq, d, sw, rcijsq, dc, rCut, &
@@ -1717,47 +1367,34 @@ contains
     real (kind=dp), dimension(3,nLocal) :: t
     
     integer, intent(in) :: i, j
-    real ( kind = dp ), intent(inout)    :: rijsq, rcijsq, rCut
-    real ( kind = dp )                :: r, rc
+    real ( kind = dp ), intent(inout)    :: rijsq, rCut
+    real ( kind = dp )                :: r
     real ( kind = dp ), intent(inout) :: d(3), dc(3)
     real ( kind = dp ) :: rho_i_at_j, rho_j_at_i
-    integer :: atid_i, atid_j, iHash, c_ident_i, c_ident_j
+    integer ::  c_ident_i, c_ident_j
     
     r = sqrt(rijsq)
     
 #ifdef IS_MPI   
-    atid_i = atid_row(i)
-    atid_j = atid_col(j)   
     c_ident_i = c_idents_row(i)
     c_ident_j = c_idents_col(j)    
 #else   
-    atid_i = atid(i)
-    atid_j = atid(j)   
     c_ident_i = c_idents_local(i)
     c_ident_j = c_idents_local(j)    
 #endif
     rho_i_at_j = 0.0_dp
     rho_j_at_i = 0.0_dp
     
-    iHash = InteractionHash(atid_i, atid_j)
-
-    if ( iand(iHash, EAM_PAIR).ne.0 ) then       
-       call calc_EAM_prepair_rho(c_ident_i, c_ident_j, r, rho_i_at_j, rho_j_at_i)
-    endif
+    call doPrepairInteraction(c_ident_i, c_ident_j, r, &
+         rho_i_at_j, rho_j_at_i)
     
-    if ( iand(iHash, SC_PAIR).ne.0 ) then       
-       call calc_SC_prepair_rho(c_ident_i, c_ident_j, r, rho_i_at_j, rho_j_at_i)
-    endif
-
-    if ( iand(iHash, EAM_PAIR).ne.0 .or. iand(iHash, SC_PAIR).ne.0  ) then 
 #ifdef IS_MPI
-       rho_col(j) = rho_col(j) + rho_i_at_j
-       rho_row(i) = rho_row(i) + rho_j_at_i
+    rho_col(j) = rho_col(j) + rho_i_at_j
+    rho_row(i) = rho_row(i) + rho_j_at_i
 #else
-       rho(j) = rho(j) + rho_i_at_j
-       rho(i) = rho(i) + rho_j_at_i
+    rho(j) = rho(j) + rho_i_at_j
+    rho(i) = rho(i) + rho_j_at_i
 #endif       
-    endif
     
   end subroutine do_prepair
 
@@ -1787,15 +1424,8 @@ contains
        do atom = 1, nlocal
           c_ident1 = c_idents_local(atom)
           
-          if (FF_uses_EAM .and. SIM_uses_EAM) then
           
-             call calc_EAM_preforce_Frho(c_ident1, rho(atom), frho(atom), dfrhodrho(atom))
-
-          else if (FF_uses_SC .and. SIM_uses_SC) then
-             
-             call calc_SC_preforce_Frho(c_ident1, rho(atom), frho(atom), dfrhodrho(atom))
-          endif
-
+          call doPreforceInteraction(c_ident1, rho(atom), frho(atom), dfrhodrho(atom)) 
           pot(METALLIC_POT) = pot(METALLIC_POT) + frho(atom)
           particle_pot(atom) = particle_pot(atom) + frho(atom)
        end do

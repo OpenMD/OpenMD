@@ -62,6 +62,7 @@
 #include "UseTheForce/ForceField.hpp"
 #include "utils/PropertyMap.hpp"
 #include "utils/LocalIndexManager.hpp"
+#include "nonbonded/Electrostatic.hpp"
 
 //another nonsense macro declaration
 #define __OPENMD_C
@@ -74,6 +75,7 @@ namespace OpenMD{
   class Molecule;
   class SelectionManager;
   class StuntDouble;
+  class Electrostatic;
   /**
    * @class SimInfo SimInfo.hpp "brains/SimInfo.hpp" 
    * @brief One of the heavy weight classes of OpenMD, SimInfo maintains a list of molecules.

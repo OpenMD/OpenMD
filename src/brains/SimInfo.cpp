@@ -55,12 +55,9 @@
 #include "primitives/Molecule.hpp"
 #include "primitives/StuntDouble.hpp"
 #include "UseTheForce/fCutoffPolicy.h"
-#include "UseTheForce/DarkSide/fElectrostaticSummationMethod.h"
-#include "UseTheForce/DarkSide/fElectrostaticScreeningMethod.h"
 #include "UseTheForce/DarkSide/fSwitchingFunctionType.h"
 #include "UseTheForce/doForces_interface.h"
 #include "UseTheForce/DarkSide/neighborLists_interface.h"
-#include "UseTheForce/DarkSide/electrostatic_interface.h"
 #include "UseTheForce/DarkSide/switcheroo_interface.h"
 #include "utils/MemoryUtils.hpp"
 #include "utils/simError.h"
@@ -1148,9 +1145,9 @@ namespace OpenMD {
         if (simParams_->haveElectrostaticSummationMethod()) {
           std::string myMethod = simParams_->getElectrostaticSummationMethod();
           toUpper(myMethod);
-      
-      // For the time being, we're tethering the LJ shifted behavior to the
-      // electrostaticSummationMethod keyword options
+          
+          // For the time being, we're tethering the LJ shifted behavior to the
+          // electrostaticSummationMethod keyword options
 	  if (myMethod == "SHIFTED_POTENTIAL") {
 	    ljsp_ = 1;
 	  } else if (myMethod == "SHIFTED_FORCE") {
@@ -1180,6 +1177,7 @@ namespace OpenMD {
           rsw_ = 0.85 * rcut_;
         }
 
+        Electrostatic::setElectrostaticCutoffRadius(rcut_, rsw_);
         notifyFortranCutoffs(&rcut_, &rsw_, &ljsp_, &ljsf_);
 
       } else {
@@ -1195,8 +1193,8 @@ namespace OpenMD {
   void SimInfo::setupElectrostaticSummationMethod( int isError ) {    
      
     int errorOut;
-    int esm =  NONE;
-    int sm = UNDAMPED;
+    ElectrostaticSummationMethod esm = NONE;
+    ElectrostaticScreeningMethod sm = UNDAMPED;
     RealType alphaVal;
     RealType dielectric;
     
@@ -1283,12 +1281,11 @@ namespace OpenMD {
       }
     }
     
-    // let's pass some summation method variables to fortran
-    setElectrostaticSummationMethod( &esm );
-    setFortranElectrostaticMethod( &esm );
-    setScreeningMethod( &sm );
-    setDampingAlpha( &alphaVal );
-    setReactionFieldDielectric( &dielectric );
+
+    Electrostatic::setElectrostaticSummationMethod( esm );
+    Electrostatic::setElectrostaticScreeningMethod( sm );
+    Electrostatic::setDampingAlpha( alphaVal );
+    Electrostatic::setReactionFieldDielectric( dielectric );
     initFortranFF( &errorOut );
   }
 

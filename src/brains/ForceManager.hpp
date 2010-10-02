@@ -57,6 +57,8 @@
 #include "nonbonded/Sticky.hpp"
 #include "nonbonded/EAM.hpp"
 #include "nonbonded/SC.hpp"
+#include "nonbonded/Morse.hpp"
+#include "nonbonded/Electrostatic.hpp"
 
 namespace OpenMD {
   /**
@@ -101,6 +103,8 @@ namespace OpenMD {
     Sticky* sticky_;
     EAM* eam_;
     SC* sc_;
+    Morse* morse_;
+    Electrostatic* electrostatic_;
     
   };
 
