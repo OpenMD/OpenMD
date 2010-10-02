@@ -67,39 +67,6 @@ namespace OpenMD {
     static InteractionManager* Instance();
     static void setForceField(ForceField *ff) {forceField_ = ff;};    
 
-    static void doPrePair(AtomType* atype1,
-                          AtomType* atype2,
-                          RealType rij,
-                          RealType &rho_i_at_j,
-                          RealType &rho_j_at_i);
-
-    static void doPreForce(AtomType* atype,
-                           RealType rho,      
-                           RealType &frho,
-                           RealType &dfrhodrho);
-
-    static void doSkipCorrection(AtomType* atype1,       
-                                 AtomType* atype2,
-                                 Vector3d d,
-                                 RealType rij,
-                                 RealType &skippedCharge1,
-                                 RealType &skippedCharge2,
-                                 RealType sw,
-                                 RealType electroMult,
-                                 RealType &pot,
-                                 RealType &vpair,
-                                 Vector3d &f1,
-                                 Mat3x3d eFrame1,
-                                 Mat3x3d eFrame2,
-                                 Vector3d &t1,
-                                 Vector3d &t2);
-    
-    static void doSelfCorrection(AtomType* atype,
-                                 Mat3x3d eFrame,
-                                 RealType skippedCharge,
-                                 RealType &pot,
-                                 Vector3d &t);
-
     static RealType getCutoff();
 
     // Fortran support routines

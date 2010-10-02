@@ -883,14 +883,14 @@ namespace OpenMD {
 
       if (i_is_Dipole) {
         mu_i = data1.dipole_moment;
-        uz_i = skdat.eFrame1->getColumn(2);      
+        uz_i = skdat.eFrame1.getColumn(2);      
         ct_i = dot(uz_i, rhat);
         duduz_i = V3Zero;
       }
             
       if (j_is_Dipole) {
         mu_j = data2.dipole_moment;
-        uz_j = skdat.eFrame2->getColumn(2);      
+        uz_j = skdat.eFrame2.getColumn(2);      
         ct_j = dot(uz_j, rhat);
         duduz_j = V3Zero;
       }
@@ -932,9 +932,9 @@ namespace OpenMD {
       skdat.f1 += dVdr;
       
       if (i_is_Dipole) 
-        *(skdat.t1) -= cross(uz_i, duduz_i);
+        skdat.t1 -= cross(uz_i, duduz_i);
       if (j_is_Dipole) 
-        *(skdat.t2) -= cross(uz_j, duduz_j);
+        skdat.t2 -= cross(uz_j, duduz_j);
     }
   }
     
@@ -957,11 +957,11 @@ namespace OpenMD {
         scdat.pot -= 0.5 * preVal;
         
         // The self-correction term adds into the reaction field vector
-        Vector3d uz_i = scdat.eFrame->getColumn(2);
+        Vector3d uz_i = scdat.eFrame.getColumn(2);
         Vector3d ei = preVal * uz_i;
 
         // This looks very wrong.  A vector crossed with itself is zero.
-        *(scdat.t) -= cross(uz_i, ei);
+        scdat.t -= cross(uz_i, ei);
       }
     } else if (summationMethod_ == SHIFTED_FORCE || summationMethod_ == SHIFTED_POTENTIAL) {
       if (i_is_Charge) {        

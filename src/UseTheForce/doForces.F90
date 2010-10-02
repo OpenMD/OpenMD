@@ -1115,62 +1115,47 @@ contains
           
           ! we loop only over the local atoms, so we don't need row and column
           ! lookups for the types
+          c_ident_i = c_idents_local(i)
 
-          me_i = atid(i)
+          do i1 = 1, nSkipsForLocalAtom(i)
+             j = skipsForLocalAtom(i, i1)
+
+             ! prevent overcounting the skips
+             if (i.lt.j) then
+
+                c_ident_j = c_idents_local(j)
           
-          ! is the atom electrostatic?  See if it would have an 
-          ! electrostatic interaction with itself
-          iHash = InteractionHash(me_i,me_i)
-
-          if ( iand(iHash, ELECTROSTATIC_PAIR).ne.0 ) then
-
-             ! loop over the excludes to accumulate charge in the
-             ! cutoff sphere that we've left out of the normal pair loop
-             skch = 0.0_dp
-                          
-             do i1 = 1, nSkipsForLocalAtom(i)                
-                j = skipsForLocalAtom(i, i1)                
-                me_j = atid(j)
-                jHash = InteractionHash(me_i,me_j)
-                if ( iand(jHash, ELECTROSTATIC_PAIR).ne.0 ) then
-                   skch = skch + getCharge(me_j)
-                endif
-             enddo
-
+                call get_interatomic_vector(q(:,i), q(:,j), d_atm, ratmsq)
+                rVal = sqrt(ratmsq)
+                call get_switch(ratmsq, sw, dswdr, rVal,in_switching_region)
 #ifdef IS_MPI
-             call self_self(i, eFrame, skch, pot_local(ELECTROSTATIC_POT), t)
-#else
-             call self_self(i, eFrame, skch, pot(ELECTROSTATIC_POT), t)
+                call do_skip_correction(c_ident_i, c_ident_j, d_atm, rVal, &
+                     skipped_charge(i), skipped_charge(j), sw, 1.0_dp, &
+                     pot_local(ELECTROSTATIC_POT), vpair, f, t(i), t(j))
+# else
+                call do_skip_correction(c_ident_i, c_ident_j, d_atm, rVal, &
+                     skipped_charge(i), skipped_charge(j), sw, 1.0_dp, &
+                     pot(ELECTROSTATIC_POT), vpair, f, t(i), t(j))
 #endif
-          endif
-  
+             endif
+          enddo
+       enddo
+
+       do i = 1, nlocal
+          ! we loop only over the local atoms, so we don't need row and column
+          ! lookups for the types
+          c_ident_i = c_idents_local(i)
           
-          if (electrostaticSummationMethod.eq.REACTION_FIELD) then
-             
-             ! loop over the excludes to accumulate RF stuff we've
-             ! left out of the normal pair loop
-             
-             do i1 = 1, nSkipsForLocalAtom(i)
-                j = skipsForLocalAtom(i, i1)
-                
-                ! prevent overcounting of the skips
-                if (i.lt.j) then
-                   call get_interatomic_vector(q(:,i), q(:,j), d_atm, ratmsq)
-                   rVal = sqrt(ratmsq)
-                   call get_switch(ratmsq, sw, dswdr, rVal,in_switching_region)
 #ifdef IS_MPI
-                   call rf_self_excludes(i, j, sw, 1.0_dp, eFrame, d_atm, rVal, &
-                        vpair, pot_local(ELECTROSTATIC_POT), f, t)
+          call do_self_correction(c_ident_i, eFrame(i), skippedCharge(i), &
+               pot_local(ELECTROSTATIC_POT), t(i))
 #else
-                   call rf_self_excludes(i, j, sw, 1.0_dp, eFrame, d_atm, rVal, &
-                        vpair, pot(ELECTROSTATIC_POT), f, t)
+          call do_self_correction(c_ident_i, eFrame(i), skippedCharge(i), &
+               pot(ELECTROSTATIC_POT), t(i))
 #endif
-                endif
-             enddo
-          endif
        enddo
     endif
-
+            
 #ifdef IS_MPI
 #ifdef SINGLE_PRECISION
     call mpi_allreduce(pot_local, pot, LR_POT_TYPES,mpi_real,mpi_sum, &

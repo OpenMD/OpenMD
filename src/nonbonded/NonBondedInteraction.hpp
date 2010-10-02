@@ -119,10 +119,10 @@ namespace OpenMD {
     RealType pot;             /**< total potential */
     RealType vpair;           /**< pair potential */
     Vector3d f1;              /**< force correction */
-    Mat3x3d* eFrame1;         /**< pointer to electrostatic frame for first atom */
-    Mat3x3d* eFrame2;         /**< pointer to electrostatic frame for second atom*/
-    Vector3d* t1;             /**< pointer to torque on first atom */
-    Vector3d* t2;             /**< pointer to torque on second atom */
+    Mat3x3d eFrame1;         /**< pointer to electrostatic frame for first atom */
+    Mat3x3d eFrame2;         /**< pointer to electrostatic frame for second atom*/
+    Vector3d t1;             /**< pointer to torque on first atom */
+    Vector3d t2;             /**< pointer to torque on second atom */
   };
 
   /** 
@@ -134,10 +134,10 @@ namespace OpenMD {
    */
   struct SelfCorrectionData {
     AtomType* atype;        /**< pointer to AtomType of the atom */
-    Mat3x3d* eFrame;        /**< pointer to electrostatic frame for first atom */
+    Mat3x3d eFrame;        /**< pointer to electrostatic frame for first atom */
     RealType skippedCharge; /**< charge skipped in normal pairwise interaction loop */
     RealType pot;           /**< total potential contribution */
-    Vector3d* t;            /**< pointer to resultant torque on atom */
+    Vector3d t;            /**< pointer to resultant torque on atom */
   };
 
 
