@@ -39,7 +39,6 @@
  * [4]  Vardeman & Gezelter, in progress (2009).                        
  */
  
-#include "UseTheForce/DarkSide/shapes_interface.h"
 #include "UseTheForce/ForceFieldFactory.hpp"
 #include "io/OptionSectionParser.hpp"
 #include "io/DirectionalAtomTypesSectionParser.hpp"
@@ -78,12 +77,6 @@ namespace OpenMD {
     
   }
   
-  SHAPES_FF::~SHAPES_FF(){
-    // We need to clean up the fortran side so we don't have bad things happen if
-    // we try to create a second EAM force field.
-    destroyShapeTypes();
-  }
-  
   void SHAPES_FF::parse(const std::string& filename) {
     ifstrstream* ffStream;
     ffStream = openForceFieldFile(filename);
@@ -108,18 +101,7 @@ namespace OpenMD {
       at->makeFortranAtomType();
     }
     
-    for (at = atomTypeCont_.beginType(i); at != NULL; at = atomTypeCont_.nextType(i)) {
-      at->complete();
-    }
-
-    int isError = 0;
-    completeShapeFF(&isError);
-    
     delete ffStream;
   }
-  
-  
-//  RealType SHAPES_FF::getRcutFromAtomType(AtomType* at){
-//  }
 } //end namespace OpenMD 
   

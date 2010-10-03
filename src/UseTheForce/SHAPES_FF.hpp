@@ -65,16 +65,9 @@ namespace OpenMD {
   class SHAPES_FF : public ForceField {
   public:
     SHAPES_FF();
-    ~SHAPES_FF();
 
     virtual void parse(const std::string& filename);
 
-//    virtual void parseShapeFile(std::string& shapeFileName, ShapeAtomType* st);
-    
-//    RealType findLargestContactDistance(ShapeAtomType* st);
-//    RealType findCutoffDistance(ShapeAtomType* st);
-//    virtual void calcRcut( void );
-  
   private:
     SectionParserManager spMan_;
     

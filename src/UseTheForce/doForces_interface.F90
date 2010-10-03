@@ -44,26 +44,6 @@ subroutine doForceloop(q, q_group, A, eFrame, f, t, tau, pot, particle_pot, &
   
 end subroutine doForceloop
 
-subroutine getAccumulatedBoxDipole( box_dipole )
-  
-  use definitions, ONLY: dp
-  use doForces, ONLY: getBoxDipole
-
-  !! simulation box dipole moment 
-  real ( kind = dp ), dimension(3) :: box_dipole
-  
-  call getBoxDipole( box_dipole )
-  
-end subroutine getAccumulatedBoxDipole
-
-subroutine setAccumulateBoxDipole()
-
-  use doForces, ONLY: setBoxDipole
-
-  call setBoxDipole()
-  
-end subroutine setAccumulateBoxDipole
-
 subroutine setFortranElectrostaticMethod(electrostaticMethod)
   use doForces, ONLY : setElectrostaticMethod
 

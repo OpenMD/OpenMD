@@ -90,11 +90,6 @@ namespace OpenMD {
       at->makeFortranAtomType();
     }
     
-    
-    for (at = atomTypeCont_.beginType(i); at != NULL; at = atomTypeCont_.nextType(i)) {
-      at->complete();
-    }
-    
     delete ffStream;
   }
 } //end namespace OpenMD

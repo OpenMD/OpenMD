@@ -56,7 +56,6 @@ module doForces
   use atype_module
   use switcheroo
   use neighborLists  
-  use shapes
   use vector_class
   use MetalNonMetal
   use status
@@ -69,12 +68,7 @@ module doForces
   implicit none
   PRIVATE
 
-  real(kind=dp), external :: getSigma
-  real(kind=dp), external :: getEpsilon
-  real(kind=dp), external :: getEAMcut
-  real(kind=dp), external :: getGayBerneCut
-  real(kind=dp), external :: getStickyCut
-  real(kind=dp), external :: getSCCut
+  real(kind=dp), external :: get_cutoff
 
   
 #define __FORTRAN90
@@ -185,51 +179,11 @@ contains
     biggestAtypeCutoff = 0.0_dp
     do i = 1, nAtypes
        if (SimHasAtype(i)) then     
-          call getElementProperty(atypes, i, "is_LennardJones", i_is_LJ)
-          call getElementProperty(atypes, i, "is_Electrostatic", i_is_Elect)
-          call getElementProperty(atypes, i, "is_Sticky", i_is_Sticky)
-          call getElementProperty(atypes, i, "is_StickyPower", i_is_StickyP)
-          call getElementProperty(atypes, i, "is_GayBerne", i_is_GB)
-          call getElementProperty(atypes, i, "is_EAM", i_is_EAM)
-          call getElementProperty(atypes, i, "is_Shape", i_is_Shape)
-          call getElementProperty(atypes, i, "is_SC", i_is_SC)
-          call getElementProperty(atypes, i, "c_ident", c_ident_i)
- 
+
           if (haveDefaultCutoffs) then
              atypeMaxCutoff(i) = defaultRcut
           else
-             if (i_is_LJ) then           
-                thisRcut = getSigma(c_ident_i)  * 2.5_dp
-                if (thisRCut .gt. atypeMaxCutoff(i)) atypeMaxCutoff(i) = thisRCut
-             endif
-             if (i_is_Elect) then
-                thisRcut = defaultRcut
-                if (thisRCut .gt. atypeMaxCutoff(i)) atypeMaxCutoff(i) = thisRCut
-             endif
-             if (i_is_Sticky) then
-                thisRcut = getStickyCut(c_ident_i)
-                if (thisRCut .gt. atypeMaxCutoff(i)) atypeMaxCutoff(i) = thisRCut
-             endif
-             if (i_is_StickyP) then
-                thisRcut = getStickyCut(c_ident_i)
-                if (thisRCut .gt. atypeMaxCutoff(i)) atypeMaxCutoff(i) = thisRCut
-             endif
-             if (i_is_GB) then
-                thisRcut = getGayBerneCut(c_ident_i)
-                if (thisRCut .gt. atypeMaxCutoff(i)) atypeMaxCutoff(i) = thisRCut
-             endif
-             if (i_is_EAM) then
-                thisRcut = getEAMCut(c_ident_i)
-                if (thisRCut .gt. atypeMaxCutoff(i)) atypeMaxCutoff(i) = thisRCut
-             endif
-             if (i_is_Shape) then
-                thisRcut = getShapeCut(i)
-                if (thisRCut .gt. atypeMaxCutoff(i)) atypeMaxCutoff(i) = thisRCut
-             endif
-             if (i_is_SC) then
-                thisRcut = getSCCut(c_ident_i)
-                if (thisRCut .gt. atypeMaxCutoff(i)) atypeMaxCutoff(i) = thisRCut
-             endif
+             atypeMaxCutoff(i) = get_cutoff(c_ident_i)
           endif
                     
           if (atypeMaxCutoff(i).gt.biggestAtypeCutoff) then
@@ -672,6 +626,7 @@ contains
     real( kind = dp), dimension(9) :: tau   
     real ( kind = dp ),dimension(LR_POT_TYPES) :: pot
     real( kind = dp ), dimension(nLocal) :: particle_pot
+    real( kind = dp ), dimension(nLocal) :: skipped_charge
 
     logical :: in_switching_region
 #ifdef IS_MPI 
@@ -901,13 +856,13 @@ contains
 #endif                                               
                          else
 #ifdef IS_MPI                      
-                            call do_pair(atom1, atom2, ratmsq, d_atm, sw, &
+                            call f_do_pair(atom1, atom2, ratmsq, d_atm, sw, &
                                  eFrame, A, f, t, pot_local, particle_pot, vpair, &
                                  fpair, d_grp, rgrp, rCut, topoDist)
                             ! particle_pot will be accumulated from row & column
                             ! arrays later
 #else
-                            call do_pair(atom1, atom2, ratmsq, d_atm, sw, &
+                            call f_do_pair(atom1, atom2, ratmsq, d_atm, sw, &
                                  eFrame, A, f, t, pot, particle_pot, vpair, &
                                  fpair, d_grp, rgrp, rCut, topoDist)
 #endif
@@ -1113,45 +1068,36 @@ contains
     if (SIM_requires_postpair_calc) then
        do i = 1, nlocal             
           
-          ! we loop only over the local atoms, so we don't need row and column
-          ! lookups for the types
-          c_ident_i = c_idents_local(i)
-
           do i1 = 1, nSkipsForLocalAtom(i)
              j = skipsForLocalAtom(i, i1)
 
              ! prevent overcounting the skips
              if (i.lt.j) then
-
-                c_ident_j = c_idents_local(j)
           
                 call get_interatomic_vector(q(:,i), q(:,j), d_atm, ratmsq)
                 rVal = sqrt(ratmsq)
                 call get_switch(ratmsq, sw, dswdr, rVal,in_switching_region)
 #ifdef IS_MPI
-                call do_skip_correction(c_ident_i, c_ident_j, d_atm, rVal, &
-                     skipped_charge(i), skipped_charge(j), sw, 1.0_dp, &
-                     pot_local(ELECTROSTATIC_POT), vpair, f, t(i), t(j))
+                call do_skip_correction(c_idents_local(i), c_idents_local(j), &
+                     d_atm, rVal, skipped_charge(i), skipped_charge(j), sw, &
+                     1.0_dp, pot_local(ELECTROSTATIC_POT), vpair, f, t(:,i), t(:,j))
 # else
-                call do_skip_correction(c_ident_i, c_ident_j, d_atm, rVal, &
-                     skipped_charge(i), skipped_charge(j), sw, 1.0_dp, &
-                     pot(ELECTROSTATIC_POT), vpair, f, t(i), t(j))
+                call do_skip_correction(c_idents_local(i), c_idents_local(j), &
+                     d_atm, rVal, skipped_charge(i), skipped_charge(j), sw, &
+                     1.0_dp, pot(ELECTROSTATIC_POT), vpair, f, t(:,i), t(:,j))
 #endif
              endif
           enddo
        enddo
 
        do i = 1, nlocal
-          ! we loop only over the local atoms, so we don't need row and column
-          ! lookups for the types
-          c_ident_i = c_idents_local(i)
           
 #ifdef IS_MPI
-          call do_self_correction(c_ident_i, eFrame(i), skippedCharge(i), &
-               pot_local(ELECTROSTATIC_POT), t(i))
+          call do_self_correction(c_idents_local(i), eFrame(:,i), &
+               skipped_charge(i), pot_local(ELECTROSTATIC_POT), t(:,i))
 #else
-          call do_self_correction(c_ident_i, eFrame(i), skippedCharge(i), &
-               pot(ELECTROSTATIC_POT), t(i))
+          call do_self_correction(c_idents_local(i), eFrame(:,i), &
+               skipped_charge(i), pot(ELECTROSTATIC_POT), t(:,i))
 #endif
        enddo
     endif
@@ -1168,10 +1114,10 @@ contains
 
   end subroutine do_force_loop
 
-  subroutine do_pair(i, j, rijsq, d, sw, &
+  subroutine f_do_pair(i, j, rijsq, d, sw, &
        eFrame, A, f, t, pot, particle_pot, vpair, &
        fpair, d_grp, r_grp, rCut, topoDist)
-
+    
     real( kind = dp ) :: vpair, sw
     real( kind = dp ), dimension(LR_POT_TYPES) :: pot, pairpot
     real( kind = dp ), dimension(nLocal) :: particle_pot
@@ -1197,6 +1143,7 @@ contains
     real( kind = dp) :: dfrhodrho_i, dfrhodrho_j
     real( kind = dp) :: rho_i, rho_j
     real( kind = dp) :: fshift_i, fshift_j 
+    real( kind = dp) :: p_vdw,  p_elect, p_hb, p_met
     integer :: id1, id2, idx
     integer :: k
     integer :: c_ident_i, c_ident_j
@@ -1221,34 +1168,28 @@ contains
     c_ident_i = c_idents_row(i)
     c_ident_j = c_idents_col(j)
 
-    do idx = 1, 9
-       A1(idx) = A_Row(idx, i)
-       A2(idx) = A_Col(idx, j)
-       eF1(idx) = eFrame_Row(idx, i)
-       eF2(idx) = eFrame_Col(idx, j)
-    enddo
+    A1(:) = A_Row(:,i)
+    A2(:) = A_Col(:,j)
+    eF1(:) = eFrame_Row(:,i)
+    eF2(:) = eFrame_Col(:,j)
 
     dfrhodrho_i = dfrhodrho_row(i)
     dfrhodrho_j = dfrhodrho_col(j)
     rho_i = rho_row(i)
-    rho_j = rho_col(j)
-       
+    rho_j = rho_col(j)       
 #else
     c_ident_i = c_idents_local(i)
     c_ident_j = c_idents_local(j)
 
-    do idx = 1, 9
-       A1(idx) = A(idx, i)
-       A2(idx) = A(idx, j)
-       eF1(idx) = eFrame(idx, i)
-       eF2(idx) = eFrame(idx, j)       
-    enddo
+    A1(:) = A(:,i)
+    A2(:) = A(:,j)
+    eF1(:) = eFrame(:,i)
+    eF2(:) = eFrame(:,j)
 
     dfrhodrho_i = dfrhodrho(i)
     dfrhodrho_j = dfrhodrho(j)
     rho_i = rho(i)
-    rho_j = rho(j)
-    
+    rho_j = rho(j)    
 #endif
     
     vdwMult = vdwScale(topoDist)
@@ -1270,7 +1211,7 @@ contains
     pot_row(HB_POT,i) = pot_row(HB_POT,i) + 0.5*pairpot(HB_POT)
     pot_col(HB_POT,j) = pot_col(HB_POT,j) + 0.5*pairpot(HB_POT)
     pot_Row(METALLIC_POT,i) = pot_Row(METALLIC_POT,i) + 0.5*pairpot(METALLIC_POT)
-    pot_Col(METALLIC_POT,j) = pot_Col(METALLIC_POT,j) + 0.5*p(METALLIC_POT)
+    pot_Col(METALLIC_POT,j) = pot_Col(METALLIC_POT,j) + 0.5*pairpot(METALLIC_POT)
 
     do idx = 1, 3
        f_Row(idx,i) = f_Row(idx,i) + f1(idx)
@@ -1339,7 +1280,7 @@ contains
        fpair(3) = fpair(3) + f1(3)
        
     endif
-  end subroutine do_pair
+  end subroutine f_do_pair
 
   subroutine do_prepair(i, j, rijsq, d, sw, rcijsq, dc, rCut, &
        eFrame, A, f, t, pot)
@@ -1352,8 +1293,8 @@ contains
     real (kind=dp), dimension(3,nLocal) :: t
     
     integer, intent(in) :: i, j
-    real ( kind = dp ), intent(inout)    :: rijsq, rCut
-    real ( kind = dp )                :: r
+    real ( kind = dp ), intent(inout)    :: rijsq, rcijsq, rCut
+    real ( kind = dp )                :: r, rc
     real ( kind = dp ), intent(inout) :: d(3), dc(3)
     real ( kind = dp ) :: rho_i_at_j, rho_j_at_i
     integer ::  c_ident_i, c_ident_j

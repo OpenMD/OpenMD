@@ -55,19 +55,20 @@ namespace OpenMD {
   public:    
     SHAPES();
     void setForceField(ForceField *ff) {forceField_ = ff;};
-    void addType(AtomType* atomType);
-    void calcForce(InteractionData idat);
+    virtual void calcForce(InteractionData idat);
     
   private:
     void initialize();
-    ShapesParam  getShapesParam(AtomType* atomType);
+    void addShape(ShapeAtomType* atomType);
+    void addLJ(AtomType* atomType);
     LJParam  getLJParam(AtomType* atomType);
     RealType getLJSigma(AtomType* atomType);
     RealType getLJEpsilon(AtomType* atomType);
   
     bool initialized_;
-    map<int, AtomType*> ShapesMap;
-    map<pair<AtomType*, AtomType*>, SHAPESInteractionData> MixingMap;
+    map<int, ShapeAtomType*> ShapesMap;
+    map<int, AtomType*> LJMap;   
+   
     ForceField* forceField_;
     int lMax_;
     int mMax_;

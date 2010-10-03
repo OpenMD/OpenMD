@@ -67,16 +67,16 @@ namespace OpenMD {
     static InteractionManager* Instance();
     static void setForceField(ForceField *ff) {forceField_ = ff;};    
 
-    static RealType getCutoff();
+
 
     // Fortran support routines
 
-    static void do_prepair(int *atid1, int *atid2, RealType *rij, RealType *rho_i_at_j, RealType *rho_j_at_i);
-    static void do_preforce(int *atid, RealType *rho, RealType *frho, RealType *dfrhodrho);
-    static void do_pair(int *atid1, int *atid2, RealType *d, RealType *r, RealType *r2, RealType *rcut, RealType *sw, RealType *vdwMult,RealType *electroMult, RealType *pot, RealType *vpair, RealType *f1, RealType *eFrame1, RealType *eFrame2, RealType *A1, RealType *A2, RealType *t1, RealType *t2, RealType *rho1, RealType *rho2, RealType *dfrho1, RealType *dfrho2, RealType *fshift1, RealType *fshift2);    
-    static void do_skip_correction(int *atid1, int *atid2, RealType *d, RealType *r, RealType *skippedCharge1, RealType *skippedCharge2, RealType *sw, RealType *electroMult, RealType *pot, RealType *vpair, RealType *f1, RealType *eFrame1, RealType *eFrame2, RealType *t1, RealType *t2);
-    static void do_self_correction(int *atid, RealType *eFrame, RealType *skippedCharge, RealType *pot, RealType *t);
-   
+    static void doPrePair(int *atid1, int *atid2, RealType *rij, RealType *rho_i_at_j, RealType *rho_j_at_i);
+    static void doPreForce(int *atid, RealType *rho, RealType *frho, RealType *dfrhodrho);
+    static void doPair(int *atid1, int *atid2, RealType *d, RealType *r, RealType *r2, RealType *rcut, RealType *sw, RealType *vdwMult,RealType *electroMult, RealType *pot, RealType *vpair, RealType *f1, RealType *eFrame1, RealType *eFrame2, RealType *A1, RealType *A2, RealType *t1, RealType *t2, RealType *rho1, RealType *rho2, RealType *dfrho1, RealType *dfrho2, RealType *fshift1, RealType *fshift2);    
+    static void doSkipCorrection(int *atid1, int *atid2, RealType *d, RealType *r, RealType *skippedCharge1, RealType *skippedCharge2, RealType *sw, RealType *electroMult, RealType *pot, RealType *vpair, RealType *f1, RealType *eFrame1, RealType *eFrame2, RealType *t1, RealType *t2);
+    static void doSelfCorrection(int *atid, RealType *eFrame, RealType *skippedCharge, RealType *pot, RealType *t);
+    static RealType getSuggestedCutoffRadius(int *atid1);   
     
   private:
     virtual ~InteractionManager() { }
@@ -106,7 +106,6 @@ namespace OpenMD {
      */
     static map<pair<AtomType*, AtomType*>, set<NonBondedInteraction*> > interactions_;
     
-
   };
 }
 #endif

@@ -69,9 +69,7 @@ namespace OpenMD {
 
     virtual void useBase(AtomType* base);
 
-    virtual void copyAllData(AtomType* orig);
-    
-    virtual void complete();
+    virtual void copyAllData(AtomType* orig);   
     
     /**
      * Finishes off the AtomType by communicating the logical portions of the

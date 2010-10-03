@@ -232,7 +232,7 @@ namespace OpenMD {
     }
   } 
   
-  void InteractionManager::do_prepair(int *atid1, int *atid2, RealType *rij, RealType *rho_i_at_j, RealType *rho_j_at_i){
+  void InteractionManager::doPrePair(int *atid1, int *atid2, RealType *rij, RealType *rho_i_at_j, RealType *rho_j_at_i){
     
     if (!initialized_) initialize();
 	  
@@ -256,7 +256,7 @@ namespace OpenMD {
     return;    
   }
   
-  void InteractionManager::do_preforce(int *atid, RealType *rho, RealType *frho, RealType *dfrhodrho){
+  void InteractionManager::doPreForce(int *atid, RealType *rho, RealType *frho, RealType *dfrhodrho){
 
     if (!initialized_) initialize();
 	  
@@ -279,7 +279,7 @@ namespace OpenMD {
     return;    
   }
 
-  void InteractionManager::do_pair(int *atid1, int *atid2, RealType *d, RealType *r, RealType *r2, RealType *rcut, RealType *sw, RealType *vdwMult,RealType *electroMult, RealType *pot, RealType *vpair, RealType *f1, RealType *eFrame1, RealType *eFrame2, RealType *A1, RealType *A2, RealType *t1, RealType *t2, RealType *rho1, RealType *rho2, RealType *dfrho1, RealType *dfrho2, RealType *fshift1, RealType *fshift2){
+  void InteractionManager::doPair(int *atid1, int *atid2, RealType *d, RealType *r, RealType *r2, RealType *rcut, RealType *sw, RealType *vdwMult,RealType *electroMult, RealType *pot, RealType *vpair, RealType *f1, RealType *eFrame1, RealType *eFrame2, RealType *A1, RealType *A2, RealType *t1, RealType *t2, RealType *rho1, RealType *rho2, RealType *dfrho1, RealType *dfrho2, RealType *fshift1, RealType *fshift2){
     
     if (!initialized_) initialize();
     
@@ -331,7 +331,7 @@ namespace OpenMD {
     return;    
   }
 
-  void InteractionManager::do_skip_correction(int *atid1, int *atid2, RealType *d, RealType *r, RealType *skippedCharge1, RealType *skippedCharge2, RealType *sw, RealType *electroMult, RealType *pot, RealType *vpair, RealType *f1, RealType *eFrame1, RealType *eFrame2, RealType *t1, RealType *t2){
+  void InteractionManager::doSkipCorrection(int *atid1, int *atid2, RealType *d, RealType *r, RealType *skippedCharge1, RealType *skippedCharge2, RealType *sw, RealType *electroMult, RealType *pot, RealType *vpair, RealType *f1, RealType *eFrame1, RealType *eFrame2, RealType *t1, RealType *t2){
 
     if (!initialized_) initialize();
     
@@ -377,7 +377,7 @@ namespace OpenMD {
     return;    
   }
 
-  void InteractionManager::do_self_correction(int *atid, RealType *eFrame, RealType *skippedCharge, RealType *pot, RealType *t){
+  void InteractionManager::doSelfCorrection(int *atid, RealType *eFrame, RealType *skippedCharge, RealType *pot, RealType *t){
 
     if (!initialized_) initialize();
     
@@ -405,6 +405,21 @@ namespace OpenMD {
     return;    
   }
 
+
+  RealType InteractionManager::getSuggestedCutoffRadius(int *atid) {
+    if (!initialized_) initialize();
+    
+    AtomType* atype = typeMap_[*atid];
+
+    pair<AtomType*, AtomType*> key = make_pair(atype, atype);
+    set<NonBondedInteraction*>::iterator it;
+    RealType cutoff = 0.0;
+    
+    for (it = interactions_[key].begin(); it != interactions_[key].end(); ++it)
+      cutoff = max(cutoff, (*it)->getSuggestedCutoffRadius(atype, atype));   
+    return cutoff;    
+  }
+
 } //end namespace OpenMD
 
 extern "C" {
@@ -419,15 +434,15 @@ extern "C" {
   void fortranDoPrePair(int *atid1, int *atid2, RealType *rij, 
                         RealType *rho_i_at_j, RealType *rho_j_at_i) {
 	    
-    return OpenMD::InteractionManager::Instance()->do_prepair(atid1, atid2, rij, 
-                                                              rho_i_at_j,  
-                                                              rho_j_at_i);
+    return OpenMD::InteractionManager::Instance()->doPrePair(atid1, atid2, rij,
+                                                             rho_i_at_j,  
+                                                             rho_j_at_i);
   }
   void fortranDoPreforce(int *atid, RealType *rho, RealType *frho,
                          RealType *dfrhodrho) {  
     
-    return OpenMD::InteractionManager::Instance()->do_preforce(atid, rho, frho,
-                                                               dfrhodrho);    
+    return OpenMD::InteractionManager::Instance()->doPreForce(atid, rho, frho,
+                                                              dfrhodrho);    
   }
   
   void fortranDoPair(int *atid1, int *atid2, RealType *d, RealType *r, 
@@ -439,36 +454,43 @@ extern "C" {
                      RealType *dfrho1, RealType *dfrho2, RealType *fshift1, 
                      RealType *fshift2){
     
-    return OpenMD::InteractionManager::Instance()->do_pair(atid1, atid2, d, r, r2, rcut,
-                                                           sw, vdwMult, electroMult, pot, 
-                                                           vpair, f1, eFrame1, eFrame2, 
-                                                           A1, A2, t1, t2, rho1, rho2, 
-                                                           dfrho1, dfrho2, fshift1, fshift2);
+    return OpenMD::InteractionManager::Instance()->doPair(atid1, atid2, d, r, 
+                                                          r2, rcut, sw, 
+                                                          vdwMult, electroMult,
+                                                          pot, vpair, f1, 
+                                                          eFrame1, eFrame2, 
+                                                          A1, A2, t1, t2, rho1,
+                                                          rho2, dfrho1, dfrho2,
+                                                          fshift1, fshift2);
   }
-
-  void fortranDoSkipCorrection(int *atid1, int *atid2, RealType *d, RealType *r, 
-                               RealType *skippedCharge1, RealType *skippedCharge2,
-                               RealType *sw, RealType *electroMult, RealType *pot, 
+  
+  void fortranDoSkipCorrection(int *atid1, int *atid2, RealType *d, 
+                               RealType *r, RealType *skippedCharge1, 
+                               RealType *skippedCharge2, RealType *sw, 
+                               RealType *electroMult, RealType *pot, 
                                RealType *vpair, RealType *f1,
                                RealType *eFrame1, RealType *eFrame2,
                                RealType *t1, RealType *t2){
     
-    return OpenMD::InteractionManager::Instance()->do_skip_correction(atid1, atid2, d, r, 
-                                                                      skippedCharge1,
-                                                                      skippedCharge2,
-                                                                      sw, electroMult, pot,
-                                                                      vpair, f1, eFrame1, 
-                                                                      eFrame2, t1, t2);
+    return OpenMD::InteractionManager::Instance()->doSkipCorrection(atid1, 
+                                                                    atid2, d, 
+                                                                    r, 
+                                                                    skippedCharge1,
+                                                                    skippedCharge2,
+                                                                    sw, electroMult, pot,
+                                                                    vpair, f1, eFrame1, 
+                                                                    eFrame2, t1, t2);
   }
-
+  
   void fortranDoSelfCorrection(int *atid, RealType *eFrame, RealType *skippedCharge, 
                                RealType *pot, RealType *t) {
     
-    return OpenMD::InteractionManager::Instance()->do_self_correction(atid, eFrame, 
-                                                                      skippedCharge,
-                                                                      pot, t);
+    return OpenMD::InteractionManager::Instance()->doSelfCorrection(atid, 
+                                                                    eFrame, 
+                                                                    skippedCharge,
+                                                                    pot, t);
   }
-  RealType fortranGetCutoff() {
-    return OpenMD::InteractionManager::Instance()->getCutoff();
+  RealType fortranGetCutoff(int *atid) {    
+    return OpenMD::InteractionManager::Instance()->getSuggestedCutoffRadius(atid);
   }
 }

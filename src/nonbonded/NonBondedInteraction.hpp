@@ -180,6 +180,7 @@ namespace OpenMD {
     virtual ~NonBondedInteraction() {}
     virtual void calcForce(InteractionData idat) = 0;
     virtual InteractionFamily getFamily() = 0;
+    virtual RealType getSuggestedCutoffRadius(AtomType* at1, AtomType* at2) = 0;
     virtual string getName() =  0;
   };    
 

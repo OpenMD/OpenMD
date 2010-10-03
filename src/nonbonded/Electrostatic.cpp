@@ -283,6 +283,12 @@ namespace OpenMD {
           simError();                  
         }
         
+        // Quadrupoles in OpenMD are set as the diagonal elements
+        // of the diagonalized traceless quadrupole moment tensor.
+        // The column vectors of the unitary matrix that diagonalizes 
+        // the quadrupole moment tensor become the eFrame (or the
+        // electrostatic version of the body-fixed frame.
+
         Vector3dGenericData* v3dData = dynamic_cast<Vector3dGenericData*>(data);
         if (v3dData == NULL) {
           sprintf( painCave.errMsg,
@@ -974,5 +980,13 @@ namespace OpenMD {
         scdat.pot += self;
       }
     }
+  }
+
+  RealType Electrostatic::getSuggestedCutoffRadius(AtomType* at1, AtomType* at2) {
+    // This seems to work moderately well as a default.  There's no
+    // inherent scale for 1/r interactions that we can standardize.
+    // 12 angstroms seems to be a reasonably good guess for most
+    // cases.
+    return 12.0;
   }
 }

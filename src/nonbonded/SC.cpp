@@ -385,4 +385,17 @@ namespace OpenMD {
       
     return;    
   }
+
+  RealType SC::getSuggestedCutoffRadius(AtomType* at1, AtomType* at2) {
+    if (!initialized_) initialize();   
+    pair<AtomType*, AtomType*> key = make_pair(at1, at2); 
+    map<pair<AtomType*, AtomType*>, SCInteractionData>::iterator it;
+    it = MixingMap.find(key);
+    if (it == MixingMap.end()) 
+      return 0.0;
+    else  {
+      SCInteractionData mixer = (*it).second;
+      return mixer.rCut;
+    }
+  }
 }

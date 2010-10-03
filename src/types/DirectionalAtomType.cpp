@@ -41,7 +41,6 @@
 
 #include <cstdio> 
 #include "types/DirectionalAtomType.hpp"
-#include "UseTheForce/DarkSide/electrostatic_interface.h"
 #include "utils/simError.h"
 namespace OpenMD {
   
@@ -92,119 +91,5 @@ namespace OpenMD {
   void DirectionalAtomType::setShape() { 
     myResponsibilities_["is_Shape"] = true;
     atp.is_Shape = 1; 
-  }
-
-  void DirectionalAtomType::complete() {
-    
-    AtomType::complete();
-    
-    int isError  = 0;
-    GenericData* data;
-    
-    //setup dipole atom type in fortran side
-    if (isDipole()) {
-      data = getPropertyByName("Dipole");
-      if (data != NULL) {
-        DoubleGenericData* doubleData= dynamic_cast<DoubleGenericData*>(data);
-        
-        if (doubleData != NULL) {
-          RealType dipole = doubleData->getData();
-          
-          setDipoleMoment(&atp.ident, &dipole, &isError);
-          if (isError != 0) {
-            sprintf( painCave.errMsg,
-                     "Fortran rejected setDipoleMoment\n");
-            painCave.severity = OPENMD_ERROR;
-            painCave.isFatal = 1;
-            simError();          
-          }
-          
-        } else {
-          sprintf( painCave.errMsg,
-                   "Can not cast GenericData to DoubleGenericData\n");
-          painCave.severity = OPENMD_ERROR;
-          painCave.isFatal = 1;
-          simError();          
-        }
-      } else {
-        sprintf( painCave.errMsg, "Can not find Dipole Parameters\n");
-        painCave.severity = OPENMD_ERROR;
-        painCave.isFatal = 1;
-        simError();          
-      }
-    }
-    
-    if (isSplitDipole()) {
-      data = getPropertyByName("SplitDipoleDistance");
-      if (data != NULL) {
-        DoubleGenericData* doubleData= dynamic_cast<DoubleGenericData*>(data);
-        
-        if (doubleData != NULL) {
-          RealType splitDipoleDistance = doubleData->getData();
-          
-          setSplitDipoleDistance(&atp.ident, &splitDipoleDistance, &isError);
-          if (isError != 0) {
-            sprintf( painCave.errMsg,
-                     "Fortran rejected setSplitDipoleDistance\n");
-            painCave.severity = OPENMD_ERROR;
-            painCave.isFatal = 1;
-            simError();          
-          }
-          
-        } else {
-          sprintf( painCave.errMsg,
-                   "Can not cast GenericData to DoubleGenericData\n");
-          painCave.severity = OPENMD_ERROR;
-          painCave.isFatal = 1;
-          simError();          
-        }
-      } else {
-        sprintf( painCave.errMsg, "Can not find SplitDipole distance parameter\n");
-        painCave.severity = OPENMD_ERROR;
-        painCave.isFatal = 1;
-        simError();          
-      }
-    }
-    
-    //setup quadrupole atom type in fortran side
-    if (isQuadrupole()) {
-      data = getPropertyByName("QuadrupoleMoments");
-      if (data != NULL) {
-        Vector3dGenericData* vector3dData= dynamic_cast<Vector3dGenericData*>(data);
-        
-        // Quadrupoles in OpenMD are set as the diagonal elements
-        // of the diagonalized traceless quadrupole moment tensor.
-        // The column vectors of the unitary matrix that diagonalizes 
-        // the quadrupole moment tensor become the eFrame (or the
-        // electrostatic version of the body-fixed frame.
-        
-        if (vector3dData != NULL) {
-          Vector3d diagElem= vector3dData->getData();
-          
-          setQuadrupoleMoments(&atp.ident, diagElem.getArrayPointer(), 
-                               &isError);
-          if (isError != 0) {
-            sprintf( painCave.errMsg,
-                     "Fortran rejected setQuadrupoleMoments\n");
-            painCave.severity = OPENMD_ERROR;
-            painCave.isFatal = 1;
-            simError();          
-          }
-          
-        } else {
-          sprintf( painCave.errMsg,
-                   "Can not cast GenericData to Vector3dGenericData\n");
-          painCave.severity = OPENMD_ERROR;
-          painCave.isFatal = 1;
-          simError();          
-        }
-      } else {
-        sprintf( painCave.errMsg, "Can not find QuadrupoleMoments\n");
-        painCave.severity = OPENMD_ERROR;
-        painCave.isFatal = 1;
-        simError();          
-      }
-      
-    }        
   }
 } //end namespace OpenMD

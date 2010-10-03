@@ -366,5 +366,32 @@ namespace OpenMD {
     return;
 
   }
+
+  RealType GB::getSuggestedCutoffRadius(AtomType* at1, AtomType* at2) {
+    if (!initialized_) initialize();   
+
+    RealType cut = 0.0;
+
+    if (at1->isGayBerne()) {
+      GayBerneParam gb1 = getGayBerneParam(at1);
+      RealType d1 = gb1.GB_d;
+      RealType l1 = gb1.GB_l;
+      // sigma is actually sqrt(2)*l  for prolate ellipsoids 
+      cut = max(cut, 2.5 * sqrt(2.0) * max(d1, l1));
+    } else if (at1->isLennardJones()) {
+      cut = max(cut, 2.5 * getLJSigma(at1));
+    }
+
+    if (at2->isGayBerne()) {
+      GayBerneParam gb2 = getGayBerneParam(at2);
+      RealType d2 = gb2.GB_d;
+      RealType l2 = gb2.GB_l;
+      cut = max(cut, 2.5 * sqrt(2.0) * max(d2, l2));
+    } else if (at1->isLennardJones()) {
+      cut = max(cut, 2.5 * getLJSigma(at2));
+    }
+   
+    return cut;
+  }
 }
 

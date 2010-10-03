@@ -486,5 +486,28 @@ namespace OpenMD {
     return;
     
   }
+
+  RealType EAM::getSuggestedCutoffRadius(AtomType* at1, AtomType* at2) {
+    if (!initialized_) initialize();   
+
+    RealType cut = 0.0;
+
+    map<AtomType*, EAMAtomData>::iterator it;
+
+    it = EAMMap.find(at1);
+    if (it != EAMMap.end()) {
+      EAMAtomData data1 = (*it).second;
+      cut = data1.rcut;
+    }
+
+    it = EAMMap.find(at2);
+    if (it != EAMMap.end()) {
+      EAMAtomData data2 = (*it).second;
+      if (data2.rcut > cut)
+        cut = data2.rcut;
+    }
+
+    return cut;
+  }
 }
 

@@ -244,49 +244,52 @@ namespace OpenMD {
     
     if (!initialized_) initialize();
     
-    RealType ros;
-    RealType rcos;
-    RealType myPot = 0.0;
-    RealType myPotC = 0.0;
-    RealType myDeriv = 0.0;
-    RealType myDerivC = 0.0;
-
-    std::pair<AtomType*, AtomType*> key = std::make_pair(idat.atype1, 
-                                                         idat.atype2);
-    LJInteractionData mixer = MixingMap[key];
-
-    RealType sigmai = mixer.sigmai;
-    RealType epsilon = mixer.epsilon;
+    pair<AtomType*, AtomType*> key = make_pair(idat.atype1, idat.atype2);
+    map<pair<AtomType*, AtomType*>, LJInteractionData>::iterator it;
+    it = MixingMap.find(key);
     
+    if (it != MixingMap.end())  {
+      
+      LJInteractionData mixer = (*it).second;
+      
+      RealType sigmai = mixer.sigmai;
+      RealType epsilon = mixer.epsilon;
+      
+      RealType ros;
+      RealType rcos;
+      RealType myPot = 0.0;
+      RealType myPotC = 0.0;
+      RealType myDeriv = 0.0;
+      RealType myDerivC = 0.0;
+     
+      ros = idat.rij * sigmai;
+      
+      getLJfunc(ros, myPot, myDeriv);
+      
+      if (shiftedPot_) {
+        rcos = idat.rcut * sigmai;
+        getLJfunc(rcos, myPotC, myDerivC);
+        myDerivC = 0.0;
+      } else if (LJ::shiftedFrc_) {
+        rcos = idat.rcut * sigmai;
+        getLJfunc(rcos, myPotC, myDerivC);
+        myPotC = myPotC + myDerivC * (idat.rij - idat.rcut) * sigmai;
+      } else {
+        myPotC = 0.0;
+        myDerivC = 0.0;        
+      }
 
-    ros = idat.rij * sigmai;
-
-    getLJfunc(ros, myPot, myDeriv);
-
-    if (shiftedPot_) {
-      rcos = idat.rcut * sigmai;
-      getLJfunc(rcos, myPotC, myDerivC);
-      myDerivC = 0.0;
-    } else if (LJ::shiftedFrc_) {
-      rcos = idat.rcut * sigmai;
-      getLJfunc(rcos, myPotC, myDerivC);
-      myPotC = myPotC + myDerivC * (idat.rij - idat.rcut) * sigmai;
-    } else {
-      myPotC = 0.0;
-      myDerivC = 0.0;
+      RealType pot_temp = idat.vdwMult * epsilon * (myPot - myPotC);
+      idat.vpair += pot_temp;
+      
+      RealType dudr = idat.sw * idat.vdwMult * epsilon * (myDeriv - 
+                                                          myDerivC)*sigmai;
+      
+      idat.pot += idat.sw * pot_temp;
+      idat.f1 = idat.d * dudr / idat.rij;
+      
     }
-
-    RealType pot_temp = idat.vdwMult * epsilon * (myPot - myPotC);
-    idat.vpair += pot_temp;
-
-    RealType dudr = idat.sw * idat.vdwMult * epsilon * (myDeriv - 
-                                                        myDerivC)*sigmai;
-    
-    idat.pot += idat.sw * pot_temp;
-    idat.f1 = idat.d * dudr / idat.rij;
-
     return;
-
   }
   
   void LJ::getLJfunc(RealType r, RealType &pot, RealType &deriv) {
@@ -304,5 +307,17 @@ namespace OpenMD {
     return;
   }
   
+  RealType LJ::getSuggestedCutoffRadius(AtomType* at1, AtomType* at2) {
+    if (!initialized_) initialize();   
+    pair<AtomType*, AtomType*> key = make_pair(at1, at2); 
+    map<pair<AtomType*, AtomType*>, LJInteractionData>::iterator it;
+    it = MixingMap.find(key);
+    if (it == MixingMap.end()) 
+      return 0.0;
+    else  {
+      LJInteractionData mixer = (*it).second;
+      return 2.5 * mixer.sigma;
+    }
+  }
 
 }

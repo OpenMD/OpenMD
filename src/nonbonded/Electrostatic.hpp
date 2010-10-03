@@ -83,10 +83,11 @@ namespace OpenMD {
     Electrostatic();
     void setForceField(ForceField *ff) {forceField_ = ff;};
     void addType(AtomType* atomType);
-    void calcForce(InteractionData idat);
-    void calcSkipCorrection(SkipCorrectionData skdat);
-    void calcSelfCorrection(SelfCorrectionData scdat);
+    virtual void calcForce(InteractionData idat);
+    virtual void calcSkipCorrection(SkipCorrectionData skdat);
+    virtual void calcSelfCorrection(SelfCorrectionData scdat);
     virtual string getName() {return name_;}
+    virtual RealType getSuggestedCutoffRadius(AtomType* at1, AtomType* at2);
 
     void setElectrostaticCutoffRadius( RealType theECR, RealType theRSW );
     void setElectrostaticSummationMethod( ElectrostaticSummationMethod esm );

@@ -762,7 +762,6 @@ namespace OpenMD {
     useSP = 0;
     useBoxDipole = 0;
 
-
     if (simParams_->haveElectrostaticSummationMethod()) {
       std::string myMethod = simParams_->getElectrostaticSummationMethod();
       toUpper(myMethod);
@@ -862,7 +861,6 @@ namespace OpenMD {
     MPI_Allreduce(&temp, &useAtomicVirial_, 1, MPI_INT, MPI_LOR, MPI_COMM_WORLD); 
 
 #endif
-
     fInfo_.SIM_uses_PBC = usePBC;    
     fInfo_.SIM_uses_DirectionalAtoms = useDirectionalAtom;
     fInfo_.SIM_uses_LennardJones = useLennardJones;
@@ -1472,7 +1470,7 @@ namespace OpenMD {
 
 
        [  Ixx -Ixy  -Ixz ]
-  J =| -Iyx  Iyy  -Iyz |
+    J =| -Iyx  Iyy  -Iyz |
        [ -Izx -Iyz   Izz ]
     */
 

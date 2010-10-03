@@ -49,8 +49,7 @@
 
 using namespace std;
 namespace OpenMD {
-  
-
+ 
   SHAPES::SHAPES() {
     initialized_ = false;
     lMax_ = 64;
@@ -71,21 +70,25 @@ namespace OpenMD {
     for (at = atomTypes->beginType(i); at != NULL;
          at = atomTypes->nextType(i)) {
       
-      if (at->isShape() || at->isLennardJones())
-        addType(at);
+      if (at->isShape()) 
+        addShape(dynamic_cast<ShapeAtomType*>(at));
+
+      if (at->isLennardJones())
+        addLJ(at);
+      
     }
     
     initialized_ = true;
   }
   
-  void SHAPES::addType(AtomType* atomType){
+  void SHAPES::addShape(ShapeAtomType* atomType){
     // add it to the map:
     AtomTypeProperties atp = atomType->getATP();    
-    
-    pair<map<int,AtomType*>::iterator,bool> ret;    
-    ret = ShapesMap.insert( pair<int, AtomType*>(atp.ident, atomType) );
+
+    pair<map<int,ShapeAtomType*>::iterator, bool> ret;
+    ret = shapesMap.insert( pair<int, ShapeAtomType*>(atp.ident, atomType));
     if (ret.second == false) {
-      sprintf( painCave.errMsg,
+      sprintf( painCave.errmsg,
                "SHAPES already had a previous entry with ident %d\n",
                atp.ident);
       painCave.severity = OPENMD_INFO;
@@ -93,18 +96,9 @@ namespace OpenMD {
       simError();         
     }   
     
-    if (atomType->isShape()) {
-      ShapeAtomType* sAtomType = dynamic_cast<ShapeAtomType*>(atomType);
-      if (sAtomType == NULL) {
-        sprintf(painCave.errMsg,
-                "SHAPES:: Can't cast to ShapeAtomType");
-        painCave.severity = OPENMD_ERROR;
-        painCave.isFatal = 1;
-        simError();
-      } 
-      ShapesMap.insert( pair<int, ShapeAtomType*>(atp.ident, sAtomType) );
-      
-    } else if (atomType->isLennardJones()) {
+    ShapesMap.insert( pair<int, ShapeAtomType*>(atp.ident, sAtomType) );
+    
+  } else if (atomType->isLennardJones()) {
       d1 = getLJSigma(atomType) / sqrt(2.0);
       e1 = getLJEpsilon(atomType);
     } else {
@@ -115,72 +109,7 @@ namespace OpenMD {
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal = 1;
       simError();
-    }
-    
-
-    // Now, iterate over all known types and add to the mixing map:
-    
-    map<int, AtomType*>::iterator it;
-    for( it = ShapesMap.begin(); it != SHAPESMap.end(); ++it) {
-      
-      AtomType* atype2 = (*it).second;
-      
-      RealType d2, l2, e2, er2, dw2;
-      
-      if (atype2->isGayBerne()) {
-        GayBerneParam gb2 = getGayBerneParam(atype2);
-        d2 = gb2.SHAPES_d;
-        l2 = gb2.SHAPES_l;
-        e2 = gb2.SHAPES_eps;
-        er2 = gb2.SHAPES_eps_ratio;
-        dw2 = gb2.SHAPES_dw;
-      } else if (atype2->isLennardJones()) {
-        d2 = getLJSigma(atype2) / sqrt(2.0);
-        e2 = getLJEpsilon(atype2);
-        l2 = d2;
-        er2 = 1.0;
-        dw2 = 1.0;
-      } 
-                       
-      SHAPESInteractionData mixer;        
-      
-      //  Cleaver paper uses sqrt of squares to get sigma0 for
-      //  mixed interactions.
-            
-      mixer.sigma0 = sqrt(d1*d1 + d2*d2);
-      mixer.xa2 = (l1*l1 - d1*d1)/(l1*l1 + d2*d2);
-      mixer.xai2 = (l2*l2 - d2*d2)/(l2*l2 + d1*d1);
-      mixer.x2 = (l1*l1 - d1*d1) * (l2*l2 - d2*d2) /
-        ((l2*l2 + d1*d1) * (l1*l1 + d2*d2));
- 
-      // assumed LB mixing rules for now:
-
-      mixer.dw = 0.5 * (dw1 + dw2);
-      mixer.eps0 = sqrt(e1 * e2);
-      
-      RealType er = sqrt(er1 * er2);
-      RealType ermu = pow(er,(1.0 / mu_));
-      RealType xp = (1.0 - ermu) / (1.0 + ermu);
-      RealType ap2 = 1.0 / (1.0 + ermu);
-      
-      mixer.xp2 = xp * xp;
-      mixer.xpap2 = xp * ap2;
-      mixer.xpapi2 = xp / ap2;
-
-      // only add this pairing if at least one of the atoms is a Gay-Berne atom
-
-      if (atomType->isGayBerne() || atype2->isGayBerne()) {
-
-        pair<AtomType*, AtomType*> key1, key2;
-        key1 = make_pair(atomType, atype2);
-        key2 = make_pair(atype2, atomType);
-        
-        MixingMap[key1] = mixer;
-        if (key2 != key1) {
-          MixingMap[key2] = mixer;
-        }
-      }
-    }      
+    }   
   }
   
 

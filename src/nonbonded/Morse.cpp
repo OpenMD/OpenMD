@@ -146,88 +146,110 @@ namespace OpenMD {
 
     if (!initialized_) initialize();
     
-    RealType myPot = 0.0;
-    RealType myPotC = 0.0;
-    RealType myDeriv = 0.0;
-    RealType myDerivC = 0.0;
-
-    pair<AtomType*, AtomType*> key = make_pair(idat.atype1, idat.atype2);
-    MorseInteractionData mixer = MixingMap[key];
-
-    RealType De = mixer.De;
-    RealType Re = mixer.Re;
-    RealType beta = mixer.beta;
-    MorseInteractionType interactionType = mixer.interactionType;
-   
-    // V(r) = D_e exp(-a(r-re)(exp(-a(r-re))-2)
-    
-    RealType expt     = -beta*(idat.rij - Re);
-    RealType expfnc   = exp(expt);
-    RealType expfnc2  = expfnc*expfnc;
-
-    RealType exptC = 0.0;
-    RealType expfncC = 0.0;
-    RealType expfnc2C = 0.0;
-
-    if (Morse::shiftedPot_ || Morse::shiftedFrc_) {
-      exptC     = -beta*(idat.rcut - Re);
-      expfncC   = exp(exptC);
-      expfnc2C  = expfncC*expfncC;
-    }
-
-
-    switch(interactionType) {
-    case shiftedMorse : {
-
-      myPot  = De * (expfnc2  - 2.0 * expfnc);
-      myDeriv   = 2.0 * De * beta * (expfnc - expfnc2);
-
-      if (Morse::shiftedPot_) {
-        myPotC = De * (expfnc2C - 2.0 * expfncC);
-        myDerivC = 0.0;
-      } else if (Morse::shiftedFrc_) {
-        myPotC = De * (expfnc2C - 2.0 * expfncC);
-        myDerivC  = 2.0 * De * beta * (expfnc2C - expfnc2C);
-        myPotC += myDerivC * (idat.rij - idat.rcut);
-      } else {
-        myPotC = 0.0;
-        myDerivC = 0.0;
+    pair<AtomType*, AtomType*> key = make_pair(idat.atype1, idat.atype2); 
+    map<pair<AtomType*, AtomType*>, MorseInteractionData>::iterator it;
+    it = MixingMap.find(key);
+    if (it != MixingMap.end()) {
+      MorseInteractionData mixer = (*it).second;
+      
+      RealType myPot = 0.0;
+      RealType myPotC = 0.0;
+      RealType myDeriv = 0.0;
+      RealType myDerivC = 0.0;
+      
+      RealType De = mixer.De;
+      RealType Re = mixer.Re;
+      RealType beta = mixer.beta;
+      MorseInteractionType interactionType = mixer.interactionType;
+      
+      // V(r) = D_e exp(-a(r-re)(exp(-a(r-re))-2)
+      
+      RealType expt     = -beta*(idat.rij - Re);
+      RealType expfnc   = exp(expt);
+      RealType expfnc2  = expfnc*expfnc;
+      
+      RealType exptC = 0.0;
+      RealType expfncC = 0.0;
+      RealType expfnc2C = 0.0;
+      
+      if (Morse::shiftedPot_ || Morse::shiftedFrc_) {
+        exptC     = -beta*(idat.rcut - Re);
+        expfncC   = exp(exptC);
+        expfnc2C  = expfncC*expfncC;
       }
-
-      break;
-    }
-    case repulsiveMorse : {
-
-      myPot  = De * expfnc2;
-      myDeriv  = -2.0 * De * beta * expfnc2;
-
-      if (Morse::shiftedPot_) {
-        myPotC = De * expfnc2C;
-        myDerivC = 0.0;
-      } else if (Morse::shiftedFrc_) {
-        myPotC = De * expfnc2C;
-        myDerivC = -2.0 * De * beta * expfnc2C;
-        myPotC += myDerivC * (idat.rij - idat.rcut);
-      } else {
-        myPotC = 0.0;
-        myDerivC = 0.0;
+      
+      
+      switch(interactionType) {
+      case shiftedMorse : {
+        
+        myPot  = De * (expfnc2  - 2.0 * expfnc);
+        myDeriv   = 2.0 * De * beta * (expfnc - expfnc2);
+        
+        if (Morse::shiftedPot_) {
+          myPotC = De * (expfnc2C - 2.0 * expfncC);
+          myDerivC = 0.0;
+        } else if (Morse::shiftedFrc_) {
+          myPotC = De * (expfnc2C - 2.0 * expfncC);
+          myDerivC  = 2.0 * De * beta * (expfnc2C - expfnc2C);
+          myPotC += myDerivC * (idat.rij - idat.rcut);
+        } else {
+          myPotC = 0.0;
+          myDerivC = 0.0;
+        }
+        
+        break;
       }
-
-      break;
+      case repulsiveMorse : {
+        
+        myPot  = De * expfnc2;
+        myDeriv  = -2.0 * De * beta * expfnc2;
+        
+        if (Morse::shiftedPot_) {
+          myPotC = De * expfnc2C;
+          myDerivC = 0.0;
+        } else if (Morse::shiftedFrc_) {
+          myPotC = De * expfnc2C;
+          myDerivC = -2.0 * De * beta * expfnc2C;
+          myPotC += myDerivC * (idat.rij - idat.rcut);
+        } else {
+          myPotC = 0.0;
+          myDerivC = 0.0;
+        }
+        
+        break;
+      }
+      }
+      
+      RealType pot_temp = idat.vdwMult * (myPot - myPotC);
+      idat.vpair += pot_temp;
+      
+      RealType dudr = idat.sw * idat.vdwMult * (myDeriv - myDerivC);
+      
+      idat.pot += idat.sw * pot_temp;
+      idat.f1 = idat.d * dudr / idat.rij;
     }
-    }
-
-    RealType pot_temp = idat.vdwMult * (myPot - myPotC);
-    idat.vpair += pot_temp;
-
-    RealType dudr = idat.sw * idat.vdwMult * (myDeriv - myDerivC);
-    
-    idat.pot += idat.sw * pot_temp;
-    idat.f1 = idat.d * dudr / idat.rij;
-
     return;
-
+    
   }
     
+  RealType Morse::getSuggestedCutoffRadius(AtomType* at1, AtomType* at2) {
+    if (!initialized_) initialize();   
+    pair<AtomType*, AtomType*> key = make_pair(at1, at2); 
+    map<pair<AtomType*, AtomType*>, MorseInteractionData>::iterator it;
+    it = MixingMap.find(key);
+    if (it == MixingMap.end()) 
+      return 0.0;
+    else  {
+      MorseInteractionData mixer = (*it).second;
+
+      RealType Re = mixer.Re;
+      RealType beta = mixer.beta;
+      // This value of the r corresponds to an energy about 1.48% of 
+      // the energy at the bottom of the Morse well.  For comparison, the
+      // Lennard-Jones function is about 1.63% of it's minimum value at
+      // a distance of 2.5 sigma.
+      return (4.9 + beta * Re) / beta;
+    }
+  }
 }
 

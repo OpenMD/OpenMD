@@ -48,7 +48,6 @@
 #include "utils/simError.h"
 #define __OPENMD_C
 #include "UseTheForce/DarkSide/atype_interface.h"
-#include "UseTheForce/DarkSide/electrostatic_interface.h"
 
 namespace OpenMD {
   AtomType::AtomType(){
@@ -192,54 +191,6 @@ namespace OpenMD {
     }
   }
   
-  
-  void AtomType::complete() {
-    int isError;
-    GenericData* data;   
-    
-    if (isElectrostatic()) {
-      newElectrostaticType(&atp, &isError);
-      if (isError != 0) {
-        sprintf( painCave.errMsg,
-                 "Fortran rejected newElectrostaticType\n");
-        painCave.severity = OPENMD_ERROR;
-        painCave.isFatal = 1;
-        simError();          
-      }
-    }
-    
-    if (isCharge()) {
-      data = getPropertyByName("Charge");
-      if (data != NULL) {
-	DoubleGenericData* doubleData= dynamic_cast<DoubleGenericData*>(data);
-        
-	if (doubleData != NULL) {
-	  RealType charge = doubleData->getData();
-	  setCharge(&atp.ident, &charge, &isError);
-          
-	  if (isError != 0) {
-	    sprintf( painCave.errMsg,
-		     "Fortran rejected setCharge\n");
-	    painCave.severity = OPENMD_ERROR;
-	    painCave.isFatal = 1;
-	    simError();          
-	  }
-	} else {
-	  sprintf( painCave.errMsg,
-		   "Can not cast GenericData to DoubleGenericData\n");
-	  painCave.severity = OPENMD_ERROR;
-	  painCave.isFatal = 1;
-	  simError();          
-	}
-      } else {
-	sprintf( painCave.errMsg, "Can not find Charge Parameters\n");
-	painCave.severity = OPENMD_ERROR;
-	painCave.isFatal = 1;
-	simError();          
-      }
-    }        
-  }
-
   void AtomType::addProperty(GenericData* genData) {
     myResponsibilities_[genData->getID()] = true;
     properties_.addProperty(genData);  

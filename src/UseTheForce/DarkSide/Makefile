@@ -14,8 +14,6 @@ Source    = \
 	switcheroo_interface.F90 \
 	simulation.F90 \
 	simulation_interface.F90 \
-	shapes.F90 \
-	shapes_interface.F90 \
 	MetalNonMetal.F90 \
 	MetalNonMetal_interface.F90
 
@@ -25,7 +23,6 @@ ParallelSource = \
 	neighborLists.F90 \
 	force_globals.F90 \
 	simulation.F90 \
-	shapes.F90 \
 	MetalNonMetal.F90
 
 Modules = \
@@ -33,7 +30,6 @@ Modules = \
 	force_globals \
 	fforceoptions \
 	neighborLists \
-	shapes \
 	mpiSimulation \
 	simulation \
 	switcheroo \

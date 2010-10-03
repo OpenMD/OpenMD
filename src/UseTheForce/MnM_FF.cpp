@@ -130,11 +130,6 @@ namespace OpenMD {
       at->makeFortranAtomType();
     }
     
-    for (at = atomTypeCont_.beginType(i); at != NULL;
-         at = atomTypeCont_.nextType(i)) {
-      at->complete();
-    }
-    
     hasSCtypes_ = false;
     for (at = atomTypeCont_.beginType(i); at != NULL;
          at = atomTypeCont_.nextType(i)) {

@@ -81,9 +81,7 @@ namespace OpenMD {
     void setGayBerne();
     void setSticky();
     void setStickyPower();
-    void setShape();
-    
-    virtual void complete();
+    void setShape();   
     
   private:
     

@@ -98,8 +98,6 @@ namespace OpenMD {
      */
     RealType getStrengthValueAt(RealType costheta, RealType phi);
     
-    virtual void complete();
-    
   private:
     
     std::vector<RealSphericalHarmonic*> contactFuncs;  // The contact functions
