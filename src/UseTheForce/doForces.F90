@@ -158,15 +158,15 @@ module doForces
 
 contains
 
-  FUNCTION omd_anint(x) result(res)
-    real(kind=dp), intent(in) :: x
-    real(kind=dp) :: round, res
-    ! accept IEEE rounding, and possible large even results 
-    ! on extended precision systems, use instead the corresponding EPSILON 
-    round= SIGN(1.0_dp/EPSILON(x),x) 
-    res= (x+round)-round 
-    RETURN
-  end FUNCTION omd_anint
+!!$  FUNCTION omd_anint(x) result(res)
+!!$    real(kind=dp), intent(in) :: x
+!!$    real(kind=dp) :: round, res
+!!$    ! accept IEEE rounding, and possible large even results 
+!!$    ! on extended precision systems, use instead the corresponding EPSILON 
+!!$    round= SIGN(1.0_dp/EPSILON(x),x) 
+!!$    res= (x+round)-round 
+!!$    RETURN
+!!$  end FUNCTION omd_anint
 
   subroutine createInteractionHash()
     integer :: nAtypes
@@ -1813,6 +1813,7 @@ contains
     real (kind = dp), dimension(3) :: q_j
     real ( kind = dp ), intent(out) :: r_sq
     real( kind = dp ) :: d(3), scaled(3)
+    real(kind=dp)::t
     integer i
 
     d(1) = q_j(1) - q_i(1)
@@ -1832,9 +1833,26 @@ contains
           
           ! wrap the scaled coordinates
 
-          scaled(1) = scaled(1) - omd_anint(scaled(1))
-          scaled(2) = scaled(2) - omd_anint(scaled(2))
-          scaled(3) = scaled(3) - omd_anint(scaled(3))
+          t = scaled(1)
+          if (t .ge. 0.0) then
+             scaled(1) = t - floor(t + 0.5)
+          else
+             scaled(1) = t + ceiling(t - 0.5)
+          endif
+
+          t = scaled(2)
+          if (t .ge. 0.0) then
+             scaled(2) = t - floor(t + 0.5)
+          else
+             scaled(2) = t + ceiling(t - 0.5)
+          endif
+
+          t = scaled(3)
+          if (t .ge. 0.0) then
+             scaled(3) = t - floor(t + 0.5)
+          else
+             scaled(3) = t + ceiling(t - 0.5)
+          endif
 
           ! calc the wrapped real coordinates from the wrapped scaled 
           ! coordinates
@@ -1844,17 +1862,37 @@ contains
           d(3)= Hmat(3,1)*scaled(1) + Hmat(3,2)*scaled(2) + Hmat(3,3)*scaled(3)
 
        else
-          ! calc the scaled coordinates.
-
+          ! calc the scaled coordinates
           scaled(1) = d(1) * HmatInv(1,1)
           scaled(2) = d(2) * HmatInv(2,2)
           scaled(3) = d(3) * HmatInv(3,3)
           
           ! wrap the scaled coordinates
           
-          scaled(1) = scaled(1) - omd_anint(scaled(1))
-          scaled(2) = scaled(2) - omd_anint(scaled(2))
-          scaled(3) = scaled(3) - omd_anint(scaled(3))
+          t = scaled(1)
+          if (t .ge. 0.0) then
+             scaled(1) = t - floor(t + 0.5)
+          else
+             scaled(1) = t + ceiling(t - 0.5)
+          endif
+
+          t = scaled(2)
+          if (t .ge. 0.0) then
+             scaled(2) = t - floor(t + 0.5)
+          else
+             scaled(2) = t + ceiling(t - 0.5)
+          endif
+
+          t = scaled(3)
+          if (t .ge. 0.0) then
+             scaled(3) = t - floor(t + 0.5)
+          else
+             scaled(3) = t + ceiling(t - 0.5)
+          endif
+
+          !scaled(1) = scaled(1) - omd_round(scaled(1))
+          !scaled(2) = scaled(2) - omd_round(scaled(2))
+          !scaled(3) = scaled(3) - omd_round(scaled(3))
 
           ! calc the wrapped real coordinates from the wrapped scaled 
           ! coordinates
