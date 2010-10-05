@@ -158,16 +158,6 @@ module doForces
 
 contains
 
-!!$  FUNCTION omd_anint(x) result(res)
-!!$    real(kind=dp), intent(in) :: x
-!!$    real(kind=dp) :: round, res
-!!$    ! accept IEEE rounding, and possible large even results 
-!!$    ! on extended precision systems, use instead the corresponding EPSILON 
-!!$    round= SIGN(1.0_dp/EPSILON(x),x) 
-!!$    res= (x+round)-round 
-!!$    RETURN
-!!$  end FUNCTION omd_anint
-
   subroutine createInteractionHash()
     integer :: nAtypes
     integer :: i
@@ -1825,13 +1815,14 @@ contains
 
        if( .not.boxIsOrthorhombic ) then
           ! calc the scaled coordinates.
+          ! unwrap the matmul and do things explicitly
           ! scaled = matmul(HmatInv, d)
 
           scaled(1) = HmatInv(1,1)*d(1) + HmatInv(1,2)*d(2) + HmatInv(1,3)*d(3)
           scaled(2) = HmatInv(2,1)*d(1) + HmatInv(2,2)*d(2) + HmatInv(2,3)*d(3)
           scaled(3) = HmatInv(3,1)*d(1) + HmatInv(3,2)*d(2) + HmatInv(3,3)*d(3)
           
-          ! wrap the scaled coordinates
+          ! wrap the scaled coordinates (but don't use anint for speed)
 
           t = scaled(1)
           if (t .ge. 0.0) then
@@ -1889,10 +1880,6 @@ contains
           else
              scaled(3) = t + ceiling(t - 0.5)
           endif
-
-          !scaled(1) = scaled(1) - omd_round(scaled(1))
-          !scaled(2) = scaled(2) - omd_round(scaled(2))
-          !scaled(3) = scaled(3) - omd_round(scaled(3))
 
           ! calc the wrapped real coordinates from the wrapped scaled 
           ! coordinates
