@@ -158,6 +158,16 @@ module doForces
 
 contains
 
+  FUNCTION omd_anint(x) result(res)
+    real(kind=dp), intent(in) :: x
+    real(kind=dp) :: round, res
+    ! accept IEEE rounding, and possible large even results 
+    ! on extended precision systems, use instead the corresponding EPSILON 
+    round= SIGN(1.0_dp/EPSILON(x),x) 
+    res= (x+round)-round 
+    RETURN
+  end FUNCTION omd_anint
+
   subroutine createInteractionHash()
     integer :: nAtypes
     integer :: i
@@ -1822,9 +1832,9 @@ contains
           
           ! wrap the scaled coordinates
 
-          scaled(1) = scaled(1) - anint(scaled(1), kind=dp)
-          scaled(2) = scaled(2) - anint(scaled(2), kind=dp)
-          scaled(3) = scaled(3) - anint(scaled(3), kind=dp)
+          scaled(1) = scaled(1) - omd_anint(scaled(1))
+          scaled(2) = scaled(2) - omd_anint(scaled(2))
+          scaled(3) = scaled(3) - omd_anint(scaled(3))
 
           ! calc the wrapped real coordinates from the wrapped scaled 
           ! coordinates
@@ -1842,9 +1852,9 @@ contains
           
           ! wrap the scaled coordinates
           
-          scaled(1) = scaled(1) - anint(scaled(1), kind=dp)
-          scaled(2) = scaled(2) - anint(scaled(2), kind=dp)
-          scaled(3) = scaled(3) - anint(scaled(3), kind=dp)
+          scaled(1) = scaled(1) - omd_anint(scaled(1))
+          scaled(2) = scaled(2) - omd_anint(scaled(2))
+          scaled(3) = scaled(3) - omd_anint(scaled(3))
 
           ! calc the wrapped real coordinates from the wrapped scaled 
           ! coordinates
