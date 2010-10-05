@@ -57,7 +57,6 @@ module doForces
   use switcheroo
   use neighborLists  
   use vector_class
-  use MetalNonMetal
   use status
   use ISO_C_BINDING
 
@@ -70,9 +69,7 @@ module doForces
 
   real(kind=dp), external :: get_cutoff
 
-  
 #define __FORTRAN90
-#include "UseTheForce/fCutoffPolicy.h"
 #include "UseTheForce/DarkSide/fInteractionMap.h"
 #include "UseTheForce/DarkSide/fElectrostaticSummationMethod.h"
 
@@ -82,12 +79,9 @@ module doForces
   logical, save :: haveNeighborList = .false.
   logical, save :: haveSIMvariables = .false.
   logical, save :: haveSaneForceField = .false.
-  logical, save :: haveGtypeCutoffMap = .false.
   logical, save :: haveDefaultCutoffs = .false.
   logical, save :: haveSkinThickness = .false.
   logical, save :: haveElectrostaticSummationMethod = .false.
-  logical, save :: haveCutoffPolicy = .false.
-  logical, save :: VisitCutoffsAfterComputing = .false.
 
   logical, save :: FF_uses_DirectionalAtoms
   logical, save :: FF_uses_Dipoles
@@ -96,7 +90,6 @@ module doForces
   logical, save :: FF_uses_SC
   logical, save :: FF_uses_MNM
  
-
   logical, save :: SIM_uses_DirectionalAtoms
   logical, save :: SIM_uses_EAM
   logical, save :: SIM_uses_SC
@@ -107,7 +100,6 @@ module doForces
   logical, save :: SIM_uses_AtomicVirial
 
   integer, save :: electrostaticSummationMethod
-  integer, save :: cutoffPolicy = TRADITIONAL_CUTOFF_POLICY
 
   real(kind=dp), save :: defaultRcut, defaultRsw, largestRcut
   real(kind=dp), save :: skinThickness
@@ -116,9 +108,7 @@ module doForces
 
   public :: init_FF
   public :: setCutoffs
-  public :: cWasLame
   public :: setElectrostaticMethod
-  public :: setCutoffPolicy
   public :: setSkinThickness
   public :: do_force_loop
 
@@ -128,271 +118,8 @@ module doForces
   real :: forceTimeInitial, forceTimeFinal
   integer :: nLoops
 #endif
-  
-  !! Variables for cutoff mapping and interaction mapping
-  real(kind=dp), dimension(:), allocatable :: atypeMaxCutoff
-  real(kind=dp), dimension(:), allocatable, target :: groupMaxCutoffRow
-  real(kind=dp), dimension(:), pointer :: groupMaxCutoffCol
-
-  integer, dimension(:), allocatable, target :: groupToGtypeRow
-  integer, dimension(:), pointer :: groupToGtypeCol => null()
-
-  real(kind=dp), dimension(:), allocatable,target :: gtypeMaxCutoffRow
-  real(kind=dp), dimension(:), pointer :: gtypeMaxCutoffCol
-  type ::gtypeCutoffs
-     real(kind=dp) :: rcut 
-     real(kind=dp) :: rcutsq 
-     real(kind=dp) :: rlistsq
-  end type gtypeCutoffs
-  type(gtypeCutoffs), dimension(:,:), allocatable :: gtypeCutoffMap
    
 contains
-
-  subroutine createGtypeCutoffMap()
-
-    logical :: i_is_LJ
-    logical :: i_is_Elect
-    logical :: i_is_Sticky
-    logical :: i_is_StickyP
-    logical :: i_is_GB
-    logical :: i_is_EAM
-    logical :: i_is_Shape
-    logical :: i_is_SC
-    logical :: GtypeFound
-
-    integer :: myStatus, nAtypes,  i, j, istart, iend, jstart, jend
-    integer :: n_in_i, me_i, ia, g, atom1, ja, n_in_j,me_j
-    integer :: nGroupsInRow
-    integer :: nGroupsInCol
-    integer :: nGroupTypesRow,nGroupTypesCol
-    real(kind=dp):: thisSigma, bigSigma, thisRcut, tradRcut, tol
-    real(kind=dp) :: biggestAtypeCutoff
-    integer :: c_ident_i
-
-#ifdef IS_MPI
-    nGroupsInRow = getNgroupsInRow(plan_group_row)
-    nGroupsInCol = getNgroupsInCol(plan_group_col)
-#endif
-    nAtypes = getSize(atypes)
-! Set all of the initial cutoffs to zero.
-    atypeMaxCutoff = 0.0_dp
-    biggestAtypeCutoff = 0.0_dp
-    do i = 1, nAtypes
-       if (SimHasAtype(i)) then     
-
-          if (haveDefaultCutoffs) then
-             atypeMaxCutoff(i) = defaultRcut
-          else
-             atypeMaxCutoff(i) = get_cutoff(c_ident_i)
-          endif
-                    
-          if (atypeMaxCutoff(i).gt.biggestAtypeCutoff) then
-             biggestAtypeCutoff = atypeMaxCutoff(i)
-          endif
-
-       endif
-    enddo
-    
-    istart = 1
-    jstart = 1
-#ifdef IS_MPI
-    iend = nGroupsInRow
-    jend = nGroupsInCol
-#else
-    iend = nGroups 
-    jend = nGroups
-#endif
-    
-    !! allocate the groupToGtype and gtypeMaxCutoff here.
-    if(.not.allocated(groupToGtypeRow)) then
-     !  allocate(groupToGtype(iend))
-       allocate(groupToGtypeRow(iend))
-    else
-       deallocate(groupToGtypeRow)
-       allocate(groupToGtypeRow(iend))
-    endif
-    if(.not.allocated(groupMaxCutoffRow)) then
-       allocate(groupMaxCutoffRow(iend))
-    else
-       deallocate(groupMaxCutoffRow)
-       allocate(groupMaxCutoffRow(iend))
-    end if
-
-    if(.not.allocated(gtypeMaxCutoffRow)) then
-       allocate(gtypeMaxCutoffRow(iend))
-    else
-       deallocate(gtypeMaxCutoffRow)
-       allocate(gtypeMaxCutoffRow(iend))
-    endif
-
-
-#ifdef IS_MPI
-       ! We only allocate new storage if we are in MPI because Ncol /= Nrow
-    if(.not.associated(groupToGtypeCol)) then
-       allocate(groupToGtypeCol(jend))
-    else
-       deallocate(groupToGtypeCol)
-       allocate(groupToGtypeCol(jend))
-    end if
-
-    if(.not.associated(groupMaxCutoffCol)) then
-       allocate(groupMaxCutoffCol(jend))
-    else
-       deallocate(groupMaxCutoffCol)
-       allocate(groupMaxCutoffCol(jend))
-    end if
-    if(.not.associated(gtypeMaxCutoffCol)) then
-       allocate(gtypeMaxCutoffCol(jend))
-    else
-       deallocate(gtypeMaxCutoffCol)       
-       allocate(gtypeMaxCutoffCol(jend))
-    end if
-
-       groupMaxCutoffCol = 0.0_dp
-       gtypeMaxCutoffCol = 0.0_dp
-
-#endif
-       groupMaxCutoffRow = 0.0_dp
-       gtypeMaxCutoffRow = 0.0_dp
-
-
-    !! first we do a single loop over the cutoff groups to find the
-    !! largest cutoff for any atypes present in this group.  We also
-    !! create gtypes at this point.
-    
-    tol = 1.0e-6_dp
-    nGroupTypesRow = 0
-    nGroupTypesCol = 0
-    do i = istart, iend       
-       n_in_i = groupStartRow(i+1) - groupStartRow(i)
-       groupMaxCutoffRow(i) = 0.0_dp
-       do ia = groupStartRow(i), groupStartRow(i+1)-1
-          atom1 = groupListRow(ia)
-#ifdef IS_MPI
-          me_i = atid_row(atom1)
-#else
-          me_i = atid(atom1)
-#endif          
-          if (atypeMaxCutoff(me_i).gt.groupMaxCutoffRow(i)) then 
-             groupMaxCutoffRow(i)=atypeMaxCutoff(me_i)
-          endif          
-       enddo
-       if (nGroupTypesRow.eq.0) then
-          nGroupTypesRow = nGroupTypesRow + 1
-          gtypeMaxCutoffRow(nGroupTypesRow) = groupMaxCutoffRow(i)
-          groupToGtypeRow(i) = nGroupTypesRow
-       else
-          GtypeFound = .false.
-          do g = 1, nGroupTypesRow
-             if ( abs(groupMaxCutoffRow(i) - gtypeMaxCutoffRow(g)).lt.tol) then
-                groupToGtypeRow(i) = g
-                GtypeFound = .true.
-             endif
-          enddo
-          if (.not.GtypeFound) then             
-             nGroupTypesRow = nGroupTypesRow + 1
-             gtypeMaxCutoffRow(nGroupTypesRow) = groupMaxCutoffRow(i)
-             groupToGtypeRow(i) = nGroupTypesRow
-          endif
-       endif
-    enddo    
-
-#ifdef IS_MPI
-    do j = jstart, jend       
-       n_in_j = groupStartCol(j+1) - groupStartCol(j)
-       groupMaxCutoffCol(j) = 0.0_dp
-       do ja = groupStartCol(j), groupStartCol(j+1)-1
-          atom1 = groupListCol(ja)
-
-          me_j = atid_col(atom1)
-
-          if (atypeMaxCutoff(me_j).gt.groupMaxCutoffCol(j)) then 
-             groupMaxCutoffCol(j)=atypeMaxCutoff(me_j)
-          endif          
-       enddo
-
-       if (nGroupTypesCol.eq.0) then
-          nGroupTypesCol = nGroupTypesCol + 1
-          gtypeMaxCutoffCol(nGroupTypesCol) = groupMaxCutoffCol(j)
-          groupToGtypeCol(j) = nGroupTypesCol
-       else
-          GtypeFound = .false.
-          do g = 1, nGroupTypesCol
-             if ( abs(groupMaxCutoffCol(j) - gtypeMaxCutoffCol(g)).lt.tol) then
-                groupToGtypeCol(j) = g
-                GtypeFound = .true.
-             endif
-          enddo
-          if (.not.GtypeFound) then             
-             nGroupTypesCol = nGroupTypesCol + 1
-             gtypeMaxCutoffCol(nGroupTypesCol) = groupMaxCutoffCol(j)
-             groupToGtypeCol(j) = nGroupTypesCol
-          endif
-       endif
-    enddo    
-
-#else
-! Set pointers to information we just found
-    nGroupTypesCol = nGroupTypesRow
-    groupToGtypeCol => groupToGtypeRow
-    gtypeMaxCutoffCol => gtypeMaxCutoffRow
-    groupMaxCutoffCol => groupMaxCutoffRow
-#endif
-
-    !! allocate the gtypeCutoffMap here.
-    allocate(gtypeCutoffMap(nGroupTypesRow,nGroupTypesCol))
-    !! then we do a double loop over all the group TYPES to find the cutoff
-    !! map between groups of two types
-    tradRcut = max(maxval(gtypeMaxCutoffRow),maxval(gtypeMaxCutoffCol))
-
-    do i = 1, nGroupTypesRow      
-       do j = 1, nGroupTypesCol
-       
-          select case(cutoffPolicy)
-          case(TRADITIONAL_CUTOFF_POLICY)
-             thisRcut = tradRcut
-          case(MIX_CUTOFF_POLICY)
-             thisRcut = 0.5_dp * (gtypeMaxCutoffRow(i) + gtypeMaxCutoffCol(j))
-          case(MAX_CUTOFF_POLICY)
-             thisRcut = max(gtypeMaxCutoffRow(i), gtypeMaxCutoffCol(j))
-          case default
-             call handleError("createGtypeCutoffMap", "Unknown Cutoff Policy")
-             return
-          end select
-          gtypeCutoffMap(i,j)%rcut = thisRcut
-          
-          if (thisRcut.gt.largestRcut) largestRcut = thisRcut
-
-          gtypeCutoffMap(i,j)%rcutsq = thisRcut*thisRcut
-
-          if (.not.haveSkinThickness) then
-             skinThickness = 1.0_dp
-          endif
-
-          gtypeCutoffMap(i,j)%rlistsq = (thisRcut + skinThickness)**2
-
-          ! sanity check
-
-          if (haveDefaultCutoffs) then
-             if (abs(gtypeCutoffMap(i,j)%rcut - defaultRcut).gt.0.0001) then
-                call handleError("createGtypeCutoffMap", "user-specified rCut does not match computed group Cutoff")
-             endif
-          endif
-       enddo
-    enddo
-
-    if(allocated(gtypeMaxCutoffRow)) deallocate(gtypeMaxCutoffRow)
-    if(allocated(groupMaxCutoffRow)) deallocate(groupMaxCutoffRow)
-    if(allocated(atypeMaxCutoff)) deallocate(atypeMaxCutoff)
-#ifdef IS_MPI
-    if(associated(groupMaxCutoffCol)) deallocate(groupMaxCutoffCol)
-    if(associated(gtypeMaxCutoffCol)) deallocate(gtypeMaxCutoffCol)
-#endif
-    groupMaxCutoffCol => null()
-    gtypeMaxCutoffCol => null()
-    
-    haveGtypeCutoffMap = .true.
-   end subroutine createGtypeCutoffMap
 
    subroutine setCutoffs(defRcut, defRsw, defSP, defSF)
 
@@ -437,39 +164,12 @@ contains
      endif
      
      localError = 0
-     call setLJDefaultCutoff( defaultRcut, defaultDoShiftPot, &
-          defaultDoShiftFrc )
-     call setElectrostaticCutoffRadius( defaultRcut, defaultRsw )
-     call setCutoffEAM( defaultRcut )
-     call setCutoffSC( defaultRcut )
-     call setMnMDefaultCutoff( defaultRcut, defaultDoShiftPot, &
-          defaultDoShiftFrc )
      call set_switch(defaultRsw, defaultRcut)
      call setHmatDangerousRcutValue(defaultRcut)
          
      haveDefaultCutoffs = .true.
-     haveGtypeCutoffMap = .false.
-
    end subroutine setCutoffs
-
-   subroutine cWasLame()
-     
-     VisitCutoffsAfterComputing = .true.
-     return
-     
-   end subroutine cWasLame
    
-   subroutine setCutoffPolicy(cutPolicy)
-     
-     integer, intent(in) :: cutPolicy
-     
-     cutoffPolicy = cutPolicy
-     haveCutoffPolicy = .true.
-     haveGtypeCutoffMap = .false.
-     
-   end subroutine setCutoffPolicy
-     
-
    subroutine setElectrostaticMethod( thisESM )
 
      integer, intent(in) :: thisESM
@@ -509,18 +209,6 @@ contains
 
     error = 0
 
-    if (.not. haveGtypeCutoffMap) then        
-       call createGtypeCutoffMap()       
-    endif
-
-    if (VisitCutoffsAfterComputing) then
-       call set_switch(largestRcut, largestRcut)       
-       call setHmatDangerousRcutValue(largestRcut)
-       call setCutoffEAM(largestRcut)
-       call setCutoffSC(largestRcut)
-       VisitCutoffsAfterComputing = .false.
-    endif
-
     if (.not. haveSIMvariables) then
        call setSimVariables()
     endif
@@ -546,7 +234,6 @@ contains
 #endif
     return
   end subroutine doReadyCheck
-
 
   subroutine init_FF(thisStat)
 
@@ -1330,7 +1017,7 @@ contains
     real( kind = dp ),dimension(LR_POT_TYPES) :: pot
     real( kind = dp ),dimension(nlocal) :: particle_pot
     integer :: sc_err = 0
-    integer :: atid1, atom, c_ident1
+    integer :: atom, c_ident1
     
     if ((FF_uses_EAM .and. SIM_uses_EAM) .or. (FF_uses_SC .and. SIM_uses_SC)) then
        
@@ -1349,8 +1036,7 @@ contains
 
        do atom = 1, nlocal
           c_ident1 = c_idents_local(atom)
-          
-          
+                    
           call doPreforceInteraction(c_ident1, rho(atom), frho(atom), dfrhodrho(atom)) 
           pot(METALLIC_POT) = pot(METALLIC_POT) + frho(atom)
           particle_pot(atom) = particle_pot(atom) + frho(atom)
@@ -1493,7 +1179,6 @@ contains
     integer, intent(in), optional :: atom2
     logical :: skip_it
     integer :: unique_id_1, unique_id_2
-    integer :: me_i,me_j
     integer :: i
 
     skip_it = .false. 
