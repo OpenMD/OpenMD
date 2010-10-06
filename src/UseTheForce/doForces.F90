@@ -1498,52 +1498,17 @@ contains
     p_met = 0.0
 
     f1(1:3) = 0.0
-    t1(1:3) = 0.0
-    t2(1:3) = 0.0
 
 #ifdef IS_MPI
     atid_i = atid_row(i)
     atid_j = atid_col(j)
-
-    do idx = 1, 9
-       A1(idx) = A_Row(idx, i)
-       A2(idx) = A_Col(idx, j)
-       eF1(idx) = eFrame_Row(idx, i)
-       eF2(idx) = eFrame_Col(idx, j)
-    enddo
-       
 #else
     atid_i = atid(i)
     atid_j = atid(j)
-    do idx = 1, 9
-       A1(idx) = A(idx, i)
-       A2(idx) = A(idx, j)
-       eF1(idx) = eFrame(idx, i)
-       eF2(idx) = eFrame(idx, j)       
-    enddo
-
 #endif
-
     
     iHash = InteractionHash(atid_i, atid_j)
 
-    !! For the metallic potentials, we need to pass dF[rho]/drho since
-    !! the pair calculation routines no longer are aware of parallel.
-
-    if ( (iand(iHash, EAM_PAIR).ne.0) .or. (iand(iHash, SC_PAIR).ne.0)  ) then       
-#ifdef IS_MPI
-       dfrhodrho_i = dfrhodrho_row(i)
-       dfrhodrho_j = dfrhodrho_col(j)
-       rho_i = rho_row(i)
-       rho_j = rho_col(j)
-#else
-       dfrhodrho_i = dfrhodrho(i)
-       dfrhodrho_j = dfrhodrho(j)
-       rho_i = rho(i)
-       rho_j = rho(j)
-#endif
-    end if
-    
     vdwMult = vdwScale(topoDist)
     electroMult = electrostaticScale(topoDist)
 
@@ -1553,53 +1518,106 @@ contains
     endif
     
     if ( iand(iHash, ELECTROSTATIC_PAIR).ne.0 ) then
+#ifdef IS_MPI
        call doElectrostaticPair(atid_i, atid_j, d, r, rijsq, rcut, sw, electroMult, &
-            vpair, fpair, p_elect, eF1, eF2, f1, t1, t2)
+            vpair, fpair, p_elect, eFrame_Row(:,i), eFrame_Col(:,j), &
+            f1, t_Row(:,i), t_Col(:,j))
+#else
+       call doElectrostaticPair(atid_i, atid_j, d, r, rijsq, rcut, sw, electroMult, &
+            vpair, fpair, p_elect, eFrame(:,i), eFrame(:,j), f1, t(:,i), t(:,j))
+#endif
     endif
     
     if ( iand(iHash, STICKY_PAIR).ne.0 ) then
+#ifdef IS_MPI
        call do_sticky_pair(atid_i, atid_j, d, r, rijsq, sw, vpair, fpair, &
-            p_hb, A1, A2, f1, t1, t2)
+            p_hb, A_Row(:,i), A_Col(:,j), f1, t_Row(:,i), t_Row(:,j))
+#else
+       call do_sticky_pair(atid_i, atid_j, d, r, rijsq, sw, vpair, fpair, &
+            p_hb, A(:,i), A(:,j), f1, t(:,i), t(:,j))
+#endif
     endif
     
     if ( iand(iHash, STICKYPOWER_PAIR).ne.0 ) then
+#ifdef IS_MPI
        call do_sticky_power_pair(atid_i, atid_j, d, r, rijsq, sw, vpair, fpair, &
-            p_hb, A1, A2, f1, t1, t2)
+            p_hb, A_Row(:,i), A_Col(:,j), f1, t_Row(:,i), t_Row(:,j))
+#else
+       call do_sticky_power_pair(atid_i, atid_j, d, r, rijsq, sw, vpair, fpair, &
+            p_hb, A(:,i), A(:,j), f1, t(:,i), t(:,j))
+#endif
     endif
     
     if ( iand(iHash, GAYBERNE_PAIR).ne.0 ) then
+#ifdef IS_MPI
        call do_gb_pair(atid_i, atid_j, d, r, rijsq, sw, vdwMult, vpair, fpair, &
-            p_vdw, A1, A2, f1, t1, t2)
+            p_vdw, A_Row(:,i), A_Col(:,j), f1, t_Row(:,i), t_Row(:,j))
+#else
+       call do_gb_pair(atid_i, atid_j, d, r, rijsq, sw, vdwMult, vpair, fpair, &
+            p_vdw, A(:,i), A(:,j), f1, t(:,i), t(:,j))
+#endif
     endif
     
     if ( iand(iHash, GAYBERNE_LJ).ne.0 ) then
+#ifdef IS_MPI
        call do_gb_pair(atid_i, atid_j, d, r, rijsq, sw, vdwMult, vpair, fpair, &
-            p_vdw, A1, A2, f1, t1, t2)
+            p_vdw, A_Row(:,i), A_Col(:,j), f1, t_Row(:,i), t_Row(:,j))
+#else
+       call do_gb_pair(atid_i, atid_j, d, r, rijsq, sw, vdwMult, vpair, fpair, &
+            p_vdw, A(:,i), A(:,j), f1, t(:,i), t(:,j))
+#endif
     endif
         
     if ( iand(iHash, SHAPE_PAIR).ne.0 ) then       
+#ifdef IS_MPI
        call do_shape_pair(atid_i, atid_j, d, r, rijsq, sw, vpair, fpair, &
-            p_vdw, A1, A2, f1, t1, t2)
+            p_vdw, A_Row(:,i), A_Col(:,j), f1, t_Row(:,i), t_Row(:,j))
+#else
+       call do_shape_pair(atid_i, atid_j, d, r, rijsq, sw, vpair, fpair, &
+            p_vdw, A(:,i), A(:,j), f1, t(:,i), t(:,j))
+#endif
     endif
     
     if ( iand(iHash, SHAPE_LJ).ne.0 ) then       
+#ifdef IS_MPI
        call do_shape_pair(atid_i, atid_j, d, r, rijsq, sw, vpair, fpair, &
-            p_vdw, A1, A2, f1, t1, t2)
+            p_vdw, A_Row(:,i), A_Col(:,j), f1, t_Row(:,i), t_Row(:,j))
+#else
+       call do_shape_pair(atid_i, atid_j, d, r, rijsq, sw, vpair, fpair, &
+            p_vdw, A(:,i), A(:,j), f1, t(:,i), t(:,j))
+#endif
     endif
 
-    if ( iand(iHash, EAM_PAIR).ne.0 ) then       
+    if ( iand(iHash, EAM_PAIR).ne.0 ) then 
+#ifdef IS_MPI      
        call do_eam_pair(atid_i, atid_j, d, r, rijsq, sw, vpair, &
-            fpair, p_met, f1, rho_i, rho_j, dfrhodrho_i, dfrhodrho_j, fshift_i,fshift_j)
+            fpair, p_met, f1, rho_row(i), rho_col(j), dfrhodrho_row(i), dfrhodrho_col(j), &
+            fshift_i, fshift_j)
+#else
+       call do_eam_pair(atid_i, atid_j, d, r, rijsq, sw, vpair, &
+            fpair, p_met, f1, rho(i), rho(j), dfrhodrho(i), dfrhodrho(j), fshift_i, fshift_j)
+#endif
     endif
 
     if ( iand(iHash, SC_PAIR).ne.0 ) then       
+#ifdef IS_MPI      
        call do_SC_pair(atid_i, atid_j, d, r, rijsq, sw, vpair, &
-            fpair, p_met, f1, rho_i, rho_j, dfrhodrho_i, dfrhodrho_j, fshift_i, fshift_j)
+            fpair, p_met, f1, rho_row(i), rho_col(j), dfrhodrho_row(i), dfrhodrho_col(j), &
+            fshift_i, fshift_j)
+#else
+       call do_SC_pair(atid_i, atid_j, d, r, rijsq, sw, vpair, &
+            fpair, p_met, f1, rho(i), rho(j), dfrhodrho(i), dfrhodrho(j), fshift_i, fshift_j)
+#endif
     endif
      
     if ( iand(iHash, MNM_PAIR).ne.0 ) then       
+#ifdef IS_MPI
        call do_mnm_pair(atid_i, atid_j, d, r, rijsq, rcut, sw, vdwMult, vpair, fpair, &
-            p_vdw, A1, A2, f1, t1, t2)
+            p_vdw, A_Row(:,i), A_Col(:,j), f1, t_Row(:,i), t_Col(:,j))
+#else
+       call do_mnm_pair(atid_i, atid_j, d, r, rijsq, rcut, sw, vdwMult, vpair, fpair, &
+            p_vdw, A(:,i), A(:,j), f1, t(:,i), t(:,j))
+#endif
     endif
 
 
@@ -1619,9 +1637,6 @@ contains
     do idx = 1, 3
        f_Row(idx,i) = f_Row(idx,i) + f1(idx)
        f_Col(idx,j) = f_Col(idx,j) - f1(idx)
-    
-       t_Row(idx,i) = t_Row(idx,i) + t1(idx)
-       t_Col(idx,j) = t_Col(idx,j) + t2(idx)
     enddo
        ! particle_pot is the difference between the full potential 
        ! and the full potential without the presence of a particular
@@ -1652,9 +1667,6 @@ contains
     do idx = 1, 3
        f(idx,i) = f(idx,i) + f1(idx)
        f(idx,j) = f(idx,j) - f1(idx)
-
-       t(idx,i) = t(idx,i) + t1(idx)
-       t(idx,j) = t(idx,j) + t2(idx)
     enddo
        ! particle_pot is the difference between the full potential 
        ! and the full potential without the presence of a particular
