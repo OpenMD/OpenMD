@@ -513,7 +513,7 @@ AC_REQUIRE([AC_CANONICAL_HOST])
 # Try to determine "good" native compiler flags if none specified on command
 # line
 
-if test "$ac_test_FFLAGS" != "set"; then
+if test "$ac_test_FCFLAGS" != "set"; then
   FCFLAGS=""
   case "${host_cpu}-${host_os}" in
 
