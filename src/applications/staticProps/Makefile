@@ -22,6 +22,7 @@ Source    = \
 	RhoR.cpp \
 	BondAngleDistribution.cpp \
 	pAngle.cpp \
+	ObjectCount.cpp \
 	NanoVolume.cpp
 BuiltParallelExe = 0
 

@@ -56,6 +56,7 @@ const char *gengetopt_args_info_help[] = {
   "      --bo                      bond order parameter (--rcut must be specified)",
   "      --bor                     bond order parameter as a function of radius \n                                  (--rcut must be specified)",
   "      --bad                     N(theta) bond angle density within (--rcut must \n                                  be specified)",
+  "      --count                   count of molecules matching selection criteria \n                                  (and associated statistics)",
   "  -g, --gofr                    g(r)",
   "      --gofz                    g(z)",
   "      --r_theta                 g(r, cos(theta))",
@@ -127,6 +128,7 @@ void clear_given (struct gengetopt_args_info *args_info)
   args_info->bo_given = 0 ;
   args_info->bor_given = 0 ;
   args_info->bad_given = 0 ;
+  args_info->count_given = 0 ;
   args_info->gofr_given = 0 ;
   args_info->gofz_given = 0 ;
   args_info->r_theta_given = 0 ;
@@ -222,23 +224,24 @@ void init_args_info(struct gengetopt_args_info *args_info)
   args_info->bo_help = gengetopt_args_info_help[25] ;
   args_info->bor_help = gengetopt_args_info_help[26] ;
   args_info->bad_help = gengetopt_args_info_help[27] ;
-  args_info->gofr_help = gengetopt_args_info_help[28] ;
-  args_info->gofz_help = gengetopt_args_info_help[29] ;
-  args_info->r_theta_help = gengetopt_args_info_help[30] ;
-  args_info->r_omega_help = gengetopt_args_info_help[31] ;
-  args_info->r_z_help = gengetopt_args_info_help[32] ;
-  args_info->theta_omega_help = gengetopt_args_info_help[33] ;
-  args_info->gxyz_help = gengetopt_args_info_help[34] ;
-  args_info->twodgofr_help = gengetopt_args_info_help[35] ;
-  args_info->p2_help = gengetopt_args_info_help[36] ;
-  args_info->rp2_help = gengetopt_args_info_help[37] ;
-  args_info->scd_help = gengetopt_args_info_help[38] ;
-  args_info->density_help = gengetopt_args_info_help[39] ;
-  args_info->slab_density_help = gengetopt_args_info_help[40] ;
-  args_info->p_angle_help = gengetopt_args_info_help[41] ;
-  args_info->hxy_help = gengetopt_args_info_help[42] ;
-  args_info->rho_r_help = gengetopt_args_info_help[43] ;
-  args_info->hullvol_help = gengetopt_args_info_help[44] ;
+  args_info->count_help = gengetopt_args_info_help[28] ;
+  args_info->gofr_help = gengetopt_args_info_help[29] ;
+  args_info->gofz_help = gengetopt_args_info_help[30] ;
+  args_info->r_theta_help = gengetopt_args_info_help[31] ;
+  args_info->r_omega_help = gengetopt_args_info_help[32] ;
+  args_info->r_z_help = gengetopt_args_info_help[33] ;
+  args_info->theta_omega_help = gengetopt_args_info_help[34] ;
+  args_info->gxyz_help = gengetopt_args_info_help[35] ;
+  args_info->twodgofr_help = gengetopt_args_info_help[36] ;
+  args_info->p2_help = gengetopt_args_info_help[37] ;
+  args_info->rp2_help = gengetopt_args_info_help[38] ;
+  args_info->scd_help = gengetopt_args_info_help[39] ;
+  args_info->density_help = gengetopt_args_info_help[40] ;
+  args_info->slab_density_help = gengetopt_args_info_help[41] ;
+  args_info->p_angle_help = gengetopt_args_info_help[42] ;
+  args_info->hxy_help = gengetopt_args_info_help[43] ;
+  args_info->rho_r_help = gengetopt_args_info_help[44] ;
+  args_info->hullvol_help = gengetopt_args_info_help[45] ;
   
 }
 
@@ -438,6 +441,8 @@ cmdline_parser_dump(FILE *outfile, struct gengetopt_args_info *args_info)
     write_into_file(outfile, "bor", 0, 0 );
   if (args_info->bad_given)
     write_into_file(outfile, "bad", 0, 0 );
+  if (args_info->count_given)
+    write_into_file(outfile, "count", 0, 0 );
   if (args_info->gofr_given)
     write_into_file(outfile, "gofr", 0, 0 );
   if (args_info->gofz_given)
@@ -528,6 +533,7 @@ reset_group_staticProps(struct gengetopt_args_info *args_info)
   args_info->bo_given = 0 ;
   args_info->bor_given = 0 ;
   args_info->bad_given = 0 ;
+  args_info->count_given = 0 ;
   args_info->gofr_given = 0 ;
   args_info->gofz_given = 0 ;
   args_info->r_theta_given = 0 ;
@@ -812,6 +818,7 @@ cmdline_parser_internal (int argc, char * const *argv, struct gengetopt_args_inf
         { "bo",	0, NULL, 0 },
         { "bor",	0, NULL, 0 },
         { "bad",	0, NULL, 0 },
+        { "count",	0, NULL, 0 },
         { "gofr",	0, NULL, 'g' },
         { "gofz",	0, NULL, 0 },
         { "r_theta",	0, NULL, 0 },
@@ -1247,6 +1254,23 @@ cmdline_parser_internal (int argc, char * const *argv, struct gengetopt_args_inf
                 &(local_args_info.bad_given), optarg, 0, 0, ARG_NO,
                 check_ambiguity, override, 0, 0,
                 "bad", '-',
+                additional_error))
+              goto failure;
+          
+          }
+          /* count of molecules matching selection criteria (and associated statistics).  */
+          else if (strcmp (long_options[option_index].name, "count") == 0)
+          {
+          
+            if (args_info->staticProps_group_counter && override)
+              reset_group_staticProps (args_info);
+            args_info->staticProps_group_counter += 1;
+          
+            if (update_arg( 0 , 
+                 0 , &(args_info->count_given),
+                &(local_args_info.count_given), optarg, 0, 0, ARG_NO,
+                check_ambiguity, override, 0, 0,
+                "count", '-',
                 additional_error))
               goto failure;
           

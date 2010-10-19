@@ -103,6 +103,7 @@ struct gengetopt_args_info
   const char *bo_help; /**< @brief bond order parameter (--rcut must be specified) help description.  */
   const char *bor_help; /**< @brief bond order parameter as a function of radius (--rcut must be specified) help description.  */
   const char *bad_help; /**< @brief N(theta) bond angle density within (--rcut must be specified) help description.  */
+  const char *count_help; /**< @brief count of molecules matching selection criteria (and associated statistics) help description.  */
   const char *gofr_help; /**< @brief g(r) help description.  */
   const char *gofz_help; /**< @brief g(z) help description.  */
   const char *r_theta_help; /**< @brief g(r, cos(theta)) help description.  */
@@ -148,6 +149,7 @@ struct gengetopt_args_info
   unsigned int bo_given ;	/**< @brief Whether bo was given.  */
   unsigned int bor_given ;	/**< @brief Whether bor was given.  */
   unsigned int bad_given ;	/**< @brief Whether bad was given.  */
+  unsigned int count_given ;	/**< @brief Whether count was given.  */
   unsigned int gofr_given ;	/**< @brief Whether gofr was given.  */
   unsigned int gofz_given ;	/**< @brief Whether gofz was given.  */
   unsigned int r_theta_given ;	/**< @brief Whether r_theta was given.  */

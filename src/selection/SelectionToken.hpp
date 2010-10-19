@@ -153,6 +153,7 @@ namespace OpenMD {
     const static int x            = atomproperty | dynamic | 2;
     const static int y            = atomproperty | dynamic | 3;
     const static int z            = atomproperty | dynamic | 4;
+    const static int r            = atomproperty | dynamic | 5;
         
     const static int opGT         = comparator |  0;
     const static int opGE         = comparator |  1;

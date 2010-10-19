@@ -80,6 +80,7 @@ namespace OpenMD {
     tokenMap_.insert(TokenMapType::value_type("x", Token(Token::x, std::string("x"))));
     tokenMap_.insert(TokenMapType::value_type("y", Token(Token::y, std::string("y"))));
     tokenMap_.insert(TokenMapType::value_type("z", Token(Token::z, std::string("z"))));
+    tokenMap_.insert(TokenMapType::value_type("r", Token(Token::z, std::string("r"))));
     tokenMap_.insert(TokenMapType::value_type("to", Token(Token::to, std::string("to"))));
     
     tokenMap_.insert(TokenMapType::value_type("all", Token(Token::all, std::string("all"))));
