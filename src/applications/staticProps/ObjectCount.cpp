@@ -68,8 +68,13 @@ void ObjectCount::process() {
   SimInfo::MoleculeIterator mi;
   Molecule::RigidBodyIterator rbIter;
   
+  counts_.clear();
+  counts_.resize(10, 0);
   DumpReader reader(info_, dumpFilename_);    
   int nFrames = reader.getNFrames();
+  unsigned long int nsum = 0;
+  unsigned long int n2sum = 0;
+
   for (int i = 0; i < nFrames; i += step_) {
     reader.readFrame(i);
     currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
@@ -87,29 +92,19 @@ void ObjectCount::process() {
 	seleMan_.setSelectionSet(evaluator_.evaluate());
     }
         
-    int count = 0;
-    int k; 
+    int count = seleMan_.getSelectionCount();
 
-    for (StuntDouble* sd = seleMan_.beginSelected(k); 
-         sd != NULL; sd = seleMan_.nextSelected(k)) {
-      count++;
+    if (counts_.size() <= count)  {
+      counts_.resize(count, 0);
     }
-    
-    if (counts_.size() < count) counts_.resize(count);
+
     counts_[count]++;
+
+    nsum += count;
+    n2sum += count * count;
   }
    
   int nProcessed = nFrames /step_;
-
-  vector<int>::iterator it;
-  unsigned long int n;
-  unsigned long int nsum = 0;
-  unsigned long int n2sum = 0;
-  for (it = counts_.begin(); it != counts_.end(); ++it) {
-    n = (*it);
-    nsum += n;
-    n2sum += n*n;
-  }
 
   nAvg = nsum / nProcessed;
   n2Avg = n2sum / nProcessed;
@@ -125,11 +120,11 @@ void ObjectCount::process() {
       ofs << "# <N> = "<< nAvg << "\n";
       ofs << "# <N^2> = " << n2Avg << "\n";
       ofs << "# sqrt(<N^2> - <N>^2)  = " << sDev << "\n";
-      ofs << "# N\tcount(N)\n";
-      
+      ofs << "# N\tcounts[N]\n";
       for (int i = 0; i < counts_.size(); ++i) {
-        ofs << i <<"\t" << counts_[i]<< std::endl;
-      }        
+        ofs << i << "\t" << counts_[i] << "\n";
+      }
+      
     } else {
       
       sprintf(painCave.errMsg, "ObjectCount: unable to open %s\n", outputFilename_.c_str());
