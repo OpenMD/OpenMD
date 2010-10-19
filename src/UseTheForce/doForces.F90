@@ -1837,21 +1837,21 @@ contains
           ! wrap the scaled coordinates (but don't use anint for speed)
 
           t = scaled(1)
-          if (t .ge. 0.0) then
+          if (t .gt. 0.0) then
              scaled(1) = t - floor(t + 0.5)
           else
              scaled(1) = t - ceiling(t - 0.5)
           endif
 
           t = scaled(2)
-          if (t .ge. 0.0) then
+          if (t .gt. 0.0) then
              scaled(2) = t - floor(t + 0.5)
           else
              scaled(2) = t - ceiling(t - 0.5)
           endif
 
           t = scaled(3)
-          if (t .ge. 0.0) then
+          if (t .gt. 0.0) then
              scaled(3) = t - floor(t + 0.5)
           else
              scaled(3) = t - ceiling(t - 0.5)
@@ -1873,21 +1873,21 @@ contains
           ! wrap the scaled coordinates
           
           t = scaled(1)
-          if (t .ge. 0.0) then
+          if (t .gt. 0.0) then
              scaled(1) = t - floor(t + 0.5)
           else
              scaled(1) = t - ceiling(t - 0.5)
           endif
 
           t = scaled(2)
-          if (t .ge. 0.0) then
+          if (t .gt. 0.0) then
              scaled(2) = t - floor(t + 0.5)
           else
              scaled(2) = t - ceiling(t - 0.5)
           endif
 
           t = scaled(3)
-          if (t .ge. 0.0) then
+          if (t .gt. 0.0) then
              scaled(3) = t - floor(t + 0.5)
           else
              scaled(3) = t - ceiling(t - 0.5)
