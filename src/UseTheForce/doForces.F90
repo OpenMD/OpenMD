@@ -1840,21 +1840,21 @@ contains
           if (t .ge. 0.0) then
              scaled(1) = t - floor(t + 0.5)
           else
-             scaled(1) = t + ceiling(t - 0.5)
+             scaled(1) = t - ceiling(t - 0.5)
           endif
 
           t = scaled(2)
           if (t .ge. 0.0) then
              scaled(2) = t - floor(t + 0.5)
           else
-             scaled(2) = t + ceiling(t - 0.5)
+             scaled(2) = t - ceiling(t - 0.5)
           endif
 
           t = scaled(3)
           if (t .ge. 0.0) then
              scaled(3) = t - floor(t + 0.5)
           else
-             scaled(3) = t + ceiling(t - 0.5)
+             scaled(3) = t - ceiling(t - 0.5)
           endif
 
           ! calc the wrapped real coordinates from the wrapped scaled 
@@ -1876,21 +1876,21 @@ contains
           if (t .ge. 0.0) then
              scaled(1) = t - floor(t + 0.5)
           else
-             scaled(1) = t + ceiling(t - 0.5)
+             scaled(1) = t - ceiling(t - 0.5)
           endif
 
           t = scaled(2)
           if (t .ge. 0.0) then
              scaled(2) = t - floor(t + 0.5)
           else
-             scaled(2) = t + ceiling(t - 0.5)
+             scaled(2) = t - ceiling(t - 0.5)
           endif
 
           t = scaled(3)
           if (t .ge. 0.0) then
              scaled(3) = t - floor(t + 0.5)
           else
-             scaled(3) = t + ceiling(t - 0.5)
+             scaled(3) = t - ceiling(t - 0.5)
           endif
 
           ! calc the wrapped real coordinates from the wrapped scaled 
