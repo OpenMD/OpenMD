@@ -49,6 +49,7 @@
 #include "integrators/NPTi.hpp"
 #include "integrators/NPTf.hpp"
 #include "integrators/NPTxyz.hpp"
+#include "integrators/NPTsz.hpp"
 #include "integrators/NPAT.hpp"
 #include "integrators/NPrT.hpp"
 #include "integrators/NgammaT.hpp"
@@ -102,6 +103,7 @@ namespace OpenMD {
     IntegratorFactory::getInstance()->registerIntegrator(new IntegratorBuilder<NPTi>("NPTI"));
     IntegratorFactory::getInstance()->registerIntegrator(new IntegratorBuilder<NPTf>("NPTF"));
     IntegratorFactory::getInstance()->registerIntegrator(new IntegratorBuilder<NPTxyz>("NPTXYZ"));
+    IntegratorFactory::getInstance()->registerIntegrator(new IntegratorBuilder<NPTsz>("NPTSZ"));
     IntegratorFactory::getInstance()->registerIntegrator(new IntegratorBuilder<NPAT>("NPAT"));
     IntegratorFactory::getInstance()->registerIntegrator(new IntegratorBuilder<NPrT>("NPRT"));
     IntegratorFactory::getInstance()->registerIntegrator(new IntegratorBuilder<NPrT>("NPGT"));
