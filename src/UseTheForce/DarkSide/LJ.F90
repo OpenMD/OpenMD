@@ -350,9 +350,9 @@ contains
     
     pot = pot + sw*pot_temp
 
-    f1(1) = fx
-    f1(2) = fy
-    f1(3) = fz
+    f1(1) = f1(1) + fx
+    f1(2) = f1(2) + fy
+    f1(3) = f1(3) + fz
 
     return    
 

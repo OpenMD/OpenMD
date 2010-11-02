@@ -1531,7 +1531,7 @@ contains
     if ( iand(iHash, STICKY_PAIR).ne.0 ) then
 #ifdef IS_MPI
        call do_sticky_pair(atid_i, atid_j, d, r, rijsq, sw, vpair, fpair, &
-            p_hb, A_Row(:,i), A_Col(:,j), f1, t_Row(:,i), t_Row(:,j))
+            p_hb, A_Row(:,i), A_Col(:,j), f1, t_Row(:,i), t_Col(:,j))
 #else
        call do_sticky_pair(atid_i, atid_j, d, r, rijsq, sw, vpair, fpair, &
             p_hb, A(:,i), A(:,j), f1, t(:,i), t(:,j))
@@ -1541,7 +1541,7 @@ contains
     if ( iand(iHash, STICKYPOWER_PAIR).ne.0 ) then
 #ifdef IS_MPI
        call do_sticky_power_pair(atid_i, atid_j, d, r, rijsq, sw, vpair, fpair, &
-            p_hb, A_Row(:,i), A_Col(:,j), f1, t_Row(:,i), t_Row(:,j))
+            p_hb, A_Row(:,i), A_Col(:,j), f1, t_Row(:,i), t_Col(:,j))
 #else
        call do_sticky_power_pair(atid_i, atid_j, d, r, rijsq, sw, vpair, fpair, &
             p_hb, A(:,i), A(:,j), f1, t(:,i), t(:,j))
@@ -1551,7 +1551,7 @@ contains
     if ( iand(iHash, GAYBERNE_PAIR).ne.0 ) then
 #ifdef IS_MPI
        call do_gb_pair(atid_i, atid_j, d, r, rijsq, sw, vdwMult, vpair, fpair, &
-            p_vdw, A_Row(:,i), A_Col(:,j), f1, t_Row(:,i), t_Row(:,j))
+            p_vdw, A_Row(:,i), A_Col(:,j), f1, t_Row(:,i), t_Col(:,j))
 #else
        call do_gb_pair(atid_i, atid_j, d, r, rijsq, sw, vdwMult, vpair, fpair, &
             p_vdw, A(:,i), A(:,j), f1, t(:,i), t(:,j))
@@ -1561,7 +1561,7 @@ contains
     if ( iand(iHash, GAYBERNE_LJ).ne.0 ) then
 #ifdef IS_MPI
        call do_gb_pair(atid_i, atid_j, d, r, rijsq, sw, vdwMult, vpair, fpair, &
-            p_vdw, A_Row(:,i), A_Col(:,j), f1, t_Row(:,i), t_Row(:,j))
+            p_vdw, A_Row(:,i), A_Col(:,j), f1, t_Row(:,i), t_Col(:,j))
 #else
        call do_gb_pair(atid_i, atid_j, d, r, rijsq, sw, vdwMult, vpair, fpair, &
             p_vdw, A(:,i), A(:,j), f1, t(:,i), t(:,j))
@@ -1571,7 +1571,7 @@ contains
     if ( iand(iHash, SHAPE_PAIR).ne.0 ) then       
 #ifdef IS_MPI
        call do_shape_pair(atid_i, atid_j, d, r, rijsq, sw, vpair, fpair, &
-            p_vdw, A_Row(:,i), A_Col(:,j), f1, t_Row(:,i), t_Row(:,j))
+            p_vdw, A_Row(:,i), A_Col(:,j), f1, t_Row(:,i), t_Col(:,j))
 #else
        call do_shape_pair(atid_i, atid_j, d, r, rijsq, sw, vpair, fpair, &
             p_vdw, A(:,i), A(:,j), f1, t(:,i), t(:,j))
@@ -1581,7 +1581,7 @@ contains
     if ( iand(iHash, SHAPE_LJ).ne.0 ) then       
 #ifdef IS_MPI
        call do_shape_pair(atid_i, atid_j, d, r, rijsq, sw, vpair, fpair, &
-            p_vdw, A_Row(:,i), A_Col(:,j), f1, t_Row(:,i), t_Row(:,j))
+            p_vdw, A_Row(:,i), A_Col(:,j), f1, t_Row(:,i), t_Col(:,j))
 #else
        call do_shape_pair(atid_i, atid_j, d, r, rijsq, sw, vpair, fpair, &
             p_vdw, A(:,i), A(:,j), f1, t(:,i), t(:,j))
