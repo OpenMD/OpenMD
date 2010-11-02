@@ -13,6 +13,7 @@ MySource    = \
 	NPTi.cpp \
 	NPTf.cpp \
 	NPTxyz.cpp \
+	NPTsz.cpp \
 	NPAT.cpp \
 	NPrT.cpp \
 	NgammaT.cpp \
