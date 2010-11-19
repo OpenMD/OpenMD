@@ -120,7 +120,9 @@ struct gengetopt_args_info
   const char *p_angle_help; /**< @brief p(cos(theta)) help description.  */
   const char *hxy_help; /**< @brief hxy help description.  */
   const char *rho_r_help; /**< @brief rho of R help description.  */
+  const char *angle_r_help; /**< @brief angle of R help description.  */
   const char *hullvol_help; /**< @brief hull volume of nanoparticle help description.  */
+  const char *tet_param_help; /**< @brief tetrahedrality order parameter help description.  */
   
   unsigned int help_given ;	/**< @brief Whether help was given.  */
   unsigned int version_given ;	/**< @brief Whether version was given.  */
@@ -166,7 +168,9 @@ struct gengetopt_args_info
   unsigned int p_angle_given ;	/**< @brief Whether p_angle was given.  */
   unsigned int hxy_given ;	/**< @brief Whether hxy was given.  */
   unsigned int rho_r_given ;	/**< @brief Whether rho_r was given.  */
+  unsigned int angle_r_given ;	/**< @brief Whether angle_r was given.  */
   unsigned int hullvol_given ;	/**< @brief Whether hullvol was given.  */
+  unsigned int tet_param_given ;	/**< @brief Whether tet_param was given.  */
 
   char **inputs ; /**< @brief unamed options (options without names) */
   unsigned inputs_num ; /**< @brief unamed options number */

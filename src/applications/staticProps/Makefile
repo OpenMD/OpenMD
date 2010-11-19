@@ -18,8 +18,10 @@ Source    = \
 	Hxy.cpp \
         RippleOP.cpp \
 	BondOrderParameter.cpp \
+	TetrahedralityParam.cpp \
 	BOPofR.cpp \
 	RhoR.cpp \
+	AngleR.cpp \
 	BondAngleDistribution.cpp \
 	pAngle.cpp \
 	ObjectCount.cpp \

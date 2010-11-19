@@ -100,9 +100,11 @@ namespace OpenMD {
         seleMan_.setSelectionSet(evaluator_.evaluate());
       }
       
+
+      int runningTot = 0;
       for (sd = seleMan_.beginSelected(i); sd != NULL; 
            sd = seleMan_.nextSelected(i)) {
-        
+       
         Vector3d pos = sd->getPos();
         
         Vector3d r1 = CenterOfMass - pos;
@@ -134,7 +136,7 @@ namespace OpenMD {
       atot += count_[i];
     
     for(int i = 0; i < count_.size(); ++i) {
-      histogram_[i] = double(count_[i] / atot);
+      histogram_[i] = double(count_[i]) / double(atot);
     }    
   }
   
@@ -147,9 +149,10 @@ namespace OpenMD {
       rdfStream << "#nFrames:\t" << nProcessed_ << "\n";
       rdfStream << "#selection: (" << selectionScript_ << ")\n";
       rdfStream << "#cos(theta)\tp(cos(theta))\n";
+      RealType dct = 2.0 / histogram_.size();
       for (int i = 0; i < histogram_.size(); ++i) {
-        RealType ct = -1.0 + i / histogram_.size();
-        rdfStream << ct << "\t" << histogram_[i] << "\n";
+        RealType ct = -1.0 + (2.0 * i + 1) / (histogram_.size());
+        rdfStream << ct << "\t" << histogram_[i]/dct << "\n";
       }
       
     } else {

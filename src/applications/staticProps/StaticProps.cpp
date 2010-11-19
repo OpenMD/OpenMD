@@ -73,6 +73,9 @@
 #include "applications/staticProps/Hxy.hpp"
 #endif
 #include "applications/staticProps/RhoR.hpp"
+#include "applications/staticProps/AngleR.hpp"
+#include "applications/staticProps/RhoAngleR.hpp"
+#include "applications/staticProps/TetrahedralityParam.hpp"
 
 using namespace OpenMD;
 
@@ -187,33 +190,33 @@ int main(int argc, char* argv[]){
     maxLen = std::min(std::min(hmat(0, 0), hmat(1, 1)), hmat(2, 2)) /2.0;
     zmaxLen = hmat(2,2);    
   }    
-
+  
   StaticAnalyser* analyser;
   if (args_info.gofr_given){
     analyser= new GofR(info, dumpFileName, sele1, sele2, maxLen, 
-                       args_info.nbins_arg);        
+		       args_info.nbins_arg);        
   } else if (args_info.gofz_given) {
     analyser= new GofZ(info, dumpFileName, sele1, sele2, maxLen,
-                       args_info.nbins_arg);
+		       args_info.nbins_arg);
   } else if (args_info.r_z_given) {
     analyser  = new GofRZ(info, dumpFileName, sele1, sele2, maxLen, zmaxLen, 
-                          args_info.nbins_arg, args_info.nbins_z_arg);
+			  args_info.nbins_arg, args_info.nbins_z_arg);
   } else if (args_info.r_theta_given) {
     analyser  = new GofRTheta(info, dumpFileName, sele1, sele2, maxLen, 
-                              args_info.nbins_arg, args_info.nanglebins_arg);
+			      args_info.nbins_arg, args_info.nanglebins_arg);
   } else if (args_info.r_omega_given) {
     analyser  = new GofROmega(info, dumpFileName, sele1, sele2, maxLen, 
-                              args_info.nbins_arg, args_info.nanglebins_arg);
+			      args_info.nbins_arg, args_info.nanglebins_arg);
   } else if (args_info.theta_omega_given) {
     analyser  = new GofAngle2(info, dumpFileName, sele1, sele2, 
-                              args_info.nanglebins_arg);
+			      args_info.nanglebins_arg);
   } else if (args_info.gxyz_given) {
     if (args_info.refsele_given) {
       analyser= new GofXyz(info, dumpFileName, sele1, sele2,args_info.refsele_arg, 
-                           maxLen, args_info.nbins_arg);        
+			   maxLen, args_info.nbins_arg);        
     } else {
       sprintf( painCave.errMsg,
-               "--refsele must set when --gxyz is used");
+	       "--refsele must set when --gxyz is used");
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal = 1;
       simError();  
@@ -221,14 +224,14 @@ int main(int argc, char* argv[]){
   } else if (args_info.twodgofr_given){
     if (args_info.dz_given) {
       analyser= new TwoDGofR(info, dumpFileName, sele1, sele2, maxLen, 
-                             args_info.dz_arg, args_info.nbins_arg);        
+			     args_info.dz_arg, args_info.nbins_arg);        
     } else {
       sprintf( painCave.errMsg,
-               "A slab width (dz) must be specified when calculating TwoDGofR");
+	       "A slab width (dz) must be specified when calculating TwoDGofR");
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal = 1;
       simError();
-    }
+    }    
   } else if (args_info.p2_given) {
     analyser  = new P2OrderParameter(info, dumpFileName, sele1, sele2);
   } else if (args_info.rp2_given){
@@ -236,11 +239,24 @@ int main(int argc, char* argv[]){
   } else if (args_info.bo_given){
     if (args_info.rcut_given) {
       analyser = new BondOrderParameter(info, dumpFileName, sele1, 
-                                        args_info.rcut_arg, 
-                                        args_info.nbins_arg);
+					args_info.rcut_arg, 
+					args_info.nbins_arg);
     } else {
       sprintf( painCave.errMsg,
-               "A cutoff radius (rcut) must be specified when calculating Bond Order Parameters");
+	       "A cutoff radius (rcut) must be specified when calculating Bond Order Parameters");
+      painCave.severity = OPENMD_ERROR;
+      painCave.isFatal = 1;
+      simError();
+    }
+    
+  } else if (args_info.tet_param_given) {
+    if (args_info.rcut_given) {	  
+      analyser = new TetrahedralityParam(info, dumpFileName, sele1, 
+					 args_info.rcut_arg, 
+					 args_info.nbins_arg);
+    } else {
+      sprintf( painCave.errMsg,
+	       "A cutoff radius (rcut) must be specified when calculating Tetrahedrality Parameters");
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal = 1;
       simError();
@@ -248,10 +264,10 @@ int main(int argc, char* argv[]){
   } else if (args_info.bor_given){
     if (args_info.rcut_given) {
       analyser = new BOPofR(info, dumpFileName, sele1, args_info.rcut_arg,
-                            args_info.nbins_arg, maxLen);
+			    args_info.nbins_arg, maxLen);
     } else {
       sprintf( painCave.errMsg,
-               "A cutoff radius (rcut) must be specified when calculating Bond Order Parameters");
+	       "A cutoff radius (rcut) must be specified when calculating Bond Order Parameters");
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal = 1;
       simError();
@@ -259,25 +275,25 @@ int main(int argc, char* argv[]){
   } else if (args_info.bad_given){
     if (args_info.rcut_given) {
       analyser = new BondAngleDistribution(info, dumpFileName, sele1, args_info.rcut_arg,
-                                           args_info.nbins_arg);
+					   args_info.nbins_arg);
     } else {
       sprintf( painCave.errMsg,
-               "A cutoff radius (rcut) must be specified when calculating Bond Angle Distributions");
+	       "A cutoff radius (rcut) must be specified when calculating Bond Angle Distributions");
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal = 1;
       simError();
-    }
+      }
   } else if (args_info.scd_given) {
     if (batchMode) {
       analyser  = new SCDOrderParameter(info, dumpFileName, args_info.molname_arg, 
-                                        args_info.begin_arg, args_info.end_arg);
+					args_info.begin_arg, args_info.end_arg);
     } else{
       std::string sele3 = args_info.sele3_arg;
       analyser  = new SCDOrderParameter(info, dumpFileName, sele1, sele2, sele3);
     }
   }else if (args_info.density_given) {
     analyser= new DensityPlot(info, dumpFileName, sele1, sele2, maxLen,
-                              args_info.nbins_arg);  
+			      args_info.nbins_arg);  
   } else if (args_info.count_given) {
     analyser = new ObjectCount(info, dumpFileName, sele1 );
   } else if (args_info.slab_density_given) {
@@ -287,31 +303,33 @@ int main(int argc, char* argv[]){
 #if defined(HAVE_FFTW_H) || defined(HAVE_DFFTW_H) || defined(HAVE_FFTW3_H)
   }else if (args_info.hxy_given) {
     analyser = new Hxy(info, dumpFileName, sele1, args_info.nbins_x_arg, 
-                       args_info.nbins_y_arg, args_info.nbins_arg);
+		       args_info.nbins_y_arg, args_info.nbins_arg);
 #endif
   }else if (args_info.rho_r_given) {
     if (args_info.radius_given){
       analyser = new RhoR(info, dumpFileName, sele1, maxLen,args_info.nbins_arg,args_info.radius_arg);
     }else{
       sprintf( painCave.errMsg,
-               "A particle radius (radius) must be specified when calculating Rho(r)");
+	       "A particle radius (radius) must be specified when calculating Rho(r)");
       painCave.severity = OPENMD_ERROR;
       painCave.isFatal = 1;
       simError();
     }
-  }else if (args_info.hullvol_given) {
+  } else if (args_info.hullvol_given) {
     analyser = new NanoVolume(info, dumpFileName, sele1);
+  } else if (args_info.angle_r_given) {
+    analyser = new AngleR(info, dumpFileName, sele1, maxLen,args_info.nbins_arg);
   }
-  
+    
   if (args_info.output_given) {
     analyser->setOutputName(args_info.output_arg);
   }
   if (args_info.step_given) {
     analyser->setStep(args_info.step_arg);
   }
-
+  
   analyser->process();
-
+  
   delete analyser;    
   delete info;
 
