@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2008, 2010 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -38,27 +38,64 @@
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
  * [4]  Vardeman & Gezelter, in progress (2009).                        
  */
+ 
+#ifndef INTEGRATOR_LANGEVINHULLFORCEMANAGER_HPP
+#define INTEGRATOR_LANGEVINHULLFORCEMANAGER_HPP
 
-#ifndef INTEGRATOR_SMIPDYNAMICS_HPP
-#define INTEGRATOR_SMIPDYNAMICS_HPP
-#include <map>
-#include <vector>
-#include "integrators/VelocityVerletIntegrator.hpp"
+#include "brains/ForceManager.hpp"
+#include "brains/Thermo.hpp"
+#include "primitives/Molecule.hpp"
+#include "integrators/Velocitizer.hpp"
+#include "math/Hull.hpp"
+#include "math/Triangle.hpp"
+#include "math/SeqRandNumGen.hpp"
 
 namespace OpenMD {
-
-
-
-class SMIPDynamics: public VelocityVerletIntegrator {
-  public:
-    SMIPDynamics(SimInfo* info);
-
-  private:    
-    virtual void moveA();
-    virtual void moveB();
-    virtual RealType calcConservedQuantity();            
+   
+  /**
+   * @class LangevinHullForceManager
+   * Force manager for NPT Langevin Hull Dynamics
+   * applying friction and random forces as well as torques. 
+   * Stochasitc force is determined by area of surface triangles 
+   * on the convex hull. See: Kohanoff et al. CHEMPHYSCHEM 2005, 6, 1848-1852.
+   */
+  class LangevinHullForceManager : public ForceManager{
     
-};
+  public:
+    LangevinHullForceManager(SimInfo * info);
+    
+  protected:
+    virtual void postCalculation();
+    
+  private:
+    std::vector<Vector3d> genTriangleForces(int nTriangles, RealType variance);
 
-}
-#endif
+    Globals* simParams;
+    SeqRandNumGen randNumGen_;    
+    Velocitizer* veloMunge;
+
+    RealType dt_;
+    RealType targetTemp_;
+    RealType targetPressure_; 
+    RealType viscosity_;
+
+    RealType variance_;
+
+  enum HullTypeEnum {
+      hullConvex,
+      hullAlphaShape,
+      hullUnknown
+    };
+    
+    std::map<std::string, HullTypeEnum> stringToEnumMap_;
+    HullTypeEnum hullType_;
+
+
+    
+    Hull* surfaceMesh_;
+    std::vector<StuntDouble*> localSites_;
+  };
+  
+} //end namespace OpenMD
+#endif //LANGEVINHULL_FORCEMANAGER
+

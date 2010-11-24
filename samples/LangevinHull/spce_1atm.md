@@ -29,7 +29,7 @@ component{
   nMol = 1372;
 }
 
-ensemble = "LHull";
+ensemble = "LangevinHull";
 forceField = "Amber";
 electrostaticSummationMethod = "shifted_force";
 electrostaticScreeningMethod = "damped";

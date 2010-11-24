@@ -157,7 +157,7 @@ int main(int argc,char* argv[]){
     Integrator* myIntegrator = IntegratorFactory::getInstance()->createIntegrator(toUpperCopy(simParams->getEnsemble()), info);
  
     if (myIntegrator == NULL) {
-      sprintf(painCave.errMsg, "Integrator Factory can not create %s Integrator\n",
+      sprintf(painCave.errMsg, "Integrator Factory cannot create %s Integrator\n",
 	      simParams->getEnsemble().c_str());
       painCave.isFatal = 1;
       simError();

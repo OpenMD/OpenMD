@@ -99,7 +99,7 @@ Samples = \
 	samples/bond-order \
 	samples/Madelung \
 	samples/RNEMD \
-	samples/SMIPD \
+	samples/LangevinHull \
 	samples/zeolite
 
 

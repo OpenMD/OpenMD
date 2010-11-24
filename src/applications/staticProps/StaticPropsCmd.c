@@ -905,7 +905,7 @@ cmdline_parser_internal (int argc, char * const *argv, struct gengetopt_args_inf
               "nbins_x", 'x',
               additional_error))
             goto failure;
-        
+         
           break;
         case 'y':	/* number of bins in y axis.  */
         
@@ -1017,6 +1017,21 @@ cmdline_parser_internal (int argc, char * const *argv, struct gengetopt_args_inf
           break;
 
         case 0:	/* Long option with no short option */
+	  /* number of bins in z axis.  */
+	  if (strcmp (long_options[option_index].name, "nbins_z") == 0)
+          {        
+	          
+	    if (update_arg( (void *)&(args_info->nbins_z_arg), 
+	       	&(args_info->nbins_z_orig), &(args_info->nbins_z_given),
+	        &(local_args_info.nbins_z_given), optarg, 0, "100", ARG_INT,
+	        check_ambiguity, override, 0, 0,
+	        "nbins_z", '-',
+	         additional_error))
+	       goto failure;
+	          
+	  }
+
+
           /* slab width (dz).  */
           else if (strcmp (long_options[option_index].name, "dz") == 0)
           {

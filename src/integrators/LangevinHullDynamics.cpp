@@ -47,18 +47,18 @@
  * @version 1.0
  */
 
-#include "integrators/SMIPDynamics.hpp"
+#include "integrators/LangevinHullDynamics.hpp"
 #include "primitives/Molecule.hpp"
 #include "utils/PhysicalConstants.hpp"
-#include "integrators/SMIPDForceManager.hpp"
+#include "integrators/LangevinHullForceManager.hpp"
 namespace OpenMD {
 
   
-   SMIPDynamics::SMIPDynamics(SimInfo* info) : VelocityVerletIntegrator(info){
-    setForceManager(new SMIPDForceManager(info));
+   LangevinHullDynamics::LangevinHullDynamics(SimInfo* info) : VelocityVerletIntegrator(info){
+    setForceManager(new LangevinHullForceManager(info));
   }
   
-  void SMIPDynamics::moveA(){
+  void LangevinHullDynamics::moveA(){
     SimInfo::MoleculeIterator i;
     Molecule::IntegrableObjectIterator  j;
     Molecule* mol;
@@ -113,7 +113,7 @@ namespace OpenMD {
     
   }    
 
-  void SMIPDynamics::moveB(){
+  void LangevinHullDynamics::moveB(){
     SimInfo::MoleculeIterator i;
     Molecule::IntegrableObjectIterator  j;
     Molecule* mol;
@@ -162,7 +162,7 @@ namespace OpenMD {
   }
 
 
-  RealType SMIPDynamics::calcConservedQuantity() {
+  RealType LangevinHullDynamics::calcConservedQuantity() {
     return 0.0;
   }
 
