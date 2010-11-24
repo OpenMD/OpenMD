@@ -16,21 +16,14 @@ component{
 
 forceField="MnM";
 
-ensemble = "LHull";
+ensemble = "LangevinHull";
 dt = 1.0;
 runTime = 5e4;
 
-thermalTime = 500.0;
 sampleTime = 1e4;
 statusTime=10;
 seed = 985456376;
 
-tempSet="false";
-useInitialExtendedSystemState="false";
-useInitialTime="false";
-
-tauThermostat = 1E5;
-tauBarostat = 1E5;
 electrostaticSummationMethod = "shifted_force";
 electrostaticScreeningMethod = "damped";
 cutoffRadius = 12;
@@ -41,19 +34,14 @@ targetTemp = 300.0;
 targetPressure = 100.0;
 viscosity = 0.0089;
 
-tauThermostat = 1e3;
-tauBarostat = 1e4;
-
 usePeriodicBoundaryConditions = "false";
-
-
 
   </MetaData>
   <Snapshot>
     <FrameData>
-        Time: 1000000
+        Time: 0
         Hmat: {{ 72.468166, 0, 0 }, { 0, 71.028458, 0 }, { 0, 0, 69.736755 }}
-  Thermostat: 1.538023594e-06 , -0.09838895418
+  Thermostat: 0 , 0
     Barostat: {{ 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 }}
     </FrameData>
     <StuntDoubles>

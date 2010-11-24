@@ -5,7 +5,7 @@
 
 component{
   type = "Au";
-	nMol = 15707;
+  nMol = 15707;
 }
 
 targetTemp = 400.0;
@@ -14,30 +14,23 @@ viscosity = 0.07288;
 
 forceField = "SC";
 forceFieldFileName = "SuttonChen.QSC.frc";
-//forceFieldVariant="QSC";
 
-ensemble = "LHull";
+ensemble = "LangevinHull";
 dt = 4.0;
 runTime = 5e4;
 
-thermalTime = 1000.0;
 sampleTime = 500.0;
 statusTime = 4;
 seed = 985456376;
 
-tempSet="false";
 usePeriodicBoundaryConditions = "false";
-useInitialExtendedSystemState="false";
-useInitialTime="false";
-tauThermostat = 1E3;
-tauBarostat = 5E3;
 
   </MetaData>
   <Snapshot>
     <FrameData>
-        Time: 100000
+        Time: 0
         Hmat: {{ 400, 0, 0 }, { 0, 400, 0 }, { 0, 0, 400 }}
-  Thermostat: 0.0004996900459 , 7.246892182
+  Thermostat: 0 , 0
     Barostat: {{ 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 }}
     </FrameData>
     <StuntDoubles>

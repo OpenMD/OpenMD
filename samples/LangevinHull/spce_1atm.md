@@ -1,28 +1,7 @@
 <OpenMD version=1>
   <MetaData>
 
-
-molecule{
-  name = "SPCE";
-  
-  atom[0]{
-    type = "O_SPCE";
-    position( 0.0, 0.0, -0.06461 );
-  }
-  atom[1]{
-    type = "H_SPCE";
-    position( 0.0, 0.81649, 0.51275 );
-  }
-  atom[2]{
-    type = "H_SPCE";
-    position( 0.0, -0.81649, 0.51275 );
-  }
-  
-  rigidBody[0]{
-    members(0, 1, 2);
-  }
-
-}
+#include "water.md"
 
 component{
   type = "SPCE";
@@ -33,7 +12,6 @@ ensemble = "LangevinHull";
 forceField = "Amber";
 electrostaticSummationMethod = "shifted_force";
 electrostaticScreeningMethod = "damped";
-dielectric = 80.0;
 dampingAlpha = 0.20;
 cutoffRadius = 9.0;
 switchingRadius = 9.0;
@@ -42,21 +20,11 @@ targetTemp = 300;
 targetPressure = 1.0;
 viscosity = 0.0089;
 
-tauThermostat = 1e3;
-tauBarostat = 1e4;
-
 dt = 1.0;
-runTime = 5e4;
-useInitialTime = "false";
-useInitialExtendedSystemState = "false";
+runTime = 5e3;
 usePeriodicBoundaryConditions = "false";
-tempSet = "false";
-thermalTime = 10;
-sampleTime = 1e4;
+sampleTime = 1e3;
 statusTime = 10;
-
-
-HydroPropFile = "spce.diff";
 
   </MetaData>
   <Snapshot>

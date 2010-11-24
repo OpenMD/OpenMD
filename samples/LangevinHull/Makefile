@@ -13,7 +13,6 @@ SampleFiles =  \
 	spce_Au_1atm.md \
 	spce_Au_100atm.md \
 	metals.md \
-	thiols.md \
 	water.md
 
 DEV_ROOT=../..
