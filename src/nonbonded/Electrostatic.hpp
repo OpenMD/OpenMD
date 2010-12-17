@@ -47,6 +47,7 @@
 #include "UseTheForce/ForceField.hpp"
 #include "math/SquareMatrix3.hpp"
 #include "math/CubicSpline.hpp"
+#include "brains/SimInfo.hpp"
 
 namespace OpenMD {
 
@@ -62,14 +63,14 @@ namespace OpenMD {
   };
   
   enum ElectrostaticSummationMethod{
-    NONE,
-    SWITCHING_FUNCTION,
-    SHIFTED_POTENTIAL,
-    SHIFTED_FORCE,
-    REACTION_FIELD,
-    EWALD_FULL,  /**< Ewald methods aren't supported yet */
-    EWALD_PME,   /**< Ewald methods aren't supported yet */
-    EWALD_SPME   /**< Ewald methods aren't supported yet */
+    esm_HARD,
+    esm_SWITCHING_FUNCTION,
+    esm_SHIFTED_POTENTIAL,
+    esm_SHIFTED_FORCE,
+    esm_REACTION_FIELD,
+    esm_EWALD_FULL,  /**< Ewald methods aren't supported yet */
+    esm_EWALD_PME,   /**< Ewald methods aren't supported yet */
+    esm_EWALD_SPME   /**< Ewald methods aren't supported yet */
   };
 
   enum ElectrostaticScreeningMethod{
@@ -99,15 +100,17 @@ namespace OpenMD {
     void initialize();
     string name_;
     bool initialized_;
-    bool haveDefaultCutoff_;
+    bool haveCutoffRadius_;
     bool haveDampingAlpha_;
     bool haveDielectric_;
     bool haveElectroSpline_;
     std::map<int, AtomType*> ElectrostaticList;
     std::map<AtomType*, ElectrostaticAtomData> ElectrostaticMap;
     ForceField* forceField_;
-    RealType defaultCutoff_;
-    RealType defaultCutoff2_;
+    SimInfo* info_;
+    Globals* simParams_;
+    RealType cutoffRadius_;
+    RealType cutoffRadius2_;
     RealType pre11_;
     RealType pre12_;
     RealType pre22_;
@@ -118,6 +121,8 @@ namespace OpenMD {
     int np_;
     ElectrostaticSummationMethod summationMethod_;    
     ElectrostaticScreeningMethod screeningMethod_;
+    map<string, ElectrostaticSummationMethod> summationMap_;
+    map<string, ElectrostaticScreeningMethod> screeningMap_;
     RealType dampingAlpha_;
     RealType alpha2_;
     RealType alpha4_;

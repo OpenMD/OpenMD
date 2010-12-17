@@ -47,13 +47,8 @@
 
 #define initFortranFF FC_FUNC(initfortranff, INITFORTRANFF)
 #define doForceLoop FC_FUNC(doforceloop, DOFORCELOOP)
-#define getAccumulatedBoxDipole FC_FUNC(getaccumulatedboxdipole, GETACCUMULATEDBOXDIPOLE)
-#define setAccumulateBoxDipole FC_FUNC(setaccumulateboxdipole, SETACCUMULATEBOXDIPOLE)
-#define setFortranElectrostaticMethod FC_FUNC(setfortranelectrostaticmethod, SETFORTRANELECTROSTATICMETHOD)
-#define notifyFortranCutoffPolicy FC_FUNC(notifyfortrancutoffpolicy, NOTIFYFORTRANCUTOFFPOLICY)
 #define notifyFortranSkinThickness FC_FUNC(notifyfortranskinthickness, NOTIFYFORTRANSKINTHICKNESS)
 #define notifyFortranCutoffs FC_FUNC(notifyfortrancutoffs, NOTIFYFORTRANCUTOFFS)
-#define notifyFortranYouAreOnYourOwn FC_FUNC(notifyfortranyouareonyourown, NOTIFYFORTRANYOUAREONYOUROWN)
 
 extern "C"{
   
@@ -70,22 +65,11 @@ extern "C"{
 		    RealType* particlePotArray,
                     int* isError );
 
-  void getAccumulatedBoxDipole( RealType* boxDipole );
-
-  void setAccumulateBoxDipole();
-
-  void setFortranElectrostaticMethod( int* electrostaticMethod );
-
-  void notifyFortranCutoffPolicy( int* cutPolicy );
-
   void notifyFortranSkinThickness( RealType *skinThickness );
 
   void notifyFortranCutoffs( RealType *rCut,
 			     RealType *rSw,
 			     int *ljsp,
 			     int *ljsf);
-
-  void notifyFortranYouAreOnYourOwn( );
-
 }
 #endif

@@ -53,7 +53,6 @@ module doForces
   use fForceOptions
   use simulation
   use definitions
-  use atype_module
   use switcheroo
   use neighborLists  
   use vector_class
@@ -71,44 +70,29 @@ module doForces
 
 #define __FORTRAN90
 #include "UseTheForce/DarkSide/fInteractionMap.h"
-#include "UseTheForce/DarkSide/fElectrostaticSummationMethod.h"
 
   INTEGER, PARAMETER:: PREPAIR_LOOP = 1
   INTEGER, PARAMETER:: PAIR_LOOP    = 2
 
   logical, save :: haveNeighborList = .false.
   logical, save :: haveSIMvariables = .false.
-  logical, save :: haveSaneForceField = .false.
-  logical, save :: haveDefaultCutoffs = .false.
+  logical, save :: haveCutoffs = .false.
   logical, save :: haveSkinThickness = .false.
-  logical, save :: haveElectrostaticSummationMethod = .false.
-
-  logical, save :: FF_uses_DirectionalAtoms
-  logical, save :: FF_uses_Dipoles
-  logical, save :: FF_uses_GayBerne
-  logical, save :: FF_uses_EAM
-  logical, save :: FF_uses_SC
-  logical, save :: FF_uses_MNM
  
   logical, save :: SIM_uses_DirectionalAtoms
-  logical, save :: SIM_uses_EAM
-  logical, save :: SIM_uses_SC
-  logical, save :: SIM_uses_MNM
-  logical, save :: SIM_requires_postpair_calc
-  logical, save :: SIM_requires_prepair_calc
+  logical, save :: SIM_uses_MetallicAtoms
+  logical, save :: SIM_requires_skip_correction
+  logical, save :: SIM_requires_self_correction
   logical, save :: SIM_uses_PBC
   logical, save :: SIM_uses_AtomicVirial
 
-  integer, save :: electrostaticSummationMethod
-
-  real(kind=dp), save :: defaultRcut, defaultRsw, largestRcut
+  real(kind=dp), save :: rCut, rSwitch, rList, rListSq, rCutSq
   real(kind=dp), save :: skinThickness
-  logical, save :: defaultDoShiftPot
-  logical, save :: defaultDoShiftFrc
+  logical, save :: shifted_pot
+  logical, save :: shifted_force
 
   public :: init_FF
   public :: setCutoffs
-  public :: setElectrostaticMethod
   public :: setSkinThickness
   public :: do_force_loop
 
@@ -121,29 +105,35 @@ module doForces
    
 contains
 
-   subroutine setCutoffs(defRcut, defRsw, defSP, defSF)
+   subroutine setCutoffs(rc, rsw, sp, sf)
 
-     real(kind=dp),intent(in) :: defRcut, defRsw
-     integer, intent(in) :: defSP, defSF
+     real(kind=dp),intent(in) :: rc, rsw
+     integer, intent(in) :: sp, sf
      character(len = statusMsgSize) :: errMsg
      integer :: localError
 
-     defaultRcut = defRcut
-     defaultRsw = defRsw
-    
-     if (defSP .ne. 0) then  
-        defaultDoShiftPot = .true.
-     else
-        defaultDoShiftPot = .false.
+     rCut = rc
+     rSwitch = rsw
+     rCutsq = rCut * rCut
+
+     if (haveSkinThickness) then
+        rList = rCut + skinThickness
+        rListSq = rListSq
      endif
-     if (defSF .ne. 0) then  
-        defaultDoShiftFrc = .true.
+    
+     if (sp .ne. 0) then  
+        shifted_pot = .true.
      else
-        defaultDoShiftFrc = .false.
+        shifted_pot = .false.
+     endif
+     if (sf .ne. 0) then  
+        shifted_force = .true.
+     else
+        shifted_force = .false.
      endif
 
-     if (abs(defaultRcut-defaultRsw) .lt. 0.0001) then
-        if (defaultDoShiftFrc) then
+     if (abs(rCut - rSwitch) .lt. 0.0001) then
+        if (shifted_force) then
            write(errMsg, *) &
                 'cutoffRadius and switchingRadius are set to the', newline &
                 // tab, 'same value.  OpenMD will use shifted force', newline &
@@ -158,48 +148,41 @@ contains
            
            call handleInfo("setCutoffs", errMsg)
            
-           defaultDoShiftPot = .true.
+           shifted_pot = .true.
         endif
                 
      endif
      
      localError = 0
-     call set_switch(defaultRsw, defaultRcut)
-     call setHmatDangerousRcutValue(defaultRcut)
+     call set_switch(rSwitch, rCut)
+     call setHmatDangerousRcutValue(rCut)
          
-     haveDefaultCutoffs = .true.
+     haveCutoffs = .true.
    end subroutine setCutoffs
    
-   subroutine setElectrostaticMethod( thisESM )
-
-     integer, intent(in) :: thisESM
-
-     electrostaticSummationMethod = thisESM
-     haveElectrostaticSummationMethod = .true.
-    
-   end subroutine setElectrostaticMethod
-
    subroutine setSkinThickness( thisSkin )
      
      real(kind=dp), intent(in) :: thisSkin
      
      skinThickness = thisSkin
      haveSkinThickness = .true.    
-     haveGtypeCutoffMap = .false.
+
+     if (haveCutoffs) then
+        rList = rCut + skinThickness
+        rListSq = rList * rList
+     endif
      
    end subroutine setSkinThickness
       
    subroutine setSimVariables()
      SIM_uses_DirectionalAtoms = SimUsesDirectionalAtoms()
-     SIM_uses_EAM = SimUsesEAM()
-     SIM_requires_postpair_calc = SimRequiresPostpairCalc()
-     SIM_requires_prepair_calc = SimRequiresPrepairCalc()
+     SIM_uses_MetallicAtoms = SimUsesMetallicAtoms()     
+     SIM_requires_skip_correction = SimRequiresSkipCorrection()
+     SIM_requires_self_correction = SimRequiresSelfCorrection()
      SIM_uses_PBC = SimUsesPBC()
-     SIM_uses_SC = SimUsesSC()
      SIM_uses_AtomicVirial = SimUsesAtomicVirial()
 
-     haveSIMvariables = .true.
-     
+     haveSIMvariables = .true.     
      return
    end subroutine setSimVariables
 
@@ -213,18 +196,25 @@ contains
        call setSimVariables()
     endif
 
+    if (.not. haveCutoffs) then
+       write(default_error, *) 'cutoffs have not been set in doForces!'
+       error = -1
+       return
+    endif
+
+    if (.not. haveSkinThickness) then
+       write(default_error, *) 'skin thickness has not been set in doForces!'
+       error = -1
+       return
+    endif
+
     if (.not. haveNeighborList) then
        write(default_error, *) 'neighbor list has not been initialized in doForces!'
        error = -1
        return
     end if
-    
-    if (.not. haveSaneForceField) then
-       write(default_error, *) 'Force Field is not sane in doForces!'
-       error = -1
-       return
-    end if
-    
+
+        
 #ifdef IS_MPI
     if (.not. isMPISimSet()) then
        write(default_error,*) "ERROR: mpiSimulation has not been initialized!"
@@ -237,46 +227,11 @@ contains
 
   subroutine init_FF(thisStat)
 
-    integer, intent(out) :: thisStat   
-    integer :: my_status, nMatches
-    integer, pointer :: MatchList(:) => null()
+    integer :: my_status
+    integer, intent(out) :: thisStat  
 
     !! assume things are copacetic, unless they aren't
     thisStat = 0
-
-    !! init_FF is called *after* all of the atom types have been 
-    !! defined in atype_module using the new_atype subroutine.
-    !!
-    !! this will scan through the known atypes and figure out what
-    !! interactions are used by the force field.     
-
-    FF_uses_DirectionalAtoms = .false.
-    FF_uses_Dipoles = .false.
-    FF_uses_GayBerne = .false.
-    FF_uses_EAM = .false.
-    FF_uses_SC = .false.
-
-    call getMatchingElementList(atypes, "is_Directional", .true., &
-         nMatches, MatchList)
-    if (nMatches .gt. 0) FF_uses_DirectionalAtoms = .true.
-
-    call getMatchingElementList(atypes, "is_Dipole", .true., &
-         nMatches, MatchList)
-    if (nMatches .gt. 0) FF_uses_Dipoles = .true.
-    
-    call getMatchingElementList(atypes, "is_GayBerne", .true., &
-         nMatches, MatchList)
-    if (nMatches .gt. 0) FF_uses_GayBerne = .true.
-
-    call getMatchingElementList(atypes, "is_EAM", .true., nMatches, MatchList)
-    if (nMatches .gt. 0) FF_uses_EAM = .true.
-
-    call getMatchingElementList(atypes, "is_SC", .true., nMatches, MatchList)
-    if (nMatches .gt. 0) FF_uses_SC = .true.
-
-
-    haveSaneForceField = .true.
-
 
     if (.not. haveNeighborList) then
        !! Create neighbor lists
@@ -336,7 +291,7 @@ contains
     real(kind=dp),dimension(3) :: d_atm, d_grp, fpair, fij, fg, dag
     real(kind=dp) :: rfpot, mu_i
     real(kind=dp):: rCut
-    integer :: me_i, me_j, n_in_i, n_in_j, iG, j1
+    integer :: n_in_i, n_in_j, iG, j1
     logical :: is_dp_i
     integer :: neighborListSize
     integer :: listerror, error
@@ -377,10 +332,10 @@ contains
     call gather(q_group, q_group_Row, plan_group_row_3d)
     call gather(q_group, q_group_Col, plan_group_col_3d)
 
-    if (FF_UsesDirectionalAtoms() .and. SIM_uses_DirectionalAtoms) then
+    if (SIM_uses_DirectionalAtoms) then
        call gather(eFrame, eFrame_Row, plan_atom_row_rotation)
        call gather(eFrame, eFrame_Col, plan_atom_col_rotation)
-
+       
        call gather(A, A_Row, plan_atom_row_rotation)
        call gather(A, A_Col, plan_atom_col_rotation)
     endif
@@ -394,7 +349,7 @@ contains
 #endif
 
     loopEnd = PAIR_LOOP
-    if (FF_RequiresPrepairCalc() .and. SIM_requires_prepair_calc) then
+    if (SIM_uses_MetallicAtoms) then
        loopStart = PREPAIR_LOOP
     else
        loopStart = PAIR_LOOP
@@ -460,16 +415,14 @@ contains
              endif
 
 #ifdef IS_MPI
-             me_j = atid_col(j)
              call get_interatomic_vector(q_group_Row(:,i), &
                   q_group_Col(:,j), d_grp, rgrpsq)
 #else
-             me_j = atid(j)
              call get_interatomic_vector(q_group(:,i), &
                   q_group(:,j), d_grp, rgrpsq)
 #endif      
 
-             if (rgrpsq < gtypeCutoffMap(groupToGtypeRow(i),groupToGtypeCol(j))%rListsq) then
+             if (rgrpsq < rListsq) then
                 if (update_nlist) then
                    nlist = nlist + 1
 
@@ -490,9 +443,8 @@ contains
                    list(nlist) = j
                 endif
                  
-                if (rgrpsq < gtypeCutoffMap(groupToGtypeRow(i),groupToGtypeCol(j))%rCutsq) then
+                if (rgrpsq < rCutsq) then
 
-                   rCut = gtypeCutoffMap(groupToGtypeRow(i),groupToGtypeCol(j))%rCut
                    if (loop .eq. PAIR_LOOP) then
                       vij = 0.0_dp
                       fij(1) = 0.0_dp
@@ -533,11 +485,11 @@ contains
 
                          if (loop .eq. PREPAIR_LOOP) then
 #ifdef IS_MPI                      
-                            call do_prepair(atom1, atom2, ratmsq, d_atm, sw, &
+                            call f_do_prepair(atom1, atom2, ratmsq, d_atm, sw, &
                                  rgrpsq, d_grp, rCut, &
                                  eFrame, A, f, t, pot_local)
 #else
-                            call do_prepair(atom1, atom2, ratmsq, d_atm, sw, &
+                            call f_do_prepair(atom1, atom2, ratmsq, d_atm, sw, &
                                  rgrpsq, d_grp, rCut, &
                                  eFrame, A, f, t, pot)
 #endif                                               
@@ -663,9 +615,9 @@ contains
 
        if (loop .eq. PREPAIR_LOOP) then
 #ifdef IS_MPI
-          call do_preforce(nlocal, pot_local, particle_pot)
+          call f_do_preforce(nlocal, pot_local, particle_pot)
 #else
-          call do_preforce(nlocal, pot, particle_pot)
+          call f_do_preforce(nlocal, pot, particle_pot)
 #endif
        endif
 
@@ -692,7 +644,7 @@ contains
        f(1:3,i) = f(1:3,i) + f_temp(1:3,i)
     end do
 
-    if (FF_UsesDirectionalAtoms() .and. SIM_uses_DirectionalAtoms) then
+    if (SIM_uses_DirectionalAtoms) then
        t_temp = 0.0_dp
        call scatter(t_Row,t_temp,plan_atom_row_3d)
        do i = 1,nlocal
@@ -752,7 +704,7 @@ contains
    
 #endif
 
-    if (SIM_requires_postpair_calc) then
+    if (SIM_requires_skip_correction) then
        do i = 1, nlocal             
           
           do i1 = 1, nSkipsForLocalAtom(i)
@@ -776,7 +728,10 @@ contains
              endif
           enddo
        enddo
+    endif
 
+    if (SIM_requires_self_correction) then
+       
        do i = 1, nlocal
           
 #ifdef IS_MPI
@@ -882,7 +837,7 @@ contains
     vdwMult = vdwScale(topoDist)
     electroMult = electrostaticScale(topoDist)
 
-    call doPairInteraction(c_ident_i, c_ident_j, d, r, rijsq, sw, vpair, &
+    call do_pair(c_ident_i, c_ident_j, d, r, rijsq, sw, vpair, &
          vdwMult, electroMult, A1, A2, eF1, eF2,  &
          pairpot, f1, t1, t2, &
          rho_i, rho_j, dfrhodrho_i, dfrhodrho_j, fshift_i, fshift_j)
@@ -969,7 +924,7 @@ contains
     endif
   end subroutine f_do_pair
 
-  subroutine do_prepair(i, j, rijsq, d, sw, rcijsq, dc, rCut, &
+  subroutine f_do_prepair(i, j, rijsq, d, sw, rcijsq, dc, rCut, &
        eFrame, A, f, t, pot)
     
     real( kind = dp ) :: sw
@@ -998,7 +953,7 @@ contains
     rho_i_at_j = 0.0_dp
     rho_j_at_i = 0.0_dp
     
-    call doPrepairInteraction(c_ident_i, c_ident_j, r, &
+    call do_prepair(c_ident_i, c_ident_j, r, &
          rho_i_at_j, rho_j_at_i)
     
 #ifdef IS_MPI
@@ -1009,17 +964,17 @@ contains
     rho(i) = rho(i) + rho_j_at_i
 #endif       
     
-  end subroutine do_prepair
+  end subroutine f_do_prepair
 
 
-  subroutine do_preforce(nlocal, pot, particle_pot)
+  subroutine f_do_preforce(nlocal, pot, particle_pot)
     integer :: nlocal
     real( kind = dp ),dimension(LR_POT_TYPES) :: pot
     real( kind = dp ),dimension(nlocal) :: particle_pot
     integer :: sc_err = 0
     integer :: atom, c_ident1
-    
-    if ((FF_uses_EAM .and. SIM_uses_EAM) .or. (FF_uses_SC .and. SIM_uses_SC)) then
+
+    if (SIM_uses_MetallicAtoms) then
        
 #ifdef IS_MPI
        call scatter(rho_row,rho,plan_atom_row,sc_err)
@@ -1037,7 +992,7 @@ contains
        do atom = 1, nlocal
           c_ident1 = c_idents_local(atom)
                     
-          call doPreforceInteraction(c_ident1, rho(atom), frho(atom), dfrhodrho(atom)) 
+          call do_preforce(c_ident1, rho(atom), frho(atom), dfrhodrho(atom)) 
           pot(METALLIC_POT) = pot(METALLIC_POT) + frho(atom)
           particle_pot(atom) = particle_pot(atom) + frho(atom)
        end do
@@ -1063,15 +1018,16 @@ contains
 #endif
        
     end if
-  end subroutine do_preforce
+  end subroutine f_do_preforce
 
 
   subroutine get_interatomic_vector(q_i, q_j, d, r_sq)
 
-    real (kind = dp), dimension(3) :: q_i
-    real (kind = dp), dimension(3) :: q_j
-    real ( kind = dp ), intent(out) :: r_sq
-    real( kind = dp ) :: d(3), scaled(3)
+    real(kind = dp), dimension(3) :: q_i
+    real(kind = dp), dimension(3) :: q_j
+    real(kind = dp), intent(out) :: r_sq
+    real(kind = dp) :: d(3), scaled(3)
+    real(kind = dp) :: t
     integer i
 
     d(1) = q_j(1) - q_i(1)
@@ -1084,20 +1040,40 @@ contains
        if( .not.boxIsOrthorhombic ) then
           ! calc the scaled coordinates.
           ! scaled = matmul(HmatInv, d)
+          ! unwrap the matmul and do things explicitly:
 
           scaled(1) = HmatInv(1,1)*d(1) + HmatInv(1,2)*d(2) + HmatInv(1,3)*d(3)
           scaled(2) = HmatInv(2,1)*d(1) + HmatInv(2,2)*d(2) + HmatInv(2,3)*d(3)
           scaled(3) = HmatInv(3,1)*d(1) + HmatInv(3,2)*d(2) + HmatInv(3,3)*d(3)
           
-          ! wrap the scaled coordinates
+          ! wrap the scaled coordinates (but don't use anint for speed)
 
-          scaled(1) = scaled(1) - anint(scaled(1), kind=dp)
-          scaled(2) = scaled(2) - anint(scaled(2), kind=dp)
-          scaled(3) = scaled(3) - anint(scaled(3), kind=dp)
+          t = scaled(1)
+          if (t .ge. 0.0) then
+             scaled(1) = t - floor(t + 0.5)
+          else
+             scaled(1) = t + ceiling(t - 0.5)
+          endif
+
+          t = scaled(2)
+          if (t .ge. 0.0) then
+             scaled(2) = t - floor(t + 0.5)
+          else
+             scaled(2) = t + ceiling(t - 0.5)
+          endif
+
+          t = scaled(3)
+          if (t .ge. 0.0) then
+             scaled(3) = t - floor(t + 0.5)
+          else
+             scaled(3) = t + ceiling(t - 0.5)
+          endif
 
           ! calc the wrapped real coordinates from the wrapped scaled 
           ! coordinates
           ! d = matmul(Hmat,scaled)
+          ! unwrap the matmul and do things explicitly:
+
           d(1)= Hmat(1,1)*scaled(1) + Hmat(1,2)*scaled(2) + Hmat(1,3)*scaled(3)
           d(2)= Hmat(2,1)*scaled(1) + Hmat(2,2)*scaled(2) + Hmat(2,3)*scaled(3)
           d(3)= Hmat(3,1)*scaled(1) + Hmat(3,2)*scaled(2) + Hmat(3,3)*scaled(3)
@@ -1109,11 +1085,28 @@ contains
           scaled(2) = d(2) * HmatInv(2,2)
           scaled(3) = d(3) * HmatInv(3,3)
           
-          ! wrap the scaled coordinates
-          
-          scaled(1) = scaled(1) - anint(scaled(1), kind=dp)
-          scaled(2) = scaled(2) - anint(scaled(2), kind=dp)
-          scaled(3) = scaled(3) - anint(scaled(3), kind=dp)
+          ! wrap the scaled coordinates (but don't use anint for speed)
+
+          t = scaled(1)
+          if (t .ge. 0.0) then
+             scaled(1) = t - floor(t + 0.5)
+          else
+             scaled(1) = t + ceiling(t - 0.5)
+          endif
+
+          t = scaled(2)
+          if (t .ge. 0.0) then
+             scaled(2) = t - floor(t + 0.5)
+          else
+             scaled(2) = t + ceiling(t - 0.5)
+          endif
+
+          t = scaled(3)
+          if (t .ge. 0.0) then
+             scaled(3) = t - floor(t + 0.5)
+          else
+             scaled(3) = t + ceiling(t - 0.5)
+          endif
 
           ! calc the wrapped real coordinates from the wrapped scaled 
           ! coordinates
@@ -1262,16 +1255,6 @@ contains
 
     return
   end function getTopoDistance
-
-  function FF_UsesDirectionalAtoms() result(doesit)
-    logical :: doesit
-    doesit = FF_uses_DirectionalAtoms
-  end function FF_UsesDirectionalAtoms
-
-  function FF_RequiresPrepairCalc() result(doesit)
-    logical :: doesit
-    doesit = FF_uses_EAM .or. FF_uses_SC
-  end function FF_RequiresPrepairCalc
 
 #ifdef PROFILE
   function getforcetime() result(totalforcetime)

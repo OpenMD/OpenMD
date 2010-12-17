@@ -60,7 +60,6 @@ module simulation
 #define __FORTRAN90
 #include "brains/fSimulation.h"
 #include "UseTheForce/fSwitchingFunction.h"
-#include "UseTheForce/DarkSide/fElectrostaticSummationMethod.h"
 
   type (simtype), public, save :: thisSim
 
@@ -92,11 +91,6 @@ module simulation
   real(kind=dp), allocatable, dimension(:), public :: mfactCol
   real(kind=dp), allocatable, dimension(:), public :: mfactLocal
 
-  logical, allocatable, dimension(:) :: simHasAtypeMap
-#ifdef IS_MPI
-  logical, allocatable, dimension(:) :: simHasAtypeMapTemp
-#endif
-
   real(kind=dp), public, dimension(3,3), save :: Hmat, HmatInv
   real(kind=dp), save :: DangerRcut
   logical, public, save :: boxIsOrthorhombic
@@ -107,27 +101,10 @@ module simulation
   public :: checkBox
   public :: SimUsesPBC
   public :: SimUsesAtomicVirial
-
   public :: SimUsesDirectionalAtoms
-  public :: SimUsesLennardJones
-  public :: SimUsesElectrostatics
-  public :: SimUsesCharges
-  public :: SimUsesDipoles
-  public :: SimUsesSticky
-  public :: SimUsesStickyPower
-  public :: SimUsesGayBerne
-  public :: SimUsesEAM
-  public :: SimUsesShapes
-  public :: SimUsesFLARB
-  public :: SimUsesRF
-  public :: SimUsesSF
-  public :: SimUsesSP
-  public :: SimUsesBoxDipole
-  public :: SimRequiresPrepairCalc
-  public :: SimRequiresPostpairCalc
-  public :: SimHasAtype
-  public :: SimUsesSC
-  public :: SimUsesMNM
+  public :: SimUsesMetallicAtoms
+  public :: SimRequiresSkipCorrection
+  public :: SimRequiresSelfCorrection
   public :: setHmatDangerousRcutValue
 
 contains
@@ -619,11 +596,6 @@ contains
           endif
        end do
     enddo
-
-    call createSimHasAtype(alloc_stat)
-    if (alloc_stat /= 0) then
-       status = -1
-    end if
     
     if (status == 0) simulation_setup_complete = .true.
     
@@ -680,176 +652,45 @@ contains
           enddo        
           return     
         end subroutine checkBox
-
+        
         function SimUsesPBC() result(doesit)
           logical :: doesit
           doesit = thisSim%SIM_uses_PBC
         end function SimUsesPBC
-
+        
         function SimUsesAtomicVirial() result(doesit)
           logical :: doesit
           doesit = thisSim%SIM_uses_AtomicVirial
         end function SimUsesAtomicVirial
-
+        
         function SimUsesDirectionalAtoms() result(doesit)
           logical :: doesit
-          doesit = thisSim%SIM_uses_dipoles .or. thisSim%SIM_uses_Sticky .or. &
-               thisSim%SIM_uses_StickyPower .or. &
-               thisSim%SIM_uses_GayBerne .or. thisSim%SIM_uses_Shapes
+          doesit = thisSim%SIM_uses_DirectionalAtoms
         end function SimUsesDirectionalAtoms
-
-        function SimUsesLennardJones() result(doesit)
-          logical :: doesit
-          doesit = thisSim%SIM_uses_LennardJones
-        end function SimUsesLennardJones
-
-        function SimUsesElectrostatics() result(doesit)
-          logical :: doesit
-          doesit = thisSim%SIM_uses_Electrostatics
-        end function SimUsesElectrostatics
-
-        function SimUsesCharges() result(doesit)
-          logical :: doesit
-          doesit = thisSim%SIM_uses_Charges
-        end function SimUsesCharges
-
-        function SimUsesDipoles() result(doesit)
-          logical :: doesit
-          doesit = thisSim%SIM_uses_Dipoles
-        end function SimUsesDipoles
-
-        function SimUsesSticky() result(doesit)
-          logical :: doesit
-          doesit = thisSim%SIM_uses_Sticky
-        end function SimUsesSticky
-
-        function SimUsesStickyPower() result(doesit)
-          logical :: doesit
-          doesit = thisSim%SIM_uses_StickyPower
-        end function SimUsesStickyPower
-
-        function SimUsesGayBerne() result(doesit)
-          logical :: doesit
-          doesit = thisSim%SIM_uses_GayBerne
-        end function SimUsesGayBerne
-
-        function SimUsesEAM() result(doesit)
-          logical :: doesit
-          doesit = thisSim%SIM_uses_EAM
-        end function SimUsesEAM
-
-
-        function SimUsesSC() result(doesit)
-          logical :: doesit
-          doesit = thisSim%SIM_uses_SC
-        end function SimUsesSC
-
-        function SimUsesMNM() result(doesit)
-          logical :: doesit
-          doesit = thisSim%SIM_uses_MNM
-        end function SimUsesMNM
-
-
-        function SimUsesShapes() result(doesit)
-          logical :: doesit
-          doesit = thisSim%SIM_uses_Shapes
-        end function SimUsesShapes
-
-        function SimUsesFLARB() result(doesit)
-          logical :: doesit
-          doesit = thisSim%SIM_uses_FLARB
-        end function SimUsesFLARB
-
-        function SimUsesRF() result(doesit)
-          logical :: doesit
-          doesit = thisSim%SIM_uses_RF
-        end function SimUsesRF
-
-        function SimUsesSF() result(doesit)
-          logical :: doesit
-          doesit = thisSim%SIM_uses_SF
-        end function SimUsesSF
-
-        function SimUsesSP() result(doesit)
-          logical :: doesit
-          doesit = thisSim%SIM_uses_SP
-        end function SimUsesSP
-
-        function SimUsesBoxDipole() result(doesit)
-          logical :: doesit
-          doesit = thisSim%SIM_uses_BoxDipole
-        end function SimUsesBoxDipole
-
-        function SimRequiresPrepairCalc() result(doesit)
-          logical :: doesit
-          doesit = thisSim%SIM_uses_EAM .or. thisSim%SIM_uses_SC
-        end function SimRequiresPrepairCalc
         
-        function SimRequiresPostpairCalc() result(doesit)
+        function SimUsesMetallicAtoms() result(doesit)
           logical :: doesit
-          doesit = thisSim%SIM_uses_RF .or. thisSim%SIM_uses_SF &
-               .or. thisSim%SIM_uses_SP .or. thisSim%SIM_uses_BoxDipole
-        end function SimRequiresPostpairCalc
-
-        ! Function returns true if the simulation has this atype
-        function SimHasAtype(thisAtype) result(doesit)
-          logical :: doesit
-          integer :: thisAtype
-          doesit = .false.
-          if(.not.allocated(SimHasAtypeMap)) return
-
-          doesit = SimHasAtypeMap(thisAtype)
-             
-        end function SimHasAtype
-
-        subroutine createSimHasAtype(status)
-          integer, intent(out) :: status
-          integer :: alloc_stat
-          integer :: me_i
-          integer :: mpiErrors
-          integer :: nAtypes
-          status = 0
-
-          nAtypes = getSize(atypes)
-          ! Setup logical map for atypes in simulation
-          if (.not.allocated(SimHasAtypeMap)) then
-             allocate(SimHasAtypeMap(nAtypes),stat=alloc_stat)
-             if (alloc_stat /= 0 ) then
-                status = -1
-                return
-             end if
-             SimHasAtypeMap = .false.
-          end if
-          
-          ! Loop through the local atoms and grab the atypes present         
-          do me_i = 1,nLocal
-             SimHasAtypeMap(atid(me_i)) = .true.
-          end do
-          ! For MPI, we need to know all possible atypes present in 
-          ! simulation on all processors. Use LOR operation to set map.
-#ifdef IS_MPI
-          if (.not.allocated(SimHasAtypeMapTemp)) then
-             allocate(SimHasAtypeMapTemp(nAtypes),stat=alloc_stat)
-             if (alloc_stat /= 0 ) then
-                status = -1
-                return
-             end if
-          end if
-          call mpi_allreduce(SimHasAtypeMap, SimHasAtypeMaptemp, nAtypes, &
-               mpi_logical, MPI_LOR, mpi_comm_world, mpiErrors)
-          simHasAtypeMap = simHasAtypeMapTemp
-          deallocate(simHasAtypeMapTemp)
-#endif          
-        end subroutine createSimHasAtype
+          doesit = thisSim%SIM_uses_MetallicAtoms
+        end function SimUsesMetallicAtoms
         
-       subroutine InitializeSimGlobals(thisStat)
+        function SimRequiresSkipCorrection() result(doesit)
+          logical :: doesit
+          doesit = thisSim%SIM_requires_SkipCorrection
+        end function SimRequiresSkipCorrection
+        
+        function SimRequiresSelfCorrection() result(doesit)
+          logical :: doesit
+          doesit = thisSim%SIM_requires_SelfCorrection
+        end function SimRequiresSelfCorrection
+        
+        subroutine InitializeSimGlobals(thisStat)
           integer, intent(out) :: thisStat
           integer :: alloc_stat
-
+          
           thisStat = 0
-
+          
           call FreeSimGlobals()    
-
+          
           allocate(excludes(2,nExcludes), stat=alloc_stat)
           if (alloc_stat /= 0 ) then
              thisStat = -1
@@ -899,7 +740,6 @@ contains
 
           return
         end subroutine setHmatDangerousRcutValue
-
-
-
+        
       end module simulation
+      

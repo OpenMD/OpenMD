@@ -45,7 +45,6 @@ namespace OpenMD {
 
     ForceFieldOptions::ForceFieldOptions() {
       DefineOptionalParameter(Name, "Name");
-      DefineOptionalParameter(CutoffPolicy, "cutoffPolicy");
       DefineOptionalParameterWithDefaultValue(vdWtype, "vdWtype", "Lennard-Jones");
       DefineOptionalParameterWithDefaultValue(DistanceMixingRule, "DistanceMixingRule", "arithmetic");
       DefineOptionalParameterWithDefaultValue(DistanceType, "DistanceType", "sigma");
@@ -64,6 +63,8 @@ namespace OpenMD {
       DefineOptionalParameterWithDefaultValue(GayBerneMu, "GayBerneMu", 2.0);
       DefineOptionalParameterWithDefaultValue(GayBerneNu, "GayBerneNu", 1.0);
       DefineOptionalParameterWithDefaultValue(EAMMixingMethod, "EAMMixingMethod", "Johnson");
+
+      deprecatedKeywords_.insert("cutoffPolicy");
     }
 
 

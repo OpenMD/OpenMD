@@ -48,6 +48,14 @@ namespace OpenMD {
   InteractionManager* InteractionManager::_instance = NULL;
   map<int, AtomType*> InteractionManager::typeMap_;
   map<pair<AtomType*, AtomType*>, set<NonBondedInteraction*> > InteractionManager::interactions_;
+
+  LJ* InteractionManager::lj_ = new LJ();
+  GB* InteractionManager::gb_ = new GB();
+  Sticky* InteractionManager::sticky_ = new Sticky();
+  Morse* InteractionManager::morse_ = new Morse();
+  EAM* InteractionManager::eam_ = new EAM();
+  SC* InteractionManager::sc_ = new SC();
+  Electrostatic* InteractionManager::electrostatic_ = new Electrostatic();
  
   InteractionManager* InteractionManager::Instance() {
     if (!_instance) {
@@ -58,14 +66,6 @@ namespace OpenMD {
 
   void InteractionManager::initialize() {
     
-    lj_ = new LJ();
-    gb_ = new GB();
-    sticky_ = new Sticky();
-    eam_ = new EAM();
-    sc_ = new SC();
-    morse_ = new Morse();
-    electrostatic_ = new Electrostatic();
-
     lj_->setForceField(forceField_);
     gb_->setForceField(forceField_);
     sticky_->setForceField(forceField_);
@@ -420,6 +420,18 @@ namespace OpenMD {
     return cutoff;    
   }
 
+  RealType InteractionManager::getSuggestedCutoffRadius(AtomType* atype) {
+    if (!initialized_) initialize();
+    
+    pair<AtomType*, AtomType*> key = make_pair(atype, atype);
+    set<NonBondedInteraction*>::iterator it;
+    RealType cutoff = 0.0;
+    
+    for (it = interactions_[key].begin(); it != interactions_[key].end(); ++it)
+      cutoff = max(cutoff, (*it)->getSuggestedCutoffRadius(atype, atype));   
+    return cutoff;    
+  }
+
 } //end namespace OpenMD
 
 extern "C" {
@@ -438,7 +450,7 @@ extern "C" {
                                                              rho_i_at_j,  
                                                              rho_j_at_i);
   }
-  void fortranDoPreforce(int *atid, RealType *rho, RealType *frho,
+  void fortranDoPreForce(int *atid, RealType *rho, RealType *frho,
                          RealType *dfrhodrho) {  
     
     return OpenMD::InteractionManager::Instance()->doPreForce(atid, rho, frho,

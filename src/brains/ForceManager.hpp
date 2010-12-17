@@ -52,13 +52,7 @@
 
 #include "brains/SimInfo.hpp"
 #include "primitives/Molecule.hpp"
-#include "nonbonded/LJ.hpp"
-#include "nonbonded/GB.hpp"
-#include "nonbonded/Sticky.hpp"
-#include "nonbonded/EAM.hpp"
-#include "nonbonded/SC.hpp"
-#include "nonbonded/Morse.hpp"
-#include "nonbonded/Electrostatic.hpp"
+#include "nonbonded/InteractionManager.hpp"
 
 namespace OpenMD {
   /**
@@ -98,13 +92,7 @@ namespace OpenMD {
     Mat3x3d tau;
 
     bool NBforcesInitialized_;
-    LJ* lj_;
-    GB* gb_;
-    Sticky* sticky_;
-    EAM* eam_;
-    SC* sc_;
-    Morse* morse_;
-    Electrostatic* electrostatic_;
+    InteractionManager* nbiMan_;
     
   };
 

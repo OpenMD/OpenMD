@@ -42,6 +42,7 @@
 #ifndef IO_FORCEFIELDOPTIONS_HPP
 #define IO_FORCEFIELDOPTIONS_HPP
 #include "utils/simError.h"
+#include "types/DataHolder.hpp"
 #include "utils/ParameterManager.hpp"
 #include "utils/StringUtils.hpp"
 #include "io/ParamConstraint.hpp"
@@ -50,7 +51,7 @@
 
 namespace OpenMD {
   
-  class ForceFieldOptions {
+  class ForceFieldOptions : public DataHolder {
     DeclareParameter(Name, std::string);
     DeclareParameter(vdWtype, std::string);
     DeclareParameter(DistanceMixingRule, std::string);

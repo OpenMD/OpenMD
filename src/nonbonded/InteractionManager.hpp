@@ -67,7 +67,10 @@ namespace OpenMD {
     static InteractionManager* Instance();
     static void setForceField(ForceField *ff) {forceField_ = ff;};    
 
-
+    static void setCutoffRadius(RealType rcut);
+    static void setSwitchingRadius(RealType rsw);
+    static void useShiftedForce();
+    static void useShiftedPot();
 
     // Fortran support routines
 
@@ -77,6 +80,7 @@ namespace OpenMD {
     static void doSkipCorrection(int *atid1, int *atid2, RealType *d, RealType *r, RealType *skippedCharge1, RealType *skippedCharge2, RealType *sw, RealType *electroMult, RealType *pot, RealType *vpair, RealType *f1, RealType *eFrame1, RealType *eFrame2, RealType *t1, RealType *t2);
     static void doSelfCorrection(int *atid, RealType *eFrame, RealType *skippedCharge, RealType *pot, RealType *t);
     static RealType getSuggestedCutoffRadius(int *atid1);   
+    static RealType getSuggestedCutoffRadius(AtomType *atype);   
     
   private:
     virtual ~InteractionManager() { }
@@ -104,8 +108,7 @@ namespace OpenMD {
      * natural data structures are a map between the pair, and a set
      * of non-bonded interactions.
      */
-    static map<pair<AtomType*, AtomType*>, set<NonBondedInteraction*> > interactions_;
-    
+    static map<pair<AtomType*, AtomType*>, set<NonBondedInteraction*> > interactions_;    
   };
 }
 #endif

@@ -11,23 +11,10 @@
 typedef  struct{
   int SIM_uses_PBC;
   int SIM_uses_DirectionalAtoms;
-  int SIM_uses_LennardJones;
-  int SIM_uses_Electrostatics;
-  int SIM_uses_Charges;
-  int SIM_uses_Dipoles;
-  int SIM_uses_Sticky;
-  int SIM_uses_StickyPower;
-  int SIM_uses_GayBerne;
-  int SIM_uses_EAM;
-  int SIM_uses_Shapes;
-  int SIM_uses_FLARB;
-  int SIM_uses_RF;
-  int SIM_uses_SF;
-  int SIM_uses_SP;
-  int SIM_uses_SC;
-  int SIM_uses_MNM;
-  int SIM_uses_BoxDipole;
+  int SIM_uses_MetallicAtoms;
   int SIM_uses_AtomicVirial;
+  int SIM_requires_SkipCorrection;
+  int SIM_requires_SelfCorrection;
 } simtype;
 #endif /*__FSIMULATION*/
 #endif /*__OPENMD_C*/
@@ -40,23 +27,10 @@ typedef  struct{
     !! Periodic Boundry Conditions
     logical :: SIM_uses_PBC
     logical :: SIM_uses_DirectionalAtoms
-    logical :: SIM_uses_LennardJones
-    logical :: SIM_uses_Electrostatics
-    logical :: SIM_uses_Charges
-    logical :: SIM_uses_Dipoles
-    logical :: SIM_uses_Sticky
-    logical :: SIM_uses_StickyPower
-    logical :: SIM_uses_GayBerne
-    logical :: SIM_uses_EAM
-    logical :: SIM_uses_Shapes
-    logical :: SIM_uses_FLARB
-    logical :: SIM_uses_RF
-    logical :: SIM_uses_SF
-    logical :: SIM_uses_SP
-    logical :: SIM_uses_SC
-    logical :: SIM_uses_MNM
-    logical :: SIM_uses_BoxDipole
+    logical :: SIM_uses_MetallicAtoms
     logical :: SIM_uses_AtomicVirial
+    logical :: SIM_requires_SkipCorrection
+    logical :: SIM_requires_SelfCorrection
   end type simtype
 
 #endif

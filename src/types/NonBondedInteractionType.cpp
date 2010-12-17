@@ -88,6 +88,14 @@ namespace OpenMD {
   bool NonBondedInteractionType::isLennardJones() {
     return nbitp.is_LennardJones;
   }
+
+  void NonBondedInteractionType::setMorse() {
+    nbitp.is_Morse = 1;
+  }
+  
+  bool NonBondedInteractionType::isMorse() {
+    return nbitp.is_Morse;
+  }
   
   void NonBondedInteractionType::setEAM() {
     nbitp.is_EAM = 1;

@@ -52,9 +52,21 @@
 namespace OpenMD {
   
   Electrostatic::Electrostatic(): name_("Electrostatic"), initialized_(false),
-                                  forceField_(NULL) {}
+                                  forceField_(NULL), info_(NULL) {}
   
   void Electrostatic::initialize() { 
+
+    summationMap_["HARD"]               = esm_HARD;
+    summationMap_["SWITCHING_FUNCTION"] = esm_SWITCHING_FUNCTION;
+    summationMap_["SHIFTED_POTENTIAL"]  = esm_SHIFTED_POTENTIAL; 
+    summationMap_["SHIFTED_FORCE"]      = esm_SHIFTED_FORCE;     
+    summationMap_["REACTION_FIELD"]     = esm_REACTION_FIELD;    
+    summationMap_["EWALD_FULL"]         = esm_EWALD_FULL;        
+    summationMap_["EWALD_PME"]          = esm_EWALD_PME;         
+    summationMap_["EWALD_SPME"]         = esm_EWALD_SPME;        
+    screeningMap_["DAMPED"]             = DAMPED;
+    screeningMap_["UNDAMPED"]           = UNDAMPED;
+
     // these prefactors convert the multipole interactions into kcal / mol
     // all were computed assuming distances are measured in angstroms
     // Charge-Charge, assuming charges are measured in electrons
@@ -79,20 +91,115 @@ namespace OpenMD {
     
     // variables to handle different summation methods for long-range 
     // electrostatics:
-    summationMethod_ = NONE;    
+    summationMethod_ = esm_HARD;    
     screeningMethod_ = UNDAMPED;
     dielectric_ = 1.0;
     one_third_ = 1.0 / 3.0;
-    haveDefaultCutoff_ = false;
+    haveCutoffRadius_ = false;
     haveDampingAlpha_ = false;
     haveDielectric_ = false;  
     haveElectroSpline_ = false;
   
+    // check the summation method:
+    if (simParams_->haveElectrostaticSummationMethod()) {
+      string myMethod = simParams_->getElectrostaticSummationMethod();
+      toUpper(myMethod);
+      map<string, ElectrostaticSummationMethod>::iterator i;
+      i = summationMap_.find(myMethod);
+      if ( i != summationMap_.end() ) {
+        summationMethod_ = (*i).second;
+      } else {
+        // throw error
+        sprintf( painCave.errMsg,
+                 "SimInfo error: Unknown electrostaticSummationMethod.\n"
+                 "\t(Input file specified %s .)\n"
+                 "\telectrostaticSummationMethod must be one of: \"none\",\n"
+                 "\t\"shifted_potential\", \"shifted_force\", or \n"
+                 "\t\"reaction_field\".\n", myMethod.c_str() );
+        painCave.isFatal = 1;
+        simError();
+      }
+    } else {
+      // set ElectrostaticSummationMethod to the cutoffMethod:
+      if (simParams_->haveCutoffMethod()){
+        string myMethod = simParams_->getCutoffMethod();
+        toUpper(myMethod);
+        map<string, ElectrostaticSummationMethod>::iterator i;
+        i = summationMap_.find(myMethod);
+        if ( i != summationMap_.end() ) {
+          summationMethod_ = (*i).second;
+        }
+      }
+    }
+    
+    if (summationMethod_ == esm_REACTION_FIELD) {        
+      if (!simParams_->haveDielectric()) {
+        // throw warning
+        sprintf( painCave.errMsg,
+                 "SimInfo warning: dielectric was not specified in the input file\n\tfor the reaction field correction method.\n"
+                 "\tA default value of %f will be used for the dielectric.\n", dielectric_);
+        painCave.isFatal = 0;
+        painCave.severity = OPENMD_INFO;
+        simError();
+      } else {
+        dielectric_ = simParams_->getDielectric();       
+      }
+      haveDielectric_ = true;
+    }
+    
+    if (simParams_->haveElectrostaticScreeningMethod()) {
+      string myScreen = simParams_->getElectrostaticScreeningMethod();
+      toUpper(myScreen);
+      map<string, ElectrostaticScreeningMethod>::iterator i;
+      i = screeningMap_.find(myScreen);
+      if ( i != screeningMap_.end()) {
+        screeningMethod_ = (*i).second;
+      } else {
+        sprintf( painCave.errMsg,
+                 "SimInfo error: Unknown electrostaticScreeningMethod.\n"
+                 "\t(Input file specified %s .)\n"
+                 "\telectrostaticScreeningMethod must be one of: \"undamped\"\n"
+                 "or \"damped\".\n", myScreen.c_str() );
+        painCave.isFatal = 1;
+        simError();
+      }
+    }
+
+    // check to make sure a cutoff value has been set:
+    if (!haveCutoffRadius_) {
+      sprintf( painCave.errMsg, "Electrostatic::initialize has no Default "
+               "Cutoff value!\n");
+      painCave.severity = OPENMD_ERROR;
+      painCave.isFatal = 1;
+      simError();
+    }
+           
+    if (screeningMethod_ == DAMPED) {      
+      if (!simParams_->haveDampingAlpha()) {
+        // first set a cutoff dependent alpha value
+        // we assume alpha depends linearly with rcut from 0 to 20.5 ang
+        dampingAlpha_ = 0.425 - cutoffRadius_* 0.02;
+        if (dampingAlpha_ < 0.0) dampingAlpha_ = 0.0;
+        
+        // throw warning
+        sprintf( painCave.errMsg,
+                 "Electrostatic::initialize: dampingAlpha was not specified in the input file.\n"
+                 "\tA default value of %f (1/ang) will be used for the cutoff of\n\t%f (ang).\n", 
+                 dampingAlpha_, cutoffRadius_);
+        painCave.severity = OPENMD_INFO;
+        painCave.isFatal = 0;
+        simError();
+      } else {
+        dampingAlpha_ = simParams_->getDampingAlpha();
+      }
+      haveDampingAlpha_ = true;
+    }
+
     // find all of the Electrostatic atom Types:
     ForceField::AtomTypeContainer* atomTypes = forceField_->getAtomTypes();
     ForceField::AtomTypeContainer::MapTypeIterator i;
     AtomType* at;
-
+    
     for (at = atomTypes->beginType(i); at != NULL; 
          at = atomTypes->nextType(i)) {
       
@@ -100,40 +207,25 @@ namespace OpenMD {
         addType(at);
     }
     
-    // check to make sure a cutoff value has been set:
-    if (!haveDefaultCutoff_) {
-      sprintf( painCave.errMsg, "Electrostatic::initialize has no Default "
-               "Cutoff value!\n");
-      painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
-      simError();
-    }
 
-    defaultCutoff2_ = defaultCutoff_ * defaultCutoff_;
-    rcuti_ = 1.0 / defaultCutoff_;
+    cutoffRadius2_ = cutoffRadius_ * cutoffRadius_;
+    rcuti_ = 1.0 / cutoffRadius_;
     rcuti2_ = rcuti_ * rcuti_;
     rcuti3_ = rcuti2_ * rcuti_;
     rcuti4_ = rcuti2_ * rcuti2_;
 
     if (screeningMethod_ == DAMPED) {
-      if (!haveDampingAlpha_) {
-        sprintf( painCave.errMsg, "Electrostatic::initialize has no "
-                 "DampingAlpha value!\n");
-        painCave.severity = OPENMD_ERROR;
-        painCave.isFatal = 1;
-        simError();
-      }
-
+      
       alpha2_ = dampingAlpha_ * dampingAlpha_;
       alpha4_ = alpha2_ * alpha2_;
       alpha6_ = alpha4_ * alpha2_;
       alpha8_ = alpha4_ * alpha4_;
       
-      constEXP_ = exp(-alpha2_ * defaultCutoff2_);
+      constEXP_ = exp(-alpha2_ * cutoffRadius2_);
       invRootPi_ = 0.56418958354775628695;
       alphaPi_ = 2.0 * dampingAlpha_ * invRootPi_;
 
-      c1c_ = erfc(dampingAlpha_ * defaultCutoff_) * rcuti_;
+      c1c_ = erfc(dampingAlpha_ * cutoffRadius_) * rcuti_;
       c2c_ = alphaPi_ * constEXP_ * rcuti_ + c1c_ * rcuti_;
       c3c_ = 2.0 * alphaPi_ * alpha2_ + 3.0 * c2c_ * rcuti_;
       c4c_ = 4.0 * alphaPi_ * alpha4_ + 5.0 * c3c_ * rcuti2_;
@@ -148,21 +240,13 @@ namespace OpenMD {
       c6c_ = 9.0 * c5c_ * rcuti2_;
     }
    
-    if (summationMethod_ == REACTION_FIELD) {
-      if (haveDielectric_) {
-        preRF_ = (dielectric_ - 1.0) / 
-            ((2.0 * dielectric_ + 1.0) * defaultCutoff2_ * defaultCutoff_);
-        preRF2_ = 2.0 * preRF_;
-      } else {
-        sprintf( painCave.errMsg, "Electrostatic::initialize has no Dielectric"
-                 " value!\n");
-        painCave.severity = OPENMD_ERROR;
-        painCave.isFatal = 1;
-        simError();
-      }
+    if (summationMethod_ == esm_REACTION_FIELD) {
+      preRF_ = (dielectric_ - 1.0) / 
+        ((2.0 * dielectric_ + 1.0) * cutoffRadius2_ * cutoffRadius_);
+      preRF2_ = 2.0 * preRF_;
     }
-                              
-    RealType dx = defaultCutoff_ / RealType(np_ - 1);
+    
+    RealType dx = cutoffRadius_ / RealType(np_ - 1);
     RealType rval;
     vector<RealType> rvals;
     vector<RealType> yvals;
@@ -323,10 +407,10 @@ namespace OpenMD {
   
   void Electrostatic::setElectrostaticCutoffRadius( RealType theECR, 
                                                     RealType theRSW ) {
-    defaultCutoff_ = theECR;
-    rrf_ = defaultCutoff_;
+    cutoffRadius_ = theECR;
+    rrf_ = cutoffRadius_;
     rt_ = theRSW;
-    haveDefaultCutoff_ = true;
+    haveCutoffRadius_ = true;
   }
   void Electrostatic::setElectrostaticSummationMethod( ElectrostaticSummationMethod esm ) {
     summationMethod_ = esm;
@@ -485,15 +569,15 @@ namespace OpenMD {
 
         preVal = idat.electroMult * pre11_ * q_i * q_j;
         
-        if (summationMethod_ == SHIFTED_POTENTIAL) {
+        if (summationMethod_ == esm_SHIFTED_POTENTIAL) {
           vterm = preVal * (c1 - c1c_);
           dudr  = -idat.sw * preVal * c2;
 
-        } else if (summationMethod_ == SHIFTED_FORCE)  {
-          vterm = preVal * ( c1 - c1c_ + c2c_*(idat.rij - defaultCutoff_) );
+        } else if (summationMethod_ == esm_SHIFTED_FORCE)  {
+          vterm = preVal * ( c1 - c1c_ + c2c_*(idat.rij - cutoffRadius_) );
           dudr  = idat.sw * preVal * (c2c_ - c2);
 
-        } else if (summationMethod_ == REACTION_FIELD) {
+        } else if (summationMethod_ == esm_REACTION_FIELD) {
           rfVal = idat.electroMult * preRF_ * idat.rij * idat.rij;
           vterm = preVal * ( riji + rfVal );             
           dudr  = idat.sw * preVal * ( 2.0 * rfVal - riji ) * riji;
@@ -516,7 +600,7 @@ namespace OpenMD {
         pref = idat.electroMult * pre12_ * q_i * mu_j;
         preSw = idat.sw * pref;
 
-        if (summationMethod_ == REACTION_FIELD) {
+        if (summationMethod_ == esm_REACTION_FIELD) {
           ri2 = riji * riji;
           ri3 = ri2 * riji;
     
@@ -628,7 +712,7 @@ namespace OpenMD {
         pref = idat.electroMult * pre12_ * q_j * mu_i;
         preSw = idat.sw * pref;
 
-        if (summationMethod_ == REACTION_FIELD) {
+        if (summationMethod_ == esm_REACTION_FIELD) {
 
           ri2 = riji * riji;
           ri3 = ri2 * riji;
@@ -690,7 +774,7 @@ namespace OpenMD {
         pref = idat.electroMult * pre22_ * mu_i * mu_j;
         preSw = idat.sw * pref;
 
-        if (summationMethod_ == REACTION_FIELD) {
+        if (summationMethod_ == esm_REACTION_FIELD) {
           ri2 = riji * riji;
           ri3 = ri2 * riji;
           ri4 = ri2 * ri2;
@@ -875,7 +959,7 @@ namespace OpenMD {
 
     // the rest of this function should only be necessary for reaction field.
 
-    if (summationMethod_ == REACTION_FIELD) {
+    if (summationMethod_ == esm_REACTION_FIELD) {
       RealType riji, ri2, ri3;
       RealType q_i, mu_i, ct_i;
       RealType q_j, mu_j, ct_j;
@@ -956,7 +1040,7 @@ namespace OpenMD {
     bool i_is_Charge = data.is_Charge;
     bool i_is_Dipole = data.is_Dipole;
 
-    if (summationMethod_ == REACTION_FIELD) {
+    if (summationMethod_ == esm_REACTION_FIELD) {
       if (i_is_Dipole) {
         mu1 = data.dipole_moment;          
         preVal = pre22_ * preRF2_ * mu1 * mu1;
@@ -969,7 +1053,7 @@ namespace OpenMD {
         // This looks very wrong.  A vector crossed with itself is zero.
         scdat.t -= cross(uz_i, ei);
       }
-    } else if (summationMethod_ == SHIFTED_FORCE || summationMethod_ == SHIFTED_POTENTIAL) {
+    } else if (summationMethod_ == esm_SHIFTED_FORCE || summationMethod_ == esm_SHIFTED_POTENTIAL) {
       if (i_is_Charge) {        
         chg1 = data.charge;
         if (screeningMethod_ == DAMPED) {

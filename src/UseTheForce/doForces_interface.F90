@@ -44,24 +44,6 @@ subroutine doForceloop(q, q_group, A, eFrame, f, t, tau, pot, particle_pot, &
   
 end subroutine doForceloop
 
-subroutine setFortranElectrostaticMethod(electrostaticMethod)
-  use doForces, ONLY : setElectrostaticMethod
-
-  integer, intent(in) :: electrostaticMethod
-
-  call setElectrostaticMethod(electrostaticMethod)
-
-end subroutine setFortranElectrostaticMethod
-
-subroutine notifyFortranCutoffPolicy(cutPolicy)
-  use doForces, ONLY : setCutoffPolicy
-
-  integer, intent(in) :: cutPolicy
-
-  call setCutoffPolicy( cutPolicy )
-
-end subroutine notifyFortranCutoffPolicy
-
 subroutine notifyFortranSkinThickness(this_skin)
   use doForces, ONLY : setSkinThickness
   use definitions, ONLY : dp
@@ -82,9 +64,3 @@ subroutine notifyFortranCutoffs(this_rcut, this_rsw, this_sp, this_sf)
   call setCutoffs(this_rcut, this_rsw, this_sp, this_sf)
 
 end subroutine notifyFortranCutoffs
-
-subroutine notifyFortranYouAreOnYourOwn()
-  use doForces, ONLY : cWasLame
-
-  call cWasLame()
-end subroutine notifyFortranYouAreOnYourOwn  

@@ -92,7 +92,6 @@ Globals::Globals() {
   DefineOptionalParameter(PrintPressureTensor, "printPressureTensor");
   DefineOptionalParameter(TaggedAtomPair, "taggedAtomPair");
   DefineOptionalParameter(PrintTaggedPairDistance, "printTaggedPairDistance");
-  DefineOptionalParameter(CutoffPolicy, "cutoffPolicy");
   DefineOptionalParameter(SwitchingFunctionType, "switchingFunctionType");
   DefineOptionalParameter(HydroPropFile, "HydroPropFile");
   DefineOptionalParameter(Viscosity, "viscosity");
@@ -101,6 +100,7 @@ Globals::Globals() {
   DefineOptionalParameter(LangevinBufferRadius, "langevinBufferRadius");
   DefineOptionalParameter(NeighborListNeighbors,"NeighborListNeighbors");
   DefineOptionalParameter(UseMultipleTemperatureMethod, "useMultipleTemperatureMethod");
+  DefineOptionalParameter(ElectrostaticSummationMethod, "electrostaticSummationMethod");
   DefineOptionalParameter(MTM_Ce, "MTM_Ce");
   DefineOptionalParameter(MTM_G, "MTM_G");
   DefineOptionalParameter(MTM_Io, "MTM_Io");
@@ -114,9 +114,9 @@ Globals::Globals() {
   DefineOptionalParameterWithDefaultValue(UseInitalTime, "useInitialTime", false);
   DefineOptionalParameterWithDefaultValue(UseIntialExtendedSystemState, "useInitialExtendedSystemState", false);
   DefineOptionalParameterWithDefaultValue(OrthoBoxTolerance, "orthoBoxTolerance", 1E-6);  
-  DefineOptionalParameterWithDefaultValue(ElectrostaticSummationMethod, "electrostaticSummationMethod", "SHIFTED_FORCE");
+  DefineOptionalParameterWithDefaultValue(CutoffMethod, "cutoffMethod", "SHIFTED_FORCE");
   DefineOptionalParameterWithDefaultValue(ElectrostaticScreeningMethod, "electrostaticScreeningMethod", "DAMPED");
-  DefineOptionalParameterWithDefaultValue(Dielectric, "dielectric", 78.5);
+  DefineOptionalParameterWithDefaultValue(Dielectric, "dielectric", 80.0);
   DefineOptionalParameterWithDefaultValue(CompressDumpFile, "compressDumpFile", 0);
   DefineOptionalParameterWithDefaultValue(OutputForceVector, "outputForceVector", 0);
   DefineOptionalParameterWithDefaultValue(SkinThickness, "skinThickness", 1.0);
@@ -137,6 +137,7 @@ Globals::Globals() {
   DefineOptionalParameterWithDefaultValue(HULL_Method,"HULL_Method","Convex");
 
 
+
   deprecatedKeywords_.insert("nComponents");
   deprecatedKeywords_.insert("nZconstraints");
   deprecatedKeywords_.insert("initialConfig");
@@ -145,6 +146,7 @@ Globals::Globals() {
   deprecatedKeywords_.insert("thermIntOmegaSpringConst");
   deprecatedKeywords_.insert("useSolidThermInt");  
   deprecatedKeywords_.insert("useLiquidThermInt");
+  deprecatedKeywords_.insert("cutoffPolicy");
     
 }
 
@@ -189,11 +191,10 @@ void Globals::validate() {
   CheckParameter(ThermodynamicIntegrationK, isPositive());
   CheckParameter(ForceFieldVariant, isNotEmpty());
   CheckParameter(ForceFieldFileName, isNotEmpty());
-  CheckParameter(ElectrostaticSummationMethod, isEqualIgnoreCase("NONE") || isEqualIgnoreCase("SHIFTED_POTENTIAL") || isEqualIgnoreCase("SHIFTED_FORCE") || isEqualIgnoreCase("REACTION_FIELD"));
+  CheckParameter(CutoffMethod, isEqualIgnoreCase("HARD") || isEqualIgnoreCase("SWITCHED") || isEqualIgnoreCase("SHIFTED_POTENTIAL") || isEqualIgnoreCase("SHIFTED_FORCE"));
+  CheckParameter(ElectrostaticSummationMethod, isEqualIgnoreCase("HARD") || isEqualIgnoreCase("SWITCHED") || isEqualIgnoreCase("SHIFTED_POTENTIAL") || isEqualIgnoreCase("SHIFTED_FORCE") || isEqualIgnoreCase("REACTION_FIELD"));
   CheckParameter(ElectrostaticScreeningMethod, isEqualIgnoreCase("UNDAMPED") || isEqualIgnoreCase("DAMPED")); 
-  CheckParameter(CutoffPolicy, isEqualIgnoreCase("MIX") || isEqualIgnoreCase("MAX") || isEqualIgnoreCase("TRADITIONAL"));
   CheckParameter(SwitchingFunctionType, isEqualIgnoreCase("CUBIC") || isEqualIgnoreCase("FIFTH_ORDER_POLYNOMIAL"));
-  //CheckParameter(StatFileFormat,);     
   CheckParameter(OrthoBoxTolerance, isPositive());  
   CheckParameter(DampingAlpha,isNonNegative());
   CheckParameter(SkinThickness, isPositive());
