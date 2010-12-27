@@ -44,6 +44,8 @@
 namespace OpenMD {
  
   bool InteractionManager::initialized_ = false;
+  RealType InteractionManager::rCut_ = -1.0;
+  RealType InteractionManager::rSwitch_ = -1.0;
   ForceField* InteractionManager::forceField_ = NULL;  
   InteractionManager* InteractionManager::_instance = NULL;
   map<int, AtomType*> InteractionManager::typeMap_;

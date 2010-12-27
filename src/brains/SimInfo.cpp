@@ -684,14 +684,11 @@ namespace OpenMD {
     Atom* atom;
     set<AtomType*> atomTypes;
     
-    for(mol = beginMolecule(mi); mol != NULL; mol = nextMolecule(mi)) {
-      
+    for(mol = beginMolecule(mi); mol != NULL; mol = nextMolecule(mi)) {      
       for(atom = mol->beginAtom(ai); atom != NULL; atom = mol->nextAtom(ai)) {
 	atomTypes.insert(atom->getAtomType());
-      }
-      
-    }
-    
+      }      
+    }    
     return atomTypes;        
   }
 
@@ -1005,7 +1002,9 @@ namespace OpenMD {
 	} else {
 	  // throw error        
 	  sprintf( painCave.errMsg,
-		   "SimInfo error: Unknown switchingFunctionType. (Input file specified %s .)\n\tswitchingFunctionType must be one of: \"cubic\" or \"fifth_order_polynomial\".", funcType.c_str() );
+		   "SimInfo error: Unknown switchingFunctionType. (Input file specified %s .)\n"
+                   "\tswitchingFunctionType must be one of: \"cubic\" or \"fifth_order_polynomial\".", 
+                   funcType.c_str() );
 	  painCave.isFatal = 1;
 	  simError();
         }           

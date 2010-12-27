@@ -65,11 +65,11 @@ namespace OpenMD {
 
   public:
     static InteractionManager* Instance();
-    static void setForceField(ForceField *ff) {forceField_ = ff;};    
+    static void setForceField(ForceField *ff) {forceField_ = ff;} 
 
-    static void setCutoffRadius(RealType rcut);
-    static void setSwitchingRadius(RealType rsw);
-    static void useShiftedForce();
+    static void setCutoffRadius(RealType rcut) {rCut_ = rcut;}
+    static void setSwitchingRadius(RealType rsw) {rSwitch_ = rsw;}
+    static void useShiftedForce() ;
     static void useShiftedPot();
 
     // Fortran support routines
@@ -101,6 +101,9 @@ namespace OpenMD {
     static SC* sc_;
     static Morse* morse_;
     static Electrostatic* electrostatic_;
+
+    static RealType rCut_;
+    static RealType rSwitch_;
 
     static map<int, AtomType*> typeMap_;
     /**
