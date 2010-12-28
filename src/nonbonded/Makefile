@@ -7,6 +7,7 @@ Source    = LJ.cpp \
 	EAM.cpp \
 	SC.cpp \
 	Electrostatic.cpp \
+	SwitchingFunction.cpp \
 	InteractionManager.cpp
 	
 RmiSource =

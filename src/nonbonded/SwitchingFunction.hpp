@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2009 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -39,21 +39,37 @@
  * [4]  Vardeman & Gezelter, in progress (2009).                        
  */
  
-#ifndef USETHEFORCE_DARKSIDE_SWITCHEROO_INTERFACE_H
-#define USETHEFORCE_DARKSIDE_SWITCHEROO_INTERFACE_H
+#ifndef NONBONDED_SWITCHINGFUNCTION_HPP
+#define NONBONDED_SWITCHINGFUNCTION_HPP
 
-#define __OPENMD_C
+#include "math/CubicSpline.hpp"
 
-#include "config.h"
- 
-#define setFunctionType FC_FUNC(setfunctiontype, SETFUNCTIONTYPE)
-#define deleteSwitch FC_FUNC(deleteswitch, DELETESWITCH)
+using namespace std;
+namespace OpenMD {
 
-extern "C"{
+  enum SwitchingFunctionType {
+    cubic,
+    fifth_order_poly,
+  };
 
-  void setFunctionType( int* theFT );
-  void deleteSwitch( );
-
-}  
+  class SwitchingFunction {
+    
+  public:    
+    SwitchingFunction();
+    void setSwitchType(SwitchingFunctionType sft);
+    void setSwitch(RealType rinner, RealType router);
+    bool getSwitch(RealType r2, RealType sw, RealType dswdr, RealType r);
+    
+  private:
+    RealType rin_;
+    RealType rout_;
+    RealType rin2_;
+    RealType rout2_;
+    SwitchingFunctionType functionType_;
+    bool haveSpline_;
+    bool isCubic_;
+    int np_;
+    CubicSpline* switchSpline_;   
+  };
+}                  
 #endif
-

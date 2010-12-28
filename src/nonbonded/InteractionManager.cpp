@@ -58,6 +58,7 @@ namespace OpenMD {
   EAM* InteractionManager::eam_ = new EAM();
   SC* InteractionManager::sc_ = new SC();
   Electrostatic* InteractionManager::electrostatic_ = new Electrostatic();
+  SwitchingFunction* InteractionManager::switcher_ = new SwitchingFunction();
  
   InteractionManager* InteractionManager::Instance() {
     if (!_instance) {
@@ -75,6 +76,25 @@ namespace OpenMD {
     sc_->setForceField(forceField_);
     morse_->setForceField(forceField_);
     electrostatic_->setForceField(forceField_);
+
+    ForceFieldOptions& fopts = forceField_->getForceFieldOptions();
+    // Force fields can set options on how to scale van der Waals and electrostatic
+    // interactions for atoms connected via bonds, bends and torsions
+    // in this case the topological distance between atoms is:
+    // 0 = the atom itself
+    // 1 = bonded together 
+    // 2 = connected via a bend
+    // 3 = connected via a torsion
+
+    vdwScale_[0] = 0.0;
+    vdwScale_[1] = fopts.getvdw12scale();
+    vdwScale_[2] = fopts.getvdw13scale();
+    vdwScale_[3] = fopts.getvdw14scale();
+
+    electrostaticScale_[0] = 0.0;
+    electrostaticScale_[1] = fopts.getelectrostatic12scale();
+    electrostaticScale_[2] = fopts.getelectrostatic13scale();
+    electrostaticScale_[3] = fopts.getelectrostatic14scale();
 
     ForceField::AtomTypeContainer* atomTypes = forceField_->getAtomTypes();
     ForceField::AtomTypeContainer::MapTypeIterator i1, i2;
@@ -281,7 +301,7 @@ namespace OpenMD {
     return;    
   }
 
-  void InteractionManager::doPair(int *atid1, int *atid2, RealType *d, RealType *r, RealType *r2, RealType *rcut, RealType *sw, RealType *vdwMult,RealType *electroMult, RealType *pot, RealType *vpair, RealType *f1, RealType *eFrame1, RealType *eFrame2, RealType *A1, RealType *A2, RealType *t1, RealType *t2, RealType *rho1, RealType *rho2, RealType *dfrho1, RealType *dfrho2, RealType *fshift1, RealType *fshift2){
+  void InteractionManager::doPair(int *atid1, int *atid2, RealType *d, RealType *r, RealType *r2, RealType *rcut, RealType *sw, int *topoDist, RealType *pot, RealType *vpair, RealType *f1, RealType *eFrame1, RealType *eFrame2, RealType *A1, RealType *A2, RealType *t1, RealType *t2, RealType *rho1, RealType *rho2, RealType *dfrho1, RealType *dfrho2, RealType *fshift1, RealType *fshift2){
     
     if (!initialized_) initialize();
     
@@ -294,8 +314,8 @@ namespace OpenMD {
     idat.r2 = *r2;
     idat.rcut = *rcut;
     idat.sw = *sw;
-    idat.vdwMult = *vdwMult;
-    idat.electroMult = *electroMult;
+    idat.vdwMult = vdwScale_[*topoDist];
+    idat.electroMult = electrostaticScale_[*topoDist];
     idat.pot = *pot;
     idat.vpair = *vpair;
     idat.f1 = Vector3d(f1);
@@ -434,6 +454,17 @@ namespace OpenMD {
     return cutoff;    
   }
 
+
+  void InteractionManager::setSwitch(RealType *rIn, RealType *rOut) {
+    switcher_->setSwitch(*rIn, *rOut);    
+  }
+
+  void InteractionManager::getSwitch(RealType *r2, RealType *sw, RealType *dswdr, RealType *r,
+                                     int *in_switching_region) {
+    bool isr = switcher_->getSwitch(*r2, *sw, *dswdr, *r);    
+    *in_switching_region = (int)isr;
+  }
+
 } //end namespace OpenMD
 
 extern "C" {
@@ -444,6 +475,8 @@ extern "C" {
 #define fortranDoSkipCorrection FC_FUNC(do_skip_correction, DO_SKIP_CORRECTION)
 #define fortranDoSelfCorrection FC_FUNC(do_self_correction, DO_SELF_CORRECTION)
 #define fortranGetCutoff FC_FUNC(get_cutoff, GET_CUTOFF)
+#define fortranSetSwitch FC_FUNC(set_switch, SET_SWITCH)
+#define fortranGetSwitch FC_FUNC(get_switch, GET_SWITCH)
 
   void fortranDoPrePair(int *atid1, int *atid2, RealType *rij, 
                         RealType *rho_i_at_j, RealType *rho_j_at_i) {
@@ -460,17 +493,15 @@ extern "C" {
   }
   
   void fortranDoPair(int *atid1, int *atid2, RealType *d, RealType *r, 
-                     RealType *r2, RealType *rcut, RealType *sw, 
-                     RealType *vdwMult, RealType *electroMult, RealType *pot, 
-                     RealType *vpair, RealType *f1, RealType *eFrame1, 
+                     RealType *r2, RealType *rcut, RealType *sw, int *topoDist,
+                     RealType *pot, RealType *vpair, RealType *f1, RealType *eFrame1, 
                      RealType *eFrame2, RealType *A1, RealType *A2, 
                      RealType *t1, RealType *t2, RealType *rho1, RealType *rho2,
                      RealType *dfrho1, RealType *dfrho2, RealType *fshift1, 
                      RealType *fshift2){
     
     return OpenMD::InteractionManager::Instance()->doPair(atid1, atid2, d, r, 
-                                                          r2, rcut, sw, 
-                                                          vdwMult, electroMult,
+                                                          r2, rcut, sw, topoDist,
                                                           pot, vpair, f1, 
                                                           eFrame1, eFrame2, 
                                                           A1, A2, t1, t2, rho1,
@@ -507,4 +538,16 @@ extern "C" {
   RealType fortranGetCutoff(int *atid) {    
     return OpenMD::InteractionManager::Instance()->getSuggestedCutoffRadius(atid);
   }
+
+  void fortranGetSwitch(RealType *r2, RealType *sw, RealType *dswdr, RealType *r,
+                        int *in_switching_region) {
+    
+    return OpenMD::InteractionManager::Instance()->getSwitch(r2, sw, dswdr, r, 
+                                                             in_switching_region);
+  }
+
+  void fortranSetSwitch(RealType *rIn, RealType *rOut) {    
+    return OpenMD::InteractionManager::Instance()->setSwitch(rIn, rOut);
+  }
+  
 }

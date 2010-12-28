@@ -66,42 +66,4 @@ namespace OpenMD {
 
       deprecatedKeywords_.insert("cutoffPolicy");
     }
-
-
-  void ForceFieldOptions::makeFortranOptions(ForceOptions& fortranForceOptions){
-    
-    fortranForceOptions.vdw12scale = this->getvdw12scale();
-    fortranForceOptions.vdw13scale = this->getvdw13scale();
-    fortranForceOptions.vdw14scale = this->getvdw14scale();
-    fortranForceOptions.electrostatic12scale = this->getelectrostatic12scale();
-    fortranForceOptions.electrostatic13scale = this->getelectrostatic13scale();
-    fortranForceOptions.electrostatic14scale = this->getelectrostatic14scale();
-    fortranForceOptions.GayBerneMu = this->getGayBerneMu();
-    fortranForceOptions.GayBerneNu = this->getGayBerneNu();
-
-
-    std::string DistanceMix = this->getDistanceMixingRule();
-    toUpper(DistanceMix);
-    if(DistanceMix == "ARITHMETIC"){
-      fortranForceOptions.DistanceMixingRule = ARITHMETIC_MIXING_RULE;
-    }else if(DistanceMix == "GEOMETRIC"){
-      fortranForceOptions.DistanceMixingRule = GEOMETRIC_MIXING_RULE;
-    }else if(DistanceMix == "CUBIC"){
-      fortranForceOptions.DistanceMixingRule = CUBIC_MIXING_RULE;
-    }else{
-      fortranForceOptions.DistanceMixingRule = ARITHMETIC_MIXING_RULE;
-    }
-    std::string EnergyMix = this->getEnergyMixingRule();  
-    toUpper(EnergyMix);
-    if(EnergyMix == "ARITHMETIC"){
-      fortranForceOptions.EnergyMixingRule = ARITHMETIC_MIXING_RULE;
-    }else if(EnergyMix == "GEOMETRIC"){
-      fortranForceOptions.EnergyMixingRule = GEOMETRIC_MIXING_RULE;
-    }else if(EnergyMix == "HHG"){
-      fortranForceOptions.EnergyMixingRule = HHG_MIXING_RULE;
-    }else{
-      fortranForceOptions.EnergyMixingRule = GEOMETRIC_MIXING_RULE;
-    }
-  }
-
 }

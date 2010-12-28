@@ -46,8 +46,6 @@
 #include "utils/ParameterManager.hpp"
 #include "utils/StringUtils.hpp"
 #include "io/ParamConstraint.hpp"
-#define __OPENMD_C
-#include "UseTheForce/fForceOptions.h"
 
 namespace OpenMD {
   
@@ -111,7 +109,6 @@ namespace OpenMD {
       return result;
     }
 
-    void makeFortranOptions(ForceOptions & fortranForceOptions);
   private:
     typedef std::map<std::string, ParameterBase*> ParamMap;
     ParamMap parameters_;                  

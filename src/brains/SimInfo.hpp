@@ -62,6 +62,7 @@
 #include "UseTheForce/ForceField.hpp"
 #include "utils/PropertyMap.hpp"
 #include "utils/LocalIndexManager.hpp"
+#include "nonbonded/SwitchingFunction.hpp"
 
 //another nonsense macro declaration
 #define __OPENMD_C
@@ -69,7 +70,6 @@
 
 using namespace std;
 namespace OpenMD{
-
   enum CutoffMethod {
     HARD,
     SWITCHING_FUNCTION,
@@ -489,8 +489,8 @@ namespace OpenMD{
         
   private:
 
-    /** fill up the simtype struct*/
-    void setupSimType();
+    /** fill up the simtype struct and other simulation-related variables */
+    void setupSimVariables();
 
     /**
      * Setup Fortran Simulation
@@ -498,16 +498,14 @@ namespace OpenMD{
      */
     void setupFortranSim();
 
-    /** Figure out the cutoff radius */
-    void setupCutoffRadius();
-    /** Figure out the cutoff method */
-    void setupCutoffMethod();
-    /** Figure out the switching radius */
-    void setupSwitchingRadius();
+    /** Figure out the cutoff radius and cutoff method */
+    void setupCutoffs();
+    /** Figure out the switching radius and polynomial type for the switching function */
+    void setupSwitching();
+    /** Figure out the simulation variables associated with electrostatics */
+    void setupElectrostatics();   
     /** Figure out the neighbor list skin thickness */
-    void setupSkinThickness();
-    /** Figure out which polynomial type to use for the switching function */
-    void setupSwitchingFunction();
+    void setupNeighborlists();
 
     /** Determine if we need to accumulate the simulation box dipole */
     void setupAccumulateBoxDipole();

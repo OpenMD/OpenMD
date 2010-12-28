@@ -8,10 +8,6 @@ Source    = \
 	atype.F90 \
 	atype_interface.F90 \
 	force_globals.F90 \
-	fForceOptions.F90 \
-	fForceOptions_interface.F90 \
-	switcheroo.F90 \
-	switcheroo_interface.F90 \
 	simulation.F90 \
 	simulation_interface.F90 \
 	MetalNonMetal.F90 \
@@ -32,7 +28,6 @@ Modules = \
 	neighborLists \
 	mpiSimulation \
 	simulation \
-	switcheroo \
 	MetalNonMetal \
 
 RmiSource =

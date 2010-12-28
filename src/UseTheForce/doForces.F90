@@ -50,10 +50,8 @@
 
 module doForces
   use force_globals
-  use fForceOptions
   use simulation
   use definitions
-  use switcheroo
   use neighborLists  
   use vector_class
   use status
@@ -777,7 +775,7 @@ contains
     real ( kind = dp ), intent(inout) :: d_grp(3)
     real ( kind = dp ), intent(inout) :: rCut 
     integer, intent(inout) :: topoDist
-    real ( kind = dp ) :: r, pair_pot, vdwMult, electroMult
+    real ( kind = dp ) :: r, pair_pot
     real ( kind = dp ) :: a_k, b_k, c_k, d_k, dx
 
     real( kind = dp), dimension(3) :: f1, t1, t2
@@ -834,11 +832,8 @@ contains
     rho_j = rho(j)    
 #endif
     
-    vdwMult = vdwScale(topoDist)
-    electroMult = electrostaticScale(topoDist)
-
     call do_pair(c_ident_i, c_ident_j, d, r, rijsq, sw, vpair, &
-         vdwMult, electroMult, A1, A2, eF1, eF2,  &
+         topoDist, A1, A2, eF1, eF2,  &
          pairpot, f1, t1, t2, &
          rho_i, rho_j, dfrhodrho_i, dfrhodrho_j, fshift_i, fshift_j)
     

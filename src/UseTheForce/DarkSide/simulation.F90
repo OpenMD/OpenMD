@@ -49,7 +49,6 @@ module simulation
   use force_globals
   use vector_class
   use atype_module
-  use switcheroo
 #ifdef IS_MPI
   use mpiSimulation
 #endif
@@ -59,7 +58,6 @@ module simulation
 
 #define __FORTRAN90
 #include "brains/fSimulation.h"
-#include "UseTheForce/fSwitchingFunction.h"
 
   type (simtype), public, save :: thisSim
 

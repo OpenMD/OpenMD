@@ -55,16 +55,14 @@
 #include "primitives/Molecule.hpp"
 #include "primitives/StuntDouble.hpp"
 #include "UseTheForce/fCutoffPolicy.h"
-#include "UseTheForce/DarkSide/fSwitchingFunctionType.h"
 #include "UseTheForce/doForces_interface.h"
 #include "UseTheForce/DarkSide/neighborLists_interface.h"
-#include "UseTheForce/DarkSide/switcheroo_interface.h"
 #include "utils/MemoryUtils.hpp"
 #include "utils/simError.h"
 #include "selection/SelectionManager.hpp"
 #include "io/ForceFieldOptions.hpp"
 #include "UseTheForce/ForceField.hpp"
-#include "nonbonded/InteractionManager.hpp"
+#include "nonbonded/SwitchingFunction.hpp"
 
 
 #ifdef IS_MPI
@@ -656,15 +654,21 @@ namespace OpenMD {
     molStampIds_.insert(molStampIds_.end(), nmol, curStampId);
   }
 
-  void SimInfo::update() {
 
-    setupSimType();
-    setupCutoffRadius();
-    setupSwitchingRadius();
-    setupCutoffMethod();
-    setupSkinThickness();
-    setupSwitchingFunction();
-    setupAccumulateBoxDipole();
+  /**
+   * update
+   *
+   *  Performs the global checks and variable settings after the objects have been
+   *  created. 
+   * 
+   */
+  void SimInfo::update() {
+    
+    setupSimVariables();
+    setupCutoffs();
+    setupSwitching();
+    setupElectrostatics();
+    setupNeighborlists();
 
 #ifdef IS_MPI
     setupFortranParallel();
@@ -693,26 +697,34 @@ namespace OpenMD {
   }
 
   /**
-   * setupCutoffRadius
+   * setupCutoffs
    *
+   * Sets the values of cutoffRadius and cutoffMethod
+   *
+   * cutoffRadius : realType
    *  If the cutoffRadius was explicitly set, use that value.
    *  If the cutoffRadius was not explicitly set:
    *      Are there electrostatic atoms?  Use 12.0 Angstroms.
    *      No electrostatic atoms?  Poll the atom types present in the
    *      simulation for suggested cutoff values (e.g. 2.5 * sigma).
    *      Use the maximum suggested value that was found.
+   *
+   * cutoffMethod : (one of HARD, SWITCHED, SHIFTED_FORCE, SHIFTED_POTENTIAL)
+   *      If cutoffMethod was explicitly set, use that choice.
+   *      If cutoffMethod was not explicitly set, use SHIFTED_FORCE
    */
-  void SimInfo::setupCutoffRadius() {
+  void SimInfo::setupCutoffs() {
     
     if (simParams_->haveCutoffRadius()) {
       cutoffRadius_ = simParams_->getCutoffRadius();
     } else {      
       if (usesElectrostaticAtoms_) {
         sprintf(painCave.errMsg,
-                "SimInfo Warning: No value was set for the cutoffRadius.\n"
+                "SimInfo: No value was set for the cutoffRadius.\n"
                 "\tOpenMD will use a default value of 12.0 angstroms"
                 "\tfor the cutoffRadius.\n");
         painCave.isFatal = 0;
+        painCave.severity = OPENMD_INFO;
 	simError();
 	cutoffRadius_ = 12.0;
       } else {
@@ -725,45 +737,109 @@ namespace OpenMD {
           cutoffRadius_ = max(thisCut, cutoffRadius_);
         }
         sprintf(painCave.errMsg,
-                "SimInfo Warning: No value was set for the cutoffRadius.\n"
+                "SimInfo: No value was set for the cutoffRadius.\n"
                 "\tOpenMD will use %lf angstroms.\n",
                 cutoffRadius_);
         painCave.isFatal = 0;
+        painCave.severity = OPENMD_INFO;
 	simError();
       }             
     }
 
     InteractionManager::Instance()->setCutoffRadius(cutoffRadius_);
+
+    map<string, CutoffMethod> stringToCutoffMethod;
+    stringToCutoffMethod["HARD"] = HARD;
+    stringToCutoffMethod["SWITCHING_FUNCTION"] = SWITCHING_FUNCTION;
+    stringToCutoffMethod["SHIFTED_POTENTIAL"] = SHIFTED_POTENTIAL;    
+    stringToCutoffMethod["SHIFTED_FORCE"] = SHIFTED_FORCE;
+  
+    if (simParams_->haveCutoffMethod()) {
+      string cutMeth = toUpperCopy(simParams_->getCutoffMethod());
+      map<string, CutoffMethod>::iterator i;
+      i = stringToCutoffMethod.find(cutMeth);
+      if (i == stringToCutoffMethod.end()) {
+        sprintf(painCave.errMsg,
+                "SimInfo: Could not find chosen cutoffMethod %s\n"
+                "\tShould be one of: "
+                "HARD, SWITCHING_FUNCTION, SHIFTED_POTENTIAL, or SHIFTED_FORCE\n",
+                cutMeth.c_str());
+        painCave.isFatal = 1;
+        painCave.severity = OPENMD_ERROR;
+	simError();
+      } else {
+        cutoffMethod_ = i->second;
+      }
+    } else {
+      sprintf(painCave.errMsg,
+              "SimInfo: No value was set for the cutoffMethod.\n"
+              "\tOpenMD will use SHIFTED_FORCE.\n");
+        painCave.isFatal = 0;
+        painCave.severity = OPENMD_INFO;
+	simError();
+        cutoffMethod_ = SHIFTED_FORCE;        
+    }
+
+    InteractionManager::Instance()->setCutoffMethod(cutoffMethod_);
   }
   
   /**
-   * setupSwitchingRadius
+   * setupSwitching
    *
+   * Sets the values of switchingRadius and 
    *  If the switchingRadius was explicitly set, use that value (but check it)
    *  If the switchingRadius was not explicitly set: use 0.85 * cutoffRadius_
    */
-  void SimInfo::setupSwitchingRadius() {
+  void SimInfo::setupSwitching() {
     
     if (simParams_->haveSwitchingRadius()) {
       switchingRadius_ = simParams_->getSwitchingRadius();
       if (switchingRadius_ > cutoffRadius_) {        
         sprintf(painCave.errMsg,
-                "SimInfo Error: switchingRadius (%f) is larger than cutoffRadius(%f)\n",
+                "SimInfo: switchingRadius (%f) is larger than cutoffRadius(%f)\n",
                 switchingRadius_, cutoffRadius_);
         painCave.isFatal = 1;
+        painCave.severity = OPENMD_ERROR;
         simError();
-
       }
     } else {      
       switchingRadius_ = 0.85 * cutoffRadius_;
       sprintf(painCave.errMsg,
-              "SimInfo Warning: No value was set for the switchingRadius.\n"
+              "SimInfo: No value was set for the switchingRadius.\n"
               "\tOpenMD will use a default value of 85 percent of the cutoffRadius.\n"
               "\tswitchingRadius = %f. for this simulation\n", switchingRadius_);
       painCave.isFatal = 0;
+      painCave.severity = OPENMD_WARNING;
       simError();
-    }             
+    }           
+  
     InteractionManager::Instance()->setSwitchingRadius(switchingRadius_);
+
+    SwitchingFunctionType ft;
+    
+    if (simParams_->haveSwitchingFunctionType()) {
+      string funcType = simParams_->getSwitchingFunctionType();
+      toUpper(funcType);
+      if (funcType == "CUBIC") {
+        ft = cubic;
+      } else {
+        if (funcType == "FIFTH_ORDER_POLYNOMIAL") {
+          ft = fifth_order_poly;
+	} else {
+	  // throw error        
+	  sprintf( painCave.errMsg,
+		   "SimInfo : Unknown switchingFunctionType. (Input file specified %s .)\n"
+                   "\tswitchingFunctionType must be one of: "
+                   "\"cubic\" or \"fifth_order_polynomial\".", 
+                   funcType.c_str() );
+	  painCave.isFatal = 1;
+          painCave.severity = OPENMD_ERROR;
+	  simError();
+        }           
+      }
+    }
+
+    InteractionManager::Instance()->setSwitchingFunctionType(ft);
   }
 
   /**
@@ -989,30 +1065,6 @@ namespace OpenMD {
 
 
   void SimInfo::setupSwitchingFunction() {    
-    int ft = CUBIC;
-    
-    if (simParams_->haveSwitchingFunctionType()) {
-      string funcType = simParams_->getSwitchingFunctionType();
-      toUpper(funcType);
-      if (funcType == "CUBIC") {
-        ft = CUBIC;
-      } else {
-        if (funcType == "FIFTH_ORDER_POLYNOMIAL") {
-          ft = FIFTH_ORDER_POLY;
-	} else {
-	  // throw error        
-	  sprintf( painCave.errMsg,
-		   "SimInfo error: Unknown switchingFunctionType. (Input file specified %s .)\n"
-                   "\tswitchingFunctionType must be one of: \"cubic\" or \"fifth_order_polynomial\".", 
-                   funcType.c_str() );
-	  painCave.isFatal = 1;
-	  simError();
-        }           
-      }
-    }
-
-    // send switching function notification to switcheroo
-    setFunctionType(&ft);
 
   }
 

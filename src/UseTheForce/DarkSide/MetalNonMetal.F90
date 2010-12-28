@@ -51,7 +51,6 @@ module MetalNonMetal
   use vector_class
   use simulation
   use status
-  use fForceOptions
   use force_globals
 
   implicit none

@@ -52,8 +52,6 @@
 #include "utils/simError.h"
 #include "utils/Tuple.hpp"
 #include "UseTheForce/DarkSide/atype_interface.h"
-#include "UseTheForce/DarkSide/fForceOptions_interface.h"
-#include "UseTheForce/DarkSide/switcheroo_interface.h"
 namespace OpenMD {
 
   ForceField::ForceField() { 
@@ -72,7 +70,6 @@ namespace OpenMD {
 
   ForceField::~ForceField() {
     deleteAtypes();
-    deleteSwitch();   
   }
 
   AtomType* ForceField::getAtomType(const std::string &at) {
@@ -631,9 +628,4 @@ namespace OpenMD {
     return ffStream;
   }
 
-  void ForceField::setFortranForceOptions(){
-    ForceOptions theseFortranOptions;
-    forceFieldOptions_.makeFortranOptions(theseFortranOptions);
-    setfForceOptions(&theseFortranOptions);
-  }
 } //end namespace OpenMD

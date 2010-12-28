@@ -65,7 +65,6 @@
 #include "types/TorsionType.hpp"
 #include "types/InversionType.hpp"
 #include "types/NonBondedInteractionType.hpp"
-#include "UseTheForce/fForceOptions.h"
 namespace OpenMD {
 
   /**
