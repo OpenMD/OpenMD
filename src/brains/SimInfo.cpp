@@ -63,7 +63,6 @@
 #include "UseTheForce/ForceField.hpp"
 #include "nonbonded/SwitchingFunction.hpp"
 
-
 #ifdef IS_MPI
 #include "UseTheForce/mpiComponentPlan.h"
 #include "UseTheForce/DarkSide/simParallel_interface.h"
@@ -745,8 +744,6 @@ namespace OpenMD {
       }             
     }
 
-    InteractionManager::Instance()->setCutoffRadius(cutoffRadius_);
-
     map<string, CutoffMethod> stringToCutoffMethod;
     stringToCutoffMethod["HARD"] = HARD;
     stringToCutoffMethod["SWITCHING_FUNCTION"] = SWITCHING_FUNCTION;
@@ -778,8 +775,6 @@ namespace OpenMD {
 	simError();
         cutoffMethod_ = SHIFTED_FORCE;        
     }
-
-    InteractionManager::Instance()->setCutoffMethod(cutoffMethod_);
   }
   
   /**
@@ -811,19 +806,15 @@ namespace OpenMD {
       painCave.severity = OPENMD_WARNING;
       simError();
     }           
-  
-    InteractionManager::Instance()->setSwitchingRadius(switchingRadius_);
-
-    SwitchingFunctionType ft;
     
     if (simParams_->haveSwitchingFunctionType()) {
       string funcType = simParams_->getSwitchingFunctionType();
       toUpper(funcType);
       if (funcType == "CUBIC") {
-        ft = cubic;
+        sft_ = cubic;
       } else {
         if (funcType == "FIFTH_ORDER_POLYNOMIAL") {
-          ft = fifth_order_poly;
+          sft_ = fifth_order_poly;
 	} else {
 	  // throw error        
 	  sprintf( painCave.errMsg,
@@ -837,37 +828,41 @@ namespace OpenMD {
         }           
       }
     }
-
-    InteractionManager::Instance()->setSwitchingFunctionType(ft);
   }
 
   /**
-   * setupSkinThickness
+   * setupNeighborlists
    *
    *  If the skinThickness was explicitly set, use that value (but check it)
    *  If the skinThickness was not explicitly set: use 1.0 angstroms
    */
-  void SimInfo::setupSkinThickness() {    
+  void SimInfo::setupNeighborlists() {    
     if (simParams_->haveSkinThickness()) {
       skinThickness_ = simParams_->getSkinThickness();
     } else {      
       skinThickness_ = 1.0;
       sprintf(painCave.errMsg,
-              "SimInfo Warning: No value was set for the skinThickness.\n"
+              "SimInfo: No value was set for the skinThickness.\n"
               "\tOpenMD will use a default value of %f Angstroms\n"
               "\tfor this simulation\n", skinThickness_);
+      painCave.severity = OPENMD_INFO;
       painCave.isFatal = 0;
       simError();
     }             
   }
 
-  void SimInfo::setupSimType() {
+  void SimInfo::setupSimVariables() {
+    useAtomicVirial_ = simParams_->getUseAtomicVirial();
+    // we only call setAccumulateBoxDipole if the accumulateBoxDipole parameter is true
+    calcBoxDipole_ = false;
+    if ( simParams_->haveAccumulateBoxDipole() ) 
+      if ( simParams_->getAccumulateBoxDipole() ) {
+	calcBoxDipole_ = true;       
+      }
+
     set<AtomType*>::iterator i;
     set<AtomType*> atomTypes;
-    atomTypes = getSimulatedAtomTypes();
-
-    useAtomicVirial_ = simParams_->getUseAtomicVirial();
-
+    atomTypes = getSimulatedAtomTypes();    
     int usesElectrostatic = 0;
     int usesMetallic = 0;
     int usesDirectional = 0;
@@ -1063,17 +1058,8 @@ namespace OpenMD {
   }
 
 
-  void SimInfo::setupSwitchingFunction() {    
-
-  }
-
   void SimInfo::setupAccumulateBoxDipole() {    
 
-    // we only call setAccumulateBoxDipole if the accumulateBoxDipole parameter is true
-    if ( simParams_->haveAccumulateBoxDipole() ) 
-      if ( simParams_->getAccumulateBoxDipole() ) {
-	calcBoxDipole_ = true;
-      }
 
   }
 

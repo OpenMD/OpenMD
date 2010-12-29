@@ -626,6 +626,7 @@ namespace OpenMD{
     RealType listRadius_;           /**< Verlet neighbor list radius */
     RealType skinThickness_;        /**< Verlet neighbor list skin thickness */    
     CutoffMethod cutoffMethod_;     /**< Cutoff Method for most non-bonded interactions */
+    SwitchingFunctionType sft_;     /**< Type of switching function in use */
 
     bool fortranInitialized_; /** flag to indicate whether the fortran side is initialized */
     
