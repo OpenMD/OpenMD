@@ -2,7 +2,6 @@ Package = profiling
 
 Source    = \
 	mdProfile.cpp \
-	timing.F90 \
 
 ParallelSource = \
 	mdProfile.cpp
