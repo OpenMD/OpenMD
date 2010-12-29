@@ -98,7 +98,6 @@ namespace OpenMD {
 
         }
       } 
-      at->makeFortranAtomType();
     }
     
     delete ffStream;

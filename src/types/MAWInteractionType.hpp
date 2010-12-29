@@ -63,10 +63,11 @@ namespace OpenMD {
    * of spherical polar coordinates (r, theta, phi) in the
    * body-fixed frame of each water molecule.
    */
+
   class MAWInteractionType : public NonBondedInteractionType {
-    
+       
   public:
-    
+        
     MAWInteractionType(RealType myD0, RealType myBeta0, RealType myR0,
                        RealType myCa1, RealType myCb1){
       D_e = myD0;
@@ -74,18 +75,6 @@ namespace OpenMD {
       r_e = myR0;
       ca1 = myCa1;
       cb1 = myCb1;
-    }
-    
-    virtual void tellFortran(int atid1, int atid2) {
-      mnmit.MNMInteractionType = MNM_MAW;
-      mnmit.metal_atid = atid1;
-      mnmit.nonmetal_atid = atid2;
-      mnmit.R0 = r_e;
-      mnmit.D0 = D_e;
-      mnmit.beta0 = beta;
-      mnmit.ca1 = ca1;
-      mnmit.cb1 = cb1;
-      addMNMInteraction(&mnmit);
     }
     
   private:    

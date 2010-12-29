@@ -58,6 +58,7 @@ namespace OpenMD {
   EAM* InteractionManager::eam_ = new EAM();
   SC* InteractionManager::sc_ = new SC();
   Electrostatic* InteractionManager::electrostatic_ = new Electrostatic();
+  MAW* InteractionManager::maw_ = new MAW();
   SwitchingFunction* InteractionManager::switcher_ = new SwitchingFunction();
  
   InteractionManager* InteractionManager::Instance() {
@@ -76,6 +77,7 @@ namespace OpenMD {
     sc_->setForceField(forceField_);
     morse_->setForceField(forceField_);
     electrostatic_->setForceField(forceField_);
+    maw_->setForceField(forceField_);
 
     ForceFieldOptions& fopts = forceField_->getForceFieldOptions();
     // Force fields can set options on how to scale van der Waals and electrostatic
@@ -231,6 +233,27 @@ namespace OpenMD {
           interactions_[key].insert(sc_);
           metExplicit = true;
         }
+
+        if (nbiType->isMAW()) {
+          if (vdwExplicit) {
+            sprintf( painCave.errMsg,
+                     "InteractionManager::initialize found more than one explicit\n"
+                     "\tvan der Waals interaction for atom types %s - %s\n",
+                     atype1->getName().c_str(), atype2->getName().c_str());
+            painCave.severity = OPENMD_ERROR;
+            painCave.isFatal = 1;
+            simError();
+          }
+          // We found an explicit MAW interaction.  
+          // override all other vdw entries for this pair of atom types:
+          set<NonBondedInteraction*>::iterator it;
+          for (it = interactions_[key].begin(); it != interactions_[key].end(); ++it) {
+            InteractionFamily ifam = (*it)->getFamily();
+            if (ifam == VANDERWAALS_FAMILY) interactions_[key].erase(*it);
+          }
+          interactions_[key].insert(maw_);
+          vdwExplicit = true;
+        }        
       }
     }
     

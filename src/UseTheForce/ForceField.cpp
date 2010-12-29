@@ -51,7 +51,6 @@
 #include "UseTheForce/ForceField.hpp"
 #include "utils/simError.h"
 #include "utils/Tuple.hpp"
-#include "UseTheForce/DarkSide/atype_interface.h"
 namespace OpenMD {
 
   ForceField::ForceField() { 
@@ -65,11 +64,6 @@ namespace OpenMD {
     } else {
       ffPath_ = tempPath;
     }
-  }
-
-
-  ForceField::~ForceField() {
-    deleteAtypes();
   }
 
   AtomType* ForceField::getAtomType(const std::string &at) {

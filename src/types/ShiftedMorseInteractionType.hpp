@@ -64,16 +64,6 @@ namespace OpenMD {
       r0 = myR0;
     }
     
-    virtual void tellFortran(int atid1, int atid2) {
-      mnmit.MNMInteractionType = MNM_SHIFTEDMORSE;
-      mnmit.metal_atid = atid1;
-      mnmit.nonmetal_atid = atid2;
-      mnmit.R0 = r0;
-      mnmit.D0 = D0;
-      mnmit.beta0 = beta0;
-      addMNMInteraction(&mnmit);
-    }
-    
   private:    
     RealType D0;
     RealType beta0;

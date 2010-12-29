@@ -43,12 +43,10 @@
 
 module simulation
   use definitions
-  use status
   use linearAlgebra
+  use status
   use neighborLists
   use force_globals
-  use vector_class
-  use atype_module
 #ifdef IS_MPI
   use mpiSimulation
 #endif
@@ -187,16 +185,6 @@ contains
 
     call gather(c_idents, c_idents_Row, plan_atom_row)
     call gather(c_idents, c_idents_Col, plan_atom_col)
-
-    do i = 1, nAtomsInRow
-       me = getFirstMatchingElement(atypes, "c_ident", c_idents_Row(i))
-       atid_Row(i) = me
-    enddo
-
-    do i = 1, nAtomsInCol
-       me = getFirstMatchingElement(atypes, "c_ident", c_idents_Col(i))
-       atid_Col(i) = me
-    enddo
 
 #endif
 
@@ -338,10 +326,8 @@ contains
 
 #endif
 
-    ! We build the local atid's for both mpi and nonmpi
+    ! We build the local idents for both mpi and nonmpi
     do i = 1, nLocal
-       me = getFirstMatchingElement(atypes, "c_ident", c_idents(i))
-       atid(i) = me
        c_idents_local(i) = c_idents(i)
     enddo
 

@@ -127,7 +127,6 @@ namespace OpenMD {
 
         }
       }
-      at->makeFortranAtomType();
     }
     
     hasSCtypes_ = false;
@@ -152,45 +151,6 @@ namespace OpenMD {
       simError();
     }
     
-    /* to handle metal-nonmetal interactions, first we loop over
-       all atom types: */ 
-    
-    for (at = atomTypeCont_.beginType(i); at != NULL;
-         at = atomTypeCont_.nextType(i)) {
-      
-      /* if we find a metallic atom, we need to compare against
-         all other atom types */ 
-      
-      if (at->isEAM() || at->isSC()) {
-        
-        /* loop over all other atom types */
-        for (at2 = atomTypeCont_.beginType(j); at2 != NULL;
-             at2 = atomTypeCont_.nextType(j)) {
-          
-          /* if the other partner is not a metallic type, we need to
-             look for explicit non-bonded interactions */
-          if (!at2->isEAM() && !at2->isSC()) {
-	  
-            /* get the name and ident of the metallic atom type */
-            std::string at1s = at->getName();
-            int atid1 = at->getIdent();
-	  
-            /* get the name and ident of the nonmetallic atom type */
-            std::string at2s = at2->getName();
-            int atid2 = at2->getIdent();
-	  
-            /* look for a match in the non-bonded interactions parsed
-               from the force field file */ 
-            nbit = getNonBondedInteractionType(at1s, at2s);
-          
-            /* if we found a match (even a partial match), punt to the
-               interaction to poke our info down to fortran. */
-            if (nbit != NULL)	nbit->tellFortran(atid1, atid2);
-          }			
-        }
-      }
-    }
-  
     delete ffStream;
   
   }

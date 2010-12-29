@@ -50,15 +50,13 @@
 #define TYPES_NONBONDEDINTERACTIONTYPE_HPP
 
 #include "types/AtomType.hpp"
-#define __OPENMD_C
-#include "UseTheForce/DarkSide/fMnMInteractions.h"
-#include "UseTheForce/DarkSide/MetalNonMetal_interface.h"
 
 namespace OpenMD {
 
   typedef  struct{
     int is_LennardJones;
     int is_Morse;
+    int is_MAW;
     int is_EAM;
     int is_SC;
   } NonBondedInteractionTypeProperties;
@@ -72,33 +70,15 @@ namespace OpenMD {
    */
   class NonBondedInteractionType {
   public:
-    NonBondedInteractionType(){
-      /* set all of the values in case we pass down to fortran
-       * without setting some unimportant ones... 
-       */
-      mnmit.MNMInteractionType = 0;
-      mnmit.metal_atid = -1;
-      mnmit.nonmetal_atid = -1;
-      mnmit.R0 = 0.0;
-      mnmit.D0 = 0.0;
-      mnmit.beta0 = 0.0;
-      mnmit.betaH = 0.0;
-      mnmit.ca1 = 0.0;
-      mnmit.cb1 = 0.0;
-      mnmit.sigma = 0.0;
-      mnmit.epsilon = 0.0;
-    }
+    NonBondedInteractionType() { }
     virtual ~NonBondedInteractionType() { } ;
     
-    /**
-     * in metal-nonmetal interactions atid1 is always the metallic atom type.
-     */
-    virtual void tellFortran(int atid1, int atid2){}
-
     void setLennardJones();    
     bool isLennardJones();
     void setMorse();    
     bool isMorse();
+    void setMAW();
+    bool isMAW();
     void setEAM();
     bool isEAM();
     bool isSC();
@@ -149,7 +129,6 @@ namespace OpenMD {
     
   protected:
     NonBondedInteractionTypeProperties nbitp;
-    MNMtype mnmit;
     std::pair<AtomType*, AtomType*> atomTypes_;
     
   private:
@@ -179,7 +158,17 @@ namespace OpenMD {
   };
   
   typedef SimpleTypeData<MorseParam> MorseData;
+
+  struct MAWParam {
+    RealType De;
+    RealType Re;
+    RealType beta;
+    RealType ca1;
+    RealType cb1;
+  };
   
+  typedef SimpleTypeData<MAWParam> MAWData;
+
 } //end namespace OpenMD
 #endif //TYPES_NONBONDEDINTERACTIONTYPE_HPP
 

@@ -46,8 +46,6 @@
 
 #include "types/AtomType.hpp"
 #include "utils/simError.h"
-#define __OPENMD_C
-#include "UseTheForce/DarkSide/atype_interface.h"
 
 namespace OpenMD {
   AtomType::AtomType(){
@@ -156,41 +154,6 @@ namespace OpenMD {
     }
   }
 
-  void AtomType::makeFortranAtomType() {
-    
-    int status;
-    
-    if (name_.empty()) {
-      sprintf( painCave.errMsg,
-               "Attempting to complete an AtomType without giving "
-               "it a name_!\n");
-      painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
-      simError();
-    }
-    
-    if (atp.ident == -1) {
-      sprintf( painCave.errMsg,
-               "Attempting to complete AtomType %s without setting the"
-               " ident!/n", name_.c_str());
-      painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
-      simError();          
-    }
-    
-    status = 0;
-    
-    makeAtype(&atp, &status);   
-    
-    if (status != 0) {
-      sprintf( painCave.errMsg,
-               "Fortran rejected AtomType %s!\n", name_.c_str());
-      painCave.severity = OPENMD_ERROR;
-      painCave.isFatal = 1;
-      simError();          
-    }
-  }
-  
   void AtomType::addProperty(GenericData* genData) {
     myResponsibilities_[genData->getID()] = true;
     properties_.addProperty(genData);  

@@ -51,7 +51,6 @@
 
 #define __OPENMD_C
 #include "types/AtomTypeProperties.h"
-#include "UseTheForce/DarkSide/atype_interface.h"
 
 namespace OpenMD {
   /**
@@ -68,15 +67,7 @@ namespace OpenMD {
     virtual ~AtomType() { } ;
 
     virtual void useBase(AtomType* base);
-
     virtual void copyAllData(AtomType* orig);   
-    
-    /**
-     * Finishes off the AtomType by communicating the logical portions of the
-     * structure to the Fortran atype module
-     */
-    void makeFortranAtomType();
-
     void setMass(RealType m);
     RealType getMass();
 

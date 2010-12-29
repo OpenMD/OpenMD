@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2009 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -39,21 +39,46 @@
  * [4]  Vardeman & Gezelter, in progress (2009).                        
  */
  
-#ifndef USETHEFORCE_DARKSIDE_ATYPE_INTERFACE_H
-#define USETHEFORCE_DARKSIDE_ATYPE_INTERFACE_H
+#ifndef NONBONDED_MAW_HPP
+#define NONBONDED_MAW_HPP
 
-#define __OPENMD_C
+#include "types/MAWInteractionType.hpp"
+#include "nonbonded/NonBondedInteraction.hpp"
+#include "UseTheForce/ForceField.hpp"
+#include "math/Vector3.hpp"
 
-#include "config.h"
-#include "types/AtomTypeProperties.h"
+using namespace std;
+namespace OpenMD {
 
-#define makeAtype FC_FUNC(makeatype, MAKEATYPE)
-#define deleteAtypes FC_FUNC(deleteatypes, DELETEATYPES)
+  struct MAWInteractionData {
+    RealType De;
+    RealType Re;
+    RealType beta;
+    RealType ca1;
+    RealType cb1;
+  };
 
-extern "C" {
-  void makeAtype(AtomTypeProperties* atp, int* status );
-  void deleteAtypes(void);
-}  
+  class MAW : public VanDerWaalsInteraction {
+    
+  public:    
+    MAW();
+    void setForceField(ForceField *ff) {forceField_ = ff;};
+    void addExplicitInteraction(AtomType* atype1, AtomType* atype2, RealType De, RealType beta, RealType Re, RealType ca1, RealType cb1); 
+    virtual void calcForce(InteractionData idat);
+    virtual string getName() {return name_;}
+    virtual RealType getSuggestedCutoffRadius(AtomType* at1, AtomType* at2);
+    
+  private:
+    void initialize();
+    bool initialized_;
+    map<pair<AtomType*, AtomType*>, MAWInteractionData> MixingMap;
+    bool shiftedPot_;
+    bool shiftedFrc_;
+    ForceField* forceField_;    
+    string name_;
+    
+  };
+}
+
+                               
 #endif
-
-

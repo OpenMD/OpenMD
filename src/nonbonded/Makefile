@@ -7,6 +7,7 @@ Source    = LJ.cpp \
 	EAM.cpp \
 	SC.cpp \
 	Electrostatic.cpp \
+	MAW.cpp \
 	SwitchingFunction.cpp \
 	InteractionManager.cpp
 	

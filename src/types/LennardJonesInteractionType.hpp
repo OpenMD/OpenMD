@@ -60,17 +60,6 @@ namespace OpenMD {
       epsilon = myEpsilon;
     }
     
-    virtual void tellFortran(int atid1, int atid2) {
-      mnmit.MNMInteractionType = MNM_LENNARDJONES;
-      mnmit.metal_atid = atid1;
-      mnmit.nonmetal_atid = atid2;
-      mnmit.sigma = sigma;
-      mnmit.epsilon = epsilon;
-      
-      addMNMInteraction(&mnmit);
-    }
-    
-    
   private:
     RealType sigma;
     RealType epsilon;    

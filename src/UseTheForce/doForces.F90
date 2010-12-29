@@ -53,7 +53,6 @@ module doForces
   use simulation
   use definitions
   use neighborLists  
-  use vector_class
   use status
   use ISO_C_BINDING
 

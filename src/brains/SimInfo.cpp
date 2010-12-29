@@ -54,7 +54,6 @@
 #include "math/Vector3.hpp"
 #include "primitives/Molecule.hpp"
 #include "primitives/StuntDouble.hpp"
-#include "UseTheForce/fCutoffPolicy.h"
 #include "UseTheForce/doForces_interface.h"
 #include "UseTheForce/DarkSide/neighborLists_interface.h"
 #include "utils/MemoryUtils.hpp"

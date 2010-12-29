@@ -52,6 +52,7 @@
 #include "nonbonded/SC.hpp"
 #include "nonbonded/Morse.hpp"
 #include "nonbonded/Electrostatic.hpp"
+#include "nonbonded/MAW.hpp"
 #include "nonbonded/SwitchingFunction.hpp"
 
 using namespace std;
@@ -102,6 +103,7 @@ namespace OpenMD {
     static SC* sc_;
     static Morse* morse_;
     static Electrostatic* electrostatic_;
+    static MAW* maw_;
     static SwitchingFunction* switcher_;
 
     static RealType rCut_;
