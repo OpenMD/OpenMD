@@ -44,7 +44,6 @@
 
 #include "brains/SimInfo.hpp"
 #include "types/AtomType.hpp"
-#include "UseTheForce/ForceField.hpp"
 #include "nonbonded/LJ.hpp"
 #include "nonbonded/GB.hpp"
 #include "nonbonded/Sticky.hpp"
@@ -58,6 +57,13 @@
 using namespace std;
 
 namespace OpenMD {
+  enum CutoffMethod {
+    HARD,
+    SWITCHED,
+    SHIFTED_POTENTIAL,
+    SHIFTED_FORCE
+  };
+
   /**
    * @class InteractionManager InteractionManager is responsible for
    * keeping track of the non-bonded interactions (C++) and providing
@@ -67,10 +73,8 @@ namespace OpenMD {
 
   public:
     static InteractionManager* Instance();
-    static void setForceField(ForceField *ff) {forceField_ = ff;} 
-    static void setCutoffRadius(RealType rcut) {rCut_ = rcut;}
-    static void setSwitchingRadius(RealType rsw) {rSwitch_ = rsw;}
-    static void setCutoffMethod(CutoffMethod cm) {cutoffMethod_ = cm;}
+    static void setSimInfo(SimInfo* info) {info_ = info;} 
+    static void initialize();
 
     // Fortran support routines
 
@@ -92,10 +96,13 @@ namespace OpenMD {
     InteractionManager& operator=(InteractionManager const&) {};
     static InteractionManager* _instance; 
 
-    static void initialize();
     static bool initialized_; 
 
-    static ForceField* forceField_;
+    static void setupCutoffs();
+    static void setupSwitching();
+    static void setupNeighborlists();
+
+    static SimInfo* info_;
     static LJ* lj_;
     static GB* gb_;
     static Sticky* sticky_;
@@ -106,9 +113,12 @@ namespace OpenMD {
     static MAW* maw_;
     static SwitchingFunction* switcher_;
 
-    static RealType rCut_;
-    static RealType rSwitch_;
-    static CutoffMethod cutoffMethod_;
+    static RealType rCut_;            /**< cutoff radius for non-bonded interactions */
+    static RealType rSwitch_;         /**< inner radius of switching function */
+    static CutoffMethod cutoffMethod_;/**< Cutoff Method for most non-bonded interactions */
+    static SwitchingFunctionType sft_;/**< Type of switching function in use */
+    static RealType listRadius_;      /**< Verlet neighbor list radius */
+    static RealType skinThickness_;   /**< Verlet neighbor list skin thickness */    
 
     static RealType vdwScale_[4];
     static RealType electrostaticScale_[4];

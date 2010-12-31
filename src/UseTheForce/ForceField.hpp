@@ -82,9 +82,9 @@ namespace OpenMD {
     typedef TypeContainer<InversionType, 4> InversionTypeContainer;
     typedef TypeContainer<NonBondedInteractionType, 2> NonBondedInteractionTypeContainer;
     
-    ForceField(); 
+    ForceField();
     
-    virtual ~ForceField();
+    virtual ~ForceField() {};
 
     std::string getForceFieldFileName() {
       return forceFieldFileName_;
@@ -97,6 +97,7 @@ namespace OpenMD {
     virtual void parse(const std::string& filename) = 0;  
 
     AtomType* getAtomType(const std::string &at);
+    AtomType* getAtomType(int ident);
     BondType* getBondType(const std::string &at1, const std::string &at2);
     BendType* getBendType(const std::string &at1, const std::string &at2,
                           const std::string &at3);
@@ -172,9 +173,6 @@ namespace OpenMD {
     
     ForceFieldOptions& getForceFieldOptions() {return forceFieldOptions_;}
 
-    void setFortranForceOptions(void);
-
- 
   protected:
 
     AtomTypeContainer atomTypeCont_;    
@@ -184,12 +182,11 @@ namespace OpenMD {
     InversionTypeContainer inversionTypeCont_;
     NonBondedInteractionTypeContainer nonBondedInteractionTypeCont_;
     ForceFieldOptions forceFieldOptions_;
+    std::map<int, std::string> atypeIdentToName;
     
   private:  
-    std::string ffPath_;
-    
-    std::string wildCardAtomTypeName_;
-    
+    std::string ffPath_;    
+    std::string wildCardAtomTypeName_;    
     std::string forceFieldFileName_;    
     
   };

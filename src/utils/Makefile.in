@@ -3,7 +3,6 @@ Package = utils
 MySource    = \
 	definitions.F90 \
 	status.F90 \
-	interpolation.F90 \
 	fError.c \
 	PropertyMap.cpp \
 	OpenMDMPI.F90 \
@@ -13,7 +12,6 @@ MySource    = \
 	Exception.cpp \
 	Report.cpp \
 	StringUtils.cpp \
-	vector_class.F90 \
         StringTokenizer.cpp \
 	Utility.cpp \
 	Trim.cpp \
@@ -43,8 +41,6 @@ Modules = \
 	definitions \
 	OpenMDMPI \
 	status \
-	interpolation \
-	Vector_class
 
 RmiSource =
 

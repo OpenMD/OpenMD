@@ -369,7 +369,6 @@ namespace OpenMD {
     } 
     
     ff->parse(forcefieldFileName);
-    ff->setFortranForceOptions();
     //create SimInfo
     SimInfo * info = new SimInfo(ff, simParams);
 

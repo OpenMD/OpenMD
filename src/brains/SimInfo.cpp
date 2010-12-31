@@ -54,7 +54,6 @@
 #include "math/Vector3.hpp"
 #include "primitives/Molecule.hpp"
 #include "primitives/StuntDouble.hpp"
-#include "UseTheForce/doForces_interface.h"
 #include "UseTheForce/DarkSide/neighborLists_interface.h"
 #include "utils/MemoryUtils.hpp"
 #include "utils/simError.h"
@@ -656,29 +655,24 @@ namespace OpenMD {
   /**
    * update
    *
-   *  Performs the global checks and variable settings after the objects have been
-   *  created. 
+   *  Performs the global checks and variable settings after the
+   *  objects have been created.
    * 
    */
-  void SimInfo::update() {
-    
+  void SimInfo::update() {   
     setupSimVariables();
-    setupCutoffs();
-    setupSwitching();
-    setupElectrostatics();
-    setupNeighborlists();
-
-#ifdef IS_MPI
-    setupFortranParallel();
-#endif
-    setupFortranSim();
-    fortranInitialized_ = true;
-
     calcNdf();
     calcNdfRaw();
     calcNdfTrans();
   }
   
+  /**
+   * getSimulatedAtomTypes
+   *
+   * Returns an STL set of AtomType* that are actually present in this
+   * simulation.  Must query all processors to assemble this information.
+   * 
+   */
   set<AtomType*> SimInfo::getSimulatedAtomTypes() {
     SimInfo::MoleculeIterator mi;
     Molecule* mol;
@@ -691,164 +685,56 @@ namespace OpenMD {
 	atomTypes.insert(atom->getAtomType());
       }      
     }    
+
+#ifdef IS_MPI
+
+    // loop over the found atom types on this processor, and add their
+    // numerical idents to a vector:
+
+    vector<int> foundTypes;
+    set<AtomType*>::iterator i;
+    for (i = atomTypes.begin(); i != atomTypes.end(); ++i) 
+      foundTypes.push_back( (*i)->getIdent() );
+
+    // count_local holds the number of found types on this processor
+    int count_local = foundTypes.size();
+
+    // count holds the total number of found types on all processors
+    // (some will be redundant with the ones found locally):
+    int count;
+    MPI::COMM_WORLD.Allreduce(&count_local, &count, 1, MPI::INT, MPI::SUM);
+
+    // create a vector to hold the globally found types, and resize it:
+    vector<int> ftGlobal;
+    ftGlobal.resize(count);
+    vector<int> counts;
+
+    int nproc = MPI::COMM_WORLD.Get_size();
+    counts.resize(nproc);
+    vector<int> disps;
+    disps.resize(nproc);
+
+    // now spray out the foundTypes to all the other processors:
+    
+    MPI::COMM_WORLD.Allgatherv(&foundTypes[0], count_local, MPI::INT, 
+                               &ftGlobal[0], &counts[0], &disps[0], MPI::INT);
+
+    // foundIdents is a stl set, so inserting an already found ident
+    // will have no effect.
+    set<int> foundIdents;
+    vector<int>::iterator j;
+    for (j = ftGlobal.begin(); j != ftGlobal.end(); ++j)
+      foundIdents.insert((*j));
+    
+    // now iterate over the foundIdents and get the actual atom types 
+    // that correspond to these:
+    set<int>::iterator it;
+    for (it = foundIdents.begin(); it != foundIdents.end(); ++it)
+      atomTypes.insert( forceField_->getAtomType((*it)) );
+ 
+#endif
+    
     return atomTypes;        
-  }
-
-  /**
-   * setupCutoffs
-   *
-   * Sets the values of cutoffRadius and cutoffMethod
-   *
-   * cutoffRadius : realType
-   *  If the cutoffRadius was explicitly set, use that value.
-   *  If the cutoffRadius was not explicitly set:
-   *      Are there electrostatic atoms?  Use 12.0 Angstroms.
-   *      No electrostatic atoms?  Poll the atom types present in the
-   *      simulation for suggested cutoff values (e.g. 2.5 * sigma).
-   *      Use the maximum suggested value that was found.
-   *
-   * cutoffMethod : (one of HARD, SWITCHED, SHIFTED_FORCE, SHIFTED_POTENTIAL)
-   *      If cutoffMethod was explicitly set, use that choice.
-   *      If cutoffMethod was not explicitly set, use SHIFTED_FORCE
-   */
-  void SimInfo::setupCutoffs() {
-    
-    if (simParams_->haveCutoffRadius()) {
-      cutoffRadius_ = simParams_->getCutoffRadius();
-    } else {      
-      if (usesElectrostaticAtoms_) {
-        sprintf(painCave.errMsg,
-                "SimInfo: No value was set for the cutoffRadius.\n"
-                "\tOpenMD will use a default value of 12.0 angstroms"
-                "\tfor the cutoffRadius.\n");
-        painCave.isFatal = 0;
-        painCave.severity = OPENMD_INFO;
-	simError();
-	cutoffRadius_ = 12.0;
-      } else {
-        RealType thisCut;
-        set<AtomType*>::iterator i;
-        set<AtomType*> atomTypes;
-        atomTypes = getSimulatedAtomTypes();        
-        for (i = atomTypes.begin(); i != atomTypes.end(); ++i) {
-          thisCut = InteractionManager::Instance()->getSuggestedCutoffRadius((*i));
-          cutoffRadius_ = max(thisCut, cutoffRadius_);
-        }
-        sprintf(painCave.errMsg,
-                "SimInfo: No value was set for the cutoffRadius.\n"
-                "\tOpenMD will use %lf angstroms.\n",
-                cutoffRadius_);
-        painCave.isFatal = 0;
-        painCave.severity = OPENMD_INFO;
-	simError();
-      }             
-    }
-
-    map<string, CutoffMethod> stringToCutoffMethod;
-    stringToCutoffMethod["HARD"] = HARD;
-    stringToCutoffMethod["SWITCHING_FUNCTION"] = SWITCHING_FUNCTION;
-    stringToCutoffMethod["SHIFTED_POTENTIAL"] = SHIFTED_POTENTIAL;    
-    stringToCutoffMethod["SHIFTED_FORCE"] = SHIFTED_FORCE;
-  
-    if (simParams_->haveCutoffMethod()) {
-      string cutMeth = toUpperCopy(simParams_->getCutoffMethod());
-      map<string, CutoffMethod>::iterator i;
-      i = stringToCutoffMethod.find(cutMeth);
-      if (i == stringToCutoffMethod.end()) {
-        sprintf(painCave.errMsg,
-                "SimInfo: Could not find chosen cutoffMethod %s\n"
-                "\tShould be one of: "
-                "HARD, SWITCHING_FUNCTION, SHIFTED_POTENTIAL, or SHIFTED_FORCE\n",
-                cutMeth.c_str());
-        painCave.isFatal = 1;
-        painCave.severity = OPENMD_ERROR;
-	simError();
-      } else {
-        cutoffMethod_ = i->second;
-      }
-    } else {
-      sprintf(painCave.errMsg,
-              "SimInfo: No value was set for the cutoffMethod.\n"
-              "\tOpenMD will use SHIFTED_FORCE.\n");
-        painCave.isFatal = 0;
-        painCave.severity = OPENMD_INFO;
-	simError();
-        cutoffMethod_ = SHIFTED_FORCE;        
-    }
-  }
-  
-  /**
-   * setupSwitching
-   *
-   * Sets the values of switchingRadius and 
-   *  If the switchingRadius was explicitly set, use that value (but check it)
-   *  If the switchingRadius was not explicitly set: use 0.85 * cutoffRadius_
-   */
-  void SimInfo::setupSwitching() {
-    
-    if (simParams_->haveSwitchingRadius()) {
-      switchingRadius_ = simParams_->getSwitchingRadius();
-      if (switchingRadius_ > cutoffRadius_) {        
-        sprintf(painCave.errMsg,
-                "SimInfo: switchingRadius (%f) is larger than cutoffRadius(%f)\n",
-                switchingRadius_, cutoffRadius_);
-        painCave.isFatal = 1;
-        painCave.severity = OPENMD_ERROR;
-        simError();
-      }
-    } else {      
-      switchingRadius_ = 0.85 * cutoffRadius_;
-      sprintf(painCave.errMsg,
-              "SimInfo: No value was set for the switchingRadius.\n"
-              "\tOpenMD will use a default value of 85 percent of the cutoffRadius.\n"
-              "\tswitchingRadius = %f. for this simulation\n", switchingRadius_);
-      painCave.isFatal = 0;
-      painCave.severity = OPENMD_WARNING;
-      simError();
-    }           
-    
-    if (simParams_->haveSwitchingFunctionType()) {
-      string funcType = simParams_->getSwitchingFunctionType();
-      toUpper(funcType);
-      if (funcType == "CUBIC") {
-        sft_ = cubic;
-      } else {
-        if (funcType == "FIFTH_ORDER_POLYNOMIAL") {
-          sft_ = fifth_order_poly;
-	} else {
-	  // throw error        
-	  sprintf( painCave.errMsg,
-		   "SimInfo : Unknown switchingFunctionType. (Input file specified %s .)\n"
-                   "\tswitchingFunctionType must be one of: "
-                   "\"cubic\" or \"fifth_order_polynomial\".", 
-                   funcType.c_str() );
-	  painCave.isFatal = 1;
-          painCave.severity = OPENMD_ERROR;
-	  simError();
-        }           
-      }
-    }
-  }
-
-  /**
-   * setupNeighborlists
-   *
-   *  If the skinThickness was explicitly set, use that value (but check it)
-   *  If the skinThickness was not explicitly set: use 1.0 angstroms
-   */
-  void SimInfo::setupNeighborlists() {    
-    if (simParams_->haveSkinThickness()) {
-      skinThickness_ = simParams_->getSkinThickness();
-    } else {      
-      skinThickness_ = 1.0;
-      sprintf(painCave.errMsg,
-              "SimInfo: No value was set for the skinThickness.\n"
-              "\tOpenMD will use a default value of %f Angstroms\n"
-              "\tfor this simulation\n", skinThickness_);
-      painCave.severity = OPENMD_INFO;
-      painCave.isFatal = 0;
-      simError();
-    }             
   }
 
   void SimInfo::setupSimVariables() {
@@ -892,17 +778,11 @@ namespace OpenMD {
     fInfo_.SIM_uses_AtomicVirial = usesAtomicVirial_;
   }
 
-  void SimInfo::setupFortranSim() {
+  void SimInfo::setupFortran() {
     int isError;
     int nExclude, nOneTwo, nOneThree, nOneFour;
     vector<int> fortranGlobalGroupMembership;
     
-    notifyFortranSkinThickness(&skinThickness_);
-
-    int ljsp = cutoffMethod_ == SHIFTED_POTENTIAL ? 1 : 0;
-    int ljsf = cutoffMethod_ == SHIFTED_FORCE ? 1 : 0;
-    notifyFortranCutoffs(&cutoffRadius_, &switchingRadius_, &ljsp, &ljsf);
-
     isError = 0;
 
     //globalGroupMembership_ is filled by SimCreator    
@@ -937,7 +817,8 @@ namespace OpenMD {
       }       
     }
 
-    //fill ident array of local atoms (it is actually ident of AtomType, it is so confusing !!!)
+    //fill ident array of local atoms (it is actually ident of
+    //AtomType, it is so confusing !!!)
     vector<int> identArray;
 
     //to avoid memory reallocation, reserve enough space identArray
@@ -997,23 +878,12 @@ namespace OpenMD {
       setNeighbors(&nlistNeighbors);
     }
    
-
-  }
-
-
-  void SimInfo::setupFortranParallel() {
 #ifdef IS_MPI    
-    //SimInfo is responsible for creating localToGlobalAtomIndex and localToGlobalGroupIndex
+    //SimInfo is responsible for creating localToGlobalAtomIndex and
+    //localToGlobalGroupIndex
     vector<int> localToGlobalAtomIndex(getNAtoms(), 0);
     vector<int> localToGlobalCutoffGroupIndex;
-    SimInfo::MoleculeIterator mi;
-    Molecule::AtomIterator ai;
-    Molecule::CutoffGroupIterator ci;
-    Molecule* mol;
-    Atom* atom;
-    CutoffGroup* cg;
     mpiSimData parallelData;
-    int isError;
 
     for (mol = beginMolecule(mi); mol != NULL; mol  = nextMolecule(mi)) {
 
@@ -1053,14 +923,8 @@ namespace OpenMD {
 
     sprintf(checkPointMsg, " mpiRefresh successful.\n");
     errorCheckPoint();
-
 #endif
-  }
-
-
-  void SimInfo::setupAccumulateBoxDipole() {    
-
-
+    fortranInitialized_ = true;
   }
 
   void SimInfo::addProperty(GenericData* genData) {

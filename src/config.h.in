@@ -1,5 +1,5 @@
-#define OPENMD_VERSION_MAJOR 1
-#define OPENMD_VERSION_MINOR 1
+#define OPENMD_VERSION_MAJOR 2
+#define OPENMD_VERSION_MINOR 0
 #define OPENMD_VERSION_TINY  0
 #define MK_STR(s) # s
 #define STR_DEFINE(t, s) t = MK_STR(s)

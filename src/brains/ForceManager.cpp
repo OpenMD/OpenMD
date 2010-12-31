@@ -66,8 +66,12 @@ namespace OpenMD {
  
   void ForceManager::calcForces() {
     
+
     if (!info_->isFortranInitialized()) {
       info_->update();
+      nbiMan_->setSimInfo(info_);
+      nbiMan_->initialize();    
+      info_->setupFortran();
     }
     
     preCalculation();

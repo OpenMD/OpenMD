@@ -70,13 +70,6 @@
 
 using namespace std;
 namespace OpenMD{
-  enum CutoffMethod {
-    HARD,
-    SWITCHING_FUNCTION,
-    SHIFTED_POTENTIAL,
-    SHIFTED_FORCE
-  };
-
   //forward decalration 
   class SnapshotManager;
   class Molecule;
@@ -306,9 +299,13 @@ namespace OpenMD{
     /** Overloaded version of gyrational volume that also returns
         det(I) so dV/dr can be calculated*/
     void getGyrationalVolume(RealType &vol, RealType &detI);
-    /** main driver function to interact with fortran during the
-        initialization and molecule migration */
+
     void update();
+    /**
+     * Setup Fortran Simulation
+     */
+    void setupFortran();
+
 
     /** Returns the local index manager */
     LocalIndexManager* getLocalIndexManager() {
@@ -343,18 +340,6 @@ namespace OpenMD{
 
     int getGlobalMolMembership(int id){
       return globalMolMembership_[id];
-    }
-
-    RealType getCutoffRadius() {
-      return cutoffRadius_;
-    }
-
-    RealType getSwitchingRadius() {
-      return switchingRadius_;
-    }
-
-    RealType getListRadius() {
-      return listRadius_;
     }
         
     string getFinalConfigFileName() {
@@ -476,10 +461,6 @@ namespace OpenMD{
      */
     void removeInteractionPairs(Molecule* mol);
 
-
-    /** Returns the unique atom types of local processor in an array */
-    set<AtomType*> getUniqueAtomTypes();
-
     /** Returns the set of atom types present in this simulation */
     set<AtomType*> getSimulatedAtomTypes();
         
@@ -492,20 +473,6 @@ namespace OpenMD{
     /** fill up the simtype struct and other simulation-related variables */
     void setupSimVariables();
 
-    /**
-     * Setup Fortran Simulation
-     * @see #setupFortranParallel
-     */
-    void setupFortranSim();
-
-    /** Figure out the cutoff radius and cutoff method */
-    void setupCutoffs();
-    /** Figure out the switching radius and polynomial type for the switching function */
-    void setupSwitching();
-    /** Figure out the simulation variables associated with electrostatics */
-    void setupElectrostatics();   
-    /** Figure out the neighbor list skin thickness */
-    void setupNeighborlists();
 
     /** Determine if we need to accumulate the simulation box dipole */
     void setupAccumulateBoxDipole();
@@ -561,6 +528,12 @@ namespace OpenMD{
     bool requiresSkipCorrection_; /**< does this simulation require a skip-correction? */
     bool requiresSelfCorrection_; /**< does this simulation require a self-correction? */
 
+  public:
+    bool usesElectrostaticAtoms() { return usesElectrostaticAtoms_; }
+    bool usesDirectionalAtoms() { return usesDirectionalAtoms_; }
+    bool usesMetallicAtoms() { return usesMetallicAtoms_; }
+
+  private:
     /// Data structures holding primary simulation objects
     map<int, Molecule*>  molecules_;  /**< map holding pointers to LOCAL molecules */
     simtype fInfo_;                   /**< A dual struct shared by C++
@@ -568,7 +541,7 @@ namespace OpenMD{
                                          information about what types
                                          of calculation are
                                          required */
-    
+
     /// Stamps are templates for objects that are then used to create
     /// groups of objects.  For example, a molecule stamp contains
     /// information on how to build that molecule (i.e. the topology,
@@ -621,12 +594,6 @@ namespace OpenMD{
     string statFileName_;
     string restFileName_;
         
-    RealType cutoffRadius_;         /**< cutoff radius for non-bonded interactions */
-    RealType switchingRadius_;      /**< inner radius of switching function */
-    RealType listRadius_;           /**< Verlet neighbor list radius */
-    RealType skinThickness_;        /**< Verlet neighbor list skin thickness */    
-    CutoffMethod cutoffMethod_;     /**< Cutoff Method for most non-bonded interactions */
-    SwitchingFunctionType sft_;     /**< Type of switching function in use */
 
     bool fortranInitialized_; /** flag to indicate whether the fortran side is initialized */
     
@@ -669,8 +636,6 @@ namespace OpenMD{
     }
         
   private:
-
-    void setupFortranParallel();
         
     /** 
      * The size of molToProcMap_ is equal to total number of molecules

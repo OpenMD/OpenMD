@@ -112,6 +112,14 @@ namespace OpenMD {
   void NonBondedInteractionType::setSC() {
     nbitp.is_SC = 1;
   }
+
+  bool NonBondedInteractionType::isMAW() {
+    return nbitp.is_MAW;
+  }
+  
+  void NonBondedInteractionType::setMAW() {
+    nbitp.is_MAW = 1;
+  }
   
   bool NonBondedInteractionType::isMetal() {
     return isSC() || isEAM();

@@ -47,14 +47,16 @@
 #include "utils/simError.h"
 #include "types/NonBondedInteractionType.hpp"
 #include "types/DirectionalAtomType.hpp"
-
+#include "io/Globals.hpp"
 
 namespace OpenMD {
   
   Electrostatic::Electrostatic(): name_("Electrostatic"), initialized_(false),
-                                  forceField_(NULL), info_(NULL) {}
+                                  forceField_(NULL) {}
   
   void Electrostatic::initialize() { 
+
+    Globals* simParams_;
 
     summationMap_["HARD"]               = esm_HARD;
     summationMap_["SWITCHING_FUNCTION"] = esm_SWITCHING_FUNCTION;

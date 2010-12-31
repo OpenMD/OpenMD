@@ -40,14 +40,23 @@
  */
  
 #include "nonbonded/InteractionManager.hpp"
+#include "UseTheForce/doForces_interface.h"
 
 namespace OpenMD {
- 
+
+  InteractionManager* InteractionManager::_instance = NULL; 
+  SimInfo* InteractionManager::info_ = NULL;
   bool InteractionManager::initialized_ = false;
-  RealType InteractionManager::rCut_ = -1.0;
-  RealType InteractionManager::rSwitch_ = -1.0;
-  ForceField* InteractionManager::forceField_ = NULL;  
-  InteractionManager* InteractionManager::_instance = NULL;
+
+  RealType InteractionManager::rCut_ = 0.0;
+  RealType InteractionManager::rSwitch_ = 0.0;
+  RealType InteractionManager::skinThickness_ = 0.0;
+  RealType InteractionManager::listRadius_ = 0.0;
+  CutoffMethod InteractionManager::cutoffMethod_ = SHIFTED_FORCE;
+  SwitchingFunctionType InteractionManager::sft_ = cubic;
+  RealType InteractionManager::vdwScale_[4] = {0.0, 0.0, 0.0, 0.0};
+  RealType InteractionManager::electrostaticScale_[4] = {0.0, 0.0, 0.0, 0.0};
+
   map<int, AtomType*> InteractionManager::typeMap_;
   map<pair<AtomType*, AtomType*>, set<NonBondedInteraction*> > InteractionManager::interactions_;
 
@@ -70,6 +79,8 @@ namespace OpenMD {
 
   void InteractionManager::initialize() {
     
+    ForceField* forceField_ = info_->getForceField();
+    
     lj_->setForceField(forceField_);
     gb_->setForceField(forceField_);
     sticky_->setForceField(forceField_);
@@ -80,6 +91,7 @@ namespace OpenMD {
     maw_->setForceField(forceField_);
 
     ForceFieldOptions& fopts = forceField_->getForceFieldOptions();
+
     // Force fields can set options on how to scale van der Waals and electrostatic
     // interactions for atoms connected via bonds, bends and torsions
     // in this case the topological distance between atoms is:
@@ -96,7 +108,7 @@ namespace OpenMD {
     electrostaticScale_[0] = 0.0;
     electrostaticScale_[1] = fopts.getelectrostatic12scale();
     electrostaticScale_[2] = fopts.getelectrostatic13scale();
-    electrostaticScale_[3] = fopts.getelectrostatic14scale();
+    electrostaticScale_[3] = fopts.getelectrostatic14scale();    
 
     ForceField::AtomTypeContainer* atomTypes = forceField_->getAtomTypes();
     ForceField::AtomTypeContainer::MapTypeIterator i1, i2;
@@ -167,101 +179,117 @@ namespace OpenMD {
         // look for an explicitly-set non-bonded interaction type using the 
         // two atom types.
         NonBondedInteractionType* nbiType = forceField_->getNonBondedInteractionType(atype1->getName(), atype2->getName());
+        
+        if (nbiType != NULL) {
 
-        if (nbiType->isLennardJones()) {
-          // We found an explicit Lennard-Jones interaction.  
-          // override all other vdw entries for this pair of atom types:
-          set<NonBondedInteraction*>::iterator it;
-          for (it = interactions_[key].begin(); it != interactions_[key].end(); ++it) {
-            InteractionFamily ifam = (*it)->getFamily();
-            if (ifam == VANDERWAALS_FAMILY) interactions_[key].erase(*it);
+          if (nbiType->isLennardJones()) {
+            // We found an explicit Lennard-Jones interaction.  
+            // override all other vdw entries for this pair of atom types:
+            set<NonBondedInteraction*>::iterator it;
+            for (it = interactions_[key].begin(); 
+                 it != interactions_[key].end(); ++it) {
+              InteractionFamily ifam = (*it)->getFamily();
+              if (ifam == VANDERWAALS_FAMILY) interactions_[key].erase(*it);
+            }
+            interactions_[key].insert(lj_);
+            vdwExplicit = true;
           }
-          interactions_[key].insert(lj_);
-          vdwExplicit = true;
+          
+          if (nbiType->isMorse()) {
+            if (vdwExplicit) {
+              sprintf( painCave.errMsg,
+                       "InteractionManager::initialize found more than one "
+                       "explicit \n"
+                       "\tvan der Waals interaction for atom types %s - %s\n",
+                       atype1->getName().c_str(), atype2->getName().c_str());
+              painCave.severity = OPENMD_ERROR;
+              painCave.isFatal = 1;
+              simError();
+            }
+            // We found an explicit Morse interaction.  
+            // override all other vdw entries for this pair of atom types:
+            set<NonBondedInteraction*>::iterator it;
+            for (it = interactions_[key].begin(); 
+                 it != interactions_[key].end(); ++it) {
+              InteractionFamily ifam = (*it)->getFamily();
+              if (ifam == VANDERWAALS_FAMILY) interactions_[key].erase(*it);
+            }
+            interactions_[key].insert(morse_);
+            vdwExplicit = true;
+          }
+          
+          if (nbiType->isEAM()) {
+            // We found an explicit EAM interaction.  
+            // override all other metallic entries for this pair of atom types:
+            set<NonBondedInteraction*>::iterator it;
+            for (it = interactions_[key].begin(); 
+                 it != interactions_[key].end(); ++it) {
+              InteractionFamily ifam = (*it)->getFamily();
+              if (ifam == METALLIC_FAMILY) interactions_[key].erase(*it);
+            }
+            interactions_[key].insert(eam_);
+            metExplicit = true;
+          }
+          
+          if (nbiType->isSC()) {
+            if (metExplicit) {
+              sprintf( painCave.errMsg,
+                       "InteractionManager::initialize found more than one "
+                       "explicit\n"
+                       "\tmetallic interaction for atom types %s - %s\n",
+                       atype1->getName().c_str(), atype2->getName().c_str());
+              painCave.severity = OPENMD_ERROR;
+              painCave.isFatal = 1;
+              simError();
+            }
+            // We found an explicit Sutton-Chen interaction.  
+            // override all other metallic entries for this pair of atom types:
+            set<NonBondedInteraction*>::iterator it;
+            for (it = interactions_[key].begin(); 
+                 it != interactions_[key].end(); ++it) {
+              InteractionFamily ifam = (*it)->getFamily();
+              if (ifam == METALLIC_FAMILY) interactions_[key].erase(*it);
+            }
+            interactions_[key].insert(sc_);
+            metExplicit = true;
+          }
+          
+          if (nbiType->isMAW()) {
+            if (vdwExplicit) {
+              sprintf( painCave.errMsg,
+                       "InteractionManager::initialize found more than one "
+                       "explicit\n"
+                       "\tvan der Waals interaction for atom types %s - %s\n",
+                       atype1->getName().c_str(), atype2->getName().c_str());
+              painCave.severity = OPENMD_ERROR;
+              painCave.isFatal = 1;
+              simError();
+            }
+            // We found an explicit MAW interaction.  
+            // override all other vdw entries for this pair of atom types:
+            set<NonBondedInteraction*>::iterator it;
+            for (it = interactions_[key].begin(); 
+                 it != interactions_[key].end(); ++it) {
+              InteractionFamily ifam = (*it)->getFamily();
+              if (ifam == VANDERWAALS_FAMILY) interactions_[key].erase(*it);
+            }
+            interactions_[key].insert(maw_);
+            vdwExplicit = true;
+          }        
         }
-
-        if (nbiType->isMorse()) {
-          if (vdwExplicit) {
-            sprintf( painCave.errMsg,
-                     "InteractionManager::initialize found more than one explicit\n"
-                     "\tvan der Waals interaction for atom types %s - %s\n",
-                     atype1->getName().c_str(), atype2->getName().c_str());
-            painCave.severity = OPENMD_ERROR;
-            painCave.isFatal = 1;
-            simError();
-          }
-          // We found an explicit Morse interaction.  
-          // override all other vdw entries for this pair of atom types:
-          set<NonBondedInteraction*>::iterator it;
-          for (it = interactions_[key].begin(); it != interactions_[key].end(); ++it) {
-            InteractionFamily ifam = (*it)->getFamily();
-            if (ifam == VANDERWAALS_FAMILY) interactions_[key].erase(*it);
-          }
-          interactions_[key].insert(morse_);
-          vdwExplicit = true;
-        }
-
-        if (nbiType->isEAM()) {
-          // We found an explicit EAM interaction.  
-          // override all other metallic entries for this pair of atom types:
-          set<NonBondedInteraction*>::iterator it;
-          for (it = interactions_[key].begin(); it != interactions_[key].end(); ++it) {
-            InteractionFamily ifam = (*it)->getFamily();
-            if (ifam == METALLIC_FAMILY) interactions_[key].erase(*it);
-          }
-          interactions_[key].insert(eam_);
-          metExplicit = true;
-        }
-
-        if (nbiType->isSC()) {
-          if (metExplicit) {
-            sprintf( painCave.errMsg,
-                     "InteractionManager::initialize found more than one explicit\n"
-                     "\tmetallic interaction for atom types %s - %s\n",
-                     atype1->getName().c_str(), atype2->getName().c_str());
-            painCave.severity = OPENMD_ERROR;
-            painCave.isFatal = 1;
-            simError();
-          }
-          // We found an explicit Sutton-Chen interaction.  
-          // override all other metallic entries for this pair of atom types:
-          set<NonBondedInteraction*>::iterator it;
-          for (it = interactions_[key].begin(); it != interactions_[key].end(); ++it) {
-            InteractionFamily ifam = (*it)->getFamily();
-            if (ifam == METALLIC_FAMILY) interactions_[key].erase(*it);
-          }
-          interactions_[key].insert(sc_);
-          metExplicit = true;
-        }
-
-        if (nbiType->isMAW()) {
-          if (vdwExplicit) {
-            sprintf( painCave.errMsg,
-                     "InteractionManager::initialize found more than one explicit\n"
-                     "\tvan der Waals interaction for atom types %s - %s\n",
-                     atype1->getName().c_str(), atype2->getName().c_str());
-            painCave.severity = OPENMD_ERROR;
-            painCave.isFatal = 1;
-            simError();
-          }
-          // We found an explicit MAW interaction.  
-          // override all other vdw entries for this pair of atom types:
-          set<NonBondedInteraction*>::iterator it;
-          for (it = interactions_[key].begin(); it != interactions_[key].end(); ++it) {
-            InteractionFamily ifam = (*it)->getFamily();
-            if (ifam == VANDERWAALS_FAMILY) interactions_[key].erase(*it);
-          }
-          interactions_[key].insert(maw_);
-          vdwExplicit = true;
-        }        
       }
     }
     
-    // make sure every pair of atom types has a non-bonded interaction:
-    for (atype1 = atomTypes->beginType(i1); atype1 != NULL; 
-         atype1 = atomTypes->nextType(i1)) {
-      for (atype2 = atomTypes->beginType(i2); atype2 != NULL; 
-           atype2 = atomTypes->nextType(i2)) {
+    
+    // make sure every pair of atom types in this simulation has a
+    // non-bonded interaction:
+
+    set<AtomType*> simTypes = info_->getSimulatedAtomTypes();
+    set<AtomType*>::iterator it, jt;
+    for (it = simTypes.begin(); it != simTypes.end(); ++it) {
+      atype1 = (*it);
+      for (jt = simTypes.begin(); jt != simTypes.end(); ++jt) {
+        atype2 = (*jt);
         key = make_pair(atype1, atype2);
         
         if (interactions_[key].size() == 0) {
@@ -275,8 +303,190 @@ namespace OpenMD {
         }
       }
     }
-  } 
+
+    setupCutoffs();
+    setupSwitching();
+    setupNeighborlists();
+    notifyFortranSkinThickness(&skinThickness_);
+
+    int ljsp = cutoffMethod_ == SHIFTED_POTENTIAL ? 1 : 0;
+    int ljsf = cutoffMethod_ == SHIFTED_FORCE ? 1 : 0;
+    notifyFortranCutoffs(&rCut_, &rSwitch_, &ljsp, &ljsf);
+
+    int isError;
+    initFortranFF(&isError);
+
+    initialized_ = true;
+  }
   
+  /**
+   * setupCutoffs
+   *
+   * Sets the values of cutoffRadius and cutoffMethod
+   *
+   * cutoffRadius : realType
+   *  If the cutoffRadius was explicitly set, use that value.
+   *  If the cutoffRadius was not explicitly set:
+   *      Are there electrostatic atoms?  Use 12.0 Angstroms.
+   *      No electrostatic atoms?  Poll the atom types present in the
+   *      simulation for suggested cutoff values (e.g. 2.5 * sigma).
+   *      Use the maximum suggested value that was found.
+   *
+   * cutoffMethod : (one of HARD, SWITCHED, SHIFTED_FORCE, SHIFTED_POTENTIAL)
+   *      If cutoffMethod was explicitly set, use that choice.
+   *      If cutoffMethod was not explicitly set, use SHIFTED_FORCE
+   */
+  void InteractionManager::setupCutoffs() {
+    
+    Globals* simParams_ = info_->getSimParams();
+    
+    if (simParams_->haveCutoffRadius()) {
+      rCut_ = simParams_->getCutoffRadius();
+    } else {      
+      if (info_->usesElectrostaticAtoms()) {
+        sprintf(painCave.errMsg,
+                "InteractionManager::setupCutoffs: No value was set for the cutoffRadius.\n"
+                "\tOpenMD will use a default value of 12.0 angstroms"
+                "\tfor the cutoffRadius.\n");
+        painCave.isFatal = 0;
+        painCave.severity = OPENMD_INFO;
+	simError();
+	rCut_ = 12.0;
+      } else {
+        RealType thisCut;
+        set<AtomType*>::iterator i;
+        set<AtomType*> atomTypes;
+        atomTypes = info_->getSimulatedAtomTypes();        
+        for (i = atomTypes.begin(); i != atomTypes.end(); ++i) {
+          thisCut = getSuggestedCutoffRadius((*i));
+          rCut_ = max(thisCut, rCut_);
+        }
+        sprintf(painCave.errMsg,
+                "InteractionManager::setupCutoffs: No value was set for the cutoffRadius.\n"
+                "\tOpenMD will use %lf angstroms.\n",
+                rCut_);
+        painCave.isFatal = 0;
+        painCave.severity = OPENMD_INFO;
+	simError();
+      }             
+    }
+
+    map<string, CutoffMethod> stringToCutoffMethod;
+    stringToCutoffMethod["HARD"] = HARD;
+    stringToCutoffMethod["SWITCHED"] = SWITCHED;
+    stringToCutoffMethod["SHIFTED_POTENTIAL"] = SHIFTED_POTENTIAL;    
+    stringToCutoffMethod["SHIFTED_FORCE"] = SHIFTED_FORCE;
+  
+    if (simParams_->haveCutoffMethod()) {
+      string cutMeth = toUpperCopy(simParams_->getCutoffMethod());
+      map<string, CutoffMethod>::iterator i;
+      i = stringToCutoffMethod.find(cutMeth);
+      if (i == stringToCutoffMethod.end()) {
+        sprintf(painCave.errMsg,
+                "InteractionManager::setupCutoffs: Could not find chosen cutoffMethod %s\n"
+                "\tShould be one of: "
+                "HARD, SWITCHED, SHIFTED_POTENTIAL, or SHIFTED_FORCE\n",
+                cutMeth.c_str());
+        painCave.isFatal = 1;
+        painCave.severity = OPENMD_ERROR;
+	simError();
+      } else {
+        cutoffMethod_ = i->second;
+      }
+    } else {
+      sprintf(painCave.errMsg,
+              "InteractionManager::setupCutoffs: No value was set for the cutoffMethod.\n"
+              "\tOpenMD will use SHIFTED_FORCE.\n");
+        painCave.isFatal = 0;
+        painCave.severity = OPENMD_INFO;
+	simError();
+        cutoffMethod_ = SHIFTED_FORCE;        
+    }
+  }
+
+
+  /**
+   * setupSwitching
+   *
+   * Sets the values of switchingRadius and 
+   *  If the switchingRadius was explicitly set, use that value (but check it)
+   *  If the switchingRadius was not explicitly set: use 0.85 * cutoffRadius_
+   */
+  void InteractionManager::setupSwitching() {
+    Globals* simParams_ = info_->getSimParams();
+
+    if (simParams_->haveSwitchingRadius()) {
+      rSwitch_ = simParams_->getSwitchingRadius();
+      if (rSwitch_ > rCut_) {        
+        sprintf(painCave.errMsg,
+                "InteractionManager::setupSwitching: switchingRadius (%f) is larger than cutoffRadius(%f)\n",
+                rSwitch_, rCut_);
+        painCave.isFatal = 1;
+        painCave.severity = OPENMD_ERROR;
+        simError();
+      }
+    } else {      
+      rSwitch_ = 0.85 * rCut_;
+      sprintf(painCave.errMsg,
+              "InteractionManager::setupSwitching: No value was set for the switchingRadius.\n"
+              "\tOpenMD will use a default value of 85 percent of the cutoffRadius.\n"
+              "\tswitchingRadius = %f. for this simulation\n", rSwitch_);
+      painCave.isFatal = 0;
+      painCave.severity = OPENMD_WARNING;
+      simError();
+    }           
+    
+    if (simParams_->haveSwitchingFunctionType()) {
+      string funcType = simParams_->getSwitchingFunctionType();
+      toUpper(funcType);
+      if (funcType == "CUBIC") {
+        sft_ = cubic;
+      } else {
+        if (funcType == "FIFTH_ORDER_POLYNOMIAL") {
+          sft_ = fifth_order_poly;
+	} else {
+	  // throw error        
+	  sprintf( painCave.errMsg,
+		   "InteractionManager::setupSwitching : Unknown switchingFunctionType. (Input file specified %s .)\n"
+                   "\tswitchingFunctionType must be one of: "
+                   "\"cubic\" or \"fifth_order_polynomial\".", 
+                   funcType.c_str() );
+	  painCave.isFatal = 1;
+          painCave.severity = OPENMD_ERROR;
+	  simError();
+        }           
+      }
+    }
+  }
+
+  /**
+   * setupNeighborlists
+   *
+   *  If the skinThickness was explicitly set, use that value (but check it)
+   *  If the skinThickness was not explicitly set: use 1.0 angstroms
+   */
+  void InteractionManager::setupNeighborlists() {  
+
+    Globals* simParams_ = info_->getSimParams();    
+  
+    if (simParams_->haveSkinThickness()) {
+      skinThickness_ = simParams_->getSkinThickness();
+    } else {      
+      skinThickness_ = 1.0;
+      sprintf(painCave.errMsg,
+              "InteractionManager::setupNeighborlists: No value was set for the skinThickness.\n"
+              "\tOpenMD will use a default value of %f Angstroms\n"
+              "\tfor this simulation\n", skinThickness_);
+      painCave.severity = OPENMD_INFO;
+      painCave.isFatal = 0;
+      simError();
+    }             
+
+    listRadius_ = rCut_ + skinThickness_;
+
+  }
+
+
   void InteractionManager::doPrePair(int *atid1, int *atid2, RealType *rij, RealType *rho_i_at_j, RealType *rho_j_at_i){
     
     if (!initialized_) initialize();

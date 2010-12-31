@@ -66,10 +66,27 @@ namespace OpenMD {
     }
   }
 
+  /**
+   * getAtomType by string
+   *
+   * finds the requested atom type in this force field using the string
+   * name of the atom type.
+   */
   AtomType* ForceField::getAtomType(const std::string &at) {
     std::vector<std::string> keys;
     keys.push_back(at);
     return atomTypeCont_.find(keys);
+  }
+
+  /**
+   * getAtomType by ident
+   *
+   * finds the requested atom type in this force field using the
+   * integer ident instead of the string name of the atom type.
+   */
+  AtomType* ForceField::getAtomType(int ident) {   
+    std::string at = atypeIdentToName.find(ident)->second;
+    return getAtomType(at);
   }
 
   BondType* ForceField::getBondType(const std::string &at1, 
@@ -434,14 +451,14 @@ namespace OpenMD {
     std::vector<std::string> keys;
     keys.push_back(at1);
     keys.push_back(at2);    
-    
+   
     //try exact match first
     NonBondedInteractionType* nbiType = nonBondedInteractionTypeCont_.find(keys);
     if (nbiType) {
       return nbiType;
     } else {
       //if no exact match found, try wild card match
-      return nonBondedInteractionTypeCont_.find(keys, wildCardAtomTypeName_);
+      return nonBondedInteractionTypeCont_.find(keys, wildCardAtomTypeName_);  
     }    
   }
   
@@ -498,12 +515,14 @@ namespace OpenMD {
   bool ForceField::addAtomType(const std::string &at, AtomType* atomType) {
     std::vector<std::string> keys;
     keys.push_back(at);
+    atypeIdentToName[atomType->getIdent()] = at;
     return atomTypeCont_.add(keys, atomType);
   }
 
   bool ForceField::replaceAtomType(const std::string &at, AtomType* atomType) {
     std::vector<std::string> keys;
     keys.push_back(at);
+    atypeIdentToName[atomType->getIdent()] = at;
     return atomTypeCont_.replace(keys, atomType);
   }
 

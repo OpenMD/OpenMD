@@ -47,7 +47,6 @@
 #include "UseTheForce/ForceField.hpp"
 #include "math/SquareMatrix3.hpp"
 #include "math/CubicSpline.hpp"
-#include "brains/SimInfo.hpp"
 
 namespace OpenMD {
 
@@ -107,8 +106,6 @@ namespace OpenMD {
     std::map<int, AtomType*> ElectrostaticList;
     std::map<AtomType*, ElectrostaticAtomData> ElectrostaticMap;
     ForceField* forceField_;
-    SimInfo* info_;
-    Globals* simParams_;
     RealType cutoffRadius_;
     RealType cutoffRadius2_;
     RealType pre11_;
