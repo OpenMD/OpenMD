@@ -71,7 +71,7 @@ namespace OpenMD {
     Sticky();
     void setForceField(ForceField *ff) {forceField_ = ff;};
     void addType(AtomType* atomType);
-    virtual void calcForce(InteractionData idat);
+    virtual void calcForce(InteractionData &idat);
     virtual string getName() { return name_; }
     virtual RealType getSuggestedCutoffRadius(AtomType* at1, AtomType* at2);
     

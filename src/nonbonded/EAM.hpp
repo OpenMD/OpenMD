@@ -75,9 +75,9 @@ namespace OpenMD {
     void setForceField(ForceField *ff) {forceField_ = ff;};
     void addType(AtomType* atomType);
     void addExplicitInteraction(AtomType* atype1, AtomType* atype2, RealType dr, int nr, std::vector<RealType> phiAB);
-    void calcDensity(DensityData ddat);
-    void calcFunctional(FunctionalData fdat);
-    void calcForce(InteractionData idat);
+    void calcDensity(DensityData &ddat);
+    void calcFunctional(FunctionalData &fdat);
+    void calcForce(InteractionData &idat);
     virtual string getName() { return name_; }
     virtual RealType getSuggestedCutoffRadius(AtomType* at1, AtomType* at2);
 

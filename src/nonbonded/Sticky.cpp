@@ -186,7 +186,7 @@ namespace OpenMD {
    * idat structure.
    */
   
-  void Sticky::calcForce(InteractionData idat) {
+  void Sticky::calcForce(InteractionData &idat) {
    
     if (!initialized_) initialize();
     
@@ -343,8 +343,8 @@ namespace OpenMD {
           dspdr = 0.0;
         }
         
-        idat.vpair += 0.5*(v0*s*w + v0p*sp*wp);
-        idat.pot += 0.5*(v0*s*w + v0p*sp*wp)*idat.sw;
+        idat.vpair[2] += 0.5*(v0*s*w + v0p*sp*wp);
+        idat.pot[2] += 0.5*(v0*s*w + v0p*sp*wp)*idat.sw;
         
         // do the torques first since they are easy:
         // remember that these are still in the body-fixed axes

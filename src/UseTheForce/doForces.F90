@@ -115,7 +115,7 @@ contains
 
      if (haveSkinThickness) then
         rList = rCut + skinThickness
-        rListSq = rListSq
+        rListSq = rList * rList
      endif
     
      if (sp .ne. 0) then  
@@ -151,7 +151,6 @@ contains
      endif
      
      localError = 0
-     call set_switch(rSwitch, rCut)
      call setHmatDangerousRcutValue(rCut)
          
      haveCutoffs = .true.
@@ -502,6 +501,7 @@ contains
                                  eFrame, A, f, t, pot, particle_pot, vpair, &
                                  fpair, d_grp, rgrp, rCut, topoDist)
 #endif
+
                             vij = vij + vpair
                             fij(1) = fij(1) + fpair(1)
                             fij(2) = fij(2) + fpair(2)
@@ -581,7 +581,7 @@ contains
                                   call get_interatomic_vector(q(:,atom2), &
                                        q_group(:,j), dag, rag)
 #endif
-                                  call add_stress_tensor(dag,fg,tau)
+                                  call add_stress_tensor(dag, fg, tau)
                                endif
                             endif
                          enddo
@@ -756,9 +756,9 @@ contains
   subroutine f_do_pair(i, j, rijsq, d, sw, &
        eFrame, A, f, t, pot, particle_pot, vpair, &
        fpair, d_grp, r_grp, rCut, topoDist)
-    
+ 
     real( kind = dp ) :: vpair, sw
-    real( kind = dp ), dimension(LR_POT_TYPES) :: pot, pairpot
+    real( kind = dp ), dimension(LR_POT_TYPES) :: pot, ptmp
     real( kind = dp ), dimension(nLocal) :: particle_pot
     real( kind = dp ), dimension(3) :: fpair
     real( kind = dp ), dimension(nLocal)   :: mfact
@@ -794,10 +794,7 @@ contains
     vpair = 0.0_dp
     fpair(1:3) = 0.0_dp
 
-    p_vdw = 0.0
-    p_elect = 0.0
-    p_hb = 0.0
-    p_met = 0.0
+    ptmp(1:4) = 0.0_dp
 
     f1(1:3) = 0.0
     t1(1:3) = 0.0
@@ -830,24 +827,25 @@ contains
     rho_i = rho(i)
     rho_j = rho(j)    
 #endif
-    
-    call do_pair(c_ident_i, c_ident_j, d, r, rijsq, sw, vpair, &
-         topoDist, A1, A2, eF1, eF2,  &
-         pairpot, f1, t1, t2, &
+
+    call do_pair(c_ident_i, c_ident_j, d, r, rijsq, &
+         sw, topoDist, A1, A2, eF1, eF2,  &
+         vpair, ptmp, f1, t1, t2, &
          rho_i, rho_j, dfrhodrho_i, dfrhodrho_j, fshift_i, fshift_j)
+
     
 #ifdef IS_MPI
     id1 = AtomRowToGlobal(i)
     id2 = AtomColToGlobal(j)
 
-    pot_row(VDW_POT,i) = pot_row(VDW_POT,i) + 0.5*pairpot(VDW_POT)
-    pot_col(VDW_POT,j) = pot_col(VDW_POT,j) + 0.5*pairpot(VDW_POT)
-    pot_row(ELECTROSTATIC_POT,i) = pot_row(ELECTROSTATIC_POT,i) + 0.5*pairpot(ELECTROSTATIC_POT)
-    pot_col(ELECTROSTATIC_POT,j) = pot_col(ELECTROSTATIC_POT,j) + 0.5*pairpot(ELECTROSTATIC_POT)
-    pot_row(HB_POT,i) = pot_row(HB_POT,i) + 0.5*pairpot(HB_POT)
-    pot_col(HB_POT,j) = pot_col(HB_POT,j) + 0.5*pairpot(HB_POT)
-    pot_Row(METALLIC_POT,i) = pot_Row(METALLIC_POT,i) + 0.5*pairpot(METALLIC_POT)
-    pot_Col(METALLIC_POT,j) = pot_Col(METALLIC_POT,j) + 0.5*pairpot(METALLIC_POT)
+    pot_row(VDW_POT,i) = pot_row(VDW_POT,i) + 0.5*ptmp(VDW_POT)
+    pot_col(VDW_POT,j) = pot_col(VDW_POT,j) + 0.5*ptmp(VDW_POT)
+    pot_row(ELECTROSTATIC_POT,i) = pot_row(ELECTROSTATIC_POT,i) + 0.5*ptmp(ELECTROSTATIC_POT)
+    pot_col(ELECTROSTATIC_POT,j) = pot_col(ELECTROSTATIC_POT,j) + 0.5*ptmp(ELECTROSTATIC_POT)
+    pot_row(HB_POT,i) = pot_row(HB_POT,i) + 0.5*ptmp(HB_POT)
+    pot_col(HB_POT,j) = pot_col(HB_POT,j) + 0.5*ptmp(HB_POT)
+    pot_Row(METALLIC_POT,i) = pot_Row(METALLIC_POT,i) + 0.5*ptmp(METALLIC_POT)
+    pot_Col(METALLIC_POT,j) = pot_Col(METALLIC_POT,j) + 0.5*ptmp(METALLIC_POT)
 
     do idx = 1, 3
        f_Row(idx,i) = f_Row(idx,i) + f1(idx)
@@ -877,10 +875,10 @@ contains
     id1 = i
     id2 = j
 
-    pot(VDW_POT) = pot(VDW_POT) + pairpot(VDW_POT)
-    pot(ELECTROSTATIC_POT) = pot(ELECTROSTATIC_POT) + pairpot(ELECTROSTATIC_POT)
-    pot(HB_POT) = pot(HB_POT) + pairpot(HB_POT)
-    pot(METALLIC_POT) = pot(METALLIC_POT) + pairpot(METALLIC_POT)
+    pot(VDW_POT) = pot(VDW_POT) + ptmp(VDW_POT)
+    pot(ELECTROSTATIC_POT) = pot(ELECTROSTATIC_POT) + ptmp(ELECTROSTATIC_POT)
+    pot(HB_POT) = pot(HB_POT) + ptmp(HB_POT)
+    pot(METALLIC_POT) = pot(METALLIC_POT) + ptmp(METALLIC_POT)
 
     do idx = 1, 3
        f(idx,i) = f(idx,i) + f1(idx)

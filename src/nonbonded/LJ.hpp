@@ -66,7 +66,7 @@ namespace OpenMD {
     void addExplicitInteraction(AtomType* atype1, AtomType* atype2, RealType sigma, RealType epsilon);
     RealType getSigma(AtomType* atomType);
     RealType getEpsilon(AtomType* atomType);
-    virtual void calcForce(InteractionData idat);
+    virtual void calcForce(InteractionData &idat);
     virtual string getName() {return name_;}
     virtual RealType getSuggestedCutoffRadius(AtomType* at1, AtomType* at2);
             

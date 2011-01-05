@@ -80,15 +80,15 @@ namespace OpenMD {
     RealType sw;          /**< switching function value at rij (precomputed) */
     RealType vdwMult;     /**< multiplier for van der Waals interactions */
     RealType electroMult; /**< multiplier for electrostatic interactions */
-    RealType pot;         /**< total potential */
-    RealType vpair;       /**< pair potential */
-    Vector3d f1;         /**< force between the two atoms */
-    Mat3x3d eFrame1;     /**< pointer to electrostatic frame for first atom */
-    Mat3x3d eFrame2;     /**< pointer to electrostatic frame for second atom*/
-    RotMat3x3d A1;       /**< pointer to rotation matrix of first atom */
-    RotMat3x3d A2;       /**< pointer to rotation matrix of second atom */
-    Vector3d t1;         /**< pointer to torque on first atom */
-    Vector3d t2;         /**< pointer to torque on second atom */
+    RealType pot[4];      /**< total potential */
+    RealType vpair[4];    /**< pair potential */
+    Vector3d f1;          /**< force between the two atoms */
+    Mat3x3d eFrame1;      /**< pointer to electrostatic frame for first atom */
+    Mat3x3d eFrame2;      /**< pointer to electrostatic frame for second atom*/
+    RotMat3x3d A1;        /**< pointer to rotation matrix of first atom */
+    RotMat3x3d A2;        /**< pointer to rotation matrix of second atom */
+    Vector3d t1;          /**< pointer to torque on first atom */
+    Vector3d t2;          /**< pointer to torque on second atom */
     RealType rho1;        /**< electron density at first atom */
     RealType rho2;        /**< electron density at second atom */
     RealType dfrho1;      /**< derivative of density functional for atom 1 */
@@ -108,21 +108,21 @@ namespace OpenMD {
    * their indirect interactions on each other.
    */
   struct SkipCorrectionData {
-    AtomType* atype1;         /**< pointer to AtomType of first atom */
-    AtomType* atype2;         /**< pointer to AtomType of second atom */
-    Vector3d d;               /**< interatomic vector (already wrapped into box) */
-    RealType rij;             /**< interatomic separation (precomputed) */
-    RealType skippedCharge1;  /**< charge skipped in normal pairwise interaction loop */
-    RealType skippedCharge2;  /**< charge skipped in normal pairwise interaction loop */
-    RealType sw;              /**< switching function value at rij (precomputed) */
-    RealType electroMult;     /**< multiplier for electrostatic interactions */
-    RealType pot;             /**< total potential */
-    RealType vpair;           /**< pair potential */
-    Vector3d f1;              /**< force correction */
-    Mat3x3d eFrame1;         /**< pointer to electrostatic frame for first atom */
-    Mat3x3d eFrame2;         /**< pointer to electrostatic frame for second atom*/
-    Vector3d t1;             /**< pointer to torque on first atom */
-    Vector3d t2;             /**< pointer to torque on second atom */
+    AtomType* atype1;      /**< pointer to AtomType of first atom */
+    AtomType* atype2;      /**< pointer to AtomType of second atom */
+    Vector3d d;            /**< interatomic vector (already wrapped into box) */
+    RealType rij;          /**< interatomic separation (precomputed) */
+    RealType skippedCharge1; /**< charge skipped in normal pairwise interaction loop */
+    RealType skippedCharge2; /**< charge skipped in normal pairwise interaction loop */
+    RealType sw;           /**< switching function value at rij (precomputed) */
+    RealType electroMult;  /**< multiplier for electrostatic interactions */
+    RealType pot[4];       /**< total potential */
+    RealType vpair[4];     /**< pair potential */
+    Vector3d f1;           /**< force correction */
+    Mat3x3d eFrame1;       /**< pointer to electrostatic frame for first atom */
+    Mat3x3d eFrame2;       /**< pointer to electrostatic frame for second atom*/
+    Vector3d t1;           /**< pointer to torque on first atom */
+    Vector3d t2;           /**< pointer to torque on second atom */
   };
 
   /** 
@@ -136,7 +136,7 @@ namespace OpenMD {
     AtomType* atype;        /**< pointer to AtomType of the atom */
     Mat3x3d eFrame;        /**< pointer to electrostatic frame for first atom */
     RealType skippedCharge; /**< charge skipped in normal pairwise interaction loop */
-    RealType pot;           /**< total potential contribution */
+    RealType pot[4];       /**< total potential contribution */
     Vector3d t;            /**< pointer to resultant torque on atom */
   };
 
@@ -178,7 +178,7 @@ namespace OpenMD {
   public:
     NonBondedInteraction() {}
     virtual ~NonBondedInteraction() {}
-    virtual void calcForce(InteractionData idat) = 0;
+    virtual void calcForce(InteractionData &idat) = 0;
     virtual InteractionFamily getFamily() = 0;
     virtual RealType getSuggestedCutoffRadius(AtomType* at1, AtomType* at2) = 0;
     virtual string getName() =  0;
@@ -201,9 +201,9 @@ namespace OpenMD {
   public:
     ElectrostaticInteraction() : NonBondedInteraction() { }
     virtual ~ElectrostaticInteraction() {}
-    virtual void calcSkipCorrection(SkipCorrectionData skdat) = 0;
-    virtual void calcSelfCorrection(SelfCorrectionData scdat) = 0;
-    virtual InteractionFamily getFamily() {return ELECTROSTATIC_FAMILY;}
+    virtual void calcSkipCorrection(SkipCorrectionData &skdat) = 0;
+    virtual void calcSelfCorrection(SelfCorrectionData &scdat) = 0;
+    virtual InteractionFamily getFamily() {return ELECTROSTATIC_FAMILY;}    
   };    
 
   /**
@@ -213,8 +213,8 @@ namespace OpenMD {
   public:
     MetallicInteraction() : NonBondedInteraction() { }
     virtual ~MetallicInteraction() {}
-    virtual void calcDensity(DensityData ddat) = 0;
-    virtual void calcFunctional(FunctionalData fdat) = 0;
+    virtual void calcDensity(DensityData &ddat) = 0;
+    virtual void calcFunctional(FunctionalData &fdat) = 0;
     virtual InteractionFamily getFamily() {return METALLIC_FAMILY;}
   };
           

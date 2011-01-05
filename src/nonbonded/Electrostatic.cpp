@@ -113,7 +113,7 @@ namespace OpenMD {
       } else {
         // throw error
         sprintf( painCave.errMsg,
-                 "SimInfo error: Unknown electrostaticSummationMethod.\n"
+                 "Electrostatic::initialize: Unknown electrostaticSummationMethod.\n"
                  "\t(Input file specified %s .)\n"
                  "\telectrostaticSummationMethod must be one of: \"none\",\n"
                  "\t\"shifted_potential\", \"shifted_force\", or \n"
@@ -429,7 +429,7 @@ namespace OpenMD {
     haveDielectric_ = true;
   }
 
-  void Electrostatic::calcForce(InteractionData idat) {
+  void Electrostatic::calcForce(InteractionData &idat) {
 
     // utility variables.  Should clean these up and use the Vector3d and 
     // Mat3x3d to replace as many as we can in future versions:
@@ -591,7 +591,7 @@ namespace OpenMD {
 
         }
  
-        idat.vpair += vterm;
+        idat.vpair[2] += vterm;
         epot += idat.sw * vterm;
 
         dVdr += dudr * rhat;       
@@ -607,7 +607,7 @@ namespace OpenMD {
           ri3 = ri2 * riji;
     
           vterm = - pref * ct_j * ( ri2 - preRF2_ * idat.rij );
-          idat.vpair += vterm;
+          idat.vpair[2] += vterm;
           epot += idat.sw * vterm;
 
           dVdr +=  -preSw * (ri3 * (uz_j - 3.0 * ct_j * rhat) - preRF2_*uz_j);
@@ -645,7 +645,7 @@ namespace OpenMD {
           // calculate the potential
           pot_term =  scale * c2;
           vterm = -pref * ct_j * pot_term;
-          idat.vpair += vterm;
+          idat.vpair[2] += vterm;
           epot += idat.sw * vterm;
              
           // calculate derivatives for forces and torques
@@ -692,7 +692,7 @@ namespace OpenMD {
                      qyy_j * (cy2*c3 - c2ri) + 
                      qzz_j * (cz2*c3 - c2ri) );
         vterm = pref * pot_term;
-        idat.vpair += vterm;
+        idat.vpair[2] += vterm;
         epot += idat.sw * vterm;
                 
         // calculate derivatives for the forces and torques
@@ -720,7 +720,7 @@ namespace OpenMD {
           ri3 = ri2 * riji;
 
           vterm = pref * ct_i * ( ri2 - preRF2_ * idat.rij );
-          idat.vpair += vterm;
+          idat.vpair[2] += vterm;
           epot += idat.sw * vterm;
           
           dVdr += preSw * (ri3 * (uz_i - 3.0 * ct_i * rhat) - preRF2_ * uz_i);
@@ -760,7 +760,7 @@ namespace OpenMD {
           // calculate the potential
           pot_term = c2 * scale;
           vterm = pref * ct_i * pot_term;
-          idat.vpair += vterm;
+          idat.vpair[2] += vterm;
           epot += idat.sw * vterm;
 
           // calculate derivatives for the forces and torques
@@ -783,7 +783,7 @@ namespace OpenMD {
 
           vterm = pref * ( ri3 * (ct_ij - 3.0 * ct_i * ct_j) -
                            preRF2_ * ct_ij );
-          idat.vpair += vterm;
+          idat.vpair[2] += vterm;
           epot += idat.sw * vterm;
              
           a1 = 5.0 * ct_i * ct_j - ct_ij;
@@ -842,7 +842,7 @@ namespace OpenMD {
           // calculate the potential 
           pot_term = (ct_ij * c2ri - ctidotj * c3);
           vterm = pref * pot_term;
-          idat.vpair += vterm;
+          idat.vpair[2] += vterm;
           epot += idat.sw * vterm;
 
           // calculate derivatives for the forces and torques
@@ -894,7 +894,7 @@ namespace OpenMD {
                      qzz_i * (cz2 * c3 - c2ri) );
         
         vterm = pref * pot_term;
-        idat.vpair += vterm;
+        idat.vpair[2] += vterm;
         epot += idat.sw * vterm;
 
         // calculate the derivatives for the forces and torques
@@ -909,7 +909,7 @@ namespace OpenMD {
       }
     }
 
-    idat.pot += epot;
+    idat.pot[2] += epot;
     idat.f1 += dVdr;
 
     if (i_is_Dipole || i_is_Quadrupole) 
@@ -929,7 +929,7 @@ namespace OpenMD {
     return;
   }  
 
-  void Electrostatic::calcSkipCorrection(SkipCorrectionData skdat) {
+  void Electrostatic::calcSkipCorrection(SkipCorrectionData &skdat) {
 
     if (!initialized_) initialize();
     
@@ -963,9 +963,9 @@ namespace OpenMD {
 
     if (summationMethod_ == esm_REACTION_FIELD) {
       RealType riji, ri2, ri3;
-      RealType q_i, mu_i, ct_i;
-      RealType q_j, mu_j, ct_j;
-      RealType preVal, rfVal, vterm, dudr, pref, myPot;
+      RealType mu_i, ct_i;
+      RealType mu_j, ct_j;
+      RealType preVal, rfVal, vterm, dudr, pref, myPot(0.0);
       Vector3d dVdr, uz_i, uz_j, duduz_i, duduz_j, rhat;
 
       // some variables we'll need independent of electrostatic type:
@@ -1020,7 +1020,7 @@ namespace OpenMD {
       }
       
       // accumulate the forces and torques resulting from the self term
-      skdat.pot += myPot;
+      skdat.pot[2] += myPot;
       skdat.f1 += dVdr;
       
       if (i_is_Dipole) 
@@ -1030,7 +1030,7 @@ namespace OpenMD {
     }
   }
     
-  void Electrostatic::calcSelfCorrection(SelfCorrectionData scdat) {
+  void Electrostatic::calcSelfCorrection(SelfCorrectionData &scdat) {
     RealType mu1, preVal, chg1, self;
     
     if (!initialized_) initialize();
@@ -1046,7 +1046,7 @@ namespace OpenMD {
       if (i_is_Dipole) {
         mu1 = data.dipole_moment;          
         preVal = pre22_ * preRF2_ * mu1 * mu1;
-        scdat.pot -= 0.5 * preVal;
+        scdat.pot[2] -= 0.5 * preVal;
         
         // The self-correction term adds into the reaction field vector
         Vector3d uz_i = scdat.eFrame.getColumn(2);
@@ -1063,7 +1063,7 @@ namespace OpenMD {
         } else {         
           self = - 0.5 * rcuti_ * chg1 * (chg1 + scdat.skippedCharge) * pre11_;
         }
-        scdat.pot += self;
+        scdat.pot[2] += self;
       }
     }
   }

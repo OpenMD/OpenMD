@@ -347,7 +347,7 @@ namespace OpenMD {
     return;
   }
 
-  void EAM::calcDensity(DensityData ddat) {
+  void EAM::calcDensity(DensityData &ddat) {
     
     if (!initialized_) initialize();
     
@@ -363,7 +363,7 @@ namespace OpenMD {
     return;
   }
 
-  void EAM::calcFunctional(FunctionalData fdat) {
+  void EAM::calcFunctional(FunctionalData &fdat) {
 
     if (!initialized_) initialize();
 
@@ -377,7 +377,7 @@ namespace OpenMD {
   }
 
  
-  void EAM::calcForce(InteractionData idat) {
+  void EAM::calcForce(InteractionData &idat) {
 
     if (!initialized_) initialize();
 
@@ -478,9 +478,9 @@ namespace OpenMD {
       idat.fshift1 = data1.F->getValueAt( idat.rho1 - rhb );
       idat.fshift2 = data1.F->getValueAt( idat.rho2 - rha );
 
-      idat.pot += phab;
+      idat.pot[3] += phab;
 
-      idat.vpair += phab;
+      idat.vpair[3] += phab;
     }
 
     return;

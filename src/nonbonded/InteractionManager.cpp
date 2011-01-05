@@ -54,8 +54,8 @@ namespace OpenMD {
   RealType InteractionManager::listRadius_ = 0.0;
   CutoffMethod InteractionManager::cutoffMethod_ = SHIFTED_FORCE;
   SwitchingFunctionType InteractionManager::sft_ = cubic;
-  RealType InteractionManager::vdwScale_[4] = {0.0, 0.0, 0.0, 0.0};
-  RealType InteractionManager::electrostaticScale_[4] = {0.0, 0.0, 0.0, 0.0};
+  RealType InteractionManager::vdwScale_[4] = {1.0, 0.0, 0.0, 0.0};
+  RealType InteractionManager::electrostaticScale_[4] = {1.0, 0.0, 0.0, 0.0};
 
   map<int, AtomType*> InteractionManager::typeMap_;
   map<pair<AtomType*, AtomType*>, set<NonBondedInteraction*> > InteractionManager::interactions_;
@@ -95,17 +95,17 @@ namespace OpenMD {
     // Force fields can set options on how to scale van der Waals and electrostatic
     // interactions for atoms connected via bonds, bends and torsions
     // in this case the topological distance between atoms is:
-    // 0 = the atom itself
+    // 0 = topologically unconnected
     // 1 = bonded together 
     // 2 = connected via a bend
     // 3 = connected via a torsion
 
-    vdwScale_[0] = 0.0;
+    vdwScale_[0] = 1.0;
     vdwScale_[1] = fopts.getvdw12scale();
     vdwScale_[2] = fopts.getvdw13scale();
     vdwScale_[3] = fopts.getvdw14scale();
 
-    electrostaticScale_[0] = 0.0;
+    electrostaticScale_[0] = 1.0;
     electrostaticScale_[1] = fopts.getelectrostatic12scale();
     electrostaticScale_[2] = fopts.getelectrostatic13scale();
     electrostaticScale_[3] = fopts.getelectrostatic14scale();    
@@ -307,14 +307,11 @@ namespace OpenMD {
     setupCutoffs();
     setupSwitching();
     setupNeighborlists();
-    notifyFortranSkinThickness(&skinThickness_);
 
     int ljsp = cutoffMethod_ == SHIFTED_POTENTIAL ? 1 : 0;
     int ljsf = cutoffMethod_ == SHIFTED_FORCE ? 1 : 0;
     notifyFortranCutoffs(&rCut_, &rSwitch_, &ljsp, &ljsf);
-
-    int isError;
-    initFortranFF(&isError);
+    notifyFortranSkinThickness(&skinThickness_);
 
     initialized_ = true;
   }
@@ -457,6 +454,9 @@ namespace OpenMD {
         }           
       }
     }
+
+    switcher_->setSwitchType(sft_);
+    switcher_->setSwitch(rSwitch_, rCut_);
   }
 
   /**
@@ -483,7 +483,6 @@ namespace OpenMD {
     }             
 
     listRadius_ = rCut_ + skinThickness_;
-
   }
 
 
@@ -534,7 +533,7 @@ namespace OpenMD {
     return;    
   }
 
-  void InteractionManager::doPair(int *atid1, int *atid2, RealType *d, RealType *r, RealType *r2, RealType *rcut, RealType *sw, int *topoDist, RealType *pot, RealType *vpair, RealType *f1, RealType *eFrame1, RealType *eFrame2, RealType *A1, RealType *A2, RealType *t1, RealType *t2, RealType *rho1, RealType *rho2, RealType *dfrho1, RealType *dfrho2, RealType *fshift1, RealType *fshift2){
+  void InteractionManager::doPair(int *atid1, int *atid2, RealType *d, RealType *r, RealType *r2, RealType *sw, int *topoDist, RealType *A1, RealType *A2, RealType *eFrame1, RealType *eFrame2, RealType *vpair, RealType *pot, RealType  *f1, RealType *t1, RealType *t2, RealType *rho1, RealType *rho2, RealType *dfrho1, RealType *dfrho2, RealType *fshift1, RealType *fshift2){
     
     if (!initialized_) initialize();
     
@@ -545,13 +544,14 @@ namespace OpenMD {
     idat.d = Vector3d(d);
     idat.rij = *r;
     idat.r2 = *r2;
-    idat.rcut = *rcut;
     idat.sw = *sw;
     idat.vdwMult = vdwScale_[*topoDist];
     idat.electroMult = electrostaticScale_[*topoDist];
-    idat.pot = *pot;
-    idat.vpair = *vpair;
-    idat.f1 = Vector3d(f1);
+    for (int i = 0; i < 4; i++) {
+      idat.vpair[i] = vpair[i];
+      idat.pot[i] = pot[i];
+    }
+    idat.f1 = Vector3d(f1[0], f1[1], f1[2]);
     idat.eFrame1 = Mat3x3d(eFrame1);
     idat.eFrame2 = Mat3x3d(eFrame2);
     idat.A1 = RotMat3x3d(A1);
@@ -571,17 +571,16 @@ namespace OpenMD {
     for (it = interactions_[key].begin(); it != interactions_[key].end(); ++it)
       (*it)->calcForce(idat);
     
-    f1[0] = idat.f1.x();
-    f1[1] = idat.f1.y();
-    f1[2] = idat.f1.z();
-    
-    t1[0] = idat.t1.x();
-    t1[1] = idat.t1.y();
-    t1[2] = idat.t1.z();
-    
-    t2[0] = idat.t2.x();
-    t2[1] = idat.t2.y();
-    t2[2] = idat.t2.z();
+    for (int i = 0; i < 4; i++) {
+      vpair[i] = idat.vpair[i];
+      pot[i] = idat.pot[i];
+    }
+
+    for (int i = 0; i < 3; i++) {
+      f1[i] = idat.f1[i];
+      t1[i] = idat.t1[i];
+      t2[i] = idat.t2[i];
+    }
 
     return;    
   }
@@ -600,8 +599,10 @@ namespace OpenMD {
     skdat.skippedCharge2 = *skippedCharge2;
     skdat.sw = *sw;
     skdat.electroMult = *electroMult;
-    skdat.pot = *pot;
-    skdat.vpair = *vpair;
+    for (int i = 0; i < 4; i++) {
+      skdat.vpair[i] = vpair[i];
+      skdat.pot[i] = pot[i];
+    }
     skdat.f1 = Vector3d(f1);
     skdat.eFrame1 = Mat3x3d(eFrame1);
     skdat.eFrame2 = Mat3x3d(eFrame2);
@@ -617,17 +618,16 @@ namespace OpenMD {
       }
     }
     
-    f1[0] = skdat.f1.x();
-    f1[1] = skdat.f1.y();
-    f1[2] = skdat.f1.z();
-    
-    t1[0] = skdat.t1.x();
-    t1[1] = skdat.t1.y();
-    t1[2] = skdat.t1.z();
-    
-    t2[0] = skdat.t2.x();
-    t2[1] = skdat.t2.y();
-    t2[2] = skdat.t2.z();
+    for (int i = 0; i < 4; i++) {
+      vpair[i] = skdat.vpair[i];
+      pot[i] = skdat.pot[i];
+    }
+
+    for (int i = 0; i < 3; i++) {
+      f1[i] = skdat.f1[i];
+      t1[i] = skdat.t1[i];
+      t2[i] = skdat.t2[i];
+    }
 
     return;    
   }
@@ -641,7 +641,9 @@ namespace OpenMD {
     scdat.atype = typeMap_[*atid];
     scdat.eFrame = Mat3x3d(eFrame);
     scdat.skippedCharge = *skippedCharge;
-    scdat.pot = *pot;
+    for (int i = 0; i < 4; i++){
+      scdat.pot[i] = pot[i];
+    }    
     scdat.t = Vector3d(t);
 
     pair<AtomType*, AtomType*> key = make_pair(scdat.atype, scdat.atype);
@@ -652,7 +654,7 @@ namespace OpenMD {
         dynamic_cast<ElectrostaticInteraction*>(*it)->calcSelfCorrection(scdat);
       }
     }
-        
+      
     t[0] = scdat.t.x();
     t[1] = scdat.t.y();
     t[2] = scdat.t.z();
@@ -687,14 +689,9 @@ namespace OpenMD {
     return cutoff;    
   }
 
-
-  void InteractionManager::setSwitch(RealType *rIn, RealType *rOut) {
-    switcher_->setSwitch(*rIn, *rOut);    
-  }
-
   void InteractionManager::getSwitch(RealType *r2, RealType *sw, RealType *dswdr, RealType *r,
                                      int *in_switching_region) {
-    bool isr = switcher_->getSwitch(*r2, *sw, *dswdr, *r);    
+    bool isr = switcher_->getSwitch( *r2 , *sw, *dswdr, *r);    
     *in_switching_region = (int)isr;
   }
 
@@ -708,7 +705,6 @@ extern "C" {
 #define fortranDoSkipCorrection FC_FUNC(do_skip_correction, DO_SKIP_CORRECTION)
 #define fortranDoSelfCorrection FC_FUNC(do_self_correction, DO_SELF_CORRECTION)
 #define fortranGetCutoff FC_FUNC(get_cutoff, GET_CUTOFF)
-#define fortranSetSwitch FC_FUNC(set_switch, SET_SWITCH)
 #define fortranGetSwitch FC_FUNC(get_switch, GET_SWITCH)
 
   void fortranDoPrePair(int *atid1, int *atid2, RealType *rij, 
@@ -725,20 +721,21 @@ extern "C" {
                                                               dfrhodrho);    
   }
   
-  void fortranDoPair(int *atid1, int *atid2, RealType *d, RealType *r, 
-                     RealType *r2, RealType *rcut, RealType *sw, int *topoDist,
-                     RealType *pot, RealType *vpair, RealType *f1, RealType *eFrame1, 
-                     RealType *eFrame2, RealType *A1, RealType *A2, 
-                     RealType *t1, RealType *t2, RealType *rho1, RealType *rho2,
-                     RealType *dfrho1, RealType *dfrho2, RealType *fshift1, 
-                     RealType *fshift2){
+  void fortranDoPair(int *atid1, int *atid2, RealType *d, RealType *r, RealType *r2, 
+                     RealType *sw, int *topoDist, RealType *A1, RealType *A2,
+                     RealType *eFrame1, RealType *eFrame2, 
+                     RealType *vpair, RealType *pot,
+                     RealType *f1, RealType *t1, RealType *t2, 
+                     RealType *rho1, RealType *rho2, RealType *dfrho1, RealType *dfrho2, 
+                     RealType *fshift1, RealType *fshift2){
     
-    return OpenMD::InteractionManager::Instance()->doPair(atid1, atid2, d, r, 
-                                                          r2, rcut, sw, topoDist,
-                                                          pot, vpair, f1, 
+    return OpenMD::InteractionManager::Instance()->doPair(atid1, atid2, d, r, r2,
+                                                          sw, topoDist, A1, A2,
                                                           eFrame1, eFrame2, 
-                                                          A1, A2, t1, t2, rho1,
-                                                          rho2, dfrho1, dfrho2,
+                                                          vpair, pot,
+                                                          f1, t1, t2, 
+                                                          rho1, rho2,
+                                                          dfrho1, dfrho2,
                                                           fshift1, fshift2);
   }
   
@@ -773,14 +770,8 @@ extern "C" {
   }
 
   void fortranGetSwitch(RealType *r2, RealType *sw, RealType *dswdr, RealType *r,
-                        int *in_switching_region) {
-    
+                        int *in_switching_region) {    
     return OpenMD::InteractionManager::Instance()->getSwitch(r2, sw, dswdr, r, 
                                                              in_switching_region);
-  }
-
-  void fortranSetSwitch(RealType *rIn, RealType *rOut) {    
-    return OpenMD::InteractionManager::Instance()->setSwitch(rIn, rOut);
-  }
-  
+  }  
 }

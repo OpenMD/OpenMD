@@ -43,15 +43,16 @@
 #include "utils/simError.h"
 #include <cmath>
 #include <algorithm>
-#include <iostream>
 
 using namespace OpenMD;
 using namespace std;
 
-CubicSpline::CubicSpline() : generated(false), isUniform(true) {}
+CubicSpline::CubicSpline() : generated(false), isUniform(true) {
+  data_.clear();
+}
 
-void CubicSpline::addPoint(RealType xp, RealType yp) {
-  data.push_back(make_pair(xp, yp));
+void CubicSpline::addPoint(const RealType xp, const RealType yp) {
+  data_.push_back(make_pair(xp, yp));
 }
 
 void CubicSpline::addPoints(const vector<RealType>& xps, 
@@ -66,26 +67,26 @@ void CubicSpline::addPoints(const vector<RealType>& xps,
   }
 
   for (int i = 0; i < xps.size(); i++) 
-    data.push_back(make_pair(xps[i], yps[i]));
+    data_.push_back(make_pair(xps[i], yps[i]));
 }
 
 void CubicSpline::generate() { 
   // Calculate coefficients defining a smooth cubic interpolatory spline.
   //
   // class values constructed:
-  //   n   = number of data points.
+  //   n   = number of data_ points.
   //   x   = vector of independent variable values 
   //   y   = vector of dependent variable values
   //   b   = vector of S'(x[i]) values.
   //   c   = vector of S"(x[i])/2 values.
   //   d   = vector of S'''(x[i]+)/6 values (i < n).
   // Local variables:   
-  
+ 
   RealType fp1, fpn, h, p;
   
   // make sure the sizes match
   
-  n = data.size();  
+  n = data_.size();  
   b.resize(n);
   c.resize(n);
   d.resize(n);
@@ -95,35 +96,35 @@ void CubicSpline::generate() {
   bool sorted = true;
   
   for (int i = 1; i < n; i++) {
-    if ( (data[i].first - data[i-1].first ) <= 0.0 ) sorted = false;
+    if ( (data_[i].first - data_[i-1].first ) <= 0.0 ) sorted = false;
   }
   
   // sort if necessary
   
-  if (!sorted) sort(data.begin(), data.end());  
+  if (!sorted) sort(data_.begin(), data_.end());  
   
   // Calculate coefficients for the tridiagonal system: store
   // sub-diagonal in B, diagonal in D, difference quotient in C.  
   
-  b[0] = data[1].first - data[0].first;
-  c[0] = (data[1].second - data[0].second) / b[0];
+  b[0] = data_[1].first - data_[0].first;
+  c[0] = (data_[1].second - data_[0].second) / b[0];
   
   if (n == 2) {
 
     // Assume the derivatives at both endpoints are zero. Another
     // assumption could be made to have a linear interpolant between
     // the two points.  In that case, the b coefficients below would be
-    // (data[1].second - data[0].second) / (data[1].first - data[0].first)
+    // (data_[1].second - data_[0].second) / (data_[1].first - data_[0].first)
     // and the c and d coefficients would both be zero.
     b[0] = 0.0;
-    c[0] = -3.0 * pow((data[1].second - data[0].second) /
-                      (data[1].first-data[0].first), 2);
-    d[0] = -2.0 * pow((data[1].second - data[0].second) / 
-                      (data[1].first-data[0].first), 3);
+    c[0] = -3.0 * pow((data_[1].second - data_[0].second) /
+                      (data_[1].first-data_[0].first), 2);
+    d[0] = -2.0 * pow((data_[1].second - data_[0].second) / 
+                      (data_[1].first-data_[0].first), 3);
     b[1] = b[0];
     c[1] = 0.0;
     d[1] = 0.0;
-    dx = 1.0 / (data[1].first - data[0].first);
+    dx = 1.0 / (data_[1].first - data_[0].first);
     isUniform = true;
     generated = true;
     return;
@@ -132,27 +133,27 @@ void CubicSpline::generate() {
   d[0] = 2.0 * b[0];
   
   for (int i = 1; i < n-1; i++) {
-    b[i] = data[i+1].first - data[i].first;
+    b[i] = data_[i+1].first - data_[i].first;
     if ( fabs( b[i] - b[0] ) / b[0] > 1.0e-5) isUniform = false;
-    c[i] = (data[i+1].second - data[i].second) / b[i];
+    c[i] = (data_[i+1].second - data_[i].second) / b[i];
     d[i] = 2.0 * (b[i] + b[i-1]);
   }
   
   d[n-1] = 2.0 * b[n-2];
   
   // Calculate estimates for the end slopes using polynomials
-  // that interpolate the data nearest the end.
+  // that interpolate the data_ nearest the end.
   
   fp1 = c[0] - b[0]*(c[1] - c[0])/(b[0] + b[1]);
   if (n > 3) fp1 = fp1 + b[0]*((b[0] + b[1]) * (c[2] - c[1]) / 
                                (b[1] + b[2]) - 
-                               c[1] + c[0]) / (data[3].first - data[0].first);
+                               c[1] + c[0]) / (data_[3].first - data_[0].first);
   
   fpn = c[n-2] + b[n-2]*(c[n-2] - c[n-3])/(b[n-3] + b[n-2]);
 
   if (n > 3)  fpn = fpn + b[n-2] * 
     (c[n-2] - c[n-3] - (b[n-3] + b[n-2]) * 
-     (c[n-3] - c[n-4])/(b[n-3] + b[n-4]))/(data[n-1].first - data[n-4].first);
+     (c[n-3] - c[n-4])/(b[n-3] + b[n-4]))/(data_[n-1].first - data_[n-4].first);
   
   
   // Calculate the right hand side and store it in C.
@@ -178,14 +179,14 @@ void CubicSpline::generate() {
   // Calculate the coefficients defining the spline.
   
   for (int i = 0; i < n-1; i++) {
-    h = data[i+1].first - data[i].first;
+    h = data_[i+1].first - data_[i].first;
     d[i] = (c[i+1] - c[i]) / (3.0 * h);
-    b[i] = (data[i+1].second - data[i].second)/h - h * (c[i] + h * d[i]);
+    b[i] = (data_[i+1].second - data_[i].second)/h - h * (c[i] + h * d[i]);
   }
   
   b[n-1] = b[n-2] + h * (2.0 * c[n-2] + h * 3.0 * d[n-2]);
   
-  if (isUniform) dx = 1.0 / (data[1].first - data[0].first); 
+  if (isUniform) dx = 1.0 / (data_[1].first - data_[0].first); 
   
   generated = true;
   return;
@@ -202,7 +203,7 @@ RealType CubicSpline::getValueAt(RealType t) {
   if (!generated) generate();
   RealType dt;
   
-  if ( t < data[0].first || t > data[n-1].first ) {    
+  if ( t < data_[0].first || t > data_[n-1].first ) {    
     sprintf( painCave.errMsg,
              "CubicSpline::getValueAt was passed a value outside the range of the spline!\n");
     painCave.severity = OPENMD_ERROR;
@@ -217,14 +218,14 @@ RealType CubicSpline::getValueAt(RealType t) {
 
   if (isUniform) {    
     
-    j = max(0, min(n-1, int((t - data[0].first) * dx)));   
+    j = max(0, min(n-1, int((t - data_[0].first) * dx)));   
 
   } else { 
 
     j = n-1;
     
     for (int i = 0; i < n; i++) {
-      if ( t < data[i].first ) {
+      if ( t < data_[i].first ) {
         j = i-1;
         break;
       }      
@@ -233,8 +234,8 @@ RealType CubicSpline::getValueAt(RealType t) {
   
   //  Evaluate the cubic polynomial.
   
-  dt = t - data[j].first;
-  return data[j].second + dt*(b[j] + dt*(c[j] + dt*d[j]));
+  dt = t - data_[j].first;
+  return data_[j].second + dt*(b[j] + dt*(c[j] + dt*d[j]));
   
 }
 
@@ -250,7 +251,7 @@ pair<RealType, RealType> CubicSpline::getValueAndDerivativeAt(RealType t) {
   if (!generated) generate();
   RealType dt;
   
-  if ( t < data.front().first || t > data.back().first ) {    
+  if ( t < data_.front().first || t > data_.back().first ) {    
     sprintf( painCave.errMsg,
              "CubicSpline::getValueAndDerivativeAt was passed a value outside the range of the spline!\n");
     painCave.severity = OPENMD_ERROR;
@@ -265,14 +266,14 @@ pair<RealType, RealType> CubicSpline::getValueAndDerivativeAt(RealType t) {
 
   if (isUniform) {    
     
-    j = max(0, min(n-1, int((t - data[0].first) * dx)));   
+    j = max(0, min(n-1, int((t - data_[0].first) * dx)));   
 
   } else { 
 
     j = n-1;
     
     for (int i = 0; i < n; i++) {
-      if ( t < data[i].first ) {
+      if ( t < data_[i].first ) {
         j = i-1;
         break;
       }      
@@ -281,9 +282,9 @@ pair<RealType, RealType> CubicSpline::getValueAndDerivativeAt(RealType t) {
   
   //  Evaluate the cubic polynomial.
   
-  dt = t - data[j].first;
+  dt = t - data_[j].first;
 
-  RealType yval = data[j].second + dt*(b[j] + dt*(c[j] + dt*d[j]));
+  RealType yval = data_[j].second + dt*(b[j] + dt*(c[j] + dt*d[j]));
   RealType dydx = b[j] + dt*(2.0 * c[j] + 3.0 * dt * d[j]);
   
   return make_pair(yval, dydx);

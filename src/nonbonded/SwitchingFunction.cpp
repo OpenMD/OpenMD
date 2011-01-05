@@ -40,6 +40,7 @@
  */
 
 #include <cmath>
+#include <iostream>
 
 #include "nonbonded/SwitchingFunction.hpp"
 #include "utils/simError.h"
@@ -48,12 +49,15 @@ using namespace std;
 namespace OpenMD {
 
   SwitchingFunction::SwitchingFunction() : np_(150), haveSpline_(false), 
-                                           isCubic_(true), functionType_(cubic) {}
+                                           isCubic_(true), functionType_(cubic) {
+    switchSpline_ = new CubicSpline();
+  }
 
   void SwitchingFunction::setSwitchType(SwitchingFunctionType sft) {
     if ((sft == fifth_order_poly) || (sft == cubic)) {
       if (haveSpline_) {
         delete switchSpline_;
+        switchSpline_ = new CubicSpline();
         setSwitch(rin_, rout_);
       } 
     } else {
@@ -102,7 +106,6 @@ namespace OpenMD {
     }
     
     // setup r -> sw lookup spline
-    CubicSpline* switchSpline_ = new CubicSpline();
     if (functionType_ == fifth_order_poly) {
       isCubic_ = false;
       RealType c0 = 1.0;
@@ -140,27 +143,25 @@ namespace OpenMD {
     return;
   }
 
-  bool SwitchingFunction::getSwitch(RealType r2, RealType sw, RealType dswdr, 
-                                    RealType r) {
+  bool SwitchingFunction::getSwitch(const RealType &r2, RealType &sw, RealType &dswdr, 
+                                    RealType &r) {
+
     sw = 1.0;
     dswdr = 0.0;
+
     bool in_switching_region = false;
 
     if (r2 > rin2_) {
       if (r2 > rout2_) {
         sw = 0.0;
-        dswdr = 0.0;
-        return in_switching_region;
       } else {
         in_switching_region = true;
         r = sqrt(r2);
         pair<RealType, RealType> result = switchSpline_->getValueAndDerivativeAt(r);
         sw = result.first;
         dswdr = result.second;
-        return in_switching_region;
       }
-    } else {
-      return in_switching_region;
     }
+    return in_switching_region;
   }
 }

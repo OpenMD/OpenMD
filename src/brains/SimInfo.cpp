@@ -55,6 +55,7 @@
 #include "primitives/Molecule.hpp"
 #include "primitives/StuntDouble.hpp"
 #include "UseTheForce/DarkSide/neighborLists_interface.h"
+#include "UseTheForce/doForces_interface.h"
 #include "utils/MemoryUtils.hpp"
 #include "utils/simError.h"
 #include "selection/SelectionManager.hpp"
@@ -924,6 +925,14 @@ namespace OpenMD {
     sprintf(checkPointMsg, " mpiRefresh successful.\n");
     errorCheckPoint();
 #endif
+
+    initFortranFF(&isError);
+    if (isError) {
+      sprintf(painCave.errMsg,
+	      "initFortranFF errror: fortran didn't like something we gave it.\n");
+      painCave.isFatal = 1;
+      simError();
+    }
     fortranInitialized_ = true;
   }
 

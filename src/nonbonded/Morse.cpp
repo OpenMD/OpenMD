@@ -142,7 +142,7 @@ namespace OpenMD {
     }    
   }
   
-  void Morse::calcForce(InteractionData idat) {
+  void Morse::calcForce(InteractionData &idat) {
 
     if (!initialized_) initialize();
     
@@ -221,11 +221,11 @@ namespace OpenMD {
       }
       
       RealType pot_temp = idat.vdwMult * (myPot - myPotC);
-      idat.vpair += pot_temp;
+      idat.vpair[0] += pot_temp;
       
       RealType dudr = idat.sw * idat.vdwMult * (myDeriv - myDerivC);
       
-      idat.pot += idat.sw * pot_temp;
+      idat.pot[0] += idat.sw * pot_temp;
       idat.f1 = idat.d * dudr / idat.rij;
     }
     return;

@@ -58,7 +58,7 @@ namespace OpenMD {
     SwitchingFunction();
     void setSwitchType(SwitchingFunctionType sft);
     void setSwitch(RealType rinner, RealType router);
-    bool getSwitch(RealType r2, RealType sw, RealType dswdr, RealType r);
+    bool getSwitch(const RealType &r2, RealType &sw, RealType &dswdr, RealType &r);
     
   private:
     RealType rin_;

@@ -55,7 +55,7 @@ namespace OpenMD {
   public:    
     SHAPES();
     void setForceField(ForceField *ff) {forceField_ = ff;};
-    virtual void calcForce(InteractionData idat);
+    virtual void calcForce(InteractionData &idat);
     
   private:
     void initialize();

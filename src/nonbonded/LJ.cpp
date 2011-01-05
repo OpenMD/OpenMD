@@ -240,7 +240,7 @@ namespace OpenMD {
     }    
   }
  
-  void LJ::calcForce(InteractionData idat) {
+  void LJ::calcForce(InteractionData &idat) {
     
     if (!initialized_) initialize();
     
@@ -280,14 +280,13 @@ namespace OpenMD {
       }
 
       RealType pot_temp = idat.vdwMult * epsilon * (myPot - myPotC);
-      idat.vpair += pot_temp;
+      idat.vpair[0] += pot_temp;
       
       RealType dudr = idat.sw * idat.vdwMult * epsilon * (myDeriv - 
                                                           myDerivC)*sigmai;
       
-      idat.pot += idat.sw * pot_temp;
-      idat.f1 = idat.d * dudr / idat.rij;
-      
+      idat.pot[0] += idat.sw * pot_temp;
+      idat.f1 = idat.d * dudr / idat.rij;      
     }
     return;
   }

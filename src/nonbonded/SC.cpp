@@ -302,7 +302,7 @@ namespace OpenMD {
     return;
   }
 
-  void SC::calcDensity(DensityData ddat) {
+  void SC::calcDensity(DensityData &ddat) {
     
     if (!initialized_) initialize();
     
@@ -321,7 +321,7 @@ namespace OpenMD {
     return;
   }
 
-  void SC::calcFunctional(FunctionalData fdat) {
+  void SC::calcFunctional(FunctionalData &fdat) {
 
     if (!initialized_) initialize();
 
@@ -334,7 +334,7 @@ namespace OpenMD {
   }
   
  
-  void SC::calcForce(InteractionData idat) {
+  void SC::calcForce(InteractionData &idat) {
     
     if (!initialized_) initialize();
     
@@ -359,7 +359,7 @@ namespace OpenMD {
       RealType dvpdr = res.second;
       
       RealType pot_temp = vptmp - vcij;
-      idat.vpair += pot_temp;
+      idat.vpair[3] += pot_temp;
       
       RealType dudr = drhodr * (idat.dfrho1 + idat.dfrho2) + dvpdr;
       
@@ -380,7 +380,7 @@ namespace OpenMD {
       idat.fshift1 = - data1.c * data1.epsilon * sqrt(idat.rho1 - rhtmp);
       idat.fshift2 = - data2.c * data2.epsilon * sqrt(idat.rho2 - rhtmp);
       
-      idat.pot += pot_temp;
+      idat.pot[3] += pot_temp;
     }
       
     return;    

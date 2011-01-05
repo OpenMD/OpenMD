@@ -124,7 +124,7 @@ namespace OpenMD {
     }    
   }
   
-  void MAW::calcForce(InteractionData idat) {
+  void MAW::calcForce(InteractionData &idat) {
 
     if (!initialized_) initialize();
     
@@ -220,8 +220,8 @@ namespace OpenMD {
       RealType Vang = ca1 * x2 / idat.r2 + cb1 * z / idat.rij + (0.8 - ca1 / 3.0);
          
       RealType pot_temp = idat.vdwMult * Vmorse * Vang;
-      idat.vpair += pot_temp;
-      idat.pot += idat.sw * pot_temp;
+      idat.vpair[0] += pot_temp;
+      idat.pot[0] += idat.sw * pot_temp;
            
       Vector3d dVmorsedr = (myDeriv - myDerivC) * Vector3d(x, y, z) / idat.rij;
     
