@@ -100,6 +100,7 @@ namespace OpenMD {
     static void setupCutoffs();
     static void setupSwitching();
     static void setupNeighborlists();
+    static void setupElectrostatics();
 
     static SimInfo* info_;
     static LJ* lj_;
