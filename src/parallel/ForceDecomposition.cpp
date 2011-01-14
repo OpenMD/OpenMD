@@ -1,12 +1,5 @@
-/**
- * @file ForceDecomposition.cpp
- * @author Charles Vardeman <cvardema.at.nd.edu>
- * @date 08/18/2010
- * @time 11:56am
- * @version 1.0
- *
- * @section LICENSE
- * Copyright (c) 2010 The University of Notre Dame. All Rights Reserved.
+/*
+ * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -45,93 +38,109 @@
  * [3]  Sun, Lin & Gezelter, J. Chem. Phys. 128, 24107 (2008).          
  * [4]  Vardeman & Gezelter, in progress (2009).                        
  */
-
-
-
-/*  -*- c++ -*-  */
-#include "config.h"
-#include <stdlib.h>
-#ifdef IS_MPI
-#include <mpi.h>
-#endif
-
-#include <iostream>
-#include <vector>
-#include <algorithm>
-#include <cmath>
 #include "parallel/ForceDecomposition.hpp"
+#include "parallel/Communicator.hpp"
+#include "math/SquareMatrix3.hpp"
 
+namespace OpenMD {
 
-using namespace std;
-using namespace OpenMD;
-
-//__static
+  void ForceDecomposition::distributeInitialData() {
 #ifdef IS_MPI
-static vector<MPI:Comm> communictors;
+
+    int nAtoms;
+    int nGroups;
+
+    AtomCommRealI = new Comm<I,RealType>(nAtoms);
+    AtomCommVectorI = new Comm<I,Vector3d>(nAtoms);
+    AtomCommMatrixI = new Comm<I,Mat3x3d>(nAtoms);
+
+    AtomCommRealJ = new Comm<J,RealType>(nAtoms);
+    AtomCommVectorJ = new Comm<J,Vector3d>(nAtoms);
+    AtomCommMatrixJ = new Comm<J,Mat3x3d>(nAtoms);
+
+    cgCommVectorI = new Comm<I,Vector3d>(nGroups);
+    cgCommVectorJ = new Comm<J,Vector3d>(nGroups);
+    // more to come
 #endif
+  }
+    
 
-//____ MPITypeTraits
-template<typename T>
-struct MPITypeTraits;
 
+  void ForceDecomposition::distributeData()  {
 #ifdef IS_MPI
-template<>
-struct MPITypeTraits<RealType> {
-  static const MPI::Datatype datatype;
-};
-const MPI_Datatype MPITypeTraits<RealType>::datatype = MY_MPI_REAL;
+    Snapshot* snap = sman_->getCurrentSnapshot();
 
-template<>
-struct MPITypeTraits<int> {
-  static const MPI::Datatype datatype;
-};
-const MPI::Datatype MPITypeTraits<int>::datatype = MPI_INT;
-#endif
-
-/**
-* Constructor for ForceDecomposition Parallel Decomposition Method
-* Will try to construct a symmetric grid of processors. Ideally, the
-* number of processors will be a square ex: 4, 9, 16, 25.
-*
-*/
-
-ForceDecomposition::ForceDecomposition() {
-
-#ifdef IS_MPI
-  int nProcs = MPI::COMM_WORLD.Get_size();
-  int worldRank = MPI::COMM_WORLD.Get_rank();
-#endif
-
-  // First time through, construct column stride.
-  if (communicators.size() == 0)
-  {
-    int nColumnsMax = (int) round(sqrt((float) nProcs));
-    for (int i = 0; i < nProcs; ++i)
-    {
-      if (nProcs%i==0) nColumns=i;
+    // gather up the atomic positions
+    AtomCommVectorI->gather(snap->atomData.position, 
+                            snap->atomIData.position);
+    AtomCommVectorJ->gather(snap->atomData.position, 
+                           snap->atomJData.position);
+    
+    // gather up the cutoff group positions
+    cgCommVectorI->gather(snap->cgData.position, 
+                         snap->cgIData.position);
+    cgCommVectorJ->gather(snap->cgData.position, 
+                         snap->cgJData.position);
+    
+    // if needed, gather the atomic rotation matrices
+    if (snap->atomData.getStorageLayout() & DataStorage::dslAmat) {
+      AtomCommMatrixI->gather(snap->atomData.aMat, 
+                             snap->atomIData.aMat);
+      AtomCommMatrixJ->gather(snap->atomData.aMat, 
+                             snap->atomJData.aMat);
     }
-
-    int nRows = nProcs/nColumns;    
-    myRank_ = (int) worldRank%nColumns;
+    
+    // if needed, gather the atomic eletrostatic frames
+    if (snap->atomData.getStorageLayout() & DataStorage::dslElectroFrame) {
+      AtomCommMatrixI->gather(snap->atomData.electroFrame, 
+                             snap->atomIData.electroFrame);
+      AtomCommMatrixJ->gather(snap->atomData.electroFrame, 
+                             snap->atomJData.electroFrame);
+    }
+#endif      
   }
-  else
-  {
-    myRank_ = myRank/nColumns;
+  
+  void ForceDecomposition::collectIntermediateData() {
+#ifdef IS_MPI
+    Snapshot* snap = sman_->getCurrentSnapshot();
+    // gather up the atomic positions
+    
+    if (snap->atomData.getStorageLayout() & DataStorage::dslDensity) {
+      AtomCommRealI->scatter(snap->atomIData.density, 
+                            snap->atomData.density);
+      std::vector<RealType> rho_tmp;
+      int n = snap->getNumberOfAtoms();
+      rho_tmp.reserve( n );
+      AtomCommRealJ->scatter(snap->atomJData.density, rho_tmp);
+      for (int i = 0; i < n; i++)
+        snap->atomData.density[i] += rho_tmp[i];
+    }
+#endif
   }
-  MPI::Comm newComm = MPI:COMM_WORLD.Split(myRank_,0);
   
-  isColumn_ = false;
+  void ForceDecomposition::distributeIntermediateData() {
+#ifdef IS_MPI
+    Snapshot* snap = sman_->getCurrentSnapshot();
+    if (snap->atomData.getStorageLayout() & DataStorage::dslFunctional) {
+      AtomCommRealI->gather(snap->atomData.functional, 
+                           snap->atomIData.functional);
+      AtomCommRealJ->gather(snap->atomData.functional, 
+                           snap->atomJData.functional);
+    }
+    
+    if (snap->atomData.getStorageLayout() & DataStorage::dslFunctionalDerivative) {
+      AtomCommRealI->gather(snap->atomData.functionalDerivative, 
+                           snap->atomIData.functionalDerivative);
+      AtomCommRealJ->gather(snap->atomData.functionalDerivative, 
+                           snap->atomJData.functionalDerivative);
+    }
+#endif
+  }
   
-}
-
-ForceDecomposition::gather(sendbuf, receivebuf){
-  communicators(myIndex_).Allgatherv();
-}
-
-
-
-ForceDecomposition::scatter(sbuffer, rbuffer){
-  communicators(myIndex_).Reduce_scatter(sbuffer, recevbuf. recvcounts, MPI::DOUBLE, MPI::SUM);
-}
-
-
+  
+  void ForceDecomposition::collectData() {
+#ifdef IS_MPI
+#endif
+  }
+  
+} //end namespace OpenMD

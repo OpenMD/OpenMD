@@ -39,49 +39,70 @@
  * [4]  Vardeman & Gezelter, in progress (2009).                        
  */
  
-#ifndef PARALLEL_FORCEDECOMPOSITION_HPP
-#define PARALLEL_FORCEDECOMPOSITION_HPP
+#ifndef PARALLEL_DECOMPOSITION_HPP
+#define PARALLEL_DECOMPOSITION_HPP
 
-#include "Parallel/Decomposition.hpp"
-#include "Parallel/Communicator.hpp"
-#include "math/SquareMatrix3.hpp"
+#include "brains/SnapshotManager.hpp"
+#include "types/AtomType.hpp"
 
+using namespace std;
 namespace OpenMD {
   
-  class ForceDecomposition : public Decomposition {
+  /**
+   * @class Decomposition 
+   * Decomposition is an interface for passing out and collecting information
+   * from many processors at various stages of the main non-bonded ForceLoop.
+   *
+   * The pairwise force calculation has an outer-running loop (the "I"
+   * loop) and an inner-running loop (the "J" loop).  In parallel
+   * decompositions, these loop over different groups of atoms on
+   * different processors.  Between each set of computations on the
+   * local processor, data must be exchanged among the processors.
+   * This can happen at different times in the calculation:
+   *
+   *  distributeInitialData      (parallel communication - one time only)
+   *  distributeData             (parallel communication - every ForceLoop)
+   *  loop over i
+   *  | loop over j
+   *  | | localComputation
+   *  |  end
+   *  end
+   *  collectIntermediateData    (parallel communication)
+   *  distributeIntermediateData (parallel communication)
+   *  loop over i
+   *  | loop over j
+   *  | | localComputation
+   *  |  end
+   *  end
+   * collectData                  (parallel communication)
+   *
+   * Decomposition provides the interface for ForceLoop to do the
+   * communication steps and to iterate using the correct set of atoms
+   * and cutoff groups.
+   */
+  class Decomposition {
   public:
-    ForceDecomposition(Snapshot* sman);
-    void distributeInitialData();
-    void distributeData();
-    void collectIntermediateData();
-    void distributeIntermediateData();
-    void collectData();
 
-    unsigned int getNcutoffGroupsI();
-    unsigned int getNcutoffGroupsJ();
-
-    vector<int> getAtomsInGroupI(int whichCGI);
-    vector<int> getAtomsInGroupJ(int whichCGJ);
-
-    AtomType* getAtomTypeI(int whichAtomI);
-    AtomType* getAtomTypeJ(int whichAtomJ);   
-
-#ifdef IS_MPI
+    Decomposition(SnapshotManager* sman) : sman_(sman) {}
+    virtual ~Decomposition() {}
     
-    Comm<I, RealType>* AtomCommRealI; 
-    Comm<I, Vector3d>* AtomCommVectorI; 
-    Comm<I, Mat3x3d>*  AtomCommMatrixI; 
+    virtual void distributeInitialData() = 0;
+    virtual void distributeData() = 0;
+    virtual void collectIntermediateData() = 0;
+    virtual void distributeIntermediateData() = 0;
+    virtual void collectData() = 0;
 
-    Comm<J, RealType>* AtomCommRealJ; 
-    Comm<J, Vector3d>* AtomCommVectorJ; 
-    Comm<J, Mat3x3d>*  AtomCommMatrixJ; 
+    virtual unsigned int getNcutoffGroupsI() = 0;
+    virtual unsigned int getNcutoffGroupsJ() = 0;
 
-    Comm<I, Vector3d>* cgCommVectorI; 
-    Comm<J, Vector3d>* cgCommVectorJ; 
+    virtual vector<int> getAtomsInGroupI(int whichCGI) = 0;
+    virtual vector<int> getAtomsInGroupJ(int whichCGJ) = 0;
+
+    virtual AtomType* getAtomTypeI(int whichAtomI) = 0;
+    virtual AtomType* getAtomTypeJ(int whichAtomJ) = 0;
     
-#endif
-  };
-
+  protected:
+    SnapshotManager* sman_;
+  };    
 }
 #endif
-
