@@ -68,16 +68,16 @@ namespace OpenMD {
 
 #ifdef IS_MPI
     
-    Comm<I, RealType>* AtomCommRealI; 
-    Comm<I, Vector3d>* AtomCommVectorI; 
-    Comm<I, Mat3x3d>*  AtomCommMatrixI; 
+    Communicator<Row, RealType>* AtomCommRealI; 
+    Communicator<Row, Vector3d>* AtomCommVectorI; 
+    Communicator<Row, Mat3x3d>*  AtomCommMatrixI; 
 
-    Comm<J, RealType>* AtomCommRealJ; 
-    Comm<J, Vector3d>* AtomCommVectorJ; 
-    Comm<J, Mat3x3d>*  AtomCommMatrixJ; 
+    Communicator<Column, RealType>* AtomCommRealJ; 
+    Communicator<Column, Vector3d>* AtomCommVectorJ; 
+    Communicator<Column, Mat3x3d>*  AtomCommMatrixJ; 
 
-    Comm<I, Vector3d>* cgCommVectorI; 
-    Comm<J, Vector3d>* cgCommVectorJ; 
+    Communicator<Row, Vector3d>* cgCommVectorI; 
+    Communicator<Column, Vector3d>* cgCommVectorJ; 
     
 #endif
   };

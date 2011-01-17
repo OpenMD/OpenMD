@@ -132,6 +132,7 @@ int main(int argc,char* argv[]){
   //create simulation model
   SimCreator creator;
   SimInfo* info = creator.createSim(argv[1]);
+
   Globals* simParams = info->getSimParams();
 
   if (simParams->haveMinimizer() && simParams->haveEnsemble()) {
@@ -186,6 +187,7 @@ int main(int argc,char* argv[]){
       myIntegrator->setForceManager(fman);
     }
         
+    std::cerr << "About to integrate\n";
     myIntegrator->integrate();
     delete myIntegrator;
   }else {

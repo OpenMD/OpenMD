@@ -132,7 +132,13 @@ namespace OpenMD {
     //equal to the total number of atoms minus number of atoms belong to 
     //cutoff group defined in meta-data file plus the number of cutoff 
     //groups defined in meta-data file
+    std::cerr << "nGA = " << nGlobalAtoms_ << "\n";
+    std::cerr << "nCA = " << nCutoffAtoms << "\n";
+    std::cerr << "nG = " << nGroups << "\n";
+
     nGlobalCutoffGroups_ = nGlobalAtoms_ - nCutoffAtoms + nGroups;
+
+    std::cerr << "nGCG = " << nGlobalCutoffGroups_ << "\n";
     
     //every free atom (atom does not belong to rigid bodies) is an 
     //integrable object therefore the total number of integrable objects 
@@ -970,9 +976,11 @@ namespace OpenMD {
     Molecule* mol;
     RigidBody* rb;
     Atom* atom;
+    CutoffGroup* cg;
     SimInfo::MoleculeIterator mi;
     Molecule::RigidBodyIterator rbIter;
-    Molecule::AtomIterator atomIter;;
+    Molecule::AtomIterator atomIter;
+    Molecule::CutoffGroupIterator cgIter;
  
     for (mol = beginMolecule(mi); mol != NULL; mol = nextMolecule(mi)) {
         
@@ -982,6 +990,10 @@ namespace OpenMD {
         
       for (rb = mol->beginRigidBody(rbIter); rb != NULL; rb = mol->nextRigidBody(rbIter)) {
 	rb->setSnapshotManager(sman_);
+      }
+
+      for (cg = mol->beginCutoffGroup(cgIter); cg != NULL; cg = mol->nextCutoffGroup(cgIter)) {
+	cg->setSnapshotManager(sman_);
       }
     }    
     

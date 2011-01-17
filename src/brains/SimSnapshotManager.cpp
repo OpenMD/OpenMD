@@ -49,10 +49,11 @@ namespace OpenMD {
 
       int nAtoms = info_->getNAtoms();
       int nRigidBodies = info_->getNRigidBodies();
-    
+      int nCutoffGroups = info_->getNCutoffGroups();
+      
       //allocate memory for snapshots
-      previousSnapshot_ = new Snapshot(nAtoms, nRigidBodies, storageLayout);
-      currentSnapshot_ = new Snapshot(nAtoms, nRigidBodies, storageLayout);
+      previousSnapshot_ = new Snapshot(nAtoms, nRigidBodies, nCutoffGroups, storageLayout);
+      currentSnapshot_ = new Snapshot(nAtoms, nRigidBodies, nCutoffGroups, storageLayout);
     }
 
   SimSnapshotManager::~SimSnapshotManager(){

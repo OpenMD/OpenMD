@@ -63,32 +63,37 @@ namespace OpenMD{
    * @class Snapshot Snapshot.hpp "brains/Snapshot.hpp"
    * @brief Snapshot class is a repository class for storing dynamic data during 
    *  Simulation
-   * Every snapshot class will contain one DataStorage  for atoms and one DataStorage
+   * Every snapshot class will contain one DataStorage for atoms and one DataStorage
    *  for rigid bodies.
    */
   class Snapshot {
   public:
             
-    Snapshot(int nAtoms, int nRigidbodies) : atomData(nAtoms), 
-                                             rigidbodyData(nRigidbodies),
-					     currentTime_(0), 
-                                             orthoTolerance_(1e-6), 
-                                             orthoRhombic_(0), 
-                                             chi_(0.0), 
-                                             integralOfChiDt_(0.0), 
-                                             eta_(0.0), id_(-1), 
-                                             hasCOM_(false), hasVolume_(false), volume_(0.0) {
+    Snapshot(int nAtoms, int nRigidbodies, 
+             int nCutoffGroups) : atomData(nAtoms), 
+                                  rigidbodyData(nRigidbodies),
+                                  cgData(nCutoffGroups, DataStorage::dslPosition),
+                                  currentTime_(0), 
+                                  orthoTolerance_(1e-6), 
+                                  orthoRhombic_(0), 
+                                  chi_(0.0), 
+                                  integralOfChiDt_(0.0), 
+                                  eta_(0.0), id_(-1), hasCOM_(false), 
+                                  hasVolume_(false), volume_(0.0) {
 
     }
 
-    Snapshot(int nAtoms, int nRigidbodies, int storageLayout) 
-      : atomData(nAtoms, storageLayout), 
-        rigidbodyData(nRigidbodies, storageLayout),
-	currentTime_(0), orthoTolerance_(1e-6), orthoRhombic_(0), chi_(0.0), 
-        integralOfChiDt_(0.0), eta_(0.0), id_(-1), hasCOM_(false), hasVolume_(false),volume_(0.0)  {
-
-      }
-            
+    Snapshot(int nAtoms, int nRigidbodies, int nCutoffGroups, 
+             int storageLayout) : atomData(nAtoms, storageLayout), 
+                                  rigidbodyData(nRigidbodies, storageLayout),
+                                  cgData(nCutoffGroups, DataStorage::dslPosition),
+                                  currentTime_(0), orthoTolerance_(1e-6), 
+                                  orthoRhombic_(0), chi_(0.0), 
+                                  integralOfChiDt_(0.0), eta_(0.0), id_(-1), 
+                                  hasCOM_(false), hasVolume_(false),
+                                  volume_(0.0)  {
+    }
+    
     /** Returns the id of this Snapshot */
     int getID() {
       return id_;
@@ -198,9 +203,48 @@ namespace OpenMD{
       COMw_ = COMw;
       hasCOM_ = true;
     }
-                  
+
+    Vector3d getAtomPosByIindex(int iIndex) {
+#ifdef IS_MPI
+      return atomIData.position[iIndex];
+#else
+      return atomData.position[iIndex];
+#endif
+    }
+    Vector3d getAtomPosByJindex(int jIndex) {
+#ifdef IS_MPI
+      return atomJData.position[jIndex];
+#else
+      return atomData.position[jIndex];
+#endif
+    }
+
+    Vector3d getCutoffGroupPosByIindex(int iIndex) {
+#ifdef IS_MPI
+      return cgIData.position[iIndex];
+#else
+      return cgData.position[iIndex];
+#endif
+    }
+    Vector3d getCutoffGroupPosByJindex(int jIndex) {
+#ifdef IS_MPI
+      return cgJData.position[jIndex];
+#else
+      return cgData.position[jIndex];
+#endif
+    }
+
     DataStorage atomData;
     DataStorage rigidbodyData;
+    DataStorage cgData;
+
+#ifdef IS_MPI
+    DataStorage atomIData;
+    DataStorage atomJData;
+    DataStorage cgIData;
+    DataStorage cgJData;
+#endif
+    
     Stats statData;
             
   private:

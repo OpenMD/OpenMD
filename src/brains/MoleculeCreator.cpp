@@ -138,7 +138,7 @@ namespace OpenMD {
     int nCutoffGroups = molStamp->getNCutoffGroups();
     for (int i = 0; i < nCutoffGroups; ++i) {
       currentCutoffGroupStamp = molStamp->getCutoffGroupStamp(i);
-      cutoffGroup = createCutoffGroup(mol, currentCutoffGroupStamp);
+      cutoffGroup = createCutoffGroup(mol, currentCutoffGroupStamp, localIndexMan);
       mol->addCutoffGroup(cutoffGroup);
     }
 
@@ -169,7 +169,7 @@ namespace OpenMD {
     // every single free atom
     
     for (fai = freeAtoms.begin(); fai != freeAtoms.end(); ++fai) {
-      cutoffGroup = createCutoffGroup(mol, *fai);
+      cutoffGroup = createCutoffGroup(mol, *fai, localIndexMan);
       mol->addCutoffGroup(cutoffGroup);
     }
     //create constraints
@@ -449,7 +449,9 @@ namespace OpenMD {
   }
   
 
-  CutoffGroup* MoleculeCreator::createCutoffGroup(Molecule* mol, CutoffGroupStamp* stamp) {
+  CutoffGroup* MoleculeCreator::createCutoffGroup(Molecule* mol, 
+                                                  CutoffGroupStamp* stamp,
+                                                  LocalIndexManager* localIndexMan) {
     int nAtoms;
     CutoffGroup* cg;
     Atom* atom;
@@ -461,14 +463,22 @@ namespace OpenMD {
       assert(atom);
       cg->addAtom(atom);
     }
-
+    
+    //set the local index of this cutoffGroup, global index will be set later
+    cg->setLocalIndex(localIndexMan->getNextCutoffGroupIndex());
+    
     return cg;
   }    
-
-  CutoffGroup* MoleculeCreator::createCutoffGroup(Molecule * mol, Atom* atom) {
+  
+  CutoffGroup* MoleculeCreator::createCutoffGroup(Molecule * mol, Atom* atom,
+                                                  LocalIndexManager* localIndexMan) {
     CutoffGroup* cg;
     cg  = new CutoffGroup();
     cg->addAtom(atom);
+
+    //set the local index of this cutoffGroup, global index will be set later
+    cg->setLocalIndex(localIndexMan->getNextCutoffGroupIndex());
+
     return cg;
   }
 

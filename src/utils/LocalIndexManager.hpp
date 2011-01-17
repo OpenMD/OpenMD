@@ -294,11 +294,32 @@ namespace OpenMD {
     void releaseRigidBodyIndex(std::vector<int> indices) {
       rigidBodyIndexContainer_.insert(indices);
     }
+
+    int getNextCutoffGroupIndex() {
+      return cutoffGroupIndexContainer_.pop();
+    }
+
+    std::vector<int> getCutoffGroupIndicesBefore(int index) {
+      return cutoffGroupIndexContainer_.getIndicesBefore(index);
+    }
+        
+    void releaseCutoffGroupIndex(int index) {
+      cutoffGroupIndexContainer_.insert(index);
+    }
+
+    void releaseCutoffGroupIndex(int beginIndex, int endIndex) {
+      cutoffGroupIndexContainer_.insert(beginIndex, endIndex);
+    }
+
+    void releaseCutoffGroupIndex(std::vector<int> indices) {
+      cutoffGroupIndexContainer_.insert(indices);
+    }
  
   private:
 
     IndexListContainer atomIndexContainer_;
     IndexListContainer rigidBodyIndexContainer_;
+    IndexListContainer cutoffGroupIndexContainer_;
   };
 
 } //end namespace OpenMD

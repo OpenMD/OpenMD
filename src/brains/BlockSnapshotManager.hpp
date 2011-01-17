@@ -117,6 +117,7 @@ namespace OpenMD {
         
     int nAtoms_;
     int nRigidBodies_;
+    int nCutoffGroups_;
     
     DumpReader* reader_;
     int nframes_;

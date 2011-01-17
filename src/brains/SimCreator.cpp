@@ -386,7 +386,6 @@ namespace OpenMD {
     //create the molecules
     createMolecules(info);
     
-    
     //allocate memory for DataStorage(circular reference, need to
     //break it)
     info->setSnapshotManager(new SimSnapshotManager(info));
@@ -412,7 +411,6 @@ namespace OpenMD {
     
     if (loadInitCoords)
       loadCoordinates(info, mdFileName);    
-    
     return info;
   }
   
@@ -797,12 +795,12 @@ namespace OpenMD {
   
   void SimCreator::loadCoordinates(SimInfo* info, const std::string& mdFileName) {
     Globals* simParams;
+
     simParams = info->getSimParams();
-    
     
     DumpReader reader(info, mdFileName);
     int nframes = reader.getNFrames();
-    
+
     if (nframes > 0) {
       reader.readFrame(nframes - 1);
     } else {
@@ -813,7 +811,6 @@ namespace OpenMD {
       painCave.isFatal = 1;
       simError();
     }
-    
     //copy the current snapshot to previous snapshot
     info->getSnapshotManager()->advance();
   }

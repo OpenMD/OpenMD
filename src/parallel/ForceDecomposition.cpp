@@ -50,16 +50,16 @@ namespace OpenMD {
     int nAtoms;
     int nGroups;
 
-    AtomCommRealI = new Comm<I,RealType>(nAtoms);
-    AtomCommVectorI = new Comm<I,Vector3d>(nAtoms);
-    AtomCommMatrixI = new Comm<I,Mat3x3d>(nAtoms);
+    AtomCommRealI = new Communicator<Row,RealType>(nAtoms);
+    AtomCommVectorI = new Communicator<Row,Vector3d>(nAtoms);
+    AtomCommMatrixI = new Communicator<Row,Mat3x3d>(nAtoms);
 
-    AtomCommRealJ = new Comm<J,RealType>(nAtoms);
-    AtomCommVectorJ = new Comm<J,Vector3d>(nAtoms);
-    AtomCommMatrixJ = new Comm<J,Mat3x3d>(nAtoms);
+    AtomCommRealJ = new Communicator<Column,RealType>(nAtoms);
+    AtomCommVectorJ = new Communicator<Column,Vector3d>(nAtoms);
+    AtomCommMatrixJ = new Communicator<Column,Mat3x3d>(nAtoms);
 
-    cgCommVectorI = new Comm<I,Vector3d>(nGroups);
-    cgCommVectorJ = new Comm<J,Vector3d>(nGroups);
+    cgCommVectorI = new Communicator<Row,Vector3d>(nGroups);
+    cgCommVectorJ = new Communicator<Column,Vector3d>(nGroups);
     // more to come
 #endif
   }
@@ -69,33 +69,33 @@ namespace OpenMD {
   void ForceDecomposition::distributeData()  {
 #ifdef IS_MPI
     Snapshot* snap = sman_->getCurrentSnapshot();
-
+    
     // gather up the atomic positions
     AtomCommVectorI->gather(snap->atomData.position, 
                             snap->atomIData.position);
     AtomCommVectorJ->gather(snap->atomData.position, 
-                           snap->atomJData.position);
+                            snap->atomJData.position);
     
     // gather up the cutoff group positions
     cgCommVectorI->gather(snap->cgData.position, 
-                         snap->cgIData.position);
+                          snap->cgIData.position);
     cgCommVectorJ->gather(snap->cgData.position, 
-                         snap->cgJData.position);
+                          snap->cgJData.position);
     
     // if needed, gather the atomic rotation matrices
     if (snap->atomData.getStorageLayout() & DataStorage::dslAmat) {
       AtomCommMatrixI->gather(snap->atomData.aMat, 
-                             snap->atomIData.aMat);
+                              snap->atomIData.aMat);
       AtomCommMatrixJ->gather(snap->atomData.aMat, 
-                             snap->atomJData.aMat);
+                              snap->atomJData.aMat);
     }
     
     // if needed, gather the atomic eletrostatic frames
     if (snap->atomData.getStorageLayout() & DataStorage::dslElectroFrame) {
       AtomCommMatrixI->gather(snap->atomData.electroFrame, 
-                             snap->atomIData.electroFrame);
+                              snap->atomIData.electroFrame);
       AtomCommMatrixJ->gather(snap->atomData.electroFrame, 
-                             snap->atomJData.electroFrame);
+                              snap->atomJData.electroFrame);
     }
 #endif      
   }
@@ -103,11 +103,10 @@ namespace OpenMD {
   void ForceDecomposition::collectIntermediateData() {
 #ifdef IS_MPI
     Snapshot* snap = sman_->getCurrentSnapshot();
-    // gather up the atomic positions
     
     if (snap->atomData.getStorageLayout() & DataStorage::dslDensity) {
       AtomCommRealI->scatter(snap->atomIData.density, 
-                            snap->atomData.density);
+                             snap->atomData.density);
       std::vector<RealType> rho_tmp;
       int n = snap->getNumberOfAtoms();
       rho_tmp.reserve( n );
@@ -123,16 +122,16 @@ namespace OpenMD {
     Snapshot* snap = sman_->getCurrentSnapshot();
     if (snap->atomData.getStorageLayout() & DataStorage::dslFunctional) {
       AtomCommRealI->gather(snap->atomData.functional, 
-                           snap->atomIData.functional);
+                            snap->atomIData.functional);
       AtomCommRealJ->gather(snap->atomData.functional, 
-                           snap->atomJData.functional);
+                            snap->atomJData.functional);
     }
     
     if (snap->atomData.getStorageLayout() & DataStorage::dslFunctionalDerivative) {
       AtomCommRealI->gather(snap->atomData.functionalDerivative, 
-                           snap->atomIData.functionalDerivative);
+                            snap->atomIData.functionalDerivative);
       AtomCommRealJ->gather(snap->atomData.functionalDerivative, 
-                           snap->atomJData.functionalDerivative);
+                            snap->atomJData.functionalDerivative);
     }
 #endif
   }
@@ -140,6 +139,38 @@ namespace OpenMD {
   
   void ForceDecomposition::collectData() {
 #ifdef IS_MPI
+    Snapshot* snap = sman_->getCurrentSnapshot();
+    int n = snap->getNumberOfAtoms();
+
+    std::vector<Vector3d> frc_tmp;
+    frc_tmp.reserve( n );
+    
+    AtomCommVectorI->scatter(snap->atomIData.force, frc_tmp);
+    for (int i = 0; i < n; i++)
+      snap->atomData.force[i] += frc_tmp[i];
+    
+    AtomCommVectorJ->scatter(snap->atomJData.force, frc_tmp);
+    for (int i = 0; i < n; i++)
+      snap->atomData.force[i] += frc_tmp[i];
+    
+    
+    if (snap->atomData.getStorageLayout() & DataStorage::dslTorque) {
+      std::vector<Vector3d> trq_tmp;
+      trq_tmp.reserve( n );
+      
+      AtomCommVectorI->scatter(snap->atomIData.torque, trq_tmp);
+      for (int i = 0; i < n; i++)
+        snap->atomData.torque[i] += trq_tmp[i];
+      
+      AtomCommVectorJ->scatter(snap->atomJData.torque, trq_tmp);
+      for (int i = 0; i < n; i++)
+        snap->atomData.torque[i] += trq_tmp[i];
+    }
+    
+    // Still need pot!
+    
+
+
 #endif
   }
   

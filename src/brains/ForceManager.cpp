@@ -91,6 +91,8 @@ namespace OpenMD {
     Atom* atom;
     Molecule::RigidBodyIterator rbIter;
     RigidBody* rb;
+    Molecule::CutoffGroupIterator ci;
+    CutoffGroup* cg;
     
     // forces are zeroed here, before any are accumulated.
     // NOTE: do not rezero the forces in Fortran.
@@ -106,9 +108,17 @@ namespace OpenMD {
            rb = mol->nextRigidBody(rbIter)) {
 	rb->zeroForcesAndTorques();
       }        
-          
+
+      if(info_->getNGlobalCutoffGroups() != info_->getNGlobalAtoms()){
+        std::cerr << "should not see me \n";
+        for(cg = mol->beginCutoffGroup(ci); cg != NULL; 
+            cg = mol->nextCutoffGroup(ci)) {
+          //calculate the center of mass of cutoff group
+          cg->updateCOM();
+        }
+      }      
     }
-    
+   
     // Zero out the stress tensor
     tau *= 0.0;
     
@@ -235,6 +245,7 @@ namespace OpenMD {
   void ForceManager::calcLongRangeInteraction() {
     Snapshot* curSnapshot;
     DataStorage* config;
+    DataStorage* cgConfig;
     RealType* frc;
     RealType* pos;
     RealType* trq;
@@ -248,6 +259,7 @@ namespace OpenMD {
     
     //get array pointers
     config = &(curSnapshot->atomData);
+    cgConfig = &(curSnapshot->cgData);
     frc = config->getArrayPointer(DataStorage::dslForce);
     pos = config->getArrayPointer(DataStorage::dslPosition);
     trq = config->getArrayPointer(DataStorage::dslTorque);
@@ -255,26 +267,9 @@ namespace OpenMD {
     electroFrame = config->getArrayPointer(DataStorage::dslElectroFrame);
     particlePot = config->getArrayPointer(DataStorage::dslParticlePot);
 
-    //calculate the center of mass of cutoff group
-    SimInfo::MoleculeIterator mi;
-    Molecule* mol;
-    Molecule::CutoffGroupIterator ci;
-    CutoffGroup* cg;
-    Vector3d com;
-    std::vector<Vector3d> rcGroup;
-    
-    if(info_->getNCutoffGroups() > 0){
-      
-      for (mol = info_->beginMolecule(mi); mol != NULL; 
-           mol = info_->nextMolecule(mi)) {
-        for(cg = mol->beginCutoffGroup(ci); cg != NULL; 
-            cg = mol->nextCutoffGroup(ci)) {
-	  cg->getCOM(com);
-	  rcGroup.push_back(com);
-        }
-      }// end for (mol)
-       
-      rc = rcGroup[0].getArrayPointer();
+    if(info_->getNGlobalCutoffGroups() != info_->getNGlobalAtoms()){
+      std::cerr << "should not see me \n";
+      rc = cgConfig->getArrayPointer(DataStorage::dslPosition);
     } else {
       // center of mass of the group is the same as position of the atom  
       // if cutoff group does not exist

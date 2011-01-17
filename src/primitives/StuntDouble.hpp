@@ -1071,6 +1071,10 @@ namespace OpenMD{
 
     ObjectType objType_;
     DataStoragePointer storage_;
+#ifdef IS_MPI
+    DataStoragePointer storageI_;
+    DataStoragePointer storageJ_;
+#endif
     SnapshotManager* snapshotMan_;
         
     bool linear_;

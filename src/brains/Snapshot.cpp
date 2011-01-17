@@ -59,7 +59,6 @@ namespace OpenMD {
     hmat_ = m;
     invHmat_ = hmat_.inverse();
     
-
     //prepare fortran Hmat 
     RealType fortranHmat[9];
     RealType fortranInvHmat[9];
@@ -137,7 +136,10 @@ namespace OpenMD {
       // calc the wrapped real coordinates from the wrapped scaled coordinates
       pos = hmat_ * scaled;    
 
-    } else {//if it is orthoRhombic, we could improve efficiency by only caculating the diagonal element
+    } else {
+
+      // if it is orthoRhombic, we could improve efficiency by only
+      // caculating the diagonal element
     
       // calc the scaled coordinates.
       for (i=0; i<3; i++) {
@@ -152,10 +154,8 @@ namespace OpenMD {
       // calc the wrapped real coordinates from the wrapped scaled coordinates
       for (i=0; i<3; i++) {
 	pos[i] = scaled[i] * hmat_(i, i);
-      }
-        
+      }   
     }
-
   }
 
   Vector3d Snapshot::getCOM() {
@@ -184,6 +184,5 @@ namespace OpenMD {
     }
     return COMw_;
   }
- 
 }
   

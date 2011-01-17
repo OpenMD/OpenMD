@@ -86,8 +86,10 @@ namespace OpenMD {
     virtual Inversion* createInversion(ForceField* ff, Molecule* mol, 
                                        InversionStamp* stamp);
     virtual CutoffGroup* createCutoffGroup(Molecule* mol, 
-                                           CutoffGroupStamp* stamp);
-    virtual CutoffGroup* createCutoffGroup(Molecule * mol, Atom* atom);
+                                           CutoffGroupStamp* stamp, 
+                                           LocalIndexManager* localIndexMan);
+    virtual CutoffGroup* createCutoffGroup(Molecule * mol, Atom* atom, 
+                                           LocalIndexManager* localIndexMan);
     virtual void createConstraintPair(Molecule* mol);     
     virtual void createConstraintElem(Molecule* mol);
   };

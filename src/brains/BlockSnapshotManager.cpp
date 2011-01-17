@@ -54,6 +54,7 @@ namespace OpenMD {
 
       nAtoms_ = info->getNGlobalAtoms();
       nRigidBodies_ = info->getNGlobalRigidBodies();
+      nCutoffGroups_ = info->getNCutoffGroups();
 
       RealType physMem = physmem_total();
       RealType rssMem = residentMem();
@@ -218,7 +219,7 @@ namespace OpenMD {
   }
 
   Snapshot* BlockSnapshotManager::loadFrame(int frame){
-    Snapshot* snapshot = new Snapshot(nAtoms_, nRigidBodies_, getStorageLayout());
+    Snapshot* snapshot = new Snapshot(nAtoms_, nRigidBodies_, nCutoffGroups_, getStorageLayout());
     snapshot->setID(frame);
     
     /** @todo fixed me */

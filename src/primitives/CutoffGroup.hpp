@@ -50,11 +50,25 @@ namespace OpenMD {
   class CutoffGroup {
   public:
     
-    CutoffGroup() {
+    CutoffGroup() :  snapshotMan_(NULL) {
+
+      storage_ = &Snapshot::cgData;
+#ifdef IS_MPI
+      iStorage_ = &Snapshot::cgIData;
+      jStorage_ = &Snapshot::cgJData;
+#endif
       haveTotalMass = false;
       totalMass = 0.0;
     }
     
+    /**
+     * Sets the Snapshot Manager of this cutoffGroup
+     */
+    void setSnapshotManager(SnapshotManager* sman) {
+      snapshotMan_ = sman;
+    }
+
+
     void addAtom(Atom *atom) {
       cutoffAtomList.push_back(atom);
     }
@@ -89,28 +103,59 @@ namespace OpenMD {
       return totalMass;
     }
     
-    void getCOM(Vector3d & com) {
+    void updateCOM() {
       std::vector<Atom *>::iterator i;
       Atom * atom;
-      Vector3d pos;
-      RealType mass;
-      
-      com[0] = 0;
-      com[1] = 0;
-      com[2] = 0;
+
+      DataStorage&  data = snapshotMan_->getCurrentSnapshot()->*storage_;
+     
       totalMass = getMass();
       
       if (cutoffAtomList.size() == 1) {
-	com = beginAtom(i)->getPos();
+        std::cerr << "YO!\n";
+        std::cerr << "atipos = " << beginAtom(i)->getPos() << "\n";
+        std::cerr << "lI = " << localIndex_ << "\n";
+
+        data.position[localIndex_] = beginAtom(i)->getPos();
+        std::cerr << "YOYO!\n";
       } else {
+        data.position[localIndex_] = V3Zero;
 	for(atom = beginAtom(i); atom != NULL; atom = nextAtom(i)) {
-	  mass = atom->getMass();
-	  pos = atom->getPos();
-	  com += pos * mass;
-	}
-        
-	com /= totalMass;
+          data.position[localIndex_] += atom->getMass() * atom->getPos();
+	}        
+	data.position[localIndex_] /= totalMass;
       }
+    }
+
+
+    /**
+     * Returns the current position of this cutoffGroup for the outer
+     * iteration over the cutoff groups.  For Force decomposition,
+     * this is the position of the cutoff groups ordered by row index.
+     * For serial calculations, this is just the position of the
+     * cutoff group.
+     */    
+    Vector3d getPosI() {
+#ifdef IS_MPI
+      return ((snapshotMan_->getCurrentSnapshot())->*iStorage_).position[iIndex_];
+#else
+      return ((snapshotMan_->getCurrentSnapshot())->*storage_).position[localIndex_];      
+#endif
+    }
+
+    /**
+     * Returns the current position of this cutoffGroup for the inner
+     * iteration over the cutoff groups.  For Force decomposition,
+     * this is the position of the cutoff groups ordered by column
+     * index.  For serial calculations, this is just the position of
+     * the cutoff group.
+     */    
+    Vector3d getPosJ() {
+#ifdef IS_MPI
+      return ((snapshotMan_->getCurrentSnapshot())->*jStorage_).position[jIndex_];
+#else
+      return ((snapshotMan_->getCurrentSnapshot())->*storage_).position[localIndex_];      
+#endif
     }
     
     int getNumAtom() {
@@ -124,13 +169,40 @@ namespace OpenMD {
     void setGlobalIndex(int id) {
       this->globalIndex = id;
     }
+
+    /** 
+     * Returns the local index of this cutoffGroup
+     * @return the local index of this cutoffGroup
+     */
+    int getLocalIndex() {
+      return localIndex_;
+    }
+
+    /**
+     * Sets the local index of this cutoffGroup
+     * @param index new index to be set
+     */        
+    void setLocalIndex(int index) {
+      localIndex_ = index;
+    }
     
   private:
     
     std::vector<Atom *>cutoffAtomList;
     bool haveTotalMass;
     RealType totalMass;
-    int globalIndex;
+    int globalIndex;    
+
+    int localIndex_;
+    DataStoragePointer storage_;
+    SnapshotManager* snapshotMan_;
+#ifdef IS_MPI
+    int iIndex_;
+    int jIndex_;
+    DataStoragePointer iStorage_;
+    DataStoragePointer jStorage_;
+#endif
+
   };  
 } //end namespace OpenMD
 #endif //PRIMITIVES_CUTOFFGROUP_HPP  
