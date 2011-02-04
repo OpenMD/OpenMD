@@ -237,6 +237,7 @@ namespace OpenMD{
     DataStorage atomData;
     DataStorage rigidbodyData;
     DataStorage cgData;
+    Stats statData;
 
 #ifdef IS_MPI
     DataStorage atomIData;
@@ -244,8 +245,7 @@ namespace OpenMD{
     DataStorage cgIData;
     DataStorage cgJData;
 #endif
-    
-    Stats statData;
+   
             
   private:
     RealType currentTime_;

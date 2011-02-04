@@ -113,10 +113,17 @@ namespace OpenMD{
 
       myComm.Allgather(&planSize_, 1, MPI::INT, &counts[0], 1, MPI::INT);
 
+
       displacements[0] = 0;
       for (int i = 1; i < nCommProcs; i++) {
         displacements[i] = displacements[i-1] + counts[i-1];
-      }      
+        size_ += count[i-1];
+      }
+
+      size_ = 0;
+      for (int i = 0; i < nCommProcs; i++) {
+        size_ += counts[i];
+      }
     }
 
 
@@ -138,11 +145,16 @@ namespace OpenMD{
       myComm.Reduce_scatter(&v1[0], &v2[0], &counts[0], 
                             MPITraits<T>::datatype, MPI::SUM);
     }
+
+    int getSize() {
+      return size_;
+    }
     
   private:
     int planSize_;     ///< how many are on local proc
     int rowIndex_;
     int columnIndex_;
+    int size_;
     std::vector<int> counts;
     std::vector<int> displacements;
     MPI::Intracomm myComm;

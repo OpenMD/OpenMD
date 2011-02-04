@@ -42,13 +42,14 @@
 #include "parallel/Communicator.hpp"
 #include "math/SquareMatrix3.hpp"
 
+using namespace std;
 namespace OpenMD {
 
   void ForceDecomposition::distributeInitialData() {
 #ifdef IS_MPI
-
-    int nAtoms;
-    int nGroups;
+    Snapshot* snap = sman_->getCurrentSnapshot();
+    int nAtoms = snap->getNumberOfAtoms();
+    int nGroups = snap->getNumberOfCutoffGroups();
 
     AtomCommRealI = new Communicator<Row,RealType>(nAtoms);
     AtomCommVectorI = new Communicator<Row,Vector3d>(nAtoms);
@@ -60,7 +61,18 @@ namespace OpenMD {
 
     cgCommVectorI = new Communicator<Row,Vector3d>(nGroups);
     cgCommVectorJ = new Communicator<Column,Vector3d>(nGroups);
-    // more to come
+
+    int nInRow = AtomCommRealI.getSize();
+    int nInCol = AtomCommRealJ.getSize();
+
+    vector<vector<RealType> > pot_row(LR_POT_TYPES, 
+                                      vector<RealType> (nInRow, 0.0));
+    vector<vector<RealType> > pot_col(LR_POT_TYPES,
+                                      vector<RealType> (nInCol, 0.0));
+
+    vector<vector<RealType> > pot_local(LR_POT_TYPES, 
+                                        vector<RealType> (nAtoms, 0.0));
+
 #endif
   }
     
@@ -105,11 +117,12 @@ namespace OpenMD {
     Snapshot* snap = sman_->getCurrentSnapshot();
     
     if (snap->atomData.getStorageLayout() & DataStorage::dslDensity) {
+
       AtomCommRealI->scatter(snap->atomIData.density, 
                              snap->atomData.density);
-      std::vector<RealType> rho_tmp;
-      int n = snap->getNumberOfAtoms();
-      rho_tmp.reserve( n );
+
+      int n = snap->atomData.density.size();
+      std::vector<RealType> rho_tmp(n, 0.0);
       AtomCommRealJ->scatter(snap->atomJData.density, rho_tmp);
       for (int i = 0; i < n; i++)
         snap->atomData.density[i] += rho_tmp[i];
@@ -140,14 +153,15 @@ namespace OpenMD {
   void ForceDecomposition::collectData() {
 #ifdef IS_MPI
     Snapshot* snap = sman_->getCurrentSnapshot();
-    int n = snap->getNumberOfAtoms();
-
-    std::vector<Vector3d> frc_tmp;
-    frc_tmp.reserve( n );
+    
+    int n = snap->atomData.force.size();
+    std::vector<Vector3d> frc_tmp(n, 0.0);
     
     AtomCommVectorI->scatter(snap->atomIData.force, frc_tmp);
-    for (int i = 0; i < n; i++)
+    for (int i = 0; i < n; i++) {
       snap->atomData.force[i] += frc_tmp[i];
+      frc_tmp[i] = 0.0;
+    }
     
     AtomCommVectorJ->scatter(snap->atomJData.force, frc_tmp);
     for (int i = 0; i < n; i++)
@@ -155,19 +169,31 @@ namespace OpenMD {
     
     
     if (snap->atomData.getStorageLayout() & DataStorage::dslTorque) {
-      std::vector<Vector3d> trq_tmp;
-      trq_tmp.reserve( n );
-      
+
+      int nt = snap->atomData.force.size();
+      std::vector<Vector3d> trq_tmp(nt, 0.0);
+
       AtomCommVectorI->scatter(snap->atomIData.torque, trq_tmp);
-      for (int i = 0; i < n; i++)
+      for (int i = 0; i < n; i++) {
         snap->atomData.torque[i] += trq_tmp[i];
+        trq_tmp[i] = 0.0;
+      }
       
       AtomCommVectorJ->scatter(snap->atomJData.torque, trq_tmp);
       for (int i = 0; i < n; i++)
         snap->atomData.torque[i] += trq_tmp[i];
     }
     
-    // Still need pot!
+    
+    vector<vector<RealType> > pot_temp(LR_POT_TYPES, 
+                                       vector<RealType> (nAtoms, 0.0));
+    
+    for (int i = 0; i < LR_POT_TYPES; i++) {
+      AtomCommRealI->scatter(pot_row[i], pot_temp[i]);
+      for (int ii = 0;  ii < pot_temp[i].size(); ii++ ) {
+        pot_local[i] += pot_temp[i][ii];
+      }
+    }
     
 
 

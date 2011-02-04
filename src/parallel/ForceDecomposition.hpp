@@ -46,6 +46,7 @@
 #include "Parallel/Communicator.hpp"
 #include "math/SquareMatrix3.hpp"
 
+using namespace std;
 namespace OpenMD {
   
   class ForceDecomposition : public Decomposition {
@@ -78,7 +79,11 @@ namespace OpenMD {
 
     Communicator<Row, Vector3d>* cgCommVectorI; 
     Communicator<Column, Vector3d>* cgCommVectorJ; 
-    
+
+  private:
+    vector<vector<RealType> > pot_row;
+    vector<vector<RealType> > pot_col;
+    vector<vector<RealType> > pot_local;
 #endif
   };
 
