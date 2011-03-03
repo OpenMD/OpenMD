@@ -44,34 +44,43 @@
 #include "selection/SelectionManager.hpp"
 #include "applications/staticProps/StaticAnalyser.hpp"
 
+using namespace std;
 namespace OpenMD {
 
-    class P2OrderParameter : public StaticAnalyser{
-        public:
-            P2OrderParameter(SimInfo* info, const std::string& filename, const std::string& sele1, const std::string& sele2);
-            virtual void process();
-
-        private:
-
-            struct OrderParam{
-                RealType p2;
-                Vector3d director;
-                RealType angle;
-            };            
-            void writeP2();
-
-            Snapshot* currentSnapshot_;
-
-            std::string selectionScript1_;
-            std::string selectionScript2_;
-            SelectionManager seleMan1_;
-            SelectionManager seleMan2_;       
-            SelectionEvaluator evaluator1_;
-            SelectionEvaluator evaluator2_;
-            std::vector<std::pair<StuntDouble*, StuntDouble*> > sdPairs_;  /**< each pair is used to define a vector, vector = first - second */
-            std::vector<OrderParam> orderParams_;
-            
+  class P2OrderParameter : public StaticAnalyser{
+  public:    
+    P2OrderParameter(SimInfo* info, const string& filename,
+                     const string& sele1);
+    P2OrderParameter(SimInfo* info, const string& filename, 
+                     const string& sele1, const string& sele2);
+    virtual void process();
+    
+  private:
+    
+    struct OrderParam{
+      RealType p2;
+      Vector3d director;
+      RealType angle;
     };
+            
+    void writeP2();
+    
+    Snapshot* currentSnapshot_;
+    
+    bool doVect_;
+    string selectionScript1_;
+    string selectionScript2_;
+    SelectionManager seleMan1_;
+    SelectionManager seleMan2_;       
+    SelectionEvaluator evaluator1_;
+    SelectionEvaluator evaluator2_;
+    vector<pair<StuntDouble*, StuntDouble*> > sdPairs_;  /**< each pair is used
+                                                            to define a vector,
+                                                            v = first - second 
+                                                         */
+    vector<OrderParam> orderParams_;
+    
+  };
 }
 
 #endif

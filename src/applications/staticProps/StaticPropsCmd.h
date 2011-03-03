@@ -117,7 +117,7 @@ struct gengetopt_args_info
   const char *theta_omega_help; /**< @brief g(cos(theta), cos(omega)) help description.  */
   const char *gxyz_help; /**< @brief g(x, y, z) help description.  */
   const char *twodgofr_help; /**< @brief 2D g(r) (Slab width --dz must be specified) help description.  */
-  const char *p2_help; /**< @brief p2 order parameter (--sele1 and --sele2 must be specified) help description.  */
+  const char *p2_help; /**< @brief p2 order parameter (--sele1 must be specified, --sele2 is optional) help description.  */
   const char *rp2_help; /**< @brief rp2 order parameter (--sele1 and --sele2 must be specified) help description.  */
   const char *scd_help; /**< @brief scd order parameter (either --sele1, --sele2, --sele3 are specified or --molname, --begin, --end are specified) help description.  */
   const char *density_help; /**< @brief density plot help description.  */

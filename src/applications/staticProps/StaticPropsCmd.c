@@ -69,7 +69,7 @@ const char *gengetopt_args_info_help[] = {
   "      --theta_omega             g(cos(theta), cos(omega))",
   "      --gxyz                    g(x, y, z)",
   "      --twodgofr                2D g(r) (Slab width --dz must be specified)",
-  "  -p, --p2                      p2 order parameter (--sele1 and --sele2 must be \n                                  specified)",
+  "  -p, --p2                      p2 order parameter (--sele1 must be specified, \n                                  --sele2 is optional)",
   "      --rp2                     rp2 order parameter (--sele1 and --sele2 must \n                                  be specified)",
   "  -s, --scd                     scd order parameter (either --sele1, --sele2, \n                                  --sele3 are specified or --molname, --begin, \n                                  --end are specified)",
   "  -d, --density                 density plot",
@@ -1005,7 +1005,7 @@ cmdline_parser_internal (
             goto failure;
         
           break;
-        case 'p':	/* p2 order parameter (--sele1 and --sele2 must be specified).  */
+        case 'p':	/* p2 order parameter (--sele1 must be specified, --sele2 is optional).  */
         
           if (args_info->staticProps_group_counter && override)
             reset_group_staticProps (args_info);

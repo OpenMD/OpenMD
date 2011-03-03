@@ -233,7 +233,18 @@ int main(int argc, char* argv[]){
       simError();
     }    
   } else if (args_info.p2_given) {
-    analyser  = new P2OrderParameter(info, dumpFileName, sele1, sele2);
+    if (args_info.sele1_given) {     
+      if (args_info.sele2_given) 
+        analyser  = new P2OrderParameter(info, dumpFileName, sele1, sele2);
+      else 
+        analyser  = new P2OrderParameter(info, dumpFileName, sele1);
+    } else {
+      sprintf( painCave.errMsg,
+	       "At least one selection script (--sele1) must be specified when calculating P2 order parameters");
+      painCave.severity = OPENMD_ERROR;
+      painCave.isFatal = 1;
+      simError();
+    }
   } else if (args_info.rp2_given){
     analyser = new RippleOP(info, dumpFileName, sele1, sele2);
   } else if (args_info.bo_given){
