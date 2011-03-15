@@ -61,7 +61,6 @@ namespace OpenMD {
     if (!evaluator1_.isDynamic()) {
       seleMan1_.setSelectionSet(evaluator1_.evaluate());
     }
-    
   }
 
   P2OrderParameter::P2OrderParameter(SimInfo* info, const string& filename, 
@@ -122,8 +121,7 @@ namespace OpenMD {
     SimInfo::MoleculeIterator mi;
     Molecule::RigidBodyIterator rbIter;
     StuntDouble* sd;
-    int i;
-
+    int i, ii;
   
     DumpReader reader(info_, dumpFilename_);    
     int nFrames = reader.getNFrames();
@@ -131,7 +129,7 @@ namespace OpenMD {
     for (int i = 0; i < nFrames; i += step_) {
       reader.readFrame(i);
       currentSnapshot_ = info_->getSnapshotManager()->getCurrentSnapshot();
-
+      
       for (mol = info_->beginMolecule(mi); mol != NULL; 
            mol = info_->nextMolecule(mi)) {
         //change the positions of atoms which belong to the rigidbodies
@@ -148,8 +146,8 @@ namespace OpenMD {
         if  (evaluator1_.isDynamic()) 
           seleMan1_.setSelectionSet(evaluator1_.evaluate());
         
-        for (sd = seleMan1_.beginSelected(i); sd != NULL; 
-             sd = seleMan1_.nextSelected(i)) {
+        for (sd = seleMan1_.beginSelected(ii); sd != NULL; 
+             sd = seleMan1_.nextSelected(ii)) {
           if (sd->isDirectional()) {
             Vector3d vec = sd->getA().getColumn(2);
             vec.normalize();
@@ -173,10 +171,12 @@ namespace OpenMD {
         orderTensor /= sdPairs_.size();
       }
       
+
       orderTensor -= (RealType)(1.0/3.0) * Mat3x3d::identity();  
       
       Vector3d eigenvalues;
       Mat3x3d eigenvectors;    
+
       Mat3x3d::diagonalize(orderTensor, eigenvalues, eigenvectors);
       
       int which;
@@ -196,11 +196,10 @@ namespace OpenMD {
       }   
 
       RealType angle = 0.0;
-
       
       if (doVect_) {
-        for (sd = seleMan1_.beginSelected(i); sd != NULL; 
-             sd = seleMan1_.nextSelected(i)) {
+        for (sd = seleMan1_.beginSelected(ii); sd != NULL; 
+             sd = seleMan1_.nextSelected(ii)) {
           if (sd->isDirectional()) {
             Vector3d vec = sd->getA().getColumn(2);
             vec.normalize();
