@@ -90,6 +90,7 @@ end AtomTypes
 
 begin DirectionalAtomTypes
 //Name		I_xx	I_yy	I_zz	(All moments in (amu*Ang^2)
+Au 		0.24437807	0.24437807	0.00
 SSD		1.7696	0.6145	1.1550  
 SSD1		1.7696	0.6145	1.1550  
 SSD_E		1.7696	0.6145	1.1550  
@@ -145,17 +146,13 @@ end SCAtomTypes
 
 
 // Metal non-metal interactions.
-// Format: Metal Atom Type, Non-Metal Atom Type, Interaction Type, Interaction Parameters
-// Where interaction type can be: MAW, LennardJones or ShiftedMorse or RepulsiveMorse
-begin MetalNonMetalInteractions
+// Format: Metal Atom, Non-Metal Atom, Interaction Type, Interaction Parameters
+// Interaction type can be: MAW, LennardJones or ShiftedMorse or RepulsiveMorse
+begin NonBondedInteractions
 
 //MAW (Metal Angular Water section)
 // r_e, D_e beta ca1 cb1
 Cu   SSD_E  MAW  2.5525 1.9850 1.1680  1.1250 0.750000
-//Au   SSD_E  MAW  2.8170 1.7850 1.2680  1.2500 0.2050 0.0
-//Au   SSD_E  MAW  2.7510 2.95   1.101  0.750000 0.750000
-//1. 1.5 2.6500001 -3.000162356E-2 1.30999744
-//Au   SSD_E  MAW  2.7 1.06   1.264  0.16 0.8
 Au   SSD_E  MAW  2.68 0.6   1.33  0.95 -0.25
 
 //LennardJones
@@ -172,9 +169,7 @@ Au	O_SPCE	ShiftedMorse	3.70 0.0424 0.769
 //Repulsive Morse
 // r0 D0 beta0
 Au	H_SPCE	RepulsiveMorse	-1.00 0.00850 0.769
-
-
-end MetalNonMetalInteractions
+end NonBondedInteractions
 
 
 begin ChargeAtomTypes

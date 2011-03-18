@@ -46,8 +46,8 @@
  * [4]  Vardeman & Gezelter, in progress (2009).                        
  */
 
-#ifndef FORCEDECOMPOSITION_COMMUNICATOR_HPP
-#define FORCEDECOMPOSITION_COMMUNICATOR_HPP
+#ifndef PARALLEL_COMMUNICATOR_HPP
+#define PARALLEL_COMMUNICATOR_HPP
 
 #include <config.h>
 #include <mpi.h>
@@ -113,11 +113,10 @@ namespace OpenMD{
 
       myComm.Allgather(&planSize_, 1, MPI::INT, &counts[0], 1, MPI::INT);
 
-
       displacements[0] = 0;
       for (int i = 1; i < nCommProcs; i++) {
         displacements[i] = displacements[i-1] + counts[i-1];
-        size_ += count[i-1];
+        size_ += counts[i-1];
       }
 
       size_ = 0;

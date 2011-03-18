@@ -564,7 +564,15 @@ namespace OpenMD{
      * by SimCreator once and only once, since it is never changed
      * during the simulation. It shoudl be nGlobalAtoms_ in size.
      */
-    vector<int> globalMolMembership_;        
+    vector<int> globalMolMembership_; 
+
+    /** 
+     * A vector that maps between the local index of an atom and the
+     * index of the AtomType.
+     */
+    vector<int> identArray_;
+    vector<int> getIdentArray() { return identArray_; }
+    
                
     /// lists to handle atoms needing special treatment in the non-bonded interactions
     PairList excludedInteractions_;  /**< atoms excluded from interacting with each other */

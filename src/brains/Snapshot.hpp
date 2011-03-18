@@ -118,6 +118,11 @@ namespace OpenMD{
       return rigidbodyData.getSize();
     }
 
+    /** Returns the number of rigid bodies */
+    int getNumberOfCutoffGroups() {
+      return cgData.getSize();
+    }
+
     /** Returns the H-Matrix */
     Mat3x3d getHmat() {
       return hmat_;

@@ -824,16 +824,13 @@ namespace OpenMD {
       }       
     }
 
-    //fill ident array of local atoms (it is actually ident of
-    //AtomType, it is so confusing !!!)
-    vector<int> identArray;
+    // Build the identArray_
 
-    //to avoid memory reallocation, reserve enough space identArray
-    identArray.reserve(getNAtoms());
-    
+    identArray_.clear();
+    identArray_.reserve(getNAtoms());    
     for(mol = beginMolecule(mi); mol != NULL; mol = nextMolecule(mi)) {        
       for(atom = mol->beginAtom(ai); atom != NULL; atom = mol->nextAtom(ai)) {
-	identArray.push_back(atom->getIdent());
+	identArray_.push_back(atom->getIdent());
       }
     }    
 

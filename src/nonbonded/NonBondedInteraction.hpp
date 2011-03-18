@@ -60,7 +60,8 @@ namespace OpenMD {
     VANDERWAALS_FAMILY,    /**< Long-range dispersion and short-range pauli repulsion */
     ELECTROSTATIC_FAMILY,  /**< Coulombic and point-multipole interactions */
     METALLIC_FAMILY,       /**< Transition metal interactions involving electron density */
-    HYDROGENBONDING_FAMILY /**< Short-range directional interactions */
+    HYDROGENBONDING_FAMILY,/**< Short-range directional interactions */
+    N_INTERACTION_FAMILIES
   };
 
   /**

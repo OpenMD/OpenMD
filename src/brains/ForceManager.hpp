@@ -53,6 +53,7 @@
 #include "brains/SimInfo.hpp"
 #include "primitives/Molecule.hpp"
 #include "nonbonded/InteractionManager.hpp"
+#include "parallel/Decomposition.hpp"
 
 namespace OpenMD {
   /**
@@ -93,6 +94,7 @@ namespace OpenMD {
 
     bool NBforcesInitialized_;
     InteractionManager* nbiMan_;
+    Decomposition* decomp_;
     
   };
 

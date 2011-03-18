@@ -39,40 +39,71 @@
  * [4]  Vardeman & Gezelter, in progress (2009).                        
  */
 #include "parallel/ForceDecomposition.hpp"
-#include "parallel/Communicator.hpp"
 #include "math/SquareMatrix3.hpp"
+#include "nonbonded/NonBondedInteraction.hpp"
+#include "brains/SnapshotManager.hpp"
 
 using namespace std;
 namespace OpenMD {
 
+  /**
+   * distributeInitialData is essentially a copy of the older fortran 
+   * SimulationSetup
+   */
+  
   void ForceDecomposition::distributeInitialData() {
-#ifdef IS_MPI
+#ifdef IS_MPI    
     Snapshot* snap = sman_->getCurrentSnapshot();
-    int nAtoms = snap->getNumberOfAtoms();
+    int nLocal = snap->getNumberOfAtoms();
     int nGroups = snap->getNumberOfCutoffGroups();
 
-    AtomCommRealI = new Communicator<Row,RealType>(nAtoms);
-    AtomCommVectorI = new Communicator<Row,Vector3d>(nAtoms);
-    AtomCommMatrixI = new Communicator<Row,Mat3x3d>(nAtoms);
+    AtomCommIntI = new Communicator<Row,int>(nLocal);
+    AtomCommRealI = new Communicator<Row,RealType>(nLocal);
+    AtomCommVectorI = new Communicator<Row,Vector3d>(nLocal);
+    AtomCommMatrixI = new Communicator<Row,Mat3x3d>(nLocal);
 
-    AtomCommRealJ = new Communicator<Column,RealType>(nAtoms);
-    AtomCommVectorJ = new Communicator<Column,Vector3d>(nAtoms);
-    AtomCommMatrixJ = new Communicator<Column,Mat3x3d>(nAtoms);
+    AtomCommIntJ = new Communicator<Column,int>(nLocal);
+    AtomCommRealJ = new Communicator<Column,RealType>(nLocal);
+    AtomCommVectorJ = new Communicator<Column,Vector3d>(nLocal);
+    AtomCommMatrixJ = new Communicator<Column,Mat3x3d>(nLocal);
 
+    cgCommIntI = new Communicator<Row,int>(nGroups);
     cgCommVectorI = new Communicator<Row,Vector3d>(nGroups);
+    cgCommIntJ = new Communicator<Column,int>(nGroups);
     cgCommVectorJ = new Communicator<Column,Vector3d>(nGroups);
 
-    int nInRow = AtomCommRealI.getSize();
-    int nInCol = AtomCommRealJ.getSize();
+    int nAtomsInRow = AtomCommIntI->getSize();
+    int nAtomsInCol = AtomCommIntJ->getSize();
+    int nGroupsInRow = cgCommIntI->getSize();
+    int nGroupsInCol = cgCommIntJ->getSize();
 
-    vector<vector<RealType> > pot_row(LR_POT_TYPES, 
-                                      vector<RealType> (nInRow, 0.0));
-    vector<vector<RealType> > pot_col(LR_POT_TYPES,
-                                      vector<RealType> (nInCol, 0.0));
+    vector<vector<RealType> > pot_row(N_INTERACTION_FAMILIES, 
+                                      vector<RealType> (nAtomsInRow, 0.0));
+    vector<vector<RealType> > pot_col(N_INTERACTION_FAMILIES,
+                                      vector<RealType> (nAtomsInCol, 0.0));
+    
+    vector<RealType> pot_local(N_INTERACTION_FAMILIES, 0.0);
 
-    vector<vector<RealType> > pot_local(LR_POT_TYPES, 
-                                        vector<RealType> (nAtoms, 0.0));
+    // gather the information for atomtype IDs (atids):
+    AtomCommIntI->gather(info_->getIdentArray(), identsRow);
+    AtomCommIntJ->gather(info_->getIdentArray(), identsCol);
 
+    AtomLocalToGlobal = info_->getLocalToGlobalAtomIndex();
+    AtomCommIntI->gather(AtomLocalToGlobal, AtomRowToGlobal);
+    AtomCommIntJ->gather(AtomLocalToGlobal, AtomColToGlobal);
+
+    cgLocalToGlobal = info_->getLocalToGlobalCutoffGroupIndex();
+    cgCommIntI->gather(cgLocalToGlobal, cgRowToGlobal);
+    cgCommIntJ->gather(cgLocalToGlobal, cgColToGlobal);
+
+      
+      
+
+
+
+    // still need:
+    // topoDist
+    // exclude
 #endif
   }
     
@@ -155,7 +186,7 @@ namespace OpenMD {
     Snapshot* snap = sman_->getCurrentSnapshot();
     
     int n = snap->atomData.force.size();
-    std::vector<Vector3d> frc_tmp(n, 0.0);
+    vector<Vector3d> frc_tmp(n, V3Zero);
     
     AtomCommVectorI->scatter(snap->atomIData.force, frc_tmp);
     for (int i = 0; i < n; i++) {
@@ -171,7 +202,7 @@ namespace OpenMD {
     if (snap->atomData.getStorageLayout() & DataStorage::dslTorque) {
 
       int nt = snap->atomData.force.size();
-      std::vector<Vector3d> trq_tmp(nt, 0.0);
+      vector<Vector3d> trq_tmp(nt, V3Zero);
 
       AtomCommVectorI->scatter(snap->atomIData.torque, trq_tmp);
       for (int i = 0; i < n; i++) {
@@ -184,19 +215,17 @@ namespace OpenMD {
         snap->atomData.torque[i] += trq_tmp[i];
     }
     
+    int nLocal = snap->getNumberOfAtoms();
+
+    vector<vector<RealType> > pot_temp(N_INTERACTION_FAMILIES, 
+                                       vector<RealType> (nLocal, 0.0));
     
-    vector<vector<RealType> > pot_temp(LR_POT_TYPES, 
-                                       vector<RealType> (nAtoms, 0.0));
-    
-    for (int i = 0; i < LR_POT_TYPES; i++) {
+    for (int i = 0; i < N_INTERACTION_FAMILIES; i++) {
       AtomCommRealI->scatter(pot_row[i], pot_temp[i]);
       for (int ii = 0;  ii < pot_temp[i].size(); ii++ ) {
         pot_local[i] += pot_temp[i][ii];
       }
     }
-    
-
-
 #endif
   }
   

@@ -43,15 +43,18 @@
 #define PARALLEL_FORCEDECOMPOSITION_HPP
 
 #include "Parallel/Decomposition.hpp"
-#include "Parallel/Communicator.hpp"
 #include "math/SquareMatrix3.hpp"
+
+#ifdef IS_MPI
+#include "Parallel/Communicator.hpp"
+#endif
 
 using namespace std;
 namespace OpenMD {
   
   class ForceDecomposition : public Decomposition {
   public:
-    ForceDecomposition(Snapshot* sman);
+    ForceDecomposition(SimInfo* info) : Decomposition(info) {sman_ = info_->getSnapshotManager();}
     void distributeInitialData();
     void distributeData();
     void collectIntermediateData();
@@ -67,24 +70,37 @@ namespace OpenMD {
     AtomType* getAtomTypeI(int whichAtomI);
     AtomType* getAtomTypeJ(int whichAtomJ);   
 
-#ifdef IS_MPI
-    
+  private: 
+    SnapshotManager* sman_;    
+#ifdef IS_MPI    
+    Communicator<Row, int>* AtomCommIntI;
     Communicator<Row, RealType>* AtomCommRealI; 
     Communicator<Row, Vector3d>* AtomCommVectorI; 
     Communicator<Row, Mat3x3d>*  AtomCommMatrixI; 
 
+    Communicator<Column, int>* AtomCommIntJ;
     Communicator<Column, RealType>* AtomCommRealJ; 
     Communicator<Column, Vector3d>* AtomCommVectorJ; 
     Communicator<Column, Mat3x3d>*  AtomCommMatrixJ; 
 
+    Communicator<Row, int>* cgCommIntI;
     Communicator<Row, Vector3d>* cgCommVectorI; 
+    Communicator<Column, int>* cgCommIntJ;
     Communicator<Column, Vector3d>* cgCommVectorJ; 
 
-  private:
     vector<vector<RealType> > pot_row;
     vector<vector<RealType> > pot_col;
-    vector<vector<RealType> > pot_local;
+    vector<int> identRow;
+    vector<int> identCol;
+
+    vector<int> AtomLocalToGlobal;
+    vector<int> AtomRowToGlobal;
+    vector<int> AtomColToGlobal;
+    vector<int> cgLocalToGlobal;
+    vector<int> cgRowToGlobal;
+    vector<int> cgColToGlobal;
 #endif
+    vector<RealType> pot_local;
   };
 
 }

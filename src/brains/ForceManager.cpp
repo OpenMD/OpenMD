@@ -57,11 +57,18 @@
 #include "primitives/Bend.hpp"
 #include "primitives/Torsion.hpp"
 #include "primitives/Inversion.hpp"
+#include "parallel/ForceDecomposition.hpp"
+//#include "parallel/SerialDecomposition.hpp"
 
 namespace OpenMD {
   
   ForceManager::ForceManager(SimInfo * info) : info_(info), 
                                                NBforcesInitialized_(false) {
+#ifdef IS_MPI
+    decomp_ = new ForceDecomposition(info_);
+#else
+    //  decomp_ = new SerialDecomposition(info);
+#endif
   }
  
   void ForceManager::calcForces() {
@@ -70,16 +77,14 @@ namespace OpenMD {
     if (!info_->isFortranInitialized()) {
       info_->update();
       nbiMan_->setSimInfo(info_);
-      nbiMan_->initialize();    
+      nbiMan_->initialize();
+      decomp_->distributeInitialData();
       info_->setupFortran();
     }
     
-    preCalculation();
-    
+    preCalculation();   
     calcShortRangeInteraction();
-
     calcLongRangeInteraction();
-
     postCalculation();
     
   }
@@ -285,17 +290,29 @@ namespace OpenMD {
       longRangePotential[i]=0.0; //Initialize array
     }
     
-    doForceLoop(pos,
-                rc,
-                A,
-                electroFrame,
-                frc,
-                trq,
-	        tau.getArrayPointer(),
-                longRangePotential, 
-                particlePot,
-                &isError );
-    
+    decomp_->distributeData();
+
+    int nLoops = 1;
+    for (int iLoop = 0; iLoop < nLoops; iLoop++) {
+      doForceLoop(pos,
+                  rc,
+                  A,
+                  electroFrame,
+                  frc,
+                  trq,
+                  tau.getArrayPointer(),
+                  longRangePotential, 
+                  particlePot,
+                  &isError );   
+
+      if (nLoops > 1) {
+        decomp_->collectIntermediateData();
+        decomp_->distributeIntermediateData();
+      }
+    }
+   
+    decomp_->collectData();
+
     if( isError ){
       sprintf( painCave.errMsg,
 	       "Error returned from the fortran force calculation.\n" );

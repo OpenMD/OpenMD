@@ -42,7 +42,7 @@
 #ifndef PARALLEL_DECOMPOSITION_HPP
 #define PARALLEL_DECOMPOSITION_HPP
 
-#include "brains/SnapshotManager.hpp"
+#include "brains/SimInfo.hpp"
 #include "types/AtomType.hpp"
 
 using namespace std;
@@ -62,19 +62,19 @@ namespace OpenMD {
    *
    *  distributeInitialData      (parallel communication - one time only)
    *  distributeData             (parallel communication - every ForceLoop)
-   *  loop over i
-   *  | loop over j
-   *  | | localComputation
+   *
+   *  loop iLoop over nLoops     (nLoops may be 1, 2, or until self consistent)
+   *  |  loop over i
+   *  |  | loop over j
+   *  |  | | localComputation
+   *  |  |  end
    *  |  end
+   *  |  if (nLoops > 1):
+   *  |  |   collectIntermediateData    (parallel communication)
+   *  |  |   distributeIntermediateData (parallel communication)
+   *  |  endif
    *  end
-   *  collectIntermediateData    (parallel communication)
-   *  distributeIntermediateData (parallel communication)
-   *  loop over i
-   *  | loop over j
-   *  | | localComputation
-   *  |  end
-   *  end
-   * collectData                  (parallel communication)
+   * collectData                        (parallel communication)
    *
    * Decomposition provides the interface for ForceLoop to do the
    * communication steps and to iterate using the correct set of atoms
@@ -83,7 +83,7 @@ namespace OpenMD {
   class Decomposition {
   public:
 
-    Decomposition(SnapshotManager* sman) : sman_(sman) {}
+    Decomposition(SimInfo* info) : info_(info) {}
     virtual ~Decomposition() {}
     
     virtual void distributeInitialData() = 0;
@@ -102,7 +102,27 @@ namespace OpenMD {
     virtual AtomType* getAtomTypeJ(int whichAtomJ) = 0;
     
   protected:
-    SnapshotManager* sman_;
+    SimInfo* info_;   
+    map<pair<int, int>, int> topoDist; //< topoDist gives the
+                                       //topological distance between
+                                       //two atomic sites.  This
+                                       //declaration is agnostic
+                                       //regarding the parallel
+                                       //decomposition.  The two
+                                       //indices could be local or row
+                                       //& column.  It will be up to
+                                       //the specific decomposition
+                                       //method to fill this.
+    map<pair<int, int>, bool> exclude; //< exclude is the set of pairs
+                                       //to leave out of non-bonded
+                                       //force evaluations.  This
+                                       //declaration is agnostic
+                                       //regarding the parallel
+                                       //decomposition.  The two
+                                       //indices could be local or row
+                                       //& column.  It will be up to
+                                       //the specific decomposition
+                                       //method to fill this.
   };    
 }
 #endif
