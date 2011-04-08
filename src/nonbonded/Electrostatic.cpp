@@ -463,8 +463,8 @@ namespace OpenMD {
     
     if (!initialized_) initialize();
     
-    ElectrostaticAtomData data1 = ElectrostaticMap[idat.atype1];
-    ElectrostaticAtomData data2 = ElectrostaticMap[idat.atype2];
+    ElectrostaticAtomData data1 = ElectrostaticMap[idat.atypes.first];
+    ElectrostaticAtomData data2 = ElectrostaticMap[idat.atypes.second];
     
     // some variables we'll need independent of electrostatic type:
 
@@ -929,12 +929,12 @@ namespace OpenMD {
     return;
   }  
 
-  void Electrostatic::calcSkipCorrection(SkipCorrectionData &skdat) {
+  void Electrostatic::calcSkipCorrection(InteractionData &idat) {
 
     if (!initialized_) initialize();
     
-    ElectrostaticAtomData data1 = ElectrostaticMap[skdat.atype1];
-    ElectrostaticAtomData data2 = ElectrostaticMap[skdat.atype2];
+    ElectrostaticAtomData data1 = ElectrostaticMap[idat.atypes.first];
+    ElectrostaticAtomData data2 = ElectrostaticMap[idat.atypes.second];
     
     // logicals
 
@@ -951,12 +951,12 @@ namespace OpenMD {
 
     if (i_is_Charge) {
       q_i = data1.charge;
-      skdat.skippedCharge2 += q_i;
+      idat.skippedCharge2 += q_i;
     }
 
     if (j_is_Charge) {
       q_j = data2.charge;
-      skdat.skippedCharge1 += q_j;
+      idat.skippedCharge1 += q_j;
     }
 
     // the rest of this function should only be necessary for reaction field.
@@ -970,72 +970,72 @@ namespace OpenMD {
 
       // some variables we'll need independent of electrostatic type:
       
-      riji = 1.0 / skdat.rij;
-      rhat = skdat.d  * riji;
+      riji = 1.0 / idat.rij;
+      rhat = idat.d  * riji;
 
       if (i_is_Dipole) {
         mu_i = data1.dipole_moment;
-        uz_i = skdat.eFrame1.getColumn(2);      
+        uz_i = idat.eFrame1.getColumn(2);      
         ct_i = dot(uz_i, rhat);
         duduz_i = V3Zero;
       }
             
       if (j_is_Dipole) {
         mu_j = data2.dipole_moment;
-        uz_j = skdat.eFrame2.getColumn(2);      
+        uz_j = idat.eFrame2.getColumn(2);      
         ct_j = dot(uz_j, rhat);
         duduz_j = V3Zero;
       }
      
       if (i_is_Charge) {
         if (j_is_Charge) {
-          preVal = skdat.electroMult * pre11_ * q_i * q_j;
-          rfVal = preRF_ * skdat.rij * skdat.rij;
+          preVal = idat.electroMult * pre11_ * q_i * q_j;
+          rfVal = preRF_ * idat.rij * idat.rij;
           vterm = preVal * rfVal; 
-          myPot += skdat.sw * vterm;        
-          dudr  = skdat.sw * preVal * 2.0 * rfVal * riji;        
+          myPot += idat.sw * vterm;        
+          dudr  = idat.sw * preVal * 2.0 * rfVal * riji;        
           dVdr += dudr * rhat;
         } 
         
         if (j_is_Dipole) {
           ri2 = riji * riji;
           ri3 = ri2 * riji;        
-          pref = skdat.electroMult * pre12_ * q_i * mu_j;
-          vterm = - pref * ct_j * ( ri2 - preRF2_ * skdat.rij );
-          myPot += skdat.sw * vterm;        
-          dVdr += -skdat.sw * pref * ( ri3 * ( uz_j - 3.0 * ct_j * rhat) - preRF2_ * uz_j);
-          duduz_j += -skdat.sw * pref * rhat * (ri2 - preRF2_ * skdat.rij);
+          pref = idat.electroMult * pre12_ * q_i * mu_j;
+          vterm = - pref * ct_j * ( ri2 - preRF2_ * idat.rij );
+          myPot += idat.sw * vterm;        
+          dVdr += -idat.sw * pref * ( ri3 * ( uz_j - 3.0 * ct_j * rhat) - preRF2_ * uz_j);
+          duduz_j += -idat.sw * pref * rhat * (ri2 - preRF2_ * idat.rij);
         } 
       }
       if (i_is_Dipole) {
         if (j_is_Charge) {
           ri2 = riji * riji;
           ri3 = ri2 * riji;        
-          pref = skdat.electroMult * pre12_ * q_j * mu_i;
-          vterm = - pref * ct_i * ( ri2 - preRF2_ * skdat.rij );
-          myPot += skdat.sw * vterm;        
-          dVdr += skdat.sw * pref * ( ri3 * ( uz_i - 3.0 * ct_i * rhat) - preRF2_ * uz_i);      
-          duduz_i += skdat.sw * pref * rhat * (ri2 - preRF2_ * skdat.rij);
+          pref = idat.electroMult * pre12_ * q_j * mu_i;
+          vterm = - pref * ct_i * ( ri2 - preRF2_ * idat.rij );
+          myPot += idat.sw * vterm;        
+          dVdr += idat.sw * pref * ( ri3 * ( uz_i - 3.0 * ct_i * rhat) - preRF2_ * uz_i);      
+          duduz_i += idat.sw * pref * rhat * (ri2 - preRF2_ * idat.rij);
         } 
       }
       
       // accumulate the forces and torques resulting from the self term
-      skdat.pot[2] += myPot;
-      skdat.f1 += dVdr;
+      idat.pot[2] += myPot;
+      idat.f1 += dVdr;
       
       if (i_is_Dipole) 
-        skdat.t1 -= cross(uz_i, duduz_i);
+        idat.t1 -= cross(uz_i, duduz_i);
       if (j_is_Dipole) 
-        skdat.t2 -= cross(uz_j, duduz_j);
+        idat.t2 -= cross(uz_j, duduz_j);
     }
   }
     
-  void Electrostatic::calcSelfCorrection(SelfCorrectionData &scdat) {
+  void Electrostatic::calcSelfCorrection(SelfData &sdat) {
     RealType mu1, preVal, chg1, self;
     
     if (!initialized_) initialize();
     
-    ElectrostaticAtomData data = ElectrostaticMap[scdat.atype];
+    ElectrostaticAtomData data = ElectrostaticMap[sdat.atype];
    
     // logicals
 
@@ -1046,29 +1046,29 @@ namespace OpenMD {
       if (i_is_Dipole) {
         mu1 = data.dipole_moment;          
         preVal = pre22_ * preRF2_ * mu1 * mu1;
-        scdat.pot[2] -= 0.5 * preVal;
+        sdat.pot[2] -= 0.5 * preVal;
         
         // The self-correction term adds into the reaction field vector
-        Vector3d uz_i = scdat.eFrame.getColumn(2);
+        Vector3d uz_i = sdat.eFrame.getColumn(2);
         Vector3d ei = preVal * uz_i;
 
         // This looks very wrong.  A vector crossed with itself is zero.
-        scdat.t -= cross(uz_i, ei);
+        sdat.t -= cross(uz_i, ei);
       }
     } else if (summationMethod_ == esm_SHIFTED_FORCE || summationMethod_ == esm_SHIFTED_POTENTIAL) {
       if (i_is_Charge) {        
         chg1 = data.charge;
         if (screeningMethod_ == DAMPED) {
-          self = - 0.5 * (c1c_ + alphaPi_) * chg1 * (chg1 + scdat.skippedCharge) * pre11_;
+          self = - 0.5 * (c1c_ + alphaPi_) * chg1 * (chg1 + sdat.skippedCharge) * pre11_;
         } else {         
-          self = - 0.5 * rcuti_ * chg1 * (chg1 + scdat.skippedCharge) * pre11_;
+          self = - 0.5 * rcuti_ * chg1 * (chg1 + sdat.skippedCharge) * pre11_;
         }
-        scdat.pot[2] += self;
+        sdat.pot[2] += self;
       }
     }
   }
 
-  RealType Electrostatic::getSuggestedCutoffRadius(AtomType* at1, AtomType* at2) {
+  RealType Electrostatic::getSuggestedCutoffRadius(pair<AtomType*, AtomType*> atypes) {
     // This seems to work moderately well as a default.  There's no
     // inherent scale for 1/r interactions that we can standardize.
     // 12 angstroms seems to be a reasonably good guess for most

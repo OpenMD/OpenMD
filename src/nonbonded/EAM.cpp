@@ -347,32 +347,32 @@ namespace OpenMD {
     return;
   }
 
-  void EAM::calcDensity(DensityData &ddat) {
+  void EAM::calcDensity(InteractionData &idat) {
     
     if (!initialized_) initialize();
     
-    EAMAtomData data1 = EAMMap[ddat.atype1];
-    EAMAtomData data2 = EAMMap[ddat.atype2];
+    EAMAtomData data1 = EAMMap[idat.atypes.first];
+    EAMAtomData data2 = EAMMap[idat.atypes.second];
 
-    if (ddat.rij < data1.rcut) 
-      ddat.rho_i_at_j = data1.rho->getValueAt(ddat.rij);
+    if (idat.rij < data1.rcut) 
+      idat.rho_i_at_j = data1.rho->getValueAt(idat.rij);
 
-    if (ddat.rij < data2.rcut) 
-      ddat.rho_j_at_i = data2.rho->getValueAt(ddat.rij);
+    if (idat.rij < data2.rcut) 
+      idat.rho_j_at_i = data2.rho->getValueAt(idat.rij);
 
     return;
   }
 
-  void EAM::calcFunctional(FunctionalData &fdat) {
+  void EAM::calcFunctional(SelfData &sdat) {
 
     if (!initialized_) initialize();
 
-    EAMAtomData data1 = EAMMap[fdat.atype];
+    EAMAtomData data1 = EAMMap[sdat.atype];
         
-    pair<RealType, RealType> result = data1.F->getValueAndDerivativeAt(fdat.rho);
+    pair<RealType, RealType> result = data1.F->getValueAndDerivativeAt(sdat.rho);
 
-    fdat.frho = result.first;
-    fdat.dfrhodrho = result.second;
+    sdat.frho = result.first;
+    sdat.dfrhodrho = result.second;
     return;
   }
 
@@ -385,8 +385,8 @@ namespace OpenMD {
     
     if (idat.rij < eamRcut_) {
 
-      EAMAtomData data1 = EAMMap[idat.atype1];
-      EAMAtomData data2 = EAMMap[idat.atype2];
+      EAMAtomData data1 = EAMMap[idat.atypes.first];
+      EAMAtomData data2 = EAMMap[idat.atypes.second];
 
       // get type-specific cutoff radii
 
@@ -403,7 +403,7 @@ namespace OpenMD {
         rha = res.first;
         drha = res.second;
 
-        res = MixingMap[make_pair(idat.atype1, idat.atype1)].phi->getValueAndDerivativeAt(idat.rij);
+        res = MixingMap[make_pair(idat.atypes.first, idat.atypes.first)].phi->getValueAndDerivativeAt(idat.rij);
         pha = res.first;
         dpha = res.second;
       }
@@ -413,7 +413,7 @@ namespace OpenMD {
         rhb = res.first;
         drhb = res.second;
 
-        res = MixingMap[make_pair(idat.atype2, idat.atype2)].phi->getValueAndDerivativeAt(idat.rij);
+        res = MixingMap[make_pair(idat.atypes.second, idat.atypes.second)].phi->getValueAndDerivativeAt(idat.rij);
         phb = res.first;
         dphb = res.second;
       }
@@ -439,7 +439,7 @@ namespace OpenMD {
         break;
 
       case eamDaw:
-        res = MixingMap[make_pair(idat.atype1,idat.atype2)].phi->getValueAndDerivativeAt(idat.rij);
+        res = MixingMap[idat.atypes].phi->getValueAndDerivativeAt(idat.rij);
         phab = res.first;
         dvpdr = res.second;
 
@@ -487,20 +487,20 @@ namespace OpenMD {
     
   }
 
-  RealType EAM::getSuggestedCutoffRadius(AtomType* at1, AtomType* at2) {
+  RealType EAM::getSuggestedCutoffRadius(pair<AtomType*, AtomType*> atypes) {
     if (!initialized_) initialize();   
 
     RealType cut = 0.0;
 
     map<AtomType*, EAMAtomData>::iterator it;
 
-    it = EAMMap.find(at1);
+    it = EAMMap.find(atypes.first);
     if (it != EAMMap.end()) {
       EAMAtomData data1 = (*it).second;
       cut = data1.rcut;
     }
 
-    it = EAMMap.find(at2);
+    it = EAMMap.find(atypes.second);
     if (it != EAMMap.end()) {
       EAMAtomData data2 = (*it).second;
       if (data2.rcut > cut)

@@ -73,7 +73,7 @@ namespace OpenMD {
     void addType(AtomType* atomType);
     virtual void calcForce(InteractionData &idat);
     virtual string getName() { return name_; }
-    virtual RealType getSuggestedCutoffRadius(AtomType* at1, AtomType* at2);
+    virtual RealType getSuggestedCutoffRadius(pair<AtomType*, AtomType*> atypes);
     
   private:
     void initialize();

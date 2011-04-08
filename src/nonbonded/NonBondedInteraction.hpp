@@ -72,105 +72,58 @@ namespace OpenMD {
    * by any given interaction.
    */
   struct InteractionData {
-    AtomType* atype1;     /**< pointer to AtomType of first atom */
-    AtomType* atype2;     /**< pointer to AtomType of second atom */
-    Vector3d d;           /**< interatomic vector (already wrapped into box) */
-    RealType rij;         /**< interatomic separation (precomputed) */
-    RealType r2;          /**< square of rij (precomputed) */
-    RealType rcut;        /**< cutoff radius for this interaction */
-    RealType sw;          /**< switching function value at rij (precomputed) */
-    RealType vdwMult;     /**< multiplier for van der Waals interactions */
-    RealType electroMult; /**< multiplier for electrostatic interactions */
-    RealType pot[4];      /**< total potential */
-    RealType vpair[4];    /**< pair potential */
-    Vector3d f1;          /**< force between the two atoms */
-    Mat3x3d eFrame1;      /**< pointer to electrostatic frame for first atom */
-    Mat3x3d eFrame2;      /**< pointer to electrostatic frame for second atom*/
-    RotMat3x3d A1;        /**< pointer to rotation matrix of first atom */
-    RotMat3x3d A2;        /**< pointer to rotation matrix of second atom */
-    Vector3d t1;          /**< pointer to torque on first atom */
-    Vector3d t2;          /**< pointer to torque on second atom */
-    RealType rho1;        /**< electron density at first atom */
-    RealType rho2;        /**< electron density at second atom */
-    RealType dfrho1;      /**< derivative of density functional for atom 1 */
-    RealType dfrho2;      /**< derivative of density functional for atom 2 */
-    RealType fshift1;     /**< indirect potential contribution from atom 1 */
-    RealType fshift2;     /**< indirect potential contribution from atom 2 */
-  };
-  
-  /** 
-   * The SkipCorrectionData struct.
-   *
-   * This is used to pass data for corrections due to "skipped" pairs
-   * of atoms.  These are atoms that are topologically bonded to each
-   * other, but which have indirect effects by way of long range
-   * interactions.  In the normal pair interaction loop, these atoms
-   * are skipped entirely, so a second pass must be made to compute
-   * their indirect interactions on each other.
-   */
-  struct SkipCorrectionData {
-    AtomType* atype1;      /**< pointer to AtomType of first atom */
-    AtomType* atype2;      /**< pointer to AtomType of second atom */
-    Vector3d d;            /**< interatomic vector (already wrapped into box) */
-    RealType rij;          /**< interatomic separation (precomputed) */
+    pair<AtomType*, AtomType*> atypes; /**< pair of atom types interacting */
+    Vector3d d;              /**< interatomic vector (already wrapped into box) */
+    RealType rij;            /**< interatomic separation */
+    RealType r2;             /**< square of rij */
+    RealType rcut;           /**< cutoff radius for this interaction */
+    RealType sw;             /**< switching function value at rij */
+    int topoDist;            /**< topological distance between atoms */
+    RealType vdwMult;        /**< multiplier for van der Waals interactions */
+    RealType electroMult;    /**< multiplier for electrostatic interactions */
+    RealType pot[4];         /**< total potential */
+    RealType vpair[4];       /**< pair potential */
+    Vector3d f1;             /**< force between the two atoms */
+    Mat3x3d eFrame1;         /**< pointer to electrostatic frame for first atom */
+    Mat3x3d eFrame2;         /**< pointer to electrostatic frame for second atom*/
+    RotMat3x3d A1;           /**< pointer to rotation matrix of first atom */
+    RotMat3x3d A2;           /**< pointer to rotation matrix of second atom */
+    Vector3d t1;             /**< pointer to torque on first atom */
+    Vector3d t2;             /**< pointer to torque on second atom */
+    RealType rho_i_at_j;     /**< electron density at second atom due to first */
+    RealType rho_j_at_i;     /**< electron density at first atom due to second */
+    RealType rho1;           /**< total electron density at first atom */
+    RealType rho2;           /**< total electron density at second atom */
+    RealType dfrho1;         /**< derivative of density functional for atom 1 */
+    RealType dfrho2;         /**< derivative of density functional for atom 2 */
+    RealType fshift1;        /**< indirect potential contribution from atom 1 */
+    RealType fshift2;        /**< indirect potential contribution from atom 2 */
     RealType skippedCharge1; /**< charge skipped in normal pairwise interaction loop */
     RealType skippedCharge2; /**< charge skipped in normal pairwise interaction loop */
-    RealType sw;           /**< switching function value at rij (precomputed) */
-    RealType electroMult;  /**< multiplier for electrostatic interactions */
-    RealType pot[4];       /**< total potential */
-    RealType vpair[4];     /**< pair potential */
-    Vector3d f1;           /**< force correction */
-    Mat3x3d eFrame1;       /**< pointer to electrostatic frame for first atom */
-    Mat3x3d eFrame2;       /**< pointer to electrostatic frame for second atom*/
-    Vector3d t1;           /**< pointer to torque on first atom */
-    Vector3d t2;           /**< pointer to torque on second atom */
   };
-
+  
   /** 
-   * The SelfCorrectionData struct.
+   * The SelfData struct.
    * 
-   * This is used to pass data for the self-interaction (used by
-   * electrostatic methods) that have long-range corrections involving
-   * interactions with a medium or a boundary.
+   * This is used to pass data for the self-interaction or derived
+   * information on a single atom after a pass through all other
+   * interactions.  This is used by electrostatic methods that have
+   * long-range corrections involving interactions with a medium or a
+   * boundary and also by specific metal interactions for electron
+   * density functional calculations.  Not all of the struct members
+   * are utilized by any given self interaction.
    */
-  struct SelfCorrectionData {
+  struct SelfData {
     AtomType* atype;        /**< pointer to AtomType of the atom */
-    Mat3x3d eFrame;        /**< pointer to electrostatic frame for first atom */
+    Mat3x3d eFrame;         /**< pointer to electrostatic frame for atom */
     RealType skippedCharge; /**< charge skipped in normal pairwise interaction loop */
-    RealType pot[4];       /**< total potential contribution */
-    Vector3d t;            /**< pointer to resultant torque on atom */
-  };
-
-
-
-  /**
-   * The DensityData struct.  
-   *
-   * This is used to pass data to specific metallic interactions for
-   * electron density calculations.  
-   */
-  
-  struct DensityData {
-    AtomType* atype1;     /**< pointer to AtomType of first atom */
-    AtomType* atype2;     /**< pointer to AtomType of second atom */
-    RealType rij;         /**< interatomic separation (precomputed) */
-    RealType rho_i_at_j;  /**< electron density at second atom due to first */
-    RealType rho_j_at_i;  /**< electron density at first atom due to second */
+    RealType pot[4];        /**< total potential contribution */
+    Vector3d t;             /**< pointer to resultant torque on atom */
+    RealType rho;           /**< electron density */
+    RealType frho;          /**< value of density functional for the atom */
+    RealType dfrhodrho;     /**< derivative of density functional for the atom */
   };
   
-  /**
-   * The FunctionalData struct.  
-   *
-   * This is used to pass data to specific metallic interactions for
-   * electron density functional calculations.  
-   */
-  
-  struct FunctionalData {
-    AtomType* atype;     /**< pointer to AtomType of the atom */
-    RealType rho;        /**< electron density (precomputed) */
-    RealType frho;       /**< value of density functional for the atom */
-    RealType dfrhodrho;  /**< derivative of density functional for the atom */
-  };
     
   /**
    * The basic interface for non-bonded interactions.  
@@ -181,7 +134,7 @@ namespace OpenMD {
     virtual ~NonBondedInteraction() {}
     virtual void calcForce(InteractionData &idat) = 0;
     virtual InteractionFamily getFamily() = 0;
-    virtual RealType getSuggestedCutoffRadius(AtomType* at1, AtomType* at2) = 0;
+    virtual RealType getSuggestedCutoffRadius(pair<AtomType*, AtomType*> atypes) = 0;
     virtual string getName() =  0;
   };    
 
@@ -202,8 +155,8 @@ namespace OpenMD {
   public:
     ElectrostaticInteraction() : NonBondedInteraction() { }
     virtual ~ElectrostaticInteraction() {}
-    virtual void calcSkipCorrection(SkipCorrectionData &skdat) = 0;
-    virtual void calcSelfCorrection(SelfCorrectionData &scdat) = 0;
+    virtual void calcSkipCorrection(InteractionData &idat) = 0;
+    virtual void calcSelfCorrection(SelfData &sdat) = 0;
     virtual InteractionFamily getFamily() {return ELECTROSTATIC_FAMILY;}    
   };    
 
@@ -214,8 +167,8 @@ namespace OpenMD {
   public:
     MetallicInteraction() : NonBondedInteraction() { }
     virtual ~MetallicInteraction() {}
-    virtual void calcDensity(DensityData &ddat) = 0;
-    virtual void calcFunctional(FunctionalData &fdat) = 0;
+    virtual void calcDensity(InteractionData &idat) = 0;
+    virtual void calcFunctional(SelfData &sdat) = 0;
     virtual InteractionFamily getFamily() {return METALLIC_FAMILY;}
   };
           

@@ -78,14 +78,14 @@ namespace OpenMD {
 
     // Fortran support routines
 
-    static void doPrePair(int *atid1, int *atid2, RealType *rij, RealType *rho_i_at_j, RealType *rho_j_at_i);
-    static void doPreForce(int *atid, RealType *rho, RealType *frho, RealType *dfrhodrho);
-    static void doPair(int *atid1, int *atid2, RealType *d, RealType *r, RealType *r2, RealType *sw, int *topoDist, RealType *A1, RealType *A2,  RealType *eFrame1, RealType *eFrame2, RealType *vpair, RealType *pot, RealType *f1,  RealType *t1, RealType *t2, RealType *rho1, RealType *rho2, RealType *dfrho1, RealType *dfrho2, RealType *fshift1, RealType *fshift2);    
-    static void doSkipCorrection(int *atid1, int *atid2, RealType *d, RealType *r, RealType *skippedCharge1, RealType *skippedCharge2, RealType *sw, RealType *electroMult, RealType *pot, RealType *vpair, RealType *f1, RealType *eFrame1, RealType *eFrame2, RealType *t1, RealType *t2);
-    static void doSelfCorrection(int *atid, RealType *eFrame, RealType *skippedCharge, RealType *pot, RealType *t);
+    static void doPrePair(InteractionData idat);
+    static void doPreForce(SelfData sdat);
+    static void doPair(InteractionData idat);    
+    static void doSkipCorrection(InteractionData idat);
+    static void doSelfCorrection(SelfData sdat);
     static RealType getSuggestedCutoffRadius(int *atid1);   
     static RealType getSuggestedCutoffRadius(AtomType *atype); 
-    void getSwitch(RealType *r2, RealType *sw, RealType *dswdr, RealType *r, int *in_switching_region);
+    SwitchingFunction* getSwitchingFunction() {return switcher_;}
     
   private:
     virtual ~InteractionManager() { }

@@ -244,9 +244,8 @@ namespace OpenMD {
     
     if (!initialized_) initialize();
     
-    pair<AtomType*, AtomType*> key = make_pair(idat.atype1, idat.atype2);
     map<pair<AtomType*, AtomType*>, LJInteractionData>::iterator it;
-    it = MixingMap.find(key);
+    it = MixingMap.find(idat.atypes);
     
     if (it != MixingMap.end())  {
       
@@ -306,11 +305,10 @@ namespace OpenMD {
     return;
   }
   
-  RealType LJ::getSuggestedCutoffRadius(AtomType* at1, AtomType* at2) {
+  RealType LJ::getSuggestedCutoffRadius(pair<AtomType*, AtomType*> atypes) {
     if (!initialized_) initialize();   
-    pair<AtomType*, AtomType*> key = make_pair(at1, at2); 
     map<pair<AtomType*, AtomType*>, LJInteractionData>::iterator it;
-    it = MixingMap.find(key);
+    it = MixingMap.find(atypes);
     if (it == MixingMap.end()) 
       return 0.0;
     else  {

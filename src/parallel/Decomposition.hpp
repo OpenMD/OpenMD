@@ -43,7 +43,7 @@
 #define PARALLEL_DECOMPOSITION_HPP
 
 #include "brains/SimInfo.hpp"
-#include "types/AtomType.hpp"
+#include "nonbonded/NonBondedInteraction.hpp"
 
 using namespace std;
 namespace OpenMD {
@@ -92,14 +92,36 @@ namespace OpenMD {
     virtual void distributeIntermediateData() = 0;
     virtual void collectData() = 0;
 
-    virtual unsigned int getNcutoffGroupsI() = 0;
-    virtual unsigned int getNcutoffGroupsJ() = 0;
+    // neighbor list routines
+    virtual bool checkNeighborList() = 0;
+    virtual vector<pair<int, int> >  buildNeighborList() = 0;
 
-    virtual vector<int> getAtomsInGroupI(int whichCGI) = 0;
-    virtual vector<int> getAtomsInGroupJ(int whichCGJ) = 0;
+    // group bookkeeping
+    virtual pair<int, int> getGroupTypes(int cg1, int cg2) = 0;
 
-    virtual AtomType* getAtomTypeI(int whichAtomI) = 0;
-    virtual AtomType* getAtomTypeJ(int whichAtomJ) = 0;
+    // Group->atom bookkeeping
+    virtual vector<int> getAtomsInGroupI(int cg1) = 0;
+    virtual vector<int> getAtomsInGroupJ(int cg2) = 0;
+    virtual Vector3d getAtomToGroupVectorI(int atom1, int cg1) = 0;
+    virtual Vector3d getAtomToGroupVectorJ(int atom2, int cg2) = 0;
+    virtual RealType getMfactI(int atom1) = 0;
+    virtual RealType getMfactJ(int atom2) = 0;
+
+    // spatial data
+    virtual Vector3d getIntergroupVector(int cg1, int cg2) = 0;
+    virtual Vector3d getInteratomicVector(int atom1, int atom2) = 0;
+       
+    // atom bookkeeping
+    virtual vector<int> getAtomList() = 0;
+    virtual vector<int> getSkipsForAtom(int atom1) = 0
+    virtual bool skipAtomPair(int atom1, int atom2) = 0;
+    virtual void addForceToAtomI(int atom1, Vector3d fg) = 0;
+    virtual void addForceToAtomJ(int atom2, Vector3d fg) = 0;
+
+    // filling interaction blocks with pointers
+    virtual InteractionData fillInteractionData(int atom1, int atom2) = 0;
+    virtual InteractionData fillSkipData(int atom1, int atom2) = 0;
+    virtual SelfData fillSelfData(int atom1) = 0;
     
   protected:
     SimInfo* info_;   

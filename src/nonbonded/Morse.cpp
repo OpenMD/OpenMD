@@ -146,9 +146,8 @@ namespace OpenMD {
 
     if (!initialized_) initialize();
     
-    pair<AtomType*, AtomType*> key = make_pair(idat.atype1, idat.atype2); 
     map<pair<AtomType*, AtomType*>, MorseInteractionData>::iterator it;
-    it = MixingMap.find(key);
+    it = MixingMap.find(idat.atypes);
     if (it != MixingMap.end()) {
       MorseInteractionData mixer = (*it).second;
       
@@ -232,11 +231,10 @@ namespace OpenMD {
     
   }
     
-  RealType Morse::getSuggestedCutoffRadius(AtomType* at1, AtomType* at2) {
+  RealType Morse::getSuggestedCutoffRadius(pair<AtomType*, AtomType*> atypes) {
     if (!initialized_) initialize();   
-    pair<AtomType*, AtomType*> key = make_pair(at1, at2); 
     map<pair<AtomType*, AtomType*>, MorseInteractionData>::iterator it;
-    it = MixingMap.find(key);
+    it = MixingMap.find(atypes);
     if (it == MixingMap.end()) 
       return 0.0;
     else  {

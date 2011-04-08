@@ -60,24 +60,25 @@
 #include "parallel/ForceDecomposition.hpp"
 //#include "parallel/SerialDecomposition.hpp"
 
+using namespace std;
 namespace OpenMD {
   
-  ForceManager::ForceManager(SimInfo * info) : info_(info), 
-                                               NBforcesInitialized_(false) {
+  ForceManager::ForceManager(SimInfo * info) : info_(info) {
+
 #ifdef IS_MPI
     decomp_ = new ForceDecomposition(info_);
 #else
-    //  decomp_ = new SerialDecomposition(info);
+    // decomp_ = new SerialDecomposition(info);
 #endif
   }
- 
+  
   void ForceManager::calcForces() {
     
-
     if (!info_->isFortranInitialized()) {
       info_->update();
       nbiMan_->setSimInfo(info_);
       nbiMan_->initialize();
+      swfun_ = nbiMan_->getSwitchingFunction();
       decomp_->distributeInitialData();
       info_->setupFortran();
     }
@@ -100,7 +101,6 @@ namespace OpenMD {
     CutoffGroup* cg;
     
     // forces are zeroed here, before any are accumulated.
-    // NOTE: do not rezero the forces in Fortran.
     
     for (mol = info_->beginMolecule(mi); mol != NULL; 
          mol = info_->nextMolecule(mi)) {
@@ -115,7 +115,6 @@ namespace OpenMD {
       }        
 
       if(info_->getNGlobalCutoffGroups() != info_->getNGlobalAtoms()){
-        std::cerr << "should not see me \n";
         for(cg = mol->beginCutoffGroup(ci); cg != NULL; 
             cg = mol->nextCutoffGroup(ci)) {
           //calculate the center of mass of cutoff group
@@ -171,13 +170,13 @@ namespace OpenMD {
         RealType currBendPot = bend->getPotential();          
          
         bendPotential += bend->getPotential();
-        std::map<Bend*, BendDataSet>::iterator i = bendDataSets.find(bend);
+        map<Bend*, BendDataSet>::iterator i = bendDataSets.find(bend);
         if (i == bendDataSets.end()) {
           BendDataSet dataSet;
           dataSet.prev.angle = dataSet.curr.angle = angle;
           dataSet.prev.potential = dataSet.curr.potential = currBendPot;
           dataSet.deltaV = 0.0;
-          bendDataSets.insert(std::map<Bend*, BendDataSet>::value_type(bend, dataSet));
+          bendDataSets.insert(map<Bend*, BendDataSet>::value_type(bend, dataSet));
         }else {
           i->second.prev.angle = i->second.curr.angle;
           i->second.prev.potential = i->second.curr.potential;
@@ -194,13 +193,13 @@ namespace OpenMD {
         torsion->calcForce(angle);
         RealType currTorsionPot = torsion->getPotential();
         torsionPotential += torsion->getPotential();
-        std::map<Torsion*, TorsionDataSet>::iterator i = torsionDataSets.find(torsion);
+        map<Torsion*, TorsionDataSet>::iterator i = torsionDataSets.find(torsion);
         if (i == torsionDataSets.end()) {
           TorsionDataSet dataSet;
           dataSet.prev.angle = dataSet.curr.angle = angle;
           dataSet.prev.potential = dataSet.curr.potential = currTorsionPot;
           dataSet.deltaV = 0.0;
-          torsionDataSets.insert(std::map<Torsion*, TorsionDataSet>::value_type(torsion, dataSet));
+          torsionDataSets.insert(map<Torsion*, TorsionDataSet>::value_type(torsion, dataSet));
         }else {
           i->second.prev.angle = i->second.curr.angle;
           i->second.prev.potential = i->second.curr.potential;
@@ -210,7 +209,7 @@ namespace OpenMD {
                                    i->second.prev.potential);
         }      
       }      
-
+      
       for (inversion = mol->beginInversion(inversionIter); 
 	   inversion != NULL; 
            inversion = mol->nextInversion(inversionIter)) {
@@ -218,13 +217,13 @@ namespace OpenMD {
         inversion->calcForce(angle);
         RealType currInversionPot = inversion->getPotential();
         inversionPotential += inversion->getPotential();
-        std::map<Inversion*, InversionDataSet>::iterator i = inversionDataSets.find(inversion);
+        map<Inversion*, InversionDataSet>::iterator i = inversionDataSets.find(inversion);
         if (i == inversionDataSets.end()) {
           InversionDataSet dataSet;
           dataSet.prev.angle = dataSet.curr.angle = angle;
           dataSet.prev.potential = dataSet.curr.potential = currInversionPot;
           dataSet.deltaV = 0.0;
-          inversionDataSets.insert(std::map<Inversion*, InversionDataSet>::value_type(inversion, dataSet));
+          inversionDataSets.insert(map<Inversion*, InversionDataSet>::value_type(inversion, dataSet));
         }else {
           i->second.prev.angle = i->second.curr.angle;
           i->second.prev.potential = i->second.curr.potential;
@@ -243,37 +242,24 @@ namespace OpenMD {
     curSnapshot->statData[Stats::BOND_POTENTIAL] = bondPotential;
     curSnapshot->statData[Stats::BEND_POTENTIAL] = bendPotential;
     curSnapshot->statData[Stats::DIHEDRAL_POTENTIAL] = torsionPotential;
-    curSnapshot->statData[Stats::INVERSION_POTENTIAL] = inversionPotential;
-    
+    curSnapshot->statData[Stats::INVERSION_POTENTIAL] = inversionPotential;    
   }
   
   void ForceManager::calcLongRangeInteraction() {
-    Snapshot* curSnapshot;
-    DataStorage* config;
-    DataStorage* cgConfig;
-    RealType* frc;
-    RealType* pos;
-    RealType* trq;
-    RealType* A;
-    RealType* electroFrame;
-    RealType* rc;
-    RealType* particlePot;
-    
-    //get current snapshot from SimInfo
-    curSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
-    
-    //get array pointers
-    config = &(curSnapshot->atomData);
-    cgConfig = &(curSnapshot->cgData);
-    frc = config->getArrayPointer(DataStorage::dslForce);
-    pos = config->getArrayPointer(DataStorage::dslPosition);
-    trq = config->getArrayPointer(DataStorage::dslTorque);
-    A   = config->getArrayPointer(DataStorage::dslAmat);
-    electroFrame = config->getArrayPointer(DataStorage::dslElectroFrame);
-    particlePot = config->getArrayPointer(DataStorage::dslParticlePot);
+
+    // some of this initial stuff will go away:
+    Snapshot* curSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
+    DataStorage* config = &(curSnapshot->atomData);
+    DataStorage* cgConfig = &(curSnapshot->cgData);
+    RealType* frc = config->getArrayPointer(DataStorage::dslForce);
+    RealType* pos = config->getArrayPointer(DataStorage::dslPosition);
+    RealType* trq = config->getArrayPointer(DataStorage::dslTorque);
+    RealType* A = config->getArrayPointer(DataStorage::dslAmat);
+    RealType* electroFrame = config->getArrayPointer(DataStorage::dslElectroFrame);
+    RealType* particlePot = config->getArrayPointer(DataStorage::dslParticlePot);
+    RealType* rc;    
 
     if(info_->getNGlobalCutoffGroups() != info_->getNGlobalAtoms()){
-      std::cerr << "should not see me \n";
       rc = cgConfig->getArrayPointer(DataStorage::dslPosition);
     } else {
       // center of mass of the group is the same as position of the atom  
@@ -289,36 +275,196 @@ namespace OpenMD {
     for (int i=0; i<LR_POT_TYPES;i++){
       longRangePotential[i]=0.0; //Initialize array
     }
-    
+
+    // new stuff starts here:
+
     decomp_->distributeData();
+ 
+    int cg1, cg2;
+    Vector3d d_grp;
+    RealType rgrpsq, rgrp;
+    RealType vij;
+    Vector3d fij, fg;
+    pair<int, int> gtypes;
+    RealType rCutSq;
+    bool in_switching_region;
+    RealType sw, dswdr, swderiv;
+    vector<int> atomListI;
+    vector<int> atomListJ;
+    InteractionData idat;
 
-    int nLoops = 1;
-    for (int iLoop = 0; iLoop < nLoops; iLoop++) {
-      doForceLoop(pos,
-                  rc,
-                  A,
-                  electroFrame,
-                  frc,
-                  trq,
-                  tau.getArrayPointer(),
-                  longRangePotential, 
-                  particlePot,
-                  &isError );   
+    int loopStart, loopEnd;
 
-      if (nLoops > 1) {
-        decomp_->collectIntermediateData();
-        decomp_->distributeIntermediateData();
+    loopEnd = PAIR_LOOP;
+    if (info_->requiresPrepair_) {
+      loopStart = PREPAIR_LOOP;
+    } else {
+      loopStart = PAIR_LOOP;
+    }
+
+    for (int iLoop = loopStart; iLoop < loopEnd; iLoop++) {
+      
+      if (iLoop == loopStart) {
+        bool update_nlist = decomp_->checkNeighborList();
+        if (update_nlist) 
+          neighborList = decomp_->buildNeighborList();
       }
-    }
-   
-    decomp_->collectData();
 
-    if( isError ){
-      sprintf( painCave.errMsg,
-	       "Error returned from the fortran force calculation.\n" );
-      painCave.isFatal = 1;
-      simError();
+      for (vector<pair<int, int> >::iterator it = neighborList.begin(); 
+             it != neighborList.end(); ++it) {
+        
+        cg1 = (*it).first;
+        cg2 = (*it).second;
+
+        gtypes = decomp_->getGroupTypes(cg1, cg2);
+        d_grp  = decomp_->getIntergroupVector(cg1, cg2);
+        curSnapshot->wrapVector(d_grp);        
+        rgrpsq = d_grp.lengthSquare();
+        rCutSq = groupCutoffMap(gtypes).first;
+
+        if (rgrpsq < rCutSq) {
+          idat.rcut = groupCutoffMap(gtypes).second;
+          if (iLoop == PAIR_LOOP) {
+            vij = 0.0;
+            fij = V3Zero;
+          }
+          
+          in_switching_region = swfun_->getSwitch(rgrpsq, idat.sw, idat.dswdr, rgrp);     
+          
+          atomListI = decomp_->getAtomsInGroupI(cg1);
+          atomListJ = decomp_->getAtomsInGroupJ(cg2);
+
+          for (vector<int>::iterator ia = atomListI.begin(); 
+               ia != atomListI.end(); ++ia) {            
+            atom1 = (*ia);
+            
+            for (vector<int>::iterator jb = atomListJ.begin(); 
+                 jb != atomListJ.end(); ++jb) {              
+              atom2 = (*jb);
+              
+              if (!decomp_->skipAtomPair(atom1, atom2)) {
+                
+                if (atomListI.size() == 1 && atomListJ.size() == 1) {
+                  idat.d = d_grp;
+                  idat.r2 = rgrpsq;
+                } else {
+                  idat.d = decomp_->getInteratomicVector(atom1, atom2);
+                  curSnapshot->wrapVector(idat.d);
+                  idat.r2 = idat.d.lengthSquare();
+                }
+                
+                idat.r = sqrt(idat.r2);
+                decomp_->fillInteractionData(atom1, atom2, idat);
+                
+                if (iLoop == PREPAIR_LOOP) {
+                  interactionMan_->doPrePair(idat);
+                } else {
+                  interactionMan_->doPair(idat);
+                  vij += idat.vpair;
+                  fij += idat.f1;
+                  tau -= outProduct(idat.d, idat.f);
+                }
+              }
+            }
+          }
+
+          if (iLoop == PAIR_LOOP) {
+            if (in_switching_region) {
+              swderiv = vij * dswdr / rgrp;
+              fg = swderiv * d_grp;
+
+              fij += fg;
+
+              if (atomListI.size() == 1 && atomListJ.size() == 1) {
+                tau -= outProduct(idat.d, fg);
+              }
+          
+              for (vector<int>::iterator ia = atomListI.begin(); 
+                   ia != atomListI.end(); ++ia) {            
+                atom1 = (*ia);                
+                mf = decomp_->getMfactI(atom1);
+                // fg is the force on atom ia due to cutoff group's
+                // presence in switching region
+                fg = swderiv * d_grp * mf;
+                decomp_->addForceToAtomI(atom1, fg);
+
+                if (atomListI.size() > 1) {
+                  if (info_->usesAtomicVirial_) {
+                    // find the distance between the atom
+                    // and the center of the cutoff group:
+                    dag = decomp_->getAtomToGroupVectorI(atom1, cg1);
+                    tau -= outProduct(dag, fg);
+                  }
+                }
+              }
+              for (vector<int>::iterator jb = atomListJ.begin(); 
+                   jb != atomListJ.end(); ++jb) {              
+                atom2 = (*jb);
+                mf = decomp_->getMfactJ(atom2);
+                // fg is the force on atom jb due to cutoff group's
+                // presence in switching region
+                fg = -swderiv * d_grp * mf;
+                decomp_->addForceToAtomJ(atom2, fg);
+
+                if (atomListJ.size() > 1) {
+                  if (info_->usesAtomicVirial_) {
+                    // find the distance between the atom
+                    // and the center of the cutoff group:
+                    dag = decomp_->getAtomToGroupVectorJ(atom2, cg2);
+                    tau -= outProduct(dag, fg);
+                  }
+                }
+              }
+            }
+            //if (!SIM_uses_AtomicVirial) {
+            //  tau -= outProduct(d_grp, fij);
+            //}
+          }
+        }
+      }
+
+      if (iLoop == PREPAIR_LOOP) {
+        if (info_->requiresPrepair_) {            
+          decomp_->collectIntermediateData();
+          atomList = decomp_->getAtomList();
+          for (vector<int>::iterator ia = atomList.begin(); 
+               ia != atomList.end(); ++ia) {              
+            atom1 = (*ia);            
+            decomp_->populateSelfData(atom1, SelfData sdat);
+            interactionMan_->doPreForce(sdat);
+          }
+          decomp_->distributeIntermediateData();        
+        }
+      }
+
     }
+    
+    decomp_->collectData();
+    
+    if (info_->requiresSkipCorrection_ || info_->requiresSelfCorrection_) {
+      atomList = decomp_->getAtomList();
+      for (vector<int>::iterator ia = atomList.begin(); 
+           ia != atomList.end(); ++ia) {              
+        atom1 = (*ia);     
+
+        if (info_->requiresSkipCorrection_) {
+          vector<int> skipList = decomp_->getSkipsForAtom(atom1);
+          for (vector<int>::iterator jb = skipList.begin(); 
+               jb != skipList.end(); ++jb) {              
+            atom2 = (*jb);
+            decomp_->populateSkipData(atom1, atom2, InteractionData idat);
+            interactionMan_->doSkipCorrection(idat);
+          }
+        }
+          
+        if (info_->requiresSelfCorrection_) {
+          decomp_->populateSelfData(atom1, SelfData sdat);
+          interactionMan_->doSelfCorrection(sdat);
+      }
+      
+      
+    }
+
     for (int i=0; i<LR_POT_TYPES;i++){
       lrPot += longRangePotential[i]; //Quick hack
     }

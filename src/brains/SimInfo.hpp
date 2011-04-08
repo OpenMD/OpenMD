@@ -571,8 +571,9 @@ namespace OpenMD{
      * index of the AtomType.
      */
     vector<int> identArray_;
+  public:
     vector<int> getIdentArray() { return identArray_; }
-    
+  private:
                
     /// lists to handle atoms needing special treatment in the non-bonded interactions
     PairList excludedInteractions_;  /**< atoms excluded from interacting with each other */

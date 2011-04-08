@@ -49,7 +49,7 @@ namespace OpenMD {
    * @class HarmonicBondType 
    *
    * HarmonicBondType is the basic OpenMD bond type.
-   * Formula is V = 0.5* k(r -r0)^2
+   * \f[ V = 0.5* k(r -r_0)^2  \f]
    */
   class HarmonicBondType : public BondType {
     

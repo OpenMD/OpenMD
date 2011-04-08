@@ -51,7 +51,7 @@ namespace OpenMD {
    * ShiftedMorseInteractionType is one of the basic Metal-to-NonMetal
    * interaction types.
    *
-   * Formula is V = D0*exp(-beta0*(r-r0))*(exp(-beta0(r-r0)-2)
+   * \f[ V = D_0 \exp(-\beta_0 (r - r_0)) * (\exp(-\beta_0 (r - r_0)) - 2) \f]
    */
   class ShiftedMorseInteractionType : public NonBondedInteractionType {
     

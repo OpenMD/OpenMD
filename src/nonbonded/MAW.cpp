@@ -128,9 +128,8 @@ namespace OpenMD {
 
     if (!initialized_) initialize();
     
-    pair<AtomType*, AtomType*> key = make_pair(idat.atype1, idat.atype2); 
     map<pair<AtomType*, AtomType*>, MAWInteractionData>::iterator it;
-    it = MixingMap.find(key);
+    it = MixingMap.find(idat.atypes);
     if (it != MixingMap.end()) {
       MAWInteractionData mixer = (*it).second;
       
@@ -145,7 +144,7 @@ namespace OpenMD {
       RealType ca1 = mixer.ca1;
       RealType cb1 = mixer.cb1;
 
-      bool j_is_Metal = idat.atype2->isMetal();
+      bool j_is_Metal = idat.atypes.second->isMetal();
 
       Vector3d r;
       RotMat3x3d Atrans;
@@ -271,11 +270,10 @@ namespace OpenMD {
     
   }
     
-  RealType MAW::getSuggestedCutoffRadius(AtomType* at1, AtomType* at2) {
+  RealType MAW::getSuggestedCutoffRadius(pair<AtomType*, AtomType*> atypes) {
     if (!initialized_) initialize();   
-    pair<AtomType*, AtomType*> key = make_pair(at1, at2); 
     map<pair<AtomType*, AtomType*>, MAWInteractionData>::iterator it;
-    it = MixingMap.find(key);
+    it = MixingMap.find(atypes);
     if (it == MixingMap.end()) 
       return 0.0;
     else  {

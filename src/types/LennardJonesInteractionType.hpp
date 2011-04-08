@@ -49,7 +49,8 @@ namespace OpenMD {
    * @class LennardJonesInteractionType 
    *
    * LennardJonesInteractionType is one of the basic interaction types.
-   * Formula is V = 4*epsilon*((sigma/R)^12 - (sigma/r)^6)
+   * \f[ V = 4 \epsilon \left(\left( \sigma/r \right)^{12} - 
+         \left( \sigma/r\right)^6\right) \f]
    */
   class LennardJonesInteractionType : public NonBondedInteractionType {
     

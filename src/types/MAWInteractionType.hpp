@@ -52,15 +52,15 @@ namespace OpenMD {
    * MAWInteractionType (Metal-Angular-Water) is one of the basic
    * Metal-to-NonMetal interaction types.
    *
-   * Formula is V =  D_e * exp(-a(r-re)) * (exp(-a(r-re)) - 2) *
-   *                      (1 + ca1*(1-sqrt(3)*cos(theta))^2 + 
-   *                           cb1*3*(sin(theta)*cos(phi))^2)
-   *
+   * \f[ V =  D_e * \exp(-a(r-r_e)) * (\exp(-a(r-r_e)) - 2) *
+                         (1 + ca1*(1-\sqrt(3)*\cos(\theta))^2 + 
+                              cb1*3*(\sin(\theta)*\cos(\phi))^2) \f]
+   
    * The spherical coordinates are defined in the body-fixed frame
    * of a rigid-body water molecule (HO bonds are on the Y-Z plane)
    * and the dipole vector of the water molecule points along the
    * Z-axis.  A metal atom's position is uniquely defined by a set
-   * of spherical polar coordinates (r, theta, phi) in the
+   * of spherical polar coordinates \f$(r, \theta, \phi)\f$ in the
    * body-fixed frame of each water molecule.
    */
 

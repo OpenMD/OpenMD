@@ -51,7 +51,7 @@ namespace OpenMD {
    * RepulsiveMorseInteractionType is one of the basic
    * Metal-to-NonMetal interaction types.
    *
-   * Formula is V = D0*exp(-2.0*beta0*(r-r0))
+   * \f[ V = D_0 \exp(-2 * \beta_0 (r-r_0)) \f]
    */
   class RepulsiveMorseInteractionType : public NonBondedInteractionType {
     

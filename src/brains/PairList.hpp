@@ -55,7 +55,7 @@ namespace OpenMD {
    * @brief PairList class maintains a general purpose list of atom
    * pairs using the global indices of the atoms.  This structure is
    * the general form for exclude lists as well as 1-4, 1-3, and 1-2 
-   * lists.  The PairLists are passed to fortran in a plain array.
+   * lists.
    */
   class PairList {
   public:

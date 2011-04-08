@@ -55,17 +55,19 @@
 #include "nonbonded/InteractionManager.hpp"
 #include "parallel/Decomposition.hpp"
 
+#define PREPAIR_LOOP 0
+#define PAIR_LOOP 1
+
+using namespace std;
 namespace OpenMD {
   /**
    * @class ForceManager ForceManager.hpp "brains/ForceManager.hpp"
    * ForceManager is responsible for calculating the short range
-   * interactions (C++) and long range interactions (Fortran). If the
-   * Fortran side is not set up before the force calculation, call
-   * SimInfo's update function to settle it down.
+   * interactions and long range interactions.
    *
-   * @note the reason we delay fortran side's setup is that some
-   * applications (Dump2XYZ etc.) may not need force calculation, so why
-   * bother?
+   * @note the reason we delay some of the setup is that some
+   * applications (Dump2XYZ etc.) may not need force calculation, so
+   * why bother?
    */
   class ForceManager {
 
@@ -73,9 +75,6 @@ namespace OpenMD {
     
     ForceManager(SimInfo * info);                          
     virtual ~ForceManager() {}
-
-    // public virtual functions should be avoided
-    /**@todo needs refactoring */
     virtual void calcForces();
     virtual void init() {};
 
@@ -87,16 +86,17 @@ namespace OpenMD {
     virtual void postCalculation();
  
     SimInfo * info_;        
-    std::map<Bend*, BendDataSet> bendDataSets;
-    std::map<Torsion*, TorsionDataSet> torsionDataSets;
-    std::map<Inversion*, InversionDataSet> inversionDataSets;
+    map<Bend*, BendDataSet> bendDataSets;
+    map<Torsion*, TorsionDataSet> torsionDataSets;
+    map<Inversion*, InversionDataSet> inversionDataSets;
     Mat3x3d tau;
 
-    bool NBforcesInitialized_;
+    vector<pair<int, int> > neighborList_;
+
     InteractionManager* nbiMan_;
     Decomposition* decomp_;
     
   };
-
-} //end namespace OpenMD
+  
+} 
 #endif //BRAINS_FORCEMANAGER_HPP

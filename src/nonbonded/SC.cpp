@@ -302,33 +302,33 @@ namespace OpenMD {
     return;
   }
 
-  void SC::calcDensity(DensityData &ddat) {
+  void SC::calcDensity(InteractionData &idat) {
     
     if (!initialized_) initialize();
     
-    SCInteractionData mixer = MixingMap[make_pair(ddat.atype1, ddat.atype2)];
+    SCInteractionData mixer = MixingMap[idat.atypes];
 
     RealType rcij = mixer.rCut;
 
-    if (ddat.rij < rcij) {
-      ddat.rho_i_at_j = mixer.phi->getValueAt(ddat.rij);
-      ddat.rho_j_at_i = ddat.rho_i_at_j;
+    if (idat.rij < rcij) {
+      idat.rho_i_at_j = mixer.phi->getValueAt(idat.rij);
+      idat.rho_j_at_i = idat.rho_i_at_j;
     } else {
-      ddat.rho_i_at_j = 0.0;
-      ddat.rho_j_at_i = 0.0;
+      idat.rho_i_at_j = 0.0;
+      idat.rho_j_at_i = 0.0;
     }
 
     return;
   }
 
-  void SC::calcFunctional(FunctionalData &fdat) {
+  void SC::calcFunctional(SelfData &sdat) {
 
     if (!initialized_) initialize();
 
-    SCAtomData data1 = SCMap[fdat.atype];
+    SCAtomData data1 = SCMap[sdat.atype];
     
-    fdat.frho = - data1.c * data1.epsilon * sqrt(fdat.rho);
-    fdat.dfrhodrho = 0.5 * fdat.frho / fdat.rho;
+    sdat.frho = - data1.c * data1.epsilon * sqrt(sdat.rho);
+    sdat.dfrhodrho = 0.5 * sdat.frho / sdat.rho;
     
     return;
   }
@@ -338,10 +338,10 @@ namespace OpenMD {
     
     if (!initialized_) initialize();
     
-    SCAtomData data1 = SCMap[idat.atype1];
-    SCAtomData data2 = SCMap[idat.atype2];
+    SCAtomData data1 = SCMap[idat.atypes.first];
+    SCAtomData data2 = SCMap[idat.atypes.second];
 
-    SCInteractionData mixer = MixingMap[make_pair(idat.atype1, idat.atype2)];
+    SCInteractionData mixer = MixingMap[idat.atypes];
 
     RealType rcij = mixer.rCut;
 
@@ -386,11 +386,11 @@ namespace OpenMD {
     return;    
   }
 
-  RealType SC::getSuggestedCutoffRadius(AtomType* at1, AtomType* at2) {
+  RealType SC::getSuggestedCutoffRadius(pair<AtomType*, AtomType*> atypes) {
     if (!initialized_) initialize();   
-    pair<AtomType*, AtomType*> key = make_pair(at1, at2); 
+
     map<pair<AtomType*, AtomType*>, SCInteractionData>::iterator it;
-    it = MixingMap.find(key);
+    it = MixingMap.find(atypes);
     if (it == MixingMap.end()) 
       return 0.0;
     else  {
