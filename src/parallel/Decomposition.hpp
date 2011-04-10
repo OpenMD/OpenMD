@@ -113,7 +113,7 @@ namespace OpenMD {
        
     // atom bookkeeping
     virtual vector<int> getAtomList() = 0;
-    virtual vector<int> getSkipsForAtom(int atom1) = 0
+    virtual vector<int> getSkipsForAtom(int atom1) = 0;
     virtual bool skipAtomPair(int atom1, int atom2) = 0;
     virtual void addForceToAtomI(int atom1, Vector3d fg) = 0;
     virtual void addForceToAtomJ(int atom2, Vector3d fg) = 0;

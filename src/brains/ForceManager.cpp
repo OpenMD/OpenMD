@@ -76,16 +76,16 @@ namespace OpenMD {
     
     if (!info_->isFortranInitialized()) {
       info_->update();
-      nbiMan_->setSimInfo(info_);
-      nbiMan_->initialize();
-      swfun_ = nbiMan_->getSwitchingFunction();
+      interactionMan_->setSimInfo(info_);
+      interactionMan_->initialize();
+      swfun_ = interactionMan_->getSwitchingFunction();
       decomp_->distributeInitialData();
       info_->setupFortran();
     }
     
     preCalculation();   
-    calcShortRangeInteraction();
-    calcLongRangeInteraction();
+    shortRangeInteractions();
+    longRangeInteractions();
     postCalculation();
     
   }
@@ -128,7 +128,7 @@ namespace OpenMD {
     
   }
   
-  void ForceManager::calcShortRangeInteraction() {
+  void ForceManager::shortRangeInteractions() {
     Molecule* mol;
     RigidBody* rb;
     Bond* bond;
@@ -245,7 +245,7 @@ namespace OpenMD {
     curSnapshot->statData[Stats::INVERSION_POTENTIAL] = inversionPotential;    
   }
   
-  void ForceManager::calcLongRangeInteraction() {
+  void ForceManager::longRangeInteractions() {
 
     // some of this initial stuff will go away:
     Snapshot* curSnapshot = info_->getSnapshotManager()->getCurrentSnapshot();
@@ -280,23 +280,24 @@ namespace OpenMD {
 
     decomp_->distributeData();
  
-    int cg1, cg2;
-    Vector3d d_grp;
+    int cg1, cg2, atom1, atom2;
+    Vector3d d_grp, dag;
     RealType rgrpsq, rgrp;
-    RealType vij;
+    Vector<RealType, 4> vij;
     Vector3d fij, fg;
     pair<int, int> gtypes;
     RealType rCutSq;
     bool in_switching_region;
     RealType sw, dswdr, swderiv;
-    vector<int> atomListI;
-    vector<int> atomListJ;
+    vector<int> atomListI, atomListJ, atomList;
     InteractionData idat;
+    SelfData sdat;
+    RealType mf;
 
     int loopStart, loopEnd;
 
     loopEnd = PAIR_LOOP;
-    if (info_->requiresPrepair_) {
+    if (info_->requiresPrepair() ) {
       loopStart = PREPAIR_LOOP;
     } else {
       loopStart = PAIR_LOOP;
@@ -320,17 +321,16 @@ namespace OpenMD {
         d_grp  = decomp_->getIntergroupVector(cg1, cg2);
         curSnapshot->wrapVector(d_grp);        
         rgrpsq = d_grp.lengthSquare();
-        rCutSq = groupCutoffMap(gtypes).first;
+        rCutSq = groupCutoffMap[gtypes].first;
 
         if (rgrpsq < rCutSq) {
-          idat.rcut = groupCutoffMap(gtypes).second;
+          idat.rcut = groupCutoffMap[gtypes].second;
           if (iLoop == PAIR_LOOP) {
-            vij = 0.0;
+            vij *= 0.0;
             fij = V3Zero;
           }
           
-          in_switching_region = swfun_->getSwitch(rgrpsq, idat.sw, idat.dswdr, rgrp);     
-          
+          in_switching_region = swfun_->getSwitch(rgrpsq, idat.sw, dswdr, rgrp);               
           atomListI = decomp_->getAtomsInGroupI(cg1);
           atomListJ = decomp_->getAtomsInGroupJ(cg2);
 
@@ -344,6 +344,8 @@ namespace OpenMD {
               
               if (!decomp_->skipAtomPair(atom1, atom2)) {
                 
+                idat = decomp_->fillInteractionData(atom1, atom2);
+
                 if (atomListI.size() == 1 && atomListJ.size() == 1) {
                   idat.d = d_grp;
                   idat.r2 = rgrpsq;
@@ -353,16 +355,15 @@ namespace OpenMD {
                   idat.r2 = idat.d.lengthSquare();
                 }
                 
-                idat.r = sqrt(idat.r2);
-                decomp_->fillInteractionData(atom1, atom2, idat);
-                
+                idat.rij = sqrt(idat.r2);
+               
                 if (iLoop == PREPAIR_LOOP) {
                   interactionMan_->doPrePair(idat);
                 } else {
                   interactionMan_->doPair(idat);
                   vij += idat.vpair;
                   fij += idat.f1;
-                  tau -= outProduct(idat.d, idat.f);
+                  tau -= outProduct(idat.d, idat.f1);
                 }
               }
             }
@@ -389,7 +390,7 @@ namespace OpenMD {
                 decomp_->addForceToAtomI(atom1, fg);
 
                 if (atomListI.size() > 1) {
-                  if (info_->usesAtomicVirial_) {
+                  if (info_->usesAtomicVirial()) {
                     // find the distance between the atom
                     // and the center of the cutoff group:
                     dag = decomp_->getAtomToGroupVectorI(atom1, cg1);
@@ -407,7 +408,7 @@ namespace OpenMD {
                 decomp_->addForceToAtomJ(atom2, fg);
 
                 if (atomListJ.size() > 1) {
-                  if (info_->usesAtomicVirial_) {
+                  if (info_->usesAtomicVirial()) {
                     // find the distance between the atom
                     // and the center of the cutoff group:
                     dag = decomp_->getAtomToGroupVectorJ(atom2, cg2);
@@ -424,13 +425,13 @@ namespace OpenMD {
       }
 
       if (iLoop == PREPAIR_LOOP) {
-        if (info_->requiresPrepair_) {            
+        if (info_->requiresPrepair()) {            
           decomp_->collectIntermediateData();
           atomList = decomp_->getAtomList();
           for (vector<int>::iterator ia = atomList.begin(); 
                ia != atomList.end(); ++ia) {              
             atom1 = (*ia);            
-            decomp_->populateSelfData(atom1, SelfData sdat);
+            sdat = decomp_->fillSelfData(atom1);
             interactionMan_->doPreForce(sdat);
           }
           decomp_->distributeIntermediateData();        
@@ -441,24 +442,24 @@ namespace OpenMD {
     
     decomp_->collectData();
     
-    if (info_->requiresSkipCorrection_ || info_->requiresSelfCorrection_) {
+    if (info_->requiresSkipCorrection() || info_->requiresSelfCorrection()) {
       atomList = decomp_->getAtomList();
       for (vector<int>::iterator ia = atomList.begin(); 
            ia != atomList.end(); ++ia) {              
         atom1 = (*ia);     
 
-        if (info_->requiresSkipCorrection_) {
+        if (info_->requiresSkipCorrection()) {
           vector<int> skipList = decomp_->getSkipsForAtom(atom1);
           for (vector<int>::iterator jb = skipList.begin(); 
                jb != skipList.end(); ++jb) {              
             atom2 = (*jb);
-            decomp_->populateSkipData(atom1, atom2, InteractionData idat);
+            idat = decomp_->fillSkipData(atom1, atom2);
             interactionMan_->doSkipCorrection(idat);
           }
         }
           
-        if (info_->requiresSelfCorrection_) {
-          decomp_->populateSelfData(atom1, SelfData sdat);
+        if (info_->requiresSelfCorrection()) {
+          sdat = decomp_->fillSelfData(atom1);
           interactionMan_->doSelfCorrection(sdat);
       }
       

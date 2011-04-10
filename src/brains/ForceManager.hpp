@@ -81,8 +81,8 @@ namespace OpenMD {
   protected:
 
     virtual void preCalculation();        
-    virtual void calcShortRangeInteraction();
-    virtual void calcLongRangeInteraction();
+    virtual void shortRangeInteractions();
+    virtual void longRangeInteractions();
     virtual void postCalculation();
  
     SimInfo * info_;        
@@ -93,8 +93,11 @@ namespace OpenMD {
 
     vector<pair<int, int> > neighborList_;
 
-    InteractionManager* nbiMan_;
+    InteractionManager* interactionMan_;
     Decomposition* decomp_;
+    SwitchingFunction* swfun_;
+    vector<pair<int, int> > neighborList;
+    map< pair<int, int>, pair<RealType, RealType> > groupCutoffMap;
     
   };
   

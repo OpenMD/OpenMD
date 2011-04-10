@@ -532,6 +532,10 @@ namespace OpenMD{
     bool usesElectrostaticAtoms() { return usesElectrostaticAtoms_; }
     bool usesDirectionalAtoms() { return usesDirectionalAtoms_; }
     bool usesMetallicAtoms() { return usesMetallicAtoms_; }
+    bool usesAtomicVirial() { return usesAtomicVirial_; }
+    bool requiresPrepair() { return requiresPrepair_; }
+    bool requiresSkipCorrection() { return requiresSkipCorrection_;}
+    bool requiresSelfCorrection() { return requiresSelfCorrection_;}
 
   private:
     /// Data structures holding primary simulation objects
