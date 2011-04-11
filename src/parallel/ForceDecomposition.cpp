@@ -85,8 +85,12 @@ namespace OpenMD {
     vector<RealType> pot_local(N_INTERACTION_FAMILIES, 0.0);
 
     // gather the information for atomtype IDs (atids):
-    AtomCommIntI->gather(info_->getIdentArray(), identsRow);
-    AtomCommIntJ->gather(info_->getIdentArray(), identsCol);
+    vector<int> identsLocal = info_->getIdentArray();
+    identsRow.reserve(nAtomsInRow);
+    identsCol.reserve(nAtomsInCol);
+
+    AtomCommIntI->gather(identsLocal, identsRow);
+    AtomCommIntJ->gather(identsLocal, identsCol);
 
     AtomLocalToGlobal = info_->getLocalToGlobalAtomIndex();
     AtomCommIntI->gather(AtomLocalToGlobal, AtomRowToGlobal);
@@ -96,10 +100,7 @@ namespace OpenMD {
     cgCommIntI->gather(cgLocalToGlobal, cgRowToGlobal);
     cgCommIntJ->gather(cgLocalToGlobal, cgColToGlobal);
 
-      
-      
-
-
+     
 
     // still need:
     // topoDist

@@ -853,7 +853,7 @@ namespace OpenMD {
     int* oneThreeList = oneThreeInteractions_.getPairList();
     int* oneFourList = oneFourInteractions_.getPairList();
 
-    setFortranSim( &fInfo_, &nGlobalAtoms_, &nAtoms_, &identArray[0], 
+    setFortranSim( &fInfo_, &nGlobalAtoms_, &nAtoms_, &identArray_[0], 
                    &nExclude, excludeList, 
                    &nOneTwo, oneTwoList,
                    &nOneThree, oneThreeList,

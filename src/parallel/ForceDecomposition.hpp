@@ -90,8 +90,8 @@ namespace OpenMD {
 
     vector<vector<RealType> > pot_row;
     vector<vector<RealType> > pot_col;
-    vector<int> identRow;
-    vector<int> identCol;
+    vector<int> identsRow;
+    vector<int> identsCol;
 
     vector<int> AtomLocalToGlobal;
     vector<int> AtomRowToGlobal;

@@ -561,6 +561,9 @@ namespace OpenMD{
      * the simulation.  It should be nGlobalAtoms_ in size.
      */
     vector<int> globalGroupMembership_; 
+  public:
+    vector<int> getGlobalGroupMembership() { return globalGroupMembership_; }
+  private:
 
     /**
      * A vector that maps between the global index of an atom and the
