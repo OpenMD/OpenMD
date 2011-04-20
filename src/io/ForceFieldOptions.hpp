@@ -99,6 +99,14 @@ namespace OpenMD {
         } else{
           result = i->second->setData(value);
         }
+
+        if (!result) {
+          sprintf(painCave.errMsg,  
+                  "Unrecognized data type for keyword: %s = %s\n",
+                  keyword.c_str(), value.c_str() );
+          painCave.isFatal = 1;
+          simError();                  
+        }
       } else {
         sprintf(painCave.errMsg,  "%s is an unrecognized keyword\n", keyword.c_str() );
         painCave.isFatal = 0;
