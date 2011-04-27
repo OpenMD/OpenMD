@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005 The University of Notre Dame. All Rights Reserved.
+ * Copyright (c) 2011 The University of Notre Dame. All Rights Reserved.
  *
  * The University of Notre Dame grants you ("Licensee") a
  * non-exclusive, royalty free, license to use, modify and
@@ -42,67 +42,111 @@
 #ifndef PARALLEL_FORCEDECOMPOSITION_HPP
 #define PARALLEL_FORCEDECOMPOSITION_HPP
 
-#include "Parallel/Decomposition.hpp"
-#include "math/SquareMatrix3.hpp"
-
-#ifdef IS_MPI
-#include "Parallel/Communicator.hpp"
-#endif
+#include "brains/SimInfo.hpp"
+#include "nonbonded/NonBondedInteraction.hpp"
 
 using namespace std;
 namespace OpenMD {
   
-  class ForceDecomposition : public Decomposition {
+  /**
+   * @class ForceDecomposition 
+   *
+   * ForceDecomposition is an interface for passing out and collecting
+   * information from many processors at various stages of the main
+   * non-bonded ForceLoop.
+   *
+   * The pairwise force calculation has an outer-running loop (the "I"
+   * loop) and an inner-running loop (the "J" loop).  In parallel
+   * decompositions, these loop over different groups of atoms on
+   * different processors.  Between each set of computations on the
+   * local processor, data must be exchanged among the processors.
+   * This can happen at different times in the calculation:
+   *
+   *  distributeInitialData      (parallel communication - one time only)
+   *  distributeData             (parallel communication - every ForceLoop)
+   *
+   *  loop iLoop over nLoops     (nLoops may be 1, 2, or until self consistent)
+   *  |  loop over i
+   *  |  | loop over j
+   *  |  | | localComputation
+   *  |  |  end
+   *  |  end
+   *  |  if (nLoops > 1):
+   *  |  |   collectIntermediateData    (parallel communication)
+   *  |  |   distributeIntermediateData (parallel communication)
+   *  |  endif
+   *  end
+   * collectData                        (parallel communication)
+   *
+   * ForceDecomposition provides the interface for ForceLoop to do the
+   * communication steps and to iterate using the correct set of atoms
+   * and cutoff groups.
+   */
+  class ForceDecomposition {
   public:
-    ForceDecomposition(SimInfo* info) : Decomposition(info) {sman_ = info_->getSnapshotManager();}
-    void distributeInitialData();
-    void distributeData();
-    void collectIntermediateData();
-    void distributeIntermediateData();
-    void collectData();
 
-    unsigned int getNcutoffGroupsI();
-    unsigned int getNcutoffGroupsJ();
+    ForceDecomposition(SimInfo* info) : info_(info) {}
+    virtual ~ForceDecomposition() {}
+    
+    virtual void distributeInitialData() = 0;
+    virtual void distributeData() = 0;
+    virtual void collectIntermediateData() = 0;
+    virtual void distributeIntermediateData() = 0;
+    virtual void collectData() = 0;
 
-    vector<int> getAtomsInGroupI(int whichCGI);
-    vector<int> getAtomsInGroupJ(int whichCGJ);
+    // neighbor list routines
+    virtual bool checkNeighborList() = 0;
+    virtual vector<pair<int, int> >  buildNeighborList() = 0;
 
-    AtomType* getAtomTypeI(int whichAtomI);
-    AtomType* getAtomTypeJ(int whichAtomJ);   
+    // group bookkeeping
+    virtual pair<int, int> getGroupTypes(int cg1, int cg2) = 0;
 
-  private: 
-    SnapshotManager* sman_;    
-#ifdef IS_MPI    
-    Communicator<Row, int>* AtomCommIntI;
-    Communicator<Row, RealType>* AtomCommRealI; 
-    Communicator<Row, Vector3d>* AtomCommVectorI; 
-    Communicator<Row, Mat3x3d>*  AtomCommMatrixI; 
+    // Group->atom bookkeeping
+    virtual vector<int> getAtomsInGroupRow(int cg1) = 0;
+    virtual vector<int> getAtomsInGroupColumn(int cg2) = 0;
+    virtual Vector3d getAtomToGroupVectorRow(int atom1, int cg1) = 0;
+    virtual Vector3d getAtomToGroupVectorColumn(int atom2, int cg2) = 0;
+    virtual RealType getMfactRow(int atom1) = 0;
+    virtual RealType getMfactColumn(int atom2) = 0;
 
-    Communicator<Column, int>* AtomCommIntJ;
-    Communicator<Column, RealType>* AtomCommRealJ; 
-    Communicator<Column, Vector3d>* AtomCommVectorJ; 
-    Communicator<Column, Mat3x3d>*  AtomCommMatrixJ; 
+    // spatial data
+    virtual Vector3d getIntergroupVector(int cg1, int cg2) = 0;
+    virtual Vector3d getInteratomicVector(int atom1, int atom2) = 0;
+       
+    // atom bookkeeping
+    virtual vector<int> getAtomList() = 0;
+    virtual vector<int> getSkipsForAtom(int atom1) = 0;
+    virtual bool skipAtomPair(int atom1, int atom2) = 0;
+    virtual void addForceToAtomRow(int atom1, Vector3d fg) = 0;
+    virtual void addForceToAtomColumn(int atom2, Vector3d fg) = 0;
 
-    Communicator<Row, int>* cgCommIntI;
-    Communicator<Row, Vector3d>* cgCommVectorI; 
-    Communicator<Column, int>* cgCommIntJ;
-    Communicator<Column, Vector3d>* cgCommVectorJ; 
-
-    vector<vector<RealType> > pot_row;
-    vector<vector<RealType> > pot_col;
-    vector<int> identsRow;
-    vector<int> identsCol;
-
-    vector<int> AtomLocalToGlobal;
-    vector<int> AtomRowToGlobal;
-    vector<int> AtomColToGlobal;
-    vector<int> cgLocalToGlobal;
-    vector<int> cgRowToGlobal;
-    vector<int> cgColToGlobal;
-#endif
-    vector<RealType> pot_local;
-  };
-
+    // filling interaction blocks with pointers
+    virtual InteractionData fillInteractionData(int atom1, int atom2) = 0;
+    virtual InteractionData fillSkipData(int atom1, int atom2) = 0;
+    virtual SelfData fillSelfData(int atom1) = 0;
+    
+  protected:
+    SimInfo* info_;   
+    map<pair<int, int>, int> topoDist; //< topoDist gives the
+                                       //topological distance between
+                                       //two atomic sites.  This
+                                       //declaration is agnostic
+                                       //regarding the parallel
+                                       //decomposition.  The two
+                                       //indices could be local or row
+                                       //& column.  It will be up to
+                                       //the specific decomposition
+                                       //method to fill this.
+    map<pair<int, int>, bool> exclude; //< exclude is the set of pairs
+                                       //to leave out of non-bonded
+                                       //force evaluations.  This
+                                       //declaration is agnostic
+                                       //regarding the parallel
+                                       //decomposition.  The two
+                                       //indices could be local or row
+                                       //& column.  It will be up to
+                                       //the specific decomposition
+                                       //method to fill this.
+  };    
 }
 #endif
-

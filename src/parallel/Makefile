@@ -1,10 +1,10 @@
 Package = parallel
 
 Source    = \
-        ForceDecomposition.cpp \
+        ForceMatrixDecomposition.cpp \
 
 ParallelSource = \
-	ForceDecomposition.cpp \
+	ForceMatrixDecomposition.cpp \
 
 RmiSource =
 

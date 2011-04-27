@@ -82,7 +82,7 @@ namespace OpenMD {
     RealType vdwMult;        /**< multiplier for van der Waals interactions */
     RealType electroMult;    /**< multiplier for electrostatic interactions */
     RealType pot[4];         /**< total potential */
-    RealType vpair[4];       /**< pair potential */
+    RealType vpair;          /**< pair potential */
     Vector3d f1;             /**< force between the two atoms */
     Mat3x3d eFrame1;         /**< pointer to electrostatic frame for first atom */
     Mat3x3d eFrame2;         /**< pointer to electrostatic frame for second atom*/

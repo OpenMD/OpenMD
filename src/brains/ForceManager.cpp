@@ -57,8 +57,8 @@
 #include "primitives/Bend.hpp"
 #include "primitives/Torsion.hpp"
 #include "primitives/Inversion.hpp"
-#include "parallel/ForceDecomposition.hpp"
-//#include "parallel/SerialDecomposition.hpp"
+#include "parallel/ForceMatrixDecomposition.hpp"
+//#include "parallel/ForceSerialDecomposition.hpp"
 
 using namespace std;
 namespace OpenMD {
@@ -66,9 +66,9 @@ namespace OpenMD {
   ForceManager::ForceManager(SimInfo * info) : info_(info) {
 
 #ifdef IS_MPI
-    decomp_ = new ForceDecomposition(info_);
+    fDecomp_ = new ForceMatrixDecomposition(info_);
 #else
-    // decomp_ = new SerialDecomposition(info);
+    // fDecomp_ = new ForceSerialDecomposition(info);
 #endif
   }
   
@@ -79,7 +79,7 @@ namespace OpenMD {
       interactionMan_->setSimInfo(info_);
       interactionMan_->initialize();
       swfun_ = interactionMan_->getSwitchingFunction();
-      decomp_->distributeInitialData();
+      fDecomp_->distributeInitialData();
       info_->setupFortran();
     }
     
@@ -278,18 +278,18 @@ namespace OpenMD {
 
     // new stuff starts here:
 
-    decomp_->distributeData();
+    fDecomp_->distributeData();
  
     int cg1, cg2, atom1, atom2;
     Vector3d d_grp, dag;
     RealType rgrpsq, rgrp;
-    Vector<RealType, 4> vij;
+    RealType vij;
     Vector3d fij, fg;
     pair<int, int> gtypes;
     RealType rCutSq;
     bool in_switching_region;
     RealType sw, dswdr, swderiv;
-    vector<int> atomListI, atomListJ, atomList;
+    vector<int> atomListColumn, atomListRow, atomListLocal;
     InteractionData idat;
     SelfData sdat;
     RealType mf;
@@ -306,9 +306,9 @@ namespace OpenMD {
     for (int iLoop = loopStart; iLoop < loopEnd; iLoop++) {
       
       if (iLoop == loopStart) {
-        bool update_nlist = decomp_->checkNeighborList();
+        bool update_nlist = fDecomp_->checkNeighborList();
         if (update_nlist) 
-          neighborList = decomp_->buildNeighborList();
+          neighborList = fDecomp_->buildNeighborList();
       }
 
       for (vector<pair<int, int> >::iterator it = neighborList.begin(); 
@@ -317,8 +317,8 @@ namespace OpenMD {
         cg1 = (*it).first;
         cg2 = (*it).second;
 
-        gtypes = decomp_->getGroupTypes(cg1, cg2);
-        d_grp  = decomp_->getIntergroupVector(cg1, cg2);
+        gtypes = fDecomp_->getGroupTypes(cg1, cg2);
+        d_grp  = fDecomp_->getIntergroupVector(cg1, cg2);
         curSnapshot->wrapVector(d_grp);        
         rgrpsq = d_grp.lengthSquare();
         rCutSq = groupCutoffMap[gtypes].first;
@@ -331,26 +331,26 @@ namespace OpenMD {
           }
           
           in_switching_region = swfun_->getSwitch(rgrpsq, idat.sw, dswdr, rgrp);               
-          atomListI = decomp_->getAtomsInGroupI(cg1);
-          atomListJ = decomp_->getAtomsInGroupJ(cg2);
+          atomListRow = fDecomp_->getAtomsInGroupRow(cg1);
+          atomListColumn = fDecomp_->getAtomsInGroupColumn(cg2);
 
-          for (vector<int>::iterator ia = atomListI.begin(); 
-               ia != atomListI.end(); ++ia) {            
+          for (vector<int>::iterator ia = atomListRow.begin(); 
+               ia != atomListRow.end(); ++ia) {            
             atom1 = (*ia);
             
-            for (vector<int>::iterator jb = atomListJ.begin(); 
-                 jb != atomListJ.end(); ++jb) {              
+            for (vector<int>::iterator jb = atomListColumn.begin(); 
+                 jb != atomListColumn.end(); ++jb) {              
               atom2 = (*jb);
               
-              if (!decomp_->skipAtomPair(atom1, atom2)) {
+              if (!fDecomp_->skipAtomPair(atom1, atom2)) {
                 
-                idat = decomp_->fillInteractionData(atom1, atom2);
+                idat = fDecomp_->fillInteractionData(atom1, atom2);
 
-                if (atomListI.size() == 1 && atomListJ.size() == 1) {
+                if (atomListRow.size() == 1 && atomListColumn.size() == 1) {
                   idat.d = d_grp;
                   idat.r2 = rgrpsq;
                 } else {
-                  idat.d = decomp_->getInteratomicVector(atom1, atom2);
+                  idat.d = fDecomp_->getInteratomicVector(atom1, atom2);
                   curSnapshot->wrapVector(idat.d);
                   idat.r2 = idat.d.lengthSquare();
                 }
@@ -376,42 +376,42 @@ namespace OpenMD {
 
               fij += fg;
 
-              if (atomListI.size() == 1 && atomListJ.size() == 1) {
+              if (atomListRow.size() == 1 && atomListColumn.size() == 1) {
                 tau -= outProduct(idat.d, fg);
               }
           
-              for (vector<int>::iterator ia = atomListI.begin(); 
-                   ia != atomListI.end(); ++ia) {            
+              for (vector<int>::iterator ia = atomListRow.begin(); 
+                   ia != atomListRow.end(); ++ia) {            
                 atom1 = (*ia);                
-                mf = decomp_->getMfactI(atom1);
+                mf = fDecomp_->getMfactRow(atom1);
                 // fg is the force on atom ia due to cutoff group's
                 // presence in switching region
                 fg = swderiv * d_grp * mf;
-                decomp_->addForceToAtomI(atom1, fg);
+                fDecomp_->addForceToAtomRow(atom1, fg);
 
-                if (atomListI.size() > 1) {
+                if (atomListRow.size() > 1) {
                   if (info_->usesAtomicVirial()) {
                     // find the distance between the atom
                     // and the center of the cutoff group:
-                    dag = decomp_->getAtomToGroupVectorI(atom1, cg1);
+                    dag = fDecomp_->getAtomToGroupVectorRow(atom1, cg1);
                     tau -= outProduct(dag, fg);
                   }
                 }
               }
-              for (vector<int>::iterator jb = atomListJ.begin(); 
-                   jb != atomListJ.end(); ++jb) {              
+              for (vector<int>::iterator jb = atomListColumn.begin(); 
+                   jb != atomListColumn.end(); ++jb) {              
                 atom2 = (*jb);
-                mf = decomp_->getMfactJ(atom2);
+                mf = fDecomp_->getMfactColumn(atom2);
                 // fg is the force on atom jb due to cutoff group's
                 // presence in switching region
                 fg = -swderiv * d_grp * mf;
-                decomp_->addForceToAtomJ(atom2, fg);
+                fDecomp_->addForceToAtomColumn(atom2, fg);
 
-                if (atomListJ.size() > 1) {
+                if (atomListColumn.size() > 1) {
                   if (info_->usesAtomicVirial()) {
                     // find the distance between the atom
                     // and the center of the cutoff group:
-                    dag = decomp_->getAtomToGroupVectorJ(atom2, cg2);
+                    dag = fDecomp_->getAtomToGroupVectorColumn(atom2, cg2);
                     tau -= outProduct(dag, fg);
                   }
                 }
@@ -426,44 +426,43 @@ namespace OpenMD {
 
       if (iLoop == PREPAIR_LOOP) {
         if (info_->requiresPrepair()) {            
-          decomp_->collectIntermediateData();
-          atomList = decomp_->getAtomList();
-          for (vector<int>::iterator ia = atomList.begin(); 
-               ia != atomList.end(); ++ia) {              
+          fDecomp_->collectIntermediateData();
+          atomListLocal = fDecomp_->getAtomList();
+          for (vector<int>::iterator ia = atomListLocal.begin(); 
+               ia != atomListLocal.end(); ++ia) {              
             atom1 = (*ia);            
-            sdat = decomp_->fillSelfData(atom1);
+            sdat = fDecomp_->fillSelfData(atom1);
             interactionMan_->doPreForce(sdat);
           }
-          decomp_->distributeIntermediateData();        
+          fDecomp_->distributeIntermediateData();        
         }
       }
 
     }
     
-    decomp_->collectData();
+    fDecomp_->collectData();
     
     if (info_->requiresSkipCorrection() || info_->requiresSelfCorrection()) {
-      atomList = decomp_->getAtomList();
-      for (vector<int>::iterator ia = atomList.begin(); 
-           ia != atomList.end(); ++ia) {              
+      atomListLocal = fDecomp_->getAtomList();
+      for (vector<int>::iterator ia = atomListLocal.begin(); 
+           ia != atomListLocal.end(); ++ia) {              
         atom1 = (*ia);     
 
         if (info_->requiresSkipCorrection()) {
-          vector<int> skipList = decomp_->getSkipsForAtom(atom1);
+          vector<int> skipList = fDecomp_->getSkipsForAtom(atom1);
           for (vector<int>::iterator jb = skipList.begin(); 
                jb != skipList.end(); ++jb) {              
             atom2 = (*jb);
-            idat = decomp_->fillSkipData(atom1, atom2);
+            idat = fDecomp_->fillSkipData(atom1, atom2);
             interactionMan_->doSkipCorrection(idat);
           }
         }
           
         if (info_->requiresSelfCorrection()) {
-          sdat = decomp_->fillSelfData(atom1);
+          sdat = fDecomp_->fillSelfData(atom1);
           interactionMan_->doSelfCorrection(sdat);
+        }
       }
-      
-      
     }
 
     for (int i=0; i<LR_POT_TYPES;i++){

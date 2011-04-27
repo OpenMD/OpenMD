@@ -220,7 +220,7 @@ namespace OpenMD {
       }
       
       RealType pot_temp = idat.vdwMult * (myPot - myPotC);
-      idat.vpair[0] += pot_temp;
+      idat.vpair += pot_temp;
       
       RealType dudr = idat.sw * idat.vdwMult * (myDeriv - myDerivC);
       

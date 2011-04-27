@@ -60,8 +60,10 @@ namespace OpenMD {
 
   /**
    * @class SimCreator SimCreator.hpp "brains/SimCreator.hpp"
-   * The only responsibility of SimCreator is to parse the meta-data file and create a SimInfo
-   * instance based on the information returned by parser. 
+   *
+   * The only responsibility of SimCreator is to parse the meta-data
+   * file and create a SimInfo instance based on the information
+   * returned by parser.
    */
   class SimCreator {
   public:
@@ -87,12 +89,13 @@ namespace OpenMD {
 
     /** create the molecules belong to current processor*/
     virtual void createMolecules(SimInfo* info);
-
+    
     /** 
-     * Sets the global index for atoms, rigidbodies and cutoff groups and fill up
-     * globalGroupMembership and globalMolMembership arrays which map atoms'
-     * global index to the global index of the groups (or molecules) they belong to.
-     * These array are never changed during the simulation.
+     * Sets the global index for atoms, rigidbodies and cutoff groups
+     * and fill up globalGroupMembership and globalMolMembership
+     * arrays which map atoms' global index to the global index of the
+     * groups (or molecules) they belong to.  These array are never
+     * changed during the simulation.
      */
     void setGlobalIndex(SimInfo* info);
 
@@ -108,6 +111,7 @@ namespace OpenMD {
     void loadCoordinates(SimInfo* info, const std::string& mdFileName);     
 
     std::string mdFileName_;  //save the meta-data file name which may be used later
+
   };
 
 } //end namespace OpenMD

@@ -360,7 +360,7 @@ namespace OpenMD {
     idat.f1 += dUdr * rhat + dUda * ul1 + dUdb * ul2;    
     idat.t1 += dUda * rxu1 - dUdg * uxu;
     idat.t2 += dUdb * rxu2 - dUdg * uxu;
-    idat.vpair[0] += U*idat.sw;
+    idat.vpair += U*idat.sw;
 
     return;
 

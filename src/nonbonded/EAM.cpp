@@ -480,7 +480,7 @@ namespace OpenMD {
 
       idat.pot[3] += phab;
 
-      idat.vpair[3] += phab;
+      idat.vpair += phab;
     }
 
     return;

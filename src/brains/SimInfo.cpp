@@ -785,6 +785,46 @@ namespace OpenMD {
     fInfo_.SIM_uses_AtomicVirial = usesAtomicVirial_;
   }
 
+
+  vector<int> SimInfo::getGlobalAtomIndices() {
+    SimInfo::MoleculeIterator mi;
+    Molecule* mol;
+    Molecule::AtomIterator ai;
+    Atom* atom;
+
+    vector<int> GlobalAtomIndices(getNAtoms(), 0);
+    
+    for (mol = beginMolecule(mi); mol != NULL; mol  = nextMolecule(mi)) {
+      
+      for (atom = mol->beginAtom(ai); atom != NULL; atom = mol->nextAtom(ai)) {
+	GlobalAtomIndices[atom->getLocalIndex()] = atom->getGlobalIndex();
+      }
+    }
+    return GlobalAtomIndices;
+  }
+
+
+  vector<int> SimInfo::getGlobalGroupIndices() {
+    SimInfo::MoleculeIterator mi;
+    Molecule* mol;
+    Molecule::CutoffGroupIterator ci;
+    CutoffGroup* cg;
+
+    vector<int> GlobalGroupIndices;
+    
+    for (mol = beginMolecule(mi); mol != NULL; mol  = nextMolecule(mi)) {
+      
+      //local index of cutoff group is trivial, it only depends on the
+      //order of travesing
+      for (cg = mol->beginCutoffGroup(ci); cg != NULL; 
+           cg = mol->nextCutoffGroup(ci)) {
+	GlobalGroupIndices.push_back(cg->getGlobalIndex());
+      }        
+    }
+    return GlobalGroupIndices;
+  }
+
+
   void SimInfo::setupFortran() {
     int isError;
     int nExclude, nOneTwo, nOneThree, nOneFour;
@@ -883,25 +923,7 @@ namespace OpenMD {
     }
    
 #ifdef IS_MPI    
-    //SimInfo is responsible for creating localToGlobalAtomIndex and
-    //localToGlobalGroupIndex
-    vector<int> localToGlobalAtomIndex(getNAtoms(), 0);
-    vector<int> localToGlobalCutoffGroupIndex;
     mpiSimData parallelData;
-
-    for (mol = beginMolecule(mi); mol != NULL; mol  = nextMolecule(mi)) {
-
-      //local index(index in DataStorge) of atom is important
-      for (atom = mol->beginAtom(ai); atom != NULL; atom = mol->nextAtom(ai)) {
-	localToGlobalAtomIndex[atom->getLocalIndex()] = atom->getGlobalIndex() + 1;
-      }
-
-      //local index of cutoff group is trivial, it only depends on the order of travesing
-      for (cg = mol->beginCutoffGroup(ci); cg != NULL; cg = mol->nextCutoffGroup(ci)) {
-	localToGlobalCutoffGroupIndex.push_back(cg->getGlobalIndex() + 1);
-      }        
-        
-    }
 
     //fill up mpiSimData struct
     parallelData.nMolGlobal = getNGlobalMolecules();
@@ -914,9 +936,9 @@ namespace OpenMD {
     MPI_Comm_size(MPI_COMM_WORLD, &(parallelData.nProcessors));
 
     //pass mpiSimData struct and index arrays to fortran
-    setFsimParallel(&parallelData, &(parallelData.nAtomsLocal),
-                    &localToGlobalAtomIndex[0],  &(parallelData.nGroupsLocal),
-                    &localToGlobalCutoffGroupIndex[0], &isError);
+    //setFsimParallel(&parallelData, &(parallelData.nAtomsLocal),
+    //                &localToGlobalAtomIndex[0],  &(parallelData.nGroupsLocal),
+    //                &localToGlobalCutoffGroupIndex[0], &isError);
 
     if (isError) {
       sprintf(painCave.errMsg,

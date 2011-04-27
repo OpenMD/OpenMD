@@ -359,7 +359,7 @@ namespace OpenMD {
       RealType dvpdr = res.second;
       
       RealType pot_temp = vptmp - vcij;
-      idat.vpair[3] += pot_temp;
+      idat.vpair += pot_temp;
       
       RealType dudr = drhodr * (idat.dfrho1 + idat.dfrho2) + dvpdr;
       

@@ -591,7 +591,7 @@ namespace OpenMD {
 
         }
  
-        idat.vpair[2] += vterm;
+        idat.vpair += vterm;
         epot += idat.sw * vterm;
 
         dVdr += dudr * rhat;       
@@ -607,7 +607,7 @@ namespace OpenMD {
           ri3 = ri2 * riji;
     
           vterm = - pref * ct_j * ( ri2 - preRF2_ * idat.rij );
-          idat.vpair[2] += vterm;
+          idat.vpair += vterm;
           epot += idat.sw * vterm;
 
           dVdr +=  -preSw * (ri3 * (uz_j - 3.0 * ct_j * rhat) - preRF2_*uz_j);
@@ -645,7 +645,7 @@ namespace OpenMD {
           // calculate the potential
           pot_term =  scale * c2;
           vterm = -pref * ct_j * pot_term;
-          idat.vpair[2] += vterm;
+          idat.vpair += vterm;
           epot += idat.sw * vterm;
              
           // calculate derivatives for forces and torques
@@ -692,7 +692,7 @@ namespace OpenMD {
                      qyy_j * (cy2*c3 - c2ri) + 
                      qzz_j * (cz2*c3 - c2ri) );
         vterm = pref * pot_term;
-        idat.vpair[2] += vterm;
+        idat.vpair += vterm;
         epot += idat.sw * vterm;
                 
         // calculate derivatives for the forces and torques
@@ -720,7 +720,7 @@ namespace OpenMD {
           ri3 = ri2 * riji;
 
           vterm = pref * ct_i * ( ri2 - preRF2_ * idat.rij );
-          idat.vpair[2] += vterm;
+          idat.vpair += vterm;
           epot += idat.sw * vterm;
           
           dVdr += preSw * (ri3 * (uz_i - 3.0 * ct_i * rhat) - preRF2_ * uz_i);
@@ -760,7 +760,7 @@ namespace OpenMD {
           // calculate the potential
           pot_term = c2 * scale;
           vterm = pref * ct_i * pot_term;
-          idat.vpair[2] += vterm;
+          idat.vpair += vterm;
           epot += idat.sw * vterm;
 
           // calculate derivatives for the forces and torques
@@ -783,7 +783,7 @@ namespace OpenMD {
 
           vterm = pref * ( ri3 * (ct_ij - 3.0 * ct_i * ct_j) -
                            preRF2_ * ct_ij );
-          idat.vpair[2] += vterm;
+          idat.vpair += vterm;
           epot += idat.sw * vterm;
              
           a1 = 5.0 * ct_i * ct_j - ct_ij;
@@ -842,7 +842,7 @@ namespace OpenMD {
           // calculate the potential 
           pot_term = (ct_ij * c2ri - ctidotj * c3);
           vterm = pref * pot_term;
-          idat.vpair[2] += vterm;
+          idat.vpair += vterm;
           epot += idat.sw * vterm;
 
           // calculate derivatives for the forces and torques
@@ -894,7 +894,7 @@ namespace OpenMD {
                      qzz_i * (cz2 * c3 - c2ri) );
         
         vterm = pref * pot_term;
-        idat.vpair[2] += vterm;
+        idat.vpair += vterm;
         epot += idat.sw * vterm;
 
         // calculate the derivatives for the forces and torques

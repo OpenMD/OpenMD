@@ -53,7 +53,7 @@
 #include "brains/SimInfo.hpp"
 #include "primitives/Molecule.hpp"
 #include "nonbonded/InteractionManager.hpp"
-#include "parallel/Decomposition.hpp"
+#include "parallel/ForceDecomposition.hpp"
 
 #define PREPAIR_LOOP 0
 #define PAIR_LOOP 1
@@ -94,7 +94,7 @@ namespace OpenMD {
     vector<pair<int, int> > neighborList_;
 
     InteractionManager* interactionMan_;
-    Decomposition* decomp_;
+    ForceDecomposition* fDecomp_;
     SwitchingFunction* swfun_;
     vector<pair<int, int> > neighborList;
     map< pair<int, int>, pair<RealType, RealType> > groupCutoffMap;

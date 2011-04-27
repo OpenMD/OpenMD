@@ -342,7 +342,7 @@ namespace OpenMD {
           dspdr = 0.0;
         }
         
-        idat.vpair[2] += 0.5*(v0*s*w + v0p*sp*wp);
+        idat.vpair += 0.5*(v0*s*w + v0p*sp*wp);
         idat.pot[2] += 0.5*(v0*s*w + v0p*sp*wp)*idat.sw;
         
         // do the torques first since they are easy:

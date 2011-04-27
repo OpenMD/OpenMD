@@ -341,6 +341,20 @@ namespace OpenMD{
     int getGlobalMolMembership(int id){
       return globalMolMembership_[id];
     }
+
+    /** 
+     * returns a vector which maps the local atom index on this
+     * processor to the global atom index.  With only one processor,
+     * these should be identical.
+     */
+    vector<int> getGlobalAtomIndices();
+
+    /** 
+     * returns a vector which maps the local cutoff group index on
+     * this processor to the global cutoff group index.  With only one
+     * processor, these should be identical.
+     */
+    vector<int> getGlobalGroupIndices();
         
     string getFinalConfigFileName() {
       return finalConfigFileName_;

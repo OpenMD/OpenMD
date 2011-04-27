@@ -57,9 +57,10 @@ namespace OpenMD{
   
 #ifdef IS_MPI
 
-  enum direction {
-    Row = 0,
-    Column = 1
+  enum communicatorType {
+    Global = 0,
+    Row = 1,
+    Column = 2
   };
     
   template<typename T> 
@@ -78,7 +79,7 @@ namespace OpenMD{
   template<> const MPI::Datatype MPITraits<Mat3x3d>::datatype = MPI_REALTYPE;
   template<> const int MPITraits<Mat3x3d>::dim = 9;
   
-  template<direction D, typename T>
+  template<communicatorType D, typename T>
   class Communicator { 
   public: 
     
@@ -98,10 +99,15 @@ namespace OpenMD{
       rowIndex_ = myRank / nColumns;      
       columnIndex_ = myRank % nColumns;
 
-      if (D == Row) {
+      switch(D) {
+      case Row :
         myComm = MPI::COMM_WORLD.Split(rowIndex_, 0);
-      } else {
+        break;
+      case Column:
         myComm = MPI::COMM_WORLD.Split(columnIndex_, 0);
+        break;
+      case Global:
+        myComm = MPI::COMM_WORLD.Split(myRank, 0);
       }
          
       int nCommProcs = myComm.Get_size();
