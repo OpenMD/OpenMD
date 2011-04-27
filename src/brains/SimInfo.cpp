@@ -54,19 +54,12 @@
 #include "math/Vector3.hpp"
 #include "primitives/Molecule.hpp"
 #include "primitives/StuntDouble.hpp"
-#include "UseTheForce/DarkSide/neighborLists_interface.h"
-#include "UseTheForce/doForces_interface.h"
 #include "utils/MemoryUtils.hpp"
 #include "utils/simError.h"
 #include "selection/SelectionManager.hpp"
 #include "io/ForceFieldOptions.hpp"
 #include "UseTheForce/ForceField.hpp"
 #include "nonbonded/SwitchingFunction.hpp"
-
-#ifdef IS_MPI
-#include "UseTheForce/mpiComponentPlan.h"
-#include "UseTheForce/DarkSide/simParallel_interface.h"
-#endif 
 
 using namespace std;
 namespace OpenMD {
@@ -893,72 +886,72 @@ namespace OpenMD {
     int* oneThreeList = oneThreeInteractions_.getPairList();
     int* oneFourList = oneFourInteractions_.getPairList();
 
-    setFortranSim( &fInfo_, &nGlobalAtoms_, &nAtoms_, &identArray_[0], 
-                   &nExclude, excludeList, 
-                   &nOneTwo, oneTwoList,
-                   &nOneThree, oneThreeList,
-                   &nOneFour, oneFourList,
-                   &molMembershipArray[0], &mfact[0], &nCutoffGroups_, 
-                   &fortranGlobalGroupMembership[0], &isError); 
+    //setFortranSim( &fInfo_, &nGlobalAtoms_, &nAtoms_, &identArray_[0], 
+    //               &nExclude, excludeList, 
+    //               &nOneTwo, oneTwoList,
+    //               &nOneThree, oneThreeList,
+    //               &nOneFour, oneFourList,
+    //               &molMembershipArray[0], &mfact[0], &nCutoffGroups_, 
+    //               &fortranGlobalGroupMembership[0], &isError); 
     
-    if( isError ){
-      
-      sprintf( painCave.errMsg,
-	       "There was an error setting the simulation information in fortran.\n" );
-      painCave.isFatal = 1;
-      painCave.severity = OPENMD_ERROR;
-      simError();
-    }
+    // if( isError ){
+    //  
+    //  sprintf( painCave.errMsg,
+    //	       "There was an error setting the simulation information in fortran.\n" );
+    //  painCave.isFatal = 1;
+    //  painCave.severity = OPENMD_ERROR;
+    //  simError();
+    //}
     
     
-    sprintf( checkPointMsg,
-	     "succesfully sent the simulation information to fortran.\n");
+    // sprintf( checkPointMsg,
+    //          "succesfully sent the simulation information to fortran.\n");
     
-    errorCheckPoint();
+    // errorCheckPoint();
     
     // Setup number of neighbors in neighbor list if present
-    if (simParams_->haveNeighborListNeighbors()) {
-      int nlistNeighbors = simParams_->getNeighborListNeighbors();
-      setNeighbors(&nlistNeighbors);
-    }
+    //if (simParams_->haveNeighborListNeighbors()) {
+    //  int nlistNeighbors = simParams_->getNeighborListNeighbors();
+    //  setNeighbors(&nlistNeighbors);
+    //}
    
 #ifdef IS_MPI    
-    mpiSimData parallelData;
+    // mpiSimData parallelData;
 
     //fill up mpiSimData struct
-    parallelData.nMolGlobal = getNGlobalMolecules();
-    parallelData.nMolLocal = getNMolecules();
-    parallelData.nAtomsGlobal = getNGlobalAtoms();
-    parallelData.nAtomsLocal = getNAtoms();
-    parallelData.nGroupsGlobal = getNGlobalCutoffGroups();
-    parallelData.nGroupsLocal = getNCutoffGroups();
-    parallelData.myNode = worldRank;
-    MPI_Comm_size(MPI_COMM_WORLD, &(parallelData.nProcessors));
+    // parallelData.nMolGlobal = getNGlobalMolecules();
+    // parallelData.nMolLocal = getNMolecules();
+    // parallelData.nAtomsGlobal = getNGlobalAtoms();
+    // parallelData.nAtomsLocal = getNAtoms();
+    // parallelData.nGroupsGlobal = getNGlobalCutoffGroups();
+    // parallelData.nGroupsLocal = getNCutoffGroups();
+    // parallelData.myNode = worldRank;
+    // MPI_Comm_size(MPI_COMM_WORLD, &(parallelData.nProcessors));
 
     //pass mpiSimData struct and index arrays to fortran
     //setFsimParallel(&parallelData, &(parallelData.nAtomsLocal),
     //                &localToGlobalAtomIndex[0],  &(parallelData.nGroupsLocal),
     //                &localToGlobalCutoffGroupIndex[0], &isError);
 
-    if (isError) {
-      sprintf(painCave.errMsg,
-	      "mpiRefresh errror: fortran didn't like something we gave it.\n");
-      painCave.isFatal = 1;
-      simError();
-    }
+    // if (isError) {
+    //   sprintf(painCave.errMsg,
+    //           "mpiRefresh errror: fortran didn't like something we gave it.\n");
+    //   painCave.isFatal = 1;
+    //   simError();
+    // }
 
-    sprintf(checkPointMsg, " mpiRefresh successful.\n");
-    errorCheckPoint();
+    // sprintf(checkPointMsg, " mpiRefresh successful.\n");
+    // errorCheckPoint();
 #endif
 
-    initFortranFF(&isError);
-    if (isError) {
-      sprintf(painCave.errMsg,
-	      "initFortranFF errror: fortran didn't like something we gave it.\n");
-      painCave.isFatal = 1;
-      simError();
-    }
-    fortranInitialized_ = true;
+    // initFortranFF(&isError);
+    // if (isError) {
+    //   sprintf(painCave.errMsg,
+    //           "initFortranFF errror: fortran didn't like something we gave it.\n");
+    //   painCave.isFatal = 1;
+    //   simError();
+    // }
+    // fortranInitialized_ = true;
   }
 
   void SimInfo::addProperty(GenericData* genData) {

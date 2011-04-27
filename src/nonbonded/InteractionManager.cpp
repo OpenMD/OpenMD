@@ -40,7 +40,6 @@
  */
  
 #include "nonbonded/InteractionManager.hpp"
-#include "UseTheForce/doForces_interface.h"
 
 namespace OpenMD {
 

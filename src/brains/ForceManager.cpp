@@ -49,16 +49,14 @@
 
 #include "brains/ForceManager.hpp"
 #include "primitives/Molecule.hpp"
-#include "UseTheForce/doForces_interface.h"
 #define __OPENMD_C
-#include "UseTheForce/DarkSide/fInteractionMap.h"
 #include "utils/simError.h"
 #include "primitives/Bond.hpp"
 #include "primitives/Bend.hpp"
 #include "primitives/Torsion.hpp"
 #include "primitives/Inversion.hpp"
 #include "parallel/ForceMatrixDecomposition.hpp"
-//#include "parallel/ForceSerialDecomposition.hpp"
+#include "nonbonded/NonBondedInteraction.hpp"
 
 using namespace std;
 namespace OpenMD {
@@ -268,11 +266,12 @@ namespace OpenMD {
     }
     
     //initialize data before passing to fortran
-    RealType longRangePotential[LR_POT_TYPES];
+    RealType longRangePotential[N_INTERACTION_FAMILIES];
     RealType lrPot = 0.0;
     int isError = 0;
 
-    for (int i=0; i<LR_POT_TYPES;i++){
+    // dangerous to iterate over enums, but we'll live on the edge:
+    for (int i = NO_FAMILY; i != N_INTERACTION_FAMILIES; ++i){
       longRangePotential[i]=0.0; //Initialize array
     }
 
@@ -465,14 +464,15 @@ namespace OpenMD {
       }
     }
 
-    for (int i=0; i<LR_POT_TYPES;i++){
+    // dangerous to iterate over enums, but we'll live on the edge:
+    for (int i = NO_FAMILY; i != N_INTERACTION_FAMILIES; ++i){
       lrPot += longRangePotential[i]; //Quick hack
     }
         
     //store the tau and long range potential    
     curSnapshot->statData[Stats::LONG_RANGE_POTENTIAL] = lrPot;
-    curSnapshot->statData[Stats::VANDERWAALS_POTENTIAL] = longRangePotential[VDW_POT];
-    curSnapshot->statData[Stats::ELECTROSTATIC_POTENTIAL] = longRangePotential[ELECTROSTATIC_POT];
+    curSnapshot->statData[Stats::VANDERWAALS_POTENTIAL] = longRangePotential[VANDERWAALS_FAMILY];
+    curSnapshot->statData[Stats::ELECTROSTATIC_POTENTIAL] = longRangePotential[ELECTROSTATIC_FAMILY];
   }
 
   

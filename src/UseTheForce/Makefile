@@ -1,8 +1,6 @@
 Package = UseTheForce
 
 Source    = \
-	doForces.F90 \
-	doForces_interface.F90 \
         ForceField.cpp \
         ForceFieldFactory.cpp \
         DUFF.cpp \
@@ -13,11 +11,9 @@ Source    = \
 	Amber_FF.cpp \
 	CLAYFF.cpp 
 
-ParallelSource = doForces.F90
+ParallelSource =
 
 Modules = \
-	doForces \
-	notifyCutoffs
 
 RmiSource =
 

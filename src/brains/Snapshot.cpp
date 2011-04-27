@@ -114,7 +114,7 @@ namespace OpenMD {
     }    
 
     //notify fortran simulation box has changed
-    setFortranBox(fortranHmat, fortranInvHmat, &orthoRhombic_);
+    // setFortranBox(fortranHmat, fortranInvHmat, &orthoRhombic_);
   }
 
 

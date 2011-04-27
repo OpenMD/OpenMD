@@ -45,7 +45,6 @@ PackageLibs = \
 	primitives \
 	nonbonded \
 	parallel \
-	UseTheForce/DarkSide \
 	UseTheForce \
 	brains \
 	io \

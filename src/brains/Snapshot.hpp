@@ -54,8 +54,6 @@
 
 #include "brains/DataStorage.hpp"
 #include "brains/Stats.hpp"
-#include "UseTheForce/DarkSide/simulation_interface.h"
-
 
 namespace OpenMD{
 
