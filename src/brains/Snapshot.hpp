@@ -207,49 +207,11 @@ namespace OpenMD{
       hasCOM_ = true;
     }
 
-    Vector3d getAtomPosByIindex(int iIndex) {
-#ifdef IS_MPI
-      return atomIData.position[iIndex];
-#else
-      return atomData.position[iIndex];
-#endif
-    }
-    Vector3d getAtomPosByJindex(int jIndex) {
-#ifdef IS_MPI
-      return atomJData.position[jIndex];
-#else
-      return atomData.position[jIndex];
-#endif
-    }
-
-    Vector3d getCutoffGroupPosByIindex(int iIndex) {
-#ifdef IS_MPI
-      return cgIData.position[iIndex];
-#else
-      return cgData.position[iIndex];
-#endif
-    }
-    Vector3d getCutoffGroupPosByJindex(int jIndex) {
-#ifdef IS_MPI
-      return cgJData.position[jIndex];
-#else
-      return cgData.position[jIndex];
-#endif
-    }
-
     DataStorage atomData;
     DataStorage rigidbodyData;
     DataStorage cgData;
     Stats statData;
 
-#ifdef IS_MPI
-    DataStorage atomIData;
-    DataStorage atomJData;
-    DataStorage cgIData;
-    DataStorage cgJData;
-#endif
-   
-            
   private:
     RealType currentTime_;
 

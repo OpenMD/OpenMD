@@ -53,10 +53,6 @@ namespace OpenMD {
     CutoffGroup() :  snapshotMan_(NULL) {
 
       storage_ = &Snapshot::cgData;
-#ifdef IS_MPI
-      iStorage_ = &Snapshot::cgIData;
-      jStorage_ = &Snapshot::cgJData;
-#endif
       haveTotalMass = false;
       totalMass = 0.0;
     }
@@ -128,34 +124,8 @@ namespace OpenMD {
     }
 
 
-    /**
-     * Returns the current position of this cutoffGroup for the outer
-     * iteration over the cutoff groups.  For Force decomposition,
-     * this is the position of the cutoff groups ordered by row index.
-     * For serial calculations, this is just the position of the
-     * cutoff group.
-     */    
-    Vector3d getPosI() {
-#ifdef IS_MPI
-      return ((snapshotMan_->getCurrentSnapshot())->*iStorage_).position[iIndex_];
-#else
+    Vector3d getPos() {
       return ((snapshotMan_->getCurrentSnapshot())->*storage_).position[localIndex_];      
-#endif
-    }
-
-    /**
-     * Returns the current position of this cutoffGroup for the inner
-     * iteration over the cutoff groups.  For Force decomposition,
-     * this is the position of the cutoff groups ordered by column
-     * index.  For serial calculations, this is just the position of
-     * the cutoff group.
-     */    
-    Vector3d getPosJ() {
-#ifdef IS_MPI
-      return ((snapshotMan_->getCurrentSnapshot())->*jStorage_).position[jIndex_];
-#else
-      return ((snapshotMan_->getCurrentSnapshot())->*storage_).position[localIndex_];      
-#endif
     }
     
     int getNumAtom() {
@@ -196,12 +166,6 @@ namespace OpenMD {
     int localIndex_;
     DataStoragePointer storage_;
     SnapshotManager* snapshotMan_;
-#ifdef IS_MPI
-    int iIndex_;
-    int jIndex_;
-    DataStoragePointer iStorage_;
-    DataStoragePointer jStorage_;
-#endif
 
   };  
 } //end namespace OpenMD

@@ -55,8 +55,8 @@
 #include "primitives/Bend.hpp"
 #include "primitives/Torsion.hpp"
 #include "primitives/Inversion.hpp"
-#include "parallel/ForceMatrixDecomposition.hpp"
 #include "nonbonded/NonBondedInteraction.hpp"
+#include "parallel/ForceMatrixDecomposition.hpp"
 
 using namespace std;
 namespace OpenMD {

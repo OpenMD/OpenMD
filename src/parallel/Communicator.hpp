@@ -53,6 +53,7 @@
 #include <mpi.h>
 #include "math/SquareMatrix3.hpp"
 
+using namespace std;
 namespace OpenMD{
   
 #ifdef IS_MPI
@@ -63,21 +64,44 @@ namespace OpenMD{
     Column = 2
   };
     
-  template<typename T> 
-  struct MPITraits
-  {
-    static const MPI::Datatype datatype;
-    static const int dim;
+  template<class T>
+  class MPITraits {
+  public:
+    static MPI::Datatype Type();
+    static int Length() { return 1; };
   };
   
-  template<> const MPI::Datatype MPITraits<int>::datatype = MPI_INT;
-  template<> const int MPITraits<int>::dim = 1;
-  template<> const MPI::Datatype MPITraits<RealType>::datatype = MPI_REALTYPE;
-  template<> const int MPITraits<RealType>::dim = 1;
-  template<> const MPI::Datatype MPITraits<Vector3d>::datatype = MPI_REALTYPE;
-  template<> const int MPITraits<Vector3d>::dim = 3;
-  template<> const MPI::Datatype MPITraits<Mat3x3d>::datatype = MPI_REALTYPE;
-  template<> const int MPITraits<Mat3x3d>::dim = 9;
+  template<> inline MPI::Datatype MPITraits<int>::Type() { return MPI_INT; }
+  template<> inline MPI::Datatype MPITraits<RealType>::Type() { return MPI_REALTYPE; }
+
+  template<class T, unsigned int Dim>
+  class MPITraits< Vector<T, Dim> > {
+  public:
+    static MPI::Datatype Type() { return MPITraits<T>::Type(); }
+    static int Length() {return Dim;}
+  };
+
+  template<class T>
+  class MPITraits< Vector3<T> > {
+  public:
+    static MPI::Datatype Type() { return MPITraits<T>::Type(); }
+    static int Length() {return 3;}
+  };
+
+  template<class T, unsigned int Row, unsigned int Col>
+  class MPITraits< RectMatrix<T, Row, Col> > {
+  public:
+    static MPI::Datatype Type() { return MPITraits<T>::Type(); }
+    static int Length() {return Row * Col;}
+  };
+
+  template<class T>
+  class MPITraits< SquareMatrix3<T> > {
+  public:
+    static MPI::Datatype Type() { return MPITraits<T>::Type(); }
+    static int Length() {return 9;}
+  };
+  
   
   template<communicatorType D, typename T>
   class Communicator { 
@@ -115,7 +139,7 @@ namespace OpenMD{
       counts.reserve(nCommProcs);
       displacements.reserve(nCommProcs);
 
-      planSize_ = MPITraits<T>::dim * nObjects; 
+      planSize_ = MPITraits<T>::Length() * nObjects; 
 
       myComm.Allgather(&planSize_, 1, MPI::INT, &counts[0], 1, MPI::INT);
 
@@ -131,26 +155,26 @@ namespace OpenMD{
       }
     }
 
-
-    void gather(std::vector<T>& v1, std::vector<T>& v2) {
+    
+    void gather(vector<T>& v1, vector<T>& v2) {
       
       myComm.Allgatherv(&v1[0], 
                         planSize_, 
-                        MPITraits<T>::datatype, 
+                        MPITraits<T>::Type(), 
                         &v2[0], 
                         &counts[0], 
                         &displacements[0], 
-                        MPITraits<T>::datatype);      
+                        MPITraits<T>::Type());      
     }
-
     
-   
-    void scatter(std::vector<T>& v1, std::vector<T>& v2) {
-
+    
+    
+    void scatter(vector<T>& v1, vector<T>& v2) {
+      
       myComm.Reduce_scatter(&v1[0], &v2[0], &counts[0], 
-                            MPITraits<T>::datatype, MPI::SUM);
+                            MPITraits<T>::Type(), MPI::SUM);
     }
-
+    
     int getSize() {
       return size_;
     }
@@ -160,8 +184,8 @@ namespace OpenMD{
     int rowIndex_;
     int columnIndex_;
     int size_;
-    std::vector<int> counts;
-    std::vector<int> displacements;
+    vector<int> counts;
+    vector<int> displacements;
     MPI::Intracomm myComm;
   }; 
 

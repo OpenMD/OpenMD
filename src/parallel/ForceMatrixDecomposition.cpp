@@ -52,11 +52,12 @@ namespace OpenMD {
    */
   
   void ForceMatrixDecomposition::distributeInitialData() {
+    snap_ = sman_->getCurrentSnapshot();
+    storageLayout_ = sman_->getStorageLayout();
 #ifdef IS_MPI    
-    Snapshot* snap = sman_->getCurrentSnapshot();
-    int nLocal = snap->getNumberOfAtoms();
-    int nGroups = snap->getNumberOfCutoffGroups();
-
+    int nLocal = snap_->getNumberOfAtoms();
+    int nGroups = snap_->getNumberOfCutoffGroups();
+    
     AtomCommIntRow = new Communicator<Row,int>(nLocal);
     AtomCommRealRow = new Communicator<Row,RealType>(nLocal);
     AtomCommVectorRow = new Communicator<Row,Vector3d>(nLocal);
@@ -76,12 +77,23 @@ namespace OpenMD {
     int nAtomsInCol = AtomCommIntColumn->getSize();
     int nGroupsInRow = cgCommIntRow->getSize();
     int nGroupsInCol = cgCommIntColumn->getSize();
+
+    // Modify the data storage objects with the correct layouts and sizes:
+    atomRowData.resize(nAtomsInRow);
+    atomRowData.setStorageLayout(storageLayout_);
+    atomColData.resize(nAtomsInCol);
+    atomColData.setStorageLayout(storageLayout_);
+    cgRowData.resize(nGroupsInRow);
+    cgRowData.setStorageLayout(DataStorage::dslPosition);
+    cgColData.resize(nGroupsInCol);
+    cgColData.setStorageLayout(DataStorage::dslPosition);
     
     vector<vector<RealType> > pot_row(N_INTERACTION_FAMILIES, 
                                       vector<RealType> (nAtomsInRow, 0.0));
     vector<vector<RealType> > pot_col(N_INTERACTION_FAMILIES,
                                       vector<RealType> (nAtomsInCol, 0.0));
-    
+
+
     vector<RealType> pot_local(N_INTERACTION_FAMILIES, 0.0);
     
     // gather the information for atomtype IDs (atids):
@@ -109,112 +121,115 @@ namespace OpenMD {
 
 
   void ForceMatrixDecomposition::distributeData()  {
+    snap_ = sman_->getCurrentSnapshot();
+    storageLayout_ = sman_->getStorageLayout();
 #ifdef IS_MPI
-    Snapshot* snap = sman_->getCurrentSnapshot();
     
     // gather up the atomic positions
-    AtomCommVectorRow->gather(snap->atomData.position, 
-                            snap->atomIData.position);
-    AtomCommVectorColumn->gather(snap->atomData.position, 
-                            snap->atomJData.position);
+    AtomCommVectorRow->gather(snap_->atomData.position, 
+                              atomRowData.position);
+    AtomCommVectorColumn->gather(snap_->atomData.position, 
+                                 atomColData.position);
     
     // gather up the cutoff group positions
-    cgCommVectorRow->gather(snap->cgData.position, 
-                          snap->cgIData.position);
-    cgCommVectorColumn->gather(snap->cgData.position, 
-                          snap->cgJData.position);
+    cgCommVectorRow->gather(snap_->cgData.position, 
+                            cgRowData.position);
+    cgCommVectorColumn->gather(snap_->cgData.position, 
+                               cgColData.position);
     
     // if needed, gather the atomic rotation matrices
-    if (snap->atomData.getStorageLayout() & DataStorage::dslAmat) {
-      AtomCommMatrixRow->gather(snap->atomData.aMat, 
-                              snap->atomIData.aMat);
-      AtomCommMatrixColumn->gather(snap->atomData.aMat, 
-                              snap->atomJData.aMat);
+    if (storageLayout_ & DataStorage::dslAmat) {
+      AtomCommMatrixRow->gather(snap_->atomData.aMat, 
+                                atomRowData.aMat);
+      AtomCommMatrixColumn->gather(snap_->atomData.aMat, 
+                                   atomColData.aMat);
     }
     
     // if needed, gather the atomic eletrostatic frames
-    if (snap->atomData.getStorageLayout() & DataStorage::dslElectroFrame) {
-      AtomCommMatrixRow->gather(snap->atomData.electroFrame, 
-                              snap->atomIData.electroFrame);
-      AtomCommMatrixColumn->gather(snap->atomData.electroFrame, 
-                              snap->atomJData.electroFrame);
+    if (storageLayout_ & DataStorage::dslElectroFrame) {
+      AtomCommMatrixRow->gather(snap_->atomData.electroFrame, 
+                                atomRowData.electroFrame);
+      AtomCommMatrixColumn->gather(snap_->atomData.electroFrame, 
+                                   atomColData.electroFrame);
     }
 #endif      
   }
   
   void ForceMatrixDecomposition::collectIntermediateData() {
+    snap_ = sman_->getCurrentSnapshot();
+    storageLayout_ = sman_->getStorageLayout();
 #ifdef IS_MPI
-    Snapshot* snap = sman_->getCurrentSnapshot();
     
-    if (snap->atomData.getStorageLayout() & DataStorage::dslDensity) {
-
-      AtomCommRealRow->scatter(snap->atomIData.density, 
-                             snap->atomData.density);
-
-      int n = snap->atomData.density.size();
+    if (storageLayout_ & DataStorage::dslDensity) {
+      
+      AtomCommRealRow->scatter(atomRowData.density, 
+                               snap_->atomData.density);
+      
+      int n = snap_->atomData.density.size();
       std::vector<RealType> rho_tmp(n, 0.0);
-      AtomCommRealColumn->scatter(snap->atomJData.density, rho_tmp);
+      AtomCommRealColumn->scatter(atomColData.density, rho_tmp);
       for (int i = 0; i < n; i++)
-        snap->atomData.density[i] += rho_tmp[i];
+        snap_->atomData.density[i] += rho_tmp[i];
     }
 #endif
   }
   
   void ForceMatrixDecomposition::distributeIntermediateData() {
+    snap_ = sman_->getCurrentSnapshot();
+    storageLayout_ = sman_->getStorageLayout();
 #ifdef IS_MPI
-    Snapshot* snap = sman_->getCurrentSnapshot();
-    if (snap->atomData.getStorageLayout() & DataStorage::dslFunctional) {
-      AtomCommRealRow->gather(snap->atomData.functional, 
-                            snap->atomIData.functional);
-      AtomCommRealColumn->gather(snap->atomData.functional, 
-                            snap->atomJData.functional);
+    if (storageLayout_ & DataStorage::dslFunctional) {
+      AtomCommRealRow->gather(snap_->atomData.functional, 
+                              atomRowData.functional);
+      AtomCommRealColumn->gather(snap_->atomData.functional, 
+                                 atomColData.functional);
     }
     
-    if (snap->atomData.getStorageLayout() & DataStorage::dslFunctionalDerivative) {
-      AtomCommRealRow->gather(snap->atomData.functionalDerivative, 
-                            snap->atomIData.functionalDerivative);
-      AtomCommRealColumn->gather(snap->atomData.functionalDerivative, 
-                            snap->atomJData.functionalDerivative);
+    if (storageLayout_ & DataStorage::dslFunctionalDerivative) {
+      AtomCommRealRow->gather(snap_->atomData.functionalDerivative, 
+                              atomRowData.functionalDerivative);
+      AtomCommRealColumn->gather(snap_->atomData.functionalDerivative, 
+                                 atomColData.functionalDerivative);
     }
 #endif
   }
   
   
   void ForceMatrixDecomposition::collectData() {
-#ifdef IS_MPI
-    Snapshot* snap = sman_->getCurrentSnapshot();
-    
-    int n = snap->atomData.force.size();
+    snap_ = sman_->getCurrentSnapshot();
+    storageLayout_ = sman_->getStorageLayout();
+#ifdef IS_MPI    
+    int n = snap_->atomData.force.size();
     vector<Vector3d> frc_tmp(n, V3Zero);
     
-    AtomCommVectorRow->scatter(snap->atomIData.force, frc_tmp);
+    AtomCommVectorRow->scatter(atomRowData.force, frc_tmp);
     for (int i = 0; i < n; i++) {
-      snap->atomData.force[i] += frc_tmp[i];
+      snap_->atomData.force[i] += frc_tmp[i];
       frc_tmp[i] = 0.0;
     }
     
-    AtomCommVectorColumn->scatter(snap->atomJData.force, frc_tmp);
+    AtomCommVectorColumn->scatter(atomColData.force, frc_tmp);
     for (int i = 0; i < n; i++)
-      snap->atomData.force[i] += frc_tmp[i];
+      snap_->atomData.force[i] += frc_tmp[i];
     
     
-    if (snap->atomData.getStorageLayout() & DataStorage::dslTorque) {
+    if (storageLayout_ & DataStorage::dslTorque) {
 
-      int nt = snap->atomData.force.size();
+      int nt = snap_->atomData.force.size();
       vector<Vector3d> trq_tmp(nt, V3Zero);
 
-      AtomCommVectorRow->scatter(snap->atomIData.torque, trq_tmp);
+      AtomCommVectorRow->scatter(atomRowData.torque, trq_tmp);
       for (int i = 0; i < n; i++) {
-        snap->atomData.torque[i] += trq_tmp[i];
+        snap_->atomData.torque[i] += trq_tmp[i];
         trq_tmp[i] = 0.0;
       }
       
-      AtomCommVectorColumn->scatter(snap->atomJData.torque, trq_tmp);
+      AtomCommVectorColumn->scatter(atomColData.torque, trq_tmp);
       for (int i = 0; i < n; i++)
-        snap->atomData.torque[i] += trq_tmp[i];
+        snap_->atomData.torque[i] += trq_tmp[i];
     }
     
-    int nLocal = snap->getNumberOfAtoms();
+    int nLocal = snap_->getNumberOfAtoms();
 
     vector<vector<RealType> > pot_temp(N_INTERACTION_FAMILIES, 
                                        vector<RealType> (nLocal, 0.0));
@@ -227,5 +242,115 @@ namespace OpenMD {
     }
 #endif
   }
+
+  
+  Vector3d ForceMatrixDecomposition::getIntergroupVector(int cg1, int cg2){
+    Vector3d d;
+    
+#ifdef IS_MPI
+    d = cgColData.position[cg2] - cgRowData.position[cg1];
+#else
+    d = snap_->cgData.position[cg2] - snap_->cgData.position[cg1];
+#endif
+    
+    snap_->wrapVector(d);
+    return d;    
+  }
+
+
+  Vector3d ForceMatrixDecomposition::getAtomToGroupVectorRow(int atom1, int cg1){
+
+    Vector3d d;
+    
+#ifdef IS_MPI
+    d = cgRowData.position[cg1] - atomRowData.position[atom1];
+#else
+    d = snap_->cgData.position[cg1] - snap_->atomData.position[atom1];
+#endif
+
+    snap_->wrapVector(d);
+    return d;    
+  }
+  
+  Vector3d ForceMatrixDecomposition::getAtomToGroupVectorColumn(int atom2, int cg2){
+    Vector3d d;
+    
+#ifdef IS_MPI
+    d = cgColData.position[cg2] - atomColData.position[atom2];
+#else
+    d = snap_->cgData.position[cg2] - snap_->atomData.position[atom2];
+#endif
+    
+    snap_->wrapVector(d);
+    return d;    
+  }
+    
+  Vector3d ForceMatrixDecomposition::getInteratomicVector(int atom1, int atom2){
+    Vector3d d;
+    
+#ifdef IS_MPI
+    d = atomColData.position[atom2] - atomRowData.position[atom1];
+#else
+    d = snap_->atomData.position[atom2] - snap_->atomData.position[atom1];
+#endif
+
+    snap_->wrapVector(d);
+    return d;    
+  }
+
+  void ForceMatrixDecomposition::addForceToAtomRow(int atom1, Vector3d fg){
+#ifdef IS_MPI
+    atomRowData.force[atom1] += fg;
+#else
+    snap_->atomData.force[atom1] += fg;
+#endif
+  }
+
+  void ForceMatrixDecomposition::addForceToAtomColumn(int atom2, Vector3d fg){
+#ifdef IS_MPI
+    atomColData.force[atom2] += fg;
+#else
+    snap_->atomData.force[atom2] += fg;
+#endif
+
+  }
+
+    // filling interaction blocks with pointers
+  InteractionData ForceMatrixDecomposition::fillInteractionData(int atom1, int atom2) {    
+
+    InteractionData idat;
+#ifdef IS_MPI
+    if (storageLayout_ & DataStorage::dslAmat) {
+      idat.A1 = atomRowData.aMat[atom1];
+      idat.A2 = atomColData.aMat[atom2];
+    }
+
+    if (storageLayout_ & DataStorage::dslElectroFrame) {
+      idat.eFrame1 = atomRowData.electroFrame[atom1];
+      idat.eFrame2 = atomColData.electroFrame[atom2];
+    }
+
+    if (storageLayout_ & DataStorage::dslTorque) {
+      idat.t1 = atomRowData.torque[atom1];
+      idat.t2 = atomColData.torque[atom2];
+    }
+
+    if (storageLayout_ & DataStorage::dslDensity) {
+      idat.rho1 = atomRowData.density[atom1];
+      idat.rho2 = atomColData.density[atom2];
+    }
+
+    if (storageLayout_ & DataStorage::dslFunctionalDerivative) {
+      idat.dfrho1 = atomRowData.functionalDerivative[atom1];
+      idat.dfrho2 = atomColData.functionalDerivative[atom2];
+    }
+#endif
+    
+  }
+  InteractionData ForceMatrixDecomposition::fillSkipData(int atom1, int atom2){
+  }
+  SelfData ForceMatrixDecomposition::fillSelfData(int atom1) {
+  }
+
   
 } //end namespace OpenMD

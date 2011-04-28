@@ -44,6 +44,7 @@
 
 #include "Parallel/ForceDecomposition.hpp"
 #include "math/SquareMatrix3.hpp"
+#include "brains/Snapshot.hpp"
 
 #ifdef IS_MPI
 #include "Parallel/Communicator.hpp"
@@ -94,7 +95,15 @@ namespace OpenMD {
 
   private: 
     SnapshotManager* sman_;    
+    Snapshot* snap_;
+    int storageLayout_;
 #ifdef IS_MPI    
+
+    DataStorage atomRowData;
+    DataStorage atomColData;
+    DataStorage cgRowData;
+    DataStorage cgColData;
+
     Communicator<Row, int>* AtomCommIntRow;
     Communicator<Row, RealType>* AtomCommRealRow; 
     Communicator<Row, Vector3d>* AtomCommVectorRow; 
