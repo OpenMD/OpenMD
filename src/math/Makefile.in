@@ -10,11 +10,9 @@ MySource    = \
 	LegendrePolynomial.cpp \
 	RMSD.cpp \
 	CubicSpline.cpp \
-	linearAlgebra.F90 \
 	Wigner3jm.F90 
 
 Modules= \
-	linearAlgebra
 
 USE_QHULL = @USE_QHULL@
 

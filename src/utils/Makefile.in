@@ -1,11 +1,8 @@
 Package = utils
 
 MySource    = \
-	definitions.F90 \
-	status.F90 \
 	fError.c \
 	PropertyMap.cpp \
-	OpenMDMPI.F90 \
 	simError.c \
 	FileLocation.cpp \
 	SystemUtilities.cpp \
@@ -35,12 +32,8 @@ ParallelSource = \
 	ElementsTable.cpp \
 	fError.c \
 	simError.c \
-	OpenMDMPI.F90
 
-Modules = \
-	definitions \
-	OpenMDMPI \
-	status \
+Modules =
 
 RmiSource =
 
