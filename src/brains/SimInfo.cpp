@@ -770,12 +770,6 @@ namespace OpenMD {
     temp = usesElectrostatic;
     MPI_Allreduce(&temp, &usesElectrostaticAtoms_, 1, MPI_INT, MPI_LOR, MPI_COMM_WORLD); 
 #endif
-    fInfo_.SIM_uses_PBC = usesPeriodicBoundaries_;    
-    fInfo_.SIM_uses_DirectionalAtoms = usesDirectionalAtoms_;
-    fInfo_.SIM_uses_MetallicAtoms = usesMetallicAtoms_;
-    fInfo_.SIM_requires_SkipCorrection = usesElectrostaticAtoms_;
-    fInfo_.SIM_requires_SelfCorrection = usesElectrostaticAtoms_;
-    fInfo_.SIM_uses_AtomicVirial = usesAtomicVirial_;
   }
 
 

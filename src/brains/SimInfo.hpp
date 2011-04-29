@@ -64,13 +64,9 @@
 #include "utils/LocalIndexManager.hpp"
 #include "nonbonded/SwitchingFunction.hpp"
 
-//another nonsense macro declaration
-#define __OPENMD_C
-#include "brains/fSimulation.h"
-
 using namespace std;
 namespace OpenMD{
-  //forward decalration 
+  //forward declaration 
   class SnapshotManager;
   class Molecule;
   class SelectionManager;
@@ -554,11 +550,6 @@ namespace OpenMD{
   private:
     /// Data structures holding primary simulation objects
     map<int, Molecule*>  molecules_;  /**< map holding pointers to LOCAL molecules */
-    simtype fInfo_;                   /**< A dual struct shared by C++
-                                         and Fortran to pass
-                                         information about what types
-                                         of calculation are
-                                         required */
 
     /// Stamps are templates for objects that are then used to create
     /// groups of objects.  For example, a molecule stamp contains

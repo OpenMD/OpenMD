@@ -1,7 +1,6 @@
 Package = utils
 
 MySource    = \
-	fError.c \
 	PropertyMap.cpp \
 	simError.c \
 	FileLocation.cpp \
@@ -30,7 +29,6 @@ endif
 
 ParallelSource = \
 	ElementsTable.cpp \
-	fError.c \
 	simError.c \
 
 Modules =
