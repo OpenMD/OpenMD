@@ -191,7 +191,7 @@ namespace OpenMD {
     if (!initialized_) initialize();
     
     map<pair<AtomType*, AtomType*>, StickyInteractionData>::iterator it;
-    it = MixingMap.find(idat.atypes);
+    it = MixingMap.find(*(idat.atypes));
     if (it != MixingMap.end()) {
 
       StickyInteractionData mixer = (*it).second;
@@ -206,22 +206,22 @@ namespace OpenMD {
       RealType rbig = mixer.rbig;
       bool isPower = mixer.isPower;
       
-      if (idat.rij <= rbig) {
+      if ( *(idat.rij) <= rbig) {
         
-        RealType r3 = idat.r2 * idat.rij;
-        RealType r5 = r3 * idat.r2;
+        RealType r3 = *(idat.r2) * *(idat.rij);
+        RealType r5 = r3 * *(idat.r2);
         
-        RotMat3x3d A1trans = idat.A1.transpose();
-        RotMat3x3d A2trans = idat.A2.transpose();
+        RotMat3x3d A1trans = idat.A1->transpose();
+        RotMat3x3d A2trans = idat.A2->transpose();
         
         // rotate the inter-particle separation into the two different
         // body-fixed coordinate systems:
         
-        Vector3d ri = idat.A1 * idat.d;
+        Vector3d ri = *(idat.A1) * *(idat.d);
         
         // negative sign because this is the vector from j to i:
         
-        Vector3d rj = - idat.A2 * idat.d;
+        Vector3d rj = - *(idat.A2) * *(idat.d);
         
         RealType xi = ri.x();
         RealType yi = ri.y();
@@ -246,27 +246,27 @@ namespace OpenMD {
         RealType sp = 0.0;
         RealType dspdr = 0.0;
         
-        if (idat.rij < ru) {
-          if (idat.rij < rl) {
+        if ( *(idat.rij) < ru) {
+          if ( *(idat.rij) < rl) {
             s = 1.0;
             dsdr = 0.0;
           } else {          
             // we are in the switching region 
             
-            pair<RealType, RealType> res = mixer.s->getValueAndDerivativeAt(idat.rij);
+            pair<RealType, RealType> res = mixer.s->getValueAndDerivativeAt(*(idat.rij));
             s = res.first;
             dsdr = res.second;
           }
         }
         
-        if (idat.rij < rup) {
-          if (idat.rij < rlp) {
+        if (*(idat.rij) < rup) {
+          if ( *(idat.rij) < rlp) {
             sp = 1.0;
             dspdr = 0.0;
           } else {
             // we are in the switching region 
             
-            pair<RealType, RealType> res =mixer.sp->getValueAndDerivativeAt(idat.rij);
+            pair<RealType, RealType> res =mixer.sp->getValueAndDerivativeAt( *(idat.rij));
             sp = res.first;
             dspdr = res.second;
           }
@@ -277,11 +277,11 @@ namespace OpenMD {
         RealType w = wi+wj;
         
         
-        RealType zif = zi/idat.rij - 0.6;
-        RealType zis = zi/idat.rij + 0.8;
+        RealType zif = zi/ *(idat.rij)  - 0.6;
+        RealType zis = zi/ *(idat.rij)  + 0.8;
         
-        RealType zjf = zj/idat.rij - 0.6;
-        RealType zjs = zj/idat.rij + 0.8;
+        RealType zjf = zj/ *(idat.rij)  - 0.6;
+        RealType zjs = zj/ *(idat.rij)  + 0.8;
         
         RealType wip = zif*zif*zis*zis - w0;
         RealType wjp = zjf*zjf*zjs*zjs - w0;
@@ -300,11 +300,11 @@ namespace OpenMD {
 
         Vector3d dwip(-2.0*xi*zi*uglyi/r3, 
                       -2.0*yi*zi*uglyi/r3,
-                      2.0*(1.0/idat.rij - zi2/r3)*uglyi);
+                      2.0*(1.0/ *(idat.rij)  - zi2/r3)*uglyi);
         
         Vector3d dwjp(-2.0*xj*zj*uglyj/r3,
                       -2.0*yj*zj*uglyj/r3,
-                      2.0*(1.0/idat.rij - zj2/r3)*uglyj);
+                      2.0*(1.0/ *(idat.rij)  - zj2/r3)*uglyj);
         
         Vector3d dwidu(4.0*(yi*zi2 + 0.5*yi*(xi2-yi2))/r3,
                        4.0*(xi*zi2 - 0.5*xi*(xi2-yi2))/r3,
@@ -314,12 +314,12 @@ namespace OpenMD {
                        4.0*(xj*zj2 - 0.5*xj*(xj2-yj2))/r3,
                        - 8.0*xj*yj*zj/r3);
         
-        Vector3d dwipdu(2.0*yi*uglyi/idat.rij,
-                        -2.0*xi*uglyi/idat.rij,
+        Vector3d dwipdu(2.0*yi*uglyi/ *(idat.rij) ,
+                        -2.0*xi*uglyi/ *(idat.rij) ,
                         0.0);
         
-        Vector3d dwjpdu(2.0*yj*uglyj/idat.rij,
-                        -2.0*xj*uglyj/idat.rij,
+        Vector3d dwjpdu(2.0*yj*uglyj/ *(idat.rij) ,
+                        -2.0*xj*uglyj/ *(idat.rij) ,
                         0.0);
         
         if (isPower) {
@@ -342,34 +342,34 @@ namespace OpenMD {
           dspdr = 0.0;
         }
         
-        idat.vpair += 0.5*(v0*s*w + v0p*sp*wp);
-        idat.pot[2] += 0.5*(v0*s*w + v0p*sp*wp)*idat.sw;
+        *(idat.vpair) += 0.5*(v0*s*w + v0p*sp*wp);
+        idat.pot[HYDROGENBONDING_FAMILY] += 0.5*(v0*s*w + v0p*sp*wp)* *(idat.sw) ;
         
         // do the torques first since they are easy:
         // remember that these are still in the body-fixed axes
         
-        Vector3d ti = 0.5*idat.sw*(v0*s*dwidu + v0p*sp*dwipdu);
-        Vector3d tj = 0.5*idat.sw*(v0*s*dwjdu + v0p*sp*dwjpdu);
+        Vector3d ti = 0.5* *(idat.sw) *(v0*s*dwidu + v0p*sp*dwipdu);
+        Vector3d tj = 0.5* *(idat.sw) *(v0*s*dwjdu + v0p*sp*dwjpdu);
         
         // go back to lab frame using transpose of rotation matrix:
         
-        idat.t1 += A1trans * ti;
-        idat.t2 += A2trans * tj;
+        *(idat.t1) += A1trans * ti;
+        *(idat.t2) += A2trans * tj;
         
         // Now, on to the forces:
         
         // first rotate the i terms back into the lab frame:
         
-        Vector3d radcomi = (v0 * s * dwi + v0p * sp * dwip) * idat.sw;
-        Vector3d radcomj = (v0 * s * dwj + v0p * sp * dwjp) * idat.sw;
+        Vector3d radcomi = (v0 * s * dwi + v0p * sp * dwip) *  *(idat.sw);
+        Vector3d radcomj = (v0 * s * dwj + v0p * sp * dwjp) *  *(idat.sw);
         
         Vector3d fii = A1trans * radcomi;
         Vector3d fjj = A2trans * radcomj;
         
         // now assemble these with the radial-only terms:
         
-        idat.f1 += 0.5 * ((v0*dsdr*w + v0p*dspdr*wp) * idat.d / 
-                          idat.rij + fii - fjj);
+        *(idat.f1) += 0.5 * ((v0*dsdr*w + v0p*dspdr*wp) * *(idat.d) / 
+                             *(idat.rij)  + fii - fjj);
         
       }
     }

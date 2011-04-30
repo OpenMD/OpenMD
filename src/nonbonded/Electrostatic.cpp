@@ -463,13 +463,13 @@ namespace OpenMD {
     
     if (!initialized_) initialize();
     
-    ElectrostaticAtomData data1 = ElectrostaticMap[idat.atypes.first];
-    ElectrostaticAtomData data2 = ElectrostaticMap[idat.atypes.second];
+    ElectrostaticAtomData data1 = ElectrostaticMap[idat.atypes->first];
+    ElectrostaticAtomData data2 = ElectrostaticMap[idat.atypes->second];
     
     // some variables we'll need independent of electrostatic type:
 
-    riji = 1.0 / idat.rij;
-    Vector3d rhat = idat.d  * riji;
+    riji = 1.0 /  *(idat.rij) ;
+    Vector3d rhat =  *(idat.d)   * riji;
 
     // logicals
 
@@ -488,7 +488,7 @@ namespace OpenMD {
 
     if (i_is_Dipole) {
       mu_i = data1.dipole_moment;
-      uz_i = idat.eFrame1.getColumn(2);
+      uz_i = idat.eFrame1->getColumn(2);
       
       ct_i = dot(uz_i, rhat);
 
@@ -504,9 +504,9 @@ namespace OpenMD {
       qyy_i = Q_i.y();
       qzz_i = Q_i.z();
       
-      ux_i = idat.eFrame1.getColumn(0);
-      uy_i = idat.eFrame1.getColumn(1);
-      uz_i = idat.eFrame1.getColumn(2);
+      ux_i = idat.eFrame1->getColumn(0);
+      uy_i = idat.eFrame1->getColumn(1);
+      uz_i = idat.eFrame1->getColumn(2);
 
       cx_i = dot(ux_i, rhat);
       cy_i = dot(uy_i, rhat);
@@ -522,7 +522,7 @@ namespace OpenMD {
 
     if (j_is_Dipole) {
       mu_j = data2.dipole_moment;
-      uz_j = idat.eFrame2.getColumn(2);
+      uz_j = idat.eFrame2->getColumn(2);
       
       ct_j = dot(uz_j, rhat);
 
@@ -538,9 +538,9 @@ namespace OpenMD {
       qyy_j = Q_j.y();
       qzz_j = Q_j.z();
       
-      ux_j = idat.eFrame2.getColumn(0);
-      uy_j = idat.eFrame2.getColumn(1);
-      uz_j = idat.eFrame2.getColumn(2);
+      ux_j = idat.eFrame2->getColumn(0);
+      uy_j = idat.eFrame2->getColumn(1);
+      uz_j = idat.eFrame2->getColumn(2);
 
       cx_j = dot(ux_j, rhat);
       cy_j = dot(uy_j, rhat);
@@ -559,7 +559,7 @@ namespace OpenMD {
       if (j_is_Charge) {
         if (screeningMethod_ == DAMPED) {
           // assemble the damping variables
-          res = erfcSpline_->getValueAndDerivativeAt(idat.rij);
+          res = erfcSpline_->getValueAndDerivativeAt( *(idat.rij) );
           erfcVal = res.first;
           derfcVal = res.second;
           c1 = erfcVal * riji;
@@ -569,56 +569,56 @@ namespace OpenMD {
           c2 = c1 * riji;
         }
 
-        preVal = idat.electroMult * pre11_ * q_i * q_j;
+        preVal =  *(idat.electroMult) * pre11_ * q_i * q_j;
         
         if (summationMethod_ == esm_SHIFTED_POTENTIAL) {
           vterm = preVal * (c1 - c1c_);
-          dudr  = -idat.sw * preVal * c2;
+          dudr  = - *(idat.sw)  * preVal * c2;
 
         } else if (summationMethod_ == esm_SHIFTED_FORCE)  {
-          vterm = preVal * ( c1 - c1c_ + c2c_*(idat.rij - cutoffRadius_) );
-          dudr  = idat.sw * preVal * (c2c_ - c2);
+          vterm = preVal * ( c1 - c1c_ + c2c_*( *(idat.rij)  - cutoffRadius_) );
+          dudr  =  *(idat.sw)  * preVal * (c2c_ - c2);
 
         } else if (summationMethod_ == esm_REACTION_FIELD) {
-          rfVal = idat.electroMult * preRF_ * idat.rij * idat.rij;
+          rfVal =  *(idat.electroMult) * preRF_ *  *(idat.rij)  *  *(idat.rij) ;
           vterm = preVal * ( riji + rfVal );             
-          dudr  = idat.sw * preVal * ( 2.0 * rfVal - riji ) * riji;
+          dudr  =  *(idat.sw)  * preVal * ( 2.0 * rfVal - riji ) * riji;
 
         } else {
           vterm = preVal * riji * erfcVal;             
 
-          dudr  = - idat.sw * preVal * c2;
+          dudr  = -  *(idat.sw)  * preVal * c2;
 
         }
  
-        idat.vpair += vterm;
-        epot += idat.sw * vterm;
+        *(idat.vpair) += vterm;
+        epot +=  *(idat.sw)  * vterm;
 
         dVdr += dudr * rhat;       
       }
 
       if (j_is_Dipole) {
         // pref is used by all the possible methods
-        pref = idat.electroMult * pre12_ * q_i * mu_j;
-        preSw = idat.sw * pref;
+        pref =  *(idat.electroMult) * pre12_ * q_i * mu_j;
+        preSw =  *(idat.sw)  * pref;
 
         if (summationMethod_ == esm_REACTION_FIELD) {
           ri2 = riji * riji;
           ri3 = ri2 * riji;
     
-          vterm = - pref * ct_j * ( ri2 - preRF2_ * idat.rij );
-          idat.vpair += vterm;
-          epot += idat.sw * vterm;
+          vterm = - pref * ct_j * ( ri2 - preRF2_ *  *(idat.rij)  );
+          *(idat.vpair) += vterm;
+          epot +=  *(idat.sw)  * vterm;
 
           dVdr +=  -preSw * (ri3 * (uz_j - 3.0 * ct_j * rhat) - preRF2_*uz_j);
-          duduz_j += -preSw * rhat * (ri2 - preRF2_ * idat.rij);   
+          duduz_j += -preSw * rhat * (ri2 - preRF2_ *  *(idat.rij) );   
 
         } else {
           // determine the inverse r used if we have split dipoles
           if (j_is_SplitDipole) {
-            BigR = sqrt(idat.r2 + 0.25 * d_j * d_j);
+            BigR = sqrt( *(idat.r2) + 0.25 * d_j * d_j);
             ri = 1.0 / BigR;
-            scale = idat.rij * ri;
+            scale =  *(idat.rij)  * ri;
           } else {
             ri = riji;
             scale = 1.0;
@@ -628,7 +628,7 @@ namespace OpenMD {
 
           if (screeningMethod_ == DAMPED) {
             // assemble the damping variables
-            res = erfcSpline_->getValueAndDerivativeAt(idat.rij);
+            res = erfcSpline_->getValueAndDerivativeAt( *(idat.rij) );
             erfcVal = res.first;
             derfcVal = res.second;
             c1 = erfcVal * ri;
@@ -645,8 +645,8 @@ namespace OpenMD {
           // calculate the potential
           pot_term =  scale * c2;
           vterm = -pref * ct_j * pot_term;
-          idat.vpair += vterm;
-          epot += idat.sw * vterm;
+          *(idat.vpair) += vterm;
+          epot +=  *(idat.sw)  * vterm;
              
           // calculate derivatives for forces and torques
 
@@ -661,11 +661,11 @@ namespace OpenMD {
         cx2 = cx_j * cx_j;
         cy2 = cy_j * cy_j;
         cz2 = cz_j * cz_j;
-        pref =  idat.electroMult * pre14_ * q_i * one_third_;
+        pref =   *(idat.electroMult) * pre14_ * q_i * one_third_;
           
         if (screeningMethod_ == DAMPED) {
           // assemble the damping variables
-          res = erfcSpline_->getValueAndDerivativeAt(idat.rij);
+          res = erfcSpline_->getValueAndDerivativeAt( *(idat.rij) );
           erfcVal = res.first;
           derfcVal = res.second;
           c1 = erfcVal * riji;
@@ -680,10 +680,10 @@ namespace OpenMD {
         }
 
         // precompute variables for convenience
-        preSw = idat.sw * pref;
+        preSw =  *(idat.sw)  * pref;
         c2ri = c2 * riji;
         c3ri = c3 * riji;
-        c4rij = c4 * idat.rij;
+        c4rij = c4 *  *(idat.rij) ;
         rhatdot2 = 2.0 * rhat * c3;
         rhatc4 = rhat * c4rij;
 
@@ -692,8 +692,8 @@ namespace OpenMD {
                      qyy_j * (cy2*c3 - c2ri) + 
                      qzz_j * (cz2*c3 - c2ri) );
         vterm = pref * pot_term;
-        idat.vpair += vterm;
-        epot += idat.sw * vterm;
+        *(idat.vpair) += vterm;
+        epot +=  *(idat.sw)  * vterm;
                 
         // calculate derivatives for the forces and torques
 
@@ -711,29 +711,29 @@ namespace OpenMD {
 
       if (j_is_Charge) {
         // variables used by all the methods
-        pref = idat.electroMult * pre12_ * q_j * mu_i;
-        preSw = idat.sw * pref;
+        pref =  *(idat.electroMult) * pre12_ * q_j * mu_i;
+        preSw =  *(idat.sw)  * pref;
 
         if (summationMethod_ == esm_REACTION_FIELD) {
 
           ri2 = riji * riji;
           ri3 = ri2 * riji;
 
-          vterm = pref * ct_i * ( ri2 - preRF2_ * idat.rij );
-          idat.vpair += vterm;
-          epot += idat.sw * vterm;
+          vterm = pref * ct_i * ( ri2 - preRF2_ *  *(idat.rij)  );
+          *(idat.vpair) += vterm;
+          epot +=  *(idat.sw)  * vterm;
           
           dVdr += preSw * (ri3 * (uz_i - 3.0 * ct_i * rhat) - preRF2_ * uz_i);
           
-          duduz_i += preSw * rhat * (ri2 - preRF2_ * idat.rij);
+          duduz_i += preSw * rhat * (ri2 - preRF2_ *  *(idat.rij) );
              
         } else {
           
           // determine inverse r if we are using split dipoles
           if (i_is_SplitDipole) {
-            BigR = sqrt(idat.r2 + 0.25 * d_i * d_i);
+            BigR = sqrt( *(idat.r2) + 0.25 * d_i * d_i);
             ri = 1.0 / BigR;
-            scale = idat.rij * ri;
+            scale =  *(idat.rij)  * ri;
           } else {
             ri = riji;
             scale = 1.0;
@@ -743,7 +743,7 @@ namespace OpenMD {
             
           if (screeningMethod_ == DAMPED) {
             // assemble the damping variables
-            res = erfcSpline_->getValueAndDerivativeAt(idat.rij);
+            res = erfcSpline_->getValueAndDerivativeAt( *(idat.rij) );
             erfcVal = res.first;
             derfcVal = res.second;
             c1 = erfcVal * ri;
@@ -760,8 +760,8 @@ namespace OpenMD {
           // calculate the potential
           pot_term = c2 * scale;
           vterm = pref * ct_i * pot_term;
-          idat.vpair += vterm;
-          epot += idat.sw * vterm;
+          *(idat.vpair) += vterm;
+          epot +=  *(idat.sw)  * vterm;
 
           // calculate derivatives for the forces and torques
           dVdr += preSw * (uz_i * c2ri - ct_i * rhat * sc2 * c3);
@@ -773,8 +773,8 @@ namespace OpenMD {
         // variables used by all methods
         ct_ij = dot(uz_i, uz_j);
 
-        pref = idat.electroMult * pre22_ * mu_i * mu_j;
-        preSw = idat.sw * pref;
+        pref =  *(idat.electroMult) * pre22_ * mu_i * mu_j;
+        preSw =  *(idat.sw)  * pref;
 
         if (summationMethod_ == esm_REACTION_FIELD) {
           ri2 = riji * riji;
@@ -783,8 +783,8 @@ namespace OpenMD {
 
           vterm = pref * ( ri3 * (ct_ij - 3.0 * ct_i * ct_j) -
                            preRF2_ * ct_ij );
-          idat.vpair += vterm;
-          epot += idat.sw * vterm;
+          *(idat.vpair) += vterm;
+          epot +=  *(idat.sw)  * vterm;
              
           a1 = 5.0 * ct_i * ct_j - ct_ij;
              
@@ -797,17 +797,17 @@ namespace OpenMD {
           
           if (i_is_SplitDipole) {
             if (j_is_SplitDipole) {
-              BigR = sqrt(idat.r2 + 0.25 * d_i * d_i + 0.25 * d_j * d_j);
+              BigR = sqrt( *(idat.r2) + 0.25 * d_i * d_i + 0.25 * d_j * d_j);
             } else {
-              BigR = sqrt(idat.r2 + 0.25 * d_i * d_i);
+              BigR = sqrt( *(idat.r2) + 0.25 * d_i * d_i);
             }
             ri = 1.0 / BigR;
-            scale = idat.rij * ri;
+            scale =  *(idat.rij)  * ri;
           } else {
             if (j_is_SplitDipole) {
-              BigR = sqrt(idat.r2 + 0.25 * d_j * d_j);
+              BigR = sqrt( *(idat.r2) + 0.25 * d_j * d_j);
               ri = 1.0 / BigR;
-              scale = idat.rij * ri;
+              scale =  *(idat.rij)  * ri;
             } else {
               ri = riji;
               scale = 1.0;
@@ -815,7 +815,7 @@ namespace OpenMD {
           }
           if (screeningMethod_ == DAMPED) {
             // assemble damping variables
-            res = erfcSpline_->getValueAndDerivativeAt(idat.rij);
+            res = erfcSpline_->getValueAndDerivativeAt( *(idat.rij) );
             erfcVal = res.first;
             derfcVal = res.second;
             c1 = erfcVal * ri;
@@ -837,13 +837,13 @@ namespace OpenMD {
           preSwSc = preSw * scale;
           c2ri = c2 * ri;
           c3ri = c3 * ri;
-          c4rij = c4 * idat.rij;
+          c4rij = c4 *  *(idat.rij) ;
 
           // calculate the potential 
           pot_term = (ct_ij * c2ri - ctidotj * c3);
           vterm = pref * pot_term;
-          idat.vpair += vterm;
-          epot += idat.sw * vterm;
+          *(idat.vpair) += vterm;
+          epot +=  *(idat.sw)  * vterm;
 
           // calculate derivatives for the forces and torques
           dVdr += preSwSc * ( ctidotj * rhat * c4rij  - 
@@ -862,11 +862,11 @@ namespace OpenMD {
         cy2 = cy_i * cy_i;
         cz2 = cz_i * cz_i;
 
-        pref = idat.electroMult * pre14_ * q_j * one_third_;
+        pref =  *(idat.electroMult) * pre14_ * q_j * one_third_;
 
         if (screeningMethod_ == DAMPED) {
           // assemble the damping variables
-          res = erfcSpline_->getValueAndDerivativeAt(idat.rij);
+          res = erfcSpline_->getValueAndDerivativeAt( *(idat.rij) );
           erfcVal = res.first;
           derfcVal = res.second;
           c1 = erfcVal * riji;
@@ -881,10 +881,10 @@ namespace OpenMD {
         }
           
         // precompute some variables for convenience
-        preSw = idat.sw * pref;
+        preSw =  *(idat.sw)  * pref;
         c2ri = c2 * riji;
         c3ri = c3 * riji;
-        c4rij = c4 * idat.rij;
+        c4rij = c4 *  *(idat.rij) ;
         rhatdot2 = 2.0 * rhat * c3;
         rhatc4 = rhat * c4rij;
 
@@ -894,8 +894,8 @@ namespace OpenMD {
                      qzz_i * (cz2 * c3 - c2ri) );
         
         vterm = pref * pot_term;
-        idat.vpair += vterm;
-        epot += idat.sw * vterm;
+        *(idat.vpair) += vterm;
+        epot +=  *(idat.sw)  * vterm;
 
         // calculate the derivatives for the forces and torques
 
@@ -909,21 +909,21 @@ namespace OpenMD {
       }
     }
 
-    idat.pot[2] += epot;
-    idat.f1 += dVdr;
+    idat.pot[ELECTROSTATIC_FAMILY] += epot;
+    *(idat.f1) += dVdr;
 
     if (i_is_Dipole || i_is_Quadrupole) 
-      idat.t1 -= cross(uz_i, duduz_i);
+      *(idat.t1) -= cross(uz_i, duduz_i);
     if (i_is_Quadrupole) {
-      idat.t1 -= cross(ux_i, dudux_i);
-      idat.t1 -= cross(uy_i, duduy_i);
+      *(idat.t1) -= cross(ux_i, dudux_i);
+      *(idat.t1) -= cross(uy_i, duduy_i);
     }
-
+    
     if (j_is_Dipole || j_is_Quadrupole) 
-      idat.t2 -= cross(uz_j, duduz_j);
+      *(idat.t2) -= cross(uz_j, duduz_j);
     if (j_is_Quadrupole) {
-      idat.t2 -= cross(uz_j, dudux_j);
-      idat.t2 -= cross(uz_j, duduy_j);
+      *(idat.t2) -= cross(uz_j, dudux_j);
+      *(idat.t2) -= cross(uz_j, duduy_j);
     }
 
     return;
@@ -933,8 +933,8 @@ namespace OpenMD {
 
     if (!initialized_) initialize();
     
-    ElectrostaticAtomData data1 = ElectrostaticMap[idat.atypes.first];
-    ElectrostaticAtomData data2 = ElectrostaticMap[idat.atypes.second];
+    ElectrostaticAtomData data1 = ElectrostaticMap[idat.atypes->first];
+    ElectrostaticAtomData data2 = ElectrostaticMap[idat.atypes->second];
     
     // logicals
 
@@ -951,12 +951,12 @@ namespace OpenMD {
 
     if (i_is_Charge) {
       q_i = data1.charge;
-      idat.skippedCharge2 += q_i;
+      *(idat.skippedCharge2) += q_i;
     }
 
     if (j_is_Charge) {
       q_j = data2.charge;
-      idat.skippedCharge1 += q_j;
+      *(idat.skippedCharge1) += q_j;
     }
 
     // the rest of this function should only be necessary for reaction field.
@@ -970,63 +970,63 @@ namespace OpenMD {
 
       // some variables we'll need independent of electrostatic type:
       
-      riji = 1.0 / idat.rij;
-      rhat = idat.d  * riji;
+      riji = 1.0 /  *(idat.rij) ;
+      rhat =  *(idat.d)  * riji;
 
       if (i_is_Dipole) {
         mu_i = data1.dipole_moment;
-        uz_i = idat.eFrame1.getColumn(2);      
+        uz_i = idat.eFrame1->getColumn(2);      
         ct_i = dot(uz_i, rhat);
         duduz_i = V3Zero;
       }
             
       if (j_is_Dipole) {
         mu_j = data2.dipole_moment;
-        uz_j = idat.eFrame2.getColumn(2);      
+        uz_j = idat.eFrame2->getColumn(2);      
         ct_j = dot(uz_j, rhat);
         duduz_j = V3Zero;
       }
      
       if (i_is_Charge) {
         if (j_is_Charge) {
-          preVal = idat.electroMult * pre11_ * q_i * q_j;
-          rfVal = preRF_ * idat.rij * idat.rij;
+          preVal =  *(idat.electroMult) * pre11_ * q_i * q_j;
+          rfVal = preRF_ *  *(idat.rij)  *  *(idat.rij) ;
           vterm = preVal * rfVal; 
-          myPot += idat.sw * vterm;        
-          dudr  = idat.sw * preVal * 2.0 * rfVal * riji;        
+          myPot +=  *(idat.sw)  * vterm;        
+          dudr  =  *(idat.sw)  * preVal * 2.0 * rfVal * riji;        
           dVdr += dudr * rhat;
         } 
         
         if (j_is_Dipole) {
           ri2 = riji * riji;
           ri3 = ri2 * riji;        
-          pref = idat.electroMult * pre12_ * q_i * mu_j;
-          vterm = - pref * ct_j * ( ri2 - preRF2_ * idat.rij );
-          myPot += idat.sw * vterm;        
-          dVdr += -idat.sw * pref * ( ri3 * ( uz_j - 3.0 * ct_j * rhat) - preRF2_ * uz_j);
-          duduz_j += -idat.sw * pref * rhat * (ri2 - preRF2_ * idat.rij);
+          pref =  *(idat.electroMult) * pre12_ * q_i * mu_j;
+          vterm = - pref * ct_j * ( ri2 - preRF2_ *  *(idat.rij)  );
+          myPot +=  *(idat.sw)  * vterm;        
+          dVdr += - *(idat.sw)  * pref * ( ri3 * ( uz_j - 3.0 * ct_j * rhat) - preRF2_ * uz_j);
+          duduz_j += - *(idat.sw)  * pref * rhat * (ri2 - preRF2_ *  *(idat.rij) );
         } 
       }
       if (i_is_Dipole) {
         if (j_is_Charge) {
           ri2 = riji * riji;
           ri3 = ri2 * riji;        
-          pref = idat.electroMult * pre12_ * q_j * mu_i;
-          vterm = - pref * ct_i * ( ri2 - preRF2_ * idat.rij );
-          myPot += idat.sw * vterm;        
-          dVdr += idat.sw * pref * ( ri3 * ( uz_i - 3.0 * ct_i * rhat) - preRF2_ * uz_i);      
-          duduz_i += idat.sw * pref * rhat * (ri2 - preRF2_ * idat.rij);
+          pref =  *(idat.electroMult) * pre12_ * q_j * mu_i;
+          vterm = - pref * ct_i * ( ri2 - preRF2_ *  *(idat.rij)  );
+          myPot +=  *(idat.sw)  * vterm;        
+          dVdr +=  *(idat.sw)  * pref * ( ri3 * ( uz_i - 3.0 * ct_i * rhat) - preRF2_ * uz_i);      
+          duduz_i +=  *(idat.sw)  * pref * rhat * (ri2 - preRF2_ *  *(idat.rij));
         } 
       }
       
       // accumulate the forces and torques resulting from the self term
-      idat.pot[2] += myPot;
-      idat.f1 += dVdr;
+      idat.pot[ELECTROSTATIC_FAMILY] += myPot;
+      *(idat.f1) += dVdr;
       
       if (i_is_Dipole) 
-        idat.t1 -= cross(uz_i, duduz_i);
+        *(idat.t1) -= cross(uz_i, duduz_i);
       if (j_is_Dipole) 
-        idat.t2 -= cross(uz_j, duduz_j);
+        *(idat.t2) -= cross(uz_j, duduz_j);
     }
   }
     
@@ -1049,21 +1049,21 @@ namespace OpenMD {
         sdat.pot[2] -= 0.5 * preVal;
         
         // The self-correction term adds into the reaction field vector
-        Vector3d uz_i = sdat.eFrame.getColumn(2);
+        Vector3d uz_i = sdat.eFrame->getColumn(2);
         Vector3d ei = preVal * uz_i;
 
         // This looks very wrong.  A vector crossed with itself is zero.
-        sdat.t -= cross(uz_i, ei);
+        *(sdat.t) -= cross(uz_i, ei);
       }
     } else if (summationMethod_ == esm_SHIFTED_FORCE || summationMethod_ == esm_SHIFTED_POTENTIAL) {
       if (i_is_Charge) {        
         chg1 = data.charge;
         if (screeningMethod_ == DAMPED) {
-          self = - 0.5 * (c1c_ + alphaPi_) * chg1 * (chg1 + sdat.skippedCharge) * pre11_;
+          self = - 0.5 * (c1c_ + alphaPi_) * chg1 * (chg1 + *(sdat.skippedCharge)) * pre11_;
         } else {         
-          self = - 0.5 * rcuti_ * chg1 * (chg1 + sdat.skippedCharge) * pre11_;
+          self = - 0.5 * rcuti_ * chg1 * (chg1 +  *(sdat.skippedCharge)) * pre11_;
         }
-        sdat.pot[2] += self;
+        sdat.pot[ELECTROSTATIC_FAMILY] += self;
       }
     }
   }

@@ -306,18 +306,18 @@ namespace OpenMD {
     
     if (!initialized_) initialize();
     
-    SCInteractionData mixer = MixingMap[idat.atypes];
+    SCInteractionData mixer = MixingMap[ *(idat.atypes) ];
 
     RealType rcij = mixer.rCut;
 
-    if (idat.rij < rcij) {
-      idat.rho_i_at_j = mixer.phi->getValueAt(idat.rij);
-      idat.rho_j_at_i = idat.rho_i_at_j;
+    if ( *(idat.rij)  < rcij) {
+      *(idat.rho_i_at_j) = mixer.phi->getValueAt( *(idat.rij) );
+      *(idat.rho_j_at_i) = *(idat.rho_i_at_j);
     } else {
-      idat.rho_i_at_j = 0.0;
-      idat.rho_j_at_i = 0.0;
+      *(idat.rho_i_at_j) = 0.0;
+      *(idat.rho_j_at_i) = 0.0;
     }
-
+    
     return;
   }
 
@@ -327,8 +327,8 @@ namespace OpenMD {
 
     SCAtomData data1 = SCMap[sdat.atype];
     
-    sdat.frho = - data1.c * data1.epsilon * sqrt(sdat.rho);
-    sdat.dfrhodrho = 0.5 * sdat.frho / sdat.rho;
+    *(sdat.frho) = - data1.c * data1.epsilon * sqrt( *(sdat.rho) );
+    *(sdat.dfrhodrho) = 0.5 * *(sdat.frho) / *(sdat.rho);
     
     return;
   }
@@ -338,32 +338,32 @@ namespace OpenMD {
     
     if (!initialized_) initialize();
     
-    SCAtomData data1 = SCMap[idat.atypes.first];
-    SCAtomData data2 = SCMap[idat.atypes.second];
+    SCAtomData data1 = SCMap[idat.atypes->first];
+    SCAtomData data2 = SCMap[idat.atypes->second];
 
-    SCInteractionData mixer = MixingMap[idat.atypes];
+    SCInteractionData mixer = MixingMap[*(idat.atypes)];
 
     RealType rcij = mixer.rCut;
 
-    if (idat.rij < rcij) {
+    if ( *(idat.rij)  < rcij) {
       RealType vcij = mixer.vCut;
       
       pair<RealType, RealType> res;
       
-      res = mixer.phi->getValueAndDerivativeAt(idat.rij);
+      res = mixer.phi->getValueAndDerivativeAt( *(idat.rij) );
       RealType rhtmp = res.first;
       RealType drhodr = res.second;
       
-      res = mixer.V->getValueAndDerivativeAt(idat.rij);
+      res = mixer.V->getValueAndDerivativeAt( *(idat.rij) );
       RealType vptmp = res.first;
       RealType dvpdr = res.second;
       
       RealType pot_temp = vptmp - vcij;
-      idat.vpair += pot_temp;
+      *(idat.vpair) += pot_temp;
       
-      RealType dudr = drhodr * (idat.dfrho1 + idat.dfrho2) + dvpdr;
+      RealType dudr = drhodr * ( *(idat.dfrho1) + *(idat.dfrho2) ) + dvpdr;
       
-      idat.f1 += idat.d * dudr / idat.rij;
+      *(idat.f1) += *(idat.d) * dudr / *(idat.rij) ;
         
       // particle_pot is the difference between the full potential 
       // and the full potential without the presence of a particular
@@ -377,10 +377,10 @@ namespace OpenMD {
       // Most of the particle_pot heavy lifting comes from the
       // pair interaction, and will be handled by vpair.
       
-      idat.fshift1 = - data1.c * data1.epsilon * sqrt(idat.rho1 - rhtmp);
-      idat.fshift2 = - data2.c * data2.epsilon * sqrt(idat.rho2 - rhtmp);
+      *(idat.fshift1) = - data1.c * data1.epsilon * sqrt( *(idat.rho1) - rhtmp);
+      *(idat.fshift2) = - data2.c * data2.epsilon * sqrt( *(idat.rho2) - rhtmp);
       
-      idat.pot[3] += pot_temp;
+      idat.pot[METALLIC_FAMILY] += pot_temp;
     }
       
     return;    

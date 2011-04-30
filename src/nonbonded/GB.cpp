@@ -267,7 +267,7 @@ namespace OpenMD {
 
     if (!initialized_) initialize();
     
-    GBInteractionData mixer = MixingMap[idat.atypes];
+    GBInteractionData mixer = MixingMap[*(idat.atypes)];
 
     RealType sigma0 = mixer.sigma0;
     RealType dw     = mixer.dw;
@@ -279,26 +279,26 @@ namespace OpenMD {
     RealType xpap2  = mixer.xpap2; 
     RealType xpapi2 = mixer.xpapi2;
 
-    Vector3d ul1 = idat.A1.getRow(2);
-    Vector3d ul2 = idat.A2.getRow(2);
+    Vector3d ul1 = idat.A1->getRow(2);
+    Vector3d ul2 = idat.A2->getRow(2);
 
     RealType a, b, g;
 
-    bool i_is_LJ = idat.atypes.first->isLennardJones();
-    bool j_is_LJ = idat.atypes.second->isLennardJones();
-
+    bool i_is_LJ = idat.atypes->first->isLennardJones();
+    bool j_is_LJ = idat.atypes->second->isLennardJones();
+    
     if (i_is_LJ) {
       a = 0.0;
       ul1 = V3Zero;
     } else {
-      a = dot(idat.d, ul1);
+      a = dot(*(idat.d), ul1);
     }
 
     if (j_is_LJ) {
       b = 0.0;
       ul2 = V3Zero;
     } else {
-      b = dot(idat.d, ul2);
+      b = dot(*(idat.d), ul2);
     }
 
     if (i_is_LJ || j_is_LJ) 
@@ -306,8 +306,8 @@ namespace OpenMD {
     else
       g = dot(ul1, ul2);
 
-    RealType au = a / idat.rij;
-    RealType bu = b / idat.rij;
+    RealType au = a / *(idat.rij);
+    RealType bu = b / *(idat.rij);
     
     RealType au2 = au * au;
     RealType bu2 = bu * bu;
@@ -320,7 +320,7 @@ namespace OpenMD {
     RealType e1 = 1.0 / sqrt(1.0 - x2*g2);
     RealType e2 = 1.0 - Hp;
     RealType eps = eps0 * pow(e1,nu_) * pow(e2,mu_);
-    RealType BigR = dw*sigma0 / (idat.rij - sigma + dw*sigma0);
+    RealType BigR = dw*sigma0 / (*(idat.rij) - sigma + dw*sigma0);
     
     RealType R3 = BigR*BigR*BigR;
     RealType R6 = R3*R3;
@@ -328,16 +328,19 @@ namespace OpenMD {
     RealType R12 = R6*R6;
     RealType R13 = R6*R7;
 
-    RealType U = idat.vdwMult * 4.0 * eps * (R12 - R6);
+    RealType U = *(idat.vdwMult) * 4.0 * eps * (R12 - R6);
 
     RealType s3 = sigma*sigma*sigma;
     RealType s03 = sigma0*sigma0*sigma0;
 
-    RealType pref1 = - idat.vdwMult * 8.0 * eps * mu_ * (R12 - R6) / (e2 * idat.rij);
+    RealType pref1 = - *(idat.vdwMult) * 8.0 * eps * mu_ * (R12 - R6) / 
+      (e2 * *(idat.rij));
 
-    RealType pref2 = idat.vdwMult * 8.0 * eps * s3 * (6.0*R13 - 3.0*R7) /(dw*idat.rij*s03);
+    RealType pref2 = *(idat.vdwMult) * 8.0 * eps * s3 * (6.0*R13 - 3.0*R7) /
+      (dw*  *(idat.rij) * s03);
 
-    RealType dUdr = - (pref1 * Hp + pref2 * (sigma0*sigma0*idat.rij/s3 + H));
+    RealType dUdr = - (pref1 * Hp + pref2 * (sigma0 * sigma0 *  
+                                             *(idat.rij) / s3 + H));
     
     RealType dUda = pref1 * (xpap2*au - xp2*bu*g) / (1.0 - xp2 * g2) 
       + pref2 * (xa2 * au - x2 *bu*g) / (1.0 - x2 * g2);
@@ -351,16 +354,16 @@ namespace OpenMD {
       (x2 * au * bu - H * x2 * g) / (1.0 - x2 * g2) / (dw * s03);
     
 
-    Vector3d rhat = idat.d / idat.rij;   
-    Vector3d rxu1 = cross(idat.d, ul1);
-    Vector3d rxu2 = cross(idat.d, ul2);
+    Vector3d rhat = *(idat.d) / *(idat.rij);   
+    Vector3d rxu1 = cross(*(idat.d), ul1);
+    Vector3d rxu2 = cross(*(idat.d), ul2);
     Vector3d uxu = cross(ul1, ul2);
     
-    idat.pot[0] += U*idat.sw;
-    idat.f1 += dUdr * rhat + dUda * ul1 + dUdb * ul2;    
-    idat.t1 += dUda * rxu1 - dUdg * uxu;
-    idat.t2 += dUdb * rxu2 - dUdg * uxu;
-    idat.vpair += U*idat.sw;
+    idat.pot[VANDERWAALS_FAMILY] += U *  *(idat.sw);
+    *(idat.f1) += dUdr * rhat + dUda * ul1 + dUdb * ul2;    
+    *(idat.t1) += dUda * rxu1 - dUdg * uxu;
+    *(idat.t2) += dUdb * rxu2 - dUdg * uxu;
+    *(idat.vpair) += U * *(idat.sw);
 
     return;
 

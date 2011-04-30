@@ -147,7 +147,7 @@ namespace OpenMD {
     if (!initialized_) initialize();
     
     map<pair<AtomType*, AtomType*>, MorseInteractionData>::iterator it;
-    it = MixingMap.find(idat.atypes);
+    it = MixingMap.find( *(idat.atypes) );
     if (it != MixingMap.end()) {
       MorseInteractionData mixer = (*it).second;
       
@@ -163,7 +163,7 @@ namespace OpenMD {
       
       // V(r) = D_e exp(-a(r-re)(exp(-a(r-re))-2)
       
-      RealType expt     = -beta*(idat.rij - Re);
+      RealType expt     = -beta*( *(idat.rij) - Re);
       RealType expfnc   = exp(expt);
       RealType expfnc2  = expfnc*expfnc;
       
@@ -172,7 +172,7 @@ namespace OpenMD {
       RealType expfnc2C = 0.0;
       
       if (Morse::shiftedPot_ || Morse::shiftedFrc_) {
-        exptC     = -beta*(idat.rcut - Re);
+        exptC     = -beta*( *(idat.rcut) - Re);
         expfncC   = exp(exptC);
         expfnc2C  = expfncC*expfncC;
       }
@@ -190,7 +190,7 @@ namespace OpenMD {
         } else if (Morse::shiftedFrc_) {
           myPotC = De * (expfnc2C - 2.0 * expfncC);
           myDerivC  = 2.0 * De * beta * (expfnc2C - expfnc2C);
-          myPotC += myDerivC * (idat.rij - idat.rcut);
+          myPotC += myDerivC * ( *(idat.rij) - *(idat.rcut) );
         } else {
           myPotC = 0.0;
           myDerivC = 0.0;
@@ -209,7 +209,7 @@ namespace OpenMD {
         } else if (Morse::shiftedFrc_) {
           myPotC = De * expfnc2C;
           myDerivC = -2.0 * De * beta * expfnc2C;
-          myPotC += myDerivC * (idat.rij - idat.rcut);
+          myPotC += myDerivC * ( *(idat.rij) - *(idat.rcut));
         } else {
           myPotC = 0.0;
           myDerivC = 0.0;
@@ -219,13 +219,13 @@ namespace OpenMD {
       }
       }
       
-      RealType pot_temp = idat.vdwMult * (myPot - myPotC);
-      idat.vpair += pot_temp;
+      RealType pot_temp = *(idat.vdwMult) * (myPot - myPotC);
+      *(idat.vpair) += pot_temp;
       
-      RealType dudr = idat.sw * idat.vdwMult * (myDeriv - myDerivC);
+      RealType dudr = *(idat.sw) * *(idat.vdwMult) * (myDeriv - myDerivC);
       
-      idat.pot[0] += idat.sw * pot_temp;
-      idat.f1 = idat.d * dudr / idat.rij;
+      idat.pot[VANDERWAALS_FAMILY] += *(idat.sw) * pot_temp;
+      *(idat.f1) = *(idat.d) * dudr / *(idat.rij);
     }
     return;
     

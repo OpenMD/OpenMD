@@ -245,7 +245,7 @@ namespace OpenMD {
     if (!initialized_) initialize();
     
     map<pair<AtomType*, AtomType*>, LJInteractionData>::iterator it;
-    it = MixingMap.find(idat.atypes);
+    it = MixingMap.find( *(idat.atypes) );
     
     if (it != MixingMap.end())  {
       
@@ -261,31 +261,31 @@ namespace OpenMD {
       RealType myDeriv = 0.0;
       RealType myDerivC = 0.0;
      
-      ros = idat.rij * sigmai;
+      ros = *(idat.rij) * sigmai;
       
       getLJfunc(ros, myPot, myDeriv);
       
       if (shiftedPot_) {
-        rcos = idat.rcut * sigmai;
+        rcos = *(idat.rcut) * sigmai;
         getLJfunc(rcos, myPotC, myDerivC);
         myDerivC = 0.0;
       } else if (LJ::shiftedFrc_) {
-        rcos = idat.rcut * sigmai;
+        rcos = *(idat.rcut) * sigmai;
         getLJfunc(rcos, myPotC, myDerivC);
-        myPotC = myPotC + myDerivC * (idat.rij - idat.rcut) * sigmai;
+        myPotC = myPotC + myDerivC * (*(idat.rij) - *(idat.rcut)) * sigmai;
       } else {
         myPotC = 0.0;
         myDerivC = 0.0;        
       }
 
-      RealType pot_temp = idat.vdwMult * epsilon * (myPot - myPotC);
-      idat.vpair += pot_temp;
+      RealType pot_temp = *(idat.vdwMult) * epsilon * (myPot - myPotC);
+      *(idat.vpair) += pot_temp;
       
-      RealType dudr = idat.sw * idat.vdwMult * epsilon * (myDeriv - 
-                                                          myDerivC)*sigmai;
+      RealType dudr = *(idat.sw) * *(idat.vdwMult) * epsilon * (myDeriv - 
+                                                             myDerivC)*sigmai;
       
-      idat.pot[0] += idat.sw * pot_temp;
-      idat.f1 = idat.d * dudr / idat.rij;      
+      (idat.pot)[VANDERWAALS_FAMILY] += *(idat.sw) * pot_temp;
+      *(idat.f1) = *(idat.d) * dudr / *(idat.rij);
     }
     return;
   }

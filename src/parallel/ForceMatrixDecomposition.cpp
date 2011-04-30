@@ -321,28 +321,28 @@ namespace OpenMD {
     InteractionData idat;
 #ifdef IS_MPI
     if (storageLayout_ & DataStorage::dslAmat) {
-      idat.A1 = atomRowData.aMat[atom1];
-      idat.A2 = atomColData.aMat[atom2];
+      idat.A1 = &(atomRowData.aMat[atom1]);
+      idat.A2 = &(atomColData.aMat[atom2]);
     }
 
     if (storageLayout_ & DataStorage::dslElectroFrame) {
-      idat.eFrame1 = atomRowData.electroFrame[atom1];
-      idat.eFrame2 = atomColData.electroFrame[atom2];
+      idat.eFrame1 = &(atomRowData.electroFrame[atom1]);
+      idat.eFrame2 = &(atomColData.electroFrame[atom2]);
     }
 
     if (storageLayout_ & DataStorage::dslTorque) {
-      idat.t1 = atomRowData.torque[atom1];
-      idat.t2 = atomColData.torque[atom2];
+      idat.t1 = &(atomRowData.torque[atom1]);
+      idat.t2 = &(atomColData.torque[atom2]);
     }
 
     if (storageLayout_ & DataStorage::dslDensity) {
-      idat.rho1 = atomRowData.density[atom1];
-      idat.rho2 = atomColData.density[atom2];
+      idat.rho1 = &(atomRowData.density[atom1]);
+      idat.rho2 = &(atomColData.density[atom2]);
     }
 
     if (storageLayout_ & DataStorage::dslFunctionalDerivative) {
-      idat.dfrho1 = atomRowData.functionalDerivative[atom1];
-      idat.dfrho2 = atomColData.functionalDerivative[atom2];
+      idat.dfrho1 = &(atomRowData.functionalDerivative[atom1]);
+      idat.dfrho2 = &(atomColData.functionalDerivative[atom2]);
     }
 #endif
     

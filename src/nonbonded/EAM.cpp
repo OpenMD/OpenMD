@@ -351,14 +351,14 @@ namespace OpenMD {
     
     if (!initialized_) initialize();
     
-    EAMAtomData data1 = EAMMap[idat.atypes.first];
-    EAMAtomData data2 = EAMMap[idat.atypes.second];
+    EAMAtomData data1 = EAMMap[idat.atypes->first];
+    EAMAtomData data2 = EAMMap[idat.atypes->second];
 
-    if (idat.rij < data1.rcut) 
-      idat.rho_i_at_j = data1.rho->getValueAt(idat.rij);
+    if ( *(idat.rij) < data1.rcut) 
+      *(idat.rho_i_at_j) = data1.rho->getValueAt( *(idat.rij));
 
-    if (idat.rij < data2.rcut) 
-      idat.rho_j_at_i = data2.rho->getValueAt(idat.rij);
+    if ( *(idat.rij) < data2.rcut) 
+      *(idat.rho_j_at_i) = data2.rho->getValueAt( *(idat.rij));
 
     return;
   }
@@ -367,12 +367,12 @@ namespace OpenMD {
 
     if (!initialized_) initialize();
 
-    EAMAtomData data1 = EAMMap[sdat.atype];
+    EAMAtomData data1 = EAMMap[ sdat.atype ];
         
-    pair<RealType, RealType> result = data1.F->getValueAndDerivativeAt(sdat.rho);
+    pair<RealType, RealType> result = data1.F->getValueAndDerivativeAt( *(sdat.rho) );
 
-    sdat.frho = result.first;
-    sdat.dfrhodrho = result.second;
+    *(sdat.frho) = result.first;
+    *(sdat.dfrhodrho) = result.second;
     return;
   }
 
@@ -383,10 +383,10 @@ namespace OpenMD {
 
     pair<RealType, RealType> res;
     
-    if (idat.rij < eamRcut_) {
+    if ( *(idat.rij) < eamRcut_) {
 
-      EAMAtomData data1 = EAMMap[idat.atypes.first];
-      EAMAtomData data2 = EAMMap[idat.atypes.second];
+      EAMAtomData data1 = EAMMap[idat.atypes->first];
+      EAMAtomData data2 = EAMMap[idat.atypes->second];
 
       // get type-specific cutoff radii
 
@@ -398,22 +398,22 @@ namespace OpenMD {
       RealType phab, dvpdr;
       RealType drhoidr, drhojdr, dudr;
       
-      if (idat.rij < rci) {
-        res = data1.rho->getValueAndDerivativeAt(idat.rij);
+      if ( *(idat.rij) < rci) {
+        res = data1.rho->getValueAndDerivativeAt( *(idat.rij));
         rha = res.first;
         drha = res.second;
 
-        res = MixingMap[make_pair(idat.atypes.first, idat.atypes.first)].phi->getValueAndDerivativeAt(idat.rij);
+        res = MixingMap[make_pair(idat.atypes->first, idat.atypes->first)].phi->getValueAndDerivativeAt( *(idat.rij) );
         pha = res.first;
         dpha = res.second;
       }
 
-      if (idat.rij < rcj) {
-        res = data2.rho->getValueAndDerivativeAt(idat.rij);
+      if ( *(idat.rij) < rcj) {
+        res = data2.rho->getValueAndDerivativeAt( *(idat.rij) );
         rhb = res.first;
         drhb = res.second;
 
-        res = MixingMap[make_pair(idat.atypes.second, idat.atypes.second)].phi->getValueAndDerivativeAt(idat.rij);
+        res = MixingMap[make_pair(idat.atypes->second, idat.atypes->second)].phi->getValueAndDerivativeAt( *(idat.rij) );
         phb = res.first;
         dphb = res.second;
       }
@@ -424,13 +424,13 @@ namespace OpenMD {
       switch(mixMeth_) {
       case eamJohnson:
        
-        if (idat.rij < rci) {
+        if ( *(idat.rij) < rci) {
           phab = phab + 0.5 * (rhb / rha) * pha;
           dvpdr = dvpdr + 0.5*((rhb/rha)*dpha + 
                                pha*((drhb/rha) - (rhb*drha/rha/rha)));
         }
 
-        if (idat.rij < rcj) {
+        if ( *(idat.rij) < rcj) {
           phab = phab + 0.5 * (rha / rhb) * phb;
           dvpdr = dvpdr + 0.5 * ((rha/rhb)*dphb + 
                                  phb*((drha/rhb) - (rha*drhb/rhb/rhb)));
@@ -439,7 +439,7 @@ namespace OpenMD {
         break;
 
       case eamDaw:
-        res = MixingMap[idat.atypes].phi->getValueAndDerivativeAt(idat.rij);
+        res = MixingMap[*(idat.atypes)].phi->getValueAndDerivativeAt( *(idat.rij));
         phab = res.first;
         dvpdr = res.second;
 
@@ -459,9 +459,9 @@ namespace OpenMD {
       drhoidr = drha;
       drhojdr = drhb;
 
-      dudr = drhojdr*idat.dfrho1 + drhoidr*idat.dfrho2 + dvpdr; 
+      dudr = drhojdr* *(idat.dfrho1) + drhoidr* *(idat.dfrho2) + dvpdr; 
 
-      idat.f1 = idat.d * dudr / idat.rij;
+      *(idat.f1) = *(idat.d) * dudr / *(idat.rij);
         
       // particle_pot is the difference between the full potential 
       // and the full potential without the presence of a particular
@@ -475,12 +475,12 @@ namespace OpenMD {
       // Most of the particle_pot heavy lifting comes from the
       // pair interaction, and will be handled by vpair.
      
-      idat.fshift1 = data1.F->getValueAt( idat.rho1 - rhb );
-      idat.fshift2 = data1.F->getValueAt( idat.rho2 - rha );
+      *(idat.fshift1) = data1.F->getValueAt( *(idat.rho1) - rhb );
+      *(idat.fshift2) = data1.F->getValueAt( *(idat.rho2) - rha );
 
-      idat.pot[3] += phab;
+      idat.pot[METALLIC_FAMILY] += phab;
 
-      idat.vpair += phab;
+      *(idat.vpair) += phab;
     }
 
     return;

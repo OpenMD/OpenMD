@@ -323,13 +323,14 @@ namespace OpenMD {
         rCutSq = groupCutoffMap[gtypes].first;
 
         if (rgrpsq < rCutSq) {
-          idat.rcut = groupCutoffMap[gtypes].second;
+          *(idat.rcut) = groupCutoffMap[gtypes].second;
           if (iLoop == PAIR_LOOP) {
             vij *= 0.0;
             fij = V3Zero;
           }
           
-          in_switching_region = swfun_->getSwitch(rgrpsq, idat.sw, dswdr, rgrp);               
+          in_switching_region = swfun_->getSwitch(rgrpsq, *(idat.sw), dswdr, 
+                                                  rgrp);               
           atomListRow = fDecomp_->getAtomsInGroupRow(cg1);
           atomListColumn = fDecomp_->getAtomsInGroupColumn(cg2);
 
@@ -346,23 +347,23 @@ namespace OpenMD {
                 idat = fDecomp_->fillInteractionData(atom1, atom2);
 
                 if (atomListRow.size() == 1 && atomListColumn.size() == 1) {
-                  idat.d = d_grp;
-                  idat.r2 = rgrpsq;
+                  *(idat.d) = d_grp;
+                  *(idat.r2) = rgrpsq;
                 } else {
-                  idat.d = fDecomp_->getInteratomicVector(atom1, atom2);
-                  curSnapshot->wrapVector(idat.d);
-                  idat.r2 = idat.d.lengthSquare();
+                  *(idat.d) = fDecomp_->getInteratomicVector(atom1, atom2);
+                  curSnapshot->wrapVector( *(idat.d) );
+                  *(idat.r2) = idat.d->lengthSquare();
                 }
                 
-                idat.rij = sqrt(idat.r2);
+                *(idat.rij) = sqrt( *(idat.r2) );
                
                 if (iLoop == PREPAIR_LOOP) {
                   interactionMan_->doPrePair(idat);
                 } else {
                   interactionMan_->doPair(idat);
-                  vij += idat.vpair;
-                  fij += idat.f1;
-                  tau -= outProduct(idat.d, idat.f1);
+                  vij += *(idat.vpair);
+                  fij += *(idat.f1);
+                  tau -= outProduct( *(idat.d), *(idat.f1));
                 }
               }
             }
@@ -376,7 +377,7 @@ namespace OpenMD {
               fij += fg;
 
               if (atomListRow.size() == 1 && atomListColumn.size() == 1) {
-                tau -= outProduct(idat.d, fg);
+                tau -= outProduct( *(idat.d), fg);
               }
           
               for (vector<int>::iterator ia = atomListRow.begin(); 
