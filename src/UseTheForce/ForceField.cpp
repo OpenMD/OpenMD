@@ -449,9 +449,64 @@ namespace OpenMD {
     if (nbiType) {
       return nbiType;
     } else {
-      //if no exact match found, try wild card match
-      return nonBondedInteractionTypeCont_.find(keys, wildCardAtomTypeName_);
-    }    
+      AtomType* atype1;
+      AtomType* atype2;
+      std::vector<std::string> at1key;
+      at1key.push_back(at1);
+      atype1 = atomTypeCont_.find(at1key);
+  
+      std::vector<std::string> at2key;
+      at2key.push_back(at2);
+      atype2 = atomTypeCont_.find(at2key);
+
+      // query atom types for their chains of responsibility
+      std::vector<AtomType*> at1Chain = atype1->allYourBase();
+      std::vector<AtomType*> at2Chain = atype2->allYourBase();
+
+      std::vector<AtomType*>::iterator i;
+      std::vector<AtomType*>::iterator j;
+
+      int ii = 0;
+      int jj = 0;
+      int nbiTypeScore;
+
+      std::vector<std::pair<int, std::vector<std::string> > > foundNBI;
+
+      for (i = at1Chain.begin(); i != at1Chain.end(); i++) {
+	jj = 0;
+	for (j = at2Chain.begin(); j != at2Chain.end(); j++) {
+
+	  nbiTypeScore = ii + jj;
+
+	  std::vector<std::string> myKeys;
+	  myKeys.push_back((*i)->getName());
+	  myKeys.push_back((*j)->getName());
+
+	  NonBondedInteractionType* nbiType = nonBondedInteractionTypeCont_.find(myKeys);
+	  if (nbiType) {
+	    foundNBI.push_back(std::make_pair(nbiTypeScore, myKeys));
+	  }
+	  jj++;
+	}
+	ii++;
+      }
+
+
+      if (foundNBI.size() > 0) {
+        // sort the foundNBI by the score:
+        std::sort(foundNBI.begin(), foundNBI.end());
+     
+        int bestScore = foundNBI[0].first;
+        std::vector<std::string> theKeys = foundNBI[0].second;
+        
+        NonBondedInteractionType* bestType = nonBondedInteractionTypeCont_.find(theKeys);
+        
+        return bestType;
+      } else {
+        //if no exact match found, try wild card match
+        return nonBondedInteractionTypeCont_.find(keys, wildCardAtomTypeName_);      
+      }
+    }
   }
   
   BondType* ForceField::getExactBondType(const std::string &at1, 

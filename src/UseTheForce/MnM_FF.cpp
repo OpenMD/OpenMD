@@ -125,10 +125,8 @@ namespace OpenMD {
 
       std::vector<AtomType*> ayb = at->allYourBase();      
       if (ayb.size() > 1) {
-        for (int j = ayb.size()-1; j > 0; j--) {
-          
+        for (int j = ayb.size()-1; j > 0; j--) {          
           ayb[j-1]->useBase(ayb[j]);
-
         }
       }
       at->makeFortranAtomType();
