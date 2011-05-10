@@ -6,9 +6,9 @@
 // of Siepmann's group.
 
 begin Options
-      Name                   = "DUFF"
-      GayBerneMu             = 2.0
-      GayBerneNu             = 1.0
+      Name                   "DUFF"
+      GayBerneMu              2.0
+      GayBerneNu              1.0
 end Options
 
 begin BaseAtomTypes    
