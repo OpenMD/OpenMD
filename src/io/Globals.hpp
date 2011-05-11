@@ -139,6 +139,8 @@ namespace OpenMD {
     DeclareParameter(RNEMD_exchangeType, std::string);
     DeclareParameter(RNEMD_objectSelection, std::string);
     DeclareParameter(RNEMD_targetFlux, RealType);
+    DeclareParameter(RNEMD_binShift, bool);
+    DeclareParameter(RNEMD_outputDimensionalTemperature, bool);
     DeclareParameter(UseRestraints, bool);
     DeclareParameter(Restraint_file, std::string);
     DeclareParameter(HULL_Method, std::string);

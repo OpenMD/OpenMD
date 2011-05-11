@@ -131,6 +131,8 @@ Globals::Globals() {
   DefineOptionalParameterWithDefaultValue(RNEMD_exchangeType, "RNEMD_exchangeType", "KineticScale");
   DefineOptionalParameterWithDefaultValue(RNEMD_targetFlux, "RNEMD_targetFlux", 0.0);
   DefineOptionalParameterWithDefaultValue(RNEMD_objectSelection, "RNEMD_objectSelection", "select all");
+  DefineOptionalParameterWithDefaultValue(RNEMD_binShift, "RNEMD_binShift", false);
+  DefineOptionalParameterWithDefaultValue(RNEMD_outputDimensionalTemperature, "RNEMD_outputDimensionalTemperature", false);
   DefineOptionalParameterWithDefaultValue(UseRestraints, "useRestraints", false);
   DefineOptionalParameterWithDefaultValue(Restraint_file, "Restraint_file", "idealCrystal.in");
   DefineOptionalParameterWithDefaultValue(UseThermodynamicIntegration, "useThermodynamicIntegration", false);
@@ -205,7 +207,7 @@ void Globals::validate() {
   CheckParameter(RNEMD_exchangeTime, isPositive());
   CheckParameter(RNEMD_nBins, isPositive() && isEven());
   CheckParameter(RNEMD_exchangeType, isEqualIgnoreCase("KineticSwap") || isEqualIgnoreCase("KineticScale") || isEqualIgnoreCase("Px") || isEqualIgnoreCase("Py") || isEqualIgnoreCase("Pz") || isEqualIgnoreCase("PxScale") || isEqualIgnoreCase("PyScale") || isEqualIgnoreCase("PzScale"));
-  CheckParameter(RNEMD_targetFlux, isNonNegative());
+  //CheckParameter(RNEMD_targetFlux, isNonNegative());
   CheckParameter(HULL_Method, isEqualIgnoreCase("Convex") || isEqualIgnoreCase("AlphaShape")); 
   CheckParameter(Alpha, isPositive()); 
 
