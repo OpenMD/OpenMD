@@ -213,8 +213,7 @@ namespace OpenMD {
           Vector3d vec = j->first->getPos() - j->second->getPos();
           if (usePeriodicBoundaryConditions_)
             currentSnapshot_->wrapVector(vec);
-          vec.normalize();
-          
+          vec.normalize();          
           angle += acos(dot(vec, director)) ;
         }
         angle = angle / (sdPairs_.size() * NumericConstant::PI) * 180.0;

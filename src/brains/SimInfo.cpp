@@ -409,7 +409,7 @@ namespace OpenMD {
 
       a = bond->getAtomA()->getGlobalIndex();
       b = bond->getAtomB()->getGlobalIndex();   
-    
+
       if (options_.havevdw12scale() || options_.haveelectrostatic12scale()) {
         oneTwoInteractions_.addPair(a, b);
       } else {

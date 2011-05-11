@@ -8,9 +8,10 @@
  * $Id$
  */
 
+#include <antlr/config.hpp>
+
 #include <istream>
 
-#include <antlr/config.hpp>
 #include <antlr/InputBuffer.hpp>
 
 #ifdef ANTLR_CXX_SUPPORTS_NAMESPACE

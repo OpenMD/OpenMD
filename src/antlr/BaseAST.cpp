@@ -5,9 +5,10 @@
  * $Id$
  */
 
+#include "antlr/config.hpp"
+
 #include <iostream>
 
-#include "antlr/config.hpp"
 #include "antlr/AST.hpp"
 #include "antlr/BaseAST.hpp"
 
@@ -15,8 +16,6 @@ ANTLR_USING_NAMESPACE(std)
 #ifdef ANTLR_CXX_SUPPORTS_NAMESPACE
 namespace antlr {
 #endif
-
-const char* const BaseAST::TYPE_NAME = "BaseAST";
 
 size_t BaseAST::getNumberOfChildren() const
 {

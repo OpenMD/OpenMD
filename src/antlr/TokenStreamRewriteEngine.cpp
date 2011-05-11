@@ -1,3 +1,5 @@
+#include <antlr/config.hpp>
+
 #include <string>
 #include <list>
 #include <vector>
@@ -8,8 +10,6 @@
 #include <sstream>
 #include <cassert>
 
-#include <antlr/config.hpp>
-
 #include <antlr/TokenStream.hpp>
 #include <antlr/TokenWithIndex.hpp>
 #include <antlr/BitSet.hpp>
@@ -17,6 +17,11 @@
 
 #ifdef ANTLR_CXX_SUPPORTS_NAMESPACE
 namespace antlr {
+#endif
+
+#ifndef NO_STATIC_CONSTS
+const size_t TokenStreamRewriteEngine::MIN_TOKEN_INDEX = 0;
+const int TokenStreamRewriteEngine::PROGRAM_INIT_SIZE = 100;
 #endif
 
 const char* TokenStreamRewriteEngine::DEFAULT_PROGRAM_NAME = "default";

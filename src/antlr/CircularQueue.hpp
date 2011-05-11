@@ -56,7 +56,18 @@ public:
 	}
 	inline void removeItems( size_t nb )
 	{
-		assert(nb <= entries());
+		// it would be nice if we would not get called with nb > entries
+		// (or to be precise when entries() == 0)
+		// This case is possible when lexer/parser::recover() calls
+		// consume+consumeUntil when the queue is empty.
+		// In recover the consume says to prepare to read another
+		// character/token. Then in the subsequent consumeUntil the
+		// LA() call will trigger
+		// syncConsume which calls this method *before* the same queue
+		// has been sufficiently filled.
+		if( nb > entries() )
+			nb = entries();
+
 		if (m_offset >= OFFSET_MAX_RESIZE)
 		{
 			storage.erase( storage.begin(), storage.begin() + m_offset + nb );
@@ -75,7 +86,7 @@ public:
 	}
 
 private:
-	typename ANTLR_USE_NAMESPACE(std)vector<T> storage;
+	ANTLR_USE_NAMESPACE(std)vector<T> storage;
 	size_t m_offset;
 
 	CircularQueue(const CircularQueue&);

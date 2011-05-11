@@ -2,7 +2,7 @@
 #define INC_MDParser_hpp_
 
 #include <antlr/config.hpp>
-/* $ANTLR 2.7.7 (20090623): "MDParser.g" -> "MDParser.hpp"$ */
+/* $ANTLR 2.7.7 (20101020): "MDParser.g" -> "MDParser.hpp"$ */
 #include <antlr/TokenStream.hpp>
 #include <antlr/TokenBuffer.hpp>
 #include "MDTokenTypes.hpp"

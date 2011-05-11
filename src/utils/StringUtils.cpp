@@ -39,7 +39,7 @@
  * [4]  Vardeman & Gezelter, in progress (2009).                        
  */
 
-#include <algorithm> 
+#include <algorithm>
 #include "utils/StringUtils.hpp"
 
 namespace OpenMD {
@@ -218,22 +218,22 @@ namespace OpenMD {
     return str.substr(0, str.find('.'));
   }
 
-bool isInteger(const std::string& str) {
-
+  bool isInteger(const std::string& str) {
+    
     bool result = false;
-
+    
     std::string::const_iterator i = str.begin();    
     if (i != str.end() && (*i == '+' || *i == '-' || std::isdigit(*i) )) {
-        ++i;        
-        while (i != str.end() && std::isdigit(*i))
-            ++i;
-        if (i == str.end())
-            result = true;
+      ++i;        
+      while (i != str.end() && std::isdigit(*i))
+        ++i;
+      if (i == str.end())
+        result = true;
     }
     
     return result;
-}
-
+  }
+  
 bool CaseInsensitiveEquals(const char ch1, const char ch2) {
   return std::toupper((unsigned char)ch1) == std::toupper((unsigned char)ch2);
 }

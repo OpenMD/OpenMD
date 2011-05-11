@@ -43,6 +43,12 @@
 // _MSC_VER == 1300 for Microsoft Visual C++ 7.0
 #if defined(_MSC_VER)
 
+# if _MSC_VER < 1300
+#	define NOMINMAX
+#	pragma warning(disable : 4786)
+#	define min _cpp_min
+# endif
+
 // This warning really gets on my nerves.
 // It's the one about symbol longer than 256 chars, and it happens
 // all the time with STL.
@@ -73,23 +79,29 @@
 #	define ANTLR_API __declspec(dllimport)
 # endif
 
+# if ( _MSC_VER < 1200 )
+// supposedly only for MSVC5 and before...
+// Using vector<XXX> requires operator<(X,X) to be defined
+#	define NEEDS_OPERATOR_LESS_THAN
+# endif
+
 // VC6
 # if ( _MSC_VER == 1200 )
 #	undef ANTLR_ATOI_IN_STD
 # endif
 
-// These should be verified for newer MSVC's
+# if ( _MSC_VER < 1310 )
+// Supposedly only for MSVC7 and before...
 // Not allowed to put 'static const int XXX=20;' in a class definition
-# define NO_STATIC_CONSTS
-// Using vector<XXX> requires operator<(X,X) to be defined
-# define NEEDS_OPERATOR_LESS_THAN
+#	define NO_STATIC_CONSTS
+#	define NO_TEMPLATE_PARTS
+# endif
+
 // No strcasecmp in the C library (so use stricmp instead)
 // - Anyone know which is in which standard?
+# define NO_STRCASECMP
 # undef ANTLR_CCTYPE_NEEDS_STD
-
-// needed for CharScannerLiteralsLess
-# define NO_TEMPLATE_PARTS
-
+#	define NO_STATIC_CONSTS
 #endif	// End of Microsoft Visual C++
 
 /*}}}*/
@@ -161,6 +173,7 @@
  *****************************************************************************/
 #ifdef __BCPLUSPLUS__
 # define NO_TEMPLATE_PARTS
+# define NO_STRCASECMP
 # undef ANTLR_CCTYPE_NEEDS_STD
 #endif	// End of C++ Builder 3.0
 /*}}}*/
@@ -171,7 +184,12 @@
 
 // No strcasecmp in the C library (so use stricmp instead)
 // - Anyone know which is in which standard?
+#if (defined(_AIX) && (__IBMCPP__ >= 600))
+# define NO_STATIC_CONSTS
+#else
+# define NO_STRCASECMP
 # undef ANTLR_CCTYPE_NEEDS_STD
+#endif
 
 #endif	// end IBM VisualAge C++
 /*}}}*/
@@ -184,6 +202,7 @@
 # endif
 
 // CW 6.0 and 7.0 still do not have it.
+# define ANTLR_REALLY_NO_STRCASECMP
 
 # undef ANTLR_C_USING
 # define ANTLR_C_USING(_x_)   using std:: ## _x_;
@@ -226,6 +245,11 @@
 #	  undef ANTLR_IOS_BASE
 #	  define ANTLR_IOS_BASE ios
 #	  undef ANTLR_CCTYPE_NEEDS_STD
+// compiling with -ansi ?
+#	  ifdef __STRICT_ANSI__
+#		undef ANTLR_REALLY_NO_STRCASECMP
+#		define ANTLR_REALLY_NO_STRCASECMP
+#	  endif
 #	else
 // experimental .96 .97 branches..
 #	 undef ANTLR_CCTYPE_NEEDS_STD
@@ -242,14 +266,14 @@
 /*}}}*/
 /*****************************************************************************/
 #ifdef __BORLANDC__
-#if  __BORLANDC__ >= 560
-#include <ctype>
-#include <stdlib>
-#define ANTLR_CCTYPE_NEEDS_STD
-#else
-#error "sorry, compiler is too old - consider an update."
+# if  __BORLANDC__ >= 560
+#	include <ctype>
+#	include <stdlib>
+#	define ANTLR_CCTYPE_NEEDS_STD
+# else
+#	error "sorry, compiler is too old - consider an update."
+# endif
 #endif
-#endif 
 
 // Redefine these for backwards compatability..
 #undef ANTLR_BEGIN_NAMESPACE

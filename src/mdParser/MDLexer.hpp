@@ -2,7 +2,7 @@
 #define INC_MDLexer_hpp_
 
 #include <antlr/config.hpp>
-/* $ANTLR 2.7.7 (20090623): "MDParser.g" -> "MDLexer.hpp"$ */
+/* $ANTLR 2.7.7 (20101020): "MDParser.g" -> "MDLexer.hpp"$ */
 #include <antlr/CommonToken.hpp>
 #include <antlr/InputBuffer.hpp>
 #include <antlr/BitSet.hpp>

@@ -3,7 +3,7 @@
 
 #include <antlr/config.hpp>
 #include "MDTreeParserTokenTypes.hpp"
-/* $ANTLR 2.7.7 (20090623): "MDTreeParser.g" -> "MDTreeParser.hpp"$ */
+/* $ANTLR 2.7.7 (20101020): "MDTreeParser.g" -> "MDTreeParser.hpp"$ */
 #include <antlr/TreeParser.hpp>
 
 #line 2 "MDTreeParser.g"

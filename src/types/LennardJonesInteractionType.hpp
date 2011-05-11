@@ -65,8 +65,7 @@ namespace OpenMD {
       mnmit.metal_atid = atid1;
       mnmit.nonmetal_atid = atid2;
       mnmit.sigma = sigma;
-      mnmit.epsilon = epsilon;
-      
+      mnmit.epsilon = epsilon;     
       addMNMInteraction(&mnmit);
     }
     
