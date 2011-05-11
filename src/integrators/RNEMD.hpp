@@ -76,9 +76,10 @@ namespace OpenMD {
       exchangeTime_ = exchangeTime;
     }
     void set_RNEMD_nBins(int nbins) { nBins_ = nbins; }
-    RealType get_RNEMD_exchange_total() { return exchangeSum_; }
+    void set_RNEMD_logWidth(int logWidth) { rnemdLogWidth_ = logWidth; }
     void set_RNEMD_exchange_total(RealType et) { exchangeSum_ = et; }
     void set_RNEMD_target_flux(RealType targetFlux) {targetFlux_ = targetFlux;}
+    RealType get_RNEMD_exchange_total() { return exchangeSum_; }
 
   private:
 
@@ -102,9 +103,11 @@ namespace OpenMD {
     SelectionEvaluator evaluator_;
     SelectionManager seleMan_;
     bool usePeriodicBoundaryConditions_;
+    bool output3DTemp_;
     int nBins_;
     int midBin_;
     int rnemdLogWidth_;
+    RealType zShift_;
     RealType exchangeTime_;
     RealType targetFlux_;
     RealType exchangeSum_;
@@ -113,7 +116,7 @@ namespace OpenMD {
     std::ofstream rnemdLog_;
     // keeps track of what's being averaged
     std::vector<RealType> valueHist_;
-    std::vector<int> valueCount_;
+    std::vector<int> valueCount_, xyzTempCount_;
     // keeps track of the number of degrees of freedom being averaged
     std::vector<RealType> xTempHist_, yTempHist_, zTempHist_;
     std::ofstream xTempLog_, yTempLog_, zTempLog_;

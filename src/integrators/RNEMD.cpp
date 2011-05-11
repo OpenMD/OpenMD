@@ -111,14 +111,16 @@ namespace OpenMD {
       std::cerr << "WARNING! RNEMD Type Unknown!\n";
     }
 
+    output3DTemp_ = false;
+    if (simParams->haveRNEMD_outputDimensionalTemperature()) {
+      output3DTemp_ = simParams->getRNEMD_outputDimensionalTemperature();
+    }
+
 #ifdef IS_MPI
     if (worldRank == 0) {
 #endif
 
       std::string rnemdFileName;
-      std::string xTempFileName;
-      std::string yTempFileName;
-      std::string zTempFileName;
       switch(rnemdType_) {
       case rnemdKineticSwap :
       case rnemdKineticScale :
@@ -129,12 +131,6 @@ namespace OpenMD {
       case rnemdPy :
       case rnemdPyScale :
         rnemdFileName = "momemtum.log";
-        xTempFileName = "temperatureX.log";
-        yTempFileName = "temperatureY.log";
-        zTempFileName = "temperatureZ.log";
-        xTempLog_.open(xTempFileName.c_str());
-        yTempLog_.open(yTempFileName.c_str());
-        zTempLog_.open(zTempFileName.c_str());
         break;
       case rnemdPz :
       case rnemdPzScale :
@@ -145,6 +141,18 @@ namespace OpenMD {
       }
       rnemdLog_.open(rnemdFileName.c_str());
 
+      std::string xTempFileName;
+      std::string yTempFileName;
+      std::string zTempFileName;
+      if (output3DTemp_) {
+	xTempFileName = "temperatureX.log";
+	yTempFileName = "temperatureY.log";
+	zTempFileName = "temperatureZ.log";
+	xTempLog_.open(xTempFileName.c_str());
+	yTempLog_.open(yTempFileName.c_str());
+	zTempLog_.open(zTempFileName.c_str());
+      }
+
 #ifdef IS_MPI
     }
 #endif
@@ -152,21 +160,35 @@ namespace OpenMD {
     set_RNEMD_exchange_time(simParams->getRNEMD_exchangeTime());
     set_RNEMD_nBins(simParams->getRNEMD_nBins());
     midBin_ = nBins_ / 2;
+    if (simParams->haveRNEMD_binShift()) {
+        if (simParams->getRNEMD_binShift()) {
+	  zShift_ = 0.5 / (RealType)(nBins_);
+	} else {
+	  zShift_ = 0.0;
+	}
+    } else {
+      zShift_ = 0.0;
+    }
+    //std::cerr << "we have zShift_ = " << zShift_ << "\n";
+    //shift slabs by half slab width, might be useful in heterogeneous systems
+    //set to 0.0 if not using it; can NOT be used in status output yet
     if (simParams->haveRNEMD_logWidth()) {
-      rnemdLogWidth_ = simParams->getRNEMD_logWidth();
+      set_RNEMD_logWidth(simParams->getRNEMD_logWidth());
+      /*arbitary rnemdLogWidth_ no checking
       if (rnemdLogWidth_ != nBins_ && rnemdLogWidth_ != midBin_ + 1) {
         std::cerr << "WARNING! RNEMD_logWidth has abnormal value!\n";
         std::cerr << "Automaically set back to default.\n";
         rnemdLogWidth_ = nBins_;
-      }
+	}*/
     } else {
-      rnemdLogWidth_ = nBins_;
+      set_RNEMD_logWidth(nBins_);
     }
     valueHist_.resize(rnemdLogWidth_, 0.0);
     valueCount_.resize(rnemdLogWidth_, 0);
     xTempHist_.resize(rnemdLogWidth_, 0.0);
     yTempHist_.resize(rnemdLogWidth_, 0.0);
     zTempHist_.resize(rnemdLogWidth_, 0.0);
+    xyzTempCount_.resize(rnemdLogWidth_, 0);
 
     set_RNEMD_exchange_total(0.0);
     if (simParams->haveRNEMD_targetFlux()) {
@@ -202,7 +224,7 @@ namespace OpenMD {
       rnemdLog_.close();
       if (rnemdType_ == rnemdKineticScale || rnemdType_ == rnemdPxScale || rnemdType_ == rnemdPyScale)
         std::cerr<< "total root-checking warnings: " << failRootCount_ << "\n";
-      if (rnemdType_ == rnemdPx || rnemdType_ == rnemdPxScale || rnemdType_ == rnemdPy || rnemdType_ == rnemdPyScale) {
+      if (output3DTemp_) {
         xTempLog_.close();
         yTempLog_.close();
         zTempLog_.close();
@@ -246,7 +268,7 @@ namespace OpenMD {
       // which bin is this stuntdouble in?
       // wrapped positions are in the range [-0.5*hmat(2,2), +0.5*hmat(2,2)]
 
-      int binNo = int(nBins_ * (pos.z() / hmat(2,2) + 0.5)) % nBins_;
+      int binNo = int(nBins_ * (pos.z() / hmat(2,2) + zShift_ + 0.5)) % nBins_;
 
 
       // if we're in bin 0 or the middleBin
@@ -261,6 +283,7 @@ namespace OpenMD {
           
           value = mass * (vel[0]*vel[0] + vel[1]*vel[1] + 
                           vel[2]*vel[2]);
+	  /*
           if (sd->isDirectional()) {
             Vector3d angMom = sd->getJ();
             Mat3x3d I = sd->getI();
@@ -276,7 +299,8 @@ namespace OpenMD {
                 + angMom[1]*angMom[1]/I(1, 1) 
                 + angMom[2]*angMom[2]/I(2, 2);
             }
-          }
+	  } no exchange of angular momenta
+	  */
           //make exchangeSum_ comparable between swap & scale
           //temporarily without using energyConvert
           //value = value * 0.5 / PhysicalConstants::energyConvert;
@@ -330,14 +354,14 @@ namespace OpenMD {
     bool my_min_found = min_found;
     bool my_max_found = max_found;
 
-    // Even if we didn't find a minimum, did someone else?
-    MPI::COMM_WORLD.Allreduce(&my_min_found, &min_found, 
-                              1, MPI::BOOL, MPI::LAND);
-    
+    // Even if we didn't find a minimum, did someone else? debugging...
+    //MPI::COMM_WORLD.Allreduce(&my_min_found, &min_found, 
+    //                          1, MPI::BOOL, MPI::LAND);
+    MPI::COMM_WORLD.Allreduce(&my_min_found, &min_found, 1, MPI::BOOL, MPI::LOR);
     // Even if we didn't find a maximum, did someone else?
-    MPI::COMM_WORLD.Allreduce(&my_max_found, &max_found, 
-                              1, MPI::BOOL, MPI::LAND);
-    
+    //MPI::COMM_WORLD.Allreduce(&my_max_found, &max_found, 
+    //                          1, MPI::BOOL, MPI::LAND);
+    MPI::COMM_WORLD.Allreduce(&my_max_found, &max_found, 1, MPI::BOOL, MPI::LOR);
     struct {
       RealType val;
       int rank;
@@ -373,14 +397,14 @@ namespace OpenMD {
 #endif
 
     if (max_found && min_found) {
-      if (min_val< max_val) {
+      if (min_val < max_val) {
 
 #ifdef IS_MPI       
         if (max_vals.rank == worldRank && min_vals.rank == worldRank) {
           // I have both maximum and minimum, so proceed like a single
           // processor version:
 #endif
-          // objects to be swapped: velocity & angular velocity
+          // objects to be swapped: velocity ONLY
           Vector3d min_vel = min_sd->getVel();
           Vector3d max_vel = max_sd->getVel();
           RealType temp_vel;
@@ -389,12 +413,14 @@ namespace OpenMD {
           case rnemdKineticSwap :
             min_sd->setVel(max_vel);
             max_sd->setVel(min_vel);
+	    /*
             if (min_sd->isDirectional() && max_sd->isDirectional()) {
               Vector3d min_angMom = min_sd->getJ();
               Vector3d max_angMom = max_sd->getJ();
               min_sd->setJ(max_angMom);
               max_sd->setJ(min_angMom);
-            }
+            } no angular momentum exchange
+	    */
             break;
           case rnemdPx :
             temp_vel = min_vel.x();
@@ -438,7 +464,7 @@ namespace OpenMD {
           switch(rnemdType_) {
           case rnemdKineticSwap :
             max_sd->setVel(min_vel);
-            
+	    /*            
             if (max_sd->isDirectional()) {
               Vector3d min_angMom;
               Vector3d max_angMom = max_sd->getJ();
@@ -451,7 +477,8 @@ namespace OpenMD {
                                        status);
 
               max_sd->setJ(min_angMom);
-            }
+            } no angular momentum exchange
+	    */
             break;
           case rnemdPx :
             max_vel.x() = min_vel.x();
@@ -484,7 +511,7 @@ namespace OpenMD {
           switch(rnemdType_) {
           case rnemdKineticSwap :
             min_sd->setVel(max_vel);
-            
+	    /*            
             if (min_sd->isDirectional()) {
               Vector3d min_angMom = min_sd->getJ();
               Vector3d max_angMom;
@@ -497,7 +524,8 @@ namespace OpenMD {
                                        status);
 
               min_sd->setJ(max_angMom);
-            }
+            } no angular momentum exchange
+	    */
             break;
           case rnemdPx :
             min_vel.x() = max_vel.x();
@@ -570,7 +598,7 @@ namespace OpenMD {
       // which bin is this stuntdouble in?
       // wrapped positions are in the range [-0.5*hmat(2,2), +0.5*hmat(2,2)]
 
-      int binNo = int(nBins_ * (pos.z() / hmat(2,2) + 0.5)) % nBins_;
+      int binNo = int(nBins_ * (pos.z() / hmat(2,2) + zShift_ + 0.5)) % nBins_;
 
       // if we're in bin 0 or the middleBin
       if (binNo == 0 || binNo == midBin_) {
@@ -776,6 +804,8 @@ namespace OpenMD {
             + fastpow(r1 * r1 / r2 / r2 - Kcz/Kcx, 2);
           break;
         case rnemdPzScale :
+	  diff = fastpow(1.0 - r1, 2) + fastpow(1.0 - r2, 2)
+	    + fastpow(r1 * r1 / r2 / r2 - Kcy/Kcx, 2);
         default :
           break;
         }
@@ -879,6 +909,17 @@ namespace OpenMD {
     StuntDouble* sd;
     int idx;
 
+    // alternative approach, track all molecules instead of only those selected for scaling/swapping
+    //SimInfo::MoleculeIterator miter;
+    //std::vector<StuntDouble*>::iterator iiter;
+    //Molecule* mol;
+    //StuntDouble* integrableObject;
+    //for (mol = info_->beginMolecule(miter); mol != NULL;
+    //     mol = info_->nextMolecule(miter))
+    // integrableObject is essentially sd
+    //for (integrableObject = mol->beginIntegrableObject(iiter);
+    //     integrableObject != NULL;
+    //     integrableObject = mol->nextIntegrableObject(iiter))
     for (sd = seleMan_.beginSelected(selei); sd != NULL; 
          sd = seleMan_.nextSelected(selei)) {
       
@@ -894,12 +935,13 @@ namespace OpenMD {
       // which bin is this stuntdouble in?
       // wrapped positions are in the range [-0.5*hmat(2,2), +0.5*hmat(2,2)]
       
-      int binNo = int(nBins_ * (pos.z() / hmat(2,2) + 0.5)) % nBins_;
-
+      int binNo = int(rnemdLogWidth_ * (pos.z() / hmat(2,2) + 0.5)) %
+	rnemdLogWidth_;
+      /* no symmetrization allowed due to arbitary rnemdLogWidth_ value
       if (rnemdLogWidth_ == midBin_ + 1)
         if (binNo > midBin_)
           binNo = nBins_ - binNo;
-
+      */
       RealType mass = sd->getMass();
       Vector3d vel = sd->getVel();
       RealType value;
@@ -940,15 +982,6 @@ namespace OpenMD {
       case rnemdPxScale :
 	value = mass * vel[0];
         valueCount_[binNo]++;
-        xVal = mass * vel.x() * vel.x() / PhysicalConstants::energyConvert
-          / PhysicalConstants::kb;
-        yVal = mass * vel.y() * vel.y() / PhysicalConstants::energyConvert
-          / PhysicalConstants::kb;
-        zVal = mass * vel.z() * vel.z() / PhysicalConstants::energyConvert
-          / PhysicalConstants::kb;
-        xTempHist_[binNo] += xVal;
-        yTempHist_[binNo] += yVal;
-        zTempHist_[binNo] += zVal;
 	break;
       case rnemdPy :
       case rnemdPyScale :
@@ -957,22 +990,40 @@ namespace OpenMD {
 	break;
       case rnemdPz :
       case rnemdPzScale :
-	value = mass * vel[2];
+	value = pos.z(); //temporarily for homogeneous systems ONLY
         valueCount_[binNo]++;
 	break;
       case rnemdUnknown : 
       default :
+	value = 1.0;
+	valueCount_[binNo]++;
 	break;
       }
       valueHist_[binNo] += value;
-    }
 
+      if (output3DTemp_) {
+	xVal = mass * vel.x() * vel.x() / PhysicalConstants::energyConvert
+	  / PhysicalConstants::kb;
+	yVal = mass * vel.y() * vel.y() / PhysicalConstants::energyConvert
+	  / PhysicalConstants::kb;
+	zVal = mass * vel.z() * vel.z() / PhysicalConstants::energyConvert
+	  / PhysicalConstants::kb;
+	xTempHist_[binNo] += xVal;
+	yTempHist_[binNo] += yVal;
+	zTempHist_[binNo] += zVal;
+	xyzTempCount_[binNo]++;
+      }
+    }
   }
 
   void RNEMD::getStarted() {
+    collectData();
+    /* now should be able to output profile in step 0, but might not be useful
     Snapshot* currentSnap_ = info_->getSnapshotManager()->getCurrentSnapshot();
     Stats& stat = currentSnap_->statData;
     stat[Stats::RNEMD_EXCHANGE_TOTAL] = exchangeSum_;
+    */
+    getStatus();
   }
 
   void RNEMD::getStatus() {
@@ -994,13 +1045,15 @@ namespace OpenMD {
                               rnemdLogWidth_, MPI::REALTYPE, MPI::SUM);
     MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &valueCount_[0],
                               rnemdLogWidth_, MPI::INT, MPI::SUM);
-    if (rnemdType_ == rnemdPx || rnemdType_ == rnemdPxScale) {
+    if (output3DTemp_) {
       MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &xTempHist_[0],
                                 rnemdLogWidth_, MPI::REALTYPE, MPI::SUM);
       MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &yTempHist_[0],
                                 rnemdLogWidth_, MPI::REALTYPE, MPI::SUM);
       MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &zTempHist_[0],
                                 rnemdLogWidth_, MPI::REALTYPE, MPI::SUM);
+      MPI::COMM_WORLD.Allreduce(MPI::IN_PLACE, &xyzTempCount_[0],
+                                rnemdLogWidth_, MPI::INT, MPI::SUM);
     }
     // If we're the root node, should we print out the results
     int worldRank = MPI::COMM_WORLD.Get_rank();
@@ -1011,20 +1064,20 @@ namespace OpenMD {
         rnemdLog_ << "\t" << valueHist_[j] / (RealType)valueCount_[j];
       }
       rnemdLog_ << "\n";
-      if (rnemdType_ == rnemdPx || rnemdType_ == rnemdPxScale ) {
+      if (output3DTemp_) {
         xTempLog_ << time;      
         for (j = 0; j < rnemdLogWidth_; j++) {
-          xTempLog_ << "\t" << xTempHist_[j] / (RealType)valueCount_[j];
+          xTempLog_ << "\t" << xTempHist_[j] / (RealType)xyzTempCount_[j];
         }
         xTempLog_ << "\n";
         yTempLog_ << time;
         for (j = 0; j < rnemdLogWidth_; j++) {
-          yTempLog_ << "\t" << yTempHist_[j] / (RealType)valueCount_[j];
+          yTempLog_ << "\t" << yTempHist_[j] / (RealType)xyzTempCount_[j];
         }
         yTempLog_ << "\n";
         zTempLog_ << time;
         for (j = 0; j < rnemdLogWidth_; j++) {
-          zTempLog_ << "\t" << zTempHist_[j] / (RealType)valueCount_[j];
+          zTempLog_ << "\t" << zTempHist_[j] / (RealType)xyzTempCount_[j];
         }
         zTempLog_ << "\n";
       }
@@ -1035,11 +1088,12 @@ namespace OpenMD {
       valueCount_[j] = 0;
       valueHist_[j] = 0.0;
     }
-    if (rnemdType_ == rnemdPx || rnemdType_ == rnemdPxScale)
+    if (output3DTemp_)
       for (j = 0; j < rnemdLogWidth_; j++) {
         xTempHist_[j] = 0.0;
         yTempHist_[j] = 0.0;
         zTempHist_[j] = 0.0;
+	xyzTempCount_[j] = 0;
       }
   }
 }
