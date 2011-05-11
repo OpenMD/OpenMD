@@ -114,6 +114,7 @@ namespace OpenMD {
 #if defined(HAVE_QHULL)
     IntegratorFactory::getInstance()->registerIntegrator(new IntegratorBuilder<LangevinHullDynamics>("LHULL"));
     IntegratorFactory::getInstance()->registerIntegrator(new IntegratorBuilder<LangevinHullDynamics>("LANGEVINHULL"));
+    IntegratorFactory::getInstance()->registerIntegrator(new IntegratorBuilder<LangevinHullDynamics>("SMIPD"));
 #endif
   }
 
