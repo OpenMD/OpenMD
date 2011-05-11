@@ -57,9 +57,11 @@
 
 #define HONKING_LARGE_VALUE 1.0e10
 
+using namespace std;
 namespace OpenMD {
   
-  RNEMD::RNEMD(SimInfo* info) : info_(info), evaluator_(info), seleMan_(info), usePeriodicBoundaryConditions_(info->getSimParams()->getUsePeriodicBoundaryConditions()) {
+  RNEMD::RNEMD(SimInfo* info) : info_(info), evaluator_(info), seleMan_(info), 
+                                usePeriodicBoundaryConditions_(info->getSimParams()->getUsePeriodicBoundaryConditions()) {
 
     failTrialCount_ = 0;
     failRootCount_ = 0;
@@ -88,7 +90,7 @@ namespace OpenMD {
 
     if (selectionCount > nIntegrable) {
       sprintf(painCave.errMsg, 
-              "RNEMD warning: The current RNEMD_objectSelection,\n"
+              "RNEMD: The current RNEMD_objectSelection,\n"
               "\t\t%s\n"
               "\thas resulted in %d selected objects.  However,\n"
               "\tthe total number of integrable objects in the system\n"
@@ -98,19 +100,26 @@ namespace OpenMD {
               rnemdObjectSelection_.c_str(), 
               selectionCount, nIntegrable);
       painCave.isFatal = 0;
+      painCave.severity = OPENMD_WARNING;
       simError();
-
     }
     
-    const std::string st = simParams->getRNEMD_exchangeType();
+    const string st = simParams->getRNEMD_exchangeType();
 
-    std::map<std::string, RNEMDTypeEnum>::iterator i;
+    map<string, RNEMDTypeEnum>::iterator i;
     i = stringToEnumMap_.find(st);
     rnemdType_ = (i == stringToEnumMap_.end()) ? RNEMD::rnemdUnknown : i->second;
     if (rnemdType_ == rnemdUnknown) {
-      std::cerr << "WARNING! RNEMD Type Unknown!\n";
+      sprintf(painCave.errMsg, 
+              "RNEMD: The current RNEMD_exchangeType,\n"
+              "\t\t%s\n"
+              "\tis not one of the recognized exchange types.\n",
+              st.c_str());
+      painCave.isFatal = 1;
+      painCave.severity = OPENMD_ERROR;
+      simError();
     }
-
+    
     output3DTemp_ = false;
     if (simParams->haveRNEMD_outputDimensionalTemperature()) {
       output3DTemp_ = simParams->getRNEMD_outputDimensionalTemperature();
@@ -120,7 +129,7 @@ namespace OpenMD {
     if (worldRank == 0) {
 #endif
 
-      std::string rnemdFileName;
+      string rnemdFileName;
       switch(rnemdType_) {
       case rnemdKineticSwap :
       case rnemdKineticScale :
@@ -141,9 +150,9 @@ namespace OpenMD {
       }
       rnemdLog_.open(rnemdFileName.c_str());
 
-      std::string xTempFileName;
-      std::string yTempFileName;
-      std::string zTempFileName;
+      string xTempFileName;
+      string yTempFileName;
+      string zTempFileName;
       if (output3DTemp_) {
 	xTempFileName = "temperatureX.log";
 	yTempFileName = "temperatureY.log";
@@ -161,23 +170,23 @@ namespace OpenMD {
     set_RNEMD_nBins(simParams->getRNEMD_nBins());
     midBin_ = nBins_ / 2;
     if (simParams->haveRNEMD_binShift()) {
-        if (simParams->getRNEMD_binShift()) {
-	  zShift_ = 0.5 / (RealType)(nBins_);
-	} else {
-	  zShift_ = 0.0;
-	}
+      if (simParams->getRNEMD_binShift()) {
+        zShift_ = 0.5 / (RealType)(nBins_);
+      } else {
+        zShift_ = 0.0;
+      }
     } else {
       zShift_ = 0.0;
     }
-    //std::cerr << "we have zShift_ = " << zShift_ << "\n";
+    //cerr << "we have zShift_ = " << zShift_ << "\n";
     //shift slabs by half slab width, might be useful in heterogeneous systems
     //set to 0.0 if not using it; can NOT be used in status output yet
     if (simParams->haveRNEMD_logWidth()) {
       set_RNEMD_logWidth(simParams->getRNEMD_logWidth());
       /*arbitary rnemdLogWidth_ no checking
-      if (rnemdLogWidth_ != nBins_ && rnemdLogWidth_ != midBin_ + 1) {
-        std::cerr << "WARNING! RNEMD_logWidth has abnormal value!\n";
-        std::cerr << "Automaically set back to default.\n";
+        if (rnemdLogWidth_ != nBins_ && rnemdLogWidth_ != midBin_ + 1) {
+        cerr << "WARNING! RNEMD_logWidth has abnormal value!\n";
+        cerr << "Automaically set back to default.\n";
         rnemdLogWidth_ = nBins_;
 	}*/
     } else {
@@ -220,10 +229,23 @@ namespace OpenMD {
 #ifdef IS_MPI
     if (worldRank == 0) {
 #endif
-      std::cerr << "total fail trials: " << failTrialCount_ << "\n";
+      
+      sprintf(painCave.errMsg, 
+              "RNEMD: total failed trials: %d\n",
+              failTrialCount_);
+      painCave.isFatal = 0;
+      painCave.severity = OPENMD_INFO;
+      simError();
+
       rnemdLog_.close();
-      if (rnemdType_ == rnemdKineticScale || rnemdType_ == rnemdPxScale || rnemdType_ == rnemdPyScale)
-        std::cerr<< "total root-checking warnings: " << failRootCount_ << "\n";
+      if (rnemdType_ == rnemdKineticScale || rnemdType_ == rnemdPxScale || rnemdType_ == rnemdPyScale) {
+        sprintf(painCave.errMsg, 
+                "RNEMD: total root-checking warnings: %d\n",
+                failRootCount_);
+        painCave.isFatal = 0;
+        painCave.severity = OPENMD_INFO;
+        simError();
+      }
       if (output3DTemp_) {
         xTempLog_.close();
         yTempLog_.close();
@@ -284,22 +306,22 @@ namespace OpenMD {
           value = mass * (vel[0]*vel[0] + vel[1]*vel[1] + 
                           vel[2]*vel[2]);
 	  /*
-          if (sd->isDirectional()) {
+            if (sd->isDirectional()) {
             Vector3d angMom = sd->getJ();
             Mat3x3d I = sd->getI();
             
             if (sd->isLinear()) {
-              int i = sd->linearAxis();
-              int j = (i + 1) % 3;
-              int k = (i + 2) % 3;
-              value += angMom[j] * angMom[j] / I(j, j) + 
-                angMom[k] * angMom[k] / I(k, k);
+            int i = sd->linearAxis();
+            int j = (i + 1) % 3;
+            int k = (i + 2) % 3;
+            value += angMom[j] * angMom[j] / I(j, j) + 
+            angMom[k] * angMom[k] / I(k, k);
             } else {                        
-              value += angMom[0]*angMom[0]/I(0, 0) 
-                + angMom[1]*angMom[1]/I(1, 1) 
-                + angMom[2]*angMom[2]/I(2, 2);
+            value += angMom[0]*angMom[0]/I(0, 0) 
+            + angMom[1]*angMom[1]/I(1, 1) 
+            + angMom[2]*angMom[2]/I(2, 2);
             }
-	  } no exchange of angular momenta
+            } no exchange of angular momenta
 	  */
           //make exchangeSum_ comparable between swap & scale
           //temporarily without using energyConvert
@@ -354,13 +376,9 @@ namespace OpenMD {
     bool my_min_found = min_found;
     bool my_max_found = max_found;
 
-    // Even if we didn't find a minimum, did someone else? debugging...
-    //MPI::COMM_WORLD.Allreduce(&my_min_found, &min_found, 
-    //                          1, MPI::BOOL, MPI::LAND);
+    // Even if we didn't find a minimum, did someone else?
     MPI::COMM_WORLD.Allreduce(&my_min_found, &min_found, 1, MPI::BOOL, MPI::LOR);
     // Even if we didn't find a maximum, did someone else?
-    //MPI::COMM_WORLD.Allreduce(&my_max_found, &max_found, 
-    //                          1, MPI::BOOL, MPI::LAND);
     MPI::COMM_WORLD.Allreduce(&my_max_found, &max_found, 1, MPI::BOOL, MPI::LOR);
     struct {
       RealType val;
@@ -414,12 +432,12 @@ namespace OpenMD {
             min_sd->setVel(max_vel);
             max_sd->setVel(min_vel);
 	    /*
-            if (min_sd->isDirectional() && max_sd->isDirectional()) {
+              if (min_sd->isDirectional() && max_sd->isDirectional()) {
               Vector3d min_angMom = min_sd->getJ();
               Vector3d max_angMom = max_sd->getJ();
               min_sd->setJ(max_angMom);
               max_sd->setJ(min_angMom);
-            } no angular momentum exchange
+              } no angular momentum exchange
 	    */
             break;
           case rnemdPx :
@@ -464,21 +482,22 @@ namespace OpenMD {
           switch(rnemdType_) {
           case rnemdKineticSwap :
             max_sd->setVel(min_vel);
-	    /*            
+            //no angular momentum exchange for now
+            /*
             if (max_sd->isDirectional()) {
               Vector3d min_angMom;
               Vector3d max_angMom = max_sd->getJ();
-
+              
               // point-to-point swap of the angular momentum vector
               MPI::COMM_WORLD.Sendrecv(max_angMom.getArrayPointer(), 3, 
                                        MPI::REALTYPE, min_vals.rank, 1, 
                                        min_angMom.getArrayPointer(), 3, 
                                        MPI::REALTYPE, min_vals.rank, 1, 
                                        status);
-
+              
               max_sd->setJ(min_angMom);
-            } no angular momentum exchange
-	    */
+             }
+             */            
             break;
           case rnemdPx :
             max_vel.x() = min_vel.x();
@@ -511,20 +530,21 @@ namespace OpenMD {
           switch(rnemdType_) {
           case rnemdKineticSwap :
             min_sd->setVel(max_vel);
-	    /*            
+            // no angular momentum exchange for now
+            /*
             if (min_sd->isDirectional()) {
               Vector3d min_angMom = min_sd->getJ();
               Vector3d max_angMom;
-
+              
               // point-to-point swap of the angular momentum vector
               MPI::COMM_WORLD.Sendrecv(min_angMom.getArrayPointer(), 3, 
                                        MPI::REALTYPE, max_vals.rank, 1, 
                                        max_angMom.getArrayPointer(), 3, 
                                        MPI::REALTYPE, max_vals.rank, 1, 
                                        status);
-
+              
               min_sd->setJ(max_angMom);
-            } no angular momentum exchange
+            }
 	    */
             break;
           case rnemdPx :
@@ -545,13 +565,21 @@ namespace OpenMD {
         }
 #endif
         exchangeSum_ += max_val - min_val;
-      } else {
-        std::cerr << "exchange NOT performed!\nmin_val > max_val.\n";
+      } else {        
+        sprintf(painCave.errMsg, 
+                "RNEMD: exchange NOT performed because min_val > max_val\n");
+        painCave.isFatal = 0;
+        painCave.severity = OPENMD_INFO;
+        simError();        
         failTrialCount_++;
       }
     } else {
-      std::cerr << "exchange NOT performed!\n";
-      std::cerr << "at least one of the two slabs empty.\n";
+      sprintf(painCave.errMsg, 
+              "RNEMD: exchange NOT performed because at least one\n"
+              "\tof the two slabs is empty\n");
+      painCave.isFatal = 0;
+      painCave.severity = OPENMD_INFO;
+      simError();        
       failTrialCount_++;
     }
     
@@ -568,7 +596,7 @@ namespace OpenMD {
     StuntDouble* sd;
     int idx;
 
-    std::vector<StuntDouble*> hotBin, coldBin;
+    vector<StuntDouble*> hotBin, coldBin;
 
     RealType Phx = 0.0;
     RealType Phy = 0.0;
@@ -657,19 +685,19 @@ namespace OpenMD {
     RealType a000, a110, c0, a001, a111, b01, b11, c1, c;
     switch(rnemdType_) {
     case rnemdKineticScale :
-    /*used hotBin coeff's & only scale x & y dimensions
+      // used hotBin coeff's & only scale x & y dimensions
+      /*
       RealType px = Phx / Pcx;
       RealType py = Phy / Pcy;
       a110 = Khy;
       c0 = - Khx - Khy - targetFlux_;
       a000 = Khx;
-      a111 = Kcy * py * py
+      a111 = Kcy * py * py;
       b11 = -2.0 * Kcy * py * (1.0 + py);
       c1 = Kcy * py * (2.0 + py) + Kcx * px * ( 2.0 + px) + targetFlux_;
       b01 = -2.0 * Kcx * px * (1.0 + px);
       a001 = Kcx * px * px;
-    */
-
+      */
       //scale all three dimensions, let c_x = c_y
       a000 = Kcx + Kcy;
       a110 = Kcz;
@@ -679,7 +707,7 @@ namespace OpenMD {
       b01 = -2.0 * (Khx * px * (1.0 + px) + Khy * py * (1.0 + py));
       b11 = -2.0 * Khz * pz * (1.0 + pz);
       c1 = Khx * px * (2.0 + px) + Khy * py * (2.0 + py)
-         + Khz * pz * (2.0 + pz) - targetFlux_;
+        + Khz * pz * (2.0 + pz) - targetFlux_;
       break;
     case rnemdPxScale :
       c = 1 - targetFlux_ / Pcx;
@@ -691,7 +719,7 @@ namespace OpenMD {
       b01 = -2.0 * Khy * py * (1.0 + py);
       b11 = -2.0 * Khz * pz * (1.0 + pz);
       c1 = Khy * py * (2.0 + py) + Khz * pz * (2.0 + pz)
-         + Khx * (fastpow(c * px - px - 1.0, 2) - 1.0);
+        + Khx * (fastpow(c * px - px - 1.0, 2) - 1.0);
       break;
     case rnemdPyScale :
       c = 1 - targetFlux_ / Pcy;
@@ -703,7 +731,7 @@ namespace OpenMD {
       b01 = -2.0 * Khx * px * (1.0 + px);
       b11 = -2.0 * Khz * pz * (1.0 + pz);
       c1 = Khx * px * (2.0 + px) + Khz * pz * (2.0 + pz)
-         + Khy * (fastpow(c * py - py - 1.0, 2) - 1.0);
+        + Khy * (fastpow(c * py - py - 1.0, 2) - 1.0);
       break;
     case rnemdPzScale ://we don't really do this, do we?
       c = 1 - targetFlux_ / Pcz;
@@ -751,11 +779,11 @@ namespace OpenMD {
     poly.setCoefficient(2, u2);
     poly.setCoefficient(1, u1);
     poly.setCoefficient(0, u0);
-    std::vector<RealType> realRoots = poly.FindRealRoots();
+    vector<RealType> realRoots = poly.FindRealRoots();
 
-    std::vector<RealType>::iterator ri;
+    vector<RealType>::iterator ri;
     RealType r1, r2, alpha0;
-    std::vector<std::pair<RealType,RealType> > rps;
+    vector<pair<RealType,RealType> > rps;
     for (ri = realRoots.begin(); ri !=realRoots.end(); ri++) {
       r2 = *ri;
       //check if FindRealRoots() give the right answer
@@ -771,21 +799,21 @@ namespace OpenMD {
       if (alpha0 >= 0.0) {
         r1 = sqrt(alpha0 / a000);
         if (fabs(c1 + r1 * (b01 + r1 * a001) + r2 * (b11 + r2 * a111)) < 1e-6)
-          { rps.push_back(std::make_pair(r1, r2)); }
+          { rps.push_back(make_pair(r1, r2)); }
         if (r1 > 1e-6) { //r1 non-negative
           r1 = -r1;
           if (fabs(c1 + r1 * (b01 + r1 * a001) + r2 * (b11 + r2 * a111)) <1e-6)
-            { rps.push_back(std::make_pair(r1, r2)); }
+            { rps.push_back(make_pair(r1, r2)); }
         }
       }
     }
-    // Consider combininig together the solving pair part w/ the searching
+    // Consider combining together the solving pair part w/ the searching
     // best solution part so that we don't need the pairs vector
     if (!rps.empty()) {
       RealType smallestDiff = HONKING_LARGE_VALUE;
       RealType diff;
-      std::pair<RealType,RealType> bestPair = std::make_pair(1.0, 1.0);
-      std::vector<std::pair<RealType,RealType> >::iterator rpi;
+      pair<RealType,RealType> bestPair = make_pair(1.0, 1.0);
+      vector<pair<RealType,RealType> >::iterator rpi;
       for (rpi = rps.begin(); rpi != rps.end(); rpi++) {
         r1 = (*rpi).first;
         r2 = (*rpi).second;
@@ -817,38 +845,42 @@ namespace OpenMD {
 #ifdef IS_MPI
       if (worldRank == 0) {
 #endif
-        std::cerr << "we choose r1 = " << bestPair.first
-                  << " and r2 = " << bestPair.second << "\n";
+        sprintf(painCave.errMsg, 
+                "RNEMD: roots r1= %lf\tr2 = %lf\n",
+                bestPair.first, bestPair.second);
+        painCave.isFatal = 0;
+        painCave.severity = OPENMD_INFO;
+        simError();
 #ifdef IS_MPI
       }
 #endif
-
+      
       RealType x, y, z;
-        switch(rnemdType_) {
-        case rnemdKineticScale :
-          x = bestPair.first;
-          y = bestPair.first;
-          z = bestPair.second;
-          break;
-        case rnemdPxScale :
-          x = c;
-          y = bestPair.first;
-          z = bestPair.second;
-          break;
-        case rnemdPyScale :
-          x = bestPair.first;
-          y = c;
-          z = bestPair.second;
-          break;
-        case rnemdPzScale :
-          x = bestPair.first;
-          y = bestPair.second;
-          z = c;
-          break;          
-        default :
-          break;
-        }
-      std::vector<StuntDouble*>::iterator sdi;
+      switch(rnemdType_) {
+      case rnemdKineticScale :
+        x = bestPair.first;
+        y = bestPair.first;
+        z = bestPair.second;
+        break;
+      case rnemdPxScale :
+        x = c;
+        y = bestPair.first;
+        z = bestPair.second;
+        break;
+      case rnemdPyScale :
+        x = bestPair.first;
+        y = c;
+        z = bestPair.second;
+        break;
+      case rnemdPzScale :
+        x = bestPair.first;
+        y = bestPair.second;
+        z = c;
+        break;          
+      default :
+        break;
+      }
+      vector<StuntDouble*>::iterator sdi;
       Vector3d vel;
       for (sdi = coldBin.begin(); sdi != coldBin.end(); sdi++) {
         vel = (*sdi)->getVel();
@@ -871,7 +903,11 @@ namespace OpenMD {
       exchangeSum_ += targetFlux_;
       //we may want to check whether the exchange has been successful
     } else {
-      std::cerr << "exchange NOT performed!\n";//MPI incompatible
+      sprintf(painCave.errMsg, 
+              "RNEMD: exchange NOT performed!\n");
+      painCave.isFatal = 0;
+      painCave.severity = OPENMD_INFO;
+      simError();        
       failTrialCount_++;
     }
 
@@ -909,17 +945,20 @@ namespace OpenMD {
     StuntDouble* sd;
     int idx;
 
-    // alternative approach, track all molecules instead of only those selected for scaling/swapping
-    //SimInfo::MoleculeIterator miter;
-    //std::vector<StuntDouble*>::iterator iiter;
-    //Molecule* mol;
-    //StuntDouble* integrableObject;
-    //for (mol = info_->beginMolecule(miter); mol != NULL;
-    //     mol = info_->nextMolecule(miter))
-    // integrableObject is essentially sd
-    //for (integrableObject = mol->beginIntegrableObject(iiter);
-    //     integrableObject != NULL;
-    //     integrableObject = mol->nextIntegrableObject(iiter))
+    // alternative approach, track all molecules instead of only those
+    // selected for scaling/swapping:
+    /*
+    SimInfo::MoleculeIterator miter;
+    vector<StuntDouble*>::iterator iiter;
+    Molecule* mol;
+    StuntDouble* integrableObject;
+    for (mol = info_->beginMolecule(miter); mol != NULL;
+         mol = info_->nextMolecule(miter))
+      integrableObject is essentially sd
+        for (integrableObject = mol->beginIntegrableObject(iiter);
+             integrableObject != NULL;
+             integrableObject = mol->nextIntegrableObject(iiter))
+    */
     for (sd = seleMan_.beginSelected(selei); sd != NULL; 
          sd = seleMan_.nextSelected(selei)) {
       
@@ -937,7 +976,8 @@ namespace OpenMD {
       
       int binNo = int(rnemdLogWidth_ * (pos.z() / hmat(2,2) + 0.5)) %
 	rnemdLogWidth_;
-      /* no symmetrization allowed due to arbitary rnemdLogWidth_ value
+      // no symmetrization allowed due to arbitary rnemdLogWidth_ value
+      /*
       if (rnemdLogWidth_ == midBin_ + 1)
         if (binNo > midBin_)
           binNo = nBins_ - binNo;
@@ -951,8 +991,7 @@ namespace OpenMD {
       case rnemdKineticSwap :
       case rnemdKineticScale :
 	
-	value = mass * (vel[0]*vel[0] + vel[1]*vel[1] + 
-			vel[2]*vel[2]);
+	value = mass * (vel[0]*vel[0] + vel[1]*vel[1] + vel[2]*vel[2]);
 	
         valueCount_[binNo] += 3;
 	if (sd->isDirectional()) {
@@ -965,9 +1004,9 @@ namespace OpenMD {
 	    int k = (i + 2) % 3;
 	    value += angMom[j] * angMom[j] / I(j, j) + 
 	      angMom[k] * angMom[k] / I(k, k);
-
+            
             valueCount_[binNo] +=2;
-
+            
 	  } else {
 	    value += angMom[0]*angMom[0]/I(0, 0) 
 	      + angMom[1]*angMom[1]/I(1, 1) 
@@ -976,7 +1015,7 @@ namespace OpenMD {
 	  }
 	}
 	value = value / PhysicalConstants::energyConvert / PhysicalConstants::kb;
-
+        
 	break;
       case rnemdPx :
       case rnemdPxScale :
@@ -1019,9 +1058,9 @@ namespace OpenMD {
   void RNEMD::getStarted() {
     collectData();
     /* now should be able to output profile in step 0, but might not be useful
-    Snapshot* currentSnap_ = info_->getSnapshotManager()->getCurrentSnapshot();
-    Stats& stat = currentSnap_->statData;
-    stat[Stats::RNEMD_EXCHANGE_TOTAL] = exchangeSum_;
+       Snapshot* currentSnap_ = info_->getSnapshotManager()->getCurrentSnapshot();
+       Stats& stat = currentSnap_->statData;
+       stat[Stats::RNEMD_EXCHANGE_TOTAL] = exchangeSum_;
     */
     getStatus();
   }

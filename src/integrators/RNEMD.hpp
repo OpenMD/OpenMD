@@ -55,6 +55,7 @@
 #include "selection/SelectionManager.hpp"
 #include <iostream>
 
+using namespace std;
 namespace OpenMD {
 
   /**
@@ -97,9 +98,9 @@ namespace OpenMD {
     
     SimInfo* info_;
     RandNumGen* randNumGen_;
-    std::map<std::string, RNEMDTypeEnum> stringToEnumMap_;
+    map<string, RNEMDTypeEnum> stringToEnumMap_;
     RNEMDTypeEnum rnemdType_;
-    std::string rnemdObjectSelection_;
+    string rnemdObjectSelection_;
     SelectionEvaluator evaluator_;
     SelectionManager seleMan_;
     bool usePeriodicBoundaryConditions_;
@@ -113,13 +114,13 @@ namespace OpenMD {
     RealType exchangeSum_;
     int failTrialCount_;
     int failRootCount_;
-    std::ofstream rnemdLog_;
+    ofstream rnemdLog_;
     // keeps track of what's being averaged
-    std::vector<RealType> valueHist_;
-    std::vector<int> valueCount_, xyzTempCount_;
+    vector<RealType> valueHist_;
+    vector<int> valueCount_, xyzTempCount_;
     // keeps track of the number of degrees of freedom being averaged
-    std::vector<RealType> xTempHist_, yTempHist_, zTempHist_;
-    std::ofstream xTempLog_, yTempLog_, zTempLog_;
+    vector<RealType> xTempHist_, yTempHist_, zTempHist_;
+    ofstream xTempLog_, yTempLog_, zTempLog_;
   };
 
 }
