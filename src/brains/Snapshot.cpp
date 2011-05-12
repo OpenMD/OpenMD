@@ -118,46 +118,39 @@ namespace OpenMD {
   }
 
 
-  void Snapshot::wrapVector(Vector3d& pos) {
-
-    int i;
-    Vector3d scaled;
-
-    if( !orthoRhombic_ ){
-
-      // calc the scaled coordinates.
-      scaled = invHmat_* pos;
-
-      // wrap the scaled coordinates
-      for (i = 0; i < 3; ++i) {
-	scaled[i] -= roundMe(scaled[i]);
-      }
-
-      // calc the wrapped real coordinates from the wrapped scaled coordinates
-      pos = hmat_ * scaled;    
-
-    } else {
-
-      // if it is orthoRhombic, we could improve efficiency by only
-      // caculating the diagonal element
+  inline void Snapshot::wrapVector(Vector3d& pos) {
     
-      // calc the scaled coordinates.
-      for (i=0; i<3; i++) {
-	scaled[i] = pos[i] * invHmat_(i, i);
-      }
-        
-      // wrap the scaled coordinates
-      for (i = 0; i < 3; ++i) {
-	scaled[i] -= roundMe(scaled[i]);
-      }
+    Vector3d scaled = scaleVector(pos);
+
+    for (int i = 0; i < 3; i++) 
+      scaled[i] -= roundMe(scaled[i]);
+
+    if( !orthoRhombic_ )
+      pos = hmat_ * scaled;    
+    else {
 
       // calc the wrapped real coordinates from the wrapped scaled coordinates
-      for (i=0; i<3; i++) {
+      for (int i=0; i<3; i++) {
 	pos[i] = scaled[i] * hmat_(i, i);
       }   
     }
   }
 
+  inline Vector3d Snapshot::scaleVector(Vector3d& pos) {   
+    
+    Vector3d scaled;
+
+    if( !orthoRhombic_ )
+      scaled = invHmat_* pos;
+    else {
+      // calc the scaled coordinates.
+      for (int i=0; i<3; i++) 
+        scaled[i] = pos[i] * invHmat_(i, i);
+    }
+
+    return scaled;
+  }
+  
   Vector3d Snapshot::getCOM() {
     if( !hasCOM_ ) {
       sprintf( painCave.errMsg, "COM was requested before COM was computed!\n");

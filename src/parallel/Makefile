@@ -1,6 +1,7 @@
 Package = parallel
 
 Source    = \
+        ForceDecomposition.cpp \
         ForceMatrixDecomposition.cpp \
 
 ParallelSource = \

@@ -149,6 +149,10 @@ namespace OpenMD{
 
     /** Wrapping the vector according to periodic boundary condition*/
     void wrapVector(Vector3d& v);
+    /** Scaling a vector to multiples of the periodic box */
+    Vector3d scaleVector(Vector3d &v);
+
+
     Vector3d getCOM();
     Vector3d getCOMvel();
     Vector3d getCOMw();

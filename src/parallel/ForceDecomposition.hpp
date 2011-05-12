@@ -85,7 +85,7 @@ namespace OpenMD {
   class ForceDecomposition {
   public:
 
-    ForceDecomposition(SimInfo* info) : info_(info) {}
+    ForceDecomposition(SimInfo* info);
     virtual ~ForceDecomposition() {}
     
     virtual void distributeInitialData() = 0;
@@ -147,6 +147,8 @@ namespace OpenMD {
                                        //& column.  It will be up to
                                        //the specific decomposition
                                        //method to fill this.
+    vector<Vector3i> cellOffsets_;
+    int nOffset_;
   };    
 }
 #endif

@@ -42,6 +42,7 @@
 #include "applications/hydrodynamics/RoughShell.hpp"
 #include "applications/hydrodynamics/ShapeBuilder.hpp"
 #include "brains/SimInfo.hpp"
+
 namespace OpenMD {
   
   RoughShell::RoughShell(StuntDouble* sd, SimInfo* info) : ApproximationModel(sd, info){

@@ -43,72 +43,9 @@
 
 #include "applications/hydrodynamics/ApproximationModel.hpp"
 #include "applications/hydrodynamics/CompositeShape.hpp"
+#include "utils/Grid3d.hpp"
+
 namespace OpenMD {
-  /**
-   * @class Grid3d
-   * A generic 3d grid class
-   */
-  template<class Elem>
-  class Grid3D {
-  public:
-    Grid3D(unsigned int dim1, unsigned int dim2, unsigned int dim3) : dim1_(dim1), dim2_(dim2), dim3_(dim3) {
-      data_.resize(dim1_*dim2_*dim3_);
-    }
-    Elem& operator ()(unsigned int i, unsigned int j, unsigned int k) {
-      int index = isValidGrid(i, j , k);
-      assert(index != -1);
-      return data_[index];
-    }
-    
-    const Elem& operator () (unsigned int i, unsigned int j, unsigned int k) const {
-      int index = isValidGrid(i, j , k);
-      assert(index != -1);
-      return data_[index];
-    }
-    
-    std::vector<Elem> getAllNeighbors(unsigned int i, unsigned int j, unsigned int k) {
-      std::vector<Elem> result;
-      int index;
-      index = isValidGrid(i-1, j, k);
-      if (index != -1)
-        result.push_back(data_[index]);
-      
-      index = isValidGrid(i+1, j, k);
-      if (index != -1)
-        result.push_back(data_[index]);
-      
-      index = isValidGrid(i, j-1, k);
-      if (index != -1)
-        result.push_back(data_[index]);
-      
-      index = isValidGrid(i, j+1, k);
-      if (index != -1)
-        result.push_back(data_[index]);
-      
-      index = isValidGrid(i, j, k-1);
-      if (index != -1)
-        result.push_back(data_[index]);
-      
-      index = isValidGrid(i, j, k+1);
-      if (index != -1)
-        result.push_back(data_[index]);
-      
-      return result;
-    }
-  private:
-    
-    int isValidGrid(unsigned int i, unsigned int j, unsigned int k) const {
-      int index = i * dim2_*dim3_ + j * dim3_ + k;
-      return index < data_.size() ? index : -1;
-    };
-    
-    unsigned int dim1_;
-    unsigned int dim2_;
-    unsigned int dim3_;
-    std::vector<Elem> data_;
-    
-  };
-  
   
   class RoughShell : public ApproximationModel {
   public:
@@ -117,7 +54,7 @@ namespace OpenMD {
     void setSigma(RealType sigma) {sigma_ = sigma;}
     RealType getSigma() {return sigma_;}
   private:
-    virtual bool createBeads(std::vector<BeadParam>& beads);
+    virtual bool createBeads(vector<BeadParam>& beads);
     //StuntDoubleShape sdShape_;
     RealType sigma_;
     Shape* shape_;

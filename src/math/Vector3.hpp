@@ -132,7 +132,7 @@ namespace OpenMD {
    * @see #vector::dot
    */
   template<typename Real>
-  Vector3<Real> cross( const Vector3<Real>& v1, const Vector3<Real>& v2 ) {
+  inline Vector3<Real> cross( const Vector3<Real>& v1, const Vector3<Real>& v2 ) {
     Vector3<Real> result;
     
     result.x() = v1.y() * v2.z() - v1.z() * v2.y();
@@ -142,6 +142,19 @@ namespace OpenMD {
     return result;
   }
 
+
+  /**
+   * Returns the linear indexing for integer vectors. Compare to
+   * Rapaport's VLinear
+   *
+   * @param p first vector
+   * @param s second vector
+   */
+  template<typename Real>
+  inline Real Vlinear( const Vector3<Real>& p, const Vector3<Real>& s ) {
+    return (p.z() * s.y() + p.y()) * s.x() + p.x();
+  }
+
   typedef Vector3<int> Vector3i;
   
   typedef Vector3<RealType> Vector3d;    
@@ -149,8 +162,8 @@ namespace OpenMD {
   const Vector3d V3Zero(0.0 , 0.0, 0.0);
   const Vector3d V3X( 1.0, 0.0, 0.0 ) ;
   const Vector3d V3Y( 0.0, 1.0, 0.0 ) ;
-  const Vector3d V3Z ( 0.0, 0.0, 1.0 ) ;    
-  
+  const Vector3d V3Z ( 0.0, 0.0, 1.0 ) ;
+ 
 }
 
 #endif
