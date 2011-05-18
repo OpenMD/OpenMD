@@ -999,8 +999,8 @@ end AtomTypes
 
 begin ChargeAtomTypes
 //name			charge
-HO			0.45
-OH			-0.5.8
+HO			0.435
+OH			-0.7
 O2			-0.5
 C			0.55
 GLY-N                   -0.4157
