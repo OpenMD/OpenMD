@@ -306,7 +306,8 @@ namespace OpenMD {
     }
     
     const int masterNode = 0;
-
+    int nProc;
+    MPI_Comm_size(MPI_COMM_WORLD, &nProc);
     if (worldRank == masterNode) {	
       os << "  <Snapshot>\n";	
       writeFrameProperties(os, info_->getSnapshotManager()->getCurrentSnapshot());
@@ -314,13 +315,13 @@ namespace OpenMD {
 	
       os << buffer;
 
-      int nProc;
-      MPI_Comm_size(MPI_COMM_WORLD, &nProc);
+     
       for (int i = 1; i < nProc; ++i) {
 
         // receive the length of the string buffer that was
         // prepared by processor i
-
+       
+        MPI_Bcast(&i, 1, MPI_INT,masterNode,MPI_COMM_WORLD);
         int recvLength;
         MPI_Recv(&recvLength, 1, MPI_INT, i, 0, MPI_COMM_WORLD, &istatus);
         char* recvBuffer = new char[recvLength];
@@ -337,8 +338,14 @@ namespace OpenMD {
       os.flush();
     } else {
       int sendBufferLength = buffer.size() + 1;
-      MPI_Send(&sendBufferLength, 1, MPI_INT, masterNode, 0, MPI_COMM_WORLD);
-      MPI_Send((void *)buffer.c_str(), sendBufferLength, MPI_CHAR, masterNode, 0, MPI_COMM_WORLD);
+      int myturn = 0;
+      for (int i = 1; i < nProc; ++i){
+        MPI_Bcast(&myturn,1, MPI_INT,masterNode,MPI_COMM_WORLD);
+        if (myturn == worldRank){
+          MPI_Send(&sendBufferLength, 1, MPI_INT, masterNode, 0, MPI_COMM_WORLD);
+          MPI_Send((void *)buffer.c_str(), sendBufferLength, MPI_CHAR, masterNode, 0, MPI_COMM_WORLD);
+        }
+      }
     }
 
 #endif // is_mpi
