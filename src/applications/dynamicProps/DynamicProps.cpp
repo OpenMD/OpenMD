@@ -127,7 +127,7 @@ int main(int argc, char* argv[]){
     corrFunc = new VCorrFunc(info, dumpFileName, sele1, sele2); 
   } else if (args_info.helfandEcorr_given){
     corrFunc = new EnergyCorrFunc(info, dumpFileName, sele1, sele2);
-  } else if (args_info.StresCorrFunc_given){
+  } else if (args_info.stresscorr_given){
     corrFunc = new StressCorrFunc(info, dumpFileName, sele1, sele2);
   } else if (args_info.lcorr_given) {
     int order;

@@ -189,7 +189,7 @@ namespace OpenMD {
         updateFrame(j);
 
 	// do the forces:
-	forceMan->calcForces(true, true);
+	//forceMan->calcForces(true, true);
 	// call thermo to get the pressure and volume.
         pSum += thermo->getPressure();
         vSum += thermo->getVolume();

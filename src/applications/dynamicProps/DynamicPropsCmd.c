@@ -23,7 +23,7 @@
 
 #include <getopt.h>
 
-#include "cmdline.h"
+#include "DynamicPropsCmd.h"
 
 const char *gengetopt_args_info_purpose = "";
 
