@@ -14,7 +14,8 @@ Source    = \
 	    RadialRCorrFunc.cpp \
 	    ThetaCorrFunc.cpp \
 	    EnergyCorrFunc.cpp \
-            DirectionalRCorrFunc.cpp
+            DirectionalRCorrFunc.cpp \
+            StressCorrFunc.cpp
 
 BuiltParallelExe = 0
 

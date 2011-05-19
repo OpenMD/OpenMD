@@ -57,6 +57,7 @@
 #include "applications/dynamicProps/ThetaCorrFunc.hpp"
 #include "applications/dynamicProps/DirectionalRCorrFunc.hpp"
 #include "applications/dynamicProps/EnergyCorrFunc.hpp"
+#include "applications/dynamicProps/StressCorrFunc.hpp"
 
 
 using namespace OpenMD;
@@ -125,7 +126,9 @@ int main(int argc, char* argv[]){
   } else if (args_info.vcorr_given) {
     corrFunc = new VCorrFunc(info, dumpFileName, sele1, sele2); 
   } else if (args_info.helfandEcorr_given){
-    corrFunc = new EnergyCorrFunc(info, dumpFileName, sele1, sele2);  
+    corrFunc = new EnergyCorrFunc(info, dumpFileName, sele1, sele2);
+  } else if (args_info.StresCorrFunc_given){
+    corrFunc = new StressCorrFunc(info, dumpFileName, sele1, sele2);
   } else if (args_info.lcorr_given) {
     int order;
     if (args_info.order_given)
