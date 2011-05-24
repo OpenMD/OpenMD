@@ -42,12 +42,12 @@
 #ifndef PARALLEL_FORCEMATRIXDECOMPOSITION_HPP
 #define PARALLEL_FORCEMATRIXDECOMPOSITION_HPP
 
-#include "Parallel/ForceDecomposition.hpp"
+#include "parallel/ForceDecomposition.hpp"
 #include "math/SquareMatrix3.hpp"
 #include "brains/Snapshot.hpp"
 
 #ifdef IS_MPI
-#include "Parallel/Communicator.hpp"
+#include "parallel/Communicator.hpp"
 #endif
 
 using namespace std;
@@ -97,12 +97,21 @@ namespace OpenMD {
     SnapshotManager* sman_;    
     Snapshot* snap_;
     int storageLayout_;
-#ifdef IS_MPI    
+    vector<Vector3i> Cells;
 
+    int nLocal_;
+    int nGroups_;
+
+#ifdef IS_MPI    
     DataStorage atomRowData;
     DataStorage atomColData;
     DataStorage cgRowData;
     DataStorage cgColData;
+
+    int nAtomsInRow_; 
+    int nAtomsInCol_;
+    int nGroupsInRow_;
+    int nGroupsInCol_;
 
     Communicator<Row, int>* AtomCommIntRow;
     Communicator<Row, RealType>* AtomCommRealRow; 
@@ -130,8 +139,14 @@ namespace OpenMD {
     vector<int> cgLocalToGlobal;
     vector<int> cgRowToGlobal;
     vector<int> cgColToGlobal;
+
+    vector<vector<int> > CellListRow;
+    vector<vector<int> > CellListCol;
+#else 
+    vector<vector<int> > CellList;
 #endif
     vector<RealType> pot_local;
+
   };
 
 }
