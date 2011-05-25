@@ -99,7 +99,6 @@ namespace OpenMD {
 
     static void setupCutoffs();
     static void setupSwitching();
-    static void setupNeighborlists();
     static void setupElectrostatics();
 
     static SimInfo* info_;
@@ -117,8 +116,6 @@ namespace OpenMD {
     static RealType rSwitch_;         /**< inner radius of switching function */
     static CutoffMethod cutoffMethod_;/**< Cutoff Method for most non-bonded interactions */
     static SwitchingFunctionType sft_;/**< Type of switching function in use */
-    static RealType listRadius_;      /**< Verlet neighbor list radius */
-    static RealType skinThickness_;   /**< Verlet neighbor list skin thickness */    
 
     static RealType vdwScale_[4];
     static RealType electrostaticScale_[4];

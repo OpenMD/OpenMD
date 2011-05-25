@@ -43,6 +43,7 @@
 #define PARALLEL_FORCEDECOMPOSITION_HPP
 
 #include "brains/SimInfo.hpp"
+#include "brains/SnapshotManager.hpp"
 #include "nonbonded/NonBondedInteraction.hpp"
 
 using namespace std;
@@ -95,7 +96,7 @@ namespace OpenMD {
     virtual void collectData() = 0;
 
     // neighbor list routines
-    virtual bool checkNeighborList() = 0;
+    virtual bool checkNeighborList();
     virtual vector<pair<int, int> >  buildNeighborList() = 0;
 
     // group bookkeeping
@@ -123,10 +124,15 @@ namespace OpenMD {
     // filling interaction blocks with pointers
     virtual InteractionData fillInteractionData(int atom1, int atom2) = 0;
     virtual InteractionData fillSkipData(int atom1, int atom2) = 0;
-    virtual SelfData fillSelfData(int atom1) = 0;
+    virtual SelfData fillSelfData(int atom1);
     
   protected:
     SimInfo* info_;   
+    SnapshotManager* sman_;    
+    Snapshot* snap_;
+    int storageLayout_;
+    RealType skinThickness_;   /**< Verlet neighbor list skin thickness */    
+
     map<pair<int, int>, int> topoDist; //< topoDist gives the
                                        //topological distance between
                                        //two atomic sites.  This
@@ -148,7 +154,10 @@ namespace OpenMD {
                                        //the specific decomposition
                                        //method to fill this.
     vector<Vector3i> cellOffsets_;
-    int nOffset_;
+    Vector3i nCells_;
+    vector<vector<int> > cellList_;
+    vector<Vector3d> saved_CG_positions_;
+
   };    
 }
 #endif

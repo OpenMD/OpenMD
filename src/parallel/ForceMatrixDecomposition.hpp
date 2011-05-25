@@ -55,7 +55,8 @@ namespace OpenMD {
   
   class ForceMatrixDecomposition : public ForceDecomposition {
   public:
-    ForceMatrixDecomposition(SimInfo* info) : ForceDecomposition(info) {sman_ = info_->getSnapshotManager();}
+    ForceMatrixDecomposition(SimInfo* info) : ForceDecomposition(info) {};
+
     void distributeInitialData();
     void distributeData();
     void collectIntermediateData();
@@ -63,7 +64,6 @@ namespace OpenMD {
     void collectData();
 
     // neighbor list routines
-    bool checkNeighborList();
     vector<pair<int, int> >  buildNeighborList();
 
     // group bookkeeping
@@ -91,14 +91,8 @@ namespace OpenMD {
     // filling interaction blocks with pointers
     InteractionData fillInteractionData(int atom1, int atom2);
     InteractionData fillSkipData(int atom1, int atom2);
-    SelfData fillSelfData(int atom1);
 
   private: 
-    SnapshotManager* sman_;    
-    Snapshot* snap_;
-    int storageLayout_;
-    vector<Vector3i> Cells;
-
     int nLocal_;
     int nGroups_;
 
@@ -140,10 +134,8 @@ namespace OpenMD {
     vector<int> cgRowToGlobal;
     vector<int> cgColToGlobal;
 
-    vector<vector<int> > CellListRow;
-    vector<vector<int> > CellListCol;
-#else 
-    vector<vector<int> > CellList;
+    vector<vector<int> > cellListRow_;
+    vector<vector<int> > cellListCol_;
 #endif
     vector<RealType> pot_local;
 

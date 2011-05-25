@@ -406,31 +406,6 @@ namespace OpenMD {
     
   }
 
-  SelfData ForceMatrixDecomposition::fillSelfData(int atom1) {
-    SelfData sdat;
-    // Still Missing atype, skippedCharge, potVec pot,
-    if (storageLayout_ & DataStorage::dslElectroFrame) {
-      sdat.eFrame = &(snap_->atomData.electroFrame[atom1]);
-    }
-    
-    if (storageLayout_ & DataStorage::dslTorque) {
-      sdat.t = &(snap_->atomData.torque[atom1]);
-    }
-    
-    if (storageLayout_ & DataStorage::dslDensity) {
-      sdat.rho = &(snap_->atomData.density[atom1]);
-    }
-    
-    if (storageLayout_ & DataStorage::dslFunctional) {
-      sdat.frho = &(snap_->atomData.functional[atom1]);
-    }
-    
-    if (storageLayout_ & DataStorage::dslFunctionalDerivative) {
-      sdat.dfrhodrho = &(snap_->atomData.functionalDerivative[atom1]);
-    }
-
-    return sdat;    
-  }
 
 
 
@@ -444,14 +419,13 @@ namespace OpenMD {
       
     vector<pair<int, int> > neighborList;
 #ifdef IS_MPI
-    CellListRow.clear();
-    CellListCol.clear();
+    cellListRow_.clear();
+    cellListCol_.clear();
 #else
-    CellList.clear();
+    cellList_.clear();
 #endif
 
     // dangerous to not do error checking.
-    RealType skinThickness_ = info_->getSimParams()->getSkinThickness();
     RealType rCut_;
  
     RealType rList_ = (rCut_ + skinThickness_);
@@ -461,11 +435,10 @@ namespace OpenMD {
     Vector3d Hx = Hmat.getColumn(0);
     Vector3d Hy = Hmat.getColumn(1);
     Vector3d Hz = Hmat.getColumn(2);
-    Vector3i nCells;
 
-    nCells.x() = (int) ( Hx.length() )/ rList_;
-    nCells.y() = (int) ( Hy.length() )/ rList_;
-    nCells.z() = (int) ( Hz.length() )/ rList_;
+    nCells_.x() = (int) ( Hx.length() )/ rList_;
+    nCells_.y() = (int) ( Hy.length() )/ rList_;
+    nCells_.z() = (int) ( Hz.length() )/ rList_;
 
     Mat3x3d invHmat = snap_->getInvHmat();
     Vector3d rs, scaled, dr;
@@ -483,14 +456,14 @@ namespace OpenMD {
         scaled[j] -= roundMe(scaled[j]);
      
       // find xyz-indices of cell that cutoffGroup is in.
-      whichCell.x() = nCells.x() * scaled.x();
-      whichCell.y() = nCells.y() * scaled.y();
-      whichCell.z() = nCells.z() * scaled.z();
+      whichCell.x() = nCells_.x() * scaled.x();
+      whichCell.y() = nCells_.y() * scaled.y();
+      whichCell.z() = nCells_.z() * scaled.z();
 
       // find single index of this cell:
-      cellIndex = Vlinear(whichCell, nCells);
+      cellIndex = Vlinear(whichCell, nCells_);
       // add this cutoff group to the list of groups in this cell;
-      CellListRow[cellIndex].push_back(i);
+      cellListRow_[cellIndex].push_back(i);
     }
 
     for (int i = 0; i < nGroupsInCol_; i++) {
@@ -503,14 +476,14 @@ namespace OpenMD {
         scaled[j] -= roundMe(scaled[j]);
 
       // find xyz-indices of cell that cutoffGroup is in.
-      whichCell.x() = nCells.x() * scaled.x();
-      whichCell.y() = nCells.y() * scaled.y();
-      whichCell.z() = nCells.z() * scaled.z();
+      whichCell.x() = nCells_.x() * scaled.x();
+      whichCell.y() = nCells_.y() * scaled.y();
+      whichCell.z() = nCells_.z() * scaled.z();
 
       // find single index of this cell:
-      cellIndex = Vlinear(whichCell, nCells);
+      cellIndex = Vlinear(whichCell, nCells_);
       // add this cutoff group to the list of groups in this cell;
-      CellListCol[cellIndex].push_back(i);
+      cellListCol_[cellIndex].push_back(i);
     }
 #else
     for (int i = 0; i < nGroups_; i++) {
@@ -523,52 +496,55 @@ namespace OpenMD {
         scaled[j] -= roundMe(scaled[j]);
 
       // find xyz-indices of cell that cutoffGroup is in.
-      whichCell.x() = nCells.x() * scaled.x();
-      whichCell.y() = nCells.y() * scaled.y();
-      whichCell.z() = nCells.z() * scaled.z();
+      whichCell.x() = nCells_.x() * scaled.x();
+      whichCell.y() = nCells_.y() * scaled.y();
+      whichCell.z() = nCells_.z() * scaled.z();
 
       // find single index of this cell:
-      cellIndex = Vlinear(whichCell, nCells);
+      cellIndex = Vlinear(whichCell, nCells_);
       // add this cutoff group to the list of groups in this cell;
-      CellList[cellIndex].push_back(i);
+      cellList_[cellIndex].push_back(i);
     }
 #endif
 
 
 
-    for (int m1z = 0; m1z < nCells.z(); m1z++) {
-      for (int m1y = 0; m1y < nCells.y(); m1y++) {
-        for (int m1x = 0; m1x < nCells.x(); m1x++) {
+    for (int m1z = 0; m1z < nCells_.z(); m1z++) {
+      for (int m1y = 0; m1y < nCells_.y(); m1y++) {
+        for (int m1x = 0; m1x < nCells_.x(); m1x++) {
           Vector3i m1v(m1x, m1y, m1z);
-          int m1 = Vlinear(m1v, nCells);
-          for (int offset = 0; offset < nOffset_; offset++) {
-            Vector3i m2v = m1v + cellOffsets_[offset];
+          int m1 = Vlinear(m1v, nCells_);
 
-            if (m2v.x() >= nCells.x()) {
+          for (vector<Vector3i>::iterator os = cellOffsets_.begin();
+               os != cellOffsets_.end(); ++os) {
+            
+            Vector3i m2v = m1v + (*os);
+            
+            if (m2v.x() >= nCells_.x()) {
               m2v.x() = 0;           
             } else if (m2v.x() < 0) {
-              m2v.x() = nCells.x() - 1; 
+              m2v.x() = nCells_.x() - 1; 
             }
-
-            if (m2v.y() >= nCells.y()) {
+            
+            if (m2v.y() >= nCells_.y()) {
               m2v.y() = 0;           
             } else if (m2v.y() < 0) {
-              m2v.y() = nCells.y() - 1; 
+              m2v.y() = nCells_.y() - 1; 
             }
-
-            if (m2v.z() >= nCells.z()) {
+            
+            if (m2v.z() >= nCells_.z()) {
               m2v.z() = 0;           
             } else if (m2v.z() < 0) {
-              m2v.z() = nCells.z() - 1; 
+              m2v.z() = nCells_.z() - 1; 
             }
-
-            int m2 = Vlinear (m2v, nCells);
+            
+            int m2 = Vlinear (m2v, nCells_);
 
 #ifdef IS_MPI
-            for (vector<int>::iterator j1 = CellListRow[m1].begin(); 
-                 j1 != CellListRow[m1].end(); ++j1) {
-              for (vector<int>::iterator j2 = CellListCol[m2].begin(); 
-                   j2 != CellListCol[m2].end(); ++j2) {
+            for (vector<int>::iterator j1 = cellListRow_[m1].begin(); 
+                 j1 != cellListRow_[m1].end(); ++j1) {
+              for (vector<int>::iterator j2 = cellListCol_[m2].begin(); 
+                   j2 != cellListCol_[m2].end(); ++j2) {
                                
                 // Always do this if we're in different cells or if
                 // we're in the same cell and the global index of the
@@ -584,10 +560,10 @@ namespace OpenMD {
               }
             }
 #else
-            for (vector<int>::iterator j1 = CellList[m1].begin(); 
-                 j1 != CellList[m1].end(); ++j1) {
-              for (vector<int>::iterator j2 = CellList[m2].begin(); 
-                   j2 != CellList[m2].end(); ++j2) {
+            for (vector<int>::iterator j1 = cellList_[m1].begin(); 
+                 j1 != cellList_[m1].end(); ++j1) {
+              for (vector<int>::iterator j2 = cellList_[m2].begin(); 
+                   j2 != cellList_[m2].end(); ++j2) {
                                
                 // Always do this if we're in different cells or if
                 // we're in the same cell and the global index of the
@@ -607,6 +583,13 @@ namespace OpenMD {
         }
       }
     }
+
+    // save the local cutoff group positions for the check that is
+    // done on each loop:
+    saved_CG_positions_.clear();
+    for (int i = 0; i < nGroups_; i++)
+      saved_CG_positions_.push_back(snap_->cgData.position[i]);
+
     return neighborList;
   }
 } //end namespace OpenMD

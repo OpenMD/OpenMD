@@ -118,10 +118,10 @@ namespace OpenMD {
   }
 
 
-  inline void Snapshot::wrapVector(Vector3d& pos) {
+  void Snapshot::wrapVector(Vector3d& pos) {
     
     Vector3d scaled = scaleVector(pos);
-
+    
     for (int i = 0; i < 3; i++) 
       scaled[i] -= roundMe(scaled[i]);
 

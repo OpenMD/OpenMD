@@ -49,8 +49,6 @@ namespace OpenMD {
 
   RealType InteractionManager::rCut_ = 0.0;
   RealType InteractionManager::rSwitch_ = 0.0;
-  RealType InteractionManager::skinThickness_ = 0.0;
-  RealType InteractionManager::listRadius_ = 0.0;
   CutoffMethod InteractionManager::cutoffMethod_ = SHIFTED_FORCE;
   SwitchingFunctionType InteractionManager::sft_ = cubic;
   RealType InteractionManager::vdwScale_[4] = {1.0, 0.0, 0.0, 0.0};
@@ -305,12 +303,10 @@ namespace OpenMD {
 
     setupCutoffs();
     setupSwitching();
-    setupNeighborlists();
 
     //int ljsp = cutoffMethod_ == SHIFTED_POTENTIAL ? 1 : 0;
     //int ljsf = cutoffMethod_ == SHIFTED_FORCE ? 1 : 0;
     //notifyFortranCutoffs(&rCut_, &rSwitch_, &ljsp, &ljsf);
-    //notifyFortranSkinThickness(&skinThickness_);
 
     initialized_ = true;
   }
@@ -457,33 +453,6 @@ namespace OpenMD {
     switcher_->setSwitchType(sft_);
     switcher_->setSwitch(rSwitch_, rCut_);
   }
-
-  /**
-   * setupNeighborlists
-   *
-   *  If the skinThickness was explicitly set, use that value (but check it)
-   *  If the skinThickness was not explicitly set: use 1.0 angstroms
-   */
-  void InteractionManager::setupNeighborlists() {  
-
-    Globals* simParams_ = info_->getSimParams();    
-  
-    if (simParams_->haveSkinThickness()) {
-      skinThickness_ = simParams_->getSkinThickness();
-    } else {      
-      skinThickness_ = 1.0;
-      sprintf(painCave.errMsg,
-              "InteractionManager::setupNeighborlists: No value was set for the skinThickness.\n"
-              "\tOpenMD will use a default value of %f Angstroms\n"
-              "\tfor this simulation\n", skinThickness_);
-      painCave.severity = OPENMD_INFO;
-      painCave.isFatal = 0;
-      simError();
-    }             
-
-    listRadius_ = rCut_ + skinThickness_;
-  }
-
 
   void InteractionManager::doPrePair(InteractionData idat){
     
