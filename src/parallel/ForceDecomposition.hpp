@@ -116,8 +116,8 @@ namespace OpenMD {
     virtual Vector3d getInteratomicVector(int atom1, int atom2) = 0;
        
     // atom bookkeeping
-    virtual vector<int> getAtomList() = 0;
-    virtual vector<int> getSkipsForAtom(int atom1) = 0;
+    virtual int getNAtomsInRow() = 0;
+    virtual vector<int> getSkipsForRowAtom(int atom1) = 0;
     virtual bool skipAtomPair(int atom1, int atom2) = 0;
     virtual void addForceToAtomRow(int atom1, Vector3d fg) = 0;
     virtual void addForceToAtomColumn(int atom2, Vector3d fg) = 0;

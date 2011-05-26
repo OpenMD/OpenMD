@@ -42,6 +42,7 @@
 #include "math/SquareMatrix3.hpp"
 #include "nonbonded/NonBondedInteraction.hpp"
 #include "brains/SnapshotManager.hpp"
+#include "brains/PairList.hpp"
 
 using namespace std;
 namespace OpenMD {
@@ -63,6 +64,10 @@ namespace OpenMD {
     cgLocalToGlobal = info_->getGlobalGroupIndices();
     vector<int> globalGroupMembership = info_->getGlobalGroupMembership();
     vector<RealType> massFactorsLocal = info_->getMassFactors();
+    PairList excludes = info_->getExcludedInteractions();
+    PairList oneTwo = info_->getOneTwoInteractions();
+    PairList oneThree = info_->getOneThreeInteractions();
+    PairList oneFour = info_->getOneFourInteractions();
     vector<RealType> pot_local(N_INTERACTION_FAMILIES, 0.0);
 
 #ifdef IS_MPI
@@ -139,6 +144,42 @@ namespace OpenMD {
       }      
     }
 
+    skipsForRowAtom.clear();
+    skipsForRowAtom.reserve(nAtomsInRow_);
+    for (int i = 0; i < nAtomsInRow_; i++) {
+      int iglob = AtomColToGlobal[i];
+      for (int j = 0; j < nAtomsInCol_; j++) {
+        int jglob = AtomRowToGlobal[j];        
+        if (excludes.hasPair(iglob, jglob)) 
+          skipsForRowAtom[i].push_back(j);       
+      }      
+    }
+
+    toposForRowAtom.clear();
+    toposForRowAtom.reserve(nAtomsInRow_);
+    for (int i = 0; i < nAtomsInRow_; i++) {
+      int iglob = AtomColToGlobal[i];
+      int nTopos = 0;
+      for (int j = 0; j < nAtomsInCol_; j++) {
+        int jglob = AtomRowToGlobal[j];        
+        if (oneTwo.hasPair(iglob, jglob)) {
+          toposForRowAtom[i].push_back(j);
+          topoDistRow[i][nTopos] = 1;
+          nTopos++;
+        }
+        if (oneThree.hasPair(iglob, jglob)) {
+          toposForRowAtom[i].push_back(j);
+          topoDistRow[i][nTopos] = 2;
+          nTopos++;
+        }
+        if (oneFour.hasPair(iglob, jglob)) {
+          toposForRowAtom[i].push_back(j);
+          topoDistRow[i][nTopos] = 3;
+          nTopos++;
+        }
+      }      
+    }
+
 #endif
 
     groupList_.clear();
@@ -152,15 +193,44 @@ namespace OpenMD {
       }      
     }
 
-   
-    // still need:
-    // topoDist
-    // exclude
+    skipsForLocalAtom.clear();
+    skipsForLocalAtom.reserve(nLocal_);
 
+    for (int i = 0; i < nLocal_; i++) {
+      int iglob = AtomLocalToGlobal[i];
+      for (int j = 0; j < nLocal_; j++) {
+        int jglob = AtomLocalToGlobal[j];        
+        if (excludes.hasPair(iglob, jglob)) 
+          skipsForLocalAtom[i].push_back(j);       
+      }      
+    }
+
+    toposForLocalAtom.clear();
+    toposForLocalAtom.reserve(nLocal_);
+    for (int i = 0; i < nLocal_; i++) {
+      int iglob = AtomLocalToGlobal[i];
+      int nTopos = 0;
+      for (int j = 0; j < nLocal_; j++) {
+        int jglob = AtomLocalToGlobal[j];        
+        if (oneTwo.hasPair(iglob, jglob)) {
+          toposForLocalAtom[i].push_back(j);
+          topoDistLocal[i][nTopos] = 1;
+          nTopos++;
+        }
+        if (oneThree.hasPair(iglob, jglob)) {
+          toposForLocalAtom[i].push_back(j);
+          topoDistLocal[i][nTopos] = 2;
+          nTopos++;
+        }
+        if (oneFour.hasPair(iglob, jglob)) {
+          toposForLocalAtom[i].push_back(j);
+          topoDistLocal[i][nTopos] = 3;
+          nTopos++;
+        }
+      }      
+    }
   }
-    
-
-
+   
   void ForceMatrixDecomposition::distributeData()  {
     snap_ = sman_->getCurrentSnapshot();
     storageLayout_ = sman_->getStorageLayout();
@@ -284,6 +354,14 @@ namespace OpenMD {
 #endif
   }
 
+  int ForceMatrixDecomposition::getNAtomsInRow() {   
+#ifdef IS_MPI
+    return nAtomsInRow_;
+#else
+    return nLocal_;
+#endif
+  }
+
   /**
    * returns the list of atoms belonging to this group.  
    */
@@ -374,6 +452,73 @@ namespace OpenMD {
     return d;    
   }
 
+  vector<int> ForceMatrixDecomposition::getSkipsForRowAtom(int atom1) {
+#ifdef IS_MPI
+    return skipsForRowAtom[atom1];
+#else
+    return skipsForLocalAtom[atom1];
+#endif
+  }
+
+  /**
+   * there are a number of reasons to skip a pair or a particle mostly
+   * we do this to exclude atoms who are involved in short range
+   * interactions (bonds, bends, torsions), but we also need to
+   * exclude some overcounted interactions that result from the
+   * parallel decomposition. 
+   */
+  bool ForceMatrixDecomposition::skipAtomPair(int atom1, int atom2) {
+    int unique_id_1, unique_id_2;
+
+#ifdef IS_MPI
+    // in MPI, we have to look up the unique IDs for each atom
+    unique_id_1 = AtomRowToGlobal[atom1];
+    unique_id_2 = AtomColToGlobal[atom2];
+
+    // this situation should only arise in MPI simulations
+    if (unique_id_1 == unique_id_2) return true;
+    
+    // this prevents us from doing the pair on multiple processors
+    if (unique_id_1 < unique_id_2) {
+      if ((unique_id_1 + unique_id_2) % 2 == 0) return true;
+    } else {
+      if ((unique_id_1 + unique_id_2) % 2 == 1) return true; 
+    }
+#else
+    // in the normal loop, the atom numbers are unique
+    unique_id_1 = atom1;
+    unique_id_2 = atom2;
+#endif
+    
+#ifdef IS_MPI
+    for (vector<int>::iterator i = skipsForRowAtom[atom1].begin();
+         i != skipsForRowAtom[atom1].end(); ++i) {
+      if ( (*i) == unique_id_2 ) return true;
+    }    
+#else
+    for (vector<int>::iterator i = skipsForLocalAtom[atom1].begin();
+         i != skipsForLocalAtom[atom1].end(); ++i) {
+      if ( (*i) == unique_id_2 ) return true;
+    }    
+#endif
+  }
+
+  int ForceMatrixDecomposition::getTopoDistance(int atom1, int atom2) {
+    
+#ifdef IS_MPI
+    for (int i = 0; i < toposForRowAtom[atom1].size(); i++) {
+      if ( toposForRowAtom[atom1][i] == atom2 ) return topoDistRow[atom1][i];
+    }
+#else
+    for (int i = 0; i < toposForLocalAtom[atom1].size(); i++) {
+      if ( toposForLocalAtom[atom1][i] == atom2 ) return topoDistLocal[atom1][i];
+    }
+#endif
+
+    // zero is default for unconnected (i.e. normal) pair interactions
+    return 0;
+  }
+
   void ForceMatrixDecomposition::addForceToAtomRow(int atom1, Vector3d fg){
 #ifdef IS_MPI
     atomRowData.force[atom1] += fg;
@@ -419,6 +564,7 @@ namespace OpenMD {
       idat.dfrho1 = &(atomRowData.functionalDerivative[atom1]);
       idat.dfrho2 = &(atomColData.functionalDerivative[atom2]);
     }
+
 #else
     if (storageLayout_ & DataStorage::dslAmat) {
       idat.A1 = &(snap_->atomData.aMat[atom1]);

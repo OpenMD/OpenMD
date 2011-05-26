@@ -598,6 +598,12 @@ namespace OpenMD{
     vector<RealType> massFactors_;
   public:
     vector<RealType> getMassFactors() { return massFactors_; }
+
+    PairList getExcludedInteractions() { return excludedInteractions_; }
+    PairList getOneTwoInteractions() { return oneTwoInteractions_; }
+    PairList getOneThreeInteractions() { return oneThreeInteractions_; }
+    PairList getOneFourInteractions() { return oneFourInteractions_; }
+
   private:
 
                

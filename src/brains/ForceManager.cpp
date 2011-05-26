@@ -427,13 +427,12 @@ namespace OpenMD {
       if (iLoop == PREPAIR_LOOP) {
         if (info_->requiresPrepair()) {            
           fDecomp_->collectIntermediateData();
-          atomListLocal = fDecomp_->getAtomList();
-          for (vector<int>::iterator ia = atomListLocal.begin(); 
-               ia != atomListLocal.end(); ++ia) {              
-            atom1 = (*ia);            
+
+          for (int atom1 = 0; atom1 < info_->getNAtoms(); atom1++) {
             sdat = fDecomp_->fillSelfData(atom1);
             interactionMan_->doPreForce(sdat);
           }
+
           fDecomp_->distributeIntermediateData();        
         }
       }
@@ -442,27 +441,30 @@ namespace OpenMD {
     
     fDecomp_->collectData();
     
-    if (info_->requiresSkipCorrection() || info_->requiresSelfCorrection()) {
-      atomListLocal = fDecomp_->getAtomList();
-      for (vector<int>::iterator ia = atomListLocal.begin(); 
-           ia != atomListLocal.end(); ++ia) {              
-        atom1 = (*ia);     
+    if ( info_->requiresSkipCorrection() ) {
+      
+      for (int atom1 = 0; atom1 < fDecomp_->getNAtomsInRow(); atom1++) {
 
-        if (info_->requiresSkipCorrection()) {
-          vector<int> skipList = fDecomp_->getSkipsForAtom(atom1);
-          for (vector<int>::iterator jb = skipList.begin(); 
-               jb != skipList.end(); ++jb) {              
-            atom2 = (*jb);
-            idat = fDecomp_->fillSkipData(atom1, atom2);
-            interactionMan_->doSkipCorrection(idat);
-          }
-        }
-          
-        if (info_->requiresSelfCorrection()) {
-          sdat = fDecomp_->fillSelfData(atom1);
-          interactionMan_->doSelfCorrection(sdat);
+        vector<int> skipList = fDecomp_->getSkipsForRowAtom( atom1 );
+        
+        for (vector<int>::iterator jb = skipList.begin(); 
+             jb != skipList.end(); ++jb) {         
+     
+          atom2 = (*jb);
+          idat = fDecomp_->fillSkipData(atom1, atom2);
+          interactionMan_->doSkipCorrection(idat);
+
         }
       }
+    }
+    
+    if (info_->requiresSelfCorrection()) {
+
+      for (int atom1 = 0; atom1 < info_->getNAtoms(); atom1++) {          
+        sdat = fDecomp_->fillSelfData(atom1);
+        interactionMan_->doSelfCorrection(sdat);
+      }
+
     }
 
     // dangerous to iterate over enums, but we'll live on the edge:

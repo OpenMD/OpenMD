@@ -91,14 +91,11 @@ namespace OpenMD {
     map<Inversion*, InversionDataSet> inversionDataSets;
     Mat3x3d tau;
 
-    vector<pair<int, int> > neighborList_;
-
     InteractionManager* interactionMan_;
     ForceDecomposition* fDecomp_;
     SwitchingFunction* swfun_;
     vector<pair<int, int> > neighborList;
-    map< pair<int, int>, pair<RealType, RealType> > groupCutoffMap;
-    
+    map< pair<int, int>, pair<RealType, RealType> > groupCutoffMap;    
   };
   
 } 
