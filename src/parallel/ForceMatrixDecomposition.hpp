@@ -74,8 +74,8 @@ namespace OpenMD {
     vector<int> getAtomsInGroupColumn(int cg2);
     Vector3d getAtomToGroupVectorRow(int atom1, int cg1);
     Vector3d getAtomToGroupVectorColumn(int atom2, int cg2);
-    RealType getMfactRow(int atom1);
-    RealType getMfactColumn(int atom2);
+    RealType getMassFactorRow(int atom1);
+    RealType getMassFactorColumn(int atom2);
 
     // spatial data
     Vector3d getIntergroupVector(int cg1, int cg2);
@@ -95,6 +95,10 @@ namespace OpenMD {
   private: 
     int nLocal_;
     int nGroups_;
+    vector<int> AtomLocalToGlobal;
+    vector<int> cgLocalToGlobal;
+    vector<RealType> pot_local;
+    vector<RealType> massFactorsLocal;
 
 #ifdef IS_MPI    
     DataStorage atomRowData;
@@ -124,20 +128,26 @@ namespace OpenMD {
 
     vector<vector<RealType> > pot_row;
     vector<vector<RealType> > pot_col;
+
     vector<int> identsRow;
     vector<int> identsCol;
 
-    vector<int> AtomLocalToGlobal;
     vector<int> AtomRowToGlobal;
     vector<int> AtomColToGlobal;
-    vector<int> cgLocalToGlobal;
+
     vector<int> cgRowToGlobal;
     vector<int> cgColToGlobal;
 
     vector<vector<int> > cellListRow_;
     vector<vector<int> > cellListCol_;
+
+    vector<vector<int> > groupListRow_;
+    vector<vector<int> > groupListCol_;
+
+    vector<RealType> massFactorsRow;
+    vector<RealType> massFactorsCol;
+
 #endif
-    vector<RealType> pot_local;
 
   };
 

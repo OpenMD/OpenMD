@@ -103,12 +103,13 @@ namespace OpenMD {
     virtual pair<int, int> getGroupTypes(int cg1, int cg2) = 0;
 
     // Group->atom bookkeeping
-    virtual vector<int> getAtomsInGroupRow(int cg1) = 0;
+    virtual vector<int> getAtomsInGroupRow(int cg1) = 0; 
     virtual vector<int> getAtomsInGroupColumn(int cg2) = 0;
+
     virtual Vector3d getAtomToGroupVectorRow(int atom1, int cg1) = 0;
     virtual Vector3d getAtomToGroupVectorColumn(int atom2, int cg2) = 0;
-    virtual RealType getMfactRow(int atom1) = 0;
-    virtual RealType getMfactColumn(int atom2) = 0;
+    virtual RealType getMassFactorRow(int atom1) = 0;
+    virtual RealType getMassFactorColumn(int atom2) = 0;
 
     // spatial data
     virtual Vector3d getIntergroupVector(int cg1, int cg2) = 0;
@@ -153,6 +154,8 @@ namespace OpenMD {
                                        //& column.  It will be up to
                                        //the specific decomposition
                                        //method to fill this.
+
+    vector<vector<int> > groupList_;
     vector<Vector3i> cellOffsets_;
     Vector3i nCells_;
     vector<vector<int> > cellList_;

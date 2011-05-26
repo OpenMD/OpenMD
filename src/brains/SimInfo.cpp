@@ -71,7 +71,7 @@ namespace OpenMD {
     nGlobalIntegrableObjects_(0), nGlobalRigidBodies_(0),
     nAtoms_(0), nBonds_(0),  nBends_(0), nTorsions_(0), nInversions_(0), 
     nRigidBodies_(0), nIntegrableObjects_(0), nCutoffGroups_(0), 
-    nConstraints_(0), sman_(NULL), fortranInitialized_(false), 
+    nConstraints_(0), sman_(NULL), topologyDone_(false), 
     calcBoxDipole_(false), useAtomicVirial_(true) {    
     
     MoleculeStamp* molStamp;
@@ -812,20 +812,10 @@ namespace OpenMD {
   }
 
 
-  void SimInfo::setupFortran() {
-    int isError;
+  void SimInfo::prepareTopology() {
     int nExclude, nOneTwo, nOneThree, nOneFour;
-    vector<int> fortranGlobalGroupMembership;
-    
-    isError = 0;
-
-    //globalGroupMembership_ is filled by SimCreator    
-    for (int i = 0; i < nGlobalAtoms_; i++) {
-      fortranGlobalGroupMembership.push_back(globalGroupMembership_[i] + 1);
-    }
 
     //calculate mass ratio of cutoff group
-    vector<RealType> mfact;
     SimInfo::MoleculeIterator mi;
     Molecule* mol;
     Molecule::CutoffGroupIterator ci;
@@ -834,19 +824,21 @@ namespace OpenMD {
     Atom* atom;
     RealType totalMass;
 
-    //to avoid memory reallocation, reserve enough space for mfact
-    mfact.reserve(getNCutoffGroups());
+    //to avoid memory reallocation, reserve enough space for massFactors_
+    massFactors_.clear();
+    massFactors_.reserve(getNCutoffGroups());
     
     for(mol = beginMolecule(mi); mol != NULL; mol = nextMolecule(mi)) {        
-      for (cg = mol->beginCutoffGroup(ci); cg != NULL; cg = mol->nextCutoffGroup(ci)) {
+      for (cg = mol->beginCutoffGroup(ci); cg != NULL; 
+           cg = mol->nextCutoffGroup(ci)) {
 
 	totalMass = cg->getMass();
 	for(atom = cg->beginAtom(ai); atom != NULL; atom = cg->nextAtom(ai)) {
 	  // Check for massless groups - set mfact to 1 if true
 	  if (totalMass != 0)
-	    mfact.push_back(atom->getMass()/totalMass);
+	    massFactors_.push_back(atom->getMass()/totalMass);
 	  else
-	    mfact.push_back( 1.0 );
+	    massFactors_.push_back( 1.0 );
 	}
       }       
     }
@@ -860,15 +852,8 @@ namespace OpenMD {
 	identArray_.push_back(atom->getIdent());
       }
     }    
-
-    //fill molMembershipArray
-    //molMembershipArray is filled by SimCreator    
-    vector<int> molMembershipArray(nGlobalAtoms_);
-    for (int i = 0; i < nGlobalAtoms_; i++) {
-      molMembershipArray[i] = globalMolMembership_[i] + 1;
-    }
     
-    //setup fortran simulation
+    //scan topology 
 
     nExclude = excludedInteractions_.getSize();
     nOneTwo = oneTwoInteractions_.getSize();
@@ -888,64 +873,7 @@ namespace OpenMD {
     //               &molMembershipArray[0], &mfact[0], &nCutoffGroups_, 
     //               &fortranGlobalGroupMembership[0], &isError); 
     
-    // if( isError ){
-    //  
-    //  sprintf( painCave.errMsg,
-    //	       "There was an error setting the simulation information in fortran.\n" );
-    //  painCave.isFatal = 1;
-    //  painCave.severity = OPENMD_ERROR;
-    //  simError();
-    //}
-    
-    
-    // sprintf( checkPointMsg,
-    //          "succesfully sent the simulation information to fortran.\n");
-    
-    // errorCheckPoint();
-    
-    // Setup number of neighbors in neighbor list if present
-    //if (simParams_->haveNeighborListNeighbors()) {
-    //  int nlistNeighbors = simParams_->getNeighborListNeighbors();
-    //  setNeighbors(&nlistNeighbors);
-    //}
-   
-#ifdef IS_MPI    
-    // mpiSimData parallelData;
-
-    //fill up mpiSimData struct
-    // parallelData.nMolGlobal = getNGlobalMolecules();
-    // parallelData.nMolLocal = getNMolecules();
-    // parallelData.nAtomsGlobal = getNGlobalAtoms();
-    // parallelData.nAtomsLocal = getNAtoms();
-    // parallelData.nGroupsGlobal = getNGlobalCutoffGroups();
-    // parallelData.nGroupsLocal = getNCutoffGroups();
-    // parallelData.myNode = worldRank;
-    // MPI_Comm_size(MPI_COMM_WORLD, &(parallelData.nProcessors));
-
-    //pass mpiSimData struct and index arrays to fortran
-    //setFsimParallel(&parallelData, &(parallelData.nAtomsLocal),
-    //                &localToGlobalAtomIndex[0],  &(parallelData.nGroupsLocal),
-    //                &localToGlobalCutoffGroupIndex[0], &isError);
-
-    // if (isError) {
-    //   sprintf(painCave.errMsg,
-    //           "mpiRefresh errror: fortran didn't like something we gave it.\n");
-    //   painCave.isFatal = 1;
-    //   simError();
-    // }
-
-    // sprintf(checkPointMsg, " mpiRefresh successful.\n");
-    // errorCheckPoint();
-#endif
-
-    // initFortranFF(&isError);
-    // if (isError) {
-    //   sprintf(painCave.errMsg,
-    //           "initFortranFF errror: fortran didn't like something we gave it.\n");
-    //   painCave.isFatal = 1;
-    //   simError();
-    // }
-    // fortranInitialized_ = true;
+    topologyDone_ = true;
   }
 
   void SimInfo::addProperty(GenericData* genData) {

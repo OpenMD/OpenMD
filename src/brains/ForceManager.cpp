@@ -72,13 +72,13 @@ namespace OpenMD {
   
   void ForceManager::calcForces() {
     
-    if (!info_->isFortranInitialized()) {
+    if (!info_->isTopologyDone()) {
       info_->update();
       interactionMan_->setSimInfo(info_);
       interactionMan_->initialize();
       swfun_ = interactionMan_->getSwitchingFunction();
       fDecomp_->distributeInitialData();
-      info_->setupFortran();
+      info_->prepareTopology();
     }
     
     preCalculation();   
@@ -383,7 +383,7 @@ namespace OpenMD {
               for (vector<int>::iterator ia = atomListRow.begin(); 
                    ia != atomListRow.end(); ++ia) {            
                 atom1 = (*ia);                
-                mf = fDecomp_->getMfactRow(atom1);
+                mf = fDecomp_->getMassFactorRow(atom1);
                 // fg is the force on atom ia due to cutoff group's
                 // presence in switching region
                 fg = swderiv * d_grp * mf;
@@ -401,7 +401,7 @@ namespace OpenMD {
               for (vector<int>::iterator jb = atomListColumn.begin(); 
                    jb != atomListColumn.end(); ++jb) {              
                 atom2 = (*jb);
-                mf = fDecomp_->getMfactColumn(atom2);
+                mf = fDecomp_->getMassFactorColumn(atom2);
                 // fg is the force on atom jb due to cutoff group's
                 // presence in switching region
                 fg = -swderiv * d_grp * mf;

@@ -57,6 +57,14 @@ namespace OpenMD {
     nLocal_ = snap_->getNumberOfAtoms();
     nGroups_ = snap_->getNumberOfCutoffGroups();
 
+    // gather the information for atomtype IDs (atids):
+    vector<int> identsLocal = info_->getIdentArray();
+    AtomLocalToGlobal = info_->getGlobalAtomIndices();
+    cgLocalToGlobal = info_->getGlobalGroupIndices();
+    vector<int> globalGroupMembership = info_->getGlobalGroupMembership();
+    vector<RealType> massFactorsLocal = info_->getMassFactors();
+    vector<RealType> pot_local(N_INTERACTION_FAMILIES, 0.0);
+
 #ifdef IS_MPI
  
     AtomCommIntRow = new Communicator<Row,int>(nLocal_);
@@ -93,30 +101,62 @@ namespace OpenMD {
                                       vector<RealType> (nAtomsInRow_, 0.0));
     vector<vector<RealType> > pot_col(N_INTERACTION_FAMILIES,
                                       vector<RealType> (nAtomsInCol_, 0.0));
-
-
-    vector<RealType> pot_local(N_INTERACTION_FAMILIES, 0.0);
     
-    // gather the information for atomtype IDs (atids):
-    vector<int> identsLocal = info_->getIdentArray();
     identsRow.reserve(nAtomsInRow_);
     identsCol.reserve(nAtomsInCol_);
     
     AtomCommIntRow->gather(identsLocal, identsRow);
     AtomCommIntColumn->gather(identsLocal, identsCol);
     
-    AtomLocalToGlobal = info_->getGlobalAtomIndices();
     AtomCommIntRow->gather(AtomLocalToGlobal, AtomRowToGlobal);
     AtomCommIntColumn->gather(AtomLocalToGlobal, AtomColToGlobal);
     
-    cgLocalToGlobal = info_->getGlobalGroupIndices();
     cgCommIntRow->gather(cgLocalToGlobal, cgRowToGlobal);
     cgCommIntColumn->gather(cgLocalToGlobal, cgColToGlobal);
 
+    AtomCommRealRow->gather(massFactorsLocal, massFactorsRow);
+    AtomCommRealColumn->gather(massFactorsLocal, massFactorsCol);
+
+    groupListRow_.clear();
+    groupListRow_.reserve(nGroupsInRow_);
+    for (int i = 0; i < nGroupsInRow_; i++) {
+      int gid = cgRowToGlobal[i];
+      for (int j = 0; j < nAtomsInRow_; j++) {
+        int aid = AtomRowToGlobal[j];
+        if (globalGroupMembership[aid] == gid)
+          groupListRow_[i].push_back(j);
+      }      
+    }
+
+    groupListCol_.clear();
+    groupListCol_.reserve(nGroupsInCol_);
+    for (int i = 0; i < nGroupsInCol_; i++) {
+      int gid = cgColToGlobal[i];
+      for (int j = 0; j < nAtomsInCol_; j++) {
+        int aid = AtomColToGlobal[j];
+        if (globalGroupMembership[aid] == gid)
+          groupListCol_[i].push_back(j);
+      }      
+    }
+
+#endif
+
+    groupList_.clear();
+    groupList_.reserve(nGroups_);
+    for (int i = 0; i < nGroups_; i++) {
+      int gid = cgLocalToGlobal[i];
+      for (int j = 0; j < nLocal_; j++) {
+        int aid = AtomLocalToGlobal[j];
+        if (globalGroupMembership[aid] == gid)
+          groupList_[i].push_back(j);
+      }      
+    }
+
+   
     // still need:
     // topoDist
     // exclude
-#endif
+
   }
     
 
@@ -244,6 +284,24 @@ namespace OpenMD {
 #endif
   }
 
+  /**
+   * returns the list of atoms belonging to this group.  
+   */
+  vector<int> ForceMatrixDecomposition::getAtomsInGroupRow(int cg1){
+#ifdef IS_MPI
+    return groupListRow_[cg1];
+#else 
+    return groupList_[cg1];
+#endif
+  }
+
+  vector<int> ForceMatrixDecomposition::getAtomsInGroupColumn(int cg2){
+#ifdef IS_MPI
+    return groupListCol_[cg2];
+#else 
+    return groupList_[cg2];
+#endif
+  }
   
   Vector3d ForceMatrixDecomposition::getIntergroupVector(int cg1, int cg2){
     Vector3d d;
@@ -284,6 +342,23 @@ namespace OpenMD {
     
     snap_->wrapVector(d);
     return d;    
+  }
+
+  RealType ForceMatrixDecomposition::getMassFactorRow(int atom1) {
+#ifdef IS_MPI
+    return massFactorsRow[atom1];
+#else
+    return massFactorsLocal[atom1];
+#endif
+  }
+
+  RealType ForceMatrixDecomposition::getMassFactorColumn(int atom2) {
+#ifdef IS_MPI
+    return massFactorsCol[atom2];
+#else
+    return massFactorsLocal[atom2];
+#endif
+
   }
     
   Vector3d ForceMatrixDecomposition::getInteratomicVector(int atom1, int atom2){

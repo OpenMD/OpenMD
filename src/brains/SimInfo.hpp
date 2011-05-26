@@ -298,9 +298,9 @@ namespace OpenMD{
 
     void update();
     /**
-     * Setup Fortran Simulation
+     * Do final bookkeeping before Force managers need their data.
      */
-    void setupFortran();
+    void prepareTopology();
 
 
     /** Returns the local index manager */
@@ -351,6 +351,7 @@ namespace OpenMD{
      * processor, these should be identical.
      */
     vector<int> getGlobalGroupIndices();
+
         
     string getFinalConfigFileName() {
       return finalConfigFileName_;
@@ -410,8 +411,8 @@ namespace OpenMD{
     }
 
 
-    bool isFortranInitialized() {
-      return fortranInitialized_;
+    bool isTopologyDone() {
+      return topologyDone_;
     }
         
     bool getCalcBoxDipole() {
@@ -586,6 +587,19 @@ namespace OpenMD{
   public:
     vector<int> getIdentArray() { return identArray_; }
   private:
+    
+    /** 
+     * A vector which contains the fractional contribution of an
+     * atom's mass to the total mass of the cutoffGroup that atom
+     * belongs to.  In the case of single atom cutoff groups, the mass
+     * factor for that atom is 1.  For massless atoms, the factor is
+     * also 1.
+     */
+    vector<RealType> massFactors_;
+  public:
+    vector<RealType> getMassFactors() { return massFactors_; }
+  private:
+
                
     /// lists to handle atoms needing special treatment in the non-bonded interactions
     PairList excludedInteractions_;  /**< atoms excluded from interacting with each other */
@@ -616,7 +630,9 @@ namespace OpenMD{
     string restFileName_;
         
 
-    bool fortranInitialized_; /** flag to indicate whether the fortran side is initialized */
+    bool topologyDone_;  /** flag to indicate whether the topology has
+                             been scanned and all the relevant
+                             bookkeeping has been done*/
     
     bool calcBoxDipole_; /**< flag to indicate whether or not we calculate 
                             the simulation box dipole moment */
