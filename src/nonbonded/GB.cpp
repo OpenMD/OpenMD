@@ -267,7 +267,7 @@ namespace OpenMD {
 
     if (!initialized_) initialize();
     
-    GBInteractionData mixer = MixingMap[*(idat.atypes)];
+    GBInteractionData mixer = MixingMap[idat.atypes];
 
     RealType sigma0 = mixer.sigma0;
     RealType dw     = mixer.dw;
@@ -284,8 +284,8 @@ namespace OpenMD {
 
     RealType a, b, g;
 
-    bool i_is_LJ = idat.atypes->first->isLennardJones();
-    bool j_is_LJ = idat.atypes->second->isLennardJones();
+    bool i_is_LJ = idat.atypes.first->isLennardJones();
+    bool j_is_LJ = idat.atypes.second->isLennardJones();
     
     if (i_is_LJ) {
       a = 0.0;

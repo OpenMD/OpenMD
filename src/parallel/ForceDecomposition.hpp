@@ -131,6 +131,7 @@ namespace OpenMD {
     SimInfo* info_;   
     SnapshotManager* sman_;    
     Snapshot* snap_;
+    ForceField* ff_;
     int storageLayout_;
     RealType skinThickness_;   /**< Verlet neighbor list skin thickness */    
 

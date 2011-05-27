@@ -63,11 +63,7 @@ namespace OpenMD {
   
   ForceManager::ForceManager(SimInfo * info) : info_(info) {
 
-#ifdef IS_MPI
     fDecomp_ = new ForceMatrixDecomposition(info_);
-#else
-    // fDecomp_ = new ForceSerialDecomposition(info);
-#endif
   }
   
   void ForceManager::calcForces() {
@@ -77,8 +73,8 @@ namespace OpenMD {
       interactionMan_->setSimInfo(info_);
       interactionMan_->initialize();
       swfun_ = interactionMan_->getSwitchingFunction();
-      fDecomp_->distributeInitialData();
       info_->prepareTopology();
+      fDecomp_->distributeInitialData();
     }
     
     preCalculation();   

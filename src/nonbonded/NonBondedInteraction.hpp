@@ -74,7 +74,7 @@ namespace OpenMD {
    * members are utilized by any given interaction.
    */
   struct InteractionData {
-    pair<AtomType*, AtomType*>* atypes; /**< pair of atom types interacting */
+    pair<AtomType*, AtomType*> atypes; /**< pair of atom types interacting */
     Vector3d* d;              /**< interatomic vector (already wrapped into box) */
     RealType* rij;            /**< interatomic separation */
     RealType* r2;             /**< square of rij */

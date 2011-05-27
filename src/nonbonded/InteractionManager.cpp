@@ -460,8 +460,8 @@ namespace OpenMD {
 	 
     set<NonBondedInteraction*>::iterator it;
 
-    for (it = interactions_[ *(idat.atypes) ].begin(); 
-         it != interactions_[ *(idat.atypes) ].end(); ++it){
+    for (it = interactions_[ idat.atypes ].begin(); 
+         it != interactions_[ idat.atypes ].end(); ++it){
       if ((*it)->getFamily() == METALLIC_FAMILY) {
         dynamic_cast<MetallicInteraction*>(*it)->calcDensity(idat);
       }
@@ -492,8 +492,8 @@ namespace OpenMD {
    
     set<NonBondedInteraction*>::iterator it;
 
-    for (it = interactions_[ *(idat.atypes) ].begin(); 
-         it != interactions_[ *(idat.atypes) ].end(); ++it)
+    for (it = interactions_[ idat.atypes ].begin(); 
+         it != interactions_[ idat.atypes ].end(); ++it)
       (*it)->calcForce(idat);
     
     return;    
@@ -505,8 +505,8 @@ namespace OpenMD {
     
     set<NonBondedInteraction*>::iterator it;
 
-    for (it = interactions_[ *(idat.atypes) ].begin(); 
-         it != interactions_[ *(idat.atypes) ].end(); ++it){
+    for (it = interactions_[ idat.atypes ].begin(); 
+         it != interactions_[ idat.atypes ].end(); ++it){
       if ((*it)->getFamily() == ELECTROSTATIC_FAMILY) {
         dynamic_cast<ElectrostaticInteraction*>(*it)->calcSkipCorrection(idat);
       }

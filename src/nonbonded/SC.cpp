@@ -306,7 +306,7 @@ namespace OpenMD {
     
     if (!initialized_) initialize();
     
-    SCInteractionData mixer = MixingMap[ *(idat.atypes) ];
+    SCInteractionData mixer = MixingMap[ idat.atypes ];
 
     RealType rcij = mixer.rCut;
 
@@ -338,10 +338,10 @@ namespace OpenMD {
     
     if (!initialized_) initialize();
     
-    SCAtomData data1 = SCMap[idat.atypes->first];
-    SCAtomData data2 = SCMap[idat.atypes->second];
+    SCAtomData data1 = SCMap[idat.atypes.first];
+    SCAtomData data2 = SCMap[idat.atypes.second];
 
-    SCInteractionData mixer = MixingMap[*(idat.atypes)];
+    SCInteractionData mixer = MixingMap[idat.atypes];
 
     RealType rcij = mixer.rCut;
 

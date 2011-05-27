@@ -129,7 +129,7 @@ namespace OpenMD {
     if (!initialized_) initialize();
     
     map<pair<AtomType*, AtomType*>, MAWInteractionData>::iterator it;
-    it = MixingMap.find( *(idat.atypes) );
+    it = MixingMap.find( idat.atypes );
     if (it != MixingMap.end()) {
       MAWInteractionData mixer = (*it).second;
       
@@ -144,7 +144,7 @@ namespace OpenMD {
       RealType ca1 = mixer.ca1;
       RealType cb1 = mixer.cb1;
 
-      bool j_is_Metal = idat.atypes->second->isMetal();
+      bool j_is_Metal = idat.atypes.second->isMetal();
 
       Vector3d r;
       RotMat3x3d Atrans;

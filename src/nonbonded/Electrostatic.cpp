@@ -463,8 +463,8 @@ namespace OpenMD {
     
     if (!initialized_) initialize();
     
-    ElectrostaticAtomData data1 = ElectrostaticMap[idat.atypes->first];
-    ElectrostaticAtomData data2 = ElectrostaticMap[idat.atypes->second];
+    ElectrostaticAtomData data1 = ElectrostaticMap[idat.atypes.first];
+    ElectrostaticAtomData data2 = ElectrostaticMap[idat.atypes.second];
     
     // some variables we'll need independent of electrostatic type:
 
@@ -933,8 +933,8 @@ namespace OpenMD {
 
     if (!initialized_) initialize();
     
-    ElectrostaticAtomData data1 = ElectrostaticMap[idat.atypes->first];
-    ElectrostaticAtomData data2 = ElectrostaticMap[idat.atypes->second];
+    ElectrostaticAtomData data1 = ElectrostaticMap[idat.atypes.first];
+    ElectrostaticAtomData data2 = ElectrostaticMap[idat.atypes.second];
     
     // logicals
 

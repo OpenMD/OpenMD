@@ -96,6 +96,7 @@ namespace OpenMD {
   private: 
     int nLocal_;
     int nGroups_;
+    vector<int> identsLocal;
     vector<int> AtomLocalToGlobal;
     vector<int> cgLocalToGlobal;
     vector<RealType> pot_local;
@@ -136,6 +137,9 @@ namespace OpenMD {
     vector<int> identsRow;
     vector<int> identsCol;
 
+    vector<AtomType*> atypesRow;
+    vector<AtomType*> atypesCol;
+
     vector<int> AtomRowToGlobal;
     vector<int> AtomColToGlobal;
 
@@ -154,8 +158,6 @@ namespace OpenMD {
     vector<vector<int> > skipsForRowAtom;
     vector<vector<int> > toposForRowAtom;
     vector<vector<int> > topoDistRow;
-
-
 #endif
 
   };

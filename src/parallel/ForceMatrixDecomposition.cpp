@@ -55,11 +55,12 @@ namespace OpenMD {
   void ForceMatrixDecomposition::distributeInitialData() {
     snap_ = sman_->getCurrentSnapshot();
     storageLayout_ = sman_->getStorageLayout();
+    ff_ = info_->getForceField();
     nLocal_ = snap_->getNumberOfAtoms();
     nGroups_ = snap_->getNumberOfCutoffGroups();
 
     // gather the information for atomtype IDs (atids):
-    vector<int> identsLocal = info_->getIdentArray();
+    identsLocal = info_->getIdentArray();
     AtomLocalToGlobal = info_->getGlobalAtomIndices();
     cgLocalToGlobal = info_->getGlobalGroupIndices();
     vector<int> globalGroupMembership = info_->getGlobalGroupMembership();
@@ -147,9 +148,9 @@ namespace OpenMD {
     skipsForRowAtom.clear();
     skipsForRowAtom.reserve(nAtomsInRow_);
     for (int i = 0; i < nAtomsInRow_; i++) {
-      int iglob = AtomColToGlobal[i];
+      int iglob = AtomRowToGlobal[i];
       for (int j = 0; j < nAtomsInCol_; j++) {
-        int jglob = AtomRowToGlobal[j];        
+        int jglob = AtomColToGlobal[j];        
         if (excludes.hasPair(iglob, jglob)) 
           skipsForRowAtom[i].push_back(j);       
       }      
@@ -158,10 +159,10 @@ namespace OpenMD {
     toposForRowAtom.clear();
     toposForRowAtom.reserve(nAtomsInRow_);
     for (int i = 0; i < nAtomsInRow_; i++) {
-      int iglob = AtomColToGlobal[i];
+      int iglob = AtomRowToGlobal[i];
       int nTopos = 0;
       for (int j = 0; j < nAtomsInCol_; j++) {
-        int jglob = AtomRowToGlobal[j];        
+        int jglob = AtomColToGlobal[j];        
         if (oneTwo.hasPair(iglob, jglob)) {
           toposForRowAtom[i].push_back(j);
           topoDistRow[i][nTopos] = 1;
@@ -540,6 +541,10 @@ namespace OpenMD {
     InteractionData idat;
 
 #ifdef IS_MPI
+    
+    idat.atypes = make_pair( ff_->getAtomType(identsRow[atom1]), 
+                             ff_->getAtomType(identsCol[atom2]) );
+
     if (storageLayout_ & DataStorage::dslAmat) {
       idat.A1 = &(atomRowData.aMat[atom1]);
       idat.A2 = &(atomColData.aMat[atom2]);
@@ -566,6 +571,10 @@ namespace OpenMD {
     }
 
 #else
+
+    idat.atypes = make_pair( ff_->getAtomType(identsLocal[atom1]), 
+                             ff_->getAtomType(identsLocal[atom2]) );
+
     if (storageLayout_ & DataStorage::dslAmat) {
       idat.A1 = &(snap_->atomData.aMat[atom1]);
       idat.A2 = &(snap_->atomData.aMat[atom2]);
@@ -598,6 +607,9 @@ namespace OpenMD {
 
     InteractionData idat;
 #ifdef IS_MPI
+    idat.atypes = make_pair( ff_->getAtomType(identsRow[atom1]), 
+                             ff_->getAtomType(identsCol[atom2]) );
+
     if (storageLayout_ & DataStorage::dslElectroFrame) {
       idat.eFrame1 = &(atomRowData.electroFrame[atom1]);
       idat.eFrame2 = &(atomColData.electroFrame[atom2]);
@@ -611,6 +623,9 @@ namespace OpenMD {
       idat.t2 = &(atomColData.force[atom2]);
     }
 #else
+    idat.atypes = make_pair( ff_->getAtomType(identsLocal[atom1]), 
+                             ff_->getAtomType(identsLocal[atom2]) );
+
     if (storageLayout_ & DataStorage::dslElectroFrame) {
       idat.eFrame1 = &(snap_->atomData.electroFrame[atom1]);
       idat.eFrame2 = &(snap_->atomData.electroFrame[atom2]);
@@ -623,12 +638,8 @@ namespace OpenMD {
       idat.t1 = &(snap_->atomData.force[atom1]);
       idat.t2 = &(snap_->atomData.force[atom2]);
     }
-#endif
-    
+#endif    
   }
-
-
-
 
   /*
    * buildNeighborList

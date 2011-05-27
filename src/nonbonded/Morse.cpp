@@ -147,7 +147,7 @@ namespace OpenMD {
     if (!initialized_) initialize();
     
     map<pair<AtomType*, AtomType*>, MorseInteractionData>::iterator it;
-    it = MixingMap.find( *(idat.atypes) );
+    it = MixingMap.find( idat.atypes );
     if (it != MixingMap.end()) {
       MorseInteractionData mixer = (*it).second;
       

@@ -351,8 +351,8 @@ namespace OpenMD {
     
     if (!initialized_) initialize();
     
-    EAMAtomData data1 = EAMMap[idat.atypes->first];
-    EAMAtomData data2 = EAMMap[idat.atypes->second];
+    EAMAtomData data1 = EAMMap[idat.atypes.first];
+    EAMAtomData data2 = EAMMap[idat.atypes.second];
 
     if ( *(idat.rij) < data1.rcut) 
       *(idat.rho_i_at_j) = data1.rho->getValueAt( *(idat.rij));
@@ -385,8 +385,8 @@ namespace OpenMD {
     
     if ( *(idat.rij) < eamRcut_) {
 
-      EAMAtomData data1 = EAMMap[idat.atypes->first];
-      EAMAtomData data2 = EAMMap[idat.atypes->second];
+      EAMAtomData data1 = EAMMap[idat.atypes.first];
+      EAMAtomData data2 = EAMMap[idat.atypes.second];
 
       // get type-specific cutoff radii
 
@@ -403,7 +403,7 @@ namespace OpenMD {
         rha = res.first;
         drha = res.second;
 
-        res = MixingMap[make_pair(idat.atypes->first, idat.atypes->first)].phi->getValueAndDerivativeAt( *(idat.rij) );
+        res = MixingMap[make_pair(idat.atypes.first, idat.atypes.first)].phi->getValueAndDerivativeAt( *(idat.rij) );
         pha = res.first;
         dpha = res.second;
       }
@@ -413,7 +413,7 @@ namespace OpenMD {
         rhb = res.first;
         drhb = res.second;
 
-        res = MixingMap[make_pair(idat.atypes->second, idat.atypes->second)].phi->getValueAndDerivativeAt( *(idat.rij) );
+        res = MixingMap[make_pair(idat.atypes.second, idat.atypes.second)].phi->getValueAndDerivativeAt( *(idat.rij) );
         phb = res.first;
         dphb = res.second;
       }
@@ -439,7 +439,7 @@ namespace OpenMD {
         break;
 
       case eamDaw:
-        res = MixingMap[*(idat.atypes)].phi->getValueAndDerivativeAt( *(idat.rij));
+        res = MixingMap[idat.atypes].phi->getValueAndDerivativeAt( *(idat.rij));
         phab = res.first;
         dvpdr = res.second;
 
