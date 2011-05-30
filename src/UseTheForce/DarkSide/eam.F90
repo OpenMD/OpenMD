@@ -225,6 +225,7 @@ contains
     real(kind = dp), intent(inout) :: rho_i_at_j
     ! value of electron density rho do to atom j at atom i
     real(kind = dp), intent(inout) :: rho_j_at_i
+    real(kind = dp) :: rci, rcj
     integer :: eam_err
    
     integer :: myid_atom1 ! EAM atid
@@ -237,11 +238,20 @@ contains
     
     if (r.lt.EAMList%EAMParams(myid_atom1)%eam_rcut) then
        
-       call lookupEAMSpline(EAMList%EAMParams(myid_atom1)%rho, r, &
-            rho_i_at_j)
+       ! get cutoff for atom 1
+       rci = EAMList%EAMParams(myid_atom1)%eam_rcut
+       ! get type specific cutoff for atom 2
+       rcj = EAMList%EAMParams(myid_atom2)%eam_rcut
+       
+       if (r.lt.rci) then
+          call lookupEAMSpline(EAMList%EAMParams(myid_atom1)%rho, r, &
+               rho_i_at_j)
+       endif
 
-       call lookupEAMSpline(EAMList%EAMParams(myid_atom2)%rho, r, &
-            rho_j_at_i)
+       if (r.lt.rcj) then
+          call lookupEAMSpline(EAMList%EAMParams(myid_atom2)%rho, r, &
+               rho_j_at_i)
+       endif
     endif
   end subroutine calc_eam_prepair_rho
 
