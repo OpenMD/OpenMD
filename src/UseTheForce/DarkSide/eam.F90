@@ -317,6 +317,8 @@ contains
 
     phab = 0.0E0_DP
     dvpdr = 0.0E0_DP
+    drha = 0.0
+    drhb = 0.0
 
     if (rij .lt. EAM_rcut) then
 
@@ -376,8 +378,7 @@ contains
        drhoidr = drha
        drhojdr = drhb
 
-       dudr = drhojdr*dfrhodrho_i + drhoidr*dfrhodrho_j + dvpdr 
-
+       dudr = drhojdr*dfrhodrho_i + drhoidr*dfrhodrho_j + dvpdr        
 
        fx = dudr * drdx
        fy = dudr * drdy
