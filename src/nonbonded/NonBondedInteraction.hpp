@@ -85,23 +85,23 @@ namespace OpenMD {
     RealType* electroMult;    /**< multiplier for electrostatic interactions */
     potVec* pot;              /**< total potential */
     RealType* vpair;          /**< pair potential */
+    RealType* particlePot1;   /**< pointer to particle potential for atom1 */
+    RealType* particlePot2;   /**< pointer to particle potential for atom2 */
     Vector3d* f1;             /**< force between the two atoms */
-    Mat3x3d* eFrame1;         /**< pointer to electrostatic frame for first atom */
-    Mat3x3d* eFrame2;         /**< pointer to electrostatic frame for second atom*/
+    Mat3x3d* eFrame1;         /**< pointer to electrostatic frame for atom 1 */
+    Mat3x3d* eFrame2;         /**< pointer to electrostatic frame for atom 2 */
     RotMat3x3d* A1;           /**< pointer to rotation matrix of first atom */
     RotMat3x3d* A2;           /**< pointer to rotation matrix of second atom */
     Vector3d* t1;             /**< pointer to torque on first atom */
     Vector3d* t2;             /**< pointer to torque on second atom */
-    RealType* rho_i_at_j;     /**< electron density at second atom due to first */
-    RealType* rho_j_at_i;     /**< electron density at first atom due to second */
     RealType* rho1;           /**< total electron density at first atom */
     RealType* rho2;           /**< total electron density at second atom */
-    RealType* dfrho1;         /**< derivative of density functional for atom 1 */
-    RealType* dfrho2;         /**< derivative of density functional for atom 2 */
-    RealType* fshift1;        /**< indirect potential contribution from atom 1 */
-    RealType* fshift2;        /**< indirect potential contribution from atom 2 */
-    RealType* skippedCharge1; /**< charge skipped in normal pairwise interaction loop */
-    RealType* skippedCharge2; /**< charge skipped in normal pairwise interaction loop */
+    RealType* frho1;          /**< density functional at first atom */
+    RealType* frho2;          /**< density functional at second atom */
+    RealType* dfrho1;         /**< derivative of functional for atom 1 */
+    RealType* dfrho2;         /**< derivative of functional for atom 2 */
+    RealType* skippedCharge1; /**< charge skipped in pairwise interaction loop */
+    RealType* skippedCharge2; /**< charge skipped in pairwise interaction loop */
   };
   
   /** 
@@ -116,14 +116,15 @@ namespace OpenMD {
    * members are utilized by any given self interaction.
    */
   struct SelfData {
-    AtomType* atype;       /**< pointer to AtomType of the atom */
-    Mat3x3d* eFrame;       /**< pointer to electrostatic frame for atom */
-    RealType* skippedCharge;/**< charge skipped in normal pairwise interaction loop */
-    potVec pot;            /**< total potential */
-    Vector3d* t;           /**< pointer to resultant torque on atom */
-    RealType* rho;         /**< electron density */
-    RealType* frho;        /**< value of density functional for the atom */
-    RealType* dfrhodrho;   /**< derivative of density functional for the atom */
+    AtomType* atype;        /**< pointer to AtomType of the atom */
+    Mat3x3d* eFrame;        /**< pointer to electrostatic frame for atom */
+    RealType* skippedCharge;/**< charge skipped in pairwise interaction loop */
+    potVec* pot;            /**< total potential */
+    RealType* particlePot;  /**< contribution to potential from this particle */
+    Vector3d* t;            /**< pointer to resultant torque on atom */
+    RealType* rho;          /**< electron density */
+    RealType* frho;         /**< value of density functional for atom */
+    RealType* dfrhodrho;    /**< derivative of density functional for atom */
   };
   
     

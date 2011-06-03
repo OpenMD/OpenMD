@@ -58,6 +58,7 @@ namespace OpenMD {
     ForceMatrixDecomposition(SimInfo* info) : ForceDecomposition(info) {};
 
     void distributeInitialData();
+    void zeroWorkArrays();
     void distributeData();
     void collectIntermediateData();
     void distributeIntermediateData();
@@ -91,6 +92,7 @@ namespace OpenMD {
 
     // filling interaction blocks with pointers
     InteractionData fillInteractionData(int atom1, int atom2);
+    void unpackInteractionData(InteractionData idat, int atom1, int atom2);
     InteractionData fillSkipData(int atom1, int atom2);
 
   private: 
@@ -99,7 +101,6 @@ namespace OpenMD {
     vector<int> identsLocal;
     vector<int> AtomLocalToGlobal;
     vector<int> cgLocalToGlobal;
-    vector<RealType> pot_local;
     vector<RealType> massFactorsLocal;
     vector<vector<int> > skipsForLocalAtom;
     vector<vector<int> > toposForLocalAtom;
@@ -120,19 +121,23 @@ namespace OpenMD {
     Communicator<Row, RealType>* AtomCommRealRow; 
     Communicator<Row, Vector3d>* AtomCommVectorRow; 
     Communicator<Row, Mat3x3d>*  AtomCommMatrixRow; 
+    Communicator<Row, potVec>* AtomCommPotRow;
 
     Communicator<Column, int>* AtomCommIntColumn;
     Communicator<Column, RealType>* AtomCommRealColumn; 
     Communicator<Column, Vector3d>* AtomCommVectorColumn; 
-    Communicator<Column, Mat3x3d>*  AtomCommMatrixColumn; 
+    Communicator<Column, Mat3x3d>*  AtomCommMatrixColumn;
+    Communicator<Column, potVec>* AtomCommPotColumn; 
 
     Communicator<Row, int>* cgCommIntRow;
     Communicator<Row, Vector3d>* cgCommVectorRow; 
     Communicator<Column, int>* cgCommIntColumn;
     Communicator<Column, Vector3d>* cgCommVectorColumn; 
 
-    vector<vector<RealType> > pot_row;
-    vector<vector<RealType> > pot_col;
+    // work arrays for assembling potential energy
+    vector<potVec> pot_row;
+    vector<potVec> pot_col;
+    potVec pot_local;
 
     vector<int> identsRow;
     vector<int> identsCol;

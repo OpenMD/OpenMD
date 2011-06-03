@@ -91,9 +91,11 @@ namespace OpenMD {
     
     virtual void distributeInitialData() = 0;
     virtual void distributeData() = 0;
+    virtual void zeroWorkArrays() = 0;
     virtual void collectIntermediateData() = 0;
     virtual void distributeIntermediateData() = 0;
     virtual void collectData() = 0;
+    virtual potVec getLongRangePotential() { return longRangePot_; }
 
     // neighbor list routines
     virtual bool checkNeighborList();
@@ -124,6 +126,7 @@ namespace OpenMD {
 
     // filling interaction blocks with pointers
     virtual InteractionData fillInteractionData(int atom1, int atom2) = 0;
+    virtual void unpackInteractionData(InteractionData idat, int atom1, int atom2) = 0;
     virtual InteractionData fillSkipData(int atom1, int atom2) = 0;
     virtual SelfData fillSelfData(int atom1);
     
@@ -161,6 +164,7 @@ namespace OpenMD {
     Vector3i nCells_;
     vector<vector<int> > cellList_;
     vector<Vector3d> saved_CG_positions_;
+    potVec longRangePot_;
 
   };    
 }

@@ -261,18 +261,8 @@ namespace OpenMD {
       rc = pos;
     }
     
-    //initialize data before passing to fortran
-    RealType longRangePotential[N_INTERACTION_FAMILIES];
-    RealType lrPot = 0.0;
-    int isError = 0;
-
-    // dangerous to iterate over enums, but we'll live on the edge:
-    for (int i = NO_FAMILY; i != N_INTERACTION_FAMILIES; ++i){
-      longRangePotential[i]=0.0; //Initialize array
-    }
-
     // new stuff starts here:
-
+    fDecomp_->zeroWorkArrays();
     fDecomp_->distributeData();
  
     int cg1, cg2, atom1, atom2;
@@ -288,6 +278,9 @@ namespace OpenMD {
     InteractionData idat;
     SelfData sdat;
     RealType mf;
+    potVec pot(0.0);
+    potVec longRangePotential(0.0);
+    RealType lrPot;
 
     int loopStart, loopEnd;
 
@@ -340,7 +333,10 @@ namespace OpenMD {
               
               if (!fDecomp_->skipAtomPair(atom1, atom2)) {
                 
+                pot *= 0.0;
+
                 idat = fDecomp_->fillInteractionData(atom1, atom2);
+                *(idat.pot) = pot;
 
                 if (atomListRow.size() == 1 && atomListColumn.size() == 1) {
                   *(idat.d) = d_grp;
@@ -357,6 +353,7 @@ namespace OpenMD {
                   interactionMan_->doPrePair(idat);
                 } else {
                   interactionMan_->doPair(idat);
+                  fDecomp_->unpackInteractionData(idat, atom1, atom2);
                   vij += *(idat.vpair);
                   fij += *(idat.f1);
                   tau -= outProduct( *(idat.d), *(idat.f1));
@@ -463,11 +460,9 @@ namespace OpenMD {
 
     }
 
-    // dangerous to iterate over enums, but we'll live on the edge:
-    for (int i = NO_FAMILY; i != N_INTERACTION_FAMILIES; ++i){
-      lrPot += longRangePotential[i]; //Quick hack
-    }
-        
+    longRangePotential = fDecomp_->getLongRangePotential();
+    lrPot = longRangePotential.sum();
+
     //store the tau and long range potential    
     curSnapshot->statData[Stats::LONG_RANGE_POTENTIAL] = lrPot;
     curSnapshot->statData[Stats::VANDERWAALS_POTENTIAL] = longRangePotential[VANDERWAALS_FAMILY];

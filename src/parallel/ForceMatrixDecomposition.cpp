@@ -69,7 +69,6 @@ namespace OpenMD {
     PairList oneTwo = info_->getOneTwoInteractions();
     PairList oneThree = info_->getOneThreeInteractions();
     PairList oneFour = info_->getOneFourInteractions();
-    vector<RealType> pot_local(N_INTERACTION_FAMILIES, 0.0);
 
 #ifdef IS_MPI
  
@@ -77,11 +76,13 @@ namespace OpenMD {
     AtomCommRealRow = new Communicator<Row,RealType>(nLocal_);
     AtomCommVectorRow = new Communicator<Row,Vector3d>(nLocal_);
     AtomCommMatrixRow = new Communicator<Row,Mat3x3d>(nLocal_);
+    AtomCommPotRow = new Communicator<Row,potVec>(nLocal_);
 
     AtomCommIntColumn = new Communicator<Column,int>(nLocal_);
     AtomCommRealColumn = new Communicator<Column,RealType>(nLocal_);
     AtomCommVectorColumn = new Communicator<Column,Vector3d>(nLocal_);
     AtomCommMatrixColumn = new Communicator<Column,Mat3x3d>(nLocal_);
+    AtomCommPotColumn = new Communicator<Column,potVec>(nLocal_);
 
     cgCommIntRow = new Communicator<Row,int>(nGroups_);
     cgCommVectorRow = new Communicator<Row,Vector3d>(nGroups_);
@@ -102,12 +103,7 @@ namespace OpenMD {
     cgRowData.setStorageLayout(DataStorage::dslPosition);
     cgColData.resize(nGroupsInCol_);
     cgColData.setStorageLayout(DataStorage::dslPosition);
-    
-    vector<vector<RealType> > pot_row(N_INTERACTION_FAMILIES, 
-                                      vector<RealType> (nAtomsInRow_, 0.0));
-    vector<vector<RealType> > pot_col(N_INTERACTION_FAMILIES,
-                                      vector<RealType> (nAtomsInCol_, 0.0));
-    
+        
     identsRow.reserve(nAtomsInRow_);
     identsCol.reserve(nAtomsInCol_);
     
@@ -232,6 +228,77 @@ namespace OpenMD {
     }
   }
    
+  void ForceMatrixDecomposition::zeroWorkArrays() {
+
+    for (int j = 0; j < N_INTERACTION_FAMILIES; j++) {
+      longRangePot_[j] = 0.0;
+    }
+
+#ifdef IS_MPI
+    if (storageLayout_ & DataStorage::dslForce) {
+      fill(atomRowData.force.begin(), atomRowData.force.end(), V3Zero);
+      fill(atomColData.force.begin(), atomColData.force.end(), V3Zero);
+    }
+
+    if (storageLayout_ & DataStorage::dslTorque) {
+      fill(atomRowData.torque.begin(), atomRowData.torque.end(), V3Zero);
+      fill(atomColData.torque.begin(), atomColData.torque.end(), V3Zero);
+    }
+    
+    fill(pot_row.begin(), pot_row.end(), 
+         Vector<RealType, N_INTERACTION_FAMILIES> (0.0));
+
+    fill(pot_col.begin(), pot_col.end(), 
+         Vector<RealType, N_INTERACTION_FAMILIES> (0.0));
+    
+    pot_local = Vector<RealType, N_INTERACTION_FAMILIES>(0.0);
+
+    if (storageLayout_ & DataStorage::dslParticlePot) {    
+      fill(atomRowData.particlePot.begin(), atomRowData.particlePot.end(), 0.0);
+      fill(atomColData.particlePot.begin(), atomColData.particlePot.end(), 0.0);
+    }
+
+    if (storageLayout_ & DataStorage::dslDensity) {      
+      fill(atomRowData.density.begin(), atomRowData.density.end(), 0.0);
+      fill(atomColData.density.begin(), atomColData.density.end(), 0.0);
+    }
+
+    if (storageLayout_ & DataStorage::dslFunctional) {   
+      fill(atomRowData.functional.begin(), atomRowData.functional.end(), 0.0);
+      fill(atomColData.functional.begin(), atomColData.functional.end(), 0.0);
+    }
+
+    if (storageLayout_ & DataStorage::dslFunctionalDerivative) {      
+      fill(atomRowData.functionalDerivative.begin(), 
+           atomRowData.functionalDerivative.end(), 0.0);
+      fill(atomColData.functionalDerivative.begin(), 
+           atomColData.functionalDerivative.end(), 0.0);
+    }
+
+#else
+    
+    if (storageLayout_ & DataStorage::dslParticlePot) {      
+      fill(snap_->atomData.particlePot.begin(), 
+           snap_->atomData.particlePot.end(), 0.0);
+    }
+    
+    if (storageLayout_ & DataStorage::dslDensity) {      
+      fill(snap_->atomData.density.begin(), 
+           snap_->atomData.density.end(), 0.0);
+    }
+    if (storageLayout_ & DataStorage::dslFunctional) {
+      fill(snap_->atomData.functional.begin(), 
+           snap_->atomData.functional.end(), 0.0);
+    }
+    if (storageLayout_ & DataStorage::dslFunctionalDerivative) {      
+      fill(snap_->atomData.functionalDerivative.begin(), 
+           snap_->atomData.functionalDerivative.end(), 0.0);
+    }
+#endif
+    
+  }
+
+
   void ForceMatrixDecomposition::distributeData()  {
     snap_ = sman_->getCurrentSnapshot();
     storageLayout_ = sman_->getStorageLayout();
@@ -267,6 +334,9 @@ namespace OpenMD {
 #endif      
   }
   
+  /* collects information obtained during the pre-pair loop onto local
+   * data structures.
+   */
   void ForceMatrixDecomposition::collectIntermediateData() {
     snap_ = sman_->getCurrentSnapshot();
     storageLayout_ = sman_->getStorageLayout();
@@ -278,14 +348,18 @@ namespace OpenMD {
                                snap_->atomData.density);
       
       int n = snap_->atomData.density.size();
-      std::vector<RealType> rho_tmp(n, 0.0);
+      vector<RealType> rho_tmp(n, 0.0);
       AtomCommRealColumn->scatter(atomColData.density, rho_tmp);
       for (int i = 0; i < n; i++)
         snap_->atomData.density[i] += rho_tmp[i];
     }
 #endif
   }
-  
+
+  /*
+   * redistributes information obtained during the pre-pair loop out to 
+   * row and column-indexed data structures
+   */
   void ForceMatrixDecomposition::distributeIntermediateData() {
     snap_ = sman_->getCurrentSnapshot();
     storageLayout_ = sman_->getStorageLayout();
@@ -343,15 +417,24 @@ namespace OpenMD {
     
     nLocal_ = snap_->getNumberOfAtoms();
 
-    vector<vector<RealType> > pot_temp(N_INTERACTION_FAMILIES, 
-                                       vector<RealType> (nLocal_, 0.0));
+    vector<potVec> pot_temp(nLocal_, 
+                            Vector<RealType, N_INTERACTION_FAMILIES> (0.0));
+
+    // scatter/gather pot_row into the members of my column
+          
+    AtomCommPotRow->scatter(pot_row, pot_temp);
+
+    for (int ii = 0;  ii < pot_temp.size(); ii++ )
+      pot_local += pot_temp[ii];
     
-    for (int i = 0; i < N_INTERACTION_FAMILIES; i++) {
-      AtomCommRealRow->scatter(pot_row[i], pot_temp[i]);
-      for (int ii = 0;  ii < pot_temp[i].size(); ii++ ) {
-        pot_local[i] += pot_temp[i][ii];
-      }
-    }
+    fill(pot_temp.begin(), pot_temp.end(), 
+         Vector<RealType, N_INTERACTION_FAMILIES> (0.0));
+      
+    AtomCommPotColumn->scatter(pot_col, pot_temp);    
+    
+    for (int ii = 0;  ii < pot_temp.size(); ii++ )
+      pot_local += pot_temp[ii];
+    
 #endif
   }
 
@@ -462,11 +545,11 @@ namespace OpenMD {
   }
 
   /**
-   * there are a number of reasons to skip a pair or a particle mostly
-   * we do this to exclude atoms who are involved in short range
-   * interactions (bonds, bends, torsions), but we also need to
-   * exclude some overcounted interactions that result from the
-   * parallel decomposition. 
+   * There are a number of reasons to skip a pair or a
+   * particle. Mostly we do this to exclude atoms who are involved in
+   * short range interactions (bonds, bends, torsions), but we also
+   * need to exclude some overcounted interactions that result from
+   * the parallel decomposition.
    */
   bool ForceMatrixDecomposition::skipAtomPair(int atom1, int atom2) {
     int unique_id_1, unique_id_2;
@@ -545,6 +628,7 @@ namespace OpenMD {
     idat.atypes = make_pair( ff_->getAtomType(identsRow[atom1]), 
                              ff_->getAtomType(identsCol[atom2]) );
 
+    
     if (storageLayout_ & DataStorage::dslAmat) {
       idat.A1 = &(atomRowData.aMat[atom1]);
       idat.A2 = &(atomColData.aMat[atom2]);
@@ -565,9 +649,19 @@ namespace OpenMD {
       idat.rho2 = &(atomColData.density[atom2]);
     }
 
+    if (storageLayout_ & DataStorage::dslFunctional) {
+      idat.frho1 = &(atomRowData.functional[atom1]);
+      idat.frho2 = &(atomColData.functional[atom2]);
+    }
+
     if (storageLayout_ & DataStorage::dslFunctionalDerivative) {
       idat.dfrho1 = &(atomRowData.functionalDerivative[atom1]);
       idat.dfrho2 = &(atomColData.functionalDerivative[atom2]);
+    }
+
+    if (storageLayout_ & DataStorage::dslParticlePot) {
+      idat.particlePot1 = &(atomRowData.particlePot[atom1]);
+      idat.particlePot2 = &(atomColData.particlePot[atom2]);
     }
 
 #else
@@ -595,13 +689,42 @@ namespace OpenMD {
       idat.rho2 = &(snap_->atomData.density[atom2]);
     }
 
+    if (storageLayout_ & DataStorage::dslFunctional) {
+      idat.frho1 = &(snap_->atomData.functional[atom1]);
+      idat.frho2 = &(snap_->atomData.functional[atom2]);
+    }
+
     if (storageLayout_ & DataStorage::dslFunctionalDerivative) {
       idat.dfrho1 = &(snap_->atomData.functionalDerivative[atom1]);
       idat.dfrho2 = &(snap_->atomData.functionalDerivative[atom2]);
     }
+
+    if (storageLayout_ & DataStorage::dslParticlePot) {
+      idat.particlePot1 = &(snap_->atomData.particlePot[atom1]);
+      idat.particlePot2 = &(snap_->atomData.particlePot[atom2]);
+    }
+
 #endif
     return idat;
   }
+
+  
+  void ForceMatrixDecomposition::unpackInteractionData(InteractionData idat, int atom1, int atom2) {    
+#ifdef IS_MPI
+    pot_row[atom1] += 0.5 *  *(idat.pot);
+    pot_col[atom2] += 0.5 *  *(idat.pot);
+
+    atomRowData.force[atom1] += *(idat.f1);
+    atomColData.force[atom2] -= *(idat.f1);
+#else
+    longRangePot_ += *(idat.pot);
+    
+    snap_->atomData.force[atom1] += *(idat.f1);
+    snap_->atomData.force[atom2] -= *(idat.f1);
+#endif
+
+  }
+
 
   InteractionData ForceMatrixDecomposition::fillSkipData(int atom1, int atom2){
 
@@ -618,10 +741,6 @@ namespace OpenMD {
       idat.t1 = &(atomRowData.torque[atom1]);
       idat.t2 = &(atomColData.torque[atom2]);
     }
-    if (storageLayout_ & DataStorage::dslForce) {
-      idat.t1 = &(atomRowData.force[atom1]);
-      idat.t2 = &(atomColData.force[atom2]);
-    }
 #else
     idat.atypes = make_pair( ff_->getAtomType(identsLocal[atom1]), 
                              ff_->getAtomType(identsLocal[atom2]) );
@@ -633,10 +752,6 @@ namespace OpenMD {
     if (storageLayout_ & DataStorage::dslTorque) {
       idat.t1 = &(snap_->atomData.torque[atom1]);
       idat.t2 = &(snap_->atomData.torque[atom2]);
-    }
-    if (storageLayout_ & DataStorage::dslForce) {
-      idat.t1 = &(snap_->atomData.force[atom1]);
-      idat.t2 = &(snap_->atomData.force[atom2]);
     }
 #endif    
   }
@@ -738,8 +853,6 @@ namespace OpenMD {
       cellList_[cellIndex].push_back(i);
     }
 #endif
-
-
 
     for (int m1z = 0; m1z < nCells_.z(); m1z++) {
       for (int m1y = 0; m1y < nCells_.y(); m1y++) {

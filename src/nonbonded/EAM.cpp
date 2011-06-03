@@ -355,10 +355,11 @@ namespace OpenMD {
     EAMAtomData data2 = EAMMap[idat.atypes.second];
 
     if ( *(idat.rij) < data1.rcut) 
-      *(idat.rho_i_at_j) = data1.rho->getValueAt( *(idat.rij));
+      *(idat.rho1) += data1.rho->getValueAt( *(idat.rij));
+
 
     if ( *(idat.rij) < data2.rcut) 
-      *(idat.rho_j_at_i) = data2.rho->getValueAt( *(idat.rij));
+      *(idat.rho2) += data2.rho->getValueAt( *(idat.rij));
 
     return;
   }
@@ -373,6 +374,10 @@ namespace OpenMD {
 
     *(sdat.frho) = result.first;
     *(sdat.dfrhodrho) = result.second;
+
+    sdat.pot[METALLIC_FAMILY] += result.first;
+    *(sdat.particlePot) += result.first;
+
     return;
   }
 
@@ -393,9 +398,9 @@ namespace OpenMD {
       RealType rci = data1.rcut;
       RealType rcj = data2.rcut;
       
-      RealType rha, drha, rhb, drhb;
-      RealType pha, dpha, phb, dphb;
-      RealType phab, dvpdr;
+      RealType rha(0.0), drha(0.0), rhb(0.0), drhb(0.0);
+      RealType pha(0.0), dpha(0.0), phb(0.0), dphb(0.0);
+      RealType phab(0.0), dvpdr(0.0);
       RealType drhoidr, drhojdr, dudr;
       
       if ( *(idat.rij) < rci) {
@@ -418,9 +423,6 @@ namespace OpenMD {
         dphb = res.second;
       }
 
-      phab = 0.0;
-      dvpdr = 0.0;
-
       switch(mixMeth_) {
       case eamJohnson:
        
@@ -429,6 +431,8 @@ namespace OpenMD {
           dvpdr = dvpdr + 0.5*((rhb/rha)*dpha + 
                                pha*((drhb/rha) - (rhb*drha/rha/rha)));
         }
+          
+          
 
         if ( *(idat.rij) < rcj) {
           phab = phab + 0.5 * (rha / rhb) * phb;
@@ -463,20 +467,20 @@ namespace OpenMD {
 
       *(idat.f1) = *(idat.d) * dudr / *(idat.rij);
         
-      // particle_pot is the difference between the full potential 
-      // and the full potential without the presence of a particular
+      // particlePot is the difference between the full potential and
+      // the full potential without the presence of a particular
       // particle (atom1).
       //
-      // This reduces the density at other particle locations, so
-      // we need to recompute the density at atom2 assuming atom1
-      // didn't contribute.  This then requires recomputing the
-      // density functional for atom2 as well.
-      //
-      // Most of the particle_pot heavy lifting comes from the
-      // pair interaction, and will be handled by vpair.
-     
-      *(idat.fshift1) = data1.F->getValueAt( *(idat.rho1) - rhb );
-      *(idat.fshift2) = data1.F->getValueAt( *(idat.rho2) - rha );
+      // This reduces the density at other particle locations, so we
+      // need to recompute the density at atom2 assuming atom1 didn't
+      // contribute.  This then requires recomputing the density
+      // functional for atom2 as well.
+
+      *(idat.particlePot1) += data2.F->getValueAt( *(idat.rho2) - rha ) 
+        - *(idat.frho2);
+
+      *(idat.particlePot2) += data1.F->getValueAt( *(idat.rho1) - rhb) 
+        - *(idat.frho1);
 
       idat.pot[METALLIC_FAMILY] += phab;
 

@@ -109,6 +109,10 @@ namespace OpenMD {
       sdat.dfrhodrho = &(snap_->atomData.functionalDerivative[atom1]);
     }
 
+    if (storageLayout_ & DataStorage::dslParticlePot) {
+      sdat.particlePot = &(snap_->atomData.particlePot[atom1]);
+    }
+
     return sdat;    
   }
 

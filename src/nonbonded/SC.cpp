@@ -311,12 +311,10 @@ namespace OpenMD {
     RealType rcij = mixer.rCut;
 
     if ( *(idat.rij)  < rcij) {
-      *(idat.rho_i_at_j) = mixer.phi->getValueAt( *(idat.rij) );
-      *(idat.rho_j_at_i) = *(idat.rho_i_at_j);
-    } else {
-      *(idat.rho_i_at_j) = 0.0;
-      *(idat.rho_j_at_i) = 0.0;
-    }
+      RealType rho = mixer.phi->getValueAt( *(idat.rij) );
+      *(idat.rho1) += rho;
+      *(idat.rho2) += rho;
+    } 
     
     return;
   }
@@ -326,9 +324,13 @@ namespace OpenMD {
     if (!initialized_) initialize();
 
     SCAtomData data1 = SCMap[sdat.atype];
-    
-    *(sdat.frho) = - data1.c * data1.epsilon * sqrt( *(sdat.rho) );
+   
+    RealType u = - data1.c * data1.epsilon * sqrt( *(sdat.rho) );
+    *(sdat.frho) = u;
     *(sdat.dfrhodrho) = 0.5 * *(sdat.frho) / *(sdat.rho);
+
+    sdat.pot[METALLIC_FAMILY] += u;
+    *(sdat.particlePot) += u;
     
     return;
   }
@@ -365,20 +367,20 @@ namespace OpenMD {
       
       *(idat.f1) += *(idat.d) * dudr / *(idat.rij) ;
         
-      // particle_pot is the difference between the full potential 
-      // and the full potential without the presence of a particular
+      // particlePot is the difference between the full potential and
+      // the full potential without the presence of a particular
       // particle (atom1).
       //
-      // This reduces the density at other particle locations, so
-      // we need to recompute the density at atom2 assuming atom1
-      // didn't contribute.  This then requires recomputing the
-      // density functional for atom2 as well.
-      //
-      // Most of the particle_pot heavy lifting comes from the
-      // pair interaction, and will be handled by vpair.
-      
-      *(idat.fshift1) = - data1.c * data1.epsilon * sqrt( *(idat.rho1) - rhtmp);
-      *(idat.fshift2) = - data2.c * data2.epsilon * sqrt( *(idat.rho2) - rhtmp);
+      // This reduces the density at other particle locations, so we
+      // need to recompute the density at atom2 assuming atom1 didn't
+      // contribute.  This then requires recomputing the density
+      // functional for atom2 as well.
+           
+      *(idat.particlePot1) -= data2.c * data2.epsilon * 
+        sqrt( *(idat.rho2) - rhtmp) + *(idat.frho2);
+
+      *(idat.particlePot1) -= data1.c * data1.epsilon * 
+        sqrt( *(idat.rho1) - rhtmp) + *(idat.frho1);
       
       idat.pot[METALLIC_FAMILY] += pot_temp;
     }
