@@ -125,13 +125,8 @@ namespace OpenMD {
     //equal to the total number of atoms minus number of atoms belong to 
     //cutoff group defined in meta-data file plus the number of cutoff 
     //groups defined in meta-data file
-    std::cerr << "nGA = " << nGlobalAtoms_ << "\n";
-    std::cerr << "nCA = " << nCutoffAtoms << "\n";
-    std::cerr << "nG = " << nGroups << "\n";
 
     nGlobalCutoffGroups_ = nGlobalAtoms_ - nCutoffAtoms + nGroups;
-
-    std::cerr << "nGCG = " << nGlobalCutoffGroups_ << "\n";
     
     //every free atom (atom does not belong to rigid bodies) is an 
     //integrable object therefore the total number of integrable objects 
@@ -273,6 +268,25 @@ namespace OpenMD {
     fdf_ = fdf_local;
 #endif
     return fdf_;
+  }
+  
+  unsigned int SimInfo::getNLocalCutoffGroups(){
+    int nLocalCutoffAtoms = 0;
+    Molecule* mol;
+    MoleculeIterator mi;
+    CutoffGroup* cg;
+    Molecule::CutoffGroupIterator ci;
+    
+    for (mol = beginMolecule(mi); mol != NULL; mol  = nextMolecule(mi)) {
+      
+      for (cg = mol->beginCutoffGroup(ci); cg != NULL; 
+           cg = mol->nextCutoffGroup(ci)) {
+        nLocalCutoffAtoms += cg->getNumAtom();
+        
+      }        
+    }
+    
+    return nAtoms_ - nLocalCutoffAtoms + nCutoffGroups_;
   }
     
   void SimInfo::calcNdfRaw() {

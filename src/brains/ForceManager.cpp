@@ -65,6 +65,7 @@ namespace OpenMD {
   ForceManager::ForceManager(SimInfo * info) : info_(info) {
     forceField_ = info_->getForceField();
     fDecomp_ = new ForceMatrixDecomposition(info_);
+    interactionMan_ = new InteractionManager();
   }
 
   /**
@@ -205,13 +206,16 @@ namespace OpenMD {
    */
   void ForceManager::setupSwitching() {
     Globals* simParams_ = info_->getSimParams();
+
+    // create the switching function object:
+    switcher_ = new SwitchingFunction();
     
     if (simParams_->haveSwitchingRadius()) {
       rSwitch_ = simParams_->getSwitchingRadius();
       if (rSwitch_ > rCut_) {        
         sprintf(painCave.errMsg,
-                "ForceManager::setupSwitching: switchingRadius (%f) is larger than cutoffRadius(%f)\n",
-                rSwitch_, rCut_);
+                "ForceManager::setupSwitching: switchingRadius (%f) is larger "
+                "than the cutoffRadius(%f)\n", rSwitch_, rCut_);
         painCave.isFatal = 1;
         painCave.severity = OPENMD_ERROR;
         simError();
@@ -227,6 +231,8 @@ namespace OpenMD {
       simError();
     }           
     
+    // Default to cubic switching function.
+    sft_ = cubic;
     if (simParams_->haveSwitchingFunctionType()) {
       string funcType = simParams_->getSwitchingFunctionType();
       toUpper(funcType);

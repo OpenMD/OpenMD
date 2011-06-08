@@ -57,8 +57,8 @@ namespace OpenMD {
     storageLayout_ = sman_->getStorageLayout();
     ff_ = info_->getForceField();
     nLocal_ = snap_->getNumberOfAtoms();
-    nGroups_ = snap_->getNumberOfCutoffGroups();
 
+    nGroups_ = info_->getNLocalCutoffGroups();
     // gather the information for atomtype IDs (atids):
     identsLocal = info_->getIdentArray();
     AtomLocalToGlobal = info_->getGlobalAtomIndices();
@@ -104,8 +104,8 @@ namespace OpenMD {
     cgColData.resize(nGroupsInCol_);
     cgColData.setStorageLayout(DataStorage::dslPosition);
         
-    identsRow.reserve(nAtomsInRow_);
-    identsCol.reserve(nAtomsInCol_);
+    identsRow.resize(nAtomsInRow_);
+    identsCol.resize(nAtomsInCol_);
     
     AtomCommIntRow->gather(identsLocal, identsRow);
     AtomCommIntColumn->gather(identsLocal, identsCol);
@@ -120,7 +120,7 @@ namespace OpenMD {
     AtomCommRealColumn->gather(massFactorsLocal, massFactorsCol);
 
     groupListRow_.clear();
-    groupListRow_.reserve(nGroupsInRow_);
+    groupListRow_.resize(nGroupsInRow_);
     for (int i = 0; i < nGroupsInRow_; i++) {
       int gid = cgRowToGlobal[i];
       for (int j = 0; j < nAtomsInRow_; j++) {
@@ -131,7 +131,7 @@ namespace OpenMD {
     }
 
     groupListCol_.clear();
-    groupListCol_.reserve(nGroupsInCol_);
+    groupListCol_.resize(nGroupsInCol_);
     for (int i = 0; i < nGroupsInCol_; i++) {
       int gid = cgColToGlobal[i];
       for (int j = 0; j < nAtomsInCol_; j++) {
@@ -142,7 +142,7 @@ namespace OpenMD {
     }
 
     skipsForRowAtom.clear();
-    skipsForRowAtom.reserve(nAtomsInRow_);
+    skipsForRowAtom.resize(nAtomsInRow_);
     for (int i = 0; i < nAtomsInRow_; i++) {
       int iglob = AtomRowToGlobal[i];
       for (int j = 0; j < nAtomsInCol_; j++) {
@@ -153,7 +153,7 @@ namespace OpenMD {
     }
 
     toposForRowAtom.clear();
-    toposForRowAtom.reserve(nAtomsInRow_);
+    toposForRowAtom.resize(nAtomsInRow_);
     for (int i = 0; i < nAtomsInRow_; i++) {
       int iglob = AtomRowToGlobal[i];
       int nTopos = 0;
@@ -178,20 +178,21 @@ namespace OpenMD {
     }
 
 #endif
-
     groupList_.clear();
-    groupList_.reserve(nGroups_);
+    groupList_.resize(nGroups_);
     for (int i = 0; i < nGroups_; i++) {
       int gid = cgLocalToGlobal[i];
       for (int j = 0; j < nLocal_; j++) {
         int aid = AtomLocalToGlobal[j];
-        if (globalGroupMembership[aid] == gid)
+        if (globalGroupMembership[aid] == gid) {
           groupList_[i].push_back(j);
+
+        }
       }      
     }
 
     skipsForLocalAtom.clear();
-    skipsForLocalAtom.reserve(nLocal_);
+    skipsForLocalAtom.resize(nLocal_);
 
     for (int i = 0; i < nLocal_; i++) {
       int iglob = AtomLocalToGlobal[i];
@@ -201,9 +202,8 @@ namespace OpenMD {
           skipsForLocalAtom[i].push_back(j);       
       }      
     }
-
     toposForLocalAtom.clear();
-    toposForLocalAtom.reserve(nLocal_);
+    toposForLocalAtom.resize(nLocal_);
     for (int i = 0; i < nLocal_; i++) {
       int iglob = AtomLocalToGlobal[i];
       int nTopos = 0;
@@ -236,7 +236,7 @@ namespace OpenMD {
     int atid;
     set<AtomType*> atypes = info_->getSimulatedAtomTypes();
     vector<RealType> atypeCutoff;
-    atypeCutoff.reserve( atypes.size() );
+    atypeCutoff.resize( atypes.size() );
 
     for (set<AtomType*>::iterator at = atypes.begin(); at != atypes.end(); ++at){
       rc = interactionMan_->getSuggestedCutoffRadius(*at);

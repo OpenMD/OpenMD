@@ -718,7 +718,7 @@ namespace OpenMD {
         
       }       
     }
-    
+   
 #ifdef IS_MPI    
     // Since the globalGroupMembership has been zero filled and we've only
     // poked values into the atoms we know, we can do an Allreduce

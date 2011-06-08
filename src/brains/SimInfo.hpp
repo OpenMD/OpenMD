@@ -166,6 +166,9 @@ namespace OpenMD{
       return nAtoms_;
     }
 
+    /** Returns the number of effective cutoff groups on local processor */
+    unsigned int getNLocalCutoffGroups();
+
     /** Returns the number of local bonds */        
     unsigned int getNBonds(){
       return nBonds_;
